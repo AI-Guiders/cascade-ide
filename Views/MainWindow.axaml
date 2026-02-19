@@ -7,7 +7,8 @@
         x:Class="AgentIde.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="AgentIde">
+        Title="AgentIde"
+        Background="#F5F5F5">
 
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
@@ -15,7 +16,7 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
+    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12" Foreground="#1A1A1A">
         <TextBlock Text="AgentIde — IDE под управление агента (MCP + Ollama)" FontWeight="SemiBold"/>
         <TextBlock Text="{Binding OllamaStatus}"/>
         <ItemsControl ItemsSource="{Binding OllamaModels}" IsVisible="{Binding OllamaAvailable}">
