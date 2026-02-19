@@ -1,0 +1,15 @@
+# Build
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.dll
+*.exe
+*.pdb
+*.cache
+project.lock.json
+.DS_Store
+*.log
+.vs/
+*.rsuser
