@@ -13,3 +13,4 @@ project.lock.json
 *.log
 .vs/
 *.rsuser
+.dotnet-debug-mcp-breakpoints.json

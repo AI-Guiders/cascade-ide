@@ -1,7 +1,7 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             x:Class="AgentIde.App"
-             xmlns:local="using:AgentIde"
+             x:Class="CascadeIDE.App"
+             xmlns:local="using:CascadeIDE"
              RequestedThemeVariant="Default">
              <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
@@ -11,5 +11,6 @@
   
     <Application.Styles>
         <FluentTheme />
+        <StyleInclude Source="avares://AvaloniaEdit/Themes/Fluent/AvaloniaEdit.xaml" />
     </Application.Styles>
 </Application>

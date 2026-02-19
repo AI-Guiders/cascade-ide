@@ -1,31 +1,125 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:AgentIde.ViewModels"
+        xmlns:vm="using:CascadeIDE.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="AgentIde.Views.MainWindow"
+        xmlns:models="using:CascadeIDE.Models"
+        mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="600"
+        x:Class="CascadeIDE.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="AgentIde"
-        Background="#F5F5F5">
+        Title="CascadeIDE"
+        Background="#F5F5F5"
+        Width="1000" Height="600">
+
+    <Window.Styles>
+        <!-- Редактор: всегда светлый фон и тёмный текст (тема при :focus/:pointerover даёт тёмный фон) -->
+        <Style Selector="TextBox.EditorBox /template/ Border#PART_BorderElement">
+            <Setter Property="Background" Value="#FFF"/>
+            <Setter Property="BorderBrush" Value="#CCC"/>
+        </Style>
+        <Style Selector="TextBox.EditorBox:pointerover /template/ Border#PART_BorderElement">
+            <Setter Property="Background" Value="#FFF"/>
+            <Setter Property="BorderBrush" Value="#CCC"/>
+        </Style>
+        <Style Selector="TextBox.EditorBox:focus /template/ Border#PART_BorderElement">
+            <Setter Property="Background" Value="#FFF"/>
+            <Setter Property="BorderBrush" Value="#4A9EFF"/>
+            <Setter Property="BorderThickness" Value="2"/>
+        </Style>
+        <Style Selector="TextBox.EditorBox">
+            <Setter Property="Foreground" Value="#1A1A1A"/>
+            <Setter Property="CaretBrush" Value="#1A1A1A"/>
+        </Style>
+        <Style Selector="TextBox.EditorBox:pointerover">
+            <Setter Property="Foreground" Value="#1A1A1A"/>
+        </Style>
+        <Style Selector="TextBox.EditorBox:focus">
+            <Setter Property="Foreground" Value="#1A1A1A"/>
+            <Setter Property="CaretBrush" Value="#1A1A1A"/>
+        </Style>
+    </Window.Styles>
 
     <Design.DataContext>
-        <!-- This only sets the DataContext for the previewer in an IDE,
-             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12" Foreground="#1A1A1A">
-        <TextBlock Text="AgentIde — IDE под управление агента (MCP + Ollama)" FontWeight="SemiBold"/>
-        <TextBlock Text="{Binding OllamaStatus}"/>
-        <ItemsControl ItemsSource="{Binding OllamaModels}" IsVisible="{Binding OllamaAvailable}">
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <TextBlock Text="{Binding}" Margin="0,2"/>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
-    </StackPanel>
+    <Grid RowDefinitions="Auto,*" ColumnDefinitions="220,*,340">
+        <!-- Toolbar -->
+        <StackPanel Grid.Row="0" Grid.ColumnSpan="3" Orientation="Horizontal" Spacing="8" Margin="8,4" Background="#E8E8E8">
+            <Button x:Name="OpenSolutionButton" Content="Открыть решение"/>
+            <TextBlock Text="{Binding SolutionPath}" VerticalAlignment="Center" MaxWidth="300" TextTrimming="CharacterEllipsis" Foreground="#333"/>
+            <TextBlock Text="{Binding SolutionLoadError}" VerticalAlignment="Center" MaxWidth="350" TextTrimming="CharacterEllipsis" Foreground="#C00"/>
+            <TextBlock Text="{Binding OllamaStatus}" VerticalAlignment="Center" Margin="8,0,0,0" Foreground="#333"/>
+        </StackPanel>
 
+        <!-- Solution tree -->
+        <Border Grid.Row="1" Grid.Column="0" BorderBrush="#CCC" BorderThickness="0,0,1,0" Padding="4">
+            <DockPanel>
+                <TextBlock Text="Решение" FontWeight="SemiBold" Margin="4" Foreground="#1A1A1A"/>
+                <TreeView ItemsSource="{Binding SolutionRoots}"
+                          SelectedItem="{Binding SelectedSolutionItem}"
+                          Margin="0,4,0,0">
+                    <TreeView.ItemTemplate>
+                        <TreeDataTemplate DataType="models:SolutionItem" ItemsSource="{Binding Children}">
+                            <TextBlock Text="{Binding Title}" Foreground="#1A1A1A"/>
+                        </TreeDataTemplate>
+                    </TreeView.ItemTemplate>
+                </TreeView>
+            </DockPanel>
+        </Border>
+
+        <!-- Editor -->
+        <Border Grid.Row="1" Grid.Column="1" BorderBrush="#CCC" BorderThickness="0,0,1,0" Background="#FFF" Padding="4">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Top" Text="{Binding CurrentFilePath}" Margin="4" Foreground="#666" TextTrimming="CharacterEllipsis"/>
+                <TextBox Classes="EditorBox"
+                         Text="{Binding EditorText, Mode=TwoWay}"
+                         AcceptsReturn="True"
+                         AcceptsTab="True"
+                         TextWrapping="NoWrap"
+                         FontFamily="Consolas,Cascadia Code,monospace"
+                         FontSize="13"
+                         Padding="8"
+                         Background="#FFF"
+                         Foreground="#1A1A1A"
+                         CaretBrush="#1A1A1A"/>
+            </DockPanel>
+        </Border>
+
+        <!-- Chat -->
+        <Border Grid.Row="1" Grid.Column="2" Background="#FFF" Padding="8">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="8" Margin="0,0,0,8">
+                    <TextBlock Text="Модель:" VerticalAlignment="Center" Foreground="#333"/>
+                    <ComboBox ItemsSource="{Binding OllamaModels}"
+                              SelectedItem="{Binding SelectedOllamaModel}"
+                              MinWidth="140"
+                              IsEnabled="{Binding OllamaAvailable}"/>
+                </StackPanel>
+                <StackPanel DockPanel.Dock="Bottom" Spacing="4" Margin="0,8,0,0">
+                    <TextBox Text="{Binding ChatInput, Mode=TwoWay}"
+                             Watermark="Сообщение…"
+                             MinHeight="56"
+                             AcceptsReturn="True"
+                             IsEnabled="{Binding !IsChatLoading}"/>
+                    <Button Content="Отправить" Command="{Binding SendChatCommand}"/>
+                </StackPanel>
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding ChatMessages}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="vm:ChatMessageViewModel">
+                                <Border Margin="0,4" Padding="8" Background="#F0F0F0" CornerRadius="4">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Role}" FontWeight="SemiBold" Foreground="#555" FontSize="11"/>
+                                        <TextBlock Text="{Binding Content}" TextWrapping="Wrap" Foreground="#1A1A1A" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </DockPanel>
+        </Border>
+    </Grid>
 </Window>

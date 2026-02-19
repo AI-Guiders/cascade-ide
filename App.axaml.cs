@@ -4,10 +4,10 @@ using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using System.Linq;
 using Avalonia.Markup.Xaml;
-using AgentIde.ViewModels;
-using AgentIde.Views;
+using CascadeIDE.ViewModels;
+using CascadeIDE.Views;
 
-namespace AgentIde;
+namespace CascadeIDE;
 
 public partial class App : Application
 {

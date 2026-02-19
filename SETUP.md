@@ -1,4 +1,4 @@
-# Установка стека AgentIde на машину
+# Установка стека CascadeIDE на машину
 
 Краткий чеклист и рекомендации под твою конфигурацию.
 
@@ -49,7 +49,7 @@ dotnet new install Avalonia.Templates
   ```
 - Вариант 2: скачать [OllamaSetup.exe](https://ollama.com/download/windows) с сайта.
 
-После установки сервис слушает **http://localhost:11434**. Первый запуск модели (например в терминале `ollama run llama3.2`) скачает модель и покажет её в AgentIde.
+После установки сервис слушает **http://localhost:11434**. Первый запуск модели (например в терминале `ollama run llama3.2`) скачает модель и покажет её в CascadeIDE.
 
 **Требования:** Windows 10 22H2+, для GPU — драйверы NVIDIA 452.39+ или актуальные AMD.
 
@@ -70,16 +70,16 @@ ollama pull llama3.2
 ollama pull qwen2.5:7b
 ```
 
-Список установленных моделей в AgentIde подтягивается автоматически при запуске.
+Список установленных моделей в CascadeIDE подтягивается автоматически при запуске.
 
 ---
 
-## 5. Сборка и запуск AgentIde
+## 5. Сборка и запуск CascadeIDE
 
 Из каталога репо **open**:
 
 ```powershell
-cd agent-ide
+cd cascade-ide
 dotnet restore
 dotnet build
 dotnet run

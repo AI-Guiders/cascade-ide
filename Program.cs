@@ -1,7 +1,7 @@
-﻿using Avalonia;
+using Avalonia;
 using System;
 
-namespace AgentIde;
+namespace CascadeIDE;
 
 sealed class Program
 {

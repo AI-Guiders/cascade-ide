@@ -5,6 +5,8 @@
     <Nullable>enable</Nullable>
     <LangVersion>14</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>CascadeIDE</RootNamespace>
+    <AssemblyName>CascadeIDE</AssemblyName>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
   </PropertyGroup>
@@ -24,8 +26,11 @@
       <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
       <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="Avalonia.AvaloniaEdit" Version="11.0.6" />
+    <PackageReference Include="AvaloniaEdit.TextMate" Version="11.0.6" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1" />
     <PackageReference Include="Microsoft.Extensions.AI" Version="9.5.0" />
+    <PackageReference Include="ModelContextProtocol" Version="0.8.0-preview.1" />
     <PackageReference Include="OllamaSharp" Version="5.4.16" />
   </ItemGroup>
 </Project>
