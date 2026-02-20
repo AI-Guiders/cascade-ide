@@ -5,6 +5,47 @@
              RequestedThemeVariant="Default">
              <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
+    <Application.Resources>
+        <ResourceDictionary>
+            <!-- Тема: ide_get_ui_theme / ide_set_ui_theme -->
+            <SolidColorBrush x:Key="CascadeTheme.MainWindowBackground">#F5F5F5</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.MenuBackground">#F0F0F0</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.MenuForeground">#1A1A1A</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.ButtonBackground">#E0E0E0</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.ButtonForeground">#1A1A1A</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.ButtonBorderBrush">#BBB</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.ButtonHoverBackground">#D0D0D0</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.ButtonDisabledBackground">#EEE</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.ButtonDisabledForeground">#888</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.ToolbarBackground">#E8E8E8</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.ToolbarTextForeground">#333</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.ToolbarErrorForeground">#C00</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.EditorBackground">#FFF</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.EditorForeground">#1A1A1A</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.EditorColumnBorderBrush">#CCC</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.EditorColumnBackground">#FFF</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.CurrentFileForeground">#666</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.MarkdownPreviewPanelBackground">#FAFAFA</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.MarkdownPreviewPanelBorderBrush">#E0E0E0</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.SolutionExplorerBorderBrush">#CCC</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.SolutionExplorerHeaderForeground">#1A1A1A</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.BuildOutputBackground">#F8F8F8</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.BuildOutputBorderBrush">#CCC</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.ChatPanelBackground">#FFF</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.ChatLabelForeground">#333</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.ChatMessageBubbleBackground">#F0F0F0</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.ChatMessageContentForeground">#1A1A1A</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.SendButtonBackground">#4CAF50</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.SendButtonForeground">White</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.TerminalBackground">#1E1E1E</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.TerminalForeground">#CCC</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.TerminalInputBackground">#2D2D2D</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.McpBannerBackground">#E3F2FD</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.McpBannerForeground">#1565C0</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.PreviewWindowBackground">#F0F0F0</SolidColorBrush>
+        </ResourceDictionary>
+    </Application.Resources>
+
     <Application.DataTemplates>
         <local:ViewLocator/>
     </Application.DataTemplates>

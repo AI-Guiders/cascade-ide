@@ -1,0 +1,16 @@
+CascadeIDE
+Copyright (c) 2024–2026. See LICENSE for full license terms.
+
+This product includes the following third-party components:
+
+---
+
+Tomlyn (https://github.com/xoofx/Tomlyn)
+Copyright (c) Alexandre Mutel (xoofx)
+Licensed under the BSD-2-Clause License. See https://opensource.org/licenses/BSD-2-Clause
+
+---
+
+OutWit.Database.Core, OutWit.Database.EntityFramework / WitDatabase (https://github.com/dmitrat/WitDatabase)
+Copyright 2020–2026 Dmitry Ratner. WitDatabase: https://witdatabase.io/
+Licensed under the Apache License, Version 2.0. See the package LICENSE.

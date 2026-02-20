@@ -2,6 +2,9 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <GenerateExecutable>true</GenerateExecutable>
     <Nullable>enable</Nullable>
     <LangVersion>14</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -28,9 +31,16 @@
     </PackageReference>
     <PackageReference Include="Avalonia.AvaloniaEdit" Version="11.0.6" />
     <PackageReference Include="AvaloniaEdit.TextMate" Version="11.0.6" />
+    <PackageReference Include="Markdown.Avalonia" Version="11.0.2" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.14.0" />
     <PackageReference Include="Microsoft.Extensions.AI" Version="9.5.0" />
     <PackageReference Include="ModelContextProtocol" Version="0.8.0-preview.1" />
     <PackageReference Include="OllamaSharp" Version="5.4.16" />
+    <PackageReference Include="OutWit.Common" Version="1.3.2" />
+    <PackageReference Include="OutWit.Common.Json" Version="1.1.3" />
+    <PackageReference Include="OutWit.Database.Core" Version="1.0.0" />
+    <PackageReference Include="OutWit.Database.EntityFramework" Version="1.0.1" />
+    <PackageReference Include="Tomlyn" Version="0.20.0" />
   </ItemGroup>
 </Project>

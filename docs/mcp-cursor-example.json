@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "cascade-ide": {
+      "command": "D:\\cascade-ide\\CascadeIDE.exe",
+      "args": ["--mcp-stdio"]
+    },
+    "cascade-ide-debug": {
+      "command": "D:\\cascade-ide-debug\\CascadeIDE.exe",
+      "args": ["--mcp-stdio"]
+    }
+  }
+}

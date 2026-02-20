@@ -63,14 +63,31 @@ dotnet new install Avalonia.Templates
 | Средние (13B)  | `qwen2.5:13b`, `llama3.1:8b`     | При 8 GB VRAM часть может уйти в RAM — всё ещё приемлемо. |
 | Крупные        | `qwen2.5:32b`, `llama3.1:70b`    | 64 GB RAM позволяют тянуть на CPU или гибрид; скорость ниже. |
 
+**Для ноутбука + MCP (tool calling) и кодинга на .NET** по умолчанию в настройках подставлена модель **qwen2.5-coder:7b** — поддерживает вызов инструментов и заточена под код. Установка:
+
+```powershell
+ollama pull qwen2.5-coder:7b
+```
+
+Выбранная в IDE модель сохраняется в настройках (`%LocalAppData%\CascadeIDE\settings.toml`) и подставляется при следующем запуске. При первом запуске после обновления старый `settings.json` автоматически мигрирует в TOML.
+
 Команды (после установки Ollama):
 
 ```powershell
+ollama pull qwen2.5-coder:7b
 ollama pull llama3.2
 ollama pull qwen2.5:7b
 ```
 
 Список установленных моделей в CascadeIDE подтягивается автоматически при запуске.
+
+---
+
+## 4.1. MCP: агент ↔ IDE
+
+Чтобы агент (Cursor и др.) управлял CascadeIDE по MCP, IDE нужно запускать с флагом **`--mcp-stdio`**. Тогда она поднимает MCP-сервер на stdin/stdout; хост (например Cursor) подключается к этому процессу и вызывает тулы: открытие файла, брейкпоинты, превью, подтверждения.
+
+Подробно и пример конфига Cursor: **[docs/MCP-PROTOCOL.md](docs/MCP-PROTOCOL.md)**.
 
 ---
 

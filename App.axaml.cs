@@ -6,11 +6,15 @@ using System.Linq;
 using Avalonia.Markup.Xaml;
 using CascadeIDE.ViewModels;
 using CascadeIDE.Views;
+using ModelContextProtocol.Server;
 
 namespace CascadeIDE;
 
 public partial class App : Application
 {
+    /// <summary>Запуск с MCP-сервером на stdio (агент/Cursor подключается к IDE по stdin/stdout).</summary>
+    public static bool RunMcpStdio { get; set; }
+
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -20,15 +24,30 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
-            // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
             DisableAvaloniaDataAnnotationValidation();
             var vm = new MainWindowViewModel();
+            vm.IsMcpServerMode = RunMcpStdio;
             desktop.MainWindow = new MainWindow { DataContext = vm };
+            if (RunMcpStdio && Services.SettingsService.Load().IdeMcpServerEnabled)
+                _ = RunMcpServerAsync(vm);
             _ = vm.RefreshOllamaAsync();
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private static async Task RunMcpServerAsync(MainWindowViewModel vm)
+    {
+        try
+        {
+            var options = Services.IdeMcpServer.BuildOptions(vm);
+            await using var server = McpServer.Create(new StdioServerTransport("CascadeIDE"), options);
+            await server.RunAsync();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"MCP server error: {ex.Message}");
+        }
     }
 
     private void DisableAvaloniaDataAnnotationValidation()

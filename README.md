@@ -26,7 +26,8 @@ dotnet run
 - **Дерево решения:** левая панель — открытие .slnx/.sln (кнопка «Открыть решение»), проекты в виде дерева; клик по узлу открывает файл в редакторе.
 - **Нативная поддержка slnx:** парсер `SolutionParser` загружает .slnx (XML) и .sln (текстовый формат).
 - **MCP для модели:** сервис `McpClientService` (пока заглушка) — вызовы debug-mcp и RoslynMCP для отладки и рефакторинга; модель сможет использовать их при интеграции tool calling.
-- **MCP сервер IDE:** `IdeMcpServer` — тулы `ide_open_file`, `ide_set_breakpoint`, `ide_show_preview`, `ide_request_confirmation`; агент/модель может управлять IDE через этот MCP (подключение: stdio при запуске в режиме MCP или будущий TCP).
+- **MCP сервер IDE:** `IdeMcpServer` — тулы `ide_open_file`, `ide_set_breakpoint`, `ide_show_preview`, `ide_request_confirmation`. Запуск с **`--mcp-stdio`** поднимает MCP на stdin/stdout; Cursor (или другой хост) подключается к процессу и вызывает тулы. См. [docs/MCP-PROTOCOL.md](docs/MCP-PROTOCOL.md).
+- **Модель по умолчанию:** для ноутбука и кодинга с MCP в настройках задана `qwen2.5-coder:7b`; выбранная в UI модель сохраняется в `%LocalAppData%\CascadeIDE\settings.toml`. Данные приложения (при необходимости) — в WitDatabase (`app.witdb` в том же каталоге).
 
 ## Подключение как submodule (репо open)
 

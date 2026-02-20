@@ -1,0 +1,42 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:CascadeIDE.ViewModels"
+        xmlns:models="using:CascadeIDE.Models"
+        x:Class="CascadeIDE.Views.InstallModelDialog"
+        x:Name="ThisDialog"
+        x:DataType="vm:InstallModelDialogViewModel"
+        Title="Установить модель Ollama"
+        Width="420" Height="380"
+        Background="#F5F5F5"
+        WindowStartupLocation="CenterOwner">
+
+    <StackPanel Margin="16" Spacing="12">
+        <TextBlock Text="Recommended (по конфигурации ПК)" FontWeight="SemiBold" Foreground="#1A1A1A"/>
+        <ScrollViewer MaxHeight="140" VerticalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{Binding RecommendedModels}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="models:RecommendedModel">
+                        <Button Content="{Binding Description}"
+                                Tapped="OnRecommendedItemTapped"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Left"
+                                Margin="0,2"
+                                Padding="8,4"
+                                Background="#E8E8E8"
+                                Foreground="#1A1A1A"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+        <TextBlock Text="Или введите имя модели:" Foreground="#333"/>
+        <TextBox Text="{Binding CustomModelName, Mode=TwoWay}"
+                 Watermark="Например: qwen2.5-coder:7b"
+                 IsEnabled="{Binding !IsPulling}"/>
+        <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button Content="Установить" Command="{Binding InstallCommand}" Background="#4CAF50" Foreground="White" Padding="12,6"/>
+            <Button Content="Отмена" Command="{Binding CancelCommand}" Background="#E0E0E0" Foreground="#1A1A1A" Padding="12,6"/>
+        </StackPanel>
+        <TextBlock Text="{Binding ProgressText}" Foreground="#666" FontSize="11" TextWrapping="Wrap"/>
+        <TextBlock Text="{Binding ErrorText}" Foreground="#C00" FontSize="11" TextWrapping="Wrap"/>
+    </StackPanel>
+</Window>
