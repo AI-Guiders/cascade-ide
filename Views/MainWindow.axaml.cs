@@ -12,6 +12,7 @@ using Avalonia.Threading;
 using Avalonia.VisualTree;
 using AvaloniaEdit;
 using AvaloniaEdit.Document;
+using AvaloniaEdit.Rendering;
 using AvaloniaEdit.TextMate;
 using CommunityToolkit.Mvvm.Input;
 using TextMateSharp.Grammars;
@@ -21,6 +22,7 @@ namespace CascadeIDE.Views;
 
 public partial class MainWindow : Window
 {
+    private RegistryOptions? _registryOptions;
     private TextMate.Installation? _textMateInstallation;
     private bool _suppressEditorSync;
     private Services.CSharpLanguageService? _languageService;
@@ -28,6 +30,8 @@ public partial class MainWindow : Window
     private MarkdownPreviewWindow? _previewWindow;
     private ViewModels.MarkdownPreviewWindowViewModel? _previewVm;
     private IDisposable? _highlightHideTimer;
+    private BreakpointLineRenderer? _breakpointRenderer;
+    private DebugCurrentLineRenderer? _debugCurrentLineRenderer;
 
     public MainWindow()
     {
@@ -45,6 +49,7 @@ public partial class MainWindow : Window
             vm.RequestClose = Close;
             vm.RequestShowAbout = ShowAbout;
             vm.RequestOpenSettings = ShowSettingsWindow;
+            vm.RequestOpenThemeFile = ShowOpenThemeFileDialogAsync;
             vm.RequestShowMarkdownPreviewWindow = ShowMarkdownPreviewWindow;
             vm.RequestShowMarkdownPreviewForEditor = ShowMarkdownPreviewForEditor;
             vm.GetUiLayoutProvider = () => Services.UiLayoutSnapshot.BuildJson(this);
@@ -71,6 +76,19 @@ public partial class MainWindow : Window
             SetupTerminalKeyHandler();
             SetupEditorAndTextMate();
         }
+    }
+
+    private async Task<string?> ShowOpenThemeFileDialogAsync()
+    {
+        var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = "Открыть файл темы",
+            AllowMultiple = false,
+            FileTypeFilter = [new FilePickerFileType("JSON") { Patterns = ["*.json"] }]
+        });
+        if (files.Count == 0)
+            return null;
+        return files[0].TryGetLocalPath() ?? files[0].Path.LocalPath;
     }
 
     private async Task ShowOpenSolutionDialogAsync()
@@ -136,8 +154,8 @@ public partial class MainWindow : Window
         if (editor is null)
             return;
 
-        var registryOptions = new RegistryOptions(ThemeName.LightPlus);
-        _textMateInstallation = editor.InstallTextMate(registryOptions);
+        _registryOptions = new RegistryOptions(ThemeName.LightPlus);
+        _textMateInstallation = editor.InstallTextMate(_registryOptions);
 
         editor.Document.Changed += OnEditorDocumentChanged;
 
@@ -152,17 +170,25 @@ public partial class MainWindow : Window
 
         if (DataContext is ViewModels.MainWindowViewModel vmSetup)
         {
-            vmSetup.SetEditorStateProvider(() => GetEditorState(editor, vmSetup.CurrentFilePath));
+            vmSetup.SetEditorStateProvider(maxPreview => GetEditorState(editor, vmSetup.CurrentFilePath, maxPreview));
+            vmSetup.SetEditorContentRangeProvider((startLine, endLine) => GetEditorContentRange(editor, startLine, endLine));
             vmSetup.SetApplyEdit((path, sl, sc, el, ec, newText) => ApplyEditInEditor(editor, vmSetup, path, sl, sc, el, ec, newText));
             vmSetup.SetFocusEditor(() => editor.Focus());
+
+            _breakpointRenderer = new BreakpointLineRenderer(() => vmSetup.AllBreakpointLinesInCurrentFile);
+            editor.TextArea.TextView.BackgroundRenderers.Add(_breakpointRenderer);
+            _debugCurrentLineRenderer = new DebugCurrentLineRenderer(() => vmSetup.DebugCurrentLineInCurrentFile);
+            editor.TextArea.TextView.BackgroundRenderers.Add(_debugCurrentLineRenderer);
+            editor.TextArea.PointerPressed += (s, e) => OnEditorMarginPointerPressed(e, editor, vmSetup);
         }
 
         SyncFromViewModel();
     }
 
-    private static Services.EditorStateDto GetEditorState(TextEditor editor, string? currentFilePath)
+    private static Services.EditorStateDto GetEditorState(TextEditor editor, string? currentFilePath, int? maxPreviewChars)
     {
         var doc = editor.Document;
+        var text = doc.Text ?? "";
         var caret = editor.TextArea.Caret;
         var offset = caret.Offset;
         if (offset < 0 || offset > doc.TextLength)
@@ -176,6 +202,9 @@ public partial class MainWindow : Window
             selLen = seg.EndOffset - seg.StartOffset;
         }
         var selectionText = selLen > 0 ? doc.GetText(selStart, selLen) : "";
+        string? preview = null;
+        if (maxPreviewChars is > 0)
+            preview = text.Length <= maxPreviewChars.Value ? text : text[..maxPreviewChars.Value];
         return new Services.EditorStateDto
         {
             FilePath = currentFilePath,
@@ -183,8 +212,25 @@ public partial class MainWindow : Window
             CaretColumn = offset - line.Offset + 1,
             SelectionStart = selStart,
             SelectionLength = selLen,
-            SelectionText = selectionText
+            SelectionText = selectionText,
+            ContentLength = text.Length,
+            IsEmpty = text.Length == 0,
+            ContentPreview = preview
         };
+    }
+
+    private static string? GetEditorContentRange(TextEditor editor, int startLine, int endLine)
+    {
+        var text = editor.Document.Text ?? "";
+        if (text.Length == 0)
+            return "";
+        var lines = text.Split('\n');
+        var oneBased = startLine >= 1 && endLine >= 1 && startLine <= endLine;
+        if (!oneBased || lines.Length == 0)
+            return "";
+        var from = Math.Max(1, Math.Min(startLine, lines.Length));
+        var to = Math.Max(from, Math.Min(endLine, lines.Length));
+        return string.Join("\n", lines.Skip(from - 1).Take(to - from + 1));
     }
 
     private static void ApplyEditInEditor(TextEditor editor, ViewModels.MainWindowViewModel vm, string filePath, int startLine, int startColumn, int endLine, int endColumn, string newText)
@@ -233,11 +279,63 @@ public partial class MainWindow : Window
             UpdateSolutionColumnWidth(vmSol.IsSolutionExplorerVisible);
         if (e.PropertyName is nameof(ViewModels.MainWindowViewModel.IsChatPanelExpanded) && DataContext is ViewModels.MainWindowViewModel vmChat)
             UpdateChatColumnWidth(vmChat.IsChatPanelExpanded);
-        if (e.PropertyName is nameof(ViewModels.MainWindowViewModel.IsMarkdownFile) && DataContext is ViewModels.MainWindowViewModel vmMd)
-            UpdateMarkdownPreviewColumn(vmMd.IsMarkdownFile);
+        if (e.PropertyName is nameof(ViewModels.MainWindowViewModel.IsMarkdownPreviewVisible) && DataContext is ViewModels.MainWindowViewModel vmMd)
+        {
+            UpdateMarkdownPreviewColumn(vmMd.IsMarkdownPreviewVisible);
+            UpdateInlineMarkdownPreview();
+        }
+        if (e.PropertyName is nameof(ViewModels.MainWindowViewModel.IsMarkdownFile))
+            UpdateInlineMarkdownPreview();
+        if (e.PropertyName is nameof(ViewModels.MainWindowViewModel.EditorText))
+            UpdateInlineMarkdownPreview();
         if (e.PropertyName is nameof(ViewModels.MainWindowViewModel.SelectedOllamaModel) && DataContext is ViewModels.MainWindowViewModel vm2
             && vm2.SelectedOllamaModel == ViewModels.MainWindowViewModel.InstallNewSentinel)
             _ = ShowInstallModelDialogAsync(vm2);
+        if (e.PropertyName is nameof(ViewModels.MainWindowViewModel.BreakpointLinesInCurrentFile)
+            or nameof(ViewModels.MainWindowViewModel.DebuggerBreakpointLinesInCurrentFile)
+            or nameof(ViewModels.MainWindowViewModel.McpFileBreakpointLinesInCurrentFile)
+            or nameof(ViewModels.MainWindowViewModel.AllBreakpointLinesInCurrentFile)
+            or nameof(ViewModels.MainWindowViewModel.CurrentFilePath)
+            or nameof(ViewModels.MainWindowViewModel.DebugCurrentLineInCurrentFile)
+            or nameof(ViewModels.MainWindowViewModel.DebugPositionFile)
+            or nameof(ViewModels.MainWindowViewModel.DebugPositionLine))
+        {
+            var ed = this.FindControl<TextEditor>("Editor");
+            if (ed is not null)
+            {
+                ed.TextArea.TextView.Redraw();
+                if (DataContext is ViewModels.MainWindowViewModel mainVm
+                    && mainVm.DebugCurrentLineInCurrentFile is var debugLine && debugLine > 0
+                    && debugLine <= ed.Document.LineCount)
+                    ScrollEditorToLine(ed, debugLine);
+            }
+        }
+    }
+
+    /// <summary>Клик по полю слева от текста (номера строк / брейкпоинты) — переключить брейкпоинт в .dotnet-debug-mcp-breakpoints.json.</summary>
+    private static void OnEditorMarginPointerPressed(PointerPressedEventArgs e, TextEditor editor, ViewModels.MainWindowViewModel vm)
+    {
+        var textView = editor.TextArea.TextView;
+        var pt = e.GetCurrentPoint(textView).Position;
+        const double gutterWidth = 50;
+        if (pt.X > gutterWidth || pt.X < 0)
+            return;
+        var scrollOffset = textView.ScrollOffset;
+        var docY = pt.Y + scrollOffset.Y;
+        var vl = textView.VisualLines?.FirstOrDefault(v => docY >= v.VisualTop && docY < v.VisualTop + v.Height);
+        if (vl is null)
+            return;
+        var line = vl.FirstDocumentLine.LineNumber;
+        vm.ToggleBreakpointInFile(line);
+    }
+
+    private static void ScrollEditorToLine(TextEditor editor, int oneBasedLine)
+    {
+        if (oneBasedLine < 1 || oneBasedLine > editor.Document.LineCount)
+            return;
+        var line = editor.Document.GetLineByNumber(oneBasedLine);
+        editor.TextArea.Caret.Offset = line.Offset;
+        editor.TextArea.Caret.BringCaretToView();
     }
 
     private void ApplyEditorSelection(int start, int length)
@@ -321,6 +419,16 @@ public partial class MainWindow : Window
             grid.ColumnDefinitions[1].Width = showPreview ? new GridLength(1, GridUnitType.Star) : new GridLength(0, GridUnitType.Pixel);
     }
 
+    /// <summary>Принудительно обновить контент панели превью справа от редактора (Markdown.Avalonia иногда не обновляет привязку при смене EditorText).</summary>
+    private void UpdateInlineMarkdownPreview()
+    {
+        if (DataContext is not ViewModels.MainWindowViewModel vm || !vm.IsMarkdownFile)
+            return;
+        var viewer = this.FindControl<Markdown.Avalonia.MarkdownScrollViewer>("InlineMarkdownPreview");
+        if (viewer is not null)
+            viewer.Markdown = vm.EditorText ?? "";
+    }
+
     private void EnsurePreviewWindow()
     {
         if (_previewWindow is not null)
@@ -372,27 +480,22 @@ public partial class MainWindow : Window
 
     private void ApplyGrammarByFilePath(TextEditor editor, string? filePath)
     {
-        if (_textMateInstallation is null)
+        if (_textMateInstallation is null || _registryOptions is null)
             return;
 
-        var registryOptions = new RegistryOptions(ThemeName.LightPlus);
         var ext = string.IsNullOrEmpty(filePath) ? "" : Path.GetExtension(filePath).ToLowerInvariant();
+        if (!Services.EditorLanguageSupport.ExtensionToGrammarExtension.TryGetValue(ext, out var grammarExt))
+            return;
+
         try
         {
-            string scope = ext switch
-            {
-                ".cs" => registryOptions.GetScopeByLanguageId(registryOptions.GetLanguageByExtension(".cs").Id),
-                ".md" or ".markdown" => registryOptions.GetScopeByLanguageId(registryOptions.GetLanguageByExtension(".md").Id),
-                ".csproj" or ".xml" or ".axaml" or ".xaml" or ".config" or ".props" or ".targets" =>
-                    registryOptions.GetScopeByLanguageId(registryOptions.GetLanguageByExtension(".xml").Id),
-                ".json" => registryOptions.GetScopeByLanguageId(registryOptions.GetLanguageByExtension(".json").Id),
-                _ => registryOptions.GetScopeByLanguageId(registryOptions.GetLanguageByExtension(".txt").Id)
-            };
+            var lang = _registryOptions.GetLanguageByExtension(grammarExt);
+            var scope = _registryOptions.GetScopeByLanguageId(lang.Id);
             _textMateInstallation.SetGrammar(scope);
         }
         catch
         {
-            // Неизвестное расширение — без подсветки
+            // грамматика не в бандле — не меняем подсветку
         }
     }
 
@@ -461,5 +564,56 @@ public partial class MainWindow : Window
                 return c;
         return null;
     }
+}
 
+internal sealed class BreakpointLineRenderer(Func<IReadOnlyList<int>> getBreakpointLines) : IBackgroundRenderer
+{
+    private const double SymbolRadius = 5;
+    private static readonly SolidColorBrush s_backBrush = new(Color.FromArgb(40, 200, 80, 80));
+    private static readonly SolidColorBrush s_symbolBrush = new(Color.FromRgb(200, 80, 80));
+    private static readonly Pen s_symbolPen = new(new SolidColorBrush(Color.FromRgb(160, 60, 60)), 1);
+
+    public KnownLayer Layer => KnownLayer.Background;
+
+    public void Draw(TextView textView, DrawingContext drawingContext)
+    {
+        var document = textView.Document;
+        if (document is null) return;
+        var lines = getBreakpointLines();
+        if (lines.Count == 0) return;
+        foreach (var lineNumber in lines)
+        {
+            if (lineNumber < 1 || lineNumber > document.LineCount) continue;
+            var line = document.GetLineByNumber(lineNumber);
+            var first = true;
+            foreach (var rect in BackgroundGeometryBuilder.GetRectsForSegment(textView, line))
+            {
+                drawingContext.DrawRectangle(s_backBrush, null, rect);
+                if (first)
+                {
+                    var centerX = rect.Left + SymbolRadius + 2;
+                    var centerY = rect.Top + rect.Height / 2;
+                    drawingContext.DrawEllipse(s_symbolBrush, s_symbolPen, new Rect(centerX - SymbolRadius, centerY - SymbolRadius, SymbolRadius * 2, SymbolRadius * 2));
+                    first = false;
+                }
+            }
+        }
+    }
+}
+
+internal sealed class DebugCurrentLineRenderer(Func<int> getCurrentLine) : IBackgroundRenderer
+{
+    public KnownLayer Layer => KnownLayer.Background;
+
+    public void Draw(TextView textView, DrawingContext drawingContext)
+    {
+        var lineNumber = getCurrentLine();
+        if (lineNumber < 1) return;
+        var document = textView.Document;
+        if (document is null || lineNumber > document.LineCount) return;
+        var line = document.GetLineByNumber(lineNumber);
+        var brush = new SolidColorBrush(Color.FromArgb(60, 255, 200, 80));
+        foreach (var rect in BackgroundGeometryBuilder.GetRectsForSegment(textView, line))
+            drawingContext.DrawRectangle(brush, null, rect);
+    }
 }

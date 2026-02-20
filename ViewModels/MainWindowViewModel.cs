@@ -20,17 +20,20 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private CascadeIdeSettings? _lastSavedSettings;
     private AiKeys? _lastSavedAiKeys;
 
-    private Func<Services.EditorStateDto?>? _editorStateProvider;
+    private Func<int?, Services.EditorStateDto?>? _editorStateProvider;
+    private Func<int, int, string?>? _editorContentRangeProvider;
     private Action<string, int, int, int, int, string>? _applyEditAction;
     private Action? _focusEditorAction;
 
     public static readonly IReadOnlyList<string> AiProviderKeys = ["Ollama", "Anthropic", "OpenAI", "DeepSeek"];
     public IReadOnlyList<string> AiProviderKeysList => AiProviderKeys;
 
+    private readonly Services.ContextMinimizer _contextMinimizer;
+
     public MainWindowViewModel()
     {
-        var minimizer = new Services.ContextMinimizer(new Services.CSharpLanguageService());
-        _aiProviderManager = new Services.AiProviderManager(minimizer, ResolveProvider);
+        _contextMinimizer = new Services.ContextMinimizer(new Services.CSharpLanguageService());
+        _aiProviderManager = new Services.AiProviderManager(_contextMinimizer, ResolveProvider);
         _ideMcpServerEnabled = _settings.IdeMcpServerEnabled;
         _activeAiProvider = _settings.ActiveAiProvider;
         _anthropicApiKey = _aiKeys.AnthropicApiKey ?? "";
@@ -72,7 +75,8 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         };
     }
 
-    public void SetEditorStateProvider(Func<Services.EditorStateDto?> provider) => _editorStateProvider = provider;
+    public void SetEditorStateProvider(Func<int?, Services.EditorStateDto?> provider) => _editorStateProvider = provider;
+    public void SetEditorContentRangeProvider(Func<int, int, string?> provider) => _editorContentRangeProvider = provider;
     public void SetApplyEdit(Action<string, int, int, int, int, string> action) => _applyEditAction = action;
     public void SetFocusEditor(Action action) => _focusEditorAction = action;
 
@@ -84,6 +88,8 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     public Action? RequestShowAbout { get; set; }
     /// <summary>Показать окно настроек (View подставит создание и Show).</summary>
     public Action? RequestOpenSettings { get; set; }
+    /// <summary>Показать диалог выбора файла темы (.json). Возвращает путь к файлу или null.</summary>
+    public Func<Task<string?>>? RequestOpenThemeFile { get; set; }
     /// <summary>Показать превью Markdown в отдельном окне (контент от агента).</summary>
     public Action<string, string>? RequestShowMarkdownPreviewWindow { get; set; }
     /// <summary>Показать превью текущего редактора в отдельном окне (живое обновление).</summary>
@@ -183,13 +189,128 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsMarkdownFile))]
+    [NotifyPropertyChangedFor(nameof(IsMarkdownPreviewVisible))]
+    [NotifyPropertyChangedFor(nameof(BreakpointLinesInCurrentFile))]
+    [NotifyPropertyChangedFor(nameof(DebuggerBreakpointLinesInCurrentFile))]
+    [NotifyPropertyChangedFor(nameof(McpFileBreakpointLinesInCurrentFile))]
+    [NotifyPropertyChangedFor(nameof(AllBreakpointLinesInCurrentFile))]
+    [NotifyPropertyChangedFor(nameof(DebugCurrentLineInCurrentFile))]
     private string? _currentFilePath;
+
+    private readonly List<(string FilePath, int Line)> _breakpoints = [];
+    private readonly List<(string FilePath, int Line)> _debuggerBreakpoints = [];
+    private FileSystemWatcher? _breakpointsFileWatcher;
+    private CancellationTokenSource? _openFileDebounceCts;
+    private const int OpenFileDebounceMs = 100;
+
+    /// <summary>Номера строк с брейкпоинтами в текущем открытом файле (для отрисовки в редакторе).</summary>
+    public IReadOnlyList<int> BreakpointLinesInCurrentFile
+    {
+        get
+        {
+            var current = CurrentFilePath;
+            if (string.IsNullOrEmpty(current))
+                return [];
+            var normalized = Path.GetFullPath(current);
+            return _breakpoints
+                .Where(b => string.Equals(Path.GetFullPath(b.FilePath), normalized, StringComparison.OrdinalIgnoreCase))
+                .Select(b => b.Line)
+                .OrderBy(static l => l)
+                .Distinct()
+                .ToList();
+        }
+    }
+
+    /// <summary>Строки с брейкпоинтами отладчика (ide_show_breakpoints) в текущем файле.</summary>
+    public IReadOnlyList<int> DebuggerBreakpointLinesInCurrentFile
+    {
+        get
+        {
+            var current = CurrentFilePath;
+            if (string.IsNullOrEmpty(current))
+                return [];
+            var normalized = Path.GetFullPath(current);
+            return _debuggerBreakpoints
+                .Where(b => string.Equals(Path.GetFullPath(b.FilePath), normalized, StringComparison.OrdinalIgnoreCase))
+                .Select(b => b.Line)
+                .OrderBy(static l => l)
+                .Distinct()
+                .ToList();
+        }
+    }
+
+    /// <summary>Строки с брейкпоинтами из .dotnet-debug-mcp-breakpoints.json в текущем файле.</summary>
+    public IReadOnlyList<int> McpFileBreakpointLinesInCurrentFile
+    {
+        get
+        {
+            var ws = GetWorkspacePath();
+            if (string.IsNullOrEmpty(ws) || string.IsNullOrEmpty(CurrentFilePath))
+                return [];
+            return Services.BreakpointsFileService.GetLinesForFile(ws, CurrentFilePath);
+        }
+    }
+
+    /// <summary>Все брейкпоинты (IDE + отладчик + файл MCP) в текущем файле для отрисовки.</summary>
+    public IReadOnlyList<int> AllBreakpointLinesInCurrentFile =>
+        BreakpointLinesInCurrentFile
+            .Union(DebuggerBreakpointLinesInCurrentFile)
+            .Union(McpFileBreakpointLinesInCurrentFile)
+            .OrderBy(static l => l)
+            .ToList();
+
+    private static string GetWorkspacePath(string? solutionPath)
+    {
+        if (string.IsNullOrWhiteSpace(solutionPath))
+            return "";
+        var p = Path.GetFullPath(solutionPath.Trim());
+        return File.Exists(p) ? Path.GetDirectoryName(p) ?? "" : p;
+    }
+
+    private string GetWorkspacePath() => GetWorkspacePath(SolutionPath);
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DebugCurrentLineInCurrentFile))]
+    private string? _debugPositionFile;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DebugCurrentLineInCurrentFile))]
+    private int _debugPositionLine;
+
+    /// <summary>Номер строки текущей позиции отладки в открытом файле (0 если другой файл или сброшено).</summary>
+    public int DebugCurrentLineInCurrentFile
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(DebugPositionFile) || string.IsNullOrEmpty(CurrentFilePath))
+                return 0;
+            if (!string.Equals(Path.GetFullPath(DebugPositionFile), Path.GetFullPath(CurrentFilePath), StringComparison.OrdinalIgnoreCase))
+                return 0;
+            return DebugPositionLine;
+        }
+    }
+
+    [ObservableProperty]
+    private ObservableCollection<DebugStackFrameViewModel> _debugStackFrames = [];
+
+    [ObservableProperty]
+    private ObservableCollection<DebugVariableViewModel> _debugVariables = [];
+
+    /// <summary>Показывать панель отладки (стек/переменные), когда агент присылал состояние.</summary>
+    public bool IsDebugPanelVisible => DebugStackFrames.Count > 0 || DebugVariables.Count > 0;
 
     /// <summary>True, если открыт файл .md или .markdown — показываем превью.</summary>
     public bool IsMarkdownFile =>
         !string.IsNullOrEmpty(CurrentFilePath)
         && (CurrentFilePath.EndsWith(".md", StringComparison.OrdinalIgnoreCase)
             || CurrentFilePath.EndsWith(".markdown", StringComparison.OrdinalIgnoreCase));
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsMarkdownPreviewVisible))]
+    private bool _isLoadingCurrentFile;
+
+    /// <summary>Показывать панель превью Markdown только когда контент уже загружен (избегаем смены лейаута до загрузки, из‑за которой сбрасывается выбор в дереве).</summary>
+    public bool IsMarkdownPreviewVisible => IsMarkdownFile && !IsLoadingCurrentFile;
 
     [ObservableProperty]
     private string _editorText = "";
@@ -204,6 +325,8 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(BuildSolutionCommand))]
+    [NotifyPropertyChangedFor(nameof(McpFileBreakpointLinesInCurrentFile))]
+    [NotifyPropertyChangedFor(nameof(AllBreakpointLinesInCurrentFile))]
     private string _solutionPath = "";
 
     [ObservableProperty]
@@ -304,6 +427,9 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
 
     public IReadOnlyList<string> SendMessageKeyOptionsList => SendMessageKeyOptions;
 
+    /// <summary>Краткий список языков с подсветкой в редакторе (для окна настроек).</summary>
+    public string SupportedEditorLanguagesSummary => Services.EditorLanguageSupport.GetSummary();
+
     partial void OnSelectedOllamaModelChanged(string? value)
     {
         (SendChatCommand as IRelayCommand)?.NotifyCanExecuteChanged();
@@ -358,30 +484,121 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
 
     partial void OnSelectedSolutionItemChanged(SolutionItem? value)
     {
-        if (value?.FullPath is not { } path || !File.Exists(path))
+        _openFileDebounceCts?.Cancel();
+        _openFileDebounceCts = new CancellationTokenSource();
+        var cts = _openFileDebounceCts;
+        _ = OpenFileAfterDebounceAsync(cts.Token);
+    }
+
+    partial void OnSolutionPathChanged(string value)
+    {
+        AttachBreakpointsFileWatcher(value);
+    }
+
+    private void AttachBreakpointsFileWatcher(string? solutionPath)
+    {
+        _breakpointsFileWatcher?.Dispose();
+        _breakpointsFileWatcher = null;
+        var ws = GetWorkspacePath(solutionPath);
+        if (string.IsNullOrEmpty(ws) || !Directory.Exists(ws))
             return;
-        CurrentFilePath = path;
-        EditorText = ""; // сразу очищаем, потом подставим содержимое
-        _ = LoadFileContentAsync(path);
+        try
+        {
+            _breakpointsFileWatcher = new FileSystemWatcher(ws)
+            {
+                Filter = Services.BreakpointsFileService.FileName,
+                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName
+            };
+            _breakpointsFileWatcher.Changed += (_, _) => Dispatcher.UIThread.Post(() =>
+            {
+                OnPropertyChanged(nameof(McpFileBreakpointLinesInCurrentFile));
+                OnPropertyChanged(nameof(AllBreakpointLinesInCurrentFile));
+            });
+            _breakpointsFileWatcher.Renamed += (_, _) => Dispatcher.UIThread.Post(() =>
+            {
+                OnPropertyChanged(nameof(McpFileBreakpointLinesInCurrentFile));
+                OnPropertyChanged(nameof(AllBreakpointLinesInCurrentFile));
+            });
+            _breakpointsFileWatcher.EnableRaisingEvents = true;
+        }
+        catch { /* нет прав или диск недоступен */ }
+    }
+
+    /// <summary>Открыть файл выбранного узла после паузы, чтобы не реагировать на двойное срабатывание/мигание выбора в дереве.</summary>
+    private async Task OpenFileAfterDebounceAsync(CancellationToken ct)
+    {
+        try
+        {
+            await Task.Delay(OpenFileDebounceMs, ct).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
+        await Dispatcher.UIThread.InvokeAsync(() =>
+        {
+            var value = SelectedSolutionItem;
+            if (value?.FullPath is not { } path || !File.Exists(path))
+                return;
+            var normalizedPath = Path.GetFullPath(path);
+            // Уже открыт этот файл и контент загружен — не затирать (защита от сбоя выбора в дереве при появлении превью .md)
+            if (string.Equals(CurrentFilePath, normalizedPath, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(EditorText))
+                return;
+            IsLoadingCurrentFile = true;
+            CurrentFilePath = normalizedPath;
+            EditorText = "";
+            _ = LoadFileContentAsync(normalizedPath);
+        });
+    }
+
+    /// <summary>Выделить в дереве решения узел, соответствующий текущему открытому файлу (после ide_open_file и т.п.).</summary>
+    private void SyncSelectedSolutionItemToCurrentFile()
+    {
+        var current = CurrentFilePath;
+        if (string.IsNullOrEmpty(current))
+            return;
+        var normalized = Path.GetFullPath(current);
+        var item = FindSolutionItemByPath(SolutionRoots, normalized);
+        if (item is not null)
+            SelectedSolutionItem = item;
+    }
+
+    private static SolutionItem? FindSolutionItemByPath(IEnumerable<SolutionItem> items, string fullPath)
+    {
+        foreach (var node in items)
+        {
+            if (node.FullPath is not null && string.Equals(Path.GetFullPath(node.FullPath), fullPath, StringComparison.OrdinalIgnoreCase))
+                return node;
+            var found = FindSolutionItemByPath(node.Children, fullPath);
+            if (found is not null)
+                return found;
+        }
+        return null;
     }
 
     private async Task LoadFileContentAsync(string path)
     {
+        var pathToMatch = Path.GetFullPath(path);
         try
         {
             var text = await Task.Run(() => File.ReadAllText(path)).ConfigureAwait(false);
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                if (CurrentFilePath == path)
+                var current = CurrentFilePath is not null ? Path.GetFullPath(CurrentFilePath) : "";
+                if (string.Equals(current, pathToMatch, StringComparison.OrdinalIgnoreCase))
                     EditorText = text;
+                IsLoadingCurrentFile = false;
             });
         }
         catch
         {
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                if (CurrentFilePath == path)
+                var current = CurrentFilePath is not null ? Path.GetFullPath(CurrentFilePath) : "";
+                if (string.Equals(current, pathToMatch, StringComparison.OrdinalIgnoreCase))
                     EditorText = "";
+                IsLoadingCurrentFile = false;
             });
         }
     }
@@ -440,6 +657,33 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private void OpenSettings()
     {
         RequestOpenSettings?.Invoke();
+    }
+
+    [RelayCommand]
+    private async Task ApplyDarkThemeAsync()
+    {
+        await Services.UiThemeApply.ApplyOnUiThreadAsync(Services.UiThemeApply.GetDarkThemeJson());
+    }
+
+    [RelayCommand]
+    private async Task ApplyLightThemeAsync()
+    {
+        await Services.UiThemeApply.ApplyOnUiThreadAsync(Services.UiThemeApply.GetLightThemeJson());
+    }
+
+    [RelayCommand]
+    private async Task ApplyCursorLikeThemeAsync()
+    {
+        await Services.UiThemeApply.ApplyOnUiThreadAsync(Services.UiThemeApply.GetCursorLikeThemeJson());
+    }
+
+    [RelayCommand]
+    private async Task OpenThemeFileAsync()
+    {
+        var path = RequestOpenThemeFile != null ? await RequestOpenThemeFile() : null;
+        if (string.IsNullOrEmpty(path))
+            return;
+        await Services.UiThemeApply.ApplyOnUiThreadAsync(Services.UiThemeApply.GetThemeJsonFromFile(path));
     }
 
     [RelayCommand]
@@ -670,6 +914,144 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
 
     private bool CanInstallModel() => OllamaAvailable && !string.IsNullOrWhiteSpace(ModelToInstall) && !IsPullingModel;
 
+    async Task<string> Services.IIdeMcpActions.ExecuteCommandAsync(string commandId, IReadOnlyDictionary<string, JsonElement>? args, CancellationToken cancellationToken)
+    {
+        static string? S(IReadOnlyDictionary<string, JsonElement>? a, string key) => a is not null && a.TryGetValue(key, out var e) ? e.GetString() : null;
+        static int I(IReadOnlyDictionary<string, JsonElement>? a, string key, int def = 0) => a is not null && a.TryGetValue(key, out var e) && e.TryGetInt32(out var v) ? v : def;
+
+        var a = (Services.IIdeMcpActions)this;
+        switch (commandId)
+        {
+            case Services.IdeCommands.OpenFile:
+                if (string.IsNullOrEmpty(S(args, "path"))) return "Missing path";
+                a.OpenFile(S(args, "path")!);
+                return "OK";
+            case Services.IdeCommands.LoadSolution:
+                if (string.IsNullOrEmpty(S(args, "path"))) return "Missing path";
+                a.LoadSolution(S(args, "path")!);
+                return "OK";
+            case Services.IdeCommands.Select:
+                if (args is null || string.IsNullOrEmpty(S(args, "file_path"))) return "Missing file_path";
+                a.SelectInEditor(S(args, "file_path"), I(args, "start_line"), I(args, "start_column"), I(args, "end_line"), I(args, "end_column"));
+                return "OK";
+            case Services.IdeCommands.SetBreakpoint:
+                if (args is null || string.IsNullOrEmpty(S(args, "file_path")) || !args.TryGetValue("line", out _)) return "Missing file_path or line";
+                a.SetBreakpoint(S(args, "file_path")!, I(args, "line", 1), S(args, "condition"));
+                return "OK";
+            case Services.IdeCommands.ShowPreview:
+                a.ShowPreview(S(args, "title") ?? "", S(args, "content") ?? "");
+                return "OK";
+            case Services.IdeCommands.ShowEditorPreview:
+                a.ShowEditorPreview();
+                return "OK";
+            case Services.IdeCommands.RequestConfirmation:
+                return await a.RequestConfirmationAsync(S(args, "message") ?? "", cancellationToken);
+            case Services.IdeCommands.GetEditorState:
+                return await a.GetEditorStateAsync(args is not null && args.TryGetValue("max_preview_chars", out var mpc) && mpc.TryGetInt32(out var maxPreview) ? maxPreview : null);
+            case Services.IdeCommands.GetEditorContentRange:
+                return await a.GetEditorContentRangeAsync(I(args, "start_line", 1), I(args, "end_line", 1));
+            case Services.IdeCommands.ApplyEdit:
+                if (args is null || string.IsNullOrEmpty(S(args, "file_path")) || !args.TryGetValue("new_text", out _)) return "Missing arguments";
+                a.ApplyEdit(S(args, "file_path")!, I(args, "start_line"), I(args, "start_column"), I(args, "end_line"), I(args, "end_column"), S(args, "new_text") ?? "");
+                return "OK";
+            case Services.IdeCommands.GoToPosition:
+                if (args is null || string.IsNullOrEmpty(S(args, "file_path")) || !args.TryGetValue("line", out _) || !args.TryGetValue("column", out _)) return "Missing file_path, line or column";
+                int? endLine = args.TryGetValue("end_line", out var el) && el.TryGetInt32(out var endL) ? endL : null;
+                int? endCol = args.TryGetValue("end_column", out var ec) && ec.TryGetInt32(out var endC) ? endC : null;
+                a.GoToPosition(S(args, "file_path"), I(args, "line"), I(args, "column"), endLine, endCol);
+                return "OK";
+            case Services.IdeCommands.GetSolutionInfo:
+                return a.GetSolutionInfo();
+            case Services.IdeCommands.GetSolutionFiles:
+                return await a.GetSolutionFilesAsync();
+            case Services.IdeCommands.GetCurrentFileDiagnostics:
+                return await a.GetCurrentFileDiagnosticsAsync();
+            case Services.IdeCommands.Build:
+                return await a.BuildAsync();
+            case Services.IdeCommands.GetBuildOutput:
+                return a.GetBuildOutput();
+            case Services.IdeCommands.FocusEditor:
+                a.FocusEditor();
+                return "OK";
+            case Services.IdeCommands.GetUiTheme:
+                return a.GetUiTheme();
+            case Services.IdeCommands.SetUiTheme:
+                return await a.SetUiThemeAsync(S(args, "theme") ?? "");
+            case Services.IdeCommands.GetUiLayout:
+                return await a.GetUiLayoutAsync();
+            case Services.IdeCommands.GetColorsUnderCursor:
+                return await a.GetColorsUnderCursorAsync();
+            case Services.IdeCommands.GetControlAppearance:
+                return await a.GetControlAppearanceAsync(S(args, "name"));
+            case Services.IdeCommands.SetControlLayout:
+                if (args is null || string.IsNullOrEmpty(S(args, "name"))) return "Missing name or layout";
+                return await a.SetControlLayoutAsync(S(args, "name")!, S(args, "layout") ?? "{}");
+            case Services.IdeCommands.SetControlText:
+                return await a.SetControlTextAsync(S(args, "name") ?? "", S(args, "text") ?? "");
+            case Services.IdeCommands.ClickControl:
+                return await a.ClickControlAsync(S(args, "name"));
+            case Services.IdeCommands.SendKeys:
+                return await a.SendKeysAsync(S(args, "name"), S(args, "keys") ?? "");
+            case Services.IdeCommands.SetFocus:
+                return await a.SetFocusAsync(S(args, "name"));
+            case Services.IdeCommands.HighlightControl:
+                return await a.HighlightControlAsync(S(args, "name"));
+            case Services.IdeCommands.SetPanelSize:
+                double? w = args is not null && args.TryGetValue("width", out var pw) && pw.TryGetDouble(out var wv) ? wv : null;
+                double? h = args is not null && args.TryGetValue("height", out var ph) && ph.TryGetDouble(out var hv) ? hv : null;
+                return await a.SetPanelSizeAsync(S(args, "panel") ?? "", w, h);
+            case Services.IdeCommands.GetSupportedEditorLanguages:
+                return a.GetSupportedEditorLanguages();
+            case Services.IdeCommands.ShowBreakpoints:
+                return ParseAndShowDebugBreakpoints(a, args);
+            case Services.IdeCommands.ShowDebugPosition:
+                a.ShowDebugPosition(S(args, "file_path"), I(args, "line"));
+                return "OK";
+            case Services.IdeCommands.ShowDebugState:
+                return ParseAndShowDebugState(a, args);
+#if DEBUG
+            case Services.IdeCommands.AddControl:
+                return await a.AddControlAsync(S(args, "parent_name") ?? "", S(args, "control_type") ?? "", S(args, "content"), S(args, "name"));
+#endif
+            default:
+                return $"Unknown command: {commandId}";
+        }
+    }
+
+    private static string ParseAndShowDebugBreakpoints(Services.IIdeMcpActions actions, IReadOnlyDictionary<string, JsonElement>? args)
+    {
+        if (args is null || !args.TryGetValue("breakpoints", out var arr) || arr.ValueKind != JsonValueKind.Array)
+            return "Missing breakpoints (array of { file_path, line })";
+        var list = new List<(string, int)>();
+        foreach (var item in arr.EnumerateArray())
+        {
+            if (!item.TryGetProperty("file_path", out var fp) || !item.TryGetProperty("line", out var ln)) continue;
+            var path = fp.GetString();
+            if (string.IsNullOrEmpty(path)) continue;
+            list.Add((path, ln.GetInt32()));
+        }
+        actions.ShowDebugBreakpoints(list);
+        return "OK";
+    }
+
+    private static string ParseAndShowDebugState(Services.IIdeMcpActions actions, IReadOnlyDictionary<string, JsonElement>? args)
+    {
+        var stackFrames = new List<(string, string?, int)>();
+        var variables = new List<(string, string)>();
+        if (args is not null)
+        {
+            if (args.TryGetValue("stack_frames", out var sf) && sf.ValueKind == JsonValueKind.Array)
+                foreach (var item in sf.EnumerateArray())
+                    stackFrames.Add((item.TryGetProperty("name", out var n) ? n.GetString() ?? "" : "", item.TryGetProperty("file", out var f) ? f.GetString() : null, item.TryGetProperty("line", out var l) ? l.GetInt32() : 0));
+            if (args.TryGetValue("variables", out var v) && v.ValueKind == JsonValueKind.Array)
+                foreach (var item in v.EnumerateArray())
+                    if (item.TryGetProperty("name", out var vn) && item.TryGetProperty("value", out var vv))
+                        variables.Add((vn.GetString() ?? "", vv.GetString() ?? ""));
+        }
+        actions.ShowDebugState(stackFrames, variables);
+        return "OK";
+    }
+
     void Services.IIdeMcpActions.OpenFile(string path)
     {
         if (string.IsNullOrEmpty(path))
@@ -679,14 +1061,24 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         {
             if (!File.Exists(pathCopy))
                 return;
-            CurrentFilePath = pathCopy;
+            var normalizedPath = Path.GetFullPath(pathCopy);
+            IsLoadingCurrentFile = true;
             try
             {
-                EditorText = File.ReadAllText(pathCopy);
+                CurrentFilePath = normalizedPath;
+                try
+                {
+                    EditorText = File.ReadAllText(normalizedPath);
+                }
+                catch
+                {
+                    EditorText = "";
+                }
+                SyncSelectedSolutionItemToCurrentFile();
             }
-            catch
+            finally
             {
-                EditorText = "";
+                IsLoadingCurrentFile = false;
             }
         });
     }
@@ -705,9 +1097,15 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         {
             if (!string.IsNullOrEmpty(filePath) && filePath != CurrentFilePath && File.Exists(filePath))
             {
-                CurrentFilePath = filePath;
-                try { EditorText = File.ReadAllText(filePath); }
-                catch { EditorText = ""; }
+                IsLoadingCurrentFile = true;
+                try
+                {
+                    CurrentFilePath = Path.GetFullPath(filePath);
+                    try { EditorText = File.ReadAllText(filePath); }
+                    catch { EditorText = ""; }
+                    SyncSelectedSolutionItemToCurrentFile();
+                }
+                finally { IsLoadingCurrentFile = false; }
             }
             var text = EditorText ?? "";
             int start = LineColumnToOffset(text, startLine, startColumn);
@@ -735,15 +1133,41 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         return offset + (col - 1);
     }
 
-    async Task<string> Services.IIdeMcpActions.GetEditorStateAsync()
+    async Task<string> Services.IIdeMcpActions.GetEditorStateAsync(int? maxPreviewChars)
+    {
+        var tcs = new TaskCompletionSource<string>();
+        var preview = maxPreviewChars ?? 2000;
+        Dispatcher.UIThread.Post(() =>
+        {
+            try
+            {
+                var dto = _editorStateProvider?.Invoke(preview) ?? new Services.EditorStateDto();
+                tcs.SetResult(JsonSerializer.Serialize(dto));
+            }
+            catch (Exception ex)
+            {
+                tcs.TrySetException(ex);
+            }
+        });
+        return await tcs.Task.ConfigureAwait(false);
+    }
+
+    async Task<string> Services.IIdeMcpActions.GetEditorContentRangeAsync(int startLine, int endLine)
     {
         var tcs = new TaskCompletionSource<string>();
         Dispatcher.UIThread.Post(() =>
         {
             try
             {
-                var dto = _editorStateProvider?.Invoke() ?? new Services.EditorStateDto();
-                tcs.SetResult(JsonSerializer.Serialize(dto));
+                var content = _editorContentRangeProvider?.Invoke(startLine, endLine);
+                var obj = new
+                {
+                    file_path = CurrentFilePath,
+                    start_line = startLine,
+                    end_line = endLine,
+                    content = content ?? ""
+                };
+                tcs.SetResult(JsonSerializer.Serialize(obj));
             }
             catch (Exception ex)
             {
@@ -768,7 +1192,8 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         var path = SolutionPath ?? "";
         var current = CurrentFilePath ?? "";
         var projects = CollectProjectPaths(SolutionRoots).ToList();
-        return JsonSerializer.Serialize(new { solution_path = path, current_file_path = current, project_paths = projects });
+        var selected = SelectedSolutionItem?.FullPath ?? "";
+        return JsonSerializer.Serialize(new { solution_path = path, current_file_path = current, project_paths = projects, selected_solution_path = selected });
     }
 
     string Services.IIdeMcpActions.GetBuildOutput()
@@ -787,6 +1212,67 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
                 yield return child;
         }
     }
+
+    private static IEnumerable<(string Title, string FullPath)> CollectFileEntries(ObservableCollection<SolutionItem> roots)
+    {
+        foreach (var item in roots)
+        {
+            if (item.FullPath is { } p && !p.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase) && !p.EndsWith(".sln", StringComparison.OrdinalIgnoreCase) && !p.EndsWith(".slnx", StringComparison.OrdinalIgnoreCase))
+                yield return (item.Title, p);
+            foreach (var child in CollectFileEntries(item.Children))
+                yield return child;
+        }
+    }
+
+    private static string? GetRelativePath(string? solutionPath, string? fullPath)
+    {
+        if (string.IsNullOrEmpty(solutionPath) || string.IsNullOrEmpty(fullPath))
+            return null;
+        var solutionDir = Path.GetDirectoryName(solutionPath);
+        if (string.IsNullOrEmpty(solutionDir))
+            return null;
+        try
+        {
+            return Path.GetRelativePath(solutionDir, fullPath);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static object BuildSolutionTreeNode(SolutionItem item, string? solutionPath)
+    {
+        var relative = GetRelativePath(solutionPath, item.FullPath);
+        var path = item.FullPath;
+        var title = item.Title;
+        if (item.Children.Count == 0)
+            return new { title, path, relative_path = relative };
+        var children = item.Children.Select(c => BuildSolutionTreeNode(c, solutionPath)).ToList();
+        return new { title, path, relative_path = relative, children };
+    }
+
+    /// <summary>Диагностики открытого .cs файла (ошибки и предупреждения Roslyn). JSON: массив { id, message, severity, line, column }. Для не-C# или при отсутствии файла — [].</summary>
+    async Task<string> Services.IIdeMcpActions.GetCurrentFileDiagnosticsAsync()
+    {
+        var (path, text) = await Dispatcher.UIThread.InvokeAsync(() => (CurrentFilePath ?? "", EditorText ?? "")).GetTask();
+        return await Task.Run(() => _contextMinimizer.GetDiagnosticsJson(path, text)).ConfigureAwait(false);
+    }
+
+    /// <summary>Список файлов и дерево решения. file_entries — плоский список с path, title, relative_path. solution_tree — иерархия (solution → projects → folders → files). Выполняется в UI-потоке.</summary>
+    Task<string> Services.IIdeMcpActions.GetSolutionFilesAsync() =>
+        Dispatcher.UIThread.InvokeAsync(() =>
+        {
+            var solutionPath = SolutionPath;
+            var entries = CollectFileEntries(SolutionRoots).Select(e => new
+            {
+                path = e.FullPath,
+                title = e.Title,
+                relative_path = GetRelativePath(solutionPath, e.FullPath)
+            }).ToList();
+            var tree = SolutionRoots.Select(r => BuildSolutionTreeNode(r, solutionPath)).ToList();
+            return JsonSerializer.Serialize(new { file_entries = entries, solution_tree = tree });
+        }).GetTask();
 
     async Task<string> Services.IIdeMcpActions.BuildAsync()
     {
@@ -845,8 +1331,26 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
 
     void Services.IIdeMcpActions.SetBreakpoint(string filePath, int line, string? condition)
     {
-        // TODO: отобразить в UI (маргина или список брейкпоинтов), передать в debug-mcp
-        System.Diagnostics.Debug.WriteLine($"Breakpoint: {filePath}:{line} {condition}");
+        if (string.IsNullOrEmpty(filePath) || line < 1)
+            return;
+        var path = Path.GetFullPath(filePath);
+        if (_breakpoints.Any(b => string.Equals(Path.GetFullPath(b.FilePath), path, StringComparison.OrdinalIgnoreCase) && b.Line == line))
+            return;
+        _breakpoints.Add((path, line));
+        OnPropertyChanged(nameof(BreakpointLinesInCurrentFile));
+    }
+
+    /// <summary>Переключить брейкпоинт в .dotnet-debug-mcp-breakpoints.json для текущего файла и строки (клик по полю в редакторе).</summary>
+    public void ToggleBreakpointInFile(int line)
+    {
+        if (line < 1 || string.IsNullOrEmpty(CurrentFilePath))
+            return;
+        var ws = GetWorkspacePath();
+        if (string.IsNullOrEmpty(ws))
+            return;
+        Services.BreakpointsFileService.ToggleBreakpoint(ws, CurrentFilePath, line);
+        OnPropertyChanged(nameof(McpFileBreakpointLinesInCurrentFile));
+        OnPropertyChanged(nameof(AllBreakpointLinesInCurrentFile));
     }
 
     void Services.IIdeMcpActions.ShowPreview(string title, string content)
@@ -854,6 +1358,11 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         var t = title ?? "Превью";
         var c = content ?? "";
         Dispatcher.UIThread.Post(() => RequestShowMarkdownPreviewWindow?.Invoke(t, c));
+    }
+
+    void Services.IIdeMcpActions.ShowEditorPreview()
+    {
+        Dispatcher.UIThread.Post(() => RequestShowMarkdownPreviewForEditor?.Invoke());
     }
 
     [RelayCommand]
@@ -960,4 +1469,72 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             return "No provider.";
         return await Dispatcher.UIThread.InvokeAsync(() => provider(panel, width, height));
     }
+
+    string Services.IIdeMcpActions.GetSupportedEditorLanguages() => Services.EditorLanguageSupport.GetJson();
+
+    void Services.IIdeMcpActions.ShowDebugBreakpoints(IReadOnlyList<(string FilePath, int Line)> breakpoints)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            _debuggerBreakpoints.Clear();
+            foreach (var (path, line) in breakpoints)
+                _debuggerBreakpoints.Add((Path.GetFullPath(path), line));
+            OnPropertyChanged(nameof(DebuggerBreakpointLinesInCurrentFile));
+            OnPropertyChanged(nameof(AllBreakpointLinesInCurrentFile));
+        });
+    }
+
+    void Services.IIdeMcpActions.ShowDebugPosition(string? filePath, int line)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            DebugPositionFile = filePath is not null ? Path.GetFullPath(filePath) : null;
+            DebugPositionLine = line;
+            if (filePath is not null && !string.IsNullOrEmpty(filePath) && File.Exists(filePath))
+            {
+                var normalized = Path.GetFullPath(filePath);
+                if (!string.Equals(CurrentFilePath, normalized, StringComparison.OrdinalIgnoreCase))
+                {
+                    IsLoadingCurrentFile = true;
+                    try
+                    {
+                        CurrentFilePath = normalized;
+                        try { EditorText = File.ReadAllText(normalized); }
+                        catch { EditorText = ""; }
+                        SyncSelectedSolutionItemToCurrentFile();
+                    }
+                    finally { IsLoadingCurrentFile = false; }
+                }
+            }
+        });
+    }
+
+    void Services.IIdeMcpActions.ShowDebugState(IReadOnlyList<(string Name, string? File, int Line)> stackFrames, IReadOnlyList<(string Name, string Value)> variables)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            DebugStackFrames.Clear();
+            foreach (var f in stackFrames)
+                DebugStackFrames.Add(new DebugStackFrameViewModel(f.Name, f.File, f.Line));
+            DebugVariables.Clear();
+            foreach (var v in variables)
+                DebugVariables.Add(new DebugVariableViewModel(v.Name, v.Value));
+            OnPropertyChanged(nameof(IsDebugPanelVisible));
+        });
+    }
+}
+
+/// <summary>Элемент стека вызовов для панели отладки.</summary>
+public sealed class DebugStackFrameViewModel(string name, string? file, int line)
+{
+    public string Name { get; } = name;
+    public string? File { get; } = file;
+    public int Line { get; } = line;
+}
+
+/// <summary>Переменная для панели отладки.</summary>
+public sealed class DebugVariableViewModel(string name, string value)
+{
+    public string Name { get; } = name;
+    public string Value { get; } = value;
 }
