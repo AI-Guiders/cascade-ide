@@ -1,0 +1,42 @@
+{
+  "main_window": { "background": "#F5F5F5" },
+  "menu": { "background": "#F0F0F0", "foreground": "#1A1A1A" },
+  "button": {
+    "background": "#E0E0E0",
+    "foreground": "#1A1A1A",
+    "border_brush": "#BBB",
+    "hover_background": "#D0D0D0",
+    "disabled_background": "#EEE",
+    "disabled_foreground": "#888"
+  },
+  "toolbar": { "background": "#E8E8E8" },
+  "toolbar_text": { "foreground": "#333", "error_foreground": "#C00" },
+  "editor": { "background": "#FFF", "foreground": "#1A1A1A" },
+  "editor_column": {
+    "border_brush": "#CCC",
+    "background": "#FFF",
+    "current_file_foreground": "#666"
+  },
+  "markdown_preview_panel": { "background": "#FAFAFA", "border_brush": "#E0E0E0" },
+  "solution_explorer": { "border_brush": "#CCC", "header_foreground": "#1A1A1A" },
+  "build_output": {
+    "background": "#F8F8F8",
+    "foreground": "#1A1A1A",
+    "border_brush": "#CCC"
+  },
+  "chat_panel": {
+    "background": "#FFF",
+    "label_foreground": "#333",
+    "message_bubble_background": "#F0F0F0",
+    "message_content_foreground": "#1A1A1A",
+    "send_button_background": "#4CAF50",
+    "send_button_foreground": "#FFF"
+  },
+  "terminal": {
+    "background": "#1E1E1E",
+    "foreground": "#CCC",
+    "input_background": "#2D2D2D"
+  },
+  "mcp_banner": { "background": "#E3F2FD", "foreground": "#1565C0" },
+  "preview_window": { "background": "#F0F0F0" }
+}
