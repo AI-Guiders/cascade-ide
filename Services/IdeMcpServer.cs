@@ -184,13 +184,19 @@ public static class IdeMcpServer
             new()
             {
                 Name = "ide_build",
-                Description = "Запустить сборку решения (dotnet build). Вернёт вывод.",
+                Description = "Запустить сборку решения (dotnet build). Возвращает JSON: success, exit_code, errors[] (file, line, column?, code?, message), warnings[], raw_output (обрезано до 4000 символов). Агент получает структурированные ошибки без парсинга лога.",
                 InputSchema = Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
             },
             new()
             {
                 Name = "ide_get_build_output",
                 Description = "Текущее содержимое панели «Вывод сборки»: полный текст вывода и цвета оформления (background, foreground). JSON: text, theme. Чтобы агент видел, что сейчас отображается в панели сборки.",
+                InputSchema = Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
+            },
+            new()
+            {
+                Name = "ide_run_tests",
+                Description = "Запустить тесты решения (dotnet test; при необходимости выполняет сборку). Возвращает JSON: success, total, passed, failed, skipped, failed_tests[] (name, message?, duration_ms?). Агент получает структурированный список упавших тестов без парсинга лога.",
                 InputSchema = Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
             },
             new()
@@ -468,8 +474,9 @@ public static class IdeMcpServer
                             "ide_get_solution_info" => await actions.ExecuteCommandAsync(IdeCommands.GetSolutionInfo, args, cancellationToken),
                             "ide_get_solution_files" => await actions.ExecuteCommandAsync(IdeCommands.GetSolutionFiles, args, cancellationToken),
                             "ide_get_current_file_diagnostics" => await actions.ExecuteCommandAsync(IdeCommands.GetCurrentFileDiagnostics, args, cancellationToken),
-                            "ide_build" => await actions.ExecuteCommandAsync(IdeCommands.Build, args, cancellationToken),
+                            "ide_build" => await actions.ExecuteCommandAsync(IdeCommands.BuildStructured, args, cancellationToken),
                             "ide_get_build_output" => await actions.ExecuteCommandAsync(IdeCommands.GetBuildOutput, args, cancellationToken),
+                            "ide_run_tests" => await actions.RunTestsAsync(),
                             "ide_focus_editor" => await actions.ExecuteCommandAsync(IdeCommands.FocusEditor, args, cancellationToken),
                             "ide_get_ui_theme" => await actions.ExecuteCommandAsync(IdeCommands.GetUiTheme, args, cancellationToken),
                             "ide_set_ui_theme" => await actions.ExecuteCommandAsync(IdeCommands.SetUiTheme, args, cancellationToken),

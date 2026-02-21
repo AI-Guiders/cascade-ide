@@ -31,6 +31,10 @@ public interface IIdeMcpActions
     Task<string> GetCurrentFileDiagnosticsAsync();
     /// <summary>Запустить сборку решения, вернуть вывод.</summary>
     Task<string> BuildAsync();
+    /// <summary>Запустить сборку и вернуть структурированный результат: success, exit_code, errors[], warnings[], raw_output (обрезано). JSON.</summary>
+    Task<string> BuildStructuredAsync();
+    /// <summary>Запустить тесты решения (dotnet test) и вернуть структурированный результат: success, total, passed, failed, skipped, failed_tests[] (name, message?, duration_ms?). JSON.</summary>
+    Task<string> RunTestsAsync();
     /// <summary>Текущий текст панели «Вывод сборки» и цвета её оформления (background, foreground). JSON. Чтобы агент видел содержимое панели.</summary>
     string GetBuildOutput();
     void SetBreakpoint(string filePath, int line, string? condition = null);

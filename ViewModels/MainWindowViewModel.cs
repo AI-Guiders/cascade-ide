@@ -968,6 +968,10 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
                 return await a.GetCurrentFileDiagnosticsAsync();
             case Services.IdeCommands.Build:
                 return await a.BuildAsync();
+            case Services.IdeCommands.BuildStructured:
+                return await a.BuildStructuredAsync();
+            case Services.IdeCommands.RunTests:
+                return await a.RunTestsAsync();
             case Services.IdeCommands.GetBuildOutput:
                 return a.GetBuildOutput();
             case Services.IdeCommands.FocusEditor:
@@ -1325,6 +1329,70 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             var msg = "Error: " + ex.Message;
             Dispatcher.UIThread.Post(() => { BuildOutput = msg + "\r\n"; IsBuildOutputVisible = true; });
             return msg;
+        }
+    }
+
+    async Task<string> Services.IIdeMcpActions.BuildStructuredAsync()
+    {
+        var raw = await ((Services.IIdeMcpActions)this).BuildAsync().ConfigureAwait(false);
+        var parsed = Services.BuildOutputParser.Parse(raw);
+        const int maxRawChars = 4000;
+        var rawTruncated = raw.Length > maxRawChars ? raw[..maxRawChars] + "\n... (output truncated)" : raw;
+        var result = new
+        {
+            success = parsed.Success,
+            exit_code = parsed.ExitCode,
+            errors = parsed.Errors.Select(e => new { e.File, e.Line, e.Column, e.Code, e.Message }).ToList(),
+            warnings = parsed.Warnings.Select(w => new { w.File, w.Line, w.Column, w.Code, w.Message }).ToList(),
+            raw_output = rawTruncated
+        };
+        return System.Text.Json.JsonSerializer.Serialize(result, new System.Text.Json.JsonSerializerOptions { WriteIndented = false });
+    }
+
+    async Task<string> Services.IIdeMcpActions.RunTestsAsync()
+    {
+        var path = SolutionPath;
+        if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+        {
+            var msg = JsonSerializer.Serialize(new { success = false, error = "No solution loaded or file not found." });
+            return msg;
+        }
+        try
+        {
+            var psi = new System.Diagnostics.ProcessStartInfo("dotnet")
+            {
+                ArgumentList = { "test", path, "--logger", "console;verbosity=detailed" },
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WorkingDirectory = Path.GetDirectoryName(path) ?? ""
+            };
+            using var process = System.Diagnostics.Process.Start(psi);
+            if (process is null)
+            {
+                return JsonSerializer.Serialize(new { success = false, error = "Failed to start dotnet test." });
+            }
+            var stdout = process.StandardOutput.ReadToEndAsync();
+            var stderr = process.StandardError.ReadToEndAsync();
+            await Task.WhenAll(stdout, stderr).ConfigureAwait(false);
+            await process.WaitForExitAsync().ConfigureAwait(false);
+            var outStr = await stdout + "\n" + await stderr;
+            var parsed = Services.TestOutputParser.Parse(outStr);
+            var result = new
+            {
+                success = parsed.Success,
+                total = parsed.Total,
+                passed = parsed.Passed,
+                failed = parsed.Failed,
+                skipped = parsed.Skipped,
+                failed_tests = parsed.FailedTests.Select(t => new { t.Name, t.Message, duration_ms = t.DurationMs }).ToList()
+            };
+            return JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = false });
+        }
+        catch (Exception ex)
+        {
+            return JsonSerializer.Serialize(new { success = false, error = ex.Message });
         }
     }
 

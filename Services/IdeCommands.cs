@@ -18,6 +18,8 @@ public static class IdeCommands
     public const string GetSolutionFiles = "get_solution_files";
     public const string GetCurrentFileDiagnostics = "get_current_file_diagnostics";
     public const string Build = "build";
+    public const string BuildStructured = "build_structured";
+    public const string RunTests = "run_tests";
     public const string GetBuildOutput = "get_build_output";
     public const string FocusEditor = "focus_editor";
     public const string GetUiTheme = "get_ui_theme";
