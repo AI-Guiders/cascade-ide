@@ -6,6 +6,7 @@
         xmlns:models="using:CascadeIDE.Models"
         xmlns:ae="using:AvaloniaEdit"
         xmlns:md="using:Markdown.Avalonia"
+        xmlns:views="using:CascadeIDE.Views"
         mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="600"
         x:Class="CascadeIDE.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
@@ -13,6 +14,10 @@
         Title="CascadeIDE"
         Background="{DynamicResource CascadeTheme.MainWindowBackground}"
         Width="1000" Height="600">
+
+    <Window.Resources>
+        <views:SolutionItemIconConverter x:Key="SolutionItemIconConverter"/>
+    </Window.Resources>
 
     <Window.Styles>
         <!-- Меню и кнопки — из темы (ide_set_ui_theme) -->
@@ -73,6 +78,14 @@
                 <MenuItem Header="_Чат" ToggleType="CheckBox" IsChecked="{Binding IsChatPanelExpanded, Mode=TwoWay}"/>
                 <MenuItem Header="_Терминал" ToggleType="CheckBox" IsChecked="{Binding IsTerminalVisible, Mode=TwoWay}"/>
                 <Separator/>
+                <MenuItem Header="_Тема">
+                    <MenuItem Header="_Светлая" Command="{Binding ApplyLightThemeCommand}"/>
+                    <MenuItem Header="_Тёмная" Command="{Binding ApplyDarkThemeCommand}"/>
+                    <MenuItem Header="Как _Cursor" Command="{Binding ApplyCursorLikeThemeCommand}"/>
+                    <Separator/>
+                    <MenuItem Header="Открыть файл темы..." Command="{Binding OpenThemeFileCommand}"/>
+                </MenuItem>
+                <Separator/>
                 <MenuItem Header="Превью в отдельном _окне" Command="{Binding OpenPreviewWindowCommand}"/>
             </MenuItem>
             <MenuItem Header="_Настройки">
@@ -104,9 +117,20 @@
                 <TreeView ItemsSource="{Binding SolutionRoots}"
                           SelectedItem="{Binding SelectedSolutionItem}"
                           Margin="0,4,0,0">
-                        <TreeView.ItemTemplate>
+                    <TreeView.Styles>
+                        <!-- Узлы дерева раскрыты по умолчанию, чтобы можно было спуститься к проектам и файлам -->
+                        <Style Selector="TreeViewItem">
+                            <Setter Property="IsExpanded" Value="True"/>
+                        </Style>
+                    </TreeView.Styles>
+                    <TreeView.ItemTemplate>
                         <TreeDataTemplate DataType="models:SolutionItem" ItemsSource="{Binding Children}">
-                            <TextBlock Text="{Binding Title}" Foreground="{DynamicResource CascadeTheme.SolutionExplorerHeaderForeground}"/>
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <Image Source="{Binding Converter={StaticResource SolutionItemIconConverter}}"
+                                       Width="16" Height="16" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Title}" VerticalAlignment="Center"
+                                           Foreground="{DynamicResource CascadeTheme.SolutionExplorerHeaderForeground}"/>
+                            </StackPanel>
                         </TreeDataTemplate>
                     </TreeView.ItemTemplate>
                 </TreeView>
@@ -116,7 +140,7 @@
 
         <!-- Editor + (опционально) Markdown preview + Build output -->
         <Border Grid.Row="2" Grid.Column="2" BorderBrush="{DynamicResource CascadeTheme.EditorColumnBorderBrush}" BorderThickness="0,0,1,0" Background="{DynamicResource CascadeTheme.EditorColumnBackground}" Padding="4">
-            <Grid x:Name="EditorColumnGrid" RowDefinitions="Auto,*,4,180">
+            <Grid x:Name="EditorColumnGrid" RowDefinitions="Auto,*,4,180,4,120">
                 <TextBlock Grid.Row="0" Text="{Binding CurrentFilePath}" Margin="4" Foreground="{DynamicResource CascadeTheme.CurrentFileForeground}" TextTrimming="CharacterEllipsis"/>
                 <Grid x:Name="EditorContentGrid" Grid.Row="1" ColumnDefinitions="*,0">
                     <ae:TextEditor Grid.Column="0"
@@ -126,8 +150,8 @@
                               FontFamily="Consolas,Cascadia Code,monospace"
                               FontSize="13"
                               Padding="8"/>
-                    <Border Grid.Column="1" Background="{DynamicResource CascadeTheme.MarkdownPreviewPanelBackground}" BorderBrush="{DynamicResource CascadeTheme.MarkdownPreviewPanelBorderBrush}" BorderThickness="1,0,0,0" Padding="8" IsVisible="{Binding IsMarkdownFile}">
-                        <md:MarkdownScrollViewer Markdown="{Binding EditorText}"/>
+                    <Border Grid.Column="1" x:Name="InlinePreviewBorder" Background="{DynamicResource CascadeTheme.MarkdownPreviewPanelBackground}" BorderBrush="{DynamicResource CascadeTheme.MarkdownPreviewPanelBorderBrush}" BorderThickness="1,0,0,0" Padding="8" IsVisible="{Binding IsMarkdownPreviewVisible}">
+                        <md:MarkdownScrollViewer x:Name="InlineMarkdownPreview" Markdown="{Binding EditorText}"/>
                     </Border>
                 </Grid>
                 <GridSplitter Grid.Row="2" Height="4" ResizeDirection="Rows" Background="{DynamicResource CascadeTheme.BuildOutputBorderBrush}" IsVisible="{Binding IsBuildOutputVisible}"/>
@@ -138,6 +162,39 @@
                             <TextBox Text="{Binding BuildOutput}" IsReadOnly="True" TextWrapping="NoWrap" FontFamily="Consolas,monospace" FontSize="12" Background="{DynamicResource CascadeTheme.BuildOutputBackground}" BorderThickness="0"/>
                         </ScrollViewer>
                     </DockPanel>
+                </Border>
+                <GridSplitter Grid.Row="4" Height="4" ResizeDirection="Rows" Background="{DynamicResource CascadeTheme.BuildOutputBorderBrush}" IsVisible="{Binding IsDebugPanelVisible}"/>
+                <Border Grid.Row="5" IsVisible="{Binding IsDebugPanelVisible}" MinHeight="60" Margin="0,4,0,0" BorderBrush="{DynamicResource CascadeTheme.BuildOutputBorderBrush}" BorderThickness="0,1,0,0" Padding="4" Background="{DynamicResource CascadeTheme.BuildOutputBackground}">
+                    <Grid ColumnDefinitions="*,*">
+                        <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                            <TextBlock Text="Стек вызовов" FontWeight="SemiBold" FontSize="11" Foreground="{DynamicResource CascadeTheme.CurrentFileForeground}" Margin="0,0,0,4"/>
+                            <ScrollViewer MaxHeight="100" VerticalScrollBarVisibility="Auto">
+                                <ItemsControl ItemsSource="{Binding DebugStackFrames}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="vm:DebugStackFrameViewModel">
+                                            <TextBlock FontSize="11" Foreground="{DynamicResource CascadeTheme.EditorForeground}" Text="{Binding Name}" TextTrimming="CharacterEllipsis"/>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Переменные" FontWeight="SemiBold" FontSize="11" Foreground="{DynamicResource CascadeTheme.CurrentFileForeground}" Margin="0,0,0,4"/>
+                            <ScrollViewer MaxHeight="100" VerticalScrollBarVisibility="Auto">
+                                <ItemsControl ItemsSource="{Binding DebugVariables}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="vm:DebugVariableViewModel">
+                                            <TextBlock FontSize="11" Foreground="{DynamicResource CascadeTheme.EditorForeground}" TextTrimming="CharacterEllipsis">
+                                                <Run Text="{Binding Name}" FontWeight="SemiBold"/>
+                                                <Run Text=" = "/>
+                                                <Run Text="{Binding Value}"/>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </StackPanel>
+                    </Grid>
                 </Border>
             </Grid>
         </Border>

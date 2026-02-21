@@ -51,6 +51,12 @@
             <CheckBox Content="Минимальный контекст (только диагностики и сигнатуры)" IsChecked="{Binding UseMinimizedContext}" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
             <CheckBox Content="Запускать MCP-сервер при старте с --mcp-stdio" IsChecked="{Binding IdeMcpServerEnabled}" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
 
+            <TextBlock Text="Редактор" FontWeight="SemiBold" FontSize="16" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+            <StackPanel Spacing="4">
+                <TextBlock Text="Подсветка синтаксиса:" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+                <TextBlock Text="{Binding SupportedEditorLanguagesSummary}" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" TextWrapping="Wrap" FontSize="12"/>
+            </StackPanel>
+
             <Button x:Name="CloseButton" Content="Закрыть" HorizontalAlignment="Right" MinWidth="100" Margin="0,8,0,0"/>
         </StackPanel>
     </ScrollViewer>

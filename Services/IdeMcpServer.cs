@@ -85,6 +85,12 @@ public static class IdeMcpServer
             },
             new()
             {
+                Name = "ide_show_editor_preview",
+                Description = "Показать превью текущего файла из редактора в отдельном окне. Контент берётся из IDE (не передаётся по MCP) — удобно для длинных .md с таблицами. Если открыт не .md — окно покажет текущий текст редактора.",
+                InputSchema = Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
+            },
+            new()
+            {
                 Name = "ide_request_confirmation",
                 Description = "Запросить подтверждение у пользователя. Возвращает ответ пользователя (ok/cancel или текст).",
                 InputSchema = Schema(new
@@ -97,8 +103,28 @@ public static class IdeMcpServer
             new()
             {
                 Name = "ide_get_editor_state",
-                Description = "Получить состояние редактора: открытый файл, каретка (line/column), выделение (start, length, text). JSON.",
-                InputSchema = Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
+                Description = "Состояние редактора: file_path, каретка, выделение, content_length, is_empty, content_preview (если max_preview_chars > 0). По умолчанию превью 2000 символов; 0 = без превью.",
+                InputSchema = Schema(new
+                {
+                    type = "object",
+                    properties = new { max_preview_chars = new { type = "integer", description = "Сколько символов превью (0 = нет, по умолчанию 2000)." } },
+                    required = Array.Empty<string>()
+                })
+            },
+            new()
+            {
+                Name = "ide_get_editor_content_range",
+                Description = "Содержимое редактора по диапазону строк (1-based). JSON: file_path, start_line, end_line, content. Чтобы не тянуть весь файл — запросить нужные строки.",
+                InputSchema = Schema(new
+                {
+                    type = "object",
+                    properties = new
+                    {
+                        start_line = new { type = "integer", description = "Начальная строка (1-based)." },
+                        end_line = new { type = "integer", description = "Конечная строка (1-based)." }
+                    },
+                    required = new[] { "start_line", "end_line" }
+                })
             },
             new()
             {
@@ -140,7 +166,19 @@ public static class IdeMcpServer
             new()
             {
                 Name = "ide_get_solution_info",
-                Description = "Информация о решении: solution_path, current_file_path, project_paths. JSON.",
+                Description = "Информация о решении: solution_path, current_file_path, project_paths, selected_solution_path (путь узла, выделенного в обозревателе). JSON.",
+                InputSchema = Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
+            },
+            new()
+            {
+                Name = "ide_get_solution_files",
+                Description = "Файлы и дерево решения. file_entries — массив { path, title, relative_path } (relative_path от каталога решения). solution_tree — иерархия (solution → projects → folders → files) с теми же полями. Для поиска .md или узла по пути и открытия через ide_open_file.",
+                InputSchema = Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
+            },
+            new()
+            {
+                Name = "ide_get_current_file_diagnostics",
+                Description = "Диагностики (ошибки и предупреждения) по текущему открытому файлу. Только .cs; для остальных — []. JSON: массив { id, message, severity, line, column } (line/column 1-based). Live-анализ Roslyn по содержимому редактора.",
                 InputSchema = Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
             },
             new()
@@ -294,6 +332,56 @@ public static class IdeMcpServer
                     },
                     required = new[] { "panel" }
                 })
+            },
+            new()
+            {
+                Name = "ide_get_supported_editor_languages",
+                Description = "Список языков редактора с подсветкой синтаксиса. JSON: массив объектов { \"extension\": \".cs\", \"language\": \"C#\" }. Чтобы знать, для каких расширений файлов есть подсветка.",
+                InputSchema = Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
+            },
+            new()
+            {
+                Name = "ide_show_breakpoints",
+                Description = "Показать в IDE брейкпоинты отладчика (из debug_set_breakpoints). Агент вызывает после установки брейкпоинтов, чтобы пользователь видел их в редакторе.",
+                InputSchema = Schema(new
+                {
+                    type = "object",
+                    properties = new
+                    {
+                        breakpoints = new { type = "array", description = "Массив { file_path, line } (1-based).", items = new { type = "object", properties = new { file_path = new { type = "string" }, line = new { type = "integer" } }, required = new[] { "file_path", "line" } } }
+                    },
+                    required = new[] { "breakpoints" }
+                })
+            },
+            new()
+            {
+                Name = "ide_show_debug_position",
+                Description = "Показать текущую позицию отладки (файл, строка). IDE откроет файл при необходимости и подсветит строку. Сброс: file_path = null или пустая строка.",
+                InputSchema = Schema(new
+                {
+                    type = "object",
+                    properties = new
+                    {
+                        file_path = new { type = "string", description = "Полный путь к файлу (null/пусто = сбросить подсветку)." },
+                        line = new { type = "integer", description = "Номер строки (1-based)." }
+                    },
+                    required = Array.Empty<string>()
+                })
+            },
+            new()
+            {
+                Name = "ide_show_debug_state",
+                Description = "Показать в панели отладки стек вызовов и переменные (после остановки на брейкпоинте). Агент передаёт данные из debug_stack_trace и debug_variables.",
+                InputSchema = Schema(new
+                {
+                    type = "object",
+                    properties = new
+                    {
+                        stack_frames = new { type = "array", description = "Массив { name, file?, line }.", items = new { type = "object", properties = new { name = new { type = "string" }, file = new { type = "string" }, line = new { type = "integer" } } } },
+                        variables = new { type = "array", description = "Массив { name, value }.", items = new { type = "object", properties = new { name = new { type = "string" }, value = new { type = "string" } }, required = new[] { "name", "value" } } }
+                    },
+                    required = Array.Empty<string>()
+                })
             }
 #if DEBUG
             ,
@@ -315,6 +403,39 @@ public static class IdeMcpServer
                 })
             }
 #endif
+            ,
+            new()
+            {
+                Name = "ide_write_agent_notes",
+                Description = "Записать заметки агента. Агент сам решает, когда, что и в каком формате сохранять (markdown, json, текст). Хранятся в каталоге решения в .cascade-ide/agent-notes. Без открытого решения — ошибка. Для непрерывности между сессиями и до суммаризации.",
+                InputSchema = Schema(new
+                {
+                    type = "object",
+                    properties = new { content = new { type = "string", description = "Полное содержимое заметок (перезаписывает файл)." } },
+                    required = new[] { "content" }
+                })
+            },
+            new()
+            {
+                Name = "ide_read_agent_notes",
+                Description = "Прочитать заметки агента из .cascade-ide/agent-notes в каталоге решения. Возвращает содержимое или пустую строку, если файла нет или решение не загружено. Агент восстанавливает контекст в новом чате.",
+                InputSchema = Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
+            },
+            new()
+            {
+                Name = "ide_execute_command",
+                Description = "Выполнить команду IDE по коду. Единая точка входа: command_id (например open_file, load_solution, get_editor_state), args — аргументы команды (те же, что у соответствующих ide_* тулов). Список кодов в IdeCommands. Экономит контекст агента: один тул вместо многих.",
+                InputSchema = Schema(new
+                {
+                    type = "object",
+                    properties = new
+                    {
+                        command_id = new { type = "string", description = "Код команды (open_file, load_solution, select, set_breakpoint, show_preview, get_editor_state, apply_edit, go_to_position, build, …)." },
+                        args = new { type = "object", description = "Аргументы команды (path, file_path, line, start_line, …). Опционально." }
+                    },
+                    required = new[] { "command_id" }
+                })
+            }
         };
 
         return new McpServerOptions
@@ -333,49 +454,60 @@ public static class IdeMcpServer
                     {
                         var text = name switch
                         {
-                            "ide_open_file" => CallOpenFile(actions, args),
-                            "ide_load_solution" => CallLoadSolution(actions, args),
-                            "ide_select" => CallSelect(actions, args),
-                            "ide_set_breakpoint" => CallSetBreakpoint(actions, args),
-                            "ide_show_preview" => CallShowPreview(actions, args),
-                            "ide_request_confirmation" => await CallRequestConfirmation(actions, args, cancellationToken),
-                            "ide_get_editor_state" => await actions.GetEditorStateAsync(),
-                            "ide_apply_edit" => CallApplyEdit(actions, args),
-                            "ide_go_to_position" => CallGoToPosition(actions, args),
-                            "ide_get_solution_info" => actions.GetSolutionInfo(),
-                            "ide_build" => await actions.BuildAsync(),
-                            "ide_get_build_output" => actions.GetBuildOutput(),
-                            "ide_focus_editor" => CallFocusEditor(actions),
-                            "ide_get_ui_theme" => actions.GetUiTheme(),
-                            "ide_set_ui_theme" => await CallSetUiTheme(actions, args),
-                            "ide_get_ui_layout" => await actions.GetUiLayoutAsync(),
-                            "ide_get_colors_under_cursor" => await actions.GetColorsUnderCursorAsync(),
-                            "ide_get_control_appearance" => await actions.GetControlAppearanceAsync(args is not null && args.TryGetValue("name", out var n) ? n.GetString() : null),
-                            "ide_set_control_layout" => await CallSetControlLayout(actions, args),
-                            "ide_set_control_text" => await actions.SetControlTextAsync(args is not null && args.TryGetValue("name", out var stn) ? stn.GetString() ?? "" : "", args is not null && args.TryGetValue("text", out var stt) ? stt.GetString() ?? "" : ""),
-                            "ide_click_control" => await actions.ClickControlAsync(args is not null && args.TryGetValue("name", out var ccn) ? ccn.GetString() : null),
-                            "ide_send_keys" => await actions.SendKeysAsync(args is not null && args.TryGetValue("name", out var skn) ? skn.GetString() : null, args is not null && args.TryGetValue("keys", out var skk) ? skk.GetString() ?? "" : ""),
-                            "ide_set_focus" => await actions.SetFocusAsync(args is not null && args.TryGetValue("name", out var sfn) ? sfn.GetString() : null),
-                            "ide_highlight_control" => await actions.HighlightControlAsync(args is not null && args.TryGetValue("name", out var hcn) ? hcn.GetString() : null),
-                            "ide_set_panel_size" => await actions.SetPanelSizeAsync(
-                                args is not null && args.TryGetValue("panel", out var pn) ? pn.GetString() ?? "" : "",
-                                args is not null && args.TryGetValue("width", out var pw) && pw.TryGetDouble(out var w) ? w : null,
-                                args is not null && args.TryGetValue("height", out var ph) && ph.TryGetDouble(out var h) ? h : null),
+                            "ide_open_file" => await actions.ExecuteCommandAsync(IdeCommands.OpenFile, args, cancellationToken),
+                            "ide_load_solution" => await actions.ExecuteCommandAsync(IdeCommands.LoadSolution, args, cancellationToken),
+                            "ide_select" => await actions.ExecuteCommandAsync(IdeCommands.Select, args, cancellationToken),
+                            "ide_set_breakpoint" => await actions.ExecuteCommandAsync(IdeCommands.SetBreakpoint, args, cancellationToken),
+                            "ide_show_preview" => await actions.ExecuteCommandAsync(IdeCommands.ShowPreview, args, cancellationToken),
+                            "ide_show_editor_preview" => await actions.ExecuteCommandAsync(IdeCommands.ShowEditorPreview, args, cancellationToken),
+                            "ide_request_confirmation" => await actions.ExecuteCommandAsync(IdeCommands.RequestConfirmation, args, cancellationToken),
+                            "ide_get_editor_state" => await actions.ExecuteCommandAsync(IdeCommands.GetEditorState, args, cancellationToken),
+                            "ide_get_editor_content_range" => await actions.ExecuteCommandAsync(IdeCommands.GetEditorContentRange, args, cancellationToken),
+                            "ide_apply_edit" => await actions.ExecuteCommandAsync(IdeCommands.ApplyEdit, args, cancellationToken),
+                            "ide_go_to_position" => await actions.ExecuteCommandAsync(IdeCommands.GoToPosition, args, cancellationToken),
+                            "ide_get_solution_info" => await actions.ExecuteCommandAsync(IdeCommands.GetSolutionInfo, args, cancellationToken),
+                            "ide_get_solution_files" => await actions.ExecuteCommandAsync(IdeCommands.GetSolutionFiles, args, cancellationToken),
+                            "ide_get_current_file_diagnostics" => await actions.ExecuteCommandAsync(IdeCommands.GetCurrentFileDiagnostics, args, cancellationToken),
+                            "ide_build" => await actions.ExecuteCommandAsync(IdeCommands.Build, args, cancellationToken),
+                            "ide_get_build_output" => await actions.ExecuteCommandAsync(IdeCommands.GetBuildOutput, args, cancellationToken),
+                            "ide_focus_editor" => await actions.ExecuteCommandAsync(IdeCommands.FocusEditor, args, cancellationToken),
+                            "ide_get_ui_theme" => await actions.ExecuteCommandAsync(IdeCommands.GetUiTheme, args, cancellationToken),
+                            "ide_set_ui_theme" => await actions.ExecuteCommandAsync(IdeCommands.SetUiTheme, args, cancellationToken),
+                            "ide_get_ui_layout" => await actions.ExecuteCommandAsync(IdeCommands.GetUiLayout, args, cancellationToken),
+                            "ide_get_colors_under_cursor" => await actions.ExecuteCommandAsync(IdeCommands.GetColorsUnderCursor, args, cancellationToken),
+                            "ide_get_control_appearance" => await actions.ExecuteCommandAsync(IdeCommands.GetControlAppearance, args, cancellationToken),
+                            "ide_set_control_layout" => await actions.ExecuteCommandAsync(IdeCommands.SetControlLayout, args, cancellationToken),
+                            "ide_set_control_text" => await actions.ExecuteCommandAsync(IdeCommands.SetControlText, args, cancellationToken),
+                            "ide_click_control" => await actions.ExecuteCommandAsync(IdeCommands.ClickControl, args, cancellationToken),
+                            "ide_send_keys" => await actions.ExecuteCommandAsync(IdeCommands.SendKeys, args, cancellationToken),
+                            "ide_set_focus" => await actions.ExecuteCommandAsync(IdeCommands.SetFocus, args, cancellationToken),
+                            "ide_highlight_control" => await actions.ExecuteCommandAsync(IdeCommands.HighlightControl, args, cancellationToken),
+                            "ide_set_panel_size" => await actions.ExecuteCommandAsync(IdeCommands.SetPanelSize, args, cancellationToken),
+                            "ide_get_supported_editor_languages" => await actions.ExecuteCommandAsync(IdeCommands.GetSupportedEditorLanguages, args, cancellationToken),
+                            "ide_show_breakpoints" => await actions.ExecuteCommandAsync(IdeCommands.ShowBreakpoints, args, cancellationToken),
+                            "ide_show_debug_position" => await actions.ExecuteCommandAsync(IdeCommands.ShowDebugPosition, args, cancellationToken),
+                            "ide_show_debug_state" => await actions.ExecuteCommandAsync(IdeCommands.ShowDebugState, args, cancellationToken),
 #if DEBUG
-                            "ide_add_control" => await actions.AddControlAsync(
-                                args is not null && args.TryGetValue("parent_name", out var pn) ? pn.GetString() ?? "" : "",
-                                args is not null && args.TryGetValue("control_type", out var ct) ? ct.GetString() ?? "" : "",
-                                args is not null && args.TryGetValue("content", out var cnt) ? cnt.GetString() : null,
-                                args is not null && args.TryGetValue("name", out var nm) ? nm.GetString() : null),
+                            "ide_add_control" => await actions.ExecuteCommandAsync(IdeCommands.AddControl, args, cancellationToken),
 #endif
+                            "ide_write_agent_notes" => await actions.WriteAgentNotesAsync(args?.TryGetValue("content", out var c) == true ? c.GetString() ?? "" : "", cancellationToken),
+                            "ide_read_agent_notes" => await actions.ReadAgentNotesAsync(cancellationToken),
+                            "ide_execute_command" => await CallExecuteCommand(actions, args, cancellationToken),
                             _ => $"Unknown tool: {name}"
                         };
                         // Тулы-действия при ошибке возвращают текст (не "OK") — помечаем как IsError, чтобы агент видел сбой.
+                        bool isError;
+                        if (name == "ide_execute_command")
+                            isError = text.StartsWith("Missing", StringComparison.Ordinal) || text.StartsWith("Unknown command", StringComparison.Ordinal) || text.StartsWith("Error", StringComparison.Ordinal);
+                        else
+                        {
                         var isActionTool = name is "ide_open_file" or "ide_load_solution" or "ide_select" or "ide_set_breakpoint"
-                            or "ide_show_preview" or "ide_apply_edit" or "ide_go_to_position" or "ide_focus_editor"
+                            or "ide_show_preview" or "ide_show_editor_preview" or "ide_apply_edit" or "ide_go_to_position" or "ide_focus_editor"
                             or "ide_set_ui_theme" or "ide_set_control_layout" or "ide_set_control_text" or "ide_click_control"
-                            or "ide_send_keys" or "ide_set_focus" or "ide_highlight_control" or "ide_set_panel_size" or "ide_add_control";
-                        var isError = isActionTool && text != "OK";
+                            or "ide_send_keys" or "ide_set_focus" or "ide_highlight_control" or "ide_set_panel_size" or "ide_add_control"
+                            or "ide_show_breakpoints" or "ide_show_debug_position" or "ide_show_debug_state" or "ide_write_agent_notes";
+                        isError = isActionTool && text != "OK";
+                        }
                         return new CallToolResult { Content = [new TextContentBlock { Text = text }], IsError = isError };
                     }
                     catch (Exception ex)
@@ -387,114 +519,12 @@ public static class IdeMcpServer
         };
     }
 
-    private static string CallOpenFile(IIdeMcpActions actions, IReadOnlyDictionary<string, JsonElement>? args)
+    private static async Task<string> CallExecuteCommand(IIdeMcpActions actions, IReadOnlyDictionary<string, JsonElement>? args, CancellationToken cancellationToken)
     {
-        var path = args is not null && args.TryGetValue("path", out var p) ? p.GetString() : null;
-        if (string.IsNullOrEmpty(path))
-            return "Missing path";
-        actions.OpenFile(path);
-        return "OK";
+        var commandId = args is not null && args.TryGetValue("command_id", out var cid) ? cid.GetString() : null;
+        if (string.IsNullOrEmpty(commandId))
+            return "Missing command_id";
+        return await actions.ExecuteCommandAsync(commandId, args, cancellationToken);
     }
 
-    private static string CallLoadSolution(IIdeMcpActions actions, IReadOnlyDictionary<string, JsonElement>? args)
-    {
-        var path = args is not null && args.TryGetValue("path", out var p) ? p.GetString() : null;
-        if (string.IsNullOrEmpty(path))
-            return "Missing path";
-        actions.LoadSolution(path);
-        return "OK";
-    }
-
-    private static string CallSelect(IIdeMcpActions actions, IReadOnlyDictionary<string, JsonElement>? args)
-    {
-        if (args is null || !args.TryGetValue("file_path", out var fp))
-            return "Missing file_path";
-        var filePath = fp.GetString();
-        if (string.IsNullOrEmpty(filePath))
-            return "Missing file_path";
-        if (!args.TryGetValue("start_line", out var sl) || !args.TryGetValue("start_column", out var sc)
-            || !args.TryGetValue("end_line", out var el) || !args.TryGetValue("end_column", out var ec))
-            return "Missing start_line, start_column, end_line or end_column";
-        actions.SelectInEditor(filePath, sl.GetInt32(), sc.GetInt32(), el.GetInt32(), ec.GetInt32());
-        return "OK";
-    }
-
-    private static string CallSetBreakpoint(IIdeMcpActions actions, IReadOnlyDictionary<string, JsonElement>? args)
-    {
-        if (args is null || !args.TryGetValue("file_path", out var fp) || !args.TryGetValue("line", out var ln))
-            return "Missing arguments";
-        var filePath = fp.GetString();
-        var line = ln.GetInt32();
-        var condition = args.TryGetValue("condition", out var c) ? c.GetString() : null;
-        if (string.IsNullOrEmpty(filePath))
-            return "Missing file_path";
-        actions.SetBreakpoint(filePath, line, condition);
-        return "OK";
-    }
-
-    private static string CallShowPreview(IIdeMcpActions actions, IReadOnlyDictionary<string, JsonElement>? args)
-    {
-        if (args is null)
-            return "Missing arguments";
-        var title = args.TryGetValue("title", out var t) ? t.GetString() ?? "" : "";
-        var content = args.TryGetValue("content", out var c) ? c.GetString() ?? "" : "";
-        actions.ShowPreview(title, content);
-        return "OK";
-    }
-
-    private static async Task<string> CallRequestConfirmation(IIdeMcpActions actions, IReadOnlyDictionary<string, JsonElement>? args, CancellationToken ct)
-    {
-        var message = args is not null && args.TryGetValue("message", out var m) ? m.GetString() ?? "" : "";
-        return await actions.RequestConfirmationAsync(message, ct);
-    }
-
-    private static string CallApplyEdit(IIdeMcpActions actions, IReadOnlyDictionary<string, JsonElement>? args)
-    {
-        if (args is null || !args.TryGetValue("file_path", out var fp) || !args.TryGetValue("start_line", out var sl)
-            || !args.TryGetValue("start_column", out var sc) || !args.TryGetValue("end_line", out var el)
-            || !args.TryGetValue("end_column", out var ec) || !args.TryGetValue("new_text", out var nt))
-            return "Missing arguments";
-        var filePath = fp.GetString();
-        var newText = nt.GetString() ?? "";
-        if (string.IsNullOrEmpty(filePath))
-            return "Missing file_path";
-        actions.ApplyEdit(filePath, sl.GetInt32(), sc.GetInt32(), el.GetInt32(), ec.GetInt32(), newText);
-        return "OK";
-    }
-
-    private static string CallGoToPosition(IIdeMcpActions actions, IReadOnlyDictionary<string, JsonElement>? args)
-    {
-        if (args is null || !args.TryGetValue("file_path", out var fp) || !args.TryGetValue("line", out var ln) || !args.TryGetValue("column", out var col))
-            return "Missing file_path, line or column";
-        var filePath = fp.GetString();
-        var line = ln.GetInt32();
-        var column = col.GetInt32();
-        int? endLine = args.TryGetValue("end_line", out var el) ? el.GetInt32() : null;
-        int? endColumn = args.TryGetValue("end_column", out var ec) ? ec.GetInt32() : null;
-        actions.GoToPosition(filePath, line, column, endLine, endColumn);
-        return "OK";
-    }
-
-    private static string CallFocusEditor(IIdeMcpActions actions)
-    {
-        actions.FocusEditor();
-        return "OK";
-    }
-
-    private static async Task<string> CallSetUiTheme(IIdeMcpActions actions, IReadOnlyDictionary<string, JsonElement>? args)
-    {
-        if (args is null || !args.TryGetValue("theme", out var themeEl))
-            return "Missing argument: theme (JSON string)";
-        var themeJson = themeEl.GetString() ?? "";
-        return await actions.SetUiThemeAsync(themeJson);
-    }
-
-    private static async Task<string> CallSetControlLayout(IIdeMcpActions actions, IReadOnlyDictionary<string, JsonElement>? args)
-    {
-        if (args is null || !args.TryGetValue("name", out var nameEl) || !args.TryGetValue("layout", out var layoutEl))
-            return "Missing name or layout";
-        var controlName = nameEl.GetString() ?? "";
-        var layoutJson = layoutEl.GetString() ?? "{}";
-        return await actions.SetControlLayoutAsync(controlName, layoutJson);
-    }
 }

@@ -9,6 +9,23 @@ public sealed class SolutionItem
     public bool IsFolder => Children.Count > 0 && FullPath is null;
     public ObservableCollection<SolutionItem> Children { get; } = [];
 
+    /// <summary>Ключ иконки для UI: solution, project, folder, file, file_cs, file_json, file_md, file_xml, file_txt и т.д.</summary>
+    public string IconKey => GetIconKey();
+
+    private string GetIconKey()
+    {
+        if (FullPath is null)
+            return Children.Count > 0 ? "folder" : "file";
+        var p = FullPath.AsSpan();
+        if (p.EndsWith(".slnx", StringComparison.OrdinalIgnoreCase) || p.EndsWith(".sln", StringComparison.OrdinalIgnoreCase))
+            return "solution";
+        if (p.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase))
+            return "project";
+        var ext = Path.GetExtension(FullPath);
+        if (string.IsNullOrEmpty(ext) || ext.Length <= 1) return "file";
+        return "file_" + ext[1..].ToLowerInvariant();
+    }
+
     private SolutionItem(string title, string? fullPath)
     {
         Title = title;

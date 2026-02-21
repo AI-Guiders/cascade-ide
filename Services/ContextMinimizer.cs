@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.CodeAnalysis;
 
 namespace CascadeIDE.Services;
@@ -48,5 +49,19 @@ public sealed class ContextMinimizer
                 sb.Append(sig).Append('\n');
         }
         return sb.ToString();
+    }
+
+    /// <summary>Диагностики по файлу в виде JSON для MCP (ide_get_current_file_diagnostics): массив { id, message, severity, line, column } (line/column 1-based). Только .cs.</summary>
+    public string GetDiagnosticsJson(string filePath, string sourceText, CancellationToken ct = default)
+    {
+        if (string.IsNullOrEmpty(filePath) || !filePath.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
+            return "[]";
+        var diagnostics = _languageService.GetDiagnosticsForFile(filePath, sourceText, ct);
+        var list = diagnostics.Select(d =>
+        {
+            var span = d.Location.GetLineSpan().StartLinePosition;
+            return new { id = d.Id, message = d.GetMessage(), severity = d.Severity == DiagnosticSeverity.Error ? "error" : "warning", line = span.Line + 1, column = span.Character + 1 };
+        }).ToList();
+        return JsonSerializer.Serialize(list);
     }
 }

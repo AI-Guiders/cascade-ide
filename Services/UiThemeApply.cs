@@ -10,6 +10,34 @@ namespace CascadeIDE.Services;
 /// </summary>
 public static class UiThemeApply
 {
+    private static (string path, DateTime lastWrite, string json)? _themeCache;
+
+    /// <summary>Загружает тему из файла. Перечитывает только если изменились путь или дата модификации файла.</summary>
+    public static string GetThemeJsonFromFile(string filePath)
+    {
+        var path = Path.GetFullPath(filePath);
+        if (!File.Exists(path))
+            return "{}";
+        var lastWrite = File.GetLastWriteTimeUtc(path);
+        if (_themeCache is { } c && c.path == path && c.lastWrite == lastWrite)
+            return c.json;
+        var json = File.ReadAllText(path);
+        _themeCache = (path, lastWrite, json);
+        return json;
+    }
+
+    /// <summary>Тёмная тема: Themes/dark-theme.json рядом с exe.</summary>
+    public static string GetDarkThemeJson() =>
+        GetThemeJsonFromFile(Path.Combine(AppContext.BaseDirectory, "Themes", "dark-theme.json"));
+
+    /// <summary>Светлая тема: Themes/light-theme.json рядом с exe.</summary>
+    public static string GetLightThemeJson() =>
+        GetThemeJsonFromFile(Path.Combine(AppContext.BaseDirectory, "Themes", "light-theme.json"));
+
+    /// <summary>Тема «как Cursor»: тёмная с акцентом #3794FF. Themes/cursor-like-theme.json.</summary>
+    public static string GetCursorLikeThemeJson() =>
+        GetThemeJsonFromFile(Path.Combine(AppContext.BaseDirectory, "Themes", "cursor-like-theme.json"));
+
     /// <summary>Ключи ресурсов в Application.Resources. Должны совпадать с App.axaml и DynamicResource в XAML.</summary>
     public static class Keys
     {

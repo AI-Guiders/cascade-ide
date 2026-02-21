@@ -12,11 +12,18 @@
     <AssemblyName>CascadeIDE</AssemblyName>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="**/obj/**" />
+    <Compile Remove="**/bin/**" />
     <Folder Include="Models\" />
     <AvaloniaResource Include="Assets\**" />
+    <Content Include="Themes\dark-theme.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="Themes\light-theme.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="Themes\cursor-like-theme.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
@@ -41,6 +48,7 @@
     <PackageReference Include="OutWit.Common.Json" Version="1.1.3" />
     <PackageReference Include="OutWit.Database.Core" Version="1.0.0" />
     <PackageReference Include="OutWit.Database.EntityFramework" Version="1.0.1" />
+    <PackageReference Include="Svg.Controls.Avalonia" Version="11.3.9.2" Aliases="svgctrl" />
     <PackageReference Include="Tomlyn" Version="0.20.0" />
   </ItemGroup>
 </Project>

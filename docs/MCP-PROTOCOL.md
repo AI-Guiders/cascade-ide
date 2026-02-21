@@ -42,7 +42,10 @@
 | `ide_add_control` | **(Только Debug)** Добавить контрол в конец панели: Button, TextBlock или Border. parent_name, control_type, content, опционально name | `parent_name`, `control_type`; опционально `content`, `name` |
 | `ide_set_breakpoint` | Поставить брейкпоинт | `file_path`, `line` (1-based), опционально `condition` |
 | `ide_show_preview` | Показать Markdown в отдельном окне превью (планы, заметки, отчёты) | `title`, `content` (Markdown) |
+| `ide_show_editor_preview` | Показать превью **текущего файла из редактора** в отдельном окне. Контент берётся из IDE (не передаётся по MCP) — удобно для длинных .md с таблицами. | — |
 | `ide_request_confirmation` | Запросить подтверждение у пользователя | `message`; возвращает ответ (ok/cancel или текст) |
+| `ide_write_agent_notes` | Записать заметки агента. Агент сам решает, когда, что и в каком формате (markdown, json, текст). Хранятся в каталоге решения в `.cascade-ide/agent-notes.md`. Без открытого решения — ошибка. Для непрерывности между сессиями и до суммаризации. | `content` — полное содержимое (перезаписывает файл); при успехе — `OK` |
+| `ide_read_agent_notes` | Прочитать заметки агента из `.cascade-ide/agent-notes.md`. Возвращает содержимое или пустую строку. Агент восстанавливает контекст в новом чате. | —; возвращает текст файла или `""` |
 
 ## Подключение из Cursor
 
