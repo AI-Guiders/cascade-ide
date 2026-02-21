@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Windows.Input;
 using Avalonia.Threading;
 using CascadeIDE.Models;
+using DotNetBuildTestParsers;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using OutWit.Common.Values;
@@ -1335,7 +1336,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     async Task<string> Services.IIdeMcpActions.BuildStructuredAsync()
     {
         var raw = await ((Services.IIdeMcpActions)this).BuildAsync().ConfigureAwait(false);
-        var parsed = Services.BuildOutputParser.Parse(raw);
+        var parsed = BuildOutputParser.Parse(raw);
         const int maxRawChars = 4000;
         var rawTruncated = raw.Length > maxRawChars ? raw[..maxRawChars] + "\n... (output truncated)" : raw;
         var result = new
@@ -1378,7 +1379,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             await Task.WhenAll(stdout, stderr).ConfigureAwait(false);
             await process.WaitForExitAsync().ConfigureAwait(false);
             var outStr = await stdout + "\n" + await stderr;
-            var parsed = Services.TestOutputParser.Parse(outStr);
+            var parsed = TestOutputParser.Parse(outStr);
             var result = new
             {
                 success = parsed.Success,
