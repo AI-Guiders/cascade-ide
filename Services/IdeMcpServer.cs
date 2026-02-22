@@ -70,6 +70,21 @@ public static class IdeMcpServer
             },
             new()
             {
+                Name = "ide_remove_breakpoint",
+                Description = "Снять брейкпоинт в файле на указанной строке.",
+                InputSchema = Schema(new
+                {
+                    type = "object",
+                    properties = new
+                    {
+                        file_path = new { type = "string" },
+                        line = new { type = "integer", description = "Номер строки (1-based)." }
+                    },
+                    required = new[] { "file_path", "line" }
+                })
+            },
+            new()
+            {
                 Name = "ide_show_preview",
                 Description = "Показать Markdown в отдельном окне превью. Удобно показывать пользователю планы, заметки, отчёты в читаемом виде (как в Cursor).",
                 InputSchema = Schema(new
@@ -464,6 +479,7 @@ public static class IdeMcpServer
                             "ide_load_solution" => await actions.ExecuteCommandAsync(IdeCommands.LoadSolution, args, cancellationToken),
                             "ide_select" => await actions.ExecuteCommandAsync(IdeCommands.Select, args, cancellationToken),
                             "ide_set_breakpoint" => await actions.ExecuteCommandAsync(IdeCommands.SetBreakpoint, args, cancellationToken),
+                            "ide_remove_breakpoint" => await actions.ExecuteCommandAsync(IdeCommands.RemoveBreakpoint, args, cancellationToken),
                             "ide_show_preview" => await actions.ExecuteCommandAsync(IdeCommands.ShowPreview, args, cancellationToken),
                             "ide_show_editor_preview" => await actions.ExecuteCommandAsync(IdeCommands.ShowEditorPreview, args, cancellationToken),
                             "ide_request_confirmation" => await actions.ExecuteCommandAsync(IdeCommands.RequestConfirmation, args, cancellationToken),
@@ -508,7 +524,7 @@ public static class IdeMcpServer
                             isError = text.StartsWith("Missing", StringComparison.Ordinal) || text.StartsWith("Unknown command", StringComparison.Ordinal) || text.StartsWith("Error", StringComparison.Ordinal);
                         else
                         {
-                        var isActionTool = name is "ide_open_file" or "ide_load_solution" or "ide_select" or "ide_set_breakpoint"
+                        var isActionTool = name is "ide_open_file" or "ide_load_solution" or "ide_select" or "ide_set_breakpoint" or "ide_remove_breakpoint"
                             or "ide_show_preview" or "ide_show_editor_preview" or "ide_apply_edit" or "ide_go_to_position" or "ide_focus_editor"
                             or "ide_set_ui_theme" or "ide_set_control_layout" or "ide_set_control_text" or "ide_click_control"
                             or "ide_send_keys" or "ide_set_focus" or "ide_highlight_control" or "ide_set_panel_size" or "ide_add_control"
@@ -519,6 +535,20 @@ public static class IdeMcpServer
                     }
                     catch (Exception ex)
                     {
+                        if (ex.Message.Contains("invalid thread", StringComparison.OrdinalIgnoreCase))
+                        {
+                            try
+                            {
+                                var dir = AppContext.BaseDirectory;
+                                var logPath = Path.Combine(dir, "invalid-thread-log.txt");
+                                File.WriteAllText(logPath, ex.ToString());
+                            }
+                            catch { /* ignore */ }
+#if DEBUG
+                            var stack = ex.StackTrace ?? "";
+                            return new CallToolResult { Content = [new TextContentBlock { Text = "Error: " + ex.Message + " [caught in IdeMcpServer]\n\n" + stack }], IsError = true };
+#endif
+                        }
                         return new CallToolResult { Content = [new TextContentBlock { Text = "Error: " + ex.Message }], IsError = true };
                     }
                 }

@@ -7,6 +7,7 @@ public static class IdeCommands
     public const string LoadSolution = "load_solution";
     public const string Select = "select";
     public const string SetBreakpoint = "set_breakpoint";
+    public const string RemoveBreakpoint = "remove_breakpoint";
     public const string ShowPreview = "show_preview";
     public const string ShowEditorPreview = "show_editor_preview";
     public const string RequestConfirmation = "request_confirmation";

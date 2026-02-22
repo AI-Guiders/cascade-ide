@@ -937,7 +937,11 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
                 return "OK";
             case Services.IdeCommands.SetBreakpoint:
                 if (args is null || string.IsNullOrEmpty(S(args, "file_path")) || !args.TryGetValue("line", out _)) return "Missing file_path or line";
-                a.SetBreakpoint(S(args, "file_path")!, I(args, "line", 1), S(args, "condition"));
+                await Dispatcher.UIThread.InvokeAsync(() => a.SetBreakpoint(S(args, "file_path")!, I(args, "line", 1), S(args, "condition")));
+                return "OK";
+            case Services.IdeCommands.RemoveBreakpoint:
+                if (args is null || string.IsNullOrEmpty(S(args, "file_path")) || !args.TryGetValue("line", out _)) return "Missing file_path or line";
+                await Dispatcher.UIThread.InvokeAsync(() => a.RemoveBreakpoint(S(args, "file_path")!, I(args, "line", 1)));
                 return "OK";
             case Services.IdeCommands.ShowPreview:
                 a.ShowPreview(S(args, "title") ?? "", S(args, "content") ?? "");
@@ -1411,6 +1415,16 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             return;
         _breakpoints.Add((path, line));
         OnPropertyChanged(nameof(BreakpointLinesInCurrentFile));
+    }
+
+    void Services.IIdeMcpActions.RemoveBreakpoint(string filePath, int line)
+    {
+        if (string.IsNullOrEmpty(filePath) || line < 1)
+            return;
+        var path = Path.GetFullPath(filePath);
+        var removed = _breakpoints.RemoveAll(b => string.Equals(Path.GetFullPath(b.FilePath), path, StringComparison.OrdinalIgnoreCase) && b.Line == line) > 0;
+        if (removed)
+            OnPropertyChanged(nameof(BreakpointLinesInCurrentFile));
     }
 
     /// <summary>Переключить брейкпоинт в .dotnet-debug-mcp-breakpoints.json для текущего файла и строки (клик по полю в редакторе).</summary>

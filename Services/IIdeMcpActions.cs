@@ -38,6 +38,7 @@ public interface IIdeMcpActions
     /// <summary>Текущий текст панели «Вывод сборки» и цвета её оформления (background, foreground). JSON. Чтобы агент видел содержимое панели.</summary>
     string GetBuildOutput();
     void SetBreakpoint(string filePath, int line, string? condition = null);
+    void RemoveBreakpoint(string filePath, int line);
     void ShowPreview(string title, string content);
     /// <summary>Показать превью текущего файла из редактора в отдельном окне. Контент берётся из IDE, не передаётся по MCP — удобно для длинных .md.</summary>
     void ShowEditorPreview();

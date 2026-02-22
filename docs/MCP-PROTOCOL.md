@@ -42,6 +42,7 @@
 | `ide_set_panel_size` | Изменить размер панели: solution_explorer/chat — width (px); build_output/terminal — height (px) | `panel`; опционально `width`, `height` |
 | `ide_add_control` | **(Только Debug)** Добавить контрол в конец панели: Button, TextBlock или Border. parent_name, control_type, content, опционально name | `parent_name`, `control_type`; опционально `content`, `name` |
 | `ide_set_breakpoint` | Поставить брейкпоинт | `file_path`, `line` (1-based), опционально `condition` |
+| `ide_remove_breakpoint` | Снять брейкпоинт | `file_path`, `line` (1-based) |
 | `ide_show_preview` | Показать Markdown в отдельном окне превью (планы, заметки, отчёты) | `title`, `content` (Markdown) |
 | `ide_show_editor_preview` | Показать превью **текущего файла из редактора** в отдельном окне. Контент берётся из IDE (не передаётся по MCP) — удобно для длинных .md с таблицами. | — |
 | `ide_request_confirmation` | Запросить подтверждение у пользователя | `message`; возвращает ответ (ok/cancel или текст) |
