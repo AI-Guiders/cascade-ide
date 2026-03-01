@@ -95,6 +95,8 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     public Action<string, string>? RequestShowMarkdownPreviewWindow { get; set; }
     /// <summary>Показать превью текущего редактора в отдельном окне (живое обновление).</summary>
     public Action? RequestShowMarkdownPreviewForEditor { get; set; }
+    /// <summary>Показать подтверждение пользователю. Возвращает "ok" или "cancel".</summary>
+    public Func<string, CancellationToken, Task<string>>? RequestConfirmation { get; set; }
     /// <summary>Поставщик снимка дерева UI (View подставит вызов UiLayoutSnapshot.BuildJson).</summary>
     public Func<string>? GetUiLayoutProvider { get; set; }
     public Func<string>? GetColorsUnderCursorProvider { get; set; }
@@ -202,6 +204,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private readonly List<(string FilePath, int Line)> _debuggerBreakpoints = [];
     private FileSystemWatcher? _breakpointsFileWatcher;
     private CancellationTokenSource? _openFileDebounceCts;
+    private long _solutionLoadVersion;
     private const int OpenFileDebounceMs = 100;
 
     /// <summary>Номера строк с брейкпоинтами в текущем открытом файле (для отрисовки в редакторе).</summary>
@@ -822,6 +825,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     /// <summary>Загрузка решения в фоне, чтобы не блокировать UI.</summary>
     public async Task LoadSolutionAsync(string path)
     {
+        var loadVersion = Interlocked.Increment(ref _solutionLoadVersion);
         SolutionLoadError = "";
         var (root, error) = await Task.Run(() =>
         {
@@ -831,12 +835,31 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
 
         await Dispatcher.UIThread.InvokeAsync(() =>
         {
+            // Ignore stale completion when a newer ide_load_solution call already started.
+            if (loadVersion != Interlocked.Read(ref _solutionLoadVersion))
+                return;
+
             if (root is null)
             {
                 SolutionLoadError = error ?? "Не удалось загрузить решение.";
                 return;
             }
-            SolutionPath = path;
+
+            var normalizedSolutionPath = root.FullPath;
+            if (string.IsNullOrEmpty(normalizedSolutionPath))
+            {
+                try { normalizedSolutionPath = Path.GetFullPath(path); }
+                catch { normalizedSolutionPath = path; }
+            }
+
+            // New solution becomes authoritative UI context: clear stale editor selection/state.
+            _openFileDebounceCts?.Cancel();
+            SelectedSolutionItem = null;
+            CurrentFilePath = null;
+            EditorText = "";
+            IsLoadingCurrentFile = false;
+
+            SolutionPath = normalizedSolutionPath ?? path;
             SolutionRoots.Clear();
             SolutionRoots.Add(root);
         });
@@ -1460,8 +1483,10 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
 
     Task<string> Services.IIdeMcpActions.RequestConfirmationAsync(string message, CancellationToken cancellationToken)
     {
-        // TODO: модальное окно с Ok/Cancel; пока возвращаем ok
-        return Task.FromResult("ok");
+        var request = RequestConfirmation;
+        if (request is null)
+            return Task.FromResult(Services.ConfirmationResponses.Ok);
+        return request(message ?? "", cancellationToken);
     }
 
     string Services.IIdeMcpActions.GetUiTheme() => Services.UiThemeSnapshot.GetJson();
