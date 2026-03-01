@@ -17,3 +17,9 @@ project.lock.json
 
 # Заметки агента (хранятся в каталоге решения, не коммитить)
 .cascade-ide/
+
+# Локальные артефакты разработки/публикации
+publish/
+publish-debug/
+Data/
+.cursor/
