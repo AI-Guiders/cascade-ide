@@ -52,6 +52,7 @@ public partial class MainWindow : Window
             vm.RequestOpenThemeFile = ShowOpenThemeFileDialogAsync;
             vm.RequestShowMarkdownPreviewWindow = ShowMarkdownPreviewWindow;
             vm.RequestShowMarkdownPreviewForEditor = ShowMarkdownPreviewForEditor;
+            vm.RequestConfirmation = ShowConfirmationDialogAsync;
             vm.GetUiLayoutProvider = () => Services.UiLayoutSnapshot.BuildJson(this);
             vm.GetColorsUnderCursorProvider = () => Services.UiColorsUnderCursor.GetJson(this);
             vm.GetControlAppearanceProvider = (name) => Services.UiControlAppearance.GetJson(this, name);
@@ -108,6 +109,95 @@ public partial class MainWindow : Window
             var path = files[0].TryGetLocalPath() ?? files[0].Path.LocalPath;
             vm.LoadSolution(path);
         }
+    }
+
+    private Task<string> ShowConfirmationDialogAsync(string message, CancellationToken cancellationToken)
+    {
+        var tcs = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
+        CancellationTokenRegistration ctr = default;
+        if (cancellationToken.CanBeCanceled)
+        {
+            ctr = cancellationToken.Register(() => tcs.TrySetResult(Services.ConfirmationResponses.Cancel));
+        }
+
+        Dispatcher.UIThread.Post(async () =>
+        {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                tcs.TrySetResult(Services.ConfirmationResponses.Cancel);
+                return;
+            }
+
+            try
+            {
+                var result = await ShowConfirmationDialogOnUiThreadAsync(message).ConfigureAwait(true);
+                tcs.TrySetResult(result);
+            }
+            catch
+            {
+                tcs.TrySetResult(Services.ConfirmationResponses.Cancel);
+            }
+            finally
+            {
+                ctr.Dispose();
+            }
+        });
+
+        return tcs.Task;
+    }
+
+    private async Task<string> ShowConfirmationDialogOnUiThreadAsync(string message)
+    {
+        var dialog = new Window
+        {
+            Title = "Подтверждение",
+            Width = 460,
+            Height = 190,
+            CanResize = false,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner
+        };
+
+        var text = string.IsNullOrWhiteSpace(message) ? "Подтвердить действие?" : message;
+        var result = Services.ConfirmationResponses.Cancel;
+
+        var okButton = new Button { Content = "OK", MinWidth = 90 };
+        var cancelButton = new Button { Content = "Cancel", MinWidth = 90 };
+
+        okButton.Click += (_, _) =>
+        {
+            result = Services.ConfirmationResponses.Ok;
+            dialog.Close();
+        };
+        cancelButton.Click += (_, _) =>
+        {
+            result = Services.ConfirmationResponses.Cancel;
+            dialog.Close();
+        };
+
+        dialog.Content = new StackPanel
+        {
+            Margin = new Thickness(16),
+            Spacing = 14,
+            Children =
+            {
+                new TextBlock
+                {
+                    Text = text,
+                    TextWrapping = TextWrapping.Wrap
+                },
+                new StackPanel
+                {
+                    Orientation = Orientation.Horizontal,
+                    HorizontalAlignment = HorizontalAlignment.Right,
+                    Spacing = 10,
+                    Children = { okButton, cancelButton }
+                }
+            }
+        };
+
+        await dialog.ShowDialog(this);
+
+        return result;
     }
 
     private async void ShowAbout()
