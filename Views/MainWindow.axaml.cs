@@ -70,7 +70,7 @@ public partial class MainWindow : Window
             vm.SetFocusProvider = (name) => Services.UiControlSetFocus.SetFocus(this, this, name);
             vm.HighlightControlProvider = ShowHighlightForControl;
             vm.SetPanelSizeProvider = (panel, width, height) => Services.UiPanelResize.Resize(this, panel, width, height);
-            UpdateChatColumnWidth(vm.IsChatPanelExpanded);
+            UpdateChatColumnWidth(vm);
             UpdateSolutionColumnWidth(vm.IsSolutionExplorerVisible);
             UpdateMarkdownPreviewColumn(vm.IsMarkdownFile);
             SetupChatInputKeyHandler();
@@ -244,7 +244,8 @@ public partial class MainWindow : Window
         if (editor is null)
             return;
 
-        _registryOptions = new RegistryOptions(ThemeName.LightPlus);
+        // Use a dark TextMate theme to keep syntax readable in Focus/Balanced/Power dark palettes.
+        _registryOptions = new RegistryOptions(ThemeName.DarkPlus);
         _textMateInstallation = editor.InstallTextMate(_registryOptions);
 
         editor.Document.Changed += OnEditorDocumentChanged;
@@ -367,8 +368,9 @@ public partial class MainWindow : Window
             _languageService?.InvalidateCache();
         if (e.PropertyName is nameof(ViewModels.MainWindowViewModel.IsSolutionExplorerVisible) && DataContext is ViewModels.MainWindowViewModel vmSol)
             UpdateSolutionColumnWidth(vmSol.IsSolutionExplorerVisible);
-        if (e.PropertyName is nameof(ViewModels.MainWindowViewModel.IsChatPanelExpanded) && DataContext is ViewModels.MainWindowViewModel vmChat)
-            UpdateChatColumnWidth(vmChat.IsChatPanelExpanded);
+        if (e.PropertyName is nameof(ViewModels.MainWindowViewModel.IsChatPanelExpanded) or nameof(ViewModels.MainWindowViewModel.UiMode)
+            && DataContext is ViewModels.MainWindowViewModel vmChat)
+            UpdateChatColumnWidth(vmChat);
         if (e.PropertyName is nameof(ViewModels.MainWindowViewModel.IsMarkdownPreviewVisible) && DataContext is ViewModels.MainWindowViewModel vmMd)
         {
             UpdateMarkdownPreviewColumn(vmMd.IsMarkdownPreviewVisible);
@@ -495,11 +497,11 @@ public partial class MainWindow : Window
         }
     }
 
-    private void UpdateChatColumnWidth(bool isExpanded)
+    private void UpdateChatColumnWidth(ViewModels.MainWindowViewModel vm)
     {
         var grid = this.FindControl<Grid>("MainGrid");
         if (grid?.ColumnDefinitions.Count > 4)
-            grid.ColumnDefinitions[4].Width = new GridLength(isExpanded ? 340 : 88);
+            grid.ColumnDefinitions[4].Width = new GridLength(vm.IsChatPanelExpanded ? (vm.IsPowerMode ? 420 : 340) : 88);
     }
 
     private void UpdateMarkdownPreviewColumn(bool showPreview)

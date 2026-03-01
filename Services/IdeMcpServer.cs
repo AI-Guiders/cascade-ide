@@ -186,6 +186,12 @@ public static class IdeMcpServer
             },
             new()
             {
+                Name = "ide_get_workspace_state",
+                Description = "Одна сводка состояния IDE: solution/current file/selection/debug/build output/diagnostics. JSON. Удобно, чтобы агент получил основной контекст одним вызовом.",
+                InputSchema = Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
+            },
+            new()
+            {
                 Name = "ide_get_solution_files",
                 Description = "Файлы и дерево решения. file_entries — массив { path, title, relative_path } (relative_path от каталога решения). solution_tree — иерархия (solution → projects → folders → files) с теми же полями. Для поиска .md или узла по пути и открытия через ide_open_file.",
                 InputSchema = Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
@@ -213,6 +219,105 @@ public static class IdeMcpServer
                 Name = "ide_run_tests",
                 Description = "Запустить тесты решения (dotnet test; при необходимости выполняет сборку). Возвращает JSON: success, total, passed, failed, skipped, failed_tests[] (name, message?, duration_ms?). Агент получает структурированный список упавших тестов без парсинга лога.",
                 InputSchema = Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
+            },
+            new()
+            {
+                Name = "ide_run_affected_tests",
+                Description = "Запустить затронутые тесты по changed_paths (фильтр FullyQualifiedName~...). Если список пустой или не извлечены тестовые токены — автоматически fallback на полный ide_run_tests. Возвращает JSON: success, total, passed, failed, skipped, failed_tests[], mode, filter.",
+                InputSchema = Schema(new
+                {
+                    type = "object",
+                    properties = new
+                    {
+                        changed_paths = new
+                        {
+                            type = "array",
+                            items = new { type = "string" },
+                            description = "Опционально: список изменённых путей/файлов для вычисления фильтра затронутых тестов."
+                        }
+                    },
+                    required = Array.Empty<string>()
+                })
+            },
+            new()
+            {
+                Name = "ide_run_code_cleanup",
+                Description = "Запустить code cleanup через dotnet format для текущего решения. Опционально include_path — точечный файл/путь внутри решения. Возвращает JSON: success, exit_code, raw_output.",
+                InputSchema = Schema(new
+                {
+                    type = "object",
+                    properties = new
+                    {
+                        include_path = new { type = "string", description = "Опционально: полный путь к файлу/пути для точечной чистки через --include." }
+                    },
+                    required = Array.Empty<string>()
+                })
+            },
+            new()
+            {
+                Name = "ide_get_code_metrics",
+                Description = "Метрики кода (LOC, class_count, method_count, cyclomatic complexity). scope: current_file/file/path/solution; path — опционально для file/path. Возвращает JSON по файлам и агрегаты.",
+                InputSchema = Schema(new
+                {
+                    type = "object",
+                    properties = new
+                    {
+                        scope = new { type = "string", description = "current_file|file|path|solution (по умолчанию current_file)." },
+                        path = new { type = "string", description = "Опционально: путь к файлу/каталогу (для scope=file/path)." }
+                    },
+                    required = Array.Empty<string>()
+                })
+            },
+            new()
+            {
+                Name = "ide_git_status",
+                Description = "Git status (branch + short status) в каталоге решения/workspace. JSON: success, exit_code, output.",
+                InputSchema = Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
+            },
+            new()
+            {
+                Name = "ide_git_diff",
+                Description = "Git diff в каталоге решения/workspace. Опционально path и staged=true. JSON: success, exit_code, output (обрезано).",
+                InputSchema = Schema(new
+                {
+                    type = "object",
+                    properties = new
+                    {
+                        path = new { type = "string", description = "Опционально: путь к файлу/каталогу для ограничения diff." },
+                        staged = new { type = "boolean", description = "true: git diff --staged; false (по умолчанию): рабочие изменения." }
+                    },
+                    required = Array.Empty<string>()
+                })
+            },
+            new()
+            {
+                Name = "ide_git_commit",
+                Description = "Сделать git commit в каталоге решения/workspace. message обязателен; paths — опционально (иначе add -A). JSON: success, exit_code, output.",
+                InputSchema = Schema(new
+                {
+                    type = "object",
+                    properties = new
+                    {
+                        message = new { type = "string", description = "Сообщение коммита." },
+                        paths = new { type = "array", items = new { type = "string" }, description = "Опционально: пути для git add." }
+                    },
+                    required = new[] { "message" }
+                })
+            },
+            new()
+            {
+                Name = "ide_git_push",
+                Description = "Сделать git push в каталоге решения/workspace. Опционально remote и branch. JSON: success, exit_code, output.",
+                InputSchema = Schema(new
+                {
+                    type = "object",
+                    properties = new
+                    {
+                        remote = new { type = "string", description = "Опционально: remote (по умолчанию origin)." },
+                        branch = new { type = "string", description = "Опционально: branch (по умолчанию текущая)." }
+                    },
+                    required = Array.Empty<string>()
+                })
             },
             new()
             {
@@ -451,7 +556,7 @@ public static class IdeMcpServer
                     type = "object",
                     properties = new
                     {
-                        command_id = new { type = "string", description = "Код команды (open_file, load_solution, select, set_breakpoint, show_preview, get_editor_state, apply_edit, go_to_position, build, …)." },
+                        command_id = new { type = "string", description = "Код команды (open_file, load_solution, select, set_breakpoint, show_preview, get_editor_state, apply_edit, go_to_position, build, run_tests, run_affected_tests, run_code_cleanup, get_code_metrics, get_workspace_state, git_status/diff/commit/push, …)." },
                         args = new { type = "object", description = "Аргументы команды (path, file_path, line, start_line, …). Опционально." }
                     },
                     required = new[] { "command_id" }
@@ -488,11 +593,19 @@ public static class IdeMcpServer
                             "ide_apply_edit" => await actions.ExecuteCommandAsync(IdeCommands.ApplyEdit, args, cancellationToken),
                             "ide_go_to_position" => await actions.ExecuteCommandAsync(IdeCommands.GoToPosition, args, cancellationToken),
                             "ide_get_solution_info" => await actions.ExecuteCommandAsync(IdeCommands.GetSolutionInfo, args, cancellationToken),
+                            "ide_get_workspace_state" => await actions.ExecuteCommandAsync(IdeCommands.GetWorkspaceState, args, cancellationToken),
                             "ide_get_solution_files" => await actions.ExecuteCommandAsync(IdeCommands.GetSolutionFiles, args, cancellationToken),
                             "ide_get_current_file_diagnostics" => await actions.ExecuteCommandAsync(IdeCommands.GetCurrentFileDiagnostics, args, cancellationToken),
                             "ide_build" => await actions.ExecuteCommandAsync(IdeCommands.BuildStructured, args, cancellationToken),
                             "ide_get_build_output" => await actions.ExecuteCommandAsync(IdeCommands.GetBuildOutput, args, cancellationToken),
                             "ide_run_tests" => await actions.RunTestsAsync(),
+                            "ide_run_affected_tests" => await actions.ExecuteCommandAsync(IdeCommands.RunAffectedTests, args, cancellationToken),
+                            "ide_run_code_cleanup" => await actions.ExecuteCommandAsync(IdeCommands.RunCodeCleanup, args, cancellationToken),
+                            "ide_get_code_metrics" => await actions.ExecuteCommandAsync(IdeCommands.GetCodeMetrics, args, cancellationToken),
+                            "ide_git_status" => await actions.ExecuteCommandAsync(IdeCommands.GitStatus, args, cancellationToken),
+                            "ide_git_diff" => await actions.ExecuteCommandAsync(IdeCommands.GitDiff, args, cancellationToken),
+                            "ide_git_commit" => await actions.ExecuteCommandAsync(IdeCommands.GitCommit, args, cancellationToken),
+                            "ide_git_push" => await actions.ExecuteCommandAsync(IdeCommands.GitPush, args, cancellationToken),
                             "ide_focus_editor" => await actions.ExecuteCommandAsync(IdeCommands.FocusEditor, args, cancellationToken),
                             "ide_get_ui_theme" => await actions.ExecuteCommandAsync(IdeCommands.GetUiTheme, args, cancellationToken),
                             "ide_set_ui_theme" => await actions.ExecuteCommandAsync(IdeCommands.SetUiTheme, args, cancellationToken),
@@ -528,7 +641,8 @@ public static class IdeMcpServer
                             or "ide_show_preview" or "ide_show_editor_preview" or "ide_apply_edit" or "ide_go_to_position" or "ide_focus_editor"
                             or "ide_set_ui_theme" or "ide_set_control_layout" or "ide_set_control_text" or "ide_click_control"
                             or "ide_send_keys" or "ide_set_focus" or "ide_highlight_control" or "ide_set_panel_size" or "ide_add_control"
-                            or "ide_show_breakpoints" or "ide_show_debug_position" or "ide_show_debug_state" or "ide_write_agent_notes";
+                            or "ide_show_breakpoints" or "ide_show_debug_position" or "ide_show_debug_state" or "ide_write_agent_notes"
+                            or "ide_run_code_cleanup" or "ide_git_commit" or "ide_git_push";
                         isError = isActionTool && text != "OK";
                         }
                         return new CallToolResult { Content = [new TextContentBlock { Text = text }], IsError = isError };

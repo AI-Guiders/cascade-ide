@@ -1,11 +1,16 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Text.Json;
 using System.Windows.Input;
+using System.Xml.Linq;
 using Avalonia.Threading;
 using CascadeIDE.Models;
 using DotNetBuildTestParsers;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using OutWit.Common.Values;
 
 namespace CascadeIDE.ViewModels;
@@ -42,6 +47,9 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _deepSeekApiKey = _aiKeys.DeepSeekApiKey ?? "";
         _isSolutionExplorerVisible = _settings.SolutionExplorerVisible;
         _isTerminalVisible = _settings.TerminalVisible;
+        _uiMode = NormalizeUiMode(_settings.UiMode);
+        InitializeAgentUiDefaults();
+        ApplyUiModeLayout(_uiMode, persist: false);
         _lastSavedSettings = (CascadeIdeSettings)_settings.Clone();
         _lastSavedAiKeys = (AiKeys)_aiKeys.Clone();
     }
@@ -205,6 +213,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private FileSystemWatcher? _breakpointsFileWatcher;
     private CancellationTokenSource? _openFileDebounceCts;
     private long _solutionLoadVersion;
+    private string? _lastBuildBinlogPath;
     private const int OpenFileDebounceMs = 100;
 
     /// <summary>Номера строк с брейкпоинтами в текущем открытом файле (для отрисовки в редакторе).</summary>
@@ -269,6 +278,83 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             return "";
         var p = Path.GetFullPath(solutionPath.Trim());
         return File.Exists(p) ? Path.GetDirectoryName(p) ?? "" : p;
+    }
+
+    private static string NormalizeUiMode(string? mode)
+    {
+        if (string.Equals(mode, "Focus", StringComparison.OrdinalIgnoreCase))
+            return "Focus";
+        if (string.Equals(mode, "Power", StringComparison.OrdinalIgnoreCase))
+            return "Power";
+        return "Balanced";
+    }
+
+    private void InitializeAgentUiDefaults()
+    {
+        if (AgentToolCalls.Count == 0)
+        {
+            AgentToolCalls.Add("Analyze dependencies and touched files");
+            AgentToolCalls.Add("Run targeted diagnostics");
+            AgentToolCalls.Add("Propose minimal patch set");
+        }
+
+        if (AgentTraceTimeline.Count == 0)
+        {
+            AgentTraceTimeline.Add("[Plan] Build safe refactor strategy");
+            AgentTraceTimeline.Add("[Action] Apply focused edits");
+            AgentTraceTimeline.Add("[Observation] Build green, tests partial");
+            AgentTraceTimeline.Add("[Next] Run affected tests and cleanup");
+        }
+
+        if (EventTimeline.Count == 0)
+        {
+            EventTimeline.Add("10:02 — file modified");
+            EventTimeline.Add("10:05 — analysis started");
+            EventTimeline.Add("10:07 — risk detected");
+            EventTimeline.Add("10:08 — patch prepared");
+        }
+    }
+
+    private void ApplyUiModeLayout(string mode, bool persist)
+    {
+        var normalized = NormalizeUiMode(mode);
+        switch (normalized)
+        {
+            case "Focus":
+                IsSolutionExplorerVisible = false;
+                IsBuildOutputVisible = false;
+                IsTerminalVisible = false;
+                IsChatPanelExpanded = false;
+                break;
+            case "Power":
+                IsSolutionExplorerVisible = true;
+                IsBuildOutputVisible = true;
+                IsTerminalVisible = true;
+                IsChatPanelExpanded = true;
+                break;
+            default:
+                IsSolutionExplorerVisible = true;
+                IsBuildOutputVisible = false;
+                IsTerminalVisible = false;
+                IsChatPanelExpanded = true;
+                break;
+        }
+
+        // Mode-specific visual identity: Power gets cosmic palette; Focus/Balanced keep calmer dark themes.
+        _ = normalized switch
+        {
+            "Power" => Services.UiThemeApply.ApplyOnUiThreadAsync(Services.UiThemeApply.GetPowerThemeJson()),
+            "Focus" => Services.UiThemeApply.ApplyOnUiThreadAsync(Services.UiThemeApply.GetDarkThemeJson()),
+            _ => Services.UiThemeApply.ApplyOnUiThreadAsync(Services.UiThemeApply.GetCursorLikeThemeJson())
+        };
+
+        if (!persist)
+            return;
+
+        _settings.UiMode = normalized;
+        _settings.SolutionExplorerVisible = IsSolutionExplorerVisible;
+        _settings.TerminalVisible = IsTerminalVisible;
+        SaveSettingsIfChanged();
     }
 
     private string GetWorkspacePath() => GetWorkspacePath(SolutionPath);
@@ -345,6 +431,75 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
 
     [ObservableProperty]
     private bool _isTerminalVisible;
+
+    public static readonly IReadOnlyList<string> UiModeOptions = ["Focus", "Balanced", "Power"];
+    public IReadOnlyList<string> UiModeOptionsList => UiModeOptions;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsFocusMode))]
+    [NotifyPropertyChangedFor(nameof(IsBalancedMode))]
+    [NotifyPropertyChangedFor(nameof(IsPowerMode))]
+    [NotifyPropertyChangedFor(nameof(ShowTaskBar))]
+    [NotifyPropertyChangedFor(nameof(ShowQuickActions))]
+    [NotifyPropertyChangedFor(nameof(ShowAgentOperations))]
+    [NotifyPropertyChangedFor(nameof(ShowAgentTrace))]
+    [NotifyPropertyChangedFor(nameof(ShowPowerTelemetry))]
+    [NotifyPropertyChangedFor(nameof(ShowSafetyControls))]
+    private string _uiMode = "Balanced";
+
+    public bool IsFocusMode => string.Equals(UiMode, "Focus", StringComparison.OrdinalIgnoreCase);
+    public bool IsBalancedMode => string.Equals(UiMode, "Balanced", StringComparison.OrdinalIgnoreCase);
+    public bool IsPowerMode => string.Equals(UiMode, "Power", StringComparison.OrdinalIgnoreCase);
+    public bool ShowTaskBar => !IsFocusMode;
+    public bool ShowQuickActions => !IsFocusMode;
+    public bool ShowAgentOperations => !IsFocusMode;
+    public bool ShowAgentTrace => IsPowerMode;
+    public bool ShowPowerTelemetry => IsPowerMode;
+    public bool ShowSafetyControls => IsPowerMode;
+
+    [ObservableProperty]
+    private string _activeTaskTitle = "Refactor payment retries";
+
+    [ObservableProperty]
+    private string _activeTaskStatus = "In progress";
+
+    [ObservableProperty]
+    private int _activeTaskProgress = 72;
+
+    [ObservableProperty]
+    private string _activeObjective = "Refactor retry pipeline with predictable backoff and safer error handling.";
+
+    [ObservableProperty]
+    private string _riskSummary = "2 potential null references identified.";
+
+    [ObservableProperty]
+    private string _resultSummary = "Build green; targeted tests pending.";
+
+    [ObservableProperty]
+    private string _nextActionSummary = "Run affected tests and validate rollback strategy.";
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsSafetyL1))]
+    [NotifyPropertyChangedFor(nameof(IsSafetyL2))]
+    [NotifyPropertyChangedFor(nameof(IsSafetyL3))]
+    private string _safetyLevel = "L2";
+
+    public bool IsSafetyL1 => string.Equals(SafetyLevel, "L1", StringComparison.OrdinalIgnoreCase);
+    public bool IsSafetyL2 => string.Equals(SafetyLevel, "L2", StringComparison.OrdinalIgnoreCase);
+    public bool IsSafetyL3 => string.Equals(SafetyLevel, "L3", StringComparison.OrdinalIgnoreCase);
+
+    [ObservableProperty]
+    private int _complexityBadge = 12;
+
+    [ObservableProperty]
+    private int _impactedTestsBadge = 5;
+
+    [ObservableProperty]
+    private int _filesChangedBadge = 3;
+
+    public ObservableCollection<string> AgentToolCalls { get; } = [];
+    public ObservableCollection<string> AgentTraceTimeline { get; } = [];
+    public ObservableCollection<string> EventTimeline { get; } = [];
 
     [ObservableProperty]
     private string _terminalOutput = "";
@@ -477,6 +632,18 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     partial void OnSendMessageKeyChanged(string value)
     {
         _appData.Put("SendMessageKey", value);
+    }
+
+    partial void OnUiModeChanged(string value)
+    {
+        var normalized = NormalizeUiMode(value);
+        if (!string.Equals(value, normalized, StringComparison.Ordinal))
+        {
+            UiMode = normalized;
+            return;
+        }
+
+        ApplyUiModeLayout(normalized, persist: true);
     }
 
     public void LoadSendMessageKeyFromStorage()
@@ -706,6 +873,81 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private void ToggleTerminal()
     {
         IsTerminalVisible = !IsTerminalVisible;
+    }
+
+    [RelayCommand]
+    private void SetFocusMode()
+    {
+        UiMode = "Focus";
+    }
+
+    [RelayCommand]
+    private void SetBalancedMode()
+    {
+        UiMode = "Balanced";
+    }
+
+    [RelayCommand]
+    private void SetPowerMode()
+    {
+        UiMode = "Power";
+    }
+
+    [RelayCommand]
+    private void CycleUiMode()
+    {
+        UiMode = UiMode switch
+        {
+            "Focus" => "Balanced",
+            "Balanced" => "Power",
+            _ => "Focus"
+        };
+    }
+
+    [RelayCommand]
+    private void SetSafetyL1() => SafetyLevel = "L1";
+
+    [RelayCommand]
+    private void SetSafetyL2() => SafetyLevel = "L2";
+
+    [RelayCommand]
+    private void SetSafetyL3() => SafetyLevel = "L3";
+
+    [RelayCommand]
+    private void FixFailingTests()
+    {
+        IsChatPanelExpanded = true;
+        ChatInput = "Fix failing tests using minimal-risk changes. Start with ide_run_affected_tests and explain each step.";
+    }
+
+    [RelayCommand]
+    private void InvestigateNullref()
+    {
+        IsChatPanelExpanded = true;
+        ChatInput = "Investigate possible null reference in current context. Show the shortest safe fix plan.";
+    }
+
+    [RelayCommand]
+    private void PrepareCommit()
+    {
+        IsChatPanelExpanded = true;
+        ChatInput = "Prepare a clean commit plan grouped by logical changes and include verification steps.";
+    }
+
+    [RelayCommand]
+    private void ExplainCurrentStep()
+    {
+        IsChatPanelExpanded = true;
+        ChatInput = "Explain the current autonomous step in plain language: intent, tool call, risk, and rollback.";
+    }
+
+    [RelayCommand]
+    private void EmergencyStop()
+    {
+        IsBuilding = false;
+        ActiveTaskStatus = "Paused";
+        ResultSummary = "Autonomous flow paused by operator.";
+        EventTimeline.Insert(0, $"{DateTime.Now:HH:mm:ss} — Emergency stop engaged");
     }
 
     [RelayCommand]
@@ -942,6 +1184,20 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     {
         static string? S(IReadOnlyDictionary<string, JsonElement>? a, string key) => a is not null && a.TryGetValue(key, out var e) ? e.GetString() : null;
         static int I(IReadOnlyDictionary<string, JsonElement>? a, string key, int def = 0) => a is not null && a.TryGetValue(key, out var e) && e.TryGetInt32(out var v) ? v : def;
+        static bool B(IReadOnlyDictionary<string, JsonElement>? a, string key, bool def = false) => a is not null && a.TryGetValue(key, out var e) && (e.ValueKind is JsonValueKind.True or JsonValueKind.False) ? e.GetBoolean() : def;
+        static IReadOnlyList<string>? SA(IReadOnlyDictionary<string, JsonElement>? a, string key)
+        {
+            if (a is null || !a.TryGetValue(key, out var e) || e.ValueKind != JsonValueKind.Array)
+                return null;
+            var values = new List<string>();
+            foreach (var item in e.EnumerateArray())
+            {
+                var value = item.GetString();
+                if (!string.IsNullOrWhiteSpace(value))
+                    values.Add(value);
+            }
+            return values;
+        }
 
         var a = (Services.IIdeMcpActions)this;
         switch (commandId)
@@ -990,6 +1246,8 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
                 return "OK";
             case Services.IdeCommands.GetSolutionInfo:
                 return a.GetSolutionInfo();
+            case Services.IdeCommands.GetWorkspaceState:
+                return await a.GetWorkspaceStateAsync();
             case Services.IdeCommands.GetSolutionFiles:
                 return await a.GetSolutionFilesAsync();
             case Services.IdeCommands.GetCurrentFileDiagnostics:
@@ -1000,6 +1258,21 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
                 return await a.BuildStructuredAsync();
             case Services.IdeCommands.RunTests:
                 return await a.RunTestsAsync();
+            case Services.IdeCommands.RunAffectedTests:
+                return await a.RunAffectedTestsAsync(SA(args, "changed_paths"));
+            case Services.IdeCommands.RunCodeCleanup:
+                return await a.RunCodeCleanupAsync(S(args, "include_path"));
+            case Services.IdeCommands.GetCodeMetrics:
+                return await a.GetCodeMetricsAsync(S(args, "scope"), S(args, "path"));
+            case Services.IdeCommands.GitStatus:
+                return await a.GitStatusAsync();
+            case Services.IdeCommands.GitDiff:
+                return await a.GitDiffAsync(S(args, "path"), B(args, "staged"));
+            case Services.IdeCommands.GitCommit:
+                if (string.IsNullOrWhiteSpace(S(args, "message"))) return "Missing message";
+                return await a.GitCommitAsync(S(args, "message")!, SA(args, "paths"));
+            case Services.IdeCommands.GitPush:
+                return await a.GitPushAsync(S(args, "remote"), S(args, "branch"));
             case Services.IdeCommands.GetBuildOutput:
                 return a.GetBuildOutput();
             case Services.IdeCommands.FocusEditor:
@@ -1238,6 +1511,298 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         return JsonSerializer.Serialize(new { text = BuildOutput ?? "", theme = new { background = bg, foreground = fg } });
     }
 
+    async Task<string> Services.IIdeMcpActions.GetWorkspaceStateAsync()
+    {
+        var diagnosticsJson = await ((Services.IIdeMcpActions)this).GetCurrentFileDiagnosticsAsync().ConfigureAwait(false);
+        JsonElement diagnostics;
+        try { diagnostics = JsonSerializer.Deserialize<JsonElement>(diagnosticsJson); }
+        catch { diagnostics = JsonSerializer.SerializeToElement(Array.Empty<object>()); }
+
+        var buildText = BuildOutput ?? "";
+        if (buildText.Length > 2000)
+            buildText = buildText[..2000] + "\n... (output truncated)";
+
+        var state = new
+        {
+            solution_path = SolutionPath,
+            current_file_path = CurrentFilePath,
+            selected_solution_path = SelectedSolutionItem?.FullPath,
+            editor = new
+            {
+                content_length = (EditorText ?? "").Length,
+                selection_start = EditorSelectionStart,
+                selection_length = EditorSelectionLength
+            },
+            breakpoints = new
+            {
+                current_file = AllBreakpointLinesInCurrentFile,
+                debugger_count = _debuggerBreakpoints.Count
+            },
+            debug = new
+            {
+                position_file = DebugPositionFile,
+                position_line = DebugPositionLine,
+                stack_count = DebugStackFrames.Count,
+                variables_count = DebugVariables.Count
+            },
+            build = new
+            {
+                is_visible = IsBuildOutputVisible,
+                output_preview = buildText,
+                binlog_path = _lastBuildBinlogPath
+            },
+            diagnostics
+        };
+        return JsonSerializer.Serialize(state);
+    }
+
+    async Task<string> Services.IIdeMcpActions.GetCodeMetricsAsync(string? scope, string? path)
+    {
+        var files = ResolveMetricFiles(scope, path).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        if (files.Count == 0)
+            return JsonSerializer.Serialize(new { success = false, error = "No C# files resolved for metrics." });
+
+        var perFile = new List<object>();
+        var topMethods = new List<(string File, string Method, int Line, int Complexity)>();
+        int totalLoc = 0, totalClasses = 0, totalMethods = 0, complexityTotal = 0, complexityMax = 0;
+
+        foreach (var file in files)
+        {
+            string text;
+            try { text = await File.ReadAllTextAsync(file).ConfigureAwait(false); }
+            catch { continue; }
+
+            var tree = CSharpSyntaxTree.ParseText(text);
+            var root = await tree.GetRootAsync().ConfigureAwait(false);
+            var methods = root.DescendantNodes().OfType<BaseMethodDeclarationSyntax>().ToList();
+            var classes = root.DescendantNodes().OfType<ClassDeclarationSyntax>().Count();
+            var fileLoc = text.Split('\n').Count(static l => !string.IsNullOrWhiteSpace(l));
+
+            int fileComplexity = 0;
+            int fileMaxMethodComplexity = 0;
+            foreach (var method in methods)
+            {
+                var complexity = CalculateCyclomaticComplexity(method);
+                fileComplexity += complexity;
+                if (complexity > fileMaxMethodComplexity)
+                    fileMaxMethodComplexity = complexity;
+
+                if (complexity >= 10)
+                {
+                    var methodName = method switch
+                    {
+                        MethodDeclarationSyntax m => m.Identifier.Text,
+                        ConstructorDeclarationSyntax c => c.Identifier.Text,
+                        DestructorDeclarationSyntax d => d.Identifier.Text,
+                        _ => "method"
+                    };
+                    var line = method.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
+                    topMethods.Add((file, methodName, line, complexity));
+                }
+            }
+
+            totalLoc += fileLoc;
+            totalClasses += classes;
+            totalMethods += methods.Count;
+            complexityTotal += fileComplexity;
+            complexityMax = Math.Max(complexityMax, fileMaxMethodComplexity);
+
+            perFile.Add(new
+            {
+                file,
+                loc = fileLoc,
+                class_count = classes,
+                method_count = methods.Count,
+                cyclomatic_total = fileComplexity,
+                cyclomatic_max_method = fileMaxMethodComplexity
+            });
+        }
+
+        return JsonSerializer.Serialize(new
+        {
+            success = true,
+            scope = string.IsNullOrWhiteSpace(scope) ? "current_file" : scope,
+            file_count = perFile.Count,
+            totals = new
+            {
+                loc = totalLoc,
+                class_count = totalClasses,
+                method_count = totalMethods,
+                cyclomatic_total = complexityTotal,
+                cyclomatic_max_method = complexityMax
+            },
+            files = perFile,
+            hot_methods = topMethods
+                .OrderByDescending(x => x.Complexity)
+                .Take(20)
+                .Select(x => new { file = x.File, method = x.Method, line = x.Line, complexity = x.Complexity })
+        });
+    }
+
+    Task<string> Services.IIdeMcpActions.GitStatusAsync() => RunGitCommandJsonAsync(["status", "--short", "--branch"]);
+
+    Task<string> Services.IIdeMcpActions.GitDiffAsync(string? path, bool staged)
+    {
+        var args = new List<string> { "diff" };
+        if (staged)
+            args.Add("--staged");
+        if (!string.IsNullOrWhiteSpace(path))
+        {
+            args.Add("--");
+            args.Add(path!);
+        }
+        return RunGitCommandJsonAsync(args);
+    }
+
+    async Task<string> Services.IIdeMcpActions.GitCommitAsync(string message, IReadOnlyList<string>? paths)
+    {
+        if (string.IsNullOrWhiteSpace(message))
+            return JsonSerializer.Serialize(new { success = false, error = "Commit message is required." });
+
+        var addArgs = new List<string> { "add" };
+        if (paths is { Count: > 0 })
+            addArgs.AddRange(paths.Where(p => !string.IsNullOrWhiteSpace(p)));
+        else
+            addArgs.Add("-A");
+
+        var addResult = await RunGitCommandAsync(addArgs).ConfigureAwait(false);
+        if (!addResult.Success)
+            return JsonSerializer.Serialize(new { success = false, step = "add", exit_code = addResult.ExitCode, output = addResult.Output });
+
+        var commitResult = await RunGitCommandAsync(["commit", "-m", message]).ConfigureAwait(false);
+        return JsonSerializer.Serialize(new
+        {
+            success = commitResult.Success,
+            exit_code = commitResult.ExitCode,
+            output = TruncateOutput(commitResult.Output, 4000)
+        });
+    }
+
+    Task<string> Services.IIdeMcpActions.GitPushAsync(string? remote, string? branch)
+    {
+        var args = new List<string> { "push" };
+        if (!string.IsNullOrWhiteSpace(remote))
+            args.Add(remote!);
+        if (!string.IsNullOrWhiteSpace(branch))
+            args.Add(branch!);
+        return RunGitCommandJsonAsync(args);
+    }
+
+    private IReadOnlyList<string> ResolveMetricFiles(string? scope, string? path)
+    {
+        var normalizedScope = string.IsNullOrWhiteSpace(scope) ? "current_file" : scope.Trim().ToLowerInvariant();
+        return normalizedScope switch
+        {
+            "file" => ResolveFilesFromPath(path),
+            "path" => ResolveFilesFromPath(path),
+            "solution" => CollectFileEntries(SolutionRoots)
+                .Select(e => e.FullPath)
+                .Where(p => p.EndsWith(".cs", StringComparison.OrdinalIgnoreCase) && File.Exists(p))
+                .ToList(),
+            _ => ResolveFilesFromPath(path ?? CurrentFilePath)
+        };
+    }
+
+    private static IReadOnlyList<string> ResolveFilesFromPath(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            return Array.Empty<string>();
+
+        try
+        {
+            var fullPath = Path.GetFullPath(path);
+            if (File.Exists(fullPath))
+                return fullPath.EndsWith(".cs", StringComparison.OrdinalIgnoreCase) ? [fullPath] : Array.Empty<string>();
+            if (!Directory.Exists(fullPath))
+                return Array.Empty<string>();
+            return Directory.EnumerateFiles(fullPath, "*.cs", SearchOption.AllDirectories).ToList();
+        }
+        catch
+        {
+            return Array.Empty<string>();
+        }
+    }
+
+    private static int CalculateCyclomaticComplexity(SyntaxNode node)
+    {
+        var complexity = 1;
+        foreach (var child in node.DescendantNodes())
+        {
+            switch (child)
+            {
+                case IfStatementSyntax:
+                case ForStatementSyntax:
+                case ForEachStatementSyntax:
+                case WhileStatementSyntax:
+                case DoStatementSyntax:
+                case CaseSwitchLabelSyntax:
+                case CatchClauseSyntax:
+                case ConditionalExpressionSyntax:
+                    complexity++;
+                    break;
+                case BinaryExpressionSyntax b when b.IsKind(SyntaxKind.LogicalAndExpression) || b.IsKind(SyntaxKind.LogicalOrExpression):
+                    complexity++;
+                    break;
+            }
+        }
+        return complexity;
+    }
+
+    private async Task<string> RunGitCommandJsonAsync(IReadOnlyList<string> args)
+    {
+        var result = await RunGitCommandAsync(args).ConfigureAwait(false);
+        return JsonSerializer.Serialize(new
+        {
+            success = result.Success,
+            exit_code = result.ExitCode,
+            output = TruncateOutput(result.Output, 4000)
+        });
+    }
+
+    private async Task<(bool Success, int ExitCode, string Output)> RunGitCommandAsync(IReadOnlyList<string> args)
+    {
+        var workspace = GetWorkspacePath();
+        if (string.IsNullOrWhiteSpace(workspace) || !Directory.Exists(workspace))
+            return (false, -1, "Workspace path is not available.");
+
+        try
+        {
+            var psi = new ProcessStartInfo("git")
+            {
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WorkingDirectory = workspace
+            };
+            foreach (var arg in args)
+                psi.ArgumentList.Add(arg);
+
+            using var process = Process.Start(psi);
+            if (process is null)
+                return (false, -1, "Failed to start git process.");
+
+            var stdout = process.StandardOutput.ReadToEndAsync();
+            var stderr = process.StandardError.ReadToEndAsync();
+            await Task.WhenAll(stdout, stderr).ConfigureAwait(false);
+            await process.WaitForExitAsync().ConfigureAwait(false);
+
+            var output = (await stdout) + "\n" + (await stderr);
+            return (process.ExitCode == 0, process.ExitCode, output.Trim());
+        }
+        catch (Exception ex)
+        {
+            return (false, -1, ex.Message);
+        }
+    }
+
+    private static string TruncateOutput(string? text, int maxChars)
+    {
+        if (string.IsNullOrEmpty(text))
+            return "";
+        return text.Length > maxChars ? text[..maxChars] + "\n... (output truncated)" : text;
+    }
+
     private static IEnumerable<string> CollectProjectPaths(ObservableCollection<SolutionItem> roots)
     {
         foreach (var item in roots)
@@ -1321,6 +1886,9 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         }
         try
         {
+            var artifactsDir = Path.Combine(Path.GetDirectoryName(path) ?? "", ".cascade-ide", "build-artifacts");
+            Directory.CreateDirectory(artifactsDir);
+            var binlogPath = Path.Combine(artifactsDir, $"build-{DateTime.UtcNow:yyyyMMdd-HHmmss-fff}.binlog");
             var psi = new System.Diagnostics.ProcessStartInfo("dotnet")
             {
                 ArgumentList = { "build", path },
@@ -1330,6 +1898,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
                 CreateNoWindow = true,
                 WorkingDirectory = Path.GetDirectoryName(path) ?? ""
             };
+            psi.ArgumentList.Add($"-bl:{binlogPath}");
             using var process = System.Diagnostics.Process.Start(psi);
             if (process is null)
             {
@@ -1349,6 +1918,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             {
                 BuildOutput = $"Сборка: {pathCopy}\r\n{outStr}";
                 IsBuildOutputVisible = true;
+                _lastBuildBinlogPath = binlogPath;
             });
             return outStr;
         }
@@ -1372,6 +1942,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             exit_code = parsed.ExitCode,
             errors = parsed.Errors.Select(e => new { e.File, e.Line, e.Column, e.Code, e.Message }).ToList(),
             warnings = parsed.Warnings.Select(w => new { w.File, w.Line, w.Column, w.Code, w.Message }).ToList(),
+            binlog_path = _lastBuildBinlogPath,
             raw_output = rawTruncated
         };
         return System.Text.Json.JsonSerializer.Serialize(result, new System.Text.Json.JsonSerializerOptions { WriteIndented = false });
@@ -1379,34 +1950,67 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
 
     async Task<string> Services.IIdeMcpActions.RunTestsAsync()
     {
+        return await RunTestsInternalAsync(filterExpression: null, mode: "all").ConfigureAwait(false);
+    }
+
+    async Task<string> Services.IIdeMcpActions.RunAffectedTestsAsync(IReadOnlyList<string>? changedPaths)
+    {
+        var tokens = BuildAffectedTestTokens(changedPaths);
+        if (tokens.Count == 0)
+            return await RunTestsInternalAsync(filterExpression: null, mode: "fallback_all").ConfigureAwait(false);
+
+        var filter = string.Join('|', tokens.Select(t => $"FullyQualifiedName~{t}"));
+        return await RunTestsInternalAsync(filter, mode: "affected", tokens).ConfigureAwait(false);
+    }
+
+    private async Task<string> RunTestsInternalAsync(string? filterExpression, string mode, IReadOnlyList<string>? tokens = null)
+    {
         var path = SolutionPath;
         if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
-        {
-            var msg = JsonSerializer.Serialize(new { success = false, error = "No solution loaded or file not found." });
-            return msg;
-        }
+            return JsonSerializer.Serialize(new { success = false, error = "No solution loaded or file not found.", mode });
+
         try
         {
-            var psi = new System.Diagnostics.ProcessStartInfo("dotnet")
+            var resultsDir = Path.Combine(Path.GetDirectoryName(path) ?? "", ".cascade-ide", "test-artifacts");
+            Directory.CreateDirectory(resultsDir);
+            var trxFileName = $"tests-{DateTime.UtcNow:yyyyMMdd-HHmmss-fff}.trx";
+            var trxPath = Path.Combine(resultsDir, trxFileName);
+
+            var psi = new ProcessStartInfo("dotnet")
             {
-                ArgumentList = { "test", path, "--logger", "console;verbosity=detailed" },
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
                 CreateNoWindow = true,
                 WorkingDirectory = Path.GetDirectoryName(path) ?? ""
             };
-            using var process = System.Diagnostics.Process.Start(psi);
-            if (process is null)
+            psi.ArgumentList.Add("test");
+            psi.ArgumentList.Add(path);
+            psi.ArgumentList.Add("--logger");
+            psi.ArgumentList.Add("console;verbosity=detailed");
+            psi.ArgumentList.Add("--logger");
+            psi.ArgumentList.Add($"trx;LogFileName={trxFileName}");
+            psi.ArgumentList.Add("--results-directory");
+            psi.ArgumentList.Add(resultsDir);
+            if (!string.IsNullOrWhiteSpace(filterExpression))
             {
-                return JsonSerializer.Serialize(new { success = false, error = "Failed to start dotnet test." });
+                psi.ArgumentList.Add("--filter");
+                psi.ArgumentList.Add(filterExpression);
             }
+
+            using var process = Process.Start(psi);
+            if (process is null)
+                return JsonSerializer.Serialize(new { success = false, error = "Failed to start dotnet test.", mode, filter = filterExpression });
+
             var stdout = process.StandardOutput.ReadToEndAsync();
             var stderr = process.StandardError.ReadToEndAsync();
             await Task.WhenAll(stdout, stderr).ConfigureAwait(false);
             await process.WaitForExitAsync().ConfigureAwait(false);
+
             var outStr = await stdout + "\n" + await stderr;
-            var parsed = TestOutputParser.Parse(outStr);
+            var parsed = File.Exists(trxPath)
+                ? ParseTrx(trxPath) ?? TestOutputParser.Parse(outStr)
+                : TestOutputParser.Parse(outStr);
             var result = new
             {
                 success = parsed.Success,
@@ -1414,9 +2018,164 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
                 passed = parsed.Passed,
                 failed = parsed.Failed,
                 skipped = parsed.Skipped,
-                failed_tests = parsed.FailedTests.Select(t => new { t.Name, t.Message, duration_ms = t.DurationMs }).ToList()
+                failed_tests = parsed.FailedTests.Select(t => new { t.Name, t.Message, duration_ms = t.DurationMs }).ToList(),
+                mode,
+                filter = filterExpression,
+                tokens,
+                trx_path = File.Exists(trxPath) ? trxPath : null
             };
             return JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = false });
+        }
+        catch (Exception ex)
+        {
+            return JsonSerializer.Serialize(new { success = false, error = ex.Message, mode, filter = filterExpression });
+        }
+    }
+
+    private static TestParseResult? ParseTrx(string trxPath)
+    {
+        try
+        {
+            var doc = XDocument.Load(trxPath);
+            var root = doc.Root;
+            if (root is null)
+                return null;
+
+            XNamespace ns = root.Name.Namespace;
+            var counters = doc.Descendants(ns + "Counters").FirstOrDefault();
+            int total = ParseInt(counters?.Attribute("total")?.Value);
+            int passed = ParseInt(counters?.Attribute("passed")?.Value);
+            int failed = ParseInt(counters?.Attribute("failed")?.Value);
+            int skipped = ParseInt(counters?.Attribute("notExecuted")?.Value);
+
+            var failedTests = new List<TestResultItem>();
+            foreach (var unitTestResult in doc.Descendants(ns + "UnitTestResult"))
+            {
+                var outcome = unitTestResult.Attribute("outcome")?.Value;
+                if (!string.Equals(outcome, "Failed", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                var name = unitTestResult.Attribute("testName")?.Value ?? "";
+                var duration = ParseDurationMs(unitTestResult.Attribute("duration")?.Value);
+                var message = unitTestResult
+                    .Descendants(ns + "Message")
+                    .Select(m => m.Value)
+                    .FirstOrDefault() ?? "";
+                failedTests.Add(new TestResultItem(name, Passed: false, Message: message, DurationMs: duration));
+            }
+
+            return new TestParseResult(
+                Total: total,
+                Passed: passed,
+                Failed: failed,
+                Skipped: skipped,
+                FailedTests: failedTests);
+        }
+        catch
+        {
+            return null;
+        }
+
+        static int ParseInt(string? raw) => int.TryParse(raw, out var value) ? value : 0;
+        static int? ParseDurationMs(string? raw)
+        {
+            if (string.IsNullOrWhiteSpace(raw))
+                return null;
+            return TimeSpan.TryParse(raw, out var ts) ? (int)ts.TotalMilliseconds : null;
+        }
+    }
+
+    private static IReadOnlyList<string> BuildAffectedTestTokens(IReadOnlyList<string>? changedPaths)
+    {
+        if (changedPaths is null || changedPaths.Count == 0)
+            return Array.Empty<string>();
+
+        var tokens = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var rawPath in changedPaths)
+        {
+            if (string.IsNullOrWhiteSpace(rawPath))
+                continue;
+
+            var fileName = Path.GetFileNameWithoutExtension(rawPath);
+            if (string.IsNullOrWhiteSpace(fileName))
+                continue;
+
+            // Prefer explicit test-like names; this keeps filter broad enough but still targeted.
+            if (fileName.Contains("test", StringComparison.OrdinalIgnoreCase))
+            {
+                tokens.Add(fileName);
+                continue;
+            }
+
+            tokens.Add(fileName + "Test");
+            tokens.Add(fileName + "Tests");
+        }
+        return tokens.Take(24).ToList();
+    }
+
+    async Task<string> Services.IIdeMcpActions.RunCodeCleanupAsync(string? includePath)
+    {
+        var path = SolutionPath;
+        if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+            return JsonSerializer.Serialize(new { success = false, error = "No solution loaded or file not found." });
+
+        try
+        {
+            var psi = new System.Diagnostics.ProcessStartInfo("dotnet")
+            {
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WorkingDirectory = Path.GetDirectoryName(path) ?? ""
+            };
+            psi.ArgumentList.Add("format");
+            psi.ArgumentList.Add(path);
+            psi.ArgumentList.Add("--no-restore");
+            psi.ArgumentList.Add("--verbosity");
+            psi.ArgumentList.Add("minimal");
+
+            if (!string.IsNullOrWhiteSpace(includePath))
+            {
+                string includeArg;
+                try
+                {
+                    includeArg = Path.GetFullPath(includePath);
+                }
+                catch
+                {
+                    includeArg = includePath;
+                }
+                psi.ArgumentList.Add("--include");
+                psi.ArgumentList.Add(includeArg);
+            }
+
+            using var process = System.Diagnostics.Process.Start(psi);
+            if (process is null)
+                return JsonSerializer.Serialize(new { success = false, error = "Failed to start dotnet format." });
+
+            var stdout = process.StandardOutput.ReadToEndAsync();
+            var stderr = process.StandardError.ReadToEndAsync();
+            await Task.WhenAll(stdout, stderr).ConfigureAwait(false);
+            await process.WaitForExitAsync().ConfigureAwait(false);
+
+            var outStr = await stdout + "\n" + await stderr;
+            const int maxRawChars = 4000;
+            var rawTruncated = outStr.Length > maxRawChars ? outStr[..maxRawChars] + "\n... (output truncated)" : outStr;
+
+            var pathCopy = path;
+            Dispatcher.UIThread.Post(() =>
+            {
+                BuildOutput = $"Code cleanup: {pathCopy}\r\n{outStr}";
+                IsBuildOutputVisible = true;
+            });
+
+            return JsonSerializer.Serialize(new
+            {
+                success = process.ExitCode == 0,
+                exit_code = process.ExitCode,
+                raw_output = rawTruncated
+            });
         }
         catch (Exception ex)
         {

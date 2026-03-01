@@ -58,7 +58,38 @@
             <Setter Property="Padding" Value="10,8"/>
             <Setter Property="CornerRadius" Value="6"/>
         </Style>
+        <Style Selector="Border#ModeBadge">
+            <Setter Property="Background" Value="#29437A"/>
+            <Setter Property="BorderBrush" Value="#4D72D5"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="6"/>
+        </Style>
+        <Style Selector="Border#ModeBadge.power">
+            <Setter Property="Background" Value="#36256D"/>
+            <Setter Property="BorderBrush" Value="#8A65FF"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="6"/>
+        </Style>
+        <Style Selector="Border.modeCard">
+            <Setter Property="Background" Value="{DynamicResource CascadeTheme.ChatMessageBubbleBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.EditorColumnBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="8"/>
+        </Style>
+        <Style Selector="TextBlock.modeCardTitle">
+            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="11"/>
+        </Style>
     </Window.Styles>
+
+    <Window.KeyBindings>
+        <KeyBinding Gesture="Alt+1" Command="{Binding SetFocusModeCommand}"/>
+        <KeyBinding Gesture="Alt+2" Command="{Binding SetBalancedModeCommand}"/>
+        <KeyBinding Gesture="Alt+3" Command="{Binding SetPowerModeCommand}"/>
+        <KeyBinding Gesture="Ctrl+Alt+M" Command="{Binding CycleUiModeCommand}"/>
+    </Window.KeyBindings>
 
     <Design.DataContext>
         <vm:MainWindowViewModel/>
@@ -78,6 +109,12 @@
                 <MenuItem Header="_Чат" ToggleType="CheckBox" IsChecked="{Binding IsChatPanelExpanded, Mode=TwoWay}"/>
                 <MenuItem Header="_Терминал" ToggleType="CheckBox" IsChecked="{Binding IsTerminalVisible, Mode=TwoWay}"/>
                 <Separator/>
+                <MenuItem Header="_Режим интерфейса">
+                    <MenuItem Header="_Focus" ToggleType="Radio" IsChecked="{Binding IsFocusMode}" Command="{Binding SetFocusModeCommand}"/>
+                    <MenuItem Header="_Balanced" ToggleType="Radio" IsChecked="{Binding IsBalancedMode}" Command="{Binding SetBalancedModeCommand}"/>
+                    <MenuItem Header="_Power" ToggleType="Radio" IsChecked="{Binding IsPowerMode}" Command="{Binding SetPowerModeCommand}"/>
+                </MenuItem>
+                <Separator/>
                 <MenuItem Header="_Тема">
                     <MenuItem Header="_Светлая" Command="{Binding ApplyLightThemeCommand}"/>
                     <MenuItem Header="_Тёмная" Command="{Binding ApplyDarkThemeCommand}"/>
@@ -96,22 +133,63 @@
             </MenuItem>
         </Menu>
 
-        <Grid x:Name="MainGrid" RowDefinitions="Auto,Auto,*,4,Auto" ColumnDefinitions="220,4,*,4,340">
+        <Grid x:Name="MainGrid" RowDefinitions="Auto,Auto,Auto,*,4,Auto" ColumnDefinitions="220,4,*,4,340">
         <!-- Подсказка при работе как MCP-сервер -->
         <Border Grid.Row="0" Grid.ColumnSpan="5" Background="{DynamicResource CascadeTheme.McpBannerBackground}" Padding="8,4" IsVisible="{Binding IsMcpServerMode}">
             <TextBlock Text="Управляется агентом (MCP). Не закрывайте окно — подключение будет потеряно." Foreground="{DynamicResource CascadeTheme.McpBannerForeground}" FontSize="12" VerticalAlignment="Center"/>
         </Border>
         <!-- Toolbar -->
-        <StackPanel Grid.Row="1" Grid.ColumnSpan="5" Orientation="Horizontal" Spacing="8" Margin="8,4" Background="{DynamicResource CascadeTheme.ToolbarBackground}">
-            <Button x:Name="OpenSolutionButton" Content="Открыть решение" Command="{Binding OpenSolutionCommand}"/>
-            <Button Content="Собрать" Command="{Binding BuildSolutionCommand}" IsEnabled="{Binding !IsBuilding}"/>
-            <TextBlock Text="{Binding SolutionPath}" VerticalAlignment="Center" MaxWidth="300" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
-            <TextBlock Text="{Binding SolutionLoadError}" VerticalAlignment="Center" MaxWidth="350" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource CascadeTheme.ToolbarErrorForeground}"/>
-            <TextBlock Text="{Binding OllamaStatus}" VerticalAlignment="Center" Margin="8,0,0,0" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
-        </StackPanel>
+        <ScrollViewer Grid.Row="1" Grid.ColumnSpan="5"
+                      Margin="8,4"
+                      HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Disabled">
+            <StackPanel Orientation="Horizontal" Spacing="8" Background="{DynamicResource CascadeTheme.ToolbarBackground}">
+                <Button x:Name="OpenSolutionButton" Content="Открыть решение" Command="{Binding OpenSolutionCommand}"/>
+                <Button Content="Собрать" Command="{Binding BuildSolutionCommand}" IsEnabled="{Binding !IsBuilding}"/>
+                <TextBlock Text="Режим:" VerticalAlignment="Center" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}" Margin="8,0,0,0"/>
+                <ComboBox Width="130"
+                          ItemsSource="{Binding UiModeOptionsList}"
+                          SelectedItem="{Binding UiMode, Mode=TwoWay}"/>
+                <Border x:Name="ModeBadge"
+                        Classes.power="{Binding IsPowerMode}"
+                        Padding="8,2"
+                        Margin="4,0,0,0"
+                        VerticalAlignment="Center">
+                    <TextBlock Text="{Binding UiMode}" FontWeight="SemiBold" Foreground="#EAF0FF"/>
+                </Border>
+                <TextBlock Text="{Binding SolutionPath}" VerticalAlignment="Center" MaxWidth="300" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
+                <TextBlock Text="{Binding SolutionLoadError}" VerticalAlignment="Center" MaxWidth="350" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource CascadeTheme.ToolbarErrorForeground}"/>
+                <TextBlock Text="{Binding OllamaStatus}" VerticalAlignment="Center" Margin="8,0,0,0" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Task bar / status cockpit -->
+        <Border Grid.Row="2" Grid.ColumnSpan="5" Margin="8,0,8,4" Padding="8,6"
+                IsVisible="{Binding ShowTaskBar}"
+                Classes="modeCard">
+            <StackPanel Spacing="6">
+                <WrapPanel Orientation="Horizontal" ItemHeight="28">
+                    <TextBlock Text="{Binding ActiveTaskTitle}" FontWeight="SemiBold" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}" Margin="0,0,8,0"/>
+                    <Border Classes="modeCard" Padding="6,2" Margin="0,0,8,0">
+                        <TextBlock Text="{Binding ActiveTaskStatus}" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
+                    </Border>
+                    <TextBlock Text="{Binding ActiveTaskProgress, StringFormat='{}Progress: {0}%'}" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}" Margin="0,0,8,0"/>
+                </WrapPanel>
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                    <WrapPanel Orientation="Horizontal" ItemHeight="30">
+                        <Button Content="Fix failing tests" Command="{Binding FixFailingTestsCommand}" IsVisible="{Binding ShowQuickActions}" Margin="0,0,6,0"/>
+                        <Button Content="Investigate nullref" Command="{Binding InvestigateNullrefCommand}" IsVisible="{Binding ShowQuickActions}" Margin="0,0,6,0"/>
+                        <Button Content="Prepare commit" Command="{Binding PrepareCommitCommand}" IsVisible="{Binding ShowQuickActions}" Margin="0,0,6,0"/>
+                        <Border Classes="modeCard" Padding="6,2" Margin="0,0,6,0"><TextBlock Text="{Binding ComplexityBadge, StringFormat='{}Complexity: {0}'}" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/></Border>
+                        <Border Classes="modeCard" Padding="6,2" Margin="0,0,6,0"><TextBlock Text="{Binding ImpactedTestsBadge, StringFormat='{}Impacted tests: {0}'}" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/></Border>
+                        <Border Classes="modeCard" Padding="6,2" Margin="0,0,6,0"><TextBlock Text="{Binding FilesChangedBadge, StringFormat='{}Files changed: {0}'}" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/></Border>
+                    </WrapPanel>
+                </ScrollViewer>
+            </StackPanel>
+        </Border>
 
         <!-- Solution tree (скрываемый) -->
-        <Border Grid.Row="2" Grid.Column="0" x:Name="SolutionExplorerBorder" BorderBrush="{DynamicResource CascadeTheme.SolutionExplorerBorderBrush}" BorderThickness="0,0,1,0" Padding="4" IsVisible="{Binding IsSolutionExplorerVisible}">
+        <Border Grid.Row="3" Grid.Column="0" x:Name="SolutionExplorerBorder" BorderBrush="{DynamicResource CascadeTheme.SolutionExplorerBorderBrush}" BorderThickness="0,0,1,0" Padding="4" IsVisible="{Binding IsSolutionExplorerVisible}">
             <DockPanel>
                 <TextBlock DockPanel.Dock="Top" Text="Решение" FontWeight="SemiBold" Margin="4" Foreground="{DynamicResource CascadeTheme.SolutionExplorerHeaderForeground}"/>
                 <TreeView ItemsSource="{Binding SolutionRoots}"
@@ -136,11 +214,11 @@
                 </TreeView>
             </DockPanel>
         </Border>
-        <GridSplitter Grid.Row="2" Grid.Column="1" Width="4" ResizeDirection="Columns" Background="{DynamicResource CascadeTheme.SolutionExplorerBorderBrush}" IsVisible="{Binding IsSolutionExplorerVisible}"/>
+        <GridSplitter Grid.Row="3" Grid.Column="1" Width="4" ResizeDirection="Columns" Background="{DynamicResource CascadeTheme.SolutionExplorerBorderBrush}" IsVisible="{Binding IsSolutionExplorerVisible}"/>
 
         <!-- Editor + (опционально) Markdown preview + Build output -->
-        <Border Grid.Row="2" Grid.Column="2" BorderBrush="{DynamicResource CascadeTheme.EditorColumnBorderBrush}" BorderThickness="0,0,1,0" Background="{DynamicResource CascadeTheme.EditorColumnBackground}" Padding="4">
-            <Grid x:Name="EditorColumnGrid" RowDefinitions="Auto,*,4,180,4,120">
+        <Border Grid.Row="3" Grid.Column="2" BorderBrush="{DynamicResource CascadeTheme.EditorColumnBorderBrush}" BorderThickness="0,0,1,0" Background="{DynamicResource CascadeTheme.EditorColumnBackground}" Padding="4">
+            <Grid x:Name="EditorColumnGrid" RowDefinitions="Auto,*,Auto,Auto,Auto,Auto">
                 <TextBlock Grid.Row="0" Text="{Binding CurrentFilePath}" Margin="4" Foreground="{DynamicResource CascadeTheme.CurrentFileForeground}" TextTrimming="CharacterEllipsis"/>
                 <Grid x:Name="EditorContentGrid" Grid.Row="1" ColumnDefinitions="*,0">
                     <ae:TextEditor Grid.Column="0"
@@ -198,12 +276,53 @@
                 </Border>
             </Grid>
         </Border>
-        <GridSplitter Grid.Row="2" Grid.Column="3" Width="4" ResizeDirection="Columns" Background="{DynamicResource CascadeTheme.EditorColumnBorderBrush}"/>
+        <GridSplitter Grid.Row="3" Grid.Column="3" Width="4" ResizeDirection="Columns" Background="{DynamicResource CascadeTheme.EditorColumnBorderBrush}"/>
 
         <!-- Chat -->
-        <Border x:Name="ChatPanel" Grid.Row="2" Grid.Column="4" Background="{DynamicResource CascadeTheme.ChatPanelBackground}" Padding="8">
-            <Grid RowDefinitions="*,4,120">
-                <DockPanel Grid.Row="0">
+        <Border x:Name="ChatPanel" Grid.Row="3" Grid.Column="4" Background="{DynamicResource CascadeTheme.ChatPanelBackground}" Padding="8">
+            <Grid RowDefinitions="Auto,Auto,Auto,4,120,Auto">
+                <Border Grid.Row="0" IsVisible="{Binding ShowAgentOperations}" Classes="modeCard" Margin="0,0,0,6">
+                    <StackPanel Spacing="6">
+                        <TextBlock Classes="modeCardTitle" Text="Agent Operations"/>
+                        <TextBlock Text="{Binding ActiveObjective}" TextWrapping="Wrap" Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
+                        <ItemsControl ItemsSource="{Binding AgentToolCalls}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding}" TextWrapping="Wrap" Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock Text="{Binding RiskSummary}" Foreground="{DynamicResource CascadeTheme.ToolbarErrorForeground}" TextWrapping="Wrap"/>
+                        <TextBlock Text="{Binding ResultSummary}" Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}" TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+                <Border Grid.Row="1" IsVisible="{Binding ShowAgentTrace}" Classes="modeCard" Margin="0,0,0,6">
+                    <StackPanel Spacing="6">
+                        <TextBlock Classes="modeCardTitle" Text="Agent Trace Timeline"/>
+                        <ItemsControl ItemsSource="{Binding AgentTraceTimeline}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding}" TextWrapping="Wrap" Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}" Margin="0,0,0,2"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <Button Content="Explain this step" Command="{Binding ExplainCurrentStepCommand}" HorizontalAlignment="Left"/>
+                    </StackPanel>
+                </Border>
+                <Border Grid.Row="2" IsVisible="{Binding ShowSafetyControls}" Classes="modeCard" Margin="0,0,0,6">
+                    <StackPanel Spacing="6">
+                        <TextBlock Classes="modeCardTitle" Text="Safety Level Control"/>
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <Button Content="L1" Command="{Binding SetSafetyL1Command}"/>
+                            <Button Content="L2" Command="{Binding SetSafetyL2Command}"/>
+                            <Button Content="L3" Command="{Binding SetSafetyL3Command}"/>
+                            <TextBlock Text="{Binding SafetyLevel}" VerticalAlignment="Center" Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}" Margin="6,0,0,0"/>
+                        </StackPanel>
+                        <Button Content="Emergency stop" Command="{Binding EmergencyStopCommand}" HorizontalAlignment="Left"/>
+                    </StackPanel>
+                </Border>
+                <GridSplitter Grid.Row="3" Height="4" ResizeDirection="Rows" Background="{DynamicResource CascadeTheme.ChatPanelBackground}" IsVisible="{Binding IsChatPanelExpanded}"/>
+                <DockPanel Grid.Row="4">
                     <Button DockPanel.Dock="Left" Content="▶ Чат" Command="{Binding ToggleChatPanelCommand}"
                             IsVisible="{Binding !IsChatPanelExpanded}"
                             ToolTip.Tip="Развернуть чат" Padding="6,8" Margin="0,0,4,0"
@@ -226,8 +345,7 @@
                         </ItemsControl>
                     </ScrollViewer>
                 </DockPanel>
-                <GridSplitter Grid.Row="1" Height="4" ResizeDirection="Rows" Background="{DynamicResource CascadeTheme.ChatPanelBackground}" IsVisible="{Binding IsChatPanelExpanded}"/>
-                <StackPanel Grid.Row="2" Spacing="4" Margin="0,8,0,0" IsVisible="{Binding IsChatPanelExpanded}" MinHeight="56">
+                <StackPanel Grid.Row="5" Spacing="4" Margin="0,8,0,0" IsVisible="{Binding IsChatPanelExpanded}" MinHeight="56">
                     <TextBox x:Name="ChatInputBox"
                              Text="{Binding ChatInput, Mode=TwoWay}"
                              Watermark="Сообщение…"
@@ -241,10 +359,33 @@
         </Border>
 
         <!-- Разделитель для терминала -->
-        <GridSplitter Grid.Row="3" Grid.ColumnSpan="5" Height="4" ResizeDirection="Rows" Background="{DynamicResource CascadeTheme.BuildOutputBorderBrush}" IsVisible="{Binding IsTerminalVisible}"/>
+        <GridSplitter Grid.Row="4" Grid.ColumnSpan="5" Height="4" ResizeDirection="Rows" Background="{DynamicResource CascadeTheme.BuildOutputBorderBrush}" IsVisible="{Binding IsTerminalVisible}"/>
         <!-- Терминал (скрываемый, высота меняется перетаскиванием разделителя) -->
-        <Border Grid.Row="4" Grid.ColumnSpan="5" IsVisible="{Binding IsTerminalVisible}" MinHeight="120" BorderBrush="{DynamicResource CascadeTheme.BuildOutputBorderBrush}" BorderThickness="0,1,0,0" Padding="4" Background="{DynamicResource CascadeTheme.TerminalBackground}">
+        <Border Grid.Row="5" Grid.ColumnSpan="5" IsVisible="{Binding IsTerminalVisible}" MinHeight="120" BorderBrush="{DynamicResource CascadeTheme.BuildOutputBorderBrush}" BorderThickness="0,1,0,0" Padding="4" Background="{DynamicResource CascadeTheme.TerminalBackground}">
             <DockPanel>
+                <Border DockPanel.Dock="Top" IsVisible="{Binding ShowPowerTelemetry}" Classes="modeCard" Margin="0,0,0,4">
+                    <StackPanel Spacing="4">
+                        <WrapPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding ActiveTaskStatus, StringFormat='{}Build: {0}'}" Foreground="{DynamicResource CascadeTheme.TerminalForeground}" Margin="0,0,12,0"/>
+                            <TextBlock Text="{Binding ResultSummary}" Foreground="{DynamicResource CascadeTheme.TerminalForeground}" Margin="0,0,12,0" MaxWidth="320" TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Text="{Binding RiskSummary}" Foreground="{DynamicResource CascadeTheme.TerminalForeground}" Margin="0,0,12,0" MaxWidth="320" TextTrimming="CharacterEllipsis"/>
+                        </WrapPanel>
+                        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                            <ItemsControl ItemsSource="{Binding EventTimeline}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel Orientation="Horizontal"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding}" Foreground="{DynamicResource CascadeTheme.TerminalForeground}" FontSize="11" Margin="0,0,10,0"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </StackPanel>
+                </Border>
                 <TextBlock DockPanel.Dock="Top" Text="Терминал" Foreground="{DynamicResource CascadeTheme.TerminalForeground}" FontSize="11" Margin="0,0,0,4"/>
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
                     <TextBox Text="{Binding TerminalOutput, Mode=OneWay}" IsReadOnly="True" TextWrapping="NoWrap" FontFamily="Consolas,monospace" FontSize="12" Background="Transparent" Foreground="{DynamicResource CascadeTheme.TerminalForeground}" BorderThickness="0"/>
@@ -253,7 +394,7 @@
             </DockPanel>
         </Border>
         <!-- Оверлей подсветки эффективного контрола (ide_highlight_control, как в Comet) -->
-        <Canvas x:Name="AgentHighlightLayer" Grid.Row="0" Grid.RowSpan="5" Grid.Column="0" Grid.ColumnSpan="5" IsHitTestVisible="False" ZIndex="1000">
+        <Canvas x:Name="AgentHighlightLayer" Grid.Row="0" Grid.RowSpan="6" Grid.Column="0" Grid.ColumnSpan="5" IsHitTestVisible="False" ZIndex="1000">
             <Border x:Name="AgentHighlightOverlay" IsVisible="False" BorderBrush="#FF6B9D" BorderThickness="2" Background="#10000000"/>
         </Canvas>
         </Grid>

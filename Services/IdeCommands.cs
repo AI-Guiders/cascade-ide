@@ -21,6 +21,14 @@ public static class IdeCommands
     public const string Build = "build";
     public const string BuildStructured = "build_structured";
     public const string RunTests = "run_tests";
+    public const string RunAffectedTests = "run_affected_tests";
+    public const string RunCodeCleanup = "run_code_cleanup";
+    public const string GetCodeMetrics = "get_code_metrics";
+    public const string GetWorkspaceState = "get_workspace_state";
+    public const string GitStatus = "git_status";
+    public const string GitDiff = "git_diff";
+    public const string GitCommit = "git_commit";
+    public const string GitPush = "git_push";
     public const string GetBuildOutput = "get_build_output";
     public const string FocusEditor = "focus_editor";
     public const string GetUiTheme = "get_ui_theme";

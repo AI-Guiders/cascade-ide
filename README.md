@@ -21,6 +21,7 @@ dotnet run
 При запуске приложение проверяет доступность Ollama и выводит список локальных моделей (или подсказку установить Ollama).
 
 **Текущее состояние:**
+
 - **Редактор:** `AvaloniaEdit` + TextMate-подсветка (включая C#), выделение диапазонов, применение точечных правок из MCP.
 - **Чат с моделью:** правая панель — провайдеры Ollama/OpenAI/Anthropic/DeepSeek, выбор модели, история сообщений и стриминг ответа.
 - **Дерево решения:** левая панель — открытие `.slnx/.sln`, проекты/файлы в дереве; клик открывает файл в редакторе.
@@ -28,6 +29,7 @@ dotnet run
 - **MCP сервер IDE:** `IdeMcpServer` с инструментами для редактора, build/test, отладки-представления и UI-автоматизации (включая `ide_get_ui_layout`, `ide_build`, `ide_run_tests`, `ide_set_breakpoint`, `ide_request_confirmation`). Запуск с **`--mcp-stdio`** поднимает MCP на stdin/stdout; Cursor (или другой хост) подключается к процессу и вызывает тулы. См. [docs/MCP-PROTOCOL.md](docs/MCP-PROTOCOL.md).
 - **Подтверждения из MCP:** `ide_request_confirmation` показывает модальный `OK/Cancel` диалог в UI и возвращает `ok`/`cancel`.
 - **Отладочный контур:** поддержаны отображение брейкпоинтов/текущей строки/состояния отладки и синхронизация с `dotnet-debug-mcp`.
+- **Режимы UI:** `Focus / Balanced / Power` с переключением из меню/toolbar и хоткеями `Alt+1/Alt+2/Alt+3` (`Ctrl+Alt+M` — циклическое переключение).
 - **Настройки и данные:** выбранные модели и UI-параметры сохраняются в `%LocalAppData%\\CascadeIDE\\settings.toml`; данные приложения — в WitDatabase (`app.witdb` в том же каталоге).
 
 ## Подключение как submodule (репо open)
@@ -36,11 +38,13 @@ dotnet run
 
 1. Создай пустой проект **cascade-ide** на своём GitLab (например `http://193.124.113.7/Krawler/cascade-ide`).
 2. В корне репо **open** выполни:
+
    ```bash
    git submodule add http://193.124.113.7/Krawler/cascade-ide.git cascade-ide
    git add .gitmodules cascade-ide
    git commit -m "Add cascade-ide as submodule"
    ```
+
 3. Если проект пока только локальный (ещё не в отдельном репо): инициализируй git в `cascade-ide`, добавь remote и запушь первый коммит, затем выполни шаги 1–2.
 
 ## Стек

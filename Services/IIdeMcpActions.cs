@@ -35,6 +35,22 @@ public interface IIdeMcpActions
     Task<string> BuildStructuredAsync();
     /// <summary>Запустить тесты решения (dotnet test) и вернуть структурированный результат: success, total, passed, failed, skipped, failed_tests[] (name, message?, duration_ms?). JSON.</summary>
     Task<string> RunTestsAsync();
+    /// <summary>Запустить затронутые тесты (по переданным путям) или fallback на полный прогон. JSON: success, total, passed, failed, skipped, failed_tests[], mode, filter.</summary>
+    Task<string> RunAffectedTestsAsync(IReadOnlyList<string>? changedPaths = null);
+    /// <summary>Запустить code cleanup через dotnet format для решения. Опционально includePath — конкретный файл/путь для точечной чистки. JSON: success, exit_code, raw_output.</summary>
+    Task<string> RunCodeCleanupAsync(string? includePath = null);
+    /// <summary>Посчитать метрики кода (LOC, классы, методы, cyclomatic complexity) для current_file/file/path/solution. JSON.</summary>
+    Task<string> GetCodeMetricsAsync(string? scope = null, string? path = null);
+    /// <summary>Одна сводка состояния IDE: solution/current file/selection/debug/build output/diagnostics. JSON.</summary>
+    Task<string> GetWorkspaceStateAsync();
+    /// <summary>Git status в каталоге решения/workspace. JSON с short/branch/output.</summary>
+    Task<string> GitStatusAsync();
+    /// <summary>Git diff в каталоге решения/workspace. Опционально path, staged. JSON.</summary>
+    Task<string> GitDiffAsync(string? path = null, bool staged = false);
+    /// <summary>Git commit в каталоге решения/workspace: message обязателен, paths опциональны (иначе add -A). JSON.</summary>
+    Task<string> GitCommitAsync(string message, IReadOnlyList<string>? paths = null);
+    /// <summary>Git push в каталоге решения/workspace. Опционально remote/branch. JSON.</summary>
+    Task<string> GitPushAsync(string? remote = null, string? branch = null);
     /// <summary>Текущий текст панели «Вывод сборки» и цвета её оформления (background, foreground). JSON. Чтобы агент видел содержимое панели.</summary>
     string GetBuildOutput();
     void SetBreakpoint(string filePath, int line, string? condition = null);

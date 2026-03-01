@@ -36,6 +36,9 @@ public sealed class CascadeIdeSettings : ModelBase
     /// <summary>Видимость панели «Терминал».</summary>
     public bool TerminalVisible { get; set; } = false;
 
+    /// <summary>Режим интерфейса: Focus, Balanced, Power.</summary>
+    public string UiMode { get; set; } = "Balanced";
+
     public override bool Is(ModelBase modelBase, double tolerance = DEFAULT_TOLERANCE)
     {
         if (modelBase is not CascadeIdeSettings o)
@@ -49,7 +52,8 @@ public sealed class CascadeIdeSettings : ModelBase
             && DeepSeekBaseUrl.Is(o.DeepSeekBaseUrl)
             && DeepSeekModelId.Is(o.DeepSeekModelId)
             && SolutionExplorerVisible.Is(o.SolutionExplorerVisible)
-            && TerminalVisible.Is(o.TerminalVisible);
+            && TerminalVisible.Is(o.TerminalVisible)
+            && UiMode.Is(o.UiMode);
     }
 
     public override ModelBase Clone()
@@ -65,7 +69,8 @@ public sealed class CascadeIdeSettings : ModelBase
             DeepSeekBaseUrl = DeepSeekBaseUrl,
             DeepSeekModelId = DeepSeekModelId,
             SolutionExplorerVisible = SolutionExplorerVisible,
-            TerminalVisible = TerminalVisible
+            TerminalVisible = TerminalVisible,
+            UiMode = UiMode
         };
     }
 }

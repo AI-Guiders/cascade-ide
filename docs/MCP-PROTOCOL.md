@@ -24,9 +24,17 @@
 | `ide_apply_edit` | Применить правку в открытом файле | `file_path`, `start_line`, `start_column`, `end_line`, `end_column`, `new_text` (1-based) |
 | `ide_go_to_position` | Перейти на позицию (и опционально выделить) | `file_path`, `line`, `column`; опционально `end_line`, `end_column` |
 | `ide_get_solution_info` | Информация о решении и открытом файле | —; возвращает JSON (solution_path, current_file_path, project_paths) |
+| `ide_get_workspace_state` | Единая сводка состояния IDE: solution/current file/selection/debug/build output/diagnostics | —; возвращает JSON |
 | `ide_build` | Запустить сборку решения (dotnet build). **Структурированный результат:** JSON: success, exit_code, errors[] (file, line, column?, code?, message), warnings[], raw_output (обрезано). Агент получает ошибки без парсинга лога. | —; возвращает JSON |
 | `ide_get_build_output` | Текст панели «Вывод сборки» и цвета (background, foreground) | —; возвращает JSON: text, theme |
 | `ide_run_tests` | Запустить тесты решения (dotnet test; при необходимости выполняет сборку). **Структурированный результат:** JSON: success, total, passed, failed, skipped, failed_tests[] (name, message?, duration_ms?). Агент получает упавшие тесты без парсинга лога. | —; возвращает JSON |
+| `ide_run_affected_tests` | Запустить затронутые тесты по `changed_paths` (фильтр `FullyQualifiedName~...`). Если токены не извлечены — fallback на полный прогон. Возвращает JSON: `success`, `total`, `passed`, `failed`, `skipped`, `failed_tests[]`, `mode`, `filter`, `tokens`. | опционально `changed_paths` (массив путей) |
+| `ide_run_code_cleanup` | Запустить code cleanup через `dotnet format` для текущего решения. Возвращает JSON: `success`, `exit_code`, `raw_output` (обрезано). | опционально `include_path` для точечной чистки через `--include` |
+| `ide_get_code_metrics` | Метрики кода (LOC, class_count, method_count, cyclomatic complexity) для `current_file/file/path/solution` | опционально `scope`, `path`; возвращает JSON |
+| `ide_git_status` | Git status в каталоге решения/workspace | —; возвращает JSON: success, exit_code, output |
+| `ide_git_diff` | Git diff в каталоге решения/workspace | опционально `path`, `staged`; возвращает JSON |
+| `ide_git_commit` | Git commit в каталоге решения/workspace | `message`, опционально `paths`; возвращает JSON |
+| `ide_git_push` | Git push в каталоге решения/workspace | опционально `remote`, `branch`; возвращает JSON |
 | `ide_focus_editor` | Передать фокус в редактор | — |
 | `ide_get_ui_theme` | Параметры темы UI (цвета, фоны, кнопки, шрифты) | —; возвращает JSON |
 | `ide_set_ui_theme` | Применить тему UI на лету (JSON в формате get_ui_theme) | `theme` — JSON-строка |
