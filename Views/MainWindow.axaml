@@ -9,6 +9,7 @@
         xmlns:views="using:CascadeIDE.Views"
         mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="600"
         x:Class="CascadeIDE.Views.MainWindow"
+        x:Name="RootWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
         Title="CascadeIDE"
@@ -157,6 +158,16 @@
                         VerticalAlignment="Center">
                     <TextBlock Text="{Binding UiMode}" FontWeight="SemiBold" Foreground="#EAF0FF"/>
                 </Border>
+                <Button Content="{Binding TelemetryButtonText}"
+                        Command="{Binding ToggleTerminalCommand}"
+                        IsVisible="{Binding ShowPowerTelemetry}"/>
+                <Button Content="Show explorer" Command="{Binding ShowSolutionExplorerPanelCommand}" IsVisible="{Binding IsSolutionPanelHidden}"/>
+                <Button Content="Show build" Command="{Binding ShowBuildOutputPanelCommand}" IsVisible="{Binding IsBuildPanelHidden}"/>
+                <Button Content="Show chat" Command="{Binding ShowChatPanelCommand}" IsVisible="{Binding IsChatPanelHidden}"/>
+                <Button Content="Show terminal" Command="{Binding ShowTerminalPanelCommand}" IsVisible="{Binding IsTerminalPanelHidden}"/>
+                <Button Content="1-up" Command="{Binding SetSingleEditorGroupCommand}"/>
+                <Button Content="2-up" Command="{Binding SetDualEditorGroupCommand}"/>
+                <Button Content="3-up" Command="{Binding SetTripleEditorGroupCommand}"/>
                 <TextBlock Text="{Binding SolutionPath}" VerticalAlignment="Center" MaxWidth="300" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
                 <TextBlock Text="{Binding SolutionLoadError}" VerticalAlignment="Center" MaxWidth="350" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource CascadeTheme.ToolbarErrorForeground}"/>
                 <TextBlock Text="{Binding OllamaStatus}" VerticalAlignment="Center" Margin="8,0,0,0" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
@@ -175,6 +186,14 @@
                     </Border>
                     <TextBlock Text="{Binding ActiveTaskProgress, StringFormat='{}Progress: {0}%'}" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}" Margin="0,0,8,0"/>
                 </WrapPanel>
+                <Border Classes="modeCard" IsVisible="{Binding ShowTelemetryHiddenHint}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="Telemetry panel is hidden. Open it to see the dashboard."
+                                   Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"
+                                   VerticalAlignment="Center"/>
+                        <Button Content="Show now" Command="{Binding ToggleTerminalCommand}"/>
+                    </StackPanel>
+                </Border>
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
                     <WrapPanel Orientation="Horizontal" ItemHeight="30">
                         <Button Content="Fix failing tests" Command="{Binding FixFailingTestsCommand}" IsVisible="{Binding ShowQuickActions}" Margin="0,0,6,0"/>
@@ -218,22 +237,122 @@
 
         <!-- Editor + (опционально) Markdown preview + Build output -->
         <Border Grid.Row="3" Grid.Column="2" BorderBrush="{DynamicResource CascadeTheme.EditorColumnBorderBrush}" BorderThickness="0,0,1,0" Background="{DynamicResource CascadeTheme.EditorColumnBackground}" Padding="4">
-            <Grid x:Name="EditorColumnGrid" RowDefinitions="Auto,*,Auto,Auto,Auto,Auto">
-                <TextBlock Grid.Row="0" Text="{Binding CurrentFilePath}" Margin="4" Foreground="{DynamicResource CascadeTheme.CurrentFileForeground}" TextTrimming="CharacterEllipsis"/>
-                <Grid x:Name="EditorContentGrid" Grid.Row="1" ColumnDefinitions="*,0">
-                    <ae:TextEditor Grid.Column="0"
-                              x:Name="Editor"
-                              Classes="EditorBox"
-                              ShowLineNumbers="True"
-                              FontFamily="Consolas,Cascadia Code,monospace"
-                              FontSize="13"
-                              Padding="8"/>
-                    <Border Grid.Column="1" x:Name="InlinePreviewBorder" Background="{DynamicResource CascadeTheme.MarkdownPreviewPanelBackground}" BorderBrush="{DynamicResource CascadeTheme.MarkdownPreviewPanelBorderBrush}" BorderThickness="1,0,0,0" Padding="8" IsVisible="{Binding IsMarkdownPreviewVisible}">
-                        <md:MarkdownScrollViewer x:Name="InlineMarkdownPreview" Markdown="{Binding EditorText}"/>
+            <Grid x:Name="EditorColumnGrid" RowDefinitions="Auto,Auto,*,Auto,Auto,Auto,Auto">
+                <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,4">
+                    <ScrollViewer Grid.Column="0" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                        <Border x:Name="Group1TabsDropHost" DragDrop.AllowDrop="True" DragDrop.Drop="OnGroup1TabsDrop" DragDrop.DragOver="OnGroupTabsDragOver">
+                            <ItemsControl x:Name="Group1Tabs" ItemsSource="{Binding Group1Documents}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal" Spacing="4"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="vm:OpenDocumentViewModel">
+                                        <Border Classes="modeCard" Padding="4,2">
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <Button Content="{Binding DisplayTitle}" PointerPressed="OnDocumentTabPointerPressed"
+                                                        Command="{Binding DataContext.ActivateDocumentCommand, ElementName=RootWindow}"
+                                                        CommandParameter="{Binding FilePath}"/>
+                                                <Button Content="Pin"
+                                                        Command="{Binding DataContext.TogglePinDocumentCommand, ElementName=RootWindow}"
+                                                        CommandParameter="{Binding FilePath}"/>
+                                                <Button Content="G2" Command="{Binding DataContext.MoveDocumentToGroup2Command, ElementName=RootWindow}" CommandParameter="{Binding FilePath}"/>
+                                                <Button Content="G3" Command="{Binding DataContext.MoveDocumentToGroup3Command, ElementName=RootWindow}" CommandParameter="{Binding FilePath}"/>
+                                                <Button Content="x"
+                                                        Command="{Binding DataContext.CloseDocumentCommand, ElementName=RootWindow}"
+                                                        CommandParameter="{Binding FilePath}"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Border>
+                    </ScrollViewer>
+                    <Button Grid.Column="1"
+                            Margin="6,0,0,0"
+                            Content="Reopen closed"
+                            Command="{Binding ReopenClosedDocumentCommand}"/>
+                </Grid>
+                <TextBlock Grid.Row="1" Text="{Binding CurrentFilePath}" Margin="4" Foreground="{DynamicResource CascadeTheme.CurrentFileForeground}" TextTrimming="CharacterEllipsis"/>
+                <Grid Grid.Row="2" ColumnDefinitions="*,4,*,4,*">
+                    <Grid Grid.Column="0" x:Name="EditorContentGrid" ColumnDefinitions="*,0">
+                        <ae:TextEditor Grid.Column="0"
+                                  x:Name="Editor"
+                                  Classes="EditorBox"
+                                  ShowLineNumbers="True"
+                                  FontFamily="Consolas,Cascadia Code,monospace"
+                                  FontSize="13"
+                                  Padding="8"/>
+                        <Border Grid.Column="1" x:Name="InlinePreviewBorder" Background="{DynamicResource CascadeTheme.MarkdownPreviewPanelBackground}" BorderBrush="{DynamicResource CascadeTheme.MarkdownPreviewPanelBorderBrush}" BorderThickness="1,0,0,0" Padding="8" IsVisible="{Binding IsMarkdownPreviewVisible}">
+                            <md:MarkdownScrollViewer x:Name="InlineMarkdownPreview" Markdown="{Binding EditorText}"/>
+                        </Border>
+                    </Grid>
+
+                    <GridSplitter Grid.Column="1" Width="4" ResizeDirection="Columns" IsVisible="{Binding ShowEditorGroup2}" Background="{DynamicResource CascadeTheme.EditorColumnBorderBrush}"/>
+                    <Border Grid.Column="2" Classes="modeCard" IsVisible="{Binding ShowEditorGroup2}">
+                        <Grid RowDefinitions="Auto,*">
+                            <ScrollViewer Grid.Row="0" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                                <Border x:Name="Group2TabsDropHost" DragDrop.AllowDrop="True" DragDrop.Drop="OnGroup2TabsDrop" DragDrop.DragOver="OnGroupTabsDragOver">
+                                    <ItemsControl x:Name="Group2Tabs" ItemsSource="{Binding Group2Documents}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal" Spacing="4"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate DataType="vm:OpenDocumentViewModel">
+                                                <Button Content="{Binding DisplayTitle}"
+                                                        PointerPressed="OnDocumentTabPointerPressed"
+                                                        Command="{Binding DataContext.ActivateDocumentCommand, ElementName=RootWindow}"
+                                                        CommandParameter="{Binding FilePath}"/>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </Border>
+                            </ScrollViewer>
+                            <TextBox Grid.Row="1"
+                                     IsReadOnly="True"
+                                     TextWrapping="NoWrap"
+                                     FontFamily="Consolas,monospace"
+                                     FontSize="12"
+                                     Text="{Binding EditorTextGroup2}"/>
+                        </Grid>
+                    </Border>
+
+                    <GridSplitter Grid.Column="3" Width="4" ResizeDirection="Columns" IsVisible="{Binding ShowEditorGroup3}" Background="{DynamicResource CascadeTheme.EditorColumnBorderBrush}"/>
+                    <Border Grid.Column="4" Classes="modeCard" IsVisible="{Binding ShowEditorGroup3}">
+                        <Grid RowDefinitions="Auto,*">
+                            <ScrollViewer Grid.Row="0" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                                <Border x:Name="Group3TabsDropHost" DragDrop.AllowDrop="True" DragDrop.Drop="OnGroup3TabsDrop" DragDrop.DragOver="OnGroupTabsDragOver">
+                                    <ItemsControl x:Name="Group3Tabs" ItemsSource="{Binding Group3Documents}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal" Spacing="4"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate DataType="vm:OpenDocumentViewModel">
+                                                <Button Content="{Binding DisplayTitle}"
+                                                        PointerPressed="OnDocumentTabPointerPressed"
+                                                        Command="{Binding DataContext.ActivateDocumentCommand, ElementName=RootWindow}"
+                                                        CommandParameter="{Binding FilePath}"/>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </Border>
+                            </ScrollViewer>
+                            <TextBox Grid.Row="1"
+                                     IsReadOnly="True"
+                                     TextWrapping="NoWrap"
+                                     FontFamily="Consolas,monospace"
+                                     FontSize="12"
+                                     Text="{Binding EditorTextGroup3}"/>
+                        </Grid>
                     </Border>
                 </Grid>
-                <GridSplitter Grid.Row="2" Height="4" ResizeDirection="Rows" Background="{DynamicResource CascadeTheme.BuildOutputBorderBrush}" IsVisible="{Binding IsBuildOutputVisible}"/>
-                <Border Grid.Row="3" IsVisible="{Binding IsBuildOutputVisible}" MinHeight="80" Margin="0,4,0,0" BorderBrush="{DynamicResource CascadeTheme.BuildOutputBorderBrush}" BorderThickness="0,1,0,0" Padding="4">
+                <GridSplitter Grid.Row="3" Height="4" ResizeDirection="Rows" Background="{DynamicResource CascadeTheme.BuildOutputBorderBrush}" IsVisible="{Binding IsBuildOutputVisible}"/>
+                <Border Grid.Row="4" IsVisible="{Binding IsBuildOutputVisible}" MinHeight="80" Margin="0,4,0,0" BorderBrush="{DynamicResource CascadeTheme.BuildOutputBorderBrush}" BorderThickness="0,1,0,0" Padding="4">
                     <DockPanel>
                         <Button DockPanel.Dock="Top" Content="Скрыть вывод" Command="{Binding HideBuildOutputCommand}" HorizontalAlignment="Right" Margin="0,0,0,4"/>
                         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
@@ -241,8 +360,8 @@
                         </ScrollViewer>
                     </DockPanel>
                 </Border>
-                <GridSplitter Grid.Row="4" Height="4" ResizeDirection="Rows" Background="{DynamicResource CascadeTheme.BuildOutputBorderBrush}" IsVisible="{Binding IsDebugPanelVisible}"/>
-                <Border Grid.Row="5" IsVisible="{Binding IsDebugPanelVisible}" MinHeight="60" Margin="0,4,0,0" BorderBrush="{DynamicResource CascadeTheme.BuildOutputBorderBrush}" BorderThickness="0,1,0,0" Padding="4" Background="{DynamicResource CascadeTheme.BuildOutputBackground}">
+                <GridSplitter Grid.Row="5" Height="4" ResizeDirection="Rows" Background="{DynamicResource CascadeTheme.BuildOutputBorderBrush}" IsVisible="{Binding IsDebugPanelVisible}"/>
+                <Border Grid.Row="6" IsVisible="{Binding IsDebugPanelVisible}" MinHeight="60" Margin="0,4,0,0" BorderBrush="{DynamicResource CascadeTheme.BuildOutputBorderBrush}" BorderThickness="0,1,0,0" Padding="4" Background="{DynamicResource CascadeTheme.BuildOutputBackground}">
                     <Grid ColumnDefinitions="*,*">
                         <StackPanel Grid.Column="0" Margin="0,0,8,0">
                             <TextBlock Text="Стек вызовов" FontWeight="SemiBold" FontSize="11" Foreground="{DynamicResource CascadeTheme.CurrentFileForeground}" Margin="0,0,0,4"/>

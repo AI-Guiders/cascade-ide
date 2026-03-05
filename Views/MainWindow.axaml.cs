@@ -656,6 +656,53 @@ public partial class MainWindow : Window
                 return c;
         return null;
     }
+
+    private async void OnDocumentTabPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (sender is not Button button || button.DataContext is not ViewModels.OpenDocumentViewModel doc)
+            return;
+        if (!e.GetCurrentPoint(button).Properties.IsLeftButtonPressed)
+            return;
+
+        var data = new DataObject();
+        data.Set(DataFormats.Text, doc.FilePath);
+        await DragDrop.DoDragDrop(e, data, DragDropEffects.Move);
+    }
+
+    private void OnGroupTabsDragOver(object? sender, DragEventArgs e)
+    {
+        e.DragEffects = e.Data.Contains(DataFormats.Text) ? DragDropEffects.Move : DragDropEffects.None;
+        e.Handled = true;
+    }
+
+    private void OnGroup1TabsDrop(object? sender, DragEventArgs e) => MoveDroppedDocumentToGroup(e, 1);
+    private void OnGroup2TabsDrop(object? sender, DragEventArgs e) => MoveDroppedDocumentToGroup(e, 2);
+    private void OnGroup3TabsDrop(object? sender, DragEventArgs e) => MoveDroppedDocumentToGroup(e, 3);
+
+    private void MoveDroppedDocumentToGroup(DragEventArgs e, int group)
+    {
+        if (DataContext is not ViewModels.MainWindowViewModel vm)
+            return;
+        var path = e.Data.GetText();
+        if (string.IsNullOrWhiteSpace(path))
+            return;
+
+        switch (group)
+        {
+            case 2:
+                if (vm.MoveDocumentToGroup2Command.CanExecute(path))
+                    vm.MoveDocumentToGroup2Command.Execute(path);
+                break;
+            case 3:
+                if (vm.MoveDocumentToGroup3Command.CanExecute(path))
+                    vm.MoveDocumentToGroup3Command.Execute(path);
+                break;
+            default:
+                if (vm.MoveDocumentToGroup1Command.CanExecute(path))
+                    vm.MoveDocumentToGroup1Command.Execute(path);
+                break;
+        }
+    }
 }
 
 internal sealed class BreakpointLineRenderer(Func<IReadOnlyList<int>> getBreakpointLines) : IBackgroundRenderer

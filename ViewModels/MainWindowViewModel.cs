@@ -50,6 +50,10 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _uiMode = NormalizeUiMode(_settings.UiMode);
         InitializeAgentUiDefaults();
         ApplyUiModeLayout(_uiMode, persist: false);
+        OpenDocuments.CollectionChanged += (_, _) =>
+        {
+            OnPropertyChanged(nameof(HasOpenDocuments));
+        };
         _lastSavedSettings = (CascadeIdeSettings)_settings.Clone();
         _lastSavedAiKeys = (AiKeys)_aiKeys.Clone();
     }
@@ -127,13 +131,25 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     partial void OnIsSolutionExplorerVisibleChanged(bool value)
     {
         _settings.SolutionExplorerVisible = value;
+        OnPropertyChanged(nameof(IsSolutionPanelHidden));
         SaveSettingsIfChanged();
     }
 
     partial void OnIsTerminalVisibleChanged(bool value)
     {
         _settings.TerminalVisible = value;
+        OnPropertyChanged(nameof(IsTerminalPanelHidden));
         SaveSettingsIfChanged();
+    }
+
+    partial void OnIsBuildOutputVisibleChanged(bool value)
+    {
+        OnPropertyChanged(nameof(IsBuildPanelHidden));
+    }
+
+    partial void OnIsChatPanelExpandedChanged(bool value)
+    {
+        OnPropertyChanged(nameof(IsChatPanelHidden));
     }
 
     partial void OnActiveAiProviderChanged(string value)
@@ -208,13 +224,23 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     [NotifyPropertyChangedFor(nameof(DebugCurrentLineInCurrentFile))]
     private string? _currentFilePath;
 
+    [ObservableProperty]
+    private OpenDocumentViewModel? _selectedDocument;
+
     private readonly List<(string FilePath, int Line)> _breakpoints = [];
     private readonly List<(string FilePath, int Line)> _debuggerBreakpoints = [];
     private FileSystemWatcher? _breakpointsFileWatcher;
     private CancellationTokenSource? _openFileDebounceCts;
     private long _solutionLoadVersion;
     private string? _lastBuildBinlogPath;
+    private bool _isSwitchingDocument;
+    private readonly Stack<string> _recentlyClosedDocumentPaths = new();
+    private int _recentlyClosedDocumentCount;
     private const int OpenFileDebounceMs = 100;
+
+    public ObservableCollection<OpenDocumentViewModel> OpenDocuments { get; } = [];
+    public bool HasOpenDocuments => OpenDocuments.Count > 0;
+    public int RecentlyClosedDocumentCount => _recentlyClosedDocumentCount;
 
     /// <summary>Номера строк с брейкпоинтами в текущем открытом файле (для отрисовки в редакторе).</summary>
     public IReadOnlyList<int> BreakpointLinesInCurrentFile
@@ -325,18 +351,21 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
                 IsBuildOutputVisible = false;
                 IsTerminalVisible = false;
                 IsChatPanelExpanded = false;
+                EditorGroupCount = 1;
                 break;
             case "Power":
                 IsSolutionExplorerVisible = true;
                 IsBuildOutputVisible = true;
                 IsTerminalVisible = true;
                 IsChatPanelExpanded = true;
+                EditorGroupCount = 3;
                 break;
             default:
                 IsSolutionExplorerVisible = true;
                 IsBuildOutputVisible = false;
                 IsTerminalVisible = false;
                 IsChatPanelExpanded = true;
+                EditorGroupCount = 2;
                 break;
         }
 
@@ -430,6 +459,8 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private bool _isSolutionExplorerVisible = true;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowTelemetryHiddenHint))]
+    [NotifyPropertyChangedFor(nameof(TelemetryButtonText))]
     private bool _isTerminalVisible;
 
     public static readonly IReadOnlyList<string> UiModeOptions = ["Focus", "Balanced", "Power"];
@@ -445,6 +476,10 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     [NotifyPropertyChangedFor(nameof(ShowAgentTrace))]
     [NotifyPropertyChangedFor(nameof(ShowPowerTelemetry))]
     [NotifyPropertyChangedFor(nameof(ShowSafetyControls))]
+    [NotifyPropertyChangedFor(nameof(ShowTelemetryHiddenHint))]
+    [NotifyPropertyChangedFor(nameof(TelemetryButtonText))]
+    [NotifyPropertyChangedFor(nameof(ShowEditorGroup2))]
+    [NotifyPropertyChangedFor(nameof(ShowEditorGroup3))]
     private string _uiMode = "Balanced";
 
     public bool IsFocusMode => string.Equals(UiMode, "Focus", StringComparison.OrdinalIgnoreCase);
@@ -456,6 +491,18 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     public bool ShowAgentTrace => IsPowerMode;
     public bool ShowPowerTelemetry => IsPowerMode;
     public bool ShowSafetyControls => IsPowerMode;
+    public bool ShowTelemetryHiddenHint => ShowPowerTelemetry && !IsTerminalVisible;
+    public string TelemetryButtonText => IsTerminalVisible ? "Telemetry: on" : "Show telemetry";
+    public bool ShowEditorGroup2 => EditorGroupCount >= 2;
+    public bool ShowEditorGroup3 => EditorGroupCount >= 3;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowEditorGroup2))]
+    [NotifyPropertyChangedFor(nameof(ShowEditorGroup3))]
+    private int _editorGroupCount = 1;
+
+    [ObservableProperty]
+    private int _activeEditorGroup = 1;
 
     [ObservableProperty]
     private string _activeTaskTitle = "Refactor payment retries";
@@ -508,6 +555,10 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private string _terminalInput = "";
 
     public string ChatPanelToggleButtonText => IsChatPanelExpanded ? "◀" : "▶";
+    public bool IsSolutionPanelHidden => !IsSolutionExplorerVisible;
+    public bool IsBuildPanelHidden => !IsBuildOutputVisible;
+    public bool IsChatPanelHidden => !IsChatPanelExpanded;
+    public bool IsTerminalPanelHidden => !IsTerminalVisible;
 
     [ObservableProperty]
     private string _buildOutput = "";
@@ -581,6 +632,21 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
 
     [ObservableProperty]
     private string _deepSeekApiKey = "";
+
+    public ObservableCollection<OpenDocumentViewModel> Group1Documents { get; } = [];
+    public ObservableCollection<OpenDocumentViewModel> Group2Documents { get; } = [];
+    public ObservableCollection<OpenDocumentViewModel> Group3Documents { get; } = [];
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(EditorTextGroup2))]
+    private OpenDocumentViewModel? _selectedDocumentGroup2;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(EditorTextGroup3))]
+    private OpenDocumentViewModel? _selectedDocumentGroup3;
+
+    public string EditorTextGroup2 => SelectedDocumentGroup2?.Content ?? "";
+    public string EditorTextGroup3 => SelectedDocumentGroup3?.Content ?? "";
 
     public static readonly IReadOnlyList<string> SendMessageKeyOptions = ["Enter", "Ctrl+Enter", "Shift+Enter"];
 
@@ -717,9 +783,8 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             if (string.Equals(CurrentFilePath, normalizedPath, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(EditorText))
                 return;
             IsLoadingCurrentFile = true;
-            CurrentFilePath = normalizedPath;
-            EditorText = "";
-            _ = LoadFileContentAsync(normalizedPath);
+            OpenOrActivateDocument(normalizedPath);
+            IsLoadingCurrentFile = false;
         });
     }
 
@@ -735,6 +800,126 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             SelectedSolutionItem = item;
     }
 
+    partial void OnSelectedDocumentChanged(OpenDocumentViewModel? value)
+    {
+        _isSwitchingDocument = true;
+        try
+        {
+            if (value is null)
+            {
+                CurrentFilePath = null;
+                EditorText = "";
+                return;
+            }
+
+            CurrentFilePath = value.FilePath;
+            EditorText = value.Content;
+            SyncSelectedSolutionItemToCurrentFile();
+        }
+        finally
+        {
+            _isSwitchingDocument = false;
+        }
+    }
+
+    partial void OnEditorTextChanged(string value)
+    {
+        if (_isSwitchingDocument || SelectedDocument is null)
+            return;
+
+        SelectedDocument.Content = value ?? "";
+        SelectedDocument.IsDirty = !string.Equals(SelectedDocument.Content, SelectedDocument.OriginalContent, StringComparison.Ordinal);
+        OnPropertyChanged(nameof(EditorTextGroup2));
+        OnPropertyChanged(nameof(EditorTextGroup3));
+    }
+
+    private void OpenOrActivateDocument(string filePath)
+    {
+        if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
+            return;
+
+        var normalized = Path.GetFullPath(filePath);
+        var existing = OpenDocuments.FirstOrDefault(d => string.Equals(d.FilePath, normalized, StringComparison.OrdinalIgnoreCase));
+        var targetGroup = Math.Clamp(ActiveEditorGroup, 1, 3);
+        if (existing is null)
+        {
+            var text = SafeReadFile(normalized);
+            existing = new OpenDocumentViewModel(normalized, Path.GetFileName(normalized), text)
+            {
+                GroupIndex = targetGroup
+            };
+            OpenDocuments.Add(existing);
+            GetGroupCollection(targetGroup).Add(existing);
+        }
+        else if (existing.GroupIndex != targetGroup)
+        {
+            MoveDocumentToGroupInternal(existing, targetGroup);
+        }
+
+        ActivateDocumentInternal(existing);
+    }
+
+    private static string SafeReadFile(string path)
+    {
+        try
+        {
+            return File.ReadAllText(path);
+        }
+        catch
+        {
+            return "";
+        }
+    }
+
+    private ObservableCollection<OpenDocumentViewModel> GetGroupCollection(int group) =>
+        group switch
+        {
+            2 => Group2Documents,
+            3 => Group3Documents,
+            _ => Group1Documents
+        };
+
+    private void ActivateDocumentInternal(OpenDocumentViewModel doc)
+    {
+        ActiveEditorGroup = doc.GroupIndex;
+        switch (doc.GroupIndex)
+        {
+            case 2:
+                SelectedDocumentGroup2 = doc;
+                break;
+            case 3:
+                SelectedDocumentGroup3 = doc;
+                break;
+            default:
+                SelectedDocument = doc;
+                break;
+        }
+    }
+
+    private void MoveDocumentToGroupInternal(OpenDocumentViewModel doc, int targetGroup)
+    {
+        var normalizedGroup = Math.Clamp(targetGroup, 1, 3);
+        if (doc.GroupIndex == normalizedGroup)
+            return;
+
+        var sourceCollection = GetGroupCollection(doc.GroupIndex);
+        sourceCollection.Remove(doc);
+        var targetCollection = GetGroupCollection(normalizedGroup);
+        if (!targetCollection.Contains(doc))
+            targetCollection.Add(doc);
+
+        doc.GroupIndex = normalizedGroup;
+
+        if (SelectedDocument == doc && normalizedGroup != 1)
+            SelectedDocument = Group1Documents.FirstOrDefault();
+        if (SelectedDocumentGroup2 == doc && normalizedGroup != 2)
+            SelectedDocumentGroup2 = Group2Documents.FirstOrDefault();
+        if (SelectedDocumentGroup3 == doc && normalizedGroup != 3)
+            SelectedDocumentGroup3 = Group3Documents.FirstOrDefault();
+
+        ActivateDocumentInternal(doc);
+    }
+
     private static SolutionItem? FindSolutionItemByPath(IEnumerable<SolutionItem> items, string fullPath)
     {
         foreach (var node in items)
@@ -746,32 +931,6 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
                 return found;
         }
         return null;
-    }
-
-    private async Task LoadFileContentAsync(string path)
-    {
-        var pathToMatch = Path.GetFullPath(path);
-        try
-        {
-            var text = await Task.Run(() => File.ReadAllText(path)).ConfigureAwait(false);
-            await Dispatcher.UIThread.InvokeAsync(() =>
-            {
-                var current = CurrentFilePath is not null ? Path.GetFullPath(CurrentFilePath) : "";
-                if (string.Equals(current, pathToMatch, StringComparison.OrdinalIgnoreCase))
-                    EditorText = text;
-                IsLoadingCurrentFile = false;
-            });
-        }
-        catch
-        {
-            await Dispatcher.UIThread.InvokeAsync(() =>
-            {
-                var current = CurrentFilePath is not null ? Path.GetFullPath(CurrentFilePath) : "";
-                if (string.Equals(current, pathToMatch, StringComparison.OrdinalIgnoreCase))
-                    EditorText = "";
-                IsLoadingCurrentFile = false;
-            });
-        }
     }
 
     public async Task RefreshOllamaAsync()
@@ -874,6 +1033,126 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     {
         IsTerminalVisible = !IsTerminalVisible;
     }
+
+    [RelayCommand]
+    private void SetSingleEditorGroup() => EditorGroupCount = 1;
+
+    [RelayCommand]
+    private void SetDualEditorGroup() => EditorGroupCount = 2;
+
+    [RelayCommand]
+    private void SetTripleEditorGroup() => EditorGroupCount = 3;
+
+    [RelayCommand]
+    private void ActivateDocument(string? filePath)
+    {
+        if (string.IsNullOrWhiteSpace(filePath))
+            return;
+        var doc = OpenDocuments.FirstOrDefault(d => string.Equals(d.FilePath, filePath, StringComparison.OrdinalIgnoreCase));
+        if (doc is null)
+            OpenOrActivateDocument(filePath);
+        else
+            ActivateDocumentInternal(doc);
+    }
+
+    [RelayCommand]
+    private void CloseDocument(string? filePath)
+    {
+        if (string.IsNullOrWhiteSpace(filePath))
+            return;
+        var doc = OpenDocuments.FirstOrDefault(d => string.Equals(d.FilePath, filePath, StringComparison.OrdinalIgnoreCase));
+        if (doc is null)
+            return;
+
+        var index = OpenDocuments.IndexOf(doc);
+        GetGroupCollection(doc.GroupIndex).Remove(doc);
+        OpenDocuments.Remove(doc);
+        _recentlyClosedDocumentPaths.Push(doc.FilePath);
+        _recentlyClosedDocumentCount = _recentlyClosedDocumentPaths.Count;
+        ReopenClosedDocumentCommand.NotifyCanExecuteChanged();
+
+        if (OpenDocuments.Count == 0)
+        {
+            SelectedDocument = null;
+            SelectedDocumentGroup2 = null;
+            SelectedDocumentGroup3 = null;
+            return;
+        }
+
+        SelectedDocument = Group1Documents.FirstOrDefault();
+        SelectedDocumentGroup2 = Group2Documents.FirstOrDefault();
+        SelectedDocumentGroup3 = Group3Documents.FirstOrDefault();
+        if (SelectedDocument is null)
+        {
+            var nextIndex = Math.Clamp(index, 0, OpenDocuments.Count - 1);
+            ActivateDocumentInternal(OpenDocuments[nextIndex]);
+        }
+    }
+
+    [RelayCommand]
+    private void TogglePinDocument(string? filePath)
+    {
+        if (string.IsNullOrWhiteSpace(filePath))
+            return;
+        var doc = OpenDocuments.FirstOrDefault(d => string.Equals(d.FilePath, filePath, StringComparison.OrdinalIgnoreCase));
+        if (doc is not null)
+            doc.IsPinned = !doc.IsPinned;
+    }
+
+    [RelayCommand]
+    private void MoveDocumentToGroup1(string? filePath)
+    {
+        if (string.IsNullOrWhiteSpace(filePath))
+            return;
+        var doc = OpenDocuments.FirstOrDefault(d => string.Equals(d.FilePath, filePath, StringComparison.OrdinalIgnoreCase));
+        if (doc is not null)
+            MoveDocumentToGroupInternal(doc, 1);
+    }
+
+    [RelayCommand]
+    private void MoveDocumentToGroup2(string? filePath)
+    {
+        if (string.IsNullOrWhiteSpace(filePath))
+            return;
+        var doc = OpenDocuments.FirstOrDefault(d => string.Equals(d.FilePath, filePath, StringComparison.OrdinalIgnoreCase));
+        if (doc is not null)
+            MoveDocumentToGroupInternal(doc, 2);
+    }
+
+    [RelayCommand]
+    private void MoveDocumentToGroup3(string? filePath)
+    {
+        if (string.IsNullOrWhiteSpace(filePath))
+            return;
+        var doc = OpenDocuments.FirstOrDefault(d => string.Equals(d.FilePath, filePath, StringComparison.OrdinalIgnoreCase));
+        if (doc is not null)
+            MoveDocumentToGroupInternal(doc, 3);
+    }
+
+    [RelayCommand(CanExecute = nameof(CanReopenClosedDocument))]
+    private void ReopenClosedDocument()
+    {
+        if (_recentlyClosedDocumentPaths.Count == 0)
+            return;
+        var path = _recentlyClosedDocumentPaths.Pop();
+        _recentlyClosedDocumentCount = _recentlyClosedDocumentPaths.Count;
+        ReopenClosedDocumentCommand.NotifyCanExecuteChanged();
+        OpenOrActivateDocument(path);
+    }
+
+    private bool CanReopenClosedDocument() => _recentlyClosedDocumentCount > 0;
+
+    [RelayCommand]
+    private void ShowSolutionExplorerPanel() => IsSolutionExplorerVisible = true;
+
+    [RelayCommand]
+    private void ShowBuildOutputPanel() => IsBuildOutputVisible = true;
+
+    [RelayCommand]
+    private void ShowChatPanel() => IsChatPanelExpanded = true;
+
+    [RelayCommand]
+    private void ShowTerminalPanel() => IsTerminalVisible = true;
 
     [RelayCommand]
     private void SetFocusMode()
@@ -1097,6 +1376,16 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             // New solution becomes authoritative UI context: clear stale editor selection/state.
             _openFileDebounceCts?.Cancel();
             SelectedSolutionItem = null;
+            OpenDocuments.Clear();
+            Group1Documents.Clear();
+            Group2Documents.Clear();
+            Group3Documents.Clear();
+            _recentlyClosedDocumentPaths.Clear();
+            _recentlyClosedDocumentCount = 0;
+            ReopenClosedDocumentCommand.NotifyCanExecuteChanged();
+            SelectedDocument = null;
+            SelectedDocumentGroup2 = null;
+            SelectedDocumentGroup3 = null;
             CurrentFilePath = null;
             EditorText = "";
             IsLoadingCurrentFile = false;
@@ -1374,16 +1663,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             IsLoadingCurrentFile = true;
             try
             {
-                CurrentFilePath = normalizedPath;
-                try
-                {
-                    EditorText = File.ReadAllText(normalizedPath);
-                }
-                catch
-                {
-                    EditorText = "";
-                }
-                SyncSelectedSolutionItemToCurrentFile();
+                OpenOrActivateDocument(normalizedPath);
             }
             finally
             {
@@ -1409,10 +1689,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
                 IsLoadingCurrentFile = true;
                 try
                 {
-                    CurrentFilePath = Path.GetFullPath(filePath);
-                    try { EditorText = File.ReadAllText(filePath); }
-                    catch { EditorText = ""; }
-                    SyncSelectedSolutionItemToCurrentFile();
+                    OpenOrActivateDocument(filePath);
                 }
                 finally { IsLoadingCurrentFile = false; }
             }
@@ -2369,10 +2646,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
                     IsLoadingCurrentFile = true;
                     try
                     {
-                        CurrentFilePath = normalized;
-                        try { EditorText = File.ReadAllText(normalized); }
-                        catch { EditorText = ""; }
-                        SyncSelectedSolutionItemToCurrentFile();
+                        OpenOrActivateDocument(normalized);
                     }
                     finally { IsLoadingCurrentFile = false; }
                 }
@@ -2438,6 +2712,37 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             return Task.FromResult("");
         }
     }
+}
+
+public partial class OpenDocumentViewModel : ObservableObject
+{
+    public OpenDocumentViewModel(string filePath, string title, string content)
+    {
+        FilePath = filePath;
+        Title = title;
+        OriginalContent = content;
+        _content = content;
+    }
+
+    public string FilePath { get; }
+    public string Title { get; }
+    public string OriginalContent { get; }
+    public string DisplayTitle => IsPinned ? $"[P] {Title}{(IsDirty ? "*" : "")}" : $"{Title}{(IsDirty ? "*" : "")}";
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DisplayTitle))]
+    private string _content;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DisplayTitle))]
+    private bool _isPinned;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DisplayTitle))]
+    private bool _isDirty;
+
+    [ObservableProperty]
+    private int _groupIndex = 1;
 }
 
 /// <summary>Элемент стека вызовов для панели отладки.</summary>
