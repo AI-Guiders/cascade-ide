@@ -54,3 +54,10 @@ dotnet run
 - **CommunityToolkit.Mvvm** — MVVM
 
 Установка стека на машину — см. [SETUP.md](SETUP.md).
+
+## Макеты и раскладка UI
+
+Описание макета главного окна (зоны, панели, режимы Focus/Balanced/Power, контролы для MCP) — в **[docs/ux/](docs/ux/)**:
+- [docs/ux/README.md](docs/ux/README.md) — оглавление UX-набора;
+- [docs/ux/cascade-ide-ui-layout-v1.md](docs/ux/cascade-ide-ui-layout-v1.md) — раскладка по строкам/колонкам и имена панелей для MCP.
+Визуальных макетов (Figma/PNG) в репо нет; эталон — `Views/MainWindow.axaml` и этот документ.
