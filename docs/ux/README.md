@@ -9,10 +9,16 @@
 | `README.md`                             | Этот файл — оглавление UX-набора.                                                                                |
 | `cascade-ide-ui-layout-v1.md`           | Описание макета главного окна: зоны, панели, грид, режимы (Focus / Balanced / Power), ключевые контролы для MCP. |
 | `cascade-ide-main-window-wireframe.png` | Макет-картинка (wireframe) главного окна.                                                                        |
+| `concept-screens/`                      | Сохранённые изображения из чатов (референсы и UI-концепты, включая Power Mode).                                  |
+| `concept-generated/`                    | Сгенерированные агентом UI-концепты CascadeIDE (Focus/Balanced/Power “cockpit”).                                 |
 
 ## Макеты
 
 **Макет-картинка (wireframe):** `cascade-ide-main-window-wireframe.png` — схема главного окна: меню, тулбар, дерево решения слева, редактор в центре, чат справа, терминал снизу. Положи файл в этот каталог (`docs/ux/`); если картинка была сгенерирована в чате — сохрани её из интерфейса Cursor сюда под этим именем.
+
+**Скрины-концепты (из чатов):** см. `concept-screens/` — там лежат исходные картинки, на базе которых собирались Power Mode / раскладка / визуальный стиль.
+
+**Сгенерированные UI-концепты (agent render):** см. `concept-generated/` — `cascadeide-ui-concept-focus/balanced/power.png` и wireframe.
 
 **Источник правды** по разметке — `Views/MainWindow.axaml` и поведение из ViewModel. Документ `cascade-ide-ui-layout-v1.md` фиксирует раскладку и имена панелей/контролов для MCP и онбординга.
 
