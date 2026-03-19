@@ -42,8 +42,12 @@
     </PackageReference>
     <PackageReference Include="Avalonia.AvaloniaEdit" Version="11.0.6" />
     <PackageReference Include="AvaloniaEdit.TextMate" Version="11.0.6" />
+    <PackageReference Include="Dock.Avalonia" Version="11.3.11.22" />
+    <PackageReference Include="Dock.Model.Avalonia" Version="11.3.11.22" />
+    <PackageReference Include="Dock.Model.Mvvm" Version="11.3.11.22" />
+    <PackageReference Include="Dock.Avalonia.Themes.Fluent" Version="11.3.11.22" />
     <PackageReference Include="Markdown.Avalonia" Version="11.0.2" />
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.14.0" />
     <PackageReference Include="Microsoft.Extensions.AI" Version="9.5.0" />
     <PackageReference Include="ModelContextProtocol" Version="0.8.0-preview.1" />

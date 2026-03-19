@@ -1,0 +1,14 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CascadeIDE.ViewModels"
+             x:Class="CascadeIDE.Views.McpBannerView"
+             x:DataType="vm:MainWindowViewModel">
+    <Border Background="{DynamicResource CascadeTheme.McpBannerBackground}"
+            Padding="8,4"
+            IsVisible="{Binding IsMcpServerMode}">
+        <TextBlock Text="Управляется агентом (MCP). Не закрывайте окно — подключение будет потеряно."
+                   Foreground="{DynamicResource CascadeTheme.McpBannerForeground}"
+                   FontSize="12"
+                   VerticalAlignment="Center"/>
+    </Border>
+</UserControl>

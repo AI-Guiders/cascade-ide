@@ -1,0 +1,24 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CascadeIDE.ViewModels"
+             x:Class="CascadeIDE.Views.TelemetryStripView"
+             x:DataType="vm:MainWindowViewModel">
+    <Border Margin="8,4"
+            Padding="8,6"
+            Classes="modeCard">
+        <WrapPanel Orientation="Horizontal" ItemHeight="28" VerticalAlignment="Center">
+            <Border Classes="modeCard" Padding="6,2" Margin="0,0,8,0">
+                <TextBlock Text="{Binding TelemetryBuildText}" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
+            </Border>
+            <Border Classes="modeCard" Padding="6,2" Margin="0,0,8,0">
+                <TextBlock Text="{Binding TelemetryTestsText}" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
+            </Border>
+            <Border Classes="modeCard" Padding="6,2" Margin="0,0,8,0">
+                <TextBlock Text="{Binding TelemetryDebugText}" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
+            </Border>
+            <Border Classes="modeCard" Padding="6,2" Margin="0,0,8,0">
+                <TextBlock Text="{Binding TelemetryGitText}" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
+            </Border>
+        </WrapPanel>
+    </Border>
+</UserControl>

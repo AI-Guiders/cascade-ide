@@ -11,6 +11,8 @@
 | `cascade-ide-main-window-wireframe.png` | Макет-картинка (wireframe) главного окна.                                                                        |
 | `concept-screens/`                      | Сохранённые изображения из чатов (референсы и UI-концепты, включая Power Mode).                                  |
 | `concept-generated/`                    | Сгенерированные агентом UI-концепты CascadeIDE (Focus/Balanced/Power “cockpit”).                                 |
+| `power-mode-concepts-v1.md`             | Текстовое описание сгенерированных UI-концептов (Focus/Balanced/Power) с чеклистом для имплементации.            |
+| `concept-to-implementation-map-v1.md`   | Таблица соответствия “концепт → текущий XAML/VM” + список минимальных инкрементов для выравнивания UI 1:1.       |
 
 ## Макеты
 

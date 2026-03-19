@@ -1,0 +1,48 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CascadeIDE.ViewModels"
+             x:Class="CascadeIDE.Views.TaskCockpitView"
+             x:DataType="vm:MainWindowViewModel">
+    <Border Margin="8,0,8,4"
+            Padding="8,6"
+            IsVisible="{Binding ShowTaskBar}"
+            Classes="modeCard">
+        <StackPanel Spacing="6">
+            <WrapPanel Orientation="Horizontal" ItemHeight="28">
+                <TextBlock Text="{Binding ActiveTaskTitle}" FontWeight="SemiBold" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}" Margin="0,0,8,0"/>
+                <Border Classes="modeCard" Padding="6,2" Margin="0,0,8,0">
+                    <TextBlock Text="{Binding ActiveTaskStatus}" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
+                </Border>
+                <TextBlock Text="{Binding ActiveTaskProgress, StringFormat='{}Progress: {0}%'}"
+                           Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"
+                           Margin="0,0,8,0"/>
+            </WrapPanel>
+
+            <Border Classes="modeCard" IsVisible="{Binding ShowTelemetryHiddenHint}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock Text="Telemetry panel is hidden. Open it to see the dashboard."
+                               Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"
+                               VerticalAlignment="Center"/>
+                    <Button Content="Show now" Command="{Binding ToggleTerminalCommand}"/>
+                </StackPanel>
+            </Border>
+
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                <WrapPanel Orientation="Horizontal" ItemHeight="30">
+                    <Button Content="Fix failing tests" Command="{Binding FixFailingTestsCommand}" IsVisible="{Binding ShowQuickActions}" Margin="0,0,6,0"/>
+                    <Button Content="Investigate nullref" Command="{Binding InvestigateNullrefCommand}" IsVisible="{Binding ShowQuickActions}" Margin="0,0,6,0"/>
+                    <Button Content="Prepare commit" Command="{Binding PrepareCommitCommand}" IsVisible="{Binding ShowQuickActions}" Margin="0,0,6,0"/>
+                    <Border Classes="modeCard" Padding="6,2" Margin="0,0,6,0">
+                        <TextBlock Text="{Binding ComplexityBadge, StringFormat='{}Complexity: {0}'}" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
+                    </Border>
+                    <Border Classes="modeCard" Padding="6,2" Margin="0,0,6,0">
+                        <TextBlock Text="{Binding ImpactedTestsBadge, StringFormat='{}Impacted tests: {0}'}" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
+                    </Border>
+                    <Border Classes="modeCard" Padding="6,2" Margin="0,0,6,0">
+                        <TextBlock Text="{Binding FilesChangedBadge, StringFormat='{}Files changed: {0}'}" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
+                    </Border>
+                </WrapPanel>
+            </ScrollViewer>
+        </StackPanel>
+    </Border>
+</UserControl>

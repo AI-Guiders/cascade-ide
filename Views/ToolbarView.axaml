@@ -1,0 +1,39 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CascadeIDE.ViewModels"
+             x:Class="CascadeIDE.Views.ToolbarView"
+             x:DataType="vm:MainWindowViewModel">
+    <ScrollViewer
+        Margin="8,4"
+        HorizontalScrollBarVisibility="Auto"
+        VerticalScrollBarVisibility="Disabled">
+        <StackPanel Orientation="Horizontal" Spacing="8" Background="{DynamicResource CascadeTheme.ToolbarBackground}">
+            <Button x:Name="OpenSolutionButton" Content="Открыть решение" Command="{Binding OpenSolutionCommand}"/>
+            <Button Content="Собрать" Command="{Binding BuildSolutionCommand}" IsEnabled="{Binding !IsBuilding}"/>
+            <TextBlock Text="Режим:" VerticalAlignment="Center" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}" Margin="8,0,0,0"/>
+            <ComboBox Width="130"
+                      ItemsSource="{Binding UiModeOptionsList}"
+                      SelectedItem="{Binding UiMode, Mode=TwoWay}"/>
+            <Border x:Name="ModeBadge"
+                    Classes.power="{Binding IsPowerMode}"
+                    Padding="8,2"
+                    Margin="4,0,0,0"
+                    VerticalAlignment="Center">
+                <TextBlock Text="{Binding UiMode}" FontWeight="SemiBold" Foreground="#EAF0FF"/>
+            </Border>
+            <Button Content="{Binding TelemetryButtonText}"
+                    Command="{Binding ToggleTerminalCommand}"
+                    IsVisible="{Binding ShowPowerTelemetry}"/>
+            <Button Content="Show explorer" Command="{Binding ShowSolutionExplorerPanelCommand}" IsVisible="{Binding IsSolutionPanelHidden}"/>
+            <Button Content="Show build" Command="{Binding ShowBuildOutputPanelCommand}" IsVisible="{Binding IsBuildPanelHidden}"/>
+            <Button Content="Show chat" Command="{Binding ShowChatPanelCommand}" IsVisible="{Binding IsChatPanelHidden}"/>
+            <Button Content="Show terminal" Command="{Binding ShowTerminalPanelCommand}" IsVisible="{Binding IsTerminalPanelHidden}"/>
+            <Button Content="1-up" Command="{Binding SetSingleEditorGroupCommand}"/>
+            <Button Content="2-up" Command="{Binding SetDualEditorGroupCommand}"/>
+            <Button Content="3-up" Command="{Binding SetTripleEditorGroupCommand}"/>
+            <TextBlock Text="{Binding SolutionPath}" VerticalAlignment="Center" MaxWidth="300" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
+            <TextBlock Text="{Binding SolutionLoadError}" VerticalAlignment="Center" MaxWidth="350" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource CascadeTheme.ToolbarErrorForeground}"/>
+            <TextBlock Text="{Binding OllamaStatus}" VerticalAlignment="Center" Margin="8,0,0,0" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

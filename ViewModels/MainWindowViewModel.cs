@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Text.Json;
 using System.Windows.Input;
@@ -8,6 +9,9 @@ using CascadeIDE.Models;
 using DotNetBuildTestParsers;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Dock.Model.Core;
+using Dock.Model.Mvvm;
+using Dock.Model.Mvvm.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -54,6 +58,11 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         {
             OnPropertyChanged(nameof(HasOpenDocuments));
         };
+
+        DockFactory = new Factory();
+        DockLayout = BuildDockLayout();
+        DockFactory.InitLayout(DockLayout);
+
         _lastSavedSettings = (CascadeIdeSettings)_settings.Clone();
         _lastSavedAiKeys = (AiKeys)_aiKeys.Clone();
     }
@@ -139,12 +148,16 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     {
         _settings.TerminalVisible = value;
         OnPropertyChanged(nameof(IsTerminalPanelHidden));
+        OnPropertyChanged(nameof(IsBottomPanelVisible));
         SaveSettingsIfChanged();
     }
 
     partial void OnIsBuildOutputVisibleChanged(bool value)
     {
         OnPropertyChanged(nameof(IsBuildPanelHidden));
+        OnPropertyChanged(nameof(IsBottomPanelVisible));
+        if (value)
+            BottomPanelTabIndex = 1;
     }
 
     partial void OnIsChatPanelExpandedChanged(bool value)
@@ -241,6 +254,18 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     public ObservableCollection<OpenDocumentViewModel> OpenDocuments { get; } = [];
     public bool HasOpenDocuments => OpenDocuments.Count > 0;
     public int RecentlyClosedDocumentCount => _recentlyClosedDocumentCount;
+
+    // ---- Dock MDI (inside MainWindow only; no floating) ----
+    public Dock.Model.Core.IFactory DockFactory { get; }
+
+    public Dock.Model.Core.IDock DockLayout { get; private set; }
+
+    public ObservableCollection<Dock.Model.Core.IDockable> DockDocuments { get; } = [];
+
+    [ObservableProperty]
+    private Dock.Model.Core.IDockable? _dockActiveDocument;
+
+    private IDisposable? _selectedDocumentContentSubscription;
 
     /// <summary>Номера строк с брейкпоинтами в текущем открытом файле (для отрисовки в редакторе).</summary>
     public IReadOnlyList<int> BreakpointLinesInCurrentFile
@@ -471,6 +496,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     [NotifyPropertyChangedFor(nameof(IsBalancedMode))]
     [NotifyPropertyChangedFor(nameof(IsPowerMode))]
     [NotifyPropertyChangedFor(nameof(ShowTaskBar))]
+    [NotifyPropertyChangedFor(nameof(ShowTelemetryStrip))]
     [NotifyPropertyChangedFor(nameof(ShowQuickActions))]
     [NotifyPropertyChangedFor(nameof(ShowAgentOperations))]
     [NotifyPropertyChangedFor(nameof(ShowAgentTrace))]
@@ -492,6 +518,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     public bool ShowPowerTelemetry => IsPowerMode;
     public bool ShowSafetyControls => IsPowerMode;
     public bool ShowTelemetryHiddenHint => ShowPowerTelemetry && !IsTerminalVisible;
+    public bool ShowTelemetryStrip => !IsFocusMode;
     public string TelemetryButtonText => IsTerminalVisible ? "Telemetry: on" : "Show telemetry";
     public bool ShowEditorGroup2 => EditorGroupCount >= 2;
     public bool ShowEditorGroup3 => EditorGroupCount >= 3;
@@ -542,11 +569,37 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private int _impactedTestsBadge = 5;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(TelemetryGitText))]
     private int _filesChangedBadge = 3;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(TelemetryTestsText))]
+    private string _lastTestSummary = "";
 
     public ObservableCollection<string> AgentToolCalls { get; } = [];
     public ObservableCollection<string> AgentTraceTimeline { get; } = [];
     public ObservableCollection<string> EventTimeline { get; } = [];
+
+    public string TelemetryBuildText => IsBuilding ? "Build: running…" : "Build: idle";
+
+    public string TelemetryTestsText =>
+        !string.IsNullOrWhiteSpace(LastTestSummary)
+            ? $"Tests: {LastTestSummary}"
+            : $"Tests: impacted {ImpactedTestsBadge}";
+
+    public string TelemetryDebugText =>
+        IsDebugPanelVisible
+            ? $"Debug: paused (frames {DebugStackFrames.Count}, vars {DebugVariables.Count})"
+            : "Debug: idle";
+
+    public string TelemetryGitText
+    {
+        get
+        {
+            var branch = string.IsNullOrWhiteSpace(GitBranchSummary) ? "" : $" ({GitBranchSummary})";
+            return $"Git: {GitStagedCount} staged, {GitUnstagedCount} unstaged, {GitUntrackedCount} untracked{branch}";
+        }
+    }
 
     [ObservableProperty]
     private string _terminalOutput = "";
@@ -559,12 +612,18 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     public bool IsBuildPanelHidden => !IsBuildOutputVisible;
     public bool IsChatPanelHidden => !IsChatPanelExpanded;
     public bool IsTerminalPanelHidden => !IsTerminalVisible;
+    public bool IsBottomPanelVisible => IsTerminalVisible || IsBuildOutputVisible;
+
+    /// <summary>0 = Terminal, 1 = Build Output.</summary>
+    [ObservableProperty]
+    private int _bottomPanelTabIndex;
 
     [ObservableProperty]
     private string _buildOutput = "";
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(BuildSolutionCommand))]
+    [NotifyPropertyChangedFor(nameof(TelemetryBuildText))]
     private bool _isBuilding;
 
     [ObservableProperty]
@@ -730,6 +789,83 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     partial void OnSolutionPathChanged(string value)
     {
         AttachBreakpointsFileWatcher(value);
+        _ = RefreshGitSummaryAsync();
+    }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(TelemetryGitText))]
+    private string _gitBranchSummary = "";
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(TelemetryGitText))]
+    private int _gitStagedCount;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(TelemetryGitText))]
+    private int _gitUnstagedCount;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(TelemetryGitText))]
+    private int _gitUntrackedCount;
+
+    private async Task RefreshGitSummaryAsync()
+    {
+        var result = await RunGitCommandAsync(["status", "--short", "--branch"]).ConfigureAwait(false);
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (!result.Success)
+            {
+                GitBranchSummary = "";
+                GitStagedCount = 0;
+                GitUnstagedCount = 0;
+                GitUntrackedCount = 0;
+                return;
+            }
+
+            var parsed = ParseGitStatusShortBranch(result.Output);
+            GitBranchSummary = parsed.BranchSummary;
+            GitStagedCount = parsed.Staged;
+            GitUnstagedCount = parsed.Unstaged;
+            GitUntrackedCount = parsed.Untracked;
+        });
+    }
+
+    private static (string BranchSummary, int Staged, int Unstaged, int Untracked) ParseGitStatusShortBranch(string output)
+    {
+        // Expected first line:
+        // ## main...origin/main [ahead 1]
+        // Other lines: XY <path> or ?? <path>
+        var branch = "";
+        int staged = 0, unstaged = 0, untracked = 0;
+        var lines = (output ?? "")
+            .Replace("\r\n", "\n")
+            .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        for (var i = 0; i < lines.Length; i++)
+        {
+            var line = lines[i];
+            if (line.StartsWith("## ", StringComparison.Ordinal))
+            {
+                branch = line[3..].Trim();
+                continue;
+            }
+            if (line.StartsWith("??", StringComparison.Ordinal))
+            {
+                untracked++;
+                continue;
+            }
+            if (line.Length < 2)
+                continue;
+            var x = line[0];
+            var y = line[1];
+            // X (index): staged changes
+            if (x != ' ' && x != '?')
+                staged++;
+            // Y (worktree): unstaged changes
+            if (y != ' ' && y != '?')
+                unstaged++;
+        }
+
+        return (branch, staged, unstaged, untracked);
     }
 
     private void AttachBreakpointsFileWatcher(string? solutionPath)
@@ -802,6 +938,9 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
 
     partial void OnSelectedDocumentChanged(OpenDocumentViewModel? value)
     {
+        _selectedDocumentContentSubscription?.Dispose();
+        _selectedDocumentContentSubscription = null;
+
         _isSwitchingDocument = true;
         try
         {
@@ -815,6 +954,15 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             CurrentFilePath = value.FilePath;
             EditorText = value.Content;
             SyncSelectedSolutionItemToCurrentFile();
+
+            _selectedDocumentContentSubscription = ObservePropertyChanged(value, nameof(OpenDocumentViewModel.Content), () =>
+            {
+                if (_isSwitchingDocument)
+                    return;
+                // EditorText is used by MCP tools; keep it synced even if editor binds indirectly.
+                if (!string.Equals(EditorText, value.Content, StringComparison.Ordinal))
+                    EditorText = value.Content ?? "";
+            });
         }
         finally
         {
@@ -850,24 +998,123 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             };
             OpenDocuments.Add(existing);
             GetGroupCollection(targetGroup).Add(existing);
+
+            DockDocuments.Add(new DockDocumentViewModel(existing)
+            {
+                Id = normalized,
+                Title = existing.DisplayTitle
+            });
         }
-        else if (existing.GroupIndex != targetGroup)
+        else
         {
-            MoveDocumentToGroupInternal(existing, targetGroup);
+            if (string.IsNullOrEmpty(existing.OriginalContent))
+            {
+                // If a previous read failed and we opened an "empty" document, try to re-load it
+                // so the editor isn't blank for regular files.
+                var text = SafeReadFile(normalized);
+                existing.ReloadContent(text);
+            }
+
+            if (existing.GroupIndex != targetGroup)
+            {
+                MoveDocumentToGroupInternal(existing, targetGroup);
+            }
         }
 
         ActivateDocumentInternal(existing);
+        // Rebuild after setting DockActiveDocument so DockControl sees ActiveDockable.
+        RebuildAndReinitDockLayout();
     }
 
     private static string SafeReadFile(string path)
     {
-        try
+        // File IO is best-effort; editor should show content whenever possible.
+        // Some Windows setups (locks / transient FS issues) can cause File.ReadAllText to throw,
+        // so we use a FileStream with sharing and a tiny retry.
+        for (var attempt = 0; attempt < 3; attempt++)
         {
-            return File.ReadAllText(path);
+            try
+            {
+                using var stream = new FileStream(
+                    path,
+                    FileMode.Open,
+                    FileAccess.Read,
+                    FileShare.ReadWrite | FileShare.Delete);
+
+                using var reader = new StreamReader(stream, detectEncodingFromByteOrderMarks: true);
+                return reader.ReadToEnd();
+            }
+            catch (IOException) when (attempt < 2)
+            {
+                Thread.Sleep(40);
+            }
+            catch (UnauthorizedAccessException) when (attempt < 2)
+            {
+                Thread.Sleep(40);
+            }
+            catch
+            {
+                return "";
+            }
         }
-        catch
+
+        return "";
+    }
+
+    partial void OnDockActiveDocumentChanged(IDockable? value)
+    {
+        if (value is DockDocumentViewModel d)
+            ActivateDocumentInternal(d.Doc);
+    }
+
+    private Dock.Model.Core.IDock BuildDockLayout()
+    {
+        var documents = new DocumentDock
         {
-            return "";
+            Id = "DocumentsDock",
+            Title = "Documents",
+            IsCollapsable = false,
+            VisibleDockables = DockFactory.CreateList<Dock.Model.Core.IDockable>(DockDocuments.ToArray()),
+            ActiveDockable = DockActiveDocument,
+            CanCreateDocument = false
+        };
+
+        var root = DockFactory.CreateRootDock();
+        root.Id = "RootDock";
+        root.VisibleDockables = DockFactory.CreateList<Dock.Model.Core.IDockable>(documents);
+        root.DefaultDockable = documents;
+        root.ActiveDockable = documents;
+        return root;
+    }
+
+    private void RebuildAndReinitDockLayout()
+    {
+        // DockLayout.VisibleDockables берётся из DockDocuments.ToArray() во время построения.
+        // Поэтому после добавления/удаления документов нужно заново инициализировать DockFactory,
+        // иначе UI может показывать "No document open".
+        DockLayout = BuildDockLayout();
+        DockFactory.InitLayout(DockLayout);
+        OnPropertyChanged(nameof(DockLayout));
+    }
+
+    private static IDisposable ObservePropertyChanged(INotifyPropertyChanged obj, string propertyName, Action onChanged)
+    {
+        PropertyChangedEventHandler handler = (_, e) =>
+        {
+            if (string.Equals(e.PropertyName, propertyName, StringComparison.Ordinal))
+                onChanged();
+        };
+        obj.PropertyChanged += handler;
+        return new Subscription(() => obj.PropertyChanged -= handler);
+    }
+
+    private sealed class Subscription(Action dispose) : IDisposable
+    {
+        private Action? _dispose = dispose;
+        public void Dispose()
+        {
+            _dispose?.Invoke();
+            _dispose = null;
         }
     }
 
@@ -894,6 +1141,12 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
                 SelectedDocument = doc;
                 break;
         }
+
+        var dockDoc = DockDocuments
+            .OfType<DockDocumentViewModel>()
+            .FirstOrDefault(d => string.Equals(d.Doc.FilePath, doc.FilePath, StringComparison.OrdinalIgnoreCase));
+        if (dockDoc is not null && !ReferenceEquals(DockActiveDocument, dockDoc))
+            DockActiveDocument = dockDoc;
     }
 
     private void MoveDocumentToGroupInternal(OpenDocumentViewModel doc, int targetGroup)
@@ -1026,12 +1279,16 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private void ToggleBuildOutput()
     {
         IsBuildOutputVisible = !IsBuildOutputVisible;
+        if (IsBuildOutputVisible)
+            BottomPanelTabIndex = 1;
     }
 
     [RelayCommand]
     private void ToggleTerminal()
     {
         IsTerminalVisible = !IsTerminalVisible;
+        if (IsTerminalVisible)
+            BottomPanelTabIndex = 0;
     }
 
     [RelayCommand]
@@ -1067,6 +1324,11 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         var index = OpenDocuments.IndexOf(doc);
         GetGroupCollection(doc.GroupIndex).Remove(doc);
         OpenDocuments.Remove(doc);
+        var dockDoc = DockDocuments
+            .OfType<DockDocumentViewModel>()
+            .FirstOrDefault(d => string.Equals(d.Doc.FilePath, doc.FilePath, StringComparison.OrdinalIgnoreCase));
+        if (dockDoc is not null)
+            DockDocuments.Remove(dockDoc);
         _recentlyClosedDocumentPaths.Push(doc.FilePath);
         _recentlyClosedDocumentCount = _recentlyClosedDocumentPaths.Count;
         ReopenClosedDocumentCommand.NotifyCanExecuteChanged();
@@ -1082,11 +1344,16 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         SelectedDocument = Group1Documents.FirstOrDefault();
         SelectedDocumentGroup2 = Group2Documents.FirstOrDefault();
         SelectedDocumentGroup3 = Group3Documents.FirstOrDefault();
-        if (SelectedDocument is null)
-        {
-            var nextIndex = Math.Clamp(index, 0, OpenDocuments.Count - 1);
-            ActivateDocumentInternal(OpenDocuments[nextIndex]);
-        }
+
+        // Ensure DockActiveDocument always points to a still-open dockable.
+        var next =
+            SelectedDocument ??
+            SelectedDocumentGroup2 ??
+            SelectedDocumentGroup3 ??
+            OpenDocuments[Math.Clamp(index, 0, OpenDocuments.Count - 1)];
+
+        ActivateDocumentInternal(next);
+        RebuildAndReinitDockLayout();
     }
 
     [RelayCommand]
@@ -1348,52 +1615,102 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     {
         var loadVersion = Interlocked.Increment(ref _solutionLoadVersion);
         SolutionLoadError = "";
-        var (root, error) = await Task.Run(() =>
+        try
         {
-            var r = Services.SolutionParser.Load(path, out var err);
-            return (r, err);
-        }).ConfigureAwait(false);
-
-        await Dispatcher.UIThread.InvokeAsync(() =>
-        {
-            // Ignore stale completion when a newer ide_load_solution call already started.
-            if (loadVersion != Interlocked.Read(ref _solutionLoadVersion))
-                return;
-
-            if (root is null)
+            var (root, error) = await Task.Run(() =>
             {
-                SolutionLoadError = error ?? "Не удалось загрузить решение.";
-                return;
+                var r = Services.SolutionParser.Load(path, out var err);
+                return (r, err);
+            }).ConfigureAwait(false);
+
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                // Ignore stale completion when a newer ide_load_solution call already started.
+                if (loadVersion != Interlocked.Read(ref _solutionLoadVersion))
+                    return;
+
+                if (root is null)
+                {
+                    SolutionLoadError = error ?? "Не удалось загрузить решение.";
+                    return;
+                }
+
+                var normalizedSolutionPath = root.FullPath;
+                if (string.IsNullOrEmpty(normalizedSolutionPath))
+                {
+                    try { normalizedSolutionPath = Path.GetFullPath(path); }
+                    catch { normalizedSolutionPath = path; }
+                }
+
+                // New solution becomes authoritative UI context: clear stale editor selection/state.
+                _openFileDebounceCts?.Cancel();
+                SelectedSolutionItem = null;
+                OpenDocuments.Clear();
+                Group1Documents.Clear();
+                Group2Documents.Clear();
+                Group3Documents.Clear();
+                DockDocuments.Clear();
+                DockActiveDocument = null;
+                _recentlyClosedDocumentPaths.Clear();
+                _recentlyClosedDocumentCount = 0;
+                ReopenClosedDocumentCommand.NotifyCanExecuteChanged();
+                SelectedDocument = null;
+                SelectedDocumentGroup2 = null;
+                SelectedDocumentGroup3 = null;
+                CurrentFilePath = null;
+                EditorText = "";
+                IsLoadingCurrentFile = false;
+
+                SolutionPath = normalizedSolutionPath ?? path;
+                SolutionRoots.Clear();
+                SolutionRoots.Add(root);
+
+                RebuildAndReinitDockLayout();
+            });
+        }
+        catch (Exception ex)
+        {
+            SolutionLoadError = "Ошибка загрузки решения: " + ex.Message;
+            TryLogLoadSolutionCrash(path, ex);
+        }
+    }
+
+    private void TryLogLoadSolutionCrash(string? solutionPath, Exception ex)
+    {
+        try
+        {
+            var baseDir = "";
+            if (!string.IsNullOrWhiteSpace(solutionPath))
+            {
+                try
+                {
+                    var full = Path.GetFullPath(solutionPath);
+                    baseDir = File.Exists(full) ? (Path.GetDirectoryName(full) ?? "") : full;
+                }
+                catch
+                {
+                    baseDir = "";
+                }
             }
 
-            var normalizedSolutionPath = root.FullPath;
-            if (string.IsNullOrEmpty(normalizedSolutionPath))
-            {
-                try { normalizedSolutionPath = Path.GetFullPath(path); }
-                catch { normalizedSolutionPath = path; }
-            }
+            if (string.IsNullOrWhiteSpace(baseDir))
+                baseDir = Environment.CurrentDirectory;
 
-            // New solution becomes authoritative UI context: clear stale editor selection/state.
-            _openFileDebounceCts?.Cancel();
-            SelectedSolutionItem = null;
-            OpenDocuments.Clear();
-            Group1Documents.Clear();
-            Group2Documents.Clear();
-            Group3Documents.Clear();
-            _recentlyClosedDocumentPaths.Clear();
-            _recentlyClosedDocumentCount = 0;
-            ReopenClosedDocumentCommand.NotifyCanExecuteChanged();
-            SelectedDocument = null;
-            SelectedDocumentGroup2 = null;
-            SelectedDocumentGroup3 = null;
-            CurrentFilePath = null;
-            EditorText = "";
-            IsLoadingCurrentFile = false;
-
-            SolutionPath = normalizedSolutionPath ?? path;
-            SolutionRoots.Clear();
-            SolutionRoots.Add(root);
-        });
+            var logDir = Path.Combine(baseDir, ".cascade-ide");
+            Directory.CreateDirectory(logDir);
+            var logPath = Path.Combine(logDir, "crash-log.txt");
+            var stamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff 'UTC'");
+            var payload =
+                $"[{stamp}] LoadSolution crash{Environment.NewLine}" +
+                $"solution: {solutionPath}{Environment.NewLine}" +
+                $"{ex}{Environment.NewLine}" +
+                $"---{Environment.NewLine}";
+            File.AppendAllText(logPath, payload);
+        }
+        catch
+        {
+            // Do not throw from crash logger.
+        }
     }
 
     [RelayCommand(CanExecute = nameof(CanSendChat))]
@@ -1947,6 +2264,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             return JsonSerializer.Serialize(new { success = false, step = "add", exit_code = addResult.ExitCode, output = addResult.Output });
 
         var commitResult = await RunGitCommandAsync(["commit", "-m", message]).ConfigureAwait(false);
+        _ = RefreshGitSummaryAsync();
         return JsonSerializer.Serialize(new
         {
             success = commitResult.Success,
@@ -1962,6 +2280,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             args.Add(remote!);
         if (!string.IsNullOrWhiteSpace(branch))
             args.Add(branch!);
+        _ = RefreshGitSummaryAsync();
         return RunGitCommandJsonAsync(args);
     }
 
@@ -2288,6 +2607,11 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             var parsed = File.Exists(trxPath)
                 ? ParseTrx(trxPath) ?? TestOutputParser.Parse(outStr)
                 : TestOutputParser.Parse(outStr);
+
+            Dispatcher.UIThread.Post(() =>
+            {
+                LastTestSummary = $"{parsed.Passed}/{parsed.Total} passed, {parsed.Failed} failed";
+            });
             var result = new
             {
                 success = parsed.Success,
@@ -2665,6 +2989,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             foreach (var v in variables)
                 DebugVariables.Add(new DebugVariableViewModel(v.Name, v.Value));
             OnPropertyChanged(nameof(IsDebugPanelVisible));
+            OnPropertyChanged(nameof(TelemetryDebugText));
         });
     }
 
@@ -2726,7 +3051,7 @@ public partial class OpenDocumentViewModel : ObservableObject
 
     public string FilePath { get; }
     public string Title { get; }
-    public string OriginalContent { get; }
+    public string OriginalContent { get; private set; }
     public string DisplayTitle => IsPinned ? $"[P] {Title}{(IsDirty ? "*" : "")}" : $"{Title}{(IsDirty ? "*" : "")}";
 
     [ObservableProperty]
@@ -2743,6 +3068,13 @@ public partial class OpenDocumentViewModel : ObservableObject
 
     [ObservableProperty]
     private int _groupIndex = 1;
+
+    public void ReloadContent(string newContent)
+    {
+        OriginalContent = newContent ?? "";
+        Content = OriginalContent;
+        IsDirty = false;
+    }
 }
 
 /// <summary>Элемент стека вызовов для панели отладки.</summary>

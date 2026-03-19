@@ -1,0 +1,88 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CascadeIDE.ViewModels"
+             x:Class="CascadeIDE.Views.BottomPanelView"
+             x:DataType="vm:MainWindowViewModel">
+    <Grid RowDefinitions="4,*">
+        <GridSplitter Grid.Row="0"
+                      Height="4"
+                      ResizeDirection="Rows"
+                      Background="{DynamicResource CascadeTheme.BuildOutputBorderBrush}"
+                      IsVisible="{Binding IsBottomPanelVisible}"/>
+        <Border Grid.Row="1"
+                IsVisible="{Binding IsBottomPanelVisible}"
+                MinHeight="120"
+                BorderBrush="{DynamicResource CascadeTheme.BuildOutputBorderBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="4"
+                Background="{DynamicResource CascadeTheme.TerminalBackground}">
+            <TabControl SelectedIndex="{Binding BottomPanelTabIndex, Mode=TwoWay}">
+                <TabItem Header="Terminal" IsVisible="{Binding IsTerminalVisible}">
+                    <DockPanel>
+                        <Border DockPanel.Dock="Top" IsVisible="{Binding ShowPowerTelemetry}" Classes="modeCard" Margin="0,0,0,4">
+                            <StackPanel Spacing="4">
+                                <WrapPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding ActiveTaskStatus, StringFormat='{}Build: {0}'}" Foreground="{DynamicResource CascadeTheme.TerminalForeground}" Margin="0,0,12,0"/>
+                                    <TextBlock Text="{Binding ResultSummary}" Foreground="{DynamicResource CascadeTheme.TerminalForeground}" Margin="0,0,12,0" MaxWidth="320" TextTrimming="CharacterEllipsis"/>
+                                    <TextBlock Text="{Binding RiskSummary}" Foreground="{DynamicResource CascadeTheme.TerminalForeground}" Margin="0,0,12,0" MaxWidth="320" TextTrimming="CharacterEllipsis"/>
+                                </WrapPanel>
+                                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                                    <ItemsControl ItemsSource="{Binding EventTimeline}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel Orientation="Horizontal"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding}" Foreground="{DynamicResource CascadeTheme.TerminalForeground}" FontSize="11" Margin="0,0,10,0"/>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                            </StackPanel>
+                        </Border>
+                        <TextBlock DockPanel.Dock="Top" Text="Терминал" Foreground="{DynamicResource CascadeTheme.TerminalForeground}" FontSize="11" Margin="0,0,0,4"/>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                            <TextBox Text="{Binding TerminalOutput, Mode=OneWay}"
+                                     IsReadOnly="True"
+                                     TextWrapping="NoWrap"
+                                     FontFamily="Consolas,monospace"
+                                     FontSize="12"
+                                     Background="Transparent"
+                                     Foreground="{DynamicResource CascadeTheme.TerminalForeground}"
+                                     BorderThickness="0"/>
+                        </ScrollViewer>
+                        <TextBox DockPanel.Dock="Bottom"
+                                 Text="{Binding TerminalInput, Mode=TwoWay}"
+                                 Watermark="Команда (Enter — выполнить)"
+                                 FontFamily="Consolas,monospace"
+                                 FontSize="12"
+                                 Background="{DynamicResource CascadeTheme.TerminalInputBackground}"
+                                 Foreground="{DynamicResource CascadeTheme.TerminalForeground}"
+                                 Margin="0,4,0,0">
+                            <TextBox.KeyBindings>
+                                <KeyBinding Gesture="Enter" Command="{Binding RunTerminalCommandCommand}"/>
+                            </TextBox.KeyBindings>
+                        </TextBox>
+                    </DockPanel>
+                </TabItem>
+                <TabItem Header="Build output" IsVisible="{Binding IsBuildOutputVisible}">
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Top" Text="Вывод сборки" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}" FontSize="11" Margin="0,0,0,4"/>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                            <TextBox Text="{Binding BuildOutput, Mode=OneWay}"
+                                     IsReadOnly="True"
+                                     TextWrapping="NoWrap"
+                                     FontFamily="Consolas,monospace"
+                                     FontSize="12"
+                                     Background="{DynamicResource CascadeTheme.BuildOutputBackground}"
+                                     Foreground="{DynamicResource CascadeTheme.TerminalForeground}"
+                                     BorderThickness="0"/>
+                        </ScrollViewer>
+                    </DockPanel>
+                </TabItem>
+            </TabControl>
+        </Border>
+    </Grid>
+</UserControl>

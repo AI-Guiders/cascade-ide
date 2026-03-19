@@ -1,0 +1,24 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CascadeIDE.ViewModels"
+             xmlns:ae="using:AvaloniaEdit"
+             x:Class="CascadeIDE.Views.DockDocumentView"
+             x:DataType="vm:DockDocumentViewModel">
+
+    <Grid RowDefinitions="Auto,*">
+        <TextBlock Grid.Row="0"
+                   Margin="4,2"
+                   Text="{Binding Doc.FilePath}"
+                   TextTrimming="CharacterEllipsis"
+                   Foreground="{DynamicResource CascadeTheme.CurrentFileForeground}" />
+
+        <ae:TextEditor Grid.Row="1"
+                       x:Name="Editor"
+                       Classes="EditorBox"
+                       ShowLineNumbers="True"
+                       FontFamily="Consolas,Cascadia Code,monospace"
+                       FontSize="13"
+                       Padding="8"/>
+    </Grid>
+</UserControl>
+

@@ -54,7 +54,7 @@ public static class UiControlLayoutApply
             if (rootEl.TryGetProperty("dock", out var dockEl))
             {
                 var dockStr = dockEl.GetString()?.Trim();
-                if (Enum.TryParse<Dock>(dockStr, ignoreCase: true, out var dock))
+                if (Enum.TryParse<Avalonia.Controls.Dock>(dockStr, ignoreCase: true, out var dock))
                     DockPanel.SetDock(control, dock);
             }
 

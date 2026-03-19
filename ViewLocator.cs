@@ -32,6 +32,12 @@ public class ViewLocator : IDataTemplate
 
     public bool Match(object? data)
     {
-        return data is ViewModelBase;
+        if (data is null)
+            return false;
+
+        // Support classic MVVM VMs and Dock's document VMs
+        // (e.g., DockDocumentViewModel) that don't inherit ViewModelBase.
+        return data is ViewModelBase
+               || data.GetType().Name.EndsWith("ViewModel", StringComparison.Ordinal);
     }
 }

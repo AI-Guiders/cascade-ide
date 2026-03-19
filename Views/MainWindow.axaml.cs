@@ -32,6 +32,7 @@ public partial class MainWindow : Window
     private IDisposable? _highlightHideTimer;
     private BreakpointLineRenderer? _breakpointRenderer;
     private DebugCurrentLineRenderer? _debugCurrentLineRenderer;
+    private static readonly object HighlightLogLock = new();
 
     public MainWindow()
     {
@@ -240,40 +241,161 @@ public partial class MainWindow : Window
 
     private void SetupEditorAndTextMate()
     {
-        var editor = this.FindControl<TextEditor>("Editor");
-        if (editor is null)
+        if (DataContext is not ViewModels.MainWindowViewModel vmSetup)
             return;
 
         // Use a dark TextMate theme to keep syntax readable in Focus/Balanced/Power dark palettes.
         _registryOptions = new RegistryOptions(ThemeName.DarkPlus);
-        _textMateInstallation = editor.InstallTextMate(_registryOptions);
-
-        editor.Document.Changed += OnEditorDocumentChanged;
-
         _languageService ??= new Services.CSharpLanguageService();
-        _editorIntelligence ??= new Services.EditorIntelligence(editor, _languageService, () =>
+
+        // Providers must always read/write the *active* dock document editor.
+        vmSetup.SetEditorStateProvider(maxPreview =>
         {
-            if (DataContext is ViewModels.MainWindowViewModel vm)
-                return (vm.CurrentFilePath, editor.Document.Text);
-            return (null, editor.Document.Text);
+            var active = TryGetActiveDockEditor();
+            return active is null ? null : GetEditorState(active, vmSetup.CurrentFilePath, maxPreview);
         });
-        _editorIntelligence.Attach();
-
-        if (DataContext is ViewModels.MainWindowViewModel vmSetup)
+        vmSetup.SetEditorContentRangeProvider((startLine, endLine) =>
         {
-            vmSetup.SetEditorStateProvider(maxPreview => GetEditorState(editor, vmSetup.CurrentFilePath, maxPreview));
-            vmSetup.SetEditorContentRangeProvider((startLine, endLine) => GetEditorContentRange(editor, startLine, endLine));
-            vmSetup.SetApplyEdit((path, sl, sc, el, ec, newText) => ApplyEditInEditor(editor, vmSetup, path, sl, sc, el, ec, newText));
-            vmSetup.SetFocusEditor(() => editor.Focus());
+            var active = TryGetActiveDockEditor();
+            return active is null ? "" : GetEditorContentRange(active, startLine, endLine);
+        });
+        vmSetup.SetApplyEdit((path, sl, sc, el, ec, newText) =>
+            ApplyEditInActiveDockEditor(vmSetup, path, sl, sc, el, ec, newText));
+        vmSetup.SetFocusEditor(() =>
+        {
+            var active = TryGetActiveDockEditor();
+            active?.Focus();
+        });
 
-            _breakpointRenderer = new BreakpointLineRenderer(() => vmSetup.AllBreakpointLinesInCurrentFile);
-            editor.TextArea.TextView.BackgroundRenderers.Add(_breakpointRenderer);
-            _debugCurrentLineRenderer = new DebugCurrentLineRenderer(() => vmSetup.DebugCurrentLineInCurrentFile);
-            editor.TextArea.TextView.BackgroundRenderers.Add(_debugCurrentLineRenderer);
-            editor.TextArea.PointerPressed += (s, e) => OnEditorMarginPointerPressed(e, editor, vmSetup);
+        // Initial attachment (if a dock editor already exists).
+        TryAttachTextMateAndRenderers();
+        SyncFromViewModel();
+    }
+
+    private void TryAttachTextMateAndRenderers()
+    {
+        if (DataContext is not ViewModels.MainWindowViewModel vmSetup)
+            return;
+
+        var editor = TryGetActiveDockEditor();
+        if (editor is null)
+        {
+            LogHighlight("TryAttachTextMateAndRenderers: active editor not found.");
+            return;
         }
 
+        try
+        {
+            _textMateInstallation = editor.InstallTextMate(_registryOptions!);
+            LogHighlight($"InstallTextMate: ok, file='{vmSetup.CurrentFilePath ?? "<null>"}'.");
+        }
+        catch (Exception ex)
+        {
+            LogHighlight($"InstallTextMate: FAILED: {ex}");
+            throw;
+        }
+        ApplyGrammarByFilePath(editor, vmSetup.CurrentFilePath);
+
+        _editorIntelligence = new Services.EditorIntelligence(editor, _languageService!, () =>
+            (vmSetup.CurrentFilePath, editor.Document.Text));
+        _editorIntelligence.Attach();
+
+        _breakpointRenderer = new BreakpointLineRenderer(() => vmSetup.AllBreakpointLinesInCurrentFile);
+        editor.TextArea.TextView.BackgroundRenderers.Add(_breakpointRenderer);
+
+        _debugCurrentLineRenderer = new DebugCurrentLineRenderer(() => vmSetup.DebugCurrentLineInCurrentFile);
+        editor.TextArea.TextView.BackgroundRenderers.Add(_debugCurrentLineRenderer);
+
+        editor.TextArea.PointerPressed -= OnDockEditorPointerPressed;
+        editor.TextArea.PointerPressed += OnDockEditorPointerPressed;
+
+        void OnDockEditorPointerPressed(object? s, PointerPressedEventArgs e)
+        {
+            // Use the editor instance that owns this pointer event.
+            OnEditorMarginPointerPressed(e, editor, vmSetup);
+        }
+    }
+
+    /// <summary>
+    /// Called by DockDocumentView when its editor is fully created in visual tree.
+    /// Ensures TextMate/grammar attach happens after the editor is actually available.
+    /// </summary>
+    internal void AttachTextMateWhenEditorReady()
+    {
+        TryAttachTextMateAndRenderers();
         SyncFromViewModel();
+    }
+
+    private TextEditor? TryGetActiveDockEditor()
+    {
+        if (DataContext is not ViewModels.MainWindowViewModel vm)
+            return null;
+
+        var targetPath = vm.CurrentFilePath;
+        if (string.IsNullOrWhiteSpace(targetPath))
+            return null;
+
+        foreach (var v in EnumerateVisualDescendants(this))
+        {
+            if (v is not DockDocumentView dockView)
+                continue;
+
+            if (dockView.DataContext is not ViewModels.DockDocumentViewModel dv)
+                continue;
+
+            if (!string.Equals(dv.Doc.FilePath, targetPath, StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            return dockView.FindControl<TextEditor>("Editor");
+        }
+
+        // Fallback: if we can't match by path, try any dock editor named "Editor".
+        foreach (var v in EnumerateVisualDescendants(this))
+        {
+            if (v is DockDocumentView dockView && dockView.FindControl<TextEditor>("Editor") is { } ed)
+                return ed;
+        }
+
+        return null;
+    }
+
+    private static IEnumerable<Visual> EnumerateVisualDescendants(Visual root)
+    {
+        foreach (var child in root.GetVisualChildren())
+        {
+            yield return child;
+            foreach (var grandChild in EnumerateVisualDescendants(child))
+                yield return grandChild;
+        }
+    }
+
+    private void ApplyEditInActiveDockEditor(
+        ViewModels.MainWindowViewModel vmSetup,
+        string filePath,
+        int startLine,
+        int startColumn,
+        int endLine,
+        int endColumn,
+        string newText)
+    {
+        if (string.IsNullOrWhiteSpace(filePath))
+            return;
+
+        if (vmSetup.CurrentFilePath is null ||
+            !string.Equals(vmSetup.CurrentFilePath, filePath, StringComparison.OrdinalIgnoreCase))
+            return;
+
+        var editor = TryGetActiveDockEditor();
+        if (editor is null)
+            return;
+
+        var text = editor.Document.Text;
+        int start = LineColumnToOffset(text, startLine, startColumn);
+        int end = LineColumnToOffset(text, endLine, endColumn);
+        if (start < 0 || end < 0)
+            return;
+
+        editor.Document.Replace(start, end - start, newText);
     }
 
     private static Services.EditorStateDto GetEditorState(TextEditor editor, string? currentFilePath, int? maxPreviewChars)
@@ -351,11 +473,11 @@ public partial class MainWindow : Window
 
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName is nameof(ViewModels.MainWindowViewModel.CurrentFilePath) or nameof(ViewModels.MainWindowViewModel.EditorText))
+        if (e.PropertyName is nameof(ViewModels.MainWindowViewModel.CurrentFilePath))
         {
             SyncFromViewModel();
-            if (e.PropertyName is nameof(ViewModels.MainWindowViewModel.CurrentFilePath))
-                _languageService?.InvalidateCache();
+            _languageService?.InvalidateCache();
+            TryAttachTextMateAndRenderers();
         }
         if (e.PropertyName is nameof(ViewModels.MainWindowViewModel.EditorSelectionStart) or nameof(ViewModels.MainWindowViewModel.EditorSelectionLength)
             && DataContext is ViewModels.MainWindowViewModel vm && vm.EditorSelectionStart is { } start && vm.EditorSelectionLength is { } length)
@@ -392,7 +514,7 @@ public partial class MainWindow : Window
             or nameof(ViewModels.MainWindowViewModel.DebugPositionFile)
             or nameof(ViewModels.MainWindowViewModel.DebugPositionLine))
         {
-            var ed = this.FindControl<TextEditor>("Editor");
+            var ed = TryGetActiveDockEditor();
             if (ed is not null)
             {
                 ed.TextArea.TextView.Redraw();
@@ -432,7 +554,7 @@ public partial class MainWindow : Window
 
     private void ApplyEditorSelection(int start, int length)
     {
-        var editor = this.FindControl<TextEditor>("Editor");
+        var editor = TryGetActiveDockEditor();
         if (editor is null)
             return;
         var docLen = editor.Document.TextLength;
@@ -554,14 +676,16 @@ public partial class MainWindow : Window
 
     private void SyncFromViewModel()
     {
-        var editor = this.FindControl<TextEditor>("Editor");
+        var editor = TryGetActiveDockEditor();
         if (editor is null || DataContext is not ViewModels.MainWindowViewModel vm)
             return;
 
         _suppressEditorSync = true;
         try
         {
-            editor.Document.Text = vm.EditorText ?? "";
+            var desired = vm.EditorText ?? "";
+            if (!string.Equals(editor.Document.Text, desired, StringComparison.Ordinal))
+                editor.Document.Text = desired;
             ApplyGrammarByFilePath(editor, vm.CurrentFilePath);
         }
         finally
@@ -573,21 +697,49 @@ public partial class MainWindow : Window
     private void ApplyGrammarByFilePath(TextEditor editor, string? filePath)
     {
         if (_textMateInstallation is null || _registryOptions is null)
+        {
+            LogHighlight("ApplyGrammarByFilePath: skipped (_textMateInstallation/_registryOptions is null).");
             return;
+        }
 
         var ext = string.IsNullOrEmpty(filePath) ? "" : Path.GetExtension(filePath).ToLowerInvariant();
         if (!Services.EditorLanguageSupport.ExtensionToGrammarExtension.TryGetValue(ext, out var grammarExt))
+        {
+            LogHighlight($"ApplyGrammarByFilePath: no grammar mapping for ext='{ext}' file='{filePath ?? "<null>"}'.");
             return;
+        }
 
         try
         {
             var lang = _registryOptions.GetLanguageByExtension(grammarExt);
             var scope = _registryOptions.GetScopeByLanguageId(lang.Id);
             _textMateInstallation.SetGrammar(scope);
+            LogHighlight($"ApplyGrammarByFilePath: OK file='{filePath ?? "<null>"}' ext='{ext}' grammarExt='{grammarExt}' langId='{lang.Id}' scope='{scope}'.");
+        }
+        catch (Exception ex)
+        {
+            // грамматика не в бандле — не меняем подсветку
+            LogHighlight($"ApplyGrammarByFilePath: FAILED file='{filePath ?? "<null>"}' ext='{ext}' grammarExt='{grammarExt}': {ex}");
+        }
+    }
+
+    private static void LogHighlight(string message)
+    {
+        try
+        {
+            var baseDir = AppContext.BaseDirectory;
+            var logDir = Path.Combine(baseDir, ".cascade-ide");
+            Directory.CreateDirectory(logDir);
+            var logPath = Path.Combine(logDir, "editor-highlight-log.txt");
+            var line = $"[{DateTime.UtcNow:yyyy-MM-dd HH:mm:ss.fff} UTC] {message}{Environment.NewLine}";
+            lock (HighlightLogLock)
+            {
+                File.AppendAllText(logPath, line);
+            }
         }
         catch
         {
-            // грамматика не в бандле — не меняем подсветку
+            // Never crash UI because of debug logging.
         }
     }
 
@@ -596,7 +748,7 @@ public partial class MainWindow : Window
         if (_suppressEditorSync || DataContext is not ViewModels.MainWindowViewModel vm)
             return;
 
-        var editor = this.FindControl<TextEditor>("Editor");
+        var editor = sender as TextEditor ?? TryGetActiveDockEditor();
         if (editor is null)
             return;
 
