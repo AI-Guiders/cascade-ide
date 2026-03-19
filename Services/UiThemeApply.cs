@@ -80,6 +80,15 @@ public static class UiThemeApply
         public const string McpBannerBackground = "CascadeTheme.McpBannerBackground";
         public const string McpBannerForeground = "CascadeTheme.McpBannerForeground";
         public const string PreviewWindowBackground = "CascadeTheme.PreviewWindowBackground";
+        /// <summary>Опционально: секция power_cockpit в JSON темы (неон, safety, телеметрия).</summary>
+        public const string PowerNeonBorder = "CascadeTheme.PowerNeonBorder";
+        public const string PowerNeonAccent = "CascadeTheme.PowerNeonAccent";
+        public const string PowerCockpitPanelBackground = "CascadeTheme.PowerCockpitPanelBackground";
+        public const string PowerTelemetryStripBackground = "CascadeTheme.PowerTelemetryStripBackground";
+        public const string PowerSafetyL1 = "CascadeTheme.PowerSafetyL1";
+        public const string PowerSafetyL2 = "CascadeTheme.PowerSafetyL2";
+        public const string PowerSafetyL3 = "CascadeTheme.PowerSafetyL3";
+        public const string PowerEmergency = "CascadeTheme.PowerEmergency";
     }
 
     /// <summary>Применить тему из JSON (формат ide_get_ui_theme). Вызывать из UI-потока. Возвращает "OK" или сообщение об ошибке (для ответа тулу ide_set_ui_theme).</summary>
@@ -140,8 +149,24 @@ public static class UiThemeApply
             Set(res, Keys.McpBannerBackground, GetColor(root, "mcp_banner", "background"));
             Set(res, Keys.McpBannerForeground, GetColor(root, "mcp_banner", "foreground"));
             Set(res, Keys.PreviewWindowBackground, GetColor(root, "preview_window", "background"));
+            if (root.TryGetProperty("power_cockpit", out var pc))
+            {
+                Set(res, Keys.PowerNeonBorder, GetColorFrom(pc, "neon_border"));
+                Set(res, Keys.PowerNeonAccent, GetColorFrom(pc, "neon_accent"));
+                Set(res, Keys.PowerCockpitPanelBackground, GetColorFrom(pc, "panel_background"));
+                Set(res, Keys.PowerTelemetryStripBackground, GetColorFrom(pc, "telemetry_strip_background"));
+                Set(res, Keys.PowerSafetyL1, GetColorFrom(pc, "safety_l1"));
+                Set(res, Keys.PowerSafetyL2, GetColorFrom(pc, "safety_l2"));
+                Set(res, Keys.PowerSafetyL3, GetColorFrom(pc, "safety_l3"));
+                Set(res, Keys.PowerEmergency, GetColorFrom(pc, "emergency"));
+            }
             return "OK";
         }
+    }
+
+    private static string? GetColorFrom(JsonElement parent, string prop)
+    {
+        return parent.TryGetProperty(prop, out var p) ? p.GetString() : null;
     }
 
     /// <summary>Запустить применение темы в UI-потоке и вернуть результат (для вызова из MCP).</summary>

@@ -1,42 +1,52 @@
 {
-  "main_window": { "background": "#0B1020" },
-  "menu": { "background": "#10162B", "foreground": "#D8E8FF" },
+  "main_window": { "background": "#060A14" },
+  "menu": { "background": "#0C1224", "foreground": "#E0F4FF" },
   "button": {
-    "background": "#192445",
-    "foreground": "#DDE8FF",
-    "border_brush": "#415A9E",
-    "hover_background": "#24366A",
-    "disabled_background": "#131B34",
-    "disabled_foreground": "#7A8AB3"
+    "background": "#152042",
+    "foreground": "#E8F0FF",
+    "border_brush": "#00C8E8",
+    "hover_background": "#1E2D5C",
+    "disabled_background": "#0E1428",
+    "disabled_foreground": "#5A6A8A"
   },
-  "toolbar": { "background": "#111A33" },
-  "toolbar_text": { "foreground": "#CDE4FF", "error_foreground": "#FF8FA3" },
-  "editor": { "background": "#0A1327", "foreground": "#D9E6FF" },
+  "toolbar": { "background": "#0A1020" },
+  "toolbar_text": { "foreground": "#B8DCFF", "error_foreground": "#FF6B8A" },
+  "editor": { "background": "#050A18", "foreground": "#E2EEFF" },
   "editor_column": {
-    "border_brush": "#2A3E76",
-    "background": "#0B142A",
-    "current_file_foreground": "#8FB3FF"
+    "border_brush": "#00A8CC",
+    "background": "#070E1C",
+    "current_file_foreground": "#7AE0FF"
   },
-  "markdown_preview_panel": { "background": "#121D39", "border_brush": "#2A3E76" },
-  "solution_explorer": { "border_brush": "#2A3E76", "header_foreground": "#CDE4FF" },
+  "markdown_preview_panel": { "background": "#0C1428", "border_brush": "#00A8CC" },
+  "solution_explorer": { "border_brush": "#00A8CC", "header_foreground": "#C8E8FF" },
   "build_output": {
-    "background": "#101A34",
+    "background": "#080E1C",
     "foreground": "#D9E6FF",
     "border_brush": "#35539D"
   },
   "chat_panel": {
-    "background": "#101A34",
-    "label_foreground": "#9CC2FF",
-    "message_bubble_background": "#1A2750",
-    "message_content_foreground": "#E5EFFF",
-    "send_button_background": "#6A4DFF",
+    "background": "#080E1E",
+    "label_foreground": "#7AE0FF",
+    "message_bubble_background": "#101C3A",
+    "message_content_foreground": "#EEF6FF",
+    "send_button_background": "#8A4DFF",
     "send_button_foreground": "#FFFFFF"
   },
   "terminal": {
-    "background": "#090F1E",
-    "foreground": "#C8DEFF",
-    "input_background": "#16274F"
+    "background": "#040810",
+    "foreground": "#B8DEFF",
+    "input_background": "#0E1A38"
   },
-  "mcp_banner": { "background": "#1E2A59", "foreground": "#8AD9FF" },
-  "preview_window": { "background": "#101A34" }
+  "mcp_banner": { "background": "#102050", "foreground": "#7AE0FF" },
+  "preview_window": { "background": "#0C1428" },
+  "power_cockpit": {
+    "neon_border": "#00E5FF",
+    "neon_accent": "#D080FF",
+    "panel_background": "#0A1022",
+    "telemetry_strip_background": "#060C18",
+    "safety_l1": "#1E4A7A",
+    "safety_l2": "#8A6E18",
+    "safety_l3": "#5A28A0",
+    "emergency": "#FF2244"
+  }
 }

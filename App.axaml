@@ -43,6 +43,14 @@
             <SolidColorBrush x:Key="CascadeTheme.McpBannerBackground">#E3F2FD</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.McpBannerForeground">#1565C0</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.PreviewWindowBackground">#F0F0F0</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.PowerNeonBorder">#00C8E8</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.PowerNeonAccent">#BF5FFF</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.PowerCockpitPanelBackground">#0C1428</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.PowerTelemetryStripBackground">#080E18</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.PowerSafetyL1">#2A5A8A</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.PowerSafetyL2">#8A6A1A</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.PowerSafetyL3">#5A2A8A</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.PowerEmergency">#E02040</SolidColorBrush>
         </ResourceDictionary>
     </Application.Resources>
 
