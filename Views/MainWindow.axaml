@@ -13,7 +13,7 @@
         x:Name="RootWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="CascadeIDE"
+        Title="{Binding WindowTitle}"
         Background="{DynamicResource CascadeTheme.MainWindowBackground}"
         Width="1000" Height="600">
 
@@ -108,6 +108,10 @@
                 <MenuItem Header="_Вывод сборки" ToggleType="CheckBox" IsChecked="{Binding IsBuildOutputVisible, Mode=TwoWay}"/>
                 <MenuItem Header="_Чат" ToggleType="CheckBox" IsChecked="{Binding IsChatPanelExpanded, Mode=TwoWay}"/>
                 <MenuItem Header="_Терминал" ToggleType="CheckBox" IsChecked="{Binding IsTerminalVisible, Mode=TwoWay}"/>
+                <MenuItem Header="Док_ инструментирования (события, тесты, отладка)"
+                          ToggleType="CheckBox"
+                          IsChecked="{Binding IsInstrumentationDockVisible, Mode=TwoWay}"
+                          IsVisible="{Binding ShowInstrumentationLayoutMenu}"/>
                 <Separator/>
                 <MenuItem Header="_Режим интерфейса">
                     <MenuItem Header="_Focus" ToggleType="Radio" IsChecked="{Binding IsFocusMode}" Command="{Binding SetFocusModeCommand}"/>

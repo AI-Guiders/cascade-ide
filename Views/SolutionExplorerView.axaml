@@ -12,17 +12,17 @@
             BorderThickness="0,0,1,0"
             Padding="4"
             IsVisible="{Binding IsSolutionExplorerVisible}">
-        <DockPanel>
-            <TextBlock DockPanel.Dock="Top"
+        <Grid RowDefinitions="Auto,*,4,Auto">
+            <TextBlock Grid.Row="0"
                        Text="Решение"
                        FontWeight="SemiBold"
                        Margin="4"
                        Foreground="{DynamicResource CascadeTheme.SolutionExplorerHeaderForeground}"/>
-            <TreeView ItemsSource="{Binding SolutionRoots}"
+            <TreeView Grid.Row="1"
+                      ItemsSource="{Binding SolutionRoots}"
                       SelectedItem="{Binding SelectedSolutionItem}"
                       Margin="0,4,0,0">
                 <TreeView.Styles>
-                    <!-- Узлы дерева раскрыты по умолчанию, чтобы можно было спуститься к проектам и файлам -->
                     <Style Selector="TreeViewItem">
                         <Setter Property="IsExpanded" Value="True"/>
                     </Style>
@@ -39,6 +39,51 @@
                     </TreeDataTemplate>
                 </TreeView.ItemTemplate>
             </TreeView>
-        </DockPanel>
+            <GridSplitter Grid.Row="2"
+                          Height="4"
+                          ResizeDirection="Rows"
+                          Background="{DynamicResource CascadeTheme.SolutionExplorerBorderBrush}"
+                          IsVisible="{Binding IsPowerMode}"/>
+            <Border Grid.Row="3"
+                    IsVisible="{Binding IsPowerMode}"
+                    MaxHeight="200"
+                    MinHeight="72"
+                    Margin="0,4,0,0"
+                    Padding="4"
+                    BorderBrush="{DynamicResource CascadeTheme.EditorColumnBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top"
+                               Text="Очередь задач"
+                               FontWeight="SemiBold"
+                               Margin="0,0,0,4"
+                               Foreground="{DynamicResource CascadeTheme.SolutionExplorerHeaderForeground}"/>
+                    <TextBlock DockPanel.Dock="Top"
+                               Text="Очередь пуста — элементы появятся при постановке задач агентом."
+                               FontSize="11"
+                               TextWrapping="Wrap"
+                               IsVisible="{Binding !HasPowerTaskQueueItems}"
+                               Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                               Margin="0,0,0,4"/>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding PowerTaskQueueItems}"
+                                      IsVisible="{Binding HasPowerTaskQueueItems}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="vm:PowerTaskQueueItemViewModel">
+                                    <Border Padding="4,2" Margin="0,0,0,2" CornerRadius="2"
+                                            Background="{DynamicResource CascadeTheme.ChatMessageBubbleBackground}">
+                                        <TextBlock Text="{Binding DisplayLine}"
+                                                   TextWrapping="Wrap"
+                                                   FontSize="11"
+                                                   Foreground="{DynamicResource CascadeTheme.SolutionExplorerHeaderForeground}"/>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </DockPanel>
+            </Border>
+        </Grid>
     </Border>
 </UserControl>

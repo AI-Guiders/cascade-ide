@@ -9,7 +9,12 @@
         VerticalScrollBarVisibility="Disabled">
         <StackPanel Orientation="Horizontal" Spacing="8" Background="{DynamicResource CascadeTheme.ToolbarBackground}">
             <Button x:Name="OpenSolutionButton" Content="Открыть решение" Command="{Binding OpenSolutionCommand}"/>
-            <Button Content="Собрать" Command="{Binding BuildSolutionCommand}" IsEnabled="{Binding !IsBuilding}"/>
+            <StackPanel Orientation="Horizontal" Spacing="6" IsVisible="{Binding IsFocusMode}">
+                <Button Content="Запуск (сборка)" Command="{Binding BuildSolutionCommand}" IsEnabled="{Binding !IsBuilding}"/>
+                <Button Content="Контрольная точка" Command="{Binding FocusCheckpointCommand}"/>
+                <Button Content="Откат" Command="{Binding FocusRollbackCommand}"/>
+            </StackPanel>
+            <Button Content="Собрать" Command="{Binding BuildSolutionCommand}" IsEnabled="{Binding !IsBuilding}" IsVisible="{Binding !IsFocusMode}"/>
             <TextBlock Text="Режим:" VerticalAlignment="Center" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}" Margin="8,0,0,0"/>
             <ComboBox Width="130"
                       ItemsSource="{Binding UiModeOptionsList}"

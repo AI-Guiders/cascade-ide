@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.Text.Json;
 using System.Windows.Input;
 using System.Xml.Linq;
@@ -51,9 +52,13 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _deepSeekApiKey = _aiKeys.DeepSeekApiKey ?? "";
         _isSolutionExplorerVisible = _settings.SolutionExplorerVisible;
         _isTerminalVisible = _settings.TerminalVisible;
+        _isInstrumentationDockVisible = _settings.InstrumentationDockVisible;
         _uiMode = NormalizeUiMode(_settings.UiMode);
         InitializeAgentUiDefaults();
+        RegisterAgentFeedHandlers();
         ApplyUiModeLayout(_uiMode, persist: false);
+        if (IsPowerMode)
+            Dispatcher.UIThread.Post(RefreshWorkspaceSnapshotCore, DispatcherPriority.Background);
         OpenDocuments.CollectionChanged += (_, _) =>
         {
             OnPropertyChanged(nameof(HasOpenDocuments));
@@ -158,6 +163,20 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         OnPropertyChanged(nameof(IsBottomPanelVisible));
         if (value)
             BottomPanelTabIndex = 1;
+    }
+
+    partial void OnIsInstrumentationDockVisibleChanged(bool value)
+    {
+        _settings.InstrumentationDockVisible = value;
+        SaveSettingsIfChanged();
+        if (value)
+        {
+            BottomPanelTabIndex = 2;
+            return;
+        }
+
+        if (BottomPanelTabIndex is >= 2 and <= 4)
+            BottomPanelTabIndex = IsTerminalVisible ? 0 : IsBuildOutputVisible ? 1 : 0;
     }
 
     partial void OnIsChatPanelExpandedChanged(bool value)
@@ -342,28 +361,18 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
 
     private void InitializeAgentUiDefaults()
     {
-        if (AgentToolCalls.Count == 0)
-        {
-            AgentToolCalls.Add("Analyze dependencies and touched files");
-            AgentToolCalls.Add("Run targeted diagnostics");
-            AgentToolCalls.Add("Propose minimal patch set");
-        }
+        // Keep operation/trace feeds empty until real runtime events arrive.
+        // This avoids demo-like placeholder content in production UI.
+    }
 
-        if (AgentTraceTimeline.Count == 0)
-        {
-            AgentTraceTimeline.Add("[Plan] Build safe refactor strategy");
-            AgentTraceTimeline.Add("[Action] Apply focused edits");
-            AgentTraceTimeline.Add("[Observation] Build green, tests partial");
-            AgentTraceTimeline.Add("[Next] Run affected tests and cleanup");
-        }
-
-        if (EventTimeline.Count == 0)
-        {
-            EventTimeline.Add("10:02 — file modified");
-            EventTimeline.Add("10:05 — analysis started");
-            EventTimeline.Add("10:07 — risk detected");
-            EventTimeline.Add("10:08 — patch prepared");
-        }
+    private void RegisterAgentFeedHandlers()
+    {
+        AgentToolCalls.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasAgentToolCalls));
+        AgentTraceSteps.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasAgentTraceSteps));
+        PowerTaskQueueItems.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasPowerTaskQueueItems));
+        EventTimeline.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasEventTimeline));
+        ChatMessages.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasChatMessages));
+        FocusPlanItems.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasFocusPlanItems));
     }
 
     private void ApplyUiModeLayout(string mode, bool persist)
@@ -372,10 +381,10 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         switch (normalized)
         {
             case "Focus":
-                IsSolutionExplorerVisible = false;
+                IsSolutionExplorerVisible = true;
                 IsBuildOutputVisible = false;
                 IsTerminalVisible = false;
-                IsChatPanelExpanded = false;
+                IsChatPanelExpanded = true;
                 EditorGroupCount = 1;
                 break;
             case "Power":
@@ -506,22 +515,45 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     [NotifyPropertyChangedFor(nameof(TelemetryButtonText))]
     [NotifyPropertyChangedFor(nameof(ShowEditorGroup2))]
     [NotifyPropertyChangedFor(nameof(ShowEditorGroup3))]
+    [NotifyPropertyChangedFor(nameof(IsRiskCardVisible))]
+    [NotifyPropertyChangedFor(nameof(IsResultCardVisible))]
+    [NotifyPropertyChangedFor(nameof(ShowAgentOperationsBlock))]
+    [NotifyPropertyChangedFor(nameof(ShowInstrumentationTabs))]
+    [NotifyPropertyChangedFor(nameof(ShowInstrumentationLayoutMenu))]
+    [NotifyPropertyChangedFor(nameof(IsBottomPanelVisible))]
+    [NotifyPropertyChangedFor(nameof(WindowTitle))]
     private string _uiMode = "Balanced";
+
+    /// <summary>Заголовок главного окна (в Power — подпись «Autonomous Agent Cockpit»).</summary>
+    public string WindowTitle =>
+        IsPowerMode
+            ? "CascadeIDE — Power Mode [Autonomous Agent Cockpit]"
+            : "CascadeIDE";
 
     public bool IsFocusMode => string.Equals(UiMode, "Focus", StringComparison.OrdinalIgnoreCase);
     public bool IsBalancedMode => string.Equals(UiMode, "Balanced", StringComparison.OrdinalIgnoreCase);
     public bool IsPowerMode => string.Equals(UiMode, "Power", StringComparison.OrdinalIgnoreCase);
-    public bool ShowTaskBar => !IsFocusMode;
+    public bool ShowTaskBar => true;
     public bool ShowQuickActions => !IsFocusMode;
-    public bool ShowAgentOperations => !IsFocusMode;
+    public bool ShowAgentOperations => true;
+    /// <summary>В Focus справа показываем план и гейт; блок «операции» переносим в Balanced/Power.</summary>
+    public bool ShowAgentOperationsBlock => !IsFocusMode;
     public bool ShowAgentTrace => IsPowerMode;
     public bool ShowPowerTelemetry => IsPowerMode;
     public bool ShowSafetyControls => IsPowerMode;
     public bool ShowTelemetryHiddenHint => ShowPowerTelemetry && !IsTerminalVisible;
-    public bool ShowTelemetryStrip => !IsFocusMode;
+    /// <summary>Полоска build/tests/debug/git — и в Focus (по концепту).</summary>
+    public bool ShowTelemetryStrip => true;
     public string TelemetryButtonText => IsTerminalVisible ? "Telemetry: on" : "Show telemetry";
     public bool ShowEditorGroup2 => EditorGroupCount >= 2;
     public bool ShowEditorGroup3 => EditorGroupCount >= 3;
+
+    /// <summary>Balanced/Power: нижние вкладки «События / Тесты / Отладка». В Focus всегда скрыты.</summary>
+    public bool ShowInstrumentationTabs =>
+        !IsFocusMode && (IsBalancedMode || IsPowerMode) && IsInstrumentationDockVisible;
+
+    /// <summary>Пункт меню для док-панели инструментирования (не в Focus).</summary>
+    public bool ShowInstrumentationLayoutMenu => !IsFocusMode;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowEditorGroup2))]
@@ -532,65 +564,154 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private int _activeEditorGroup = 1;
 
     [ObservableProperty]
-    private string _activeTaskTitle = "Refactor payment retries";
+    private string _activeTaskTitle = "Нет активной задачи";
 
     [ObservableProperty]
-    private string _activeTaskStatus = "In progress";
+    private string _activeTaskStatus = "Ожидание";
 
     [ObservableProperty]
-    private int _activeTaskProgress = 72;
+    [NotifyPropertyChangedFor(nameof(IsActiveTaskProgressVisible))]
+    private int _activeTaskProgress;
 
     [ObservableProperty]
-    private string _activeObjective = "Refactor retry pipeline with predictable backoff and safer error handling.";
+    private string _activeObjective = "Нет активной операции агента.";
 
     [ObservableProperty]
-    private string _riskSummary = "2 potential null references identified.";
+    [NotifyPropertyChangedFor(nameof(IsRiskSummaryVisible))]
+    [NotifyPropertyChangedFor(nameof(IsRiskCardVisible))]
+    private string _riskSummary = "Риски не зафиксированы.";
 
     [ObservableProperty]
-    private string _resultSummary = "Build green; targeted tests pending.";
+    [NotifyPropertyChangedFor(nameof(IsResultSummaryVisible))]
+    [NotifyPropertyChangedFor(nameof(IsResultCardVisible))]
+    private string _resultSummary = "Результатов пока нет.";
 
     [ObservableProperty]
-    private string _nextActionSummary = "Run affected tests and validate rollback strategy.";
+    private string _nextActionSummary = "Ожидание следующего шага.";
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsSafetyL1))]
     [NotifyPropertyChangedFor(nameof(IsSafetyL2))]
     [NotifyPropertyChangedFor(nameof(IsSafetyL3))]
+    [NotifyPropertyChangedFor(nameof(SafetyLevelDescription))]
+    [NotifyPropertyChangedFor(nameof(SafetyL1Opacity))]
+    [NotifyPropertyChangedFor(nameof(SafetyL2Opacity))]
+    [NotifyPropertyChangedFor(nameof(SafetyL3Opacity))]
     private string _safetyLevel = "L2";
 
     public bool IsSafetyL1 => string.Equals(SafetyLevel, "L1", StringComparison.OrdinalIgnoreCase);
     public bool IsSafetyL2 => string.Equals(SafetyLevel, "L2", StringComparison.OrdinalIgnoreCase);
     public bool IsSafetyL3 => string.Equals(SafetyLevel, "L3", StringComparison.OrdinalIgnoreCase);
 
-    [ObservableProperty]
-    private int _complexityBadge = 12;
+    /// <summary>Подпись режима безопасности (как на мокапе Power).</summary>
+    public string SafetyLevelDescription =>
+        SafetyLevel switch
+        {
+            "L1" => "Только чтение: без автоматических правок файлов.",
+            "L2" => "Правки после явного подтверждения.",
+            "L3" => "Автономный режим: цепочка шагов без запроса.",
+            _ => ""
+        };
+
+    public double SafetyL1Opacity => IsSafetyL1 ? 1 : 0.38;
+    public double SafetyL2Opacity => IsSafetyL2 ? 1 : 0.38;
+    public double SafetyL3Opacity => IsSafetyL3 ? 1 : 0.38;
 
     [ObservableProperty]
-    private int _impactedTestsBadge = 5;
+    [NotifyPropertyChangedFor(nameof(IsComplexityBadgeVisible))]
+    private int _complexityBadge;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsImpactedTestsBadgeVisible))]
+    [NotifyPropertyChangedFor(nameof(TelemetryTestsText))]
+    [NotifyPropertyChangedFor(nameof(TelemetryTestsCockpitShort))]
+    private int _impactedTestsBadge;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(TelemetryGitText))]
-    private int _filesChangedBadge = 3;
+    [NotifyPropertyChangedFor(nameof(IsFilesChangedBadgeVisible))]
+    private int _filesChangedBadge;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(TelemetryTestsText))]
+    [NotifyPropertyChangedFor(nameof(TelemetryTestsCockpitShort))]
     private string _lastTestSummary = "";
 
     public ObservableCollection<string> AgentToolCalls { get; } = [];
     public ObservableCollection<string> AgentTraceTimeline { get; } = [];
+    public ObservableCollection<AgentTraceStepViewModel> AgentTraceSteps { get; } = [];
     public ObservableCollection<string> EventTimeline { get; } = [];
+    public bool HasAgentToolCalls => AgentToolCalls.Count > 0;
+    public bool HasAgentTraceSteps => AgentTraceSteps.Count > 0;
+
+    /// <summary>Очередь задач (Power mode, под деревом решения).</summary>
+    public ObservableCollection<PowerTaskQueueItemViewModel> PowerTaskQueueItems { get; } = [];
+
+    public bool HasPowerTaskQueueItems => PowerTaskQueueItems.Count > 0;
+
+    /// <summary>Снимок раскладки UI (JSON), полоса телеметрии в Power.</summary>
+    [ObservableProperty]
+    private string _workspaceSnapshotJson = "";
+
+    public bool HasEventTimeline => EventTimeline.Count > 0;
+    public bool HasChatMessages => ChatMessages.Count > 0;
+
+    public ObservableCollection<FocusPlanItemViewModel> FocusPlanItems { get; } = [];
+
+    public bool HasFocusPlanItems => FocusPlanItems.Count > 0;
+
+    public bool IsRiskSummaryVisible =>
+        !string.IsNullOrWhiteSpace(RiskSummary)
+        && !string.Equals(RiskSummary, "Риски не зафиксированы.", StringComparison.Ordinal);
+
+    public bool IsResultSummaryVisible =>
+        !string.IsNullOrWhiteSpace(ResultSummary)
+        && !string.Equals(ResultSummary, "Результатов пока нет.", StringComparison.Ordinal);
+
+    public bool IsRiskCardVisible => !IsFocusMode && IsRiskSummaryVisible;
+    public bool IsResultCardVisible => !IsFocusMode && IsResultSummaryVisible;
+    public bool IsComplexityBadgeVisible => ComplexityBadge > 0;
+    public bool IsImpactedTestsBadgeVisible => ImpactedTestsBadge > 0;
+    public bool IsFilesChangedBadgeVisible => FilesChangedBadge > 0;
+    public bool IsActiveTaskProgressVisible => ActiveTaskProgress > 0;
 
     public string TelemetryBuildText => IsBuilding ? "Build: running…" : "Build: idle";
+
+    /// <summary>Короткий статус для «кольца» сборки в Power cockpit.</summary>
+    public string TelemetryBuildCockpitShort => IsBuilding ? "BUILD…" : "READY";
 
     public string TelemetryTestsText =>
         !string.IsNullOrWhiteSpace(LastTestSummary)
             ? $"Tests: {LastTestSummary}"
             : $"Tests: impacted {ImpactedTestsBadge}";
 
+    /// <summary>Компактная строка тестов для полосы Power.</summary>
+    public string TelemetryTestsCockpitShort =>
+        !string.IsNullOrWhiteSpace(LastTestSummary)
+            ? (LastTestSummary.Length > 36 ? string.Concat(LastTestSummary.AsSpan(0, 33), "…") : LastTestSummary)
+            : $"imp {ImpactedTestsBadge}";
+
+    /// <summary>Компактный Git для полосы Power.</summary>
+    public string TelemetryGitCockpitShort
+    {
+        get
+        {
+            var br = GitBranchSummary ?? "";
+            if (br.Length > 16)
+                br = string.Concat(br.AsSpan(0, 14), "…");
+            var delta = GitStagedCount + GitUnstagedCount + GitUntrackedCount;
+            return string.IsNullOrWhiteSpace(br) ? $"Δ{delta}" : $"{br} · Δ{delta}";
+        }
+    }
+
     public string TelemetryDebugText =>
         IsDebugPanelVisible
             ? $"Debug: paused (frames {DebugStackFrames.Count}, vars {DebugVariables.Count})"
             : "Debug: idle";
+
+    /// <summary>Короткий статус отладки для Power.</summary>
+    public string TelemetryDebugCockpitShort =>
+        IsDebugPanelVisible ? $"DBG · {DebugStackFrames.Count}fr" : "DBG · —";
 
     public string TelemetryGitText
     {
@@ -612,9 +733,9 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     public bool IsBuildPanelHidden => !IsBuildOutputVisible;
     public bool IsChatPanelHidden => !IsChatPanelExpanded;
     public bool IsTerminalPanelHidden => !IsTerminalVisible;
-    public bool IsBottomPanelVisible => IsTerminalVisible || IsBuildOutputVisible;
+    public bool IsBottomPanelVisible => IsTerminalVisible || IsBuildOutputVisible || ShowInstrumentationTabs;
 
-    /// <summary>0 = Terminal, 1 = Build Output.</summary>
+    /// <summary>0 = Terminal, 1 = Build output, 2 = Events, 3 = Tests, 4 = Debug.</summary>
     [ObservableProperty]
     private int _bottomPanelTabIndex;
 
@@ -624,10 +745,21 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(BuildSolutionCommand))]
     [NotifyPropertyChangedFor(nameof(TelemetryBuildText))]
+    [NotifyPropertyChangedFor(nameof(TelemetryBuildCockpitShort))]
     private bool _isBuilding;
 
     [ObservableProperty]
     private bool _isBuildOutputVisible;
+
+    /// <summary>Вкладки «События / Тесты / Отладка» в Balanced/Power (сохраняется в настройках).</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowInstrumentationTabs))]
+    [NotifyPropertyChangedFor(nameof(IsBottomPanelVisible))]
+    private bool _isInstrumentationDockVisible = true;
+
+    /// <summary>Накопленный текстовый лог прогонов тестов для вкладки «Тесты».</summary>
+    [ObservableProperty]
+    private string _testResultsOutput = "";
 
     public ObservableCollection<ChatMessageViewModel> ChatMessages { get; } = [];
 
@@ -769,6 +901,8 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         }
 
         ApplyUiModeLayout(normalized, persist: true);
+        if (string.Equals(normalized, "Power", StringComparison.OrdinalIgnoreCase))
+            Dispatcher.UIThread.Post(RefreshWorkspaceSnapshotCore, DispatcherPriority.Background);
     }
 
     public void LoadSendMessageKeyFromStorage()
@@ -794,18 +928,22 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(TelemetryGitText))]
+    [NotifyPropertyChangedFor(nameof(TelemetryGitCockpitShort))]
     private string _gitBranchSummary = "";
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(TelemetryGitText))]
+    [NotifyPropertyChangedFor(nameof(TelemetryGitCockpitShort))]
     private int _gitStagedCount;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(TelemetryGitText))]
+    [NotifyPropertyChangedFor(nameof(TelemetryGitCockpitShort))]
     private int _gitUnstagedCount;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(TelemetryGitText))]
+    [NotifyPropertyChangedFor(nameof(TelemetryGitCockpitShort))]
     private int _gitUntrackedCount;
 
     private async Task RefreshGitSummaryAsync()
@@ -1292,6 +1430,9 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     }
 
     [RelayCommand]
+    private void ToggleInstrumentationDock() => IsInstrumentationDockVisible = !IsInstrumentationDockVisible;
+
+    [RelayCommand]
     private void SetSingleEditorGroup() => EditorGroupCount = 1;
 
     [RelayCommand]
@@ -1488,12 +1629,102 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     }
 
     [RelayCommand]
+    private void ExplainTraceStep(AgentTraceStepViewModel? step)
+    {
+        if (step is null)
+            return;
+        IsChatPanelExpanded = true;
+        ChatInput =
+            $"Объясни шаг трассы [{step.Kind} / {step.Status}] ({step.TimestampText}): {step.Text}. Укажи намерение, риск и откат.";
+    }
+
+    [RelayCommand]
+    private void RollbackTraceStep(AgentTraceStepViewModel? step)
+    {
+        if (step is null)
+            return;
+        EventTimeline.Insert(0, $"{DateTime.Now:HH:mm:ss} — Запрошен откат для шага [{step.Kind}]");
+        IsChatPanelExpanded = true;
+        ChatInput =
+            $"Предложи минимальный откат для шага [{step.Kind}] ({step.TimestampText}): {step.Text}. Проверь состояние workspace.";
+    }
+
+    /// <summary>Добавить шаг в Agent Trace Timeline (Power); потокобезопасно.</summary>
+    public void AppendAgentTraceStep(string kind, string text, string status, DateTimeOffset? at = null)
+    {
+        void Add()
+        {
+            AgentTraceSteps.Add(new AgentTraceStepViewModel(kind, text, status, at));
+            while (AgentTraceSteps.Count > 200)
+                AgentTraceSteps.RemoveAt(0);
+        }
+
+        if (Dispatcher.UIThread.CheckAccess())
+            Add();
+        else
+            Dispatcher.UIThread.Post(Add);
+    }
+
+    private void RefreshWorkspaceSnapshotCore()
+    {
+        try
+        {
+            var json = GetUiLayoutProvider?.Invoke() ?? "{}";
+            if (json.Length > 4000)
+                json = json[..4000] + "\n…";
+            WorkspaceSnapshotJson = json;
+        }
+        catch (Exception ex)
+        {
+            WorkspaceSnapshotJson = JsonSerializer.Serialize(new { error = ex.Message });
+        }
+    }
+
+    [RelayCommand]
+    private void RefreshWorkspaceSnapshot() => RefreshWorkspaceSnapshotCore();
+
+    [RelayCommand]
     private void EmergencyStop()
     {
         IsBuilding = false;
         ActiveTaskStatus = "Paused";
         ResultSummary = "Autonomous flow paused by operator.";
         EventTimeline.Insert(0, $"{DateTime.Now:HH:mm:ss} — Emergency stop engaged");
+    }
+
+    /// <summary>Focus: зафиксировать контрольную точку в таймлайне и кратком результате.</summary>
+    [RelayCommand]
+    private void FocusCheckpoint()
+    {
+        var stamp = DateTime.Now;
+        EventTimeline.Insert(0, $"{stamp:HH:mm:ss} — Контрольная точка");
+        ResultSummary = $"Контрольная точка: {stamp:yyyy-MM-dd HH:mm}";
+    }
+
+    /// <summary>Focus: запрос на откат — подсказка в чат и событие в таймлайне.</summary>
+    [RelayCommand]
+    private void FocusRollback()
+    {
+        EventTimeline.Insert(0, $"{DateTime.Now:HH:mm:ss} — Запрошен откат");
+        IsChatPanelExpanded = true;
+        ChatInput = "Помоги безопасно откатить последние изменения (git или патчи). Оцени риск и предложи минимальный набор команд.";
+    }
+
+    /// <summary>Focus: подтвердить текущий шаг в гейте.</summary>
+    [RelayCommand]
+    private void ConfirmFocusStep()
+    {
+        EventTimeline.Insert(0, $"{DateTime.Now:HH:mm:ss} — Шаг подтверждён");
+        ActiveTaskStatus = "В работе";
+    }
+
+    /// <summary>Focus: отменить предложенный шаг.</summary>
+    [RelayCommand]
+    private void CancelFocusStep()
+    {
+        EventTimeline.Insert(0, $"{DateTime.Now:HH:mm:ss} — Шаг отменён");
+        NextActionSummary = "Ожидание следующего шага.";
+        ActiveTaskStatus = "Ожидание";
     }
 
     [RelayCommand]
@@ -2611,6 +2842,15 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             Dispatcher.UIThread.Post(() =>
             {
                 LastTestSummary = $"{parsed.Passed}/{parsed.Total} passed, {parsed.Failed} failed";
+                const int maxLogChars = 120_000;
+                var stamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                var block = $"=== {stamp} ===\n{LastTestSummary}\n\n{outStr}\n\n";
+                var combined = TestResultsOutput + block;
+                if (combined.Length > maxLogChars)
+                    combined = combined[^maxLogChars..];
+                TestResultsOutput = combined;
+                if (ShowInstrumentationTabs)
+                    BottomPanelTabIndex = 3;
             });
             var result = new
             {
@@ -2629,6 +2869,16 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         }
         catch (Exception ex)
         {
+            Dispatcher.UIThread.Post(() =>
+            {
+                const int maxLogChars = 120_000;
+                var stamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                var block = $"=== {stamp} (ошибка) ===\n{ex.Message}\n\n";
+                var combined = TestResultsOutput + block;
+                if (combined.Length > maxLogChars)
+                    combined = combined[^maxLogChars..];
+                TestResultsOutput = combined;
+            });
             return JsonSerializer.Serialize(new { success = false, error = ex.Message, mode, filter = filterExpression });
         }
     }
@@ -2990,6 +3240,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
                 DebugVariables.Add(new DebugVariableViewModel(v.Name, v.Value));
             OnPropertyChanged(nameof(IsDebugPanelVisible));
             OnPropertyChanged(nameof(TelemetryDebugText));
+            OnPropertyChanged(nameof(TelemetryDebugCockpitShort));
         });
     }
 
@@ -3083,6 +3334,8 @@ public sealed class DebugStackFrameViewModel(string name, string? file, int line
     public string Name { get; } = name;
     public string? File { get; } = file;
     public int Line { get; } = line;
+
+    public string DisplayText => $"{Name} — {File ?? ""}:{Line}";
 }
 
 /// <summary>Переменная для панели отладки.</summary>
@@ -3090,4 +3343,33 @@ public sealed class DebugVariableViewModel(string name, string value)
 {
     public string Name { get; } = name;
     public string Value { get; } = value;
+
+    public string DisplayText => $"{Name} = {Value}";
+}
+
+/// <summary>Structured trace step for Power-mode timeline cards.</summary>
+public sealed class AgentTraceStepViewModel
+{
+    public AgentTraceStepViewModel(string kind, string text, string status, DateTimeOffset? at = null)
+    {
+        Kind = kind;
+        Text = text;
+        Status = status;
+        var t = at ?? DateTimeOffset.Now;
+        TimestampText = t.ToLocalTime().ToString("HH:mm:ss.fff", CultureInfo.InvariantCulture);
+    }
+
+    public string Kind { get; }
+    public string Text { get; }
+    public string Status { get; }
+    public string TimestampText { get; }
+
+    public bool IsPlan => string.Equals(Kind, "PLAN", StringComparison.OrdinalIgnoreCase);
+    public bool IsAction => string.Equals(Kind, "ACTION", StringComparison.OrdinalIgnoreCase);
+    public bool IsObservation => string.Equals(Kind, "OBSERVATION", StringComparison.OrdinalIgnoreCase);
+    public bool IsNext => string.Equals(Kind, "NEXT", StringComparison.OrdinalIgnoreCase);
+
+    public bool IsSuccess => string.Equals(Status, "SUCCESS", StringComparison.OrdinalIgnoreCase);
+    public bool IsWarning => string.Equals(Status, "WARNING", StringComparison.OrdinalIgnoreCase);
+    public bool IsPending => string.Equals(Status, "PENDING", StringComparison.OrdinalIgnoreCase);
 }

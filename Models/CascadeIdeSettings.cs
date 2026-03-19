@@ -36,6 +36,9 @@ public sealed class CascadeIdeSettings : ModelBase
     /// <summary>Видимость панели «Терминал».</summary>
     public bool TerminalVisible { get; set; } = false;
 
+    /// <summary>Вкладки нижней док-панели Balanced/Power: события, тесты, отладка (без терминала/сборки).</summary>
+    public bool InstrumentationDockVisible { get; set; } = true;
+
     /// <summary>Режим интерфейса: Focus, Balanced, Power.</summary>
     public string UiMode { get; set; } = "Balanced";
 
@@ -53,6 +56,7 @@ public sealed class CascadeIdeSettings : ModelBase
             && DeepSeekModelId.Is(o.DeepSeekModelId)
             && SolutionExplorerVisible.Is(o.SolutionExplorerVisible)
             && TerminalVisible.Is(o.TerminalVisible)
+            && InstrumentationDockVisible.Is(o.InstrumentationDockVisible)
             && UiMode.Is(o.UiMode);
     }
 
@@ -70,6 +74,7 @@ public sealed class CascadeIdeSettings : ModelBase
             DeepSeekModelId = DeepSeekModelId,
             SolutionExplorerVisible = SolutionExplorerVisible,
             TerminalVisible = TerminalVisible,
+            InstrumentationDockVisible = InstrumentationDockVisible,
             UiMode = UiMode
         };
     }

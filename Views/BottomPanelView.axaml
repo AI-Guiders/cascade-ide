@@ -22,11 +22,21 @@
                         <Border DockPanel.Dock="Top" IsVisible="{Binding ShowPowerTelemetry}" Classes="modeCard" Margin="0,0,0,4">
                             <StackPanel Spacing="4">
                                 <WrapPanel Orientation="Horizontal">
-                                    <TextBlock Text="{Binding ActiveTaskStatus, StringFormat='{}Build: {0}'}" Foreground="{DynamicResource CascadeTheme.TerminalForeground}" Margin="0,0,12,0"/>
-                                    <TextBlock Text="{Binding ResultSummary}" Foreground="{DynamicResource CascadeTheme.TerminalForeground}" Margin="0,0,12,0" MaxWidth="320" TextTrimming="CharacterEllipsis"/>
-                                    <TextBlock Text="{Binding RiskSummary}" Foreground="{DynamicResource CascadeTheme.TerminalForeground}" Margin="0,0,12,0" MaxWidth="320" TextTrimming="CharacterEllipsis"/>
+                                    <TextBlock Text="{Binding TelemetryBuildText}" Foreground="{DynamicResource CascadeTheme.TerminalForeground}" Margin="0,0,12,0"/>
+                                    <TextBlock Text="{Binding ResultSummary}"
+                                               IsVisible="{Binding IsResultSummaryVisible}"
+                                               Foreground="{DynamicResource CascadeTheme.TerminalForeground}" Margin="0,0,12,0" MaxWidth="320" TextTrimming="CharacterEllipsis"/>
+                                    <TextBlock Text="{Binding RiskSummary}"
+                                               IsVisible="{Binding IsRiskSummaryVisible}"
+                                               Foreground="{DynamicResource CascadeTheme.TerminalForeground}" Margin="0,0,12,0" MaxWidth="320" TextTrimming="CharacterEllipsis"/>
                                 </WrapPanel>
-                                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                                <TextBlock Text="События появятся при работе агента и сборке."
+                                           IsVisible="{Binding !HasEventTimeline}"
+                                           Foreground="{DynamicResource CascadeTheme.TerminalForeground}"
+                                           FontSize="11"
+                                           Margin="0,0,0,4"/>
+                                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
+                                              IsVisible="{Binding HasEventTimeline}">
                                     <ItemsControl ItemsSource="{Binding EventTimeline}">
                                         <ItemsControl.ItemsPanel>
                                             <ItemsPanelTemplate>
@@ -81,6 +91,79 @@
                                      BorderThickness="0"/>
                         </ScrollViewer>
                     </DockPanel>
+                </TabItem>
+                <TabItem Header="События" IsVisible="{Binding ShowInstrumentationTabs}">
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Top" Text="Лента событий (агент, сборка)" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}" FontSize="11" Margin="0,0,0,4"/>
+                        <TextBlock Text="События появятся при работе агента и сборке."
+                                   IsVisible="{Binding !HasEventTimeline}"
+                                   Foreground="{DynamicResource CascadeTheme.TerminalForeground}"
+                                   FontSize="11"
+                                   Margin="0,0,0,4"/>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                                      IsVisible="{Binding HasEventTimeline}">
+                            <ItemsControl ItemsSource="{Binding EventTimeline}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel Orientation="Horizontal"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding}" Foreground="{DynamicResource CascadeTheme.TerminalForeground}" FontSize="11" Margin="0,0,10,0"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </DockPanel>
+                </TabItem>
+                <TabItem Header="Тесты" IsVisible="{Binding ShowInstrumentationTabs}">
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Top" Text="{Binding LastTestSummary, StringFormat=Последний прогон: {0}}" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}" FontSize="11" Margin="0,0,0,4"/>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                            <TextBox Text="{Binding TestResultsOutput, Mode=OneWay}"
+                                     Watermark="Здесь появится вывод dotnet test после запуска тестов из IDE или агента."
+                                     IsReadOnly="True"
+                                     TextWrapping="Wrap"
+                                     FontFamily="Consolas,monospace"
+                                     FontSize="12"
+                                     Background="{DynamicResource CascadeTheme.BuildOutputBackground}"
+                                     Foreground="{DynamicResource CascadeTheme.TerminalForeground}"
+                                     BorderThickness="0"/>
+                        </ScrollViewer>
+                    </DockPanel>
+                </TabItem>
+                <TabItem Header="Отладка" IsVisible="{Binding ShowInstrumentationTabs}">
+                    <Grid RowDefinitions="Auto,*,4,Auto,*" Margin="0,4,0,0">
+                        <TextBlock Grid.Row="0" Text="Стек вызовов" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}" FontSize="11" Margin="0,0,0,4"/>
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                            <ItemsControl ItemsSource="{Binding DebugStackFrames}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding DisplayText}"
+                                                   FontFamily="Consolas,monospace" FontSize="11"
+                                                   Foreground="{DynamicResource CascadeTheme.TerminalForeground}"
+                                                   TextWrapping="Wrap"
+                                                   Margin="0,0,0,2"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                        <TextBlock Grid.Row="3" Text="Переменные" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}" FontSize="11" Margin="0,8,0,4"/>
+                        <ScrollViewer Grid.Row="4" VerticalScrollBarVisibility="Auto">
+                            <ItemsControl ItemsSource="{Binding DebugVariables}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding DisplayText}"
+                                                   FontFamily="Consolas,monospace" FontSize="11"
+                                                   Foreground="{DynamicResource CascadeTheme.TerminalForeground}"
+                                                   TextWrapping="Wrap"
+                                                   Margin="0,0,0,2"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
                 </TabItem>
             </TabControl>
         </Border>
