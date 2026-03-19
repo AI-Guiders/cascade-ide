@@ -55,20 +55,20 @@ This map is intended to drive incremental alignment work with clear acceptance c
 
 | Concept element | XAML control | VM property/command | Status | Notes |
 |---|---|---|---|---|
-| Task bar / status cockpit (always-on) | `Grid.Row="2"` card | `ShowTaskBar` | ✅ | Visible in Power (`ShowTaskBar => !IsFocusMode`). |
+| Task bar / status cockpit (always-on) | `Grid.Row="2"` card | `ShowTaskBar` | ✅ | `ShowTaskBar => true` (полоска видна и в Focus). |
 | “Telemetry” explicit control | Toolbar Telemetry button + hidden hint block | `TelemetryButtonText`, `ToggleTerminalCommand`, `ShowTelemetryHiddenHint` | ✅ | This directly addresses the “where is приборка?” problem. |
-| Agent Trace Timeline | Chat panel row 1 | `ShowAgentTrace => IsPowerMode`, `AgentTraceTimeline`, `ExplainCurrentStepCommand` | 🟨 | Present but currently a simple list + one “Explain” button; concept shows richer step cards with statuses and per-step actions. |
-| Safety Level Control + Emergency Stop | Chat panel row 2 | `ShowSafetyControls => IsPowerMode`, `SetSafetyL1/2/3Command`, `EmergencyStopCommand` | 🟨 | Present; L1/L2/L3 are currently string state with buttons. Needs styling + enforcement in tool pipeline. |
-| Bottom telemetry strip (build/tests/git/snapshot) | Terminal telemetry block (Row=5 top border) | `ShowPowerTelemetry => IsPowerMode`, `EventTimeline`, `RiskSummary`, `ResultSummary` | 🟨 | Some telemetry exists (build/result/risk + event timeline). Missing git summary + workspace snapshot JSON preview. |
-| Task queue list (multiple tasks, L1/L2/L3 per item) | (no dedicated panel) | — | ❌ | Not implemented; currently only `ActiveTask*` single task fields. |
+| Agent Trace Timeline | Chat panel trace block | `ShowAgentTrace => IsPowerMode`, `AgentTraceSteps`, `TimestampText`, `ExplainTraceStepCommand`, `RollbackTraceStepCommand`, `AppendAgentTraceStep` | ✅ | Structured cards with timestamp, status chips, per-step Explain/Rollback. |
+| Safety Level Control + Emergency Stop | Chat panel Power block | `SafetyLevelDescription`, крупные карточки L1/L2/L3, `PowerNeonAccent` кольцо на активном, `EmergencyStopCommand` | ✅ UI / 🟨 enforcement | Визуал как на мокапе; политика инструментов — отдельно. |
+| Bottom telemetry strip (build/tests/git/snapshot) | `TelemetryStripView` (Power: одна SOC-полоса + JSON `MaxHeight` 100) | `Telemetry*CockpitShort`, `WorkspaceSnapshotJson`, `power_cockpit` в `power-theme.json` | ✅ | Мини-графики тестов в мокапе — пока текст/компакт; при желании — отдельный шаг. |
+| Task queue list (multiple tasks, L1/L2/L3 per item) | `SolutionExplorerView` bottom (Power only) | `PowerTaskQueueItems`, `PowerTaskQueueItemViewModel`, `HasPowerTaskQueueItems` | 🟨 | Panel + model; fills when agent pushes items (empty state until then). |
+| Window title “Power Mode [Autonomous Agent Cockpit]” | `MainWindow` `Title` | `WindowTitle` | ✅ | — |
 
 ---
 
 ## 5) Concrete next alignment steps (minimal increments)
 
 1. **Focus mode contract**: decide which minimal “instrument line” stays visible (task pill + last build/test/debug status) even in Focus.
-2. **Telemetry strip extraction**: move Power telemetry from Terminal into a dedicated dock row (so it never “disappears” with terminal).
-3. **Agent Trace upgrade**: replace string list with structured step model (status, timestamp, actions).
-4. **Task queue model**: introduce `ObservableCollection<TaskQueueItem>` with safety + state; bind to left panel in Power.
-5. **Real badge computation**: compute `ComplexityBadge`, `ImpactedTestsBadge`, `FilesChangedBadge` from real state (git + solution graph + test selection).
+2. **Task queue feed**: push `PowerTaskQueueItemViewModel` from MCP/agent when multi-task orchestration exists.
+3. **Real badge computation**: compute `ComplexityBadge`, `ImpactedTestsBadge`, `FilesChangedBadge` from real state (git + solution graph + test selection).
+4. **Dependency mini-map** (Balanced): optional graph dock under solution explorer.
 
