@@ -12,6 +12,14 @@ public sealed class CascadeIdeSettings : ModelBase
     /// <summary>Включить MCP-сервер IDE при запуске с --mcp-stdio (агент подключается к IDE по stdio).</summary>
     public bool IdeMcpServerEnabled { get; set; } = true;
 
+    /// <summary>
+    /// Внешние MCP-серверы для автономного режима (stdio).
+    /// Формат JSON массива:
+    /// [{"name":"roslyn-mcp","command":"dotnet","arguments":["run","--project","..."],"toolPrefix":"roslyn"}]
+    /// Поле toolPrefix опционально (если пустое — используется name).
+    /// </summary>
+    public string ExternalMcpServersJson { get; set; } = "[]";
+
     /// <summary>Активный провайдер: Ollama, Anthropic, OpenAI, DeepSeek.</summary>
     public string ActiveAiProvider { get; set; } = "Ollama";
 
@@ -51,6 +59,7 @@ public sealed class CascadeIdeSettings : ModelBase
             return false;
         return PreferredOllamaModel.Is(o.PreferredOllamaModel)
             && IdeMcpServerEnabled.Is(o.IdeMcpServerEnabled)
+            && ExternalMcpServersJson.Is(o.ExternalMcpServersJson)
             && ActiveAiProvider.Is(o.ActiveAiProvider)
             && AnthropicModelId.Is(o.AnthropicModelId)
             && OpenAiBaseUrl.Is(o.OpenAiBaseUrl)
@@ -70,6 +79,7 @@ public sealed class CascadeIdeSettings : ModelBase
         {
             PreferredOllamaModel = PreferredOllamaModel,
             IdeMcpServerEnabled = IdeMcpServerEnabled,
+            ExternalMcpServersJson = ExternalMcpServersJson,
             ActiveAiProvider = ActiveAiProvider,
             AnthropicModelId = AnthropicModelId,
             OpenAiBaseUrl = OpenAiBaseUrl,
