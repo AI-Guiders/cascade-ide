@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:CascadeIDE.ViewModels"
+             xmlns:feat="using:CascadeIDE.Features.Instrumentation"
              xmlns:models="using:CascadeIDE.Models"
              xmlns:views="using:CascadeIDE.Views"
              x:Class="CascadeIDE.Views.SolutionExplorerView"
@@ -53,7 +54,7 @@
                     BorderBrush="{DynamicResource CascadeTheme.EditorColumnBorderBrush}"
                     BorderThickness="1"
                     CornerRadius="4">
-                <DockPanel>
+                <DockPanel DataContext="{Binding InstrumentationPanel}" x:DataType="feat:InstrumentationPanelViewModel">
                     <TextBlock DockPanel.Dock="Top"
                                Text="Очередь задач"
                                FontWeight="SemiBold"

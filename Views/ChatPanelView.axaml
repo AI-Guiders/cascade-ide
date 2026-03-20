@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:CascadeIDE.ViewModels"
+             xmlns:feat="using:CascadeIDE.Features.Instrumentation"
              x:Class="CascadeIDE.Views.ChatPanelView"
              x:Name="ChatPanelRoot"
              x:DataType="vm:MainWindowViewModel">
@@ -88,32 +89,34 @@
                                TextTrimming="CharacterEllipsis"
                                Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
 
-                    <TextBlock IsVisible="{Binding !HasAgentToolCalls}"
-                               Text="Операции появятся после запуска агента."
-                               Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
-                               FontSize="11"/>
+                    <StackPanel DataContext="{Binding InstrumentationPanel}" x:DataType="feat:InstrumentationPanelViewModel">
+                        <TextBlock IsVisible="{Binding !HasAgentToolCalls}"
+                                   Text="Операции появятся после запуска агента."
+                                   Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                                   FontSize="11"/>
 
-                    <ScrollViewer IsVisible="{Binding HasAgentToolCalls}"
-                                  MaxHeight="88"
-                                  VerticalScrollBarVisibility="Auto">
-                        <ItemsControl ItemsSource="{Binding AgentToolCalls}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <DockPanel Margin="0,0,0,2">
-                                        <TextBlock DockPanel.Dock="Left"
-                                                   Text="• "
-                                                   Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-                                        <TextBlock Text="{Binding}"
-                                                   TextWrapping="Wrap"
-                                                   MaxLines="2"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   FontSize="11"
-                                                   Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
-                                    </DockPanel>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
+                        <ScrollViewer IsVisible="{Binding HasAgentToolCalls}"
+                                      MaxHeight="88"
+                                      VerticalScrollBarVisibility="Auto">
+                            <ItemsControl ItemsSource="{Binding AgentToolCalls}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <DockPanel Margin="0,0,0,2">
+                                            <TextBlock DockPanel.Dock="Left"
+                                                       Text="• "
+                                                       Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+                                            <TextBlock Text="{Binding}"
+                                                       TextWrapping="Wrap"
+                                                       MaxLines="2"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       FontSize="11"
+                                                       Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
+                                        </DockPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </StackPanel>
 
                     <Border Classes="modeCard" Padding="6,4" IsVisible="{Binding IsRiskCardVisible}">
                         <TextBlock Text="{Binding RiskSummary}"
@@ -151,55 +154,57 @@
             <Border Grid.Row="4" IsVisible="{Binding ShowAgentTrace}" Classes="modeCard chatPanelSection">
                 <StackPanel Spacing="6">
                     <TextBlock Classes="modeCardTitle" Text="Agent Trace Timeline"/>
-                    <TextBlock IsVisible="{Binding !HasAgentTraceSteps}"
-                               Text="Трасса шагов пока пуста — шаги добавят агент или MCP (AppendAgentTraceStep)."
-                               Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
-                               FontSize="11"
-                               TextWrapping="Wrap"/>
-                    <ScrollViewer MaxHeight="280"
-                                  VerticalScrollBarVisibility="Auto"
-                                  IsVisible="{Binding HasAgentTraceSteps}">
-                        <ItemsControl ItemsSource="{Binding AgentTraceSteps}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate DataType="vm:AgentTraceStepViewModel">
-                                    <Border Classes="traceStepCard">
-                                        <StackPanel Spacing="4">
-                                            <DockPanel LastChildFill="False">
-                                                <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" Spacing="6">
-                                                    <TextBlock Text="{Binding TimestampText}"
-                                                               FontSize="10"
-                                                               Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-                                                    <TextBlock Text="{Binding Kind}"
-                                                               FontWeight="SemiBold"
-                                                               Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+                    <StackPanel DataContext="{Binding InstrumentationPanel}" x:DataType="feat:InstrumentationPanelViewModel" Spacing="6">
+                        <TextBlock IsVisible="{Binding !HasAgentTraceSteps}"
+                                   Text="Трасса шагов пока пуста — шаги добавят агент или MCP (AppendAgentTraceStep)."
+                                   Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                                   FontSize="11"
+                                   TextWrapping="Wrap"/>
+                        <ScrollViewer MaxHeight="280"
+                                      VerticalScrollBarVisibility="Auto"
+                                      IsVisible="{Binding HasAgentTraceSteps}">
+                            <ItemsControl ItemsSource="{Binding AgentTraceSteps}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="vm:AgentTraceStepViewModel">
+                                        <Border Classes="traceStepCard">
+                                            <StackPanel Spacing="4">
+                                                <DockPanel LastChildFill="False">
+                                                    <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" Spacing="6">
+                                                        <TextBlock Text="{Binding TimestampText}"
+                                                                   FontSize="10"
+                                                                   Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+                                                        <TextBlock Text="{Binding Kind}"
+                                                                   FontWeight="SemiBold"
+                                                                   Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+                                                    </StackPanel>
+                                                    <Border DockPanel.Dock="Right"
+                                                            Classes.success="{Binding IsSuccess}"
+                                                            Classes.warning="{Binding IsWarning}"
+                                                            Classes.pending="{Binding IsPending}"
+                                                            Classes="traceStatus">
+                                                        <TextBlock Text="{Binding Status}"
+                                                                   Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}"
+                                                                   FontSize="11"/>
+                                                    </Border>
+                                                </DockPanel>
+                                                <TextBlock Text="{Binding Text}"
+                                                           TextWrapping="Wrap"
+                                                           Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
+                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                    <Button Content="Объяснить шаг"
+                                                            Command="{Binding #ChatPanelRoot.DataContext.ExplainTraceStepCommand}"
+                                                            CommandParameter="{Binding}"/>
+                                                    <Button Content="Откат"
+                                                            Command="{Binding #ChatPanelRoot.DataContext.RollbackTraceStepCommand}"
+                                                            CommandParameter="{Binding}"/>
                                                 </StackPanel>
-                                                <Border DockPanel.Dock="Right"
-                                                        Classes.success="{Binding IsSuccess}"
-                                                        Classes.warning="{Binding IsWarning}"
-                                                        Classes.pending="{Binding IsPending}"
-                                                        Classes="traceStatus">
-                                                    <TextBlock Text="{Binding Status}"
-                                                               Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}"
-                                                               FontSize="11"/>
-                                                </Border>
-                                            </DockPanel>
-                                            <TextBlock Text="{Binding Text}"
-                                                       TextWrapping="Wrap"
-                                                       Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
-                                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                                <Button Content="Объяснить шаг"
-                                                        Command="{Binding #ChatPanelRoot.DataContext.ExplainTraceStepCommand}"
-                                                        CommandParameter="{Binding}"/>
-                                                <Button Content="Откат"
-                                                        Command="{Binding #ChatPanelRoot.DataContext.RollbackTraceStepCommand}"
-                                                        CommandParameter="{Binding}"/>
                                             </StackPanel>
-                                        </StackPanel>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </StackPanel>
                 </StackPanel>
             </Border>
             <Border Grid.Row="5" IsVisible="{Binding ShowSafetyControls}" Classes="modeCard chatPanelSection">
@@ -348,6 +353,7 @@
                     <Button Content="{Binding ChatPanelToggleButtonText}" Command="{Binding ToggleChatPanelCommand}" ToolTip.Tip="Свернуть чат" Padding="4,2"/>
                 </StackPanel>
                 <Border DockPanel.Dock="Top"
+                        DataContext="{Binding ChatPanel}"
                         Classes="chatLoadingBanner"
                         IsVisible="{Binding IsChatLoading}">
                     <TextBlock Text="Ответ агента формируется…"
@@ -355,7 +361,7 @@
                                FontSize="11"/>
                 </Border>
                 <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding IsChatPanelExpanded}">
-                    <StackPanel Spacing="6">
+                    <StackPanel DataContext="{Binding ChatPanel}" Spacing="6">
                         <TextBlock IsVisible="{Binding !HasChatMessages}"
                                    Text="Сообщений пока нет — напишите запрос ниже."
                                    Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
@@ -377,19 +383,21 @@
                 </ScrollViewer>
             </DockPanel>
 
-            <StackPanel Grid.Row="8" Spacing="4" Margin="0,8,0,0" IsVisible="{Binding IsChatPanelExpanded}" MinHeight="56">
-                <TextBox x:Name="ChatInputBox"
-                         Text="{Binding ChatInput, Mode=TwoWay}"
-                         Watermark="Сообщение…"
-                         MinHeight="40"
-                         AcceptsReturn="True"
-                         IsEnabled="{Binding !IsChatLoading}"
-                         TextWrapping="Wrap"/>
-                <Button Content="Отправить"
-                        Command="{Binding SendChatCommand}"
-                        IsEnabled="{Binding !IsChatLoading}"
-                        Background="{DynamicResource CascadeTheme.SendButtonBackground}"
-                        Foreground="{DynamicResource CascadeTheme.SendButtonForeground}"/>
+            <StackPanel Grid.Row="8" Margin="0,8,0,0" IsVisible="{Binding IsChatPanelExpanded}" MinHeight="56">
+                <StackPanel DataContext="{Binding ChatPanel}" Spacing="4">
+                    <TextBox x:Name="ChatInputBox"
+                             Text="{Binding ChatInput, Mode=TwoWay}"
+                             Watermark="Сообщение…"
+                             MinHeight="40"
+                             AcceptsReturn="True"
+                             IsEnabled="{Binding !IsChatLoading}"
+                             TextWrapping="Wrap"/>
+                    <Button Content="Отправить"
+                            Command="{Binding SendChatCommand}"
+                            IsEnabled="{Binding !IsChatLoading}"
+                            Background="{DynamicResource CascadeTheme.SendButtonBackground}"
+                            Foreground="{DynamicResource CascadeTheme.SendButtonForeground}"/>
+                </StackPanel>
             </StackPanel>
         </Grid>
     </Border>

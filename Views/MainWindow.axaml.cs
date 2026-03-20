@@ -63,7 +63,7 @@ public partial class MainWindow : Window
             {
                 var result = Services.UiControlSetText.SetText(this, name, text);
                 if (name == "ChatInputBox")
-                    vm.ChatInput = text ?? "";
+                    vm.ChatPanel.ChatInput = text ?? "";
                 return result;
             };
             vm.ClickControlProvider = (name) => Services.UiControlClick.Click(this, this, name);
@@ -581,7 +581,7 @@ public partial class MainWindow : Window
         box.KeyDown += (_, ev) =>
         {
             if (ev.Key != Key.Enter || DataContext is not ViewModels.MainWindowViewModel vm) return;
-            var cmd = vm.RunTerminalCommandCommand;
+            var cmd = vm.TerminalPanel.RunTerminalCommandCommand;
             if (cmd.CanExecute(null))
             {
                 cmd.Execute(null);
@@ -611,9 +611,9 @@ public partial class MainWindow : Window
                 "Shift+Enter" => isEnter && !ctrl && shift,
                 _ => false
             };
-            if (match && (vm.SendChatCommand as IRelayCommand)?.CanExecute(null) == true)
+            if (match && (vm.ChatPanel.SendChatCommand as IRelayCommand)?.CanExecute(null) == true)
             {
-                _ = vm.SendChatCommand.ExecuteAsync(null);
+                _ = vm.ChatPanel.SendChatCommand.ExecuteAsync(null);
                 e.Handled = true;
             }
         }

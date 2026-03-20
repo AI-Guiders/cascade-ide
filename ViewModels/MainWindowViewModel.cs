@@ -1,13 +1,16 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using System.Windows.Input;
 using System.Xml.Linq;
 using Avalonia.Threading;
+using CascadeIDE.Features.Build;
+using CascadeIDE.Features.Chat;
 using CascadeIDE.Features.Git;
+using CascadeIDE.Features.Instrumentation;
+using CascadeIDE.Features.Terminal;
 using CascadeIDE.Models;
 using DotNetBuildTestParsers;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -74,11 +77,45 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _lastSavedSettings = (CascadeIdeSettings)_settings.Clone();
         _lastSavedAiKeys = (AiKeys)_aiKeys.Clone();
 
+        BuildOutputPanel = new BuildOutputPanelViewModel();
+        TerminalPanel = new TerminalPanelViewModel(() => SolutionPath);
         GitPanel = new GitPanelViewModel(_gitRunner, GetWorkspacePath, this, LoadSolution, RefreshGitSummaryAsync);
+        ChatPanel = new ChatPanelViewModel(
+            _aiProviderManager,
+            () => ActiveAiProvider,
+            () => SelectedOllamaModel,
+            () => UseMinimizedContext,
+            () => CurrentFilePath,
+            () => EditorText);
+        InstrumentationPanel = new InstrumentationPanelViewModel();
+        InstrumentationPanel.PropertyChanged += OnInstrumentationPanelPropertyChanged;
     }
+
+    /// <summary>
+    /// Полоса телеметрии читает счётчики отладки с главного VM; при смене MCP-стека обновляем строки.
+    /// </summary>
+    private void OnInstrumentationPanelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != nameof(InstrumentationPanelViewModel.IsDebugPanelVisible))
+            return;
+        OnPropertyChanged(nameof(TelemetryDebugText));
+        OnPropertyChanged(nameof(TelemetryDebugCockpitShort));
+    }
+
+    /// <summary>Вывод сборки (нижняя вкладка Build output).</summary>
+    public BuildOutputPanelViewModel BuildOutputPanel { get; }
+
+    /// <summary>Терминал (нижняя вкладка Terminal).</summary>
+    public TerminalPanelViewModel TerminalPanel { get; }
 
     /// <summary>Панель Git (нижняя вкладка); состояние и команды вынесены из <see cref="MainWindowViewModel"/>.</summary>
     public GitPanelViewModel GitPanel { get; }
+
+    /// <summary>Чат с LLM (правая колонка): история, ввод, отправка.</summary>
+    public ChatPanelViewModel ChatPanel { get; }
+
+    /// <summary>Инструментирование: трасса агента, события, тесты, стек MCP-отладки. В разметке — <c>DataContext="{Binding InstrumentationPanel}"</c>.</summary>
+    public InstrumentationPanelViewModel InstrumentationPanel { get; }
 
     private void SaveSettingsIfChanged()
     {
@@ -199,7 +236,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             _settings.ActiveAiProvider = value;
             SaveSettingsIfChanged();
         }
-        (SendChatCommand as IRelayCommand)?.NotifyCanExecuteChanged();
+        ChatPanel.RefreshSendChatCommandState();
     }
 
     partial void OnAnthropicApiKeyChanged(string value)
@@ -376,11 +413,6 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
 
     private void RegisterAgentFeedHandlers()
     {
-        AgentToolCalls.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasAgentToolCalls));
-        AgentTraceSteps.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasAgentTraceSteps));
-        PowerTaskQueueItems.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasPowerTaskQueueItems));
-        EventTimeline.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasEventTimeline));
-        ChatMessages.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasChatMessages));
         FocusPlanItems.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasFocusPlanItems));
     }
 
@@ -451,15 +483,6 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             return DebugPositionLine;
         }
     }
-
-    [ObservableProperty]
-    private ObservableCollection<DebugStackFrameViewModel> _debugStackFrames = [];
-
-    [ObservableProperty]
-    private ObservableCollection<DebugVariableViewModel> _debugVariables = [];
-
-    /// <summary>Показывать панель отладки (стек/переменные), когда агент присылал состояние.</summary>
-    public bool IsDebugPanelVisible => DebugStackFrames.Count > 0 || DebugVariables.Count > 0;
 
     /// <summary>True, если открыт файл .md или .markdown — показываем превью.</summary>
     public bool IsMarkdownFile =>
@@ -668,24 +691,9 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     [NotifyPropertyChangedFor(nameof(TelemetryTestsCockpitShort))]
     private string _lastTestSummary = "";
 
-    public ObservableCollection<string> AgentToolCalls { get; } = [];
-    public ObservableCollection<string> AgentTraceTimeline { get; } = [];
-    public ObservableCollection<AgentTraceStepViewModel> AgentTraceSteps { get; } = [];
-    public ObservableCollection<string> EventTimeline { get; } = [];
-    public bool HasAgentToolCalls => AgentToolCalls.Count > 0;
-    public bool HasAgentTraceSteps => AgentTraceSteps.Count > 0;
-
-    /// <summary>Очередь задач (Power mode, под деревом решения).</summary>
-    public ObservableCollection<PowerTaskQueueItemViewModel> PowerTaskQueueItems { get; } = [];
-
-    public bool HasPowerTaskQueueItems => PowerTaskQueueItems.Count > 0;
-
     /// <summary>Снимок раскладки UI (JSON), полоса телеметрии в Power.</summary>
     [ObservableProperty]
     private string _workspaceSnapshotJson = "";
-
-    public bool HasEventTimeline => EventTimeline.Count > 0;
-    public bool HasChatMessages => ChatMessages.Count > 0;
 
     public ObservableCollection<FocusPlanItemViewModel> FocusPlanItems { get; } = [];
 
@@ -736,13 +744,13 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     }
 
     public string TelemetryDebugText =>
-        IsDebugPanelVisible
-            ? $"Debug: paused (frames {DebugStackFrames.Count}, vars {DebugVariables.Count})"
+        InstrumentationPanel.IsDebugPanelVisible
+            ? $"Debug: paused (frames {InstrumentationPanel.DebugStackFrames.Count}, vars {InstrumentationPanel.DebugVariables.Count})"
             : "Debug: idle";
 
     /// <summary>Короткий статус отладки для Power.</summary>
     public string TelemetryDebugCockpitShort =>
-        IsDebugPanelVisible ? $"DBG · {DebugStackFrames.Count}fr" : "DBG · —";
+        InstrumentationPanel.IsDebugPanelVisible ? $"DBG · {InstrumentationPanel.DebugStackFrames.Count}fr" : "DBG · —";
 
     public string TelemetryGitText
     {
@@ -752,12 +760,6 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             return $"Git: {GitStagedCount} staged, {GitUnstagedCount} unstaged, {GitUntrackedCount} untracked{branch}";
         }
     }
-
-    [ObservableProperty]
-    private string _terminalOutput = "";
-
-    [ObservableProperty]
-    private string _terminalInput = "";
 
     public string ChatPanelToggleButtonText => IsChatPanelExpanded ? "◀" : "▶";
     public bool IsSolutionPanelHidden => !IsSolutionExplorerVisible;
@@ -769,9 +771,6 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     /// <summary>0 = Terminal, 1 = Build, 2 = Git, 3 = Events, 4 = Tests, 5 = Debug.</summary>
     [ObservableProperty]
     private int _bottomPanelTabIndex;
-
-    [ObservableProperty]
-    private string _buildOutput = "";
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(BuildSolutionCommand))]
@@ -787,20 +786,6 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     [NotifyPropertyChangedFor(nameof(ShowInstrumentationTabs))]
     [NotifyPropertyChangedFor(nameof(IsBottomPanelVisible))]
     private bool _isInstrumentationDockVisible = true;
-
-    /// <summary>Накопленный текстовый лог прогонов тестов для вкладки «Тесты».</summary>
-    [ObservableProperty]
-    private string _testResultsOutput = "";
-
-    public ObservableCollection<ChatMessageViewModel> ChatMessages { get; } = [];
-
-    [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(SendChatCommand))]
-    private string _chatInput = "";
-
-    [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(SendChatCommand))]
-    private bool _isChatLoading;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(InstallModelCommand))]
@@ -879,7 +864,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
 
     partial void OnSelectedOllamaModelChanged(string? value)
     {
-        (SendChatCommand as IRelayCommand)?.NotifyCanExecuteChanged();
+        ChatPanel.RefreshSendChatCommandState();
         if (value == InstallNewSentinel)
         {
             SelectedModelDetails = "";
@@ -1638,28 +1623,28 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private void FixFailingTests()
     {
         IsChatPanelExpanded = true;
-        ChatInput = "Fix failing tests using minimal-risk changes. Start with ide_run_affected_tests and explain each step.";
+        ChatPanel.ChatInput = "Fix failing tests using minimal-risk changes. Start with ide_run_affected_tests and explain each step.";
     }
 
     [RelayCommand]
     private void InvestigateNullref()
     {
         IsChatPanelExpanded = true;
-        ChatInput = "Investigate possible null reference in current context. Show the shortest safe fix plan.";
+        ChatPanel.ChatInput = "Investigate possible null reference in current context. Show the shortest safe fix plan.";
     }
 
     [RelayCommand]
     private void PrepareCommit()
     {
         IsChatPanelExpanded = true;
-        ChatInput = "Prepare a clean commit plan grouped by logical changes and include verification steps.";
+        ChatPanel.ChatInput = "Prepare a clean commit plan grouped by logical changes and include verification steps.";
     }
 
     [RelayCommand]
     private void ExplainCurrentStep()
     {
         IsChatPanelExpanded = true;
-        ChatInput = "Explain the current autonomous step in plain language: intent, tool call, risk, and rollback.";
+        ChatPanel.ChatInput = "Explain the current autonomous step in plain language: intent, tool call, risk, and rollback.";
     }
 
     [RelayCommand]
@@ -1668,7 +1653,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         if (step is null)
             return;
         IsChatPanelExpanded = true;
-        ChatInput =
+        ChatPanel.ChatInput =
             $"Объясни шаг трассы [{step.Kind} / {step.Status}] ({step.TimestampText}): {step.Text}. Укажи намерение, риск и откат.";
     }
 
@@ -1677,27 +1662,15 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     {
         if (step is null)
             return;
-        EventTimeline.Insert(0, $"{DateTime.Now:HH:mm:ss} — Запрошен откат для шага [{step.Kind}]");
+        InstrumentationPanel.EventTimeline.Insert(0, $"{DateTime.Now:HH:mm:ss} — Запрошен откат для шага [{step.Kind}]");
         IsChatPanelExpanded = true;
-        ChatInput =
+        ChatPanel.ChatInput =
             $"Предложи минимальный откат для шага [{step.Kind}] ({step.TimestampText}): {step.Text}. Проверь состояние workspace.";
     }
 
     /// <summary>Добавить шаг в Agent Trace Timeline (Power); потокобезопасно.</summary>
-    public void AppendAgentTraceStep(string kind, string text, string status, DateTimeOffset? at = null)
-    {
-        void Add()
-        {
-            AgentTraceSteps.Add(new AgentTraceStepViewModel(kind, text, status, at));
-            while (AgentTraceSteps.Count > 200)
-                AgentTraceSteps.RemoveAt(0);
-        }
-
-        if (Dispatcher.UIThread.CheckAccess())
-            Add();
-        else
-            Dispatcher.UIThread.Post(Add);
-    }
+    public void AppendAgentTraceStep(string kind, string text, string status, DateTimeOffset? at = null) =>
+        InstrumentationPanel.AppendAgentTraceStep(kind, text, status, at);
 
     private void RefreshWorkspaceSnapshotCore()
     {
@@ -1723,7 +1696,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         IsBuilding = false;
         ActiveTaskStatus = "Paused";
         ResultSummary = "Autonomous flow paused by operator.";
-        EventTimeline.Insert(0, $"{DateTime.Now:HH:mm:ss} — Emergency stop engaged");
+        InstrumentationPanel.EventTimeline.Insert(0, $"{DateTime.Now:HH:mm:ss} — Emergency stop engaged");
     }
 
     /// <summary>Focus: зафиксировать контрольную точку в таймлайне и кратком результате.</summary>
@@ -1731,7 +1704,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private void FocusCheckpoint()
     {
         var stamp = DateTime.Now;
-        EventTimeline.Insert(0, $"{stamp:HH:mm:ss} — Контрольная точка");
+        InstrumentationPanel.EventTimeline.Insert(0, $"{stamp:HH:mm:ss} — Контрольная точка");
         ResultSummary = $"Контрольная точка: {stamp:yyyy-MM-dd HH:mm}";
     }
 
@@ -1739,16 +1712,16 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     [RelayCommand]
     private void FocusRollback()
     {
-        EventTimeline.Insert(0, $"{DateTime.Now:HH:mm:ss} — Запрошен откат");
+        InstrumentationPanel.EventTimeline.Insert(0, $"{DateTime.Now:HH:mm:ss} — Запрошен откат");
         IsChatPanelExpanded = true;
-        ChatInput = "Помоги безопасно откатить последние изменения (git или патчи). Оцени риск и предложи минимальный набор команд.";
+        ChatPanel.ChatInput = "Помоги безопасно откатить последние изменения (git или патчи). Оцени риск и предложи минимальный набор команд.";
     }
 
     /// <summary>Focus: подтвердить текущий шаг в гейте.</summary>
     [RelayCommand]
     private void ConfirmFocusStep()
     {
-        EventTimeline.Insert(0, $"{DateTime.Now:HH:mm:ss} — Шаг подтверждён");
+        InstrumentationPanel.EventTimeline.Insert(0, $"{DateTime.Now:HH:mm:ss} — Шаг подтверждён");
         ActiveTaskStatus = "В работе";
     }
 
@@ -1756,55 +1729,9 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     [RelayCommand]
     private void CancelFocusStep()
     {
-        EventTimeline.Insert(0, $"{DateTime.Now:HH:mm:ss} — Шаг отменён");
+        InstrumentationPanel.EventTimeline.Insert(0, $"{DateTime.Now:HH:mm:ss} — Шаг отменён");
         NextActionSummary = "Ожидание следующего шага.";
         ActiveTaskStatus = "Ожидание";
-    }
-
-    [RelayCommand]
-    private async Task RunTerminalCommandAsync()
-    {
-        var cmd = TerminalInput?.Trim() ?? "";
-        if (string.IsNullOrEmpty(cmd))
-            return;
-        TerminalInput = "";
-        var workDir = !string.IsNullOrWhiteSpace(SolutionPath) && File.Exists(SolutionPath)
-            ? Path.GetDirectoryName(SolutionPath) ?? Environment.CurrentDirectory
-            : Environment.CurrentDirectory;
-        TerminalOutput += $"> {cmd}\r\n";
-        try
-        {
-            var isWin = Environment.OSVersion.Platform == PlatformID.Win32NT;
-            var psi = new System.Diagnostics.ProcessStartInfo(isWin ? "cmd" : "sh")
-            {
-                ArgumentList = { isWin ? "/c" : "-c", cmd },
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                WorkingDirectory = workDir
-            };
-            using var process = System.Diagnostics.Process.Start(psi);
-            if (process is null)
-            {
-                TerminalOutput += "Не удалось запустить процесс.\r\n";
-                return;
-            }
-            var stdout = process.StandardOutput.ReadToEndAsync();
-            var stderr = process.StandardError.ReadToEndAsync();
-            await Task.WhenAll(stdout, stderr).ConfigureAwait(true);
-            await process.WaitForExitAsync().ConfigureAwait(true);
-            var outStr = await stdout;
-            var errStr = await stderr;
-            if (outStr.Length > 0) TerminalOutput += outStr;
-            if (errStr.Length > 0) TerminalOutput += errStr;
-            if (process.ExitCode != 0)
-                TerminalOutput += $"\r\nExit code: {process.ExitCode}\r\n";
-        }
-        catch (Exception ex)
-        {
-            TerminalOutput += ex.Message + "\r\n";
-        }
     }
 
     [RelayCommand(CanExecute = nameof(CanToggleChatPanel))]
@@ -1823,7 +1750,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
 
         IsBuilding = true;
         IsBuildOutputVisible = true;
-        BuildOutput = $"Сборка: {SolutionPath}\r\n";
+        BuildOutputPanel.BuildOutput = $"Сборка: {SolutionPath}\r\n";
 
         try
         {
@@ -1839,7 +1766,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             using var process = System.Diagnostics.Process.Start(psi);
             if (process is null)
             {
-                BuildOutput += "Не удалось запустить dotnet build.\r\n";
+                BuildOutputPanel.BuildOutput += "Не удалось запустить dotnet build.\r\n";
                 return;
             }
 
@@ -1848,13 +1775,13 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             await Task.WhenAll(stdout, stderr);
             await process.WaitForExitAsync();
 
-            BuildOutput += await stdout + "\r\n" + await stderr;
+            BuildOutputPanel.BuildOutput += await stdout + "\r\n" + await stderr;
             if (process.ExitCode != 0)
-                BuildOutput += $"\r\nКод выхода: {process.ExitCode}";
+                BuildOutputPanel.BuildOutput += $"\r\nКод выхода: {process.ExitCode}";
         }
         catch (Exception ex)
         {
-            BuildOutput += "Ошибка: " + ex.Message + "\r\n";
+            BuildOutputPanel.BuildOutput += "Ошибка: " + ex.Message + "\r\n";
         }
         finally
         {
@@ -1977,47 +1904,6 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             // Do not throw from crash logger.
         }
     }
-
-    [RelayCommand(CanExecute = nameof(CanSendChat))]
-    private async Task SendChatAsync()
-    {
-        var input = ChatInput.Trim();
-        if (string.IsNullOrEmpty(input))
-            return;
-
-        ChatInput = "";
-        ChatMessages.Add(new ChatMessageViewModel("user", input));
-        IsChatLoading = true;
-
-        try
-        {
-            var messages = ChatMessages.Take(ChatMessages.Count - 1)
-                .Select(m => new Services.ChatMessage(m.Role, m.Content))
-                .Append(new Services.ChatMessage("user", input))
-                .ToList();
-            var assistantMsg = new ChatMessageViewModel("assistant", "");
-            ChatMessages.Add(assistantMsg);
-
-            await foreach (var token in _aiProviderManager.StreamChatAsync(
-                ActiveAiProvider,
-                messages,
-                CurrentFilePath,
-                EditorText,
-                UseMinimizedContext,
-                CancellationToken.None))
-            {
-                assistantMsg.Content += token;
-            }
-        }
-        finally
-        {
-            IsChatLoading = false;
-        }
-    }
-
-    private bool CanSendChat() => !string.IsNullOrWhiteSpace(ChatInput)
-        && !IsChatLoading
-        && (ActiveAiProvider != "Ollama" || (!string.IsNullOrEmpty(SelectedOllamaModel) && SelectedOllamaModel != InstallNewSentinel));
 
     [RelayCommand(CanExecute = nameof(CanInstallModel))]
     private async Task InstallModelAsync()
@@ -2367,7 +2253,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     string Services.IIdeMcpActions.GetBuildOutput()
     {
         var (bg, fg) = Services.UiThemeSnapshot.GetBuildOutputTheme();
-        return JsonSerializer.Serialize(new { text = BuildOutput ?? "", theme = new { background = bg, foreground = fg } });
+        return JsonSerializer.Serialize(new { text = BuildOutputPanel.BuildOutput ?? "", theme = new { background = bg, foreground = fg } });
     }
 
     async Task<string> Services.IIdeMcpActions.GetWorkspaceStateAsync()
@@ -2377,7 +2263,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         try { diagnostics = JsonSerializer.Deserialize<JsonElement>(diagnosticsJson); }
         catch { diagnostics = JsonSerializer.SerializeToElement(Array.Empty<object>()); }
 
-        var buildText = BuildOutput ?? "";
+        var buildText = BuildOutputPanel.BuildOutput ?? "";
         if (buildText.Length > 2000)
             buildText = buildText[..2000] + "\n... (output truncated)";
 
@@ -2401,8 +2287,8 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             {
                 position_file = DebugPositionFile,
                 position_line = DebugPositionLine,
-                stack_count = DebugStackFrames.Count,
-                variables_count = DebugVariables.Count
+                stack_count = InstrumentationPanel.DebugStackFrames.Count,
+                variables_count = InstrumentationPanel.DebugVariables.Count
             },
             build = new
             {
@@ -2713,7 +2599,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
         {
             var msg = "No solution loaded or file not found.";
-            Dispatcher.UIThread.Post(() => { BuildOutput = msg + "\r\n"; IsBuildOutputVisible = true; });
+            Dispatcher.UIThread.Post(() => { BuildOutputPanel.BuildOutput = msg + "\r\n"; IsBuildOutputVisible = true; });
             return msg;
         }
         try
@@ -2735,7 +2621,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             if (process is null)
             {
                 var msg = "Failed to start dotnet build.";
-                Dispatcher.UIThread.Post(() => { BuildOutput = msg + "\r\n"; IsBuildOutputVisible = true; });
+                Dispatcher.UIThread.Post(() => { BuildOutputPanel.BuildOutput = msg + "\r\n"; IsBuildOutputVisible = true; });
                 return msg;
             }
             var stdout = process.StandardOutput.ReadToEndAsync();
@@ -2748,7 +2634,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             var pathCopy = path;
             Dispatcher.UIThread.Post(() =>
             {
-                BuildOutput = $"Сборка: {pathCopy}\r\n{outStr}";
+                BuildOutputPanel.BuildOutput = $"Сборка: {pathCopy}\r\n{outStr}";
                 IsBuildOutputVisible = true;
                 _lastBuildBinlogPath = binlogPath;
             });
@@ -2757,7 +2643,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         catch (Exception ex)
         {
             var msg = "Error: " + ex.Message;
-            Dispatcher.UIThread.Post(() => { BuildOutput = msg + "\r\n"; IsBuildOutputVisible = true; });
+            Dispatcher.UIThread.Post(() => { BuildOutputPanel.BuildOutput = msg + "\r\n"; IsBuildOutputVisible = true; });
             return msg;
         }
     }
@@ -2850,10 +2736,10 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
                 const int maxLogChars = 120_000;
                 var stamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
                 var block = $"=== {stamp} ===\n{LastTestSummary}\n\n{outStr}\n\n";
-                var combined = TestResultsOutput + block;
+                var combined = InstrumentationPanel.TestResultsOutput + block;
                 if (combined.Length > maxLogChars)
                     combined = combined[^maxLogChars..];
-                TestResultsOutput = combined;
+                InstrumentationPanel.TestResultsOutput = combined;
                 if (ShowInstrumentationTabs)
                     BottomPanelTabIndex = 4;
             });
@@ -2879,10 +2765,10 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
                 const int maxLogChars = 120_000;
                 var stamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
                 var block = $"=== {stamp} (ошибка) ===\n{ex.Message}\n\n";
-                var combined = TestResultsOutput + block;
+                var combined = InstrumentationPanel.TestResultsOutput + block;
                 if (combined.Length > maxLogChars)
                     combined = combined[^maxLogChars..];
-                TestResultsOutput = combined;
+                InstrumentationPanel.TestResultsOutput = combined;
             });
             return JsonSerializer.Serialize(new { success = false, error = ex.Message, mode, filter = filterExpression });
         }
@@ -3022,7 +2908,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             var pathCopy = path;
             Dispatcher.UIThread.Post(() =>
             {
-                BuildOutput = $"Code cleanup: {pathCopy}\r\n{outStr}";
+                BuildOutputPanel.BuildOutput = $"Code cleanup: {pathCopy}\r\n{outStr}";
                 IsBuildOutputVisible = true;
             });
 
@@ -3237,15 +3123,12 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     {
         Dispatcher.UIThread.Post(() =>
         {
-            DebugStackFrames.Clear();
+            InstrumentationPanel.DebugStackFrames.Clear();
             foreach (var f in stackFrames)
-                DebugStackFrames.Add(new DebugStackFrameViewModel(f.Name, f.File, f.Line));
-            DebugVariables.Clear();
+                InstrumentationPanel.DebugStackFrames.Add(new DebugStackFrameViewModel(f.Name, f.File, f.Line));
+            InstrumentationPanel.DebugVariables.Clear();
             foreach (var v in variables)
-                DebugVariables.Add(new DebugVariableViewModel(v.Name, v.Value));
-            OnPropertyChanged(nameof(IsDebugPanelVisible));
-            OnPropertyChanged(nameof(TelemetryDebugText));
-            OnPropertyChanged(nameof(TelemetryDebugCockpitShort));
+                InstrumentationPanel.DebugVariables.Add(new DebugVariableViewModel(v.Name, v.Value));
         });
     }
 
@@ -3331,50 +3214,4 @@ public partial class OpenDocumentViewModel : ObservableObject
         Content = OriginalContent;
         IsDirty = false;
     }
-}
-
-/// <summary>Элемент стека вызовов для панели отладки.</summary>
-public sealed class DebugStackFrameViewModel(string name, string? file, int line)
-{
-    public string Name { get; } = name;
-    public string? File { get; } = file;
-    public int Line { get; } = line;
-
-    public string DisplayText => $"{Name} — {File ?? ""}:{Line}";
-}
-
-/// <summary>Переменная для панели отладки.</summary>
-public sealed class DebugVariableViewModel(string name, string value)
-{
-    public string Name { get; } = name;
-    public string Value { get; } = value;
-
-    public string DisplayText => $"{Name} = {Value}";
-}
-
-/// <summary>Structured trace step for Power-mode timeline cards.</summary>
-public sealed class AgentTraceStepViewModel
-{
-    public AgentTraceStepViewModel(string kind, string text, string status, DateTimeOffset? at = null)
-    {
-        Kind = kind;
-        Text = text;
-        Status = status;
-        var t = at ?? DateTimeOffset.Now;
-        TimestampText = t.ToLocalTime().ToString("HH:mm:ss.fff", CultureInfo.InvariantCulture);
-    }
-
-    public string Kind { get; }
-    public string Text { get; }
-    public string Status { get; }
-    public string TimestampText { get; }
-
-    public bool IsPlan => string.Equals(Kind, "PLAN", StringComparison.OrdinalIgnoreCase);
-    public bool IsAction => string.Equals(Kind, "ACTION", StringComparison.OrdinalIgnoreCase);
-    public bool IsObservation => string.Equals(Kind, "OBSERVATION", StringComparison.OrdinalIgnoreCase);
-    public bool IsNext => string.Equals(Kind, "NEXT", StringComparison.OrdinalIgnoreCase);
-
-    public bool IsSuccess => string.Equals(Status, "SUCCESS", StringComparison.OrdinalIgnoreCase);
-    public bool IsWarning => string.Equals(Status, "WARNING", StringComparison.OrdinalIgnoreCase);
-    public bool IsPending => string.Equals(Status, "PENDING", StringComparison.OrdinalIgnoreCase);
 }
