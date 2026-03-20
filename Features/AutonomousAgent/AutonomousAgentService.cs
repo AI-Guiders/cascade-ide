@@ -58,31 +58,68 @@ public sealed class AutonomousAgentService
 
     public async Task<string> RunAutonomousAsync(string objective, string safetyLevel, int maxSteps, CancellationToken cancellationToken)
     {
+        return await RunAutonomousAsync(objective, safetyLevel, maxSteps, cancellationToken, state: null).ConfigureAwait(false);
+    }
+
+    public async Task<string> RunAutonomousAsync(
+        string objective,
+        string safetyLevel,
+        int maxSteps,
+        CancellationToken cancellationToken,
+        AutonomousRunState? state)
+    {
         objective = objective?.Trim() ?? "";
         if (string.IsNullOrWhiteSpace(objective))
             return "Error: empty objective.";
 
         maxSteps = Math.Clamp(maxSteps, 1, 40);
 
-        _appendEvent($"{DateTime.Now:HH:mm:ss} — Autonomous started");
-        _appendTraceStep("PLAN", objective, "PENDING", null);
+        state ??= new AutonomousRunState
+        {
+            Objective = objective,
+            SafetyLevel = safetyLevel,
+            MaxSteps = maxSteps,
+            NextStep = 0
+        };
+
+        // Ensure state fields are consistent with latest call.
+        state.Objective = objective;
+        state.SafetyLevel = safetyLevel;
+        state.MaxSteps = maxSteps;
+
+        var isResume = state.NextStep > 0;
+
+        if (!isResume)
+        {
+            state.History.Clear();
+            _appendEvent($"{DateTime.Now:HH:mm:ss} — Autonomous started");
+            _appendTraceStep("PLAN", objective, "PENDING", null);
+        }
 
         var toolKeys = await SafeListExternalToolsAsync(cancellationToken).ConfigureAwait(false);
 
-        var history = new List<string>
+        // Initialize history header once.
+        if (state.History.Count == 0)
         {
-            $"Objective: {objective}",
-            $"Safety: {safetyLevel}",
-            toolKeys.Count > 0 ? $"External MCP tools: {string.Join(", ", toolKeys.Take(40))}" : "External MCP tools: none"
-        };
+            state.History.Add($"Objective: {objective}");
+            state.History.Add($"Safety: {safetyLevel}");
+            state.History.Add(
+                toolKeys.Count > 0
+                    ? $"External MCP tools: {string.Join(", ", toolKeys.Take(40))}"
+                    : "External MCP tools: none");
+        }
 
-        for (var step = 0; step < maxSteps; step++)
+        var startStep = Math.Clamp(state.NextStep, 0, maxSteps);
+
+        for (var step = startStep; step < maxSteps; step++)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            state.NextStep = step; // if cancellation happens mid-step, resume repeats this step
+
             var progress = (int)((step * 100.0) / maxSteps);
             _appendEvent($"{DateTime.Now:HH:mm:ss} — Step {step + 1}/{maxSteps} (progress {progress}%)");
 
-            var prompt = BuildPrompt(objective, safetyLevel, step + 1, maxSteps, history, toolKeys);
+            var prompt = BuildPrompt(objective, safetyLevel, step + 1, maxSteps, state.History, toolKeys);
             _appendTraceStep("ACTION", $"Request tool decision (step {step + 1}).", "PENDING", null);
 
             var assistantRaw = await GetAssistantRawAsync(prompt, cancellationToken).ConfigureAwait(false);
@@ -92,21 +129,25 @@ public sealed class AutonomousAgentService
             {
                 _appendTraceStep("OBSERVATION", decision.FinalAnswer ?? assistantRaw, "SUCCESS", null);
                 _appendEvent($"{DateTime.Now:HH:mm:ss} — Autonomous finished");
+                state.NextStep = maxSteps;
                 return decision.FinalAnswer ?? assistantRaw;
             }
 
             if (decision.Type != "tool_call")
             {
                 _appendTraceStep("OBSERVATION", "Model returned invalid decision; stopping.", "WARNING", null);
+                state.NextStep = step; // keep this step for retry if user resumes
                 return "Autonomous stopped: invalid decision output from model.";
             }
 
             var observation = await ExecuteToolCallAsync(decision, safetyLevel, cancellationToken).ConfigureAwait(false);
-            history.Add($"[{step + 1}] {observation}");
+            state.History.Add($"[{step + 1}] {observation}");
+            state.NextStep = step + 1;
 
             _appendTraceStep("NEXT", "Continue.", "PENDING", null);
         }
 
+        state.NextStep = maxSteps;
         return $"Max steps reached ({maxSteps}).";
     }
 

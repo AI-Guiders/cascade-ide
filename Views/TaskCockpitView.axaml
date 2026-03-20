@@ -55,10 +55,13 @@
                         <Button Content="Start"
                                 Command="{Binding StartAutonomousCommand}"
                                 Margin="8,0,0,0"
-                                IsEnabled="{Binding !IsAutonomousRunning}"/>
+                                IsVisible="{Binding !IsAutonomousPaused}"/>
                         <Button Content="Pause"
                                 Command="{Binding PauseAutonomousCommand}"
                                 IsVisible="{Binding IsAutonomousRunning}"/>
+                        <Button Content="Resume"
+                                Command="{Binding ResumeAutonomousCommand}"
+                                IsVisible="{Binding IsAutonomousPaused}"/>
                     </StackPanel>
                 </StackPanel>
             </Border>
