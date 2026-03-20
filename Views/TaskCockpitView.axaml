@@ -36,33 +36,65 @@
                     <TextBlock Text="Autonomous run (Power)"
                                FontWeight="SemiBold"
                                Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
-
-                    <TextBox Text="{Binding AutonomousObjective, Mode=TwoWay}"
-                             AcceptsReturn="True"
-                             TextWrapping="Wrap"
-                             FontFamily="Consolas,monospace"
-                             FontSize="11"
-                             MinHeight="70"/>
-
-                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                        <TextBlock Text="Max steps:" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}" VerticalAlignment="Center"/>
-                        <TextBox Text="{Binding AutonomousMaxSteps, Mode=TwoWay}"
-                                 Width="60"
+                    <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto"
+                          ColumnSpacing="8">
+                        <TextBox Grid.Column="0"
+                                 Text="{Binding AutonomousObjective, Mode=TwoWay}"
+                                 Watermark="Autonomous objective"
+                                 FontFamily="Consolas,monospace"
+                                 FontSize="11"/>
+                        <TextBlock Grid.Column="1"
+                                   Text="Max steps:"
+                                   Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"
+                                   VerticalAlignment="Center"/>
+                        <TextBox Grid.Column="2"
+                                 Text="{Binding AutonomousMaxSteps, Mode=TwoWay}"
+                                 Width="56"
                                  TextAlignment="Center"
                                  FontFamily="Consolas,monospace"
                                  FontSize="11"/>
-
-                        <Button Content="Start"
+                        <Button Grid.Column="3"
+                                Content="Start"
                                 Command="{Binding StartAutonomousCommand}"
-                                Margin="8,0,0,0"
                                 IsVisible="{Binding !IsAutonomousPaused}"/>
-                        <Button Content="Pause"
+                        <Button Grid.Column="4"
+                                Content="Pause"
                                 Command="{Binding PauseAutonomousCommand}"
                                 IsVisible="{Binding IsAutonomousRunning}"/>
-                        <Button Content="Resume"
+                        <Button Grid.Column="4"
+                                Content="Resume"
                                 Command="{Binding ResumeAutonomousCommand}"
                                 IsVisible="{Binding IsAutonomousPaused}"/>
-                    </StackPanel>
+                        <Button Grid.Column="5"
+                                Content="Details…"
+                                VerticalAlignment="Center"
+                                ToolTip.Tip="Редактировать полную формулировку цели (popover)">
+                            <Button.Flyout>
+                                <Flyout Placement="BottomEdgeAlignedLeft">
+                                    <Border Classes="modeCard"
+                                            Padding="10"
+                                            MinWidth="360"
+                                            MaxWidth="520">
+                                        <StackPanel Spacing="8">
+                                            <TextBlock Text="Autonomous objective (full)"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
+                                            <TextBox Text="{Binding AutonomousObjective, Mode=TwoWay}"
+                                                     AcceptsReturn="True"
+                                                     TextWrapping="Wrap"
+                                                     MinHeight="120"
+                                                     FontFamily="Consolas,monospace"
+                                                     FontSize="11"/>
+                                            <TextBlock Text="Та же строка, что в компактном поле выше; закрой popover кликом снаружи или Esc."
+                                                       TextWrapping="Wrap"
+                                                       FontSize="11"
+                                                       Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+                                        </StackPanel>
+                                    </Border>
+                                </Flyout>
+                            </Button.Flyout>
+                        </Button>
+                    </Grid>
                 </StackPanel>
             </Border>
 

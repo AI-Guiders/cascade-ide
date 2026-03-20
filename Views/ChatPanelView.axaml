@@ -8,8 +8,8 @@
     <UserControl.Styles>
         <Style Selector="Border.traceStepCard">
             <Setter Property="Padding" Value="6"/>
-            <Setter Property="Margin" Value="0,0,0,4"/>
-            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Margin" Value="0,0,0,3"/>
+            <Setter Property="CornerRadius" Value="6"/>
             <Setter Property="Background" Value="{DynamicResource CascadeTheme.ChatMessageBubbleBackground}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.EditorColumnBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
@@ -32,7 +32,16 @@
             <Setter Property="BorderBrush" Value="#4D72D5"/>
         </Style>
         <Style Selector="Border.chatPanelSection">
-            <Setter Property="Margin" Value="0,0,0,8"/>
+            <Setter Property="Margin" Value="0,0,0,6"/>
+        </Style>
+        <!-- Power cockpit: одинаковый ритм секций trace + safety -->
+        <Style Selector="Border.powerCockpitBlock">
+            <Setter Property="Padding" Value="8"/>
+            <Setter Property="Margin" Value="0,0,0,5"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Background" Value="{DynamicResource CascadeTheme.ChatMessageBubbleBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.EditorColumnBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
         </Style>
         <Style Selector="Border.chatLoadingBanner">
             <Setter Property="Padding" Value="8,6"/>
@@ -44,7 +53,7 @@
         </Style>
     </UserControl.Styles>
     <Border Background="{DynamicResource CascadeTheme.ChatPanelBackground}" Padding="8">
-        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,4,120,Auto">
+        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,4,96,Auto">
             <!-- Focus: план (чеклист) -->
             <Border Grid.Row="0" IsVisible="{Binding IsFocusMode}" Classes="modeCard chatPanelSection">
                 <StackPanel Spacing="6">
@@ -151,7 +160,7 @@
                     </StackPanel>
                 </StackPanel>
             </Border>
-            <Border Grid.Row="4" IsVisible="{Binding ShowAgentTrace}" Classes="modeCard chatPanelSection">
+            <Border Grid.Row="4" IsVisible="{Binding ShowAgentTrace}" Classes="modeCard chatPanelSection powerCockpitBlock">
                 <StackPanel Spacing="6">
                     <TextBlock Classes="modeCardTitle" Text="Agent Trace Timeline"/>
                     <StackPanel DataContext="{Binding InstrumentationPanel}" x:DataType="feat:InstrumentationPanelViewModel" Spacing="6">
@@ -160,7 +169,7 @@
                                    Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
                                    FontSize="11"
                                    TextWrapping="Wrap"/>
-                        <ScrollViewer MaxHeight="280"
+                        <ScrollViewer MaxHeight="220"
                                       VerticalScrollBarVisibility="Auto"
                                       IsVisible="{Binding HasAgentTraceSteps}">
                             <ItemsControl ItemsSource="{Binding AgentTraceSteps}">
@@ -207,19 +216,21 @@
                     </StackPanel>
                 </StackPanel>
             </Border>
-            <Border Grid.Row="5" IsVisible="{Binding ShowSafetyControls}" Classes="modeCard chatPanelSection">
+            <Border Grid.Row="5" IsVisible="{Binding ShowSafetyControls}" Classes="modeCard chatPanelSection powerCockpitBlock">
                 <StackPanel Spacing="8">
                     <TextBlock Classes="modeCardTitle" Text="Safety Level Control"/>
 
                     <!-- Power: крупные карточки L1/L2/L3 + заметный Emergency -->
-                    <StackPanel IsVisible="{Binding IsPowerMode}" Spacing="10">
+                    <StackPanel IsVisible="{Binding IsPowerMode}" Spacing="8">
                         <TextBlock Text="{Binding SafetyLevelDescription}"
                                    TextWrapping="Wrap"
+                                   MaxLines="2"
+                                   TextTrimming="CharacterEllipsis"
                                    FontSize="11"
                                    Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-                        <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                        <UniformGrid Columns="3">
                             <!-- Активный уровень: внешнее неоновое кольцо (как на мокапе) -->
-                            <Grid Grid.Column="0">
+                            <Grid>
                                 <Border CornerRadius="12"
                                         Padding="2"
                                         Margin="-2"
@@ -234,14 +245,15 @@
                                         BorderThickness="0"
                                         Padding="0">
                                     <Border CornerRadius="10"
-                                            Padding="10,12"
+                                            Padding="8,8"
+                                            MinHeight="58"
                                             BorderThickness="2"
                                             BorderBrush="{DynamicResource CascadeTheme.PowerNeonBorder}"
                                             Background="{DynamicResource CascadeTheme.PowerSafetyL1}"
                                             Opacity="{Binding SafetyL1Opacity}">
                                         <StackPanel Spacing="2">
                                             <TextBlock Text="L1"
-                                                       FontSize="18"
+                                                       FontSize="16"
                                                        FontWeight="Bold"
                                                        Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
                                             <TextBlock Text="READ-ONLY"
@@ -251,7 +263,7 @@
                                     </Border>
                                 </Button>
                             </Grid>
-                            <Grid Grid.Column="1">
+                            <Grid>
                                 <Border CornerRadius="12"
                                         Padding="2"
                                         Margin="-2"
@@ -266,14 +278,15 @@
                                         BorderThickness="0"
                                         Padding="0">
                                     <Border CornerRadius="10"
-                                            Padding="10,12"
+                                            Padding="8,8"
+                                            MinHeight="58"
                                             BorderThickness="2"
                                             BorderBrush="{DynamicResource CascadeTheme.PowerNeonBorder}"
                                             Background="{DynamicResource CascadeTheme.PowerSafetyL2}"
                                             Opacity="{Binding SafetyL2Opacity}">
                                         <StackPanel Spacing="2">
                                             <TextBlock Text="L2"
-                                                       FontSize="18"
+                                                       FontSize="16"
                                                        FontWeight="Bold"
                                                        Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
                                             <TextBlock Text="CONFIRM"
@@ -283,7 +296,7 @@
                                     </Border>
                                 </Button>
                             </Grid>
-                            <Grid Grid.Column="2">
+                            <Grid>
                                 <Border CornerRadius="12"
                                         Padding="2"
                                         Margin="-2"
@@ -298,14 +311,15 @@
                                         BorderThickness="0"
                                         Padding="0">
                                     <Border CornerRadius="10"
-                                            Padding="10,12"
+                                            Padding="8,8"
+                                            MinHeight="58"
                                             BorderThickness="2"
                                             BorderBrush="{DynamicResource CascadeTheme.PowerNeonBorder}"
                                             Background="{DynamicResource CascadeTheme.PowerSafetyL3}"
                                             Opacity="{Binding SafetyL3Opacity}">
                                         <StackPanel Spacing="2">
                                             <TextBlock Text="L3"
-                                                       FontSize="18"
+                                                       FontSize="16"
                                                        FontWeight="Bold"
                                                        Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
                                             <TextBlock Text="AUTONOMOUS"
@@ -315,11 +329,11 @@
                                     </Border>
                                 </Button>
                             </Grid>
-                        </Grid>
+                        </UniformGrid>
                         <Button Content="Emergency stop"
                                 Command="{Binding EmergencyStopCommand}"
                                 HorizontalAlignment="Stretch"
-                                Padding="14,10"
+                                Padding="10,8"
                                 FontWeight="Bold"
                                 Foreground="#FFFFFF"
                                 Background="{DynamicResource CascadeTheme.PowerEmergency}"/>

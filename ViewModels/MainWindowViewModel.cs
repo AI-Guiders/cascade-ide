@@ -624,10 +624,10 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     public bool IsBalancedMode => string.Equals(UiMode, "Balanced", StringComparison.OrdinalIgnoreCase);
     public bool IsPowerMode => string.Equals(UiMode, "Power", StringComparison.OrdinalIgnoreCase);
     public bool ShowTaskBar => true;
-    public bool ShowQuickActions => !IsFocusMode;
+    public bool ShowQuickActions => IsBalancedMode;
     public bool ShowAgentOperations => true;
-    /// <summary>В Focus справа показываем план и гейт; блок «операции» переносим в Balanced/Power.</summary>
-    public bool ShowAgentOperationsBlock => !IsFocusMode;
+    /// <summary>В Focus справа показываем план и гейт, в Power — trace/safety; блок «операции» остаётся в Balanced.</summary>
+    public bool ShowAgentOperationsBlock => IsBalancedMode;
     public bool ShowAgentTrace => IsPowerMode;
     public bool ShowPowerTelemetry => IsPowerMode;
     public bool ShowSafetyControls => IsPowerMode;
