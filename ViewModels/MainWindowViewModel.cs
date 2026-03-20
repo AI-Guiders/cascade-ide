@@ -7,6 +7,7 @@ using System.Text.Json;
 using System.Windows.Input;
 using System.Xml.Linq;
 using Avalonia.Threading;
+using CascadeIDE.Features.Git;
 using CascadeIDE.Models;
 using DotNetBuildTestParsers;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -72,7 +73,12 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
 
         _lastSavedSettings = (CascadeIdeSettings)_settings.Clone();
         _lastSavedAiKeys = (AiKeys)_aiKeys.Clone();
+
+        GitPanel = new GitPanelViewModel(_gitRunner, GetWorkspacePath, this, LoadSolution, RefreshGitSummaryAsync);
     }
+
+    /// <summary>Панель Git (нижняя вкладка); состояние и команды вынесены из <see cref="MainWindowViewModel"/>.</summary>
+    public GitPanelViewModel GitPanel { get; }
 
     private void SaveSettingsIfChanged()
     {
@@ -215,6 +221,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     }
 
     private readonly Services.AppDataService _appData = new();
+    private readonly Services.IGitCommandRunner _gitRunner = new Services.GitCommandRunner();
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(InstallModelCommand))]
@@ -503,42 +510,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     /// <summary>Вкладка «Git» в нижней панели (Вид → Git).</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsBottomPanelVisible))]
-    [NotifyCanExecuteChangedFor(nameof(CommitGitFromPanelCommand))]
-    [NotifyCanExecuteChangedFor(nameof(PushGitFromPanelCommand))]
     private bool _isGitPanelVisible;
-
-    [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(CommitGitFromPanelCommand))]
-    [NotifyCanExecuteChangedFor(nameof(PushGitFromPanelCommand))]
-    private bool _isGitRepository;
-
-    [ObservableProperty]
-    private string _gitBranchLine = "";
-
-    [ObservableProperty]
-    private string _gitPanelStatusText = "";
-
-    [ObservableProperty]
-    private string _gitCommitMessage = "";
-
-    [ObservableProperty]
-    private string _gitDiffText = "";
-
-    [ObservableProperty]
-    private string _gitSubmoduleStatusText = "";
-
-    /// <summary>Корень репозитория (git rev-parse --show-toplevel) и каталог решения — для ясности родитель vs вложенный репо.</summary>
-    [ObservableProperty]
-    private string _gitRepositoryContextText = "";
-
-    /// <summary>Последний вывод команд submodule (update/sync).</summary>
-    [ObservableProperty]
-    private string _gitSubmoduleCommandOutput = "";
-
-    [ObservableProperty]
-    private GitStatusRow? _selectedGitStatusRow;
-
-    public ObservableCollection<GitStatusRow> GitStatusRows { get; } = [];
 
     partial void OnIsGitPanelVisibleChanged(bool value)
     {
@@ -548,40 +520,12 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         if (value)
         {
             BottomPanelTabIndex = 2;
-            _ = RefreshGitPanelAsync();
+            _ = GitPanel.RefreshGitPanelAsync();
         }
         else if (BottomPanelTabIndex == 2)
         {
             BottomPanelTabIndex = IsTerminalVisible ? 0 : IsBuildOutputVisible ? 1 : 0;
         }
-    }
-
-    partial void OnSelectedGitStatusRowChanged(GitStatusRow? value)
-    {
-        _ = LoadGitDiffForSelectionAsync();
-        StageGitSelectionCommand.NotifyCanExecuteChanged();
-        UnstageGitSelectionCommand.NotifyCanExecuteChanged();
-        OpenSubmoduleFolderCommand.NotifyCanExecuteChanged();
-        OpenSubmoduleSolutionInIdeCommand.NotifyCanExecuteChanged();
-    }
-
-    partial void OnGitCommitMessageChanged(string value)
-    {
-        CommitGitFromPanelCommand.NotifyCanExecuteChanged();
-        CommitGitStagedOnlyCommand.NotifyCanExecuteChanged();
-    }
-
-    partial void OnIsGitRepositoryChanged(bool value)
-    {
-        CommitGitFromPanelCommand.NotifyCanExecuteChanged();
-        PushGitFromPanelCommand.NotifyCanExecuteChanged();
-        CommitGitStagedOnlyCommand.NotifyCanExecuteChanged();
-        StageGitSelectionCommand.NotifyCanExecuteChanged();
-        UnstageGitSelectionCommand.NotifyCanExecuteChanged();
-        OpenSubmoduleFolderCommand.NotifyCanExecuteChanged();
-        GitSubmoduleUpdateInitCommand.NotifyCanExecuteChanged();
-        GitSubmoduleSyncCommand.NotifyCanExecuteChanged();
-        OpenSubmoduleSolutionInIdeCommand.NotifyCanExecuteChanged();
     }
 
     public static readonly IReadOnlyList<string> UiModeOptions = ["Focus", "Balanced", "Power"];
@@ -1011,9 +955,9 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     {
         AttachBreakpointsFileWatcher(value);
         _ = RefreshGitSummaryAsync();
-        _ = RefreshGitRepositoryFlagAsync();
+        _ = GitPanel.RefreshRepositoryFlagAsync();
         if (IsGitPanelVisible)
-            _ = RefreshGitPanelAsync();
+            _ = GitPanel.RefreshGitPanelAsync();
     }
 
     [ObservableProperty]
@@ -1518,421 +1462,6 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         if (IsTerminalVisible)
             BottomPanelTabIndex = 0;
     }
-
-    [RelayCommand]
-    private async Task RefreshGitPanelAsync()
-    {
-        var ws = GetWorkspacePath();
-        if (string.IsNullOrWhiteSpace(ws) || !Directory.Exists(ws))
-        {
-            await Dispatcher.UIThread.InvokeAsync(() =>
-            {
-                GitBranchLine = "";
-                GitStatusRows.Clear();
-                GitSubmoduleStatusText = "";
-                GitDiffText = "";
-                GitRepositoryContextText = "";
-                GitPanelStatusText = "Откройте решение (.sln / .slnx).";
-                IsGitRepository = false;
-            });
-            return;
-        }
-
-        var inside = await RunGitCommandAsync(["rev-parse", "--is-inside-work-tree"]).ConfigureAwait(false);
-        var inRepo = inside.Success && string.Equals(inside.Output.Trim(), "true", StringComparison.OrdinalIgnoreCase);
-        if (!inRepo)
-        {
-            await Dispatcher.UIThread.InvokeAsync(() =>
-            {
-                IsGitRepository = false;
-                GitBranchLine = "";
-                GitStatusRows.Clear();
-                GitSubmoduleStatusText = "";
-                GitDiffText = "";
-                GitRepositoryContextText = "";
-                GitPanelStatusText = "Каталог решения не в git-репозитории.";
-            });
-            return;
-        }
-
-        var status = await RunGitCommandAsync(["status", "--short", "--branch"]).ConfigureAwait(false);
-        var submodule = await RunGitCommandAsync(["submodule", "status"]).ConfigureAwait(false);
-        var subPaths = await LoadSubmodulePathsAsync(ws).ConfigureAwait(false);
-        var toplevel = await RunGitCommandAsync(["rev-parse", "--show-toplevel"]).ConfigureAwait(false);
-
-        await Dispatcher.UIThread.InvokeAsync(() =>
-        {
-            IsGitRepository = true;
-            GitPanelStatusText = status.Success ? "" : status.Output;
-            GitBranchLine = ExtractGitBranchLine(status.Output);
-            FillGitStatusRows(status.Output, subPaths);
-            GitSubmoduleStatusText = submodule.Success
-                ? submodule.Output.Trim()
-                : $"(submodule: {submodule.Output.Trim()})";
-            GitRepositoryContextText = BuildGitRepositoryContext(ws, toplevel.Success ? toplevel.Output : "");
-        });
-
-        await LoadGitDiffForSelectionAsync().ConfigureAwait(false);
-    }
-
-    private async Task RefreshGitRepositoryFlagAsync()
-    {
-        var ws = GetWorkspacePath();
-        if (string.IsNullOrWhiteSpace(ws) || !Directory.Exists(ws))
-        {
-            await Dispatcher.UIThread.InvokeAsync(() => IsGitRepository = false);
-            return;
-        }
-
-        var inside = await RunGitCommandAsync(["rev-parse", "--is-inside-work-tree"]).ConfigureAwait(false);
-        var ok = inside.Success && string.Equals(inside.Output.Trim(), "true", StringComparison.OrdinalIgnoreCase);
-        await Dispatcher.UIThread.InvokeAsync(() => IsGitRepository = ok);
-    }
-
-    private void FillGitStatusRows(string output, HashSet<string> submodulePaths)
-    {
-        GitStatusRows.Clear();
-        foreach (var line in (output ?? "").Replace("\r\n", "\n").Split('\n', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
-        {
-            if (line.StartsWith("##", StringComparison.Ordinal))
-                continue;
-            var rel = ParseGitStatusPath(line);
-            var path = rel ?? "";
-            var norm = path.Replace('\\', '/').TrimEnd('/');
-            var isUntracked = line.StartsWith("??", StringComparison.Ordinal);
-            var hasStaged = !isUntracked && line.Length >= 1 && line[0] is not (' ' or '?');
-            var isSub = !string.IsNullOrEmpty(norm) && submodulePaths.Contains(norm);
-            GitStatusRows.Add(new GitStatusRow
-            {
-                RawLine = line,
-                RelativePath = path,
-                IsUntracked = isUntracked,
-                HasStagedChanges = hasStaged,
-                IsSubmodulePath = isSub
-            });
-        }
-    }
-
-    private async Task<HashSet<string>> LoadSubmodulePathsAsync(string workspace)
-    {
-        var result = await RunGitCommandAsync(["config", "-f", ".gitmodules", "--get-regexp", "path"]).ConfigureAwait(false);
-        if (!result.Success)
-            return new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-        var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var line in (result.Output ?? "").Replace("\r\n", "\n").Split('\n', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
-        {
-            var tab = line.IndexOf('\t');
-            if (tab < 0)
-                continue;
-            var p = line[(tab + 1)..].Trim().Replace('\\', '/').TrimEnd('/');
-            if (!string.IsNullOrEmpty(p))
-                set.Add(p);
-        }
-
-        return set;
-    }
-
-    private static string ExtractGitBranchLine(string output)
-    {
-        var first = (output ?? "").Replace("\r\n", "\n").Split('\n', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
-        return first is { Length: >= 3 } && first.StartsWith("## ", StringComparison.Ordinal) ? first[3..].Trim() : "";
-    }
-
-    private static string? ParseGitStatusPath(string line)
-    {
-        if (string.IsNullOrWhiteSpace(line))
-            return null;
-        if (line.StartsWith("##", StringComparison.Ordinal))
-            return null;
-        if (line.StartsWith("??", StringComparison.Ordinal))
-            return line.Length > 2 ? line[2..].Trim() : null;
-        if (line.Length < 4)
-            return null;
-        var trimmed = line[3..].Trim();
-        if (trimmed.Contains(" -> ", StringComparison.Ordinal))
-        {
-            var parts = trimmed.Split([" -> "], StringSplitOptions.None);
-            return parts.Length == 2 ? parts[1].Trim() : parts[0].Trim();
-        }
-
-        return trimmed;
-    }
-
-    private static string BuildGitRepositoryContext(string workspaceDir, string toplevelRaw)
-    {
-        if (string.IsNullOrWhiteSpace(workspaceDir))
-            return "";
-        try
-        {
-            var wsFull = Path.GetFullPath(workspaceDir);
-            var topTrim = (toplevelRaw ?? "").Trim().Replace('/', Path.DirectorySeparatorChar);
-            if (string.IsNullOrEmpty(topTrim))
-                return $"Каталог решения: {wsFull}";
-            var topFull = Path.GetFullPath(topTrim);
-            var same = string.Equals(wsFull, topFull, StringComparison.OrdinalIgnoreCase);
-            return same
-                ? $"Корень git: {topFull}"
-                : $"Корень git: {topFull} · каталог решения: {wsFull}";
-        }
-        catch
-        {
-            return (toplevelRaw ?? "").Trim();
-        }
-    }
-
-    /// <summary>Ищет .slnx / .sln в корне submodule и в подпапках первого уровня (предпочтение .slnx).</summary>
-    private static string? FindSolutionFileInDirectory(string submoduleRoot)
-    {
-        if (string.IsNullOrWhiteSpace(submoduleRoot) || !Directory.Exists(submoduleRoot))
-            return null;
-
-        static string? PickFirst(IEnumerable<string> files)
-        {
-            var arr = files as string[] ?? files.ToArray();
-            return arr.Length == 0 ? null : arr.OrderBy(static f => f, StringComparer.OrdinalIgnoreCase).First();
-        }
-
-        var topSlnx = Directory.GetFiles(submoduleRoot, "*.slnx", SearchOption.TopDirectoryOnly);
-        var topSln = Directory.GetFiles(submoduleRoot, "*.sln", SearchOption.TopDirectoryOnly);
-        var p = PickFirst(topSlnx) ?? PickFirst(topSln);
-        if (p is not null)
-            return p;
-
-        foreach (var sub in Directory.GetDirectories(submoduleRoot))
-        {
-            var innerSlnx = Directory.GetFiles(sub, "*.slnx", SearchOption.TopDirectoryOnly);
-            var innerSln = Directory.GetFiles(sub, "*.sln", SearchOption.TopDirectoryOnly);
-            p = PickFirst(innerSlnx) ?? PickFirst(innerSln);
-            if (p is not null)
-                return p;
-        }
-
-        return null;
-    }
-
-    private async Task LoadGitDiffForSelectionAsync()
-    {
-        if (SelectedGitStatusRow is not { HasPath: true } row || string.IsNullOrWhiteSpace(row.RelativePath))
-        {
-            await Dispatcher.UIThread.InvokeAsync(() => GitDiffText = "");
-            return;
-        }
-
-        var unstaged = await RunGitCommandAsync(["diff", "--", row.RelativePath]).ConfigureAwait(false);
-        var staged = await RunGitCommandAsync(["diff", "--staged", "--", row.RelativePath]).ConfigureAwait(false);
-        var sb = new StringBuilder();
-        if (staged.Success && !string.IsNullOrWhiteSpace(staged.Output))
-        {
-            sb.AppendLine("--- staged ---");
-            sb.AppendLine(staged.Output);
-            sb.AppendLine();
-        }
-
-        if (unstaged.Success && !string.IsNullOrWhiteSpace(unstaged.Output))
-        {
-            sb.AppendLine("--- unstaged ---");
-            sb.AppendLine(unstaged.Output);
-        }
-
-        if (sb.Length == 0)
-            sb.AppendLine("(нет diff для выбранного пути)");
-
-        await Dispatcher.UIThread.InvokeAsync(() => GitDiffText = sb.ToString());
-    }
-
-    [RelayCommand(CanExecute = nameof(CanCommitGitFromPanel))]
-    private async Task CommitGitFromPanelAsync()
-    {
-        var msg = GitCommitMessage.Trim();
-        if (string.IsNullOrWhiteSpace(msg) || !IsGitRepository)
-            return;
-
-        GitPanelStatusText = "Коммит…";
-        var json = await ((Services.IIdeMcpActions)this).GitCommitAsync(msg, null).ConfigureAwait(false);
-        await Dispatcher.UIThread.InvokeAsync(() =>
-        {
-            GitPanelStatusText = json;
-            GitCommitMessage = "";
-        });
-        await RefreshGitPanelAsync().ConfigureAwait(false);
-        await RefreshGitSummaryAsync().ConfigureAwait(false);
-    }
-
-    private bool CanCommitGitFromPanel() => IsGitRepository && !string.IsNullOrWhiteSpace(GitCommitMessage);
-
-    [RelayCommand(CanExecute = nameof(CanPushGitFromPanel))]
-    private async Task PushGitFromPanelAsync()
-    {
-        if (!IsGitRepository)
-            return;
-
-        GitPanelStatusText = "Push…";
-        var json = await ((Services.IIdeMcpActions)this).GitPushAsync(null, null).ConfigureAwait(false);
-        await Dispatcher.UIThread.InvokeAsync(() => GitPanelStatusText = json);
-        await RefreshGitPanelAsync().ConfigureAwait(false);
-        await RefreshGitSummaryAsync().ConfigureAwait(false);
-    }
-
-    private bool CanPushGitFromPanel() => IsGitRepository;
-
-    [RelayCommand(CanExecute = nameof(CanStageGitSelection))]
-    private async Task StageGitSelectionAsync()
-    {
-        if (SelectedGitStatusRow is not { HasPath: true, RelativePath: var rel })
-            return;
-
-        GitPanelStatusText = "";
-        var r = await RunGitCommandAsync(["add", "--", rel]).ConfigureAwait(false);
-        await Dispatcher.UIThread.InvokeAsync(() => GitPanelStatusText = r.Success ? "" : r.Output);
-        await RefreshGitPanelAsync().ConfigureAwait(false);
-        await RefreshGitSummaryAsync().ConfigureAwait(false);
-    }
-
-    private bool CanStageGitSelection() => IsGitRepository && SelectedGitStatusRow is { HasPath: true };
-
-    [RelayCommand(CanExecute = nameof(CanUnstageGitSelection))]
-    private async Task UnstageGitSelectionAsync()
-    {
-        if (SelectedGitStatusRow is not { HasPath: true, RelativePath: var rel })
-            return;
-
-        GitPanelStatusText = "";
-        var r = await RunGitCommandAsync(["restore", "--staged", "--", rel]).ConfigureAwait(false);
-        await Dispatcher.UIThread.InvokeAsync(() => GitPanelStatusText = r.Success ? "" : r.Output);
-        await RefreshGitPanelAsync().ConfigureAwait(false);
-        await RefreshGitSummaryAsync().ConfigureAwait(false);
-    }
-
-    private bool CanUnstageGitSelection() =>
-        IsGitRepository && SelectedGitStatusRow is { HasPath: true, HasStagedChanges: true };
-
-    [RelayCommand(CanExecute = nameof(CanOpenSubmoduleFolder))]
-    private void OpenSubmoduleFolder()
-    {
-        if (SelectedGitStatusRow is not { IsSubmodulePath: true, RelativePath: var rel })
-            return;
-
-        var ws = GetWorkspacePath();
-        if (string.IsNullOrWhiteSpace(ws))
-            return;
-
-        var full = Path.GetFullPath(Path.Combine(ws, rel.Replace('/', Path.DirectorySeparatorChar)));
-        if (!Directory.Exists(full))
-            return;
-
-        try
-        {
-            Process.Start(new ProcessStartInfo { FileName = full, UseShellExecute = true });
-        }
-        catch (Exception ex)
-        {
-            GitPanelStatusText = ex.Message;
-        }
-    }
-
-    private bool CanOpenSubmoduleFolder()
-    {
-        if (!IsGitRepository || SelectedGitStatusRow is not { IsSubmodulePath: true, RelativePath: var rel })
-            return false;
-
-        var ws = GetWorkspacePath();
-        if (string.IsNullOrWhiteSpace(ws))
-            return false;
-
-        var full = Path.GetFullPath(Path.Combine(ws, rel.Replace('/', Path.DirectorySeparatorChar)));
-        return Directory.Exists(full);
-    }
-
-    [RelayCommand(CanExecute = nameof(CanOpenSubmoduleSolutionInIde))]
-    private void OpenSubmoduleSolutionInIde()
-    {
-        if (SelectedGitStatusRow is not { IsSubmodulePath: true, RelativePath: var rel })
-            return;
-
-        var ws = GetWorkspacePath();
-        if (string.IsNullOrWhiteSpace(ws))
-            return;
-
-        var dir = Path.GetFullPath(Path.Combine(ws, rel.Replace('/', Path.DirectorySeparatorChar)));
-        if (!Directory.Exists(dir))
-            return;
-
-        var sln = FindSolutionFileInDirectory(dir);
-        if (string.IsNullOrEmpty(sln))
-        {
-            GitPanelStatusText =
-                "В каталоге submodule не найден .sln / .slnx (корень и подпапки первого уровня).";
-            return;
-        }
-
-        LoadSolution(sln);
-    }
-
-    private bool CanOpenSubmoduleSolutionInIde()
-    {
-        if (!IsGitRepository || SelectedGitStatusRow is not { IsSubmodulePath: true, RelativePath: var rel })
-            return false;
-
-        var ws = GetWorkspacePath();
-        if (string.IsNullOrWhiteSpace(ws))
-            return false;
-
-        var full = Path.GetFullPath(Path.Combine(ws, rel.Replace('/', Path.DirectorySeparatorChar)));
-        return Directory.Exists(full) && FindSolutionFileInDirectory(full) is not null;
-    }
-
-    [RelayCommand(CanExecute = nameof(CanRunGitSubmoduleCommands))]
-    private async Task GitSubmoduleUpdateInitAsync()
-    {
-        GitSubmoduleCommandOutput = "git submodule update --init --recursive …\n";
-        var r = await RunGitCommandAsync(["submodule", "update", "--init", "--recursive"]).ConfigureAwait(false);
-        await Dispatcher.UIThread.InvokeAsync(() =>
-        {
-            GitSubmoduleCommandOutput = TruncateOutput(r.Output, 8000);
-            GitPanelStatusText = r.Success ? "" : "Submodule update завершился с ошибкой (см. вывод ниже).";
-        });
-        await RefreshGitPanelAsync().ConfigureAwait(false);
-        await RefreshGitSummaryAsync().ConfigureAwait(false);
-    }
-
-    [RelayCommand(CanExecute = nameof(CanRunGitSubmoduleCommands))]
-    private async Task GitSubmoduleSyncAsync()
-    {
-        GitSubmoduleCommandOutput = "git submodule sync --recursive …\n";
-        var r = await RunGitCommandAsync(["submodule", "sync", "--recursive"]).ConfigureAwait(false);
-        await Dispatcher.UIThread.InvokeAsync(() =>
-        {
-            GitSubmoduleCommandOutput = TruncateOutput(r.Output, 8000);
-            if (!r.Success)
-                GitPanelStatusText = "Submodule sync завершился с ошибкой (см. вывод ниже).";
-        });
-        await RefreshGitPanelAsync().ConfigureAwait(false);
-        await RefreshGitSummaryAsync().ConfigureAwait(false);
-    }
-
-    private bool CanRunGitSubmoduleCommands() => IsGitRepository;
-
-    [RelayCommand(CanExecute = nameof(CanCommitGitStagedOnly))]
-    private async Task CommitGitStagedOnlyAsync()
-    {
-        var msg = GitCommitMessage.Trim();
-        if (string.IsNullOrWhiteSpace(msg) || !IsGitRepository)
-            return;
-
-        GitPanelStatusText = "Коммит (только staged)…";
-        var result = await RunGitCommandAsync(["commit", "-m", msg]).ConfigureAwait(false);
-        await Dispatcher.UIThread.InvokeAsync(() =>
-        {
-            GitPanelStatusText = result.Success ? "" : result.Output;
-            if (result.Success)
-                GitCommitMessage = "";
-        });
-        await RefreshGitPanelAsync().ConfigureAwait(false);
-        await RefreshGitSummaryAsync().ConfigureAwait(false);
-    }
-
-    private bool CanCommitGitStagedOnly() => IsGitRepository && !string.IsNullOrWhiteSpace(GitCommitMessage);
 
     [RelayCommand]
     private void ToggleInstrumentationDock() => IsInstrumentationDockVisible = !IsInstrumentationDockVisible;
@@ -3096,36 +2625,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         var workspace = GetWorkspacePath();
         if (string.IsNullOrWhiteSpace(workspace) || !Directory.Exists(workspace))
             return (false, -1, "Workspace path is not available.");
-
-        try
-        {
-            var psi = new ProcessStartInfo("git")
-            {
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                WorkingDirectory = workspace
-            };
-            foreach (var arg in args)
-                psi.ArgumentList.Add(arg);
-
-            using var process = Process.Start(psi);
-            if (process is null)
-                return (false, -1, "Failed to start git process.");
-
-            var stdout = process.StandardOutput.ReadToEndAsync();
-            var stderr = process.StandardError.ReadToEndAsync();
-            await Task.WhenAll(stdout, stderr).ConfigureAwait(false);
-            await process.WaitForExitAsync().ConfigureAwait(false);
-
-            var output = (await stdout) + "\n" + (await stderr);
-            return (process.ExitCode == 0, process.ExitCode, output.Trim());
-        }
-        catch (Exception ex)
-        {
-            return (false, -1, ex.Message);
-        }
+        return await _gitRunner.RunAsync(args, workspace).ConfigureAwait(false);
     }
 
     private static string TruncateOutput(string? text, int maxChars)

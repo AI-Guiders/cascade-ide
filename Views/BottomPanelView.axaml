@@ -94,7 +94,8 @@
                     </DockPanel>
                 </TabItem>
                 <TabItem Header="Git" IsVisible="{Binding IsGitPanelVisible}">
-                    <Grid ColumnDefinitions="280,4,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,*,Auto,120,Auto,Auto,Auto">
+                    <Grid DataContext="{Binding GitPanel}"
+                          ColumnDefinitions="280,4,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,*,Auto,120,Auto,Auto,Auto">
                         <TextBlock Grid.Row="0" Grid.ColumnSpan="3"
                                    Text="{Binding GitBranchLine, StringFormat=Ветка / состояние: {0}}"
                                    Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"
