@@ -58,7 +58,7 @@ dotnet run
 
 ## Архитектура
 
-Слои, вертикальные срезы фич, роль `MainWindowViewModel` и правила миграции: **[docs/architecture-policy.md](docs/architecture-policy.md)**.
+Слои, вертикальные срезы фич, роль `MainWindowViewModel` и правила миграции: **[docs/architecture-policy.md](docs/architecture-policy.md)**. Карта срезов (Git, Build, Terminal, Chat…) и фазы выноса: **[docs/architecture-migration.md](docs/architecture-migration.md)**. Каталог **`Features/`** — см. [Features/README.md](Features/README.md).
 
 ## Git и submodules (roadmap)
 
