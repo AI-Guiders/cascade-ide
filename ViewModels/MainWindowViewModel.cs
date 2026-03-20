@@ -8,6 +8,7 @@ using System.Xml.Linq;
 using Avalonia.Threading;
 using CascadeIDE.Features.Build;
 using CascadeIDE.Features.Chat;
+using CascadeIDE.Features.AutonomousAgent;
 using CascadeIDE.Features.Git;
 using CascadeIDE.Features.Instrumentation;
 using CascadeIDE.Features.Terminal;
@@ -46,11 +47,17 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
 
     private readonly Services.ContextMinimizer _contextMinimizer;
 
+    private Services.McpClientService _mcpClientService;
+    private AutonomousAgentService _autonomousAgentService;
+    private CancellationTokenSource? _autonomousCts;
+    private Task? _autonomousTask;
+
     public MainWindowViewModel()
     {
         _contextMinimizer = new Services.ContextMinimizer(new Services.CSharpLanguageService());
         _aiProviderManager = new Services.AiProviderManager(_contextMinimizer, ResolveProvider);
         _ideMcpServerEnabled = _settings.IdeMcpServerEnabled;
+        _externalMcpServersJson = _settings.ExternalMcpServersJson;
         _activeAiProvider = _settings.ActiveAiProvider;
         _anthropicApiKey = _aiKeys.AnthropicApiKey ?? "";
         _openAiApiKey = _aiKeys.OpenAiApiKey ?? "";
@@ -89,7 +96,23 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             () => EditorText);
         InstrumentationPanel = new InstrumentationPanelViewModel();
         InstrumentationPanel.PropertyChanged += OnInstrumentationPanelPropertyChanged;
+
+        _mcpClientService = new Services.McpClientService(_settings.ExternalMcpServersJson);
+        _autonomousAgentService = CreateAutonomousAgentService(_mcpClientService);
     }
+
+    private AutonomousAgentService CreateAutonomousAgentService(Services.McpClientService mcpClientService) =>
+        new AutonomousAgentService(
+            _aiProviderManager,
+            this,
+            mcpClientService,
+            () => ActiveAiProvider,
+            () => SelectedOllamaModel,
+            () => UseMinimizedContext,
+            () => CurrentFilePath,
+            () => EditorText,
+            (kind, text, status, at) => InstrumentationPanel.AppendAgentTraceStep(kind, text, status, at),
+            msg => Dispatcher.UIThread.Post(() => InstrumentationPanel.EventTimeline.Insert(0, msg)));
 
     /// <summary>
     /// Полоса телеметрии читает счётчики отладки с главного VM; при смене MCP-стека обновляем строки.
@@ -184,6 +207,18 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     partial void OnIdeMcpServerEnabledChanged(bool value)
     {
         _settings.IdeMcpServerEnabled = value;
+        SaveSettingsIfChanged();
+    }
+
+    partial void OnExternalMcpServersJsonChanged(string value)
+    {
+        _settings.ExternalMcpServersJson = value ?? "[]";
+
+        // External MCP connectivity affects autonomous tool list/calls.
+        _autonomousCts?.Cancel();
+        _mcpClientService = new Services.McpClientService(_settings.ExternalMcpServersJson);
+        _autonomousAgentService = CreateAutonomousAgentService(_mcpClientService);
+
         SaveSettingsIfChanged();
     }
 
@@ -808,6 +843,13 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     /// <summary>Включить MCP-сервер при старте с --mcp-stdio (сохраняется в настройках, действует при следующем запуске).</summary>
     [ObservableProperty]
     private bool _ideMcpServerEnabled = true;
+
+    /// <summary>
+    /// JSON-конфиг внешних MCP-серверов (stdio) для автономного режима.
+    /// Формат — как в <see cref="CascadeIdeSettings.ExternalMcpServersJson"/>.
+    /// </summary>
+    [ObservableProperty]
+    private string _externalMcpServersJson = "[]";
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsOllamaSelected))]
@@ -1619,9 +1661,65 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     [RelayCommand]
     private void SetSafetyL3() => SafetyLevel = "L3";
 
+    private void StartAutonomousFlow(string objective, int maxSteps)
+    {
+        if (!IsPowerMode)
+            return;
+
+        // Avoid overlapping runs: new run cancels the previous one.
+        _autonomousCts?.Cancel();
+        _autonomousCts = new CancellationTokenSource();
+        var ct = _autonomousCts.Token;
+
+        ActiveTaskTitle = "Autonomous Agent";
+        ActiveTaskStatus = "Running";
+        ActiveTaskProgress = 0;
+        ResultSummary = "Autonomous flow started…";
+
+        _autonomousTask = Task.Run(async () =>
+        {
+            try
+            {
+                var result = await _autonomousAgentService.RunAutonomousAsync(objective, SafetyLevel, maxSteps, ct)
+                    .ConfigureAwait(false);
+                Dispatcher.UIThread.Post(() =>
+                {
+                    ActiveTaskStatus = "Done";
+                    ActiveTaskProgress = 100;
+                    ResultSummary = result;
+                });
+            }
+            catch (OperationCanceledException)
+            {
+                Dispatcher.UIThread.Post(() =>
+                {
+                    ActiveTaskStatus = "Paused";
+                    ActiveTaskProgress = 0;
+                    ResultSummary = "Autonomous flow cancelled.";
+                });
+            }
+            catch (Exception ex)
+            {
+                Dispatcher.UIThread.Post(() =>
+                {
+                    ActiveTaskStatus = "Error";
+                    ActiveTaskProgress = 0;
+                    ResultSummary = "Autonomous error: " + ex.Message;
+                });
+            }
+        }, ct);
+    }
+
     [RelayCommand]
     private void FixFailingTests()
     {
+        var objective = "Fix failing tests using minimal-risk changes. Use get_workspace_state / run_affected_tests, then propose safe fixes.";
+        if (IsPowerMode)
+        {
+            StartAutonomousFlow(objective, maxSteps: 10);
+            return;
+        }
+
         IsChatPanelExpanded = true;
         ChatPanel.ChatInput = "Fix failing tests using minimal-risk changes. Start with ide_run_affected_tests and explain each step.";
     }
@@ -1629,6 +1727,13 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     [RelayCommand]
     private void InvestigateNullref()
     {
+        var objective = "Investigate possible null reference in current context. Show the shortest safe fix plan with evidence from diagnostics/tests.";
+        if (IsPowerMode)
+        {
+            StartAutonomousFlow(objective, maxSteps: 8);
+            return;
+        }
+
         IsChatPanelExpanded = true;
         ChatPanel.ChatInput = "Investigate possible null reference in current context. Show the shortest safe fix plan.";
     }
@@ -1636,6 +1741,13 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     [RelayCommand]
     private void PrepareCommit()
     {
+        var objective = "Prepare a clean commit plan grouped by logical changes and include verification steps.";
+        if (IsPowerMode)
+        {
+            StartAutonomousFlow(objective, maxSteps: 6);
+            return;
+        }
+
         IsChatPanelExpanded = true;
         ChatPanel.ChatInput = "Prepare a clean commit plan grouped by logical changes and include verification steps.";
     }
@@ -1694,6 +1806,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private void EmergencyStop()
     {
         IsBuilding = false;
+        _autonomousCts?.Cancel();
         ActiveTaskStatus = "Paused";
         ResultSummary = "Autonomous flow paused by operator.";
         InstrumentationPanel.EventTimeline.Insert(0, $"{DateTime.Now:HH:mm:ss} — Emergency stop engaged");

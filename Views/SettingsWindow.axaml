@@ -51,6 +51,14 @@
             <CheckBox Content="Минимальный контекст (только диагностики и сигнатуры)" IsChecked="{Binding UseMinimizedContext}" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
             <CheckBox Content="Запускать MCP-сервер при старте с --mcp-stdio" IsChecked="{Binding IdeMcpServerEnabled}" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
 
+            <TextBlock Text="Внешние MCP-серверы (autonomous), JSON:" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" Margin="0,12,0,0" TextWrapping="Wrap"/>
+            <TextBox Text="{Binding ExternalMcpServersJson, Mode=TwoWay}"
+                     AcceptsReturn="True"
+                     TextWrapping="Wrap"
+                     FontFamily="Consolas,monospace"
+                     FontSize="11"
+                     MinHeight="110"/>
+
             <TextBlock Text="Редактор" FontWeight="SemiBold" FontSize="16" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
             <StackPanel Spacing="4">
                 <TextBlock Text="Подсветка синтаксиса:" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
