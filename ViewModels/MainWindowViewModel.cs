@@ -666,6 +666,19 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private string _activeObjective = "Нет активной операции агента.";
 
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(StartAutonomousCommand))]
+    private string _autonomousObjective = "Autonomous objective: fix issues in the current workspace.";
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(StartAutonomousCommand))]
+    private int _autonomousMaxSteps = 10;
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(StartAutonomousCommand))]
+    [NotifyCanExecuteChangedFor(nameof(PauseAutonomousCommand))]
+    private bool _isAutonomousRunning;
+
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsRiskSummaryVisible))]
     [NotifyPropertyChangedFor(nameof(IsRiskCardVisible))]
     private string _riskSummary = "Риски не зафиксированы.";
@@ -1661,16 +1674,43 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     [RelayCommand]
     private void SetSafetyL3() => SafetyLevel = "L3";
 
+    private bool CanStartAutonomous() =>
+        IsPowerMode
+        && !IsAutonomousRunning
+        && !string.IsNullOrWhiteSpace(AutonomousObjective)
+        && AutonomousMaxSteps > 0;
+
+    [RelayCommand(CanExecute = nameof(CanStartAutonomous))]
+    private void StartAutonomous()
+    {
+        StartAutonomousFlow(AutonomousObjective, AutonomousMaxSteps);
+    }
+
+    private bool CanPauseAutonomous() => IsAutonomousRunning;
+
+    [RelayCommand(CanExecute = nameof(CanPauseAutonomous))]
+    private void PauseAutonomous()
+    {
+        _autonomousCts?.Cancel();
+        IsAutonomousRunning = false;
+        ActiveTaskStatus = "Paused";
+        ResultSummary = "Autonomous flow paused.";
+    }
+
     private void StartAutonomousFlow(string objective, int maxSteps)
     {
         if (!IsPowerMode)
             return;
+
+        AutonomousObjective = objective;
+        AutonomousMaxSteps = maxSteps;
 
         // Avoid overlapping runs: new run cancels the previous one.
         _autonomousCts?.Cancel();
         _autonomousCts = new CancellationTokenSource();
         var ct = _autonomousCts.Token;
 
+        IsAutonomousRunning = true;
         ActiveTaskTitle = "Autonomous Agent";
         ActiveTaskStatus = "Running";
         ActiveTaskProgress = 0;
@@ -1684,6 +1724,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
                     .ConfigureAwait(false);
                 Dispatcher.UIThread.Post(() =>
                 {
+                    IsAutonomousRunning = false;
                     ActiveTaskStatus = "Done";
                     ActiveTaskProgress = 100;
                     ResultSummary = result;
@@ -1693,6 +1734,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             {
                 Dispatcher.UIThread.Post(() =>
                 {
+                    IsAutonomousRunning = false;
                     ActiveTaskStatus = "Paused";
                     ActiveTaskProgress = 0;
                     ResultSummary = "Autonomous flow cancelled.";
@@ -1702,6 +1744,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             {
                 Dispatcher.UIThread.Post(() =>
                 {
+                    IsAutonomousRunning = false;
                     ActiveTaskStatus = "Error";
                     ActiveTaskProgress = 0;
                     ResultSummary = "Autonomous error: " + ex.Message;
@@ -1807,6 +1850,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     {
         IsBuilding = false;
         _autonomousCts?.Cancel();
+        IsAutonomousRunning = false;
         ActiveTaskStatus = "Paused";
         ResultSummary = "Autonomous flow paused by operator.";
         InstrumentationPanel.EventTimeline.Insert(0, $"{DateTime.Now:HH:mm:ss} — Emergency stop engaged");

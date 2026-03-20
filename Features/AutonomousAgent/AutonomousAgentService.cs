@@ -249,6 +249,15 @@ Return JSON in this exact shape:
             var externalToolKey = root.TryGetProperty("external_tool_key", out var ee) ? ee.GetString() : null;
             var argsRaw = root.TryGetProperty("args", out var ae) ? ae.GetRawText() : null;
 
+            if (string.IsNullOrWhiteSpace(scope))
+                return new Decision(Type: "final", FinalAnswer: assistantRaw);
+
+            if (string.Equals(scope, "ide", StringComparison.OrdinalIgnoreCase) && string.IsNullOrWhiteSpace(ideCommandId))
+                return new Decision(Type: "final", FinalAnswer: assistantRaw);
+
+            if (string.Equals(scope, "external", StringComparison.OrdinalIgnoreCase) && string.IsNullOrWhiteSpace(externalToolKey))
+                return new Decision(Type: "final", FinalAnswer: assistantRaw);
+
             return new Decision(
                 Type: "tool_call",
                 Scope: scope,

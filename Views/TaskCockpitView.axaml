@@ -28,6 +28,41 @@
                 </StackPanel>
             </Border>
 
+            <Border Classes="modeCard"
+                    IsVisible="{Binding IsPowerMode}"
+                    Padding="8"
+                    Margin="0,0,0,6">
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Autonomous run (Power)"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
+
+                    <TextBox Text="{Binding AutonomousObjective, Mode=TwoWay}"
+                             AcceptsReturn="True"
+                             TextWrapping="Wrap"
+                             FontFamily="Consolas,monospace"
+                             FontSize="11"
+                             MinHeight="70"/>
+
+                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <TextBlock Text="Max steps:" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}" VerticalAlignment="Center"/>
+                        <TextBox Text="{Binding AutonomousMaxSteps, Mode=TwoWay}"
+                                 Width="60"
+                                 TextAlignment="Center"
+                                 FontFamily="Consolas,monospace"
+                                 FontSize="11"/>
+
+                        <Button Content="Start"
+                                Command="{Binding StartAutonomousCommand}"
+                                Margin="8,0,0,0"
+                                IsEnabled="{Binding !IsAutonomousRunning}"/>
+                        <Button Content="Pause"
+                                Command="{Binding PauseAutonomousCommand}"
+                                IsVisible="{Binding IsAutonomousRunning}"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
             <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" IsVisible="{Binding !IsFocusMode}">
                 <WrapPanel Orientation="Horizontal" ItemHeight="30">
                     <Button Content="Fix failing tests" Command="{Binding FixFailingTestsCommand}" IsVisible="{Binding ShowQuickActions}" Margin="0,0,6,0"/>
