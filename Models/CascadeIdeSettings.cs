@@ -36,6 +36,9 @@ public sealed class CascadeIdeSettings : ModelBase
     /// <summary>Видимость панели «Терминал».</summary>
     public bool TerminalVisible { get; set; } = false;
 
+    /// <summary>Видимость вкладки «Git» в нижней док-панели.</summary>
+    public bool GitPanelVisible { get; set; } = false;
+
     /// <summary>Вкладки нижней док-панели Balanced/Power: события, тесты, отладка (без терминала/сборки).</summary>
     public bool InstrumentationDockVisible { get; set; } = true;
 
@@ -56,6 +59,7 @@ public sealed class CascadeIdeSettings : ModelBase
             && DeepSeekModelId.Is(o.DeepSeekModelId)
             && SolutionExplorerVisible.Is(o.SolutionExplorerVisible)
             && TerminalVisible.Is(o.TerminalVisible)
+            && GitPanelVisible.Is(o.GitPanelVisible)
             && InstrumentationDockVisible.Is(o.InstrumentationDockVisible)
             && UiMode.Is(o.UiMode);
     }
@@ -74,6 +78,7 @@ public sealed class CascadeIdeSettings : ModelBase
             DeepSeekModelId = DeepSeekModelId,
             SolutionExplorerVisible = SolutionExplorerVisible,
             TerminalVisible = TerminalVisible,
+            GitPanelVisible = GitPanelVisible,
             InstrumentationDockVisible = InstrumentationDockVisible,
             UiMode = UiMode
         };

@@ -29,6 +29,7 @@ dotnet run
 - **MCP сервер IDE:** `IdeMcpServer` с инструментами для редактора, build/test, отладки-представления и UI-автоматизации (включая `ide_get_ui_layout`, `ide_build`, `ide_run_tests`, `ide_set_breakpoint`, `ide_request_confirmation`). Запуск с **`--mcp-stdio`** поднимает MCP на stdin/stdout; Cursor (или другой хост) подключается к процессу и вызывает тулы. См. [docs/MCP-PROTOCOL.md](docs/MCP-PROTOCOL.md).
 - **Подтверждения из MCP:** `ide_request_confirmation` показывает модальный `OK/Cancel` диалог в UI и возвращает `ok`/`cancel`.
 - **Отладочный контур:** поддержаны отображение брейкпоинтов/текущей строки/состояния отладки и синхронизация с `dotnet-debug-mcp`.
+- **Git (нативно):** вкладка «Git» в нижней панели (меню **Вид → Git**) — корень репозитория vs каталог решения, статус, diff, `submodule status`, стейджинг, пометка `[sm]` из `.gitmodules`, **submodule update --init** / **sync**, **открыть .sln/.slnx в submodule** (переключение решения), папка submodule в проводнике, коммит (add -A или только staged), push. Подробнее: [docs/git-and-submodules-v1.md](docs/git-and-submodules-v1.md).
 - **Режимы UI:** `Focus / Balanced / Power` с переключением из меню/toolbar и хоткеями `Alt+1/Alt+2/Alt+3` (`Ctrl+Alt+M` — циклическое переключение).
 - **Настройки и данные:** выбранные модели и UI-параметры сохраняются в `%LocalAppData%\\CascadeIDE\\settings.toml`; данные приложения — в WitDatabase (`app.witdb` в том же каталоге).
 
@@ -54,6 +55,14 @@ dotnet run
 - **CommunityToolkit.Mvvm** — MVVM
 
 Установка стека на машину — см. [SETUP.md](SETUP.md).
+
+## Архитектура
+
+Слои, вертикальные срезы фич, роль `MainWindowViewModel` и правила миграции: **[docs/architecture-policy.md](docs/architecture-policy.md)**.
+
+## Git и submodules (roadmap)
+
+Нативная работа с **Git** и **submodules** — целевое требование для использования IDE как основной среды (в т.ч. без боли, типичной для Visual Studio при submodules). Принципы и критерии приёмки: **[docs/git-and-submodules-v1.md](docs/git-and-submodules-v1.md)**.
 
 ## Макеты и раскладка UI
 

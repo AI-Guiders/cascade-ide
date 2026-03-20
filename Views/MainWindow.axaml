@@ -108,6 +108,7 @@
                 <MenuItem Header="_Вывод сборки" ToggleType="CheckBox" IsChecked="{Binding IsBuildOutputVisible, Mode=TwoWay}"/>
                 <MenuItem Header="_Чат" ToggleType="CheckBox" IsChecked="{Binding IsChatPanelExpanded, Mode=TwoWay}"/>
                 <MenuItem Header="_Терминал" ToggleType="CheckBox" IsChecked="{Binding IsTerminalVisible, Mode=TwoWay}"/>
+                <MenuItem Header="_Git" ToggleType="CheckBox" IsChecked="{Binding IsGitPanelVisible, Mode=TwoWay}"/>
                 <MenuItem Header="Док_ инструментирования (события, тесты, отладка)"
                           ToggleType="CheckBox"
                           IsChecked="{Binding IsInstrumentationDockVisible, Mode=TwoWay}"

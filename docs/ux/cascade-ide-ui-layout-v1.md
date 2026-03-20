@@ -81,16 +81,17 @@
 
 **TabControl** (индексы `BottomPanelTabIndex`): при необходимости показываются только вкладки с `IsVisible=true`.
 
-| Вкладка | Видимость | Содержимое |
-| ------- | --------- | ----------- |
-| Terminal | `IsTerminalVisible` | Опционально Telemetry (Power), вывод, `TerminalInputBox`. |
-| Build output | `IsBuildOutputVisible` | Текст `BuildOutput`. |
-| События | `ShowInstrumentationTabs` | Лента `EventTimeline` (Balanced/Power, не Focus). |
-| Тесты | `ShowInstrumentationTabs` | Накопленный лог `TestResultsOutput` после `dotnet test`. |
-| Отладка | `ShowInstrumentationTabs` | `DebugStackFrames`, `DebugVariables`. |
+| Индекс | Вкладка | Видимость | Содержимое |
+| ------ | ------- | --------- | ----------- |
+| 0 | Terminal | `IsTerminalVisible` | Опционально Telemetry (Power), вывод, `TerminalInputBox`. |
+| 1 | Build output | `IsBuildOutputVisible` | Текст `BuildOutput`. |
+| 2 | Git | `IsGitPanelVisible` | Ветка, корень git vs каталог решения, `git status --short`, diff, submodule update/sync, открытие `.sln` в submodule, `git submodule status`, коммит/push (меню **Вид → Git**). |
+| 3 | События | `ShowInstrumentationTabs` | Лента `EventTimeline` (Balanced/Power, не Focus). |
+| 4 | Тесты | `ShowInstrumentationTabs` | Накопленный лог `TestResultsOutput` после `dotnet test`. |
+| 5 | Отладка | `ShowInstrumentationTabs` | `DebugStackFrames`, `DebugVariables`. |
 
 `ShowInstrumentationTabs` = Balanced или Power, не Focus, и `IsInstrumentationDockVisible` (меню **Вид → Док инструментирования**).  
-`IsBottomPanelVisible` = терминал или сборка или `ShowInstrumentationTabs`.
+`IsBottomPanelVisible` = терминал или сборка или `ShowInstrumentationTabs` или **Git** (`IsGitPanelVisible`).
 
 Высота — сплиттер (строка 4). `ide_set_panel_size(panel: "terminal", height: …)`.
 
