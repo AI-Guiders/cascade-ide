@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="ChatPanel_PlanHeader" xml:space="preserve"><value>План · чеклист</value></data>
+  <data name="ChatPanel_PlanEmptyHint" xml:space="preserve"><value>Шаги плана появятся из задачи или чата.</value></data>
+  <data name="ChatPanel_NextActionHeader" xml:space="preserve"><value>Следующее действие · один шаг</value></data>
+  <data name="ChatPanel_AgentOpsHeader" xml:space="preserve"><value>Операции агента · цель и инструменты</value></data>
+  <data name="ChatPanel_AgentOpsEmptyHint" xml:space="preserve"><value>Операции появятся после запуска агента.</value></data>
+  <data name="ChatPanel_ConfirmHeader" xml:space="preserve"><value>Подтверждение · ворота действия</value></data>
+  <data name="ChatPanel_ConfirmHint" xml:space="preserve"><value>Подтвердите или отмените предложенное действие агента.</value></data>
+  <data name="ChatPanel_ConfirmButton" xml:space="preserve"><value>Подтвердить</value></data>
+  <data name="ChatPanel_CancelButton" xml:space="preserve"><value>Отменить</value></data>
+  <data name="ChatPanel_ExplainStep" xml:space="preserve"><value>Объяснить шаг</value></data>
+  <data name="ChatPanel_EmergencyStop" xml:space="preserve"><value>Аварийная остановка</value></data>
+  <data name="ChatPanel_TraceHeader" xml:space="preserve"><value>Трасса агента · временная шкала</value></data>
+  <data name="ChatPanel_TraceEmptyHint" xml:space="preserve"><value>Трасса шагов пока пуста — шаги добавят агент или MCP (AppendAgentTraceStep).</value></data>
+  <data name="ChatPanel_TraceRollback" xml:space="preserve"><value>Откат</value></data>
+  <data name="ChatPanel_SafetyDockTitlePower" xml:space="preserve"><value>Уровень безопасности · L1 · L2 · L3</value></data>
+  <data name="ChatPanel_SafetyTierL1" xml:space="preserve"><value>L1</value></data>
+  <data name="ChatPanel_SafetyTierL2" xml:space="preserve"><value>L2</value></data>
+  <data name="ChatPanel_SafetyTierL3" xml:space="preserve"><value>L3</value></data>
+  <data name="ChatPanel_SafetyTierL1Subtitle" xml:space="preserve"><value>READ-ONLY</value></data>
+  <data name="ChatPanel_SafetyTierL2Subtitle" xml:space="preserve"><value>CONFIRM</value></data>
+  <data name="ChatPanel_SafetyTierL3Subtitle" xml:space="preserve"><value>AUTONOMOUS</value></data>
+  <data name="ChatPanel_SafetyCompactHeader" xml:space="preserve"><value>Безопасность · уровень L1–L3</value></data>
+  <data name="ChatPanel_EmergencyStopCompact" xml:space="preserve"><value>Аварийная остановка</value></data>
+  <data name="ChatPanel_ChatExpandButton" xml:space="preserve"><value>▶ Чат с агентом</value></data>
+  <data name="ChatPanel_ChatExpandTooltip" xml:space="preserve"><value>Развернуть чат</value></data>
+  <data name="ChatPanel_ChatCollapseTooltip" xml:space="preserve"><value>Свернуть чат</value></data>
+  <data name="ChatPanel_AgentTyping" xml:space="preserve"><value>Ответ агента формируется…</value></data>
+  <data name="ChatPanel_NoMessagesYet" xml:space="preserve"><value>Сообщений пока нет — напишите запрос ниже.</value></data>
+  <data name="ChatPanel_MessageWatermark" xml:space="preserve"><value>Сообщение…</value></data>
+  <data name="ChatPanel_SendButton" xml:space="preserve"><value>Отправить</value></data>
+  <data name="PanelChrome_EmergencyStopCaps" xml:space="preserve"><value>АВАРИЙНАЯ ОСТАНОВКА</value></data>
+  <data name="PanelChrome_OverflowActionsPlaceholder" xml:space="preserve"><value>Действия панели (скоро)</value></data>
+  <data name="PanelChrome_CopyTitle" xml:space="preserve"><value>Копировать заголовок</value></data>
+  <data name="Lang_Menu_UiLanguage" xml:space="preserve"><value>Язык интерфейса</value></data>
+  <data name="Lang_Menu_Russian" xml:space="preserve"><value>Русский</value></data>
+  <data name="Lang_Menu_English" xml:space="preserve"><value>English</value></data>
+  <data name="Lang_Menu_FollowSystem" xml:space="preserve"><value>Как в системе</value></data>
+  <data name="Safety_Description_L1" xml:space="preserve"><value>Только чтение: без автоматических правок файлов.</value></data>
+  <data name="Safety_Description_L2" xml:space="preserve"><value>Правки после явного подтверждения.</value></data>
+  <data name="Safety_Description_L3" xml:space="preserve"><value>Автономный режим: цепочка шагов без запроса.</value></data>
+</root>
