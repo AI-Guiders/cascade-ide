@@ -7,7 +7,9 @@
         xmlns:ae="using:AvaloniaEdit"
         xmlns:md="using:Markdown.Avalonia"
         xmlns:views="using:CascadeIDE.Views"
+        xmlns:lang="using:CascadeIDE.Lang"
         xmlns:dock="clr-namespace:Dock.Avalonia.Controls;assembly=Dock.Avalonia"
+        xmlns:Ease="using:Avalonia.Animation.Easings"
         mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="600"
         x:Class="CascadeIDE.Views.MainWindow"
         x:Name="RootWindow"
@@ -45,9 +47,11 @@
         </Style>
         <Style Selector="ae|TextEditor.EditorBox">
             <Setter Property="Background" Value="{DynamicResource CascadeTheme.EditorBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.EditorForeground}"/>
         </Style>
         <Style Selector="ae|TextEditor.EditorBox:focus">
             <Setter Property="Background" Value="{DynamicResource CascadeTheme.EditorBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.EditorForeground}"/>
         </Style>
         <!-- Поле ввода чата — в тон пузырям сообщений -->
         <Style Selector="TextBox#ChatInputBox">
@@ -63,24 +67,41 @@
             <Setter Property="BorderBrush" Value="#4D72D5"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
+            <Setter Property="RenderTransform" Value="scale(1)"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="BorderBrush" Duration="0:0:0.35">
+                        <BrushTransition.Easing>
+                            <Ease:CubicEaseOut/>
+                        </BrushTransition.Easing>
+                    </BrushTransition>
+                    <BrushTransition Property="Background" Duration="0:0:0.35">
+                        <BrushTransition.Easing>
+                            <Ease:CubicEaseOut/>
+                        </BrushTransition.Easing>
+                    </BrushTransition>
+                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.28">
+                        <TransformOperationsTransition.Easing>
+                            <Ease:CubicEaseOut/>
+                        </TransformOperationsTransition.Easing>
+                    </TransformOperationsTransition>
+                </Transitions>
+            </Setter>
         </Style>
         <Style Selector="Border#ModeBadge.power">
             <Setter Property="Background" Value="#36256D"/>
             <Setter Property="BorderBrush" Value="#8A65FF"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="RenderTransform" Value="scale(1.04)"/>
         </Style>
         <Style Selector="Border.modeCard">
             <Setter Property="Background" Value="{DynamicResource CascadeTheme.ChatMessageBubbleBackground}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.EditorColumnBorderBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="6"/>
             <Setter Property="Padding" Value="8"/>
-        </Style>
-        <Style Selector="TextBlock.modeCardTitle">
-            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="FontSize" Value="11"/>
         </Style>
     </Window.Styles>
 
@@ -128,6 +149,16 @@
                     <MenuItem Header="Открыть файл темы..." Command="{Binding OpenThemeFileCommand}"/>
                 </MenuItem>
                 <Separator/>
+                <MenuItem Header="{Binding Lang_Menu_UiLanguage, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}">
+                    <MenuItem Header="{Binding Lang_Menu_Russian, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}"
+                              Command="{Binding SetUiLanguageCommand}" CommandParameter="ru-RU"/>
+                    <MenuItem Header="{Binding Lang_Menu_English, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}"
+                              Command="{Binding SetUiLanguageCommand}" CommandParameter="en-US"/>
+                    <Separator/>
+                    <MenuItem Header="{Binding Lang_Menu_FollowSystem, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}"
+                              Command="{Binding ResetUiLanguageToSystemCommand}"/>
+                </MenuItem>
+                <Separator/>
                 <MenuItem Header="Превью в отдельном _окне" Command="{Binding OpenPreviewWindowCommand}"/>
             </MenuItem>
             <MenuItem Header="_Настройки">
@@ -147,17 +178,39 @@
 
         <!-- Solution tree (скрываемый) -->
         <views:SolutionExplorerView Grid.Row="3" Grid.Column="0"/>
-        <GridSplitter Grid.Row="3" Grid.Column="1" Width="4" ResizeDirection="Columns" Background="{DynamicResource CascadeTheme.SolutionExplorerBorderBrush}" IsVisible="{Binding IsSolutionExplorerVisible}"/>
+        <GridSplitter Grid.Row="3" Grid.Column="1" Width="4" ResizeDirection="Columns" Background="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}" IsVisible="{Binding IsSolutionExplorerVisible}"/>
 
         <!-- Editor / Documents (Dock MDI, single window; no floating) -->
         <views:DocumentsDockView Grid.Row="3" Grid.Column="2"/>
-        <GridSplitter Grid.Row="3" Grid.Column="3" Width="4" ResizeDirection="Columns" Background="{DynamicResource CascadeTheme.EditorColumnBorderBrush}"/>
+        <GridSplitter Grid.Row="3" Grid.Column="3"
+                      Grid.RowSpan="{Binding ChatPanelMainGridRowSpan}"
+                      Width="4" ResizeDirection="Columns" Background="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"/>
 
-        <!-- Chat -->
-        <views:ChatPanelView Grid.Row="3" Grid.Column="4"/>
+        <!-- Chat: в Power — RowSpan 2 (рядом с полосой телеметрии только под левым+центром, по концепту) -->
+        <views:ChatPanelView Grid.Row="3" Grid.Column="4" Grid.RowSpan="{Binding ChatPanelMainGridRowSpan}"/>
 
-        <views:TelemetryStripView Grid.Row="4" Grid.ColumnSpan="5" IsVisible="{Binding ShowTelemetryStrip}"/>
+        <views:TelemetryStripView Grid.Row="4"
+                                  Grid.Column="0"
+                                  Grid.ColumnSpan="{Binding MainWorkspaceTelemetryColumnSpan}"
+                                  IsVisible="{Binding ShowTelemetryStrip}"/>
         <views:BottomPanelView Grid.Row="5" Grid.RowSpan="2" Grid.ColumnSpan="5"/>
+        <!-- Кинематографичный bloom при смене режима UI (подсветка «кадра», меню не затрагивается) -->
+        <Border x:Name="UiModeBloomOverlay"
+                Grid.Row="2" Grid.RowSpan="5" Grid.Column="0" Grid.ColumnSpan="5"
+                ZIndex="400"
+                IsHitTestVisible="False"
+                Background="{Binding UiModeBloomBrush}"
+                Opacity="{Binding UiModeBloomOpacity}">
+            <Border.Transitions>
+                <Transitions>
+                    <DoubleTransition Property="Opacity" Duration="0:0:0.42">
+                        <DoubleTransition.Easing>
+                            <Ease:CubicEaseOut/>
+                        </DoubleTransition.Easing>
+                    </DoubleTransition>
+                </Transitions>
+            </Border.Transitions>
+        </Border>
         <!-- Оверлей подсветки эффективного контрола (ide_highlight_control, как в Comet) -->
         <Canvas x:Name="AgentHighlightLayer" Grid.Row="0" Grid.RowSpan="7" Grid.Column="0" Grid.ColumnSpan="5" IsHitTestVisible="False" ZIndex="1000">
             <Border x:Name="AgentHighlightOverlay" IsVisible="False" BorderBrush="#FF6B9D" BorderThickness="2" Background="#10000000"/>

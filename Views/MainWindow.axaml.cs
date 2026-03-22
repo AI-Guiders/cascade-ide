@@ -1,6 +1,6 @@
 using System.ComponentModel;
 using System.Linq;
-using System.Windows.Input;
+using System.Runtime.CompilerServices;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
@@ -23,15 +23,14 @@ namespace CascadeIDE.Views;
 public partial class MainWindow : Window
 {
     private RegistryOptions? _registryOptions;
-    private TextMate.Installation? _textMateInstallation;
+    private readonly ConditionalWeakTable<TextEditor, TextMate.Installation> _textMateByEditor = new();
     private bool _suppressEditorSync;
     private Services.CSharpLanguageService? _languageService;
     private Services.EditorIntelligence? _editorIntelligence;
     private MarkdownPreviewWindow? _previewWindow;
     private ViewModels.MarkdownPreviewWindowViewModel? _previewVm;
     private IDisposable? _highlightHideTimer;
-    private BreakpointLineRenderer? _breakpointRenderer;
-    private DebugCurrentLineRenderer? _debugCurrentLineRenderer;
+    private TextEditor? _marginPointerEditor;
     private static readonly object HighlightLogLock = new();
 
     public MainWindow()
@@ -272,6 +271,17 @@ public partial class MainWindow : Window
         SyncFromViewModel();
     }
 
+    /// <summary>Один раз на экземпляр <see cref="TextEditor"/> (вкладка). Вызывается из <see cref="DockDocumentView"/>.</summary>
+    internal void EnsureTextMateOnEditor(TextEditor editor)
+    {
+        if (_registryOptions is null)
+            return;
+        if (_textMateByEditor.TryGetValue(editor, out _))
+            return;
+        var inst = editor.InstallTextMate(_registryOptions);
+        _textMateByEditor.Add(editor, inst);
+    }
+
     private void TryAttachTextMateAndRenderers()
     {
         if (DataContext is not ViewModels.MainWindowViewModel vmSetup)
@@ -286,34 +296,34 @@ public partial class MainWindow : Window
 
         try
         {
-            _textMateInstallation = editor.InstallTextMate(_registryOptions!);
-            LogHighlight($"InstallTextMate: ok, file='{vmSetup.CurrentFilePath ?? "<null>"}'.");
+            EnsureTextMateOnEditor(editor);
+            LogHighlight($"TextMate: ensured for active editor, file='{vmSetup.CurrentFilePath ?? "<null>"}'.");
         }
         catch (Exception ex)
         {
             LogHighlight($"InstallTextMate: FAILED: {ex}");
             throw;
         }
+
         ApplyGrammarByFilePath(editor, vmSetup.CurrentFilePath);
 
+        _editorIntelligence?.Detach();
         _editorIntelligence = new Services.EditorIntelligence(editor, _languageService!, () =>
             (vmSetup.CurrentFilePath, editor.Document.Text));
         _editorIntelligence.Attach();
 
-        _breakpointRenderer = new BreakpointLineRenderer(() => vmSetup.AllBreakpointLinesInCurrentFile);
-        editor.TextArea.TextView.BackgroundRenderers.Add(_breakpointRenderer);
+        if (_marginPointerEditor is { } prev && !ReferenceEquals(prev, editor))
+            prev.TextArea.PointerPressed -= OnDockMarginPointerPressed;
+        _marginPointerEditor = editor;
+        editor.TextArea.PointerPressed -= OnDockMarginPointerPressed;
+        editor.TextArea.PointerPressed += OnDockMarginPointerPressed;
+    }
 
-        _debugCurrentLineRenderer = new DebugCurrentLineRenderer(() => vmSetup.DebugCurrentLineInCurrentFile);
-        editor.TextArea.TextView.BackgroundRenderers.Add(_debugCurrentLineRenderer);
-
-        editor.TextArea.PointerPressed -= OnDockEditorPointerPressed;
-        editor.TextArea.PointerPressed += OnDockEditorPointerPressed;
-
-        void OnDockEditorPointerPressed(object? s, PointerPressedEventArgs e)
-        {
-            // Use the editor instance that owns this pointer event.
-            OnEditorMarginPointerPressed(e, editor, vmSetup);
-        }
+    private void OnDockMarginPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (_marginPointerEditor is null || DataContext is not ViewModels.MainWindowViewModel vm)
+            return;
+        OnEditorMarginPointerPressed(e, _marginPointerEditor, vm);
     }
 
     /// <summary>
@@ -696,9 +706,15 @@ public partial class MainWindow : Window
 
     private void ApplyGrammarByFilePath(TextEditor editor, string? filePath)
     {
-        if (_textMateInstallation is null || _registryOptions is null)
+        if (_registryOptions is null)
         {
-            LogHighlight("ApplyGrammarByFilePath: skipped (_textMateInstallation/_registryOptions is null).");
+            LogHighlight("ApplyGrammarByFilePath: skipped (_registryOptions is null).");
+            return;
+        }
+
+        if (!_textMateByEditor.TryGetValue(editor, out var installation))
+        {
+            LogHighlight("ApplyGrammarByFilePath: skipped (no TextMate installation for this editor).");
             return;
         }
 
@@ -713,7 +729,7 @@ public partial class MainWindow : Window
         {
             var lang = _registryOptions.GetLanguageByExtension(grammarExt);
             var scope = _registryOptions.GetScopeByLanguageId(lang.Id);
-            _textMateInstallation.SetGrammar(scope);
+            installation.SetGrammar(scope);
             LogHighlight($"ApplyGrammarByFilePath: OK file='{filePath ?? "<null>"}' ext='{ext}' grammarExt='{grammarExt}' langId='{lang.Id}' scope='{scope}'.");
         }
         catch (Exception ex)
@@ -816,14 +832,14 @@ public partial class MainWindow : Window
         if (!e.GetCurrentPoint(button).Properties.IsLeftButtonPressed)
             return;
 
-        var data = new DataObject();
-        data.Set(DataFormats.Text, doc.FilePath);
-        await DragDrop.DoDragDrop(e, data, DragDropEffects.Move);
+        var data = new DataTransfer();
+        data.Add(DataTransferItem.Create(DataFormat.Text, doc.FilePath));
+        await DragDrop.DoDragDropAsync(e, data, DragDropEffects.Move);
     }
 
     private void OnGroupTabsDragOver(object? sender, DragEventArgs e)
     {
-        e.DragEffects = e.Data.Contains(DataFormats.Text) ? DragDropEffects.Move : DragDropEffects.None;
+        e.DragEffects = e.DataTransfer.Contains(DataFormat.Text) ? DragDropEffects.Move : DragDropEffects.None;
         e.Handled = true;
     }
 
@@ -835,7 +851,7 @@ public partial class MainWindow : Window
     {
         if (DataContext is not ViewModels.MainWindowViewModel vm)
             return;
-        var path = e.Data.GetText();
+        var path = e.DataTransfer.TryGetText();
         if (string.IsNullOrWhiteSpace(path))
             return;
 

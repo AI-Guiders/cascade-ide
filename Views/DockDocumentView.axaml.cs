@@ -45,6 +45,19 @@ public partial class DockDocumentView : UserControl
         if (_editor is null)
             return;
 
+        // Каждая вкладка — свой Document; VM.EditorText только у активной. Без этого неактивные вкладки остаются пустыми.
+        _suppress = true;
+        try
+        {
+            var fromModel = _docVm.Doc.Content ?? "";
+            if (!string.Equals(_editor.Document.Text, fromModel, StringComparison.Ordinal))
+                _editor.Document.Text = fromModel;
+        }
+        finally
+        {
+            _suppress = false;
+        }
+
         _editor.Document.Changed += OnEditorDocumentChanged;
 
         _vmHandler = (_, args) =>
@@ -60,7 +73,10 @@ public partial class DockDocumentView : UserControl
         _vm.PropertyChanged += _vmHandler;
 
         if (w is MainWindow mainWindow)
+        {
+            mainWindow.EnsureTextMateOnEditor(_editor);
             mainWindow.AttachTextMateWhenEditorReady();
+        }
 
         SyncFromVmIfActive();
         UpdateMcpProvidersIfActive();

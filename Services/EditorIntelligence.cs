@@ -63,6 +63,30 @@ public sealed class EditorIntelligence
         _signatureDebounce.Tick += (_, _) => { _signatureDebounce.Stop(); UpdateSignature(); };
     }
 
+    /// <summary>Отвязка перед переключением на другой <see cref="TextEditor"/> (другая вкладка).</summary>
+    public void Detach()
+    {
+        _completionCts?.Cancel();
+        CloseCompletion();
+        _signaturePopup?.SetCurrentValue(Popup.IsOpenProperty, false);
+
+        _completionDebounce?.Stop();
+        _highlightDebounce?.Stop();
+        _signatureDebounce?.Stop();
+
+        var textArea = _editor.TextArea;
+        if (textArea is not null)
+        {
+            textArea.KeyDown -= OnKeyDown;
+            textArea.KeyUp -= OnKeyUp;
+            textArea.Caret.PositionChanged -= OnCaretPositionChanged;
+            if (_highlightRenderer is not null && textArea.TextView.BackgroundRenderers is { } renderers)
+                renderers.Remove(_highlightRenderer);
+        }
+
+        _highlightRenderer = null;
+    }
+
     private void OnKeyDown(object? sender, KeyEventArgs e)
     {
         if (e.Key == Key.Space && e.KeyModifiers.HasFlag(KeyModifiers.Control))
