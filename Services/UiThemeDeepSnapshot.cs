@@ -15,10 +15,13 @@ namespace CascadeIDE.Services;
 
 /// <summary>
 /// Расширенный слой для <see cref="UiThemeSnapshot"/>: разрешённые ресурсы под текущей темой,
-/// рамка главного окна, именованные регионы лэйаута, все вкладки-редакторы в док-доке.
+/// рамка главного окна, именованные регионы лэйаута, открытые документы дока и смонтированные TextEditor.
 /// </summary>
 internal static class UiThemeDeepSnapshot
 {
+    /// <summary>Общий лимит для <c>text_preview</c> и <c>model_text_preview</c>.</summary>
+    private const int DockTextPreviewMaxChars = 240;
+
     private static readonly JsonSerializerOptions NodeOptions = new()
     {
         WriteIndented = true,
@@ -64,13 +67,23 @@ internal static class UiThemeDeepSnapshot
             root["window_frame"] = JsonSerializer.SerializeToNode(BuildWindowFrame(app, mw), NodeOptions);
             root["layout_regions"] = JsonSerializer.SerializeToNode(BuildLayoutRegions(mw), NodeOptions);
             var vm = mw.DataContext as MainWindowViewModel;
-            root["dock_text_editors"] = JsonSerializer.SerializeToNode(BuildAllDockTextEditors(mw, vm), NodeOptions);
+            var dockEditors = BuildAllDockTextEditors(mw, vm);
+            root["dock_text_editors"] = JsonSerializer.SerializeToNode(dockEditors, NodeOptions);
+            var materializedPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var row in dockEditors)
+            {
+                if (row.TryGetValue("file_path", out var fp) && fp is string path && path.Length > 0)
+                    materializedPaths.Add(path);
+            }
+
+            root["dock_open_documents"] = JsonSerializer.SerializeToNode(BuildDockOpenDocuments(vm, materializedPaths), NodeOptions);
         }
         else
         {
             root["window_frame"] = null;
             root["layout_regions"] = null;
             root["dock_text_editors"] = null;
+            root["dock_open_documents"] = null;
         }
     }
 
@@ -163,9 +176,10 @@ internal static class UiThemeDeepSnapshot
                 y = p.Y;
             }
 
-            const int previewMax = 240;
             var text = ed.Document.Text ?? "";
-            var preview = text.Length <= previewMax ? text : text[..previewMax] + "…";
+            var preview = text.Length <= DockTextPreviewMaxChars
+                ? text
+                : text[..DockTextPreviewMaxChars] + "…";
 
             list.Add(new Dictionary<string, object?>
             {
@@ -192,6 +206,50 @@ internal static class UiThemeDeepSnapshot
                 ["effective_background"] = effBg,
                 ["effective_foreground"] = effFg,
                 ["text_preview"] = preview
+            });
+        }
+
+        return list;
+    }
+
+    /// <summary>
+    /// Все открытые вкладки из <see cref="MainWindowViewModel.DockDocuments"/> (модель дока).
+    /// Неактивные вкладки часто без <see cref="TextEditor"/> в визуальном дереве — смотри <c>editor_in_visual_tree</c>.
+    /// </summary>
+    private static List<Dictionary<string, object?>> BuildDockOpenDocuments(MainWindowViewModel? vm, HashSet<string> editorMaterializedPaths)
+    {
+        var list = new List<Dictionary<string, object?>>();
+        if (vm is null)
+            return list;
+
+        var current = vm.CurrentFilePath;
+        var docs = vm.DockDocuments;
+        for (var i = 0; i < docs.Count; i++)
+        {
+            if (docs[i] is not DockDocumentViewModel dvm)
+                continue;
+
+            var doc = dvm.Doc;
+            var path = doc.FilePath;
+            var isActive = !string.IsNullOrEmpty(current)
+                           && string.Equals(path, current, StringComparison.OrdinalIgnoreCase);
+            var modelText = doc.Content ?? "";
+            var modelLen = modelText.Length;
+            var modelPreview = modelLen <= DockTextPreviewMaxChars
+                ? modelText
+                : modelText[..DockTextPreviewMaxChars] + "…";
+
+            list.Add(new Dictionary<string, object?>
+            {
+                ["tab_index"] = i,
+                ["file_path"] = path,
+                ["dock_title"] = dvm.Title,
+                ["display_title"] = doc.DisplayTitle,
+                ["is_active"] = isActive,
+                ["is_dirty"] = doc.IsDirty,
+                ["model_content_length"] = modelLen,
+                ["model_text_preview"] = modelPreview,
+                ["editor_in_visual_tree"] = editorMaterializedPaths.Contains(path)
             });
         }
 

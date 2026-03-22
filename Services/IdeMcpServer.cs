@@ -143,6 +143,21 @@ public static class IdeMcpServer
             },
             new()
             {
+                Name = "ide_get_open_document_text",
+                Description = "Полный текст открытой вкладки из модели документа (все вкладки из DockDocuments, не только активная). JSON: file_path, length, truncated, is_dirty, text. Без file_path — текущий файл. max_chars — опционально, обрезать text и выставить truncated. Если файл не открыт: error, message.",
+                InputSchema = Schema(new
+                {
+                    type = "object",
+                    properties = new
+                    {
+                        file_path = new { type = "string", description = "Полный путь к файлу вкладки. Пусто/нет — текущий открытый файл." },
+                        max_chars = new { type = "integer", description = "Максимум символов в text (>0). Без параметра — без обрезки." }
+                    },
+                    required = Array.Empty<string>()
+                })
+            },
+            new()
+            {
                 Name = "ide_apply_edit",
                 Description = "Применить правку в открытом файле: заменить диапазон (1-based line/column) на новый текст.",
                 InputSchema = Schema(new
@@ -328,13 +343,13 @@ public static class IdeMcpServer
             new()
             {
                 Name = "ide_get_ui_theme",
-                Description = "Полный снимок темы и лэйаута. Ресурсы: секции как у ide_set_ui_theme + solution_explorer_tree_power + power_island_frame_brushes. Дополнительно: cascade_theme_resolved — все ключи CascadeTheme.*, разрешённые через TryGetResource под actual_theme_variant (solid и linear(...) для градиентов); window_frame — заголовок, client/bounds, extend_client_area*, transparency, фон окна; layout_regions — по именам (RootWindow, MainGrid, DockIslandInner, DocumentsDock, SolutionIslandInner, ChatIslandInner, ChatPanelRoot, BottomPanelShell, ModeBadge, UiModeBloomOverlay, ChatInputBox, TerminalInputBox): bounds, видимость, effective_*, background_brush/border_brush_display (в т.ч. градиенты), corner_radius/box_shadow для Border; dock_text_editors — массив по каждой вкладке-документу (file_path, dock_title, matches_main_window_current_file, document_length, model_content_length, length_matches_model, line_count, bounds, шрифт, кисти, effective_*, text_preview до ~240 символов). ide_set_ui_theme игнорирует новые корневые ключи.",
+                Description = "Полный снимок темы и лэйаута. Ресурсы: секции как у ide_set_ui_theme + solution_explorer_tree_power + power_island_frame_brushes. Дополнительно: cascade_theme_resolved — все ключи CascadeTheme.*, разрешённые через TryGetResource под actual_theme_variant (solid и linear(...) для градиентов); window_frame — заголовок, client/bounds, extend_client_area*, transparency, фон окна; layout_regions — по именам (RootWindow, MainGrid, DockIslandInner, DocumentsDock, SolutionIslandInner, ChatIslandInner, ChatPanelRoot, BottomPanelShell, ModeBadge, UiModeBloomOverlay, ChatInputBox, TerminalInputBox): bounds, видимость, effective_*, background_brush/border_brush_display (в т.ч. градиенты), corner_radius/box_shadow для Border; dock_open_documents — все открытые вкладки из VM (tab_index, file_path, dock_title, display_title, is_active, is_dirty, model_content_length, model_text_preview ~240 симв., editor_in_visual_tree); dock_text_editors — только вкладки, у которых TextEditor уже в визуальном дереве (часто одна активная): file_path, dock_title, matches_main_window_current_file, document_length, model_content_length, length_matches_model, line_count, bounds, шрифт, кисти, effective_*, text_preview ~240 симв. ide_set_ui_theme игнорирует новые корневые ключи.",
                 InputSchema = Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
             },
             new()
             {
                 Name = "ide_set_ui_theme",
-                Description = "Применить тему UI на лету. Берутся только известные секции (main_window…power_cockpit); игнорируются: _snapshot, solution_explorer_tree_power, power_island_frame_brushes, cascade_theme_resolved, window_frame, layout_regions, dock_text_editors. Градиенты рамок островов задаются в App.axaml, не через set.",
+                Description = "Применить тему UI на лету. Берутся только известные секции (main_window…power_cockpit); игнорируются: _snapshot, solution_explorer_tree_power, power_island_frame_brushes, cascade_theme_resolved, window_frame, layout_regions, dock_open_documents, dock_text_editors. Градиенты рамок островов задаются в App.axaml, не через set.",
                 InputSchema = Schema(new
                 {
                     type = "object",
@@ -550,13 +565,13 @@ public static class IdeMcpServer
             new()
             {
                 Name = "ide_execute_command",
-                Description = "Выполнить команду IDE по коду. Единая точка входа: command_id (например open_file, load_solution, get_editor_state), args — аргументы команды (те же, что у соответствующих ide_* тулов). Список кодов в IdeCommands. Экономит контекст агента: один тул вместо многих.",
+                Description = "Выполнить команду IDE по коду. command_id — как в IdeCommands (в т.ч. паритет с меню/тулбаром: open_solution_dialog, apply_light_theme, set_focus_mode, build_solution_ui, send_chat, explain_trace_step+step_index, …). args — плоские поля (path, file_path, visible, mode, culture, message, step_index, …). Полная таблица: docs/MCP-PROTOCOL.md.",
                 InputSchema = Schema(new
                 {
                     type = "object",
                     properties = new
                     {
-                        command_id = new { type = "string", description = "Код команды (open_file, load_solution, select, set_breakpoint, show_preview, get_editor_state, apply_edit, go_to_position, build, run_tests, run_affected_tests, run_code_cleanup, get_code_metrics, get_workspace_state, git_status/diff/commit/push, …)." },
+                        command_id = new { type = "string", description = "Код команды: см. IdeCommands и docs/MCP-PROTOCOL.md (меню «Вид», Файл, тулбар, чат, трасса)." },
                         args = new { type = "object", description = "Аргументы команды (path, file_path, line, start_line, …). Опционально." }
                     },
                     required = new[] { "command_id" }
@@ -590,6 +605,7 @@ public static class IdeMcpServer
                             "ide_request_confirmation" => await actions.ExecuteCommandAsync(IdeCommands.RequestConfirmation, args, cancellationToken),
                             "ide_get_editor_state" => await actions.ExecuteCommandAsync(IdeCommands.GetEditorState, args, cancellationToken),
                             "ide_get_editor_content_range" => await actions.ExecuteCommandAsync(IdeCommands.GetEditorContentRange, args, cancellationToken),
+                            "ide_get_open_document_text" => await actions.ExecuteCommandAsync(IdeCommands.GetOpenDocumentText, args, cancellationToken),
                             "ide_apply_edit" => await actions.ExecuteCommandAsync(IdeCommands.ApplyEdit, args, cancellationToken),
                             "ide_go_to_position" => await actions.ExecuteCommandAsync(IdeCommands.GoToPosition, args, cancellationToken),
                             "ide_get_solution_info" => await actions.ExecuteCommandAsync(IdeCommands.GetSolutionInfo, args, cancellationToken),
@@ -637,13 +653,13 @@ public static class IdeMcpServer
                             isError = text.StartsWith("Missing", StringComparison.Ordinal) || text.StartsWith("Unknown command", StringComparison.Ordinal) || text.StartsWith("Error", StringComparison.Ordinal);
                         else
                         {
-                        var isActionTool = name is "ide_open_file" or "ide_load_solution" or "ide_select" or "ide_set_breakpoint" or "ide_remove_breakpoint"
-                            or "ide_show_preview" or "ide_show_editor_preview" or "ide_apply_edit" or "ide_go_to_position" or "ide_focus_editor"
-                            or "ide_set_ui_theme" or "ide_set_control_layout" or "ide_set_control_text" or "ide_click_control"
-                            or "ide_send_keys" or "ide_set_focus" or "ide_highlight_control" or "ide_set_panel_size" or "ide_add_control"
-                            or "ide_show_breakpoints" or "ide_show_debug_position" or "ide_show_debug_state" or "ide_write_agent_notes"
-                            or "ide_run_code_cleanup" or "ide_git_commit" or "ide_git_push";
-                        isError = isActionTool && text != "OK";
+                            var isActionTool = name is "ide_open_file" or "ide_load_solution" or "ide_select" or "ide_set_breakpoint" or "ide_remove_breakpoint"
+                                or "ide_show_preview" or "ide_show_editor_preview" or "ide_apply_edit" or "ide_go_to_position" or "ide_focus_editor"
+                                or "ide_set_ui_theme" or "ide_set_control_layout" or "ide_set_control_text" or "ide_click_control"
+                                or "ide_send_keys" or "ide_set_focus" or "ide_highlight_control" or "ide_set_panel_size" or "ide_add_control"
+                                or "ide_show_breakpoints" or "ide_show_debug_position" or "ide_show_debug_state" or "ide_write_agent_notes"
+                                or "ide_run_code_cleanup" or "ide_git_commit" or "ide_git_push";
+                            isError = isActionTool && text != "OK";
                         }
                         return new CallToolResult { Content = [new TextContentBlock { Text = text }], IsError = isError };
                     }

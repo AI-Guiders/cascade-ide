@@ -21,6 +21,7 @@
 | `ide_load_solution` | Загрузить решение (.sln / .slnx), обновить дерево проектов | `path` — полный путь к решению |
 | `ide_select` | Выделить диапазон в редакторе | `file_path`, `start_line`, `start_column`, `end_line`, `end_column` (1-based) |
 | `ide_get_editor_state` | Состояние редактора (файл, каретка, выделение) | —; возвращает JSON |
+| `ide_get_open_document_text` | Полный текст любой **открытой** вкладки из модели документа (не только активной) | опционально `file_path` (иначе текущий), `max_chars` для обрезки; JSON: `file_path`, `length`, `truncated`, `is_dirty`, `text` или `error` |
 | `ide_apply_edit` | Применить правку в открытом файле | `file_path`, `start_line`, `start_column`, `end_line`, `end_column`, `new_text` (1-based) |
 | `ide_go_to_position` | Перейти на позицию (и опционально выделить) | `file_path`, `line`, `column`; опционально `end_line`, `end_column` |
 | `ide_get_solution_info` | Информация о решении и открытом файле | —; возвращает JSON (solution_path, current_file_path, project_paths) |
@@ -36,7 +37,7 @@
 | `ide_git_commit` | Git commit в каталоге решения/workspace | `message`, опционально `paths`; возвращает JSON |
 | `ide_git_push` | Git push в каталоге решения/workspace | опционально `remote`, `branch`; возвращает JSON |
 | `ide_focus_editor` | Передать фокус в редактор | — |
-| `ide_get_ui_theme` | Параметры темы UI (цвета, фоны, кнопки, шрифты) | —; возвращает JSON |
+| `ide_get_ui_theme` | Параметры темы UI + глубокий снимок (resolved-тема, окно, регионы, **dock_open_documents** — все вкладки из VM + `model_text_preview`, **dock_text_editors** — только смонтированные TextEditor) | —; возвращает JSON |
 | `ide_set_ui_theme` | Применить тему UI на лету (JSON в формате get_ui_theme) | `theme` — JSON-строка |
 | `ide_get_ui_layout` | Дерево элементов UI: тип, имя, видимость, границы (x,y,w,h), контент, дети | —; возвращает JSON |
 | `ide_get_colors_under_cursor` | Цвета под курсором: background, foreground и effective_background, effective_foreground (как на экране) | —; возвращает JSON |
@@ -57,6 +58,28 @@
 | `ide_write_agent_notes` | Записать заметки агента. Агент сам решает, когда, что и в каком формате (markdown, json, текст). Хранятся в каталоге решения в `.cascade-ide/agent-notes.md`. Без открытого решения — ошибка. Для непрерывности между сессиями и до суммаризации. | `content` — полное содержимое (перезаписывает файл); при успехе — `OK` |
 | `ide_read_agent_notes` | Прочитать заметки агента из `.cascade-ide/agent-notes.md`. Возвращает содержимое или пустую строку. Агент восстанавливает контекст в новом чате. | —; возвращает текст файла или `""` |
 | `ide_execute_command` | Унифицированный вызов IDE-команды по коду (`command_id`) с аргументами (`args`) в формате выбранного инструмента. Нужен для единой точки входа (MCP/меню/хоткеи). | `command_id`, опционально `args` (JSON object) |
+
+**Меню, тулбар, task bar и чат через `ide_execute_command`:** те же `command_id`, что реализованы как `RelayCommand` / свойства в `MainWindowViewModel` (см. `IdeCommands.cs` и разметку `MainWindow.axaml`, `ToolbarView.axaml`, `TaskCockpitView.axaml`, `ChatPanelView.axaml`).
+
+| Зона | `command_id` | Аргументы |
+|------|----------------|-----------|
+| Файл | `open_solution_dialog`, `exit_application` | — |
+| Вид → панели | `toggle_*` / `set_*_visible` | `set_solution_explorer_visible`, `set_chat_panel_expanded`, `set_git_panel_visible`, `set_instrumentation_dock_visible` — поле `visible` (bool); также `toggle_git_panel`, `toggle_instrumentation_dock`, `toggle_chat_panel` + уже были `toggle_terminal`, `toggle_build_output`, `toggle_solution_explorer`, `set_terminal_visible`, `set_build_output_visible` |
+| Режим | `set_ui_mode` или `set_focus_mode`, `set_balanced_mode`, `set_power_mode`, `cycle_ui_mode` | `set_ui_mode`: `mode`: `Focus` \| `Balanced` \| `Power` |
+| Тема | `apply_light_theme`, `apply_dark_theme`, `apply_cursor_like_theme`, `apply_power_classic_theme`, `open_theme_file_dialog` | — |
+| Язык | `set_ui_language`, `reset_ui_language_to_system` | `culture`: `ru-RU`, `en-US`, … |
+| Прочее меню | `open_preview_window`, `open_settings`, `about` | — |
+| Тулбар | `show_solution_explorer_panel`, `show_build_output_panel`, `show_chat_panel`, `show_terminal_panel`, `hide_build_output_panel`, `set_single_editor_group`, `set_dual_editor_group`, `set_triple_editor_group`, `build_solution_ui` | `build_solution_ui` — как кнопка «Собрать» (лог в панель; не то же, что `ide_build` / structured) |
+| Focus / Power | `focus_checkpoint`, `focus_rollback`, `confirm_focus_step`, `cancel_focus_step`, `explain_current_step`, `emergency_stop`, `refresh_workspace_snapshot` | — |
+| Трасса | `explain_trace_step`, `rollback_trace_step` | `step_index` (int ≥ 0): индекс в `AgentTraceSteps`, **0 — самый старый** |
+| Safety | `set_safety_l1`, `set_safety_l2`, `set_safety_l3` | — |
+| Autonomous | `start_autonomous`, `pause_autonomous`, `resume_autonomous` | Условия `CanExecute` как в UI |
+| Quick actions | `fix_failing_tests`, `investigate_nullref`, `prepare_commit` | — |
+| Чат | `send_chat` | опционально `message` — подставить в поле ввода перед отправкой |
+| Ollama | `install_ollama_model` | `model` — имя модели |
+| Документы | `reopen_closed_document`, `activate_document`, `close_document`, `toggle_pin_document`, `move_document_to_group_1` … `_3` | где нужен путь: `file_path` |
+
+Проверка: `ide_get_workspace_state` — помимо `terminal.is_visible`, `ui_mode`, есть `panels` (видимость колонок), `safety_level`, `editor_group_count`, `agent_trace_step_count`, `is_autonomous_running`.
 
 ## Подключение из Cursor
 

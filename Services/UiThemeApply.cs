@@ -38,9 +38,13 @@ public static class UiThemeApply
     public static string GetCursorLikeThemeJson() =>
         GetThemeJsonFromFile(Path.Combine(AppContext.BaseDirectory, "Themes", "cursor-like-theme.json"));
 
-    /// <summary>Тема Power Mode: неоново-тёмная «космическая» палитра. Themes/power-theme.json.</summary>
+    /// <summary>Тема Power Mode: неоново-тёмная «космическая» палитра (циан). Themes/power-theme.json.</summary>
     public static string GetPowerThemeJson() =>
         GetThemeJsonFromFile(Path.Combine(AppContext.BaseDirectory, "Themes", "power-theme.json"));
+
+    /// <summary>Power cockpit по концепт-PNG: фиолет/янтарь/бирюза L1–L3, фуксийные каймы. Themes/power-cockpit-concept-theme.json.</summary>
+    public static string GetPowerCockpitConceptThemeJson() =>
+        GetThemeJsonFromFile(Path.Combine(AppContext.BaseDirectory, "Themes", "power-cockpit-concept-theme.json"));
 
     /// <summary>Ключи ресурсов в Application.Resources. Должны совпадать с App.axaml и DynamicResource в XAML.</summary>
     public static class Keys

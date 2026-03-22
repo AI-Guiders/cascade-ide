@@ -1,0 +1,62 @@
+{
+  "_comment": "Палитра ближе к docs/ux/concept-generated/cascadeide-ui-concept-power.png: L1 бирюза, L2 янтарь, L3 фиолет, неон фуксия/циан. Сплошные кисти CascadeTheme.* (градиенты островов по-прежнему из App.axaml).",
+  "main_window": { "background": "#07051A" },
+  "menu": { "background": "#10082A", "foreground": "#EDE9FE" },
+  "button": {
+    "background": "#1E1040",
+    "foreground": "#F5F3FF",
+    "border_brush": "#C084FC",
+    "hover_background": "#2D1A55",
+    "disabled_background": "#120A24",
+    "disabled_foreground": "#6B5B8C"
+  },
+  "toolbar": { "background": "#0C0618" },
+  "toolbar_text": { "foreground": "#DDD6FE", "error_foreground": "#FB7185" },
+  "editor": { "background": "#050818", "foreground": "#F1F5F9" },
+  "editor_column": {
+    "border_brush": "#6366F1",
+    "background": "#080B1E",
+    "current_file_foreground": "#A5B4FC"
+  },
+  "workspace_layout": { "border_brush": "#D946EF" },
+  "markdown_preview_panel": { "background": "#0F0824", "border_brush": "#818CF8" },
+  "solution_explorer": { "border_brush": "#818CF8", "header_foreground": "#DDD6FE" },
+  "panel_chrome": {
+    "title_foreground": "#EDE9FE",
+    "accent_brush": "#E879F9",
+    "header_background": "#140B32",
+    "header_separator": "#4C1D95",
+    "menu_glyph_foreground": "#A78BFA"
+  },
+  "build_output": {
+    "background": "#0A0616",
+    "foreground": "#E0E7FF",
+    "border_brush": "#4338CA"
+  },
+  "chat_panel": {
+    "background": "#08051A",
+    "label_foreground": "#C4B5FD",
+    "message_bubble_background": "#12082A",
+    "message_content_foreground": "#F8FAFC",
+    "send_button_background": "#9333EA",
+    "send_button_foreground": "#FFFFFF"
+  },
+  "terminal": {
+    "background": "#040612",
+    "foreground": "#CBD5E1",
+    "input_background": "#1A1035"
+  },
+  "mcp_banner": { "background": "#2E1065", "foreground": "#C4B5FD" },
+  "preview_window": { "background": "#0F0824" },
+  "power_cockpit": {
+    "neon_border": "#22D3EE",
+    "neon_accent": "#E879F9",
+    "panel_background": "#120A28",
+    "safety_dock_background": "#05030E",
+    "telemetry_strip_background": "#0A0618",
+    "safety_l1": "#0D9488",
+    "safety_l2": "#D97706",
+    "safety_l3": "#7C3AED",
+    "emergency": "#F43F5E"
+  }
+}

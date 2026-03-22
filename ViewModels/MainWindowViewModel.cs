@@ -241,6 +241,10 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         OnPropertyChanged(nameof(IsTerminalPanelHidden));
         OnPropertyChanged(nameof(IsBottomPanelVisible));
         SaveSettingsIfChanged();
+        if (value)
+            BottomPanelTabIndex = 0;
+        else if (BottomPanelTabIndex == 0)
+            CoerceBottomPanelTabToVisible();
     }
 
     partial void OnIsBuildOutputVisibleChanged(bool value)
@@ -249,6 +253,8 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         OnPropertyChanged(nameof(IsBottomPanelVisible));
         if (value)
             BottomPanelTabIndex = 1;
+        else if (BottomPanelTabIndex == 1)
+            CoerceBottomPanelTabToVisible();
     }
 
     partial void OnIsInstrumentationDockVisibleChanged(bool value)
@@ -262,7 +268,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         }
 
         if (BottomPanelTabIndex is >= 3 and <= 5)
-            BottomPanelTabIndex = IsTerminalVisible ? 0 : IsBuildOutputVisible ? 1 : IsGitPanelVisible ? 2 : 0;
+            CoerceBottomPanelTabToVisible();
     }
 
     partial void OnIsChatPanelExpandedChanged(bool value)
@@ -481,17 +487,23 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
                 break;
             default:
                 IsSolutionExplorerVisible = true;
-                IsBuildOutputVisible = false;
-                IsTerminalVisible = false;
+                // Balanced: терминал и журнал сборки видны по умолчанию (иначе TabControl часто остаётся на скрытой вкладке 0 — «пустая» панель).
+                IsBuildOutputVisible = true;
+                IsTerminalVisible = true;
                 IsChatPanelExpanded = true;
                 EditorGroupCount = 2;
                 break;
         }
 
+        CoerceBottomPanelTabToVisible();
+        // Power cockpit: сразу вкладка «Терминал» (консоль + сборка рядом), а не «События».
+        if (string.Equals(normalized, "Power", StringComparison.OrdinalIgnoreCase) && IsTerminalVisible)
+            BottomPanelTabIndex = 0;
+
         // Mode-specific visual identity: Power gets cosmic palette; Focus/Balanced keep calmer dark themes.
         _ = normalized switch
         {
-            "Power" => Services.UiThemeApply.ApplyOnUiThreadAsync(Services.UiThemeApply.GetPowerThemeJson()),
+            "Power" => Services.UiThemeApply.ApplyOnUiThreadAsync(Services.UiThemeApply.GetPowerCockpitConceptThemeJson()),
             "Focus" => Services.UiThemeApply.ApplyOnUiThreadAsync(Services.UiThemeApply.GetDarkThemeJson()),
             _ => Services.UiThemeApply.ApplyOnUiThreadAsync(Services.UiThemeApply.GetCursorLikeThemeJson())
         };
@@ -503,6 +515,37 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _settings.SolutionExplorerVisible = IsSolutionExplorerVisible;
         _settings.TerminalVisible = IsTerminalVisible;
         SaveSettingsIfChanged();
+    }
+
+    /// <summary>Вкладки 0–5: терминал, сборка, Git, события, тесты, отладка.</summary>
+    private bool IsBottomPanelTabVisible(int index) => index switch
+    {
+        0 => IsTerminalVisible,
+        1 => IsBuildOutputVisible,
+        2 => IsGitPanelVisible,
+        3 or 4 or 5 => ShowInstrumentationTabs,
+        _ => false,
+    };
+
+    private int GetFirstVisibleBottomPanelTabIndex()
+    {
+        if (IsTerminalVisible)
+            return 0;
+        if (IsBuildOutputVisible)
+            return 1;
+        if (IsGitPanelVisible)
+            return 2;
+        if (ShowInstrumentationTabs)
+            return 3;
+        return 0;
+    }
+
+    /// <summary>Если выбрана скрытая вкладка, TabControl в Avalonia показывает пустую область — переключаем на первую видимую.</summary>
+    private void CoerceBottomPanelTabToVisible()
+    {
+        if (IsBottomPanelTabVisible(BottomPanelTabIndex))
+            return;
+        BottomPanelTabIndex = GetFirstVisibleBottomPanelTabIndex();
     }
 
     private string GetWorkspacePath() => GetWorkspacePath(SolutionPath);
@@ -590,9 +633,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             _ = GitPanel.RefreshGitPanelAsync();
         }
         else if (BottomPanelTabIndex == 2)
-        {
-            BottomPanelTabIndex = IsTerminalVisible ? 0 : IsBuildOutputVisible ? 1 : 0;
-        }
+            CoerceBottomPanelTabToVisible();
     }
 
     public static readonly IReadOnlyList<string> UiModeOptions = ["Focus", "Balanced", "Power"];
@@ -608,6 +649,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     [NotifyPropertyChangedFor(nameof(ShowAgentOperations))]
     [NotifyPropertyChangedFor(nameof(ShowAgentTrace))]
     [NotifyPropertyChangedFor(nameof(ShowPowerTelemetry))]
+    [NotifyPropertyChangedFor(nameof(ShowPowerTelemetryOnTerminalTab))]
     [NotifyPropertyChangedFor(nameof(ShowSafetyControls))]
     [NotifyPropertyChangedFor(nameof(ShowTelemetryHiddenHint))]
     [NotifyPropertyChangedFor(nameof(TelemetryButtonText))]
@@ -621,7 +663,6 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     [NotifyPropertyChangedFor(nameof(IsBottomPanelVisible))]
     [NotifyPropertyChangedFor(nameof(WindowTitle))]
     [NotifyPropertyChangedFor(nameof(MainWorkspaceTelemetryColumnSpan))]
-    [NotifyPropertyChangedFor(nameof(ChatPanelMainGridRowSpan))]
     private string _uiMode = "Balanced";
 
     /// <summary>Заголовок главного окна (в Power — подпись «Autonomous Agent Cockpit»).</summary>
@@ -643,6 +684,13 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     /// <summary>Карточка уровня безопасности: в Power — крупные L1–L3; в Focus/Balanced — компактные кнопки (разметка в ChatPanelView).</summary>
     public bool ShowSafetyControls => true;
     public bool ShowTelemetryHiddenHint => ShowPowerTelemetry && !IsTerminalVisible;
+
+    /// <summary>
+    /// Дублирующая карточка телеметрии на вкладке «Терминал» в Power. Пока видна полоса <see cref="TelemetryStripView"/> под редактором —
+    /// false, чтобы DockPanel не отдавал высоту дублю и не схлопывал область вывода консоли.
+    /// </summary>
+    public bool ShowPowerTelemetryOnTerminalTab => IsPowerMode && !ShowTelemetryStrip;
+
     /// <summary>Полоска build/tests/debug/git — и в Focus (по концепту).</summary>
     public bool ShowTelemetryStrip => true;
 
@@ -653,9 +701,8 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     public int MainWorkspaceTelemetryColumnSpan =>
         IsPowerMode && ShowTelemetryStrip ? 3 : 5;
 
-    /// <summary>В Power правая колонка занимает строку редактора и строку телеметрии (RowSpan 2).</summary>
-    public int ChatPanelMainGridRowSpan =>
-        IsPowerMode && ShowTelemetryStrip ? 2 : 1;
+    /// <summary>Чат в одной строке с редактором; телеметрия и док — в нижней строке MainGrid (после сплиттера).</summary>
+    public int ChatPanelMainGridRowSpan => 1;
     /// <summary>Короткая «кинематографичная» вспышка при смене режима UI (Opacity + кисть; разметка — MainWindow).</summary>
     [ObservableProperty]
     private double _uiModeBloomOpacity;
@@ -1578,6 +1625,13 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         await Services.UiThemeApply.ApplyOnUiThreadAsync(Services.UiThemeApply.GetCursorLikeThemeJson());
     }
 
+    /// <summary>Предыдущая Power-палитра (циан/неон без фиолетового кокпита концепта).</summary>
+    [RelayCommand]
+    private async Task ApplyPowerClassicThemeAsync()
+    {
+        await Services.UiThemeApply.ApplyOnUiThreadAsync(Services.UiThemeApply.GetPowerThemeJson());
+    }
+
     [RelayCommand]
     private void SetUiLanguage(string? cultureName)
     {
@@ -1762,13 +1816,21 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private void ShowSolutionExplorerPanel() => IsSolutionExplorerVisible = true;
 
     [RelayCommand]
-    private void ShowBuildOutputPanel() => IsBuildOutputVisible = true;
+    private void ShowBuildOutputPanel()
+    {
+        IsBuildOutputVisible = true;
+        BottomPanelTabIndex = 1;
+    }
 
     [RelayCommand]
     private void ShowChatPanel() => IsChatPanelExpanded = true;
 
     [RelayCommand]
-    private void ShowTerminalPanel() => IsTerminalVisible = true;
+    private void ShowTerminalPanel()
+    {
+        IsTerminalVisible = true;
+        BottomPanelTabIndex = 0;
+    }
 
     [RelayCommand]
     private void SetFocusMode()
@@ -2176,8 +2238,29 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             return;
 
         IsBuilding = true;
+        if (!IsTerminalVisible)
+            IsTerminalVisible = true;
         IsBuildOutputVisible = true;
-        BuildOutputPanel.BuildOutput = $"Сборка: {SolutionPath}\r\n";
+
+        // Power: вкладка «Терминал» — основная консоль кокпита; вывод сборки туда же, иначе пользователь
+        // остаётся на терминале и не видит лог (он шёл только в «Сборка · вывод»). В Focus/Balanced — вкладка журнала.
+        var mirrorBuildToTerminal = IsPowerMode;
+        if (mirrorBuildToTerminal)
+            BottomPanelTabIndex = 0;
+        else
+            BottomPanelTabIndex = 1;
+
+        var header = $"Сборка: {SolutionPath}\r\n";
+        BuildOutputPanel.BuildOutput = header;
+        if (mirrorBuildToTerminal)
+            TerminalPanel.TerminalOutput += $"\r\n=== dotnet build (IDE) ===\r\n{header}";
+
+        void AppendBuildChunk(string chunk)
+        {
+            BuildOutputPanel.BuildOutput += chunk;
+            if (mirrorBuildToTerminal)
+                TerminalPanel.TerminalOutput += chunk;
+        }
 
         try
         {
@@ -2193,7 +2276,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             using var process = System.Diagnostics.Process.Start(psi);
             if (process is null)
             {
-                BuildOutputPanel.BuildOutput += "Не удалось запустить dotnet build.\r\n";
+                AppendBuildChunk("Не удалось запустить dotnet build.\r\n");
                 return;
             }
 
@@ -2202,13 +2285,13 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             await Task.WhenAll(stdout, stderr);
             await process.WaitForExitAsync();
 
-            BuildOutputPanel.BuildOutput += await stdout + "\r\n" + await stderr;
+            AppendBuildChunk(await stdout + "\r\n" + await stderr);
             if (process.ExitCode != 0)
-                BuildOutputPanel.BuildOutput += $"\r\nКод выхода: {process.ExitCode}";
+                AppendBuildChunk($"\r\nКод выхода: {process.ExitCode}");
         }
         catch (Exception ex)
         {
-            BuildOutputPanel.BuildOutput += "Ошибка: " + ex.Message + "\r\n";
+            AppendBuildChunk("Ошибка: " + ex.Message + "\r\n");
         }
         finally
         {
@@ -2418,6 +2501,13 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
                 return await a.GetEditorStateAsync(args is not null && args.TryGetValue("max_preview_chars", out var mpc) && mpc.TryGetInt32(out var maxPreview) ? maxPreview : null);
             case Services.IdeCommands.GetEditorContentRange:
                 return await a.GetEditorContentRangeAsync(I(args, "start_line", 1), I(args, "end_line", 1));
+            case Services.IdeCommands.GetOpenDocumentText:
+                {
+                    int? maxCharsOpen = null;
+                    if (args is not null && args.TryGetValue("max_chars", out var mco) && mco.ValueKind == JsonValueKind.Number && mco.TryGetInt32(out var mcOpen) && mcOpen > 0)
+                        maxCharsOpen = mcOpen;
+                    return await a.GetOpenDocumentTextAsync(S(args, "file_path"), maxCharsOpen);
+                }
             case Services.IdeCommands.ApplyEdit:
                 if (args is null || string.IsNullOrEmpty(S(args, "file_path")) || !args.TryGetValue("new_text", out _)) return "Missing arguments";
                 a.ApplyEdit(S(args, "file_path")!, I(args, "start_line"), I(args, "start_column"), I(args, "end_line"), I(args, "end_column"), S(args, "new_text") ?? "");
@@ -2462,6 +2552,535 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             case Services.IdeCommands.FocusEditor:
                 a.FocusEditor();
                 return "OK";
+            case Services.IdeCommands.ToggleTerminal:
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (ToggleTerminalCommand.CanExecute(null))
+                        ToggleTerminalCommand.Execute(null);
+                });
+                return "OK";
+            case Services.IdeCommands.ToggleBuildOutput:
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (ToggleBuildOutputCommand.CanExecute(null))
+                        ToggleBuildOutputCommand.Execute(null);
+                });
+                return "OK";
+            case Services.IdeCommands.ToggleSolutionExplorer:
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (ToggleSolutionExplorerCommand.CanExecute(null))
+                        ToggleSolutionExplorerCommand.Execute(null);
+                });
+                return "OK";
+            case Services.IdeCommands.SetTerminalVisible:
+                if (args is null || !args.TryGetValue("visible", out var tv) || tv.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
+                    return "Missing or invalid visible (boolean)";
+                {
+                    var on = tv.GetBoolean();
+                    await Dispatcher.UIThread.InvokeAsync(() => IsTerminalVisible = on);
+                }
+                return "OK";
+            case Services.IdeCommands.SetBuildOutputVisible:
+                if (args is null || !args.TryGetValue("visible", out var bv) || bv.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
+                    return "Missing or invalid visible (boolean)";
+                {
+                    var on = bv.GetBoolean();
+                    await Dispatcher.UIThread.InvokeAsync(() => IsBuildOutputVisible = on);
+                }
+                return "OK";
+            case Services.IdeCommands.SetUiMode:
+                {
+                    var m = S(args, "mode")?.Trim();
+                    if (string.IsNullOrEmpty(m))
+                        return "Missing mode (Focus|Balanced|Power)";
+                    if (!string.Equals(m, "Focus", StringComparison.OrdinalIgnoreCase)
+                        && !string.Equals(m, "Balanced", StringComparison.OrdinalIgnoreCase)
+                        && !string.Equals(m, "Power", StringComparison.OrdinalIgnoreCase))
+                        return $"Unknown mode: {m}";
+                    var norm = NormalizeUiMode(m);
+                    await Dispatcher.UIThread.InvokeAsync(() => UiMode = norm);
+                }
+                return "OK";
+
+            // ——— Паритет с меню / тулбаром / task bar / чатом (те же RelayCommand, что в XAML)
+            case Services.IdeCommands.OpenSolutionDialog:
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (OpenSolutionCommand.CanExecute(null))
+                        OpenSolutionCommand.Execute(null);
+                });
+                return "OK";
+            case Services.IdeCommands.ExitApplication:
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (ExitCommand.CanExecute(null))
+                        ExitCommand.Execute(null);
+                });
+                return "OK";
+            case Services.IdeCommands.About:
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (AboutCommand.CanExecute(null))
+                        AboutCommand.Execute(null);
+                });
+                return "OK";
+            case Services.IdeCommands.OpenSettings:
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (OpenSettingsCommand.CanExecute(null))
+                        OpenSettingsCommand.Execute(null);
+                });
+                return "OK";
+            case Services.IdeCommands.OpenPreviewWindow:
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (OpenPreviewWindowCommand.CanExecute(null))
+                        OpenPreviewWindowCommand.Execute(null);
+                });
+                return "OK";
+
+            case Services.IdeCommands.SetSolutionExplorerVisible:
+                if (args is null || !args.TryGetValue("visible", out var sev) || sev.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
+                    return "Missing or invalid visible (boolean)";
+                await Dispatcher.UIThread.InvokeAsync(() => IsSolutionExplorerVisible = sev.GetBoolean());
+                return "OK";
+            case Services.IdeCommands.SetChatPanelExpanded:
+                if (args is null || !args.TryGetValue("visible", out var cev) || cev.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
+                    return "Missing or invalid visible (boolean)";
+                await Dispatcher.UIThread.InvokeAsync(() => IsChatPanelExpanded = cev.GetBoolean());
+                return "OK";
+            case Services.IdeCommands.SetGitPanelVisible:
+                if (args is null || !args.TryGetValue("visible", out var gev) || gev.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
+                    return "Missing or invalid visible (boolean)";
+                await Dispatcher.UIThread.InvokeAsync(() => IsGitPanelVisible = gev.GetBoolean());
+                return "OK";
+            case Services.IdeCommands.SetInstrumentationDockVisible:
+                if (args is null || !args.TryGetValue("visible", out var idv) || idv.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
+                    return "Missing or invalid visible (boolean)";
+                await Dispatcher.UIThread.InvokeAsync(() => IsInstrumentationDockVisible = idv.GetBoolean());
+                return "OK";
+            case Services.IdeCommands.ToggleGitPanel:
+                await Dispatcher.UIThread.InvokeAsync(() => IsGitPanelVisible = !IsGitPanelVisible);
+                return "OK";
+            case Services.IdeCommands.ToggleInstrumentationDock:
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (ToggleInstrumentationDockCommand.CanExecute(null))
+                        ToggleInstrumentationDockCommand.Execute(null);
+                });
+                return "OK";
+            case Services.IdeCommands.ToggleChatPanel:
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (ToggleChatPanelCommand.CanExecute(null))
+                        ToggleChatPanelCommand.Execute(null);
+                });
+                return "OK";
+
+            case Services.IdeCommands.SetFocusModeUi:
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (SetFocusModeCommand.CanExecute(null))
+                        SetFocusModeCommand.Execute(null);
+                });
+                return "OK";
+            case Services.IdeCommands.SetBalancedModeUi:
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (SetBalancedModeCommand.CanExecute(null))
+                        SetBalancedModeCommand.Execute(null);
+                });
+                return "OK";
+            case Services.IdeCommands.SetPowerModeUi:
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (SetPowerModeCommand.CanExecute(null))
+                        SetPowerModeCommand.Execute(null);
+                });
+                return "OK";
+            case Services.IdeCommands.CycleUiMode:
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (CycleUiModeCommand.CanExecute(null))
+                        CycleUiModeCommand.Execute(null);
+                });
+                return "OK";
+
+            case Services.IdeCommands.ApplyLightTheme:
+                await Dispatcher.UIThread.InvokeAsync(async () =>
+                {
+                    if (ApplyLightThemeCommand.CanExecute(null))
+                        await ApplyLightThemeCommand.ExecuteAsync(null);
+                });
+                return "OK";
+            case Services.IdeCommands.ApplyDarkTheme:
+                await Dispatcher.UIThread.InvokeAsync(async () =>
+                {
+                    if (ApplyDarkThemeCommand.CanExecute(null))
+                        await ApplyDarkThemeCommand.ExecuteAsync(null);
+                });
+                return "OK";
+            case Services.IdeCommands.ApplyCursorLikeTheme:
+                await Dispatcher.UIThread.InvokeAsync(async () =>
+                {
+                    if (ApplyCursorLikeThemeCommand.CanExecute(null))
+                        await ApplyCursorLikeThemeCommand.ExecuteAsync(null);
+                });
+                return "OK";
+            case Services.IdeCommands.ApplyPowerClassicTheme:
+                await Dispatcher.UIThread.InvokeAsync(async () =>
+                {
+                    if (ApplyPowerClassicThemeCommand.CanExecute(null))
+                        await ApplyPowerClassicThemeCommand.ExecuteAsync(null);
+                });
+                return "OK";
+            case Services.IdeCommands.OpenThemeFileDialog:
+                await Dispatcher.UIThread.InvokeAsync(async () =>
+                {
+                    if (OpenThemeFileCommand.CanExecute(null))
+                        await OpenThemeFileCommand.ExecuteAsync(null);
+                });
+                return "OK";
+
+            case Services.IdeCommands.SetUiLanguage:
+                {
+                    var cult = S(args, "culture") ?? S(args, "ci");
+                    if (string.IsNullOrWhiteSpace(cult))
+                        return "Missing culture (e.g. ru-RU, en-US)";
+                    var c = cult.Trim();
+                    await Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        if (SetUiLanguageCommand.CanExecute(c))
+                            SetUiLanguageCommand.Execute(c);
+                    });
+                }
+                return "OK";
+            case Services.IdeCommands.ResetUiLanguageToSystem:
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (ResetUiLanguageToSystemCommand.CanExecute(null))
+                        ResetUiLanguageToSystemCommand.Execute(null);
+                });
+                return "OK";
+
+            case Services.IdeCommands.ShowSolutionExplorerPanel:
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (ShowSolutionExplorerPanelCommand.CanExecute(null))
+                        ShowSolutionExplorerPanelCommand.Execute(null);
+                });
+                return "OK";
+            case Services.IdeCommands.ShowBuildOutputPanel:
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (ShowBuildOutputPanelCommand.CanExecute(null))
+                        ShowBuildOutputPanelCommand.Execute(null);
+                });
+                return "OK";
+            case Services.IdeCommands.ShowChatPanel:
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (ShowChatPanelCommand.CanExecute(null))
+                        ShowChatPanelCommand.Execute(null);
+                });
+                return "OK";
+            case Services.IdeCommands.ShowTerminalPanel:
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (ShowTerminalPanelCommand.CanExecute(null))
+                        ShowTerminalPanelCommand.Execute(null);
+                });
+                return "OK";
+            case Services.IdeCommands.HideBuildOutputPanel:
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (HideBuildOutputCommand.CanExecute(null))
+                        HideBuildOutputCommand.Execute(null);
+                });
+                return "OK";
+
+            case Services.IdeCommands.SetSingleEditorGroup:
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (SetSingleEditorGroupCommand.CanExecute(null))
+                        SetSingleEditorGroupCommand.Execute(null);
+                });
+                return "OK";
+            case Services.IdeCommands.SetDualEditorGroup:
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (SetDualEditorGroupCommand.CanExecute(null))
+                        SetDualEditorGroupCommand.Execute(null);
+                });
+                return "OK";
+            case Services.IdeCommands.SetTripleEditorGroup:
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (SetTripleEditorGroupCommand.CanExecute(null))
+                        SetTripleEditorGroupCommand.Execute(null);
+                });
+                return "OK";
+
+            case Services.IdeCommands.BuildSolutionUi:
+                await Dispatcher.UIThread.InvokeAsync(async () =>
+                {
+                    if (BuildSolutionCommand.CanExecute(null))
+                        await BuildSolutionCommand.ExecuteAsync(null);
+                });
+                return "OK";
+
+            case Services.IdeCommands.FocusCheckpoint:
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (FocusCheckpointCommand.CanExecute(null))
+                        FocusCheckpointCommand.Execute(null);
+                });
+                return "OK";
+            case Services.IdeCommands.FocusRollback:
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (FocusRollbackCommand.CanExecute(null))
+                        FocusRollbackCommand.Execute(null);
+                });
+                return "OK";
+            case Services.IdeCommands.ConfirmFocusStep:
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (ConfirmFocusStepCommand.CanExecute(null))
+                        ConfirmFocusStepCommand.Execute(null);
+                });
+                return "OK";
+            case Services.IdeCommands.CancelFocusStep:
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (CancelFocusStepCommand.CanExecute(null))
+                        CancelFocusStepCommand.Execute(null);
+                });
+                return "OK";
+            case Services.IdeCommands.ExplainCurrentStep:
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (ExplainCurrentStepCommand.CanExecute(null))
+                        ExplainCurrentStepCommand.Execute(null);
+                });
+                return "OK";
+            case Services.IdeCommands.EmergencyStop:
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (EmergencyStopCommand.CanExecute(null))
+                        EmergencyStopCommand.Execute(null);
+                });
+                return "OK";
+            case Services.IdeCommands.RefreshWorkspaceSnapshot:
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (RefreshWorkspaceSnapshotCommand.CanExecute(null))
+                        RefreshWorkspaceSnapshotCommand.Execute(null);
+                });
+                return "OK";
+
+            case Services.IdeCommands.ExplainTraceStep:
+                if (args is null || !args.TryGetValue("step_index", out var exIdx) || exIdx.ValueKind != JsonValueKind.Number || !exIdx.TryGetInt32(out var explainStepIndex) || explainStepIndex < 0)
+                    return "Missing or invalid step_index (non-negative int; 0 = oldest in AgentTraceSteps)";
+                {
+                    var explainErr = await Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        var list = InstrumentationPanel.AgentTraceSteps;
+                        if (explainStepIndex >= list.Count)
+                            return $"Invalid step_index (count={list.Count})";
+                        ExplainTraceStepCommand.Execute(list[explainStepIndex]);
+                        return (string?)null;
+                    });
+                    return explainErr ?? "OK";
+                }
+            case Services.IdeCommands.RollbackTraceStep:
+                if (args is null || !args.TryGetValue("step_index", out var rbIdx) || rbIdx.ValueKind != JsonValueKind.Number || !rbIdx.TryGetInt32(out var rollbackStepIndex) || rollbackStepIndex < 0)
+                    return "Missing or invalid step_index (non-negative int; 0 = oldest in AgentTraceSteps)";
+                {
+                    var rollbackErr = await Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        var list = InstrumentationPanel.AgentTraceSteps;
+                        if (rollbackStepIndex >= list.Count)
+                            return $"Invalid step_index (count={list.Count})";
+                        RollbackTraceStepCommand.Execute(list[rollbackStepIndex]);
+                        return (string?)null;
+                    });
+                    return rollbackErr ?? "OK";
+                }
+
+            case Services.IdeCommands.SetSafetyL1:
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (SetSafetyL1Command.CanExecute(null))
+                        SetSafetyL1Command.Execute(null);
+                });
+                return "OK";
+            case Services.IdeCommands.SetSafetyL2:
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (SetSafetyL2Command.CanExecute(null))
+                        SetSafetyL2Command.Execute(null);
+                });
+                return "OK";
+            case Services.IdeCommands.SetSafetyL3:
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (SetSafetyL3Command.CanExecute(null))
+                        SetSafetyL3Command.Execute(null);
+                });
+                return "OK";
+
+            case Services.IdeCommands.StartAutonomous:
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (StartAutonomousCommand.CanExecute(null))
+                        StartAutonomousCommand.Execute(null);
+                });
+                return "OK";
+            case Services.IdeCommands.PauseAutonomous:
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (PauseAutonomousCommand.CanExecute(null))
+                        PauseAutonomousCommand.Execute(null);
+                });
+                return "OK";
+            case Services.IdeCommands.ResumeAutonomous:
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (ResumeAutonomousCommand.CanExecute(null))
+                        ResumeAutonomousCommand.Execute(null);
+                });
+                return "OK";
+
+            case Services.IdeCommands.FixFailingTests:
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (FixFailingTestsCommand.CanExecute(null))
+                        FixFailingTestsCommand.Execute(null);
+                });
+                return "OK";
+            case Services.IdeCommands.InvestigateNullref:
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (InvestigateNullrefCommand.CanExecute(null))
+                        InvestigateNullrefCommand.Execute(null);
+                });
+                return "OK";
+            case Services.IdeCommands.PrepareCommit:
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (PrepareCommitCommand.CanExecute(null))
+                        PrepareCommitCommand.Execute(null);
+                });
+                return "OK";
+
+            case Services.IdeCommands.SendChat:
+                await Dispatcher.UIThread.InvokeAsync(async () =>
+                {
+                    var msg = S(args, "message");
+                    if (!string.IsNullOrWhiteSpace(msg))
+                        ChatPanel.ChatInput = msg!;
+                    if (ChatPanel.SendChatCommand.CanExecute(null))
+                        await ChatPanel.SendChatCommand.ExecuteAsync(null);
+                });
+                return "OK";
+
+            case Services.IdeCommands.InstallOllamaModel:
+                {
+                    var model = S(args, "model");
+                    if (string.IsNullOrWhiteSpace(model))
+                        return "Missing model";
+                    var m = model.Trim();
+                    await Dispatcher.UIThread.InvokeAsync(async () =>
+                    {
+                        ModelToInstall = m;
+                        if (InstallModelCommand.CanExecute(null))
+                            await InstallModelCommand.ExecuteAsync(null);
+                    });
+                }
+                return "OK";
+
+            case Services.IdeCommands.ReopenClosedDocument:
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (ReopenClosedDocumentCommand.CanExecute(null))
+                        ReopenClosedDocumentCommand.Execute(null);
+                });
+                return "OK";
+            case Services.IdeCommands.ActivateDocument:
+                if (string.IsNullOrWhiteSpace(S(args, "file_path")))
+                    return "Missing file_path";
+                {
+                    var pathAct = S(args, "file_path")!;
+                    await Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        if (ActivateDocumentCommand.CanExecute(pathAct))
+                            ActivateDocumentCommand.Execute(pathAct);
+                    });
+                }
+                return "OK";
+            case Services.IdeCommands.CloseDocument:
+                if (string.IsNullOrWhiteSpace(S(args, "file_path")))
+                    return "Missing file_path";
+                {
+                    var pathClose = S(args, "file_path")!;
+                    await Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        if (CloseDocumentCommand.CanExecute(pathClose))
+                            CloseDocumentCommand.Execute(pathClose);
+                    });
+                }
+                return "OK";
+            case Services.IdeCommands.TogglePinDocument:
+                if (string.IsNullOrWhiteSpace(S(args, "file_path")))
+                    return "Missing file_path";
+                {
+                    var pathPin = S(args, "file_path")!;
+                    await Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        if (TogglePinDocumentCommand.CanExecute(pathPin))
+                            TogglePinDocumentCommand.Execute(pathPin);
+                    });
+                }
+                return "OK";
+            case Services.IdeCommands.MoveDocumentToGroup1:
+                if (string.IsNullOrWhiteSpace(S(args, "file_path")))
+                    return "Missing file_path";
+                {
+                    var p1 = S(args, "file_path")!;
+                    await Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        if (MoveDocumentToGroup1Command.CanExecute(p1))
+                            MoveDocumentToGroup1Command.Execute(p1);
+                    });
+                }
+                return "OK";
+            case Services.IdeCommands.MoveDocumentToGroup2:
+                if (string.IsNullOrWhiteSpace(S(args, "file_path")))
+                    return "Missing file_path";
+                {
+                    var p2 = S(args, "file_path")!;
+                    await Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        if (MoveDocumentToGroup2Command.CanExecute(p2))
+                            MoveDocumentToGroup2Command.Execute(p2);
+                    });
+                }
+                return "OK";
+            case Services.IdeCommands.MoveDocumentToGroup3:
+                if (string.IsNullOrWhiteSpace(S(args, "file_path")))
+                    return "Missing file_path";
+                {
+                    var p3 = S(args, "file_path")!;
+                    await Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        if (MoveDocumentToGroup3Command.CanExecute(p3))
+                            MoveDocumentToGroup3Command.Execute(p3);
+                    });
+                }
+                return "OK";
+
             case Services.IdeCommands.GetUiTheme:
                 return a.GetUiTheme();
             case Services.IdeCommands.SetUiTheme:
@@ -2658,6 +3277,85 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         return await tcs.Task.ConfigureAwait(false);
     }
 
+    async Task<string> Services.IIdeMcpActions.GetOpenDocumentTextAsync(string? filePath, int? maxChars)
+    {
+        var tcs = new TaskCompletionSource<string>();
+        Dispatcher.UIThread.Post(() =>
+        {
+            try
+            {
+                var target = string.IsNullOrWhiteSpace(filePath) ? CurrentFilePath : filePath.Trim();
+                if (string.IsNullOrEmpty(target))
+                {
+                    tcs.SetResult(JsonSerializer.Serialize(new { error = "no_path", message = "file_path не задан и нет текущего открытого файла." }));
+                    return;
+                }
+
+                var doc = FindOpenDocumentModelByPath(target);
+                if (doc is null)
+                {
+                    tcs.SetResult(JsonSerializer.Serialize(new
+                    {
+                        error = "not_open",
+                        message = "Файл не среди открытых вкладок.",
+                        file_path_requested = target
+                    }));
+                    return;
+                }
+
+                var fullText = doc.Content ?? "";
+                var len = fullText.Length;
+                var truncated = false;
+                var outText = fullText;
+                if (maxChars is > 0 && len > maxChars.Value)
+                {
+                    outText = fullText[..maxChars.Value];
+                    truncated = true;
+                }
+
+                tcs.SetResult(JsonSerializer.Serialize(new
+                {
+                    file_path = doc.FilePath,
+                    length = len,
+                    truncated,
+                    is_dirty = doc.IsDirty,
+                    text = outText
+                }));
+            }
+            catch (Exception ex)
+            {
+                tcs.TrySetException(ex);
+            }
+        });
+        return await tcs.Task.ConfigureAwait(false);
+    }
+
+    /// <summary>Модель открытого документа по пути (вкладка в <see cref="DockDocuments"/>).</summary>
+    private OpenDocumentViewModel? FindOpenDocumentModelByPath(string path)
+    {
+        foreach (var item in DockDocuments)
+        {
+            if (item is not DockDocumentViewModel dvm)
+                continue;
+            if (PathsReferToSameFile(dvm.Doc.FilePath, path))
+                return dvm.Doc;
+        }
+
+        return null;
+    }
+
+    private static bool PathsReferToSameFile(string a, string b)
+    {
+        try
+        {
+            return string.Equals(Path.GetFullPath(a), Path.GetFullPath(b), StringComparison.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            return string.Equals(a, b, StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
     void Services.IIdeMcpActions.ApplyEdit(string filePath, int startLine, int startColumn, int endLine, int endColumn, string newText)
     {
         Dispatcher.UIThread.Post(() => _applyEditAction?.Invoke(filePath, startLine, startColumn, endLine, endColumn, newText));
@@ -2723,6 +3421,20 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
                 output_preview = buildText,
                 binlog_path = _lastBuildBinlogPath
             },
+            terminal = new { is_visible = IsTerminalVisible },
+            ui_mode = UiMode,
+            panels = new
+            {
+                solution_explorer = IsSolutionExplorerVisible,
+                build_output = IsBuildOutputVisible,
+                chat_expanded = IsChatPanelExpanded,
+                git = IsGitPanelVisible,
+                instrumentation_dock = IsInstrumentationDockVisible
+            },
+            safety_level = SafetyLevel,
+            editor_group_count = EditorGroupCount,
+            agent_trace_step_count = InstrumentationPanel.AgentTraceSteps.Count,
+            is_autonomous_running = IsAutonomousRunning,
             diagnostics
         };
         return JsonSerializer.Serialize(state);

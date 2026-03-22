@@ -19,6 +19,8 @@ public interface IIdeMcpActions
     Task<string> GetEditorStateAsync(int? maxPreviewChars = null);
     /// <summary>Содержимое редактора по строкам (1-based). JSON: file_path, start_line, end_line, content.</summary>
     Task<string> GetEditorContentRangeAsync(int startLine, int endLine);
+    /// <summary>Полный текст открытой вкладки из модели документа. JSON: file_path, length, truncated, is_dirty, text; или error. filePath null — текущий файл; maxChars — опциональная обрезка.</summary>
+    Task<string> GetOpenDocumentTextAsync(string? filePath, int? maxChars);
     /// <summary>Применить правку: заменить диапазон в файле (1-based). Файл должен быть открыт.</summary>
     void ApplyEdit(string filePath, int startLine, int startColumn, int endLine, int endColumn, string newText);
     /// <summary>Перейти на позицию (и опционально выделить до end). Если файл не открыт — открыть.</summary>

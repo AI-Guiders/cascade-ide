@@ -49,7 +49,7 @@ This map is intended to drive incremental alignment work with clear acceptance c
 | Quick actions | `TaskCockpitView` | `FixFailingTestsCommand`, …, `ShowQuickActions` | ✅ | `ShowQuickActions => IsBalancedMode`. |
 | Editor badges (Complexity / Impacted / Files) | `TaskCockpitView` | `ComplexityBadge`, `ImpactedTestsBadge`, `FilesChangedBadge` | 🟨 | **Реальные эвристики:** строки текущего файла на диске; упавшие тесты последнего `dotnet test`; число путей из `git status --short`. Подсказки на бейджах в XAML. |
 | Agent operations card | `ChatPanelView` row 2 | `ShowAgentOperationsBlock` | ✅ | Balanced only. |
-| Build/Test/Debug + event timeline | Terminal tab (telemetry при Power) + вкладка «События» | `EventTimeline`, `IsTerminalVisible` | ✅ | В Balanced лента событий — вкладка «События»; в Terminal при Power — доп. блок с `ShowPowerTelemetry`. |
+| Build/Test/Debug + event timeline | `TelemetryStripView` (Power cockpit) + вкладка «События» | `EventTimeline`, `IsTerminalVisible` | ✅ | В Power дубль телеметрии на вкладке «Терминал» отключён (`ShowPowerTelemetryOnTerminalTab`), чтобы не сжимать консоль; лента — «События». |
 | Dependency mini-map / solution graph | — | — | ❌ | Не реализовано; см. шаг 4 в «Next steps». |
 
 ---
@@ -67,7 +67,7 @@ This map is intended to drive incremental alignment work with clear acceptance c
 | Window title | `MainWindow` `Title` | `WindowTitle` | ✅ | |
 | **Panel headers** (полоса + разделитель + ⋯) | `Views/PanelChromeHeader.axaml`, стили в `App.axaml` | `panel_chrome` в JSON темы | 🟨 | Меню по ⋯: заглушка + «Копировать заголовок»; `UppercaseTitle` для коротких меток. Glow / телеметрия-дуги — вне scope. |
 | **Рамки рабочей области** (колонки, вертикальные сплиттеры, шов с нижней панелью, карточки `modeCard`) | `CascadeTheme.WorkspacePanelBorderBrush` в `App.axaml`; `MainWindow`, `SolutionExplorerView`, `DocumentsDockView`, `ChatPanelView`, `BottomPanelView` | `workspace_layout.border_brush` (если нет — `editor_column.border_brush`) | ✅ | Power: чуть ярче кайма колонок (`#00C8E8`) vs внутренние линии редактора. |
-| **Power: телеметрия только под левым+центром** (правая колонка на всю высоту рядом) | `MainWindow.axaml`: `TelemetryStripView` `Grid.ColumnSpan` = `MainWorkspaceTelemetryColumnSpan` (3 в Power); `ChatPanelView` + сплиттер редактор↔чат `Grid.RowSpan` = `ChatPanelMainGridRowSpan` (2 в Power) | `MainWindowViewModel` | ✅ | Focus/Balanced: телеметрия на всю ширину (`ColumnSpan` 5), чат одна строка. |
+| **Power: телеметрия только под левым+центром** | `MainWindow.axaml`: нижняя строка — вложенная сетка с теми же `ColumnDefinitions`; `TelemetryStripView` `Grid.ColumnSpan` = `MainWorkspaceTelemetryColumnSpan` (3 в Power). Чат — одна строка с редактором (`ChatPanelMainGridRowSpan` = 1). Между редактором (`2*`) и низом (`*`) — `GridSplitter` 6px; между телеметрией и док-панелью — второй сплиттер. | `MainWindowViewModel` | ✅ | Focus/Balanced: телеметрия на всю ширину (`ColumnSpan` 5). |
 | **Power: острова, gutter, градиентные каймы** | `App.axaml`: `PowerEditorIslandFrameBrush`, `PowerChatIslandFrameBrush`, `PowerSolutionIslandFrameBrush`; `DocumentsDockView`, `SolutionExplorerView`, `ChatPanelView` — `Panel` + внутренний `Border` (`#…IslandInner`) с `Classes.power`, `Margin` 6–8 у `UserControl.power`; телеметрия — `CornerRadius` 14, усиленный `BoxShadow`; низ — `BottomPanelShell` скругление сверху в Power | — | ✅ | Focus/Balanced: без градиентных рамок, скругления ~10px у колонок. |
 
 ### 4.1) Визуальный хром Power: концепт (PNG) vs текущий XAML

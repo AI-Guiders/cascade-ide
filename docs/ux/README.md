@@ -42,5 +42,5 @@
 ## Связь с кодом
 
 - **Режимы UI:** Focus / Balanced / Power — переключение из меню «Вид → Режим интерфейса» и хоткеи `Alt+1` / `Alt+2` / `Alt+3`, `Ctrl+Alt+M`. В Power-режиме видимы Task Bar, Quick Actions, Telemetry; в Focus — минимум отвлечений.
-- **Темы:** меню «Вид → Тема» (светлая, тёмная, как Cursor); тул `ide_set_ui_theme` меняет тему из MCP.
+- **Темы:** меню «Вид → Тема» (светлая, тёмная, как Cursor, **Power классическая (циан)**); при входе в режим **Power** по умолчанию подставляется **`Themes/power-cockpit-concept-theme.json`** (палитра ближе к `concept-generated/cascadeide-ui-concept-power.png`); прежняя циановая Power — пункт меню. Тул `ide_set_ui_theme` меняет тему из MCP.
 - **Панели:** Solution Explorer, Build Output, Chat, Terminal — скрываемые; имена контролов для MCP см. в `cascade-ide-ui-layout-v1.md`.
