@@ -60,12 +60,18 @@ public static class UiThemeApply
         public const string EditorBackground = "CascadeTheme.EditorBackground";
         public const string EditorForeground = "CascadeTheme.EditorForeground";
         public const string EditorColumnBorderBrush = "CascadeTheme.EditorColumnBorderBrush";
+        public const string WorkspacePanelBorderBrush = "CascadeTheme.WorkspacePanelBorderBrush";
         public const string EditorColumnBackground = "CascadeTheme.EditorColumnBackground";
         public const string CurrentFileForeground = "CascadeTheme.CurrentFileForeground";
         public const string MarkdownPreviewPanelBackground = "CascadeTheme.MarkdownPreviewPanelBackground";
         public const string MarkdownPreviewPanelBorderBrush = "CascadeTheme.MarkdownPreviewPanelBorderBrush";
         public const string SolutionExplorerBorderBrush = "CascadeTheme.SolutionExplorerBorderBrush";
         public const string SolutionExplorerHeaderForeground = "CascadeTheme.SolutionExplorerHeaderForeground";
+        public const string PanelChromeTitleForeground = "CascadeTheme.PanelChromeTitleForeground";
+        public const string PanelTitleAccentBrush = "CascadeTheme.PanelTitleAccentBrush";
+        public const string PanelChromeHeaderBackground = "CascadeTheme.PanelChromeHeaderBackground";
+        public const string PanelChromeHeaderSeparatorBrush = "CascadeTheme.PanelChromeHeaderSeparatorBrush";
+        public const string PanelChromeMenuGlyphForeground = "CascadeTheme.PanelChromeMenuGlyphForeground";
         public const string BuildOutputBackground = "CascadeTheme.BuildOutputBackground";
         public const string BuildOutputBorderBrush = "CascadeTheme.BuildOutputBorderBrush";
         public const string ChatPanelBackground = "CascadeTheme.ChatPanelBackground";
@@ -84,6 +90,7 @@ public static class UiThemeApply
         public const string PowerNeonBorder = "CascadeTheme.PowerNeonBorder";
         public const string PowerNeonAccent = "CascadeTheme.PowerNeonAccent";
         public const string PowerCockpitPanelBackground = "CascadeTheme.PowerCockpitPanelBackground";
+        public const string PowerSafetyDockBackground = "CascadeTheme.PowerSafetyDockBackground";
         public const string PowerTelemetryStripBackground = "CascadeTheme.PowerTelemetryStripBackground";
         public const string PowerSafetyL1 = "CascadeTheme.PowerSafetyL1";
         public const string PowerSafetyL2 = "CascadeTheme.PowerSafetyL2";
@@ -129,12 +136,18 @@ public static class UiThemeApply
             Set(res, Keys.EditorBackground, GetColor(root, "editor", "background"));
             Set(res, Keys.EditorForeground, GetColor(root, "editor", "foreground"));
             Set(res, Keys.EditorColumnBorderBrush, GetColor(root, "editor_column", "border_brush"));
+            Set(res, Keys.WorkspacePanelBorderBrush, GetWorkspacePanelBorderBrush(root));
             Set(res, Keys.EditorColumnBackground, GetColor(root, "editor_column", "background"));
             Set(res, Keys.CurrentFileForeground, GetColor(root, "editor_column", "current_file_foreground"));
             Set(res, Keys.MarkdownPreviewPanelBackground, GetColor(root, "markdown_preview_panel", "background"));
             Set(res, Keys.MarkdownPreviewPanelBorderBrush, GetColor(root, "markdown_preview_panel", "border_brush"));
             Set(res, Keys.SolutionExplorerBorderBrush, GetColor(root, "solution_explorer", "border_brush"));
             Set(res, Keys.SolutionExplorerHeaderForeground, GetColor(root, "solution_explorer", "header_foreground"));
+            Set(res, Keys.PanelChromeTitleForeground, GetColor(root, "panel_chrome", "title_foreground"));
+            Set(res, Keys.PanelTitleAccentBrush, GetColor(root, "panel_chrome", "accent_brush"));
+            Set(res, Keys.PanelChromeHeaderBackground, GetColor(root, "panel_chrome", "header_background"));
+            Set(res, Keys.PanelChromeHeaderSeparatorBrush, GetColor(root, "panel_chrome", "header_separator"));
+            Set(res, Keys.PanelChromeMenuGlyphForeground, GetColor(root, "panel_chrome", "menu_glyph_foreground"));
             Set(res, Keys.BuildOutputBackground, GetColor(root, "build_output", "background"));
             Set(res, Keys.BuildOutputBorderBrush, GetColor(root, "build_output", "border_brush"));
             Set(res, Keys.ChatPanelBackground, GetColor(root, "chat_panel", "background"));
@@ -154,6 +167,7 @@ public static class UiThemeApply
                 Set(res, Keys.PowerNeonBorder, GetColorFrom(pc, "neon_border"));
                 Set(res, Keys.PowerNeonAccent, GetColorFrom(pc, "neon_accent"));
                 Set(res, Keys.PowerCockpitPanelBackground, GetColorFrom(pc, "panel_background"));
+                Set(res, Keys.PowerSafetyDockBackground, GetColorFrom(pc, "safety_dock_background"));
                 Set(res, Keys.PowerTelemetryStripBackground, GetColorFrom(pc, "telemetry_strip_background"));
                 Set(res, Keys.PowerSafetyL1, GetColorFrom(pc, "safety_l1"));
                 Set(res, Keys.PowerSafetyL2, GetColorFrom(pc, "safety_l2"));
@@ -179,6 +193,13 @@ public static class UiThemeApply
     private static Avalonia.Controls.IResourceDictionary? GetResourceDictionary()
     {
         return Avalonia.Application.Current?.Resources;
+    }
+
+    /// <summary>Рамки рабочей области: workspace_layout.border_brush или, если нет, editor_column.border_brush.</summary>
+    private static string? GetWorkspacePanelBorderBrush(JsonElement root)
+    {
+        var w = GetColor(root, "workspace_layout", "border_brush");
+        return !string.IsNullOrEmpty(w) ? w : GetColor(root, "editor_column", "border_brush");
     }
 
     private static string? GetColor(JsonElement root, string obj, string prop)

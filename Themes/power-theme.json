@@ -1,6 +1,6 @@
 {
-  "main_window": { "background": "#060A14" },
-  "menu": { "background": "#0C1224", "foreground": "#E0F4FF" },
+  "main_window": { "background": "#03060E" },
+  "menu": { "background": "#080F1C", "foreground": "#E8F8FF" },
   "button": {
     "background": "#152042",
     "foreground": "#E8F0FF",
@@ -9,26 +9,34 @@
     "disabled_background": "#0E1428",
     "disabled_foreground": "#5A6A8A"
   },
-  "toolbar": { "background": "#0A1020" },
-  "toolbar_text": { "foreground": "#B8DCFF", "error_foreground": "#FF6B8A" },
-  "editor": { "background": "#050A18", "foreground": "#E2EEFF" },
+  "toolbar": { "background": "#060C18" },
+  "toolbar_text": { "foreground": "#C4E8FF", "error_foreground": "#FF7A9A" },
+  "editor": { "background": "#040814", "foreground": "#EAF2FF" },
   "editor_column": {
     "border_brush": "#00A8CC",
     "background": "#070E1C",
     "current_file_foreground": "#7AE0FF"
   },
+  "workspace_layout": { "border_brush": "#00C8E8" },
   "markdown_preview_panel": { "background": "#0C1428", "border_brush": "#00A8CC" },
   "solution_explorer": { "border_brush": "#00A8CC", "header_foreground": "#C8E8FF" },
+  "panel_chrome": {
+    "title_foreground": "#C8E8FF",
+    "accent_brush": "#00E5FF",
+    "header_background": "#0C1628",
+    "header_separator": "#1A4A6A",
+    "menu_glyph_foreground": "#5A8AA8"
+  },
   "build_output": {
     "background": "#080E1C",
     "foreground": "#D9E6FF",
     "border_brush": "#35539D"
   },
   "chat_panel": {
-    "background": "#080E1E",
-    "label_foreground": "#7AE0FF",
-    "message_bubble_background": "#101C3A",
-    "message_content_foreground": "#EEF6FF",
+    "background": "#050A12",
+    "label_foreground": "#8AE8FF",
+    "message_bubble_background": "#0C1628",
+    "message_content_foreground": "#F2F8FF",
     "send_button_background": "#8A4DFF",
     "send_button_foreground": "#FFFFFF"
   },
@@ -40,13 +48,14 @@
   "mcp_banner": { "background": "#102050", "foreground": "#7AE0FF" },
   "preview_window": { "background": "#0C1428" },
   "power_cockpit": {
-    "neon_border": "#00E5FF",
-    "neon_accent": "#D080FF",
-    "panel_background": "#0A1022",
-    "telemetry_strip_background": "#060C18",
-    "safety_l1": "#1E4A7A",
-    "safety_l2": "#8A6E18",
-    "safety_l3": "#5A28A0",
-    "emergency": "#FF2244"
+    "neon_border": "#00F0FF",
+    "neon_accent": "#E090FF",
+    "panel_background": "#070E18",
+    "safety_dock_background": "#020814",
+    "telemetry_strip_background": "#040A14",
+    "safety_l1": "#1A5088",
+    "safety_l2": "#9A7818",
+    "safety_l3": "#6230B0",
+    "emergency": "#FF3355"
   }
 }

@@ -2,11 +2,14 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="CascadeIDE.App"
              xmlns:local="using:CascadeIDE"
+             xmlns:lang="using:CascadeIDE.Lang"
+             xmlns:views="using:CascadeIDE.Views"
              RequestedThemeVariant="Default">
              <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
     <Application.Resources>
         <ResourceDictionary>
+            <lang:LocViewModel x:Key="Loc"/>
             <!-- Тема: ide_get_ui_theme / ide_set_ui_theme -->
             <SolidColorBrush x:Key="CascadeTheme.MainWindowBackground">#F5F5F5</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.MenuBackground">#F0F0F0</SolidColorBrush>
@@ -23,12 +26,19 @@
             <SolidColorBrush x:Key="CascadeTheme.EditorBackground">#FFF</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.EditorForeground">#1A1A1A</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.EditorColumnBorderBrush">#CCC</SolidColorBrush>
+            <!-- Рамки колонок (решение / редактор / чат), вертикальные сплиттеры, шов с нижней панелью -->
+            <SolidColorBrush x:Key="CascadeTheme.WorkspacePanelBorderBrush">#CCC</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.EditorColumnBackground">#FFF</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.CurrentFileForeground">#666</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.MarkdownPreviewPanelBackground">#FAFAFA</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.MarkdownPreviewPanelBorderBrush">#E0E0E0</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.SolutionExplorerBorderBrush">#CCC</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.SolutionExplorerHeaderForeground">#1A1A1A</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.PanelChromeTitleForeground">#1A1A1A</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.PanelTitleAccentBrush">#5B4FC9</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.PanelChromeHeaderBackground">#E8E8EC</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.PanelChromeHeaderSeparatorBrush">#C8C8D0</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.PanelChromeMenuGlyphForeground">#666</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.BuildOutputBackground">#F8F8F8</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.BuildOutputBorderBrush">#CCC</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.ChatPanelBackground">#FFF</SolidColorBrush>
@@ -46,11 +56,35 @@
             <SolidColorBrush x:Key="CascadeTheme.PowerNeonBorder">#00C8E8</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.PowerNeonAccent">#BF5FFF</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.PowerCockpitPanelBackground">#0C1428</SolidColorBrush>
+            <!-- Отдельный «док» уровней L1–L3 (темнее тела чата, по концепту cockpit) -->
+            <SolidColorBrush x:Key="CascadeTheme.PowerSafetyDockBackground">#060A14</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.PowerTelemetryStripBackground">#080E18</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.PowerSafetyL1">#2A5A8A</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.PowerSafetyL2">#8A6A1A</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.PowerSafetyL3">#5A2A8A</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.PowerEmergency">#E02040</SolidColorBrush>
+            <!-- Градиентные каймы «островов» Power cockpit (концепт: редактор cyan→blue, чат purple→pink) -->
+            <LinearGradientBrush x:Key="CascadeTheme.PowerEditorIslandFrameBrush" StartPoint="0%,0%" EndPoint="100%,100%">
+                <GradientStop Offset="0" Color="#00E5FF"/>
+                <GradientStop Offset="0.5" Color="#3A78D4"/>
+                <GradientStop Offset="1" Color="#6B9DFF"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="CascadeTheme.PowerChatIslandFrameBrush" StartPoint="0%,0%" EndPoint="100%,100%">
+                <GradientStop Offset="0" Color="#D080FF"/>
+                <GradientStop Offset="0.42" Color="#FF6B9D"/>
+                <GradientStop Offset="1" Color="#00B8D8"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="CascadeTheme.PowerSolutionIslandFrameBrush" StartPoint="0%,0%" EndPoint="100%,0%">
+                <GradientStop Offset="0" Color="#284A5C"/>
+                <GradientStop Offset="1" Color="#142A3A"/>
+            </LinearGradientBrush>
+            <!-- Дерево решения в Power cockpit (тёмная панель, строки, акцент выбора) -->
+            <SolidColorBrush x:Key="CascadeTheme.PowerSolutionTreePanelBackground">#0A1018</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.PowerSolutionTreeForeground">#D6E4F0</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.PowerSolutionTreeItemSelectedBackground">#163248</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.PowerSolutionTreeItemPointerOverBackground">#122030</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.PowerSolutionPanelBorderSubtle">#2A4A60</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.PowerSolutionTaskQueueBubbleBackground">#152A38</SolidColorBrush>
         </ResourceDictionary>
     </Application.Resources>
 
@@ -62,5 +96,119 @@
         <FluentTheme />
         <StyleInclude Source="avares://Dock.Avalonia.Themes.Fluent/DockFluentTheme.axaml"/>
         <StyleInclude Source="avares://AvaloniaEdit/Themes/Fluent/AvaloniaEdit.xaml" />
+        <!-- Заголовки панелей: полоса + разделитель + акцент (концепт Power cockpit) -->
+        <Style Selector="Border.panelChromeHeaderStrip">
+            <Setter Property="Background" Value="{DynamicResource CascadeTheme.PanelChromeHeaderBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.PanelChromeHeaderSeparatorBrush}"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="Padding" Value="12,10,10,10"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+        <Style Selector="Border.panelTitleAccent">
+            <Setter Property="Width" Value="4"/>
+            <Setter Property="MinHeight" Value="22"/>
+            <Setter Property="MaxHeight" Value="26"/>
+            <Setter Property="CornerRadius" Value="2"/>
+            <Setter Property="Margin" Value="0,0,12,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Background" Value="{DynamicResource CascadeTheme.PanelTitleAccentBrush}"/>
+        </Style>
+        <Style Selector="TextBlock.panelChromeTitle">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="LetterSpacing" Value="1.05"/>
+            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.PanelChromeTitleForeground}"/>
+        </Style>
+        <Style Selector="TextBlock.panelChromeTitleCaps">
+            <Setter Property="LetterSpacing" Value="1.35"/>
+        </Style>
+        <Style Selector="Button.panelChromeOverflowBtn">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="4,0,2,0"/>
+            <Setter Property="MinWidth" Value="32"/>
+            <Setter Property="MinHeight" Value="28"/>
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.PanelChromeMenuGlyphForeground}"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="Opacity" Value="0.72"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style Selector="Button.panelChromeOverflowBtn:pointerover">
+            <Setter Property="Opacity" Value="1"/>
+            <Setter Property="Background" Value="#14000000"/>
+        </Style>
+        <Style Selector="Button.panelChromeEmergencyBtn">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style Selector="Button.panelChromeEmergencyBtn:pointerover">
+            <Setter Property="Background" Value="#28FFFFFF"/>
+        </Style>
+        <Style Selector="TextBlock.panelDocumentPathTitle">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="LetterSpacing" Value="0.2"/>
+            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.PanelChromeTitleForeground}"/>
+        </Style>
+        <Style Selector="views|PanelChromeHeader.documentTitle TextBlock.headerTitlePart">
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="LetterSpacing" Value="0.2"/>
+        </Style>
+        <!-- Терминал (тёмный фон нижней панели): заголовок и меню-глиф как у консоли -->
+        <Style Selector="views|PanelChromeHeader.terminal TextBlock.headerTitlePart">
+            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.TerminalForeground}"/>
+        </Style>
+        <Style Selector="views|PanelChromeHeader.terminal Button.panelChromeOverflowBtn">
+            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.TerminalForeground}"/>
+            <Setter Property="Opacity" Value="0.55"/>
+        </Style>
+        <Style Selector="views|PanelChromeHeader.terminal Button.panelChromeOverflowBtn:pointerover">
+            <Setter Property="Background" Value="#22FFFFFF"/>
+        </Style>
+        <!-- Power: заголовки колонки дерева / очереди — тёмная полоса, светлый текст, бирюзовый акцент -->
+        <Style Selector="views|PanelChromeHeader.powerSolutionExplorer Border.panelChromeHeaderStrip">
+            <Setter Property="Background" Value="{DynamicResource CascadeTheme.PowerTelemetryStripBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.PowerSolutionPanelBorderSubtle}"/>
+        </Style>
+        <Style Selector="views|PanelChromeHeader.powerSolutionExplorer TextBlock.headerTitlePart">
+            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.PowerSolutionTreeForeground}"/>
+        </Style>
+        <Style Selector="views|PanelChromeHeader.powerSolutionExplorer TextBlock.panelChromeTitle">
+            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.PowerSolutionTreeForeground}"/>
+        </Style>
+        <Style Selector="views|PanelChromeHeader.powerSolutionExplorer Button.panelChromeOverflowBtn">
+            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.PowerSolutionTreeForeground}"/>
+            <Setter Property="Opacity" Value="0.55"/>
+        </Style>
+        <Style Selector="views|PanelChromeHeader.powerSolutionExplorer Button.panelChromeOverflowBtn:pointerover">
+            <Setter Property="Background" Value="#22FFFFFF"/>
+        </Style>
+        <Style Selector="views|PanelChromeHeader.powerSolutionExplorer Border.panelTitleAccent">
+            <Setter Property="Background" Value="{DynamicResource CascadeTheme.PowerNeonBorder}"/>
+        </Style>
+        <!-- Внутри карточек чата: компактнее, цвет как у подписей карточки -->
+        <Style Selector="views|PanelChromeHeader.compact Border.panelChromeHeaderStrip">
+            <Setter Property="Padding" Value="8,6,6,6"/>
+            <Setter Property="Margin" Value="0,0,0,6"/>
+            <Setter Property="CornerRadius" Value="4"/>
+        </Style>
+        <Style Selector="views|PanelChromeHeader.compact TextBlock.headerTitlePart">
+            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+        </Style>
+        <Style Selector="views|PanelChromeHeader.compact Button.panelChromeOverflowBtn">
+            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+            <Setter Property="Opacity" Value="0.5"/>
+        </Style>
+        <Style Selector="views|PanelChromeHeader.compact Button.panelChromeOverflowBtn:pointerover">
+            <Setter Property="Background" Value="#18000000"/>
+        </Style>
     </Application.Styles>
 </Application>

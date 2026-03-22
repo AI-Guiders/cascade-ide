@@ -17,8 +17,16 @@
     "background": "#1E1E1E",
     "current_file_foreground": "#9D9D9D"
   },
+  "workspace_layout": { "border_brush": "#3F3F46" },
   "markdown_preview_panel": { "background": "#252526", "border_brush": "#3F3F46" },
   "solution_explorer": { "border_brush": "#3F3F46", "header_foreground": "#CCCCCC" },
+  "panel_chrome": {
+    "title_foreground": "#E8E8E8",
+    "accent_brush": "#3794FF",
+    "header_background": "#2A2D2E",
+    "header_separator": "#3B3B3B",
+    "menu_glyph_foreground": "#858585"
+  },
   "build_output": {
     "background": "#252526",
     "foreground": "#D4D4D4",
