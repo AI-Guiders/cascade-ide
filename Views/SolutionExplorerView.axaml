@@ -5,20 +5,68 @@
              xmlns:models="using:CascadeIDE.Models"
              xmlns:views="using:CascadeIDE.Views"
              x:Class="CascadeIDE.Views.SolutionExplorerView"
+             Classes.power="{Binding IsPowerMode}"
              x:DataType="vm:MainWindowViewModel">
     <UserControl.Resources>
         <views:SolutionItemIconConverter x:Key="SolutionItemIconConverter"/>
     </UserControl.Resources>
-    <Border BorderBrush="{DynamicResource CascadeTheme.SolutionExplorerBorderBrush}"
-            BorderThickness="0,0,1,0"
-            Padding="4"
-            IsVisible="{Binding IsSolutionExplorerVisible}">
+    <UserControl.Styles>
+        <Style Selector="UserControl">
+            <Setter Property="Margin" Value="0"/>
+        </Style>
+        <Style Selector="UserControl.power">
+            <Setter Property="Margin" Value="8,6,6,6"/>
+        </Style>
+        <Style Selector="Border#SolutionIslandInner">
+            <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="4"/>
+        </Style>
+        <Style Selector="Border#SolutionIslandInner.power">
+            <Setter Property="Background" Value="{DynamicResource CascadeTheme.PowerSolutionTreePanelBackground}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="BoxShadow" Value="0 0 18 0 #3300A8CC, 0 3 14 0 #22000000"/>
+        </Style>
+        <Style Selector="TreeView TreeViewItem TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.SolutionExplorerHeaderForeground}"/>
+        </Style>
+        <Style Selector="UserControl.power TreeView TreeViewItem TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.PowerSolutionTreeForeground}"/>
+        </Style>
+        <Style Selector="UserControl.power TreeView TreeViewItem">
+            <Setter Property="Padding" Value="4,6"/>
+            <Setter Property="MinHeight" Value="32"/>
+        </Style>
+        <Style Selector="UserControl.power TreeView TreeViewItem:pointerover">
+            <Setter Property="Background" Value="{DynamicResource CascadeTheme.PowerSolutionTreeItemPointerOverBackground}"/>
+        </Style>
+        <Style Selector="UserControl.power TreeView TreeViewItem:selected">
+            <Setter Property="Background" Value="{DynamicResource CascadeTheme.PowerSolutionTreeItemSelectedBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.PowerNeonBorder}"/>
+            <Setter Property="BorderThickness" Value="3,0,0,0"/>
+        </Style>
+        <Style Selector="UserControl.power Image.solutionExplorerTreeIcon">
+            <Setter Property="Width" Value="20"/>
+            <Setter Property="Height" Value="20"/>
+        </Style>
+    </UserControl.Styles>
+    <Panel IsVisible="{Binding IsSolutionExplorerVisible}">
+        <Border IsVisible="{Binding IsPowerMode}"
+                IsHitTestVisible="False"
+                Background="{DynamicResource CascadeTheme.PowerSolutionIslandFrameBrush}"
+                CornerRadius="14"/>
+        <Border x:Name="SolutionIslandInner"
+                ZIndex="1"
+                Classes.power="{Binding IsPowerMode}">
         <Grid RowDefinitions="Auto,*,4,Auto">
-            <TextBlock Grid.Row="0"
-                       Text="Решение"
-                       FontWeight="SemiBold"
-                       Margin="4"
-                       Foreground="{DynamicResource CascadeTheme.SolutionExplorerHeaderForeground}"/>
+            <views:PanelChromeHeader Grid.Row="0"
+                                     Classes.powerSolutionExplorer="{Binding IsPowerMode}"
+                                     Title="Решение · дерево проекта"
+                                     UppercaseTitle="True"
+                                     Margin="0,4,0,0"/>
             <TreeView Grid.Row="1"
                       ItemsSource="{Binding SolutionRoots}"
                       SelectedItem="{Binding SelectedSolutionItem}"
@@ -32,10 +80,10 @@
                     <TreeDataTemplate DataType="models:SolutionItem"
                                        ItemsSource="{Binding Children}">
                         <StackPanel Orientation="Horizontal" Spacing="6">
-                            <Image Source="{Binding Converter={StaticResource SolutionItemIconConverter}}"
+                            <Image Classes="solutionExplorerTreeIcon"
+                                   Source="{Binding Converter={StaticResource SolutionItemIconConverter}}"
                                    Width="16" Height="16" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding Title}" VerticalAlignment="Center"
-                                       Foreground="{DynamicResource CascadeTheme.SolutionExplorerHeaderForeground}"/>
+                            <TextBlock Text="{Binding Title}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </TreeDataTemplate>
                 </TreeView.ItemTemplate>
@@ -43,7 +91,7 @@
             <GridSplitter Grid.Row="2"
                           Height="4"
                           ResizeDirection="Rows"
-                          Background="{DynamicResource CascadeTheme.SolutionExplorerBorderBrush}"
+                          Background="{DynamicResource CascadeTheme.PowerSolutionPanelBorderSubtle}"
                           IsVisible="{Binding IsPowerMode}"/>
             <Border Grid.Row="3"
                     IsVisible="{Binding IsPowerMode}"
@@ -51,21 +99,22 @@
                     MinHeight="72"
                     Margin="0,4,0,0"
                     Padding="4"
-                    BorderBrush="{DynamicResource CascadeTheme.EditorColumnBorderBrush}"
+                    Background="{DynamicResource CascadeTheme.PowerTelemetryStripBackground}"
+                    BorderBrush="{DynamicResource CascadeTheme.PowerSolutionPanelBorderSubtle}"
                     BorderThickness="1"
-                    CornerRadius="4">
+                    CornerRadius="8">
                 <DockPanel DataContext="{Binding InstrumentationPanel}" x:DataType="feat:InstrumentationPanelViewModel">
-                    <TextBlock DockPanel.Dock="Top"
-                               Text="Очередь задач"
-                               FontWeight="SemiBold"
-                               Margin="0,0,0,4"
-                               Foreground="{DynamicResource CascadeTheme.SolutionExplorerHeaderForeground}"/>
+                    <views:PanelChromeHeader DockPanel.Dock="Top"
+                                             Classes="powerSolutionExplorer"
+                                             Title="Очередь задач · исполнение"
+                                             UppercaseTitle="True"/>
                     <TextBlock DockPanel.Dock="Top"
                                Text="Очередь пуста — элементы появятся при постановке задач агентом."
                                FontSize="11"
                                TextWrapping="Wrap"
                                IsVisible="{Binding !HasPowerTaskQueueItems}"
-                               Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                               Foreground="{DynamicResource CascadeTheme.PowerSolutionTreeForeground}"
+                               Opacity="0.75"
                                Margin="0,0,0,4"/>
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <ItemsControl ItemsSource="{Binding PowerTaskQueueItems}"
@@ -73,11 +122,11 @@
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate DataType="vm:PowerTaskQueueItemViewModel">
                                     <Border Padding="4,2" Margin="0,0,0,2" CornerRadius="2"
-                                            Background="{DynamicResource CascadeTheme.ChatMessageBubbleBackground}">
+                                            Background="{DynamicResource CascadeTheme.PowerSolutionTaskQueueBubbleBackground}">
                                         <TextBlock Text="{Binding DisplayLine}"
                                                    TextWrapping="Wrap"
                                                    FontSize="11"
-                                                   Foreground="{DynamicResource CascadeTheme.SolutionExplorerHeaderForeground}"/>
+                                                   Foreground="{DynamicResource CascadeTheme.PowerSolutionTreeForeground}"/>
                                     </Border>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
@@ -86,5 +135,6 @@
                 </DockPanel>
             </Border>
         </Grid>
-    </Border>
+        </Border>
+    </Panel>
 </UserControl>

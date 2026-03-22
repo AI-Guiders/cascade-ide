@@ -53,6 +53,9 @@ public sealed class CascadeIdeSettings : ModelBase
     /// <summary>Режим интерфейса: Focus, Balanced, Power.</summary>
     public string UiMode { get; set; } = "Balanced";
 
+    /// <summary>Язык UI (<c>ru-RU</c>, <c>en-US</c>). Пустая строка — при старте берётся системная локаль (<c>UiCulture.ApplyFromSystem</c>).</summary>
+    public string UiCultureName { get; set; } = "";
+
     public override bool Is(ModelBase modelBase, double tolerance = DEFAULT_TOLERANCE)
     {
         if (modelBase is not CascadeIdeSettings o)
@@ -70,7 +73,8 @@ public sealed class CascadeIdeSettings : ModelBase
             && TerminalVisible.Is(o.TerminalVisible)
             && GitPanelVisible.Is(o.GitPanelVisible)
             && InstrumentationDockVisible.Is(o.InstrumentationDockVisible)
-            && UiMode.Is(o.UiMode);
+            && UiMode.Is(o.UiMode)
+            && UiCultureName.Is(o.UiCultureName);
     }
 
     public override ModelBase Clone()
@@ -90,7 +94,8 @@ public sealed class CascadeIdeSettings : ModelBase
             TerminalVisible = TerminalVisible,
             GitPanelVisible = GitPanelVisible,
             InstrumentationDockVisible = InstrumentationDockVisible,
-            UiMode = UiMode
+            UiMode = UiMode,
+            UiCultureName = UiCultureName
         };
     }
 }

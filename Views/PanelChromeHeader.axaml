@@ -1,0 +1,55 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:views="using:CascadeIDE.Views"
+             x:Class="CascadeIDE.Views.PanelChromeHeader"
+             x:Name="Root"
+             x:CompileBindings="False">
+    <UserControl.Resources>
+        <views:PanelChromeTitleDisplayConverter x:Key="PanelChromeTitleDisplayConverter"/>
+    </UserControl.Resources>
+    <Border Classes="panelChromeHeaderStrip">
+        <Grid ColumnDefinitions="Auto,*,Auto,Auto" MinHeight="34">
+            <Border Grid.Column="0" Classes="panelTitleAccent" VerticalAlignment="Center"/>
+            <TextBlock x:Name="TitleText"
+                       Grid.Column="1"
+                       Classes="panelChromeTitle headerTitlePart"
+                       VerticalAlignment="Center"
+                       TextTrimming="CharacterEllipsis">
+                <TextBlock.Text>
+                    <MultiBinding Converter="{StaticResource PanelChromeTitleDisplayConverter}">
+                        <Binding Path="Title" ElementName="Root" Mode="OneWay"/>
+                        <Binding Path="UppercaseTitle" ElementName="Root" Mode="OneWay"/>
+                    </MultiBinding>
+                </TextBlock.Text>
+            </TextBlock>
+            <!-- Концепт Power: аварийная остановка в заголовке панели -->
+            <Border Grid.Column="2"
+                    VerticalAlignment="Center"
+                    Margin="0,0,10,0"
+                    CornerRadius="6"
+                    Background="{DynamicResource CascadeTheme.PowerEmergency}"
+                    BoxShadow="0 4 14 0 #88FF3355, 0 2 8 0 #40000000"
+                    IsVisible="{Binding ShowEmergencyStop, ElementName=Root}">
+                <Button Content="{Binding PanelChrome_EmergencyStopCaps, Source={StaticResource Loc}}"
+                        Classes="panelChromeEmergencyBtn"
+                        Command="{Binding EmergencyStopCommand, ElementName=Root}"
+                        VerticalAlignment="Center"/>
+            </Border>
+            <Button Grid.Column="3"
+                    x:Name="OverflowButton"
+                    Classes="panelChromeOverflowBtn"
+                    Content="⋯"
+                    VerticalAlignment="Center"
+                    IsVisible="{Binding ShowOverflow, ElementName=Root}"
+                    Click="OnOverflowButtonClick">
+                <Button.ContextMenu>
+                    <ContextMenu x:Name="OverflowContextMenu">
+                        <MenuItem Header="{Binding PanelChrome_OverflowActionsPlaceholder, Source={StaticResource Loc}}" IsEnabled="False"/>
+                        <Separator/>
+                        <MenuItem Header="{Binding PanelChrome_CopyTitle, Source={StaticResource Loc}}" Click="OnCopyTitleMenuClick"/>
+                    </ContextMenu>
+                </Button.ContextMenu>
+            </Button>
+        </Grid>
+    </Border>
+</UserControl>

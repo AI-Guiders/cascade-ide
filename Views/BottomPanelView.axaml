@@ -3,23 +3,35 @@
              xmlns:vm="using:CascadeIDE.ViewModels"
              xmlns:feat="using:CascadeIDE.Features.Instrumentation"
              xmlns:models="using:CascadeIDE.Models"
+             xmlns:views="using:CascadeIDE.Views"
              x:Class="CascadeIDE.Views.BottomPanelView"
+             Classes.power="{Binding IsPowerMode}"
              x:DataType="vm:MainWindowViewModel">
+    <UserControl.Styles>
+        <Style Selector="Border#BottomPanelShell">
+            <Setter Property="CornerRadius" Value="0"/>
+        </Style>
+        <Style Selector="UserControl.power Border#BottomPanelShell">
+            <Setter Property="CornerRadius" Value="12,12,0,0"/>
+            <Setter Property="BoxShadow" Value="0 -8 32 0 #4000C8E8, 0 -2 20 0 #20000000"/>
+        </Style>
+    </UserControl.Styles>
     <Grid RowDefinitions="4,*">
         <GridSplitter Grid.Row="0"
                       Height="4"
                       ResizeDirection="Rows"
-                      Background="{DynamicResource CascadeTheme.BuildOutputBorderBrush}"
+                      Background="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"
                       IsVisible="{Binding IsBottomPanelVisible}"/>
-        <Border Grid.Row="1"
+        <Border x:Name="BottomPanelShell"
+                Grid.Row="1"
                 IsVisible="{Binding IsBottomPanelVisible}"
                 MinHeight="120"
-                BorderBrush="{DynamicResource CascadeTheme.BuildOutputBorderBrush}"
+                BorderBrush="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"
                 BorderThickness="0,1,0,0"
                 Padding="4"
                 Background="{DynamicResource CascadeTheme.TerminalBackground}">
             <TabControl SelectedIndex="{Binding BottomPanelTabIndex, Mode=TwoWay}">
-                <TabItem Header="Terminal" IsVisible="{Binding IsTerminalVisible}">
+                <TabItem Header="Терминал · консоль" IsVisible="{Binding IsTerminalVisible}">
                     <DockPanel>
                         <Border DockPanel.Dock="Top" IsVisible="{Binding ShowPowerTelemetry}" Classes="modeCard" Margin="0,0,0,4">
                             <StackPanel Spacing="4">
@@ -57,7 +69,7 @@
                             </StackPanel>
                         </Border>
                         <DockPanel DataContext="{Binding TerminalPanel}">
-                            <TextBlock DockPanel.Dock="Top" Text="Терминал" Foreground="{DynamicResource CascadeTheme.TerminalForeground}" FontSize="11" Margin="0,0,0,4"/>
+                            <views:PanelChromeHeader DockPanel.Dock="Top" Classes="terminal" Title="Консоль · ввод и вывод" UppercaseTitle="True"/>
                             <TextBox x:Name="TerminalInputBox"
                                      DockPanel.Dock="Bottom"
                                      Text="{Binding TerminalInput, Mode=TwoWay}"
@@ -84,9 +96,9 @@
                         </DockPanel>
                     </DockPanel>
                 </TabItem>
-                <TabItem Header="Build output" IsVisible="{Binding IsBuildOutputVisible}">
+                <TabItem Header="Сборка · вывод" IsVisible="{Binding IsBuildOutputVisible}">
                     <DockPanel DataContext="{Binding BuildOutputPanel}">
-                        <TextBlock DockPanel.Dock="Top" Text="Вывод сборки" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}" FontSize="11" Margin="0,0,0,4"/>
+                        <views:PanelChromeHeader DockPanel.Dock="Top" Title="Журнал сборки · MSBuild / Roslyn" UppercaseTitle="True"/>
                         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
                             <TextBox Text="{Binding BuildOutput, Mode=OneWay}"
                                      IsReadOnly="True"
@@ -99,7 +111,7 @@
                         </ScrollViewer>
                     </DockPanel>
                 </TabItem>
-                <TabItem Header="Git" IsVisible="{Binding IsGitPanelVisible}">
+                <TabItem Header="Git · статус и diff" IsVisible="{Binding IsGitPanelVisible}">
                     <Grid DataContext="{Binding GitPanel}"
                           ColumnDefinitions="280,4,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,*,Auto,120,Auto,Auto,Auto">
                         <TextBlock Grid.Row="0" Grid.ColumnSpan="3"
@@ -185,7 +197,7 @@
                                      BorderThickness="0"
                                      Watermark="Выберите строку статуса слева — покажется diff."/>
                         </ScrollViewer>
-                        <TextBlock Grid.Row="7" Grid.ColumnSpan="3" Text="git submodule status" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}" FontSize="11" Margin="0,8,0,4"/>
+                        <views:PanelChromeHeader Grid.Row="7" Grid.ColumnSpan="3" Classes="terminal" Title="git submodule status" UppercaseTitle="True" Margin="0,8,0,0"/>
                         <ScrollViewer Grid.Row="8" Grid.ColumnSpan="3" VerticalScrollBarVisibility="Auto">
                             <TextBox Text="{Binding GitSubmoduleStatusText, Mode=OneWay}"
                                      IsReadOnly="True"
@@ -196,7 +208,7 @@
                                      Foreground="{DynamicResource CascadeTheme.TerminalForeground}"
                                      BorderThickness="0"/>
                         </ScrollViewer>
-                        <TextBlock Grid.Row="9" Grid.ColumnSpan="3" Text="Сообщение коммита" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}" FontSize="11" Margin="0,4,0,4"/>
+                        <views:PanelChromeHeader Grid.Row="9" Grid.ColumnSpan="3" Classes="terminal" Title="Сообщение коммита" UppercaseTitle="True" Margin="0,4,0,0"/>
                         <TextBox Grid.Row="10" Grid.ColumnSpan="3"
                                  Text="{Binding GitCommitMessage, Mode=TwoWay}"
                                  Watermark="Сообщение коммита"
@@ -212,9 +224,9 @@
                         </StackPanel>
                     </Grid>
                 </TabItem>
-                <TabItem Header="События" IsVisible="{Binding ShowInstrumentationTabs}">
+                <TabItem Header="События · таймлайн" IsVisible="{Binding ShowInstrumentationTabs}">
                     <DockPanel>
-                        <TextBlock DockPanel.Dock="Top" Text="Лента событий (агент, сборка)" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}" FontSize="11" Margin="0,0,0,4"/>
+                        <views:PanelChromeHeader DockPanel.Dock="Top" Classes="terminal" Title="Лента событий · агент и сборка" UppercaseTitle="True"/>
                         <DockPanel DataContext="{Binding InstrumentationPanel}" x:DataType="feat:InstrumentationPanelViewModel">
                             <TextBlock DockPanel.Dock="Top" Text="События появятся при работе агента и сборке."
                                        IsVisible="{Binding !HasEventTimeline}"
@@ -239,9 +251,9 @@
                         </DockPanel>
                     </DockPanel>
                 </TabItem>
-                <TabItem Header="Тесты" IsVisible="{Binding ShowInstrumentationTabs}">
+                <TabItem Header="Тесты · результаты" IsVisible="{Binding ShowInstrumentationTabs}">
                     <DockPanel>
-                        <TextBlock DockPanel.Dock="Top" Text="{Binding LastTestSummary, StringFormat=Последний прогон: {0}}" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}" FontSize="11" Margin="0,0,0,4"/>
+                        <views:PanelChromeHeader DockPanel.Dock="Top" Classes="terminal" Title="{Binding LastTestSummary, StringFormat=Последний прогон: {0}}" UppercaseTitle="False"/>
                         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
                                       DataContext="{Binding InstrumentationPanel}" x:DataType="feat:InstrumentationPanelViewModel">
                             <TextBox Text="{Binding TestResultsOutput, Mode=OneWay}"
@@ -256,10 +268,10 @@
                         </ScrollViewer>
                     </DockPanel>
                 </TabItem>
-                <TabItem Header="Отладка" IsVisible="{Binding ShowInstrumentationTabs}">
+                <TabItem Header="Отладка · стек" IsVisible="{Binding ShowInstrumentationTabs}">
                     <Grid DataContext="{Binding InstrumentationPanel}" x:DataType="feat:InstrumentationPanelViewModel"
                           RowDefinitions="Auto,*,4,Auto,*" Margin="0,4,0,0">
-                        <TextBlock Grid.Row="0" Text="Стек вызовов" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}" FontSize="11" Margin="0,0,0,4"/>
+                        <views:PanelChromeHeader Grid.Row="0" Classes="terminal" Title="Стек вызовов · отладчик" UppercaseTitle="True"/>
                         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                             <ItemsControl ItemsSource="{Binding DebugStackFrames}">
                                 <ItemsControl.ItemTemplate>
@@ -273,7 +285,7 @@
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
                         </ScrollViewer>
-                        <TextBlock Grid.Row="3" Text="Переменные" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}" FontSize="11" Margin="0,8,0,4"/>
+                        <views:PanelChromeHeader Grid.Row="3" Classes="terminal" Title="Локальные переменные" UppercaseTitle="True" Margin="0,8,0,0"/>
                         <ScrollViewer Grid.Row="4" VerticalScrollBarVisibility="Auto">
                             <ItemsControl ItemsSource="{Binding DebugVariables}">
                                 <ItemsControl.ItemTemplate>

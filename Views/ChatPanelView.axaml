@@ -2,8 +2,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:CascadeIDE.ViewModels"
              xmlns:feat="using:CascadeIDE.Features.Instrumentation"
+             xmlns:views="using:CascadeIDE.Views"
+             xmlns:lang="using:CascadeIDE.Lang"
              x:Class="CascadeIDE.Views.ChatPanelView"
              x:Name="ChatPanelRoot"
+             Classes.power="{Binding IsPowerMode}"
              x:DataType="vm:MainWindowViewModel">
     <UserControl.Styles>
         <Style Selector="Border.traceStepCard">
@@ -51,15 +54,66 @@
             <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.EditorColumnBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
         </Style>
+        <Style Selector="UserControl">
+            <Setter Property="Margin" Value="0"/>
+        </Style>
+        <Style Selector="UserControl.power">
+            <Setter Property="Margin" Value="6,6,8,6"/>
+        </Style>
+        <Style Selector="Border#ChatIslandInner">
+            <Setter Property="Background" Value="{DynamicResource CascadeTheme.ChatPanelBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="8"/>
+            <Setter Property="Margin" Value="0"/>
+        </Style>
+        <Style Selector="Border#ChatIslandInner.power">
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="BoxShadow" Value="0 0 28 0 #668A65FF, 0 0 42 0 #4400C8E8, 0 4 22 0 #32000000"/>
+        </Style>
+        <Style Selector="UserControl.power Border.powerCockpitBlock">
+            <Setter Property="CornerRadius" Value="10"/>
+        </Style>
+        <Style Selector="UserControl.power Border.traceStepCard">
+            <Setter Property="CornerRadius" Value="8"/>
+        </Style>
+        <!-- Отдельная панель уровней (Power): ниже трассы, свой фон и кайма -->
+        <Style Selector="Border.safetyLevelIsland">
+            <Setter Property="Background" Value="{DynamicResource CascadeTheme.PowerSafetyDockBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.PowerNeonBorder}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="16"/>
+            <Setter Property="Padding" Value="14,14"/>
+            <Setter Property="Margin" Value="0,14,0,0"/>
+            <Setter Property="BoxShadow" Value="0 14 36 0 #70000000, 0 0 0 1 #3000F0FF, inset 0 1 0 0 #1CFFFFFF"/>
+        </Style>
+        <!-- Объёмные «плитки» L1–L3: тень + подсветка сверху -->
+        <Style Selector="Border.powerSafetyTierFace">
+            <Setter Property="CornerRadius" Value="14"/>
+            <Setter Property="Padding" Value="14,20"/>
+            <Setter Property="MinHeight" Value="92"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BoxShadow" Value="0 14 32 0 #A0000000, 0 6 16 0 #58000000, inset 0 2 0 0 #35FFFFFF"/>
+        </Style>
     </UserControl.Styles>
-    <Border Background="{DynamicResource CascadeTheme.ChatPanelBackground}" Padding="8">
+    <Panel>
+        <Border IsVisible="{Binding IsPowerMode}"
+                IsHitTestVisible="False"
+                Background="{DynamicResource CascadeTheme.PowerChatIslandFrameBrush}"
+                CornerRadius="14"/>
+        <Border x:Name="ChatIslandInner"
+                ZIndex="1"
+                Classes.power="{Binding IsPowerMode}">
         <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,4,96,Auto">
             <!-- Focus: план (чеклист) -->
             <Border Grid.Row="0" IsVisible="{Binding IsFocusMode}" Classes="modeCard chatPanelSection">
                 <StackPanel Spacing="6">
-                    <TextBlock Classes="modeCardTitle" Text="План"/>
+                    <views:PanelChromeHeader Title="{Binding ChatPanel_PlanHeader, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}" Classes="compact"/>
                     <TextBlock IsVisible="{Binding !HasFocusPlanItems}"
-                               Text="Шаги плана появятся из задачи или чата."
+                               Text="{Binding ChatPanel_PlanEmptyHint, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}"
                                Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
                                FontSize="11"/>
                     <ScrollViewer IsVisible="{Binding HasFocusPlanItems}"
@@ -82,7 +136,7 @@
             <!-- Focus: один следующий шаг -->
             <Border Grid.Row="1" IsVisible="{Binding IsFocusMode}" Classes="modeCard chatPanelSection">
                 <StackPanel Spacing="4">
-                    <TextBlock Classes="modeCardTitle" Text="Следующий шаг"/>
+                    <views:PanelChromeHeader Title="{Binding ChatPanel_NextActionHeader, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}" Classes="compact"/>
                     <TextBlock Text="{Binding NextActionSummary}"
                                TextWrapping="Wrap"
                                Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
@@ -91,7 +145,7 @@
 
             <Border Grid.Row="2" IsVisible="{Binding ShowAgentOperationsBlock}" Classes="modeCard chatPanelSection">
                 <StackPanel Spacing="6">
-                    <TextBlock Classes="modeCardTitle" Text="Agent Operations"/>
+                    <views:PanelChromeHeader Title="{Binding ChatPanel_AgentOpsHeader, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}" Classes="compact"/>
                     <TextBlock Text="{Binding ActiveObjective}"
                                TextWrapping="Wrap"
                                MaxLines="2"
@@ -100,7 +154,7 @@
 
                     <StackPanel DataContext="{Binding InstrumentationPanel}" x:DataType="feat:InstrumentationPanelViewModel">
                         <TextBlock IsVisible="{Binding !HasAgentToolCalls}"
-                                   Text="Операции появятся после запуска агента."
+                                   Text="{Binding ChatPanel_AgentOpsEmptyHint, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}"
                                    Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
                                    FontSize="11"/>
 
@@ -145,27 +199,27 @@
             </Border>
             <Border Grid.Row="3" IsVisible="{Binding IsFocusMode}" Classes="modeCard chatPanelSection">
                 <StackPanel Spacing="6">
-                    <TextBlock Classes="modeCardTitle" Text="Подтверждение шага"/>
-                    <TextBlock Text="Подтвердите или отмените предложенное действие агента."
+                    <views:PanelChromeHeader Title="{Binding ChatPanel_ConfirmHeader, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}" Classes="compact"/>
+                    <TextBlock Text="{Binding ChatPanel_ConfirmHint, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}"
                                TextWrapping="Wrap"
                                FontSize="11"
                                Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
                     <StackPanel Orientation="Horizontal" Spacing="6">
-                        <Button Content="Подтвердить" Command="{Binding ConfirmFocusStepCommand}"/>
-                        <Button Content="Отменить" Command="{Binding CancelFocusStepCommand}"/>
+                        <Button Content="{Binding ChatPanel_ConfirmButton, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}" Command="{Binding ConfirmFocusStepCommand}"/>
+                        <Button Content="{Binding ChatPanel_CancelButton, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}" Command="{Binding CancelFocusStepCommand}"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Spacing="6">
-                        <Button Content="Объяснить шаг" Command="{Binding ExplainCurrentStepCommand}"/>
-                        <Button Content="Аварийная остановка" Command="{Binding EmergencyStopCommand}"/>
+                        <Button Content="{Binding ChatPanel_ExplainStep, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}" Command="{Binding ExplainCurrentStepCommand}"/>
+                        <Button Content="{Binding ChatPanel_EmergencyStop, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}" Command="{Binding EmergencyStopCommand}"/>
                     </StackPanel>
                 </StackPanel>
             </Border>
             <Border Grid.Row="4" IsVisible="{Binding ShowAgentTrace}" Classes="modeCard chatPanelSection powerCockpitBlock">
                 <StackPanel Spacing="6">
-                    <TextBlock Classes="modeCardTitle" Text="Agent Trace Timeline"/>
+                    <views:PanelChromeHeader Title="{Binding ChatPanel_TraceHeader, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}" Classes="compact" UppercaseTitle="True"/>
                     <StackPanel DataContext="{Binding InstrumentationPanel}" x:DataType="feat:InstrumentationPanelViewModel" Spacing="6">
                         <TextBlock IsVisible="{Binding !HasAgentTraceSteps}"
-                                   Text="Трасса шагов пока пуста — шаги добавят агент или MCP (AppendAgentTraceStep)."
+                                   Text="{Binding ChatPanel_TraceEmptyHint, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}"
                                    Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
                                    FontSize="11"
                                    TextWrapping="Wrap"/>
@@ -200,10 +254,10 @@
                                                            TextWrapping="Wrap"
                                                            Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
                                                 <StackPanel Orientation="Horizontal" Spacing="6">
-                                                    <Button Content="Объяснить шаг"
+                                                    <Button Content="{Binding ChatPanel_ExplainStep, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}"
                                                             Command="{Binding #ChatPanelRoot.DataContext.ExplainTraceStepCommand}"
                                                             CommandParameter="{Binding}"/>
-                                                    <Button Content="Откат"
+                                                    <Button Content="{Binding ChatPanel_TraceRollback, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}"
                                                             Command="{Binding #ChatPanelRoot.DataContext.RollbackTraceStepCommand}"
                                                             CommandParameter="{Binding}"/>
                                                 </StackPanel>
@@ -216,27 +270,32 @@
                     </StackPanel>
                 </StackPanel>
             </Border>
-            <Border Grid.Row="5" IsVisible="{Binding ShowSafetyControls}" Classes="modeCard chatPanelSection powerCockpitBlock">
-                <StackPanel Spacing="8">
-                    <TextBlock Classes="modeCardTitle" Text="Safety Level Control"/>
-
-                    <!-- Power: крупные карточки L1/L2/L3 + заметный Emergency -->
-                    <StackPanel IsVisible="{Binding IsPowerMode}" Spacing="8">
+            <!-- Безопасность: в Power — отдельный «док» под трасой; иначе компактная карточка -->
+            <Border Grid.Row="5"
+                    IsVisible="{Binding ShowSafetyControls}"
+                    Classes="chatPanelSection">
+                <Grid>
+                <Border IsVisible="{Binding IsPowerMode}" Classes="safetyLevelIsland">
+                    <StackPanel Spacing="12">
+                        <views:PanelChromeHeader Title="{Binding ChatPanel_SafetyDockTitlePower, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}"
+                                                 UppercaseTitle="True"
+                                                 ShowEmergencyStop="True"
+                                                 EmergencyStopCommand="{Binding EmergencyStopCommand}"/>
                         <TextBlock Text="{Binding SafetyLevelDescription}"
                                    TextWrapping="Wrap"
-                                   MaxLines="2"
+                                   MaxLines="3"
                                    TextTrimming="CharacterEllipsis"
                                    FontSize="11"
                                    Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
                         <UniformGrid Columns="3">
-                            <!-- Активный уровень: внешнее неоновое кольцо (как на мокапе) -->
                             <Grid>
-                                <Border CornerRadius="12"
-                                        Padding="2"
-                                        Margin="-2"
-                                        BorderThickness="2"
+                                <Border CornerRadius="16"
+                                        Padding="3"
+                                        Margin="-4"
+                                        BorderThickness="3"
                                         BorderBrush="{DynamicResource CascadeTheme.PowerNeonAccent}"
                                         Background="Transparent"
+                                        BoxShadow="0 0 28 0 #A0BF5FFF, 0 0 44 0 #50D080FF"
                                         IsVisible="{Binding IsSafetyL1}"/>
                                 <Button Command="{Binding SetSafetyL1Command}"
                                         HorizontalAlignment="Stretch"
@@ -244,32 +303,31 @@
                                         Background="Transparent"
                                         BorderThickness="0"
                                         Padding="0">
-                                    <Border CornerRadius="10"
-                                            Padding="8,8"
-                                            MinHeight="58"
-                                            BorderThickness="2"
+                                    <Border Classes="powerSafetyTierFace"
                                             BorderBrush="{DynamicResource CascadeTheme.PowerNeonBorder}"
                                             Background="{DynamicResource CascadeTheme.PowerSafetyL1}"
                                             Opacity="{Binding SafetyL1Opacity}">
-                                        <StackPanel Spacing="2">
-                                            <TextBlock Text="L1"
-                                                       FontSize="16"
+                                        <StackPanel Spacing="4" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding ChatPanel_SafetyTierL1, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}"
+                                                       FontSize="20"
                                                        FontWeight="Bold"
                                                        Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
-                                            <TextBlock Text="READ-ONLY"
-                                                       FontSize="10"
+                                            <TextBlock Text="{Binding ChatPanel_SafetyTierL1Subtitle, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}"
+                                                       FontSize="11"
+                                                       FontWeight="SemiBold"
                                                        Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
                                         </StackPanel>
                                     </Border>
                                 </Button>
                             </Grid>
                             <Grid>
-                                <Border CornerRadius="12"
-                                        Padding="2"
-                                        Margin="-2"
-                                        BorderThickness="2"
+                                <Border CornerRadius="16"
+                                        Padding="3"
+                                        Margin="-4"
+                                        BorderThickness="3"
                                         BorderBrush="{DynamicResource CascadeTheme.PowerNeonAccent}"
                                         Background="Transparent"
+                                        BoxShadow="0 0 28 0 #A0BF5FFF, 0 0 44 0 #50D080FF"
                                         IsVisible="{Binding IsSafetyL2}"/>
                                 <Button Command="{Binding SetSafetyL2Command}"
                                         HorizontalAlignment="Stretch"
@@ -277,32 +335,31 @@
                                         Background="Transparent"
                                         BorderThickness="0"
                                         Padding="0">
-                                    <Border CornerRadius="10"
-                                            Padding="8,8"
-                                            MinHeight="58"
-                                            BorderThickness="2"
+                                    <Border Classes="powerSafetyTierFace"
                                             BorderBrush="{DynamicResource CascadeTheme.PowerNeonBorder}"
                                             Background="{DynamicResource CascadeTheme.PowerSafetyL2}"
                                             Opacity="{Binding SafetyL2Opacity}">
-                                        <StackPanel Spacing="2">
-                                            <TextBlock Text="L2"
-                                                       FontSize="16"
+                                        <StackPanel Spacing="4" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding ChatPanel_SafetyTierL2, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}"
+                                                       FontSize="20"
                                                        FontWeight="Bold"
                                                        Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
-                                            <TextBlock Text="CONFIRM"
-                                                       FontSize="10"
+                                            <TextBlock Text="{Binding ChatPanel_SafetyTierL2Subtitle, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}"
+                                                       FontSize="11"
+                                                       FontWeight="SemiBold"
                                                        Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
                                         </StackPanel>
                                     </Border>
                                 </Button>
                             </Grid>
                             <Grid>
-                                <Border CornerRadius="12"
-                                        Padding="2"
-                                        Margin="-2"
-                                        BorderThickness="2"
+                                <Border CornerRadius="16"
+                                        Padding="3"
+                                        Margin="-4"
+                                        BorderThickness="3"
                                         BorderBrush="{DynamicResource CascadeTheme.PowerNeonAccent}"
                                         Background="Transparent"
+                                        BoxShadow="0 0 32 0 #B0D080FF, 0 0 52 0 #60FF6B9D"
                                         IsVisible="{Binding IsSafetyL3}"/>
                                 <Button Command="{Binding SetSafetyL3Command}"
                                         HorizontalAlignment="Stretch"
@@ -310,74 +367,70 @@
                                         Background="Transparent"
                                         BorderThickness="0"
                                         Padding="0">
-                                    <Border CornerRadius="10"
-                                            Padding="8,8"
-                                            MinHeight="58"
-                                            BorderThickness="2"
+                                    <Border Classes="powerSafetyTierFace"
                                             BorderBrush="{DynamicResource CascadeTheme.PowerNeonBorder}"
                                             Background="{DynamicResource CascadeTheme.PowerSafetyL3}"
                                             Opacity="{Binding SafetyL3Opacity}">
-                                        <StackPanel Spacing="2">
-                                            <TextBlock Text="L3"
-                                                       FontSize="16"
+                                        <StackPanel Spacing="4" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding ChatPanel_SafetyTierL3, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}"
+                                                       FontSize="20"
                                                        FontWeight="Bold"
                                                        Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
-                                            <TextBlock Text="AUTONOMOUS"
-                                                       FontSize="10"
+                                            <TextBlock Text="{Binding ChatPanel_SafetyTierL3Subtitle, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}"
+                                                       FontSize="11"
+                                                       FontWeight="SemiBold"
                                                        Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
                                         </StackPanel>
                                     </Border>
                                 </Button>
                             </Grid>
                         </UniformGrid>
-                        <Button Content="Emergency stop"
-                                Command="{Binding EmergencyStopCommand}"
-                                HorizontalAlignment="Stretch"
-                                Padding="10,8"
-                                FontWeight="Bold"
-                                Foreground="#FFFFFF"
-                                Background="{DynamicResource CascadeTheme.PowerEmergency}"/>
                     </StackPanel>
+                </Border>
 
-                    <!-- Balanced / Focus: компактные кнопки -->
-                    <StackPanel IsVisible="{Binding !IsPowerMode}" Spacing="6">
-                        <StackPanel Orientation="Horizontal" Spacing="6">
-                            <Button Content="L1" Command="{Binding SetSafetyL1Command}"/>
-                            <Button Content="L2" Command="{Binding SetSafetyL2Command}"/>
-                            <Button Content="L3" Command="{Binding SetSafetyL3Command}"/>
-                            <TextBlock Text="{Binding SafetyLevel}"
-                                       VerticalAlignment="Center"
-                                       Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}"
-                                       Margin="6,0,0,0"/>
+                <Border IsVisible="{Binding !IsPowerMode}" Classes="modeCard">
+                    <StackPanel Spacing="8">
+                        <views:PanelChromeHeader Title="{Binding ChatPanel_SafetyCompactHeader, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}" Classes="compact" UppercaseTitle="True"/>
+                        <StackPanel Spacing="6">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <Button Content="{Binding ChatPanel_SafetyTierL1, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}" Command="{Binding SetSafetyL1Command}"/>
+                                <Button Content="{Binding ChatPanel_SafetyTierL2, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}" Command="{Binding SetSafetyL2Command}"/>
+                                <Button Content="{Binding ChatPanel_SafetyTierL3, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}" Command="{Binding SetSafetyL3Command}"/>
+                                <TextBlock Text="{Binding SafetyLevel}"
+                                           VerticalAlignment="Center"
+                                           Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}"
+                                           Margin="6,0,0,0"/>
+                            </StackPanel>
+                            <Button Content="{Binding ChatPanel_EmergencyStopCompact, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}"
+                                    Command="{Binding EmergencyStopCommand}"
+                                    HorizontalAlignment="Left"/>
                         </StackPanel>
-                        <Button Content="Emergency stop"
-                                Command="{Binding EmergencyStopCommand}"
-                                HorizontalAlignment="Left"/>
                     </StackPanel>
-                </StackPanel>
+                </Border>
+                </Grid>
             </Border>
-            <GridSplitter Grid.Row="6" Height="4" ResizeDirection="Rows" Background="{DynamicResource CascadeTheme.ChatPanelBackground}" IsVisible="{Binding IsChatPanelExpanded}"/>
+            <GridSplitter Grid.Row="6" Height="4" ResizeDirection="Rows" Background="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}" IsVisible="{Binding IsChatPanelExpanded}"/>
 
             <DockPanel Grid.Row="7">
-                <Button DockPanel.Dock="Left" Content="▶ Чат" Command="{Binding ToggleChatPanelCommand}"
+                <Button DockPanel.Dock="Left" Content="{Binding ChatPanel_ChatExpandButton, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}" Command="{Binding ToggleChatPanelCommand}"
                         IsVisible="{Binding !IsChatPanelExpanded}"
-                        ToolTip.Tip="Развернуть чат" Padding="6,8" Margin="0,0,4,0"
+                        ToolTip.Tip="{Binding ChatPanel_ChatExpandTooltip, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}" Padding="6,8" Margin="0,0,4,0"
                         VerticalAlignment="Center"/>
                 <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,4" IsVisible="{Binding IsChatPanelExpanded}">
-                    <Button Content="{Binding ChatPanelToggleButtonText}" Command="{Binding ToggleChatPanelCommand}" ToolTip.Tip="Свернуть чат" Padding="4,2"/>
+                    <Button Content="{Binding ChatPanelToggleButtonText}" Command="{Binding ToggleChatPanelCommand}" ToolTip.Tip="{Binding ChatPanel_ChatCollapseTooltip, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}" Padding="4,2"/>
                 </StackPanel>
                 <Border DockPanel.Dock="Top"
                         DataContext="{Binding ChatPanel}"
                         Classes="chatLoadingBanner"
                         IsVisible="{Binding IsChatLoading}">
-                    <TextBlock Text="Ответ агента формируется…"
+                    <TextBlock Text="{Binding ChatPanel_AgentTyping, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}"
                                Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
                                FontSize="11"/>
                 </Border>
                 <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding IsChatPanelExpanded}">
                     <StackPanel DataContext="{Binding ChatPanel}" Spacing="6">
                         <TextBlock IsVisible="{Binding !HasChatMessages}"
-                                   Text="Сообщений пока нет — напишите запрос ниже."
+                                   Text="{Binding ChatPanel_NoMessagesYet, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}"
                                    Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
                                    FontSize="11"/>
                         <ItemsControl ItemsSource="{Binding ChatMessages}"
@@ -401,12 +454,12 @@
                 <StackPanel DataContext="{Binding ChatPanel}" Spacing="4">
                     <TextBox x:Name="ChatInputBox"
                              Text="{Binding ChatInput, Mode=TwoWay}"
-                             Watermark="Сообщение…"
+                             Watermark="{Binding ChatPanel_MessageWatermark, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}"
                              MinHeight="40"
                              AcceptsReturn="True"
                              IsEnabled="{Binding !IsChatLoading}"
                              TextWrapping="Wrap"/>
-                    <Button Content="Отправить"
+                    <Button Content="{Binding ChatPanel_SendButton, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}"
                             Command="{Binding SendChatCommand}"
                             IsEnabled="{Binding !IsChatLoading}"
                             Background="{DynamicResource CascadeTheme.SendButtonBackground}"
@@ -414,5 +467,6 @@
                 </StackPanel>
             </StackPanel>
         </Grid>
-    </Border>
+        </Border>
+    </Panel>
 </UserControl>

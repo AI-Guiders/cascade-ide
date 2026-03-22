@@ -103,13 +103,16 @@
                     <Button Content="Fix failing tests" Command="{Binding FixFailingTestsCommand}" IsVisible="{Binding ShowQuickActions}" Margin="0,0,6,0"/>
                     <Button Content="Investigate nullref" Command="{Binding InvestigateNullrefCommand}" IsVisible="{Binding ShowQuickActions}" Margin="0,0,6,0"/>
                     <Button Content="Prepare commit" Command="{Binding PrepareCommitCommand}" IsVisible="{Binding ShowQuickActions}" Margin="0,0,6,0"/>
-                    <Border Classes="modeCard" Padding="6,2" Margin="0,0,6,0" IsVisible="{Binding IsComplexityBadgeVisible}">
+                    <Border Classes="modeCard" Padding="6,2" Margin="0,0,6,0" IsVisible="{Binding IsComplexityBadgeVisible}"
+                            ToolTip.Tip="Прокси по концепту: число строк текущего файла на диске (обновляется при смене документа), не цикломатика.">
                         <TextBlock Text="{Binding ComplexityBadge, StringFormat='{}Complexity: {0}'}" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
                     </Border>
-                    <Border Classes="modeCard" Padding="6,2" Margin="0,0,6,0" IsVisible="{Binding IsImpactedTestsBadgeVisible}">
+                    <Border Classes="modeCard" Padding="6,2" Margin="0,0,6,0" IsVisible="{Binding IsImpactedTestsBadgeVisible}"
+                            ToolTip.Tip="Упавшие тесты в последнем прогоне dotnet test (IDE/MCP).">
                         <TextBlock Text="{Binding ImpactedTestsBadge, StringFormat='{}Impacted tests: {0}'}" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
                     </Border>
-                    <Border Classes="modeCard" Padding="6,2" Margin="0,0,6,0" IsVisible="{Binding IsFilesChangedBadgeVisible}">
+                    <Border Classes="modeCard" Padding="6,2" Margin="0,0,6,0" IsVisible="{Binding IsFilesChangedBadgeVisible}"
+                            ToolTip.Tip="Число путей в git status --short (изменённые/новые), синхронно со сводкой Git.">
                         <TextBlock Text="{Binding FilesChangedBadge, StringFormat='{}Files changed: {0}'}" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
                     </Border>
                 </WrapPanel>

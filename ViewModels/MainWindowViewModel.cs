@@ -1,10 +1,14 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
+using System.IO;
 using System.Text;
+using System.Threading;
 using System.Text.Json;
 using System.Windows.Input;
 using System.Xml.Linq;
+using Avalonia.Media;
 using Avalonia.Threading;
 using CascadeIDE.Features.Build;
 using CascadeIDE.Features.Chat;
@@ -13,6 +17,7 @@ using CascadeIDE.Features.Git;
 using CascadeIDE.Features.Instrumentation;
 using CascadeIDE.Features.Terminal;
 using CascadeIDE.Models;
+using CascadeIDE.Lang;
 using DotNetBuildTestParsers;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -345,6 +350,9 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private readonly List<(string FilePath, int Line)> _debuggerBreakpoints = [];
     private FileSystemWatcher? _breakpointsFileWatcher;
     private CancellationTokenSource? _openFileDebounceCts;
+    private CancellationTokenSource? _uiModeBloomCts;
+    /// <summary>Предыдущий применённый режим UI — чтобы не давать bloom при первом применении и при повторной установке того же значения.</summary>
+    private string? _lastAppliedUiModeForBloomEffects;
     private long _solutionLoadVersion;
     private string? _lastBuildBinlogPath;
     private bool _isSwitchingDocument;
@@ -612,6 +620,8 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     [NotifyPropertyChangedFor(nameof(ShowInstrumentationLayoutMenu))]
     [NotifyPropertyChangedFor(nameof(IsBottomPanelVisible))]
     [NotifyPropertyChangedFor(nameof(WindowTitle))]
+    [NotifyPropertyChangedFor(nameof(MainWorkspaceTelemetryColumnSpan))]
+    [NotifyPropertyChangedFor(nameof(ChatPanelMainGridRowSpan))]
     private string _uiMode = "Balanced";
 
     /// <summary>Заголовок главного окна (в Power — подпись «Autonomous Agent Cockpit»).</summary>
@@ -630,20 +640,39 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     public bool ShowAgentOperationsBlock => IsBalancedMode;
     public bool ShowAgentTrace => IsPowerMode;
     public bool ShowPowerTelemetry => IsPowerMode;
-    public bool ShowSafetyControls => IsPowerMode;
+    /// <summary>Карточка уровня безопасности: в Power — крупные L1–L3; в Focus/Balanced — компактные кнопки (разметка в ChatPanelView).</summary>
+    public bool ShowSafetyControls => true;
     public bool ShowTelemetryHiddenHint => ShowPowerTelemetry && !IsTerminalVisible;
     /// <summary>Полоска build/tests/debug/git — и в Focus (по концепту).</summary>
     public bool ShowTelemetryStrip => true;
+
+    /// <summary>
+    /// В Power полоса телеметрии только под колонками «решение + редактор» (сетка 0–2: дерево, сплиттер, док);
+    /// справа trace/safety тянутся вниз — как в макете Power cockpit.
+    /// </summary>
+    public int MainWorkspaceTelemetryColumnSpan =>
+        IsPowerMode && ShowTelemetryStrip ? 3 : 5;
+
+    /// <summary>В Power правая колонка занимает строку редактора и строку телеметрии (RowSpan 2).</summary>
+    public int ChatPanelMainGridRowSpan =>
+        IsPowerMode && ShowTelemetryStrip ? 2 : 1;
+    /// <summary>Короткая «кинематографичная» вспышка при смене режима UI (Opacity + кисть; разметка — MainWindow).</summary>
+    [ObservableProperty]
+    private double _uiModeBloomOpacity;
+
+    [ObservableProperty]
+    private IBrush _uiModeBloomBrush = Brushes.Transparent;
+
     public string TelemetryButtonText => IsTerminalVisible ? "Telemetry: on" : "Show telemetry";
     public bool ShowEditorGroup2 => EditorGroupCount >= 2;
     public bool ShowEditorGroup3 => EditorGroupCount >= 3;
 
-    /// <summary>Balanced/Power: нижние вкладки «События / Тесты / Отладка». В Focus всегда скрыты.</summary>
+    /// <summary>Нижние вкладки «События / Тесты / Отладка» при включённом доке — во всех режимах (в Focus детали здесь, компактная полоса — TelemetryStrip).</summary>
     public bool ShowInstrumentationTabs =>
-        !IsFocusMode && (IsBalancedMode || IsPowerMode) && IsInstrumentationDockVisible;
+        IsInstrumentationDockVisible && (IsFocusMode || IsBalancedMode || IsPowerMode);
 
-    /// <summary>Пункт меню для док-панели инструментирования (не в Focus).</summary>
-    public bool ShowInstrumentationLayoutMenu => !IsFocusMode;
+    /// <summary>Пункт меню для док-панели инструментирования (можно отключить и в Focus).</summary>
+    public bool ShowInstrumentationLayoutMenu => true;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowEditorGroup2))]
@@ -710,9 +739,9 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     public string SafetyLevelDescription =>
         SafetyLevel switch
         {
-            "L1" => "Только чтение: без автоматических правок файлов.",
-            "L2" => "Правки после явного подтверждения.",
-            "L3" => "Автономный режим: цепочка шагов без запроса.",
+            "L1" => Resources.Safety_Description_L1,
+            "L2" => Resources.Safety_Description_L2,
+            "L3" => Resources.Safety_Description_L3,
             _ => ""
         };
 
@@ -975,6 +1004,46 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         ApplyUiModeLayout(normalized, persist: true);
         if (string.Equals(normalized, "Power", StringComparison.OrdinalIgnoreCase))
             Dispatcher.UIThread.Post(RefreshWorkspaceSnapshotCore, DispatcherPriority.Background);
+
+        if (_lastAppliedUiModeForBloomEffects is not null
+            && !string.Equals(_lastAppliedUiModeForBloomEffects, normalized, StringComparison.OrdinalIgnoreCase))
+            TriggerUiModeBloom(normalized);
+        _lastAppliedUiModeForBloomEffects = normalized;
+    }
+
+    private void TriggerUiModeBloom(string normalizedMode)
+    {
+        _uiModeBloomCts?.Cancel();
+        _uiModeBloomCts = new CancellationTokenSource();
+        var ct = _uiModeBloomCts.Token;
+        UiModeBloomBrush = PickUiModeBloomBrush(normalizedMode);
+        UiModeBloomOpacity = 0;
+        _ = RunUiModeBloomAsync(ct);
+    }
+
+    private static IBrush PickUiModeBloomBrush(string mode)
+    {
+        if (string.Equals(mode, "Power", StringComparison.OrdinalIgnoreCase))
+            return new SolidColorBrush(Color.FromArgb(200, 110, 60, 210));
+        if (string.Equals(mode, "Focus", StringComparison.OrdinalIgnoreCase))
+            return new SolidColorBrush(Color.FromArgb(150, 25, 120, 185));
+        return new SolidColorBrush(Color.FromArgb(120, 255, 235, 200));
+    }
+
+    private async Task RunUiModeBloomAsync(CancellationToken ct)
+    {
+        try
+        {
+            await Task.Delay(18, ct).ConfigureAwait(false);
+            var peak = IsPowerMode ? 0.2 : IsFocusMode ? 0.13 : 0.11;
+            await Dispatcher.UIThread.InvokeAsync(() => UiModeBloomOpacity = peak);
+            await Task.Delay(300, ct).ConfigureAwait(false);
+            await Dispatcher.UIThread.InvokeAsync(() => UiModeBloomOpacity = 0);
+        }
+        catch (OperationCanceledException)
+        {
+            await Dispatcher.UIThread.InvokeAsync(() => UiModeBloomOpacity = 0);
+        }
     }
 
     public void LoadSendMessageKeyFromStorage()
@@ -1032,6 +1101,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
                 GitStagedCount = 0;
                 GitUnstagedCount = 0;
                 GitUntrackedCount = 0;
+                FilesChangedBadge = 0;
                 return;
             }
 
@@ -1040,16 +1110,17 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             GitStagedCount = parsed.Staged;
             GitUnstagedCount = parsed.Unstaged;
             GitUntrackedCount = parsed.Untracked;
+            FilesChangedBadge = parsed.ChangedPaths;
         });
     }
 
-    private static (string BranchSummary, int Staged, int Unstaged, int Untracked) ParseGitStatusShortBranch(string output)
+    private static (string BranchSummary, int Staged, int Unstaged, int Untracked, int ChangedPaths) ParseGitStatusShortBranch(string output)
     {
         // Expected first line:
         // ## main...origin/main [ahead 1]
         // Other lines: XY <path> or ?? <path>
         var branch = "";
-        int staged = 0, unstaged = 0, untracked = 0;
+        int staged = 0, unstaged = 0, untracked = 0, changedPaths = 0;
         var lines = (output ?? "")
             .Replace("\r\n", "\n")
             .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
@@ -1061,6 +1132,9 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
                 branch = line[3..].Trim();
                 continue;
             }
+
+            changedPaths++;
+
             if (line.StartsWith("??", StringComparison.Ordinal))
             {
                 untracked++;
@@ -1078,7 +1152,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
                 unstaged++;
         }
 
-        return (branch, staged, unstaged, untracked);
+        return (branch, staged, unstaged, untracked, changedPaths);
     }
 
     private void AttachBreakpointsFileWatcher(string? solutionPath)
@@ -1192,6 +1266,37 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         SelectedDocument.IsDirty = !string.Equals(SelectedDocument.Content, SelectedDocument.OriginalContent, StringComparison.Ordinal);
         OnPropertyChanged(nameof(EditorTextGroup2));
         OnPropertyChanged(nameof(EditorTextGroup3));
+    }
+
+    partial void OnCurrentFilePathChanged(string? value) => RefreshComplexityBadgeFromCurrentFile();
+
+    /// <summary>Прокси «сложности» для task cockpit: число строк текущего файла на диске (при переключении документа).</summary>
+    private void RefreshComplexityBadgeFromCurrentFile()
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(CurrentFilePath) || !File.Exists(CurrentFilePath))
+            {
+                ComplexityBadge = 0;
+                return;
+            }
+
+            const int maxLines = 95_000;
+            var lines = 0;
+            using var sr = new StreamReader(CurrentFilePath, Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
+            while (sr.ReadLine() is not null)
+            {
+                lines++;
+                if (lines >= maxLines)
+                    break;
+            }
+
+            ComplexityBadge = lines;
+        }
+        catch
+        {
+            ComplexityBadge = 0;
+        }
     }
 
     private void OpenOrActivateDocument(string filePath)
@@ -1471,6 +1576,34 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private async Task ApplyCursorLikeThemeAsync()
     {
         await Services.UiThemeApply.ApplyOnUiThreadAsync(Services.UiThemeApply.GetCursorLikeThemeJson());
+    }
+
+    [RelayCommand]
+    private void SetUiLanguage(string? cultureName)
+    {
+        if (string.IsNullOrWhiteSpace(cultureName))
+            return;
+        try
+        {
+            var culture = CultureInfo.GetCultureInfo(cultureName.Trim());
+            LocViewModel.Current?.SetCulture(culture);
+            OnPropertyChanged(nameof(SafetyLevelDescription));
+            _settings.UiCultureName = culture.Name;
+            SaveSettingsIfChanged();
+        }
+        catch (CultureNotFoundException)
+        {
+            // игнорируем неверный параметр меню
+        }
+    }
+
+    [RelayCommand]
+    private void ResetUiLanguageToSystem()
+    {
+        _settings.UiCultureName = "";
+        UiCulture.ApplyFromSystem();
+        OnPropertyChanged(nameof(SafetyLevelDescription));
+        SaveSettingsIfChanged();
     }
 
     [RelayCommand]
@@ -3027,6 +3160,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             Dispatcher.UIThread.Post(() =>
             {
                 LastTestSummary = $"{parsed.Passed}/{parsed.Total} passed, {parsed.Failed} failed";
+                ImpactedTestsBadge = parsed.Failed;
                 const int maxLogChars = 120_000;
                 var stamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
                 var block = $"=== {stamp} ===\n{LastTestSummary}\n\n{outStr}\n\n";
