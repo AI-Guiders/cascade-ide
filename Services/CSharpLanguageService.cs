@@ -266,7 +266,11 @@ public sealed class CSharpLanguageService
         }
     }
 
-    /// <summary>Диагностики по файлу (ошибки и выбранные предупреждения) для минимизации контекста.</summary>
+    /// <summary>
+    /// Диагностики по файлу для Problems / MCP: только <b>лексика и синтаксис</b> (парсер Roslyn).
+    /// Полная <c>CSharpCompilation</c> у нас без ссылок на пакеты и соседние файлы проекта — семантические
+    /// ошибки (CS0246 и т.д.) были бы ложными при успешной сборке MSBuild. Семантика — из вывода сборки.
+    /// </summary>
     public IReadOnlyList<Diagnostic> GetDiagnosticsForFile(string filePath, string sourceText, CancellationToken ct = default)
     {
         if (string.IsNullOrEmpty(filePath) || !filePath.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
@@ -274,17 +278,18 @@ public sealed class CSharpLanguageService
         try
         {
             var text = SourceText.From(sourceText);
-            var (comp, tree) = GetOrCreateCompilationAndTree(filePath, text, ct);
-            var all = comp.GetDiagnostics(ct);
+            var tree = CSharpSyntaxTree.ParseText(text, path: filePath, cancellationToken: ct);
             var list = new List<Diagnostic>();
-            foreach (var d in all)
+            foreach (var d in tree.GetDiagnostics(ct))
             {
-                if (d.Location.SourceTree?.FilePath != filePath) continue;
+                if (d.Location.SourceTree != tree)
+                    continue;
                 if (d.Severity == DiagnosticSeverity.Error)
                     list.Add(d);
                 else if (d.Severity == DiagnosticSeverity.Warning && list.Count < 50)
                     list.Add(d);
             }
+
             return list;
         }
         catch

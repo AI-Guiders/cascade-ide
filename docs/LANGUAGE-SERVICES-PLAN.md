@@ -12,7 +12,11 @@
 - **In-process Roslyn** (один файл, кэш):
   - `CSharpLanguageService`: completion (члены после `.`, ключевые слова, LookupSymbols), signature help, подсветка вхождений в текущем файле.
   - Кэш по (path, textHash, line, column); сброс при смене файла/решения.
-  - `EditorIntelligence`: триггеры (`.` / Ctrl+Space), debounce, Popup для completion и signature, IBackgroundRenderer для highlight.
+  - `EditorIntelligence`: триггеры (`.` / Ctrl+Space), debounce, Popup для completion и signature, IBackgroundRenderer для highlight вхождений в текущем файле (без дублирования диагностик в intelligence).
+- **Диагностики по всем открытым `.cs`:** `WorkspaceDiagnosticsCoordinator` — debounce ~400 ms, кэш по пути, событие `DiagnosticsChanged`, список для панели Problems (`ProblemsPanelViewModel`). В `CSharpLanguageService.GetDiagnosticsForFile` — **только парсер** (синтаксис/лексика), без семантики однофайловой «скретч»-компиляции, чтобы не было ложных CS0246 при успешном `dotnet build`.
+- **Редактор:** на каждой вкладке `DockDocumentView` ставит `EditorDiagnosticBackgroundRenderer` + подписка на координатор (не только активная вкладка); tooltip по наведению на полосу (`HitTest`).
+- **LSP (выбор провайдера):** настройки `CSharpLspProvider` (ParseOnly / OmniSharp / CSharpLs / Custom), stdio JSON-RPC, `CSharpLspDiagnosticsHost` + `WorkspaceDiagnosticsCoordinator.SetLspDiagnosticsHost`. Перезапуск при смене решения или настроек.
+- **Контракт:** `Services/Lsp/ILspDiagnosticSource.cs`.
 - Редактор: AvaloniaEdit, TextMate для подсветки синтаксиса.
 - Загрузка решения и файлов — в фоне (LoadSolutionAsync, LoadFileContentAsync).
 

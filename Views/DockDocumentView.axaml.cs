@@ -1,9 +1,12 @@
 using System;
 using System.ComponentModel;
 using System.Linq;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Threading;
 using AvaloniaEdit;
+using AvaloniaEdit.Rendering;
 using CascadeIDE.Services;
 using CascadeIDE.ViewModels;
 
@@ -18,6 +21,12 @@ public partial class DockDocumentView : UserControl
     private PropertyChangedEventHandler? _vmHandler;
 
     private bool _renderersInstalled;
+    private EditorDiagnosticBackgroundRenderer? _diagRenderer;
+    private Action? _diagHubHandler;
+    private bool _diagPointerHooked;
+    private DispatcherTimer? _diagTipDebounce;
+    private Point _lastPointerInTextView;
+    private string? _lastTipText;
 
     public DockDocumentView()
     {
@@ -45,7 +54,6 @@ public partial class DockDocumentView : UserControl
         if (_editor is null)
             return;
 
-        // Каждая вкладка — свой Document; VM.EditorText только у активной. Без этого неактивные вкладки остаются пустыми.
         _suppress = true;
         try
         {
@@ -79,21 +87,50 @@ public partial class DockDocumentView : UserControl
         }
 
         SyncFromVmIfActive();
+        InstallVisualAdornersOnce();
         UpdateMcpProvidersIfActive();
     }
 
     private void Teardown()
     {
+        _diagTipDebounce?.Stop();
+        _diagTipDebounce = null;
+
         if (_editor is not null)
+        {
+            if (_diagPointerHooked)
+            {
+                _editor.TextArea.PointerMoved -= OnPointerMovedDiagnosticTip;
+                _editor.TextArea.PointerExited -= OnPointerExitedDiagnosticTip;
+                _diagPointerHooked = false;
+            }
+
             _editor.Document.Changed -= OnEditorDocumentChanged;
+
+            if (_vm?.WorkspaceDiagnostics is not null && _diagHubHandler is not null)
+                _vm.WorkspaceDiagnostics.DiagnosticsChanged -= _diagHubHandler;
+            _diagHubHandler = null;
+
+            if (_renderersInstalled && _editor.TextArea.TextView.BackgroundRenderers is { } br)
+            {
+                for (var i = br.Count - 1; i >= 0; i--)
+                {
+                    if (br[i] is BreakpointLineRenderer or DebugCurrentLineRenderer or EditorDiagnosticBackgroundRenderer)
+                        br.RemoveAt(i);
+                }
+            }
+        }
+
         if (_vm is not null && _vmHandler is not null)
             _vm.PropertyChanged -= _vmHandler;
 
+        _diagRenderer = null;
         _editor = null;
         _vm = null;
         _docVm = null;
         _vmHandler = null;
         _renderersInstalled = false;
+        _lastTipText = null;
     }
 
     private bool IsActive()
@@ -103,6 +140,101 @@ public partial class DockDocumentView : UserControl
 
         return ReferenceEquals(_vm.DockActiveDocument, _docVm)
                || string.Equals(_vm.CurrentFilePath, _docVm.Doc.FilePath, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private void InstallVisualAdornersOnce()
+    {
+        if (_renderersInstalled || _vm is null || _editor is null || _docVm is null)
+            return;
+
+        var textView = _editor.TextArea.TextView;
+        textView.BackgroundRenderers.Add(new BreakpointLineRenderer(() => _vm.AllBreakpointLinesInCurrentFile));
+        textView.BackgroundRenderers.Add(new DebugCurrentLineRenderer(() => _vm.DebugCurrentLineInCurrentFile));
+
+        _diagRenderer = new EditorDiagnosticBackgroundRenderer(() => _vm.WorkspaceDiagnostics.GetStripsForFile(_docVm.Doc.FilePath));
+        textView.BackgroundRenderers.Add(_diagRenderer);
+
+        _diagHubHandler = () =>
+        {
+            if (_editor is not null)
+                _editor.TextArea.TextView.Redraw();
+        };
+        _vm.WorkspaceDiagnostics.DiagnosticsChanged += _diagHubHandler;
+
+        if (!_diagPointerHooked)
+        {
+            _editor.TextArea.PointerMoved += OnPointerMovedDiagnosticTip;
+            _editor.TextArea.PointerExited += OnPointerExitedDiagnosticTip;
+            _diagPointerHooked = true;
+        }
+
+        _diagTipDebounce = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(120) };
+        _diagTipDebounce.Tick += (_, _) =>
+        {
+            _diagTipDebounce?.Stop();
+            UpdateDiagnosticToolTip();
+        };
+
+        _renderersInstalled = true;
+    }
+
+    private void OnPointerMovedDiagnosticTip(object? sender, PointerEventArgs e)
+    {
+        if (_editor is null)
+            return;
+        _lastPointerInTextView = e.GetPosition(_editor.TextArea.TextView);
+        _diagTipDebounce?.Stop();
+        _diagTipDebounce?.Start();
+    }
+
+    private void OnPointerExitedDiagnosticTip(object? sender, PointerEventArgs e)
+    {
+        if (_editor is not null)
+            ToolTip.SetTip(_editor, null);
+        _lastTipText = null;
+    }
+
+    private void UpdateDiagnosticToolTip()
+    {
+        if (_editor is null || _vm is null || _docVm is null)
+            return;
+        if (!_docVm.Doc.FilePath.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
+        {
+            ToolTip.SetTip(_editor, null);
+            return;
+        }
+
+        var tv = _editor.TextArea.TextView;
+        var pos = tv.GetPosition(_lastPointerInTextView);
+        if (pos is null)
+        {
+            if (_lastTipText is not null)
+            {
+                ToolTip.SetTip(_editor, null);
+                _lastTipText = null;
+            }
+
+            return;
+        }
+
+        int offset;
+        try
+        {
+            offset = _editor.Document.GetOffset(pos.Value.Line, pos.Value.Column);
+        }
+        catch
+        {
+            ToolTip.SetTip(_editor, null);
+            return;
+        }
+
+        var strips = _vm.WorkspaceDiagnostics.GetStripsForFile(_docVm.Doc.FilePath);
+        var hit = WorkspaceDiagnosticsCoordinator.HitTest(strips, offset);
+        var tip = hit is null ? null : $"{hit.Id}: {hit.Message}";
+        if (string.Equals(tip, _lastTipText, StringComparison.Ordinal))
+            return;
+        _lastTipText = tip;
+        ToolTip.SetTip(_editor, tip);
     }
 
     private void SyncFromVmIfActive()
@@ -142,20 +274,11 @@ public partial class DockDocumentView : UserControl
         if (!IsActive() || _vm is null || _editor is null)
             return;
 
-        // MCP: editor state, selection ranges, and ApplyEdit all operate on *this* editor.
         _vm.SetEditorStateProvider(maxPreview => EditorHelpers.GetEditorState(_editor, _vm.CurrentFilePath, maxPreview));
         _vm.SetEditorContentRangeProvider((startLine, endLine) => EditorHelpers.GetEditorContentRange(_editor, startLine, endLine));
         _vm.SetApplyEdit((path, sl, sc, el, ec, newText) =>
             EditorHelpers.ApplyEditInEditor(_editor, _vm, path, sl, sc, el, ec, newText));
         _vm.SetFocusEditor(() => _editor.Focus());
-
-        if (_renderersInstalled)
-            return;
-
-        // Best-effort: show breakpoints and current debug line in this editor instance.
-        _editor.TextArea.TextView.BackgroundRenderers.Add(new BreakpointLineRenderer(() => _vm.AllBreakpointLinesInCurrentFile));
-        _editor.TextArea.TextView.BackgroundRenderers.Add(new DebugCurrentLineRenderer(() => _vm.DebugCurrentLineInCurrentFile));
-        _renderersInstalled = true;
     }
 }
 
@@ -177,6 +300,7 @@ internal static class EditorHelpers
             selStart = seg.StartOffset;
             selLen = seg.EndOffset - seg.StartOffset;
         }
+
         var selectionText = selLen > 0 ? doc.GetText(selStart, selLen) : "";
         string? preview = null;
         if (maxPreviewChars is > 0)
@@ -252,4 +376,3 @@ internal static class EditorHelpers
         return offset + (col - 1);
     }
 }
-

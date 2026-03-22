@@ -56,6 +56,18 @@ public sealed class CascadeIdeSettings : ModelBase
     /// <summary>Язык UI (<c>ru-RU</c>, <c>en-US</c>). Пустая строка — при старте берётся системная локаль (<c>UiCulture.ApplyFromSystem</c>).</summary>
     public string UiCultureName { get; set; } = "";
 
+    /// <summary>
+    /// Источник диагностик C#: <c>ParseOnly</c> (только парсер), <c>OmniSharp</c>, <c>CSharpLs</c>, <c>Custom</c>.
+    /// Один активный LSP-процесс при открытом решении.
+    /// </summary>
+    public string CSharpLspProvider { get; set; } = "ParseOnly";
+
+    /// <summary>Путь или имя exe для LSP (пусто — пресет по умолчанию: OmniSharp / csharp-ls).</summary>
+    public string CSharpLspExecutable { get; set; } = "";
+
+    /// <summary>Дополнительные аргументы командной строки LSP (через пробел).</summary>
+    public string CSharpLspArguments { get; set; } = "";
+
     public override bool Is(ModelBase modelBase, double tolerance = DEFAULT_TOLERANCE)
     {
         if (modelBase is not CascadeIdeSettings o)
@@ -74,7 +86,10 @@ public sealed class CascadeIdeSettings : ModelBase
             && GitPanelVisible.Is(o.GitPanelVisible)
             && InstrumentationDockVisible.Is(o.InstrumentationDockVisible)
             && UiMode.Is(o.UiMode)
-            && UiCultureName.Is(o.UiCultureName);
+            && UiCultureName.Is(o.UiCultureName)
+            && CSharpLspProvider.Is(o.CSharpLspProvider)
+            && CSharpLspExecutable.Is(o.CSharpLspExecutable)
+            && CSharpLspArguments.Is(o.CSharpLspArguments);
     }
 
     public override ModelBase Clone()
@@ -95,7 +110,10 @@ public sealed class CascadeIdeSettings : ModelBase
             GitPanelVisible = GitPanelVisible,
             InstrumentationDockVisible = InstrumentationDockVisible,
             UiMode = UiMode,
-            UiCultureName = UiCultureName
+            UiCultureName = UiCultureName,
+            CSharpLspProvider = CSharpLspProvider,
+            CSharpLspExecutable = CSharpLspExecutable,
+            CSharpLspArguments = CSharpLspArguments
         };
     }
 }
