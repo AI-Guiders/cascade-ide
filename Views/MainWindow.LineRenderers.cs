@@ -1,0 +1,58 @@
+using Avalonia;
+using Avalonia.Media;
+using AvaloniaEdit.Document;
+using AvaloniaEdit.Rendering;
+
+namespace CascadeIDE.Views;
+
+internal sealed class BreakpointLineRenderer(Func<IReadOnlyList<int>> getBreakpointLines) : IBackgroundRenderer
+{
+    private const double SymbolRadius = 5;
+    private static readonly SolidColorBrush s_backBrush = new(Color.FromArgb(40, 200, 80, 80));
+    private static readonly SolidColorBrush s_symbolBrush = new(Color.FromRgb(200, 80, 80));
+    private static readonly Pen s_symbolPen = new(new SolidColorBrush(Color.FromRgb(160, 60, 60)), 1);
+
+    public KnownLayer Layer => KnownLayer.Background;
+
+    public void Draw(TextView textView, DrawingContext drawingContext)
+    {
+        var document = textView.Document;
+        if (document is null) return;
+        var lines = getBreakpointLines();
+        if (lines.Count == 0) return;
+        foreach (var lineNumber in lines)
+        {
+            if (lineNumber < 1 || lineNumber > document.LineCount) continue;
+            var line = document.GetLineByNumber(lineNumber);
+            var first = true;
+            foreach (var rect in BackgroundGeometryBuilder.GetRectsForSegment(textView, line))
+            {
+                drawingContext.DrawRectangle(s_backBrush, null, rect);
+                if (first)
+                {
+                    var centerX = rect.Left + SymbolRadius + 2;
+                    var centerY = rect.Top + rect.Height / 2;
+                    drawingContext.DrawEllipse(s_symbolBrush, s_symbolPen, new Rect(centerX - SymbolRadius, centerY - SymbolRadius, SymbolRadius * 2, SymbolRadius * 2));
+                    first = false;
+                }
+            }
+        }
+    }
+}
+
+internal sealed class DebugCurrentLineRenderer(Func<int> getCurrentLine) : IBackgroundRenderer
+{
+    public KnownLayer Layer => KnownLayer.Background;
+
+    public void Draw(TextView textView, DrawingContext drawingContext)
+    {
+        var lineNumber = getCurrentLine();
+        if (lineNumber < 1) return;
+        var document = textView.Document;
+        if (document is null || lineNumber > document.LineCount) return;
+        var line = document.GetLineByNumber(lineNumber);
+        var brush = new SolidColorBrush(Color.FromArgb(60, 255, 200, 80));
+        foreach (var rect in BackgroundGeometryBuilder.GetRectsForSegment(textView, line))
+            drawingContext.DrawRectangle(brush, null, rect);
+    }
+}
