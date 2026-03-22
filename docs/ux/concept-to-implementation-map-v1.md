@@ -5,6 +5,7 @@ Scope: **CascadeIDE UI concepts** (Focus/Balanced/Power) mapped to current imple
 - `Views/MainWindow.axaml`
 - `Views/MainWindow.axaml.cs`
 - `ViewModels/MainWindowViewModel.cs`
+- `Views/TaskCockpitView.axaml`, `Views/ChatPanelView.axaml`, `Views/SolutionExplorerView.axaml`, `Views/TelemetryStripView.axaml`, `Views/BottomPanelView.axaml`
 
 This map is intended to drive incremental alignment work with clear acceptance checks.
 
@@ -12,7 +13,7 @@ This map is intended to drive incremental alignment work with clear acceptance c
 
 - **Status**
   - ✅ implemented
-  - 🟨 partial / placeholder data
+  - 🟨 partial / heuristic data
   - ❌ missing
 
 ---
@@ -21,7 +22,7 @@ This map is intended to drive incremental alignment work with clear acceptance c
 
 | Concept element | XAML control (x:Name / binding) | VM property/command | Status | Notes |
 |---|---|---|---|---|
-| Main grid columns (left / center / right) | `MainGrid` `ColumnDefinitions="220,4,*,4,340"` | `IsSolutionExplorerVisible`, `IsChatPanelExpanded` | ✅ | Chat width is adjusted in code-behind based on mode (Power=420, else 340). |
+| Main grid columns (left / center / right) | `MainGrid` `ColumnDefinitions="220,4,*,4,340"` | `IsSolutionExplorerVisible`, `IsChatPanelExpanded` | ✅ | Chat width adjusted in code-behind (Power=420, else 340). |
 | Mode hotkeys | `<Window.KeyBindings>` | `SetFocusModeCommand`, `SetBalancedModeCommand`, `SetPowerModeCommand`, `CycleUiModeCommand` | ✅ | `Alt+1/2/3`, `Ctrl+Alt+M`. |
 | Mode switch UI | Toolbar ComboBox + menu radio items | `UiMode`, `UiModeOptionsList` | ✅ | `ModeBadge` adds `.power` class when `IsPowerMode`. |
 
@@ -31,11 +32,13 @@ This map is intended to drive incremental alignment work with clear acceptance c
 
 | Concept element | XAML control | VM property/command | Status | Notes |
 |---|---|---|---|---|
-| Top bar: task title + status pill | Task bar row (`Grid.Row="2"`) | `ActiveTaskTitle`, `ActiveTaskStatus`, `ActiveTaskProgress` | 🟨 | Present, but currently hidden in Focus because `ShowTaskBar => !IsFocusMode`. Concept shows it in Focus. Decide: either show a minimal task pill in Focus or keep hidden. |
+| Top bar: task title + status pill | `TaskCockpitView` (`Grid.Row="2"`) | `ActiveTaskTitle`, `ActiveTaskStatus`, `ActiveTaskProgress` | ✅ | `ShowTaskBar => true` — полоска видна в Focus. |
 | Minimal left navigation | `SolutionExplorerBorder` | `IsSolutionExplorerVisible` | ✅ | Toggle via menu. |
-| Dominant editor | `Editor` (`AvaloniaEdit`) | `EditorText`, `CurrentFilePath` | ✅ | Inline markdown preview exists (`InlinePreviewBorder`). |
-| Agent panel (plan/next action/confirmation) | Chat panel blocks | `ShowAgentOperations => !IsFocusMode` | 🟨 | In Focus the concept shows Agent panel; current impl hides Agent Operations in Focus. Needs a Focus-safe subset: plan + next action + confirmation. |
-| Bottom status pills (Build/Test/Debug) | Terminal telemetry block (Row=5) + task bar | `ShowPowerTelemetry => IsPowerMode` | ❌ | Concept has a compact always-on bottom status line in Focus; current telemetry is Power-only and lives in Terminal panel. |
+| Dominant editor | `Editor` (`AvaloniaEdit`) | `EditorText`, `CurrentFilePath` | ✅ | Inline markdown preview (`InlinePreviewBorder`). |
+| Agent panel (plan / next / confirmation) | `ChatPanelView` rows 0–1, 3 | `FocusPlanItems`, `NextActionSummary`, confirm commands | ✅ | Отдельные карточки в Focus; полный блок «Agent Operations» — в Balanced (`ShowAgentOperationsBlock`). |
+| Bottom status pills (Build/Test/Debug/Git) | `TelemetryStripView` (`!IsPowerMode`) | `TelemetryBuildText`, `TelemetryTestsText`, `TelemetryDebugText`, `TelemetryGitText` | ✅ | Компактная полоса под редактором для Focus/Balanced. |
+| Док инструментирования (События / Тесты / Отладка) | `BottomPanelView` tabs | `ShowInstrumentationTabs`, `IsInstrumentationDockVisible` | ✅ | В Focus доступны при включённом доке (меню «Док инструментирования»); детали — вкладки, сводка — полоса телеметрии. |
+| Карточка Safety L1–L3 | `ChatPanelView` row 5 (`modeCard` / Power: `safetyLevelIsland`) | `ShowSafetyControls`, `SetSafetyL*Command` | ✅ | Focus/Balanced — компактные кнопки; Power — отдельная панель-док, объёмные L1–L3 с тенью. |
 
 ---
 
@@ -43,11 +46,11 @@ This map is intended to drive incremental alignment work with clear acceptance c
 
 | Concept element | XAML control | VM property/command | Status | Notes |
 |---|---|---|---|---|
-| Quick actions (Fix failing tests / Investigate nullref / Prepare commit) | Task bar row buttons | `FixFailingTestsCommand`, `InvestigateNullrefCommand`, `PrepareCommitCommand` + `ShowQuickActions` | ✅ | `ShowQuickActions => !IsFocusMode` so visible in Balanced & Power. |
-| Editor badges (Complexity/Impacted/Files changed) | Task bar row borders | `ComplexityBadge`, `ImpactedTestsBadge`, `FilesChangedBadge` | 🟨 | Values exist in VM (currently placeholder numbers). Needs real calculation pipeline. |
-| Agent operations card | Chat panel row 0 | `ShowAgentOperations` | ✅ | Present for Balanced/Power. |
-| Build/Test/Debug tabs + event timeline | Terminal panel + `EventTimeline` ItemsControl | `EventTimeline`, `IsTerminalVisible` | 🟨 | Event timeline exists but is shown only inside the terminal telemetry block (Power-only). Balanced concept wants build/test/debug always accessible (tabs). Current impl has build output in editor column + debug panel; terminal is separate. |
-| Dependency mini-map / solution graph | (no dedicated panel) | — | ❌ | Not implemented. Candidate: add a secondary left-bottom dock in Balanced, or reuse existing panels. |
+| Quick actions | `TaskCockpitView` | `FixFailingTestsCommand`, …, `ShowQuickActions` | ✅ | `ShowQuickActions => IsBalancedMode`. |
+| Editor badges (Complexity / Impacted / Files) | `TaskCockpitView` | `ComplexityBadge`, `ImpactedTestsBadge`, `FilesChangedBadge` | 🟨 | **Реальные эвристики:** строки текущего файла на диске; упавшие тесты последнего `dotnet test`; число путей из `git status --short`. Подсказки на бейджах в XAML. |
+| Agent operations card | `ChatPanelView` row 2 | `ShowAgentOperationsBlock` | ✅ | Balanced only. |
+| Build/Test/Debug + event timeline | Terminal tab (telemetry при Power) + вкладка «События» | `EventTimeline`, `IsTerminalVisible` | ✅ | В Balanced лента событий — вкладка «События»; в Terminal при Power — доп. блок с `ShowPowerTelemetry`. |
+| Dependency mini-map / solution graph | — | — | ❌ | Не реализовано; см. шаг 4 в «Next steps». |
 
 ---
 
@@ -55,20 +58,39 @@ This map is intended to drive incremental alignment work with clear acceptance c
 
 | Concept element | XAML control | VM property/command | Status | Notes |
 |---|---|---|---|---|
-| Task bar / status cockpit (always-on) | `Grid.Row="2"` card | `ShowTaskBar` | ✅ | `ShowTaskBar => true` (полоска видна и в Focus). |
-| “Telemetry” explicit control | Toolbar Telemetry button + hidden hint block | `TelemetryButtonText`, `ToggleTerminalCommand`, `ShowTelemetryHiddenHint` | ✅ | This directly addresses the “where is приборка?” problem. |
-| Agent Trace Timeline | Chat panel trace block | `ShowAgentTrace => IsPowerMode`, `AgentTraceSteps`, `TimestampText`, `ExplainTraceStepCommand`, `RollbackTraceStepCommand`, `AppendAgentTraceStep` | ✅ | Structured cards with timestamp, status chips, per-step Explain/Rollback. |
-| Safety Level Control + Emergency Stop | Chat panel Power block | `SafetyLevelDescription`, крупные карточки L1/L2/L3, `PowerNeonAccent` кольцо на активном, `EmergencyStopCommand` | ✅ UI / 🟨 enforcement | Визуал как на мокапе; политика инструментов — отдельно. |
-| Bottom telemetry strip (build/tests/git/snapshot) | `TelemetryStripView` (Power: одна SOC-полоса + JSON `MaxHeight` 100) | `Telemetry*CockpitShort`, `WorkspaceSnapshotJson`, `power_cockpit` в `power-theme.json` | ✅ | Мини-графики тестов в мокапе — пока текст/компакт; при желании — отдельный шаг. |
-| Task queue list (multiple tasks, L1/L2/L3 per item) | `SolutionExplorerView` bottom (Power only) | `PowerTaskQueueItems`, `PowerTaskQueueItemViewModel`, `HasPowerTaskQueueItems` | 🟨 | Panel + model; fills when agent pushes items (empty state until then). |
-| Window title “Power Mode [Autonomous Agent Cockpit]” | `MainWindow` `Title` | `WindowTitle` | ✅ | — |
+| Task bar / status cockpit | `TaskCockpitView` | `ShowTaskBar` | ✅ | Включая блок Autonomous (Power). |
+| Telemetry explicit control | Toolbar + hint in cockpit | `TelemetryButtonText`, `ToggleTerminalCommand`, `ShowTelemetryHiddenHint` | ✅ | |
+| Agent Trace Timeline | `ChatPanelView` | `ShowAgentTrace`, `AgentTraceSteps`, … | ✅ | |
+| Safety Level + Emergency Stop | `ChatPanelView` row 5: отдельный док `safetyLevelIsland` (Power) + `modeCard` (Focus/Balanced) | L1/L2/L3 (`powerSafetyTierFace`, кольцо активного уровня); Power: **EMERGENCY STOP** в `PanelChromeHeader` (`ShowEmergencyStop`), Focus/Balanced — кнопка под L1–L3 | ✅ UI / 🟨 enforcement | Фон дока: `PowerSafetyDockBackground` ← `safety_dock_background`. Политика инструментов — отдельно. |
+| Bottom telemetry strip (cockpit + JSON) | `TelemetryStripView` (Power) | `Telemetry*CockpitShort`, `WorkspaceSnapshotJson` | ✅ | |
+| Task queue list | `SolutionExplorerView` (Power) | `PowerTaskQueueItems` | 🟨 | Заполняется при появлении очереди от агента. |
+| Window title | `MainWindow` `Title` | `WindowTitle` | ✅ | |
+| **Panel headers** (полоса + разделитель + ⋯) | `Views/PanelChromeHeader.axaml`, стили в `App.axaml` | `panel_chrome` в JSON темы | 🟨 | Меню по ⋯: заглушка + «Копировать заголовок»; `UppercaseTitle` для коротких меток. Glow / телеметрия-дуги — вне scope. |
+| **Рамки рабочей области** (колонки, вертикальные сплиттеры, шов с нижней панелью, карточки `modeCard`) | `CascadeTheme.WorkspacePanelBorderBrush` в `App.axaml`; `MainWindow`, `SolutionExplorerView`, `DocumentsDockView`, `ChatPanelView`, `BottomPanelView` | `workspace_layout.border_brush` (если нет — `editor_column.border_brush`) | ✅ | Power: чуть ярче кайма колонок (`#00C8E8`) vs внутренние линии редактора. |
+| **Power: телеметрия только под левым+центром** (правая колонка на всю высоту рядом) | `MainWindow.axaml`: `TelemetryStripView` `Grid.ColumnSpan` = `MainWorkspaceTelemetryColumnSpan` (3 в Power); `ChatPanelView` + сплиттер редактор↔чат `Grid.RowSpan` = `ChatPanelMainGridRowSpan` (2 в Power) | `MainWindowViewModel` | ✅ | Focus/Balanced: телеметрия на всю ширину (`ColumnSpan` 5), чат одна строка. |
+| **Power: острова, gutter, градиентные каймы** | `App.axaml`: `PowerEditorIslandFrameBrush`, `PowerChatIslandFrameBrush`, `PowerSolutionIslandFrameBrush`; `DocumentsDockView`, `SolutionExplorerView`, `ChatPanelView` — `Panel` + внутренний `Border` (`#…IslandInner`) с `Classes.power`, `Margin` 6–8 у `UserControl.power`; телеметрия — `CornerRadius` 14, усиленный `BoxShadow`; низ — `BottomPanelShell` скругление сверху в Power | — | ✅ | Focus/Balanced: без градиентных рамок, скругления ~10px у колонок. |
+
+### 4.1) Визуальный хром Power: концепт (PNG) vs текущий XAML
+
+Речь не о отсутствии функций, а о **внешнем виде строк, выделения, плотности** — как на крупном референсе дерева: `concept-screens/power-project-explorer-tree-concept.png` (рядом см. автогенерацию `concept-generated/cascadeide-ui-concept-power.png`).
+
+| Элемент концепта | Где в коде | Status | Notes |
+|---|---|---|---|
+| **Дерево решения / Project Explorer** | `SolutionExplorerView.axaml` + `App.axaml`: в Power — тёмный фон острова (`PowerSolutionTreePanelBackground`), строки `TreeViewItem` (padding, `MinHeight`, hover/selected фоны, **левый акцент** `PowerNeonBorder` 3px), иконки **20×20** (`solutionExplorerTreeIcon`), заголовки `PanelChromeHeader` с классом **`powerSolutionExplorer`** (полоса как у телеметрии, светлый текст). Очередь задач в том же визуальном ряду. | 🟨 | Остаётся **Fluent-шаблон** `TreeViewItem` (не полная замена control theme); если акцент/фон не пробиваются в рантайме — точечный `ControlTheme` / копия шаблона. |
+| **Центр: редактор** | `DocumentsDockView` + AvaloniaEdit | 🟨 | Концепт: выразительный gutter, inline diagnostics / блок предупреждений в теле. Сейчас — возможности редактора по умолчанию, без полного «кино»-хрома макета. |
+| **Правая колонка: карточки трассы** | `ChatPanelView` (trace / safety) | 🟨 | Состав блоков и кнопки соответствуют идее; **плотность, неон, типографика** карточек могут отличаться от PNG. |
+| **Нижняя полоса телеметрии** | `TelemetryStripView` | 🟨 | Данные кокпита и JSON есть; **спарклайны / капс-лейблы / «глянец»** из концепта — частично или упрощённо. |
+| **Заголовки панелей (⋯, полоса)** | `PanelChromeHeader` | 🟨 | Уже в таблице выше; детали glow / дуг — вне текущего scope. |
 
 ---
 
-## 5) Concrete next alignment steps (minimal increments)
+## 5) Concrete next alignment steps (remaining)
 
-1. **Focus mode contract**: decide which minimal “instrument line” stays visible (task pill + last build/test/debug status) even in Focus.
-2. **Task queue feed**: push `PowerTaskQueueItemViewModel` from MCP/agent when multi-task orchestration exists.
-3. **Real badge computation**: compute `ComplexityBadge`, `ImpactedTestsBadge`, `FilesChangedBadge` from real state (git + solution graph + test selection).
-4. **Dependency mini-map** (Balanced): optional graph dock under solution explorer.
+1. **Dependency mini-map** (Balanced): опциональная панель графа зависимостей / solution graph.
+2. **Task queue feed**: наполнение `PowerTaskQueueItemViewModel` из MCP при мульти-задачной оркестрации.
+3. **Бейджи глубже:** цикломатика / реально «затронутые» тесты по графу изменений — отдельный pipeline (сейчас эвристики).
+4. **Живая сложность при редактировании:** при необходимости обновлять proxy сложности по `EditorText` с debounce (сейчас — при смене файла с диска).
+5. **Хром дерева решения (Power):** сделано стилями на `TreeViewItem` + кисти; при необходимости — **полный** кастомный шаблон `TreeViewItem`, если тема Fluent перекрывает `Background`/`BorderThickness`.
+6. **Редактор / трасса / телеметрия:** точечное выравнивание с PNG-концептами по приоритету (см. §4.1).
 
+Версия карты: **2026-03-20** (§4.1: дерево решения Power — тёмная панель, акцент выбора, хром заголовков; референс `concept-screens/power-project-explorer-tree-concept.png`).

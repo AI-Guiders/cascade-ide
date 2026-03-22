@@ -136,6 +136,10 @@ Autonomous execution cockpit: a high signal, always-on view of what the agent is
   - “Is it safe?” (safety level + confirmations),
   - “How to stop/rollback?” (emergency stop + rollback).
 
+### Visual language (детальный референс дерева)
+
+Автогенерация `concept-generated/cascadeide-ui-concept-power.png` задаёт общую композицию. **Крупный кадр стиля дерева проекта** (тёмный фон, бирюзовая полоска выделения, воздух между строками, иконки типов файлов, заголовок в духе *PROJECT EXPLORER*) сохранён отдельно: **`concept-screens/power-project-explorer-tree-concept.png`** (+ оглавление в `concept-screens/README.md`). В коде левая колонка пока ближе к **стандартному `TreeView` Fluent** внутри «острова» — см. таблицу **§4.1** в `concept-to-implementation-map-v1.md`.
+
 ---
 
 ## 4) Mapping to current implementation docs
@@ -147,4 +151,11 @@ When aligning UI, keep these invariants:
 - **Focus**: minimal panels + explicit confirmation gate.
 - **Balanced**: quick actions + risk checks + build/test/debug output with timeline.
 - **Power**: task queue + trace timeline + telemetry strip + safety controls + emergency stop.
+
+---
+
+## 5) Визуальное соответствие коду (кратко)
+
+Функциональные блоки Power в основном заведены на контролы из `cascade-ide-ui-layout-v1.md`. **«Глянец» PNG-концептов** (кастомный хром списков, редакторный gutter, спарклайны в телеметрии) **частично** — детальная матрица: **`concept-to-implementation-map-v1.md` §4.1**.  
+Референсы: **`concept-generated/*.png`** (общий макет), **`concept-screens/power-project-explorer-tree-concept.png`** (фрагмент дерева).
 
