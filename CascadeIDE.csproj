@@ -59,4 +59,19 @@
     <PackageReference Include="Svg.Controls.Avalonia" Version="11.3.9.2" Aliases="svgctrl" />
     <PackageReference Include="Tomlyn" Version="0.20.0" />
   </ItemGroup>
+
+  <!-- При RID вывод в net10.0/win-x64/; в корне net10.0/ часто остаётся старый apphost от прошлой сборки — Cursor/проводник открывают его и кажется «древняя» сборка. Удаляем только наши артефакты в корне TFM. -->
+  <Target Name="RemoveStaleTfmRootHost" AfterTargets="Build" Condition="'$(RuntimeIdentifier)' != ''">
+    <PropertyGroup>
+      <_TfmRoot>$(MSBuildProjectDirectory)\bin\$(Configuration)\$(TargetFramework)</_TfmRoot>
+    </PropertyGroup>
+    <ItemGroup>
+      <_StaleHost Include="$(_TfmRoot)\$(AssemblyName).exe" />
+      <_StaleHost Include="$(_TfmRoot)\$(AssemblyName).dll" />
+      <_StaleHost Include="$(_TfmRoot)\$(AssemblyName).pdb" />
+      <_StaleHost Include="$(_TfmRoot)\$(AssemblyName).deps.json" />
+      <_StaleHost Include="$(_TfmRoot)\$(AssemblyName).runtimeconfig.json" />
+    </ItemGroup>
+    <Delete Files="@(_StaleHost)" ContinueOnError="true" />
+  </Target>
 </Project>
