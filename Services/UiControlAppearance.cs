@@ -113,7 +113,33 @@ public static class UiControlAppearance
         };
         if (contentTruncated.HasValue)
             dict["content_truncated"] = contentTruncated.Value;
+        dict["background_brush"] = UiThemeSnapshot.FormatBrushForJson(GetBrush(control, "Background"));
+        dict["border_brush_display"] = UiThemeSnapshot.FormatBrushForJson(GetBrush(control, "BorderBrush"));
+        if (control is Border br)
+        {
+            var cr = br.CornerRadius;
+            dict["corner_radius"] = new Dictionary<string, double>
+            {
+                ["top_left"] = cr.TopLeft,
+                ["top_right"] = cr.TopRight,
+                ["bottom_right"] = cr.BottomRight,
+                ["bottom_left"] = cr.BottomLeft
+            };
+            dict["box_shadow"] = br.BoxShadow.ToString();
+        }
+
         return dict;
+    }
+
+    /// <summary>Снимок контрола по имени в дереве окна (те же поля, что у <c>ide_get_control_appearance</c>).</summary>
+    public static Dictionary<string, object?>? TryBuildNamedRegionSnapshot(TopLevel topLevel, string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return null;
+        var c = FindControlByName(topLevel, name.Trim());
+        if (c is null)
+            return null;
+        return BuildSnapshot(c, topLevel as Visual);
     }
 
     /// <summary>Реальное состояние обрезки: для TextBlock — из контрола (TextLayout.TextLines.HasOverflowed); иначе — оценка по измерению.</summary>

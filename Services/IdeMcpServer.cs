@@ -328,17 +328,17 @@ public static class IdeMcpServer
             new()
             {
                 Name = "ide_get_ui_theme",
-                Description = "Получить параметры темы UI: цвета, фоны, кнопки, шрифты (JSON). Чтобы не гадать при правках оформления.",
+                Description = "Полный снимок темы и лэйаута. Ресурсы: секции как у ide_set_ui_theme + solution_explorer_tree_power + power_island_frame_brushes. Дополнительно: cascade_theme_resolved — все ключи CascadeTheme.*, разрешённые через TryGetResource под actual_theme_variant (solid и linear(...) для градиентов); window_frame — заголовок, client/bounds, extend_client_area*, transparency, фон окна; layout_regions — по именам (RootWindow, MainGrid, DockIslandInner, DocumentsDock, SolutionIslandInner, ChatIslandInner, ChatPanelRoot, BottomPanelShell, ModeBadge, UiModeBloomOverlay, ChatInputBox, TerminalInputBox): bounds, видимость, effective_*, background_brush/border_brush_display (в т.ч. градиенты), corner_radius/box_shadow для Border; dock_text_editors — массив по каждой вкладке-документу (file_path, dock_title, matches_main_window_current_file, document_length, model_content_length, length_matches_model, line_count, bounds, шрифт, кисти, effective_*, text_preview до ~240 символов). ide_set_ui_theme игнорирует новые корневые ключи.",
                 InputSchema = Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
             },
             new()
             {
                 Name = "ide_set_ui_theme",
-                Description = "Применить тему UI на лету. JSON в том же формате, что возвращает ide_get_ui_theme (можно вызвать get, изменить нужные поля, передать в set).",
+                Description = "Применить тему UI на лету. Берутся только известные секции (main_window…power_cockpit); игнорируются: _snapshot, solution_explorer_tree_power, power_island_frame_brushes, cascade_theme_resolved, window_frame, layout_regions, dock_text_editors. Градиенты рамок островов задаются в App.axaml, не через set.",
                 InputSchema = Schema(new
                 {
                     type = "object",
-                    properties = new { theme = new { type = "string", description = "JSON темы (объект с main_window, menu, button, toolbar, editor, chat_panel, terminal, mcp_banner, preview_window и т.д.)." } },
+                    properties = new { theme = new { type = "string", description = "JSON темы (…, panel_chrome: title_foreground, accent_brush, header_background, header_separator, menu_glyph_foreground — полоса заголовка панелей)." } },
                     required = new[] { "theme" }
                 })
             },
@@ -357,7 +357,7 @@ public static class IdeMcpServer
             new()
             {
                 Name = "ide_get_control_appearance",
-                Description = "Универсальный снимок любого контрола: прямой и эффективный цвет фона/текста (effective_*), содержимое, границы, видимость, шрифт, рамка, content_truncated (для TextBlock — из реального TextLayout контрола, HasOverflowed; иначе — оценка по измерению). Без аргументов — под курсором; с name — по имени. JSON: type, name, bounds, visible, content, content_truncated, background, foreground, effective_*, border_*, font_*.",
+                Description = "Универсальный снимок любого контрола: прямой и эффективный цвет фона/текста (effective_*), содержимое, границы, видимость, шрифт, рамка, content_truncated (для TextBlock — из реального TextLayout контрола, HasOverflowed; иначе — оценка по измерению). Для Border: corner_radius, box_shadow; background_brush и border_brush_display — кисть строкой (в т.ч. linear(...)). Без аргументов — под курсором; с name — по имени. JSON: type, name, bounds, visible, content, content_truncated, background, foreground, effective_*, border_*, font_*, background_brush, border_brush_display.",
                 InputSchema = Schema(new
                 {
                     type = "object",
