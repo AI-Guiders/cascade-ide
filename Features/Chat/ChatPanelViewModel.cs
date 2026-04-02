@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using Avalonia.Threading;
 using CascadeIDE.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -77,12 +78,13 @@ public partial class ChatPanelViewModel : ViewModelBase
                 _getUseMinimizedContext(),
                 CancellationToken.None))
             {
-                assistantMsg.Content += token;
+                var t = token;
+                Dispatcher.UIThread.Post(() => assistantMsg.Content += t);
             }
         }
         finally
         {
-            IsChatLoading = false;
+            await Dispatcher.UIThread.InvokeAsync(() => IsChatLoading = false);
         }
     }
 

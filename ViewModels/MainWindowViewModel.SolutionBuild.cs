@@ -53,7 +53,9 @@ public partial class MainWindowViewModel
         try
         {
             var workDir = Path.GetDirectoryName(solutionPath) ?? "";
-            var (success, exitCode, output) = await _dotnetRunner.RunAsync(["build", solutionPath], workDir).ConfigureAwait(false);
+            // Без ConfigureAwait(false): иначе после await — пул потоков, finally с IsBuilding и вывод
+            // в панель идут с фона → Avalonia: Call from invalid thread.
+            var (success, exitCode, output) = await _dotnetRunner.RunAsync(["build", solutionPath], workDir);
 
             AppendBuildChunk(output + "\r\n");
             if (!success && exitCode != 0)
@@ -120,7 +122,8 @@ public partial class MainWindowViewModel
         }
         catch (Exception ex)
         {
-            Workspace.SolutionLoadError = "Ошибка загрузки решения: " + ex.Message;
+            await Dispatcher.UIThread.InvokeAsync(() =>
+                Workspace.SolutionLoadError = "Ошибка загрузки решения: " + ex.Message);
             TryLogLoadSolutionCrash(path, ex);
         }
     }
@@ -180,16 +183,21 @@ public partial class MainWindowViewModel
                 var s = status;
                 Dispatcher.UIThread.Post(() => PullModelProgress = s);
             }
-            PullModelProgress = "Готово.";
-            await RefreshOllamaAsync();
+            // IAsyncEnumerable после цикла может продолжиться не на UI — как у сборки без нужного контекста.
+            await Dispatcher.UIThread.InvokeAsync(async () =>
+            {
+                PullModelProgress = "Готово.";
+                await RefreshOllamaAsync();
+            });
         }
         catch (Exception ex)
         {
-            PullModelProgress = "Ошибка: " + ex.Message;
+            await Dispatcher.UIThread.InvokeAsync(() =>
+                PullModelProgress = "Ошибка: " + ex.Message);
         }
         finally
         {
-            IsPullingModel = false;
+            await Dispatcher.UIThread.InvokeAsync(() => IsPullingModel = false);
         }
     }
 

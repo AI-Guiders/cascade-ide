@@ -41,6 +41,10 @@ public sealed partial class SolutionWorkspaceViewModel : ViewModelBase
     /// Loads solution tree in background thread and returns parsed root + normalized path.
     /// Caller should ignore stale results by comparing returned <c>LoadVersion</c>.
     /// </summary>
+    /// <remarks>
+    /// Вызов с UI-потока: до первого <c>await</c> выполняется сброс <see cref="SolutionLoadError"/> и инкремент версии —
+    /// это свойства, связанные с интерфейсом (Avalonia). Вызывать с фона нельзя без маршалинга на UI.
+    /// </remarks>
     public async Task<(SolutionItem? Root, string? NormalizedSolutionPath, string? Error, long LoadVersion)> LoadSolutionTreeAsync(
         string path,
         CancellationToken cancellationToken = default)

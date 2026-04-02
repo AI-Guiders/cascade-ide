@@ -32,7 +32,7 @@ public partial class MainWindowViewModel
 
     async Task<string> Services.IIdeMcpActions.BuildAsync()
     {
-        var path = Workspace.SolutionPath;
+        var path = await Dispatcher.UIThread.InvokeAsync(() => Workspace.SolutionPath ?? "");
         if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
         {
             var msg = "No solution loaded or file not found.";
@@ -104,7 +104,7 @@ public partial class MainWindowViewModel
 
     private async Task<string> RunTestsInternalAsync(string? filterExpression, string mode, IReadOnlyList<string>? tokens = null)
     {
-        var path = Workspace.SolutionPath;
+        var path = await Dispatcher.UIThread.InvokeAsync(() => Workspace.SolutionPath ?? "");
         if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
             return JsonSerializer.Serialize(new { success = false, error = "No solution loaded or file not found.", mode });
 
@@ -269,7 +269,7 @@ public partial class MainWindowViewModel
 
     async Task<string> Services.IIdeMcpActions.RunCodeCleanupAsync(string? includePath)
     {
-        var path = Workspace.SolutionPath;
+        var path = await Dispatcher.UIThread.InvokeAsync(() => Workspace.SolutionPath ?? "");
         if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
             return JsonSerializer.Serialize(new { success = false, error = "No solution loaded or file not found." });
 

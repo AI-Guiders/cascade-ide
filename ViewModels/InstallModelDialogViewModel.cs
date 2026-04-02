@@ -58,16 +58,19 @@ public partial class InstallModelDialogViewModel : ViewModelBase
                 var s = status;
                 Dispatcher.UIThread.Post(() => ProgressText = s);
             }
-            ProgressText = "Готово.";
-            _closeRequested();
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                ProgressText = "Готово.";
+                _closeRequested();
+            });
         }
         catch (Exception ex)
         {
-            ErrorText = ex.Message;
+            await Dispatcher.UIThread.InvokeAsync(() => ErrorText = ex.Message);
         }
         finally
         {
-            IsPulling = false;
+            await Dispatcher.UIThread.InvokeAsync(() => IsPulling = false);
         }
     }
 

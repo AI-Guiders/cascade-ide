@@ -35,61 +35,66 @@ public partial class MainWindowViewModel
         try { diagnostics = JsonSerializer.Deserialize<JsonElement>(diagnosticsJson); }
         catch { diagnostics = JsonSerializer.SerializeToElement(Array.Empty<object>()); }
 
-        var buildText = BuildOutputPanel.BuildOutput ?? "";
-        if (buildText.Length > 2000)
-            buildText = buildText[..2000] + "\n... (output truncated)";
-
-        var state = new
+        // MCP вызывает с пула потоков; после ConfigureAwait(false) чтение VM/панелей только на UI.
+        return await Dispatcher.UIThread.InvokeAsync(() =>
         {
-            solution_path = Workspace.SolutionPath,
-            current_file_path = CurrentFilePath,
-            selected_solution_path = Workspace.SelectedSolutionItem?.FullPath,
-            editor = new
+            var buildText = BuildOutputPanel.BuildOutput ?? "";
+            if (buildText.Length > 2000)
+                buildText = buildText[..2000] + "\n... (output truncated)";
+
+            var state = new
             {
-                content_length = (EditorText ?? "").Length,
-                selection_start = EditorSelectionStart,
-                selection_length = EditorSelectionLength
-            },
-            breakpoints = new
-            {
-                current_file = AllBreakpointLinesInCurrentFile,
-                debugger_count = _debuggerBreakpoints.Count
-            },
-            debug = new
-            {
-                position_file = DebugPositionFile,
-                position_line = DebugPositionLine,
-                stack_count = InstrumentationPanel.DebugStackFrames.Count,
-                variables_count = InstrumentationPanel.DebugVariables.Count
-            },
-            build = new
-            {
-                is_visible = IsBuildOutputVisible,
-                output_preview = buildText,
-                binlog_path = _lastBuildBinlogPath
-            },
-            terminal = new { is_visible = IsTerminalVisible },
-            ui_mode = UiMode,
-            panels = new
-            {
-                solution_explorer = IsSolutionExplorerVisible,
-                build_output = IsBuildOutputVisible,
-                chat_expanded = IsChatPanelExpanded,
-                git = IsGitPanelVisible,
-                instrumentation_dock = IsInstrumentationDockVisible
-            },
-            safety_level = SafetyLevel,
-            editor_group_count = EditorGroupCount,
-            agent_trace_step_count = InstrumentationPanel.AgentTraceSteps.Count,
-            is_autonomous_running = Autonomous.IsAutonomousRunning,
-            diagnostics
-        };
-        return JsonSerializer.Serialize(state);
+                solution_path = Workspace.SolutionPath,
+                current_file_path = CurrentFilePath,
+                selected_solution_path = Workspace.SelectedSolutionItem?.FullPath,
+                editor = new
+                {
+                    content_length = (EditorText ?? "").Length,
+                    selection_start = EditorSelectionStart,
+                    selection_length = EditorSelectionLength
+                },
+                breakpoints = new
+                {
+                    current_file = AllBreakpointLinesInCurrentFile,
+                    debugger_count = _debuggerBreakpoints.Count
+                },
+                debug = new
+                {
+                    position_file = DebugPositionFile,
+                    position_line = DebugPositionLine,
+                    stack_count = InstrumentationPanel.DebugStackFrames.Count,
+                    variables_count = InstrumentationPanel.DebugVariables.Count
+                },
+                build = new
+                {
+                    is_visible = IsBuildOutputVisible,
+                    output_preview = buildText,
+                    binlog_path = _lastBuildBinlogPath
+                },
+                terminal = new { is_visible = IsTerminalVisible },
+                ui_mode = UiMode,
+                panels = new
+                {
+                    solution_explorer = IsSolutionExplorerVisible,
+                    build_output = IsBuildOutputVisible,
+                    chat_expanded = IsChatPanelExpanded,
+                    git = IsGitPanelVisible,
+                    instrumentation_dock = IsInstrumentationDockVisible
+                },
+                safety_level = SafetyLevel,
+                editor_group_count = EditorGroupCount,
+                agent_trace_step_count = InstrumentationPanel.AgentTraceSteps.Count,
+                is_autonomous_running = Autonomous.IsAutonomousRunning,
+                diagnostics
+            };
+            return JsonSerializer.Serialize(state);
+        });
     }
 
     async Task<string> Services.IIdeMcpActions.GetCodeMetricsAsync(string? scope, string? path)
     {
-        var files = ResolveMetricFiles(scope, path).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        var files = await Dispatcher.UIThread.InvokeAsync(() =>
+            ResolveMetricFiles(scope, path).Distinct(StringComparer.OrdinalIgnoreCase).ToList());
         if (files.Count == 0)
             return JsonSerializer.Serialize(new { success = false, error = "No C# files resolved for metrics." });
 
