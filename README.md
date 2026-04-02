@@ -33,6 +33,10 @@ dotnet run
 - **Режимы UI:** `Focus / Balanced / Power` с переключением из меню/toolbar и хоткеями `Alt+1/Alt+2/Alt+3` (`Ctrl+Alt+M` — циклическое переключение).
 - **Настройки и данные:** выбранные модели и UI-параметры сохраняются в `%LocalAppData%\\CascadeIDE\\settings.toml`; данные приложения — в WitDatabase (`app.witdb` в том же каталоге).
 
+## MCP-сервер IDE: откуда список инструментов
+
+Инструменты собираются в коде: [`Services/IdeMcpToolCatalog.cs`](Services/IdeMcpToolCatalog.cs) и [`Services/IdeMcpToolCatalogFull.cs`](Services/IdeMcpToolCatalogFull.cs); для полей `IdeCommands` дополнительно генерируются прокси-тулы. Человекочитаемая таблица команд — в [docs/MCP-PROTOCOL.md](docs/MCP-PROTOCOL.md); блок между маркерами `GENERATED:IdeCommands` обновляется утилитой [`tools/CascadeIDE.ProtocolDocGen`](tools/CascadeIDE.ProtocolDocGen/Program.cs) (см. комментарий в `CascadeIDE.csproj`). В отличие от отдельных консольных MCP в `Financial/software/open` (цикл `ToolCatalog` → `mcp-tools.manifest.json` и `docs/MCP-TOOLS.md` через `ExportMcpManifest`), у встроенного сервера Cascade IDE отдельного манифеста нет — источник правды в перечисленных сервисах и сгенерированных файлах.
+
 ## Подключение как submodule (репо open)
 
 Если этот проект вынесен в отдельный репозиторий на GitLab:
