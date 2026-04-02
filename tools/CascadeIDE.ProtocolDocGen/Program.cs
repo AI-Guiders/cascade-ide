@@ -3,18 +3,23 @@ using System.Text.RegularExpressions;
 
 // Run from repo/cascade-ide folder:
 //   dotnet run --project tools/CascadeIDE.ProtocolDocGen -- [--cs-only|--md-only|--lint] <optional: path-to-cascade-ide>
+
+const int ExitSuccess = 0;
+const int ExitUsageOrMissingInput = 2;
+const int ExitLintFailed = 3;
+
 var csOnly = args.Any(a => string.Equals(a, "--cs-only", StringComparison.OrdinalIgnoreCase));
 var mdOnly = args.Any(a => string.Equals(a, "--md-only", StringComparison.OrdinalIgnoreCase));
 var lintOnly = args.Any(a => string.Equals(a, "--lint", StringComparison.OrdinalIgnoreCase));
 if (csOnly && mdOnly)
 {
     Console.Error.WriteLine("Specify at most one of --cs-only / --md-only.");
-    return 2;
+    return ExitUsageOrMissingInput;
 }
 if (lintOnly && (csOnly || mdOnly))
 {
     Console.Error.WriteLine("Specify --lint alone (do not combine with --cs-only/--md-only).");
-    return 2;
+    return ExitUsageOrMissingInput;
 }
 
 var rootArg = args.LastOrDefault(a => !a.StartsWith("--", StringComparison.Ordinal));
@@ -30,12 +35,12 @@ var generatedExecutorPath = Path.Combine(root, "ViewModels", "Generated", "IdeMc
 if (!File.Exists(ideCommandsPath))
 {
     Console.Error.WriteLine($"Missing file: {ideCommandsPath}");
-    return 2;
+    return ExitUsageOrMissingInput;
 }
 if (!File.Exists(protocolPath))
 {
     Console.Error.WriteLine($"Missing file: {protocolPath}");
-    return 2;
+    return ExitUsageOrMissingInput;
 }
 
 var items = IdeCommandsParser.Parse(File.ReadAllText(ideCommandsPath, Encoding.UTF8));
@@ -47,10 +52,10 @@ if (lintOnly)
     {
         foreach (var e in errors)
             Console.Error.WriteLine(e);
-        return 3;
+        return ExitLintFailed;
     }
     Console.WriteLine("OK");
-    return 0;
+    return ExitSuccess;
 }
 
 if (!mdOnly)
@@ -75,7 +80,7 @@ if (!csOnly)
 }
 
 Console.WriteLine("OK");
-return 0;
+return ExitSuccess;
 
 internal sealed record IdeCommandDoc(string FieldName, string CommandId, string? Summary, string Category);
 
