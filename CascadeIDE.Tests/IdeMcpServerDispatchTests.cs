@@ -125,6 +125,18 @@ public sealed class IdeMcpServerDispatchTests
         public void ShowDebugState(IReadOnlyList<(string Name, string? File, int Line)> stackFrames, IReadOnlyList<(string Name, string Value)> variables) => throw new NotImplementedException();
         public Task<string> WriteAgentNotesAsync(string content, CancellationToken cancellationToken = default) => throw new NotImplementedException();
         public Task<string> ReadAgentNotesAsync(CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<string> AppendAgentNotesAsync(string content, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<string> ListAgentNotesRevisionsAsync(int? limit = null, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<string> RollbackAgentNotesAsync(string? revisionFile = null, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<string> ReadHotContextAsync(string? activeScope = null, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<string> RouteContextAsync(string query, string? activeScope = null, int? maxSections = null, int? maxChars = null, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<string> MemoryHealthAsync(string? activeScope = null, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<string> CompactHotContextAsync(bool apply = false, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<string> ExtractFromArchiveAsync(string query, string? revisionFile = null, int? headLimit = null, int? contextLines = null, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<string> UpsertAgentNotesSectionAsync(string sectionId, string content, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<string> SearchAgentNotesAsync(string query, int? headLimit = null, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<string> ReadKnowledgeFileAsync(string filePath, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<string> ListKnowledgeFilesAsync(string? subdir = null, CancellationToken cancellationToken = default) => throw new NotImplementedException();
     }
 }
 

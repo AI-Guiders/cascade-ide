@@ -209,21 +209,29 @@
 |-----------:|----------|
 | `activate_document` | Активировать документ (переключить вкладку). args: file_path:string; returns: text; example: {"file_path":"C:\\tmp\\a.cs"}. |
 | `add_control` | Добавить контрол в UI (Debug). args: parent_name:string, control_type:string, content?:string, name?:string; returns: text; example: {"parent_name":"Root","control_type":"TextBlock","content":"Hi"}. |
+| `append_agent_notes` | Добавить блок в конец заметок агента. args: content:string; returns: text; example: {"content":"\\n# Update\\n..."}. |
 | `click_control` | Клик по кнопке (под курсором или по имени). args: name?:string; returns: text; example: {"name":"BuildButton"}. |
 | `close_document` | Закрыть документ. args: file_path:string; returns: text; example: {"file_path":"C:\\tmp\\a.cs"}. |
+| `compact_hot_context` | Ужать hot-context (preview/apply). args: apply?:boolean; returns: json; example: {"apply":false}. |
+| `extract_from_archive` | Поиск по архивной ревизии заметок с контекстом строк. args: query:string, revision_file?:string, head_limit?:integer, context_lines?:integer; returns: json; example: {"query":"ActiveProjectId","head_limit":10,"context_lines":2}. |
 | `get_colors_under_cursor` | Цвета под курсором (прямые и effective). returns: json. |
 | `get_control_appearance` | Снимок внешнего вида контрола (под курсором или по имени). args: name?:string; returns: json; example: {"name":"BuildButton"}. |
 | `get_supported_editor_languages` | Список поддерживаемых языков подсветки редактора. returns: json. |
 | `get_ui_layout` | Дерево UI-элементов (layout) с bounds/visibility/content. returns: json. |
 | `get_ui_theme` | Снимок темы UI и лэйаута (включая resolved-ресурсы). returns: json. |
 | `highlight_control` | Подсветить контрол рамкой (под курсором или по имени). args: name?:string; returns: text; example: {"name":"BuildButton"}. |
+| `list_agent_notes_revisions` | Список ревизий заметок агента. args: limit?:integer; returns: json; example: {"limit":20}. |
 | `list_knowledge_files` | Список knowledge-файлов в каталоге решения (опционально subdir). args: subdir?:string; returns: json; example: {"subdir":"work"}. |
+| `memory_health` | Health-check памяти: размер hot-context и рекомендации. args: active_scope?:string; returns: json; example: {"active_scope":"current-projects"}. |
 | `move_document_to_group_1` | Переместить документ в группу 1. args: file_path:string; returns: text; example: {"file_path":"C:\\tmp\\a.cs"}. |
 | `move_document_to_group_2` | Переместить документ в группу 2. args: file_path:string; returns: text; example: {"file_path":"C:\\tmp\\a.cs"}. |
 | `move_document_to_group_3` | Переместить документ в группу 3. args: file_path:string; returns: text; example: {"file_path":"C:\\tmp\\a.cs"}. |
 | `read_agent_notes` | Прочитать заметки агента из каталога решения. returns: text. |
+| `read_hot_context` | Прочитать только hot-context (L0/L1) без архивного хвоста. args: active_scope?:string; returns: json; example: {"active_scope":"current-projects"}. |
 | `read_knowledge_file` | Прочитать knowledge-файл из каталога решения. args: file_path:string; returns: text; example: {"file_path":"META/integrity-core.md"}. |
 | `reopen_closed_document` | Переоткрыть недавно закрытый документ. returns: text. |
+| `rollback_agent_notes` | Откатить заметки к ревизии (или к последней). args: revision_file?:string; returns: text; example: {"revision_file":"20260402-120000-write-acde123.md"}. |
+| `route_context` | Router-first контекст пакет по запросу. args: query:string, active_scope?:string, max_sections?:integer, max_chars?:integer; returns: json; example: {"query":"CascadeIDE notes structure","max_sections":5,"max_chars":12000}. |
 | `search_agent_notes` | Поиск по заметкам агента (case-insensitive) с возвратом совпадающих строк. args: query:string, head_limit?:integer; returns: json; example: {"query":"ActiveProjectId","head_limit":20}. |
 | `send_keys` | Отправить хоткей в контрол. args: keys:string, name?:string; returns: text; example: {"keys":"Ctrl+S"}. |
 | `set_control_layout` | Изменить раскладку/позицию контрола. args: name:string, layout:string; returns: text; example: {"name":"BuildButton","layout":"{\"x\":10,\"y\":10}"}. |

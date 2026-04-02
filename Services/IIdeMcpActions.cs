@@ -102,6 +102,22 @@ public interface IIdeMcpActions
     Task<string> WriteAgentNotesAsync(string content, CancellationToken cancellationToken = default);
     /// <summary>Прочитать заметки агента. Возвращает содержимое файла или пустую строку, если файла нет или решение не загружено.</summary>
     Task<string> ReadAgentNotesAsync(CancellationToken cancellationToken = default);
+    /// <summary>Добавить блок в конец заметок агента без полной перезаписи. Возвращает "OK" или ошибку.</summary>
+    Task<string> AppendAgentNotesAsync(string content, CancellationToken cancellationToken = default);
+    /// <summary>Список ревизий заметок агента. JSON: массив { file, size_bytes, modified_utc }.</summary>
+    Task<string> ListAgentNotesRevisionsAsync(int? limit = null, CancellationToken cancellationToken = default);
+    /// <summary>Откатить заметки к ревизии (или к последней, если revisionFile null). Возвращает OK/NO_CHANGES с именем ревизии.</summary>
+    Task<string> RollbackAgentNotesAsync(string? revisionFile = null, CancellationToken cancellationToken = default);
+    /// <summary>Прочитать только горячий контекст (L0/L1) без архивного хвоста. JSON: active_scope, loaded_sections, content.</summary>
+    Task<string> ReadHotContextAsync(string? activeScope = null, CancellationToken cancellationToken = default);
+    /// <summary>Router-first контекст пакет по запросу. JSON: assembled_context, loaded_sections, scores.</summary>
+    Task<string> RouteContextAsync(string query, string? activeScope = null, int? maxSections = null, int? maxChars = null, CancellationToken cancellationToken = default);
+    /// <summary>Health-check памяти по hot-context бюджетам. JSON.</summary>
+    Task<string> MemoryHealthAsync(string? activeScope = null, CancellationToken cancellationToken = default);
+    /// <summary>Ужать hot-context (preview/apply). JSON.</summary>
+    Task<string> CompactHotContextAsync(bool apply = false, CancellationToken cancellationToken = default);
+    /// <summary>Поиск по архивной ревизии заметок (или последней), с контекстом строк. JSON.</summary>
+    Task<string> ExtractFromArchiveAsync(string query, string? revisionFile = null, int? headLimit = null, int? contextLines = null, CancellationToken cancellationToken = default);
 
     /// <summary>Вставить/обновить секцию в заметках агента. section_id — стабильный идентификатор, content — новое содержимое секции. Возвращает "OK" или ошибку.</summary>
     Task<string> UpsertAgentNotesSectionAsync(string sectionId, string content, CancellationToken cancellationToken = default);
