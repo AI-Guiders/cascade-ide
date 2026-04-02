@@ -6,15 +6,15 @@ public static class IdeCommands
     /// <summary>Список MCP-тулов, которые IDE публикует (name/description/inputSchema). returns: json.</summary>
     public const string ListTools = "list_tools";
 
-    /// <summary>Открыть файл в редакторе IDE. args: path:string; returns: text; example: {"path":"C:\tmp\a.txt"}.</summary>
+    /// <summary>Открыть файл в редакторе IDE. args: path:string; returns: text; example: {"path":"C:\\tmp\\a.txt"}.</summary>
     public const string OpenFile = "open_file";
-    /// <summary>Загрузить решение (.sln/.slnx/.slnf) и обновить дерево решения. args: path:string; returns: text; example: {"path":"D:\Experiments\PersonalCursorFolder\Financial\software\open\cascade-ide\CascadeIDE.slnx"}.</summary>
+    /// <summary>Загрузить решение (.sln/.slnx/.slnf) и обновить дерево решения. args: path:string; returns: text; example: {"path":"D:\\Experiments\\PersonalCursorFolder\\Financial\\software\\open\\cascade-ide\\CascadeIDE.slnx"}.</summary>
     public const string LoadSolution = "load_solution";
-    /// <summary>Выделить диапазон в редакторе (1-based). args: file_path:string, start_line:integer, start_column:integer, end_line:integer, end_column:integer; returns: text; example: {"file_path":"C:\tmp\a.cs","start_line":1,"start_column":1,"end_line":1,"end_column":10}.</summary>
+    /// <summary>Выделить диапазон в редакторе (1-based). args: file_path:string, start_line:integer, start_column:integer, end_line:integer, end_column:integer; returns: text; example: {"file_path":"C:\\tmp\\a.cs","start_line":1,"start_column":1,"end_line":1,"end_column":10}.</summary>
     public const string Select = "select";
-    /// <summary>Поставить брейкпоинт. args: file_path:string, line:integer, condition?:string; returns: text; example: {"file_path":"C:\tmp\a.cs","line":42}.</summary>
+    /// <summary>Поставить брейкпоинт. args: file_path:string, line:integer, condition?:string; returns: text; example: {"file_path":"C:\\tmp\\a.cs","line":42}.</summary>
     public const string SetBreakpoint = "set_breakpoint";
-    /// <summary>Снять брейкпоинт. args: file_path:string, line:integer; returns: text; example: {"file_path":"C:\tmp\a.cs","line":42}.</summary>
+    /// <summary>Снять брейкпоинт. args: file_path:string, line:integer; returns: text; example: {"file_path":"C:\\tmp\\a.cs","line":42}.</summary>
     public const string RemoveBreakpoint = "remove_breakpoint";
     /// <summary>Показать Markdown-превью в отдельном окне. args: title:string, content:string; returns: text; example: {"title":"Plan","content":"- step 1\n- step 2"}.</summary>
     public const string ShowPreview = "show_preview";
@@ -28,9 +28,9 @@ public static class IdeCommands
     public const string GetEditorContentRange = "get_editor_content_range";
     /// <summary>Полный текст открытого документа по пути (или текущего). Модель вкладки, не снимок темы. returns: text.</summary>
     public const string GetOpenDocumentText = "get_open_document_text";
-    /// <summary>Применить текстовую правку в открытом документе. args: file_path:string, start_line:integer, start_column:integer, end_line:integer, end_column:integer, new_text:string; returns: text; example: {"file_path":"C:\tmp\a.cs","start_line":1,"start_column":1,"end_line":1,"end_column":1,"new_text":"// hi\n"}.</summary>
+    /// <summary>Применить текстовую правку в открытом документе. args: file_path:string, start_line:integer, start_column:integer, end_line:integer, end_column:integer, new_text:string; returns: text; example: {"file_path":"C:\\tmp\\a.cs","start_line":1,"start_column":1,"end_line":1,"end_column":1,"new_text":"// hi\n"}.</summary>
     public const string ApplyEdit = "apply_edit";
-    /// <summary>Перейти на позицию (и опционально выделить диапазон). args: file_path:string, line:integer, column:integer, end_line?:integer, end_column?:integer; returns: text; example: {"file_path":"C:\tmp\a.cs","line":10,"column":1}.</summary>
+    /// <summary>Перейти на позицию (и опционально выделить диапазон). args: file_path:string, line:integer, column:integer, end_line?:integer, end_column?:integer; returns: text; example: {"file_path":"C:\\tmp\\a.cs","line":10,"column":1}.</summary>
     public const string GoToPosition = "go_to_position";
     /// <summary>Короткая информация о текущем решении/файле/выделении в дереве. returns: json.</summary>
     public const string GetSolutionInfo = "get_solution_info";
@@ -205,17 +205,17 @@ public static class IdeCommands
     // ——— Документы (контекстное меню / док)
     /// <summary>Переоткрыть недавно закрытый документ. returns: text.</summary>
     public const string ReopenClosedDocument = "reopen_closed_document";
-    /// <summary>Активировать документ (переключить вкладку). args: file_path:string; returns: text; example: {"file_path":"C:\tmp\a.cs"}.</summary>
+    /// <summary>Активировать документ (переключить вкладку). args: file_path:string; returns: text; example: {"file_path":"C:\\tmp\\a.cs"}.</summary>
     public const string ActivateDocument = "activate_document";
-    /// <summary>Закрыть документ. args: file_path:string; returns: text; example: {"file_path":"C:\tmp\a.cs"}.</summary>
+    /// <summary>Закрыть документ. args: file_path:string; returns: text; example: {"file_path":"C:\\tmp\\a.cs"}.</summary>
     public const string CloseDocument = "close_document";
-    /// <summary>Закрепить/открепить документ (pin). args: file_path:string; returns: text; example: {"file_path":"C:\tmp\a.cs"}.</summary>
+    /// <summary>Закрепить/открепить документ (pin). args: file_path:string; returns: text; example: {"file_path":"C:\\tmp\\a.cs"}.</summary>
     public const string TogglePinDocument = "toggle_pin_document";
-    /// <summary>Переместить документ в группу 1. args: file_path:string; returns: text; example: {"file_path":"C:\tmp\a.cs"}.</summary>
+    /// <summary>Переместить документ в группу 1. args: file_path:string; returns: text; example: {"file_path":"C:\\tmp\\a.cs"}.</summary>
     public const string MoveDocumentToGroup1 = "move_document_to_group_1";
-    /// <summary>Переместить документ в группу 2. args: file_path:string; returns: text; example: {"file_path":"C:\tmp\a.cs"}.</summary>
+    /// <summary>Переместить документ в группу 2. args: file_path:string; returns: text; example: {"file_path":"C:\\tmp\\a.cs"}.</summary>
     public const string MoveDocumentToGroup2 = "move_document_to_group_2";
-    /// <summary>Переместить документ в группу 3. args: file_path:string; returns: text; example: {"file_path":"C:\tmp\a.cs"}.</summary>
+    /// <summary>Переместить документ в группу 3. args: file_path:string; returns: text; example: {"file_path":"C:\\tmp\\a.cs"}.</summary>
     public const string MoveDocumentToGroup3 = "move_document_to_group_3";
 
     /// <summary>Снимок темы UI и лэйаута (включая resolved-ресурсы). returns: json.</summary>
@@ -244,9 +244,9 @@ public static class IdeCommands
     public const string SetPanelSize = "set_panel_size";
     /// <summary>Список поддерживаемых языков подсветки редактора. returns: json.</summary>
     public const string GetSupportedEditorLanguages = "get_supported_editor_languages";
-    /// <summary>Показать брейкпоинты отладчика в IDE. args: breakpoints:object[]; returns: text; example: {"breakpoints":[{"file_path":"C:\tmp\a.cs","line":1}]}.</summary>
+    /// <summary>Показать брейкпоинты отладчика в IDE. args: breakpoints:object[]; returns: text; example: {"breakpoints":[{"file_path":"C:\\tmp\\a.cs","line":1}]}.</summary>
     public const string ShowBreakpoints = "show_breakpoints";
-    /// <summary>Показать текущую позицию отладки (файл/строка). args: file_path?:string, line?:integer; returns: text; example: {"file_path":"C:\tmp\a.cs","line":1}.</summary>
+    /// <summary>Показать текущую позицию отладки (файл/строка). args: file_path?:string, line?:integer; returns: text; example: {"file_path":"C:\\tmp\\a.cs","line":1}.</summary>
     public const string ShowDebugPosition = "show_debug_position";
     /// <summary>Показать стек/переменные отладки в панели Debug. args: stack_frames?:object[], variables?:object[]; returns: text; example: {"stack_frames":[],"variables":[]}.</summary>
     public const string ShowDebugState = "show_debug_state";
