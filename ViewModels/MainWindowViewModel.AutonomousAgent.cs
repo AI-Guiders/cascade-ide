@@ -1,265 +1,36 @@
 using System.Text.Json;
-using System.Threading;
-using Avalonia.Threading;
 using CascadeIDE.Features.AutonomousAgent;
-using CascadeIDE.Features.Instrumentation;
 using CommunityToolkit.Mvvm.Input;
 
 namespace CascadeIDE.ViewModels;
 
 public partial class MainWindowViewModel
 {
-    private bool HasResumableAutonomousRun =>
-        _autonomousRunState?.HasResumableSteps == true;
+    bool IAutonomousAgentSessionHost.IsPowerMode => IsPowerMode;
 
-    public bool IsAutonomousPaused =>
-        IsPowerMode && !IsAutonomousRunning && HasResumableAutonomousRun;
-
-    private bool CanStartAutonomous() =>
-        IsPowerMode
-        && !IsAutonomousRunning
-        && !HasResumableAutonomousRun
-        && !string.IsNullOrWhiteSpace(AutonomousObjective)
-        && AutonomousMaxSteps > 0;
-
-    [RelayCommand(CanExecute = nameof(CanStartAutonomous))]
-    private void StartAutonomous()
+    string IAutonomousAgentSessionHost.SafetyLevel
     {
-        StartAutonomousFlow(AutonomousObjective, AutonomousMaxSteps);
+        get => SafetyLevel;
+        set => SafetyLevel = value;
     }
 
-    private bool CanPauseAutonomous() => IsAutonomousRunning;
-
-    [RelayCommand(CanExecute = nameof(CanPauseAutonomous))]
-    private void PauseAutonomous()
+    string IAutonomousAgentSessionHost.ResultSummary
     {
-        _autonomousCts?.Cancel();
-        IsAutonomousRunning = false;
-        ActiveTaskStatus = "Paused";
-        var state = _autonomousRunState;
-        ResultSummary = state is null
-            ? "Autonomous flow paused."
-            : $"Autonomous paused. Next step: {state.NextStep + 1}/{state.MaxSteps}.";
-        OnPropertyChanged(nameof(IsAutonomousPaused));
-        StartAutonomousCommand.NotifyCanExecuteChanged();
-        ResumeAutonomousCommand.NotifyCanExecuteChanged();
+        get => ResultSummary;
+        set => ResultSummary = value;
     }
 
-    private bool CanResumeAutonomous() =>
-        IsPowerMode && !IsAutonomousRunning && HasResumableAutonomousRun;
-
-    [RelayCommand(CanExecute = nameof(CanResumeAutonomous))]
-    private void ResumeAutonomous()
+    void IAutonomousAgentSessionHost.SetActiveTaskStrip(string title, string status, int progress)
     {
-        ResumeAutonomousFlow();
+        ActiveTaskTitle = title;
+        ActiveTaskStatus = status;
+        ActiveTaskProgress = progress;
     }
 
-    private void StartAutonomousFlow(string objective, int maxSteps)
+    void IAutonomousAgentSessionHost.OpenChatForAgentFallback(string chatInput)
     {
-        if (!IsPowerMode)
-            return;
-
-        AutonomousObjective = objective;
-        AutonomousMaxSteps = maxSteps;
-
-        _autonomousRunState = new AutonomousRunState
-        {
-            Objective = objective,
-            SafetyLevel = SafetyLevel,
-            MaxSteps = maxSteps,
-            NextStep = 0
-        };
-
-        // Avoid overlapping runs: new run cancels the previous one.
-        _autonomousCts?.Cancel();
-        _autonomousCts = new CancellationTokenSource();
-        var ct = _autonomousCts.Token;
-
-        IsAutonomousRunning = true;
-        ActiveTaskTitle = "Autonomous Agent";
-        ActiveTaskStatus = "Running";
-        ActiveTaskProgress = 0;
-        ResultSummary = "Autonomous flow started…";
-        OnPropertyChanged(nameof(IsAutonomousPaused));
-
-        _autonomousTask = Task.Run(async () =>
-        {
-            try
-            {
-                var state = _autonomousRunState;
-                var result = await _autonomousAgentService.RunAutonomousAsync(
-                        objective,
-                        SafetyLevel,
-                        maxSteps,
-                        ct,
-                        state)
-                    .ConfigureAwait(false);
-                Dispatcher.UIThread.Post(() =>
-                {
-                    IsAutonomousRunning = false;
-                    ActiveTaskStatus = "Done";
-                    ActiveTaskProgress = 100;
-                    ResultSummary = result;
-                    _autonomousRunState = null;
-                    OnPropertyChanged(nameof(IsAutonomousPaused));
-                    StartAutonomousCommand.NotifyCanExecuteChanged();
-                    ResumeAutonomousCommand.NotifyCanExecuteChanged();
-                });
-            }
-            catch (OperationCanceledException)
-            {
-                var state = _autonomousRunState;
-                Dispatcher.UIThread.Post(() =>
-                {
-                    IsAutonomousRunning = false;
-                    ActiveTaskStatus = "Paused";
-                    ActiveTaskProgress = 0;
-                    ResultSummary = state is null
-                        ? "Autonomous flow cancelled."
-                        : $"Autonomous paused. Next step: {state.NextStep + 1}/{state.MaxSteps}.";
-                    OnPropertyChanged(nameof(IsAutonomousPaused));
-                    StartAutonomousCommand.NotifyCanExecuteChanged();
-                    ResumeAutonomousCommand.NotifyCanExecuteChanged();
-                });
-            }
-            catch (Exception ex)
-            {
-                Dispatcher.UIThread.Post(() =>
-                {
-                    IsAutonomousRunning = false;
-                    ActiveTaskStatus = "Error";
-                    ActiveTaskProgress = 0;
-                    ResultSummary = "Autonomous error: " + ex.Message;
-                    _autonomousRunState = null;
-                    OnPropertyChanged(nameof(IsAutonomousPaused));
-                    StartAutonomousCommand.NotifyCanExecuteChanged();
-                    ResumeAutonomousCommand.NotifyCanExecuteChanged();
-                });
-            }
-        }, ct);
-    }
-
-    private void ResumeAutonomousFlow()
-    {
-        if (!CanResumeAutonomous())
-            return;
-
-        var state = _autonomousRunState;
-        if (state is null)
-            return;
-
-        // Align UI with the captured run settings.
-        SafetyLevel = state.SafetyLevel;
-        AutonomousObjective = state.Objective;
-        AutonomousMaxSteps = state.MaxSteps;
-
-        _autonomousCts?.Cancel();
-        _autonomousCts = new CancellationTokenSource();
-        var ct = _autonomousCts.Token;
-
-        IsAutonomousRunning = true;
-        ActiveTaskTitle = "Autonomous Agent";
-        ActiveTaskStatus = "Running";
-        ActiveTaskProgress = 0;
-        ResultSummary = $"Autonomous resumed from step {state.NextStep + 1}/{state.MaxSteps}…";
-        OnPropertyChanged(nameof(IsAutonomousPaused));
-
-        var capturedState = state;
-
-        _autonomousTask = Task.Run(async () =>
-        {
-            try
-            {
-                var result = await _autonomousAgentService.RunAutonomousAsync(
-                        capturedState.Objective,
-                        capturedState.SafetyLevel,
-                        capturedState.MaxSteps,
-                        ct,
-                        capturedState)
-                    .ConfigureAwait(false);
-                Dispatcher.UIThread.Post(() =>
-                {
-                    IsAutonomousRunning = false;
-                    ActiveTaskStatus = "Done";
-                    ActiveTaskProgress = 100;
-                    ResultSummary = result;
-                    _autonomousRunState = null;
-                    OnPropertyChanged(nameof(IsAutonomousPaused));
-                    StartAutonomousCommand.NotifyCanExecuteChanged();
-                    ResumeAutonomousCommand.NotifyCanExecuteChanged();
-                });
-            }
-            catch (OperationCanceledException)
-            {
-                Dispatcher.UIThread.Post(() =>
-                {
-                    IsAutonomousRunning = false;
-                    ActiveTaskStatus = "Paused";
-                    ActiveTaskProgress = 0;
-                    ResultSummary =
-                        $"Autonomous paused. Next step: {capturedState.NextStep + 1}/{capturedState.MaxSteps}.";
-                    OnPropertyChanged(nameof(IsAutonomousPaused));
-                    StartAutonomousCommand.NotifyCanExecuteChanged();
-                    ResumeAutonomousCommand.NotifyCanExecuteChanged();
-                });
-            }
-            catch (Exception ex)
-            {
-                Dispatcher.UIThread.Post(() =>
-                {
-                    IsAutonomousRunning = false;
-                    ActiveTaskStatus = "Error";
-                    ActiveTaskProgress = 0;
-                    ResultSummary = "Autonomous error: " + ex.Message;
-                    _autonomousRunState = null;
-                    OnPropertyChanged(nameof(IsAutonomousPaused));
-                    StartAutonomousCommand.NotifyCanExecuteChanged();
-                    ResumeAutonomousCommand.NotifyCanExecuteChanged();
-                });
-            }
-        }, ct);
-    }
-
-    [RelayCommand]
-    private void FixFailingTests()
-    {
-        var objective = "Fix failing tests using minimal-risk changes. Use get_workspace_state / run_affected_tests, then propose safe fixes.";
-        if (IsPowerMode)
-        {
-            StartAutonomousFlow(objective, maxSteps: 10);
-            return;
-        }
-
         IsChatPanelExpanded = true;
-        ChatPanel.ChatInput = "Fix failing tests using minimal-risk changes. Start with ide_run_affected_tests and explain each step.";
-    }
-
-    [RelayCommand]
-    private void InvestigateNullref()
-    {
-        var objective = "Investigate possible null reference in current context. Show the shortest safe fix plan with evidence from diagnostics/tests.";
-        if (IsPowerMode)
-        {
-            StartAutonomousFlow(objective, maxSteps: 8);
-            return;
-        }
-
-        IsChatPanelExpanded = true;
-        ChatPanel.ChatInput = "Investigate possible null reference in current context. Show the shortest safe fix plan.";
-    }
-
-    [RelayCommand]
-    private void PrepareCommit()
-    {
-        var objective = "Prepare a clean commit plan grouped by logical changes and include verification steps.";
-        if (IsPowerMode)
-        {
-            StartAutonomousFlow(objective, maxSteps: 6);
-            return;
-        }
-
-        IsChatPanelExpanded = true;
-        ChatPanel.ChatInput = "Prepare a clean commit plan grouped by logical changes and include verification steps.";
+        ChatPanel.ChatInput = chatInput;
     }
 
     [RelayCommand]
@@ -316,14 +87,7 @@ public partial class MainWindowViewModel
     private void EmergencyStop()
     {
         IsBuilding = false;
-        _autonomousCts?.Cancel();
-        IsAutonomousRunning = false;
-        ActiveTaskStatus = "Paused";
-        ResultSummary = "Autonomous flow paused by operator.";
-        _autonomousRunState = null;
-        OnPropertyChanged(nameof(IsAutonomousPaused));
-        StartAutonomousCommand.NotifyCanExecuteChanged();
-        ResumeAutonomousCommand.NotifyCanExecuteChanged();
+        Autonomous.CancelAutonomousRunCompletely();
         InstrumentationPanel.EventTimeline.Insert(0, $"{DateTime.Now:HH:mm:ss} — Emergency stop engaged");
     }
 

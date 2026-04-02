@@ -8,6 +8,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Media;
 using Avalonia.VisualTree;
 using AvaloniaEdit;
+using CascadeIDE.Features.Documents;
 using CascadeIDE.ViewModels;
 using CascadeIDE.Views;
 
@@ -213,7 +214,7 @@ internal static class UiThemeDeepSnapshot
     }
 
     /// <summary>
-    /// Все открытые вкладки из <see cref="MainWindowViewModel.DockDocuments"/> (модель дока).
+    /// Все открытые вкладки из <see cref="DocumentsWorkspaceViewModel.DockDocuments"/> (модель дока).
     /// Неактивные вкладки часто без <see cref="TextEditor"/> в визуальном дереве — смотри <c>editor_in_visual_tree</c>.
     /// </summary>
     private static List<Dictionary<string, object?>> BuildDockOpenDocuments(MainWindowViewModel? vm, HashSet<string> editorMaterializedPaths)
@@ -223,7 +224,7 @@ internal static class UiThemeDeepSnapshot
             return list;
 
         var current = vm.CurrentFilePath;
-        var docs = vm.DockDocuments;
+        var docs = vm.Documents.DockDocuments;
         for (var i = 0; i < docs.Count; i++)
         {
             if (docs[i] is not DockDocumentViewModel dvm)

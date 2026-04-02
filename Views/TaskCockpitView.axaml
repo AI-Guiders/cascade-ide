@@ -39,7 +39,7 @@
                     <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto"
                           ColumnSpacing="8">
                         <TextBox Grid.Column="0"
-                                 Text="{Binding AutonomousObjective, Mode=TwoWay}"
+                                 Text="{Binding Autonomous.AutonomousObjective, Mode=TwoWay}"
                                  Watermark="Autonomous objective"
                                  FontFamily="Consolas,monospace"
                                  FontSize="11"/>
@@ -48,23 +48,23 @@
                                    Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"
                                    VerticalAlignment="Center"/>
                         <TextBox Grid.Column="2"
-                                 Text="{Binding AutonomousMaxSteps, Mode=TwoWay}"
+                                 Text="{Binding Autonomous.AutonomousMaxSteps, Mode=TwoWay}"
                                  Width="56"
                                  TextAlignment="Center"
                                  FontFamily="Consolas,monospace"
                                  FontSize="11"/>
                         <Button Grid.Column="3"
                                 Content="Start"
-                                Command="{Binding StartAutonomousCommand}"
-                                IsVisible="{Binding !IsAutonomousPaused}"/>
+                                Command="{Binding Autonomous.StartAutonomousCommand}"
+                                IsVisible="{Binding !Autonomous.IsAutonomousPaused}"/>
                         <Button Grid.Column="4"
                                 Content="Pause"
-                                Command="{Binding PauseAutonomousCommand}"
-                                IsVisible="{Binding IsAutonomousRunning}"/>
+                                Command="{Binding Autonomous.PauseAutonomousCommand}"
+                                IsVisible="{Binding Autonomous.IsAutonomousRunning}"/>
                         <Button Grid.Column="4"
                                 Content="Resume"
-                                Command="{Binding ResumeAutonomousCommand}"
-                                IsVisible="{Binding IsAutonomousPaused}"/>
+                                Command="{Binding Autonomous.ResumeAutonomousCommand}"
+                                IsVisible="{Binding Autonomous.IsAutonomousPaused}"/>
                         <Button Grid.Column="5"
                                 Content="Details…"
                                 VerticalAlignment="Center"
@@ -79,7 +79,7 @@
                                             <TextBlock Text="Autonomous objective (full)"
                                                        FontWeight="SemiBold"
                                                        Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
-                                            <TextBox Text="{Binding AutonomousObjective, Mode=TwoWay}"
+                                            <TextBox Text="{Binding Autonomous.AutonomousObjective, Mode=TwoWay}"
                                                      AcceptsReturn="True"
                                                      TextWrapping="Wrap"
                                                      MinHeight="120"
@@ -100,9 +100,9 @@
 
             <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" IsVisible="{Binding !IsFocusMode}">
                 <WrapPanel Orientation="Horizontal" ItemHeight="30">
-                    <Button Content="Fix failing tests" Command="{Binding FixFailingTestsCommand}" IsVisible="{Binding ShowQuickActions}" Margin="0,0,6,0"/>
-                    <Button Content="Investigate nullref" Command="{Binding InvestigateNullrefCommand}" IsVisible="{Binding ShowQuickActions}" Margin="0,0,6,0"/>
-                    <Button Content="Prepare commit" Command="{Binding PrepareCommitCommand}" IsVisible="{Binding ShowQuickActions}" Margin="0,0,6,0"/>
+                    <Button Content="Fix failing tests" Command="{Binding Autonomous.FixFailingTestsCommand}" IsVisible="{Binding ShowQuickActions}" Margin="0,0,6,0"/>
+                    <Button Content="Investigate nullref" Command="{Binding Autonomous.InvestigateNullrefCommand}" IsVisible="{Binding ShowQuickActions}" Margin="0,0,6,0"/>
+                    <Button Content="Prepare commit" Command="{Binding Autonomous.PrepareCommitCommand}" IsVisible="{Binding ShowQuickActions}" Margin="0,0,6,0"/>
                     <Border Classes="modeCard" Padding="6,2" Margin="0,0,6,0" IsVisible="{Binding IsComplexityBadgeVisible}"
                             ToolTip.Tip="Прокси по концепту: число строк текущего файла на диске (обновляется при смене документа), не цикломатика.">
                         <TextBlock Text="{Binding ComplexityBadge, StringFormat='{}Complexity: {0}'}" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
@@ -111,9 +111,9 @@
                             ToolTip.Tip="Упавшие тесты в последнем прогоне dotnet test (IDE/MCP).">
                         <TextBlock Text="{Binding ImpactedTestsBadge, StringFormat='{}Impacted tests: {0}'}" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
                     </Border>
-                    <Border Classes="modeCard" Padding="6,2" Margin="0,0,6,0" IsVisible="{Binding IsFilesChangedBadgeVisible}"
+                    <Border Classes="modeCard" Padding="6,2" Margin="0,0,6,0" IsVisible="{Binding Chrome.IsFilesChangedBadgeVisible}"
                             ToolTip.Tip="Число путей в git status --short (изменённые/новые), синхронно со сводкой Git.">
-                        <TextBlock Text="{Binding FilesChangedBadge, StringFormat='{}Files changed: {0}'}" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
+                        <TextBlock Text="{Binding Chrome.FilesChangedBadge, StringFormat='{}Files changed: {0}'}" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
                     </Border>
                 </WrapPanel>
             </ScrollViewer>

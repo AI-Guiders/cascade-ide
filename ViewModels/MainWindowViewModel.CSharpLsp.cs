@@ -40,7 +40,7 @@ public partial class MainWindowViewModel
 
             _csharpLspHost = host;
             _workspaceDiagnostics.SetLspDiagnosticsHost(host);
-            foreach (var d in OpenDocuments)
+            foreach (var d in Documents.OpenDocuments)
             {
                 if (d.FilePath.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
                     host.EnsureOpened(d.FilePath, d.Content ?? "");

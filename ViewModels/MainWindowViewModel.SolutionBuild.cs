@@ -108,18 +108,7 @@ public partial class MainWindowViewModel
                 // New solution becomes authoritative UI context: clear stale editor selection/state.
                 _openFileDebounceCts?.Cancel();
                 Workspace.SelectedSolutionItem = null;
-                OpenDocuments.Clear();
-                Group1Documents.Clear();
-                Group2Documents.Clear();
-                Group3Documents.Clear();
-                DockDocuments.Clear();
-                DockActiveDocument = null;
-                _recentlyClosedDocumentPaths.Clear();
-                _recentlyClosedDocumentCount = 0;
-                ReopenClosedDocumentCommand.NotifyCanExecuteChanged();
-                SelectedDocument = null;
-                SelectedDocumentGroup2 = null;
-                SelectedDocumentGroup3 = null;
+                Documents.ClearForNewSolution();
                 CurrentFilePath = null;
                 EditorText = "";
                 IsLoadingCurrentFile = false;
@@ -127,8 +116,6 @@ public partial class MainWindowViewModel
                 Workspace.SolutionPath = normalizedSolutionPath ?? path;
                 Workspace.SolutionRoots.Clear();
                 Workspace.SolutionRoots.Add(root);
-
-                RebuildAndReinitDockLayout();
             });
         }
         catch (Exception ex)

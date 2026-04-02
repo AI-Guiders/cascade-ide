@@ -36,10 +36,10 @@ public sealed class WorkspaceDiagnosticsCoordinator : IDisposable
     public void Attach(MainWindowViewModel vm)
     {
         _vm = vm;
-        vm.OpenDocuments.CollectionChanged += OnOpenDocumentsChanged;
-        foreach (var d in vm.OpenDocuments)
+        vm.Documents.OpenDocuments.CollectionChanged += OnOpenDocumentsChanged;
+        foreach (var d in vm.Documents.OpenDocuments)
             WatchDocument(d);
-        foreach (var d in vm.OpenDocuments)
+        foreach (var d in vm.Documents.OpenDocuments)
             TrySchedule(d.FilePath, d.Content);
     }
 
@@ -67,7 +67,7 @@ public sealed class WorkspaceDiagnosticsCoordinator : IDisposable
         }
         else if (_vm is not null)
         {
-            foreach (var d in _vm.OpenDocuments)
+            foreach (var d in _vm.Documents.OpenDocuments)
                 TrySchedule(d.FilePath, d.Content);
         }
 
@@ -113,7 +113,7 @@ public sealed class WorkspaceDiagnosticsCoordinator : IDisposable
             return;
         _disposed = true;
         if (_vm is not null)
-            _vm.OpenDocuments.CollectionChanged -= OnOpenDocumentsChanged;
+            _vm.Documents.OpenDocuments.CollectionChanged -= OnOpenDocumentsChanged;
         foreach (var cts in _pending.Values)
             cts.Cancel();
         _pending.Clear();
@@ -252,7 +252,7 @@ public sealed class WorkspaceDiagnosticsCoordinator : IDisposable
         {
             if (ct.IsCancellationRequested)
                 return;
-            var doc = _vm?.OpenDocuments.FirstOrDefault(d => NormalizePath(d.FilePath) == key);
+            var doc = _vm?.Documents.OpenDocuments.FirstOrDefault(d => NormalizePath(d.FilePath) == key);
             if (doc is not null && !string.Equals(doc.Content, textSnapshot, StringComparison.Ordinal))
                 return;
 
@@ -273,7 +273,7 @@ public sealed class WorkspaceDiagnosticsCoordinator : IDisposable
         var rows = new List<ProblemListItem>();
         lock (_cacheLock)
         {
-            foreach (var doc in _vm.OpenDocuments)
+            foreach (var doc in _vm.Documents.OpenDocuments)
             {
                 if (!doc.FilePath.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
                     continue;

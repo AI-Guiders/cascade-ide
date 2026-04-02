@@ -90,7 +90,6 @@ public partial class MainWindowViewModel
     public bool IsResultCardVisible => !IsFocusMode && IsResultSummaryVisible;
     public bool IsComplexityBadgeVisible => ComplexityBadge > 0;
     public bool IsImpactedTestsBadgeVisible => ImpactedTestsBadge > 0;
-    public bool IsFilesChangedBadgeVisible => FilesChangedBadge > 0;
     public bool IsActiveTaskProgressVisible => ActiveTaskProgress > 0;
 
     public string TelemetryBuildText => IsBuilding ? "Build: running…" : "Build: idle";
@@ -109,19 +108,6 @@ public partial class MainWindowViewModel
             ? (LastTestSummary.Length > 36 ? string.Concat(LastTestSummary.AsSpan(0, 33), "…") : LastTestSummary)
             : $"imp {ImpactedTestsBadge}";
 
-    /// <summary>Компактный Git для полосы Power.</summary>
-    public string TelemetryGitCockpitShort
-    {
-        get
-        {
-            var br = GitBranchSummary ?? "";
-            if (br.Length > 16)
-                br = string.Concat(br.AsSpan(0, 14), "…");
-            var delta = GitStagedCount + GitUnstagedCount + GitUntrackedCount;
-            return string.IsNullOrWhiteSpace(br) ? $"Δ{delta}" : $"{br} · Δ{delta}";
-        }
-    }
-
     public string TelemetryDebugText =>
         InstrumentationPanel.IsDebugPanelVisible
             ? $"Debug: paused (frames {InstrumentationPanel.DebugStackFrames.Count}, vars {InstrumentationPanel.DebugVariables.Count})"
@@ -130,15 +116,6 @@ public partial class MainWindowViewModel
     /// <summary>Короткий статус отладки для Power.</summary>
     public string TelemetryDebugCockpitShort =>
         InstrumentationPanel.IsDebugPanelVisible ? $"DBG · {InstrumentationPanel.DebugStackFrames.Count}fr" : "DBG · —";
-
-    public string TelemetryGitText
-    {
-        get
-        {
-            var branch = string.IsNullOrWhiteSpace(GitBranchSummary) ? "" : $" ({GitBranchSummary})";
-            return $"Git: {GitStagedCount} staged, {GitUnstagedCount} unstaged, {GitUntrackedCount} untracked{branch}";
-        }
-    }
 
     public string ChatPanelToggleButtonText => IsChatPanelExpanded ? "◀" : "▶";
     public bool IsSolutionPanelHidden => !IsSolutionExplorerVisible;

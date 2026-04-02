@@ -33,9 +33,19 @@
             <Button Content="Show build" Command="{Binding ShowBuildOutputPanelCommand}" IsVisible="{Binding IsBuildPanelHidden}"/>
             <Button Content="Show chat" Command="{Binding ShowChatPanelCommand}" IsVisible="{Binding IsChatPanelHidden}"/>
             <Button Content="Show terminal" Command="{Binding ShowTerminalPanelCommand}" IsVisible="{Binding IsTerminalPanelHidden}"/>
-            <Button Content="1-up" Command="{Binding SetSingleEditorGroupCommand}"/>
-            <Button Content="2-up" Command="{Binding SetDualEditorGroupCommand}"/>
-            <Button Content="3-up" Command="{Binding SetTripleEditorGroupCommand}"/>
+            <TextBlock Text="Колонки редактора:"
+                       VerticalAlignment="Center"
+                       Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"
+                       Margin="8,0,0,0"/>
+            <Button Content="1"
+                    Command="{Binding SetSingleEditorGroupCommand}"
+                    ToolTip.Tip="Одна колонка: все вкладки в одной группе (без разделения)."/>
+            <Button Content="2"
+                    Command="{Binding SetDualEditorGroupCommand}"
+                    ToolTip.Tip="Две колонки: можно открывать и переносить файлы во вторую группу (два редактора рядом)."/>
+            <Button Content="3"
+                    Command="{Binding SetTripleEditorGroupCommand}"
+                    ToolTip.Tip="Три колонки: до трёх групп редакторов; новый файл из дерева открывается в активной группе."/>
             <TextBlock Text="{Binding Workspace.SolutionPath}" VerticalAlignment="Center" MaxWidth="300" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
             <TextBlock Text="{Binding Workspace.SolutionLoadError}" VerticalAlignment="Center" MaxWidth="350" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource CascadeTheme.ToolbarErrorForeground}"/>
             <TextBlock Text="{Binding OllamaStatus}" VerticalAlignment="Center" Margin="8,0,0,0" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>

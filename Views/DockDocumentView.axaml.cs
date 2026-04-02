@@ -7,6 +7,7 @@ using Avalonia.Input;
 using Avalonia.Threading;
 using AvaloniaEdit;
 using AvaloniaEdit.Rendering;
+using CascadeIDE.Features.Documents;
 using CascadeIDE.Services;
 using CascadeIDE.ViewModels;
 
@@ -19,6 +20,7 @@ public partial class DockDocumentView : UserControl
     private MainWindowViewModel? _vm;
     private DockDocumentViewModel? _docVm;
     private PropertyChangedEventHandler? _vmHandler;
+    private PropertyChangedEventHandler? _documentsHandler;
 
     private bool _renderersInstalled;
     private EditorDiagnosticBackgroundRenderer? _diagRenderer;
@@ -71,14 +73,23 @@ public partial class DockDocumentView : UserControl
         _vmHandler = (_, args) =>
         {
             if (args.PropertyName is nameof(MainWindowViewModel.EditorText)
-                or nameof(MainWindowViewModel.CurrentFilePath)
-                or nameof(MainWindowViewModel.DockActiveDocument))
+                or nameof(MainWindowViewModel.CurrentFilePath))
             {
                 SyncFromVmIfActive();
                 UpdateMcpProvidersIfActive();
             }
         };
         _vm.PropertyChanged += _vmHandler;
+
+        _documentsHandler = (_, args) =>
+        {
+            if (args.PropertyName == nameof(DocumentsWorkspaceViewModel.DockActiveDocument))
+            {
+                SyncFromVmIfActive();
+                UpdateMcpProvidersIfActive();
+            }
+        };
+        _vm.Documents.PropertyChanged += _documentsHandler;
 
         if (w is MainWindow mainWindow)
         {
@@ -121,14 +132,20 @@ public partial class DockDocumentView : UserControl
             }
         }
 
-        if (_vm is not null && _vmHandler is not null)
-            _vm.PropertyChanged -= _vmHandler;
+        if (_vm is not null)
+        {
+            if (_vmHandler is not null)
+                _vm.PropertyChanged -= _vmHandler;
+            if (_documentsHandler is not null)
+                _vm.Documents.PropertyChanged -= _documentsHandler;
+        }
 
         _diagRenderer = null;
         _editor = null;
         _vm = null;
         _docVm = null;
         _vmHandler = null;
+        _documentsHandler = null;
         _renderersInstalled = false;
         _lastTipText = null;
     }
@@ -138,7 +155,7 @@ public partial class DockDocumentView : UserControl
         if (_vm is null || _docVm is null)
             return false;
 
-        return ReferenceEquals(_vm.DockActiveDocument, _docVm)
+        return ReferenceEquals(_vm.Documents.DockActiveDocument, _docVm)
                || string.Equals(_vm.CurrentFilePath, _docVm.Doc.FilePath, StringComparison.OrdinalIgnoreCase);
     }
 

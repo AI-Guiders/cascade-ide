@@ -28,7 +28,7 @@
                     <TextBlock Text="{Binding TelemetryDebugText}" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
                 </Border>
                 <Border Classes="modeCard" Padding="6,2" Margin="0,0,8,0">
-                    <TextBlock Text="{Binding TelemetryGitText}" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
+                    <TextBlock Text="{Binding Chrome.TelemetryGitText}" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
                 </Border>
             </WrapPanel>
         </Border>
@@ -98,7 +98,7 @@
                             BorderBrush="{DynamicResource CascadeTheme.PowerNeonBorder}"
                             BorderThickness="1"
                             MaxWidth="200">
-                        <TextBlock Text="{Binding TelemetryGitCockpitShort}"
+                        <TextBlock Text="{Binding Chrome.TelemetryGitCockpitShort}"
                                    TextTrimming="CharacterEllipsis"
                                    FontSize="11"
                                    Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>

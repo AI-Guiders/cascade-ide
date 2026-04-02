@@ -133,11 +133,11 @@ public partial class MainWindowViewModel
     {
         if (string.IsNullOrWhiteSpace(filePath))
             return;
-        var doc = OpenDocuments.FirstOrDefault(d => string.Equals(d.FilePath, filePath, StringComparison.OrdinalIgnoreCase));
+        var doc = Documents.OpenDocuments.FirstOrDefault(d => string.Equals(d.FilePath, filePath, StringComparison.OrdinalIgnoreCase));
         if (doc is null)
-            OpenOrActivateDocument(filePath);
+            Documents.OpenOrActivateDocument(filePath);
         else
-            ActivateDocumentInternal(doc);
+            Documents.ActivateDocumentInternal(doc);
     }
 
     [RelayCommand]
@@ -145,43 +145,7 @@ public partial class MainWindowViewModel
     {
         if (string.IsNullOrWhiteSpace(filePath))
             return;
-        var doc = OpenDocuments.FirstOrDefault(d => string.Equals(d.FilePath, filePath, StringComparison.OrdinalIgnoreCase));
-        if (doc is null)
-            return;
-
-        var index = OpenDocuments.IndexOf(doc);
-        GetGroupCollection(doc.GroupIndex).Remove(doc);
-        OpenDocuments.Remove(doc);
-        var dockDoc = DockDocuments
-            .OfType<DockDocumentViewModel>()
-            .FirstOrDefault(d => string.Equals(d.Doc.FilePath, doc.FilePath, StringComparison.OrdinalIgnoreCase));
-        if (dockDoc is not null)
-            DockDocuments.Remove(dockDoc);
-        _recentlyClosedDocumentPaths.Push(doc.FilePath);
-        _recentlyClosedDocumentCount = _recentlyClosedDocumentPaths.Count;
-        ReopenClosedDocumentCommand.NotifyCanExecuteChanged();
-
-        if (OpenDocuments.Count == 0)
-        {
-            SelectedDocument = null;
-            SelectedDocumentGroup2 = null;
-            SelectedDocumentGroup3 = null;
-            return;
-        }
-
-        SelectedDocument = Group1Documents.FirstOrDefault();
-        SelectedDocumentGroup2 = Group2Documents.FirstOrDefault();
-        SelectedDocumentGroup3 = Group3Documents.FirstOrDefault();
-
-        // Ensure DockActiveDocument always points to a still-open dockable.
-        var next =
-            SelectedDocument ??
-            SelectedDocumentGroup2 ??
-            SelectedDocumentGroup3 ??
-            OpenDocuments[Math.Clamp(index, 0, OpenDocuments.Count - 1)];
-
-        ActivateDocumentInternal(next);
-        RebuildAndReinitDockLayout();
+        Documents.CloseDocument(filePath);
     }
 
     [RelayCommand]
@@ -189,7 +153,7 @@ public partial class MainWindowViewModel
     {
         if (string.IsNullOrWhiteSpace(filePath))
             return;
-        var doc = OpenDocuments.FirstOrDefault(d => string.Equals(d.FilePath, filePath, StringComparison.OrdinalIgnoreCase));
+        var doc = Documents.OpenDocuments.FirstOrDefault(d => string.Equals(d.FilePath, filePath, StringComparison.OrdinalIgnoreCase));
         if (doc is not null)
             doc.IsPinned = !doc.IsPinned;
     }
@@ -199,9 +163,9 @@ public partial class MainWindowViewModel
     {
         if (string.IsNullOrWhiteSpace(filePath))
             return;
-        var doc = OpenDocuments.FirstOrDefault(d => string.Equals(d.FilePath, filePath, StringComparison.OrdinalIgnoreCase));
+        var doc = Documents.OpenDocuments.FirstOrDefault(d => string.Equals(d.FilePath, filePath, StringComparison.OrdinalIgnoreCase));
         if (doc is not null)
-            MoveDocumentToGroupInternal(doc, 1);
+            Documents.MoveDocumentToGroupInternal(doc, 1);
     }
 
     [RelayCommand]
@@ -209,9 +173,9 @@ public partial class MainWindowViewModel
     {
         if (string.IsNullOrWhiteSpace(filePath))
             return;
-        var doc = OpenDocuments.FirstOrDefault(d => string.Equals(d.FilePath, filePath, StringComparison.OrdinalIgnoreCase));
+        var doc = Documents.OpenDocuments.FirstOrDefault(d => string.Equals(d.FilePath, filePath, StringComparison.OrdinalIgnoreCase));
         if (doc is not null)
-            MoveDocumentToGroupInternal(doc, 2);
+            Documents.MoveDocumentToGroupInternal(doc, 2);
     }
 
     [RelayCommand]
@@ -219,23 +183,15 @@ public partial class MainWindowViewModel
     {
         if (string.IsNullOrWhiteSpace(filePath))
             return;
-        var doc = OpenDocuments.FirstOrDefault(d => string.Equals(d.FilePath, filePath, StringComparison.OrdinalIgnoreCase));
+        var doc = Documents.OpenDocuments.FirstOrDefault(d => string.Equals(d.FilePath, filePath, StringComparison.OrdinalIgnoreCase));
         if (doc is not null)
-            MoveDocumentToGroupInternal(doc, 3);
+            Documents.MoveDocumentToGroupInternal(doc, 3);
     }
 
     [RelayCommand(CanExecute = nameof(CanReopenClosedDocument))]
-    private void ReopenClosedDocument()
-    {
-        if (_recentlyClosedDocumentPaths.Count == 0)
-            return;
-        var path = _recentlyClosedDocumentPaths.Pop();
-        _recentlyClosedDocumentCount = _recentlyClosedDocumentPaths.Count;
-        ReopenClosedDocumentCommand.NotifyCanExecuteChanged();
-        OpenOrActivateDocument(path);
-    }
+    private void ReopenClosedDocument() => Documents.ReopenLastClosedDocument();
 
-    private bool CanReopenClosedDocument() => _recentlyClosedDocumentCount > 0;
+    private bool CanReopenClosedDocument() => Documents.CanReopenClosedDocument();
 
     [RelayCommand]
     private void ShowSolutionExplorerPanel() => IsSolutionExplorerVisible = true;

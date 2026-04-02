@@ -20,7 +20,7 @@ public partial class MainWindowViewModel
             IsLoadingCurrentFile = true;
             try
             {
-                OpenOrActivateDocument(normalizedPath);
+                Documents.OpenOrActivateDocument(normalizedPath);
             }
             finally
             {
@@ -46,7 +46,7 @@ public partial class MainWindowViewModel
                 IsLoadingCurrentFile = true;
                 try
                 {
-                    OpenOrActivateDocument(filePath);
+                    Documents.OpenOrActivateDocument(filePath);
                 }
                 finally { IsLoadingCurrentFile = false; }
             }
@@ -173,10 +173,10 @@ public partial class MainWindowViewModel
         return await tcs.Task.ConfigureAwait(false);
     }
 
-    /// <summary>Модель открытого документа по пути (вкладка в <see cref="DockDocuments"/>).</summary>
+    /// <summary>Модель открытого документа по пути (вкладка в <see cref="Documents.DockDocuments"/>).</summary>
     private OpenDocumentViewModel? FindOpenDocumentModelByPath(string path)
     {
-        foreach (var item in DockDocuments)
+        foreach (var item in Documents.DockDocuments)
         {
             if (item is not DockDocumentViewModel dvm)
                 continue;

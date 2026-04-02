@@ -216,8 +216,8 @@
                 Grid.Row="2" Grid.RowSpan="2" Grid.Column="0" Grid.ColumnSpan="5"
                 ZIndex="400"
                 IsHitTestVisible="False"
-                Background="{Binding UiModeBloomBrush}"
-                Opacity="{Binding UiModeBloomOpacity}">
+                Background="{Binding Chrome.UiModeBloomBrush}"
+                Opacity="{Binding Chrome.UiModeBloomOpacity}">
             <Border.Transitions>
                 <Transitions>
                     <DoubleTransition Property="Opacity" Duration="0:0:0.42">

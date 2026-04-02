@@ -34,7 +34,7 @@ public partial class MainWindowViewModel
                     IsLoadingCurrentFile = true;
                     try
                     {
-                        OpenOrActivateDocument(normalized);
+                        Documents.OpenOrActivateDocument(normalized);
                     }
                     finally { IsLoadingCurrentFile = false; }
                 }

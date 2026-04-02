@@ -37,8 +37,8 @@
                 Classes.power="{Binding IsPowerMode}">
             <dock:DockControl x:Name="DocumentsDock"
                               DefaultContext="{Binding}"
-                              Factory="{Binding DockFactory}"
-                              Layout="{Binding DockLayout}"
+                              Factory="{Binding Documents.DockFactory}"
+                              Layout="{Binding Documents.DockLayout}"
                               InitializeFactory="True"
                               InitializeLayout="True"/>
         </Border>

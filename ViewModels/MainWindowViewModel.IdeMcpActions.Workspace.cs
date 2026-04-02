@@ -81,7 +81,7 @@ public partial class MainWindowViewModel
             safety_level = SafetyLevel,
             editor_group_count = EditorGroupCount,
             agent_trace_step_count = InstrumentationPanel.AgentTraceSteps.Count,
-            is_autonomous_running = IsAutonomousRunning,
+            is_autonomous_running = Autonomous.IsAutonomousRunning,
             diagnostics
         };
         return JsonSerializer.Serialize(state);

@@ -746,8 +746,8 @@ internal sealed partial class IdeMcpCommandExecutor
         {
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                if (_vm.StartAutonomousCommand.CanExecute(null))
-                    _vm.StartAutonomousCommand.Execute(null);
+                if (_vm.Autonomous.StartAutonomousCommand.CanExecute(null))
+                    _vm.Autonomous.StartAutonomousCommand.Execute(null);
             });
             return "OK";
         });
@@ -755,8 +755,8 @@ internal sealed partial class IdeMcpCommandExecutor
         {
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                if (_vm.PauseAutonomousCommand.CanExecute(null))
-                    _vm.PauseAutonomousCommand.Execute(null);
+                if (_vm.Autonomous.PauseAutonomousCommand.CanExecute(null))
+                    _vm.Autonomous.PauseAutonomousCommand.Execute(null);
             });
             return "OK";
         });
@@ -764,8 +764,8 @@ internal sealed partial class IdeMcpCommandExecutor
         {
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                if (_vm.ResumeAutonomousCommand.CanExecute(null))
-                    _vm.ResumeAutonomousCommand.Execute(null);
+                if (_vm.Autonomous.ResumeAutonomousCommand.CanExecute(null))
+                    _vm.Autonomous.ResumeAutonomousCommand.Execute(null);
             });
             return "OK";
         });
@@ -774,8 +774,8 @@ internal sealed partial class IdeMcpCommandExecutor
         {
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                if (_vm.FixFailingTestsCommand.CanExecute(null))
-                    _vm.FixFailingTestsCommand.Execute(null);
+                if (_vm.Autonomous.FixFailingTestsCommand.CanExecute(null))
+                    _vm.Autonomous.FixFailingTestsCommand.Execute(null);
             });
             return "OK";
         });
@@ -783,8 +783,8 @@ internal sealed partial class IdeMcpCommandExecutor
         {
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                if (_vm.InvestigateNullrefCommand.CanExecute(null))
-                    _vm.InvestigateNullrefCommand.Execute(null);
+                if (_vm.Autonomous.InvestigateNullrefCommand.CanExecute(null))
+                    _vm.Autonomous.InvestigateNullrefCommand.Execute(null);
             });
             return "OK";
         });
@@ -792,8 +792,8 @@ internal sealed partial class IdeMcpCommandExecutor
         {
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                if (_vm.PrepareCommitCommand.CanExecute(null))
-                    _vm.PrepareCommitCommand.Execute(null);
+                if (_vm.Autonomous.PrepareCommitCommand.CanExecute(null))
+                    _vm.Autonomous.PrepareCommitCommand.Execute(null);
             });
             return "OK";
         });

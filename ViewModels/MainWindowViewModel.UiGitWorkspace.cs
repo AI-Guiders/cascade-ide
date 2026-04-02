@@ -1,5 +1,5 @@
-using Avalonia.Media;
 using Avalonia.Threading;
+using CascadeIDE.Features.UiChrome;
 
 namespace CascadeIDE.ViewModels;
 
@@ -13,14 +13,9 @@ public partial class MainWindowViewModel
         return File.Exists(p) ? Path.GetDirectoryName(p) ?? "" : p;
     }
 
-    internal static string NormalizeUiMode(string? mode)
-    {
-        if (string.Equals(mode, "Focus", StringComparison.OrdinalIgnoreCase))
-            return "Focus";
-        if (string.Equals(mode, "Power", StringComparison.OrdinalIgnoreCase))
-            return "Power";
-        return "Balanced";
-    }
+    internal static string NormalizeUiMode(string? mode) => UiChromeViewModel.NormalizeUiMode(mode);
+
+    private Task RefreshGitSummaryAsync() => Chrome.RefreshGitSummaryAsync(RunGitCommandAsync);
 
     private void InitializeAgentUiDefaults()
     {
@@ -170,113 +165,11 @@ public partial class MainWindowViewModel
         }
 
         ApplyUiModeLayout(normalized, persist: true);
+        Autonomous.NotifyHostPowerContextChanged();
         if (string.Equals(normalized, "Power", StringComparison.OrdinalIgnoreCase))
             Dispatcher.UIThread.Post(RefreshWorkspaceSnapshotCore, DispatcherPriority.Background);
 
-        if (_lastAppliedUiModeForBloomEffects is not null
-            && !string.Equals(_lastAppliedUiModeForBloomEffects, normalized, StringComparison.OrdinalIgnoreCase))
-            TriggerUiModeBloom(normalized);
-        _lastAppliedUiModeForBloomEffects = normalized;
-    }
-
-    private void TriggerUiModeBloom(string normalizedMode)
-    {
-        _uiModeBloomCts?.Cancel();
-        _uiModeBloomCts = new CancellationTokenSource();
-        var ct = _uiModeBloomCts.Token;
-        UiModeBloomBrush = PickUiModeBloomBrush(normalizedMode);
-        UiModeBloomOpacity = 0;
-        _ = RunUiModeBloomAsync(ct);
-    }
-
-    private static IBrush PickUiModeBloomBrush(string mode)
-    {
-        if (string.Equals(mode, "Power", StringComparison.OrdinalIgnoreCase))
-            return new SolidColorBrush(Color.FromArgb(200, 110, 60, 210));
-        if (string.Equals(mode, "Focus", StringComparison.OrdinalIgnoreCase))
-            return new SolidColorBrush(Color.FromArgb(150, 25, 120, 185));
-        return new SolidColorBrush(Color.FromArgb(120, 255, 235, 200));
-    }
-
-    private async Task RunUiModeBloomAsync(CancellationToken ct)
-    {
-        try
-        {
-            await Task.Delay(18, ct).ConfigureAwait(false);
-            var peak = IsPowerMode ? 0.2 : IsFocusMode ? 0.13 : 0.11;
-            await Dispatcher.UIThread.InvokeAsync(() => UiModeBloomOpacity = peak);
-            await Task.Delay(300, ct).ConfigureAwait(false);
-            await Dispatcher.UIThread.InvokeAsync(() => UiModeBloomOpacity = 0);
-        }
-        catch (OperationCanceledException)
-        {
-            await Dispatcher.UIThread.InvokeAsync(() => UiModeBloomOpacity = 0);
-        }
-    }
-
-    private async Task RefreshGitSummaryAsync()
-    {
-        var result = await RunGitCommandAsync(["status", "--short", "--branch"]).ConfigureAwait(false);
-        Dispatcher.UIThread.Post(() =>
-        {
-            if (!result.Success)
-            {
-                GitBranchSummary = "";
-                GitStagedCount = 0;
-                GitUnstagedCount = 0;
-                GitUntrackedCount = 0;
-                FilesChangedBadge = 0;
-                return;
-            }
-
-            var parsed = ParseGitStatusShortBranch(result.Output);
-            GitBranchSummary = parsed.BranchSummary;
-            GitStagedCount = parsed.Staged;
-            GitUnstagedCount = parsed.Unstaged;
-            GitUntrackedCount = parsed.Untracked;
-            FilesChangedBadge = parsed.ChangedPaths;
-        });
-    }
-
-    private static (string BranchSummary, int Staged, int Unstaged, int Untracked, int ChangedPaths) ParseGitStatusShortBranch(string output)
-    {
-        // Expected first line:
-        // ## main...origin/main [ahead 1]
-        // Other lines: XY <path> or ?? <path>
-        var branch = "";
-        int staged = 0, unstaged = 0, untracked = 0, changedPaths = 0;
-        var lines = (output ?? "")
-            .Replace("\r\n", "\n")
-            .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        for (var i = 0; i < lines.Length; i++)
-        {
-            var line = lines[i];
-            if (line.StartsWith("## ", StringComparison.Ordinal))
-            {
-                branch = line[3..].Trim();
-                continue;
-            }
-
-            changedPaths++;
-
-            if (line.StartsWith("??", StringComparison.Ordinal))
-            {
-                untracked++;
-                continue;
-            }
-            if (line.Length < 2)
-                continue;
-            var x = line[0];
-            var y = line[1];
-            // X (index): staged changes
-            if (x != ' ' && x != '?')
-                staged++;
-            // Y (worktree): unstaged changes
-            if (y != ' ' && y != '?')
-                unstaged++;
-        }
-
-        return (branch, staged, unstaged, untracked, changedPaths);
+        Chrome.NotifyUiModeChangedForBloom(normalized, IsPowerMode, IsFocusMode);
     }
 
     private void AttachBreakpointsFileWatcher(string? solutionPath)

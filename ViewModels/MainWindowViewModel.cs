@@ -1,7 +1,6 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Text.Json;
-using Avalonia.Media;
 using Avalonia.Threading;
 using CascadeIDE.Features.Build;
 using CascadeIDE.Features.Chat;
@@ -9,14 +8,14 @@ using CascadeIDE.Features.AutonomousAgent;
 using CascadeIDE.Features.Git;
 using CascadeIDE.Features.Instrumentation;
 using CascadeIDE.Features.Terminal;
+using CascadeIDE.Features.Documents;
+using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Models;
 using CascadeIDE.Services.Lsp;
 using CommunityToolkit.Mvvm.ComponentModel;
-using Dock.Model.Mvvm;
-
 namespace CascadeIDE.ViewModels;
 
-public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpActions
+public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpActions, IAutonomousAgentSessionHost
 {
     public const string InstallNewSentinel = "— Установить модель… —";
 
@@ -49,13 +48,13 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
 
     private Services.McpClientService _mcpClientService;
     private AutonomousAgentService _autonomousAgentService;
-    private CancellationTokenSource? _autonomousCts;
-    private Task? _autonomousTask;
-    private AutonomousRunState? _autonomousRunState;
 
     public MainWindowViewModel()
     {
         Workspace = new SolutionWorkspaceViewModel();
+        Chrome = new UiChromeViewModel();
+        Documents = new DocumentsWorkspaceViewModel(this, Workspace, () => ReopenClosedDocumentCommand.NotifyCanExecuteChanged());
+        Documents.PropertyChanged += OnDocumentsPropertyChanged;
         _csharpLanguageService = new Services.CSharpLanguageService();
         _contextMinimizer = new Services.ContextMinimizer(_csharpLanguageService);
         _aiProviderManager = new Services.AiProviderManager(_contextMinimizer, ResolveProvider);
@@ -75,14 +74,8 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         ApplyUiModeLayout(_uiMode, persist: false);
         if (IsPowerMode)
             Dispatcher.UIThread.Post(RefreshWorkspaceSnapshotCore, DispatcherPriority.Background);
-        OpenDocuments.CollectionChanged += (_, _) =>
-        {
-            OnPropertyChanged(nameof(HasOpenDocuments));
-        };
 
-        DockFactory = new Factory();
-        DockLayout = BuildDockLayout();
-        DockFactory.InitLayout(DockLayout);
+        Documents.InitializeDock();
 
         _lastSavedSettings = (CascadeIdeSettings)_settings.Clone();
         _lastSavedAiKeys = (AiKeys)_aiKeys.Clone();
@@ -112,6 +105,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
 
         _mcpClientService = new Services.McpClientService(_settings.ExternalMcpServersJson);
         _autonomousAgentService = CreateAutonomousAgentService(_mcpClientService);
+        Autonomous = new AutonomousAgentSessionViewModel(_autonomousAgentService, this);
         _ideMcpExecutor = new IdeMcpCommandExecutor(this);
 
         Workspace.PropertyChanged += (_, e) => OnWorkspacePropertyChanged(e.PropertyName);
@@ -119,6 +113,26 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
 
     /// <summary>Solution/workspace state and background loading.</summary>
     public SolutionWorkspaceViewModel Workspace { get; }
+
+    /// <summary>Git-телеметрия полосы задач и bloom при смене UI-режима.</summary>
+    public UiChromeViewModel Chrome { get; }
+
+    /// <summary>Открытые файлы, группы редакторов и Dock.</summary>
+    public DocumentsWorkspaceViewModel Documents { get; }
+
+    /// <summary>Автономный агент (Power): цель, шаги, start/pause/resume.</summary>
+    public AutonomousAgentSessionViewModel Autonomous { get; }
+
+    private void OnDocumentsPropertyChanged(object? _, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is null)
+            return;
+        OnPropertyChanged(e.PropertyName);
+        if (e.PropertyName == nameof(DocumentsWorkspaceViewModel.SelectedDocumentGroup2))
+            OnPropertyChanged(nameof(EditorTextGroup2));
+        if (e.PropertyName == nameof(DocumentsWorkspaceViewModel.SelectedDocumentGroup3))
+            OnPropertyChanged(nameof(EditorTextGroup3));
+    }
 
     private void OnWorkspacePropertyChanged(string? propertyName)
     {
@@ -143,7 +157,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     {
         if (string.IsNullOrWhiteSpace(item.FilePath))
             return;
-        OpenOrActivateDocument(item.FilePath);
+        Documents.OpenOrActivateDocument(item.FilePath);
         var line = item.Line;
         var col = item.Column;
         Dispatcher.UIThread.Post(() => GotoActiveEditorLineColumnRequested?.Invoke(line, col), DispatcherPriority.Loaded);
@@ -272,9 +286,10 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _settings.ExternalMcpServersJson = value ?? "[]";
 
         // External MCP connectivity affects autonomous tool list/calls.
-        _autonomousCts?.Cancel();
+        Autonomous.CancelForHostReconfiguration();
         _mcpClientService = new Services.McpClientService(_settings.ExternalMcpServersJson);
         _autonomousAgentService = CreateAutonomousAgentService(_mcpClientService);
+        Autonomous.ReplaceAgentService(_autonomousAgentService);
 
         SaveSettingsIfChanged();
     }
@@ -395,38 +410,12 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     [NotifyPropertyChangedFor(nameof(DebugCurrentLineInCurrentFile))]
     private string? _currentFilePath;
 
-    [ObservableProperty]
-    private OpenDocumentViewModel? _selectedDocument;
-
     private readonly List<(string FilePath, int Line)> _breakpoints = [];
     private readonly List<(string FilePath, int Line)> _debuggerBreakpoints = [];
     private FileSystemWatcher? _breakpointsFileWatcher;
     private CancellationTokenSource? _openFileDebounceCts;
-    private CancellationTokenSource? _uiModeBloomCts;
-    /// <summary>Предыдущий применённый режим UI — чтобы не давать bloom при первом применении и при повторной установке того же значения.</summary>
-    private string? _lastAppliedUiModeForBloomEffects;
     // Solution load version is owned by Workspace.
     private string? _lastBuildBinlogPath;
-    private bool _isSwitchingDocument;
-    private readonly Stack<string> _recentlyClosedDocumentPaths = new();
-    private int _recentlyClosedDocumentCount;
-    private const int OpenFileDebounceMs = 100;
-
-    public ObservableCollection<OpenDocumentViewModel> OpenDocuments { get; } = [];
-    public bool HasOpenDocuments => OpenDocuments.Count > 0;
-    public int RecentlyClosedDocumentCount => _recentlyClosedDocumentCount;
-
-    // ---- Dock MDI (inside MainWindow only; no floating) ----
-    public Dock.Model.Core.IFactory DockFactory { get; }
-
-    public Dock.Model.Core.IDock DockLayout { get; private set; }
-
-    public ObservableCollection<Dock.Model.Core.IDockable> DockDocuments { get; } = [];
-
-    [ObservableProperty]
-    private Dock.Model.Core.IDockable? _dockActiveDocument;
-
-    private IDisposable? _selectedDocumentContentSubscription;
 
     /// <summary>Номера строк с брейкпоинтами в текущем открытом файле (для отрисовки в редакторе).</summary>
     public IReadOnlyList<int> BreakpointLinesInCurrentFile
@@ -587,20 +576,10 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     [NotifyPropertyChangedFor(nameof(MainWorkspaceTelemetryColumnSpan))]
     private string _uiMode = "Balanced";
 
-    /// <summary>Короткая «кинематографичная» вспышка при смене режима UI (Opacity + кисть; разметка — MainWindow).</summary>
-    [ObservableProperty]
-    private double _uiModeBloomOpacity;
-
-    [ObservableProperty]
-    private IBrush _uiModeBloomBrush = Brushes.Transparent;
-
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowEditorGroup2))]
     [NotifyPropertyChangedFor(nameof(ShowEditorGroup3))]
     private int _editorGroupCount = 1;
-
-    [ObservableProperty]
-    private int _activeEditorGroup = 1;
 
     [ObservableProperty]
     private string _activeTaskTitle = "Нет активной задачи";
@@ -614,19 +593,6 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
 
     [ObservableProperty]
     private string _activeObjective = "Нет активной операции агента.";
-
-    [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(StartAutonomousCommand))]
-    private string _autonomousObjective = "Autonomous objective: fix issues in the current workspace.";
-
-    [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(StartAutonomousCommand))]
-    private int _autonomousMaxSteps = 10;
-
-    [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(StartAutonomousCommand))]
-    [NotifyCanExecuteChangedFor(nameof(PauseAutonomousCommand))]
-    private bool _isAutonomousRunning;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsRiskSummaryVisible))]
@@ -660,11 +626,6 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     [NotifyPropertyChangedFor(nameof(TelemetryTestsText))]
     [NotifyPropertyChangedFor(nameof(TelemetryTestsCockpitShort))]
     private int _impactedTestsBadge;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(TelemetryGitText))]
-    [NotifyPropertyChangedFor(nameof(IsFilesChangedBadgeVisible))]
-    private int _filesChangedBadge;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(TelemetryTestsText))]
@@ -804,20 +765,9 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     [ObservableProperty]
     private string _deepSeekApiKey = "";
 
-    public ObservableCollection<OpenDocumentViewModel> Group1Documents { get; } = [];
-    public ObservableCollection<OpenDocumentViewModel> Group2Documents { get; } = [];
-    public ObservableCollection<OpenDocumentViewModel> Group3Documents { get; } = [];
+    public string EditorTextGroup2 => Documents.SelectedDocumentGroup2?.Content ?? "";
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(EditorTextGroup2))]
-    private OpenDocumentViewModel? _selectedDocumentGroup2;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(EditorTextGroup3))]
-    private OpenDocumentViewModel? _selectedDocumentGroup3;
-
-    public string EditorTextGroup2 => SelectedDocumentGroup2?.Content ?? "";
-    public string EditorTextGroup3 => SelectedDocumentGroup3?.Content ?? "";
+    public string EditorTextGroup3 => Documents.SelectedDocumentGroup3?.Content ?? "";
 
     public static readonly IReadOnlyList<string> SendMessageKeyOptions = ["Enter", "Ctrl+Enter", "Shift+Enter"];
 
@@ -843,7 +793,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _openFileDebounceCts?.Cancel();
         _openFileDebounceCts = new CancellationTokenSource();
         var cts = _openFileDebounceCts;
-        _ = OpenFileAfterDebounceAsync(cts.Token);
+        _ = Documents.OpenFileAfterDebounceAsync(cts.Token);
     }
 
     private void HandleSolutionPathChanged(string value)
@@ -855,26 +805,6 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             _ = GitPanel.RefreshGitPanelAsync();
         _ = RestartCSharpLanguageServerAsync();
     }
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(TelemetryGitText))]
-    [NotifyPropertyChangedFor(nameof(TelemetryGitCockpitShort))]
-    private string _gitBranchSummary = "";
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(TelemetryGitText))]
-    [NotifyPropertyChangedFor(nameof(TelemetryGitCockpitShort))]
-    private int _gitStagedCount;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(TelemetryGitText))]
-    [NotifyPropertyChangedFor(nameof(TelemetryGitCockpitShort))]
-    private int _gitUnstagedCount;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(TelemetryGitText))]
-    [NotifyPropertyChangedFor(nameof(TelemetryGitCockpitShort))]
-    private int _gitUntrackedCount;
 
     Task<string> Services.IIdeMcpActions.ExecuteCommandAsync(string commandId, IReadOnlyDictionary<string, JsonElement>? args, CancellationToken cancellationToken) =>
         _ideMcpExecutor.ExecuteAsync(commandId, args, cancellationToken);
