@@ -256,4 +256,13 @@ public static class IdeCommands
     public const string WriteAgentNotes = "write_agent_notes";
     /// <summary>Прочитать заметки агента из каталога решения. returns: text.</summary>
     public const string ReadAgentNotes = "read_agent_notes";
+
+    /// <summary>Вставить/обновить секцию заметок агента по section_id (маркерный блок). args: section_id:string, content:string; returns: text; example: {"section_id":"active","content":"ActiveProjectId: cascade-ide"}.</summary>
+    public const string UpsertAgentNotesSection = "upsert_agent_notes_section";
+    /// <summary>Поиск по заметкам агента (case-insensitive) с возвратом совпадающих строк. args: query:string, head_limit?:integer; returns: json; example: {"query":"ActiveProjectId","head_limit":20}.</summary>
+    public const string SearchAgentNotes = "search_agent_notes";
+    /// <summary>Прочитать knowledge-файл из каталога решения. args: file_path:string; returns: text; example: {"file_path":"META/integrity-core.md"}.</summary>
+    public const string ReadKnowledgeFile = "read_knowledge_file";
+    /// <summary>Список knowledge-файлов в каталоге решения (опционально subdir). args: subdir?:string; returns: json; example: {"subdir":"work"}.</summary>
+    public const string ListKnowledgeFiles = "list_knowledge_files";
 }

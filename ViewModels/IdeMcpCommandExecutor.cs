@@ -941,5 +941,13 @@ internal sealed partial class IdeMcpCommandExecutor
     {
         add(Services.IdeCommands.WriteAgentNotes, async (args, ct) => await ((IIdeMcpActions)_vm).WriteAgentNotesAsync(S(args, "content") ?? "", ct));
         add(Services.IdeCommands.ReadAgentNotes, async (_, ct) => await ((IIdeMcpActions)_vm).ReadAgentNotesAsync(ct));
+        add(Services.IdeCommands.UpsertAgentNotesSection, async (args, ct) =>
+            await ((IIdeMcpActions)_vm).UpsertAgentNotesSectionAsync(S(args, "section_id") ?? "", S(args, "content") ?? "", ct));
+        add(Services.IdeCommands.SearchAgentNotes, async (args, ct) =>
+            await ((IIdeMcpActions)_vm).SearchAgentNotesAsync(S(args, "query") ?? "", args is not null && args.TryGetValue("head_limit", out var hl) && hl.TryGetInt32(out var v) ? v : null, ct));
+        add(Services.IdeCommands.ReadKnowledgeFile, async (args, ct) =>
+            await ((IIdeMcpActions)_vm).ReadKnowledgeFileAsync(S(args, "file_path") ?? "", ct));
+        add(Services.IdeCommands.ListKnowledgeFiles, async (args, ct) =>
+            await ((IIdeMcpActions)_vm).ListKnowledgeFilesAsync(S(args, "subdir"), ct));
     }
 }

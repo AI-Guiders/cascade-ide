@@ -54,6 +54,7 @@ internal static class IdeCommandsDoc
         ["highlight_control"] = "Подсветить контрол рамкой (под курсором или по имени). args: name?:string; returns: text; example: {\"name\":\"BuildButton\"}.",
         ["install_ollama_model"] = "Скачать модель Ollama (как в настройках). args: model:string; returns: text; example: {\"model\":\"qwen2.5-coder:7b\"}.",
         ["investigate_nullref"] = "Quick action: расследовать NullReferenceException. returns: text.",
+        ["list_knowledge_files"] = "Список knowledge-файлов в каталоге решения (опционально subdir). args: subdir?:string; returns: json; example: {\"subdir\":\"work\"}.",
         ["list_tools"] = "Список MCP-тулов, которые IDE публикует (name/description/inputSchema). returns: json.",
         ["load_solution"] = "Загрузить решение (.sln/.slnx/.slnf) и обновить дерево решения. args: path:string; returns: text; example: {\"path\":\"D:\\\\Experiments\\\\PersonalCursorFolder\\\\Financial\\\\software\\\\open\\\\cascade-ide\\\\CascadeIDE.slnx\"}.",
         ["move_document_to_group_1"] = "Переместить документ в группу 1. args: file_path:string; returns: text; example: {\"file_path\":\"C:\\\\tmp\\\\a.cs\"}.",
@@ -67,6 +68,7 @@ internal static class IdeCommandsDoc
         ["pause_autonomous"] = "Поставить автономный режим на паузу. returns: text.",
         ["prepare_commit"] = "Quick action: подготовить коммит (сводка/план/проверки). returns: text.",
         ["read_agent_notes"] = "Прочитать заметки агента из каталога решения. returns: text.",
+        ["read_knowledge_file"] = "Прочитать knowledge-файл из каталога решения. args: file_path:string; returns: text; example: {\"file_path\":\"META/integrity-core.md\"}.",
         ["refresh_workspace_snapshot"] = "Обновить снимок рабочего состояния (Power cockpit). returns: text.",
         ["remove_breakpoint"] = "Снять брейкпоинт. args: file_path:string, line:integer; returns: text; example: {\"file_path\":\"C:\\\\tmp\\\\a.cs\",\"line\":42}.",
         ["reopen_closed_document"] = "Переоткрыть недавно закрытый документ. returns: text.",
@@ -77,6 +79,7 @@ internal static class IdeCommandsDoc
         ["run_affected_tests"] = "Запустить затронутые тесты по changed_paths (или fallback на полный прогон). args: changed_paths?:string[]; returns: json; example: {\"changed_paths\":[\"a.cs\",\"b.cs\"]}.",
         ["run_code_cleanup"] = "Запустить code cleanup (`dotnet format`). args: include_path?:string; returns: json; example: {\"include_path\":\"src\"}.",
         ["run_tests"] = "Запустить тесты решения. returns: json.",
+        ["search_agent_notes"] = "Поиск по заметкам агента (case-insensitive) с возвратом совпадающих строк. args: query:string, head_limit?:integer; returns: json; example: {\"query\":\"ActiveProjectId\",\"head_limit\":20}.",
         ["select"] = "Выделить диапазон в редакторе (1-based). args: file_path:string, start_line:integer, start_column:integer, end_line:integer, end_column:integer; returns: text; example: {\"file_path\":\"C:\\\\tmp\\\\a.cs\",\"start_line\":1,\"start_column\":1,\"end_line\":1,\"end_column\":10}.",
         ["send_chat"] = "Кнопка отправки чата; опционально `message` — записать в поле ввода перед отправкой. returns: text.",
         ["send_keys"] = "Отправить хоткей в контрол. args: keys:string, name?:string; returns: text; example: {\"keys\":\"Ctrl+S\"}.",
@@ -120,6 +123,7 @@ internal static class IdeCommandsDoc
         ["toggle_pin_document"] = "Закрепить/открепить документ (pin). args: file_path:string; returns: text; example: {\"file_path\":\"C:\\\\tmp\\\\a.cs\"}.",
         ["toggle_solution_explorer"] = "Как меню «Вид → Обозреватель решения». returns: text.",
         ["toggle_terminal"] = "Как меню «Вид → Терминал» (переключатель). returns: text.",
+        ["upsert_agent_notes_section"] = "Вставить/обновить секцию заметок агента по section_id (маркерный блок). args: section_id:string, content:string; returns: text; example: {\"section_id\":\"active\",\"content\":\"ActiveProjectId: cascade-ide\"}.",
         ["write_agent_notes"] = "Записать заметки агента в каталог решения. args: content:string; returns: text; example: {\"content\":\"notes\"}.",
     };
 

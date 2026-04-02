@@ -217,11 +217,14 @@
 | `get_ui_layout` | Дерево UI-элементов (layout) с bounds/visibility/content. returns: json. |
 | `get_ui_theme` | Снимок темы UI и лэйаута (включая resolved-ресурсы). returns: json. |
 | `highlight_control` | Подсветить контрол рамкой (под курсором или по имени). args: name?:string; returns: text; example: {"name":"BuildButton"}. |
+| `list_knowledge_files` | Список knowledge-файлов в каталоге решения (опционально subdir). args: subdir?:string; returns: json; example: {"subdir":"work"}. |
 | `move_document_to_group_1` | Переместить документ в группу 1. args: file_path:string; returns: text; example: {"file_path":"C:\\tmp\\a.cs"}. |
 | `move_document_to_group_2` | Переместить документ в группу 2. args: file_path:string; returns: text; example: {"file_path":"C:\\tmp\\a.cs"}. |
 | `move_document_to_group_3` | Переместить документ в группу 3. args: file_path:string; returns: text; example: {"file_path":"C:\\tmp\\a.cs"}. |
 | `read_agent_notes` | Прочитать заметки агента из каталога решения. returns: text. |
+| `read_knowledge_file` | Прочитать knowledge-файл из каталога решения. args: file_path:string; returns: text; example: {"file_path":"META/integrity-core.md"}. |
 | `reopen_closed_document` | Переоткрыть недавно закрытый документ. returns: text. |
+| `search_agent_notes` | Поиск по заметкам агента (case-insensitive) с возвратом совпадающих строк. args: query:string, head_limit?:integer; returns: json; example: {"query":"ActiveProjectId","head_limit":20}. |
 | `send_keys` | Отправить хоткей в контрол. args: keys:string, name?:string; returns: text; example: {"keys":"Ctrl+S"}. |
 | `set_control_layout` | Изменить раскладку/позицию контрола. args: name:string, layout:string; returns: text; example: {"name":"BuildButton","layout":"{\"x\":10,\"y\":10}"}. |
 | `set_control_text` | Установить текст в контроле ввода. args: name:string, text:string; returns: text; example: {"name":"ChatInput","text":"hi"}. |
@@ -232,6 +235,7 @@
 | `show_debug_position` | Показать текущую позицию отладки (файл/строка). args: file_path?:string, line?:integer; returns: text; example: {"file_path":"C:\\tmp\\a.cs","line":1}. |
 | `show_debug_state` | Показать стек/переменные отладки в панели Debug. args: stack_frames?:object[], variables?:object[]; returns: text; example: {"stack_frames":[],"variables":[]}. |
 | `toggle_pin_document` | Закрепить/открепить документ (pin). args: file_path:string; returns: text; example: {"file_path":"C:\\tmp\\a.cs"}. |
+| `upsert_agent_notes_section` | Вставить/обновить секцию заметок агента по section_id (маркерный блок). args: section_id:string, content:string; returns: text; example: {"section_id":"active","content":"ActiveProjectId: cascade-ide"}. |
 | `write_agent_notes` | Записать заметки агента в каталог решения. args: content:string; returns: text; example: {"content":"notes"}. |
 <!-- GENERATED:IdeCommands END -->
 
