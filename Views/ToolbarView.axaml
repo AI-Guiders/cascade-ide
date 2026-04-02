@@ -36,8 +36,8 @@
             <Button Content="1-up" Command="{Binding SetSingleEditorGroupCommand}"/>
             <Button Content="2-up" Command="{Binding SetDualEditorGroupCommand}"/>
             <Button Content="3-up" Command="{Binding SetTripleEditorGroupCommand}"/>
-            <TextBlock Text="{Binding SolutionPath}" VerticalAlignment="Center" MaxWidth="300" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
-            <TextBlock Text="{Binding SolutionLoadError}" VerticalAlignment="Center" MaxWidth="350" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource CascadeTheme.ToolbarErrorForeground}"/>
+            <TextBlock Text="{Binding Workspace.SolutionPath}" VerticalAlignment="Center" MaxWidth="300" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
+            <TextBlock Text="{Binding Workspace.SolutionLoadError}" VerticalAlignment="Center" MaxWidth="350" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource CascadeTheme.ToolbarErrorForeground}"/>
             <TextBlock Text="{Binding OllamaStatus}" VerticalAlignment="Center" Margin="8,0,0,0" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
         </StackPanel>
     </ScrollViewer>

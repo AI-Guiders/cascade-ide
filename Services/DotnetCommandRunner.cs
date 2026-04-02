@@ -2,9 +2,12 @@ using System.Diagnostics;
 
 namespace CascadeIDE.Services;
 
-/// <inheritdoc cref="IGitCommandRunner" />
-public sealed class GitCommandRunner : IGitCommandRunner
+/// <inheritdoc cref="IDotnetCommandRunner" />
+public sealed class DotnetCommandRunner : IDotnetCommandRunner
 {
+    /// <summary>
+    /// Safety cap for accumulated process output. Keeps last N chars.
+    /// </summary>
     public const int MaxOutputChars = 250_000;
 
     public async Task<(bool Success, int ExitCode, string Output)> RunAsync(
@@ -13,11 +16,11 @@ public sealed class GitCommandRunner : IGitCommandRunner
         CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(workingDirectory) || !Directory.Exists(workingDirectory))
-            return (false, -1, "Workspace path is not available.");
+            return (false, -1, "Working directory is not available.");
 
         try
         {
-            var psi = new ProcessStartInfo("git")
+            var psi = new ProcessStartInfo("dotnet")
             {
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -30,7 +33,7 @@ public sealed class GitCommandRunner : IGitCommandRunner
 
             using var process = Process.Start(psi);
             if (process is null)
-                return (false, -1, "Failed to start git process.");
+                return (false, -1, "Failed to start dotnet process.");
 
             var acc = new OutputAccumulator(MaxOutputChars);
 
@@ -61,3 +64,4 @@ public sealed class GitCommandRunner : IGitCommandRunner
         }
     }
 }
+

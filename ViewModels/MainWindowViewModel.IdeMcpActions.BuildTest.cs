@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 using System.Xml.Linq;
@@ -20,24 +19,24 @@ public partial class MainWindowViewModel
     Task<string> Services.IIdeMcpActions.GetSolutionFilesAsync() =>
         Dispatcher.UIThread.InvokeAsync(() =>
         {
-            var solutionPath = SolutionPath;
-            var entries = CollectFileEntries(SolutionRoots).Select(e => new
+            var solutionPath = Workspace.SolutionPath;
+            var entries = CollectFileEntries(Workspace.SolutionRoots).Select(e => new
             {
                 path = e.FullPath,
                 title = e.Title,
                 relative_path = GetRelativePath(solutionPath, e.FullPath)
             }).ToList();
-            var tree = SolutionRoots.Select(r => BuildSolutionTreeNode(r, solutionPath)).ToList();
+            var tree = Workspace.SolutionRoots.Select(r => BuildSolutionTreeNode(r, solutionPath)).ToList();
             return JsonSerializer.Serialize(new { file_entries = entries, solution_tree = tree });
         }).GetTask();
 
     async Task<string> Services.IIdeMcpActions.BuildAsync()
     {
-        var path = SolutionPath;
+        var path = Workspace.SolutionPath;
         if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
         {
             var msg = "No solution loaded or file not found.";
-            Dispatcher.UIThread.Post(() => { BuildOutputPanel.BuildOutput = msg + "\r\n"; IsBuildOutputVisible = true; });
+            Dispatcher.UIThread.Post(() => { BuildOutputPanel.Set(msg + "\r\n"); IsBuildOutputVisible = true; });
             return msg;
         }
         try
@@ -45,34 +44,18 @@ public partial class MainWindowViewModel
             var artifactsDir = Path.Combine(Path.GetDirectoryName(path) ?? "", ".cascade-ide", "build-artifacts");
             Directory.CreateDirectory(artifactsDir);
             var binlogPath = Path.Combine(artifactsDir, $"build-{DateTime.UtcNow:yyyyMMdd-HHmmss-fff}.binlog");
-            var psi = new ProcessStartInfo("dotnet")
-            {
-                ArgumentList = { "build", path },
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                WorkingDirectory = Path.GetDirectoryName(path) ?? ""
-            };
-            psi.ArgumentList.Add($"-bl:{binlogPath}");
-            using var process = Process.Start(psi);
-            if (process is null)
-            {
-                var msg = "Failed to start dotnet build.";
-                Dispatcher.UIThread.Post(() => { BuildOutputPanel.BuildOutput = msg + "\r\n"; IsBuildOutputVisible = true; });
-                return msg;
-            }
-            var stdout = process.StandardOutput.ReadToEndAsync();
-            var stderr = process.StandardError.ReadToEndAsync();
-            await Task.WhenAll(stdout, stderr).ConfigureAwait(false);
-            await process.WaitForExitAsync().ConfigureAwait(false);
-            var outStr = await stdout + "\r\n" + await stderr;
-            if (process.ExitCode != 0)
-                outStr += $"\r\nExit code: {process.ExitCode}";
+            var workDir = Path.GetDirectoryName(path) ?? "";
+            var (success, exitCode, output) = await _dotnetRunner
+                .RunAsync(["build", path, $"-bl:{binlogPath}"], workDir)
+                .ConfigureAwait(false);
+
+            var outStr = output;
+            if (!success && exitCode != 0)
+                outStr += $"\r\nExit code: {exitCode}";
             var pathCopy = path;
             Dispatcher.UIThread.Post(() =>
             {
-                BuildOutputPanel.BuildOutput = $"Сборка: {pathCopy}\r\n{outStr}";
+                BuildOutputPanel.Set($"Сборка: {pathCopy}\r\n{outStr}");
                 IsBuildOutputVisible = true;
                 _lastBuildBinlogPath = binlogPath;
             });
@@ -81,7 +64,7 @@ public partial class MainWindowViewModel
         catch (Exception ex)
         {
             var msg = "Error: " + ex.Message;
-            Dispatcher.UIThread.Post(() => { BuildOutputPanel.BuildOutput = msg + "\r\n"; IsBuildOutputVisible = true; });
+            Dispatcher.UIThread.Post(() => { BuildOutputPanel.Set(msg + "\r\n"); IsBuildOutputVisible = true; });
             return msg;
         }
     }
@@ -121,7 +104,7 @@ public partial class MainWindowViewModel
 
     private async Task<string> RunTestsInternalAsync(string? filterExpression, string mode, IReadOnlyList<string>? tokens = null)
     {
-        var path = SolutionPath;
+        var path = Workspace.SolutionPath;
         if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
             return JsonSerializer.Serialize(new { success = false, error = "No solution loaded or file not found.", mode });
 
@@ -132,38 +115,28 @@ public partial class MainWindowViewModel
             var trxFileName = $"tests-{DateTime.UtcNow:yyyyMMdd-HHmmss-fff}.trx";
             var trxPath = Path.Combine(resultsDir, trxFileName);
 
-            var psi = new ProcessStartInfo("dotnet")
+            var workDir = Path.GetDirectoryName(path) ?? "";
+            var args = new List<string>
             {
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                WorkingDirectory = Path.GetDirectoryName(path) ?? ""
+                "test",
+                path,
+                "--logger",
+                "console;verbosity=detailed",
+                "--logger",
+                $"trx;LogFileName={trxFileName}",
+                "--results-directory",
+                resultsDir
             };
-            psi.ArgumentList.Add("test");
-            psi.ArgumentList.Add(path);
-            psi.ArgumentList.Add("--logger");
-            psi.ArgumentList.Add("console;verbosity=detailed");
-            psi.ArgumentList.Add("--logger");
-            psi.ArgumentList.Add($"trx;LogFileName={trxFileName}");
-            psi.ArgumentList.Add("--results-directory");
-            psi.ArgumentList.Add(resultsDir);
             if (!string.IsNullOrWhiteSpace(filterExpression))
             {
-                psi.ArgumentList.Add("--filter");
-                psi.ArgumentList.Add(filterExpression);
+                args.Add("--filter");
+                args.Add(filterExpression);
             }
 
-            using var process = Process.Start(psi);
-            if (process is null)
-                return JsonSerializer.Serialize(new { success = false, error = "Failed to start dotnet test.", mode, filter = filterExpression });
-
-            var stdout = process.StandardOutput.ReadToEndAsync();
-            var stderr = process.StandardError.ReadToEndAsync();
-            await Task.WhenAll(stdout, stderr).ConfigureAwait(false);
-            await process.WaitForExitAsync().ConfigureAwait(false);
-
-            var outStr = await stdout + "\n" + await stderr;
+            var (success, exitCode, output) = await _dotnetRunner.RunAsync(args, workDir).ConfigureAwait(false);
+            var outStr = output;
+            if (!success && exitCode != 0)
+                outStr += $"\nExit code: {exitCode}";
             var parsed = File.Exists(trxPath)
                 ? ParseTrx(trxPath) ?? TestOutputParser.Parse(outStr)
                 : TestOutputParser.Parse(outStr);
@@ -296,25 +269,21 @@ public partial class MainWindowViewModel
 
     async Task<string> Services.IIdeMcpActions.RunCodeCleanupAsync(string? includePath)
     {
-        var path = SolutionPath;
+        var path = Workspace.SolutionPath;
         if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
             return JsonSerializer.Serialize(new { success = false, error = "No solution loaded or file not found." });
 
         try
         {
-            var psi = new ProcessStartInfo("dotnet")
+            var workDir = Path.GetDirectoryName(path) ?? "";
+            var args = new List<string>
             {
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                WorkingDirectory = Path.GetDirectoryName(path) ?? ""
+                "format",
+                path,
+                "--no-restore",
+                "--verbosity",
+                "minimal"
             };
-            psi.ArgumentList.Add("format");
-            psi.ArgumentList.Add(path);
-            psi.ArgumentList.Add("--no-restore");
-            psi.ArgumentList.Add("--verbosity");
-            psi.ArgumentList.Add("minimal");
 
             if (!string.IsNullOrWhiteSpace(includePath))
             {
@@ -327,34 +296,25 @@ public partial class MainWindowViewModel
                 {
                     includeArg = includePath;
                 }
-                psi.ArgumentList.Add("--include");
-                psi.ArgumentList.Add(includeArg);
+                args.Add("--include");
+                args.Add(includeArg);
             }
 
-            using var process = Process.Start(psi);
-            if (process is null)
-                return JsonSerializer.Serialize(new { success = false, error = "Failed to start dotnet format." });
-
-            var stdout = process.StandardOutput.ReadToEndAsync();
-            var stderr = process.StandardError.ReadToEndAsync();
-            await Task.WhenAll(stdout, stderr).ConfigureAwait(false);
-            await process.WaitForExitAsync().ConfigureAwait(false);
-
-            var outStr = await stdout + "\n" + await stderr;
+            var (success, exitCode, outStr) = await _dotnetRunner.RunAsync(args, workDir).ConfigureAwait(false);
             const int maxRawChars = 4000;
             var rawTruncated = outStr.Length > maxRawChars ? outStr[..maxRawChars] + "\n... (output truncated)" : outStr;
 
             var pathCopy = path;
             Dispatcher.UIThread.Post(() =>
             {
-                BuildOutputPanel.BuildOutput = $"Code cleanup: {pathCopy}\r\n{outStr}";
+                BuildOutputPanel.Set($"Code cleanup: {pathCopy}\r\n{outStr}");
                 IsBuildOutputVisible = true;
             });
 
             return JsonSerializer.Serialize(new
             {
-                success = process.ExitCode == 0,
-                exit_code = process.ExitCode,
+                success,
+                exit_code = exitCode,
                 raw_output = rawTruncated
             });
         }

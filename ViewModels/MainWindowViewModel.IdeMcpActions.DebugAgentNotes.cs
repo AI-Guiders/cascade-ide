@@ -57,7 +57,7 @@ public partial class MainWindowViewModel
 
     Task<string> Services.IIdeMcpActions.WriteAgentNotesAsync(string content, CancellationToken cancellationToken)
     {
-        var solutionPath = SolutionPath;
+        var solutionPath = Workspace.SolutionPath;
         if (string.IsNullOrWhiteSpace(solutionPath) || !File.Exists(solutionPath))
             return Task.FromResult("Error: solution not loaded. Open a solution first.");
         var solutionDir = Path.GetDirectoryName(solutionPath);
@@ -79,7 +79,7 @@ public partial class MainWindowViewModel
 
     Task<string> Services.IIdeMcpActions.ReadAgentNotesAsync(CancellationToken cancellationToken)
     {
-        var solutionPath = SolutionPath;
+        var solutionPath = Workspace.SolutionPath;
         if (string.IsNullOrWhiteSpace(solutionPath) || !File.Exists(solutionPath))
             return Task.FromResult("");
         var solutionDir = Path.GetDirectoryName(solutionPath);

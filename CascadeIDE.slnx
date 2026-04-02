@@ -1,3 +1,4 @@
 <Solution>
   <Project Path="CascadeIDE.csproj" />
+  <Project Path="CascadeIDE.Tests\CascadeIDE.Tests.csproj" />
 </Solution>

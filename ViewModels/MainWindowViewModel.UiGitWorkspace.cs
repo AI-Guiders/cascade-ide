@@ -118,7 +118,7 @@ public partial class MainWindowViewModel
         BottomPanelTabIndex = GetFirstVisibleBottomPanelTabIndex();
     }
 
-    private string GetWorkspacePath() => GetWorkspacePath(SolutionPath);
+    private string GetWorkspacePath() => GetWorkspacePath(Workspace.SolutionPath);
 
     partial void OnSelectedOllamaModelChanged(string? value)
     {

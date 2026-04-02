@@ -68,8 +68,8 @@
                                      UppercaseTitle="True"
                                      Margin="0,4,0,0"/>
             <TreeView Grid.Row="1"
-                      ItemsSource="{Binding SolutionRoots}"
-                      SelectedItem="{Binding SelectedSolutionItem}"
+                      ItemsSource="{Binding Workspace.SolutionRoots}"
+                      SelectedItem="{Binding Workspace.SelectedSolutionItem}"
                       Margin="0,4,0,0">
                 <TreeView.Styles>
                     <Style Selector="TreeViewItem">

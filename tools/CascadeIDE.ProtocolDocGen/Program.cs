@@ -1,0 +1,590 @@
+using System.Text;
+using System.Text.RegularExpressions;
+
+// Run from repo/cascade-ide folder:
+//   dotnet run --project tools/CascadeIDE.ProtocolDocGen -- [--cs-only|--md-only|--lint] <optional: path-to-cascade-ide>
+var csOnly = args.Any(a => string.Equals(a, "--cs-only", StringComparison.OrdinalIgnoreCase));
+var mdOnly = args.Any(a => string.Equals(a, "--md-only", StringComparison.OrdinalIgnoreCase));
+var lintOnly = args.Any(a => string.Equals(a, "--lint", StringComparison.OrdinalIgnoreCase));
+if (csOnly && mdOnly)
+{
+    Console.Error.WriteLine("Specify at most one of --cs-only / --md-only.");
+    return 2;
+}
+if (lintOnly && (csOnly || mdOnly))
+{
+    Console.Error.WriteLine("Specify --lint alone (do not combine with --cs-only/--md-only).");
+    return 2;
+}
+
+var rootArg = args.LastOrDefault(a => !a.StartsWith("--", StringComparison.Ordinal));
+var root = !string.IsNullOrWhiteSpace(rootArg) ? Path.GetFullPath(rootArg) : Directory.GetCurrentDirectory();
+
+var ideCommandsPath = Path.Combine(root, "Services", "IdeCommands.cs");
+var protocolPath = Path.Combine(root, "docs", "MCP-PROTOCOL.md");
+var generatedCsPath = Path.Combine(root, "Services", "Generated", "IdeCommandsDoc.g.cs");
+var generatedArgsPath = Path.Combine(root, "Services", "Generated", "IdeCommandsArgsGenerated.g.cs");
+var generatedContractPath = Path.Combine(root, "Services", "Generated", "IdeCommandsContract.g.cs");
+var generatedExecutorPath = Path.Combine(root, "ViewModels", "Generated", "IdeMcpCommandExecutor.Generated.g.cs");
+
+if (!File.Exists(ideCommandsPath))
+{
+    Console.Error.WriteLine($"Missing file: {ideCommandsPath}");
+    return 2;
+}
+if (!File.Exists(protocolPath))
+{
+    Console.Error.WriteLine($"Missing file: {protocolPath}");
+    return 2;
+}
+
+var items = IdeCommandsParser.Parse(File.ReadAllText(ideCommandsPath, Encoding.UTF8));
+
+if (lintOnly)
+{
+    var errors = IdeCommandsLint.Run(items);
+    if (errors.Count > 0)
+    {
+        foreach (var e in errors)
+            Console.Error.WriteLine(e);
+        return 3;
+    }
+    Console.WriteLine("OK");
+    return 0;
+}
+
+if (!mdOnly)
+{
+    Directory.CreateDirectory(Path.GetDirectoryName(generatedCsPath)!);
+    File.WriteAllText(generatedCsPath, IdeCommandsDocEmitter.Emit(items), new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+    File.WriteAllText(generatedArgsPath, IdeCommandsArgsEmitter.Emit(items), new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+    File.WriteAllText(generatedContractPath, IdeCommandsContractEmitter.Emit(items), new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+    Directory.CreateDirectory(Path.GetDirectoryName(generatedExecutorPath)!);
+    File.WriteAllText(generatedExecutorPath, IdeMcpCommandExecutorEmitter.Emit(), new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+}
+
+if (!csOnly)
+{
+    var protocol = File.ReadAllText(protocolPath, Encoding.UTF8);
+    var updated = MarkerReplace.ReplaceSection(
+        protocol,
+        startMarker: "<!-- GENERATED:IdeCommands START -->",
+        endMarker: "<!-- GENERATED:IdeCommands END -->",
+        newContent: ProtocolMdEmitter.EmitIdeCommandsTable(items));
+    File.WriteAllText(protocolPath, updated, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+}
+
+Console.WriteLine("OK");
+return 0;
+
+internal sealed record IdeCommandDoc(string FieldName, string CommandId, string? Summary, string Category);
+
+internal readonly record struct IdeCommandArg(string Name, string JsonType, bool Required, bool IsArray, string? ItemJsonType);
+
+internal static class IdeCommandsParser
+{
+    private static readonly Regex ConstString = new(@"public\s+const\s+string\s+(?<name>\w+)\s*=\s*""(?<value>[^""]+)""\s*;", RegexOptions.Compiled);
+
+    public static IReadOnlyList<IdeCommandDoc> Parse(string text)
+    {
+        var lines = (text ?? "").Replace("\r\n", "\n").Split('\n');
+        var docs = new List<IdeCommandDoc>();
+
+        var pendingSummary = new StringBuilder();
+        var inSummary = false;
+        var category = "Core";
+
+        for (var i = 0; i < lines.Length; i++)
+        {
+            var raw = lines[i];
+            var line = raw.Trim();
+
+            if (line.Contains("class IdeCommands", StringComparison.Ordinal))
+            {
+                // Discard type-level XML doc (we only want per-command summaries).
+                pendingSummary.Clear();
+                inSummary = false;
+                continue;
+            }
+
+            // Category separators in IdeCommands.cs:
+            if (line.StartsWith("// ———", StringComparison.Ordinal))
+            {
+                category = line.TrimStart('/').Trim().Trim('—', ' ', '\t');
+                continue;
+            }
+
+            if (line.StartsWith("///", StringComparison.Ordinal))
+            {
+                var body = line[3..].Trim();
+                if (body.StartsWith("<summary>", StringComparison.Ordinal))
+                {
+                    inSummary = true;
+                    body = body["<summary>".Length..];
+                }
+
+                if (inSummary)
+                {
+                    var endIdx = body.IndexOf("</summary>", StringComparison.Ordinal);
+                    if (endIdx >= 0)
+                    {
+                        pendingSummary.AppendLine(body[..endIdx]);
+                        inSummary = false;
+                    }
+                    else
+                    {
+                        pendingSummary.AppendLine(body);
+                    }
+                }
+
+                continue;
+            }
+
+            var m = ConstString.Match(line);
+            if (!m.Success)
+                continue;
+
+            var fieldName = m.Groups["name"].Value;
+            var commandId = m.Groups["value"].Value;
+            var summary = NormalizeSummary(pendingSummary.ToString());
+            pendingSummary.Clear();
+            inSummary = false;
+
+            docs.Add(new IdeCommandDoc(fieldName, commandId, summary, category));
+        }
+
+        return docs;
+    }
+
+    private static string? NormalizeSummary(string raw)
+    {
+        var s = (raw ?? "").Trim();
+        if (s.Length == 0)
+            return null;
+
+        // Drop XML tags but keep inline <c>text</c>.
+        s = s.Replace("<c>", "`", StringComparison.Ordinal).Replace("</c>", "`", StringComparison.Ordinal);
+        s = Regex.Replace(s, "<.*?>", string.Empty);
+        s = Regex.Replace(s, @"\s+", " ").Trim();
+        return s.Length == 0 ? null : s;
+    }
+}
+
+internal static class IdeCommandsLint
+{
+    public static IReadOnlyList<string> Run(IReadOnlyList<IdeCommandDoc> items)
+    {
+        var errors = new List<string>();
+
+        foreach (var it in items.OrderBy(i => i.CommandId, StringComparer.Ordinal))
+        {
+            var s = it.Summary ?? "";
+
+            if (!s.Contains("returns:", StringComparison.OrdinalIgnoreCase))
+                errors.Add($"Missing returns: command_id='{it.CommandId}' ({it.FieldName})");
+
+            if (s.Contains("args:", StringComparison.OrdinalIgnoreCase) && !s.Contains("example:", StringComparison.OrdinalIgnoreCase))
+                errors.Add($"Missing example (args present): command_id='{it.CommandId}' ({it.FieldName})");
+        }
+
+        return errors;
+    }
+}
+
+internal static class IdeMcpCommandExecutorEmitter
+{
+    // First iteration: generate only "pure IIdeMcpActions pass-through" handlers.
+    // UI-thread / RelayCommand based handlers remain manual in IdeMcpCommandExecutor.
+    public static string Emit()
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("// <auto-generated/>");
+        sb.AppendLine("using System.Text.Json;");
+        sb.AppendLine("using Avalonia.Threading;");
+        sb.AppendLine("using CascadeIDE.Services;");
+        sb.AppendLine();
+        sb.AppendLine("namespace CascadeIDE.ViewModels;");
+        sb.AppendLine();
+        sb.AppendLine("internal sealed partial class IdeMcpCommandExecutor");
+        sb.AppendLine("{");
+        sb.AppendLine("    partial void RegisterGenerated(Action<string, Handler> add)");
+        sb.AppendLine("    {");
+
+        // Workspace / solution info
+        sb.AppendLine("        add(Services.IdeCommands.GetSolutionInfo, async (_, _) => await Task.FromResult(((IIdeMcpActions)_vm).GetSolutionInfo()));");
+        sb.AppendLine("        add(Services.IdeCommands.GetWorkspaceState, async (_, _) => await ((IIdeMcpActions)_vm).GetWorkspaceStateAsync());");
+        sb.AppendLine("        add(Services.IdeCommands.GetSolutionFiles, async (_, _) => await ((IIdeMcpActions)_vm).GetSolutionFilesAsync());");
+        sb.AppendLine("        add(Services.IdeCommands.GetCurrentFileDiagnostics, async (_, _) => await ((IIdeMcpActions)_vm).GetCurrentFileDiagnosticsAsync());");
+
+        // Build / test
+        sb.AppendLine("        add(Services.IdeCommands.Build, async (_, _) => await ((IIdeMcpActions)_vm).BuildAsync());");
+        sb.AppendLine("        add(Services.IdeCommands.BuildStructured, async (_, _) => await ((IIdeMcpActions)_vm).BuildStructuredAsync());");
+        sb.AppendLine("        add(Services.IdeCommands.RunTests, async (_, _) => await ((IIdeMcpActions)_vm).RunTestsAsync());");
+        sb.AppendLine("        add(Services.IdeCommands.RunAffectedTests, async (args, _) => await ((IIdeMcpActions)_vm).RunAffectedTestsAsync(SA(args, \"changed_paths\")));");
+        sb.AppendLine("        add(Services.IdeCommands.RunCodeCleanup, async (args, _) => await ((IIdeMcpActions)_vm).RunCodeCleanupAsync(S(args, \"include_path\")));");
+        sb.AppendLine("        add(Services.IdeCommands.GetCodeMetrics, async (args, _) => await ((IIdeMcpActions)_vm).GetCodeMetricsAsync(S(args, \"scope\"), S(args, \"path\")));");
+
+        // Git
+        sb.AppendLine("        add(Services.IdeCommands.GitStatus, async (_, _) => await ((IIdeMcpActions)_vm).GitStatusAsync());");
+        sb.AppendLine("        add(Services.IdeCommands.GitDiff, async (args, _) => await ((IIdeMcpActions)_vm).GitDiffAsync(S(args, \"path\"), B(args, \"staged\")));");
+        sb.AppendLine("        add(Services.IdeCommands.GitCommit, async (args, _) =>");
+        sb.AppendLine("        {");
+        sb.AppendLine("            if (string.IsNullOrWhiteSpace(S(args, \"message\"))) return \"Missing message\";");
+        sb.AppendLine("            return await ((IIdeMcpActions)_vm).GitCommitAsync(S(args, \"message\")!, SA(args, \"paths\"));");
+        sb.AppendLine("        });");
+        sb.AppendLine("        add(Services.IdeCommands.GitPush, async (args, _) => await ((IIdeMcpActions)_vm).GitPushAsync(S(args, \"remote\"), S(args, \"branch\")));");
+
+        // Output / diagnostics
+        sb.AppendLine("        add(Services.IdeCommands.GetBuildOutput, async (_, _) => await Task.FromResult(((IIdeMcpActions)_vm).GetBuildOutput()));");
+
+        // UI inspection / control (pure IIdeMcpActions)
+        sb.AppendLine("        add(Services.IdeCommands.GetUiTheme, async (_, _) => await Task.FromResult(((IIdeMcpActions)_vm).GetUiTheme()));");
+        sb.AppendLine("        add(Services.IdeCommands.SetUiTheme, async (args, _) => await ((IIdeMcpActions)_vm).SetUiThemeAsync(S(args, \"theme\") ?? \"\"));");
+        sb.AppendLine("        add(Services.IdeCommands.GetUiLayout, async (_, _) => await ((IIdeMcpActions)_vm).GetUiLayoutAsync());");
+        sb.AppendLine("        add(Services.IdeCommands.GetColorsUnderCursor, async (_, _) => await ((IIdeMcpActions)_vm).GetColorsUnderCursorAsync());");
+        sb.AppendLine("        add(Services.IdeCommands.GetControlAppearance, async (args, _) => await ((IIdeMcpActions)_vm).GetControlAppearanceAsync(S(args, \"name\")));");
+        sb.AppendLine("        add(Services.IdeCommands.SetControlLayout, async (args, _) =>");
+        sb.AppendLine("        {");
+        sb.AppendLine("            if (args is null || string.IsNullOrEmpty(S(args, \"name\"))) return \"Missing name or layout\";");
+        sb.AppendLine("            return await ((IIdeMcpActions)_vm).SetControlLayoutAsync(S(args, \"name\")!, S(args, \"layout\") ?? \"{}\" );");
+        sb.AppendLine("        });");
+        sb.AppendLine("        add(Services.IdeCommands.SetControlText, async (args, _) => await ((IIdeMcpActions)_vm).SetControlTextAsync(S(args, \"name\") ?? \"\", S(args, \"text\") ?? \"\"));");
+        sb.AppendLine("        add(Services.IdeCommands.ClickControl, async (args, _) => await ((IIdeMcpActions)_vm).ClickControlAsync(S(args, \"name\")));");
+        sb.AppendLine("        add(Services.IdeCommands.SendKeys, async (args, _) => await ((IIdeMcpActions)_vm).SendKeysAsync(S(args, \"name\"), S(args, \"keys\") ?? \"\"));");
+        sb.AppendLine("        add(Services.IdeCommands.SetFocus, async (args, _) => await ((IIdeMcpActions)_vm).SetFocusAsync(S(args, \"name\")));");
+        sb.AppendLine("        add(Services.IdeCommands.HighlightControl, async (args, _) => await ((IIdeMcpActions)_vm).HighlightControlAsync(S(args, \"name\")));");
+        sb.AppendLine("        add(Services.IdeCommands.SetPanelSize, async (args, _) =>");
+        sb.AppendLine("        {");
+        sb.AppendLine("            double? w = args is not null && args.TryGetValue(\"width\", out var pw) && pw.TryGetDouble(out var wv) ? wv : null;");
+        sb.AppendLine("            double? h = args is not null && args.TryGetValue(\"height\", out var ph) && ph.TryGetDouble(out var hv) ? hv : null;");
+        sb.AppendLine("            return await ((IIdeMcpActions)_vm).SetPanelSizeAsync(S(args, \"panel\") ?? \"\", w, h);");
+        sb.AppendLine("        });");
+        sb.AppendLine("        add(Services.IdeCommands.GetSupportedEditorLanguages, async (_, _) => await Task.FromResult(((IIdeMcpActions)_vm).GetSupportedEditorLanguages()));");
+
+        sb.AppendLine("    }");
+        sb.AppendLine("}");
+        return sb.ToString();
+    }
+}
+
+internal static class IdeCommandArgsParser
+{
+    // Strict mini-grammar for args:
+    // args: name:type, name?:type, name:type[], name?:type[]
+    // where type is one of: string|integer|number|boolean|object
+    private static readonly Regex ArgToken = new(
+        @"^(?<name>[a-zA-Z_][a-zA-Z0-9_]*)(?<opt>\?)?\s*:\s*(?<type>string|integer|number|boolean|object)(?<arr>\[\])?$",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+    public static IReadOnlyList<IdeCommandArg> ParseArgsFromSummary(string commandId, string? summary)
+    {
+        if (string.IsNullOrWhiteSpace(summary))
+            return Array.Empty<IdeCommandArg>();
+
+        var s = summary!;
+        var idx = s.IndexOf("args:", StringComparison.OrdinalIgnoreCase);
+        if (idx < 0)
+            return Array.Empty<IdeCommandArg>();
+
+        var tail = s[(idx + 5)..].Trim();
+        // Stop at first sentence end to avoid pulling extra prose.
+        var end = tail.IndexOfAny(['.', ';']);
+        if (end >= 0)
+            tail = tail[..end];
+
+        if (tail.Length == 0)
+            return Array.Empty<IdeCommandArg>();
+
+        var list = new List<IdeCommandArg>();
+        foreach (var rawPart in tail.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            var part = rawPart.Trim();
+            if (part.Length == 0)
+                continue;
+
+            var match = ArgToken.Match(part);
+            if (!match.Success)
+                throw new InvalidOperationException($"Invalid args token for command '{commandId}': '{part}'. Expected 'name:type' with optional '?' and optional '[]'.");
+
+            var name = match.Groups["name"].Value;
+            var required = !match.Groups["opt"].Success;
+            var jsonType = match.Groups["type"].Value;
+            var isArray = match.Groups["arr"].Success;
+            var itemType = isArray ? jsonType : null;
+
+            list.Add(new IdeCommandArg(name, jsonType, required, isArray, itemType));
+        }
+
+        // de-dupe by name, prefer required=true
+        return list
+            .GroupBy(a => a.Name, StringComparer.Ordinal)
+            .Select(g =>
+            {
+                var best = g.OrderByDescending(x => x.Required).ThenByDescending(x => x.IsArray).First();
+                return best;
+            })
+            .ToList();
+    }
+}
+
+internal enum IdeReturnKind
+{
+    Unspecified = 0,
+    Text = 1,
+    Json = 2,
+    None = 3
+}
+
+internal static class IdeCommandContractParser
+{
+    private static readonly Regex ReturnsToken = new(@"^(?<kind>json|text|none)$", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+
+    public static IdeReturnKind ParseReturns(string commandId, string? summary)
+    {
+        if (string.IsNullOrWhiteSpace(summary))
+            return IdeReturnKind.Unspecified;
+
+        var idx = summary!.IndexOf("returns:", StringComparison.OrdinalIgnoreCase);
+        if (idx < 0)
+            return IdeReturnKind.Unspecified;
+
+        var tail = summary[(idx + "returns:".Length)..].Trim();
+        var end = tail.IndexOfAny(['.', ';']);
+        if (end >= 0)
+            tail = tail[..end];
+        tail = tail.Trim();
+
+        if (tail.Length == 0)
+            throw new InvalidOperationException($"Invalid returns spec for command '{commandId}': empty. Expected returns: json|text|none.");
+
+        var m = ReturnsToken.Match(tail);
+        if (!m.Success)
+            throw new InvalidOperationException($"Invalid returns spec for command '{commandId}': '{tail}'. Expected returns: json|text|none.");
+
+        var kind = m.Groups["kind"].Value.ToLowerInvariant();
+        return kind switch
+        {
+            "json" => IdeReturnKind.Json,
+            "text" => IdeReturnKind.Text,
+            "none" => IdeReturnKind.None,
+            _ => IdeReturnKind.Unspecified
+        };
+    }
+
+    public static string? ParseExample(string? summary)
+    {
+        if (string.IsNullOrWhiteSpace(summary))
+            return null;
+
+        var idx = summary!.IndexOf("example:", StringComparison.OrdinalIgnoreCase);
+        if (idx < 0)
+            return null;
+
+        var tail = summary[(idx + "example:".Length)..].Trim();
+        // Example goes to end of sentence.
+        var end = tail.IndexOfAny(['.']);
+        if (end >= 0)
+            tail = tail[..end];
+
+        tail = tail.Trim();
+        return tail.Length == 0 ? null : tail;
+    }
+}
+
+internal static class IdeCommandsContractEmitter
+{
+    public static string Emit(IReadOnlyList<IdeCommandDoc> items)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("// <auto-generated/>");
+        sb.AppendLine("using System.Collections.Generic;");
+        sb.AppendLine();
+        sb.AppendLine("namespace CascadeIDE.Services;");
+        sb.AppendLine();
+        sb.AppendLine("internal static class IdeCommandsContractGenerated");
+        sb.AppendLine("{");
+        sb.AppendLine("    private static readonly Dictionary<string, IdeReturnKind> ReturnsByCommandId = new(StringComparer.Ordinal)");
+        sb.AppendLine("    {");
+        foreach (var it in items.OrderBy(i => i.CommandId, StringComparer.Ordinal))
+        {
+            var kind = IdeCommandContractParser.ParseReturns(it.CommandId, it.Summary);
+            if (kind == IdeReturnKind.Unspecified)
+                continue;
+            sb.Append("        [\"");
+            sb.Append(Escape(it.CommandId));
+            sb.Append("\"] = IdeReturnKind.");
+            sb.Append(kind.ToString());
+            sb.AppendLine(",");
+        }
+        sb.AppendLine("    };");
+        sb.AppendLine();
+        sb.AppendLine("    private static readonly Dictionary<string, string> ExampleByCommandId = new(StringComparer.Ordinal)");
+        sb.AppendLine("    {");
+        foreach (var it in items.OrderBy(i => i.CommandId, StringComparer.Ordinal))
+        {
+            var ex = IdeCommandContractParser.ParseExample(it.Summary);
+            if (string.IsNullOrWhiteSpace(ex))
+                continue;
+            sb.Append("        [\"");
+            sb.Append(Escape(it.CommandId));
+            sb.Append("\"] = \"");
+            sb.Append(Escape(ex!));
+            sb.AppendLine("\",");
+        }
+        sb.AppendLine("    };");
+        sb.AppendLine();
+        sb.AppendLine("    public static bool TryGetReturns(string commandId, out IdeReturnKind kind) =>");
+        sb.AppendLine("        ReturnsByCommandId.TryGetValue(commandId, out kind);");
+        sb.AppendLine();
+        sb.AppendLine("    public static bool TryGetExample(string commandId, out string example) =>");
+        sb.AppendLine("        ExampleByCommandId.TryGetValue(commandId, out example);");
+        sb.AppendLine("}");
+        return sb.ToString();
+    }
+
+    private static string Escape(string s) =>
+        s.Replace("\\", "\\\\", StringComparison.Ordinal).Replace("\"", "\\\"", StringComparison.Ordinal);
+}
+
+internal static class IdeCommandsDocEmitter
+{
+    public static string Emit(IReadOnlyList<IdeCommandDoc> items)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("// <auto-generated/>");
+        sb.AppendLine("using System.Collections.Generic;");
+        sb.AppendLine();
+        sb.AppendLine("namespace CascadeIDE.Services;");
+        sb.AppendLine();
+        sb.AppendLine("internal static class IdeCommandsDoc");
+        sb.AppendLine("{");
+        sb.AppendLine("    private static readonly Dictionary<string, string> SummaryByCommandId = new(StringComparer.Ordinal)");
+        sb.AppendLine("    {");
+
+        foreach (var it in items.OrderBy(i => i.CommandId, StringComparer.Ordinal))
+        {
+            if (string.IsNullOrWhiteSpace(it.Summary))
+                continue;
+            sb.Append("        [\"");
+            sb.Append(Escape(it.CommandId));
+            sb.Append("\"] = \"");
+            sb.Append(Escape(it.Summary!));
+            sb.AppendLine("\",");
+        }
+
+        sb.AppendLine("    };");
+        sb.AppendLine();
+        sb.AppendLine("    public static bool TryGetSummary(string commandId, out string summary) =>");
+        sb.AppendLine("        SummaryByCommandId.TryGetValue(commandId, out summary);");
+        sb.AppendLine("}");
+        return sb.ToString();
+    }
+
+    private static string Escape(string s) =>
+        s.Replace("\\", "\\\\", StringComparison.Ordinal).Replace("\"", "\\\"", StringComparison.Ordinal);
+}
+
+internal static class IdeCommandsArgsEmitter
+{
+    public static string Emit(IReadOnlyList<IdeCommandDoc> items)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("// <auto-generated/>");
+        sb.AppendLine("using System.Collections.Generic;");
+        sb.AppendLine("using System;");
+        sb.AppendLine();
+        sb.AppendLine("namespace CascadeIDE.Services;");
+        sb.AppendLine();
+        sb.AppendLine("internal static class IdeCommandsArgsGenerated");
+        sb.AppendLine("{");
+        sb.AppendLine("    private static readonly Dictionary<string, IdeCommandsArgs.Arg[]> ArgsByCommandId = new(StringComparer.Ordinal)");
+        sb.AppendLine("    {");
+
+        foreach (var it in items.OrderBy(i => i.CommandId, StringComparer.Ordinal))
+        {
+            var args = IdeCommandArgsParser.ParseArgsFromSummary(it.CommandId, it.Summary);
+            if (args.Count == 0)
+                continue;
+
+            sb.Append("        [\"");
+            sb.Append(Escape(it.CommandId));
+            sb.Append("\"] = new IdeCommandsArgs.Arg[] { ");
+            for (var i = 0; i < args.Count; i++)
+            {
+                var a = args[i];
+                if (i > 0) sb.Append(", ");
+                sb.Append("new(\"");
+                sb.Append(Escape(a.Name));
+                sb.Append("\", \"");
+                sb.Append(Escape(a.JsonType));
+                sb.Append("\", ");
+                sb.Append(a.Required ? "true" : "false");
+                sb.Append(", ");
+                sb.Append(a.IsArray ? "true" : "false");
+                sb.Append(", ");
+                sb.Append(a.ItemJsonType is null ? "null" : $"\"{Escape(a.ItemJsonType)}\"");
+                sb.Append(")");
+            }
+            sb.AppendLine(" },");
+        }
+
+        sb.AppendLine("    };");
+        sb.AppendLine();
+        sb.AppendLine("    public static bool TryGetArgs(string commandId, out IdeCommandsArgs.Arg[] args) =>");
+        sb.AppendLine("        ArgsByCommandId.TryGetValue(commandId, out args);");
+        sb.AppendLine();
+        sb.AppendLine("}");
+        return sb.ToString();
+    }
+
+    private static string Escape(string s) =>
+        s.Replace("\\", "\\\\", StringComparison.Ordinal).Replace("\"", "\\\"", StringComparison.Ordinal);
+}
+
+internal static class ProtocolMdEmitter
+{
+    public static string EmitIdeCommandsTable(IReadOnlyList<IdeCommandDoc> items)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine();
+        sb.AppendLine("> Этот блок сгенерирован из XML-doc в `Services/IdeCommands.cs`.");
+        sb.AppendLine();
+
+        foreach (var grp in items.GroupBy(i => i.Category, StringComparer.Ordinal))
+        {
+            sb.AppendLine($"### {grp.Key}");
+            sb.AppendLine();
+            sb.AppendLine("| command_id | Описание |");
+            sb.AppendLine("|-----------:|----------|");
+            foreach (var it in grp.OrderBy(i => i.CommandId, StringComparer.Ordinal))
+            {
+                var desc = it.Summary ?? "";
+                sb.Append("| `");
+                sb.Append(it.CommandId);
+                sb.Append("` | ");
+                sb.Append(EscapeMd(desc));
+                sb.AppendLine(" |");
+            }
+            sb.AppendLine();
+        }
+
+        return sb.ToString().TrimEnd() + "\n";
+    }
+
+    private static string EscapeMd(string s) => (s ?? "").Replace("|", "\\|", StringComparison.Ordinal);
+}
+
+internal static class MarkerReplace
+{
+    public static string ReplaceSection(string text, string startMarker, string endMarker, string newContent)
+    {
+        var start = text.IndexOf(startMarker, StringComparison.Ordinal);
+        var end = text.IndexOf(endMarker, StringComparison.Ordinal);
+        if (start < 0 || end < 0 || end <= start)
+            throw new InvalidOperationException("Markers not found or invalid order in MCP-PROTOCOL.md.");
+
+        var insertAt = start + startMarker.Length;
+        return text[..insertAt] + "\n" + newContent + text[end..];
+    }
+}
+

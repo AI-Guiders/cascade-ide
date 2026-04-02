@@ -59,25 +59,181 @@
 | `ide_read_agent_notes` | Прочитать заметки агента из `.cascade-ide/agent-notes.md`. Возвращает содержимое или пустую строку. Агент восстанавливает контекст в новом чате. | —; возвращает текст файла или `""` |
 | `ide_execute_command` | Унифицированный вызов IDE-команды по коду (`command_id`) с аргументами (`args`) в формате выбранного инструмента. Нужен для единой точки входа (MCP/меню/хоткеи). | `command_id`, опционально `args` (JSON object) |
 
-**Меню, тулбар, task bar и чат через `ide_execute_command`:** те же `command_id`, что реализованы как `RelayCommand` / свойства в `MainWindowViewModel` (см. `IdeCommands.cs` и разметку `MainWindow.axaml`, `ToolbarView.axaml`, `TaskCockpitView.axaml`, `ChatPanelView.axaml`).
+**Меню, тулбар, task bar и чат через `ide_execute_command`:** те же `command_id`, что заданы в `IdeCommands.cs`.
 
-| Зона | `command_id` | Аргументы |
-|------|----------------|-----------|
-| Файл | `open_solution_dialog`, `exit_application` | — |
-| Вид → панели | `toggle_*` / `set_*_visible` | `set_solution_explorer_visible`, `set_chat_panel_expanded`, `set_git_panel_visible`, `set_instrumentation_dock_visible` — поле `visible` (bool); также `toggle_git_panel`, `toggle_instrumentation_dock`, `toggle_chat_panel` + уже были `toggle_terminal`, `toggle_build_output`, `toggle_solution_explorer`, `set_terminal_visible`, `set_build_output_visible` |
-| Режим | `set_ui_mode` или `set_focus_mode`, `set_balanced_mode`, `set_power_mode`, `cycle_ui_mode` | `set_ui_mode`: `mode`: `Focus` \| `Balanced` \| `Power` |
-| Тема | `apply_light_theme`, `apply_dark_theme`, `apply_cursor_like_theme`, `apply_power_classic_theme`, `open_theme_file_dialog` | — |
-| Язык | `set_ui_language`, `reset_ui_language_to_system` | `culture`: `ru-RU`, `en-US`, … |
-| Прочее меню | `open_preview_window`, `open_settings`, `about` | — |
-| Тулбар | `show_solution_explorer_panel`, `show_build_output_panel`, `show_chat_panel`, `show_terminal_panel`, `hide_build_output_panel`, `set_single_editor_group`, `set_dual_editor_group`, `set_triple_editor_group`, `build_solution_ui` | `build_solution_ui` — как кнопка «Собрать» (лог в панель; не то же, что `ide_build` / structured) |
-| Focus / Power | `focus_checkpoint`, `focus_rollback`, `confirm_focus_step`, `cancel_focus_step`, `explain_current_step`, `emergency_stop`, `refresh_workspace_snapshot` | — |
-| Трасса | `explain_trace_step`, `rollback_trace_step` | `step_index` (int ≥ 0): индекс в `AgentTraceSteps`, **0 — самый старый** |
-| Safety | `set_safety_l1`, `set_safety_l2`, `set_safety_l3` | — |
-| Autonomous | `start_autonomous`, `pause_autonomous`, `resume_autonomous` | Условия `CanExecute` как в UI |
-| Quick actions | `fix_failing_tests`, `investigate_nullref`, `prepare_commit` | — |
-| Чат | `send_chat` | опционально `message` — подставить в поле ввода перед отправкой |
-| Ollama | `install_ollama_model` | `model` — имя модели |
-| Документы | `reopen_closed_document`, `activate_document`, `close_document`, `toggle_pin_document`, `move_document_to_group_1` … `_3` | где нужен путь: `file_path` |
+<!-- GENERATED:IdeCommands START -->
+
+> Этот блок сгенерирован из XML-doc в `Services/IdeCommands.cs`.
+
+### Core
+
+| command_id | Описание |
+|-----------:|----------|
+| `apply_edit` | Применить текстовую правку в открытом документе. args: file_path:string, start_line:integer, start_column:integer, end_line:integer, end_column:integer, new_text:string; returns: text; example: {"file_path":"C:\tmp\a.cs","start_line":1,"start_column":1,"end_line":1,"end_column":1,"new_text":"// hi\n"}. |
+| `build` | Сборка решения (структурированный результат). returns: json. |
+| `build_structured` | Сборка решения (структурированный результат). То же, что `build`; выделено для совместимости/алиасов. returns: json. |
+| `focus_editor` | Передать фокус в редактор (чтобы клавиши/ввод шли в него). returns: text. |
+| `get_build_output` | Текст панели «Вывод сборки» + цвета оформления. returns: json. |
+| `get_code_metrics` | Метрики кода (LOC/классы/методы/цикломатика). args: scope?:string, path?:string; returns: json; example: {"scope":"solution","path":"."}. |
+| `get_current_file_diagnostics` | Диагностики текущего открытого .cs (ошибки/предупреждения). returns: json. |
+| `get_editor_content_range` | Текст активного редактора по диапазону строк (1-based). args: start_line:integer, end_line:integer; returns: json; example: {"start_line":1,"end_line":40}. |
+| `get_editor_state` | Состояние активного редактора: файл, каретка, выделение. args: max_preview_chars?:integer; returns: json; example: {"max_preview_chars":0}. |
+| `get_open_document_text` | Полный текст открытого документа по пути (или текущего). Модель вкладки, не снимок темы. returns: text. |
+| `get_solution_files` | Список файлов и дерево решения (Solution Explorer). returns: json. |
+| `get_solution_info` | Короткая информация о текущем решении/файле/выделении в дереве. returns: json. |
+| `get_workspace_state` | Единая сводка состояния IDE (solution/editor/build/diagnostics...). returns: json. |
+| `git_commit` | Git commit в каталоге решения/workspace. args: message:string, paths?:string[]; returns: text; example: {"message":"chore: update","paths":["a.txt"]}. |
+| `git_diff` | Git diff в каталоге решения/workspace. args: path?:string, staged?:boolean; returns: json; example: {"path":"README.md","staged":false}. |
+| `git_push` | Git push в каталоге решения/workspace. args: remote?:string, branch?:string; returns: text; example: {"remote":"origin","branch":"main"}. |
+| `git_status` | Git status в каталоге решения/workspace. returns: json. |
+| `go_to_position` | Перейти на позицию (и опционально выделить диапазон). args: file_path:string, line:integer, column:integer, end_line?:integer, end_column?:integer; returns: text; example: {"file_path":"C:\tmp\a.cs","line":10,"column":1}. |
+| `list_tools` | Список MCP-тулов, которые IDE публикует (name/description/inputSchema). returns: json. |
+| `load_solution` | Загрузить решение (.sln/.slnx/.slnf) и обновить дерево решения. args: path:string; returns: text; example: {"path":"D:\Experiments\PersonalCursorFolder\Financial\software\open\cascade-ide\CascadeIDE.slnx"}. |
+| `open_file` | Открыть файл в редакторе IDE. args: path:string; returns: text; example: {"path":"C:\tmp\a.txt"}. |
+| `remove_breakpoint` | Снять брейкпоинт. args: file_path:string, line:integer; returns: text; example: {"file_path":"C:\tmp\a.cs","line":42}. |
+| `request_confirmation` | Запросить подтверждение у пользователя. args: message:string; returns: text; example: {"message":"Продолжить?"}. Возвращает `ok`/`cancel`. |
+| `run_affected_tests` | Запустить затронутые тесты по changed_paths (или fallback на полный прогон). args: changed_paths?:string[]; returns: json; example: {"changed_paths":["a.cs","b.cs"]}. |
+| `run_code_cleanup` | Запустить code cleanup (`dotnet format`). args: include_path?:string; returns: json; example: {"include_path":"src"}. |
+| `run_tests` | Запустить тесты решения. returns: json. |
+| `select` | Выделить диапазон в редакторе (1-based). args: file_path:string, start_line:integer, start_column:integer, end_line:integer, end_column:integer; returns: text; example: {"file_path":"C:\tmp\a.cs","start_line":1,"start_column":1,"end_line":1,"end_column":10}. |
+| `set_breakpoint` | Поставить брейкпоинт. args: file_path:string, line:integer, condition?:string; returns: text; example: {"file_path":"C:\tmp\a.cs","line":42}. |
+| `set_build_output_visible` | Явно показать/скрыть журнал сборки. args: visible:boolean; returns: text; example: {"visible":true}. |
+| `set_terminal_visible` | Явно показать/скрыть терминал (без переключения). args: visible:boolean; returns: text; example: {"visible":true}. |
+| `set_ui_mode` | Режим UI (как меню «Вид → Режим интерфейса»). args: mode:string; returns: text; example: {"mode":"Power"}. |
+| `show_editor_preview` | Показать превью текущего файла из редактора в отдельном окне (контент берётся из IDE). returns: text. |
+| `show_preview` | Показать Markdown-превью в отдельном окне. args: title:string, content:string; returns: text; example: {"title":"Plan","content":"- step 1\n- step 2"}. |
+| `toggle_build_output` | Как меню «Вид → Вывод сборки». returns: text. |
+| `toggle_solution_explorer` | Как меню «Вид → Обозреватель решения». returns: text. |
+| `toggle_terminal` | Как меню «Вид → Терминал» (переключатель). returns: text. |
+
+### Меню «Файл» / приложение (те же RelayCommand, что в UI)
+
+| command_id | Описание |
+|-----------:|----------|
+| `exit_application` | Закрыть приложение (как меню Файл → Выход). returns: none. |
+| `open_solution_dialog` | Открыть диалог выбора решения (как меню Файл → Открыть решение...). returns: text. |
+
+### Вид: панели (явная установка + переключатели)
+
+| command_id | Описание |
+|-----------:|----------|
+| `set_chat_panel_expanded` | Развернуть/свернуть чат-панель. args: visible:boolean; returns: text; example: {"visible":true}. |
+| `set_git_panel_visible` | Показать/скрыть панель Git (нижняя вкладка). args: visible:boolean; returns: text; example: {"visible":true}. |
+| `set_instrumentation_dock_visible` | Показать/скрыть док инструментирования (Events/Tests/Debug). args: visible:boolean; returns: text; example: {"visible":true}. |
+| `set_solution_explorer_visible` | Показать/скрыть обозреватель решения. args: visible:boolean; returns: text; example: {"visible":true}. |
+| `toggle_chat_panel` | Переключить сворачивание чата (toggle). returns: text. |
+| `toggle_git_panel` | Переключить видимость панели Git (toggle). returns: text. |
+| `toggle_instrumentation_dock` | Переключить видимость дока инструментирования (toggle). returns: text. |
+
+### Вид: режим (дублируют хоткеи Alt+1/2/3, Ctrl+Alt+M)
+
+| command_id | Описание |
+|-----------:|----------|
+| `cycle_ui_mode` | Циклически переключить UI mode (hotkey). returns: text. |
+| `set_balanced_mode` | Установить Balanced UI mode (hotkey). returns: text. |
+| `set_focus_mode` | Установить Focus UI mode (hotkey). returns: text. |
+| `set_power_mode` | Установить Power UI mode (hotkey). returns: text. |
+
+### Вид: тема
+
+| command_id | Описание |
+|-----------:|----------|
+| `apply_cursor_like_theme` | Применить тему «как Cursor». returns: text. |
+| `apply_dark_theme` | Применить тёмную тему. returns: text. |
+| `apply_light_theme` | Применить светлую тему. returns: text. |
+| `apply_power_classic_theme` | Применить классическую Power-тему (циан). returns: text. |
+| `open_theme_file_dialog` | Открыть диалог выбора файла темы. returns: text. |
+
+### Вид: язык UI
+
+| command_id | Описание |
+|-----------:|----------|
+| `reset_ui_language_to_system` | Сбросить язык UI к системному. returns: text. |
+| `set_ui_language` | Установить язык UI. args: culture:string; returns: text; example: {"culture":"ru-RU"}. |
+
+### Меню: превью, настройки, справка
+
+| command_id | Описание |
+|-----------:|----------|
+| `about` | Показать диалог «О программе». returns: text. |
+| `open_preview_window` | Открыть отдельное окно превью (Markdown). returns: text. |
+| `open_settings` | Открыть окно настроек. returns: text. |
+
+### Тулбар: показать панели / скрыть вывод сборки
+
+| command_id | Описание |
+|-----------:|----------|
+| `hide_build_output_panel` | Скрыть панель вывода сборки (toolbar). returns: text. |
+| `show_build_output_panel` | Явно показать панель вывода сборки (toolbar). returns: text. |
+| `show_chat_panel` | Явно показать чат-панель (toolbar). returns: text. |
+| `show_solution_explorer_panel` | Явно показать обозреватель решения (toolbar). returns: text. |
+| `show_terminal_panel` | Явно показать терминал (toolbar). returns: text. |
+
+### Тулбар: группы редакторов
+
+| command_id | Описание |
+|-----------:|----------|
+| `build_solution_ui` | Кнопка «Собрать» в тулбаре: `dotnet build` в панель вывода (не structured build). returns: text. |
+| `set_dual_editor_group` | Две группы редакторов (2-up). returns: text. |
+| `set_single_editor_group` | Одна группа редакторов (1-up). returns: text. |
+| `set_triple_editor_group` | Три группы редакторов (3-up). returns: text. |
+
+### Focus / Power: чат и автономный режим
+
+| command_id | Описание |
+|-----------:|----------|
+| `cancel_focus_step` | Отменить текущий шаг плана (Focus). returns: text. |
+| `confirm_focus_step` | Подтвердить текущий шаг плана (Focus). returns: text. |
+| `emergency_stop` | Экстренно остановить автономные действия/выполнение (Emergency stop). returns: text. |
+| `explain_current_step` | Пояснить текущий шаг (Focus/Power). returns: text. |
+| `explain_trace_step` | Шаг трассы по индексу в `AgentTraceSteps` (0 — самый старый). args: step_index:integer; returns: text; example: {"step_index":0}. |
+| `fix_failing_tests` | Quick action: починить упавшие тесты. returns: text. |
+| `focus_checkpoint` | Создать контрольную точку (Focus). returns: text. |
+| `focus_rollback` | Откатить к последней контрольной точке (Focus). returns: text. |
+| `install_ollama_model` | Скачать модель Ollama (как в настройках). args: model:string; returns: text; example: {"model":"qwen2.5-coder:7b"}. |
+| `investigate_nullref` | Quick action: расследовать NullReferenceException. returns: text. |
+| `pause_autonomous` | Поставить автономный режим на паузу. returns: text. |
+| `prepare_commit` | Quick action: подготовить коммит (сводка/план/проверки). returns: text. |
+| `refresh_workspace_snapshot` | Обновить снимок рабочего состояния (Power cockpit). returns: text. |
+| `resume_autonomous` | Продолжить автономный режим после паузы. returns: text. |
+| `rollback_trace_step` | Откатить состояние по шагу трассы. returns: text. |
+| `send_chat` | Кнопка отправки чата; опционально `message` — записать в поле ввода перед отправкой. returns: text. |
+| `set_safety_l1` | Установить Safety L1. returns: text. |
+| `set_safety_l2` | Установить Safety L2. returns: text. |
+| `set_safety_l3` | Установить Safety L3. returns: text. |
+| `start_autonomous` | Запустить автономный режим (agent run). returns: text. |
+
+### Документы (контекстное меню / док)
+
+| command_id | Описание |
+|-----------:|----------|
+| `activate_document` | Активировать документ (переключить вкладку). args: file_path:string; returns: text; example: {"file_path":"C:\tmp\a.cs"}. |
+| `add_control` | Добавить контрол в UI (Debug). args: parent_name:string, control_type:string, content?:string, name?:string; returns: text; example: {"parent_name":"Root","control_type":"TextBlock","content":"Hi"}. |
+| `click_control` | Клик по кнопке (под курсором или по имени). args: name?:string; returns: text; example: {"name":"BuildButton"}. |
+| `close_document` | Закрыть документ. args: file_path:string; returns: text; example: {"file_path":"C:\tmp\a.cs"}. |
+| `get_colors_under_cursor` | Цвета под курсором (прямые и effective). returns: json. |
+| `get_control_appearance` | Снимок внешнего вида контрола (под курсором или по имени). args: name?:string; returns: json; example: {"name":"BuildButton"}. |
+| `get_supported_editor_languages` | Список поддерживаемых языков подсветки редактора. returns: json. |
+| `get_ui_layout` | Дерево UI-элементов (layout) с bounds/visibility/content. returns: json. |
+| `get_ui_theme` | Снимок темы UI и лэйаута (включая resolved-ресурсы). returns: json. |
+| `highlight_control` | Подсветить контрол рамкой (под курсором или по имени). args: name?:string; returns: text; example: {"name":"BuildButton"}. |
+| `move_document_to_group_1` | Переместить документ в группу 1. args: file_path:string; returns: text; example: {"file_path":"C:\tmp\a.cs"}. |
+| `move_document_to_group_2` | Переместить документ в группу 2. args: file_path:string; returns: text; example: {"file_path":"C:\tmp\a.cs"}. |
+| `move_document_to_group_3` | Переместить документ в группу 3. args: file_path:string; returns: text; example: {"file_path":"C:\tmp\a.cs"}. |
+| `read_agent_notes` | Прочитать заметки агента из каталога решения. returns: text. |
+| `reopen_closed_document` | Переоткрыть недавно закрытый документ. returns: text. |
+| `send_keys` | Отправить хоткей в контрол. args: keys:string, name?:string; returns: text; example: {"keys":"Ctrl+S"}. |
+| `set_control_layout` | Изменить раскладку/позицию контрола. args: name:string, layout:string; returns: text; example: {"name":"BuildButton","layout":"{\"x\":10,\"y\":10}"}. |
+| `set_control_text` | Установить текст в контроле ввода. args: name:string, text:string; returns: text; example: {"name":"ChatInput","text":"hi"}. |
+| `set_focus` | Передать фокус контролу (под курсором или по имени). args: name?:string; returns: text; example: {"name":"Editor"}. |
+| `set_panel_size` | Изменить размер панели. args: panel:string, width?:integer, height?:integer; returns: text; example: {"panel":"terminal","height":300}. |
+| `set_ui_theme` | Применить тему UI из JSON. args: theme:string; returns: text; example: {"theme":"{\"name\":\"MyTheme\"}"}. |
+| `show_breakpoints` | Показать брейкпоинты отладчика в IDE. args: breakpoints:object[]; returns: text; example: {"breakpoints":[{"file_path":"C:\tmp\a.cs","line":1}]}. |
+| `show_debug_position` | Показать текущую позицию отладки (файл/строка). args: file_path?:string, line?:integer; returns: text; example: {"file_path":"C:\tmp\a.cs","line":1}. |
+| `show_debug_state` | Показать стек/переменные отладки в панели Debug. args: stack_frames?:object[], variables?:object[]; returns: text; example: {"stack_frames":[],"variables":[]}. |
+| `toggle_pin_document` | Закрепить/открепить документ (pin). args: file_path:string; returns: text; example: {"file_path":"C:\tmp\a.cs"}. |
+| `write_agent_notes` | Записать заметки агента в каталог решения. args: content:string; returns: text; example: {"content":"notes"}. |
+<!-- GENERATED:IdeCommands END -->
 
 Проверка: `ide_get_workspace_state` — помимо `terminal.is_visible`, `ui_mode`, есть `panels` (видимость колонок), `safety_level`, `editor_group_count`, `agent_trace_step_count`, `is_autonomous_running`.
 

@@ -16,9 +16,15 @@
     <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(GenerateIdeProtocolDocs)'=='true'">
+    <DefineConstants>$(DefineConstants);IDE_COMMANDS_CODEGEN</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Remove="**/obj/**" />
     <Compile Remove="**/bin/**" />
+    <Compile Remove="CascadeIDE.Tests\**\*.cs" />
+    <Compile Remove="tools\**\*.cs" />
     <Folder Include="Models\" />
     <AvaloniaResource Include="Assets\**" />
     <Content Include="Themes\dark-theme.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
@@ -50,6 +56,7 @@
     <PackageReference Include="Markdown.Avalonia" Version="11.0.2" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.14.0" />
+    <PackageReference Include="Microsoft.VisualStudio.SolutionPersistence" Version="1.0.52" />
     <PackageReference Include="Microsoft.Extensions.AI" Version="9.5.0" />
     <PackageReference Include="ModelContextProtocol" Version="0.8.0-preview.1" />
     <PackageReference Include="OllamaSharp" Version="5.4.16" />
@@ -74,5 +81,42 @@
       <_StaleHost Include="$(_TfmRoot)\$(AssemblyName).runtimeconfig.json" />
     </ItemGroup>
     <Delete Files="@(_StaleHost)" ContinueOnError="true" />
+  </Target>
+
+  <!-- Keep MCP protocol docs and proxy tool summaries in sync with XML-doc in IdeCommands.cs -->
+  <PropertyGroup>
+    <GenerateIdeProtocolDocs Condition="'$(GenerateIdeProtocolDocs)'==''">true</GenerateIdeProtocolDocs>
+    <_IdeProtocolDocGenProject>$(MSBuildProjectDirectory)\tools\CascadeIDE.ProtocolDocGen\CascadeIDE.ProtocolDocGen.csproj</_IdeProtocolDocGenProject>
+    <_IdeCommandsFile>$(MSBuildProjectDirectory)\Services\IdeCommands.cs</_IdeCommandsFile>
+    <_IdeCommandsDocGenerated>$(MSBuildProjectDirectory)\Services\Generated\IdeCommandsDoc.g.cs</_IdeCommandsDocGenerated>
+    <_IdeCommandsArgsGenerated>$(MSBuildProjectDirectory)\Services\Generated\IdeCommandsArgsGenerated.g.cs</_IdeCommandsArgsGenerated>
+    <_IdeCommandsContractGenerated>$(MSBuildProjectDirectory)\Services\Generated\IdeCommandsContract.g.cs</_IdeCommandsContractGenerated>
+    <_IdeExecutorGenerated>$(MSBuildProjectDirectory)\ViewModels\Generated\IdeMcpCommandExecutor.Generated.g.cs</_IdeExecutorGenerated>
+    <_McpProtocolDoc>$(MSBuildProjectDirectory)\docs\MCP-PROTOCOL.md</_McpProtocolDoc>
+  </PropertyGroup>
+
+  <!-- Generate C# doc map BEFORE compilation (required by IdeMcpToolCatalog). -->
+  <Target Name="GenerateIdeCommandsDocCs"
+          BeforeTargets="CoreCompile"
+          Condition="'$(GenerateIdeProtocolDocs)'=='true' and Exists('$(_IdeProtocolDocGenProject)') and Exists('$(_IdeCommandsFile)')"
+          Inputs="$(_IdeCommandsFile)"
+          Outputs="$(_IdeCommandsDocGenerated);$(_IdeCommandsArgsGenerated);$(_IdeCommandsContractGenerated);$(_IdeExecutorGenerated)">
+    <Exec Command="dotnet run --project &quot;$(_IdeProtocolDocGenProject)&quot; --no-restore -- --cs-only &quot;$(MSBuildProjectDirectory)&quot;" />
+  </Target>
+
+  <!-- Lint IdeCommands XML-doc contract: require returns for all, example when args exist. -->
+  <Target Name="LintIdeCommandsContract"
+          BeforeTargets="CoreCompile"
+          Condition="'$(GenerateIdeProtocolDocs)'=='true' and Exists('$(_IdeProtocolDocGenProject)') and Exists('$(_IdeCommandsFile)')">
+    <Exec Command="dotnet run --project &quot;$(_IdeProtocolDocGenProject)&quot; --no-restore -- --lint &quot;$(MSBuildProjectDirectory)&quot;" />
+  </Target>
+
+  <!-- Generate Markdown protocol doc AFTER build (keeps docs always fresh). -->
+  <Target Name="GenerateMcpProtocolDocMd"
+          AfterTargets="Build"
+          Condition="'$(GenerateIdeProtocolDocs)'=='true' and Exists('$(_IdeProtocolDocGenProject)') and Exists('$(_IdeCommandsFile)') and Exists('$(_McpProtocolDoc)')"
+          Inputs="$(_IdeCommandsFile);$(_McpProtocolDoc)"
+          Outputs="$(_McpProtocolDoc)">
+    <Exec Command="dotnet run --project &quot;$(_IdeProtocolDocGenProject)&quot; --no-restore -- --md-only &quot;$(MSBuildProjectDirectory)&quot;" />
   </Target>
 </Project>

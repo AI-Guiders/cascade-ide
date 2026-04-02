@@ -42,6 +42,16 @@ public partial class MainWindow
             active?.Focus();
         });
 
+        if (!_workspaceEventsAttached)
+        {
+            _workspaceEventsAttached = true;
+            vmSetup.Workspace.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName is nameof(ViewModels.SolutionWorkspaceViewModel.SolutionPath))
+                    _languageService?.InvalidateCache();
+            };
+        }
+
         // Initial attachment (if a dock editor already exists).
         TryAttachTextMateAndRenderers();
         SyncFromViewModel();
@@ -272,8 +282,6 @@ public partial class MainWindow
             vm.EditorSelectionStart = null;
             vm.EditorSelectionLength = null;
         }
-        if (e.PropertyName is nameof(ViewModels.MainWindowViewModel.SolutionPath))
-            _languageService?.InvalidateCache();
         if (e.PropertyName is nameof(ViewModels.MainWindowViewModel.IsSolutionExplorerVisible) && DataContext is ViewModels.MainWindowViewModel vmSol)
             UpdateSolutionColumnWidth(vmSol.IsSolutionExplorerVisible);
         if (e.PropertyName is nameof(ViewModels.MainWindowViewModel.IsChatPanelExpanded) or nameof(ViewModels.MainWindowViewModel.UiMode)

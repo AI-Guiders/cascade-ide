@@ -20,6 +20,7 @@ public partial class MainWindow : Window
     private IDisposable? _highlightHideTimer;
     private TextEditor? _marginPointerEditor;
     private ViewModels.MainWindowViewModel? _boundMainVm;
+    private bool _workspaceEventsAttached;
     private static readonly object HighlightLogLock = new();
 
     public MainWindow()

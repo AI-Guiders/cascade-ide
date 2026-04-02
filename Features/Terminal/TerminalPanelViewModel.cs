@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using CascadeIDE.Services;
 using CascadeIDE.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -10,7 +11,10 @@ namespace CascadeIDE.Features.Terminal;
 /// </summary>
 public partial class TerminalPanelViewModel : ViewModelBase
 {
+    public const int MaxChars = 250_000;
+
     private readonly Func<string?> _getSolutionPath;
+    private OutputAccumulator _acc = new(MaxChars);
 
     public TerminalPanelViewModel(Func<string?> getSolutionPath)
     {
@@ -23,6 +27,20 @@ public partial class TerminalPanelViewModel : ViewModelBase
     [ObservableProperty]
     private string _terminalInput = "";
 
+    public void Clear()
+    {
+        _acc = new OutputAccumulator(MaxChars);
+        TerminalOutput = "";
+    }
+
+    public void AppendOutput(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+            return;
+        _acc.Append(text.AsSpan());
+        TerminalOutput = _acc.ToStringAndTrim();
+    }
+
     [RelayCommand]
     private async Task RunTerminalCommandAsync()
     {
@@ -34,7 +52,7 @@ public partial class TerminalPanelViewModel : ViewModelBase
         var workDir = !string.IsNullOrWhiteSpace(solutionPath) && File.Exists(solutionPath)
             ? Path.GetDirectoryName(solutionPath) ?? Environment.CurrentDirectory
             : Environment.CurrentDirectory;
-        TerminalOutput += $"> {cmd}\r\n";
+        AppendOutput($"> {cmd}\r\n");
         try
         {
             var isWin = Environment.OSVersion.Platform == PlatformID.Win32NT;
@@ -50,23 +68,34 @@ public partial class TerminalPanelViewModel : ViewModelBase
             using var process = Process.Start(psi);
             if (process is null)
             {
-                TerminalOutput += "Не удалось запустить процесс.\r\n";
+                AppendOutput("Не удалось запустить процесс.\r\n");
                 return;
             }
-            var stdout = process.StandardOutput.ReadToEndAsync();
-            var stderr = process.StandardError.ReadToEndAsync();
-            await Task.WhenAll(stdout, stderr).ConfigureAwait(true);
+
+            async Task PumpAsync(StreamReader reader)
+            {
+                var buffer = new char[4096];
+                while (true)
+                {
+                    var read = await reader.ReadAsync(buffer).ConfigureAwait(true);
+                    if (read <= 0)
+                        break;
+                    AppendOutput(new string(buffer, 0, read));
+                }
+            }
+
+            var pumpOut = PumpAsync(process.StandardOutput);
+            var pumpErr = PumpAsync(process.StandardError);
+
+            await Task.WhenAll(pumpOut, pumpErr).ConfigureAwait(true);
             await process.WaitForExitAsync().ConfigureAwait(true);
-            var outStr = await stdout;
-            var errStr = await stderr;
-            if (outStr.Length > 0) TerminalOutput += outStr;
-            if (errStr.Length > 0) TerminalOutput += errStr;
+
             if (process.ExitCode != 0)
-                TerminalOutput += $"\r\nExit code: {process.ExitCode}\r\n";
+                AppendOutput($"\r\nExit code: {process.ExitCode}\r\n");
         }
         catch (Exception ex)
         {
-            TerminalOutput += ex.Message + "\r\n";
+            AppendOutput(ex.Message + "\r\n");
         }
     }
 }

@@ -6,7 +6,9 @@ $target = "D:\cascade-ide-debug"
 
 Push-Location $here
 try {
-    dotnet publish -c Debug -o publish-debug
+    # IMPORTANT: publish the app project (not the .slnx), otherwise solution-level output may mix/overwrite runtime assemblies
+    # (e.g., System.Text.Json) when multiple projects (like tests) publish into the same folder.
+    dotnet publish .\CascadeIDE.csproj -c Debug -r win-x64 --self-contained true -o publish-debug
     if (-not (Test-Path $target)) {
         New-Item -ItemType Directory -Path $target -Force
     }

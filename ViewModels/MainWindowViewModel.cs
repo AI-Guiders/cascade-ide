@@ -55,6 +55,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
 
     public MainWindowViewModel()
     {
+        Workspace = new SolutionWorkspaceViewModel();
         _csharpLanguageService = new Services.CSharpLanguageService();
         _contextMinimizer = new Services.ContextMinimizer(_csharpLanguageService);
         _aiProviderManager = new Services.AiProviderManager(_contextMinimizer, ResolveProvider);
@@ -87,7 +88,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _lastSavedAiKeys = (AiKeys)_aiKeys.Clone();
 
         BuildOutputPanel = new BuildOutputPanelViewModel();
-        TerminalPanel = new TerminalPanelViewModel(() => SolutionPath);
+        TerminalPanel = new TerminalPanelViewModel(() => Workspace.SolutionPath);
         GitPanel = new GitPanelViewModel(_gitRunner, GetWorkspacePath, this, LoadSolution, RefreshGitSummaryAsync);
         ChatPanel = new ChatPanelViewModel(
             _aiProviderManager,
@@ -112,6 +113,27 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _mcpClientService = new Services.McpClientService(_settings.ExternalMcpServersJson);
         _autonomousAgentService = CreateAutonomousAgentService(_mcpClientService);
         _ideMcpExecutor = new IdeMcpCommandExecutor(this);
+
+        Workspace.PropertyChanged += (_, e) => OnWorkspacePropertyChanged(e.PropertyName);
+    }
+
+    /// <summary>Solution/workspace state and background loading.</summary>
+    public SolutionWorkspaceViewModel Workspace { get; }
+
+    private void OnWorkspacePropertyChanged(string? propertyName)
+    {
+        switch (propertyName)
+        {
+            case nameof(SolutionWorkspaceViewModel.SolutionPath):
+                OnPropertyChanged(nameof(McpFileBreakpointLinesInCurrentFile));
+                OnPropertyChanged(nameof(AllBreakpointLinesInCurrentFile));
+                BuildSolutionCommand.NotifyCanExecuteChanged();
+                HandleSolutionPathChanged(Workspace.SolutionPath);
+                break;
+            case nameof(SolutionWorkspaceViewModel.SelectedSolutionItem):
+                HandleSelectedSolutionItemChanged(Workspace.SelectedSolutionItem);
+                break;
+        }
     }
 
     /// <summary>Событие: перейти в активном редакторе на строку/колонку (1-based) после открытия файла.</summary>
@@ -335,6 +357,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
 
     private readonly Services.AppDataService _appData = new();
     private readonly Services.IGitCommandRunner _gitRunner = new Services.GitCommandRunner();
+    private readonly Services.IDotnetCommandRunner _dotnetRunner = new Services.DotnetCommandRunner();
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(InstallModelCommand))]
@@ -363,12 +386,6 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     public string? LastSelectedRealModel { get; set; }
 
     [ObservableProperty]
-    private ObservableCollection<SolutionItem> _solutionRoots = [];
-
-    [ObservableProperty]
-    private SolutionItem? _selectedSolutionItem;
-
-    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsMarkdownFile))]
     [NotifyPropertyChangedFor(nameof(IsMarkdownPreviewVisible))]
     [NotifyPropertyChangedFor(nameof(BreakpointLinesInCurrentFile))]
@@ -388,7 +405,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private CancellationTokenSource? _uiModeBloomCts;
     /// <summary>Предыдущий применённый режим UI — чтобы не давать bloom при первом применении и при повторной установке того же значения.</summary>
     private string? _lastAppliedUiModeForBloomEffects;
-    private long _solutionLoadVersion;
+    // Solution load version is owned by Workspace.
     private string? _lastBuildBinlogPath;
     private bool _isSwitchingDocument;
     private readonly Stack<string> _recentlyClosedDocumentPaths = new();
@@ -511,15 +528,6 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     /// <summary>Запрос выделения: длина. View применит к редактору и сбросит.</summary>
     [ObservableProperty]
     private int? _editorSelectionLength;
-
-    [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(BuildSolutionCommand))]
-    [NotifyPropertyChangedFor(nameof(McpFileBreakpointLinesInCurrentFile))]
-    [NotifyPropertyChangedFor(nameof(AllBreakpointLinesInCurrentFile))]
-    private string _solutionPath = "";
-
-    [ObservableProperty]
-    private string _solutionLoadError = "";
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ChatPanelToggleButtonText))]
@@ -830,7 +838,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             SendMessageKey = stored;
     }
 
-    partial void OnSelectedSolutionItemChanged(SolutionItem? value)
+    private void HandleSelectedSolutionItemChanged(SolutionItem? value)
     {
         _openFileDebounceCts?.Cancel();
         _openFileDebounceCts = new CancellationTokenSource();
@@ -838,7 +846,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _ = OpenFileAfterDebounceAsync(cts.Token);
     }
 
-    partial void OnSolutionPathChanged(string value)
+    private void HandleSolutionPathChanged(string value)
     {
         AttachBreakpointsFileWatcher(value);
         _ = RefreshGitSummaryAsync();

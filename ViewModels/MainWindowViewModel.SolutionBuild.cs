@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 using System.Threading;
@@ -22,7 +21,8 @@ public partial class MainWindowViewModel
     [RelayCommand(CanExecute = nameof(CanBuildSolution))]
     private async Task BuildSolutionAsync()
     {
-        if (string.IsNullOrWhiteSpace(SolutionPath) || !File.Exists(SolutionPath))
+        var solutionPath = Workspace.SolutionPath;
+        if (string.IsNullOrWhiteSpace(solutionPath) || !File.Exists(solutionPath))
             return;
 
         IsBuilding = true;
@@ -38,44 +38,26 @@ public partial class MainWindowViewModel
         else
             BottomPanelTabIndex = 1;
 
-        var header = $"Сборка: {SolutionPath}\r\n";
-        BuildOutputPanel.BuildOutput = header;
+        var header = $"Сборка: {solutionPath}\r\n";
+        BuildOutputPanel.Set(header);
         if (mirrorBuildToTerminal)
-            TerminalPanel.TerminalOutput += $"\r\n=== dotnet build (IDE) ===\r\n{header}";
+            TerminalPanel.AppendOutput($"\r\n=== dotnet build (IDE) ===\r\n{header}");
 
         void AppendBuildChunk(string chunk)
         {
-            BuildOutputPanel.BuildOutput += chunk;
+            BuildOutputPanel.Append(chunk);
             if (mirrorBuildToTerminal)
-                TerminalPanel.TerminalOutput += chunk;
+                TerminalPanel.AppendOutput(chunk);
         }
 
         try
         {
-            var psi = new System.Diagnostics.ProcessStartInfo("dotnet")
-            {
-                ArgumentList = { "build", SolutionPath },
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                WorkingDirectory = Path.GetDirectoryName(SolutionPath) ?? ""
-            };
-            using var process = System.Diagnostics.Process.Start(psi);
-            if (process is null)
-            {
-                AppendBuildChunk("Не удалось запустить dotnet build.\r\n");
-                return;
-            }
+            var workDir = Path.GetDirectoryName(solutionPath) ?? "";
+            var (success, exitCode, output) = await _dotnetRunner.RunAsync(["build", solutionPath], workDir).ConfigureAwait(false);
 
-            var stdout = process.StandardOutput.ReadToEndAsync();
-            var stderr = process.StandardError.ReadToEndAsync();
-            await Task.WhenAll(stdout, stderr);
-            await process.WaitForExitAsync();
-
-            AppendBuildChunk(await stdout + "\r\n" + await stderr);
-            if (process.ExitCode != 0)
-                AppendBuildChunk($"\r\nКод выхода: {process.ExitCode}");
+            AppendBuildChunk(output + "\r\n");
+            if (!success && exitCode != 0)
+                AppendBuildChunk($"\r\nКод выхода: {exitCode}");
         }
         catch (Exception ex)
         {
@@ -87,7 +69,10 @@ public partial class MainWindowViewModel
         }
     }
 
-    private bool CanBuildSolution() => !string.IsNullOrWhiteSpace(SolutionPath) && File.Exists(SolutionPath) && !IsBuilding;
+    private bool CanBuildSolution() =>
+        !string.IsNullOrWhiteSpace(Workspace.SolutionPath)
+        && File.Exists(Workspace.SolutionPath)
+        && !IsBuilding;
 
     [RelayCommand]
     private void HideBuildOutput()
@@ -103,38 +88,26 @@ public partial class MainWindowViewModel
     /// <summary>Загрузка решения в фоне, чтобы не блокировать UI.</summary>
     public async Task LoadSolutionAsync(string path)
     {
-        var loadVersion = Interlocked.Increment(ref _solutionLoadVersion);
-        SolutionLoadError = "";
+        Workspace.SolutionLoadError = "";
         try
         {
-            var (root, error) = await Task.Run(() =>
-            {
-                var r = Services.SolutionParser.Load(path, out var err);
-                return (r, err);
-            }).ConfigureAwait(false);
+            var (root, normalizedSolutionPath, error, workspaceLoadVersion) =
+                await Workspace.LoadSolutionTreeAsync(path).ConfigureAwait(false);
 
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                // Ignore stale completion when a newer ide_load_solution call already started.
-                if (loadVersion != Interlocked.Read(ref _solutionLoadVersion))
+                if (workspaceLoadVersion != Workspace.CurrentLoadVersion)
                     return;
 
                 if (root is null)
                 {
-                    SolutionLoadError = error ?? "Не удалось загрузить решение.";
+                    Workspace.SolutionLoadError = error ?? "Не удалось загрузить решение.";
                     return;
-                }
-
-                var normalizedSolutionPath = root.FullPath;
-                if (string.IsNullOrEmpty(normalizedSolutionPath))
-                {
-                    try { normalizedSolutionPath = Path.GetFullPath(path); }
-                    catch { normalizedSolutionPath = path; }
                 }
 
                 // New solution becomes authoritative UI context: clear stale editor selection/state.
                 _openFileDebounceCts?.Cancel();
-                SelectedSolutionItem = null;
+                Workspace.SelectedSolutionItem = null;
                 OpenDocuments.Clear();
                 Group1Documents.Clear();
                 Group2Documents.Clear();
@@ -151,16 +124,16 @@ public partial class MainWindowViewModel
                 EditorText = "";
                 IsLoadingCurrentFile = false;
 
-                SolutionPath = normalizedSolutionPath ?? path;
-                SolutionRoots.Clear();
-                SolutionRoots.Add(root);
+                Workspace.SolutionPath = normalizedSolutionPath ?? path;
+                Workspace.SolutionRoots.Clear();
+                Workspace.SolutionRoots.Add(root);
 
                 RebuildAndReinitDockLayout();
             });
         }
         catch (Exception ex)
         {
-            SolutionLoadError = "Ошибка загрузки решения: " + ex.Message;
+            Workspace.SolutionLoadError = "Ошибка загрузки решения: " + ex.Message;
             TryLogLoadSolutionCrash(path, ex);
         }
     }

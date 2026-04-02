@@ -15,7 +15,7 @@ public partial class MainWindowViewModel
             _csharpLspHost?.Dispose();
             _csharpLspHost = null;
             return (
-                SolutionPath ?? "",
+                Workspace.SolutionPath ?? "",
                 _settings.CSharpLspProvider,
                 _settings.CSharpLspExecutable,
                 _settings.CSharpLspArguments);

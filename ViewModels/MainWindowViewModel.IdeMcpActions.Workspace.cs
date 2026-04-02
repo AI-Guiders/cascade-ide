@@ -15,10 +15,10 @@ public partial class MainWindowViewModel
 {
     string Services.IIdeMcpActions.GetSolutionInfo()
     {
-        var path = SolutionPath ?? "";
+        var path = Workspace.SolutionPath ?? "";
         var current = CurrentFilePath ?? "";
-        var projects = CollectProjectPaths(SolutionRoots).ToList();
-        var selected = SelectedSolutionItem?.FullPath ?? "";
+        var projects = CollectProjectPaths(Workspace.SolutionRoots).ToList();
+        var selected = Workspace.SelectedSolutionItem?.FullPath ?? "";
         return JsonSerializer.Serialize(new { solution_path = path, current_file_path = current, project_paths = projects, selected_solution_path = selected });
     }
 
@@ -41,9 +41,9 @@ public partial class MainWindowViewModel
 
         var state = new
         {
-            solution_path = SolutionPath,
+            solution_path = Workspace.SolutionPath,
             current_file_path = CurrentFilePath,
-            selected_solution_path = SelectedSolutionItem?.FullPath,
+            selected_solution_path = Workspace.SelectedSolutionItem?.FullPath,
             editor = new
             {
                 content_length = (EditorText ?? "").Length,
@@ -177,7 +177,7 @@ public partial class MainWindowViewModel
         {
             "file" => ResolveFilesFromPath(path),
             "path" => ResolveFilesFromPath(path),
-            "solution" => CollectFileEntries(SolutionRoots)
+            "solution" => CollectFileEntries(Workspace.SolutionRoots)
                 .Select(e => e.FullPath)
                 .Where(p => p.EndsWith(".cs", StringComparison.OrdinalIgnoreCase) && File.Exists(p))
                 .ToList(),

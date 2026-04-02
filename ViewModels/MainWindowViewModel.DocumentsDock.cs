@@ -27,7 +27,7 @@ public partial class MainWindowViewModel
 
         await Dispatcher.UIThread.InvokeAsync(() =>
         {
-            var value = SelectedSolutionItem;
+            var value = Workspace.SelectedSolutionItem;
             if (value?.FullPath is not { } path || !File.Exists(path))
                 return;
             var normalizedPath = Path.GetFullPath(path);
@@ -47,9 +47,9 @@ public partial class MainWindowViewModel
         if (string.IsNullOrEmpty(current))
             return;
         var normalized = Path.GetFullPath(current);
-        var item = FindSolutionItemByPath(SolutionRoots, normalized);
+        var item = FindSolutionItemByPath(Workspace.SolutionRoots, normalized);
         if (item is not null)
-            SelectedSolutionItem = item;
+            Workspace.SelectedSolutionItem = item;
     }
 
     partial void OnSelectedDocumentChanged(OpenDocumentViewModel? value)
