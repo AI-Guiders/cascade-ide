@@ -275,101 +275,6 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     public Func<string?, string>? HighlightControlProvider { get; set; }
     public Func<string, double?, double?, string>? SetPanelSizeProvider { get; set; }
 
-    partial void OnIdeMcpServerEnabledChanged(bool value)
-    {
-        _settings.IdeMcpServerEnabled = value;
-        SaveSettingsIfChanged();
-    }
-
-    partial void OnExternalMcpServersJsonChanged(string value)
-    {
-        _settings.ExternalMcpServersJson = value ?? "[]";
-
-        // External MCP connectivity affects autonomous tool list/calls.
-        Autonomous.CancelForHostReconfiguration();
-        _mcpClientService = new Services.McpClientService(_settings.ExternalMcpServersJson);
-        _autonomousAgentService = CreateAutonomousAgentService(_mcpClientService);
-        Autonomous.ReplaceAgentService(_autonomousAgentService);
-
-        SaveSettingsIfChanged();
-    }
-
-    partial void OnIsSolutionExplorerVisibleChanged(bool value)
-    {
-        _settings.SolutionExplorerVisible = value;
-        OnPropertyChanged(nameof(IsSolutionPanelHidden));
-        SaveSettingsIfChanged();
-    }
-
-    partial void OnIsTerminalVisibleChanged(bool value)
-    {
-        _settings.TerminalVisible = value;
-        OnPropertyChanged(nameof(IsTerminalPanelHidden));
-        OnPropertyChanged(nameof(IsBottomPanelVisible));
-        SaveSettingsIfChanged();
-        if (value)
-            BottomPanelTabIndex = 0;
-        else if (BottomPanelTabIndex == 0)
-            CoerceBottomPanelTabToVisible();
-    }
-
-    partial void OnIsBuildOutputVisibleChanged(bool value)
-    {
-        OnPropertyChanged(nameof(IsBuildPanelHidden));
-        OnPropertyChanged(nameof(IsBottomPanelVisible));
-        if (value)
-            BottomPanelTabIndex = 1;
-        else if (BottomPanelTabIndex == 1)
-            CoerceBottomPanelTabToVisible();
-    }
-
-    partial void OnIsInstrumentationDockVisibleChanged(bool value)
-    {
-        _settings.InstrumentationDockVisible = value;
-        SaveSettingsIfChanged();
-        if (value)
-        {
-            BottomPanelTabIndex = 4;
-            return;
-        }
-
-        if (BottomPanelTabIndex is >= 4 and <= 6)
-            CoerceBottomPanelTabToVisible();
-    }
-
-    partial void OnIsChatPanelExpandedChanged(bool value)
-    {
-        OnPropertyChanged(nameof(IsChatPanelHidden));
-    }
-
-    partial void OnActiveAiProviderChanged(string value)
-    {
-        if (!string.IsNullOrEmpty(value))
-        {
-            _settings.ActiveAiProvider = value;
-            SaveSettingsIfChanged();
-        }
-        ChatPanel.RefreshSendChatCommandState();
-    }
-
-    partial void OnAnthropicApiKeyChanged(string value)
-    {
-        _aiKeys.AnthropicApiKey = string.IsNullOrEmpty(value) ? null : value;
-        SaveAiKeysIfChanged();
-    }
-
-    partial void OnOpenAiApiKeyChanged(string value)
-    {
-        _aiKeys.OpenAiApiKey = string.IsNullOrEmpty(value) ? null : value;
-        SaveAiKeysIfChanged();
-    }
-
-    partial void OnDeepSeekApiKeyChanged(string value)
-    {
-        _aiKeys.DeepSeekApiKey = string.IsNullOrEmpty(value) ? null : value;
-        SaveAiKeysIfChanged();
-    }
-
     private readonly Services.AppDataService _appData = new();
     private readonly Services.IGitCommandRunner _gitRunner = new Services.GitCommandRunner();
     private readonly Services.IDotnetCommandRunner _dotnetRunner = new Services.DotnetCommandRunner();
@@ -400,99 +305,9 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     /// <summary>Последняя выбранная реальная модель (для восстановления после "Install New").</summary>
     public string? LastSelectedRealModel { get; set; }
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsMarkdownFile))]
-    [NotifyPropertyChangedFor(nameof(IsMarkdownPreviewVisible))]
-    [NotifyPropertyChangedFor(nameof(BreakpointLinesInCurrentFile))]
-    [NotifyPropertyChangedFor(nameof(DebuggerBreakpointLinesInCurrentFile))]
-    [NotifyPropertyChangedFor(nameof(McpFileBreakpointLinesInCurrentFile))]
-    [NotifyPropertyChangedFor(nameof(AllBreakpointLinesInCurrentFile))]
-    [NotifyPropertyChangedFor(nameof(DebugCurrentLineInCurrentFile))]
-    private string? _currentFilePath;
-
-    private readonly List<(string FilePath, int Line)> _breakpoints = [];
-    private readonly List<(string FilePath, int Line)> _debuggerBreakpoints = [];
-    private FileSystemWatcher? _breakpointsFileWatcher;
     private CancellationTokenSource? _openFileDebounceCts;
     // Solution load version is owned by Workspace.
     private string? _lastBuildBinlogPath;
-
-    /// <summary>Номера строк с брейкпоинтами в текущем открытом файле (для отрисовки в редакторе).</summary>
-    public IReadOnlyList<int> BreakpointLinesInCurrentFile
-    {
-        get
-        {
-            var current = CurrentFilePath;
-            if (string.IsNullOrEmpty(current))
-                return [];
-            var normalized = Path.GetFullPath(current);
-            return _breakpoints
-                .Where(b => string.Equals(Path.GetFullPath(b.FilePath), normalized, StringComparison.OrdinalIgnoreCase))
-                .Select(b => b.Line)
-                .OrderBy(static l => l)
-                .Distinct()
-                .ToList();
-        }
-    }
-
-    /// <summary>Строки с брейкпоинтами отладчика (ide_show_breakpoints) в текущем файле.</summary>
-    public IReadOnlyList<int> DebuggerBreakpointLinesInCurrentFile
-    {
-        get
-        {
-            var current = CurrentFilePath;
-            if (string.IsNullOrEmpty(current))
-                return [];
-            var normalized = Path.GetFullPath(current);
-            return _debuggerBreakpoints
-                .Where(b => string.Equals(Path.GetFullPath(b.FilePath), normalized, StringComparison.OrdinalIgnoreCase))
-                .Select(b => b.Line)
-                .OrderBy(static l => l)
-                .Distinct()
-                .ToList();
-        }
-    }
-
-    /// <summary>Строки с брейкпоинтами из .dotnet-debug-mcp-breakpoints.json в текущем файле.</summary>
-    public IReadOnlyList<int> McpFileBreakpointLinesInCurrentFile
-    {
-        get
-        {
-            var ws = GetWorkspacePath();
-            if (string.IsNullOrEmpty(ws) || string.IsNullOrEmpty(CurrentFilePath))
-                return [];
-            return Services.BreakpointsFileService.GetLinesForFile(ws, CurrentFilePath);
-        }
-    }
-
-    /// <summary>Все брейкпоинты (IDE + отладчик + файл MCP) в текущем файле для отрисовки.</summary>
-    public IReadOnlyList<int> AllBreakpointLinesInCurrentFile =>
-        BreakpointLinesInCurrentFile
-            .Union(DebuggerBreakpointLinesInCurrentFile)
-            .Union(McpFileBreakpointLinesInCurrentFile)
-            .OrderBy(static l => l)
-            .ToList();
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(DebugCurrentLineInCurrentFile))]
-    private string? _debugPositionFile;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(DebugCurrentLineInCurrentFile))]
-    private int _debugPositionLine;
-
-    /// <summary>Номер строки текущей позиции отладки в открытом файле (0 если другой файл или сброшено).</summary>
-    public int DebugCurrentLineInCurrentFile
-    {
-        get
-        {
-            if (string.IsNullOrEmpty(DebugPositionFile) || string.IsNullOrEmpty(CurrentFilePath))
-                return 0;
-            if (!string.Equals(Path.GetFullPath(DebugPositionFile), Path.GetFullPath(CurrentFilePath), StringComparison.OrdinalIgnoreCase))
-                return 0;
-            return DebugPositionLine;
-        }
-    }
 
     /// <summary>True, если открыт файл .md или .markdown — показываем превью.</summary>
     public bool IsMarkdownFile =>
@@ -535,20 +350,6 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsBottomPanelVisible))]
     private bool _isGitPanelVisible;
-
-    partial void OnIsGitPanelVisibleChanged(bool value)
-    {
-        _settings.GitPanelVisible = value;
-        OnPropertyChanged(nameof(IsBottomPanelVisible));
-        SaveSettingsIfChanged();
-        if (value)
-        {
-            BottomPanelTabIndex = 3;
-            _ = GitPanel.RefreshGitPanelAsync();
-        }
-        else if (BottomPanelTabIndex == 3)
-            CoerceBottomPanelTabToVisible();
-    }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsFocusMode))]
@@ -775,11 +576,6 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
 
     /// <summary>Краткий список языков с подсветкой в редакторе (для окна настроек).</summary>
     public string SupportedEditorLanguagesSummary => Services.EditorLanguageSupport.GetSummary();
-
-    partial void OnSendMessageKeyChanged(string value)
-    {
-        _appData.Put("SendMessageKey", value);
-    }
 
     public void LoadSendMessageKeyFromStorage()
     {

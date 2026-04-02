@@ -172,35 +172,6 @@ public partial class MainWindowViewModel
         Chrome.NotifyUiModeChangedForBloom(normalized, IsPowerMode, IsFocusMode);
     }
 
-    private void AttachBreakpointsFileWatcher(string? solutionPath)
-    {
-        _breakpointsFileWatcher?.Dispose();
-        _breakpointsFileWatcher = null;
-        var ws = GetWorkspacePath(solutionPath);
-        if (string.IsNullOrEmpty(ws) || !Directory.Exists(ws))
-            return;
-        try
-        {
-            _breakpointsFileWatcher = new FileSystemWatcher(ws)
-            {
-                Filter = Services.BreakpointsFileService.FileName,
-                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName
-            };
-            _breakpointsFileWatcher.Changed += (_, _) => Dispatcher.UIThread.Post(() =>
-            {
-                OnPropertyChanged(nameof(McpFileBreakpointLinesInCurrentFile));
-                OnPropertyChanged(nameof(AllBreakpointLinesInCurrentFile));
-            });
-            _breakpointsFileWatcher.Renamed += (_, _) => Dispatcher.UIThread.Post(() =>
-            {
-                OnPropertyChanged(nameof(McpFileBreakpointLinesInCurrentFile));
-                OnPropertyChanged(nameof(AllBreakpointLinesInCurrentFile));
-            });
-            _breakpointsFileWatcher.EnableRaisingEvents = true;
-        }
-        catch { /* нет прав или диск недоступен */ }
-    }
-
     public async Task RefreshOllamaAsync()
     {
         OllamaStatus = "Проверка Ollama…";

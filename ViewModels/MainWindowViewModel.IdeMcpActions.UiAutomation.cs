@@ -21,6 +21,7 @@ public partial class MainWindowViewModel
             return;
         _breakpoints.Add((path, line));
         OnPropertyChanged(nameof(BreakpointLinesInCurrentFile));
+        OnPropertyChanged(nameof(AllBreakpointLinesInCurrentFile));
     }
 
     void Services.IIdeMcpActions.RemoveBreakpoint(string filePath, int line)
@@ -30,7 +31,10 @@ public partial class MainWindowViewModel
         var path = Path.GetFullPath(filePath);
         var removed = _breakpoints.RemoveAll(b => string.Equals(Path.GetFullPath(b.FilePath), path, StringComparison.OrdinalIgnoreCase) && b.Line == line) > 0;
         if (removed)
+        {
             OnPropertyChanged(nameof(BreakpointLinesInCurrentFile));
+            OnPropertyChanged(nameof(AllBreakpointLinesInCurrentFile));
+        }
     }
 
     /// <summary>Переключить брейкпоинт в .dotnet-debug-mcp-breakpoints.json для текущего файла и строки (клик по полю в редакторе).</summary>

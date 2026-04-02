@@ -78,6 +78,18 @@ public partial class DockDocumentView : UserControl
                 SyncFromVmIfActive();
                 UpdateMcpProvidersIfActive();
             }
+
+            if (args.PropertyName is nameof(MainWindowViewModel.BreakpointLinesInCurrentFile)
+                or nameof(MainWindowViewModel.DebuggerBreakpointLinesInCurrentFile)
+                or nameof(MainWindowViewModel.McpFileBreakpointLinesInCurrentFile)
+                or nameof(MainWindowViewModel.AllBreakpointLinesInCurrentFile)
+                or nameof(MainWindowViewModel.DebugCurrentLineInCurrentFile)
+                or nameof(MainWindowViewModel.DebugPositionFile)
+                or nameof(MainWindowViewModel.DebugPositionLine))
+            {
+                if (_editor is not null)
+                    _editor.TextArea.TextView.Redraw();
+            }
         };
         _vm.PropertyChanged += _vmHandler;
 
@@ -165,8 +177,10 @@ public partial class DockDocumentView : UserControl
             return;
 
         var textView = _editor.TextArea.TextView;
-        textView.BackgroundRenderers.Add(new BreakpointLineRenderer(() => _vm.AllBreakpointLinesInCurrentFile));
-        textView.BackgroundRenderers.Add(new DebugCurrentLineRenderer(() => _vm.DebugCurrentLineInCurrentFile));
+        textView.BackgroundRenderers.Add(new BreakpointLineRenderer(() =>
+            _vm.GetAllBreakpointLinesForFile(_docVm.Doc.FilePath)));
+        textView.BackgroundRenderers.Add(new DebugCurrentLineRenderer(() =>
+            _vm.GetDebugCurrentLineForFile(_docVm.Doc.FilePath)));
 
         _diagRenderer = new EditorDiagnosticBackgroundRenderer(() => _vm.WorkspaceDiagnostics.GetStripsForFile(_docVm.Doc.FilePath));
         textView.BackgroundRenderers.Add(_diagRenderer);
