@@ -7,6 +7,60 @@ namespace CascadeIDE.ViewModels;
 
 public partial class MainWindowViewModel
 {
+    /// <summary>Варианты C# LSP (настройки; активен не более одного процесса).</summary>
+    public IReadOnlyList<string> CSharpLspProviderOptionsList => CSharpLspProviderIds.All;
+
+    public bool IsCSharpLspProcessSelected =>
+        !string.Equals(_csharpLspProvider, CSharpLspProviderIds.ParseOnly, StringComparison.OrdinalIgnoreCase);
+
+    private string _csharpLspProvider = CSharpLspProviderIds.ParseOnly;
+    private string _csharpLspExecutable = "";
+    private string _csharpLspArguments = "";
+
+    /// <summary><see cref="CSharpLspProviderIds"/>.</summary>
+    public string CSharpLspProvider
+    {
+        get => _csharpLspProvider;
+        set
+        {
+            var v = string.IsNullOrWhiteSpace(value) ? CSharpLspProviderIds.ParseOnly : value.Trim();
+            if (!SetProperty(ref _csharpLspProvider, v))
+                return;
+            _settings.CSharpLspProvider = v;
+            SaveSettingsIfChanged();
+            OnPropertyChanged(nameof(IsCSharpLspProcessSelected));
+            _ = RestartCSharpLanguageServerAsync();
+        }
+    }
+
+    public string CSharpLspExecutable
+    {
+        get => _csharpLspExecutable;
+        set
+        {
+            var v = value ?? "";
+            if (!SetProperty(ref _csharpLspExecutable, v))
+                return;
+            _settings.CSharpLspExecutable = v;
+            SaveSettingsIfChanged();
+            _ = RestartCSharpLanguageServerAsync();
+        }
+    }
+
+    public string CSharpLspArguments
+    {
+        get => _csharpLspArguments;
+        set
+        {
+            var v = value ?? "";
+            if (!SetProperty(ref _csharpLspArguments, v))
+                return;
+            _settings.CSharpLspArguments = v;
+            SaveSettingsIfChanged();
+            _ = RestartCSharpLanguageServerAsync();
+        }
+    }
+
     private async Task RestartCSharpLanguageServerAsync()
     {
         var snap = await Dispatcher.UIThread.InvokeAsync(() =>

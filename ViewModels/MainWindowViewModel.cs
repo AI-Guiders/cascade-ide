@@ -1,18 +1,17 @@
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Text.Json;
+using System.Threading;
 using Avalonia.Threading;
+using CascadeIDE.Features.AutonomousAgent;
 using CascadeIDE.Features.Build;
 using CascadeIDE.Features.Chat;
-using CascadeIDE.Features.AutonomousAgent;
+using CascadeIDE.Features.Documents;
 using CascadeIDE.Features.Git;
 using CascadeIDE.Features.Instrumentation;
 using CascadeIDE.Features.Terminal;
-using CascadeIDE.Features.Documents;
 using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Models;
 using CascadeIDE.Services.Lsp;
-using CommunityToolkit.Mvvm.ComponentModel;
 namespace CascadeIDE.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpActions, IAutonomousAgentSessionHost
@@ -26,19 +25,8 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private CascadeIdeSettings? _lastSavedSettings;
     private AiKeys? _lastSavedAiKeys;
 
-    private Func<int?, Services.EditorStateDto?>? _editorStateProvider;
-    private Func<int, int, string?>? _editorContentRangeProvider;
-    private Action<string, int, int, int, int, string>? _applyEditAction;
-    private Action? _focusEditorAction;
-
     public static readonly IReadOnlyList<string> AiProviderKeys = ["Ollama", "Anthropic", "OpenAI", "DeepSeek"];
     public IReadOnlyList<string> AiProviderKeysList => AiProviderKeys;
-
-    /// <summary>Варианты C# LSP (настройки; активен не более одного процесса).</summary>
-    public IReadOnlyList<string> CSharpLspProviderOptionsList => CSharpLspProviderIds.All;
-
-    public bool IsCSharpLspProcessSelected =>
-        !string.Equals(_csharpLspProvider, CSharpLspProviderIds.ParseOnly, StringComparison.OrdinalIgnoreCase);
 
     private readonly Services.CSharpLanguageService _csharpLanguageService;
     private readonly Services.ContextMinimizer _contextMinimizer;
@@ -241,338 +229,13 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         };
     }
 
-    public void SetEditorStateProvider(Func<int?, Services.EditorStateDto?> provider) => _editorStateProvider = provider;
-    public void SetEditorContentRangeProvider(Func<int, int, string?> provider) => _editorContentRangeProvider = provider;
-    public void SetApplyEdit(Action<string, int, int, int, int, string> action) => _applyEditAction = action;
-    public void SetFocusEditor(Action action) => _focusEditorAction = action;
-
-    /// <summary>Вызвать, чтобы показать диалог «Открыть решение» (View подставит реализацию).</summary>
-    public Action? RequestOpenSolution { get; set; }
-    /// <summary>Вызвать для закрытия окна (View подставит Close).</summary>
-    public Action? RequestClose { get; set; }
-    /// <summary>Показать «О программе» (View подставит диалог).</summary>
-    public Action? RequestShowAbout { get; set; }
-    /// <summary>Показать окно настроек (View подставит создание и Show).</summary>
-    public Action? RequestOpenSettings { get; set; }
-    /// <summary>Показать диалог выбора файла темы (.json). Возвращает путь к файлу или null.</summary>
-    public Func<Task<string?>>? RequestOpenThemeFile { get; set; }
-    /// <summary>Показать превью Markdown в отдельном окне (контент от агента).</summary>
-    public Action<string, string>? RequestShowMarkdownPreviewWindow { get; set; }
-    /// <summary>Показать превью текущего редактора в отдельном окне (живое обновление).</summary>
-    public Action? RequestShowMarkdownPreviewForEditor { get; set; }
-    /// <summary>Показать подтверждение пользователю. Возвращает "ok" или "cancel".</summary>
-    public Func<string, CancellationToken, Task<string>>? RequestConfirmation { get; set; }
-    /// <summary>Поставщик снимка дерева UI (View подставит вызов UiLayoutSnapshot.BuildJson).</summary>
-    public Func<string>? GetUiLayoutProvider { get; set; }
-    public Func<string>? GetColorsUnderCursorProvider { get; set; }
-    public Func<string?, string>? GetControlAppearanceProvider { get; set; }
-    public Func<string, string, string>? SetControlLayoutProvider { get; set; }
-    public Func<string, string, string?, string?, string>? AddControlProvider { get; set; }
-    public Func<string, string, string>? SetControlTextProvider { get; set; }
-    public Func<string?, string>? ClickControlProvider { get; set; }
-    public Func<string?, string, string>? SendKeysProvider { get; set; }
-    public Func<string?, string>? SetFocusProvider { get; set; }
-    public Func<string?, string>? HighlightControlProvider { get; set; }
-    public Func<string, double?, double?, string>? SetPanelSizeProvider { get; set; }
-
     private readonly Services.AppDataService _appData = new();
     private readonly Services.IGitCommandRunner _gitRunner = new Services.GitCommandRunner();
     private readonly Services.IDotnetCommandRunner _dotnetRunner = new Services.DotnetCommandRunner();
 
-    [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(InstallModelCommand))]
-    private bool _ollamaAvailable;
-
-    [ObservableProperty]
-    private string _ollamaStatus = "Проверка Ollama…";
-
-    /// <summary>True, если IDE запущена как MCP-сервер (--mcp-stdio). Показывать подсказку «управляется агентом».</summary>
-    [ObservableProperty]
-    private bool _isMcpServerMode;
-
-    public ObservableCollection<string> OllamaModels { get; } = [];
-
-    /// <summary>Список моделей + пункт "Install New" для ComboBox.</summary>
-    public ObservableCollection<string> OllamaModelChoices { get; } = [];
-
-    [ObservableProperty]
-    private string? _selectedOllamaModel;
-
-    /// <summary>Краткое описание выбранной модели (размер, контекст, возможности) из Ollama API.</summary>
-    [ObservableProperty]
-    private string _selectedModelDetails = "";
-
-    /// <summary>Последняя выбранная реальная модель (для восстановления после "Install New").</summary>
-    public string? LastSelectedRealModel { get; set; }
-
     private CancellationTokenSource? _openFileDebounceCts;
     // Solution load version is owned by Workspace.
     private string? _lastBuildBinlogPath;
-
-    /// <summary>True, если открыт файл .md или .markdown — показываем превью.</summary>
-    public bool IsMarkdownFile =>
-        !string.IsNullOrEmpty(CurrentFilePath)
-        && (CurrentFilePath.EndsWith(".md", StringComparison.OrdinalIgnoreCase)
-            || CurrentFilePath.EndsWith(".markdown", StringComparison.OrdinalIgnoreCase));
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsMarkdownPreviewVisible))]
-    private bool _isLoadingCurrentFile;
-
-    /// <summary>Показывать панель превью Markdown только когда контент уже загружен (избегаем смены лейаута до загрузки, из‑за которой сбрасывается выбор в дереве).</summary>
-    public bool IsMarkdownPreviewVisible => IsMarkdownFile && !IsLoadingCurrentFile;
-
-    [ObservableProperty]
-    private string _editorText = "";
-
-    /// <summary>Запрос выделения: начальный offset. View применит к редактору и сбросит.</summary>
-    [ObservableProperty]
-    private int? _editorSelectionStart;
-
-    /// <summary>Запрос выделения: длина. View применит к редактору и сбросит.</summary>
-    [ObservableProperty]
-    private int? _editorSelectionLength;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ChatPanelToggleButtonText))]
-    private bool _isChatPanelExpanded = true;
-
-    [ObservableProperty]
-    private bool _isSolutionExplorerVisible = true;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ShowTelemetryHiddenHint))]
-    [NotifyPropertyChangedFor(nameof(TelemetryButtonText))]
-    [NotifyPropertyChangedFor(nameof(IsBottomPanelVisible))]
-    private bool _isTerminalVisible;
-
-    /// <summary>Вкладка «Git» в нижней панели (Вид → Git).</summary>
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsBottomPanelVisible))]
-    private bool _isGitPanelVisible;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsFocusMode))]
-    [NotifyPropertyChangedFor(nameof(IsBalancedMode))]
-    [NotifyPropertyChangedFor(nameof(IsPowerMode))]
-    [NotifyPropertyChangedFor(nameof(ShowTaskBar))]
-    [NotifyPropertyChangedFor(nameof(ShowTelemetryStrip))]
-    [NotifyPropertyChangedFor(nameof(ShowQuickActions))]
-    [NotifyPropertyChangedFor(nameof(ShowAgentOperations))]
-    [NotifyPropertyChangedFor(nameof(ShowAgentTrace))]
-    [NotifyPropertyChangedFor(nameof(ShowPowerTelemetry))]
-    [NotifyPropertyChangedFor(nameof(ShowPowerTelemetryOnTerminalTab))]
-    [NotifyPropertyChangedFor(nameof(ShowSafetyControls))]
-    [NotifyPropertyChangedFor(nameof(ShowTelemetryHiddenHint))]
-    [NotifyPropertyChangedFor(nameof(TelemetryButtonText))]
-    [NotifyPropertyChangedFor(nameof(ShowEditorGroup2))]
-    [NotifyPropertyChangedFor(nameof(ShowEditorGroup3))]
-    [NotifyPropertyChangedFor(nameof(IsRiskCardVisible))]
-    [NotifyPropertyChangedFor(nameof(IsResultCardVisible))]
-    [NotifyPropertyChangedFor(nameof(ShowAgentOperationsBlock))]
-    [NotifyPropertyChangedFor(nameof(ShowInstrumentationTabs))]
-    [NotifyPropertyChangedFor(nameof(ShowInstrumentationLayoutMenu))]
-    [NotifyPropertyChangedFor(nameof(IsBottomPanelVisible))]
-    [NotifyPropertyChangedFor(nameof(WindowTitle))]
-    [NotifyPropertyChangedFor(nameof(MainWorkspaceTelemetryColumnSpan))]
-    private string _uiMode = "Balanced";
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ShowEditorGroup2))]
-    [NotifyPropertyChangedFor(nameof(ShowEditorGroup3))]
-    private int _editorGroupCount = 1;
-
-    [ObservableProperty]
-    private string _activeTaskTitle = "Нет активной задачи";
-
-    [ObservableProperty]
-    private string _activeTaskStatus = "Ожидание";
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsActiveTaskProgressVisible))]
-    private int _activeTaskProgress;
-
-    [ObservableProperty]
-    private string _activeObjective = "Нет активной операции агента.";
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsRiskSummaryVisible))]
-    [NotifyPropertyChangedFor(nameof(IsRiskCardVisible))]
-    private string _riskSummary = "Риски не зафиксированы.";
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsResultSummaryVisible))]
-    [NotifyPropertyChangedFor(nameof(IsResultCardVisible))]
-    private string _resultSummary = "Результатов пока нет.";
-
-    [ObservableProperty]
-    private string _nextActionSummary = "Ожидание следующего шага.";
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsSafetyL1))]
-    [NotifyPropertyChangedFor(nameof(IsSafetyL2))]
-    [NotifyPropertyChangedFor(nameof(IsSafetyL3))]
-    [NotifyPropertyChangedFor(nameof(SafetyLevelDescription))]
-    [NotifyPropertyChangedFor(nameof(SafetyL1Opacity))]
-    [NotifyPropertyChangedFor(nameof(SafetyL2Opacity))]
-    [NotifyPropertyChangedFor(nameof(SafetyL3Opacity))]
-    private string _safetyLevel = "L2";
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsComplexityBadgeVisible))]
-    private int _complexityBadge;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsImpactedTestsBadgeVisible))]
-    [NotifyPropertyChangedFor(nameof(TelemetryTestsText))]
-    [NotifyPropertyChangedFor(nameof(TelemetryTestsCockpitShort))]
-    private int _impactedTestsBadge;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(TelemetryTestsText))]
-    [NotifyPropertyChangedFor(nameof(TelemetryTestsCockpitShort))]
-    private string _lastTestSummary = "";
-
-    /// <summary>Снимок раскладки UI (JSON), полоса телеметрии в Power.</summary>
-    [ObservableProperty]
-    private string _workspaceSnapshotJson = "";
-
-    public ObservableCollection<FocusPlanItemViewModel> FocusPlanItems { get; } = [];
-
-    /// <summary>0 = Terminal, 1 = Build, 2 = Git, 3 = Events, 4 = Tests, 5 = Debug.</summary>
-    [ObservableProperty]
-    private int _bottomPanelTabIndex;
-
-    [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(BuildSolutionCommand))]
-    [NotifyPropertyChangedFor(nameof(TelemetryBuildText))]
-    [NotifyPropertyChangedFor(nameof(TelemetryBuildCockpitShort))]
-    private bool _isBuilding;
-
-    [ObservableProperty]
-    private bool _isBuildOutputVisible;
-
-    /// <summary>Вкладки «События / Тесты / Отладка» в Balanced/Power (сохраняется в настройках).</summary>
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ShowInstrumentationTabs))]
-    [NotifyPropertyChangedFor(nameof(IsBottomPanelVisible))]
-    private bool _isInstrumentationDockVisible = true;
-
-    [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(InstallModelCommand))]
-    private string _modelToInstall = "";
-
-    [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(InstallModelCommand))]
-    private bool _isPullingModel;
-
-    [ObservableProperty]
-    private string _pullModelProgress = "";
-
-    [ObservableProperty]
-    private string _sendMessageKey = "Enter";
-
-    /// <summary>Отправлять только диагностики и сигнатуры текущего файла (минимальный контекст).</summary>
-    [ObservableProperty]
-    private bool _useMinimizedContext = true;
-
-    /// <summary>Включить MCP-сервер при старте с --mcp-stdio (сохраняется в настройках, действует при следующем запуске).</summary>
-    [ObservableProperty]
-    private bool _ideMcpServerEnabled = true;
-
-    /// <summary>
-    /// JSON-конфиг внешних MCP-серверов (stdio) для автономного режима.
-    /// Формат — как в <see cref="CascadeIdeSettings.ExternalMcpServersJson"/>.
-    /// </summary>
-    [ObservableProperty]
-    private string _externalMcpServersJson = "[]";
-
-    private string _csharpLspProvider = CSharpLspProviderIds.ParseOnly;
-    private string _csharpLspExecutable = "";
-    private string _csharpLspArguments = "";
-
-    /// <summary><see cref="CSharpLspProviderIds"/>.</summary>
-    public string CSharpLspProvider
-    {
-        get => _csharpLspProvider;
-        set
-        {
-            var v = string.IsNullOrWhiteSpace(value) ? CSharpLspProviderIds.ParseOnly : value.Trim();
-            if (!SetProperty(ref _csharpLspProvider, v))
-                return;
-            _settings.CSharpLspProvider = v;
-            SaveSettingsIfChanged();
-            OnPropertyChanged(nameof(IsCSharpLspProcessSelected));
-            _ = RestartCSharpLanguageServerAsync();
-        }
-    }
-
-    public string CSharpLspExecutable
-    {
-        get => _csharpLspExecutable;
-        set
-        {
-            var v = value ?? "";
-            if (!SetProperty(ref _csharpLspExecutable, v))
-                return;
-            _settings.CSharpLspExecutable = v;
-            SaveSettingsIfChanged();
-            _ = RestartCSharpLanguageServerAsync();
-        }
-    }
-
-    public string CSharpLspArguments
-    {
-        get => _csharpLspArguments;
-        set
-        {
-            var v = value ?? "";
-            if (!SetProperty(ref _csharpLspArguments, v))
-                return;
-            _settings.CSharpLspArguments = v;
-            SaveSettingsIfChanged();
-            _ = RestartCSharpLanguageServerAsync();
-        }
-    }
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsOllamaSelected))]
-    [NotifyPropertyChangedFor(nameof(IsAnthropicSelected))]
-    [NotifyPropertyChangedFor(nameof(IsOpenAiSelected))]
-    [NotifyPropertyChangedFor(nameof(IsDeepSeekSelected))]
-    [NotifyPropertyChangedFor(nameof(CurrentModelDisplay))]
-    private string _activeAiProvider = "Ollama";
-
-    public bool IsOllamaSelected => ActiveAiProvider == "Ollama";
-    public bool IsAnthropicSelected => ActiveAiProvider == "Anthropic";
-    public bool IsOpenAiSelected => ActiveAiProvider == "OpenAI";
-    public bool IsDeepSeekSelected => ActiveAiProvider == "DeepSeek";
-
-    /// <summary>Отображаемое имя модели (для облачных — из настроек).</summary>
-    public string CurrentModelDisplay => ActiveAiProvider switch
-    {
-        "Anthropic" => _settings.AnthropicModelId,
-        "OpenAI" => _settings.OpenAiModelId,
-        "DeepSeek" => _settings.DeepSeekModelId,
-        _ => SelectedOllamaModel ?? _settings.PreferredOllamaModel ?? ""
-    };
-
-    [ObservableProperty]
-    private string _anthropicApiKey = "";
-
-    [ObservableProperty]
-    private string _openAiApiKey = "";
-
-    [ObservableProperty]
-    private string _deepSeekApiKey = "";
-
-    public string EditorTextGroup2 => Documents.SelectedDocumentGroup2?.Content ?? "";
-
-    public string EditorTextGroup3 => Documents.SelectedDocumentGroup3?.Content ?? "";
-
-    public static readonly IReadOnlyList<string> SendMessageKeyOptions = ["Enter", "Ctrl+Enter", "Shift+Enter"];
-
-    public IReadOnlyList<string> SendMessageKeyOptionsList => SendMessageKeyOptions;
 
     /// <summary>Краткий список языков с подсветкой в редакторе (для окна настроек).</summary>
     public string SupportedEditorLanguagesSummary => Services.EditorLanguageSupport.GetSummary();
