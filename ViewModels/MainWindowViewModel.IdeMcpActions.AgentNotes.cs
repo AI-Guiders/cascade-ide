@@ -1,60 +1,11 @@
 using System.IO;
 using System.Text.Json;
 using AgentNotes.Core;
-using Avalonia.Threading;
-using CascadeIDE.Features.Instrumentation;
 
 namespace CascadeIDE.ViewModels;
 
 public partial class MainWindowViewModel
 {
-    void Services.IIdeMcpActions.ShowDebugBreakpoints(IReadOnlyList<(string FilePath, int Line)> breakpoints)
-    {
-        Dispatcher.UIThread.Post(() =>
-        {
-            _debuggerBreakpoints.Clear();
-            foreach (var (path, line) in breakpoints)
-                _debuggerBreakpoints.Add((Path.GetFullPath(path), line));
-            OnPropertyChanged(nameof(DebuggerBreakpointLinesInCurrentFile));
-            OnPropertyChanged(nameof(AllBreakpointLinesInCurrentFile));
-        });
-    }
-
-    void Services.IIdeMcpActions.ShowDebugPosition(string? filePath, int line)
-    {
-        Dispatcher.UIThread.Post(() =>
-        {
-            DebugPositionFile = filePath is not null ? Path.GetFullPath(filePath) : null;
-            DebugPositionLine = line;
-            if (filePath is not null && !string.IsNullOrEmpty(filePath) && File.Exists(filePath))
-            {
-                var normalized = Path.GetFullPath(filePath);
-                if (!string.Equals(CurrentFilePath, normalized, StringComparison.OrdinalIgnoreCase))
-                {
-                    IsLoadingCurrentFile = true;
-                    try
-                    {
-                        Documents.OpenOrActivateDocument(normalized);
-                    }
-                    finally { IsLoadingCurrentFile = false; }
-                }
-            }
-        });
-    }
-
-    void Services.IIdeMcpActions.ShowDebugState(IReadOnlyList<(string Name, string? File, int Line)> stackFrames, IReadOnlyList<(string Name, string Value)> variables)
-    {
-        Dispatcher.UIThread.Post(() =>
-        {
-            InstrumentationPanel.DebugStackFrames.Clear();
-            foreach (var f in stackFrames)
-                InstrumentationPanel.DebugStackFrames.Add(new DebugStackFrameViewModel(f.Name, f.File, f.Line));
-            InstrumentationPanel.DebugVariables.Clear();
-            foreach (var v in variables)
-                InstrumentationPanel.DebugVariables.Add(new DebugVariableViewModel(v.Name, v.Value));
-        });
-    }
-
     private readonly NotesStorage _notesStorage = new();
 
     private string? TryGetSolutionDir()
@@ -286,6 +237,66 @@ public partial class MainWindowViewModel
         catch (Exception ex)
         {
             return Task.FromResult("{\"error\":\"" + ex.Message.Replace("\"", "\\\"", StringComparison.Ordinal) + "\"}");
+        }
+    }
+
+    Task<string> Services.IIdeMcpActions.WriteKnowledgeFileAsync(string filePath, string content, string? canonPath, bool saveRevision, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return Task.FromResult(_notesStorage.WriteKnowledgeFile(canonPath, filePath, content, saveRevision));
+        }
+        catch (Exception ex)
+        {
+            return Task.FromResult("Error: " + ex.Message);
+        }
+    }
+
+    Task<string> Services.IIdeMcpActions.AppendKnowledgeFileAsync(string filePath, string content, string? canonPath, bool saveRevision, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return Task.FromResult(_notesStorage.AppendKnowledgeFile(canonPath, filePath, content, saveRevision));
+        }
+        catch (Exception ex)
+        {
+            return Task.FromResult("Error: " + ex.Message);
+        }
+    }
+
+    Task<string> Services.IIdeMcpActions.UpsertKnowledgeSectionAsync(string filePath, string sectionId, string content, string? canonPath, bool saveRevision, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return Task.FromResult(_notesStorage.UpsertKnowledgeSection(canonPath, filePath, sectionId, content, saveRevision));
+        }
+        catch (Exception ex)
+        {
+            return Task.FromResult("Error: " + ex.Message);
+        }
+    }
+
+    Task<string> Services.IIdeMcpActions.DeleteKnowledgeFileAsync(string filePath, string? canonPath, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return Task.FromResult(_notesStorage.DeleteKnowledgeFile(canonPath, filePath));
+        }
+        catch (Exception ex)
+        {
+            return Task.FromResult("Error: " + ex.Message);
+        }
+    }
+
+    Task<string> Services.IIdeMcpActions.DeleteKnowledgeSectionAsync(string filePath, string sectionId, string? canonPath, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return Task.FromResult(_notesStorage.DeleteKnowledgeSection(canonPath, filePath, sectionId));
+        }
+        catch (Exception ex)
+        {
+            return Task.FromResult("Error: " + ex.Message);
         }
     }
 }

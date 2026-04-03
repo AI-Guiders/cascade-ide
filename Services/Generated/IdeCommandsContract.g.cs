@@ -11,6 +11,7 @@ internal static class IdeCommandsContractGenerated
         ["activate_document"] = IdeReturnKind.Text,
         ["add_control"] = IdeReturnKind.Text,
         ["append_agent_notes"] = IdeReturnKind.Text,
+        ["append_knowledge_file"] = IdeReturnKind.Text,
         ["apply_cursor_like_theme"] = IdeReturnKind.Text,
         ["apply_dark_theme"] = IdeReturnKind.Text,
         ["apply_edit"] = IdeReturnKind.Text,
@@ -25,6 +26,8 @@ internal static class IdeCommandsContractGenerated
         ["compact_hot_context"] = IdeReturnKind.Json,
         ["confirm_focus_step"] = IdeReturnKind.Text,
         ["cycle_ui_mode"] = IdeReturnKind.Text,
+        ["delete_knowledge_file"] = IdeReturnKind.Text,
+        ["delete_knowledge_section"] = IdeReturnKind.Text,
         ["emergency_stop"] = IdeReturnKind.Text,
         ["exit_application"] = IdeReturnKind.None,
         ["explain_current_step"] = IdeReturnKind.Text,
@@ -132,7 +135,9 @@ internal static class IdeCommandsContractGenerated
         ["toggle_solution_explorer"] = IdeReturnKind.Text,
         ["toggle_terminal"] = IdeReturnKind.Text,
         ["upsert_agent_notes_section"] = IdeReturnKind.Text,
+        ["upsert_knowledge_section"] = IdeReturnKind.Text,
         ["write_agent_notes"] = IdeReturnKind.Text,
+        ["write_knowledge_file"] = IdeReturnKind.Text,
     };
 
     private static readonly Dictionary<string, string> ExampleByCommandId = new(StringComparer.Ordinal)
@@ -140,10 +145,13 @@ internal static class IdeCommandsContractGenerated
         ["activate_document"] = "{\"file_path\":\"C:\\\\tmp\\\\a.cs\"}",
         ["add_control"] = "{\"parent_name\":\"Root\",\"control_type\":\"TextBlock\",\"content\":\"Hi\"}",
         ["append_agent_notes"] = "{\"content\":\"\\\\n# Update\\\\n...\"}",
+        ["append_knowledge_file"] = "{\"file_path\":\"META/x.md\",\"content\":\"more\",\"save_revision\":true}",
         ["apply_edit"] = "{\"file_path\":\"C:\\\\tmp\\\\a.cs\",\"start_line\":1,\"start_column\":1,\"end_line\":1,\"end_column\":1,\"new_text\":\"// hi\\n\"}",
         ["click_control"] = "{\"name\":\"BuildButton\"}",
         ["close_document"] = "{\"file_path\":\"C:\\\\tmp\\\\a.cs\"}",
         ["compact_hot_context"] = "{\"apply\":false}",
+        ["delete_knowledge_file"] = "{\"file_path\":\"tmp.md\"}",
+        ["delete_knowledge_section"] = "{\"file_path\":\"index.md\",\"section_id\":\"foo\"}",
         ["explain_trace_step"] = "{\"step_index\":0}",
         ["extract_from_archive"] = "{\"query\":\"ActiveProjectId\",\"head_limit\":10,\"context_lines\":2}",
         ["get_code_metrics"] = "{\"scope\":\"solution\",\"path\":\".\"}",
@@ -195,7 +203,9 @@ internal static class IdeCommandsContractGenerated
         ["show_preview"] = "{\"title\":\"Plan\",\"content\":\"- step 1\\n- step 2\"}",
         ["toggle_pin_document"] = "{\"file_path\":\"C:\\\\tmp\\\\a.cs\"}",
         ["upsert_agent_notes_section"] = "{\"section_id\":\"active\",\"content\":\"ActiveProjectId: cascade-ide\"}",
+        ["upsert_knowledge_section"] = "{\"file_path\":\"index.md\",\"section_id\":\"foo\",\"content\":\"body\"}",
         ["write_agent_notes"] = "{\"content\":\"notes\"}",
+        ["write_knowledge_file"] = "{\"file_path\":\"META/x.md\",\"content\":\"# Hi\",\"save_revision\":true}",
     };
 
     public static bool TryGetReturns(string commandId, out IdeReturnKind kind) =>

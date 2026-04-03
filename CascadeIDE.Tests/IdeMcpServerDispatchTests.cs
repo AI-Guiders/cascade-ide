@@ -137,6 +137,11 @@ public sealed class IdeMcpServerDispatchTests
         public Task<string> SearchAgentNotesAsync(string query, int? headLimit = null, CancellationToken cancellationToken = default) => throw new NotImplementedException();
         public Task<string> ReadKnowledgeFileAsync(string filePath, CancellationToken cancellationToken = default) => throw new NotImplementedException();
         public Task<string> ListKnowledgeFilesAsync(string? subdir = null, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<string> WriteKnowledgeFileAsync(string filePath, string content, string? canonPath = null, bool saveRevision = true, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<string> AppendKnowledgeFileAsync(string filePath, string content, string? canonPath = null, bool saveRevision = true, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<string> UpsertKnowledgeSectionAsync(string filePath, string sectionId, string content, string? canonPath = null, bool saveRevision = true, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<string> DeleteKnowledgeFileAsync(string filePath, string? canonPath = null, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<string> DeleteKnowledgeSectionAsync(string filePath, string sectionId, string? canonPath = null, CancellationToken cancellationToken = default) => throw new NotImplementedException();
     }
 }
 

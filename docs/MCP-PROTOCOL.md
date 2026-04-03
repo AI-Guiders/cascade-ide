@@ -101,7 +101,7 @@
 | `set_breakpoint` | Поставить брейкпоинт. args: file_path:string, line:integer, condition?:string; returns: text; example: {"file_path":"C:\\tmp\\a.cs","line":42}. |
 | `set_build_output_visible` | Явно показать/скрыть журнал сборки. args: visible:boolean; returns: text; example: {"visible":true}. |
 | `set_terminal_visible` | Явно показать/скрыть терминал (без переключения). args: visible:boolean; returns: text; example: {"visible":true}. |
-| `set_ui_mode` | Режим UI (как меню «Вид → Режим интерфейса»). args: mode:string (`Focus`, `Balanced`, `Power`, `AgentChat`); returns: text; example: {"mode":"Power"}. |
+| `set_ui_mode` | Режим UI (как меню «Вид → Режим интерфейса»). args: mode:string; returns: text; example: {"mode":"Power"}. |
 | `show_editor_preview` | Показать превью текущего файла из редактора в отдельном окне (контент берётся из IDE). returns: text. |
 | `show_preview` | Показать Markdown-превью в отдельном окне. args: title:string, content:string; returns: text; example: {"title":"Plan","content":"- step 1\n- step 2"}. |
 | `toggle_build_output` | Как меню «Вид → Вывод сборки». returns: text. |
@@ -212,9 +212,12 @@
 | `activate_document` | Активировать документ (переключить вкладку). args: file_path:string; returns: text; example: {"file_path":"C:\\tmp\\a.cs"}. |
 | `add_control` | Добавить контрол в UI (Debug). args: parent_name:string, control_type:string, content?:string, name?:string; returns: text; example: {"parent_name":"Root","control_type":"TextBlock","content":"Hi"}. |
 | `append_agent_notes` | Добавить блок в конец заметок агента. args: content:string; returns: text; example: {"content":"\\n# Update\\n..."}. |
+| `append_knowledge_file` | Добавить блок в конец knowledge-файла. args: file_path:string, content:string, canon_path?:string, save_revision?:boolean; returns: text; example: {"file_path":"META/x.md","content":"more","save_revision":true}. |
 | `click_control` | Клик по кнопке (под курсором или по имени). args: name?:string; returns: text; example: {"name":"BuildButton"}. |
 | `close_document` | Закрыть документ. args: file_path:string; returns: text; example: {"file_path":"C:\\tmp\\a.cs"}. |
 | `compact_hot_context` | Ужать hot-context (preview/apply). args: apply?:boolean; returns: json; example: {"apply":false}. |
+| `delete_knowledge_file` | Удалить knowledge-файл. args: file_path:string, canon_path?:string; returns: text; example: {"file_path":"tmp.md"}. |
+| `delete_knowledge_section` | Удалить секцию из knowledge-файла. args: file_path:string, section_id:string, canon_path?:string; returns: text; example: {"file_path":"index.md","section_id":"foo"}. |
 | `extract_from_archive` | Поиск по архивной ревизии заметок с контекстом строк. args: query:string, revision_file?:string, head_limit?:integer, context_lines?:integer; returns: json; example: {"query":"ActiveProjectId","head_limit":10,"context_lines":2}. |
 | `get_colors_under_cursor` | Цвета под курсором (прямые и effective). returns: json. |
 | `get_control_appearance` | Снимок внешнего вида контрола (под курсором или по имени). args: name?:string; returns: json; example: {"name":"BuildButton"}. |
@@ -246,7 +249,9 @@
 | `show_debug_state` | Показать стек/переменные отладки в панели Debug. args: stack_frames?:object[], variables?:object[]; returns: text; example: {"stack_frames":[],"variables":[]}. |
 | `toggle_pin_document` | Закрепить/открепить документ (pin). args: file_path:string; returns: text; example: {"file_path":"C:\\tmp\\a.cs"}. |
 | `upsert_agent_notes_section` | Вставить/обновить секцию заметок агента по section_id (маркерный блок). args: section_id:string, content:string; returns: text; example: {"section_id":"active","content":"ActiveProjectId: cascade-ide"}. |
+| `upsert_knowledge_section` | Вставить/обновить секцию в knowledge-файле по section_id. args: file_path:string, section_id:string, content:string, canon_path?:string, save_revision?:boolean; returns: text; example: {"file_path":"index.md","section_id":"foo","content":"body"}. |
 | `write_agent_notes` | Записать заметки агента в каталог решения. args: content:string; returns: text; example: {"content":"notes"}. |
+| `write_knowledge_file` | Записать knowledge-файл в канон (полная замена). args: file_path:string, content:string, canon_path?:string, save_revision?:boolean; returns: text; example: {"file_path":"META/x.md","content":"# Hi","save_revision":true}. |
 <!-- GENERATED:IdeCommands END -->
 
 Проверка: `ide_get_workspace_state` — помимо `terminal.is_visible`, `ui_mode`, есть `panels` (видимость колонок), `safety_level`, `editor_group_count`, `agent_trace_step_count`, `is_autonomous_running`.

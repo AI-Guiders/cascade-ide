@@ -975,5 +975,31 @@ internal sealed partial class IdeMcpCommandExecutor
             await ((IIdeMcpActions)_vm).ReadKnowledgeFileAsync(S(args, "file_path") ?? "", ct));
         add(Services.IdeCommands.ListKnowledgeFiles, async (args, ct) =>
             await ((IIdeMcpActions)_vm).ListKnowledgeFilesAsync(S(args, "subdir"), ct));
+        add(Services.IdeCommands.WriteKnowledgeFile, async (args, ct) =>
+            await ((IIdeMcpActions)_vm).WriteKnowledgeFileAsync(
+                S(args, "file_path") ?? "",
+                S(args, "content") ?? "",
+                S(args, "canon_path"),
+                B(args, "save_revision", true),
+                ct));
+        add(Services.IdeCommands.AppendKnowledgeFile, async (args, ct) =>
+            await ((IIdeMcpActions)_vm).AppendKnowledgeFileAsync(
+                S(args, "file_path") ?? "",
+                S(args, "content") ?? "",
+                S(args, "canon_path"),
+                B(args, "save_revision", true),
+                ct));
+        add(Services.IdeCommands.UpsertKnowledgeSection, async (args, ct) =>
+            await ((IIdeMcpActions)_vm).UpsertKnowledgeSectionAsync(
+                S(args, "file_path") ?? "",
+                S(args, "section_id") ?? "",
+                S(args, "content") ?? "",
+                S(args, "canon_path"),
+                B(args, "save_revision", true),
+                ct));
+        add(Services.IdeCommands.DeleteKnowledgeFile, async (args, ct) =>
+            await ((IIdeMcpActions)_vm).DeleteKnowledgeFileAsync(S(args, "file_path") ?? "", S(args, "canon_path"), ct));
+        add(Services.IdeCommands.DeleteKnowledgeSection, async (args, ct) =>
+            await ((IIdeMcpActions)_vm).DeleteKnowledgeSectionAsync(S(args, "file_path") ?? "", S(args, "section_id") ?? "", S(args, "canon_path"), ct));
     }
 }

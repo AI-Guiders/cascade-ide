@@ -127,4 +127,14 @@ public interface IIdeMcpActions
     Task<string> ReadKnowledgeFileAsync(string filePath, CancellationToken cancellationToken = default);
     /// <summary>Список knowledge-файлов в каталоге решения (knowledge/). subdir — относительный подкаталог (например "work"). Возвращает JSON: files [{ path, size_bytes, modified_utc }].</summary>
     Task<string> ListKnowledgeFilesAsync(string? subdir = null, CancellationToken cancellationToken = default);
+    /// <summary>Записать knowledge-файл (полная замена). canon_path — корень канона или AGENT_NOTES_CANON_PATH.</summary>
+    Task<string> WriteKnowledgeFileAsync(string filePath, string content, string? canonPath = null, bool saveRevision = true, CancellationToken cancellationToken = default);
+    /// <summary>Добавить блок в конец knowledge-файла.</summary>
+    Task<string> AppendKnowledgeFileAsync(string filePath, string content, string? canonPath = null, bool saveRevision = true, CancellationToken cancellationToken = default);
+    /// <summary>Вставить/обновить секцию в knowledge-файле по section_id.</summary>
+    Task<string> UpsertKnowledgeSectionAsync(string filePath, string sectionId, string content, string? canonPath = null, bool saveRevision = true, CancellationToken cancellationToken = default);
+    /// <summary>Удалить knowledge-файл.</summary>
+    Task<string> DeleteKnowledgeFileAsync(string filePath, string? canonPath = null, CancellationToken cancellationToken = default);
+    /// <summary>Удалить секцию из knowledge-файла.</summary>
+    Task<string> DeleteKnowledgeSectionAsync(string filePath, string sectionId, string? canonPath = null, CancellationToken cancellationToken = default);
 }
