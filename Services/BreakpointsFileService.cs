@@ -1,62 +1,13 @@
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using DotnetDebug.Core;
 
 namespace CascadeIDE.Services;
 
-/// <summary>Чтение и запись .dotnet-debug-mcp-breakpoints.json (тот же формат, что у dotnet-debug-mcp).</summary>
+/// <summary>Операции IDE поверх <see cref="BreakpointsStorage"/> (тот же JSON, что у dotnet-debug-mcp).</summary>
 public static class BreakpointsFileService
 {
-    public const string FileName = ".dotnet-debug-mcp-breakpoints.json";
+    public const string FileName = BreakpointsStorage.FileName;
 
-    public record BreakpointEntry(string File, int Line, string? Condition = null);
-
-    public record StorageModel(Dictionary<string, List<BreakpointEntry>> Targets)
-    {
-        public static StorageModel Empty() => new(new Dictionary<string, List<BreakpointEntry>>());
-    }
-
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        WriteIndented = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-    };
-
-    public static string GetFilePath(string workspacePath)
-    {
-        var dir = Path.GetFullPath(workspacePath.Trim());
-        if (File.Exists(dir))
-            dir = Path.GetDirectoryName(dir) ?? dir;
-        return Path.Combine(dir, FileName);
-    }
-
-    public static StorageModel Load(string workspacePath)
-    {
-        var path = GetFilePath(workspacePath);
-        if (!File.Exists(path))
-            return StorageModel.Empty();
-        try
-        {
-            var json = File.ReadAllText(path);
-            var model = JsonSerializer.Deserialize<StorageModel>(json, JsonOptions);
-            if (model?.Targets != null)
-                return model;
-        }
-        catch { /* ignore */ }
-        return StorageModel.Empty();
-    }
-
-    public static void Save(string workspacePath, StorageModel model)
-    {
-        var path = GetFilePath(workspacePath);
-        var dir = Path.GetDirectoryName(path);
-        if (!string.IsNullOrEmpty(dir))
-            Directory.CreateDirectory(dir);
-        File.WriteAllText(path, JsonSerializer.Serialize(model, JsonOptions));
-    }
+    public static string GetFilePath(string workspacePath) => BreakpointsStorage.GetStorageFilePath(workspacePath);
 
     private static string? NormalizeEntryPath(string workspacePath, string? entryFile)
     {
@@ -74,7 +25,7 @@ public static class BreakpointsFileService
         if (string.IsNullOrEmpty(filePath))
             return [];
         var normalized = Path.GetFullPath(filePath);
-        var model = Load(workspacePath);
+        var model = BreakpointsStorage.Load(workspacePath);
         var lines = new HashSet<int>();
         foreach (var list in model.Targets.Values)
         {
@@ -94,7 +45,7 @@ public static class BreakpointsFileService
         var ws = Path.GetFullPath(workspacePath.Trim());
         if (File.Exists(ws))
             ws = Path.GetDirectoryName(ws) ?? ws;
-        var model = Load(workspacePath);
+        var model = BreakpointsStorage.Load(workspacePath);
         var key = model.Targets.Keys.FirstOrDefault(k => k.StartsWith(ws, StringComparison.OrdinalIgnoreCase));
         return key ?? model.Targets.Keys.FirstOrDefault();
     }
@@ -104,7 +55,7 @@ public static class BreakpointsFileService
     {
         if (line < 1) return;
         var path = Path.GetFullPath(filePath);
-        var model = Load(workspacePath);
+        var model = BreakpointsStorage.Load(workspacePath);
         var targetKey = GetPreferredTargetKey(workspacePath);
         if (string.IsNullOrEmpty(targetKey))
         {
@@ -124,7 +75,7 @@ public static class BreakpointsFileService
             return ep != null && string.Equals(ep, fileNorm, StringComparison.OrdinalIgnoreCase) && e.Line == line;
         });
         if (removed == 0)
-            list.Add(new BreakpointEntry(path, line));
-        Save(workspacePath, model);
+            list.Add(new BreakpointsStorage.BreakpointEntry(path, line));
+        BreakpointsStorage.Save(workspacePath, model);
     }
 }

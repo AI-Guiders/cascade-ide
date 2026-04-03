@@ -37,6 +37,7 @@
   <ItemGroup>
     <ProjectReference Include="..\dotnet-build-test-mcp-repo\DotNetBuildTestParsers\DotNetBuildTestParsers.csproj" />
     <ProjectReference Include="..\agent-notes-core\AgentNotes.Core.csproj" />
+    <ProjectReference Include="..\dotnet-debug-core\DotnetDebug.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.3.12" />
