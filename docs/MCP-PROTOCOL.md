@@ -7,6 +7,8 @@
 - **Агент** — клиент MCP (Cursor, встроенный чат с моделью с tool calling и т.п.).
 - **CascadeIDE** — MCP-сервер: предоставляет инструменты для управления редактором, брейкпоинтами, превью, подтверждениями.
 
+**Принцип по отладке:** состояние брейкпоинтов и останова, которое видит агент через тулы, должно в перспективе совпадать с тем, что видит человек в UI (единый слой). Подробнее: [debug-human-agent-parity-v1.md](debug-human-agent-parity-v1.md).
+
 Тулы-действия (ide_set_ui_theme, ide_click_control, ide_set_control_text и т.д.) при успехе возвращают строку `OK`, при ошибке — текст причины («Control not found», «Invalid JSON», «Missing argument: …» и т.п.). В ответе вызова при ошибке выставляется `IsError: true`, чтобы агент однозначно видел сбой и мог по сообщению скорректировать запрос.
 
 ## Транспорт
@@ -99,7 +101,7 @@
 | `set_breakpoint` | Поставить брейкпоинт. args: file_path:string, line:integer, condition?:string; returns: text; example: {"file_path":"C:\\tmp\\a.cs","line":42}. |
 | `set_build_output_visible` | Явно показать/скрыть журнал сборки. args: visible:boolean; returns: text; example: {"visible":true}. |
 | `set_terminal_visible` | Явно показать/скрыть терминал (без переключения). args: visible:boolean; returns: text; example: {"visible":true}. |
-| `set_ui_mode` | Режим UI (как меню «Вид → Режим интерфейса»). args: mode:string; returns: text; example: {"mode":"Power"}. |
+| `set_ui_mode` | Режим UI (как меню «Вид → Режим интерфейса»). args: mode:string (`Focus`, `Balanced`, `Power`, `AgentChat`); returns: text; example: {"mode":"Power"}. |
 | `show_editor_preview` | Показать превью текущего файла из редактора в отдельном окне (контент берётся из IDE). returns: text. |
 | `show_preview` | Показать Markdown-превью в отдельном окне. args: title:string, content:string; returns: text; example: {"title":"Plan","content":"- step 1\n- step 2"}. |
 | `toggle_build_output` | Как меню «Вид → Вывод сборки». returns: text. |

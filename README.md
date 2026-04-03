@@ -2,7 +2,7 @@
 
 Лёгкая IDE для .NET, которой управляет агент через MCP. Стек: .NET 10, Avalonia, интеграция с локальными моделями **Ollama** (в т.ч. Ollama 4.x).
 
-Концепция и общий backlog MCP+IDE описаны в каноне заметок: `knowledge/work/projects/current-projects/cascade-ide/README.md` в репозитории **agent-notes** (секция «Backlog: MCP, IDE, синергия»). В двух словах: редактор + дерево решения + сборка/запуск + отладка через debug-mcp, анализ через roslyn-mcp, чат/запросы к модели — через локальный Ollama.
+Операционная карточка проекта (Purpose, Vision, границы, ссылки) в каноне заметок: `knowledge/work/projects/current-projects/cascade-ide/README.md` в репозитории **agent-notes**. В двух словах: редактор + дерево решения + сборка/запуск + отладка через debug-mcp, анализ через roslyn-mcp, чат/запросы к модели — через локальный Ollama.
 
 ## Требования
 
@@ -28,7 +28,7 @@ dotnet run
 - **Нативная поддержка slnx:** `SolutionParser` загружает `.slnx` (XML) и `.sln` (текстовый формат).
 - **MCP сервер IDE:** `IdeMcpServer` с инструментами для редактора, build/test, отладки-представления и UI-автоматизации (включая `ide_get_ui_layout`, `ide_build`, `ide_run_tests`, `ide_set_breakpoint`, `ide_request_confirmation`). Запуск с **`--mcp-stdio`** поднимает MCP на stdin/stdout; Cursor (или другой хост) подключается к процессу и вызывает тулы. См. [docs/MCP-PROTOCOL.md](docs/MCP-PROTOCOL.md).
 - **Подтверждения из MCP:** `ide_request_confirmation` показывает модальный `OK/Cancel` диалог в UI и возвращает `ok`/`cancel`.
-- **Отладочный контур:** поддержаны отображение брейкпоинтов/текущей строки/состояния отладки и синхронизация с `dotnet-debug-mcp`.
+- **Отладочный контур:** поддержаны отображение брейкпоинтов/текущей строки/состояния отладки и синхронизация с `dotnet-debug-mcp`. Целевое видение — один слой отладки для человека и агента: [docs/debug-human-agent-parity-v1.md](docs/debug-human-agent-parity-v1.md).
 - **Git (нативно):** вкладка «Git» в нижней панели (меню **Вид → Git**) — корень репозитория vs каталог решения, статус, diff, `submodule status`, стейджинг, пометка `[sm]` из `.gitmodules`, **submodule update --init** / **sync**, **открыть .sln/.slnx в submodule** (переключение решения), папка submodule в проводнике, коммит (add -A или только staged), push. Подробнее: [docs/git-and-submodules-v1.md](docs/git-and-submodules-v1.md).
 - **Режимы UI:** `Focus / Balanced / Power` с переключением из меню/toolbar и хоткеями `Alt+1/Alt+2/Alt+3` (`Ctrl+Alt+M` — циклическое переключение).
 - **Настройки и данные:** выбранные модели и UI-параметры сохраняются в `%LocalAppData%\\CascadeIDE\\settings.toml`; данные приложения — в WitDatabase (`app.witdb` в том же каталоге).
