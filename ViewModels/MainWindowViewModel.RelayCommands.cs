@@ -232,12 +232,19 @@ public partial class MainWindowViewModel
     }
 
     [RelayCommand]
+    private void SetAgentChatMode()
+    {
+        UiMode = "AgentChat";
+    }
+
+    [RelayCommand]
     private void CycleUiMode()
     {
-        UiMode = UiMode switch
+        UiMode = NormalizeUiMode(UiMode) switch
         {
             "Focus" => "Balanced",
             "Balanced" => "Power",
+            "Power" => "AgentChat",
             _ => "Focus"
         };
     }

@@ -65,7 +65,7 @@ public partial class MainWindow
     {
         var grid = this.FindControl<Grid>("MainGrid");
         if (grid?.ColumnDefinitions.Count > 4)
-            grid.ColumnDefinitions[4].Width = new GridLength(vm.IsChatPanelExpanded ? (vm.IsPowerMode ? 420 : 340) : 88);
+            grid.ColumnDefinitions[4].Width = new GridLength(vm.ChatPanelColumnPixelWidth);
     }
 
     private void UpdateMarkdownPreviewColumn(bool showPreview)

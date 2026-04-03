@@ -284,7 +284,8 @@ public partial class MainWindow
         }
         if (e.PropertyName is nameof(ViewModels.MainWindowViewModel.IsSolutionExplorerVisible) && DataContext is ViewModels.MainWindowViewModel vmSol)
             UpdateSolutionColumnWidth(vmSol.IsSolutionExplorerVisible);
-        if (e.PropertyName is nameof(ViewModels.MainWindowViewModel.IsChatPanelExpanded) or nameof(ViewModels.MainWindowViewModel.UiMode)
+        if ((e.PropertyName is nameof(ViewModels.MainWindowViewModel.IsChatPanelExpanded) or nameof(ViewModels.MainWindowViewModel.UiMode)
+            or nameof(ViewModels.MainWindowViewModel.ChatPanelColumnPixelWidth))
             && DataContext is ViewModels.MainWindowViewModel vmChat)
             UpdateChatColumnWidth(vmChat);
         if (e.PropertyName is nameof(ViewModels.MainWindowViewModel.IsMarkdownPreviewVisible) && DataContext is ViewModels.MainWindowViewModel vmMd)

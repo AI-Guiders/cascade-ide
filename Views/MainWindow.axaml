@@ -96,6 +96,13 @@
             <Setter Property="CornerRadius" Value="6"/>
             <Setter Property="RenderTransform" Value="scale(1.04)"/>
         </Style>
+        <Style Selector="Border#ModeBadge.agentchat">
+            <Setter Property="Background" Value="#1E4D3A"/>
+            <Setter Property="BorderBrush" Value="#3DCC8C"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="RenderTransform" Value="scale(1.02)"/>
+        </Style>
         <Style Selector="Border.modeCard">
             <Setter Property="Background" Value="{DynamicResource CascadeTheme.ChatMessageBubbleBackground}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"/>
@@ -109,6 +116,7 @@
         <KeyBinding Gesture="Alt+1" Command="{Binding SetFocusModeCommand}"/>
         <KeyBinding Gesture="Alt+2" Command="{Binding SetBalancedModeCommand}"/>
         <KeyBinding Gesture="Alt+3" Command="{Binding SetPowerModeCommand}"/>
+        <KeyBinding Gesture="Alt+4" Command="{Binding SetAgentChatModeCommand}"/>
         <KeyBinding Gesture="Ctrl+Alt+M" Command="{Binding CycleUiModeCommand}"/>
     </Window.KeyBindings>
 
@@ -139,6 +147,7 @@
                     <MenuItem Header="_Focus" ToggleType="Radio" IsChecked="{Binding IsFocusMode}" Command="{Binding SetFocusModeCommand}"/>
                     <MenuItem Header="_Balanced" ToggleType="Radio" IsChecked="{Binding IsBalancedMode}" Command="{Binding SetBalancedModeCommand}"/>
                     <MenuItem Header="_Power" ToggleType="Radio" IsChecked="{Binding IsPowerMode}" Command="{Binding SetPowerModeCommand}"/>
+                    <MenuItem Header="Agent _Chat" ToggleType="Radio" IsChecked="{Binding IsAgentChatMode}" Command="{Binding SetAgentChatModeCommand}"/>
                 </MenuItem>
                 <Separator/>
                 <MenuItem Header="_Тема">

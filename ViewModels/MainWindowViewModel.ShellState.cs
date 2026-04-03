@@ -8,6 +8,7 @@ public partial class MainWindowViewModel
 {
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ChatPanelToggleButtonText))]
+    [NotifyPropertyChangedFor(nameof(ChatPanelColumnPixelWidth))]
     private bool _isChatPanelExpanded = true;
 
     [ObservableProperty]
@@ -28,6 +29,8 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(IsFocusMode))]
     [NotifyPropertyChangedFor(nameof(IsBalancedMode))]
     [NotifyPropertyChangedFor(nameof(IsPowerMode))]
+    [NotifyPropertyChangedFor(nameof(IsAgentChatMode))]
+    [NotifyPropertyChangedFor(nameof(ChatPanelColumnPixelWidth))]
     [NotifyPropertyChangedFor(nameof(ShowTaskBar))]
     [NotifyPropertyChangedFor(nameof(ShowTelemetryStrip))]
     [NotifyPropertyChangedFor(nameof(ShowQuickActions))]

@@ -1,3 +1,4 @@
+using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Lang;
 
 namespace CascadeIDE.ViewModels;
@@ -5,18 +6,27 @@ namespace CascadeIDE.ViewModels;
 /// <summary>Вычисляемые свойства разметки, телеметрии и видимости панелей (режимы UI).</summary>
 public partial class MainWindowViewModel
 {
-    public static readonly IReadOnlyList<string> UiModeOptions = ["Focus", "Balanced", "Power"];
+    public static readonly IReadOnlyList<string> UiModeOptions = UiModeLayoutRegistry.OrderedModeIds;
     public IReadOnlyList<string> UiModeOptionsList => UiModeOptions;
 
     /// <summary>Заголовок главного окна (в Power — подпись «Autonomous Agent Cockpit»).</summary>
     public string WindowTitle =>
         IsPowerMode
             ? "CascadeIDE — Power Mode [Autonomous Agent Cockpit]"
-            : "CascadeIDE";
+            : IsAgentChatMode
+                ? "CascadeIDE — Agent Chat"
+                : "CascadeIDE";
 
     public bool IsFocusMode => string.Equals(UiMode, "Focus", StringComparison.OrdinalIgnoreCase);
     public bool IsBalancedMode => string.Equals(UiMode, "Balanced", StringComparison.OrdinalIgnoreCase);
     public bool IsPowerMode => string.Equals(UiMode, "Power", StringComparison.OrdinalIgnoreCase);
+    public bool IsAgentChatMode => string.Equals(UiMode, "AgentChat", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>Ширина колонки чата (пиксели); значения — <see cref="UiModeLayoutRegistry"/> и <see cref="UiModeLayoutDimensions"/>.</summary>
+    public int ChatPanelColumnPixelWidth =>
+        IsChatPanelExpanded
+            ? UiModeLayoutRegistry.GetChatPanelExpandedWidthPixels(NormalizeUiMode(UiMode))
+            : UiModeLayoutDimensions.ChatPanelCollapsedWidthPixels;
     public bool ShowTaskBar => true;
     public bool ShowQuickActions => IsBalancedMode;
     public bool ShowAgentOperations => true;
@@ -53,7 +63,7 @@ public partial class MainWindowViewModel
 
     /// <summary>Нижние вкладки «События / Тесты / Отладка» при включённом доке — во всех режимах (в Focus детали здесь, компактная полоса — TelemetryStrip).</summary>
     public bool ShowInstrumentationTabs =>
-        IsInstrumentationDockVisible && (IsFocusMode || IsBalancedMode || IsPowerMode);
+        IsInstrumentationDockVisible && (IsFocusMode || IsBalancedMode || IsPowerMode || IsAgentChatMode);
 
     /// <summary>Пункт меню для док-панели инструментирования (можно отключить и в Focus).</summary>
     public bool ShowInstrumentationLayoutMenu => true;
@@ -86,8 +96,8 @@ public partial class MainWindowViewModel
         !string.IsNullOrWhiteSpace(ResultSummary)
         && !string.Equals(ResultSummary, "Результатов пока нет.", StringComparison.Ordinal);
 
-    public bool IsRiskCardVisible => !IsFocusMode && IsRiskSummaryVisible;
-    public bool IsResultCardVisible => !IsFocusMode && IsResultSummaryVisible;
+    public bool IsRiskCardVisible => !IsFocusMode && !IsAgentChatMode && IsRiskSummaryVisible;
+    public bool IsResultCardVisible => !IsFocusMode && !IsAgentChatMode && IsResultSummaryVisible;
     public bool IsComplexityBadgeVisible => ComplexityBadge > 0;
     public bool IsImpactedTestsBadgeVisible => ImpactedTestsBadge > 0;
     public bool IsActiveTaskProgressVisible => ActiveTaskProgress > 0;

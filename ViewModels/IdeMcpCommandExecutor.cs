@@ -318,10 +318,11 @@ internal sealed partial class IdeMcpCommandExecutor
         {
             var m = S(args, "mode")?.Trim();
             if (string.IsNullOrEmpty(m))
-                return "Missing mode (Focus|Balanced|Power)";
+                return "Missing mode (Focus|Balanced|Power|AgentChat)";
             if (!string.Equals(m, "Focus", StringComparison.OrdinalIgnoreCase)
                 && !string.Equals(m, "Balanced", StringComparison.OrdinalIgnoreCase)
-                && !string.Equals(m, "Power", StringComparison.OrdinalIgnoreCase))
+                && !string.Equals(m, "Power", StringComparison.OrdinalIgnoreCase)
+                && !string.Equals(m, "AgentChat", StringComparison.OrdinalIgnoreCase))
                 return $"Unknown mode: {m}";
             var norm = MainWindowViewModel.NormalizeUiMode(m);
             await Dispatcher.UIThread.InvokeAsync(() => _vm.UiMode = norm);

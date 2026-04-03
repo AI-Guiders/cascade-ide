@@ -18,6 +18,8 @@ public sealed partial class UiChromeViewModel : ObservableObject
             return "Focus";
         if (string.Equals(mode, "Power", StringComparison.OrdinalIgnoreCase))
             return "Power";
+        if (string.Equals(mode, "AgentChat", StringComparison.OrdinalIgnoreCase))
+            return "AgentChat";
         return "Balanced";
     }
 
@@ -47,22 +49,22 @@ public sealed partial class UiChromeViewModel : ObservableObject
     }
 
     /// <summary>Вызывается из <see cref="MainWindowViewModel"/> после нормализации и сохранения режима UI.</summary>
-    public void NotifyUiModeChangedForBloom(string normalizedMode, bool isPowerMode, bool isFocusMode)
+    public void NotifyUiModeChangedForBloom(string normalizedMode)
     {
         if (_lastAppliedUiModeForBloomEffects is not null
             && !string.Equals(_lastAppliedUiModeForBloomEffects, normalizedMode, StringComparison.OrdinalIgnoreCase))
-            TriggerUiModeBloom(normalizedMode, isPowerMode, isFocusMode);
+            TriggerUiModeBloom(normalizedMode);
         _lastAppliedUiModeForBloomEffects = normalizedMode;
     }
 
-    private void TriggerUiModeBloom(string normalizedMode, bool isPowerMode, bool isFocusMode)
+    private void TriggerUiModeBloom(string normalizedMode)
     {
         _uiModeBloomCts?.Cancel();
         _uiModeBloomCts = new CancellationTokenSource();
         var ct = _uiModeBloomCts.Token;
         UiModeBloomBrush = PickUiModeBloomBrush(normalizedMode);
         UiModeBloomOpacity = 0;
-        _ = RunUiModeBloomAsync(ct, isPowerMode, isFocusMode);
+        _ = RunUiModeBloomAsync(ct, normalizedMode);
     }
 
     private static IBrush PickUiModeBloomBrush(string mode)
@@ -71,15 +73,28 @@ public sealed partial class UiChromeViewModel : ObservableObject
             return new SolidColorBrush(Color.FromArgb(200, 110, 60, 210));
         if (string.Equals(mode, "Focus", StringComparison.OrdinalIgnoreCase))
             return new SolidColorBrush(Color.FromArgb(150, 25, 120, 185));
+        if (string.Equals(mode, "AgentChat", StringComparison.OrdinalIgnoreCase))
+            return new SolidColorBrush(Color.FromArgb(140, 40, 180, 140));
         return new SolidColorBrush(Color.FromArgb(120, 255, 235, 200));
     }
 
-    private async Task RunUiModeBloomAsync(CancellationToken ct, bool isPowerMode, bool isFocusMode)
+    private static double BloomPeakOpacity(string normalizedMode)
+    {
+        if (string.Equals(normalizedMode, "Power", StringComparison.OrdinalIgnoreCase))
+            return 0.2;
+        if (string.Equals(normalizedMode, "Focus", StringComparison.OrdinalIgnoreCase))
+            return 0.13;
+        if (string.Equals(normalizedMode, "AgentChat", StringComparison.OrdinalIgnoreCase))
+            return 0.12;
+        return 0.11;
+    }
+
+    private async Task RunUiModeBloomAsync(CancellationToken ct, string normalizedMode)
     {
         try
         {
             await Task.Delay(18, ct).ConfigureAwait(false);
-            var peak = isPowerMode ? 0.2 : isFocusMode ? 0.13 : 0.11;
+            var peak = BloomPeakOpacity(normalizedMode);
             await Dispatcher.UIThread.InvokeAsync(() => UiModeBloomOpacity = peak);
             await Task.Delay(300, ct).ConfigureAwait(false);
             await Dispatcher.UIThread.InvokeAsync(() => UiModeBloomOpacity = 0);

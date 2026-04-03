@@ -16,11 +16,13 @@
             </StackPanel>
             <Button Content="Собрать" Command="{Binding BuildSolutionCommand}" IsEnabled="{Binding !IsBuilding}" IsVisible="{Binding !IsFocusMode}"/>
             <TextBlock Text="Режим:" VerticalAlignment="Center" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}" Margin="8,0,0,0"/>
-            <ComboBox Width="130"
+            <ComboBox Width="150"
+                      MinWidth="148"
                       ItemsSource="{Binding UiModeOptionsList}"
                       SelectedItem="{Binding UiMode, Mode=TwoWay}"/>
             <Border x:Name="ModeBadge"
                     Classes.power="{Binding IsPowerMode}"
+                    Classes.agentchat="{Binding IsAgentChatMode}"
                     Padding="8,2"
                     Margin="4,0,0,0"
                     VerticalAlignment="Center">

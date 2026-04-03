@@ -31,42 +31,23 @@ public partial class MainWindowViewModel
     private void ApplyUiModeLayout(string mode, bool persist)
     {
         var normalized = NormalizeUiMode(mode);
-        switch (normalized)
-        {
-            case "Focus":
-                IsSolutionExplorerVisible = true;
-                IsBuildOutputVisible = false;
-                IsTerminalVisible = false;
-                IsChatPanelExpanded = true;
-                EditorGroupCount = 1;
-                break;
-            case "Power":
-                IsSolutionExplorerVisible = true;
-                IsBuildOutputVisible = true;
-                IsTerminalVisible = true;
-                IsChatPanelExpanded = true;
-                EditorGroupCount = 3;
-                break;
-            default:
-                IsSolutionExplorerVisible = true;
-                // Balanced: терминал и журнал сборки видны по умолчанию (иначе TabControl часто остаётся на скрытой вкладке 0 — «пустая» панель).
-                IsBuildOutputVisible = true;
-                IsTerminalVisible = true;
-                IsChatPanelExpanded = true;
-                EditorGroupCount = 2;
-                break;
-        }
+        var spec = UiModeLayoutRegistry.Get(normalized);
+
+        IsSolutionExplorerVisible = spec.SolutionExplorerVisible;
+        IsBuildOutputVisible = spec.BuildOutputVisible;
+        IsTerminalVisible = spec.TerminalVisible;
+        IsChatPanelExpanded = spec.ChatPanelExpanded;
+        EditorGroupCount = spec.EditorGroupCount;
 
         CoerceBottomPanelTabToVisible();
-        // Power cockpit: сразу вкладка «Терминал» (консоль + сборка рядом), а не «События».
-        if (string.Equals(normalized, "Power", StringComparison.OrdinalIgnoreCase) && IsTerminalVisible)
+        if (spec.SelectTerminalTabWhenTerminalShown && IsTerminalVisible)
             BottomPanelTabIndex = 0;
 
-        // Mode-specific visual identity: Power gets cosmic palette; Focus/Balanced keep calmer dark themes.
-        _ = normalized switch
+        _ = spec.ThemeSlot switch
         {
-            "Power" => Services.UiThemeApply.ApplyOnUiThreadAsync(Services.UiThemeApply.GetPowerCockpitConceptThemeJson()),
-            "Focus" => Services.UiThemeApply.ApplyOnUiThreadAsync(Services.UiThemeApply.GetDarkThemeJson()),
+            UiModeThemeSlot.PowerCockpit => Services.UiThemeApply.ApplyOnUiThreadAsync(Services.UiThemeApply.GetPowerCockpitConceptThemeJson()),
+            UiModeThemeSlot.Dark => Services.UiThemeApply.ApplyOnUiThreadAsync(Services.UiThemeApply.GetDarkThemeJson()),
+            UiModeThemeSlot.CursorLike => Services.UiThemeApply.ApplyOnUiThreadAsync(Services.UiThemeApply.GetCursorLikeThemeJson()),
             _ => Services.UiThemeApply.ApplyOnUiThreadAsync(Services.UiThemeApply.GetCursorLikeThemeJson())
         };
 
@@ -169,7 +150,7 @@ public partial class MainWindowViewModel
         if (string.Equals(normalized, "Power", StringComparison.OrdinalIgnoreCase))
             Dispatcher.UIThread.Post(RefreshWorkspaceSnapshotCore, DispatcherPriority.Background);
 
-        Chrome.NotifyUiModeChangedForBloom(normalized, IsPowerMode, IsFocusMode);
+        Chrome.NotifyUiModeChangedForBloom(normalized);
     }
 
     public async Task RefreshOllamaAsync()
