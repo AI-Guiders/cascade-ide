@@ -50,6 +50,16 @@
 - **`ViewModels/`** — `DebugStackFrameViewModel`, `DebugVariableViewModel`, `AgentTraceStepViewModel` вынесены в отдельные файлы (типы для `x:DataType` без изменений).
 - **`MainWindowViewModel`:** свойство **`InstrumentationPanel`**, подписка на `IsDebugPanelVisible` для строк телеметрии полосы; `IIdeMcpActions.ShowDebugState` и `RunTests` пишут в `InstrumentationPanel`. Дочерние виды биндят блоки к `InstrumentationPanel`, без прокси на главном VM.
 
+### Фаза 5 — события, UI-поток, нагрузка (**в работе**)
+
+Цель и порядок шагов — в [architecture-policy.md](architecture-policy.md) (разделы «События, UI-поток и нагрузка» и «Отложенные идеи расширяемости»). Кратко:
+
+1. Явные границы между источниками сигналов и подписчиками (без лишней связности между подсистемами).
+2. Единая политика маршалинга на UI-поток для обновлений после фона.
+3. Точечно — очереди/батчинг там, где поток данных давит на UI.
+
+**Не в этой фазе:** MEF и загрузка плагинов из каталога — зафиксировано как отложенная идея в политике.
+
 ## Правила на время миграции
 
 1. Новый код фич — **в срезе** `Features/<Имя>/`, не в конец `MainWindowViewModel`. Панельный VM вешаем на UI через **`DataContext="{Binding ИмяПанели}"`** (и при compiled bindings — **`x:DataType`** на том же элементе), а не через десятки прокси-свойств на главном VM.
@@ -64,3 +74,4 @@
 - **v1.3** — фаза 3 (`ChatPanelViewModel`, привязки в `ChatPanelView` + `MainWindow.axaml.cs`).
 - **v1.4** — фаза 4 (`InstrumentationPanelViewModel`, модели трассы/отладки в отдельных файлах, прокси на главном VM).
 - **v1.5** — инструментирование без прокси: разметка с `DataContext` на `InstrumentationPanel`, правила миграции уточнены.
+- **v1.6** — фаза 5 (события, UI-поток, батчинг); MEF/плагины вынесены в отложенные идеи политики.
