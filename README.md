@@ -2,7 +2,7 @@
 
 Лёгкая IDE для .NET, которой управляет агент через MCP. Стек: .NET 10, Avalonia, интеграция с локальными моделями **Ollama** (в т.ч. Ollama 4.x).
 
-Операционная карточка проекта (Purpose, Vision, границы, ссылки) в каноне заметок: `knowledge/work/projects/current-projects/cascade-ide/README.md` в репозитории **agent-notes**. В двух словах: редактор + дерево решения + сборка/запуск + отладка через debug-mcp, анализ через roslyn-mcp, чат/запросы к модели — через локальный Ollama.
+Операционная карточка проекта (Purpose, Vision, границы, ссылки) в каноне заметок: `knowledge/work/projects/current-projects/cascade-ide/README.md` в репозитории **agent-notes** (слой **`work/`** — оперативный канон; в публичную KB не входит, см. **`knowledge/PUBLISHING.md`** и `scripts/build-public-kb.ps1` в agent-notes). В двух словах: редактор + дерево решения + сборка/запуск + отладка через debug-mcp, анализ через roslyn-mcp, чат/запросы к модели — через локальный Ollama.
 
 ## Требования
 
