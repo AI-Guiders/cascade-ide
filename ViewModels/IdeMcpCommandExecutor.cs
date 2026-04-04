@@ -16,35 +16,6 @@ internal sealed partial class IdeMcpCommandExecutor
         _handlers = BuildHandlers();
     }
 
-    /// <summary>Чтение примитивов из словаря аргументов MCP (JSON).</summary>
-    private static class JsonArgs
-    {
-        public static string? String(IReadOnlyDictionary<string, JsonElement>? args, string key) =>
-            args is not null && args.TryGetValue(key, out var e) ? e.GetString() : null;
-
-        public static int Int(IReadOnlyDictionary<string, JsonElement>? args, string key, int defaultValue = 0) =>
-            args is not null && args.TryGetValue(key, out var e) && e.TryGetInt32(out var v) ? v : defaultValue;
-
-        public static bool Bool(IReadOnlyDictionary<string, JsonElement>? args, string key, bool defaultValue = false) =>
-            args is not null && args.TryGetValue(key, out var e) && (e.ValueKind is JsonValueKind.True or JsonValueKind.False)
-                ? e.GetBoolean()
-                : defaultValue;
-
-        public static List<string>? StringList(IReadOnlyDictionary<string, JsonElement>? args, string key)
-        {
-            if (args is null || !args.TryGetValue(key, out var e) || e.ValueKind != JsonValueKind.Array)
-                return null;
-            var values = new List<string>();
-            foreach (var item in e.EnumerateArray())
-            {
-                var value = item.GetString();
-                if (!string.IsNullOrWhiteSpace(value))
-                    values.Add(value);
-            }
-            return values;
-        }
-    }
-
     private static string ParseAndShowDebugBreakpoints(IIdeMcpActions actions, IReadOnlyDictionary<string, JsonElement>? args)
     {
         if (!McpDebugPayloadParsing.TryParseBreakpoints(args, out var list, out var error))

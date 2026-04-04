@@ -10,15 +10,15 @@ internal sealed partial class IdeMcpCommandExecutor
         add(Services.IdeCommands.SetBreakpoint, async (args, ct) =>
         {
             var a = (IIdeMcpActions)_vm;
-            if (args is null || string.IsNullOrEmpty(JsonArgs.String(args, "file_path")) || !args.TryGetValue("line", out _)) return "Missing file_path or line";
-            a.SetBreakpoint(JsonArgs.String(args, "file_path")!, JsonArgs.Int(args, "line", 1), JsonArgs.String(args, "condition"));
+            if (args is null || string.IsNullOrEmpty(McpCommandJsonArgs.String(args, "file_path")) || !args.TryGetValue("line", out _)) return "Missing file_path or line";
+            a.SetBreakpoint(McpCommandJsonArgs.String(args, "file_path")!, McpCommandJsonArgs.Int(args, "line", 1), McpCommandJsonArgs.String(args, "condition"));
             return "OK";
         });
         add(Services.IdeCommands.RemoveBreakpoint, async (args, ct) =>
         {
             var a = (IIdeMcpActions)_vm;
-            if (args is null || string.IsNullOrEmpty(JsonArgs.String(args, "file_path")) || !args.TryGetValue("line", out _)) return "Missing file_path or line";
-            a.RemoveBreakpoint(JsonArgs.String(args, "file_path")!, JsonArgs.Int(args, "line", 1));
+            if (args is null || string.IsNullOrEmpty(McpCommandJsonArgs.String(args, "file_path")) || !args.TryGetValue("line", out _)) return "Missing file_path or line";
+            a.RemoveBreakpoint(McpCommandJsonArgs.String(args, "file_path")!, McpCommandJsonArgs.Int(args, "line", 1));
             return "OK";
         });
     }
@@ -28,7 +28,7 @@ internal sealed partial class IdeMcpCommandExecutor
         add(Services.IdeCommands.ShowPreview, async (args, _) =>
         {
             var a = (IIdeMcpActions)_vm;
-            a.ShowPreview(JsonArgs.String(args, "title") ?? "", JsonArgs.String(args, "content") ?? "");
+            a.ShowPreview(McpCommandJsonArgs.String(args, "title") ?? "", McpCommandJsonArgs.String(args, "content") ?? "");
             return await Task.FromResult("OK");
         });
         add(Services.IdeCommands.ShowEditorPreview, async (_, _) =>
@@ -40,7 +40,7 @@ internal sealed partial class IdeMcpCommandExecutor
         add(Services.IdeCommands.RequestConfirmation, async (args, ct) =>
         {
             var a = (IIdeMcpActions)_vm;
-            return await a.RequestConfirmationAsync(JsonArgs.String(args, "message") ?? "", ct);
+            return await a.RequestConfirmationAsync(McpCommandJsonArgs.String(args, "message") ?? "", ct);
         });
     }
 
@@ -50,7 +50,7 @@ internal sealed partial class IdeMcpCommandExecutor
         add(Services.IdeCommands.ShowDebugPosition, async (args, _) =>
         {
             var a = (IIdeMcpActions)_vm;
-            a.ShowDebugPosition(JsonArgs.String(args, "file_path"), JsonArgs.Int(args, "line"));
+            a.ShowDebugPosition(McpCommandJsonArgs.String(args, "file_path"), McpCommandJsonArgs.Int(args, "line"));
             return await Task.FromResult("OK");
         });
         add(Services.IdeCommands.ShowDebugState, async (args, _) => await Task.FromResult(ParseAndShowDebugState((IIdeMcpActions)_vm, args)));
@@ -59,7 +59,7 @@ internal sealed partial class IdeMcpCommandExecutor
         add(Services.IdeCommands.AddControl, async (args, _) =>
         {
             var a = (IIdeMcpActions)_vm;
-            return await a.AddControlAsync(JsonArgs.String(args, "parent_name") ?? "", JsonArgs.String(args, "control_type") ?? "", JsonArgs.String(args, "content"), JsonArgs.String(args, "name"));
+            return await a.AddControlAsync(McpCommandJsonArgs.String(args, "parent_name") ?? "", McpCommandJsonArgs.String(args, "control_type") ?? "", McpCommandJsonArgs.String(args, "content"), McpCommandJsonArgs.String(args, "name"));
         });
 #endif
     }

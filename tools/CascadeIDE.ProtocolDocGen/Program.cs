@@ -266,44 +266,44 @@ internal static class IdeMcpCommandExecutorEmitter
         sb.AppendLine("        add(Services.IdeCommands.Build, async (_, _) => await ((IIdeMcpActions)_vm).BuildAsync());");
         sb.AppendLine("        add(Services.IdeCommands.BuildStructured, async (_, _) => await ((IIdeMcpActions)_vm).BuildStructuredAsync());");
         sb.AppendLine("        add(Services.IdeCommands.RunTests, async (_, _) => await ((IIdeMcpActions)_vm).RunTestsAsync());");
-        sb.AppendLine("        add(Services.IdeCommands.RunAffectedTests, async (args, _) => await ((IIdeMcpActions)_vm).RunAffectedTestsAsync(JsonArgs.StringList(args, \"changed_paths\")));");
-        sb.AppendLine("        add(Services.IdeCommands.RunCodeCleanup, async (args, _) => await ((IIdeMcpActions)_vm).RunCodeCleanupAsync(JsonArgs.String(args, \"include_path\")));");
-        sb.AppendLine("        add(Services.IdeCommands.GetCodeMetrics, async (args, _) => await ((IIdeMcpActions)_vm).GetCodeMetricsAsync(JsonArgs.String(args, \"scope\"), JsonArgs.String(args, \"path\")));");
+        sb.AppendLine("        add(Services.IdeCommands.RunAffectedTests, async (args, _) => await ((IIdeMcpActions)_vm).RunAffectedTestsAsync(McpCommandJsonArgs.StringList(args, \"changed_paths\")));");
+        sb.AppendLine("        add(Services.IdeCommands.RunCodeCleanup, async (args, _) => await ((IIdeMcpActions)_vm).RunCodeCleanupAsync(McpCommandJsonArgs.String(args, \"include_path\")));");
+        sb.AppendLine("        add(Services.IdeCommands.GetCodeMetrics, async (args, _) => await ((IIdeMcpActions)_vm).GetCodeMetricsAsync(McpCommandJsonArgs.String(args, \"scope\"), McpCommandJsonArgs.String(args, \"path\")));");
 
         // Git
         sb.AppendLine("        add(Services.IdeCommands.GitStatus, async (_, _) => await ((IIdeMcpActions)_vm).GitStatusAsync());");
-        sb.AppendLine("        add(Services.IdeCommands.GitDiff, async (args, _) => await ((IIdeMcpActions)_vm).GitDiffAsync(JsonArgs.String(args, \"path\"), JsonArgs.Bool(args, \"staged\")));");
+        sb.AppendLine("        add(Services.IdeCommands.GitDiff, async (args, _) => await ((IIdeMcpActions)_vm).GitDiffAsync(McpCommandJsonArgs.String(args, \"path\"), McpCommandJsonArgs.Bool(args, \"staged\")));");
         sb.AppendLine("        add(Services.IdeCommands.GitCommit, async (args, _) =>");
         sb.AppendLine("        {");
-        sb.AppendLine("            if (string.IsNullOrWhiteSpace(JsonArgs.String(args, \"message\"))) return \"Missing message\";");
-        sb.AppendLine("            return await ((IIdeMcpActions)_vm).GitCommitAsync(JsonArgs.String(args, \"message\")!, JsonArgs.StringList(args, \"paths\"));");
+        sb.AppendLine("            if (string.IsNullOrWhiteSpace(McpCommandJsonArgs.String(args, \"message\"))) return \"Missing message\";");
+        sb.AppendLine("            return await ((IIdeMcpActions)_vm).GitCommitAsync(McpCommandJsonArgs.String(args, \"message\")!, McpCommandJsonArgs.StringList(args, \"paths\"));");
         sb.AppendLine("        });");
-        sb.AppendLine("        add(Services.IdeCommands.GitPush, async (args, _) => await ((IIdeMcpActions)_vm).GitPushAsync(JsonArgs.String(args, \"remote\"), JsonArgs.String(args, \"branch\")));");
+        sb.AppendLine("        add(Services.IdeCommands.GitPush, async (args, _) => await ((IIdeMcpActions)_vm).GitPushAsync(McpCommandJsonArgs.String(args, \"remote\"), McpCommandJsonArgs.String(args, \"branch\")));");
 
         // Output / diagnostics
         sb.AppendLine("        add(Services.IdeCommands.GetBuildOutput, async (_, _) => await Task.FromResult(((IIdeMcpActions)_vm).GetBuildOutput()));");
 
         // UI inspection / control (pure IIdeMcpActions)
         sb.AppendLine("        add(Services.IdeCommands.GetUiTheme, async (_, _) => await Task.FromResult(((IIdeMcpActions)_vm).GetUiTheme()));");
-        sb.AppendLine("        add(Services.IdeCommands.SetUiTheme, async (args, _) => await ((IIdeMcpActions)_vm).SetUiThemeAsync(JsonArgs.String(args, \"theme\") ?? \"\"));");
+        sb.AppendLine("        add(Services.IdeCommands.SetUiTheme, async (args, _) => await ((IIdeMcpActions)_vm).SetUiThemeAsync(McpCommandJsonArgs.String(args, \"theme\") ?? \"\"));");
         sb.AppendLine("        add(Services.IdeCommands.GetUiLayout, async (_, _) => await ((IIdeMcpActions)_vm).GetUiLayoutAsync());");
         sb.AppendLine("        add(Services.IdeCommands.GetColorsUnderCursor, async (_, _) => await ((IIdeMcpActions)_vm).GetColorsUnderCursorAsync());");
-        sb.AppendLine("        add(Services.IdeCommands.GetControlAppearance, async (args, _) => await ((IIdeMcpActions)_vm).GetControlAppearanceAsync(JsonArgs.String(args, \"name\")));");
+        sb.AppendLine("        add(Services.IdeCommands.GetControlAppearance, async (args, _) => await ((IIdeMcpActions)_vm).GetControlAppearanceAsync(McpCommandJsonArgs.String(args, \"name\")));");
         sb.AppendLine("        add(Services.IdeCommands.SetControlLayout, async (args, _) =>");
         sb.AppendLine("        {");
-        sb.AppendLine("            if (args is null || string.IsNullOrEmpty(JsonArgs.String(args, \"name\"))) return \"Missing name or layout\";");
-        sb.AppendLine("            return await ((IIdeMcpActions)_vm).SetControlLayoutAsync(JsonArgs.String(args, \"name\")!, JsonArgs.String(args, \"layout\") ?? \"{}\" );");
+        sb.AppendLine("            if (args is null || string.IsNullOrEmpty(McpCommandJsonArgs.String(args, \"name\"))) return \"Missing name or layout\";");
+        sb.AppendLine("            return await ((IIdeMcpActions)_vm).SetControlLayoutAsync(McpCommandJsonArgs.String(args, \"name\")!, McpCommandJsonArgs.String(args, \"layout\") ?? \"{}\" );");
         sb.AppendLine("        });");
-        sb.AppendLine("        add(Services.IdeCommands.SetControlText, async (args, _) => await ((IIdeMcpActions)_vm).SetControlTextAsync(JsonArgs.String(args, \"name\") ?? \"\", JsonArgs.String(args, \"text\") ?? \"\"));");
-        sb.AppendLine("        add(Services.IdeCommands.ClickControl, async (args, _) => await ((IIdeMcpActions)_vm).ClickControlAsync(JsonArgs.String(args, \"name\")));");
-        sb.AppendLine("        add(Services.IdeCommands.SendKeys, async (args, _) => await ((IIdeMcpActions)_vm).SendKeysAsync(JsonArgs.String(args, \"name\"), JsonArgs.String(args, \"keys\") ?? \"\"));");
-        sb.AppendLine("        add(Services.IdeCommands.SetFocus, async (args, _) => await ((IIdeMcpActions)_vm).SetFocusAsync(JsonArgs.String(args, \"name\")));");
-        sb.AppendLine("        add(Services.IdeCommands.HighlightControl, async (args, _) => await ((IIdeMcpActions)_vm).HighlightControlAsync(JsonArgs.String(args, \"name\")));");
+        sb.AppendLine("        add(Services.IdeCommands.SetControlText, async (args, _) => await ((IIdeMcpActions)_vm).SetControlTextAsync(McpCommandJsonArgs.String(args, \"name\") ?? \"\", McpCommandJsonArgs.String(args, \"text\") ?? \"\"));");
+        sb.AppendLine("        add(Services.IdeCommands.ClickControl, async (args, _) => await ((IIdeMcpActions)_vm).ClickControlAsync(McpCommandJsonArgs.String(args, \"name\")));");
+        sb.AppendLine("        add(Services.IdeCommands.SendKeys, async (args, _) => await ((IIdeMcpActions)_vm).SendKeysAsync(McpCommandJsonArgs.String(args, \"name\"), McpCommandJsonArgs.String(args, \"keys\") ?? \"\"));");
+        sb.AppendLine("        add(Services.IdeCommands.SetFocus, async (args, _) => await ((IIdeMcpActions)_vm).SetFocusAsync(McpCommandJsonArgs.String(args, \"name\")));");
+        sb.AppendLine("        add(Services.IdeCommands.HighlightControl, async (args, _) => await ((IIdeMcpActions)_vm).HighlightControlAsync(McpCommandJsonArgs.String(args, \"name\")));");
         sb.AppendLine("        add(Services.IdeCommands.SetPanelSize, async (args, _) =>");
         sb.AppendLine("        {");
         sb.AppendLine("            double? w = args is not null && args.TryGetValue(\"width\", out var pw) && pw.TryGetDouble(out var wv) ? wv : null;");
         sb.AppendLine("            double? h = args is not null && args.TryGetValue(\"height\", out var ph) && ph.TryGetDouble(out var hv) ? hv : null;");
-        sb.AppendLine("            return await ((IIdeMcpActions)_vm).SetPanelSizeAsync(JsonArgs.String(args, \"panel\") ?? \"\", w, h);");
+        sb.AppendLine("            return await ((IIdeMcpActions)_vm).SetPanelSizeAsync(McpCommandJsonArgs.String(args, \"panel\") ?? \"\", w, h);");
         sb.AppendLine("        });");
         sb.AppendLine("        add(Services.IdeCommands.GetSupportedEditorLanguages, async (_, _) => await Task.FromResult(((IIdeMcpActions)_vm).GetSupportedEditorLanguages()));");
 
