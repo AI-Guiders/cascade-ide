@@ -28,6 +28,8 @@ public sealed class CSharpLspDiagnosticsHost : ILspDiagnosticSource
     private int _versionCounter;
     private volatile bool _handshakeDone;
     private bool _disposed;
+    private readonly object _diagNotifyLock = new();
+    private bool _diagNotifyPosted;
 
     public bool IsActive => _handshakeDone && _process is { HasExited: false };
 
@@ -374,7 +376,31 @@ public sealed class CSharpLspDiagnosticsHost : ILspDiagnosticSource
         }
 
         _strips[key] = list;
-        UiScheduler.Default.Post(() => DiagnosticsChanged?.Invoke(), DispatcherPriority.Background);
+        ScheduleDiagnosticsNotify();
+    }
+
+    /// <summary>
+    /// Коалесит <see cref="DiagnosticsChanged"/> в один <see cref="IUiScheduler.Post"/> на серию
+    /// <c>textDocument/publishDiagnostics</c> (как <see cref="Features.Build.BuildOutputPanelViewModel.Append"/>).
+    /// </summary>
+    private void ScheduleDiagnosticsNotify()
+    {
+        lock (_diagNotifyLock)
+        {
+            if (_diagNotifyPosted)
+                return;
+            _diagNotifyPosted = true;
+        }
+
+        UiScheduler.Default.Post(() =>
+        {
+            lock (_diagNotifyLock)
+            {
+                _diagNotifyPosted = false;
+            }
+
+            DiagnosticsChanged?.Invoke();
+        }, DispatcherPriority.Background);
     }
 
     private static DiagnosticSeverity? MapSeverity(JsonElement d)
