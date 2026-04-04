@@ -5,13 +5,42 @@
 
 ## Текущее состояние
 
-`MainWindowViewModel` (~3.2k строк) — **композитор окна** и носитель логики нижней панели, телеметрии, документов, MCP; чат, инструментирование и отдельные вкладки нижней панели вынесены в `Features/*`. Это допустимо как исторический компромисс; цель — **сужать ответственность** по мере доработок.
+`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~3.3k строк** суммарно по **partial-классу** в `ViewModels/MainWindowViewModel*.cs` (не один файл). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
+
+### Срез `MainWindowViewModel` (карта partial-файлов)
+
+Имена и порядок ниже — для навигации; строки — ориентир по состоянию репозитория.
+
+| Файл | Строк (≈) | Содержание |
+|------|------------|------------|
+| `MainWindowViewModel.cs` | 270 | Конструктор, дочерние VM, `WorkspaceDiagnostics`, `ExecuteCommandAsync`, навигация к проблемам, `ResolveProvider` |
+| `MainWindowViewModel.RelayCommands.cs` | 260 | Команды (Relay) |
+| `MainWindowViewModel.IdeMcpActions.BuildTest.cs` | 325 | MCP: сборка, тесты |
+| `MainWindowViewModel.IdeMcpActions.AgentNotes.cs` | 302 | MCP: agent-notes |
+| `MainWindowViewModel.IdeMcpActions.Workspace.cs` | 287 | MCP: workspace |
+| `MainWindowViewModel.UiGitWorkspace.cs` | 187 | Git + workspace UI (телеметрия полосы, refresh) |
+| `MainWindowViewModel.ShellState.cs` | 204 | Видимость панелей, режимы UI, ключи AI, телеметрия |
+| `MainWindowViewModel.SolutionBuild.cs` | 195 | Сборка решения, вывод в `BuildOutputPanel` |
+| `MainWindowViewModel.IdeMcpActions.Editor.cs` | 211 | MCP: редактор |
+| `MainWindowViewModel.IdeMcpActions.UiAutomation.cs` | 173 | MCP: UI automation |
+| `MainWindowViewModel.Presentation.cs` | 139 | Вычисляемые свойства заголовка, режимов, подписей |
+| `MainWindowViewModel.Breakpoints.cs` | 148 | Брейкпоинты и файловый watcher |
+| `MainWindowViewModel.CSharpLsp.cs` | 104 | Запуск/перезапуск C# LSP |
+| `MainWindowViewModel.AutonomousAgent.cs` | 128 | Автономный агент (Power) |
+| `MainWindowViewModel.SettingsReactive.cs` | 119 | Реакции на настройки, сохранение |
+| `MainWindowViewModel.IdeMcpActions.Git.cs` | 84 | MCP: git |
+| `MainWindowViewModel.IdeMcpActions.DebuggerPanel.cs` | 53 | MCP: панель отладки |
+| `MainWindowViewModel.EditorOllama.cs` | 58 | Редактор + Ollama |
+| `MainWindowViewModel.DocumentsDock.cs` | 45 | Документы / dock |
+| `MainWindowViewModel.ViewBridge.cs` | 46 | Мост к view (запросы к окну) |
+
+**Техдолг по главному VM (без обязательного срока):** тяжёлые куски MCP по-прежнему рядом с VM (`IdeMcpActions.*`); при росте — переносить разбор аргументов и доменную логику в `Services/`, оставляя VM оркестратором (план B внизу документа).
 
 ## Целевая карта срезов
 
 | Срез | Что сейчас (где живёт) | Целевое размещение | Примечание |
 |------|------------------------|-------------------|------------|
-| **Git** | Свойства/команды/парсинг в `MainWindowViewModel` | `Features/Git/GitPanelViewModel` + при необходимости `GitStatusRow` остаётся в `Models/` | Панель нижней вкладки Git; `MainWindow` передаёт workspace, `LoadSolution`, MCP commit/push |
+| **Git** | Оркестрация и MCP на `MainWindowViewModel`; вкладка — `GitPanelViewModel` | `Features/Git/GitPanelViewModel` + `GitStatusRow` в `Models/` | `MainWindow` передаёт workspace, `LoadSolution`, MCP commit/push; телеметрия полосы частично в `UiGitWorkspace` / `ShellState` |
 | **Инфраструктура git** | `Process` + `git` внутри VM | `Services/IGitCommandRunner` / `GitCommandRunner` | Общий для панели, полосы телеметрии, MCP `GitCommit`/`GitStatus` |
 | **Сборка / вывод** | Текст вывода в `BuildOutputPanelViewModel`; оркестрация сборки в `MainWindowViewModel` | `Features/Build/BuildOutputPanelViewModel` | Вкладка Build output |
 | **Терминал** | `TerminalPanelViewModel` | `Features/Terminal/TerminalPanelViewModel` | Вкладка Terminal (телеметрия Power на той же вкладке — пока на главном VM) |
@@ -50,7 +79,7 @@
 - **`ViewModels/`** — `DebugStackFrameViewModel`, `DebugVariableViewModel`, `AgentTraceStepViewModel` вынесены в отдельные файлы (типы для `x:DataType` без изменений).
 - **`MainWindowViewModel`:** свойство **`InstrumentationPanel`**, подписка на `IsDebugPanelVisible` для строк телеметрии полосы; `IIdeMcpActions.ShowDebugState` и `RunTests` пишут в `InstrumentationPanel`. Дочерние виды биндят блоки к `InstrumentationPanel`, без прокси на главном VM.
 
-### Фаза 5 — события, UI-поток, нагрузка (**в работе**)
+### Фаза 5 — события, UI-поток, нагрузка (**основное сделано**)
 
 Цель и порядок шагов — в [architecture-policy.md](architecture-policy.md) (разделы «События, UI-поток и нагрузка» и «Отложенные идеи расширяемости»). Кратко:
 
@@ -60,7 +89,9 @@
 
 **Сделано по п. 2:** контракт **`IUiScheduler`**, реализация **`AvaloniaUiScheduler`** (единственное место с прямым `Dispatcher.UIThread`), доступ из кода через **`UiScheduler.Default`**. Вызовы переведены с размазанного `Dispatcher.UIThread` на `UiScheduler.Default`; для удобства — **`GlobalUsings.cs`** с `global using CascadeIDE.Services`.
 
-**Дальше по фазе 5:** лавина диагностик (при необходимости — доп. батчинг поверх debounce LSP/Roslyn); при необходимости — шина событий между подсистемами (п. 1).
+**Сделано по п. 3 (диагностики):** **`WorkspaceDiagnosticsCoordinator`** — debounce для Roslyn без LSP; **`CSharpLspDiagnosticsHost`** — коалесcing **`DiagnosticsChanged`** (один `Post` на серию `textDocument/publishDiagnostics`, по тому же принципу, что **`BuildOutputPanelViewModel.Append`**).
+
+**Опционально позже по фазе 5:** при профилировании — ещё батчинг на стороне подписчиков Problems; шина событий / слабее связность (п. 1) — только если вырастет число кросс-подсистемных подписок.
 
 **Сделано по MCP и UI-потоку (дыра закрыта):** единый вход `IIdeMcpActions.ExecuteCommandAsync` в `MainWindowViewModel` маршалит выполнение на UI через `IUiScheduler.InvokeAsync(Func<Task<string>>)`; добавлен перегруз `InvokeAsync<T>(Func<Task<T>>)` в `IUiScheduler` / `AvaloniaUiScheduler`. Так MCP stdio и автономный агент не вызывают хендлеры `IdeMcpCommandExecutor` с фонового потока. Долгие операции по-прежнему не блокируют UI: внутри `IIdeMcpActions` используются `ConfigureAwait(false)`, `Task.Run`, `Post` на панели вывода и т.д.
 
@@ -93,3 +124,7 @@
 - **v1.7** — фаза 5: введены `IUiScheduler` / `UiScheduler.Default`, маршалинг UI сосредоточен в `AvaloniaUiScheduler`.
 - **v1.8** — фаза 5: `BuildOutputPanelViewModel.Append` коалесит обновления привязки; `FlushPending` после сборки решения.
 - **v1.9** — фаза 5: `IUiScheduler.InvokeAsync<T>(Func<Task<T>>)`; MCP `ExecuteCommandAsync` всегда на UI; план шага B по выносу логики из VM.
+- **v1.10** — фаза 5: коалесcing `DiagnosticsChanged` в `CSharpLspDiagnosticsHost`; фаза 5 отмечена как «основное сделано», опциональные пункты вынесены отдельно.
+- **v1.11** — раздел «Срез MainWindowViewModel»: карта partial-файлов и уточнение текущего состояния (не один `.cs` на ~3k строк).
+- **v1.12** — обозреватель решения: вложенность файлов как в VS — `<DependentUpon>` из `.csproj` + эвристика для SDK-glob (`Stem.*.cs` → родитель `Stem.cs` в той же папке). Формат `.sln` вложенность не задаёт.
+- **v1.13** — рефакторинг: дерево файлов проекта вынесено в `Services/ProjectFileTreeBuilder.cs`, `SolutionParser` — только загрузка решения и сортировка узлов.

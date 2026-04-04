@@ -7,6 +7,10 @@ using Microsoft.VisualStudio.SolutionPersistence.Serializer;
 
 namespace CascadeIDE.Services;
 
+/// <summary>
+/// Загрузка .sln / .slnx / .slnf и построение дерева <see cref="SolutionItem"/>.
+/// Файлы внутри .csproj — <see cref="ProjectFileTreeBuilder"/>.
+/// </summary>
 public static class SolutionParser
 {
     public static SolutionItem? Load(string solutionPath, out string? error)
@@ -107,7 +111,7 @@ public static class SolutionParser
                 var fullPath = Path.GetFullPath(Path.Combine(baseDir, projectPath.Replace('/', Path.DirectorySeparatorChar)));
                 var title = Path.GetFileName(projectPath);
                 var projectNode = SolutionItem.CreateProject(title, fullPath);
-                AddProjectFileChildren(projectNode, fullPath);
+                ProjectFileTreeBuilder.AddProjectFileChildren(projectNode, fullPath);
 
                 SolutionItem parent = root;
                 try
@@ -128,7 +132,7 @@ public static class SolutionParser
                 parent.Children.Add(projectNode);
             }
 
-            SortSolutionItemChildren(root, StringComparer.OrdinalIgnoreCase);
+            ProjectFileTreeBuilder.SortSolutionItemChildren(root, StringComparer.OrdinalIgnoreCase);
             return root;
         }
         catch (Exception ex)
@@ -177,13 +181,13 @@ public static class SolutionParser
                 var fullPath = Path.GetFullPath(Path.Combine(baseDir, path.Replace('/', Path.DirectorySeparatorChar)));
                 var title = Path.GetFileName(path);
                 var projectNode = SolutionItem.CreateProject(title, fullPath);
-                AddProjectFileChildren(projectNode, fullPath);
+                ProjectFileTreeBuilder.AddProjectFileChildren(projectNode, fullPath);
                 parentFolder.Children.Add(projectNode);
             }
         }
 
         VisitContainer(solutionEl, root);
-        SortSolutionItemChildren(root, StringComparer.OrdinalIgnoreCase);
+        ProjectFileTreeBuilder.SortSolutionItemChildren(root, StringComparer.OrdinalIgnoreCase);
 
         return root;
     }
@@ -206,7 +210,7 @@ public static class SolutionParser
             var fullPath = Path.GetFullPath(Path.Combine(baseDir, path.Replace('\\', Path.DirectorySeparatorChar)));
             var title = Path.GetFileName(path);
             var projectNode = SolutionItem.CreateProject(title, fullPath);
-            AddProjectFileChildren(projectNode, fullPath);
+            ProjectFileTreeBuilder.AddProjectFileChildren(projectNode, fullPath);
             root.Children.Add(projectNode);
         }
 
@@ -292,7 +296,7 @@ public static class SolutionParser
             }
 
             PruneTreeToAllowedProjects(baseRoot, allowedProjects);
-            SortSolutionItemChildren(baseRoot, StringComparer.OrdinalIgnoreCase);
+            ProjectFileTreeBuilder.SortSolutionItemChildren(baseRoot, StringComparer.OrdinalIgnoreCase);
             return baseRoot;
         }
         catch (Exception ex)
@@ -321,124 +325,6 @@ public static class SolutionParser
 
         // Keep folders/solution root if they still have children.
         return node.Children.Count > 0 || node.FullPath is not null && node.FullPath.EndsWith(".sln", StringComparison.OrdinalIgnoreCase);
-    }
-
-    private static void AddProjectFileChildren(SolutionItem projectNode, string projectPath)
-    {
-        if (!File.Exists(projectPath))
-            return;
-
-        var projectDir = Path.GetDirectoryName(projectPath) ?? "";
-        var fileEntries = new List<(string RelativePath, string FullPath)>();
-
-        try
-        {
-            using var stream = File.OpenRead(projectPath);
-            var doc = XDocument.Load(stream);
-
-            var included = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-            foreach (var itemGroup in doc.Descendants().Where(e => e.Name.LocalName == "ItemGroup"))
-            {
-                foreach (var item in itemGroup.Elements())
-                {
-                    var localName = item.Name.LocalName;
-                    if (localName != "Compile" && localName != "None" && localName != "Page" && localName != "AvaloniaResource")
-                        continue;
-
-                    var include = (string?)item.Attribute("Include");
-                    if (string.IsNullOrWhiteSpace(include))
-                        continue;
-
-                    var ext = Path.GetExtension(include);
-                    if (!string.Equals(ext, ".cs", StringComparison.OrdinalIgnoreCase) &&
-                        !string.Equals(ext, ".axaml", StringComparison.OrdinalIgnoreCase) &&
-                        !string.Equals(ext, ".xaml", StringComparison.OrdinalIgnoreCase) &&
-                        !string.Equals(ext, ".md", StringComparison.OrdinalIgnoreCase) &&
-                        !string.Equals(ext, ".markdown", StringComparison.OrdinalIgnoreCase))
-                        continue;
-
-                    var normalizedInclude = include.Replace('\\', Path.DirectorySeparatorChar);
-                    var fullPath = Path.GetFullPath(Path.Combine(projectDir, normalizedInclude));
-                    if (!included.Add(fullPath) || !File.Exists(fullPath))
-                        continue;
-
-                    fileEntries.Add((normalizedInclude, fullPath));
-                }
-            }
-
-            // SDK-стиль: в XML часто нет явных Compile — сканируем каталог
-            if (fileEntries.Count == 0)
-            {
-                foreach (var f in Directory.EnumerateFiles(projectDir, "*.cs", SearchOption.AllDirectories)
-                    .Concat(Directory.EnumerateFiles(projectDir, "*.axaml", SearchOption.AllDirectories))
-                    .Concat(Directory.EnumerateFiles(projectDir, "*.xaml", SearchOption.AllDirectories))
-                    .Concat(Directory.EnumerateFiles(projectDir, "*.md", SearchOption.AllDirectories))
-                    .Concat(Directory.EnumerateFiles(projectDir, "*.markdown", SearchOption.AllDirectories)))
-                {
-                    var rel = Path.GetRelativePath(projectDir, f);
-                    if (rel.StartsWith("obj", StringComparison.OrdinalIgnoreCase) ||
-                        rel.StartsWith("bin", StringComparison.OrdinalIgnoreCase))
-                        continue;
-                    fileEntries.Add((rel, Path.GetFullPath(f)));
-                }
-            }
-
-            AddFileEntriesAsTree(projectNode, fileEntries);
-        }
-        catch
-        {
-            // Оставляем проект без дочерних файлов
-        }
-    }
-
-    /// <summary>Добавляет файлы в дерево проекта: папки по относительному пути, единый порядок (папки, затем файлы по имени).</summary>
-    private static void AddFileEntriesAsTree(SolutionItem projectNode, List<(string RelativePath, string FullPath)> fileEntries)
-    {
-        var comparer = StringComparer.OrdinalIgnoreCase;
-        foreach (var (relativePath, fullPath) in fileEntries)
-        {
-            var parts = relativePath.Split(Path.DirectorySeparatorChar, '/').Where(p => p.Length > 0).ToList();
-            if (parts.Count == 0)
-                continue;
-            if (parts.Count == 1)
-            {
-                projectNode.Children.Add(SolutionItem.CreateFile(parts[0], fullPath));
-                continue;
-            }
-            SolutionItem current = projectNode;
-            for (var i = 0; i < parts.Count - 1; i++)
-            {
-                var segment = parts[i];
-                var folder = current.Children.FirstOrDefault(c => c.FullPath is null && comparer.Equals(c.Title, segment));
-                if (folder is null)
-                {
-                    folder = SolutionItem.CreateFolder(segment);
-                    current.Children.Add(folder);
-                }
-                current = folder;
-            }
-            current.Children.Add(SolutionItem.CreateFile(parts[^1], fullPath));
-        }
-        SortSolutionItemChildren(projectNode, comparer);
-    }
-
-    private static void SortSolutionItemChildren(SolutionItem node, StringComparer comparer)
-    {
-        var list = node.Children;
-        if (list.Count == 0)
-            return;
-        // Папки (FullPath == null) сначала по Title, затем файлы по Title
-        var ordered = list
-            .OrderBy(c => c.FullPath is not null ? 1 : 0)
-            .ThenBy(c => c.Title, comparer)
-            .ToList();
-        list.Clear();
-        foreach (var c in ordered)
-        {
-            list.Add(c);
-            SortSolutionItemChildren(c, comparer);
-        }
     }
 
     private static string? ExtractPathFromSlnProjectLine(string line)
