@@ -1,8 +1,8 @@
 # ADR 0004: Маршалинг обновлений UI через IUiScheduler
 
 **Статус:** Accepted (план внедрения — strangler)  
-**Дата:** 2026-04-02 (ретроспектива; см. [architecture-policy.md](../architecture-policy.md), раздел «События, UI-поток и нагрузка»)  
-**Связь:** фаза 5 в [architecture-migration.md](../architecture-migration.md).
+**Дата:** 2026-04-02 (ретроспектива)  
+**Связь:** фаза 5 в [architecture-migration.md](../architecture-migration.md); слабая связность и батчинг — [ADR 0007](0007-signals-coupling-and-ui-backpressure.md); навигатор — [architecture-policy.md](../architecture-policy.md).
 
 ## Контекст
 
@@ -12,12 +12,12 @@
 
 Обновления ViewModel и UI после работы в фоне по возможности проходят через **одну согласованную точку** маршалинга: **`IUiScheduler`** и **`UiScheduler.Default`** (реализация на `Dispatcher.UIThread`), а не произвольные вызовы диспетчера по всему коду.
 
-Точечные очереди и батчинг для перегруженных потоков данных — отдельно, где нужно (см. политику).
+Точечные очереди и батчинг для перегруженных потоков данных — отдельно, где нужно (см. [ADR 0007](0007-signals-coupling-and-ui-backpressure.md)).
 
 ## Последствия
 
 - Новый код следует этому правилу; существующий мигрируется постепенно.
-- Полный текст рационале и порядок внедрения — в architecture-policy.
+- Порядок внедрения в коде — в [architecture-migration.md](../architecture-migration.md) (фаза 5).
 
 ## Отклонённые альтернативы
 
