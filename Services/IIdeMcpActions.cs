@@ -7,7 +7,7 @@ namespace CascadeIDE.Services;
 /// </summary>
 public interface IIdeMcpActions
 {
-    /// <summary>Выполнить команду по коду (IdeCommands). args — аргументы в том же формате, что у соответствующих тулов. Унифицированный вход для MCP и будущих меню/хоткеев.</summary>
+    /// <summary>Выполнить команду по коду (IdeCommands). args — аргументы в том же формате, что у соответствующих тулов. Унифицированный вход для MCP и будущих меню/хоткеев. Реализация в главном окне маршалит на UI-поток.</summary>
     Task<string> ExecuteCommandAsync(string commandId, IReadOnlyDictionary<string, JsonElement>? args, CancellationToken cancellationToken = default);
 
     void OpenFile(string path);

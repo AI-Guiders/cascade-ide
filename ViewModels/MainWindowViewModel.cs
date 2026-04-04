@@ -265,7 +265,8 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _ = RestartCSharpLanguageServerAsync();
     }
 
+    /// <summary>MCP и агент вызывают с фона; весь разбор команд и доступ к VM — на UI-потоке. Тяжёлые операции внутри хендлеров сами уходят с UI (<c>ConfigureAwait(false)</c>, <c>Task.Run</c>, <c>Post</c> обратно).</summary>
     Task<string> Services.IIdeMcpActions.ExecuteCommandAsync(string commandId, IReadOnlyDictionary<string, JsonElement>? args, CancellationToken cancellationToken) =>
-        _ideMcpExecutor.ExecuteAsync(commandId, args, cancellationToken);
+        UiScheduler.Default.InvokeAsync(() => _ideMcpExecutor.ExecuteAsync(commandId, args, cancellationToken));
 
 }

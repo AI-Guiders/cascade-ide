@@ -24,4 +24,7 @@ public sealed class AvaloniaUiScheduler : IUiScheduler
 
     public Task InvokeAsync(Func<Task> action, DispatcherPriority priority = default) =>
         Dispatcher.UIThread.InvokeAsync(action, priority);
+
+    public Task<T> InvokeAsync<T>(Func<Task<T>> action, DispatcherPriority priority = default) =>
+        Dispatcher.UIThread.InvokeAsync(action, priority);
 }

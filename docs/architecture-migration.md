@@ -62,6 +62,15 @@
 
 **Дальше по фазе 5:** лавина диагностик (при необходимости — доп. батчинг поверх debounce LSP/Roslyn); при необходимости — шина событий между подсистемами (п. 1).
 
+**Сделано по MCP и UI-потоку (дыра закрыта):** единый вход `IIdeMcpActions.ExecuteCommandAsync` в `MainWindowViewModel` маршалит выполнение на UI через `IUiScheduler.InvokeAsync(Func<Task<string>>)`; добавлен перегруз `InvokeAsync<T>(Func<Task<T>>)` в `IUiScheduler` / `AvaloniaUiScheduler`. Так MCP stdio и автономный агент не вызывают хендлеры `IdeMcpCommandExecutor` с фонового потока. Долгие операции по-прежнему не блокируют UI: внутри `IIdeMcpActions` используются `ConfigureAwait(false)`, `Task.Run`, `Post` на панели вывода и т.д.
+
+### План: связность `MainWindowViewModel` / MCP (не фаза 5, отдельная дорожка)
+
+| Шаг | Смысл |
+|-----|--------|
+| **A — сделано** | Один канал маршалинга MCP → UI (`ExecuteCommandAsync` + `InvokeAsync<Task<string>>`), документация на входе executor. |
+| **B — по мере роста** | Новую логику по возможности класть в сервисы с узким интерфейсом; VM оставить оркестратором и точкой `IIdeMcpActions`, без раздувания «командными» методами. |
+
 **Сделано:** коалесcing обновлений **`BuildOutput`** в **`BuildOutputPanelViewModel.Append`** (один `Post` на серию вызовов; `Set`/`Clear`/`FlushPending` инвалидируют отложенный flush); после **`BuildSolutionAsync`** вызывается **`FlushPending`**, чтобы текст и флаг сборки были согласованы до чтения MCP.
 
 **Не в этой фазе:** MEF и загрузка плагинов из каталога — зафиксировано как отложенная идея в политике.
@@ -83,3 +92,4 @@
 - **v1.6** — фаза 5 (события, UI-поток, батчинг); MEF/плагины вынесены в отложенные идеи политики.
 - **v1.7** — фаза 5: введены `IUiScheduler` / `UiScheduler.Default`, маршалинг UI сосредоточен в `AvaloniaUiScheduler`.
 - **v1.8** — фаза 5: `BuildOutputPanelViewModel.Append` коалесит обновления привязки; `FlushPending` после сборки решения.
+- **v1.9** — фаза 5: `IUiScheduler.InvokeAsync<T>(Func<Task<T>>)`; MCP `ExecuteCommandAsync` всегда на UI; план шага B по выносу логики из VM.

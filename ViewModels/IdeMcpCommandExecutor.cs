@@ -83,6 +83,7 @@ internal sealed partial class IdeMcpCommandExecutor
         return "OK";
     }
 
+    /// <summary>Вход с MCP/агента маршалится на UI в <see cref="MainWindowViewModel"/> до вызова этого метода; хендлеры могут дополнительно использовать <see cref="UiScheduler"/> для команд.</summary>
     public async Task<string> ExecuteAsync(string commandId, IReadOnlyDictionary<string, JsonElement>? args, CancellationToken cancellationToken)
     {
         if (_handlers.TryGetValue(commandId, out var handler))
