@@ -130,7 +130,7 @@ internal sealed partial class IdeMcpCommandExecutor
 
         add(Services.IdeCommands.SendChat, async (args, _) =>
         {
-            var msg = S(args, "message");
+            var msg = JsonArgs.String(args, "message");
             if (!string.IsNullOrWhiteSpace(msg))
                 _vm.ChatPanel.ChatInput = msg!;
             if (_vm.ChatPanel.SendChatCommand.CanExecute(null))
@@ -140,7 +140,7 @@ internal sealed partial class IdeMcpCommandExecutor
 
         add(Services.IdeCommands.InstallOllamaModel, async (args, _) =>
         {
-            var model = S(args, "model");
+            var model = JsonArgs.String(args, "model");
             if (string.IsNullOrWhiteSpace(model))
                 return "Missing model";
             var m = model.Trim();
@@ -161,54 +161,54 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.ActivateDocument, async (args, _) =>
         {
-            if (string.IsNullOrWhiteSpace(S(args, "file_path")))
+            if (string.IsNullOrWhiteSpace(JsonArgs.String(args, "file_path")))
                 return "Missing file_path";
-            var pathAct = S(args, "file_path")!;
+            var pathAct = JsonArgs.String(args, "file_path")!;
             if (_vm.ActivateDocumentCommand.CanExecute(pathAct))
                 _vm.ActivateDocumentCommand.Execute(pathAct);
             return "OK";
         });
         add(Services.IdeCommands.CloseDocument, async (args, _) =>
         {
-            if (string.IsNullOrWhiteSpace(S(args, "file_path")))
+            if (string.IsNullOrWhiteSpace(JsonArgs.String(args, "file_path")))
                 return "Missing file_path";
-            var pathClose = S(args, "file_path")!;
+            var pathClose = JsonArgs.String(args, "file_path")!;
             if (_vm.CloseDocumentCommand.CanExecute(pathClose))
                 _vm.CloseDocumentCommand.Execute(pathClose);
             return "OK";
         });
         add(Services.IdeCommands.TogglePinDocument, async (args, _) =>
         {
-            if (string.IsNullOrWhiteSpace(S(args, "file_path")))
+            if (string.IsNullOrWhiteSpace(JsonArgs.String(args, "file_path")))
                 return "Missing file_path";
-            var pathPin = S(args, "file_path")!;
+            var pathPin = JsonArgs.String(args, "file_path")!;
             if (_vm.TogglePinDocumentCommand.CanExecute(pathPin))
                 _vm.TogglePinDocumentCommand.Execute(pathPin);
             return "OK";
         });
         add(Services.IdeCommands.MoveDocumentToGroup1, async (args, _) =>
         {
-            if (string.IsNullOrWhiteSpace(S(args, "file_path")))
+            if (string.IsNullOrWhiteSpace(JsonArgs.String(args, "file_path")))
                 return "Missing file_path";
-            var p1 = S(args, "file_path")!;
+            var p1 = JsonArgs.String(args, "file_path")!;
             if (_vm.MoveDocumentToGroup1Command.CanExecute(p1))
                 _vm.MoveDocumentToGroup1Command.Execute(p1);
             return "OK";
         });
         add(Services.IdeCommands.MoveDocumentToGroup2, async (args, _) =>
         {
-            if (string.IsNullOrWhiteSpace(S(args, "file_path")))
+            if (string.IsNullOrWhiteSpace(JsonArgs.String(args, "file_path")))
                 return "Missing file_path";
-            var p2 = S(args, "file_path")!;
+            var p2 = JsonArgs.String(args, "file_path")!;
             if (_vm.MoveDocumentToGroup2Command.CanExecute(p2))
                 _vm.MoveDocumentToGroup2Command.Execute(p2);
             return "OK";
         });
         add(Services.IdeCommands.MoveDocumentToGroup3, async (args, _) =>
         {
-            if (string.IsNullOrWhiteSpace(S(args, "file_path")))
+            if (string.IsNullOrWhiteSpace(JsonArgs.String(args, "file_path")))
                 return "Missing file_path";
-            var p3 = S(args, "file_path")!;
+            var p3 = JsonArgs.String(args, "file_path")!;
             if (_vm.MoveDocumentToGroup3Command.CanExecute(p3))
                 _vm.MoveDocumentToGroup3Command.Execute(p3);
             return "OK";

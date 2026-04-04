@@ -16,29 +16,33 @@ internal sealed partial class IdeMcpCommandExecutor
         _handlers = BuildHandlers();
     }
 
-    private static string? S(IReadOnlyDictionary<string, JsonElement>? a, string key) =>
-        a is not null && a.TryGetValue(key, out var e) ? e.GetString() : null;
-
-    private static int I(IReadOnlyDictionary<string, JsonElement>? a, string key, int def = 0) =>
-        a is not null && a.TryGetValue(key, out var e) && e.TryGetInt32(out var v) ? v : def;
-
-    private static bool B(IReadOnlyDictionary<string, JsonElement>? a, string key, bool def = false) =>
-        a is not null && a.TryGetValue(key, out var e) && (e.ValueKind is JsonValueKind.True or JsonValueKind.False)
-            ? e.GetBoolean()
-            : def;
-
-    private static IReadOnlyList<string>? SA(IReadOnlyDictionary<string, JsonElement>? a, string key)
+    /// <summary>Чтение примитивов из словаря аргументов MCP (JSON).</summary>
+    private static class JsonArgs
     {
-        if (a is null || !a.TryGetValue(key, out var e) || e.ValueKind != JsonValueKind.Array)
-            return null;
-        var values = new List<string>();
-        foreach (var item in e.EnumerateArray())
+        public static string? String(IReadOnlyDictionary<string, JsonElement>? args, string key) =>
+            args is not null && args.TryGetValue(key, out var e) ? e.GetString() : null;
+
+        public static int Int(IReadOnlyDictionary<string, JsonElement>? args, string key, int defaultValue = 0) =>
+            args is not null && args.TryGetValue(key, out var e) && e.TryGetInt32(out var v) ? v : defaultValue;
+
+        public static bool Bool(IReadOnlyDictionary<string, JsonElement>? args, string key, bool defaultValue = false) =>
+            args is not null && args.TryGetValue(key, out var e) && (e.ValueKind is JsonValueKind.True or JsonValueKind.False)
+                ? e.GetBoolean()
+                : defaultValue;
+
+        public static List<string>? StringList(IReadOnlyDictionary<string, JsonElement>? args, string key)
         {
-            var value = item.GetString();
-            if (!string.IsNullOrWhiteSpace(value))
-                values.Add(value);
+            if (args is null || !args.TryGetValue(key, out var e) || e.ValueKind != JsonValueKind.Array)
+                return null;
+            var values = new List<string>();
+            foreach (var item in e.EnumerateArray())
+            {
+                var value = item.GetString();
+                if (!string.IsNullOrWhiteSpace(value))
+                    values.Add(value);
+            }
+            return values;
         }
-        return values;
     }
 
     private static string ParseAndShowDebugBreakpoints(IIdeMcpActions actions, IReadOnlyDictionary<string, JsonElement>? args)

@@ -53,7 +53,7 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.SetUiMode, async (args, _) =>
         {
-            var m = S(args, "mode")?.Trim();
+            var m = JsonArgs.String(args, "mode")?.Trim();
             if (string.IsNullOrEmpty(m))
                 return "Missing mode (Focus|Balanced|Power|AgentChat)";
             if (!string.Equals(m, "Focus", StringComparison.OrdinalIgnoreCase)
@@ -203,7 +203,7 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.SetUiLanguage, async (args, _) =>
         {
-            var cult = S(args, "culture") ?? S(args, "ci");
+            var cult = JsonArgs.String(args, "culture") ?? JsonArgs.String(args, "ci");
             if (string.IsNullOrWhiteSpace(cult))
                 return "Missing culture (e.g. ru-RU, en-US)";
             var c = cult.Trim();

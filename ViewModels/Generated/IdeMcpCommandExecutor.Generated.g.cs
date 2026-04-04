@@ -14,38 +14,38 @@ internal sealed partial class IdeMcpCommandExecutor
         add(Services.IdeCommands.Build, async (_, _) => await ((IIdeMcpActions)_vm).BuildAsync());
         add(Services.IdeCommands.BuildStructured, async (_, _) => await ((IIdeMcpActions)_vm).BuildStructuredAsync());
         add(Services.IdeCommands.RunTests, async (_, _) => await ((IIdeMcpActions)_vm).RunTestsAsync());
-        add(Services.IdeCommands.RunAffectedTests, async (args, _) => await ((IIdeMcpActions)_vm).RunAffectedTestsAsync(SA(args, "changed_paths")));
-        add(Services.IdeCommands.RunCodeCleanup, async (args, _) => await ((IIdeMcpActions)_vm).RunCodeCleanupAsync(S(args, "include_path")));
-        add(Services.IdeCommands.GetCodeMetrics, async (args, _) => await ((IIdeMcpActions)_vm).GetCodeMetricsAsync(S(args, "scope"), S(args, "path")));
+        add(Services.IdeCommands.RunAffectedTests, async (args, _) => await ((IIdeMcpActions)_vm).RunAffectedTestsAsync(JsonArgs.StringList(args, "changed_paths")));
+        add(Services.IdeCommands.RunCodeCleanup, async (args, _) => await ((IIdeMcpActions)_vm).RunCodeCleanupAsync(JsonArgs.String(args, "include_path")));
+        add(Services.IdeCommands.GetCodeMetrics, async (args, _) => await ((IIdeMcpActions)_vm).GetCodeMetricsAsync(JsonArgs.String(args, "scope"), JsonArgs.String(args, "path")));
         add(Services.IdeCommands.GitStatus, async (_, _) => await ((IIdeMcpActions)_vm).GitStatusAsync());
-        add(Services.IdeCommands.GitDiff, async (args, _) => await ((IIdeMcpActions)_vm).GitDiffAsync(S(args, "path"), B(args, "staged")));
+        add(Services.IdeCommands.GitDiff, async (args, _) => await ((IIdeMcpActions)_vm).GitDiffAsync(JsonArgs.String(args, "path"), JsonArgs.Bool(args, "staged")));
         add(Services.IdeCommands.GitCommit, async (args, _) =>
         {
-            if (string.IsNullOrWhiteSpace(S(args, "message"))) return "Missing message";
-            return await ((IIdeMcpActions)_vm).GitCommitAsync(S(args, "message")!, SA(args, "paths"));
+            if (string.IsNullOrWhiteSpace(JsonArgs.String(args, "message"))) return "Missing message";
+            return await ((IIdeMcpActions)_vm).GitCommitAsync(JsonArgs.String(args, "message")!, JsonArgs.StringList(args, "paths"));
         });
-        add(Services.IdeCommands.GitPush, async (args, _) => await ((IIdeMcpActions)_vm).GitPushAsync(S(args, "remote"), S(args, "branch")));
+        add(Services.IdeCommands.GitPush, async (args, _) => await ((IIdeMcpActions)_vm).GitPushAsync(JsonArgs.String(args, "remote"), JsonArgs.String(args, "branch")));
         add(Services.IdeCommands.GetBuildOutput, async (_, _) => await Task.FromResult(((IIdeMcpActions)_vm).GetBuildOutput()));
         add(Services.IdeCommands.GetUiTheme, async (_, _) => await Task.FromResult(((IIdeMcpActions)_vm).GetUiTheme()));
-        add(Services.IdeCommands.SetUiTheme, async (args, _) => await ((IIdeMcpActions)_vm).SetUiThemeAsync(S(args, "theme") ?? ""));
+        add(Services.IdeCommands.SetUiTheme, async (args, _) => await ((IIdeMcpActions)_vm).SetUiThemeAsync(JsonArgs.String(args, "theme") ?? ""));
         add(Services.IdeCommands.GetUiLayout, async (_, _) => await ((IIdeMcpActions)_vm).GetUiLayoutAsync());
         add(Services.IdeCommands.GetColorsUnderCursor, async (_, _) => await ((IIdeMcpActions)_vm).GetColorsUnderCursorAsync());
-        add(Services.IdeCommands.GetControlAppearance, async (args, _) => await ((IIdeMcpActions)_vm).GetControlAppearanceAsync(S(args, "name")));
+        add(Services.IdeCommands.GetControlAppearance, async (args, _) => await ((IIdeMcpActions)_vm).GetControlAppearanceAsync(JsonArgs.String(args, "name")));
         add(Services.IdeCommands.SetControlLayout, async (args, _) =>
         {
-            if (args is null || string.IsNullOrEmpty(S(args, "name"))) return "Missing name or layout";
-            return await ((IIdeMcpActions)_vm).SetControlLayoutAsync(S(args, "name")!, S(args, "layout") ?? "{}" );
+            if (args is null || string.IsNullOrEmpty(JsonArgs.String(args, "name"))) return "Missing name or layout";
+            return await ((IIdeMcpActions)_vm).SetControlLayoutAsync(JsonArgs.String(args, "name")!, JsonArgs.String(args, "layout") ?? "{}" );
         });
-        add(Services.IdeCommands.SetControlText, async (args, _) => await ((IIdeMcpActions)_vm).SetControlTextAsync(S(args, "name") ?? "", S(args, "text") ?? ""));
-        add(Services.IdeCommands.ClickControl, async (args, _) => await ((IIdeMcpActions)_vm).ClickControlAsync(S(args, "name")));
-        add(Services.IdeCommands.SendKeys, async (args, _) => await ((IIdeMcpActions)_vm).SendKeysAsync(S(args, "name"), S(args, "keys") ?? ""));
-        add(Services.IdeCommands.SetFocus, async (args, _) => await ((IIdeMcpActions)_vm).SetFocusAsync(S(args, "name")));
-        add(Services.IdeCommands.HighlightControl, async (args, _) => await ((IIdeMcpActions)_vm).HighlightControlAsync(S(args, "name")));
+        add(Services.IdeCommands.SetControlText, async (args, _) => await ((IIdeMcpActions)_vm).SetControlTextAsync(JsonArgs.String(args, "name") ?? "", JsonArgs.String(args, "text") ?? ""));
+        add(Services.IdeCommands.ClickControl, async (args, _) => await ((IIdeMcpActions)_vm).ClickControlAsync(JsonArgs.String(args, "name")));
+        add(Services.IdeCommands.SendKeys, async (args, _) => await ((IIdeMcpActions)_vm).SendKeysAsync(JsonArgs.String(args, "name"), JsonArgs.String(args, "keys") ?? ""));
+        add(Services.IdeCommands.SetFocus, async (args, _) => await ((IIdeMcpActions)_vm).SetFocusAsync(JsonArgs.String(args, "name")));
+        add(Services.IdeCommands.HighlightControl, async (args, _) => await ((IIdeMcpActions)_vm).HighlightControlAsync(JsonArgs.String(args, "name")));
         add(Services.IdeCommands.SetPanelSize, async (args, _) =>
         {
             double? w = args is not null && args.TryGetValue("width", out var pw) && pw.TryGetDouble(out var wv) ? wv : null;
             double? h = args is not null && args.TryGetValue("height", out var ph) && ph.TryGetDouble(out var hv) ? hv : null;
-            return await ((IIdeMcpActions)_vm).SetPanelSizeAsync(S(args, "panel") ?? "", w, h);
+            return await ((IIdeMcpActions)_vm).SetPanelSizeAsync(JsonArgs.String(args, "panel") ?? "", w, h);
         });
         add(Services.IdeCommands.GetSupportedEditorLanguages, async (_, _) => await Task.FromResult(((IIdeMcpActions)_vm).GetSupportedEditorLanguages()));
     }
