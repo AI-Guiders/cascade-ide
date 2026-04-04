@@ -49,14 +49,16 @@
 
 ### Этап 5 (опционально) — Отладка (DAP)
 
-- [ ] Использовать **OmniSharp.Extensions.DebugAdapter.Client** и запуск отладчика (например, vsdbg/OmniSharp) для F5/присоединения.
-- [ ] Интеграция с существующим dotnet-debug-mcp по желанию (общий сценарий с Cursor).
+- [x] Встроенная отладка через **netcoredbg** (протокол DAP по stdio): общий клиент в `DotnetDebug.Core` (`DapClient`), сессия в IDE — `Services/IdeDapDebugSession` (паритет с `dotnet-debug-mcp`).
+- [x] Команды MCP/IDE: `debug_launch`, `debug_attach`, `debug_continue`, шаги, стек/переменные — см. `IdeCommands` и `IdeMcpCommandExecutor.Handlers.DapDebug.cs`.
+- [x] UI: меню **Отладка**, горячие клавиши F5 / Shift+F5 / F10 / F11 / Shift+F11; диалоги выбора цели (.dll/.exe) и PID для attach (`MainWindow.Dialogs.axaml.cs`).
+- Примечание: отдельный NuGet **OmniSharp.Extensions.DebugAdapter.Client** не используется — достаточно общего DAP-клиента и netcoredbg, как в MCP.
 
 ## Зависимости и ссылки
 
 - **OmniSharp-Roslyn:** https://github.com/OmniSharp/omnisharp-roslyn (C# language server, LSP по stdio).
-- **OmniSharp csharp-language-server-protocol:** https://github.com/OmniSharp/csharp-language-server-protocol (LSP/DAP на C#, NuGet: `OmniSharp.Extensions.LanguageClient`, `OmniSharp.Extensions.LanguageServer` и др.).
-- C# Dev Kit для VS Code опирается на ту же LSP-архитектуру; мы используем те же открытые компоненты, без самого VS Code.
+- **OmniSharp csharp-language-server-protocol:** https://github.com/OmniSharp/csharp-language-server-protocol (LSP на C#; для этапов 2–4).
+- **netcoredbg** (внешний процесс): путь через `NETCOREDBG_PATH` или `PATH`; см. также `Financial/software/open/dotnet-debug-mcp`.
 
 ## Документ
 

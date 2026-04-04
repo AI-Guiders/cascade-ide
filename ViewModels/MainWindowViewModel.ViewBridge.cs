@@ -43,4 +43,16 @@ public partial class MainWindowViewModel
     public Func<string?, string>? SetFocusProvider { get; set; }
     public Func<string?, string>? HighlightControlProvider { get; set; }
     public Func<string, double?, double?, string>? SetPanelSizeProvider { get; set; }
+
+    /// <summary>Выбор .dll/.exe для запуска под отладчиком. Возвращает полный путь или null.</summary>
+    public Func<Task<string?>>? RequestPickDebugTarget { get; set; }
+
+    /// <summary>Ввод PID для attach. Возвращает PID или null.</summary>
+    public Func<Task<int?>>? RequestAttachProcessId { get; set; }
+
+    /// <summary>Простой информационный диалог (заголовок, текст).</summary>
+    public Func<string, string, Task>? RequestShowInfoAsync { get; set; }
+
+    /// <summary>MCP <c>capture_main_window</c>: снимок главного окна (PNG JSON). Подставляет <see cref="Views.MainWindow"/>.</summary>
+    public Func<string?, string?, Task<string>>? CaptureMainWindowForMcpAsync { get; set; }
 }

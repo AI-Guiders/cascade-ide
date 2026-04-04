@@ -62,15 +62,30 @@
                 ZIndex="1"
                 Classes.power="{Binding IsPowerMode}">
         <Grid RowDefinitions="Auto,*,4,Auto">
-            <views:PanelChromeHeader Grid.Row="0"
-                                     Classes.powerSolutionExplorer="{Binding IsPowerMode}"
-                                     Title="Решение · дерево проекта"
-                                     UppercaseTitle="True"
-                                     Margin="0,4,0,0"/>
+            <StackPanel Grid.Row="0" Margin="0,4,0,0">
+                <views:PanelChromeHeader Classes.powerSolutionExplorer="{Binding IsPowerMode}"
+                                         Title="Решение · дерево проекта"
+                                         UppercaseTitle="True"/>
+                <TextBlock Text="{Binding StartupProjectBanner}"
+                           FontSize="11"
+                           TextWrapping="Wrap"
+                           Margin="2,2,0,0"
+                           Opacity="0.8"
+                           Foreground="{DynamicResource CascadeTheme.SolutionExplorerHeaderForeground}"
+                           IsVisible="{Binding HasStartupProject}"/>
+            </StackPanel>
             <TreeView Grid.Row="1"
                       ItemsSource="{Binding Workspace.SolutionRoots}"
                       SelectedItem="{Binding Workspace.SelectedSolutionItem}"
                       Margin="0,4,0,0">
+                <TreeView.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Сделать стартовым для отладки (F5)"
+                                  Command="{Binding SetStartupProjectFromSelectionCommand}"/>
+                        <MenuItem Header="Сбросить стартовый проект"
+                                  Command="{Binding ClearStartupProjectCommand}"/>
+                    </ContextMenu>
+                </TreeView.ContextMenu>
                 <TreeView.Styles>
                     <Style Selector="TreeViewItem">
                         <Setter Property="IsExpanded" Value="True"/>

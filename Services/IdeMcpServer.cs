@@ -96,10 +96,30 @@ public static class IdeMcpServer
 
     private static async Task<string> CallExecuteCommand(IIdeMcpActions actions, IReadOnlyDictionary<string, JsonElement>? args, CancellationToken cancellationToken)
     {
-        var commandId = args is not null && args.TryGetValue("command_id", out var cid) ? cid.GetString() : null;
+        var merged = MergeExecuteCommandArgs(args);
+        var commandId = merged is not null && merged.TryGetValue("command_id", out var cid) ? cid.GetString() : null;
         if (string.IsNullOrEmpty(commandId))
             return "Missing command_id";
-        return await actions.ExecuteCommandAsync(commandId, args, cancellationToken);
+        return await actions.ExecuteCommandAsync(commandId, merged, cancellationToken);
+    }
+
+    /// <summary>
+    /// Клиенты MCP часто шлют <c>{ "command_id": "…", "args": { "workspace_path": "…" } }</c> — сливаем вложенный объект с верхним уровнем (верхний уровень при конфликте важнее).
+    /// </summary>
+    private static IReadOnlyDictionary<string, JsonElement>? MergeExecuteCommandArgs(IReadOnlyDictionary<string, JsonElement>? args)
+    {
+        if (args is null || !args.TryGetValue("args", out var nested) || nested.ValueKind != JsonValueKind.Object)
+            return args;
+        var merged = new Dictionary<string, JsonElement>(StringComparer.Ordinal);
+        foreach (var prop in nested.EnumerateObject())
+            merged[prop.Name] = prop.Value;
+        foreach (var kv in args)
+        {
+            if (string.Equals(kv.Key, "args", StringComparison.Ordinal))
+                continue;
+            merged[kv.Key] = kv.Value;
+        }
+        return merged;
     }
 
 }

@@ -7,7 +7,26 @@ public static class BreakpointsFileService
 {
     public const string FileName = BreakpointsStorage.FileName;
 
+    /// <summary>Относительный путь от корня workspace к собранной DLL тестовой цели (после <c>dotnet build</c>).</summary>
+    public static readonly string DefaultDebugTargetRelativeDll = Path.Combine("samples", "DebugTarget", "bin", "Debug", "net10.0", "DebugTarget.dll");
+
     public static string GetFilePath(string workspacePath) => BreakpointsStorage.GetStorageFilePath(workspacePath);
+
+    /// <summary>Корень workspace (каталог с .sln/.slnx или переданный каталог).</summary>
+    public static string GetWorkspaceRoot(string workspacePath)
+    {
+        var dir = Path.GetFullPath(workspacePath.Trim());
+        if (File.Exists(dir))
+            dir = Path.GetDirectoryName(dir) ?? dir;
+        return dir;
+    }
+
+    /// <summary>
+    /// Полный путь к тестовой сборке <c>samples/DebugTarget</c>: используется как ключ в JSON для MCP/set_breakpoint
+    /// и как стартовая папка в диалоге выбора цели. Запуск отладки всегда с выбранным пользователем <c>target_path</c> — эта DLL не стартует сама.
+    /// </summary>
+    public static string GetDefaultDebugTargetPath(string workspacePath) =>
+        Path.GetFullPath(Path.Combine(GetWorkspaceRoot(workspacePath), DefaultDebugTargetRelativeDll));
 
     private static string? NormalizeEntryPath(string workspacePath, string? entryFile)
     {
@@ -39,15 +58,49 @@ public static class BreakpointsFileService
         return lines.OrderBy(static l => l).ToList();
     }
 
-    /// <summary>Выбрать target для добавления/удаления: первый, чей путь содержит workspace, иначе первый в списке.</summary>
+    /// <summary>Выбрать target для добавления/удаления: сначала тестовая <see cref="GetDefaultDebugTargetPath"/>, иначе первый под workspace, иначе первый в списке.</summary>
     public static string? GetPreferredTargetKey(string workspacePath)
     {
-        var ws = Path.GetFullPath(workspacePath.Trim());
-        if (File.Exists(ws))
-            ws = Path.GetDirectoryName(ws) ?? ws;
+        var ws = GetWorkspaceRoot(workspacePath);
         var model = BreakpointsStorage.Load(workspacePath);
+        var preferred = Path.GetFullPath(GetDefaultDebugTargetPath(workspacePath));
+        if (model.Targets.ContainsKey(preferred))
+            return preferred;
         var key = model.Targets.Keys.FirstOrDefault(k => k.StartsWith(ws, StringComparison.OrdinalIgnoreCase));
         return key ?? model.Targets.Keys.FirstOrDefault();
+    }
+
+    /// <summary>Записать брейкпоинт в JSON для цели по умолчанию (<see cref="GetDefaultDebugTargetPath"/>), в том числе из MCP <c>set_breakpoint</c>.</summary>
+    public static void SetBreakpointForDefaultTarget(string workspacePath, string filePath, int line, string? condition = null)
+    {
+        if (line < 1 || string.IsNullOrEmpty(filePath))
+            return;
+        var path = Path.GetFullPath(filePath);
+        var target = Path.GetFullPath(GetDefaultDebugTargetPath(workspacePath));
+        var list = BreakpointsStorage.GetBreakpoints(workspacePath, target).ToList();
+        list.RemoveAll(e =>
+        {
+            var ep = NormalizeEntryPath(workspacePath, e.File);
+            return ep != null && string.Equals(ep, path, StringComparison.OrdinalIgnoreCase) && e.Line == line;
+        });
+        list.Add(new BreakpointsStorage.BreakpointEntry(path, line, condition));
+        BreakpointsStorage.SetBreakpoints(workspacePath, target, list);
+    }
+
+    /// <summary>Удалить брейкпоинт из JSON для цели по умолчанию.</summary>
+    public static void RemoveBreakpointForDefaultTarget(string workspacePath, string filePath, int line)
+    {
+        if (line < 1 || string.IsNullOrEmpty(filePath))
+            return;
+        var path = Path.GetFullPath(filePath);
+        var target = Path.GetFullPath(GetDefaultDebugTargetPath(workspacePath));
+        var list = BreakpointsStorage.GetBreakpoints(workspacePath, target).ToList();
+        list.RemoveAll(e =>
+        {
+            var ep = NormalizeEntryPath(workspacePath, e.File);
+            return ep != null && string.Equals(ep, path, StringComparison.OrdinalIgnoreCase) && e.Line == line;
+        });
+        BreakpointsStorage.SetBreakpoints(workspacePath, target, list);
     }
 
     /// <summary>Переключить брейкпоинт в файле: если есть — удалить, иначе добавить в предпочитаемый target.</summary>
@@ -59,7 +112,7 @@ public static class BreakpointsFileService
         var targetKey = GetPreferredTargetKey(workspacePath);
         if (string.IsNullOrEmpty(targetKey))
         {
-            targetKey = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(GetFilePath(workspacePath)) ?? "", "bin", "Debug", "net10.0", "win-x64", "CascadeIDE.exe"));
+            targetKey = Path.GetFullPath(GetDefaultDebugTargetPath(workspacePath));
             if (!model.Targets.ContainsKey(targetKey))
                 model.Targets[targetKey] = [];
         }

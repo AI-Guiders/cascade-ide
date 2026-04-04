@@ -24,6 +24,7 @@
     <Compile Remove="**/obj/**" />
     <Compile Remove="**/bin/**" />
     <Compile Remove="CascadeIDE.Tests\**\*.cs" />
+    <Compile Remove="samples\**\*.cs" />
     <Compile Remove="tools\**\*.cs" />
     <Folder Include="Models\" />
     <AvaloniaResource Include="Assets\**" />

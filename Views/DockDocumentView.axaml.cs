@@ -138,7 +138,8 @@ public partial class DockDocumentView : UserControl
             {
                 for (var i = br.Count - 1; i >= 0; i--)
                 {
-                    if (br[i] is BreakpointLineRenderer or DebugCurrentLineRenderer or EditorDiagnosticBackgroundRenderer)
+                    if (br[i] is BreakpointLineRenderer or DebugCurrentLineRenderer or DebugInstructionArrowRenderer
+                        or EditorDiagnosticBackgroundRenderer)
                         br.RemoveAt(i);
                 }
             }
@@ -180,6 +181,8 @@ public partial class DockDocumentView : UserControl
         textView.BackgroundRenderers.Add(new BreakpointLineRenderer(() =>
             _vm.GetAllBreakpointLinesForFile(_docVm.Doc.FilePath)));
         textView.BackgroundRenderers.Add(new DebugCurrentLineRenderer(() =>
+            _vm.GetDebugCurrentLineForFile(_docVm.Doc.FilePath)));
+        textView.BackgroundRenderers.Add(new DebugInstructionArrowRenderer(() =>
             _vm.GetDebugCurrentLineForFile(_docVm.Doc.FilePath)));
 
         _diagRenderer = new EditorDiagnosticBackgroundRenderer(() => _vm.WorkspaceDiagnostics.GetStripsForFile(_docVm.Doc.FilePath));

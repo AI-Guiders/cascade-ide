@@ -74,6 +74,7 @@
 | `apply_edit` | Применить текстовую правку в открытом документе. args: file_path:string, start_line:integer, start_column:integer, end_line:integer, end_column:integer, new_text:string; returns: text; example: {"file_path":"C:\\tmp\\a.cs","start_line":1,"start_column":1,"end_line":1,"end_column":1,"new_text":"// hi\n"}. |
 | `build` | Сборка решения (структурированный результат). returns: json. |
 | `build_structured` | Сборка решения (структурированный результат). То же, что `build`; выделено для совместимости/алиасов. returns: json. |
+| `capture_main_window` | Снимок главного окна IDE (PNG), в ответе base64 PNG; чтобы сохранить файл под workspace, передай оба аргумента. returns: json. args: workspace_path?:string, output_path?:string; example: {"workspace_path":"D:\\\\tmp\\\\ws","output_path":".cascade-ide/ide-window.png"}. |
 | `focus_editor` | Передать фокус в редактор (чтобы клавиши/ввод шли в него). returns: text. |
 | `get_build_output` | Текст панели «Вывод сборки» + цвета оформления. returns: json. |
 | `get_code_metrics` | Метрики кода (LOC/классы/методы/цикломатика). args: scope?:string, path?:string; returns: json; example: {"scope":"solution","path":"."}. |
@@ -252,6 +253,21 @@
 | `upsert_knowledge_section` | Вставить/обновить секцию в knowledge-файле по section_id. args: file_path:string, section_id:string, content:string, canon_path?:string, save_revision?:boolean; returns: text; example: {"file_path":"index.md","section_id":"foo","content":"body"}. |
 | `write_agent_notes` | Записать заметки агента в каталог решения. args: content:string; returns: text; example: {"content":"notes"}. |
 | `write_knowledge_file` | Записать knowledge-файл в канон (полная замена). args: file_path:string, content:string, canon_path?:string, save_revision?:boolean; returns: text; example: {"file_path":"META/x.md","content":"# Hi","save_revision":true}. |
+
+### DAP / netcoredbg (паритет с dotnet-debug-mcp)
+
+| command_id | Описание |
+|-----------:|----------|
+| `debug_attach` | Подключиться к процессу по PID. args: workspace_path:string, process_id:integer, target_path?:string, netcoredbg_path?:string; returns: text; example: {"workspace_path":"D:\\\\proj","process_id":12345}. |
+| `debug_continue` | Продолжить выполнение (DAP continue). returns: text. |
+| `debug_launch` | Запустить отладку (netcoredbg DAP): workspace_path, target_path (.dll/.exe) — цель задаёшь явно; опционально netcoredbg_path, program_args. Пример target — тестовая samples/DebugTarget, чтобы не дебажить саму IDE. returns: text; example: {"workspace_path":"D:\\\\proj","target_path":"samples\\\\DebugTarget\\\\bin\\\\Debug\\\\net10.0\\\\DebugTarget.dll"}. |
+| `debug_ping` | Проверка доступности встроенной отладки. returns: text. |
+| `debug_stack_trace` | Стек вызовов (DAP stackTrace). returns: text. |
+| `debug_step_into` | Шаг с заходом (DAP stepIn). returns: text. |
+| `debug_step_out` | Шаг с выходом (DAP stepOut). returns: text. |
+| `debug_step_over` | Шаг через строку (DAP next). returns: text. |
+| `debug_stop` | Завершить сессию отладки (dispose DAP). returns: text. |
+| `debug_variables` | Переменные кадра. args: frame_index?:integer; returns: text; example: {"frame_index":0}. |
 <!-- GENERATED:IdeCommands END -->
 
 Проверка: `ide_get_workspace_state` — помимо `terminal.is_visible`, `ui_mode`, есть `panels` (видимость колонок), `safety_level`, `editor_group_count`, `agent_trace_step_count`, `is_autonomous_running`.

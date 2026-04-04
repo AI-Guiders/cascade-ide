@@ -12,6 +12,15 @@ internal sealed partial class IdeMcpCommandExecutor
             ((IIdeMcpActions)_vm).FocusEditor();
             return await Task.FromResult("OK");
         });
+
+        add(Services.IdeCommands.CaptureMainWindow, async (args, _) =>
+        {
+            if (_vm.CaptureMainWindowForMcpAsync is null)
+                return "Error: главное окно не привязано к VM (внутренний снимок недоступен).";
+            var ws = McpCommandJsonArgs.String(args, "workspace_path");
+            var rel = McpCommandJsonArgs.String(args, "output_path");
+            return await _vm.CaptureMainWindowForMcpAsync(ws, rel).ConfigureAwait(false);
+        });
     }
 
     private void RegisterUiVisibilityAndModes(Action<string, Handler> add)

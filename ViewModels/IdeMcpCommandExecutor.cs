@@ -51,6 +51,7 @@ internal sealed partial class IdeMcpCommandExecutor
         RegisterGenerated(Add); // generated .g.cs adds pass-through handlers
         RegisterEditorAndSolution(Add);
         RegisterDebuggerBreakpoints(Add);
+        RegisterDapDebug(Add);
         RegisterPreviewAndConfirmation(Add);
         RegisterEditorStateAndContent(Add);
         RegisterEditAndNavigation(Add);

@@ -108,6 +108,7 @@ public partial class MainWindowViewModel
                 Workspace.SolutionPath = normalizedSolutionPath ?? path;
                 Workspace.SolutionRoots.Clear();
                 Workspace.SolutionRoots.Add(root);
+                RefreshStartupProjectAfterSolutionLoad();
             });
         }
         catch (Exception ex)

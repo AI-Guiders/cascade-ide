@@ -118,6 +118,11 @@
         <KeyBinding Gesture="Alt+3" Command="{Binding SetPowerModeCommand}"/>
         <KeyBinding Gesture="Alt+4" Command="{Binding SetAgentChatModeCommand}"/>
         <KeyBinding Gesture="Ctrl+Alt+M" Command="{Binding CycleUiModeCommand}"/>
+        <KeyBinding Gesture="F5" Command="{Binding DebugStartOrContinueCommand}"/>
+        <KeyBinding Gesture="Shift+F5" Command="{Binding DebugStopCommand}"/>
+        <KeyBinding Gesture="F10" Command="{Binding DebugStepOverCommand}"/>
+        <KeyBinding Gesture="F11" Command="{Binding DebugStepIntoCommand}"/>
+        <KeyBinding Gesture="Shift+F11" Command="{Binding DebugStepOutCommand}"/>
     </Window.KeyBindings>
 
     <Design.DataContext>
@@ -131,6 +136,18 @@
                 <MenuItem Header="_Открыть решение..." Command="{Binding OpenSolutionCommand}"/>
                 <Separator/>
                 <MenuItem Header="В_ыход" Command="{Binding ExitCommand}"/>
+            </MenuItem>
+            <MenuItem Header="_Отладка">
+                <MenuItem Header="_Начать или продолжить" Command="{Binding DebugStartOrContinueCommand}" HotKey="F5"/>
+                <MenuItem Header="Стартовый проект из _выделения в дереве" Command="{Binding SetStartupProjectFromSelectionCommand}"/>
+                <MenuItem Header="_Сбросить стартовый проект" Command="{Binding ClearStartupProjectCommand}"/>
+                <Separator/>
+                <MenuItem Header="_Присоединиться к процессу…" Command="{Binding DebugAttachCommand}"/>
+                <MenuItem Header="_Остановить отладку" Command="{Binding DebugStopCommand}" HotKey="Shift+F5"/>
+                <Separator/>
+                <MenuItem Header="Шаг с _обходом" Command="{Binding DebugStepOverCommand}" HotKey="F10"/>
+                <MenuItem Header="Шаг с _заходом" Command="{Binding DebugStepIntoCommand}" HotKey="F11"/>
+                <MenuItem Header="Шаг с _выходом" Command="{Binding DebugStepOutCommand}" HotKey="Shift+F11"/>
             </MenuItem>
             <MenuItem Header="_Вид">
                 <MenuItem Header="Обозреватель _решения" ToggleType="CheckBox" IsChecked="{Binding IsSolutionExplorerVisible, Mode=TwoWay}"/>

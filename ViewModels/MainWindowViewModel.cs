@@ -37,6 +37,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private readonly Services.WorkspaceDiagnosticsCoordinator _workspaceDiagnostics;
     private CSharpLspDiagnosticsHost? _csharpLspHost;
     private readonly IdeMcpCommandExecutor _ideMcpExecutor;
+    private readonly Services.IdeDapDebugSession _dapDebug;
 
     private Services.McpClientService _mcpClientService;
     private AutonomousAgentService _autonomousAgentService;
@@ -98,12 +99,24 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _mcpClientService = new Services.McpClientService(_settings.ExternalMcpServersJson);
         _autonomousAgentService = CreateAutonomousAgentService(_mcpClientService);
         Autonomous = new AutonomousAgentSessionViewModel(_autonomousAgentService, this);
+        _dapDebug = new Services.IdeDapDebugSession((file, line, stack, vars) =>
+        {
+            UiScheduler.Default.Post(() =>
+            {
+                ((Services.IIdeMcpActions)this).ShowDebugPosition(file, line);
+                ((Services.IIdeMcpActions)this).ShowDebugState(stack, vars);
+            });
+        });
+        _dapDebug.StateChanged += (_, _) => NotifyDebugRelayCommandsChanged();
         _ideMcpExecutor = new IdeMcpCommandExecutor(this);
         _mcpBuildTest = new Services.McpDotnetBuildTestService(_dotnetRunner);
         _mcpAgentNotes = new Services.McpAgentNotesService();
 
         Workspace.PropertyChanged += (_, e) => OnWorkspacePropertyChanged(e.PropertyName);
     }
+
+    /// <summary>DAP-сессия (netcoredbg): launch/attach и обновление панели отладки.</summary>
+    public Services.IdeDapDebugSession DapDebug => _dapDebug;
 
     /// <summary>Solution/workspace state and background loading.</summary>
     public SolutionWorkspaceViewModel Workspace { get; }
@@ -140,6 +153,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
                 break;
             case nameof(SolutionWorkspaceViewModel.SelectedSolutionItem):
                 HandleSelectedSolutionItemChanged(Workspace.SelectedSolutionItem);
+                SetStartupProjectFromSelectionCommand.NotifyCanExecuteChanged();
                 break;
         }
     }
@@ -265,6 +279,9 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
 
     private void HandleSolutionPathChanged(string value)
     {
+        if (string.IsNullOrWhiteSpace(value))
+            ClearStartupProjectInMemoryOnly();
+
         AttachBreakpointsFileWatcher(value);
         _ = RefreshGitSummaryAsync();
         _ = GitPanel.RefreshRepositoryFlagAsync();

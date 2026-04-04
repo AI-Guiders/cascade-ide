@@ -36,7 +36,32 @@ public sealed class IdeMcpServerDispatchTests
 
         Assert.Equal("OK", result);
         Assert.Equal(IdeCommands.ToggleTerminal, fake.LastCommandId);
-        Assert.Same(args, fake.LastArgs);
+        Assert.NotNull(fake.LastArgs);
+        Assert.True(fake.LastArgs!.TryGetValue("visible", out var visEl) && visEl.GetBoolean());
+        Assert.False(fake.LastArgs.ContainsKey("args"));
+    }
+
+    [Fact]
+    public async Task DispatcherTool_MergesNestedArgsObjectForExecuteCommand()
+    {
+        var fake = new FakeActions();
+        var args = new Dictionary<string, JsonElement>
+        {
+            ["command_id"] = JsonSerializer.SerializeToElement(IdeCommands.DebugLaunch),
+            ["args"] = JsonSerializer.SerializeToElement(new
+            {
+                workspace_path = @"D:\proj",
+                target_path = @"C:\Program Files\dotnet\dotnet.exe"
+            })
+        };
+
+        var result = await CallToolByConventionAsync(fake, "ide_execute_command", args);
+
+        Assert.Equal("OK", result);
+        Assert.Equal(IdeCommands.DebugLaunch, fake.LastCommandId);
+        Assert.NotNull(fake.LastArgs);
+        Assert.Equal(@"D:\proj", fake.LastArgs!["workspace_path"].GetString());
+        Assert.Equal(@"C:\Program Files\dotnet\dotnet.exe", fake.LastArgs["target_path"].GetString());
     }
 
     [Fact]

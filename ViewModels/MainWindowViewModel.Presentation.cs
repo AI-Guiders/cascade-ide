@@ -118,14 +118,29 @@ public partial class MainWindowViewModel
             ? (LastTestSummary.Length > 36 ? string.Concat(LastTestSummary.AsSpan(0, 33), "…") : LastTestSummary)
             : $"imp {ImpactedTestsBadge}";
 
+    /// <summary>Есть активная DAP-сессия (режим отладки, как в VS).</summary>
+    public bool HasDebugSession => _dapDebug.HasActiveSession;
+
+    /// <summary>Выполнение остановлено — доступны шаги и просмотр стека.</summary>
+    public bool IsDebugExecutionPaused => _dapDebug.HasActiveSession && _dapDebug.IsExecutionStopped;
+
+    /// <summary>Процесс запущен под отладчиком, выполнение идёт.</summary>
+    public bool IsDebugExecutionRunning => _dapDebug.HasActiveSession && !_dapDebug.IsExecutionStopped;
+
     public string TelemetryDebugText =>
-        InstrumentationPanel.IsDebugPanelVisible
-            ? $"Debug: paused (frames {InstrumentationPanel.DebugStackFrames.Count}, vars {InstrumentationPanel.DebugVariables.Count})"
-            : "Debug: idle";
+        !_dapDebug.HasActiveSession
+            ? "Debug: idle"
+            : _dapDebug.IsExecutionStopped
+                ? $"Debug: paused · frames {InstrumentationPanel.DebugStackFrames.Count}, vars {InstrumentationPanel.DebugVariables.Count}"
+                : "Debug: running…";
 
     /// <summary>Короткий статус отладки для Power.</summary>
     public string TelemetryDebugCockpitShort =>
-        InstrumentationPanel.IsDebugPanelVisible ? $"DBG · {InstrumentationPanel.DebugStackFrames.Count}fr" : "DBG · —";
+        !_dapDebug.HasActiveSession
+            ? "DBG · —"
+            : _dapDebug.IsExecutionStopped
+                ? $"DBG · pause · {InstrumentationPanel.DebugStackFrames.Count}fr"
+                : "DBG · run";
 
     public string ChatPanelToggleButtonText => IsChatPanelExpanded ? "◀" : "▶";
     public bool IsSolutionPanelHidden => !IsSolutionExplorerVisible;

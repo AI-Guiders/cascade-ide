@@ -20,7 +20,11 @@ public partial class MainWindowViewModel
         if (_breakpoints.Any(b => string.Equals(Path.GetFullPath(b.FilePath), path, StringComparison.OrdinalIgnoreCase) && b.Line == line))
             return;
         _breakpoints.Add((path, line));
+        var ws = GetWorkspacePath();
+        if (!string.IsNullOrEmpty(ws))
+            BreakpointsFileService.SetBreakpointForDefaultTarget(ws, path, line, condition);
         OnPropertyChanged(nameof(BreakpointLinesInCurrentFile));
+        OnPropertyChanged(nameof(McpFileBreakpointLinesInCurrentFile));
         OnPropertyChanged(nameof(AllBreakpointLinesInCurrentFile));
     }
 
@@ -29,12 +33,13 @@ public partial class MainWindowViewModel
         if (string.IsNullOrEmpty(filePath) || line < 1)
             return;
         var path = Path.GetFullPath(filePath);
-        var removed = _breakpoints.RemoveAll(b => string.Equals(Path.GetFullPath(b.FilePath), path, StringComparison.OrdinalIgnoreCase) && b.Line == line) > 0;
-        if (removed)
-        {
-            OnPropertyChanged(nameof(BreakpointLinesInCurrentFile));
-            OnPropertyChanged(nameof(AllBreakpointLinesInCurrentFile));
-        }
+        _ = _breakpoints.RemoveAll(b => string.Equals(Path.GetFullPath(b.FilePath), path, StringComparison.OrdinalIgnoreCase) && b.Line == line) > 0;
+        var ws = GetWorkspacePath();
+        if (!string.IsNullOrEmpty(ws))
+            BreakpointsFileService.RemoveBreakpointForDefaultTarget(ws, path, line);
+        OnPropertyChanged(nameof(BreakpointLinesInCurrentFile));
+        OnPropertyChanged(nameof(McpFileBreakpointLinesInCurrentFile));
+        OnPropertyChanged(nameof(AllBreakpointLinesInCurrentFile));
     }
 
     /// <summary>Переключить брейкпоинт в .dotnet-debug-mcp-breakpoints.json для текущего файла и строки (клик по полю в редакторе).</summary>

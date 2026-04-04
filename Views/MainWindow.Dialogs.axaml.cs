@@ -4,6 +4,7 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
+using CascadeIDE.Services;
 using CommunityToolkit.Mvvm.Input;
 
 namespace CascadeIDE.Views;
@@ -21,6 +22,113 @@ public partial class MainWindow
         if (files.Count == 0)
             return null;
         return files[0].TryGetLocalPath() ?? files[0].Path.LocalPath;
+    }
+
+    private async Task<string?> ShowPickDebugTargetAsync()
+    {
+        var options = new FilePickerOpenOptions
+        {
+            Title = "Отладка: выбери .dll или .exe (цель не подставляется автоматически)",
+            AllowMultiple = false,
+            FileTypeFilter =
+            [
+                new FilePickerFileType("Сборка .NET") { Patterns = ["*.dll", "*.exe"] }
+            ]
+        };
+        if (DataContext is ViewModels.MainWindowViewModel vm && !string.IsNullOrEmpty(vm.Workspace.SolutionPath))
+        {
+            var defaultDll = BreakpointsFileService.GetDefaultDebugTargetPath(vm.Workspace.SolutionPath);
+            var binDir = Path.GetDirectoryName(defaultDll);
+            if (!string.IsNullOrEmpty(binDir) && Directory.Exists(binDir))
+            {
+                var folder = await StorageProvider.TryGetFolderFromPathAsync(binDir).ConfigureAwait(true);
+                if (folder != null)
+                    options.SuggestedStartLocation = folder;
+            }
+        }
+
+        var files = await StorageProvider.OpenFilePickerAsync(options);
+        if (files.Count == 0)
+            return null;
+        return files[0].TryGetLocalPath() ?? files[0].Path.LocalPath;
+    }
+
+    private async Task<int?> ShowAttachProcessIdAsync()
+    {
+        var dialog = new Window
+        {
+            Title = "Присоединиться к процессу",
+            Width = 420,
+            Height = 160,
+            CanResize = false,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner
+        };
+
+        var box = new TextBox { Watermark = "PID (целое число)", Margin = new Thickness(0, 0, 0, 8) };
+        int? result = null;
+
+        var ok = new Button { Content = "OK", MinWidth = 90 };
+        var cancel = new Button { Content = "Отмена", MinWidth = 90 };
+        ok.Click += (_, _) =>
+        {
+            if (int.TryParse(box.Text?.Trim(), out var pid) && pid > 0)
+                result = pid;
+            dialog.Close();
+        };
+        cancel.Click += (_, _) => dialog.Close();
+
+        dialog.Content = new StackPanel
+        {
+            Margin = new Thickness(16),
+            Spacing = 12,
+            Children =
+            {
+                new TextBlock { Text = "Введите PID процесса .NET:", TextWrapping = TextWrapping.Wrap },
+                box,
+                new StackPanel
+                {
+                    Orientation = Orientation.Horizontal,
+                    HorizontalAlignment = HorizontalAlignment.Right,
+                    Spacing = 10,
+                    Children = { ok, cancel }
+                }
+            }
+        };
+
+        await dialog.ShowDialog(this);
+        return result;
+    }
+
+    private async Task ShowInfoDialogAsync(string title, string message)
+    {
+        var dialog = new Window
+        {
+            Title = string.IsNullOrWhiteSpace(title) ? "Сообщение" : title,
+            Width = 480,
+            MinHeight = 140,
+            CanResize = true,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner
+        };
+
+        var ok = new Button { Content = "OK", MinWidth = 90, HorizontalAlignment = HorizontalAlignment.Right };
+        ok.Click += (_, _) => dialog.Close();
+
+        dialog.Content = new StackPanel
+        {
+            Margin = new Thickness(16),
+            Spacing = 14,
+            Children =
+            {
+                new TextBlock
+                {
+                    Text = string.IsNullOrWhiteSpace(message) ? "" : message,
+                    TextWrapping = TextWrapping.Wrap
+                },
+                ok
+            }
+        };
+
+        await dialog.ShowDialog(this);
     }
 
     private async Task ShowOpenSolutionDialogAsync()

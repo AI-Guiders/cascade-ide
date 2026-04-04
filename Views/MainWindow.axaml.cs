@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using AvaloniaEdit;
 using AvaloniaEdit.TextMate;
@@ -26,6 +27,8 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        // KeyBindings на Window не доходят до команд, когда фокус в TextEditor — ловим F5/F10/F11 в tunnel.
+        AddHandler(InputElement.KeyDownEvent, OnDebugShortcutKeyDown, RoutingStrategies.Tunnel);
         DataContextChanged += OnDataContextChanged;
     }
 
@@ -48,6 +51,10 @@ public partial class MainWindow : Window
             vm.RequestShowMarkdownPreviewWindow = ShowMarkdownPreviewWindow;
             vm.RequestShowMarkdownPreviewForEditor = ShowMarkdownPreviewForEditor;
             vm.RequestConfirmation = ShowConfirmationDialogAsync;
+            vm.RequestPickDebugTarget = ShowPickDebugTargetAsync;
+            vm.RequestAttachProcessId = ShowAttachProcessIdAsync;
+            vm.RequestShowInfoAsync = ShowInfoDialogAsync;
+            vm.CaptureMainWindowForMcpAsync = (ws, rel) => CaptureMainWindowForMcpCoreAsync(ws, rel);
             vm.GetUiLayoutProvider = () => Services.UiLayoutSnapshot.BuildJson(this);
             vm.GetColorsUnderCursorProvider = () => Services.UiColorsUnderCursor.GetJson(this);
             vm.GetControlAppearanceProvider = (name) => Services.UiControlAppearance.GetJson(this, name);
@@ -78,6 +85,7 @@ public partial class MainWindow : Window
             {
                 _boundMainVm.GotoActiveEditorLineColumnRequested -= OnGotoEditorLineColumn;
                 _boundMainVm.PropertyChanged -= OnViewModelPropertyChanged;
+                _boundMainVm.CaptureMainWindowForMcpAsync = null;
                 _boundMainVm = null;
             }
         }
