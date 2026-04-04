@@ -47,39 +47,15 @@ internal sealed partial class IdeMcpCommandExecutor
 
     private static string ParseAndShowDebugBreakpoints(IIdeMcpActions actions, IReadOnlyDictionary<string, JsonElement>? args)
     {
-        if (args is null || !args.TryGetValue("breakpoints", out var arr) || arr.ValueKind != JsonValueKind.Array)
-            return "Missing breakpoints (array of { file_path, line })";
-        var list = new List<(string, int)>();
-        foreach (var item in arr.EnumerateArray())
-        {
-            if (!item.TryGetProperty("file_path", out var fp) || !item.TryGetProperty("line", out var ln))
-                continue;
-            var path = fp.GetString();
-            if (string.IsNullOrEmpty(path))
-                continue;
-            list.Add((path, ln.GetInt32()));
-        }
+        if (!McpDebugPayloadParsing.TryParseBreakpoints(args, out var list, out var error))
+            return error;
         actions.ShowDebugBreakpoints(list);
         return "OK";
     }
 
     private static string ParseAndShowDebugState(IIdeMcpActions actions, IReadOnlyDictionary<string, JsonElement>? args)
     {
-        var stackFrames = new List<(string, string?, int)>();
-        var variables = new List<(string, string)>();
-        if (args is not null)
-        {
-            if (args.TryGetValue("stack_frames", out var sf) && sf.ValueKind == JsonValueKind.Array)
-                foreach (var item in sf.EnumerateArray())
-                    stackFrames.Add((
-                        item.TryGetProperty("name", out var n) ? n.GetString() ?? "" : "",
-                        item.TryGetProperty("file", out var f) ? f.GetString() : null,
-                        item.TryGetProperty("line", out var l) ? l.GetInt32() : 0));
-            if (args.TryGetValue("variables", out var v) && v.ValueKind == JsonValueKind.Array)
-                foreach (var item in v.EnumerateArray())
-                    if (item.TryGetProperty("name", out var vn) && item.TryGetProperty("value", out var vv))
-                        variables.Add((vn.GetString() ?? "", vv.GetString() ?? ""));
-        }
+        McpDebugPayloadParsing.ParseDebugState(args, out var stackFrames, out var variables);
         actions.ShowDebugState(stackFrames, variables);
         return "OK";
     }
