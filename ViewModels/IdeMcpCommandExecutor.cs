@@ -1,5 +1,4 @@
 using System.Text.Json;
-using Avalonia.Threading;
 using CascadeIDE.Services;
 using ModelContextProtocol.Protocol;
 
@@ -83,7 +82,7 @@ internal sealed partial class IdeMcpCommandExecutor
         return "OK";
     }
 
-    /// <summary>Вход с MCP/агента маршалится на UI в <see cref="MainWindowViewModel"/> до вызова этого метода; хендлеры могут дополнительно использовать <see cref="UiScheduler"/> для команд.</summary>
+    /// <summary>Вход с MCP/агента маршалится на UI в <see cref="MainWindowViewModel"/> до вызова хендлеров; UI-операции выполнять напрямую без вложенного маршалинга.</summary>
     public async Task<string> ExecuteAsync(string commandId, IReadOnlyDictionary<string, JsonElement>? args, CancellationToken cancellationToken)
     {
         if (_handlers.TryGetValue(commandId, out var handler))
@@ -170,14 +169,14 @@ internal sealed partial class IdeMcpCommandExecutor
         {
             var a = (IIdeMcpActions)_vm;
             if (args is null || string.IsNullOrEmpty(S(args, "file_path")) || !args.TryGetValue("line", out _)) return "Missing file_path or line";
-            await UiScheduler.Default.InvokeAsync(() => a.SetBreakpoint(S(args, "file_path")!, I(args, "line", 1), S(args, "condition")));
+            a.SetBreakpoint(S(args, "file_path")!, I(args, "line", 1), S(args, "condition"));
             return "OK";
         });
         add(Services.IdeCommands.RemoveBreakpoint, async (args, ct) =>
         {
             var a = (IIdeMcpActions)_vm;
             if (args is null || string.IsNullOrEmpty(S(args, "file_path")) || !args.TryGetValue("line", out _)) return "Missing file_path or line";
-            await UiScheduler.Default.InvokeAsync(() => a.RemoveBreakpoint(S(args, "file_path")!, I(args, "line", 1)));
+            a.RemoveBreakpoint(S(args, "file_path")!, I(args, "line", 1));
             return "OK";
         });
     }
@@ -273,29 +272,20 @@ internal sealed partial class IdeMcpCommandExecutor
     {
         add(Services.IdeCommands.ToggleTerminal, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.ToggleTerminalCommand.CanExecute(null))
-                    _vm.ToggleTerminalCommand.Execute(null);
-            });
+            if (_vm.ToggleTerminalCommand.CanExecute(null))
+                _vm.ToggleTerminalCommand.Execute(null);
             return "OK";
         });
         add(Services.IdeCommands.ToggleBuildOutput, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.ToggleBuildOutputCommand.CanExecute(null))
-                    _vm.ToggleBuildOutputCommand.Execute(null);
-            });
+            if (_vm.ToggleBuildOutputCommand.CanExecute(null))
+                _vm.ToggleBuildOutputCommand.Execute(null);
             return "OK";
         });
         add(Services.IdeCommands.ToggleSolutionExplorer, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.ToggleSolutionExplorerCommand.CanExecute(null))
-                    _vm.ToggleSolutionExplorerCommand.Execute(null);
-            });
+            if (_vm.ToggleSolutionExplorerCommand.CanExecute(null))
+                _vm.ToggleSolutionExplorerCommand.Execute(null);
             return "OK";
         });
 
@@ -304,7 +294,7 @@ internal sealed partial class IdeMcpCommandExecutor
             if (args is null || !args.TryGetValue("visible", out var tv) || tv.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
                 return "Missing or invalid visible (boolean)";
             var on = tv.GetBoolean();
-            await UiScheduler.Default.InvokeAsync(() => _vm.IsTerminalVisible = on);
+            _vm.IsTerminalVisible = on;
             return "OK";
         });
         add(Services.IdeCommands.SetBuildOutputVisible, async (args, _) =>
@@ -312,7 +302,7 @@ internal sealed partial class IdeMcpCommandExecutor
             if (args is null || !args.TryGetValue("visible", out var bv) || bv.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
                 return "Missing or invalid visible (boolean)";
             var on = bv.GetBoolean();
-            await UiScheduler.Default.InvokeAsync(() => _vm.IsBuildOutputVisible = on);
+            _vm.IsBuildOutputVisible = on;
             return "OK";
         });
         add(Services.IdeCommands.SetUiMode, async (args, _) =>
@@ -326,7 +316,7 @@ internal sealed partial class IdeMcpCommandExecutor
                 && !string.Equals(m, "AgentChat", StringComparison.OrdinalIgnoreCase))
                 return $"Unknown mode: {m}";
             var norm = MainWindowViewModel.NormalizeUiMode(m);
-            await UiScheduler.Default.InvokeAsync(() => _vm.UiMode = norm);
+            _vm.UiMode = norm;
             return "OK";
         });
 
@@ -334,88 +324,70 @@ internal sealed partial class IdeMcpCommandExecutor
         {
             if (args is null || !args.TryGetValue("visible", out var sev) || sev.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
                 return "Missing or invalid visible (boolean)";
-            await UiScheduler.Default.InvokeAsync(() => _vm.IsSolutionExplorerVisible = sev.GetBoolean());
+            _vm.IsSolutionExplorerVisible = sev.GetBoolean();
             return "OK";
         });
         add(Services.IdeCommands.SetChatPanelExpanded, async (args, _) =>
         {
             if (args is null || !args.TryGetValue("visible", out var cev) || cev.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
                 return "Missing or invalid visible (boolean)";
-            await UiScheduler.Default.InvokeAsync(() => _vm.IsChatPanelExpanded = cev.GetBoolean());
+            _vm.IsChatPanelExpanded = cev.GetBoolean();
             return "OK";
         });
         add(Services.IdeCommands.SetGitPanelVisible, async (args, _) =>
         {
             if (args is null || !args.TryGetValue("visible", out var gev) || gev.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
                 return "Missing or invalid visible (boolean)";
-            await UiScheduler.Default.InvokeAsync(() => _vm.IsGitPanelVisible = gev.GetBoolean());
+            _vm.IsGitPanelVisible = gev.GetBoolean();
             return "OK";
         });
         add(Services.IdeCommands.SetInstrumentationDockVisible, async (args, _) =>
         {
             if (args is null || !args.TryGetValue("visible", out var idv) || idv.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
                 return "Missing or invalid visible (boolean)";
-            await UiScheduler.Default.InvokeAsync(() => _vm.IsInstrumentationDockVisible = idv.GetBoolean());
+            _vm.IsInstrumentationDockVisible = idv.GetBoolean();
             return "OK";
         });
         add(Services.IdeCommands.ToggleGitPanel, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() => _vm.IsGitPanelVisible = !_vm.IsGitPanelVisible);
+            _vm.IsGitPanelVisible = !_vm.IsGitPanelVisible;
             return "OK";
         });
         add(Services.IdeCommands.ToggleInstrumentationDock, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.ToggleInstrumentationDockCommand.CanExecute(null))
-                    _vm.ToggleInstrumentationDockCommand.Execute(null);
-            });
+            if (_vm.ToggleInstrumentationDockCommand.CanExecute(null))
+                _vm.ToggleInstrumentationDockCommand.Execute(null);
             return "OK";
         });
         add(Services.IdeCommands.ToggleChatPanel, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.ToggleChatPanelCommand.CanExecute(null))
-                    _vm.ToggleChatPanelCommand.Execute(null);
-            });
+            if (_vm.ToggleChatPanelCommand.CanExecute(null))
+                _vm.ToggleChatPanelCommand.Execute(null);
             return "OK";
         });
 
         add(Services.IdeCommands.SetFocusModeUi, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.SetFocusModeCommand.CanExecute(null))
-                    _vm.SetFocusModeCommand.Execute(null);
-            });
+            if (_vm.SetFocusModeCommand.CanExecute(null))
+                _vm.SetFocusModeCommand.Execute(null);
             return "OK";
         });
         add(Services.IdeCommands.SetBalancedModeUi, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.SetBalancedModeCommand.CanExecute(null))
-                    _vm.SetBalancedModeCommand.Execute(null);
-            });
+            if (_vm.SetBalancedModeCommand.CanExecute(null))
+                _vm.SetBalancedModeCommand.Execute(null);
             return "OK";
         });
         add(Services.IdeCommands.SetPowerModeUi, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.SetPowerModeCommand.CanExecute(null))
-                    _vm.SetPowerModeCommand.Execute(null);
-            });
+            if (_vm.SetPowerModeCommand.CanExecute(null))
+                _vm.SetPowerModeCommand.Execute(null);
             return "OK";
         });
         add(Services.IdeCommands.CycleUiMode, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.CycleUiModeCommand.CanExecute(null))
-                    _vm.CycleUiModeCommand.Execute(null);
-            });
+            if (_vm.CycleUiModeCommand.CanExecute(null))
+                _vm.CycleUiModeCommand.Execute(null);
             return "OK";
         });
     }
@@ -424,93 +396,63 @@ internal sealed partial class IdeMcpCommandExecutor
     {
         add(Services.IdeCommands.OpenSolutionDialog, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.OpenSolutionCommand.CanExecute(null))
-                    _vm.OpenSolutionCommand.Execute(null);
-            });
+            if (_vm.OpenSolutionCommand.CanExecute(null))
+                _vm.OpenSolutionCommand.Execute(null);
             return "OK";
         });
         add(Services.IdeCommands.ExitApplication, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.ExitCommand.CanExecute(null))
-                    _vm.ExitCommand.Execute(null);
-            });
+            if (_vm.ExitCommand.CanExecute(null))
+                _vm.ExitCommand.Execute(null);
             return "OK";
         });
         add(Services.IdeCommands.About, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.AboutCommand.CanExecute(null))
-                    _vm.AboutCommand.Execute(null);
-            });
+            if (_vm.AboutCommand.CanExecute(null))
+                _vm.AboutCommand.Execute(null);
             return "OK";
         });
         add(Services.IdeCommands.OpenSettings, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.OpenSettingsCommand.CanExecute(null))
-                    _vm.OpenSettingsCommand.Execute(null);
-            });
+            if (_vm.OpenSettingsCommand.CanExecute(null))
+                _vm.OpenSettingsCommand.Execute(null);
             return "OK";
         });
         add(Services.IdeCommands.OpenPreviewWindow, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.OpenPreviewWindowCommand.CanExecute(null))
-                    _vm.OpenPreviewWindowCommand.Execute(null);
-            });
+            if (_vm.OpenPreviewWindowCommand.CanExecute(null))
+                _vm.OpenPreviewWindowCommand.Execute(null);
             return "OK";
         });
 
         add(Services.IdeCommands.ApplyLightTheme, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(async () =>
-            {
-                if (_vm.ApplyLightThemeCommand.CanExecute(null))
-                    await _vm.ApplyLightThemeCommand.ExecuteAsync(null);
-            });
+            if (_vm.ApplyLightThemeCommand.CanExecute(null))
+                await _vm.ApplyLightThemeCommand.ExecuteAsync(null);
             return "OK";
         });
         add(Services.IdeCommands.ApplyDarkTheme, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(async () =>
-            {
-                if (_vm.ApplyDarkThemeCommand.CanExecute(null))
-                    await _vm.ApplyDarkThemeCommand.ExecuteAsync(null);
-            });
+            if (_vm.ApplyDarkThemeCommand.CanExecute(null))
+                await _vm.ApplyDarkThemeCommand.ExecuteAsync(null);
             return "OK";
         });
         add(Services.IdeCommands.ApplyCursorLikeTheme, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(async () =>
-            {
-                if (_vm.ApplyCursorLikeThemeCommand.CanExecute(null))
-                    await _vm.ApplyCursorLikeThemeCommand.ExecuteAsync(null);
-            });
+            if (_vm.ApplyCursorLikeThemeCommand.CanExecute(null))
+                await _vm.ApplyCursorLikeThemeCommand.ExecuteAsync(null);
             return "OK";
         });
         add(Services.IdeCommands.ApplyPowerClassicTheme, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(async () =>
-            {
-                if (_vm.ApplyPowerClassicThemeCommand.CanExecute(null))
-                    await _vm.ApplyPowerClassicThemeCommand.ExecuteAsync(null);
-            });
+            if (_vm.ApplyPowerClassicThemeCommand.CanExecute(null))
+                await _vm.ApplyPowerClassicThemeCommand.ExecuteAsync(null);
             return "OK";
         });
         add(Services.IdeCommands.OpenThemeFileDialog, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(async () =>
-            {
-                if (_vm.OpenThemeFileCommand.CanExecute(null))
-                    await _vm.OpenThemeFileCommand.ExecuteAsync(null);
-            });
+            if (_vm.OpenThemeFileCommand.CanExecute(null))
+                await _vm.OpenThemeFileCommand.ExecuteAsync(null);
             return "OK";
         });
         add(Services.IdeCommands.SetUiLanguage, async (args, _) =>
@@ -519,104 +461,71 @@ internal sealed partial class IdeMcpCommandExecutor
             if (string.IsNullOrWhiteSpace(cult))
                 return "Missing culture (e.g. ru-RU, en-US)";
             var c = cult.Trim();
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.SetUiLanguageCommand.CanExecute(c))
-                    _vm.SetUiLanguageCommand.Execute(c);
-            });
+            if (_vm.SetUiLanguageCommand.CanExecute(c))
+                _vm.SetUiLanguageCommand.Execute(c);
             return "OK";
         });
         add(Services.IdeCommands.ResetUiLanguageToSystem, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.ResetUiLanguageToSystemCommand.CanExecute(null))
-                    _vm.ResetUiLanguageToSystemCommand.Execute(null);
-            });
+            if (_vm.ResetUiLanguageToSystemCommand.CanExecute(null))
+                _vm.ResetUiLanguageToSystemCommand.Execute(null);
             return "OK";
         });
 
         add(Services.IdeCommands.ShowSolutionExplorerPanel, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.ShowSolutionExplorerPanelCommand.CanExecute(null))
-                    _vm.ShowSolutionExplorerPanelCommand.Execute(null);
-            });
+            if (_vm.ShowSolutionExplorerPanelCommand.CanExecute(null))
+                _vm.ShowSolutionExplorerPanelCommand.Execute(null);
             return "OK";
         });
         add(Services.IdeCommands.ShowBuildOutputPanel, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.ShowBuildOutputPanelCommand.CanExecute(null))
-                    _vm.ShowBuildOutputPanelCommand.Execute(null);
-            });
+            if (_vm.ShowBuildOutputPanelCommand.CanExecute(null))
+                _vm.ShowBuildOutputPanelCommand.Execute(null);
             return "OK";
         });
         add(Services.IdeCommands.ShowChatPanel, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.ShowChatPanelCommand.CanExecute(null))
-                    _vm.ShowChatPanelCommand.Execute(null);
-            });
+            if (_vm.ShowChatPanelCommand.CanExecute(null))
+                _vm.ShowChatPanelCommand.Execute(null);
             return "OK";
         });
         add(Services.IdeCommands.ShowTerminalPanel, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.ShowTerminalPanelCommand.CanExecute(null))
-                    _vm.ShowTerminalPanelCommand.Execute(null);
-            });
+            if (_vm.ShowTerminalPanelCommand.CanExecute(null))
+                _vm.ShowTerminalPanelCommand.Execute(null);
             return "OK";
         });
         add(Services.IdeCommands.HideBuildOutputPanel, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.HideBuildOutputCommand.CanExecute(null))
-                    _vm.HideBuildOutputCommand.Execute(null);
-            });
+            if (_vm.HideBuildOutputCommand.CanExecute(null))
+                _vm.HideBuildOutputCommand.Execute(null);
             return "OK";
         });
 
         add(Services.IdeCommands.SetSingleEditorGroup, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.SetSingleEditorGroupCommand.CanExecute(null))
-                    _vm.SetSingleEditorGroupCommand.Execute(null);
-            });
+            if (_vm.SetSingleEditorGroupCommand.CanExecute(null))
+                _vm.SetSingleEditorGroupCommand.Execute(null);
             return "OK";
         });
         add(Services.IdeCommands.SetDualEditorGroup, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.SetDualEditorGroupCommand.CanExecute(null))
-                    _vm.SetDualEditorGroupCommand.Execute(null);
-            });
+            if (_vm.SetDualEditorGroupCommand.CanExecute(null))
+                _vm.SetDualEditorGroupCommand.Execute(null);
             return "OK";
         });
         add(Services.IdeCommands.SetTripleEditorGroup, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.SetTripleEditorGroupCommand.CanExecute(null))
-                    _vm.SetTripleEditorGroupCommand.Execute(null);
-            });
+            if (_vm.SetTripleEditorGroupCommand.CanExecute(null))
+                _vm.SetTripleEditorGroupCommand.Execute(null);
             return "OK";
         });
 
         add(Services.IdeCommands.BuildSolutionUi, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(async () =>
-            {
-                if (_vm.BuildSolutionCommand.CanExecute(null))
-                    await _vm.BuildSolutionCommand.ExecuteAsync(null);
-            });
+            if (_vm.BuildSolutionCommand.CanExecute(null))
+                await _vm.BuildSolutionCommand.ExecuteAsync(null);
             return "OK";
         });
     }
@@ -625,65 +534,44 @@ internal sealed partial class IdeMcpCommandExecutor
     {
         add(Services.IdeCommands.FocusCheckpoint, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.FocusCheckpointCommand.CanExecute(null))
-                    _vm.FocusCheckpointCommand.Execute(null);
-            });
+            if (_vm.FocusCheckpointCommand.CanExecute(null))
+                _vm.FocusCheckpointCommand.Execute(null);
             return "OK";
         });
         add(Services.IdeCommands.FocusRollback, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.FocusRollbackCommand.CanExecute(null))
-                    _vm.FocusRollbackCommand.Execute(null);
-            });
+            if (_vm.FocusRollbackCommand.CanExecute(null))
+                _vm.FocusRollbackCommand.Execute(null);
             return "OK";
         });
         add(Services.IdeCommands.ConfirmFocusStep, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.ConfirmFocusStepCommand.CanExecute(null))
-                    _vm.ConfirmFocusStepCommand.Execute(null);
-            });
+            if (_vm.ConfirmFocusStepCommand.CanExecute(null))
+                _vm.ConfirmFocusStepCommand.Execute(null);
             return "OK";
         });
         add(Services.IdeCommands.CancelFocusStep, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.CancelFocusStepCommand.CanExecute(null))
-                    _vm.CancelFocusStepCommand.Execute(null);
-            });
+            if (_vm.CancelFocusStepCommand.CanExecute(null))
+                _vm.CancelFocusStepCommand.Execute(null);
             return "OK";
         });
         add(Services.IdeCommands.ExplainCurrentStep, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.ExplainCurrentStepCommand.CanExecute(null))
-                    _vm.ExplainCurrentStepCommand.Execute(null);
-            });
+            if (_vm.ExplainCurrentStepCommand.CanExecute(null))
+                _vm.ExplainCurrentStepCommand.Execute(null);
             return "OK";
         });
         add(Services.IdeCommands.EmergencyStop, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.EmergencyStopCommand.CanExecute(null))
-                    _vm.EmergencyStopCommand.Execute(null);
-            });
+            if (_vm.EmergencyStopCommand.CanExecute(null))
+                _vm.EmergencyStopCommand.Execute(null);
             return "OK";
         });
         add(Services.IdeCommands.RefreshWorkspaceSnapshot, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.RefreshWorkspaceSnapshotCommand.CanExecute(null))
-                    _vm.RefreshWorkspaceSnapshotCommand.Execute(null);
-            });
+            if (_vm.RefreshWorkspaceSnapshotCommand.CanExecute(null))
+                _vm.RefreshWorkspaceSnapshotCommand.Execute(null);
             return "OK";
         });
 
@@ -691,125 +579,87 @@ internal sealed partial class IdeMcpCommandExecutor
         {
             if (args is null || !args.TryGetValue("step_index", out var exIdx) || exIdx.ValueKind != JsonValueKind.Number || !exIdx.TryGetInt32(out var explainStepIndex) || explainStepIndex < 0)
                 return "Missing or invalid step_index (non-negative int; 0 = oldest in AgentTraceSteps)";
-            var explainErr = await UiScheduler.Default.InvokeAsync(() =>
-            {
-                var list = _vm.InstrumentationPanel.AgentTraceSteps;
-                if (explainStepIndex >= list.Count)
-                    return $"Invalid step_index (count={list.Count})";
-                _vm.ExplainTraceStepCommand.Execute(list[explainStepIndex]);
-                return (string?)null;
-            });
-            return explainErr ?? "OK";
+            var list = _vm.InstrumentationPanel.AgentTraceSteps;
+            if (explainStepIndex >= list.Count)
+                return $"Invalid step_index (count={list.Count})";
+            _vm.ExplainTraceStepCommand.Execute(list[explainStepIndex]);
+            return "OK";
         });
         add(Services.IdeCommands.RollbackTraceStep, async (args, _) =>
         {
             if (args is null || !args.TryGetValue("step_index", out var rbIdx) || rbIdx.ValueKind != JsonValueKind.Number || !rbIdx.TryGetInt32(out var rollbackStepIndex) || rollbackStepIndex < 0)
                 return "Missing or invalid step_index (non-negative int; 0 = oldest in AgentTraceSteps)";
-            var rollbackErr = await UiScheduler.Default.InvokeAsync(() =>
-            {
-                var list = _vm.InstrumentationPanel.AgentTraceSteps;
-                if (rollbackStepIndex >= list.Count)
-                    return $"Invalid step_index (count={list.Count})";
-                _vm.RollbackTraceStepCommand.Execute(list[rollbackStepIndex]);
-                return (string?)null;
-            });
-            return rollbackErr ?? "OK";
+            var listRb = _vm.InstrumentationPanel.AgentTraceSteps;
+            if (rollbackStepIndex >= listRb.Count)
+                return $"Invalid step_index (count={listRb.Count})";
+            _vm.RollbackTraceStepCommand.Execute(listRb[rollbackStepIndex]);
+            return "OK";
         });
 
         add(Services.IdeCommands.SetSafetyL1, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.SetSafetyL1Command.CanExecute(null))
-                    _vm.SetSafetyL1Command.Execute(null);
-            });
+            if (_vm.SetSafetyL1Command.CanExecute(null))
+                _vm.SetSafetyL1Command.Execute(null);
             return "OK";
         });
         add(Services.IdeCommands.SetSafetyL2, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.SetSafetyL2Command.CanExecute(null))
-                    _vm.SetSafetyL2Command.Execute(null);
-            });
+            if (_vm.SetSafetyL2Command.CanExecute(null))
+                _vm.SetSafetyL2Command.Execute(null);
             return "OK";
         });
         add(Services.IdeCommands.SetSafetyL3, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.SetSafetyL3Command.CanExecute(null))
-                    _vm.SetSafetyL3Command.Execute(null);
-            });
+            if (_vm.SetSafetyL3Command.CanExecute(null))
+                _vm.SetSafetyL3Command.Execute(null);
             return "OK";
         });
 
         add(Services.IdeCommands.StartAutonomous, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.Autonomous.StartAutonomousCommand.CanExecute(null))
-                    _vm.Autonomous.StartAutonomousCommand.Execute(null);
-            });
+            if (_vm.Autonomous.StartAutonomousCommand.CanExecute(null))
+                _vm.Autonomous.StartAutonomousCommand.Execute(null);
             return "OK";
         });
         add(Services.IdeCommands.PauseAutonomous, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.Autonomous.PauseAutonomousCommand.CanExecute(null))
-                    _vm.Autonomous.PauseAutonomousCommand.Execute(null);
-            });
+            if (_vm.Autonomous.PauseAutonomousCommand.CanExecute(null))
+                _vm.Autonomous.PauseAutonomousCommand.Execute(null);
             return "OK";
         });
         add(Services.IdeCommands.ResumeAutonomous, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.Autonomous.ResumeAutonomousCommand.CanExecute(null))
-                    _vm.Autonomous.ResumeAutonomousCommand.Execute(null);
-            });
+            if (_vm.Autonomous.ResumeAutonomousCommand.CanExecute(null))
+                _vm.Autonomous.ResumeAutonomousCommand.Execute(null);
             return "OK";
         });
 
         add(Services.IdeCommands.FixFailingTests, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.Autonomous.FixFailingTestsCommand.CanExecute(null))
-                    _vm.Autonomous.FixFailingTestsCommand.Execute(null);
-            });
+            if (_vm.Autonomous.FixFailingTestsCommand.CanExecute(null))
+                _vm.Autonomous.FixFailingTestsCommand.Execute(null);
             return "OK";
         });
         add(Services.IdeCommands.InvestigateNullref, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.Autonomous.InvestigateNullrefCommand.CanExecute(null))
-                    _vm.Autonomous.InvestigateNullrefCommand.Execute(null);
-            });
+            if (_vm.Autonomous.InvestigateNullrefCommand.CanExecute(null))
+                _vm.Autonomous.InvestigateNullrefCommand.Execute(null);
             return "OK";
         });
         add(Services.IdeCommands.PrepareCommit, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.Autonomous.PrepareCommitCommand.CanExecute(null))
-                    _vm.Autonomous.PrepareCommitCommand.Execute(null);
-            });
+            if (_vm.Autonomous.PrepareCommitCommand.CanExecute(null))
+                _vm.Autonomous.PrepareCommitCommand.Execute(null);
             return "OK";
         });
 
         add(Services.IdeCommands.SendChat, async (args, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(async () =>
-            {
-                var msg = S(args, "message");
-                if (!string.IsNullOrWhiteSpace(msg))
-                    _vm.ChatPanel.ChatInput = msg!;
-                if (_vm.ChatPanel.SendChatCommand.CanExecute(null))
-                    await _vm.ChatPanel.SendChatCommand.ExecuteAsync(null);
-            });
+            var msg = S(args, "message");
+            if (!string.IsNullOrWhiteSpace(msg))
+                _vm.ChatPanel.ChatInput = msg!;
+            if (_vm.ChatPanel.SendChatCommand.CanExecute(null))
+                await _vm.ChatPanel.SendChatCommand.ExecuteAsync(null);
             return "OK";
         });
 
@@ -819,12 +669,9 @@ internal sealed partial class IdeMcpCommandExecutor
             if (string.IsNullOrWhiteSpace(model))
                 return "Missing model";
             var m = model.Trim();
-            await UiScheduler.Default.InvokeAsync(async () =>
-            {
-                _vm.ModelToInstall = m;
-                if (_vm.InstallModelCommand.CanExecute(null))
-                    await _vm.InstallModelCommand.ExecuteAsync(null);
-            });
+            _vm.ModelToInstall = m;
+            if (_vm.InstallModelCommand.CanExecute(null))
+                await _vm.InstallModelCommand.ExecuteAsync(null);
             return "OK";
         });
     }
@@ -833,11 +680,8 @@ internal sealed partial class IdeMcpCommandExecutor
     {
         add(Services.IdeCommands.ReopenClosedDocument, async (_, _) =>
         {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.ReopenClosedDocumentCommand.CanExecute(null))
-                    _vm.ReopenClosedDocumentCommand.Execute(null);
-            });
+            if (_vm.ReopenClosedDocumentCommand.CanExecute(null))
+                _vm.ReopenClosedDocumentCommand.Execute(null);
             return "OK";
         });
         add(Services.IdeCommands.ActivateDocument, async (args, _) =>
@@ -845,11 +689,8 @@ internal sealed partial class IdeMcpCommandExecutor
             if (string.IsNullOrWhiteSpace(S(args, "file_path")))
                 return "Missing file_path";
             var pathAct = S(args, "file_path")!;
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.ActivateDocumentCommand.CanExecute(pathAct))
-                    _vm.ActivateDocumentCommand.Execute(pathAct);
-            });
+            if (_vm.ActivateDocumentCommand.CanExecute(pathAct))
+                _vm.ActivateDocumentCommand.Execute(pathAct);
             return "OK";
         });
         add(Services.IdeCommands.CloseDocument, async (args, _) =>
@@ -857,11 +698,8 @@ internal sealed partial class IdeMcpCommandExecutor
             if (string.IsNullOrWhiteSpace(S(args, "file_path")))
                 return "Missing file_path";
             var pathClose = S(args, "file_path")!;
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.CloseDocumentCommand.CanExecute(pathClose))
-                    _vm.CloseDocumentCommand.Execute(pathClose);
-            });
+            if (_vm.CloseDocumentCommand.CanExecute(pathClose))
+                _vm.CloseDocumentCommand.Execute(pathClose);
             return "OK";
         });
         add(Services.IdeCommands.TogglePinDocument, async (args, _) =>
@@ -869,11 +707,8 @@ internal sealed partial class IdeMcpCommandExecutor
             if (string.IsNullOrWhiteSpace(S(args, "file_path")))
                 return "Missing file_path";
             var pathPin = S(args, "file_path")!;
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.TogglePinDocumentCommand.CanExecute(pathPin))
-                    _vm.TogglePinDocumentCommand.Execute(pathPin);
-            });
+            if (_vm.TogglePinDocumentCommand.CanExecute(pathPin))
+                _vm.TogglePinDocumentCommand.Execute(pathPin);
             return "OK";
         });
         add(Services.IdeCommands.MoveDocumentToGroup1, async (args, _) =>
@@ -881,11 +716,8 @@ internal sealed partial class IdeMcpCommandExecutor
             if (string.IsNullOrWhiteSpace(S(args, "file_path")))
                 return "Missing file_path";
             var p1 = S(args, "file_path")!;
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.MoveDocumentToGroup1Command.CanExecute(p1))
-                    _vm.MoveDocumentToGroup1Command.Execute(p1);
-            });
+            if (_vm.MoveDocumentToGroup1Command.CanExecute(p1))
+                _vm.MoveDocumentToGroup1Command.Execute(p1);
             return "OK";
         });
         add(Services.IdeCommands.MoveDocumentToGroup2, async (args, _) =>
@@ -893,11 +725,8 @@ internal sealed partial class IdeMcpCommandExecutor
             if (string.IsNullOrWhiteSpace(S(args, "file_path")))
                 return "Missing file_path";
             var p2 = S(args, "file_path")!;
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.MoveDocumentToGroup2Command.CanExecute(p2))
-                    _vm.MoveDocumentToGroup2Command.Execute(p2);
-            });
+            if (_vm.MoveDocumentToGroup2Command.CanExecute(p2))
+                _vm.MoveDocumentToGroup2Command.Execute(p2);
             return "OK";
         });
         add(Services.IdeCommands.MoveDocumentToGroup3, async (args, _) =>
@@ -905,11 +734,8 @@ internal sealed partial class IdeMcpCommandExecutor
             if (string.IsNullOrWhiteSpace(S(args, "file_path")))
                 return "Missing file_path";
             var p3 = S(args, "file_path")!;
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_vm.MoveDocumentToGroup3Command.CanExecute(p3))
-                    _vm.MoveDocumentToGroup3Command.Execute(p3);
-            });
+            if (_vm.MoveDocumentToGroup3Command.CanExecute(p3))
+                _vm.MoveDocumentToGroup3Command.Execute(p3);
             return "OK";
         });
     }
