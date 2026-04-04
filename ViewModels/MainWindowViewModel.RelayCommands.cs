@@ -238,6 +238,12 @@ public partial class MainWindowViewModel
     }
 
     [RelayCommand]
+    private void SetDebugMode()
+    {
+        UiMode = "Debug";
+    }
+
+    [RelayCommand]
     private void CycleUiMode()
     {
         UiMode = NormalizeUiMode(UiMode) switch
@@ -245,6 +251,7 @@ public partial class MainWindowViewModel
             "Focus" => "Balanced",
             "Balanced" => "Power",
             "Power" => "AgentChat",
+            "AgentChat" => "Debug",
             _ => "Focus"
         };
     }

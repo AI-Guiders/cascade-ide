@@ -5,6 +5,7 @@ using Avalonia.Threading;
 using CascadeIDE.Features.AutonomousAgent;
 using CascadeIDE.Features.Build;
 using CascadeIDE.Features.Chat;
+using CascadeIDE.Features.Debug;
 using CascadeIDE.Features.Documents;
 using CascadeIDE.Features.Git;
 using CascadeIDE.Features.Instrumentation;
@@ -20,6 +21,12 @@ namespace CascadeIDE.ViewModels;
 /// </summary>
 public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpActions, IAutonomousAgentSessionHost
 {
+    /// <summary>Нижняя панель: вкладка «Гипотезы» (только в UI-режиме Debug).</summary>
+    public const int BottomPanelTabHypothesesIndex = 6;
+
+    /// <summary>Нижняя панель: вкладка «Отладка · стек».</summary>
+    public const int BottomPanelTabDebugStackIndex = 7;
+
     public const string InstallNewSentinel = "— Установить модель… —";
 
     private readonly Services.IOllamaService _ollama = new Services.OllamaService();
@@ -85,6 +92,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             () => EditorText);
         InstrumentationPanel = new InstrumentationPanelViewModel();
         InstrumentationPanel.PropertyChanged += OnInstrumentationPanelPropertyChanged;
+        HypothesesPanel = new HypothesesPanelViewModel(GetWorkspacePath);
 
         ProblemsPanel = new ProblemsPanelViewModel(NavigateToProblemFromList);
         _workspaceDiagnostics = new Services.WorkspaceDiagnosticsCoordinator(_csharpLanguageService, ProblemsPanel);
@@ -213,6 +221,9 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     /// <summary>Инструментирование: трасса агента, события, тесты, стек MCP-отладки. В разметке — <c>DataContext="{Binding InstrumentationPanel}"</c>.</summary>
     public InstrumentationPanelViewModel InstrumentationPanel { get; }
 
+    /// <summary>Гипотезы отладки (JSON в workspace). Вкладка нижней панели в режиме Debug.</summary>
+    public HypothesesPanelViewModel HypothesesPanel { get; }
+
     /// <summary>Общий экземпляр Roslyn для редактора, контекста чата и диагностик.</summary>
     public Services.CSharpLanguageService CSharpLanguage => _csharpLanguageService;
 
@@ -288,6 +299,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         if (IsGitPanelVisible)
             _ = GitPanel.RefreshGitPanelAsync();
         _ = RestartCSharpLanguageServerAsync();
+        HypothesesPanel.LoadFromWorkspace();
     }
 
     /// <summary>MCP и агент вызывают с фона; весь разбор команд и доступ к VM — на UI-потоке. Тяжёлые операции внутри хендлеров сами уходят с UI (<c>ConfigureAwait(false)</c>, <c>Task.Run</c>, <c>Post</c> обратно).</summary>

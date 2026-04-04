@@ -15,12 +15,15 @@ public partial class MainWindowViewModel
             ? "CascadeIDE — Power Mode [Autonomous Agent Cockpit]"
             : IsAgentChatMode
                 ? "CascadeIDE — Agent Chat"
-                : "CascadeIDE";
+                : IsDebugMode
+                    ? "CascadeIDE — Debug"
+                    : "CascadeIDE";
 
     public bool IsFocusMode => string.Equals(UiMode, "Focus", StringComparison.OrdinalIgnoreCase);
     public bool IsBalancedMode => string.Equals(UiMode, "Balanced", StringComparison.OrdinalIgnoreCase);
     public bool IsPowerMode => string.Equals(UiMode, "Power", StringComparison.OrdinalIgnoreCase);
     public bool IsAgentChatMode => string.Equals(UiMode, "AgentChat", StringComparison.OrdinalIgnoreCase);
+    public bool IsDebugMode => string.Equals(UiMode, "Debug", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>Ширина колонки чата (пиксели); значения — <see cref="UiModeLayoutRegistry"/> и <see cref="UiModeLayoutDimensions"/>.</summary>
     public int ChatPanelColumnPixelWidth =>
@@ -61,9 +64,12 @@ public partial class MainWindowViewModel
     public bool ShowEditorGroup2 => EditorGroupCount >= 2;
     public bool ShowEditorGroup3 => EditorGroupCount >= 3;
 
-    /// <summary>Нижние вкладки «События / Тесты / Отладка» при включённом доке — во всех режимах (в Focus детали здесь, компактная полоса — TelemetryStrip).</summary>
+    /// <summary>Нижние вкладки «События / Тесты / Гипотезы / Отладка» при включённом доке.</summary>
     public bool ShowInstrumentationTabs =>
-        IsInstrumentationDockVisible && (IsFocusMode || IsBalancedMode || IsPowerMode || IsAgentChatMode);
+        IsInstrumentationDockVisible && (IsFocusMode || IsBalancedMode || IsPowerMode || IsAgentChatMode || IsDebugMode);
+
+    /// <summary>Вкладка «Гипотезы» — только в UI-режиме Debug (ADR 0003).</summary>
+    public bool ShowHypothesesTab => ShowInstrumentationTabs && IsDebugMode;
 
     /// <summary>Пункт меню для док-панели инструментирования (можно отключить и в Focus).</summary>
     public bool ShowInstrumentationLayoutMenu => true;

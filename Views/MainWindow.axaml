@@ -103,6 +103,13 @@
             <Setter Property="CornerRadius" Value="6"/>
             <Setter Property="RenderTransform" Value="scale(1.02)"/>
         </Style>
+        <Style Selector="Border#ModeBadge.debug">
+            <Setter Property="Background" Value="#3A2E1E"/>
+            <Setter Property="BorderBrush" Value="#C88A2A"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="RenderTransform" Value="scale(1.02)"/>
+        </Style>
         <Style Selector="Border.modeCard">
             <Setter Property="Background" Value="{DynamicResource CascadeTheme.ChatMessageBubbleBackground}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"/>
@@ -117,6 +124,7 @@
         <KeyBinding Gesture="Alt+2" Command="{Binding SetBalancedModeCommand}"/>
         <KeyBinding Gesture="Alt+3" Command="{Binding SetPowerModeCommand}"/>
         <KeyBinding Gesture="Alt+4" Command="{Binding SetAgentChatModeCommand}"/>
+        <KeyBinding Gesture="Alt+5" Command="{Binding SetDebugModeCommand}"/>
         <KeyBinding Gesture="Ctrl+Alt+M" Command="{Binding CycleUiModeCommand}"/>
         <KeyBinding Gesture="F5" Command="{Binding DebugStartOrContinueCommand}"/>
         <KeyBinding Gesture="Shift+F5" Command="{Binding DebugStopCommand}"/>
@@ -165,6 +173,7 @@
                     <MenuItem Header="_Balanced" ToggleType="Radio" IsChecked="{Binding IsBalancedMode}" Command="{Binding SetBalancedModeCommand}"/>
                     <MenuItem Header="_Power" ToggleType="Radio" IsChecked="{Binding IsPowerMode}" Command="{Binding SetPowerModeCommand}"/>
                     <MenuItem Header="Agent _Chat" ToggleType="Radio" IsChecked="{Binding IsAgentChatMode}" Command="{Binding SetAgentChatModeCommand}"/>
+                    <MenuItem Header="_Debug" ToggleType="Radio" IsChecked="{Binding IsDebugMode}" Command="{Binding SetDebugModeCommand}"/>
                 </MenuItem>
                 <Separator/>
                 <MenuItem Header="_Тема">

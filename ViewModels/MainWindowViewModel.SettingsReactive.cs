@@ -61,7 +61,7 @@ public partial class MainWindowViewModel
             return;
         }
 
-        if (BottomPanelTabIndex is >= 4 and <= 6)
+        if (BottomPanelTabIndex is >= 4 and <= MainWindowViewModel.BottomPanelTabDebugStackIndex)
             CoerceBottomPanelTabToVisible();
     }
 

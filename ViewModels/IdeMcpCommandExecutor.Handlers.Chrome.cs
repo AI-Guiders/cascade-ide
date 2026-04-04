@@ -64,11 +64,12 @@ internal sealed partial class IdeMcpCommandExecutor
         {
             var m = McpCommandJsonArgs.String(args, "mode")?.Trim();
             if (string.IsNullOrEmpty(m))
-                return "Missing mode (Focus|Balanced|Power|AgentChat)";
+                return "Missing mode (Focus|Balanced|Power|AgentChat|Debug)";
             if (!string.Equals(m, "Focus", StringComparison.OrdinalIgnoreCase)
                 && !string.Equals(m, "Balanced", StringComparison.OrdinalIgnoreCase)
                 && !string.Equals(m, "Power", StringComparison.OrdinalIgnoreCase)
-                && !string.Equals(m, "AgentChat", StringComparison.OrdinalIgnoreCase))
+                && !string.Equals(m, "AgentChat", StringComparison.OrdinalIgnoreCase)
+                && !string.Equals(m, "Debug", StringComparison.OrdinalIgnoreCase))
                 return $"Unknown mode: {m}";
             var norm = MainWindowViewModel.NormalizeUiMode(m);
             _vm.UiMode = norm;

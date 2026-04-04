@@ -26,7 +26,7 @@ public static class UiModeLayoutRegistry
 {
     /// <summary>Стабильный порядок пунктов «Режим интерфейса» и комбо.</summary>
     public static readonly IReadOnlyList<string> OrderedModeIds =
-        ["Focus", "Balanced", "Power", "AgentChat"];
+        ["Focus", "Balanced", "Power", "AgentChat", "Debug"];
 
     private static readonly Dictionary<string, UiModeLayoutSpec> ByNormalizedMode =
         new(StringComparer.OrdinalIgnoreCase)
@@ -62,6 +62,14 @@ public static class UiModeLayoutRegistry
                 ChatPanelExpanded: true,
                 EditorGroupCount: 1,
                 ThemeSlot: UiModeThemeSlot.CursorLike,
+                SelectTerminalTabWhenTerminalShown: false),
+            ["Debug"] = new UiModeLayoutSpec(
+                SolutionExplorerVisible: true,
+                BuildOutputVisible: false,
+                TerminalVisible: false,
+                ChatPanelExpanded: false,
+                EditorGroupCount: 2,
+                ThemeSlot: UiModeThemeSlot.Dark,
                 SelectTerminalTabWhenTerminalShown: false),
         };
 

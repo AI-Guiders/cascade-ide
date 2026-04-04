@@ -20,6 +20,8 @@ public sealed partial class UiChromeViewModel : ObservableObject
             return "Power";
         if (string.Equals(mode, "AgentChat", StringComparison.OrdinalIgnoreCase))
             return "AgentChat";
+        if (string.Equals(mode, "Debug", StringComparison.OrdinalIgnoreCase))
+            return "Debug";
         return "Balanced";
     }
 
@@ -75,6 +77,8 @@ public sealed partial class UiChromeViewModel : ObservableObject
             return new SolidColorBrush(Color.FromArgb(150, 25, 120, 185));
         if (string.Equals(mode, "AgentChat", StringComparison.OrdinalIgnoreCase))
             return new SolidColorBrush(Color.FromArgb(140, 40, 180, 140));
+        if (string.Equals(mode, "Debug", StringComparison.OrdinalIgnoreCase))
+            return new SolidColorBrush(Color.FromArgb(150, 200, 120, 40));
         return new SolidColorBrush(Color.FromArgb(120, 255, 235, 200));
     }
 
@@ -85,6 +89,8 @@ public sealed partial class UiChromeViewModel : ObservableObject
         if (string.Equals(normalizedMode, "Focus", StringComparison.OrdinalIgnoreCase))
             return 0.13;
         if (string.Equals(normalizedMode, "AgentChat", StringComparison.OrdinalIgnoreCase))
+            return 0.12;
+        if (string.Equals(normalizedMode, "Debug", StringComparison.OrdinalIgnoreCase))
             return 0.12;
         return 0.11;
     }

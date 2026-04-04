@@ -59,6 +59,7 @@
             <Border x:Name="ModeBadge"
                     Classes.power="{Binding IsPowerMode}"
                     Classes.agentchat="{Binding IsAgentChatMode}"
+                    Classes.debug="{Binding IsDebugMode}"
                     Padding="8,2"
                     Margin="4,0,0,0"
                     VerticalAlignment="Center">

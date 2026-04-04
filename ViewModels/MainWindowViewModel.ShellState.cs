@@ -30,6 +30,7 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(IsBalancedMode))]
     [NotifyPropertyChangedFor(nameof(IsPowerMode))]
     [NotifyPropertyChangedFor(nameof(IsAgentChatMode))]
+    [NotifyPropertyChangedFor(nameof(IsDebugMode))]
     [NotifyPropertyChangedFor(nameof(ChatPanelColumnPixelWidth))]
     [NotifyPropertyChangedFor(nameof(ShowTaskBar))]
     [NotifyPropertyChangedFor(nameof(ShowTelemetryStrip))]
@@ -47,6 +48,7 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(IsResultCardVisible))]
     [NotifyPropertyChangedFor(nameof(ShowAgentOperationsBlock))]
     [NotifyPropertyChangedFor(nameof(ShowInstrumentationTabs))]
+    [NotifyPropertyChangedFor(nameof(ShowHypothesesTab))]
     [NotifyPropertyChangedFor(nameof(ShowInstrumentationLayoutMenu))]
     [NotifyPropertyChangedFor(nameof(IsBottomPanelVisible))]
     [NotifyPropertyChangedFor(nameof(WindowTitle))]
@@ -115,7 +117,7 @@ public partial class MainWindowViewModel
 
     public ObservableCollection<FocusPlanItemViewModel> FocusPlanItems { get; } = [];
 
-    /// <summary>0 = Terminal, 1 = Build, 2 = Git, 3 = Events, 4 = Tests, 5 = Debug.</summary>
+    /// <summary>0–3: терминал/сборка/problems/Git; 4–5 события/тесты; 6 гипотезы; 7 стек отладки.</summary>
     [ObservableProperty]
     private int _bottomPanelTabIndex;
 
@@ -128,9 +130,10 @@ public partial class MainWindowViewModel
     [ObservableProperty]
     private bool _isBuildOutputVisible;
 
-    /// <summary>Вкладки «События / Тесты / Отладка» в Balanced/Power (сохраняется в настройках).</summary>
+    /// <summary>Вкладки «События / Тесты / …» (сохраняется в настройках).</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowInstrumentationTabs))]
+    [NotifyPropertyChangedFor(nameof(ShowHypothesesTab))]
     [NotifyPropertyChangedFor(nameof(IsBottomPanelVisible))]
     private bool _isInstrumentationDockVisible = true;
 

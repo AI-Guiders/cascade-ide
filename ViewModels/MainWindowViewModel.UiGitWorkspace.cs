@@ -60,14 +60,16 @@ public partial class MainWindowViewModel
         SaveSettingsIfChanged();
     }
 
-    /// <summary>Вкладки 0–6: терминал, сборка, problems, Git, события, тесты, отладка.</summary>
+    /// <summary>Вкладки 0–7: терминал, сборка, problems, Git, события, тесты, гипотезы (только Debug), стек отладки.</summary>
     private bool IsBottomPanelTabVisible(int index) => index switch
     {
         0 => IsTerminalVisible,
         1 => IsBuildOutputVisible,
         2 => IsProblemsPanelVisible,
         3 => IsGitPanelVisible,
-        4 or 5 or 6 => ShowInstrumentationTabs,
+        4 or 5 => ShowInstrumentationTabs,
+        MainWindowViewModel.BottomPanelTabHypothesesIndex => ShowHypothesesTab,
+        MainWindowViewModel.BottomPanelTabDebugStackIndex => ShowInstrumentationTabs,
         _ => false,
     };
 
