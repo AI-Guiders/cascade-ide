@@ -1,4 +1,5 @@
 using System.Text.Json;
+using CascadeIDE.Services;
 
 namespace CascadeIDE.ViewModels;
 
@@ -16,13 +17,13 @@ public partial class MainWindowViewModel
         UiScheduler.Default.InvokeAsync(() =>
         {
             var solutionPath = Workspace.SolutionPath;
-            var entries = CollectFileEntries(Workspace.SolutionRoots).Select(e => new
+            var entries = McpSolutionTree.CollectFileEntries(Workspace.SolutionRoots).Select(e => new
             {
                 path = e.FullPath,
                 title = e.Title,
-                relative_path = GetRelativePath(solutionPath, e.FullPath)
+                relative_path = McpSolutionTree.GetRelativePath(solutionPath, e.FullPath)
             }).ToList();
-            var tree = Workspace.SolutionRoots.Select(r => BuildSolutionTreeNode(r, solutionPath)).ToList();
+            var tree = Workspace.SolutionRoots.Select(r => McpSolutionTree.BuildSolutionTreeNode(r, solutionPath)).ToList();
             return JsonSerializer.Serialize(new { file_entries = entries, solution_tree = tree });
         });
 
