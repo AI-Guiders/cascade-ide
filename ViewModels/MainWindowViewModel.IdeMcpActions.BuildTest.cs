@@ -1,7 +1,4 @@
-using System.IO;
 using System.Text.Json;
-using System.Xml.Linq;
-using DotNetBuildTestParsers;
 
 namespace CascadeIDE.ViewModels;
 
@@ -40,24 +37,14 @@ public partial class MainWindowViewModel
         }
         try
         {
-            var artifactsDir = Path.Combine(Path.GetDirectoryName(path) ?? "", ".cascade-ide", "build-artifacts");
-            Directory.CreateDirectory(artifactsDir);
-            var binlogPath = Path.Combine(artifactsDir, $"build-{DateTime.UtcNow:yyyyMMdd-HHmmss-fff}.binlog");
-            var workDir = Path.GetDirectoryName(path) ?? "";
-            var (success, exitCode, output) = await _dotnetRunner
-                .RunAsync(["build", path, $"-bl:{binlogPath}"], workDir)
-                .ConfigureAwait(false);
-
-            var outStr = output;
-            if (!success && exitCode != 0)
-                outStr += $"\r\nExit code: {exitCode}";
+            var (outStr, _, _, binlogPath) = await _mcpBuildTest.BuildWithBinlogAsync(path).ConfigureAwait(false);
             var pathCopy = path;
-            UiScheduler.Default.Post(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 BuildOutputPanel.Set($"Сборка: {pathCopy}\r\n{outStr}");
                 IsBuildOutputVisible = true;
                 _lastBuildBinlogPath = binlogPath;
-            });
+            }).ConfigureAwait(false);
             return outStr;
         }
         catch (Exception ex)
@@ -71,19 +58,7 @@ public partial class MainWindowViewModel
     async Task<string> Services.IIdeMcpActions.BuildStructuredAsync()
     {
         var raw = await ((Services.IIdeMcpActions)this).BuildAsync().ConfigureAwait(false);
-        var parsed = BuildOutputParser.Parse(raw);
-        const int maxRawChars = 4000;
-        var rawTruncated = raw.Length > maxRawChars ? raw[..maxRawChars] + "\n... (output truncated)" : raw;
-        var result = new
-        {
-            success = parsed.Success,
-            exit_code = parsed.ExitCode,
-            errors = parsed.Errors.Select(e => new { e.File, e.Line, e.Column, e.Code, e.Message }).ToList(),
-            warnings = parsed.Warnings.Select(w => new { w.File, w.Line, w.Column, w.Code, w.Message }).ToList(),
-            binlog_path = _lastBuildBinlogPath,
-            raw_output = rawTruncated
-        };
-        return JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = false });
+        return Services.McpDotnetBuildTestService.SerializeStructuredBuild(raw, _lastBuildBinlogPath);
     }
 
     async Task<string> Services.IIdeMcpActions.RunTestsAsync()
@@ -93,7 +68,7 @@ public partial class MainWindowViewModel
 
     async Task<string> Services.IIdeMcpActions.RunAffectedTestsAsync(IReadOnlyList<string>? changedPaths)
     {
-        var tokens = BuildAffectedTestTokens(changedPaths);
+        var tokens = Services.McpDotnetBuildTestService.BuildAffectedTestTokens(changedPaths);
         if (tokens.Count == 0)
             return await RunTestsInternalAsync(filterExpression: null, mode: "fallback_all").ConfigureAwait(false);
 
@@ -109,36 +84,9 @@ public partial class MainWindowViewModel
 
         try
         {
-            var resultsDir = Path.Combine(Path.GetDirectoryName(path) ?? "", ".cascade-ide", "test-artifacts");
-            Directory.CreateDirectory(resultsDir);
-            var trxFileName = $"tests-{DateTime.UtcNow:yyyyMMdd-HHmmss-fff}.trx";
-            var trxPath = Path.Combine(resultsDir, trxFileName);
-
-            var workDir = Path.GetDirectoryName(path) ?? "";
-            var args = new List<string>
-            {
-                "test",
-                path,
-                "--logger",
-                "console;verbosity=detailed",
-                "--logger",
-                $"trx;LogFileName={trxFileName}",
-                "--results-directory",
-                resultsDir
-            };
-            if (!string.IsNullOrWhiteSpace(filterExpression))
-            {
-                args.Add("--filter");
-                args.Add(filterExpression);
-            }
-
-            var (success, exitCode, output) = await _dotnetRunner.RunAsync(args, workDir).ConfigureAwait(false);
-            var outStr = output;
-            if (!success && exitCode != 0)
-                outStr += $"\nExit code: {exitCode}";
-            var parsed = File.Exists(trxPath)
-                ? ParseTrx(trxPath) ?? TestOutputParser.Parse(outStr)
-                : TestOutputParser.Parse(outStr);
+            var outcome = await _mcpBuildTest.RunTestsAsync(path, filterExpression, mode, tokens).ConfigureAwait(false);
+            var parsed = outcome.Parsed;
+            var outStr = outcome.ConsoleOutput;
 
             UiScheduler.Default.Post(() =>
             {
@@ -154,20 +102,7 @@ public partial class MainWindowViewModel
                 if (ShowInstrumentationTabs)
                     BottomPanelTabIndex = 5;
             });
-            var result = new
-            {
-                success = parsed.Success,
-                total = parsed.Total,
-                passed = parsed.Passed,
-                failed = parsed.Failed,
-                skipped = parsed.Skipped,
-                failed_tests = parsed.FailedTests.Select(t => new { t.Name, t.Message, duration_ms = t.DurationMs }).ToList(),
-                mode,
-                filter = filterExpression,
-                tokens,
-                trx_path = File.Exists(trxPath) ? trxPath : null
-            };
-            return JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = false });
+            return outcome.JsonPayload;
         }
         catch (Exception ex)
         {
@@ -181,89 +116,8 @@ public partial class MainWindowViewModel
                     combined = combined[^maxLogChars..];
                 InstrumentationPanel.TestResultsOutput = combined;
             });
-            return JsonSerializer.Serialize(new { success = false, error = ex.Message, mode, filter = filterExpression });
+            return Services.McpDotnetBuildTestService.SerializeTestRunFailure(ex.Message, mode, filterExpression);
         }
-    }
-
-    private static TestParseResult? ParseTrx(string trxPath)
-    {
-        try
-        {
-            var doc = XDocument.Load(trxPath);
-            var root = doc.Root;
-            if (root is null)
-                return null;
-
-            XNamespace ns = root.Name.Namespace;
-            var counters = doc.Descendants(ns + "Counters").FirstOrDefault();
-            int total = ParseInt(counters?.Attribute("total")?.Value);
-            int passed = ParseInt(counters?.Attribute("passed")?.Value);
-            int failed = ParseInt(counters?.Attribute("failed")?.Value);
-            int skipped = ParseInt(counters?.Attribute("notExecuted")?.Value);
-
-            var failedTests = new List<TestResultItem>();
-            foreach (var unitTestResult in doc.Descendants(ns + "UnitTestResult"))
-            {
-                var outcome = unitTestResult.Attribute("outcome")?.Value;
-                if (!string.Equals(outcome, "Failed", StringComparison.OrdinalIgnoreCase))
-                    continue;
-
-                var name = unitTestResult.Attribute("testName")?.Value ?? "";
-                var duration = ParseDurationMs(unitTestResult.Attribute("duration")?.Value);
-                var message = unitTestResult
-                    .Descendants(ns + "Message")
-                    .Select(m => m.Value)
-                    .FirstOrDefault() ?? "";
-                failedTests.Add(new TestResultItem(name, Passed: false, Message: message, DurationMs: duration));
-            }
-
-            return new TestParseResult(
-                Total: total,
-                Passed: passed,
-                Failed: failed,
-                Skipped: skipped,
-                FailedTests: failedTests);
-        }
-        catch
-        {
-            return null;
-        }
-
-        static int ParseInt(string? raw) => int.TryParse(raw, out var value) ? value : 0;
-        static int? ParseDurationMs(string? raw)
-        {
-            if (string.IsNullOrWhiteSpace(raw))
-                return null;
-            return TimeSpan.TryParse(raw, out var ts) ? (int)ts.TotalMilliseconds : null;
-        }
-    }
-
-    private static IReadOnlyList<string> BuildAffectedTestTokens(IReadOnlyList<string>? changedPaths)
-    {
-        if (changedPaths is null || changedPaths.Count == 0)
-            return Array.Empty<string>();
-
-        var tokens = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var rawPath in changedPaths)
-        {
-            if (string.IsNullOrWhiteSpace(rawPath))
-                continue;
-
-            var fileName = Path.GetFileNameWithoutExtension(rawPath);
-            if (string.IsNullOrWhiteSpace(fileName))
-                continue;
-
-            // Prefer explicit test-like names; this keeps filter broad enough but still targeted.
-            if (fileName.Contains("test", StringComparison.OrdinalIgnoreCase))
-            {
-                tokens.Add(fileName);
-                continue;
-            }
-
-            tokens.Add(fileName + "Test");
-            tokens.Add(fileName + "Tests");
-        }
-        return tokens.Take(24).ToList();
     }
 
     async Task<string> Services.IIdeMcpActions.RunCodeCleanupAsync(string? includePath)
@@ -274,32 +128,7 @@ public partial class MainWindowViewModel
 
         try
         {
-            var workDir = Path.GetDirectoryName(path) ?? "";
-            var args = new List<string>
-            {
-                "format",
-                path,
-                "--no-restore",
-                "--verbosity",
-                "minimal"
-            };
-
-            if (!string.IsNullOrWhiteSpace(includePath))
-            {
-                string includeArg;
-                try
-                {
-                    includeArg = Path.GetFullPath(includePath);
-                }
-                catch
-                {
-                    includeArg = includePath;
-                }
-                args.Add("--include");
-                args.Add(includeArg);
-            }
-
-            var (success, exitCode, outStr) = await _dotnetRunner.RunAsync(args, workDir).ConfigureAwait(false);
+            var (success, exitCode, outStr) = await _mcpBuildTest.RunCodeCleanupAsync(path, includePath).ConfigureAwait(false);
             const int maxRawChars = 4000;
             var rawTruncated = outStr.Length > maxRawChars ? outStr[..maxRawChars] + "\n... (output truncated)" : outStr;
 

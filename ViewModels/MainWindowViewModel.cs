@@ -14,6 +14,10 @@ using CascadeIDE.Models;
 using CascadeIDE.Services.Lsp;
 namespace CascadeIDE.ViewModels;
 
+/// <summary>
+/// Главный композитор окна (partial-класс, несколько <c>MainWindowViewModel*.cs</c>).
+/// Карта файлов и ответственности — <c>docs/architecture-migration.md</c>, раздел «Срез MainWindowViewModel».
+/// </summary>
 public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpActions, IAutonomousAgentSessionHost
 {
     public const string InstallNewSentinel = "— Установить модель… —";
@@ -95,6 +99,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _autonomousAgentService = CreateAutonomousAgentService(_mcpClientService);
         Autonomous = new AutonomousAgentSessionViewModel(_autonomousAgentService, this);
         _ideMcpExecutor = new IdeMcpCommandExecutor(this);
+        _mcpBuildTest = new Services.McpDotnetBuildTestService(_dotnetRunner);
 
         Workspace.PropertyChanged += (_, e) => OnWorkspacePropertyChanged(e.PropertyName);
     }
@@ -232,6 +237,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private readonly Services.AppDataService _appData = new();
     private readonly Services.IGitCommandRunner _gitRunner = new Services.GitCommandRunner();
     private readonly Services.IDotnetCommandRunner _dotnetRunner = new Services.DotnetCommandRunner();
+    private readonly Services.McpDotnetBuildTestService _mcpBuildTest;
 
     private CancellationTokenSource? _openFileDebounceCts;
     // Solution load version is owned by Workspace.
