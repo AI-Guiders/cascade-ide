@@ -30,25 +30,14 @@ public partial class MainWindowViewModel
             IsTerminalVisible = true;
         IsBuildOutputVisible = true;
 
-        // Power: вкладка «Терминал» — основная консоль кокпита; вывод сборки туда же, иначе пользователь
-        // остаётся на терминале и не видит лог (он шёл только в «Сборка · вывод»). В Focus/Balanced — вкладка журнала.
-        var mirrorBuildToTerminal = IsPowerMode;
-        if (mirrorBuildToTerminal)
-            BottomPanelTabIndex = 0;
-        else
-            BottomPanelTabIndex = 1;
+        // Один канонический лог — только «Сборка · вывод» (и MCP get_build_output). Терминал не дублируем:
+        // в Power переключаем нижнюю панель на эту вкладку, чтобы лог был на глазах без второй копии текста.
+        BottomPanelTabIndex = 1;
 
         var header = $"Сборка: {solutionPath}\r\n";
         BuildOutputPanel.Set(header);
-        if (mirrorBuildToTerminal)
-            TerminalPanel.AppendOutput($"\r\n=== dotnet build (IDE) ===\r\n{header}");
 
-        void AppendBuildChunk(string chunk)
-        {
-            BuildOutputPanel.Append(chunk);
-            if (mirrorBuildToTerminal)
-                TerminalPanel.AppendOutput(chunk);
-        }
+        void AppendBuildChunk(string chunk) => BuildOutputPanel.Append(chunk);
 
         try
         {
@@ -67,6 +56,7 @@ public partial class MainWindowViewModel
         }
         finally
         {
+            BuildOutputPanel.FlushPending();
             IsBuilding = false;
         }
     }
@@ -96,7 +86,7 @@ public partial class MainWindowViewModel
             var (root, normalizedSolutionPath, error, workspaceLoadVersion) =
                 await Workspace.LoadSolutionTreeAsync(path).ConfigureAwait(false);
 
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (workspaceLoadVersion != Workspace.CurrentLoadVersion)
                     return;
@@ -122,7 +112,7 @@ public partial class MainWindowViewModel
         }
         catch (Exception ex)
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
                 Workspace.SolutionLoadError = "Ошибка загрузки решения: " + ex.Message);
             TryLogLoadSolutionCrash(path, ex);
         }
@@ -181,10 +171,10 @@ public partial class MainWindowViewModel
             await foreach (var status in _ollama.PullModelAsync(model, CancellationToken.None))
             {
                 var s = status;
-                Dispatcher.UIThread.Post(() => PullModelProgress = s);
+                UiScheduler.Default.Post(() => PullModelProgress = s);
             }
             // IAsyncEnumerable после цикла может продолжиться не на UI — как у сборки без нужного контекста.
-            await Dispatcher.UIThread.InvokeAsync(async () =>
+            await UiScheduler.Default.InvokeAsync(async () =>
             {
                 PullModelProgress = "Готово.";
                 await RefreshOllamaAsync();
@@ -192,12 +182,12 @@ public partial class MainWindowViewModel
         }
         catch (Exception ex)
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
                 PullModelProgress = "Ошибка: " + ex.Message);
         }
         finally
         {
-            await Dispatcher.UIThread.InvokeAsync(() => IsPullingModel = false);
+            await UiScheduler.Default.InvokeAsync(() => IsPullingModel = false);
         }
     }
 
