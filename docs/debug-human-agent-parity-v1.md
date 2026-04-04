@@ -1,7 +1,7 @@
 # Отладка: единый слой для человека и агента (целевое видение)
 
 **Статус:** зафиксированная цель продукта; реализация по мере итераций.  
-**Связь:** [MCP-PROTOCOL.md](MCP-PROTOCOL.md), [architecture-policy.md](architecture-policy.md).
+**Связь:** [MCP-PROTOCOL.md](MCP-PROTOCOL.md), [architecture-policy.md](architecture-policy.md). Решение в формате ADR: [adr/0002-debug-human-agent-parity.md](adr/0002-debug-human-agent-parity.md).
 
 ## Зачем
 
