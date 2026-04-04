@@ -79,12 +79,12 @@ public partial class ChatPanelViewModel : ViewModelBase
                 CancellationToken.None))
             {
                 var t = token;
-                Dispatcher.UIThread.Post(() => assistantMsg.Content += t);
+                UiScheduler.Default.Post(() => assistantMsg.Content += t);
             }
         }
         finally
         {
-            await Dispatcher.UIThread.InvokeAsync(() => IsChatLoading = false);
+            await UiScheduler.Default.InvokeAsync(() => IsChatLoading = false);
         }
     }
 

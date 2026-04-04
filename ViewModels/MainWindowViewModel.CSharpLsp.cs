@@ -63,7 +63,7 @@ public partial class MainWindowViewModel
 
     private async Task RestartCSharpLanguageServerAsync()
     {
-        var snap = await Dispatcher.UIThread.InvokeAsync(() =>
+        var snap = await UiScheduler.Default.InvokeAsync(() =>
         {
             _workspaceDiagnostics.SetLspDiagnosticsHost(null);
             _csharpLspHost?.Dispose();
@@ -84,7 +84,7 @@ public partial class MainWindowViewModel
         var ok = await host.TryStartAsync(snap.Item2, snap.Item1, snap.Item3, snap.Item4, CancellationToken.None)
             .ConfigureAwait(false);
 
-        await Dispatcher.UIThread.InvokeAsync(() =>
+        await UiScheduler.Default.InvokeAsync(() =>
         {
             if (!ok)
             {

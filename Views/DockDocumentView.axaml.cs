@@ -34,7 +34,7 @@ public partial class DockDocumentView : UserControl
     {
         InitializeComponent();
         DataContextChanged += (_, _) => TrySetup();
-        Dispatcher.UIThread.Post(TrySetup);
+        UiScheduler.Default.Post(TrySetup);
     }
 
     private void TrySetup()

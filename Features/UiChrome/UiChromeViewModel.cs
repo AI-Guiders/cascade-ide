@@ -27,7 +27,7 @@ public sealed partial class UiChromeViewModel : ObservableObject
         Func<IReadOnlyList<string>, Task<(bool Success, int ExitCode, string Output)>> runGit)
     {
         var result = await runGit(["status", "--short", "--branch"]).ConfigureAwait(false);
-        Dispatcher.UIThread.Post(() =>
+        UiScheduler.Default.Post(() =>
         {
             if (!result.Success)
             {
@@ -95,13 +95,13 @@ public sealed partial class UiChromeViewModel : ObservableObject
         {
             await Task.Delay(18, ct).ConfigureAwait(false);
             var peak = BloomPeakOpacity(normalizedMode);
-            await Dispatcher.UIThread.InvokeAsync(() => UiModeBloomOpacity = peak);
+            await UiScheduler.Default.InvokeAsync(() => UiModeBloomOpacity = peak);
             await Task.Delay(300, ct).ConfigureAwait(false);
-            await Dispatcher.UIThread.InvokeAsync(() => UiModeBloomOpacity = 0);
+            await UiScheduler.Default.InvokeAsync(() => UiModeBloomOpacity = 0);
         }
         catch (OperationCanceledException)
         {
-            await Dispatcher.UIThread.InvokeAsync(() => UiModeBloomOpacity = 0);
+            await UiScheduler.Default.InvokeAsync(() => UiModeBloomOpacity = 0);
         }
     }
 

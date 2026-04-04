@@ -61,7 +61,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         RegisterAgentFeedHandlers();
         ApplyUiModeLayout(_uiMode, persist: false);
         if (IsPowerMode)
-            Dispatcher.UIThread.Post(RefreshWorkspaceSnapshotCore, DispatcherPriority.Background);
+            UiScheduler.Default.Post(RefreshWorkspaceSnapshotCore, DispatcherPriority.Background);
 
         Documents.InitializeDock();
 
@@ -148,7 +148,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         Documents.OpenOrActivateDocument(item.FilePath);
         var line = item.Line;
         var col = item.Column;
-        Dispatcher.UIThread.Post(() => GotoActiveEditorLineColumnRequested?.Invoke(line, col), DispatcherPriority.Loaded);
+        UiScheduler.Default.Post(() => GotoActiveEditorLineColumnRequested?.Invoke(line, col), DispatcherPriority.Loaded);
     }
 
     private AutonomousAgentService CreateAutonomousAgentService(Services.McpClientService mcpClientService) =>
@@ -162,7 +162,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             () => CurrentFilePath,
             () => EditorText,
             (kind, text, status, at) => InstrumentationPanel.AppendAgentTraceStep(kind, text, status, at),
-            msg => Dispatcher.UIThread.Post(() => InstrumentationPanel.EventTimeline.Insert(0, msg)));
+            msg => UiScheduler.Default.Post(() => InstrumentationPanel.EventTimeline.Insert(0, msg)));
 
     /// <summary>
     /// Полоса телеметрии читает счётчики отладки с главного VM; при смене MCP-стека обновляем строки.

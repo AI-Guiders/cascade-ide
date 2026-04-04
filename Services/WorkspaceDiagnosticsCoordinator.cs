@@ -248,7 +248,7 @@ public sealed class WorkspaceDiagnosticsCoordinator : IDisposable
                 lp.Character + 1));
         }
 
-        Dispatcher.UIThread.Post(() =>
+        UiScheduler.Default.Post(() =>
         {
             if (ct.IsCancellationRequested)
                 return;

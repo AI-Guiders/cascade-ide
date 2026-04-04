@@ -56,9 +56,9 @@ public partial class InstallModelDialogViewModel : ViewModelBase
             await foreach (var status in _ollama.PullModelAsync(model, CancellationToken.None))
             {
                 var s = status;
-                Dispatcher.UIThread.Post(() => ProgressText = s);
+                UiScheduler.Default.Post(() => ProgressText = s);
             }
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 ProgressText = "Готово.";
                 _closeRequested();
@@ -66,11 +66,11 @@ public partial class InstallModelDialogViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await Dispatcher.UIThread.InvokeAsync(() => ErrorText = ex.Message);
+            await UiScheduler.Default.InvokeAsync(() => ErrorText = ex.Message);
         }
         finally
         {
-            await Dispatcher.UIThread.InvokeAsync(() => IsPulling = false);
+            await UiScheduler.Default.InvokeAsync(() => IsPulling = false);
         }
     }
 

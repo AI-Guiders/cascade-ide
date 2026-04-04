@@ -99,7 +99,7 @@ public partial class GitPanelViewModel : ViewModelBase
         var ws = _getWorkspacePath();
         if (string.IsNullOrWhiteSpace(ws) || !Directory.Exists(ws))
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 GitBranchLine = "";
                 GitStatusRows.Clear();
@@ -116,7 +116,7 @@ public partial class GitPanelViewModel : ViewModelBase
         var inRepo = inside.Success && string.Equals(inside.Output.Trim(), "true", StringComparison.OrdinalIgnoreCase);
         if (!inRepo)
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 IsGitRepository = false;
                 GitBranchLine = "";
@@ -134,7 +134,7 @@ public partial class GitPanelViewModel : ViewModelBase
         var subPaths = await LoadSubmodulePathsAsync(ws).ConfigureAwait(false);
         var toplevel = await RunGitCommandAsync(["rev-parse", "--show-toplevel"]).ConfigureAwait(false);
 
-        await Dispatcher.UIThread.InvokeAsync(() =>
+        await UiScheduler.Default.InvokeAsync(() =>
         {
             IsGitRepository = true;
             GitPanelStatusText = status.Success ? "" : status.Output;
@@ -155,13 +155,13 @@ public partial class GitPanelViewModel : ViewModelBase
         var ws = _getWorkspacePath();
         if (string.IsNullOrWhiteSpace(ws) || !Directory.Exists(ws))
         {
-            await Dispatcher.UIThread.InvokeAsync(() => IsGitRepository = false);
+            await UiScheduler.Default.InvokeAsync(() => IsGitRepository = false);
             return;
         }
 
         var inside = await RunGitCommandAsync(["rev-parse", "--is-inside-work-tree"]).ConfigureAwait(false);
         var ok = inside.Success && string.Equals(inside.Output.Trim(), "true", StringComparison.OrdinalIgnoreCase);
-        await Dispatcher.UIThread.InvokeAsync(() => IsGitRepository = ok);
+        await UiScheduler.Default.InvokeAsync(() => IsGitRepository = ok);
     }
 
     private void FillGitStatusRows(string output, HashSet<string> submodulePaths)
@@ -289,7 +289,7 @@ public partial class GitPanelViewModel : ViewModelBase
     {
         if (SelectedGitStatusRow is not { HasPath: true } row || string.IsNullOrWhiteSpace(row.RelativePath))
         {
-            await Dispatcher.UIThread.InvokeAsync(() => GitDiffText = "");
+            await UiScheduler.Default.InvokeAsync(() => GitDiffText = "");
             return;
         }
 
@@ -312,7 +312,7 @@ public partial class GitPanelViewModel : ViewModelBase
         if (sb.Length == 0)
             sb.AppendLine("(нет diff для выбранного пути)");
 
-        await Dispatcher.UIThread.InvokeAsync(() => GitDiffText = sb.ToString());
+        await UiScheduler.Default.InvokeAsync(() => GitDiffText = sb.ToString());
     }
 
     [RelayCommand(CanExecute = nameof(CanCommitGitFromPanel))]
@@ -324,7 +324,7 @@ public partial class GitPanelViewModel : ViewModelBase
 
         GitPanelStatusText = "Коммит…";
         var json = await _ideActions.GitCommitAsync(msg, null).ConfigureAwait(false);
-        await Dispatcher.UIThread.InvokeAsync(() =>
+        await UiScheduler.Default.InvokeAsync(() =>
         {
             GitPanelStatusText = json;
             GitCommitMessage = "";
@@ -343,7 +343,7 @@ public partial class GitPanelViewModel : ViewModelBase
 
         GitPanelStatusText = "Push…";
         var json = await _ideActions.GitPushAsync(null, null).ConfigureAwait(false);
-        await Dispatcher.UIThread.InvokeAsync(() => GitPanelStatusText = json);
+        await UiScheduler.Default.InvokeAsync(() => GitPanelStatusText = json);
         await RefreshGitPanelAsync().ConfigureAwait(false);
         await _refreshGitSummaryAsync().ConfigureAwait(false);
     }
@@ -358,7 +358,7 @@ public partial class GitPanelViewModel : ViewModelBase
 
         GitPanelStatusText = "";
         var r = await RunGitCommandAsync(["add", "--", rel]).ConfigureAwait(false);
-        await Dispatcher.UIThread.InvokeAsync(() => GitPanelStatusText = r.Success ? "" : r.Output);
+        await UiScheduler.Default.InvokeAsync(() => GitPanelStatusText = r.Success ? "" : r.Output);
         await RefreshGitPanelAsync().ConfigureAwait(false);
         await _refreshGitSummaryAsync().ConfigureAwait(false);
     }
@@ -373,7 +373,7 @@ public partial class GitPanelViewModel : ViewModelBase
 
         GitPanelStatusText = "";
         var r = await RunGitCommandAsync(["restore", "--staged", "--", rel]).ConfigureAwait(false);
-        await Dispatcher.UIThread.InvokeAsync(() => GitPanelStatusText = r.Success ? "" : r.Output);
+        await UiScheduler.Default.InvokeAsync(() => GitPanelStatusText = r.Success ? "" : r.Output);
         await RefreshGitPanelAsync().ConfigureAwait(false);
         await _refreshGitSummaryAsync().ConfigureAwait(false);
     }
@@ -461,7 +461,7 @@ public partial class GitPanelViewModel : ViewModelBase
     {
         GitSubmoduleCommandOutput = "git submodule update --init --recursive …\n";
         var r = await RunGitCommandAsync(["submodule", "update", "--init", "--recursive"]).ConfigureAwait(false);
-        await Dispatcher.UIThread.InvokeAsync(() =>
+        await UiScheduler.Default.InvokeAsync(() =>
         {
             GitSubmoduleCommandOutput = TruncateOutput(r.Output, 8000);
             GitPanelStatusText = r.Success ? "" : "Submodule update завершился с ошибкой (см. вывод ниже).";
@@ -475,7 +475,7 @@ public partial class GitPanelViewModel : ViewModelBase
     {
         GitSubmoduleCommandOutput = "git submodule sync --recursive …\n";
         var r = await RunGitCommandAsync(["submodule", "sync", "--recursive"]).ConfigureAwait(false);
-        await Dispatcher.UIThread.InvokeAsync(() =>
+        await UiScheduler.Default.InvokeAsync(() =>
         {
             GitSubmoduleCommandOutput = TruncateOutput(r.Output, 8000);
             if (!r.Success)
@@ -496,7 +496,7 @@ public partial class GitPanelViewModel : ViewModelBase
 
         GitPanelStatusText = "Коммит (только staged)…";
         var result = await RunGitCommandAsync(["commit", "-m", msg]).ConfigureAwait(false);
-        await Dispatcher.UIThread.InvokeAsync(() =>
+        await UiScheduler.Default.InvokeAsync(() =>
         {
             GitPanelStatusText = result.Success ? "" : result.Output;
             if (result.Success)

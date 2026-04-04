@@ -27,10 +27,10 @@ public static class UiThemeSnapshot
         if (Application.Current is null)
             return SerializeStaticFallback();
 
-        if (Dispatcher.UIThread.CheckAccess())
+        if (UiScheduler.Default.CheckAccess())
             return CaptureAndSerialize(Application.Current);
 
-        return Dispatcher.UIThread.Invoke(() =>
+        return UiScheduler.Default.Invoke(() =>
         {
             if (Application.Current is null)
                 return SerializeStaticFallback();
@@ -331,10 +331,10 @@ public static class UiThemeSnapshot
         if (Application.Current is null)
             return (defBg, defFg);
 
-        if (Dispatcher.UIThread.CheckAccess())
+        if (UiScheduler.Default.CheckAccess())
             return ReadBuildOutput(Application.Current.Resources);
 
-        return Dispatcher.UIThread.Invoke(() =>
+        return UiScheduler.Default.Invoke(() =>
             Application.Current is { } app
                 ? ReadBuildOutput(app.Resources)
                 : (defBg, defFg));

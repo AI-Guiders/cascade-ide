@@ -36,7 +36,7 @@ public partial class MainWindowViewModel
         catch { diagnostics = JsonSerializer.SerializeToElement(Array.Empty<object>()); }
 
         // MCP вызывает с пула потоков; после ConfigureAwait(false) чтение VM/панелей только на UI.
-        return await Dispatcher.UIThread.InvokeAsync(() =>
+        return await UiScheduler.Default.InvokeAsync(() =>
         {
             var buildText = BuildOutputPanel.BuildOutput ?? "";
             if (buildText.Length > 2000)
@@ -93,7 +93,7 @@ public partial class MainWindowViewModel
 
     async Task<string> Services.IIdeMcpActions.GetCodeMetricsAsync(string? scope, string? path)
     {
-        var files = await Dispatcher.UIThread.InvokeAsync(() =>
+        var files = await UiScheduler.Default.InvokeAsync(() =>
             ResolveMetricFiles(scope, path).Distinct(StringComparer.OrdinalIgnoreCase).ToList());
         if (files.Count == 0)
             return JsonSerializer.Serialize(new { success = false, error = "No C# files resolved for metrics." });

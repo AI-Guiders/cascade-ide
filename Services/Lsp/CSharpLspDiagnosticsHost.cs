@@ -374,7 +374,7 @@ public sealed class CSharpLspDiagnosticsHost : ILspDiagnosticSource
         }
 
         _strips[key] = list;
-        Dispatcher.UIThread.Post(() => DiagnosticsChanged?.Invoke(), DispatcherPriority.Background);
+        UiScheduler.Default.Post(() => DiagnosticsChanged?.Invoke(), DispatcherPriority.Background);
     }
 
     private static DiagnosticSeverity? MapSeverity(JsonElement d)

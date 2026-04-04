@@ -12,7 +12,7 @@ public partial class MainWindowViewModel
         if (string.IsNullOrEmpty(path))
             return;
         var pathCopy = path;
-        Dispatcher.UIThread.Post(() =>
+        UiScheduler.Default.Post(() =>
         {
             if (!File.Exists(pathCopy))
                 return;
@@ -34,12 +34,12 @@ public partial class MainWindowViewModel
         if (string.IsNullOrEmpty(path))
             return;
         var pathCopy = path;
-        Dispatcher.UIThread.Post(() => LoadSolution(pathCopy));
+        UiScheduler.Default.Post(() => LoadSolution(pathCopy));
     }
 
     void Services.IIdeMcpActions.SelectInEditor(string? filePath, int startLine, int startColumn, int endLine, int endColumn)
     {
-        Dispatcher.UIThread.Post(() =>
+        UiScheduler.Default.Post(() =>
         {
             if (!string.IsNullOrEmpty(filePath) && filePath != CurrentFilePath && File.Exists(filePath))
             {
@@ -80,7 +80,7 @@ public partial class MainWindowViewModel
     {
         var tcs = new TaskCompletionSource<string>();
         var preview = maxPreviewChars ?? 2000;
-        Dispatcher.UIThread.Post(() =>
+        UiScheduler.Default.Post(() =>
         {
             try
             {
@@ -98,7 +98,7 @@ public partial class MainWindowViewModel
     async Task<string> Services.IIdeMcpActions.GetEditorContentRangeAsync(int startLine, int endLine)
     {
         var tcs = new TaskCompletionSource<string>();
-        Dispatcher.UIThread.Post(() =>
+        UiScheduler.Default.Post(() =>
         {
             try
             {
@@ -123,7 +123,7 @@ public partial class MainWindowViewModel
     async Task<string> Services.IIdeMcpActions.GetOpenDocumentTextAsync(string? filePath, int? maxChars)
     {
         var tcs = new TaskCompletionSource<string>();
-        Dispatcher.UIThread.Post(() =>
+        UiScheduler.Default.Post(() =>
         {
             try
             {
@@ -201,7 +201,7 @@ public partial class MainWindowViewModel
 
     void Services.IIdeMcpActions.ApplyEdit(string filePath, int startLine, int startColumn, int endLine, int endColumn, string newText)
     {
-        Dispatcher.UIThread.Post(() => _applyEditAction?.Invoke(filePath, startLine, startColumn, endLine, endColumn, newText));
+        UiScheduler.Default.Post(() => _applyEditAction?.Invoke(filePath, startLine, startColumn, endLine, endColumn, newText));
     }
 
     void Services.IIdeMcpActions.GoToPosition(string? filePath, int line, int column, int? endLine, int? endColumn)

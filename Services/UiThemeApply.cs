@@ -191,7 +191,7 @@ public static class UiThemeApply
     public static async Task<string> ApplyOnUiThreadAsync(string themeJson)
     {
         var json = themeJson ?? "";
-        return await Dispatcher.UIThread.InvokeAsync(() => Apply(json));
+        return await UiScheduler.Default.InvokeAsync(() => Apply(json));
     }
 
     private static Avalonia.Controls.IResourceDictionary? GetResourceDictionary()

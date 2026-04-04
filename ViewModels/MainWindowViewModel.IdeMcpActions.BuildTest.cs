@@ -1,7 +1,6 @@
 using System.IO;
 using System.Text.Json;
 using System.Xml.Linq;
-using Avalonia.Threading;
 using DotNetBuildTestParsers;
 
 namespace CascadeIDE.ViewModels;
@@ -11,13 +10,13 @@ public partial class MainWindowViewModel
     /// <summary>Диагностики открытого .cs файла (ошибки и предупреждения Roslyn). JSON: массив { id, message, severity, line, column }. Для не-C# или при отсутствии файла — [].</summary>
     async Task<string> Services.IIdeMcpActions.GetCurrentFileDiagnosticsAsync()
     {
-        var (path, text) = await Dispatcher.UIThread.InvokeAsync(() => (CurrentFilePath ?? "", EditorText ?? "")).GetTask();
+        var (path, text) = await UiScheduler.Default.InvokeAsync(() => (CurrentFilePath ?? "", EditorText ?? ""));
         return await Task.Run(() => _contextMinimizer.GetDiagnosticsJson(path, text)).ConfigureAwait(false);
     }
 
     /// <summary>Список файлов и дерево решения. file_entries — плоский список с path, title, relative_path. solution_tree — иерархия (solution → projects → folders → files). Выполняется в UI-потоке.</summary>
     Task<string> Services.IIdeMcpActions.GetSolutionFilesAsync() =>
-        Dispatcher.UIThread.InvokeAsync(() =>
+        UiScheduler.Default.InvokeAsync(() =>
         {
             var solutionPath = Workspace.SolutionPath;
             var entries = CollectFileEntries(Workspace.SolutionRoots).Select(e => new
@@ -28,15 +27,15 @@ public partial class MainWindowViewModel
             }).ToList();
             var tree = Workspace.SolutionRoots.Select(r => BuildSolutionTreeNode(r, solutionPath)).ToList();
             return JsonSerializer.Serialize(new { file_entries = entries, solution_tree = tree });
-        }).GetTask();
+        });
 
     async Task<string> Services.IIdeMcpActions.BuildAsync()
     {
-        var path = await Dispatcher.UIThread.InvokeAsync(() => Workspace.SolutionPath ?? "");
+        var path = await UiScheduler.Default.InvokeAsync(() => Workspace.SolutionPath ?? "");
         if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
         {
             var msg = "No solution loaded or file not found.";
-            Dispatcher.UIThread.Post(() => { BuildOutputPanel.Set(msg + "\r\n"); IsBuildOutputVisible = true; });
+            UiScheduler.Default.Post(() => { BuildOutputPanel.Set(msg + "\r\n"); IsBuildOutputVisible = true; });
             return msg;
         }
         try
@@ -53,7 +52,7 @@ public partial class MainWindowViewModel
             if (!success && exitCode != 0)
                 outStr += $"\r\nExit code: {exitCode}";
             var pathCopy = path;
-            Dispatcher.UIThread.Post(() =>
+            UiScheduler.Default.Post(() =>
             {
                 BuildOutputPanel.Set($"Сборка: {pathCopy}\r\n{outStr}");
                 IsBuildOutputVisible = true;
@@ -64,7 +63,7 @@ public partial class MainWindowViewModel
         catch (Exception ex)
         {
             var msg = "Error: " + ex.Message;
-            Dispatcher.UIThread.Post(() => { BuildOutputPanel.Set(msg + "\r\n"); IsBuildOutputVisible = true; });
+            UiScheduler.Default.Post(() => { BuildOutputPanel.Set(msg + "\r\n"); IsBuildOutputVisible = true; });
             return msg;
         }
     }
@@ -104,7 +103,7 @@ public partial class MainWindowViewModel
 
     private async Task<string> RunTestsInternalAsync(string? filterExpression, string mode, IReadOnlyList<string>? tokens = null)
     {
-        var path = await Dispatcher.UIThread.InvokeAsync(() => Workspace.SolutionPath ?? "");
+        var path = await UiScheduler.Default.InvokeAsync(() => Workspace.SolutionPath ?? "");
         if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
             return JsonSerializer.Serialize(new { success = false, error = "No solution loaded or file not found.", mode });
 
@@ -141,7 +140,7 @@ public partial class MainWindowViewModel
                 ? ParseTrx(trxPath) ?? TestOutputParser.Parse(outStr)
                 : TestOutputParser.Parse(outStr);
 
-            Dispatcher.UIThread.Post(() =>
+            UiScheduler.Default.Post(() =>
             {
                 LastTestSummary = $"{parsed.Passed}/{parsed.Total} passed, {parsed.Failed} failed";
                 ImpactedTestsBadge = parsed.Failed;
@@ -172,7 +171,7 @@ public partial class MainWindowViewModel
         }
         catch (Exception ex)
         {
-            Dispatcher.UIThread.Post(() =>
+            UiScheduler.Default.Post(() =>
             {
                 const int maxLogChars = 120_000;
                 var stamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
@@ -269,7 +268,7 @@ public partial class MainWindowViewModel
 
     async Task<string> Services.IIdeMcpActions.RunCodeCleanupAsync(string? includePath)
     {
-        var path = await Dispatcher.UIThread.InvokeAsync(() => Workspace.SolutionPath ?? "");
+        var path = await UiScheduler.Default.InvokeAsync(() => Workspace.SolutionPath ?? "");
         if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
             return JsonSerializer.Serialize(new { success = false, error = "No solution loaded or file not found." });
 
@@ -305,7 +304,7 @@ public partial class MainWindowViewModel
             var rawTruncated = outStr.Length > maxRawChars ? outStr[..maxRawChars] + "\n... (output truncated)" : outStr;
 
             var pathCopy = path;
-            Dispatcher.UIThread.Post(() =>
+            UiScheduler.Default.Post(() =>
             {
                 BuildOutputPanel.Set($"Code cleanup: {pathCopy}\r\n{outStr}");
                 IsBuildOutputVisible = true;

@@ -108,7 +108,7 @@ public sealed partial class DocumentsWorkspaceViewModel : ObservableObject
             return;
         }
 
-        await Dispatcher.UIThread.InvokeAsync(() =>
+        await UiScheduler.Default.InvokeAsync(() =>
         {
             var value = _workspace.SelectedSolutionItem;
             if (value?.FullPath is not { } path || !File.Exists(path))

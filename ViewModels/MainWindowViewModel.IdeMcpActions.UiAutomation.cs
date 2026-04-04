@@ -9,7 +9,7 @@ public partial class MainWindowViewModel
 {
     void Services.IIdeMcpActions.FocusEditor()
     {
-        Dispatcher.UIThread.Post(() => _focusEditorAction?.Invoke());
+        UiScheduler.Default.Post(() => _focusEditorAction?.Invoke());
     }
 
     void Services.IIdeMcpActions.SetBreakpoint(string filePath, int line, string? condition)
@@ -54,12 +54,12 @@ public partial class MainWindowViewModel
     {
         var t = title ?? "Превью";
         var c = content ?? "";
-        Dispatcher.UIThread.Post(() => RequestShowMarkdownPreviewWindow?.Invoke(t, c));
+        UiScheduler.Default.Post(() => RequestShowMarkdownPreviewWindow?.Invoke(t, c));
     }
 
     void Services.IIdeMcpActions.ShowEditorPreview()
     {
-        Dispatcher.UIThread.Post(() => RequestShowMarkdownPreviewForEditor?.Invoke());
+        UiScheduler.Default.Post(() => RequestShowMarkdownPreviewForEditor?.Invoke());
     }
 
     [RelayCommand]
@@ -86,7 +86,7 @@ public partial class MainWindowViewModel
         var provider = GetUiLayoutProvider;
         if (provider is null)
             return "{}";
-        return await Dispatcher.UIThread.InvokeAsync(() => provider() ?? "{}");
+        return await UiScheduler.Default.InvokeAsync(() => provider() ?? "{}");
     }
 
     async Task<string> Services.IIdeMcpActions.GetColorsUnderCursorAsync()
@@ -94,7 +94,7 @@ public partial class MainWindowViewModel
         var provider = GetColorsUnderCursorProvider;
         if (provider is null)
             return "{}";
-        return await Dispatcher.UIThread.InvokeAsync(() => provider() ?? "{}");
+        return await UiScheduler.Default.InvokeAsync(() => provider() ?? "{}");
     }
 
     async Task<string> Services.IIdeMcpActions.GetControlAppearanceAsync(string? name)
@@ -102,7 +102,7 @@ public partial class MainWindowViewModel
         var provider = GetControlAppearanceProvider;
         if (provider is null)
             return "{}";
-        return await Dispatcher.UIThread.InvokeAsync(() => provider(name) ?? "{}");
+        return await UiScheduler.Default.InvokeAsync(() => provider(name) ?? "{}");
     }
 
     async Task<string> Services.IIdeMcpActions.SetControlLayoutAsync(string controlName, string layoutJson)
@@ -110,7 +110,7 @@ public partial class MainWindowViewModel
         var provider = SetControlLayoutProvider;
         if (provider is null)
             return "No layout provider.";
-        return await Dispatcher.UIThread.InvokeAsync(() => provider(controlName, layoutJson ?? "{}"));
+        return await UiScheduler.Default.InvokeAsync(() => provider(controlName, layoutJson ?? "{}"));
     }
 
     async Task<string> Services.IIdeMcpActions.AddControlAsync(string parentName, string controlType, string? content, string? name)
@@ -118,7 +118,7 @@ public partial class MainWindowViewModel
         var provider = AddControlProvider;
         if (provider is null)
             return "AddControl disabled.";
-        return await Dispatcher.UIThread.InvokeAsync(() => provider(parentName, controlType ?? "", content, name));
+        return await UiScheduler.Default.InvokeAsync(() => provider(parentName, controlType ?? "", content, name));
     }
 
     async Task<string> Services.IIdeMcpActions.SetControlTextAsync(string controlName, string text)
@@ -126,7 +126,7 @@ public partial class MainWindowViewModel
         var provider = SetControlTextProvider;
         if (provider is null)
             return "No provider.";
-        return await Dispatcher.UIThread.InvokeAsync(() => provider(controlName, text ?? ""));
+        return await UiScheduler.Default.InvokeAsync(() => provider(controlName, text ?? ""));
     }
 
     async Task<string> Services.IIdeMcpActions.ClickControlAsync(string? controlName)
@@ -134,7 +134,7 @@ public partial class MainWindowViewModel
         var provider = ClickControlProvider;
         if (provider is null)
             return "No provider.";
-        return await Dispatcher.UIThread.InvokeAsync(() => provider(controlName));
+        return await UiScheduler.Default.InvokeAsync(() => provider(controlName));
     }
 
     async Task<string> Services.IIdeMcpActions.SendKeysAsync(string? controlName, string keys)
@@ -142,7 +142,7 @@ public partial class MainWindowViewModel
         var provider = SendKeysProvider;
         if (provider is null)
             return "No provider.";
-        return await Dispatcher.UIThread.InvokeAsync(() => provider(controlName, keys ?? ""));
+        return await UiScheduler.Default.InvokeAsync(() => provider(controlName, keys ?? ""));
     }
 
     async Task<string> Services.IIdeMcpActions.SetFocusAsync(string? controlName)
@@ -150,7 +150,7 @@ public partial class MainWindowViewModel
         var provider = SetFocusProvider;
         if (provider is null)
             return "No provider.";
-        return await Dispatcher.UIThread.InvokeAsync(() => provider(controlName));
+        return await UiScheduler.Default.InvokeAsync(() => provider(controlName));
     }
 
     async Task<string> Services.IIdeMcpActions.HighlightControlAsync(string? controlName)
@@ -158,7 +158,7 @@ public partial class MainWindowViewModel
         var provider = HighlightControlProvider;
         if (provider is null)
             return "No provider.";
-        return await Dispatcher.UIThread.InvokeAsync(() => provider(controlName));
+        return await UiScheduler.Default.InvokeAsync(() => provider(controlName));
     }
 
     async Task<string> Services.IIdeMcpActions.SetPanelSizeAsync(string panel, double? width, double? height)
@@ -166,7 +166,7 @@ public partial class MainWindowViewModel
         var provider = SetPanelSizeProvider;
         if (provider is null)
             return "No provider.";
-        return await Dispatcher.UIThread.InvokeAsync(() => provider(panel, width, height));
+        return await UiScheduler.Default.InvokeAsync(() => provider(panel, width, height));
     }
 
     string Services.IIdeMcpActions.GetSupportedEditorLanguages() => EditorLanguageSupport.GetJson();

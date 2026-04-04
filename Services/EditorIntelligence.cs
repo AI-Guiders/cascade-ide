@@ -168,7 +168,7 @@ public sealed class EditorIntelligence
         {
             var items = _languageService.GetCompletionItems(filePath, sourceText, line, column, ct);
             if (ct.IsCancellationRequested || items.Count == 0) return;
-            Dispatcher.UIThread.Post(() =>
+            UiScheduler.Default.Post(() =>
             {
                 if (_completionCts?.IsCancellationRequested == true) return;
                 _lastCompletionItems = items;
@@ -245,7 +245,7 @@ public sealed class EditorIntelligence
         Task.Run(() =>
         {
             var spans = _languageService.GetHighlightSpans(filePath, sourceText, line, column, cts.Token);
-            Dispatcher.UIThread.Post(() =>
+            UiScheduler.Default.Post(() =>
             {
                 _highlightRenderer?.SetSpans(spans);
                 _editor.TextArea.TextView.Redraw();
@@ -261,7 +261,7 @@ public sealed class EditorIntelligence
         Task.Run(() =>
         {
             var sig = _languageService.GetSignatureHelp(filePath, sourceText, line, column);
-            Dispatcher.UIThread.Post(() =>
+            UiScheduler.Default.Post(() =>
             {
                 if (string.IsNullOrEmpty(sig))
                 {

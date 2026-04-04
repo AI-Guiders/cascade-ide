@@ -169,14 +169,14 @@ internal sealed partial class IdeMcpCommandExecutor
         {
             var a = (IIdeMcpActions)_vm;
             if (args is null || string.IsNullOrEmpty(S(args, "file_path")) || !args.TryGetValue("line", out _)) return "Missing file_path or line";
-            await Dispatcher.UIThread.InvokeAsync(() => a.SetBreakpoint(S(args, "file_path")!, I(args, "line", 1), S(args, "condition")));
+            await UiScheduler.Default.InvokeAsync(() => a.SetBreakpoint(S(args, "file_path")!, I(args, "line", 1), S(args, "condition")));
             return "OK";
         });
         add(Services.IdeCommands.RemoveBreakpoint, async (args, ct) =>
         {
             var a = (IIdeMcpActions)_vm;
             if (args is null || string.IsNullOrEmpty(S(args, "file_path")) || !args.TryGetValue("line", out _)) return "Missing file_path or line";
-            await Dispatcher.UIThread.InvokeAsync(() => a.RemoveBreakpoint(S(args, "file_path")!, I(args, "line", 1)));
+            await UiScheduler.Default.InvokeAsync(() => a.RemoveBreakpoint(S(args, "file_path")!, I(args, "line", 1)));
             return "OK";
         });
     }
@@ -272,7 +272,7 @@ internal sealed partial class IdeMcpCommandExecutor
     {
         add(Services.IdeCommands.ToggleTerminal, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.ToggleTerminalCommand.CanExecute(null))
                     _vm.ToggleTerminalCommand.Execute(null);
@@ -281,7 +281,7 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.ToggleBuildOutput, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.ToggleBuildOutputCommand.CanExecute(null))
                     _vm.ToggleBuildOutputCommand.Execute(null);
@@ -290,7 +290,7 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.ToggleSolutionExplorer, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.ToggleSolutionExplorerCommand.CanExecute(null))
                     _vm.ToggleSolutionExplorerCommand.Execute(null);
@@ -303,7 +303,7 @@ internal sealed partial class IdeMcpCommandExecutor
             if (args is null || !args.TryGetValue("visible", out var tv) || tv.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
                 return "Missing or invalid visible (boolean)";
             var on = tv.GetBoolean();
-            await Dispatcher.UIThread.InvokeAsync(() => _vm.IsTerminalVisible = on);
+            await UiScheduler.Default.InvokeAsync(() => _vm.IsTerminalVisible = on);
             return "OK";
         });
         add(Services.IdeCommands.SetBuildOutputVisible, async (args, _) =>
@@ -311,7 +311,7 @@ internal sealed partial class IdeMcpCommandExecutor
             if (args is null || !args.TryGetValue("visible", out var bv) || bv.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
                 return "Missing or invalid visible (boolean)";
             var on = bv.GetBoolean();
-            await Dispatcher.UIThread.InvokeAsync(() => _vm.IsBuildOutputVisible = on);
+            await UiScheduler.Default.InvokeAsync(() => _vm.IsBuildOutputVisible = on);
             return "OK";
         });
         add(Services.IdeCommands.SetUiMode, async (args, _) =>
@@ -325,7 +325,7 @@ internal sealed partial class IdeMcpCommandExecutor
                 && !string.Equals(m, "AgentChat", StringComparison.OrdinalIgnoreCase))
                 return $"Unknown mode: {m}";
             var norm = MainWindowViewModel.NormalizeUiMode(m);
-            await Dispatcher.UIThread.InvokeAsync(() => _vm.UiMode = norm);
+            await UiScheduler.Default.InvokeAsync(() => _vm.UiMode = norm);
             return "OK";
         });
 
@@ -333,38 +333,38 @@ internal sealed partial class IdeMcpCommandExecutor
         {
             if (args is null || !args.TryGetValue("visible", out var sev) || sev.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
                 return "Missing or invalid visible (boolean)";
-            await Dispatcher.UIThread.InvokeAsync(() => _vm.IsSolutionExplorerVisible = sev.GetBoolean());
+            await UiScheduler.Default.InvokeAsync(() => _vm.IsSolutionExplorerVisible = sev.GetBoolean());
             return "OK";
         });
         add(Services.IdeCommands.SetChatPanelExpanded, async (args, _) =>
         {
             if (args is null || !args.TryGetValue("visible", out var cev) || cev.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
                 return "Missing or invalid visible (boolean)";
-            await Dispatcher.UIThread.InvokeAsync(() => _vm.IsChatPanelExpanded = cev.GetBoolean());
+            await UiScheduler.Default.InvokeAsync(() => _vm.IsChatPanelExpanded = cev.GetBoolean());
             return "OK";
         });
         add(Services.IdeCommands.SetGitPanelVisible, async (args, _) =>
         {
             if (args is null || !args.TryGetValue("visible", out var gev) || gev.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
                 return "Missing or invalid visible (boolean)";
-            await Dispatcher.UIThread.InvokeAsync(() => _vm.IsGitPanelVisible = gev.GetBoolean());
+            await UiScheduler.Default.InvokeAsync(() => _vm.IsGitPanelVisible = gev.GetBoolean());
             return "OK";
         });
         add(Services.IdeCommands.SetInstrumentationDockVisible, async (args, _) =>
         {
             if (args is null || !args.TryGetValue("visible", out var idv) || idv.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
                 return "Missing or invalid visible (boolean)";
-            await Dispatcher.UIThread.InvokeAsync(() => _vm.IsInstrumentationDockVisible = idv.GetBoolean());
+            await UiScheduler.Default.InvokeAsync(() => _vm.IsInstrumentationDockVisible = idv.GetBoolean());
             return "OK";
         });
         add(Services.IdeCommands.ToggleGitPanel, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() => _vm.IsGitPanelVisible = !_vm.IsGitPanelVisible);
+            await UiScheduler.Default.InvokeAsync(() => _vm.IsGitPanelVisible = !_vm.IsGitPanelVisible);
             return "OK";
         });
         add(Services.IdeCommands.ToggleInstrumentationDock, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.ToggleInstrumentationDockCommand.CanExecute(null))
                     _vm.ToggleInstrumentationDockCommand.Execute(null);
@@ -373,7 +373,7 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.ToggleChatPanel, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.ToggleChatPanelCommand.CanExecute(null))
                     _vm.ToggleChatPanelCommand.Execute(null);
@@ -383,7 +383,7 @@ internal sealed partial class IdeMcpCommandExecutor
 
         add(Services.IdeCommands.SetFocusModeUi, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.SetFocusModeCommand.CanExecute(null))
                     _vm.SetFocusModeCommand.Execute(null);
@@ -392,7 +392,7 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.SetBalancedModeUi, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.SetBalancedModeCommand.CanExecute(null))
                     _vm.SetBalancedModeCommand.Execute(null);
@@ -401,7 +401,7 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.SetPowerModeUi, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.SetPowerModeCommand.CanExecute(null))
                     _vm.SetPowerModeCommand.Execute(null);
@@ -410,7 +410,7 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.CycleUiMode, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.CycleUiModeCommand.CanExecute(null))
                     _vm.CycleUiModeCommand.Execute(null);
@@ -423,7 +423,7 @@ internal sealed partial class IdeMcpCommandExecutor
     {
         add(Services.IdeCommands.OpenSolutionDialog, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.OpenSolutionCommand.CanExecute(null))
                     _vm.OpenSolutionCommand.Execute(null);
@@ -432,7 +432,7 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.ExitApplication, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.ExitCommand.CanExecute(null))
                     _vm.ExitCommand.Execute(null);
@@ -441,7 +441,7 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.About, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.AboutCommand.CanExecute(null))
                     _vm.AboutCommand.Execute(null);
@@ -450,7 +450,7 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.OpenSettings, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.OpenSettingsCommand.CanExecute(null))
                     _vm.OpenSettingsCommand.Execute(null);
@@ -459,7 +459,7 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.OpenPreviewWindow, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.OpenPreviewWindowCommand.CanExecute(null))
                     _vm.OpenPreviewWindowCommand.Execute(null);
@@ -469,7 +469,7 @@ internal sealed partial class IdeMcpCommandExecutor
 
         add(Services.IdeCommands.ApplyLightTheme, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(async () =>
+            await UiScheduler.Default.InvokeAsync(async () =>
             {
                 if (_vm.ApplyLightThemeCommand.CanExecute(null))
                     await _vm.ApplyLightThemeCommand.ExecuteAsync(null);
@@ -478,7 +478,7 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.ApplyDarkTheme, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(async () =>
+            await UiScheduler.Default.InvokeAsync(async () =>
             {
                 if (_vm.ApplyDarkThemeCommand.CanExecute(null))
                     await _vm.ApplyDarkThemeCommand.ExecuteAsync(null);
@@ -487,7 +487,7 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.ApplyCursorLikeTheme, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(async () =>
+            await UiScheduler.Default.InvokeAsync(async () =>
             {
                 if (_vm.ApplyCursorLikeThemeCommand.CanExecute(null))
                     await _vm.ApplyCursorLikeThemeCommand.ExecuteAsync(null);
@@ -496,7 +496,7 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.ApplyPowerClassicTheme, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(async () =>
+            await UiScheduler.Default.InvokeAsync(async () =>
             {
                 if (_vm.ApplyPowerClassicThemeCommand.CanExecute(null))
                     await _vm.ApplyPowerClassicThemeCommand.ExecuteAsync(null);
@@ -505,7 +505,7 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.OpenThemeFileDialog, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(async () =>
+            await UiScheduler.Default.InvokeAsync(async () =>
             {
                 if (_vm.OpenThemeFileCommand.CanExecute(null))
                     await _vm.OpenThemeFileCommand.ExecuteAsync(null);
@@ -518,7 +518,7 @@ internal sealed partial class IdeMcpCommandExecutor
             if (string.IsNullOrWhiteSpace(cult))
                 return "Missing culture (e.g. ru-RU, en-US)";
             var c = cult.Trim();
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.SetUiLanguageCommand.CanExecute(c))
                     _vm.SetUiLanguageCommand.Execute(c);
@@ -527,7 +527,7 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.ResetUiLanguageToSystem, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.ResetUiLanguageToSystemCommand.CanExecute(null))
                     _vm.ResetUiLanguageToSystemCommand.Execute(null);
@@ -537,7 +537,7 @@ internal sealed partial class IdeMcpCommandExecutor
 
         add(Services.IdeCommands.ShowSolutionExplorerPanel, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.ShowSolutionExplorerPanelCommand.CanExecute(null))
                     _vm.ShowSolutionExplorerPanelCommand.Execute(null);
@@ -546,7 +546,7 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.ShowBuildOutputPanel, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.ShowBuildOutputPanelCommand.CanExecute(null))
                     _vm.ShowBuildOutputPanelCommand.Execute(null);
@@ -555,7 +555,7 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.ShowChatPanel, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.ShowChatPanelCommand.CanExecute(null))
                     _vm.ShowChatPanelCommand.Execute(null);
@@ -564,7 +564,7 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.ShowTerminalPanel, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.ShowTerminalPanelCommand.CanExecute(null))
                     _vm.ShowTerminalPanelCommand.Execute(null);
@@ -573,7 +573,7 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.HideBuildOutputPanel, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.HideBuildOutputCommand.CanExecute(null))
                     _vm.HideBuildOutputCommand.Execute(null);
@@ -583,7 +583,7 @@ internal sealed partial class IdeMcpCommandExecutor
 
         add(Services.IdeCommands.SetSingleEditorGroup, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.SetSingleEditorGroupCommand.CanExecute(null))
                     _vm.SetSingleEditorGroupCommand.Execute(null);
@@ -592,7 +592,7 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.SetDualEditorGroup, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.SetDualEditorGroupCommand.CanExecute(null))
                     _vm.SetDualEditorGroupCommand.Execute(null);
@@ -601,7 +601,7 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.SetTripleEditorGroup, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.SetTripleEditorGroupCommand.CanExecute(null))
                     _vm.SetTripleEditorGroupCommand.Execute(null);
@@ -611,7 +611,7 @@ internal sealed partial class IdeMcpCommandExecutor
 
         add(Services.IdeCommands.BuildSolutionUi, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(async () =>
+            await UiScheduler.Default.InvokeAsync(async () =>
             {
                 if (_vm.BuildSolutionCommand.CanExecute(null))
                     await _vm.BuildSolutionCommand.ExecuteAsync(null);
@@ -624,7 +624,7 @@ internal sealed partial class IdeMcpCommandExecutor
     {
         add(Services.IdeCommands.FocusCheckpoint, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.FocusCheckpointCommand.CanExecute(null))
                     _vm.FocusCheckpointCommand.Execute(null);
@@ -633,7 +633,7 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.FocusRollback, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.FocusRollbackCommand.CanExecute(null))
                     _vm.FocusRollbackCommand.Execute(null);
@@ -642,7 +642,7 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.ConfirmFocusStep, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.ConfirmFocusStepCommand.CanExecute(null))
                     _vm.ConfirmFocusStepCommand.Execute(null);
@@ -651,7 +651,7 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.CancelFocusStep, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.CancelFocusStepCommand.CanExecute(null))
                     _vm.CancelFocusStepCommand.Execute(null);
@@ -660,7 +660,7 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.ExplainCurrentStep, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.ExplainCurrentStepCommand.CanExecute(null))
                     _vm.ExplainCurrentStepCommand.Execute(null);
@@ -669,7 +669,7 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.EmergencyStop, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.EmergencyStopCommand.CanExecute(null))
                     _vm.EmergencyStopCommand.Execute(null);
@@ -678,7 +678,7 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.RefreshWorkspaceSnapshot, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.RefreshWorkspaceSnapshotCommand.CanExecute(null))
                     _vm.RefreshWorkspaceSnapshotCommand.Execute(null);
@@ -690,7 +690,7 @@ internal sealed partial class IdeMcpCommandExecutor
         {
             if (args is null || !args.TryGetValue("step_index", out var exIdx) || exIdx.ValueKind != JsonValueKind.Number || !exIdx.TryGetInt32(out var explainStepIndex) || explainStepIndex < 0)
                 return "Missing or invalid step_index (non-negative int; 0 = oldest in AgentTraceSteps)";
-            var explainErr = await Dispatcher.UIThread.InvokeAsync(() =>
+            var explainErr = await UiScheduler.Default.InvokeAsync(() =>
             {
                 var list = _vm.InstrumentationPanel.AgentTraceSteps;
                 if (explainStepIndex >= list.Count)
@@ -704,7 +704,7 @@ internal sealed partial class IdeMcpCommandExecutor
         {
             if (args is null || !args.TryGetValue("step_index", out var rbIdx) || rbIdx.ValueKind != JsonValueKind.Number || !rbIdx.TryGetInt32(out var rollbackStepIndex) || rollbackStepIndex < 0)
                 return "Missing or invalid step_index (non-negative int; 0 = oldest in AgentTraceSteps)";
-            var rollbackErr = await Dispatcher.UIThread.InvokeAsync(() =>
+            var rollbackErr = await UiScheduler.Default.InvokeAsync(() =>
             {
                 var list = _vm.InstrumentationPanel.AgentTraceSteps;
                 if (rollbackStepIndex >= list.Count)
@@ -717,7 +717,7 @@ internal sealed partial class IdeMcpCommandExecutor
 
         add(Services.IdeCommands.SetSafetyL1, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.SetSafetyL1Command.CanExecute(null))
                     _vm.SetSafetyL1Command.Execute(null);
@@ -726,7 +726,7 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.SetSafetyL2, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.SetSafetyL2Command.CanExecute(null))
                     _vm.SetSafetyL2Command.Execute(null);
@@ -735,7 +735,7 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.SetSafetyL3, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.SetSafetyL3Command.CanExecute(null))
                     _vm.SetSafetyL3Command.Execute(null);
@@ -745,7 +745,7 @@ internal sealed partial class IdeMcpCommandExecutor
 
         add(Services.IdeCommands.StartAutonomous, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.Autonomous.StartAutonomousCommand.CanExecute(null))
                     _vm.Autonomous.StartAutonomousCommand.Execute(null);
@@ -754,7 +754,7 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.PauseAutonomous, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.Autonomous.PauseAutonomousCommand.CanExecute(null))
                     _vm.Autonomous.PauseAutonomousCommand.Execute(null);
@@ -763,7 +763,7 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.ResumeAutonomous, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.Autonomous.ResumeAutonomousCommand.CanExecute(null))
                     _vm.Autonomous.ResumeAutonomousCommand.Execute(null);
@@ -773,7 +773,7 @@ internal sealed partial class IdeMcpCommandExecutor
 
         add(Services.IdeCommands.FixFailingTests, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.Autonomous.FixFailingTestsCommand.CanExecute(null))
                     _vm.Autonomous.FixFailingTestsCommand.Execute(null);
@@ -782,7 +782,7 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.InvestigateNullref, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.Autonomous.InvestigateNullrefCommand.CanExecute(null))
                     _vm.Autonomous.InvestigateNullrefCommand.Execute(null);
@@ -791,7 +791,7 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.PrepareCommit, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.Autonomous.PrepareCommitCommand.CanExecute(null))
                     _vm.Autonomous.PrepareCommitCommand.Execute(null);
@@ -801,7 +801,7 @@ internal sealed partial class IdeMcpCommandExecutor
 
         add(Services.IdeCommands.SendChat, async (args, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(async () =>
+            await UiScheduler.Default.InvokeAsync(async () =>
             {
                 var msg = S(args, "message");
                 if (!string.IsNullOrWhiteSpace(msg))
@@ -818,7 +818,7 @@ internal sealed partial class IdeMcpCommandExecutor
             if (string.IsNullOrWhiteSpace(model))
                 return "Missing model";
             var m = model.Trim();
-            await Dispatcher.UIThread.InvokeAsync(async () =>
+            await UiScheduler.Default.InvokeAsync(async () =>
             {
                 _vm.ModelToInstall = m;
                 if (_vm.InstallModelCommand.CanExecute(null))
@@ -832,7 +832,7 @@ internal sealed partial class IdeMcpCommandExecutor
     {
         add(Services.IdeCommands.ReopenClosedDocument, async (_, _) =>
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.ReopenClosedDocumentCommand.CanExecute(null))
                     _vm.ReopenClosedDocumentCommand.Execute(null);
@@ -844,7 +844,7 @@ internal sealed partial class IdeMcpCommandExecutor
             if (string.IsNullOrWhiteSpace(S(args, "file_path")))
                 return "Missing file_path";
             var pathAct = S(args, "file_path")!;
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.ActivateDocumentCommand.CanExecute(pathAct))
                     _vm.ActivateDocumentCommand.Execute(pathAct);
@@ -856,7 +856,7 @@ internal sealed partial class IdeMcpCommandExecutor
             if (string.IsNullOrWhiteSpace(S(args, "file_path")))
                 return "Missing file_path";
             var pathClose = S(args, "file_path")!;
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.CloseDocumentCommand.CanExecute(pathClose))
                     _vm.CloseDocumentCommand.Execute(pathClose);
@@ -868,7 +868,7 @@ internal sealed partial class IdeMcpCommandExecutor
             if (string.IsNullOrWhiteSpace(S(args, "file_path")))
                 return "Missing file_path";
             var pathPin = S(args, "file_path")!;
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.TogglePinDocumentCommand.CanExecute(pathPin))
                     _vm.TogglePinDocumentCommand.Execute(pathPin);
@@ -880,7 +880,7 @@ internal sealed partial class IdeMcpCommandExecutor
             if (string.IsNullOrWhiteSpace(S(args, "file_path")))
                 return "Missing file_path";
             var p1 = S(args, "file_path")!;
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.MoveDocumentToGroup1Command.CanExecute(p1))
                     _vm.MoveDocumentToGroup1Command.Execute(p1);
@@ -892,7 +892,7 @@ internal sealed partial class IdeMcpCommandExecutor
             if (string.IsNullOrWhiteSpace(S(args, "file_path")))
                 return "Missing file_path";
             var p2 = S(args, "file_path")!;
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.MoveDocumentToGroup2Command.CanExecute(p2))
                     _vm.MoveDocumentToGroup2Command.Execute(p2);
@@ -904,7 +904,7 @@ internal sealed partial class IdeMcpCommandExecutor
             if (string.IsNullOrWhiteSpace(S(args, "file_path")))
                 return "Missing file_path";
             var p3 = S(args, "file_path")!;
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (_vm.MoveDocumentToGroup3Command.CanExecute(p3))
                     _vm.MoveDocumentToGroup3Command.Execute(p3);

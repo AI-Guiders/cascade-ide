@@ -120,7 +120,7 @@ public partial class MainWindowViewModel
         try
         {
             var details = await _ollama.GetModelDetailsAsync(modelName).ConfigureAwait(false);
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (SelectedOllamaModel == modelName)
                     SelectedModelDetails = details?.ToShortString() ?? "";
@@ -128,7 +128,7 @@ public partial class MainWindowViewModel
         }
         catch
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            await UiScheduler.Default.InvokeAsync(() =>
             {
                 if (SelectedOllamaModel == modelName)
                     SelectedModelDetails = "";
@@ -148,7 +148,7 @@ public partial class MainWindowViewModel
         ApplyUiModeLayout(normalized, persist: true);
         Autonomous.NotifyHostPowerContextChanged();
         if (string.Equals(normalized, "Power", StringComparison.OrdinalIgnoreCase))
-            Dispatcher.UIThread.Post(RefreshWorkspaceSnapshotCore, DispatcherPriority.Background);
+            UiScheduler.Default.Post(RefreshWorkspaceSnapshotCore, DispatcherPriority.Background);
 
         Chrome.NotifyUiModeChangedForBloom(normalized);
     }

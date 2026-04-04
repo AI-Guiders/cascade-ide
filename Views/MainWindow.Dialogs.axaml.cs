@@ -51,7 +51,7 @@ public partial class MainWindow
             ctr = cancellationToken.Register(() => tcs.TrySetResult(Services.ConfirmationResponses.Cancel));
         }
 
-        Dispatcher.UIThread.Post(async () =>
+        UiScheduler.Default.Post(async () =>
         {
             if (cancellationToken.IsCancellationRequested)
             {

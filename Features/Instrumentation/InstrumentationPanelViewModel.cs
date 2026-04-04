@@ -54,9 +54,9 @@ public sealed partial class InstrumentationPanelViewModel : ViewModelBase
                 AgentTraceSteps.RemoveAt(0);
         }
 
-        if (Dispatcher.UIThread.CheckAccess())
+        if (UiScheduler.Default.CheckAccess())
             Add();
         else
-            Dispatcher.UIThread.Post(Add);
+            UiScheduler.Default.Post(Add);
     }
 }

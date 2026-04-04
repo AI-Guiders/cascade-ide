@@ -6,7 +6,7 @@ public partial class MainWindowViewModel
 {
     void Services.IIdeMcpActions.ShowDebugBreakpoints(IReadOnlyList<(string FilePath, int Line)> breakpoints)
     {
-        Dispatcher.UIThread.Post(() =>
+        UiScheduler.Default.Post(() =>
         {
             _debuggerBreakpoints.Clear();
             foreach (var (path, line) in breakpoints)
@@ -18,7 +18,7 @@ public partial class MainWindowViewModel
 
     void Services.IIdeMcpActions.ShowDebugPosition(string? filePath, int line)
     {
-        Dispatcher.UIThread.Post(() =>
+        UiScheduler.Default.Post(() =>
         {
             DebugPositionFile = filePath is not null ? Path.GetFullPath(filePath) : null;
             DebugPositionLine = line;
@@ -40,7 +40,7 @@ public partial class MainWindowViewModel
 
     void Services.IIdeMcpActions.ShowDebugState(IReadOnlyList<(string Name, string? File, int Line)> stackFrames, IReadOnlyList<(string Name, string Value)> variables)
     {
-        Dispatcher.UIThread.Post(() =>
+        UiScheduler.Default.Post(() =>
         {
             InstrumentationPanel.DebugStackFrames.Clear();
             foreach (var f in stackFrames)

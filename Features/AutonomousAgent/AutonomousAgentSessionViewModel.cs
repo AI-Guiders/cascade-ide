@@ -123,7 +123,7 @@ public sealed partial class AutonomousAgentSessionViewModel : ObservableObject
                         ct,
                         state)
                     .ConfigureAwait(false);
-                Dispatcher.UIThread.Post(() =>
+                UiScheduler.Default.Post(() =>
                 {
                     IsAutonomousRunning = false;
                     _host.SetActiveTaskStrip("Autonomous Agent", "Done", 100);
@@ -137,7 +137,7 @@ public sealed partial class AutonomousAgentSessionViewModel : ObservableObject
             catch (OperationCanceledException)
             {
                 var state = _runState;
-                Dispatcher.UIThread.Post(() =>
+                UiScheduler.Default.Post(() =>
                 {
                     IsAutonomousRunning = false;
                     _host.SetActiveTaskStrip("Autonomous Agent", "Paused", 0);
@@ -151,7 +151,7 @@ public sealed partial class AutonomousAgentSessionViewModel : ObservableObject
             }
             catch (Exception ex)
             {
-                Dispatcher.UIThread.Post(() =>
+                UiScheduler.Default.Post(() =>
                 {
                     IsAutonomousRunning = false;
                     _host.SetActiveTaskStrip("Autonomous Agent", "Error", 0);
@@ -200,7 +200,7 @@ public sealed partial class AutonomousAgentSessionViewModel : ObservableObject
                         ct,
                         capturedState)
                     .ConfigureAwait(false);
-                Dispatcher.UIThread.Post(() =>
+                UiScheduler.Default.Post(() =>
                 {
                     IsAutonomousRunning = false;
                     _host.SetActiveTaskStrip("Autonomous Agent", "Done", 100);
@@ -213,7 +213,7 @@ public sealed partial class AutonomousAgentSessionViewModel : ObservableObject
             }
             catch (OperationCanceledException)
             {
-                Dispatcher.UIThread.Post(() =>
+                UiScheduler.Default.Post(() =>
                 {
                     IsAutonomousRunning = false;
                     _host.SetActiveTaskStrip("Autonomous Agent", "Paused", 0);
@@ -226,7 +226,7 @@ public sealed partial class AutonomousAgentSessionViewModel : ObservableObject
             }
             catch (Exception ex)
             {
-                Dispatcher.UIThread.Post(() =>
+                UiScheduler.Default.Post(() =>
                 {
                     IsAutonomousRunning = false;
                     _host.SetActiveTaskStrip("Autonomous Agent", "Error", 0);

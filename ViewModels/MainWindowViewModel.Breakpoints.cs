@@ -131,12 +131,12 @@ public partial class MainWindowViewModel
                 Filter = Services.BreakpointsFileService.FileName,
                 NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName
             };
-            _breakpointsFileWatcher.Changed += (_, _) => Dispatcher.UIThread.Post(() =>
+            _breakpointsFileWatcher.Changed += (_, _) => UiScheduler.Default.Post(() =>
             {
                 OnPropertyChanged(nameof(McpFileBreakpointLinesInCurrentFile));
                 OnPropertyChanged(nameof(AllBreakpointLinesInCurrentFile));
             });
-            _breakpointsFileWatcher.Renamed += (_, _) => Dispatcher.UIThread.Post(() =>
+            _breakpointsFileWatcher.Renamed += (_, _) => UiScheduler.Default.Post(() =>
             {
                 OnPropertyChanged(nameof(McpFileBreakpointLinesInCurrentFile));
                 OnPropertyChanged(nameof(AllBreakpointLinesInCurrentFile));
