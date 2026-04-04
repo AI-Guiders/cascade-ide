@@ -100,6 +100,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         Autonomous = new AutonomousAgentSessionViewModel(_autonomousAgentService, this);
         _ideMcpExecutor = new IdeMcpCommandExecutor(this);
         _mcpBuildTest = new Services.McpDotnetBuildTestService(_dotnetRunner);
+        _mcpAgentNotes = new Services.McpAgentNotesService();
 
         Workspace.PropertyChanged += (_, e) => OnWorkspacePropertyChanged(e.PropertyName);
     }
@@ -238,6 +239,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private readonly Services.IGitCommandRunner _gitRunner = new Services.GitCommandRunner();
     private readonly Services.IDotnetCommandRunner _dotnetRunner = new Services.DotnetCommandRunner();
     private readonly Services.McpDotnetBuildTestService _mcpBuildTest;
+    private readonly Services.McpAgentNotesService _mcpAgentNotes;
 
     private CancellationTokenSource? _openFileDebounceCts;
     // Solution load version is owned by Workspace.
