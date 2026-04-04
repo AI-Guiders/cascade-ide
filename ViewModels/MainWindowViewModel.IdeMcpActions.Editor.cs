@@ -1,6 +1,5 @@
 using System.IO;
 using System.Text.Json;
-using Avalonia.Threading;
 using Dock.Model.Mvvm.Controls;
 
 namespace CascadeIDE.ViewModels;
@@ -51,29 +50,14 @@ public partial class MainWindowViewModel
                 finally { IsLoadingCurrentFile = false; }
             }
             var text = EditorText ?? "";
-            int start = LineColumnToOffset(text, startLine, startColumn);
-            int end = LineColumnToOffset(text, endLine, endColumn);
+            int start = EditorTextCoordinateUtilities.LineColumnToOffset(text, startLine, startColumn);
+            int end = EditorTextCoordinateUtilities.LineColumnToOffset(text, endLine, endColumn);
             if (start < 0 || end < 0)
                 return;
             int len = Math.Max(0, end - start);
             EditorSelectionStart = start;
             EditorSelectionLength = len;
         });
-    }
-
-    private static int LineColumnToOffset(string text, int line, int column)
-    {
-        if (line < 1 || column < 1)
-            return -1;
-        var lines = text.Split('\n');
-        if (line > lines.Length)
-            return -1;
-        int offset = 0;
-        for (int i = 0; i < line - 1; i++)
-            offset += lines[i].Length + 1; // +1 for \n
-        int lineLen = lines[line - 1].Length;
-        int col = Math.Min(column, lineLen + 1);
-        return offset + (col - 1);
     }
 
     async Task<string> Services.IIdeMcpActions.GetEditorStateAsync(int? maxPreviewChars)
@@ -180,23 +164,11 @@ public partial class MainWindowViewModel
         {
             if (item is not DockDocumentViewModel dvm)
                 continue;
-            if (PathsReferToSameFile(dvm.Doc.FilePath, path))
+            if (EditorTextCoordinateUtilities.PathsReferToSameFile(dvm.Doc.FilePath, path))
                 return dvm.Doc;
         }
 
         return null;
-    }
-
-    private static bool PathsReferToSameFile(string a, string b)
-    {
-        try
-        {
-            return string.Equals(Path.GetFullPath(a), Path.GetFullPath(b), StringComparison.OrdinalIgnoreCase);
-        }
-        catch
-        {
-            return string.Equals(a, b, StringComparison.OrdinalIgnoreCase);
-        }
     }
 
     void Services.IIdeMcpActions.ApplyEdit(string filePath, int startLine, int startColumn, int endLine, int endColumn, string newText)

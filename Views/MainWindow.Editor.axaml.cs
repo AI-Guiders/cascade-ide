@@ -186,8 +186,8 @@ public partial class MainWindow
             return;
 
         var text = editor.Document.Text;
-        int start = LineColumnToOffset(text, startLine, startColumn);
-        int end = LineColumnToOffset(text, endLine, endColumn);
+        int start = EditorTextCoordinateUtilities.LineColumnToOffset(text, startLine, startColumn);
+        int end = EditorTextCoordinateUtilities.LineColumnToOffset(text, endLine, endColumn);
         if (start < 0 || end < 0)
             return;
 
@@ -247,24 +247,11 @@ public partial class MainWindow
         if (vm.CurrentFilePath != filePath)
             return;
         var text = editor.Document.Text;
-        int start = LineColumnToOffset(text, startLine, startColumn);
-        int end = LineColumnToOffset(text, endLine, endColumn);
+        int start = EditorTextCoordinateUtilities.LineColumnToOffset(text, startLine, startColumn);
+        int end = EditorTextCoordinateUtilities.LineColumnToOffset(text, endLine, endColumn);
         if (start < 0 || end < 0)
             return;
         editor.Document.Replace(start, end - start, newText);
-    }
-
-    private static int LineColumnToOffset(string text, int line, int column)
-    {
-        if (line < 1 || column < 1) return -1;
-        var lines = text.Split('\n');
-        if (line > lines.Length) return -1;
-        int offset = 0;
-        for (int i = 0; i < line - 1; i++)
-            offset += lines[i].Length + 1;
-        int lineLen = lines[line - 1].Length;
-        int col = Math.Min(column, lineLen + 1);
-        return offset + (col - 1);
     }
 
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -353,7 +340,7 @@ public partial class MainWindow
         if (editor is null)
             return;
         var text = editor.Document.Text ?? "";
-        var offset = LineColumnToOffset(text, line1, column1);
+        var offset = EditorTextCoordinateUtilities.LineColumnToOffset(text, line1, column1);
         if (offset < 0)
             return;
         editor.TextArea.Caret.Offset = offset;
