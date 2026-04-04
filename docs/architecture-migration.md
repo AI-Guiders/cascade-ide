@@ -34,7 +34,7 @@
 | `MainWindowViewModel.DocumentsDock.cs` | 45 | Документы / dock |
 | `MainWindowViewModel.ViewBridge.cs` | 46 | Мост к view (запросы к окну) |
 
-**Техдолг по главному VM (без обязательного срока):** тяжёлые куски MCP по-прежнему рядом с VM (`IdeMcpActions.*`); при росте — переносить разбор аргументов и доменную логику в `Services/`, оставляя VM оркестратором (план B внизу документа).
+**Техдолг по главному VM (не блокирует развитие):** крупные куски MCP по-прежнему рядом с VM (`IdeMcpActions.*`); дальнейший вынос — по мере изменений. **План B по примитивам MCP для текущего объёма закрыт:** координаты/пути редактора (`EditorTextCoordinateUtilities`), разбор JSON панели отладки (`McpDebugPayloadParsing`), чтение полей args MCP (`McpCommandJsonArgs` в `Services/`) — вне `ViewModels/`.
 
 ## Целевая карта срезов
 
@@ -100,7 +100,10 @@
 | Шаг | Смысл |
 |-----|--------|
 | **A — сделано** | Один канал маршалинга MCP → UI (`ExecuteCommandAsync` + `InvokeAsync<Task<string>>`), документация на входе executor. |
-| **B — по мере роста** | Новую логику по возможности класть в сервисы с узким интерфейсом; VM оставить оркестратором и точкой `IIdeMcpActions`, без раздувания «командными» методами. |
+| **B — примитивы (текущий объём закрыт)** | Разбор аргументов JSON и вспомогательная логика без UI — в `Services/` (`EditorTextCoordinateUtilities`, `McpDebugPayloadParsing`, `McpCommandJsonArgs`); `IdeMcpCommandExecutor` остаётся диспетчером к `IIdeMcpActions`. |
+| **B — дальше по мере роста** | Новые фичи по возможности — в сервисы с узким интерфейсом; VM — оркестратор и `IIdeMcpActions`, без раздувания «командными» методами. |
+
+**Не блокирует продукт:** выделение **`SolutionWorkspaceViewModel`**, MEF/плагины, опциональный дополнительный батчинг Problems — см. политику и таблицу срезов выше.
 
 **Сделано:** коалесcing обновлений **`BuildOutput`** в **`BuildOutputPanelViewModel.Append`** (один `Post` на серию вызовов; `Set`/`Clear`/`FlushPending` инвалидируют отложенный flush); после **`BuildSolutionAsync`** вызывается **`FlushPending`**, чтобы текст и флаг сборки были согласованы до чтения MCP.
 
@@ -128,3 +131,4 @@
 - **v1.11** — раздел «Срез MainWindowViewModel»: карта partial-файлов и уточнение текущего состояния (не один `.cs` на ~3k строк).
 - **v1.12** — обозреватель решения: вложенность файлов как в VS — `<DependentUpon>` из `.csproj` + эвристика для SDK-glob (`Stem.*.cs` → родитель `Stem.cs` в той же папке). Формат `.sln` вложенность не задаёт.
 - **v1.13** — рефакторинг: дерево файлов проекта вынесено в `Services/ProjectFileTreeBuilder.cs`, `SolutionParser` — только загрузка решения и сортировка узлов.
+- **v1.14** — план B (примитивы MCP): `McpCommandJsonArgs` в `Services/` вместо вложенного класса в `IdeMcpCommandExecutor`; генератор `ProtocolDocGen` и `IdeMcpCommandExecutor.Generated.g.cs` синхронизированы; тесты на контракт чтения args.
