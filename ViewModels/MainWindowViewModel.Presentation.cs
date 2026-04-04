@@ -6,37 +6,43 @@ namespace CascadeIDE.ViewModels;
 /// <summary>Вычисляемые свойства разметки, телеметрии и видимости панелей (режимы UI).</summary>
 public partial class MainWindowViewModel
 {
-    public static readonly IReadOnlyList<string> UiModeOptions = UiModeLayoutRegistry.OrderedModeIds;
+    public static IReadOnlyList<string> UiModeOptions => UiModeCatalog.OrderedModeIds;
     public IReadOnlyList<string> UiModeOptionsList => UiModeOptions;
 
-    /// <summary>Заголовок главного окна (в Power — подпись «Autonomous Agent Cockpit»).</summary>
+    /// <summary>Семейство текущего UI-режима (одна ось вместо булевых Is*Mode).</summary>
+    public UiModeFamily UiModeFamily => UiModeFamilyResolver.FromNormalizedMode(NormalizeUiMode(UiMode));
+
+    /// <summary>Заголовок главного окна (в Power — подпись «Autonomous Agent Cockpit»); из TOML — <c>window_title</c>.</summary>
     public string WindowTitle =>
-        IsPowerMode
-            ? "CascadeIDE — Power Mode [Autonomous Agent Cockpit]"
-            : IsAgentChatMode
-                ? "CascadeIDE — Agent Chat"
-                : IsDebugMode
-                    ? "CascadeIDE — Debug"
-                    : "CascadeIDE";
+        UiModeCatalog.GetWindowTitleOverride(NormalizeUiMode(UiMode))
+        ?? UiModeFamily switch
+        {
+            UiModeFamily.Power => "CascadeIDE — Power Mode [Autonomous Agent Cockpit]",
+            UiModeFamily.AgentChat => "CascadeIDE — Agent Chat",
+            UiModeFamily.Debug => "CascadeIDE — Debug",
+            _ => "CascadeIDE",
+        };
 
-    public bool IsFocusMode => string.Equals(UiMode, "Focus", StringComparison.OrdinalIgnoreCase);
-    public bool IsBalancedMode => string.Equals(UiMode, "Balanced", StringComparison.OrdinalIgnoreCase);
-    public bool IsPowerMode => string.Equals(UiMode, "Power", StringComparison.OrdinalIgnoreCase);
-    public bool IsAgentChatMode => string.Equals(UiMode, "AgentChat", StringComparison.OrdinalIgnoreCase);
-    public bool IsDebugMode => string.Equals(UiMode, "Debug", StringComparison.OrdinalIgnoreCase);
-
-    /// <summary>Ширина колонки чата (пиксели); значения — <see cref="UiModeLayoutRegistry"/> и <see cref="UiModeLayoutDimensions"/>.</summary>
+    /// <summary>Ширина колонки чата (пиксели); свёрнут — 0 (место отдаётся редактору).</summary>
     public int ChatPanelColumnPixelWidth =>
         IsChatPanelExpanded
-            ? UiModeLayoutRegistry.GetChatPanelExpandedWidthPixels(NormalizeUiMode(UiMode))
-            : UiModeLayoutDimensions.ChatPanelCollapsedWidthPixels;
-    public bool ShowTaskBar => true;
-    public bool ShowQuickActions => IsBalancedMode;
+            ? UiModeCatalog.GetChatPanelExpandedWidthPixels(NormalizeUiMode(UiMode))
+            : UiWorkspaceLayoutRuntimeMetrics.ChatPanelCollapsedWidthPixels;
+
+    /// <summary>Есть правая колонка чата и сплиттер перед ней (не свёрнуто в ноль).</summary>
+    public bool IsChatPanelColumnVisible => ChatPanelColumnPixelWidth > 0;
+    /// <summary>Полоса активной задачи / Task Cockpit — из <c>UiModes/&lt;id&gt;.toml</c> (<c>show_task_cockpit</c>), по умолчанию скрыто для семьи Debug.</summary>
+    public bool ShowTaskBar => UiModeCatalog.GetShowTaskBar(NormalizeUiMode(UiMode));
+
+    private UiModeCapabilities UiModeCapabilities =>
+        UiModeCatalog.GetCapabilities(NormalizeUiMode(UiMode));
+
+    public bool ShowQuickActions => UiModeCapabilities.ShowQuickActions;
     public bool ShowAgentOperations => true;
     /// <summary>В Focus справа показываем план и гейт, в Power — trace/safety; блок «операции» остаётся в Balanced.</summary>
-    public bool ShowAgentOperationsBlock => IsBalancedMode;
-    public bool ShowAgentTrace => IsPowerMode;
-    public bool ShowPowerTelemetry => IsPowerMode;
+    public bool ShowAgentOperationsBlock => UiModeCapabilities.ShowAgentOperationsBlock;
+    public bool ShowAgentTrace => UiModeCapabilities.ShowAgentTrace;
+    public bool ShowPowerTelemetry => UiModeCapabilities.ShowPowerTelemetry;
     /// <summary>Карточка уровня безопасности: в Power — крупные L1–L3; в Focus/Balanced — компактные кнопки (разметка в ChatPanelView).</summary>
     public bool ShowSafetyControls => true;
     public bool ShowTelemetryHiddenHint => ShowPowerTelemetry && !IsTerminalVisible;
@@ -45,7 +51,8 @@ public partial class MainWindowViewModel
     /// Дублирующая карточка телеметрии на вкладке «Терминал» в Power. Пока видна полоса <see cref="TelemetryStripView"/> под редактором —
     /// false, чтобы DockPanel не отдавал высоту дублю и не схлопывал область вывода консоли.
     /// </summary>
-    public bool ShowPowerTelemetryOnTerminalTab => IsPowerMode && !ShowTelemetryStrip;
+    public bool ShowPowerTelemetryOnTerminalTab =>
+        UiModeCapabilities.ShowPowerTelemetryOnTerminalTab && !ShowTelemetryStrip;
 
     /// <summary>Полоска build/tests/debug/git — и в Focus (по концепту).</summary>
     public bool ShowTelemetryStrip => true;
@@ -55,7 +62,9 @@ public partial class MainWindowViewModel
     /// справа trace/safety тянутся вниз — как в макете Power cockpit.
     /// </summary>
     public int MainWorkspaceTelemetryColumnSpan =>
-        IsPowerMode && ShowTelemetryStrip ? 3 : 5;
+        UiModeFamily.IsPowerFamily() && ShowTelemetryStrip
+            ? UiModeCapabilities.PowerTelemetryMainGridColumnSpan
+            : 5;
 
     /// <summary>Чат в одной строке с редактором; телеметрия и док — в нижней строке MainGrid (после сплиттера).</summary>
     public int ChatPanelMainGridRowSpan => 1;
@@ -66,10 +75,13 @@ public partial class MainWindowViewModel
 
     /// <summary>Нижние вкладки «События / Тесты / Гипотезы / Отладка» при включённом доке.</summary>
     public bool ShowInstrumentationTabs =>
-        IsInstrumentationDockVisible && (IsFocusMode || IsBalancedMode || IsPowerMode || IsAgentChatMode || IsDebugMode);
+        IsInstrumentationDockVisible && UiModeCapabilities.ShowInstrumentationTabs;
 
-    /// <summary>Вкладка «Гипотезы» — только в UI-режиме Debug (ADR 0003).</summary>
-    public bool ShowHypothesesTab => ShowInstrumentationTabs && IsDebugMode;
+    /// <summary>Вкладка «Гипотезы» — семья Debug и capabilities (ADR 0003, ADR 0010).</summary>
+    public bool ShowHypothesesTab =>
+        IsInstrumentationDockVisible
+        && UiModeCapabilities.ShowInstrumentationTabs
+        && UiModeCapabilities.ShowHypothesesTab;
 
     /// <summary>Пункт меню для док-панели инструментирования (можно отключить и в Focus).</summary>
     public bool ShowInstrumentationLayoutMenu => true;
@@ -102,8 +114,11 @@ public partial class MainWindowViewModel
         !string.IsNullOrWhiteSpace(ResultSummary)
         && !string.Equals(ResultSummary, "Результатов пока нет.", StringComparison.Ordinal);
 
-    public bool IsRiskCardVisible => !IsFocusMode && !IsAgentChatMode && IsRiskSummaryVisible;
-    public bool IsResultCardVisible => !IsFocusMode && !IsAgentChatMode && IsResultSummaryVisible;
+    public bool IsRiskCardVisible =>
+        UiModeCapabilities.ShowRiskSummaryCard && IsRiskSummaryVisible;
+
+    public bool IsResultCardVisible =>
+        UiModeCapabilities.ShowResultSummaryCard && IsResultSummaryVisible;
     public bool IsComplexityBadgeVisible => ComplexityBadge > 0;
     public bool IsImpactedTestsBadgeVisible => ImpactedTestsBadge > 0;
     public bool IsActiveTaskProgressVisible => ActiveTaskProgress > 0;
