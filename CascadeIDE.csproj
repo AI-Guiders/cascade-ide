@@ -15,11 +15,9 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
   </PropertyGroup>
-
   <PropertyGroup Condition="'$(GenerateIdeProtocolDocs)'=='true'">
     <DefineConstants>$(DefineConstants);IDE_COMMANDS_CODEGEN</DefineConstants>
   </PropertyGroup>
-
   <ItemGroup>
     <Compile Remove="**/obj/**" />
     <Compile Remove="**/bin/**" />
@@ -28,6 +26,7 @@
     <Compile Remove="CascadeIDE.Tests\**\*.cs" />
     <Compile Remove="samples\**\*.cs" />
     <Compile Remove="tools\**\*.cs" />
+    
     <Folder Include="Models\" />
     <AvaloniaResource Include="Assets\**" />
     <Content Include="Themes\dark-theme.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
@@ -38,7 +37,6 @@
     <Content Include="UiModes\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="TextMateGrammars\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\dotnet-build-test-mcp-repo\DotNetBuildTestParsers\DotNetBuildTestParsers.csproj" />
     <ProjectReference Include="..\agent-notes-core\AgentNotes.Core.csproj" />
@@ -81,7 +79,6 @@
   <ItemGroup>
     <ProjectReference Include="externals\acp-csharp\src\AgentClientProtocol\AgentClientProtocol.csproj" />
   </ItemGroup>
-
   <!-- При RID вывод в net10.0/win-x64/; в корне net10.0/ часто остаётся старый apphost от прошлой сборки — Cursor/проводник открывают его и кажется «древняя» сборка. Удаляем только наши артефакты в корне TFM. -->
   <Target Name="RemoveStaleTfmRootHost" AfterTargets="Build" Condition="'$(RuntimeIdentifier)' != ''">
     <PropertyGroup>
@@ -96,11 +93,11 @@
     </ItemGroup>
     <Delete Files="@(_StaleHost)" ContinueOnError="true" />
   </Target>
-
-  <!-- Keep MCP protocol docs and proxy tool summaries in sync with XML-doc in IdeCommands.cs -->
+  <!-- Keep MCP protocol docs and proxy tool summaries in sync with XML-doc in partial IdeCommands (IdeCommands.cs + IdeCommands.*.cs). -->
   <PropertyGroup>
     <GenerateIdeProtocolDocs Condition="'$(GenerateIdeProtocolDocs)'==''">true</GenerateIdeProtocolDocs>
     <_IdeProtocolDocGenProject>$(MSBuildProjectDirectory)\tools\CascadeIDE.ProtocolDocGen\CascadeIDE.ProtocolDocGen.csproj</_IdeProtocolDocGenProject>
+    <_ProtocolDocGenProgram>$(MSBuildProjectDirectory)\tools\CascadeIDE.ProtocolDocGen\Program.cs</_ProtocolDocGenProgram>
     <_IdeCommandsFile>$(MSBuildProjectDirectory)\Services\IdeCommands.cs</_IdeCommandsFile>
     <_IdeCommandsDocGenerated>$(MSBuildProjectDirectory)\Services\Generated\IdeCommandsDoc.g.cs</_IdeCommandsDocGenerated>
     <_IdeCommandsArgsGenerated>$(MSBuildProjectDirectory)\Services\Generated\IdeCommandsArgsGenerated.g.cs</_IdeCommandsArgsGenerated>
@@ -108,19 +105,220 @@
     <_IdeExecutorGenerated>$(MSBuildProjectDirectory)\ViewModels\Generated\IdeMcpCommandExecutor.Generated.g.cs</_IdeExecutorGenerated>
     <_McpProtocolDoc>$(MSBuildProjectDirectory)\docs\MCP-PROTOCOL.md</_McpProtocolDoc>
   </PropertyGroup>
-
+  <ItemGroup Condition="'$(GenerateIdeProtocolDocs)'=='true'">
+    <_IdeCommandsSources Include="$(MSBuildProjectDirectory)\Services\IdeCommands.cs" />
+    <_IdeCommandsSources Include="$(MSBuildProjectDirectory)\Services\IdeCommands.*.cs" />
+  </ItemGroup>
   <!-- Generate C# doc map BEFORE compilation (required by IdeMcpToolCatalog). -->
-  <Target Name="GenerateIdeCommandsDocCs" BeforeTargets="CoreCompile" Condition="'$(GenerateIdeProtocolDocs)'=='true' and Exists('$(_IdeProtocolDocGenProject)') and Exists('$(_IdeCommandsFile)')" Inputs="$(_IdeCommandsFile)" Outputs="$(_IdeCommandsDocGenerated);$(_IdeCommandsArgsGenerated);$(_IdeCommandsContractGenerated);$(_IdeExecutorGenerated)">
+  <Target Name="GenerateIdeCommandsDocCs" BeforeTargets="CoreCompile" Condition="'$(GenerateIdeProtocolDocs)'=='true' and Exists('$(_IdeProtocolDocGenProject)') and Exists('$(_IdeCommandsFile)')" Inputs="@(_IdeCommandsSources);$(_ProtocolDocGenProgram)" Outputs="$(_IdeCommandsDocGenerated);$(_IdeCommandsArgsGenerated);$(_IdeCommandsContractGenerated);$(_IdeExecutorGenerated)">
     <Exec Command="dotnet run --project &quot;$(_IdeProtocolDocGenProject)&quot; --no-restore -- --cs-only &quot;$(MSBuildProjectDirectory)&quot;" />
   </Target>
-
   <!-- Lint IdeCommands XML-doc contract: require returns for all, example when args exist. -->
   <Target Name="LintIdeCommandsContract" BeforeTargets="CoreCompile" Condition="'$(GenerateIdeProtocolDocs)'=='true' and Exists('$(_IdeProtocolDocGenProject)') and Exists('$(_IdeCommandsFile)')">
     <Exec Command="dotnet run --project &quot;$(_IdeProtocolDocGenProject)&quot; --no-restore -- --lint &quot;$(MSBuildProjectDirectory)&quot;" />
   </Target>
-
   <!-- Generate Markdown protocol doc AFTER build (keeps docs always fresh). -->
-  <Target Name="GenerateMcpProtocolDocMd" AfterTargets="Build" Condition="'$(GenerateIdeProtocolDocs)'=='true' and Exists('$(_IdeProtocolDocGenProject)') and Exists('$(_IdeCommandsFile)') and Exists('$(_McpProtocolDoc)')" Inputs="$(_IdeCommandsFile);$(_McpProtocolDoc)" Outputs="$(_McpProtocolDoc)">
+  <Target Name="GenerateMcpProtocolDocMd" AfterTargets="Build" Condition="'$(GenerateIdeProtocolDocs)'=='true' and Exists('$(_IdeProtocolDocGenProject)') and Exists('$(_IdeCommandsFile)') and Exists('$(_McpProtocolDoc)')" Inputs="@(_IdeCommandsSources);$(_McpProtocolDoc);$(_ProtocolDocGenProgram)" Outputs="$(_McpProtocolDoc)">
     <Exec Command="dotnet run --project &quot;$(_IdeProtocolDocGenProject)&quot; --no-restore -- --md-only &quot;$(MSBuildProjectDirectory)&quot;" />
   </Target>
+  <ItemGroup>
+    <Compile Update="Services\IdeCommands.AgentNotes.cs">
+      <DependentUpon>IdeCommands.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Services\IdeCommands.Chrome.cs">
+      <DependentUpon>IdeCommands.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Services\IdeCommands.DapDebug.cs">
+      <DependentUpon>IdeCommands.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Services\IdeCommands.DebuggerUi.cs">
+      <DependentUpon>IdeCommands.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Services\IdeCommands.Knowledge.cs">
+      <DependentUpon>IdeCommands.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Services\IdeCommands.PowerDocuments.cs">
+      <DependentUpon>IdeCommands.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Services\IdeCommands.BuildTest.cs">
+      <DependentUpon>IdeCommands.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Services\IdeCommands.Git.cs">
+      <DependentUpon>IdeCommands.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Services\IdeCommands.McpAndEditor.cs">
+      <DependentUpon>IdeCommands.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Services\IdeCommands.SolutionWorkspace.cs">
+      <DependentUpon>IdeCommands.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Services\IdeCommands.UiVisibility.cs">
+      <DependentUpon>IdeCommands.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.AgentNotes.cs">
+      <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.Chrome.cs">
+      <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.DapDebug.cs">
+      <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.DebuggerUi.cs">
+      <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.Editor.cs">
+      <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.PowerDocuments.cs">
+      <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="ViewModels\MainWindowViewModel.AutonomousAgent.cs">
+      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="ViewModels\MainWindowViewModel.Breakpoints.cs">
+      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="ViewModels\MainWindowViewModel.CSharpLsp.cs">
+      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="ViewModels\MainWindowViewModel.CursorAcp.cs">
+      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="ViewModels\MainWindowViewModel.DocumentsDock.cs">
+      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="ViewModels\MainWindowViewModel.EditorOllama.cs">
+      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="ViewModels\MainWindowViewModel.IdeMcpActions.AgentNotes.cs">
+      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="ViewModels\MainWindowViewModel.IdeMcpActions.BuildTest.cs">
+      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="ViewModels\MainWindowViewModel.IdeMcpActions.DebuggerPanel.cs">
+      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="ViewModels\MainWindowViewModel.IdeMcpActions.Editor.cs">
+      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="ViewModels\MainWindowViewModel.IdeMcpActions.Git.cs">
+      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="ViewModels\MainWindowViewModel.IdeMcpActions.UiAutomation.cs">
+      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="ViewModels\MainWindowViewModel.IdeMcpActions.Workspace.cs">
+      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="ViewModels\MainWindowViewModel.Presentation.cs">
+      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="ViewModels\MainWindowViewModel.RelayCommands.cs">
+      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="ViewModels\MainWindowViewModel.RelayCommands.Debug.cs">
+      <DependentUpon>MainWindowViewModel.RelayCommands.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="ViewModels\MainWindowViewModel.SettingsReactive.cs">
+      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="ViewModels\MainWindowViewModel.ShellState.cs">
+      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="ViewModels\MainWindowViewModel.SolutionBuild.cs">
+      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="ViewModels\MainWindowViewModel.StartupProject.cs">
+      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="ViewModels\MainWindowViewModel.UiGitWorkspace.cs">
+      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="ViewModels\MainWindowViewModel.ViewBridge.cs">
+      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="ViewModels\ProblemsPanelViewModel.Counts.cs">
+      <DependentUpon>ProblemsPanelViewModel.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
 </Project>

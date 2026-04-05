@@ -54,7 +54,8 @@ if (!Directory.Exists(root))
     return PrintUsage();
 }
 
-var ideCommandsPath = Path.Combine(root, "Services", "IdeCommands.cs");
+var servicesDir = Path.Combine(root, "Services");
+var ideCommandsPath = Path.Combine(servicesDir, "IdeCommands.cs");
 var protocolPath = Path.Combine(root, "docs", "MCP-PROTOCOL.md");
 var generatedCsPath = Path.Combine(root, "Services", "Generated", "IdeCommandsDoc.g.cs");
 var generatedArgsPath = Path.Combine(root, "Services", "Generated", "IdeCommandsArgsGenerated.g.cs");
@@ -72,7 +73,7 @@ if (!File.Exists(protocolPath))
     return PrintUsage();
 }
 
-var items = IdeCommandsParser.Parse(File.ReadAllText(ideCommandsPath, Encoding.UTF8));
+var items = IdeCommandsParser.Parse(IdeCommandsSourceReader.ReadMerged(servicesDir));
 
 if (lintOnly)
 {
@@ -111,6 +112,24 @@ if (!csOnly)
 Console.WriteLine("OK");
 return ExitSuccess;
 
+/// <summary>Склеивает <c>Services/IdeCommands.cs</c> и <c>Services/IdeCommands.*.cs</c> для парсера XML-doc (тот же порядок, что при компиляции partial).</summary>
+internal static class IdeCommandsSourceReader
+{
+    public static string ReadMerged(string servicesDir)
+    {
+        var mainPath = Path.Combine(servicesDir, "IdeCommands.cs");
+        var sb = new StringBuilder();
+        sb.Append(File.ReadAllText(mainPath, Encoding.UTF8));
+        foreach (var path in Directory.GetFiles(servicesDir, "IdeCommands.*.cs").OrderBy(p => p, StringComparer.OrdinalIgnoreCase))
+        {
+            sb.Append('\n');
+            sb.Append(File.ReadAllText(path, Encoding.UTF8));
+        }
+
+        return sb.ToString();
+    }
+}
+
 internal sealed record IdeCommandDoc(string FieldName, string CommandId, string? Summary, string Category);
 
 internal readonly record struct IdeCommandArg(string Name, string JsonType, bool Required, bool IsArray, string? ItemJsonType);
@@ -141,7 +160,7 @@ internal static class IdeCommandsParser
                 continue;
             }
 
-            // Category separators in IdeCommands.cs:
+            // Category separators (lines // ——— …) in merged IdeCommands sources:
             if (line.StartsWith("// ———", StringComparison.Ordinal))
             {
                 category = line.TrimStart('/').Trim().Trim('—', ' ', '\t');
@@ -637,7 +656,7 @@ internal static class ProtocolMdEmitter
     {
         var sb = new StringBuilder();
         sb.AppendLine();
-        sb.AppendLine("> Этот блок сгенерирован из XML-doc в `Services/IdeCommands.cs`.");
+        sb.AppendLine("> Этот блок сгенерирован из XML-doc в частичном классе `IdeCommands`: `Services/IdeCommands.cs` и `Services/IdeCommands.*.cs` (склейка как в генераторе).");
         sb.AppendLine();
 
         foreach (var grp in items.GroupBy(i => i.Category, StringComparer.Ordinal))

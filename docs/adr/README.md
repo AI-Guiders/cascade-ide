@@ -24,6 +24,8 @@
 | [0014](0014-situational-checklists.md) | Ситуационные чеклисты (модель, триггеры, UI; родитель — 0013) | Accepted (направление) |
 | [0015](0015-editor-toml-syntax-highlighting.md) | Подсветка TOML в редакторе (шипнутый TextMate-пакет taplo; не LSP в v1) | Accepted |
 | [0016](0016-agent-client-protocol-external-agent.md) | Внешний агент по ACP (stdio, Cursor CLI); вендор SDK; UTF-8; ортогонально MCP | Accepted |
+| [0017](0017-multi-window-workspace-and-agent-surfaces.md) | Несколько окон приложения, зоны экрана, поверхности агента; MCP multi-root в scope | Proposed |
+| [0018](0018-ide-commands-canonical-xml-documentation.md) | Каноничные XML-доки для `IdeCommands` и ProtocolDocGen (вместо мини-языка только в summary) | Proposed |
 
 ## Соглашения
 
