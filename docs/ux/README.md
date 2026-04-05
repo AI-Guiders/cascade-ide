@@ -7,7 +7,8 @@
 | Файл                                    | Назначение                                                                                                       |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | `README.md`                             | Этот файл — оглавление UX-набора.                                                                                |
-| `cascade-ide-ui-layout-v1.md`           | Описание макета главного окна: зоны, панели, грид, режимы (Focus / Balanced / Power), ключевые контролы для MCP. |
+| `cascade-ide-ui-layout-v1.md`           | Описание макета главного окна: зоны, панели, грид, режимы, ключевые контролы для MCP. |
+| `ui-modes-overview-v1.md`               | Краткий обзор режимов: id vs семья, TOML, связь с VM/XAML; детали — ADR 0010. |
 | `cascade-ide-main-window-wireframe.png` | Макет-картинка (wireframe) главного окна.                                                                        |
 | `concept-screens/`                      | Скрины из чатов: референсы детального хрома UI. См. `concept-screens/README.md` (напр. `power-project-explorer-tree-concept.png`). |
 | `concept-generated/`                    | Сгенерированные агентом UI-концепты CascadeIDE (Focus/Balanced/Power “cockpit”).                                 |
@@ -41,6 +42,6 @@
 
 ## Связь с кодом
 
-- **Режимы UI:** Focus / Balanced / Power — переключение из меню «Вид → Режим интерфейса» и хоткеи `Alt+1` / `Alt+2` / `Alt+3`, `Ctrl+Alt+M`. В Power-режиме видимы Task Bar, Quick Actions, Telemetry; в Focus — минимум отвлечений.
+- **Режимы UI:** встроенные пресеты Focus / Balanced / Power / Agent Chat / Debug — меню «Вид → Режим интерфейса», комбо в тулбаре, хоткеи цикла `Alt+1` / `Alt+2` / `Alt+3`, `Ctrl+Alt+M`. Поведение и данные: **`ui-modes-overview-v1.md`**, контракт TOML — **[ADR 0010](../adr/0010-ui-modes-toml-configuration.md)**. В Power — task bar, Quick Actions (capability), телеметрия кокпита; в Focus — минимум отвлечений.
 - **Темы:** меню «Вид → Тема» (светлая, тёмная, как Cursor, **Power классическая (циан)**); при входе в режим **Power** по умолчанию подставляется **`Themes/power-cockpit-concept-theme.json`** (палитра ближе к `concept-generated/cascadeide-ui-concept-power.png`); прежняя циановая Power — пункт меню. Тул `ide_set_ui_theme` меняет тему из MCP.
 - **Панели:** Solution Explorer, Build Output, Chat, Terminal — скрываемые; имена контролов для MCP см. в `cascade-ide-ui-layout-v1.md`.

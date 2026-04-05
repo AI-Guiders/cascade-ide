@@ -22,9 +22,9 @@ This map is intended to drive incremental alignment work with clear acceptance c
 
 | Concept element | XAML control (x:Name / binding) | VM property/command | Status | Notes |
 |---|---|---|---|---|
-| Main grid columns (left / center / right) | `MainGrid` `ColumnDefinitions="220,4,*,4,340"` | `IsSolutionExplorerVisible`, `IsChatPanelExpanded` | ✅ | Chat width adjusted in code-behind (Power=420, else 340). |
+| Main grid columns (left / center / right) | `MainGrid` `ColumnDefinitions="220,4,*,4,340"` | `IsSolutionExplorerVisible`, `IsChatPanelExpanded` | ✅ | Ширина чата: рантайм + правила семьи; глобальные числа — `UiModes/workspace.toml` / `UiWorkspaceLayoutRuntimeMetrics` (см. ADR 0010). |
 | Mode hotkeys | `<Window.KeyBindings>` | `SetFocusModeCommand`, `SetBalancedModeCommand`, `SetPowerModeCommand`, `CycleUiModeCommand` | ✅ | `Alt+1/2/3`, `Ctrl+Alt+M`. |
-| Mode switch UI | Toolbar ComboBox + menu radio items | `UiMode`, `UiModeOptionsList` | ✅ | `ModeBadge` adds `.power` class when `IsPowerMode`. |
+| Mode switch UI | Toolbar ComboBox + menu radio items | `UiMode`, `UiModeOptionsList` | ✅ | `ModeBadge`: классы `.power` / `.agentchat` / `.debug` от **`UiModeFamily`** (`UiModeFamilyEq` + параметр enum). |
 
 ---
 
@@ -36,7 +36,7 @@ This map is intended to drive incremental alignment work with clear acceptance c
 | Minimal left navigation | `SolutionExplorerBorder` | `IsSolutionExplorerVisible` | ✅ | Toggle via menu. |
 | Dominant editor | `Editor` (`AvaloniaEdit`) | `EditorText`, `CurrentFilePath` | ✅ | Inline markdown preview (`InlinePreviewBorder`). |
 | Agent panel (plan / next / confirmation) | `ChatPanelView` rows 0–1, 3 | `FocusPlanItems`, `NextActionSummary`, confirm commands | ✅ | Отдельные карточки в Focus; полный блок «Agent Operations» — в Balanced (`ShowAgentOperationsBlock`). |
-| Bottom status pills (Build/Test/Debug/Git) | `TelemetryStripView` (`!IsPowerMode`) | `TelemetryBuildText`, `TelemetryTestsText`, `TelemetryDebugText`, `TelemetryGitText` | ✅ | Компактная полоса под редактором для Focus/Balanced. |
+| Bottom status pills (Build/Test/Debug/Git) | `TelemetryStripView` (`UiModeFamilyNe` + `Power`) | `TelemetryBuildText`, `TelemetryTestsText`, `TelemetryDebugText`, `TelemetryGitText` | ✅ | Компактная полоса под редактором, когда семья **не** Power (Focus/Balanced/AgentChat/Debug и т.д.). |
 | Док инструментирования (События / Тесты / Отладка) | `BottomPanelView` tabs | `ShowInstrumentationTabs`, `IsInstrumentationDockVisible` | ✅ | В Focus доступны при включённом доке (меню «Док инструментирования»); детали — вкладки, сводка — полоса телеметрии. |
 | Карточка Safety L1–L3 | `ChatPanelView` row 5 (`modeCard` / Power: `safetyLevelIsland`) | `ShowSafetyControls`, `SetSafetyL*Command` | ✅ | Focus/Balanced — компактные кнопки; Power — отдельная панель-док, объёмные L1–L3 с тенью. |
 
@@ -46,7 +46,7 @@ This map is intended to drive incremental alignment work with clear acceptance c
 
 | Concept element | XAML control | VM property/command | Status | Notes |
 |---|---|---|---|---|
-| Quick actions | `TaskCockpitView` | `FixFailingTestsCommand`, …, `ShowQuickActions` | ✅ | `ShowQuickActions => IsBalancedMode`. |
+| Quick actions | `TaskCockpitView` | `FixFailingTestsCommand`, …, `QuickActions` | ✅ | **`QuickActions`** на VM из **`Capabilities.QuickActions`** (TOML `quick_actions`, дефолты по семье; у Balanced обычно true). |
 | Editor badges (Complexity / Impacted / Files) | `TaskCockpitView` | `ComplexityBadge`, `ImpactedTestsBadge`, `FilesChangedBadge` | 🟨 | **Реальные эвристики:** строки текущего файла на диске; упавшие тесты последнего `dotnet test`; число путей из `git status --short`. Подсказки на бейджах в XAML. |
 | Agent operations card | `ChatPanelView` row 2 | `ShowAgentOperationsBlock` | ✅ | Balanced only. |
 | Build/Test/Debug + event timeline | `TelemetryStripView` (Power cockpit) + вкладка «События» | `EventTimeline`, `IsTerminalVisible` | ✅ | В Power дубль телеметрии на вкладке «Терминал» отключён (`ShowPowerTelemetryOnTerminalTab`), чтобы не сжимать консоль; лента — «События». |
@@ -93,4 +93,4 @@ This map is intended to drive incremental alignment work with clear acceptance c
 5. **Хром дерева решения (Power):** сделано стилями на `TreeViewItem` + кисти; при необходимости — **полный** кастомный шаблон `TreeViewItem`, если тема Fluent перекрывает `Background`/`BorderThickness`.
 6. **Редактор / трасса / телеметрия:** точечное выравнивание с PNG-концептами по приоритету (см. §4.1).
 
-Версия карты: **2026-03-20** (§4.1: дерево решения Power — тёмная панель, акцент выбора, хром заголовков; референс `concept-screens/power-project-explorer-tree-concept.png`).
+Версия карты: **2026-04-02** (термины режима: `UiModeFamily` / capabilities вместо `Is*Mode`; §4.1 без изменений по смыслу).
