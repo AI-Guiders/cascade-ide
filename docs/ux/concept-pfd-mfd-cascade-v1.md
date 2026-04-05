@@ -107,7 +107,7 @@
 
 **Итог:** мультиоконность и три монитора усиливают PFD/MFD; внешний агент и Cursor — **соседние приборные панели**, а не обязательные элементы внутри одного макета. Концепт остаётся читаемым, если не требовать, что «весь интеллект» живёт только внутри правой колонки Cascade.
 
-**Технический слой (отдельно):** связь IDE↔внешний агент по стандарту **Agent Client Protocol** — см. заметку [`note-acp-cascade-cursor-v1.md`](note-acp-cascade-cursor-v1.md); локальный smoke без Cursor — [`samples/AcpSmoke/README.md`](../../samples/AcpSmoke/README.md).
+**Технический слой (отдельно):** связь IDE↔внешний агент по стандарту **Agent Client Protocol** — архитектурное решение после PoC: **[ADR 0016](../adr/0016-agent-client-protocol-external-agent.md)**; заметка [`note-acp-cascade-cursor-v1.md`](note-acp-cascade-cursor-v1.md); локальный smoke без Cursor — [`samples/AcpSmoke/README.md`](../../samples/AcpSmoke/README.md).
 
 ---
 
@@ -120,10 +120,10 @@
 - **Agent Client Protocol (ACP)** — провод между IDE и внешним агентом (stdio, JSON-RPC). Это **не** слой PFD/MFD; с PFD/MFD связан лишь опосредованно (куда вынести чат, §8).
 - **MCP** — другой контур (сервер инструментов, в т.ч. `--mcp-stdio` к IDE). Тоже **не** определение PFD/MFD.
 
-Ниже — удобная таблица «что сделано / что дальше» по продукту; держать её можно здесь или вынести в отдельный трекинг-док.
+Ниже — краткий снимок; **решение по ACP после PoC** зафиксировано в **[ADR 0016](../adr/0016-agent-client-protocol-external-agent.md)**.
 
 | Тема | Статус |
 | ---- | ------ |
-| **Cursor ACP** (внешний `cursor-agent` по stdio, ответы во встроенном чате) | Работает: провайдер в настройках, путь к `cursor-agent.cmd` / `dist-package`, UTF-8 для перенаправленных потоков. SDK: `externals/acp-csharp`. Детали — [`note-acp-cascade-cursor-v1.md`](note-acp-cascade-cursor-v1.md). |
+| **Cursor ACP** (внешний `cursor-agent` по stdio, ответы во встроенном чате) | PoC принят → **Accepted** в [ADR 0016](../adr/0016-agent-client-protocol-external-agent.md). Провайдер в настройках, путь к `cursor-agent.cmd` / `dist-package`, UTF-8 stdio, вендор SDK в `externals/acp-csharp`. См. также [`note-acp-cascade-cursor-v1.md`](note-acp-cascade-cursor-v1.md). |
 | **MCP к IDE** (`--mcp-stdio`, каталог инструментов для агента) | Следующая доработка; ортогонально PFD/MFD и ортогонально самому факту ACP (другой протокол/роль). |
 | **Чат** (контекст, глубина истории, как вписан в раскладку) | Итерации по UX; раскладка чата по §5–§8 — это уже про PFD/MFD; «провод» к агенту — про ACP/MCP выше. |

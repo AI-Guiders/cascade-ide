@@ -30,6 +30,7 @@
 | Поверхность команд, палитра, минимальный toolbar; не смешивать с размещением хрома | [0013](adr/0013-command-surface-and-discoverability.md) |
 | Ситуационные чеклисты (каталог, триггеры, карточка UI) | [0014](adr/0014-situational-checklists.md) |
 | Подсветка TOML в редакторе (шипнутый TextMate-пакет; LSP — отдельно) | [0015](adr/0015-editor-toml-syntax-highlighting.md) |
+| Внешний агент по ACP (stdio, Cursor CLI), не путать с MCP-сервером IDE | [0016](adr/0016-agent-client-protocol-external-agent.md) |
 
 Полный индекс: [docs/adr/README.md](adr/README.md).
 
@@ -56,4 +57,5 @@
 - **v1.6** — в таблицу ADR добавлен [0013](adr/0013-command-surface-and-discoverability.md) (палитра команд, discoverability, минимальный toolbar).  
 - **v1.7** — уточнён [0013](adr/0013-command-surface-and-discoverability.md); добавлен [0014](adr/0014-situational-checklists.md) (ситуационные чеклисты отдельно от палитры/toolbar).  
 - **v1.8** — добавлен [0015](adr/0015-editor-toml-syntax-highlighting.md) (подсветка TOML в редакторе через TextMate; не LSP в v1).  
+- **v1.9** — добавлен [0016](adr/0016-agent-client-protocol-external-agent.md) (внешний агент по Agent Client Protocol, stdio, Cursor CLI; PoC принят).  
 - Изменения направления — отдельным коммитом: обновление этого файла и при необходимости новый ADR в [docs/adr/README.md](adr/README.md).
