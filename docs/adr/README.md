@@ -18,6 +18,9 @@
 | [0008](0008-mcp-contracts-and-testable-infrastructure.md) | Контракты MCP и тестируемая инфраструктура | Accepted |
 | [0009](0009-strangler-migration-and-exceptions.md) | Strangler-миграция и исключения для spike | Accepted |
 | [0010](0010-ui-modes-toml-configuration.md) | Данные UI-режимов в TOML | Accepted (загрузчик и файлы — по плану в ADR) |
+| [0011](0011-debug-situational-awareness.md) | Ситуационная осведомлённость в отладке (полоска, hover; детали в панели) | Accepted (направление) |
+| [0012](0012-floating-workspace-chrome.md) | Плавающий и отцепляемый хром workspace (телеметрия, полоски; не доки в v1) | Accepted (направление) |
+| [0013](0013-command-surface-and-discoverability.md) | Поверхность команд и discoverability (палитра, чеклисты, минимальный toolbar) | Accepted (направление) |
 
 ## Соглашения
 

@@ -24,8 +24,10 @@
 | Контракты MCP, тестируемые абстракции для git/процессов | [0008](adr/0008-mcp-contracts-and-testable-infrastructure.md) |
 | Strangler-миграция, когда можно отклоняться от политики | [0009](adr/0009-strangler-migration-and-exceptions.md) |
 | Динамические плагины (MEF) — не ближайшая цель | [0005](adr/0005-defer-dynamic-plugins-mef.md) |
-| Отладка: паритет человек/агент; Debug UI; гипотезы в JSON | [0002](adr/0002-debug-human-agent-parity.md), [0003](adr/0003-debug-ui-mode-separate-from-power.md), [0001](adr/0001-debug-hypotheses-json-storage.md) |
+| Отладка: паритет человек/агент; Debug UI; гипотезы в JSON; осведомлённость без «только нижняя панель» | [0002](adr/0002-debug-human-agent-parity.md), [0003](adr/0003-debug-ui-mode-separate-from-power.md), [0001](adr/0001-debug-hypotheses-json-storage.md), [0011](adr/0011-debug-situational-awareness.md) |
 | Конфигурация UI-режимов (TOML), принято; реализация — по ADR | [0010](adr/0010-ui-modes-toml-configuration.md) |
+| Плавающий/отцепляемый хром workspace (нижняя зона, телеметрия; не floating доки в v1) | [0012](adr/0012-floating-workspace-chrome.md) |
+| Поверхность команд, палитра, discoverability (чеклисты); не смешивать с размещением хрома | [0013](adr/0013-command-surface-and-discoverability.md) |
 
 Полный индекс: [docs/adr/README.md](adr/README.md).
 
@@ -47,4 +49,7 @@
 - **v1.1** — целевой каталог `Features/`, ссылка на architecture-migration; git через `IGitCommandRunner`.  
 - **v1.2** — план событий и UI-потока; MEF отложен.  
 - **v1.3** — политика свёрнута в **навигатор**; расширенная логика вынесена в ADR 0006–0009 (и ранее 0001–0005).  
+- **v1.4** — в таблицу ADR добавлен [0011](adr/0011-debug-situational-awareness.md) (отладка: осведомлённость без опоры только на нижнюю панель).  
+- **v1.5** — в таблицу ADR добавлен [0012](adr/0012-floating-workspace-chrome.md) (плавающий хром workspace).  
+- **v1.6** — в таблицу ADR добавлен [0013](adr/0013-command-surface-and-discoverability.md) (палитра команд, discoverability, минимальный toolbar).  
 - Изменения направления — отдельным коммитом: обновление этого файла и при необходимости новый ADR в [docs/adr/README.md](adr/README.md).
