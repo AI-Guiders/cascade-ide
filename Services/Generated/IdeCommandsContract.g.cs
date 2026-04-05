@@ -80,6 +80,7 @@ internal static class IdeCommandsContractGenerated
         ["move_document_to_group_2"] = IdeReturnKind.Text,
         ["move_document_to_group_3"] = IdeReturnKind.Text,
         ["open_file"] = IdeReturnKind.Text,
+        ["open_file_dialog"] = IdeReturnKind.Text,
         ["open_preview_window"] = IdeReturnKind.Text,
         ["open_settings"] = IdeReturnKind.Text,
         ["open_solution_dialog"] = IdeReturnKind.Text,

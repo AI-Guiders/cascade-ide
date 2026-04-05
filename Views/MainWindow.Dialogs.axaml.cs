@@ -150,6 +150,46 @@ public partial class MainWindow
         }
     }
 
+    private async Task ShowOpenFileDialogAsync()
+    {
+        var options = new FilePickerOpenOptions
+        {
+            Title = "Открыть файл",
+            AllowMultiple = false,
+            FileTypeFilter =
+            [
+                new FilePickerFileType("Все файлы") { Patterns = ["*"] },
+                new FilePickerFileType("Текст и код")
+                {
+                    Patterns =
+                    [
+                        "*.cs", "*.xaml", "*.axaml", "*.json", "*.toml", "*.md", "*.xml", "*.txt",
+                        "*.csproj", "*.sln", "*.slnx", "*.css", "*.js", "*.ts"
+                    ]
+                }
+            ]
+        };
+        if (DataContext is ViewModels.MainWindowViewModel vmStart && !string.IsNullOrEmpty(vmStart.Workspace.SolutionPath))
+        {
+            var dir = Path.GetDirectoryName(vmStart.Workspace.SolutionPath);
+            if (!string.IsNullOrEmpty(dir) && Directory.Exists(dir))
+            {
+                var folder = await StorageProvider.TryGetFolderFromPathAsync(dir).ConfigureAwait(true);
+                if (folder != null)
+                    options.SuggestedStartLocation = folder;
+            }
+        }
+
+        var files = await StorageProvider.OpenFilePickerAsync(options);
+        if (files.Count == 0 || DataContext is not ViewModels.MainWindowViewModel vm)
+            return;
+        var path = files[0].TryGetLocalPath() ?? files[0].Path.LocalPath;
+        if (string.IsNullOrEmpty(path) || !File.Exists(path))
+            return;
+        var normalized = Path.GetFullPath(path);
+        vm.Documents.OpenOrActivateDocument(normalized);
+    }
+
     private Task<string> ShowConfirmationDialogAsync(string message, CancellationToken cancellationToken)
     {
         var tcs = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);

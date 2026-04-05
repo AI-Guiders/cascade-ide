@@ -16,6 +16,12 @@ public partial class MainWindowViewModel
     }
 
     [RelayCommand]
+    private void OpenFileFromDialog()
+    {
+        RequestOpenFile?.Invoke();
+    }
+
+    [RelayCommand]
     private void Exit()
     {
         RequestClose?.Invoke();

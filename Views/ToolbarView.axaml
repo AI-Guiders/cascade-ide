@@ -9,6 +9,7 @@
         VerticalScrollBarVisibility="Disabled">
         <StackPanel Orientation="Horizontal" Spacing="8" Background="{DynamicResource CascadeTheme.ToolbarBackground}">
             <Button x:Name="OpenSolutionButton" Content="Открыть решение" Command="{Binding OpenSolutionCommand}"/>
+            <Button Content="Открыть файл" Command="{Binding OpenFileFromDialogCommand}" ToolTip.Tip="Открыть произвольный файл в редакторе"/>
             <StackPanel Orientation="Horizontal" Spacing="6" IsVisible="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Focus}">
                 <Button Content="Запуск (сборка)" Command="{Binding BuildSolutionCommand}" IsEnabled="{Binding !IsBuilding}"/>
                 <Button Content="Контрольная точка" Command="{Binding FocusCheckpointCommand}"/>

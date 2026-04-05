@@ -80,6 +80,7 @@ internal static class IdeCommandsDoc
         ["move_document_to_group_2"] = "Переместить документ в группу 2. args: file_path:string; returns: text; example: {\"file_path\":\"C:\\\\tmp\\\\a.cs\"}.",
         ["move_document_to_group_3"] = "Переместить документ в группу 3. args: file_path:string; returns: text; example: {\"file_path\":\"C:\\\\tmp\\\\a.cs\"}.",
         ["open_file"] = "Открыть файл в редакторе IDE. args: path:string; returns: text; example: {\"path\":\"C:\\\\tmp\\\\a.txt\"}.",
+        ["open_file_dialog"] = "Открыть диалог выбора файла и показать его в редакторе (как меню Файл → Открыть файл...). returns: text.",
         ["open_preview_window"] = "Открыть отдельное окно превью (Markdown). returns: text.",
         ["open_settings"] = "Открыть окно настроек. returns: text.",
         ["open_solution_dialog"] = "Открыть диалог выбора решения (как меню Файл → Открыть решение...). returns: text.",

@@ -156,6 +156,12 @@ internal sealed partial class IdeMcpCommandExecutor
                 _vm.OpenSolutionCommand.Execute(null);
             return "OK";
         });
+        add(Services.IdeCommands.OpenFileDialog, async (_, _) =>
+        {
+            if (_vm.OpenFileFromDialogCommand.CanExecute(null))
+                _vm.OpenFileFromDialogCommand.Execute(null);
+            return "OK";
+        });
         add(Services.IdeCommands.ExitApplication, async (_, _) =>
         {
             if (_vm.ExitCommand.CanExecute(null))

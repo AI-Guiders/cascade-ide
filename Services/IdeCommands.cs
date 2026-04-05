@@ -82,6 +82,8 @@ public static class IdeCommands
     // ——— Меню «Файл» / приложение (те же RelayCommand, что в UI)
     /// <summary>Открыть диалог выбора решения (как меню Файл → Открыть решение...). returns: text.</summary>
     public const string OpenSolutionDialog = "open_solution_dialog";
+    /// <summary>Открыть диалог выбора файла и показать его в редакторе (как меню Файл → Открыть файл...). returns: text.</summary>
+    public const string OpenFileDialog = "open_file_dialog";
     /// <summary>Закрыть приложение (как меню Файл → Выход). returns: none.</summary>
     public const string ExitApplication = "exit_application";
 
