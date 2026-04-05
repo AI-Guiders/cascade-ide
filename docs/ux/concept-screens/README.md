@@ -6,3 +6,4 @@ PNG из чатов и обсуждений макетов — **не** авто
 |------|------------|
 | `power-project-explorer-tree-concept.png` | Крупный фрагмент Power: стиль дерева проекта (**PROJECT EXPLORER**): тёмный фон, бирюзовая полоска выделения, отступы строк, иконки типов файлов. Сравнение с кодом — `concept-to-implementation-map-v1.md` §4.1. |
 | `cascade-ide-checklist-ui-concept.png` | **Концепт (генерация):** ситуационный чеклист как компактная карточка поверх редактора; см. [ADR 0013](../../adr/0013-command-surface-and-discoverability.md) (мини-чеклисты, не палитра). |
+| `checklist-ui-concept-v2.png` | **Концепт (генерация):** вторая версия мокапа чеклиста (альтернативные подписи шагов); см. [ADR 0013](../../adr/0013-command-surface-and-discoverability.md). |
