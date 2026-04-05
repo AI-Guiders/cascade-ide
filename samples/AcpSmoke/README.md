@@ -25,6 +25,10 @@ python smoke_client.py
 | `smoke_client.py` | Минимальный клиент через `spawn_agent_process` из пакета `acp`. |
 | `requirements.txt` | Зависимость `agent-client-protocol`. |
 
+## Вариант на .NET
+
+Тот же сценарий с тем же `echo_agent.py`: [`samples/AcpSmokeDotnet`](../AcpSmokeDotnet/README.md) (`dotnet run`, пакет `AgentClientProtocol`).
+
 ## Cursor и Cascade
 
 Подключение **Cursor как ACP-агента** к JetBrains описано у Cursor ([блог](https://cursor.com/blog/jetbrains-acp)); для Cascade см. заметку [`docs/ux/note-acp-cascade-cursor-v1.md`](../../docs/ux/note-acp-cascade-cursor-v1.md). Этот smoke **не** подставляет бинарник Cursor — только проверяет протокол на референс-агенте.

@@ -40,7 +40,10 @@
 
 ## 5. Локальный smoke (репозиторий)
 
-В [`samples/AcpSmoke/README.md`](../../samples/AcpSmoke/README.md) — минимальный Python-клиент + эталонный `echo_agent` из upstream: проверка, что цепочка `initialize` → `new_session` → `prompt` работает на машине разработчика. Это **не** замена интеграционного теста с Cursor.
+- [`samples/AcpSmoke/README.md`](../../samples/AcpSmoke/README.md) — Python-клиент (`agent-client-protocol` на PyPI) + эталонный `echo_agent` из upstream.
+- [`samples/AcpSmokeDotnet/README.md`](../../samples/AcpSmokeDotnet/README.md) — тот же сценарий клиентом на **.NET** (NuGet [`AgentClientProtocol`](https://www.nuget.org/packages/AgentClientProtocol), неофициальный SDK).
+
+Проверяется, что цепочка `initialize` → `new_session` → `prompt` работает на машине разработчика. Это **не** замена интеграционного теста с Cursor.
 
 ---
 
@@ -48,5 +51,5 @@
 
 - [Introduction](https://agentclientprotocol.com/get-started/introduction.md)
 - [Initialization](https://agentclientprotocol.com/protocol/initialization.md), [Prompt turn](https://agentclientprotocol.com/protocol/prompt-turn.md)
-- [Python SDK](https://agentclientprotocol.com/libraries/python.md), [TypeScript SDK](https://agentclientprotocol.com/libraries/typescript.md)
+- [Python SDK](https://agentclientprotocol.com/libraries/python.md), [TypeScript SDK](https://agentclientprotocol.com/libraries/typescript.md); для C# в smoke используется community-пакет на NuGet (см. §5).
 - Список [клиентов и редакторов](https://agentclientprotocol.com/get-started/clients.md)

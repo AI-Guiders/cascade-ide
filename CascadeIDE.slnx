@@ -2,4 +2,5 @@
   <Project Path="CascadeIDE.csproj" />
   <Project Path="CascadeIDE.Tests\CascadeIDE.Tests.csproj" />
   <Project Path="samples\DebugTarget\DebugTarget.csproj" />
+  <Project Path="samples\AcpSmokeDotnet\AcpSmokeDotnet.csproj" />
 </Solution>
