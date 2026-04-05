@@ -23,6 +23,8 @@
   <ItemGroup>
     <Compile Remove="**/obj/**" />
     <Compile Remove="**/bin/**" />
+    <!-- Внешний субмодуль/вендор: не компилировать в IDE (иначе sandbox с top-level Main перехватывает входную точку). -->
+    <Compile Remove="externals\**\*.cs" />
     <Compile Remove="CascadeIDE.Tests\**\*.cs" />
     <Compile Remove="samples\**\*.cs" />
     <Compile Remove="tools\**\*.cs" />
@@ -75,6 +77,9 @@
     <PackageReference Include="TextMateSharp" Version="2.0.3" />
     <PackageReference Include="TextMateSharp.Grammars" Version="2.0.3" />
     <PackageReference Include="Tomlyn" Version="2.3.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="externals\acp-csharp\src\AgentClientProtocol\AgentClientProtocol.csproj" />
   </ItemGroup>
 
   <!-- При RID вывод в net10.0/win-x64/; в корне net10.0/ часто остаётся старый apphost от прошлой сборки — Cursor/проводник открывают его и кажется «древняя» сборка. Удаляем только наши артефакты в корне TFM. -->

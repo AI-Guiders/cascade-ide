@@ -26,3 +26,8 @@ Data/
 
 # Локальные скрипты правок ADR (не шипить)
 docs/adr/_patch_*.py
+
+# Cursor agent CLI (качается с downloads.cursor.com / снимок реестра ACP)
+.tools/cursor-agent-win-x64.zip
+.tools/cursor-agent-package/
+.tools/acp-registry-snapshot.json

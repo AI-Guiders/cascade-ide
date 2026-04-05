@@ -169,6 +169,7 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(IsAnthropicSelected))]
     [NotifyPropertyChangedFor(nameof(IsOpenAiSelected))]
     [NotifyPropertyChangedFor(nameof(IsDeepSeekSelected))]
+    [NotifyPropertyChangedFor(nameof(IsCursorAcpSelected))]
     [NotifyPropertyChangedFor(nameof(CurrentModelDisplay))]
     private string _activeAiProvider = "Ollama";
 
@@ -176,6 +177,7 @@ public partial class MainWindowViewModel
     public bool IsAnthropicSelected => ActiveAiProvider == "Anthropic";
     public bool IsOpenAiSelected => ActiveAiProvider == "OpenAI";
     public bool IsDeepSeekSelected => ActiveAiProvider == "DeepSeek";
+    public bool IsCursorAcpSelected => ActiveAiProvider == "CursorACP";
 
     /// <summary>Отображаемое имя модели (для облачных — из настроек).</summary>
     public string CurrentModelDisplay => ActiveAiProvider switch
@@ -183,6 +185,7 @@ public partial class MainWindowViewModel
         "Anthropic" => _settings.AnthropicModelId,
         "OpenAI" => _settings.OpenAiModelId,
         "DeepSeek" => _settings.DeepSeekModelId,
+        "CursorACP" => "Cursor ACP",
         _ => SelectedOllamaModel ?? _settings.PreferredOllamaModel ?? ""
     };
 

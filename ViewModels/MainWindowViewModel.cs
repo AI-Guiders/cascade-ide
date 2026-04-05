@@ -36,7 +36,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private CascadeIdeSettings? _lastSavedSettings;
     private AiKeys? _lastSavedAiKeys;
 
-    public static readonly IReadOnlyList<string> AiProviderKeys = ["Ollama", "Anthropic", "OpenAI", "DeepSeek"];
+    public static readonly IReadOnlyList<string> AiProviderKeys = ["Ollama", "Anthropic", "OpenAI", "DeepSeek", "CursorACP"];
     public IReadOnlyList<string> AiProviderKeysList => AiProviderKeys;
 
     private readonly Services.CSharpLanguageService _csharpLanguageService;
@@ -61,6 +61,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _ideMcpServerEnabled = _settings.IdeMcpServerEnabled;
         _externalMcpServersJson = _settings.ExternalMcpServersJson;
         _activeAiProvider = _settings.ActiveAiProvider;
+        _cursorAcpAgentPath = _settings.CursorAcpAgentPath ?? "";
         _anthropicApiKey = _aiKeys.AnthropicApiKey ?? "";
         _openAiApiKey = _aiKeys.OpenAiApiKey ?? "";
         _deepSeekApiKey = _aiKeys.DeepSeekApiKey ?? "";
@@ -89,7 +90,15 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             () => SelectedOllamaModel,
             () => UseMinimizedContext,
             () => CurrentFilePath,
-            () => EditorText);
+            () => EditorText,
+            GetWorkspacePath,
+            () => CursorAcpAgentPath,
+            appendAcpTerminal: text => UiScheduler.Default.Post(() => TerminalPanel.AppendOutput(text)),
+            showAcpTerminal: () => UiScheduler.Default.Post(() =>
+            {
+                if (ShowTerminalPanelCommand.CanExecute(null))
+                    ShowTerminalPanelCommand.Execute(null);
+            }));
         InstrumentationPanel = new InstrumentationPanelViewModel();
         InstrumentationPanel.PropertyChanged += OnInstrumentationPanelPropertyChanged;
         HypothesesPanel = new HypothesesPanelViewModel(GetWorkspacePath);
@@ -256,6 +265,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             "Anthropic" => (new Services.AnthropicProvider(_aiKeys.AnthropicApiKey ?? "", _settings.AnthropicModelId), _settings.AnthropicModelId),
             "OpenAI" => (new Services.OpenAiCompatibleProvider(_settings.OpenAiBaseUrl, _aiKeys.OpenAiApiKey ?? "", _settings.OpenAiModelId), _settings.OpenAiModelId),
             "DeepSeek" => (new Services.OpenAiCompatibleProvider(_settings.DeepSeekBaseUrl, _aiKeys.DeepSeekApiKey ?? "", _settings.DeepSeekModelId), _settings.DeepSeekModelId),
+            "CursorACP" => (null, ""),
             _ => (new Services.OllamaProvider(_ollama), SelectedOllamaModel ?? _settings.PreferredOllamaModel)
         };
     }
@@ -293,6 +303,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         if (string.IsNullOrWhiteSpace(value))
             ClearStartupProjectInMemoryOnly();
 
+        ChatPanel.DisposeCursorAcpSession();
         AttachBreakpointsFileWatcher(value);
         _ = RefreshGitSummaryAsync();
         _ = GitPanel.RefreshRepositoryFlagAsync();

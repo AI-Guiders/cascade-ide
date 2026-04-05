@@ -38,6 +38,11 @@ public sealed class CascadeIdeSettings : ModelBase
     /// <summary>Модель DeepSeek (например deepseek-chat).</summary>
     public string DeepSeekModelId { get; set; } = "deepseek-chat";
 
+    /// <summary>
+    /// Путь к <c>cursor-agent.cmd</c> из архива Cursor ACP или к каталогу, где лежит <c>dist-package\cursor-agent.cmd</c>.
+    /// </summary>
+    public string CursorAcpAgentPath { get; set; } = "";
+
     /// <summary>Видимость панели «Решение» (Solution Explorer).</summary>
     public bool SolutionExplorerVisible { get; set; } = true;
 
@@ -81,6 +86,7 @@ public sealed class CascadeIdeSettings : ModelBase
             && OpenAiModelId.Is(o.OpenAiModelId)
             && DeepSeekBaseUrl.Is(o.DeepSeekBaseUrl)
             && DeepSeekModelId.Is(o.DeepSeekModelId)
+            && CursorAcpAgentPath.Is(o.CursorAcpAgentPath)
             && SolutionExplorerVisible.Is(o.SolutionExplorerVisible)
             && TerminalVisible.Is(o.TerminalVisible)
             && GitPanelVisible.Is(o.GitPanelVisible)
@@ -105,6 +111,7 @@ public sealed class CascadeIdeSettings : ModelBase
             OpenAiModelId = OpenAiModelId,
             DeepSeekBaseUrl = DeepSeekBaseUrl,
             DeepSeekModelId = DeepSeekModelId,
+            CursorAcpAgentPath = CursorAcpAgentPath,
             SolutionExplorerVisible = SolutionExplorerVisible,
             TerminalVisible = TerminalVisible,
             GitPanelVisible = GitPanelVisible,

@@ -77,6 +77,7 @@ public partial class MainWindowViewModel
             _settings.ActiveAiProvider = value;
             SaveSettingsIfChanged();
         }
+        ChatPanel.DisposeCursorAcpSession();
         ChatPanel.RefreshSendChatCommandState();
     }
 

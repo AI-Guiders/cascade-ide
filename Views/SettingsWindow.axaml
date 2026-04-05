@@ -43,6 +43,14 @@
                 <TextBox Text="{Binding DeepSeekApiKey, Mode=TwoWay}" PasswordChar="*" Watermark="sk-..." MinWidth="280"/>
             </StackPanel>
 
+            <StackPanel Spacing="6" IsVisible="{Binding IsCursorAcpSelected}">
+                <TextBlock Text="Cursor ACP: путь к cursor-agent.cmd или к папке с dist-package" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" TextWrapping="Wrap"/>
+                <TextBox Text="{Binding CursorAcpAgentPath, Mode=TwoWay}"
+                         Watermark="...\dist-package  или  ...\cursor-agent.cmd"
+                         MinWidth="280"
+                         TextWrapping="Wrap"/>
+            </StackPanel>
+
             <StackPanel Spacing="6">
                 <TextBlock Text="Отправка сообщения в чате:" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
                 <ComboBox ItemsSource="{Binding SendMessageKeyOptionsList}" SelectedItem="{Binding SendMessageKey}" MinWidth="140"/>
