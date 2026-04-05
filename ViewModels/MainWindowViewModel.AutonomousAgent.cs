@@ -1,12 +1,13 @@
 using System.Text.Json;
 using CascadeIDE.Features.AutonomousAgent;
+using CascadeIDE.Features.UiChrome;
 using CommunityToolkit.Mvvm.Input;
 
 namespace CascadeIDE.ViewModels;
 
 public partial class MainWindowViewModel
 {
-    bool IAutonomousAgentSessionHost.IsPowerMode => IsPowerMode;
+    UiModeFamily IAutonomousAgentSessionHost.UiModeFamily => UiModeFamily;
 
     string IAutonomousAgentSessionHost.SafetyLevel
     {

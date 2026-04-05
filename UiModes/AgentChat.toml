@@ -1,0 +1,23 @@
+# ADR 0010: снимок дефолтов как в UiModeLayoutRegistry + UiModeCapabilities.DefaultsForFamily(AgentChat).
+family = "AgentChat"
+
+solution_explorer_visible = false
+build_output_visible = false
+terminal_visible = false
+chat_panel_expanded = true
+editor_group_count = 1
+theme_slot = "CursorLike"
+select_terminal_tab_when_terminal_shown = false
+
+active_task_strip = true
+
+quick_actions = false
+agent_operations_panel = false
+agent_trace = false
+autonomous_agent_telemetry = false
+telemetry_on_terminal_tab = false
+telemetry_main_column_span = 5
+instrumentation_tabs = true
+hypotheses_tab = false
+risk_summary_card = false
+result_summary_card = false

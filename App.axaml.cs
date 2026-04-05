@@ -4,6 +4,7 @@ using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using System.Linq;
 using Avalonia.Markup.Xaml;
+using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Lang;
 using CascadeIDE.ViewModels;
 using CascadeIDE.Views;
@@ -24,6 +25,7 @@ public partial class App : Application
     public override void OnFrameworkInitializationCompleted()
     {
         UiCulture.ApplyFromSettingsOrSystem();
+        UiModeCatalog.Initialize();
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             DisableAvaloniaDataAnnotationValidation();

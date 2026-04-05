@@ -6,7 +6,7 @@
              xmlns:lang="using:CascadeIDE.Lang"
              x:Class="CascadeIDE.Views.ChatPanelView"
              x:Name="ChatPanelRoot"
-             Classes.power="{Binding IsPowerMode}"
+             Classes.power="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Power}"
              x:DataType="vm:MainWindowViewModel">
     <UserControl.Styles>
         <Style Selector="Border.traceStepCard">
@@ -100,16 +100,16 @@
         </Style>
     </UserControl.Styles>
     <Panel>
-        <Border IsVisible="{Binding IsPowerMode}"
+        <Border IsVisible="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Power}"
                 IsHitTestVisible="False"
                 Background="{DynamicResource CascadeTheme.PowerChatIslandFrameBrush}"
                 CornerRadius="14"/>
         <Border x:Name="ChatIslandInner"
                 ZIndex="1"
-                Classes.power="{Binding IsPowerMode}">
+                Classes.power="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Power}">
         <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,4,96,Auto">
             <!-- Focus: план (чеклист) -->
-            <Border Grid.Row="0" IsVisible="{Binding IsFocusMode}" Classes="modeCard chatPanelSection">
+            <Border Grid.Row="0" IsVisible="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Focus}" Classes="modeCard chatPanelSection">
                 <StackPanel Spacing="6">
                     <views:PanelChromeHeader Title="{Binding ChatPanel_PlanHeader, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}" Classes="compact"/>
                     <TextBlock IsVisible="{Binding !HasFocusPlanItems}"
@@ -134,7 +134,7 @@
             </Border>
 
             <!-- Focus: один следующий шаг -->
-            <Border Grid.Row="1" IsVisible="{Binding IsFocusMode}" Classes="modeCard chatPanelSection">
+            <Border Grid.Row="1" IsVisible="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Focus}" Classes="modeCard chatPanelSection">
                 <StackPanel Spacing="4">
                     <views:PanelChromeHeader Title="{Binding ChatPanel_NextActionHeader, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}" Classes="compact"/>
                     <TextBlock Text="{Binding NextActionSummary}"
@@ -143,7 +143,7 @@
                 </StackPanel>
             </Border>
 
-            <Border Grid.Row="2" IsVisible="{Binding ShowAgentOperationsBlock}" Classes="modeCard chatPanelSection">
+            <Border Grid.Row="2" IsVisible="{Binding AgentOperationsPanel}" Classes="modeCard chatPanelSection">
                 <StackPanel Spacing="6">
                     <views:PanelChromeHeader Title="{Binding ChatPanel_AgentOpsHeader, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}" Classes="compact"/>
                     <TextBlock Text="{Binding ActiveObjective}"
@@ -197,7 +197,7 @@
                     </Border>
                 </StackPanel>
             </Border>
-            <Border Grid.Row="3" IsVisible="{Binding IsFocusMode}" Classes="modeCard chatPanelSection">
+            <Border Grid.Row="3" IsVisible="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Focus}" Classes="modeCard chatPanelSection">
                 <StackPanel Spacing="6">
                     <views:PanelChromeHeader Title="{Binding ChatPanel_ConfirmHeader, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}" Classes="compact"/>
                     <TextBlock Text="{Binding ChatPanel_ConfirmHint, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}"
@@ -214,7 +214,7 @@
                     </StackPanel>
                 </StackPanel>
             </Border>
-            <Border Grid.Row="4" IsVisible="{Binding ShowAgentTrace}" Classes="modeCard chatPanelSection powerCockpitBlock">
+            <Border Grid.Row="4" IsVisible="{Binding AgentTrace}" Classes="modeCard chatPanelSection powerCockpitBlock">
                 <StackPanel Spacing="6">
                     <views:PanelChromeHeader Title="{Binding ChatPanel_TraceHeader, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}" Classes="compact" UppercaseTitle="True"/>
                     <StackPanel DataContext="{Binding InstrumentationPanel}" x:DataType="feat:InstrumentationPanelViewModel" Spacing="6">
@@ -275,7 +275,7 @@
                     IsVisible="{Binding ShowSafetyControls}"
                     Classes="chatPanelSection">
                 <Grid>
-                <Border IsVisible="{Binding IsPowerMode}" Classes="safetyLevelIsland">
+                <Border IsVisible="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Power}" Classes="safetyLevelIsland">
                     <StackPanel Spacing="12">
                         <views:PanelChromeHeader Title="{Binding ChatPanel_SafetyDockTitlePower, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}"
                                                  UppercaseTitle="True"
@@ -388,7 +388,7 @@
                     </StackPanel>
                 </Border>
 
-                <Border IsVisible="{Binding !IsPowerMode}" Classes="modeCard">
+                <Border IsVisible="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyNe}, ConverterParameter=Power}" Classes="modeCard">
                     <StackPanel Spacing="8">
                         <views:PanelChromeHeader Title="{Binding ChatPanel_SafetyCompactHeader, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}" Classes="compact" UppercaseTitle="True"/>
                         <StackPanel Spacing="6">

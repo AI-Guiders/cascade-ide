@@ -1,3 +1,5 @@
+using CascadeIDE.Features.UiChrome;
+
 namespace CascadeIDE.Features.AutonomousAgent;
 
 /// <summary>
@@ -5,7 +7,7 @@ namespace CascadeIDE.Features.AutonomousAgent;
 /// </summary>
 public interface IAutonomousAgentSessionHost
 {
-    bool IsPowerMode { get; }
+    UiModeFamily UiModeFamily { get; }
 
     string SafetyLevel { get; set; }
 

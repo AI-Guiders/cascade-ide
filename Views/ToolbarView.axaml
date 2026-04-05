@@ -9,12 +9,12 @@
         VerticalScrollBarVisibility="Disabled">
         <StackPanel Orientation="Horizontal" Spacing="8" Background="{DynamicResource CascadeTheme.ToolbarBackground}">
             <Button x:Name="OpenSolutionButton" Content="Открыть решение" Command="{Binding OpenSolutionCommand}"/>
-            <StackPanel Orientation="Horizontal" Spacing="6" IsVisible="{Binding IsFocusMode}">
+            <StackPanel Orientation="Horizontal" Spacing="6" IsVisible="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Focus}">
                 <Button Content="Запуск (сборка)" Command="{Binding BuildSolutionCommand}" IsEnabled="{Binding !IsBuilding}"/>
                 <Button Content="Контрольная точка" Command="{Binding FocusCheckpointCommand}"/>
                 <Button Content="Откат" Command="{Binding FocusRollbackCommand}"/>
             </StackPanel>
-            <Button Content="Собрать" Command="{Binding BuildSolutionCommand}" IsEnabled="{Binding !IsBuilding}" IsVisible="{Binding !IsFocusMode}"/>
+            <Button Content="Собрать" Command="{Binding BuildSolutionCommand}" IsEnabled="{Binding !IsBuilding}" IsVisible="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyNe}, ConverterParameter=Focus}"/>
             <!-- Отладка (как в VS): команды дублируют меню и F5/F10; IsEnabled даёт ICommand. -->
             <Border Width="1" Height="22" Margin="6,0,4,0" Background="{DynamicResource CascadeTheme.EditorColumnBorderBrush}" VerticalAlignment="Center"/>
             <StackPanel Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
@@ -57,9 +57,9 @@
                       ItemsSource="{Binding UiModeOptionsList}"
                       SelectedItem="{Binding UiMode, Mode=TwoWay}"/>
             <Border x:Name="ModeBadge"
-                    Classes.power="{Binding IsPowerMode}"
-                    Classes.agentchat="{Binding IsAgentChatMode}"
-                    Classes.debug="{Binding IsDebugMode}"
+                    Classes.power="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Power}"
+                    Classes.agentchat="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=AgentChat}"
+                    Classes.debug="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Debug}"
                     Padding="8,2"
                     Margin="4,0,0,0"
                     VerticalAlignment="Center">
@@ -67,7 +67,7 @@
             </Border>
             <Button Content="{Binding TelemetryButtonText}"
                     Command="{Binding ToggleTerminalCommand}"
-                    IsVisible="{Binding ShowPowerTelemetry}"/>
+                    IsVisible="{Binding AutonomousAgentTelemetry}"/>
             <Button Content="Show explorer" Command="{Binding ShowSolutionExplorerPanelCommand}" IsVisible="{Binding IsSolutionPanelHidden}"/>
             <Button Content="Show build" Command="{Binding ShowBuildOutputPanelCommand}" IsVisible="{Binding IsBuildPanelHidden}"/>
             <Button Content="Show chat" Command="{Binding ShowChatPanelCommand}" IsVisible="{Binding IsChatPanelHidden}"/>

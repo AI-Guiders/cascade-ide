@@ -5,20 +5,20 @@ namespace CascadeIDE.Features.UiChrome;
 /// Значения по умолчанию повторяют прежнюю логику VM до выноса в данные.
 /// </summary>
 public sealed record UiModeCapabilities(
-    bool ShowQuickActions,
-    bool ShowAgentOperationsBlock,
-    bool ShowAgentTrace,
-    bool ShowPowerTelemetry,
+    bool QuickActions,
+    bool AgentOperationsPanel,
+    bool AgentTrace,
+    bool AutonomousAgentTelemetry,
     /// <summary>Дубль телеметрии на вкладке «Терминал» в Power, когда полоска под редактором скрыта.</summary>
-    bool ShowPowerTelemetryOnTerminalTab,
+    bool TelemetryOnTerminalTab,
     /// <summary>Column span нижней телеметрии в MainGrid при Power и видимой полоске телеметрии под редактором.</summary>
-    int PowerTelemetryMainGridColumnSpan,
+    int TelemetryMainColumnSpan,
     /// <summary>Вкладки инструментирования (события/тесты/…), когда док включён.</summary>
-    bool ShowInstrumentationTabs,
+    bool InstrumentationTabs,
     /// <summary>Вкладка «Гипотезы» (семья Debug и док).</summary>
-    bool ShowHypothesesTab,
-    bool ShowRiskSummaryCard,
-    bool ShowResultSummaryCard)
+    bool HypothesesTab,
+    bool RiskSummaryCard,
+    bool ResultSummaryCard)
 {
     /// <summary>Дефолты по семье, если в TOML нет переопределений и нет наследуемого родителя.</summary>
     public static UiModeCapabilities DefaultsForFamily(UiModeFamily family)
@@ -30,15 +30,15 @@ public sealed record UiModeCapabilities(
         var agentChat = family.IsAgentChatFamily();
 
         return new UiModeCapabilities(
-            ShowQuickActions: balanced,
-            ShowAgentOperationsBlock: balanced,
-            ShowAgentTrace: power,
-            ShowPowerTelemetry: power,
-            ShowPowerTelemetryOnTerminalTab: false,
-            PowerTelemetryMainGridColumnSpan: power ? 3 : 5,
-            ShowInstrumentationTabs: focus || balanced || power || agentChat || debug,
-            ShowHypothesesTab: debug,
-            ShowRiskSummaryCard: !focus && !agentChat,
-            ShowResultSummaryCard: !focus && !agentChat);
+            QuickActions: balanced,
+            AgentOperationsPanel: balanced,
+            AgentTrace: power,
+            AutonomousAgentTelemetry: power,
+            TelemetryOnTerminalTab: false,
+            TelemetryMainColumnSpan: power ? 3 : 5,
+            InstrumentationTabs: focus || balanced || power || agentChat || debug,
+            HypothesesTab: debug,
+            RiskSummaryCard: !focus && !agentChat,
+            ResultSummaryCard: !focus && !agentChat);
     }
 }

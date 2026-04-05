@@ -79,11 +79,11 @@ public static class UiModeLayoutRegistry
             ? spec
             : ByNormalizedMode["Balanced"];
 
-    /// <summary>Ширина развёрнутой колонки чата в пикселях для нормализованного режима.</summary>
+    /// <summary>Ширина развёрнутой колонки чата в пикселях для нормализованного режима (с учётом <c>workspace.toml</c> через <see cref="UiWorkspaceLayoutRuntimeMetrics"/>).</summary>
     public static int GetChatPanelExpandedWidthPixels(string normalizedMode) => normalizedMode switch
     {
-        "Power" => UiModeLayoutDimensions.ChatPanelExpandedPowerWidthPixels,
-        "AgentChat" => UiModeLayoutDimensions.ChatPanelExpandedAgentChatWidthPixels,
-        _ => UiModeLayoutDimensions.ChatPanelExpandedDefaultWidthPixels,
+        "Power" => UiWorkspaceLayoutRuntimeMetrics.ChatPanelExpandedPowerWidthPixels,
+        "AgentChat" => UiWorkspaceLayoutRuntimeMetrics.ChatPanelExpandedAgentChatWidthPixels,
+        _ => UiWorkspaceLayoutRuntimeMetrics.ChatPanelExpandedDefaultWidthPixels,
     };
 }

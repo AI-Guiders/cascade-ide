@@ -12,7 +12,7 @@ public partial class MainWindowViewModel
     /// <summary>Семейство текущего UI-режима (одна ось вместо булевых Is*Mode).</summary>
     public UiModeFamily UiModeFamily => UiModeFamilyResolver.FromNormalizedMode(NormalizeUiMode(UiMode));
 
-    /// <summary>Заголовок главного окна (в Power — подпись «Autonomous Agent Cockpit»); из TOML — <c>window_title</c>.</summary>
+    /// <summary>Заголовок главного окна (в Power — подпись «Autonomous Agent Cockpit»); из TOML — <c>main_window_title</c>.</summary>
     public string WindowTitle =>
         UiModeCatalog.GetWindowTitleOverride(NormalizeUiMode(UiMode))
         ?? UiModeFamily switch
@@ -31,28 +31,28 @@ public partial class MainWindowViewModel
 
     /// <summary>Есть правая колонка чата и сплиттер перед ней (не свёрнуто в ноль).</summary>
     public bool IsChatPanelColumnVisible => ChatPanelColumnPixelWidth > 0;
-    /// <summary>Полоса активной задачи / Task Cockpit — из <c>UiModes/&lt;id&gt;.toml</c> (<c>show_task_cockpit</c>), по умолчанию скрыто для семьи Debug.</summary>
+    /// <summary>Полоса активной задачи / Task Cockpit — из <c>UiModes/&lt;id&gt;.toml</c> (<c>active_task_strip</c>); по умолчанию скрыто для семьи Debug.</summary>
     public bool ShowTaskBar => UiModeCatalog.GetShowTaskBar(NormalizeUiMode(UiMode));
 
-    private UiModeCapabilities UiModeCapabilities =>
+    private UiModeCapabilities Capabilities =>
         UiModeCatalog.GetCapabilities(NormalizeUiMode(UiMode));
 
-    public bool ShowQuickActions => UiModeCapabilities.ShowQuickActions;
+    public bool QuickActions => Capabilities.QuickActions;
     public bool ShowAgentOperations => true;
     /// <summary>В Focus справа показываем план и гейт, в Power — trace/safety; блок «операции» остаётся в Balanced.</summary>
-    public bool ShowAgentOperationsBlock => UiModeCapabilities.ShowAgentOperationsBlock;
-    public bool ShowAgentTrace => UiModeCapabilities.ShowAgentTrace;
-    public bool ShowPowerTelemetry => UiModeCapabilities.ShowPowerTelemetry;
+    public bool AgentOperationsPanel => Capabilities.AgentOperationsPanel;
+    public bool AgentTrace => Capabilities.AgentTrace;
+    public bool AutonomousAgentTelemetry => Capabilities.AutonomousAgentTelemetry;
     /// <summary>Карточка уровня безопасности: в Power — крупные L1–L3; в Focus/Balanced — компактные кнопки (разметка в ChatPanelView).</summary>
     public bool ShowSafetyControls => true;
-    public bool ShowTelemetryHiddenHint => ShowPowerTelemetry && !IsTerminalVisible;
+    public bool ShowTelemetryHiddenHint => AutonomousAgentTelemetry && !IsTerminalVisible;
 
     /// <summary>
     /// Дублирующая карточка телеметрии на вкладке «Терминал» в Power. Пока видна полоса <see cref="TelemetryStripView"/> под редактором —
     /// false, чтобы DockPanel не отдавал высоту дублю и не схлопывал область вывода консоли.
     /// </summary>
-    public bool ShowPowerTelemetryOnTerminalTab =>
-        UiModeCapabilities.ShowPowerTelemetryOnTerminalTab && !ShowTelemetryStrip;
+    public bool TelemetryOnTerminalTab =>
+        Capabilities.TelemetryOnTerminalTab && !ShowTelemetryStrip;
 
     /// <summary>Полоска build/tests/debug/git — и в Focus (по концепту).</summary>
     public bool ShowTelemetryStrip => true;
@@ -63,7 +63,7 @@ public partial class MainWindowViewModel
     /// </summary>
     public int MainWorkspaceTelemetryColumnSpan =>
         UiModeFamily.IsPowerFamily() && ShowTelemetryStrip
-            ? UiModeCapabilities.PowerTelemetryMainGridColumnSpan
+            ? Capabilities.TelemetryMainColumnSpan
             : 5;
 
     /// <summary>Чат в одной строке с редактором; телеметрия и док — в нижней строке MainGrid (после сплиттера).</summary>
@@ -74,14 +74,14 @@ public partial class MainWindowViewModel
     public bool ShowEditorGroup3 => EditorGroupCount >= 3;
 
     /// <summary>Нижние вкладки «События / Тесты / Гипотезы / Отладка» при включённом доке.</summary>
-    public bool ShowInstrumentationTabs =>
-        IsInstrumentationDockVisible && UiModeCapabilities.ShowInstrumentationTabs;
+    public bool InstrumentationTabs =>
+        IsInstrumentationDockVisible && Capabilities.InstrumentationTabs;
 
     /// <summary>Вкладка «Гипотезы» — семья Debug и capabilities (ADR 0003, ADR 0010).</summary>
-    public bool ShowHypothesesTab =>
+    public bool HypothesesTab =>
         IsInstrumentationDockVisible
-        && UiModeCapabilities.ShowInstrumentationTabs
-        && UiModeCapabilities.ShowHypothesesTab;
+        && Capabilities.InstrumentationTabs
+        && Capabilities.HypothesesTab;
 
     /// <summary>Пункт меню для док-панели инструментирования (можно отключить и в Focus).</summary>
     public bool ShowInstrumentationLayoutMenu => true;
@@ -115,10 +115,10 @@ public partial class MainWindowViewModel
         && !string.Equals(ResultSummary, "Результатов пока нет.", StringComparison.Ordinal);
 
     public bool IsRiskCardVisible =>
-        UiModeCapabilities.ShowRiskSummaryCard && IsRiskSummaryVisible;
+        Capabilities.RiskSummaryCard && IsRiskSummaryVisible;
 
     public bool IsResultCardVisible =>
-        UiModeCapabilities.ShowResultSummaryCard && IsResultSummaryVisible;
+        Capabilities.ResultSummaryCard && IsResultSummaryVisible;
     public bool IsComplexityBadgeVisible => ComplexityBadge > 0;
     public bool IsImpactedTestsBadgeVisible => ImpactedTestsBadge > 0;
     public bool IsActiveTaskProgressVisible => ActiveTaskProgress > 0;
@@ -171,5 +171,5 @@ public partial class MainWindowViewModel
     public bool IsProblemsPanelVisible => true;
 
     public bool IsBottomPanelVisible =>
-        IsProblemsPanelVisible || IsTerminalVisible || IsBuildOutputVisible || ShowInstrumentationTabs || IsGitPanelVisible;
+        IsProblemsPanelVisible || IsTerminalVisible || IsBuildOutputVisible || InstrumentationTabs || IsGitPanelVisible;
 }

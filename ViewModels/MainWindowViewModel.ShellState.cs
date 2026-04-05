@@ -9,6 +9,7 @@ public partial class MainWindowViewModel
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ChatPanelToggleButtonText))]
     [NotifyPropertyChangedFor(nameof(ChatPanelColumnPixelWidth))]
+    [NotifyPropertyChangedFor(nameof(IsChatPanelColumnVisible))]
     private bool _isChatPanelExpanded = true;
 
     [ObservableProperty]
@@ -26,19 +27,16 @@ public partial class MainWindowViewModel
     private bool _isGitPanelVisible;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsFocusMode))]
-    [NotifyPropertyChangedFor(nameof(IsBalancedMode))]
-    [NotifyPropertyChangedFor(nameof(IsPowerMode))]
-    [NotifyPropertyChangedFor(nameof(IsAgentChatMode))]
-    [NotifyPropertyChangedFor(nameof(IsDebugMode))]
+    [NotifyPropertyChangedFor(nameof(UiModeFamily))]
     [NotifyPropertyChangedFor(nameof(ChatPanelColumnPixelWidth))]
+    [NotifyPropertyChangedFor(nameof(IsChatPanelColumnVisible))]
     [NotifyPropertyChangedFor(nameof(ShowTaskBar))]
     [NotifyPropertyChangedFor(nameof(ShowTelemetryStrip))]
-    [NotifyPropertyChangedFor(nameof(ShowQuickActions))]
+    [NotifyPropertyChangedFor(nameof(QuickActions))]
     [NotifyPropertyChangedFor(nameof(ShowAgentOperations))]
-    [NotifyPropertyChangedFor(nameof(ShowAgentTrace))]
-    [NotifyPropertyChangedFor(nameof(ShowPowerTelemetry))]
-    [NotifyPropertyChangedFor(nameof(ShowPowerTelemetryOnTerminalTab))]
+    [NotifyPropertyChangedFor(nameof(AgentTrace))]
+    [NotifyPropertyChangedFor(nameof(AutonomousAgentTelemetry))]
+    [NotifyPropertyChangedFor(nameof(TelemetryOnTerminalTab))]
     [NotifyPropertyChangedFor(nameof(ShowSafetyControls))]
     [NotifyPropertyChangedFor(nameof(ShowTelemetryHiddenHint))]
     [NotifyPropertyChangedFor(nameof(TelemetryButtonText))]
@@ -46,9 +44,9 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(ShowEditorGroup3))]
     [NotifyPropertyChangedFor(nameof(IsRiskCardVisible))]
     [NotifyPropertyChangedFor(nameof(IsResultCardVisible))]
-    [NotifyPropertyChangedFor(nameof(ShowAgentOperationsBlock))]
-    [NotifyPropertyChangedFor(nameof(ShowInstrumentationTabs))]
-    [NotifyPropertyChangedFor(nameof(ShowHypothesesTab))]
+    [NotifyPropertyChangedFor(nameof(AgentOperationsPanel))]
+    [NotifyPropertyChangedFor(nameof(InstrumentationTabs))]
+    [NotifyPropertyChangedFor(nameof(HypothesesTab))]
     [NotifyPropertyChangedFor(nameof(ShowInstrumentationLayoutMenu))]
     [NotifyPropertyChangedFor(nameof(IsBottomPanelVisible))]
     [NotifyPropertyChangedFor(nameof(WindowTitle))]
@@ -132,8 +130,8 @@ public partial class MainWindowViewModel
 
     /// <summary>Вкладки «События / Тесты / …» (сохраняется в настройках).</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ShowInstrumentationTabs))]
-    [NotifyPropertyChangedFor(nameof(ShowHypothesesTab))]
+    [NotifyPropertyChangedFor(nameof(InstrumentationTabs))]
+    [NotifyPropertyChangedFor(nameof(HypothesesTab))]
     [NotifyPropertyChangedFor(nameof(IsBottomPanelVisible))]
     private bool _isInstrumentationDockVisible = true;
 

@@ -100,7 +100,7 @@ public partial class MainWindowViewModel
                 if (combined.Length > maxLogChars)
                     combined = combined[^maxLogChars..];
                 InstrumentationPanel.TestResultsOutput = combined;
-                if (ShowInstrumentationTabs)
+                if (InstrumentationTabs)
                     BottomPanelTabIndex = 5;
             });
             return outcome.JsonPayload;

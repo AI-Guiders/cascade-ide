@@ -5,7 +5,7 @@
              xmlns:models="using:CascadeIDE.Models"
              xmlns:views="using:CascadeIDE.Views"
              x:Class="CascadeIDE.Views.SolutionExplorerView"
-             Classes.power="{Binding IsPowerMode}"
+             Classes.power="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Power}"
              x:DataType="vm:MainWindowViewModel">
     <UserControl.Resources>
         <views:SolutionItemIconConverter x:Key="SolutionItemIconConverter"/>
@@ -54,16 +54,16 @@
         </Style>
     </UserControl.Styles>
     <Panel IsVisible="{Binding IsSolutionExplorerVisible}">
-        <Border IsVisible="{Binding IsPowerMode}"
+        <Border IsVisible="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Power}"
                 IsHitTestVisible="False"
                 Background="{DynamicResource CascadeTheme.PowerSolutionIslandFrameBrush}"
                 CornerRadius="14"/>
         <Border x:Name="SolutionIslandInner"
                 ZIndex="1"
-                Classes.power="{Binding IsPowerMode}">
+                Classes.power="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Power}">
         <Grid RowDefinitions="Auto,*,4,Auto">
             <StackPanel Grid.Row="0" Margin="0,4,0,0">
-                <views:PanelChromeHeader Classes.powerSolutionExplorer="{Binding IsPowerMode}"
+                <views:PanelChromeHeader Classes.powerSolutionExplorer="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Power}"
                                          Title="Решение · дерево проекта"
                                          UppercaseTitle="True"/>
                 <TextBlock Text="{Binding StartupProjectBanner}"
@@ -107,9 +107,9 @@
                           Height="4"
                           ResizeDirection="Rows"
                           Background="{DynamicResource CascadeTheme.PowerSolutionPanelBorderSubtle}"
-                          IsVisible="{Binding IsPowerMode}"/>
+                          IsVisible="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Power}"/>
             <Border Grid.Row="3"
-                    IsVisible="{Binding IsPowerMode}"
+                    IsVisible="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Power}"
                     MaxHeight="200"
                     MinHeight="72"
                     Margin="0,4,0,0"

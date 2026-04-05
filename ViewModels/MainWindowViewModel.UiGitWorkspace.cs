@@ -31,7 +31,7 @@ public partial class MainWindowViewModel
     private void ApplyUiModeLayout(string mode, bool persist)
     {
         var normalized = NormalizeUiMode(mode);
-        var spec = UiModeLayoutRegistry.Get(normalized);
+        var spec = UiModeCatalog.GetSpec(normalized);
 
         IsSolutionExplorerVisible = spec.SolutionExplorerVisible;
         IsBuildOutputVisible = spec.BuildOutputVisible;
@@ -67,9 +67,9 @@ public partial class MainWindowViewModel
         1 => IsBuildOutputVisible,
         2 => IsProblemsPanelVisible,
         3 => IsGitPanelVisible,
-        4 or 5 => ShowInstrumentationTabs,
-        MainWindowViewModel.BottomPanelTabHypothesesIndex => ShowHypothesesTab,
-        MainWindowViewModel.BottomPanelTabDebugStackIndex => ShowInstrumentationTabs,
+        4 or 5 => InstrumentationTabs,
+        MainWindowViewModel.BottomPanelTabHypothesesIndex => HypothesesTab,
+        MainWindowViewModel.BottomPanelTabDebugStackIndex => InstrumentationTabs,
         _ => false,
     };
 
@@ -83,7 +83,7 @@ public partial class MainWindowViewModel
             return 2;
         if (IsGitPanelVisible)
             return 3;
-        if (ShowInstrumentationTabs)
+        if (InstrumentationTabs)
             return 4;
         return 2;
     }

@@ -72,7 +72,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         InitializeAgentUiDefaults();
         RegisterAgentFeedHandlers();
         ApplyUiModeLayout(_uiMode, persist: false);
-        if (IsPowerMode)
+        if (UiModeFamily.IsPowerFamily())
             UiScheduler.Default.Post(RefreshWorkspaceSnapshotCore, DispatcherPriority.Background);
 
         Documents.InitializeDock();

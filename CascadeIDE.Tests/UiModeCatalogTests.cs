@@ -45,6 +45,34 @@ public sealed class UiModeCatalogTests : IDisposable
     }
 
     [Fact]
+    public void Inherits_uses_parent_chat_width_when_child_omits_chat_expanded_width_pixels()
+    {
+        var dir = Path.Combine(Path.GetTempPath(), "uimodes_" + Guid.NewGuid());
+        Directory.CreateDirectory(dir);
+        File.WriteAllText(
+            Path.Combine(dir, "index.toml"),
+            """
+            schema_version = 1
+            modes = [ "Balanced", "DerivedBalanced" ]
+            """);
+        File.WriteAllText(
+            Path.Combine(dir, "Balanced.toml"),
+            """
+            chat_expanded_width_pixels = 555
+            """);
+        File.WriteAllText(
+            Path.Combine(dir, "DerivedBalanced.toml"),
+            """
+            inherits = "Balanced"
+            """);
+
+        UiModeCatalog.Initialize(dir);
+
+        Assert.Equal(555, UiModeCatalog.GetChatPanelExpandedWidthPixels("Balanced"));
+        Assert.Equal(555, UiModeCatalog.GetChatPanelExpandedWidthPixels("DerivedBalanced"));
+    }
+
+    [Fact]
     public void Show_task_cockpit_defaults_false_for_debug_family_without_toml()
     {
         var dir = Path.Combine(Path.GetTempPath(), "uimodes_" + Guid.NewGuid());
@@ -75,7 +103,7 @@ public sealed class UiModeCatalogTests : IDisposable
         File.WriteAllText(
             Path.Combine(dir, "Debug.toml"),
             """
-            show_task_cockpit = true
+            active_task_strip = true
             """);
 
         UiModeCatalog.Initialize(dir);
@@ -120,23 +148,23 @@ public sealed class UiModeCatalogTests : IDisposable
         UiModeCatalog.Initialize(dir);
 
         var balanced = UiModeCatalog.GetCapabilities("Balanced");
-        Assert.True(balanced.ShowQuickActions);
-        Assert.True(balanced.ShowAgentOperationsBlock);
-        Assert.False(balanced.ShowHypothesesTab);
-        Assert.True(balanced.ShowRiskSummaryCard);
+        Assert.True(balanced.QuickActions);
+        Assert.True(balanced.AgentOperationsPanel);
+        Assert.False(balanced.HypothesesTab);
+        Assert.True(balanced.RiskSummaryCard);
 
         var debug = UiModeCatalog.GetCapabilities("Debug");
-        Assert.False(debug.ShowQuickActions);
-        Assert.True(debug.ShowHypothesesTab);
-        Assert.True(debug.ShowRiskSummaryCard);
+        Assert.False(debug.QuickActions);
+        Assert.True(debug.HypothesesTab);
+        Assert.True(debug.RiskSummaryCard);
 
         var power = UiModeCatalog.GetCapabilities("Power");
-        Assert.True(power.ShowAgentTrace);
-        Assert.True(power.ShowPowerTelemetry);
-        Assert.Equal(3, power.PowerTelemetryMainGridColumnSpan);
+        Assert.True(power.AgentTrace);
+        Assert.True(power.AutonomousAgentTelemetry);
+        Assert.Equal(3, power.TelemetryMainColumnSpan);
 
-        Assert.False(UiModeCatalog.GetCapabilities("Focus").ShowRiskSummaryCard);
-        Assert.False(UiModeCatalog.GetCapabilities("AgentChat").ShowResultSummaryCard);
+        Assert.False(UiModeCatalog.GetCapabilities("Focus").RiskSummaryCard);
+        Assert.False(UiModeCatalog.GetCapabilities("AgentChat").ResultSummaryCard);
     }
 
     [Fact]
@@ -153,16 +181,16 @@ public sealed class UiModeCatalogTests : IDisposable
         File.WriteAllText(
             Path.Combine(dir, "Debug.toml"),
             """
-            show_hypotheses_tab = false
-            window_title = "IDE — Debug (custom)"
-            power_telemetry_main_grid_column_span = 4
+            hypotheses_tab = false
+            main_window_title = "IDE — Debug (custom)"
+            telemetry_main_column_span = 4
             """);
 
         UiModeCatalog.Initialize(dir);
 
         var caps = UiModeCatalog.GetCapabilities("Debug");
-        Assert.False(caps.ShowHypothesesTab);
-        Assert.Equal(4, caps.PowerTelemetryMainGridColumnSpan);
+        Assert.False(caps.HypothesesTab);
+        Assert.Equal(4, caps.TelemetryMainColumnSpan);
 
         Assert.Equal("IDE — Debug (custom)", UiModeCatalog.GetWindowTitleOverride("Debug"));
     }

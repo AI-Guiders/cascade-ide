@@ -1,0 +1,23 @@
+# ADR 0010: снимок дефолтов как в UiModeLayoutRegistry + UiModeCapabilities.DefaultsForFamily(Power).
+family = "Power"
+
+solution_explorer_visible = true
+build_output_visible = true
+terminal_visible = true
+chat_panel_expanded = true
+editor_group_count = 3
+theme_slot = "PowerCockpit"
+select_terminal_tab_when_terminal_shown = true
+
+active_task_strip = true
+
+quick_actions = false
+agent_operations_panel = false
+agent_trace = true
+autonomous_agent_telemetry = true
+telemetry_on_terminal_tab = false
+telemetry_main_column_span = 3
+instrumentation_tabs = true
+hypotheses_tab = false
+risk_summary_card = true
+result_summary_card = true

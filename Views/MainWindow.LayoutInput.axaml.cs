@@ -1,7 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using Avalonia.Layout;
+using CascadeIDE.Services;
 using CommunityToolkit.Mvvm.Input;
 
 namespace CascadeIDE.Views;
@@ -10,10 +10,9 @@ public partial class MainWindow
 {
     private void UpdateSolutionColumnWidth(bool visible)
     {
-        var grid = this.FindControl<Grid>("MainGrid");
-        if (grid?.ColumnDefinitions.Count > 0 != true)
+        if (this.FindControl<Grid>("MainGrid") is not { } grid)
             return;
-        grid.ColumnDefinitions[0] = new ColumnDefinition(visible ? new GridLength(220, GridUnitType.Pixel) : new GridLength(0, GridUnitType.Pixel));
+        UiWorkspaceLayout.ApplySolutionExplorerVisible(grid, visible);
     }
 
     private void SetupTerminalKeyHandler()
@@ -63,16 +62,17 @@ public partial class MainWindow
 
     private void UpdateChatColumnWidth(ViewModels.MainWindowViewModel vm)
     {
-        var grid = this.FindControl<Grid>("MainGrid");
-        if (grid?.ColumnDefinitions.Count > 4)
-            grid.ColumnDefinitions[4].Width = new GridLength(vm.ChatPanelColumnPixelWidth);
+        if (this.FindControl<Grid>("MainGrid") is not { } main)
+            return;
+        var inner = this.FindControl<Grid>("WorkspaceTelemetryColumnsGrid");
+        UiWorkspaceLayout.ApplyChatPanelColumns(main, inner, vm.ChatPanelColumnPixelWidth);
     }
 
     private void UpdateMarkdownPreviewColumn(bool showPreview)
     {
-        var grid = this.FindControl<Grid>("EditorContentGrid");
-        if (grid?.ColumnDefinitions.Count > 1)
-            grid.ColumnDefinitions[1].Width = showPreview ? new GridLength(1, GridUnitType.Star) : new GridLength(0, GridUnitType.Pixel);
+        if (this.FindControl<Grid>("EditorContentGrid") is not { } grid)
+            return;
+        UiWorkspaceLayout.ApplyMarkdownPreviewColumn(grid, showPreview);
     }
 
     /// <summary>Принудительно обновить контент панели превью справа от редактора (Markdown.Avalonia иногда не обновляет привязку при смене EditorText).</summary>

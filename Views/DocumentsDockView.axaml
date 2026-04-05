@@ -3,7 +3,7 @@
              xmlns:vm="using:CascadeIDE.ViewModels"
              xmlns:dock="clr-namespace:Dock.Avalonia.Controls;assembly=Dock.Avalonia"
              x:Class="CascadeIDE.Views.DocumentsDockView"
-             Classes.power="{Binding IsPowerMode}"
+             Classes.power="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Power}"
              x:DataType="vm:MainWindowViewModel">
     <UserControl.Styles>
         <Style Selector="UserControl">
@@ -28,13 +28,13 @@
         </Style>
     </UserControl.Styles>
     <Panel>
-        <Border IsVisible="{Binding IsPowerMode}"
+        <Border IsVisible="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Power}"
                 IsHitTestVisible="False"
                 Background="{DynamicResource CascadeTheme.PowerEditorIslandFrameBrush}"
                 CornerRadius="14"/>
         <Border x:Name="DockIslandInner"
                 ZIndex="1"
-                Classes.power="{Binding IsPowerMode}">
+                Classes.power="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Power}">
             <dock:DockControl x:Name="DocumentsDock"
                               DefaultContext="{Binding}"
                               Factory="{Binding Documents.DockFactory}"

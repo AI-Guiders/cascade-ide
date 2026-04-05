@@ -29,7 +29,7 @@
             </Border>
 
             <Border Classes="modeCard"
-                    IsVisible="{Binding IsPowerMode}"
+                    IsVisible="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Power}"
                     Padding="8"
                     Margin="0,0,0,6">
                 <StackPanel Spacing="8">
@@ -98,11 +98,11 @@
                 </StackPanel>
             </Border>
 
-            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" IsVisible="{Binding !IsFocusMode}">
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" IsVisible="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyNe}, ConverterParameter=Focus}">
                 <WrapPanel Orientation="Horizontal" ItemHeight="30">
-                    <Button Content="Fix failing tests" Command="{Binding Autonomous.FixFailingTestsCommand}" IsVisible="{Binding ShowQuickActions}" Margin="0,0,6,0"/>
-                    <Button Content="Investigate nullref" Command="{Binding Autonomous.InvestigateNullrefCommand}" IsVisible="{Binding ShowQuickActions}" Margin="0,0,6,0"/>
-                    <Button Content="Prepare commit" Command="{Binding Autonomous.PrepareCommitCommand}" IsVisible="{Binding ShowQuickActions}" Margin="0,0,6,0"/>
+                    <Button Content="Fix failing tests" Command="{Binding Autonomous.FixFailingTestsCommand}" IsVisible="{Binding QuickActions}" Margin="0,0,6,0"/>
+                    <Button Content="Investigate nullref" Command="{Binding Autonomous.InvestigateNullrefCommand}" IsVisible="{Binding QuickActions}" Margin="0,0,6,0"/>
+                    <Button Content="Prepare commit" Command="{Binding Autonomous.PrepareCommitCommand}" IsVisible="{Binding QuickActions}" Margin="0,0,6,0"/>
                     <Border Classes="modeCard" Padding="6,2" Margin="0,0,6,0" IsVisible="{Binding IsComplexityBadgeVisible}"
                             ToolTip.Tip="Прокси по концепту: число строк текущего файла на диске (обновляется при смене документа), не цикломатика.">
                         <TextBlock Text="{Binding ComplexityBadge, StringFormat='{}Complexity: {0}'}" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>

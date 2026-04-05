@@ -85,6 +85,8 @@
             <SolidColorBrush x:Key="CascadeTheme.PowerSolutionTreeItemPointerOverBackground">#122030</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.PowerSolutionPanelBorderSubtle">#2A4A60</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.PowerSolutionTaskQueueBubbleBackground">#152A38</SolidColorBrush>
+            <views:UiModeFamilyEqualsConverter x:Key="UiModeFamilyEq"/>
+            <views:UiModeFamilyNotEqualsConverter x:Key="UiModeFamilyNe"/>
         </ResourceDictionary>
     </Application.Resources>
 

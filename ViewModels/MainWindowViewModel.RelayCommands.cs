@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Threading.Tasks;
+using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Lang;
 using CascadeIDE.Services;
 using CommunityToolkit.Mvvm.Input;
@@ -246,14 +247,25 @@ public partial class MainWindowViewModel
     [RelayCommand]
     private void CycleUiMode()
     {
-        UiMode = NormalizeUiMode(UiMode) switch
+        var norm = NormalizeUiMode(UiMode);
+        var ids = UiModeCatalog.OrderedModeIds;
+        var idx = -1;
+        for (var i = 0; i < ids.Count; i++)
         {
-            "Focus" => "Balanced",
-            "Balanced" => "Power",
-            "Power" => "AgentChat",
-            "AgentChat" => "Debug",
-            _ => "Focus"
-        };
+            if (string.Equals(ids[i], norm, StringComparison.OrdinalIgnoreCase))
+            {
+                idx = i;
+                break;
+            }
+        }
+
+        if (idx < 0 || ids.Count == 0)
+        {
+            UiMode = "Focus";
+            return;
+        }
+
+        UiMode = ids[(idx + 1) % ids.Count];
     }
 
     [RelayCommand]

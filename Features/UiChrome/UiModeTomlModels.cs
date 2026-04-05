@@ -19,7 +19,11 @@ public sealed class UiWorkspaceToml
     public int? ChatPanelExpandedAgentChatWidthPixels { get; set; }
 }
 
-/// <summary>Один режим: <c>UiModes/&lt;Id&gt;.toml</c>.</summary>
+/// <summary>
+/// Один режим: <c>UiModes/&lt;Id&gt;.toml</c>.
+/// Имена свойств в PascalCase; Tomlyn десериализует ключи в snake_case (как в <c>workspace.toml</c>).
+/// Ключи по смыслу интерфейса, не именам полей VM.
+/// </summary>
 public sealed class UiModeFileToml
 {
     public string? Inherits { get; set; }
@@ -33,25 +37,22 @@ public sealed class UiModeFileToml
     public bool? SelectTerminalTabWhenTerminalShown { get; set; }
     public int? ChatExpandedWidthPixels { get; set; }
 
-    /// <summary>Полоса Task Cockpit под тулбаром (активная задача, quick actions). Если не задано — по умолчанию скрыто для семьи Debug.</summary>
-    public bool? ShowTaskCockpit { get; set; }
+    /// <summary>Полоса активной задачи под тулбаром; TOML: <c>active_task_strip</c>.</summary>
+    public bool? ActiveTaskStrip { get; set; }
 
-    /// <summary>Полный заголовок главного окна; если не задан — встроенные строки по семье.</summary>
-    public string? WindowTitle { get; set; }
+    /// <summary>Заголовок главного окна; TOML: <c>main_window_title</c>.</summary>
+    public string? MainWindowTitle { get; set; }
 
-    // --- capabilities (ADR 0010); ключи в TOML — snake_case (Tomlyn).
+    // --- capabilities (ADR 0010)
 
-    public bool? ShowQuickActions { get; set; }
-    public bool? ShowAgentOperationsBlock { get; set; }
-    public bool? ShowAgentTrace { get; set; }
-    public bool? ShowPowerTelemetry { get; set; }
-    public bool? ShowPowerTelemetryOnTerminalTab { get; set; }
-
-    /// <summary>При Power и видимой полоске телеметрии под редактором (обычно 3).</summary>
-    public int? PowerTelemetryMainGridColumnSpan { get; set; }
-
-    public bool? ShowInstrumentationTabs { get; set; }
-    public bool? ShowHypothesesTab { get; set; }
-    public bool? ShowRiskSummaryCard { get; set; }
-    public bool? ShowResultSummaryCard { get; set; }
+    public bool? QuickActions { get; set; }
+    public bool? AgentOperationsPanel { get; set; }
+    public bool? AgentTrace { get; set; }
+    public bool? AutonomousAgentTelemetry { get; set; }
+    public bool? TelemetryOnTerminalTab { get; set; }
+    public int? TelemetryMainColumnSpan { get; set; }
+    public bool? InstrumentationTabs { get; set; }
+    public bool? HypothesesTab { get; set; }
+    public bool? RiskSummaryCard { get; set; }
+    public bool? ResultSummaryCard { get; set; }
 }

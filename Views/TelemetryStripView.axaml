@@ -2,7 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:CascadeIDE.ViewModels"
              x:Class="CascadeIDE.Views.TelemetryStripView"
-             Classes.power="{Binding IsPowerMode}"
+             Classes.power="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Power}"
              x:DataType="vm:MainWindowViewModel">
     <UserControl.Styles>
         <Style Selector="StackPanel#TelemetryRoot">
@@ -16,7 +16,7 @@
         <!-- Balanced / Focus: классическая полоса -->
         <Border Padding="8,6"
                 Classes="modeCard"
-                IsVisible="{Binding !IsPowerMode}">
+                IsVisible="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyNe}, ConverterParameter=Power}">
             <WrapPanel Orientation="Horizontal" ItemHeight="28" VerticalAlignment="Center">
                 <Border Classes="modeCard" Padding="6,2" Margin="0,0,8,0">
                     <TextBlock Text="{Binding TelemetryBuildText}" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
@@ -34,7 +34,7 @@
         </Border>
 
         <!-- Power: кокпит — одна «SOC»-полоса + компактный JSON -->
-        <Border IsVisible="{Binding IsPowerMode}"
+        <Border IsVisible="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Power}"
                 Background="{DynamicResource CascadeTheme.PowerTelemetryStripBackground}"
                 BorderBrush="{DynamicResource CascadeTheme.PowerNeonBorder}"
                 BorderThickness="1"

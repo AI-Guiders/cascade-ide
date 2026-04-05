@@ -265,6 +265,10 @@ public static class UiModeCatalog
         }
     }
 
+    /// <summary>
+    /// Явный <c>chat_expanded_width_pixels</c> в файле режима; иначе при <c>inherits</c> — ширина уже разрешённого родителя;
+    /// иначе — глобальные метрики и правило Power / AgentChat / остальные (<see cref="UiModeLayoutRegistry.GetChatPanelExpandedWidthPixels"/>).
+    /// </summary>
     private static int ResolveChatWidth(
         string modeId,
         UiModeFileToml? file,
@@ -288,7 +292,7 @@ public static class UiModeCatalog
         ResolvedMode? parentResolved,
         UiModeFamily family)
     {
-        if (file?.ShowTaskCockpit is { } st)
+        if (file?.ActiveTaskStrip is { } st)
             return st;
 
         if (inherits is not null && parentResolved is not null)
@@ -310,28 +314,29 @@ public static class UiModeCatalog
         if (file is null)
             return baseCaps;
 
-        var span = baseCaps.PowerTelemetryMainGridColumnSpan;
-        if (file.PowerTelemetryMainGridColumnSpan is { } s && s >= 1 && s <= 12)
+        var span = baseCaps.TelemetryMainColumnSpan;
+        if (file.TelemetryMainColumnSpan is { } s && s >= 1 && s <= 12)
             span = s;
 
         return new UiModeCapabilities(
-            ShowQuickActions: file.ShowQuickActions ?? baseCaps.ShowQuickActions,
-            ShowAgentOperationsBlock: file.ShowAgentOperationsBlock ?? baseCaps.ShowAgentOperationsBlock,
-            ShowAgentTrace: file.ShowAgentTrace ?? baseCaps.ShowAgentTrace,
-            ShowPowerTelemetry: file.ShowPowerTelemetry ?? baseCaps.ShowPowerTelemetry,
-            ShowPowerTelemetryOnTerminalTab: file.ShowPowerTelemetryOnTerminalTab
-                ?? baseCaps.ShowPowerTelemetryOnTerminalTab,
-            PowerTelemetryMainGridColumnSpan: span,
-            ShowInstrumentationTabs: file.ShowInstrumentationTabs ?? baseCaps.ShowInstrumentationTabs,
-            ShowHypothesesTab: file.ShowHypothesesTab ?? baseCaps.ShowHypothesesTab,
-            ShowRiskSummaryCard: file.ShowRiskSummaryCard ?? baseCaps.ShowRiskSummaryCard,
-            ShowResultSummaryCard: file.ShowResultSummaryCard ?? baseCaps.ShowResultSummaryCard);
+            QuickActions: file.QuickActions ?? baseCaps.QuickActions,
+            AgentOperationsPanel: file.AgentOperationsPanel ?? baseCaps.AgentOperationsPanel,
+            AgentTrace: file.AgentTrace ?? baseCaps.AgentTrace,
+            AutonomousAgentTelemetry: file.AutonomousAgentTelemetry ?? baseCaps.AutonomousAgentTelemetry,
+            TelemetryOnTerminalTab: file.TelemetryOnTerminalTab
+                ?? baseCaps.TelemetryOnTerminalTab,
+            TelemetryMainColumnSpan: span,
+            InstrumentationTabs: file.InstrumentationTabs ?? baseCaps.InstrumentationTabs,
+            HypothesesTab: file.HypothesesTab ?? baseCaps.HypothesesTab,
+            RiskSummaryCard: file.RiskSummaryCard ?? baseCaps.RiskSummaryCard,
+            ResultSummaryCard: file.ResultSummaryCard ?? baseCaps.ResultSummaryCard);
     }
 
     private static string? ResolveWindowTitle(UiModeFileToml? file, string? inherits, ResolvedMode? parentResolved)
     {
-        if (!string.IsNullOrWhiteSpace(file?.WindowTitle))
-            return file!.WindowTitle!.Trim();
+        var title = file?.MainWindowTitle;
+        if (!string.IsNullOrWhiteSpace(title))
+            return title.Trim();
 
         if (inherits is not null && parentResolved is not null)
             return parentResolved.WindowTitleOverride;

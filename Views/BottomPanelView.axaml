@@ -7,7 +7,7 @@
              xmlns:views="using:CascadeIDE.Views"
              x:Class="CascadeIDE.Views.BottomPanelView"
              x:Name="BottomPanelRoot"
-             Classes.power="{Binding IsPowerMode}"
+             Classes.power="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Power}"
              x:DataType="vm:MainWindowViewModel">
     <UserControl.Styles>
         <Style Selector="Border#BottomPanelShell">
@@ -39,7 +39,7 @@
             <TabControl SelectedIndex="{Binding BottomPanelTabIndex, Mode=TwoWay}">
                 <TabItem Header="Терминал · консоль" IsVisible="{Binding IsTerminalVisible}">
                     <DockPanel>
-                        <Border DockPanel.Dock="Top" IsVisible="{Binding ShowPowerTelemetryOnTerminalTab}" Classes="modeCard" Margin="0,0,0,4">
+                        <Border DockPanel.Dock="Top" IsVisible="{Binding TelemetryOnTerminalTab}" Classes="modeCard" Margin="0,0,0,4">
                             <StackPanel Spacing="4">
                                 <WrapPanel Orientation="Horizontal">
                                     <TextBlock Text="{Binding TelemetryBuildText}" Foreground="{DynamicResource CascadeTheme.TerminalForeground}" Margin="0,0,12,0"/>
@@ -253,7 +253,7 @@
                         </StackPanel>
                     </Grid>
                 </TabItem>
-                <TabItem Header="События · таймлайн" IsVisible="{Binding ShowInstrumentationTabs}">
+                <TabItem Header="События · таймлайн" IsVisible="{Binding InstrumentationTabs}">
                     <DockPanel>
                         <views:PanelChromeHeader DockPanel.Dock="Top" Classes="terminal" Title="Лента событий · агент и сборка" UppercaseTitle="True"/>
                         <DockPanel DataContext="{Binding InstrumentationPanel}" x:DataType="feat:InstrumentationPanelViewModel">
@@ -280,7 +280,7 @@
                         </DockPanel>
                     </DockPanel>
                 </TabItem>
-                <TabItem Header="Тесты · результаты" IsVisible="{Binding ShowInstrumentationTabs}">
+                <TabItem Header="Тесты · результаты" IsVisible="{Binding InstrumentationTabs}">
                     <DockPanel>
                         <views:PanelChromeHeader DockPanel.Dock="Top" Classes="terminal" Title="{Binding LastTestSummary, StringFormat=Последний прогон: {0}}" UppercaseTitle="False"/>
                         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
@@ -297,7 +297,7 @@
                         </ScrollViewer>
                     </DockPanel>
                 </TabItem>
-                <TabItem Header="Гипотезы · отладка" IsVisible="{Binding ShowHypothesesTab}">
+                <TabItem Header="Гипотезы · отладка" IsVisible="{Binding HypothesesTab}">
                     <DockPanel DataContext="{Binding HypothesesPanel}" x:DataType="dbg:HypothesesPanelViewModel">
                         <views:PanelChromeHeader DockPanel.Dock="Top" Classes="terminal" Title="Гипотезы · workspace JSON" UppercaseTitle="True"/>
                         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="8" Margin="0,0,0,6">
@@ -336,7 +336,7 @@
                         </ScrollViewer>
                     </DockPanel>
                 </TabItem>
-                <TabItem Header="Отладка · стек" IsVisible="{Binding ShowInstrumentationTabs}">
+                <TabItem Header="Отладка · стек" IsVisible="{Binding InstrumentationTabs}">
                     <Grid DataContext="{Binding InstrumentationPanel}" x:DataType="feat:InstrumentationPanelViewModel"
                           RowDefinitions="Auto,*,4,Auto,*" Margin="0,4,0,0">
                         <views:PanelChromeHeader Grid.Row="0" Classes="terminal" Title="Стек вызовов · отладчик" UppercaseTitle="True"/>

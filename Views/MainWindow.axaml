@@ -169,11 +169,11 @@
                           IsVisible="{Binding ShowInstrumentationLayoutMenu}"/>
                 <Separator/>
                 <MenuItem Header="_Режим интерфейса">
-                    <MenuItem Header="_Focus" ToggleType="Radio" IsChecked="{Binding IsFocusMode}" Command="{Binding SetFocusModeCommand}"/>
-                    <MenuItem Header="_Balanced" ToggleType="Radio" IsChecked="{Binding IsBalancedMode}" Command="{Binding SetBalancedModeCommand}"/>
-                    <MenuItem Header="_Power" ToggleType="Radio" IsChecked="{Binding IsPowerMode}" Command="{Binding SetPowerModeCommand}"/>
-                    <MenuItem Header="Agent _Chat" ToggleType="Radio" IsChecked="{Binding IsAgentChatMode}" Command="{Binding SetAgentChatModeCommand}"/>
-                    <MenuItem Header="_Debug" ToggleType="Radio" IsChecked="{Binding IsDebugMode}" Command="{Binding SetDebugModeCommand}"/>
+                    <MenuItem Header="_Focus" ToggleType="Radio" IsChecked="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Focus}" Command="{Binding SetFocusModeCommand}"/>
+                    <MenuItem Header="_Balanced" ToggleType="Radio" IsChecked="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Balanced}" Command="{Binding SetBalancedModeCommand}"/>
+                    <MenuItem Header="_Power" ToggleType="Radio" IsChecked="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Power}" Command="{Binding SetPowerModeCommand}"/>
+                    <MenuItem Header="Agent _Chat" ToggleType="Radio" IsChecked="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=AgentChat}" Command="{Binding SetAgentChatModeCommand}"/>
+                    <MenuItem Header="_Debug" ToggleType="Radio" IsChecked="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Debug}" Command="{Binding SetDebugModeCommand}"/>
                 </MenuItem>
                 <Separator/>
                 <MenuItem Header="_Тема">
@@ -221,10 +221,12 @@
         <views:DocumentsDockView Grid.Row="3" Grid.Column="2"/>
         <GridSplitter Grid.Row="3" Grid.Column="3"
                       Grid.RowSpan="{Binding ChatPanelMainGridRowSpan}"
-                      Width="4" ResizeDirection="Columns" Background="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"/>
+                      Width="4" ResizeDirection="Columns" Background="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"
+                      IsVisible="{Binding IsChatPanelColumnVisible}"/>
 
-        <!-- Chat: в Power — RowSpan 2 (рядом с полосой телеметрии только под левым+центром, по концепту) -->
-        <views:ChatPanelView Grid.Row="3" Grid.Column="4" Grid.RowSpan="{Binding ChatPanelMainGridRowSpan}"/>
+        <!-- Chat: в Power — RowSpan 2 (рядом с полосой телеметрии только под левым+центром, по концепту). Свёрнут — колонка 0 px, панель скрыта. -->
+        <views:ChatPanelView Grid.Row="3" Grid.Column="4" Grid.RowSpan="{Binding ChatPanelMainGridRowSpan}"
+                             IsVisible="{Binding IsChatPanelColumnVisible}"/>
 
         <GridSplitter Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="5"
                       Height="6"
@@ -232,7 +234,7 @@
                       Background="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"/>
         <!-- Телеметрия + док: внутренний сплиттер между полосой WORKSPACE и вкладками терминала/сборки. -->
         <Grid Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="5" RowDefinitions="Auto,6,*" MinHeight="160">
-            <Grid Grid.Row="0" ColumnDefinitions="220,4,*,4,340">
+            <Grid x:Name="WorkspaceTelemetryColumnsGrid" Grid.Row="0" ColumnDefinitions="220,4,*,4,340">
                 <views:TelemetryStripView Grid.Column="0"
                                           Grid.ColumnSpan="{Binding MainWorkspaceTelemetryColumnSpan}"
                                           IsVisible="{Binding ShowTelemetryStrip}"/>

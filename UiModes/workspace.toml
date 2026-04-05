@@ -1,0 +1,8 @@
+# Глобальные метрики хрома (без отдельного schema_version — см. index.toml).
+solution_explorer_default_width_pixels = 220
+main_grid_column_splitter_width_pixels = 4
+bottom_panel_min_row_pixels = 80
+chat_panel_collapsed_width_pixels = 0
+chat_panel_expanded_default_width_pixels = 340
+chat_panel_expanded_power_width_pixels = 420
+chat_panel_expanded_agent_chat_width_pixels = 520

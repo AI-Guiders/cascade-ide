@@ -1,4 +1,5 @@
 using Avalonia.Threading;
+using CascadeIDE.Features.UiChrome;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -22,11 +23,14 @@ public sealed partial class AutonomousAgentSessionViewModel : ObservableObject
         _host = host;
     }
 
+    /// <summary>Автономный цикл разрешён только в семействе Power (кокпит); иначе сценарии уходят в чат.</summary>
+    private bool AutonomousCockpitActive => _host.UiModeFamily.IsPowerFamily();
+
     private bool HasResumableAutonomousRun =>
         _runState?.HasResumableSteps == true;
 
     public bool IsAutonomousPaused =>
-        _host.IsPowerMode && !IsAutonomousRunning && HasResumableAutonomousRun;
+        AutonomousCockpitActive && !IsAutonomousRunning && HasResumableAutonomousRun;
 
     public void NotifyHostPowerContextChanged() =>
         OnPropertyChanged(nameof(IsAutonomousPaused));
@@ -52,7 +56,7 @@ public sealed partial class AutonomousAgentSessionViewModel : ObservableObject
     }
 
     private bool CanStartAutonomous() =>
-        _host.IsPowerMode
+        AutonomousCockpitActive
         && !IsAutonomousRunning
         && !HasResumableAutonomousRun
         && !string.IsNullOrWhiteSpace(AutonomousObjective)
@@ -80,7 +84,7 @@ public sealed partial class AutonomousAgentSessionViewModel : ObservableObject
     }
 
     private bool CanResumeAutonomous() =>
-        _host.IsPowerMode && !IsAutonomousRunning && HasResumableAutonomousRun;
+        AutonomousCockpitActive && !IsAutonomousRunning && HasResumableAutonomousRun;
 
     [RelayCommand(CanExecute = nameof(CanResumeAutonomous))]
     private void ResumeAutonomous() =>
@@ -88,7 +92,7 @@ public sealed partial class AutonomousAgentSessionViewModel : ObservableObject
 
     private void StartAutonomousFlow(string objective, int maxSteps)
     {
-        if (!_host.IsPowerMode)
+        if (!AutonomousCockpitActive)
             return;
 
         AutonomousObjective = objective;
@@ -244,7 +248,7 @@ public sealed partial class AutonomousAgentSessionViewModel : ObservableObject
     private void FixFailingTests()
     {
         var objective = "Fix failing tests using minimal-risk changes. Use get_workspace_state / run_affected_tests, then propose safe fixes.";
-        if (_host.IsPowerMode)
+        if (AutonomousCockpitActive)
         {
             StartAutonomousFlow(objective, maxSteps: 10);
             return;
@@ -258,7 +262,7 @@ public sealed partial class AutonomousAgentSessionViewModel : ObservableObject
     private void InvestigateNullref()
     {
         var objective = "Investigate possible null reference in current context. Show the shortest safe fix plan with evidence from diagnostics/tests.";
-        if (_host.IsPowerMode)
+        if (AutonomousCockpitActive)
         {
             StartAutonomousFlow(objective, maxSteps: 8);
             return;
@@ -272,7 +276,7 @@ public sealed partial class AutonomousAgentSessionViewModel : ObservableObject
     private void PrepareCommit()
     {
         var objective = "Prepare a clean commit plan grouped by logical changes and include verification steps.";
-        if (_host.IsPowerMode)
+        if (AutonomousCockpitActive)
         {
             StartAutonomousFlow(objective, maxSteps: 6);
             return;

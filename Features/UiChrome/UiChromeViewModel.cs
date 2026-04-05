@@ -12,18 +12,7 @@ public sealed partial class UiChromeViewModel : ObservableObject
     private CancellationTokenSource? _uiModeBloomCts;
     private string? _lastAppliedUiModeForBloomEffects;
 
-    public static string NormalizeUiMode(string? mode)
-    {
-        if (string.Equals(mode, "Focus", StringComparison.OrdinalIgnoreCase))
-            return "Focus";
-        if (string.Equals(mode, "Power", StringComparison.OrdinalIgnoreCase))
-            return "Power";
-        if (string.Equals(mode, "AgentChat", StringComparison.OrdinalIgnoreCase))
-            return "AgentChat";
-        if (string.Equals(mode, "Debug", StringComparison.OrdinalIgnoreCase))
-            return "Debug";
-        return "Balanced";
-    }
+    public static string NormalizeUiMode(string? mode) => UiModeCatalog.NormalizeUiMode(mode);
 
     public async Task RefreshGitSummaryAsync(
         Func<IReadOnlyList<string>, Task<(bool Success, int ExitCode, string Output)>> runGit)
