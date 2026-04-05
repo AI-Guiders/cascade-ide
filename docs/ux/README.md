@@ -14,6 +14,7 @@
 | `concept-generated/`                    | Сгенерированные агентом UI-концепты CascadeIDE (Focus/Balanced/Power “cockpit”).                                 |
 | `power-mode-concepts-v1.md`             | Текстовое описание сгенерированных UI-концептов (Focus/Balanced/Power) с чеклистом для имплементации.            |
 | `concept-to-implementation-map-v1.md`   | Таблица «концепт → XAML/VM» + **§4.1** визуальный хром Power (дерево / редактор / трасса / телеметрия) vs Fluent по умолчанию. |
+| `concept-pfd-mfd-cascade-v1.md`         | Концепт **PFD/MFD** (авионика): первичное внимание vs мультифункциональные панели; связь с Focus/Balanced/Power и агентом; не ADR. |
 
 ## Макеты
 
