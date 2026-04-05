@@ -2,7 +2,12 @@
 
 **Статус:** Accepted (направление; состав команд и итерации UI — отдельно)  
 **Дата:** 2026-04-02  
-**Связь:** [0012-floating-workspace-chrome.md](0012-floating-workspace-chrome.md) (где лежит хром и панели — не то же самое, что *как* пользователь вызывает действия), [0010-ui-modes-toml-configuration.md](0010-ui-modes-toml-configuration.md) (режимы и видимость), [0008-mcp-contracts-and-testable-infrastructure.md](0008-mcp-contracts-and-testable-infrastructure.md) (команды и MCP), [0002-debug-human-agent-parity.md](0002-debug-human-agent-parity.md) (один слой для человека и агента, если команды общие).
+**Связь:** [0012-floating-workspace-chrome.md](0012-floating-workspace-chrome.md) (см. раздел ниже), [0010-ui-modes-toml-configuration.md](0010-ui-modes-toml-configuration.md) (режимы и видимость), [0008-mcp-contracts-and-testable-infrastructure.md](0008-mcp-contracts-and-testable-infrastructure.md) (команды и MCP), [0002-debug-human-agent-parity.md](0002-debug-human-agent-parity.md) (один слой для человека и агента, если команды общие).
+
+## Разделение с [0012](0012-floating-workspace-chrome.md)
+
+- **[0012](0012-floating-workspace-chrome.md)** — размещение и плавающий хром workspace.
+- **0013 (этот ADR)** — поверхность команд: как пользователь вызывает действия и как обеспечивается discoverability без раздувания toolbar.
 
 ## Контекст
 
@@ -16,9 +21,7 @@
 
 ## Решение
 
-1. **Разделить оси:**  
-   - **0012** — размещение и плавающий хром workspace.  
-   - **0013** — **поверхность команд**: как пользователь вызывает действия и как обеспечивается discoverability **без** раздувания toolbar.
+1. **Разделение осей** — см. раздел **«Разделение с 0012»** выше; формулировки и ссылки на оба ADR — там и в начале документа.
 
 2. **Опорная точка — палитра команд** (аналог Ctrl+Shift+P): одна явная точка входа (кнопка «Command» и/или хоткей), **поиск по списку команд** с подсказками и привязкой к хоткеям, **fuzzy/подстрока**, **недавние и частые** — чтобы не требовать длинной полосы кнопок для всего.
 

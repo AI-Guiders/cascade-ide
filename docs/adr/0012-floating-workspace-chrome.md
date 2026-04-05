@@ -2,7 +2,12 @@
 
 **Статус:** Accepted (направление; объём v1 и конкретные контролы — по итерациям)  
 **Дата:** 2026-04-02  
-**Связь:** [0011-debug-situational-awareness.md](0011-debug-situational-awareness.md) (осведомлённость без раздувания низа), [0010-ui-modes-toml-configuration.md](0010-ui-modes-toml-configuration.md) (пресеты и `workspace.toml`), [0006-presentation-layers-and-feature-slices.md](0006-presentation-layers-and-feature-slices.md) (границы VM/UI), [0013-command-surface-and-discoverability.md](0013-command-surface-and-discoverability.md) (палитра команд и discoverability — отдельно от размещения хрома).
+**Связь:** [0011-debug-situational-awareness.md](0011-debug-situational-awareness.md) (осведомлённость без раздувания низа), [0010-ui-modes-toml-configuration.md](0010-ui-modes-toml-configuration.md) (пресеты и `workspace.toml`), [0006-presentation-layers-and-feature-slices.md](0006-presentation-layers-and-feature-slices.md) (границы VM/UI), [0013-command-surface-and-discoverability.md](0013-command-surface-and-discoverability.md) (см. раздел ниже).
+
+## Разделение с [0013](0013-command-surface-and-discoverability.md)
+
+- **0012 (этот ADR)** — размещение и плавающий хром workspace.
+- **[0013](0013-command-surface-and-discoverability.md)** — поверхность команд: как пользователь вызывает действия и как обеспечивается discoverability без раздувания toolbar.
 
 ## Контекст
 
