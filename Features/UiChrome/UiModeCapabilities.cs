@@ -24,19 +24,21 @@ public sealed record UiModeCapabilities(
     public static UiModeCapabilities DefaultsForFamily(UiModeFamily family)
     {
         var balanced = family.IsBalancedFamily();
+        var flight = family.IsFlightFamily();
+        var balancedOrFlight = balanced || flight;
         var power = family.IsPowerFamily();
         var debug = family.IsDebugFamily();
         var focus = family.IsFocusFamily();
         var agentChat = family.IsAgentChatFamily();
 
         return new UiModeCapabilities(
-            QuickActions: balanced,
-            AgentOperationsPanel: balanced,
+            QuickActions: balancedOrFlight,
+            AgentOperationsPanel: balancedOrFlight,
             AgentTrace: power,
             AutonomousAgentTelemetry: power,
             TelemetryOnTerminalTab: false,
             TelemetryMainColumnSpan: power ? 3 : 5,
-            InstrumentationTabs: focus || balanced || power || agentChat || debug,
+            InstrumentationTabs: focus || balanced || flight || power || agentChat || debug,
             HypothesesTab: debug,
             RiskSummaryCard: !focus && !agentChat,
             ResultSummaryCard: !focus && !agentChat);

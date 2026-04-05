@@ -403,6 +403,8 @@ public static class UiModeCatalog
             return UiModeFamily.AgentChat;
         if (string.Equals(s, nameof(UiModeFamily.Debug), StringComparison.OrdinalIgnoreCase))
             return UiModeFamily.Debug;
+        if (string.Equals(s, nameof(UiModeFamily.Flight), StringComparison.OrdinalIgnoreCase))
+            return UiModeFamily.Flight;
         global::System.Diagnostics.Debug.WriteLine($"UiModeCatalog: unknown family — {s}");
         return null;
     }
@@ -415,6 +417,7 @@ public static class UiModeCatalog
             "Power" => UiModeFamily.Power,
             "AgentChat" => UiModeFamily.AgentChat,
             "Debug" => UiModeFamily.Debug,
+            "Flight" => UiModeFamily.Flight,
             _ => UiModeFamily.Balanced,
         };
 

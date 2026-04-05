@@ -8,6 +8,8 @@ public enum UiModeFamily
     Power,
     AgentChat,
     Debug,
+    /// <summary>Полигон для экспериментов с раскладкой; дефолты capabilities как у <see cref="Balanced"/>.</summary>
+    Flight,
 }
 
 /// <summary>Соответствие стабильного id режима (после <see cref="UiChromeViewModel.NormalizeUiMode"/>) семейству.</summary>
@@ -34,4 +36,7 @@ public static class UiModeFamilyExtensions
 
     public static bool IsDebugFamily(this UiModeFamily family) =>
         family == UiModeFamily.Debug;
+
+    public static bool IsFlightFamily(this UiModeFamily family) =>
+        family == UiModeFamily.Flight;
 }

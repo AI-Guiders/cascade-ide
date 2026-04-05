@@ -168,6 +168,33 @@ public sealed class UiModeCatalogTests : IDisposable
     }
 
     [Fact]
+    public void Flight_inherits_balanced_spec_and_uses_flight_family()
+    {
+        var dir = Path.Combine(Path.GetTempPath(), "uimodes_" + Guid.NewGuid());
+        Directory.CreateDirectory(dir);
+        File.WriteAllText(
+            Path.Combine(dir, "index.toml"),
+            """
+            schema_version = 1
+            modes = [ "Balanced", "Flight" ]
+            """);
+        File.WriteAllText(
+            Path.Combine(dir, "Flight.toml"),
+            """
+            inherits = "Balanced"
+            family = "Flight"
+            main_window_title = "CascadeIDE — Flight (test)"
+            """);
+
+        UiModeCatalog.Initialize(dir);
+
+        Assert.Equal(UiModeFamily.Flight, UiModeCatalog.GetFamily("Flight"));
+        Assert.Equal(UiModeCatalog.GetSpec("Balanced"), UiModeCatalog.GetSpec("Flight"));
+        Assert.Equal(UiModeCatalog.GetCapabilities("Balanced"), UiModeCatalog.GetCapabilities("Flight"));
+        Assert.Equal("CascadeIDE — Flight (test)", UiModeCatalog.GetWindowTitleOverride("Flight"));
+    }
+
+    [Fact]
     public void Capabilities_toml_overrides_and_window_title()
     {
         var dir = Path.Combine(Path.GetTempPath(), "uimodes_" + Guid.NewGuid());

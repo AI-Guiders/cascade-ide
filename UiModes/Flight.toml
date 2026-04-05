@@ -1,0 +1,6 @@
+# Полигон для экспериментов с раскладкой (PFD/MFD, мультиоконность): стартуем как Balanced, дельты — только здесь.
+# Стабильные режимы (Focus / Balanced / Power / …) не трогаем.
+inherits = "Balanced"
+family = "Flight"
+
+main_window_title = "CascadeIDE — Flight (layout lab)"

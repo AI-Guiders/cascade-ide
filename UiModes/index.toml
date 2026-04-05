@@ -1,4 +1,4 @@
 # ADR 0010: порядок и полный список id режимов в меню. schema_version — версия всего бандла UiModes/.
 # Ключи в snake_case — соглашение Tomlyn для свойств PascalCase в модели C#.
 schema_version = 1
-modes = [ "Focus", "Balanced", "Power", "AgentChat", "Debug" ]
+modes = [ "Focus", "Balanced", "Power", "AgentChat", "Debug", "Flight" ]
