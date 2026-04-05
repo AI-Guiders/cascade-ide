@@ -18,7 +18,7 @@ public sealed record ProblemListItem(
 }
 
 /// <summary>Вкладка «Problems»: список диагностик по открытым .cs.</summary>
-public sealed class ProblemsPanelViewModel : ObservableObject
+public sealed partial class ProblemsPanelViewModel : ObservableObject
 {
     private readonly Action<ProblemListItem> _navigate;
 
@@ -46,35 +46,6 @@ public sealed class ProblemsPanelViewModel : ObservableObject
         OnPropertyChanged(nameof(SummaryText));
     }
 
-    public int ErrorCount
-    {
-        get
-        {
-            var n = 0;
-            foreach (var i in Items)
-            {
-                if (string.Equals(i.Severity, "error", StringComparison.OrdinalIgnoreCase))
-                    n++;
-            }
-
-            return n;
-        }
-    }
-
-    public int WarningCount
-    {
-        get
-        {
-            var n = 0;
-            foreach (var i in Items)
-            {
-                if (string.Equals(i.Severity, "warning", StringComparison.OrdinalIgnoreCase))
-                    n++;
-            }
-
-            return n;
-        }
-    }
 
     public string SummaryText => $"{ErrorCount} ошиб., {WarningCount} предупр., всего {Items.Count}";
 }

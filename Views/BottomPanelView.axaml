@@ -373,3 +373,14 @@
         </ThemeVariantScope>
     </Border>
 </UserControl>
+         Margin="0,0,0,2"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
+                </TabItem>
+            </TabControl>
+        </ThemeVariantScope>
+    </Border>
+</UserControl>
