@@ -42,7 +42,7 @@
 
 ## Реализация (зафиксировано)
 
-- **Расположение:** каталог [`git-mcp-core/`](../../../git-mcp-core/) в корне meta-repo `open` (рядом с субмодулем `git-mcp`), по аналогии с `agent-notes-core`. Отдельный субмодуль для Core не вводился.
+- **Расположение:** субмодуль [`git-mcp-core/`](../../../git-mcp-core/) в корне meta-repo `open` (рядом с `git-mcp`). **Канонический remote:** GitLab `Krawler/git-mcp-core` (как у остальных MCP в `open`); зеркало на GitHub — дополнительный remote, не `origin` в рабочей политике.
 - **Сборка:** `GitMcp.Core.csproj`, `net10.0`, namespace `GitMcp.Core`. Зависимостей от `System.Text.Json` в Core нет — только примитивы и списки аргументов; `GitArgsResult` для ошибок валидации argv.
 - **git-mcp:** `ProjectReference` на `../git-mcp-core/GitMcp.Core.csproj`; вызов `git` через `ProcessStartInfo.ArgumentList`. Версия MCP-сервера **0.3.0**. `git_status` в MCP — последовательность из Core (`StatusMcpSequence`: `rev-parse` + `status`); в IDE панель по-прежнему `status --short --branch` (`StatusShortBranch`).
 - **Cascade IDE:** `ProjectReference` на тот же Core; расширены `ide_git_*` (log, fetch, pull, branch, show, submodule); для `ide_git_push` — `Push(..., defaultOriginWhenRemoteEmpty: false)` (без подстановки `origin` при пустом remote), в отличие от MCP `git_push`.
