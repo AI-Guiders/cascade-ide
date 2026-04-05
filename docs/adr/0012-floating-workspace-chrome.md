@@ -2,7 +2,9 @@
 
 **Статус:** Accepted (направление; объём v1 и конкретные контролы — по итерациям)  
 **Дата:** 2026-04-02  
-**Связь:** [0011-debug-situational-awareness.md](0011-debug-situational-awareness.md) (осведомлённость без раздувания низа), [0010-ui-modes-toml-configuration.md](0010-ui-modes-toml-configuration.md) (пресеты и `workspace.toml`), [0006-presentation-layers-and-feature-slices.md](0006-presentation-layers-and-feature-slices.md) (границы VM/UI), [0013-command-surface-and-discoverability.md](0013-command-surface-and-discoverability.md) (см. раздел ниже).
+**Связь:** [0011-debug-situational-awareness.md](0011-debug-situational-awareness.md) (осведомлённость без раздувания низа), [0010-ui-modes-toml-configuration.md](0010-ui-modes-toml-configuration.md) (пресеты и `workspace.toml`), [0006-presentation-layers-and-feature-slices.md](0006-presentation-layers-and-feature-slices.md) (границы VM/UI), [0013-command-surface-and-discoverability.md](0013-command-surface-and-discoverability.md) (см. [раздел «Разделение с 0013»](#scope-split-0013) ниже).
+
+<a id="scope-split-0013"></a>
 
 ## Разделение с [0013](0013-command-surface-and-discoverability.md)
 
