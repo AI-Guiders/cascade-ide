@@ -1,0 +1,2 @@
+# PyPI: см. доступные версии (`pip index versions agent-client-protocol`). На 2026-04 актуально до 0.9.x.
+agent-client-protocol>=0.8.0,<1
