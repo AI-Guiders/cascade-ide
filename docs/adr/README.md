@@ -20,7 +20,8 @@
 | [0010](0010-ui-modes-toml-configuration.md) | Данные UI-режимов в TOML | Accepted (загрузчик и файлы — по плану в ADR) |
 | [0011](0011-debug-situational-awareness.md) | Ситуационная осведомлённость в отладке (полоска, hover; детали в панели) | Accepted (направление) |
 | [0012](0012-floating-workspace-chrome.md) | Плавающий и отцепляемый хром workspace (телеметрия, полоски; не доки в v1) | Accepted (направление) |
-| [0013](0013-command-surface-and-discoverability.md) | Поверхность команд и discoverability (палитра, чеклисты, минимальный toolbar) | Accepted (направление) |
+| [0013](0013-command-surface-and-discoverability.md) | Поверхность команд и discoverability (палитра, минимальный toolbar) | Accepted (направление) |
+| [0014](0014-situational-checklists.md) | Ситуационные чеклисты (модель, триггеры, UI; родитель — 0013) | Accepted (направление) |
 
 ## Соглашения
 
