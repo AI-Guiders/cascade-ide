@@ -289,9 +289,20 @@ internal static class IdeMcpCommandExecutorEmitter
         sb.AppendLine("        add(Services.IdeCommands.RunCodeCleanup, async (args, _) => await ((IIdeMcpActions)_vm).RunCodeCleanupAsync(McpCommandJsonArgs.String(args, \"include_path\")));");
         sb.AppendLine("        add(Services.IdeCommands.GetCodeMetrics, async (args, _) => await ((IIdeMcpActions)_vm).GetCodeMetricsAsync(McpCommandJsonArgs.String(args, \"scope\"), McpCommandJsonArgs.String(args, \"path\")));");
 
-        // Git
+        // Git (argv — GitMcp.Core, паритет с git-mcp)
         sb.AppendLine("        add(Services.IdeCommands.GitStatus, async (_, _) => await ((IIdeMcpActions)_vm).GitStatusAsync());");
         sb.AppendLine("        add(Services.IdeCommands.GitDiff, async (args, _) => await ((IIdeMcpActions)_vm).GitDiffAsync(McpCommandJsonArgs.String(args, \"path\"), McpCommandJsonArgs.Bool(args, \"staged\")));");
+        sb.AppendLine("        add(Services.IdeCommands.GitLog, async (args, _) => await ((IIdeMcpActions)_vm).GitLogAsync(McpCommandJsonArgs.Int(args, \"n\", 20)));");
+        sb.AppendLine("        add(Services.IdeCommands.GitFetch, async (args, _) => await ((IIdeMcpActions)_vm).GitFetchAsync(McpCommandJsonArgs.String(args, \"remote\"), McpCommandJsonArgs.Bool(args, \"all\"), McpCommandJsonArgs.Bool(args, \"prune\")));");
+        sb.AppendLine("        add(Services.IdeCommands.GitPull, async (args, _) => await ((IIdeMcpActions)_vm).GitPullAsync(McpCommandJsonArgs.String(args, \"remote\"), McpCommandJsonArgs.String(args, \"branch\"), McpCommandJsonArgs.Bool(args, \"ff_only\", true)));");
+        sb.AppendLine("        add(Services.IdeCommands.GitBranch, async (args, _) => await ((IIdeMcpActions)_vm).GitBranchAsync(McpCommandJsonArgs.String(args, \"action\"), McpCommandJsonArgs.String(args, \"name\"), McpCommandJsonArgs.String(args, \"start_point\"), McpCommandJsonArgs.Bool(args, \"force\")));");
+        sb.AppendLine("        add(Services.IdeCommands.GitShow, async (args, _) =>");
+        sb.AppendLine("        {");
+        sb.AppendLine("            var rev = McpCommandJsonArgs.String(args, \"rev\") ?? \"\";");
+        sb.AppendLine("            if (string.IsNullOrWhiteSpace(rev)) return \"Missing rev\";");
+        sb.AppendLine("            return await ((IIdeMcpActions)_vm).GitShowAsync(rev, McpCommandJsonArgs.String(args, \"path\"), McpCommandJsonArgs.Bool(args, \"stat_only\"));");
+        sb.AppendLine("        });");
+        sb.AppendLine("        add(Services.IdeCommands.GitSubmodule, async (args, _) => await ((IIdeMcpActions)_vm).GitSubmoduleAsync(McpCommandJsonArgs.String(args, \"action\"), McpCommandJsonArgs.String(args, \"path\"), McpCommandJsonArgs.Bool(args, \"recursive\", true)));");
         sb.AppendLine("        add(Services.IdeCommands.GitCommit, async (args, _) =>");
         sb.AppendLine("        {");
         sb.AppendLine("            if (string.IsNullOrWhiteSpace(McpCommandJsonArgs.String(args, \"message\"))) return \"Missing message\";");

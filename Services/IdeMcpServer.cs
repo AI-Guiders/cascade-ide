@@ -40,7 +40,8 @@ public static class IdeMcpServer
                                 or "ide_set_ui_theme" or "ide_set_control_layout" or "ide_set_control_text" or "ide_click_control"
                                 or "ide_send_keys" or "ide_set_focus" or "ide_highlight_control" or "ide_set_panel_size" or "ide_add_control"
                                 or "ide_show_breakpoints" or "ide_show_debug_position" or "ide_show_debug_state" or "ide_write_agent_notes"
-                                or "ide_run_code_cleanup" or "ide_git_commit" or "ide_git_push";
+                                or "ide_run_code_cleanup" or "ide_git_commit" or "ide_git_push"
+                                or "ide_git_log" or "ide_git_fetch" or "ide_git_pull" or "ide_git_branch" or "ide_git_show" or "ide_git_submodule";
                             isError = isActionTool && text != "OK";
                         }
                         return new CallToolResult { Content = [new TextContentBlock { Text = text }], IsError = isError };

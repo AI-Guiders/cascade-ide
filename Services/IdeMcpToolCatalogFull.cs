@@ -321,14 +321,106 @@ internal static class IdeMcpToolCatalogFull
             new()
             {
                 Name = "ide_git_push",
-                Description = "Сделать git push в каталоге решения/workspace. Опционально remote и branch. JSON: success, exit_code, output.",
+                Description = "Сделать git push в каталоге решения/workspace. Опционально remote и branch (как git push без лишних аргументов). JSON: success, exit_code, output.",
                 InputSchema = Schema(new
                 {
                     type = "object",
                     properties = new
                     {
-                        remote = new { type = "string", description = "Опционально: remote (по умолчанию origin)." },
-                        branch = new { type = "string", description = "Опционально: branch (по умолчанию текущая)." }
+                        remote = new { type = "string", description = "Опционально: remote." },
+                        branch = new { type = "string", description = "Опционально: branch." }
+                    },
+                    required = Array.Empty<string>()
+                })
+            },
+            new()
+            {
+                Name = "ide_git_log",
+                Description = "Git log -n N --oneline в workspace. JSON: success, exit_code, output.",
+                InputSchema = Schema(new
+                {
+                    type = "object",
+                    properties = new { n = new { type = "integer", description = "Число коммитов (по умолчанию 20, макс. 500)." } },
+                    required = Array.Empty<string>()
+                })
+            },
+            new()
+            {
+                Name = "ide_git_fetch",
+                Description = "Git fetch в workspace. Опционально remote, all, prune. JSON: success, exit_code, output.",
+                InputSchema = Schema(new
+                {
+                    type = "object",
+                    properties = new
+                    {
+                        remote = new { type = "string", description = "Опционально: remote (не сочетать с all=true)." },
+                        all = new { type = "boolean", description = "true — fetch --all." },
+                        prune = new { type = "boolean", description = "true — --prune." }
+                    },
+                    required = Array.Empty<string>()
+                })
+            },
+            new()
+            {
+                Name = "ide_git_pull",
+                Description = "Git pull в workspace. Оба remote+branch или ни одного; ff_only по умолчанию true. JSON: success, exit_code, output.",
+                InputSchema = Schema(new
+                {
+                    type = "object",
+                    properties = new
+                    {
+                        remote = new { type = "string", description = "Вместе с branch или оба пустые." },
+                        branch = new { type = "string", description = "Вместе с remote." },
+                        ff_only = new { type = "boolean", description = "По умолчанию true (--ff-only)." }
+                    },
+                    required = Array.Empty<string>()
+                })
+            },
+            new()
+            {
+                Name = "ide_git_branch",
+                Description = "Git branch: list (-vv), create, delete. JSON: success, exit_code, output.",
+                InputSchema = Schema(new
+                {
+                    type = "object",
+                    properties = new
+                    {
+                        action = new { type = "string", description = "list | create | delete (по умолчанию list)." },
+                        name = new { type = "string", description = "Для create/delete." },
+                        start_point = new { type = "string", description = "Опционально для create." },
+                        force = new { type = "boolean", description = "Для delete: -D." }
+                    },
+                    required = Array.Empty<string>()
+                })
+            },
+            new()
+            {
+                Name = "ide_git_show",
+                Description = "Git show rev; опционально path, stat_only. JSON: success, exit_code, output.",
+                InputSchema = Schema(new
+                {
+                    type = "object",
+                    properties = new
+                    {
+                        rev = new { type = "string", description = "Ревизия (обязательно)." },
+                        path = new { type = "string", description = "Опционально: файл в ревизии." },
+                        stat_only = new { type = "boolean", description = "Только --stat." }
+                    },
+                    required = new[] { "rev" }
+                })
+            },
+            new()
+            {
+                Name = "ide_git_submodule",
+                Description = "Git submodule status или update --init. JSON: success, exit_code, output.",
+                InputSchema = Schema(new
+                {
+                    type = "object",
+                    properties = new
+                    {
+                        action = new { type = "string", description = "status | update (по умолчанию status)." },
+                        path = new { type = "string", description = "Опционально для update." },
+                        recursive = new { type = "boolean", description = "Для update: по умолчанию true." }
                     },
                     required = Array.Empty<string>()
                 })

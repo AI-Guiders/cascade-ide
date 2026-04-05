@@ -1,6 +1,6 @@
 # ADR 0019: Общий Git Core для Cascade IDE и git-mcp
 
-**Статус:** Proposed (обсуждение; после согласования — Accepted и план внедрения)  
+**Статус:** Accepted  
 **Дата:** 2026-04-06  
 **Связь:** [0008-mcp-contracts-and-testable-infrastructure.md](0008-mcp-contracts-and-testable-infrastructure.md), [0002-debug-human-agent-parity.md](0002-debug-human-agent-parity.md), [git-and-submodules-v1.md](../git-and-submodules-v1.md), [MCP-PROTOCOL.md](../MCP-PROTOCOL.md). Внешний репозиторий: `git-mcp` (субмодуль `financial-open`).
 
@@ -40,9 +40,17 @@
 - **Только документировать контракт** без общей библиотеки — дешевле краткосрочно, не снимает дублирование и риск расхождений при паритете.
 - **Считать git-mcp единственным источником и убрать git из IDE** — противоречит встроенному сценарию (панель, телеметрия, офлайн-агент без внешнего exe).
 
-## Открытые вопросы (для обсуждения)
+## Реализация (зафиксировано)
 
-- Размещение репозитория: **отдельный субмодуль** рядом с `git-mcp` vs каталог **внутри** `git-mcp` с `ProjectReference` из Cascade (как `agent-notes-core` относится к `agent-notes-mcp`).
-- Имя сборки и namespace (`GitMcp.Core` vs нейтральное `GitAutomation.Core`).
-- Нужна ли в Core **зависимость от `System.Text.Json`** для DTO или только строки и примитивы.
-- Порядок миграции: **strangler** (сначала Core + git-mcp, затем IDE) vs сначала вынести общее из IDE — зафиксировать в задаче на внедрение после Accepted.
+- **Расположение:** каталог [`git-mcp-core/`](../../../git-mcp-core/) в корне meta-repo `open` (рядом с субмодулем `git-mcp`), по аналогии с `agent-notes-core`. Отдельный субмодуль для Core не вводился.
+- **Сборка:** `GitMcp.Core.csproj`, `net10.0`, namespace `GitMcp.Core`. Зависимостей от `System.Text.Json` в Core нет — только примитивы и списки аргументов; `GitArgsResult` для ошибок валидации argv.
+- **git-mcp:** `ProjectReference` на `../git-mcp-core/GitMcp.Core.csproj`; вызов `git` через `ProcessStartInfo.ArgumentList`. Версия MCP-сервера **0.3.0**. `git_status` в MCP — последовательность из Core (`StatusMcpSequence`: `rev-parse` + `status`); в IDE панель по-прежнему `status --short --branch` (`StatusShortBranch`).
+- **Cascade IDE:** `ProjectReference` на тот же Core; расширены `ide_git_*` (log, fetch, pull, branch, show, submodule); для `ide_git_push` — `Push(..., defaultOriginWhenRemoteEmpty: false)` (без подстановки `origin` при пустом remote), в отличие от MCP `git_push`.
+- **Тесты:** `GitMcp.Tests` ссылается на Core; юнит-тесты `GitCommandBuilder`.
+
+## Открытые вопросы (закрыты при принятии)
+
+- ~~Размещение~~ — каталог в `open`, не внутри субмодуля `git-mcp`.
+- ~~Имя~~ — `GitMcp.Core` / `GitMcp.Core`.
+- ~~STJ в Core~~ — не используется.
+- ~~Порядок миграции~~ — Core + оба адаптера в одном изменении.

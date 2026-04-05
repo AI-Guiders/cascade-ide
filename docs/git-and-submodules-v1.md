@@ -37,6 +37,7 @@
 
 ## Связь с текущей реализацией
 
+- Сборка аргументов CLI для git в сценариях агента **централизована** в библиотеке `GitMcp.Core` (корень meta-repo `open`), общей для встроенных команд IDE и отдельного процесса git-mcp ([ADR 0019](adr/0019-shared-git-core-ide-and-git-mcp.md)).
 - Сводка по git в полосе телеметрии и вызовы через MCP (`GitStatusAsync`, `GitDiffAsync`, `GitCommitAsync`, `GitPushAsync` и т.д.) задают **контракт для агента**.
 - **Вкладка «Git»** в нижней панели (Вид → Git): ветка/статус, строка **«Корень git»** (`git rev-parse --show-toplevel`) vs каталог решения — чтобы видеть родительский репозиторий и вложенный; список `git status --short`, diff по выбранной строке, блок `git submodule status`, **стейджинг** (`git add` / `git restore --staged`), пометка submodule по `.gitmodules` (`[sm]`), **папка submodule** в проводнике, **`git submodule update --init --recursive`** и **`git submodule sync --recursive`** с выводом в панели, **«Открыть решение в submodule»** — поиск `.slnx`/`.sln` в корне или подпапке первого уровня и `LoadSolution` (контекст IDE переключается на этот репозиторий), коммит **add -A** или **только staged**, push. Дальнейшее развитие — расширенный статус submodule (ветка/грязь/remote), мастера и подтверждения для редких команд (см. критерии выше).
 

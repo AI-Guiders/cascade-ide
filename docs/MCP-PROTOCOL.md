@@ -188,10 +188,16 @@
 | `get_supported_editor_languages` | Список поддерживаемых языков подсветки редактора. returns: json. |
 | `get_ui_layout` | Дерево UI-элементов (layout) с bounds/visibility/content. returns: json. |
 | `get_ui_theme` | Снимок темы UI и лэйаута (включая resolved-ресурсы). returns: json. |
+| `git_branch` | Git branch в каталоге решения/workspace. args: action?:string, name?:string, start_point?:string, force?:boolean; returns: json; example: {"action":"list"}. |
 | `git_commit` | Git commit в каталоге решения/workspace. args: message:string, paths?:string[]; returns: text; example: {"message":"chore: update","paths":["a.txt"]}. |
 | `git_diff` | Git diff в каталоге решения/workspace. args: path?:string, staged?:boolean; returns: json; example: {"path":"README.md","staged":false}. |
+| `git_fetch` | Git fetch в каталоге решения/workspace. args: remote?:string, all?:boolean, prune?:boolean; returns: json; example: {"prune":true}. |
+| `git_log` | Git log в каталоге решения/workspace. args: n?:integer; returns: json; example: {"n":20}. |
+| `git_pull` | Git pull в каталоге решения/workspace. args: remote?:string, branch?:string, ff_only?:boolean; returns: json; example: {"ff_only":true}. |
 | `git_push` | Git push в каталоге решения/workspace. args: remote?:string, branch?:string; returns: text; example: {"remote":"origin","branch":"main"}. |
-| `git_status` | Git status в каталоге решения/workspace. returns: json. |
+| `git_show` | Git show в каталоге решения/workspace. args: rev:string, path?:string, stat_only?:boolean; returns: json; example: {"rev":"HEAD","stat_only":true}. |
+| `git_status` | Git status в каталоге решения/workspace (git status --short --branch). returns: json. |
+| `git_submodule` | Git submodule в каталоге решения/workspace. args: action?:string, path?:string, recursive?:boolean; returns: json; example: {"action":"status"}. |
 | `highlight_control` | Подсветить контрол рамкой (под курсором или по имени). args: name?:string; returns: text; example: {"name":"BuildButton"}. |
 | `list_knowledge_files` | Список knowledge-файлов в каталоге решения (опционально subdir). args: subdir?:string; returns: json; example: {"subdir":"work"}. |
 | `read_knowledge_file` | Прочитать knowledge-файл из каталога решения. args: file_path:string; returns: text; example: {"file_path":"META/integrity-core.md"}. |

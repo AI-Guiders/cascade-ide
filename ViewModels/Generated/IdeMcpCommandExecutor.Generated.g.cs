@@ -19,6 +19,17 @@ internal sealed partial class IdeMcpCommandExecutor
         add(Services.IdeCommands.GetCodeMetrics, async (args, _) => await ((IIdeMcpActions)_vm).GetCodeMetricsAsync(McpCommandJsonArgs.String(args, "scope"), McpCommandJsonArgs.String(args, "path")));
         add(Services.IdeCommands.GitStatus, async (_, _) => await ((IIdeMcpActions)_vm).GitStatusAsync());
         add(Services.IdeCommands.GitDiff, async (args, _) => await ((IIdeMcpActions)_vm).GitDiffAsync(McpCommandJsonArgs.String(args, "path"), McpCommandJsonArgs.Bool(args, "staged")));
+        add(Services.IdeCommands.GitLog, async (args, _) => await ((IIdeMcpActions)_vm).GitLogAsync(McpCommandJsonArgs.Int(args, "n", 20)));
+        add(Services.IdeCommands.GitFetch, async (args, _) => await ((IIdeMcpActions)_vm).GitFetchAsync(McpCommandJsonArgs.String(args, "remote"), McpCommandJsonArgs.Bool(args, "all"), McpCommandJsonArgs.Bool(args, "prune")));
+        add(Services.IdeCommands.GitPull, async (args, _) => await ((IIdeMcpActions)_vm).GitPullAsync(McpCommandJsonArgs.String(args, "remote"), McpCommandJsonArgs.String(args, "branch"), McpCommandJsonArgs.Bool(args, "ff_only", true)));
+        add(Services.IdeCommands.GitBranch, async (args, _) => await ((IIdeMcpActions)_vm).GitBranchAsync(McpCommandJsonArgs.String(args, "action"), McpCommandJsonArgs.String(args, "name"), McpCommandJsonArgs.String(args, "start_point"), McpCommandJsonArgs.Bool(args, "force")));
+        add(Services.IdeCommands.GitShow, async (args, _) =>
+        {
+            var rev = McpCommandJsonArgs.String(args, "rev") ?? "";
+            if (string.IsNullOrWhiteSpace(rev)) return "Missing rev";
+            return await ((IIdeMcpActions)_vm).GitShowAsync(rev, McpCommandJsonArgs.String(args, "path"), McpCommandJsonArgs.Bool(args, "stat_only"));
+        });
+        add(Services.IdeCommands.GitSubmodule, async (args, _) => await ((IIdeMcpActions)_vm).GitSubmoduleAsync(McpCommandJsonArgs.String(args, "action"), McpCommandJsonArgs.String(args, "path"), McpCommandJsonArgs.Bool(args, "recursive", true)));
         add(Services.IdeCommands.GitCommit, async (args, _) =>
         {
             if (string.IsNullOrWhiteSpace(McpCommandJsonArgs.String(args, "message"))) return "Missing message";

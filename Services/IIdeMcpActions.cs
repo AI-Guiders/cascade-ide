@@ -53,6 +53,18 @@ public interface IIdeMcpActions
     Task<string> GitCommitAsync(string message, IReadOnlyList<string>? paths = null);
     /// <summary>Git push в каталоге решения/workspace. Опционально remote/branch. JSON.</summary>
     Task<string> GitPushAsync(string? remote = null, string? branch = null);
+    /// <summary>Git log (--oneline). Опционально n (число коммитов). JSON.</summary>
+    Task<string> GitLogAsync(int n = 20);
+    /// <summary>Git fetch. Опционально remote, all, prune. JSON.</summary>
+    Task<string> GitFetchAsync(string? remote = null, bool all = false, bool prune = false);
+    /// <summary>Git pull. Оба remote и branch или ни одного; ff_only по умолчанию true. JSON.</summary>
+    Task<string> GitPullAsync(string? remote = null, string? branch = null, bool ffOnly = true);
+    /// <summary>Git branch: list | create | delete. JSON.</summary>
+    Task<string> GitBranchAsync(string? action = null, string? name = null, string? startPoint = null, bool force = false);
+    /// <summary>Git show. rev обязателен. JSON.</summary>
+    Task<string> GitShowAsync(string rev, string? path = null, bool statOnly = false);
+    /// <summary>Git submodule: status | update. JSON.</summary>
+    Task<string> GitSubmoduleAsync(string? action = null, string? path = null, bool recursive = true);
     /// <summary>Текущий текст панели «Вывод сборки» и цвета её оформления (background, foreground). JSON. Чтобы агент видел содержимое панели.</summary>
     string GetBuildOutput();
     void SetBreakpoint(string filePath, int line, string? condition = null);
