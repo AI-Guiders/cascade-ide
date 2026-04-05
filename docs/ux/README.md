@@ -15,6 +15,7 @@
 | `power-mode-concepts-v1.md`             | Текстовое описание сгенерированных UI-концептов (Focus/Balanced/Power) с чеклистом для имплементации.            |
 | `concept-to-implementation-map-v1.md`   | Таблица «концепт → XAML/VM» + **§4.1** визуальный хром Power (дерево / редактор / трасса / телеметрия) vs Fluent по умолчанию. |
 | `concept-pfd-mfd-cascade-v1.md`         | Концепт **PFD/MFD** (авионика): первичное внимание vs мультифункциональные панели; связь с Focus/Balanced/Power и агентом; не ADR. |
+| `note-acp-cascade-cursor-v1.md`        | Заметка **Agent Client Protocol (ACP)**: Cascade как клиент, Cursor/другие как агенты; не путать с другим «ACP»; ссылки на спеку и smoke `samples/AcpSmoke`. |
 
 ## Макеты
 
