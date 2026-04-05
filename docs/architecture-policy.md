@@ -34,6 +34,7 @@
 | Мультиоконность workspace, вторые поверхности агента, зоны экрана; MCP — несколько корней в scope фичи | [0017](adr/0017-multi-window-workspace-and-agent-surfaces.md) (Proposed) |
 | Реестр `IdeCommands`: каноничные XML-доки (`summary` / `param` / `returns` / `example`) для ProtocolDocGen; миграция с мини-языка в summary | [0018](adr/0018-ide-commands-canonical-xml-documentation.md) (Proposed) |
 | Git: общая библиотека логики для встроенных `ide_git_*` и отдельного git-mcp; паритет семантики | [0019](adr/0019-shared-git-core-ide-and-git-mcp.md) (Accepted) |
+| Агент: слои видимости рассуждения (ответ, трасс инструментов, опционально сырой лог); ограничения API провайдеров — явно, без имитации «полного мыслительного процесса» | [0020](adr/0020-agent-reasoning-visibility-and-provider-limits.md) (Proposed) |
 
 Полный индекс: [docs/adr/README.md](adr/README.md).
 
@@ -65,4 +66,5 @@
 - **v1.11** — добавлен [0018](adr/0018-ide-commands-canonical-xml-documentation.md) (каноничные XML-доки для `IdeCommands`/ProtocolDocGen; Proposed).  
 - **v1.12** — добавлен [0019](adr/0019-shared-git-core-ide-and-git-mcp.md) (общий Git Core для IDE и git-mcp; Proposed).  
 - **v1.13** — [0019](adr/0019-shared-git-core-ide-and-git-mcp.md) принят (Accepted); реализация `GitMcp.Core` в meta-repo `open`, паритет argv для IDE и git-mcp.  
+- **v1.14** — добавлен [0020](adr/0020-agent-reasoning-visibility-and-provider-limits.md) (видимость рассуждения агента: слои L0–L2, честные ограничения провайдеров LLM; Proposed).  
 - Изменения направления — отдельным коммитом: обновление этого файла и при необходимости новый ADR в [docs/adr/README.md](adr/README.md).
