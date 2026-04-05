@@ -1,4 +1,4 @@
-using Tomlyn;
+using CascadeIDE.Services;
 
 namespace CascadeIDE.Features.UiChrome;
 
@@ -102,7 +102,7 @@ public static class UiModeCatalog
         UiModesIndexToml? index;
         try
         {
-            index = Toml.ToModel<UiModesIndexToml>(File.ReadAllText(indexPath));
+            index = CascadeTomlSerializer.Deserialize<UiModesIndexToml>(File.ReadAllText(indexPath));
         }
         catch (Exception ex)
         {
@@ -123,7 +123,7 @@ public static class UiModeCatalog
         {
             try
             {
-                var w = Toml.ToModel<UiWorkspaceToml>(File.ReadAllText(workspacePath));
+                var w = CascadeTomlSerializer.Deserialize<UiWorkspaceToml>(File.ReadAllText(workspacePath));
                 UiWorkspaceLayoutRuntimeMetrics.ApplyWorkspaceToml(w);
             }
             catch (Exception ex)
@@ -228,7 +228,7 @@ public static class UiModeCatalog
             {
                 try
                 {
-                    file = Toml.ToModel<UiModeFileToml>(File.ReadAllText(path));
+                    file = CascadeTomlSerializer.Deserialize<UiModeFileToml>(File.ReadAllText(path));
                 }
                 catch (Exception ex)
                 {

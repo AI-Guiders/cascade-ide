@@ -5,7 +5,7 @@ namespace CascadeIDE.Services;
 /// <summary>Список расширений редактора с подсветкой синтаксиса (один источник правды для маппинга, MCP и настроек).</summary>
 public static class EditorLanguageSupport
 {
-    /// <summary>Пары расширение → краткое имя языка (для отображения и MCP). Только расширения, проверенные через GetLanguageByExtension в TextMateSharp.Grammars.</summary>
+    /// <summary>Пары расширение → краткое имя языка (для отображения и MCP). Расширения должны резолвиться в <see cref="TextMateSharp.Grammars.RegistryOptions"/> после той же инициализации, что в приложении (в т.ч. <see cref="TextMateTomlGrammar.TryLoadInto"/> для TOML).</summary>
     public static IReadOnlyList<(string Extension, string LanguageName)> Supported { get; } =
     [
         (".bat", "Batch"),
@@ -35,6 +35,7 @@ public static class EditorLanguageSupport
         (".scss", "SCSS"),
         (".sh", "Bash"),
         (".sql", "SQL"),
+        (".toml", "TOML"),
         (".ts", "TypeScript"),
         (".tsx", "TypeScript React"),
         (".xml", "XML"),
@@ -48,7 +49,7 @@ public static class EditorLanguageSupport
         (".yml", "YAML"),
     ];
 
-    /// <summary>Расширения файлов → расширение грамматики для GetLanguageByExtension (только проверенные в бандле).</summary>
+    /// <summary>Расширения файлов → расширение грамматики для GetLanguageByExtension (встроенный бандл + при необходимости шипнутые грамматики, см. TextMateGrammars).</summary>
     public static IReadOnlyDictionary<string, string> ExtensionToGrammarExtension { get; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
     {
         [".bat"] = ".bat",
@@ -78,6 +79,7 @@ public static class EditorLanguageSupport
         [".scss"] = ".scss",
         [".sh"] = ".sh",
         [".sql"] = ".sql",
+        [".toml"] = ".toml",
         [".ts"] = ".ts",
         [".tsx"] = ".tsx",
         [".xml"] = ".xml",

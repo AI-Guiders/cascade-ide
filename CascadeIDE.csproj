@@ -34,6 +34,7 @@
     <Content Include="Themes\power-theme.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="Themes\power-cockpit-concept-theme.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="UiModes\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="TextMateGrammars\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
@@ -42,34 +43,38 @@
     <ProjectReference Include="..\dotnet-debug-core\DotnetDebug.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Avalonia" Version="11.3.12" />
-    <PackageReference Include="Avalonia.Desktop" Version="11.3.12" />
-    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.12" />
-    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.12" />
+    <PackageReference Include="Avalonia" Version="11.3.13" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.3.13" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.13" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.13" />
     <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-    <PackageReference Include="Avalonia.Diagnostics" Version="11.3.12">
+    <PackageReference Include="Avalonia.Diagnostics" Version="11.3.13">
       <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
       <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Avalonia.AvaloniaEdit" Version="11.0.6" />
-    <PackageReference Include="AvaloniaEdit.TextMate" Version="11.0.6" />
+    <!-- Версии Avalonia.AvaloniaEdit и AvaloniaEdit.TextMate держать синхронно (см. TypeLoadException TextEditorModel). -->
+    <PackageReference Include="Avalonia.AvaloniaEdit" Version="11.4.1" />
+    <PackageReference Include="AvaloniaEdit.TextMate" Version="11.4.1" />
     <PackageReference Include="Dock.Avalonia" Version="11.3.11.22" />
     <PackageReference Include="Dock.Model.Avalonia" Version="11.3.11.22" />
     <PackageReference Include="Dock.Model.Mvvm" Version="11.3.11.22" />
     <PackageReference Include="Dock.Avalonia.Themes.Fluent" Version="11.3.11.22" />
     <PackageReference Include="Markdown.Avalonia" Version="11.0.2" />
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.14.0" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="5.3.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="5.3.0" />
     <PackageReference Include="Microsoft.VisualStudio.SolutionPersistence" Version="1.0.52" />
-    <PackageReference Include="Microsoft.Extensions.AI" Version="9.5.0" />
-    <PackageReference Include="ModelContextProtocol" Version="0.8.0-preview.1" />
-    <PackageReference Include="OllamaSharp" Version="5.4.16" />
+    <PackageReference Include="Microsoft.Extensions.AI" Version="10.4.1" />
+    <PackageReference Include="ModelContextProtocol" Version="1.2.0" />
+    <PackageReference Include="OllamaSharp" Version="5.4.25" />
     <PackageReference Include="OutWit.Common" Version="1.3.2" />
     <PackageReference Include="OutWit.Common.Json" Version="1.1.3" />
     <PackageReference Include="OutWit.Database.Core" Version="1.0.0" />
-    <PackageReference Include="OutWit.Database.EntityFramework" Version="1.0.1" />
-    <PackageReference Include="Svg.Controls.Avalonia" Version="11.3.9.2" Aliases="svgctrl" />
-    <PackageReference Include="Tomlyn" Version="0.20.0" />
+    <PackageReference Include="OutWit.Database.EntityFramework" Version="1.0.2" />
+    <PackageReference Include="Svg.Controls.Avalonia" Version="11.3.9.5" Aliases="svgctrl" />
+    <PackageReference Include="TextMateSharp" Version="2.0.3" />
+    <PackageReference Include="TextMateSharp.Grammars" Version="2.0.3" />
+    <PackageReference Include="Tomlyn" Version="2.3.0" />
   </ItemGroup>
 
   <!-- При RID вывод в net10.0/win-x64/; в корне net10.0/ часто остаётся старый apphost от прошлой сборки — Cursor/проводник открывают его и кажется «древняя» сборка. Удаляем только наши артефакты в корне TFM. -->
@@ -100,27 +105,17 @@
   </PropertyGroup>
 
   <!-- Generate C# doc map BEFORE compilation (required by IdeMcpToolCatalog). -->
-  <Target Name="GenerateIdeCommandsDocCs"
-          BeforeTargets="CoreCompile"
-          Condition="'$(GenerateIdeProtocolDocs)'=='true' and Exists('$(_IdeProtocolDocGenProject)') and Exists('$(_IdeCommandsFile)')"
-          Inputs="$(_IdeCommandsFile)"
-          Outputs="$(_IdeCommandsDocGenerated);$(_IdeCommandsArgsGenerated);$(_IdeCommandsContractGenerated);$(_IdeExecutorGenerated)">
+  <Target Name="GenerateIdeCommandsDocCs" BeforeTargets="CoreCompile" Condition="'$(GenerateIdeProtocolDocs)'=='true' and Exists('$(_IdeProtocolDocGenProject)') and Exists('$(_IdeCommandsFile)')" Inputs="$(_IdeCommandsFile)" Outputs="$(_IdeCommandsDocGenerated);$(_IdeCommandsArgsGenerated);$(_IdeCommandsContractGenerated);$(_IdeExecutorGenerated)">
     <Exec Command="dotnet run --project &quot;$(_IdeProtocolDocGenProject)&quot; --no-restore -- --cs-only &quot;$(MSBuildProjectDirectory)&quot;" />
   </Target>
 
   <!-- Lint IdeCommands XML-doc contract: require returns for all, example when args exist. -->
-  <Target Name="LintIdeCommandsContract"
-          BeforeTargets="CoreCompile"
-          Condition="'$(GenerateIdeProtocolDocs)'=='true' and Exists('$(_IdeProtocolDocGenProject)') and Exists('$(_IdeCommandsFile)')">
+  <Target Name="LintIdeCommandsContract" BeforeTargets="CoreCompile" Condition="'$(GenerateIdeProtocolDocs)'=='true' and Exists('$(_IdeProtocolDocGenProject)') and Exists('$(_IdeCommandsFile)')">
     <Exec Command="dotnet run --project &quot;$(_IdeProtocolDocGenProject)&quot; --no-restore -- --lint &quot;$(MSBuildProjectDirectory)&quot;" />
   </Target>
 
   <!-- Generate Markdown protocol doc AFTER build (keeps docs always fresh). -->
-  <Target Name="GenerateMcpProtocolDocMd"
-          AfterTargets="Build"
-          Condition="'$(GenerateIdeProtocolDocs)'=='true' and Exists('$(_IdeProtocolDocGenProject)') and Exists('$(_IdeCommandsFile)') and Exists('$(_McpProtocolDoc)')"
-          Inputs="$(_IdeCommandsFile);$(_McpProtocolDoc)"
-          Outputs="$(_McpProtocolDoc)">
+  <Target Name="GenerateMcpProtocolDocMd" AfterTargets="Build" Condition="'$(GenerateIdeProtocolDocs)'=='true' and Exists('$(_IdeProtocolDocGenProject)') and Exists('$(_IdeCommandsFile)') and Exists('$(_McpProtocolDoc)')" Inputs="$(_IdeCommandsFile);$(_McpProtocolDoc)" Outputs="$(_McpProtocolDoc)">
     <Exec Command="dotnet run --project &quot;$(_IdeProtocolDocGenProject)&quot; --no-restore -- --md-only &quot;$(MSBuildProjectDirectory)&quot;" />
   </Target>
 </Project>

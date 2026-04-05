@@ -20,5 +20,9 @@
     <ProjectReference Include="..\CascadeIDE.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="..\TextMateGrammars\**\*" CopyToOutputDirectory="PreserveNewest" Link="TextMateGrammars\%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+
 </Project>
 

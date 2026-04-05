@@ -27,7 +27,7 @@ public static class SettingsService
             if (File.Exists(tomlPath))
             {
                 var toml = File.ReadAllText(tomlPath);
-                return Toml.ToModel<CascadeIdeSettings>(toml) ?? new CascadeIdeSettings();
+                return CascadeTomlSerializer.Deserialize<CascadeIdeSettings>(toml) ?? new CascadeIdeSettings();
             }
 
             // Однократная миграция с JSON на TOML
@@ -60,7 +60,7 @@ public static class SettingsService
         try
         {
             var path = GetSettingsPath();
-            var toml = Toml.FromModel(settings);
+            var toml = CascadeTomlSerializer.Serialize(settings);
             File.WriteAllText(path, toml);
         }
         catch

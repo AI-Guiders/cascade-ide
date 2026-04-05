@@ -1,0 +1,20 @@
+{
+  "name": "cascade-toml-textmate",
+  "private": true,
+  "contributes": {
+    "languages": [
+      {
+        "id": "toml",
+        "aliases": ["TOML"],
+        "extensions": [".toml"]
+      }
+    ],
+    "grammars": [
+      {
+        "language": "toml",
+        "scopeName": "source.toml",
+        "path": "./syntaxes/toml.tmLanguage.json"
+      }
+    ]
+  }
+}

@@ -21,7 +21,7 @@ public sealed class UiWorkspaceToml
 
 /// <summary>
 /// Один режим: <c>UiModes/&lt;Id&gt;.toml</c>.
-/// Имена свойств в PascalCase; Tomlyn десериализует ключи в snake_case (как в <c>workspace.toml</c>).
+/// Имена свойств в PascalCase; <see cref="Services.CascadeTomlSerializer"/> маппит ключи snake_case (как в <c>workspace.toml</c>).
 /// Ключи по смыслу интерфейса, не именам полей VM.
 /// </summary>
 public sealed class UiModeFileToml

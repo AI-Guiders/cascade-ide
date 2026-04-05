@@ -21,6 +21,7 @@ public partial class MainWindow
 
         // Use a dark TextMate theme to keep syntax readable in Focus/Balanced/Power dark palettes.
         _registryOptions = new RegistryOptions(ThemeName.DarkPlus);
+        Services.TextMateTomlGrammar.TryLoadInto(_registryOptions);
         _languageService = vmSetup.CSharpLanguage;
 
         // Providers must always read/write the *active* dock document editor.
