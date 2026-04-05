@@ -408,13 +408,15 @@ public sealed class IdeDapDebugSession
                         continue;
                     usedScopes = true;
                     variables.Add(($"{scopeName}:", ""));
-                    foreach (var v in vars.EnumerateArray())
-                    {
-                        var vn = v.TryGetProperty("name", out var nn) ? nn.GetString() ?? "?" : "?";
-                        var vv = v.TryGetProperty("value", out var val) ? val.GetString() ?? "?" : "?";
-                        var vt = v.TryGetProperty("type", out var t) ? t.GetString() : null;
-                        variables.Add((vn, vv + (vt != null ? $" ({vt})" : "")));
-                    }
+                    await DapVariableExpansion.CollectExpandedVariablesAsync(
+                        client,
+                        variables,
+                        vars,
+                        indent: "  ",
+                        depth: 0,
+                        maxDepth: DapVariableExpansion.DefaultMaxDepth,
+                        maxChildrenPerNode: DapVariableExpansion.DefaultMaxChildrenPerNode,
+                        cancellationToken: CancellationToken.None).ConfigureAwait(false);
                 }
             }
         }
@@ -430,13 +432,15 @@ public sealed class IdeDapDebugSession
                 var varsBody = await DapShared.WithRetryAsync(() => client.VariablesAsync(frameId)).ConfigureAwait(false);
                 if (varsBody != null && varsBody.Value.TryGetProperty("variables", out var vars))
                 {
-                    foreach (var v in vars.EnumerateArray())
-                    {
-                        var vn = v.TryGetProperty("name", out var nn) ? nn.GetString() ?? "?" : "?";
-                        var vv = v.TryGetProperty("value", out var val) ? val.GetString() ?? "?" : "?";
-                        var vt = v.TryGetProperty("type", out var t) ? t.GetString() : null;
-                        variables.Add((vn, vv + (vt != null ? $" ({vt})" : "")));
-                    }
+                    await DapVariableExpansion.CollectExpandedVariablesAsync(
+                        client,
+                        variables,
+                        vars,
+                        indent: "  ",
+                        depth: 0,
+                        maxDepth: DapVariableExpansion.DefaultMaxDepth,
+                        maxChildrenPerNode: DapVariableExpansion.DefaultMaxChildrenPerNode,
+                        cancellationToken: CancellationToken.None).ConfigureAwait(false);
                 }
             }
             catch
@@ -584,13 +588,15 @@ public sealed class IdeDapDebugSession
                         continue;
                     usedScopes = true;
                     sb.AppendLine($"## {scopeName}");
-                    foreach (var v in vars.EnumerateArray())
-                    {
-                        var name = v.TryGetProperty("name", out var n) ? n.GetString() : "?";
-                        var value = v.TryGetProperty("value", out var val) ? val.GetString() : "?";
-                        var type = v.TryGetProperty("type", out var t) ? t.GetString() : null;
-                        sb.AppendLine($"  {name} = {value}" + (type != null ? $" ({type})" : ""));
-                    }
+                    await DapVariableExpansion.AppendExpandedVariablesAsync(
+                        client,
+                        sb,
+                        vars,
+                        indent: "  ",
+                        depth: 0,
+                        maxDepth: DapVariableExpansion.DefaultMaxDepth,
+                        maxChildrenPerNode: DapVariableExpansion.DefaultMaxChildrenPerNode,
+                        cancellationToken).ConfigureAwait(false);
                 }
             }
         }
@@ -612,13 +618,15 @@ public sealed class IdeDapDebugSession
             }
             if (varsBody == null || !varsBody.Value.TryGetProperty("variables", out var vars))
                 return "# No variables for this frame.";
-            foreach (var v in vars.EnumerateArray())
-            {
-                var name = v.TryGetProperty("name", out var n) ? n.GetString() : "?";
-                var value = v.TryGetProperty("value", out var val) ? val.GetString() : "?";
-                var type = v.TryGetProperty("type", out var t) ? t.GetString() : null;
-                sb.AppendLine($"  {name} = {value}" + (type != null ? $" ({type})" : ""));
-            }
+            await DapVariableExpansion.AppendExpandedVariablesAsync(
+                client,
+                sb,
+                vars,
+                indent: "  ",
+                depth: 0,
+                maxDepth: DapVariableExpansion.DefaultMaxDepth,
+                maxChildrenPerNode: DapVariableExpansion.DefaultMaxChildrenPerNode,
+                cancellationToken).ConfigureAwait(false);
         }
 
         return sb.ToString();
