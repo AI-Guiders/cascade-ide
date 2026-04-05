@@ -23,3 +23,6 @@ publish/
 publish-debug/
 Data/
 .cursor/
+
+# Локальные скрипты правок ADR (не шипить)
+docs/adr/_patch_*.py
