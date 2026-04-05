@@ -114,6 +114,7 @@
 | command_id | Описание |
 |-----------:|----------|
 | `exit_application` | Закрыть приложение (как меню Файл → Выход). returns: none. |
+| `open_file_dialog` | Открыть диалог выбора файла и показать его в редакторе (как меню Файл → Открыть файл...). returns: text. |
 | `open_solution_dialog` | Открыть диалог выбора решения (как меню Файл → Открыть решение...). returns: text. |
 
 ### Вид: панели (явная установка + переключатели)
@@ -278,7 +279,7 @@
    - `dotnet publish -c Release -o publish` из каталога `cascade-ide`;
    - junction: `D:\cascade-ide` → каталог `publish` (полный путь к нему в репо);
    - в `mcp.json`: `command`: `D:\cascade-ide\CascadeIDE.exe`, `args`: `["--mcp-stdio"]`.
-   - **Debug (для отладки MCP-обработчиков):** `dotnet publish -c Debug -o publish-debug`; junction `D:\cascade-ide-debug` → каталог `publish-debug`; в Cursor — сервер `cascade-ide-debug` с `command`: `D:\cascade-ide-debug\CascadeIDE.exe`. Включать, когда нужно отлаживать тулы IDE.
+   - **Debug (отладка MCP-обработчиков):** из каталога `cascade-ide` запусти **`.\publish-and-deploy-debug.ps1`** — публикует в `publish-debug` и зеркалит в **`D:\cascade-ide-debug`** (путь без пробелов; копирование вместо junction). В конце скрипт печатает фрагмент для `mcp.json`. В Cursor: `command` — `D:\cascade-ide-debug\CascadeIDE.exe`, **`args`: `["--mcp-stdio"]`**. Ускоренная сборка без регенерации doc из `IdeCommands`: **`.\publish-and-deploy-debug.ps1 -SkipDocGen`**.
 
 2. В настройках MCP Cursor (например, `.cursor/mcp.json` или глобальные настройки) добавьте сервер:
 
