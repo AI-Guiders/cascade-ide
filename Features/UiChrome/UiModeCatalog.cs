@@ -179,7 +179,8 @@ public static class UiModeCatalog
         }
     }
 
-    private static bool DefaultShowTaskBarForFamily(UiModeFamily family) => !family.IsDebugFamily();
+    private static bool DefaultShowTaskBarForFamily(UiModeFamily family) =>
+        !family.IsDebugFamily() && !family.IsEditorFamily();
 
     private sealed record ResolvedMode(
         UiModeLayoutSpec Spec,
@@ -329,7 +330,10 @@ public static class UiModeCatalog
             InstrumentationTabs: file.InstrumentationTabs ?? baseCaps.InstrumentationTabs,
             HypothesesTab: file.HypothesesTab ?? baseCaps.HypothesesTab,
             RiskSummaryCard: file.RiskSummaryCard ?? baseCaps.RiskSummaryCard,
-            ResultSummaryCard: file.ResultSummaryCard ?? baseCaps.ResultSummaryCard);
+            ResultSummaryCard: file.ResultSummaryCard ?? baseCaps.ResultSummaryCard,
+            TelemetryStripVisible: file.TelemetryStrip ?? baseCaps.TelemetryStripVisible,
+            MainToolbarVisible: file.MainToolbar ?? baseCaps.MainToolbarVisible,
+            ProblemsPanelVisible: file.ProblemsPanel ?? baseCaps.ProblemsPanelVisible);
     }
 
     private static string? ResolveWindowTitle(UiModeFileToml? file, string? inherits, ResolvedMode? parentResolved)
@@ -372,7 +376,8 @@ public static class UiModeCatalog
             EditorGroupCount: o.EditorGroupCount ?? baseSpec.EditorGroupCount,
             ThemeSlot: ParseThemeSlot(o.ThemeSlot) ?? baseSpec.ThemeSlot,
             SelectTerminalTabWhenTerminalShown: o.SelectTerminalTabWhenTerminalShown
-                ?? baseSpec.SelectTerminalTabWhenTerminalShown);
+                ?? baseSpec.SelectTerminalTabWhenTerminalShown,
+            InstrumentationDockVisible: o.InstrumentationDockVisible ?? baseSpec.InstrumentationDockVisible);
     }
 
     private static UiModeThemeSlot? ParseThemeSlot(string? s)
@@ -405,6 +410,8 @@ public static class UiModeCatalog
             return UiModeFamily.Debug;
         if (string.Equals(s, nameof(UiModeFamily.Flight), StringComparison.OrdinalIgnoreCase))
             return UiModeFamily.Flight;
+        if (string.Equals(s, nameof(UiModeFamily.Editor), StringComparison.OrdinalIgnoreCase))
+            return UiModeFamily.Editor;
         global::System.Diagnostics.Debug.WriteLine($"UiModeCatalog: unknown family — {s}");
         return null;
     }
@@ -413,6 +420,7 @@ public static class UiModeCatalog
         normalizedMode switch
         {
             "Focus" => UiModeFamily.Focus,
+            "Editor" => UiModeFamily.Editor,
             "Balanced" => UiModeFamily.Balanced,
             "Power" => UiModeFamily.Power,
             "AgentChat" => UiModeFamily.AgentChat,

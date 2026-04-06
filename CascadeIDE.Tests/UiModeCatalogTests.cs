@@ -223,6 +223,39 @@ public sealed class UiModeCatalogTests : IDisposable
     }
 
     [Fact]
+    public void Editor_family_minimal_chrome_and_layout()
+    {
+        var dir = Path.Combine(Path.GetTempPath(), "uimodes_" + Guid.NewGuid());
+        Directory.CreateDirectory(dir);
+        File.WriteAllText(
+            Path.Combine(dir, "index.toml"),
+            """
+            schema_version = 1
+            modes = [ "Editor" ]
+            """);
+        File.WriteAllText(
+            Path.Combine(dir, "Editor.toml"),
+            """
+            family = "Editor"
+            """);
+
+        UiModeCatalog.Initialize(dir);
+
+        Assert.Equal(UiModeFamily.Editor, UiModeCatalog.GetFamily("Editor"));
+        Assert.False(UiModeCatalog.GetShowTaskBar("Editor"));
+
+        var spec = UiModeCatalog.GetSpec("Editor");
+        Assert.False(spec.SolutionExplorerVisible);
+        Assert.False(spec.ChatPanelExpanded);
+        Assert.False(spec.InstrumentationDockVisible);
+
+        var caps = UiModeCatalog.GetCapabilities("Editor");
+        Assert.False(caps.TelemetryStripVisible);
+        Assert.False(caps.MainToolbarVisible);
+        Assert.False(caps.ProblemsPanelVisible);
+    }
+
+    [Fact]
     public void Missing_index_falls_back_to_builtin_registry()
     {
         var dir = Path.Combine(Path.GetTempPath(), "uimodes_empty_" + Guid.NewGuid());

@@ -64,13 +64,7 @@ internal sealed partial class IdeMcpCommandExecutor
         {
             var m = McpCommandJsonArgs.String(args, "mode")?.Trim();
             if (string.IsNullOrEmpty(m))
-                return "Missing mode (Focus|Balanced|Power|AgentChat|Debug)";
-            if (!string.Equals(m, "Focus", StringComparison.OrdinalIgnoreCase)
-                && !string.Equals(m, "Balanced", StringComparison.OrdinalIgnoreCase)
-                && !string.Equals(m, "Power", StringComparison.OrdinalIgnoreCase)
-                && !string.Equals(m, "AgentChat", StringComparison.OrdinalIgnoreCase)
-                && !string.Equals(m, "Debug", StringComparison.OrdinalIgnoreCase))
-                return $"Unknown mode: {m}";
+                return "Missing mode (см. UiModes/index.toml)";
             var norm = MainWindowViewModel.NormalizeUiMode(m);
             _vm.UiMode = norm;
             return "OK";
@@ -145,6 +139,13 @@ internal sealed partial class IdeMcpCommandExecutor
             if (_vm.CycleUiModeCommand.CanExecute(null))
                 _vm.CycleUiModeCommand.Execute(null);
             return "OK";
+        });
+
+        add(Services.IdeCommands.ToggleCommandPalette, async (_, _) =>
+        {
+            if (_vm.ToggleCommandPaletteCommand.CanExecute(null))
+                _vm.ToggleCommandPaletteCommand.Execute(null);
+            return await Task.FromResult("OK");
         });
     }
 

@@ -147,6 +147,7 @@ internal static class IdeCommandsContractGenerated
         ["start_autonomous"] = IdeReturnKind.Text,
         ["toggle_build_output"] = IdeReturnKind.Text,
         ["toggle_chat_panel"] = IdeReturnKind.Text,
+        ["toggle_command_palette"] = IdeReturnKind.Text,
         ["toggle_git_panel"] = IdeReturnKind.Text,
         ["toggle_instrumentation_dock"] = IdeReturnKind.Text,
         ["toggle_pin_document"] = IdeReturnKind.Text,

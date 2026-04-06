@@ -227,6 +227,12 @@ public partial class MainWindowViewModel
     }
 
     [RelayCommand]
+    private void SetEditorMode()
+    {
+        UiMode = "Editor";
+    }
+
+    [RelayCommand]
     private void SetBalancedMode()
     {
         UiMode = "Balanced";

@@ -18,11 +18,35 @@ public sealed record UiModeCapabilities(
     /// <summary>Вкладка «Гипотезы» (семья Debug и док).</summary>
     bool HypothesesTab,
     bool RiskSummaryCard,
-    bool ResultSummaryCard)
+    bool ResultSummaryCard,
+    /// <summary>Полоса build/tests/debug/git под редактором.</summary>
+    bool TelemetryStripVisible,
+    /// <summary>Панель инструментов под меню.</summary>
+    bool MainToolbarVisible,
+    /// <summary>Вкладка Problems и учёт в <see cref="MainWindowViewModel.IsBottomPanelVisible"/>.</summary>
+    bool ProblemsPanelVisible)
 {
     /// <summary>Дефолты по семье, если в TOML нет переопределений и нет наследуемого родителя.</summary>
     public static UiModeCapabilities DefaultsForFamily(UiModeFamily family)
     {
+        if (family.IsEditorFamily())
+        {
+            return new UiModeCapabilities(
+                QuickActions: false,
+                AgentOperationsPanel: false,
+                AgentTrace: false,
+                AutonomousAgentTelemetry: false,
+                TelemetryOnTerminalTab: false,
+                TelemetryMainColumnSpan: 5,
+                InstrumentationTabs: false,
+                HypothesesTab: false,
+                RiskSummaryCard: false,
+                ResultSummaryCard: false,
+                TelemetryStripVisible: false,
+                MainToolbarVisible: false,
+                ProblemsPanelVisible: false);
+        }
+
         var balanced = family.IsBalancedFamily();
         var flight = family.IsFlightFamily();
         var balancedOrFlight = balanced || flight;
@@ -41,6 +65,9 @@ public sealed record UiModeCapabilities(
             InstrumentationTabs: focus || balanced || flight || power || agentChat || debug,
             HypothesesTab: debug,
             RiskSummaryCard: !focus && !agentChat,
-            ResultSummaryCard: !focus && !agentChat);
+            ResultSummaryCard: !focus && !agentChat,
+            TelemetryStripVisible: true,
+            MainToolbarVisible: true,
+            ProblemsPanelVisible: true);
     }
 }

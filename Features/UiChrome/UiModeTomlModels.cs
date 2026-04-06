@@ -37,6 +37,9 @@ public sealed class UiModeFileToml
     public bool? SelectTerminalTabWhenTerminalShown { get; set; }
     public int? ChatExpandedWidthPixels { get; set; }
 
+    /// <summary>Нижний док с вкладками событий/тестов и т.д.; TOML: <c>instrumentation_dock_visible</c>.</summary>
+    public bool? InstrumentationDockVisible { get; set; }
+
     /// <summary>Полоса активной задачи под тулбаром; TOML: <c>active_task_strip</c>.</summary>
     public bool? ActiveTaskStrip { get; set; }
 
@@ -55,4 +58,13 @@ public sealed class UiModeFileToml
     public bool? HypothesesTab { get; set; }
     public bool? RiskSummaryCard { get; set; }
     public bool? ResultSummaryCard { get; set; }
+
+    /// <summary>Полоса телеметрии под редактором; TOML: <c>telemetry_strip</c>.</summary>
+    public bool? TelemetryStrip { get; set; }
+
+    /// <summary>Панель инструментов под меню; TOML: <c>main_toolbar</c>.</summary>
+    public bool? MainToolbar { get; set; }
+
+    /// <summary>Вкладка Problems в нижнем доке; TOML: <c>problems_panel</c>.</summary>
+    public bool? ProblemsPanel { get; set; }
 }

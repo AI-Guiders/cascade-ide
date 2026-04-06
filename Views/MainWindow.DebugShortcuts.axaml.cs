@@ -14,6 +14,19 @@ public partial class MainWindow
         if (DataContext is not ViewModels.MainWindowViewModel vm)
             return;
 
+        if (e.Key == Key.Q && e.KeyModifiers == KeyModifiers.Control)
+        {
+            if (vm.IsCommandPaletteOpen)
+                return;
+            if (vm.ToggleCommandPaletteCommand.CanExecute(null))
+            {
+                vm.ToggleCommandPaletteCommand.Execute(null);
+                e.Handled = true;
+            }
+
+            return;
+        }
+
         if (e.Key == Key.F5 && e.KeyModifiers == KeyModifiers.None)
         {
             if (vm.DebugStartOrContinueCommand.CanExecute(null))

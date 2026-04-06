@@ -20,6 +20,7 @@ public partial class MainWindowViewModel
             UiModeFamily.Power => "CascadeIDE — Power Mode [Autonomous Agent Cockpit]",
             UiModeFamily.AgentChat => "CascadeIDE — Agent Chat",
             UiModeFamily.Debug => "CascadeIDE — Debug",
+            UiModeFamily.Editor => "CascadeIDE — Editor",
             _ => "CascadeIDE",
         };
 
@@ -54,8 +55,14 @@ public partial class MainWindowViewModel
     public bool TelemetryOnTerminalTab =>
         Capabilities.TelemetryOnTerminalTab && !ShowTelemetryStrip;
 
-    /// <summary>Полоска build/tests/debug/git — и в Focus (по концепту).</summary>
-    public bool ShowTelemetryStrip => true;
+    /// <summary>Полоска build/tests/debug/git — из capabilities (<c>telemetry_strip</c> в TOML).</summary>
+    public bool ShowTelemetryStrip => Capabilities.TelemetryStripVisible;
+
+    /// <summary>Панель инструментов под меню — из capabilities (<c>main_toolbar</c> в TOML).</summary>
+    public bool ShowMainToolbar => Capabilities.MainToolbarVisible;
+
+    /// <summary>Нижняя зона (сплиттер + телеметрия + док): скрыть целиком, если нечего показывать.</summary>
+    public bool ShowWorkspaceBottomChrome => ShowTelemetryStrip || IsBottomPanelVisible;
 
     /// <summary>
     /// В Power полоса телеметрии только под колонками «решение + редактор» (сетка 0–2: дерево, сплиттер, док);
@@ -168,7 +175,7 @@ public partial class MainWindowViewModel
     public bool IsBuildPanelHidden => !IsBuildOutputVisible;
     public bool IsChatPanelHidden => !IsChatPanelExpanded;
     public bool IsTerminalPanelHidden => !IsTerminalVisible;
-    public bool IsProblemsPanelVisible => true;
+    public bool IsProblemsPanelVisible => Capabilities.ProblemsPanelVisible;
 
     public bool IsBottomPanelVisible =>
         IsProblemsPanelVisible || IsTerminalVisible || IsBuildOutputVisible || InstrumentationTabs || IsGitPanelVisible;

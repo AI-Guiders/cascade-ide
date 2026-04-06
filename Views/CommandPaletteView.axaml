@@ -1,0 +1,49 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CascadeIDE.ViewModels"
+             x:Class="CascadeIDE.Views.CommandPaletteView"
+             x:DataType="vm:MainWindowViewModel"
+             Focusable="True"
+             IsVisible="{Binding IsCommandPaletteOpen}">
+  <UserControl.Styles>
+    <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource CascadeTheme.MenuBackground}"/>
+    </Style>
+  </UserControl.Styles>
+  <Border Background="#AA000000"
+          PointerPressed="OnDimmerPressed">
+    <Grid RowDefinitions="Auto,*"
+          MaxWidth="720"
+          MaxHeight="480"
+          Margin="40"
+          HorizontalAlignment="Center"
+          VerticalAlignment="Center"
+          PointerPressed="OnPanelPressed">
+      <TextBox x:Name="SearchTextBox"
+               Grid.Row="0"
+               Watermark="Команда…"
+               Text="{Binding CommandPaletteQuery, Mode=TwoWay}"/>
+      <ListBox Grid.Row="1"
+               Margin="0,8,0,0"
+               ItemsSource="{Binding FilteredCommandPaletteEntries}"
+               SelectedIndex="{Binding CommandPaletteSelectedIndex, Mode=TwoWay}"
+               Background="Transparent">
+        <ListBox.ItemTemplate>
+          <DataTemplate DataType="vm:IdeCommandPaletteRowViewModel">
+            <Grid ColumnDefinitions="*,Auto">
+              <StackPanel Grid.Column="0" Orientation="Vertical" Spacing="2">
+                <TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>
+                <TextBlock Text="{Binding Category}" Opacity="0.7" FontSize="11"/>
+              </StackPanel>
+              <TextBlock Grid.Column="1"
+                         Text="{Binding HotkeyHint}"
+                         Opacity="0.65"
+                         VerticalAlignment="Center"
+                         Margin="12,0,0,0"/>
+            </Grid>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+    </Grid>
+  </Border>
+</UserControl>

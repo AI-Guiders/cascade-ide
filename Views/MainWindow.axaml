@@ -121,10 +121,11 @@
 
     <Window.KeyBindings>
         <KeyBinding Gesture="Alt+1" Command="{Binding SetFocusModeCommand}"/>
-        <KeyBinding Gesture="Alt+2" Command="{Binding SetBalancedModeCommand}"/>
-        <KeyBinding Gesture="Alt+3" Command="{Binding SetPowerModeCommand}"/>
-        <KeyBinding Gesture="Alt+4" Command="{Binding SetAgentChatModeCommand}"/>
-        <KeyBinding Gesture="Alt+5" Command="{Binding SetDebugModeCommand}"/>
+        <KeyBinding Gesture="Alt+2" Command="{Binding SetEditorModeCommand}"/>
+        <KeyBinding Gesture="Alt+3" Command="{Binding SetBalancedModeCommand}"/>
+        <KeyBinding Gesture="Alt+4" Command="{Binding SetPowerModeCommand}"/>
+        <KeyBinding Gesture="Alt+5" Command="{Binding SetAgentChatModeCommand}"/>
+        <KeyBinding Gesture="Alt+6" Command="{Binding SetDebugModeCommand}"/>
         <KeyBinding Gesture="Ctrl+Alt+M" Command="{Binding CycleUiModeCommand}"/>
         <KeyBinding Gesture="F5" Command="{Binding DebugStartOrContinueCommand}"/>
         <KeyBinding Gesture="Shift+F5" Command="{Binding DebugStopCommand}"/>
@@ -137,6 +138,7 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
+    <Grid>
     <DockPanel>
         <!-- Главное меню -->
         <Menu DockPanel.Dock="Top" Background="{DynamicResource CascadeTheme.MenuBackground}">
@@ -159,6 +161,8 @@
                 <MenuItem Header="Шаг с _выходом" Command="{Binding DebugStepOutCommand}" HotKey="Shift+F11"/>
             </MenuItem>
             <MenuItem Header="_Вид">
+                <MenuItem Header="Палитра _команд" Command="{Binding ToggleCommandPaletteCommand}" HotKey="Ctrl+Q"/>
+                <Separator/>
                 <MenuItem Header="Обозреватель _решения" ToggleType="CheckBox" IsChecked="{Binding IsSolutionExplorerVisible, Mode=TwoWay}"/>
                 <MenuItem Header="_Вывод сборки" ToggleType="CheckBox" IsChecked="{Binding IsBuildOutputVisible, Mode=TwoWay}"/>
                 <MenuItem Header="_Чат" ToggleType="CheckBox" IsChecked="{Binding IsChatPanelExpanded, Mode=TwoWay}"/>
@@ -171,6 +175,7 @@
                 <Separator/>
                 <MenuItem Header="_Режим интерфейса">
                     <MenuItem Header="_Focus" ToggleType="Radio" IsChecked="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Focus}" Command="{Binding SetFocusModeCommand}"/>
+                    <MenuItem Header="_Editor" ToggleType="Radio" IsChecked="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Editor}" Command="{Binding SetEditorModeCommand}"/>
                     <MenuItem Header="_Balanced" ToggleType="Radio" IsChecked="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Balanced}" Command="{Binding SetBalancedModeCommand}"/>
                     <MenuItem Header="_Power" ToggleType="Radio" IsChecked="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Power}" Command="{Binding SetPowerModeCommand}"/>
                     <MenuItem Header="Agent _Chat" ToggleType="Radio" IsChecked="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=AgentChat}" Command="{Binding SetAgentChatModeCommand}"/>
@@ -210,7 +215,7 @@
         <Grid x:Name="MainGrid" RowDefinitions="Auto,Auto,Auto,2*,6,*" ColumnDefinitions="220,4,*,4,340">
         <!-- Подсказка при работе как MCP-сервер -->
         <views:McpBannerView Grid.Row="0" Grid.ColumnSpan="5"/>
-        <views:ToolbarView Grid.Row="1" Grid.ColumnSpan="5"/>
+        <views:ToolbarView Grid.Row="1" Grid.ColumnSpan="5" IsVisible="{Binding ShowMainToolbar}"/>
 
         <views:TaskCockpitView Grid.Row="2" Grid.ColumnSpan="5"/>
 
@@ -232,9 +237,11 @@
         <GridSplitter Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="5"
                       Height="6"
                       ResizeDirection="Rows"
-                      Background="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"/>
+                      Background="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"
+                      IsVisible="{Binding ShowWorkspaceBottomChrome}"/>
         <!-- Телеметрия + док: внутренний сплиттер между полосой WORKSPACE и вкладками терминала/сборки. -->
-        <Grid Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="5" RowDefinitions="Auto,6,*" MinHeight="160">
+        <Grid Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="5" RowDefinitions="Auto,6,*" MinHeight="160"
+              IsVisible="{Binding ShowWorkspaceBottomChrome}">
             <Grid x:Name="WorkspaceTelemetryColumnsGrid" Grid.Row="0" ColumnDefinitions="220,4,*,4,340">
                 <views:TelemetryStripView Grid.Column="0"
                                           Grid.ColumnSpan="{Binding MainWorkspaceTelemetryColumnSpan}"
@@ -272,4 +279,6 @@
         </Canvas>
         </Grid>
     </DockPanel>
+    <views:CommandPaletteView ZIndex="5000"/>
+    </Grid>
 </Window>

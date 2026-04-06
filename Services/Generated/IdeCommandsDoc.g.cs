@@ -147,6 +147,7 @@ internal static class IdeCommandsDoc
         ["start_autonomous"] = "Запустить автономный режим (agent run). returns: text.",
         ["toggle_build_output"] = "Как меню «Вид → Вывод сборки». returns: text.",
         ["toggle_chat_panel"] = "Переключить сворачивание чата (toggle). returns: text.",
+        ["toggle_command_palette"] = "Открыть или закрыть палитру команд (как Ctrl+Q / пункт меню «Вид»). returns: text.",
         ["toggle_git_panel"] = "Переключить видимость панели Git (toggle). returns: text.",
         ["toggle_instrumentation_dock"] = "Переключить видимость дока инструментирования (toggle). returns: text.",
         ["toggle_pin_document"] = "Закрепить/открепить документ (pin). args: file_path:string; returns: text; example: {\"file_path\":\"C:\\\\\\\\tmp\\\\\\\\a.cs\"}.",

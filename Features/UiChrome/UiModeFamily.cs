@@ -4,6 +4,8 @@ namespace CascadeIDE.Features.UiChrome;
 public enum UiModeFamily
 {
     Focus,
+    /// <summary>Максимум места редактору: скрытый хром по capabilities; вызовы — палитра/MCP.</summary>
+    Editor,
     Balanced,
     Power,
     AgentChat,
@@ -24,6 +26,9 @@ public static class UiModeFamilyExtensions
 {
     public static bool IsFocusFamily(this UiModeFamily family) =>
         family == UiModeFamily.Focus;
+
+    public static bool IsEditorFamily(this UiModeFamily family) =>
+        family == UiModeFamily.Editor;
 
     public static bool IsBalancedFamily(this UiModeFamily family) =>
         family == UiModeFamily.Balanced;

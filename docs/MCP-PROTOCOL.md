@@ -119,6 +119,7 @@
 | `set_balanced_mode` | Установить Balanced UI mode (hotkey). returns: text. |
 | `set_focus_mode` | Установить Focus UI mode (hotkey). returns: text. |
 | `set_power_mode` | Установить Power UI mode (hotkey). returns: text. |
+| `toggle_command_palette` | Открыть или закрыть палитру команд (как Ctrl+Q / пункт меню «Вид»). returns: text. |
 
 ### Вид: тема
 

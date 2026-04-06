@@ -38,6 +38,7 @@ public partial class MainWindowViewModel
         IsTerminalVisible = spec.TerminalVisible;
         IsChatPanelExpanded = spec.ChatPanelExpanded;
         EditorGroupCount = spec.EditorGroupCount;
+        IsInstrumentationDockVisible = spec.InstrumentationDockVisible;
 
         CoerceBottomPanelTabToVisible();
         if (spec.SelectTerminalTabWhenTerminalShown && IsTerminalVisible)
@@ -75,17 +76,13 @@ public partial class MainWindowViewModel
 
     private int GetFirstVisibleBottomPanelTabIndex()
     {
-        if (IsTerminalVisible)
-            return 0;
-        if (IsBuildOutputVisible)
-            return 1;
-        if (IsProblemsPanelVisible)
-            return 2;
-        if (IsGitPanelVisible)
-            return 3;
-        if (InstrumentationTabs)
-            return 4;
-        return 2;
+        for (var i = 0; i <= BottomPanelTabDebugStackIndex; i++)
+        {
+            if (IsBottomPanelTabVisible(i))
+                return i;
+        }
+
+        return 0;
     }
 
     /// <summary>Если выбрана скрытая вкладка, TabControl в Avalonia показывает пустую область — переключаем на первую видимую.</summary>

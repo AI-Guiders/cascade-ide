@@ -37,6 +37,9 @@ public static partial class IdeCommands
     /// <summary>Циклически переключить UI mode (hotkey). returns: text.</summary>
     public const string CycleUiMode = "cycle_ui_mode";
 
+    /// <summary>Открыть или закрыть палитру команд (как Ctrl+Q / пункт меню «Вид»). returns: text.</summary>
+    public const string ToggleCommandPalette = "toggle_command_palette";
+
     // ——— Вид: тема
     /// <summary>Применить светлую тему. returns: text.</summary>
     public const string ApplyLightTheme = "apply_light_theme";

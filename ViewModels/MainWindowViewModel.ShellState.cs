@@ -19,11 +19,13 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(ShowTelemetryHiddenHint))]
     [NotifyPropertyChangedFor(nameof(TelemetryButtonText))]
     [NotifyPropertyChangedFor(nameof(IsBottomPanelVisible))]
+    [NotifyPropertyChangedFor(nameof(ShowWorkspaceBottomChrome))]
     private bool _isTerminalVisible;
 
     /// <summary>Вкладка «Git» в нижней панели (Вид → Git).</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsBottomPanelVisible))]
+    [NotifyPropertyChangedFor(nameof(ShowWorkspaceBottomChrome))]
     private bool _isGitPanelVisible;
 
     [ObservableProperty]
@@ -32,6 +34,8 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(IsChatPanelColumnVisible))]
     [NotifyPropertyChangedFor(nameof(ShowTaskBar))]
     [NotifyPropertyChangedFor(nameof(ShowTelemetryStrip))]
+    [NotifyPropertyChangedFor(nameof(ShowMainToolbar))]
+    [NotifyPropertyChangedFor(nameof(ShowWorkspaceBottomChrome))]
     [NotifyPropertyChangedFor(nameof(QuickActions))]
     [NotifyPropertyChangedFor(nameof(ShowAgentOperations))]
     [NotifyPropertyChangedFor(nameof(AgentTrace))]
@@ -49,6 +53,7 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(HypothesesTab))]
     [NotifyPropertyChangedFor(nameof(ShowInstrumentationLayoutMenu))]
     [NotifyPropertyChangedFor(nameof(IsBottomPanelVisible))]
+    [NotifyPropertyChangedFor(nameof(IsProblemsPanelVisible))]
     [NotifyPropertyChangedFor(nameof(WindowTitle))]
     [NotifyPropertyChangedFor(nameof(MainWorkspaceTelemetryColumnSpan))]
     private string _uiMode = "Balanced";
@@ -126,6 +131,8 @@ public partial class MainWindowViewModel
     private bool _isBuilding;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsBottomPanelVisible))]
+    [NotifyPropertyChangedFor(nameof(ShowWorkspaceBottomChrome))]
     private bool _isBuildOutputVisible;
 
     /// <summary>Вкладки «События / Тесты / …» (сохраняется в настройках).</summary>
@@ -133,6 +140,7 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(InstrumentationTabs))]
     [NotifyPropertyChangedFor(nameof(HypothesesTab))]
     [NotifyPropertyChangedFor(nameof(IsBottomPanelVisible))]
+    [NotifyPropertyChangedFor(nameof(ShowWorkspaceBottomChrome))]
     private bool _isInstrumentationDockVisible = true;
 
     [ObservableProperty]

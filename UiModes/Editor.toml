@@ -1,0 +1,4 @@
+# Семья Editor: максимум площади под редактор; хром выключен в capabilities (см. UiModeCapabilities.DefaultsForFamily(Editor)).
+# Раскладка — встроенный снимок в UiModeLayoutRegistry["Editor"] (без inherits).
+family = "Editor"
+main_window_title = "CascadeIDE — Editor"

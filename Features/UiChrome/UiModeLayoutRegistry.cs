@@ -16,7 +16,8 @@ public sealed record UiModeLayoutSpec(
     bool ChatPanelExpanded,
     int EditorGroupCount,
     UiModeThemeSlot ThemeSlot,
-    bool SelectTerminalTabWhenTerminalShown);
+    bool SelectTerminalTabWhenTerminalShown,
+    bool InstrumentationDockVisible);
 
 /// <summary>
 /// Встроенные режимы UI: порядок в списке UI, раскладка при <c>ApplyUiModeLayout</c>, ширина чата.
@@ -26,7 +27,7 @@ public static class UiModeLayoutRegistry
 {
     /// <summary>Стабильный порядок пунктов «Режим интерфейса» и комбо.</summary>
     public static readonly IReadOnlyList<string> OrderedModeIds =
-        ["Focus", "Balanced", "Power", "AgentChat", "Debug"];
+        ["Focus", "Editor", "Balanced", "Power", "AgentChat", "Debug"];
 
     private static readonly Dictionary<string, UiModeLayoutSpec> ByNormalizedMode =
         new(StringComparer.OrdinalIgnoreCase)
@@ -38,7 +39,17 @@ public static class UiModeLayoutRegistry
                 ChatPanelExpanded: true,
                 EditorGroupCount: 1,
                 ThemeSlot: UiModeThemeSlot.Dark,
-                SelectTerminalTabWhenTerminalShown: false),
+                SelectTerminalTabWhenTerminalShown: false,
+                InstrumentationDockVisible: true),
+            ["Editor"] = new UiModeLayoutSpec(
+                SolutionExplorerVisible: false,
+                BuildOutputVisible: false,
+                TerminalVisible: false,
+                ChatPanelExpanded: false,
+                EditorGroupCount: 1,
+                ThemeSlot: UiModeThemeSlot.Dark,
+                SelectTerminalTabWhenTerminalShown: false,
+                InstrumentationDockVisible: false),
             ["Balanced"] = new UiModeLayoutSpec(
                 SolutionExplorerVisible: true,
                 BuildOutputVisible: true,
@@ -46,7 +57,8 @@ public static class UiModeLayoutRegistry
                 ChatPanelExpanded: true,
                 EditorGroupCount: 2,
                 ThemeSlot: UiModeThemeSlot.CursorLike,
-                SelectTerminalTabWhenTerminalShown: false),
+                SelectTerminalTabWhenTerminalShown: false,
+                InstrumentationDockVisible: true),
             ["Power"] = new UiModeLayoutSpec(
                 SolutionExplorerVisible: true,
                 BuildOutputVisible: true,
@@ -54,7 +66,8 @@ public static class UiModeLayoutRegistry
                 ChatPanelExpanded: true,
                 EditorGroupCount: 3,
                 ThemeSlot: UiModeThemeSlot.PowerCockpit,
-                SelectTerminalTabWhenTerminalShown: true),
+                SelectTerminalTabWhenTerminalShown: true,
+                InstrumentationDockVisible: true),
             ["AgentChat"] = new UiModeLayoutSpec(
                 SolutionExplorerVisible: false,
                 BuildOutputVisible: false,
@@ -62,7 +75,8 @@ public static class UiModeLayoutRegistry
                 ChatPanelExpanded: true,
                 EditorGroupCount: 1,
                 ThemeSlot: UiModeThemeSlot.CursorLike,
-                SelectTerminalTabWhenTerminalShown: false),
+                SelectTerminalTabWhenTerminalShown: false,
+                InstrumentationDockVisible: true),
             ["Debug"] = new UiModeLayoutSpec(
                 SolutionExplorerVisible: true,
                 BuildOutputVisible: false,
@@ -70,7 +84,8 @@ public static class UiModeLayoutRegistry
                 ChatPanelExpanded: false,
                 EditorGroupCount: 2,
                 ThemeSlot: UiModeThemeSlot.Dark,
-                SelectTerminalTabWhenTerminalShown: false),
+                SelectTerminalTabWhenTerminalShown: false,
+                InstrumentationDockVisible: true),
         };
 
     /// <summary>Спека для режима; неизвестный режим трактуется как Balanced.</summary>
