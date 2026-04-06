@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using CascadeIDE.Services;
 
 namespace CascadeIDE.ViewModels;
 
@@ -19,5 +18,13 @@ public partial class MainWindowViewModel
         {
             OnPropertyChanged(nameof(MainGridRowHeights));
         }
+
+        if (e.PropertyName is nameof(TelemetryBuildText)
+            or nameof(TelemetryTestsText)
+            or nameof(TelemetryDebugText)
+            or nameof(TelemetryBuildCockpitShort)
+            or nameof(TelemetryTestsCockpitShort)
+            or nameof(TelemetryDebugCockpitShort))
+            RebuildAttentionStrip();
     }
 }

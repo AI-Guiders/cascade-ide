@@ -130,6 +130,15 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _mcpAgentNotes = new Services.McpAgentNotesService();
 
         Workspace.PropertyChanged += (_, e) => OnWorkspacePropertyChanged(e.PropertyName);
+        Chrome.PropertyChanged += OnChromePropertyChangedForAttentionStrip;
+        RebuildAttentionStrip();
+    }
+
+    private void OnChromePropertyChangedForAttentionStrip(object? _, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is nameof(UiChromeViewModel.TelemetryGitText)
+            or nameof(UiChromeViewModel.TelemetryGitCockpitShort))
+            RebuildAttentionStrip();
     }
 
     /// <summary>DAP-сессия (netcoredbg): launch/attach и обновление панели отладки.</summary>
