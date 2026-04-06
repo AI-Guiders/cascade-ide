@@ -43,7 +43,8 @@
 | Инвалидация | `ViewModels/MainWindowViewModel.LayoutNotifications.cs` | `RebuildAttentionStrip` при смене телеметрии build/tests/debug. |
 | Git-строки | `Features/UiChrome/UiChromeViewModel.cs` | `TelemetryGitText`, `TelemetryGitCockpitShort`; подписка в `MainWindowViewModel` на `Chrome.PropertyChanged`. |
 | Свойства для UI | `ViewModels/MainWindowViewModel.Presentation.cs` | `TelemetryBuild*` / `TelemetryTests*` / `TelemetryDebug*` читают сегменты из `_attentionStripTelemetry.GetSnapshot()`; флаги сессии отладки по-прежнему из DAP. |
-| UI | `Views/TelemetryStripView.axaml` | `ItemsControl` по `AttentionStripSegments`; разные шаблоны для Power vs остальные режимы. |
+| Хост полосы (нижняя поверхность) | `Views/WorkspaceTelemetrySurfaceHostView.axaml` | Сетка колонок как у `MainGrid` (0–4); вложенный `TelemetryStripView`. Включение: `ShowTelemetryStrip` (`telemetry_strip` + `TelemetryUiSurface.BottomStrip` в capabilities). |
+| UI полосы | `Views/TelemetryStripView.axaml` | `ItemsControl` по `AttentionStripSegments`; разные шаблоны для Power vs остальные режимы. |
 | Тесты | `CascadeIDE.Tests/AttentionStripCompositorTests.cs`, `AttentionStripTelemetryFormatTests.cs` | Композитор: порядок, `IsBuildRunning`. Формат: сегменты и `Compose` для снимка. |
 
 ---
@@ -53,7 +54,7 @@
 1. Состояние меняется (сборка, тесты, DAP, git, …).
 2. Свойства `Telemetry*` уведомляют UI (частично через `[NotifyPropertyChangedFor]`, частично явный `OnPropertyChanged` для отладки).
 3. `RebuildAttentionStrip()` берёт снимок через `IAttentionStripTelemetryProvider.GetSnapshot()` (внутри — делегаты/DAP/`UiChromeViewModel` + `AttentionStripTelemetryFormat`) и вызывает `AttentionStripCompositor.Rebuild`.
-4. `AttentionStripSegments` обновляется; привязка к `TelemetryStripView`.
+4. `AttentionStripSegments` обновляется; привязка к `TelemetryStripView` (через `WorkspaceTelemetrySurfaceHostView` в `MainWindow`).
 
 Альтернативная реализация провайдера (агент, MCP, моки в тестах VM) подменяет только сбор снимка, не композитор и не разметку полосы.
 
