@@ -13,14 +13,13 @@ public partial class MainWindowViewModel
     {
         AttentionStripCompositor.Rebuild(
             AttentionStripSegments,
-            TelemetryBuildText,
-            TelemetryBuildCockpitShort,
-            IsBuilding,
-            TelemetryTestsText,
-            TelemetryTestsCockpitShort,
-            TelemetryDebugText,
-            TelemetryDebugCockpitShort,
-            Chrome.TelemetryGitText,
-            Chrome.TelemetryGitCockpitShort);
+            new AttentionStripInputSnapshot(
+                Build: new AttentionStripSegmentInput(
+                    TelemetryBuildText,
+                    TelemetryBuildCockpitShort,
+                    IsBuilding),
+                Tests: new AttentionStripSegmentInput(TelemetryTestsText, TelemetryTestsCockpitShort),
+                Debug: new AttentionStripSegmentInput(TelemetryDebugText, TelemetryDebugCockpitShort),
+                Git: new AttentionStripSegmentInput(Chrome.TelemetryGitText, Chrome.TelemetryGitCockpitShort)));
     }
 }

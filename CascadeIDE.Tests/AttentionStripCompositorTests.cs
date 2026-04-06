@@ -12,15 +12,11 @@ public sealed class AttentionStripCompositorTests
         var col = new ObservableCollection<AttentionStripSegment>();
         AttentionStripCompositor.Rebuild(
             col,
-            buildLine: "Build: idle",
-            buildShort: "READY",
-            isBuildRunning: false,
-            testsLine: "Tests: x",
-            testsShort: "imp 0",
-            debugLine: "Debug: idle",
-            debugShort: "DBG · —",
-            gitLine: "Git: 0 staged",
-            gitShort: "main · Δ0");
+            new AttentionStripInputSnapshot(
+                Build: new AttentionStripSegmentInput("Build: idle", "READY", IsBuildRunning: false),
+                Tests: new AttentionStripSegmentInput("Tests: x", "imp 0"),
+                Debug: new AttentionStripSegmentInput("Debug: idle", "DBG · —"),
+                Git: new AttentionStripSegmentInput("Git: 0 staged", "main · Δ0")));
 
         Assert.Equal(4, col.Count);
         Assert.Equal(AttentionStripSource.Build, col[0].Source);
@@ -38,18 +34,31 @@ public sealed class AttentionStripCompositorTests
         var col = new ObservableCollection<AttentionStripSegment>();
         AttentionStripCompositor.Rebuild(
             col,
-            "Build: running…",
-            "BUILD…",
-            isBuildRunning: true,
-            "Tests: a",
-            "a",
-            "Debug: idle",
-            "—",
-            "Git: a",
-            "a");
+            new AttentionStripInputSnapshot(
+                Build: new AttentionStripSegmentInput("Build: running…", "BUILD…", IsBuildRunning: true),
+                Tests: new AttentionStripSegmentInput("Tests: a", "a"),
+                Debug: new AttentionStripSegmentInput("Debug: idle", "—"),
+                Git: new AttentionStripSegmentInput("Git: a", "a")));
 
         Assert.True(col[0].IsBuildRunning);
         Assert.True(col[0].IsBuildSource);
         Assert.False(col[1].IsBuildSource);
+    }
+
+    [Fact]
+    public void Rebuild_ignores_IsBuildRunning_on_non_build_segments()
+    {
+        var col = new ObservableCollection<AttentionStripSegment>();
+        AttentionStripCompositor.Rebuild(
+            col,
+            new AttentionStripInputSnapshot(
+                Build: new AttentionStripSegmentInput("Build: idle", "READY", IsBuildRunning: false),
+                Tests: new AttentionStripSegmentInput("Tests: x", "t", IsBuildRunning: true),
+                Debug: new AttentionStripSegmentInput("Debug: idle", "d"),
+                Git: new AttentionStripSegmentInput("Git: a", "g")));
+
+        Assert.False(col[1].IsBuildRunning);
+        Assert.False(col[2].IsBuildRunning);
+        Assert.False(col[3].IsBuildRunning);
     }
 }
