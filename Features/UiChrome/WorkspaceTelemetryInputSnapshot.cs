@@ -11,7 +11,7 @@ public readonly record struct WorkspaceTelemetrySegmentInput(
 
 /// <summary>
 /// Снимок четырёх источников телеметрии воркспейса (build → tests → debug → git).
-/// Единая структура для <see cref="WorkspaceTelemetryCompositor"/> и тестов. Канал EICAS — отдельный контур (<see cref="IEicasFeed"/>), не снимок здесь.
+/// Единая структура для <see cref="WorkspaceTelemetryCompositor"/> и тестов. Канал EICAS — отдельный контур (<see cref="IEicasFeed"/>), не снимок здесь и не тот же контур, что сегменты build/tests/debug/git.
 /// </summary>
 public readonly record struct WorkspaceTelemetryInputSnapshot(
     WorkspaceTelemetrySegmentInput Build,

@@ -13,7 +13,7 @@
 
 ## Транспорт
 
-- **stdio**: агент (или хост вроде Cursor) запускает CascadeIDE с аргументом `--mcp-stdio`. Обмен идёт по stdin/stdout процесса IDE. Так Cursor может добавить CascadeIDE как MCP-сервер в настройках и вызывать тулы от имени агента.
+- **stdio**: агент или **ProcessHost** (внешний процесс вроде Cursor, поднимающий процесс IDE) запускает CascadeIDE с аргументом `--mcp-stdio`. Обмен идёт по stdin/stdout процесса IDE. Так Cursor может добавить CascadeIDE как MCP-сервер в настройках и вызывать тулы от имени агента. **ProcessHost** здесь — про жизненный цикл процесса и транспорт, не про контролы кокпита (`EicasAlertsBarView` и т.д.); словарь: [ADR 0021 §1.1](adr/0021-pfd-mfd-cockpit-attention-model.md#glossary-channel-presentation).
 
 ## Инструменты IDE (tools)
 

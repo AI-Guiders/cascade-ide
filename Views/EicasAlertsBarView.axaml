@@ -3,7 +3,7 @@
              xmlns:chrome="using:CascadeIDE.Features.UiChrome"
              xmlns:vm="using:CascadeIDE.ViewModels"
              xmlns:views="using:CascadeIDE.Views"
-             x:Class="CascadeIDE.Views.EicasStripView"
+             x:Class="CascadeIDE.Views.EicasAlertsBarView"
              x:DataType="vm:MainWindowViewModel">
     <UserControl.Resources>
         <views:EicasSeverityToBrushConverter x:Key="EicasSevBrush"/>

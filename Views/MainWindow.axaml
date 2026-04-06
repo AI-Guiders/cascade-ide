@@ -251,13 +251,13 @@
         <!-- Телеметрия + док: внутренний сплиттер между полосой WORKSPACE и вкладками терминала/сборки. -->
         <Grid Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="5" RowDefinitions="Auto,6,*" MinHeight="160"
               IsVisible="{Binding ShowWorkspaceBottomChrome}">
-            <views:WorkspaceTelemetrySurfaceHostView Grid.Row="0"
-                                                     IsVisible="{Binding ShowWorkspaceTelemetrySurfaceHost}"/>
+            <views:WorkspaceChromeBandView Grid.Row="0"
+                                           IsVisible="{Binding ShowWorkspaceChromeBand}"/>
             <GridSplitter Grid.Row="1"
                           Height="6"
                           ResizeDirection="Rows"
                           Background="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"
-                          IsVisible="{Binding ShowWorkspaceTelemetrySurfaceHost}"/>
+                          IsVisible="{Binding ShowWorkspaceChromeBand}"/>
             <!-- Явный DC с окна: корень BottomPanelView (Classes.power) всегда на MainWindowViewModel -->
             <views:BottomPanelView Grid.Row="2"
                                    DataContext="{Binding DataContext, ElementName=RootWindow}"/>

@@ -62,19 +62,22 @@ public partial class MainWindowViewModel
     public bool ShowTelemetryStrip =>
         Capabilities.TelemetryStripVisible && Capabilities.TelemetrySurface == TelemetryUiSurface.BottomStrip;
 
-    /// <summary>Оповещения EICAS (отдельный контур); видно только при <c>eicas_strip</c> и непустом списке (Dark Cockpit).</summary>
-    public bool ShowEicasStrip =>
-        Capabilities.EicasStripEnabled && EicasMessages.Count > 0;
+    /// <summary>
+    /// Полоса оповещений EICAS v1 (над телеметрией работы). Видно при <c>eicas_alerts_bar</c> и непустом списке (Dark Cockpit).
+    /// Отдельный контур от build/tests/debug/git (ADR 0021 §5; словарь §1.1).
+    /// </summary>
+    public bool ShowEicasAlertsBar =>
+        Capabilities.EicasAlertsBarEnabled && EicasMessages.Count > 0;
 
-    /// <summary>Область над нижним доком: телеметрия работы и/или EICAS.</summary>
-    public bool ShowWorkspaceTelemetrySurfaceHost => ShowTelemetryStrip || ShowEicasStrip;
+    /// <summary>Область разметки над нижним доком: телеметрия работы и/или полоса EICAS (<see cref="Views.WorkspaceChromeBandView"/>).</summary>
+    public bool ShowWorkspaceChromeBand => ShowTelemetryStrip || ShowEicasAlertsBar;
 
     /// <summary>Панель инструментов под меню — из capabilities (<c>main_toolbar</c> в TOML).</summary>
     public bool ShowMainToolbar => Capabilities.MainToolbarVisible;
 
     /// <summary>Нижняя зона (сплиттер + телеметрия + док): скрыть целиком, если нечего показывать.</summary>
     public bool ShowWorkspaceBottomChrome =>
-        ShowTelemetryStrip || ShowEicasStrip || IsBottomPanelVisible;
+        ShowTelemetryStrip || ShowEicasAlertsBar || IsBottomPanelVisible;
 
     /// <summary>
     /// В Power полоса телеметрии только под колонками «решение + редактор» (сетка 0–2: дерево, сплиттер, док);

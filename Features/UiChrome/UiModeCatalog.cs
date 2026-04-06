@@ -17,6 +17,9 @@ public static class UiModeCatalog
     private static readonly Dictionary<string, UiModeCapabilities> CapabilitiesByMode = new(StringComparer.OrdinalIgnoreCase);
     private static readonly Dictionary<string, string?> WindowTitleOverrideByMode = new(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>Снимок <c>UiModes/workspace.toml</c> из бандла для merge с репозиторием (ADR 0021 §2.1).</summary>
+    private static UiWorkspaceToml? _bundleWorkspaceToml;
+
     public static bool IsInitialized
     {
         get
@@ -70,8 +73,44 @@ public static class UiModeCatalog
             ShowTaskBarByMode.Clear();
             CapabilitiesByMode.Clear();
             WindowTitleOverrideByMode.Clear();
+            _bundleWorkspaceToml = null;
             UiWorkspaceLayoutRuntimeMetrics.ResetToCodeDefaults();
             AttentionZonePanelRuntime.ResetToCodeDefaults();
+        }
+    }
+
+    /// <summary>
+    /// Накладывает <c>.cascade/workspace.toml</c> из корня открытого решения на метрики и <c>attention_zone_panels</c> бандла.
+    /// Вызывать с UI-потока при смене <see cref="SolutionWorkspaceViewModel.SolutionPath"/>; при пустом пути — только бандл.
+    /// </summary>
+    public static void ApplyRepositoryWorkspaceOverlay(string? solutionDirectory)
+    {
+        lock (Gate)
+        {
+            if (!_initialized)
+                return;
+
+            UiWorkspaceToml? repo = null;
+            if (!string.IsNullOrWhiteSpace(solutionDirectory))
+            {
+                var trimmed = solutionDirectory.Trim();
+                var path = Path.Combine(trimmed, ".cascade", "workspace.toml");
+                if (File.Exists(path))
+                {
+                    try
+                    {
+                        repo = CascadeTomlSerializer.Deserialize<UiWorkspaceToml>(File.ReadAllText(path));
+                    }
+                    catch (Exception ex)
+                    {
+                        global::System.Diagnostics.Debug.WriteLine($"UiModeCatalog: repo workspace.toml ignored — {ex.Message}");
+                    }
+                }
+            }
+
+            var merged = UiWorkspaceTomlMerger.Merge(_bundleWorkspaceToml, repo);
+            UiWorkspaceLayoutRuntimeMetrics.ApplyWorkspaceToml(merged);
+            AttentionZonePanelRuntime.ApplyWorkspaceToml(merged);
         }
     }
 
@@ -83,6 +122,7 @@ public static class UiModeCatalog
         ShowTaskBarByMode.Clear();
         CapabilitiesByMode.Clear();
         WindowTitleOverrideByMode.Clear();
+        _bundleWorkspaceToml = null;
         UiWorkspaceLayoutRuntimeMetrics.ResetToCodeDefaults();
         AttentionZonePanelRuntime.ResetToCodeDefaults();
 
@@ -126,6 +166,7 @@ public static class UiModeCatalog
             try
             {
                 var w = CascadeTomlSerializer.Deserialize<UiWorkspaceToml>(File.ReadAllText(workspacePath));
+                _bundleWorkspaceToml = w;
                 UiWorkspaceLayoutRuntimeMetrics.ApplyWorkspaceToml(w);
                 AttentionZonePanelRuntime.ApplyWorkspaceToml(w);
             }
@@ -169,6 +210,7 @@ public static class UiModeCatalog
 
     private static void ApplyBuiltinOnly()
     {
+        _bundleWorkspaceToml = null;
         _orderedModeIds = UiModeLayoutRegistry.OrderedModeIds;
         foreach (var id in _orderedModeIds)
         {
@@ -354,7 +396,7 @@ public static class UiModeCatalog
             TelemetrySurface: surface,
             MainToolbarVisible: modeFile.MainToolbar ?? baseCaps.MainToolbarVisible,
             ProblemsPanelVisible: modeFile.ProblemsPanel ?? baseCaps.ProblemsPanelVisible,
-            EicasStripEnabled: modeFile.EicasStrip ?? baseCaps.EicasStripEnabled);
+            EicasAlertsBarEnabled: modeFile.EicasAlertsBar ?? baseCaps.EicasAlertsBarEnabled);
     }
 
     private static string? ResolveWindowTitle(UiModeFileToml? file, string? inherits, ResolvedMode? parentResolved)

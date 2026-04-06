@@ -326,6 +326,11 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         if (string.IsNullOrWhiteSpace(value))
             ClearStartupProjectInMemoryOnly();
 
+        UiModeCatalog.ApplyRepositoryWorkspaceOverlay(GetWorkspacePath(value));
+        OnPropertyChanged(nameof(ChatPanelColumnPixelWidth));
+        OnPropertyChanged(nameof(IsChatPanelColumnVisible));
+        OnPropertyChanged(nameof(IsSolutionExplorerVisible));
+
         ChatPanel.DisposeCursorAcpSession();
         AttachBreakpointsFileWatcher(value);
         _ = RefreshGitSummaryAsync();
