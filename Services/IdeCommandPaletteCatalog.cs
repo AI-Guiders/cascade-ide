@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using System.Text.Json;
+using CascadeIDE.Features.UiChrome;
 
 namespace CascadeIDE.Services;
 
@@ -8,7 +9,14 @@ namespace CascadeIDE.Services;
 /// </summary>
 public static class IdeCommandPaletteCatalog
 {
-    public sealed record Entry(string PaletteId, string CommandId, string Title, string Category, string? ArgsJson = null);
+    /// <param name="AllowedFamilies">Если задано и не пусто — команда доступна только в перечисленных семействах UI-режима.</param>
+    public sealed record Entry(
+        string PaletteId,
+        string CommandId,
+        string Title,
+        string Category,
+        string? ArgsJson = null,
+        ImmutableArray<UiModeFamily>? AllowedFamilies = null);
 
     public static ImmutableArray<Entry> All { get; } = Build();
 
@@ -16,8 +24,11 @@ public static class IdeCommandPaletteCatalog
     {
         var b = ImmutableArray.CreateBuilder<Entry>();
 
-        void add(string paletteId, string commandId, string title, string category, string? args = null) =>
-            b.Add(new Entry(paletteId, commandId, title, category, args));
+        void add(string paletteId, string commandId, string title, string category, string? args = null, params UiModeFamily[] allowed)
+        {
+            ImmutableArray<UiModeFamily>? fam = allowed.Length > 0 ? ImmutableArray.Create(allowed) : null;
+            b.Add(new Entry(paletteId, commandId, title, category, args, fam));
+        }
 
         // Файл
         add("open_solution_dialog", IdeCommands.OpenSolutionDialog, "Открыть решение…", "Файл");
@@ -67,13 +78,13 @@ public static class IdeCommandPaletteCatalog
         add("build_solution_ui", IdeCommands.BuildSolutionUi, "Собрать решение (UI)", "Сборка");
         add("build", IdeCommands.Build, "Сборка (structured)", "Сборка");
 
-        // Отладка
-        add("debug_continue", IdeCommands.DebugContinue, "Отладка: продолжить", "Отладка");
-        add("debug_step_over", IdeCommands.DebugStepOver, "Отладка: шаг с обходом", "Отладка");
-        add("debug_step_into", IdeCommands.DebugStepInto, "Отладка: шаг с заходом", "Отладка");
-        add("debug_step_out", IdeCommands.DebugStepOut, "Отладка: шаг с выходом", "Отладка");
-        add("debug_stop", IdeCommands.DebugStop, "Отладка: остановить", "Отладка");
-        add("debug_ping", IdeCommands.DebugPing, "Отладка: ping", "Отладка");
+        // Отладка — в палитре только при семействе Debug (UX: недоступные строки серые).
+        add("debug_continue", IdeCommands.DebugContinue, "Отладка: продолжить", "Отладка", null, UiModeFamily.Debug);
+        add("debug_step_over", IdeCommands.DebugStepOver, "Отладка: шаг с обходом", "Отладка", null, UiModeFamily.Debug);
+        add("debug_step_into", IdeCommands.DebugStepInto, "Отладка: шаг с заходом", "Отладка", null, UiModeFamily.Debug);
+        add("debug_step_out", IdeCommands.DebugStepOut, "Отладка: шаг с выходом", "Отладка", null, UiModeFamily.Debug);
+        add("debug_stop", IdeCommands.DebugStop, "Отладка: остановить", "Отладка", null, UiModeFamily.Debug);
+        add("debug_ping", IdeCommands.DebugPing, "Отладка: ping", "Отладка", null, UiModeFamily.Debug);
 
         // Git
         add("git_status", IdeCommands.GitStatus, "Git: статус", "Git");
