@@ -211,8 +211,17 @@
             </MenuItem>
         </Menu>
 
-        <!-- Редактор (2*) и низ (*): сплиттер между ними — иначе низ только Auto по контенту, «увеличить» док нельзя. -->
-        <Grid x:Name="MainGrid" RowDefinitions="Auto,Auto,Auto,2*,6,*" ColumnDefinitions="220,4,*,4,340">
+        <!-- Редактор (2*) и низ (*): сплиттер между ними — иначе низ только Auto по контенту, «увеличить» док нельзя.
+             Высоты строк 3–5: MainGridRowHeights → Services/MainGridRowHeightSet.cs; инвалидация — MainWindowViewModel.LayoutNotifications.cs. -->
+        <Grid x:Name="MainGrid" ColumnDefinitions="220,4,*,4,340">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="{Binding MainGridRowHeights.Workspace}"/>
+            <RowDefinition Height="{Binding MainGridRowHeights.BottomSplitter}"/>
+            <RowDefinition Height="{Binding MainGridRowHeights.BottomPanel}"/>
+        </Grid.RowDefinitions>
         <!-- Подсказка при работе как MCP-сервер -->
         <views:McpBannerView Grid.Row="0" Grid.ColumnSpan="5"/>
         <views:ToolbarView Grid.Row="1" Grid.ColumnSpan="5" IsVisible="{Binding ShowMainToolbar}"/>

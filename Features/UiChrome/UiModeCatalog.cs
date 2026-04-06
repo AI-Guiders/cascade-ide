@@ -71,6 +71,7 @@ public static class UiModeCatalog
             CapabilitiesByMode.Clear();
             WindowTitleOverrideByMode.Clear();
             UiWorkspaceLayoutRuntimeMetrics.ResetToCodeDefaults();
+            AttentionZonePanelRuntime.ResetToCodeDefaults();
         }
     }
 
@@ -83,6 +84,7 @@ public static class UiModeCatalog
         CapabilitiesByMode.Clear();
         WindowTitleOverrideByMode.Clear();
         UiWorkspaceLayoutRuntimeMetrics.ResetToCodeDefaults();
+        AttentionZonePanelRuntime.ResetToCodeDefaults();
 
         if (!Directory.Exists(uiModesDirectory))
         {
@@ -125,6 +127,7 @@ public static class UiModeCatalog
             {
                 var w = CascadeTomlSerializer.Deserialize<UiWorkspaceToml>(File.ReadAllText(workspacePath));
                 UiWorkspaceLayoutRuntimeMetrics.ApplyWorkspaceToml(w);
+                AttentionZonePanelRuntime.ApplyWorkspaceToml(w);
             }
             catch (Exception ex)
             {

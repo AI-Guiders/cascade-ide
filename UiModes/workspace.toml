@@ -6,3 +6,12 @@ chat_panel_collapsed_width_pixels = 0
 chat_panel_expanded_default_width_pixels = 340
 chat_panel_expanded_power_width_pixels = 420
 chat_panel_expanded_agent_chat_width_pixels = 520
+
+# ADR 0021: привязка поверхностей к зонам внимания (канонические id: frontal, pfd, mfd, eicas, hud).
+# Переопределение только здесь / в пользовательском бандле UiModes — не drag-and-drop в сессии.
+[attention_zone_panels]
+solution_explorer = "pfd"
+chat_panel = "mfd"
+git = "mfd"
+terminal_dock = "mfd"
+editor = "frontal"

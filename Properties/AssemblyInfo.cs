@@ -1,5 +1,8 @@
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.Versioning;
+
+[assembly: InternalsVisibleTo("CascadeIDE.Tests")]
 
 [assembly: AssemblyTitle("CascadeIDE")]
 [assembly: AssemblyCompany("CascadeIDE")]

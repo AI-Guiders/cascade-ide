@@ -17,6 +17,9 @@ public sealed class UiWorkspaceToml
     public int? ChatPanelExpandedDefaultWidthPixels { get; set; }
     public int? ChatPanelExpandedPowerWidthPixels { get; set; }
     public int? ChatPanelExpandedAgentChatWidthPixels { get; set; }
+
+    /// <summary>Привязка id поверхности к каноническому id зоны; TOML: <c>[attention_zone_panels]</c> (ADR 0021).</summary>
+    public Dictionary<string, string>? AttentionZonePanels { get; set; }
 }
 
 /// <summary>
