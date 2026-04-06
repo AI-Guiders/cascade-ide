@@ -18,12 +18,14 @@
 | Композитор | `Features/UiChrome/AttentionStripCompositor.cs` | `Rebuild(ObservableCollection<AttentionStripSegment>, AttentionStripInputSnapshot)`; порядок: Build → Tests → Debug → Git; `IsBuildRunning` только на сегменте Build. |
 | Модель сегмента | `Features/UiChrome/AttentionStripSegment.cs` | `LineText` (полная строка), `CockpitShort` (Power), флаги для шаблона. |
 | Источник enum | `Features/UiChrome/AttentionStripSource.cs` | `Build`, `Tests`, `Debug`, `Git`. |
-| VM | `ViewModels/MainWindowViewModel.AttentionStrip.cs` | Сборка снимка из `Telemetry*` + `Chrome.TelemetryGit*`; `RebuildAttentionStrip()`. |
+| Форматирование строк | `Features/UiChrome/AttentionStripTelemetryFormat.cs` | Статические сегменты `BuildSegment` / `TestsSegment` / `DebugSegment` / `GitSegment` и `Compose(...)` — чистая логика без VM/DAP; удобно для юнит-тестов. |
+| Провайдер снимка | `Features/UiChrome/IAttentionStripTelemetryProvider.cs`, `AttentionStripTelemetryProvider.cs` | `GetSnapshot()` собирает входы (build/tests/DAP/instrumentation/git из `UiChromeViewModel`) в `AttentionStripInputSnapshot`. `MainWindowViewModel` не знает текст каждой строки по отдельности — только держит провайдер и передаёт снимок в композитор. |
+| VM | `ViewModels/MainWindowViewModel.AttentionStrip.cs` | `RebuildAttentionStrip()` вызывает `AttentionStripCompositor.Rebuild(AttentionStripSegments, _attentionStripTelemetry.GetSnapshot())`. |
 | Инвалидация | `ViewModels/MainWindowViewModel.LayoutNotifications.cs` | `RebuildAttentionStrip` при смене телеметрии build/tests/debug. |
 | Git-строки | `Features/UiChrome/UiChromeViewModel.cs` | `TelemetryGitText`, `TelemetryGitCockpitShort`; подписка в `MainWindowViewModel` на `Chrome.PropertyChanged`. |
-| Вычисляемые строки | `ViewModels/MainWindowViewModel.Presentation.cs` | `TelemetryBuild*`, `TelemetryTests*`, `TelemetryDebug*`. |
+| Свойства для UI | `ViewModels/MainWindowViewModel.Presentation.cs` | `TelemetryBuild*` / `TelemetryTests*` / `TelemetryDebug*` читают сегменты из `_attentionStripTelemetry.GetSnapshot()`; флаги сессии отладки по-прежнему из DAP. |
 | UI | `Views/TelemetryStripView.axaml` | `ItemsControl` по `AttentionStripSegments`; разные шаблоны для Power vs остальные режимы. |
-| Тесты | `CascadeIDE.Tests/AttentionStripCompositorTests.cs` | Порядок сегментов, `IsBuildRunning`, игнор флага на не-Build. |
+| Тесты | `CascadeIDE.Tests/AttentionStripCompositorTests.cs`, `AttentionStripTelemetryFormatTests.cs` | Композитор: порядок, `IsBuildRunning`. Формат: сегменты и `Compose` для снимка. |
 
 ---
 
@@ -31,8 +33,10 @@
 
 1. Состояние меняется (сборка, тесты, DAP, git, …).
 2. Свойства `Telemetry*` уведомляют UI (частично через `[NotifyPropertyChangedFor]`, частично явный `OnPropertyChanged` для отладки).
-3. `RebuildAttentionStrip()` строит `AttentionStripInputSnapshot` и вызывает `AttentionStripCompositor.Rebuild`.
+3. `RebuildAttentionStrip()` берёт снимок через `IAttentionStripTelemetryProvider.GetSnapshot()` (внутри — делегаты/DAP/`UiChromeViewModel` + `AttentionStripTelemetryFormat`) и вызывает `AttentionStripCompositor.Rebuild`.
 4. `AttentionStripSegments` обновляется; привязка к `TelemetryStripView`.
+
+Альтернативная реализация провайдера (агент, MCP, моки в тестах VM) подменяет только сбор снимка, не композитор и не разметку полосы.
 
 ---
 
@@ -52,7 +56,7 @@
 1. **Пустые / placeholder-сегменты** — правило показа (всегда 4 слота vs только непустые) и согласование с Dark Cockpit (ADR §6).
 2. **Приоритет / сортировка** — поля уровня в снимке или отдельный шаг ранжирования перед `Rebuild` (связь с §5 ADR).
 3. **Канал EICAS** — отдельные сегменты или вторая полоса в том же контуре композитора, без нового «слоя уведомлений вне правил».
-4. **Провайдер телеметрии** — вынести сбор строк из `MainWindowViewModel` в узкий сервис/интерфейс для тестов и подключения агента/MCP.
+4. **Провайдер телеметрии** — сделано: `IAttentionStripTelemetryProvider`, `AttentionStripTelemetryProvider`, `AttentionStripTelemetryFormat` (см. таблицу выше).
 5. **Конфиг** — какие сегменты включены в каком UI-режиме (расширение capabilities или TOML).
 
 ---
