@@ -12,7 +12,7 @@
   </UserControl.Styles>
   <Border Background="#AA000000"
           PointerPressed="OnDimmerPressed">
-    <Grid RowDefinitions="Auto,*"
+    <Grid RowDefinitions="Auto,*,Auto"
           MaxWidth="720"
           MaxHeight="480"
           Margin="40"
@@ -30,10 +30,15 @@
                Background="Transparent">
         <ListBox.ItemTemplate>
           <DataTemplate DataType="vm:IdeCommandPaletteRowViewModel">
-            <Grid ColumnDefinitions="*,Auto">
+            <Grid ColumnDefinitions="*,Auto"
+                  Opacity="{Binding RowOpacity}">
               <StackPanel Grid.Column="0" Orientation="Vertical" Spacing="2">
                 <TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>
                 <TextBlock Text="{Binding Category}" Opacity="0.7" FontSize="11"/>
+                <TextBlock Text="{Binding UnavailableHint}"
+                           IsVisible="{Binding ShowUnavailableHint}"
+                           Opacity="0.85"
+                           FontSize="11"/>
               </StackPanel>
               <TextBlock Grid.Column="1"
                          Text="{Binding HotkeyHint}"
@@ -44,6 +49,11 @@
           </DataTemplate>
         </ListBox.ItemTemplate>
       </ListBox>
+      <TextBlock Grid.Row="2"
+                 Margin="0,8,0,0"
+                 FontSize="11"
+                 Opacity="0.65"
+                 Text="↑↓ выбор · Enter выполнить · Esc закрыть · PgUp/PgDn страница · Ctrl+Q выделить запрос"/>
     </Grid>
   </Border>
 </UserControl>

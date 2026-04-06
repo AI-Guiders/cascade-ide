@@ -150,6 +150,7 @@ public partial class MainWindowViewModel
             UiScheduler.Default.Post(RefreshWorkspaceSnapshotCore, DispatcherPriority.Background);
 
         Chrome.NotifyUiModeChangedForBloom(normalized);
+        RefreshCommandPaletteIfOpen();
     }
 
     public async Task RefreshOllamaAsync()

@@ -66,6 +66,20 @@ public partial class CommandPaletteView : UserControl
         {
             vm.CommandPaletteMoveSelectionCommand.Execute(-1);
             e.Handled = true;
+            return;
+        }
+
+        if (e.Key == Key.PageDown)
+        {
+            vm.CommandPalettePageMoveCommand.Execute(1);
+            e.Handled = true;
+            return;
+        }
+
+        if (e.Key == Key.PageUp)
+        {
+            vm.CommandPalettePageMoveCommand.Execute(-1);
+            e.Handled = true;
         }
     }
 

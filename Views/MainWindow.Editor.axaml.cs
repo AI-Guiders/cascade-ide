@@ -283,6 +283,8 @@ public partial class MainWindow
         }
         if (e.PropertyName is nameof(ViewModels.MainWindowViewModel.IsMarkdownFile))
             UpdateInlineMarkdownPreview();
+        if (e.PropertyName is nameof(ViewModels.MainWindowViewModel.IsCommandPaletteOpen) && DataContext is ViewModels.MainWindowViewModel vmPalette)
+            HandleCommandPaletteOpenStateChanged(vmPalette.IsCommandPaletteOpen);
         if (e.PropertyName is nameof(ViewModels.MainWindowViewModel.EditorText))
             UpdateInlineMarkdownPreview();
         if (e.PropertyName is nameof(ViewModels.MainWindowViewModel.SelectedOllamaModel) && DataContext is ViewModels.MainWindowViewModel vm2
