@@ -45,6 +45,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private CSharpLspDiagnosticsHost? _csharpLspHost;
     private readonly IdeMcpCommandExecutor _ideMcpExecutor;
     private readonly Services.IdeDapDebugSession _dapDebug;
+    private readonly IAttentionStripTelemetryProvider _attentionStripTelemetry;
 
     private Services.McpClientService _mcpClientService;
     private AutonomousAgentService _autonomousAgentService;
@@ -128,6 +129,14 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _ideMcpExecutor = new IdeMcpCommandExecutor(this);
         _mcpBuildTest = new Services.McpDotnetBuildTestService(_dotnetRunner);
         _mcpAgentNotes = new Services.McpAgentNotesService();
+
+        _attentionStripTelemetry = new AttentionStripTelemetryProvider(
+            () => IsBuilding,
+            () => LastTestSummary,
+            () => ImpactedTestsBadge,
+            _dapDebug,
+            () => InstrumentationPanel,
+            Chrome);
 
         Workspace.PropertyChanged += (_, e) => OnWorkspacePropertyChanged(e.PropertyName);
         Chrome.PropertyChanged += OnChromePropertyChangedForAttentionStrip;

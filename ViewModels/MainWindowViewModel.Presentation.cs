@@ -130,21 +130,16 @@ public partial class MainWindowViewModel
     public bool IsImpactedTestsBadgeVisible => ImpactedTestsBadge > 0;
     public bool IsActiveTaskProgressVisible => ActiveTaskProgress > 0;
 
-    public string TelemetryBuildText => IsBuilding ? "Build: running…" : "Build: idle";
+    /// <summary>Строки из <see cref="IAttentionStripTelemetryProvider"/> (форматирование в <see cref="AttentionStripTelemetryFormat"/>).</summary>
+    public string TelemetryBuildText => _attentionStripTelemetry.GetSnapshot().Build.LineText;
 
     /// <summary>Короткий статус для «кольца» сборки в Power cockpit.</summary>
-    public string TelemetryBuildCockpitShort => IsBuilding ? "BUILD…" : "READY";
+    public string TelemetryBuildCockpitShort => _attentionStripTelemetry.GetSnapshot().Build.CockpitShort;
 
-    public string TelemetryTestsText =>
-        !string.IsNullOrWhiteSpace(LastTestSummary)
-            ? $"Tests: {LastTestSummary}"
-            : $"Tests: impacted {ImpactedTestsBadge}";
+    public string TelemetryTestsText => _attentionStripTelemetry.GetSnapshot().Tests.LineText;
 
     /// <summary>Компактная строка тестов для полосы Power.</summary>
-    public string TelemetryTestsCockpitShort =>
-        !string.IsNullOrWhiteSpace(LastTestSummary)
-            ? (LastTestSummary.Length > 36 ? string.Concat(LastTestSummary.AsSpan(0, 33), "…") : LastTestSummary)
-            : $"imp {ImpactedTestsBadge}";
+    public string TelemetryTestsCockpitShort => _attentionStripTelemetry.GetSnapshot().Tests.CockpitShort;
 
     /// <summary>Есть активная DAP-сессия (режим отладки, как в VS).</summary>
     public bool HasDebugSession => _dapDebug.HasActiveSession;
@@ -155,20 +150,10 @@ public partial class MainWindowViewModel
     /// <summary>Процесс запущен под отладчиком, выполнение идёт.</summary>
     public bool IsDebugExecutionRunning => _dapDebug.HasActiveSession && !_dapDebug.IsExecutionStopped;
 
-    public string TelemetryDebugText =>
-        !_dapDebug.HasActiveSession
-            ? "Debug: idle"
-            : _dapDebug.IsExecutionStopped
-                ? $"Debug: paused · frames {InstrumentationPanel.DebugStackFrames.Count}, vars {InstrumentationPanel.DebugVariables.Count}"
-                : "Debug: running…";
+    public string TelemetryDebugText => _attentionStripTelemetry.GetSnapshot().Debug.LineText;
 
     /// <summary>Короткий статус отладки для Power.</summary>
-    public string TelemetryDebugCockpitShort =>
-        !_dapDebug.HasActiveSession
-            ? "DBG · —"
-            : _dapDebug.IsExecutionStopped
-                ? $"DBG · pause · {InstrumentationPanel.DebugStackFrames.Count}fr"
-                : "DBG · run";
+    public string TelemetryDebugCockpitShort => _attentionStripTelemetry.GetSnapshot().Debug.CockpitShort;
 
     public string ChatPanelToggleButtonText => IsChatPanelExpanded ? "◀" : "▶";
     public bool IsSolutionPanelHidden => !IsSolutionExplorerVisible;

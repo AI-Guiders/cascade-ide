@@ -11,15 +11,6 @@ public partial class MainWindowViewModel
 
     private void RebuildAttentionStrip()
     {
-        AttentionStripCompositor.Rebuild(
-            AttentionStripSegments,
-            new AttentionStripInputSnapshot(
-                Build: new AttentionStripSegmentInput(
-                    TelemetryBuildText,
-                    TelemetryBuildCockpitShort,
-                    IsBuilding),
-                Tests: new AttentionStripSegmentInput(TelemetryTestsText, TelemetryTestsCockpitShort),
-                Debug: new AttentionStripSegmentInput(TelemetryDebugText, TelemetryDebugCockpitShort),
-                Git: new AttentionStripSegmentInput(Chrome.TelemetryGitText, Chrome.TelemetryGitCockpitShort)));
+        AttentionStripCompositor.Rebuild(AttentionStripSegments, _attentionStripTelemetry.GetSnapshot());
     }
 }
