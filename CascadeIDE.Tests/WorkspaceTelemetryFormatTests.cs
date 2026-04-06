@@ -3,17 +3,17 @@ using Xunit;
 
 namespace CascadeIDE.Tests;
 
-public sealed class AttentionStripTelemetryFormatTests
+public sealed class WorkspaceTelemetryFormatTests
 {
     [Fact]
     public void BuildSegment_idle_and_running()
     {
-        var idle = AttentionStripTelemetryFormat.BuildSegment(isBuilding: false);
+        var idle = WorkspaceTelemetryFormat.BuildSegment(isBuilding: false);
         Assert.Equal("Build: idle", idle.LineText);
         Assert.Equal("READY", idle.CockpitShort);
         Assert.False(idle.IsBuildRunning);
 
-        var run = AttentionStripTelemetryFormat.BuildSegment(isBuilding: true);
+        var run = WorkspaceTelemetryFormat.BuildSegment(isBuilding: true);
         Assert.Equal("Build: running…", run.LineText);
         Assert.Equal("BUILD…", run.CockpitShort);
         Assert.True(run.IsBuildRunning);
@@ -22,11 +22,11 @@ public sealed class AttentionStripTelemetryFormatTests
     [Fact]
     public void TestsSegment_uses_summary_or_impacted()
     {
-        var withSummary = AttentionStripTelemetryFormat.TestsSegment("ok 3 passed", 0);
+        var withSummary = WorkspaceTelemetryFormat.TestsSegment("ok 3 passed", 0);
         Assert.Equal("Tests: ok 3 passed", withSummary.LineText);
         Assert.Equal("ok 3 passed", withSummary.CockpitShort);
 
-        var impacted = AttentionStripTelemetryFormat.TestsSegment(null, 5);
+        var impacted = WorkspaceTelemetryFormat.TestsSegment(null, 5);
         Assert.Equal("Tests: impacted 5", impacted.LineText);
         Assert.Equal("imp 5", impacted.CockpitShort);
     }
@@ -35,7 +35,7 @@ public sealed class AttentionStripTelemetryFormatTests
     public void TestsSegment_truncates_long_summary_in_cockpit()
     {
         var longText = new string('a', 40);
-        var s = AttentionStripTelemetryFormat.TestsSegment(longText, 0);
+        var s = WorkspaceTelemetryFormat.TestsSegment(longText, 0);
         Assert.Equal(34, s.CockpitShort.Length);
         Assert.EndsWith("…", s.CockpitShort);
     }
@@ -43,16 +43,16 @@ public sealed class AttentionStripTelemetryFormatTests
     [Fact]
     public void DebugSegment_idle_paused_running()
     {
-        var idle = AttentionStripTelemetryFormat.DebugSegment(false, false, 0, 0);
+        var idle = WorkspaceTelemetryFormat.DebugSegment(false, false, 0, 0);
         Assert.Equal("Debug: idle", idle.LineText);
         Assert.Equal("DBG · —", idle.CockpitShort);
 
-        var paused = AttentionStripTelemetryFormat.DebugSegment(true, true, 2, 4);
+        var paused = WorkspaceTelemetryFormat.DebugSegment(true, true, 2, 4);
         Assert.Contains("frames 2", paused.LineText);
         Assert.Contains("vars 4", paused.LineText);
         Assert.Equal("DBG · pause · 2fr", paused.CockpitShort);
 
-        var running = AttentionStripTelemetryFormat.DebugSegment(true, false, 0, 0);
+        var running = WorkspaceTelemetryFormat.DebugSegment(true, false, 0, 0);
         Assert.Equal("Debug: running…", running.LineText);
         Assert.Equal("DBG · run", running.CockpitShort);
     }
@@ -60,7 +60,7 @@ public sealed class AttentionStripTelemetryFormatTests
     [Fact]
     public void Compose_fills_all_four_segments()
     {
-        var snap = AttentionStripTelemetryFormat.Compose(
+        var snap = WorkspaceTelemetryFormat.Compose(
             isBuilding: false,
             lastTestSummary: "",
             impactedTestsBadge: 1,

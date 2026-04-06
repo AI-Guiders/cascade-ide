@@ -2,7 +2,7 @@ namespace CascadeIDE.Features.UiChrome;
 
 /// <summary>
 /// Где показывается телеметрия build/tests/debug/git: нижняя полоса или отдельная страница зоны.
-/// Данные (<see cref="AttentionStripInputSnapshot"/>) от выбора не зависят — только разметка.
+/// Данные (<see cref="WorkspaceTelemetryInputSnapshot"/>) от выбора не зависят — только разметка.
 /// </summary>
 public enum TelemetryUiSurface
 {

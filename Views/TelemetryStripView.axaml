@@ -18,14 +18,14 @@
         <Border Padding="8,6"
                 Classes="modeCard"
                 IsVisible="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyNe}, ConverterParameter=Power}">
-            <ItemsControl ItemsSource="{Binding AttentionStripSegments}">
+            <ItemsControl ItemsSource="{Binding WorkspaceTelemetrySegments}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <WrapPanel Orientation="Horizontal" ItemHeight="28" VerticalAlignment="Center"/>
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
-                    <DataTemplate x:DataType="chrome:AttentionStripSegment">
+                    <DataTemplate x:DataType="chrome:WorkspaceTelemetrySegment">
                         <Border Classes="modeCard" Padding="6,2" Margin="0,0,8,0">
                             <TextBlock Text="{Binding LineText}" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
                         </Border>
@@ -46,7 +46,7 @@
                 <Grid ColumnDefinitions="*,Auto"
                       RowDefinitions="Auto">
                     <ItemsControl Grid.Column="0"
-                                  ItemsSource="{Binding AttentionStripSegments}"
+                                  ItemsSource="{Binding WorkspaceTelemetrySegments}"
                                   HorizontalAlignment="Left">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
@@ -54,7 +54,7 @@
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="chrome:AttentionStripSegment">
+                            <DataTemplate x:DataType="chrome:WorkspaceTelemetrySegment">
                                 <Panel>
                                     <Border IsVisible="{Binding IsBuildSource}"
                                             Margin="0,0,8,0"

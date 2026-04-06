@@ -26,7 +26,9 @@ public sealed record UiModeCapabilities(
     /// <summary>Панель инструментов под меню.</summary>
     bool MainToolbarVisible,
     /// <summary>Вкладка Problems и учёт в <see cref="MainWindowViewModel.IsBottomPanelVisible"/>.</summary>
-    bool ProblemsPanelVisible)
+    bool ProblemsPanelVisible,
+    /// <summary>Разрешить хост EICAS при наличии сообщений; TOML: <c>eicas_strip</c>.</summary>
+    bool EicasStripEnabled)
 {
     /// <summary>Дефолты по семье, если в TOML нет переопределений и нет наследуемого родителя.</summary>
     public static UiModeCapabilities DefaultsForFamily(UiModeFamily family)
@@ -47,7 +49,8 @@ public sealed record UiModeCapabilities(
                 TelemetryStripVisible: false,
                 TelemetrySurface: TelemetryUiSurface.BottomStrip,
                 MainToolbarVisible: false,
-                ProblemsPanelVisible: false);
+                ProblemsPanelVisible: false,
+                EicasStripEnabled: false);
         }
 
         var balanced = family.IsBalancedFamily();
@@ -72,6 +75,7 @@ public sealed record UiModeCapabilities(
             TelemetryStripVisible: true,
             TelemetrySurface: TelemetryUiSurface.BottomStrip,
             MainToolbarVisible: true,
-            ProblemsPanelVisible: true);
+            ProblemsPanelVisible: true,
+            EicasStripEnabled: true);
     }
 }

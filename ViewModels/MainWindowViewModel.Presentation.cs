@@ -62,11 +62,19 @@ public partial class MainWindowViewModel
     public bool ShowTelemetryStrip =>
         Capabilities.TelemetryStripVisible && Capabilities.TelemetrySurface == TelemetryUiSurface.BottomStrip;
 
+    /// <summary>Оповещения EICAS (отдельный контур); видно только при <c>eicas_strip</c> и непустом списке (Dark Cockpit).</summary>
+    public bool ShowEicasStrip =>
+        Capabilities.EicasStripEnabled && EicasMessages.Count > 0;
+
+    /// <summary>Область над нижним доком: телеметрия работы и/или EICAS.</summary>
+    public bool ShowWorkspaceTelemetrySurfaceHost => ShowTelemetryStrip || ShowEicasStrip;
+
     /// <summary>Панель инструментов под меню — из capabilities (<c>main_toolbar</c> в TOML).</summary>
     public bool ShowMainToolbar => Capabilities.MainToolbarVisible;
 
     /// <summary>Нижняя зона (сплиттер + телеметрия + док): скрыть целиком, если нечего показывать.</summary>
-    public bool ShowWorkspaceBottomChrome => ShowTelemetryStrip || IsBottomPanelVisible;
+    public bool ShowWorkspaceBottomChrome =>
+        ShowTelemetryStrip || ShowEicasStrip || IsBottomPanelVisible;
 
     /// <summary>
     /// В Power полоса телеметрии только под колонками «решение + редактор» (сетка 0–2: дерево, сплиттер, док);
@@ -134,16 +142,16 @@ public partial class MainWindowViewModel
     public bool IsImpactedTestsBadgeVisible => ImpactedTestsBadge > 0;
     public bool IsActiveTaskProgressVisible => ActiveTaskProgress > 0;
 
-    /// <summary>Строки из <see cref="IAttentionStripTelemetryProvider"/> (форматирование в <see cref="AttentionStripTelemetryFormat"/>).</summary>
-    public string TelemetryBuildText => _attentionStripTelemetry.GetSnapshot().Build.LineText;
+    /// <summary>Строки из <see cref="IWorkspaceTelemetryProvider"/> (форматирование в <see cref="WorkspaceTelemetryFormat"/>).</summary>
+    public string TelemetryBuildText => _workspaceTelemetry.GetSnapshot().Build.LineText;
 
     /// <summary>Короткий статус для «кольца» сборки в Power cockpit.</summary>
-    public string TelemetryBuildCockpitShort => _attentionStripTelemetry.GetSnapshot().Build.CockpitShort;
+    public string TelemetryBuildCockpitShort => _workspaceTelemetry.GetSnapshot().Build.CockpitShort;
 
-    public string TelemetryTestsText => _attentionStripTelemetry.GetSnapshot().Tests.LineText;
+    public string TelemetryTestsText => _workspaceTelemetry.GetSnapshot().Tests.LineText;
 
     /// <summary>Компактная строка тестов для полосы Power.</summary>
-    public string TelemetryTestsCockpitShort => _attentionStripTelemetry.GetSnapshot().Tests.CockpitShort;
+    public string TelemetryTestsCockpitShort => _workspaceTelemetry.GetSnapshot().Tests.CockpitShort;
 
     /// <summary>Есть активная DAP-сессия (режим отладки, как в VS).</summary>
     public bool HasDebugSession => _dapDebug.HasActiveSession;
@@ -154,10 +162,10 @@ public partial class MainWindowViewModel
     /// <summary>Процесс запущен под отладчиком, выполнение идёт.</summary>
     public bool IsDebugExecutionRunning => _dapDebug.HasActiveSession && !_dapDebug.IsExecutionStopped;
 
-    public string TelemetryDebugText => _attentionStripTelemetry.GetSnapshot().Debug.LineText;
+    public string TelemetryDebugText => _workspaceTelemetry.GetSnapshot().Debug.LineText;
 
     /// <summary>Короткий статус отладки для Power.</summary>
-    public string TelemetryDebugCockpitShort => _attentionStripTelemetry.GetSnapshot().Debug.CockpitShort;
+    public string TelemetryDebugCockpitShort => _workspaceTelemetry.GetSnapshot().Debug.CockpitShort;
 
     public string ChatPanelToggleButtonText => IsChatPanelExpanded ? "◀" : "▶";
     public bool IsSolutionPanelHidden => !IsSolutionExplorerVisible;

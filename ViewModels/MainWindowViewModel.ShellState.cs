@@ -34,6 +34,8 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(IsChatPanelColumnVisible))]
     [NotifyPropertyChangedFor(nameof(ShowTaskBar))]
     [NotifyPropertyChangedFor(nameof(ShowTelemetryStrip))]
+    [NotifyPropertyChangedFor(nameof(ShowEicasStrip))]
+    [NotifyPropertyChangedFor(nameof(ShowWorkspaceTelemetrySurfaceHost))]
     [NotifyPropertyChangedFor(nameof(TelemetryUiSurface))]
     [NotifyPropertyChangedFor(nameof(ShowMainToolbar))]
     [NotifyPropertyChangedFor(nameof(ShowWorkspaceBottomChrome))]

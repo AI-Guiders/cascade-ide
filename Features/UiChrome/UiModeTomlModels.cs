@@ -73,4 +73,7 @@ public sealed class UiModeFileToml
 
     /// <summary>Вкладка Problems в нижнем доке; TOML: <c>problems_panel</c>.</summary>
     public bool? ProblemsPanel { get; set; }
+
+    /// <summary>Хост полосы EICAS над нижним доком при наличии сообщений; TOML: <c>eicas_strip</c>.</summary>
+    public bool? EicasStrip { get; set; }
 }

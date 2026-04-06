@@ -1,0 +1,172 @@
+# Полоса телеметрии воркспейса (WorkspaceTelemetry) — implementation map (v1)
+
+**Статус:** живой чертёж (не ADR). **Обновлено:** 2026-04-05 — §7.1: **решение v1 = вариант A** (отдельный контур EICAS); ранее — union types / вариант B, углубление, фазы.  
+**Решения и термины** — в [ADR 0021](../adr/0021-pfd-mfd-cockpit-attention-model.md) (PFD/MFD/EICAS, ARINC 661-идеи). Здесь — **где в коде** и **что дальше**, чтобы не раздувать ADR.
+
+---
+
+## 1. Термины (глоссарий)
+
+| Термин | Смысл |
+|--------|--------|
+| **Зона PFD / MFD / EICAS** | Семантическая роль участка UI из ADR 0021: первичный контекст, вторичные потоки, канал оповещений. **Где** на экране задаётся **пресетом** (TOML/capabilities), не перетаскиванием в сессии. |
+| **Снимок телеметрии воркспейса** | `WorkspaceTelemetryInputSnapshot`: нормализованные входы (build/tests/debug/git) до композитора. Не привязан к форме «полоски». |
+| **Композитор смысла (semantic)** | `WorkspaceTelemetryCompositor`: из снимка собирает упорядоченные `WorkspaceTelemetrySegment` (порядок, флаги вроде `IsBuildRunning`). Отвечает за **состав каналов**, не за пиксели и не за зону PFD/MFD. |
+| **Раскладка зоны / страницы (chrome layout)** | Куда на экране попадают блоки: полоса снизу, сетка на странице MFD, карточка в PFD. Задаётся **пресетом** и шаблонами (AXAML) и/или отдельным слоем в коде; рабочее имя в дизайне — *compositor страницы зоны* / *display page layout*. Только **геометрия контейнера** в зоне, не дублирует порядок build/tests — тот уже зафиксирован композитором смысла. |
+| **Поверхность (surface)** | Способ **показать** те же сегменты: полоса, страница, карточка в хроме и т.д. Выбор Strip vs Page (и зона размещения) — **настройки пользователя / пресета**; **снимок и композитор смысла от этого не зависят**: одни и те же данные, разный только host UI. |
+| **Strip (полоса)** | Конкретная поверхность: узкая горизонтальная полоса на всю ширину контейнера — текущая реализация [`TelemetryStripView`](../../Views/TelemetryStripView.axaml). |
+| **Page (страница)** | Поверхность в зоне PFD или MFD: полноэкранная/вкладка с тем же содержанием по смыслу, но без ограничения «одна строка на сегмент»; переход осознанный, не замена scan по полоске. |
+| **Канал EICAS** | Оповещения по приоритету (Warning / Caution / Advisory) — в ADR отдельно от «телеметрии контура работы»; может быть полосой, списком, оверлеем (см. §5 ADR 0021). Не смешивать терминологически с build/tests/debug/git, если только пресет явно не объединяет их визуально. |
+
+Типы `WorkspaceTelemetry*` задают **смысл** сегментов (build/tests/debug/git); виджет [`TelemetryStripView`](../../Views/TelemetryStripView.axaml) — одна из **поверхностей** показа; при странице MFD / блоке PFD те же данные подаются в другой host без смены композитора.
+
+**Показ и данные развязаны:** кто-то выберет **Strip** (статус всегда внизу), кто-то **Page** (та же телеметрия на странице зоны) — это решение **настроек**, не ветвление логики снимка. Strip отнимает высоту у лобового; Page не отнимает ту же полосу, но требует перехода взгляда — пользователь сам решает, что важнее, **не меняя** источники данных и `WorkspaceTelemetryCompositor`.
+
+---
+
+## 2. Идея в одном абзаце
+
+Несколько источников (сборка, тесты, отладка, git) **подают состояние и строки**; **один** слой (`WorkspaceTelemetryCompositor`) задаёт **порядок и состав** сегментов — независимо от того, пользователь включил **Strip** или **Page**. Текущая разметка полосы: [`TelemetryStripView`](../../Views/TelemetryStripView.axaml) (Balanced/Focus vs Power cockpit).
+
+---
+
+## 3. Карта файлов
+
+| Компонент | Путь | Роль |
+|-----------|------|------|
+| Снимок входов | `Features/UiChrome/WorkspaceTelemetryInputSnapshot.cs` | `WorkspaceTelemetryInputSnapshot` + `WorkspaceTelemetrySegmentInput` (build/tests/debug/git). Точка расширения без раздувания сигнатур. |
+| Композитор | `Features/UiChrome/WorkspaceTelemetryCompositor.cs` | `Rebuild(ObservableCollection<WorkspaceTelemetrySegment>, WorkspaceTelemetryInputSnapshot)`; порядок: Build → Tests → Debug → Git; `IsBuildRunning` только на сегменте Build. |
+| Модель сегмента | `Features/UiChrome/WorkspaceTelemetrySegment.cs` | `LineText` (полная строка), `CockpitShort` (Power), флаги для шаблона. |
+| Источник enum | `Features/UiChrome/WorkspaceTelemetrySource.cs` | `Build`, `Tests`, `Debug`, `Git`. |
+| Форматирование строк | `Features/UiChrome/WorkspaceTelemetryFormat.cs` | Статические сегменты `BuildSegment` / `TestsSegment` / `DebugSegment` / `GitSegment` и `Compose(...)` — чистая логика без VM/DAP; удобно для юнит-тестов. |
+| Провайдер снимка | `Features/UiChrome/IWorkspaceTelemetryProvider.cs`, `WorkspaceTelemetryProvider.cs` | `GetSnapshot()` собирает входы (build/tests/DAP/instrumentation/git из `UiChromeViewModel`) в `WorkspaceTelemetryInputSnapshot`. `MainWindowViewModel` не знает текст каждой строки по отдельности — только держит провайдер и передаёт снимок в композитор. |
+| VM | `ViewModels/MainWindowViewModel.WorkspaceTelemetry.cs` | `RebuildWorkspaceTelemetry()` вызывает `WorkspaceTelemetryCompositor.Rebuild(WorkspaceTelemetrySegments, _workspaceTelemetry.GetSnapshot())`. |
+| Инвалидация | `ViewModels/MainWindowViewModel.LayoutNotifications.cs` | `RebuildWorkspaceTelemetry` при смене телеметрии build/tests/debug. |
+| Git-строки | `Features/UiChrome/UiChromeViewModel.cs` | `TelemetryGitText`, `TelemetryGitCockpitShort`; подписка в `MainWindowViewModel` на `Chrome.PropertyChanged`. |
+| Свойства для UI | `ViewModels/MainWindowViewModel.Presentation.cs` | `TelemetryBuild*` / `TelemetryTests*` / `TelemetryDebug*` читают сегменты из `_workspaceTelemetry.GetSnapshot()`; флаги сессии отладки по-прежнему из DAP. |
+| Хост полосы (нижняя поверхность) | `Views/WorkspaceTelemetrySurfaceHostView.axaml` | Сетка колонок как у `MainGrid` (0–4); вложенный `TelemetryStripView`. Включение: `ShowTelemetryStrip` (`telemetry_strip` + `TelemetryUiSurface.BottomStrip` в capabilities). |
+| UI полосы | `Views/TelemetryStripView.axaml` | `ItemsControl` по `WorkspaceTelemetrySegments`; разные шаблоны для Power vs остальные режимы. |
+| Тесты | `CascadeIDE.Tests/WorkspaceTelemetryCompositorTests.cs`, `WorkspaceTelemetryFormatTests.cs` | Композитор: порядок, `IsBuildRunning`. Формат: сегменты и `Compose` для снимка. |
+
+---
+
+## 4. Поток данных (кратко)
+
+1. Состояние меняется (сборка, тесты, DAP, git, …).
+2. Свойства `Telemetry*` уведомляют UI (частично через `[NotifyPropertyChangedFor]`, частично явный `OnPropertyChanged` для отладки).
+3. `RebuildWorkspaceTelemetry()` берёт снимок через `IWorkspaceTelemetryProvider.GetSnapshot()` (внутри — делегаты/DAP/`UiChromeViewModel` + `WorkspaceTelemetryFormat`) и вызывает `WorkspaceTelemetryCompositor.Rebuild`.
+4. `WorkspaceTelemetrySegments` обновляется; привязка к `TelemetryStripView` (через `WorkspaceTelemetrySurfaceHostView` в `MainWindow`).
+
+Альтернативная реализация провайдера (агент, MCP, моки в тестах VM) подменяет только сбор снимка, не композитор и не разметку полосы.
+
+---
+
+## 5. Статус vs ADR 0021 (первая строка таблицы ARINC)
+
+| Идея ADR | В коде сейчас |
+|----------|----------------|
+| Один композитор «стекла», много источников | Да: один `Rebuild` + снимок входов. |
+| Источники не владеют отдельным слоем toast без правил | Частично: строки централизованы; отдельные toast-цепочки не сводились сюда. |
+| EICAS / Warning–Caution–Advisory | Нет: сегменты без уровня приоритета; полоса не EICAS-лента. |
+| Декларативный merge из TOML | Частично: видимость полосы через capabilities/режимы; **порядок/состав** сегментов пока не из конфига. |
+
+---
+
+## 6. Краткий backlog (приоритет на усмотрение продукта)
+
+1. **Пустые / placeholder-сегменты** — см. §7.2; согласовать с Dark Cockpit ([ADR 0021 §6](../adr/0021-pfd-mfd-cockpit-attention-model.md)).
+2. **Приоритет / EICAS** — отдельный контур оповещений и уровни W/C/A ([ADR §5](../adr/0021-pfd-mfd-cockpit-attention-model.md)); см. §7.1 и §7.3.
+3. **Конфиг** — порядок/видимость сегментов телеметрии работы по режиму (TOML / capabilities); §7.4.
+4. **Раскладка без нижней полосы** — Page / карточка PFD; тот же снимок + композитор, другой host UI (§1, §7.5).
+5. **Провайдер телеметрии** — сделано: `IWorkspaceTelemetryProvider`, `WorkspaceTelemetryProvider`, `WorkspaceTelemetryFormat`.
+
+---
+
+## 7. Углубление: два контура, приоритет, Dark Cockpit
+
+Ниже — рабочая модель для реализации **без смешения** «статуса работы» (сборка, тесты, отладка, git) и **оповещений EICAS** (Warning / Caution / Advisory). ADR уже разводит их по смыслу; в коде это стоит закрепить явно.
+
+### 7.1 Два контура данных
+
+| Контур | Назначение | Примеры | Приоритет W/C/A |
+|--------|------------|---------|------------------|
+| **Телеметрия контура работы** | Ориентир «что происходит с задачей» | Сборка, тесты, сессия отладки, git | **Не применяется** — фиксированный канонический порядок в `WorkspaceTelemetryCompositor` (Build → Tests → Debug → Git) |
+| **EICAS / CAS** | Оповещения, требующие внимания или действия | Падение MCP при L3, блокировка агента, критичная ошибка по файлу в фокусе | **Да** — сортировка и отсечение по уровню ([ADR §5](../adr/0021-pfd-mfd-cockpit-attention-model.md)) |
+
+**Почему «просто один список» опасен без дисциплины:** смешение в одной коллекции без явного тега «work vs alert» ведёт к спецслучаям в шаблонах и к риску раздуть полосу (Dark Cockpit). Это **не** запрет на один `ItemsControl`: при **явном** дискриминаторе проблема «полуслучайного порядка» снимается на уровне типов.
+
+- **Вариант A:** `WorkspaceTelemetryCompositor` остаётся только про **телеметрию работы**. EICAS — отдельная модель (`EicasMessage`, коллекция для UI), отдельный мини-композитор или сортировка по `Severity`; **хост** (`MainWindow` / зона `eicas` по пресету) решает, рисовать ли полосу над доком, оверлей или компактный список ([ADR §5](../adr/0021-pfd-mfd-cockpit-attention-model.md) уже допускает размещение).
+- **Вариант B:** дискриминированное объединение — один список элементов ленты, каждый элемент знает вариант: **работа** (build/tests/…) или **EICAS**; один `ItemsControl` с шаблоном по типу/варианту; `Rebuild` строит упорядоченную последовательность с **разными** правилами сортировки для каждой группы (сначала канон работы, внутри EICAS — по W/C/A), без смешения в одну «кучу».
+
+**Решение для v1:** принят **вариант A** — отдельный контур EICAS в коде и в источниках данных. Это **сознательная цена** за ясность двух смыслов (работа vs оповещение), простые границы тестов и соответствие ADR; **не** избегание объединённого списка ради осторожности. Вариант B остаётся запасной траекторией для последующих версий (в т.ч. при зрелом C# union types и явном продуктовом решении о «одном ментальном канале»).
+
+**C# и union types:** в языке появляются [union types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/union) (`union` / закрытый набор кейсов, исчерпывающий pattern matching) — удобный носитель для варианта B на уровне модели. На **.NET 11 Preview 2** атрибуты/интерфейс для unions в BCL ещё не обязательны в рантайме; в документации указано объявлять их в проекте до стабилизации превью. Пока целевой LangVersion репо ниже — тот же смысл можно выразить вручную через `[Union]`/ручной union-шаблон из спеки или остаться на record-иерархии + общий интерфейс, с пониманием, что компилятор не выгонит за забытую ветку так же жёстко.
+
+Вариант B после принятия union types в toolchain становится **существенно привлекательнее**: меньше страха перед «if в разметке», больше ответственности за то, **должен** ли пользователь видеть работу и оповещения в одном ментальном канале (продукт/ADR), а не только за типобезопасность.
+
+Текущий код (`WorkspaceTelemetrySegment` без уровня приоритета) соответствует **только** первому контуру; расширение под EICAS — **новые типы**, а не «добавить поле Priority в Build».
+
+```mermaid
+flowchart LR
+  subgraph work [Телеметрия работы]
+    Snap[WorkspaceTelemetryInputSnapshot]
+    Comp[WorkspaceTelemetryCompositor]
+    Seg[WorkspaceTelemetrySegments]
+  end
+  subgraph eicas [EICAS]
+    Feed[EicasFeed / провайдер]
+    Rank[Сортировка W greater than C greater than A]
+    Cas[Eicas UI host]
+  end
+  Snap --> Comp --> Seg
+  Feed --> Rank --> Cas
+```
+
+Визуально слои могут быть **рядом** (полоса телеметрии + узкая EICAS под/над ней по пресету), но **логика и источники** остаются раздельными.
+
+### 7.2 Пустые сегменты и Dark Cockpit
+
+**Проблема:** при пустых строках (нет git, тесты не запускались) либо пропадают «слоты», либо остаётся шум из placeholder’ов.
+
+| Политика | Поведение | Плюсы / минусы |
+|----------|-----------|----------------|
+| **Compact** | В полосу попадают только сегменты с непустым `LineText` (после trim) | Меньше шума, соответствует «не показывать лишнее» ([Dark Cockpit §6](../adr/0021-pfd-mfd-cockpit-attention-model.md)); меняется длина полосы |
+| **Fixed slots** | Всегда 4 (или N) ячеек; пустые — «—» / приглушённый placeholder | Стабильный scan pattern; риск визуального мусора в тихом режиме |
+| **Режим-зависимый** | Focus/Balanced — compact; Power — fixed для нижнего ряда кокпита | Согласуется с разными шаблонами в `TelemetryStripView` |
+
+**Рекомендация для первой итерации:** ввести флаг политики на уровне VM или пресета (`StripEmptySegmentPolicy: Compact | FixedFour`), реализовать **фильтрацию или placeholder** в одном месте — либо в `WorkspaceTelemetryCompositor.Append` (не добавлять пустые), либо в отдельном шаге **после** `Rebuild` (нормализация коллекции). Не размазывать условия по AXAML.
+
+### 7.3 Приоритет и сортировка
+
+- **Телеметрия работы:** порядок **не** конфигурируется приоритетом опасности — только **фиксированная пермутация** (при необходимости единственный конфиг: массив enum порядка в TOML, без W/C/A).
+- **EICAS:** сортировка по **уровню** и времени/идентификатору; дубликаты сообщений — политика слияния (одна строка на источник). Связь с **escalation** и таймерами — в [ADR §5](../adr/0021-pfd-mfd-cockpit-attention-model.md), не в `WorkspaceTelemetryFormat`.
+
+### 7.4 Конфиг сегментов телеметрии работы
+
+Цель: **какие** источники включены в каком `UiMode` / capability, без смешения с EICAS.
+
+- **Минимум:** расширение capabilities (например скрыть git в Focus).
+- **Полный вариант:** в `workspace.toml` опциональный блок в духе `attention_strip_order = ["build", "tests", "debug", "git"]` и/или `attention_strip_enabled = { git = false }` — парсится в структуру рядом с `UiWorkspaceToml`, merge с бандлом ([ADR 0021 §2.1 / §17](../adr/0021-pfd-mfd-cockpit-attention-model.md)).
+- **Композитор:** читает не сырой TOML, а **уже слитый** `WorkspaceTelemetryLayoutPolicy` (immutable) на один вызов `Rebuild`, чтобы тестировать без файлов.
+
+### 7.5 Page и нижняя полоса
+
+Тот же `WorkspaceTelemetryInputSnapshot` и тот же порядок сегментов подаются в **другой** host: полноэкранная страница MFD или блок в PFD. Меняются только шаблоны (не одна строка на сегмент, допускается многострочный вывод). Композитор смысла **не** ветвится по Strip/Page.
+
+### 7.6 Фазы внедрения (предложение)
+
+| Фаза | Содержание | Критерий готовности |
+|------|------------|---------------------|
+| **F1** | Политика пустых сегментов + тесты на `WorkspaceTelemetryCompositor` / нормализацию | Предсказуемое поведение в Focus vs Power |
+| **F2** | Модель `EicasMessage`, провайдер, UI-хост в зоне пресета (хотя бы список + цвет W/C/A) | Один Warning виден без охоты по вкладкам ([§18 / EICAS в ADR](../adr/0021-pfd-mfd-cockpit-attention-model.md)) |
+| **F3** | Dark Cockpit transition: из «тихо» в Warning (бейдж/полоса/оверлей по пресету) | Нет постоянной четвёртой колонки |
+| **F4** | TOML / merge для порядка и включения сегментов телеметрии работы | Согласовано с roadmap `.cascade/workspace.toml` |
+| **F5** | Страница телеметрии (Page) как альтернатива Strip | Тот же снимок, другой AXAML |
+
+---
+
+## 8. Связанные документы
+
+- [ADR 0021](../adr/0021-pfd-mfd-cockpit-attention-model.md) — модель внимания, зоны, EICAS (§5), Dark Cockpit (§6), метрики.
+- [ADR 0010](../adr/0010-ui-modes-toml-configuration.md) — режимы UI и capabilities.
+- [`cascade-ide-ui-layout-v1.md`](../ux/cascade-ide-ui-layout-v1.md) — раскладка окон.

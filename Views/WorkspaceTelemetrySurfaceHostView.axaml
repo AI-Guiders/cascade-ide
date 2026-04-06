@@ -4,8 +4,14 @@
              xmlns:vm="using:CascadeIDE.ViewModels"
              x:Class="CascadeIDE.Views.WorkspaceTelemetrySurfaceHostView"
              x:DataType="vm:MainWindowViewModel">
-    <Grid ColumnDefinitions="220,4,*,4,340">
-        <views:TelemetryStripView Grid.Column="0"
-                                  Grid.ColumnSpan="{Binding MainWorkspaceTelemetryColumnSpan}"/>
+    <Grid RowDefinitions="Auto,*">
+        <views:EicasStripView Grid.Row="0"
+                              IsVisible="{Binding ShowEicasStrip}"/>
+        <Grid Grid.Row="1"
+              ColumnDefinitions="220,4,*,4,340"
+              IsVisible="{Binding ShowTelemetryStrip}">
+            <views:TelemetryStripView Grid.Column="0"
+                                      Grid.ColumnSpan="{Binding MainWorkspaceTelemetryColumnSpan}"/>
+        </Grid>
     </Grid>
 </UserControl>

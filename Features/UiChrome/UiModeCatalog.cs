@@ -353,7 +353,8 @@ public static class UiModeCatalog
             TelemetryStripVisible: modeFile.TelemetryStrip ?? baseCaps.TelemetryStripVisible,
             TelemetrySurface: surface,
             MainToolbarVisible: modeFile.MainToolbar ?? baseCaps.MainToolbarVisible,
-            ProblemsPanelVisible: modeFile.ProblemsPanel ?? baseCaps.ProblemsPanelVisible);
+            ProblemsPanelVisible: modeFile.ProblemsPanel ?? baseCaps.ProblemsPanelVisible,
+            EicasStripEnabled: modeFile.EicasStrip ?? baseCaps.EicasStripEnabled);
     }
 
     private static string? ResolveWindowTitle(UiModeFileToml? file, string? inherits, ResolvedMode? parentResolved)

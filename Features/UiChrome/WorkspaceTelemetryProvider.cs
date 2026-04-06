@@ -4,9 +4,9 @@ using CascadeIDE.Services;
 namespace CascadeIDE.Features.UiChrome;
 
 /// <summary>
-/// Собирает <see cref="AttentionStripInputSnapshot"/> из состояния окна (сборка, тесты, отладка, git).
+/// Собирает <see cref="WorkspaceTelemetryInputSnapshot"/> из состояния окна (сборка, тесты, отладка, git).
 /// </summary>
-public sealed class AttentionStripTelemetryProvider : IAttentionStripTelemetryProvider
+public sealed class WorkspaceTelemetryProvider : IWorkspaceTelemetryProvider
 {
     private readonly Func<bool> _isBuilding;
     private readonly Func<string> _lastTestSummary;
@@ -15,7 +15,7 @@ public sealed class AttentionStripTelemetryProvider : IAttentionStripTelemetryPr
     private readonly Func<InstrumentationPanelViewModel> _instrumentation;
     private readonly UiChromeViewModel _chrome;
 
-    public AttentionStripTelemetryProvider(
+    public WorkspaceTelemetryProvider(
         Func<bool> isBuilding,
         Func<string> lastTestSummary,
         Func<int> impactedTestsBadge,
@@ -31,10 +31,10 @@ public sealed class AttentionStripTelemetryProvider : IAttentionStripTelemetryPr
         _chrome = chrome;
     }
 
-    public AttentionStripInputSnapshot GetSnapshot()
+    public WorkspaceTelemetryInputSnapshot GetSnapshot()
     {
         var inst = _instrumentation();
-        return AttentionStripTelemetryFormat.Compose(
+        return WorkspaceTelemetryFormat.Compose(
             _isBuilding(),
             _lastTestSummary(),
             _impactedTestsBadge(),

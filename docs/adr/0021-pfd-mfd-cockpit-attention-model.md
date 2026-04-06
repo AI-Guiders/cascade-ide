@@ -2,9 +2,9 @@
 
 **Статус:** Proposed  
 **Дата:** 2026-04-06  
-**Обновлено:** 2026-04-06 — контекст: переносимые идеи ARINC 661 (композитор, контракты зон); §5 Escalation; голос; §2.1; §19; §16/§17. Ранее: три зоны, HUD, §18 DX acceptance.  
+**Обновлено:** 2026-04-05 — §17 подпункт «Редактор раскладки (FancyZones-аналог)». Ранее: переносимые идеи ARINC 661; §5 Escalation; голос; §2.1; §19; §16/§17; три зоны, HUD, §18 DX acceptance.  
 **Поглощает:** [`concept-pfd-mfd-cascade-v1.md`](../ux/concept-pfd-mfd-cascade-v1.md) (черновик концепта → формализован здесь).  
-**Связь:** [0010](0010-ui-modes-toml-configuration.md) (режимы UI, TOML), [0012](0012-floating-workspace-chrome.md) (плавающий хром), [0013](0013-command-surface-and-discoverability.md) (команды и discoverability), [0017](0017-multi-window-workspace-and-agent-surfaces.md) (мультиоконность), [0016](0016-agent-client-protocol-external-agent.md) (ACP / внешний агент). UX-детали режимов: [`power-mode-concepts-v1.md`](../ux/power-mode-concepts-v1.md), [`cascade-ide-ui-layout-v1.md`](../ux/cascade-ide-ui-layout-v1.md), [`concept-to-implementation-map-v1.md`](../ux/concept-to-implementation-map-v1.md). Command Palette: [`command-palette-ux-concept-v1.md`](../ux/command-palette-ux-concept-v1.md). **Реализация полосы телеметрии / композитора** (код, статус, next): [`attention-strip-compositor-implementation-v1.md`](../design/attention-strip-compositor-implementation-v1.md).
+**Связь:** [0010](0010-ui-modes-toml-configuration.md) (режимы UI, TOML), [0012](0012-floating-workspace-chrome.md) (плавающий хром), [0013](0013-command-surface-and-discoverability.md) (команды и discoverability), [0017](0017-multi-window-workspace-and-agent-surfaces.md) (мультиоконность), [0016](0016-agent-client-protocol-external-agent.md) (ACP / внешний агент). UX-детали режимов: [`power-mode-concepts-v1.md`](../ux/power-mode-concepts-v1.md), [`cascade-ide-ui-layout-v1.md`](../ux/cascade-ide-ui-layout-v1.md), [`concept-to-implementation-map-v1.md`](../ux/concept-to-implementation-map-v1.md). Command Palette: [`command-palette-ux-concept-v1.md`](../ux/command-palette-ux-concept-v1.md). **Реализация полосы телеметрии / композитора** (код, статус, backlog; **§7.1** — **v1: отдельный контур EICAS**, вариант A в чертеже; §7 далее — пустые сегменты, фазы): [`workspace-telemetry-compositor-implementation-v1.md`](../design/workspace-telemetry-compositor-implementation-v1.md).
 
 ---
 
@@ -454,6 +454,20 @@ Command Palette хорошо стыкуется с тремя зонами (де
 11. Реализовать **слияние workspace репозитория** с бандлом для `[attention_zone_panels]` (и при необходимости метрик хрома): путь к файлу, момент загрузки при открытии solution, приоритеты §2.1.
 12. Контент **онбординга** по §19: сценарии коротких роликов (зоны, режимы, агент), единая рамка «Почему / Зачем / Что я получу» в подсказках и на страницах справки.
 13. После стабильного EICAS: оценить **голосовой слой** §5 (нужен ли, opt-in, только Warning, офис/доступность) — отдельно от «атмосферы».
+
+### Редактор раскладки зон (визуальный, по мотивам FancyZones)
+
+Внешний референс UX: [FancyZones](https://learn.microsoft.com/ru-ru/windows/powertoys/fancyzones) (PowerToys) — пользовательские макеты зон на рабочем столе и привязка окон к зонам.
+
+**В Cascade это другой слой:** не замена оконному менеджеру ОС, а **настройка пресета** раскладки IDE (пропорции колонок, видимость хрома, телеметрия strip vs page и т.д. — см. [0010](0010-ui-modes-toml-configuration.md), чертёж [`workspace-telemetry-compositor-implementation-v1.md`](../design/workspace-telemetry-compositor-implementation-v1.md)). Инвариант ADR сохраняется: **не** перетаскивать семантику PFD/MFD/EICAS между зонами в обычной рабочей сессии — только смена пресета / конфигурации (§16).
+
+| Уровень | Содержание |
+|---------|------------|
+| **MVP** | Предпросмотр пресета, числовые доли / ограниченный набор шаблонов, правка через TOML с валидацией |
+| **Расширение** | Упрощённый grid-редактор в отдельном режиме «настройка пресета» (не в потоке редактирования) |
+| **Не цель по умолчанию** | Полный паритет с FancyZones (произвольная сетка, мультизона drag, горячие клавиши на все мониторы) — высокая стоимость и риск дублировать роль ОС и [ADR 0017](0017-multi-window-workspace-and-agent-surfaces.md) |
+
+**Статус:** решение зафиксировано на уровне принципов; детальная спецификация UI — в `docs/design/`, когда появится реализация. Отдельный ADR не требуется до смены инвариантов зон.
 
 ---
 

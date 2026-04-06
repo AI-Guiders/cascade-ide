@@ -25,6 +25,6 @@ public partial class MainWindowViewModel
             or nameof(TelemetryBuildCockpitShort)
             or nameof(TelemetryTestsCockpitShort)
             or nameof(TelemetryDebugCockpitShort))
-            RebuildAttentionStrip();
+            RebuildWorkspaceTelemetry();
     }
 }

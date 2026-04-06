@@ -45,7 +45,8 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private CSharpLspDiagnosticsHost? _csharpLspHost;
     private readonly IdeMcpCommandExecutor _ideMcpExecutor;
     private readonly Services.IdeDapDebugSession _dapDebug;
-    private readonly IAttentionStripTelemetryProvider _attentionStripTelemetry;
+    private readonly IWorkspaceTelemetryProvider _workspaceTelemetry;
+    private readonly IEicasFeed _eicasFeed;
 
     private Services.McpClientService _mcpClientService;
     private AutonomousAgentService _autonomousAgentService;
@@ -130,7 +131,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _mcpBuildTest = new Services.McpDotnetBuildTestService(_dotnetRunner);
         _mcpAgentNotes = new Services.McpAgentNotesService();
 
-        _attentionStripTelemetry = new AttentionStripTelemetryProvider(
+        _workspaceTelemetry = new WorkspaceTelemetryProvider(
             () => IsBuilding,
             () => LastTestSummary,
             () => ImpactedTestsBadge,
@@ -138,16 +139,20 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             () => InstrumentationPanel,
             Chrome);
 
+        _eicasFeed = new EmptyEicasFeed();
+        _eicasFeed.MessagesChanged += (_, _) => RebuildEicas();
+
         Workspace.PropertyChanged += (_, e) => OnWorkspacePropertyChanged(e.PropertyName);
-        Chrome.PropertyChanged += OnChromePropertyChangedForAttentionStrip;
-        RebuildAttentionStrip();
+        Chrome.PropertyChanged += OnChromePropertyChangedForWorkspaceTelemetry;
+        RebuildWorkspaceTelemetry();
+        RebuildEicas();
     }
 
-    private void OnChromePropertyChangedForAttentionStrip(object? _, PropertyChangedEventArgs e)
+    private void OnChromePropertyChangedForWorkspaceTelemetry(object? _, PropertyChangedEventArgs e)
     {
         if (e.PropertyName is nameof(UiChromeViewModel.TelemetryGitText)
             or nameof(UiChromeViewModel.TelemetryGitCockpitShort))
-            RebuildAttentionStrip();
+            RebuildWorkspaceTelemetry();
     }
 
     /// <summary>DAP-сессия (netcoredbg): launch/attach и обновление панели отладки.</summary>
