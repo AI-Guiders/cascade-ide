@@ -1,0 +1,11 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:views="using:CascadeIDE.Views"
+             xmlns:vm="using:CascadeIDE.ViewModels"
+             x:Class="CascadeIDE.Views.WorkspaceTelemetrySurfaceHostView"
+             x:DataType="vm:MainWindowViewModel">
+    <Grid ColumnDefinitions="220,4,*,4,340">
+        <views:TelemetryStripView Grid.Column="0"
+                                  Grid.ColumnSpan="{Binding MainWorkspaceTelemetryColumnSpan}"/>
+    </Grid>
+</UserControl>

@@ -21,6 +21,8 @@ public sealed record UiModeCapabilities(
     bool ResultSummaryCard,
     /// <summary>Полоса build/tests/debug/git под редактором.</summary>
     bool TelemetryStripVisible,
+    /// <summary>Нижняя полоса vs страница зоны; TOML: <c>telemetry_surface</c>.</summary>
+    TelemetryUiSurface TelemetrySurface,
     /// <summary>Панель инструментов под меню.</summary>
     bool MainToolbarVisible,
     /// <summary>Вкладка Problems и учёт в <see cref="MainWindowViewModel.IsBottomPanelVisible"/>.</summary>
@@ -43,6 +45,7 @@ public sealed record UiModeCapabilities(
                 RiskSummaryCard: false,
                 ResultSummaryCard: false,
                 TelemetryStripVisible: false,
+                TelemetrySurface: TelemetryUiSurface.BottomStrip,
                 MainToolbarVisible: false,
                 ProblemsPanelVisible: false);
         }
@@ -67,6 +70,7 @@ public sealed record UiModeCapabilities(
             RiskSummaryCard: !focus && !agentChat,
             ResultSummaryCard: !focus && !agentChat,
             TelemetryStripVisible: true,
+            TelemetrySurface: TelemetryUiSurface.BottomStrip,
             MainToolbarVisible: true,
             ProblemsPanelVisible: true);
     }

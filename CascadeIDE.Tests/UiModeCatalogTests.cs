@@ -256,6 +256,29 @@ public sealed class UiModeCatalogTests : IDisposable
     }
 
     [Fact]
+    public void Telemetry_surface_toml_sets_dedicated_page()
+    {
+        var dir = Path.Combine(Path.GetTempPath(), "uimodes_" + Guid.NewGuid());
+        Directory.CreateDirectory(dir);
+        File.WriteAllText(
+            Path.Combine(dir, "index.toml"),
+            """
+            schema_version = 1
+            modes = [ "Balanced" ]
+            """);
+        File.WriteAllText(
+            Path.Combine(dir, "Balanced.toml"),
+            """
+            telemetry_surface = "dedicated_page"
+            """);
+
+        UiModeCatalog.Initialize(dir);
+
+        var caps = UiModeCatalog.GetCapabilities("Balanced");
+        Assert.Equal(TelemetryUiSurface.DedicatedPage, caps.TelemetrySurface);
+    }
+
+    [Fact]
     public void Missing_index_falls_back_to_builtin_registry()
     {
         var dir = Path.Combine(Path.GetTempPath(), "uimodes_empty_" + Guid.NewGuid());

@@ -55,8 +55,12 @@ public partial class MainWindowViewModel
     public bool TelemetryOnTerminalTab =>
         Capabilities.TelemetryOnTerminalTab && !ShowTelemetryStrip;
 
-    /// <summary>Полоска build/tests/debug/git — из capabilities (<c>telemetry_strip</c> в TOML).</summary>
-    public bool ShowTelemetryStrip => Capabilities.TelemetryStripVisible;
+    /// <summary>Куда вести телеметрию: нижняя полоса или страница зоны — из capabilities (<c>telemetry_surface</c>).</summary>
+    public TelemetryUiSurface TelemetryUiSurface => Capabilities.TelemetrySurface;
+
+    /// <summary>Полоска build/tests/debug/git под редактором — при <c>telemetry_strip</c> и поверхности <c>bottom_strip</c>.</summary>
+    public bool ShowTelemetryStrip =>
+        Capabilities.TelemetryStripVisible && Capabilities.TelemetrySurface == TelemetryUiSurface.BottomStrip;
 
     /// <summary>Панель инструментов под меню — из capabilities (<c>main_toolbar</c> в TOML).</summary>
     public bool ShowMainToolbar => Capabilities.MainToolbarVisible;

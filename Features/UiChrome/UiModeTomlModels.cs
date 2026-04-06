@@ -65,6 +65,9 @@ public sealed class UiModeFileToml
     /// <summary>Полоса телеметрии под редактором; TOML: <c>telemetry_strip</c>.</summary>
     public bool? TelemetryStrip { get; set; }
 
+    /// <summary><c>bottom_strip</c> | <c>dedicated_page</c>; TOML: <c>telemetry_surface</c>.</summary>
+    public string? TelemetrySurface { get; set; }
+
     /// <summary>Панель инструментов под меню; TOML: <c>main_toolbar</c>.</summary>
     public bool? MainToolbar { get; set; }
 

@@ -305,6 +305,18 @@ public static class UiModeCatalog
         return DefaultShowTaskBarForFamily(family);
     }
 
+    private static TelemetryUiSurface ResolveTelemetrySurface(string? fromFile, TelemetryUiSurface inherited)
+    {
+        if (string.IsNullOrWhiteSpace(fromFile))
+            return inherited;
+        var v = fromFile.Trim();
+        if (string.Equals(v, "dedicated_page", StringComparison.OrdinalIgnoreCase))
+            return TelemetryUiSurface.DedicatedPage;
+        if (string.Equals(v, "bottom_strip", StringComparison.OrdinalIgnoreCase))
+            return TelemetryUiSurface.BottomStrip;
+        return inherited;
+    }
+
     private static UiModeCapabilities ResolveCapabilities(
         UiModeFileToml? file,
         string? inherits,
@@ -318,25 +330,30 @@ public static class UiModeCatalog
         if (file is null)
             return baseCaps;
 
+        var modeFile = file!;
+
         var span = baseCaps.TelemetryMainColumnSpan;
-        if (file.TelemetryMainColumnSpan is { } s && s >= 1 && s <= 12)
+        if (modeFile.TelemetryMainColumnSpan is { } s && s >= 1 && s <= 12)
             span = s;
 
+        var surface = ResolveTelemetrySurface(modeFile.TelemetrySurface, baseCaps.TelemetrySurface);
+
         return new UiModeCapabilities(
-            QuickActions: file.QuickActions ?? baseCaps.QuickActions,
-            AgentOperationsPanel: file.AgentOperationsPanel ?? baseCaps.AgentOperationsPanel,
-            AgentTrace: file.AgentTrace ?? baseCaps.AgentTrace,
-            AutonomousAgentTelemetry: file.AutonomousAgentTelemetry ?? baseCaps.AutonomousAgentTelemetry,
-            TelemetryOnTerminalTab: file.TelemetryOnTerminalTab
+            QuickActions: modeFile.QuickActions ?? baseCaps.QuickActions,
+            AgentOperationsPanel: modeFile.AgentOperationsPanel ?? baseCaps.AgentOperationsPanel,
+            AgentTrace: modeFile.AgentTrace ?? baseCaps.AgentTrace,
+            AutonomousAgentTelemetry: modeFile.AutonomousAgentTelemetry ?? baseCaps.AutonomousAgentTelemetry,
+            TelemetryOnTerminalTab: modeFile.TelemetryOnTerminalTab
                 ?? baseCaps.TelemetryOnTerminalTab,
             TelemetryMainColumnSpan: span,
-            InstrumentationTabs: file.InstrumentationTabs ?? baseCaps.InstrumentationTabs,
-            HypothesesTab: file.HypothesesTab ?? baseCaps.HypothesesTab,
-            RiskSummaryCard: file.RiskSummaryCard ?? baseCaps.RiskSummaryCard,
-            ResultSummaryCard: file.ResultSummaryCard ?? baseCaps.ResultSummaryCard,
-            TelemetryStripVisible: file.TelemetryStrip ?? baseCaps.TelemetryStripVisible,
-            MainToolbarVisible: file.MainToolbar ?? baseCaps.MainToolbarVisible,
-            ProblemsPanelVisible: file.ProblemsPanel ?? baseCaps.ProblemsPanelVisible);
+            InstrumentationTabs: modeFile.InstrumentationTabs ?? baseCaps.InstrumentationTabs,
+            HypothesesTab: modeFile.HypothesesTab ?? baseCaps.HypothesesTab,
+            RiskSummaryCard: modeFile.RiskSummaryCard ?? baseCaps.RiskSummaryCard,
+            ResultSummaryCard: modeFile.ResultSummaryCard ?? baseCaps.ResultSummaryCard,
+            TelemetryStripVisible: modeFile.TelemetryStrip ?? baseCaps.TelemetryStripVisible,
+            TelemetrySurface: surface,
+            MainToolbarVisible: modeFile.MainToolbar ?? baseCaps.MainToolbarVisible,
+            ProblemsPanelVisible: modeFile.ProblemsPanel ?? baseCaps.ProblemsPanelVisible);
     }
 
     private static string? ResolveWindowTitle(UiModeFileToml? file, string? inherits, ResolvedMode? parentResolved)
