@@ -1,6 +1,6 @@
 # Полоса телеметрии воркспейса (WorkspaceTelemetry) — implementation map (v1)
 
-**Статус:** живой чертёж (не ADR). **Обновлено:** 2026-04-05 — §7.1: **решение v1 = вариант A** (отдельный контур EICAS); ранее — union types / вариант B, углубление, фазы.  
+**Статус:** живой чертёж (не ADR). **Обновлено:** 2026-04-06 — `TelemetryMfdPageView` + строка в §3/§4; отсылка к ADR: [содержимое якоря PFD/MFD vs Page канала](../adr/0021-pfd-mfd-cockpit-attention-model.md#anchor-pfd-mfd-content-vs-telemetry-page). Ранее: 2026-04-05 — §7.1: **решение v1 = вариант A** (отдельный контур EICAS); ранее — union types / вариант B, углубление, фазы.  
 **Решения и термины** — в [ADR 0021](../adr/0021-pfd-mfd-cockpit-attention-model.md) (PFD/MFD/EICAS, ARINC 661-идеи); **канонический словарь** «канал / слой представления / имена в коде» — [§1.1](../adr/0021-pfd-mfd-cockpit-attention-model.md#glossary-channel-presentation). Здесь — **где в коде** и **что дальше**, чтобы не раздувать ADR.
 
 ---
@@ -15,7 +15,7 @@
 | **Раскладка зоны / страницы (chrome layout)** | Куда на экране попадают блоки: полоса снизу, сетка на странице MFD, карточка в PFD. Задаётся **пресетом** и шаблонами (AXAML) и/или отдельным слоем в коде; рабочее имя в дизайне — *compositor страницы зоны* / *display page layout*. Только **геометрия контейнера** в зоне, не дублирует порядок build/tests — тот уже зафиксирован композитором смысла. |
 | **Поверхность (surface)** | **Слой представления:** как **показать** те же сегменты (полоса, страница, карточка в хроме). Выбор Strip vs Page (`telemetry_surface`, enum `TelemetryUiSurface`) — пресет и разметка; **снимок и композитор смысла не зависят** от этого слоя. Это не «хост событий» и не шина сообщений — только UI. |
 | **Strip (полоса)** | Конкретная поверхность представления: узкая горизонтальная полоса — [`TelemetryStripView`](../../Views/TelemetryStripView.axaml). |
-| **Page (страница)** | Другая поверхность представления: зона PFD/MFD (полноэкранно/вкладка), тот же смысл сегментов, иная геометрия; переход осознанный. |
+| **Page (страница)** | Другая поверхность представления **только для канала телеметрии работы** (`telemetry_surface`): те же сегменты в регионе PFD/MFD вместо полосы. Это **не** определение всего содержимого якоря — см. [ADR 0021](../adr/0021-pfd-mfd-cockpit-attention-model.md#anchor-pfd-mfd-content-vs-telemetry-page). |
 | **Канал EICAS** | Оповещения W/C/A — отдельный **семантический** контур от телеметрии работы (ADR §5). Визуально — полоса, список, оверлей и т.д.; контейнер в текущей разметке: `EicasAlertsBarView`, TOML `eicas_alerts_bar`. **Не путать** со Strip/Page: те относятся к **представлению** телеметрии build/tests/debug/git, а не к каналу CAS. |
 
 Типы `WorkspaceTelemetry*` задают **смысл** сегментов (build/tests/debug/git); [`TelemetryStripView`](../../Views/TelemetryStripView.axaml) — одна из **поверхностей представления**; при странице MFD / блоке PFD те же данные идут в **другую разметку** без смены композитора.
@@ -46,6 +46,7 @@
 | Свойства для UI | `ViewModels/MainWindowViewModel.Presentation.cs` | `TelemetryBuild*` / `TelemetryTests*` / `TelemetryDebug*` читают сегменты из `_workspaceTelemetry.GetSnapshot()`; флаги сессии отладки по-прежнему из DAP. |
 | Полоса хрома над нижним доком | `Views/WorkspaceChromeBandView.axaml` | Сетка колонок как у `MainGrid` (0–4); слот `EicasAlertsBarView` и вложенный `TelemetryStripView`. Включение полосы телеметрии: `ShowTelemetryStrip` (`telemetry_strip` + `TelemetryUiSurface.BottomStrip` в capabilities). По смыслу — контейнер **представления** нижней зоны (EICAS + Strip), не «хост событий». |
 | UI полосы | `Views/TelemetryStripView.axaml` | `ItemsControl` по `WorkspaceTelemetrySegments`; разные шаблоны для Power vs остальные режимы. |
+| Страница в MFD | `Views/TelemetryMfdPageView.axaml` | Тот же `WorkspaceTelemetrySegments` при `ShowTelemetryMfdPage` (`telemetry_strip` + `DedicatedPage`); в `MainWindow` — над `ChatPanelView` в зоне MFD. |
 | Тесты | `CascadeIDE.Tests/WorkspaceTelemetryCompositorTests.cs`, `WorkspaceTelemetryFormatTests.cs` | Композитор: порядок, `IsBuildRunning`. Формат: сегменты и `Compose` для снимка. |
 
 ---
@@ -55,7 +56,7 @@
 1. Состояние меняется (сборка, тесты, DAP, git, …).
 2. Свойства `Telemetry*` уведомляют UI (частично через `[NotifyPropertyChangedFor]`, частично явный `OnPropertyChanged` для отладки).
 3. `RebuildWorkspaceTelemetry()` берёт снимок через `IWorkspaceTelemetryProvider.GetSnapshot()` (внутри — делегаты/DAP/`UiChromeViewModel` + `WorkspaceTelemetryFormat`) и вызывает `WorkspaceTelemetryCompositor.Rebuild`.
-4. `WorkspaceTelemetrySegments` обновляется; привязка к `TelemetryStripView` (через `WorkspaceChromeBandView` в `MainWindow`).
+4. `WorkspaceTelemetrySegments` обновляется; привязка к `TelemetryStripView` (через `WorkspaceChromeBandView`) или к `TelemetryMfdPageView` в колонке MFD при `DedicatedPage`.
 
 Альтернативная реализация провайдера (агент, MCP, моки в тестах VM) подменяет только сбор снимка, не композитор и не разметку полосы.
 

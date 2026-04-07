@@ -47,6 +47,7 @@
 | [architecture-migration.md](architecture-migration.md) | Пошаговый перенос, фазы, статус strangler |
 | [MCP-PROTOCOL.md](MCP-PROTOCOL.md) | Контракты команд агента |
 | [Features/README.md](../Features/README.md) | Каталог срезов `Features/` |
+| [design/onboarding-first-run-v1.md](design/onboarding-first-run-v1.md) | Онбординг и First Run — живой чертёж (не ADR); дополняется по мере идей |
 
 ---
 
