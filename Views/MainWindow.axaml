@@ -137,6 +137,9 @@
             <Setter Property="Background" Value="#147E57C2"/>
             <Setter Property="ToolTip.Tip" Value="Якорь: MFD"/>
         </Style>
+        <Style Selector="chrome|AttentionZoneContainer.attention-layer-hud">
+            <Setter Property="ToolTip.Tip" Value="Слой: HUD (над редактором, ADR 0021 §9)"/>
+        </Style>
     </Window.Styles>
 
     <Window.KeyBindings>

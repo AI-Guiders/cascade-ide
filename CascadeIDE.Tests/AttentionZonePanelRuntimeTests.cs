@@ -22,6 +22,8 @@ public sealed class AttentionZonePanelRuntimeTests : IDisposable
         Assert.Equal(AttentionZone.Mfd, ch);
         Assert.True(AttentionZonePanelRuntime.TryGetZone(AttentionPanelIds.Editor, out var ed));
         Assert.Equal(AttentionZone.Forward, ed);
+        Assert.True(AttentionZonePanelRuntime.TryGetZone(AttentionPanelIds.EditorHud, out var hud));
+        Assert.Equal(AttentionZone.Hud, hud);
     }
 
     [Fact]

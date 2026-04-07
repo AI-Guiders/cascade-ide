@@ -11,4 +11,7 @@ public static class AttentionPanelIds
     public const string Git = "git";
     public const string TerminalDock = "terminal_dock";
     public const string Editor = "editor";
+
+    /// <summary>Полоса HUD над текстом редактора (слой внутри лобового, не отдельный якорь-колонка).</summary>
+    public const string EditorHud = "editor_hud";
 }

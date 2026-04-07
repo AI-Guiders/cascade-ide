@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:CascadeIDE.ViewModels"
+             xmlns:chrome="using:CascadeIDE.Features.UiChrome"
              xmlns:dock="clr-namespace:Dock.Avalonia.Controls;assembly=Dock.Avalonia"
              x:Class="CascadeIDE.Views.DocumentsDockView"
              Classes.power="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Power}"
@@ -35,12 +36,33 @@
         <Border x:Name="DockIslandInner"
                 ZIndex="1"
                 Classes.power="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Power}">
-            <dock:DockControl x:Name="DocumentsDock"
-                              DefaultContext="{Binding}"
-                              Factory="{Binding Documents.DockFactory}"
-                              Layout="{Binding Documents.DockLayout}"
-                              InitializeFactory="True"
-                              InitializeLayout="True"/>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <!-- ADR 0021 §9: HUD — слой на лобовом; визуальный хост — только при непустом баннере. -->
+                <chrome:AttentionZoneContainer Zone="Hud" Grid.Row="0"
+                                               IsVisible="{Binding IsEditorHudBannerVisible}">
+                    <Border Background="#1AFFB300"
+                            BorderBrush="#45FFB300"
+                            BorderThickness="0,0,0,1"
+                            Padding="8,4"
+                            CornerRadius="6,6,0,0">
+                        <TextBlock Text="{Binding EditorHudBannerText}"
+                                   TextTrimming="CharacterEllipsis"
+                                   Foreground="{DynamicResource CascadeTheme.EditorForeground}"
+                                   FontSize="12"/>
+                    </Border>
+                </chrome:AttentionZoneContainer>
+                <dock:DockControl x:Name="DocumentsDock"
+                                  Grid.Row="1"
+                                  DefaultContext="{Binding}"
+                                  Factory="{Binding Documents.DockFactory}"
+                                  Layout="{Binding Documents.DockLayout}"
+                                  InitializeFactory="True"
+                                  InitializeLayout="True"/>
+            </Grid>
         </Border>
     </Panel>
 </UserControl>
