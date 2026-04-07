@@ -39,7 +39,7 @@
 | `ide_git_commit` | Git commit в каталоге решения/workspace | `message`, опционально `paths`; возвращает JSON |
 | `ide_git_push` | Git push в каталоге решения/workspace | опционально `remote`, `branch`; возвращает JSON |
 | `ide_focus_editor` | Передать фокус в редактор | — |
-| `ide_get_ui_theme` | Параметры темы UI + глубокий снимок (resolved-тема, окно, регионы, **dock_open_documents** — все вкладки из VM + `model_text_preview`, **dock_text_editors** — только смонтированные TextEditor) | —; возвращает JSON |
+| `ide_get_ui_theme` | Параметры темы UI + глубокий снимок (resolved-тема, окно, регионы, **dock_open_documents**, **dock_text_editors**, **top_levels** — все открытые `Window`: `role` main/auxiliary/other, позиция, размер, активность) | —; возвращает JSON |
 | `ide_set_ui_theme` | Применить тему UI на лету (JSON в формате get_ui_theme) | `theme` — JSON-строка |
 | `ide_get_ui_layout` | Дерево элементов UI: тип, имя, видимость, границы (x,y,w,h), контент, дети | —; возвращает JSON |
 | `ide_get_colors_under_cursor` | Цвета под курсором: background, foreground и effective_background, effective_foreground (как на экране) | —; возвращает JSON |
@@ -145,6 +145,7 @@
 | `about` | Показать диалог «О программе». returns: text. |
 | `open_preview_window` | Открыть отдельное окно превью (Markdown). returns: text. |
 | `open_settings` | Открыть окно настроек. returns: text. |
+| `toggle_auxiliary_workspace_window` | Открыть или активировать второе окно рабочей области (второй монитор). returns: text. |
 
 ### Тулбар: показать панели / скрыть вывод сборки
 
@@ -187,7 +188,7 @@
 | `get_colors_under_cursor` | Цвета под курсором (прямые и effective). returns: json. |
 | `get_control_appearance` | Снимок внешнего вида контрола (под курсором или по имени). args: name?:string; returns: json; example: {"name":"BuildButton"}. |
 | `get_supported_editor_languages` | Список поддерживаемых языков подсветки редактора. returns: json. |
-| `get_ui_layout` | Дерево UI-элементов (layout) с bounds/visibility/content. returns: json. |
+| `get_ui_layout` | Дерево UI по всем окнам верхнего уровня: JSON с массивом windows (role, window_type, title, is_active, root — то же дерево, что раньше для MainWindow). returns: json. |
 | `get_ui_theme` | Снимок темы UI и лэйаута (включая resolved-ресурсы). returns: json. |
 | `git_branch` | Git branch в каталоге решения/workspace. args: action?:string, name?:string, start_point?:string, force?:boolean; returns: json; example: {"action":"list"}. |
 | `git_commit` | Git commit в каталоге решения/workspace. args: message:string, paths?:string[]; returns: text; example: {"message":"chore: update","paths":["a.txt"]}. |
@@ -199,7 +200,7 @@
 | `git_show` | Git show в каталоге решения/workspace. args: rev:string, path?:string, stat_only?:boolean; returns: json; example: {"rev":"HEAD","stat_only":true}. |
 | `git_status` | Git status в каталоге решения/workspace (git status --short --branch). returns: json. |
 | `git_submodule` | Git submodule в каталоге решения/workspace. args: action?:string, path?:string, recursive?:boolean; returns: json; example: {"action":"status"}. |
-| `highlight_control` | Подсветить контрол рамкой (под курсором или по имени). args: name?:string; returns: text; example: {"name":"BuildButton"}. |
+| `highlight_control` | Подсветить контрол рамкой в том окне, где он находится (главное, вспомогательное и т.д.). args: name?:string; returns: text; example: {"name":"BuildButton"}. |
 | `list_knowledge_files` | Список knowledge-файлов в каталоге решения (опционально subdir). args: subdir?:string; returns: json; example: {"subdir":"work"}. |
 | `read_knowledge_file` | Прочитать knowledge-файл из каталога решения. args: file_path:string; returns: text; example: {"file_path":"META/integrity-core.md"}. |
 | `send_keys` | Отправить хоткей в контрол. args: keys:string, name?:string; returns: text; example: {"keys":"Ctrl+S"}. |
@@ -263,7 +264,7 @@
 | command_id | Описание |
 |-----------:|----------|
 | `activate_document` | Активировать документ (переключить вкладку). args: file_path:string; returns: text; example: {"file_path":"C:\\\\tmp\\\\a.cs"}. |
-| `capture_main_window` | Снимок главного окна IDE (PNG), в ответе base64 PNG; чтобы сохранить файл под workspace, передай оба аргумента. returns: json. args: workspace_path?:string, output_path?:string; example: {"workspace_path":"D:\\\\tmp\\\\ws","output_path":".cascade-ide/ide-window.png"}. |
+| `capture_window` | Снимок окон IDE в PNG (по умолчанию главное окно; при scope=all — все top-level, в т.ч. вспомогательные). args: scope?:string, workspace_path?:string, output_path?:string; returns: json. example: {"scope":"all","workspace_path":"D:\\\\tmp\\\\ws","output_path":".cascade-ide/window-{n}.png"}. |
 | `close_document` | Закрыть документ. args: file_path:string; returns: text; example: {"file_path":"C:\\\\tmp\\\\a.cs"}. |
 | `focus_editor` | Передать фокус в редактор (чтобы клавиши/ввод шли в него). returns: text. |
 | `get_current_file_diagnostics` | Диагностики текущего открытого .cs (ошибки/предупреждения). returns: json. |

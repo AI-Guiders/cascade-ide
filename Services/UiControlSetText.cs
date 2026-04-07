@@ -14,7 +14,9 @@ public static class UiControlSetText
         if (string.IsNullOrWhiteSpace(controlName))
             return "Missing control name.";
 
-        var control = UiControlAppearance.FindControlByName(root, controlName.Trim());
+        var control = root is Window mw
+            ? UiControlAppearance.FindControlByNameAcrossAllWindows(mw, controlName.Trim())
+            : UiControlAppearance.FindControlByName(root, controlName.Trim());
         if (control is null)
             return $"Control not found: {controlName}.";
 

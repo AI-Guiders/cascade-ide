@@ -13,7 +13,7 @@ internal static class IdeCommandsArgsGenerated
         ["append_agent_notes"] = new IdeCommandsArgs.Arg[] { new("content", "string", true, false, null) },
         ["append_knowledge_file"] = new IdeCommandsArgs.Arg[] { new("file_path", "string", true, false, null), new("content", "string", true, false, null), new("canon_path", "string", false, false, null), new("save_revision", "boolean", false, false, null) },
         ["apply_edit"] = new IdeCommandsArgs.Arg[] { new("file_path", "string", true, false, null), new("start_line", "integer", true, false, null), new("start_column", "integer", true, false, null), new("end_line", "integer", true, false, null), new("end_column", "integer", true, false, null), new("new_text", "string", true, false, null) },
-        ["capture_main_window"] = new IdeCommandsArgs.Arg[] { new("workspace_path", "string", false, false, null), new("output_path", "string", false, false, null) },
+        ["capture_window"] = new IdeCommandsArgs.Arg[] { new("scope", "string", false, false, null), new("workspace_path", "string", false, false, null), new("output_path", "string", false, false, null) },
         ["click_control"] = new IdeCommandsArgs.Arg[] { new("name", "string", false, false, null) },
         ["close_document"] = new IdeCommandsArgs.Arg[] { new("file_path", "string", true, false, null) },
         ["compact_hot_context"] = new IdeCommandsArgs.Arg[] { new("apply", "boolean", false, false, null) },

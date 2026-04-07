@@ -18,7 +18,9 @@ public static class UiControlAdd
         if (string.IsNullOrWhiteSpace(controlType))
             return "Missing control_type.";
 
-        var parent = UiControlAppearance.FindControlByName(root, parentName.Trim());
+        var parent = root is Window mw
+            ? UiControlAppearance.FindControlByNameAcrossAllWindows(mw, parentName.Trim())
+            : UiControlAppearance.FindControlByName(root, parentName.Trim());
         if (parent is null)
             return $"Parent not found: {parentName}.";
 

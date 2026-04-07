@@ -434,13 +434,13 @@ internal static class IdeMcpToolCatalogFull
             new()
             {
                 Name = "ide_get_ui_theme",
-                Description = "Полный снимок темы и лэйаута. Ресурсы: секции как у ide_set_ui_theme + solution_explorer_tree_power + power_island_frame_brushes. Дополнительно: cascade_theme_resolved — все ключи CascadeTheme.*, разрешённые через TryGetResource под actual_theme_variant (solid и linear(...) для градиентов); window_frame — заголовок, client/bounds, extend_client_area*, transparency, фон окна; layout_regions — по именам (RootWindow, MainGrid, DockIslandInner, DocumentsDock, SolutionIslandInner, ChatIslandInner, ChatPanelRoot, BottomPanelShell, ModeBadge, UiModeBloomOverlay, ChatInputBox, TerminalInputBox): bounds, видимость, effective_*, background_brush/border_brush_display (в т.ч. градиенты), corner_radius/box_shadow для Border; dock_open_documents — все открытые вкладки из VM (tab_index, file_path, dock_title, display_title, is_active, is_dirty, model_content_length, model_text_preview ~240 симв., editor_in_visual_tree); dock_text_editors — только вкладки, у которых TextEditor уже в визуальном дереве (часто одна активная): file_path, dock_title, matches_main_window_current_file, document_length, model_content_length, length_matches_model, line_count, bounds, шрифт, кисти, effective_*, text_preview ~240 симв. ide_set_ui_theme игнорирует новые корневые ключи.",
+                Description = "Полный снимок темы и лэйаута. Ресурсы: секции как у ide_set_ui_theme + solution_explorer_tree_power + power_island_frame_brushes. Дополнительно: cascade_theme_resolved — все ключи CascadeTheme.*, разрешённые через TryGetResource под actual_theme_variant (solid и linear(...) для градиентов); window_frame — заголовок, client/bounds, extend_client_area*, transparency, фон окна; layout_regions — по именам (RootWindow, MainGrid, DockIslandInner, DocumentsDock, SolutionIslandInner, ChatIslandInner, ChatPanelRoot, BottomPanelShell, ModeBadge, UiModeBloomOverlay, ChatInputBox, TerminalInputBox): bounds, видимость, effective_*, background_brush/border_brush_display (в т.ч. градиенты), corner_radius/box_shadow для Border; dock_open_documents — все открытые вкладки из VM (tab_index, file_path, dock_title, display_title, is_active, is_dirty, model_content_length, model_text_preview ~240 симв., editor_in_visual_tree); dock_text_editors — только вкладки, у которых TextEditor уже в визуальном дереве (часто одна активная): file_path, dock_title, matches_main_window_current_file, document_length, model_content_length, length_matches_model, line_count, bounds, шрифт, кисти, effective_*, text_preview ~240 симв.; top_levels — все открытые окна процесса (role: main|auxiliary|other, window_type, title, position_x/y, client_width/height, window_state, is_active). ide_set_ui_theme игнорирует новые корневые ключи.",
                 InputSchema = Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
             },
             new()
             {
                 Name = "ide_set_ui_theme",
-                Description = "Применить тему UI на лету. Берутся только известные секции (main_window…power_cockpit); игнорируются: _snapshot, solution_explorer_tree_power, power_island_frame_brushes, cascade_theme_resolved, window_frame, layout_regions, dock_open_documents, dock_text_editors. Градиенты рамок островов задаются в App.axaml, не через set.",
+                Description = "Применить тему UI на лету. Берутся только известные секции (main_window…power_cockpit); игнорируются: _snapshot, solution_explorer_tree_power, power_island_frame_brushes, cascade_theme_resolved, window_frame, layout_regions, dock_open_documents, dock_text_editors, top_levels. Градиенты рамок островов задаются в App.axaml, не через set.",
                 InputSchema = Schema(new
                 {
                     type = "object",
@@ -451,7 +451,7 @@ internal static class IdeMcpToolCatalogFull
             new()
             {
                 Name = "ide_get_ui_layout",
-                Description = "Получить дерево элементов UI: тип контрола, имя, видимость, границы (x, y, w, h в пикселях относительно окна), контент (текст/заголовок), дочерние. JSON. Чтобы видеть расположение кнопок, панелей, меню.",
+                Description = "Дерево UI по всем окнам верхнего уровня: JSON с массивом windows — у каждого элемента role (main|auxiliary|other), window_type, title, is_active, root (то же дерево контролов: тип, имя, bounds относительно окна, content, children). Второе окно рабочей области и прочие Window входят в ответ; кнопки/панели главного окна как раньше.",
                 InputSchema = Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
             },
             new()
@@ -546,6 +546,22 @@ internal static class IdeMcpToolCatalogFull
                 {
                     type = "object",
                     properties = new { name = new { type = "string", description = "Имя контрола (опционально; если не задано — элемент под курсором)." } },
+                    required = Array.Empty<string>()
+                })
+            },
+            new()
+            {
+                Name = "ide_capture_window",
+                Description = "Снимок окон IDE в PNG (base64 в JSON). По умолчанию — главное окно; при scope=all — все top-level окна (в т.ч. вспомогательные), ответ с полем windows[] и role у каждого. workspace_path — корень workspace для относительного output_path; в output_path можно использовать {n} для нумерации файлов (stem-0.png, stem-1.png, …).",
+                InputSchema = Schema(new
+                {
+                    type = "object",
+                    properties = new
+                    {
+                        scope = new { type = "string", description = "Опционально: all — снять все окна; иначе или пусто — только главное окно." },
+                        workspace_path = new { type = "string", description = "Корень workspace (для разрешения output_path)." },
+                        output_path = new { type = "string", description = "Относительный путь для сохранения PNG; {n} — номер окна при scope=all." }
+                    },
                     required = Array.Empty<string>()
                 })
             },

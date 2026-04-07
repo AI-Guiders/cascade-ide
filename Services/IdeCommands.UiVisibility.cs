@@ -5,8 +5,8 @@ public static partial class IdeCommands
 {
     /// <summary>Передать фокус в редактор (чтобы клавиши/ввод шли в него). returns: text.</summary>
     public const string FocusEditor = "focus_editor";
-    /// <summary>Снимок главного окна IDE (PNG), в ответе base64 PNG; чтобы сохранить файл под workspace, передай оба аргумента. returns: json. args: workspace_path?:string, output_path?:string; example: {"workspace_path":"D:\\\\tmp\\\\ws","output_path":".cascade-ide/ide-window.png"}.</summary>
-    public const string CaptureMainWindow = "capture_main_window";
+    /// <summary>Снимок окон IDE в PNG (по умолчанию главное окно; при scope=all — все top-level, в т.ч. вспомогательные). args: scope?:string, workspace_path?:string, output_path?:string; returns: json. example: {"scope":"all","workspace_path":"D:\\\\tmp\\\\ws","output_path":".cascade-ide/window-{n}.png"}.</summary>
+    public const string CaptureWindow = "capture_window";
     /// <summary>Как меню «Вид → Терминал» (переключатель). returns: text.</summary>
     public const string ToggleTerminal = "toggle_terminal";
     /// <summary>Как меню «Вид → Вывод сборки». returns: text.</summary>

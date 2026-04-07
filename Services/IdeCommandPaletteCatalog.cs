@@ -73,6 +73,7 @@ public static class IdeCommandPaletteCatalog
         add("apply_power_classic_theme", IdeCommands.ApplyPowerClassicTheme, "Тема: Power классическая", "Вид");
         add("open_theme_file_dialog", IdeCommands.OpenThemeFileDialog, "Открыть файл темы…", "Вид");
         add("open_preview_window", IdeCommands.OpenPreviewWindow, "Превью в отдельном окне", "Вид");
+        add("toggle_auxiliary_workspace_window", IdeCommands.ToggleAuxiliaryWorkspaceWindow, "Второе окно рабочей области…", "Вид");
 
         // Сборка
         add("build_solution_ui", IdeCommands.BuildSolutionUi, "Собрать решение (UI)", "Сборка");

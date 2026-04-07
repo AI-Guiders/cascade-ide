@@ -40,6 +40,12 @@ public partial class MainWindowViewModel
     }
 
     [RelayCommand]
+    private void ToggleAuxiliaryWorkspaceWindow()
+    {
+        RequestToggleAuxiliaryWorkspaceWindow?.Invoke();
+    }
+
+    [RelayCommand]
     private async Task ApplyDarkThemeAsync()
     {
         await Services.UiThemeApply.ApplyOnUiThreadAsync(Services.UiThemeApply.GetDarkThemeJson());

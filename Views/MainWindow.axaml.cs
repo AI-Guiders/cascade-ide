@@ -18,7 +18,6 @@ public partial class MainWindow : Window
     private Services.EditorIntelligence? _editorIntelligence;
     private MarkdownPreviewWindow? _previewWindow;
     private ViewModels.MarkdownPreviewWindowViewModel? _previewVm;
-    private IDisposable? _highlightHideTimer;
     private TextEditor? _marginPointerEditor;
     private ViewModels.MainWindowViewModel? _boundMainVm;
     private bool _workspaceEventsAttached;
@@ -48,6 +47,7 @@ public partial class MainWindow : Window
             vm.RequestClose = Close;
             vm.RequestShowAbout = ShowAbout;
             vm.RequestOpenSettings = ShowSettingsWindow;
+            vm.RequestToggleAuxiliaryWorkspaceWindow = ToggleAuxiliaryWorkspaceWindow;
             vm.RequestOpenThemeFile = ShowOpenThemeFileDialogAsync;
             vm.RequestShowMarkdownPreviewWindow = ShowMarkdownPreviewWindow;
             vm.RequestShowMarkdownPreviewForEditor = ShowMarkdownPreviewForEditor;
@@ -55,8 +55,8 @@ public partial class MainWindow : Window
             vm.RequestPickDebugTarget = ShowPickDebugTargetAsync;
             vm.RequestAttachProcessId = ShowAttachProcessIdAsync;
             vm.RequestShowInfoAsync = ShowInfoDialogAsync;
-            vm.CaptureMainWindowForMcpAsync = (ws, rel) => CaptureMainWindowForMcpCoreAsync(ws, rel);
-            vm.GetUiLayoutProvider = () => Services.UiLayoutSnapshot.BuildJson(this);
+            vm.CaptureWindowForMcpAsync = (ws, rel, scope) => CaptureWindowForMcpCoreAsync(ws, rel, scope);
+            vm.GetUiLayoutProvider = () => Services.UiLayoutSnapshot.BuildJsonAllWindows(this);
             vm.GetColorsUnderCursorProvider = () => Services.UiColorsUnderCursor.GetJson(this);
             vm.GetControlAppearanceProvider = (name) => Services.UiControlAppearance.GetJson(this, name);
             vm.SetControlLayoutProvider = (name, json) => Services.UiControlLayoutApply.Apply(this, name, json);
@@ -86,9 +86,11 @@ public partial class MainWindow : Window
             {
                 _boundMainVm.GotoActiveEditorLineColumnRequested -= OnGotoEditorLineColumn;
                 _boundMainVm.PropertyChanged -= OnViewModelPropertyChanged;
-                _boundMainVm.CaptureMainWindowForMcpAsync = null;
+                _boundMainVm.CaptureWindowForMcpAsync = null;
                 _boundMainVm = null;
             }
+
+            CloseAuxiliaryWorkspaceWindowIfOpen();
         }
     }
 }

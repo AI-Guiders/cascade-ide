@@ -6,15 +6,13 @@ using Avalonia.Media.Imaging;
 namespace CascadeIDE.Services;
 
 /// <summary>
-/// Рендер главного окна в PNG (для MCP <c>capture_main_window</c>): то же окно, что у пользователя, без сторонних тулов захвата экрана.
+/// Рендер окна в PNG (для MCP <c>capture_window</c>, в т.ч. все окна при <c>scope=all</c>).
 /// Вызывать только с UI-потока.
 /// </summary>
 public static class IdeWindowScreenshot
 {
-    /// <summary>
-    /// PNG в памяти и размеры в пикселях.
-    /// </summary>
-    public static (byte[] PngBytes, int WidthPx, int HeightPx) CaptureMainWindowPng(Window window)
+    /// <summary>PNG в памяти и размеры в пикселях.</summary>
+    public static (byte[] PngBytes, int WidthPx, int HeightPx) CaptureWindowPng(Window window)
     {
         ArgumentNullException.ThrowIfNull(window);
         var scale = window.RenderScaling;

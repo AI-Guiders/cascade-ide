@@ -7,7 +7,7 @@ public static partial class IdeCommands
     public const string GetUiTheme = "get_ui_theme";
     /// <summary>Применить тему UI из JSON. args: theme:string; returns: text; example: {"theme":"{}"}.</summary>
     public const string SetUiTheme = "set_ui_theme";
-    /// <summary>Дерево UI-элементов (layout) с bounds/visibility/content. returns: json.</summary>
+    /// <summary>Дерево UI по всем окнам верхнего уровня: JSON с массивом windows (role, window_type, title, is_active, root — то же дерево, что раньше для MainWindow). returns: json.</summary>
     public const string GetUiLayout = "get_ui_layout";
     /// <summary>Цвета под курсором (прямые и effective). returns: json.</summary>
     public const string GetColorsUnderCursor = "get_colors_under_cursor";
@@ -23,7 +23,7 @@ public static partial class IdeCommands
     public const string SendKeys = "send_keys";
     /// <summary>Передать фокус контролу (под курсором или по имени). args: name?:string; returns: text; example: {"name":"Editor"}.</summary>
     public const string SetFocus = "set_focus";
-    /// <summary>Подсветить контрол рамкой (под курсором или по имени). args: name?:string; returns: text; example: {"name":"BuildButton"}.</summary>
+    /// <summary>Подсветить контрол рамкой в том окне, где он находится (главное, вспомогательное и т.д.). args: name?:string; returns: text; example: {"name":"BuildButton"}.</summary>
     public const string HighlightControl = "highlight_control";
     /// <summary>Изменить размер панели. args: panel:string, width?:integer, height?:integer; returns: text; example: {"panel":"terminal","height":300}.</summary>
     public const string SetPanelSize = "set_panel_size";

@@ -13,14 +13,16 @@ internal sealed partial class IdeMcpCommandExecutor
             return await Task.FromResult("OK");
         });
 
-        add(Services.IdeCommands.CaptureMainWindow, async (args, _) =>
+        Handler captureWindow = async (args, _) =>
         {
-            if (_vm.CaptureMainWindowForMcpAsync is null)
+            if (_vm.CaptureWindowForMcpAsync is null)
                 return "Error: главное окно не привязано к VM (внутренний снимок недоступен).";
             var ws = McpCommandJsonArgs.String(args, "workspace_path");
             var rel = McpCommandJsonArgs.String(args, "output_path");
-            return await _vm.CaptureMainWindowForMcpAsync(ws, rel).ConfigureAwait(false);
-        });
+            var scope = McpCommandJsonArgs.String(args, "scope");
+            return await _vm.CaptureWindowForMcpAsync(ws, rel, scope).ConfigureAwait(false);
+        };
+        add(Services.IdeCommands.CaptureWindow, captureWindow);
     }
 
     private void RegisterUiVisibilityAndModes(Action<string, Handler> add)
@@ -185,6 +187,12 @@ internal sealed partial class IdeMcpCommandExecutor
         {
             if (_vm.OpenPreviewWindowCommand.CanExecute(null))
                 _vm.OpenPreviewWindowCommand.Execute(null);
+            return "OK";
+        });
+        add(Services.IdeCommands.ToggleAuxiliaryWorkspaceWindow, async (_, _) =>
+        {
+            if (_vm.ToggleAuxiliaryWorkspaceWindowCommand.CanExecute(null))
+                _vm.ToggleAuxiliaryWorkspaceWindowCommand.Execute(null);
             return "OK";
         });
 

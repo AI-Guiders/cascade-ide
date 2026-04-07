@@ -1,0 +1,32 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="560" d:DesignHeight="400"
+        x:Class="CascadeIDE.Views.AuxiliaryWorkspaceWindow"
+        Title="Cascade — второе окно"
+        Width="560" Height="400"
+        MinWidth="320" MinHeight="240"
+        Icon="/Assets/avalonia-logo.ico"
+        Background="{DynamicResource CascadeTheme.MainWindowBackground}">
+
+    <Grid>
+        <DockPanel Margin="20" ZIndex="0">
+            <TextBlock DockPanel.Dock="Top"
+                       Text="Дополнительная рабочая область"
+                       FontSize="18"
+                       FontWeight="SemiBold"
+                       Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                       Margin="0,0,0,12"/>
+            <TextBlock TextWrapping="Wrap"
+                       Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}"
+                       LineHeight="22"
+                       Text="Перетащи это окно на второй монитор. Сюда позже можно будет вынести чат, MFD и другие панели (см. ADR 0017). Сейчас окно — якорь для мультиоконности и снимка MCP top_levels."/>
+        </DockPanel>
+        <!-- Паритет ide_highlight_control с MainWindow: та же рамка поверх клиентской области. -->
+        <Canvas x:Name="AgentHighlightLayer" ZIndex="1000" IsHitTestVisible="False"
+                HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <Border x:Name="AgentHighlightOverlay" IsVisible="False" BorderBrush="#FF6B9D" BorderThickness="2" Background="#10000000"/>
+        </Canvas>
+    </Grid>
+</Window>

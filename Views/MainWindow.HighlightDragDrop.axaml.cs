@@ -1,8 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.Threading;
-using Avalonia.VisualTree;
+using CascadeIDE.Services;
 
 namespace CascadeIDE.Views;
 
@@ -34,52 +33,18 @@ public partial class MainWindow
         Control? control;
         if (!string.IsNullOrWhiteSpace(name))
         {
-            control = Services.UiControlAppearance.FindControlByName(this, name.Trim());
+            control = UiControlAppearance.FindControlByNameAcrossAllWindows(this, name.Trim());
             if (control is null)
                 return $"Control not found: {name}.";
         }
         else
         {
-            var over = (this as IInputRoot)?.PointerOverElement;
-            control = over as Control ?? FindAncestorControl(over as Visual);
+            control = UiAgentHighlight.FindControlUnderCursorAnyWindow(this);
             if (control is null)
                 return "No control under cursor. Specify name from ide_get_ui_layout.";
         }
 
-        var root = this as Visual;
-        if (root is null)
-            return "No visual root.";
-        var topLeft = control.TranslatePoint(new Point(0, 0), root);
-        if (topLeft is not { } pt)
-            return "Could not get control position.";
-        var w = control.Bounds.Width;
-        var h = control.Bounds.Height;
-
-        var overlay = this.FindControl<Border>("AgentHighlightOverlay");
-        if (overlay is null)
-            return "Highlight overlay not found.";
-        Canvas.SetLeft(overlay, pt.X);
-        Canvas.SetTop(overlay, pt.Y);
-        overlay.Width = w;
-        overlay.Height = h;
-        overlay.IsVisible = true;
-
-        _highlightHideTimer?.Dispose();
-        _highlightHideTimer = DispatcherTimer.RunOnce(() =>
-        {
-            overlay.IsVisible = false;
-            _highlightHideTimer = null;
-        }, TimeSpan.FromSeconds(3));
-
-        return "OK";
-    }
-
-    private static Control? FindAncestorControl(Visual? visual)
-    {
-        for (var v = visual?.GetVisualParent(); v is not null; v = v.GetVisualParent())
-            if (v is Control c)
-                return c;
-        return null;
+        return UiAgentHighlight.ShowForControl(control);
     }
 
     private async void OnDocumentTabPointerPressed(object? sender, PointerPressedEventArgs e)

@@ -78,6 +78,7 @@ internal static class UiThemeDeepSnapshot
             }
 
             root["dock_open_documents"] = JsonSerializer.SerializeToNode(BuildDockOpenDocuments(vm, materializedPaths), NodeOptions);
+            root["top_levels"] = JsonSerializer.SerializeToNode(BuildTopLevels(app, mw), NodeOptions);
         }
         else
         {
@@ -85,6 +86,7 @@ internal static class UiThemeDeepSnapshot
             root["layout_regions"] = null;
             root["dock_text_editors"] = null;
             root["dock_open_documents"] = null;
+            root["top_levels"] = null;
         }
     }
 
@@ -136,6 +138,41 @@ internal static class UiThemeDeepSnapshot
             ["actual_theme_variant"] = app.ActualThemeVariant.Key.ToString(),
             ["background_brush"] = bg
         };
+    }
+
+    /// <summary>Все открытые <see cref="Window"/> процесса (главное, вспомогательное, настройки, превью) — для MCP и паритета при мультиоконности (ADR 0017).</summary>
+    private static List<Dictionary<string, object?>> BuildTopLevels(Application app, Window mainWindow)
+    {
+        var list = new List<Dictionary<string, object?>>();
+        if (app.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
+            return list;
+
+        foreach (var w in desktop.Windows)
+        {
+            if (w is not Window win)
+                continue;
+
+            var role = ReferenceEquals(win, mainWindow)
+                ? "main"
+                : win is AuxiliaryWorkspaceWindow
+                    ? "auxiliary"
+                    : "other";
+
+            list.Add(new Dictionary<string, object?>
+            {
+                ["role"] = role,
+                ["window_type"] = win.GetType().Name,
+                ["title"] = win.Title,
+                ["position_x"] = win.Position.X,
+                ["position_y"] = win.Position.Y,
+                ["client_width"] = Math.Round(win.ClientSize.Width, 1),
+                ["client_height"] = Math.Round(win.ClientSize.Height, 1),
+                ["window_state"] = win.WindowState.ToString(),
+                ["is_active"] = win.IsActive
+            });
+        }
+
+        return list;
     }
 
     private static Dictionary<string, Dictionary<string, object?>?> BuildLayoutRegions(TopLevel topLevel)

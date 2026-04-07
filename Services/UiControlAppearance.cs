@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Media.TextFormatting;
@@ -30,7 +31,9 @@ public static class UiControlAppearance
         Control? control;
         if (!string.IsNullOrWhiteSpace(controlName))
         {
-            control = FindControlByName(topLevel, controlName.Trim());
+            control = topLevel is Window mw
+                ? FindControlByNameAcrossAllWindows(mw, controlName)
+                : FindControlByName(topLevel, controlName.Trim());
             if (control is null)
                 return JsonSerializer.Serialize(new { error = "Контрол с именем не найден.", name = controlName }, Options);
         }
@@ -42,7 +45,7 @@ public static class UiControlAppearance
                 return JsonSerializer.Serialize(new { hint = "Нет контрола под курсором. Укажите name из ide_get_ui_layout." }, Options);
         }
 
-        var root = topLevel as Visual;
+        var root = (control.GetVisualRoot() ?? topLevel) as Visual;
         var snapshot = BuildSnapshot(control, root);
         return JsonSerializer.Serialize(snapshot, Options);
     }
@@ -58,6 +61,32 @@ public static class UiControlAppearance
             if (found is not null)
                 return found;
         }
+        return null;
+    }
+
+    /// <summary>
+    /// Поиск по имени во всех окнах процесса: сначала в <paramref name="mainWindow"/>, затем в остальных (вспомогательные окна, настройки, превью).
+    /// Одинаковые имена в разных окнах: побеждает вхождение в главном окне.
+    /// </summary>
+    public static Control? FindControlByNameAcrossAllWindows(Window mainWindow, string name)
+    {
+        var trimmed = name.Trim();
+        var c = FindControlByName(mainWindow, trimmed);
+        if (c is not null)
+            return c;
+
+        if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            foreach (var w in desktop.Windows)
+            {
+                if (w is not Window win || ReferenceEquals(win, mainWindow))
+                    continue;
+                c = FindControlByName(win, trimmed);
+                if (c is not null)
+                    return c;
+            }
+        }
+
         return null;
     }
 

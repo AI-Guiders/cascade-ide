@@ -16,7 +16,9 @@ public static class UiControlClick
         Control? control;
         if (!string.IsNullOrWhiteSpace(controlName))
         {
-            control = UiControlAppearance.FindControlByName(root, controlName.Trim());
+            control = root is Window mw
+                ? UiControlAppearance.FindControlByNameAcrossAllWindows(mw, controlName.Trim())
+                : UiControlAppearance.FindControlByName(root, controlName.Trim());
             if (control is null)
                 return $"Control not found: {controlName}.";
         }

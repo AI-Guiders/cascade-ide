@@ -277,6 +277,7 @@ public static class UiThemeSnapshot
             fallbackNode["layout_regions"] = null;
             fallbackNode["dock_text_editors"] = null;
             fallbackNode["dock_open_documents"] = null;
+            fallbackNode["top_levels"] = null;
         }
 
         return fallbackNode?.ToJsonString(Options) ?? JsonSerializer.Serialize(theme, Options);
