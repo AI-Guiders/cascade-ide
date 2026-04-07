@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -29,6 +30,7 @@ public partial class DockDocumentView : UserControl
     private DispatcherTimer? _diagTipDebounce;
     private Point _lastPointerInTextView;
     private string? _lastTipText;
+    private int _tooltipSeq;
 
     public DockDocumentView()
     {
@@ -226,6 +228,7 @@ public partial class DockDocumentView : UserControl
         if (_editor is not null)
             ToolTip.SetTip(_editor, null);
         _lastTipText = null;
+        _tooltipSeq++;
     }
 
     private void UpdateDiagnosticToolTip()
@@ -237,6 +240,8 @@ public partial class DockDocumentView : UserControl
             ToolTip.SetTip(_editor, null);
             return;
         }
+
+        var seq = ++_tooltipSeq;
 
         var tv = _editor.TextArea.TextView;
         var pos = tv.GetPosition(_lastPointerInTextView);
@@ -264,11 +269,46 @@ public partial class DockDocumentView : UserControl
 
         var strips = _vm.WorkspaceDiagnostics.GetStripsForFile(_docVm.Doc.FilePath);
         var hit = WorkspaceDiagnosticsCoordinator.HitTest(strips, offset);
-        var tip = hit is null ? null : $"{hit.Id}: {hit.Message}";
-        if (string.Equals(tip, _lastTipText, StringComparison.Ordinal))
+        if (hit is not null)
+        {
+            var tip = $"{hit.Id}: {hit.Message}";
+            if (seq != _tooltipSeq)
+                return;
+            if (string.Equals(tip, _lastTipText, StringComparison.Ordinal))
+                return;
+            _lastTipText = tip;
+            ToolTip.SetTip(_editor, tip);
             return;
-        _lastTipText = tip;
-        ToolTip.SetTip(_editor, tip);
+        }
+
+        var path = _docVm.Doc.FilePath;
+        var text = _editor.Document.Text ?? "";
+        var line = pos.Value.Line;
+        var col = pos.Value.Column;
+        _ = Task.Run(() =>
+        {
+            var q = _vm.CSharpLanguage.GetQuickInfo(path, text, line, col);
+            UiScheduler.Default.Post(() =>
+            {
+                if (seq != _tooltipSeq)
+                    return;
+                if (string.IsNullOrEmpty(q))
+                {
+                    if (_lastTipText is not null)
+                    {
+                        ToolTip.SetTip(_editor, null);
+                        _lastTipText = null;
+                    }
+
+                    return;
+                }
+
+                if (string.Equals(q, _lastTipText, StringComparison.Ordinal))
+                    return;
+                _lastTipText = q;
+                ToolTip.SetTip(_editor, q);
+            });
+        });
     }
 
     private void SyncFromVmIfActive()
