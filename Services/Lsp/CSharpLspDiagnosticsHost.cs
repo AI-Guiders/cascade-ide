@@ -9,7 +9,8 @@ using Microsoft.CodeAnalysis;
 namespace CascadeIDE.Services.Lsp;
 
 /// <summary>
-/// Один процесс C# LSP (stdio), <see cref="textDocument/publishDiagnostics"/> → полосы в UI.
+/// Один процесс C# LSP (stdio): <see cref="textDocument/publishDiagnostics"/> → полосы в UI,
+/// <see cref="textDocument/hover"/> → Quick Info в тултипе при активном процессе.
 /// didOpen / didChange (full sync) для открытых .cs.
 /// </summary>
 public sealed class CSharpLspDiagnosticsHost : ILspDiagnosticSource
@@ -172,6 +173,94 @@ public sealed class CSharpLspDiagnosticsHost : ILspDiagnosticSource
         _ = DebouncedSyncAsync(key, filePath, text, cts.Token);
     }
 
+    /// <summary>
+    /// Полная синхронизация текста и <c>textDocument/hover</c> (позиция в редакторе — 1-based line/column).
+    /// Перед запросом буфер отправляется в LSP (без debounce), чтобы подсказка соответствовала открытому тексту.
+    /// </summary>
+    public async Task<string?> RequestHoverAsync(string filePath, string text, int line1, int col1, CancellationToken ct)
+    {
+        if (!IsActive || string.IsNullOrEmpty(filePath) || !filePath.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
+            return null;
+        if (line1 < 1 || col1 < 1)
+            return null;
+
+        await SyncFullTextForRequestAsync(filePath, text, ct).ConfigureAwait(false);
+
+        var uri = PathToFileUri(Path.GetFullPath(filePath));
+        var line0 = line1 - 1;
+        var char0 = col1 - 1;
+
+        var id = Interlocked.Increment(ref _nextRequestId);
+        var tcs = new TaskCompletionSource<JsonDocument?>(TaskCreationOptions.RunContinuationsAsynchronously);
+        _pending[id] = tcs;
+
+        var msg = new JsonObject
+        {
+            ["jsonrpc"] = "2.0",
+            ["id"] = id,
+            ["method"] = "textDocument/hover",
+            ["params"] = new JsonObject
+            {
+                ["textDocument"] = new JsonObject { ["uri"] = uri },
+                ["position"] = new JsonObject { ["line"] = line0, ["character"] = char0 }
+            }
+        };
+
+        try
+        {
+            var bytes = Encoding.UTF8.GetBytes(msg.ToJsonString());
+            if (_processStdIn is null)
+                return null;
+            await LspStdioFraming.WriteMessageAsync(_processStdIn, bytes, ct).ConfigureAwait(false);
+
+            using var doc = await tcs.Task.WaitAsync(TimeSpan.FromSeconds(8), ct).ConfigureAwait(false);
+            return ParseHoverResponse(doc);
+        }
+        catch
+        {
+            _pending.TryRemove(id, out _);
+            return null;
+        }
+    }
+
+    /// <remarks>
+    /// Порядок сообщений с <see cref="EnsureOpened"/> без общей очереди на stdin теоретически может перепутаться;
+    /// на практике после первого debounce-синка состояние стабильно.
+    /// </remarks>
+    private async Task SyncFullTextForRequestAsync(string filePath, string text, CancellationToken ct)
+    {
+        var key = NormalizePath(filePath);
+        _syncedText[key] = text;
+        bool needOpen;
+        lock (_gate)
+        {
+            needOpen = !_openedNormalized.Contains(key);
+            if (needOpen)
+                _openedNormalized.Add(key);
+        }
+
+        if (needOpen)
+            await SendDidOpenAsync(filePath, text, ct).ConfigureAwait(false);
+        else
+            await SendDidChangeFullAsync(filePath, text, ct).ConfigureAwait(false);
+    }
+
+    private static string? ParseHoverResponse(JsonDocument? doc)
+    {
+        if (doc is null)
+            return null;
+        var root = doc.RootElement;
+        if (root.TryGetProperty("error", out _))
+            return null;
+        if (!root.TryGetProperty("result", out var result))
+            return null;
+        if (result.ValueKind == JsonValueKind.Null)
+            return null;
+        if (!result.TryGetProperty("contents", out var contents))
+            return null;
+        return LspHoverContentFormatter.Format(contents);
+    }
+
     private async Task DebouncedSyncAsync(string key, string filePath, string text, CancellationToken ct)
     {
         try
@@ -206,7 +295,8 @@ public sealed class CSharpLspDiagnosticsHost : ILspDiagnosticSource
                 {
                     ["textDocument"] = new JsonObject
                     {
-                        ["synchronization"] = new JsonObject { ["dynamicRegistration"] = false }
+                        ["synchronization"] = new JsonObject { ["dynamicRegistration"] = false },
+                        ["hover"] = new JsonObject { ["dynamicRegistration"] = false }
                     },
                     ["workspace"] = new JsonObject { ["workspaceFolders"] = true }
                 },

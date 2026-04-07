@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -285,9 +286,18 @@ public partial class DockDocumentView : UserControl
         var text = _editor.Document.Text ?? "";
         var line = pos.Value.Line;
         var col = pos.Value.Column;
-        _ = Task.Run(() =>
+        _ = Task.Run(async () =>
         {
-            var q = _vm.CSharpLanguage.GetQuickInfo(path, text, line, col);
+            string? q;
+            try
+            {
+                q = await _vm.GetEditorQuickInfoAsync(path, text, line, col, CancellationToken.None).ConfigureAwait(false);
+            }
+            catch
+            {
+                q = _vm.CSharpLanguage.GetQuickInfo(path, text, line, col);
+            }
+
             UiScheduler.Default.Post(() =>
             {
                 if (seq != _tooltipSeq)

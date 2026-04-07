@@ -1,5 +1,6 @@
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 using Avalonia.Threading;
 using CascadeIDE.Services.Lsp;
 
@@ -100,5 +101,25 @@ public partial class MainWindowViewModel
                     host.EnsureOpened(d.FilePath, d.Content ?? "");
             }
         });
+    }
+
+    /// <summary>Текст Quick Info для тултипа: при активном C# LSP — <c>textDocument/hover</c>, иначе in-process Roslyn.</summary>
+    public async Task<string?> GetEditorQuickInfoAsync(string filePath, string sourceText, int line, int column, CancellationToken ct = default)
+    {
+        if (_csharpLspHost is { IsActive: true })
+        {
+            try
+            {
+                var h = await _csharpLspHost.RequestHoverAsync(filePath, sourceText, line, column, ct).ConfigureAwait(false);
+                if (!string.IsNullOrWhiteSpace(h))
+                    return h.Trim();
+            }
+            catch
+            {
+                // fallback: Roslyn
+            }
+        }
+
+        return CSharpLanguage.GetQuickInfo(filePath, sourceText, line, column, ct);
     }
 }
