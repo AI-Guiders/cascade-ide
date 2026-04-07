@@ -12,7 +12,11 @@ public partial class MainWindowViewModel
         OnPropertyChanged(nameof(EditorTextGroup3));
     }
 
-    partial void OnCurrentFilePathChanged(string? value) => RefreshComplexityBadgeFromCurrentFile();
+    partial void OnCurrentFilePathChanged(string? value)
+    {
+        RefreshComplexityBadgeFromCurrentFile();
+        RefreshEditorHudBannerFromDiagnostics();
+    }
 
     /// <summary>Прокси «сложности» для task cockpit: число строк текущего файла на диске (при переключении документа).</summary>
     private void RefreshComplexityBadgeFromCurrentFile()

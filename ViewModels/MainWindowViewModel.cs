@@ -117,6 +117,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         ProblemsPanel = new ProblemsPanelViewModel(NavigateToProblemFromList);
         _workspaceDiagnostics = new Services.WorkspaceDiagnosticsCoordinator(_csharpLanguageService, ProblemsPanel);
         _workspaceDiagnostics.Attach(this);
+        _workspaceDiagnostics.DiagnosticsChanged += OnWorkspaceDiagnosticsChangedForHud;
 
         _csharpLspProvider = string.IsNullOrEmpty(_settings.CSharpLspProvider)
             ? CSharpLspProviderIds.ParseOnly
