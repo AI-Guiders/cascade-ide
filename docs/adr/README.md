@@ -28,6 +28,8 @@
 | [0018](0018-ide-commands-canonical-xml-documentation.md) | Каноничные XML-доки для `IdeCommands` и ProtocolDocGen (вместо мини-языка только в summary) | Proposed |
 | [0019](0019-shared-git-core-ide-and-git-mcp.md) | Общий Git Core для Cascade IDE и git-mcp (паритет логики, прецедент agent-notes-core) | Accepted |
 | [0020](0020-agent-reasoning-visibility-and-provider-limits.md) | Видимость рассуждения агента: слои (ответ, трасс, опциональный лог), честные ограничения провайдеров LLM | Proposed |
+| [0021](0021-pfd-mfd-cockpit-attention-model.md) | PFD / MFD — модель внимания кокпита Cascade IDE | Proposed |
+| [0022](0022-mfd-visual-design-surface-axaml-blazor.md) | Визуальная поверхность разработки UI (AXAML / Blazor), ориентир WinForms, размещение на MFD | Proposed |
 
 ## Соглашения
 

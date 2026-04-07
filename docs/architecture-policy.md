@@ -35,6 +35,8 @@
 | Реестр `IdeCommands`: каноничные XML-доки (`summary` / `param` / `returns` / `example`) для ProtocolDocGen; миграция с мини-языка в summary | [0018](adr/0018-ide-commands-canonical-xml-documentation.md) (Proposed) |
 | Git: общая библиотека логики для встроенных `ide_git_*` и отдельного git-mcp; паритет семантики | [0019](adr/0019-shared-git-core-ide-and-git-mcp.md) (Accepted) |
 | Агент: слои видимости рассуждения (ответ, трасс инструментов, опционально сырой лог); ограничения API провайдеров — явно, без имитации «полного мыслительного процесса» | [0020](adr/0020-agent-reasoning-visibility-and-provider-limits.md) (Proposed) |
+| PFD / MFD / лобовое / EICAS / HUD — модель внимания кокпита | [0021](adr/0021-pfd-mfd-cockpit-attention-model.md) (Proposed) |
+| Визуальная поверхность UI (AXAML / Blazor): превью и дизайн-тайм на MFD / втором мониторе; не цель Blend | [0022](adr/0022-mfd-visual-design-surface-axaml-blazor.md) (Proposed) |
 
 Полный индекс: [docs/adr/README.md](adr/README.md).
 
@@ -68,4 +70,5 @@
 - **v1.12** — добавлен [0019](adr/0019-shared-git-core-ide-and-git-mcp.md) (общий Git Core для IDE и git-mcp; Proposed).  
 - **v1.13** — [0019](adr/0019-shared-git-core-ide-and-git-mcp.md) принят (Accepted); реализация `GitMcp.Core` в meta-repo `open`, паритет argv для IDE и git-mcp.  
 - **v1.14** — добавлен [0020](adr/0020-agent-reasoning-visibility-and-provider-limits.md) (видимость рассуждения агента: слои L0–L2, честные ограничения провайдеров LLM; Proposed).  
+- **v1.15** — в таблицу ADR добавлены [0021](adr/0021-pfd-mfd-cockpit-attention-model.md) (модель внимания PFD/MFD) и [0022](adr/0022-mfd-visual-design-surface-axaml-blazor.md) (визуальная поверхность AXAML/Blazor на MFD; Proposed).  
 - Изменения направления — отдельным коммитом: обновление этого файла и при необходимости новый ADR в [docs/adr/README.md](adr/README.md).
