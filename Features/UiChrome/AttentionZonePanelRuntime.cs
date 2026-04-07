@@ -17,7 +17,7 @@ public static class AttentionZonePanelRuntime
         b.Add(AttentionPanelIds.ChatPanel, AttentionZone.Mfd);
         b.Add(AttentionPanelIds.Git, AttentionZone.Mfd);
         b.Add(AttentionPanelIds.TerminalDock, AttentionZone.Mfd);
-        b.Add(AttentionPanelIds.Editor, AttentionZone.Frontal);
+        b.Add(AttentionPanelIds.Editor, AttentionZone.Forward);
         return b.ToImmutable();
     }
 

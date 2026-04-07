@@ -16,10 +16,10 @@ public sealed class AttentionZoneContainerTests
     }
 
     [Fact]
-    public void Frontal_zone_uses_frontal_class()
+    public void Forward_zone_uses_forward_class()
     {
-        var c = new AttentionZoneContainer { Zone = AttentionZone.Frontal };
-        Assert.Contains("attention-zone-frontal", c.Classes);
+        var c = new AttentionZoneContainer { Zone = AttentionZone.Forward };
+        Assert.Contains("attention-zone-forward", c.Classes);
     }
 
     [Fact]

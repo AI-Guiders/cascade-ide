@@ -19,7 +19,7 @@ public sealed class AttentionZoneContainer : ContentControl
         ZoneProperty.Changed.AddClassHandler<AttentionZoneContainer>((c, _) => c.SyncZoneClasses());
     }
 
-    /// <summary>Начальная зона <see cref="AttentionZone.Frontal"/> не даёт <c>ZoneProperty.Changed</c>; без синхронизации классы пусты до логического дерева.</summary>
+    /// <summary>Начальная зона <see cref="AttentionZone.Forward"/> не даёт <c>ZoneProperty.Changed</c>; без синхронизации классы пусты до логического дерева.</summary>
     public AttentionZoneContainer() => SyncZoneClasses();
 
     public AttentionZone Zone
@@ -51,9 +51,9 @@ public sealed class AttentionZoneContainer : ContentControl
             case AttentionZone.Hud:
                 Classes.Add("attention-layer-hud");
                 return;
-            case AttentionZone.Frontal:
+            case AttentionZone.Forward:
                 Classes.Add("attention-zone");
-                Classes.Add("attention-zone-frontal");
+                Classes.Add("attention-zone-forward");
                 return;
             case AttentionZone.Pfd:
                 Classes.Add("attention-zone");
@@ -65,7 +65,7 @@ public sealed class AttentionZoneContainer : ContentControl
                 return;
             default:
                 Classes.Add("attention-zone");
-                Classes.Add("attention-zone-frontal");
+                Classes.Add("attention-zone-forward");
                 return;
         }
     }
@@ -73,7 +73,7 @@ public sealed class AttentionZoneContainer : ContentControl
     private static readonly string[] ZoneClassTokens =
     [
         "attention-zone",
-        "attention-zone-frontal",
+        "attention-zone-forward",
         "attention-zone-pfd",
         "attention-zone-mfd",
         "attention-channel-eicas",

@@ -6,7 +6,7 @@ namespace CascadeIDE.Tests;
 public sealed class AttentionZoneTests
 {
     [Theory]
-    [InlineData("frontal", AttentionZone.Frontal)]
+    [InlineData("forward", AttentionZone.Forward)]
     [InlineData("pfd", AttentionZone.Pfd)]
     [InlineData("mfd", AttentionZone.Mfd)]
     [InlineData("eicas", AttentionZone.Eicas)]
@@ -23,7 +23,7 @@ public sealed class AttentionZoneTests
     {
         Assert.False(AttentionZoneExtensions.TryParseCanonicalId(null, out _));
         Assert.False(AttentionZoneExtensions.TryParseCanonicalId("", out _));
-        Assert.False(AttentionZoneExtensions.TryParseCanonicalId("Frontal", out _));
+        Assert.False(AttentionZoneExtensions.TryParseCanonicalId("Forward", out _));
         Assert.False(AttentionZoneExtensions.TryParseCanonicalId("PFD", out _));
         Assert.False(AttentionZoneExtensions.TryParseCanonicalId(" primary ", out _));
     }
@@ -42,7 +42,7 @@ public sealed class AttentionZoneTests
     [Fact]
     public void Spatial_anchor_flags_match_adr()
     {
-        Assert.True(AttentionZone.Frontal.IsSpatialAnchor());
+        Assert.True(AttentionZone.Forward.IsSpatialAnchor());
         Assert.True(AttentionZone.Pfd.IsSpatialAnchor());
         Assert.True(AttentionZone.Mfd.IsSpatialAnchor());
         Assert.False(AttentionZone.Eicas.IsSpatialAnchor());
@@ -56,6 +56,6 @@ public sealed class AttentionZoneTests
         Assert.False(AttentionZone.Pfd.IsAlertingChannel());
 
         Assert.True(AttentionZone.Hud.IsHudLayer());
-        Assert.False(AttentionZone.Frontal.IsHudLayer());
+        Assert.False(AttentionZone.Forward.IsHudLayer());
     }
 }

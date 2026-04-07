@@ -91,7 +91,7 @@ public partial class MainWindowViewModel
             ? Capabilities.TelemetryMainColumnSpan
             : 5;
 
-    /// <summary>Чат в одной строке с PFD/Frontal; MFD не пересекает нижнюю строку MainGrid.</summary>
+    /// <summary>Чат в одной строке с PFD/Forward; MFD не пересекает нижнюю строку MainGrid.</summary>
     public int ChatPanelMainGridRowSpan => 1;
 
     public string TelemetryButtonText => IsTerminalVisible ? "Telemetry: on" : "Show telemetry";

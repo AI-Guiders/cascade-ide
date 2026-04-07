@@ -118,18 +118,18 @@
             <Setter Property="CornerRadius" Value="6"/>
             <Setter Property="Padding" Value="8"/>
         </Style>
-        <!-- Визуальные якоря PFD | Frontal | MFD (отладка раскладки; классы задаёт AttentionZoneContainer). -->
+        <!-- Визуальные якоря PFD | Forward | MFD (отладка раскладки; классы задаёт AttentionZoneContainer). -->
         <Style Selector="chrome|AttentionZoneContainer.attention-zone-pfd">
             <Setter Property="BorderThickness" Value="2"/>
             <Setter Property="BorderBrush" Value="#00ACC1"/>
             <Setter Property="Background" Value="#1400ACC1"/>
             <Setter Property="ToolTip.Tip" Value="Якорь: PFD"/>
         </Style>
-        <Style Selector="chrome|AttentionZoneContainer.attention-zone-frontal">
+        <Style Selector="chrome|AttentionZoneContainer.attention-zone-forward">
             <Setter Property="BorderThickness" Value="2"/>
             <Setter Property="BorderBrush" Value="#FFB300"/>
             <Setter Property="Background" Value="#18FFB300"/>
-            <Setter Property="ToolTip.Tip" Value="Якорь: Frontal"/>
+            <Setter Property="ToolTip.Tip" Value="Якорь: Forward"/>
         </Style>
         <Style Selector="chrome|AttentionZoneContainer.attention-zone-mfd">
             <Setter Property="BorderThickness" Value="2"/>
@@ -232,7 +232,7 @@
             </MenuItem>
         </Menu>
 
-        <!-- Строка 3 — рабочая область (PFD | Frontal | MFD). Зона MFD — MfdShellView: вкладки WORKSPACE/чат/терминал/… и полоса EICAS сверху. -->
+        <!-- Строка 3 — рабочая область (PFD | Forward | MFD). Зона MFD — MfdShellView: вкладки WORKSPACE/чат/терминал/… и полоса EICAS сверху. -->
         <Grid x:Name="MainGrid" ColumnDefinitions="220,4,*,4,340">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -252,8 +252,8 @@
         </chrome:AttentionZoneContainer>
         <GridSplitter Grid.Row="3" Grid.Column="1" Width="4" ResizeDirection="Columns" Background="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}" IsVisible="{Binding IsSolutionExplorerVisible}"/>
 
-        <!-- Лобовое: редактор (frontal) -->
-        <chrome:AttentionZoneContainer Zone="Frontal" Grid.Row="3" Grid.Column="2">
+        <!-- Лобовое: редактор (forward) -->
+        <chrome:AttentionZoneContainer Zone="Forward" Grid.Row="3" Grid.Column="2">
             <views:DocumentsDockView />
         </chrome:AttentionZoneContainer>
         <GridSplitter Grid.Row="3" Grid.Column="3"
