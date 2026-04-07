@@ -7,6 +7,7 @@
         xmlns:ae="using:AvaloniaEdit"
         xmlns:md="using:Markdown.Avalonia"
         xmlns:views="using:CascadeIDE.Views"
+        xmlns:chrome="using:CascadeIDE.Features.UiChrome"
         xmlns:lang="using:CascadeIDE.Lang"
         xmlns:dock="clr-namespace:Dock.Avalonia.Controls;assembly=Dock.Avalonia"
         xmlns:Ease="using:Avalonia.Animation.Easings"
@@ -117,6 +118,25 @@
             <Setter Property="CornerRadius" Value="6"/>
             <Setter Property="Padding" Value="8"/>
         </Style>
+        <!-- Визуальные якоря PFD | Frontal | MFD (отладка раскладки; классы задаёт AttentionZoneContainer). -->
+        <Style Selector="chrome|AttentionZoneContainer.attention-zone-pfd">
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="BorderBrush" Value="#00ACC1"/>
+            <Setter Property="Background" Value="#1400ACC1"/>
+            <Setter Property="ToolTip.Tip" Value="Якорь: PFD"/>
+        </Style>
+        <Style Selector="chrome|AttentionZoneContainer.attention-zone-frontal">
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="BorderBrush" Value="#FFB300"/>
+            <Setter Property="Background" Value="#18FFB300"/>
+            <Setter Property="ToolTip.Tip" Value="Якорь: Frontal"/>
+        </Style>
+        <Style Selector="chrome|AttentionZoneContainer.attention-zone-mfd">
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="BorderBrush" Value="#7E57C2"/>
+            <Setter Property="Background" Value="#147E57C2"/>
+            <Setter Property="ToolTip.Tip" Value="Якорь: MFD"/>
+        </Style>
     </Window.Styles>
 
     <Window.KeyBindings>
@@ -212,16 +232,13 @@
             </MenuItem>
         </Menu>
 
-        <!-- Редактор (2*) и низ (*): сплиттер между ними — иначе низ только Auto по контенту, «увеличить» док нельзя.
-             Высоты строк 3–5: MainGridRowHeights → Services/MainGridRowHeightSet.cs; инвалидация — MainWindowViewModel.LayoutNotifications.cs. -->
+        <!-- Строка 3 — рабочая область (PFD | Frontal | MFD). Зона MFD — MfdShellView: вкладки WORKSPACE/чат/терминал/… и полоса EICAS сверху. -->
         <Grid x:Name="MainGrid" ColumnDefinitions="220,4,*,4,340">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="{Binding MainGridRowHeights.Workspace}"/>
-            <RowDefinition Height="{Binding MainGridRowHeights.BottomSplitter}"/>
-            <RowDefinition Height="{Binding MainGridRowHeights.BottomPanel}"/>
         </Grid.RowDefinitions>
         <!-- Подсказка при работе как MCP-сервер -->
         <views:McpBannerView Grid.Row="0" Grid.ColumnSpan="5"/>
@@ -229,41 +246,27 @@
 
         <views:TaskCockpitView Grid.Row="2" Grid.ColumnSpan="5"/>
 
-        <!-- Solution tree (скрываемый) -->
-        <views:SolutionExplorerView Grid.Row="3" Grid.Column="0"/>
+        <!-- PFD: обозреватель и контекст workspace (ADR 0021, канон id pfd) -->
+        <chrome:AttentionZoneContainer Zone="Pfd" Grid.Row="3" Grid.Column="0">
+            <views:SolutionExplorerView />
+        </chrome:AttentionZoneContainer>
         <GridSplitter Grid.Row="3" Grid.Column="1" Width="4" ResizeDirection="Columns" Background="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}" IsVisible="{Binding IsSolutionExplorerVisible}"/>
 
-        <!-- Editor / Documents (Dock MDI, single window; no floating) -->
-        <views:DocumentsDockView Grid.Row="3" Grid.Column="2"/>
+        <!-- Лобовое: редактор (frontal) -->
+        <chrome:AttentionZoneContainer Zone="Frontal" Grid.Row="3" Grid.Column="2">
+            <views:DocumentsDockView />
+        </chrome:AttentionZoneContainer>
         <GridSplitter Grid.Row="3" Grid.Column="3"
                       Grid.RowSpan="{Binding ChatPanelMainGridRowSpan}"
                       Width="4" ResizeDirection="Columns" Background="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"
                       IsVisible="{Binding IsChatPanelColumnVisible}"/>
 
-        <!-- Chat: в Power — RowSpan 2 (рядом с полосой телеметрии только под левым+центром, по концепту). Свёрнут — колонка 0 px, панель скрыта. -->
-        <views:ChatPanelView Grid.Row="3" Grid.Column="4" Grid.RowSpan="{Binding ChatPanelMainGridRowSpan}"
-                             IsVisible="{Binding IsChatPanelColumnVisible}"/>
-
-        <GridSplitter Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="5"
-                      Height="6"
-                      ResizeDirection="Rows"
-                      Background="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"
-                      IsVisible="{Binding ShowWorkspaceBottomChrome}"/>
-        <!-- Телеметрия + док: внутренний сплиттер между полосой WORKSPACE и вкладками терминала/сборки. -->
-        <Grid Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="5" RowDefinitions="Auto,6,*" MinHeight="160"
-              IsVisible="{Binding ShowWorkspaceBottomChrome}">
-            <views:WorkspaceChromeBandView Grid.Row="0"
-                                           IsVisible="{Binding ShowWorkspaceChromeBand}"/>
-            <GridSplitter Grid.Row="1"
-                          Height="6"
-                          ResizeDirection="Rows"
-                          Background="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"
-                          IsVisible="{Binding ShowWorkspaceChromeBand}"/>
-            <!-- Явный DC с окна: корень BottomPanelView (Classes.power) всегда на MainWindowViewModel -->
-            <views:BottomPanelView Grid.Row="2"
-                                   DataContext="{Binding DataContext, ElementName=RootWindow}"/>
-        </Grid>
-        <!-- Bloom только над task bar + рабочей областью (строки 2–3); не закрывать низ (сплиттер + телеметрия + док). -->
+        <!-- MFD: одна оболочка вкладок — WORKSPACE / чат / терминал / сборка / … (ADR 0021), без дублирования телеметрии и чата над нижним доком. -->
+        <chrome:AttentionZoneContainer Zone="Mfd" Grid.Row="3" Grid.Column="4" Grid.RowSpan="{Binding ChatPanelMainGridRowSpan}"
+                                       IsVisible="{Binding IsChatPanelColumnVisible}">
+            <views:MfdShellView DataContext="{Binding DataContext, ElementName=RootWindow}" MinHeight="0"/>
+        </chrome:AttentionZoneContainer>
+        <!-- Bloom только над task bar + рабочей областью (строки 2–3). -->
         <Border x:Name="UiModeBloomOverlay"
                 Grid.Row="2" Grid.RowSpan="2" Grid.Column="0" Grid.ColumnSpan="5"
                 ZIndex="400"
@@ -281,7 +284,7 @@
             </Border.Transitions>
         </Border>
         <!-- Оверлей подсветки эффективного контрола (ide_highlight_control, как в Comet) -->
-        <Canvas x:Name="AgentHighlightLayer" Grid.Row="0" Grid.RowSpan="6" Grid.Column="0" Grid.ColumnSpan="5" IsHitTestVisible="False" ZIndex="1000">
+        <Canvas x:Name="AgentHighlightLayer" Grid.Row="0" Grid.RowSpan="4" Grid.Column="0" Grid.ColumnSpan="5" IsHitTestVisible="False" ZIndex="1000">
             <Border x:Name="AgentHighlightOverlay" IsVisible="False" BorderBrush="#FF6B9D" BorderThickness="2" Background="#10000000"/>
         </Canvas>
         </Grid>

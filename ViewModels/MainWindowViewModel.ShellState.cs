@@ -34,6 +34,7 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(IsChatPanelColumnVisible))]
     [NotifyPropertyChangedFor(nameof(ShowTaskBar))]
     [NotifyPropertyChangedFor(nameof(ShowTelemetryStrip))]
+    [NotifyPropertyChangedFor(nameof(ShowTelemetryMfdPage))]
     [NotifyPropertyChangedFor(nameof(ShowEicasAlertsBar))]
     [NotifyPropertyChangedFor(nameof(ShowWorkspaceChromeBand))]
     [NotifyPropertyChangedFor(nameof(TelemetryUiSurface))]
@@ -123,9 +124,9 @@ public partial class MainWindowViewModel
 
     public ObservableCollection<FocusPlanItemViewModel> FocusPlanItems { get; } = [];
 
-    /// <summary>0–3: терминал/сборка/problems/Git; 4–5 события/тесты; 6 гипотезы; 7 стек отладки.</summary>
+    /// <summary>MFD TabControl: 0 WORKSPACE, 1 Чат, 2 терминал, 3 сборка, 4 Problems, 5 Git, 6–7 события/тесты, 8 гипотезы, 9 стек отладки.</summary>
     [ObservableProperty]
-    private int _bottomPanelTabIndex;
+    private int _mfdShellTabIndex = MfdShellTabTerminalIndex;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(BuildSolutionCommand))]

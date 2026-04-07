@@ -32,7 +32,7 @@ public partial class MainWindowViewModel
 
         // Один канонический лог — только «Сборка · вывод» (и MCP get_build_output). Терминал не дублируем:
         // в Power переключаем нижнюю панель на эту вкладку, чтобы лог был на глазах без второй копии текста.
-        BottomPanelTabIndex = 1;
+        MfdShellTabIndex = MfdShellTabBuildIndex;
 
         var header = $"Сборка: {solutionPath}\r\n";
         BuildOutputPanel.Set(header);

@@ -3,8 +3,9 @@ using System.Collections.Immutable;
 namespace CascadeIDE.Features.UiChrome;
 
 /// <summary>
-/// Канонические строковые id зон внимания для TOML и API (нижний регистр, латиница).
-/// Семантика: ADR 0021 (docs/adr/0021-pfd-mfd-cockpit-attention-model.md).
+/// Канонические строковые id для TOML и API (нижний регистр, латиница). ADR 0021:
+/// три пространственных якоря (<see cref="Frontal"/>, <see cref="Pfd"/>, <see cref="Mfd"/>),
+/// <see cref="Eicas"/> — <strong>канал</strong> оповещений (не четвёртый якорь-колонка), <see cref="Hud"/> — слой на лобовом.
 /// </summary>
 public static class AttentionZoneIds
 {
@@ -19,7 +20,10 @@ public static class AttentionZoneIds
         ImmutableArray.Create(Frontal, Pfd, Mfd, Eicas, Hud);
 }
 
-/// <summary>Семантическая зона внимания (соответствует <see cref="AttentionZoneIds"/>).</summary>
+/// <summary>
+/// Роль в модели внимания ADR 0021 (соответствует <see cref="AttentionZoneIds"/>).
+/// «Зона» в продуктовом смысле — про три якоря; <see cref="Eicas"/> — канал, не зона-якорь.
+/// </summary>
 public enum AttentionZone
 {
     /// <summary>Лобовое: редактор.</summary>
@@ -31,7 +35,7 @@ public enum AttentionZone
     /// <summary>MFD: вторичные инструменты.</summary>
     Mfd,
 
-    /// <summary>EICAS: канал оповещений (не якорь-колонка в том же смысле, что PFD/MFD).</summary>
+    /// <summary>EICAS/CAS: канал оповещений W/C/A — не четвёртый якорь рядом с PFD/MFD (ADR §5).</summary>
     Eicas,
 
     /// <summary>HUD: слой внутри лобового.</summary>

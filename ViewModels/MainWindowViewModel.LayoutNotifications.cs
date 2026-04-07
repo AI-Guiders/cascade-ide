@@ -5,20 +5,13 @@ namespace CascadeIDE.ViewModels;
 /// <summary>Инвалидация производных высот <c>MainGrid</c> без длинных цепочек <c>NotifyPropertyChangedFor</c> в ShellState.</summary>
 public partial class MainWindowViewModel
 {
-    /// <summary>Снимок высот нижней зоны для привязок строк Grid; обновляется при изменении флагов, влияющих на <see cref="MainWindowViewModel.ShowWorkspaceBottomChrome"/>.</summary>
+    /// <summary>Снимок высот строк MainGrid: нижний док перенесён в MFD — строки «сплиттер + низ» у корневой сетки не используются.</summary>
     public MainGridRowHeightSet MainGridRowHeights =>
-        MainGridRowHeightSet.ForWorkspaceBottomChrome(ShowWorkspaceBottomChrome);
+        MainGridRowHeightSet.ForWorkspaceBottomChrome(false);
 
     protected override void OnPropertyChanged(PropertyChangedEventArgs e)
     {
         base.OnPropertyChanged(e);
-        if (e.PropertyName is nameof(ShowWorkspaceBottomChrome)
-            or nameof(IsBottomPanelVisible)
-            or nameof(ShowTelemetryStrip))
-        {
-            OnPropertyChanged(nameof(MainGridRowHeights));
-        }
-
         if (e.PropertyName is nameof(TelemetryBuildText)
             or nameof(TelemetryTestsText)
             or nameof(TelemetryDebugText)

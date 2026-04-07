@@ -4,3 +4,6 @@ inherits = "Balanced"
 family = "Flight"
 
 main_window_title = "CascadeIDE — Flight (layout lab)"
+
+# Телеметрия работы в колонке MFD отдельной страницей вместо нижней полосы — удобно отлаживать раскладку в этом режиме.
+telemetry_surface = "dedicated_page"

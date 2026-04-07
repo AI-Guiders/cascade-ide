@@ -40,9 +40,9 @@ public partial class MainWindowViewModel
         EditorGroupCount = spec.EditorGroupCount;
         IsInstrumentationDockVisible = spec.InstrumentationDockVisible;
 
-        CoerceBottomPanelTabToVisible();
+        CoerceMfdShellTabToVisible();
         if (spec.SelectTerminalTabWhenTerminalShown && IsTerminalVisible)
-            BottomPanelTabIndex = 0;
+            MfdShellTabIndex = MfdShellTabTerminalIndex;
 
         _ = spec.ThemeSlot switch
         {
@@ -61,36 +61,37 @@ public partial class MainWindowViewModel
         SaveSettingsIfChanged();
     }
 
-    /// <summary>Вкладки 0–7: терминал, сборка, problems, Git, события, тесты, гипотезы (только Debug), стек отладки.</summary>
-    private bool IsBottomPanelTabVisible(int index) => index switch
+    /// <summary>Вкладки MFD: см. <see cref="MfdShellTabWorkspaceIndex"/> … <see cref="MfdShellTabDebugStackIndex"/>.</summary>
+    private bool IsMfdShellTabVisible(int index) => index switch
     {
-        0 => IsTerminalVisible,
-        1 => IsBuildOutputVisible,
-        2 => IsProblemsPanelVisible,
-        3 => IsGitPanelVisible,
-        4 or 5 => InstrumentationTabs,
-        MainWindowViewModel.BottomPanelTabHypothesesIndex => HypothesesTab,
-        MainWindowViewModel.BottomPanelTabDebugStackIndex => InstrumentationTabs,
+        MfdShellTabWorkspaceIndex => ShowTelemetryMfdPage,
+        MfdShellTabChatIndex => true,
+        MfdShellTabTerminalIndex => IsTerminalVisible,
+        MfdShellTabBuildIndex => IsBuildOutputVisible,
+        MfdShellTabProblemsIndex => IsProblemsPanelVisible,
+        MfdShellTabGitIndex => IsGitPanelVisible,
+        MfdShellTabEventsIndex or MfdShellTabTestsIndex or MfdShellTabDebugStackIndex => InstrumentationTabs,
+        MfdShellTabHypothesesIndex => HypothesesTab,
         _ => false,
     };
 
-    private int GetFirstVisibleBottomPanelTabIndex()
+    private int GetFirstVisibleMfdShellTabIndex()
     {
-        for (var i = 0; i <= BottomPanelTabDebugStackIndex; i++)
+        for (var i = 0; i <= MfdShellTabDebugStackIndex; i++)
         {
-            if (IsBottomPanelTabVisible(i))
+            if (IsMfdShellTabVisible(i))
                 return i;
         }
 
-        return 0;
+        return MfdShellTabChatIndex;
     }
 
     /// <summary>Если выбрана скрытая вкладка, TabControl в Avalonia показывает пустую область — переключаем на первую видимую.</summary>
-    private void CoerceBottomPanelTabToVisible()
+    private void CoerceMfdShellTabToVisible()
     {
-        if (IsBottomPanelTabVisible(BottomPanelTabIndex))
+        if (IsMfdShellTabVisible(MfdShellTabIndex))
             return;
-        BottomPanelTabIndex = GetFirstVisibleBottomPanelTabIndex();
+        MfdShellTabIndex = GetFirstVisibleMfdShellTabIndex();
     }
 
     private string GetWorkspacePath() => GetWorkspacePath(Workspace.SolutionPath);

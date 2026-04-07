@@ -4,9 +4,13 @@ using CascadeIDE.ViewModels;
 
 namespace CascadeIDE.Views;
 
-public partial class BottomPanelView : UserControl
+/// <summary>
+/// Зона MFD: одна полоса вкладок (WORKSPACE / чат / терминал / сборка / …), без наслоения отдельного «нижнего дока» под чатом.
+/// Имя Border#BottomPanelShell на корне сохранено для снимков UI / MCP.
+/// </summary>
+public partial class MfdShellView : UserControl
 {
-    public BottomPanelView()
+    public MfdShellView()
     {
         InitializeComponent();
     }

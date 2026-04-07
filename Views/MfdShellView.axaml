@@ -5,16 +5,16 @@
              xmlns:dbg="using:CascadeIDE.Features.Debug"
              xmlns:models="using:CascadeIDE.Models"
              xmlns:views="using:CascadeIDE.Views"
-             x:Class="CascadeIDE.Views.BottomPanelView"
-             x:Name="BottomPanelRoot"
+             x:Class="CascadeIDE.Views.MfdShellView"
+             x:Name="MfdShellRoot"
              Classes.power="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Power}"
              x:DataType="vm:MainWindowViewModel">
     <UserControl.Styles>
         <Style Selector="Border#BottomPanelShell">
             <Setter Property="CornerRadius" Value="0"/>
         </Style>
-        <!-- views|BottomPanelView: корень — этот UserControl; надёжнее, чем только UserControl.power -->
-        <Style Selector="views|BottomPanelView.power Border#BottomPanelShell">
+        <!-- views|MfdShellView: корень — этот UserControl; надёжнее, чем только UserControl.power -->
+        <Style Selector="views|MfdShellView.power Border#BottomPanelShell">
             <Setter Property="CornerRadius" Value="12,12,0,0"/>
             <Setter Property="BoxShadow" Value="0 -8 32 0 #4000C8E8, 0 -2 20 0 #20000000"/>
         </Style>
@@ -27,16 +27,30 @@
             <Setter Property="FontWeight" Value="SemiBold"/>
         </Style>
     </UserControl.Styles>
-    <Border x:Name="BottomPanelShell"
-            IsVisible="{Binding IsBottomPanelVisible}"
-            MinHeight="120"
-            BorderBrush="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"
-            BorderThickness="0,1,0,0"
-            Padding="4"
-            Background="{DynamicResource CascadeTheme.TerminalBackground}">
+    <!-- MFD: одна полоса вкладок — WORKSPACE, чат, терминал, сборка, … (ADR 0021). Полоса EICAS/телеметрии strip — сверху. -->
+    <Grid MinHeight="0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <views:WorkspaceChromeBandView Grid.Row="0"
+                                       IsVisible="{Binding ShowWorkspaceChromeBand}"/>
+        <Border x:Name="BottomPanelShell"
+                Grid.Row="1"
+                MinHeight="120"
+                BorderBrush="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="4"
+                Background="{DynamicResource CascadeTheme.TerminalBackground}">
         <!-- Локально тёмный вариант Fluent для TabControl, чтобы полоска вкладок не ломалась при RequestedThemeVariant=Default + светлая Windows. -->
         <ThemeVariantScope RequestedThemeVariant="Dark">
-            <TabControl SelectedIndex="{Binding BottomPanelTabIndex, Mode=TwoWay}">
+            <TabControl SelectedIndex="{Binding MfdShellTabIndex, Mode=TwoWay}">
+                <TabItem Header="WORKSPACE" IsVisible="{Binding ShowTelemetryMfdPage}">
+                    <views:TelemetryMfdPageView/>
+                </TabItem>
+                <TabItem Header="Чат">
+                    <views:ChatPanelView/>
+                </TabItem>
                 <TabItem Header="Терминал · консоль" IsVisible="{Binding IsTerminalVisible}">
                     <DockPanel>
                         <Border DockPanel.Dock="Top" IsVisible="{Binding TelemetryOnTerminalTab}" Classes="modeCard" Margin="0,0,0,4">
@@ -371,5 +385,6 @@
                 </TabItem>
             </TabControl>
         </ThemeVariantScope>
-    </Border>
+        </Border>
+    </Grid>
 </UserControl>

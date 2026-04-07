@@ -58,9 +58,13 @@ public partial class MainWindowViewModel
     /// <summary>Куда вести телеметрию: нижняя полоса или страница зоны — из capabilities (<c>telemetry_surface</c>).</summary>
     public TelemetryUiSurface TelemetryUiSurface => Capabilities.TelemetrySurface;
 
-    /// <summary>Полоска build/tests/debug/git под редактором — при <c>telemetry_strip</c> и поверхности <c>bottom_strip</c>.</summary>
+    /// <summary>Полоска build/tests/debug/git — при <c>telemetry_strip</c> и <c>bottom_strip</c>; рисуется в <see cref="Views.WorkspaceChromeBandView"/> внутри MFD.</summary>
     public bool ShowTelemetryStrip =>
         Capabilities.TelemetryStripVisible && Capabilities.TelemetrySurface == TelemetryUiSurface.BottomStrip;
+
+    /// <summary>Телеметрия работы в колонке MFD (страница вместо нижней полосы) — при <c>telemetry_strip</c> и <c>telemetry_surface = dedicated_page</c>.</summary>
+    public bool ShowTelemetryMfdPage =>
+        Capabilities.TelemetryStripVisible && Capabilities.TelemetrySurface == TelemetryUiSurface.DedicatedPage;
 
     /// <summary>
     /// Полоса оповещений EICAS v1 (над телеметрией работы). Видно при <c>eicas_alerts_bar</c> и непустом списке (Dark Cockpit).
@@ -75,20 +79,19 @@ public partial class MainWindowViewModel
     /// <summary>Панель инструментов под меню — из capabilities (<c>main_toolbar</c> в TOML).</summary>
     public bool ShowMainToolbar => Capabilities.MainToolbarVisible;
 
-    /// <summary>Нижняя зона (сплиттер + телеметрия + док): скрыть целиком, если нечего показывать.</summary>
+    /// <summary>Зона под чатом в MFD: полоса EICAS/телеметрии и/или док (терминал, сборка, Problems, Git, инструменты).</summary>
     public bool ShowWorkspaceBottomChrome =>
         ShowTelemetryStrip || ShowEicasAlertsBar || IsBottomPanelVisible;
 
     /// <summary>
-    /// В Power полоса телеметрии только под колонками «решение + редактор» (сетка 0–2: дерево, сплиттер, док);
-    /// справа trace/safety тянутся вниз — как в макете Power cockpit.
+    /// Раньше — ширина колонок под полосой телеметрии в полноширинном низу; полоса теперь в MFD. Оставлено для совместимости привязок/снимков.
     /// </summary>
     public int MainWorkspaceTelemetryColumnSpan =>
         UiModeFamily.IsPowerFamily() && ShowTelemetryStrip
             ? Capabilities.TelemetryMainColumnSpan
             : 5;
 
-    /// <summary>Чат в одной строке с редактором; телеметрия и док — в нижней строке MainGrid (после сплиттера).</summary>
+    /// <summary>Чат в одной строке с PFD/Frontal; MFD не пересекает нижнюю строку MainGrid.</summary>
     public int ChatPanelMainGridRowSpan => 1;
 
     public string TelemetryButtonText => IsTerminalVisible ? "Telemetry: on" : "Show telemetry";

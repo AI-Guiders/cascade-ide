@@ -56,7 +56,7 @@ public partial class MainWindowViewModel
         try
         {
             IsInstrumentationDockVisible = true;
-            BottomPanelTabIndex = BottomPanelTabDebugStackIndex;
+            MfdShellTabIndex = MfdShellTabDebugStackIndex;
             _ = await _dapDebug.LaunchAsync(ws, target, netcoredbgPath: null, programArgs: null).ConfigureAwait(false);
         }
         catch (Exception ex)
@@ -89,7 +89,7 @@ public partial class MainWindowViewModel
         try
         {
             IsInstrumentationDockVisible = true;
-            BottomPanelTabIndex = BottomPanelTabDebugStackIndex;
+            MfdShellTabIndex = MfdShellTabDebugStackIndex;
             _ = await _dapDebug.AttachAsync(ws, pid.Value, targetPath: null, netcoredbgPath: null).ConfigureAwait(false);
         }
         catch (Exception ex)

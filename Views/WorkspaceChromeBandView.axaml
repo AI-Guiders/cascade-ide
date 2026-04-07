@@ -7,11 +7,9 @@
     <Grid RowDefinitions="Auto,*">
         <views:EicasAlertsBarView Grid.Row="0"
                                   IsVisible="{Binding ShowEicasAlertsBar}"/>
-        <Grid Grid.Row="1"
-              ColumnDefinitions="220,4,*,4,340"
-              IsVisible="{Binding ShowTelemetryStrip}">
-            <views:TelemetryStripView Grid.Column="0"
-                                      Grid.ColumnSpan="{Binding MainWorkspaceTelemetryColumnSpan}"/>
+        <!-- Полоса телеметрии: раньше выравнивалась по MainGrid; теперь зона — MFD, на всю ширину контейнера. -->
+        <Grid Grid.Row="1" IsVisible="{Binding ShowTelemetryStrip}">
+            <views:TelemetryStripView/>
         </Grid>
     </Grid>
 </UserControl>

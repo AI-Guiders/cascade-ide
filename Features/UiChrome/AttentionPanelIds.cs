@@ -1,7 +1,7 @@
 namespace CascadeIDE.Features.UiChrome;
 
 /// <summary>
-/// Стабильные id поверхностей для ключа в <c>workspace.toml</c> → <see cref="AttentionZone"/> (ADR 0021).
+/// Стабильные id панелей для <c>workspace.toml</c> → привязка к якорям <see cref="AttentionZone"/> (frontal/pfd/mfd; не канал EICAS).
 /// Расширять по мере появления привязок в UI.
 /// </summary>
 public static class AttentionPanelIds

@@ -1,0 +1,102 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CascadeIDE.ViewModels"
+             xmlns:chrome="using:CascadeIDE.Features.UiChrome"
+             x:Class="CascadeIDE.Views.TelemetryMfdPageView"
+             Classes.power="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Power}"
+             x:DataType="vm:MainWindowViewModel">
+    <Border Classes="modeCard"
+            Margin="0,0,0,8"
+            Padding="8,8"
+            BorderBrush="{DynamicResource CascadeTheme.EditorColumnBorderBrush}"
+            BorderThickness="1"
+            CornerRadius="8">
+        <Grid RowDefinitions="Auto,*">
+            <TextBlock Grid.Row="0"
+                       Text="WORKSPACE"
+                       FontSize="10"
+                       FontWeight="SemiBold"
+                       Opacity="0.75"
+                       Margin="0,0,0,6"
+                       Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+            <!-- Balanced / Focus / Debug / AgentChat: вертикальный список сегментов -->
+            <ScrollViewer Grid.Row="1"
+                          MaxHeight="320"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled"
+                          IsVisible="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyNe}, ConverterParameter=Power}">
+                <ItemsControl ItemsSource="{Binding WorkspaceTelemetrySegments}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="chrome:WorkspaceTelemetrySegment">
+                            <Border Classes="modeCard" Padding="8,6" Margin="0,0,0,6">
+                                <TextBlock Text="{Binding LineText}"
+                                           TextWrapping="Wrap"
+                                           Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+            <!-- Power: компактный кокпит + снимок -->
+            <ScrollViewer Grid.Row="1"
+                          MaxHeight="360"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled"
+                          IsVisible="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Power}">
+                <StackPanel Spacing="8">
+                    <ItemsControl ItemsSource="{Binding WorkspaceTelemetrySegments}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="chrome:WorkspaceTelemetrySegment">
+                                <Panel Margin="0,0,0,6">
+                                    <Border IsVisible="{Binding IsBuildSource}"
+                                            Padding="8,6"
+                                            CornerRadius="6"
+                                            Background="{DynamicResource CascadeTheme.PowerCockpitPanelBackground}"
+                                            BorderBrush="{DynamicResource CascadeTheme.PowerNeonAccent}"
+                                            BorderThickness="1">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <Panel VerticalAlignment="Center">
+                                                <TextBlock Text="●" FontSize="12" Foreground="#FF6B8A" IsVisible="{Binding IsBuildRunning}"/>
+                                                <TextBlock Text="●" FontSize="12" Foreground="#2D8A5A" IsVisible="{Binding !IsBuildRunning}"/>
+                                            </Panel>
+                                            <TextBlock Text="{Binding CockpitShort}"
+                                                       FontWeight="Bold"
+                                                       FontSize="12"
+                                                       Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border IsVisible="{Binding !IsBuildSource}"
+                                            Padding="8,6"
+                                            CornerRadius="6"
+                                            Background="{DynamicResource CascadeTheme.PowerCockpitPanelBackground}"
+                                            BorderBrush="{DynamicResource CascadeTheme.PowerNeonBorder}"
+                                            BorderThickness="1">
+                                        <TextBlock Text="{Binding CockpitShort}"
+                                                   TextWrapping="Wrap"
+                                                   FontSize="11"
+                                                   Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
+                                    </Border>
+                                </Panel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <Button Content="Обновить снимок"
+                            Command="{Binding RefreshWorkspaceSnapshotCommand}"
+                            HorizontalAlignment="Left"
+                            Padding="10,4"/>
+                    <TextBox Text="{Binding WorkspaceSnapshotJson, Mode=OneWay}"
+                             IsReadOnly="True"
+                             TextWrapping="Wrap"
+                             FontFamily="Consolas,monospace"
+                             FontSize="10"
+                             MinHeight="48"
+                             MaxHeight="140"
+                             Background="Transparent"
+                             Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"
+                             BorderThickness="1"
+                             BorderBrush="{DynamicResource CascadeTheme.PowerNeonBorder}"/>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </Border>
+</UserControl>

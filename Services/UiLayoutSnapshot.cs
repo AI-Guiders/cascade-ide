@@ -4,6 +4,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.VisualTree;
+using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Views;
 
 namespace CascadeIDE.Services;
@@ -104,7 +105,7 @@ public static class UiLayoutSnapshot
                 children.Add(BuildNode(root, child, depth + 1));
         }
 
-        return new Dictionary<string, object?>
+        var node = new Dictionary<string, object?>
         {
             ["type"] = typeName,
             ["name"] = name ?? "",
@@ -113,6 +114,10 @@ public static class UiLayoutSnapshot
             ["content"] = content,
             ["children"] = children.Count > 0 ? children : null
         };
+        // Канонический id из ADR (в т.ч. eicas — канал, не якорь-колонка).
+        if (visual is AttentionZoneContainer zc)
+            node["attention_zone"] = zc.Zone.ToCanonicalId();
+        return node;
     }
 
     private static string? GetContent(Control? c)

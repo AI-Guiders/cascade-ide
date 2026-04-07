@@ -101,7 +101,7 @@ public partial class MainWindowViewModel
                     combined = combined[^maxLogChars..];
                 InstrumentationPanel.TestResultsOutput = combined;
                 if (InstrumentationTabs)
-                    BottomPanelTabIndex = 5;
+                    MfdShellTabIndex = MfdShellTabTestsIndex;
             });
             return outcome.JsonPayload;
         }

@@ -36,9 +36,9 @@ public partial class MainWindowViewModel
         OnPropertyChanged(nameof(IsBottomPanelVisible));
         SaveSettingsIfChanged();
         if (value)
-            BottomPanelTabIndex = 0;
-        else if (BottomPanelTabIndex == 0)
-            CoerceBottomPanelTabToVisible();
+            MfdShellTabIndex = MfdShellTabTerminalIndex;
+        else if (MfdShellTabIndex == MfdShellTabTerminalIndex)
+            CoerceMfdShellTabToVisible();
     }
 
     partial void OnIsBuildOutputVisibleChanged(bool value)
@@ -46,9 +46,9 @@ public partial class MainWindowViewModel
         OnPropertyChanged(nameof(IsBuildPanelHidden));
         OnPropertyChanged(nameof(IsBottomPanelVisible));
         if (value)
-            BottomPanelTabIndex = 1;
-        else if (BottomPanelTabIndex == 1)
-            CoerceBottomPanelTabToVisible();
+            MfdShellTabIndex = MfdShellTabBuildIndex;
+        else if (MfdShellTabIndex == MfdShellTabBuildIndex)
+            CoerceMfdShellTabToVisible();
     }
 
     partial void OnIsInstrumentationDockVisibleChanged(bool value)
@@ -57,12 +57,12 @@ public partial class MainWindowViewModel
         SaveSettingsIfChanged();
         if (value)
         {
-            BottomPanelTabIndex = 4;
+            MfdShellTabIndex = MfdShellTabEventsIndex;
             return;
         }
 
-        if (BottomPanelTabIndex is >= 4 and <= MainWindowViewModel.BottomPanelTabDebugStackIndex)
-            CoerceBottomPanelTabToVisible();
+        if (MfdShellTabIndex is >= MfdShellTabEventsIndex and <= MainWindowViewModel.MfdShellTabDebugStackIndex)
+            CoerceMfdShellTabToVisible();
     }
 
     partial void OnIsChatPanelExpandedChanged(bool value)
@@ -106,11 +106,11 @@ public partial class MainWindowViewModel
         SaveSettingsIfChanged();
         if (value)
         {
-            BottomPanelTabIndex = 3;
+            MfdShellTabIndex = MfdShellTabGitIndex;
             _ = GitPanel.RefreshGitPanelAsync();
         }
-        else if (BottomPanelTabIndex == 3)
-            CoerceBottomPanelTabToVisible();
+        else if (MfdShellTabIndex == MfdShellTabGitIndex)
+            CoerceMfdShellTabToVisible();
     }
 
     partial void OnSendMessageKeyChanged(string value)

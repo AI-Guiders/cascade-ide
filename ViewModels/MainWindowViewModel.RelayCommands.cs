@@ -118,7 +118,7 @@ public partial class MainWindowViewModel
     {
         IsBuildOutputVisible = !IsBuildOutputVisible;
         if (IsBuildOutputVisible)
-            BottomPanelTabIndex = 1;
+            MfdShellTabIndex = MfdShellTabBuildIndex;
     }
 
     [RelayCommand]
@@ -126,7 +126,7 @@ public partial class MainWindowViewModel
     {
         IsTerminalVisible = !IsTerminalVisible;
         if (IsTerminalVisible)
-            BottomPanelTabIndex = 0;
+            MfdShellTabIndex = MfdShellTabTerminalIndex;
     }
 
     [RelayCommand]
@@ -213,7 +213,7 @@ public partial class MainWindowViewModel
     private void ShowBuildOutputPanel()
     {
         IsBuildOutputVisible = true;
-        BottomPanelTabIndex = 1;
+        MfdShellTabIndex = MfdShellTabBuildIndex;
     }
 
     [RelayCommand]
@@ -223,7 +223,7 @@ public partial class MainWindowViewModel
     private void ShowTerminalPanel()
     {
         IsTerminalVisible = true;
-        BottomPanelTabIndex = 0;
+        MfdShellTabIndex = MfdShellTabTerminalIndex;
     }
 
     [RelayCommand]
