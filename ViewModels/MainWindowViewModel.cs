@@ -127,7 +127,6 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _mcpClientService = new Services.McpClientService(_settings.ExternalMcpServersJson);
         _autonomousAgentService = CreateAutonomousAgentService(_mcpClientService);
         Autonomous = new AutonomousAgentSessionViewModel(_autonomousAgentService, this);
-        Autonomous.PropertyChanged += OnAutonomousSessionPropertyChanged;
         _dapDebug = new Services.IdeDapDebugSession((file, line, stack, vars) =>
         {
             UiScheduler.Default.Post(() =>

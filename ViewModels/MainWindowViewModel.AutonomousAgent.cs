@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using System.Text.Json;
 using CascadeIDE.Features.AutonomousAgent;
 using CascadeIDE.Features.UiChrome;
@@ -8,15 +7,6 @@ namespace CascadeIDE.ViewModels;
 
 public partial class MainWindowViewModel
 {
-    private void OnAutonomousSessionPropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName != nameof(AutonomousAgentSessionViewModel.IsAutonomousRunning))
-            return;
-        EditorHudBannerText = Autonomous.IsAutonomousRunning
-            ? "Автономный агент выполняет шаги…"
-            : null;
-    }
-
     UiModeFamily IAutonomousAgentSessionHost.UiModeFamily => UiModeFamily;
 
     string IAutonomousAgentSessionHost.SafetyLevel
