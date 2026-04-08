@@ -19,7 +19,7 @@
 
 | Сейчас | OutWit.Common.Settings |
 |--------|-------------------------|
-| Один TOML (settings.toml) + один JSON (ai-keys.json) | Один или несколько JSON по scope, формат «группы + entries» |
+| Два TOML в `%LocalAppData%\CascadeIDE\` (`settings.toml`, `ai-keys.toml`) | Один или несколько JSON по scope, формат «группы + entries» |
 | POCO (CascadeIdeSettings, AiKeys) + ModelBase, SaveIfChanged | Контейнеры с AOP, менеджер сам грузит/сохраняет через провайдер |
 | Без DI, Load/Save в сервисах | AddSettings + GetService&lt;IAppSettings&gt;() |
 

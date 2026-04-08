@@ -69,7 +69,7 @@ dotnet new install Avalonia.Templates
 ollama pull qwen2.5-coder:7b
 ```
 
-Выбранная в IDE модель сохраняется в настройках (`%LocalAppData%\CascadeIDE\settings.toml`) и подставляется при следующем запуске. При первом запуске после обновления старый `settings.json` автоматически мигрирует в TOML.
+Выбранная в IDE модель сохраняется в настройках (`%LocalAppData%\CascadeIDE\settings.toml`) и подставляется при следующем запуске.
 
 Команды (после установки Ollama):
 

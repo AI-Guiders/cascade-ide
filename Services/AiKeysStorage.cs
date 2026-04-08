@@ -1,12 +1,11 @@
 using CascadeIDE.Models;
-using OutWit.Common.Json;
 
 namespace CascadeIDE.Services;
 
-/// <summary>Чтение/запись API-ключей в %LocalAppData%\CascadeIDE\ai-keys.json (не коммитить).</summary>
+/// <summary>Чтение/запись API-ключей в %LocalAppData%\CascadeIDE\ai-keys.toml (не коммитить).</summary>
 public static class AiKeysStorage
 {
-    private static string GetPath() => Path.Combine(SettingsService.GetSettingsDirectory(), "ai-keys.json");
+    private static string GetPath() => Path.Combine(SettingsService.GetSettingsDirectory(), "ai-keys.toml");
 
     public static AiKeys Load()
     {
@@ -15,7 +14,8 @@ public static class AiKeysStorage
             var path = GetPath();
             if (!File.Exists(path))
                 return new AiKeys();
-            return File.ReadAllText(path).FromJsonString<AiKeys>() ?? new AiKeys();
+            var toml = File.ReadAllText(path);
+            return CascadeTomlSerializer.Deserialize<AiKeys>(toml) ?? new AiKeys();
         }
         catch
         {
@@ -27,7 +27,8 @@ public static class AiKeysStorage
     {
         try
         {
-            File.WriteAllText(GetPath(), keys.ToJsonString(indented: true));
+            var toml = CascadeTomlSerializer.Serialize(keys);
+            File.WriteAllText(GetPath(), toml);
         }
         catch
         {

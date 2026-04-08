@@ -1,5 +1,4 @@
 using CascadeIDE.Models;
-using Tomlyn;
 
 namespace CascadeIDE.Services;
 
@@ -20,34 +19,12 @@ public static class SettingsService
     {
         try
         {
-            var dir = GetSettingsDirectory();
             var tomlPath = GetSettingsPath();
-            var jsonPath = Path.Combine(dir, "settings.json");
+            if (!File.Exists(tomlPath))
+                return new CascadeIdeSettings();
 
-            if (File.Exists(tomlPath))
-            {
-                var toml = File.ReadAllText(tomlPath);
-                return CascadeTomlSerializer.Deserialize<CascadeIdeSettings>(toml) ?? new CascadeIdeSettings();
-            }
-
-            // Однократная миграция с JSON на TOML
-            if (File.Exists(jsonPath))
-            {
-                try
-                {
-                    var json = File.ReadAllText(jsonPath);
-                    var migrated = System.Text.Json.JsonSerializer.Deserialize<CascadeIdeSettings>(json) ?? new CascadeIdeSettings();
-                    Save(migrated);
-                    File.Delete(jsonPath);
-                    return migrated;
-                }
-                catch
-                {
-                    return new CascadeIdeSettings();
-                }
-            }
-
-            return new CascadeIdeSettings();
+            var toml = File.ReadAllText(tomlPath);
+            return CascadeTomlSerializer.Deserialize<CascadeIdeSettings>(toml) ?? new CascadeIdeSettings();
         }
         catch
         {

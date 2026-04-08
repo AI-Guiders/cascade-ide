@@ -34,6 +34,9 @@
 | [0024](0024-ide-sdk-and-stable-contracts.md) | SDK для CascadeIDE — стабильные контракты для внутреннего расширения и будущих плагинов | Proposed |
 | [0025](0025-sdk-attention-zones-and-capabilities.md) | SDK: привязка capabilities к зонам внимания (PFD/MFD/Forward/EICAS/HUD) | Proposed |
 | [0026](0026-markdown-preview-surfaces-and-placement.md) | Превью Markdown: поверхности и размещение (`workspace.toml`); не смешивать с языковым ADR 0023 | Accepted (частично) |
+| [0027](0027-small-team-focus-vs-public-maturity.md) | Узкая команда (человек + ассистент) vs зрелость «для открытия»: две оси (границы vs очередь) | Accepted |
+| [0028](0028-user-settings-toml-localappdata-and-secrets.md) | Пользовательские настройки: `settings.toml`, `%LocalAppData%\CascadeIDE\`, секреты в `ai-keys.toml` | Accepted |
+| [0029](0029-configuration-toml-canonical-ui-facade.md) | Конфигурация: TOML-first; целостный UI настроек deferred; точечный UI — фасад канона | Accepted |
 
 ## Соглашения
 

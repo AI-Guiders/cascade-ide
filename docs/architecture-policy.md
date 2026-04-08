@@ -41,6 +41,9 @@
 | SDK для IDE: стабильные контракты и capability‑модель для внутреннего расширения; plugin-host остаётся deferred | [0024](adr/0024-ide-sdk-and-stable-contracts.md) (Proposed) |
 | SDK и зоны внимания: канон PFD/MFD/… в метаданных capabilities; overlay презентации без подмены семантики | [0025](adr/0025-sdk-attention-zones-and-capabilities.md) (Proposed) |
 | Превью Markdown: где монтируется виджет (`forward_split` / окно / MFD), ключ в `workspace.toml` | [0026](adr/0026-markdown-preview-surfaces-and-placement.md) (Accepted, частично) |
+| Продуктовый фокус: малая команда vs готовность к открытию — оси «границы/контракты» и «очередь/discoverability» | [0027](adr/0027-small-team-focus-vs-public-maturity.md) (Accepted) |
+| Пользовательские настройки: путь `settings.toml`, TOML/snake_case, секреты в отдельном `ai-keys.toml` | [0028](adr/0028-user-settings-toml-localappdata-and-secrets.md) (Accepted) |
+| Конфигурация: канон на диске (TOML); центр настроек deferred; точечный UI — фасад канона | [0029](adr/0029-configuration-toml-canonical-ui-facade.md) (Accepted) |
 
 Полный индекс: [docs/adr/README.md](adr/README.md).
 
@@ -82,4 +85,14 @@
 - **v1.18** — playbook [attention-zone-panel-playbook-v1](design/attention-zone-panel-playbook-v1.md); в [0025](adr/0025-sdk-attention-zones-and-capabilities.md): `HostAttentionPanelId`, `CapabilityAttentionConsistency`.  
 - **v1.19** — [vertical-slice-attention-capabilities-v1](design/vertical-slice-attention-capabilities-v1.md); регистрация `ui.chrome.surface.solution_explorer` для сквозной проверки.  
 - **v1.20** — добавлен [0026](adr/0026-markdown-preview-surfaces-and-placement.md) (превью Markdown: поверхности и TOML); UX размещения снят с канона в [0023](adr/0023-markdown-diagrams-language-tooling.md) (там — язык и диаграммы).  
+- **v1.21** — добавлен [0027](adr/0027-small-team-focus-vs-public-maturity.md) (узкая команда vs зрелость для открытия: две оси; Proposed).  
+- **v1.22** — [0027](adr/0027-small-team-focus-vs-public-maturity.md) принят (Accepted); минимум discoverability (дока, примеры, ADR) + ссылка на [onboarding-first-run-v1](design/onboarding-first-run-v1.md); триггеры вывода задач оси B из бэклога.  
+- **v1.23** — добавлен [0028](adr/0028-user-settings-toml-localappdata-and-secrets.md) (пользовательский `settings.toml`, `%LocalAppData%\CascadeIDE\`, `ai-keys.json`; отличие от [0010](adr/0010-ui-modes-toml-configuration.md)).  
+- **v1.24** — добавлен [0029](adr/0029-configuration-toml-canonical-ui-facade.md) (TOML-first; UI как фасад; TOML-only допустим).  
+- **v1.25** — [0029](adr/0029-configuration-toml-canonical-ui-facade.md): уточнено — deferred **целостный** UI настроек ([0027](adr/0027-small-team-focus-vs-public-maturity.md)); «фасад» = правило для точечного UI и канона.  
+- **v1.26** — [0029](adr/0029-configuration-toml-canonical-ui-facade.md): мотивация точечного UI vs TOML-only (в т.ч. редкий заход под одну опцию, ACP).  
+- **v1.27** — [0029](adr/0029-configuration-toml-canonical-ui-facade.md): перспектива динамического UI от модели/метаданных; точечный UI = вес кода, осознанно.  
+- **v1.28** — [0028](adr/0028-user-settings-toml-localappdata-and-secrets.md): канон пользовательских настроек — `settings.toml`; переход с прежнего формата считается завершённым.  
+- **v1.29** — [0028](adr/0028-user-settings-toml-localappdata-and-secrets.md): ветка миграции `settings.json` удалена из `SettingsService`; ADR и SETUP обновлены.  
+- **v1.30** — [0028](adr/0028-user-settings-toml-localappdata-and-secrets.md): секреты API — **`ai-keys.toml`** (Tomlyn, как `settings.toml`); `ai-keys.json` не используется.  
 - Изменения направления — отдельным коммитом: обновление этого файла и при необходимости новый ADR в [docs/adr/README.md](adr/README.md).

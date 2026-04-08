@@ -3,7 +3,7 @@ using OutWit.Common.Values;
 
 namespace CascadeIDE.Models;
 
-/// <summary>API-ключи для облачных провайдеров (не хранятся в settings.toml).</summary>
+/// <summary>API-ключи для облачных провайдеров (файл <c>ai-keys.toml</c>, не в <c>settings.toml</c>).</summary>
 public sealed class AiKeys : ModelBase
 {
     public string? AnthropicApiKey { get; set; }
