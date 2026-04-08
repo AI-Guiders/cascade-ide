@@ -6,33 +6,32 @@ using System.Text.Json.Nodes;
 using Avalonia.Threading;
 using Microsoft.CodeAnalysis;
 
+#nullable enable
+
 namespace CascadeIDE.Services.Lsp;
 
 /// <summary>
 /// Один процесс C# LSP (stdio): <see cref="textDocument/publishDiagnostics"/> → полосы в UI,
 /// <see cref="textDocument/hover"/> → Quick Info в тултипе при активном процессе.
 /// didOpen / didChange (full sync) для открытых .cs.
+/// Транспорт и JSON-RPC — <see cref="LspStdioSession"/>.
 /// </summary>
 public sealed class CSharpLspDiagnosticsHost : ILspDiagnosticSource
 {
-    private readonly ConcurrentDictionary<int, TaskCompletionSource<JsonDocument?>> _pending = new();
     private readonly ConcurrentDictionary<string, List<EditorDiagnosticStrip>> _strips = new(StringComparer.OrdinalIgnoreCase);
     private readonly ConcurrentDictionary<string, string> _syncedText = new(StringComparer.OrdinalIgnoreCase);
     private readonly HashSet<string> _openedNormalized = new(StringComparer.OrdinalIgnoreCase);
     private readonly ConcurrentDictionary<string, CancellationTokenSource> _debounceByPath = new(StringComparer.OrdinalIgnoreCase);
     private readonly object _gate = new();
-    private Process? _process;
-    private Stream? _processStdIn;
+    private LspStdioSession? _session;
     private CancellationTokenSource? _runCts;
-    private Task? _readLoop;
-    private int _nextRequestId = 1;
     private int _versionCounter;
     private volatile bool _handshakeDone;
     private bool _disposed;
     private readonly object _diagNotifyLock = new();
     private bool _diagNotifyPosted;
 
-    public bool IsActive => _handshakeDone && _process is { HasExited: false };
+    public bool IsActive => _handshakeDone && _session?.Process is { HasExited: false };
 
     public event Action? DiagnosticsChanged;
 
@@ -40,7 +39,7 @@ public sealed class CSharpLspDiagnosticsHost : ILspDiagnosticSource
     {
         if (string.IsNullOrEmpty(filePath))
             return [];
-        var key = NormalizePath(filePath);
+        var key = LspFileUri.NormalizePath(filePath);
         return _strips.TryGetValue(key, out var list) ? list : [];
     }
 
@@ -90,28 +89,21 @@ public sealed class CSharpLspDiagnosticsHost : ILspDiagnosticSource
         if (proc is null)
             return false;
 
-        _process = proc;
-        _processStdIn = proc.StandardInput.BaseStream;
         _runCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
         var runToken = _runCts.Token;
 
-        _ = Task.Run(() => DrainStdErrAsync(proc.StandardError, runToken), runToken);
-
-        _readLoop = Task.Run(() => ReadLoopAsync(proc.StandardOutput.BaseStream, runToken), runToken);
+        _session = new LspStdioSession(proc, proc.StandardInput.BaseStream, OnLspNotification);
+        _session.StartReadLoop(runToken);
 
         try
         {
-            var rootUri = PathToFileUri(solutionDir);
-            var initId = Interlocked.Increment(ref _nextRequestId);
-            var tcs = new TaskCompletionSource<JsonDocument?>(TaskCreationOptions.RunContinuationsAsynchronously);
-            _pending[initId] = tcs;
-
-            await SendInitializeAsync(initId, rootUri, runToken).ConfigureAwait(false);
+            var rootUri = LspFileUri.PathToFileUri(solutionDir);
+            var initId = _session.AllocateRequestId();
 
             JsonDocument initResult;
             try
             {
-                var doc = await tcs.Task.WaitAsync(TimeSpan.FromSeconds(60), runToken).ConfigureAwait(false);
+                var doc = await SendInitializeAsync(initId, rootUri, runToken).ConfigureAwait(false);
                 if (doc is null)
                     return false;
                 initResult = doc;
@@ -141,11 +133,49 @@ public sealed class CSharpLspDiagnosticsHost : ILspDiagnosticSource
         }
     }
 
+    private void OnLspNotification(string method, JsonElement @params)
+    {
+        if (string.Equals(method, "textDocument/publishDiagnostics", StringComparison.Ordinal))
+            HandlePublishDiagnostics(@params);
+    }
+
+    private async Task<JsonDocument?> SendInitializeAsync(int id, string rootUri, CancellationToken ct)
+    {
+        if (_session is null)
+            return null;
+        var msg = new JsonObject
+        {
+            ["jsonrpc"] = "2.0",
+            ["id"] = id,
+            ["method"] = "initialize",
+            ["params"] = new JsonObject
+            {
+                ["processId"] = Environment.ProcessId,
+                ["clientInfo"] = new JsonObject { ["name"] = "CascadeIDE", ["version"] = "1" },
+                ["rootUri"] = rootUri,
+                ["capabilities"] = new JsonObject
+                {
+                    ["textDocument"] = new JsonObject
+                    {
+                        ["synchronization"] = new JsonObject { ["dynamicRegistration"] = false },
+                        ["hover"] = new JsonObject { ["dynamicRegistration"] = false }
+                    },
+                    ["workspace"] = new JsonObject { ["workspaceFolders"] = true }
+                },
+                ["workspaceFolders"] = new JsonArray
+                {
+                    new JsonObject { ["uri"] = rootUri, ["name"] = "root" }
+                }
+            }
+        };
+        return await _session.SendRequestAsync(msg, id, TimeSpan.FromSeconds(60), ct).ConfigureAwait(false);
+    }
+
     public void EnsureOpened(string filePath, string text)
     {
         if (!IsActive || string.IsNullOrEmpty(filePath) || !filePath.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
             return;
-        var key = NormalizePath(filePath);
+        var key = LspFileUri.NormalizePath(filePath);
         lock (_gate)
         {
             if (!_openedNormalized.Add(key))
@@ -160,7 +190,7 @@ public sealed class CSharpLspDiagnosticsHost : ILspDiagnosticSource
     {
         if (!IsActive || string.IsNullOrEmpty(filePath) || !filePath.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
             return;
-        var key = NormalizePath(filePath);
+        var key = LspFileUri.NormalizePath(filePath);
 
         if (_debounceByPath.TryGetValue(key, out var old))
         {
@@ -183,17 +213,16 @@ public sealed class CSharpLspDiagnosticsHost : ILspDiagnosticSource
             return null;
         if (line1 < 1 || col1 < 1)
             return null;
+        if (_session is null)
+            return null;
 
         await SyncFullTextForRequestAsync(filePath, text, ct).ConfigureAwait(false);
 
-        var uri = PathToFileUri(Path.GetFullPath(filePath));
+        var uri = LspFileUri.PathToFileUri(Path.GetFullPath(filePath));
         var line0 = line1 - 1;
         var char0 = col1 - 1;
 
-        var id = Interlocked.Increment(ref _nextRequestId);
-        var tcs = new TaskCompletionSource<JsonDocument?>(TaskCreationOptions.RunContinuationsAsynchronously);
-        _pending[id] = tcs;
-
+        var id = _session.AllocateRequestId();
         var msg = new JsonObject
         {
             ["jsonrpc"] = "2.0",
@@ -208,17 +237,11 @@ public sealed class CSharpLspDiagnosticsHost : ILspDiagnosticSource
 
         try
         {
-            var bytes = Encoding.UTF8.GetBytes(msg.ToJsonString());
-            if (_processStdIn is null)
-                return null;
-            await LspStdioFraming.WriteMessageAsync(_processStdIn, bytes, ct).ConfigureAwait(false);
-
-            using var doc = await tcs.Task.WaitAsync(TimeSpan.FromSeconds(8), ct).ConfigureAwait(false);
+            using var doc = await _session.SendRequestAsync(msg, id, TimeSpan.FromSeconds(8), ct).ConfigureAwait(false);
             return ParseHoverResponse(doc);
         }
         catch
         {
-            _pending.TryRemove(id, out _);
             return null;
         }
     }
@@ -229,7 +252,7 @@ public sealed class CSharpLspDiagnosticsHost : ILspDiagnosticSource
     /// </remarks>
     private async Task SyncFullTextForRequestAsync(string filePath, string text, CancellationToken ct)
     {
-        var key = NormalizePath(filePath);
+        var key = LspFileUri.NormalizePath(filePath);
         _syncedText[key] = text;
         bool needOpen;
         lock (_gate)
@@ -279,51 +302,20 @@ public sealed class CSharpLspDiagnosticsHost : ILspDiagnosticSource
             await SendDidChangeFullAsync(filePath, text, ct).ConfigureAwait(false);
     }
 
-    private async Task SendInitializeAsync(int id, string rootUri, CancellationToken ct)
-    {
-        var msg = new JsonObject
-        {
-            ["jsonrpc"] = "2.0",
-            ["id"] = id,
-            ["method"] = "initialize",
-            ["params"] = new JsonObject
-            {
-                ["processId"] = Environment.ProcessId,
-                ["clientInfo"] = new JsonObject { ["name"] = "CascadeIDE", ["version"] = "1" },
-                ["rootUri"] = rootUri,
-                ["capabilities"] = new JsonObject
-                {
-                    ["textDocument"] = new JsonObject
-                    {
-                        ["synchronization"] = new JsonObject { ["dynamicRegistration"] = false },
-                        ["hover"] = new JsonObject { ["dynamicRegistration"] = false }
-                    },
-                    ["workspace"] = new JsonObject { ["workspaceFolders"] = true }
-                },
-                ["workspaceFolders"] = new JsonArray
-                {
-                    new JsonObject { ["uri"] = rootUri, ["name"] = "root" }
-                }
-            }
-        };
-        var bytes = Encoding.UTF8.GetBytes(msg.ToJsonString());
-        if (_processStdIn is null)
-            return;
-        await LspStdioFraming.WriteMessageAsync(_processStdIn, bytes, ct).ConfigureAwait(false);
-    }
-
     private async Task SendInitializedNotificationAsync(CancellationToken ct)
     {
+        if (_session is null)
+            return;
         const string payload = """{"jsonrpc":"2.0","method":"initialized","params":{}}""";
         var bytes = Encoding.UTF8.GetBytes(payload);
-        if (_processStdIn is null)
-            return;
-        await LspStdioFraming.WriteMessageAsync(_processStdIn, bytes, ct).ConfigureAwait(false);
+        await _session.SendRawUtf8Async(bytes, ct).ConfigureAwait(false);
     }
 
     private async Task SendDidOpenAsync(string filePath, string text, CancellationToken ct)
     {
-        var uri = PathToFileUri(Path.GetFullPath(filePath));
+        if (_session is null)
+            return;
+        var uri = LspFileUri.PathToFileUri(Path.GetFullPath(filePath));
         var ver = Interlocked.Increment(ref _versionCounter);
         var msg = new JsonObject
         {
@@ -340,15 +332,14 @@ public sealed class CSharpLspDiagnosticsHost : ILspDiagnosticSource
                 }
             }
         };
-        var bytes = Encoding.UTF8.GetBytes(msg.ToJsonString());
-        if (_processStdIn is null)
-            return;
-        await LspStdioFraming.WriteMessageAsync(_processStdIn, bytes, ct).ConfigureAwait(false);
+        await _session.SendEnvelopeAsync(msg, ct).ConfigureAwait(false);
     }
 
     private async Task SendDidChangeFullAsync(string filePath, string text, CancellationToken ct)
     {
-        var uri = PathToFileUri(Path.GetFullPath(filePath));
+        if (_session is null)
+            return;
+        var uri = LspFileUri.PathToFileUri(Path.GetFullPath(filePath));
         var ver = Interlocked.Increment(ref _versionCounter);
         var msg = new JsonObject
         {
@@ -360,77 +351,7 @@ public sealed class CSharpLspDiagnosticsHost : ILspDiagnosticSource
                 ["contentChanges"] = new JsonArray { new JsonObject { ["text"] = text } }
             }
         };
-        var bytes = Encoding.UTF8.GetBytes(msg.ToJsonString());
-        if (_processStdIn is null)
-            return;
-        await LspStdioFraming.WriteMessageAsync(_processStdIn, bytes, ct).ConfigureAwait(false);
-    }
-
-    private async Task ReadLoopAsync(Stream stdout, CancellationToken ct)
-    {
-        try
-        {
-            while (!ct.IsCancellationRequested)
-            {
-                JsonDocument? doc;
-                try
-                {
-                    doc = await LspStdioFraming.ReadMessageAsync(stdout, ct).ConfigureAwait(false);
-                }
-                catch
-                {
-                    break;
-                }
-
-                if (doc is null)
-                    break;
-
-                using (doc)
-                {
-                    var root = doc.RootElement;
-                    if (root.TryGetProperty("id", out var idEl) && idEl.ValueKind == JsonValueKind.Number)
-                    {
-                        var id = idEl.GetInt32();
-                        if (root.TryGetProperty("result", out _))
-                        {
-                            if (_pending.TryRemove(id, out var tcs))
-                            {
-                                var copy = JsonDocument.Parse(root.GetRawText());
-                                tcs.TrySetResult(copy);
-                            }
-
-                            continue;
-                        }
-
-                        if (root.TryGetProperty("error", out var errorEl))
-                        {
-                            if (_pending.TryRemove(id, out var tcs))
-                                tcs.TrySetException(new InvalidOperationException(errorEl.GetRawText()));
-                            continue;
-                        }
-                    }
-
-                    if (root.TryGetProperty("method", out var methodEl))
-                    {
-                        var method = methodEl.GetString();
-                        if (method == "textDocument/publishDiagnostics" && root.TryGetProperty("params", out var p))
-                            HandlePublishDiagnostics(p);
-                    }
-                }
-            }
-        }
-        catch
-        {
-            // ignored
-        }
-        finally
-        {
-            foreach (var kv in _pending)
-            {
-                if (_pending.TryRemove(kv.Key, out var tcs))
-                    tcs.TrySetCanceled();
-            }
-        }
+        await _session.SendEnvelopeAsync(msg, ct).ConfigureAwait(false);
     }
 
     private void HandlePublishDiagnostics(JsonElement @params)
@@ -440,9 +361,9 @@ public sealed class CSharpLspDiagnosticsHost : ILspDiagnosticSource
         var uri = uriEl.GetString();
         if (string.IsNullOrEmpty(uri))
             return;
-        if (!TryUriToPath(uri, out var path))
+        if (!LspFileUri.TryUriToPath(uri, out var path))
             return;
-        var key = NormalizePath(path);
+        var key = LspFileUri.NormalizePath(path);
 
         if (!@params.TryGetProperty("diagnostics", out var arr) || arr.ValueKind != JsonValueKind.Array)
             return;
@@ -595,24 +516,6 @@ public sealed class CSharpLspDiagnosticsHost : ILspDiagnosticSource
         return i;
     }
 
-    private static async Task DrainStdErrAsync(StreamReader err, CancellationToken ct)
-    {
-        try
-        {
-            while (!ct.IsCancellationRequested)
-            {
-                var line = await err.ReadLineAsync(ct).ConfigureAwait(false);
-                if (line is null)
-                    break;
-                Debug.WriteLine("[csharp-lsp stderr] " + line);
-            }
-        }
-        catch
-        {
-            // ignored
-        }
-    }
-
     private void DisposeProcess()
     {
         _handshakeDone = false;
@@ -639,31 +542,9 @@ public sealed class CSharpLspDiagnosticsHost : ILspDiagnosticSource
         }
         catch { }
 
-        try
-        {
-            _processStdIn?.Dispose();
-        }
-        catch { }
+        _session?.Dispose();
+        _session = null;
 
-        _processStdIn = null;
-
-        try
-        {
-            if (_process is { HasExited: false })
-            {
-                _process.Kill(entireProcessTree: true);
-                _process.WaitForExit(2000);
-            }
-        }
-        catch { }
-
-        try
-        {
-            _process?.Dispose();
-        }
-        catch { }
-
-        _process = null;
         _runCts?.Dispose();
         _runCts = null;
     }
@@ -674,31 +555,5 @@ public sealed class CSharpLspDiagnosticsHost : ILspDiagnosticSource
             return;
         _disposed = true;
         DisposeProcess();
-    }
-
-    private static string NormalizePath(string path) =>
-        Path.GetFullPath(path);
-
-    private static string PathToFileUri(string fullPath)
-    {
-        var full = Path.GetFullPath(fullPath);
-        return new Uri(full).AbsoluteUri;
-    }
-
-    private static bool TryUriToPath(string uri, out string path)
-    {
-        path = "";
-        try
-        {
-            var u = new Uri(uri);
-            path = u.LocalPath;
-            if (OperatingSystem.IsWindows() && path.StartsWith('/') && path.Length > 2 && path[2] == ':')
-                path = path.TrimStart('/');
-            return !string.IsNullOrEmpty(path);
-        }
-        catch
-        {
-            return false;
-        }
     }
 }
