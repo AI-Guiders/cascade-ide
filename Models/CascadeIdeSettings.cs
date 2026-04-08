@@ -74,6 +74,17 @@ public sealed class CascadeIdeSettings : ModelBase
     public string CSharpLspArguments { get; set; } = "";
 
     /// <summary>
+    /// Markdown LSP (Marksman): <c>Off</c>, <c>Marksman</c>, <c>Custom</c>. Корень workspace = каталог решения.
+    /// </summary>
+    public string MarkdownLspProvider { get; set; } = "Off";
+
+    /// <summary>Путь или имя exe (пусто у Marksman = <c>marksman</c> в PATH).</summary>
+    public string MarkdownLspExecutable { get; set; } = "";
+
+    /// <summary>Доп. аргументы Markdown LSP.</summary>
+    public string MarkdownLspArguments { get; set; } = "";
+
+    /// <summary>
     /// Рендерить блоки <c>```mermaid</c> / <c>```plantuml</c> в превью Markdown через Kroki (текст диаграммы уходит на сервер).
     /// </summary>
     public bool MarkdownKrokiEnabled { get; set; } = true;
@@ -104,6 +115,9 @@ public sealed class CascadeIdeSettings : ModelBase
             && CSharpLspProvider.Is(o.CSharpLspProvider)
             && CSharpLspExecutable.Is(o.CSharpLspExecutable)
             && CSharpLspArguments.Is(o.CSharpLspArguments)
+            && MarkdownLspProvider.Is(o.MarkdownLspProvider)
+            && MarkdownLspExecutable.Is(o.MarkdownLspExecutable)
+            && MarkdownLspArguments.Is(o.MarkdownLspArguments)
             && MarkdownKrokiEnabled.Is(o.MarkdownKrokiEnabled)
             && MarkdownKrokiBaseUrl.Is(o.MarkdownKrokiBaseUrl);
     }
@@ -131,6 +145,9 @@ public sealed class CascadeIdeSettings : ModelBase
             CSharpLspProvider = CSharpLspProvider,
             CSharpLspExecutable = CSharpLspExecutable,
             CSharpLspArguments = CSharpLspArguments,
+            MarkdownLspProvider = MarkdownLspProvider,
+            MarkdownLspExecutable = MarkdownLspExecutable,
+            MarkdownLspArguments = MarkdownLspArguments,
             MarkdownKrokiEnabled = MarkdownKrokiEnabled,
             MarkdownKrokiBaseUrl = MarkdownKrokiBaseUrl
         };

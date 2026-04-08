@@ -53,6 +53,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private readonly Services.WorkspaceDiagnosticsCoordinator _workspaceDiagnostics;
     private readonly Services.Capabilities.SimpleCapabilityRegistry _capabilities = new();
     private CSharpLspDiagnosticsHost? _csharpLspHost;
+    private MarkdownLspDiagnosticsHost? _markdownLspHost;
     private readonly IdeMcpCommandExecutor _ideMcpExecutor;
     private readonly Services.IdeDapDebugSession _dapDebug;
     private readonly IWorkspaceTelemetryProvider _workspaceTelemetry;
@@ -133,6 +134,11 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             : _settings.CSharpLspProvider;
         _csharpLspExecutable = _settings.CSharpLspExecutable ?? "";
         _csharpLspArguments = _settings.CSharpLspArguments ?? "";
+        _markdownLspProvider = string.IsNullOrEmpty(_settings.MarkdownLspProvider)
+            ? MarkdownLspProviderIds.Off
+            : _settings.MarkdownLspProvider;
+        _markdownLspExecutable = _settings.MarkdownLspExecutable ?? "";
+        _markdownLspArguments = _settings.MarkdownLspArguments ?? "";
 
         _mcpClientService = new Services.McpClientService(_settings.ExternalMcpServersJson);
         _autonomousAgentService = CreateAutonomousAgentService(_mcpClientService);
@@ -359,6 +365,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         if (IsGitPanelVisible)
             _ = GitPanel.RefreshGitPanelAsync();
         _ = RestartCSharpLanguageServerAsync();
+        _ = RestartMarkdownLanguageServerAsync();
         HypothesesPanel.LoadFromWorkspace();
     }
 

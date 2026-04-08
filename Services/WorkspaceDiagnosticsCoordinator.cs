@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
 using System.Collections.Specialized;
-using System.Linq;
 using Avalonia.Threading;
 using CascadeIDE.Services.Lsp;
 using CascadeIDE.ViewModels;
@@ -9,7 +8,8 @@ using Microsoft.CodeAnalysis;
 namespace CascadeIDE.Services;
 
 /// <summary>
-/// Диагностики Roslyn по всем открытым .cs: debounce, кэш по пути, список для панели Problems, событие для перерисовки вкладок.
+/// Диагностики: Roslyn по открытым <c>.cs</c> (без C# LSP), внешний C# LSP, внешний Markdown LSP (Marksman) для <c>*.md</c>;
+/// debounce, кэш, панель Problems, событие для HUD/вкладок.
 /// </summary>
 public sealed class WorkspaceDiagnosticsCoordinator : IDisposable
 {
@@ -23,6 +23,7 @@ public sealed class WorkspaceDiagnosticsCoordinator : IDisposable
 
     private MainWindowViewModel? _vm;
     private CSharpLspDiagnosticsHost? _lspHost;
+    private MarkdownLspDiagnosticsHost? _markdownLspHost;
     private bool _disposed;
 
     public WorkspaceDiagnosticsCoordinator(CSharpLanguageService language, ProblemsPanelViewModel problems)
@@ -75,6 +76,27 @@ public sealed class WorkspaceDiagnosticsCoordinator : IDisposable
         DiagnosticsChanged?.Invoke();
     }
 
+    /// <summary>Подключить Markdown LSP (Marksman) или <c>null</c>.</summary>
+    public void SetMarkdownLspDiagnosticsHost(MarkdownLspDiagnosticsHost? host)
+    {
+        if (ReferenceEquals(_markdownLspHost, host))
+            return;
+        if (_markdownLspHost is not null)
+            _markdownLspHost.DiagnosticsChanged -= OnMarkdownLspHostDiagnosticsChanged;
+        _markdownLspHost = host;
+        if (_markdownLspHost is not null)
+            _markdownLspHost.DiagnosticsChanged += OnMarkdownLspHostDiagnosticsChanged;
+
+        RebuildProblemsList();
+        DiagnosticsChanged?.Invoke();
+    }
+
+    private void OnMarkdownLspHostDiagnosticsChanged()
+    {
+        RebuildProblemsList();
+        DiagnosticsChanged?.Invoke();
+    }
+
     private void OnLspHostDiagnosticsChanged()
     {
         RebuildProblemsList();
@@ -87,6 +109,8 @@ public sealed class WorkspaceDiagnosticsCoordinator : IDisposable
             return [];
         if (_lspHost is { IsActive: true } && filePath.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
             return _lspHost.GetStripsForFile(filePath);
+        if (_markdownLspHost is { IsActive: true } && IsMarkdownPath(filePath))
+            return _markdownLspHost.GetStripsForFile(filePath);
         var key = NormalizePath(filePath);
         lock (_cacheLock)
         {
@@ -173,14 +197,29 @@ public sealed class WorkspaceDiagnosticsCoordinator : IDisposable
 
     private void TrySchedule(string filePath, string text)
     {
-        if (string.IsNullOrEmpty(filePath) || !filePath.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
+        if (string.IsNullOrEmpty(filePath))
             return;
 
-        if (_lspHost is { IsActive: true })
+        if (filePath.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
         {
-            _lspHost.ScheduleDocumentSync(filePath, text);
+            if (_lspHost is { IsActive: true })
+            {
+                _lspHost.ScheduleDocumentSync(filePath, text);
+                return;
+            }
+        }
+        else if (IsMarkdownPath(filePath))
+        {
+            if (_markdownLspHost is { IsActive: true })
+            {
+                _markdownLspHost.ScheduleDocumentSync(filePath, text);
+                return;
+            }
+
             return;
         }
+        else
+            return;
 
         var key = NormalizePath(filePath);
         if (_pending.TryGetValue(key, out var oldCts))
@@ -271,33 +310,41 @@ public sealed class WorkspaceDiagnosticsCoordinator : IDisposable
         if (_vm is null)
             return;
         var rows = new List<ProblemListItem>();
-        lock (_cacheLock)
+        foreach (var doc in _vm.Documents.OpenDocuments)
         {
-            foreach (var doc in _vm.Documents.OpenDocuments)
+            IReadOnlyList<EditorDiagnosticStrip> list;
+            if (doc.FilePath.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
             {
-                if (!doc.FilePath.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
-                    continue;
-                IReadOnlyList<EditorDiagnosticStrip> list;
                 if (_lspHost is { IsActive: true })
                     list = _lspHost.GetStripsForFile(doc.FilePath);
                 else
                 {
-                    var key = NormalizePath(doc.FilePath);
-                    if (!_byPath.TryGetValue(key, out var roslynList))
-                        continue;
-                    list = roslynList;
+                    lock (_cacheLock)
+                    {
+                        if (!_byPath.TryGetValue(NormalizePath(doc.FilePath), out var roslynList))
+                            continue;
+                        list = roslynList;
+                    }
                 }
+            }
+            else if (IsMarkdownPath(doc.FilePath))
+            {
+                if (_markdownLspHost is not { IsActive: true })
+                    continue;
+                list = _markdownLspHost.GetStripsForFile(doc.FilePath);
+            }
+            else
+                continue;
 
-                foreach (var s in list)
-                {
-                    rows.Add(new ProblemListItem(
-                        doc.FilePath,
-                        s.Line1,
-                        s.Column1,
-                        s.Severity == DiagnosticSeverity.Error ? "error" : "warning",
-                        s.Id,
-                        s.Message));
-                }
+            foreach (var s in list)
+            {
+                rows.Add(new ProblemListItem(
+                    doc.FilePath,
+                    s.Line1,
+                    s.Column1,
+                    s.Severity == DiagnosticSeverity.Error ? "error" : "warning",
+                    s.Id,
+                    s.Message));
             }
         }
 
@@ -315,4 +362,8 @@ public sealed class WorkspaceDiagnosticsCoordinator : IDisposable
 
     private static string NormalizePath(string path) =>
         Path.GetFullPath(path);
+
+    private static bool IsMarkdownPath(string filePath) =>
+        filePath.EndsWith(".md", StringComparison.OrdinalIgnoreCase)
+        || filePath.EndsWith(".markdown", StringComparison.OrdinalIgnoreCase);
 }

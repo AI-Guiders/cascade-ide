@@ -94,6 +94,19 @@
                 <TextBox Text="{Binding CSharpLspArguments, Mode=TwoWay}" Watermark="" MinWidth="280"/>
             </StackPanel>
 
+            <TextBlock Text="Markdown LSP" FontWeight="SemiBold" FontSize="16" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" Margin="0,8,0,0"/>
+            <TextBlock Text="Marksman — ссылки и диагностики по *.md в корне workspace (каталог решения). Нужен marksman в PATH или полный путь к exe." Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" TextWrapping="Wrap" FontSize="12"/>
+            <StackPanel Spacing="6">
+                <TextBlock Text="Провайдер:" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+                <ComboBox ItemsSource="{Binding MarkdownLspProviderOptionsList}" SelectedItem="{Binding MarkdownLspProvider}" MinWidth="220"/>
+            </StackPanel>
+            <StackPanel Spacing="6" IsVisible="{Binding IsMarkdownLspProcessSelected}">
+                <TextBlock Text="Исполняемый файл (пусто = marksman в PATH):" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" TextWrapping="Wrap"/>
+                <TextBox Text="{Binding MarkdownLspExecutable, Mode=TwoWay}" Watermark="marksman" MinWidth="280"/>
+                <TextBlock Text="Доп. аргументы:" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+                <TextBox Text="{Binding MarkdownLspArguments, Mode=TwoWay}" Watermark="" MinWidth="280"/>
+            </StackPanel>
+
             <Button x:Name="CloseButton" Content="Закрыть" HorizontalAlignment="Right" MinWidth="100" Margin="0,8,0,0"/>
         </StackPanel>
     </ScrollViewer>

@@ -225,6 +225,9 @@
     <Compile Update="ViewModels\MainWindowViewModel.CSharpLsp.cs">
       <DependentUpon>MainWindowViewModel.cs</DependentUpon>
     </Compile>
+    <Compile Update="ViewModels\MainWindowViewModel.MarkdownLsp.cs">
+      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Compile Update="ViewModels\MainWindowViewModel.CursorAcp.cs">
