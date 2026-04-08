@@ -9,16 +9,14 @@ namespace CascadeIDE.Features.Markdown;
 [ApiStability(ApiStability.Experimental)]
 public sealed class MarkdownCapabilitiesModule : ICascadeFeatureModule
 {
-    public const string ModuleId = "docs.markdown";
-
-    public string Id => ModuleId;
+    public string Id => CapabilityIds.DocsMarkdown.ModuleId;
 
     public void Register(ICapabilityRegistry registry)
     {
         registry.RegisterService(new ServiceCapabilityDescriptor
         {
-            Id = "docs.markdown.diagram_expansion",
-            OwnerModuleId = ModuleId,
+            Id = CapabilityIds.DocsMarkdown.DiagramExpansionService,
+            OwnerModuleId = CapabilityIds.DocsMarkdown.ModuleId,
             Stability = ApiStability.Experimental,
             ContractType = typeof(MarkdownDiagramExpansion),
             ImplementationType = typeof(MarkdownDiagramExpansion),
@@ -27,12 +25,22 @@ public sealed class MarkdownCapabilitiesModule : ICascadeFeatureModule
 
         registry.RegisterCommand(new CommandCapabilityDescriptor
         {
-            Id = "docs.markdown.dump_capabilities",
-            OwnerModuleId = ModuleId,
+            Id = CapabilityIds.DocsMarkdown.DumpCapabilitiesCommand,
+            OwnerModuleId = CapabilityIds.DocsMarkdown.ModuleId,
             Stability = ApiStability.Experimental,
             Title = "Dump capabilities map to file",
             Category = "Debug/Diagnostics",
             Tags = ["debug", "diagnostics"]
+        });
+
+        registry.RegisterCommand(new CommandCapabilityDescriptor
+        {
+            Id = CapabilityIds.DocsMarkdown.ExportExpandedMarkdownCommand,
+            OwnerModuleId = CapabilityIds.DocsMarkdown.ModuleId,
+            Stability = ApiStability.Experimental,
+            Title = "Export expanded Markdown",
+            Category = "Markdown",
+            Tags = ["markdown", "export"]
         });
     }
 }

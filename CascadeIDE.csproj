@@ -21,6 +21,8 @@
   <ItemGroup>
     <Compile Remove="**/obj/**" />
     <Compile Remove="**/bin/**" />
+    <!-- Contracts project lives inside repo; exclude its sources from main app compilation (use ProjectReference). -->
+    <Compile Remove="CascadeIDE.Contracts\**\*.cs" />
     <!-- Внешний субмодуль/вендор: не компилировать в IDE (иначе sandbox с top-level Main перехватывает входную точку). -->
     <Compile Remove="externals\**\*.cs" />
     <Compile Remove="CascadeIDE.Tests\**\*.cs" />
