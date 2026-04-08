@@ -2,7 +2,7 @@
 
 **Статус:** Proposed  
 **Дата:** 2026-04-08  
-**Связь:** [0005](0005-defer-dynamic-plugins-mef.md) (плагины deferred), [0006](0006-presentation-layers-and-feature-slices.md) (границы слоёв/срезов), [0008](0008-mcp-contracts-and-testable-infrastructure.md) (контракты и тестируемая инфраструктура), [0013](0013-command-surface-and-discoverability.md) (поверхность команд), [0019](0019-shared-git-core-ide-and-git-mcp.md) (общий core как прецедент), [0023](0023-markdown-diagrams-language-tooling.md) (внешние инструменты/LSP как контракты).
+**Связь:** [0005](0005-defer-dynamic-plugins-mef.md) (плагины deferred), [0006](0006-presentation-layers-and-feature-slices.md) (границы слоёв/срезов), [0008](0008-mcp-contracts-and-testable-infrastructure.md) (контракты и тестируемая инфраструктура), [0013](0013-command-surface-and-discoverability.md) (поверхность команд), [0019](0019-shared-git-core-ide-and-git-mcp.md) (общий core как прецедент), [0023](0023-markdown-diagrams-language-tooling.md) (внешние инструменты/LSP как контракты), [0025](0025-sdk-attention-zones-and-capabilities.md) (зоны внимания PFD/MFD/… в SDK и capabilities).
 
 ---
 
@@ -46,6 +46,10 @@ SDK в v1 включает:
    На стадии active-dev (далеко до alpha) цель — не “совместимость навсегда”, а дисциплина границ: по умолчанию всё `Experimental`, а `Stable` появляется только там, где команда осознанно хочет опираться на контракт. Ломать `Experimental` можно свободно; ломать `Stable` — осознанно (через ADR/заметку о миграции), SemVer — когда появится продуктовая потребность.
 
 7. **Отложенный plugin-host**: динамическая загрузка плагинов остаётся deferred (см. [0005](0005-defer-dynamic-plugins-mef.md)), но будущий plugin-host обязан подключаться через те же контракты SDK, что и “внутренние” фичи.
+
+### Модель внимания кокпита (PFD / MFD / Forward / EICAS / HUD) и SDK
+
+Семантика зон описана в [0021](0021-pfd-mfd-cockpit-attention-model.md). **Явная привязка UI‑capabilities к зонам внимания на уровне `CascadeIDE.Contracts`** — отдельное решение и поэтапная реализация: [0025](0025-sdk-attention-zones-and-capabilities.md). Так [0024](0024-ide-sdk-and-stable-contracts.md) остаётся про общий SDK, а кокпитная ось не смешивается с registry/plugin‑обсуждением.
 
 ---
 

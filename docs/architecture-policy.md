@@ -39,6 +39,7 @@
 | Визуальная поверхность UI (AXAML / Blazor): превью и дизайн-тайм на MFD / втором мониторе; не цель Blend | [0022](adr/0022-mfd-visual-design-surface-axaml-blazor.md) (Proposed) |
 | Markdown + диаграммы (Mermaid/PlantUML): first-class опыт через LSP и workflow; инъекция LSP в fenced-блоки — отдельная фаза | [0023](adr/0023-markdown-diagrams-language-tooling.md) (Proposed) |
 | SDK для IDE: стабильные контракты и capability‑модель для внутреннего расширения; plugin-host остаётся deferred | [0024](adr/0024-ide-sdk-and-stable-contracts.md) (Proposed) |
+| SDK и зоны внимания: канон PFD/MFD/… в метаданных capabilities; overlay презентации без подмены семантики | [0025](adr/0025-sdk-attention-zones-and-capabilities.md) (Proposed) |
 
 Полный индекс: [docs/adr/README.md](adr/README.md).
 
@@ -73,4 +74,5 @@
 - **v1.13** — [0019](adr/0019-shared-git-core-ide-and-git-mcp.md) принят (Accepted); реализация `GitMcp.Core` в meta-repo `open`, паритет argv для IDE и git-mcp.  
 - **v1.14** — добавлен [0020](adr/0020-agent-reasoning-visibility-and-provider-limits.md) (видимость рассуждения агента: слои L0–L2, честные ограничения провайдеров LLM; Proposed).  
 - **v1.15** — в таблицу ADR добавлены [0021](adr/0021-pfd-mfd-cockpit-attention-model.md) (модель внимания PFD/MFD) и [0022](adr/0022-mfd-visual-design-surface-axaml-blazor.md) (визуальная поверхность AXAML/Blazor на MFD; Proposed).  
+- **v1.16** — добавлен [0025](adr/0025-sdk-attention-zones-and-capabilities.md) (SDK: привязка capabilities к зонам внимания; Proposed).  
 - Изменения направления — отдельным коммитом: обновление этого файла и при необходимости новый ADR в [docs/adr/README.md](adr/README.md).
