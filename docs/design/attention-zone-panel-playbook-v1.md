@@ -1,7 +1,7 @@
 # Playbook: зона внимания ↔ панель shell ↔ SDK
 
 **Статус:** чертёж v1.  
-**Связь:** [ADR 0021](../adr/0021-pfd-mfd-cockpit-attention-model.md) (семантика), [ADR 0025](../adr/0025-sdk-attention-zones-and-capabilities.md) (контракты), [0010](../adr/0010-ui-modes-toml-configuration.md) (overlay).  
+**Связь:** [ADR 0021](../adr/0021-pfd-mfd-cockpit-attention-model.md) (семантика), [ADR 0017](../adr/0017-multi-window-workspace-and-agent-surfaces.md) (несколько окон / поверхности), [ADR 0025](../adr/0025-sdk-attention-zones-and-capabilities.md) (контракты), [0010](../adr/0010-ui-modes-toml-configuration.md) (overlay).  
 **Проверка среза:** [vertical-slice-attention-capabilities-v1](vertical-slice-attention-capabilities-v1.md).
 
 ## Зачем
@@ -16,7 +16,11 @@
 | Панель shell | Стабильный ключ панели в сетке / доке | `HostAttentionPanelId` ↔ `AttentionPanelCanonicalIds` / `AttentionPanelIds` |
 | Презентация | Видимость, размер, вкладки | TOML overlay ([0010](../adr/0010-ui-modes-toml-configuration.md)), Axaml |
 
-**Колонки MainGrid ≠ содержимое зоны.** Свойства вроде «видна колонка под якорь PFD/MFD» в VM описывают **разметку** (есть ли место под левую/правую колонку). **Какая панель** сейчас привязана к зоне `pfd` / `mfd` / `forward` — это слой карты `AttentionZonePanelRuntime` и TOML, а не то же имя, что у колонки сплиттера.
+**Топология презентации** (одно окно с колонками vs несколько окон/мониторов) в коде задаётся отдельно от id зоны: `AttentionLayoutSurfaceKind` (сейчас только `MainWindowDockedGrid`); на `MainWindowViewModel` — `ActiveAttentionLayoutSurface`. Свойства `IsPfdColumnVisible` / `IsMfdColumnVisible` относятся только к этой топологии.
+
+**Колонки MainGrid ≠ содержимое зоны.** Свойства вроде «видна колонка под якорь PFD/MFD» в VM описывают **разметку главного окна** (есть ли место под левую/правую колонку в одном `MainGrid`). **Какая панель** сейчас привязана к зоне `pfd` / `mfd` / `forward` — это слой карты `AttentionZonePanelRuntime` и TOML, а не то же имя, что у колонки сплиттера.
+
+**Колонки — не единственная форма раскладки.** Три семантики (PFD / лобовое / MFD) на **одном мониторе** часто складываются в три колонки одного окна; при **мультимониторе или нескольких top-level** те же зоны могут жить в **отдельных окнах** или на разных дисплеях — семантика зон сохраняется, меняется только геометрия презентации ([ADR 0021 §13 «Мультиоконность и мультимонитор»](../adr/0021-pfd-mfd-cockpit-attention-model.md), [ADR 0017](../adr/0017-multi-window-workspace-and-agent-surfaces.md)). Playbook про колонки описывает текущий путь «главное окно → MainGrid»; роутинг зон по окнам — предмет 0017 и будущей реализации, не замена таблицы панель→зона выше.
 
 ## Дефолтная карта панель → зона
 

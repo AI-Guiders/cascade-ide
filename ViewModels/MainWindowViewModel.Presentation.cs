@@ -34,16 +34,21 @@ public partial class MainWindowViewModel
     public bool IsChatPanelColumnVisible => ChatPanelColumnPixelWidth > 0;
 
     /// <summary>
-    /// Видна ли <strong>колонка MainGrid</strong> под левый пространственный якорь (в разметке — зона PFD).
-    /// Это не то же самое, что «какая панель сейчас в зоне PFD»: панели ↔ зоны задаёт <see cref="AttentionZonePanelRuntime"/> и TOML
-    /// (<c>docs/design/attention-zone-panel-playbook-v1.md</c>).
-    /// Сейчас ширина колонки совпадает с настройкой «обозреватель решения».
+    /// Какая топология размещения зон сейчас активна. Свойства <see cref="IsPfdColumnVisible"/> / <see cref="IsMfdColumnVisible"/>
+    /// имеют смысл только для <see cref="AttentionLayoutSurfaceKind.MainWindowDockedGrid"/>; иные варианты — ADR 0021 §13, 0017.
+    /// </summary>
+    public AttentionLayoutSurfaceKind ActiveAttentionLayoutSurface => AttentionLayoutSurfaceKind.MainWindowDockedGrid;
+
+    /// <summary>
+    /// Видна ли колонка <c>MainGrid</c> под левый якорь при <see cref="ActiveAttentionLayoutSurface"/> (в этой разметке — зона PFD).
+    /// Не путать с картой «панель → зона»: <see cref="AttentionZonePanelRuntime"/>, <c>docs/design/attention-zone-panel-playbook-v1.md</c>.
+    /// Ширина колонки совпадает с «обозреватель решения».
     /// </summary>
     public bool IsPfdColumnVisible => IsSolutionExplorerVisible;
 
     /// <summary>
-    /// Видна ли <strong>колонка MainGrid</strong> под правый пространственный якорь (в разметке — зона MFD).
-    /// Это не то же самое, что состав вкладок или «какая панель в MFD»: зона и карта панелей — см. <see cref="AttentionZonePanelRuntime"/>; колонка лишь резервирует место (сейчас совпадает с <see cref="IsChatPanelColumnVisible"/>).
+    /// Видна ли колонка <c>MainGrid</c> под правый якорь при <see cref="ActiveAttentionLayoutSurface"/> (в этой разметке — зона MFD).
+    /// Не путать с вкладками MFD или картой панелей — <see cref="AttentionZonePanelRuntime"/>; место в сетке совпадает с <see cref="IsChatPanelColumnVisible"/>.
     /// </summary>
     public bool IsMfdColumnVisible => IsChatPanelColumnVisible;
     /// <summary>Полоса активной задачи / Task Cockpit — из <c>UiModes/&lt;id&gt;.toml</c> (<c>active_task_strip</c>); по умолчанию скрыто для семьи Debug.</summary>

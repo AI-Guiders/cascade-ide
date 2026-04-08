@@ -1,0 +1,17 @@
+using CascadeIDE.Contracts.Experimental;
+
+namespace CascadeIDE.Features.UiChrome;
+
+/// <summary>
+/// Топология презентации зон внимания: <strong>где физически</strong> размещены регионы (одно окно, несколько окон, мониторы).
+/// Не путать с <see cref="AttentionZoneCanonicalIds"/> — это семантика зоны («pfd» / «mfd» / «forward»), а не форма раскладки.
+/// </summary>
+/// <remarks>
+/// Сейчас реализована только <see cref="MainWindowDockedGrid"/>; иные сценарии — ADR 0021 §13, ADR 0017.
+/// Свойства вроде <c>IsPfdColumnVisible</c> на главном VM относятся исключительно к этой топологии.
+/// </remarks>
+public enum AttentionLayoutSurfaceKind
+{
+    /// <summary>Одно главное окно: колонки <c>MainGrid</c> (якоря PFD / forward / MFD в одной сетке).</summary>
+    MainWindowDockedGrid = 0,
+}
