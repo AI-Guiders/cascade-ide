@@ -1,0 +1,60 @@
+# ADR 0026: Markdown — поверхности превью и размещение (`workspace.toml`)
+
+**Статус:** Accepted (частично: `forward_split`, отдельное окно; `mfd` — зафиксировано как целевое размещение, до UI — fallback на окно)  
+**Дата:** 2026-04-08  
+**Связь:** [0010](0010-ui-modes-toml-configuration.md) (`workspace.toml`, merge бандла `UiModes/` и overlay репозитория `.cascade/workspace.toml`), [0021](0021-pfd-mfd-cockpit-attention-model.md) (превью как вторичная поверхность относительно лобового редактирования), [0017](0017-multi-window-workspace-and-agent-surfaces.md) (отдельное окно как второй `TopLevel`), [0022](0022-mfd-visual-design-surface-axaml-blazor.md) (перспектива вкладки/региона на MFD), [0023](0023-markdown-diagrams-language-tooling.md) (LSP, диаграммы, Kroki, export — **ортогонально** размещению виджета превью).
+
+---
+
+## Замена прежних формулировок
+
+- **Канон по размещению превью Markdown** — этот ADR.
+- Ранее единственное упоминание «Markdown preview» в контексте UX в [0023](0023-markdown-diagrams-language-tooling.md) § «Детали UX» **снято с канона** там и **заменено ссылкой сюда** ([0023](0023-markdown-diagrams-language-tooling.md) остаётся про языковой опыт и диаграммы).
+- [0023](0023-markdown-diagrams-language-tooling.md) **не** superseded целиком — только пересечение по «где показывать превью».
+
+---
+
+## Контекст
+
+Нужна одна точка правды для **где** в UI монтируется отрендеренный Markdown: рядом с текстом во **forward** (лобовое), в отдельном **окне**, или в зоне **MFD** (вторичное внимание). Это решение про **хром и топологию виджета**, а не про LSP, include или Kroki.
+
+Конфигурация логично живёт в **`workspace.toml`** вместе с остальными глобальными метриками хрома ([0010](0010-ui-modes-toml-configuration.md)): один merge-слой с бандлом и overlay репозитория, без обратной записи динамического ресайза в шипнутые файлы.
+
+---
+
+## Решение
+
+1. **Ключ TOML:** `markdown_preview_placement` в корне merged **`UiWorkspaceToml`** (модель и snake_case → PascalCase — как у остальных полей `workspace.toml`).
+
+2. **Допустимые строковые значения** (регистр строки для пользователя не важен; в коде парсинг нормализует):
+   - **`forward_split`** — вторая колонка у активного документа редактора (`EditorContentGrid` в `DockDocumentView`), inline `MarkdownScrollViewer`. Неактивные вкладки держат ширину колонки превью **нулевой**, чтобы не копить «залипшую» раскладку на фоне.
+   - **`separate_window`** или синоним **`window`** — существующее окно `MarkdownPreviewWindow` (вторичный `TopLevel` в смысле [0017](0017-multi-window-workspace-and-agent-surfaces.md), без обязательной привязки к мультиоконной дорожной карте целиком).
+   - **`mfd`** — **целевое** размещение во вкладке/регионе зоны MFD ([0021](0021-pfd-mfd-cockpit-attention-model.md), перекрёстно с [0022](0022-mfd-visual-design-surface-axaml-blazor.md)). Пока отдельная вкладка под превью в MFD **не подключена**, поведение — **явный fallback** на отдельное окно (как зафиксировано в коде и комментариях), без молчаливого «как forward».
+
+3. **Значение по умолчанию** до загрузки merged TOML и при сбросе тестов: **`forward_split`** (`MarkdownPreviewPlacementRuntime`).
+
+4. **Связь с моделью внимания [0021](0021-pfd-mfd-cockpit-attention-model.md):** превью остаётся **вторичной** поверхностью относительно набора текста в лобовом редакторе; выбор `markdown_preview_placement` меняет только **геометрию монтирования**, не переопределяя семантику зон PFD/MFD/EICAS.
+
+5. **Не путать** с будущим ключом **общей** «топологии презентации» нескольких `TopLevel` (обсуждение в [0010](0010-ui-modes-toml-configuration.md) / [0017](0017-multi-window-workspace-and-agent-surfaces.md)): `markdown_preview_placement` — **узкий** ключ только для превью Markdown.
+
+---
+
+## Реализация (ориентир по коду)
+
+- Модель: `UiWorkspaceToml.MarkdownPreviewPlacement`, merge: `UiWorkspaceTomlMerger`.
+- Рантайм: `MarkdownPreviewPlacement`, `MarkdownPreviewPlacementParser`, `MarkdownPreviewPlacementRuntime`; подключение при загрузке каталога режимов — `UiModeCatalog` (рядом с `UiWorkspaceLayoutRuntimeMetrics`, `AttentionZonePanelRuntime`).
+- UI: `DockDocumentView` — сетка редактора и inline-превью; `MainWindow` — ветвление команд превью по `MarkdownPreviewPlacementRuntime.Current`.
+
+---
+
+## Последствия
+
+- Документация для агента/MCP: при смене размещения снимок UI может показывать превью в разных регионах; контракт мульти-корня ([0017](0017-multi-window-workspace-and-agent-surfaces.md)) применим к отдельному окну превью.
+- Расширение **`mfd`** без изменения ключа: отдельная поставка — вкладка/хост в MFD shell и снятие fallback.
+
+---
+
+## Отклонённые альтернативы
+
+- **Держать размещение превью только в пользовательском `settings.toml`** — отклонено для пресета «как у проекта»: команда должна иметь возможность зафиксировать поведение в repo overlay рядом с остальным `workspace.toml`.
+- **Сливать с [0023](0023-markdown-diagrams-language-tooling.md) одним ADR** — отклонено: смешивает языковой опыт и геометрию UI, усложняет навигацию и эволюцию по независимым осям.

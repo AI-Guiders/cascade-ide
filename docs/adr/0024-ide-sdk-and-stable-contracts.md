@@ -2,7 +2,7 @@
 
 **Статус:** Proposed  
 **Дата:** 2026-04-08  
-**Связь:** [0005](0005-defer-dynamic-plugins-mef.md) (плагины deferred), [0006](0006-presentation-layers-and-feature-slices.md) (границы слоёв/срезов), [0008](0008-mcp-contracts-and-testable-infrastructure.md) (контракты и тестируемая инфраструктура), [0013](0013-command-surface-and-discoverability.md) (поверхность команд), [0019](0019-shared-git-core-ide-and-git-mcp.md) (общий core как прецедент), [0023](0023-markdown-diagrams-language-tooling.md) (внешние инструменты/LSP как контракты), [0025](0025-sdk-attention-zones-and-capabilities.md) (зоны внимания PFD/MFD/… в SDK и capabilities).
+**Связь:** [0005](0005-defer-dynamic-plugins-mef.md) (плагины deferred), [0006](0006-presentation-layers-and-feature-slices.md) (границы слоёв/срезов), [0008](0008-mcp-contracts-and-testable-infrastructure.md) (контракты и тестируемая инфраструктура), [0013](0013-command-surface-and-discoverability.md) (поверхность команд), [0019](0019-shared-git-core-ide-and-git-mcp.md) (общий core как прецедент), [0023](0023-markdown-diagrams-language-tooling.md) (внешние инструменты/LSP как контракты), [0026](0026-markdown-preview-surfaces-and-placement.md) (геометрия превью Markdown в TOML), [0025](0025-sdk-attention-zones-and-capabilities.md) (зоны внимания PFD/MFD/… в SDK и capabilities).
 
 ---
 
