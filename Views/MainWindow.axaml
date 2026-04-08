@@ -143,12 +143,15 @@
     </Window.Styles>
 
     <Window.KeyBindings>
-        <KeyBinding Gesture="Alt+1" Command="{Binding SetFocusModeCommand}"/>
-        <KeyBinding Gesture="Alt+2" Command="{Binding SetEditorModeCommand}"/>
-        <KeyBinding Gesture="Alt+3" Command="{Binding SetBalancedModeCommand}"/>
-        <KeyBinding Gesture="Alt+4" Command="{Binding SetPowerModeCommand}"/>
-        <KeyBinding Gesture="Alt+5" Command="{Binding SetAgentChatModeCommand}"/>
-        <KeyBinding Gesture="Alt+6" Command="{Binding SetDebugModeCommand}"/>
+        <KeyBinding Gesture="Alt+1" Command="{Binding SetUiModeByIndexCommand}" CommandParameter="0"/>
+        <KeyBinding Gesture="Alt+2" Command="{Binding SetUiModeByIndexCommand}" CommandParameter="1"/>
+        <KeyBinding Gesture="Alt+3" Command="{Binding SetUiModeByIndexCommand}" CommandParameter="2"/>
+        <KeyBinding Gesture="Alt+4" Command="{Binding SetUiModeByIndexCommand}" CommandParameter="3"/>
+        <KeyBinding Gesture="Alt+5" Command="{Binding SetUiModeByIndexCommand}" CommandParameter="4"/>
+        <KeyBinding Gesture="Alt+6" Command="{Binding SetUiModeByIndexCommand}" CommandParameter="5"/>
+        <KeyBinding Gesture="Alt+7" Command="{Binding SetUiModeByIndexCommand}" CommandParameter="6"/>
+        <KeyBinding Gesture="Alt+8" Command="{Binding SetUiModeByIndexCommand}" CommandParameter="7"/>
+        <KeyBinding Gesture="Alt+9" Command="{Binding SetUiModeByIndexCommand}" CommandParameter="8"/>
         <KeyBinding Gesture="Ctrl+Alt+M" Command="{Binding CycleUiModeCommand}"/>
         <KeyBinding Gesture="F5" Command="{Binding DebugStartOrContinueCommand}"/>
         <KeyBinding Gesture="Shift+F5" Command="{Binding DebugStopCommand}"/>
@@ -197,13 +200,22 @@
                           IsChecked="{Binding IsInstrumentationDockVisible, Mode=TwoWay}"
                           IsVisible="{Binding ShowInstrumentationLayoutMenu}"/>
                 <Separator/>
-                <MenuItem Header="_Режим интерфейса">
-                    <MenuItem Header="_Focus" ToggleType="Radio" IsChecked="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Focus}" Command="{Binding SetFocusModeCommand}"/>
-                    <MenuItem Header="_Editor" ToggleType="Radio" IsChecked="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Editor}" Command="{Binding SetEditorModeCommand}"/>
-                    <MenuItem Header="_Balanced" ToggleType="Radio" IsChecked="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Balanced}" Command="{Binding SetBalancedModeCommand}"/>
-                    <MenuItem Header="_Power" ToggleType="Radio" IsChecked="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Power}" Command="{Binding SetPowerModeCommand}"/>
-                    <MenuItem Header="Agent _Chat" ToggleType="Radio" IsChecked="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=AgentChat}" Command="{Binding SetAgentChatModeCommand}"/>
-                    <MenuItem Header="_Debug" ToggleType="Radio" IsChecked="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Debug}" Command="{Binding SetDebugModeCommand}"/>
+                <MenuItem Header="_Режим интерфейса" ItemsSource="{Binding UiModeOptionsList}">
+                    <MenuItem.ItemTemplate>
+                        <DataTemplate x:DataType="x:String">
+                            <MenuItem Header="{Binding}"
+                                      ToggleType="Radio"
+                                      Command="{Binding DataContext.SetUiModeByIdCommand, ElementName=RootWindow}"
+                                      CommandParameter="{Binding}">
+                                <MenuItem.IsChecked>
+                                    <MultiBinding Converter="{StaticResource UiModeIdEqMulti}">
+                                        <Binding Path="DataContext.UiMode" ElementName="RootWindow" Mode="OneWay"/>
+                                        <Binding Mode="OneWay"/>
+                                    </MultiBinding>
+                                </MenuItem.IsChecked>
+                            </MenuItem>
+                        </DataTemplate>
+                    </MenuItem.ItemTemplate>
                 </MenuItem>
                 <Separator/>
                 <MenuItem Header="_Тема">
@@ -254,7 +266,7 @@
         <chrome:AttentionZoneContainer Zone="Pfd" Grid.Row="3" Grid.Column="0">
             <views:SolutionExplorerView />
         </chrome:AttentionZoneContainer>
-        <GridSplitter Grid.Row="3" Grid.Column="1" Width="4" ResizeDirection="Columns" Background="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}" IsVisible="{Binding IsSolutionExplorerVisible}"/>
+        <GridSplitter Grid.Row="3" Grid.Column="1" Width="4" ResizeDirection="Columns" Background="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}" IsVisible="{Binding IsPfdColumnVisible}"/>
 
         <!-- Лобовое: редактор (forward) -->
         <chrome:AttentionZoneContainer Zone="Forward" Grid.Row="3" Grid.Column="2">
@@ -263,11 +275,11 @@
         <GridSplitter Grid.Row="3" Grid.Column="3"
                       Grid.RowSpan="{Binding ChatPanelMainGridRowSpan}"
                       Width="4" ResizeDirection="Columns" Background="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"
-                      IsVisible="{Binding IsChatPanelColumnVisible}"/>
+                      IsVisible="{Binding IsMfdColumnVisible}"/>
 
         <!-- MFD: одна оболочка вкладок — WORKSPACE / чат / терминал / сборка / … (ADR 0021), без дублирования телеметрии и чата над нижним доком. -->
         <chrome:AttentionZoneContainer Zone="Mfd" Grid.Row="3" Grid.Column="4" Grid.RowSpan="{Binding ChatPanelMainGridRowSpan}"
-                                       IsVisible="{Binding IsChatPanelColumnVisible}">
+                                       IsVisible="{Binding IsMfdColumnVisible}">
             <views:MfdShellView DataContext="{Binding DataContext, ElementName=RootWindow}" MinHeight="0"/>
         </chrome:AttentionZoneContainer>
         <!-- Bloom только над task bar + рабочей областью (строки 2–3). -->

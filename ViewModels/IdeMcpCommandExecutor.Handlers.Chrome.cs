@@ -120,21 +120,18 @@ internal sealed partial class IdeMcpCommandExecutor
 
         add(Services.IdeCommands.SetFocusModeUi, async (_, _) =>
         {
-            if (_vm.SetFocusModeCommand.CanExecute(null))
-                _vm.SetFocusModeCommand.Execute(null);
-            return "OK";
+            _vm.UiMode = MainWindowViewModel.NormalizeUiMode("Focus");
+            return await Task.FromResult("OK");
         });
         add(Services.IdeCommands.SetBalancedModeUi, async (_, _) =>
         {
-            if (_vm.SetBalancedModeCommand.CanExecute(null))
-                _vm.SetBalancedModeCommand.Execute(null);
-            return "OK";
+            _vm.UiMode = MainWindowViewModel.NormalizeUiMode("Balanced");
+            return await Task.FromResult("OK");
         });
         add(Services.IdeCommands.SetPowerModeUi, async (_, _) =>
         {
-            if (_vm.SetPowerModeCommand.CanExecute(null))
-                _vm.SetPowerModeCommand.Execute(null);
-            return "OK";
+            _vm.UiMode = MainWindowViewModel.NormalizeUiMode("Power");
+            return await Task.FromResult("OK");
         });
         add(Services.IdeCommands.CycleUiMode, async (_, _) =>
         {

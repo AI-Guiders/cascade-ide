@@ -28,6 +28,7 @@
 | `ide_go_to_position` | Перейти на позицию (и опционально выделить) | `file_path`, `line`, `column`; опционально `end_line`, `end_column` |
 | `ide_get_solution_info` | Информация о решении и открытом файле | —; возвращает JSON (solution_path, current_file_path, project_paths) |
 | `ide_get_workspace_state` | Единая сводка состояния IDE: solution/current file/selection/debug/build output/diagnostics | —; возвращает JSON |
+| `ide_get_ui_modes_diagnostics` | Диагностика загрузки UI-режимов: путь к `UiModes`, наличие `index.toml`/`Flight.toml`, источник бандла (TOML vs встроенный fallback), `ordered_mode_ids`, признак Flight в меню | —; возвращает JSON |
 | `ide_build` | Запустить сборку решения (dotnet build). **Структурированный результат:** JSON: success, exit_code, errors[] (file, line, column?, code?, message), warnings[], raw_output (обрезано). Агент получает ошибки без парсинга лога. | —; возвращает JSON |
 | `ide_get_build_output` | Текст панели «Вывод сборки» и цвета (background, foreground) | —; возвращает JSON: text, theme |
 | `ide_run_tests` | Запустить тесты решения (dotnet test; при необходимости выполняет сборку). **Структурированный результат:** JSON: success, total, passed, failed, skipped, failed_tests[] (name, message?, duration_ms?). Агент получает упавшие тесты без парсинга лога. | —; возвращает JSON |
@@ -271,6 +272,7 @@
 | `get_current_file_diagnostics` | Диагностики текущего открытого .cs (ошибки/предупреждения). returns: json. |
 | `get_solution_files` | Список файлов и дерево решения (Solution Explorer). returns: json. |
 | `get_solution_info` | Короткая информация о текущем решении/файле/выделении в дереве. returns: json. |
+| `get_ui_modes_diagnostics` | Диагностика загрузки UI-режимов: пути к UiModes, TOML vs встроенный fallback, список id в меню (почему может не быть Flight). returns: json. |
 | `get_workspace_state` | Единая сводка состояния IDE (solution/editor/build/diagnostics...). returns: json. |
 | `move_document_to_group_1` | Переместить документ в группу 1. args: file_path:string; returns: text; example: {"file_path":"C:\\\\tmp\\\\a.cs"}. |
 | `move_document_to_group_2` | Переместить документ в группу 2. args: file_path:string; returns: text; example: {"file_path":"C:\\\\tmp\\\\a.cs"}. |

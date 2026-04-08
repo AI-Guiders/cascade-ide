@@ -245,8 +245,8 @@ public sealed class UiModeCatalogTests : IDisposable
         Assert.False(UiModeCatalog.GetShowTaskBar("Editor"));
 
         var spec = UiModeCatalog.GetSpec("Editor");
-        Assert.False(spec.SolutionExplorerVisible);
-        Assert.False(spec.ChatPanelExpanded);
+        Assert.True(spec.SolutionExplorerVisible);
+        Assert.True(spec.ChatPanelExpanded);
         Assert.False(spec.InstrumentationDockVisible);
 
         var caps = UiModeCatalog.GetCapabilities("Editor");

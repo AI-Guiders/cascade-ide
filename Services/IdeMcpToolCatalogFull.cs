@@ -206,6 +206,12 @@ internal static class IdeMcpToolCatalogFull
             },
             new()
             {
+                Name = "ide_get_ui_modes_diagnostics",
+                Description = "Диагностика загрузки UI-режимов: app_base_directory, путь к UiModes, наличие index.toml/Flight.toml, bundle_source (TomlBundle vs BuiltinRegistry), ordered_mode_ids, builtin_registry_fallback_ids, flight_listed_in_menu, hint (если Flight нет в меню).",
+                InputSchema = Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
+            },
+            new()
+            {
                 Name = "ide_get_solution_files",
                 Description = "Файлы и дерево решения. file_entries — массив { path, title, relative_path } (relative_path от каталога решения). solution_tree — иерархия (solution → projects → folders → files) с теми же полями. Для поиска .md или узла по пути и открытия через ide_open_file.",
                 InputSchema = Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })

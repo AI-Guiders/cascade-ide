@@ -61,6 +61,7 @@ internal static class IdeCommandsContractGenerated
         ["get_solution_info"] = IdeReturnKind.Json,
         ["get_supported_editor_languages"] = IdeReturnKind.Json,
         ["get_ui_layout"] = IdeReturnKind.Json,
+        ["get_ui_modes_diagnostics"] = IdeReturnKind.Json,
         ["get_ui_theme"] = IdeReturnKind.Json,
         ["get_workspace_state"] = IdeReturnKind.Json,
         ["git_branch"] = IdeReturnKind.Json,

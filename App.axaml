@@ -87,6 +87,7 @@
             <SolidColorBrush x:Key="CascadeTheme.PowerSolutionTaskQueueBubbleBackground">#152A38</SolidColorBrush>
             <views:UiModeFamilyEqualsConverter x:Key="UiModeFamilyEq"/>
             <views:UiModeFamilyNotEqualsConverter x:Key="UiModeFamilyNe"/>
+            <views:UiModeIdEqualsMultiConverter x:Key="UiModeIdEqMulti"/>
         </ResourceDictionary>
     </Application.Resources>
 

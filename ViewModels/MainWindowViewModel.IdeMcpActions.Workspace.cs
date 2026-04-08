@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Avalonia.Threading;
 using CascadeIDE.Features.Instrumentation;
+using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Services;
 
 namespace CascadeIDE.ViewModels;
@@ -21,6 +22,9 @@ public partial class MainWindowViewModel
         var (bg, fg) = Services.UiThemeSnapshot.GetBuildOutputTheme();
         return JsonSerializer.Serialize(new { text = BuildOutputPanel.BuildOutput ?? "", theme = new { background = bg, foreground = fg } });
     }
+
+    Task<string> Services.IIdeMcpActions.GetUiModesDiagnosticsAsync() =>
+        Task.FromResult(UiModeCatalog.GetDiagnosticsJson());
 
     async Task<string> Services.IIdeMcpActions.GetWorkspaceStateAsync()
     {

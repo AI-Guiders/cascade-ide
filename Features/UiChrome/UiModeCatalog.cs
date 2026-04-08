@@ -1,6 +1,17 @@
-using CascadeIDE.Services;
+using System.Text.Json;
 
 namespace CascadeIDE.Features.UiChrome;
+
+/// <summary>Откуда взялся текущий список UI-режимов (для диагностики MCP и деплоя).</summary>
+public enum UiModesBundleSource
+{
+    /// <summary>До <see cref="UiModeCatalog.Initialize"/> или после <see cref="UiModeCatalog.ResetForTests"/>.</summary>
+    Unknown,
+    /// <summary>Встроенный <see cref="UiModeLayoutRegistry"/> (нет TOML-бандла или ошибка загрузки).</summary>
+    BuiltinRegistry,
+    /// <summary>Успешно загружен <c>UiModes/index.toml</c> и режимы из каталога.</summary>
+    TomlBundle,
+}
 
 /// <summary>
 /// Загруженные из <c>UiModes/*.toml</c> режимы (ADR 0010). При ошибке или отсутствии файлов — встроенный <see cref="UiModeLayoutRegistry"/>.
@@ -9,6 +20,7 @@ public static class UiModeCatalog
 {
     private static readonly object Gate = new();
     private static bool _initialized;
+    private static UiModesBundleSource _bundleSource;
     private static IReadOnlyList<string> _orderedModeIds = UiModeLayoutRegistry.OrderedModeIds;
     private static readonly Dictionary<string, UiModeLayoutSpec> Specs = new(StringComparer.OrdinalIgnoreCase);
     private static readonly Dictionary<string, UiModeFamily> Families = new(StringComparer.OrdinalIgnoreCase);
@@ -36,6 +48,72 @@ public static class UiModeCatalog
             lock (Gate)
                 return _orderedModeIds;
         }
+    }
+
+    /// <summary>Источник текущего списка режимов (TOML-бандл или встроенный fallback).</summary>
+    public static UiModesBundleSource ActiveBundleSource
+    {
+        get
+        {
+            lock (Gate)
+                return _bundleSource;
+        }
+    }
+
+    /// <summary>
+    /// JSON для MCP: пути к <c>UiModes</c>, наличие <c>index.toml</c>/<c>Flight.toml</c>, <see cref="ActiveBundleSource"/>, список id в меню (почему может не быть Flight).
+    /// </summary>
+    public static string GetDiagnosticsJson()
+    {
+        var baseDir = AppContext.BaseDirectory;
+        var uiModesDir = Path.Combine(baseDir, "UiModes");
+        var indexPath = Path.Combine(uiModesDir, "index.toml");
+        var flightPath = Path.Combine(uiModesDir, "Flight.toml");
+
+        bool initialized;
+        UiModesBundleSource src;
+        string[] ordered;
+        string[] builtinIds;
+        lock (Gate)
+        {
+            initialized = _initialized;
+            src = _bundleSource;
+            ordered = _orderedModeIds.ToArray();
+            builtinIds = UiModeLayoutRegistry.OrderedModeIds.ToArray();
+        }
+
+        var flightInMenu = ordered.Any(static x => string.Equals(x, "Flight", StringComparison.OrdinalIgnoreCase));
+        string? hint = null;
+        if (!flightInMenu)
+        {
+            hint = src switch
+            {
+                UiModesBundleSource.BuiltinRegistry =>
+                    "Режимы из встроенного списка (Flight нет). Проверь папку UiModes рядом с exe и корректность index.toml.",
+                UiModesBundleSource.TomlBundle =>
+                    "Flight нет в списке modes в index.toml (или файл Flight.toml не используется для id).",
+                _ =>
+                    initialized
+                        ? "Источник бандла неизвестен; сравни ordered_mode_ids с builtin_registry_fallback_ids."
+                        : "Каталог режимов ещё не инициализирован.",
+            };
+        }
+
+        return JsonSerializer.Serialize(new
+        {
+            app_base_directory = baseDir,
+            ui_modes_directory = uiModesDir,
+            ui_modes_directory_exists = Directory.Exists(uiModesDir),
+            index_toml_path = indexPath,
+            index_toml_exists = File.Exists(indexPath),
+            flight_toml_exists = File.Exists(flightPath),
+            ui_mode_catalog_initialized = initialized,
+            bundle_source = src.ToString(),
+            ordered_mode_ids = ordered,
+            builtin_registry_fallback_ids = builtinIds,
+            flight_listed_in_menu = flightInMenu,
+            hint,
+        });
     }
 
     /// <summary>Инициализация до первого <see cref="MainWindowViewModel"/> и любых вызовов нормализации режима.</summary>
@@ -74,6 +152,7 @@ public static class UiModeCatalog
             CapabilitiesByMode.Clear();
             WindowTitleOverrideByMode.Clear();
             _bundleWorkspaceToml = null;
+            _bundleSource = UiModesBundleSource.Unknown;
             UiWorkspaceLayoutRuntimeMetrics.ResetToCodeDefaults();
             AttentionZonePanelRuntime.ResetToCodeDefaults();
         }
@@ -206,11 +285,14 @@ public static class UiModeCatalog
             if (!Specs.ContainsKey(required))
                 global::System.Diagnostics.Debug.WriteLine($"UiModeCatalog: required mode id missing from data — {required}");
         }
+
+        _bundleSource = UiModesBundleSource.TomlBundle;
     }
 
     private static void ApplyBuiltinOnly()
     {
         _bundleWorkspaceToml = null;
+        _bundleSource = UiModesBundleSource.BuiltinRegistry;
         _orderedModeIds = UiModeLayoutRegistry.OrderedModeIds;
         foreach (var id in _orderedModeIds)
         {

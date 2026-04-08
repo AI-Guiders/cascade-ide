@@ -270,10 +270,12 @@ public partial class MainWindow
             vm.EditorSelectionStart = null;
             vm.EditorSelectionLength = null;
         }
-        if (e.PropertyName is nameof(ViewModels.MainWindowViewModel.IsSolutionExplorerVisible) && DataContext is ViewModels.MainWindowViewModel vmSol)
+        if ((e.PropertyName is nameof(ViewModels.MainWindowViewModel.IsSolutionExplorerVisible) or nameof(ViewModels.MainWindowViewModel.IsPfdColumnVisible))
+            && DataContext is ViewModels.MainWindowViewModel vmSol)
             UpdateSolutionColumnWidth(vmSol.IsSolutionExplorerVisible);
         if ((e.PropertyName is nameof(ViewModels.MainWindowViewModel.IsChatPanelExpanded) or nameof(ViewModels.MainWindowViewModel.UiMode)
-            or nameof(ViewModels.MainWindowViewModel.ChatPanelColumnPixelWidth) or nameof(ViewModels.MainWindowViewModel.IsChatPanelColumnVisible))
+            or nameof(ViewModels.MainWindowViewModel.ChatPanelColumnPixelWidth) or nameof(ViewModels.MainWindowViewModel.IsChatPanelColumnVisible)
+            or nameof(ViewModels.MainWindowViewModel.IsMfdColumnVisible))
             && DataContext is ViewModels.MainWindowViewModel vmChat)
             UpdateChatColumnWidth(vmChat);
         if (e.PropertyName is nameof(ViewModels.MainWindowViewModel.IsMarkdownPreviewVisible) && DataContext is ViewModels.MainWindowViewModel vmMd)

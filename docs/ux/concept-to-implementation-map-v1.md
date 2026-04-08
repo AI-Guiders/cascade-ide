@@ -23,7 +23,7 @@ This map is intended to drive incremental alignment work with clear acceptance c
 | Concept element | XAML control (x:Name / binding) | VM property/command | Status | Notes |
 |---|---|---|---|---|
 | Main grid columns (left / center / right) | `MainGrid` `ColumnDefinitions="220,4,*,4,340"` | `IsSolutionExplorerVisible`, `IsChatPanelExpanded` | ✅ | Ширина чата: рантайм + правила семьи; глобальные числа — `UiModes/workspace.toml` / `UiWorkspaceLayoutRuntimeMetrics` (см. ADR 0010). |
-| Mode hotkeys | `<Window.KeyBindings>` | `SetFocusModeCommand`, `SetBalancedModeCommand`, `SetPowerModeCommand`, `CycleUiModeCommand` | ✅ | `Alt+1/2/3`, `Ctrl+Alt+M`. |
+| Mode hotkeys | `<Window.KeyBindings>` | `SetUiModeByIndexCommand` (порядок из `UiModeCatalog.OrderedModeIds`), `CycleUiModeCommand` | ✅ | `Alt+1`…`Alt+9` — 1…9-й режим в каталоге; `Ctrl+Alt+M` — цикл. |
 | Mode switch UI | Toolbar ComboBox + menu radio items | `UiMode`, `UiModeOptionsList` | ✅ | `ModeBadge`: классы `.power` / `.agentchat` / `.debug` от **`UiModeFamily`** (`UiModeFamilyEq` + параметр enum). |
 
 ---

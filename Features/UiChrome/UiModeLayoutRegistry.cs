@@ -41,11 +41,12 @@ public static class UiModeLayoutRegistry
                 ThemeSlot: UiModeThemeSlot.Dark,
                 SelectTerminalTabWhenTerminalShown: false,
                 InstrumentationDockVisible: true),
+            // Три якоря PFD | Forward | MFD видны сразу (ADR 0021); «лёгкий» Editor — через capabilities/TOML, не через схлопывание колонок.
             ["Editor"] = new UiModeLayoutSpec(
-                SolutionExplorerVisible: false,
+                SolutionExplorerVisible: true,
                 BuildOutputVisible: false,
                 TerminalVisible: false,
-                ChatPanelExpanded: false,
+                ChatPanelExpanded: true,
                 EditorGroupCount: 1,
                 ThemeSlot: UiModeThemeSlot.Dark,
                 SelectTerminalTabWhenTerminalShown: false,
@@ -81,7 +82,7 @@ public static class UiModeLayoutRegistry
                 SolutionExplorerVisible: true,
                 BuildOutputVisible: false,
                 TerminalVisible: false,
-                ChatPanelExpanded: false,
+                ChatPanelExpanded: true,
                 EditorGroupCount: 2,
                 ThemeSlot: UiModeThemeSlot.Dark,
                 SelectTerminalTabWhenTerminalShown: false,

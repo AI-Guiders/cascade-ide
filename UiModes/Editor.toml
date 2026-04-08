@@ -1,4 +1,4 @@
-# Семья Editor: максимум площади под редактор; хром выключен в capabilities (см. UiModeCapabilities.DefaultsForFamily(Editor)).
-# Раскладка — встроенный снимок в UiModeLayoutRegistry["Editor"] (без inherits).
+# Семья Editor: минимальный хром в capabilities (см. UiModeCapabilities.DefaultsForFamily(Editor)).
+# Колонки PFD / Forward / MFD остаются видимыми по умолчанию (снимок UiModeLayoutRegistry), иначе неочевидна модель внимания (ADR 0021).
 family = "Editor"
 main_window_title = "CascadeIDE — Editor"

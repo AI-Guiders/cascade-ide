@@ -278,6 +278,7 @@ internal static class IdeMcpCommandExecutorEmitter
         // Workspace / solution info
         sb.AppendLine("        add(Services.IdeCommands.GetSolutionInfo, async (_, _) => await Task.FromResult(((IIdeMcpActions)_vm).GetSolutionInfo()));");
         sb.AppendLine("        add(Services.IdeCommands.GetWorkspaceState, async (_, _) => await ((IIdeMcpActions)_vm).GetWorkspaceStateAsync());");
+        sb.AppendLine("        add(Services.IdeCommands.GetUiModesDiagnostics, async (_, _) => await ((IIdeMcpActions)_vm).GetUiModesDiagnosticsAsync());");
         sb.AppendLine("        add(Services.IdeCommands.GetSolutionFiles, async (_, _) => await ((IIdeMcpActions)_vm).GetSolutionFilesAsync());");
         sb.AppendLine("        add(Services.IdeCommands.GetCurrentFileDiagnostics, async (_, _) => await ((IIdeMcpActions)_vm).GetCurrentFileDiagnosticsAsync());");
 

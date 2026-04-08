@@ -10,9 +10,11 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(ChatPanelToggleButtonText))]
     [NotifyPropertyChangedFor(nameof(ChatPanelColumnPixelWidth))]
     [NotifyPropertyChangedFor(nameof(IsChatPanelColumnVisible))]
+    [NotifyPropertyChangedFor(nameof(IsMfdColumnVisible))]
     private bool _isChatPanelExpanded = true;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsPfdColumnVisible))]
     private bool _isSolutionExplorerVisible = true;
 
     [ObservableProperty]
@@ -32,6 +34,7 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(UiModeFamily))]
     [NotifyPropertyChangedFor(nameof(ChatPanelColumnPixelWidth))]
     [NotifyPropertyChangedFor(nameof(IsChatPanelColumnVisible))]
+    [NotifyPropertyChangedFor(nameof(IsMfdColumnVisible))]
     [NotifyPropertyChangedFor(nameof(ShowTaskBar))]
     [NotifyPropertyChangedFor(nameof(ShowTelemetryStrip))]
     [NotifyPropertyChangedFor(nameof(ShowTelemetryMfdPage))]

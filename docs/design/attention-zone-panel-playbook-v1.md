@@ -16,6 +16,8 @@
 | Панель shell | Стабильный ключ панели в сетке / доке | `HostAttentionPanelId` ↔ `AttentionPanelCanonicalIds` / `AttentionPanelIds` |
 | Презентация | Видимость, размер, вкладки | TOML overlay ([0010](../adr/0010-ui-modes-toml-configuration.md)), Axaml |
 
+**Колонки MainGrid ≠ содержимое зоны.** Свойства вроде «видна колонка под якорь PFD/MFD» в VM описывают **разметку** (есть ли место под левую/правую колонку). **Какая панель** сейчас привязана к зоне `pfd` / `mfd` / `forward` — это слой карты `AttentionZonePanelRuntime` и TOML, а не то же имя, что у колонки сплиттера.
+
 ## Дефолтная карта панель → зона
 
 Источник в коде: `AttentionZonePanelRuntime.BuildDefaultMap()` (после загрузки workspace накладываются переопределения из `attention_zone_panels`).

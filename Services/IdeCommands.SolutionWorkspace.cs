@@ -11,4 +11,6 @@ public static partial class IdeCommands
     public const string GetCurrentFileDiagnostics = "get_current_file_diagnostics";
     /// <summary>Единая сводка состояния IDE (solution/editor/build/diagnostics...). returns: json.</summary>
     public const string GetWorkspaceState = "get_workspace_state";
+    /// <summary>Диагностика загрузки UI-режимов: пути к UiModes, TOML vs встроенный fallback, список id в меню (почему может не быть Flight). returns: json.</summary>
+    public const string GetUiModesDiagnostics = "get_ui_modes_diagnostics";
 }

@@ -61,6 +61,7 @@ internal static class IdeCommandsDoc
         ["get_solution_info"] = "Короткая информация о текущем решении/файле/выделении в дереве. returns: json.",
         ["get_supported_editor_languages"] = "Список поддерживаемых языков подсветки редактора. returns: json.",
         ["get_ui_layout"] = "Дерево UI по всем окнам верхнего уровня: JSON с массивом windows (role, window_type, title, is_active, root — то же дерево, что раньше для MainWindow). returns: json.",
+        ["get_ui_modes_diagnostics"] = "Диагностика загрузки UI-режимов: пути к UiModes, TOML vs встроенный fallback, список id в меню (почему может не быть Flight). returns: json.",
         ["get_ui_theme"] = "Снимок темы UI и лэйаута (включая resolved-ресурсы). returns: json.",
         ["get_workspace_state"] = "Единая сводка состояния IDE (solution/editor/build/diagnostics...). returns: json.",
         ["git_branch"] = "Git branch в каталоге решения/workspace. args: action?:string, name?:string, start_point?:string, force?:boolean; returns: json; example: {\"action\":\"list\"}.",

@@ -226,40 +226,37 @@ public partial class MainWindowViewModel
         MfdShellTabIndex = MfdShellTabTerminalIndex;
     }
 
+    /// <summary>Переключение режима по id из каталога (<see cref="UiModeCatalog.OrderedModeIds"/>), меню и MCP.</summary>
     [RelayCommand]
-    private void SetFocusMode()
+    private void SetUiModeById(string? modeId)
     {
-        UiMode = "Focus";
+        if (string.IsNullOrWhiteSpace(modeId))
+            return;
+        UiMode = NormalizeUiMode(modeId);
     }
 
+    /// <summary>Alt+1…9: N-й режим в <see cref="UiModeCatalog.OrderedModeIds"/> (0-based).</summary>
     [RelayCommand]
-    private void SetEditorMode()
+    private void SetUiModeByIndex(object? parameter)
     {
-        UiMode = "Editor";
+        var idx = ParseUiModeIndex(parameter);
+        if (idx < 0)
+            return;
+        var ids = UiModeCatalog.OrderedModeIds;
+        if (idx >= ids.Count)
+            return;
+        UiMode = ids[idx];
     }
 
-    [RelayCommand]
-    private void SetBalancedMode()
+    private static int ParseUiModeIndex(object? parameter)
     {
-        UiMode = "Balanced";
-    }
-
-    [RelayCommand]
-    private void SetPowerMode()
-    {
-        UiMode = "Power";
-    }
-
-    [RelayCommand]
-    private void SetAgentChatMode()
-    {
-        UiMode = "AgentChat";
-    }
-
-    [RelayCommand]
-    private void SetDebugMode()
-    {
-        UiMode = "Debug";
+        return parameter switch
+        {
+            int i => i,
+            long l => l > int.MaxValue ? -1 : (int)l,
+            string s when int.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture, out var j) => j,
+            _ => -1,
+        };
     }
 
     [RelayCommand]

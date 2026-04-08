@@ -32,6 +32,20 @@ public partial class MainWindowViewModel
 
     /// <summary>Есть правая колонка чата и сплиттер перед ней (не свёрнуто в ноль).</summary>
     public bool IsChatPanelColumnVisible => ChatPanelColumnPixelWidth > 0;
+
+    /// <summary>
+    /// Видна ли <strong>колонка MainGrid</strong> под левый пространственный якорь (в разметке — зона PFD).
+    /// Это не то же самое, что «какая панель сейчас в зоне PFD»: панели ↔ зоны задаёт <see cref="AttentionZonePanelRuntime"/> и TOML
+    /// (<c>docs/design/attention-zone-panel-playbook-v1.md</c>).
+    /// Сейчас ширина колонки совпадает с настройкой «обозреватель решения».
+    /// </summary>
+    public bool IsPfdColumnVisible => IsSolutionExplorerVisible;
+
+    /// <summary>
+    /// Видна ли <strong>колонка MainGrid</strong> под правый пространственный якорь (в разметке — зона MFD).
+    /// Это не то же самое, что состав вкладок или «какая панель в MFD»: зона и карта панелей — см. <see cref="AttentionZonePanelRuntime"/>; колонка лишь резервирует место (сейчас совпадает с <see cref="IsChatPanelColumnVisible"/>).
+    /// </summary>
+    public bool IsMfdColumnVisible => IsChatPanelColumnVisible;
     /// <summary>Полоса активной задачи / Task Cockpit — из <c>UiModes/&lt;id&gt;.toml</c> (<c>active_task_strip</c>); по умолчанию скрыто для семьи Debug.</summary>
     public bool ShowTaskBar => UiModeCatalog.GetShowTaskBar(NormalizeUiMode(UiMode));
 

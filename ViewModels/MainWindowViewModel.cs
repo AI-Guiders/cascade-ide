@@ -348,7 +348,9 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         UiModeCatalog.ApplyRepositoryWorkspaceOverlay(GetWorkspacePath(value));
         OnPropertyChanged(nameof(ChatPanelColumnPixelWidth));
         OnPropertyChanged(nameof(IsChatPanelColumnVisible));
+        OnPropertyChanged(nameof(IsMfdColumnVisible));
         OnPropertyChanged(nameof(IsSolutionExplorerVisible));
+        OnPropertyChanged(nameof(IsPfdColumnVisible));
 
         ChatPanel.DisposeCursorAcpSession();
         AttachBreakpointsFileWatcher(value);
