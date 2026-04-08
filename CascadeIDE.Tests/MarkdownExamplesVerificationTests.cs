@@ -5,12 +5,12 @@ using Xunit;
 namespace CascadeIDE.Tests;
 
 /// <summary>
-/// Сэмплы из <c>samples/MarkdownSlice/</c> — include в fenced-блоках; копируются в output тестов.
+/// Примеры из <c>samples/MarkdownExamples/</c> — include в fenced-блоках; копируются в output тестов.
 /// </summary>
-public sealed class MarkdownSliceSampleTests
+public sealed class MarkdownExamplesVerificationTests
 {
     private static string SampleMdPath =>
-        Path.Combine(AppContext.BaseDirectory, "samples", "MarkdownSlice", "sample.md");
+        Path.Combine(AppContext.BaseDirectory, "samples", "MarkdownExamples", "sample.md");
 
     [Fact]
     public void SampleFilesExistNextToTestOutput()
