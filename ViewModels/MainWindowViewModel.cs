@@ -125,6 +125,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _workspaceDiagnostics.DiagnosticsChanged += OnWorkspaceDiagnosticsChangedForHud;
 
         // Capabilities: v1 registry (code-first, explicit module list).
+        new UiChromeCapabilitiesModule().Register(_capabilities);
         new Features.Markdown.MarkdownCapabilitiesModule().Register(_capabilities);
 
         _csharpLspProvider = string.IsNullOrEmpty(_settings.CSharpLspProvider)

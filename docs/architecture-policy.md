@@ -54,6 +54,7 @@
 | [Features/README.md](../Features/README.md) | Каталог срезов `Features/` |
 | [design/onboarding-first-run-v1.md](design/onboarding-first-run-v1.md) | Онбординг и First Run — живой чертёж (не ADR); дополняется по мере идей |
 | [design/attention-zone-panel-playbook-v1.md](design/attention-zone-panel-playbook-v1.md) | Зона ↔ панель shell ↔ SDK: следующий шаг после «это PFD» (не ADR) |
+| [design/vertical-slice-attention-capabilities-v1.md](design/vertical-slice-attention-capabilities-v1.md) | Вертикальный срез: регистрация UI surface + проверка дампа / теста |
 
 ---
 
@@ -78,4 +79,5 @@
 - **v1.16** — добавлен [0025](adr/0025-sdk-attention-zones-and-capabilities.md) (SDK: привязка capabilities к зонам внимания; Proposed).  
 - **v1.17** — в [0025](adr/0025-sdk-attention-zones-and-capabilities.md) уточнено: нативные Open/Save vs метаданные зоны, политика по умолчанию (нативный диалог; inline — осознанное исключение).  
 - **v1.18** — playbook [attention-zone-panel-playbook-v1](design/attention-zone-panel-playbook-v1.md); в [0025](adr/0025-sdk-attention-zones-and-capabilities.md): `HostAttentionPanelId`, `CapabilityAttentionConsistency`.  
+- **v1.19** — [vertical-slice-attention-capabilities-v1](design/vertical-slice-attention-capabilities-v1.md); регистрация `ui.chrome.surface.solution_explorer` для сквозной проверки.  
 - Изменения направления — отдельным коммитом: обновление этого файла и при необходимости новый ADR в [docs/adr/README.md](adr/README.md).

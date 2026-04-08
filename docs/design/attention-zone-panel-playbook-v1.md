@@ -1,7 +1,8 @@
 # Playbook: зона внимания ↔ панель shell ↔ SDK
 
 **Статус:** чертёж v1.  
-**Связь:** [ADR 0021](../adr/0021-pfd-mfd-cockpit-attention-model.md) (семантика), [ADR 0025](../adr/0025-sdk-attention-zones-and-capabilities.md) (контракты), [0010](../adr/0010-ui-modes-toml-configuration.md) (overlay).
+**Связь:** [ADR 0021](../adr/0021-pfd-mfd-cockpit-attention-model.md) (семантика), [ADR 0025](../adr/0025-sdk-attention-zones-and-capabilities.md) (контракты), [0010](../adr/0010-ui-modes-toml-configuration.md) (overlay).  
+**Проверка среза:** [vertical-slice-attention-capabilities-v1](vertical-slice-attention-capabilities-v1.md).
 
 ## Зачем
 

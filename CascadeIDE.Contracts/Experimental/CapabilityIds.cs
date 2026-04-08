@@ -17,5 +17,14 @@ public static class CapabilityIds
         /// <summary>Экспортировать Markdown с развёрнутыми include-дерективами (portable для публикации).</summary>
         public const string ExportExpandedMarkdownCommand = "docs.markdown.export_expanded";
     }
+
+    /// <summary>Shell / кокпит: поверхности, привязанные к панелям и зонам внимания (ADR 0025).</summary>
+    public static class UiChrome
+    {
+        public const string ModuleId = "ui.chrome";
+
+        /// <summary>Обозреватель решения — PFD, панель <c>solution_explorer</c>.</summary>
+        public const string SolutionExplorerSurface = "ui.chrome.surface.solution_explorer";
+    }
 }
 
