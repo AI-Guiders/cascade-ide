@@ -43,6 +43,7 @@ internal static class IdeCommandsDoc
         ["exit_application"] = "Закрыть приложение (как меню Файл → Выход). returns: none.",
         ["explain_current_step"] = "Пояснить текущий шаг (Focus/Power). returns: text.",
         ["explain_trace_step"] = "Шаг трассы по индексу в AgentTraceSteps (0 — самый старый). args: step_index:integer; returns: text; example: {\"step_index\":0}.",
+        ["export_expanded_markdown"] = "Экспортировать текущий Markdown с развёрнутыми include-директивами. returns: text.",
         ["extract_from_archive"] = "Поиск по архивной ревизии заметок с контекстом строк. args: query:string, revision_file?:string, head_limit?:integer, context_lines?:integer; returns: json; example: {\"query\":\"ActiveProjectId\",\"head_limit\":10,\"context_lines\":2}.",
         ["fix_failing_tests"] = "Quick action: починить упавшие тесты. returns: text.",
         ["focus_checkpoint"] = "Создать контрольную точку (Focus). returns: text.",

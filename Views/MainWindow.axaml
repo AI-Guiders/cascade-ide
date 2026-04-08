@@ -168,6 +168,7 @@
             <MenuItem Header="_Файл">
                 <MenuItem Header="_Открыть решение..." Command="{Binding OpenSolutionCommand}"/>
                 <MenuItem Header="_Открыть файл..." Command="{Binding OpenFileFromDialogCommand}"/>
+                <MenuItem Header="Export expanded _Markdown..." Command="{Binding ExportExpandedMarkdownCommand}"/>
                 <Separator/>
                 <MenuItem Header="В_ыход" Command="{Binding ExitCommand}"/>
             </MenuItem>

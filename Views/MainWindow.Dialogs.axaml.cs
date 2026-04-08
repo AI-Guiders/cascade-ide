@@ -190,6 +190,46 @@ public partial class MainWindow
         vm.Documents.OpenOrActivateDocument(normalized);
     }
 
+    private async Task<string?> ShowSaveExpandedMarkdownDialogAsync(string? currentMarkdownPath)
+    {
+        var options = new FilePickerSaveOptions
+        {
+            Title = "Export expanded Markdown",
+            DefaultExtension = "md",
+            FileTypeChoices =
+            [
+                new FilePickerFileType("Markdown") { Patterns = ["*.md"] },
+                new FilePickerFileType("Все файлы") { Patterns = ["*"] }
+            ]
+        };
+
+        if (!string.IsNullOrWhiteSpace(currentMarkdownPath))
+        {
+            try
+            {
+                var full = Path.GetFullPath(currentMarkdownPath);
+                var dir = Path.GetDirectoryName(full);
+                var file = Path.GetFileNameWithoutExtension(full);
+                options.SuggestedFileName = string.IsNullOrWhiteSpace(file) ? "export.expanded.md" : $"{file}.expanded.md";
+                if (!string.IsNullOrWhiteSpace(dir) && Directory.Exists(dir))
+                {
+                    var folder = await StorageProvider.TryGetFolderFromPathAsync(dir).ConfigureAwait(true);
+                    if (folder is not null)
+                        options.SuggestedStartLocation = folder;
+                }
+            }
+            catch
+            {
+                // ignore invalid path
+            }
+        }
+
+        var fileOut = await StorageProvider.SaveFilePickerAsync(options).ConfigureAwait(true);
+        if (fileOut is null)
+            return null;
+        return fileOut.TryGetLocalPath() ?? fileOut.Path.LocalPath;
+    }
+
     private Task<string> ShowConfirmationDialogAsync(string message, CancellationToken cancellationToken)
     {
         var tcs = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);

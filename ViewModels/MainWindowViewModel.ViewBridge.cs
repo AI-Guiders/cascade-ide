@@ -57,6 +57,9 @@ public partial class MainWindowViewModel
     /// <summary>Простой информационный диалог (заголовок, текст).</summary>
     public Func<string, string, Task>? RequestShowInfoAsync { get; set; }
 
+    /// <summary>Сохранить файл Markdown (View показывает SaveFile dialog). Возвращает выбранный путь или null.</summary>
+    public Func<string?, Task<string?>>? RequestSaveMarkdownFile { get; set; }
+
     /// <summary>MCP <c>capture_window</c>: PNG (по умолчанию главное окно; при <c>scope=all</c> — все top-level). Подставляет <see cref="Views.MainWindow"/>.</summary>
     public Func<string?, string?, string?, Task<string>>? CaptureWindowForMcpAsync { get; set; }
 }

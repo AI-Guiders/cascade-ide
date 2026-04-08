@@ -33,6 +33,7 @@ public static class IdeCommandPaletteCatalog
         // Файл
         add("open_solution_dialog", IdeCommands.OpenSolutionDialog, "Открыть решение…", "Файл");
         add("open_file_dialog", IdeCommands.OpenFileDialog, "Открыть файл…", "Файл");
+        add("export_expanded_markdown", IdeCommands.ExportExpandedMarkdown, "Export expanded Markdown…", "Файл");
         add("exit_application", IdeCommands.ExitApplication, "Выход", "Файл");
 
         // Вид — фокус и панели

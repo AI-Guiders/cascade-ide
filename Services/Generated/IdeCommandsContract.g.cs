@@ -43,6 +43,7 @@ internal static class IdeCommandsContractGenerated
         ["exit_application"] = IdeReturnKind.None,
         ["explain_current_step"] = IdeReturnKind.Text,
         ["explain_trace_step"] = IdeReturnKind.Text,
+        ["export_expanded_markdown"] = IdeReturnKind.Text,
         ["extract_from_archive"] = IdeReturnKind.Json,
         ["fix_failing_tests"] = IdeReturnKind.Text,
         ["focus_checkpoint"] = IdeReturnKind.Text,

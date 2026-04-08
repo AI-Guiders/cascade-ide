@@ -56,6 +56,7 @@ public partial class MainWindow : Window
             vm.RequestPickDebugTarget = ShowPickDebugTargetAsync;
             vm.RequestAttachProcessId = ShowAttachProcessIdAsync;
             vm.RequestShowInfoAsync = ShowInfoDialogAsync;
+            vm.RequestSaveMarkdownFile = ShowSaveExpandedMarkdownDialogAsync;
             vm.CaptureWindowForMcpAsync = (ws, rel, scope) => CaptureWindowForMcpCoreAsync(ws, rel, scope);
             vm.GetUiLayoutProvider = () => Services.UiLayoutSnapshot.BuildJsonAllWindows(this);
             vm.GetColorsUnderCursorProvider = () => Services.UiColorsUnderCursor.GetJson(this);

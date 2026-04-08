@@ -129,6 +129,7 @@
 | `apply_dark_theme` | Применить тёмную тему. returns: text. |
 | `apply_light_theme` | Применить светлую тему. returns: text. |
 | `apply_power_classic_theme` | Применить классическую Power-тему (циан). returns: text. |
+| `export_expanded_markdown` | Экспортировать текущий Markdown с развёрнутыми include-директивами. returns: text. |
 | `open_theme_file_dialog` | Открыть диалог выбора файла темы. returns: text. |
 
 ### Вид: язык UI

@@ -52,6 +52,9 @@ public static partial class IdeCommands
     /// <summary>Открыть диалог выбора файла темы. returns: text.</summary>
     public const string OpenThemeFileDialog = "open_theme_file_dialog";
 
+    /// <summary>Экспортировать текущий Markdown с развёрнутыми include-директивами. returns: text.</summary>
+    public const string ExportExpandedMarkdown = "export_expanded_markdown";
+
     // ——— Вид: язык UI
     /// <summary>Установить язык UI. args: culture:string; returns: text; example: {"culture":"ru-RU"}.</summary>
     public const string SetUiLanguage = "set_ui_language";

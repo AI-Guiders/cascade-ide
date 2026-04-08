@@ -189,6 +189,12 @@ internal sealed partial class IdeMcpCommandExecutor
                 _vm.OpenPreviewWindowCommand.Execute(null);
             return "OK";
         });
+        add(Services.IdeCommands.ExportExpandedMarkdown, async (_, _) =>
+        {
+            if (_vm.ExportExpandedMarkdownCommand.CanExecute(null))
+                await _vm.ExportExpandedMarkdownCommand.ExecuteAsync(null);
+            return "OK";
+        });
         add(Services.IdeCommands.ToggleAuxiliaryWorkspaceWindow, async (_, _) =>
         {
             if (_vm.ToggleAuxiliaryWorkspaceWindowCommand.CanExecute(null))
