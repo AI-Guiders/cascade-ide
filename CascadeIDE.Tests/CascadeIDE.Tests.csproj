@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CascadeIDE.csproj" />
+    <ProjectReference Include="..\CascadeIDE.Contracts\CascadeIDE.Contracts.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -42,6 +42,12 @@ public sealed record CommandCapabilityDescriptor : CapabilityDescriptorBase
     public string Category { get; init; } = "";
     /// <summary>Рекомендованный hotkey (если задан).</summary>
     public string? DefaultHotkey { get; init; }
+    /// <summary>
+    /// Первичная зона внимания в модели кокпита (канонический id), если команда осмысленно с ней связана; иначе <see langword="null"/>.
+    /// Не задаёт презентацию (диалог vs панель). ADR 0025.
+    /// </summary>
+    /// <seealso cref="Experimental.AttentionZoneCanonicalIds"/>
+    public string? PrimaryAttentionZoneId { get; init; }
 }
 
 /// <summary>UI surface capability: “предоставляю поверхность UI”.</summary>
@@ -50,5 +56,10 @@ public sealed record UiSurfaceCapabilityDescriptor : CapabilityDescriptorBase
 {
     /// <summary>Отображаемое имя поверхности UI.</summary>
     public string DisplayName { get; init; } = "";
+    /// <summary>
+    /// Первичная зона внимания в модели кокпита (канонический id). ADR 0025. Презентация (overlay, пиксели) — отдельно.
+    /// </summary>
+    /// <seealso cref="Experimental.AttentionZoneCanonicalIds"/>
+    public string? PrimaryAttentionZoneId { get; init; }
 }
 

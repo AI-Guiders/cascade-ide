@@ -35,9 +35,9 @@
 
 4. **Реализация — поэтапно:**
    - **Фаза A (документ):** этот ADR + ссылка из [0024](0024-ide-sdk-and-stable-contracts.md).
-   - **Фаза B (контракты):** добавить в `CascadeIDE.Contracts` поле (например `AttentionZoneId` или `PrimaryAttentionZone`) и/или вынести минимальный набор констант id, совпадающих с `AttentionZoneIds`.
-   - **Фаза C (реестр):** заполнять поле при регистрации модулей; отражать в `CapabilityMap` и дампах.
-   - **Фаза D (опционально):** снять дублирование — использовать один источник типов в Contracts, на который ссылается `Features/UiChrome` (чтобы не разъезжались строки).
+   - **Фаза B (контракты):** **сделано:** `AttentionZoneCanonicalIds` + опциональное `PrimaryAttentionZoneId` на `CommandCapabilityDescriptor` и `UiSurfaceCapabilityDescriptor`; строковые id в приложении (`AttentionZoneIds`) алиасят константы из Contracts.
+   - **Фаза C (реестр):** заполнять поле при регистрации модулей по смыслу; `CapabilityMap` и JSON-дампы содержат новые поля (сериализация record). По мере появления `RegisterUiSurface` / команд с зоной — задавать `PrimaryAttentionZoneId` явно.
+   - **Фаза D (опционально):** снять оставшееся дублирование — enum/расширения только в приложении, строки — из Contracts везде, где уместно.
 
 5. **Стабильность:** новые поля в `Experimental` namespace контрактов; изменение набора зон или id — только с обновлением [0021](0021-pfd-mfd-cockpit-attention-model.md) и этого ADR.
 
