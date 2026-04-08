@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -19,6 +20,13 @@ public sealed class SimpleCapabilityRegistry : ICapabilityRegistry
 
     public CapabilityMap BuildMap()
     {
+        foreach (var s in _uiSurfaces)
+        {
+            var issue = CapabilityAttentionConsistency.TryGetUiSurfaceIssue(s);
+            if (issue is not null)
+                Debug.WriteLine("CapabilityAttentionConsistency: " + issue);
+        }
+
         var map = new CapabilityMap
         {
             Services = _services.ToArray(),

@@ -61,5 +61,11 @@ public sealed record UiSurfaceCapabilityDescriptor : CapabilityDescriptorBase
     /// </summary>
     /// <seealso cref="Experimental.AttentionZoneCanonicalIds"/>
     public string? PrimaryAttentionZoneId { get; init; }
+    /// <summary>
+    /// Стабильный id панели shell (как в <c>attention_zone_panels</c> / <see cref="Experimental.AttentionPanelCanonicalIds"/>), если поверхность привязана к конкретной панели.
+    /// Вместе с <see cref="PrimaryAttentionZoneId"/> позволяет проверить согласованность с <c>AttentionZonePanelRuntime</c>. ADR 0025.
+    /// </summary>
+    /// <seealso cref="Experimental.AttentionPanelCanonicalIds"/>
+    public string? HostAttentionPanelId { get; init; }
 }
 

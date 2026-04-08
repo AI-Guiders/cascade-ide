@@ -23,6 +23,7 @@
 2. **SDK должен уметь выражать привязку capabilities к зоне внимания** как **метаданные**, а не как дублирование визуального дерева:
    - минимум: опциональное поле на **`UiSurfaceCapabilityDescriptor`** (и при необходимости на **`CommandCapabilityDescriptor`**, если команда считается привязанной к зоне по смыслу — напр. фокус в редакторе);
    - значение: **канонический id зоны** (строка, совместимая с TOML overlay и capability‑map), либо ссылка на общий enum/константы в `CascadeIDE.Contracts` после выноса.
+   - для поверхностей, совпадающих с **панелью shell**: опциональное **`HostAttentionPanelId`** (`AttentionPanelCanonicalIds`) вместе с **`PrimaryAttentionZoneId`** — мост к `AttentionZonePanelRuntime`; см. [attention-zone-panel-playbook-v1](../design/attention-zone-panel-playbook-v1.md) и проверку **`CapabilityAttentionConsistency`** при сборке карты.
 
 3. **Презентация по-прежнему через overlay** ([0010](0010-ui-modes-toml-configuration.md), [0024](0024-ide-sdk-and-stable-contracts.md)): видимость, размер, вкладка MFD shell — **не** переносятся целиком в SDK. Зона в контракте отвечает на вопрос **«где в модели внимания живёт эта поверхность»**, а не «в каком пикселе».
 
@@ -36,7 +37,7 @@
 4. **Реализация — поэтапно:**
    - **Фаза A (документ):** этот ADR + ссылка из [0024](0024-ide-sdk-and-stable-contracts.md).
    - **Фаза B (контракты):** **сделано:** `AttentionZoneCanonicalIds` + опциональное `PrimaryAttentionZoneId` на `CommandCapabilityDescriptor` и `UiSurfaceCapabilityDescriptor`; строковые id в приложении (`AttentionZoneIds`) алиасят константы из Contracts.
-   - **Фаза C (реестр):** заполнять поле при регистрации модулей по смыслу; `CapabilityMap` и JSON-дампы содержат новые поля (сериализация record). По мере появления `RegisterUiSurface` / команд с зоной — задавать `PrimaryAttentionZoneId` явно.
+   - **Фаза C (реестр):** заполнять поля при регистрации модулей по смыслу; `CapabilityMap` и JSON-дампы содержат зону и `HostAttentionPanelId` (сериализация record). При обоих заданных — согласованность с `AttentionZonePanelRuntime` (предупреждение в Debug при `BuildMap()`). Playbook: [attention-zone-panel-playbook-v1](../design/attention-zone-panel-playbook-v1.md).
    - **Фаза D (опционально):** снять оставшееся дублирование — enum/расширения только в приложении, строки — из Contracts везде, где уместно.
 
 5. **Стабильность:** новые поля в `Experimental` namespace контрактов; изменение набора зон или id — только с обновлением [0021](0021-pfd-mfd-cockpit-attention-model.md) и этого ADR.

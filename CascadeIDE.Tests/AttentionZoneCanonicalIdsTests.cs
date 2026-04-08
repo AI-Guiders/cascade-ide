@@ -47,4 +47,22 @@ public sealed class AttentionZoneCanonicalIdsTests
         Assert.NotNull(back);
         Assert.Equal(AttentionZoneCanonicalIds.Mfd, back.PrimaryAttentionZoneId);
     }
+
+    [Fact]
+    public void Ui_surface_descriptor_JSON_round_trips_zone_and_panel()
+    {
+        var d = new UiSurfaceCapabilityDescriptor
+        {
+            Id = "ui.x",
+            OwnerModuleId = "m",
+            DisplayName = "X",
+            PrimaryAttentionZoneId = AttentionZoneCanonicalIds.Pfd,
+            HostAttentionPanelId = AttentionPanelCanonicalIds.SolutionExplorer
+        };
+        var json = JsonSerializer.Serialize(d);
+        var back = JsonSerializer.Deserialize<UiSurfaceCapabilityDescriptor>(json);
+        Assert.NotNull(back);
+        Assert.Equal(AttentionZoneCanonicalIds.Pfd, back.PrimaryAttentionZoneId);
+        Assert.Equal(AttentionPanelCanonicalIds.SolutionExplorer, back.HostAttentionPanelId);
+    }
 }
