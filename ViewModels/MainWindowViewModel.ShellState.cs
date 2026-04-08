@@ -176,6 +176,14 @@ public partial class MainWindowViewModel
     [ObservableProperty]
     private string _externalMcpServersJson = "[]";
 
+    /// <summary>Mermaid/PlantUML в превью Markdown через Kroki (текст диаграммы отправляется на сервер).</summary>
+    [ObservableProperty]
+    private bool _markdownKrokiEnabled = true;
+
+    /// <summary>Базовый URL Kroki для превью диаграмм.</summary>
+    [ObservableProperty]
+    private string _markdownKrokiBaseUrl = "https://kroki.io";
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsOllamaSelected))]
     [NotifyPropertyChangedFor(nameof(IsAnthropicSelected))]

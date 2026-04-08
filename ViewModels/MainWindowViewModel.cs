@@ -70,6 +70,10 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _contextMinimizer = new Services.ContextMinimizer(_csharpLanguageService);
         _aiProviderManager = new Services.AiProviderManager(_contextMinimizer, ResolveProvider);
         _ideMcpServerEnabled = _settings.IdeMcpServerEnabled;
+        _markdownKrokiEnabled = _settings.MarkdownKrokiEnabled;
+        _markdownKrokiBaseUrl = string.IsNullOrWhiteSpace(_settings.MarkdownKrokiBaseUrl)
+            ? "https://kroki.io"
+            : _settings.MarkdownKrokiBaseUrl.Trim();
         _externalMcpServersJson = _settings.ExternalMcpServersJson;
         _activeAiProvider = _settings.ActiveAiProvider;
         _cursorAcpAgentPath = _settings.CursorAcpAgentPath ?? "";

@@ -73,6 +73,14 @@
                 <TextBlock Text="{Binding SupportedEditorLanguagesSummary}" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" TextWrapping="Wrap" FontSize="12"/>
             </StackPanel>
 
+            <TextBlock Text="Markdown · диаграммы" FontWeight="SemiBold" FontSize="16" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" Margin="0,8,0,0"/>
+            <TextBlock Text="Блоки ```mermaid и ```plantuml в превью рендерятся через Kroki (SVG). Текст диаграммы отправляется на указанный сервер." Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" TextWrapping="Wrap" FontSize="12"/>
+            <CheckBox Content="Включить Kroki для Mermaid / PlantUML" IsChecked="{Binding MarkdownKrokiEnabled}" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+            <StackPanel Spacing="4">
+                <TextBlock Text="Базовый URL Kroki:" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+                <TextBox Text="{Binding MarkdownKrokiBaseUrl, Mode=TwoWay}" Watermark="https://kroki.io" MinWidth="280"/>
+            </StackPanel>
+
             <TextBlock Text="C# / LSP" FontWeight="SemiBold" FontSize="16" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" Margin="0,8,0,0"/>
             <TextBlock Text="Один процесс language server на открытое решение. ParseOnly — только синтаксис в IDE без внешнего exe." Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" TextWrapping="Wrap" FontSize="12"/>
             <StackPanel Spacing="6">

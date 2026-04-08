@@ -21,6 +21,7 @@ public partial class MainWindow : Window
     private TextEditor? _marginPointerEditor;
     private ViewModels.MainWindowViewModel? _boundMainVm;
     private bool _workspaceEventsAttached;
+    private CancellationTokenSource? _markdownDiagramPreviewCts;
     private static readonly object HighlightLogLock = new();
 
     public MainWindow()

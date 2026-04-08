@@ -1,4 +1,9 @@
 using System.ComponentModel;
+using System.Threading;
+using System.Threading.Tasks;
+using Avalonia.Threading;
+using CascadeIDE.Models;
+using CascadeIDE.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace CascadeIDE.ViewModels;
@@ -14,6 +19,7 @@ public sealed partial class MarkdownPreviewWindowViewModel : ObservableObject
 
     private MainWindowViewModel? _editorVm;
     private PropertyChangedEventHandler? _editorHandler;
+    private CancellationTokenSource? _diagramPreviewCts;
 
     /// <summary>Подключить к редактору: превью обновляется при изменении EditorText/CurrentFilePath.</summary>
     public void AttachToEditor(MainWindowViewModel vm)
@@ -22,7 +28,8 @@ public sealed partial class MarkdownPreviewWindowViewModel : ObservableObject
         _editorVm = vm;
         _editorHandler = (_, e) =>
         {
-            if (e.PropertyName is nameof(MainWindowViewModel.EditorText) or nameof(MainWindowViewModel.CurrentFilePath))
+            if (e.PropertyName is nameof(MainWindowViewModel.EditorText) or nameof(MainWindowViewModel.CurrentFilePath)
+                or nameof(MainWindowViewModel.MarkdownKrokiEnabled) or nameof(MainWindowViewModel.MarkdownKrokiBaseUrl))
                 UpdateFromEditor();
         };
         vm.PropertyChanged += _editorHandler;
@@ -32,6 +39,8 @@ public sealed partial class MarkdownPreviewWindowViewModel : ObservableObject
     /// <summary>Отвязать от редактора (переход в режим контента от агента).</summary>
     public void DetachFromEditor()
     {
+        _diagramPreviewCts?.Cancel();
+        _diagramPreviewCts = null;
         if (_editorVm is null)
             return;
         if (_editorHandler is not null)
@@ -45,7 +54,7 @@ public sealed partial class MarkdownPreviewWindowViewModel : ObservableObject
     {
         DetachFromEditor();
         Title = title;
-        Markdown = content ?? "";
+        ApplyMarkdownWithDiagrams(content ?? "", SettingsService.Load());
     }
 
     private void UpdateFromEditor()
@@ -53,6 +62,47 @@ public sealed partial class MarkdownPreviewWindowViewModel : ObservableObject
         if (_editorVm is null)
             return;
         Title = string.IsNullOrEmpty(_editorVm.CurrentFilePath) ? "Превью" : _editorVm.CurrentFilePath;
-        Markdown = _editorVm.EditorText ?? "";
+        var raw = _editorVm.EditorText ?? "";
+        Markdown = raw;
+
+        var snapshot = new CascadeIdeSettings
+        {
+            MarkdownKrokiEnabled = _editorVm.MarkdownKrokiEnabled,
+            MarkdownKrokiBaseUrl = string.IsNullOrWhiteSpace(_editorVm.MarkdownKrokiBaseUrl)
+                ? "https://kroki.io"
+                : _editorVm.MarkdownKrokiBaseUrl.Trim()
+        };
+        ApplyMarkdownWithDiagrams(raw, snapshot);
+    }
+
+    private void ApplyMarkdownWithDiagrams(string raw, CascadeIdeSettings settings)
+    {
+        _diagramPreviewCts?.Cancel();
+        if (!settings.MarkdownKrokiEnabled)
+            return;
+
+        _diagramPreviewCts = new CancellationTokenSource();
+        var token = _diagramPreviewCts.Token;
+        _ = ExpandDiagramsAsync(raw, settings, token);
+    }
+
+    private async Task ExpandDiagramsAsync(string raw, CascadeIdeSettings settings, CancellationToken token)
+    {
+        try
+        {
+            await Task.Delay(400, token).ConfigureAwait(false);
+            var expanded = await MarkdownDiagramExpansion.ExpandAsync(raw, settings, token).ConfigureAwait(false);
+            if (token.IsCancellationRequested)
+                return;
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                if (!token.IsCancellationRequested)
+                    Markdown = expanded;
+            });
+        }
+        catch (OperationCanceledException)
+        {
+            // ожидаемо
+        }
     }
 }

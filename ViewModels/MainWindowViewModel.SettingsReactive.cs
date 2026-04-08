@@ -9,6 +9,18 @@ public partial class MainWindowViewModel
         SaveSettingsIfChanged();
     }
 
+    partial void OnMarkdownKrokiEnabledChanged(bool value)
+    {
+        _settings.MarkdownKrokiEnabled = value;
+        SaveSettingsIfChanged();
+    }
+
+    partial void OnMarkdownKrokiBaseUrlChanged(string value)
+    {
+        _settings.MarkdownKrokiBaseUrl = string.IsNullOrWhiteSpace(value) ? "https://kroki.io" : value.Trim();
+        SaveSettingsIfChanged();
+    }
+
     partial void OnExternalMcpServersJsonChanged(string value)
     {
         _settings.ExternalMcpServersJson = value ?? "[]";

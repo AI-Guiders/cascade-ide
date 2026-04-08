@@ -1,6 +1,10 @@
+using System.Threading;
+using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Threading;
+using CascadeIDE.Models;
 using CascadeIDE.Services;
 using CommunityToolkit.Mvvm.Input;
 
@@ -79,9 +83,55 @@ public partial class MainWindow
     private void UpdateInlineMarkdownPreview()
     {
         if (DataContext is not ViewModels.MainWindowViewModel vm || !vm.IsMarkdownFile)
+        {
+            _markdownDiagramPreviewCts?.Cancel();
             return;
+        }
         var viewer = this.FindControl<Markdown.Avalonia.MarkdownScrollViewer>("InlineMarkdownPreview");
-        if (viewer is not null)
-            viewer.Markdown = vm.EditorText ?? "";
+        if (viewer is null)
+            return;
+
+        var raw = vm.EditorText ?? "";
+        viewer.Markdown = raw;
+
+        if (!vm.MarkdownKrokiEnabled)
+            return;
+
+        _markdownDiagramPreviewCts?.Cancel();
+        _markdownDiagramPreviewCts = new CancellationTokenSource();
+        var token = _markdownDiagramPreviewCts.Token;
+        var krokiSnapshot = new CascadeIdeSettings
+        {
+            MarkdownKrokiEnabled = vm.MarkdownKrokiEnabled,
+            MarkdownKrokiBaseUrl = string.IsNullOrWhiteSpace(vm.MarkdownKrokiBaseUrl)
+                ? "https://kroki.io"
+                : vm.MarkdownKrokiBaseUrl.Trim()
+        };
+
+        _ = ExpandInlineMarkdownPreviewAsync(viewer, raw, krokiSnapshot, token);
+    }
+
+    private static async Task ExpandInlineMarkdownPreviewAsync(
+        Markdown.Avalonia.MarkdownScrollViewer viewer,
+        string rawMarkdown,
+        CascadeIdeSettings krokiSettings,
+        CancellationToken token)
+    {
+        try
+        {
+            await Task.Delay(400, token).ConfigureAwait(false);
+            var expanded = await MarkdownDiagramExpansion.ExpandAsync(rawMarkdown, krokiSettings, token).ConfigureAwait(false);
+            if (token.IsCancellationRequested)
+                return;
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                if (!token.IsCancellationRequested)
+                    viewer.Markdown = expanded;
+            });
+        }
+        catch (OperationCanceledException)
+        {
+            // ожидаемо при новом вводе или смене файла
+        }
     }
 }

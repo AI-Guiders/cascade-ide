@@ -73,6 +73,14 @@ public sealed class CascadeIdeSettings : ModelBase
     /// <summary>Дополнительные аргументы командной строки LSP (через пробел).</summary>
     public string CSharpLspArguments { get; set; } = "";
 
+    /// <summary>
+    /// Рендерить блоки <c>```mermaid</c> / <c>```plantuml</c> в превью Markdown через Kroki (текст диаграммы уходит на сервер).
+    /// </summary>
+    public bool MarkdownKrokiEnabled { get; set; } = true;
+
+    /// <summary>Базовый URL Kroki (публичный <c>https://kroki.io</c> или свой инстанс).</summary>
+    public string MarkdownKrokiBaseUrl { get; set; } = "https://kroki.io";
+
     public override bool Is(ModelBase modelBase, double tolerance = DEFAULT_TOLERANCE)
     {
         if (modelBase is not CascadeIdeSettings o)
@@ -95,7 +103,9 @@ public sealed class CascadeIdeSettings : ModelBase
             && UiCultureName.Is(o.UiCultureName)
             && CSharpLspProvider.Is(o.CSharpLspProvider)
             && CSharpLspExecutable.Is(o.CSharpLspExecutable)
-            && CSharpLspArguments.Is(o.CSharpLspArguments);
+            && CSharpLspArguments.Is(o.CSharpLspArguments)
+            && MarkdownKrokiEnabled.Is(o.MarkdownKrokiEnabled)
+            && MarkdownKrokiBaseUrl.Is(o.MarkdownKrokiBaseUrl);
     }
 
     public override ModelBase Clone()
@@ -120,7 +130,9 @@ public sealed class CascadeIdeSettings : ModelBase
             UiCultureName = UiCultureName,
             CSharpLspProvider = CSharpLspProvider,
             CSharpLspExecutable = CSharpLspExecutable,
-            CSharpLspArguments = CSharpLspArguments
+            CSharpLspArguments = CSharpLspArguments,
+            MarkdownKrokiEnabled = MarkdownKrokiEnabled,
+            MarkdownKrokiBaseUrl = MarkdownKrokiBaseUrl
         };
     }
 }
