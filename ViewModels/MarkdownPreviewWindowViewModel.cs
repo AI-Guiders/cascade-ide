@@ -54,7 +54,10 @@ public sealed partial class MarkdownPreviewWindowViewModel : ObservableObject
     {
         DetachFromEditor();
         Title = title;
-        ApplyMarkdownWithDiagrams(content ?? "", SettingsService.Load());
+        var raw = content ?? "";
+        // Синхронно, как в UpdateFromEditor: иначе при выключенном Kroki ApplyMarkdownWithDiagrams выходит без записи Markdown.
+        Markdown = raw;
+        ApplyMarkdownWithDiagrams(raw, SettingsService.Load());
     }
 
     private void UpdateFromEditor()
