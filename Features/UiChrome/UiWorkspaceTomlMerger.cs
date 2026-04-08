@@ -21,6 +21,7 @@ public static class UiWorkspaceTomlMerger
             ChatPanelExpandedDefaultWidthPixels = higher?.ChatPanelExpandedDefaultWidthPixels ?? lower?.ChatPanelExpandedDefaultWidthPixels,
             ChatPanelExpandedPowerWidthPixels = higher?.ChatPanelExpandedPowerWidthPixels ?? lower?.ChatPanelExpandedPowerWidthPixels,
             ChatPanelExpandedAgentChatWidthPixels = higher?.ChatPanelExpandedAgentChatWidthPixels ?? lower?.ChatPanelExpandedAgentChatWidthPixels,
+            MarkdownPreviewPlacement = higher?.MarkdownPreviewPlacement ?? lower?.MarkdownPreviewPlacement,
             AttentionZonePanels = MergeAttentionPanels(lower?.AttentionZonePanels, higher?.AttentionZonePanels)
         };
     }

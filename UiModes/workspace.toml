@@ -7,6 +7,9 @@ chat_panel_expanded_default_width_pixels = 340
 chat_panel_expanded_power_width_pixels = 420
 chat_panel_expanded_agent_chat_width_pixels = 520
 
+# Превью Markdown: forward_split (колонка у редактора, если есть EditorContentGrid), mfd (пока fallback — окно), separate_window.
+markdown_preview_placement = "forward_split"
+
 # ADR 0021: привязка поверхностей к зонам внимания (канонические id: forward, pfd, mfd, eicas, hud).
 # Переопределение только здесь / в пользовательском бандле UiModes — не drag-and-drop в сессии.
 [attention_zone_panels]

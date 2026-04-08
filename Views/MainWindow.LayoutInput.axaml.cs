@@ -4,6 +4,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
+using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Models;
 using CascadeIDE.Services;
 using CommunityToolkit.Mvvm.Input;
@@ -74,9 +75,25 @@ public partial class MainWindow
 
     private void UpdateMarkdownPreviewColumn(bool showPreview)
     {
-        if (this.FindControl<Grid>("EditorContentGrid") is not { } grid)
-            return;
-        UiWorkspaceLayout.ApplyMarkdownPreviewColumn(grid, showPreview);
+        var forwardSplit = MarkdownPreviewPlacementRuntime.Current == MarkdownPreviewPlacement.ForwardSplit;
+        var showColumn = forwardSplit && showPreview;
+
+        foreach (var v in EnumerateVisualDescendants(this))
+        {
+            if (v is not DockDocumentView dockView)
+                continue;
+            if (dockView.FindControl<Grid>("EditorContentGrid") is not { } grid)
+                continue;
+
+            var isActive = false;
+            if (DataContext is ViewModels.MainWindowViewModel vm
+                && dockView.DataContext is ViewModels.DockDocumentViewModel dv)
+            {
+                isActive = string.Equals(vm.CurrentFilePath, dv.Doc.FilePath, StringComparison.OrdinalIgnoreCase);
+            }
+
+            UiWorkspaceLayout.ApplyMarkdownPreviewColumn(grid, showColumn && isActive);
+        }
     }
 
     /// <summary>Принудительно обновить контент панели превью справа от редактора (Markdown.Avalonia иногда не обновляет привязку при смене EditorText).</summary>
@@ -87,7 +104,12 @@ public partial class MainWindow
             _markdownDiagramPreviewCts?.Cancel();
             return;
         }
-        var viewer = this.FindControl<Markdown.Avalonia.MarkdownScrollViewer>("InlineMarkdownPreview");
+
+        if (MarkdownPreviewPlacementRuntime.Current != MarkdownPreviewPlacement.ForwardSplit)
+            return;
+
+        var dock = TryGetActiveDockDocumentView();
+        var viewer = dock?.FindControl<Markdown.Avalonia.MarkdownScrollViewer>("InlineMarkdownPreview");
         if (viewer is null)
             return;
 

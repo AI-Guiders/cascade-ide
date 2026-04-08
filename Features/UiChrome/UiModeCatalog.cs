@@ -155,6 +155,7 @@ public static class UiModeCatalog
             _bundleSource = UiModesBundleSource.Unknown;
             UiWorkspaceLayoutRuntimeMetrics.ResetToCodeDefaults();
             AttentionZonePanelRuntime.ResetToCodeDefaults();
+            MarkdownPreviewPlacementRuntime.ResetToCodeDefaults();
         }
     }
 
@@ -190,6 +191,7 @@ public static class UiModeCatalog
             var merged = UiWorkspaceTomlMerger.Merge(_bundleWorkspaceToml, repo);
             UiWorkspaceLayoutRuntimeMetrics.ApplyWorkspaceToml(merged);
             AttentionZonePanelRuntime.ApplyWorkspaceToml(merged);
+            MarkdownPreviewPlacementRuntime.ApplyWorkspaceToml(merged);
         }
     }
 
@@ -204,6 +206,7 @@ public static class UiModeCatalog
         _bundleWorkspaceToml = null;
         UiWorkspaceLayoutRuntimeMetrics.ResetToCodeDefaults();
         AttentionZonePanelRuntime.ResetToCodeDefaults();
+        MarkdownPreviewPlacementRuntime.ResetToCodeDefaults();
 
         if (!Directory.Exists(uiModesDirectory))
         {
@@ -248,6 +251,7 @@ public static class UiModeCatalog
                 _bundleWorkspaceToml = w;
                 UiWorkspaceLayoutRuntimeMetrics.ApplyWorkspaceToml(w);
                 AttentionZonePanelRuntime.ApplyWorkspaceToml(w);
+                MarkdownPreviewPlacementRuntime.ApplyWorkspaceToml(w);
             }
             catch (Exception ex)
             {

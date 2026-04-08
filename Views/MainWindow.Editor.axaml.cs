@@ -156,6 +156,39 @@ public partial class MainWindow
         return null;
     }
 
+    /// <summary>Активная вкладка документа (для <c>EditorContentGrid</c> / inline-превью Markdown).</summary>
+    private DockDocumentView? TryGetActiveDockDocumentView()
+    {
+        if (DataContext is not ViewModels.MainWindowViewModel vm)
+            return null;
+
+        var targetPath = vm.CurrentFilePath;
+        if (string.IsNullOrWhiteSpace(targetPath))
+            return null;
+
+        foreach (var v in EnumerateVisualDescendants(this))
+        {
+            if (v is not DockDocumentView dockView)
+                continue;
+
+            if (dockView.DataContext is not ViewModels.DockDocumentViewModel dv)
+                continue;
+
+            if (!string.Equals(dv.Doc.FilePath, targetPath, StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            return dockView;
+        }
+
+        foreach (var v in EnumerateVisualDescendants(this))
+        {
+            if (v is DockDocumentView dockView)
+                return dockView;
+        }
+
+        return null;
+    }
+
     private static IEnumerable<Visual> EnumerateVisualDescendants(Visual root)
     {
         foreach (var child in root.GetVisualChildren())

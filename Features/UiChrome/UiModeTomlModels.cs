@@ -18,6 +18,12 @@ public sealed class UiWorkspaceToml
     public int? ChatPanelExpandedPowerWidthPixels { get; set; }
     public int? ChatPanelExpandedAgentChatWidthPixels { get; set; }
 
+    /// <summary>
+    /// Куда показывать превью Markdown: <c>forward_split</c>, <c>mfd</c>, <c>separate_window</c> (или <c>window</c>);
+    /// TOML: <c>markdown_preview_placement</c>.
+    /// </summary>
+    public string? MarkdownPreviewPlacement { get; set; }
+
     /// <summary>Привязка id поверхности к каноническому id зоны; TOML: <c>[attention_zone_panels]</c> (ADR 0021).</summary>
     public Dictionary<string, string>? AttentionZonePanels { get; set; }
 }
