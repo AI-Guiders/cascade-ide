@@ -2,7 +2,8 @@
 
 **Статус:** Accepted (загрузчик TOML, `UiModeCatalog`, capabilities и шипнутые `UiModes/` реализованы; при необходимости дорабатываются `docs/ux` и пользовательские override)  
 **Дата:** 2026-04-02  
-**Связь:** [0003-debug-ui-mode-separate-from-power.md](0003-debug-ui-mode-separate-from-power.md), [0006-presentation-layers-and-feature-slices.md](0006-presentation-layers-and-feature-slices.md), `Features/UiChrome/UiModeLayoutRegistry`, `Services/SettingsService` + Tomlyn, `Features/UiChrome/UiWorkspaceLayoutDimensions` / `Services/UiWorkspaceLayout`.
+**Обновлено:** 2026-04-08 — намерение задать **топологию презентации** зон в TOML после появления альтернатив одному `MainGrid` ([0017](0017-multi-window-workspace-and-agent-surfaces.md)); см. подраздел ниже.  
+**Связь:** [0003-debug-ui-mode-separate-from-power.md](0003-debug-ui-mode-separate-from-power.md), [0006-presentation-layers-and-feature-slices.md](0006-presentation-layers-and-feature-slices.md), [0017](0017-multi-window-workspace-and-agent-surfaces.md) (мультиоконность и топология), [`attention-zone-panel-playbook-v1.md`](../design/attention-zone-panel-playbook-v1.md) (зона ↔ панель ↔ топология), `Features/UiChrome/UiModeLayoutRegistry`, `Services/SettingsService` + Tomlyn, `Features/UiChrome/UiWorkspaceLayoutDimensions` / `Services/UiWorkspaceLayout`.
 
 ## Контекст
 
@@ -50,6 +51,14 @@
 | **Capabilities** | Что показывать в интерфейсе (гипотезы, quick actions, телеметрия Power и т.д.) | База: при **`inherits`** — **capabilities разрешённого родителя**; без **`inherits`** — **`DefaultsForFamily(family)`**. Поверх — явные ключи в `*.toml` |
 
 **Конечный пользователь IDE** в комбо «режим интерфейса» видит в основном **id пресета**; оси **`family`** / **capabilities** ему не обязательны, пока в UI нет отдельных переключателей под них.
+
+### Топология презентации зон (будущее расширение)
+
+Сейчас в коде одна топология — **`MainWindowDockedGrid`** (`AttentionLayoutSurfaceKind`, одно главное окно, колонки `MainGrid`). Когда в продукте появятся **альтернативы** (несколько `TopLevel`, сценарии [0017](0017-multi-window-workspace-and-agent-surfaces.md)), **логично** задавать выбранную топологию **тем же слоем данных**, что и остальной overlay: пресет **`workspace.toml`** бандла `UiModes/` и/или overlay репозитория workspace — с теми же правилами мержа и приоритета, что у глобальных метрик хрома, **без обратной записи** динамического ресайза окон в шипнутые файлы (см. подраздел про рантайм ниже).
+
+**Не смешивать** с картой **панель → зона** (`attention_zone_panels` / `AttentionZonePanelRuntime`): там семантика «какая панель в какой зоне», здесь — **в какой геометрии** (одно окно vs несколько) воплощены регионы. Подробнее: [`attention-zone-panel-playbook-v1.md`](../design/attention-zone-panel-playbook-v1.md).
+
+**Конкретное имя ключа, перечисление значений enum и валидация** (в т.ч. предупреждение при топологии из `workspace.toml` репозитория) — **после** согласования реализации в [0017](0017-multi-window-workspace-and-agent-surfaces.md); отдельный ADR под схему TOML **не требуется**, пока объём правил укладывается в этот подпункт.
 
 **`inherits = "BaseId"`** — один родитель: наследуется **весь** уже разрешённый режим (раскладка, capabilities, ширина чата, полоса задачи, заголовок окна — по правилам мержа в коде). В дочернем файле задаются **только отличия** от родителя. Отдельная секция вроде `[inherits]` со списком «какие поля наследовать» **не используется**: при такой модели список дельт в файле и так короче, чем перечисление срезов.
 
