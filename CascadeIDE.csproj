@@ -43,6 +43,7 @@
     <ProjectReference Include="..\agent-notes-core\AgentNotes.Core.csproj" />
     <ProjectReference Include="..\git-mcp-core\GitMcp.Core.csproj" />
     <ProjectReference Include="..\dotnet-debug-core\DotnetDebug.Core.csproj" />
+    <ProjectReference Include="CascadeIDE.Contracts\CascadeIDE.Contracts.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.3.13" />
