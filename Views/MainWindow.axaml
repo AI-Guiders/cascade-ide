@@ -248,7 +248,7 @@
             </MenuItem>
         </Menu>
 
-        <!-- Строка 3 — рабочая область (PFD | Forward | MFD). Зона MFD — MfdShellView: вкладки WORKSPACE/чат/терминал/… и полоса EICAS сверху. -->
+        <!-- Строка 3 — рабочая область (якоря PFD | Forward | MFD в MainGrid; AttentionLayoutSurfaceKind.MainWindowDockedGrid). В колонке MFD сейчас MfdShellView: вкладки WORKSPACE/чат/терминал/… и полоса EICAS сверху — не синоним «зона MFD», а хост по умолчанию. -->
         <Grid x:Name="MainGrid" ColumnDefinitions="220,4,*,4,340">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -262,7 +262,7 @@
 
         <views:TaskCockpitView Grid.Row="2" Grid.ColumnSpan="5"/>
 
-        <!-- PFD: обозреватель и контекст workspace (ADR 0021, канон id pfd) -->
+        <!-- Якорь зоны PFD (канон id pfd): по дефолтной карте — SolutionExplorerView; переопределение — attention_zone_panels / AttentionZonePanelRuntime -->
         <chrome:AttentionZoneContainer Zone="Pfd" Grid.Row="3" Grid.Column="0">
             <views:SolutionExplorerView />
         </chrome:AttentionZoneContainer>
@@ -277,7 +277,7 @@
                       Width="4" ResizeDirection="Columns" Background="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"
                       IsVisible="{Binding IsMfdColumnVisible}"/>
 
-        <!-- MFD: одна оболочка вкладок — WORKSPACE / чат / терминал / сборка / … (ADR 0021), без дублирования телеметрии и чата над нижним доком. -->
+        <!-- Якорь зоны MFD: сейчас одна оболочка вкладок (MfdShellView) — WORKSPACE / чат / терминал / сборка / …; состав вкладок ≠ сама зона (ADR 0021). -->
         <chrome:AttentionZoneContainer Zone="Mfd" Grid.Row="3" Grid.Column="4" Grid.RowSpan="{Binding ChatPanelMainGridRowSpan}"
                                        IsVisible="{Binding IsMfdColumnVisible}">
             <views:MfdShellView DataContext="{Binding DataContext, ElementName=RootWindow}" MinHeight="0"/>
