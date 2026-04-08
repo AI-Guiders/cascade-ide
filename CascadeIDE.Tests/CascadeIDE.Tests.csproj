@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <Content Include="..\TextMateGrammars\**\*" CopyToOutputDirectory="PreserveNewest" Link="TextMateGrammars\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Content Include="..\samples\MarkdownSlice\**\*" CopyToOutputDirectory="PreserveNewest" Link="samples\MarkdownSlice\%(RecursiveDir)%(Filename)%(Extension)" />
   </ItemGroup>
 
 </Project>
