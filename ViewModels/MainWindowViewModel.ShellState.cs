@@ -62,7 +62,6 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(IsBottomPanelVisible))]
     [NotifyPropertyChangedFor(nameof(IsProblemsPanelVisible))]
     [NotifyPropertyChangedFor(nameof(WindowTitle))]
-    [NotifyPropertyChangedFor(nameof(MainWorkspaceTelemetryColumnSpan))]
     private string _uiMode = "Balanced";
 
     [ObservableProperty]

@@ -102,14 +102,6 @@ public partial class MainWindowViewModel
     public bool ShowWorkspaceBottomChrome =>
         ShowTelemetryStrip || ShowEicasAlertsBar || IsBottomPanelVisible;
 
-    /// <summary>
-    /// Раньше — ширина колонок под полосой телеметрии в полноширинном низу; полоса теперь в MFD. Оставлено для совместимости привязок/снимков.
-    /// </summary>
-    public int MainWorkspaceTelemetryColumnSpan =>
-        UiModeFamily.IsPowerFamily() && ShowTelemetryStrip
-            ? Capabilities.TelemetryMainColumnSpan
-            : 5;
-
     /// <summary>Чат в одной строке с PFD/Forward; MFD не пересекает нижнюю строку MainGrid.</summary>
     public int ChatPanelMainGridRowSpan => 1;
 
