@@ -51,6 +51,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private readonly Services.CSharpLanguageService _csharpLanguageService;
     private readonly Services.ContextMinimizer _contextMinimizer;
     private readonly Services.WorkspaceDiagnosticsCoordinator _workspaceDiagnostics;
+    private readonly Services.Capabilities.SimpleCapabilityRegistry _capabilities = new();
     private CSharpLspDiagnosticsHost? _csharpLspHost;
     private readonly IdeMcpCommandExecutor _ideMcpExecutor;
     private readonly Services.IdeDapDebugSession _dapDebug;
@@ -122,6 +123,9 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _workspaceDiagnostics = new Services.WorkspaceDiagnosticsCoordinator(_csharpLanguageService, ProblemsPanel);
         _workspaceDiagnostics.Attach(this);
         _workspaceDiagnostics.DiagnosticsChanged += OnWorkspaceDiagnosticsChangedForHud;
+
+        // Capabilities: v1 registry (code-first, explicit module list).
+        new Features.Markdown.MarkdownCapabilitiesModule().Register(_capabilities);
 
         _csharpLspProvider = string.IsNullOrEmpty(_settings.CSharpLspProvider)
             ? CSharpLspProviderIds.ParseOnly
