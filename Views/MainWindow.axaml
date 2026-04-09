@@ -142,24 +142,6 @@
         </Style>
     </Window.Styles>
 
-    <Window.KeyBindings>
-        <KeyBinding Gesture="Alt+1" Command="{Binding SetUiModeByIndexCommand}" CommandParameter="0"/>
-        <KeyBinding Gesture="Alt+2" Command="{Binding SetUiModeByIndexCommand}" CommandParameter="1"/>
-        <KeyBinding Gesture="Alt+3" Command="{Binding SetUiModeByIndexCommand}" CommandParameter="2"/>
-        <KeyBinding Gesture="Alt+4" Command="{Binding SetUiModeByIndexCommand}" CommandParameter="3"/>
-        <KeyBinding Gesture="Alt+5" Command="{Binding SetUiModeByIndexCommand}" CommandParameter="4"/>
-        <KeyBinding Gesture="Alt+6" Command="{Binding SetUiModeByIndexCommand}" CommandParameter="5"/>
-        <KeyBinding Gesture="Alt+7" Command="{Binding SetUiModeByIndexCommand}" CommandParameter="6"/>
-        <KeyBinding Gesture="Alt+8" Command="{Binding SetUiModeByIndexCommand}" CommandParameter="7"/>
-        <KeyBinding Gesture="Alt+9" Command="{Binding SetUiModeByIndexCommand}" CommandParameter="8"/>
-        <KeyBinding Gesture="Ctrl+Alt+M" Command="{Binding CycleUiModeCommand}"/>
-        <KeyBinding Gesture="F5" Command="{Binding DebugStartOrContinueCommand}"/>
-        <KeyBinding Gesture="Shift+F5" Command="{Binding DebugStopCommand}"/>
-        <KeyBinding Gesture="F10" Command="{Binding DebugStepOverCommand}"/>
-        <KeyBinding Gesture="F11" Command="{Binding DebugStepIntoCommand}"/>
-        <KeyBinding Gesture="Shift+F11" Command="{Binding DebugStepOutCommand}"/>
-    </Window.KeyBindings>
-
     <Design.DataContext>
         <vm:MainWindowViewModel/>
     </Design.DataContext>
@@ -176,19 +158,19 @@
                 <MenuItem Header="В_ыход" Command="{Binding ExitCommand}"/>
             </MenuItem>
             <MenuItem Header="_Отладка">
-                <MenuItem Header="_Начать или продолжить" Command="{Binding DebugStartOrContinueCommand}" HotKey="F5"/>
+                <MenuItem x:Name="MenuDebugStartOrContinue" Header="_Начать или продолжить" Command="{Binding DebugStartOrContinueCommand}"/>
                 <MenuItem Header="Стартовый проект из _выделения в дереве" Command="{Binding SetStartupProjectFromSelectionCommand}"/>
                 <MenuItem Header="_Сбросить стартовый проект" Command="{Binding ClearStartupProjectCommand}"/>
                 <Separator/>
                 <MenuItem Header="_Присоединиться к процессу…" Command="{Binding DebugAttachCommand}"/>
-                <MenuItem Header="_Остановить отладку" Command="{Binding DebugStopCommand}" HotKey="Shift+F5"/>
+                <MenuItem x:Name="MenuDebugStop" Header="_Остановить отладку" Command="{Binding DebugStopCommand}"/>
                 <Separator/>
-                <MenuItem Header="Шаг с _обходом" Command="{Binding DebugStepOverCommand}" HotKey="F10"/>
-                <MenuItem Header="Шаг с _заходом" Command="{Binding DebugStepIntoCommand}" HotKey="F11"/>
-                <MenuItem Header="Шаг с _выходом" Command="{Binding DebugStepOutCommand}" HotKey="Shift+F11"/>
+                <MenuItem x:Name="MenuDebugStepOver" Header="Шаг с _обходом" Command="{Binding DebugStepOverCommand}"/>
+                <MenuItem x:Name="MenuDebugStepInto" Header="Шаг с _заходом" Command="{Binding DebugStepIntoCommand}"/>
+                <MenuItem x:Name="MenuDebugStepOut" Header="Шаг с _выходом" Command="{Binding DebugStepOutCommand}"/>
             </MenuItem>
             <MenuItem Header="_Вид">
-                <MenuItem Header="Палитра _команд" Command="{Binding ToggleCommandPaletteCommand}" HotKey="Ctrl+Q"/>
+                <MenuItem x:Name="MenuCommandPalette" Header="Палитра _команд" Command="{Binding ToggleCommandPaletteCommand}"/>
                 <Separator/>
                 <MenuItem Header="Обозреватель _решения" ToggleType="CheckBox" IsChecked="{Binding IsSolutionExplorerVisible, Mode=TwoWay}"/>
                 <MenuItem Header="_Вывод сборки" ToggleType="CheckBox" IsChecked="{Binding IsBuildOutputVisible, Mode=TwoWay}"/>

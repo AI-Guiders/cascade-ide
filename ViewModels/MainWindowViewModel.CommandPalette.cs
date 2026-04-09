@@ -55,6 +55,18 @@ public partial class MainWindowViewModel
     [ObservableProperty]
     private int _commandPaletteSelectedIndex = -1;
 
+    /// <summary>Подсказка внизу палитры; жест «выделить запрос» из <c>hotkeys.toml</c> (<c>toggle_command_palette</c>).</summary>
+    public string CommandPaletteFooterHint
+    {
+        get
+        {
+            var h = HotkeyGestureMap.GetDisplayHint("toggle_command_palette");
+            return !string.IsNullOrEmpty(h)
+                ? $"↑↓ выбор · Enter выполнить · Esc закрыть · PgUp/PgDn страница · {h} выделить запрос"
+                : "↑↓ выбор · Enter выполнить · Esc закрыть · PgUp/PgDn страница";
+        }
+    }
+
     public ObservableCollection<IdeCommandPaletteRowViewModel> FilteredCommandPaletteEntries { get; } = new();
 
     partial void OnCommandPaletteQueryChanged(string value)

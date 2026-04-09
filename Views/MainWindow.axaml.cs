@@ -27,9 +27,18 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        // KeyBindings на Window не доходят до команд, когда фокус в TextEditor — ловим F5/F10/F11 в tunnel.
+        // KeyBindings на Window не доходят до команд, когда фокус в TextEditor — дублируем жесты из hotkeys.toml в tunnel.
         AddHandler(InputElement.KeyDownEvent, OnDebugShortcutKeyDown, RoutingStrategies.Tunnel);
         DataContextChanged += OnDataContextChanged;
+        Loaded += OnMainWindowLoaded;
+    }
+
+    private void OnMainWindowLoaded(object? sender, RoutedEventArgs e) => TryApplyHotkeys();
+
+    private void TryApplyHotkeys()
+    {
+        if (DataContext is ViewModels.MainWindowViewModel vm)
+            Services.MainWindowHotkeyService.ApplyAll(this, vm);
     }
 
     private void OnDataContextChanged(object? sender, EventArgs e)
@@ -81,6 +90,7 @@ public partial class MainWindow : Window
             SetupChatInputKeyHandler();
             SetupTerminalKeyHandler();
             SetupEditorAndTextMate();
+            TryApplyHotkeys();
         }
         else
         {
