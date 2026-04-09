@@ -64,6 +64,10 @@ dotnet run
 
 Слои, вертикальные срезы фич, роль `MainWindowViewModel` и правила миграции: **[docs/architecture-policy.md](docs/architecture-policy.md)**. Карта срезов (Git, Build, Terminal, Chat…) и фазы выноса: **[docs/architecture-migration.md](docs/architecture-migration.md)**. Каталог **`Features/`** — см. [Features/README.md](Features/README.md).
 
+## Бэклог (идеи на потом)
+
+- **Пайплайн Markdown-сборки (resume / книга):** манифесты, профили, `dotnet-script`, деградация бэкендов — что переносимо в оркестрацию IDE/агента. Подробно: **[docs/backlog-ideas-from-doc-pipeline-v1.md](docs/backlog-ideas-from-doc-pipeline-v1.md)**.
+
 ## Git и submodules (roadmap)
 
 Нативная работа с **Git** и **submodules** — целевое требование для использования IDE как основной среды (в т.ч. без боли, типичной для Visual Studio при submodules). Принципы и критерии приёмки: **[docs/git-and-submodules-v1.md](docs/git-and-submodules-v1.md)**.
