@@ -66,7 +66,7 @@ dotnet run
 
 ## Бэклог (идеи на потом)
 
-- **Пайплайн Markdown-сборки (resume / книга):** манифесты, профили, `dotnet-script`, деградация бэкендов — что переносимо в оркестрацию IDE/агента. Подробно: **[docs/backlog-ideas-from-doc-pipeline-v1.md](docs/backlog-ideas-from-doc-pipeline-v1.md)**.
+- **Пайплайн Markdown-сборки (resume / книга):** манифесты, профили, `dotnet-script`, деградация бэкендов — что переносимо в оркестрацию IDE/агента. Указатель в операционной карточке в **agent-notes**: `knowledge/work/projects/current-projects/cascade-ide/README.md` (раздел **«Отложено»**). Подробно: **[docs/backlog-ideas-from-doc-pipeline-v1.md](docs/backlog-ideas-from-doc-pipeline-v1.md)**.
 
 ## Git и submodules (roadmap)
 
