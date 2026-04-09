@@ -37,6 +37,7 @@
 | [0027](0027-small-team-focus-vs-public-maturity.md) | Узкая команда (человек + ассистент) vs зрелость «для открытия»: две оси (границы vs очередь) | Accepted |
 | [0028](0028-user-settings-toml-localappdata-and-secrets.md) | Пользовательские настройки: `settings.toml`, `%LocalAppData%\CascadeIDE\`, секреты в `ai-keys.toml` | Accepted |
 | [0029](0029-configuration-toml-canonical-ui-facade.md) | Конфигурация: TOML-first; целостный UI настроек deferred; точечный UI — фасад канона | Accepted |
+| [0030](0030-command-ids-hotkeys-and-ui-registry-layers.md) | Слои `command_id`, хоткеев и UI: IdeCommands, палитра, TOML, мост VM; чертёж единого каталога | Accepted · Implemented |
 
 ## Соглашения
 

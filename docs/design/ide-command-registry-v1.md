@@ -1,6 +1,6 @@
 # Реестр команд IDE для палитры и MCP (чертёж v1)
 
-**Статус:** чертёж (не ADR). Согласуется с [ADR 0013](../adr/0013-command-surface-and-discoverability.md), [ADR 0010](../adr/0010-ui-modes-toml-configuration.md).  
+**Статус:** чертёж (полный `IdeCommandUiMeta` и т.д. — по плану); **реализация v1 (частично) — Implemented в коде:** partial `Services/IdeCommandRegistry*.cs` (палитра, `CommandAccessibleFrom`, хоткеи окна); жесты только в `hotkeys.toml`. Согласуется с [ADR 0013](../adr/0013-command-surface-and-discoverability.md), [ADR 0010](../adr/0010-ui-modes-toml-configuration.md), [ADR 0030](../adr/0030-command-ids-hotkeys-and-ui-registry-layers.md) (**Accepted · Implemented**).  
 **Задача:** один **идентификатор команды** (`command_id`) для MCP, `ide_execute_command`, меню и палитры; отдельно — **метаданные для человека** (имя, группа, фильтр по режиму) и **хоткеи** из файлов.
 
 ---
