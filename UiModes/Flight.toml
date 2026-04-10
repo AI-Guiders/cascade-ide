@@ -5,5 +5,5 @@ family = "Flight"
 
 main_window_title = "CascadeIDE — Flight (layout lab)"
 
-# Телеметрия работы в колонке MFD отдельной страницей вместо нижней полосы — удобно отлаживать раскладку в этом режиме.
-telemetry_surface = "dedicated_page"
+# Workspace Health в колонке MFD отдельной страницей вместо нижней полосы — удобно отлаживать раскладку в этом режиме.
+workspace_health_surface = "dedicated_page"

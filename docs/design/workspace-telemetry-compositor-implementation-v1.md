@@ -13,9 +13,9 @@
 | **Снимок Workspace Health** | `WorkspaceHealthInputSnapshot`: нормализованные входы (build/tests/debug/git) до композитора. Не привязан к форме «полоски». |
 | **Композитор смысла (semantic)** | `WorkspaceHealthCompositor`: из снимка собирает упорядоченные `WorkspaceHealthSegment` (порядок, флаги вроде `IsBuildRunning`). Отвечает за **состав каналов**, не за пиксели и не за зону PFD/MFD. |
 | **Раскладка зоны / страницы (chrome layout)** | Куда на экране попадают блоки: полоса снизу, сетка на странице MFD, карточка в PFD. Задаётся **пресетом** и шаблонами (AXAML) и/или отдельным слоем в коде; рабочее имя в дизайне — *compositor страницы зоны* / *display page layout*. Только **геометрия контейнера** в зоне, не дублирует порядок build/tests — тот уже зафиксирован композитором смысла. |
-| **Поверхность (surface)** | **Слой представления:** как **показать** те же сегменты (полоса, страница, карточка в хроме). Выбор Strip vs Page (`telemetry_surface`, enum `WorkspaceHealthUiSurface`) — пресет и разметка; **снимок и композитор смысла не зависят** от этого слоя. Это не «хост событий» и не шина сообщений — только UI. |
+| **Поверхность (surface)** | **Слой представления:** как **показать** те же сегменты (полоса, страница, карточка в хроме). Выбор Strip vs Page (`workspace_health_surface`, enum `WorkspaceHealthUiSurface`) — пресет и разметка; **снимок и композитор смысла не зависят** от этого слоя. Это не «хост событий» и не шина сообщений — только UI. |
 | **Strip (полоса)** | Конкретная поверхность представления: узкая горизонтальная полоса — [`WorkspaceHealthStripView`](../../Views/WorkspaceHealthStripView.axaml). |
-| **Page (страница)** | Другая поверхность представления **только для канала Workspace Health** (`telemetry_surface`): те же сегменты в регионе PFD/MFD вместо полосы. Это **не** определение всего содержимого якоря — см. [ADR 0021](../adr/0021-pfd-mfd-cockpit-attention-model.md#anchor-pfd-mfd-content-vs-telemetry-page). |
+| **Page (страница)** | Другая поверхность представления **только для канала Workspace Health** (`workspace_health_surface`): те же сегменты в регионе PFD/MFD вместо полосы. Это **не** определение всего содержимого якоря — см. [ADR 0021](../adr/0021-pfd-mfd-cockpit-attention-model.md#anchor-pfd-mfd-content-vs-telemetry-page). |
 | **Канал EICAS** | Оповещения W/C/A — отдельный **семантический** контур от Workspace Health (ADR §5). Визуально — полоса, список, оверлей и т.д.; контейнер в текущей разметке: `EicasAlertsBarView`, TOML `eicas_alerts_bar`. **Не путать** со Strip/Page: те относятся к **представлению** build/tests/debug/git, а не к каналу CAS. |
 
 Типы `WorkspaceHealth*` задают **смысл** сегментов (build/tests/debug/git); [`WorkspaceHealthStripView`](../../Views/WorkspaceHealthStripView.axaml) — одна из **поверхностей представления**; при странице MFD / блоке PFD те же данные идут в **другую разметку** без смены композитора.
@@ -27,7 +27,7 @@
 | **Слот презентации** | Геометрия и роль поверхности: полоса vs **полная страница** региона MFD/PFD и т.д. | Разговорное «dedicated page» как «отдельная страница» часто про этот уровень. |
 | **Канал содержимого** | Какой поток данных заполняет слот | Workspace Health (этот документ), EICAS, статус окружения, другие инструменты — **разные** каналы. |
 
-**`DedicatedPage` в пресете Workspace Health** (`telemetry_surface`, enum `WorkspaceHealthUiSurface`) относится **только** к **каналу Workspace Health**: те же `WorkspaceHealthSegments`, другая разметка ([`WorkspaceHealthMfdPageView`](../../Views/WorkspaceHealthMfdPageView.axaml)). Это **не** имя для «любой» полноэкранной страницы MFD. Полное разведение терминов и рекомендуемые формулировки — [ADR 0021 §1.2](../adr/0021-pfd-mfd-cockpit-attention-model.md#glossary-presentation-vs-channel).
+**`DedicatedPage` в пресете Workspace Health** (`workspace_health_surface`, enum `WorkspaceHealthUiSurface`) относится **только** к **каналу Workspace Health**: те же `WorkspaceHealthSegments`, другая разметка ([`WorkspaceHealthMfdPageView`](../../Views/WorkspaceHealthMfdPageView.axaml)). Это **не** имя для «любой» полноэкранной страницы MFD. Полное разведение терминов и рекомендуемые формулировки — [ADR 0021 §1.2](../adr/0021-pfd-mfd-cockpit-attention-model.md#glossary-presentation-vs-channel).
 
 ---
 
@@ -51,9 +51,9 @@
 | Инвалидация | `ViewModels/MainWindowViewModel.LayoutNotifications.cs` | `RebuildWorkspaceHealth` при смене данных build/tests/debug. |
 | Git-строки | `Features/UiChrome/UiChromeViewModel.cs` | `WorkspaceHealthGitText`, `WorkspaceHealthGitCockpitShort`; подписка в `MainWindowViewModel` на `Chrome.PropertyChanged`. |
 | Свойства для UI | `ViewModels/MainWindowViewModel.Presentation.cs` | `WorkspaceHealthBuild*` / `WorkspaceHealthTests*` / `WorkspaceHealthDebug*` читают сегменты из `_workspaceHealth.GetSnapshot()`; флаги сессии отладки по-прежнему из DAP. |
-| Полоса хрома над нижним доком | `Views/WorkspaceChromeBandView.axaml` | Сетка колонок как у `MainGrid` (0–4); слот `EicasAlertsBarView` и вложенный `WorkspaceHealthStripView`. Включение полосы Workspace Health: `ShowWorkspaceHealthStrip` (`telemetry_strip` + `WorkspaceHealthUiSurface.BottomStrip` в capabilities). По смыслу — контейнер **представления** нижней зоны (EICAS + Strip), не «хост событий». |
+| Полоса хрома над нижним доком | `Views/WorkspaceChromeBandView.axaml` | Сетка колонок как у `MainGrid` (0–4); слот `EicasAlertsBarView` и вложенный `WorkspaceHealthStripView`. Включение полосы Workspace Health: `ShowWorkspaceHealthStrip` (`workspace_health_strip` + `WorkspaceHealthUiSurface.BottomStrip` в capabilities). По смыслу — контейнер **представления** нижней зоны (EICAS + Strip), не «хост событий». |
 | UI полосы | `Views/WorkspaceHealthStripView.axaml` | `ItemsControl` по `WorkspaceHealthSegments`; разные шаблоны для Power vs остальные режимы. |
-| Страница в MFD | `Views/WorkspaceHealthMfdPageView.axaml` | Тот же `WorkspaceHealthSegments` при `ShowWorkspaceHealthMfdPage` (`telemetry_strip` + `DedicatedPage`); в `MainWindow` — над `ChatPanelView` в зоне MFD. |
+| Страница в MFD | `Views/WorkspaceHealthMfdPageView.axaml` | Тот же `WorkspaceHealthSegments` при `ShowWorkspaceHealthMfdPage` (`workspace_health_strip` + `DedicatedPage`); в `MainWindow` — над `ChatPanelView` в зоне MFD. |
 | Тесты | `CascadeIDE.Tests/WorkspaceHealthCompositorTests.cs`, `WorkspaceHealthFormatTests.cs` | Композитор: порядок, `IsBuildRunning`. Формат: сегменты и `Compose` для снимка. |
 
 ---

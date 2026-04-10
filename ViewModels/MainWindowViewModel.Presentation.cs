@@ -74,14 +74,14 @@ public partial class MainWindowViewModel
     public bool WorkspaceHealthOnTerminalTab =>
         Capabilities.WorkspaceHealthOnTerminalTab && !ShowWorkspaceHealthStrip;
 
-    /// <summary>Куда вести Workspace Health: нижняя полоса или страница зоны — из capabilities (<c>telemetry_surface</c>).</summary>
+    /// <summary>Куда вести Workspace Health: нижняя полоса или страница зоны — из capabilities (<c>workspace_health_surface</c>).</summary>
     public WorkspaceHealthUiSurface WorkspaceHealthUiSurface => Capabilities.WorkspaceHealthSurface;
 
-    /// <summary>Полоска build/tests/debug/git — при <c>telemetry_strip</c> и <c>bottom_strip</c>; рисуется в <see cref="Views.WorkspaceChromeBandView"/> внутри MFD.</summary>
+    /// <summary>Полоска build/tests/debug/git — при <c>workspace_health_strip</c> и <c>bottom_strip</c>; рисуется в <see cref="Views.WorkspaceChromeBandView"/> внутри MFD.</summary>
     public bool ShowWorkspaceHealthStrip =>
         Capabilities.WorkspaceHealthStripVisible && Capabilities.WorkspaceHealthSurface == WorkspaceHealthUiSurface.BottomStrip;
 
-    /// <summary>Workspace Health в колонке MFD (страница вместо нижней полосы) — при <c>telemetry_strip</c> и <c>telemetry_surface = dedicated_page</c>.</summary>
+    /// <summary>Workspace Health в колонке MFD (страница вместо нижней полосы) — при <c>workspace_health_strip</c> и <c>workspace_health_surface = dedicated_page</c>.</summary>
     public bool ShowWorkspaceHealthMfdPage =>
         Capabilities.WorkspaceHealthStripVisible && Capabilities.WorkspaceHealthSurface == WorkspaceHealthUiSurface.DedicatedPage;
 

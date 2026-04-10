@@ -61,18 +61,20 @@ public sealed class UiModeFileToml
     public bool? AgentOperationsPanel { get; set; }
     public bool? AgentTrace { get; set; }
     public bool? AutonomousAgentTelemetry { get; set; }
-    public bool? TelemetryOnTerminalTab { get; set; }
-    public int? TelemetryMainColumnSpan { get; set; }
+    /// <summary>Дубль Workspace Health на вкладке «Терминал» в Power; TOML: <c>workspace_health_on_terminal_tab</c>.</summary>
+    public bool? WorkspaceHealthOnTerminalTab { get; set; }
+    /// <summary>Column span нижней зоны Workspace Health в основной сетке (Power); TOML: <c>workspace_health_main_column_span</c>.</summary>
+    public int? WorkspaceHealthMainColumnSpan { get; set; }
     public bool? InstrumentationTabs { get; set; }
     public bool? HypothesesTab { get; set; }
     public bool? RiskSummaryCard { get; set; }
     public bool? ResultSummaryCard { get; set; }
 
-    /// <summary>Полоса телеметрии под редактором; TOML: <c>telemetry_strip</c>.</summary>
-    public bool? TelemetryStrip { get; set; }
+    /// <summary>Полоса Workspace Health под редактором; TOML: <c>workspace_health_strip</c>.</summary>
+    public bool? WorkspaceHealthStrip { get; set; }
 
-    /// <summary><c>bottom_strip</c> | <c>dedicated_page</c>; TOML: <c>telemetry_surface</c>.</summary>
-    public string? TelemetrySurface { get; set; }
+    /// <summary><c>bottom_strip</c> | <c>dedicated_page</c>; TOML: <c>workspace_health_surface</c>.</summary>
+    public string? WorkspaceHealthSurface { get; set; }
 
     /// <summary>Панель инструментов под меню; TOML: <c>main_toolbar</c>.</summary>
     public bool? MainToolbar { get; set; }

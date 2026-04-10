@@ -210,7 +210,7 @@ public sealed class UiModeCatalogTests : IDisposable
             """
             hypotheses_tab = false
             main_window_title = "IDE — Debug (custom)"
-            telemetry_main_column_span = 4
+            workspace_health_main_column_span = 4
             """);
 
         UiModeCatalog.Initialize(dir);
@@ -269,7 +269,7 @@ public sealed class UiModeCatalogTests : IDisposable
         File.WriteAllText(
             Path.Combine(dir, "Balanced.toml"),
             """
-            telemetry_surface = "dedicated_page"
+            workspace_health_surface = "dedicated_page"
             """);
 
         UiModeCatalog.Initialize(dir);

@@ -90,7 +90,7 @@ public static class UiThemeApply
         public const string McpBannerBackground = "CascadeTheme.McpBannerBackground";
         public const string McpBannerForeground = "CascadeTheme.McpBannerForeground";
         public const string PreviewWindowBackground = "CascadeTheme.PreviewWindowBackground";
-        /// <summary>Опционально: секция power_cockpit в JSON темы (неон, safety, телеметрия).</summary>
+        /// <summary>Опционально: секция power_cockpit в JSON темы (неон, safety, Workspace Health).</summary>
         public const string PowerNeonBorder = "CascadeTheme.PowerNeonBorder";
         public const string PowerNeonAccent = "CascadeTheme.PowerNeonAccent";
         public const string PowerCockpitPanelBackground = "CascadeTheme.PowerCockpitPanelBackground";
@@ -172,7 +172,7 @@ public static class UiThemeApply
                 Set(res, Keys.PowerNeonAccent, GetColorFrom(pc, "neon_accent"));
                 Set(res, Keys.PowerCockpitPanelBackground, GetColorFrom(pc, "panel_background"));
                 Set(res, Keys.PowerSafetyDockBackground, GetColorFrom(pc, "safety_dock_background"));
-                Set(res, Keys.PowerWorkspaceHealthStripBackground, GetColorFrom(pc, "telemetry_strip_background"));
+                Set(res, Keys.PowerWorkspaceHealthStripBackground, GetColorFrom(pc, "workspace_health_strip_background"));
                 Set(res, Keys.PowerSafetyL1, GetColorFrom(pc, "safety_l1"));
                 Set(res, Keys.PowerSafetyL2, GetColorFrom(pc, "safety_l2"));
                 Set(res, Keys.PowerSafetyL3, GetColorFrom(pc, "safety_l3"));

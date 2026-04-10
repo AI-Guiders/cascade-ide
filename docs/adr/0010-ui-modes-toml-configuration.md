@@ -22,7 +22,7 @@
 5. **Fallback:** если файл отсутствует, битый или не прошёл валидацию — **встроенные значения по умолчанию** из кода, без падения IDE. См. ниже про роль этих дефолтов.
 6. **Версия схемы:** поле **`schema_version`** — **только в корне файла индекса** (первый читаемый файл набора). Оно задаёт версию **всего** бандла `UiModes/` — индекс, **`workspace.toml`**, per-mode файлы. В **`workspace.toml` отдельного `schema_version` нет** (избегаем двух чисел и рассинхрона). Миграции формата — по одному номеру из индекса.
 7. **Валидация при загрузке (минимум):** неизвестный **`theme_slot`** → fallback; в **шипнутом** наборе отсутствует спека для **обязательного** id → предупреждение + встроенная спека из кода. **Минимальный набор обязательных id** (который продукт не имеет права «потерять» в данных) задаётся **в коде** — сейчас это совпадает с **`UiModeLayoutRegistry.OrderedModeIds`**. Индекс может перечислять **больше** id, чем этот минимум (**дополнительные пользовательские или пресетные режимы**). См. ниже про наследование и отдельный пункт меню без замены `Debug`.
-8. **Capabilities** — тип **`UiModeCapabilities`** (`Features/UiChrome/UiModeCapabilities.cs`). В **`UiModes/<id>.toml`** ключи **предметные** (что в интерфейсе), не имена свойств VM; маппинг в коде через **`TomlPropertyName`**. Мердж: явное значение → при **`inherits`** — от родителя → иначе **`DefaultsForFamily`**. API: **`GetCapabilities`**, **`GetWindowTitleOverride`**.
+8. **Capabilities** — тип **`UiModeCapabilities`** (`Features/UiChrome/UiModeCapabilities.cs`). В **`UiModes/<id>.toml`** ключи **предметные** (что в интерфейсе), в **snake_case**; десериализация через **`CascadeTomlSerializer`** (имена свойств модели в PascalCase → snake_case). Мердж: явное значение → при **`inherits`** — от родителя → иначе **`DefaultsForFamily`**. API: **`GetCapabilities`**, **`GetWindowTitleOverride`**.
 
    | Ключ TOML | Смысл |
    |-----------|--------|
@@ -32,8 +32,10 @@
    | `agent_operations_panel` | Блок операций агента в чате (Balanced) |
    | `agent_trace` | Панель trace агента (Power) |
    | `autonomous_agent_telemetry` | Телеметрия автономного агента / Power cockpit |
-   | `telemetry_on_terminal_tab` | Дубль телеметрии на вкладке «Терминал» |
-   | `telemetry_main_column_span` | Column span области телеметрии в основной сетке (Power) |
+   | `workspace_health_on_terminal_tab` | Дубль Workspace Health на вкладке «Терминал» (Power) |
+   | `workspace_health_main_column_span` | Column span области Workspace Health в основной сетке (Power) |
+   | `workspace_health_strip` | Показывать полосу Workspace Health под редактором |
+   | `workspace_health_surface` | `bottom_strip` или `dedicated_page` — слой представления Workspace Health |
    | `instrumentation_tabs` | Вкладки событий/тестов/отладки в нижнем доке |
    | `hypotheses_tab` | Вкладка «Гипотезы» |
    | `risk_summary_card` / `result_summary_card` | Карточки риска и результата в чате |

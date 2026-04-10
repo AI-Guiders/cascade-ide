@@ -53,7 +53,7 @@
     "neon_accent": "#E879F9",
     "panel_background": "#120A28",
     "safety_dock_background": "#05030E",
-    "telemetry_strip_background": "#0A0618",
+    "workspace_health_strip_background": "#0A0618",
     "safety_l1": "#0D9488",
     "safety_l2": "#D97706",
     "safety_l3": "#7C3AED",

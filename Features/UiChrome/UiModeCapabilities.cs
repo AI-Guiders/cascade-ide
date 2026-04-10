@@ -21,7 +21,7 @@ public sealed record UiModeCapabilities(
     bool ResultSummaryCard,
     /// <summary>Полоса build/tests/debug/git под редактором.</summary>
     bool WorkspaceHealthStripVisible,
-    /// <summary>Нижняя полоса vs страница зоны; TOML: <c>telemetry_surface</c>.</summary>
+    /// <summary>Нижняя полоса vs страница зоны; TOML: <c>workspace_health_surface</c>.</summary>
     WorkspaceHealthUiSurface WorkspaceHealthSurface,
     /// <summary>Панель инструментов под меню.</summary>
     bool MainToolbarVisible,

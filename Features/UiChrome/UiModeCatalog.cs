@@ -461,24 +461,24 @@ public static class UiModeCatalog
         var modeFile = file!;
 
         var span = baseCaps.WorkspaceHealthMainColumnSpan;
-        if (modeFile.TelemetryMainColumnSpan is { } s && s >= 1 && s <= 12)
+        if (modeFile.WorkspaceHealthMainColumnSpan is { } s && s >= 1 && s <= 12)
             span = s;
 
-        var surface = ResolveWorkspaceHealthSurface(modeFile.TelemetrySurface, baseCaps.WorkspaceHealthSurface);
+        var surface = ResolveWorkspaceHealthSurface(modeFile.WorkspaceHealthSurface, baseCaps.WorkspaceHealthSurface);
 
         return new UiModeCapabilities(
             QuickActions: modeFile.QuickActions ?? baseCaps.QuickActions,
             AgentOperationsPanel: modeFile.AgentOperationsPanel ?? baseCaps.AgentOperationsPanel,
             AgentTrace: modeFile.AgentTrace ?? baseCaps.AgentTrace,
             AutonomousAgentTelemetry: modeFile.AutonomousAgentTelemetry ?? baseCaps.AutonomousAgentTelemetry,
-            WorkspaceHealthOnTerminalTab: modeFile.TelemetryOnTerminalTab
+            WorkspaceHealthOnTerminalTab: modeFile.WorkspaceHealthOnTerminalTab
                 ?? baseCaps.WorkspaceHealthOnTerminalTab,
             WorkspaceHealthMainColumnSpan: span,
             InstrumentationTabs: modeFile.InstrumentationTabs ?? baseCaps.InstrumentationTabs,
             HypothesesTab: modeFile.HypothesesTab ?? baseCaps.HypothesesTab,
             RiskSummaryCard: modeFile.RiskSummaryCard ?? baseCaps.RiskSummaryCard,
             ResultSummaryCard: modeFile.ResultSummaryCard ?? baseCaps.ResultSummaryCard,
-            WorkspaceHealthStripVisible: modeFile.TelemetryStrip ?? baseCaps.WorkspaceHealthStripVisible,
+            WorkspaceHealthStripVisible: modeFile.WorkspaceHealthStrip ?? baseCaps.WorkspaceHealthStripVisible,
             WorkspaceHealthSurface: surface,
             MainToolbarVisible: modeFile.MainToolbar ?? baseCaps.MainToolbarVisible,
             ProblemsPanelVisible: modeFile.ProblemsPanel ?? baseCaps.ProblemsPanelVisible,
