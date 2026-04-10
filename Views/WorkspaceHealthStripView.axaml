@@ -2,7 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:CascadeIDE.ViewModels"
              xmlns:chrome="using:CascadeIDE.Features.UiChrome"
-             x:Class="CascadeIDE.Views.TelemetryStripView"
+             x:Class="CascadeIDE.Views.WorkspaceHealthStripView"
              Classes.power="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Power}"
              x:DataType="vm:MainWindowViewModel">
     <UserControl.Styles>
@@ -18,14 +18,14 @@
         <Border Padding="8,6"
                 Classes="modeCard"
                 IsVisible="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyNe}, ConverterParameter=Power}">
-            <ItemsControl ItemsSource="{Binding WorkspaceTelemetrySegments}">
+            <ItemsControl ItemsSource="{Binding WorkspaceHealthSegments}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <WrapPanel Orientation="Horizontal" ItemHeight="28" VerticalAlignment="Center"/>
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
-                    <DataTemplate x:DataType="chrome:WorkspaceTelemetrySegment">
+                    <DataTemplate x:DataType="chrome:WorkspaceHealthSegment">
                         <Border Classes="modeCard" Padding="6,2" Margin="0,0,8,0">
                             <TextBlock Text="{Binding LineText}" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
                         </Border>
@@ -36,7 +36,7 @@
 
         <!-- Power: кокпит — одна «SOC»-полоса + компактный JSON -->
         <Border IsVisible="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Power}"
-                Background="{DynamicResource CascadeTheme.PowerTelemetryStripBackground}"
+                Background="{DynamicResource CascadeTheme.PowerWorkspaceHealthStripBackground}"
                 BorderBrush="{DynamicResource CascadeTheme.PowerNeonBorder}"
                 BorderThickness="1"
                 CornerRadius="14"
@@ -46,7 +46,7 @@
                 <Grid ColumnDefinitions="*,Auto"
                       RowDefinitions="Auto">
                     <ItemsControl Grid.Column="0"
-                                  ItemsSource="{Binding WorkspaceTelemetrySegments}"
+                                  ItemsSource="{Binding WorkspaceHealthSegments}"
                                   HorizontalAlignment="Left">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
@@ -54,7 +54,7 @@
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="chrome:WorkspaceTelemetrySegment">
+                            <DataTemplate x:DataType="chrome:WorkspaceHealthSegment">
                                 <Panel>
                                     <Border IsVisible="{Binding IsBuildSource}"
                                             Margin="0,0,8,0"

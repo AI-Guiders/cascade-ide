@@ -56,7 +56,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private MarkdownLspDiagnosticsHost? _markdownLspHost;
     private readonly IdeMcpCommandExecutor _ideMcpExecutor;
     private readonly Services.IdeDapDebugSession _dapDebug;
-    private readonly IWorkspaceTelemetryProvider _workspaceTelemetry;
+    private readonly IWorkspaceHealthProvider _workspaceHealth;
     private readonly IEicasFeed _eicasFeed;
 
     private Services.McpClientService _mcpClientService;
@@ -156,7 +156,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _mcpBuildTest = new Services.McpDotnetBuildTestService(_dotnetRunner);
         _mcpAgentNotes = new Services.McpAgentNotesService();
 
-        _workspaceTelemetry = new WorkspaceTelemetryProvider(
+        _workspaceHealth = new WorkspaceHealthProvider(
             () => IsBuilding,
             () => LastTestSummary,
             () => ImpactedTestsBadge,
@@ -168,16 +168,16 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _eicasFeed.MessagesChanged += (_, _) => RebuildEicas();
 
         Workspace.PropertyChanged += (_, e) => OnWorkspacePropertyChanged(e.PropertyName);
-        Chrome.PropertyChanged += OnChromePropertyChangedForWorkspaceTelemetry;
-        RebuildWorkspaceTelemetry();
+        Chrome.PropertyChanged += OnChromePropertyChangedForWorkspaceHealth;
+        RebuildWorkspaceHealth();
         RebuildEicas();
     }
 
-    private void OnChromePropertyChangedForWorkspaceTelemetry(object? _, PropertyChangedEventArgs e)
+    private void OnChromePropertyChangedForWorkspaceHealth(object? _, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName is nameof(UiChromeViewModel.TelemetryGitText)
-            or nameof(UiChromeViewModel.TelemetryGitCockpitShort))
-            RebuildWorkspaceTelemetry();
+        if (e.PropertyName is nameof(UiChromeViewModel.WorkspaceHealthGitText)
+            or nameof(UiChromeViewModel.WorkspaceHealthGitCockpitShort))
+            RebuildWorkspaceHealth();
     }
 
     /// <summary>DAP-сессия (netcoredbg): launch/attach и обновление панели отладки.</summary>
@@ -186,7 +186,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     /// <summary>Solution/workspace state and background loading.</summary>
     public SolutionWorkspaceViewModel Workspace { get; }
 
-    /// <summary>Git-телеметрия полосы задач и bloom при смене UI-режима.</summary>
+    /// <summary>Git-строки для Workspace Health и bloom при смене UI-режима.</summary>
     public UiChromeViewModel Chrome { get; }
 
     /// <summary>Открытые файлы, группы редакторов и Dock.</summary>
@@ -250,14 +250,14 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             msg => UiScheduler.Default.Post(() => InstrumentationPanel.EventTimeline.Insert(0, msg)));
 
     /// <summary>
-    /// Полоса телеметрии читает счётчики отладки с главного VM; при смене MCP-стека обновляем строки.
+    /// Полоса Workspace Health читает счётчики отладки с главного VM; при смене MCP-стека обновляем строки.
     /// </summary>
     private void OnInstrumentationPanelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName != nameof(InstrumentationPanelViewModel.IsDebugPanelVisible))
             return;
-        OnPropertyChanged(nameof(TelemetryDebugText));
-        OnPropertyChanged(nameof(TelemetryDebugCockpitShort));
+        OnPropertyChanged(nameof(WorkspaceHealthDebugText));
+        OnPropertyChanged(nameof(WorkspaceHealthDebugCockpitShort));
     }
 
     /// <summary>Вывод сборки (нижняя вкладка Build output).</summary>

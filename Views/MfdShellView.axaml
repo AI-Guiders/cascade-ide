@@ -45,18 +45,18 @@
         <!-- Локально тёмный вариант Fluent для TabControl, чтобы полоска вкладок не ломалась при RequestedThemeVariant=Default + светлая Windows. -->
         <ThemeVariantScope RequestedThemeVariant="Dark">
             <TabControl SelectedIndex="{Binding MfdShellTabIndex, Mode=TwoWay}">
-                <TabItem Header="WORKSPACE" IsVisible="{Binding ShowTelemetryMfdPage}">
-                    <views:TelemetryMfdPageView/>
+                <TabItem Header="WORKSPACE" IsVisible="{Binding ShowWorkspaceHealthMfdPage}">
+                    <views:WorkspaceHealthMfdPageView/>
                 </TabItem>
                 <TabItem Header="Чат">
                     <views:ChatPanelView/>
                 </TabItem>
                 <TabItem Header="Терминал · консоль" IsVisible="{Binding IsTerminalVisible}">
                     <DockPanel>
-                        <Border DockPanel.Dock="Top" IsVisible="{Binding TelemetryOnTerminalTab}" Classes="modeCard" Margin="0,0,0,4">
+                        <Border DockPanel.Dock="Top" IsVisible="{Binding WorkspaceHealthOnTerminalTab}" Classes="modeCard" Margin="0,0,0,4">
                             <StackPanel Spacing="4">
                                 <WrapPanel Orientation="Horizontal">
-                                    <TextBlock Text="{Binding TelemetryBuildText}" Foreground="{DynamicResource CascadeTheme.TerminalForeground}" Margin="0,0,12,0"/>
+                                    <TextBlock Text="{Binding WorkspaceHealthBuildText}" Foreground="{DynamicResource CascadeTheme.TerminalForeground}" Margin="0,0,12,0"/>
                                     <TextBlock Text="{Binding ResultSummary}"
                                                IsVisible="{Binding IsResultSummaryVisible}"
                                                Foreground="{DynamicResource CascadeTheme.TerminalForeground}" Margin="0,0,12,0" MaxWidth="320" TextTrimming="CharacterEllipsis"/>

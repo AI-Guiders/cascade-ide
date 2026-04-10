@@ -16,8 +16,8 @@ public partial class MainWindowViewModel
         OnPropertyChanged(nameof(HasDebugSession));
         OnPropertyChanged(nameof(IsDebugExecutionPaused));
         OnPropertyChanged(nameof(IsDebugExecutionRunning));
-        OnPropertyChanged(nameof(TelemetryDebugText));
-        OnPropertyChanged(nameof(TelemetryDebugCockpitShort));
+        OnPropertyChanged(nameof(WorkspaceHealthDebugText));
+        OnPropertyChanged(nameof(WorkspaceHealthDebugCockpitShort));
     }
 
     private Task ShowDebugInfoAsync(string title, string message) =>

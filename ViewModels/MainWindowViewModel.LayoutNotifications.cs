@@ -12,12 +12,12 @@ public partial class MainWindowViewModel
     protected override void OnPropertyChanged(PropertyChangedEventArgs e)
     {
         base.OnPropertyChanged(e);
-        if (e.PropertyName is nameof(TelemetryBuildText)
-            or nameof(TelemetryTestsText)
-            or nameof(TelemetryDebugText)
-            or nameof(TelemetryBuildCockpitShort)
-            or nameof(TelemetryTestsCockpitShort)
-            or nameof(TelemetryDebugCockpitShort))
-            RebuildWorkspaceTelemetry();
+        if (e.PropertyName is nameof(WorkspaceHealthBuildText)
+            or nameof(WorkspaceHealthTestsText)
+            or nameof(WorkspaceHealthDebugText)
+            or nameof(WorkspaceHealthBuildCockpitShort)
+            or nameof(WorkspaceHealthTestsCockpitShort)
+            or nameof(WorkspaceHealthDebugCockpitShort))
+            RebuildWorkspaceHealth();
     }
 }

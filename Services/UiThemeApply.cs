@@ -95,7 +95,7 @@ public static class UiThemeApply
         public const string PowerNeonAccent = "CascadeTheme.PowerNeonAccent";
         public const string PowerCockpitPanelBackground = "CascadeTheme.PowerCockpitPanelBackground";
         public const string PowerSafetyDockBackground = "CascadeTheme.PowerSafetyDockBackground";
-        public const string PowerTelemetryStripBackground = "CascadeTheme.PowerTelemetryStripBackground";
+        public const string PowerWorkspaceHealthStripBackground = "CascadeTheme.PowerWorkspaceHealthStripBackground";
         public const string PowerSafetyL1 = "CascadeTheme.PowerSafetyL1";
         public const string PowerSafetyL2 = "CascadeTheme.PowerSafetyL2";
         public const string PowerSafetyL3 = "CascadeTheme.PowerSafetyL3";
@@ -172,7 +172,7 @@ public static class UiThemeApply
                 Set(res, Keys.PowerNeonAccent, GetColorFrom(pc, "neon_accent"));
                 Set(res, Keys.PowerCockpitPanelBackground, GetColorFrom(pc, "panel_background"));
                 Set(res, Keys.PowerSafetyDockBackground, GetColorFrom(pc, "safety_dock_background"));
-                Set(res, Keys.PowerTelemetryStripBackground, GetColorFrom(pc, "telemetry_strip_background"));
+                Set(res, Keys.PowerWorkspaceHealthStripBackground, GetColorFrom(pc, "telemetry_strip_background"));
                 Set(res, Keys.PowerSafetyL1, GetColorFrom(pc, "safety_l1"));
                 Set(res, Keys.PowerSafetyL2, GetColorFrom(pc, "safety_l2"));
                 Set(res, Keys.PowerSafetyL3, GetColorFrom(pc, "safety_l3"));

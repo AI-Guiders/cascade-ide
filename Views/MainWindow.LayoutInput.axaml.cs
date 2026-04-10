@@ -69,7 +69,7 @@ public partial class MainWindow
     {
         if (this.FindControl<Grid>("MainGrid") is not { } main)
             return;
-        var inner = this.FindControl<Grid>("WorkspaceTelemetryColumnsGrid");
+        var inner = this.FindControl<Grid>("WorkspaceHealthColumnsGrid");
         UiWorkspaceLayout.ApplyChatPanelColumns(main, inner, vm.ChatPanelColumnPixelWidth);
     }
 

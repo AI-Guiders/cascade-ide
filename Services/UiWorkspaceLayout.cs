@@ -25,8 +25,8 @@ public static class UiWorkspaceLayout
             mainGrid,
             visible ? UiWorkspaceLayoutRuntimeMetrics.SolutionExplorerDefaultWidthPixels : 0);
 
-    /// <summary>Колонки 3–4 MainGrid и нижней строки телеметрии: чат и сплиттер перед ним.</summary>
-    public static void ApplyChatPanelColumns(Grid mainGrid, Grid? workspaceTelemetryColumnsGrid, double chatWidthPixels)
+    /// <summary>Колонки 3–4 MainGrid и нижней строки Workspace Health: чат и сплиттер перед ним.</summary>
+    public static void ApplyChatPanelColumns(Grid mainGrid, Grid? workspaceHealthColumnsGrid, double chatWidthPixels)
     {
         var w = Math.Max(0, chatWidthPixels);
         var splitter = w > 0 ? UiWorkspaceLayoutRuntimeMetrics.MainGridColumnSplitterWidthPixels : 0;
@@ -37,19 +37,19 @@ public static class UiWorkspaceLayout
             mainGrid.ColumnDefinitions[4].Width = new GridLength(w);
         }
 
-        if (workspaceTelemetryColumnsGrid is { ColumnDefinitions.Count: > 4 } inner)
+        if (workspaceHealthColumnsGrid is { ColumnDefinitions.Count: > 4 } inner)
         {
             inner.ColumnDefinitions[3].Width = new GridLength(splitter);
             inner.ColumnDefinitions[4].Width = new GridLength(w);
         }
     }
 
-    /// <summary>Найти MainGrid и WorkspaceTelemetryColumnsGrid по корню окна и применить ширину чата.</summary>
+    /// <summary>Найти MainGrid и WorkspaceHealthColumnsGrid по корню окна и применить ширину чата.</summary>
     public static bool TryApplyChatPanelColumnsFromRoot(Visual root, double chatWidthPixels)
     {
         if (UiControlAppearance.FindControlByName(root, "MainGrid") is not Grid main || main.ColumnDefinitions.Count <= 4)
             return false;
-        var inner = UiControlAppearance.FindControlByName(root, "WorkspaceTelemetryColumnsGrid") as Grid;
+        var inner = UiControlAppearance.FindControlByName(root, "WorkspaceHealthColumnsGrid") as Grid;
         ApplyChatPanelColumns(main, inner, chatWidthPixels);
         return true;
     }

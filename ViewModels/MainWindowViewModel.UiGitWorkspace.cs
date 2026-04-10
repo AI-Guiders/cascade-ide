@@ -64,7 +64,7 @@ public partial class MainWindowViewModel
     /// <summary>Вкладки MFD: см. <see cref="MfdShellTabWorkspaceIndex"/> … <see cref="MfdShellTabDebugStackIndex"/>.</summary>
     private bool IsMfdShellTabVisible(int index) => index switch
     {
-        MfdShellTabWorkspaceIndex => ShowTelemetryMfdPage,
+        MfdShellTabWorkspaceIndex => ShowWorkspaceHealthMfdPage,
         MfdShellTabChatIndex => true,
         MfdShellTabTerminalIndex => IsTerminalVisible,
         MfdShellTabBuildIndex => IsBuildOutputVisible,

@@ -58,7 +58,7 @@
             <SolidColorBrush x:Key="CascadeTheme.PowerCockpitPanelBackground">#0C1428</SolidColorBrush>
             <!-- Отдельный «док» уровней L1–L3 (темнее тела чата, по концепту cockpit) -->
             <SolidColorBrush x:Key="CascadeTheme.PowerSafetyDockBackground">#060A14</SolidColorBrush>
-            <SolidColorBrush x:Key="CascadeTheme.PowerTelemetryStripBackground">#080E18</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.PowerWorkspaceHealthStripBackground">#080E18</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.PowerSafetyL1">#2A5A8A</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.PowerSafetyL2">#8A6A1A</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.PowerSafetyL3">#5A2A8A</SolidColorBrush>
@@ -178,7 +178,7 @@
         </Style>
         <!-- Power: заголовки колонки дерева / очереди — тёмная полоса, светлый текст, бирюзовый акцент -->
         <Style Selector="views|PanelChromeHeader.powerSolutionExplorer Border.panelChromeHeaderStrip">
-            <Setter Property="Background" Value="{DynamicResource CascadeTheme.PowerTelemetryStripBackground}"/>
+            <Setter Property="Background" Value="{DynamicResource CascadeTheme.PowerWorkspaceHealthStripBackground}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.PowerSolutionPanelBorderSubtle}"/>
         </Style>
         <Style Selector="views|PanelChromeHeader.powerSolutionExplorer TextBlock.headerTitlePart">

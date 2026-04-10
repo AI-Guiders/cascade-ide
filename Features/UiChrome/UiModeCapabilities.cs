@@ -9,10 +9,10 @@ public sealed record UiModeCapabilities(
     bool AgentOperationsPanel,
     bool AgentTrace,
     bool AutonomousAgentTelemetry,
-    /// <summary>Дубль телеметрии на вкладке «Терминал» в Power, когда полоска под редактором скрыта.</summary>
-    bool TelemetryOnTerminalTab,
-    /// <summary>Column span нижней телеметрии в MainGrid при Power и видимой полоске телеметрии под редактором.</summary>
-    int TelemetryMainColumnSpan,
+    /// <summary>Дубль Workspace Health на вкладке «Терминал» в Power, когда полоска под редактором скрыта.</summary>
+    bool WorkspaceHealthOnTerminalTab,
+    /// <summary>Column span нижней зоны Workspace Health в MainGrid при Power и видимой полоске под редактором.</summary>
+    int WorkspaceHealthMainColumnSpan,
     /// <summary>Вкладки инструментирования (события/тесты/…), когда док включён.</summary>
     bool InstrumentationTabs,
     /// <summary>Вкладка «Гипотезы» (семья Debug и док).</summary>
@@ -20,9 +20,9 @@ public sealed record UiModeCapabilities(
     bool RiskSummaryCard,
     bool ResultSummaryCard,
     /// <summary>Полоса build/tests/debug/git под редактором.</summary>
-    bool TelemetryStripVisible,
+    bool WorkspaceHealthStripVisible,
     /// <summary>Нижняя полоса vs страница зоны; TOML: <c>telemetry_surface</c>.</summary>
-    TelemetryUiSurface TelemetrySurface,
+    WorkspaceHealthUiSurface WorkspaceHealthSurface,
     /// <summary>Панель инструментов под меню.</summary>
     bool MainToolbarVisible,
     /// <summary>Вкладка Problems и учёт в <see cref="MainWindowViewModel.IsBottomPanelVisible"/>.</summary>
@@ -40,14 +40,14 @@ public sealed record UiModeCapabilities(
                 AgentOperationsPanel: false,
                 AgentTrace: false,
                 AutonomousAgentTelemetry: false,
-                TelemetryOnTerminalTab: false,
-                TelemetryMainColumnSpan: 5,
+                WorkspaceHealthOnTerminalTab: false,
+                WorkspaceHealthMainColumnSpan: 5,
                 InstrumentationTabs: false,
                 HypothesesTab: false,
                 RiskSummaryCard: false,
                 ResultSummaryCard: false,
-                TelemetryStripVisible: false,
-                TelemetrySurface: TelemetryUiSurface.BottomStrip,
+                WorkspaceHealthStripVisible: false,
+                WorkspaceHealthSurface: WorkspaceHealthUiSurface.BottomStrip,
                 MainToolbarVisible: false,
                 ProblemsPanelVisible: false,
                 EicasAlertsBarEnabled: false);
@@ -66,14 +66,14 @@ public sealed record UiModeCapabilities(
             AgentOperationsPanel: balancedOrFlight,
             AgentTrace: power,
             AutonomousAgentTelemetry: power,
-            TelemetryOnTerminalTab: false,
-            TelemetryMainColumnSpan: power ? 3 : 5,
+            WorkspaceHealthOnTerminalTab: false,
+            WorkspaceHealthMainColumnSpan: power ? 3 : 5,
             InstrumentationTabs: focus || balanced || flight || power || agentChat || debug,
             HypothesesTab: debug,
             RiskSummaryCard: !focus && !agentChat,
             ResultSummaryCard: !focus && !agentChat,
-            TelemetryStripVisible: true,
-            TelemetrySurface: TelemetryUiSurface.BottomStrip,
+            WorkspaceHealthStripVisible: true,
+            WorkspaceHealthSurface: WorkspaceHealthUiSurface.BottomStrip,
             MainToolbarVisible: true,
             ProblemsPanelVisible: true,
             EicasAlertsBarEnabled: true);

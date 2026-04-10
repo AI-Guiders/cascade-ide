@@ -161,7 +161,7 @@ public sealed class UiModeCatalogTests : IDisposable
         var power = UiModeCatalog.GetCapabilities("Power");
         Assert.True(power.AgentTrace);
         Assert.True(power.AutonomousAgentTelemetry);
-        Assert.Equal(3, power.TelemetryMainColumnSpan);
+        Assert.Equal(3, power.WorkspaceHealthMainColumnSpan);
 
         Assert.False(UiModeCatalog.GetCapabilities("Focus").RiskSummaryCard);
         Assert.False(UiModeCatalog.GetCapabilities("AgentChat").ResultSummaryCard);
@@ -217,7 +217,7 @@ public sealed class UiModeCatalogTests : IDisposable
 
         var caps = UiModeCatalog.GetCapabilities("Debug");
         Assert.False(caps.HypothesesTab);
-        Assert.Equal(4, caps.TelemetryMainColumnSpan);
+        Assert.Equal(4, caps.WorkspaceHealthMainColumnSpan);
 
         Assert.Equal("IDE — Debug (custom)", UiModeCatalog.GetWindowTitleOverride("Debug"));
     }
@@ -250,7 +250,7 @@ public sealed class UiModeCatalogTests : IDisposable
         Assert.False(spec.InstrumentationDockVisible);
 
         var caps = UiModeCatalog.GetCapabilities("Editor");
-        Assert.False(caps.TelemetryStripVisible);
+        Assert.False(caps.WorkspaceHealthStripVisible);
         Assert.False(caps.MainToolbarVisible);
         Assert.False(caps.ProblemsPanelVisible);
     }
@@ -275,7 +275,7 @@ public sealed class UiModeCatalogTests : IDisposable
         UiModeCatalog.Initialize(dir);
 
         var caps = UiModeCatalog.GetCapabilities("Balanced");
-        Assert.Equal(TelemetryUiSurface.DedicatedPage, caps.TelemetrySurface);
+        Assert.Equal(WorkspaceHealthUiSurface.DedicatedPage, caps.WorkspaceHealthSurface);
     }
 
     [Fact]

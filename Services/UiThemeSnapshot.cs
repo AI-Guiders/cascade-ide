@@ -155,7 +155,7 @@ public static class UiThemeSnapshot
                 neon_accent = H(res, UiThemeApply.Keys.PowerNeonAccent),
                 panel_background = H(res, UiThemeApply.Keys.PowerCockpitPanelBackground),
                 safety_dock_background = H(res, UiThemeApply.Keys.PowerSafetyDockBackground),
-                telemetry_strip_background = H(res, UiThemeApply.Keys.PowerTelemetryStripBackground),
+                telemetry_strip_background = H(res, UiThemeApply.Keys.PowerWorkspaceHealthStripBackground),
                 safety_l1 = H(res, UiThemeApply.Keys.PowerSafetyL1),
                 safety_l2 = H(res, UiThemeApply.Keys.PowerSafetyL2),
                 safety_l3 = H(res, UiThemeApply.Keys.PowerSafetyL3),

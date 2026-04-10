@@ -114,7 +114,7 @@
                     MinHeight="72"
                     Margin="0,4,0,0"
                     Padding="4"
-                    Background="{DynamicResource CascadeTheme.PowerTelemetryStripBackground}"
+                    Background="{DynamicResource CascadeTheme.PowerWorkspaceHealthStripBackground}"
                     BorderBrush="{DynamicResource CascadeTheme.PowerSolutionPanelBorderSubtle}"
                     BorderThickness="1"
                     CornerRadius="8">

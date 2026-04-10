@@ -8,8 +8,8 @@
         <views:EicasAlertsBarView Grid.Row="0"
                                   IsVisible="{Binding ShowEicasAlertsBar}"/>
         <!-- Полоса телеметрии: раньше выравнивалась по MainGrid; теперь зона — MFD, на всю ширину контейнера. -->
-        <Grid Grid.Row="1" IsVisible="{Binding ShowTelemetryStrip}">
-            <views:TelemetryStripView/>
+        <Grid Grid.Row="1" IsVisible="{Binding ShowWorkspaceHealthStrip}">
+            <views:WorkspaceHealthStripView/>
         </Grid>
     </Grid>
 </UserControl>

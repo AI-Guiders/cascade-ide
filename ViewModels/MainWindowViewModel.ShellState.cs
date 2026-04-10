@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace CascadeIDE.ViewModels;
 
-/// <summary>Раскладка панелей, нижняя зона, телеметрия Power/агента, ключи провайдеров и чата.</summary>
+/// <summary>Раскладка панелей, нижняя зона, Workspace Health / автономный агент, ключи провайдеров и чата.</summary>
 public partial class MainWindowViewModel
 {
     [ObservableProperty]
@@ -36,18 +36,18 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(IsChatPanelColumnVisible))]
     [NotifyPropertyChangedFor(nameof(IsMfdColumnVisible))]
     [NotifyPropertyChangedFor(nameof(ShowTaskBar))]
-    [NotifyPropertyChangedFor(nameof(ShowTelemetryStrip))]
-    [NotifyPropertyChangedFor(nameof(ShowTelemetryMfdPage))]
+    [NotifyPropertyChangedFor(nameof(ShowWorkspaceHealthStrip))]
+    [NotifyPropertyChangedFor(nameof(ShowWorkspaceHealthMfdPage))]
     [NotifyPropertyChangedFor(nameof(ShowEicasAlertsBar))]
     [NotifyPropertyChangedFor(nameof(ShowWorkspaceChromeBand))]
-    [NotifyPropertyChangedFor(nameof(TelemetryUiSurface))]
+    [NotifyPropertyChangedFor(nameof(WorkspaceHealthUiSurface))]
     [NotifyPropertyChangedFor(nameof(ShowMainToolbar))]
     [NotifyPropertyChangedFor(nameof(ShowWorkspaceBottomChrome))]
     [NotifyPropertyChangedFor(nameof(QuickActions))]
     [NotifyPropertyChangedFor(nameof(ShowAgentOperations))]
     [NotifyPropertyChangedFor(nameof(AgentTrace))]
     [NotifyPropertyChangedFor(nameof(AutonomousAgentTelemetry))]
-    [NotifyPropertyChangedFor(nameof(TelemetryOnTerminalTab))]
+    [NotifyPropertyChangedFor(nameof(WorkspaceHealthOnTerminalTab))]
     [NotifyPropertyChangedFor(nameof(ShowSafetyControls))]
     [NotifyPropertyChangedFor(nameof(ShowTelemetryHiddenHint))]
     [NotifyPropertyChangedFor(nameof(TelemetryButtonText))]
@@ -111,16 +111,16 @@ public partial class MainWindowViewModel
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsImpactedTestsBadgeVisible))]
-    [NotifyPropertyChangedFor(nameof(TelemetryTestsText))]
-    [NotifyPropertyChangedFor(nameof(TelemetryTestsCockpitShort))]
+    [NotifyPropertyChangedFor(nameof(WorkspaceHealthTestsText))]
+    [NotifyPropertyChangedFor(nameof(WorkspaceHealthTestsCockpitShort))]
     private int _impactedTestsBadge;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(TelemetryTestsText))]
-    [NotifyPropertyChangedFor(nameof(TelemetryTestsCockpitShort))]
+    [NotifyPropertyChangedFor(nameof(WorkspaceHealthTestsText))]
+    [NotifyPropertyChangedFor(nameof(WorkspaceHealthTestsCockpitShort))]
     private string _lastTestSummary = "";
 
-    /// <summary>Снимок раскладки UI (JSON), полоса телеметрии в Power.</summary>
+    /// <summary>Снимок раскладки UI (JSON), полоса Workspace Health в Power.</summary>
     [ObservableProperty]
     private string _workspaceSnapshotJson = "";
 
@@ -132,8 +132,8 @@ public partial class MainWindowViewModel
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(BuildSolutionCommand))]
-    [NotifyPropertyChangedFor(nameof(TelemetryBuildText))]
-    [NotifyPropertyChangedFor(nameof(TelemetryBuildCockpitShort))]
+    [NotifyPropertyChangedFor(nameof(WorkspaceHealthBuildText))]
+    [NotifyPropertyChangedFor(nameof(WorkspaceHealthBuildCockpitShort))]
     private bool _isBuilding;
 
     [ObservableProperty]

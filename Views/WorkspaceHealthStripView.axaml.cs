@@ -2,9 +2,9 @@ using Avalonia.Controls;
 
 namespace CascadeIDE.Views;
 
-public partial class TelemetryStripView : UserControl
+public partial class WorkspaceHealthStripView : UserControl
 {
-    public TelemetryStripView()
+    public WorkspaceHealthStripView()
     {
         InitializeComponent();
     }

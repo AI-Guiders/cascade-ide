@@ -4,9 +4,9 @@ using CascadeIDE.Services;
 namespace CascadeIDE.Features.UiChrome;
 
 /// <summary>
-/// Собирает <see cref="WorkspaceTelemetryInputSnapshot"/> из состояния окна (сборка, тесты, отладка, git).
+/// Собирает <see cref="WorkspaceHealthInputSnapshot"/> из состояния окна (сборка, тесты, отладка, git).
 /// </summary>
-public sealed class WorkspaceTelemetryProvider : IWorkspaceTelemetryProvider
+public sealed class WorkspaceHealthProvider : IWorkspaceHealthProvider
 {
     private readonly Func<bool> _isBuilding;
     private readonly Func<string> _lastTestSummary;
@@ -15,7 +15,7 @@ public sealed class WorkspaceTelemetryProvider : IWorkspaceTelemetryProvider
     private readonly Func<InstrumentationPanelViewModel> _instrumentation;
     private readonly UiChromeViewModel _chrome;
 
-    public WorkspaceTelemetryProvider(
+    public WorkspaceHealthProvider(
         Func<bool> isBuilding,
         Func<string> lastTestSummary,
         Func<int> impactedTestsBadge,
@@ -31,10 +31,10 @@ public sealed class WorkspaceTelemetryProvider : IWorkspaceTelemetryProvider
         _chrome = chrome;
     }
 
-    public WorkspaceTelemetryInputSnapshot GetSnapshot()
+    public WorkspaceHealthInputSnapshot GetSnapshot()
     {
         var inst = _instrumentation();
-        return WorkspaceTelemetryFormat.Compose(
+        return WorkspaceHealthFormat.Compose(
             _isBuilding(),
             _lastTestSummary(),
             _impactedTestsBadge(),
@@ -42,7 +42,7 @@ public sealed class WorkspaceTelemetryProvider : IWorkspaceTelemetryProvider
             _dapDebug.IsExecutionStopped,
             inst.DebugStackFrames.Count,
             inst.DebugVariables.Count,
-            _chrome.TelemetryGitText,
-            _chrome.TelemetryGitCockpitShort);
+            _chrome.WorkspaceHealthGitText,
+            _chrome.WorkspaceHealthGitCockpitShort);
     }
 }

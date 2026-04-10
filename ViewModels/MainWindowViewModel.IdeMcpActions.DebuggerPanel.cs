@@ -48,8 +48,8 @@ public partial class MainWindowViewModel
             InstrumentationPanel.DebugVariables.Clear();
             foreach (var v in variables)
                 InstrumentationPanel.DebugVariables.Add(new DebugVariableViewModel(v.Name, v.Value));
-            OnPropertyChanged(nameof(TelemetryDebugText));
-            OnPropertyChanged(nameof(TelemetryDebugCockpitShort));
+            OnPropertyChanged(nameof(WorkspaceHealthDebugText));
+            OnPropertyChanged(nameof(WorkspaceHealthDebugCockpitShort));
         });
     }
 }

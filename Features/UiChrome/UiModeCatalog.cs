@@ -433,15 +433,15 @@ public static class UiModeCatalog
         return DefaultShowTaskBarForFamily(family);
     }
 
-    private static TelemetryUiSurface ResolveTelemetrySurface(string? fromFile, TelemetryUiSurface inherited)
+    private static WorkspaceHealthUiSurface ResolveWorkspaceHealthSurface(string? fromFile, WorkspaceHealthUiSurface inherited)
     {
         if (string.IsNullOrWhiteSpace(fromFile))
             return inherited;
         var v = fromFile.Trim();
         if (string.Equals(v, "dedicated_page", StringComparison.OrdinalIgnoreCase))
-            return TelemetryUiSurface.DedicatedPage;
+            return WorkspaceHealthUiSurface.DedicatedPage;
         if (string.Equals(v, "bottom_strip", StringComparison.OrdinalIgnoreCase))
-            return TelemetryUiSurface.BottomStrip;
+            return WorkspaceHealthUiSurface.BottomStrip;
         return inherited;
     }
 
@@ -460,26 +460,26 @@ public static class UiModeCatalog
 
         var modeFile = file!;
 
-        var span = baseCaps.TelemetryMainColumnSpan;
+        var span = baseCaps.WorkspaceHealthMainColumnSpan;
         if (modeFile.TelemetryMainColumnSpan is { } s && s >= 1 && s <= 12)
             span = s;
 
-        var surface = ResolveTelemetrySurface(modeFile.TelemetrySurface, baseCaps.TelemetrySurface);
+        var surface = ResolveWorkspaceHealthSurface(modeFile.TelemetrySurface, baseCaps.WorkspaceHealthSurface);
 
         return new UiModeCapabilities(
             QuickActions: modeFile.QuickActions ?? baseCaps.QuickActions,
             AgentOperationsPanel: modeFile.AgentOperationsPanel ?? baseCaps.AgentOperationsPanel,
             AgentTrace: modeFile.AgentTrace ?? baseCaps.AgentTrace,
             AutonomousAgentTelemetry: modeFile.AutonomousAgentTelemetry ?? baseCaps.AutonomousAgentTelemetry,
-            TelemetryOnTerminalTab: modeFile.TelemetryOnTerminalTab
-                ?? baseCaps.TelemetryOnTerminalTab,
-            TelemetryMainColumnSpan: span,
+            WorkspaceHealthOnTerminalTab: modeFile.TelemetryOnTerminalTab
+                ?? baseCaps.WorkspaceHealthOnTerminalTab,
+            WorkspaceHealthMainColumnSpan: span,
             InstrumentationTabs: modeFile.InstrumentationTabs ?? baseCaps.InstrumentationTabs,
             HypothesesTab: modeFile.HypothesesTab ?? baseCaps.HypothesesTab,
             RiskSummaryCard: modeFile.RiskSummaryCard ?? baseCaps.RiskSummaryCard,
             ResultSummaryCard: modeFile.ResultSummaryCard ?? baseCaps.ResultSummaryCard,
-            TelemetryStripVisible: modeFile.TelemetryStrip ?? baseCaps.TelemetryStripVisible,
-            TelemetrySurface: surface,
+            WorkspaceHealthStripVisible: modeFile.TelemetryStrip ?? baseCaps.WorkspaceHealthStripVisible,
+            WorkspaceHealthSurface: surface,
             MainToolbarVisible: modeFile.MainToolbar ?? baseCaps.MainToolbarVisible,
             ProblemsPanelVisible: modeFile.ProblemsPanel ?? baseCaps.ProblemsPanelVisible,
             EicasAlertsBarEnabled: modeFile.EicasAlertsBar ?? baseCaps.EicasAlertsBarEnabled);

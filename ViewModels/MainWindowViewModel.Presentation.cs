@@ -3,7 +3,7 @@ using CascadeIDE.Lang;
 
 namespace CascadeIDE.ViewModels;
 
-/// <summary>Вычисляемые свойства разметки, телеметрии и видимости панелей (режимы UI).</summary>
+/// <summary>Вычисляемые свойства разметки, Workspace Health и видимости панелей (режимы UI).</summary>
 public partial class MainWindowViewModel
 {
     public static IReadOnlyList<string> UiModeOptions => UiModeCatalog.OrderedModeIds;
@@ -68,39 +68,39 @@ public partial class MainWindowViewModel
     public bool ShowTelemetryHiddenHint => AutonomousAgentTelemetry && !IsTerminalVisible;
 
     /// <summary>
-    /// Дублирующая карточка телеметрии на вкладке «Терминал» в Power. Пока видна полоса <see cref="TelemetryStripView"/> под редактором —
+    /// Дублирующая карточка Workspace Health на вкладке «Терминал» в Power. Пока видна полоса <see cref="WorkspaceHealthStripView"/> под редактором —
     /// false, чтобы DockPanel не отдавал высоту дублю и не схлопывал область вывода консоли.
     /// </summary>
-    public bool TelemetryOnTerminalTab =>
-        Capabilities.TelemetryOnTerminalTab && !ShowTelemetryStrip;
+    public bool WorkspaceHealthOnTerminalTab =>
+        Capabilities.WorkspaceHealthOnTerminalTab && !ShowWorkspaceHealthStrip;
 
-    /// <summary>Куда вести телеметрию: нижняя полоса или страница зоны — из capabilities (<c>telemetry_surface</c>).</summary>
-    public TelemetryUiSurface TelemetryUiSurface => Capabilities.TelemetrySurface;
+    /// <summary>Куда вести Workspace Health: нижняя полоса или страница зоны — из capabilities (<c>telemetry_surface</c>).</summary>
+    public WorkspaceHealthUiSurface WorkspaceHealthUiSurface => Capabilities.WorkspaceHealthSurface;
 
     /// <summary>Полоска build/tests/debug/git — при <c>telemetry_strip</c> и <c>bottom_strip</c>; рисуется в <see cref="Views.WorkspaceChromeBandView"/> внутри MFD.</summary>
-    public bool ShowTelemetryStrip =>
-        Capabilities.TelemetryStripVisible && Capabilities.TelemetrySurface == TelemetryUiSurface.BottomStrip;
+    public bool ShowWorkspaceHealthStrip =>
+        Capabilities.WorkspaceHealthStripVisible && Capabilities.WorkspaceHealthSurface == WorkspaceHealthUiSurface.BottomStrip;
 
-    /// <summary>Телеметрия работы в колонке MFD (страница вместо нижней полосы) — при <c>telemetry_strip</c> и <c>telemetry_surface = dedicated_page</c>.</summary>
-    public bool ShowTelemetryMfdPage =>
-        Capabilities.TelemetryStripVisible && Capabilities.TelemetrySurface == TelemetryUiSurface.DedicatedPage;
+    /// <summary>Workspace Health в колонке MFD (страница вместо нижней полосы) — при <c>telemetry_strip</c> и <c>telemetry_surface = dedicated_page</c>.</summary>
+    public bool ShowWorkspaceHealthMfdPage =>
+        Capabilities.WorkspaceHealthStripVisible && Capabilities.WorkspaceHealthSurface == WorkspaceHealthUiSurface.DedicatedPage;
 
     /// <summary>
-    /// Полоса оповещений EICAS v1 (над телеметрией работы). Видно при <c>eicas_alerts_bar</c> и непустом списке (Dark Cockpit).
+    /// Полоса оповещений EICAS v1 (над полосой Workspace Health). Видно при <c>eicas_alerts_bar</c> и непустом списке (Dark Cockpit).
     /// Отдельный контур от build/tests/debug/git (ADR 0021 §5; словарь §1.1).
     /// </summary>
     public bool ShowEicasAlertsBar =>
         Capabilities.EicasAlertsBarEnabled && EicasMessages.Count > 0;
 
-    /// <summary>Область разметки над нижним доком: телеметрия работы и/или полоса EICAS (<see cref="Views.WorkspaceChromeBandView"/>).</summary>
-    public bool ShowWorkspaceChromeBand => ShowTelemetryStrip || ShowEicasAlertsBar;
+    /// <summary>Область разметки над нижним доком: Workspace Health и/или полоса EICAS (<see cref="Views.WorkspaceChromeBandView"/>).</summary>
+    public bool ShowWorkspaceChromeBand => ShowWorkspaceHealthStrip || ShowEicasAlertsBar;
 
     /// <summary>Панель инструментов под меню — из capabilities (<c>main_toolbar</c> в TOML).</summary>
     public bool ShowMainToolbar => Capabilities.MainToolbarVisible;
 
-    /// <summary>Зона под чатом в MFD: полоса EICAS/телеметрии и/или док (терминал, сборка, Problems, Git, инструменты).</summary>
+    /// <summary>Зона под чатом в MFD: полоса EICAS / Workspace Health и/или док (терминал, сборка, Problems, Git, инструменты).</summary>
     public bool ShowWorkspaceBottomChrome =>
-        ShowTelemetryStrip || ShowEicasAlertsBar || IsBottomPanelVisible;
+        ShowWorkspaceHealthStrip || ShowEicasAlertsBar || IsBottomPanelVisible;
 
     /// <summary>Чат в одной строке с PFD/Forward; MFD не пересекает нижнюю строку MainGrid.</summary>
     public int ChatPanelMainGridRowSpan => 1;
@@ -159,16 +159,16 @@ public partial class MainWindowViewModel
     public bool IsImpactedTestsBadgeVisible => ImpactedTestsBadge > 0;
     public bool IsActiveTaskProgressVisible => ActiveTaskProgress > 0;
 
-    /// <summary>Строки из <see cref="IWorkspaceTelemetryProvider"/> (форматирование в <see cref="WorkspaceTelemetryFormat"/>).</summary>
-    public string TelemetryBuildText => _workspaceTelemetry.GetSnapshot().Build.LineText;
+    /// <summary>Строки из <see cref="IWorkspaceHealthProvider"/> (форматирование в <see cref="WorkspaceHealthFormat"/>).</summary>
+    public string WorkspaceHealthBuildText => _workspaceHealth.GetSnapshot().Build.LineText;
 
     /// <summary>Короткий статус для «кольца» сборки в Power cockpit.</summary>
-    public string TelemetryBuildCockpitShort => _workspaceTelemetry.GetSnapshot().Build.CockpitShort;
+    public string WorkspaceHealthBuildCockpitShort => _workspaceHealth.GetSnapshot().Build.CockpitShort;
 
-    public string TelemetryTestsText => _workspaceTelemetry.GetSnapshot().Tests.LineText;
+    public string WorkspaceHealthTestsText => _workspaceHealth.GetSnapshot().Tests.LineText;
 
     /// <summary>Компактная строка тестов для полосы Power.</summary>
-    public string TelemetryTestsCockpitShort => _workspaceTelemetry.GetSnapshot().Tests.CockpitShort;
+    public string WorkspaceHealthTestsCockpitShort => _workspaceHealth.GetSnapshot().Tests.CockpitShort;
 
     /// <summary>Есть активная DAP-сессия (режим отладки, как в VS).</summary>
     public bool HasDebugSession => _dapDebug.HasActiveSession;
@@ -179,10 +179,10 @@ public partial class MainWindowViewModel
     /// <summary>Процесс запущен под отладчиком, выполнение идёт.</summary>
     public bool IsDebugExecutionRunning => _dapDebug.HasActiveSession && !_dapDebug.IsExecutionStopped;
 
-    public string TelemetryDebugText => _workspaceTelemetry.GetSnapshot().Debug.LineText;
+    public string WorkspaceHealthDebugText => _workspaceHealth.GetSnapshot().Debug.LineText;
 
     /// <summary>Короткий статус отладки для Power.</summary>
-    public string TelemetryDebugCockpitShort => _workspaceTelemetry.GetSnapshot().Debug.CockpitShort;
+    public string WorkspaceHealthDebugCockpitShort => _workspaceHealth.GetSnapshot().Debug.CockpitShort;
 
     public string ChatPanelToggleButtonText => IsChatPanelExpanded ? "◀" : "▶";
     public bool IsSolutionPanelHidden => !IsSolutionExplorerVisible;

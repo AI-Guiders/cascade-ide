@@ -5,7 +5,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 namespace CascadeIDE.Features.UiChrome;
 
 /// <summary>
-/// Git-телеметрия для полосы задач и вспышка смены UI-режима Focus/Balanced/Power (bloom overlay).
+/// Git-строки для полосы Workspace Health и вспышка смены UI-режима Focus/Balanced/Power (bloom overlay).
 /// </summary>
 public sealed partial class UiChromeViewModel : ObservableObject
 {
@@ -138,23 +138,23 @@ public sealed partial class UiChromeViewModel : ObservableObject
     }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(TelemetryGitText))]
-    [NotifyPropertyChangedFor(nameof(TelemetryGitCockpitShort))]
+    [NotifyPropertyChangedFor(nameof(WorkspaceHealthGitText))]
+    [NotifyPropertyChangedFor(nameof(WorkspaceHealthGitCockpitShort))]
     private string _gitBranchSummary = "";
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(TelemetryGitText))]
-    [NotifyPropertyChangedFor(nameof(TelemetryGitCockpitShort))]
+    [NotifyPropertyChangedFor(nameof(WorkspaceHealthGitText))]
+    [NotifyPropertyChangedFor(nameof(WorkspaceHealthGitCockpitShort))]
     private int _gitStagedCount;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(TelemetryGitText))]
-    [NotifyPropertyChangedFor(nameof(TelemetryGitCockpitShort))]
+    [NotifyPropertyChangedFor(nameof(WorkspaceHealthGitText))]
+    [NotifyPropertyChangedFor(nameof(WorkspaceHealthGitCockpitShort))]
     private int _gitUnstagedCount;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(TelemetryGitText))]
-    [NotifyPropertyChangedFor(nameof(TelemetryGitCockpitShort))]
+    [NotifyPropertyChangedFor(nameof(WorkspaceHealthGitText))]
+    [NotifyPropertyChangedFor(nameof(WorkspaceHealthGitCockpitShort))]
     private int _gitUntrackedCount;
 
     [ObservableProperty]
@@ -170,7 +170,7 @@ public sealed partial class UiChromeViewModel : ObservableObject
 
     public bool IsFilesChangedBadgeVisible => FilesChangedBadge > 0;
 
-    public string TelemetryGitCockpitShort
+    public string WorkspaceHealthGitCockpitShort
     {
         get
         {
@@ -182,7 +182,7 @@ public sealed partial class UiChromeViewModel : ObservableObject
         }
     }
 
-    public string TelemetryGitText
+    public string WorkspaceHealthGitText
     {
         get
         {
