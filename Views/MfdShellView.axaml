@@ -27,7 +27,7 @@
             <Setter Property="FontWeight" Value="SemiBold"/>
         </Style>
     </UserControl.Styles>
-    <!-- MFD: одна полоса вкладок — WORKSPACE, чат, терминал, сборка, … (ADR 0021). Полоса EICAS/телеметрии strip — сверху. -->
+    <!-- MFD: одна полоса вкладок — WORKSPACE, чат, терминал, сборка, … (ADR 0021). Сверху: EICAS и полоса Workspace Health (strip). -->
     <Grid MinHeight="0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

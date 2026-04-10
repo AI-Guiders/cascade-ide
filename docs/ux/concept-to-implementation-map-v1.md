@@ -37,7 +37,7 @@ This map is intended to drive incremental alignment work with clear acceptance c
 | Dominant editor | `Editor` (`AvaloniaEdit`) | `EditorText`, `CurrentFilePath` | ✅ | Inline markdown preview (`InlinePreviewBorder`). |
 | Agent panel (plan / next / confirmation) | `ChatPanelView` rows 0–1, 3 | `FocusPlanItems`, `NextActionSummary`, confirm commands | ✅ | Отдельные карточки в Focus; полный блок «Agent Operations» — в Balanced (`ShowAgentOperationsBlock`). |
 | Bottom status pills (Build/Test/Debug/Git) | `WorkspaceHealthStripView` (`UiModeFamilyNe` + `Power`) | `WorkspaceHealthBuildText`, `WorkspaceHealthTestsText`, `WorkspaceHealthDebugText`, `WorkspaceHealthGitText` | ✅ | Компактная полоса под редактором, когда семья **не** Power (Focus/Balanced/AgentChat/Debug и т.д.). |
-| Док инструментирования (События / Тесты / Отладка) | `BottomPanelView` tabs | `ShowInstrumentationTabs`, `IsInstrumentationDockVisible` | ✅ | В Focus доступны при включённом доке (меню «Док инструментирования»); детали — вкладки, сводка — полоса телеметрии. |
+| Док инструментирования (События / Тесты / Отладка) | `BottomPanelView` tabs | `ShowInstrumentationTabs`, `IsInstrumentationDockVisible` | ✅ | В Focus доступны при включённом доке (меню «Док инструментирования»); детали — вкладки, сводка — полоса Workspace Health (состояние воркспейса). |
 | Карточка Safety L1–L3 | `ChatPanelView` row 5 (`modeCard` / Power: `safetyLevelIsland`) | `ShowSafetyControls`, `SetSafetyL*Command` | ✅ | Focus/Balanced — компактные кнопки; Power — отдельная панель-док, объёмные L1–L3 с тенью. |
 
 ---
@@ -49,7 +49,7 @@ This map is intended to drive incremental alignment work with clear acceptance c
 | Quick actions | `TaskCockpitView` | `FixFailingTestsCommand`, …, `QuickActions` | ✅ | **`QuickActions`** на VM из **`Capabilities.QuickActions`** (TOML `quick_actions`, дефолты по семье; у Balanced обычно true). |
 | Editor badges (Complexity / Impacted / Files) | `TaskCockpitView` | `ComplexityBadge`, `ImpactedTestsBadge`, `FilesChangedBadge` | 🟨 | **Реальные эвристики:** строки текущего файла на диске; упавшие тесты последнего `dotnet test`; число путей из `git status --short`. Подсказки на бейджах в XAML. |
 | Agent operations card | `ChatPanelView` row 2 | `ShowAgentOperationsBlock` | ✅ | Balanced only. |
-| Build/Test/Debug + event timeline | `WorkspaceHealthStripView` (Power cockpit) + вкладка «События» | `EventTimeline`, `IsTerminalVisible` | ✅ | В Power дубль телеметрии на вкладке «Терминал» отключён (`WorkspaceHealthOnTerminalTab`), чтобы не сжимать консоль; лента — «События». |
+| Build/Test/Debug + event timeline | `WorkspaceHealthStripView` (Power cockpit) + вкладка «События» | `EventTimeline`, `IsTerminalVisible` | ✅ | В Power дубль Workspace Health на вкладке «Терминал» отключён (`WorkspaceHealthOnTerminalTab`), чтобы не сжимать консоль; лента — «События». |
 | Dependency mini-map / solution graph | — | — | ❌ | Не реализовано; см. шаг 4 в «Next steps». |
 
 ---
@@ -59,16 +59,16 @@ This map is intended to drive incremental alignment work with clear acceptance c
 | Concept element | XAML control | VM property/command | Status | Notes |
 |---|---|---|---|---|
 | Task bar / status cockpit | `TaskCockpitView` | `ShowTaskBar` | ✅ | Включая блок Autonomous (Power). |
-| Telemetry explicit control | Toolbar + hint in cockpit | `TelemetryButtonText`, `ToggleTerminalCommand`, `ShowTelemetryHiddenHint` | ✅ | |
+| Terminal / cockpit output control (Power) | Toolbar + hint in cockpit | `TelemetryButtonText`, `ToggleTerminalCommand`, `ShowTelemetryHiddenHint` | ✅ | Не путать с каналом Workspace Health — это явный доступ к выводу (терминал). |
 | Agent Trace Timeline | `ChatPanelView` | `ShowAgentTrace`, `AgentTraceSteps`, … | ✅ | |
 | Safety Level + Emergency Stop | `ChatPanelView` row 5: отдельный док `safetyLevelIsland` (Power) + `modeCard` (Focus/Balanced) | L1/L2/L3 (`powerSafetyTierFace`, кольцо активного уровня); Power: **EMERGENCY STOP** в `PanelChromeHeader` (`ShowEmergencyStop`), Focus/Balanced — кнопка под L1–L3 | ✅ UI / 🟨 enforcement | Фон дока: `PowerSafetyDockBackground` ← `safety_dock_background`. Политика инструментов — отдельно. |
-| Bottom telemetry strip (cockpit + JSON) | `WorkspaceHealthStripView` (Power) | `WorkspaceHealth*CockpitShort`, `WorkspaceSnapshotJson` | ✅ | |
+| Bottom Workspace Health strip (cockpit + JSON) | `WorkspaceHealthStripView` (Power) | `WorkspaceHealth*CockpitShort`, `WorkspaceSnapshotJson` | ✅ | |
 | Task queue list | `SolutionExplorerView` (Power) | `PowerTaskQueueItems` | 🟨 | Заполняется при появлении очереди от агента. |
 | Window title | `MainWindow` `Title` | `WindowTitle` | ✅ | |
-| **Panel headers** (полоса + разделитель + ⋯) | `Views/PanelChromeHeader.axaml`, стили в `App.axaml` | `panel_chrome` в JSON темы | 🟨 | Меню по ⋯: заглушка + «Копировать заголовок»; `UppercaseTitle` для коротких меток. Glow / телеметрия-дуги — вне scope. |
+| **Panel headers** (полоса + разделитель + ⋯) | `Views/PanelChromeHeader.axaml`, стили в `App.axaml` | `panel_chrome` в JSON темы | 🟨 | Меню по ⋯: заглушка + «Копировать заголовок»; `UppercaseTitle` для коротких меток. Glow / декоративные дуги — вне scope. |
 | **Рамки рабочей области** (колонки, вертикальные сплиттеры, шов с нижней панелью, карточки `modeCard`) | `CascadeTheme.WorkspacePanelBorderBrush` в `App.axaml`; `MainWindow`, `SolutionExplorerView`, `DocumentsDockView`, `ChatPanelView`, `BottomPanelView` | `workspace_layout.border_brush` (если нет — `editor_column.border_brush`) | ✅ | Power: чуть ярче кайма колонок (`#00C8E8`) vs внутренние линии редактора. |
-| **Power: телеметрия в полосе хрома** | `WorkspaceChromeBandView`: `WorkspaceHealthStripView` на всю ширину контейнера (раньше планировался `Grid.ColumnSpan` по колонкам main grid — свойство удалено). Чат — одна строка с редактором (`ChatPanelMainGridRowSpan` = 1). | `MainWindowViewModel`, `Capabilities.WorkspaceHealthMainColumnSpan` в TOML режимов (`workspace_health_main_column_span`) | ✅ | Ширина сегментов кокпита по-прежнему из capabilities; не через отдельное свойство VM для span главной сетки. |
-| **Power: острова, gutter, градиентные каймы** | `App.axaml`: `PowerEditorIslandFrameBrush`, `PowerChatIslandFrameBrush`, `PowerSolutionIslandFrameBrush`; `DocumentsDockView`, `SolutionExplorerView`, `ChatPanelView` — `Panel` + внутренний `Border` (`#…IslandInner`) с `Classes.power`, `Margin` 6–8 у `UserControl.power`; телеметрия — `CornerRadius` 14, усиленный `BoxShadow`; низ — `BottomPanelShell` скругление сверху в Power | — | ✅ | Focus/Balanced: без градиентных рамок, скругления ~10px у колонок. |
+| **Power: Workspace Health в полосе хрома** | `WorkspaceChromeBandView`: `WorkspaceHealthStripView` на всю ширину контейнера (раньше планировался `Grid.ColumnSpan` по колонкам main grid — свойство удалено). Чат — одна строка с редактором (`ChatPanelMainGridRowSpan` = 1). | `MainWindowViewModel`, `Capabilities.WorkspaceHealthMainColumnSpan` в TOML режимов (`workspace_health_main_column_span`) | ✅ | Ширина сегментов кокпита по-прежнему из capabilities; не через отдельное свойство VM для span главной сетки. |
+| **Power: острова, gutter, градиентные каймы** | `App.axaml`: `PowerEditorIslandFrameBrush`, `PowerChatIslandFrameBrush`, `PowerSolutionIslandFrameBrush`; `DocumentsDockView`, `SolutionExplorerView`, `ChatPanelView` — `Panel` + внутренний `Border` (`#…IslandInner`) с `Classes.power`, `Margin` 6–8 у `UserControl.power`; полоса хрома (Workspace Health) — `CornerRadius` 14, усиленный `BoxShadow`; низ — `BottomPanelShell` скругление сверху в Power | — | ✅ | Focus/Balanced: без градиентных рамок, скругления ~10px у колонок. |
 
 ### 4.1) Визуальный хром Power: концепт (PNG) vs текущий XAML
 
@@ -76,10 +76,10 @@ This map is intended to drive incremental alignment work with clear acceptance c
 
 | Элемент концепта | Где в коде | Status | Notes |
 |---|---|---|---|
-| **Дерево решения / Project Explorer** | `SolutionExplorerView.axaml` + `App.axaml`: в Power — тёмный фон острова (`PowerSolutionTreePanelBackground`), строки `TreeViewItem` (padding, `MinHeight`, hover/selected фоны, **левый акцент** `PowerNeonBorder` 3px), иконки **20×20** (`solutionExplorerTreeIcon`), заголовки `PanelChromeHeader` с классом **`powerSolutionExplorer`** (полоса как у телеметрии, светлый текст). Очередь задач в том же визуальном ряду. | 🟨 | Остаётся **Fluent-шаблон** `TreeViewItem` (не полная замена control theme); если акцент/фон не пробиваются в рантайме — точечный `ControlTheme` / копия шаблона. |
+| **Дерево решения / Project Explorer** | `SolutionExplorerView.axaml` + `App.axaml`: в Power — тёмный фон острова (`PowerSolutionTreePanelBackground`), строки `TreeViewItem` (padding, `MinHeight`, hover/selected фоны, **левый акцент** `PowerNeonBorder` 3px), иконки **20×20** (`solutionExplorerTreeIcon`), заголовки `PanelChromeHeader` с классом **`powerSolutionExplorer`** (полоса как у Workspace Health, светлый текст). Очередь задач в том же визуальном ряду. | 🟨 | Остаётся **Fluent-шаблон** `TreeViewItem` (не полная замена control theme); если акцент/фон не пробиваются в рантайме — точечный `ControlTheme` / копия шаблона. |
 | **Центр: редактор** | `DocumentsDockView` + AvaloniaEdit | 🟨 | Концепт: выразительный gutter, inline diagnostics / блок предупреждений в теле. Сейчас — возможности редактора по умолчанию, без полного «кино»-хрома макета. |
 | **Правая колонка: карточки трассы** | `ChatPanelView` (trace / safety) | 🟨 | Состав блоков и кнопки соответствуют идее; **плотность, неон, типографика** карточек могут отличаться от PNG. |
-| **Нижняя полоса телеметрии** | `WorkspaceHealthStripView` | 🟨 | Данные кокпита и JSON есть; **спарклайны / капс-лейблы / «глянец»** из концепта — частично или упрощённо. |
+| **Нижняя полоса Workspace Health** | `WorkspaceHealthStripView` | 🟨 | Данные кокпита и JSON есть; **спарклайны / капс-лейблы / «глянец»** из концепта — частично или упрощённо. |
 | **Заголовки панелей (⋯, полоса)** | `PanelChromeHeader` | 🟨 | Уже в таблице выше; детали glow / дуг — вне текущего scope. |
 
 ---
@@ -91,6 +91,6 @@ This map is intended to drive incremental alignment work with clear acceptance c
 3. **Бейджи глубже:** цикломатика / реально «затронутые» тесты по графу изменений — отдельный pipeline (сейчас эвристики).
 4. **Живая сложность при редактировании:** при необходимости обновлять proxy сложности по `EditorText` с debounce (сейчас — при смене файла с диска).
 5. **Хром дерева решения (Power):** сделано стилями на `TreeViewItem` + кисти; при необходимости — **полный** кастомный шаблон `TreeViewItem`, если тема Fluent перекрывает `Background`/`BorderThickness`.
-6. **Редактор / трасса / телеметрия:** точечное выравнивание с PNG-концептами по приоритету (см. §4.1).
+6. **Редактор / трасса / Workspace Health:** точечное выравнивание с PNG-концептами по приоритету (см. §4.1).
 
-Версия карты: **2026-04-02** (термины режима: `UiModeFamily` / capabilities вместо `Is*Mode`; §4.1 без изменений по смыслу).
+Версия карты: **2026-04-02** (термины режима: `UiModeFamily` / capabilities вместо `Is*Mode`; §4.1 без изменений по смыслу). **2026-04-11** — в русских таблицах канон терминов: **Workspace Health** / «состояние воркспейса» вместо разговорной «телеметрии» для этого канала.

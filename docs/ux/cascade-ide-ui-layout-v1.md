@@ -35,7 +35,7 @@
 | 1   | Toolbar |
 | 2   | Task cockpit (`TaskCockpitView`): задача, прогресс, Quick Actions (Balanced), бейджи, блок Autonomous (Power); `ShowTaskBar` всегда true |
 | 3   | **Основная область** — Solution Explorer, редактор (Dock), чат |
-| 4   | Полоса телеметрии (`WorkspaceHealthStripView`): Build/Test/Debug/Git в Focus/Balanced; кокпит Power в Power |
+| 4   | Полоса Workspace Health (`WorkspaceHealthStripView`): Build/Test/Debug/Git в Focus/Balanced; кокпит Power в Power |
 | 5–6 | Нижняя панель (`BottomPanelView`, `RowSpan=2`): сплиттер + вкладки Terminal / Build / Git / События / Тесты / Отладка |
 
 **Колонки (ColumnDefinitions):** `220, 4, *, 4, 340`
@@ -95,7 +95,7 @@
 
 Высота — сплиттер (строка 4). `ide_set_panel_size(panel: "terminal", height: …)`.
 
-**Power (семья `Power`):** на корне `BottomPanelView` — `Classes.power` через привязку к **`UiModeFamily`** и конвертер **`UiModeFamilyEq`** с параметром `Power` (в `MainWindow` у контрола `DataContext` — `MainWindowViewModel`, чтобы биндинг не терялся). У `Border#BottomPanelShell` в Power — скругление верхних углов и усиленная тень (`views|BottomPanelView.power` в стилях). Телеметрия сборки/тестов/Git — в `WorkspaceHealthStripView` под редактором; дубль на вкладке «Терминал» не показывается (`WorkspaceHealthOnTerminalTab`), при входе в Power выбирается вкладка «Терминал» (`BottomPanelTabIndex = 0`).
+**Power (семья `Power`):** на корне `BottomPanelView` — `Classes.power` через привязку к **`UiModeFamily`** и конвертер **`UiModeFamilyEq`** с параметром `Power` (в `MainWindow` у контрола `DataContext` — `MainWindowViewModel`, чтобы биндинг не терялся). У `Border#BottomPanelShell` в Power — скругление верхних углов и усиленная тень (`views|BottomPanelView.power` в стилях). Сборка/тесты/отладка/Git — в `WorkspaceHealthStripView` под редактором (канал **Workspace Health**); дубль на вкладке «Терминал» не показывается (`WorkspaceHealthOnTerminalTab`), при входе в Power выбирается вкладка «Терминал» (`BottomPanelTabIndex = 0`).
 
 ---
 
@@ -105,9 +105,9 @@
 
 | Режим (id)   | Хоткей (часть цикла) | Особенности                                                                                                                                      |
 | ------------ | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Focus**    | Alt+1                | Правый столбец: **План** (чеклист), **Следующий шаг**, **Подтверждение** (Подтвердить/Отменить + объяснение/стоп); тулбар: Запуск (сборка), Контрольная точка, Откат; полоска телеметрии (build/tests/debug/git) видна. Блок «Agent Operations» скрыт (есть в Balanced/Power). |
+| **Focus**    | Alt+1                | Правый столбец: **План** (чеклист), **Следующий шаг**, **Подтверждение** (Подтвердить/Отменить + объяснение/стоп); тулбар: Запуск (сборка), Контрольная точка, Откат; полоска Workspace Health (build/tests/debug/git) видна. Блок «Agent Operations» скрыт (есть в Balanced/Power). |
 | **Balanced** | Alt+2                | Дерево, 2 группы редактора, чат; нижняя панель: **терминал и журнал сборки включены по умолчанию** (меню «Вид» можно снять), плюс вкладки **События / Тесты / Отладка** при включённом доке инструментирования. |
-| **Power**    | Alt+3                | Заголовок окна «Power Mode [Autonomous Agent Cockpit]»; task bar, Quick Actions, бейджи; слева очередь задач под деревом; справа **Agent Trace** (таймстемпы, объяснить/откат по шагу), **Safety**; полоса телеметрии + **снимок workspace (JSON)**. |
+| **Power**    | Alt+3                | Заголовок окна «Power Mode [Autonomous Agent Cockpit]»; task bar, Quick Actions, бейджи; слева очередь задач под деревом; справа **Agent Trace** (таймстемпы, объяснить/откат по шагу), **Safety**; полоса Workspace Health + **снимок workspace (JSON)**. |
 | **AgentChat**| —                    | Акцент на чате агента; отдельные метрики ширины чата и оформление бейджа режима (см. `workspace.toml` / темы). |
 | **Debug**    | —                    | Инструментирование и гипотезы; полоса задачи и заголовок окна под отладку (см. шипнутый `UiModes/Debug.toml`). |
 
@@ -143,7 +143,7 @@
 Раскладка и **рамки островов** (градиенты, скругления, тени) в Power уже близки к `concept-generated/cascadeide-ui-concept-power.png`. **Внутри колонок** многие списки и редактор всё ещё на **дефолтном стиле Avalonia Fluent**, тогда как на детальных PNG (например **`docs/ux/concept-screens/power-project-explorer-tree-concept.png`**) видны:
 
 - дерево: **своя** строка выделения (часто **вертикальный cyan/teal accent** слева), больше **padding** по вертикали, другой заголовок панели;
-- редактор / трасса / телеметрия: иные акценты и плотность, чем в текущих `TreeView` / AvaloniaEdit / `WorkspaceHealthStripView`.
+- редактор / трасса / Workspace Health: иные акценты и плотность, чем в текущих `TreeView` / AvaloniaEdit / `WorkspaceHealthStripView`.
 
 Полная сводка по зонам: **`concept-to-implementation-map-v1.md` §4.1**. План доработок — тот же файл, раздел **5** (пп. 5–6).
 
