@@ -3,7 +3,7 @@
 **Статус:** Accepted (загрузчик TOML, `UiModeCatalog`, capabilities и шипнутые `UiModes/` реализованы; при необходимости дорабатываются `docs/ux` и пользовательские override)  
 **Дата:** 2026-04-02  
 **Обновлено:** 2026-04-08 — намерение задать **топологию презентации** зон в TOML после появления альтернатив одному `MainGrid` ([0017](0017-multi-window-workspace-and-agent-surfaces.md)); см. подраздел ниже.  
-**Связь:** [0003-debug-ui-mode-separate-from-power.md](0003-debug-ui-mode-separate-from-power.md), [0006-presentation-layers-and-feature-slices.md](0006-presentation-layers-and-feature-slices.md), [0017](0017-multi-window-workspace-and-agent-surfaces.md) (мультиоконность и топология), [`attention-zone-panel-playbook-v1.md`](../design/attention-zone-panel-playbook-v1.md) (зона ↔ панель ↔ топология), `Features/UiChrome/UiModeLayoutRegistry`, `Services/SettingsService` + Tomlyn, `Features/UiChrome/UiWorkspaceLayoutDimensions` / `Services/UiWorkspaceLayout`.
+**Связь:** [0003-debug-ui-mode-separate-from-power.md](0003-debug-ui-mode-separate-from-power.md), [0006-presentation-layers-and-feature-slices.md](0006-presentation-layers-and-feature-slices.md), [0017](0017-multi-window-workspace-and-agent-surfaces.md) (мультиоконность и топология), [`attention-zone-panel-playbook-v1.md`](../design/attention-zone-panel-playbook-v1.md) (зона ↔ панель ↔ топология), `Features/UiChrome/UiModeLayoutRegistry`, `Services/SettingsService` + Tomlyn, `Features/UiChrome/UiWorkspaceLayoutDimensions` / `Services/UiWorkspaceLayout`. [0022](0022-workspace-health-lexicon.md) — канон имён и эволюция для **Workspace Health** (пересечение с таблицей `workspace_health_*` ниже).
 
 ## Контекст
 

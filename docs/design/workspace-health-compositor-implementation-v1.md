@@ -1,7 +1,7 @@
 # Workspace Health — полоса и страница (реализация: `WorkspaceHealth*`) — implementation map (v1)
 
 **Статус:** живой чертёж (не ADR). **Обновлено:** 2026-04-11 — каноническое имя контура: **Workspace Health**; типы в коде: `WorkspaceHealth*`; §1: «слот презентации vs канал»; ссылка на ADR 0021 §1.2. Ранее: 2026-04-06 — `WorkspaceHealthMfdPageView` + строка в §3/§4; отсылка к ADR: [содержимое якоря PFD/MFD vs Page канала](../adr/0021-pfd-mfd-cockpit-attention-model.md#anchor-pfd-mfd-content-vs-telemetry-page). Ранее: 2026-04-05 — §7.1: **решение v1 = вариант A** (отдельный контур EICAS); ранее — union types / вариант B, углубление, фазы.  
-**Решения и термины** — в [ADR 0021](../adr/0021-pfd-mfd-cockpit-attention-model.md) (PFD/MFD/EICAS, ARINC 661-идеи); **канонический словарь** «канал / слой представления / имена в коде» — [§1.1](../adr/0021-pfd-mfd-cockpit-attention-model.md#glossary-channel-presentation). Здесь — **где в коде** и **что дальше**, чтобы не раздувать ADR.
+**Решения и термины** — в [ADR 0021](../adr/0021-pfd-mfd-cockpit-attention-model.md) (PFD/MFD/EICAS, ARINC 661-идеи); **канонический словарь** «канал / слой представления / имена в коде» — [§1.1](../adr/0021-pfd-mfd-cockpit-attention-model.md#glossary-channel-presentation). Лексикон **Workspace Health** и эволюция имён — [ADR 0022](../adr/0022-workspace-health-lexicon.md). Здесь — **где в коде** и **что дальше**, чтобы не раздувать ADR.
 
 ---
 
