@@ -5,12 +5,12 @@ using CascadeIDE.ViewModels;
 namespace CascadeIDE.Views;
 
 /// <summary>
-/// Зона MFD: одна полоса вкладок (WORKSPACE / чат / терминал / сборка / …), без наслоения отдельного «нижнего дока» под чатом.
+/// Вторичный контур оболочки: одна активная страница (WORKSPACE / чат / терминал / сборка / …); v1 — колонка зоны Mfd по пресету.
 /// Имя Border#BottomPanelShell на корне сохранено для снимков UI / MCP.
 /// </summary>
-public partial class MfdShellView : UserControl
+public partial class SecondaryShellView : UserControl
 {
-    public MfdShellView()
+    public SecondaryShellView()
     {
         InitializeComponent();
     }

@@ -81,8 +81,8 @@ public partial class MainWindowViewModel
     public bool ShowWorkspaceHealthStrip =>
         Capabilities.WorkspaceHealthStripVisible && Capabilities.WorkspaceHealthSurface == WorkspaceHealthUiSurface.BottomStrip;
 
-    /// <summary>Workspace Health в колонке MFD (страница вместо нижней полосы) — при <c>workspace_health_strip</c> и <c>workspace_health_surface = dedicated_page</c>.</summary>
-    public bool ShowWorkspaceHealthMfdPage =>
+    /// <summary>Workspace Health на странице вторичного контура (вместо нижней полосы) — при <c>workspace_health_strip</c> и <c>workspace_health_surface = dedicated_page</c> (v1 — колонка зоны Mfd).</summary>
+    public bool ShowWorkspaceHealthSecondaryPage =>
         Capabilities.WorkspaceHealthStripVisible && Capabilities.WorkspaceHealthSurface == WorkspaceHealthUiSurface.DedicatedPage;
 
     /// <summary>

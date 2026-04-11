@@ -1,3 +1,5 @@
+using CascadeIDE.Models;
+
 namespace CascadeIDE.ViewModels;
 
 /// <summary>Реакции на изменение полей настроек и ключей API: диск, автономный агент, панели.</summary>
@@ -48,9 +50,9 @@ public partial class MainWindowViewModel
         OnPropertyChanged(nameof(IsBottomPanelVisible));
         SaveSettingsIfChanged();
         if (value)
-            MfdShellTabIndex = MfdShellTabTerminalIndex;
-        else if (MfdShellTabIndex == MfdShellTabTerminalIndex)
-            CoerceMfdShellTabToVisible();
+            CurrentSecondaryShellPage = SecondaryShellPage.Terminal;
+        else if (CurrentSecondaryShellPage == SecondaryShellPage.Terminal)
+            CoerceSecondaryShellPageToAllowed();
     }
 
     partial void OnIsBuildOutputVisibleChanged(bool value)
@@ -58,9 +60,9 @@ public partial class MainWindowViewModel
         OnPropertyChanged(nameof(IsBuildPanelHidden));
         OnPropertyChanged(nameof(IsBottomPanelVisible));
         if (value)
-            MfdShellTabIndex = MfdShellTabBuildIndex;
-        else if (MfdShellTabIndex == MfdShellTabBuildIndex)
-            CoerceMfdShellTabToVisible();
+            CurrentSecondaryShellPage = SecondaryShellPage.Build;
+        else if (CurrentSecondaryShellPage == SecondaryShellPage.Build)
+            CoerceSecondaryShellPageToAllowed();
     }
 
     partial void OnIsInstrumentationDockVisibleChanged(bool value)
@@ -69,12 +71,12 @@ public partial class MainWindowViewModel
         SaveSettingsIfChanged();
         if (value)
         {
-            MfdShellTabIndex = MfdShellTabEventsIndex;
+            CurrentSecondaryShellPage = SecondaryShellPage.Events;
             return;
         }
 
-        if (MfdShellTabIndex is >= MfdShellTabEventsIndex and <= MainWindowViewModel.MfdShellTabDebugStackIndex)
-            CoerceMfdShellTabToVisible();
+        if (CurrentSecondaryShellPage is SecondaryShellPage.Events or SecondaryShellPage.Tests or SecondaryShellPage.Hypotheses or SecondaryShellPage.DebugStack)
+            CoerceSecondaryShellPageToAllowed();
     }
 
     partial void OnIsChatPanelExpandedChanged(bool value)
@@ -118,11 +120,11 @@ public partial class MainWindowViewModel
         SaveSettingsIfChanged();
         if (value)
         {
-            MfdShellTabIndex = MfdShellTabGitIndex;
+            CurrentSecondaryShellPage = SecondaryShellPage.Git;
             _ = GitPanel.RefreshGitPanelAsync();
         }
-        else if (MfdShellTabIndex == MfdShellTabGitIndex)
-            CoerceMfdShellTabToVisible();
+        else if (CurrentSecondaryShellPage == SecondaryShellPage.Git)
+            CoerceSecondaryShellPageToAllowed();
     }
 
     partial void OnSendMessageKeyChanged(string value)

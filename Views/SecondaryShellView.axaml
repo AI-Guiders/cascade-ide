@@ -5,29 +5,20 @@
              xmlns:dbg="using:CascadeIDE.Features.Debug"
              xmlns:models="using:CascadeIDE.Models"
              xmlns:views="using:CascadeIDE.Views"
-             x:Class="CascadeIDE.Views.MfdShellView"
-             x:Name="MfdShellRoot"
+             x:Class="CascadeIDE.Views.SecondaryShellView"
+             x:Name="SecondaryShellRoot"
              Classes.power="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Power}"
              x:DataType="vm:MainWindowViewModel">
     <UserControl.Styles>
         <Style Selector="Border#BottomPanelShell">
             <Setter Property="CornerRadius" Value="0"/>
         </Style>
-        <!-- views|MfdShellView: корень — этот UserControl; надёжнее, чем только UserControl.power -->
-        <Style Selector="views|MfdShellView.power Border#BottomPanelShell">
+        <Style Selector="views|SecondaryShellView.power Border#BottomPanelShell">
             <Setter Property="CornerRadius" Value="12,12,0,0"/>
             <Setter Property="BoxShadow" Value="0 -8 32 0 #4000C8E8, 0 -2 20 0 #20000000"/>
         </Style>
-        <!-- Док-панель всегда на тёмном TerminalBackground; при светлой ОС Fluent TabItem остаётся «светлым» и даёт тёмный текст на тёмном фоне — вкладки визуально пропадают. -->
-        <Style Selector="Border#BottomPanelShell TabItem">
-            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.TerminalForeground}"/>
-        </Style>
-        <Style Selector="Border#BottomPanelShell TabItem:selected">
-            <Setter Property="Foreground" Value="#FFFFFFFF"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-        </Style>
     </UserControl.Styles>
-    <!-- MFD: одна полоса вкладок — WORKSPACE, чат, терминал, сборка, … (ADR 0021). Сверху: EICAS и полоса Workspace Health (strip). -->
+    <!-- Вторичный контур оболочки (v1 — колонка зоны Mfd): одна активная страница; навигация — палитра «Вторичный контур: …», без TabControl. Сверху: EICAS и полоса Workspace Health (strip). -->
     <Grid MinHeight="0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -42,16 +33,19 @@
                 BorderThickness="0,1,0,0"
                 Padding="4"
                 Background="{DynamicResource CascadeTheme.TerminalBackground}">
-        <!-- Локально тёмный вариант Fluent для TabControl, чтобы полоска вкладок не ломалась при RequestedThemeVariant=Default + светлая Windows. -->
+        <!-- Тёмная тема Fluent для нижней панели. Страница «окружение» (ADR 0023) — оверлей; открытие из палитры. -->
         <ThemeVariantScope RequestedThemeVariant="Dark">
-            <TabControl SelectedIndex="{Binding MfdShellTabIndex, Mode=TwoWay}">
-                <TabItem Header="WORKSPACE" IsVisible="{Binding ShowWorkspaceHealthMfdPage}">
-                    <views:WorkspaceHealthMfdPageView/>
-                </TabItem>
-                <TabItem Header="Чат">
+            <Grid>
+                <Grid.Resources>
+                    <views:SecondaryShellPageEqualsConverter x:Key="SecondaryShellPageEq"/>
+                </Grid.Resources>
+            <Border IsVisible="{Binding CurrentSecondaryShellPage, Converter={StaticResource SecondaryShellPageEq}, ConverterParameter=WorkspaceHealth}">
+                    <views:WorkspaceHealthSecondaryPageView/>
+            </Border>
+            <Border IsVisible="{Binding CurrentSecondaryShellPage, Converter={StaticResource SecondaryShellPageEq}, ConverterParameter=Chat}">
                     <views:ChatPanelView/>
-                </TabItem>
-                <TabItem Header="Терминал · консоль" IsVisible="{Binding IsTerminalVisible}">
+            </Border>
+            <Border IsVisible="{Binding CurrentSecondaryShellPage, Converter={StaticResource SecondaryShellPageEq}, ConverterParameter=Terminal}">
                     <DockPanel>
                         <Border DockPanel.Dock="Top" IsVisible="{Binding WorkspaceHealthOnTerminalTab}" Classes="modeCard" Margin="0,0,0,4">
                             <StackPanel Spacing="4">
@@ -115,8 +109,8 @@
                             </ScrollViewer>
                         </DockPanel>
                     </DockPanel>
-                </TabItem>
-                <TabItem Header="Сборка · вывод" IsVisible="{Binding IsBuildOutputVisible}">
+            </Border>
+            <Border IsVisible="{Binding CurrentSecondaryShellPage, Converter={StaticResource SecondaryShellPageEq}, ConverterParameter=Build}">
                     <DockPanel DataContext="{Binding BuildOutputPanel}">
                         <views:PanelChromeHeader DockPanel.Dock="Top" Title="Журнал сборки · MSBuild / Roslyn" UppercaseTitle="True"/>
                         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" MinHeight="96">
@@ -130,8 +124,8 @@
                                      BorderThickness="0"/>
                         </ScrollViewer>
                     </DockPanel>
-                </TabItem>
-                <TabItem Header="Problems · ошибки" IsVisible="{Binding IsProblemsPanelVisible}">
+            </Border>
+            <Border IsVisible="{Binding CurrentSecondaryShellPage, Converter={StaticResource SecondaryShellPageEq}, ConverterParameter=Problems}">
                     <DockPanel DataContext="{Binding ProblemsPanel}">
                         <views:PanelChromeHeader DockPanel.Dock="Top" Title="{Binding SummaryText}" UppercaseTitle="False"/>
                         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" MinHeight="96">
@@ -153,8 +147,8 @@
                             </ListBox>
                         </ScrollViewer>
                     </DockPanel>
-                </TabItem>
-                <TabItem Header="Git · статус и diff" IsVisible="{Binding IsGitPanelVisible}">
+            </Border>
+            <Border IsVisible="{Binding CurrentSecondaryShellPage, Converter={StaticResource SecondaryShellPageEq}, ConverterParameter=Git}">
                     <Grid DataContext="{Binding GitPanel}"
                           ColumnDefinitions="280,4,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,*,Auto,120,Auto,Auto,Auto">
                         <TextBlock Grid.Row="0" Grid.ColumnSpan="3"
@@ -266,8 +260,8 @@
                             <Button Content="Push" Command="{Binding PushGitFromPanelCommand}" Padding="12,6"/>
                         </StackPanel>
                     </Grid>
-                </TabItem>
-                <TabItem Header="События · таймлайн" IsVisible="{Binding InstrumentationTabs}">
+            </Border>
+            <Border IsVisible="{Binding CurrentSecondaryShellPage, Converter={StaticResource SecondaryShellPageEq}, ConverterParameter=Events}">
                     <DockPanel>
                         <views:PanelChromeHeader DockPanel.Dock="Top" Classes="terminal" Title="Лента событий · агент и сборка" UppercaseTitle="True"/>
                         <DockPanel DataContext="{Binding InstrumentationPanel}" x:DataType="feat:InstrumentationPanelViewModel">
@@ -293,8 +287,8 @@
                             </ScrollViewer>
                         </DockPanel>
                     </DockPanel>
-                </TabItem>
-                <TabItem Header="Тесты · результаты" IsVisible="{Binding InstrumentationTabs}">
+            </Border>
+            <Border IsVisible="{Binding CurrentSecondaryShellPage, Converter={StaticResource SecondaryShellPageEq}, ConverterParameter=Tests}">
                     <DockPanel>
                         <views:PanelChromeHeader DockPanel.Dock="Top" Classes="terminal" Title="{Binding LastTestSummary, StringFormat=Последний прогон: {0}}" UppercaseTitle="False"/>
                         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
@@ -310,8 +304,8 @@
                                      BorderThickness="0"/>
                         </ScrollViewer>
                     </DockPanel>
-                </TabItem>
-                <TabItem Header="Гипотезы · отладка" IsVisible="{Binding HypothesesTab}">
+            </Border>
+            <Border IsVisible="{Binding CurrentSecondaryShellPage, Converter={StaticResource SecondaryShellPageEq}, ConverterParameter=Hypotheses}">
                     <DockPanel DataContext="{Binding HypothesesPanel}" x:DataType="dbg:HypothesesPanelViewModel">
                         <views:PanelChromeHeader DockPanel.Dock="Top" Classes="terminal" Title="Гипотезы · workspace JSON" UppercaseTitle="True"/>
                         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="8" Margin="0,0,0,6">
@@ -349,8 +343,8 @@
                             </ItemsControl>
                         </ScrollViewer>
                     </DockPanel>
-                </TabItem>
-                <TabItem Header="Отладка · стек" IsVisible="{Binding InstrumentationTabs}">
+            </Border>
+            <Border IsVisible="{Binding CurrentSecondaryShellPage, Converter={StaticResource SecondaryShellPageEq}, ConverterParameter=DebugStack}">
                     <Grid DataContext="{Binding InstrumentationPanel}" x:DataType="feat:InstrumentationPanelViewModel"
                           RowDefinitions="Auto,*,4,Auto,*" Margin="0,4,0,0">
                         <views:PanelChromeHeader Grid.Row="0" Classes="terminal" Title="Стек вызовов · отладчик" UppercaseTitle="True"/>
@@ -382,8 +376,14 @@
                             </ItemsControl>
                         </ScrollViewer>
                     </Grid>
-                </TabItem>
-            </TabControl>
+            </Border>
+            <Border ZIndex="1"
+                    IsVisible="{Binding ShowEnvironmentReadinessPage}"
+                    Background="{DynamicResource CascadeTheme.TerminalBackground}"
+                    Padding="0">
+                <views:EnvironmentReadinessSecondaryPageView/>
+            </Border>
+            </Grid>
         </ThemeVariantScope>
         </Border>
     </Grid>

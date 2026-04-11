@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Threading.Tasks;
 using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Lang;
+using CascadeIDE.Models;
 using CascadeIDE.Services;
 using CommunityToolkit.Mvvm.Input;
 
@@ -118,7 +119,7 @@ public partial class MainWindowViewModel
     {
         IsBuildOutputVisible = !IsBuildOutputVisible;
         if (IsBuildOutputVisible)
-            MfdShellTabIndex = MfdShellTabBuildIndex;
+            CurrentSecondaryShellPage = SecondaryShellPage.Build;
     }
 
     [RelayCommand]
@@ -126,7 +127,7 @@ public partial class MainWindowViewModel
     {
         IsTerminalVisible = !IsTerminalVisible;
         if (IsTerminalVisible)
-            MfdShellTabIndex = MfdShellTabTerminalIndex;
+            CurrentSecondaryShellPage = SecondaryShellPage.Terminal;
     }
 
     [RelayCommand]
@@ -213,17 +214,21 @@ public partial class MainWindowViewModel
     private void ShowBuildOutputPanel()
     {
         IsBuildOutputVisible = true;
-        MfdShellTabIndex = MfdShellTabBuildIndex;
+        CurrentSecondaryShellPage = SecondaryShellPage.Build;
     }
 
     [RelayCommand]
-    private void ShowChatPanel() => IsChatPanelExpanded = true;
+    private void ShowChatPanel()
+    {
+        IsChatPanelExpanded = true;
+        CurrentSecondaryShellPage = SecondaryShellPage.Chat;
+    }
 
     [RelayCommand]
     private void ShowTerminalPanel()
     {
         IsTerminalVisible = true;
-        MfdShellTabIndex = MfdShellTabTerminalIndex;
+        CurrentSecondaryShellPage = SecondaryShellPage.Terminal;
     }
 
     /// <summary>Переключение режима по id из каталога (<see cref="UiModeCatalog.OrderedModeIds"/>), меню и MCP.</summary>

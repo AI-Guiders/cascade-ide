@@ -1,4 +1,5 @@
 using System.Text.Json;
+using CascadeIDE.Models;
 using CascadeIDE.Services;
 
 namespace CascadeIDE.ViewModels;
@@ -101,7 +102,7 @@ public partial class MainWindowViewModel
                     combined = combined[^maxLogChars..];
                 InstrumentationPanel.TestResultsOutput = combined;
                 if (InstrumentationTabs)
-                    MfdShellTabIndex = MfdShellTabTestsIndex;
+                    CurrentSecondaryShellPage = SecondaryShellPage.Tests;
             });
             return outcome.JsonPayload;
         }

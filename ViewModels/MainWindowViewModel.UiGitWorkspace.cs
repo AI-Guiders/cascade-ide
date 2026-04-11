@@ -1,5 +1,6 @@
 using Avalonia.Threading;
 using CascadeIDE.Features.UiChrome;
+using CascadeIDE.Models;
 
 namespace CascadeIDE.ViewModels;
 
@@ -40,9 +41,9 @@ public partial class MainWindowViewModel
         EditorGroupCount = spec.EditorGroupCount;
         IsInstrumentationDockVisible = spec.InstrumentationDockVisible;
 
-        CoerceMfdShellTabToVisible();
+        CoerceSecondaryShellPageToAllowed();
         if (spec.SelectTerminalTabWhenTerminalShown && IsTerminalVisible)
-            MfdShellTabIndex = MfdShellTabTerminalIndex;
+            CurrentSecondaryShellPage = SecondaryShellPage.Terminal;
 
         _ = spec.ThemeSlot switch
         {
@@ -59,39 +60,6 @@ public partial class MainWindowViewModel
         _settings.SolutionExplorerVisible = IsSolutionExplorerVisible;
         _settings.TerminalVisible = IsTerminalVisible;
         SaveSettingsIfChanged();
-    }
-
-    /// <summary>Вкладки MFD: см. <see cref="MfdShellTabWorkspaceIndex"/> … <see cref="MfdShellTabDebugStackIndex"/>.</summary>
-    private bool IsMfdShellTabVisible(int index) => index switch
-    {
-        MfdShellTabWorkspaceIndex => ShowWorkspaceHealthMfdPage,
-        MfdShellTabChatIndex => true,
-        MfdShellTabTerminalIndex => IsTerminalVisible,
-        MfdShellTabBuildIndex => IsBuildOutputVisible,
-        MfdShellTabProblemsIndex => IsProblemsPanelVisible,
-        MfdShellTabGitIndex => IsGitPanelVisible,
-        MfdShellTabEventsIndex or MfdShellTabTestsIndex or MfdShellTabDebugStackIndex => InstrumentationTabs,
-        MfdShellTabHypothesesIndex => HypothesesTab,
-        _ => false,
-    };
-
-    private int GetFirstVisibleMfdShellTabIndex()
-    {
-        for (var i = 0; i <= MfdShellTabDebugStackIndex; i++)
-        {
-            if (IsMfdShellTabVisible(i))
-                return i;
-        }
-
-        return MfdShellTabChatIndex;
-    }
-
-    /// <summary>Если выбрана скрытая вкладка, TabControl в Avalonia показывает пустую область — переключаем на первую видимую.</summary>
-    private void CoerceMfdShellTabToVisible()
-    {
-        if (IsMfdShellTabVisible(MfdShellTabIndex))
-            return;
-        MfdShellTabIndex = GetFirstVisibleMfdShellTabIndex();
     }
 
     private string GetWorkspacePath() => GetWorkspacePath(Workspace.SolutionPath);

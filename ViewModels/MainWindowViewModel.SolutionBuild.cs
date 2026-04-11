@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Threading;
+using CascadeIDE.Models;
 using CommunityToolkit.Mvvm.Input;
 
 namespace CascadeIDE.ViewModels;
@@ -31,8 +32,8 @@ public partial class MainWindowViewModel
         IsBuildOutputVisible = true;
 
         // Один канонический лог — только «Сборка · вывод» (и MCP get_build_output). Терминал не дублируем:
-        // в Power переключаем нижнюю панель на эту вкладку, чтобы лог был на глазах без второй копии текста.
-        MfdShellTabIndex = MfdShellTabBuildIndex;
+        // в Power переключаем MFD на вывод сборки, чтобы лог был на глазах без второй копии текста.
+        CurrentSecondaryShellPage = SecondaryShellPage.Build;
 
         var header = $"Сборка: {solutionPath}\r\n";
         BuildOutputPanel.Set(header);

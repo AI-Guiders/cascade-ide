@@ -69,5 +69,8 @@ public static partial class IdeCommandRegistry
             "Палитра команд",
             "Вид",
             window: new MainWindowHotkeyVmBinding(MainWindowHotkeyVmBindingKind.ToggleCommandPalette));
+
+        AddPalette(b, "show_environment_readiness_page", IdeCommands.ShowEnvironmentReadinessPage, "Готовность окружения (LSP, dotnet…)", "Вид");
+        AddPalette(b, "close_environment_readiness_page", IdeCommands.CloseEnvironmentReadinessPage, "Закрыть страницу готовности окружения", "Вид");
     }
 }

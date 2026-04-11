@@ -40,6 +40,15 @@ public static partial class IdeCommands
     /// <summary>Открыть или закрыть палитру команд (как Ctrl+Q / пункт меню «Вид»). returns: text.</summary>
     public const string ToggleCommandPalette = "toggle_command_palette";
 
+    /// <summary>Показать полноэкранную страницу «готовность окружения» в регионе MFD (оверлей нижней панели; ADR 0023). returns: text.</summary>
+    public const string ShowEnvironmentReadinessPage = "show_environment_readiness_page";
+
+    /// <summary>Скрыть страницу «готовность окружения» и вернуться к нижней панели MFD. returns: text.</summary>
+    public const string CloseEnvironmentReadinessPage = "close_environment_readiness_page";
+
+    /// <summary>Активная страница вторичного контура оболочки: имя значения SecondaryShellPage (Chat, Terminal, …). Якорь на экране — пресет (v1 — колонка зоны Mfd). args: page:string; returns: text; example: {"page":"Chat"}.</summary>
+    public const string SetSecondaryShellPage = "set_secondary_shell_page";
+
     // ——— Вид: тема
     /// <summary>Применить светлую тему. returns: text.</summary>
     public const string ApplyLightTheme = "apply_light_theme";

@@ -85,6 +85,7 @@ public static partial class IdeCommandRegistry
         RegisterGitPalette(b);
         RegisterDocumentsPalette(b);
         RegisterSettingsAndHelpPalette(b);
+        RegisterSecondaryShellPalette(b);
         RegisterWindowOnlyHotkeys(b);
         return b.ToImmutable();
     }

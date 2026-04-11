@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using CascadeIDE.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace CascadeIDE.ViewModels;
@@ -37,7 +38,7 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(IsMfdColumnVisible))]
     [NotifyPropertyChangedFor(nameof(ShowTaskBar))]
     [NotifyPropertyChangedFor(nameof(ShowWorkspaceHealthStrip))]
-    [NotifyPropertyChangedFor(nameof(ShowWorkspaceHealthMfdPage))]
+    [NotifyPropertyChangedFor(nameof(ShowWorkspaceHealthSecondaryPage))]
     [NotifyPropertyChangedFor(nameof(ShowEicasAlertsBar))]
     [NotifyPropertyChangedFor(nameof(ShowWorkspaceChromeBand))]
     [NotifyPropertyChangedFor(nameof(WorkspaceHealthUiSurface))]
@@ -126,9 +127,9 @@ public partial class MainWindowViewModel
 
     public ObservableCollection<FocusPlanItemViewModel> FocusPlanItems { get; } = [];
 
-    /// <summary>MFD TabControl: 0 WORKSPACE, 1 Чат, 2 терминал, 3 сборка, 4 Problems, 5 Git, 6–7 события/тесты, 8 гипотезы, 9 стек отладки.</summary>
+    /// <summary>Какая страница показана во вторичном контуре оболочки (без TabControl; v1 — колонка зоны Mfd).</summary>
     [ObservableProperty]
-    private int _mfdShellTabIndex = MfdShellTabTerminalIndex;
+    private SecondaryShellPage _currentSecondaryShellPage = SecondaryShellPage.Terminal;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(BuildSolutionCommand))]

@@ -230,7 +230,7 @@
             </MenuItem>
         </Menu>
 
-        <!-- Строка 3 — рабочая область (якоря PFD | Forward | MFD в MainGrid; AttentionLayoutSurfaceKind.MainWindowDockedGrid). В колонке MFD сейчас MfdShellView: вкладки WORKSPACE/чат/терминал/… и полоса EICAS сверху — не синоним «зона MFD», а хост по умолчанию. -->
+        <!-- Строка 3 — рабочая область (якоря PFD | Forward | MFD в MainGrid; AttentionLayoutSurfaceKind.MainWindowDockedGrid). В колонке MFD сейчас SecondaryShellView: страницы вторичного контура (WORKSPACE/чат/терминал/…) и полоса EICAS сверху — не синоним «зона MFD», а хост по умолчанию (пресет). -->
         <Grid x:Name="MainGrid" ColumnDefinitions="220,4,*,4,340">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -259,10 +259,10 @@
                       Width="4" ResizeDirection="Columns" Background="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"
                       IsVisible="{Binding IsMfdColumnVisible}"/>
 
-        <!-- Якорь зоны MFD: сейчас одна оболочка вкладок (MfdShellView) — WORKSPACE / чат / терминал / сборка / …; состав вкладок ≠ сама зона (ADR 0021). -->
+        <!-- Якорь зоны MFD: вторичный контур оболочки (SecondaryShellView) — WORKSPACE / чат / терминал / сборка / …; состав страниц ≠ сама зона (ADR 0021). -->
         <chrome:AttentionZoneContainer Zone="Mfd" Grid.Row="3" Grid.Column="4" Grid.RowSpan="{Binding ChatPanelMainGridRowSpan}"
                                        IsVisible="{Binding IsMfdColumnVisible}">
-            <views:MfdShellView DataContext="{Binding DataContext, ElementName=RootWindow}" MinHeight="0"/>
+            <views:SecondaryShellView DataContext="{Binding DataContext, ElementName=RootWindow}" MinHeight="0"/>
         </chrome:AttentionZoneContainer>
         <!-- Bloom только над task bar + рабочей областью (строки 2–3). -->
         <Border x:Name="UiModeBloomOverlay"

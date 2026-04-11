@@ -1,0 +1,43 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CascadeIDE.ViewModels"
+             xmlns:models="using:CascadeIDE.Models"
+             xmlns:views="using:CascadeIDE.Views"
+             x:Class="CascadeIDE.Views.EnvironmentReadinessSecondaryPageView"
+             x:DataType="vm:MainWindowViewModel">
+    <UserControl.Resources>
+        <views:EnvironmentReadinessLevelToBrushConverter x:Key="EnvLevelBrush"/>
+    </UserControl.Resources>
+    <DockPanel Margin="0,4,0,0">
+        <views:PanelChromeHeader DockPanel.Dock="Top" Title="Готовность окружения · LSP и инструменты" UppercaseTitle="True"/>
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="8" Margin="0,0,0,8">
+            <Button Content="Назад к нижней панели" Command="{Binding CloseEnvironmentReadinessPageCommand}" Padding="8,4"/>
+            <Button Content="Обновить" Command="{Binding RefreshEnvironmentReadinessCommand}" Padding="8,4"/>
+            <Button Content="Параметры…" Command="{Binding OpenSettingsCommand}" Padding="8,4"/>
+            <TextBlock Text="{Binding EnvironmentReadinessUpdatedText}"
+                       VerticalAlignment="Center"
+                       FontSize="11"
+                       Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+        </StackPanel>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <ItemsControl ItemsSource="{Binding EnvironmentReadinessItems}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="models:EnvironmentReadinessItem">
+                        <Border Classes="modeCard" Padding="8,6" Margin="0,0,0,6">
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="{Binding Title}"
+                                           FontWeight="SemiBold"
+                                           FontSize="12"
+                                           Foreground="{Binding Level, Converter={StaticResource EnvLevelBrush}}"/>
+                                <TextBlock Text="{Binding Detail}"
+                                           TextWrapping="Wrap"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource CascadeTheme.TerminalForeground}"/>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </DockPanel>
+</UserControl>

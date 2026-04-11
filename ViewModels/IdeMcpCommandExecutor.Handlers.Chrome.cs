@@ -1,4 +1,5 @@
 using System.Text.Json;
+using CascadeIDE.Models;
 using CascadeIDE.Services;
 
 namespace CascadeIDE.ViewModels;
@@ -144,6 +145,29 @@ internal sealed partial class IdeMcpCommandExecutor
         {
             if (_vm.ToggleCommandPaletteCommand.CanExecute(null))
                 _vm.ToggleCommandPaletteCommand.Execute(null);
+            return await Task.FromResult("OK");
+        });
+
+        add(Services.IdeCommands.ShowEnvironmentReadinessPage, async (_, _) =>
+        {
+            _vm.ShowEnvironmentReadinessPage = true;
+            return await Task.FromResult("OK");
+        });
+        add(Services.IdeCommands.CloseEnvironmentReadinessPage, async (_, _) =>
+        {
+            if (_vm.CloseEnvironmentReadinessPageCommand.CanExecute(null))
+                _vm.CloseEnvironmentReadinessPageCommand.Execute(null);
+            return await Task.FromResult("OK");
+        });
+
+        add(Services.IdeCommands.SetSecondaryShellPage, async (args, _) =>
+        {
+            var raw = McpCommandJsonArgs.String(args, "page");
+            if (string.IsNullOrWhiteSpace(raw))
+                return "Missing page (string, SecondaryShellPage: Chat, Terminal, Build, …)";
+            if (!Enum.TryParse<SecondaryShellPage>(raw.Trim(), ignoreCase: true, out var page))
+                return $"Unknown SecondaryShellPage: {raw}";
+            _vm.TryNavigateToSecondaryShellPage(page);
             return await Task.FromResult("OK");
         });
     }

@@ -21,21 +21,6 @@ namespace CascadeIDE.ViewModels;
 /// </summary>
 public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpActions, IAutonomousAgentSessionHost
 {
-    public const int MfdShellTabWorkspaceIndex = 0;
-    public const int MfdShellTabChatIndex = 1;
-    public const int MfdShellTabTerminalIndex = 2;
-    public const int MfdShellTabBuildIndex = 3;
-    public const int MfdShellTabProblemsIndex = 4;
-    public const int MfdShellTabGitIndex = 5;
-    public const int MfdShellTabEventsIndex = 6;
-    public const int MfdShellTabTestsIndex = 7;
-
-    /// <summary>MFD: вкладка «Гипотезы» (только в UI-режиме Debug). Индексы TabControl в <c>MfdShellView</c>: 0 WORKSPACE, 1 Чат, далее терминал/сборка/…</summary>
-    public const int MfdShellTabHypothesesIndex = 8;
-
-    /// <summary>MFD: вкладка «Отладка · стек».</summary>
-    public const int MfdShellTabDebugStackIndex = 9;
-
     public const string InstallNewSentinel = "— Установить модель… —";
 
     private readonly Services.IOllamaService _ollama = new Services.OllamaService();
