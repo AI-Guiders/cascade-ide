@@ -101,4 +101,5 @@
 - **v1.32** — добавлен [0031](adr/0031-agent-chat-clarification-batches-and-threading.md) (чат: пакеты уточнений, многострочные ответы, треды опционально; Proposed).  
 - **v1.33** — [0026](adr/0026-markdown-preview-surfaces-and-placement.md): намерение по **внутренним отсылкам** в превью (hover/peek «Show Definition» для «см. п. N» и якорей; ортогонально [0023](adr/0023-markdown-diagrams-language-tooling.md)).  
 - **v1.34** — [README ADR](adr/README.md#adr-anchors-policy): политика **внутренних якорей** (`adrNNNN-pK`) и ссылок вместо голого «см. п. N»; якоря в **0010**, **0011**, **0012**, **0015**, **0017**, **0021** (§17 п. 10 → §18), перекрёстные ссылки в **0022**, **0031**; якоря списка фазы 5 в [architecture-migration.md](architecture-migration.md).  
+- **v1.35** — [0017](adr/0017-multi-window-workspace-and-agent-surfaces.md): мультиоконность v1 **не** смешивается с переработкой **Power** и прочих режимов; вопрос Flight vs Power для второго окна **снят** до отдельной дорожной карты режимов.  
 - Изменения направления — отдельным коммитом: обновление этого файла и при необходимости новый ADR в [docs/adr/README.md](adr/README.md).
