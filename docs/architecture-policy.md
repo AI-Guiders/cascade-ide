@@ -35,7 +35,7 @@
 | Ситуационные чеклисты (каталог, триггеры, карточка UI) | [0014](adr/0014-situational-checklists.md) |
 | Подсветка TOML в редакторе (шипнутый TextMate-пакет; LSP — отдельно) | [0015](adr/0015-editor-toml-syntax-highlighting.md) |
 | Внешний агент по ACP (stdio, Cursor CLI), не путать с MCP-сервером IDE | [0016](adr/0016-agent-client-protocol-external-agent.md) |
-| Мультиоконность workspace, вторые поверхности агента, зоны экрана; MCP — несколько корней в scope фичи | [0017](adr/0017-multi-window-workspace-and-agent-surfaces.md) (Proposed) |
+| Мультиоконность workspace, вторые поверхности агента, зоны экрана; MCP — несколько корней в scope фичи | [0017](adr/0017-multi-window-workspace-and-agent-surfaces.md) (Accepted) |
 | Реестр `IdeCommands`: каноничные XML-доки (`summary` / `param` / `returns` / `example`) для ProtocolDocGen; миграция с мини-языка в summary | [0018](adr/0018-ide-commands-canonical-xml-documentation.md) (Proposed) |
 | Git: общая библиотека логики для встроенных `ide_git_*` и отдельного git-mcp; паритет семантики | [0019](adr/0019-shared-git-core-ide-and-git-mcp.md) (Accepted) |
 | Агент: слои видимости рассуждения (ответ, трасс инструментов, опционально сырой лог); ограничения API провайдеров — явно, без имитации «полного мыслительного процесса» | [0020](adr/0020-agent-reasoning-visibility-and-provider-limits.md) (Proposed) |
@@ -80,7 +80,7 @@
 - **v1.7** — уточнён [0013](adr/0013-command-surface-and-discoverability.md); добавлен [0014](adr/0014-situational-checklists.md) (ситуационные чеклисты отдельно от палитры/toolbar).  
 - **v1.8** — добавлен [0015](adr/0015-editor-toml-syntax-highlighting.md) (подсветка TOML в редакторе через TextMate; не LSP в v1).  
 - **v1.9** — добавлен [0016](adr/0016-agent-client-protocol-external-agent.md) (внешний агент по Agent Client Protocol, stdio, Cursor CLI; PoC принят).  
-- **v1.10** — добавлен [0017](adr/0017-multi-window-workspace-and-agent-surfaces.md) (мультиоконность, поверхности агента; статус Proposed до обсуждения).  
+- **v1.10** — добавлен [0017](adr/0017-multi-window-workspace-and-agent-surfaces.md) (мультиоконность, поверхности агента; тогда Proposed — см. **v1.38**).  
 - **v1.11** — добавлен [0018](adr/0018-ide-commands-canonical-xml-documentation.md) (каноничные XML-доки для `IdeCommands`/ProtocolDocGen; Proposed).  
 - **v1.12** — добавлен [0019](adr/0019-shared-git-core-ide-and-git-mcp.md) (общий Git Core для IDE и git-mcp; Proposed).  
 - **v1.13** — [0019](adr/0019-shared-git-core-ide-and-git-mcp.md) принят (Accepted); реализация `GitMcp.Core` в meta-repo `open`, паритет argv для IDE и git-mcp.  
@@ -108,4 +108,5 @@
 - **v1.35** — [0017](adr/0017-multi-window-workspace-and-agent-surfaces.md): мультиоконность v1 **не** смешивается с переработкой **Power** и прочих режимов; вопрос Flight vs Power для второго окна **снят** до отдельной дорожной карты режимов.  
 - **v1.36** — [0017](adr/0017-multi-window-workspace-and-agent-surfaces.md): уточнение **зона Mfd** vs **страницы** `SecondaryShellPage`; граница v1 — **узкий/широкий хост** `SecondaryShellView`, не «чат как зона».  
 - **v1.37** — подраздел **«Документация и справка (намерение)»**: User Guide / справка в IDE — **продуктовый слой**, не обязанность отдельного ADR; [0017](adr/0017-multi-window-workspace-and-agent-surfaces.md) остаётся нормативом по нотации и мультиоконности.  
+- **v1.38** — [0017](adr/0017-multi-window-workspace-and-agent-surfaces.md): статус **Accepted** (мультиоконность, `presentation` / EBNF, слой `settings.toml` vs репозиторный workspace).  
 - Изменения направления — отдельным коммитом: обновление этого файла и при необходимости новый ADR в [docs/adr/README.md](adr/README.md).

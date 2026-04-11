@@ -93,4 +93,4 @@ This map is intended to drive incremental alignment work with clear acceptance c
 5. **Хром дерева решения (Power):** сделано стилями на `TreeViewItem` + кисти; при необходимости — **полный** кастомный шаблон `TreeViewItem`, если тема Fluent перекрывает `Background`/`BorderThickness`.
 6. **Редактор / трасса / Workspace Health:** точечное выравнивание с PNG-концептами по приоритету (см. §4.1).
 
-Версия карты: **2026-04-02** (термины режима: `UiModeFamily` / capabilities вместо `Is*Mode`; §4.1 без изменений по смыслу). **2026-04-11** — в русских таблицах канон терминов: **Workspace Health** / «состояние воркспейса» вместо разговорной «телеметрии» для этого канала.
+Версия карты: **2026-04-02** (термины режима: `UiModeFamily` / capabilities вместо `Is*Mode`; §4.1 без изменений по смыслу). **2026-04-11** — в русских таблицах канон терминов: **Workspace Health** / «состояние воркспейса» вместо разговорной «телеметрии» для этого канала. **2026-04-11** — [ADR 0017](../adr/0017-multi-window-workspace-and-agent-surfaces.md) **Accepted**; отдельные строки маппинга под второй `TopLevel` и строку `presentation` — когда появится реализация.
