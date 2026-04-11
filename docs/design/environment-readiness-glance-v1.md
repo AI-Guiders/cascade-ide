@@ -1,6 +1,6 @@
 # Готовность окружения IDE — glance (v1, чертёж)
 
-**Статус:** живой чертёж (не ADR). **Назначение:** зафиксировать канал **отдельно от [Workspace Health](workspace-health-compositor-implementation-v1.md)** (build/tests/debug/git).
+**Статус:** живой чертёж (не ADR). **ADR решения:** [0023](../adr/0023-environment-readiness-glance.md). **Назначение:** детализировать канал **отдельно от [Workspace Health](workspace-health-compositor-implementation-v1.md)** (build/tests/debug/git).
 
 **Связь:** [ADR 0021 §1.2](../adr/0021-pfd-mfd-cockpit-attention-model.md) — слот презентации vs канал содержимого; «статус окружения» в таблице каналов — **про этот смысл**, не про `WorkspaceHealth*`.
 
