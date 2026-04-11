@@ -40,6 +40,7 @@
 | [0030](0030-command-ids-hotkeys-and-ui-registry-layers.md) | Слои `command_id`, хоткеев и UI: IdeCommands, палитра, TOML, мост VM; чертёж единого каталога | Accepted · Implemented |
 | [0031](0031-agent-chat-clarification-batches-and-threading.md) | Чат агента: пакеты уточнений, ответы сложнее да/нет, треды; не смешивать с PFD-подтверждениями | Proposed |
 | [0032](0032-hud-banner-configuration-and-grammar.md) | HUD над редактором: настраиваемое содержимое, грамматика как у `presentation`; EBNF в ADR, парсер — по сложности DSL | Proposed |
+| [0033](0033-internationalization-resx-avalonia.md) | i18n: ResX / культура .NET, Avalonia; строки UI не в TOML как основной слой; плюрализация — ключи или библиотека | Proposed |
 
 ## Соглашения
 
