@@ -90,12 +90,10 @@ if (lintOnly)
 
 if (!mdOnly)
 {
-    Directory.CreateDirectory(Path.GetDirectoryName(generatedCsPath)!);
-    File.WriteAllText(generatedCsPath, IdeCommandsDocEmitter.Emit(items), new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
-    File.WriteAllText(generatedArgsPath, IdeCommandsArgsEmitter.Emit(items), new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
-    File.WriteAllText(generatedContractPath, IdeCommandsContractEmitter.Emit(items), new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
-    Directory.CreateDirectory(Path.GetDirectoryName(generatedExecutorPath)!);
-    File.WriteAllText(generatedExecutorPath, IdeMcpCommandExecutorEmitter.Emit(), new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+    GeneratedFileWriter.WriteIfChanged(generatedCsPath, IdeCommandsDocEmitter.Emit(items));
+    GeneratedFileWriter.WriteIfChanged(generatedArgsPath, IdeCommandsArgsEmitter.Emit(items));
+    GeneratedFileWriter.WriteIfChanged(generatedContractPath, IdeCommandsContractEmitter.Emit(items));
+    GeneratedFileWriter.WriteIfChanged(generatedExecutorPath, IdeMcpCommandExecutorEmitter.Emit());
 }
 
 if (!csOnly)
@@ -106,7 +104,7 @@ if (!csOnly)
         startMarker: "<!-- GENERATED:IdeCommands START -->",
         endMarker: "<!-- GENERATED:IdeCommands END -->",
         newContent: ProtocolMdEmitter.EmitIdeCommandsTable(items));
-    File.WriteAllText(protocolPath, updated, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+    GeneratedFileWriter.WriteIfChanged(protocolPath, updated);
 }
 
 Console.WriteLine("OK");
@@ -693,6 +691,36 @@ internal static class ProtocolMdEmitter
     }
 
     private static string EscapeMd(string s) => (s ?? "").Replace("|", "\\|", StringComparison.Ordinal);
+}
+
+/// <summary>Avoids touching disk when output is unchanged (fewer watcher/CI churn; stable git status).</summary>
+internal static class GeneratedFileWriter
+{
+    private static readonly UTF8Encoding Utf8NoBom = new(encoderShouldEmitUTF8Identifier: false);
+
+    public static void WriteIfChanged(string path, string content)
+    {
+        if (ShouldSkipWrite(path, content))
+            return;
+
+        var dir = Path.GetDirectoryName(path);
+        if (!string.IsNullOrEmpty(dir))
+            Directory.CreateDirectory(dir);
+
+        File.WriteAllText(path, content, Utf8NoBom);
+    }
+
+    private static bool ShouldSkipWrite(string path, string content)
+    {
+        if (!File.Exists(path))
+            return false;
+
+        var existing = File.ReadAllText(path, Utf8NoBom);
+        return string.Equals(NormalizeNewlines(existing), NormalizeNewlines(content), StringComparison.Ordinal);
+    }
+
+    private static string NormalizeNewlines(string text) =>
+        text.Replace("\r\n", "\n", StringComparison.Ordinal).Replace("\r", "\n", StringComparison.Ordinal);
 }
 
 internal static class MarkerReplace
