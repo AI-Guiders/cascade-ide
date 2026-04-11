@@ -64,6 +64,10 @@ dotnet run
 
 Слои, вертикальные срезы фич, роль `MainWindowViewModel` и правила миграции: **[docs/architecture-policy.md](docs/architecture-policy.md)**. Карта срезов (Git, Build, Terminal, Chat…) и фазы выноса: **[docs/architecture-migration.md](docs/architecture-migration.md)**. Каталог **`Features/`** — см. [Features/README.md](Features/README.md).
 
+## Продукт и лицензирование (видение)
+
+Допустимая в будущем модель **открытой** и **коммерческой** линейки, границы доверия и что этот текст **не** заменяет: **[docs/licensing-vision.md](docs/licensing-vision.md)**.
+
 ## Бэклог (идеи на потом)
 
 - **Пайплайн Markdown-сборки (resume / книга):** манифесты, профили, `dotnet-script`, деградация бэкендов — что переносимо в оркестрацию IDE/агента. Указатель в операционной карточке в **agent-notes**: `knowledge/work/projects/current-projects/cascade-ide/README.md` (раздел **«Отложено»**). Подробно: **[docs/backlog-ideas-from-doc-pipeline-v1.md](docs/backlog-ideas-from-doc-pipeline-v1.md)**.
