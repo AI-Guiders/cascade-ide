@@ -4,6 +4,10 @@
 
 Операционная карточка проекта (Purpose, Vision, границы, ссылки) в каноне заметок: `knowledge/work/projects/door-to-singularity/cascade-ide/README.md` в репозитории **agent-notes** (слой **`work/`** — оперативный канон; в публичную KB не входит, см. **`knowledge/PUBLISHING.md`** и `scripts/build-public-kb.ps1` в agent-notes). В двух словах: редактор + дерево решения + сборка/запуск + отладка через debug-mcp, анализ через roslyn-mcp, чат/запросы к модели — через локальный Ollama.
 
+### До публичного релиза
+
+Пока основные потребители и разработчики — мы, **автоматические миграции схемы** `settings.toml` (и аналогичные слои совместимости в `SettingsService`) **не обязательны**: при смене полей правим `%LocalAppData%\CascadeIDE\settings.toml` вручную или дефолты в коде. Имеет смысл завести **явные** миграции/версию файла, когда появятся внешние установки и нужно не ломать чужие профили — см. [ADR 0028](docs/adr/0028-user-settings-toml-localappdata-and-secrets.md).
+
 ## Требования
 
 - .NET 10 SDK

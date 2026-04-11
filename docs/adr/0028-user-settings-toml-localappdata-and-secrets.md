@@ -2,7 +2,7 @@
 
 **Статус:** Accepted  
 **Дата:** 2026-04-08  
-**Обновлено:** 2026-04-11 — ссылка на [0017](0017-multi-window-workspace-and-agent-surfaces.md): `presentation` — прежде всего **`settings.toml`**, не командный репо. 2026-04-08 — `workspace.toml` (merge/LocalAppData).  
+**Обновлено:** 2026-04-11 — до публичного релиза **автоматические миграции схемы** `settings.toml` **не** вводим (команда = единственные потребители); политика — подраздел **«До публичного релиза»** в [README](../README.md). 2026-04-11 — ссылка на [0017](0017-multi-window-workspace-and-agent-surfaces.md): `presentation` — прежде всего **`settings.toml`**, не командный репо. 2026-04-08 — `workspace.toml` (merge/LocalAppData).  
 **Обновлено:** 2026-04-08 — ветка миграции `settings.json` → TOML **удалена** из кода: поддерживаемых legacy-профилей нет, канон только `settings.toml`.  
 **Обновлено:** 2026-04-08 — секреты API: **`ai-keys.toml`** вместо `ai-keys.json` (тот же Tomlyn/`CascadeTomlSerializer`, snake_case); миграции с JSON нет.  
 **Связь:** [0010](0010-ui-modes-toml-configuration.md) (TOML для **бандла режимов** и **репозиторного** `workspace.toml` — другой слой, не путать с пользовательским файлом), [0013](0013-command-surface-and-discoverability.md) (`hotkeys.toml` рядом с `settings.toml` — задумано, не обязательно реализовано), [0026](0026-markdown-preview-surfaces-and-placement.md) (часть пресетов в **merged** `workspace.toml`; пользовательский override размещения — не только `settings.toml`), [0027](0027-small-team-focus-vs-public-maturity.md) (предсказуемые пути конфигурации), [0029](0029-configuration-toml-canonical-ui-facade.md) (TOML как канон; UI — фасад над тем же файлом), реализация: `Services/SettingsService.cs`, `Services/AiKeysStorage.cs`, `Models/CascadeIdeSettings.cs`, `Services/CascadeTomlSerializer.cs`.
@@ -32,6 +32,8 @@
 - **Сериализация:** Tomlyn через `CascadeTomlSerializer`: ключи в файле — **snake_case**, свойства C# — PascalCase (`TomlSerializerOptions` с `JsonNamingPolicy.SnakeCaseLower`).
 - **Загрузка:** при старте `SettingsService.Load()`; при ошибке чтения/парсинга — **модель по умолчанию** из кода, без падения IDE.
 - **Сохранение:** `SettingsService.Save(CascadeIdeSettings)` — перезапись целого файла; ошибки записи **глотаются** (текущая политика реализации — не блокировать UI).
+
+**До публичного релиза:** не наращивать в `SettingsService` автоматические миграции при переименовании/переносе ключей TOML — см. подраздел **«До публичного релиза»** в [README](../README.md). После появления массовых установок — отдельное решение (версия файла, одноразовый мигратор, changelog).
 
 ### 3. Исторически: JSON больше не поддерживается
 

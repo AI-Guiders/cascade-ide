@@ -50,7 +50,7 @@
 | `ide_git_commit` | Git commit в каталоге решения/workspace | `message`, опционально `paths`; возвращает JSON |
 | `ide_git_push` | Git push в каталоге решения/workspace | опционально `remote`, `branch`; возвращает JSON |
 | `ide_focus_editor` | Передать фокус в редактор | — |
-| `ide_get_ui_theme` | Параметры темы UI + глубокий снимок (resolved-тема, окно, регионы, **dock_open_documents**, **dock_text_editors**, **top_levels** — все открытые `Window`: `role` main/auxiliary/other, позиция, размер, активность) | —; возвращает JSON |
+| `ide_get_ui_theme` | Параметры темы UI + глубокий снимок (resolved-тема, окно, регионы, **dock_open_documents**, **dock_text_editors**, **top_levels** — все открытые `Window`: `role` main/mfd_host/other, позиция, размер, активность) | —; возвращает JSON |
 | `ide_set_ui_theme` | Применить тему UI на лету (JSON в формате get_ui_theme) | `theme` — JSON-строка |
 | `ide_get_ui_layout` | Дерево элементов UI: тип, имя, видимость, границы (x,y,w,h), контент, дети | —; возвращает JSON |
 | `ide_get_colors_under_cursor` | Цвета под курсором: background, foreground и effective_background, effective_foreground (как на экране) | —; возвращает JSON |
@@ -130,8 +130,8 @@
 | `cycle_ui_mode` | Циклически переключить UI mode (hotkey). returns: text. |
 | `set_balanced_mode` | Установить Balanced UI mode (hotkey). returns: text. |
 | `set_focus_mode` | Установить Focus UI mode (hotkey). returns: text. |
-| `set_secondary_shell_page` | Активная страница вторичного контура оболочки: строка с именем значения SecondaryShellPage (Chat, Terminal, Build и т.д.); якорь на экране — пресет (v1 — колонка зоны Mfd). args: page:string; returns: text; example: {"page":"Chat"}. |
 | `set_power_mode` | Установить Power UI mode (hotkey). returns: text. |
+| `set_secondary_shell_page` | Активная страница вторичного контура оболочки: имя значения SecondaryShellPage (Chat, Terminal, …). Якорь на экране — пресет (v1 — колонка зоны Mfd). args: page:string; returns: text; example: {"page":"Chat"}. |
 | `show_environment_readiness_page` | Показать полноэкранную страницу «готовность окружения» в регионе MFD (оверлей нижней панели; ADR 0023). returns: text. |
 | `toggle_command_palette` | Открыть или закрыть палитру команд (как Ctrl+Q / пункт меню «Вид»). returns: text. |
 
@@ -160,7 +160,7 @@
 | `about` | Показать диалог «О программе». returns: text. |
 | `open_preview_window` | Открыть отдельное окно превью (Markdown). returns: text. |
 | `open_settings` | Открыть окно настроек. returns: text. |
-| `toggle_auxiliary_workspace_window` | Открыть или активировать второе окно рабочей области (второй монитор). returns: text. |
+| `toggle_mfd_host_window` | Открыть или активировать окно-хост зоны Mfd (второй TopLevel, второй монитор). returns: text. |
 
 ### Тулбар: показать панели / скрыть вывод сборки
 
@@ -215,7 +215,7 @@
 | `git_show` | Git show в каталоге решения/workspace. args: rev:string, path?:string, stat_only?:boolean; returns: json; example: {"rev":"HEAD","stat_only":true}. |
 | `git_status` | Git status в каталоге решения/workspace (git status --short --branch). returns: json. |
 | `git_submodule` | Git submodule в каталоге решения/workspace. args: action?:string, path?:string, recursive?:boolean; returns: json; example: {"action":"status"}. |
-| `highlight_control` | Подсветить контрол рамкой в том окне, где он находится (главное, вспомогательное и т.д.). args: name?:string; returns: text; example: {"name":"BuildButton"}. |
+| `highlight_control` | Подсветить контрол рамкой в том окне, где он находится (главное, окно-хост Mfd и т.д.). args: name?:string; returns: text; example: {"name":"BuildButton"}. |
 | `list_knowledge_files` | Список knowledge-файлов в каталоге решения (опционально subdir). args: subdir?:string; returns: json; example: {"subdir":"work"}. |
 | `read_knowledge_file` | Прочитать knowledge-файл из каталога решения. args: file_path:string; returns: text; example: {"file_path":"META/integrity-core.md"}. |
 | `send_keys` | Отправить хоткей в контрол. args: keys:string, name?:string; returns: text; example: {"keys":"Ctrl+S"}. |
@@ -279,7 +279,7 @@
 | command_id | Описание |
 |-----------:|----------|
 | `activate_document` | Активировать документ (переключить вкладку). args: file_path:string; returns: text; example: {"file_path":"C:\\\\tmp\\\\a.cs"}. |
-| `capture_window` | Снимок окон IDE в PNG (по умолчанию главное окно; при scope=all — все top-level, в т.ч. вспомогательные). args: scope?:string, workspace_path?:string, output_path?:string; returns: json. example: {"scope":"all","workspace_path":"D:\\\\tmp\\\\ws","output_path":".cascade-ide/window-{n}.png"}. |
+| `capture_window` | Снимок окон IDE в PNG (по умолчанию главное окно; при scope=all — все top-level, в т.ч. окно-хост Mfd и прочие). args: scope?:string, workspace_path?:string, output_path?:string; returns: json. example: {"scope":"all","workspace_path":"D:\\\\tmp\\\\ws","output_path":".cascade-ide/window-{n}.png"}. |
 | `close_document` | Закрыть документ. args: file_path:string; returns: text; example: {"file_path":"C:\\\\tmp\\\\a.cs"}. |
 | `focus_editor` | Передать фокус в редактор (чтобы клавиши/ввод шли в него). returns: text. |
 | `get_current_file_diagnostics` | Диагностики текущего открытого .cs (ошибки/предупреждения). returns: json. |
