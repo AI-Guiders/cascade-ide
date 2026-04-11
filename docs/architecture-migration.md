@@ -83,15 +83,18 @@
 
 Цель и порядок шагов зафиксированы в ADR: [0004](adr/0004-ui-thread-marshaling.md) (маршалинг UI), [0007](adr/0007-signals-coupling-and-ui-backpressure.md) (сигналы, батчинг), [0005](adr/0005-defer-dynamic-plugins-mef.md) (отложенные идеи расширяемости). Краткий навигатор — [architecture-policy.md](architecture-policy.md). Кратко:
 
+<a id="arch-migration-phase5-p1"></a>
 1. Явные границы между источниками сигналов и подписчиками (без лишней связности между подсистемами).
+<a id="arch-migration-phase5-p2"></a>
 2. Единая политика маршалинга на UI-поток для обновлений после фона.
+<a id="arch-migration-phase5-p3"></a>
 3. Точечно — очереди/батчинг там, где поток данных давит на UI.
 
-**Сделано по п. 2:** контракт **`IUiScheduler`**, реализация **`AvaloniaUiScheduler`** (единственное место с прямым `Dispatcher.UIThread`), доступ из кода через **`UiScheduler.Default`**. Вызовы переведены с размазанного `Dispatcher.UIThread` на `UiScheduler.Default`; для удобства — **`GlobalUsings.cs`** с `global using CascadeIDE.Services`.
+**Сделано по [п. 2](#arch-migration-phase5-p2):** контракт **`IUiScheduler`**, реализация **`AvaloniaUiScheduler`** (единственное место с прямым `Dispatcher.UIThread`), доступ из кода через **`UiScheduler.Default`**. Вызовы переведены с размазанного `Dispatcher.UIThread` на `UiScheduler.Default`; для удобства — **`GlobalUsings.cs`** с `global using CascadeIDE.Services`.
 
-**Сделано по п. 3 (диагностики):** **`WorkspaceDiagnosticsCoordinator`** — debounce для Roslyn без LSP; **`CSharpLspDiagnosticsHost`** — коалесcing **`DiagnosticsChanged`** (один `Post` на серию `textDocument/publishDiagnostics`, по тому же принципу, что **`BuildOutputPanelViewModel.Append`**).
+**Сделано по [п. 3](#arch-migration-phase5-p3) (диагностики):** **`WorkspaceDiagnosticsCoordinator`** — debounce для Roslyn без LSP; **`CSharpLspDiagnosticsHost`** — коалесcing **`DiagnosticsChanged`** (один `Post` на серию `textDocument/publishDiagnostics`, по тому же принципу, что **`BuildOutputPanelViewModel.Append`**).
 
-**Опционально позже по фазе 5:** при профилировании — ещё батчинг на стороне подписчиков Problems; шина событий / слабее связность (п. 1) — только если вырастет число кросс-подсистемных подписок.
+**Опционально позже по фазе 5:** при профилировании — ещё батчинг на стороне подписчиков Problems; шина событий / слабее связность ([п. 1](#arch-migration-phase5-p1)) — только если вырастет число кросс-подсистемных подписок.
 
 **Сделано по MCP и UI-потоку (дыра закрыта):** единый вход `IIdeMcpActions.ExecuteCommandAsync` в `MainWindowViewModel` маршалит выполнение на UI через `IUiScheduler.InvokeAsync(Func<Task<string>>)`; добавлен перегруз `InvokeAsync<T>(Func<Task<T>>)` в `IUiScheduler` / `AvaloniaUiScheduler`. Так MCP stdio и автономный агент не вызывают хендлеры `IdeMcpCommandExecutor` с фонового потока. Долгие операции по-прежнему не блокируют UI: внутри `IIdeMcpActions` используются `ConfigureAwait(false)`, `Task.Run`, `Post` на панели вывода и т.д.
 
