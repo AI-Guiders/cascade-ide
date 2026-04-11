@@ -2,7 +2,7 @@ using CascadeIDE.Services.Presentation;
 
 namespace CascadeIDE.ViewModels;
 
-/// <summary>ADR 0017: строка <c>presentation</c> из настроек и второй <c>TopLevel</c> с зоной Mfd (<see cref="Views.MfdHostWindow"/>).</summary>
+/// <summary>ADR 0017: строка <c>presentation</c> и второй <c>TopLevel</c> — <see cref="Views.MfdHostWindow"/> с полным вторичным контуром (п. 8).</summary>
 public partial class MainWindowViewModel
 {
     /// <summary>Успешный разбор <see cref="CascadeIdeSettings.GetEffectivePresentationLine"/> (может быть пустой список экранов).</summary>

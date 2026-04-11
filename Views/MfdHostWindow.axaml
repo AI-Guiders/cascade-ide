@@ -13,6 +13,7 @@
         Icon="/Assets/avalonia-logo.ico"
         Background="{DynamicResource CascadeTheme.MainWindowBackground}">
 
+    <!-- ADR 0017 п. 8: полный SecondaryShellView (все страницы), как колонка Mfd в MainWindow. -->
     <Grid>
         <views:SecondaryShellView DataContext="{Binding}" MinHeight="0"/>
         <!-- Паритет ide_highlight_control с MainWindow: та же рамка поверх клиентской области. -->
