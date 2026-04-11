@@ -175,6 +175,7 @@ flowchart LR
 
 ## 8. Связанные документы
 
+- [`environment-readiness-glance-v1.md`](environment-readiness-glance-v1.md) — канал **готовности окружения** (LSP, инструменты, glance); **не** Workspace Health.
 - [ADR 0021](../adr/0021-pfd-mfd-cockpit-attention-model.md) — модель внимания, зоны, EICAS (§5), Dark Cockpit (§6), метрики.
 - [ADR 0010](../adr/0010-ui-modes-toml-configuration.md) — режимы UI и capabilities.
 - [`cascade-ide-ui-layout-v1.md`](../ux/cascade-ide-ui-layout-v1.md) — раскладка окон.
