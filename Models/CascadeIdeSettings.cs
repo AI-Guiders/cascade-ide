@@ -106,6 +106,18 @@ public sealed class CascadeIdeSettings : ModelBase
     /// </summary>
     public bool OpenMfdHostWindowOnStartup { get; set; } = true;
 
+    /// <summary>Последняя сохранённая позиция окна <c>MfdHostWindow</c> (пиксели); вместе с шириной/высотой — или все заданы, или сброс.</summary>
+    public int? MfdHostWindowPixelX { get; set; }
+
+    /// <summary>См. <see cref="MfdHostWindowPixelX"/>.</summary>
+    public int? MfdHostWindowPixelY { get; set; }
+
+    /// <summary>См. <see cref="MfdHostWindowPixelX"/>.</summary>
+    public double? MfdHostWindowWidth { get; set; }
+
+    /// <summary>См. <see cref="MfdHostWindowPixelX"/>.</summary>
+    public double? MfdHostWindowHeight { get; set; }
+
     /// <summary>Эффективная строка: <see cref="Presentation"/> или <see cref="ZoneScreenLayout"/>.</summary>
     public string GetEffectivePresentationLine()
     {
@@ -146,7 +158,11 @@ public sealed class CascadeIdeSettings : ModelBase
             && Presentation.Is(o.Presentation)
             && ZoneScreenLayout.Is(o.ZoneScreenLayout)
             && PresentationGrammarEquals(o.PresentationGrammar)
-            && OpenMfdHostWindowOnStartup.Is(o.OpenMfdHostWindowOnStartup);
+            && OpenMfdHostWindowOnStartup.Is(o.OpenMfdHostWindowOnStartup)
+            && MfdHostWindowPixelX == o.MfdHostWindowPixelX
+            && MfdHostWindowPixelY == o.MfdHostWindowPixelY
+            && Nullable.Equals(MfdHostWindowWidth, o.MfdHostWindowWidth)
+            && Nullable.Equals(MfdHostWindowHeight, o.MfdHostWindowHeight);
     }
 
     private bool PresentationGrammarEquals(PresentationGrammarSettings? o)
@@ -201,7 +217,11 @@ public sealed class CascadeIdeSettings : ModelBase
                 ForwardZoneIdentifier = PresentationGrammar.ForwardZoneIdentifier,
                 MfdZoneIdentifier = PresentationGrammar.MfdZoneIdentifier,
             },
-            OpenMfdHostWindowOnStartup = OpenMfdHostWindowOnStartup
+            OpenMfdHostWindowOnStartup = OpenMfdHostWindowOnStartup,
+            MfdHostWindowPixelX = MfdHostWindowPixelX,
+            MfdHostWindowPixelY = MfdHostWindowPixelY,
+            MfdHostWindowWidth = MfdHostWindowWidth,
+            MfdHostWindowHeight = MfdHostWindowHeight
         };
     }
 }

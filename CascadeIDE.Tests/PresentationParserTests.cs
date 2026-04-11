@@ -52,6 +52,19 @@ public sealed class PresentationParserTests
         Assert.Equal(2, r.Screens.Count);
         Assert.Equal(new[] { PresentationAnchorKind.Pfd, PresentationAnchorKind.Forward }, r.Screens[0]);
         Assert.Equal(new[] { PresentationAnchorKind.Mfd }, r.Screens[1]);
+        Assert.True(PresentationLayoutAnalyzer.TryGetMfdHostPresentationScreenIndex(r.Screens, out var mfdIdx));
+        Assert.Equal(1, mfdIdx);
+    }
+
+    [Fact]
+    public void ThreeScreens_Pfd_Forward_Mfd_Yields_MfdIndex2()
+    {
+        var r = PresentationParser.Parse("(PFD) (Forward) (MFD)", Default);
+        Assert.True(r.IsSuccess);
+        Assert.Equal(3, r.Screens.Count);
+        Assert.True(PresentationLayoutAnalyzer.IsTriplePfdForwardMfdPreset(r.Screens));
+        Assert.True(PresentationLayoutAnalyzer.TryGetMfdHostPresentationScreenIndex(r.Screens, out var mfdIdx));
+        Assert.Equal(2, mfdIdx);
     }
 
     [Fact]

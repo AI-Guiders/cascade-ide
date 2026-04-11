@@ -20,6 +20,10 @@ public partial class MainWindow
         }
 
         var w = new MfdHostWindow { DataContext = vm };
+        w.Closing += (_, _) =>
+        {
+            vm.PersistMfdHostWindowBounds(w.Position.X, w.Position.Y, w.Width, w.Height);
+        };
         w.Closed += (_, _) =>
         {
             if (ReferenceEquals(_mfdHostWindow, w))
@@ -28,7 +32,9 @@ public partial class MainWindow
                 vm.SetMfdHostWindowShellOpen(false);
             }
         };
-        Services.MfdHostWindowPlacement.PlaceNearMain(this, w);
+        Services.MfdHostWindowPlacement.MfdHostWindowBounds? savedBounds =
+            vm.TryGetSavedMfdHostWindowBounds(out var b) ? b : null;
+        Services.MfdHostWindowPlacement.PlaceOrRestore(this, w, savedBounds, vm.MfdHostPresentationScreenIndex);
         vm.SetMfdHostWindowShellOpen(true);
         _mfdHostWindow = w;
         w.Show(this);
@@ -38,9 +44,10 @@ public partial class MainWindow
     {
         if (DataContext is not ViewModels.MainWindowViewModel vm)
             return;
-        if (!vm.PresentationRequestsDedicatedMfdSecondScreen || !vm.OpenMfdHostWindowOnStartup)
+        if (!vm.PresentationRequestsMfdHostWindow || !vm.OpenMfdHostWindowOnStartup)
             return;
-        if (Screens.All.Count < 2)
+        var minScreens = vm.MfdHostPresentationScreenIndex is int idx ? idx + 1 : 2;
+        if (Screens.All.Count < minScreens)
             return;
         ToggleMfdHostWindow();
     }

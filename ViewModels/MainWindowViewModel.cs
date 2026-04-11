@@ -45,6 +45,8 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private readonly IEicasFeed _eicasFeed;
     private readonly Services.Presentation.PresentationParseResult _presentationParse;
     private readonly bool _presentationDedicatedMfdSecondScreen;
+    private readonly bool _presentationTriplePfdForwardMfd;
+    private readonly bool _presentationMfdHostTopology;
     private bool _suppressMfdColumnForMfdHostWindow;
 
     private Services.McpClientService _mcpClientService;
@@ -171,6 +173,9 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _presentationParse = Services.Presentation.PresentationParser.Parse(_settings.GetEffectivePresentationLine(), grammar);
         _presentationDedicatedMfdSecondScreen = _presentationParse.IsSuccess
             && Services.Presentation.PresentationLayoutAnalyzer.IsDedicatedMfdSecondScreenPreset(_presentationParse.Screens);
+        _presentationTriplePfdForwardMfd = _presentationParse.IsSuccess
+            && Services.Presentation.PresentationLayoutAnalyzer.IsTriplePfdForwardMfdPreset(_presentationParse.Screens);
+        _presentationMfdHostTopology = _presentationDedicatedMfdSecondScreen || _presentationTriplePfdForwardMfd;
     }
 
     private void OnChromePropertyChangedForWorkspaceHealth(object? _, PropertyChangedEventArgs e)

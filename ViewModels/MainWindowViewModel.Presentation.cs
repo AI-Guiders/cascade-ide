@@ -38,7 +38,7 @@ public partial class MainWindowViewModel
     /// имеют смысл только для <see cref="AttentionLayoutSurfaceKind.MainWindowDockedGrid"/>; иные варианты — ADR 0021 §13, 0017.
     /// </summary>
     public AttentionLayoutSurfaceKind ActiveAttentionLayoutSurface =>
-        _suppressMfdColumnForMfdHostWindow && _presentationDedicatedMfdSecondScreen
+        _suppressMfdColumnForMfdHostWindow && _presentationMfdHostTopology
             ? AttentionLayoutSurfaceKind.MainWindowPlusMfdHostTopLevel
             : AttentionLayoutSurfaceKind.MainWindowDockedGrid;
 
