@@ -50,6 +50,7 @@
 | Конфигурация: канон на диске (TOML); центр настроек deferred; точечный UI — фасад канона | [0029](adr/0029-configuration-toml-canonical-ui-facade.md) (Accepted) |
 | Команды: слои `IdeCommands` / палитра / `hotkeys.toml` / мост VM; единый UI-каталог — чертёж, не обязателен сразу | [0030](adr/0030-command-ids-hotkeys-and-ui-registry-layers.md) (Accepted · Implemented) |
 | Чат агента: пакеты уточнений (не одна строка), структура ответов; треды — опционально; ортогонально PFD-подтверждениям | [0031](adr/0031-agent-chat-clarification-batches-and-threading.md) (Proposed) |
+| HUD над редактором: что показывать и в каком виде — в `settings.toml`; опциональная грамматика по образцу `presentation` / `[presentation_grammar]` | [0032](adr/0032-hud-banner-configuration-and-grammar.md) (Proposed) |
 
 Полный индекс: [docs/adr/README.md](adr/README.md).
 
@@ -117,4 +118,5 @@
 - **v1.43** — north-star: для экосистемы JetBrains честнее сравнение с **Rider** (не IntelliJ IDEA); ось дифференциации та же.  
 - **v1.44** — north-star: явное **позиционирование CascadeIDE как agent-first IDE** (общий контур с человеком; кокпит не противоречит оси).  
 - **v1.45** — north-star: слой **KB / память агента** (канон knowledge, MCP `read_knowledge_file` / …, agent-notes); ссылка на [MCP-PROTOCOL.md](MCP-PROTOCOL.md).  
+- **v1.46** — добавлен [0032](adr/0032-hud-banner-configuration-and-grammar.md) (HUD: конфиг содержимого и грамматика как у `presentation`; Proposed).  
 - Изменения направления — отдельным коммитом: обновление этого файла и при необходимости новый ADR в [docs/adr/README.md](adr/README.md).

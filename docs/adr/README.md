@@ -39,6 +39,7 @@
 | [0029](0029-configuration-toml-canonical-ui-facade.md) | Конфигурация: TOML-first; целостный UI настроек deferred; точечный UI — фасад канона | Accepted |
 | [0030](0030-command-ids-hotkeys-and-ui-registry-layers.md) | Слои `command_id`, хоткеев и UI: IdeCommands, палитра, TOML, мост VM; чертёж единого каталога | Accepted · Implemented |
 | [0031](0031-agent-chat-clarification-batches-and-threading.md) | Чат агента: пакеты уточнений, ответы сложнее да/нет, треды; не смешивать с PFD-подтверждениями | Proposed |
+| [0032](0032-hud-banner-configuration-and-grammar.md) | HUD над редактором: настраиваемое содержимое, грамматика как у `presentation`; EBNF в ADR, парсер — по сложности DSL | Proposed |
 
 ## Соглашения
 
