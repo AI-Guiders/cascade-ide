@@ -65,6 +65,7 @@
 | [design/onboarding-first-run-v1.md](design/onboarding-first-run-v1.md) | Онбординг и First Run — живой чертёж (не ADR); дополняется по мере идей |
 | [design/attention-zone-panel-playbook-v1.md](design/attention-zone-panel-playbook-v1.md) | Зона ↔ панель shell ↔ SDK: следующий шаг после «это PFD» (не ADR) |
 | [design/vertical-slice-attention-capabilities-v1.md](design/vertical-slice-attention-capabilities-v1.md) | Вертикальный срез: регистрация UI surface + проверка дампа / теста |
+| [design/north-star-cursor-mcp-cascade-workbench-v1.md](design/north-star-cursor-mcp-cascade-workbench-v1.md) | Границы цели «Cursor + MCP + Cascade вместо VS» и матрица сделано/осталось (черновик) |
 
 ---
 
@@ -111,4 +112,9 @@
 - **v1.38** — [0017](adr/0017-multi-window-workspace-and-agent-surfaces.md): статус **Accepted** (мультиоконность, `presentation` / EBNF, слой `settings.toml` vs репозиторный workspace).  
 - **v1.39** — [0017](adr/0017-multi-window-workspace-and-agent-surfaces.md) [п. 8](adr/0017-multi-window-workspace-and-agent-surfaces.md#adr0017-p8-mfd-host-wide): **`MfdHostWindow`** — только **полный** `SecondaryShellView` (все `SecondaryShellPage`); узкий одностраничный хост **не** планируется.  
 - **v1.40** — [0017](adr/0017-multi-window-workspace-and-agent-surfaces.md) [п. 5 доп.](adr/0017-multi-window-workspace-and-agent-surfaces.md#adr0017-p5-primary-vs-forward): primary ОС ≠ семантический Forward; пример сенсорного монитора и «основного» дисплея; согласование раскладки ОС и `presentation` — ответственность пользователя.  
+- **v1.41** — черновик границ цели «Cursor + MCP + Cascade вместо VS»: [north-star-cursor-mcp-cascade-workbench-v1.md](design/north-star-cursor-mcp-cascade-workbench-v1.md).  
+- **v1.42** — тот же документ: **продуктовое видение** — ось внимания / кокпит / Dark Cockpit vs «шкаф окон» VS; не клон VS, а иная повседневная работа.  
+- **v1.43** — north-star: для экосистемы JetBrains честнее сравнение с **Rider** (не IntelliJ IDEA); ось дифференциации та же.  
+- **v1.44** — north-star: явное **позиционирование CascadeIDE как agent-first IDE** (общий контур с человеком; кокпит не противоречит оси).  
+- **v1.45** — north-star: слой **KB / память агента** (канон knowledge, MCP `read_knowledge_file` / …, agent-notes); ссылка на [MCP-PROTOCOL.md](MCP-PROTOCOL.md).  
 - Изменения направления — отдельным коммитом: обновление этого файла и при необходимости новый ADR в [docs/adr/README.md](adr/README.md).
