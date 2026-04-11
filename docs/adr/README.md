@@ -33,7 +33,7 @@
 | [0023](0023-markdown-diagrams-language-tooling.md) | Markdown + диаграммы (Mermaid/PlantUML) — first-class опыт через LSP и workflow | Proposed |
 | [0024](0024-ide-sdk-and-stable-contracts.md) | SDK для CascadeIDE — стабильные контракты для внутреннего расширения и будущих плагинов | Proposed |
 | [0025](0025-sdk-attention-zones-and-capabilities.md) | SDK: привязка capabilities к зонам внимания (PFD/MFD/Forward/EICAS/HUD) | Proposed |
-| [0026](0026-markdown-preview-surfaces-and-placement.md) | Превью Markdown: поверхности и размещение (`workspace.toml`); не смешивать с языковым ADR 0023 | Accepted (частично) |
+| [0026](0026-markdown-preview-surfaces-and-placement.md) | Превью Markdown: поверхности и размещение (`workspace.toml`); внутренние отсылки (peek по «п. N»/якорям); не смешивать с языковым ADR 0023 | Accepted (частично) |
 | [0027](0027-small-team-focus-vs-public-maturity.md) | Узкая команда (человек + ассистент) vs зрелость «для открытия»: две оси (границы vs очередь) | Accepted |
 | [0028](0028-user-settings-toml-localappdata-and-secrets.md) | Пользовательские настройки: `settings.toml`, `%LocalAppData%\CascadeIDE\`, секреты в `ai-keys.toml` | Accepted |
 | [0029](0029-configuration-toml-canonical-ui-facade.md) | Конфигурация: TOML-first; целостный UI настроек deferred; точечный UI — фасад канона | Accepted |
@@ -45,3 +45,14 @@
 - **Имя файла:** `NNNN-краткий-kebab-title.md`, четыре цифры с ведущими нулями.
 - **Статусы:** в шапке ADR и в колонке «Статус» — жизненный цикл (**Accepted** / **Superseded** / **Deprecated**); при необходимости второй тег через **« · »** (например **Implemented**). Без подпапок по статусу — один `docs/adr/`.
 - Новый ADR добавляет строку в таблицу выше и при необходимости строку в таблицу в [architecture-policy.md](../architecture-policy.md).
+
+<a id="adr-anchors-policy"></a>
+
+### Внутренние якоря и отсылки (чтобы «см. п. N» работали как ссылки)
+
+- **Не полагаться** только на голый текст «см. п. 6 выше» — в GitHub, IDE и превью Markdown переход по **[см. п. 6](#adrNNNN-p6)** должен существовать.
+- **Идентификаторы:** для нумерованных пунктов в разделе **«Решение»** — `adrNNNN-pK`, где `NNNN` — номер ADR, `K` — номер пункта (например `adr0017-p6`). Для подпунктов при необходимости: `adr0017-p6-confirmations`.
+- **Разметка:** отдельная строка **перед** началом пункта: `<a id="adr0017-p6"></a>` (HTML допустим в CommonMark; работает в GitHub и большинстве превью). Альтернатива — заголовок `### 6. …` с явным id, если рендер поддерживает атрибуты заголовка.
+- **Кросс-ADR:** `[0017 п. 6](0017-multi-window-workspace-and-agent-surfaces.md#adr0017-p6)` — полный путь к файлу и фрагменту.
+- **Стабильность:** при вставке нового пункта выше нумерация сдвигается — **предпочтительно** дублировать смысл в якоре по смыслу (`-confirmations`), а не только по номеру; номер в тексте обновлять вместе с пунктом.
+- Детали превью и hover — [0026](0026-markdown-preview-surfaces-and-placement.md) (подраздел «Внутренние отсылки»).

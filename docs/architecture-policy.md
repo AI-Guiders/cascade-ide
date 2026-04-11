@@ -40,7 +40,7 @@
 | Markdown + диаграммы (Mermaid/PlantUML): first-class опыт через LSP и workflow; инъекция LSP в fenced-блоки — отдельная фаза | [0023](adr/0023-markdown-diagrams-language-tooling.md) (Proposed) |
 | SDK для IDE: стабильные контракты и capability‑модель для внутреннего расширения; plugin-host остаётся deferred | [0024](adr/0024-ide-sdk-and-stable-contracts.md) (Proposed) |
 | SDK и зоны внимания: канон PFD/MFD/… в метаданных capabilities; overlay презентации без подмены семантики | [0025](adr/0025-sdk-attention-zones-and-capabilities.md) (Proposed) |
-| Превью Markdown: где монтируется виджет (`forward_split` / окно / MFD), ключ в `workspace.toml` | [0026](adr/0026-markdown-preview-surfaces-and-placement.md) (Accepted, частично) |
+| Превью Markdown: где монтируется виджет (`forward_split` / окно / MFD), ключ в `workspace.toml`; внутренние отсылки (peek) — см. тот же ADR | [0026](adr/0026-markdown-preview-surfaces-and-placement.md) (Accepted, частично) |
 | Продуктовый фокус: малая команда vs готовность к открытию — оси «границы/контракты» и «очередь/discoverability» | [0027](adr/0027-small-team-focus-vs-public-maturity.md) (Accepted) |
 | Пользовательские настройки: путь `settings.toml`, TOML/snake_case, секреты в отдельном `ai-keys.toml` | [0028](adr/0028-user-settings-toml-localappdata-and-secrets.md) (Accepted) |
 | Конфигурация: канон на диске (TOML); центр настроек deferred; точечный UI — фасад канона | [0029](adr/0029-configuration-toml-canonical-ui-facade.md) (Accepted) |
@@ -99,4 +99,6 @@
 - **v1.30** — [0028](adr/0028-user-settings-toml-localappdata-and-secrets.md): секреты API — **`ai-keys.toml`** (Tomlyn, как `settings.toml`); `ai-keys.json` не используется.  
 - **v1.31** — [0030](adr/0030-command-ids-hotkeys-and-ui-registry-layers.md): слои команд и хоткеев; реестр v1 в `IdeCommandRegistry*.cs`; чертёж [ide-command-registry-v1](design/ide-command-registry-v1.md). Статус ADR: **Implemented**.  
 - **v1.32** — добавлен [0031](adr/0031-agent-chat-clarification-batches-and-threading.md) (чат: пакеты уточнений, многострочные ответы, треды опционально; Proposed).  
+- **v1.33** — [0026](adr/0026-markdown-preview-surfaces-and-placement.md): намерение по **внутренним отсылкам** в превью (hover/peek «Show Definition» для «см. п. N» и якорей; ортогонально [0023](adr/0023-markdown-diagrams-language-tooling.md)).  
+- **v1.34** — [README ADR](adr/README.md#adr-anchors-policy): политика **внутренних якорей** (`adrNNNN-pK`) и ссылок вместо голого «см. п. N»; якоря в **0010**, **0011**, **0012**, **0015**, **0017**, **0021** (§17 п. 10 → §18), перекрёстные ссылки в **0022**, **0031**; якоря списка фазы 5 в [architecture-migration.md](architecture-migration.md).  
 - Изменения направления — отдельным коммитом: обновление этого файла и при необходимости новый ADR в [docs/adr/README.md](adr/README.md).

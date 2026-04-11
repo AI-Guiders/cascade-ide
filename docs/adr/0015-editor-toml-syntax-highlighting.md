@@ -14,16 +14,21 @@
 
 ## Решение
 
+<a id="adr0015-p1"></a>
 1. **Область ADR — только подсветка (TextMate)** для `*.toml`. **Не входит:** LSP, схемы, форматирование — отдельные ADR/фичи.
 
+<a id="adr0015-p2"></a>
 2. **Грамматика по спецификации TOML в формате TextMate:** шипуется VS Code-совместимый пакет под **`TextMateGrammars/toml/`** (`package.json` + `syntaxes/toml.tmLanguage.json`). Текущий файл — **MIT**, происхождение **taplo** (см. `_source` в JSON и `TextMateGrammars/toml/README.md`). Это не «написать грамматику с нуля в репо», а **поддерживаемый артефакт** в стандартном формате; при необходимости обновление — замена файла из upstream (taplo / дистрибутив вроде flox-vscode), с сохранением лицензии.
 
 3. **Загрузка в рантайме:** `RegistryOptions.LoadFromLocalFile` (есть в **TextMateSharp.Grammars 2.x**; в проекте явные ссылки `TextMateSharp` / `TextMateSharp.Grammars` **2.0.3**, чтобы переопределить транзитивную 1.0.56 от AvaloniaEdit.TextMate) сразу после `new RegistryOptions(ThemeName.DarkPlus)` — **`TextMateTomlGrammar.TryLoadInto`**. Каталог копируется в вывод сборки (`CascadeIDE.csproj` → `Content`), тесты подключают тот же каталог (`CascadeIDE.Tests`).
 
+<a id="adr0015-p4"></a>
 4. **`EditorLanguageSupport`:** **`.toml`** в `Supported` (имя **TOML**), в **`ExtensionToGrammarExtension`** — **`.toml` → `.toml`** (после загрузки пакета `GetLanguageByExtension(".toml")` не null).
 
+<a id="adr0015-p5"></a>
 5. **MCP / настройки:** по-прежнему из `Supported` без дублирующих списков.
 
+<a id="adr0015-p6"></a>
 6. **Инвариант:** тест **`ExtensionToGrammarExtension_AllResolveInTextMateRegistry`** использует тот же порядок инициализации, что приложение (`TryLoadInto` перед проверкой).
 
 ## Последствия
@@ -41,7 +46,7 @@
 ## Отклонённые альтернативы
 
 - **Tomlyn как движок подсветки** — отклонено (не tokenization для TextMate).
-- **Маппинг на INI** — использовался как временный обход до шипнутой грамматики; для финального состояния заменён на п. 2–3.
+- **Маппинг на INI** — использовался как временный обход до шипнутой грамматики; для финального состояния заменён на [п. 2](#adr0015-p2)–[3](#adr0015-p3).
 - **LSP TOML в этом ADR** — отклонено по объёму.
 
 ## Обновление грамматики
