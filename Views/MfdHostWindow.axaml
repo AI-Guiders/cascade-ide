@@ -1,0 +1,24 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:views="using:CascadeIDE.Views"
+        xmlns:vm="using:CascadeIDE.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="560" d:DesignHeight="400"
+        x:Class="CascadeIDE.Views.MfdHostWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="Cascade — вторичный контур (Mfd)"
+        Width="560" Height="400"
+        MinWidth="320" MinHeight="240"
+        Icon="/Assets/avalonia-logo.ico"
+        Background="{DynamicResource CascadeTheme.MainWindowBackground}">
+
+    <Grid>
+        <views:SecondaryShellView DataContext="{Binding}" MinHeight="0"/>
+        <!-- Паритет ide_highlight_control с MainWindow: та же рамка поверх клиентской области. -->
+        <Canvas x:Name="AgentHighlightLayer" ZIndex="1000" IsHitTestVisible="False"
+                HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <Border x:Name="AgentHighlightOverlay" IsVisible="False" BorderBrush="#FF6B9D" BorderThickness="2" Background="#10000000"/>
+        </Canvas>
+    </Grid>
+</Window>

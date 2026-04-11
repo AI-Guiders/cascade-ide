@@ -15,7 +15,7 @@ namespace CascadeIDE.Services;
 public static class UiLayoutSnapshot
 {
     private const int MaxDepth = 14;
-    /// <summary>Лимит текста в <c>content</c> для TextBlock и длинных подписей (паритет с чтением вспомогательных окон).</summary>
+    /// <summary>Лимит текста в <c>content</c> для TextBlock и длинных подписей (паритет с чтением окон помимо главного).</summary>
     private const int LayoutContentMaxChars = 480;
 
     private static readonly JsonSerializerOptions Options = new()
@@ -31,7 +31,7 @@ public static class UiLayoutSnapshot
     }
 
     /// <summary>
-    /// Полный снимок layout для MCP: по одному дереву на каждое открытое <see cref="Window"/> (главное, вспомогательное, настройки, превью).
+    /// Полный снимок layout для MCP: по одному дереву на каждое открытое <see cref="Window"/> (главное, окно-хост Mfd, настройки, превью).
     /// Паритет с человеком/агентом при мультиоконности (ADR 0012, 0017).
     /// </summary>
     public static string BuildJsonAllWindows(Window mainWindow)
@@ -58,8 +58,8 @@ public static class UiLayoutSnapshot
     public static string GetWindowRole(Window win, Window mainWindow) =>
         ReferenceEquals(win, mainWindow)
             ? "main"
-            : win is AuxiliaryWorkspaceWindow
-                ? "auxiliary"
+            : win is MfdHostWindow
+                ? "mfd_host"
                 : "other";
 
     private static Dictionary<string, object?> BuildWindowEntry(Window win, Window mainWindow)

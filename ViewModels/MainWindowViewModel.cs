@@ -43,6 +43,9 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private readonly Services.IdeDapDebugSession _dapDebug;
     private readonly IWorkspaceHealthProvider _workspaceHealth;
     private readonly IEicasFeed _eicasFeed;
+    private readonly Services.Presentation.PresentationParseResult _presentationParse;
+    private readonly bool _presentationDedicatedMfdSecondScreen;
+    private bool _suppressMfdColumnForMfdHostWindow;
 
     private Services.McpClientService _mcpClientService;
     private AutonomousAgentService _autonomousAgentService;
@@ -156,6 +159,18 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         Chrome.PropertyChanged += OnChromePropertyChangedForWorkspaceHealth;
         RebuildWorkspaceHealth();
         RebuildEicas();
+
+        var pg = _settings.PresentationGrammar;
+        var grammar = Services.Presentation.PresentationGrammarTokens.FromSettings(
+            pg.ScreenMarkers,
+            pg.ScreenSeparator,
+            pg.ZoneSeparator,
+            pg.PfdZoneIdentifier,
+            pg.ForwardZoneIdentifier,
+            pg.MfdZoneIdentifier);
+        _presentationParse = Services.Presentation.PresentationParser.Parse(_settings.GetEffectivePresentationLine(), grammar);
+        _presentationDedicatedMfdSecondScreen = _presentationParse.IsSuccess
+            && Services.Presentation.PresentationLayoutAnalyzer.IsDedicatedMfdSecondScreenPreset(_presentationParse.Screens);
     }
 
     private void OnChromePropertyChangedForWorkspaceHealth(object? _, PropertyChangedEventArgs e)

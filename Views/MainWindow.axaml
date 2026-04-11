@@ -219,7 +219,7 @@
                               Command="{Binding ResetUiLanguageToSystemCommand}"/>
                 </MenuItem>
                 <Separator/>
-                <MenuItem Header="_Второе окно рабочей области…" Command="{Binding ToggleAuxiliaryWorkspaceWindowCommand}"/>
+                <MenuItem Header="_Второе окно рабочей области…" Command="{Binding ToggleMfdHostWindowCommand}"/>
                 <MenuItem Header="Превью в отдельном _окне" Command="{Binding OpenPreviewWindowCommand}"/>
             </MenuItem>
             <MenuItem Header="_Настройки">

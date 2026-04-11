@@ -41,9 +41,9 @@ public partial class MainWindowViewModel
     }
 
     [RelayCommand]
-    private void ToggleAuxiliaryWorkspaceWindow()
+    private void ToggleMfdHostWindow()
     {
-        RequestToggleAuxiliaryWorkspaceWindow?.Invoke();
+        RequestToggleMfdHostWindow?.Invoke();
     }
 
     [RelayCommand]

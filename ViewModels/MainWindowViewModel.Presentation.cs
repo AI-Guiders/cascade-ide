@@ -37,7 +37,10 @@ public partial class MainWindowViewModel
     /// Какая топология размещения зон сейчас активна. Свойства <see cref="IsPfdColumnVisible"/> / <see cref="IsMfdColumnVisible"/>
     /// имеют смысл только для <see cref="AttentionLayoutSurfaceKind.MainWindowDockedGrid"/>; иные варианты — ADR 0021 §13, 0017.
     /// </summary>
-    public AttentionLayoutSurfaceKind ActiveAttentionLayoutSurface => AttentionLayoutSurfaceKind.MainWindowDockedGrid;
+    public AttentionLayoutSurfaceKind ActiveAttentionLayoutSurface =>
+        _suppressMfdColumnForMfdHostWindow && _presentationDedicatedMfdSecondScreen
+            ? AttentionLayoutSurfaceKind.MainWindowPlusMfdHostTopLevel
+            : AttentionLayoutSurfaceKind.MainWindowDockedGrid;
 
     /// <summary>
     /// Видна ли колонка <c>MainGrid</c> под левый якорь при <see cref="ActiveAttentionLayoutSurface"/> (в этой разметке — зона PFD).
@@ -50,7 +53,8 @@ public partial class MainWindowViewModel
     /// Видна ли колонка <c>MainGrid</c> под правый якорь при <see cref="ActiveAttentionLayoutSurface"/> (в этой разметке — зона MFD).
     /// Не путать с вкладками MFD или картой панелей — <see cref="AttentionZonePanelRuntime"/>; место в сетке совпадает с <see cref="IsChatPanelColumnVisible"/>.
     /// </summary>
-    public bool IsMfdColumnVisible => IsChatPanelColumnVisible;
+    public bool IsMfdColumnVisible =>
+        !_suppressMfdColumnForMfdHostWindow && IsChatPanelColumnVisible;
     /// <summary>Полоса активной задачи / Task Cockpit — из <c>UiModes/&lt;id&gt;.toml</c> (<c>active_task_strip</c>); по умолчанию скрыто для семьи Debug.</summary>
     public bool ShowTaskBar => UiModeCatalog.GetShowTaskBar(NormalizeUiMode(UiMode));
 

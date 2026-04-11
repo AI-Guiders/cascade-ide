@@ -25,8 +25,8 @@ public partial class MainWindowViewModel
     public Action? RequestShowAbout { get; set; }
     /// <summary>Показать окно настроек (View подставит создание и Show).</summary>
     public Action? RequestOpenSettings { get; set; }
-    /// <summary>Открыть или активировать второе окно рабочей области (второй монитор / MFD, см. ADR 0017).</summary>
-    public Action? RequestToggleAuxiliaryWorkspaceWindow { get; set; }
+    /// <summary>Открыть или активировать окно-хост зоны Mfd — второй <c>TopLevel</c> (см. ADR 0017).</summary>
+    public Action? RequestToggleMfdHostWindow { get; set; }
     /// <summary>Показать диалог выбора файла темы (.json). Возвращает путь к файлу или null.</summary>
     public Func<Task<string?>>? RequestOpenThemeFile { get; set; }
     /// <summary>Показать превью Markdown в отдельном окне (контент от агента).</summary>

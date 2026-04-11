@@ -23,7 +23,7 @@ public static partial class IdeCommands
     public const string SendKeys = "send_keys";
     /// <summary>Передать фокус контролу (под курсором или по имени). args: name?:string; returns: text; example: {"name":"Editor"}.</summary>
     public const string SetFocus = "set_focus";
-    /// <summary>Подсветить контрол рамкой в том окне, где он находится (главное, вспомогательное и т.д.). args: name?:string; returns: text; example: {"name":"BuildButton"}.</summary>
+    /// <summary>Подсветить контрол рамкой в том окне, где он находится (главное, окно-хост Mfd и т.д.). args: name?:string; returns: text; example: {"name":"BuildButton"}.</summary>
     public const string HighlightControl = "highlight_control";
     /// <summary>Изменить размер панели. args: panel:string, width?:integer, height?:integer; returns: text; example: {"panel":"terminal","height":300}.</summary>
     public const string SetPanelSize = "set_panel_size";

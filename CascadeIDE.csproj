@@ -285,6 +285,11 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Update="ViewModels\MainWindowViewModel.PresentationLayout.cs">
+      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Update="ViewModels\MainWindowViewModel.RelayCommands.cs">
       <DependentUpon>MainWindowViewModel.cs</DependentUpon>
     </Compile>

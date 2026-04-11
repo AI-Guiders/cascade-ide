@@ -14,4 +14,7 @@ public enum AttentionLayoutSurfaceKind
 {
     /// <summary>Одно главное окно: колонки <c>MainGrid</c> (якоря PFD / forward / MFD в одной сетке).</summary>
     MainWindowDockedGrid = 0,
+
+    /// <summary>Главное окно без колонки Mfd + отдельный <c>TopLevel</c> с <c>SecondaryShellView</c> (ADR 0017).</summary>
+    MainWindowPlusMfdHostTopLevel = 1,
 }

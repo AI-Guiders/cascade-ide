@@ -73,8 +73,8 @@ public static partial class IdeCommands
     // ——— Меню: превью, настройки, справка
     /// <summary>Открыть отдельное окно превью (Markdown). returns: text.</summary>
     public const string OpenPreviewWindow = "open_preview_window";
-    /// <summary>Открыть или активировать второе окно рабочей области (второй монитор). returns: text.</summary>
-    public const string ToggleAuxiliaryWorkspaceWindow = "toggle_auxiliary_workspace_window";
+    /// <summary>Открыть или активировать окно-хост зоны Mfd (второй TopLevel, второй монитор). returns: text.</summary>
+    public const string ToggleMfdHostWindow = "toggle_mfd_host_window";
     /// <summary>Открыть окно настроек. returns: text.</summary>
     public const string OpenSettings = "open_settings";
     /// <summary>Показать диалог «О программе». returns: text.</summary>

@@ -92,6 +92,29 @@ public sealed class CascadeIdeSettings : ModelBase
     /// <summary>Базовый URL Kroki (публичный <c>https://kroki.io</c> или свой инстанс).</summary>
     public string MarkdownKrokiBaseUrl { get; set; } = "https://kroki.io";
 
+    /// <summary>Строка раскладки по физическим дисплеям (ADR 0017). Пусто — не задано.</summary>
+    public string Presentation { get; set; } = "";
+
+    /// <summary>Синоним <see cref="Presentation"/>; задаётся одно из двух, не оба (приоритет у <see cref="Presentation"/>).</summary>
+    public string ZoneScreenLayout { get; set; } = "";
+
+    /// <summary>Токены грамматики строки <see cref="Presentation"/> (TOML: секция <c>[presentation_grammar]</c>).</summary>
+    public PresentationGrammarSettings PresentationGrammar { get; set; } = new();
+
+    /// <summary>
+    /// При пресете «Mfd на втором экране» и ≥2 мониторах — открыть окно-хост зоны Mfd при старте (ADR 0017 v1).
+    /// </summary>
+    public bool OpenMfdHostWindowOnStartup { get; set; } = true;
+
+    /// <summary>Эффективная строка: <see cref="Presentation"/> или <see cref="ZoneScreenLayout"/>.</summary>
+    public string GetEffectivePresentationLine()
+    {
+        var a = Presentation?.Trim() ?? "";
+        if (a.Length > 0)
+            return a;
+        return ZoneScreenLayout?.Trim() ?? "";
+    }
+
     public override bool Is(ModelBase modelBase, double tolerance = DEFAULT_TOLERANCE)
     {
         if (modelBase is not CascadeIdeSettings o)
@@ -119,7 +142,24 @@ public sealed class CascadeIdeSettings : ModelBase
             && MarkdownLspExecutable.Is(o.MarkdownLspExecutable)
             && MarkdownLspArguments.Is(o.MarkdownLspArguments)
             && MarkdownKrokiEnabled.Is(o.MarkdownKrokiEnabled)
-            && MarkdownKrokiBaseUrl.Is(o.MarkdownKrokiBaseUrl);
+            && MarkdownKrokiBaseUrl.Is(o.MarkdownKrokiBaseUrl)
+            && Presentation.Is(o.Presentation)
+            && ZoneScreenLayout.Is(o.ZoneScreenLayout)
+            && PresentationGrammarEquals(o.PresentationGrammar)
+            && OpenMfdHostWindowOnStartup.Is(o.OpenMfdHostWindowOnStartup);
+    }
+
+    private bool PresentationGrammarEquals(PresentationGrammarSettings? o)
+    {
+        if (o is null)
+            return false;
+        var a = PresentationGrammar;
+        return a.ScreenMarkers.Is(o.ScreenMarkers)
+            && a.ScreenSeparator.Is(o.ScreenSeparator)
+            && a.ZoneSeparator.Is(o.ZoneSeparator)
+            && a.PfdZoneIdentifier.Is(o.PfdZoneIdentifier)
+            && a.ForwardZoneIdentifier.Is(o.ForwardZoneIdentifier)
+            && a.MfdZoneIdentifier.Is(o.MfdZoneIdentifier);
     }
 
     public override ModelBase Clone()
@@ -149,7 +189,19 @@ public sealed class CascadeIdeSettings : ModelBase
             MarkdownLspExecutable = MarkdownLspExecutable,
             MarkdownLspArguments = MarkdownLspArguments,
             MarkdownKrokiEnabled = MarkdownKrokiEnabled,
-            MarkdownKrokiBaseUrl = MarkdownKrokiBaseUrl
+            MarkdownKrokiBaseUrl = MarkdownKrokiBaseUrl,
+            Presentation = Presentation,
+            ZoneScreenLayout = ZoneScreenLayout,
+            PresentationGrammar = new PresentationGrammarSettings
+            {
+                ScreenMarkers = PresentationGrammar.ScreenMarkers,
+                ScreenSeparator = PresentationGrammar.ScreenSeparator,
+                ZoneSeparator = PresentationGrammar.ZoneSeparator,
+                PfdZoneIdentifier = PresentationGrammar.PfdZoneIdentifier,
+                ForwardZoneIdentifier = PresentationGrammar.ForwardZoneIdentifier,
+                MfdZoneIdentifier = PresentationGrammar.MfdZoneIdentifier,
+            },
+            OpenMfdHostWindowOnStartup = OpenMfdHostWindowOnStartup
         };
     }
 }

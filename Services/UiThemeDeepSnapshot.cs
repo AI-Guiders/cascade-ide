@@ -140,7 +140,7 @@ internal static class UiThemeDeepSnapshot
         };
     }
 
-    /// <summary>Все открытые <see cref="Window"/> процесса (главное, вспомогательное, настройки, превью) — для MCP и паритета при мультиоконности (ADR 0017).</summary>
+    /// <summary>Все открытые <see cref="Window"/> процесса (главное, окно-хост зоны Mfd, настройки, превью) — для MCP и паритета при мультиоконности (ADR 0017).</summary>
     private static List<Dictionary<string, object?>> BuildTopLevels(Application app, Window mainWindow)
     {
         var list = new List<Dictionary<string, object?>>();
@@ -154,8 +154,8 @@ internal static class UiThemeDeepSnapshot
 
             var role = ReferenceEquals(win, mainWindow)
                 ? "main"
-                : win is AuxiliaryWorkspaceWindow
-                    ? "auxiliary"
+                : win is MfdHostWindow
+                    ? "mfd_host"
                     : "other";
 
             list.Add(new Dictionary<string, object?>

@@ -5,7 +5,7 @@ public static partial class IdeCommands
 {
     /// <summary>Передать фокус в редактор (чтобы клавиши/ввод шли в него). returns: text.</summary>
     public const string FocusEditor = "focus_editor";
-    /// <summary>Снимок окон IDE в PNG (по умолчанию главное окно; при scope=all — все top-level, в т.ч. вспомогательные). args: scope?:string, workspace_path?:string, output_path?:string; returns: json. example: {"scope":"all","workspace_path":"D:\\\\tmp\\\\ws","output_path":".cascade-ide/window-{n}.png"}.</summary>
+    /// <summary>Снимок окон IDE в PNG (по умолчанию главное окно; при scope=all — все top-level, в т.ч. окно-хост Mfd и прочие). args: scope?:string, workspace_path?:string, output_path?:string; returns: json. example: {"scope":"all","workspace_path":"D:\\\\tmp\\\\ws","output_path":".cascade-ide/window-{n}.png"}.</summary>
     public const string CaptureWindow = "capture_window";
     /// <summary>Как меню «Вид → Терминал» (переключатель). returns: text.</summary>
     public const string ToggleTerminal = "toggle_terminal";

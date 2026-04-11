@@ -57,9 +57,9 @@ public static partial class IdeCommandRegistry
         AddPalette(b, "apply_power_classic_theme", IdeCommands.ApplyPowerClassicTheme, "Тема: Power классическая", "Вид");
         AddPalette(b, "open_theme_file_dialog", IdeCommands.OpenThemeFileDialog, "Открыть файл темы…", "Вид");
 
-        // ——— Вид: превью и вспомогательное окно
+        // ——— Вид: превью и окно-хост зоны Mfd
         AddPalette(b, "open_preview_window", IdeCommands.OpenPreviewWindow, "Превью в отдельном окне", "Вид");
-        AddPalette(b, "toggle_auxiliary_workspace_window", IdeCommands.ToggleAuxiliaryWorkspaceWindow, "Второе окно рабочей области…", "Вид");
+        AddPalette(b, "toggle_mfd_host_window", IdeCommands.ToggleMfdHostWindow, "Второе окно рабочей области…", "Вид");
 
         // ——— Вид: палитра команд (глобальный хоткей окна)
         AddPalette(

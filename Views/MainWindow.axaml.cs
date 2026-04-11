@@ -33,7 +33,11 @@ public partial class MainWindow : Window
         Loaded += OnMainWindowLoaded;
     }
 
-    private void OnMainWindowLoaded(object? sender, RoutedEventArgs e) => TryApplyHotkeys();
+    private void OnMainWindowLoaded(object? sender, RoutedEventArgs e)
+    {
+        TryApplyHotkeys();
+        TryOpenMfdHostWindowOnStartup();
+    }
 
     private void TryApplyHotkeys()
     {
@@ -57,7 +61,7 @@ public partial class MainWindow : Window
             vm.RequestClose = Close;
             vm.RequestShowAbout = ShowAbout;
             vm.RequestOpenSettings = ShowSettingsWindow;
-            vm.RequestToggleAuxiliaryWorkspaceWindow = ToggleAuxiliaryWorkspaceWindow;
+            vm.RequestToggleMfdHostWindow = ToggleMfdHostWindow;
             vm.RequestOpenThemeFile = ShowOpenThemeFileDialogAsync;
             vm.RequestShowMarkdownPreviewWindow = ShowMarkdownPreviewWindow;
             vm.RequestShowMarkdownPreviewForEditor = ShowMarkdownPreviewForEditor;
@@ -102,7 +106,7 @@ public partial class MainWindow : Window
                 _boundMainVm = null;
             }
 
-            CloseAuxiliaryWorkspaceWindowIfOpen();
+            CloseMfdHostWindowIfOpen();
         }
     }
 }
