@@ -2,7 +2,7 @@
 
 **Статус:** Accepted  
 **Дата:** 2026-04-08  
-**Обновлено:** 2026-04-08 — `workspace.toml` (merge/LocalAppData).  
+**Обновлено:** 2026-04-11 — ссылка на [0017](0017-multi-window-workspace-and-agent-surfaces.md): `presentation` — прежде всего **`settings.toml`**, не командный репо. 2026-04-08 — `workspace.toml` (merge/LocalAppData).  
 **Обновлено:** 2026-04-08 — ветка миграции `settings.json` → TOML **удалена** из кода: поддерживаемых legacy-профилей нет, канон только `settings.toml`.  
 **Обновлено:** 2026-04-08 — секреты API: **`ai-keys.toml`** вместо `ai-keys.json` (тот же Tomlyn/`CascadeTomlSerializer`, snake_case); миграции с JSON нет.  
 **Связь:** [0010](0010-ui-modes-toml-configuration.md) (TOML для **бандла режимов** и **репозиторного** `workspace.toml` — другой слой, не путать с пользовательским файлом), [0013](0013-command-surface-and-discoverability.md) (`hotkeys.toml` рядом с `settings.toml` — задумано, не обязательно реализовано), [0026](0026-markdown-preview-surfaces-and-placement.md) (часть пресетов в **merged** `workspace.toml`; пользовательский override размещения — не только `settings.toml`), [0027](0027-small-team-focus-vs-public-maturity.md) (предсказуемые пути конфигурации), [0029](0029-configuration-toml-canonical-ui-facade.md) (TOML как канон; UI — фасад над тем же файлом), реализация: `Services/SettingsService.cs`, `Services/AiKeysStorage.cs`, `Models/CascadeIdeSettings.cs`, `Services/CascadeTomlSerializer.cs`.
@@ -64,6 +64,7 @@
 ### 6. Будущие файлы в том же каталоге
 
 - **`hotkeys.toml`** — по намерению [0013](0013-command-surface-and-discoverability.md), рядом с `settings.toml`, только переопределения; до реализации этот ADR не обязует их наличие.
+- Раскладка по **физическим дисплеям** (`presentation` / `zone_screen_layout` и токены грамматики по [0017](0017-multi-window-workspace-and-agent-surfaces.md)) — **персональный** слой, **прежде всего** поля в **`settings.toml`**, а не обязательство команды через репозиторный `workspace.toml` ([0017 § слой хранения](0017-multi-window-workspace-and-agent-surfaces.md#adr0017-presentation-grammar)).
 - Дополнительные пользовательские файлы (например состояние окон по [0017](0017-multi-window-workspace-and-agent-surfaces.md)) — **отдельным ADR** при появлении договорённости, с явной привязкой к этому каталогу или к новому ключу в `settings.toml`.
 
 ---
