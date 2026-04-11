@@ -1,6 +1,6 @@
 # Протокол MCP: агент ↔ IDE
 
-Идея зафиксирована в каноне заметок (`knowledge/work/projects/current-projects/cascade-ide/README.md` в репозитории **agent-notes**): IDE — тонкий клиент, которым управляет агент через MCP. Агент (в Cursor или во встроенном чате) вызывает инструменты MCP; IDE отображает результат и выполняет действия.
+Идея зафиксирована в каноне заметок (`knowledge/work/projects/door-to-singularity/cascade-ide/README.md` в репозитории **agent-notes**): IDE — тонкий клиент, которым управляет агент через MCP. Агент (в Cursor или во встроенном чате) вызывает инструменты MCP; IDE отображает результат и выполняет действия.
 
 ## Роль сторон
 
@@ -90,9 +90,9 @@
 | `get_build_output` | Текст панели «Вывод сборки» + цвета оформления. returns: json. |
 | `get_code_metrics` | Метрики кода (LOC/классы/методы/цикломатика). args: scope?:string, path?:string; returns: json; example: {"scope":"solution","path":"."}. |
 | `list_agent_notes_revisions` | Список ревизий заметок агента. args: limit?:integer; returns: json; example: {"limit":20}. |
-| `memory_health` | Health-check памяти: размер hot-context и рекомендации. args: active_scope?:string; returns: json; example: {"active_scope":"current-projects"}. |
+| `memory_health` | Health-check памяти: размер hot-context и рекомендации. args: active_scope?:string; returns: json; example: {"active_scope":"door-to-singularity"}. |
 | `read_agent_notes` | Прочитать заметки агента из каталога решения. returns: text. |
-| `read_hot_context` | Прочитать только hot-context (L0/L1) без архивного хвоста. args: active_scope?:string; returns: json; example: {"active_scope":"current-projects"}. |
+| `read_hot_context` | Прочитать только hot-context (L0/L1) без архивного хвоста. args: active_scope?:string; returns: json; example: {"active_scope":"door-to-singularity"}. |
 | `rollback_agent_notes` | Откатить заметки к ревизии (или к последней). args: revision_file?:string; returns: text; example: {"revision_file":"20260402-120000-write-acde123.md"}. |
 | `route_context` | Router-first контекст пакет по запросу. args: query:string, active_scope?:string, max_sections?:integer, max_chars?:integer; returns: json; example: {"query":"CascadeIDE notes structure","max_sections":5,"max_chars":12000}. |
 | `run_affected_tests` | Запустить затронутые тесты по changed_paths (или fallback на полный прогон). args: changed_paths?:string[]; returns: json; example: {"changed_paths":["a.cs","b.cs"]}. |
