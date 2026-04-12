@@ -54,6 +54,7 @@
 | Интернационализация: ResX, культура UI; TOML не словарь всего интерфейса; ортогонально конфигу и HUD | [0033](adr/0033-internationalization-resx-avalonia.md) (Proposed) |
 | Оператор недоступен (Incapacitation): Emergency Mode; EICAS + класс сигналов КВС; liveness, HUD по контексту внимания, interlock опасных команд; сенсоры — opt-in | [0034](adr/0034-pilot-incapacitation-emergency-mode-and-presence-sensing.md) (Proposed) |
 | MFD: встроенный WebView2, внешние веб-LLM; веб не равно MCP-клиент; явная передача контекста; мост веб↔MCP — отдельная линия | [0035](adr/0035-mfd-embedded-webview-external-llm-and-mcp-boundary.md) (Proposed) |
+| CDS: канал → контракт кабины → композитор слота → поверхность (Avalonia); не ARINC 661 целиком | [0036](adr/0036-cds-channel-compositor-surface-pipeline.md) (Proposed) |
 
 Полный индекс: [docs/adr/README.md](adr/README.md).
 
@@ -131,4 +132,5 @@
 - **v1.52** — [0034](adr/0034-pilot-incapacitation-emergency-mode-and-presence-sensing.md): слой C — eye tracking отложен, не baseline; доступность (поле зрения ≠ сигнал трекера); запрет обязательного ET.  
 - **v1.49** — чертёж [cds-contract-v0](design/cds-contract-v0.md): CDS (контракт кабины) vs `UiLayoutSnapshot`; [0021](adr/0021-pfd-mfd-cockpit-attention-model.md) §1.1 — глоссарий.  
 - **v1.53** — добавлен [0035](adr/0035-mfd-embedded-webview-external-llm-and-mcp-boundary.md) (MFD: WebView2, внешние веб-LLM; граница с MCP; гибрид через оператора; мост веб↔MCP — вне baseline; Proposed).  
+- **v1.54** — добавлен [0036](adr/0036-cds-channel-compositor-surface-pipeline.md) (канал → CDS → композитор → поверхность; Agent-first; Proposed).  
 - Изменения направления — отдельным коммитом: обновление этого файла и при необходимости новый ADR в [docs/adr/README.md](adr/README.md).
