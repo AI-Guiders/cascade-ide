@@ -57,7 +57,7 @@
 | CDS: канал → контракт кабины → композитор слота → поверхность (Avalonia); не ARINC 661 целиком | [0036](adr/0036-cds-channel-compositor-surface-pipeline.md) (Accepted) |
 | PFD: инварианты поверхности (weight, input lock, каналы) и Roslyn; явные маркеры `[Pfd…]` / базовый тип | [0037](adr/0037-pfd-surface-invariants-and-roslyn-enforcement.md) (Proposed) |
 | Фасад агента: провайдеры LLM (`AiProviderManager`), чат, ACP, автономный режим; внешние MCP; направление развития | [0038](adr/0038-agent-facade-ai-provider-and-tool-orchestration.md) (Accepted · Implemented) |
-| Навигация по workspace: несколько представлений, «текущий файл + связанные»; дерево не единственный канон; ортогонально строгой PFD-поверхности | [0039](adr/0039-workspace-navigation-affordances.md) (Proposed) |
+| Навигация по workspace: несколько представлений, граф/semantic map, «текущий + связанные»; дерево не единственный канон; PFD/MFD; ортогонально строгой PFD-поверхности | [0039](adr/0039-workspace-navigation-affordances.md) (Proposed) |
 
 Полный индекс: [docs/adr/README.md](adr/README.md).
 
@@ -142,4 +142,5 @@
 - **v1.57** — добавлен [0037](adr/0037-pfd-surface-invariants-and-roslyn-enforcement.md) (PFD: weight / input lock / каналы; явные маркеры для Roslyn; Proposed).  
 - **v1.58** — добавлен [0038](adr/0038-agent-facade-ai-provider-and-tool-orchestration.md) (фасад агента: `AiProviderManager`, чат vs ACP vs автономный цикл, `McpClientService`; черновик направления в том же ADR).  
 - **v1.59** — добавлен [0039](adr/0039-workspace-navigation-affordances.md) (навигация workspace: не только дерево файлов; несколько представлений и «связанные»; Proposed).  
+- **v1.60** — [0039](adr/0039-workspace-navigation-affordances.md): продуктовая метафора (шкаф vs карта боя), граф релевантного контекста, PFD/MFD, Semantic Map и `presentation`.  
 - Изменения направления — отдельным коммитом: обновление этого файла и при необходимости новый ADR в [docs/adr/README.md](adr/README.md).
