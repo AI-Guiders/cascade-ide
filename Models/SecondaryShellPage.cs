@@ -18,4 +18,6 @@ public enum SecondaryShellPage
     Tests = 7,
     Hypotheses = 8,
     DebugStack = 9,
+    /// <summary>Параметры AI и чата (провайдеры, MCP, ключи) — по умолчанию в зоне Mfd; см. <c>ai_chat_settings_presentation</c> в <c>settings.toml</c>.</summary>
+    AiChatSettings = 10,
 }

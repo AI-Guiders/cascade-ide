@@ -9,6 +9,7 @@ public static partial class IdeCommandRegistry
     {
         AddPalette(b, "secondary_shell_page_workspace", IdeCommands.SetSecondaryShellPage, "Вторичный контур: WORKSPACE (здоровье)", "Вторичный контур", """{"page":"WorkspaceHealth"}""");
         AddPalette(b, "secondary_shell_page_chat", IdeCommands.SetSecondaryShellPage, "Вторичный контур: Чат", "Вторичный контур", """{"page":"Chat"}""");
+        AddPalette(b, "secondary_shell_page_ai_settings", IdeCommands.SetSecondaryShellPage, "Вторичный контур: Параметры AI и чата", "Вторичный контур", """{"page":"AiChatSettings"}""");
         AddPalette(b, "secondary_shell_page_terminal", IdeCommands.SetSecondaryShellPage, "Вторичный контур: Терминал", "Вторичный контур", """{"page":"Terminal"}""");
         AddPalette(b, "secondary_shell_page_build", IdeCommands.SetSecondaryShellPage, "Вторичный контур: Сборка · вывод", "Вторичный контур", """{"page":"Build"}""");
         AddPalette(b, "secondary_shell_page_problems", IdeCommands.SetSecondaryShellPage, "Вторичный контур: Problems", "Вторичный контур", """{"page":"Problems"}""");

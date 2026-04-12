@@ -37,14 +37,32 @@ public partial class MainWindowViewModel
     [RelayCommand]
     private void OpenSettings()
     {
-        RequestOpenSettings?.Invoke();
+        var placement = (_settings.AiChatSettingsPresentation ?? "mfd").Trim();
+        if (string.Equals(placement, "window", StringComparison.OrdinalIgnoreCase))
+        {
+            RequestOpenSettings?.Invoke();
+            return;
+        }
+
+        // Зона Mfd (или окно-хост Mfd на втором экране, ADR 0017): страница параметров AI.
+        IsChatPanelExpanded = true;
+        if (PresentationRequestsMfdHostWindow && !IsMfdHostWindowShellOpen)
+            RequestToggleMfdHostWindow?.Invoke();
+        TryNavigateToSecondaryShellPage(SecondaryShellPage.AiChatSettings);
     }
 
+    /// <summary>Полное окно настроек (все секции), в т.ч. из страницы AI во вторичном контуре.</summary>
     [RelayCommand]
+    private void OpenFullSettingsWindow() => RequestOpenSettings?.Invoke();
+
+    /// <summary>MCP / автоматизация: сфокусировать или снова открыть хост только если пресет <c>presentation</c> требует второго окна (нет дубля с меню «вынести Mfd»).</summary>
+    [RelayCommand(CanExecute = nameof(CanToggleMfdHostWindow))]
     private void ToggleMfdHostWindow()
     {
         RequestToggleMfdHostWindow?.Invoke();
     }
+
+    private bool CanToggleMfdHostWindow() => PresentationRequestsMfdHostWindow;
 
     [RelayCommand]
     private async Task ApplyDarkThemeAsync()

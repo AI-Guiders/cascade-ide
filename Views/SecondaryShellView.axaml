@@ -45,6 +45,19 @@
             <Border IsVisible="{Binding CurrentSecondaryShellPage, Converter={StaticResource SecondaryShellPageEq}, ConverterParameter=Chat}">
                     <views:ChatPanelView/>
             </Border>
+            <Border IsVisible="{Binding CurrentSecondaryShellPage, Converter={StaticResource SecondaryShellPageEq}, ConverterParameter=AiChatSettings}">
+                    <DockPanel>
+                        <views:PanelChromeHeader DockPanel.Dock="Top" Title="Параметры AI и чата" UppercaseTitle="False"/>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                            <StackPanel Spacing="10" Margin="0,4,0,0">
+                                <views:AiChatSettingsPanelView/>
+                                <TextBlock Text="Редактор, LSP, Markdown — в полном окне настроек." FontSize="11" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" TextWrapping="Wrap"/>
+                                <Button Content="Все настройки в отдельном окне…" HorizontalAlignment="Left" Padding="10,6"
+                                        Command="{Binding OpenFullSettingsWindowCommand}"/>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </DockPanel>
+            </Border>
             <Border IsVisible="{Binding CurrentSecondaryShellPage, Converter={StaticResource SecondaryShellPageEq}, ConverterParameter=Terminal}">
                     <DockPanel>
                         <Border DockPanel.Dock="Top" IsVisible="{Binding WorkspaceHealthOnTerminalTab}" Classes="modeCard" Margin="0,0,0,4">

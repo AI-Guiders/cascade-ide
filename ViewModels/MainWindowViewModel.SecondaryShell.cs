@@ -10,6 +10,7 @@ public partial class MainWindowViewModel
     [
         SecondaryShellPage.WorkspaceHealth,
         SecondaryShellPage.Chat,
+        SecondaryShellPage.AiChatSettings,
         SecondaryShellPage.Terminal,
         SecondaryShellPage.Build,
         SecondaryShellPage.Problems,
@@ -33,6 +34,7 @@ public partial class MainWindowViewModel
     {
         SecondaryShellPage.WorkspaceHealth => ShowWorkspaceHealthSecondaryPage,
         SecondaryShellPage.Chat => true,
+        SecondaryShellPage.AiChatSettings => true,
         SecondaryShellPage.Terminal => IsTerminalVisible,
         SecondaryShellPage.Build => IsBuildOutputVisible,
         SecondaryShellPage.Problems => IsProblemsPanelVisible,

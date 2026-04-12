@@ -43,6 +43,12 @@ public sealed class CascadeIdeSettings : ModelBase
     /// </summary>
     public string CursorAcpAgentPath { get; set; } = "";
 
+    /// <summary>
+    /// Где показывать «Параметры AI и чата»: <c>mfd</c> — страница вторичного контура (зона Mfd, ADR 0021);
+    /// <c>window</c> — отдельное окно со всеми настройками (редактор, LSP, Markdown и т.д.).
+    /// </summary>
+    public string AiChatSettingsPresentation { get; set; } = "mfd";
+
     /// <summary>Видимость панели «Решение» (Solution Explorer).</summary>
     public bool SolutionExplorerVisible { get; set; } = true;
 
@@ -141,6 +147,7 @@ public sealed class CascadeIdeSettings : ModelBase
             && DeepSeekBaseUrl.Is(o.DeepSeekBaseUrl)
             && DeepSeekModelId.Is(o.DeepSeekModelId)
             && CursorAcpAgentPath.Is(o.CursorAcpAgentPath)
+            && AiChatSettingsPresentation.Is(o.AiChatSettingsPresentation)
             && SolutionExplorerVisible.Is(o.SolutionExplorerVisible)
             && TerminalVisible.Is(o.TerminalVisible)
             && GitPanelVisible.Is(o.GitPanelVisible)
@@ -192,6 +199,7 @@ public sealed class CascadeIdeSettings : ModelBase
             DeepSeekBaseUrl = DeepSeekBaseUrl,
             DeepSeekModelId = DeepSeekModelId,
             CursorAcpAgentPath = CursorAcpAgentPath,
+            AiChatSettingsPresentation = AiChatSettingsPresentation,
             SolutionExplorerVisible = SolutionExplorerVisible,
             TerminalVisible = TerminalVisible,
             GitPanelVisible = GitPanelVisible,
