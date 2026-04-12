@@ -42,6 +42,7 @@
 | [0032](0032-hud-banner-configuration-and-grammar.md) | HUD над редактором: настраиваемое содержимое, грамматика как у `presentation`; EBNF в ADR, парсер — по сложности DSL | Proposed |
 | [0033](0033-internationalization-resx-avalonia.md) | i18n: ResX / культура .NET, Avalonia; строки UI не в TOML как основной слой; плюрализация — ключи или библиотека | Proposed |
 | [0034](0034-pilot-incapacitation-emergency-mode-and-presence-sensing.md) | Incapacitation, Emergency Mode; EICAS + сигналы КВС; liveness, контекстный HUD, safety interlock; webcam/analysis MCP opt-in | Proposed |
+| [0035](0035-mfd-embedded-webview-external-llm-and-mcp-boundary.md) | Встроенный браузер в MFD (WebView2), внешние веб-LLM; граница доверия с MCP; гибрид через оператора; мост веб↔MCP — вне baseline | Proposed |
 
 ## Соглашения
 
