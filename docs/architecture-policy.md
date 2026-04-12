@@ -52,7 +52,7 @@
 | Чат агента: пакеты уточнений (не одна строка), структура ответов; треды — опционально; ортогонально PFD-подтверждениям | [0031](adr/0031-agent-chat-clarification-batches-and-threading.md) (Proposed) |
 | HUD над редактором: что показывать и в каком виде — в `settings.toml`; опциональная грамматика по образцу `presentation` / `[presentation_grammar]` | [0032](adr/0032-hud-banner-configuration-and-grammar.md) (Proposed) |
 | Интернационализация: ResX, культура UI; TOML не словарь всего интерфейса; ортогонально конфигу и HUD | [0033](adr/0033-internationalization-resx-avalonia.md) (Proposed) |
-| Оператор недоступен (Incapacitation): Emergency Mode, стабилизация git/автономности; опционально сенсор присутствия (webcam MCP), база — программные пороги | [0034](adr/0034-pilot-incapacitation-emergency-mode-and-presence-sensing.md) (Proposed) |
+| Оператор недоступен (Incapacitation): Emergency Mode; EICAS + класс сигналов КВС; liveness, HUD по контексту внимания, interlock опасных команд; сенсоры — opt-in | [0034](adr/0034-pilot-incapacitation-emergency-mode-and-presence-sensing.md) (Proposed) |
 
 Полный индекс: [docs/adr/README.md](adr/README.md).
 
@@ -124,6 +124,7 @@
 - **v1.46** — добавлен [0032](adr/0032-hud-banner-configuration-and-grammar.md) (HUD: конфиг содержимого и грамматика как у `presentation`; Proposed).  
 - **v1.47** — добавлен [0033](adr/0033-internationalization-resx-avalonia.md) (i18n: ResX/Avalonia; Proposed); уточнён перекрёсток с [0032](adr/0032-hud-banner-configuration-and-grammar.md).  
 - **v1.48** — [0017](adr/0017-multi-window-workspace-and-agent-surfaces.md): раздел **«Состояние реализации»** (сверка с кодом: топология, плейсмент, bounds); [concept-to-implementation-map-v1](ux/concept-to-implementation-map-v1.md) **§6** — второй `TopLevel` / `MfdHostWindow`.
-- **v1.49** — добавлен [0034](adr/0034-pilot-incapacitation-emergency-mode-and-presence-sensing.md) (Incapacitation оператора, Emergency Mode, опциональное присутствие через webcam MCP; Proposed).  
+- **v1.49** — добавлен [0034](adr/0034-pilot-incapacitation-emergency-mode-and-presence-sensing.md) (Incapacitation оператора, Emergency Mode, опциональное присутствие через webcam MCP; Proposed).
+- **v1.50** — [0034](adr/0034-pilot-incapacitation-emergency-mode-and-presence-sensing.md): уточнён контракт — EICAS и сигналы КВС, liveness, контекстный HUD, safety interlock; граница «биометрия» = liveness/присутствие для безопасности.  
 - **v1.49** — чертёж [cds-contract-v0](design/cds-contract-v0.md): CDS (контракт кабины) vs `UiLayoutSnapshot`; [0021](adr/0021-pfd-mfd-cockpit-attention-model.md) §1.1 — глоссарий.  
 - Изменения направления — отдельным коммитом: обновление этого файла и при необходимости новый ADR в [docs/adr/README.md](adr/README.md).
