@@ -1,6 +1,6 @@
 # Workspace Health — полоса и страница (реализация: `WorkspaceHealth*`) — implementation map (v1)
 
-**Статус:** живой чертёж (не ADR). **Обновлено:** 2026-04-11 — каноническое имя контура: **Workspace Health**; типы в коде: `WorkspaceHealth*`; §1: «слот презентации vs канал»; ссылка на ADR 0021 §1.2. Ранее: 2026-04-06 — `WorkspaceHealthSecondaryPageView` + строка в §3/§4; отсылка к ADR: [содержимое якоря PFD/MFD vs Page канала](../adr/0021-pfd-mfd-cockpit-attention-model.md#anchor-pfd-mfd-content-vs-telemetry-page). Ранее: 2026-04-05 — §7.1: **решение v1 = вариант A** (отдельный контур EICAS); ранее — union types / вариант B, углубление, фазы.  
+**Статус:** живой чертёж (не ADR). **Обновлено:** 2026-04-11 — **имя файла:** `workspace-health-implementation-map-v1.md` (ранее `workspace-health-compositor-implementation-v1.md` — переименовано: документ про **канал** Workspace Health и карту кода, а не про «композитор стекла» IDE целиком; тип в коде `WorkspaceHealthSegmentBuilder` (переименован с `WorkspaceHealthCompositor`, см. §1/§3)). Ранее: 2026-04-11 — каноническое имя контура: **Workspace Health**; типы в коде: `WorkspaceHealth*`; §1: «слот презентации vs канал»; ссылка на ADR 0021 §1.2. Ранее: 2026-04-06 — `WorkspaceHealthSecondaryPageView` + строка в §3/§4; отсылка к ADR: [содержимое якоря PFD/MFD vs Page канала](../adr/0021-pfd-mfd-cockpit-attention-model.md#anchor-pfd-mfd-content-vs-telemetry-page). Ранее: 2026-04-05 — §7.1: **решение v1 = вариант A** (отдельный контур EICAS); ранее — union types / вариант B, углубление, фазы.  
 **Решения и термины** — в [ADR 0021](../adr/0021-pfd-mfd-cockpit-attention-model.md) (PFD/MFD/EICAS, ARINC 661-идеи); **канонический словарь** «канал / слой представления / имена в коде» — [§1.1](../adr/0021-pfd-mfd-cockpit-attention-model.md#glossary-channel-presentation). Лексикон **Workspace Health** и эволюция имён — [ADR 0022](../adr/0022-workspace-health-lexicon.md). Здесь — **где в коде** и **что дальше**, чтобы не раздувать ADR.
 
 ---
@@ -10,17 +10,17 @@
 | Термин | Смысл |
 |--------|--------|
 | **Зона PFD / MFD / EICAS** | Семантическая роль участка UI из ADR 0021: первичный контекст, вторичные потоки, канал оповещений. **Где** на экране задаётся **пресетом** (TOML/capabilities), не перетаскиванием в сессии. |
-| **Снимок Workspace Health** | `WorkspaceHealthInputSnapshot`: нормализованные входы (build/tests/debug/git) до композитора. Не привязан к форме «полоски». |
-| **Композитор смысла (semantic)** | `WorkspaceHealthCompositor`: из снимка собирает упорядоченные `WorkspaceHealthSegment` (порядок, флаги вроде `IsBuildRunning`). Отвечает за **состав каналов**, не за пиксели и не за зону PFD/MFD. |
-| **Раскладка зоны / страницы (chrome layout)** | Куда на экране попадают блоки: полоса снизу, сетка на странице MFD, карточка в PFD. Задаётся **пресетом** и шаблонами (AXAML) и/или отдельным слоем в коде; рабочее имя в дизайне — *compositor страницы зоны* / *display page layout*. Только **геометрия контейнера** в зоне, не дублирует порядок build/tests — тот уже зафиксирован композитором смысла. |
-| **Поверхность (surface)** | **Слой представления:** как **показать** те же сегменты (полоса, страница, карточка в хроме). Выбор Strip vs Page (`workspace_health_surface`, enum `WorkspaceHealthUiSurface`) — пресет и разметка; **снимок и композитор смысла не зависят** от этого слоя. Это не «хост событий» и не шина сообщений — только UI. |
+| **Снимок Workspace Health** | `WorkspaceHealthInputSnapshot`: нормализованные входы (build/tests/debug/git) до сборки сегментов (`WorkspaceHealthSegmentBuilder`). Не привязан к форме «полоски». |
+| **Сборщик сегментов канала (semantic)** | `WorkspaceHealthSegmentBuilder`: из снимка собирает упорядоченные `WorkspaceHealthSegment` (порядок, флаги вроде `IsBuildRunning`). Отвечает за **состав канала** Workspace Health, не за пиксели и не за зону PFD/MFD. |
+| **Раскладка зоны / страницы (chrome layout)** | Куда на экране попадают блоки: полоса снизу, сетка на странице MFD, карточка в PFD. Задаётся **пресетом** и шаблонами (AXAML) и/или отдельным слоем в коде; рабочее имя в дизайне — *layout страницы зоны* / *display page layout*. Только **геометрия контейнера** в зоне, не дублирует порядок build/tests — тот уже зафиксирован `WorkspaceHealthSegmentBuilder`. |
+| **Поверхность (surface)** | **Слой представления:** как **показать** те же сегменты (полоса, страница, карточка в хроме). Выбор Strip vs Page (`workspace_health_surface`, enum `WorkspaceHealthUiSurface`) — пресет и разметка; **снимок и `WorkspaceHealthSegmentBuilder` не зависят** от этого слоя. Это не «хост событий» и не шина сообщений — только UI. |
 | **Strip (полоса)** | Конкретная поверхность представления: узкая горизонтальная полоса — [`WorkspaceHealthStripView`](../../Views/WorkspaceHealthStripView.axaml). |
 | **Page (страница)** | Другая поверхность представления **только для канала Workspace Health** (`workspace_health_surface`): те же сегменты в регионе PFD/MFD вместо полосы. Это **не** определение всего содержимого якоря — см. [ADR 0021](../adr/0021-pfd-mfd-cockpit-attention-model.md#anchor-pfd-mfd-content-vs-telemetry-page). |
 | **Канал EICAS** | Оповещения W/C/A — отдельный **семантический** контур от Workspace Health (ADR §5). Визуально — полоса, список, оверлей и т.д.; контейнер в текущей разметке: `EicasAlertsBarView`, TOML `eicas_alerts_bar`. **Не путать** со Strip/Page: те относятся к **представлению** build/tests/debug/git, а не к каналу CAS. |
 
-Типы `WorkspaceHealth*` задают **смысл** сегментов (build/tests/debug/git); [`WorkspaceHealthStripView`](../../Views/WorkspaceHealthStripView.axaml) — одна из **поверхностей представления**; при странице MFD / блоке PFD те же данные идут в **другую разметку** без смены композитора.
+Типы `WorkspaceHealth*` задают **смысл** сегментов (build/tests/debug/git); [`WorkspaceHealthStripView`](../../Views/WorkspaceHealthStripView.axaml) — одна из **поверхностей представления**; при странице MFD / блоке PFD те же данные идут в **другую разметку** без смены `WorkspaceHealthSegmentBuilder`.
 
-**Показ и данные развязаны:** **Strip** или **Page** — это только **слой представления** (настройки пресета), не ветвление логики снимка и не хост событий. Strip отнимает высоту у лобового; Page не отнимает ту же полосу, но требует перехода взгляда — пользователь сам решает, что важнее, **не меняя** источники данных и `WorkspaceHealthCompositor`.
+**Показ и данные развязаны:** **Strip** или **Page** — это только **слой представления** (настройки пресета), не ветвление логики снимка и не хост событий. Strip отнимает высоту у лобового; Page не отнимает ту же полосу, но требует перехода взгляда — пользователь сам решает, что важнее, **не меняя** источники данных и `WorkspaceHealthSegmentBuilder`.
 
 | Уровень | Смысл | Заметка |
 |--------|--------|--------|
@@ -33,7 +33,7 @@
 
 ## 2. Идея в одном абзаце
 
-Несколько источников (сборка, тесты, отладка, git) **подают состояние и строки**; **один** слой (`WorkspaceHealthCompositor`) задаёт **порядок и состав** сегментов — независимо от **слоя представления** (**Strip** или **Page**). Текущая разметка полосы: [`WorkspaceHealthStripView`](../../Views/WorkspaceHealthStripView.axaml) (Balanced/Focus vs Power cockpit).
+Несколько источников (сборка, тесты, отладка, git) **подают состояние и строки**; **один** слой (`WorkspaceHealthSegmentBuilder`) задаёт **порядок и состав** сегментов — независимо от **слоя представления** (**Strip** или **Page**). Текущая разметка полосы: [`WorkspaceHealthStripView`](../../Views/WorkspaceHealthStripView.axaml) (Balanced/Focus vs Power cockpit).
 
 ---
 
@@ -41,20 +41,20 @@
 
 | Компонент | Путь | Роль |
 |-----------|------|------|
-| Снимок входов | `Features/UiChrome/WorkspaceHealthInputSnapshot.cs` | `WorkspaceHealthInputSnapshot` + `WorkspaceHealthSegmentInput` (build/tests/debug/git). Точка расширения без раздувания сигнатур. |
-| Композитор | `Features/UiChrome/WorkspaceHealthCompositor.cs` | `Rebuild(ObservableCollection<WorkspaceHealthSegment>, WorkspaceHealthInputSnapshot)`; порядок: Build → Tests → Debug → Git; `IsBuildRunning` только на сегменте Build. |
-| Модель сегмента | `Features/UiChrome/WorkspaceHealthSegment.cs` | `LineText` (полная строка), `CockpitShort` (Power), флаги для шаблона. |
-| Источник enum | `Features/UiChrome/WorkspaceHealthSource.cs` | `Build`, `Tests`, `Debug`, `Git`. |
-| Форматирование строк | `Features/UiChrome/WorkspaceHealthFormat.cs` | Статические сегменты `BuildSegment` / `TestsSegment` / `DebugSegment` / `GitSegment` и `Compose(...)` — чистая логика без VM/DAP; удобно для юнит-тестов. |
-| Провайдер снимка | `Features/UiChrome/IWorkspaceHealthProvider.cs`, `WorkspaceHealthProvider.cs` | `GetSnapshot()` собирает входы (build/tests/DAP/instrumentation/git из `UiChromeViewModel`) в `WorkspaceHealthInputSnapshot`. `MainWindowViewModel` не знает текст каждой строки по отдельности — только держит провайдер и передаёт снимок в композитор. |
-| VM | `ViewModels/MainWindowViewModel.WorkspaceHealth.cs` | `RebuildWorkspaceHealth()` вызывает `WorkspaceHealthCompositor.Rebuild(WorkspaceHealthSegments, _workspaceHealth.GetSnapshot())`. |
+| Снимок входов | `Cockpit/Channels/WorkspaceHealth/WorkspaceHealthInputSnapshot.cs` | `WorkspaceHealthInputSnapshot` + `WorkspaceHealthSegmentInput` (build/tests/debug/git). Точка расширения без раздувания сигнатур. |
+| Сборщик сегментов | `Cockpit/Composition/WorkspaceHealth/WorkspaceHealthSegmentBuilder.cs` | `Rebuild(ObservableCollection<WorkspaceHealthSegment>, WorkspaceHealthInputSnapshot)`; порядок: Build → Tests → Debug → Git; `IsBuildRunning` только на сегменте Build. |
+| Модель сегмента | `Cockpit/Channels/WorkspaceHealth/WorkspaceHealthSegment.cs` | `LineText` (полная строка), `CockpitShort` (Power), флаги для шаблона. |
+| Источник enum | `Cockpit/Channels/WorkspaceHealth/WorkspaceHealthSource.cs` | `Build`, `Tests`, `Debug`, `Git`. |
+| Форматирование строк | `Cockpit/Channels/WorkspaceHealth/WorkspaceHealthFormat.cs` | Статические сегменты `BuildSegment` / `TestsSegment` / `DebugSegment` / `GitSegment` и `Compose(...)` — чистая логика без VM/DAP; удобно для юнит-тестов. |
+| Провайдер снимка | `Cockpit/Channels/WorkspaceHealth/IWorkspaceHealthProvider.cs`, `WorkspaceHealthProvider.cs` | `GetSnapshot()` собирает входы из делегатов и DAP (строки git и счётчики отладки подставляет `MainWindowViewModel` с `Chrome` / `InstrumentationPanel`). Сам провайдер **не** ссылается на `UiChromeViewModel`. |
+| VM | `ViewModels/MainWindowViewModel.WorkspaceHealth.cs` | `RebuildWorkspaceHealth()` вызывает `WorkspaceHealthSegmentBuilder.Rebuild(WorkspaceHealthSegments, _workspaceHealth.GetSnapshot())`. |
 | Инвалидация | `ViewModels/MainWindowViewModel.LayoutNotifications.cs` | `RebuildWorkspaceHealth` при смене данных build/tests/debug. |
 | Git-строки | `Features/UiChrome/UiChromeViewModel.cs` | `WorkspaceHealthGitText`, `WorkspaceHealthGitCockpitShort`; подписка в `MainWindowViewModel` на `Chrome.PropertyChanged`. |
 | Свойства для UI | `ViewModels/MainWindowViewModel.Presentation.cs` | `WorkspaceHealthBuild*` / `WorkspaceHealthTests*` / `WorkspaceHealthDebug*` читают сегменты из `_workspaceHealth.GetSnapshot()`; флаги сессии отладки по-прежнему из DAP. |
 | Полоса хрома над нижним доком | `Views/WorkspaceChromeBandView.axaml` | Сетка колонок как у `MainGrid` (0–4); слот `EicasAlertsBarView` и вложенный `WorkspaceHealthStripView`. Включение полосы Workspace Health: `ShowWorkspaceHealthStrip` (`workspace_health_strip` + `WorkspaceHealthUiSurface.BottomStrip` в capabilities). По смыслу — контейнер **представления** нижней зоны (EICAS + Strip), не «хост событий». |
 | UI полосы | `Views/WorkspaceHealthStripView.axaml` | `ItemsControl` по `WorkspaceHealthSegments`; разные шаблоны для Power vs остальные режимы. |
 | Страница вторичного контура (v1 — зона Mfd) | `Views/WorkspaceHealthSecondaryPageView.axaml` | Тот же `WorkspaceHealthSegments` при `ShowWorkspaceHealthSecondaryPage` (`workspace_health_strip` + `DedicatedPage`); в `MainWindow` — над `ChatPanelView` в колонке зоны Mfd. |
-| Тесты | `CascadeIDE.Tests/WorkspaceHealthCompositorTests.cs`, `WorkspaceHealthFormatTests.cs` | Композитор: порядок, `IsBuildRunning`. Формат: сегменты и `Compose` для снимка. |
+| Тесты | `CascadeIDE.Tests/WorkspaceHealthSegmentBuilderTests.cs`, `WorkspaceHealthFormatTests.cs` | Билдер сегментов: порядок, `IsBuildRunning`. Формат: сегменты и `Compose` для снимка. |
 
 ---
 
@@ -62,10 +62,10 @@
 
 1. Состояние меняется (сборка, тесты, DAP, git, …).
 2. Свойства `WorkspaceHealth*` уведомляют UI (частично через `[NotifyPropertyChangedFor]`, частично явный `OnPropertyChanged` для отладки).
-3. `RebuildWorkspaceHealth()` берёт снимок через `IWorkspaceHealthProvider.GetSnapshot()` (внутри — делегаты/DAP/`UiChromeViewModel` + `WorkspaceHealthFormat`) и вызывает `WorkspaceHealthCompositor.Rebuild`.
+3. `RebuildWorkspaceHealth()` берёт снимок через `IWorkspaceHealthProvider.GetSnapshot()` (внутри — делегаты/DAP/`UiChromeViewModel` + `WorkspaceHealthFormat`) и вызывает `WorkspaceHealthSegmentBuilder.Rebuild`.
 4. `WorkspaceHealthSegments` обновляется; привязка к `WorkspaceHealthStripView` (через `WorkspaceChromeBandView`) или к `WorkspaceHealthSecondaryPageView` в колонке зоны Mfd при `DedicatedPage`.
 
-Альтернативная реализация провайдера (агент, MCP, моки в тестах VM) подменяет только сбор снимка, не композитор и не разметку полосы.
+Альтернативная реализация провайдера (агент, MCP, моки в тестах VM) подменяет только сбор снимка, не `WorkspaceHealthSegmentBuilder` и не разметку полосы.
 
 ---
 
@@ -73,7 +73,7 @@
 
 | Идея ADR | В коде сейчас |
 |----------|----------------|
-| Один композитор «стекла», много источников | Да: один `Rebuild` + снимок входов. |
+| Принцип ADR: единый слой смысла над источниками (не разрозненные toast) | Да: канал Workspace Health — `WorkspaceHealthSegmentBuilder.Rebuild` + `WorkspaceHealthInputSnapshot`. |
 | Источники не владеют отдельным слоем toast без правил | Частично: строки централизованы; отдельные toast-цепочки не сводились сюда. |
 | EICAS / Warning–Caution–Advisory | Нет: сегменты без уровня приоритета; полоса не EICAS-лента. |
 | Декларативный merge из TOML | Частично: видимость полосы через capabilities/режимы; **порядок/состав** сегментов пока не из конфига. |
@@ -85,7 +85,7 @@
 1. **Пустые / placeholder-сегменты** — см. §7.2; согласовать с Dark Cockpit ([ADR 0021 §6](../adr/0021-pfd-mfd-cockpit-attention-model.md)).
 2. **Приоритет / EICAS** — отдельный контур оповещений и уровни W/C/A ([ADR §5](../adr/0021-pfd-mfd-cockpit-attention-model.md)); см. §7.1 и §7.3.
 3. **Конфиг** — порядок/видимость сегментов Workspace Health по режиму (TOML / capabilities); §7.4.
-4. **Раскладка без нижней полосы** — Page / карточка PFD; тот же снимок + композитор, **другой слой представления** (§1, §7.5).
+4. **Раскладка без нижней полосы** — Page / карточка PFD; тот же снимок + `WorkspaceHealthSegmentBuilder`, **другой слой представления** (§1, §7.5).
 5. **Провайдер снимка** — сделано: `IWorkspaceHealthProvider`, `WorkspaceHealthProvider`, `WorkspaceHealthFormat`.
 
 ---
@@ -98,12 +98,12 @@
 
 | Контур | Назначение | Примеры | Приоритет W/C/A |
 |--------|------------|---------|------------------|
-| **Workspace Health** | Ориентир «что происходит с задачей» (build/tests/debug/git) | Сборка, тесты, сессия отладки, git | **Не применяется** — фиксированный канонический порядок в `WorkspaceHealthCompositor` (Build → Tests → Debug → Git) |
+| **Workspace Health** | Ориентир «что происходит с задачей» (build/tests/debug/git) | Сборка, тесты, сессия отладки, git | **Не применяется** — фиксированный канонический порядок в `WorkspaceHealthSegmentBuilder` (Build → Tests → Debug → Git) |
 | **EICAS / CAS** | Оповещения, требующие внимания или действия | Падение MCP при L3, блокировка агента, критичная ошибка по файлу в фокусе | **Да** — сортировка и отсечение по уровню ([ADR §5](../adr/0021-pfd-mfd-cockpit-attention-model.md)) |
 
 **Почему «просто один список» опасен без дисциплины:** смешение в одной коллекции без явного тега «work vs alert» ведёт к спецслучаям в шаблонах и к риску раздуть полосу (Dark Cockpit). Это **не** запрет на один `ItemsControl`: при **явном** дискриминаторе проблема «полуслучайного порядка» снимается на уровне типов.
 
-- **Вариант A:** `WorkspaceHealthCompositor` остаётся только про **Workspace Health**. EICAS — отдельная модель (`EicasMessage`, коллекция для UI), отдельный мини-композитор или сортировка по `Severity`; **размещение и представление** (`MainWindow` / зона `eicas` по пресету) задают, рисовать ли полосу над доком, оверлей или компактный список ([ADR §5](../adr/0021-pfd-mfd-cockpit-attention-model.md) уже допускает варианты). Это не тот же выбор, что Strip/Page для Workspace Health.
+- **Вариант A:** `WorkspaceHealthSegmentBuilder` остаётся только про **Workspace Health**. EICAS — отдельная модель (`EicasMessage`, коллекция для UI), упорядочивание для UI — `EicasMessageSorter` (по `Severity` и времени); **размещение и представление** (`MainWindow` / зона `eicas` по пресету) задают, рисовать ли полосу над доком, оверлей или компактный список ([ADR §5](../adr/0021-pfd-mfd-cockpit-attention-model.md) уже допускает варианты). Это не тот же выбор, что Strip/Page для Workspace Health.
 - **Вариант B:** дискриминированное объединение — один список элементов ленты, каждый элемент знает вариант: **работа** (build/tests/…) или **EICAS**; один `ItemsControl` с шаблоном по типу/варианту; `Rebuild` строит упорядоченную последовательность с **разными** правилами сортировки для каждой группы (сначала канон работы, внутри EICAS — по W/C/A), без смешения в одну «кучу».
 
 **Решение для v1:** принят **вариант A** — отдельный контур EICAS в коде и в источниках данных. Это **сознательная цена** за ясность двух смыслов (работа vs оповещение), простые границы тестов и соответствие ADR; **не** избегание объединённого списка ради осторожности. Вариант B остаётся запасной траекторией для последующих версий (в т.ч. при зрелом C# union types и явном продуктовом решении о «одном ментальном канале»).
@@ -118,12 +118,12 @@
 flowchart LR
   subgraph work [Workspace Health]
     Snap[WorkspaceHealthInputSnapshot]
-    Comp[WorkspaceHealthCompositor]
+    Comp[WorkspaceHealthSegmentBuilder]
     Seg[WorkspaceHealthSegments]
   end
   subgraph eicas [EICAS]
     Feed[EicasFeed / провайдер]
-    Rank[Сортировка W greater than C greater than A]
+    Rank[EicasMessageSorter]
     Cas[Eicas UI]
   end
   Snap --> Comp --> Seg
@@ -142,7 +142,7 @@ flowchart LR
 | **Fixed slots** | Всегда 4 (или N) ячеек; пустые — «—» / приглушённый placeholder | Стабильный scan pattern; риск визуального мусора в тихом режиме |
 | **Режим-зависимый** | Focus/Balanced — compact; Power — fixed для нижнего ряда кокпита | Согласуется с разными шаблонами в `WorkspaceHealthStripView` |
 
-**Рекомендация для первой итерации:** ввести флаг политики на уровне VM или пресета (`StripEmptySegmentPolicy: Compact | FixedFour`), реализовать **фильтрацию или placeholder** в одном месте — либо в `WorkspaceHealthCompositor.Append` (не добавлять пустые), либо в отдельном шаге **после** `Rebuild` (нормализация коллекции). Не размазывать условия по AXAML.
+**Рекомендация для первой итерации:** ввести флаг политики на уровне VM или пресета (`StripEmptySegmentPolicy: Compact | FixedFour`), реализовать **фильтрацию или placeholder** в одном месте — либо внутри `WorkspaceHealthSegmentBuilder` (не добавлять пустые), либо в отдельном шаге **после** `Rebuild` (нормализация коллекции). Не размазывать условия по AXAML.
 
 ### 7.3 Приоритет и сортировка
 
@@ -155,17 +155,17 @@ flowchart LR
 
 - **Минимум:** расширение capabilities (например скрыть git в Focus).
 - **Полный вариант:** в `workspace.toml` опциональный блок в духе `attention_strip_order = ["build", "tests", "debug", "git"]` и/или `attention_strip_enabled = { git = false }` — парсится в структуру рядом с `UiWorkspaceToml`, merge с бандлом ([ADR 0021 §2.1 / §17](../adr/0021-pfd-mfd-cockpit-attention-model.md)).
-- **Композитор:** читает не сырой TOML, а **уже слитый** `WorkspaceHealthLayoutPolicy` (immutable) на один вызов `Rebuild`, чтобы тестировать без файлов.
+- **`WorkspaceHealthSegmentBuilder`:** читает не сырой TOML, а **уже слитый** `WorkspaceHealthLayoutPolicy` (immutable) на один вызов `Rebuild`, чтобы тестировать без файлов.
 
 ### 7.5 Page и нижняя полоса
 
-Тот же `WorkspaceHealthInputSnapshot` и тот же порядок сегментов подаются в **другую разметку представления** (Page): полноэкранная страница MFD или блок в PFD. Меняются только шаблоны (не одна строка на сегмент, допускается многострочный вывод). Композитор смысла **не** ветвится по Strip/Page.
+Тот же `WorkspaceHealthInputSnapshot` и тот же порядок сегментов подаются в **другую разметку представления** (Page): полноэкранная страница MFD или блок в PFD. Меняются только шаблоны (не одна строка на сегмент, допускается многострочный вывод). `WorkspaceHealthSegmentBuilder` **не** ветвится по Strip/Page.
 
 ### 7.6 Фазы внедрения (предложение)
 
 | Фаза | Содержание | Критерий готовности |
 |------|------------|---------------------|
-| **F1** | Политика пустых сегментов + тесты на `WorkspaceHealthCompositor` / нормализацию | Предсказуемое поведение в Focus vs Power |
+| **F1** | Политика пустых сегментов + тесты на `WorkspaceHealthSegmentBuilder` / нормализацию | Предсказуемое поведение в Focus vs Power |
 | **F2** | Модель `EicasMessage`, провайдер, представление канала EICAS в зоне пресета (хотя бы список + цвет W/C/A) | Один Warning виден без охоты по вкладкам ([§18 / EICAS в ADR](../adr/0021-pfd-mfd-cockpit-attention-model.md)) |
 | **F3** | Dark Cockpit transition: из «тихо» в Warning (бейдж/полоса/оверлей по пресету) | Нет постоянной четвёртой колонки |
 | **F4** | TOML / merge для порядка и включения сегментов Workspace Health | Согласовано с roadmap `.cascade/workspace.toml` |

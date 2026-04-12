@@ -29,7 +29,7 @@
 |------|--------|---------------------------|
 | **CDS** | Какая **кабина** сейчас: пресет, зоны, окна, страница MFD | `presentation`, `PresentationParseResult`, флаги VM колонок/хоста, `CurrentSecondaryShellPage`, `AttentionLayoutSurfaceKind` |
 | **Дерево UI** | **Что** нарисовано в виде контролов | `UiLayoutSnapshot`, MCP `ide_get_ui_layout` |
-| **Каналы** | **Что** в полосах и списках | `WorkspaceHealthSegmentBuilder`, `EicasMessageSorter`, readiness и т.д. |
+| **Каналы** | **Что** в полосах и списках | `Cockpit/Channels/**` (данные), `Cockpit/Composition/**` (порядок/разметка для VM), readiness и т.д. |
 
 ---
 
@@ -74,17 +74,17 @@
 
 | Этап | Содержание |
 |------|------------|
-| **Сейчас** | DTO `CockpitSurfaceState` и вложенные записи в `Models/CockpitSurfaceState.cs`; сборка — `Services/CockpitSurfaceSnapshotBuilder.Build(MainWindowViewModel)`; точка входа на VM — `MainWindowViewModel.BuildCockpitSurfaceSnapshot()` (см. также `EffectivePresentationLine`, `IsMfdHostWindowShellOpen`, `IsForwardZoneVisible`). |
+| **Сейчас** | DTO `CockpitSurfaceState` и вложенные записи в `Cockpit/Cds/CockpitSurfaceState.cs`; сборка — `Cockpit/Cds/CockpitSurfaceSnapshotBuilder.Build(MainWindowViewModel)`; точка входа на VM — `MainWindowViewModel.BuildCockpitSurfaceSnapshot()` (см. также `EffectivePresentationLine`, `IsMfdHostWindowShellOpen`, `IsForwardZoneVisible`). |
 | **Дальше** | Проброс в MCP (`ide_get_cockpit_state` или расширение существующего инструмента) и стабилизация полей по обратной связи агента/тестов. |
 
 ---
 
 ## 7. Связанные файлы кода (ориентиры)
 
-- `Models/CockpitSurfaceState.cs`, `Services/CockpitSurfaceSnapshotBuilder.cs` — CDS (семантика кабины).
-- `Services/UiLayoutSnapshot.cs` — дерево UI (другой слой).
+- `Cockpit/Cds/CockpitSurfaceState.cs`, `Cockpit/Cds/CockpitSurfaceSnapshotBuilder.cs` — CDS (семантика кабины); `Cockpit/Cds/AttentionLayoutSurfaceKind.cs` — вид топологии в снимке.
+- `Cockpit/Surface/UiLayoutSnapshot.cs` — дерево UI (другой слой, ADR 0036 п.4).
+- Каналы и композиторы по ADR 0036 — `Cockpit/Channels/**`, `Cockpit/Composition/**`.
 - `Services/Presentation/PresentationParser.cs`, `PresentationLayoutAnalyzer.cs` — презентация.
-- `Features/UiChrome/AttentionLayoutSurfaceKind.cs` — вид топологии.
 - `Views/MainWindow.axaml`, `MainWindow.MfdHostWindow.axaml.cs` — геометрия окон.
 
 ---

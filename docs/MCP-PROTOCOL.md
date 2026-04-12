@@ -160,7 +160,7 @@
 | `about` | Показать диалог «О программе». returns: text. |
 | `open_preview_window` | Открыть отдельное окно превью (Markdown). returns: text. |
 | `open_settings` | Открыть окно настроек. returns: text. |
-| `toggle_mfd_host_window` | Открыть или активировать окно-хост зоны Mfd (второй TopLevel, второй монитор). returns: text. |
+| `toggle_mfd_host_window` | Открыть или активировать окно-хост зоны Mfd, если строка `presentation` / `zone_screen_layout` задаёт топологию с выносом Mfd (ADR 0017); иначе не выполняется. Отдельного пункта меню нет — источник истины раскладка. returns: text. |
 
 ### Тулбар: показать панели / скрыть вывод сборки
 
