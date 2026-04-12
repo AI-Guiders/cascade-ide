@@ -1,14 +1,15 @@
 using System.Collections.ObjectModel;
+using CascadeIDE.Cockpit.Channels.WorkspaceHealth;
 
-namespace CascadeIDE.Features.UiChrome;
+namespace CascadeIDE.Cockpit.Composition.WorkspaceHealth;
 
 /// <summary>
-/// Собирает единый упорядоченный список сегментов полосы Workspace Health из уже вычисленных строк
-/// (<see cref="ViewModels.MainWindowViewModel"/> / <see cref="UiChromeViewModel"/>).
-/// Единая точка порядка и состава (ADR 0021 / идея «одного композитора стекла»); новые источники — через
-/// <see cref="WorkspaceHealthInputSnapshot"/>, а не отдельные параметры на каждый вызов.
+/// Композитор поверхности для канала Workspace Health (ADR 0036 п.3): из <see cref="WorkspaceHealthInputSnapshot"/>
+/// строит упорядоченный список <see cref="WorkspaceHealthSegment"/> (порядок Build → Tests → Debug → Git, флаги вроде
+/// <see cref="WorkspaceHealthSegment.IsBuildRunning"/> на сегменте Build).
+/// Не задаёт зоны PFD/MFD (это CDS / пресет); не рисует контролы (поверхность — <c>WorkspaceHealthStripView</c> и др.).
 /// </summary>
-public static class WorkspaceHealthCompositor
+public static class WorkspaceHealthSegmentBuilder
 {
     /// <summary>Порядок сегментов на полосе: сборка → тесты → отладка → git.</summary>
     public static void Rebuild(ObservableCollection<WorkspaceHealthSegment> target, WorkspaceHealthInputSnapshot inputs)

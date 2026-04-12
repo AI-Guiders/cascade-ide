@@ -155,7 +155,7 @@ internal static class IdeCommandsDoc
         ["toggle_command_palette"] = "Открыть или закрыть палитру команд (как Ctrl+Q / пункт меню «Вид»). returns: text.",
         ["toggle_git_panel"] = "Переключить видимость панели Git (toggle). returns: text.",
         ["toggle_instrumentation_dock"] = "Переключить видимость дока инструментирования (toggle). returns: text.",
-        ["toggle_mfd_host_window"] = "Открыть или активировать окно-хост зоны Mfd (второй TopLevel, второй монитор). returns: text.",
+        ["toggle_mfd_host_window"] = "Открыть или активировать окно-хост зоны Mfd, если строка `presentation` / `zone_screen_layout` задаёт топологию с выносом Mfd (ADR 0017); иначе не выполняется. Отдельного пункта меню нет — источник истины раскладка. returns: text.",
         ["toggle_pin_document"] = "Закрепить/открепить документ (pin). args: file_path:string; returns: text; example: {\"file_path\":\"C:\\\\\\\\tmp\\\\\\\\a.cs\"}.",
         ["toggle_solution_explorer"] = "Как меню «Вид → Обозреватель решения». returns: text.",
         ["toggle_terminal"] = "Как меню «Вид → Терминал» (переключатель). returns: text.",

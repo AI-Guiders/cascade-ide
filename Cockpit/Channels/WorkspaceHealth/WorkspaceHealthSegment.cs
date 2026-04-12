@@ -1,7 +1,7 @@
-namespace CascadeIDE.Features.UiChrome;
+namespace CascadeIDE.Cockpit.Channels.WorkspaceHealth;
 
 /// <summary>
-/// Один сегмент полосы build/tests/debug/git: текст для классического режима и для Power cockpit, плюс флаги для шаблона.
+/// Один сегмент полосы build/tests/debug/git после <see cref="WorkspaceHealthSegmentBuilder"/> (композитор, ADR 0036 п.3): текст для полосы/кокпита и флаги для шаблона поверхности.
 /// </summary>
 public sealed class WorkspaceHealthSegment
 {

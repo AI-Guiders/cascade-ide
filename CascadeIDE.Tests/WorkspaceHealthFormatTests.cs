@@ -1,4 +1,4 @@
-using CascadeIDE.Features.UiChrome;
+using CascadeIDE.Cockpit.Channels.WorkspaceHealth;
 using Xunit;
 
 namespace CascadeIDE.Tests;

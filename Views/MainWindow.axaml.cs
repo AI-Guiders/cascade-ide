@@ -6,6 +6,7 @@ using AvaloniaEdit;
 using AvaloniaEdit.TextMate;
 using TextMateSharp.Grammars;
 using TextMateSharp.Themes;
+using CascadeIDE.Cockpit.Surface;
 
 namespace CascadeIDE.Views;
 
@@ -71,7 +72,7 @@ public partial class MainWindow : Window
             vm.RequestShowInfoAsync = ShowInfoDialogAsync;
             vm.RequestSaveMarkdownFile = ShowSaveExpandedMarkdownDialogAsync;
             vm.CaptureWindowForMcpAsync = (ws, rel, scope) => CaptureWindowForMcpCoreAsync(ws, rel, scope);
-            vm.GetUiLayoutProvider = () => Services.UiLayoutSnapshot.BuildJsonAllWindows(this);
+            vm.GetUiLayoutProvider = () => UiLayoutSnapshot.BuildJsonAllWindows(this);
             vm.GetColorsUnderCursorProvider = () => Services.UiColorsUnderCursor.GetJson(this);
             vm.GetControlAppearanceProvider = (name) => Services.UiControlAppearance.GetJson(this, name);
             vm.SetControlLayoutProvider = (name, json) => Services.UiControlLayoutApply.Apply(this, name, json);

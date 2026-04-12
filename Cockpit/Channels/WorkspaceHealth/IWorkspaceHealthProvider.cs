@@ -1,4 +1,4 @@
-namespace CascadeIDE.Features.UiChrome;
+namespace CascadeIDE.Cockpit.Channels.WorkspaceHealth;
 
 /// <summary>
 /// Снимок строк build/tests/debug/git для полосы и композитора Workspace Health.

@@ -10,6 +10,8 @@ using CascadeIDE.Features.Documents;
 using CascadeIDE.Features.Git;
 using CascadeIDE.Features.Instrumentation;
 using CascadeIDE.Features.Terminal;
+using CascadeIDE.Cockpit.Channels.Eicas;
+using CascadeIDE.Cockpit.Channels.WorkspaceHealth;
 using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Models;
 using CascadeIDE.Services.Lsp;
@@ -151,8 +153,10 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             () => LastTestSummary,
             () => ImpactedTestsBadge,
             _dapDebug,
-            () => InstrumentationPanel,
-            Chrome);
+            () => InstrumentationPanel.DebugStackFrames.Count,
+            () => InstrumentationPanel.DebugVariables.Count,
+            () => Chrome.WorkspaceHealthGitText,
+            () => Chrome.WorkspaceHealthGitCockpitShort);
 
         _eicasFeed = new EmptyEicasFeed();
         _eicasFeed.MessagesChanged += (_, _) => RebuildEicas();

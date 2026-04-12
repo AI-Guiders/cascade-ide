@@ -73,7 +73,7 @@ public static partial class IdeCommands
     // ——— Меню: превью, настройки, справка
     /// <summary>Открыть отдельное окно превью (Markdown). returns: text.</summary>
     public const string OpenPreviewWindow = "open_preview_window";
-    /// <summary>Открыть или активировать окно-хост зоны Mfd (второй TopLevel, второй монитор). returns: text.</summary>
+    /// <summary>Открыть или активировать окно-хост зоны Mfd, если строка <c>presentation</c> / <c>zone_screen_layout</c> задаёт топологию с выносом Mfd (ADR 0017); иначе не выполняется. Отдельного пункта меню нет — источник истины раскладка. returns: text.</summary>
     public const string ToggleMfdHostWindow = "toggle_mfd_host_window";
     /// <summary>Открыть окно настроек. returns: text.</summary>
     public const string OpenSettings = "open_settings";

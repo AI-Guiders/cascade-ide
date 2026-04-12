@@ -1,7 +1,7 @@
 using System.Globalization;
 using Avalonia.Data.Converters;
 using Avalonia.Media;
-using CascadeIDE.Features.UiChrome;
+using CascadeIDE.Cockpit.Channels.Eicas;
 
 namespace CascadeIDE.Views;
 

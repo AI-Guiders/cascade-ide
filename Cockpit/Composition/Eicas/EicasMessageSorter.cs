@@ -1,9 +1,13 @@
 using System.Collections.ObjectModel;
+using CascadeIDE.Cockpit.Channels.Eicas;
 
-namespace CascadeIDE.Features.UiChrome;
+namespace CascadeIDE.Cockpit.Composition.Eicas;
 
-/// <summary>Сортировка и сборка коллекции для UI EICAS (вариант A: отдельно от <see cref="WorkspaceTelemetryCompositor"/>).</summary>
-public static class EicasCompositor
+/// <summary>
+/// Композитор поверхности для канала EICAS (ADR 0036 п.3): упорядочивает <see cref="EicasMessage"/> по серьёзности и времени
+/// перед привязкой к полосе/представлению. Отделён от <see cref="WorkspaceHealthSegmentBuilder"/> (композитор канала Workspace Health).
+/// </summary>
+public static class EicasMessageSorter
 {
     /// <summary>Порядок: Warning → Caution → Advisory; внутри уровня — по времени (старше раньше), без времени — по тексту.</summary>
     public static void Rebuild(ObservableCollection<EicasMessage> target, IReadOnlyList<EicasMessage> source)

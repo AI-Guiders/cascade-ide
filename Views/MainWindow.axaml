@@ -218,8 +218,6 @@
                     <MenuItem Header="{Binding Lang_Menu_FollowSystem, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}"
                               Command="{Binding ResetUiLanguageToSystemCommand}"/>
                 </MenuItem>
-                <Separator/>
-                <MenuItem Header="_Второе окно рабочей области…" Command="{Binding ToggleMfdHostWindowCommand}"/>
                 <MenuItem Header="Превью в отдельном _окне" Command="{Binding OpenPreviewWindowCommand}"/>
             </MenuItem>
             <MenuItem Header="_Настройки">

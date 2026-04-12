@@ -218,8 +218,9 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.ToggleMfdHostWindow, async (_, _) =>
         {
-            if (_vm.ToggleMfdHostWindowCommand.CanExecute(null))
-                _vm.ToggleMfdHostWindowCommand.Execute(null);
+            if (!_vm.ToggleMfdHostWindowCommand.CanExecute(null))
+                return "Skipped: presentation does not request Mfd host window; set presentation / zone_screen_layout in settings.toml (ADR 0017).";
+            _vm.ToggleMfdHostWindowCommand.Execute(null);
             return "OK";
         });
 

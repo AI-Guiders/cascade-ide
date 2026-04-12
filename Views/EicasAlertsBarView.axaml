@@ -1,6 +1,6 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:chrome="using:CascadeIDE.Features.UiChrome"
+             xmlns:eicas="using:CascadeIDE.Cockpit.Channels.Eicas"
              xmlns:vm="using:CascadeIDE.ViewModels"
              xmlns:views="using:CascadeIDE.Views"
              x:Class="CascadeIDE.Views.EicasAlertsBarView"
@@ -19,7 +19,7 @@
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
-                <DataTemplate x:DataType="chrome:EicasMessage">
+                <DataTemplate x:DataType="eicas:EicasMessage">
                     <TextBlock Text="{Binding Text}"
                                Foreground="{Binding Severity, Converter={StaticResource EicasSevBrush}}"
                                VerticalAlignment="Center"/>

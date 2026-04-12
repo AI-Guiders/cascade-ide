@@ -1,7 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:CascadeIDE.ViewModels"
-             xmlns:chrome="using:CascadeIDE.Features.UiChrome"
+             xmlns:cockpitWh="using:CascadeIDE.Cockpit.Channels.WorkspaceHealth"
              x:Class="CascadeIDE.Views.WorkspaceHealthSecondaryPageView"
              Classes.power="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Power}"
              x:DataType="vm:MainWindowViewModel">
@@ -27,7 +27,7 @@
                           IsVisible="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyNe}, ConverterParameter=Power}">
                 <ItemsControl ItemsSource="{Binding WorkspaceHealthSegments}">
                     <ItemsControl.ItemTemplate>
-                        <DataTemplate x:DataType="chrome:WorkspaceHealthSegment">
+                        <DataTemplate x:DataType="cockpitWh:WorkspaceHealthSegment">
                             <Border Classes="modeCard" Padding="8,6" Margin="0,0,0,6">
                                 <TextBlock Text="{Binding LineText}"
                                            TextWrapping="Wrap"
@@ -46,7 +46,7 @@
                 <StackPanel Spacing="8">
                     <ItemsControl ItemsSource="{Binding WorkspaceHealthSegments}">
                         <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="chrome:WorkspaceHealthSegment">
+                            <DataTemplate x:DataType="cockpitWh:WorkspaceHealthSegment">
                                 <Panel Margin="0,0,0,6">
                                     <Border IsVisible="{Binding IsBuildSource}"
                                             Padding="8,6"

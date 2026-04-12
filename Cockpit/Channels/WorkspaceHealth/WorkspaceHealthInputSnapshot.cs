@@ -1,4 +1,6 @@
-namespace CascadeIDE.Features.UiChrome;
+using CascadeIDE.Cockpit.Channels.Eicas;
+
+namespace CascadeIDE.Cockpit.Channels.WorkspaceHealth;
 
 /// <summary>
 /// Входные строки одного сегмента до маппинга в <see cref="WorkspaceHealthSegment"/>.
@@ -11,7 +13,8 @@ public readonly record struct WorkspaceHealthSegmentInput(
 
 /// <summary>
 /// Снимок четырёх источников Workspace Health (build → tests → debug → git).
-/// Единая структура для <see cref="WorkspaceHealthCompositor"/> и тестов. Канал EICAS — отдельный контур (<see cref="IEicasFeed"/>), не снимок здесь и не тот же контур, что сегменты build/tests/debug/git.
+/// Слой <strong>канала</strong> (ADR 0036 п.1): нормализованные входы до композитора; без привязки к контролам.
+/// Подаётся в <see cref="WorkspaceHealthSegmentBuilder"/> (композитор полосы, ADR 0036 п.3). Канал EICAS — отдельный контур (<see cref="IEicasFeed"/>).
 /// </summary>
 public readonly record struct WorkspaceHealthInputSnapshot(
     WorkspaceHealthSegmentInput Build,

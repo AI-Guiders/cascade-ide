@@ -1,3 +1,4 @@
+using CascadeIDE.Cockpit.Cds;
 using CascadeIDE.Services.Presentation;
 
 namespace CascadeIDE.ViewModels;
@@ -5,6 +6,9 @@ namespace CascadeIDE.ViewModels;
 /// <summary>ADR 0017: строка <c>presentation</c> и второй <c>TopLevel</c> — <see cref="Views.MfdHostWindow"/> с полным вторичным контуром (п. 8).</summary>
 public partial class MainWindowViewModel
 {
+    /// <summary>Строка <c>presentation</c> с учётом оверлеев — та же, что уходит в <see cref="PresentationParse"/>.</summary>
+    public string EffectivePresentationLine => _settings.GetEffectivePresentationLine();
+
     /// <summary>Успешный разбор <see cref="CascadeIdeSettings.GetEffectivePresentationLine"/> (может быть пустой список экранов).</summary>
     public PresentationParseResult PresentationParse => _presentationParse;
 
@@ -30,6 +34,16 @@ public partial class MainWindowViewModel
     /// <summary>Открывать окно-хост Mfd при старте (если есть ≥2 мониторов и пресет подходит).</summary>
     public bool OpenMfdHostWindowOnStartup => _settings.OpenMfdHostWindowOnStartup;
 
+    /// <summary>Окно-хост Mfd открыло полный вторичный контур — колонка Mfd в главном окне скрыта (см. <see cref="SetMfdHostWindowShellOpen"/>).</summary>
+    public bool IsMfdHostWindowShellOpen => _suppressMfdColumnForMfdHostWindow;
+
+    /// <summary>
+    /// Центральная зона (forward): строка рабочей области <c>MainGrid</c> отводит место под колонку редактора (CDS v0.1).
+    /// </summary>
+    public bool IsForwardZoneVisible =>
+        MainGridRowHeights.Workspace.IsStar
+        || (MainGridRowHeights.Workspace.IsAbsolute && MainGridRowHeights.Workspace.Value > 0);
+
     /// <summary>
     /// Окно-хост зоны Mfd показывает <c>SecondaryShellView</c> — скрываем колонку Mfd в главном окне, чтобы не дублировать контур.
     /// </summary>
@@ -39,6 +53,7 @@ public partial class MainWindowViewModel
             return;
 
         _suppressMfdColumnForMfdHostWindow = isOpen;
+        OnPropertyChanged(nameof(IsMfdHostWindowShellOpen));
         OnPropertyChanged(nameof(IsMfdColumnVisible));
         OnPropertyChanged(nameof(ActiveAttentionLayoutSurface));
     }
@@ -69,4 +84,7 @@ public partial class MainWindowViewModel
         _settings.MfdHostWindowHeight = height;
         SaveSettingsIfChanged();
     }
+
+    /// <summary>CDS-снимок кабины (ADR 0036 п.2; см. <c>docs/design/cds-contract-v0.md</c>).</summary>
+    public CockpitSurfaceState BuildCockpitSurfaceSnapshot() => CockpitSurfaceSnapshotBuilder.Build(this);
 }

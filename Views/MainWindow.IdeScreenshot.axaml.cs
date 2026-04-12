@@ -3,6 +3,7 @@ using System.Text.Json;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using CascadeIDE.Cockpit.Surface;
 using CascadeIDE.Services;
 
 namespace CascadeIDE.Views;

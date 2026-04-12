@@ -1,6 +1,6 @@
 using CascadeIDE.Contracts.Experimental;
 
-namespace CascadeIDE.Features.UiChrome;
+namespace CascadeIDE.Cockpit.Cds;
 
 /// <summary>
 /// Топология презентации зон внимания: <strong>где физически</strong> размещены регионы (одно окно, несколько окон, мониторы).

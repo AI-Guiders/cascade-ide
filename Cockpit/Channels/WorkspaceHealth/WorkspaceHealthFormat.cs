@@ -1,4 +1,4 @@
-namespace CascadeIDE.Features.UiChrome;
+namespace CascadeIDE.Cockpit.Channels.WorkspaceHealth;
 
 /// <summary>
 /// Чистое форматирование строк Workspace Health (без доступа к VM/DAP).

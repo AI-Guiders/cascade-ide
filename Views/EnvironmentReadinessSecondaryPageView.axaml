@@ -7,6 +7,7 @@
              x:DataType="vm:MainWindowViewModel">
     <UserControl.Resources>
         <views:EnvironmentReadinessLevelToBrushConverter x:Key="EnvLevelBrush"/>
+        <views:EnvironmentReadinessLevelToGlyphTextConverter x:Key="EnvLevelGlyph"/>
     </UserControl.Resources>
     <DockPanel Margin="0,4,0,0">
         <views:PanelChromeHeader DockPanel.Dock="Top" Title="Готовность окружения · LSP и инструменты" UppercaseTitle="True"/>
@@ -20,24 +21,99 @@
                        Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
         </StackPanel>
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-            <ItemsControl ItemsSource="{Binding EnvironmentReadinessItems}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate DataType="models:EnvironmentReadinessItem">
-                        <Border Classes="modeCard" Padding="8,6" Margin="0,0,0,6">
-                            <StackPanel Spacing="4">
-                                <TextBlock Text="{Binding Title}"
-                                           FontWeight="SemiBold"
-                                           FontSize="12"
-                                           Foreground="{Binding Level, Converter={StaticResource EnvLevelBrush}}"/>
-                                <TextBlock Text="{Binding Detail}"
-                                           TextWrapping="Wrap"
-                                           FontSize="11"
-                                           Foreground="{DynamicResource CascadeTheme.TerminalForeground}"/>
-                            </StackPanel>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+            <!-- Два режима раскладки страницы зоны MFD по ширине контейнера (см. code-behind; не семантический композитор — см. docs/design/workspace-health-implementation-map-v1.md §1). -->
+            <Panel>
+                <!-- Узкая зона: текстовые карточки (удобно при (P|F|M) и узком MFD). -->
+                <Grid x:Name="CompactLayoutRoot" IsVisible="True">
+                    <ItemsControl ItemsSource="{Binding EnvironmentReadinessItems}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="models:EnvironmentReadinessItem">
+                                <Border Classes="modeCard"
+                                        Padding="8,6"
+                                        Margin="0,0,0,6"
+                                        BorderBrush="{DynamicResource CascadeTheme.EditorColumnBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="4">
+                                    <StackPanel Spacing="4">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <TextBlock VerticalAlignment="Center"
+                                                       FontSize="15"
+                                                       FontWeight="SemiBold"
+                                                       Text="{Binding Level, Converter={StaticResource EnvLevelGlyph}}"
+                                                       Foreground="{Binding Level, Converter={StaticResource EnvLevelBrush}}"/>
+                                            <TextBlock Text="{Binding Title}"
+                                                       TextWrapping="Wrap"
+                                                       FontWeight="SemiBold"
+                                                       FontSize="12"
+                                                       VerticalAlignment="Center"
+                                                       Foreground="{Binding Level, Converter={StaticResource EnvLevelBrush}}"/>
+                                        </StackPanel>
+                                        <TextBlock Text="{Binding Detail}"
+                                                   TextWrapping="Wrap"
+                                                   FontSize="11"
+                                                   Foreground="{DynamicResource CascadeTheme.TerminalForeground}"/>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Grid>
+                <!-- Достаточная ширина: таблица с шапкой. -->
+                <Grid x:Name="WideLayoutRoot" IsVisible="False" RowDefinitions="Auto,*">
+                    <Grid Grid.Row="0"
+                          ColumnDefinitions="44,160,*"
+                          Margin="0,0,0,6"
+                          Opacity="0.85">
+                        <TextBlock Grid.Column="0" Text="" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Column="1"
+                                   Text="Компонент"
+                                   FontSize="11"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+                        <TextBlock Grid.Column="2"
+                                   Text="Сведения"
+                                   FontSize="11"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+                    </Grid>
+                    <ItemsControl Grid.Row="1" ItemsSource="{Binding EnvironmentReadinessItems}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="models:EnvironmentReadinessItem">
+                                <Border Classes="modeCard"
+                                        Padding="8,8"
+                                        Margin="0,0,0,6"
+                                        BorderBrush="{DynamicResource CascadeTheme.EditorColumnBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="4">
+                                    <Grid ColumnDefinitions="44,160,*" RowDefinitions="Auto">
+                                        <TextBlock Grid.Column="0"
+                                                   VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center"
+                                                   FontSize="16"
+                                                   FontWeight="SemiBold"
+                                                   Text="{Binding Level, Converter={StaticResource EnvLevelGlyph}}"
+                                                   Foreground="{Binding Level, Converter={StaticResource EnvLevelBrush}}"/>
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding Title}"
+                                                   TextWrapping="Wrap"
+                                                   FontWeight="SemiBold"
+                                                   FontSize="12"
+                                                   VerticalAlignment="Center"
+                                                   Margin="4,0,8,0"
+                                                   Foreground="{Binding Level, Converter={StaticResource EnvLevelBrush}}"/>
+                                        <TextBlock Grid.Column="2"
+                                                   Text="{Binding Detail}"
+                                                   TextWrapping="Wrap"
+                                                   FontSize="11"
+                                                   VerticalAlignment="Center"
+                                                   Foreground="{DynamicResource CascadeTheme.TerminalForeground}"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Grid>
+            </Panel>
         </ScrollViewer>
     </DockPanel>
 </UserControl>

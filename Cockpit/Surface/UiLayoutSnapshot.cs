@@ -7,10 +7,11 @@ using Avalonia.VisualTree;
 using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Views;
 
-namespace CascadeIDE.Services;
+namespace CascadeIDE.Cockpit.Surface;
 
 /// <summary>
-/// Сбор узла дерева UI для ide_get_ui_layout. Вызывать из UI-потока, передать корень (Window).
+/// Слой <strong>поверхности</strong> (ADR 0036 п.4): снимок дерева контролов для <c>ide_get_ui_layout</c>.
+/// Вызывать из UI-потока, передать корень (<see cref="Window"/>). Ортогонально CDS (<see cref="CockpitSurfaceSnapshotBuilder"/>).
 /// </summary>
 public static class UiLayoutSnapshot
 {

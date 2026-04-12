@@ -1,4 +1,4 @@
-namespace CascadeIDE.Features.UiChrome;
+namespace CascadeIDE.Cockpit.Channels.Eicas;
 
 /// <summary>Заглушка: нет активных оповещений (Dark Cockpit по умолчанию).</summary>
 public sealed class EmptyEicasFeed : IEicasFeed

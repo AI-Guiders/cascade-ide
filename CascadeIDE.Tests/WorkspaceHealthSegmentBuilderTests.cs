@@ -1,16 +1,17 @@
 using System.Collections.ObjectModel;
-using CascadeIDE.Features.UiChrome;
+using CascadeIDE.Cockpit.Channels.WorkspaceHealth;
+using CascadeIDE.Cockpit.Composition.WorkspaceHealth;
 using Xunit;
 
 namespace CascadeIDE.Tests;
 
-public sealed class WorkspaceHealthCompositorTests
+public sealed class WorkspaceHealthSegmentBuilderTests
 {
     [Fact]
     public void Rebuild_fills_four_segments_in_order_build_tests_debug_git()
     {
         var col = new ObservableCollection<WorkspaceHealthSegment>();
-        WorkspaceHealthCompositor.Rebuild(
+        WorkspaceHealthSegmentBuilder.Rebuild(
             col,
             new WorkspaceHealthInputSnapshot(
                 Build: new WorkspaceHealthSegmentInput("Build: idle", "READY", IsBuildRunning: false),
@@ -32,7 +33,7 @@ public sealed class WorkspaceHealthCompositorTests
     public void Rebuild_sets_IsBuildRunning_on_build_segment()
     {
         var col = new ObservableCollection<WorkspaceHealthSegment>();
-        WorkspaceHealthCompositor.Rebuild(
+        WorkspaceHealthSegmentBuilder.Rebuild(
             col,
             new WorkspaceHealthInputSnapshot(
                 Build: new WorkspaceHealthSegmentInput("Build: running…", "BUILD…", IsBuildRunning: true),
@@ -49,7 +50,7 @@ public sealed class WorkspaceHealthCompositorTests
     public void Rebuild_ignores_IsBuildRunning_on_non_build_segments()
     {
         var col = new ObservableCollection<WorkspaceHealthSegment>();
-        WorkspaceHealthCompositor.Rebuild(
+        WorkspaceHealthSegmentBuilder.Rebuild(
             col,
             new WorkspaceHealthInputSnapshot(
                 Build: new WorkspaceHealthSegmentInput("Build: idle", "READY", IsBuildRunning: false),

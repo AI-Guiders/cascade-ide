@@ -1,3 +1,4 @@
+using CascadeIDE.Cockpit.Cds;
 using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Lang;
 
