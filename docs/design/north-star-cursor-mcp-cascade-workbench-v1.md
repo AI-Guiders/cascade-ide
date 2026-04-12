@@ -1,7 +1,8 @@
 # North star: Cursor + MCP + CascadeIDE как рабочая скамья (границы v1)
 
 **Статус:** черновик границ продукта (не ADR).  
-**Связь:** [architecture-policy.md](../architecture-policy.md), [architecture-migration.md](../architecture-migration.md), [ADR 0002](../adr/0002-debug-human-agent-parity.md), [ADR 0017](../adr/0017-multi-window-workspace-and-agent-surfaces.md), [MCP-PROTOCOL.md](../MCP-PROTOCOL.md).  
+**Обновлено:** 2026-04-16 — граница «не polyglot IDE»; ссылка на [ADR 0039](../adr/0039-workspace-navigation-affordances.md#adr0039-language-scope).  
+**Связь:** [architecture-policy.md](../architecture-policy.md), [architecture-migration.md](../architecture-migration.md), [ADR 0002](../adr/0002-debug-human-agent-parity.md), [ADR 0017](../adr/0017-multi-window-workspace-and-agent-surfaces.md), [ADR 0039](../adr/0039-workspace-navigation-affordances.md) (навигация; C# / .NET как north-star по языкам), [MCP-PROTOCOL.md](../MCP-PROTOCOL.md).  
 **Позиционирование:** **CascadeIDE** изначально и по смыслу — **agent-first IDE**: агент не «приложение сбоку» от редактора, а **опорная ось** продукта — общий наблюдаемый контур с человеком (MCP, паритет отладки — [ADR 0002](../adr/0002-debug-human-agent-parity.md)); модель кокпита и зон внимания задаёт рамку фокуса и **не противоречит** agent-first.  
 **Память агента (KB):** устойчивое знание живёт **в каноне решения** и в MCP-командах, а не в «контексте весов» модели: knowledge (`read_knowledge_file`, `write_knowledge_file`, `list_knowledge_files`, секции, ревизии…), заметки сессии (`ide_read_agent_notes`, `ide_write_agent_notes`) — каноничные имена и аргументы в [MCP-PROTOCOL.md](../MCP-PROTOCOL.md).
 
@@ -39,6 +40,7 @@
 | **Полная замена Visual Studio по всем сценариям** | Другой объём: профилирование, сложный мультипроцессный attach, полный набор рефакторингов Roslyn как в VS, дизайнеры и т.д. |
 | **Реализация Cursor внутри этого репозитория** | Cursor — внешний хост агента; граница — **контракт MCP и пользовательский сценарий**, а не форк Cursor. |
 | **Идеальная синхронизация без настройки** | Расстановка мониторов, primary vs семантический Forward, строка `presentation` — ответственность пользователя и ОС; см. [ADR 0017 п. 5 доп.](../adr/0017-multi-window-workspace-and-agent-surfaces.md#adr0017-p5-primary-vs-forward). |
+| **Polyglot IDE с паритетом по всем языкам** | North-star по языкам — **C# / .NET** (решение, Roslyn, типичный рабочий цикл); UI IDE на Avalonia; в контуре продукта — сценарии .NET (в т.ч. Blazor и др.) без обещания «как VS для любого стека». Другие языки после открытия возможны, но **не** определяют цель v1; см. [ADR 0039 § область языков](../adr/0039-workspace-navigation-affordances.md#adr0039-language-scope). |
 
 ## Критерии «мы в зоне цели» (проверяемые)
 
