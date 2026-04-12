@@ -121,4 +121,5 @@
 - **v1.45** — north-star: слой **KB / память агента** (канон knowledge, MCP `read_knowledge_file` / …, agent-notes); ссылка на [MCP-PROTOCOL.md](MCP-PROTOCOL.md).  
 - **v1.46** — добавлен [0032](adr/0032-hud-banner-configuration-and-grammar.md) (HUD: конфиг содержимого и грамматика как у `presentation`; Proposed).  
 - **v1.47** — добавлен [0033](adr/0033-internationalization-resx-avalonia.md) (i18n: ResX/Avalonia; Proposed); уточнён перекрёсток с [0032](adr/0032-hud-banner-configuration-and-grammar.md).  
+- **v1.48** — [0017](adr/0017-multi-window-workspace-and-agent-surfaces.md): раздел **«Состояние реализации»** (сверка с кодом: топология, плейсмент, bounds); [concept-to-implementation-map-v1](ux/concept-to-implementation-map-v1.md) **§6** — второй `TopLevel` / `MfdHostWindow`.  
 - Изменения направления — отдельным коммитом: обновление этого файла и при необходимости новый ADR в [docs/adr/README.md](adr/README.md).

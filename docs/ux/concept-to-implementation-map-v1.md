@@ -3,9 +3,11 @@
 Scope: **CascadeIDE UI concepts** (Focus/Balanced/Power) mapped to current implementation in:
 
 - `Views/MainWindow.axaml`
-- `Views/MainWindow.axaml.cs`
-- `ViewModels/MainWindowViewModel.cs`
+- `Views/MainWindow.axaml.cs` (+ `MainWindow.MfdHostWindow.axaml.cs` — второй `TopLevel`)
+- `ViewModels/MainWindowViewModel.cs` (partial-классы)
 - `Views/TaskCockpitView.axaml`, `Views/ChatPanelView.axaml`, `Views/SolutionExplorerView.axaml`, `Views/WorkspaceHealthStripView.axaml`, `Views/BottomPanelView.axaml`
+
+Отдельно [§6](#6-мультиоконность-adr-0017--второй-toplevel-mfd): **ADR 0017** — `presentation`, `MfdHostWindow`, топология мониторов.
 
 This map is intended to drive incremental alignment work with clear acceptance checks.
 
@@ -93,4 +95,26 @@ This map is intended to drive incremental alignment work with clear acceptance c
 5. **Хром дерева решения (Power):** сделано стилями на `TreeViewItem` + кисти; при необходимости — **полный** кастомный шаблон `TreeViewItem`, если тема Fluent перекрывает `Background`/`BorderThickness`.
 6. **Редактор / трасса / Workspace Health:** точечное выравнивание с PNG-концептами по приоритету (см. §4.1).
 
-Версия карты: **2026-04-02** (термины режима: `UiModeFamily` / capabilities вместо `Is*Mode`; §4.1 без изменений по смыслу). **2026-04-11** — в русских таблицах канон терминов: **Workspace Health** / «состояние воркспейса» вместо разговорной «телеметрии» для этого канала. **2026-04-11** — [ADR 0017](../adr/0017-multi-window-workspace-and-agent-surfaces.md) **Accepted**: нотация дисплеев, `presentation`, слой `settings.toml` — согласованы в ADR. **Эта** карта (привязка к **конкретным** XAML/VM) пока описывает одно главное окно; строки для второго `TopLevel` добавятся сюда **вместе с кодом** второго окна — не потому что маппинг «не обсудили», а потому что в репозитории ещё нет соответствующих контролов для строк таблицы.
+---
+
+<a id="6-мультиоконность-adr-0017--второй-toplevel-mfd"></a>
+
+## 6) Мультиоконность (ADR 0017) — второй `TopLevel` (MFD)
+
+Норматив: [ADR 0017](../adr/0017-multi-window-workspace-and-agent-surfaces.md), подробная таблица «что в коде» — [«Состояние реализации»](../adr/0017-multi-window-workspace-and-agent-surfaces.md#adr0017-implementation-status).
+
+| Элемент | Где в коде | VM / настройки | Status | Notes |
+|---|---|---|---|---|
+| Строка `presentation` / `zone_screen_layout` + `[presentation_grammar]` | `CascadeIdeSettings`, merge в VM | `GetEffectivePresentationLine()`, `PresentationParse` | ✅ | Парсер: `Services/Presentation/PresentationParser.cs`. |
+| Второе окно зоны Mfd (полный вторичный контур) | `Views/MfdHostWindow.axaml` → `SecondaryShellView` | `DataContext` = `MainWindowViewModel` (тот же, что у `MainWindow`) | ✅ | ADR п. 8: не «узкий» одностраничный хост. |
+| Открыть/закрыть хост; автозапуск | `MainWindow.MfdHostWindow.axaml.cs`, меню «Второе окно…» | `ToggleMfdHostWindowCommand`, `TryOpenMfdHostWindowOnStartup`, `OpenMfdHostWindowOnStartup` | ✅ | Автозапуск: если пресет задаёт топологию хоста, флаг включён, мониторов достаточно. |
+| Колонка Mfd в главном окне при открытом хосте | `MainWindow` / layout | `SetMfdHostWindowShellOpen` → скрыть дубль колонки | ✅ | `AttentionLayoutSurfaceKind.MainWindowPlusMfdHostTopLevel`. |
+| Плейсмент на дисплее | `MfdHostWindowPlacement.PlaceOrRestore` / `PlaceNearMain` | `MfdHostPresentationScreenIndex` из разбора `presentation` | ✅ | Топология экранов: `PresentationMonitorTopology.OrderScreensForPresentation`. Fallback: «другой экран», не главный. |
+| Сохранение геометрии хоста | `Closing` → `PersistMfdHostWindowBounds` | `MfdHostWindowPixelX/Y`, `MfdHostWindowWidth/Height` в `settings.toml` | ✅ | Восстановление с clamp к `WorkingArea`. |
+| MCP / агент | `UiLayoutSnapshot`, highlight | `role: mfd_host`, паритет подсветки | ✅ | `ide_get_ui_layout` — все top-level. |
+
+**Остаётся вне этой таблицы (roadmap ADR):** продуктовая доводка UX на втором экране, полнота fallback при смене мониторов, детали подтверждений агента при двух окнах — см. [открытые вопросы 0017](../adr/0017-multi-window-workspace-and-agent-surfaces.md#adr0017-open-questions).
+
+---
+
+Версия карты: **2026-04-02** (термины режима: `UiModeFamily` / capabilities вместо `Is*Mode`; §4.1 без изменений по смыслу). **2026-04-11** — в русских таблицах канон терминов: **Workspace Health** / «состояние воркспейса» вместо разговорной «телеметрии» для этого канала. **2026-04-11** — [ADR 0017](../adr/0017-multi-window-workspace-and-agent-surfaces.md) **Accepted**. **2026-04-11** — добавлен **§6** (второй `TopLevel`, `MfdHostWindow`, сервисы топологии/плейсмента); устаревшая оговорка «в репозитории ещё нет второго окна» снята.
