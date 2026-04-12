@@ -1,5 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <!-- RS1038/RS1041/RS1036/RS2008: ложные срабатывания на встроенном анализаторе при ссылке на Microsoft.CodeAnalysis.Workspaces в этом же приложении -->
+    <NoWarn>$(NoWarn);RS1038;RS1041;RS1036;RS2008</NoWarn>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
@@ -26,6 +28,7 @@
     <!-- Внешний субмодуль/вендор: не компилировать в IDE (иначе sandbox с top-level Main перехватывает входную точку). -->
     <Compile Remove="externals\**\*.cs" />
     <Compile Remove="CascadeIDE.Tests\**\*.cs" />
+    <Compile Remove="CascadeIDE.ArchitectureAnalyzers.Tests\**\*.cs" />
     <Compile Remove="samples\**\*.cs" />
     <Compile Remove="tools\**\*.cs" />
     
@@ -46,6 +49,7 @@
     <ProjectReference Include="..\git-mcp-core\GitMcp.Core.csproj" />
     <ProjectReference Include="..\dotnet-debug-core\DotnetDebug.Core.csproj" />
     <ProjectReference Include="CascadeIDE.Contracts\CascadeIDE.Contracts.csproj" />
+    <ProjectReference Include="CascadeIDE.ArchitectureAnalyzers\CascadeIDE.ArchitectureAnalyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.3.13" />
