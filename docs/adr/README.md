@@ -44,7 +44,7 @@
 | [0034](0034-pilot-incapacitation-emergency-mode-and-presence-sensing.md) | Incapacitation, Emergency Mode; EICAS + сигналы КВС; liveness, контекстный HUD, safety interlock; webcam/analysis MCP opt-in | Proposed |
 | [0035](0035-mfd-embedded-webview-external-llm-and-mcp-boundary.md) | Встроенный браузер в MFD (WebView2), внешние веб-LLM; граница доверия с MCP; гибрид через оператора; мост веб↔MCP — вне baseline | Proposed |
 | [0036](0036-cds-channel-compositor-surface-pipeline.md) | Канал → CDS → композитор поверхности → поверхность; CDS как маршрутизация в модели внимания (Agent-first) | Accepted |
-| [0037](0037-pfd-surface-invariants-and-roslyn-enforcement.md) | PFD: инварианты поверхности (weight, input lock, каналы) и проверка Roslyn; явные маркеры компонента | Proposed |
+| [0037](0037-pfd-surface-invariants-and-roslyn-enforcement.md) | PFD: инварианты поверхности; Roslyn; канон `[PfdStrict]` / `PfdStrictControl` | Proposed |
 | [0038](0038-agent-facade-ai-provider-and-tool-orchestration.md) | Фасад агента: `AiProviderManager`, чат vs ACP vs автономный JSON-цикл; внешние MCP; идеи оркестрации и tool-calling | Accepted · Implemented (код); направление — в ADR |
 | [0039](0039-workspace-navigation-affordances.md) | Навигация по workspace: не только дерево; граф/semantic map, PFD vs MFD для «шкафа»; связь с PFD и 0037 | Proposed |
 

@@ -55,7 +55,7 @@
 | Оператор недоступен (Incapacitation): Emergency Mode; EICAS + класс сигналов КВС; liveness, HUD по контексту внимания, interlock опасных команд; сенсоры — opt-in | [0034](adr/0034-pilot-incapacitation-emergency-mode-and-presence-sensing.md) (Proposed) |
 | MFD: встроенный WebView2, внешние веб-LLM; веб не равно MCP-клиент; явная передача контекста; мост веб↔MCP — отдельная линия | [0035](adr/0035-mfd-embedded-webview-external-llm-and-mcp-boundary.md) (Proposed) |
 | CDS: канал → контракт кабины → композитор слота → поверхность (Avalonia); не ARINC 661 целиком | [0036](adr/0036-cds-channel-compositor-surface-pipeline.md) (Accepted) |
-| PFD: инварианты поверхности (weight, input lock, каналы) и Roslyn; явные маркеры `[Pfd…]` / базовый тип | [0037](adr/0037-pfd-surface-invariants-and-roslyn-enforcement.md) (Proposed) |
+| PFD: инварианты поверхности (weight, input lock, каналы) и Roslyn; канон `[PfdStrict]` / `PfdStrictControl` | [0037](adr/0037-pfd-surface-invariants-and-roslyn-enforcement.md) (Proposed) |
 | Фасад агента: провайдеры LLM (`AiProviderManager`), чат, ACP, автономный режим; внешние MCP; направление развития | [0038](adr/0038-agent-facade-ai-provider-and-tool-orchestration.md) (Accepted · Implemented) |
 | Навигация по workspace: несколько представлений, граф/semantic map, «текущий + связанные»; дерево не единственный канон; PFD/MFD; ортогонально строгой PFD-поверхности | [0039](adr/0039-workspace-navigation-affordances.md) (Proposed) |
 
@@ -143,4 +143,5 @@
 - **v1.58** — добавлен [0038](adr/0038-agent-facade-ai-provider-and-tool-orchestration.md) (фасад агента: `AiProviderManager`, чат vs ACP vs автономный цикл, `McpClientService`; черновик направления в том же ADR).  
 - **v1.59** — добавлен [0039](adr/0039-workspace-navigation-affordances.md) (навигация workspace: не только дерево файлов; несколько представлений и «связанные»; Proposed).  
 - **v1.60** — [0039](adr/0039-workspace-navigation-affordances.md): продуктовая метафора (шкаф vs карта боя), граф релевантного контекста, PFD/MFD, Semantic Map и `presentation`.  
+- **v1.61** — [0037](adr/0037-pfd-surface-invariants-and-roslyn-enforcement.md): канон имён строгой поверхности — `[PfdStrict]` / `PfdStrictControl` ([§ канон](adr/0037-pfd-surface-invariants-and-roslyn-enforcement.md#adr0037-naming)).  
 - Изменения направления — отдельным коммитом: обновление этого файла и при необходимости новый ADR в [docs/adr/README.md](adr/README.md).
