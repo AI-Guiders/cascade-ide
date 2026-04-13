@@ -31,6 +31,8 @@ public interface IIdeMcpActions
     Task<string> GetSolutionFilesAsync();
     /// <summary>Диагностики текущего открытого .cs файла (ошибки/предупреждения Roslyn). JSON: массив { id, message, severity, line, column }. Не-C# — [].</summary>
     Task<string> GetCurrentFileDiagnosticsAsync();
+    /// <summary>Семантическая навигация (ADR 0039): режим <c>related</c> — список связанных файлов; <c>subgraph</c> — узлы и рёбра с капами. Без <c>file_path</c> — якорь = текущий файл. JSON.</summary>
+    Task<string> GetWorkspaceNavigationContextAsync(string mode, string? filePath, int? line, int? column, int? maxRelated, int? maxNodes, int? maxEdges);
     /// <summary>Запустить сборку решения, вернуть вывод.</summary>
     Task<string> BuildAsync();
     /// <summary>Запустить сборку и вернуть структурированный результат: success, exit_code, errors[], warnings[], raw_output (обрезано). JSON.</summary>

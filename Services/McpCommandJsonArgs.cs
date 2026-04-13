@@ -15,6 +15,11 @@ public static class McpCommandJsonArgs
         return e.TryGetInt32(out var v) ? v : defaultValue;
     }
 
+    public static int? OptionalInt32(IReadOnlyDictionary<string, JsonElement>? args, string key) =>
+        args is not null && args.TryGetValue(key, out var e) && e.ValueKind == JsonValueKind.Number && e.TryGetInt32(out var v)
+            ? v
+            : null;
+
     public static bool Bool(IReadOnlyDictionary<string, JsonElement>? args, string key, bool defaultValue = false) =>
         args is not null && args.TryGetValue(key, out var e) && (e.ValueKind is JsonValueKind.True or JsonValueKind.False)
             ? e.GetBoolean()
