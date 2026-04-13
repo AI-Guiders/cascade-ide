@@ -26,5 +26,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>samples\MarkdownExamples\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </None>
+    <None Include="..\WorkspaceNavigation\presets.toml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>WorkspaceNavigation\presets.toml</Link>
+    </None>
   </ItemGroup>
 </Project>

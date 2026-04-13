@@ -30,5 +30,5 @@ public partial class MainWindowViewModel
                 includeKinds,
                 excludeKinds,
                 preset,
-                _settings.WorkspaceNavigationContext.PresetsJson));
+                _settings.WorkspaceNavigationContext));
 }

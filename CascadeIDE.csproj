@@ -41,6 +41,14 @@
     <Content Include="Themes\power-cockpit-concept-theme.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="UiModes\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="Hotkeys\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="WorkspaceNavigation\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <!-- Шипнутые дефолты: копия на диске (override) + встроенный ресурс, если файла нет. -->
+    <EmbeddedResource Include="WorkspaceNavigation\presets.toml" />
+    <EmbeddedResource Include="Themes\*.json" />
+    <EmbeddedResource Include="UiModes\*.toml" />
+    <EmbeddedResource Include="Hotkeys\hotkeys.toml" />
+    <EmbeddedResource Include="TextMateGrammars\toml\package.json" />
+    <EmbeddedResource Include="TextMateGrammars\toml\syntaxes\toml.tmLanguage.json" />
     <Content Include="TextMateGrammars\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>

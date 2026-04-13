@@ -1,0 +1,15 @@
+[[presets]]
+id = "peers_only"
+include_kinds = ["partial_peer", "project_peer"]
+
+[[presets]]
+id = "no_namespace_noise"
+exclude_kinds = ["same_namespace", "same_directory"]
+
+[[presets]]
+id = "tests_and_peers"
+include_kinds = ["partial_peer", "project_peer", "test_counterpart"]
+
+[[presets]]
+id = "structure_only"
+include_kinds = ["partial_peer", "project_peer", "xaml_codebehind_pair", "same_directory"]

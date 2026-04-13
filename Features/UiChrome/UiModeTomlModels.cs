@@ -1,3 +1,5 @@
+using CascadeIDE.Models;
+
 namespace CascadeIDE.Features.UiChrome;
 
 /// <summary>Корень <c>UiModes/index.toml</c> (schema_version только здесь).</summary>
@@ -7,7 +9,10 @@ public sealed class UiModesIndexToml
     public List<string> Modes { get; set; } = [];
 }
 
-/// <summary>Корень <c>UiModes/workspace.toml</c> (без собственного schema_version).</summary>
+/// <summary>
+/// Корень <c>UiModes/workspace.toml</c> и тот же формат для репо-файла <c>.cascade/workspace.toml</c> (без собственного schema_version).
+/// Секция <see cref="WorkspaceNavigationContext"/> — опционально в репозитории (ADR 0039): командные пресеты навигации.
+/// </summary>
 public sealed class UiWorkspaceToml
 {
     public int? SolutionExplorerDefaultWidthPixels { get; set; }
@@ -26,6 +31,12 @@ public sealed class UiWorkspaceToml
 
     /// <summary>Привязка id поверхности к каноническому id зоны; TOML: <c>[attention_zone_panels]</c> (ADR 0021).</summary>
     public Dictionary<string, string>? AttentionZonePanels { get; set; }
+
+    /// <summary>
+    /// Пресеты навигации для репозитория (тот же контракт, что <c>[workspace_navigation_context]</c> в <c>settings.toml</c>).
+    /// TOML: <c>[[workspace_navigation_context.presets]]</c>.
+    /// </summary>
+    public WorkspaceNavigationContextSettings? WorkspaceNavigationContext { get; set; }
 }
 
 /// <summary>

@@ -35,11 +35,11 @@ public static class WorkspaceNavigationContextBuilder
         IReadOnlyList<string>? includeKinds = null,
         IReadOnlyList<string>? excludeKinds = null,
         string? preset = null,
-        string? presetsJson = null)
+        WorkspaceNavigationContextSettings? workspaceNavigation = null)
     {
-        var pj = string.IsNullOrWhiteSpace(presetsJson)
-            ? WorkspaceNavigationContextSettings.DefaultPresetsJson
-            : presetsJson!;
+        var pj = WorkspaceNavigationPresetsLoader.GetEffectivePresetsJson(
+            workspaceNavigation ?? new WorkspaceNavigationContextSettings(),
+            solutionPath);
         var (mergedInc, mergedExc, presetErr) = WorkspaceNavigationPresetMerge.Merge(preset, pj, includeKinds, excludeKinds);
         if (presetErr is not null)
         {

@@ -1,17 +1,24 @@
-using CascadeIDE.Models;
 using CascadeIDE.Services;
 using Xunit;
 
 namespace CascadeIDE.Tests;
 
+/// <summary>
+/// Тесты <see cref="WorkspaceNavigationPresetMerge"/> не используют диск и <see cref="AppContext.BaseDirectory"/>.
+/// Вход для merge — JSON из <see cref="WorkspaceNavigationPresetsLoader.ToPresetMergeJsonFromBundledToml"/> по встроенному бандлу (<see cref="WorkspaceNavigationPresetsLoader.GetEmbeddedBundledPresetsToml"/>), как в рантайме без дублирования литералов.
+/// </summary>
 public sealed class WorkspaceNavigationPresetMergeTests
 {
+    private static readonly string DefaultBundledMergeJson =
+        WorkspaceNavigationPresetsLoader.ToPresetMergeJsonFromBundledToml(
+            WorkspaceNavigationPresetsLoader.GetEmbeddedBundledPresetsToml());
+
     [Fact]
     public void Unknown_Preset_Returns_Error()
     {
         var (inc, exc, err) = WorkspaceNavigationPresetMerge.Merge(
             "no_such",
-            WorkspaceNavigationContextSettings.DefaultPresetsJson,
+            DefaultBundledMergeJson,
             null,
             null);
         Assert.Null(inc);
@@ -24,7 +31,7 @@ public sealed class WorkspaceNavigationPresetMergeTests
     {
         var (inc, exc, err) = WorkspaceNavigationPresetMerge.Merge(
             "peers_only",
-            WorkspaceNavigationContextSettings.DefaultPresetsJson,
+            DefaultBundledMergeJson,
             null,
             null);
         Assert.Null(err);
@@ -41,7 +48,7 @@ public sealed class WorkspaceNavigationPresetMergeTests
     {
         var (inc, exc, err) = WorkspaceNavigationPresetMerge.Merge(
             "peers_only",
-            WorkspaceNavigationContextSettings.DefaultPresetsJson,
+            DefaultBundledMergeJson,
             [WorkspaceNavigationRelatedKinds.SameNamespace],
             null);
         Assert.Null(err);
@@ -55,7 +62,7 @@ public sealed class WorkspaceNavigationPresetMergeTests
     {
         var (inc, exc, err) = WorkspaceNavigationPresetMerge.Merge(
             "no_namespace_noise",
-            WorkspaceNavigationContextSettings.DefaultPresetsJson,
+            DefaultBundledMergeJson,
             null,
             [WorkspaceNavigationRelatedKinds.TestCounterpart]);
         Assert.Null(err);

@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using Avalonia.Media;
 using Avalonia.Threading;
@@ -12,18 +13,42 @@ public static class UiThemeApply
 {
     private static (string path, DateTime lastWrite, string json)? _themeCache;
 
-    /// <summary>Загружает тему из файла. Перечитывает только если изменились путь или дата модификации файла.</summary>
+    /// <summary>Загружает тему из файла рядом с приложением; при отсутствии — из встроенного ресурса (<see cref="BundledAppContent"/>). Перечитывает с диска только если изменились путь или дата модификации.</summary>
     public static string GetThemeJsonFromFile(string filePath)
     {
         var path = Path.GetFullPath(filePath);
-        if (!File.Exists(path))
-            return "{}";
-        var lastWrite = File.GetLastWriteTimeUtc(path);
-        if (_themeCache is { } c && c.path == path && c.lastWrite == lastWrite)
-            return c.json;
-        var json = File.ReadAllText(path);
-        _themeCache = (path, lastWrite, json);
-        return json;
+        if (File.Exists(path))
+        {
+            var lastWrite = File.GetLastWriteTimeUtc(path);
+            if (_themeCache is { } c && c.path == path && c.lastWrite == lastWrite)
+                return c.json;
+            var json = File.ReadAllText(path);
+            _themeCache = (path, lastWrite, json);
+            return json;
+        }
+
+        if (TryRelativeUnderAppBase(path, out var rel) && BundledAppContent.TryReadEmbeddedText(rel, out var embedded))
+            return embedded;
+
+        return "{}";
+    }
+
+    private static bool TryRelativeUnderAppBase(string fullPath, [NotNullWhen(true)] out string? relative)
+    {
+        relative = null;
+        try
+        {
+            var baseDir = Path.GetFullPath(AppContext.BaseDirectory);
+            var fp = Path.GetFullPath(fullPath);
+            if (!fp.StartsWith(baseDir, StringComparison.OrdinalIgnoreCase))
+                return false;
+            relative = Path.GetRelativePath(baseDir, fp).Replace('\\', '/');
+            return relative.Length > 0;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     /// <summary>Тёмная тема: Themes/dark-theme.json рядом с exe.</summary>

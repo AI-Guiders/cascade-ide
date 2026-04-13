@@ -149,7 +149,56 @@ public sealed class CascadeIdeSettings : ModelBase
     {
         if (a is null || b is null)
             return a == b;
-        return string.Equals(a.PresetsJson?.Trim(), b.PresetsJson?.Trim(), StringComparison.Ordinal);
+        return WorkspaceNavigationPresetListsEqual(a.Presets, b.Presets);
+    }
+
+    private static bool WorkspaceNavigationPresetListsEqual(
+        IReadOnlyList<WorkspaceNavigationPresetEntry> a,
+        IReadOnlyList<WorkspaceNavigationPresetEntry> b)
+    {
+        var da = a.Where(p => !string.IsNullOrWhiteSpace(p.Id)).ToDictionary(x => x.Id.Trim(), StringComparer.OrdinalIgnoreCase);
+        var db = b.Where(p => !string.IsNullOrWhiteSpace(p.Id)).ToDictionary(x => x.Id.Trim(), StringComparer.OrdinalIgnoreCase);
+        if (da.Count != db.Count)
+            return false;
+        foreach (var kv in da)
+        {
+            if (!db.TryGetValue(kv.Key, out var other))
+                return false;
+            if (!WorkspaceNavigationPresetEntryEquals(kv.Value, other))
+                return false;
+        }
+
+        return true;
+    }
+
+    private static bool WorkspaceNavigationPresetEntryEquals(WorkspaceNavigationPresetEntry a, WorkspaceNavigationPresetEntry b)
+    {
+        if (!string.Equals(a.Id?.Trim(), b.Id?.Trim(), StringComparison.Ordinal))
+            return false;
+        if (!StringListEqual(a.IncludeKinds, b.IncludeKinds))
+            return false;
+        if (!StringListEqual(a.ExcludeKinds, b.ExcludeKinds))
+            return false;
+        return true;
+    }
+
+    private static bool StringListEqual(IReadOnlyList<string>? x, IReadOnlyList<string>? y)
+    {
+        if (x is null && y is null)
+            return true;
+        if (x is null || y is null)
+            return false;
+        if (x.Count != y.Count)
+            return false;
+        var sa = x.OrderBy(s => s, StringComparer.Ordinal).ToList();
+        var sb = y.OrderBy(s => s, StringComparer.Ordinal).ToList();
+        for (var i = 0; i < sa.Count; i++)
+        {
+            if (!string.Equals(sa[i], sb[i], StringComparison.Ordinal))
+                return false;
+        }
+
+        return true;
     }
 
     private bool PresentationGrammarEquals(PresentationGrammarSettings? o)
@@ -225,7 +274,14 @@ public sealed class CascadeIdeSettings : ModelBase
             },
             WorkspaceNavigationContext = new WorkspaceNavigationContextSettings
             {
-                PresetsJson = WorkspaceNavigationContext.PresetsJson
+                Presets = WorkspaceNavigationContext.Presets
+                    .Select(p => new WorkspaceNavigationPresetEntry
+                    {
+                        Id = p.Id,
+                        IncludeKinds = p.IncludeKinds?.ToList(),
+                        ExcludeKinds = p.ExcludeKinds?.ToList()
+                    })
+                    .ToList()
             },
             OpenMfdHostWindowOnStartup = OpenMfdHostWindowOnStartup,
             MfdHostWindowPixelX = MfdHostWindowPixelX,

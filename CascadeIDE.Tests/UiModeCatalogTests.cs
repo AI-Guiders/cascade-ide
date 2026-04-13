@@ -279,13 +279,27 @@ public sealed class UiModeCatalogTests : IDisposable
     }
 
     [Fact]
-    public void Missing_index_falls_back_to_builtin_registry()
+    public void Empty_override_directory_loads_embedded_uimodes_bundle()
     {
         var dir = Path.Combine(Path.GetTempPath(), "uimodes_empty_" + Guid.NewGuid());
         Directory.CreateDirectory(dir);
 
         UiModeCatalog.Initialize(dir);
 
+        Assert.Equal(UiModesBundleSource.TomlBundle, UiModeCatalog.ActiveBundleSource);
+        Assert.Contains("Flight", UiModeCatalog.OrderedModeIds);
+    }
+
+    [Fact]
+    public void Invalid_index_toml_falls_back_to_builtin_registry()
+    {
+        var dir = Path.Combine(Path.GetTempPath(), "uimodes_bad_index_" + Guid.NewGuid());
+        Directory.CreateDirectory(dir);
+        File.WriteAllText(Path.Combine(dir, "index.toml"), "not valid toml {{{");
+
+        UiModeCatalog.Initialize(dir);
+
+        Assert.Equal(UiModesBundleSource.BuiltinRegistry, UiModeCatalog.ActiveBundleSource);
         Assert.Equal(UiModeLayoutRegistry.OrderedModeIds, UiModeCatalog.OrderedModeIds);
         Assert.Equal("Balanced", UiModeCatalog.NormalizeUiMode("nope"));
     }

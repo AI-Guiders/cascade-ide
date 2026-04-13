@@ -10,21 +10,21 @@
 
 `partial_peer`, `project_peer`, `xaml_codebehind_pair`, `test_counterpart`, `same_namespace`, `same_directory`.
 
-## Пресеты в `settings.toml`
+## Базовые пресеты (бандл) и overlay в `settings.toml`
 
-Секция **`[workspace_navigation_context]`**, поле **`presets`** — JSON-объект: ключ — имя пресета, значение — `include_kinds` и/или `exclude_kinds` (массивы строк).
+**Шипнутый файл** `WorkspaceNavigation/presets.toml` рядом с `CascadeIDE.exe` задаёт пресеты по умолчанию (`peers_only`, `no_namespace_noise`, `tests_and_peers`, `structure_only`), по тому же принципу, что `UiModes/` и темы; если файла нет, используется тот же текст из **встроенного ресурса** сборки.
 
-Путь файла: `%LocalAppData%\CascadeIDE\settings.toml` (см. ADR 0028). В коде есть встроенные defaults (`WorkspaceNavigationContextSettings.DefaultPresetsJson`): `peers_only`, `no_namespace_noise`, `tests_and_peers`, `structure_only`.
+**Overlay репозитория** — опционально в **`.cascade/workspace.toml`** в корне решения: те же **`[[workspace_navigation_context.presets]]`**, merge по **`id`** поверх шипнутого бандла (как [ADR 0021](../adr/0021-pfd-mfd-cockpit-attention-model.md) для метрик UI).
 
-Пример:
+**Пользовательский overlay** — в `%LocalAppData%\CascadeIDE\settings.toml` (ADR 0028), массив таблиц **`[[workspace_navigation_context.presets]]`**: у каждой записи поля **`id`**, опционально **`include_kinds`** / **`exclude_kinds`** (массивы строк). Запись с тем же **`id`** **перекрывает** и бандл, и репо; новые **`id`** добавляются. Порядок слоёв: **бандл → `.cascade/workspace.toml` → settings**.
+
+Пример (как у `[[sources]]` в других конфигах — нативный TOML):
 
 ```toml
-[workspace_navigation_context]
-presets = """
-{
-  "my_focus": { "include_kinds": ["partial_peer", "project_peer"], "exclude_kinds": ["same_namespace"] }
-}
-"""
+[[workspace_navigation_context.presets]]
+id = "my_focus"
+include_kinds = ["partial_peer", "project_peer"]
+exclude_kinds = ["same_namespace"]
 ```
 
 ## Аргументы MCP
@@ -37,7 +37,7 @@ presets = """
 | `include_kinds` | Явный белый список; если передан непустой — **перекрывает** include из пресета |
 | `exclude_kinds` | Объединяется с exclude пресета (дедуп по канону), если оба заданы |
 
-Неизвестное имя пресета или битый JSON пресетов → JSON с `error`: `bad_preset`.
+Неизвестное имя пресета или ошибка в данных пресетов → JSON с `error`: `bad_preset`.
 
 ## Эхо фильтра в ответе
 

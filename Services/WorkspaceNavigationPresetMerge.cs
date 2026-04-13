@@ -1,5 +1,6 @@
 #nullable enable
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace CascadeIDE.Services;
 
@@ -8,7 +9,10 @@ public static class WorkspaceNavigationPresetMerge
 {
     private sealed class PresetDto
     {
+        [JsonPropertyName("include_kinds")]
         public List<string>? IncludeKinds { get; set; }
+
+        [JsonPropertyName("exclude_kinds")]
         public List<string>? ExcludeKinds { get; set; }
     }
 

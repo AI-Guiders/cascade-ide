@@ -1,4 +1,6 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
+using CascadeIDE.Services;
 
 namespace CascadeIDE.Features.UiChrome;
 
@@ -14,7 +16,7 @@ public enum UiModesBundleSource
 }
 
 /// <summary>
-/// Загруженные из <c>UiModes/*.toml</c> режимы (ADR 0010). При ошибке или отсутствии файлов — встроенный <see cref="UiModeLayoutRegistry"/>.
+/// Загруженные из <c>UiModes/*.toml</c> режимы (ADR 0010): сначала файлы в каталоге (или override), иначе те же пути как встроенные ресурсы сборки. При ошибке или полном отсутствии данных — встроенный <see cref="UiModeLayoutRegistry"/>.
 /// </summary>
 public static class UiModeCatalog
 {
@@ -195,6 +197,28 @@ public static class UiModeCatalog
         }
     }
 
+    /// <summary>Сначала файл в <paramref name="uiModesDirectory"/>, иначе встроенный ресурс <c>UiModes/…</c>.</summary>
+    private static bool TryReadUiModesFile(string uiModesDirectory, string fileName, [NotNullWhen(true)] out string? text)
+    {
+        text = null;
+        var disk = Path.Combine(uiModesDirectory, fileName);
+        try
+        {
+            if (File.Exists(disk))
+            {
+                text = File.ReadAllText(disk);
+                return true;
+            }
+        }
+        catch
+        {
+            // fallback на ресурс
+        }
+
+        var bundledRel = $"UiModes/{fileName.Replace('\\', '/')}";
+        return BundledAppContent.TryReadEmbeddedText(bundledRel, out text);
+    }
+
     private static void LoadFromDirectory(string uiModesDirectory)
     {
         Specs.Clear();
@@ -208,17 +232,9 @@ public static class UiModeCatalog
         AttentionZonePanelRuntime.ResetToCodeDefaults();
         MarkdownPreviewPlacementRuntime.ResetToCodeDefaults();
 
-        if (!Directory.Exists(uiModesDirectory))
+        if (!TryReadUiModesFile(uiModesDirectory, "index.toml", out var indexTomlText))
         {
-            global::System.Diagnostics.Debug.WriteLine($"UiModeCatalog: directory missing — {uiModesDirectory}");
-            ApplyBuiltinOnly();
-            return;
-        }
-
-        var indexPath = Path.Combine(uiModesDirectory, "index.toml");
-        if (!File.Exists(indexPath))
-        {
-            global::System.Diagnostics.Debug.WriteLine($"UiModeCatalog: index.toml missing — {indexPath}");
+            global::System.Diagnostics.Debug.WriteLine($"UiModeCatalog: index.toml missing — {Path.Combine(uiModesDirectory, "index.toml")}");
             ApplyBuiltinOnly();
             return;
         }
@@ -226,7 +242,7 @@ public static class UiModeCatalog
         UiModesIndexToml? index;
         try
         {
-            index = CascadeTomlSerializer.Deserialize<UiModesIndexToml>(File.ReadAllText(indexPath));
+            index = CascadeTomlSerializer.Deserialize<UiModesIndexToml>(indexTomlText);
         }
         catch (Exception ex)
         {
@@ -242,12 +258,11 @@ public static class UiModeCatalog
             return;
         }
 
-        var workspacePath = Path.Combine(uiModesDirectory, "workspace.toml");
-        if (File.Exists(workspacePath))
+        if (TryReadUiModesFile(uiModesDirectory, "workspace.toml", out var workspaceTomlText))
         {
             try
             {
-                var w = CascadeTomlSerializer.Deserialize<UiWorkspaceToml>(File.ReadAllText(workspacePath));
+                var w = CascadeTomlSerializer.Deserialize<UiWorkspaceToml>(workspaceTomlText);
                 _bundleWorkspaceToml = w;
                 UiWorkspaceLayoutRuntimeMetrics.ApplyWorkspaceToml(w);
                 AttentionZonePanelRuntime.ApplyWorkspaceToml(w);
@@ -355,12 +370,11 @@ public static class UiModeCatalog
         try
         {
             UiModeFileToml? file = null;
-            var path = Path.Combine(uiModesDirectory, modeId + ".toml");
-            if (File.Exists(path))
+            if (TryReadUiModesFile(uiModesDirectory, modeId + ".toml", out var modeTomlText))
             {
                 try
                 {
-                    file = CascadeTomlSerializer.Deserialize<UiModeFileToml>(File.ReadAllText(path));
+                    file = CascadeTomlSerializer.Deserialize<UiModeFileToml>(modeTomlText);
                 }
                 catch (Exception ex)
                 {
