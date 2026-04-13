@@ -105,7 +105,7 @@ This map is intended to drive incremental alignment work with clear acceptance c
 
 | Элемент | Где в коде | VM / настройки | Status | Notes |
 |---|---|---|---|---|
-| Строка `presentation` / `zone_screen_layout` + `[presentation_grammar]` | `CascadeIdeSettings`, merge в VM | `GetEffectivePresentationLine()`, `PresentationParse` | ✅ | Парсер: `Services/Presentation/PresentationParser.cs`. |
+| Строка `presentation` / `zone_screen_layout` + `[presentation_grammar]` | `CascadeIdeSettings`, merge в VM | `GetEffectivePresentationLine()`, `PresentationParse` | ✅ | Парсер: `Services/Presentation/PresentationParser.cs`, внутри экрана — `PresentationInnerEtoGrammar` (Eto.Parse). |
 | Второе окно зоны Mfd (полный вторичный контур) | `Views/MfdHostWindow.axaml` → `SecondaryShellView` | `DataContext` = `MainWindowViewModel` (тот же, что у `MainWindow`) | ✅ | ADR п. 8: не «узкий» одностраничный хост. |
 | Автозапуск хоста; MCP `toggle_mfd_host_window` только при топологии с выносом Mfd | `MainWindow.MfdHostWindow.axaml.cs` | `ToggleMfdHostWindowCommand` (`CanExecute` ← `PresentationRequestsMfdHostWindow`), `TryOpenMfdHostWindowOnStartup`, `OpenMfdHostWindowOnStartup` | ✅ | Отдельного пункта меню нет — раскладка в `settings.toml`. |
 | Колонка Mfd в главном окне при открытом хосте | `MainWindow` / layout | `SetMfdHostWindowShellOpen` → скрыть дубль колонки | ✅ | `AttentionLayoutSurfaceKind.MainWindowPlusMfdHostTopLevel`. |
