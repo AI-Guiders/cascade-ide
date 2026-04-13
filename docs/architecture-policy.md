@@ -66,6 +66,7 @@
 | PFD: инварианты поверхности (weight, input lock, каналы) и Roslyn; канон `[PfdStrict]` / `PfdStrictControl` | [0037](adr/0037-pfd-surface-invariants-and-roslyn-enforcement.md) (Proposed) |
 | Фасад агента: провайдеры LLM (`AiProviderManager`), чат, ACP, автономный режим; внешние MCP; направление развития | [0038](adr/0038-agent-facade-ai-provider-and-tool-orchestration.md) (Accepted · Implemented) |
 | Навигация по workspace: C#-first / .NET north-star; несколько представлений, граф/semantic map; PFD/MFD; ортогонально строгой PFD-поверхности | [0039](adr/0039-workspace-navigation-affordances.md) (Proposed) |
+| LSP C#/Markdown: пресеты и опциональные `executable`/`arguments` в `settings.toml`; явный флаг чтения из окружения — по [0040](adr/0040-lsp-launch-line-settings-toml-presets-and-environment.md) | [0040](adr/0040-lsp-launch-line-settings-toml-presets-and-environment.md) (Accepted · Proposed) |
 
 Полный индекс: [docs/adr/README.md](adr/README.md).
 
@@ -154,4 +155,5 @@
 - **v1.61** — [0037](adr/0037-pfd-surface-invariants-and-roslyn-enforcement.md): канон имён строгой поверхности — `[PfdStrict]` / `PfdStrictControl` ([§ канон](adr/0037-pfd-surface-invariants-and-roslyn-enforcement.md#adr0037-naming)).  
 - **v1.62** — [0039](adr/0039-workspace-navigation-affordances.md): north-star по языкам — C# / .NET, не polyglot IDE; [north-star workbench](design/north-star-cursor-mcp-cascade-workbench-v1.md) обновлён.  
 - **v1.63** — раздел **«Avalonia и слой кабины (граница ответственности)»**: фюзеляж (окна, ввод, хост редактора) vs CDS/композитор (семантика кабины); кастомная отрисовка над хостом; ссылка на [0017](adr/0017-multi-window-workspace-and-agent-surfaces.md) (предохранитель весов). Уточнение [0036](adr/0036-cds-channel-compositor-surface-pipeline.md) п. 4; строка в [cds-contract-v0](design/cds-contract-v0.md) §3.  
+- **v1.64** — добавлен [0040](adr/0040-lsp-launch-line-settings-toml-presets-and-environment.md): командная строка LSP в `settings.toml` (пресеты, опциональные ключи; флаг `launch_from_environment` — Proposed).  
 - Изменения направления — отдельным коммитом: обновление этого файла и при необходимости новый ADR в [docs/adr/README.md](adr/README.md).
