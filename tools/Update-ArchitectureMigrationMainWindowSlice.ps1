@@ -17,13 +17,19 @@
 .PARAMETER DryRun
   Печатает фрагменты в консоль, файл не перезаписывает.
 
+.PARAMETER Verify
+  Сверяет docs/architecture-migration.md с пересчётом; при расхождении exit 1 (для pre-commit).
+
 .EXAMPLE
   pwsh ./tools/Update-ArchitectureMigrationMainWindowSlice.ps1
+.EXAMPLE
+  pwsh ./tools/Update-ArchitectureMigrationMainWindowSlice.ps1 -Verify
 #>
 [CmdletBinding()]
 param(
     [string] $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path,
-    [switch] $DryRun
+    [switch] $DryRun,
+    [switch] $Verify
 )
 
 Set-StrictMode -Version Latest
@@ -204,6 +210,10 @@ $summaryParagraph = [string]::Format(
 $mwTable = Build-Table $mwRows
 $execTable = Build-Table $execRows
 
+if ($DryRun -and $Verify) {
+    throw "Нельзя одновременно -DryRun и -Verify."
+}
+
 if ($DryRun) {
     Write-Host '--- SUMMARY ---'
     Write-Host $summaryParagraph
@@ -239,6 +249,25 @@ $text = Replace-Between $text $beginSum $endSum $summaryParagraph
 $text = Replace-Between $text $beginMw $endMw $mwTable
 $text = Replace-Between $text $beginEx $endEx $execTable
 
+$expected = $text.TrimEnd() + "`n"
+function Normalize-Text([string] $s) {
+    return ($s -replace "`r`n", "`n" -replace "`r", "`n")
+}
+
+if ($Verify) {
+    if (-not (Test-Path -LiteralPath $docPath)) {
+        throw "Нет файла: $docPath"
+    }
+    $utf8NoBomRead = [System.Text.UTF8Encoding]::new($false)
+    $onDisk = [System.IO.File]::ReadAllText($docPath, $utf8NoBomRead)
+    if ((Normalize-Text $expected) -ne (Normalize-Text $onDisk)) {
+        Write-Error "architecture-migration.md не совпадает с пересчётом среза. Запусти из корня cascade-ide: pwsh ./tools/Update-ArchitectureMigrationMainWindowSlice.ps1"
+        exit 1
+    }
+    Write-Host "OK verify: $docPath (MW lines=$sumMw, Exec lines=$sumExec, total=$total)"
+    exit 0
+}
+
 $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
-[System.IO.File]::WriteAllText($docPath, $text.TrimEnd() + "`n", $utf8NoBom)
+[System.IO.File]::WriteAllText($docPath, $expected, $utf8NoBom)
 Write-Host "OK: $docPath (MW lines=$sumMw, Exec lines=$sumExec, total=$total)"
