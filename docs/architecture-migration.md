@@ -5,36 +5,63 @@
 
 ## Текущее состояние
 
-`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~3.3k строк** суммарно по **partial-классу** в `ViewModels/MainWindowViewModel*.cs` (не один файл). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
+`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~4.4k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~3.5k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~0.9k**); счётчики — ориентир по состоянию репозитория (обновлено 2026-04). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
 
 ### Срез `MainWindowViewModel` (карта partial-файлов)
 
-Имена и порядок ниже — для навигации; строки — ориентир по состоянию репозитория.
+Имена **по алфавиту** — для поиска; строки — `Measure-Object -Line` по `.cs`.
 
 | Файл | Строк (≈) | Содержание |
 |------|------------|------------|
-| `MainWindowViewModel.cs` | 270 | Конструктор, дочерние VM, `WorkspaceDiagnostics`, `ExecuteCommandAsync`, навигация к проблемам, `ResolveProvider` |
-| `MainWindowViewModel.RelayCommands.cs` | 260 | Команды (Relay) |
-| `MainWindowViewModel.IdeMcpActions.BuildTest.cs` | 325 | MCP: сборка, тесты |
-| `MainWindowViewModel.IdeMcpActions.AgentNotes.cs` | 302 | MCP: agent-notes |
-| `MainWindowViewModel.IdeMcpActions.Workspace.cs` | 287 | MCP: workspace |
-| `MainWindowViewModel.UiGitWorkspace.cs` | 187 | Git + workspace UI (телеметрия полосы, refresh) |
-| `MainWindowViewModel.ShellState.cs` | 204 | Видимость панелей, режимы UI, ключи AI, телеметрия |
-| `MainWindowViewModel.SolutionBuild.cs` | 195 | Сборка решения, вывод в `BuildOutputPanel` |
-| `MainWindowViewModel.IdeMcpActions.Editor.cs` | 211 | MCP: редактор |
-| `MainWindowViewModel.IdeMcpActions.UiAutomation.cs` | 173 | MCP: UI automation |
-| `MainWindowViewModel.Presentation.cs` | 139 | Вычисляемые свойства заголовка, режимов, подписей |
-| `MainWindowViewModel.Breakpoints.cs` | 148 | Брейкпоинты и файловый watcher |
-| `MainWindowViewModel.CSharpLsp.cs` | 104 | Запуск/перезапуск C# LSP |
-| `MainWindowViewModel.AutonomousAgent.cs` | 128 | Автономный агент (Power) |
-| `MainWindowViewModel.SettingsReactive.cs` | 119 | Реакции на настройки, сохранение |
-| `MainWindowViewModel.IdeMcpActions.Git.cs` | 84 | MCP: git |
-| `MainWindowViewModel.IdeMcpActions.DebuggerPanel.cs` | 53 | MCP: панель отладки |
-| `MainWindowViewModel.EditorOllama.cs` | 58 | Редактор + Ollama |
-| `MainWindowViewModel.DocumentsDock.cs` | 45 | Документы / dock |
-| `MainWindowViewModel.ViewBridge.cs` | 46 | Мост к view (запросы к окну) |
+| `MainWindowViewModel.AutonomousAgent.cs` | 112 | Автономный агент (Power) |
+| `MainWindowViewModel.Breakpoints.cs` | 135 | Брейкпоинты, файловый watcher |
+| `MainWindowViewModel.Capabilities.cs` | 22 | Реестр capabilities |
+| `MainWindowViewModel.CommandPalette.cs` | 130 | Палитра команд |
+| `MainWindowViewModel.cs` | 334 | Конструктор, дочерние VM, `WorkspaceDiagnostics`, `ExecuteCommandAsync`, навигация к проблемам, `ResolveProvider` |
+| `MainWindowViewModel.CSharpLsp.cs` | 111 | Запуск/перезапуск C# LSP |
+| `MainWindowViewModel.CursorAcp.cs` | 21 | Путь Cursor ACP |
+| `MainWindowViewModel.DocumentsDock.cs` | 43 | Документы / dock |
+| `MainWindowViewModel.EditorHud.cs` | 48 | HUD редактора |
+| `MainWindowViewModel.EditorOllama.cs` | 43 | Редактор + Ollama |
+| `MainWindowViewModel.Eicas.cs` | 17 | Лента EICAS |
+| `MainWindowViewModel.EnvironmentReadiness.cs` | 46 | Страница «готовность окружения»; снимок через `EnvironmentReadinessSnapshotBuilder.BuildAllRowsAsync` |
+| `MainWindowViewModel.IdeMcpActions.AgentNotes.cs` | 44 | Реализация `IIdeMcpActions`: agent-notes |
+| `MainWindowViewModel.IdeMcpActions.BuildTest.cs` | 141 | MCP: сборка, тесты |
+| `MainWindowViewModel.IdeMcpActions.DebuggerPanel.cs` | 51 | MCP: панель отладки |
+| `MainWindowViewModel.IdeMcpActions.Editor.cs` | 169 | MCP: редактор |
+| `MainWindowViewModel.IdeMcpActions.Git.cs` | 118 | MCP: git |
+| `MainWindowViewModel.IdeMcpActions.UiAutomation.cs` | 155 | MCP: UI automation |
+| `MainWindowViewModel.IdeMcpActions.Workspace.cs` | 91 | MCP: workspace |
+| `MainWindowViewModel.LayoutNotifications.cs` | 20 | Уведомления раскладки |
+| `MainWindowViewModel.MarkdownExport.cs` | 54 | Экспорт Markdown |
+| `MainWindowViewModel.MarkdownLsp.cs` | 94 | Запуск/перезапуск Markdown LSP |
+| `MainWindowViewModel.Presentation.cs` | 158 | Заголовок, режимы, подписи |
+| `MainWindowViewModel.PresentationLayout.cs` | 84 | Раскладка / presentation |
+| `MainWindowViewModel.RelayCommands.cs` | 272 | Relay-команды |
+| `MainWindowViewModel.RelayCommands.Debug.cs` | 116 | Relay: отладка |
+| `MainWindowViewModel.SecondaryShell.cs` | 57 | Вторичный контур shell |
+| `MainWindowViewModel.SettingsReactive.cs` | 115 | Реакции на настройки, сохранение |
+| `MainWindowViewModel.ShellState.cs` | 188 | Панели, UI-режим, AI, телеметрия |
+| `MainWindowViewModel.SolutionBuild.cs` | 172 | Сборка, `BuildOutputPanel` |
+| `MainWindowViewModel.StartupProject.cs` | 119 | Стартовый проект |
+| `MainWindowViewModel.UiGitWorkspace.cs` | 137 | Git + workspace UI |
+| `MainWindowViewModel.ViewBridge.cs` | 56 | Мост к view (диалоги, снимки UI) |
+| `MainWindowViewModel.WorkspaceHealth.cs` | 13 | Связка с Workspace Health |
 
-**Техдолг по главному VM (не блокирует развитие):** крупные куски MCP по-прежнему рядом с VM (`IdeMcpActions.*`); дальнейший вынос — по мере изменений. **План B по примитивам MCP для текущего объёма закрыт:** координаты/пути редактора (`EditorTextCoordinateUtilities`), разбор JSON панели отладки (`McpDebugPayloadParsing`), чтение полей args MCP (`McpCommandJsonArgs` в `Services/`) — вне `ViewModels/`.
+### `IdeMcpCommandExecutor` (диспетчер MCP → `IIdeMcpActions`)
+
+| Файл | Строк (≈) | Содержание |
+|------|------------|------------|
+| `IdeMcpCommandExecutor.cs` | 64 | `BuildHandlers`, `ExecuteAsync` |
+| `IdeMcpCommandExecutor.Handlers.AgentNotes.cs` | 69 | Хендлеры agent-notes |
+| `IdeMcpCommandExecutor.Handlers.Chrome.cs` | 316 | Хендлеры хрома / видимости |
+| `IdeMcpCommandExecutor.Handlers.DapDebug.cs` | 87 | DAP / отладка |
+| `IdeMcpCommandExecutor.Handlers.DebuggerUi.cs` | 61 | Поверхность отладки |
+| `IdeMcpCommandExecutor.Handlers.Editor.cs` | 82 | Редактор |
+| `IdeMcpCommandExecutor.Handlers.PowerDocuments.cs` | 208 | Power / документы |
+| `Generated/IdeMcpCommandExecutor.Generated.g.cs` | 62 | Сгенерированные хендлеры (ProtocolDocGen / генератор) |
+
+**Техдолг по главному VM (не блокирует развитие):** крупные куски MCP по-прежнему рядом с VM (`IdeMcpActions.*`); дальнейший вынос — по мере изменений. **План B по примитивам MCP для текущего объёма закрыт:** координаты/пути редактора (`EditorTextCoordinateUtilities`), разбор JSON панели отладки (`McpDebugPayloadParsing`), чтение полей args MCP (`McpCommandJsonArgs` в `Services/`) — вне `ViewModels/`. **Готовность окружения ([ADR 0023](adr/0023-environment-readiness-glance.md)):** полный список строк для страницы — `EnvironmentReadinessSnapshotBuilder.BuildAllRowsAsync` (`Services/`); VM только маршалит на UI и заполняет коллекцию.
 
 ## Целевая карта срезов
 

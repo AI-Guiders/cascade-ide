@@ -1,5 +1,4 @@
 using System.Collections.ObjectModel;
-using Avalonia.Threading;
 using CascadeIDE.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -30,20 +29,17 @@ public partial class MainWindowViewModel
     [RelayCommand]
     private async Task RefreshEnvironmentReadinessAsync()
     {
-        var lsp = EnvironmentReadinessSnapshotBuilder.BuildLspRows(
+        var rows = await EnvironmentReadinessSnapshotBuilder.BuildAllRowsAsync(
             _settings,
             Workspace.SolutionPath,
             _csharpLspHost,
-            _markdownLspHost);
-
-        var dotnet = await EnvironmentReadinessSnapshotBuilder.ProbeDotnetAsync().ConfigureAwait(false);
+            _markdownLspHost).ConfigureAwait(false);
 
         await UiScheduler.Default.InvokeAsync(() =>
         {
             EnvironmentReadinessItems.Clear();
-            foreach (var row in lsp)
+            foreach (var row in rows)
                 EnvironmentReadinessItems.Add(row);
-            EnvironmentReadinessItems.Add(dotnet);
             EnvironmentReadinessUpdatedText = $"Обновлено: {DateTime.Now:HH:mm:ss}";
         });
     }

@@ -185,4 +185,23 @@ public static class EnvironmentReadinessSnapshotBuilder
             $"{exeHint}. Процесс не активен.",
             EnvironmentReadinessLevel.Warning);
     }
+
+    /// <summary>
+    /// Полный набор строк для страницы «готовность окружения» (ADR 0023): LSP, затем проверка <c>dotnet</c>.
+    /// Дополнительные проверки (MCP, переменные окружения и т.д.) добавлять сюда, чтобы не раздувать ViewModel.
+    /// </summary>
+    public static async Task<IReadOnlyList<EnvironmentReadinessItem>> BuildAllRowsAsync(
+        CascadeIdeSettings settings,
+        string? solutionPath,
+        CSharpLspDiagnosticsHost? csharpHost,
+        MarkdownLspDiagnosticsHost? markdownHost,
+        CancellationToken cancellationToken = default)
+    {
+        var lsp = BuildLspRows(settings, solutionPath, csharpHost, markdownHost);
+        var dotnet = await ProbeDotnetAsync(cancellationToken).ConfigureAwait(false);
+        var combined = new List<EnvironmentReadinessItem>(lsp.Count + 1);
+        combined.AddRange(lsp);
+        combined.Add(dotnet);
+        return combined;
+    }
 }
