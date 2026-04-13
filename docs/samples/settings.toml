@@ -46,3 +46,7 @@ presentation = "(0.25P + 0.75F) (M)"
 pfd_zone_identifier = "P"
 forward_zone_identifier = "F"
 mfd_zone_identifier = "M"
+
+# Пресеты для ide_execute_command → get_workspace_navigation_context (JSON-объект имя → include_kinds / exclude_kinds).
+[workspace_navigation_context]
+# presets = """{ "my_preset": { "exclude_kinds": ["same_namespace"] } }"""

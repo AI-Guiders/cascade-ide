@@ -49,6 +49,7 @@
 | [0039](0039-workspace-navigation-affordances.md) | Навигация по workspace; C# / .NET north-star (не polyglot v1); граф/semantic map; PFD/MFD | Proposed |
 | [0040](0040-lsp-launch-line-settings-toml-presets-and-environment.md) | LSP C#/Markdown: командная строка в `settings.toml`, пресеты, опциональные ключи; опционально env (флаг — Proposed) | Accepted · Proposed |
 | [0041](0041-protobuf-for-agent-and-ide-messages.md) | Protobuf vs JSON для сообщений агента/IDE: границы, критерии, гибрид; точка входа (Proposed) | Proposed |
+| [0042](0042-pre-flight-planned-changes-and-review-before-apply.md) | Pre-flight briefing: Planned Changes (намерение + SA) и Review Before Apply (превью, семантический слой, отказ без мусора); машина состояний; ортогонально «построчному доверию» | Proposed |
 
 ## Соглашения
 

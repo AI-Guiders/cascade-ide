@@ -72,6 +72,7 @@
 | Навигация по workspace: C#-first / .NET north-star; несколько представлений, граф/semantic map; PFD/MFD; ортогонально строгой PFD-поверхности | [0039](adr/0039-workspace-navigation-affordances.md) (Proposed) |
 | LSP C#/Markdown: пресеты и опциональные `executable`/`arguments` в `settings.toml`; явный флаг чтения из окружения — по [0040](adr/0040-lsp-launch-line-settings-toml-presets-and-environment.md) | [0040](adr/0040-lsp-launch-line-settings-toml-presets-and-environment.md) (Accepted · Proposed) |
 | Protobuf vs JSON: когда уместен бинарный IDL для агента/IDE; границы с MCP и `IdeCommands`; критерии пилота | [0041](adr/0041-protobuf-for-agent-and-ide-messages.md) (Proposed) |
+| Pre-flight briefing: Planned Changes и Review Before Apply; семантический слой перед записью на диск; частичное одобрение; отказ без артефактов | [0042](adr/0042-pre-flight-planned-changes-and-review-before-apply.md) (Proposed) |
 
 Полный индекс: [docs/adr/README.md](adr/README.md).
 
