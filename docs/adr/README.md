@@ -46,7 +46,7 @@
 | [0036](0036-cds-channel-compositor-surface-pipeline.md) | Канал → CDS → композитор поверхности → поверхность; CDS как маршрутизация в модели внимания (Agent-first) | Accepted |
 | [0037](0037-pfd-surface-invariants-and-roslyn-enforcement.md) | PFD: инварианты поверхности; Roslyn; канон `[PfdStrict]` / `PfdStrictControl` | Proposed |
 | [0038](0038-agent-facade-ai-provider-and-tool-orchestration.md) | Фасад агента: `AiProviderManager`, чат vs ACP vs автономный JSON-цикл; внешние MCP; идеи оркестрации и tool-calling | Accepted · Implemented (код); направление — в ADR |
-| [0039](0039-workspace-navigation-affordances.md) | Навигация по workspace; C# / .NET north-star (не polyglot v1); граф/semantic map; PFD/MFD | Proposed |
+| [0039](0039-workspace-navigation-affordances.md) | Навигация по workspace; C# / .NET north-star (не polyglot v1); граф/semantic map; PFD/MFD; MCP: пресеты, `kind_filter`, subgraph | Proposed · MCP implemented |
 | [0040](0040-lsp-launch-line-settings-toml-presets-and-environment.md) | LSP C#/Markdown: командная строка в `settings.toml`, пресеты, опциональные ключи; опционально env (флаг — Proposed) | Accepted · Proposed |
 | [0041](0041-protobuf-for-agent-and-ide-messages.md) | Protobuf vs JSON для сообщений агента/IDE: границы, критерии, гибрид; точка входа (Proposed) | Proposed |
 | [0042](0042-pre-flight-planned-changes-and-review-before-apply.md) | Pre-flight briefing: Planned Changes (намерение + SA) и Review Before Apply (превью, семантический слой, отказ без мусора); машина состояний; ортогонально «построчному доверию» | Proposed |
