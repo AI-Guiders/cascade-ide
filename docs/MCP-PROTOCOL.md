@@ -286,6 +286,7 @@
 | `get_solution_files` | Список файлов и дерево решения (Solution Explorer). returns: json. |
 | `get_solution_info` | Короткая информация о текущем решении/файле/выделении в дереве. returns: json. |
 | `get_ui_modes_diagnostics` | Диагностика загрузки UI-режимов: пути к UiModes, TOML vs встроенный fallback, список id в меню (почему может не быть Flight). returns: json. |
+| `get_workspace_navigation_context` | Контекст навигации (ADR 0039): связанные файлы или мини-подграф. args: mode:string, file_path?:string, line?:integer, column?:integer, max_related?:integer, max_nodes?:integer, max_edges?:integer; returns: json; example: {"mode":"related","file_path":"src/Foo.cs","max_related":24}. |
 | `get_workspace_state` | Единая сводка состояния IDE (solution/editor/build/diagnostics...). returns: json. |
 | `move_document_to_group_1` | Переместить документ в группу 1. args: file_path:string; returns: text; example: {"file_path":"C:\\\\tmp\\\\a.cs"}. |
 | `move_document_to_group_2` | Переместить документ в группу 2. args: file_path:string; returns: text; example: {"file_path":"C:\\\\tmp\\\\a.cs"}. |
