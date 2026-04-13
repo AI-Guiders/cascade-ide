@@ -347,6 +347,8 @@ public partial class MainWindow
                     ScrollEditorToLine(ed, debugLine);
             }
         }
+        if (e.PropertyName == nameof(ViewModels.MainWindowViewModel.MainGridColumnDefinitions) && sender is ViewModels.MainWindowViewModel gridVm)
+            ApplyMainGridColumnDefinitions(gridVm);
     }
 
     /// <summary>Клик по полю слева от текста (номера строк / брейкпоинты) — переключить брейкпоинт в .dotnet-debug-mcp-breakpoints.json.</summary>

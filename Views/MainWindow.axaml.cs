@@ -96,6 +96,7 @@ public partial class MainWindow : Window
             SetupTerminalKeyHandler();
             SetupEditorAndTextMate();
             TryApplyHotkeys();
+            ApplyMainGridColumnDefinitions(vm);
         }
         else
         {

@@ -7,6 +7,9 @@ public sealed class PresentationParserTests
 {
     private static readonly PresentationGrammarTokens Default = PresentationGrammarTokens.Default;
 
+    private static PresentationAnchorSlot[] Unweighted(params PresentationAnchorKind[] kinds) =>
+        kinds.Select(k => new PresentationAnchorSlot(k, null)).ToArray();
+
     [Fact]
     public void Empty_Yields_NoScreens()
     {
@@ -21,9 +24,7 @@ public sealed class PresentationParserTests
         var r = PresentationParser.Parse("(PFD+Forward+MFD)", Default);
         Assert.True(r.IsSuccess);
         Assert.Single(r.Screens);
-        Assert.Equal(
-            new[] { PresentationAnchorKind.Pfd, PresentationAnchorKind.Forward, PresentationAnchorKind.Mfd },
-            r.Screens[0]);
+        Assert.Equal(Unweighted(PresentationAnchorKind.Pfd, PresentationAnchorKind.Forward, PresentationAnchorKind.Mfd), r.Screens[0]);
     }
 
     [Fact]
@@ -32,9 +33,7 @@ public sealed class PresentationParserTests
         var g = PresentationGrammarTokens.FromSettings("()", " ", "|");
         var r = PresentationParser.Parse("(PFD|Forward|MFD)", g);
         Assert.True(r.IsSuccess);
-        Assert.Equal(
-            new[] { PresentationAnchorKind.Pfd, PresentationAnchorKind.Forward, PresentationAnchorKind.Mfd },
-            r.Screens[0]);
+        Assert.Equal(Unweighted(PresentationAnchorKind.Pfd, PresentationAnchorKind.Forward, PresentationAnchorKind.Mfd), r.Screens[0]);
     }
 
     [Fact]
@@ -50,8 +49,8 @@ public sealed class PresentationParserTests
         var r = PresentationParser.Parse("(PFD+Forward) (MFD)", Default);
         Assert.True(r.IsSuccess);
         Assert.Equal(2, r.Screens.Count);
-        Assert.Equal(new[] { PresentationAnchorKind.Pfd, PresentationAnchorKind.Forward }, r.Screens[0]);
-        Assert.Equal(new[] { PresentationAnchorKind.Mfd }, r.Screens[1]);
+        Assert.Equal(Unweighted(PresentationAnchorKind.Pfd, PresentationAnchorKind.Forward), r.Screens[0]);
+        Assert.Equal(Unweighted(PresentationAnchorKind.Mfd), r.Screens[1]);
         Assert.True(PresentationLayoutAnalyzer.TryGetMfdHostPresentationScreenIndex(r.Screens, out var mfdIdx));
         Assert.Equal(1, mfdIdx);
     }
@@ -74,6 +73,67 @@ public sealed class PresentationParserTests
         var r = PresentationParser.Parse("(P+F) (M)", g);
         Assert.True(r.IsSuccess);
         Assert.True(PresentationLayoutAnalyzer.IsDedicatedMfdSecondScreenPreset(r.Screens));
+    }
+
+    [Fact]
+    public void TwoScreens_Weighted_FirstGroup()
+    {
+        var g = PresentationGrammarTokens.FromSettings("()", " ", "+", "P", "F", "M");
+        var r = PresentationParser.Parse("(0.25P+0.75F)(M)", g);
+        Assert.True(r.IsSuccess);
+        Assert.Equal(2, r.Screens.Count);
+        Assert.Equal(
+            new[]
+            {
+                new PresentationAnchorSlot(PresentationAnchorKind.Pfd, 0.25),
+                new PresentationAnchorSlot(PresentationAnchorKind.Forward, 0.75),
+            },
+            r.Screens[0]);
+        Assert.Equal(Unweighted(PresentationAnchorKind.Mfd), r.Screens[1]);
+        Assert.True(PresentationLayoutAnalyzer.IsDedicatedMfdSecondScreenPreset(r.Screens));
+    }
+
+    [Fact]
+    public void SingleScreen_ThreeAnchors_Weighted()
+    {
+        var g = PresentationGrammarTokens.FromSettings("()", " ", "+", "P", "F", "M");
+        var r = PresentationParser.Parse("(0.2P+0.3F+0.5M)", g);
+        Assert.True(r.IsSuccess);
+        Assert.Equal(
+            new[]
+            {
+                new PresentationAnchorSlot(PresentationAnchorKind.Pfd, 0.2),
+                new PresentationAnchorSlot(PresentationAnchorKind.Forward, 0.3),
+                new PresentationAnchorSlot(PresentationAnchorKind.Mfd, 0.5),
+            },
+            r.Screens[0]);
+    }
+
+    [Fact]
+    public void Weighted_SumNotOne_Fails()
+    {
+        var g = PresentationGrammarTokens.FromSettings("()", " ", "+", "P", "F", "M");
+        var r = PresentationParser.Parse("(0.5P+0.5F+0.5M)", g);
+        Assert.False(r.IsSuccess);
+        Assert.Contains("Сумма коэффициентов", r.Error ?? "");
+    }
+
+    [Fact]
+    public void MixedWeightedAndUnweighted_Fails()
+    {
+        var g = PresentationGrammarTokens.FromSettings("()", " ", "+", "P", "F", "M");
+        var r = PresentationParser.Parse("(0.25P+F+M)", g);
+        Assert.False(r.IsSuccess);
+        Assert.Contains("Смешение", r.Error ?? "");
+    }
+
+    [Fact]
+    public void SingleAnchor_WithWeight_Fails()
+    {
+        var g = PresentationGrammarTokens.FromSettings("()", " ", "+", "P", "F", "M");
+        var r = PresentationParser.Parse("(1M)", g);
+        Assert.False(r.IsSuccess);
+        Assert.Contains("Один якорь", r.Error ?? "");
     }
 
     [Fact]
@@ -103,9 +163,7 @@ public sealed class PresentationParserTests
             mfdZoneIdentifier: "Mfd");
         var r = PresentationParser.Parse("(Pfd+Lob+Mfd)", g);
         Assert.True(r.IsSuccess);
-        Assert.Equal(
-            new[] { PresentationAnchorKind.Pfd, PresentationAnchorKind.Forward, PresentationAnchorKind.Mfd },
-            r.Screens[0]);
+        Assert.Equal(Unweighted(PresentationAnchorKind.Pfd, PresentationAnchorKind.Forward, PresentationAnchorKind.Mfd), r.Screens[0]);
     }
 
     [Fact]
@@ -118,9 +176,7 @@ public sealed class PresentationParserTests
             mfdZoneIdentifier: "m");
         var r = PresentationParser.Parse("(p+l+m)", g);
         Assert.True(r.IsSuccess);
-        Assert.Equal(
-            new[] { PresentationAnchorKind.Pfd, PresentationAnchorKind.Forward, PresentationAnchorKind.Mfd },
-            r.Screens[0]);
+        Assert.Equal(Unweighted(PresentationAnchorKind.Pfd, PresentationAnchorKind.Forward, PresentationAnchorKind.Mfd), r.Screens[0]);
     }
 
     [Fact]

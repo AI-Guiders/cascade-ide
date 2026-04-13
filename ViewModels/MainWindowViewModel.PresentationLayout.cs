@@ -12,6 +12,16 @@ public partial class MainWindowViewModel
     /// <summary>Успешный разбор <see cref="CascadeIdeSettings.GetEffectivePresentationLine"/> (может быть пустой список экранов).</summary>
     public PresentationParseResult PresentationParse => _presentationParse;
 
+    /// <summary>
+    /// Колонки рабочей строки <c>MainGrid</c> (строка для Avalonia <c>ColumnDefinitions</c>).
+    /// При заданных весах якорей в <c>presentation</c> — доли <c>*</c> по ADR 0017; иначе дефолт <see cref="PresentationMainGridColumnDefinitions.Default"/>.
+    /// </summary>
+    public string MainGridColumnDefinitions =>
+        PresentationMainGridColumnDefinitions.Get(
+            _presentationParse,
+            _presentationDedicatedMfdSecondScreen,
+            _suppressMfdColumnForMfdHostWindow);
+
     /// <summary>Пресет «первый экран — PFD+Forward без MFD, второй — только MFD».</summary>
     public bool PresentationRequestsDedicatedMfdSecondScreen => _presentationDedicatedMfdSecondScreen;
 
@@ -56,6 +66,7 @@ public partial class MainWindowViewModel
         OnPropertyChanged(nameof(IsMfdHostWindowShellOpen));
         OnPropertyChanged(nameof(IsMfdColumnVisible));
         OnPropertyChanged(nameof(ActiveAttentionLayoutSurface));
+        OnPropertyChanged(nameof(MainGridColumnDefinitions));
     }
 
     /// <summary>Сохранённая геометрия <see cref="Views.MfdHostWindow"/> в <c>settings.toml</c> (ADR 0017).</summary>

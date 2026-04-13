@@ -7,14 +7,14 @@ public static class PresentationLayoutAnalyzer
     /// Два дисплея: на первом — только PFD и forward (без Mfd), на втором — только Mfd.
     /// Типичный пресет <c>(PFD+Forward) (MFD)</c>, <c>(P+F) (M)</c>.
     /// </summary>
-    public static bool IsDedicatedMfdSecondScreenPreset(IReadOnlyList<IReadOnlyList<PresentationAnchorKind>> screens)
+    public static bool IsDedicatedMfdSecondScreenPreset(IReadOnlyList<IReadOnlyList<PresentationAnchorSlot>> screens)
     {
         if (screens.Count < 2)
             return false;
 
         var first = screens[0];
         var second = screens[1];
-        if (second.Count != 1 || second[0] != PresentationAnchorKind.Mfd)
+        if (second.Count != 1 || second[0].Kind != PresentationAnchorKind.Mfd)
             return false;
 
         var hasPfd = ContainsAnchor(first, PresentationAnchorKind.Pfd);
@@ -24,7 +24,7 @@ public static class PresentationLayoutAnalyzer
     }
 
     /// <summary>Три дисплея: по одному якорю — <c>(PFD) (Forward) (MFD)</c> (ADR 0017).</summary>
-    public static bool IsTriplePfdForwardMfdPreset(IReadOnlyList<IReadOnlyList<PresentationAnchorKind>> screens)
+    public static bool IsTriplePfdForwardMfdPreset(IReadOnlyList<IReadOnlyList<PresentationAnchorSlot>> screens)
     {
         if (screens.Count != 3)
             return false;
@@ -39,7 +39,7 @@ public static class PresentationLayoutAnalyzer
     /// <see cref="PresentationMonitorTopology.OrderScreensForPresentation"/>). Иначе <c>false</c> — плейсмент без семантики.
     /// </summary>
     public static bool TryGetMfdHostPresentationScreenIndex(
-        IReadOnlyList<IReadOnlyList<PresentationAnchorKind>> screens,
+        IReadOnlyList<IReadOnlyList<PresentationAnchorSlot>> screens,
         out int index)
     {
         index = -1;
@@ -58,14 +58,14 @@ public static class PresentationLayoutAnalyzer
         return false;
     }
 
-    private static bool IsSingleAnchor(IReadOnlyList<PresentationAnchorKind> screen, PresentationAnchorKind kind) =>
-        screen.Count == 1 && screen[0] == kind;
+    private static bool IsSingleAnchor(IReadOnlyList<PresentationAnchorSlot> screen, PresentationAnchorKind kind) =>
+        screen.Count == 1 && screen[0].Kind == kind;
 
-    private static bool ContainsAnchor(IReadOnlyList<PresentationAnchorKind> screen, PresentationAnchorKind kind)
+    private static bool ContainsAnchor(IReadOnlyList<PresentationAnchorSlot> screen, PresentationAnchorKind kind)
     {
         for (var i = 0; i < screen.Count; i++)
         {
-            if (screen[i] == kind)
+            if (screen[i].Kind == kind)
                 return true;
         }
 
