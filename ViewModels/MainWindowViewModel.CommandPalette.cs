@@ -38,6 +38,7 @@ public sealed class IdeCommandPaletteRowViewModel : ViewModelBase
     public double RowOpacity => IsAvailable ? 1.0 : 0.45;
 }
 
+/// <summary>Палитра команд.</summary>
 public partial class MainWindowViewModel
 {
     private const int CommandPalettePageStep = 8;

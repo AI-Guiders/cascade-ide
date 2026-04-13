@@ -4,6 +4,7 @@ using GitMcp.Core;
 
 namespace CascadeIDE.ViewModels;
 
+/// <summary>MCP: git.</summary>
 public partial class MainWindowViewModel
 {
     Task<string> Services.IIdeMcpActions.GitStatusAsync() =>

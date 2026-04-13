@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace CascadeIDE.ViewModels;
 
+/// <summary>Стартовый проект.</summary>
 public partial class MainWindowViewModel
 {
     [ObservableProperty]

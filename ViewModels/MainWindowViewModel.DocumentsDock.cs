@@ -3,6 +3,7 @@ using System.Text;
 
 namespace CascadeIDE.ViewModels;
 
+/// <summary>Документы / dock.</summary>
 public partial class MainWindowViewModel
 {
     partial void OnEditorTextChanged(string value)

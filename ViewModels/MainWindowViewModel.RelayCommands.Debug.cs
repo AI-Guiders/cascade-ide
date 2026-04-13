@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace CascadeIDE.ViewModels;
 
+/// <summary>Relay: отладка.</summary>
 public partial class MainWindowViewModel
 {
     private void NotifyDebugRelayCommandsChanged()

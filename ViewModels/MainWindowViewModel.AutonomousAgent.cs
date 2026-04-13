@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace CascadeIDE.ViewModels;
 
+/// <summary>Автономный агент (Power).</summary>
 public partial class MainWindowViewModel
 {
     UiModeFamily IAutonomousAgentSessionHost.UiModeFamily => UiModeFamily;

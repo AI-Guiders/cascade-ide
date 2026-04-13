@@ -4,6 +4,7 @@ using CascadeIDE.Models;
 
 namespace CascadeIDE.ViewModels;
 
+/// <summary>Git + workspace UI.</summary>
 public partial class MainWindowViewModel
 {
     private static string GetWorkspacePath(string? solutionPath)

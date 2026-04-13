@@ -9,6 +9,7 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace CascadeIDE.ViewModels;
 
+/// <summary>Сборка, <c>BuildOutputPanel</c>.</summary>
 public partial class MainWindowViewModel
 {
     [RelayCommand(CanExecute = nameof(CanToggleChatPanel))]

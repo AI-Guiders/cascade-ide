@@ -3,6 +3,7 @@ using CascadeIDE.Services;
 
 namespace CascadeIDE.ViewModels;
 
+/// <summary>Редактор.</summary>
 internal sealed partial class IdeMcpCommandExecutor
 {
     private void RegisterCore(Action<string, Handler> add)

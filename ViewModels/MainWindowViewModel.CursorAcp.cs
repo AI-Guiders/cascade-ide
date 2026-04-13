@@ -1,5 +1,6 @@
 namespace CascadeIDE.ViewModels;
 
+/// <summary>Путь Cursor ACP.</summary>
 public partial class MainWindowViewModel
 {
     private string _cursorAcpAgentPath = "";

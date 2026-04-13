@@ -6,6 +6,7 @@ using CascadeIDE.Services.Lsp;
 
 namespace CascadeIDE.ViewModels;
 
+/// <summary>Запуск/перезапуск Markdown LSP.</summary>
 public partial class MainWindowViewModel
 {
     /// <summary>Варианты Markdown LSP (настройки).</summary>

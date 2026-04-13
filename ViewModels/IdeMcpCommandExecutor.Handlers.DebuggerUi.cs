@@ -3,6 +3,7 @@ using CascadeIDE.Services;
 
 namespace CascadeIDE.ViewModels;
 
+/// <summary>Поверхность отладки.</summary>
 internal sealed partial class IdeMcpCommandExecutor
 {
     private void RegisterDebuggerBreakpoints(Action<string, Handler> add)

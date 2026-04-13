@@ -4,6 +4,7 @@ using Dock.Model.Mvvm.Controls;
 
 namespace CascadeIDE.ViewModels;
 
+/// <summary>MCP: редактор.</summary>
 public partial class MainWindowViewModel
 {
     void Services.IIdeMcpActions.OpenFile(string path)

@@ -6,6 +6,7 @@ using CascadeIDE.Services;
 
 namespace CascadeIDE.ViewModels;
 
+/// <summary>MCP: workspace.</summary>
 public partial class MainWindowViewModel
 {
     string Services.IIdeMcpActions.GetSolutionInfo()

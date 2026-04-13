@@ -6,6 +6,7 @@ using CascadeIDE.Services.Lsp;
 
 namespace CascadeIDE.ViewModels;
 
+/// <summary>Запуск/перезапуск C# LSP.</summary>
 public partial class MainWindowViewModel
 {
     /// <summary>Варианты C# LSP (настройки; активен не более одного процесса).</summary>

@@ -4,6 +4,7 @@ using CascadeIDE.Services;
 
 namespace CascadeIDE.ViewModels;
 
+/// <summary>Хендлеры хрома / видимости.</summary>
 internal sealed partial class IdeMcpCommandExecutor
 {
     private void RegisterOutputAndFocus(Action<string, Handler> add)

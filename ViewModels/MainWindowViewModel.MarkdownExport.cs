@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace CascadeIDE.ViewModels;
 
+/// <summary>Экспорт Markdown.</summary>
 public partial class MainWindowViewModel
 {
     [RelayCommand(CanExecute = nameof(CanExportExpandedMarkdown))]

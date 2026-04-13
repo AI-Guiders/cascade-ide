@@ -2,6 +2,7 @@ using Avalonia.Threading;
 
 namespace CascadeIDE.ViewModels;
 
+/// <summary>MCP: панель отладки.</summary>
 public partial class MainWindowViewModel
 {
     void Services.IIdeMcpActions.ShowDebugBreakpoints(IReadOnlyList<(string FilePath, int Line)> breakpoints)

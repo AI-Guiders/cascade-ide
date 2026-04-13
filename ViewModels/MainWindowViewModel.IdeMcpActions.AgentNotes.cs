@@ -1,5 +1,6 @@
 namespace CascadeIDE.ViewModels;
 
+/// <summary>Реализация <see cref="IIdeMcpActions"/>: agent-notes.</summary>
 public partial class MainWindowViewModel
 {
     private string? TryGetNotesWorkspacePath() =>

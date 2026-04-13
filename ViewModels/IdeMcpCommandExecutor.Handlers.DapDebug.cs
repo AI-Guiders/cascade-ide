@@ -3,6 +3,7 @@ using CascadeIDE.Services;
 
 namespace CascadeIDE.ViewModels;
 
+/// <summary>DAP / отладка.</summary>
 internal sealed partial class IdeMcpCommandExecutor
 {
     private void RegisterDapDebug(Action<string, Handler> add)

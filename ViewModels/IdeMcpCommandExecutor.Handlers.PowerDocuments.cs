@@ -3,6 +3,7 @@ using CascadeIDE.Services;
 
 namespace CascadeIDE.ViewModels;
 
+/// <summary>Power / документы.</summary>
 internal sealed partial class IdeMcpCommandExecutor
 {
     private void RegisterFocusPowerAndAgentActions(Action<string, Handler> add)

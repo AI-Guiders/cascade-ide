@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace CascadeIDE.ViewModels;
 
+/// <summary>MCP: UI automation.</summary>
 public partial class MainWindowViewModel
 {
     void Services.IIdeMcpActions.FocusEditor()

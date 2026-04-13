@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace CascadeIDE.ViewModels;
 
+/// <summary>Реестр capabilities.</summary>
 public partial class MainWindowViewModel
 {
     [RelayCommand]

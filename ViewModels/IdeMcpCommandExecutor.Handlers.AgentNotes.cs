@@ -2,6 +2,7 @@ using CascadeIDE.Services;
 
 namespace CascadeIDE.ViewModels;
 
+/// <summary>Хендлеры agent-notes.</summary>
 internal sealed partial class IdeMcpCommandExecutor
 {
     private void RegisterAgentNotes(Action<string, Handler> add)
