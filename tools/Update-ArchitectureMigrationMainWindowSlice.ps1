@@ -4,10 +4,12 @@
   Пересчитывает строки в partial-файлах MainWindowViewModel / IdeMcpCommandExecutor и обновляет таблицы в docs/architecture-migration.md.
 
 .DESCRIPTION
-  Описания — tools/architecture-migration-slice/main-window-slice-descriptions.json;
-  шаблон абзаца сводки — tools/architecture-migration-slice/main-window-slice-summary.template.md
+  Колонка «Содержание»: по умолчанию берётся из XML-док-комментария `<summary>` непосредственно над
+  `partial class MainWindowViewModel` / `partial class IdeMcpCommandExecutor` в соответствующем .cs.
+  Если там нет summary — подставляется строка из
+  tools/architecture-migration-slice/main-window-slice-descriptions.json (необязательный fallback).
+  Шаблон абзаца сводки — tools/architecture-migration-slice/main-window-slice-summary.template.md
   (плейсхолдеры {0}…{3}). Каталог не tools/data: там срабатывает игнор Data/ в .gitignore.
-  При появлении нового .cs без ключа в JSON скрипт завершается с ошибкой.
 
 .PARAMETER RepoRoot
   Корень репозитория cascade-ide (родитель каталога tools).
@@ -32,11 +34,14 @@ function Get-LineCount([string] $path) {
     return (Get-Content -LiteralPath $path | Measure-Object -Line).Lines
 }
 
-function Read-DescriptionsHashtable([string] $jsonPath) {
+function Read-OptionalDescriptionsJson([string] $jsonPath) {
     if (-not (Test-Path -LiteralPath $jsonPath)) {
-        throw "Нет файла описаний: $jsonPath"
+        return @{}
     }
     $raw = Get-Content -LiteralPath $jsonPath -Raw -Encoding UTF8
+    if ([string]::IsNullOrWhiteSpace($raw)) {
+        return @{}
+    }
     $o = $raw | ConvertFrom-Json
     $ht = @{}
     foreach ($p in $o.PSObject.Properties) {
@@ -45,11 +50,95 @@ function Read-DescriptionsHashtable([string] $jsonPath) {
     return $ht
 }
 
+function Get-CrefDisplayFragment([string] $cref) {
+    $c = $cref.Trim()
+    if ($c.Length -ge 2 -and [char]::IsLetter($c[0]) -and $c[1] -eq ':') {
+        $c = $c.Substring(2)
+    }
+    $paren = $c.IndexOf('(')
+    if ($paren -ge 0) {
+        $c = $c.Substring(0, $paren)
+    }
+    $i = $c.LastIndexOf('.')
+    if ($i -ge 0) {
+        return $c.Substring($i + 1)
+    }
+    return $c
+}
+
+function Normalize-XmlDocSummaryForMarkdown([string] $text) {
+    if ([string]::IsNullOrWhiteSpace($text)) {
+        return ''
+    }
+    $t = $text
+    $t = [regex]::Replace($t, '<c>([^<]*)</c>', { param($m) [char]0x0060 + $m.Groups[1].Value + [char]0x0060 })
+    $t = [regex]::Replace($t, '<see\s+cref="([^"]+)"\s*/>', { param($m) [char]0x0060 + (Get-CrefDisplayFragment $m.Groups[1].Value) + [char]0x0060 })
+    $t = [regex]::Replace($t, '<see\s+langword="([^"]+)"\s*/>', { param($m) [char]0x0060 + $m.Groups[1].Value + [char]0x0060 })
+    $t = [regex]::Replace($t, '<[^>]+>', '')
+    $t = $t -replace '&lt;', '<' -replace '&gt;', '>' -replace '&amp;', '&' -replace '&quot;', '"'
+    $t = [regex]::Replace($t, '\s+', ' ').Trim()
+    $t = $t -replace '\|', '¦'
+    return $t
+}
+
+function Get-FileLevelXmlSummary([string] $path, [string] $classBaseName) {
+    $lines = @(Get-Content -LiteralPath $path -Encoding UTF8)
+    $escaped = [regex]::Escape($classBaseName)
+    $pattern = "^\s*(?:public|internal)\s+(?:sealed\s+)?partial\s+class\s+$escaped\b"
+    $classLineIndex = -1
+    for ($i = 0; $i -lt $lines.Count; $i++) {
+        if ($lines[$i] -match $pattern) {
+            $classLineIndex = $i
+            break
+        }
+    }
+    if ($classLineIndex -lt 0) {
+        return ''
+    }
+    $i = $classLineIndex - 1
+    while ($i -ge 0 -and [string]::IsNullOrWhiteSpace($lines[$i])) {
+        $i--
+    }
+    $docLines = [System.Collections.Generic.List[string]]::new()
+    while ($i -ge 0 -and $lines[$i] -match '^\s*///') {
+        $docLines.Insert(0, $lines[$i])
+        $i--
+    }
+    if ($docLines.Count -eq 0) {
+        return ''
+    }
+    $stripped = foreach ($dl in $docLines) {
+        if ($dl -match '^\s*///\s?(.*)$') {
+            $Matches[1]
+        }
+        else {
+            ''
+        }
+    }
+    $block = $stripped -join "`n"
+    if ($block -notmatch '<summary>([\s\S]*?)</summary>') {
+        return ''
+    }
+    $inner = $Matches[1].Trim()
+    return (Normalize-XmlDocSummaryForMarkdown $inner)
+}
+
+function Resolve-Description([string] $path, [string] $tableKey, [string] $classBaseName, [hashtable] $fallback) {
+    $fromXml = Get-FileLevelXmlSummary $path $classBaseName
+    if (-not [string]::IsNullOrWhiteSpace($fromXml)) {
+        return $fromXml
+    }
+    if ($fallback.ContainsKey($tableKey) -and -not [string]::IsNullOrWhiteSpace($fallback[$tableKey])) {
+        return [string]$fallback[$tableKey]
+    }
+    throw "Нет XML <summary> над partial class в ``$tableKey`` и нет строки в main-window-slice-descriptions.json для этого ключа."
+}
+
 $contentDir = Join-Path $PSScriptRoot 'architecture-migration-slice'
 $descriptionsPath = Join-Path $contentDir 'main-window-slice-descriptions.json'
 $summaryTemplatePath = Join-Path $contentDir 'main-window-slice-summary.template.md'
 
-$Descriptions = Read-DescriptionsHashtable $descriptionsPath
+$Fallback = Read-OptionalDescriptionsJson $descriptionsPath
 
 if (-not (Test-Path -LiteralPath $summaryTemplatePath)) {
     throw "Нет шаблона сводки: $summaryTemplatePath"
@@ -83,10 +172,8 @@ foreach ($f in $mwFiles) {
     $name = $f.Name
     $lines = Get-LineCount $f.FullName
     $sumMw += $lines
-    if (-not $Descriptions.ContainsKey($name)) {
-        throw "Нет описания для ``$name`` — добавь ключ в $descriptionsPath"
-    }
-    $mwRows.Add([pscustomobject]@{ Name = $name; Lines = $lines; Desc = $Descriptions[$name] })
+    $desc = Resolve-Description $f.FullName $name 'MainWindowViewModel' $Fallback
+    $mwRows.Add([pscustomobject]@{ Name = $name; Lines = $lines; Desc = $desc })
 }
 
 $execRows = [System.Collections.Generic.List[object]]::new()
@@ -96,10 +183,8 @@ foreach ($f in $execFiles) {
     $rel = if ($f.DirectoryName -match 'Generated') { 'Generated/' + $f.Name } else { $f.Name }
     $lines = Get-LineCount $f.FullName
     $sumExec += $lines
-    if (-not $Descriptions.ContainsKey($rel)) {
-        throw "Нет описания для ``$rel`` — добавь ключ в $descriptionsPath"
-    }
-    $execRows.Add([pscustomobject]@{ Name = $rel; Lines = $lines; Desc = $Descriptions[$rel] })
+    $desc = Resolve-Description $f.FullName $rel 'IdeMcpCommandExecutor' $Fallback
+    $execRows.Add([pscustomobject]@{ Name = $rel; Lines = $lines; Desc = $desc })
 }
 
 $total = $sumMw + $sumExec

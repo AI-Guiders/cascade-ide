@@ -20,17 +20,17 @@
 | Файл | Строк (≈) | Содержание |
 |------|------------|------------|
 | `MainWindowViewModel.AutonomousAgent.cs` | 112 | Автономный агент (Power) |
-| `MainWindowViewModel.Breakpoints.cs` | 135 | Брейкпоинты, файловый watcher |
+| `MainWindowViewModel.Breakpoints.cs` | 135 | Брейкпоинты (IDE + .dotnet-debug-mcp-breakpoints.json + отладчик) и подсветка строки остановки. |
 | `MainWindowViewModel.Capabilities.cs` | 22 | Реестр capabilities |
 | `MainWindowViewModel.CommandPalette.cs` | 130 | Палитра команд |
-| `MainWindowViewModel.cs` | 334 | Конструктор, дочерние VM, `WorkspaceDiagnostics`, `ExecuteCommandAsync`, навигация к проблемам, `ResolveProvider` |
+| `MainWindowViewModel.cs` | 334 | Главный композитор окна (partial-класс, несколько `MainWindowViewModel*.cs`). Карта файлов и ответственности — `docs/architecture-migration.md`, раздел «Срез MainWindowViewModel». |
 | `MainWindowViewModel.CSharpLsp.cs` | 111 | Запуск/перезапуск C# LSP |
 | `MainWindowViewModel.CursorAcp.cs` | 21 | Путь Cursor ACP |
 | `MainWindowViewModel.DocumentsDock.cs` | 43 | Документы / dock |
-| `MainWindowViewModel.EditorHud.cs` | 48 | HUD редактора |
-| `MainWindowViewModel.EditorOllama.cs` | 43 | Редактор + Ollama |
-| `MainWindowViewModel.Eicas.cs` | 17 | Лента EICAS |
-| `MainWindowViewModel.EnvironmentReadiness.cs` | 38 | Страница «готовность окружения»; снимок через `EnvironmentReadinessSnapshotBuilder.BuildAllRowsAsync` |
+| `MainWindowViewModel.EditorHud.cs` | 48 | Полоса HUD над редактором (ADR 0021 §9): баннеры без отдельного якоря-колонки. Основной сценарий продукта — внешний агент (например Cursor) + Cascade; текст сюда задаётся явно (MCP, диагностика, позже — встроенная автономия), а не «по умолчанию» от автономного цикла Power. |
+| `MainWindowViewModel.EditorOllama.cs` | 43 | Состояние редактора, Markdown и выбора модели Ollama. |
+| `MainWindowViewModel.Eicas.cs` | 17 | Канал EICAS / CAS — отдельно от полосы телеметрии контура работы (ADR 0021, вариант A). |
+| `MainWindowViewModel.EnvironmentReadiness.cs` | 38 | Снимок «готовность окружения» (ADR 0023), отдельно от Workspace Health. |
 | `MainWindowViewModel.IdeMcpActions.AgentNotes.cs` | 44 | Реализация `IIdeMcpActions`: agent-notes |
 | `MainWindowViewModel.IdeMcpActions.BuildTest.cs` | 141 | MCP: сборка, тесты |
 | `MainWindowViewModel.IdeMcpActions.DebuggerPanel.cs` | 51 | MCP: панель отладки |
@@ -38,20 +38,20 @@
 | `MainWindowViewModel.IdeMcpActions.Git.cs` | 118 | MCP: git |
 | `MainWindowViewModel.IdeMcpActions.UiAutomation.cs` | 155 | MCP: UI automation |
 | `MainWindowViewModel.IdeMcpActions.Workspace.cs` | 91 | MCP: workspace |
-| `MainWindowViewModel.LayoutNotifications.cs` | 20 | Уведомления раскладки |
+| `MainWindowViewModel.LayoutNotifications.cs` | 20 | Инвалидация производных высот `MainGrid` без длинных цепочек `NotifyPropertyChangedFor` в ShellState. |
 | `MainWindowViewModel.MarkdownExport.cs` | 54 | Экспорт Markdown |
 | `MainWindowViewModel.MarkdownLsp.cs` | 94 | Запуск/перезапуск Markdown LSP |
-| `MainWindowViewModel.Presentation.cs` | 158 | Заголовок, режимы, подписи |
-| `MainWindowViewModel.PresentationLayout.cs` | 84 | Раскладка / presentation |
+| `MainWindowViewModel.Presentation.cs` | 158 | Вычисляемые свойства разметки, Workspace Health и видимости панелей (режимы UI). |
+| `MainWindowViewModel.PresentationLayout.cs` | 84 | ADR 0017: строка `presentation` и второй `TopLevel` — `MfdHostWindow` с полным вторичным контуром (п. 8). |
 | `MainWindowViewModel.RelayCommands.cs` | 272 | Relay-команды |
 | `MainWindowViewModel.RelayCommands.Debug.cs` | 116 | Relay: отладка |
-| `MainWindowViewModel.SecondaryShell.cs` | 57 | Вторичный контур shell |
-| `MainWindowViewModel.SettingsReactive.cs` | 115 | Реакции на настройки, сохранение |
-| `MainWindowViewModel.ShellState.cs` | 188 | Панели, UI-режим, AI, телеметрия |
+| `MainWindowViewModel.SecondaryShell.cs` | 57 | Вторичный контур оболочки: одна активная страница; навигация — команды и палитра. Якорь на экране — пресет (v1: зона Mfd). |
+| `MainWindowViewModel.SettingsReactive.cs` | 115 | Реакции на изменение полей настроек и ключей API: диск, автономный агент, панели. |
+| `MainWindowViewModel.ShellState.cs` | 188 | Раскладка панелей, нижняя зона, Workspace Health / автономный агент, ключи провайдеров и чата. |
 | `MainWindowViewModel.SolutionBuild.cs` | 172 | Сборка, `BuildOutputPanel` |
 | `MainWindowViewModel.StartupProject.cs` | 119 | Стартовый проект |
 | `MainWindowViewModel.UiGitWorkspace.cs` | 137 | Git + workspace UI |
-| `MainWindowViewModel.ViewBridge.cs` | 56 | Мост к view (диалоги, снимки UI) |
+| `MainWindowViewModel.ViewBridge.cs` | 56 | Колбэки и провайдеры, которые View подставляет в главный VM (диалоги, UI automation). |
 | `MainWindowViewModel.WorkspaceHealth.cs` | 13 | Связка с Workspace Health |
 
 <!-- AUTO:MAIN-WINDOW-SLICE:MWVM-TABLE:END -->
@@ -62,7 +62,7 @@
 
 | Файл | Строк (≈) | Содержание |
 |------|------------|------------|
-| `IdeMcpCommandExecutor.cs` | 64 | `BuildHandlers`, `ExecuteAsync` |
+| `IdeMcpCommandExecutor.cs` | 64 | Диспетчер MCP-команд IDE: разбор args и вызов `IIdeMcpActions` / UI-команд главного окна. |
 | `IdeMcpCommandExecutor.Handlers.AgentNotes.cs` | 69 | Хендлеры agent-notes |
 | `IdeMcpCommandExecutor.Handlers.Chrome.cs` | 316 | Хендлеры хрома / видимости |
 | `IdeMcpCommandExecutor.Handlers.DapDebug.cs` | 87 | DAP / отладка |
