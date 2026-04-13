@@ -3,7 +3,7 @@
 **Статус:** действующая.  
 **Назначение этого файла:** краткий **живой навигатор** — куда смотреть и какие решения уже зафиксированы. Детальная **логика решений** (контекст, выбор, последствия, отклонённые варианты) — в [ADR](adr/README.md), не дублируем здесь длинными разделами.
 
-**Связь:** [git-and-submodules-v1.md](git-and-submodules-v1.md), [MCP-PROTOCOL.md](MCP-PROTOCOL.md), [debug-human-agent-parity-v1.md](debug-human-agent-parity-v1.md), [architecture-migration.md](architecture-migration.md).
+**Связь:** [git-and-submodules-v1.md](git-and-submodules-v1.md), [MCP-PROTOCOL.md](MCP-PROTOCOL.md), [debug-human-agent-parity-v1.md](debug-human-agent-parity-v1.md), [architecture-migration.md](architecture-migration.md), черновик границ продукта [north-star-cursor-mcp-cascade-workbench-v1.md](design/north-star-cursor-mcp-cascade-workbench-v1.md) (Cursor + MCP + Cascade).
 
 ---
 
@@ -12,6 +12,10 @@
 Сохранить скорость разработки одного десктопного приложения (Avalonia + MVVM) при явных границах между UI, сценариями и внешним миром; по отладке — единый слой для человека и агента (см. [debug-human-agent-parity-v1.md](debug-human-agent-parity-v1.md) и [ADR 0002](adr/0002-debug-human-agent-parity.md)).
 
 Политика **прагматичная**: не полный DDD на весь код — см. [ADR 0006](adr/0006-presentation-layers-and-feature-slices.md).
+
+### Продуктовый фокус (ближайший горизонт)
+
+**Приоритет итераций:** комфортный переход пользователя **из Cursor** (MCP, наблюдаемость агента и репозитория в одном контуре с CascadeIDE). **Паритет с Visual Studio** по охвату сценариев — **долгий горизонт**, не критерий скорости ближайших выпусков. Подробнее и формулировка north-star — [north-star-cursor-mcp-cascade-workbench-v1.md](design/north-star-cursor-mcp-cascade-workbench-v1.md).
 
 ### Документация и справка (намерение)
 
@@ -82,7 +86,7 @@
 | [design/onboarding-first-run-v1.md](design/onboarding-first-run-v1.md) | Онбординг и First Run — живой чертёж (не ADR); дополняется по мере идей |
 | [design/attention-zone-panel-playbook-v1.md](design/attention-zone-panel-playbook-v1.md) | Зона ↔ панель shell ↔ SDK: следующий шаг после «это PFD» (не ADR) |
 | [design/vertical-slice-attention-capabilities-v1.md](design/vertical-slice-attention-capabilities-v1.md) | Вертикальный срез: регистрация UI surface + проверка дампа / теста |
-| [design/north-star-cursor-mcp-cascade-workbench-v1.md](design/north-star-cursor-mcp-cascade-workbench-v1.md) | Границы цели «Cursor + MCP + Cascade вместо VS» и матрица сделано/осталось (черновик) |
+| [design/north-star-cursor-mcp-cascade-workbench-v1.md](design/north-star-cursor-mcp-cascade-workbench-v1.md) | Границы «Cursor + MCP + Cascade»; приоритет **перехода из Cursor**, VS-паритет — долгую; матрица сделано/осталось (черновик) |
 | [design/cds-contract-v0.md](design/cds-contract-v0.md) | CDS в **контрактном** смысле vs `UiLayoutSnapshot`; черновик полей v0 (живой чертёж; [0021 §1.1](adr/0021-pfd-mfd-cockpit-attention-model.md#glossary-cds-contract)) |
 | [CascadeIDE.ArchitectureAnalyzers/README.md](../CascadeIDE.ArchitectureAnalyzers/README.md) | Roslyn: **CASCOPE001**/**CASCOPE002** — слои `Cockpit/Channels`, `Cds`, `Composition` без Avalonia / без `using Features.UiChrome` ([0036](adr/0036-cds-channel-compositor-surface-pipeline.md)) |
 
@@ -156,4 +160,5 @@
 - **v1.62** — [0039](adr/0039-workspace-navigation-affordances.md): north-star по языкам — C# / .NET, не polyglot IDE; [north-star workbench](design/north-star-cursor-mcp-cascade-workbench-v1.md) обновлён.  
 - **v1.63** — раздел **«Avalonia и слой кабины (граница ответственности)»**: фюзеляж (окна, ввод, хост редактора) vs CDS/композитор (семантика кабины); кастомная отрисовка над хостом; ссылка на [0017](adr/0017-multi-window-workspace-and-agent-surfaces.md) (предохранитель весов). Уточнение [0036](adr/0036-cds-channel-compositor-surface-pipeline.md) п. 4; строка в [cds-contract-v0](design/cds-contract-v0.md) §3.  
 - **v1.64** — добавлен [0040](adr/0040-lsp-launch-line-settings-toml-presets-and-environment.md): командная строка LSP в `settings.toml` (пресеты, опциональные ключи; флаг `launch_from_environment` — Proposed).  
+- **v1.65** — [north-star-cursor-mcp-cascade-workbench-v1.md](design/north-star-cursor-mcp-cascade-workbench-v1.md): приоритет **перехода из Cursor** vs паритет VS в долгую; в этом файле — подраздел **«Продуктовый фокус»** под [Цель](#цель).  
 - Изменения направления — отдельным коммитом: обновление этого файла и при необходимости новый ADR в [docs/adr/README.md](adr/README.md).
