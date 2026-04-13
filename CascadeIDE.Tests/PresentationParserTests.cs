@@ -94,6 +94,17 @@ public sealed class PresentationParserTests
     }
 
     [Fact]
+    public void TwoScreens_Weighted_FirstGroup_SpacesInsideScreenMarkers_NormalizedLikeCompactForm()
+    {
+        var g = PresentationGrammarTokens.FromSettings("()", " ", "+", "P", "F", "M");
+        var compact = PresentationParser.Parse("(0.25P+0.75F)(M)", g);
+        var spaced = PresentationParser.Parse("(0.25P + 0.75F) ( M )", g);
+        Assert.True(spaced.IsSuccess);
+        Assert.True(compact.IsSuccess);
+        Assert.Equal(compact.Screens, spaced.Screens);
+    }
+
+    [Fact]
     public void SingleScreen_ThreeAnchors_Weighted()
     {
         var g = PresentationGrammarTokens.FromSettings("()", " ", "+", "P", "F", "M");

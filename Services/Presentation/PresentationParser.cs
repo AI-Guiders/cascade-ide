@@ -2,7 +2,7 @@ using System.Globalization;
 
 namespace CascadeIDE.Services.Presentation;
 
-/// <summary>Парсер строки <c>presentation</c> / <c>zone_screen_layout</c> (EBNF — ADR 0017). Внутри одного экрана <c>(…)</c> — <see cref="PresentationInnerEtoGrammar"/> (Eto.Parse). Литералы якорей задаются в TOML (<see cref="PresentationGrammarTokens"/>).</summary>
+/// <summary>Парсер строки <c>presentation</c> / <c>zone_screen_layout</c> (EBNF — ADR 0017). Внутри одного экрана <c>(…)</c> — <see cref="PresentationInnerEtoGrammar"/> (Eto.Parse); перед разбором содержимое скобок нормализуется: все символы <see cref="char.IsWhiteSpace(char)"/> удаляются (удобочитаемые пробелы вокруг <c>+</c> и т.д.). Литералы якорей задаются в TOML (<see cref="PresentationGrammarTokens"/>).</summary>
 public static class PresentationParser
 {
     private const double WeightSumTolerance = 1e-6;
@@ -72,31 +72,32 @@ public static class PresentationParser
     private static (List<PresentationAnchorSlot> Value, string? Error) ParseAnchorsInner(ReadOnlySpan<char> inner, PresentationGrammarTokens grammar)
     {
         var list = new List<PresentationAnchorSlot>();
-        var s = inner.Trim();
+        var s = CollapseInnerWhitespace(inner);
         if (s.Length == 0)
             return (list, "Пустой список якорей внутри границ экрана.");
 
         var innerGrammar = PresentationInnerEtoGrammar.GetOrCreate(grammar);
-        var eto = innerGrammar.Match(s.ToString());
+        var eto = innerGrammar.Match(s);
         if (!eto.Success)
         {
             return (list, "Неверная последовательность якорей или разделителей внутри экрана.");
         }
 
+        var sSpan = s.AsSpan();
         var i = 0;
-        while (i < s.Length)
+        while (i < sSpan.Length)
         {
             if (list.Count > 0)
             {
-                if (!TrySkipZoneSeparator(s, grammar, ref i))
+                if (!TrySkipZoneSeparator(sSpan, grammar, ref i))
                     return (list, $"Ожидался разделитель якорей на позиции {i}.");
             }
 
             double? weight = null;
-            if (TryConsumeWeight(s, ref i, out var w))
+            if (TryConsumeWeight(sSpan, ref i, out var w))
                 weight = w;
 
-            if (!TryConsumeAnchorToken(s, grammar, ref i, out var kind))
+            if (!TryConsumeAnchorToken(sSpan, grammar, ref i, out var kind))
                 return (list, $"Неизвестный якорь на позиции {i}.");
 
             list.Add(new PresentationAnchorSlot(kind, weight));
@@ -106,6 +107,34 @@ public static class PresentationParser
             return (list, err);
 
         return (list, null);
+    }
+
+    /// <summary>Удаляет все пробельные символы внутри одного экрана <c>(…)</c> (после <see cref="ReadOnlySpan{T}.Trim()"/>).</summary>
+    private static string CollapseInnerWhitespace(ReadOnlySpan<char> inner)
+    {
+        inner = inner.Trim();
+        if (inner.IsEmpty)
+            return string.Empty;
+
+        var remove = 0;
+        for (var j = 0; j < inner.Length; j++)
+        {
+            if (char.IsWhiteSpace(inner[j]))
+                remove++;
+        }
+
+        if (remove == 0)
+            return inner.ToString();
+
+        return string.Create(inner.Length - remove, inner, static (dst, src) =>
+        {
+            var d = 0;
+            for (var j = 0; j < src.Length; j++)
+            {
+                if (!char.IsWhiteSpace(src[j]))
+                    dst[d++] = src[j];
+            }
+        });
     }
 
     private static string? ValidateScreenWeights(List<PresentationAnchorSlot> list)
@@ -150,7 +179,7 @@ public static class PresentationParser
         return null;
     }
 
-    /// <summary>Десятичная точка U+002E, инвариантная культура; без пробела перед якорем.</summary>
+    /// <summary>Десятичная точка U+002E, инвариантная культура; во входной строке пробелы внутри <c>(…)</c> удаляются до разбора (<see cref="CollapseInnerWhitespace"/>).</summary>
     private static bool TryConsumeWeight(ReadOnlySpan<char> s, ref int i, out double weight)
     {
         weight = 0;
