@@ -7,7 +7,7 @@
   Колонка «Содержание»: по умолчанию берётся из XML-док-комментария `<summary>` непосредственно над
   `partial class MainWindowViewModel` / `partial class IdeMcpCommandExecutor` в соответствующем .cs.
   Если там нет summary — подставляется строка из
-  tools/architecture-migration-slice/main-window-slice-descriptions.json (необязательный fallback).
+  tools/architecture-migration-slice/main-window-slice-descriptions.json (необязательный fallback; может быть ``{}``).
   Шаблон абзаца сводки — tools/architecture-migration-slice/main-window-slice-summary.template.md
   (плейсхолдеры {0}…{3}). Каталог не tools/data: там срабатывает игнор Data/ в .gitignore.
 
