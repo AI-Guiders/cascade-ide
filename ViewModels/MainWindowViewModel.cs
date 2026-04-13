@@ -64,10 +64,10 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _contextMinimizer = new Services.ContextMinimizer(_csharpLanguageService);
         _aiProviderManager = new Services.AiProviderManager(_contextMinimizer, ResolveProvider);
         _ideMcpServerEnabled = _settings.IdeMcpServerEnabled;
-        _markdownKrokiEnabled = _settings.MarkdownKrokiEnabled;
-        _markdownKrokiBaseUrl = string.IsNullOrWhiteSpace(_settings.MarkdownKrokiBaseUrl)
+        _markdownKrokiEnabled = _settings.MarkdownDiagrams.KrokiEnabled;
+        _markdownKrokiBaseUrl = string.IsNullOrWhiteSpace(_settings.MarkdownDiagrams.KrokiBaseUrl)
             ? "https://kroki.io"
-            : _settings.MarkdownKrokiBaseUrl.Trim();
+            : _settings.MarkdownDiagrams.KrokiBaseUrl.Trim();
         _externalMcpServersJson = _settings.ExternalMcpServersJson;
         _activeAiProvider = _settings.ActiveAiProvider;
         _cursorAcpAgentPath = _settings.CursorAcpAgentPath ?? "";
@@ -121,16 +121,16 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         new UiChromeCapabilitiesModule().Register(_capabilities);
         new Features.Markdown.MarkdownCapabilitiesModule().Register(_capabilities);
 
-        _csharpLspProvider = string.IsNullOrEmpty(_settings.CSharpLspProvider)
+        _csharpLspProvider = string.IsNullOrEmpty(_settings.CSharpLsp.Provider)
             ? CSharpLspProviderIds.ParseOnly
-            : _settings.CSharpLspProvider;
-        _csharpLspExecutable = _settings.CSharpLspExecutable ?? "";
-        _csharpLspArguments = _settings.CSharpLspArguments ?? "";
-        _markdownLspProvider = string.IsNullOrEmpty(_settings.MarkdownLspProvider)
+            : _settings.CSharpLsp.Provider;
+        _csharpLspExecutable = _settings.CSharpLsp.Executable ?? "";
+        _csharpLspArguments = _settings.CSharpLsp.Arguments ?? "";
+        _markdownLspProvider = string.IsNullOrEmpty(_settings.MarkdownLsp.Provider)
             ? MarkdownLspProviderIds.Off
-            : _settings.MarkdownLspProvider;
-        _markdownLspExecutable = _settings.MarkdownLspExecutable ?? "";
-        _markdownLspArguments = _settings.MarkdownLspArguments ?? "";
+            : _settings.MarkdownLsp.Provider;
+        _markdownLspExecutable = _settings.MarkdownLsp.Executable ?? "";
+        _markdownLspArguments = _settings.MarkdownLsp.Arguments ?? "";
 
         _mcpClientService = new Services.McpClientService(_settings.ExternalMcpServersJson);
         _autonomousAgentService = CreateAutonomousAgentService(_mcpClientService);

@@ -27,7 +27,7 @@ public partial class MainWindowViewModel
             var v = string.IsNullOrWhiteSpace(value) ? MarkdownLspProviderIds.Off : value.Trim();
             if (!SetProperty(ref _markdownLspProvider, v))
                 return;
-            _settings.MarkdownLspProvider = v;
+            _settings.MarkdownLsp.Provider = v;
             SaveSettingsIfChanged();
             OnPropertyChanged(nameof(IsMarkdownLspProcessSelected));
             _ = RestartMarkdownLanguageServerAsync();
@@ -42,7 +42,7 @@ public partial class MainWindowViewModel
             var v = value ?? "";
             if (!SetProperty(ref _markdownLspExecutable, v))
                 return;
-            _settings.MarkdownLspExecutable = v;
+            _settings.MarkdownLsp.Executable = v;
             SaveSettingsIfChanged();
             _ = RestartMarkdownLanguageServerAsync();
         }
@@ -56,7 +56,7 @@ public partial class MainWindowViewModel
             var v = value ?? "";
             if (!SetProperty(ref _markdownLspArguments, v))
                 return;
-            _settings.MarkdownLspArguments = v;
+            _settings.MarkdownLsp.Arguments = v;
             SaveSettingsIfChanged();
             _ = RestartMarkdownLanguageServerAsync();
         }
@@ -71,9 +71,9 @@ public partial class MainWindowViewModel
             _markdownLspHost = null;
             return (
                 Workspace.SolutionPath ?? "",
-                _settings.MarkdownLspProvider,
-                _settings.MarkdownLspExecutable,
-                _settings.MarkdownLspArguments);
+                _settings.MarkdownLsp.Provider,
+                _settings.MarkdownLsp.Executable,
+                _settings.MarkdownLsp.Arguments);
         });
 
         if (string.Equals(snap.Item2, MarkdownLspProviderIds.Off, StringComparison.OrdinalIgnoreCase))

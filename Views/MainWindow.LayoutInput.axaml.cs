@@ -124,10 +124,13 @@ public partial class MainWindow
         var token = _markdownDiagramPreviewCts.Token;
         var krokiSnapshot = new CascadeIdeSettings
         {
-            MarkdownKrokiEnabled = vm.MarkdownKrokiEnabled,
-            MarkdownKrokiBaseUrl = string.IsNullOrWhiteSpace(vm.MarkdownKrokiBaseUrl)
-                ? "https://kroki.io"
-                : vm.MarkdownKrokiBaseUrl.Trim()
+            MarkdownDiagrams = new MarkdownDiagramSettings
+            {
+                KrokiEnabled = vm.MarkdownKrokiEnabled,
+                KrokiBaseUrl = string.IsNullOrWhiteSpace(vm.MarkdownKrokiBaseUrl)
+                    ? "https://kroki.io"
+                    : vm.MarkdownKrokiBaseUrl.Trim()
+            }
         };
 
         _ = ExpandInlineMarkdownPreviewAsync(viewer, raw, krokiSnapshot, token);

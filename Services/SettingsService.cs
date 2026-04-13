@@ -24,7 +24,9 @@ public static class SettingsService
                 return new CascadeIdeSettings();
 
             var toml = File.ReadAllText(tomlPath);
-            return CascadeTomlSerializer.Deserialize<CascadeIdeSettings>(toml) ?? new CascadeIdeSettings();
+            var settings = CascadeTomlSerializer.Deserialize<CascadeIdeSettings>(toml) ?? new CascadeIdeSettings();
+            SettingsTomlMigration.ApplyLegacyFlatKeys(settings, toml);
+            return settings;
         }
         catch
         {

@@ -13,13 +13,13 @@ public partial class MainWindowViewModel
 
     partial void OnMarkdownKrokiEnabledChanged(bool value)
     {
-        _settings.MarkdownKrokiEnabled = value;
+        _settings.MarkdownDiagrams.KrokiEnabled = value;
         SaveSettingsIfChanged();
     }
 
     partial void OnMarkdownKrokiBaseUrlChanged(string value)
     {
-        _settings.MarkdownKrokiBaseUrl = string.IsNullOrWhiteSpace(value) ? "https://kroki.io" : value.Trim();
+        _settings.MarkdownDiagrams.KrokiBaseUrl = string.IsNullOrWhiteSpace(value) ? "https://kroki.io" : value.Trim();
         SaveSettingsIfChanged();
     }
 

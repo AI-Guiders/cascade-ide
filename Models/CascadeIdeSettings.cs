@@ -3,7 +3,7 @@ using OutWit.Common.Values;
 
 namespace CascadeIDE.Models;
 
-/// <summary>Настройки CascadeIDE (модель Ollama по умолчанию, MCP, провайдеры ИИ и т.д.).</summary>
+/// <summary>Настройки CascadeIDE (модель Ollama по умолчанию, MCP, провайдеры ИИ и т.д.). В TOML: <c>[csharp_lsp]</c>, <c>[markdown_lsp]</c>, <c>[markdown_diagrams]</c>, <c>[presentation_grammar]</c> и корневые ключи.</summary>
 public sealed class CascadeIdeSettings : ModelBase
 {
     /// <summary>Предпочитаемая модель Ollama для чата (под ноутбук + MCP/tool calling: qwen2.5-coder:7b).</summary>
@@ -67,36 +67,14 @@ public sealed class CascadeIdeSettings : ModelBase
     /// <summary>Язык UI (<c>ru-RU</c>, <c>en-US</c>). Пустая строка — при старте берётся системная локаль (<c>UiCulture.ApplyFromSystem</c>).</summary>
     public string UiCultureName { get; set; } = "";
 
-    /// <summary>
-    /// Источник диагностик C#: <c>ParseOnly</c> (только парсер), <c>OmniSharp</c>, <c>CSharpLs</c>, <c>Custom</c>.
-    /// Один активный LSP-процесс при открытом решении.
-    /// </summary>
-    public string CSharpLspProvider { get; set; } = "ParseOnly";
+    /// <summary>C# LSP — секция <c>[csharp_lsp]</c> (раньше: плоские <c>c_sharp_lsp_*</c>, см. миграцию в <c>SettingsService</c>).</summary>
+    public CSharpLspSettings CSharpLsp { get; set; } = new();
 
-    /// <summary>Путь или имя exe для LSP (пусто — пресет по умолчанию: OmniSharp / csharp-ls).</summary>
-    public string CSharpLspExecutable { get; set; } = "";
+    /// <summary>Markdown LSP — <c>[markdown_lsp]</c>.</summary>
+    public MarkdownLspSettings MarkdownLsp { get; set; } = new();
 
-    /// <summary>Дополнительные аргументы командной строки LSP (через пробел).</summary>
-    public string CSharpLspArguments { get; set; } = "";
-
-    /// <summary>
-    /// Markdown LSP (Marksman): <c>Off</c>, <c>Marksman</c>, <c>Custom</c>. Корень workspace = каталог решения.
-    /// </summary>
-    public string MarkdownLspProvider { get; set; } = "Off";
-
-    /// <summary>Путь или имя exe (пусто у Marksman = <c>marksman</c> в PATH).</summary>
-    public string MarkdownLspExecutable { get; set; } = "";
-
-    /// <summary>Доп. аргументы Markdown LSP.</summary>
-    public string MarkdownLspArguments { get; set; } = "";
-
-    /// <summary>
-    /// Рендерить блоки <c>```mermaid</c> / <c>```plantuml</c> в превью Markdown через Kroki (текст диаграммы уходит на сервер).
-    /// </summary>
-    public bool MarkdownKrokiEnabled { get; set; } = true;
-
-    /// <summary>Базовый URL Kroki (публичный <c>https://kroki.io</c> или свой инстанс).</summary>
-    public string MarkdownKrokiBaseUrl { get; set; } = "https://kroki.io";
+    /// <summary>Kroki / диаграммы в превью Markdown — <c>[markdown_diagrams]</c>.</summary>
+    public MarkdownDiagramSettings MarkdownDiagrams { get; set; } = new();
 
     /// <summary>Строка раскладки по физическим дисплеям (ADR 0017). Пусто — не задано.</summary>
     public string Presentation { get; set; } = "";
@@ -154,14 +132,9 @@ public sealed class CascadeIdeSettings : ModelBase
             && InstrumentationDockVisible.Is(o.InstrumentationDockVisible)
             && UiMode.Is(o.UiMode)
             && UiCultureName.Is(o.UiCultureName)
-            && CSharpLspProvider.Is(o.CSharpLspProvider)
-            && CSharpLspExecutable.Is(o.CSharpLspExecutable)
-            && CSharpLspArguments.Is(o.CSharpLspArguments)
-            && MarkdownLspProvider.Is(o.MarkdownLspProvider)
-            && MarkdownLspExecutable.Is(o.MarkdownLspExecutable)
-            && MarkdownLspArguments.Is(o.MarkdownLspArguments)
-            && MarkdownKrokiEnabled.Is(o.MarkdownKrokiEnabled)
-            && MarkdownKrokiBaseUrl.Is(o.MarkdownKrokiBaseUrl)
+            && CSharpLspEquals(CSharpLsp, o.CSharpLsp)
+            && MarkdownLspEquals(MarkdownLsp, o.MarkdownLsp)
+            && MarkdownDiagramsEquals(MarkdownDiagrams, o.MarkdownDiagrams)
             && Presentation.Is(o.Presentation)
             && ZoneScreenLayout.Is(o.ZoneScreenLayout)
             && PresentationGrammarEquals(o.PresentationGrammar)
@@ -170,6 +143,27 @@ public sealed class CascadeIdeSettings : ModelBase
             && MfdHostWindowPixelY == o.MfdHostWindowPixelY
             && Nullable.Equals(MfdHostWindowWidth, o.MfdHostWindowWidth)
             && Nullable.Equals(MfdHostWindowHeight, o.MfdHostWindowHeight);
+    }
+
+    private static bool CSharpLspEquals(CSharpLspSettings? a, CSharpLspSettings? b)
+    {
+        if (a is null || b is null)
+            return a == b;
+        return a.Provider.Is(b.Provider) && a.Executable.Is(b.Executable) && a.Arguments.Is(b.Arguments);
+    }
+
+    private static bool MarkdownLspEquals(MarkdownLspSettings? a, MarkdownLspSettings? b)
+    {
+        if (a is null || b is null)
+            return a == b;
+        return a.Provider.Is(b.Provider) && a.Executable.Is(b.Executable) && a.Arguments.Is(b.Arguments);
+    }
+
+    private static bool MarkdownDiagramsEquals(MarkdownDiagramSettings? a, MarkdownDiagramSettings? b)
+    {
+        if (a is null || b is null)
+            return a == b;
+        return a.KrokiEnabled == b.KrokiEnabled && a.KrokiBaseUrl.Is(b.KrokiBaseUrl);
     }
 
     private bool PresentationGrammarEquals(PresentationGrammarSettings? o)
@@ -206,14 +200,23 @@ public sealed class CascadeIdeSettings : ModelBase
             InstrumentationDockVisible = InstrumentationDockVisible,
             UiMode = UiMode,
             UiCultureName = UiCultureName,
-            CSharpLspProvider = CSharpLspProvider,
-            CSharpLspExecutable = CSharpLspExecutable,
-            CSharpLspArguments = CSharpLspArguments,
-            MarkdownLspProvider = MarkdownLspProvider,
-            MarkdownLspExecutable = MarkdownLspExecutable,
-            MarkdownLspArguments = MarkdownLspArguments,
-            MarkdownKrokiEnabled = MarkdownKrokiEnabled,
-            MarkdownKrokiBaseUrl = MarkdownKrokiBaseUrl,
+            CSharpLsp = new CSharpLspSettings
+            {
+                Provider = CSharpLsp.Provider,
+                Executable = CSharpLsp.Executable,
+                Arguments = CSharpLsp.Arguments,
+            },
+            MarkdownLsp = new MarkdownLspSettings
+            {
+                Provider = MarkdownLsp.Provider,
+                Executable = MarkdownLsp.Executable,
+                Arguments = MarkdownLsp.Arguments,
+            },
+            MarkdownDiagrams = new MarkdownDiagramSettings
+            {
+                KrokiEnabled = MarkdownDiagrams.KrokiEnabled,
+                KrokiBaseUrl = MarkdownDiagrams.KrokiBaseUrl,
+            },
             Presentation = Presentation,
             ZoneScreenLayout = ZoneScreenLayout,
             PresentationGrammar = new PresentationGrammarSettings
