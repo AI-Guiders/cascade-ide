@@ -7,7 +7,7 @@ public partial class MainWindowViewModel
 {
     partial void OnIdeMcpServerEnabledChanged(bool value)
     {
-        _settings.IdeMcpServerEnabled = value;
+        _settings.Mcp.StdioServerEnabled = value;
         SaveSettingsIfChanged();
     }
 
@@ -25,11 +25,11 @@ public partial class MainWindowViewModel
 
     partial void OnExternalMcpServersJsonChanged(string value)
     {
-        _settings.ExternalMcpServersJson = value ?? "[]";
+        _settings.Mcp.ExternalServersJson = value ?? "[]";
 
         // External MCP connectivity affects autonomous tool list/calls.
         Autonomous.CancelForHostReconfiguration();
-        _mcpClientService = new Services.McpClientService(_settings.ExternalMcpServersJson);
+        _mcpClientService = new Services.McpClientService(_settings.Mcp.ExternalServersJson);
         _autonomousAgentService = CreateAutonomousAgentService(_mcpClientService);
         Autonomous.ReplaceAgentService(_autonomousAgentService);
 
@@ -38,14 +38,14 @@ public partial class MainWindowViewModel
 
     partial void OnIsSolutionExplorerVisibleChanged(bool value)
     {
-        _settings.SolutionExplorerVisible = value;
+        _settings.WorkspaceUi.ShowSolutionExplorer = value;
         OnPropertyChanged(nameof(IsSolutionPanelHidden));
         SaveSettingsIfChanged();
     }
 
     partial void OnIsTerminalVisibleChanged(bool value)
     {
-        _settings.TerminalVisible = value;
+        _settings.WorkspaceUi.ShowTerminal = value;
         OnPropertyChanged(nameof(IsTerminalPanelHidden));
         OnPropertyChanged(nameof(IsBottomPanelVisible));
         SaveSettingsIfChanged();
@@ -67,7 +67,7 @@ public partial class MainWindowViewModel
 
     partial void OnIsInstrumentationDockVisibleChanged(bool value)
     {
-        _settings.InstrumentationDockVisible = value;
+        _settings.WorkspaceUi.ShowInstrumentation = value;
         SaveSettingsIfChanged();
         if (value)
         {
@@ -88,7 +88,7 @@ public partial class MainWindowViewModel
     {
         if (!string.IsNullOrEmpty(value))
         {
-            _settings.ActiveAiProvider = value;
+            _settings.Ai.Provider = value;
             SaveSettingsIfChanged();
         }
         ChatPanel.DisposeCursorAcpSession();
@@ -115,7 +115,7 @@ public partial class MainWindowViewModel
 
     partial void OnIsGitPanelVisibleChanged(bool value)
     {
-        _settings.GitPanelVisible = value;
+        _settings.WorkspaceUi.ShowGit = value;
         OnPropertyChanged(nameof(IsBottomPanelVisible));
         SaveSettingsIfChanged();
         if (value)

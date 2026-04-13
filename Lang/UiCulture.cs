@@ -8,14 +8,14 @@ namespace CascadeIDE.Lang;
 public static class UiCulture
 {
     /// <summary>
-    /// Если в <c>settings.toml</c> задан непустой <see cref="Models.CascadeIdeSettings.UiCultureName"/> — применить его;
+    /// Если в <c>settings.toml</c> задан непустой <see cref="Models.WorkspaceUiSettings.Culture"/> — применить его;
     /// иначе как <see cref="ApplyFromSystem"/>.
     /// </summary>
     public static void ApplyFromSettingsOrSystem()
     {
         try
         {
-            var name = SettingsService.Load().UiCultureName?.Trim();
+            var name = SettingsService.Load().WorkspaceUi.Culture?.Trim();
             if (!string.IsNullOrEmpty(name))
             {
                 Apply(CultureInfo.GetCultureInfo(name));

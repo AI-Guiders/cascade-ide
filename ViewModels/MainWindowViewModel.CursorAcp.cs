@@ -13,7 +13,7 @@ public partial class MainWindowViewModel
             var v = value ?? "";
             if (!SetProperty(ref _cursorAcpAgentPath, v))
                 return;
-            _settings.CursorAcpAgentPath = v;
+            _settings.Ai.CursorAcpPath = v;
             SaveSettingsIfChanged();
             if (ActiveAiProvider == "CursorACP")
                 ChatPanel.DisposeCursorAcpSession();

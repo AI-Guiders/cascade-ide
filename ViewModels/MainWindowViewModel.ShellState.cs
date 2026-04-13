@@ -174,7 +174,7 @@ public partial class MainWindowViewModel
 
     /// <summary>
     /// JSON-конфиг внешних MCP-серверов (stdio) для автономного режима.
-    /// Формат — как в <see cref="CascadeIdeSettings.ExternalMcpServersJson"/>.
+    /// Формат — как в <see cref="McpSettings.ExternalServersJson"/>.
     /// </summary>
     [ObservableProperty]
     private string _externalMcpServersJson = "[]";
@@ -205,11 +205,11 @@ public partial class MainWindowViewModel
     /// <summary>Отображаемое имя модели (для облачных — из настроек).</summary>
     public string CurrentModelDisplay => ActiveAiProvider switch
     {
-        "Anthropic" => _settings.AnthropicModelId,
-        "OpenAI" => _settings.OpenAiModelId,
-        "DeepSeek" => _settings.DeepSeekModelId,
+        "Anthropic" => _settings.Ai.AnthropicModel,
+        "OpenAI" => _settings.Ai.OpenAiModel,
+        "DeepSeek" => _settings.Ai.DeepSeekModel,
         "CursorACP" => "Cursor ACP",
-        _ => SelectedOllamaModel ?? _settings.PreferredOllamaModel ?? ""
+        _ => SelectedOllamaModel ?? _settings.Ai.DefaultOllamaModel ?? ""
     };
 
     [ObservableProperty]

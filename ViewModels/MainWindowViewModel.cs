@@ -63,22 +63,22 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _csharpLanguageService = new Services.CSharpLanguageService();
         _contextMinimizer = new Services.ContextMinimizer(_csharpLanguageService);
         _aiProviderManager = new Services.AiProviderManager(_contextMinimizer, ResolveProvider);
-        _ideMcpServerEnabled = _settings.IdeMcpServerEnabled;
+        _ideMcpServerEnabled = _settings.Mcp.StdioServerEnabled;
         _markdownKrokiEnabled = _settings.MarkdownDiagrams.KrokiEnabled;
         _markdownKrokiBaseUrl = string.IsNullOrWhiteSpace(_settings.MarkdownDiagrams.KrokiBaseUrl)
             ? "https://kroki.io"
             : _settings.MarkdownDiagrams.KrokiBaseUrl.Trim();
-        _externalMcpServersJson = _settings.ExternalMcpServersJson;
-        _activeAiProvider = _settings.ActiveAiProvider;
-        _cursorAcpAgentPath = _settings.CursorAcpAgentPath ?? "";
+        _externalMcpServersJson = _settings.Mcp.ExternalServersJson;
+        _activeAiProvider = _settings.Ai.Provider;
+        _cursorAcpAgentPath = _settings.Ai.CursorAcpPath ?? "";
         _anthropicApiKey = _aiKeys.AnthropicApiKey ?? "";
         _openAiApiKey = _aiKeys.OpenAiApiKey ?? "";
         _deepSeekApiKey = _aiKeys.DeepSeekApiKey ?? "";
-        _isSolutionExplorerVisible = _settings.SolutionExplorerVisible;
-        _isTerminalVisible = _settings.TerminalVisible;
-        _isGitPanelVisible = _settings.GitPanelVisible;
-        _isInstrumentationDockVisible = _settings.InstrumentationDockVisible;
-        _uiMode = NormalizeUiMode(_settings.UiMode);
+        _isSolutionExplorerVisible = _settings.WorkspaceUi.ShowSolutionExplorer;
+        _isTerminalVisible = _settings.WorkspaceUi.ShowTerminal;
+        _isGitPanelVisible = _settings.WorkspaceUi.ShowGit;
+        _isInstrumentationDockVisible = _settings.WorkspaceUi.ShowInstrumentation;
+        _uiMode = NormalizeUiMode(_settings.WorkspaceUi.Mode);
         InitializeAgentUiDefaults();
         RegisterAgentFeedHandlers();
         ApplyUiModeLayout(_uiMode, persist: false);
@@ -132,7 +132,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _markdownLspExecutable = _settings.MarkdownLsp.Executable ?? "";
         _markdownLspArguments = _settings.MarkdownLsp.Arguments ?? "";
 
-        _mcpClientService = new Services.McpClientService(_settings.ExternalMcpServersJson);
+        _mcpClientService = new Services.McpClientService(_settings.Mcp.ExternalServersJson);
         _autonomousAgentService = CreateAutonomousAgentService(_mcpClientService);
         Autonomous = new AutonomousAgentSessionViewModel(_autonomousAgentService, this);
         _dapDebug = new Services.IdeDapDebugSession((file, line, stack, vars) =>
@@ -316,14 +316,14 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
 
     private (Services.IAiChatProvider? Provider, string Model) ResolveProvider(string providerKey)
     {
-        var key = providerKey ?? _settings.ActiveAiProvider;
+        var key = providerKey ?? _settings.Ai.Provider;
         return key switch
         {
-            "Anthropic" => (new Services.AnthropicProvider(_aiKeys.AnthropicApiKey ?? "", _settings.AnthropicModelId), _settings.AnthropicModelId),
-            "OpenAI" => (new Services.OpenAiCompatibleProvider(_settings.OpenAiBaseUrl, _aiKeys.OpenAiApiKey ?? "", _settings.OpenAiModelId), _settings.OpenAiModelId),
-            "DeepSeek" => (new Services.OpenAiCompatibleProvider(_settings.DeepSeekBaseUrl, _aiKeys.DeepSeekApiKey ?? "", _settings.DeepSeekModelId), _settings.DeepSeekModelId),
+            "Anthropic" => (new Services.AnthropicProvider(_aiKeys.AnthropicApiKey ?? "", _settings.Ai.AnthropicModel), _settings.Ai.AnthropicModel),
+            "OpenAI" => (new Services.OpenAiCompatibleProvider(_settings.Ai.OpenAiBaseUrl, _aiKeys.OpenAiApiKey ?? "", _settings.Ai.OpenAiModel), _settings.Ai.OpenAiModel),
+            "DeepSeek" => (new Services.OpenAiCompatibleProvider(_settings.Ai.DeepSeekBaseUrl, _aiKeys.DeepSeekApiKey ?? "", _settings.Ai.DeepSeekModel), _settings.Ai.DeepSeekModel),
             "CursorACP" => (null, ""),
-            _ => (new Services.OllamaProvider(_ollama), SelectedOllamaModel ?? _settings.PreferredOllamaModel)
+            _ => (new Services.OllamaProvider(_ollama), SelectedOllamaModel ?? _settings.Ai.DefaultOllamaModel)
         };
     }
 

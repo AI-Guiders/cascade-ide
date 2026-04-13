@@ -32,7 +32,7 @@ public partial class App : Application
             var vm = new MainWindowViewModel();
             vm.IsMcpServerMode = RunMcpStdio;
             desktop.MainWindow = new MainWindow { DataContext = vm };
-            if (RunMcpStdio && Services.SettingsService.Load().IdeMcpServerEnabled)
+            if (RunMcpStdio && Services.SettingsService.Load().Mcp.StdioServerEnabled)
                 _ = RunMcpServerAsync(vm);
             _ = vm.RefreshOllamaAsync();
         }

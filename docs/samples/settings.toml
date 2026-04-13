@@ -1,10 +1,27 @@
 # Пример пользовательского settings.toml (ADR 0028: %LocalAppData%\CascadeIDE\settings.toml).
 # Ключи — snake_case (CascadeTomlSerializer / Tomlyn). Секции — логические группы.
 
-preferred_ollama_model = "qwen2.5-coder:7b"
-ide_mcp_server_enabled = true
-external_mcp_servers_json = "[]"
-active_ai_provider = "Ollama"
+[ai]
+default_ollama_model = "qwen2.5-coder:7b"
+provider = "Ollama"
+anthropic_model = "claude-sonnet-4-20250514"
+open_ai_base_url = "https://api.openai.com"
+open_ai_model = "gpt-4o"
+deep_seek_base_url = "https://api.deepseek.com"
+deep_seek_model = "deepseek-chat"
+cursor_acp_path = ""
+
+[mcp]
+stdio_server_enabled = true
+external_servers_json = "[]"
+
+[workspace_ui]
+show_solution_explorer = true
+show_terminal = true
+show_git = false
+show_instrumentation = true
+mode = "Flight"
+culture = ""
 
 [csharp_lsp]
 # ParseOnly | OmniSharp | CSharpLs | Custom
