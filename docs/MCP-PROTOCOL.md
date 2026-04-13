@@ -286,7 +286,7 @@
 | `get_solution_files` | Список файлов и дерево решения (Solution Explorer). returns: json. |
 | `get_solution_info` | Короткая информация о текущем решении/файле/выделении в дереве. returns: json. |
 | `get_ui_modes_diagnostics` | Диагностика загрузки UI-режимов: пути к UiModes, TOML vs встроенный fallback, список id в меню (почему может не быть Flight). returns: json. |
-| `get_workspace_navigation_context` | Контекст навигации (ADR 0039): связанные файлы или мини-подграф. args: mode:string, file_path?:string, line?:integer, column?:integer, max_related?:integer, max_nodes?:integer, max_edges?:integer; returns: json; example: {"mode":"related","file_path":"src/Foo.cs","max_related":24}. |
+| `get_workspace_navigation_context` | Контекст навигации (ADR 0039): связанные файлы или мини-подграф. Виды связей — partial_peer project_peer xaml_codebehind_pair test_counterpart same_namespace same_directory. Имена preset — из settings.toml workspace_navigation_context.presets. args: mode:string, file_path?:string, line?:integer, column?:integer, max_related?:integer, max_nodes?:integer, max_edges?:integer, preset?:string, include_kinds?:string[], exclude_kinds?:string[]; returns: json; example: {"mode":"related","file_path":"src/Foo.cs","preset":"no_namespace_noise"}. |
 | `get_workspace_state` | Единая сводка состояния IDE (solution/editor/build/diagnostics...). returns: json. |
 | `move_document_to_group_1` | Переместить документ в группу 1. args: file_path:string; returns: text; example: {"file_path":"C:\\\\tmp\\\\a.cs"}. |
 | `move_document_to_group_2` | Переместить документ в группу 2. args: file_path:string; returns: text; example: {"file_path":"C:\\\\tmp\\\\a.cs"}. |
@@ -300,6 +300,8 @@
 | `toggle_solution_explorer` | Как меню «Вид → Обозреватель решения». returns: text. |
 | `toggle_terminal` | Как меню «Вид → Терминал» (переключатель). returns: text. |
 <!-- GENERATED:IdeCommands END -->
+
+**Семантическая навигация (`get_workspace_navigation_context`):** пресеты задаются в `%LocalAppData%\CascadeIDE\settings.toml` в секции `[workspace_navigation_context]` (поле `presets`, JSON). В ответе смотри `kind_filter` (эффективные списки) и в режиме `subgraph` — `kind` на узлах и `related_kind` на рёбрах. Подробный cookbook: [workspace-navigation-mcp-cookbook.md](design/workspace-navigation-mcp-cookbook.md).
 
 Проверка: `ide_get_workspace_state` — помимо `terminal.is_visible`, `ui_mode`, есть `panels` (видимость колонок), `safety_level`, `editor_group_count`, `agent_trace_step_count`, `is_autonomous_running`.
 

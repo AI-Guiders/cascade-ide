@@ -1,5 +1,3 @@
-using CascadeIDE.Services;
-
 namespace CascadeIDE.ViewModels;
 
 /// <summary>MCP: семантическая навигация (ADR 0039).</summary>
@@ -13,7 +11,10 @@ public partial class MainWindowViewModel
         int? column,
         int? maxRelated,
         int? maxNodes,
-        int? maxEdges) =>
+        int? maxEdges,
+        string? preset,
+        IReadOnlyList<string>? includeKinds,
+        IReadOnlyList<string>? excludeKinds) =>
         UiScheduler.Default.InvokeAsync(() =>
             WorkspaceNavigationContextBuilder.BuildJson(
                 mode,
@@ -25,5 +26,9 @@ public partial class MainWindowViewModel
                 column,
                 maxRelated ?? WorkspaceNavigationContextBuilder.DefaultMaxRelated,
                 maxNodes ?? WorkspaceNavigationContextBuilder.DefaultMaxNodes,
-                maxEdges ?? WorkspaceNavigationContextBuilder.DefaultMaxEdges));
+                maxEdges ?? WorkspaceNavigationContextBuilder.DefaultMaxEdges,
+                includeKinds,
+                excludeKinds,
+                preset,
+                _settings.WorkspaceNavigationContext.PresetsJson));
 }

@@ -113,6 +113,7 @@ public sealed class IdeMcpServerDispatchTests
         public string GetSolutionInfo() => throw new NotImplementedException();
         public Task<string> GetSolutionFilesAsync() => throw new NotImplementedException();
         public Task<string> GetCurrentFileDiagnosticsAsync() => throw new NotImplementedException();
+        public Task<string> GetWorkspaceNavigationContextAsync(string mode, string? filePath, int? line, int? column, int? maxRelated, int? maxNodes, int? maxEdges, string? preset, IReadOnlyList<string>? includeKinds, IReadOnlyList<string>? excludeKinds) => throw new NotImplementedException();
         public Task<string> BuildAsync() => throw new NotImplementedException();
         public Task<string> BuildStructuredAsync() => throw new NotImplementedException();
         public Task<string> RunTestsAsync() => throw new NotImplementedException();

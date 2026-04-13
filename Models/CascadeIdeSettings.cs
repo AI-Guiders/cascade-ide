@@ -39,6 +39,9 @@ public sealed class CascadeIdeSettings : ModelBase
     /// <summary>Токены грамматики строки <see cref="Presentation"/> (TOML: секция <c>[presentation_grammar]</c>).</summary>
     public PresentationGrammarSettings PresentationGrammar { get; set; } = new();
 
+    /// <summary>Пресеты фильтра видов для <c>get_workspace_navigation_context</c> (<c>[workspace_navigation_context]</c>).</summary>
+    public WorkspaceNavigationContextSettings WorkspaceNavigationContext { get; set; } = new();
+
     /// <summary>
     /// При пресете «Mfd на втором экране» и >=2 мониторах — открыть окно-хост зоны Mfd при старте (ADR 0017 v1).
     /// </summary>
@@ -79,6 +82,7 @@ public sealed class CascadeIdeSettings : ModelBase
             && Presentation.Is(o.Presentation)
             && ZoneScreenLayout.Is(o.ZoneScreenLayout)
             && PresentationGrammarEquals(o.PresentationGrammar)
+            && WorkspaceNavigationContextEquals(WorkspaceNavigationContext, o.WorkspaceNavigationContext)
             && OpenMfdHostWindowOnStartup.Is(o.OpenMfdHostWindowOnStartup)
             && MfdHostWindowPixelX == o.MfdHostWindowPixelX
             && MfdHostWindowPixelY == o.MfdHostWindowPixelY
@@ -139,6 +143,13 @@ public sealed class CascadeIdeSettings : ModelBase
         if (a is null || b is null)
             return a == b;
         return a.KrokiEnabled == b.KrokiEnabled && a.KrokiBaseUrl.Is(b.KrokiBaseUrl);
+    }
+
+    private static bool WorkspaceNavigationContextEquals(WorkspaceNavigationContextSettings? a, WorkspaceNavigationContextSettings? b)
+    {
+        if (a is null || b is null)
+            return a == b;
+        return string.Equals(a.PresetsJson?.Trim(), b.PresetsJson?.Trim(), StringComparison.Ordinal);
     }
 
     private bool PresentationGrammarEquals(PresentationGrammarSettings? o)
@@ -211,6 +222,10 @@ public sealed class CascadeIdeSettings : ModelBase
                 PfdZoneIdentifier = PresentationGrammar.PfdZoneIdentifier,
                 ForwardZoneIdentifier = PresentationGrammar.ForwardZoneIdentifier,
                 MfdZoneIdentifier = PresentationGrammar.MfdZoneIdentifier,
+            },
+            WorkspaceNavigationContext = new WorkspaceNavigationContextSettings
+            {
+                PresetsJson = WorkspaceNavigationContext.PresetsJson
             },
             OpenMfdHostWindowOnStartup = OpenMfdHostWindowOnStartup,
             MfdHostWindowPixelX = MfdHostWindowPixelX,

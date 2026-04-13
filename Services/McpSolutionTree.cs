@@ -32,6 +32,132 @@ public static class McpSolutionTree
         }
     }
 
+    /// <summary>
+    /// Полный путь файла → путь владеющего <c>.csproj</c> (или <c>null</c>, если файл вне проекта в дереве).
+    /// Обход совпадает с обозревателем решения: узел с <c>.csproj</c> задаёт контекст для потомков.
+    /// Для «реального» MSBuild-проекта файла при плоском SDK-glob см. <see cref="ResolveOwningProjectPath"/>.
+    /// </summary>
+    public static Dictionary<string, string?> MapFileToProject(ObservableCollection<SolutionItem> roots)
+    {
+        var map = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
+
+        void Walk(SolutionItem node, string? projectPath)
+        {
+            if (node.FullPath is { } p)
+            {
+                if (p.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase))
+                {
+                    string proj;
+                    try
+                    {
+                        proj = Path.GetFullPath(p);
+                    }
+                    catch
+                    {
+                        return;
+                    }
+
+                    foreach (var child in node.Children)
+                        Walk(child, proj);
+                    return;
+                }
+
+                if (!p.EndsWith(".sln", StringComparison.OrdinalIgnoreCase)
+                    && !p.EndsWith(".slnx", StringComparison.OrdinalIgnoreCase))
+                {
+                    try
+                    {
+                        // Первое вхождение пути в DFS определяет проект; не перезаписывать —
+                        // иначе последний узел в дереве «перетягивает» общие/линкованные пути на чужой .csproj.
+                        map.TryAdd(Path.GetFullPath(p), projectPath);
+                    }
+                    catch
+                    {
+                        // ignore
+                    }
+                }
+            }
+
+            if (node.FullPath is { } fp && fp.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase))
+                return;
+
+            foreach (var child in node.Children)
+                Walk(child, projectPath);
+        }
+
+        foreach (var root in roots)
+            Walk(root, null);
+
+        return map;
+    }
+
+    /// <summary>
+    /// Ближайший вверх по диску <c>.csproj</c>, которому по соглашению принадлежит файл (папка проекта = каталог с .csproj).
+    /// Нужен для <c>project_peer</c>: узел дерева решения может подвешивать все <c>.cs</c> под одним корневым .csproj из-за SDK-glob по каталогу.
+    /// </summary>
+    public static string? ResolveOwningProjectPath(string fileFullPath)
+    {
+        if (string.IsNullOrWhiteSpace(fileFullPath))
+            return null;
+        string full;
+        try
+        {
+            full = Path.GetFullPath(fileFullPath.Trim());
+        }
+        catch
+        {
+            return null;
+        }
+
+        var dir = Path.GetDirectoryName(full);
+        while (!string.IsNullOrEmpty(dir))
+        {
+            string[] csprojs;
+            try
+            {
+                csprojs = Directory.GetFiles(dir, "*.csproj");
+            }
+            catch
+            {
+                break;
+            }
+
+            if (csprojs.Length > 0)
+            {
+                if (csprojs.Length == 1)
+                    return Path.GetFullPath(csprojs[0]);
+                var folderName = Path.GetFileName(dir);
+                var match = csprojs.FirstOrDefault(p =>
+                    string.Equals(Path.GetFileNameWithoutExtension(p), folderName, StringComparison.OrdinalIgnoreCase));
+                return Path.GetFullPath(match ?? csprojs[0]);
+            }
+
+            try
+            {
+                dir = Path.GetDirectoryName(dir);
+            }
+            catch
+            {
+                break;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Артефакты сборки (obj/bin) — не участвуют в семантической навигации и часто попадают в дерево из-за явных Include в .csproj.
+    /// </summary>
+    public static bool IsBuildArtifactPath(string fullPath)
+    {
+        if (string.IsNullOrEmpty(fullPath))
+            return false;
+        return fullPath.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.OrdinalIgnoreCase)
+            || fullPath.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}", StringComparison.OrdinalIgnoreCase)
+            || fullPath.Contains("/obj/", StringComparison.OrdinalIgnoreCase)
+            || fullPath.Contains("/bin/", StringComparison.OrdinalIgnoreCase);
+    }
+
     public static string? GetRelativePath(string? solutionPath, string? fullPath)
     {
         if (string.IsNullOrEmpty(solutionPath) || string.IsNullOrEmpty(fullPath))
