@@ -36,7 +36,7 @@
 | `MainWindowViewModel.IdeMcpActions.DebuggerPanel.cs` | 52 | MCP: панель отладки. |
 | `MainWindowViewModel.IdeMcpActions.Editor.cs` | 170 | MCP: редактор. |
 | `MainWindowViewModel.IdeMcpActions.Git.cs` | 119 | MCP: git. |
-| `MainWindowViewModel.IdeMcpActions.Navigation.cs` | 27 | MCP: семантическая навигация (ADR 0039). |
+| `MainWindowViewModel.IdeMcpActions.Navigation.cs` | 33 | MCP: семантическая навигация (ADR 0039). |
 | `MainWindowViewModel.IdeMcpActions.UiAutomation.cs` | 156 | MCP: UI automation. |
 | `MainWindowViewModel.IdeMcpActions.Workspace.cs` | 92 | MCP: workspace. |
 | `MainWindowViewModel.LayoutNotifications.cs` | 20 | Инвалидация производных высот `MainGrid` без длинных цепочек `NotifyPropertyChangedFor` в ShellState. |
