@@ -4,8 +4,10 @@
   Пересчитывает строки в partial-файлах MainWindowViewModel / IdeMcpCommandExecutor и обновляет таблицы в docs/architecture-migration.md.
 
 .DESCRIPTION
-  Описания колонки «Содержание» хранятся в хеш-таблице $Descriptions в этом скрипте.
-  При появлении нового .cs файла без ключа скрипт завершается с ошибкой (добавь запись в $Descriptions).
+  Описания — tools/architecture-migration-slice/main-window-slice-descriptions.json;
+  шаблон абзаца сводки — tools/architecture-migration-slice/main-window-slice-summary.template.md
+  (плейсхолдеры {0}…{3}). Каталог не tools/data: там срабатывает игнор Data/ в .gitignore.
+  При появлении нового .cs без ключа в JSON скрипт завершается с ошибкой.
 
 .PARAMETER RepoRoot
   Корень репозитория cascade-ide (родитель каталога tools).
@@ -27,55 +29,32 @@ $ErrorActionPreference = 'Stop'
 
 function Get-LineCount([string] $path) {
     if (-not (Test-Path -LiteralPath $path)) { return 0 }
-    # Как в docs/architecture-migration.md: Measure-Object -Line (не сырой .Count строк)
     return (Get-Content -LiteralPath $path | Measure-Object -Line).Lines
 }
 
-# Описания для колонки «Содержание»; ключ — имя файла как в таблице (только имя, путь ViewModels/ не включаем для MW/Executor, для Generated — путь как в таблице).
-$Descriptions = [ordered]@{
-    'MainWindowViewModel.AutonomousAgent.cs'           = 'Автономный агент (Power)'
-    'MainWindowViewModel.Breakpoints.cs'               = 'Брейкпоинты, файловый watcher'
-    'MainWindowViewModel.Capabilities.cs'              = 'Реестр capabilities'
-    'MainWindowViewModel.CommandPalette.cs'            = 'Палитра команд'
-    'MainWindowViewModel.cs'                           = 'Конструктор, дочерние VM, `WorkspaceDiagnostics`, `ExecuteCommandAsync`, навигация к проблемам, `ResolveProvider`'
-    'MainWindowViewModel.CSharpLsp.cs'                 = 'Запуск/перезапуск C# LSP'
-    'MainWindowViewModel.CursorAcp.cs'                 = 'Путь Cursor ACP'
-    'MainWindowViewModel.DocumentsDock.cs'             = 'Документы / dock'
-    'MainWindowViewModel.EditorHud.cs'                 = 'HUD редактора'
-    'MainWindowViewModel.EditorOllama.cs'              = 'Редактор + Ollama'
-    'MainWindowViewModel.Eicas.cs'                     = 'Лента EICAS'
-    'MainWindowViewModel.EnvironmentReadiness.cs'      = 'Страница «готовность окружения»; снимок через `EnvironmentReadinessSnapshotBuilder.BuildAllRowsAsync`'
-    'MainWindowViewModel.IdeMcpActions.AgentNotes.cs'  = 'Реализация `IIdeMcpActions`: agent-notes'
-    'MainWindowViewModel.IdeMcpActions.BuildTest.cs'   = 'MCP: сборка, тесты'
-    'MainWindowViewModel.IdeMcpActions.DebuggerPanel.cs' = 'MCP: панель отладки'
-    'MainWindowViewModel.IdeMcpActions.Editor.cs'      = 'MCP: редактор'
-    'MainWindowViewModel.IdeMcpActions.Git.cs'         = 'MCP: git'
-    'MainWindowViewModel.IdeMcpActions.UiAutomation.cs' = 'MCP: UI automation'
-    'MainWindowViewModel.IdeMcpActions.Workspace.cs'   = 'MCP: workspace'
-    'MainWindowViewModel.LayoutNotifications.cs'       = 'Уведомления раскладки'
-    'MainWindowViewModel.MarkdownExport.cs'            = 'Экспорт Markdown'
-    'MainWindowViewModel.MarkdownLsp.cs'               = 'Запуск/перезапуск Markdown LSP'
-    'MainWindowViewModel.Presentation.cs'              = 'Заголовок, режимы, подписи'
-    'MainWindowViewModel.PresentationLayout.cs'          = 'Раскладка / presentation'
-    'MainWindowViewModel.RelayCommands.cs'             = 'Relay-команды'
-    'MainWindowViewModel.RelayCommands.Debug.cs'       = 'Relay: отладка'
-    'MainWindowViewModel.SecondaryShell.cs'            = 'Вторичный контур shell'
-    'MainWindowViewModel.SettingsReactive.cs'          = 'Реакции на настройки, сохранение'
-    'MainWindowViewModel.ShellState.cs'                = 'Панели, UI-режим, AI, телеметрия'
-    'MainWindowViewModel.SolutionBuild.cs'             = 'Сборка, `BuildOutputPanel`'
-    'MainWindowViewModel.StartupProject.cs'            = 'Стартовый проект'
-    'MainWindowViewModel.UiGitWorkspace.cs'            = 'Git + workspace UI'
-    'MainWindowViewModel.ViewBridge.cs'                = 'Мост к view (диалоги, снимки UI)'
-    'MainWindowViewModel.WorkspaceHealth.cs'           = 'Связка с Workspace Health'
-    'IdeMcpCommandExecutor.cs'                         = '`BuildHandlers`, `ExecuteAsync`'
-    'IdeMcpCommandExecutor.Handlers.AgentNotes.cs'    = 'Хендлеры agent-notes'
-    'IdeMcpCommandExecutor.Handlers.Chrome.cs'         = 'Хендлеры хрома / видимости'
-    'IdeMcpCommandExecutor.Handlers.DapDebug.cs'       = 'DAP / отладка'
-    'IdeMcpCommandExecutor.Handlers.DebuggerUi.cs'     = 'Поверхность отладки'
-    'IdeMcpCommandExecutor.Handlers.Editor.cs'         = 'Редактор'
-    'IdeMcpCommandExecutor.Handlers.PowerDocuments.cs' = 'Power / документы'
-    'Generated/IdeMcpCommandExecutor.Generated.g.cs'   = 'Сгенерированные хендлеры (ProtocolDocGen / генератор)'
+function Read-DescriptionsHashtable([string] $jsonPath) {
+    if (-not (Test-Path -LiteralPath $jsonPath)) {
+        throw "Нет файла описаний: $jsonPath"
+    }
+    $raw = Get-Content -LiteralPath $jsonPath -Raw -Encoding UTF8
+    $o = $raw | ConvertFrom-Json
+    $ht = @{}
+    foreach ($p in $o.PSObject.Properties) {
+        $ht[$p.Name] = [string]$p.Value
+    }
+    return $ht
 }
+
+$contentDir = Join-Path $PSScriptRoot 'architecture-migration-slice'
+$descriptionsPath = Join-Path $contentDir 'main-window-slice-descriptions.json'
+$summaryTemplatePath = Join-Path $contentDir 'main-window-slice-summary.template.md'
+
+$Descriptions = Read-DescriptionsHashtable $descriptionsPath
+
+if (-not (Test-Path -LiteralPath $summaryTemplatePath)) {
+    throw "Нет шаблона сводки: $summaryTemplatePath"
+}
+$summaryTemplate = (Get-Content -LiteralPath $summaryTemplatePath -Raw -Encoding UTF8).Trim()
 
 $viewModels = Join-Path $RepoRoot 'ViewModels'
 $mwFiles = Get-ChildItem -LiteralPath $viewModels -Filter 'MainWindowViewModel*.cs' -File | Sort-Object Name
@@ -104,8 +83,8 @@ foreach ($f in $mwFiles) {
     $name = $f.Name
     $lines = Get-LineCount $f.FullName
     $sumMw += $lines
-    if (-not $Descriptions.Contains($name)) {
-        throw "Нет описания для ``$name`` — добавь ключ в `$Descriptions в tools/Update-ArchitectureMigrationMainWindowSlice.ps1"
+    if (-not $Descriptions.ContainsKey($name)) {
+        throw "Нет описания для ``$name`` — добавь ключ в $descriptionsPath"
     }
     $mwRows.Add([pscustomobject]@{ Name = $name; Lines = $lines; Desc = $Descriptions[$name] })
 }
@@ -117,8 +96,8 @@ foreach ($f in $execFiles) {
     $rel = if ($f.DirectoryName -match 'Generated') { 'Generated/' + $f.Name } else { $f.Name }
     $lines = Get-LineCount $f.FullName
     $sumExec += $lines
-    if (-not $Descriptions.Contains($rel)) {
-        throw "Нет описания для ``$rel`` — добавь ключ в `$Descriptions в tools/Update-ArchitectureMigrationMainWindowSlice.ps1"
+    if (-not $Descriptions.ContainsKey($rel)) {
+        throw "Нет описания для ``$rel`` — добавь ключ в $descriptionsPath"
     }
     $execRows.Add([pscustomobject]@{ Name = $rel; Lines = $lines; Desc = $Descriptions[$rel] })
 }
@@ -128,11 +107,6 @@ $roundTotal = [math]::Round($total / 1000, 1)
 $roundMw = [math]::Round($sumMw / 1000, 1)
 $roundExec = [math]::Round($sumExec / 1000, 1)
 $ym = Get-Date -Format 'yyyy-MM'
-
-# Шаблон в single-quoted here-string — без съедания backtick/* PowerShell.
-$summaryTemplate = @'
-`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~{0}k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~{1}k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~{2}k**); счётчики — ориентир по состоянию репозитория (авто: {3}). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
-'@
 
 $summaryParagraph = [string]::Format(
     [System.Globalization.CultureInfo]::InvariantCulture,
