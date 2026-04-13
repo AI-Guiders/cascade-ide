@@ -5,11 +5,17 @@
 
 ## Текущее состояние
 
-`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~4.4k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~3.5k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~0.9k**); счётчики — ориентир по состоянию репозитория (обновлено 2026-04). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
+<!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:BEGIN -->
+
+`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~4.4k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~3.5k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~0.9k**); счётчики — ориентир по состоянию репозитория (авто: 2026-04). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
+
+<!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:END -->
 
 ### Срез `MainWindowViewModel` (карта partial-файлов)
 
-Имена **по алфавиту** — для поиска; строки — `Measure-Object -Line` по `.cs`.
+Имена **по алфавиту** — для поиска; строки — `Measure-Object -Line` по `.cs` (пересчёт: `tools/Update-ArchitectureMigrationMainWindowSlice.ps1`).
+
+<!-- AUTO:MAIN-WINDOW-SLICE:MWVM-TABLE:BEGIN -->
 
 | Файл | Строк (≈) | Содержание |
 |------|------------|------------|
@@ -24,7 +30,7 @@
 | `MainWindowViewModel.EditorHud.cs` | 48 | HUD редактора |
 | `MainWindowViewModel.EditorOllama.cs` | 43 | Редактор + Ollama |
 | `MainWindowViewModel.Eicas.cs` | 17 | Лента EICAS |
-| `MainWindowViewModel.EnvironmentReadiness.cs` | 46 | Страница «готовность окружения»; снимок через `EnvironmentReadinessSnapshotBuilder.BuildAllRowsAsync` |
+| `MainWindowViewModel.EnvironmentReadiness.cs` | 38 | Страница «готовность окружения»; снимок через `EnvironmentReadinessSnapshotBuilder.BuildAllRowsAsync` |
 | `MainWindowViewModel.IdeMcpActions.AgentNotes.cs` | 44 | Реализация `IIdeMcpActions`: agent-notes |
 | `MainWindowViewModel.IdeMcpActions.BuildTest.cs` | 141 | MCP: сборка, тесты |
 | `MainWindowViewModel.IdeMcpActions.DebuggerPanel.cs` | 51 | MCP: панель отладки |
@@ -48,7 +54,11 @@
 | `MainWindowViewModel.ViewBridge.cs` | 56 | Мост к view (диалоги, снимки UI) |
 | `MainWindowViewModel.WorkspaceHealth.cs` | 13 | Связка с Workspace Health |
 
+<!-- AUTO:MAIN-WINDOW-SLICE:MWVM-TABLE:END -->
+
 ### `IdeMcpCommandExecutor` (диспетчер MCP → `IIdeMcpActions`)
+
+<!-- AUTO:MAIN-WINDOW-SLICE:EXEC-TABLE:BEGIN -->
 
 | Файл | Строк (≈) | Содержание |
 |------|------------|------------|
@@ -60,6 +70,8 @@
 | `IdeMcpCommandExecutor.Handlers.Editor.cs` | 82 | Редактор |
 | `IdeMcpCommandExecutor.Handlers.PowerDocuments.cs` | 208 | Power / документы |
 | `Generated/IdeMcpCommandExecutor.Generated.g.cs` | 62 | Сгенерированные хендлеры (ProtocolDocGen / генератор) |
+
+<!-- AUTO:MAIN-WINDOW-SLICE:EXEC-TABLE:END -->
 
 **Техдолг по главному VM (не блокирует развитие):** крупные куски MCP по-прежнему рядом с VM (`IdeMcpActions.*`); дальнейший вынос — по мере изменений. **План B по примитивам MCP для текущего объёма закрыт:** координаты/пути редактора (`EditorTextCoordinateUtilities`), разбор JSON панели отладки (`McpDebugPayloadParsing`), чтение полей args MCP (`McpCommandJsonArgs` в `Services/`) — вне `ViewModels/`. **Готовность окружения ([ADR 0023](adr/0023-environment-readiness-glance.md)):** полный список строк для страницы — `EnvironmentReadinessSnapshotBuilder.BuildAllRowsAsync` (`Services/`); VM только маршалит на UI и заполняет коллекцию.
 
