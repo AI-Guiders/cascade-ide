@@ -1,0 +1,12 @@
+# Пример фрагмента пользовательского settings.toml (ADR 0028: %LocalAppData%\CascadeIDE\settings.toml).
+# Скопируй нужные ключи в свой файл. Ключи — snake_case (Tomlyn / CascadeTomlSerializer).
+
+# Раскладка по физическим дисплеям (ADR 0017). Пробелы внутри каждой пары screen_markers игнорируются парсером —
+# удобочитаемая запись эквивалентна "(0.25P+0.75F)(M)".
+presentation = "(0.25P + 0.75F) (M)"
+
+[presentation_grammar]
+# Короткие литералы якорей (согласованы со строкой presentation выше).
+pfd_zone_identifier = "P"
+forward_zone_identifier = "F"
+mfd_zone_identifier = "M"
