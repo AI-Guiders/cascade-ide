@@ -3,6 +3,7 @@ using CascadeIDE.Services;
 
 namespace CascadeIDE.ViewModels;
 
+/// <summary>Сгенерированные хендлеры MCP → <see cref="IIdeMcpActions"/> (<c>CascadeIDE.ProtocolDocGen</c>).</summary>
 internal sealed partial class IdeMcpCommandExecutor
 {
     partial void RegisterGenerated(Action<string, Handler> add)

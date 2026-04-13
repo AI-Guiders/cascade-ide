@@ -268,6 +268,7 @@ internal static class IdeMcpCommandExecutorEmitter
         sb.AppendLine();
         sb.AppendLine("namespace CascadeIDE.ViewModels;");
         sb.AppendLine();
+        sb.AppendLine("/// <summary>Сгенерированные хендлеры MCP → <see cref=\"IIdeMcpActions\"/> (<c>CascadeIDE.ProtocolDocGen</c>).</summary>");
         sb.AppendLine("internal sealed partial class IdeMcpCommandExecutor");
         sb.AppendLine("{");
         sb.AppendLine("    partial void RegisterGenerated(Action<string, Handler> add)");

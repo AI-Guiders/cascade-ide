@@ -39,6 +39,5 @@
   "IdeMcpCommandExecutor.Handlers.DapDebug.cs": "DAP / отладка",
   "IdeMcpCommandExecutor.Handlers.DebuggerUi.cs": "Поверхность отладки",
   "IdeMcpCommandExecutor.Handlers.Editor.cs": "Редактор",
-  "IdeMcpCommandExecutor.Handlers.PowerDocuments.cs": "Power / документы",
-  "Generated/IdeMcpCommandExecutor.Generated.g.cs": "Сгенерированные хендлеры (ProtocolDocGen / генератор)"
+  "IdeMcpCommandExecutor.Handlers.PowerDocuments.cs": "Power / документы"
 }
