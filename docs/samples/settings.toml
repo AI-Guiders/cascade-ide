@@ -17,6 +17,8 @@ deep_seek_model = "deepseek-chat"
 cursor_acp_path = ""
 # mfd — страница параметров AI во вторичном контуре; window — отдельное окно настроек (ADR 0021 / 0028).
 ai_chat_settings_presentation = "mfd"
+# Не вызывать встроенный LLM после отправки; ответы — через MCP (send_chat role=assistant).
+chat_mcp_only = false
 
 [mcp]
 stdio_server_enabled = true

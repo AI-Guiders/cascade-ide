@@ -62,7 +62,7 @@ internal static class IdeCommandsArgsGenerated
         ["run_code_cleanup"] = new IdeCommandsArgs.Arg[] { new("include_path", "string", false, false, null) },
         ["search_agent_notes"] = new IdeCommandsArgs.Arg[] { new("query", "string", true, false, null), new("head_limit", "integer", false, false, null) },
         ["select"] = new IdeCommandsArgs.Arg[] { new("file_path", "string", true, false, null), new("start_line", "integer", true, false, null), new("start_column", "integer", true, false, null), new("end_line", "integer", true, false, null), new("end_column", "integer", true, false, null) },
-        ["send_chat"] = new IdeCommandsArgs.Arg[] { new("message", "string", false, false, null) },
+        ["send_chat"] = new IdeCommandsArgs.Arg[] { new("message", "string", false, false, null), new("role", "string", false, false, null) },
         ["send_keys"] = new IdeCommandsArgs.Arg[] { new("keys", "string", true, false, null), new("name", "string", false, false, null) },
         ["set_breakpoint"] = new IdeCommandsArgs.Arg[] { new("file_path", "string", true, false, null), new("line", "integer", true, false, null), new("condition", "string", false, false, null) },
         ["set_build_output_visible"] = new IdeCommandsArgs.Arg[] { new("visible", "boolean", true, false, null) },

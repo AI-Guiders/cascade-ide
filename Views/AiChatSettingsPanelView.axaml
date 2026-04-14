@@ -47,6 +47,9 @@
         </StackPanel>
 
         <CheckBox Content="Минимальный контекст (только диагностики и сигнатуры)" IsChecked="{Binding UseMinimizedContext}" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+        <CheckBox Content="Чат только через MCP (не вызывать встроенный LLM; ответ ассистента — send_chat с role=assistant)"
+                  IsChecked="{Binding ChatMcpOnly}"
+                  Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
         <CheckBox Content="Запускать MCP-сервер при старте с --mcp-stdio" IsChecked="{Binding IdeMcpServerEnabled}" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
 
         <TextBlock Text="Внешние MCP-серверы (autonomous), JSON:" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" Margin="0,12,0,0" TextWrapping="Wrap"/>

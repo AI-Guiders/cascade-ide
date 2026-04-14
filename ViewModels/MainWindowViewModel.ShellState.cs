@@ -166,6 +166,10 @@ public partial class MainWindowViewModel
     [ObservableProperty]
     private string _sendMessageKey = "Enter";
 
+    /// <summary>После отправки user-сообщения не вызывать встроенный LLM; ответы добавлять через MCP (<c>send_chat</c> с <c>role=assistant</c>).</summary>
+    [ObservableProperty]
+    private bool _chatMcpOnly;
+
     /// <summary>Отправлять только диагностики и сигнатуры текущего файла (минимальный контекст).</summary>
     [ObservableProperty]
     private bool _useMinimizedContext = true;

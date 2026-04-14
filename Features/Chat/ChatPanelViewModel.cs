@@ -20,6 +20,7 @@ public partial class ChatPanelViewModel : ViewModelBase
     private readonly Services.AiProviderManager _aiProviderManager;
     private readonly Func<string> _getActiveAiProvider;
     private readonly Func<string?> _getSelectedOllamaModel;
+    private readonly Func<bool> _getChatMcpOnly;
     private readonly Func<bool> _getUseMinimizedContext;
     private readonly Func<string?> _getCurrentFilePath;
     private readonly Func<string> _getEditorText;
@@ -37,6 +38,7 @@ public partial class ChatPanelViewModel : ViewModelBase
         Services.AiProviderManager aiProviderManager,
         Func<string> getActiveAiProvider,
         Func<string?> getSelectedOllamaModel,
+        Func<bool> getChatMcpOnly,
         Func<bool> getUseMinimizedContext,
         Func<string?> getCurrentFilePath,
         Func<string> getEditorText,
@@ -48,6 +50,7 @@ public partial class ChatPanelViewModel : ViewModelBase
         _aiProviderManager = aiProviderManager;
         _getActiveAiProvider = getActiveAiProvider;
         _getSelectedOllamaModel = getSelectedOllamaModel;
+        _getChatMcpOnly = getChatMcpOnly;
         _getUseMinimizedContext = getUseMinimizedContext;
         _getCurrentFilePath = getCurrentFilePath;
         _getEditorText = getEditorText;
@@ -170,6 +173,9 @@ public partial class ChatPanelViewModel : ViewModelBase
 
         try
         {
+            if (_getChatMcpOnly())
+                return;
+
             if (string.Equals(_getActiveAiProvider(), "CursorACP", StringComparison.Ordinal))
             {
                 var assistantMsg = new ChatMessageViewModel("assistant", "");
@@ -229,6 +235,9 @@ public partial class ChatPanelViewModel : ViewModelBase
         if (string.IsNullOrWhiteSpace(ChatInput) || IsChatLoading)
             return false;
 
+        if (_getChatMcpOnly())
+            return true;
+
         if (string.Equals(_getActiveAiProvider(), "CursorACP", StringComparison.Ordinal))
             return CursorAcpAgentPath.TryResolve(_getCursorAcpAgentPath(), out _, out _);
 
@@ -241,6 +250,21 @@ public partial class ChatPanelViewModel : ViewModelBase
         _activeClarificationBatch is not null && ClarificationDraftItems.Count > 0 && !IsChatLoading;
 
     private bool CanDismissClarificationBatch() => _activeClarificationBatch is not null;
+
+    /// <summary>Добавить сообщение из внешнего MCP (<c>send_chat</c> с <c>role=assistant</c>).</summary>
+    public string AppendMessageFromMcp(string role, string content)
+    {
+        var r = string.Equals(role, "assistant", StringComparison.OrdinalIgnoreCase) ? "assistant" : "user";
+        var trimmed = content.Trim();
+        if (trimmed.Length == 0)
+            return "Empty content";
+        var vm = new ChatMessageViewModel(r, trimmed);
+        ChatMessages.Add(vm);
+        _ = PersistEventAsync(ChatHistoryEventKind.MessageAdded, MessageSnapshot(vm));
+        if (string.Equals(r, "assistant", StringComparison.Ordinal))
+            _ = PersistEventAsync(ChatHistoryEventKind.MessageCompleted, MessageSnapshot(vm));
+        return "OK";
+    }
 
     public string SelectMessageByIndex(int index)
     {

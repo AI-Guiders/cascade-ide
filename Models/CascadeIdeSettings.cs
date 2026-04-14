@@ -129,7 +129,8 @@ public sealed class CascadeIdeSettings : ModelBase
             && a.DeepSeekBaseUrl.Is(b.DeepSeekBaseUrl)
             && a.DeepSeekModel.Is(b.DeepSeekModel)
             && a.CursorAcpPath.Is(b.CursorAcpPath)
-            && a.AiChatSettingsPresentation.Is(b.AiChatSettingsPresentation);
+            && a.AiChatSettingsPresentation.Is(b.AiChatSettingsPresentation)
+            && a.ChatMcpOnly == b.ChatMcpOnly;
     }
 
     private static bool McpEquals(McpSettings? a, McpSettings? b)
@@ -270,6 +271,7 @@ public sealed class CascadeIdeSettings : ModelBase
                 DeepSeekModel = Ai.DeepSeekModel,
                 CursorAcpPath = Ai.CursorAcpPath,
                 AiChatSettingsPresentation = Ai.AiChatSettingsPresentation,
+                ChatMcpOnly = Ai.ChatMcpOnly,
             },
             Mcp = new McpSettings
             {

@@ -118,7 +118,7 @@ internal static class IdeCommandsDoc
         ["run_tests"] = "Запустить тесты решения. returns: json.",
         ["search_agent_notes"] = "Поиск по заметкам агента (case-insensitive) с возвратом совпадающих строк. args: query:string, head_limit?:integer; returns: json; example: {\"query\":\"ActiveProjectId\",\"head_limit\":20}.",
         ["select"] = "Выделить диапазон в редакторе (1-based). args: file_path:string, start_line:integer, start_column:integer, end_line:integer, end_column:integer; returns: text; example: {\"file_path\":\"C:\\\\tmp\\\\a.cs\",\"start_line\":1,\"start_column\":1,\"end_line\":1,\"end_column\":10}.",
-        ["send_chat"] = "Кнопка отправки чата; опционально message — записать в поле ввода перед отправкой. args: message?:string; returns: text; example: {\"message\":\"hello\"}.",
+        ["send_chat"] = "Чат: args: message?:string, role?:string. role assistant — только строка ассистента из MCP; иначе user и отправка; при chat_mcp_only локальный LLM не вызывается. returns: text; example: {\"message\":\"hello\"}.",
         ["send_keys"] = "Отправить хоткей в контрол. args: keys:string, name?:string; returns: text; example: {\"keys\":\"Ctrl+S\"}.",
         ["set_balanced_mode"] = "Установить Balanced UI mode (hotkey). returns: text.",
         ["set_breakpoint"] = "Поставить брейкпоинт. args: file_path:string, line:integer, condition?:string; returns: text; example: {\"file_path\":\"C:\\\\tmp\\\\a.cs\",\"line\":42}.",

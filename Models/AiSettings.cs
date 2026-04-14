@@ -22,4 +22,9 @@ public sealed class AiSettings
     /// Где показывать «Параметры AI и чата»: <c>mfd</c> — страница вторичного контура (зона Mfd); <c>window</c> — отдельное окно со всеми настройками (TOML: <c>ai_chat_settings_presentation</c>).
     /// </summary>
     public string AiChatSettingsPresentation { get; set; } = "mfd";
+
+    /// <summary>
+    /// Не вызывать встроенный провайдер (Ollama/облако/Cursor ACP) после отправки user-сообщения — ответы только через внешний MCP (<c>send_chat</c> с <c>role=assistant</c>). TOML: <c>chat_mcp_only</c>.
+    /// </summary>
+    public bool ChatMcpOnly { get; set; }
 }

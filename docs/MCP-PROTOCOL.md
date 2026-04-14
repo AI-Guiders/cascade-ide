@@ -270,7 +270,7 @@
 | `refresh_workspace_snapshot` | Обновить снимок рабочего состояния (Power cockpit). returns: text. |
 | `resume_autonomous` | Продолжить автономный режим после паузы. returns: text. |
 | `rollback_trace_step` | Откатить состояние по шагу трассы. args: step_index:integer; returns: text; example: {"step_index":0}. |
-| `send_chat` | Кнопка отправки чата; опционально message — записать в поле ввода перед отправкой. args: message?:string; returns: text; example: {"message":"hello"}. |
+| `send_chat` | Чат: args: message?:string, role?:string. role assistant — только строка ассистента из MCP; иначе user и отправка; при chat_mcp_only локальный LLM не вызывается. returns: text; example: {"message":"hello"}. |
 | `set_safety_l1` | Установить Safety L1. returns: text. |
 | `set_safety_l2` | Установить Safety L2. returns: text. |
 | `set_safety_l3` | Установить Safety L3. returns: text. |

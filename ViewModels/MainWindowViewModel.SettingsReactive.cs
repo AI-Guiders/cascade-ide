@@ -88,6 +88,13 @@ public partial class MainWindowViewModel
             TryNavigateToSecondaryShellPage(SecondaryShellPage.Chat);
     }
 
+    partial void OnChatMcpOnlyChanged(bool value)
+    {
+        _settings.Ai.ChatMcpOnly = value;
+        SaveSettingsIfChanged();
+        ChatPanel.RefreshSendChatCommandState();
+    }
+
     partial void OnActiveAiProviderChanged(string value)
     {
         if (!string.IsNullOrEmpty(value))

@@ -40,7 +40,7 @@ public static partial class IdeCommands
     public const string InvestigateNullref = "investigate_nullref";
     /// <summary>Quick action: подготовить коммит (сводка/план/проверки). returns: text.</summary>
     public const string PrepareCommit = "prepare_commit";
-    /// <summary>Кнопка отправки чата; опционально message — записать в поле ввода перед отправкой. args: message?:string; returns: text; example: {"message":"hello"}.</summary>
+    /// <summary>Чат: args: message?:string, role?:string. role assistant — только строка ассистента из MCP; иначе user и отправка; при chat_mcp_only локальный LLM не вызывается. returns: text; example: {"message":"hello"}.</summary>
     public const string SendChat = "send_chat";
     /// <summary>Скачать модель Ollama (как в настройках). args: model:string; returns: text; example: {"model":"qwen2.5-coder:7b"}.</summary>
     public const string InstallOllamaModel = "install_ollama_model";

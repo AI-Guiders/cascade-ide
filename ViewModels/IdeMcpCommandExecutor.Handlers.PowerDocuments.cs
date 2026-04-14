@@ -131,7 +131,15 @@ internal sealed partial class IdeMcpCommandExecutor
 
         add(Services.IdeCommands.SendChat, async (args, _) =>
         {
+            var role = McpCommandJsonArgs.String(args, "role")?.Trim();
             var msg = McpCommandJsonArgs.String(args, "message");
+            if (string.Equals(role, "assistant", StringComparison.OrdinalIgnoreCase))
+            {
+                if (string.IsNullOrWhiteSpace(msg))
+                    return "Missing message for role=assistant";
+                return _vm.ChatPanel.AppendMessageFromMcp("assistant", msg!);
+            }
+
             if (!string.IsNullOrWhiteSpace(msg))
                 _vm.ChatPanel.ChatInput = msg!;
             if (_vm.ChatPanel.SendChatCommand.CanExecute(null))
