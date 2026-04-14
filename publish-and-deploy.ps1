@@ -1,10 +1,10 @@
-# Publish Debug and copy to a fixed path without spaces (for Cursor MCP).
-# Run from repo:  cd ...\cascade-ide  ;  .\publish-and-deploy-debug.ps1
+# Publish Release (self-contained win-x64) and mirror to a fixed path without spaces (for Cursor MCP).
+# Run from repo:  cd ...\cascade-ide  ;  .\publish-and-deploy.ps1
 # Optional: -SkipDocGen  (faster when IdeCommands XML-doc / MCP markdown codegen not changed)
-# Optional: -Target "D:\cascade-ide-debug"
+# Optional: -Target "D:\cascade-ide"
 [CmdletBinding()]
 param(
-    [string] $Target = "D:\cascade-ide-debug",
+    [string] $Target = "D:\cascade-ide",
     [switch] $SkipDocGen
 )
 
@@ -16,13 +16,13 @@ if (-not (Test-Path -LiteralPath $csproj)) {
     exit 1
 }
 
-$outDir = Join-Path $here "publish-debug"
+$outDir = Join-Path $here "publish"
 
 Push-Location $here
 try {
     $publishArgs = @(
         "publish", $csproj,
-        "-c", "Debug",
+        "-c", "Release",
         "-r", "win-x64",
         "--self-contained", "true",
         "-o", $outDir,
@@ -57,9 +57,9 @@ try {
     Write-Host ""
     Write-Host "OK: $exe  (UTC $ts)"
     Write-Host ""
-    Write-Host "Cursor MCP (debug): paste into mcp.json ->"
+    Write-Host "Cursor MCP (Release): paste into mcp.json ->"
     Write-Host @"
-  "cascade-ide-debug": {
+  "cascade-ide": {
     "command": "$exeJson",
     "args": ["--mcp-stdio"]
   }
