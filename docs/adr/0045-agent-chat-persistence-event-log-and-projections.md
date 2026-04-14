@@ -41,6 +41,11 @@
 - `message_completed`
 - `clarification_batch_opened`
 - `clarification_answer_submitted`
+- `message_edited` — компенсирующее событие: новый текст для существующего `message_id` в payload (`message_added` / `message_completed` не переписываются).
+
+Полезная нагрузка `message_added` и `message_completed` v1 включает стабильный `message_id` (строка без дефисов), `role`, `content`.
+
+Экспорт для агента: читаемый Markdown из текущей проекции (команда `chat_export_readable`, опционально запись в `chat-sessions/exports/`).
 
 ## Почему не «сразу SQLite как источник правды»
 

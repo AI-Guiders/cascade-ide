@@ -15,4 +15,12 @@ public static partial class IdeCommands
     public const string GetUiModesDiagnostics = "get_ui_modes_diagnostics";
     /// <summary>Контекст навигации (ADR 0039): связанные файлы или мини-подграф. Виды связей — partial_peer project_peer xaml_codebehind_pair test_counterpart same_namespace same_directory. Имена preset — из settings.toml workspace_navigation_context.presets. args: mode:string, file_path?:string, line?:integer, column?:integer, max_related?:integer, max_nodes?:integer, max_edges?:integer, preset?:string, include_kinds?:string[], exclude_kinds?:string[]; returns: json; example: {"mode":"related","file_path":"src/Foo.cs","preset":"no_namespace_noise"}.</summary>
     public const string GetWorkspaceNavigationContext = "get_workspace_navigation_context";
+    /// <summary>Выбрать сообщение в чате по индексу (0-based), в т.ч. для Skia-поверхности. args: index:integer; returns: text; example: {"index":0}.</summary>
+    public const string ChatSelectMessage = "chat_select_message";
+    /// <summary>Получить выбранное сообщение чата (индекс, роль, контент) в JSON. returns: json.</summary>
+    public const string ChatGetSelectedMessage = "chat_get_selected_message";
+    /// <summary>Заменить текст ответа ассистента по стабильному message_id; в лог пишется message_edited. args: message_id:string, new_content:string, reason?:string; returns: json; example: {"message_id":"a1b2c3d4e5f6789012345678901234ab","new_content":"fixed text"}.</summary>
+    public const string ChatEditMessage = "chat_edit_message";
+    /// <summary>Экспорт текущего чата в читаемый Markdown (роли, индексы, message_id). args: write_file?:boolean, file_name?:string; returns: json; example: {"write_file":true}.</summary>
+    public const string ChatExportReadable = "chat_export_readable";
 }

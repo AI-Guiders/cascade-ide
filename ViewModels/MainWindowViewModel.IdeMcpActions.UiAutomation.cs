@@ -151,6 +151,23 @@ public partial class MainWindowViewModel
         return await UiScheduler.Default.InvokeAsync(() => provider(controlName, keys ?? ""));
     }
 
+    async Task<string> Services.IIdeMcpActions.SelectChatMessageAsync(int index) =>
+        await UiScheduler.Default.InvokeAsync(() => ChatPanel.SelectMessageByIndex(index));
+
+    async Task<string> Services.IIdeMcpActions.GetSelectedChatMessageAsync() =>
+        await UiScheduler.Default.InvokeAsync(ChatPanel.GetSelectedMessageJson);
+
+    async Task<string> Services.IIdeMcpActions.EditChatAssistantMessageAsync(string messageId, string newContent, string? reason) =>
+        await UiScheduler.Default.InvokeAsync(() =>
+        {
+            if (!Guid.TryParse(messageId, out var id))
+                return """{"ok":false,"error":"invalid_message_id"}""";
+            return ChatPanel.EditAssistantMessageById(id, newContent ?? "", reason);
+        });
+
+    async Task<string> Services.IIdeMcpActions.ExportChatReadableAsync(bool writeFile, string? fileName) =>
+        await UiScheduler.Default.InvokeAsync(() => ChatPanel.ExportReadableMarkdown(writeFile, fileName));
+
     async Task<string> Services.IIdeMcpActions.SetFocusAsync(string? controlName)
     {
         var provider = SetFocusProvider;

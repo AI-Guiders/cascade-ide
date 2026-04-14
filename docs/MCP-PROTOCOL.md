@@ -282,6 +282,10 @@
 |-----------:|----------|
 | `activate_document` | Активировать документ (переключить вкладку). args: file_path:string; returns: text; example: {"file_path":"C:\\\\tmp\\\\a.cs"}. |
 | `capture_window` | Снимок окон IDE в PNG (по умолчанию главное окно; при scope=all — все top-level, в т.ч. окно-хост Mfd и прочие). args: scope?:string, workspace_path?:string, output_path?:string; returns: json. example: {"scope":"all","workspace_path":"D:\\\\tmp\\\\ws","output_path":".cascade-ide/window-{n}.png"}. |
+| `chat_edit_message` | Заменить текст ответа ассистента по стабильному message_id; в лог пишется message_edited. args: message_id:string, new_content:string, reason?:string; returns: json; example: {"message_id":"a1b2c3d4e5f6789012345678901234ab","new_content":"fixed text"}. |
+| `chat_export_readable` | Экспорт текущего чата в читаемый Markdown (роли, индексы, message_id). args: write_file?:boolean, file_name?:string; returns: json; example: {"write_file":true}. |
+| `chat_get_selected_message` | Получить выбранное сообщение чата (индекс, роль, контент) в JSON. returns: json. |
+| `chat_select_message` | Выбрать сообщение в чате по индексу (0-based), в т.ч. для Skia-поверхности. args: index:integer; returns: text; example: {"index":0}. |
 | `close_document` | Закрыть документ. args: file_path:string; returns: text; example: {"file_path":"C:\\\\tmp\\\\a.cs"}. |
 | `focus_editor` | Передать фокус в редактор (чтобы клавиши/ввод шли в него). returns: text. |
 | `get_current_file_diagnostics` | Диагностики текущего открытого .cs (ошибки/предупреждения). returns: json. |

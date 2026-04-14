@@ -98,6 +98,14 @@ public interface IIdeMcpActions
     Task<string> ClickControlAsync(string? controlName);
     /// <summary>Отправить сочетание клавиш в эффективный контрол (под курсором или по name). keys — текст вида Ctrl+Enter, Alt+F4. Вызов на UI-потоке.</summary>
     Task<string> SendKeysAsync(string? controlName, string keys);
+    /// <summary>Выбрать сообщение в чате по индексу (0-based) для сценариев MCP/агента.</summary>
+    Task<string> SelectChatMessageAsync(int index);
+    /// <summary>Получить выбранное сообщение чата (0-based) в JSON для agent-friendly чтения.</summary>
+    Task<string> GetSelectedChatMessageAsync();
+    /// <summary>Заменить текст ответа ассистента по message_id; в event log пишется message_edited.</summary>
+    Task<string> EditChatAssistantMessageAsync(string messageId, string newContent, string? reason = null);
+    /// <summary>Экспорт текущего чата в Markdown; при write_file — запись в .cascade-ide/chat-sessions/exports/.</summary>
+    Task<string> ExportChatReadableAsync(bool writeFile = false, string? fileName = null);
     /// <summary>Передать фокус на эффективный контрол: по имени или на элемент под курсором. Вызов на UI-потоке.</summary>
     Task<string> SetFocusAsync(string? controlName);
     /// <summary>Подсветить эффективный контрол (рамка/оверлей), чтобы пользователь видел, где агент «находится». Без name — под курсором; с name — по имени. Вызов на UI-потоке.</summary>

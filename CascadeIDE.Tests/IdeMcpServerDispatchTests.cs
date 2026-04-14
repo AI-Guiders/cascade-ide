@@ -175,6 +175,10 @@ public sealed class IdeMcpServerDispatchTests
         public Task<string> UpsertKnowledgeSectionAsync(string filePath, string sectionId, string content, string? canonPath = null, bool saveRevision = true, CancellationToken cancellationToken = default) => throw new NotImplementedException();
         public Task<string> DeleteKnowledgeFileAsync(string filePath, string? canonPath = null, CancellationToken cancellationToken = default) => throw new NotImplementedException();
         public Task<string> DeleteKnowledgeSectionAsync(string filePath, string sectionId, string? canonPath = null, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<string> SelectChatMessageAsync(int index) => throw new NotImplementedException();
+        public Task<string> GetSelectedChatMessageAsync() => throw new NotImplementedException();
+        public Task<string> EditChatAssistantMessageAsync(string messageId, string newContent, string? reason = null) => throw new NotImplementedException();
+        public Task<string> ExportChatReadableAsync(bool writeFile = false, string? fileName = null) => throw new NotImplementedException();
     }
 }
 

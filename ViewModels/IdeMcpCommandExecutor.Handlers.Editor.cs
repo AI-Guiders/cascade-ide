@@ -42,6 +42,38 @@ internal sealed partial class IdeMcpCommandExecutor
             a.SelectInEditor(McpCommandJsonArgs.String(args, "file_path"), McpCommandJsonArgs.Int(args, "start_line"), McpCommandJsonArgs.Int(args, "start_column"), McpCommandJsonArgs.Int(args, "end_line"), McpCommandJsonArgs.Int(args, "end_column"));
             return await Task.FromResult("OK");
         });
+        add(Services.IdeCommands.ChatSelectMessage, async (args, _) =>
+        {
+            var a = (IIdeMcpActions)_vm;
+            if (args is null || !args.TryGetValue("index", out var raw) || !raw.TryGetInt32(out var index))
+                return "Missing index";
+            return await a.SelectChatMessageAsync(index);
+        });
+        add(Services.IdeCommands.ChatGetSelectedMessage, async (_, _) =>
+        {
+            var a = (IIdeMcpActions)_vm;
+            return await a.GetSelectedChatMessageAsync();
+        });
+        add(Services.IdeCommands.ChatEditMessage, async (args, ct) =>
+        {
+            var a = (IIdeMcpActions)_vm;
+            if (string.IsNullOrWhiteSpace(McpCommandJsonArgs.String(args, "message_id")))
+                return "Missing message_id";
+            if (args is null || !args.TryGetValue("new_content", out _))
+                return "Missing new_content";
+            _ = ct;
+            return await a.EditChatAssistantMessageAsync(
+                McpCommandJsonArgs.String(args, "message_id")!,
+                McpCommandJsonArgs.String(args, "new_content") ?? "",
+                McpCommandJsonArgs.String(args, "reason"));
+        });
+        add(Services.IdeCommands.ChatExportReadable, async (args, ct) =>
+        {
+            var a = (IIdeMcpActions)_vm;
+            _ = ct;
+            var write = McpCommandJsonArgs.Bool(args, "write_file");
+            return await a.ExportChatReadableAsync(write, McpCommandJsonArgs.String(args, "file_name"));
+        });
     }
 
     private void RegisterEditorStateAndContent(Action<string, Handler> add)

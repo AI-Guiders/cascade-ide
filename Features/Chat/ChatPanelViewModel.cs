@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Text.Json;
 using Avalonia.Threading;
 using CascadeIDE.Models.AgentChat;
@@ -14,6 +15,8 @@ namespace CascadeIDE.Features.Chat;
 /// </summary>
 public partial class ChatPanelViewModel : ViewModelBase
 {
+    private static readonly JsonSerializerOptions ChatPanelJson = new(JsonSerializerDefaults.Web);
+
     private readonly Services.AiProviderManager _aiProviderManager;
     private readonly Func<string> _getActiveAiProvider;
     private readonly Func<string?> _getSelectedOllamaModel;
@@ -87,7 +90,13 @@ public partial class ChatPanelViewModel : ViewModelBase
     private bool _isChatLoading;
 
     [ObservableProperty]
+    private bool _useSkiaSurface = true;
+
+    [ObservableProperty]
     private string _clarificationStatusText = "";
+
+    [ObservableProperty]
+    private int _selectedMessageIndex = -1;
 
     public void ShowClarificationBatch(ClarificationBatch batch)
     {
@@ -121,7 +130,9 @@ public partial class ChatPanelViewModel : ViewModelBase
         }
 
         var payload = string.Join("; ", ClarificationDraftItems.Select(x => $"{x.Id}: {x.Answer?.Trim()}"));
-        ChatMessages.Add(new ChatMessageViewModel("user", $"[clarification] {payload}"));
+        var clarifyMsg = new ChatMessageViewModel("user", $"[clarification] {payload}");
+        ChatMessages.Add(clarifyMsg);
+        _ = PersistEventAsync(ChatHistoryEventKind.MessageAdded, MessageSnapshot(clarifyMsg));
         _activeClarificationBatch = null;
         ClarificationDraftItems.Clear();
         ClarificationStatusText = "Пакет уточнений сохранен в диалог.";
@@ -152,8 +163,9 @@ public partial class ChatPanelViewModel : ViewModelBase
             return;
 
         ChatInput = "";
-        ChatMessages.Add(new ChatMessageViewModel("user", input));
-        _ = PersistEventAsync(ChatHistoryEventKind.MessageAdded, new { Role = "user", Content = input });
+        var userMsg = new ChatMessageViewModel("user", input);
+        ChatMessages.Add(userMsg);
+        _ = PersistEventAsync(ChatHistoryEventKind.MessageAdded, MessageSnapshot(userMsg));
         IsChatLoading = true;
 
         try
@@ -175,7 +187,7 @@ public partial class ChatPanelViewModel : ViewModelBase
                         input,
                         t => UiScheduler.Default.Post(() => assistantMsg.Content += t),
                         CancellationToken.None).ConfigureAwait(false);
-                    _ = PersistEventAsync(ChatHistoryEventKind.MessageCompleted, new { Role = "assistant", Content = assistantMsg.Content });
+                    _ = PersistEventAsync(ChatHistoryEventKind.MessageCompleted, MessageSnapshot(assistantMsg));
                 }
                 catch (Exception ex)
                 {
@@ -203,7 +215,7 @@ public partial class ChatPanelViewModel : ViewModelBase
                     var t = token;
                     UiScheduler.Default.Post(() => assistantMsg.Content += t);
                 }
-                _ = PersistEventAsync(ChatHistoryEventKind.MessageCompleted, new { Role = "assistant", Content = assistantMsg.Content });
+                _ = PersistEventAsync(ChatHistoryEventKind.MessageCompleted, MessageSnapshot(assistantMsg));
             }
         }
         finally
@@ -230,29 +242,107 @@ public partial class ChatPanelViewModel : ViewModelBase
 
     private bool CanDismissClarificationBatch() => _activeClarificationBatch is not null;
 
+    public string SelectMessageByIndex(int index)
+    {
+        if (index < 0 || index >= ChatMessages.Count)
+            return $"Index out of range: {index}. Count={ChatMessages.Count}.";
+        SelectedMessageIndex = index;
+        return "OK";
+    }
+
+    public string GetSelectedMessageJson()
+    {
+        if (SelectedMessageIndex < 0 || SelectedMessageIndex >= ChatMessages.Count)
+            return "{\"selected_index\":-1,\"has_selection\":false}";
+        var m = ChatMessages[SelectedMessageIndex];
+        var role = m.Role ?? "";
+        var content = m.Content ?? "";
+        return JsonSerializer.Serialize(new
+        {
+            selected_index = SelectedMessageIndex,
+            has_selection = true,
+            message_id = m.MessageId.ToString("N"),
+            role,
+            content
+        }, ChatPanelJson);
+    }
+
+    /// <summary>Редактирование только ответа ассистента; в лог добавляется <see cref="ChatHistoryEventKind.MessageEdited"/>.</summary>
+    public string EditAssistantMessageById(Guid messageId, string newContent, string? reason)
+    {
+        foreach (var m in ChatMessages)
+        {
+            if (m.MessageId != messageId)
+                continue;
+            if (!string.Equals(m.Role, "assistant", StringComparison.OrdinalIgnoreCase))
+                return JsonSerializer.Serialize(new { ok = false, error = "only_assistant_supported" }, ChatPanelJson);
+
+            m.Content = newContent;
+            _ = PersistEventAsync(
+                ChatHistoryEventKind.MessageEdited,
+                new Dictionary<string, object?>
+                {
+                    ["message_id"] = messageId.ToString("N"),
+                    ["new_content"] = newContent,
+                    ["reason"] = string.IsNullOrWhiteSpace(reason) ? "correction" : reason.Trim()
+                });
+            return JsonSerializer.Serialize(new { ok = true, message_id = messageId.ToString("N") }, ChatPanelJson);
+        }
+
+        return JsonSerializer.Serialize(new { ok = false, error = "message_not_found" }, ChatPanelJson);
+    }
+
+    /// <summary>Читаемый Markdown текущего чата; опционально запись в .cascade-ide/chat-sessions/exports/.</summary>
+    public string ExportReadableMarkdown(bool writeFile, string? fileName)
+    {
+        var md = ChatReadableExporter.BuildMarkdown(_sessionId, [.. ChatMessages]);
+        if (!writeFile)
+            return JsonSerializer.Serialize(new { ok = true, markdown = md, relative_path = (string?)null }, ChatPanelJson);
+
+        try
+        {
+            var ws = _getWorkspaceRoot().Trim();
+            if (string.IsNullOrEmpty(ws))
+                ws = Environment.CurrentDirectory;
+            var dir = Path.Combine(ws, ".cascade-ide", "chat-sessions", "exports");
+            Directory.CreateDirectory(dir);
+            var name = string.IsNullOrWhiteSpace(fileName) ? $"session-{_sessionId:N}.readable.md" : fileName.Trim();
+            if (!name.EndsWith(".md", StringComparison.OrdinalIgnoreCase))
+                name += ".md";
+            var safe = Path.GetFileName(name);
+            var full = Path.Combine(dir, safe);
+            File.WriteAllText(full, md, System.Text.Encoding.UTF8);
+            var relative = Path.GetRelativePath(ws, full);
+            return JsonSerializer.Serialize(new { ok = true, markdown = md, relative_path = relative }, ChatPanelJson);
+        }
+        catch (Exception ex)
+        {
+            return JsonSerializer.Serialize(new { ok = false, markdown = md, error = ex.Message }, ChatPanelJson);
+        }
+    }
+
+    private static Dictionary<string, object?> MessageSnapshot(ChatMessageViewModel m) => new()
+    {
+        ["message_id"] = m.MessageId.ToString("N"),
+        ["role"] = m.Role,
+        ["content"] = m.Content
+    };
+
     private async Task InitializeSessionAsync()
     {
         try
         {
             await _sessionStore.LoadOrCreateMetadataAsync(_sessionId, CancellationToken.None).ConfigureAwait(false);
             var events = await _sessionStore.ReadEventsAsync(_sessionId, CancellationToken.None).ConfigureAwait(false);
-            if (events.Count == 0)
+            var rows = ChatHistoryMessageProjector.Project(events);
+            if (rows.Count == 0)
                 return;
-            var recovered = 0;
-            foreach (var ev in events)
+            UiScheduler.Default.Post(() =>
             {
-                if (!string.Equals(ev.Kind, ChatHistoryEventKind.MessageAdded, StringComparison.Ordinal))
-                    continue;
-                using var doc = JsonDocument.Parse(ev.PayloadJson);
-                if (!doc.RootElement.TryGetProperty("Role", out var role) || !doc.RootElement.TryGetProperty("Content", out var content))
-                    continue;
-                var msg = new ChatMessageViewModel(role.GetString() ?? "assistant", content.GetString() ?? "");
-                UiScheduler.Default.Post(() => ChatMessages.Add(msg));
-                recovered++;
-            }
-
-            if (recovered > 0)
-                UiScheduler.Default.Post(() => ClarificationStatusText = $"Восстановлено сообщений: {recovered}");
+                foreach (var row in rows)
+                    ChatMessages.Add(new ChatMessageViewModel(row.Role, row.Content, row.MessageId));
+                ClarificationStatusText = $"Восстановлено сообщений: {rows.Count}";
+            });
         }
         catch
         {
@@ -269,7 +359,7 @@ public partial class ChatPanelViewModel : ViewModelBase
                 _sessionId,
                 DateTimeOffset.UtcNow,
                 kind,
-                JsonSerializer.Serialize(payload));
+                JsonSerializer.Serialize(payload, ChatPanelJson));
             await _sessionStore.AppendEventAsync(ev, CancellationToken.None).ConfigureAwait(false);
             var meta = await _sessionStore.LoadOrCreateMetadataAsync(_sessionId, CancellationToken.None).ConfigureAwait(false);
             if (meta.UpdatedAtUtc < ev.AtUtc)
