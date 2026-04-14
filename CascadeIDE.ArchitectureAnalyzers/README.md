@@ -1,6 +1,8 @@
 # CascadeIDE.ArchitectureAnalyzers
 
-Roslyn-анализаторы для границ [ADR 0036](../docs/adr/0036-cds-channel-compositor-surface-pipeline.md). Подключён к `CascadeIDE.csproj` как `Analyzer` (`ReferenceOutputAssembly=false`), **кроме** загрузки через **RoslynMcp**: при `RoslynMcpWorkspace=true` ссылка на этот проект отключается, чтобы процесс MCP не блокировал `bin\…\CascadeIDE.ArchitectureAnalyzers.dll` во время `dotnet build` (см. [roslyn-mcp README](../../roslyn-mcp/README.md)).
+Roslyn-анализаторы для границ [ADR 0036](../docs/adr/0036-cds-channel-compositor-surface-pipeline.md). Подключён к `CascadeIDE.csproj` как `Analyzer` (`ReferenceOutputAssembly=false`), **кроме** загрузки через **RoslynMcp**: при `RoslynMcpWorkspace=true` ссылка на этот проект отключается, чтобы процесс MCP не блокировал `bin\…\CascadeIDE.ArchitectureAnalyzers.dll` во время `dotnet build` (общий механизм — раздел «RoslynMcpWorkspace» в [roslyn-mcp README](../../roslyn-mcp/README.md)).
+
+**Поведение:** обычный `dotnet build` / CI без `RoslynMcpWorkspace` по-прежнему получают CASCOPE*; в MCP по главному приложению эти диагностики из локального проекта анализатора не подмешиваются — для проверки правил ориентируйся на **`dotnet build`** или на этот проект отдельно. Если в тулы передаётся полный **`CascadeIDE.sln`**, проект анализатора всё ещё может подгружаться; для MCP достаточно контекста приложения — предпочтительнее путь к **`CascadeIDE.csproj`**.
 
 | ID | Уровень | Смысл |
 |----|---------|--------|
