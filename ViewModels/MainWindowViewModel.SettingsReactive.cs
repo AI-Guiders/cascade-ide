@@ -1,4 +1,3 @@
-using CascadeIDE.Cockpit.Cds;
 using CascadeIDE.Models;
 
 namespace CascadeIDE.ViewModels;
@@ -39,13 +38,6 @@ public partial class MainWindowViewModel
 
     partial void OnIsSolutionExplorerVisibleChanged(bool value)
     {
-        var coerced = CockpitPresentationLayoutPolicy.CoerceSolutionExplorerVisible(_presentationParse, value);
-        if (coerced != value)
-        {
-            IsSolutionExplorerVisible = coerced;
-            return;
-        }
-
         _settings.WorkspaceUi.ShowSolutionExplorer = value;
         OnPropertyChanged(nameof(IsSolutionPanelHidden));
         SaveSettingsIfChanged();
@@ -89,13 +81,6 @@ public partial class MainWindowViewModel
 
     partial void OnIsChatPanelExpandedChanged(bool value)
     {
-        var coerced = CockpitPresentationLayoutPolicy.CoerceChatPanelExpanded(_presentationParse, value);
-        if (coerced != value)
-        {
-            IsChatPanelExpanded = coerced;
-            return;
-        }
-
         OnPropertyChanged(nameof(IsChatPanelHidden));
         // Разворот колонки чата из меню «Вид» только меняет ширину; без перехода на страницу Chat
         // MFD мог остаться на сборке/терминале — пользователь ожидает увидеть чат.

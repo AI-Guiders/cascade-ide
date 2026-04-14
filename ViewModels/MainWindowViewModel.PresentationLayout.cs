@@ -73,6 +73,8 @@ public partial class MainWindowViewModel
         _suppressMfdColumnForMfdHostWindow = isOpen;
         OnPropertyChanged(nameof(IsMfdHostWindowShellOpen));
         OnPropertyChanged(nameof(IsMfdColumnVisible));
+        OnPropertyChanged(nameof(ChatPanelColumnPixelWidth));
+        OnPropertyChanged(nameof(IsChatPanelColumnVisible));
         OnPropertyChanged(nameof(ActiveAttentionLayoutSurface));
         OnPropertyChanged(nameof(MainGridColumnDefinitions));
     }

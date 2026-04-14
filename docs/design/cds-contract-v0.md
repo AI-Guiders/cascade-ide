@@ -29,7 +29,7 @@
 |------|--------|---------------------------|
 | **CDS** | Какая **кабина** сейчас: пресет, зоны, окна, страница MFD | `presentation`, `PresentationParseResult`, флаги VM колонок/хоста, `CurrentSecondaryShellPage`, `AttentionLayoutSurfaceKind` |
 | **Дерево UI** | **Что** нарисовано в виде контролов | `UiLayoutSnapshot`, MCP `ide_get_ui_layout` |
-| **Каналы** | **Что** в полосах и списках | `Cockpit/Channels/**` (данные), `Cockpit/Composition/**` (порядок/разметка для VM), readiness и т.д. |
+| **Каналы** | **Что** в полосах и списках | `Cockpit/Channels/**` (данные), `Cockpit/Composition/**` (порядок/разметка для VM; в т.ч. `Composition/Shell/MainWindowShellSurfaceCompositor` — колонки PFD/MFD main grid), readiness и т.д. |
 | **Avalonia (хост)** | Окна, фокус, ввод, DPI; хост тяжёлых контролов (редактор и т.д.); **не** канон смысла зон — см. [architecture-policy.md](../architecture-policy.md) (раздел «Avalonia и слой кабины») | `MainWindow`, `MfdHostWindow`, привязки VM; кастомная отрисовка — поверх хоста |
 
 

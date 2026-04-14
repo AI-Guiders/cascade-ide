@@ -93,7 +93,7 @@ public partial class MainWindow : Window
             vm.HighlightControlProvider = ShowHighlightForControl;
             vm.SetPanelSizeProvider = (panel, width, height) => Services.UiPanelResize.Resize(this, panel, width, height);
             UpdateChatColumnWidth(vm);
-            UpdateSolutionColumnWidth(vm.IsSolutionExplorerVisible);
+            UpdateSolutionColumnWidth(vm.IsPfdColumnVisible);
             UpdateMarkdownPreviewColumn(vm.IsMarkdownFile);
             SetupChatInputKeyHandler();
             SetupTerminalKeyHandler();

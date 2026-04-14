@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Lang;
 using CascadeIDE.Models;
-using CascadeIDE.Cockpit.Cds;
 using CascadeIDE.Services;
 using CommunityToolkit.Mvvm.Input;
 
@@ -126,15 +125,11 @@ public partial class MainWindowViewModel
         await Services.UiThemeApply.ApplyOnUiThreadAsync(Services.UiThemeApply.GetThemeJsonFromFile(path));
     }
 
-    [RelayCommand(CanExecute = nameof(CanToggleSolutionExplorer))]
+    [RelayCommand]
     private void ToggleSolutionExplorer()
     {
         IsSolutionExplorerVisible = !IsSolutionExplorerVisible;
     }
-
-    private bool CanToggleSolutionExplorer() =>
-        !IsSolutionExplorerVisible
-        || !CockpitPresentationLayoutPolicy.RequiresVisiblePfdColumn(_presentationParse);
 
     [RelayCommand]
     private void ToggleBuildOutput()

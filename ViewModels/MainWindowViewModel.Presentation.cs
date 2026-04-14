@@ -1,4 +1,5 @@
 using CascadeIDE.Cockpit.Cds;
+using CascadeIDE.Cockpit.Composition.Shell;
 using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Lang;
 
@@ -25,13 +26,21 @@ public partial class MainWindowViewModel
             _ => "CascadeIDE",
         };
 
-    /// <summary>Ширина колонки чата (пиксели); свёрнут — 0 (место отдаётся редактору).</summary>
-    public int ChatPanelColumnPixelWidth =>
-        IsChatPanelExpanded
-            ? UiModeCatalog.GetChatPanelExpandedWidthPixels(NormalizeUiMode(UiMode))
-            : UiWorkspaceLayoutRuntimeMetrics.ChatPanelCollapsedWidthPixels;
+    /// <summary>Композитор: intent + CDS policy → размещение колонок PFD/MFD в <c>MainGrid</c> (ADR 0036 п.3).</summary>
+    private MainWindowShellSurfaceComposition ShellSurfaceComposition =>
+        MainWindowShellSurfaceCompositor.Compose(
+            new MainWindowShellSurfaceCompositionInput(
+                _presentationParse,
+                IsSolutionExplorerVisible,
+                IsChatPanelExpanded,
+                _suppressMfdColumnForMfdHostWindow,
+                UiModeCatalog.GetChatPanelExpandedWidthPixels(NormalizeUiMode(UiMode)),
+                UiWorkspaceLayoutRuntimeMetrics.ChatPanelCollapsedWidthPixels));
 
-    /// <summary>Есть правая колонка чата и сплиттер перед ней (не свёрнуто в ноль).</summary>
+    /// <summary>Ширина региона MFD в main grid (пиксели); 0 если колонка не выделяется (хост MFD и т.п.).</summary>
+    public int ChatPanelColumnPixelWidth => ShellSurfaceComposition.MfdColumnPixelWidthInMainGrid;
+
+    /// <summary>Есть правая колонка MFD и сплиттер перед ней (ширина &gt; 0 в main).</summary>
     public bool IsChatPanelColumnVisible => ChatPanelColumnPixelWidth > 0;
 
     /// <summary>
@@ -46,16 +55,15 @@ public partial class MainWindowViewModel
     /// <summary>
     /// Видна ли колонка <c>MainGrid</c> под левый якорь при <see cref="ActiveAttentionLayoutSurface"/> (в этой разметке — зона PFD).
     /// Не путать с картой «панель → зона»: <see cref="AttentionZonePanelRuntime"/>, <c>docs/design/attention-zone-panel-playbook-v1.md</c>.
-    /// Ширина колонки совпадает с «обозреватель решения».
+    /// Ширина колонки совпадает с поверхностью PFD в main grid.
     /// </summary>
-    public bool IsPfdColumnVisible => IsSolutionExplorerVisible;
+    public bool IsPfdColumnVisible => ShellSurfaceComposition.PfdSurfaceVisible;
 
     /// <summary>
     /// Видна ли колонка <c>MainGrid</c> под правый якорь при <see cref="ActiveAttentionLayoutSurface"/> (в этой разметке — зона MFD).
     /// Не путать с вкладками MFD или картой панелей — <see cref="AttentionZonePanelRuntime"/>; место в сетке совпадает с <see cref="IsChatPanelColumnVisible"/>.
     /// </summary>
-    public bool IsMfdColumnVisible =>
-        !_suppressMfdColumnForMfdHostWindow && IsChatPanelColumnVisible;
+    public bool IsMfdColumnVisible => ShellSurfaceComposition.MfdColumnVisibleInMainGrid;
     /// <summary>Полоса активной задачи / Task Cockpit — из <c>UiModes/&lt;id&gt;.toml</c> (<c>active_task_strip</c>); по умолчанию скрыто для семьи Debug.</summary>
     public bool ShowTaskBar => UiModeCatalog.GetShowTaskBar(NormalizeUiMode(UiMode));
 

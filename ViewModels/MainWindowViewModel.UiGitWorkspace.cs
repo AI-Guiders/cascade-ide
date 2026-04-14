@@ -1,6 +1,5 @@
 using Avalonia.Threading;
 using CascadeIDE.Features.UiChrome;
-using CascadeIDE.Cockpit.Cds;
 using CascadeIDE.Models;
 
 namespace CascadeIDE.ViewModels;
@@ -36,10 +35,10 @@ public partial class MainWindowViewModel
         var normalized = NormalizeUiMode(mode);
         var spec = UiModeCatalog.GetSpec(normalized);
 
-        IsSolutionExplorerVisible = CockpitPresentationLayoutPolicy.CoerceSolutionExplorerVisible(_presentationParse, spec.SolutionExplorerVisible);
+        IsSolutionExplorerVisible = spec.SolutionExplorerVisible;
         IsBuildOutputVisible = spec.BuildOutputVisible;
         IsTerminalVisible = spec.TerminalVisible;
-        IsChatPanelExpanded = CockpitPresentationLayoutPolicy.CoerceChatPanelExpanded(_presentationParse, spec.ChatPanelExpanded);
+        IsChatPanelExpanded = spec.ChatPanelExpanded;
         EditorGroupCount = spec.EditorGroupCount;
         IsInstrumentationDockVisible = spec.InstrumentationDockVisible;
 

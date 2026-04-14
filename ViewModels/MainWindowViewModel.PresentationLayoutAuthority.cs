@@ -1,15 +1,13 @@
-using CascadeIDE.Cockpit.Cds;
-
 namespace CascadeIDE.ViewModels;
 
-/// <summary>Применение <see cref="CockpitPresentationLayoutPolicy"/> к свойствам главного VM.</summary>
+/// <summary>Запись intent видимости панелей (семантика «хочу»); фактическая поверхность — <see cref="MainWindowShellSurfaceCompositor"/>.</summary>
 public partial class MainWindowViewModel
 {
-    /// <summary>Согласовать желаемую видимость обозревателя с пресетом <c>presentation</c> (первый экран).</summary>
+    /// <summary>Предпочтение контента зоны PFD (не surface visibility).</summary>
     public void ApplySolutionExplorerVisible(bool desired) =>
-        IsSolutionExplorerVisible = CockpitPresentationLayoutPolicy.CoerceSolutionExplorerVisible(_presentationParse, desired);
+        IsSolutionExplorerVisible = desired;
 
-    /// <summary>Согласовать разворот колонки Mfd с пресетом <c>presentation</c> (первый экран).</summary>
+    /// <summary>Предпочтение контента зоны MFD (не surface visibility).</summary>
     public void ApplyChatPanelExpanded(bool desired) =>
-        IsChatPanelExpanded = CockpitPresentationLayoutPolicy.CoerceChatPanelExpanded(_presentationParse, desired);
+        IsChatPanelExpanded = desired;
 }
