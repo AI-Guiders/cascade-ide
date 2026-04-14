@@ -20,7 +20,7 @@
 | **CDS (контракт)** | Снимок **семантики** отображения: зоны, топология, окна, активный вторичный контур. Не реализация ARINC 661 и не один God-class в репозитории. |
 | **Cockpit surface state** (рабочее имя DTO) | Условное имя будущей структуры/JSON, агрегирующей поля ниже; версионируется (`schema_version`). |
 | **Канал** | Поток данных внутри слота (Workspace Health, EICAS, readiness) — **не** входит в CDS целиком; в CDS только **какие слоты/страницы активны**, без полного текста сегментов. |
-| **Widget (кабинный)** | Именованный выбор **представления/инструмента в слоте** (результат композитора); не `Control` Avalonia. Дескриптор в коде — `CockpitWidgetDescriptor` (`Cockpit/Composition/CockpitWidgetDescriptor.cs`); нормативно — [ADR 0047](../adr/0047-cockpit-widget-descriptor-and-slot-composition.md). Пример слота PFD: дерево решения vs Semantic Map — два разных `widget_id`. |
+| **Instrument (кабинный)** | Именованный выбор **представления в слоте внимания** (результат композитора); не `Control` Avalonia. Термин сознательно в духе PFD/MFD; в бытовом английском *instrument* многозначно — в глоссарии закреплено значение «логическая единица кабины», см. [ADR 0047](../adr/0047-cockpit-instrument-descriptor-and-slot-composition.md). Дескриптор в коде — `CockpitInstrumentDescriptor` (`Cockpit/Composition/CockpitInstrumentDescriptor.cs`). Пример слота PFD: дерево решения vs Semantic Map — два разных `instrument_id`. |
 
 ---
 
@@ -88,7 +88,7 @@
 ## 7. Связанные файлы кода (ориентиры)
 
 - `Cockpit/Cds/CockpitSurfaceState.cs`, `Cockpit/Cds/CockpitSurfaceSnapshotBuilder.cs` — CDS (семантика кабины); `Cockpit/Cds/AttentionLayoutSurfaceKind.cs` — вид топологии в снимке.
-- `Cockpit/Composition/CockpitWidgetDescriptor.cs` — дескриптор виджета слота (ADR 0047); композиторы — `Cockpit/Composition/**` (в т.ч. `Composition/Shell/MainWindowShellSurfaceCompositor.cs`).
+- `Cockpit/Composition/CockpitInstrumentDescriptor.cs` — дескриптор инструмента слота (ADR 0047); композиторы — `Cockpit/Composition/**` (в т.ч. `Composition/Shell/MainWindowShellSurfaceCompositor.cs`).
 - `Cockpit/Surface/UiLayoutSnapshot.cs` — дерево UI (другой слой, ADR 0036 п.4).
 - Каналы и композиторы по ADR 0036 — `Cockpit/Channels/**`, `Cockpit/Composition/**`.
 - `Services/Presentation/PresentationParser.cs`, `PresentationLayoutAnalyzer.cs` — презентация.
