@@ -31,6 +31,23 @@ public sealed class PresentationLayoutAnalyzerTests
     }
 
     [Fact]
+    public void ShouldMaximizeMainWindowAtStartup_WhenTripleP_F_M_True()
+    {
+        var r = PresentationParser.Parse("(P) (F) (M)", DefaultGrammar());
+        Assert.True(r.IsSuccess);
+        Assert.True(PresentationLayoutAnalyzer.ShouldMaximizeMainWindowAtStartup(r.Screens));
+    }
+
+    [Fact]
+    public void ShouldMaximizeMainWindowAtStartup_WhenSingleScreenWeightedP_F_M_True()
+    {
+        var g = PresentationGrammarTokens.FromSettings("()", " ", "+", "P", "F", "M");
+        var r = PresentationParser.Parse("(0.2P+0.3F+0.5M)", g);
+        Assert.True(r.IsSuccess);
+        Assert.True(PresentationLayoutAnalyzer.ShouldMaximizeMainWindowAtStartup(r.Screens));
+    }
+
+    [Fact]
     public void IsPfdForwardCombinedOnFirstScreen_WhenOnlyP_False()
     {
         var r = PresentationParser.Parse("(P)", DefaultGrammar());

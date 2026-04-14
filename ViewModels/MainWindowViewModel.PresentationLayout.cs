@@ -22,10 +22,13 @@ public partial class MainWindowViewModel
             _presentationDedicatedMfdSecondScreen,
             _suppressMfdColumnForMfdHostWindow);
 
-    /// <summary>Первый экран — <c>(xP+yF)</c>: PFD и Forward на одном дисплее; главное окно максимизируем на старте.</summary>
+    /// <summary>
+    /// Пресет требует развернуть главное окно на весь экран при старте — см.
+    /// <see cref="PresentationLayoutAnalyzer.ShouldMaximizeMainWindowAtStartup"/>.
+    /// </summary>
     public bool PresentationRequestsMainWindowMaximized =>
         _presentationParse.IsSuccess
-        && PresentationLayoutAnalyzer.IsPfdForwardCombinedOnFirstScreen(_presentationParse.Screens);
+        && PresentationLayoutAnalyzer.ShouldMaximizeMainWindowAtStartup(_presentationParse.Screens);
 
     /// <summary>Пресет «первый экран — PFD+Forward без MFD, второй — только MFD».</summary>
     public bool PresentationRequestsDedicatedMfdSecondScreen => _presentationDedicatedMfdSecondScreen;

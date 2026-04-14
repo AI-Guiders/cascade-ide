@@ -37,6 +37,14 @@ public static class PresentationLayoutAnalyzer
             && ContainsAnchor(first, PresentationAnchorKind.Forward);
     }
 
+    /// <summary>
+    /// Главное окно при старте разворачиваем на рабочую область дисплея (не дефолт 1000×600):
+    /// на первом экране есть и PFD, и Forward — <c>(xP+yF)</c>, <c>(xP+yF+zM)</c> в одной группе и т.п.;
+    /// либо три дисплея <c>(P)(F)(M)</c> — первое окно только под PFD на первом мониторе (ADR 0017).
+    /// </summary>
+    public static bool ShouldMaximizeMainWindowAtStartup(IReadOnlyList<IReadOnlyList<PresentationAnchorSlot>> screens) =>
+        IsPfdForwardCombinedOnFirstScreen(screens) || IsTriplePfdForwardMfdPreset(screens);
+
     /// <summary>Три дисплея: по одному якорю — <c>(PFD) (Forward) (MFD)</c> (ADR 0017).</summary>
     public static bool IsTriplePfdForwardMfdPreset(IReadOnlyList<IReadOnlyList<PresentationAnchorSlot>> screens)
     {
