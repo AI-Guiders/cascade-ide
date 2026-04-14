@@ -42,7 +42,7 @@
 
 ```json
 {
-  "schema_version": "0.2",
+  "schema_version": "0.3",
   "ui_mode": "string",
   "presentation_effective_line": "string",
   "presentation_parse_success": true,
@@ -61,7 +61,14 @@
     "pfd_required_by_presentation": true,
     "forward_required_by_presentation": true,
     "mfd_required_by_presentation": true
-  }
+  },
+  "instruments": [
+    {
+      "instrument_id": "solution_explorer_tree",
+      "slot_id": "pfd",
+      "schema_version": "0.2"
+    }
+  ]
 }
 ```
 
@@ -80,7 +87,7 @@
 
 | Этап | Содержание |
 |------|------------|
-| **Сейчас** | DTO `CockpitSurfaceState` и вложенные записи в `Cockpit/Cds/CockpitSurfaceState.cs`; сборка — `Cockpit/Cds/CockpitSurfaceSnapshotBuilder.Build(MainWindowViewModel)`; точка входа на VM — `MainWindowViewModel.BuildCockpitSurfaceSnapshot()` (см. также `EffectivePresentationLine`, `IsMfdHostWindowShellOpen`, `IsForwardZoneVisible`). |
+| **Сейчас** | DTO `CockpitSurfaceState` и вложенные записи в `Cockpit/Cds/CockpitSurfaceState.cs`; сборка — `Cockpit/Cds/CockpitSurfaceSnapshotBuilder.Build(MainWindowViewModel)`; точка входа на VM — `MainWindowViewModel.BuildCockpitSurfaceSnapshot()` (см. также `EffectivePresentationLine`, `IsMfdHostWindowShellOpen`, `IsForwardZoneVisible`). В `schema_version=0.3` добавлен список `instruments` (`instrument_id`, `slot_id`, `schema_version`) как проекция HostSurface-кадра для MCP/наблюдаемости. |
 | **Дальше** | Проброс в MCP (`ide_get_cockpit_state` или расширение существующего инструмента) и стабилизация полей по обратной связи агента/тестов. |
 
 ---
@@ -91,6 +98,7 @@
 - `Cockpit/Composition/CockpitInstrumentDescriptor.cs` — дескриптор инструмента слота (ADR 0047).
 - `Cockpit/Composition/Shell/MainWindowShellSurfaceCompositor.cs` — метрики колонок shell.
 - `Cockpit/Composition/HostSurface/MainWindowHostSurfaceFrame.cs`, `MainWindowHostSurfaceCompositor.cs`, `CockpitHostSurfaceIds.cs` — кадр для хоста (shell + инструменты); стабильные `instrument_id` / `slot_id`.
+- `Cockpit/Surface/MainWindowInstrumentMountRegistry.cs` — реестр монтирования `instrument_id → mount` (хост-слой, вне композитора; Avalonia/Skia backend).
 - `Cockpit/Surface/UiLayoutSnapshot.cs` — дерево UI (другой слой, ADR 0036 п.4).
 - Каналы и композиторы по ADR 0036 — `Cockpit/Channels/**`, `Cockpit/Composition/**`.
 - `Services/Presentation/PresentationParser.cs`, `PresentationLayoutAnalyzer.cs` — презентация.
@@ -98,4 +106,4 @@
 
 ---
 
-**Версия документа:** 2026-04-15 — v0.2: слой HostSurface (кадр фюзеляжа: shell + инструменты), уточнение роли Avalonia/Skia.
+**Версия документа:** 2026-04-15 — v0.3: список `instruments` в CDS-снимке + реестр монтирования в Surface-слое.

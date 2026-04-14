@@ -176,4 +176,5 @@
 - **v1.71** — [0047](adr/0047-cockpit-instrument-descriptor-and-slot-composition.md): канонический термин **Instrument** (кабинный) и тип `CockpitInstrumentDescriptor` вместо черновика *Widget* / `CockpitWidgetDescriptor`; переименован файл ADR.
 - **v1.72** — [0047](adr/0047-cockpit-instrument-descriptor-and-slot-composition.md): статус **Accepted** (ось термина и дескриптора закреплены; реестр/wire — по дорожной карте).
 - **v1.73** — слой **`Cockpit/Composition/HostSurface`**: `MainWindowHostSurfaceFrame` + композитор (shell + `CockpitInstrumentDescriptor`); VM собирает кадр одним вызовом — граница перед Skia в слотах, Avalonia как хост ([cds-contract-v0](design/cds-contract-v0.md) §3, §7).
+- **v1.74** — `Cockpit/Cds/CockpitSurfaceState` (schema `0.3`) получил `instruments` как проекцию HostSurface-кадра для MCP/наблюдаемости; добавлен `Cockpit/Surface/MainWindowInstrumentMountRegistry` (`instrument_id → mount`, хост-слой Avalonia/Skia, без UI Semantic Map на этом шаге).
 - Изменения направления — отдельным коммитом: обновление этого файла и при необходимости новый ADR в [docs/adr/README.md](adr/README.md).
