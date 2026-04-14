@@ -23,8 +23,25 @@ public static class MfdHostWindowPlacement
         MfdHostWindowBounds? saved,
         int? mfdPresentationScreenIndex = null)
     {
-        if (saved is { } b && TryClampToWorkingAreas(mainWindow, b, out var pos, out var w, out var h))
+        if (saved is { } b && TryClampToWorkingAreas(mainWindow, b, out var pos, out var w, out var h, out var matchedScreen))
         {
+            // Сохранённая геометрия могла оказаться на том же мониторе, что и P+F, тогда как строка presentation
+            // задаёт M на другом экране — не используем restore, иначе окно M остаётся «рядом» с главным.
+            if (mfdPresentationScreenIndex is >= 0 and var tIdx)
+            {
+                var screens = mainWindow.Screens?.All;
+                if (screens is { Count: >= 2 })
+                {
+                    var ordered = PresentationMonitorTopology.OrderScreensForPresentation(screens);
+                    if (tIdx < ordered.Count && matchedScreen is not null
+                        && !ReferenceEquals(matchedScreen, ordered[tIdx]))
+                    {
+                        PlaceNearMain(mainWindow, mfdHostWindow, mfdPresentationScreenIndex);
+                        return;
+                    }
+                }
+            }
+
             mfdHostWindow.Position = pos;
             mfdHostWindow.Width = w;
             mfdHostWindow.Height = h;
@@ -87,11 +104,13 @@ public static class MfdHostWindowPlacement
         MfdHostWindowBounds b,
         out PixelPoint position,
         out double width,
-        out double height)
+        out double height,
+        out Screen? matchedScreen)
     {
         position = default;
         width = 0;
         height = 0;
+        matchedScreen = null;
 
         var screens = mainWindow.Screens?.All;
         if (screens is null || screens.Count == 0)
@@ -119,6 +138,8 @@ public static class MfdHostWindowPlacement
 
         if (best is null || bestArea <= 0)
             return false;
+
+        matchedScreen = best;
 
         var wa = best.WorkingArea;
         var iw = Math.Min((int)Math.Round(w), wa.Width);
