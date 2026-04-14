@@ -43,7 +43,7 @@
                     <views:WorkspaceHealthSecondaryPageView/>
             </Border>
             <Border IsVisible="{Binding CurrentSecondaryShellPage, Converter={StaticResource SecondaryShellPageEq}, ConverterParameter=Chat}">
-                    <views:ChatPanelView/>
+                    <views:ChatPanelView DataContext="{Binding ChatPanel}"/>
             </Border>
             <Border IsVisible="{Binding CurrentSecondaryShellPage, Converter={StaticResource SecondaryShellPageEq}, ConverterParameter=AiChatSettings}">
                     <DockPanel>

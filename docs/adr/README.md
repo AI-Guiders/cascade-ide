@@ -52,6 +52,7 @@
 | [0042](0042-pre-flight-planned-changes-and-review-before-apply.md) | Pre-flight briefing: Planned Changes (намерение + SA) и Review Before Apply (превью, семантический слой, отказ без мусора); машина состояний; ортогонально «построчному доверию» | Proposed |
 | [0043](0043-mcp-transport-recovery-human-agent-parity.md) | Паритет восстановления MCP-транспорта (человек ↔ агент), граница хоста (Cursor) vs IDE; ортогонально ADR 0002 | Proposed |
 | [0044](0044-avalonia-host-skia-agent-chat-surface.md) | Avalonia как хост (фюзеляж), кастомная отрисовка чата (Skia — гипотеза); **модель первична**, спайк следом; см. ADR 0031 | Proposed |
+| [0045](0045-agent-chat-persistence-event-log-and-projections.md) | Persistence истории чата: append-only NDJSON события + метаданные и проекции; UI/рендер не источник правды | Proposed |
 
 ## Соглашения
 
