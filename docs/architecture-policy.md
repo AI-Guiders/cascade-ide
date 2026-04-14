@@ -175,4 +175,5 @@
 - **v1.70** — добавлен [0047](adr/0047-cockpit-instrument-descriptor-and-slot-composition.md): дескриптор слота на границе композитор → поверхность; не смешивать с `Control`.
 - **v1.71** — [0047](adr/0047-cockpit-instrument-descriptor-and-slot-composition.md): канонический термин **Instrument** (кабинный) и тип `CockpitInstrumentDescriptor` вместо черновика *Widget* / `CockpitWidgetDescriptor`; переименован файл ADR.
 - **v1.72** — [0047](adr/0047-cockpit-instrument-descriptor-and-slot-composition.md): статус **Accepted** (ось термина и дескриптора закреплены; реестр/wire — по дорожной карте).
+- **v1.73** — слой **`Cockpit/Composition/HostSurface`**: `MainWindowHostSurfaceFrame` + композитор (shell + `CockpitInstrumentDescriptor`); VM собирает кадр одним вызовом — граница перед Skia в слотах, Avalonia как хост ([cds-contract-v0](design/cds-contract-v0.md) §3, §7).
 - Изменения направления — отдельным коммитом: обновление этого файла и при необходимости новый ADR в [docs/adr/README.md](adr/README.md).

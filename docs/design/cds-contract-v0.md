@@ -30,8 +30,8 @@
 |------|--------|---------------------------|
 | **CDS** | Какая **кабина** сейчас: пресет, зоны, окна, страница MFD | `presentation`, `PresentationParseResult`, флаги VM колонок/хоста, `CurrentSecondaryShellPage`, `AttentionLayoutSurfaceKind` |
 | **Дерево UI** | **Что** нарисовано в виде контролов | `UiLayoutSnapshot`, MCP `ide_get_ui_layout` |
-| **Каналы** | **Что** в полосах и списках | `Cockpit/Channels/**` (данные), `Cockpit/Composition/**` (порядок/разметка для VM; в т.ч. `Composition/Shell/MainWindowShellSurfaceCompositor` — колонки PFD/MFD main grid), readiness и т.д. |
-| **Avalonia (хост)** | Окна, фокус, ввод, DPI; хост тяжёлых контролов (редактор и т.д.); **не** канон смысла зон — см. [architecture-policy.md](../architecture-policy.md) (раздел «Avalonia и слой кабины») | `MainWindow`, `MfdHostWindow`, привязки VM; кастомная отрисовка — поверх хоста |
+| **Каналы** | **Что** в полосах и списках | `Cockpit/Channels/**` (данные), `Cockpit/Composition/**` (порядок/разметка для VM): `Composition/Shell/MainWindowShellSurfaceCompositor` — только **колонки** PFD/MFD в main grid; `Composition/HostSurface/MainWindowHostSurfaceCompositor` — **кадр хоста** (shell + список `CockpitInstrumentDescriptor`, ADR 0047) без деревьев контролов — удобная граница перед Skia в слотах. |
+| **Avalonia (хост)** | Окна, фокус, ввод, DPI; **фюзеляж** для тяжёлых контролов (редактор и т.д.); **не** канон смысла зон — см. [architecture-policy.md](../architecture-policy.md) (раздел «Avalonia и слой кабины») | `MainWindow`, `MfdHostWindow`, привязки VM; отрисовка слотов кабины — поверх хоста (в т.ч. Skia) по кадру композитора |
 
 
 ---
@@ -88,7 +88,9 @@
 ## 7. Связанные файлы кода (ориентиры)
 
 - `Cockpit/Cds/CockpitSurfaceState.cs`, `Cockpit/Cds/CockpitSurfaceSnapshotBuilder.cs` — CDS (семантика кабины); `Cockpit/Cds/AttentionLayoutSurfaceKind.cs` — вид топологии в снимке.
-- `Cockpit/Composition/CockpitInstrumentDescriptor.cs` — дескриптор инструмента слота (ADR 0047); композиторы — `Cockpit/Composition/**` (в т.ч. `Composition/Shell/MainWindowShellSurfaceCompositor.cs`).
+- `Cockpit/Composition/CockpitInstrumentDescriptor.cs` — дескриптор инструмента слота (ADR 0047).
+- `Cockpit/Composition/Shell/MainWindowShellSurfaceCompositor.cs` — метрики колонок shell.
+- `Cockpit/Composition/HostSurface/MainWindowHostSurfaceFrame.cs`, `MainWindowHostSurfaceCompositor.cs`, `CockpitHostSurfaceIds.cs` — кадр для хоста (shell + инструменты); стабильные `instrument_id` / `slot_id`.
 - `Cockpit/Surface/UiLayoutSnapshot.cs` — дерево UI (другой слой, ADR 0036 п.4).
 - Каналы и композиторы по ADR 0036 — `Cockpit/Channels/**`, `Cockpit/Composition/**`.
 - `Services/Presentation/PresentationParser.cs`, `PresentationLayoutAnalyzer.cs` — презентация.
@@ -96,4 +98,4 @@
 
 ---
 
-**Версия документа:** 2026-04-12 — v0.1 первичный текст.
+**Версия документа:** 2026-04-15 — v0.2: слой HostSurface (кадр фюзеляжа: shell + инструменты), уточнение роли Avalonia/Skia.
