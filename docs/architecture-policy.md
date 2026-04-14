@@ -74,7 +74,7 @@
 | Protobuf vs JSON: когда уместен бинарный IDL для агента/IDE; границы с MCP и `IdeCommands`; критерии пилота | [0041](adr/0041-protobuf-for-agent-and-ide-messages.md) (Proposed) |
 | Pre-flight briefing: Planned Changes и Review Before Apply; семантический слой перед записью на диск; частичное одобрение; отказ без артефактов | [0042](adr/0042-pre-flight-planned-changes-and-review-before-apply.md) (Proposed) |
 | MCP-транспорт: паритет «человек может перезапустить MCP в хосте ↔ агент видит сбой и восстановление»; уровни хост / CascadeIDE / наблюдаемость; не смешивать с паритетом отладки | [0043](adr/0043-mcp-transport-recovery-human-agent-parity.md) (Proposed) |
-| Чат агента: Avalonia как фюзеляж, Skia (или иной слой) как гипотеза для нестрочной поверхности; спайк до масштаба | [0044](adr/0044-avalonia-host-skia-agent-chat-surface.md) (Proposed) |
+| Чат агента: модель диалога первична, затем UI; Avalonia как фюзеляж, Skia — гипотеза слоя отрисовки; спайк после/параллельно модели | [0044](adr/0044-avalonia-host-skia-agent-chat-surface.md) (Proposed) |
 
 Полный индекс: [docs/adr/README.md](adr/README.md).
 
