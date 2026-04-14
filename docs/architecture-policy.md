@@ -76,6 +76,7 @@
 | MCP-транспорт: паритет «человек может перезапустить MCP в хосте ↔ агент видит сбой и восстановление»; уровни хост / CascadeIDE / наблюдаемость; не смешивать с паритетом отладки | [0043](adr/0043-mcp-transport-recovery-human-agent-parity.md) (Proposed) |
 | Чат агента: модель диалога первична, затем UI; Avalonia как фюзеляж, Skia — гипотеза слоя отрисовки; спайк после/параллельно модели | [0044](adr/0044-avalonia-host-skia-agent-chat-surface.md) (Proposed) |
 | Чат агента: persistence через append-only event log (`*.events.ndjson`) + `meta.json`; проекции для UI отдельно | [0045](adr/0045-agent-chat-persistence-event-log-and-projections.md) (Proposed) |
+| Раскладка кабины: `presentation` как инвариант P/F/M; единый `PresentationLayoutAuthority` для меню/MCP/UI-режимов и реактивного слоя | [0046](adr/0046-presentation-layout-authority-and-cockpit-invariants.md) (Proposed) |
 
 Полный индекс: [docs/adr/README.md](adr/README.md).
 
@@ -169,4 +170,5 @@
 - **v1.66** — добавлен [0041](adr/0041-protobuf-for-agent-and-ide-messages.md) (protobuf vs JSON для сообщений агента/IDE: границы, критерии, гибрид; точка входа; Proposed).  
 - **v1.67** — [0039](adr/0039-workspace-navigation-affordances.md): зафиксирован реализованный MCP-слой — `get_workspace_navigation_context` (пресеты в `settings.toml`, merge, эхо `kind_filter`, subgraph: `kind` / `related_kind`); cookbook [workspace-navigation-mcp-cookbook.md](design/workspace-navigation-mcp-cookbook.md); закрыт п.5 в [закрытых вопросах](adr/0039-workspace-navigation-affordances.md#adr0039-closed-questions).  
 - **v1.68** — добавлен [0045](adr/0045-agent-chat-persistence-event-log-and-projections.md): persistence чата как append-only NDJSON + meta/projections; стартовая реализация `ChatSessionStore` в `Features/Chat/`.
+- **v1.69** — добавлен [0046](adr/0046-presentation-layout-authority-and-cockpit-invariants.md): `presentation` трактуется как инвариант кабины P/F/M; единый `PresentationLayoutAuthority` коэрцирует изменения из меню/MCP/UI-режимов/реактивного слоя.
 - Изменения направления — отдельным коммитом: обновление этого файла и при необходимости новый ADR в [docs/adr/README.md](adr/README.md).
