@@ -1,3 +1,5 @@
+using System.Collections.Specialized;
+using System.ComponentModel;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
@@ -20,6 +22,8 @@ public sealed class SkiaChatSurfaceControl : Control
     private readonly List<BubbleHit> _bubbleHits = [];
     private int _hoveredBubble = -1;
     private int _selectedBubble = -1;
+    private INotifyCollectionChanged? _messagesCollection;
+    private readonly List<ChatMessageViewModel> _wiredMessages = [];
 
     public static readonly StyledProperty<IEnumerable<ChatMessageViewModel>?> MessagesProperty =
         AvaloniaProperty.Register<SkiaChatSurfaceControl, IEnumerable<ChatMessageViewModel>?>(nameof(Messages));
@@ -67,6 +71,85 @@ public sealed class SkiaChatSurfaceControl : Control
         AddHandler(PointerMovedEvent, OnPointerMoved, RoutingStrategies.Bubble);
         AddHandler(PointerPressedEvent, OnPointerPressed, RoutingStrategies.Bubble);
         AddHandler(PointerExitedEvent, OnPointerExited, RoutingStrategies.Bubble);
+    }
+
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
+        if (change.Property == MessagesProperty)
+            RebindMessages(change.NewValue as IEnumerable<ChatMessageViewModel>);
+    }
+
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        UnwireMessages();
+        base.OnDetachedFromVisualTree(e);
+    }
+
+    private void RebindMessages(IEnumerable<ChatMessageViewModel>? newMsgs)
+    {
+        UnwireMessages();
+        if (newMsgs is null)
+            return;
+        if (newMsgs is INotifyCollectionChanged ncc)
+        {
+            _messagesCollection = ncc;
+            ncc.CollectionChanged += OnMessagesCollectionChanged;
+        }
+
+        foreach (var vm in newMsgs)
+            WireMessage(vm);
+    }
+
+    private void UnwireMessages()
+    {
+        if (_messagesCollection is not null)
+        {
+            _messagesCollection.CollectionChanged -= OnMessagesCollectionChanged;
+            _messagesCollection = null;
+        }
+
+        foreach (var vm in _wiredMessages.ToArray())
+        {
+            vm.PropertyChanged -= OnMessageVmPropertyChanged;
+            _wiredMessages.Remove(vm);
+        }
+    }
+
+    private void OnMessagesCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        ResyncMessageItemSubscriptions();
+        InvalidateVisual();
+    }
+
+    private void ResyncMessageItemSubscriptions()
+    {
+        foreach (var vm in _wiredMessages.ToArray())
+        {
+            vm.PropertyChanged -= OnMessageVmPropertyChanged;
+            _wiredMessages.Remove(vm);
+        }
+
+        if (Messages is null)
+            return;
+        foreach (var vm in Messages)
+            WireMessage(vm);
+    }
+
+    private void WireMessage(ChatMessageViewModel vm)
+    {
+        if (_wiredMessages.Contains(vm))
+            return;
+        vm.PropertyChanged += OnMessageVmPropertyChanged;
+        _wiredMessages.Add(vm);
+    }
+
+    private void OnMessageVmPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is null
+            || e.PropertyName == nameof(ChatMessageViewModel.Content)
+            || e.PropertyName == nameof(ChatMessageViewModel.Role))
+            InvalidateVisual();
     }
 
     public override void Render(DrawingContext context)
