@@ -57,7 +57,8 @@
     <ProjectReference Include="..\git-mcp-core\GitMcp.Core.csproj" />
     <ProjectReference Include="..\dotnet-debug-core\DotnetDebug.Core.csproj" />
     <ProjectReference Include="CascadeIDE.Contracts\CascadeIDE.Contracts.csproj" />
-    <ProjectReference Include="CascadeIDE.ArchitectureAnalyzers\CascadeIDE.ArchitectureAnalyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <!-- RoslynMcp передаёт RoslynMcpWorkspace=true: не ссылаться на локальный анализатор, иначе DLL в bin держит процесс MCP и ломает dotnet build. -->
+    <ProjectReference Include="CascadeIDE.ArchitectureAnalyzers\CascadeIDE.ArchitectureAnalyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" Condition="'$(RoslynMcpWorkspace)'!='true'" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.3.13" />

@@ -1,6 +1,6 @@
 # CascadeIDE.ArchitectureAnalyzers
 
-Roslyn-анализаторы для границ [ADR 0036](../docs/adr/0036-cds-channel-compositor-surface-pipeline.md). Подключён к `CascadeIDE.csproj` как `Analyzer` (`ReferenceOutputAssembly=false`).
+Roslyn-анализаторы для границ [ADR 0036](../docs/adr/0036-cds-channel-compositor-surface-pipeline.md). Подключён к `CascadeIDE.csproj` как `Analyzer` (`ReferenceOutputAssembly=false`), **кроме** загрузки через **RoslynMcp**: при `RoslynMcpWorkspace=true` ссылка на этот проект отключается, чтобы процесс MCP не блокировал `bin\…\CascadeIDE.ArchitectureAnalyzers.dll` во время `dotnet build` (см. [roslyn-mcp README](../../roslyn-mcp/README.md)).
 
 | ID | Уровень | Смысл |
 |----|---------|--------|
