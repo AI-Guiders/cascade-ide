@@ -54,7 +54,7 @@
 | [0044](0044-avalonia-host-skia-agent-chat-surface.md) | Avalonia как хост (фюзеляж), кастомная отрисовка чата (Skia — гипотеза); **модель первична**, спайк следом; см. ADR 0031 | Proposed |
 | [0045](0045-agent-chat-persistence-event-log-and-projections.md) | Persistence истории чата: append-only NDJSON события + метаданные и проекции; UI/рендер не источник правды | Proposed |
 | [0046](0046-presentation-layout-authority-and-cockpit-invariants.md) | Единый `PresentationLayoutAuthority` и инварианты P/F/M: `presentation` как источник истины для меню/MCP/режимов/реактивного слоя | Proposed |
-| [0047](0047-cockpit-instrument-descriptor-and-slot-composition.md) | Инструмент кабины (`Instrument`): дескриптор слота (`CockpitInstrumentDescriptor`), не `Control`; SE vs Semantic Map как примеры | Proposed |
+| [0047](0047-cockpit-instrument-descriptor-and-slot-composition.md) | Инструмент кабины (`Instrument`): дескриптор слота (`CockpitInstrumentDescriptor`), не `Control`; SE vs Semantic Map как примеры | Accepted |
 
 ## Соглашения
 

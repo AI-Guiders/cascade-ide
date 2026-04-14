@@ -77,7 +77,7 @@
 | Чат агента: модель диалога первична, затем UI; Avalonia как фюзеляж, Skia — гипотеза слоя отрисовки; спайк после/параллельно модели | [0044](adr/0044-avalonia-host-skia-agent-chat-surface.md) (Proposed) |
 | Чат агента: persistence через append-only event log (`*.events.ndjson`) + `meta.json`; проекции для UI отдельно | [0045](adr/0045-agent-chat-persistence-event-log-and-projections.md) (Proposed) |
 | Раскладка кабины: `presentation` как инвариант P/F/M; единый `PresentationLayoutAuthority` для меню/MCP/UI-режимов и реактивного слоя | [0046](adr/0046-presentation-layout-authority-and-cockpit-invariants.md) (Proposed) |
-| Инструмент кабины: дескриптор слота композитора (`CockpitInstrumentDescriptor`), не Avalonia-контрол; SE vs Semantic Map как разные `instrument_id` в PFD | [0047](adr/0047-cockpit-instrument-descriptor-and-slot-composition.md) (Proposed) |
+| Инструмент кабины: дескриптор слота композитора (`CockpitInstrumentDescriptor`), не Avalonia-контрол; SE vs Semantic Map как разные `instrument_id` в PFD | [0047](adr/0047-cockpit-instrument-descriptor-and-slot-composition.md) (Accepted) |
 
 Полный индекс: [docs/adr/README.md](adr/README.md).
 
@@ -174,4 +174,5 @@
 - **v1.69** — добавлен [0046](adr/0046-presentation-layout-authority-and-cockpit-invariants.md): `presentation` трактуется как инвариант кабины P/F/M; единый `PresentationLayoutAuthority` коэрцирует изменения из меню/MCP/UI-режимов/реактивного слоя.
 - **v1.70** — добавлен [0047](adr/0047-cockpit-instrument-descriptor-and-slot-composition.md): дескриптор слота на границе композитор → поверхность; не смешивать с `Control`.
 - **v1.71** — [0047](adr/0047-cockpit-instrument-descriptor-and-slot-composition.md): канонический термин **Instrument** (кабинный) и тип `CockpitInstrumentDescriptor` вместо черновика *Widget* / `CockpitWidgetDescriptor`; переименован файл ADR.
+- **v1.72** — [0047](adr/0047-cockpit-instrument-descriptor-and-slot-composition.md): статус **Accepted** (ось термина и дескриптора закреплены; реестр/wire — по дорожной карте).
 - Изменения направления — отдельным коммитом: обновление этого файла и при необходимости новый ADR в [docs/adr/README.md](adr/README.md).

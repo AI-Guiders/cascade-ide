@@ -1,6 +1,6 @@
 # ADR 0047: Инструмент кабины (`Instrument`) — дескриптор композиции слота, не `Control`
 
-**Статус:** Proposed  
+**Статус:** Accepted (термин **Instrument** (кабинный), тип `CockpitInstrumentDescriptor` и поля `instrument_id` / `slot_id` — в коде и [`cds-contract-v0.md`](../design/cds-contract-v0.md); реестр инструментов и wire в композитор — по дорожной карте ADR).  
 **Дата:** 2026-04-15  
 **Связь:** [0036](0036-cds-channel-compositor-surface-pipeline.md) (канал → CDS → композитор → поверхность), [0021](0021-pfd-mfd-cockpit-attention-model.md) (зоны внимания), [0039](0039-workspace-navigation-affordances.md) (Semantic Map), [0046](0046-presentation-layout-authority-and-cockpit-invariants.md) (инварианты `presentation`), чертёж [`cds-contract-v0.md`](../design/cds-contract-v0.md).
 
