@@ -4,8 +4,9 @@ using CascadeIDE.Services.Presentation;
 namespace CascadeIDE.Cockpit.Composition.Shell;
 
 /// <summary>
-/// Композитор поверхности главного окна (ADR 0036 п.3): из intent + CDS policy + топологии хоста MFD
+/// Композитор <b>оболочки</b> главного окна (ADR 0036 п.3): из intent + CDS policy + топологии хоста MFD
 /// получает видимость колонок и ширину региона MFD в <c>MainGrid</c> (не дерево контролов, не данные каналов).
+/// Полный кадр для хоста (колонки + инструменты слотов) — <c>MainWindowHostSurfaceCompositor</c> в <c>Cockpit/Composition/HostSurface</c>.
 /// </summary>
 public static class MainWindowShellSurfaceCompositor
 {

@@ -1,4 +1,6 @@
 using CascadeIDE.Cockpit.Cds;
+using CascadeIDE.Cockpit.Composition;
+using CascadeIDE.Cockpit.Composition.HostSurface;
 using CascadeIDE.Cockpit.Composition.Shell;
 using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Lang;
@@ -26,9 +28,9 @@ public partial class MainWindowViewModel
             _ => "CascadeIDE",
         };
 
-    /// <summary>Композитор: intent + CDS policy → размещение колонок PFD/MFD в <c>MainGrid</c> (ADR 0036 п.3).</summary>
-    private MainWindowShellSurfaceComposition ShellSurfaceComposition =>
-        MainWindowShellSurfaceCompositor.Compose(
+    /// <summary>Композитор: intent + CDS policy → кадр хоста (колонки + инструменты слотов; ADR 0036 п.3, 0047).</summary>
+    private MainWindowHostSurfaceFrame HostSurfaceFrame =>
+        MainWindowHostSurfaceCompositor.ComposeFrame(
             new MainWindowShellSurfaceCompositionInput(
                 _presentationParse,
                 IsSolutionExplorerVisible,
@@ -36,6 +38,11 @@ public partial class MainWindowViewModel
                 _suppressMfdColumnForMfdHostWindow,
                 UiModeCatalog.GetChatPanelExpandedWidthPixels(NormalizeUiMode(UiMode)),
                 UiWorkspaceLayoutRuntimeMetrics.ChatPanelCollapsedWidthPixels));
+
+    private MainWindowShellSurfaceComposition ShellSurfaceComposition => HostSurfaceFrame.Shell;
+
+    /// <summary>Логические инструменты по слотам для главного окна; хост (Avalonia/Skia) сопоставляет <c>instrument_id</c> разметке.</summary>
+    public IReadOnlyList<CockpitInstrumentDescriptor> MainWindowHostSurfaceInstruments => HostSurfaceFrame.Instruments;
 
     /// <summary>Ширина региона MFD в main grid (пиксели); 0 если колонка не выделяется (хост MFD и т.п.).</summary>
     public int ChatPanelColumnPixelWidth => ShellSurfaceComposition.MfdColumnPixelWidthInMainGrid;
