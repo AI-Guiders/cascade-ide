@@ -8,7 +8,7 @@ namespace CascadeIDE.Tests;
 public sealed class CockpitSurfaceSnapshotBuilderTests
 {
     [Fact]
-    public void Build_sets_schema_0_1_and_maps_surface_kind_docked_grid_by_default()
+    public void Build_sets_schema_0_2_and_maps_surface_kind_docked_grid_by_default()
     {
         var vm = new MainWindowViewModel();
         var state = CockpitSurfaceSnapshotBuilder.Build(vm);
@@ -25,7 +25,7 @@ public sealed class CockpitSurfaceSnapshotBuilderTests
     public void Json_roundtrip_preserves_contract_property_names()
     {
         var state = new CockpitSurfaceState(
-            SchemaVersion: "0.1",
+            SchemaVersion: "0.2",
             UiMode: "Balanced",
             PresentationEffectiveLine: "(PFD|Forward|MFD)",
             PresentationParseSuccess: true,
@@ -34,10 +34,16 @@ public sealed class CockpitSurfaceSnapshotBuilderTests
                 MfdHostWindowOpen: false,
                 MfdColumnVisibleInMain: true),
             SecondaryShell: new CockpitSurfaceSecondaryShell("Terminal"),
-            Zones: new CockpitSurfaceZones(true, true, true));
+            Zones: new CockpitSurfaceZones(
+                PfdVisible: true,
+                ForwardVisible: true,
+                MfdVisible: true,
+                PfdRequiredByPresentation: true,
+                ForwardRequiredByPresentation: true,
+                MfdRequiredByPresentation: true));
 
         var json = JsonSerializer.Serialize(state);
-        Assert.Contains("\"schema_version\":\"0.1\"", json);
+        Assert.Contains("\"schema_version\":\"0.2\"", json);
         Assert.Contains("\"ui_mode\":\"Balanced\"", json);
         Assert.Contains("\"presentation_effective_line\"", json);
         Assert.Contains("\"surface_kind\":\"main_window_docked_grid\"", json);
@@ -46,10 +52,13 @@ public sealed class CockpitSurfaceSnapshotBuilderTests
         Assert.Contains("\"pfd_visible\":true", json);
         Assert.Contains("\"forward_visible\":true", json);
         Assert.Contains("\"mfd_visible\":true", json);
+        Assert.Contains("\"pfd_required_by_presentation\":true", json);
+        Assert.Contains("\"forward_required_by_presentation\":true", json);
+        Assert.Contains("\"mfd_required_by_presentation\":true", json);
 
         var back = JsonSerializer.Deserialize<CockpitSurfaceState>(json);
         Assert.NotNull(back);
-        Assert.Equal("0.1", back!.SchemaVersion);
+        Assert.Equal("0.2", back!.SchemaVersion);
         Assert.Equal("Terminal", back.SecondaryShell.CurrentPage);
     }
 }

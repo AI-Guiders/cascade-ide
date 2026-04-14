@@ -1,5 +1,5 @@
+using CascadeIDE.Cockpit.Cds;
 using CascadeIDE.Models;
-using CascadeIDE.Services.Presentation;
 
 namespace CascadeIDE.ViewModels;
 
@@ -39,7 +39,7 @@ public partial class MainWindowViewModel
 
     partial void OnIsSolutionExplorerVisibleChanged(bool value)
     {
-        var coerced = PresentationLayoutAuthority.CoerceSolutionExplorerVisible(_presentationParse, value);
+        var coerced = CockpitPresentationLayoutPolicy.CoerceSolutionExplorerVisible(_presentationParse, value);
         if (coerced != value)
         {
             IsSolutionExplorerVisible = coerced;
@@ -89,7 +89,7 @@ public partial class MainWindowViewModel
 
     partial void OnIsChatPanelExpandedChanged(bool value)
     {
-        var coerced = PresentationLayoutAuthority.CoerceChatPanelExpanded(_presentationParse, value);
+        var coerced = CockpitPresentationLayoutPolicy.CoerceChatPanelExpanded(_presentationParse, value);
         if (coerced != value)
         {
             IsChatPanelExpanded = coerced;

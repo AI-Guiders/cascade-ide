@@ -41,7 +41,7 @@
 
 ```json
 {
-  "schema_version": "0.1",
+  "schema_version": "0.2",
   "ui_mode": "string",
   "presentation_effective_line": "string",
   "presentation_parse_success": true,
@@ -56,7 +56,10 @@
   "zones": {
     "pfd_visible": true,
     "forward_visible": true,
-    "mfd_visible": true
+    "mfd_visible": true,
+    "pfd_required_by_presentation": true,
+    "forward_required_by_presentation": true,
+    "mfd_required_by_presentation": true
   }
 }
 ```

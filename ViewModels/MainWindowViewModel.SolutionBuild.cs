@@ -4,8 +4,8 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Threading;
+using CascadeIDE.Cockpit.Cds;
 using CascadeIDE.Models;
-using CascadeIDE.Services.Presentation;
 using CommunityToolkit.Mvvm.Input;
 
 namespace CascadeIDE.ViewModels;
@@ -21,7 +21,7 @@ public partial class MainWindowViewModel
 
     private bool CanToggleChatPanel() =>
         !IsChatPanelExpanded
-        || !PresentationLayoutAuthority.RequiresExpandedChatColumnForMainWindow(_presentationParse);
+        || !CockpitPresentationLayoutPolicy.RequiresExpandedChatColumnForMainWindow(_presentationParse);
 
     [RelayCommand(CanExecute = nameof(CanBuildSolution))]
     private async Task BuildSolutionAsync()

@@ -26,4 +26,7 @@ public sealed record CockpitSurfaceSecondaryShell(
 public sealed record CockpitSurfaceZones(
     [property: JsonPropertyName("pfd_visible")] bool PfdVisible,
     [property: JsonPropertyName("forward_visible")] bool ForwardVisible,
-    [property: JsonPropertyName("mfd_visible")] bool MfdVisible);
+    [property: JsonPropertyName("mfd_visible")] bool MfdVisible,
+    [property: JsonPropertyName("pfd_required_by_presentation")] bool PfdRequiredByPresentation,
+    [property: JsonPropertyName("forward_required_by_presentation")] bool ForwardRequiredByPresentation,
+    [property: JsonPropertyName("mfd_required_by_presentation")] bool MfdRequiredByPresentation);

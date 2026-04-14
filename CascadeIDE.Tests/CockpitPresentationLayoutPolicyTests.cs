@@ -1,9 +1,10 @@
+using CascadeIDE.Cockpit.Cds;
 using CascadeIDE.Services.Presentation;
 using Xunit;
 
 namespace CascadeIDE.Tests;
 
-public sealed class PresentationLayoutAuthorityTests
+public sealed class CockpitPresentationLayoutPolicyTests
 {
     private static PresentationGrammarTokens DefaultGrammar() =>
         PresentationGrammarTokens.FromSettings(
@@ -19,7 +20,7 @@ public sealed class PresentationLayoutAuthorityTests
     {
         var r = PresentationParser.Parse("(P+F) (M)", DefaultGrammar());
         Assert.True(r.IsSuccess);
-        Assert.True(PresentationLayoutAuthority.RequiresVisiblePfdColumn(r));
+        Assert.True(CockpitPresentationLayoutPolicy.RequiresVisiblePfdColumn(r));
     }
 
     [Fact]
@@ -27,7 +28,7 @@ public sealed class PresentationLayoutAuthorityTests
     {
         var r = PresentationParser.Parse("(0.2P+0.3F+0.5M)", DefaultGrammar());
         Assert.True(r.IsSuccess);
-        Assert.True(PresentationLayoutAuthority.RequiresExpandedChatColumnForMainWindow(r));
+        Assert.True(CockpitPresentationLayoutPolicy.RequiresExpandedChatColumnForMainWindow(r));
     }
 
     [Fact]
@@ -35,14 +36,14 @@ public sealed class PresentationLayoutAuthorityTests
     {
         var r = PresentationParser.Parse("(P+F) (M)", DefaultGrammar());
         Assert.True(r.IsSuccess);
-        Assert.False(PresentationLayoutAuthority.RequiresExpandedChatColumnForMainWindow(r));
+        Assert.False(CockpitPresentationLayoutPolicy.RequiresExpandedChatColumnForMainWindow(r));
     }
 
     [Fact]
     public void CoerceSolutionExplorer_FalseWhenPfdRequired_BecomesTrue()
     {
         var r = PresentationParser.Parse("(P+F) (M)", DefaultGrammar());
-        Assert.True(PresentationLayoutAuthority.CoerceSolutionExplorerVisible(r, false));
+        Assert.True(CockpitPresentationLayoutPolicy.CoerceSolutionExplorerVisible(r, false));
     }
 
     [Fact]
@@ -50,13 +51,13 @@ public sealed class PresentationLayoutAuthorityTests
     {
         var r = PresentationParser.Parse("(P+F+M)", DefaultGrammar());
         Assert.True(r.IsSuccess);
-        Assert.True(PresentationLayoutAuthority.CoerceChatPanelExpanded(r, false));
+        Assert.True(CockpitPresentationLayoutPolicy.CoerceChatPanelExpanded(r, false));
     }
 
     [Fact]
     public void CoerceChat_FalseWhenNoMOnFirstScreen_Unchanged()
     {
         var r = PresentationParser.Parse("(P+F) (M)", DefaultGrammar());
-        Assert.False(PresentationLayoutAuthority.CoerceChatPanelExpanded(r, false));
+        Assert.False(CockpitPresentationLayoutPolicy.CoerceChatPanelExpanded(r, false));
     }
 }

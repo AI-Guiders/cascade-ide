@@ -3,8 +3,8 @@ using System.Threading.Tasks;
 using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Lang;
 using CascadeIDE.Models;
+using CascadeIDE.Cockpit.Cds;
 using CascadeIDE.Services;
-using CascadeIDE.Services.Presentation;
 using CommunityToolkit.Mvvm.Input;
 
 namespace CascadeIDE.ViewModels;
@@ -134,7 +134,7 @@ public partial class MainWindowViewModel
 
     private bool CanToggleSolutionExplorer() =>
         !IsSolutionExplorerVisible
-        || !PresentationLayoutAuthority.RequiresVisiblePfdColumn(_presentationParse);
+        || !CockpitPresentationLayoutPolicy.RequiresVisiblePfdColumn(_presentationParse);
 
     [RelayCommand]
     private void ToggleBuildOutput()
