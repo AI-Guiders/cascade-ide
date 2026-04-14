@@ -12,10 +12,12 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(ChatPanelColumnPixelWidth))]
     [NotifyPropertyChangedFor(nameof(IsChatPanelColumnVisible))]
     [NotifyPropertyChangedFor(nameof(IsMfdColumnVisible))]
+    [NotifyCanExecuteChangedFor(nameof(ToggleChatPanelCommand))]
     private bool _isChatPanelExpanded = true;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsPfdColumnVisible))]
+    [NotifyCanExecuteChangedFor(nameof(ToggleSolutionExplorerCommand))]
     private bool _isSolutionExplorerVisible = true;
 
     [ObservableProperty]

@@ -4,6 +4,7 @@ using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Lang;
 using CascadeIDE.Models;
 using CascadeIDE.Services;
+using CascadeIDE.Services.Presentation;
 using CommunityToolkit.Mvvm.Input;
 
 namespace CascadeIDE.ViewModels;
@@ -47,8 +48,6 @@ public partial class MainWindowViewModel
 
         // Зона Mfd (или окно-хост Mfd на втором экране, ADR 0017): страница параметров AI.
         IsChatPanelExpanded = true;
-        if (PresentationRequestsMfdHostWindow && !IsMfdHostWindowShellOpen)
-            RequestToggleMfdHostWindow?.Invoke();
         TryNavigateToSecondaryShellPage(SecondaryShellPage.AiChatSettings);
     }
 
@@ -127,18 +126,22 @@ public partial class MainWindowViewModel
         await Services.UiThemeApply.ApplyOnUiThreadAsync(Services.UiThemeApply.GetThemeJsonFromFile(path));
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanToggleSolutionExplorer))]
     private void ToggleSolutionExplorer()
     {
         IsSolutionExplorerVisible = !IsSolutionExplorerVisible;
     }
+
+    private bool CanToggleSolutionExplorer() =>
+        !IsSolutionExplorerVisible
+        || !PresentationLayoutAuthority.RequiresVisiblePfdColumn(_presentationParse);
 
     [RelayCommand]
     private void ToggleBuildOutput()
     {
         IsBuildOutputVisible = !IsBuildOutputVisible;
         if (IsBuildOutputVisible)
-            CurrentSecondaryShellPage = SecondaryShellPage.Build;
+            TryNavigateToSecondaryShellPage(SecondaryShellPage.Build);
     }
 
     [RelayCommand]
@@ -146,7 +149,7 @@ public partial class MainWindowViewModel
     {
         IsTerminalVisible = !IsTerminalVisible;
         if (IsTerminalVisible)
-            CurrentSecondaryShellPage = SecondaryShellPage.Terminal;
+            TryNavigateToSecondaryShellPage(SecondaryShellPage.Terminal);
     }
 
     [RelayCommand]
@@ -227,27 +230,27 @@ public partial class MainWindowViewModel
     private bool CanReopenClosedDocument() => Documents.CanReopenClosedDocument();
 
     [RelayCommand]
-    private void ShowSolutionExplorerPanel() => IsSolutionExplorerVisible = true;
+    private void ShowSolutionExplorerPanel() => ApplySolutionExplorerVisible(true);
 
     [RelayCommand]
     private void ShowBuildOutputPanel()
     {
         IsBuildOutputVisible = true;
-        CurrentSecondaryShellPage = SecondaryShellPage.Build;
+        TryNavigateToSecondaryShellPage(SecondaryShellPage.Build);
     }
 
     [RelayCommand]
     private void ShowChatPanel()
     {
         IsChatPanelExpanded = true;
-        CurrentSecondaryShellPage = SecondaryShellPage.Chat;
+        TryNavigateToSecondaryShellPage(SecondaryShellPage.Chat);
     }
 
     [RelayCommand]
     private void ShowTerminalPanel()
     {
         IsTerminalVisible = true;
-        CurrentSecondaryShellPage = SecondaryShellPage.Terminal;
+        TryNavigateToSecondaryShellPage(SecondaryShellPage.Terminal);
     }
 
     /// <summary>Переключение режима по id из каталога (<see cref="UiModeCatalog.OrderedModeIds"/>), меню и MCP.</summary>

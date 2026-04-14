@@ -1,4 +1,5 @@
 using CascadeIDE.Models;
+using CascadeIDE.Services.Presentation;
 
 namespace CascadeIDE.ViewModels;
 
@@ -38,6 +39,13 @@ public partial class MainWindowViewModel
 
     partial void OnIsSolutionExplorerVisibleChanged(bool value)
     {
+        var coerced = PresentationLayoutAuthority.CoerceSolutionExplorerVisible(_presentationParse, value);
+        if (coerced != value)
+        {
+            IsSolutionExplorerVisible = coerced;
+            return;
+        }
+
         _settings.WorkspaceUi.ShowSolutionExplorer = value;
         OnPropertyChanged(nameof(IsSolutionPanelHidden));
         SaveSettingsIfChanged();
@@ -50,7 +58,7 @@ public partial class MainWindowViewModel
         OnPropertyChanged(nameof(IsBottomPanelVisible));
         SaveSettingsIfChanged();
         if (value)
-            CurrentSecondaryShellPage = SecondaryShellPage.Terminal;
+            TryNavigateToSecondaryShellPage(SecondaryShellPage.Terminal);
         else if (CurrentSecondaryShellPage == SecondaryShellPage.Terminal)
             CoerceSecondaryShellPageToAllowed();
     }
@@ -60,7 +68,7 @@ public partial class MainWindowViewModel
         OnPropertyChanged(nameof(IsBuildPanelHidden));
         OnPropertyChanged(nameof(IsBottomPanelVisible));
         if (value)
-            CurrentSecondaryShellPage = SecondaryShellPage.Build;
+            TryNavigateToSecondaryShellPage(SecondaryShellPage.Build);
         else if (CurrentSecondaryShellPage == SecondaryShellPage.Build)
             CoerceSecondaryShellPageToAllowed();
     }
@@ -71,7 +79,7 @@ public partial class MainWindowViewModel
         SaveSettingsIfChanged();
         if (value)
         {
-            CurrentSecondaryShellPage = SecondaryShellPage.Events;
+            TryNavigateToSecondaryShellPage(SecondaryShellPage.Events);
             return;
         }
 
@@ -81,6 +89,13 @@ public partial class MainWindowViewModel
 
     partial void OnIsChatPanelExpandedChanged(bool value)
     {
+        var coerced = PresentationLayoutAuthority.CoerceChatPanelExpanded(_presentationParse, value);
+        if (coerced != value)
+        {
+            IsChatPanelExpanded = coerced;
+            return;
+        }
+
         OnPropertyChanged(nameof(IsChatPanelHidden));
         // Разворот колонки чата из меню «Вид» только меняет ширину; без перехода на страницу Chat
         // MFD мог остаться на сборке/терминале — пользователь ожидает увидеть чат.
@@ -124,7 +139,7 @@ public partial class MainWindowViewModel
         SaveSettingsIfChanged();
         if (value)
         {
-            CurrentSecondaryShellPage = SecondaryShellPage.Git;
+            TryNavigateToSecondaryShellPage(SecondaryShellPage.Git);
             _ = GitPanel.RefreshGitPanelAsync();
         }
         else if (CurrentSecondaryShellPage == SecondaryShellPage.Git)

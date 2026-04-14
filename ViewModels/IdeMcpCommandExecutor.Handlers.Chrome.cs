@@ -78,14 +78,14 @@ internal sealed partial class IdeMcpCommandExecutor
         {
             if (args is null || !args.TryGetValue("visible", out var sev) || sev.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
                 return "Missing or invalid visible (boolean)";
-            _vm.IsSolutionExplorerVisible = sev.GetBoolean();
+            _vm.ApplySolutionExplorerVisible(sev.GetBoolean());
             return "OK";
         });
         add(Services.IdeCommands.SetChatPanelExpanded, async (args, _) =>
         {
             if (args is null || !args.TryGetValue("visible", out var cev) || cev.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
                 return "Missing or invalid visible (boolean)";
-            _vm.IsChatPanelExpanded = cev.GetBoolean();
+            _vm.ApplyChatPanelExpanded(cev.GetBoolean());
             return "OK";
         });
         add(Services.IdeCommands.SetGitPanelVisible, async (args, _) =>

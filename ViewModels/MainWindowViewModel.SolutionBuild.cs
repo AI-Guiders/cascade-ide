@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using CascadeIDE.Models;
+using CascadeIDE.Services.Presentation;
 using CommunityToolkit.Mvvm.Input;
 
 namespace CascadeIDE.ViewModels;
@@ -18,7 +19,9 @@ public partial class MainWindowViewModel
         IsChatPanelExpanded = !IsChatPanelExpanded;
     }
 
-    private static bool CanToggleChatPanel() => true;
+    private bool CanToggleChatPanel() =>
+        !IsChatPanelExpanded
+        || !PresentationLayoutAuthority.RequiresExpandedChatColumnForMainWindow(_presentationParse);
 
     [RelayCommand(CanExecute = nameof(CanBuildSolution))]
     private async Task BuildSolutionAsync()
