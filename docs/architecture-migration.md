@@ -23,7 +23,7 @@
 | `MainWindowViewModel.Breakpoints.cs` | 135 | Брейкпоинты (IDE + .dotnet-debug-mcp-breakpoints.json + отладчик) и подсветка строки остановки. |
 | `MainWindowViewModel.Capabilities.cs` | 23 | Реестр capabilities. |
 | `MainWindowViewModel.CommandPalette.cs` | 131 | Палитра команд. |
-| `MainWindowViewModel.cs` | 335 | Главный композитор окна (partial-класс, несколько `MainWindowViewModel*.cs`). Карта файлов и ответственности — `docs/architecture-migration.md`, раздел «Срез MainWindowViewModel». |
+| `MainWindowViewModel.cs` | 337 | Главный композитор окна (partial-класс, несколько `MainWindowViewModel*.cs`). Карта файлов и ответственности — `docs/architecture-migration.md`, раздел «Срез MainWindowViewModel». |
 | `MainWindowViewModel.CSharpLsp.cs` | 112 | Запуск/перезапуск C# LSP. |
 | `MainWindowViewModel.CursorAcp.cs` | 22 | Путь Cursor ACP. |
 | `MainWindowViewModel.DocumentsDock.cs` | 44 | Документы / dock. |
@@ -48,8 +48,8 @@
 | `MainWindowViewModel.RelayCommands.cs` | 271 | Relay-команды. |
 | `MainWindowViewModel.RelayCommands.Debug.cs` | 117 | Relay: отладка. |
 | `MainWindowViewModel.SecondaryShell.cs` | 67 | Вторичный контур оболочки: одна активная страница; навигация — команды и палитра. Якорь на экране — пресет (v1: зона Mfd). |
-| `MainWindowViewModel.SettingsReactive.cs` | 119 | Реакции на изменение полей настроек и ключей API: диск, автономный агент, панели. |
-| `MainWindowViewModel.ShellState.cs` | 190 | Раскладка панелей, нижняя зона, Workspace Health / автономный агент, ключи провайдеров и чата. |
+| `MainWindowViewModel.SettingsReactive.cs` | 125 | Реакции на изменение полей настроек и ключей API: диск, автономный агент, панели. |
+| `MainWindowViewModel.ShellState.cs` | 193 | Раскладка панелей, нижняя зона, Workspace Health / автономный агент, ключи провайдеров и чата. |
 | `MainWindowViewModel.SolutionBuild.cs` | 172 | Сборка, `BuildOutputPanel`. |
 | `MainWindowViewModel.StartupProject.cs` | 120 | Стартовый проект. |
 | `MainWindowViewModel.UiGitWorkspace.cs` | 138 | Git + workspace UI. |
@@ -70,7 +70,7 @@
 | `IdeMcpCommandExecutor.Handlers.DapDebug.cs` | 88 | DAP / отладка. |
 | `IdeMcpCommandExecutor.Handlers.DebuggerUi.cs` | 62 | Поверхность отладки. |
 | `IdeMcpCommandExecutor.Handlers.Editor.cs` | 115 | Редактор. |
-| `IdeMcpCommandExecutor.Handlers.PowerDocuments.cs` | 209 | Power / документы. |
+| `IdeMcpCommandExecutor.Handlers.PowerDocuments.cs` | 216 | Power / документы. |
 | `Generated/IdeMcpCommandExecutor.Generated.g.cs` | 64 | Сгенерированные хендлеры MCP → `IIdeMcpActions` (`CascadeIDE.ProtocolDocGen`). |
 
 <!-- AUTO:MAIN-WINDOW-SLICE:EXEC-TABLE:END -->
