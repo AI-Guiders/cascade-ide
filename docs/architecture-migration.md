@@ -23,7 +23,7 @@
 | `MainWindowViewModel.Breakpoints.cs` | 135 | Брейкпоинты (IDE + .dotnet-debug-mcp-breakpoints.json + отладчик) и подсветка строки остановки. |
 | `MainWindowViewModel.Capabilities.cs` | 23 | Реестр capabilities. |
 | `MainWindowViewModel.CommandPalette.cs` | 131 | Палитра команд. |
-| `MainWindowViewModel.cs` | 334 | Главный композитор окна (partial-класс, несколько `MainWindowViewModel*.cs`). Карта файлов и ответственности — `docs/architecture-migration.md`, раздел «Срез MainWindowViewModel». |
+| `MainWindowViewModel.cs` | 335 | Главный композитор окна (partial-класс, несколько `MainWindowViewModel*.cs`). Карта файлов и ответственности — `docs/architecture-migration.md`, раздел «Срез MainWindowViewModel». |
 | `MainWindowViewModel.CSharpLsp.cs` | 112 | Запуск/перезапуск C# LSP. |
 | `MainWindowViewModel.CursorAcp.cs` | 22 | Путь Cursor ACP. |
 | `MainWindowViewModel.DocumentsDock.cs` | 44 | Документы / dock. |
@@ -47,7 +47,7 @@
 | `MainWindowViewModel.RelayCommands.cs` | 273 | Relay-команды. |
 | `MainWindowViewModel.RelayCommands.Debug.cs` | 117 | Relay: отладка. |
 | `MainWindowViewModel.SecondaryShell.cs` | 57 | Вторичный контур оболочки: одна активная страница; навигация — команды и палитра. Якорь на экране — пресет (v1: зона Mfd). |
-| `MainWindowViewModel.SettingsReactive.cs` | 115 | Реакции на изменение полей настроек и ключей API: диск, автономный агент, панели. |
+| `MainWindowViewModel.SettingsReactive.cs` | 119 | Реакции на изменение полей настроек и ключей API: диск, автономный агент, панели. |
 | `MainWindowViewModel.ShellState.cs` | 188 | Раскладка панелей, нижняя зона, Workspace Health / автономный агент, ключи провайдеров и чата. |
 | `MainWindowViewModel.SolutionBuild.cs` | 173 | Сборка, `BuildOutputPanel`. |
 | `MainWindowViewModel.StartupProject.cs` | 120 | Стартовый проект. |
