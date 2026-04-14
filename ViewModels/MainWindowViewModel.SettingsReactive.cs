@@ -82,6 +82,10 @@ public partial class MainWindowViewModel
     partial void OnIsChatPanelExpandedChanged(bool value)
     {
         OnPropertyChanged(nameof(IsChatPanelHidden));
+        // Разворот колонки чата из меню «Вид» только меняет ширину; без перехода на страницу Chat
+        // MFD мог остаться на сборке/терминале — пользователь ожидает увидеть чат.
+        if (value)
+            TryNavigateToSecondaryShellPage(SecondaryShellPage.Chat);
     }
 
     partial void OnActiveAiProviderChanged(string value)

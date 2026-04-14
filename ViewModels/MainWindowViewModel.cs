@@ -166,6 +166,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         RebuildWorkspaceHealth();
         RebuildEicas();
 
+        // Топология presentation / колонки MainGrid — снимок на старте; смена строки в settings.toml — после перезапуска (ADR 0017).
         var pg = _settings.PresentationGrammar;
         var grammar = Services.Presentation.PresentationGrammarTokens.FromSettings(
             pg.ScreenMarkers,
