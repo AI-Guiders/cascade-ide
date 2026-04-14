@@ -43,7 +43,7 @@
 | `MainWindowViewModel.MarkdownExport.cs` | 55 | Экспорт Markdown. |
 | `MainWindowViewModel.MarkdownLsp.cs` | 95 | Запуск/перезапуск Markdown LSP. |
 | `MainWindowViewModel.Presentation.cs` | 158 | Вычисляемые свойства разметки, Workspace Health и видимости панелей (режимы UI). |
-| `MainWindowViewModel.PresentationLayout.cs` | 84 | ADR 0017: строка `presentation` и второй `TopLevel` — `MfdHostWindow` с полным вторичным контуром (п. 8). |
+| `MainWindowViewModel.PresentationLayout.cs` | 88 | ADR 0017: строка `presentation` и второй `TopLevel` — `MfdHostWindow` с полным вторичным контуром (п. 8). |
 | `MainWindowViewModel.RelayCommands.cs` | 273 | Relay-команды. |
 | `MainWindowViewModel.RelayCommands.Debug.cs` | 117 | Relay: отладка. |
 | `MainWindowViewModel.SecondaryShell.cs` | 57 | Вторичный контур оболочки: одна активная страница; навигация — команды и палитра. Якорь на экране — пресет (v1: зона Mfd). |
