@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using OutWit.Common.Abstract;
 using OutWit.Common.Values;
 
@@ -15,12 +16,6 @@ public sealed class CascadeIdeSettings : ModelBase
     /// <summary>Параметры панелей и UI-режима workspace (<c>[workspace_ui]</c>).</summary>
     public WorkspaceUiSettings WorkspaceUi { get; set; } = new();
 
-    /// <summary>
-    /// Где показывать «Параметры AI и чата»: <c>mfd</c> — страница вторичного контура (зона Mfd, ADR 0021);
-    /// <c>window</c> — отдельное окно со всеми настройками (редактор, LSP, Markdown и т.д.).
-    /// </summary>
-    public string AiChatSettingsPresentation { get; set; } = "mfd";
-
     /// <summary>C# LSP — секция <c>[csharp_lsp]</c>.</summary>
     public CSharpLspSettings CSharpLsp { get; set; } = new();
 
@@ -30,11 +25,25 @@ public sealed class CascadeIdeSettings : ModelBase
     /// <summary>Kroki / диаграммы в превью Markdown — <c>[markdown_diagrams]</c>.</summary>
     public MarkdownDiagramSettings MarkdownDiagrams { get; set; } = new();
 
+    /// <summary>Раскладка дисплеев и окно-хост Mfd — <c>[display]</c> в <c>settings.toml</c>.</summary>
+    public DisplaySettings Display { get; set; } = new();
+
     /// <summary>Строка раскладки по физическим дисплеям (ADR 0017). Пусто — не задано.</summary>
-    public string Presentation { get; set; } = "";
+    /// <remarks>В TOML задаётся в <see cref="Display"/> (<c>[display]</c>); свойство — прокси для кода.</remarks>
+    [JsonIgnore]
+    public string Presentation
+    {
+        get => Display.Presentation;
+        set => Display.Presentation = value ?? "";
+    }
 
     /// <summary>Синоним <see cref="Presentation"/>; задаётся одно из двух, не оба (приоритет у <see cref="Presentation"/>).</summary>
-    public string ZoneScreenLayout { get; set; } = "";
+    [JsonIgnore]
+    public string ZoneScreenLayout
+    {
+        get => Display.ZoneScreenLayout;
+        set => Display.ZoneScreenLayout = value ?? "";
+    }
 
     /// <summary>Токены грамматики строки <see cref="Presentation"/> (TOML: секция <c>[presentation_grammar]</c>).</summary>
     public PresentationGrammarSettings PresentationGrammar { get; set; } = new();
@@ -45,27 +54,52 @@ public sealed class CascadeIdeSettings : ModelBase
     /// <summary>
     /// При пресете «Mfd на втором экране» и >=2 мониторах — открыть окно-хост зоны Mfd при старте (ADR 0017 v1).
     /// </summary>
-    public bool OpenMfdHostWindowOnStartup { get; set; } = true;
+    [JsonIgnore]
+    public bool OpenMfdHostWindowOnStartup
+    {
+        get => Display.OpenMfdHostWindowOnStartup;
+        set => Display.OpenMfdHostWindowOnStartup = value;
+    }
 
     /// <summary>Последняя сохранённая позиция окна <c>MfdHostWindow</c> (пиксели); вместе с шириной/высотой — или все заданы, или сброс.</summary>
-    public int? MfdHostWindowPixelX { get; set; }
+    [JsonIgnore]
+    public int? MfdHostWindowPixelX
+    {
+        get => Display.MfdHostWindowPixelX;
+        set => Display.MfdHostWindowPixelX = value;
+    }
 
     /// <summary>См. <see cref="MfdHostWindowPixelX"/>.</summary>
-    public int? MfdHostWindowPixelY { get; set; }
+    [JsonIgnore]
+    public int? MfdHostWindowPixelY
+    {
+        get => Display.MfdHostWindowPixelY;
+        set => Display.MfdHostWindowPixelY = value;
+    }
 
     /// <summary>См. <see cref="MfdHostWindowPixelX"/>.</summary>
-    public double? MfdHostWindowWidth { get; set; }
+    [JsonIgnore]
+    public double? MfdHostWindowWidth
+    {
+        get => Display.MfdHostWindowWidth;
+        set => Display.MfdHostWindowWidth = value;
+    }
 
     /// <summary>См. <see cref="MfdHostWindowPixelX"/>.</summary>
-    public double? MfdHostWindowHeight { get; set; }
+    [JsonIgnore]
+    public double? MfdHostWindowHeight
+    {
+        get => Display.MfdHostWindowHeight;
+        set => Display.MfdHostWindowHeight = value;
+    }
 
     /// <summary>Эффективная строка: <see cref="Presentation"/> или <see cref="ZoneScreenLayout"/>.</summary>
     public string GetEffectivePresentationLine()
     {
-        var a = Presentation?.Trim() ?? "";
+        var a = Display.Presentation?.Trim() ?? "";
         if (a.Length > 0)
             return a;
-        return ZoneScreenLayout?.Trim() ?? "";
+        return Display.ZoneScreenLayout?.Trim() ?? "";
     }
 
     public override bool Is(ModelBase modelBase, double tolerance = DEFAULT_TOLERANCE)
@@ -75,19 +109,12 @@ public sealed class CascadeIdeSettings : ModelBase
         return AiEquals(Ai, o.Ai)
             && McpEquals(Mcp, o.Mcp)
             && WorkspaceUiEquals(WorkspaceUi, o.WorkspaceUi)
-            && AiChatSettingsPresentation.Is(o.AiChatSettingsPresentation)
             && CSharpLspEquals(CSharpLsp, o.CSharpLsp)
             && MarkdownLspEquals(MarkdownLsp, o.MarkdownLsp)
             && MarkdownDiagramsEquals(MarkdownDiagrams, o.MarkdownDiagrams)
-            && Presentation.Is(o.Presentation)
-            && ZoneScreenLayout.Is(o.ZoneScreenLayout)
+            && DisplayEquals(Display, o.Display)
             && PresentationGrammarEquals(o.PresentationGrammar)
-            && WorkspaceNavigationContextEquals(WorkspaceNavigationContext, o.WorkspaceNavigationContext)
-            && OpenMfdHostWindowOnStartup.Is(o.OpenMfdHostWindowOnStartup)
-            && MfdHostWindowPixelX == o.MfdHostWindowPixelX
-            && MfdHostWindowPixelY == o.MfdHostWindowPixelY
-            && Nullable.Equals(MfdHostWindowWidth, o.MfdHostWindowWidth)
-            && Nullable.Equals(MfdHostWindowHeight, o.MfdHostWindowHeight);
+            && WorkspaceNavigationContextEquals(WorkspaceNavigationContext, o.WorkspaceNavigationContext);
     }
 
     private static bool AiEquals(AiSettings? a, AiSettings? b)
@@ -101,7 +128,8 @@ public sealed class CascadeIdeSettings : ModelBase
             && a.OpenAiModel.Is(b.OpenAiModel)
             && a.DeepSeekBaseUrl.Is(b.DeepSeekBaseUrl)
             && a.DeepSeekModel.Is(b.DeepSeekModel)
-            && a.CursorAcpPath.Is(b.CursorAcpPath);
+            && a.CursorAcpPath.Is(b.CursorAcpPath)
+            && a.AiChatSettingsPresentation.Is(b.AiChatSettingsPresentation);
     }
 
     private static bool McpEquals(McpSettings? a, McpSettings? b)
@@ -143,6 +171,19 @@ public sealed class CascadeIdeSettings : ModelBase
         if (a is null || b is null)
             return a == b;
         return a.KrokiEnabled == b.KrokiEnabled && a.KrokiBaseUrl.Is(b.KrokiBaseUrl);
+    }
+
+    private static bool DisplayEquals(DisplaySettings? a, DisplaySettings? b)
+    {
+        if (a is null || b is null)
+            return a == b;
+        return a.Presentation.Is(b.Presentation)
+            && a.ZoneScreenLayout.Is(b.ZoneScreenLayout)
+            && a.OpenMfdHostWindowOnStartup == b.OpenMfdHostWindowOnStartup
+            && a.MfdHostWindowPixelX == b.MfdHostWindowPixelX
+            && a.MfdHostWindowPixelY == b.MfdHostWindowPixelY
+            && Nullable.Equals(a.MfdHostWindowWidth, b.MfdHostWindowWidth)
+            && Nullable.Equals(a.MfdHostWindowHeight, b.MfdHostWindowHeight);
     }
 
     private static bool WorkspaceNavigationContextEquals(WorkspaceNavigationContextSettings? a, WorkspaceNavigationContextSettings? b)
@@ -228,6 +269,7 @@ public sealed class CascadeIdeSettings : ModelBase
                 DeepSeekBaseUrl = Ai.DeepSeekBaseUrl,
                 DeepSeekModel = Ai.DeepSeekModel,
                 CursorAcpPath = Ai.CursorAcpPath,
+                AiChatSettingsPresentation = Ai.AiChatSettingsPresentation,
             },
             Mcp = new McpSettings
             {
@@ -243,7 +285,6 @@ public sealed class CascadeIdeSettings : ModelBase
                 Mode = WorkspaceUi.Mode,
                 Culture = WorkspaceUi.Culture,
             },
-            AiChatSettingsPresentation = AiChatSettingsPresentation,
             CSharpLsp = new CSharpLspSettings
             {
                 Provider = CSharpLsp.Provider,
@@ -261,8 +302,16 @@ public sealed class CascadeIdeSettings : ModelBase
                 KrokiEnabled = MarkdownDiagrams.KrokiEnabled,
                 KrokiBaseUrl = MarkdownDiagrams.KrokiBaseUrl,
             },
-            Presentation = Presentation,
-            ZoneScreenLayout = ZoneScreenLayout,
+            Display = new DisplaySettings
+            {
+                Presentation = Display.Presentation,
+                ZoneScreenLayout = Display.ZoneScreenLayout,
+                OpenMfdHostWindowOnStartup = Display.OpenMfdHostWindowOnStartup,
+                MfdHostWindowPixelX = Display.MfdHostWindowPixelX,
+                MfdHostWindowPixelY = Display.MfdHostWindowPixelY,
+                MfdHostWindowWidth = Display.MfdHostWindowWidth,
+                MfdHostWindowHeight = Display.MfdHostWindowHeight,
+            },
             PresentationGrammar = new PresentationGrammarSettings
             {
                 ScreenMarkers = PresentationGrammar.ScreenMarkers,
@@ -283,11 +332,6 @@ public sealed class CascadeIdeSettings : ModelBase
                     })
                     .ToList()
             },
-            OpenMfdHostWindowOnStartup = OpenMfdHostWindowOnStartup,
-            MfdHostWindowPixelX = MfdHostWindowPixelX,
-            MfdHostWindowPixelY = MfdHostWindowPixelY,
-            MfdHostWindowWidth = MfdHostWindowWidth,
-            MfdHostWindowHeight = MfdHostWindowHeight
         };
     }
 }

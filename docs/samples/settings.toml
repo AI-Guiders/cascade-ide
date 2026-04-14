@@ -1,5 +1,10 @@
 # Пример пользовательского settings.toml (ADR 0028: %LocalAppData%\CascadeIDE\settings.toml).
 # Ключи — snake_case (CascadeTomlSerializer / Tomlyn). Секции — логические группы.
+# Раскладка дисплеев и Mfd-host — секция [display].
+
+[display]
+# Раскладка по дисплеям (ADR 0017). Пробелы внутри (…) допустимы — парсер их убирает.
+presentation = "(0.25P + 0.75F) (M)"
 
 [ai]
 default_ollama_model = "qwen2.5-coder:7b"
@@ -10,6 +15,8 @@ open_ai_model = "gpt-4o"
 deep_seek_base_url = "https://api.deepseek.com"
 deep_seek_model = "deepseek-chat"
 cursor_acp_path = ""
+# mfd — страница параметров AI во вторичном контуре; window — отдельное окно настроек (ADR 0021 / 0028).
+ai_chat_settings_presentation = "mfd"
 
 [mcp]
 stdio_server_enabled = true
@@ -38,9 +45,6 @@ arguments = ""
 [markdown_diagrams]
 kroki_enabled = true
 kroki_base_url = "https://kroki.io"
-
-# Раскладка по дисплеям (ADR 0017). Пробелы внутри (…) допустимы — парсер их убирает.
-presentation = "(0.25P + 0.75F) (M)"
 
 [presentation_grammar]
 pfd_zone_identifier = "P"

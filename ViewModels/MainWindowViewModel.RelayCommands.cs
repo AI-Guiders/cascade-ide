@@ -38,7 +38,7 @@ public partial class MainWindowViewModel
     [RelayCommand]
     private void OpenSettings()
     {
-        var placement = (_settings.AiChatSettingsPresentation ?? "mfd").Trim();
+        var placement = (_settings.Ai.AiChatSettingsPresentation ?? "mfd").Trim();
         if (string.Equals(placement, "window", StringComparison.OrdinalIgnoreCase))
         {
             RequestOpenSettings?.Invoke();
