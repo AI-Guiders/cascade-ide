@@ -50,6 +50,7 @@
 | [0040](0040-lsp-launch-line-settings-toml-presets-and-environment.md) | LSP C#/Markdown: командная строка в `settings.toml`, пресеты, опциональные ключи; опционально env (флаг — Proposed) | Accepted · Proposed |
 | [0041](0041-protobuf-for-agent-and-ide-messages.md) | Protobuf vs JSON для сообщений агента/IDE: границы, критерии, гибрид; точка входа (Proposed) | Proposed |
 | [0042](0042-pre-flight-planned-changes-and-review-before-apply.md) | Pre-flight briefing: Planned Changes (намерение + SA) и Review Before Apply (превью, семантический слой, отказ без мусора); машина состояний; ортогонально «построчному доверию» | Proposed |
+| [0043](0043-mcp-transport-recovery-human-agent-parity.md) | Паритет восстановления MCP-транспорта (человек ↔ агент), граница хоста (Cursor) vs IDE; ортогонально ADR 0002 | Proposed |
 
 ## Соглашения
 
