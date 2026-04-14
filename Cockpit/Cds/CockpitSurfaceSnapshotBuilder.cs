@@ -8,12 +8,15 @@ namespace CascadeIDE.Cockpit.Cds;
 /// </summary>
 public static class CockpitSurfaceSnapshotBuilder
 {
-    public const string CurrentSchemaVersion = "0.2";
+    public const string CurrentSchemaVersion = "0.3";
 
     public static CockpitSurfaceState Build(MainWindowViewModel vm)
     {
         var surfaceKind = ToCdsSurfaceKind(vm.ActiveAttentionLayoutSurface);
         var layout = CockpitPresentationLayoutPolicy.InvariantsFromPresentation(vm.PresentationParse);
+        var instruments = vm.MainWindowHostSurfaceInstruments
+            .Select(static i => new CockpitSurfaceInstrument(i.InstrumentId, i.SlotId, i.SchemaVersion))
+            .ToArray();
         return new CockpitSurfaceState(
             SchemaVersion: CurrentSchemaVersion,
             UiMode: vm.UiMode,
@@ -31,7 +34,8 @@ public static class CockpitSurfaceSnapshotBuilder
                 MfdVisible: vm.IsMfdColumnVisible,
                 PfdRequiredByPresentation: layout.PfdRequiredByPresentation,
                 ForwardRequiredByPresentation: layout.ForwardRequiredByPresentation,
-                MfdRequiredByPresentation: layout.MfdRequiredByPresentation));
+                MfdRequiredByPresentation: layout.MfdRequiredByPresentation),
+            Instruments: instruments);
     }
 
     internal static string ToCdsSurfaceKind(AttentionLayoutSurfaceKind kind) =>

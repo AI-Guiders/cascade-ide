@@ -8,7 +8,7 @@ namespace CascadeIDE.Tests;
 public sealed class CockpitSurfaceSnapshotBuilderTests
 {
     [Fact]
-    public void Build_sets_schema_0_2_and_maps_surface_kind_docked_grid_by_default()
+    public void Build_sets_schema_0_3_and_maps_surface_kind_docked_grid_by_default()
     {
         var vm = new MainWindowViewModel();
         var state = CockpitSurfaceSnapshotBuilder.Build(vm);
@@ -18,6 +18,9 @@ public sealed class CockpitSurfaceSnapshotBuilderTests
         Assert.Equal("main_window_docked_grid", state.Topology.SurfaceKind);
         Assert.False(state.Topology.MfdHostWindowOpen);
         Assert.True(state.Zones.ForwardVisible);
+        Assert.Single(state.Instruments);
+        Assert.Equal("solution_explorer_tree", state.Instruments[0].InstrumentId);
+        Assert.Equal("pfd", state.Instruments[0].SlotId);
         Assert.Equal(vm.EffectivePresentationLine, state.PresentationEffectiveLine);
     }
 
@@ -40,7 +43,11 @@ public sealed class CockpitSurfaceSnapshotBuilderTests
                 MfdVisible: true,
                 PfdRequiredByPresentation: true,
                 ForwardRequiredByPresentation: true,
-                MfdRequiredByPresentation: true));
+                MfdRequiredByPresentation: true),
+            Instruments:
+            [
+                new CockpitSurfaceInstrument("solution_explorer_tree", "pfd", "0.2"),
+            ]);
 
         var json = JsonSerializer.Serialize(state);
         Assert.Contains("\"schema_version\":\"0.2\"", json);
@@ -55,10 +62,14 @@ public sealed class CockpitSurfaceSnapshotBuilderTests
         Assert.Contains("\"pfd_required_by_presentation\":true", json);
         Assert.Contains("\"forward_required_by_presentation\":true", json);
         Assert.Contains("\"mfd_required_by_presentation\":true", json);
+        Assert.Contains("\"instruments\":[", json);
+        Assert.Contains("\"instrument_id\":\"solution_explorer_tree\"", json);
+        Assert.Contains("\"slot_id\":\"pfd\"", json);
 
         var back = JsonSerializer.Deserialize<CockpitSurfaceState>(json);
         Assert.NotNull(back);
         Assert.Equal("0.2", back!.SchemaVersion);
         Assert.Equal("Terminal", back.SecondaryShell.CurrentPage);
+        Assert.Single(back.Instruments);
     }
 }

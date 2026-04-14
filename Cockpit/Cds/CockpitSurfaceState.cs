@@ -13,7 +13,8 @@ public sealed record CockpitSurfaceState(
     [property: JsonPropertyName("presentation_parse_success")] bool PresentationParseSuccess,
     [property: JsonPropertyName("topology")] CockpitSurfaceTopology Topology,
     [property: JsonPropertyName("secondary_shell")] CockpitSurfaceSecondaryShell SecondaryShell,
-    [property: JsonPropertyName("zones")] CockpitSurfaceZones Zones);
+    [property: JsonPropertyName("zones")] CockpitSurfaceZones Zones,
+    [property: JsonPropertyName("instruments")] IReadOnlyList<CockpitSurfaceInstrument> Instruments);
 
 public sealed record CockpitSurfaceTopology(
     [property: JsonPropertyName("surface_kind")] string SurfaceKind,
@@ -30,3 +31,8 @@ public sealed record CockpitSurfaceZones(
     [property: JsonPropertyName("pfd_required_by_presentation")] bool PfdRequiredByPresentation,
     [property: JsonPropertyName("forward_required_by_presentation")] bool ForwardRequiredByPresentation,
     [property: JsonPropertyName("mfd_required_by_presentation")] bool MfdRequiredByPresentation);
+
+public sealed record CockpitSurfaceInstrument(
+    [property: JsonPropertyName("instrument_id")] string InstrumentId,
+    [property: JsonPropertyName("slot_id")] string SlotId,
+    [property: JsonPropertyName("schema_version")] string SchemaVersion);
