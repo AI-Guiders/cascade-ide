@@ -23,6 +23,20 @@ public static class PresentationLayoutAnalyzer
         return hasPfd && hasFwd && !hasMfd;
     }
 
+    /// <summary>
+    /// Первый экран в строке объединяет PFD и Forward как <c>(xP+yF)</c> (веса или равные доли) — главное окно
+    /// должно занимать рабочую область дисплея (максимизация при старте), а не дефолт 1000×600.
+    /// </summary>
+    public static bool IsPfdForwardCombinedOnFirstScreen(IReadOnlyList<IReadOnlyList<PresentationAnchorSlot>> screens)
+    {
+        if (screens.Count == 0)
+            return false;
+
+        var first = screens[0];
+        return ContainsAnchor(first, PresentationAnchorKind.Pfd)
+            && ContainsAnchor(first, PresentationAnchorKind.Forward);
+    }
+
     /// <summary>Три дисплея: по одному якорю — <c>(PFD) (Forward) (MFD)</c> (ADR 0017).</summary>
     public static bool IsTriplePfdForwardMfdPreset(IReadOnlyList<IReadOnlyList<PresentationAnchorSlot>> screens)
     {

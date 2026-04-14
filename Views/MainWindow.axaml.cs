@@ -36,6 +36,9 @@ public partial class MainWindow : Window
 
     private void OnMainWindowLoaded(object? sender, RoutedEventArgs e)
     {
+        if (DataContext is ViewModels.MainWindowViewModel vm && vm.PresentationRequestsMainWindowMaximized)
+            WindowState = WindowState.Maximized;
+
         TryApplyHotkeys();
         TryOpenMfdHostWindowOnStartup();
     }
