@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:chat="using:CascadeIDE.Features.Chat"
              xmlns:vm="using:CascadeIDE.ViewModels"
+             xmlns:views="using:CascadeIDE.Views"
              x:Class="CascadeIDE.Views.ChatPanelView"
              x:DataType="chat:ChatPanelViewModel">
     <UserControl.Styles>
@@ -83,12 +84,25 @@
 
         <Border Grid.Row="2" Classes="section">
             <DockPanel>
-                <TextBlock DockPanel.Dock="Top"
-                           Text="Диалог"
-                           FontSize="12"
-                           Margin="0,0,0,6"
-                           Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <DockPanel DockPanel.Dock="Top" LastChildFill="False" Margin="0,0,0,6">
+                    <TextBlock DockPanel.Dock="Left"
+                               Text="Диалог"
+                               FontSize="12"
+                               Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+                    <CheckBox DockPanel.Dock="Right"
+                              Content="Skia spike"
+                              IsChecked="{Binding UseSkiaSurface, Mode=TwoWay}"
+                              Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+                </DockPanel>
+
+                <views:SkiaChatSurfaceControl IsVisible="{Binding UseSkiaSurface}"
+                                              MinHeight="220"
+                                              Messages="{Binding ChatMessages}"
+                                              HasActiveClarification="{Binding HasActiveClarificationBatch}"
+                                              ClarificationTitle="{Binding ActiveClarificationTitle}"
+                                              SelectedMessageIndex="{Binding SelectedMessageIndex, Mode=TwoWay}"/>
+
+                <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding !UseSkiaSurface}">
                     <StackPanel Spacing="6">
                         <TextBlock IsVisible="{Binding !HasChatMessages}"
                                    Text="Пока пусто. Задай вопрос или команду."
