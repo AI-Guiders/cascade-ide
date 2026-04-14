@@ -24,10 +24,21 @@ public partial class MainWindowViewModel
     /// <summary>MCP и палитра: перейти на страницу вторичного контура, если она разрешена пресетом.</summary>
     public void TryNavigateToSecondaryShellPage(SecondaryShellPage page)
     {
+        EnsureSecondaryShellSurfaceForLayout();
         if (IsSecondaryShellPageAllowed(page))
             CurrentSecondaryShellPage = page;
         else
             CoerceSecondaryShellPageToAllowed();
+    }
+
+    /// <summary>
+    /// Любая страница вторичного контура должна открываться с учетом активной раскладки:
+    /// при пресете с вынесенным MFD поднимаем/фокусируем TopLevel-хост.
+    /// </summary>
+    private void EnsureSecondaryShellSurfaceForLayout()
+    {
+        if (PresentationRequestsMfdHostWindow)
+            RequestToggleMfdHostWindow?.Invoke();
     }
 
     private bool IsSecondaryShellPageAllowed(SecondaryShellPage page) => page switch

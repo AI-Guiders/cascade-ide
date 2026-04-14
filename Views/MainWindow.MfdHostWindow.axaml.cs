@@ -29,7 +29,8 @@ public partial class MainWindow
             if (ReferenceEquals(_mfdHostWindow, w))
             {
                 _mfdHostWindow = null;
-                vm.SetMfdHostWindowShellOpen(false);
+                // Закрытие второго TopLevel не должно менять раскладку main-window:
+                // сохраняем suppress-флаг MFD-колонки до явного смены пресета/режима.
             }
         };
         Services.MfdHostWindowPlacement.MfdHostWindowBounds? savedBounds =
