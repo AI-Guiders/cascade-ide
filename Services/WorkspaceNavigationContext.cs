@@ -21,11 +21,47 @@ public static class WorkspaceNavigationContextBuilder
 
     private static readonly JsonSerializerOptions s_compactJson = new() { WriteIndented = false };
 
+    /// <summary>Снимок путей из дерева решения (UI-поток); тяжёлый <see cref="BuildJson"/> можно вызывать в фоне после этого.</summary>
     public static string BuildJson(
         string mode,
         string? anchorPath,
         string? fallbackCurrentPath,
         ObservableCollection<SolutionItem> roots,
+        string? solutionPath,
+        int? line,
+        int? column,
+        int maxRelated,
+        int maxNodes,
+        int maxEdges,
+        IReadOnlyList<string>? includeKinds = null,
+        IReadOnlyList<string>? excludeKinds = null,
+        string? preset = null,
+        WorkspaceNavigationContextSettings? workspaceNavigation = null)
+    {
+        var rawPaths = McpSolutionTree.CollectFileEntries(roots).Select(e => e.FullPath);
+        return BuildJson(
+            mode,
+            anchorPath,
+            fallbackCurrentPath,
+            rawPaths,
+            solutionPath,
+            line,
+            column,
+            maxRelated,
+            maxNodes,
+            maxEdges,
+            includeKinds,
+            excludeKinds,
+            preset,
+            workspaceNavigation);
+    }
+
+    /// <param name="knownFilePathsFromSolution">Пути из дерева (как из <see cref="McpSolutionTree.CollectFileEntries"/>), до нормализации.</param>
+    public static string BuildJson(
+        string mode,
+        string? anchorPath,
+        string? fallbackCurrentPath,
+        IEnumerable<string> knownFilePathsFromSolution,
         string? solutionPath,
         int? line,
         int? column,
@@ -64,24 +100,7 @@ public static class WorkspaceNavigationContextBuilder
             return JsonSerializer.Serialize(new { error = "bad_path", message = anchor });
         }
 
-        var allKnownFiles = McpSolutionTree.CollectFileEntries(roots)
-            .Select(e => e.FullPath)
-            .Where(p => !string.IsNullOrEmpty(p))
-            .Select(p =>
-            {
-                try
-                {
-                    return Path.GetFullPath(p);
-                }
-                catch
-                {
-                    return (string?)null;
-                }
-            })
-            .Where(p => p is not null)
-            .Cast<string>()
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToList();
+        var allKnownFiles = NormalizeKnownFilePaths(knownFilePathsFromSolution);
 
         var known = new HashSet<string>(allKnownFiles, StringComparer.OrdinalIgnoreCase);
         if (!known.Contains(anchor))
@@ -109,6 +128,25 @@ public static class WorkspaceNavigationContextBuilder
             _ => JsonSerializer.Serialize(new { error = "bad_mode", message = "mode: related | subgraph", mode })
         };
     }
+
+    private static List<string> NormalizeKnownFilePaths(IEnumerable<string> paths) =>
+        paths
+            .Where(static p => !string.IsNullOrEmpty(p))
+            .Select(static p =>
+            {
+                try
+                {
+                    return Path.GetFullPath(p);
+                }
+                catch
+                {
+                    return (string?)null;
+                }
+            })
+            .Where(static p => p is not null)
+            .Cast<string>()
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
 
     private static string BuildRelated(
         string anchor,
