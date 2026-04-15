@@ -13,4 +13,7 @@ public static class CockpitStandardInstrumentIds
 {
     public const string SolutionExplorerTree = "solution_explorer_tree";
     public const string WorkspaceNavigationMap = "workspace_navigation_map";
+
+    /// <summary>Компактный статус Workspace Health (build/tests/debug/safety) в mount-слое (Wave 3).</summary>
+    public const string WorkspaceHealthStatusV1 = "workspace_health_status_v1";
 }

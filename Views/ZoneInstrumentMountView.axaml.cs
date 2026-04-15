@@ -1,13 +1,19 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
+using CascadeIDE.Cockpit.Composition.HostSurface;
 
 namespace CascadeIDE.Views;
 
 public partial class ZoneInstrumentMountView : UserControl
 {
+    public static readonly StyledProperty<WorkspaceHealthStatusMountPayload?> MountPayloadProperty =
+        AvaloniaProperty.Register<ZoneInstrumentMountView, WorkspaceHealthStatusMountPayload?>(nameof(MountPayload));
+
     public static readonly StyledProperty<string> InstrumentIdProperty =
-        AvaloniaProperty.Register<ZoneInstrumentMountView, string>(nameof(InstrumentId), "workspace_health_status_v1");
+        AvaloniaProperty.Register<ZoneInstrumentMountView, string>(
+            nameof(InstrumentId),
+            CockpitStandardInstrumentIds.WorkspaceHealthStatusV1);
 
     public static readonly StyledProperty<string> SlotIdProperty =
         AvaloniaProperty.Register<ZoneInstrumentMountView, string>(nameof(SlotId), "pfd");
@@ -44,6 +50,13 @@ public partial class ZoneInstrumentMountView : UserControl
     {
         InitializeComponent();
         ApplyPolicyDefaults();
+    }
+
+    /// <summary>Типизированный снимок для <see cref="CockpitStandardInstrumentIds.WorkspaceHealthStatusV1"/>; задаётся родителем, не через поля VM.</summary>
+    public WorkspaceHealthStatusMountPayload? MountPayload
+    {
+        get => GetValue(MountPayloadProperty);
+        set => SetValue(MountPayloadProperty, value);
     }
 
     public string InstrumentId
@@ -158,7 +171,7 @@ internal static class ZoneInstrumentMountPolicy
             _ => "PFD STATUS PREVIEW"
         };
 
-        if (instrumentId == "workspace_health_status_v1")
+        if (string.Equals(instrumentId, CockpitStandardInstrumentIds.WorkspaceHealthStatusV1, StringComparison.OrdinalIgnoreCase))
             return BuildSkin(fallbackHeader, "#5A6E8C", "#A9D9FF", "#9FB4C9", "#DCE8F2", "#C9F0FF");
 
         return BuildSkin($"{instrumentId.ToUpperInvariant()} [{slotId.ToUpperInvariant()}]", "#5A6E8C", "#A9D9FF", "#9FB4C9", "#DCE8F2", "#C9F0FF");

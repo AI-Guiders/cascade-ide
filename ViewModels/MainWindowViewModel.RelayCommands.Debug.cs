@@ -20,6 +20,7 @@ public partial class MainWindowViewModel
         OnPropertyChanged(nameof(IsDebugExecutionRunning));
         OnPropertyChanged(nameof(WorkspaceHealthDebugText));
         OnPropertyChanged(nameof(WorkspaceHealthDebugCockpitShort));
+        OnPropertyChanged(nameof(WorkspaceHealthMountPayload));
     }
 
     private Task ShowDebugInfoAsync(string title, string message) =>

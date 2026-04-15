@@ -23,6 +23,7 @@
                                        Margin="8"
                                        Width="250"
                                        InstrumentId="workspace_health_status_v1"
+                                       MountPayload="{Binding WorkspaceHealthMountPayload}"
                                        SlotId="mfd"
                                        SlotPolicy="{Binding MfdInstrumentMountSlotPolicy}"
                                        ZIndex="415"/>

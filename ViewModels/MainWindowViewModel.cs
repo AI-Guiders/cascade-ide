@@ -275,6 +275,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             return;
         OnPropertyChanged(nameof(WorkspaceHealthDebugText));
         OnPropertyChanged(nameof(WorkspaceHealthDebugCockpitShort));
+        OnPropertyChanged(nameof(WorkspaceHealthMountPayload));
     }
 
     /// <summary>Вывод сборки (нижняя вкладка Build output).</summary>

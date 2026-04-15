@@ -13,5 +13,6 @@ public partial class MainWindowViewModel
     private void RebuildWorkspaceHealth()
     {
         WorkspaceHealthSegmentBuilder.Rebuild(WorkspaceHealthSegments, _workspaceHealth.GetSnapshot());
+        OnPropertyChanged(nameof(WorkspaceHealthMountPayload));
     }
 }

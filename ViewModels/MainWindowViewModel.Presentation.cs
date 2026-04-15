@@ -95,13 +95,21 @@ public partial class MainWindowViewModel
     public string PfdInstrumentMountSlotPolicy => ResolveInstrumentMountSlotPolicy(
         MountPolicyRuntimeSurfaceId,
         "pfd",
-        "workspace_health_status_v1");
+        CockpitStandardInstrumentIds.WorkspaceHealthStatusV1);
 
     /// <summary>Резолв policy для mount в слоте MFD с учётом registry-правил.</summary>
     public string MfdInstrumentMountSlotPolicy => ResolveInstrumentMountSlotPolicy(
         MountPolicyRuntimeSurfaceId,
         "mfd",
-        "workspace_health_status_v1");
+        CockpitStandardInstrumentIds.WorkspaceHealthStatusV1);
+
+    /// <summary>Типизированный источник данных для mount с <c>instrument_id</c> <see cref="CockpitStandardInstrumentIds.WorkspaceHealthStatusV1"/>.</summary>
+    public WorkspaceHealthStatusMountPayload WorkspaceHealthMountPayload =>
+        new(
+            WorkspaceHealthBuildCockpitShort,
+            WorkspaceHealthTestsCockpitShort,
+            WorkspaceHealthDebugCockpitShort,
+            SafetyLevel);
 
     /// <summary>Нормализованный runtime-контекст топологии для резолва slot-policy из реестра.</summary>
     private string MountPolicyRuntimeSurfaceId => ActiveAttentionLayoutSurface switch

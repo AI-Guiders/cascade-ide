@@ -112,6 +112,7 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(SafetyL1Opacity))]
     [NotifyPropertyChangedFor(nameof(SafetyL2Opacity))]
     [NotifyPropertyChangedFor(nameof(SafetyL3Opacity))]
+    [NotifyPropertyChangedFor(nameof(WorkspaceHealthMountPayload))]
     private string _safetyLevel = "L2";
 
     [ObservableProperty]
@@ -143,6 +144,7 @@ public partial class MainWindowViewModel
     [NotifyCanExecuteChangedFor(nameof(BuildSolutionCommand))]
     [NotifyPropertyChangedFor(nameof(WorkspaceHealthBuildText))]
     [NotifyPropertyChangedFor(nameof(WorkspaceHealthBuildCockpitShort))]
+    [NotifyPropertyChangedFor(nameof(WorkspaceHealthMountPayload))]
     private bool _isBuilding;
 
     [ObservableProperty]
