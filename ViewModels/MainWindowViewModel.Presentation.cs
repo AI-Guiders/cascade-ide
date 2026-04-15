@@ -71,6 +71,18 @@ public partial class MainWindowViewModel
     /// Не путать с вкладками MFD или картой панелей — <see cref="AttentionZonePanelRuntime"/>; место в сетке совпадает с <see cref="IsChatPanelColumnVisible"/>.
     /// </summary>
     public bool IsMfdColumnVisible => ShellSurfaceComposition.MfdColumnVisibleInMainGrid;
+
+    /// <summary>Включён debug-preview контуров зон (ручная валидация геометрии W2).</summary>
+    public bool UseSkiaZoneGeometryPreview => _settings.Display.UseSkiaZoneGeometryPreview;
+
+    public bool IsSkiaZonePreviewPfdVisible => UseSkiaZoneGeometryPreview && IsPfdColumnVisible;
+
+    public bool IsSkiaZonePreviewForwardVisible => UseSkiaZoneGeometryPreview;
+
+    public bool IsSkiaZonePreviewMfdVisible => UseSkiaZoneGeometryPreview && IsMfdColumnVisible;
+
+    /// <summary>Wave 3: включить отрисовку лёгкого instrument-content preview в PFD.</summary>
+    public bool UseSkiaInstrumentWave3Preview => _settings.Display.UseSkiaInstrumentWave3Preview;
     /// <summary>Полоса активной задачи / Task Cockpit — из <c>UiModes/&lt;id&gt;.toml</c> (<c>active_task_strip</c>); по умолчанию скрыто для семьи Debug.</summary>
     public bool ShowTaskBar => UiModeCatalog.GetShowTaskBar(NormalizeUiMode(UiMode));
 

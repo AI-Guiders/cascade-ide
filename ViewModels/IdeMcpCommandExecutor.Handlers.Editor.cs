@@ -67,13 +67,6 @@ internal sealed partial class IdeMcpCommandExecutor
                 McpCommandJsonArgs.String(args, "new_content") ?? "",
                 McpCommandJsonArgs.String(args, "reason"));
         });
-        add(Services.IdeCommands.ChatExportReadable, async (args, ct) =>
-        {
-            var a = (IIdeMcpActions)_vm;
-            _ = ct;
-            var write = McpCommandJsonArgs.Bool(args, "write_file");
-            return await a.ExportChatReadableAsync(write, McpCommandJsonArgs.String(args, "file_name"));
-        });
     }
 
     private void RegisterEditorStateAndContent(Action<string, Handler> add)

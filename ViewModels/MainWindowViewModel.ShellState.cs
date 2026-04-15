@@ -12,11 +12,13 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(ChatPanelColumnPixelWidth))]
     [NotifyPropertyChangedFor(nameof(IsChatPanelColumnVisible))]
     [NotifyPropertyChangedFor(nameof(IsMfdColumnVisible))]
+    [NotifyPropertyChangedFor(nameof(IsSkiaZonePreviewMfdVisible))]
     [NotifyCanExecuteChangedFor(nameof(ToggleChatPanelCommand))]
     private bool _isChatPanelExpanded = true;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsPfdColumnVisible))]
+    [NotifyPropertyChangedFor(nameof(IsSkiaZonePreviewPfdVisible))]
     [NotifyCanExecuteChangedFor(nameof(ToggleSolutionExplorerCommand))]
     private bool _isSolutionExplorerVisible = true;
 
@@ -38,6 +40,10 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(ChatPanelColumnPixelWidth))]
     [NotifyPropertyChangedFor(nameof(IsChatPanelColumnVisible))]
     [NotifyPropertyChangedFor(nameof(IsMfdColumnVisible))]
+    [NotifyPropertyChangedFor(nameof(IsSkiaZonePreviewPfdVisible))]
+    [NotifyPropertyChangedFor(nameof(IsSkiaZonePreviewForwardVisible))]
+    [NotifyPropertyChangedFor(nameof(IsSkiaZonePreviewMfdVisible))]
+    [NotifyPropertyChangedFor(nameof(UseSkiaInstrumentWave3Preview))]
     [NotifyPropertyChangedFor(nameof(ShowTaskBar))]
     [NotifyPropertyChangedFor(nameof(ShowWorkspaceHealthStrip))]
     [NotifyPropertyChangedFor(nameof(ShowWorkspaceHealthSecondaryPage))]

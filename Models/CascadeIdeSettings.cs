@@ -184,7 +184,9 @@ public sealed class CascadeIdeSettings : ModelBase
             && a.MfdHostWindowPixelX == b.MfdHostWindowPixelX
             && a.MfdHostWindowPixelY == b.MfdHostWindowPixelY
             && Nullable.Equals(a.MfdHostWindowWidth, b.MfdHostWindowWidth)
-            && Nullable.Equals(a.MfdHostWindowHeight, b.MfdHostWindowHeight);
+            && Nullable.Equals(a.MfdHostWindowHeight, b.MfdHostWindowHeight)
+            && a.UseSkiaZoneGeometryPreview == b.UseSkiaZoneGeometryPreview
+            && a.UseSkiaInstrumentWave3Preview == b.UseSkiaInstrumentWave3Preview;
     }
 
     private static bool WorkspaceNavigationContextEquals(WorkspaceNavigationContextSettings? a, WorkspaceNavigationContextSettings? b)
@@ -313,6 +315,8 @@ public sealed class CascadeIdeSettings : ModelBase
                 MfdHostWindowPixelY = Display.MfdHostWindowPixelY,
                 MfdHostWindowWidth = Display.MfdHostWindowWidth,
                 MfdHostWindowHeight = Display.MfdHostWindowHeight,
+                UseSkiaZoneGeometryPreview = Display.UseSkiaZoneGeometryPreview,
+                UseSkiaInstrumentWave3Preview = Display.UseSkiaInstrumentWave3Preview,
             },
             PresentationGrammar = new PresentationGrammarSettings
             {

@@ -28,4 +28,16 @@ public sealed class DisplaySettings
 
     /// <summary>См. <see cref="MfdHostWindowPixelX"/>.</summary>
     public double? MfdHostWindowHeight { get; set; }
+
+    /// <summary>
+    /// Показывать отладочный preview контуров зон P/F/M поверх основного layout.
+    /// Используется для визуальной валидации геометрии без изменения контента зон.
+    /// </summary>
+    public bool UseSkiaZoneGeometryPreview { get; set; }
+
+    /// <summary>
+    /// Wave 3: включить лёгкий preview контента инструмента (attitude stub) в зоне PFD.
+    /// Это первый шаг переноса instrument-content на Skia-style отрисовку.
+    /// </summary>
+    public bool UseSkiaInstrumentWave3Preview { get; set; }
 }

@@ -5,6 +5,10 @@
 [display]
 # Раскладка по дисплеям (ADR 0017). Пробелы внутри (…) допустимы — парсер их убирает.
 presentation = "(0.25P + 0.75F) (M)"
+# W2: debug-preview контуров зон поверх MainGrid (только визуализация геометрии, без замены контента).
+use_skia_zone_geometry_preview = false
+# W3: лёгкий preview instrument-content (attitude stub) в зоне PFD.
+use_skia_instrument_wave3_preview = false
 
 [ai]
 default_ollama_model = "qwen2.5-coder:7b"

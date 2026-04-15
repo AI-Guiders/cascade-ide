@@ -16,8 +16,11 @@ public partial class MainWindowViewModel
     /// Колонки рабочей строки <c>MainGrid</c> (строка для Avalonia <c>ColumnDefinitions</c>).
     /// При заданных весах якорей в <c>presentation</c> — доли <c>*</c> по ADR 0017; иначе дефолт <see cref="PresentationMainGridColumnDefinitions.Default"/>.
     /// </summary>
-    public string MainGridColumnDefinitions =>
-        PresentationMainGridColumnDefinitions.Get(
+    public string MainGridColumnDefinitions => MainGridLayoutFrame.ColumnDefinitions;
+
+    /// <summary>Кадр геометрии P/F/M для строки <c>MainGrid</c> (v1: колонка, число зон, нормализованные доли).</summary>
+    public PresentationMainGridLayoutFrame MainGridLayoutFrame =>
+        PresentationMainGridLayoutFrameBuilder.Build(
             _presentationParse,
             _presentationDedicatedMfdSecondScreen,
             _suppressMfdColumnForMfdHostWindow);
@@ -73,6 +76,7 @@ public partial class MainWindowViewModel
         _suppressMfdColumnForMfdHostWindow = isOpen;
         OnPropertyChanged(nameof(IsMfdHostWindowShellOpen));
         OnPropertyChanged(nameof(IsMfdColumnVisible));
+        OnPropertyChanged(nameof(IsSkiaZonePreviewMfdVisible));
         OnPropertyChanged(nameof(ChatPanelColumnPixelWidth));
         OnPropertyChanged(nameof(IsChatPanelColumnVisible));
         OnPropertyChanged(nameof(ActiveAttentionLayoutSurface));
