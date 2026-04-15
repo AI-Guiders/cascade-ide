@@ -27,6 +27,15 @@
    - `instrument_id` + `slot_id` + `slot_policy` в `ZoneInstrumentMountView`.
    - `Views/MainWindow.axaml` и `Views/MfdHostWindow.axaml` больше не задают ручную тему/заголовок, а передают декларативные параметры.
    - `ZoneInstrumentMountPolicy` резолвит скин/заголовок по policy (`wave3_preview_v1`) и slot.
+7. Источник `slot_policy` вынесен из hardcode в настройки:
+   - `[display].instrument_mount_slot_policy`
+   - VM-proxy: `MainWindowViewModel.InstrumentMountSlotPolicy`
+   - `MainWindow` и `MfdHostWindow` bind-ят `SlotPolicy` из VM.
+8. Добавлен policy-registry для декларативного резолва:
+   - `[[display.instrument_mount_policy_rules]]` c полями `slot_id`, `instrument_id`, `slot_policy`.
+   - резолв в VM: `ResolveInstrumentMountSlotPolicy(slot_id, instrument_id)` с приоритетом
+     `exact -> slot/* -> */instrument -> */* -> fallback`.
+   - `MainWindow`/`MfdHostWindow` bind-ят уже slot-specific policy (`PfdInstrumentMountSlotPolicy`, `MfdInstrumentMountSlotPolicy`).
 
 ## Принцип rollout
 
@@ -37,4 +46,4 @@
 ## Следующий шаг
 
 1. Перевести content-binding с фиксированных VM-полей на декларативный контракт payload (через `instrument_id` и typed data-source), чтобы mount не знал про конкретные поля `WorkspaceHealth*`.
-2. Добавить slot-policy registry из настроек/grammar (`presentation`) вместо hardcoded `wave3_preview_v1`.
+2. Связать policy-resolver с layout-контекстом (`presentation`/surface), чтобы для multi-instrument конфигураций policy выбирался не только по static rules из `[display]`, но и по runtime-топологии.

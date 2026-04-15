@@ -186,7 +186,35 @@ public sealed class CascadeIdeSettings : ModelBase
             && Nullable.Equals(a.MfdHostWindowWidth, b.MfdHostWindowWidth)
             && Nullable.Equals(a.MfdHostWindowHeight, b.MfdHostWindowHeight)
             && a.UseSkiaZoneGeometryPreview == b.UseSkiaZoneGeometryPreview
-            && a.UseSkiaInstrumentWave3Preview == b.UseSkiaInstrumentWave3Preview;
+            && a.UseSkiaInstrumentWave3Preview == b.UseSkiaInstrumentWave3Preview
+            && a.InstrumentMountSlotPolicy.Is(b.InstrumentMountSlotPolicy)
+            && InstrumentMountPolicyRulesEqual(a.InstrumentMountPolicyRules, b.InstrumentMountPolicyRules);
+    }
+
+    private static bool InstrumentMountPolicyRulesEqual(
+        IReadOnlyList<InstrumentMountPolicyRuleSettings>? x,
+        IReadOnlyList<InstrumentMountPolicyRuleSettings>? y)
+    {
+        if (x is null && y is null)
+            return true;
+        if (x is null || y is null)
+            return false;
+        if (x.Count != y.Count)
+            return false;
+
+        static string Normalize(string? value) => (value ?? string.Empty).Trim();
+        static string Key(InstrumentMountPolicyRuleSettings r) =>
+            $"{Normalize(r.SlotId)}|{Normalize(r.InstrumentId)}|{Normalize(r.SlotPolicy)}";
+
+        var left = x.Select(Key).OrderBy(static s => s, StringComparer.Ordinal).ToList();
+        var right = y.Select(Key).OrderBy(static s => s, StringComparer.Ordinal).ToList();
+        for (var i = 0; i < left.Count; i++)
+        {
+            if (!string.Equals(left[i], right[i], StringComparison.Ordinal))
+                return false;
+        }
+
+        return true;
     }
 
     private static bool WorkspaceNavigationContextEquals(WorkspaceNavigationContextSettings? a, WorkspaceNavigationContextSettings? b)
@@ -317,6 +345,15 @@ public sealed class CascadeIdeSettings : ModelBase
                 MfdHostWindowHeight = Display.MfdHostWindowHeight,
                 UseSkiaZoneGeometryPreview = Display.UseSkiaZoneGeometryPreview,
                 UseSkiaInstrumentWave3Preview = Display.UseSkiaInstrumentWave3Preview,
+                InstrumentMountSlotPolicy = Display.InstrumentMountSlotPolicy,
+                InstrumentMountPolicyRules = Display.InstrumentMountPolicyRules
+                    .Select(static r => new InstrumentMountPolicyRuleSettings
+                    {
+                        SlotId = r.SlotId,
+                        InstrumentId = r.InstrumentId,
+                        SlotPolicy = r.SlotPolicy
+                    })
+                    .ToList(),
             },
             PresentationGrammar = new PresentationGrammarSettings
             {

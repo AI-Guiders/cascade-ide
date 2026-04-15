@@ -83,6 +83,65 @@ public partial class MainWindowViewModel
 
     /// <summary>Wave 3: включить отрисовку лёгкого instrument-content preview в PFD.</summary>
     public bool UseSkiaInstrumentWave3Preview => _settings.Display.UseSkiaInstrumentWave3Preview;
+
+    /// <summary>Декларативный slot-policy mount preview-инструмента (идёт из <c>[display]</c>).</summary>
+    public string InstrumentMountSlotPolicy =>
+        string.IsNullOrWhiteSpace(_settings.Display.InstrumentMountSlotPolicy)
+            ? "wave3_preview_v1"
+            : _settings.Display.InstrumentMountSlotPolicy.Trim();
+
+    /// <summary>Резолв policy для mount в слоте PFD с учётом registry-правил.</summary>
+    public string PfdInstrumentMountSlotPolicy => ResolveInstrumentMountSlotPolicy("pfd", "workspace_health_status_v1");
+
+    /// <summary>Резолв policy для mount в слоте MFD с учётом registry-правил.</summary>
+    public string MfdInstrumentMountSlotPolicy => ResolveInstrumentMountSlotPolicy("mfd", "workspace_health_status_v1");
+
+    private string ResolveInstrumentMountSlotPolicy(string slotId, string instrumentId)
+    {
+        static string Normalize(string? value) => (value ?? string.Empty).Trim().ToLowerInvariant();
+
+        var normalizedSlot = Normalize(slotId);
+        var normalizedInstrument = Normalize(instrumentId);
+        var rules = _settings.Display.InstrumentMountPolicyRules;
+        if (rules is null || rules.Count == 0)
+            return InstrumentMountSlotPolicy;
+
+        // Priority: exact(slot+instrument) -> slot wildcard instrument -> instrument wildcard slot -> full wildcard.
+        string Pick(bool slotExact, bool instrumentExact)
+        {
+            var match = rules.FirstOrDefault(rule =>
+            {
+                var ruleSlot = Normalize(rule.SlotId);
+                var ruleInstrument = Normalize(rule.InstrumentId);
+                var slotMatches = slotExact
+                    ? ruleSlot == normalizedSlot
+                    : ruleSlot is "*" or "";
+                var instrumentMatches = instrumentExact
+                    ? ruleInstrument == normalizedInstrument
+                    : ruleInstrument is "*" or "";
+                return slotMatches && instrumentMatches;
+            });
+            return string.IsNullOrWhiteSpace(match?.SlotPolicy) ? string.Empty : match.SlotPolicy.Trim();
+        }
+
+        var exact = Pick(slotExact: true, instrumentExact: true);
+        if (!string.IsNullOrWhiteSpace(exact))
+            return exact;
+
+        var slotAnyInstrument = Pick(slotExact: true, instrumentExact: false);
+        if (!string.IsNullOrWhiteSpace(slotAnyInstrument))
+            return slotAnyInstrument;
+
+        var instrumentAnySlot = Pick(slotExact: false, instrumentExact: true);
+        if (!string.IsNullOrWhiteSpace(instrumentAnySlot))
+            return instrumentAnySlot;
+
+        var wildcard = Pick(slotExact: false, instrumentExact: false);
+        if (!string.IsNullOrWhiteSpace(wildcard))
+            return wildcard;
+
+        return InstrumentMountSlotPolicy;
+    }
     /// <summary>Полоса активной задачи / Task Cockpit — из <c>UiModes/&lt;id&gt;.toml</c> (<c>active_task_strip</c>); по умолчанию скрыто для семьи Debug.</summary>
     public bool ShowTaskBar => UiModeCatalog.GetShowTaskBar(NormalizeUiMode(UiMode));
 

@@ -36,8 +36,19 @@ public sealed class DisplaySettings
     public bool UseSkiaZoneGeometryPreview { get; set; }
 
     /// <summary>
-    /// Wave 3: включить лёгкий preview контента инструмента (attitude stub) в зоне PFD.
-    /// Это первый шаг переноса instrument-content на Skia-style отрисовку.
+    /// Wave 3: включить лёгкий preview контента инструмента в mount-слое P/F/M.
     /// </summary>
     public bool UseSkiaInstrumentWave3Preview { get; set; }
+
+    /// <summary>
+    /// Идентификатор slot-policy для mount preview-инструмента (декларативный контракт Wave 3).
+    /// Пример: <c>wave3_preview_v1</c>.
+    /// </summary>
+    public string InstrumentMountSlotPolicy { get; set; } = "wave3_preview_v1";
+
+    /// <summary>
+    /// Реестр правил резолва policy по паре <c>slot_id + instrument_id</c>.
+    /// Если пусто — используется <see cref="InstrumentMountSlotPolicy"/> как fallback.
+    /// </summary>
+    public List<InstrumentMountPolicyRuleSettings> InstrumentMountPolicyRules { get; set; } = [];
 }

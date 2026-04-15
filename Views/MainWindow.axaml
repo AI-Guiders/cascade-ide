@@ -270,7 +270,7 @@
                                                Width="250"
                                                InstrumentId="workspace_health_status_v1"
                                                SlotId="pfd"
-                                               SlotPolicy="wave3_preview_v1"
+                                               SlotPolicy="{Binding PfdInstrumentMountSlotPolicy}"
                                                ZIndex="415"/>
             </Grid>
         </chrome:AttentionZoneContainer>
