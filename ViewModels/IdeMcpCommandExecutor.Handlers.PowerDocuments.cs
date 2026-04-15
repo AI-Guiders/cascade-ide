@@ -147,6 +147,15 @@ internal sealed partial class IdeMcpCommandExecutor
             return "OK";
         });
 
+        add(Services.IdeCommands.ForkChatThread, async (args, _) =>
+        {
+            Guid? parent = null;
+            var raw = McpCommandJsonArgs.String(args, "parent_message_id")?.Trim();
+            if (!string.IsNullOrEmpty(raw) && Guid.TryParse(raw, out var pid))
+                parent = pid;
+            return _vm.ChatPanel.ForkThread(parent);
+        });
+
         add(Services.IdeCommands.InstallOllamaModel, async (args, _) =>
         {
             var model = McpCommandJsonArgs.String(args, "model");

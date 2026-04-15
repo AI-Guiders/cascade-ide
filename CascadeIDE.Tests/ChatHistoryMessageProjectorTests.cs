@@ -34,12 +34,15 @@ public sealed class ChatHistoryMessageProjectorTests
             ChatHistoryEventKind.MessageEdited,
             $$"""{"message_id":"{{asstId:N}}","new_content":"new text"}""");
 
-        var rows = ChatHistoryMessageProjector.Project([evUser, evAsst, evEdit]);
+        var defaultThread = Guid.Parse("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC");
+        var rows = ChatHistoryMessageProjector.Project([evUser, evAsst, evEdit], defaultThread);
 
         Assert.Equal(2, rows.Count);
         Assert.Equal("user", rows[0].Role);
+        Assert.Equal(defaultThread, rows[0].ThreadId);
         Assert.Equal("assistant", rows[1].Role);
         Assert.Equal("new text", rows[1].Content);
         Assert.Equal(asstId, rows[1].MessageId);
+        Assert.Equal(defaultThread, rows[1].ThreadId);
     }
 }

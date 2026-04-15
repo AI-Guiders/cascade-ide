@@ -26,6 +26,8 @@ public partial class ChatPanelViewModel : ViewModelBase
     private readonly Func<string> _getEditorText;
     private readonly Func<string> _getWorkspaceRoot;
     private readonly Func<string> _getCursorAcpAgentPath;
+    private readonly Func<string> _getExternalMcpServersJson;
+    private readonly Func<bool> _getAcpAutoInjectIdeMcp;
     private readonly Action<string>? _appendAcpTerminal;
     private readonly Action? _showAcpTerminal;
     private readonly ChatSessionStore _sessionStore;
@@ -33,6 +35,9 @@ public partial class ChatPanelViewModel : ViewModelBase
     private CursorAcpChatConnection? _cursorAcp;
     private ClarificationBatch? _activeClarificationBatch;
     private Guid _sessionId;
+    private Guid _mainThreadId;
+    private Guid _activeThreadId;
+    private Guid? _pendingParentForNextMessage;
 
     public ChatPanelViewModel(
         Services.AiProviderManager aiProviderManager,
@@ -44,6 +49,8 @@ public partial class ChatPanelViewModel : ViewModelBase
         Func<string> getEditorText,
         Func<string> getWorkspaceRoot,
         Func<string> getCursorAcpAgentPath,
+        Func<string> getExternalMcpServersJson,
+        Func<bool> getAcpAutoInjectIdeMcp,
         Action<string>? appendAcpTerminal = null,
         Action? showAcpTerminal = null)
     {
@@ -56,6 +63,8 @@ public partial class ChatPanelViewModel : ViewModelBase
         _getEditorText = getEditorText;
         _getWorkspaceRoot = getWorkspaceRoot;
         _getCursorAcpAgentPath = getCursorAcpAgentPath;
+        _getExternalMcpServersJson = getExternalMcpServersJson;
+        _getAcpAutoInjectIdeMcp = getAcpAutoInjectIdeMcp;
         _appendAcpTerminal = appendAcpTerminal;
         _showAcpTerminal = showAcpTerminal;
         _sessionStore = new ChatSessionStore(_getWorkspaceRoot());
@@ -101,6 +110,10 @@ public partial class ChatPanelViewModel : ViewModelBase
     [ObservableProperty]
     private int _selectedMessageIndex = -1;
 
+    /// <summary>Подсказка по активной ветке (короткий id).</summary>
+    [ObservableProperty]
+    private string _threadBranchHint = "";
+
     public void ShowClarificationBatch(ClarificationBatch batch)
     {
         _activeClarificationBatch = batch;
@@ -133,7 +146,7 @@ public partial class ChatPanelViewModel : ViewModelBase
         }
 
         var payload = string.Join("; ", ClarificationDraftItems.Select(x => $"{x.Id}: {x.Answer?.Trim()}"));
-        var clarifyMsg = new ChatMessageViewModel("user", $"[clarification] {payload}");
+        var clarifyMsg = new ChatMessageViewModel("user", $"[clarification] {payload}", threadId: _activeThreadId);
         ChatMessages.Add(clarifyMsg);
         _ = PersistEventAsync(ChatHistoryEventKind.MessageAdded, MessageSnapshot(clarifyMsg));
         _activeClarificationBatch = null;
@@ -166,7 +179,9 @@ public partial class ChatPanelViewModel : ViewModelBase
             return;
 
         ChatInput = "";
-        var userMsg = new ChatMessageViewModel("user", input);
+        var parent = _pendingParentForNextMessage;
+        _pendingParentForNextMessage = null;
+        var userMsg = new ChatMessageViewModel("user", input, threadId: _activeThreadId, parentMessageId: parent);
         ChatMessages.Add(userMsg);
         _ = PersistEventAsync(ChatHistoryEventKind.MessageAdded, MessageSnapshot(userMsg));
         IsChatLoading = true;
@@ -178,7 +193,7 @@ public partial class ChatPanelViewModel : ViewModelBase
 
             if (string.Equals(_getActiveAiProvider(), "CursorACP", StringComparison.Ordinal))
             {
-                var assistantMsg = new ChatMessageViewModel("assistant", "");
+                var assistantMsg = new ChatMessageViewModel("assistant", "", threadId: _activeThreadId);
                 ChatMessages.Add(assistantMsg);
                 try
                 {
@@ -190,6 +205,8 @@ public partial class ChatPanelViewModel : ViewModelBase
                     await _cursorAcp.PromptAsync(
                         workspace,
                         _getCursorAcpAgentPath(),
+                        _getExternalMcpServersJson(),
+                        _getAcpAutoInjectIdeMcp(),
                         input,
                         t => UiScheduler.Default.Post(() => assistantMsg.Content += t),
                         CancellationToken.None).ConfigureAwait(false);
@@ -207,7 +224,7 @@ public partial class ChatPanelViewModel : ViewModelBase
                     .Select(m => new Services.ChatMessage(m.Role, m.Content))
                     .Append(new Services.ChatMessage("user", input))
                     .ToList();
-                var assistantMsg = new ChatMessageViewModel("assistant", "");
+                var assistantMsg = new ChatMessageViewModel("assistant", "", threadId: _activeThreadId);
                 ChatMessages.Add(assistantMsg);
 
                 await foreach (var token in _aiProviderManager.StreamChatAsync(
@@ -258,7 +275,7 @@ public partial class ChatPanelViewModel : ViewModelBase
         var trimmed = content.Trim();
         if (trimmed.Length == 0)
             return "Empty content";
-        var vm = new ChatMessageViewModel(r, trimmed);
+        var vm = new ChatMessageViewModel(r, trimmed, threadId: _activeThreadId);
         ChatMessages.Add(vm);
         _ = PersistEventAsync(ChatHistoryEventKind.MessageAdded, MessageSnapshot(vm));
         if (string.Equals(r, "assistant", StringComparison.Ordinal))
@@ -286,6 +303,8 @@ public partial class ChatPanelViewModel : ViewModelBase
             selected_index = SelectedMessageIndex,
             has_selection = true,
             message_id = m.MessageId.ToString("N"),
+            thread_id = m.ThreadId.ToString("N"),
+            parent_message_id = m.ParentMessageId?.ToString("N"),
             role,
             content
         }, ChatPanelJson);
@@ -345,26 +364,64 @@ public partial class ChatPanelViewModel : ViewModelBase
         }
     }
 
-    private static Dictionary<string, object?> MessageSnapshot(ChatMessageViewModel m) => new()
+    private static Dictionary<string, object?> MessageSnapshot(ChatMessageViewModel m)
     {
-        ["message_id"] = m.MessageId.ToString("N"),
-        ["role"] = m.Role,
-        ["content"] = m.Content
-    };
+        var d = new Dictionary<string, object?>
+        {
+            ["message_id"] = m.MessageId.ToString("N"),
+            ["role"] = m.Role,
+            ["content"] = m.Content,
+            ["thread_id"] = m.ThreadId.ToString("N"),
+        };
+        if (m.ParentMessageId is { } p)
+            d["parent_message_id"] = p.ToString("N");
+        return d;
+    }
+
+    /// <summary>Новая ветка: следующее user-сообщение получит <see cref="ChatMessageViewModel.ParentMessageId"/>, если задано.</summary>
+    public string ForkThread(Guid? parentMessageId)
+    {
+        var previous = _activeThreadId;
+        if (previous == Guid.Empty)
+            previous = _mainThreadId;
+        _activeThreadId = Guid.NewGuid();
+        _pendingParentForNextMessage = parentMessageId;
+        ThreadBranchHint = $"Ветка {_activeThreadId:N}";
+        _ = PersistEventAsync(
+            ChatHistoryEventKind.ThreadForked,
+            new
+            {
+                new_thread_id = _activeThreadId.ToString("N"),
+                previous_thread_id = previous.ToString("N"),
+                parent_message_id = parentMessageId?.ToString("N"),
+            },
+            envelopeThreadId: _activeThreadId);
+        return "OK";
+    }
 
     private async Task InitializeSessionAsync()
     {
         try
         {
-            await _sessionStore.LoadOrCreateMetadataAsync(_sessionId, CancellationToken.None).ConfigureAwait(false);
+            var meta = await _sessionStore.LoadOrCreateMetadataAsync(_sessionId, CancellationToken.None).ConfigureAwait(false);
+            if (meta.MainThreadId == Guid.Empty)
+            {
+                meta = meta with { MainThreadId = Guid.NewGuid() };
+                await _sessionStore.SaveMetadataAsync(meta, CancellationToken.None).ConfigureAwait(false);
+            }
+
+            _mainThreadId = meta.MainThreadId;
+            _activeThreadId = meta.MainThreadId;
+            ThreadBranchHint = $"Ветка {_activeThreadId:N}";
+
             var events = await _sessionStore.ReadEventsAsync(_sessionId, CancellationToken.None).ConfigureAwait(false);
-            var rows = ChatHistoryMessageProjector.Project(events);
+            var rows = ChatHistoryMessageProjector.Project(events, _mainThreadId);
             if (rows.Count == 0)
                 return;
             UiScheduler.Default.Post(() =>
             {
                 foreach (var row in rows)
-                    ChatMessages.Add(new ChatMessageViewModel(row.Role, row.Content, row.MessageId));
+                    ChatMessages.Add(new ChatMessageViewModel(row.Role, row.Content, row.MessageId, row.ThreadId, row.ParentMessageId));
                 ClarificationStatusText = $"Восстановлено сообщений: {rows.Count}";
             });
         }
@@ -374,16 +431,20 @@ public partial class ChatPanelViewModel : ViewModelBase
         }
     }
 
-    private async Task PersistEventAsync(string kind, object payload)
+    private async Task PersistEventAsync(string kind, object payload, Guid? envelopeThreadId = null)
     {
         try
         {
+            var tid = envelopeThreadId ?? _activeThreadId;
+            if (tid == Guid.Empty)
+                tid = _mainThreadId;
             var ev = new ChatHistoryEvent(
                 Guid.NewGuid(),
                 _sessionId,
                 DateTimeOffset.UtcNow,
                 kind,
-                JsonSerializer.Serialize(payload, ChatPanelJson));
+                JsonSerializer.Serialize(payload, ChatPanelJson),
+                ThreadId: tid == Guid.Empty ? null : tid.ToString("N"));
             await _sessionStore.AppendEventAsync(ev, CancellationToken.None).ConfigureAwait(false);
             var meta = await _sessionStore.LoadOrCreateMetadataAsync(_sessionId, CancellationToken.None).ConfigureAwait(false);
             if (meta.UpdatedAtUtc < ev.AtUtc)

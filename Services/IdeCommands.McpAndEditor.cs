@@ -9,7 +9,7 @@ public static partial class IdeCommands
 
     /// <summary>Открыть файл в редакторе IDE. args: path:string; returns: text; example: {"path":"C:\\tmp\\a.txt"}.</summary>
     public const string OpenFile = "open_file";
-    /// <summary>Загрузить решение (.sln/.slnx/.slnf) и обновить дерево решения. args: path:string; returns: text; example: {"path":"D:\\Experiments\\PersonalCursorFolder\\Financial\\software\\open\\cascade-ide\\CascadeIDE.slnx"}.</summary>
+    /// <summary>Загрузить решение (.sln/.slnx/.slnf) или каталог как workspace (дерево файлов без .sln) и обновить обозреватель. args: path:string; returns: text; example: {"path":"D:\\repo\\CascadeIDE.slnx"}.</summary>
     public const string LoadSolution = "load_solution";
     /// <summary>Выделить диапазон в редакторе (1-based). args: file_path:string, start_line:integer, start_column:integer, end_line:integer, end_column:integer; returns: text; example: {"file_path":"C:\\tmp\\a.cs","start_line":1,"start_column":1,"end_line":1,"end_column":10}.</summary>
     public const string Select = "select";

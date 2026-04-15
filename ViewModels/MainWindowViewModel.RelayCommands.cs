@@ -18,6 +18,12 @@ public partial class MainWindowViewModel
     }
 
     [RelayCommand]
+    private void OpenFolder()
+    {
+        RequestOpenFolder?.Invoke();
+    }
+
+    [RelayCommand]
     private void OpenFileFromDialog()
     {
         RequestOpenFile?.Invoke();

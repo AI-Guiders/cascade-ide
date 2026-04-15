@@ -137,8 +137,8 @@ public sealed class CascadeIdeSettings : ModelBase
     {
         if (a is null || b is null)
             return a == b;
-        return a.StdioServerEnabled == b.StdioServerEnabled
-            && a.ExternalServersJson.Is(b.ExternalServersJson);
+        return a.ExternalServersJson.Is(b.ExternalServersJson)
+            && a.AcpAutoInjectIdeMcp == b.AcpAutoInjectIdeMcp;
     }
 
     private static bool WorkspaceUiEquals(WorkspaceUiSettings? a, WorkspaceUiSettings? b)
@@ -275,8 +275,8 @@ public sealed class CascadeIdeSettings : ModelBase
             },
             Mcp = new McpSettings
             {
-                StdioServerEnabled = Mcp.StdioServerEnabled,
                 ExternalServersJson = Mcp.ExternalServersJson,
+                AcpAutoInjectIdeMcp = Mcp.AcpAutoInjectIdeMcp,
             },
             WorkspaceUi = new WorkspaceUiSettings
             {

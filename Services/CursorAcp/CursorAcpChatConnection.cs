@@ -59,6 +59,9 @@ public sealed class CursorAcpChatConnection : IDisposable
     private string? _sessionId;
     private string? _cachedWorkspaceRoot;
     private string? _cachedCmdPath;
+    private string? _cachedExternalMcpJson;
+    private bool _cachedAcpAutoInjectIdeMcp = true;
+    private string? _cachedProcessPathForMcp;
 
     public bool IsDisposed { get; private set; }
 
@@ -72,6 +75,8 @@ public sealed class CursorAcpChatConnection : IDisposable
     public async Task PromptAsync(
         string workspaceRoot,
         string configuredAgentPath,
+        string externalMcpServersJson,
+        bool acpAutoInjectIdeMcp,
         string userText,
         Action<string> appendChunk,
         CancellationToken cancellationToken)
@@ -85,7 +90,7 @@ public sealed class CursorAcpChatConnection : IDisposable
             workspaceRoot = workDir;
 
         workspaceRoot = Path.GetFullPath(workspaceRoot);
-        await EnsureSessionAsync(workspaceRoot, cmdPath, workDir, cancellationToken).ConfigureAwait(false);
+        await EnsureSessionAsync(workspaceRoot, cmdPath, workDir, externalMcpServersJson, acpAutoInjectIdeMcp, cancellationToken).ConfigureAwait(false);
 
         if (_connection is null || string.IsNullOrEmpty(_sessionId))
             throw new InvalidOperationException("ACP: нет активной сессии.");
@@ -109,18 +114,28 @@ public sealed class CursorAcpChatConnection : IDisposable
         string workspaceRoot,
         string cmdPath,
         string agentWorkingDirectory,
+        string externalMcpServersJson,
+        bool acpAutoInjectIdeMcp,
         CancellationToken cancellationToken)
     {
+        var mcpJson = externalMcpServersJson ?? "";
+        var processPath = Environment.ProcessPath ?? "";
         if (_connection is not null
             && _process is { HasExited: false }
             && !string.IsNullOrEmpty(_sessionId)
             && string.Equals(_cachedWorkspaceRoot, workspaceRoot, StringComparison.OrdinalIgnoreCase)
-            && string.Equals(_cachedCmdPath, cmdPath, StringComparison.OrdinalIgnoreCase))
+            && string.Equals(_cachedCmdPath, cmdPath, StringComparison.OrdinalIgnoreCase)
+            && string.Equals(_cachedExternalMcpJson, mcpJson, StringComparison.Ordinal)
+            && _cachedAcpAutoInjectIdeMcp == acpAutoInjectIdeMcp
+            && string.Equals(_cachedProcessPathForMcp, processPath, StringComparison.OrdinalIgnoreCase))
             return;
 
         DisposeProcessAndConnection();
         _cachedWorkspaceRoot = workspaceRoot;
         _cachedCmdPath = cmdPath;
+        _cachedExternalMcpJson = mcpJson;
+        _cachedAcpAutoInjectIdeMcp = acpAutoInjectIdeMcp;
+        _cachedProcessPathForMcp = processPath;
 
         var psi = new ProcessStartInfo
         {
@@ -166,10 +181,11 @@ public sealed class CursorAcpChatConnection : IDisposable
             },
         }, cancellationToken).ConfigureAwait(false);
 
+        var mcpServers = CascadeAcpMcpServerCatalog.MergeForAcpNewSession(mcpJson, acpAutoInjectIdeMcp);
         var sessionResult = await _connection.NewSessionAsync(new NewSessionRequest
         {
             Cwd = workspaceRoot,
-            McpServers = [],
+            McpServers = mcpServers,
         }, cancellationToken).ConfigureAwait(false);
 
         _sessionId = sessionResult.SessionId;
@@ -191,6 +207,7 @@ public sealed class CursorAcpChatConnection : IDisposable
 
         _connection = null;
         _sessionId = null;
+        _cachedExternalMcpJson = null;
 
         try
         {

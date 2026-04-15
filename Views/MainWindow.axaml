@@ -152,6 +152,7 @@
         <Menu DockPanel.Dock="Top" Background="{DynamicResource CascadeTheme.MenuBackground}">
             <MenuItem Header="_Файл">
                 <MenuItem Header="_Открыть решение..." Command="{Binding OpenSolutionCommand}"/>
+                <MenuItem Header="_Открыть папку..." Command="{Binding OpenFolderCommand}"/>
                 <MenuItem Header="_Открыть файл..." Command="{Binding OpenFileFromDialogCommand}"/>
                 <MenuItem Header="Export expanded _Markdown..." Command="{Binding ExportExpandedMarkdownCommand}"/>
                 <Separator/>

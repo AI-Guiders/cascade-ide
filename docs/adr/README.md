@@ -55,6 +55,7 @@
 | [0045](0045-agent-chat-persistence-event-log-and-projections.md) | Persistence истории чата: append-only NDJSON события + метаданные и проекции; UI/рендер не источник правды | Proposed |
 | [0046](0046-presentation-layout-authority-and-cockpit-invariants.md) | Единый `PresentationLayoutAuthority` и инварианты P/F/M: `presentation` как источник истины для меню/MCP/режимов/реактивного слоя | Proposed |
 | [0047](0047-cockpit-instrument-descriptor-and-slot-composition.md) | Инструмент кабины (`Instrument`): дескриптор слота (`CockpitInstrumentDescriptor`), не `Control`; SE vs Semantic Map как примеры | Accepted |
+| [0048](0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) | Чат через Cursor ACP в IDE: `mcpServers`, авто IDE MCP; приложения — пробелы тулов, разбор `mcp.json` ↔ CIDE | Proposed |
 
 ## Соглашения
 

@@ -110,6 +110,7 @@
 |-----------:|----------|
 | `exit_application` | Закрыть приложение (как меню Файл → Выход). returns: none. |
 | `open_file_dialog` | Открыть диалог выбора файла и показать его в редакторе (как меню Файл → Открыть файл...). returns: text. |
+| `open_folder_dialog` | Открыть диалог выбора папки как workspace (как меню Файл → Открыть папку...). returns: text. |
 | `open_solution_dialog` | Открыть диалог выбора решения (как меню Файл → Открыть решение...). returns: text. |
 
 ### Вид: панели (явная установка + переключатели)
@@ -242,7 +243,7 @@
 | `get_open_document_text` | Полный текст открытого документа по пути (или текущего). Модель вкладки, не снимок темы. returns: text. |
 | `go_to_position` | Перейти на позицию (и опционально выделить диапазон). args: file_path:string, line:integer, column:integer, end_line?:integer, end_column?:integer; returns: text; example: {"file_path":"C:\\tmp\\a.cs","line":10,"column":1}. |
 | `list_tools` | Список MCP-тулов, которые IDE публикует (name/description/inputSchema). returns: json. |
-| `load_solution` | Загрузить решение (.sln/.slnx/.slnf) и обновить дерево решения. args: path:string; returns: text; example: {"path":"D:\\Experiments\\PersonalCursorFolder\\Financial\\software\\open\\cascade-ide\\CascadeIDE.slnx"}. |
+| `load_solution` | Загрузить решение (.sln/.slnx/.slnf) или каталог как workspace (дерево файлов без .sln) и обновить обозреватель. args: path:string; returns: text; example: {"path":"D:\\repo\\CascadeIDE.slnx"}. |
 | `open_file` | Открыть файл в редакторе IDE. args: path:string; returns: text; example: {"path":"C:\\tmp\\a.txt"}. |
 | `remove_breakpoint` | Снять брейкпоинт. args: file_path:string, line:integer; returns: text; example: {"file_path":"C:\\tmp\\a.cs","line":42}. |
 | `request_confirmation` | Запросить подтверждение у пользователя. args: message:string; returns: text; example: {"message":"Продолжить?"}. Возвращает `ok`/`cancel`. |
@@ -263,6 +264,7 @@
 | `fix_failing_tests` | Quick action: починить упавшие тесты. returns: text. |
 | `focus_checkpoint` | Создать контрольную точку (Focus). returns: text. |
 | `focus_rollback` | Откатить к последней контрольной точке (Focus). returns: text. |
+| `fork_chat_thread` | Новая ветка чата: args: parent_message_id?:string. Пишет thread_forked; следующее user-сообщение может ссылаться на родителя. returns: text; example: {} |
 | `install_ollama_model` | Скачать модель Ollama (как в настройках). args: model:string; returns: text; example: {"model":"qwen2.5-coder:7b"}. |
 | `investigate_nullref` | Quick action: расследовать NullReferenceException. returns: text. |
 | `pause_autonomous` | Поставить автономный режим на паузу. returns: text. |
@@ -298,6 +300,7 @@
 | `move_document_to_group_2` | Переместить документ в группу 2. args: file_path:string; returns: text; example: {"file_path":"C:\\\\tmp\\\\a.cs"}. |
 | `move_document_to_group_3` | Переместить документ в группу 3. args: file_path:string; returns: text; example: {"file_path":"C:\\\\tmp\\\\a.cs"}. |
 | `reopen_closed_document` | Переоткрыть недавно закрытый документ. returns: text. |
+| `search_workspace_text` | Поиск текста по workspace через ripgrep: вызывается команда `rg` из PATH (Windows/Linux/macOS — поставь пакетом или с релиза). Явный путь: только `rg_path`. args: pattern:string, subpath?:string, fixed_string?:boolean, glob?:string, max_matches?:integer, rg_path?:string; returns: json; example: {\"pattern\":\"LoadSolution\",\"glob\":\"*.cs\",\"max_matches\":50}. |
 | `set_build_output_visible` | Явно показать/скрыть журнал сборки. args: visible:boolean; returns: text; example: {"visible":true}. |
 | `set_terminal_visible` | Явно показать/скрыть терминал (без переключения). args: visible:boolean; returns: text; example: {"visible":true}. |
 | `set_ui_mode` | Режим UI (как меню «Вид → Режим интерфейса»). args: mode:string; returns: text; example: {"mode":"Power"}. |
@@ -358,7 +361,7 @@
 - **Со стороны Cursor (клиент):** поддержка подключения к уже запущенному MCP-серверу (attach), а не только запуск процесса. Тогда пользователь стартует IDE вручную, Cursor подключается к существующему процессу (например по сокету или именованному каналу).
 - **Со стороны Cascade IDE (сервер):** второй транспорт — не только stdio, но и, например, TCP/socket. IDE при старте открывает порт и ждёт подключения; в настройках Cursor указывается URL вместо command. Тогда «сначала IDE, потом включить MCP» работало бы без изменений в Cursor.
 
-Пока достаточно сценария «Cursor запускает IDE»; при работе в этом режиме в окне IDE отображается подсказка: «Управляется агентом (MCP). Не закрывайте окно — подключение будет потеряно.»
+Пока достаточно сценария «клиент (Cursor, ACP и т.д.) запускает IDE» с `--mcp-stdio`: открывается **главное окно** Cascade IDE — так Pilot Monitoring может смотреть в ту же IDE, куда стучится агент по MCP. Параллельно поднимается MCP на stdin/stdout (включается **только** флагом `--mcp-stdio`, отдельной настройки «включить stdio» нет). В окне отображается подсказка: «Управляется агентом (MCP). Не закрывайте окно — подключение будет потеряно.»
 
 ## Пример тёмной темы (ide_set_ui_theme)
 

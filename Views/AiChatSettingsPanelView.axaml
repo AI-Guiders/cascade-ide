@@ -50,9 +50,11 @@
         <CheckBox Content="Чат только через MCP (не вызывать встроенный LLM; ответ ассистента — send_chat с role=assistant)"
                   IsChecked="{Binding ChatMcpOnly}"
                   Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-        <CheckBox Content="Запускать MCP-сервер при старте с --mcp-stdio" IsChecked="{Binding IdeMcpServerEnabled}" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+        <CheckBox Content="Cursor ACP: автоматически передавать MCP IDE в сессию агента (cascade-ide → текущий exe + --mcp-stdio)"
+                  IsChecked="{Binding AcpAutoInjectIdeMcp}"
+                  Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
 
-        <TextBlock Text="Внешние MCP-серверы (autonomous), JSON:" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" Margin="0,12,0,0" TextWrapping="Wrap"/>
+        <TextBlock Text="Внешние MCP-серверы (autonomous и Cursor ACP), JSON:" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" Margin="0,12,0,0" TextWrapping="Wrap"/>
         <TextBox Text="{Binding ExternalMcpServersJson, Mode=TwoWay}"
                  AcceptsReturn="True"
                  TextWrapping="Wrap"

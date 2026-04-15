@@ -56,8 +56,25 @@ public sealed partial class SolutionWorkspaceViewModel : ViewModelBase
         {
             var (root, error) = await Task.Run(() =>
             {
-                var r = Services.SolutionParser.Load(path, out var err);
-                return (r, err);
+                var trimmed = path.Trim();
+                string normalizedProbe;
+                try
+                {
+                    normalizedProbe = Path.GetFullPath(trimmed);
+                }
+                catch
+                {
+                    normalizedProbe = trimmed;
+                }
+
+                if (Directory.Exists(normalizedProbe))
+                {
+                    var r = Services.FolderWorkspaceTreeBuilder.TryBuild(normalizedProbe, out var err);
+                    return (r, err);
+                }
+
+                var sln = Services.SolutionParser.Load(trimmed, out var err2);
+                return (sln, err2);
             }, cancellationToken).ConfigureAwait(false);
 
             if (root is null)

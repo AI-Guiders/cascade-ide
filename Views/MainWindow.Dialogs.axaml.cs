@@ -150,6 +150,54 @@ public partial class MainWindow
         }
     }
 
+    private async Task ShowOpenFolderDialogAsync()
+    {
+        var options = new FolderPickerOpenOptions
+        {
+            Title = "Открыть папку как workspace",
+            AllowMultiple = false
+        };
+        if (DataContext is ViewModels.MainWindowViewModel vmStart && !string.IsNullOrEmpty(vmStart.Workspace.SolutionPath))
+        {
+            var start = DialogStartDirectoryFromWorkspacePath(vmStart.Workspace.SolutionPath);
+            if (!string.IsNullOrEmpty(start))
+            {
+                var folder = await StorageProvider.TryGetFolderFromPathAsync(start).ConfigureAwait(true);
+                if (folder is not null)
+                    options.SuggestedStartLocation = folder;
+            }
+        }
+
+        var folders = await StorageProvider.OpenFolderPickerAsync(options);
+        if (folders.Count == 0 || DataContext is not ViewModels.MainWindowViewModel vm)
+            return;
+        var path = folders[0].TryGetLocalPath() ?? folders[0].Path.LocalPath;
+        if (string.IsNullOrEmpty(path))
+            return;
+        vm.LoadSolution(path);
+    }
+
+    /// <summary>Каталог для старта диалога: рядом с .sln или внутри открытой папки.</summary>
+    private static string? DialogStartDirectoryFromWorkspacePath(string workspacePath)
+    {
+        if (string.IsNullOrWhiteSpace(workspacePath))
+            return null;
+        try
+        {
+            var p = Path.GetFullPath(workspacePath.Trim());
+            if (File.Exists(p))
+                return Path.GetDirectoryName(p);
+            if (Directory.Exists(p))
+                return p;
+        }
+        catch
+        {
+            // ignore
+        }
+
+        return null;
+    }
+
     private async Task ShowOpenFileDialogAsync()
     {
         var options = new FilePickerOpenOptions
@@ -171,7 +219,7 @@ public partial class MainWindow
         };
         if (DataContext is ViewModels.MainWindowViewModel vmStart && !string.IsNullOrEmpty(vmStart.Workspace.SolutionPath))
         {
-            var dir = Path.GetDirectoryName(vmStart.Workspace.SolutionPath);
+            var dir = DialogStartDirectoryFromWorkspacePath(vmStart.Workspace.SolutionPath);
             if (!string.IsNullOrEmpty(dir) && Directory.Exists(dir))
             {
                 var folder = await StorageProvider.TryGetFolderFromPathAsync(dir).ConfigureAwait(true);

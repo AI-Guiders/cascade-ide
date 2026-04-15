@@ -5,12 +5,6 @@ namespace CascadeIDE.ViewModels;
 /// <summary>Реакции на изменение полей настроек и ключей API: диск, автономный агент, панели.</summary>
 public partial class MainWindowViewModel
 {
-    partial void OnIdeMcpServerEnabledChanged(bool value)
-    {
-        _settings.Mcp.StdioServerEnabled = value;
-        SaveSettingsIfChanged();
-    }
-
     partial void OnMarkdownKrokiEnabledChanged(bool value)
     {
         _settings.MarkdownDiagrams.KrokiEnabled = value;
@@ -32,7 +26,15 @@ public partial class MainWindowViewModel
         _mcpClientService = new Services.McpClientService(_settings.Mcp.ExternalServersJson);
         _autonomousAgentService = CreateAutonomousAgentService(_mcpClientService);
         Autonomous.ReplaceAgentService(_autonomousAgentService);
+        ChatPanel.DisposeCursorAcpSession();
 
+        SaveSettingsIfChanged();
+    }
+
+    partial void OnAcpAutoInjectIdeMcpChanged(bool value)
+    {
+        _settings.Mcp.AcpAutoInjectIdeMcp = value;
+        ChatPanel.DisposeCursorAcpSession();
         SaveSettingsIfChanged();
     }
 

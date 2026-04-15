@@ -29,6 +29,8 @@ public interface IIdeMcpActions
     string GetSolutionInfo();
     /// <summary>Список файлов в дереве решения (обозреватель). JSON: file_entries [{ path, title }]. Выполняется в UI-потоке.</summary>
     Task<string> GetSolutionFilesAsync();
+    /// <summary>Поиск текста по корню workspace через внешний <c>rg</c> (ripgrep). JSON: matches [{ path, line_number, line_text }], truncated, error?.</summary>
+    Task<string> SearchWorkspaceTextAsync(string pattern, string? subPath, bool fixedString, string? glob, int maxMatches, string? rgPath);
     /// <summary>Диагностики текущего открытого .cs файла (ошибки/предупреждения Roslyn). JSON: массив { id, message, severity, line, column }. Не-C# — [].</summary>
     Task<string> GetCurrentFileDiagnosticsAsync();
     /// <summary>Семантическая навигация (ADR 0039): режим <c>related</c> — список связанных файлов; <c>subgraph</c> — узлы и рёбра с капами. Без <c>file_path</c> — якорь = текущий файл. Опционально <c>preset</c> (имя из <c>settings.toml</c>), <c>include_kinds</c> / <c>exclude_kinds</c>. JSON.</summary>

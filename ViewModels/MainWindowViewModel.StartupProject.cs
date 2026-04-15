@@ -40,7 +40,7 @@ public partial class MainWindowViewModel
         if (!StartupProjectStore.TryLoad(sln, out var rel) || string.IsNullOrEmpty(rel))
             return;
 
-        var solutionDir = Path.GetDirectoryName(Path.GetFullPath(sln));
+        var solutionDir = Services.BreakpointsFileService.GetWorkspaceRoot(sln);
         if (string.IsNullOrEmpty(solutionDir))
             return;
 
@@ -88,7 +88,7 @@ public partial class MainWindowViewModel
         if (string.IsNullOrEmpty(sln))
             return;
 
-        var solutionDir = Path.GetDirectoryName(Path.GetFullPath(sln));
+        var solutionDir = Services.BreakpointsFileService.GetWorkspaceRoot(sln);
         if (string.IsNullOrEmpty(solutionDir))
             return;
 

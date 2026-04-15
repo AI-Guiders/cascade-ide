@@ -16,6 +16,8 @@ public sealed class SolutionItem
     {
         if (FullPath is null)
             return Children.Count > 0 ? "folder" : "file";
+        if (Directory.Exists(FullPath))
+            return "folder";
         var p = FullPath.AsSpan();
         if (p.EndsWith(".slnx", StringComparison.OrdinalIgnoreCase) || p.EndsWith(".sln", StringComparison.OrdinalIgnoreCase))
             return "solution";
@@ -34,6 +36,10 @@ public sealed class SolutionItem
 
     public static SolutionItem CreateSolution(string title, string slnPath)
         => new(title, slnPath);
+
+    /// <summary>Корень обозревателя при открытии каталога как workspace (без .sln). <see cref="IconKey"/> — папка.</summary>
+    public static SolutionItem CreateFolderWorkspaceRoot(string title, string folderPath)
+        => new(title, folderPath);
 
     public static SolutionItem CreateProject(string title, string projectPath)
         => new(title, projectPath);

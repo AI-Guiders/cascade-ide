@@ -33,6 +33,26 @@ public partial class TerminalPanelViewModel : ViewModelBase
         TerminalOutput = "";
     }
 
+    private static string ResolveTerminalWorkingDirectory(string? solutionPath)
+    {
+        if (string.IsNullOrWhiteSpace(solutionPath))
+            return Environment.CurrentDirectory;
+        try
+        {
+            var p = Path.GetFullPath(solutionPath.Trim());
+            if (File.Exists(p))
+                return Path.GetDirectoryName(p) ?? Environment.CurrentDirectory;
+            if (Directory.Exists(p))
+                return p;
+        }
+        catch
+        {
+            // fall through
+        }
+
+        return Environment.CurrentDirectory;
+    }
+
     public void AppendOutput(string text)
     {
         if (string.IsNullOrEmpty(text))
@@ -49,9 +69,7 @@ public partial class TerminalPanelViewModel : ViewModelBase
             return;
         TerminalInput = "";
         var solutionPath = _getSolutionPath();
-        var workDir = !string.IsNullOrWhiteSpace(solutionPath) && File.Exists(solutionPath)
-            ? Path.GetDirectoryName(solutionPath) ?? Environment.CurrentDirectory
-            : Environment.CurrentDirectory;
+        var workDir = ResolveTerminalWorkingDirectory(solutionPath);
         AppendOutput($"> {cmd}\r\n");
         try
         {

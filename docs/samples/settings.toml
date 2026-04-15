@@ -21,7 +21,8 @@ ai_chat_settings_presentation = "mfd"
 chat_mcp_only = false
 
 [mcp]
-stdio_server_enabled = true
+# Cursor ACP: подмешивать stdio MCP IDE (cascade-ide) в session/new без дублирования в external_servers_json (ADR 0048 §7).
+acp_auto_inject_ide_mcp = true
 external_servers_json = "[]"
 
 [workspace_ui]

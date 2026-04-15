@@ -61,6 +61,7 @@ public partial class MainWindow : Window
             vm.LoadSendMessageKeyFromStorage();
             vm.PropertyChanged += OnViewModelPropertyChanged;
             vm.RequestOpenSolution = () => _ = ShowOpenSolutionDialogAsync();
+            vm.RequestOpenFolder = () => _ = ShowOpenFolderDialogAsync();
             vm.RequestOpenFile = () => _ = ShowOpenFileDialogAsync();
             vm.RequestClose = Close;
             vm.RequestShowAbout = ShowAbout;

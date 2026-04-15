@@ -27,6 +27,33 @@ public partial class MainWindowViewModel
     Task<string> Services.IIdeMcpActions.GetUiModesDiagnosticsAsync() =>
         Task.FromResult(UiModeCatalog.GetDiagnosticsJson());
 
+    async Task<string> Services.IIdeMcpActions.SearchWorkspaceTextAsync(
+        string pattern,
+        string? subPath,
+        bool fixedString,
+        string? glob,
+        int maxMatches,
+        string? rgPath)
+    {
+        var solutionPath = await UiScheduler.Default.InvokeAsync(() => Workspace.SolutionPath ?? "");
+        if (string.IsNullOrWhiteSpace(solutionPath))
+            return JsonSerializer.Serialize(new { error = "No workspace loaded." });
+
+        var root = BreakpointsFileService.GetWorkspaceRoot(solutionPath);
+        if (string.IsNullOrEmpty(root) || !Directory.Exists(root))
+            return JsonSerializer.Serialize(new { error = "Invalid workspace root." });
+
+        return await RipgrepWorkspaceSearchService.SearchAsync(
+            root,
+            pattern,
+            subPath,
+            fixedString,
+            glob,
+            maxMatches,
+            rgPath,
+            CancellationToken.None).ConfigureAwait(false);
+    }
+
     async Task<string> Services.IIdeMcpActions.GetWorkspaceStateAsync()
     {
         var diagnosticsJson = await ((Services.IIdeMcpActions)this).GetCurrentFileDiagnosticsAsync().ConfigureAwait(false);

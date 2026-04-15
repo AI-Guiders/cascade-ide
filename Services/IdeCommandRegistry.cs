@@ -80,6 +80,7 @@ public static partial class IdeCommandRegistry
         var b = ImmutableArray.CreateBuilder<IdeCommandRegistryEntry>();
         RegisterFileMenu(b);
         RegisterView(b);
+        RegisterWorkspaceSearchPalette(b);
         RegisterBuildPalette(b);
         RegisterDebugPalette(b);
         RegisterGitPalette(b);

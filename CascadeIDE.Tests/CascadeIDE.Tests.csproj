@@ -19,6 +19,7 @@
   <ItemGroup>
     <ProjectReference Include="..\CascadeIDE.csproj" />
     <ProjectReference Include="..\CascadeIDE.Contracts\CascadeIDE.Contracts.csproj" />
+    <ProjectReference Include="..\externals\acp-csharp\src\AgentClientProtocol\AgentClientProtocol.csproj" />
   </ItemGroup>
   <!-- Примеры для MarkdownExamplesVerificationTests — рядом с выводом тестов (см. тест). -->
   <ItemGroup>

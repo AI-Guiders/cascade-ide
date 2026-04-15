@@ -42,6 +42,8 @@ public static partial class IdeCommands
     public const string PrepareCommit = "prepare_commit";
     /// <summary>Чат: args: message?:string, role?:string. role assistant — только строка ассистента из MCP; иначе user и отправка; при chat_mcp_only локальный LLM не вызывается. returns: text; example: {"message":"hello"}.</summary>
     public const string SendChat = "send_chat";
+    /// <summary>Новая ветка чата: args: parent_message_id?:string. Пишет thread_forked; следующее user-сообщение может ссылаться на родителя. returns: text; example: {}</summary>
+    public const string ForkChatThread = "fork_chat_thread";
     /// <summary>Скачать модель Ollama (как в настройках). args: model:string; returns: text; example: {"model":"qwen2.5-coder:7b"}.</summary>
     public const string InstallOllamaModel = "install_ollama_model";
 

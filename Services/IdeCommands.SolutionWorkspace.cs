@@ -7,6 +7,8 @@ public static partial class IdeCommands
     public const string GetSolutionInfo = "get_solution_info";
     /// <summary>Список файлов и дерево решения (Solution Explorer). returns: json.</summary>
     public const string GetSolutionFiles = "get_solution_files";
+    /// <summary>Поиск текста по workspace через ripgrep: вызывается команда <c>rg</c> из PATH (Windows/Linux/macOS — поставь пакетом или с релиза). Явный путь: только <c>rg_path</c>. args: pattern:string, subpath?:string, fixed_string?:boolean, glob?:string, max_matches?:integer, rg_path?:string; returns: json; example: {\"pattern\":\"LoadSolution\",\"glob\":\"*.cs\",\"max_matches\":50}.</summary>
+    public const string SearchWorkspaceText = "search_workspace_text";
     /// <summary>Диагностики текущего открытого .cs (ошибки/предупреждения). returns: json.</summary>
     public const string GetCurrentFileDiagnostics = "get_current_file_diagnostics";
     /// <summary>Единая сводка состояния IDE (solution/editor/build/diagnostics...). returns: json.</summary>

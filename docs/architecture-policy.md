@@ -78,6 +78,7 @@
 | Чат агента: persistence через append-only event log (`*.events.ndjson`) + `meta.json`; проекции для UI отдельно | [0045](adr/0045-agent-chat-persistence-event-log-and-projections.md) (Proposed) |
 | Раскладка кабины: `presentation` как инвариант P/F/M; единый `PresentationLayoutAuthority` для меню/MCP/UI-режимов и реактивного слоя | [0046](adr/0046-presentation-layout-authority-and-cockpit-invariants.md) (Proposed) |
 | Инструмент кабины: дескриптор слота композитора (`CockpitInstrumentDescriptor`), не Avalonia-контрол; SE vs Semantic Map как разные `instrument_id` в PFD | [0047](adr/0047-cockpit-instrument-descriptor-and-slot-composition.md) (Accepted) |
+| Чат Cursor ACP в IDE: `mcpServers`, авто IDE MCP; приложения — пробелы тулов, разбор хоста Cursor (`mcp.json`) ↔ `ide_*` | [0048](adr/0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) (Proposed) |
 
 Полный индекс: [docs/adr/README.md](adr/README.md).
 

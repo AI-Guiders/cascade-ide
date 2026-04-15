@@ -63,7 +63,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _csharpLanguageService = new Services.CSharpLanguageService();
         _contextMinimizer = new Services.ContextMinimizer(_csharpLanguageService);
         _aiProviderManager = new Services.AiProviderManager(_contextMinimizer, ResolveProvider);
-        _ideMcpServerEnabled = _settings.Mcp.StdioServerEnabled;
+        _acpAutoInjectIdeMcp = _settings.Mcp.AcpAutoInjectIdeMcp;
         _markdownKrokiEnabled = _settings.MarkdownDiagrams.KrokiEnabled;
         _markdownKrokiBaseUrl = string.IsNullOrWhiteSpace(_settings.MarkdownDiagrams.KrokiBaseUrl)
             ? "https://kroki.io"
@@ -104,6 +104,8 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             () => EditorText,
             GetWorkspacePath,
             () => CursorAcpAgentPath,
+            () => ExternalMcpServersJson,
+            () => AcpAutoInjectIdeMcp,
             appendAcpTerminal: text => UiScheduler.Default.Post(() => TerminalPanel.AppendOutput(text)),
             showAcpTerminal: () => UiScheduler.Default.Post(() =>
             {

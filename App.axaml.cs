@@ -1,8 +1,6 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
-using System.Linq;
 using Avalonia.Markup.Xaml;
 using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Lang;
@@ -32,7 +30,7 @@ public partial class App : Application
             var vm = new MainWindowViewModel();
             vm.IsMcpServerMode = RunMcpStdio;
             desktop.MainWindow = new MainWindow { DataContext = vm };
-            if (RunMcpStdio && Services.SettingsService.Load().Mcp.StdioServerEnabled)
+            if (RunMcpStdio)
                 _ = RunMcpServerAsync(vm);
             _ = vm.RefreshOllamaAsync();
         }
@@ -54,7 +52,7 @@ public partial class App : Application
         }
     }
 
-    private void DisableAvaloniaDataAnnotationValidation()
+    private static void DisableAvaloniaDataAnnotationValidation()
     {
         // Get an array of plugins to remove
         var dataValidationPluginsToRemove =

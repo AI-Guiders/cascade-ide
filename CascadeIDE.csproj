@@ -1,4 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <InternalsVisibleTo Include="CascadeIDE.Tests" />
+  </ItemGroup>
   <PropertyGroup>
     <!-- RS1038/RS1041/RS1036/RS2008: ложные срабатывания на встроенном анализаторе при ссылке на Microsoft.CodeAnalysis.Workspaces в этом же приложении -->
     <NoWarn>$(NoWarn);RS1038;RS1041;RS1036;RS2008</NoWarn>

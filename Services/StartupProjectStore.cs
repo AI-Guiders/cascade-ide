@@ -9,10 +9,10 @@ public static class StartupProjectStore
 
     public static string GetStorePath(string solutionPath)
     {
-        var dir = Path.GetDirectoryName(Path.GetFullPath(solutionPath));
-        if (string.IsNullOrEmpty(dir))
+        var root = BreakpointsFileService.GetWorkspaceRoot(solutionPath);
+        if (string.IsNullOrEmpty(root))
             return "";
-        return Path.Combine(dir, ".cascade-ide", FileName);
+        return Path.Combine(root, ".cascade-ide", FileName);
     }
 
     public static bool TryLoad(string solutionPath, out string? projectPathRelative)

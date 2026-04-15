@@ -18,7 +18,12 @@ public static class ChatReadableExporter
         {
             var m = messages[i];
             var role = (m.Role ?? "unknown").Trim();
-            sb.AppendLine($"## [{i}] **{role}** · `message_id={m.MessageId:N}`");
+            sb.Append($"## [{i}] **{role}** · `message_id={m.MessageId:N}`");
+            if (m.ThreadId != Guid.Empty)
+                sb.Append($" · `thread_id={m.ThreadId:N}`");
+            if (m.ParentMessageId is { } par)
+                sb.Append($" · `parent_message_id={par:N}`");
+            sb.AppendLine();
             sb.AppendLine();
             sb.AppendLine(m.Content ?? "");
             sb.AppendLine();

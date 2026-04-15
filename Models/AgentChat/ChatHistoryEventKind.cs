@@ -10,4 +10,7 @@ public static class ChatHistoryEventKind
     public const string MessageEdited = "message_edited";
     public const string ClarificationBatchOpened = "clarification_batch_opened";
     public const string ClarificationAnswerSubmitted = "clarification_answer_submitted";
+
+    /// <summary>Новая ветка: payload — new_thread_id, previous_thread_id, optional parent_message_id.</summary>
+    public const string ThreadForked = "thread_forked";
 }

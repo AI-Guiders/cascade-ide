@@ -174,16 +174,16 @@ public partial class MainWindowViewModel
     [ObservableProperty]
     private bool _useMinimizedContext = true;
 
-    /// <summary>Включить MCP-сервер при старте с --mcp-stdio (сохраняется в настройках, действует при следующем запуске).</summary>
-    [ObservableProperty]
-    private bool _ideMcpServerEnabled = true;
-
     /// <summary>
     /// JSON-конфиг внешних MCP-серверов (stdio) для автономного режима.
     /// Формат — как в <see cref="McpSettings.ExternalServersJson"/>.
     /// </summary>
     [ObservableProperty]
     private string _externalMcpServersJson = "[]";
+
+    /// <summary>Подмешивать stdio MCP текущей IDE (<c>cascade-ide</c>) в <c>session/new</c> для Cursor ACP (ADR 0048 §7).</summary>
+    [ObservableProperty]
+    private bool _acpAutoInjectIdeMcp = true;
 
     /// <summary>Mermaid/PlantUML в превью Markdown через Kroki (текст диаграммы отправляется на сервер).</summary>
     [ObservableProperty]
