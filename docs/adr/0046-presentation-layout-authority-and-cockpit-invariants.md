@@ -1,4 +1,4 @@
-# ADR 0046: Presentation Layout Authority и инварианты кабины P/F/M
+# ADR 0046: Cockpit CDS — policy раскладки (`CockpitPresentationLayoutPolicy`) и инварианты P/F/M
 
 **Статус:** Proposed  
 **Дата:** 2026-04-14  
@@ -20,8 +20,8 @@
 
 <a id="adr0046-p1"></a>
 
-1. Канон правил размещается в слое CDS: `CockpitPresentationLayoutPolicy`.
-2. Источник правды для правил — разобранный `PresentationParseResult` (первый экран); `PresentationLayoutAuthority` (если используется) — только thin-adapter у границы shell.
+1. Канон правил размещается в слое CDS: `CockpitPresentationLayoutPolicy` (`CascadeIDE.Cockpit.Cds`).
+2. Источник правды для правил — разобранный `PresentationParseResult` (первый экран). Статический `PresentationLayoutAuthority` из `Services/Presentation` **снят**; на границе shell остаётся только тонкая запись intent (частичный `MainWindowViewModel`, методы `Apply*` — семантика «хочу», не дублирование policy).
 3. Для первого экрана действуют инварианты:
    - если есть якорь `P`, нельзя скрыть левую колонку (`IsSolutionExplorerVisible`);
    - если есть якорь `M`, нельзя свернуть правую колонку MFD в ноль (`IsChatPanelExpanded = false`);
@@ -37,7 +37,7 @@
 
 - Поведение UI, MCP и режимов становится детерминированным и согласованным.
 - "Невозможные" состояния не накапливаются: policy возвращает их в валидную область.
-- Любые новые команды, влияющие на P/F/M, обязаны подключаться к authority.
+- Любые новые команды, влияющие на P/F/M, обязаны согласовываться с **той же** coercion policy в CDS и не обходить композитор поверхности.
 
 ## Отклоненные альтернативы
 
