@@ -8,5 +8,6 @@ Roslyn-анализаторы для границ [ADR 0036](../docs/adr/0036-cd
 |----|---------|--------|
 | **CASCOPE001** | Error | В `Cockpit/Channels`, `Cockpit/Cds`, `Cockpit/Composition` запрещены ссылки на типы Avalonia UI (включая `using Avalonia…` и типы в сигнатурах). `Cockpit/Surface` и `Views` не затрагиваются. |
 | **CASCOPE002** | Error | В тех же трёх папках запрещён `using CascadeIDE.Features.UiChrome` (семантика зон для MCP — на границе Surface). |
+| **CASCOPE003** | Error | Прямые присваивания `IsSolutionExplorerVisible` / `IsChatPanelExpanded` (и полям `_is*`) у `MainWindowViewModel` только в белом списке файлов (`PresentationLayoutAuthority`, relay-команды, ctor, `ShellState`, `UiGitWorkspace`); иначе — дрейф от ADR 0046 (используй `Apply*` / relay). |
 
 Расширение правил: новые диагностики в этом проекте, версии `Microsoft.CodeAnalysis.CSharp` держать совместимыми с SDK.

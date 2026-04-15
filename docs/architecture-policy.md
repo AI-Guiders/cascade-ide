@@ -96,7 +96,7 @@
 | [design/vertical-slice-attention-capabilities-v1.md](design/vertical-slice-attention-capabilities-v1.md) | Вертикальный срез: регистрация UI surface + проверка дампа / теста |
 | [design/north-star-cursor-mcp-cascade-workbench-v1.md](design/north-star-cursor-mcp-cascade-workbench-v1.md) | Границы «Cursor + MCP + Cascade»; приоритет **перехода из Cursor**, VS-паритет — долгую; матрица сделано/осталось (черновик) |
 | [design/cds-contract-v0.md](design/cds-contract-v0.md) | CDS в **контрактном** смысле vs `UiLayoutSnapshot`; черновик полей v0 (живой чертёж; [0021 §1.1](adr/0021-pfd-mfd-cockpit-attention-model.md#glossary-cds-contract)) |
-| [CascadeIDE.ArchitectureAnalyzers/README.md](../CascadeIDE.ArchitectureAnalyzers/README.md) | Roslyn: **CASCOPE001**/**CASCOPE002** — слои `Cockpit/Channels`, `Cds`, `Composition` без Avalonia / без `using Features.UiChrome` ([0036](adr/0036-cds-channel-compositor-surface-pipeline.md)) |
+| [CascadeIDE.ArchitectureAnalyzers/README.md](../CascadeIDE.ArchitectureAnalyzers/README.md) | Roslyn: **CASCOPE001**/**CASCOPE002** — слои `Cockpit/Channels`, `Cds`, `Composition` без Avalonia / без `using Features.UiChrome` ([0036](adr/0036-cds-channel-compositor-surface-pipeline.md)); **CASCOPE003** — intent P/M у `MainWindowViewModel` без «тихих» присваиваний вне белого списка ([0046](adr/0046-presentation-layout-authority-and-cockpit-invariants.md)) |
 
 ---
 
@@ -179,4 +179,5 @@
 - **v1.73** — слой **`Cockpit/Composition/HostSurface`**: `MainWindowHostSurfaceFrame` + композитор (shell + `CockpitInstrumentDescriptor`); VM собирает кадр одним вызовом — граница перед Skia в слотах, Avalonia как хост ([cds-contract-v0](design/cds-contract-v0.md) §3, §7).
 - **v1.74** — `Cockpit/Cds/CockpitSurfaceState` (schema `0.3`) получил `instruments` как проекцию HostSurface-кадра для MCP/наблюдаемости; добавлен `Cockpit/Surface/MainWindowInstrumentMountRegistry` (`instrument_id → mount`, хост-слой Avalonia/Skia, без UI Semantic Map на этом шаге).
 - **v1.75** — [0046](adr/0046-presentation-layout-authority-and-cockpit-invariants.md): заголовок, §«Решение» и индексы приведены к канону CDS (`CockpitPresentationLayoutPolicy`); уточнено, что статический слой в `Services/Presentation` снят, на границе VM — только intent `Apply*`.
+- **v1.76** — Roslyn **CASCOPE003** ([`CascadeIDE.ArchitectureAnalyzers`](../CascadeIDE.ArchitectureAnalyzers/README.md)): запрет прямых присваиваний intent P/M вне белого списка файлов; см. [0046](adr/0046-presentation-layout-authority-and-cockpit-invariants.md).
 - Изменения направления — отдельным коммитом: обновление этого файла и при необходимости новый ADR в [docs/adr/README.md](adr/README.md).

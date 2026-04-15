@@ -31,14 +31,14 @@ public partial class MainWindowViewModel
 
     void IAutonomousAgentSessionHost.OpenChatForAgentFallback(string chatInput)
     {
-        IsChatPanelExpanded = true;
+        ApplyChatPanelExpanded(true);
         ChatPanel.ChatInput = chatInput;
     }
 
     [RelayCommand]
     private void ExplainCurrentStep()
     {
-        IsChatPanelExpanded = true;
+        ApplyChatPanelExpanded(true);
         ChatPanel.ChatInput = "Explain the current autonomous step in plain language: intent, tool call, risk, and rollback.";
     }
 
@@ -47,7 +47,7 @@ public partial class MainWindowViewModel
     {
         if (step is null)
             return;
-        IsChatPanelExpanded = true;
+        ApplyChatPanelExpanded(true);
         ChatPanel.ChatInput =
             $"Объясни шаг трассы [{step.Kind} / {step.Status}] ({step.TimestampText}): {step.Text}. Укажи намерение, риск и откат.";
     }
@@ -58,7 +58,7 @@ public partial class MainWindowViewModel
         if (step is null)
             return;
         InstrumentationPanel.EventTimeline.Insert(0, $"{DateTime.Now:HH:mm:ss} — Запрошен откат для шага [{step.Kind}]");
-        IsChatPanelExpanded = true;
+        ApplyChatPanelExpanded(true);
         ChatPanel.ChatInput =
             $"Предложи минимальный откат для шага [{step.Kind}] ({step.TimestampText}): {step.Text}. Проверь состояние workspace.";
     }
@@ -107,7 +107,7 @@ public partial class MainWindowViewModel
     private void FocusRollback()
     {
         InstrumentationPanel.EventTimeline.Insert(0, $"{DateTime.Now:HH:mm:ss} — Запрошен откат");
-        IsChatPanelExpanded = true;
+        ApplyChatPanelExpanded(true);
         ChatPanel.ChatInput = "Помоги безопасно откатить последние изменения (git или патчи). Оцени риск и предложи минимальный набор команд.";
     }
 

@@ -15,7 +15,7 @@ public partial class MainWindowViewModel
     [RelayCommand]
     private void ToggleChatPanel()
     {
-        IsChatPanelExpanded = !IsChatPanelExpanded;
+        ApplyChatPanelExpanded(!IsChatPanelExpanded);
     }
 
     [RelayCommand(CanExecute = nameof(CanBuildSolution))]
