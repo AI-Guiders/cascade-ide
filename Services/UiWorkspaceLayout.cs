@@ -10,8 +10,8 @@ namespace CascadeIDE.Services;
 /// </summary>
 public static class UiWorkspaceLayout
 {
-    /// <summary>Колонка 0 MainGrid: ширина в px (0 — скрыть дерево).</summary>
-    public static void ApplySolutionExplorerColumnWidth(Grid mainGrid, double widthPixels)
+    /// <summary>Колонка 0 MainGrid: ширина региона Pfd в px (0 — свернуть).</summary>
+    public static void ApplyPfdRegionColumnWidth(Grid mainGrid, double widthPixels)
     {
         if (mainGrid.ColumnDefinitions.Count <= 0)
             return;
@@ -19,16 +19,16 @@ public static class UiWorkspaceLayout
         mainGrid.ColumnDefinitions[0].Width = new GridLength(w);
     }
 
-    /// <summary>Дерево решения: видимая ширина по умолчанию или 0.</summary>
-    public static void ApplySolutionExplorerVisible(Grid mainGrid, bool visible) =>
-        ApplySolutionExplorerColumnWidth(
+    /// <summary>Регион Pfd: видимая ширина по умолчанию или 0.</summary>
+    public static void ApplyPfdRegionExpanded(Grid mainGrid, bool visible) =>
+        ApplyPfdRegionColumnWidth(
             mainGrid,
-            visible ? UiWorkspaceLayoutRuntimeMetrics.SolutionExplorerDefaultWidthPixels : 0);
+            visible ? UiWorkspaceLayoutRuntimeMetrics.PfdRegionDefaultWidthPixels : 0);
 
-    /// <summary>Колонки 3–4 MainGrid и нижней строки Workspace Health: чат и сплиттер перед ним.</summary>
-    public static void ApplyChatPanelColumns(Grid mainGrid, Grid? workspaceHealthColumnsGrid, double chatWidthPixels)
+    /// <summary>Колонки 3–4 MainGrid и нижней строки Workspace Health: регион Mfd и сплиттер перед ним.</summary>
+    public static void ApplyMfdRegionColumns(Grid mainGrid, Grid? workspaceHealthColumnsGrid, double mfdRegionWidthPixels)
     {
-        var w = Math.Max(0, chatWidthPixels);
+        var w = Math.Max(0, mfdRegionWidthPixels);
         var splitter = w > 0 ? UiWorkspaceLayoutRuntimeMetrics.MainGridColumnSplitterWidthPixels : 0;
 
         if (mainGrid.ColumnDefinitions.Count > 4)
@@ -44,13 +44,13 @@ public static class UiWorkspaceLayout
         }
     }
 
-    /// <summary>Найти MainGrid и WorkspaceHealthColumnsGrid по корню окна и применить ширину чата.</summary>
-    public static bool TryApplyChatPanelColumnsFromRoot(Visual root, double chatWidthPixels)
+    /// <summary>Найти MainGrid и WorkspaceHealthColumnsGrid по корню окна и применить ширину региона Mfd.</summary>
+    public static bool TryApplyMfdRegionColumnsFromRoot(Visual root, double mfdRegionWidthPixels)
     {
         if (UiControlAppearance.FindControlByName(root, "MainGrid") is not Grid main || main.ColumnDefinitions.Count <= 4)
             return false;
         var inner = UiControlAppearance.FindControlByName(root, "WorkspaceHealthColumnsGrid") as Grid;
-        ApplyChatPanelColumns(main, inner, chatWidthPixels);
+        ApplyMfdRegionColumns(main, inner, mfdRegionWidthPixels);
         return true;
     }
 

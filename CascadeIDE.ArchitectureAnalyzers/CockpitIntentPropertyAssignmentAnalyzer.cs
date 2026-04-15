@@ -21,7 +21,7 @@ public sealed class CockpitIntentPropertyAssignmentAnalyzer : DiagnosticAnalyzer
     private static readonly DiagnosticDescriptor Rule = new(
         DiagnosticId,
         "Intent раскладки кабины: присваивание вне белого списка",
-        "Прямое присваивание '{0}' вне разрешённых файлов; используйте ApplySolutionExplorerVisible / ApplyChatPanelExpanded, relay-команды или слой UI-режима (см. ADR 0046, CockpitPresentationLayoutPolicy).",
+        "Прямое присваивание '{0}' вне разрешённых файлов; используйте ApplyPfdRegionExpanded / ApplyMfdRegionExpanded, relay-команды или слой UI-режима (см. ADR 0046, CockpitPresentationLayoutPolicy).",
         "Architecture",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true,
@@ -80,8 +80,8 @@ public sealed class CockpitIntentPropertyAssignmentAnalyzer : DiagnosticAnalyzer
 
             return symbol.Name switch
             {
-                "IsSolutionExplorerVisible" or "IsChatPanelExpanded" => true,
-                "_isSolutionExplorerVisible" or "_isChatPanelExpanded" => true,
+                "IsPfdRegionExpanded" or "IsMfdRegionExpanded" => true,
+                "_isPfdRegionExpanded" or "_isMfdRegionExpanded" => true,
                 _ => false,
             };
         }

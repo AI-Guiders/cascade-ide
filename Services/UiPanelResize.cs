@@ -10,7 +10,7 @@ namespace CascadeIDE.Services;
 /// </summary>
 public static class UiPanelResize
 {
-    /// <summary>Панели: solution_explorer, chat — width (px); build_output, terminal — height (px).</summary>
+    /// <summary>Панели: pfd_region, mfd_region — width (px); build_output, terminal — height (px).</summary>
     public static string Resize(Visual root, string panel, double? width, double? height)
     {
         var mainGrid = UiControlAppearance.FindControlByName(root, "MainGrid") as Grid;
@@ -19,16 +19,16 @@ public static class UiPanelResize
 
         switch (panel.Trim().ToLowerInvariant())
         {
-            case "solution_explorer":
+            case "pfd_region":
                 if (width is not { } w0)
-                    return "solution_explorer requires width (pixels).";
+                    return "pfd_region requires width (pixels).";
                 if (mainGrid.ColumnDefinitions.Count <= 0) return "Invalid grid.";
-                UiWorkspaceLayout.ApplySolutionExplorerColumnWidth(mainGrid, w0);
+                UiWorkspaceLayout.ApplyPfdRegionColumnWidth(mainGrid, w0);
                 return "OK";
-            case "chat":
+            case "mfd_region":
                 if (width is not { } w4)
-                    return "chat requires width (pixels).";
-                if (!UiWorkspaceLayout.TryApplyChatPanelColumnsFromRoot(root, w4))
+                    return "mfd_region requires width (pixels).";
+                if (!UiWorkspaceLayout.TryApplyMfdRegionColumnsFromRoot(root, w4))
                     return "Invalid grid.";
                 return "OK";
             case "terminal":
@@ -46,7 +46,7 @@ public static class UiPanelResize
                 UiWorkspaceLayout.ApplyBuildOutputRowHeight(editorGrid, bh);
                 return "OK";
             default:
-                return $"Unknown panel: {panel}. Use: solution_explorer, chat, build_output, terminal.";
+                return $"Unknown panel: {panel}. Use: pfd_region, mfd_region, build_output, terminal.";
         }
     }
 }

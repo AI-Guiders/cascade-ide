@@ -14,13 +14,13 @@ public static class UiWorkspaceTomlMerger
 
         return new UiWorkspaceToml
         {
-            SolutionExplorerDefaultWidthPixels = higher?.SolutionExplorerDefaultWidthPixels ?? lower?.SolutionExplorerDefaultWidthPixels,
+            PfdRegionDefaultWidthPixels = higher?.PfdRegionDefaultWidthPixels ?? lower?.PfdRegionDefaultWidthPixels,
             MainGridColumnSplitterWidthPixels = higher?.MainGridColumnSplitterWidthPixels ?? lower?.MainGridColumnSplitterWidthPixels,
             BottomPanelMinRowPixels = higher?.BottomPanelMinRowPixels ?? lower?.BottomPanelMinRowPixels,
-            ChatPanelCollapsedWidthPixels = higher?.ChatPanelCollapsedWidthPixels ?? lower?.ChatPanelCollapsedWidthPixels,
-            ChatPanelExpandedDefaultWidthPixels = higher?.ChatPanelExpandedDefaultWidthPixels ?? lower?.ChatPanelExpandedDefaultWidthPixels,
-            ChatPanelExpandedPowerWidthPixels = higher?.ChatPanelExpandedPowerWidthPixels ?? lower?.ChatPanelExpandedPowerWidthPixels,
-            ChatPanelExpandedAgentChatWidthPixels = higher?.ChatPanelExpandedAgentChatWidthPixels ?? lower?.ChatPanelExpandedAgentChatWidthPixels,
+            MfdRegionCollapsedWidthPixels = higher?.MfdRegionCollapsedWidthPixels ?? lower?.MfdRegionCollapsedWidthPixels,
+            MfdRegionExpandedDefaultWidthPixels = higher?.MfdRegionExpandedDefaultWidthPixels ?? lower?.MfdRegionExpandedDefaultWidthPixels,
+            MfdRegionExpandedPowerWidthPixels = higher?.MfdRegionExpandedPowerWidthPixels ?? lower?.MfdRegionExpandedPowerWidthPixels,
+            MfdRegionExpandedAgentChatWidthPixels = higher?.MfdRegionExpandedAgentChatWidthPixels ?? lower?.MfdRegionExpandedAgentChatWidthPixels,
             MarkdownPreviewPlacement = higher?.MarkdownPreviewPlacement ?? lower?.MarkdownPreviewPlacement,
             AttentionZonePanels = MergeAttentionPanels(lower?.AttentionZonePanels, higher?.AttentionZonePanels)
         };

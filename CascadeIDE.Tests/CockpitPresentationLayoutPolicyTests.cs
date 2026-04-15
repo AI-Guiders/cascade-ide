@@ -20,7 +20,7 @@ public sealed class CockpitPresentationLayoutPolicyTests
     {
         var r = PresentationParser.Parse("(P+F) (M)", DefaultGrammar());
         Assert.True(r.IsSuccess);
-        Assert.True(CockpitPresentationLayoutPolicy.RequiresVisiblePfdColumn(r));
+        Assert.True(CockpitPresentationLayoutPolicy.RequiresPfdRegionInMainWindow(r));
     }
 
     [Fact]
@@ -28,7 +28,7 @@ public sealed class CockpitPresentationLayoutPolicyTests
     {
         var r = PresentationParser.Parse("(0.2P+0.3F+0.5M)", DefaultGrammar());
         Assert.True(r.IsSuccess);
-        Assert.True(CockpitPresentationLayoutPolicy.RequiresExpandedChatColumnForMainWindow(r));
+        Assert.True(CockpitPresentationLayoutPolicy.RequiresMfdRegionInMainWindow(r));
     }
 
     [Fact]
@@ -36,28 +36,28 @@ public sealed class CockpitPresentationLayoutPolicyTests
     {
         var r = PresentationParser.Parse("(P+F) (M)", DefaultGrammar());
         Assert.True(r.IsSuccess);
-        Assert.False(CockpitPresentationLayoutPolicy.RequiresExpandedChatColumnForMainWindow(r));
+        Assert.False(CockpitPresentationLayoutPolicy.RequiresMfdRegionInMainWindow(r));
     }
 
     [Fact]
-    public void CoerceSolutionExplorer_FalseWhenPfdRequired_BecomesTrue()
+    public void CoercePfdRegion_FalseWhenPfdRequired_BecomesTrue()
     {
         var r = PresentationParser.Parse("(P+F) (M)", DefaultGrammar());
-        Assert.True(CockpitPresentationLayoutPolicy.CoerceSolutionExplorerVisible(r, false));
+        Assert.True(CockpitPresentationLayoutPolicy.CoercePfdRegionExpanded(r, false));
     }
 
     [Fact]
-    public void CoerceChat_FalseWhenMOnFirstScreen_BecomesTrue()
+    public void CoerceMfdRegion_FalseWhenMOnFirstScreen_BecomesTrue()
     {
         var r = PresentationParser.Parse("(P+F+M)", DefaultGrammar());
         Assert.True(r.IsSuccess);
-        Assert.True(CockpitPresentationLayoutPolicy.CoerceChatPanelExpanded(r, false));
+        Assert.True(CockpitPresentationLayoutPolicy.CoerceMfdRegionExpanded(r, false));
     }
 
     [Fact]
-    public void CoerceChat_FalseWhenNoMOnFirstScreen_Unchanged()
+    public void CoerceMfdRegion_FalseWhenNoMOnFirstScreen_Unchanged()
     {
         var r = PresentationParser.Parse("(P+F) (M)", DefaultGrammar());
-        Assert.False(CockpitPresentationLayoutPolicy.CoerceChatPanelExpanded(r, false));
+        Assert.False(CockpitPresentationLayoutPolicy.CoerceMfdRegionExpanded(r, false));
     }
 }

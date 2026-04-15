@@ -11,7 +11,7 @@ public sealed class MainWindowHostSurfaceCompositorTests
         PresentationGrammarTokens.FromSettings("()", " ", "+", "P", "F", "M");
 
     [Fact]
-    public void WhenPfdColumnVisible_IncludesPlacedInstrumentsForPfdSlot()
+    public void WhenPfdColumnVisible_IncludesSolutionExplorerInstrumentInPfdSlot()
     {
         var parse = PresentationParser.Parse("(P+F) (M)", DefaultGrammar());
         Assert.True(parse.IsSuccess);
@@ -19,20 +19,17 @@ public sealed class MainWindowHostSurfaceCompositorTests
         var frame = MainWindowHostSurfaceCompositor.ComposeFrame(
             new MainWindowShellSurfaceCompositionInput(
                 parse,
-                IntentSolutionExplorerVisible: true,
-                IntentChatPanelExpanded: false,
+                IntentPfdRegionExpanded: true,
+                IntentMfdRegionExpanded: false,
                 SuppressMfdColumnForMfdHostWindow: false,
                 ExpandedMfdWidthPixels: 300,
                 CollapsedMfdWidthPixels: 12,
                 SafetyLevel: "L2"));
 
         Assert.True(frame.Shell.PfdSurfaceVisible);
-        Assert.Contains(
-            frame.Instruments,
-            x => x.InstrumentId == CockpitStandardInstrumentIds.SolutionExplorerTree && x.SlotId == CockpitSlotIds.Pfd);
-        Assert.Contains(
-            frame.Instruments,
-            x => x.InstrumentId == CockpitStandardInstrumentIds.WorkspaceHealthStatusV1 && x.SlotId == CockpitSlotIds.Pfd);
+        Assert.Single(frame.Instruments);
+        Assert.Equal(CockpitStandardInstrumentIds.SolutionExplorerTree, frame.Instruments[0].InstrumentId);
+        Assert.Equal(CockpitSlotIds.Pfd, frame.Instruments[0].SlotId);
     }
 
     [Fact]
@@ -44,8 +41,8 @@ public sealed class MainWindowHostSurfaceCompositorTests
         var frame = MainWindowHostSurfaceCompositor.ComposeFrame(
             new MainWindowShellSurfaceCompositionInput(
                 parse,
-                IntentSolutionExplorerVisible: false,
-                IntentChatPanelExpanded: false,
+                IntentPfdRegionExpanded: false,
+                IntentMfdRegionExpanded: false,
                 SuppressMfdColumnForMfdHostWindow: false,
                 ExpandedMfdWidthPixels: 300,
                 CollapsedMfdWidthPixels: 12,
@@ -53,27 +50,5 @@ public sealed class MainWindowHostSurfaceCompositorTests
 
         Assert.False(frame.Shell.PfdSurfaceVisible);
         Assert.Empty(frame.Instruments);
-    }
-
-    [Fact]
-    public void WhenMfdColumnVisible_IncludesWorkspaceHealthInstrumentInMfdSlot()
-    {
-        var parse = PresentationParser.Parse("(P+F+M)", DefaultGrammar());
-        Assert.True(parse.IsSuccess);
-
-        var frame = MainWindowHostSurfaceCompositor.ComposeFrame(
-            new MainWindowShellSurfaceCompositionInput(
-                parse,
-                IntentSolutionExplorerVisible: true,
-                IntentChatPanelExpanded: false,
-                SuppressMfdColumnForMfdHostWindow: false,
-                ExpandedMfdWidthPixels: 300,
-                CollapsedMfdWidthPixels: 12,
-                SafetyLevel: "L2"));
-
-        Assert.True(frame.Shell.MfdColumnVisibleInMainGrid);
-        Assert.Contains(
-            frame.Instruments,
-            x => x.InstrumentId == CockpitStandardInstrumentIds.WorkspaceHealthStatusV1 && x.SlotId == CockpitSlotIds.Mfd);
     }
 }

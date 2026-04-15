@@ -11,8 +11,8 @@ public static partial class IdeCommands
     public const string ToggleTerminal = "toggle_terminal";
     /// <summary>Как меню «Вид → Вывод сборки». returns: text.</summary>
     public const string ToggleBuildOutput = "toggle_build_output";
-    /// <summary>Как меню «Вид → Обозреватель решения». returns: text.</summary>
-    public const string ToggleSolutionExplorer = "toggle_solution_explorer";
+    /// <summary>Переключить развёрнут/свёрнут регион Pfd (как меню «Вид → Обозреватель решения»). returns: text.</summary>
+    public const string TogglePfdRegionExpanded = "toggle_pfd_region_expanded";
     /// <summary>Явно показать/скрыть терминал (без переключения). args: visible:boolean; returns: text; example: {"visible":true}.</summary>
     public const string SetTerminalVisible = "set_terminal_visible";
     /// <summary>Явно показать/скрыть журнал сборки. args: visible:boolean; returns: text; example: {"visible":true}.</summary>

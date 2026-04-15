@@ -44,7 +44,7 @@ public sealed partial class CascadeIdeSettings
             },
             WorkspaceUi = new WorkspaceUiSettings
             {
-                ShowSolutionExplorer = WorkspaceUi.ShowSolutionExplorer,
+                PfdRegionExpanded = WorkspaceUi.PfdRegionExpanded,
                 ShowTerminal = WorkspaceUi.ShowTerminal,
                 ShowGit = WorkspaceUi.ShowGit,
                 ShowInstrumentation = WorkspaceUi.ShowInstrumentation,
@@ -149,7 +149,7 @@ public sealed partial class CascadeIdeSettings
     {
         if (a is null || b is null)
             return a == b;
-        return a.ShowSolutionExplorer == b.ShowSolutionExplorer
+        return a.PfdRegionExpanded == b.PfdRegionExpanded
             && a.ShowTerminal == b.ShowTerminal
             && a.ShowGit == b.ShowGit
             && a.ShowInstrumentation == b.ShowInstrumentation

@@ -52,7 +52,7 @@ public partial class MainWindowViewModel
         }
 
         // Зона Mfd (или окно-хост Mfd на втором экране, ADR 0017): страница параметров AI.
-        IsChatPanelExpanded = true;
+        IsMfdRegionExpanded = true;
         TryNavigateToSecondaryShellPage(SecondaryShellPage.AiChatSettings);
     }
 
@@ -132,9 +132,9 @@ public partial class MainWindowViewModel
     }
 
     [RelayCommand]
-    private void ToggleSolutionExplorer()
+    private void TogglePfdRegionExpanded()
     {
-        IsSolutionExplorerVisible = !IsSolutionExplorerVisible;
+        IsPfdRegionExpanded = !IsPfdRegionExpanded;
     }
 
     [RelayCommand]
@@ -231,7 +231,7 @@ public partial class MainWindowViewModel
     private bool CanReopenClosedDocument() => Documents.CanReopenClosedDocument();
 
     [RelayCommand]
-    private void ShowSolutionExplorerPanel() => ApplySolutionExplorerVisible(true);
+    private void ShowPfdRegionPanel() => ApplyPfdRegionExpanded(true);
 
     [RelayCommand]
     private void ShowBuildOutputPanel()
@@ -241,9 +241,9 @@ public partial class MainWindowViewModel
     }
 
     [RelayCommand]
-    private void ShowChatPanel()
+    private void ShowChatPage()
     {
-        IsChatPanelExpanded = true;
+        IsMfdRegionExpanded = true;
         TryNavigateToSecondaryShellPage(SecondaryShellPage.Chat);
     }
 

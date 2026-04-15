@@ -14,10 +14,10 @@ public static partial class IdeCommands
     public const string ExitApplication = "exit_application";
 
     // ——— Вид: панели (явная установка + переключатели)
-    /// <summary>Показать/скрыть обозреватель решения. args: visible:boolean; returns: text; example: {"visible":true}.</summary>
-    public const string SetSolutionExplorerVisible = "set_solution_explorer_visible";
-    /// <summary>Развернуть/свернуть чат-панель. args: visible:boolean; returns: text; example: {"visible":true}.</summary>
-    public const string SetChatPanelExpanded = "set_chat_panel_expanded";
+    /// <summary>Развернуть/свернуть регион Pfd в main grid (дерево решения в зоне Pfd). args: visible:boolean; returns: text; example: {"visible":true}.</summary>
+    public const string SetPfdRegionExpanded = "set_pfd_region_expanded";
+    /// <summary>Развернуть/свернуть регион Mfd в main grid. args: visible:boolean; returns: text; example: {"visible":true}.</summary>
+    public const string SetMfdRegionExpanded = "set_mfd_region_expanded";
     /// <summary>Показать/скрыть панель Git (нижняя вкладка). args: visible:boolean; returns: text; example: {"visible":true}.</summary>
     public const string SetGitPanelVisible = "set_git_panel_visible";
     /// <summary>Показать/скрыть док инструментирования (Events/Tests/Debug). args: visible:boolean; returns: text; example: {"visible":true}.</summary>
@@ -26,8 +26,8 @@ public static partial class IdeCommands
     public const string ToggleGitPanel = "toggle_git_panel";
     /// <summary>Переключить видимость дока инструментирования (toggle). returns: text.</summary>
     public const string ToggleInstrumentationDock = "toggle_instrumentation_dock";
-    /// <summary>Переключить сворачивание чата (toggle). returns: text.</summary>
-    public const string ToggleChatPanel = "toggle_chat_panel";
+    /// <summary>Переключить развёрнут/свёрнут регион Mfd (toggle). returns: text.</summary>
+    public const string ToggleMfdRegionExpanded = "toggle_mfd_region_expanded";
 
     // ——— Вид: режим (дублируют хоткеи Alt+1/2/3, Ctrl+Alt+M)
     /// <summary>Установить Focus UI mode (hotkey). returns: text.</summary>
@@ -42,10 +42,10 @@ public static partial class IdeCommands
     /// <summary>Открыть или закрыть палитру команд (как Ctrl+Q / пункт меню «Вид»). returns: text.</summary>
     public const string ToggleCommandPalette = "toggle_command_palette";
 
-    /// <summary>Показать полноэкранную страницу «готовность окружения» в регионе MFD (оверлей нижней панели; ADR 0023). returns: text.</summary>
+    /// <summary>Показать страницу «готовность окружения» во вторичном контуре (зона Mfd; ADR 0023). Разворачивает регион Mfd при необходимости. returns: text.</summary>
     public const string ShowEnvironmentReadinessPage = "show_environment_readiness_page";
 
-    /// <summary>Скрыть страницу «готовность окружения» и вернуться к нижней панели MFD. returns: text.</summary>
+    /// <summary>Перейти с страницы «готовность окружения» на первую другую разрешённую страницу вторичного контура. returns: text.</summary>
     public const string CloseEnvironmentReadinessPage = "close_environment_readiness_page";
 
     /// <summary>Активная страница вторичного контура оболочки: имя значения SecondaryShellPage (Chat, Terminal, …). Якорь на экране — пресет (v1 — колонка зоны Mfd). args: page:string; returns: text; example: {"page":"Chat"}.</summary>
@@ -83,12 +83,12 @@ public static partial class IdeCommands
     public const string About = "about";
 
     // ——— Тулбар: показать панели / скрыть вывод сборки
-    /// <summary>Явно показать обозреватель решения (toolbar). returns: text.</summary>
-    public const string ShowSolutionExplorerPanel = "show_solution_explorer_panel";
+    /// <summary>Развернуть регион Pfd (toolbar). returns: text.</summary>
+    public const string ShowPfdRegionPanel = "show_pfd_region_panel";
     /// <summary>Явно показать панель вывода сборки (toolbar). returns: text.</summary>
     public const string ShowBuildOutputPanel = "show_build_output_panel";
-    /// <summary>Явно показать чат-панель (toolbar). returns: text.</summary>
-    public const string ShowChatPanel = "show_chat_panel";
+    /// <summary>Развернуть регион Mfd и перейти на страницу Chat (toolbar). returns: text.</summary>
+    public const string ShowChatPage = "show_chat_page";
     /// <summary>Явно показать терминал (toolbar). returns: text.</summary>
     public const string ShowTerminalPanel = "show_terminal_panel";
     /// <summary>Скрыть панель вывода сборки (toolbar). returns: text.</summary>

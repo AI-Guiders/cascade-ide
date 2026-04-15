@@ -4,10 +4,13 @@ namespace CascadeIDE.ViewModels;
 public partial class MainWindowViewModel
 {
     /// <summary>Предпочтение контента зоны PFD (не surface visibility).</summary>
-    public void ApplySolutionExplorerVisible(bool desired) =>
-        IsSolutionExplorerVisible = desired;
+    public void ApplyPfdRegionExpanded(bool desired) =>
+        IsPfdRegionExpanded = desired;
 
-    /// <summary>Предпочтение контента зоны MFD (не surface visibility).</summary>
-    public void ApplyChatPanelExpanded(bool desired) =>
-        IsChatPanelExpanded = desired;
+    /// <summary>
+    /// Intent ширины региона Mfd в <c>MainGrid</c> (развёрнут/свёрнут в смысле геометрии раскладки).
+    /// Страница «Чат» — <see cref="Models.SecondaryShellPage.Chat"/> через <see cref="MainWindowViewModel.CurrentSecondaryShellPage"/>, отдельно.
+    /// </summary>
+    public void ApplyMfdRegionExpanded(bool desired) =>
+        IsMfdRegionExpanded = desired;
 }

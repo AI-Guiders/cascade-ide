@@ -77,8 +77,8 @@ public partial class MainWindowViewModel
         OnPropertyChanged(nameof(IsMfdHostWindowShellOpen));
         OnPropertyChanged(nameof(IsMfdColumnVisible));
         OnPropertyChanged(nameof(IsSkiaZonePreviewMfdVisible));
-        OnPropertyChanged(nameof(ChatPanelColumnPixelWidth));
-        OnPropertyChanged(nameof(IsChatPanelColumnVisible));
+        OnPropertyChanged(nameof(MfdRegionPixelWidth));
+        OnPropertyChanged(nameof(IsMfdRegionVisible));
         OnPropertyChanged(nameof(ActiveAttentionLayoutSurface));
         OnPropertyChanged(nameof(MainGridColumnDefinitions));
         OnPropertyChanged(nameof(IsPfdWorkspaceHealthMountVisible));

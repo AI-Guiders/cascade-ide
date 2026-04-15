@@ -63,7 +63,7 @@
 | `ide_send_keys` | Отправить сочетание клавиш в эффективный контрол (под курсором или по name). keys — текст: Ctrl+Enter, Alt+F4 | `keys`; опционально `name` |
 | `ide_set_focus` | Передать фокус на эффективный контрол (по имени или под курсором); далее клавиши идут в него | опционально `name` |
 | `ide_highlight_control` | Подсветить эффективный контрол рамкой (как в Comet), чтобы пользователь видел, где агент | опционально `name` |
-| `ide_set_panel_size` | Изменить размер панели: solution_explorer/chat — width (px); build_output/terminal — height (px) | `panel`; опционально `width`, `height` |
+| `ide_set_panel_size` | Изменить размер панели: pfd_region/mfd_region — width (px); build_output/terminal — height (px) | `panel`; опционально `width`, `height` |
 | `ide_add_control` | **(Только Debug)** Добавить контрол в конец панели: Button, TextBlock или Border. parent_name, control_type, content, опционально name | `parent_name`, `control_type`; опционально `content`, `name` |
 | `ide_set_breakpoint` | Поставить брейкпоинт | `file_path`, `line` (1-based), опционально `condition` |
 | `ide_remove_breakpoint` | Снять брейкпоинт | `file_path`, `line` (1-based) |
@@ -127,11 +127,12 @@
 
 | command_id | Описание |
 |-----------:|----------|
-| `set_chat_panel_expanded` | Развернуть/свернуть чат-панель. args: visible:boolean; returns: text; example: {"visible":true}. |
+| `set_pfd_region_expanded` | Развернуть/свернуть регион Pfd в main grid (дерево решения в зоне Pfd). args: visible:boolean; returns: text; example: {"visible":true}. |
+| `set_mfd_region_expanded` | Развернуть/свернуть регион Mfd в main grid. args: visible:boolean; returns: text; example: {"visible":true}. |
 | `set_git_panel_visible` | Показать/скрыть панель Git (нижняя вкладка). args: visible:boolean; returns: text; example: {"visible":true}. |
 | `set_instrumentation_dock_visible` | Показать/скрыть док инструментирования (Events/Tests/Debug). args: visible:boolean; returns: text; example: {"visible":true}. |
-| `set_solution_explorer_visible` | Показать/скрыть обозреватель решения. args: visible:boolean; returns: text; example: {"visible":true}. |
-| `toggle_chat_panel` | Переключить сворачивание чата (toggle). returns: text. |
+| `toggle_pfd_region_expanded` | Переключить развёрнут/свёрнут регион Pfd (toggle). returns: text. |
+| `toggle_mfd_region_expanded` | Переключить развёрнут/свёрнут регион Mfd (toggle). returns: text. |
 | `toggle_git_panel` | Переключить видимость панели Git (toggle). returns: text. |
 | `toggle_instrumentation_dock` | Переключить видимость дока инструментирования (toggle). returns: text. |
 
@@ -139,13 +140,13 @@
 
 | command_id | Описание |
 |-----------:|----------|
-| `close_environment_readiness_page` | Скрыть страницу «готовность окружения» и вернуться к нижней панели MFD. returns: text. |
+| `close_environment_readiness_page` | Перейти с страницы «готовность окружения» на первую другую разрешённую страницу вторичного контура. returns: text. |
 | `cycle_ui_mode` | Циклически переключить UI mode (hotkey). returns: text. |
 | `set_balanced_mode` | Установить Balanced UI mode (hotkey). returns: text. |
 | `set_focus_mode` | Установить Focus UI mode (hotkey). returns: text. |
 | `set_power_mode` | Установить Power UI mode (hotkey). returns: text. |
 | `set_secondary_shell_page` | Активная страница вторичного контура оболочки: имя значения SecondaryShellPage (Chat, Terminal, …). Якорь на экране — пресет (v1 — колонка зоны Mfd). args: page:string; returns: text; example: {"page":"Chat"}. |
-| `show_environment_readiness_page` | Показать полноэкранную страницу «готовность окружения» в регионе MFD (оверлей нижней панели; ADR 0023). returns: text. |
+| `show_environment_readiness_page` | Показать страницу «готовность окружения» во вторичном контуре (зона Mfd; ADR 0023). Разворачивает регион Mfd при необходимости. returns: text. |
 | `toggle_command_palette` | Открыть или закрыть палитру команд (как Ctrl+Q / пункт меню «Вид»). returns: text. |
 
 ### Вид: тема
@@ -181,8 +182,8 @@
 |-----------:|----------|
 | `hide_build_output_panel` | Скрыть панель вывода сборки (toolbar). returns: text. |
 | `show_build_output_panel` | Явно показать панель вывода сборки (toolbar). returns: text. |
-| `show_chat_panel` | Явно показать чат-панель (toolbar). returns: text. |
-| `show_solution_explorer_panel` | Явно показать обозреватель решения (toolbar). returns: text. |
+| `show_chat_page` | Развернуть регион Mfd и перейти на страницу Chat (toolbar). returns: text. |
+| `show_pfd_region_panel` | Развернуть регион Pfd (toolbar). returns: text. |
 | `show_terminal_panel` | Явно показать терминал (toolbar). returns: text. |
 
 ### Тулбар: группы редакторов
@@ -316,7 +317,6 @@
 | `set_ui_mode` | Режим UI (как меню «Вид → Режим интерфейса»). args: mode:string; returns: text; example: {"mode":"Power"}. |
 | `toggle_build_output` | Как меню «Вид → Вывод сборки». returns: text. |
 | `toggle_pin_document` | Закрепить/открепить документ (pin). args: file_path:string; returns: text; example: {"file_path":"C:\\\\tmp\\\\a.cs"}. |
-| `toggle_solution_explorer` | Как меню «Вид → Обозреватель решения». returns: text. |
 | `toggle_terminal` | Как меню «Вид → Терминал» (переключатель). returns: text. |
 <!-- GENERATED:IdeCommands END -->
 

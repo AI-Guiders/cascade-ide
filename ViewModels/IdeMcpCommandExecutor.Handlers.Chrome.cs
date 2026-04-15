@@ -41,10 +41,10 @@ internal sealed partial class IdeMcpCommandExecutor
                 _vm.ToggleBuildOutputCommand.Execute(null);
             return "OK";
         });
-        add(Services.IdeCommands.ToggleSolutionExplorer, async (_, _) =>
+        add(Services.IdeCommands.TogglePfdRegionExpanded, async (_, _) =>
         {
-            if (_vm.ToggleSolutionExplorerCommand.CanExecute(null))
-                _vm.ToggleSolutionExplorerCommand.Execute(null);
+            if (_vm.TogglePfdRegionExpandedCommand.CanExecute(null))
+                _vm.TogglePfdRegionExpandedCommand.Execute(null);
             return "OK";
         });
 
@@ -74,18 +74,18 @@ internal sealed partial class IdeMcpCommandExecutor
             return "OK";
         });
 
-        add(Services.IdeCommands.SetSolutionExplorerVisible, async (args, _) =>
+        add(Services.IdeCommands.SetPfdRegionExpanded, async (args, _) =>
         {
             if (args is null || !args.TryGetValue("visible", out var sev) || sev.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
                 return "Missing or invalid visible (boolean)";
-            _vm.ApplySolutionExplorerVisible(sev.GetBoolean());
+            _vm.ApplyPfdRegionExpanded(sev.GetBoolean());
             return "OK";
         });
-        add(Services.IdeCommands.SetChatPanelExpanded, async (args, _) =>
+        add(Services.IdeCommands.SetMfdRegionExpanded, async (args, _) =>
         {
             if (args is null || !args.TryGetValue("visible", out var cev) || cev.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
                 return "Missing or invalid visible (boolean)";
-            _vm.ApplyChatPanelExpanded(cev.GetBoolean());
+            _vm.ApplyMfdRegionExpanded(cev.GetBoolean());
             return "OK";
         });
         add(Services.IdeCommands.SetGitPanelVisible, async (args, _) =>
@@ -113,10 +113,10 @@ internal sealed partial class IdeMcpCommandExecutor
                 _vm.ToggleInstrumentationDockCommand.Execute(null);
             return "OK";
         });
-        add(Services.IdeCommands.ToggleChatPanel, async (_, _) =>
+        add(Services.IdeCommands.ToggleMfdRegionExpanded, async (_, _) =>
         {
-            if (_vm.ToggleChatPanelCommand.CanExecute(null))
-                _vm.ToggleChatPanelCommand.Execute(null);
+            if (_vm.ToggleMfdRegionExpandedCommand.CanExecute(null))
+                _vm.ToggleMfdRegionExpandedCommand.Execute(null);
             return "OK";
         });
 
@@ -151,7 +151,8 @@ internal sealed partial class IdeMcpCommandExecutor
 
         add(Services.IdeCommands.ShowEnvironmentReadinessPage, async (_, _) =>
         {
-            _vm.ShowEnvironmentReadinessPage = true;
+            _vm.ApplyMfdRegionExpanded(true);
+            _vm.TryNavigateToSecondaryShellPage(SecondaryShellPage.EnvironmentReadiness);
             return await Task.FromResult("OK");
         });
         add(Services.IdeCommands.CloseEnvironmentReadinessPage, async (_, _) =>
@@ -278,10 +279,10 @@ internal sealed partial class IdeMcpCommandExecutor
             return "OK";
         });
 
-        add(Services.IdeCommands.ShowSolutionExplorerPanel, async (_, _) =>
+        add(Services.IdeCommands.ShowPfdRegionPanel, async (_, _) =>
         {
-            if (_vm.ShowSolutionExplorerPanelCommand.CanExecute(null))
-                _vm.ShowSolutionExplorerPanelCommand.Execute(null);
+            if (_vm.ShowPfdRegionPanelCommand.CanExecute(null))
+                _vm.ShowPfdRegionPanelCommand.Execute(null);
             return "OK";
         });
         add(Services.IdeCommands.ShowBuildOutputPanel, async (_, _) =>
@@ -290,10 +291,10 @@ internal sealed partial class IdeMcpCommandExecutor
                 _vm.ShowBuildOutputPanelCommand.Execute(null);
             return "OK";
         });
-        add(Services.IdeCommands.ShowChatPanel, async (_, _) =>
+        add(Services.IdeCommands.ShowChatPage, async (_, _) =>
         {
-            if (_vm.ShowChatPanelCommand.CanExecute(null))
-                _vm.ShowChatPanelCommand.Execute(null);
+            if (_vm.ShowChatPageCommand.CanExecute(null))
+                _vm.ShowChatPageCommand.Execute(null);
             return "OK";
         });
         add(Services.IdeCommands.ShowTerminalPanel, async (_, _) =>

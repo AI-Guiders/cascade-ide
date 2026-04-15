@@ -5,8 +5,8 @@ namespace CascadeIDE.Features.UiChrome;
 /// </summary>
 public static class UiWorkspaceLayoutRuntimeMetrics
 {
-    public static int SolutionExplorerDefaultWidthPixels { get; private set; } =
-        UiWorkspaceLayoutDimensions.SolutionExplorerDefaultWidthPixels;
+    public static int PfdRegionDefaultWidthPixels { get; private set; } =
+        UiWorkspaceLayoutDimensions.PfdRegionDefaultWidthPixels;
 
     public static double MainGridColumnSplitterWidthPixels { get; private set; } =
         UiWorkspaceLayoutDimensions.MainGridColumnSplitterWidthPixels;
@@ -14,27 +14,27 @@ public static class UiWorkspaceLayoutRuntimeMetrics
     public static int BottomPanelMinRowPixels { get; private set; } =
         UiWorkspaceLayoutDimensions.BottomPanelMinRowPixels;
 
-    public static int ChatPanelCollapsedWidthPixels { get; private set; } =
-        UiWorkspaceLayoutDimensions.ChatPanelCollapsedWidthPixels;
+    public static int MfdRegionCollapsedWidthPixels { get; private set; } =
+        UiWorkspaceLayoutDimensions.MfdRegionCollapsedWidthPixels;
 
-    public static int ChatPanelExpandedDefaultWidthPixels { get; private set; } =
-        UiWorkspaceLayoutDimensions.ChatPanelExpandedDefaultWidthPixels;
+    public static int MfdRegionExpandedDefaultWidthPixels { get; private set; } =
+        UiWorkspaceLayoutDimensions.MfdRegionExpandedDefaultWidthPixels;
 
-    public static int ChatPanelExpandedPowerWidthPixels { get; private set; } =
-        UiWorkspaceLayoutDimensions.ChatPanelExpandedPowerWidthPixels;
+    public static int MfdRegionExpandedPowerWidthPixels { get; private set; } =
+        UiWorkspaceLayoutDimensions.MfdRegionExpandedPowerWidthPixels;
 
-    public static int ChatPanelExpandedAgentChatWidthPixels { get; private set; } =
-        UiWorkspaceLayoutDimensions.ChatPanelExpandedAgentChatWidthPixels;
+    public static int MfdRegionExpandedAgentChatWidthPixels { get; private set; } =
+        UiWorkspaceLayoutDimensions.MfdRegionExpandedAgentChatWidthPixels;
 
     internal static void ResetToCodeDefaults()
     {
-        SolutionExplorerDefaultWidthPixels = UiWorkspaceLayoutDimensions.SolutionExplorerDefaultWidthPixels;
+        PfdRegionDefaultWidthPixels = UiWorkspaceLayoutDimensions.PfdRegionDefaultWidthPixels;
         MainGridColumnSplitterWidthPixels = UiWorkspaceLayoutDimensions.MainGridColumnSplitterWidthPixels;
         BottomPanelMinRowPixels = UiWorkspaceLayoutDimensions.BottomPanelMinRowPixels;
-        ChatPanelCollapsedWidthPixels = UiWorkspaceLayoutDimensions.ChatPanelCollapsedWidthPixels;
-        ChatPanelExpandedDefaultWidthPixels = UiWorkspaceLayoutDimensions.ChatPanelExpandedDefaultWidthPixels;
-        ChatPanelExpandedPowerWidthPixels = UiWorkspaceLayoutDimensions.ChatPanelExpandedPowerWidthPixels;
-        ChatPanelExpandedAgentChatWidthPixels = UiWorkspaceLayoutDimensions.ChatPanelExpandedAgentChatWidthPixels;
+        MfdRegionCollapsedWidthPixels = UiWorkspaceLayoutDimensions.MfdRegionCollapsedWidthPixels;
+        MfdRegionExpandedDefaultWidthPixels = UiWorkspaceLayoutDimensions.MfdRegionExpandedDefaultWidthPixels;
+        MfdRegionExpandedPowerWidthPixels = UiWorkspaceLayoutDimensions.MfdRegionExpandedPowerWidthPixels;
+        MfdRegionExpandedAgentChatWidthPixels = UiWorkspaceLayoutDimensions.MfdRegionExpandedAgentChatWidthPixels;
     }
 
     internal static void ApplyWorkspaceToml(UiWorkspaceToml? w)
@@ -42,19 +42,19 @@ public static class UiWorkspaceLayoutRuntimeMetrics
         ResetToCodeDefaults();
         if (w is null)
             return;
-        if (w.SolutionExplorerDefaultWidthPixels is { } se)
-            SolutionExplorerDefaultWidthPixels = se;
+        if (w.PfdRegionDefaultWidthPixels is { } se)
+            PfdRegionDefaultWidthPixels = se;
         if (w.MainGridColumnSplitterWidthPixels is { } sp)
             MainGridColumnSplitterWidthPixels = sp;
         if (w.BottomPanelMinRowPixels is { } bp)
             BottomPanelMinRowPixels = bp;
-        if (w.ChatPanelCollapsedWidthPixels is { } cc)
-            ChatPanelCollapsedWidthPixels = cc;
-        if (w.ChatPanelExpandedDefaultWidthPixels is { } cd)
-            ChatPanelExpandedDefaultWidthPixels = cd;
-        if (w.ChatPanelExpandedPowerWidthPixels is { } cp)
-            ChatPanelExpandedPowerWidthPixels = cp;
-        if (w.ChatPanelExpandedAgentChatWidthPixels is { } ca)
-            ChatPanelExpandedAgentChatWidthPixels = ca;
+        if (w.MfdRegionCollapsedWidthPixels is { } cc)
+            MfdRegionCollapsedWidthPixels = cc;
+        if (w.MfdRegionExpandedDefaultWidthPixels is { } cd)
+            MfdRegionExpandedDefaultWidthPixels = cd;
+        if (w.MfdRegionExpandedPowerWidthPixels is { } cp)
+            MfdRegionExpandedPowerWidthPixels = cp;
+        if (w.MfdRegionExpandedAgentChatWidthPixels is { } ca)
+            MfdRegionExpandedAgentChatWidthPixels = ca;
     }
 }

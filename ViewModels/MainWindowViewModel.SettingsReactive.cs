@@ -38,10 +38,10 @@ public partial class MainWindowViewModel
         SaveSettingsIfChanged();
     }
 
-    partial void OnIsSolutionExplorerVisibleChanged(bool value)
+    partial void OnIsPfdRegionExpandedChanged(bool value)
     {
-        _settings.WorkspaceUi.ShowSolutionExplorer = value;
-        OnPropertyChanged(nameof(IsSolutionPanelHidden));
+        _settings.WorkspaceUi.PfdRegionExpanded = value;
+        OnPropertyChanged(nameof(IsPfdRegionCollapsed));
         SaveSettingsIfChanged();
     }
 
@@ -81,13 +81,11 @@ public partial class MainWindowViewModel
             CoerceSecondaryShellPageToAllowed();
     }
 
-    partial void OnIsChatPanelExpandedChanged(bool value)
+    partial void OnIsMfdRegionExpandedChanged(bool value)
     {
-        OnPropertyChanged(nameof(IsChatPanelHidden));
-        // Разворот колонки чата из меню «Вид» только меняет ширину; без перехода на страницу Chat
-        // MFD мог остаться на сборке/терминале — пользователь ожидает увидеть чат.
-        if (value)
-            TryNavigateToSecondaryShellPage(SecondaryShellPage.Chat);
+        OnPropertyChanged(nameof(IsMfdRegionCollapsed));
+        // Intent «развёрнут/свёрнут регион Mfd» в раскладке (ширина в MainGrid через композитор).
+        // Активная страница вторичного контура — отдельно (CurrentSecondaryShellPage); не переключаем её здесь.
     }
 
     partial void OnChatMcpOnlyChanged(bool value)

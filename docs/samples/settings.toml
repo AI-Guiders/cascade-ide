@@ -58,7 +58,7 @@ acp_auto_inject_ide_mcp = true
 external_servers_json = "[]"
 
 [workspace_ui]
-show_solution_explorer = true
+pfd_region_expanded = true
 show_terminal = true
 show_git = false
 show_instrumentation = true

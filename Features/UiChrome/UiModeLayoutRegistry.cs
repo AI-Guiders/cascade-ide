@@ -10,17 +10,17 @@ public enum UiModeThemeSlot
 
 /// <summary>Снимок раскладки панелей и темы для одного нормализованного режима (<see cref="UiChromeViewModel.NormalizeUiMode"/>).</summary>
 public sealed record UiModeLayoutSpec(
-    bool SolutionExplorerVisible,
+    bool PfdRegionExpanded,
     bool BuildOutputVisible,
     bool TerminalVisible,
-    bool ChatPanelExpanded,
+    bool MfdRegionExpanded,
     int EditorGroupCount,
     UiModeThemeSlot ThemeSlot,
     bool SelectTerminalTabWhenTerminalShown,
     bool InstrumentationDockVisible);
 
 /// <summary>
-/// Встроенные режимы UI: порядок в списке UI, раскладка при <c>ApplyUiModeLayout</c>, ширина чата.
+/// Встроенные режимы UI: порядок в списке UI, раскладка при <c>ApplyUiModeLayout</c>, ширина региона Mfd.
 /// Новый режим — новая запись в словаре (позже можно подменить загрузкой из JSON тем же типом).
 /// </summary>
 public static class UiModeLayoutRegistry
@@ -33,56 +33,56 @@ public static class UiModeLayoutRegistry
         new(StringComparer.OrdinalIgnoreCase)
         {
             ["Focus"] = new UiModeLayoutSpec(
-                SolutionExplorerVisible: true,
+                PfdRegionExpanded: true,
                 BuildOutputVisible: false,
                 TerminalVisible: false,
-                ChatPanelExpanded: true,
+                MfdRegionExpanded: true,
                 EditorGroupCount: 1,
                 ThemeSlot: UiModeThemeSlot.Dark,
                 SelectTerminalTabWhenTerminalShown: false,
                 InstrumentationDockVisible: true),
             // Три якоря PFD | Forward | MFD видны сразу (ADR 0021); «лёгкий» Editor — через capabilities/TOML, не через схлопывание колонок.
             ["Editor"] = new UiModeLayoutSpec(
-                SolutionExplorerVisible: true,
+                PfdRegionExpanded: true,
                 BuildOutputVisible: false,
                 TerminalVisible: false,
-                ChatPanelExpanded: true,
+                MfdRegionExpanded: true,
                 EditorGroupCount: 1,
                 ThemeSlot: UiModeThemeSlot.Dark,
                 SelectTerminalTabWhenTerminalShown: false,
                 InstrumentationDockVisible: false),
             ["Balanced"] = new UiModeLayoutSpec(
-                SolutionExplorerVisible: true,
+                PfdRegionExpanded: true,
                 BuildOutputVisible: true,
                 TerminalVisible: true,
-                ChatPanelExpanded: true,
+                MfdRegionExpanded: true,
                 EditorGroupCount: 2,
                 ThemeSlot: UiModeThemeSlot.CursorLike,
                 SelectTerminalTabWhenTerminalShown: false,
                 InstrumentationDockVisible: true),
             ["Power"] = new UiModeLayoutSpec(
-                SolutionExplorerVisible: true,
+                PfdRegionExpanded: true,
                 BuildOutputVisible: true,
                 TerminalVisible: true,
-                ChatPanelExpanded: true,
+                MfdRegionExpanded: true,
                 EditorGroupCount: 3,
                 ThemeSlot: UiModeThemeSlot.PowerCockpit,
                 SelectTerminalTabWhenTerminalShown: true,
                 InstrumentationDockVisible: true),
             ["AgentChat"] = new UiModeLayoutSpec(
-                SolutionExplorerVisible: false,
+                PfdRegionExpanded: false,
                 BuildOutputVisible: false,
                 TerminalVisible: false,
-                ChatPanelExpanded: true,
+                MfdRegionExpanded: true,
                 EditorGroupCount: 1,
                 ThemeSlot: UiModeThemeSlot.CursorLike,
                 SelectTerminalTabWhenTerminalShown: false,
                 InstrumentationDockVisible: true),
             ["Debug"] = new UiModeLayoutSpec(
-                SolutionExplorerVisible: true,
+                PfdRegionExpanded: true,
                 BuildOutputVisible: false,
                 TerminalVisible: false,
-                ChatPanelExpanded: true,
+                MfdRegionExpanded: true,
                 EditorGroupCount: 2,
                 ThemeSlot: UiModeThemeSlot.Dark,
                 SelectTerminalTabWhenTerminalShown: false,
@@ -95,11 +95,11 @@ public static class UiModeLayoutRegistry
             ? spec
             : ByNormalizedMode["Balanced"];
 
-    /// <summary>Ширина развёрнутой колонки чата в пикселях для нормализованного режима (с учётом <c>workspace.toml</c> через <see cref="UiWorkspaceLayoutRuntimeMetrics"/>).</summary>
-    public static int GetChatPanelExpandedWidthPixels(string normalizedMode) => normalizedMode switch
+    /// <summary>Ширина развёрнутого региона Mfd в пикселях для нормализованного режима (с учётом <c>workspace.toml</c> через <see cref="UiWorkspaceLayoutRuntimeMetrics"/>).</summary>
+    public static int GetMfdRegionExpandedWidthPixels(string normalizedMode) => normalizedMode switch
     {
-        "Power" => UiWorkspaceLayoutRuntimeMetrics.ChatPanelExpandedPowerWidthPixels,
-        "AgentChat" => UiWorkspaceLayoutRuntimeMetrics.ChatPanelExpandedAgentChatWidthPixels,
-        _ => UiWorkspaceLayoutRuntimeMetrics.ChatPanelExpandedDefaultWidthPixels,
+        "Power" => UiWorkspaceLayoutRuntimeMetrics.MfdRegionExpandedPowerWidthPixels,
+        "AgentChat" => UiWorkspaceLayoutRuntimeMetrics.MfdRegionExpandedAgentChatWidthPixels,
+        _ => UiWorkspaceLayoutRuntimeMetrics.MfdRegionExpandedDefaultWidthPixels,
     };
 }

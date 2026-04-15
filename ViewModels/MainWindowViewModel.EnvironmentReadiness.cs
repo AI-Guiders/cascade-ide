@@ -13,18 +13,31 @@ public partial class MainWindowViewModel
     [ObservableProperty]
     private string _environmentReadinessUpdatedText = "";
 
-    /// <summary>Полноэкранная страница поверх вторичного контура (v1 — колонка зоны Mfd); открытие — палитра команд.</summary>
-    [ObservableProperty]
-    private bool _showEnvironmentReadinessPage;
-
-    partial void OnShowEnvironmentReadinessPageChanged(bool value)
+    partial void OnCurrentSecondaryShellPageChanged(SecondaryShellPage value)
     {
-        if (value)
+        if (value == SecondaryShellPage.EnvironmentReadiness)
             _ = RefreshEnvironmentReadinessAsync();
     }
 
+    /// <summary>Уйти со страницы готовности окружения на первую другую разрешённую страницу вторичного контура.</summary>
     [RelayCommand]
-    private void CloseEnvironmentReadinessPage() => ShowEnvironmentReadinessPage = false;
+    private void CloseEnvironmentReadinessPage()
+    {
+        if (CurrentSecondaryShellPage != SecondaryShellPage.EnvironmentReadiness)
+            return;
+        foreach (var p in SecondaryShellPageOrder)
+        {
+            if (p == SecondaryShellPage.EnvironmentReadiness)
+                continue;
+            if (IsSecondaryShellPageAllowed(p))
+            {
+                CurrentSecondaryShellPage = p;
+                return;
+            }
+        }
+
+        CurrentSecondaryShellPage = SecondaryShellPage.Chat;
+    }
 
     [RelayCommand]
     private async Task RefreshEnvironmentReadinessAsync()

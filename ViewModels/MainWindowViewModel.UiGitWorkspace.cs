@@ -35,10 +35,10 @@ public partial class MainWindowViewModel
         var normalized = NormalizeUiMode(mode);
         var spec = UiModeCatalog.GetSpec(normalized);
 
-        IsSolutionExplorerVisible = spec.SolutionExplorerVisible;
+        IsPfdRegionExpanded = spec.PfdRegionExpanded;
         IsBuildOutputVisible = spec.BuildOutputVisible;
         IsTerminalVisible = spec.TerminalVisible;
-        IsChatPanelExpanded = spec.ChatPanelExpanded;
+        IsMfdRegionExpanded = spec.MfdRegionExpanded;
         EditorGroupCount = spec.EditorGroupCount;
         IsInstrumentationDockVisible = spec.InstrumentationDockVisible;
 
@@ -58,7 +58,7 @@ public partial class MainWindowViewModel
             return;
 
         _settings.WorkspaceUi.Mode = normalized;
-        _settings.WorkspaceUi.ShowSolutionExplorer = IsSolutionExplorerVisible;
+        _settings.WorkspaceUi.PfdRegionExpanded = IsPfdRegionExpanded;
         _settings.WorkspaceUi.ShowTerminal = IsTerminalVisible;
         SaveSettingsIfChanged();
     }

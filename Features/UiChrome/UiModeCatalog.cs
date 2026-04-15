@@ -26,7 +26,7 @@ public static class UiModeCatalog
     private static IReadOnlyList<string> _orderedModeIds = UiModeLayoutRegistry.OrderedModeIds;
     private static readonly Dictionary<string, UiModeLayoutSpec> Specs = new(StringComparer.OrdinalIgnoreCase);
     private static readonly Dictionary<string, UiModeFamily> Families = new(StringComparer.OrdinalIgnoreCase);
-    private static readonly Dictionary<string, int> ChatExpandedWidths = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly Dictionary<string, int> MfdRegionExpandedWidths = new(StringComparer.OrdinalIgnoreCase);
     private static readonly Dictionary<string, bool> ShowTaskBarByMode = new(StringComparer.OrdinalIgnoreCase);
     private static readonly Dictionary<string, UiModeCapabilities> CapabilitiesByMode = new(StringComparer.OrdinalIgnoreCase);
     private static readonly Dictionary<string, string?> WindowTitleOverrideByMode = new(StringComparer.OrdinalIgnoreCase);
@@ -149,7 +149,7 @@ public static class UiModeCatalog
             _orderedModeIds = UiModeLayoutRegistry.OrderedModeIds;
             Specs.Clear();
             Families.Clear();
-            ChatExpandedWidths.Clear();
+            MfdRegionExpandedWidths.Clear();
             ShowTaskBarByMode.Clear();
             CapabilitiesByMode.Clear();
             WindowTitleOverrideByMode.Clear();
@@ -223,7 +223,7 @@ public static class UiModeCatalog
     {
         Specs.Clear();
         Families.Clear();
-        ChatExpandedWidths.Clear();
+        MfdRegionExpandedWidths.Clear();
         ShowTaskBarByMode.Clear();
         CapabilitiesByMode.Clear();
         WindowTitleOverrideByMode.Clear();
@@ -293,7 +293,7 @@ public static class UiModeCatalog
 
             Specs[id] = r.Spec;
             Families[id] = r.Family;
-            ChatExpandedWidths[id] = r.ChatExpandedWidthPx;
+            MfdRegionExpandedWidths[id] = r.MfdRegionExpandedWidthPx;
             ShowTaskBarByMode[id] = r.ShowTaskBar;
             CapabilitiesByMode[id] = r.Capabilities;
             WindowTitleOverrideByMode[id] = r.WindowTitleOverride;
@@ -318,7 +318,7 @@ public static class UiModeCatalog
             var fam = BuiltinFamily(id);
             Specs[id] = UiModeLayoutRegistry.Get(id);
             Families[id] = fam;
-            ChatExpandedWidths[id] = UiModeLayoutRegistry.GetChatPanelExpandedWidthPixels(id);
+            MfdRegionExpandedWidths[id] = UiModeLayoutRegistry.GetMfdRegionExpandedWidthPixels(id);
             ShowTaskBarByMode[id] = DefaultShowTaskBarForFamily(fam);
             CapabilitiesByMode[id] = UiModeCapabilities.DefaultsForFamily(fam);
             WindowTitleOverrideByMode[id] = null;
@@ -331,7 +331,7 @@ public static class UiModeCatalog
     private sealed record ResolvedMode(
         UiModeLayoutSpec Spec,
         UiModeFamily Family,
-        int ChatExpandedWidthPx,
+        int MfdRegionExpandedWidthPx,
         bool ShowTaskBar,
         UiModeCapabilities Capabilities,
         string? WindowTitleOverride)
@@ -342,7 +342,7 @@ public static class UiModeCatalog
             return new ResolvedMode(
                 UiModeLayoutRegistry.Get(id),
                 fam,
-                UiModeLayoutRegistry.GetChatPanelExpandedWidthPixels(id),
+                UiModeLayoutRegistry.GetMfdRegionExpandedWidthPixels(id),
                 DefaultShowTaskBarForFamily(fam),
                 UiModeCapabilities.DefaultsForFamily(fam),
                 null);
@@ -412,8 +412,8 @@ public static class UiModeCatalog
     }
 
     /// <summary>
-    /// Явный <c>chat_expanded_width_pixels</c> в файле режима; иначе при <c>inherits</c> — ширина уже разрешённого родителя;
-    /// иначе — глобальные метрики и правило Power / AgentChat / остальные (<see cref="UiModeLayoutRegistry.GetChatPanelExpandedWidthPixels"/>).
+    /// Явный <c>mfd_region_expanded_width_pixels</c> в файле режима; иначе при <c>inherits</c> — ширина уже разрешённого родителя;
+    /// иначе — глобальные метрики и правило Power / AgentChat / остальные (<see cref="UiModeLayoutRegistry.GetMfdRegionExpandedWidthPixels"/>).
     /// </summary>
     private static int ResolveChatWidth(
         string modeId,
@@ -423,13 +423,13 @@ public static class UiModeCatalog
         UiModeLayoutSpec merged)
     {
         _ = merged;
-        if (file?.ChatExpandedWidthPixels is { } w && w >= 0)
+        if (file?.MfdRegionExpandedWidthPixels is { } w && w >= 0)
             return w;
 
         if (inherits is not null && parentResolved is not null)
-            return parentResolved.ChatExpandedWidthPx;
+            return parentResolved.MfdRegionExpandedWidthPx;
 
-        return UiModeLayoutRegistry.GetChatPanelExpandedWidthPixels(modeId);
+        return UiModeLayoutRegistry.GetMfdRegionExpandedWidthPixels(modeId);
     }
 
     private static bool ResolveShowTaskBar(
@@ -532,10 +532,10 @@ public static class UiModeCatalog
             return baseSpec;
 
         return new UiModeLayoutSpec(
-            SolutionExplorerVisible: o.SolutionExplorerVisible ?? baseSpec.SolutionExplorerVisible,
+            PfdRegionExpanded: o.PfdRegionExpanded ?? baseSpec.PfdRegionExpanded,
             BuildOutputVisible: o.BuildOutputVisible ?? baseSpec.BuildOutputVisible,
             TerminalVisible: o.TerminalVisible ?? baseSpec.TerminalVisible,
-            ChatPanelExpanded: o.ChatPanelExpanded ?? baseSpec.ChatPanelExpanded,
+            MfdRegionExpanded: o.MfdRegionExpanded ?? baseSpec.MfdRegionExpanded,
             EditorGroupCount: o.EditorGroupCount ?? baseSpec.EditorGroupCount,
             ThemeSlot: ParseThemeSlot(o.ThemeSlot) ?? baseSpec.ThemeSlot,
             SelectTerminalTabWhenTerminalShown: o.SelectTerminalTabWhenTerminalShown
@@ -602,13 +602,13 @@ public static class UiModeCatalog
         }
     }
 
-    public static int GetChatPanelExpandedWidthPixels(string normalizedMode)
+    public static int GetMfdRegionExpandedWidthPixels(string normalizedMode)
     {
         lock (Gate)
         {
-            if (ChatExpandedWidths.TryGetValue(normalizedMode, out var w))
+            if (MfdRegionExpandedWidths.TryGetValue(normalizedMode, out var w))
                 return w;
-            return UiModeLayoutRegistry.GetChatPanelExpandedWidthPixels(normalizedMode);
+            return UiModeLayoutRegistry.GetMfdRegionExpandedWidthPixels(normalizedMode);
         }
     }
 

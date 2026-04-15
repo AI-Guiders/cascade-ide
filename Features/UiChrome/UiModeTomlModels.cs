@@ -15,13 +15,13 @@ public sealed class UiModesIndexToml
 /// </summary>
 public sealed class UiWorkspaceToml
 {
-    public int? SolutionExplorerDefaultWidthPixels { get; set; }
+    public int? PfdRegionDefaultWidthPixels { get; set; }
     public double? MainGridColumnSplitterWidthPixels { get; set; }
     public int? BottomPanelMinRowPixels { get; set; }
-    public int? ChatPanelCollapsedWidthPixels { get; set; }
-    public int? ChatPanelExpandedDefaultWidthPixels { get; set; }
-    public int? ChatPanelExpandedPowerWidthPixels { get; set; }
-    public int? ChatPanelExpandedAgentChatWidthPixels { get; set; }
+    public int? MfdRegionCollapsedWidthPixels { get; set; }
+    public int? MfdRegionExpandedDefaultWidthPixels { get; set; }
+    public int? MfdRegionExpandedPowerWidthPixels { get; set; }
+    public int? MfdRegionExpandedAgentChatWidthPixels { get; set; }
 
     /// <summary>
     /// Куда показывать превью Markdown: <c>forward_split</c>, <c>mfd</c>, <c>separate_window</c> (или <c>window</c>);
@@ -48,14 +48,14 @@ public sealed class UiModeFileToml
 {
     public string? Inherits { get; set; }
     public string? Family { get; set; }
-    public bool? SolutionExplorerVisible { get; set; }
+    public bool? PfdRegionExpanded { get; set; }
     public bool? BuildOutputVisible { get; set; }
     public bool? TerminalVisible { get; set; }
-    public bool? ChatPanelExpanded { get; set; }
+    public bool? MfdRegionExpanded { get; set; }
     public int? EditorGroupCount { get; set; }
     public string? ThemeSlot { get; set; }
     public bool? SelectTerminalTabWhenTerminalShown { get; set; }
-    public int? ChatExpandedWidthPixels { get; set; }
+    public int? MfdRegionExpandedWidthPixels { get; set; }
 
     /// <summary>Нижний док с вкладками событий/тестов и т.д.; TOML: <c>instrumentation_dock_visible</c>.</summary>
     public bool? InstrumentationDockVisible { get; set; }

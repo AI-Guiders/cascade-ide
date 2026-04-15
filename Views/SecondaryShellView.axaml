@@ -33,7 +33,7 @@
                 BorderThickness="0,1,0,0"
                 Padding="4"
                 Background="{DynamicResource CascadeTheme.TerminalBackground}">
-        <!-- Тёмная тема Fluent для нижней панели. Страница «окружение» (ADR 0023) — оверлей; открытие из палитры. -->
+        <!-- Тёмная тема Fluent для нижней панели. Страница «готовность окружения» (ADR 0023) — как и прочие страницы вторичного контура. -->
         <ThemeVariantScope RequestedThemeVariant="Dark">
             <Grid>
                 <Grid.Resources>
@@ -44,6 +44,9 @@
             </Border>
             <Border IsVisible="{Binding CurrentSecondaryShellPage, Converter={StaticResource SecondaryShellPageEq}, ConverterParameter=Chat}">
                     <views:ChatPanelView DataContext="{Binding ChatPanel}"/>
+            </Border>
+            <Border IsVisible="{Binding CurrentSecondaryShellPage, Converter={StaticResource SecondaryShellPageEq}, ConverterParameter=EnvironmentReadiness}">
+                    <views:EnvironmentReadinessSecondaryPageView/>
             </Border>
             <Border IsVisible="{Binding CurrentSecondaryShellPage, Converter={StaticResource SecondaryShellPageEq}, ConverterParameter=AiChatSettings}">
                     <DockPanel>
@@ -389,12 +392,6 @@
                             </ItemsControl>
                         </ScrollViewer>
                     </Grid>
-            </Border>
-            <Border ZIndex="1"
-                    IsVisible="{Binding ShowEnvironmentReadinessPage}"
-                    Background="{DynamicResource CascadeTheme.TerminalBackground}"
-                    Padding="0">
-                <views:EnvironmentReadinessSecondaryPageView/>
             </Border>
             </Grid>
         </ThemeVariantScope>

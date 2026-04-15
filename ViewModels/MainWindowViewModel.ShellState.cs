@@ -7,26 +7,34 @@ namespace CascadeIDE.ViewModels;
 /// <summary>Раскладка панелей, нижняя зона, Workspace Health / автономный агент, ключи провайдеров и чата.</summary>
 public partial class MainWindowViewModel
 {
+    /// <summary>
+    /// Intent геометрии: регион Mfd в <c>MainGrid</c> развёрнут (ширина по режиму) или свёрнут.
+    /// Страница «Чат» — <see cref="SecondaryShellPage.Chat"/> через <see cref="CurrentSecondaryShellPage"/>, отдельно.
+    /// </summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ChatPanelToggleButtonText))]
-    [NotifyPropertyChangedFor(nameof(ChatPanelColumnPixelWidth))]
-    [NotifyPropertyChangedFor(nameof(IsChatPanelColumnVisible))]
+    [NotifyPropertyChangedFor(nameof(MfdRegionToggleButtonText))]
+    [NotifyPropertyChangedFor(nameof(MfdRegionPixelWidth))]
+    [NotifyPropertyChangedFor(nameof(IsMfdRegionVisible))]
     [NotifyPropertyChangedFor(nameof(IsMfdColumnVisible))]
     [NotifyPropertyChangedFor(nameof(IsSkiaZonePreviewMfdVisible))]
     [NotifyPropertyChangedFor(nameof(IsPfdWorkspaceHealthMountVisible))]
     [NotifyPropertyChangedFor(nameof(IsMfdWorkspaceHealthMountVisible))]
     [NotifyPropertyChangedFor(nameof(PfdWorkspaceHealthMountContext))]
     [NotifyPropertyChangedFor(nameof(MfdWorkspaceHealthMountContext))]
-    [NotifyCanExecuteChangedFor(nameof(ToggleChatPanelCommand))]
-    private bool _isChatPanelExpanded = true;
+    [NotifyCanExecuteChangedFor(nameof(ToggleMfdRegionExpandedCommand))]
+    private bool _isMfdRegionExpanded = true;
 
+    /// <summary>
+    /// Intent геометрии: регион Pfd в <c>MainGrid</c> развёрнут (ширина по workspace/режиму) или свёрнут.
+    /// Дерево решения — <see cref="Views.SolutionExplorerView"/> в зоне Pfd; отдельно от страниц вторичного контура.
+    /// </summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsPfdColumnVisible))]
     [NotifyPropertyChangedFor(nameof(IsSkiaZonePreviewPfdVisible))]
     [NotifyPropertyChangedFor(nameof(IsPfdWorkspaceHealthMountVisible))]
     [NotifyPropertyChangedFor(nameof(PfdWorkspaceHealthMountContext))]
-    [NotifyCanExecuteChangedFor(nameof(ToggleSolutionExplorerCommand))]
-    private bool _isSolutionExplorerVisible = true;
+    [NotifyCanExecuteChangedFor(nameof(TogglePfdRegionExpandedCommand))]
+    private bool _isPfdRegionExpanded = true;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowTelemetryHiddenHint))]
@@ -43,8 +51,8 @@ public partial class MainWindowViewModel
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(UiModeFamily))]
-    [NotifyPropertyChangedFor(nameof(ChatPanelColumnPixelWidth))]
-    [NotifyPropertyChangedFor(nameof(IsChatPanelColumnVisible))]
+    [NotifyPropertyChangedFor(nameof(MfdRegionPixelWidth))]
+    [NotifyPropertyChangedFor(nameof(IsMfdRegionVisible))]
     [NotifyPropertyChangedFor(nameof(IsMfdColumnVisible))]
     [NotifyPropertyChangedFor(nameof(IsSkiaZonePreviewPfdVisible))]
     [NotifyPropertyChangedFor(nameof(IsSkiaZonePreviewForwardVisible))]

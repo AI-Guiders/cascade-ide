@@ -14,7 +14,7 @@ public static class CockpitSurfaceSnapshotBuilder
     {
         var surfaceKind = ToCdsSurfaceKind(vm.ActiveAttentionLayoutSurface);
         var layout = CockpitPresentationLayoutPolicy.InvariantsFromPresentation(vm.PresentationParse);
-        var instruments = vm.MainWindowHostSurfaceInstruments
+        var instruments = vm.MainWindowSurfaceSlotBindings
             .Select(static i => new CockpitSurfaceInstrument(i.InstrumentId, i.SlotId, i.SchemaVersion))
             .ToArray();
         return new CockpitSurfaceState(

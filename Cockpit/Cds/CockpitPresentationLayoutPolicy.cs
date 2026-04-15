@@ -7,30 +7,30 @@ namespace CascadeIDE.Cockpit.Cds;
 /// </summary>
 public static class CockpitPresentationLayoutPolicy
 {
-    /// <summary>На первом экране есть якорь PFD — колонка обозревателя в главном окне не может быть скрыта.</summary>
-    public static bool RequiresVisiblePfdColumn(PresentationParseResult parse) =>
+    /// <summary>На первом экране есть якорь PFD — регион Pfd в главном окне не может быть свёрнут в ноль.</summary>
+    public static bool RequiresPfdRegionInMainWindow(PresentationParseResult parse) =>
         FirstScreenContains(parse, PresentationAnchorKind.Pfd);
 
-    /// <summary>На первом экране есть якорь MFD — правая колонка зоны M в главном окне не может быть свёрнута в ноль.</summary>
-    public static bool RequiresExpandedChatColumnForMainWindow(PresentationParseResult parse) =>
+    /// <summary>На первом экране есть якорь MFD — регион Mfd в главном окне не может быть свёрнут в ноль.</summary>
+    public static bool RequiresMfdRegionInMainWindow(PresentationParseResult parse) =>
         FirstScreenContains(parse, PresentationAnchorKind.Mfd);
 
     /// <summary>На первом экране есть якорь Forward — для симметрии и будущих проверок (v1 нет отдельного «выкл. forward»).</summary>
     public static bool RequiresForwardOnFirstScreen(PresentationParseResult parse) =>
         FirstScreenContains(parse, PresentationAnchorKind.Forward);
 
-    public static bool CoerceSolutionExplorerVisible(PresentationParseResult parse, bool desired) =>
-        RequiresVisiblePfdColumn(parse) ? true : desired;
+    public static bool CoercePfdRegionExpanded(PresentationParseResult parse, bool desired) =>
+        RequiresPfdRegionInMainWindow(parse) ? true : desired;
 
-    public static bool CoerceChatPanelExpanded(PresentationParseResult parse, bool desired) =>
-        RequiresExpandedChatColumnForMainWindow(parse) ? true : desired;
+    public static bool CoerceMfdRegionExpanded(PresentationParseResult parse, bool desired) =>
+        RequiresMfdRegionInMainWindow(parse) ? true : desired;
 
     /// <summary>Флаги «якорь обязателен на первом экране» для сериализации в <see cref="CockpitSurfaceZones"/>.</summary>
     public static CockpitPresentationLayoutInvariants InvariantsFromPresentation(PresentationParseResult parse) =>
         new(
-            RequiresVisiblePfdColumn(parse),
+            RequiresPfdRegionInMainWindow(parse),
             RequiresForwardOnFirstScreen(parse),
-            RequiresExpandedChatColumnForMainWindow(parse));
+            RequiresMfdRegionInMainWindow(parse));
 
     private static bool FirstScreenContains(PresentationParseResult parse, PresentationAnchorKind kind)
     {

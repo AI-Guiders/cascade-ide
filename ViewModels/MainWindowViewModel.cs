@@ -77,7 +77,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _anthropicApiKey = _aiKeys.AnthropicApiKey ?? "";
         _openAiApiKey = _aiKeys.OpenAiApiKey ?? "";
         _deepSeekApiKey = _aiKeys.DeepSeekApiKey ?? "";
-        _isSolutionExplorerVisible = _settings.WorkspaceUi.ShowSolutionExplorer;
+        _isPfdRegionExpanded = _settings.WorkspaceUi.PfdRegionExpanded;
         _isTerminalVisible = _settings.WorkspaceUi.ShowTerminal;
         _isGitPanelVisible = _settings.WorkspaceUi.ShowGit;
         _isInstrumentationDockVisible = _settings.WorkspaceUi.ShowInstrumentation;
@@ -275,9 +275,6 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             return;
         OnPropertyChanged(nameof(WorkspaceHealthDebugText));
         OnPropertyChanged(nameof(WorkspaceHealthDebugCockpitShort));
-        OnPropertyChanged(nameof(WorkspaceHealthMountPayload));
-        OnPropertyChanged(nameof(PfdWorkspaceHealthMountContext));
-        OnPropertyChanged(nameof(MfdWorkspaceHealthMountContext));
     }
 
     /// <summary>Вывод сборки (нижняя вкладка Build output).</summary>
@@ -292,7 +289,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     /// <summary>Панель Git (нижняя вкладка); состояние и команды вынесены из <see cref="MainWindowViewModel"/>.</summary>
     public GitPanelViewModel GitPanel { get; }
 
-    /// <summary>Чат с LLM (правая колонка): история, ввод, отправка.</summary>
+    /// <summary>Чат с LLM: история, ввод, отправка (контент страницы <see cref="Models.SecondaryShellPage.Chat"/> во вторичном контуре).</summary>
     public ChatPanelViewModel ChatPanel { get; }
 
     /// <summary>Инструментирование: трасса агента, события, тесты, стек MCP-отладки. В разметке — <c>DataContext="{Binding InstrumentationPanel}"</c>.</summary>
@@ -372,10 +369,10 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             ClearStartupProjectInMemoryOnly();
 
         UiModeCatalog.ApplyRepositoryWorkspaceOverlay(GetWorkspacePath(value));
-        OnPropertyChanged(nameof(ChatPanelColumnPixelWidth));
-        OnPropertyChanged(nameof(IsChatPanelColumnVisible));
+        OnPropertyChanged(nameof(MfdRegionPixelWidth));
+        OnPropertyChanged(nameof(IsMfdRegionVisible));
         OnPropertyChanged(nameof(IsMfdColumnVisible));
-        OnPropertyChanged(nameof(IsSolutionExplorerVisible));
+        OnPropertyChanged(nameof(IsPfdRegionExpanded));
         OnPropertyChanged(nameof(IsPfdColumnVisible));
 
         ChatPanel.DisposeCursorAcpSession();

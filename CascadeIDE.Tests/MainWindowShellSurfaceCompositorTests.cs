@@ -18,8 +18,8 @@ public sealed class MainWindowShellSurfaceCompositorTests
         var c = MainWindowShellSurfaceCompositor.Compose(
             new MainWindowShellSurfaceCompositionInput(
                 parse,
-                IntentSolutionExplorerVisible: true,
-                IntentChatPanelExpanded: true,
+                IntentPfdRegionExpanded: true,
+                IntentMfdRegionExpanded: true,
                 SuppressMfdColumnForMfdHostWindow: true,
                 ExpandedMfdWidthPixels: 340,
                 CollapsedMfdWidthPixels: 8,
@@ -40,8 +40,8 @@ public sealed class MainWindowShellSurfaceCompositorTests
         var c = MainWindowShellSurfaceCompositor.Compose(
             new MainWindowShellSurfaceCompositionInput(
                 parse,
-                IntentSolutionExplorerVisible: true,
-                IntentChatPanelExpanded: false,
+                IntentPfdRegionExpanded: true,
+                IntentMfdRegionExpanded: false,
                 SuppressMfdColumnForMfdHostWindow: false,
                 ExpandedMfdWidthPixels: 300,
                 CollapsedMfdWidthPixels: 12,

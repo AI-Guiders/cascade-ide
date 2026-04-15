@@ -20,4 +20,6 @@ public enum SecondaryShellPage
     DebugStack = 9,
     /// <summary>Параметры AI и чата (провайдеры, MCP, ключи) — по умолчанию в зоне Mfd; см. <c>ai_chat_settings_presentation</c> в <c>settings.toml</c>.</summary>
     AiChatSettings = 10,
+    /// <summary>Готовность окружения (LSP, dotnet…) — ADR 0023; страница вторичного контура, не оверлей.</summary>
+    EnvironmentReadiness = 11,
 }

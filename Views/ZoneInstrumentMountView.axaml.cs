@@ -1,22 +1,13 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
-using CascadeIDE.Cockpit.Composition.HostSurface;
 
 namespace CascadeIDE.Views;
 
 public partial class ZoneInstrumentMountView : UserControl
 {
-    public static readonly StyledProperty<WorkspaceHealthStatusMountContext?> MountContextProperty =
-        AvaloniaProperty.Register<ZoneInstrumentMountView, WorkspaceHealthStatusMountContext?>(nameof(MountContext));
-
-    public static readonly StyledProperty<WorkspaceHealthStatusMountPayload?> MountPayloadProperty =
-        AvaloniaProperty.Register<ZoneInstrumentMountView, WorkspaceHealthStatusMountPayload?>(nameof(MountPayload));
-
     public static readonly StyledProperty<string> InstrumentIdProperty =
-        AvaloniaProperty.Register<ZoneInstrumentMountView, string>(
-            nameof(InstrumentId),
-            CockpitStandardInstrumentIds.WorkspaceHealthStatusV1);
+        AvaloniaProperty.Register<ZoneInstrumentMountView, string>(nameof(InstrumentId), "workspace_health_status_v1");
 
     public static readonly StyledProperty<string> SlotIdProperty =
         AvaloniaProperty.Register<ZoneInstrumentMountView, string>(nameof(SlotId), "pfd");
@@ -44,7 +35,6 @@ public partial class ZoneInstrumentMountView : UserControl
 
     static ZoneInstrumentMountView()
     {
-        MountContextProperty.Changed.AddClassHandler<ZoneInstrumentMountView>((x, _) => x.ApplyPolicyDefaults());
         InstrumentIdProperty.Changed.AddClassHandler<ZoneInstrumentMountView>((x, _) => x.ApplyPolicyDefaults());
         SlotIdProperty.Changed.AddClassHandler<ZoneInstrumentMountView>((x, _) => x.ApplyPolicyDefaults());
         SlotPolicyProperty.Changed.AddClassHandler<ZoneInstrumentMountView>((x, _) => x.ApplyPolicyDefaults());
@@ -54,23 +44,6 @@ public partial class ZoneInstrumentMountView : UserControl
     {
         InitializeComponent();
         ApplyPolicyDefaults();
-    }
-
-    /// <summary>
-    /// Единый runtime-контекст mount (instrument/slot/policy/payload); предпочтителен вместо отдельных
-    /// <see cref="InstrumentId"/> / <see cref="SlotId"/> / <see cref="SlotPolicy"/> / <see cref="MountPayload"/>.
-    /// </summary>
-    public WorkspaceHealthStatusMountContext? MountContext
-    {
-        get => GetValue(MountContextProperty);
-        set => SetValue(MountContextProperty, value);
-    }
-
-    /// <summary>Устаревший путь задания payload без контекста; если задан <see cref="MountContext"/>, берётся <c>MountContext.Payload</c>.</summary>
-    public WorkspaceHealthStatusMountPayload? MountPayload
-    {
-        get => GetValue(MountPayloadProperty);
-        set => SetValue(MountPayloadProperty, value);
     }
 
     public string InstrumentId
@@ -129,11 +102,7 @@ public partial class ZoneInstrumentMountView : UserControl
 
     private void ApplyPolicyDefaults()
     {
-        var ctx = MountContext;
-        var instrumentId = ctx?.InstrumentId ?? InstrumentId;
-        var slotId = ctx?.SlotId ?? SlotId;
-        var policy = ctx?.SlotPolicy ?? SlotPolicy;
-        var skin = ZoneInstrumentMountPolicy.Resolve(instrumentId, slotId, policy);
+        var skin = ZoneInstrumentMountPolicy.Resolve(InstrumentId, SlotId, SlotPolicy);
         HeaderText = skin.HeaderText;
         HostBorderBrush = skin.HostBorderBrush;
         HeaderBrush = skin.HeaderBrush;
@@ -189,7 +158,7 @@ internal static class ZoneInstrumentMountPolicy
             _ => "PFD STATUS PREVIEW"
         };
 
-        if (string.Equals(instrumentId, CockpitStandardInstrumentIds.WorkspaceHealthStatusV1, StringComparison.OrdinalIgnoreCase))
+        if (instrumentId == "workspace_health_status_v1")
             return BuildSkin(fallbackHeader, "#5A6E8C", "#A9D9FF", "#9FB4C9", "#DCE8F2", "#C9F0FF");
 
         return BuildSkin($"{instrumentId.ToUpperInvariant()} [{slotId.ToUpperInvariant()}]", "#5A6E8C", "#A9D9FF", "#9FB4C9", "#DCE8F2", "#C9F0FF");

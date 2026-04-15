@@ -9,17 +9,17 @@ public static partial class IdeCommandRegistry
     {
         // ——— Вид: фокус и панели (переключатели)
         AddPalette(b, "focus_editor", IdeCommands.FocusEditor, "Фокус в редактор", "Вид");
-        AddPalette(b, "toggle_solution_explorer", IdeCommands.ToggleSolutionExplorer, "Переключить обозреватель решения", "Вид");
+        AddPalette(b, "toggle_pfd_region_expanded", IdeCommands.TogglePfdRegionExpanded, "Переключить регион Pfd", "Вид");
         AddPalette(b, "toggle_build_output", IdeCommands.ToggleBuildOutput, "Переключить вывод сборки", "Вид");
         AddPalette(b, "toggle_terminal", IdeCommands.ToggleTerminal, "Переключить терминал", "Вид");
-        AddPalette(b, "toggle_chat_panel", IdeCommands.ToggleChatPanel, "Переключить чат", "Вид");
+        AddPalette(b, "toggle_mfd_region_expanded", IdeCommands.ToggleMfdRegionExpanded, "Переключить регион Mfd", "Вид");
         AddPalette(b, "toggle_git_panel", IdeCommands.ToggleGitPanel, "Переключить панель Git", "Вид");
         AddPalette(b, "toggle_instrumentation_dock", IdeCommands.ToggleInstrumentationDock, "Переключить док инструментирования", "Вид");
 
         // ——— Вид: тулбар — явные панели
-        AddPalette(b, "show_solution_explorer_panel", IdeCommands.ShowSolutionExplorerPanel, "Показать обозреватель решения", "Вид");
+        AddPalette(b, "show_pfd_region_panel", IdeCommands.ShowPfdRegionPanel, "Развернуть регион Pfd", "Вид");
         AddPalette(b, "show_build_output_panel", IdeCommands.ShowBuildOutputPanel, "Показать вывод сборки", "Вид");
-        AddPalette(b, "show_chat_panel", IdeCommands.ShowChatPanel, "Показать чат", "Вид");
+        AddPalette(b, "show_chat_page", IdeCommands.ShowChatPage, "Страница Chat (регион Mfd)", "Вид");
         AddPalette(b, "show_terminal_panel", IdeCommands.ShowTerminalPanel, "Показать терминал", "Вид");
         AddPalette(b, "hide_build_output_panel", IdeCommands.HideBuildOutputPanel, "Скрыть вывод сборки", "Вид");
 

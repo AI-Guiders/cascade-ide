@@ -188,9 +188,9 @@
             <MenuItem Header="_Вид">
                 <MenuItem x:Name="MenuCommandPalette" Header="Палитра _команд" Command="{Binding ToggleCommandPaletteCommand}"/>
                 <Separator/>
-                <MenuItem Header="Обозреватель _решения" ToggleType="CheckBox" IsChecked="{Binding IsSolutionExplorerVisible, Mode=TwoWay}"/>
+                <MenuItem Header="Обозреватель _решения" ToggleType="CheckBox" IsChecked="{Binding IsPfdRegionExpanded, Mode=TwoWay}"/>
                 <MenuItem Header="_Вывод сборки" ToggleType="CheckBox" IsChecked="{Binding IsBuildOutputVisible, Mode=TwoWay}"/>
-                <MenuItem Header="_Чат" ToggleType="CheckBox" IsChecked="{Binding IsChatPanelExpanded, Mode=TwoWay}"/>
+                <MenuItem Header="_Чат" ToggleType="CheckBox" IsChecked="{Binding IsMfdRegionExpanded, Mode=TwoWay}"/>
                 <MenuItem Header="_Терминал" ToggleType="CheckBox" IsChecked="{Binding IsTerminalVisible, Mode=TwoWay}"/>
                 <MenuItem Header="_Git" ToggleType="CheckBox" IsChecked="{Binding IsGitPanelVisible, Mode=TwoWay}"/>
                 <MenuItem Header="Док_ инструментирования (события, тесты, отладка)"
@@ -263,12 +263,14 @@
             <Grid>
                 <views:SolutionExplorerView />
                 <!-- Wave 3: mount-layer host preview для PFD (единая точка подключения мини-инструмента). -->
-                <views:ZoneInstrumentMountView IsVisible="{Binding IsPfdWorkspaceHealthMountVisible}"
+                <views:ZoneInstrumentMountView IsVisible="{Binding UseSkiaInstrumentWave3Preview}"
                                                HorizontalAlignment="Right"
                                                VerticalAlignment="Top"
                                                Margin="8"
                                                Width="250"
-                                               MountContext="{Binding PfdWorkspaceHealthMountContext}"
+                                               InstrumentId="workspace_health_status_v1"
+                                               SlotId="pfd"
+                                               SlotPolicy="{Binding PfdInstrumentMountSlotPolicy}"
                                                ZIndex="415"/>
             </Grid>
         </chrome:AttentionZoneContainer>
@@ -279,12 +281,12 @@
             <views:DocumentsDockView />
         </chrome:AttentionZoneContainer>
         <GridSplitter Grid.Row="3" Grid.Column="3"
-                      Grid.RowSpan="{Binding ChatPanelMainGridRowSpan}"
+                      Grid.RowSpan="{Binding MfdZoneMainGridRowSpan}"
                       Width="4" ResizeDirection="Columns" Background="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"
                       IsVisible="{Binding IsMfdColumnVisible}"/>
 
         <!-- Якорь зоны MFD: вторичный контур оболочки (SecondaryShellView) — WORKSPACE / чат / терминал / сборка / …; состав страниц ≠ сама зона (ADR 0021). -->
-        <chrome:AttentionZoneContainer Zone="Mfd" Grid.Row="3" Grid.Column="4" Grid.RowSpan="{Binding ChatPanelMainGridRowSpan}"
+        <chrome:AttentionZoneContainer Zone="Mfd" Grid.Row="3" Grid.Column="4" Grid.RowSpan="{Binding MfdZoneMainGridRowSpan}"
                                        IsVisible="{Binding IsMfdColumnVisible}">
             <views:SecondaryShellView DataContext="{Binding DataContext, ElementName=RootWindow}" MinHeight="0"/>
         </chrome:AttentionZoneContainer>
@@ -315,7 +317,7 @@
         <Border x:Name="SkiaZonePreviewMfd"
                 Grid.Row="3"
                 Grid.Column="4"
-                Grid.RowSpan="{Binding ChatPanelMainGridRowSpan}"
+                Grid.RowSpan="{Binding MfdZoneMainGridRowSpan}"
                 IsVisible="{Binding IsSkiaZonePreviewMfdVisible}"
                 ZIndex="410">
             <TextBlock Text="MFD"

@@ -34,18 +34,18 @@ public sealed class UiModeCatalogTests : IDisposable
         Assert.Equal(UiModeFamily.Debug, UiModeCatalog.GetFamily("MySuperDebug"));
         var dbg = UiModeCatalog.GetSpec("Debug");
         var mine = UiModeCatalog.GetSpec("MySuperDebug");
-        Assert.Equal(dbg.SolutionExplorerVisible, mine.SolutionExplorerVisible);
+        Assert.Equal(dbg.PfdRegionExpanded, mine.PfdRegionExpanded);
         Assert.Equal(dbg.EditorGroupCount, mine.EditorGroupCount);
         Assert.Equal(
-            UiModeCatalog.GetChatPanelExpandedWidthPixels("Debug"),
-            UiModeCatalog.GetChatPanelExpandedWidthPixels("MySuperDebug"));
+            UiModeCatalog.GetMfdRegionExpandedWidthPixels("Debug"),
+            UiModeCatalog.GetMfdRegionExpandedWidthPixels("MySuperDebug"));
         Assert.False(UiModeCatalog.GetShowTaskBar("Debug"));
         Assert.False(UiModeCatalog.GetShowTaskBar("MySuperDebug"));
         Assert.Equal(UiModeCatalog.GetCapabilities("Debug"), UiModeCatalog.GetCapabilities("MySuperDebug"));
     }
 
     [Fact]
-    public void Inherits_uses_parent_chat_width_when_child_omits_chat_expanded_width_pixels()
+    public void Inherits_uses_parent_mfd_width_when_child_omits_mfd_region_expanded_width_pixels()
     {
         var dir = Path.Combine(Path.GetTempPath(), "uimodes_" + Guid.NewGuid());
         Directory.CreateDirectory(dir);
@@ -58,7 +58,7 @@ public sealed class UiModeCatalogTests : IDisposable
         File.WriteAllText(
             Path.Combine(dir, "Balanced.toml"),
             """
-            chat_expanded_width_pixels = 555
+            mfd_region_expanded_width_pixels = 555
             """);
         File.WriteAllText(
             Path.Combine(dir, "DerivedBalanced.toml"),
@@ -68,8 +68,8 @@ public sealed class UiModeCatalogTests : IDisposable
 
         UiModeCatalog.Initialize(dir);
 
-        Assert.Equal(555, UiModeCatalog.GetChatPanelExpandedWidthPixels("Balanced"));
-        Assert.Equal(555, UiModeCatalog.GetChatPanelExpandedWidthPixels("DerivedBalanced"));
+        Assert.Equal(555, UiModeCatalog.GetMfdRegionExpandedWidthPixels("Balanced"));
+        Assert.Equal(555, UiModeCatalog.GetMfdRegionExpandedWidthPixels("DerivedBalanced"));
     }
 
     [Fact]
@@ -245,8 +245,8 @@ public sealed class UiModeCatalogTests : IDisposable
         Assert.False(UiModeCatalog.GetShowTaskBar("Editor"));
 
         var spec = UiModeCatalog.GetSpec("Editor");
-        Assert.True(spec.SolutionExplorerVisible);
-        Assert.True(spec.ChatPanelExpanded);
+        Assert.True(spec.PfdRegionExpanded);
+        Assert.True(spec.MfdRegionExpanded);
         Assert.False(spec.InstrumentationDockVisible);
 
         var caps = UiModeCatalog.GetCapabilities("Editor");

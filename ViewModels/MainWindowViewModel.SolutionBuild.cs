@@ -13,9 +13,9 @@ namespace CascadeIDE.ViewModels;
 public partial class MainWindowViewModel
 {
     [RelayCommand]
-    private void ToggleChatPanel()
+    private void ToggleMfdRegionExpanded()
     {
-        ApplyChatPanelExpanded(!IsChatPanelExpanded);
+        ApplyMfdRegionExpanded(!IsMfdRegionExpanded);
     }
 
     [RelayCommand(CanExecute = nameof(CanBuildSolution))]

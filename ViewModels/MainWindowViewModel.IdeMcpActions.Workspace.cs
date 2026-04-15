@@ -100,9 +100,9 @@ public partial class MainWindowViewModel
                 ui_mode = UiMode,
                 panels = new
                 {
-                    solution_explorer = IsSolutionExplorerVisible,
+                    pfd_region_expanded = IsPfdRegionExpanded,
                     build_output = IsBuildOutputVisible,
-                    chat_expanded = IsChatPanelExpanded,
+                    mfd_region_expanded = IsMfdRegionExpanded,
                     git = IsGitPanelVisible,
                     instrumentation_dock = IsInstrumentationDockVisible
                 },
