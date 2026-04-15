@@ -32,9 +32,11 @@
    - VM-proxy: `MainWindowViewModel.InstrumentMountSlotPolicy`
    - `MainWindow` и `MfdHostWindow` bind-ят `SlotPolicy` из VM.
 8. Добавлен policy-registry для декларативного резолва:
-   - `[[display.instrument_mount_policy_rules]]` c полями `slot_id`, `instrument_id`, `slot_policy`.
-   - резолв в VM: `ResolveInstrumentMountSlotPolicy(slot_id, instrument_id)` с приоритетом
-     `exact -> slot/* -> */instrument -> */* -> fallback`.
+   - `[[display.instrument_mount_policy_rules]]` c полями `surface_id`, `slot_id`, `instrument_id`, `slot_policy`.
+   - резолв в VM: `ResolveInstrumentMountSlotPolicy(surface_id, slot_id, instrument_id)` с приоритетом:
+     - сначала правила текущей runtime-поверхности (`ActiveAttentionLayoutSurface`);
+     - затем global fallback (`surface_id = "*"`);
+     - внутри каждого слоя: `exact -> slot/* -> */instrument -> */* -> fallback`.
    - `MainWindow`/`MfdHostWindow` bind-ят уже slot-specific policy (`PfdInstrumentMountSlotPolicy`, `MfdInstrumentMountSlotPolicy`).
 
 ## Принцип rollout
@@ -46,4 +48,4 @@
 ## Следующий шаг
 
 1. Перевести content-binding с фиксированных VM-полей на декларативный контракт payload (через `instrument_id` и typed data-source), чтобы mount не знал про конкретные поля `WorkspaceHealth*`.
-2. Связать policy-resolver с layout-контекстом (`presentation`/surface), чтобы для multi-instrument конфигураций policy выбирался не только по static rules из `[display]`, но и по runtime-топологии.
+2. Перенести текущий resolver из VM в отдельный surface/policy service и подключить его к композитору host-surface, чтобы policy вычислялась рядом с `CockpitInstrumentDescriptor`, а не ad-hoc в UI binding.

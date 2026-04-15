@@ -12,6 +12,7 @@ using CascadeIDE.Features.Instrumentation;
 using CascadeIDE.Features.Terminal;
 using CascadeIDE.Cockpit.Channels.Eicas;
 using CascadeIDE.Cockpit.Channels.WorkspaceHealth;
+using CascadeIDE.Cockpit.Composition.HostSurface;
 using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Models;
 using CascadeIDE.Services.Lsp;
@@ -49,6 +50,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private readonly bool _presentationDedicatedMfdSecondScreen;
     private readonly bool _presentationTriplePfdForwardMfd;
     private readonly bool _presentationMfdHostTopology;
+    private readonly IInstrumentMountPolicyResolver _instrumentMountPolicyResolver;
     private bool _suppressMfdColumnForMfdHostWindow;
 
     private Services.McpClientService _mcpClientService;
@@ -185,6 +187,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _presentationTriplePfdForwardMfd = _presentationParse.IsSuccess
             && Services.Presentation.PresentationLayoutAnalyzer.IsTriplePfdForwardMfdPreset(_presentationParse.Screens);
         _presentationMfdHostTopology = _presentationDedicatedMfdSecondScreen || _presentationTriplePfdForwardMfd;
+        _instrumentMountPolicyResolver = new SettingsBackedInstrumentMountPolicyResolver();
     }
 
     private void OnChromePropertyChangedForWorkspaceHealth(object? _, PropertyChangedEventArgs e)

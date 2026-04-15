@@ -6,6 +6,12 @@ namespace CascadeIDE.Models;
 /// </summary>
 public sealed class InstrumentMountPolicyRuleSettings
 {
+    /// <summary>
+    /// Целевая runtime-поверхность (топология), например:
+    /// <c>main_window_docked_grid</c>, <c>main_window_plus_mfd_host_top_level</c> или <c>*</c>.
+    /// </summary>
+    public string SurfaceId { get; set; } = "*";
+
     /// <summary>Целевой slot-id (например: <c>pfd</c>, <c>forward</c>, <c>mfd</c> или <c>*</c>).</summary>
     public string SlotId { get; set; } = "*";
 

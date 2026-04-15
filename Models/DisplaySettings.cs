@@ -47,7 +47,7 @@ public sealed class DisplaySettings
     public string InstrumentMountSlotPolicy { get; set; } = "wave3_preview_v1";
 
     /// <summary>
-    /// Реестр правил резолва policy по паре <c>slot_id + instrument_id</c>.
+    /// Реестр правил резолва policy по тройке <c>surface_id + slot_id + instrument_id</c>.
     /// Если пусто — используется <see cref="InstrumentMountSlotPolicy"/> как fallback.
     /// </summary>
     public List<InstrumentMountPolicyRuleSettings> InstrumentMountPolicyRules { get; set; } = [];
