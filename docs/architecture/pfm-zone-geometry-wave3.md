@@ -1,12 +1,12 @@
 # P/F/M Zone Geometry — Wave 3
 
-Статус: in progress.
+**Статус:** поставка **wave 3** (preview + единый mount + policy/placement по слотам) — **закрыта** (реализовано ниже, пп. 1–12). Отдельно остаётся **follow-up** (декларативный payload для mount, вынесение резолва рядом с композитором) — см. [§ Следующая итерация](#wave3-follow-up).
 
 ## Цель
 
 Начать перенос не только геометрии, но и содержимого инструментов на Skia-style отрисовку, с минимальным безопасным шагом.
 
-## Реализовано
+## Реализовано (wave 3 — scope закрыт)
 
 1. Добавлен первый реальный instrument-content preview:
    - `Views/MainWindow.axaml`
@@ -62,7 +62,11 @@
 - Фича выключена по умолчанию.
 - Цель итерации — отладить pipeline контентного overlay на реальных данных, не затрагивая маршрутизацию инструментов.
 
-## Следующий шаг
+<a id="wave3-follow-up"></a>
+
+## Следующая итерация (не входила в закрытие wave 3)
+
+По коду mount всё ещё привязан к полям главного VM (например `WorkspaceHealth*` в `ZoneInstrumentMountView.axaml`); это ожидаемый техдолг до декларативного слоя.
 
 1. Перевести content-binding с фиксированных VM-полей на декларативный контракт payload (через `instrument_id` и typed data-source), чтобы mount не знал про конкретные поля `WorkspaceHealth*`.
 2. Перенести текущий resolver из VM в отдельный surface/policy service и подключить его к композитору host-surface, чтобы policy вычислялась рядом с `CockpitInstrumentDescriptor`, а не ad-hoc в UI binding.
