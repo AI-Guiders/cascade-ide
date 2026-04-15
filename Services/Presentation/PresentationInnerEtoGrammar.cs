@@ -25,7 +25,7 @@ internal static class PresentationInnerEtoGrammar
 
         var digit = Terminals.Digit;
         var intPart = digit.Repeat(1);
-        var frac = Terminals.Set('.').Then(digit.Repeat(1));
+        var frac = Terminals.Literal(".").Then(digit.Repeat(1));
         var weight = intPart.Then(frac.Optional()).Named("weight");
 
         var weighted = weight.Optional().Then(anchor).Named("slot");
@@ -33,10 +33,12 @@ internal static class PresentationInnerEtoGrammar
         var inner = weighted.Then(new RepeatParser(zoneSep.Then(weighted), 0));
 
         var rule = inner.Then(Terminals.End);
+        // Без CharacterSetAlternations: иначе Eto.Parse 1.6.0 схлопывает P|F|M в один CharSet и падает в CharSetTerminal.Test.
         return new Grammar(rule)
         {
             CaseSensitive = true,
             EnableMatchEvents = false,
+            Optimizations = GrammarOptimizations.All & ~GrammarOptimizations.CharacterSetAlternations,
         };
     }
 
