@@ -79,6 +79,7 @@
 | Раскладка кабины: `presentation` как инвариант P/F/M; канон в CDS — `CockpitPresentationLayoutPolicy`; coercion для меню/MCP/UI-режимов и реактивного слоя | [0046](adr/0046-presentation-layout-authority-and-cockpit-invariants.md) (Proposed) |
 | Инструмент кабины: дескриптор слота композитора (`CockpitInstrumentDescriptor`), не Avalonia-контрол; SE vs Semantic Map как разные `instrument_id` в PFD | [0047](adr/0047-cockpit-instrument-descriptor-and-slot-composition.md) (Accepted) |
 | Чат Cursor ACP в IDE: `mcpServers`, авто IDE MCP; приложения — пробелы тулов, разбор хоста Cursor (`mcp.json`) ↔ `ide_*` | [0048](adr/0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) (Proposed) |
+| Rollout Skia по CIDE: Avalonia остается host/fuselage, Skia расширяется в surface-слое волнами (dual-path, fallback до стабилизации) | [0049](adr/0049-skia-surface-rollout-over-avalonia-host.md) (Proposed) |
 
 Полный индекс: [docs/adr/README.md](adr/README.md).
 
@@ -180,4 +181,5 @@
 - **v1.74** — `Cockpit/Cds/CockpitSurfaceState` (schema `0.3`) получил `instruments` как проекцию HostSurface-кадра для MCP/наблюдаемости; добавлен `Cockpit/Surface/MainWindowInstrumentMountRegistry` (`instrument_id → mount`, хост-слой Avalonia/Skia, без UI Semantic Map на этом шаге).
 - **v1.75** — [0046](adr/0046-presentation-layout-authority-and-cockpit-invariants.md): заголовок, §«Решение» и индексы приведены к канону CDS (`CockpitPresentationLayoutPolicy`); уточнено, что статический слой в `Services/Presentation` снят, на границе VM — только intent `Apply*`.
 - **v1.76** — Roslyn **CASCOPE003** ([`CascadeIDE.ArchitectureAnalyzers`](../CascadeIDE.ArchitectureAnalyzers/README.md)): запрет прямых присваиваний intent P/M вне белого списка файлов; см. [0046](adr/0046-presentation-layout-authority-and-cockpit-invariants.md).
+- **v1.77** — добавлен [0049](adr/0049-skia-surface-rollout-over-avalonia-host.md): поэтапный rollout Skia-поверхностей по CIDE при сохранении Avalonia как host; волновая миграция, dual-path и fallback до стабилизации.
 - Изменения направления — отдельным коммитом: обновление этого файла и при необходимости новый ADR в [docs/adr/README.md](adr/README.md).
