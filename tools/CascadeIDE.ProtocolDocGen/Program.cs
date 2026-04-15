@@ -338,6 +338,7 @@ internal static class IdeMcpCommandExecutorEmitter
         sb.AppendLine("            return await ((IIdeMcpActions)_vm).SetPanelSizeAsync(McpCommandJsonArgs.String(args, \"panel\") ?? \"\", w, h);");
         sb.AppendLine("        });");
         sb.AppendLine("        add(Services.IdeCommands.GetSupportedEditorLanguages, async (_, _) => await Task.FromResult(((IIdeMcpActions)_vm).GetSupportedEditorLanguages()));");
+        sb.AppendLine("        add(Services.IdeCommands.ChatExportReadable, async (args, _) => await ((IIdeMcpActions)_vm).ExportChatReadableAsync(McpCommandJsonArgs.Bool(args, \"write_file\", false), McpCommandJsonArgs.String(args, \"file_name\")));");
 
         sb.AppendLine("    }");
         sb.AppendLine("}");

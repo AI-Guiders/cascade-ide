@@ -23,6 +23,6 @@ public static partial class IdeCommands
     public const string ChatGetSelectedMessage = "chat_get_selected_message";
     /// <summary>Заменить текст ответа ассистента по стабильному message_id; в лог пишется message_edited. args: message_id:string, new_content:string, reason?:string; returns: json; example: {"message_id":"a1b2c3d4e5f6789012345678901234ab","new_content":"fixed text"}.</summary>
     public const string ChatEditMessage = "chat_edit_message";
-    /// <summary>Экспорт текущего чата в читаемый Markdown (роли, индексы, message_id). args: write_file?:boolean, file_name?:string; returns: json; example: {"write_file":true}.</summary>
+    /// <summary>Экспорт текущего чата в читаемый Markdown (роли, индексы, message_id). Поддерживаемый сценарий — явно подвести итоги длинной сессии: экспорт, затем краткое смысловое резюме и согласование с пользователем (см. MCP-PROTOCOL.md, раздел «Подведение итогов сессии чата»). args: write_file?:boolean, file_name?:string; returns: json; example: {"write_file":true}.</summary>
     public const string ChatExportReadable = "chat_export_readable";
 }

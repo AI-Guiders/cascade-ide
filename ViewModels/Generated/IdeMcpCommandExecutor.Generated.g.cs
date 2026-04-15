@@ -63,5 +63,6 @@ internal sealed partial class IdeMcpCommandExecutor
             return await ((IIdeMcpActions)_vm).SetPanelSizeAsync(McpCommandJsonArgs.String(args, "panel") ?? "", w, h);
         });
         add(Services.IdeCommands.GetSupportedEditorLanguages, async (_, _) => await Task.FromResult(((IIdeMcpActions)_vm).GetSupportedEditorLanguages()));
+        add(Services.IdeCommands.ChatExportReadable, async (args, _) => await ((IIdeMcpActions)_vm).ExportChatReadableAsync(McpCommandJsonArgs.Bool(args, "write_file", false), McpCommandJsonArgs.String(args, "file_name")));
     }
 }
