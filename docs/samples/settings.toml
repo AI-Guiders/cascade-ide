@@ -11,6 +11,12 @@ use_skia_zone_geometry_preview = false
 use_skia_instrument_wave3_preview = false
 # W3: policy-id для декларативного mount preview (instrument_id + slot_id + slot_policy).
 instrument_mount_slot_policy = "wave3_preview_v1"
+# W3 rollout gate: применять policy-rule только при проходе SA/perf/workload.
+enforce_instrument_mount_policy_eligibility = false
+instrument_mount_policy_min_sa_score = 0.6
+instrument_mount_policy_min_performance_score = 0.6
+instrument_mount_policy_max_workload_score = 0.5
+require_instrument_mount_policy_scores = false
 # W3: registry правил (приоритет:
 # surface+exact -> surface+slot/* -> surface+*/instrument -> surface+*/*
 # -> global+exact -> global+slot/* -> global+*/instrument -> global+*/*).
@@ -19,12 +25,18 @@ surface_id = "main_window_docked_grid"
 slot_id = "pfd"
 instrument_id = "workspace_health_status_v1"
 slot_policy = "wave3_preview_v1"
+sa_score = 0.8
+performance_score = 0.8
+workload_score = 0.2
 
 [[display.instrument_mount_policy_rules]]
 surface_id = "main_window_plus_mfd_host_top_level"
 slot_id = "mfd"
 instrument_id = "workspace_health_status_v1"
 slot_policy = "wave3_preview_v1"
+sa_score = 0.75
+performance_score = 0.72
+workload_score = 0.28
 
 [ai]
 default_ollama_model = "qwen2.5-coder:7b"

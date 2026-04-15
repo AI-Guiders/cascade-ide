@@ -38,6 +38,23 @@
      - затем global fallback (`surface_id = "*"`);
      - внутри каждого слоя: `exact -> slot/* -> */instrument -> */* -> fallback`.
    - `MainWindow`/`MfdHostWindow` bind-ят уже slot-specific policy (`PfdInstrumentMountSlotPolicy`, `MfdInstrumentMountSlotPolicy`).
+9. Резолв policy выделен в отдельную Strategy + Specification:
+   - `IInstrumentMountPolicyResolver` + `SettingsBackedInstrumentMountPolicyResolver`.
+   - match-логика правила вынесена в `InstrumentMountPolicyRuleMatchesSpecification`.
+10. Добавлен eligibility-gate для rollout policy по метрикам:
+   - `RolloutMetricsEligibilitySpecification` проверяет SA/perf/workload для rule.
+   - gate управляется полями `[display]`:
+     `enforce_instrument_mount_policy_eligibility`,
+     `instrument_mount_policy_min_sa_score`,
+     `instrument_mount_policy_min_performance_score`,
+     `instrument_mount_policy_max_workload_score`,
+     `require_instrument_mount_policy_scores`.
+11. Для host-surface добавлен placement-spec слой (instrument routing by surface/slot/safety):
+   - `InstrumentPlacementSpecification` + `CockpitInstrumentPlacementRules`.
+   - `MainWindowHostSurfaceCompositor` монтирует инструмент только при прохождении placement-rule.
+12. Добавлена validation-спецификация конфигурации:
+   - `DisplaySettingsValidationSpecification` проверяет score-диапазоны и обязательные поля rules.
+   - вызывается при `SettingsService.Load()`; нарушения логируются в diagnostics.
 
 ## Принцип rollout
 
