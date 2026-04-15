@@ -43,6 +43,8 @@ public partial class MainWindowViewModel
         _settings.WorkspaceUi.PfdRegionExpanded = value;
         OnPropertyChanged(nameof(IsPfdRegionCollapsed));
         SaveSettingsIfChanged();
+        if (value)
+            ScheduleWorkspaceNavigationMapRefresh();
     }
 
     partial void OnIsTerminalVisibleChanged(bool value)

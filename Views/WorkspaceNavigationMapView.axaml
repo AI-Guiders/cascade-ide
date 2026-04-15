@@ -4,24 +4,68 @@
              xmlns:views="using:CascadeIDE.Views"
              x:Class="CascadeIDE.Views.WorkspaceNavigationMapView"
              x:DataType="vm:MainWindowViewModel">
-    <!-- Скелет Semantic Map (ADR 0039 / 0047): слот Pfd; граф и укладка — позже (ILayoutEngine / Skia). -->
+    <!-- Semantic Map (ADR 0039 / 0047): слот Pfd; режим related — список связанных файлов (граф/Skia позже). -->
     <Panel IsVisible="{Binding IsPfdRegionExpanded}">
         <Border BorderBrush="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"
                 BorderThickness="1"
                 CornerRadius="10"
                 Padding="8"
                 Background="{DynamicResource CascadeTheme.TerminalBackground}">
-            <Grid RowDefinitions="Auto,*">
+            <Grid RowDefinitions="Auto,Auto,Auto,*">
                 <views:PanelChromeHeader Grid.Row="0"
                                          Title="Semantic Map · workspace"
                                          UppercaseTitle="True"/>
-                <TextBlock Grid.Row="1"
-                           Text="Заглушка: узлы и рёбра графа появятся здесь (Roslyn / пресеты навигации — см. ADR 0039)."
-                           TextWrapping="Wrap"
-                           FontSize="12"
-                           Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
-                           Margin="0,8,0,0"
-                           VerticalAlignment="Top"/>
+                <StackPanel Grid.Row="1" Margin="0,6,0,0" Spacing="2">
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <TextBlock FontSize="11"
+                                   Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                                   Text="Якорь:"/>
+                        <TextBlock FontSize="11"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                                   Text="{Binding WorkspaceNavigationMapAnchorLabel}"/>
+                    </StackPanel>
+                    <TextBlock Text="{Binding WorkspaceNavigationMapStatus}"
+                               FontSize="11"
+                               Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                               TextWrapping="Wrap"/>
+                </StackPanel>
+                <Border Grid.Row="2" Height="1" Margin="0,8,0,0"
+                        Background="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"/>
+                <ScrollViewer Grid.Row="3"
+                              Margin="0,8,0,0"
+                              HorizontalScrollBarVisibility="Disabled"
+                              VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding WorkspaceNavigationMapItems}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="vm:WorkspaceNavigationMapItemVm">
+                                <Button Margin="0,0,0,6"
+                                        Padding="6,8"
+                                        HorizontalAlignment="Stretch"
+                                        HorizontalContentAlignment="Left"
+                                        Background="Transparent"
+                                        BorderThickness="1"
+                                        BorderBrush="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"
+                                        CornerRadius="6"
+                                        Command="{Binding $parent[UserControl].DataContext.OpenWorkspaceNavigationRelatedCommand}"
+                                        CommandParameter="{Binding FullPath}">
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Text="{Binding RelativePath}"
+                                                   FontSize="12"
+                                                   FontWeight="SemiBold"
+                                                   TextWrapping="Wrap"
+                                                   Foreground="{DynamicResource CascadeTheme.SolutionExplorerHeaderForeground}"/>
+                                        <TextBlock Text="{Binding KindRationaleLine}"
+                                                   FontSize="10"
+                                                   Opacity="0.85"
+                                                   Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                                                   TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
             </Grid>
         </Border>
     </Panel>

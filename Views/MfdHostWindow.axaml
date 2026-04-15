@@ -13,11 +13,13 @@
         Icon="/Assets/avalonia-logo.ico"
         Background="{DynamicResource CascadeTheme.MainWindowBackground}">
 
-    <!-- ADR 0017 п. 8: полный SecondaryShellView (все страницы), как колонка Mfd в MainWindow. -->
-    <Grid>
-        <views:SecondaryShellView DataContext="{Binding}" MinHeight="0"/>
+    <!-- ADR 0017 п. 8: паритет с колонкой Mfd в MainWindow — дерево решения + SecondaryShellView (сетка *, 2*). -->
+    <Grid RowDefinitions="*,2*">
+        <views:SolutionExplorerView Grid.Row="0" DataContext="{Binding}" MinHeight="120"/>
+        <views:SecondaryShellView Grid.Row="1" DataContext="{Binding}" MinHeight="0"/>
         <!-- W3: mount-layer host preview для MFD (паритет с PFD-host). -->
-        <views:ZoneInstrumentMountView IsVisible="{Binding UseSkiaInstrumentWave3Preview}"
+        <views:ZoneInstrumentMountView Grid.RowSpan="2"
+                                       IsVisible="{Binding UseSkiaInstrumentWave3Preview}"
                                        HorizontalAlignment="Right"
                                        VerticalAlignment="Top"
                                        Margin="8"
@@ -28,6 +30,7 @@
                                        ZIndex="415"/>
         <!-- W2: preview контура зоны MFD в отдельном окне-хосте. -->
         <Border x:Name="SkiaZonePreviewMfdHost"
+                Grid.RowSpan="2"
                 IsVisible="{Binding UseSkiaZoneGeometryPreview}"
                 ZIndex="410"
                 BorderThickness="2"
@@ -42,7 +45,7 @@
                        Foreground="#E6D8FF"/>
         </Border>
         <!-- Паритет ide_highlight_control с MainWindow: та же рамка поверх клиентской области. -->
-        <Canvas x:Name="AgentHighlightLayer" ZIndex="1000" IsHitTestVisible="False"
+        <Canvas x:Name="AgentHighlightLayer" Grid.RowSpan="2" ZIndex="1000" IsHitTestVisible="False"
                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <Border x:Name="AgentHighlightOverlay" IsVisible="False" BorderBrush="#FF6B9D" BorderThickness="2" Background="#10000000"/>
         </Canvas>

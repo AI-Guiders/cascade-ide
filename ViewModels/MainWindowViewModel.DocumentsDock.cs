@@ -17,6 +17,7 @@ public partial class MainWindowViewModel
     {
         RefreshComplexityBadgeFromCurrentFile();
         RefreshEditorHudBannerFromDiagnostics();
+        ScheduleWorkspaceNavigationMapRefresh();
     }
 
     /// <summary>Прокси «сложности» для task cockpit: число строк текущего файла на диске (при переключении документа).</summary>
