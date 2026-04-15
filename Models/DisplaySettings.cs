@@ -51,4 +51,24 @@ public sealed class DisplaySettings
     /// Если пусто — используется <see cref="InstrumentMountSlotPolicy"/> как fallback.
     /// </summary>
     public List<InstrumentMountPolicyRuleSettings> InstrumentMountPolicyRules { get; set; } = [];
+
+    /// <summary>
+    /// Включить eligibility-gate для rollout policy: правило применяется только если проходит SA/perf/workload проверки.
+    /// </summary>
+    public bool EnforceInstrumentMountPolicyEligibility { get; set; }
+
+    /// <summary>Минимальный SA score (0..1) для допуска policy-rule при <see cref="EnforceInstrumentMountPolicyEligibility"/>.</summary>
+    public double InstrumentMountPolicyMinSaScore { get; set; } = 0.6;
+
+    /// <summary>Минимальный performance score (0..1) для допуска policy-rule при <see cref="EnforceInstrumentMountPolicyEligibility"/>.</summary>
+    public double InstrumentMountPolicyMinPerformanceScore { get; set; } = 0.6;
+
+    /// <summary>Максимальный workload score (0..1, меньше лучше) для допуска policy-rule при <see cref="EnforceInstrumentMountPolicyEligibility"/>.</summary>
+    public double InstrumentMountPolicyMaxWorkloadScore { get; set; } = 0.5;
+
+    /// <summary>
+    /// Если <see langword="true"/>, rule без SA/perf/workload scores отклоняется eligibility-gate.
+    /// Если <see langword="false"/>, отсутствие score допускается (gate не блокирует rule).
+    /// </summary>
+    public bool RequireInstrumentMountPolicyScores { get; set; }
 }

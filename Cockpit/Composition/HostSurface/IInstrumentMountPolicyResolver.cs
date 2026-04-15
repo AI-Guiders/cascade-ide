@@ -8,8 +8,7 @@ namespace CascadeIDE.Cockpit.Composition.HostSurface;
 public interface IInstrumentMountPolicyResolver
 {
     string Resolve(
-        IReadOnlyList<InstrumentMountPolicyRuleSettings>? rules,
-        string defaultSlotPolicy,
+        DisplaySettings displaySettings,
         string surfaceId,
         string slotId,
         string instrumentId);

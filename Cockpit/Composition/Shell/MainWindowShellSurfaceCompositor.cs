@@ -41,7 +41,8 @@ public readonly record struct MainWindowShellSurfaceCompositionInput(
     bool IntentChatPanelExpanded,
     bool SuppressMfdColumnForMfdHostWindow,
     int ExpandedMfdWidthPixels,
-    int CollapsedMfdWidthPixels);
+    int CollapsedMfdWidthPixels,
+    string SafetyLevel);
 
 /// <summary>Результат: что отдать слою поверхности (привязки VM / code-behind) для колонок PFD/MFD.</summary>
 public readonly record struct MainWindowShellSurfaceComposition(

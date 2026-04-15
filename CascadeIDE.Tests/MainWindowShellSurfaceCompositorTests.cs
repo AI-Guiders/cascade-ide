@@ -22,7 +22,8 @@ public sealed class MainWindowShellSurfaceCompositorTests
                 IntentChatPanelExpanded: true,
                 SuppressMfdColumnForMfdHostWindow: true,
                 ExpandedMfdWidthPixels: 340,
-                CollapsedMfdWidthPixels: 8));
+                CollapsedMfdWidthPixels: 8,
+                SafetyLevel: "L2"));
 
         Assert.True(c.PfdSurfaceVisible);
         Assert.True(c.MfdSurfaceExpanded);
@@ -43,7 +44,8 @@ public sealed class MainWindowShellSurfaceCompositorTests
                 IntentChatPanelExpanded: false,
                 SuppressMfdColumnForMfdHostWindow: false,
                 ExpandedMfdWidthPixels: 300,
-                CollapsedMfdWidthPixels: 12));
+                CollapsedMfdWidthPixels: 12,
+                SafetyLevel: "L2"));
 
         Assert.True(c.MfdSurfaceExpanded);
         Assert.True(c.MfdColumnVisibleInMainGrid);

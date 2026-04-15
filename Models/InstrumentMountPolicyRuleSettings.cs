@@ -20,4 +20,20 @@ public sealed class InstrumentMountPolicyRuleSettings
 
     /// <summary>Policy-id, который должен быть применён для пары <c>slot + instrument</c>.</summary>
     public string SlotPolicy { get; set; } = "wave3_preview_v1";
+
+    /// <summary>
+    /// SA score (0..1) для rollout-оценки policy в данном правиле.
+    /// Если не задано — правило считается "без доказательства" и обрабатывается по настройкам gate.
+    /// </summary>
+    public double? SaScore { get; set; }
+
+    /// <summary>
+    /// Performance score (0..1) для rollout-оценки policy в данном правиле.
+    /// </summary>
+    public double? PerformanceScore { get; set; }
+
+    /// <summary>
+    /// Workload score (0..1, меньше лучше) для rollout-оценки policy в данном правиле.
+    /// </summary>
+    public double? WorkloadScore { get; set; }
 }

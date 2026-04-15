@@ -37,7 +37,8 @@ public partial class MainWindowViewModel
                 IsChatPanelExpanded,
                 _suppressMfdColumnForMfdHostWindow,
                 UiModeCatalog.GetChatPanelExpandedWidthPixels(NormalizeUiMode(UiMode)),
-                UiWorkspaceLayoutRuntimeMetrics.ChatPanelCollapsedWidthPixels));
+                UiWorkspaceLayoutRuntimeMetrics.ChatPanelCollapsedWidthPixels,
+                SafetyLevel));
 
     private MainWindowShellSurfaceComposition ShellSurfaceComposition => HostSurfaceFrame.Shell;
 
@@ -112,8 +113,7 @@ public partial class MainWindowViewModel
 
     private string ResolveInstrumentMountSlotPolicy(string surfaceId, string slotId, string instrumentId) =>
         _instrumentMountPolicyResolver.Resolve(
-            _settings.Display.InstrumentMountPolicyRules,
-            InstrumentMountSlotPolicy,
+            _settings.Display,
             surfaceId,
             slotId,
             instrumentId);
@@ -131,7 +131,8 @@ public partial class MainWindowViewModel
     public bool AutonomousAgentTelemetry => Capabilities.AutonomousAgentTelemetry;
     /// <summary>Карточка уровня безопасности: в Power — крупные L1–L3; в Focus/Balanced — компактные кнопки (разметка в ChatPanelView).</summary>
     public bool ShowSafetyControls => true;
-    public bool ShowTelemetryHiddenHint => AutonomousAgentTelemetry && !IsTerminalVisible;
+    public bool ShowTelemetryHiddenHint => UiModeGateSpecifications.ShowTelemetryHiddenHint.IsSatisfiedBy(
+        new UiModeGateContext(UiModeFamily, AutonomousAgentTelemetry, IsTerminalVisible, HasDebugSession));
 
     /// <summary>
     /// Дублирующая карточка Workspace Health на вкладке «Терминал» в Power. Пока видна полоса <see cref="WorkspaceHealthStripView"/> под редактором —

@@ -11,19 +11,20 @@ namespace CascadeIDE.Cockpit.Composition.HostSurface;
 public sealed class SettingsBackedInstrumentMountPolicyResolver : IInstrumentMountPolicyResolver
 {
     private static readonly IInstrumentMountPolicyRuleSpecification RuleMatches = new InstrumentMountPolicyRuleMatchesSpecification();
+    private static readonly IInstrumentMountPolicyEligibilitySpecification RuleEligibility = new RolloutMetricsEligibilitySpecification();
 
     public string Resolve(
-        IReadOnlyList<InstrumentMountPolicyRuleSettings>? rules,
-        string defaultSlotPolicy,
+        DisplaySettings displaySettings,
         string surfaceId,
         string slotId,
         string instrumentId)
     {
         static string Normalize(string? value) => (value ?? string.Empty).Trim().ToLowerInvariant();
 
-        var normalizedDefault = string.IsNullOrWhiteSpace(defaultSlotPolicy)
+        var normalizedDefault = string.IsNullOrWhiteSpace(displaySettings.InstrumentMountSlotPolicy)
             ? "wave3_preview_v1"
-            : defaultSlotPolicy.Trim();
+            : displaySettings.InstrumentMountSlotPolicy.Trim();
+        var rules = displaySettings.InstrumentMountPolicyRules;
         if (rules is null || rules.Count == 0)
             return normalizedDefault;
 
@@ -40,7 +41,9 @@ public sealed class SettingsBackedInstrumentMountPolicyResolver : IInstrumentMou
                 surfaceExact,
                 slotExact,
                 instrumentExact);
-            var match = rules.FirstOrDefault(rule => RuleMatches.IsSatisfiedBy(rule, in context));
+            var match = rules.FirstOrDefault(rule =>
+                RuleMatches.IsSatisfiedBy(rule, in context)
+                && RuleEligibility.IsSatisfiedBy(rule, displaySettings));
             return string.IsNullOrWhiteSpace(match?.SlotPolicy) ? string.Empty : match.SlotPolicy.Trim();
         }
 

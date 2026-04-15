@@ -4,6 +4,11 @@ namespace CascadeIDE.Services;
 
 public static class SettingsService
 {
+    private static readonly ISettingsValidationSpecification[] ValidationSpecifications =
+    [
+        new DisplaySettingsValidationSpecification()
+    ];
+
     public static string GetSettingsDirectory()
     {
         var appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
@@ -21,10 +26,11 @@ public static class SettingsService
         {
             var tomlPath = GetSettingsPath();
             if (!File.Exists(tomlPath))
-                return new CascadeIdeSettings();
+                return ValidateAndReturn(new CascadeIdeSettings());
 
             var toml = File.ReadAllText(tomlPath);
-            return CascadeTomlSerializer.Deserialize<CascadeIdeSettings>(toml) ?? new CascadeIdeSettings();
+            var settings = CascadeTomlSerializer.Deserialize<CascadeIdeSettings>(toml) ?? new CascadeIdeSettings();
+            return ValidateAndReturn(settings);
         }
         catch
         {
@@ -44,5 +50,12 @@ public static class SettingsService
         {
             // Игнорируем ошибки записи
         }
+    }
+
+    private static CascadeIdeSettings ValidateAndReturn(CascadeIdeSettings settings)
+    {
+        foreach (var validationError in ValidationSpecifications.SelectMany(spec => spec.Validate(settings)))
+            global::System.Diagnostics.Debug.WriteLine($"Settings validation: {validationError}");
+        return settings;
     }
 }
