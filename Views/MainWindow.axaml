@@ -188,7 +188,7 @@
             <MenuItem Header="_Вид">
                 <MenuItem x:Name="MenuCommandPalette" Header="Палитра _команд" Command="{Binding ToggleCommandPaletteCommand}"/>
                 <Separator/>
-                <MenuItem Header="Обозреватель _решения" ToggleType="CheckBox" IsChecked="{Binding IsPfdRegionExpanded, Mode=TwoWay}"/>
+                <MenuItem Header="Карта _workspace (PFD)" ToggleType="CheckBox" IsChecked="{Binding IsPfdRegionExpanded, Mode=TwoWay}"/>
                 <MenuItem Header="_Вывод сборки" ToggleType="CheckBox" IsChecked="{Binding IsBuildOutputVisible, Mode=TwoWay}"/>
                 <MenuItem Header="_Чат" ToggleType="CheckBox" IsChecked="{Binding IsMfdRegionExpanded, Mode=TwoWay}"/>
                 <MenuItem Header="_Терминал" ToggleType="CheckBox" IsChecked="{Binding IsTerminalVisible, Mode=TwoWay}"/>
@@ -258,10 +258,10 @@
 
         <views:TaskCockpitView Grid.Row="2" Grid.ColumnSpan="5"/>
 
-        <!-- Якорь зоны PFD (канон id pfd): по дефолтной карте — SolutionExplorerView; переопределение — attention_zone_panels / AttentionZonePanelRuntime -->
+        <!-- Якорь зоны PFD (канон id pfd): Semantic Map; переопределение — attention_zone_panels / AttentionZonePanelRuntime -->
         <chrome:AttentionZoneContainer Zone="Pfd" Grid.Row="3" Grid.Column="0">
             <Grid>
-                <views:SolutionExplorerView />
+                <views:WorkspaceNavigationMapView />
                 <!-- Wave 3: mount-layer host preview для PFD (единая точка подключения мини-инструмента). -->
                 <views:ZoneInstrumentMountView IsVisible="{Binding UseSkiaInstrumentWave3Preview}"
                                                HorizontalAlignment="Right"
@@ -285,10 +285,15 @@
                       Width="4" ResizeDirection="Columns" Background="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"
                       IsVisible="{Binding IsMfdColumnVisible}"/>
 
-        <!-- Якорь зоны MFD: вторичный контур оболочки (SecondaryShellView) — WORKSPACE / чат / терминал / сборка / …; состав страниц ≠ сама зона (ADR 0021). -->
+        <!-- Якорь зоны MFD: дерево решения + вторичный контур (SecondaryShellView); состав страниц ≠ сама зона (ADR 0021). -->
         <chrome:AttentionZoneContainer Zone="Mfd" Grid.Row="3" Grid.Column="4" Grid.RowSpan="{Binding MfdZoneMainGridRowSpan}"
                                        IsVisible="{Binding IsMfdColumnVisible}">
-            <views:SecondaryShellView DataContext="{Binding DataContext, ElementName=RootWindow}" MinHeight="0"/>
+            <Grid RowDefinitions="*,2*">
+                <views:SolutionExplorerView Grid.Row="0" MinHeight="120"/>
+                <views:SecondaryShellView Grid.Row="1"
+                                          DataContext="{Binding DataContext, ElementName=RootWindow}"
+                                          MinHeight="0"/>
+            </Grid>
         </chrome:AttentionZoneContainer>
 
         <!-- W2: preview контуров зон поверх контента (без изменения содержимого). -->

@@ -9,15 +9,25 @@ internal static class CockpitInstrumentPlacementRules
 {
     public static readonly IReadOnlyList<InstrumentPlacementRule> MainWindow =
     [
-        // v1: solution tree stays on PFD, on supported host surfaces and standard safety levels.
+        // Semantic Map — основной инструмент слота Pfd (ADR 0047).
         new InstrumentPlacementRule(
-            CockpitStandardInstrumentIds.SolutionExplorerTree,
+            CockpitStandardInstrumentIds.WorkspaceNavigationMap,
             CockpitSlotIds.Pfd,
             new AndInstrumentPlacementSpecification(
                 new AllowedSurfaceSpecification(
                     "main_window_docked_grid",
                     "main_window_plus_mfd_host_top_level"),
                 new AllowedSlotSpecification(CockpitSlotIds.Pfd),
+                new AllowedSafetyLevelsSpecification("L1", "L2", "L3"))),
+        // Дерево решения — слот Mfd (колонка вторичного контура), см. MainWindow Mfd grid.
+        new InstrumentPlacementRule(
+            CockpitStandardInstrumentIds.SolutionExplorerTree,
+            CockpitSlotIds.Mfd,
+            new AndInstrumentPlacementSpecification(
+                new AllowedSurfaceSpecification(
+                    "main_window_docked_grid",
+                    "main_window_plus_mfd_host_top_level"),
+                new AllowedSlotSpecification(CockpitSlotIds.Mfd),
                 new AllowedSafetyLevelsSpecification("L1", "L2", "L3")))
     ];
 

@@ -1,0 +1,28 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CascadeIDE.ViewModels"
+             xmlns:views="using:CascadeIDE.Views"
+             x:Class="CascadeIDE.Views.WorkspaceNavigationMapView"
+             x:DataType="vm:MainWindowViewModel">
+    <!-- Скелет Semantic Map (ADR 0039 / 0047): слот Pfd; граф и укладка — позже (ILayoutEngine / Skia). -->
+    <Panel IsVisible="{Binding IsPfdRegionExpanded}">
+        <Border BorderBrush="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"
+                BorderThickness="1"
+                CornerRadius="10"
+                Padding="8"
+                Background="{DynamicResource CascadeTheme.TerminalBackground}">
+            <Grid RowDefinitions="Auto,*">
+                <views:PanelChromeHeader Grid.Row="0"
+                                         Title="Semantic Map · workspace"
+                                         UppercaseTitle="True"/>
+                <TextBlock Grid.Row="1"
+                           Text="Заглушка: узлы и рёбра графа появятся здесь (Roslyn / пресеты навигации — см. ADR 0039)."
+                           TextWrapping="Wrap"
+                           FontSize="12"
+                           Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                           Margin="0,8,0,0"
+                           VerticalAlignment="Top"/>
+            </Grid>
+        </Border>
+    </Panel>
+</UserControl>

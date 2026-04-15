@@ -9,7 +9,7 @@ public static partial class IdeCommandRegistry
     {
         // ——— Вид: фокус и панели (переключатели)
         AddPalette(b, "focus_editor", IdeCommands.FocusEditor, "Фокус в редактор", "Вид");
-        AddPalette(b, "toggle_pfd_region_expanded", IdeCommands.TogglePfdRegionExpanded, "Переключить регион Pfd", "Вид");
+        AddPalette(b, "toggle_pfd_region_expanded", IdeCommands.TogglePfdRegionExpanded, "Переключить регион Pfd (Semantic Map)", "Вид");
         AddPalette(b, "toggle_build_output", IdeCommands.ToggleBuildOutput, "Переключить вывод сборки", "Вид");
         AddPalette(b, "toggle_terminal", IdeCommands.ToggleTerminal, "Переключить терминал", "Вид");
         AddPalette(b, "toggle_mfd_region_expanded", IdeCommands.ToggleMfdRegionExpanded, "Переключить регион Mfd", "Вид");

@@ -70,7 +70,7 @@
             <Button Content="{Binding TelemetryButtonText}"
                     Command="{Binding ToggleTerminalCommand}"
                     IsVisible="{Binding AutonomousAgentTelemetry}"/>
-            <Button Content="Show explorer" Command="{Binding ShowPfdRegionPanelCommand}" IsVisible="{Binding IsPfdRegionCollapsed}"/>
+            <Button Content="Показать PFD (карта)" Command="{Binding ShowPfdRegionPanelCommand}" IsVisible="{Binding IsPfdRegionCollapsed}"/>
             <Button Content="Show build" Command="{Binding ShowBuildOutputPanelCommand}" IsVisible="{Binding IsBuildPanelHidden}"/>
             <Button Content="Show chat" Command="{Binding ShowChatPageCommand}" IsVisible="{Binding IsMfdRegionCollapsed}"/>
             <Button Content="Show terminal" Command="{Binding ShowTerminalPanelCommand}" IsVisible="{Binding IsTerminalPanelHidden}"/>

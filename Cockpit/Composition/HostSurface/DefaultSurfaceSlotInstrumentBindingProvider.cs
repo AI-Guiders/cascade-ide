@@ -1,8 +1,10 @@
+using System.Collections.Generic;
+
 namespace CascadeIDE.Cockpit.Composition.HostSurface;
 
 /// <summary>
-/// Дефолт для главного окна: при видимой колонке Pfd — <see cref="CockpitStandardInstrumentIds.SolutionExplorerTree"/>,
-/// если <see cref="CockpitInstrumentPlacementRules"/> разрешает. Дальше: SM в Pfd, SE в Mfd — другая реализация <see cref="ISurfaceSlotInstrumentBindingProvider"/>.
+/// Дефолт главного окна: <see cref="CockpitStandardInstrumentIds.WorkspaceNavigationMap"/> в Pfd при видимой колонке;
+/// <see cref="CockpitStandardInstrumentIds.SolutionExplorerTree"/> в Mfd при видимой колонке Mfd в main grid.
 /// </summary>
 public sealed class DefaultSurfaceSlotInstrumentBindingProvider : ISurfaceSlotInstrumentBindingProvider
 {
@@ -14,18 +16,31 @@ public sealed class DefaultSurfaceSlotInstrumentBindingProvider : ISurfaceSlotIn
 
     public IReadOnlyList<CockpitInstrumentDescriptor> GetBindings(in SurfaceSlotInstrumentBindingContext context)
     {
-        if (!context.Shell.PfdSurfaceVisible)
-            return [];
+        var shell = context.Shell;
+        var list = new List<CockpitInstrumentDescriptor>();
 
-        var ctx = new InstrumentPlacementContext(
-            SurfaceId: context.SurfaceId,
-            SlotId: CockpitSlotIds.Pfd,
-            InstrumentId: CockpitStandardInstrumentIds.SolutionExplorerTree,
-            SafetyLevel: context.SafetyLevel);
+        if (shell.PfdSurfaceVisible)
+        {
+            var ctx = new InstrumentPlacementContext(
+                SurfaceId: context.SurfaceId,
+                SlotId: CockpitSlotIds.Pfd,
+                InstrumentId: CockpitStandardInstrumentIds.WorkspaceNavigationMap,
+                SafetyLevel: context.SafetyLevel);
+            if (CockpitInstrumentPlacementRules.IsAllowed(in ctx))
+                list.Add(new CockpitInstrumentDescriptor(CockpitStandardInstrumentIds.WorkspaceNavigationMap, CockpitSlotIds.Pfd));
+        }
 
-        if (!CockpitInstrumentPlacementRules.IsAllowed(in ctx))
-            return [];
+        if (shell.MfdColumnVisibleInMainGrid)
+        {
+            var ctx = new InstrumentPlacementContext(
+                SurfaceId: context.SurfaceId,
+                SlotId: CockpitSlotIds.Mfd,
+                InstrumentId: CockpitStandardInstrumentIds.SolutionExplorerTree,
+                SafetyLevel: context.SafetyLevel);
+            if (CockpitInstrumentPlacementRules.IsAllowed(in ctx))
+                list.Add(new CockpitInstrumentDescriptor(CockpitStandardInstrumentIds.SolutionExplorerTree, CockpitSlotIds.Mfd));
+        }
 
-        return [new CockpitInstrumentDescriptor(CockpitStandardInstrumentIds.SolutionExplorerTree, CockpitSlotIds.Pfd)];
+        return list;
     }
 }

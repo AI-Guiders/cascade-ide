@@ -127,14 +127,13 @@
 
 | command_id | Описание |
 |-----------:|----------|
-| `set_pfd_region_expanded` | Развернуть/свернуть регион Pfd в main grid (дерево решения в зоне Pfd). args: visible:boolean; returns: text; example: {"visible":true}. |
-| `set_mfd_region_expanded` | Развернуть/свернуть регион Mfd в main grid. args: visible:boolean; returns: text; example: {"visible":true}. |
 | `set_git_panel_visible` | Показать/скрыть панель Git (нижняя вкладка). args: visible:boolean; returns: text; example: {"visible":true}. |
 | `set_instrumentation_dock_visible` | Показать/скрыть док инструментирования (Events/Tests/Debug). args: visible:boolean; returns: text; example: {"visible":true}. |
-| `toggle_pfd_region_expanded` | Переключить развёрнут/свёрнут регион Pfd (toggle). returns: text. |
-| `toggle_mfd_region_expanded` | Переключить развёрнут/свёрнут регион Mfd (toggle). returns: text. |
+| `set_mfd_region_expanded` | Развернуть/свернуть регион Mfd в main grid. args: visible:boolean; returns: text; example: {"visible":true}. |
+| `set_pfd_region_expanded` | Развернуть/свернуть регион Pfd в main grid (Semantic Map в зоне Pfd). args: visible:boolean; returns: text; example: {"visible":true}. |
 | `toggle_git_panel` | Переключить видимость панели Git (toggle). returns: text. |
 | `toggle_instrumentation_dock` | Переключить видимость дока инструментирования (toggle). returns: text. |
+| `toggle_mfd_region_expanded` | Переключить развёрнут/свёрнут регион Mfd (toggle). returns: text. |
 
 ### Вид: режим (дублируют хоткеи Alt+1/2/3, Ctrl+Alt+M)
 
@@ -183,7 +182,7 @@
 | `hide_build_output_panel` | Скрыть панель вывода сборки (toolbar). returns: text. |
 | `show_build_output_panel` | Явно показать панель вывода сборки (toolbar). returns: text. |
 | `show_chat_page` | Развернуть регион Mfd и перейти на страницу Chat (toolbar). returns: text. |
-| `show_pfd_region_panel` | Развернуть регион Pfd (toolbar). returns: text. |
+| `show_pfd_region_panel` | Развернуть регион Pfd / Semantic Map (toolbar). returns: text. |
 | `show_terminal_panel` | Явно показать терминал (toolbar). returns: text. |
 
 ### Тулбар: группы редакторов
@@ -316,6 +315,7 @@
 | `set_terminal_visible` | Явно показать/скрыть терминал (без переключения). args: visible:boolean; returns: text; example: {"visible":true}. |
 | `set_ui_mode` | Режим UI (как меню «Вид → Режим интерфейса»). args: mode:string; returns: text; example: {"mode":"Power"}. |
 | `toggle_build_output` | Как меню «Вид → Вывод сборки». returns: text. |
+| `toggle_pfd_region_expanded` | Переключить развёрнут/свёрнут регион Pfd (как меню «Вид → Semantic Map (PFD)»). returns: text. |
 | `toggle_pin_document` | Закрепить/открепить документ (pin). args: file_path:string; returns: text; example: {"file_path":"C:\\\\tmp\\\\a.cs"}. |
 | `toggle_terminal` | Как меню «Вид → Терминал» (переключатель). returns: text. |
 <!-- GENERATED:IdeCommands END -->
