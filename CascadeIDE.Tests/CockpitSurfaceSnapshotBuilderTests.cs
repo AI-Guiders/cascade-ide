@@ -18,9 +18,10 @@ public sealed class CockpitSurfaceSnapshotBuilderTests
         Assert.Equal("main_window_docked_grid", state.Topology.SurfaceKind);
         Assert.False(state.Topology.MfdHostWindowOpen);
         Assert.True(state.Zones.ForwardVisible);
-        Assert.Single(state.Instruments);
-        Assert.Equal("solution_explorer_tree", state.Instruments[0].InstrumentId);
-        Assert.Equal("pfd", state.Instruments[0].SlotId);
+        Assert.Equal(3, state.Instruments.Count);
+        Assert.Contains(state.Instruments, x => x.InstrumentId == "solution_explorer_tree" && x.SlotId == "pfd");
+        Assert.Contains(state.Instruments, x => x.InstrumentId == "workspace_health_status_v1" && x.SlotId == "pfd");
+        Assert.Contains(state.Instruments, x => x.InstrumentId == "workspace_health_status_v1" && x.SlotId == "mfd");
         Assert.Equal(vm.EffectivePresentationLine, state.PresentationEffectiveLine);
     }
 

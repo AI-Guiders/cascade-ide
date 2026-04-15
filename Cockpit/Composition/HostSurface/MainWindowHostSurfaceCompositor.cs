@@ -15,17 +15,49 @@ public static class MainWindowHostSurfaceCompositor
         var surfaceId = input.SuppressMfdColumnForMfdHostWindow
             ? "main_window_plus_mfd_host_top_level"
             : "main_window_docked_grid";
+        var instruments = new List<CockpitInstrumentDescriptor>(capacity: 3);
+        TryAddInstrument(
+            instruments,
+            shell.PfdSurfaceVisible,
+            surfaceId,
+            CockpitSlotIds.Pfd,
+            CockpitStandardInstrumentIds.SolutionExplorerTree,
+            input.SafetyLevel);
+        TryAddInstrument(
+            instruments,
+            shell.PfdSurfaceVisible,
+            surfaceId,
+            CockpitSlotIds.Pfd,
+            CockpitStandardInstrumentIds.WorkspaceHealthStatusV1,
+            input.SafetyLevel);
+        TryAddInstrument(
+            instruments,
+            shell.MfdColumnVisibleInMainGrid,
+            surfaceId,
+            CockpitSlotIds.Mfd,
+            CockpitStandardInstrumentIds.WorkspaceHealthStatusV1,
+            input.SafetyLevel);
+        return new MainWindowHostSurfaceFrame(shell, instruments);
+    }
+
+    private static void TryAddInstrument(
+        List<CockpitInstrumentDescriptor> instruments,
+        bool slotVisible,
+        string surfaceId,
+        string slotId,
+        string instrumentId,
+        string safetyLevel)
+    {
+        if (!slotVisible)
+            return;
         var placementContext = new InstrumentPlacementContext(
             SurfaceId: surfaceId,
-            SlotId: CockpitSlotIds.Pfd,
-            InstrumentId: CockpitStandardInstrumentIds.SolutionExplorerTree,
-            SafetyLevel: input.SafetyLevel);
-
-        IReadOnlyList<CockpitInstrumentDescriptor> instruments =
-            shell.PfdSurfaceVisible && IsPlacementAllowed(placementContext)
-                ? [new CockpitInstrumentDescriptor(CockpitStandardInstrumentIds.SolutionExplorerTree, CockpitSlotIds.Pfd)]
-                : [];
-        return new MainWindowHostSurfaceFrame(shell, instruments);
+            SlotId: slotId,
+            InstrumentId: instrumentId,
+            SafetyLevel: safetyLevel);
+        if (!IsPlacementAllowed(placementContext))
+            return;
+        instruments.Add(new CockpitInstrumentDescriptor(instrumentId, slotId));
     }
 
     private static bool IsPlacementAllowed(in InstrumentPlacementContext context)
