@@ -16,6 +16,31 @@
     <!-- ADR 0017 п. 8: полный SecondaryShellView (все страницы), как колонка Mfd в MainWindow. -->
     <Grid>
         <views:SecondaryShellView DataContext="{Binding}" MinHeight="0"/>
+        <!-- W3: mount-layer host preview для MFD (паритет с PFD-host). -->
+        <views:ZoneInstrumentMountView IsVisible="{Binding UseSkiaInstrumentWave3Preview}"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Top"
+                                       Margin="8"
+                                       Width="250"
+                                       InstrumentId="workspace_health_status_v1"
+                                       SlotId="mfd"
+                                       SlotPolicy="wave3_preview_v1"
+                                       ZIndex="415"/>
+        <!-- W2: preview контура зоны MFD в отдельном окне-хосте. -->
+        <Border x:Name="SkiaZonePreviewMfdHost"
+                IsVisible="{Binding UseSkiaZoneGeometryPreview}"
+                ZIndex="410"
+                BorderThickness="2"
+                BorderBrush="#B38CFF"
+                CornerRadius="4"
+                Background="#04000000"
+                IsHitTestVisible="False">
+            <TextBlock Text="MFD"
+                       Margin="6,4,0,0"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Top"
+                       Foreground="#E6D8FF"/>
+        </Border>
         <!-- Паритет ide_highlight_control с MainWindow: та же рамка поверх клиентской области. -->
         <Canvas x:Name="AgentHighlightLayer" ZIndex="1000" IsHitTestVisible="False"
                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch">

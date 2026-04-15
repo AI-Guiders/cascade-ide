@@ -1,0 +1,29 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:views="using:CascadeIDE.Views"
+             xmlns:vm="using:CascadeIDE.ViewModels"
+             x:Class="CascadeIDE.Views.ZoneInstrumentMountView"
+             x:DataType="vm:MainWindowViewModel">
+    <Border CornerRadius="8"
+            BorderThickness="1"
+            BorderBrush="{Binding HostBorderBrush, RelativeSource={RelativeSource AncestorType=views:ZoneInstrumentMountView}}"
+            Background="#22000000"
+            Padding="8,6"
+            IsHitTestVisible="False">
+        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="Auto,*" RowSpacing="2" ColumnSpacing="6">
+            <TextBlock Grid.Row="0" Grid.ColumnSpan="2"
+                       Text="{Binding HeaderText, RelativeSource={RelativeSource AncestorType=views:ZoneInstrumentMountView}}"
+                       Foreground="{Binding HeaderBrush, RelativeSource={RelativeSource AncestorType=views:ZoneInstrumentMountView}}"
+                       FontSize="11"
+                       FontWeight="SemiBold"/>
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="Build:" Foreground="{Binding LabelBrush, RelativeSource={RelativeSource AncestorType=views:ZoneInstrumentMountView}}" FontSize="11"/>
+            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding WorkspaceHealthBuildCockpitShort}" Foreground="{Binding ValueBrush, RelativeSource={RelativeSource AncestorType=views:ZoneInstrumentMountView}}" FontSize="11"/>
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="Tests:" Foreground="{Binding LabelBrush, RelativeSource={RelativeSource AncestorType=views:ZoneInstrumentMountView}}" FontSize="11"/>
+            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding WorkspaceHealthTestsCockpitShort}" Foreground="{Binding ValueBrush, RelativeSource={RelativeSource AncestorType=views:ZoneInstrumentMountView}}" FontSize="11"/>
+            <TextBlock Grid.Row="3" Grid.Column="0" Text="Debug:" Foreground="{Binding LabelBrush, RelativeSource={RelativeSource AncestorType=views:ZoneInstrumentMountView}}" FontSize="11"/>
+            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding WorkspaceHealthDebugCockpitShort}" Foreground="{Binding ValueBrush, RelativeSource={RelativeSource AncestorType=views:ZoneInstrumentMountView}}" FontSize="11"/>
+            <TextBlock Grid.Row="4" Grid.Column="0" Text="Safety:" Foreground="{Binding LabelBrush, RelativeSource={RelativeSource AncestorType=views:ZoneInstrumentMountView}}" FontSize="11"/>
+            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SafetyLevel}" Foreground="{Binding SafetyBrush, RelativeSource={RelativeSource AncestorType=views:ZoneInstrumentMountView}}" FontSize="11" FontWeight="Bold"/>
+        </Grid>
+    </Border>
+</UserControl>
