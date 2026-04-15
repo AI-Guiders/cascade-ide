@@ -76,6 +76,16 @@
 
 **Меню, тулбар, task bar и чат через `ide_execute_command`:** те же `command_id`, что заданы в частичном классе `IdeCommands` (`Services/IdeCommands.cs`, `Services/IdeCommands.*.cs`).
 
+### Подведение итогов сессии чата
+
+Агенту **не нужно** притворяться, что «всё помнит без сжатия»: для длинного треда нормально **предложить** явное подведение итогов. Поддерживаемый сценарий:
+
+1. Вызвать `ide_execute_command` с `command_id` **`chat_export_readable`** и при необходимости `args`: `write_file` (boolean, по умолчанию false), `file_name` (string, опционально). При `write_file: true` файл попадает в `.cascade-ide/chat-sessions/exports/`; иначе содержимое приходит в ответе JSON.
+2. По экспорту (или по прочитанному файлу) дать **краткое смысловое резюме** — решения, открытые вопросы, следующие шаги.
+3. **Согласовать** с пользователем формулировку итога; при необходимости зафиксировать в `.cascade-ide/agent-notes.md` (`ide_write_agent_notes` / `ide_append_agent_notes`) или в KB по правилам канона (репозиторий agent-notes, `knowledge/`), а не подменять прозрачный экспорт непрозрачным «внутренним» сжатием истории.
+
+Пошаговый плейбук для агента: `knowledge/playbook-session-summary-and-chat-export-v1.md` (в каноне agent-notes — тот же путь под `knowledge/`). Если **MCP Cascade IDE в сессии нет**, тот же смысл (экспорт → резюме → согласование) выполняется **вне IDE**: поиск нужного `*.jsonl` в доступных `agent-transcripts` через `rg`/grep по запомненной фразе, затем читаемый экспорт скриптом **`tools/Export-CursorJsonlTranscript.ps1`** (в корне репозитория / в каноне agent-notes — каталог `tools/`; опционально отдельный архив вроде `cursor-agent-transcripts-archive`) — детали в том же плейбуке, **ветка B**.
+
 <!-- GENERATED:IdeCommands START -->
 
 > Этот блок сгенерирован из XML-doc в частичном классе `IdeCommands`: `Services/IdeCommands.cs` и `Services/IdeCommands.*.cs` (склейка как в генераторе).
@@ -285,7 +295,7 @@
 | `activate_document` | Активировать документ (переключить вкладку). args: file_path:string; returns: text; example: {"file_path":"C:\\\\tmp\\\\a.cs"}. |
 | `capture_window` | Снимок окон IDE в PNG (по умолчанию главное окно; при scope=all — все top-level, в т.ч. окно-хост Mfd и прочие). args: scope?:string, workspace_path?:string, output_path?:string; returns: json. example: {"scope":"all","workspace_path":"D:\\\\tmp\\\\ws","output_path":".cascade-ide/window-{n}.png"}. |
 | `chat_edit_message` | Заменить текст ответа ассистента по стабильному message_id; в лог пишется message_edited. args: message_id:string, new_content:string, reason?:string; returns: json; example: {"message_id":"a1b2c3d4e5f6789012345678901234ab","new_content":"fixed text"}. |
-| `chat_export_readable` | Экспорт текущего чата в читаемый Markdown (роли, индексы, message_id). args: write_file?:boolean, file_name?:string; returns: json; example: {"write_file":true}. |
+| `chat_export_readable` | Экспорт текущего чата в читаемый Markdown (роли, индексы, message_id). Поддерживаемый сценарий — явно подвести итоги длинной сессии: экспорт, затем краткое смысловое резюме и согласование с пользователем (см. MCP-PROTOCOL.md, раздел «Подведение итогов сессии чата»). args: write_file?:boolean, file_name?:string; returns: json; example: {"write_file":true}. |
 | `chat_get_selected_message` | Получить выбранное сообщение чата (индекс, роль, контент) в JSON. returns: json. |
 | `chat_select_message` | Выбрать сообщение в чате по индексу (0-based), в т.ч. для Skia-поверхности. args: index:integer; returns: text; example: {"index":0}. |
 | `close_document` | Закрыть документ. args: file_path:string; returns: text; example: {"file_path":"C:\\\\tmp\\\\a.cs"}. |
