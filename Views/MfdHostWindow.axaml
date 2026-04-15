@@ -17,15 +17,12 @@
     <Grid>
         <views:SecondaryShellView DataContext="{Binding}" MinHeight="0"/>
         <!-- W3: mount-layer host preview для MFD (паритет с PFD-host). -->
-        <views:ZoneInstrumentMountView IsVisible="{Binding UseSkiaInstrumentWave3Preview}"
+        <views:ZoneInstrumentMountView IsVisible="{Binding IsMfdWorkspaceHealthMountVisible}"
                                        HorizontalAlignment="Right"
                                        VerticalAlignment="Top"
                                        Margin="8"
                                        Width="250"
-                                       InstrumentId="workspace_health_status_v1"
-                                       MountPayload="{Binding WorkspaceHealthMountPayload}"
-                                       SlotId="mfd"
-                                       SlotPolicy="{Binding MfdInstrumentMountSlotPolicy}"
+                                       MountContext="{Binding MfdWorkspaceHealthMountContext}"
                                        ZIndex="415"/>
         <!-- W2: preview контура зоны MFD в отдельном окне-хосте. -->
         <Border x:Name="SkiaZonePreviewMfdHost"

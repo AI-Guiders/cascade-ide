@@ -14,5 +14,7 @@ public partial class MainWindowViewModel
     {
         WorkspaceHealthSegmentBuilder.Rebuild(WorkspaceHealthSegments, _workspaceHealth.GetSnapshot());
         OnPropertyChanged(nameof(WorkspaceHealthMountPayload));
+        OnPropertyChanged(nameof(PfdWorkspaceHealthMountContext));
+        OnPropertyChanged(nameof(MfdWorkspaceHealthMountContext));
     }
 }

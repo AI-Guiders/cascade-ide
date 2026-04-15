@@ -111,6 +111,23 @@ public partial class MainWindowViewModel
             WorkspaceHealthDebugCockpitShort,
             SafetyLevel);
 
+    /// <summary>
+    /// Полный контекст mount в PFD: совпадает с <see cref="MainWindowHostSurfaceInstruments"/> и policy resolver.
+    /// <c>null</c>, если слот/инструмент не в кадре или выключен Wave 3 preview.
+    /// </summary>
+    public WorkspaceHealthStatusMountContext? PfdWorkspaceHealthMountContext =>
+        BuildWorkspaceHealthMountContextIfAllowed(CockpitSlotIds.Pfd);
+
+    /// <summary>Контекст mount в колонке MFD (docked grid); для <see cref="Views.MfdHostWindow"/> — тот же контракт.</summary>
+    public WorkspaceHealthStatusMountContext? MfdWorkspaceHealthMountContext =>
+        BuildWorkspaceHealthMountContextIfAllowed(CockpitSlotIds.Mfd);
+
+    /// <summary>Mount в PFD показываем только если descriptor пришёл из текущего host-surface кадра.</summary>
+    public bool IsPfdWorkspaceHealthMountVisible => PfdWorkspaceHealthMountContext is not null;
+
+    /// <summary>В docked-grid mount в MFD также резолвится по descriptor'ам текущего host-surface кадра.</summary>
+    public bool IsMfdWorkspaceHealthMountVisible => MfdWorkspaceHealthMountContext is not null;
+
     /// <summary>Нормализованный runtime-контекст топологии для резолва slot-policy из реестра.</summary>
     private string MountPolicyRuntimeSurfaceId => ActiveAttentionLayoutSurface switch
     {
@@ -125,6 +142,35 @@ public partial class MainWindowViewModel
             surfaceId,
             slotId,
             instrumentId);
+
+    private bool HasHostInstrument(string slotId, string instrumentId) =>
+        MainWindowHostSurfaceInstruments.Any(x =>
+            string.Equals(x.SlotId, slotId, StringComparison.OrdinalIgnoreCase)
+            && string.Equals(x.InstrumentId, instrumentId, StringComparison.OrdinalIgnoreCase));
+
+    private WorkspaceHealthStatusMountContext? BuildWorkspaceHealthMountContextIfAllowed(string slotId)
+    {
+        if (!UseSkiaInstrumentWave3Preview)
+            return null;
+        var wh = CockpitStandardInstrumentIds.WorkspaceHealthStatusV1;
+        if (!HasHostInstrument(slotId, wh))
+            return null;
+        var policy = ResolveInstrumentMountSlotPolicy(MountPolicyRuntimeSurfaceId, slotId, wh);
+        var instrumentId = ResolveHostInstrumentId(slotId, wh);
+        return new WorkspaceHealthStatusMountContext(instrumentId, slotId, policy, WorkspaceHealthMountPayload);
+    }
+
+    private string ResolveHostInstrumentId(string slotId, string expectedInstrumentId)
+    {
+        foreach (var d in MainWindowHostSurfaceInstruments)
+        {
+            if (string.Equals(d.SlotId, slotId, StringComparison.OrdinalIgnoreCase)
+                && string.Equals(d.InstrumentId, expectedInstrumentId, StringComparison.OrdinalIgnoreCase))
+                return d.InstrumentId;
+        }
+
+        return expectedInstrumentId;
+    }
     /// <summary>Полоса активной задачи / Task Cockpit — из <c>UiModes/&lt;id&gt;.toml</c> (<c>active_task_strip</c>); по умолчанию скрыто для семьи Debug.</summary>
     public bool ShowTaskBar => UiModeCatalog.GetShowTaskBar(NormalizeUiMode(UiMode));
 

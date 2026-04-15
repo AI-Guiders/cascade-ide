@@ -21,6 +21,8 @@ public partial class MainWindowViewModel
         OnPropertyChanged(nameof(WorkspaceHealthDebugText));
         OnPropertyChanged(nameof(WorkspaceHealthDebugCockpitShort));
         OnPropertyChanged(nameof(WorkspaceHealthMountPayload));
+        OnPropertyChanged(nameof(PfdWorkspaceHealthMountContext));
+        OnPropertyChanged(nameof(MfdWorkspaceHealthMountContext));
     }
 
     private Task ShowDebugInfoAsync(string title, string message) =>

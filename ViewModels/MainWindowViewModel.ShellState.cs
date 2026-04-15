@@ -13,12 +13,18 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(IsChatPanelColumnVisible))]
     [NotifyPropertyChangedFor(nameof(IsMfdColumnVisible))]
     [NotifyPropertyChangedFor(nameof(IsSkiaZonePreviewMfdVisible))]
+    [NotifyPropertyChangedFor(nameof(IsPfdWorkspaceHealthMountVisible))]
+    [NotifyPropertyChangedFor(nameof(IsMfdWorkspaceHealthMountVisible))]
+    [NotifyPropertyChangedFor(nameof(PfdWorkspaceHealthMountContext))]
+    [NotifyPropertyChangedFor(nameof(MfdWorkspaceHealthMountContext))]
     [NotifyCanExecuteChangedFor(nameof(ToggleChatPanelCommand))]
     private bool _isChatPanelExpanded = true;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsPfdColumnVisible))]
     [NotifyPropertyChangedFor(nameof(IsSkiaZonePreviewPfdVisible))]
+    [NotifyPropertyChangedFor(nameof(IsPfdWorkspaceHealthMountVisible))]
+    [NotifyPropertyChangedFor(nameof(PfdWorkspaceHealthMountContext))]
     [NotifyCanExecuteChangedFor(nameof(ToggleSolutionExplorerCommand))]
     private bool _isSolutionExplorerVisible = true;
 
@@ -44,6 +50,10 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(IsSkiaZonePreviewForwardVisible))]
     [NotifyPropertyChangedFor(nameof(IsSkiaZonePreviewMfdVisible))]
     [NotifyPropertyChangedFor(nameof(UseSkiaInstrumentWave3Preview))]
+    [NotifyPropertyChangedFor(nameof(IsPfdWorkspaceHealthMountVisible))]
+    [NotifyPropertyChangedFor(nameof(IsMfdWorkspaceHealthMountVisible))]
+    [NotifyPropertyChangedFor(nameof(PfdWorkspaceHealthMountContext))]
+    [NotifyPropertyChangedFor(nameof(MfdWorkspaceHealthMountContext))]
     [NotifyPropertyChangedFor(nameof(ShowTaskBar))]
     [NotifyPropertyChangedFor(nameof(ShowWorkspaceHealthStrip))]
     [NotifyPropertyChangedFor(nameof(ShowWorkspaceHealthSecondaryPage))]
@@ -113,6 +123,10 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(SafetyL2Opacity))]
     [NotifyPropertyChangedFor(nameof(SafetyL3Opacity))]
     [NotifyPropertyChangedFor(nameof(WorkspaceHealthMountPayload))]
+    [NotifyPropertyChangedFor(nameof(IsPfdWorkspaceHealthMountVisible))]
+    [NotifyPropertyChangedFor(nameof(IsMfdWorkspaceHealthMountVisible))]
+    [NotifyPropertyChangedFor(nameof(PfdWorkspaceHealthMountContext))]
+    [NotifyPropertyChangedFor(nameof(MfdWorkspaceHealthMountContext))]
     private string _safetyLevel = "L2";
 
     [ObservableProperty]
@@ -123,11 +137,17 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(IsImpactedTestsBadgeVisible))]
     [NotifyPropertyChangedFor(nameof(WorkspaceHealthTestsText))]
     [NotifyPropertyChangedFor(nameof(WorkspaceHealthTestsCockpitShort))]
+    [NotifyPropertyChangedFor(nameof(WorkspaceHealthMountPayload))]
+    [NotifyPropertyChangedFor(nameof(PfdWorkspaceHealthMountContext))]
+    [NotifyPropertyChangedFor(nameof(MfdWorkspaceHealthMountContext))]
     private int _impactedTestsBadge;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(WorkspaceHealthTestsText))]
     [NotifyPropertyChangedFor(nameof(WorkspaceHealthTestsCockpitShort))]
+    [NotifyPropertyChangedFor(nameof(WorkspaceHealthMountPayload))]
+    [NotifyPropertyChangedFor(nameof(PfdWorkspaceHealthMountContext))]
+    [NotifyPropertyChangedFor(nameof(MfdWorkspaceHealthMountContext))]
     private string _lastTestSummary = "";
 
     /// <summary>Снимок раскладки UI (JSON), полоса Workspace Health в Power.</summary>
@@ -145,6 +165,8 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(WorkspaceHealthBuildText))]
     [NotifyPropertyChangedFor(nameof(WorkspaceHealthBuildCockpitShort))]
     [NotifyPropertyChangedFor(nameof(WorkspaceHealthMountPayload))]
+    [NotifyPropertyChangedFor(nameof(PfdWorkspaceHealthMountContext))]
+    [NotifyPropertyChangedFor(nameof(MfdWorkspaceHealthMountContext))]
     private bool _isBuilding;
 
     [ObservableProperty]

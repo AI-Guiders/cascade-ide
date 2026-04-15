@@ -81,6 +81,12 @@ public partial class MainWindowViewModel
         OnPropertyChanged(nameof(IsChatPanelColumnVisible));
         OnPropertyChanged(nameof(ActiveAttentionLayoutSurface));
         OnPropertyChanged(nameof(MainGridColumnDefinitions));
+        OnPropertyChanged(nameof(IsPfdWorkspaceHealthMountVisible));
+        OnPropertyChanged(nameof(IsMfdWorkspaceHealthMountVisible));
+        OnPropertyChanged(nameof(PfdWorkspaceHealthMountContext));
+        OnPropertyChanged(nameof(MfdWorkspaceHealthMountContext));
+        OnPropertyChanged(nameof(PfdInstrumentMountSlotPolicy));
+        OnPropertyChanged(nameof(MfdInstrumentMountSlotPolicy));
     }
 
     /// <summary>Сохранённая геометрия <see cref="Views.MfdHostWindow"/> в <c>settings.toml</c> (ADR 0017).</summary>
