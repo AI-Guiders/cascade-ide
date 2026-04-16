@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -208,19 +207,19 @@ public sealed class CockpitLayerArchitectureAnalyzer : DiagnosticAnalyzer
             return false;
 
         var normalized = filePath!.Replace('\\', '/');
-        if (normalized.IndexOf("/Cockpit/Channels/", StringComparison.OrdinalIgnoreCase) >= 0)
+        if (normalized.Contains("/Cockpit/Channels/", StringComparison.OrdinalIgnoreCase))
         {
             layer = "Channels";
             return true;
         }
 
-        if (normalized.IndexOf("/Cockpit/Cds/", StringComparison.OrdinalIgnoreCase) >= 0)
+        if (normalized.Contains("/Cockpit/Cds/", StringComparison.OrdinalIgnoreCase))
         {
             layer = "Cds";
             return true;
         }
 
-        if (normalized.IndexOf("/Cockpit/Composition/", StringComparison.OrdinalIgnoreCase) >= 0)
+        if (normalized.Contains("/Cockpit/Composition/", StringComparison.OrdinalIgnoreCase))
         {
             layer = "Composition";
             return true;

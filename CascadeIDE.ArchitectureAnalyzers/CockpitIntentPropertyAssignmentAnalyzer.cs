@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -64,7 +63,7 @@ public sealed class CockpitIntentPropertyAssignmentAnalyzer : DiagnosticAnalyzer
         if (string.IsNullOrEmpty(path))
             return false;
         var n = path!.Replace('\\', '/');
-        return n.IndexOf("/ViewModels/MainWindowViewModel", StringComparison.OrdinalIgnoreCase) >= 0;
+        return n.Contains("/ViewModels/MainWindowViewModel", StringComparison.OrdinalIgnoreCase);
     }
 
     private static bool IsCockpitIntentMember(ISymbol symbol, out string displayName)
@@ -105,8 +104,8 @@ public sealed class CockpitIntentPropertyAssignmentAnalyzer : DiagnosticAnalyzer
         var p = path!.Replace('\\', '/');
 
         // Тесты и сэмплы могут имитировать VM или поднимать фиктивные присваивания.
-        if (p.IndexOf("/CascadeIDE.Tests/", StringComparison.OrdinalIgnoreCase) >= 0
-            || p.IndexOf("/samples/", StringComparison.OrdinalIgnoreCase) >= 0)
+        if (p.Contains("/CascadeIDE.Tests/", StringComparison.OrdinalIgnoreCase)
+            || p.Contains("/samples/", StringComparison.OrdinalIgnoreCase))
             return true;
 
         static bool EndsWithFile(string full, string fileName) =>
