@@ -55,7 +55,7 @@ public sealed partial class UiChromeViewModel : ObservableObject
         var ct = _uiModeBloomCts.Token;
         UiModeBloomBrush = PickUiModeBloomBrush(normalizedMode);
         UiModeBloomOpacity = 0;
-        _ = RunUiModeBloomAsync(ct, normalizedMode);
+        _ = RunUiModeBloomAsync(normalizedMode, ct);
     }
 
     private static IBrush PickUiModeBloomBrush(string mode)
@@ -68,7 +68,7 @@ public sealed partial class UiChromeViewModel : ObservableObject
     private static double BloomPeakOpacity(string normalizedMode) =>
         string.Equals(normalizedMode, "Flight", StringComparison.OrdinalIgnoreCase) ? 0.14 : 0.11;
 
-    private async Task RunUiModeBloomAsync(CancellationToken ct, string normalizedMode)
+    private async Task RunUiModeBloomAsync(string normalizedMode, CancellationToken ct)
     {
         try
         {

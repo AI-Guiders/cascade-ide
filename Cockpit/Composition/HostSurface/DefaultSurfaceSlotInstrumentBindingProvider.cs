@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace CascadeIDE.Cockpit.Composition.HostSurface;
 
 /// <summary>

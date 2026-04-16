@@ -1,5 +1,4 @@
 using System.Text.Json;
-using CascadeIDE.Services;
 using CascadeIDE.ViewModels;
 
 namespace CascadeIDE.Features.AutonomousAgent;
@@ -58,15 +57,15 @@ public sealed class AutonomousAgentService
 
     public async Task<string> RunAutonomousAsync(string objective, string safetyLevel, int maxSteps, CancellationToken cancellationToken)
     {
-        return await RunAutonomousAsync(objective, safetyLevel, maxSteps, cancellationToken, state: null).ConfigureAwait(false);
+        return await RunAutonomousAsync(objective, safetyLevel, maxSteps, state: null, cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<string> RunAutonomousAsync(
         string objective,
         string safetyLevel,
         int maxSteps,
-        CancellationToken cancellationToken,
-        AutonomousRunState? state)
+        AutonomousRunState? state,
+        CancellationToken cancellationToken)
     {
         objective = objective?.Trim() ?? "";
         if (string.IsNullOrWhiteSpace(objective))
@@ -165,7 +164,7 @@ public sealed class AutonomousAgentService
         }
     }
 
-    private string BuildPrompt(
+    private static string BuildPrompt(
         string objective,
         string safetyLevel,
         int stepNumber,

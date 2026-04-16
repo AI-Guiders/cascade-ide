@@ -124,8 +124,8 @@ public sealed partial class AutonomousAgentSessionViewModel : ObservableObject
                         objective,
                         _host.SafetyLevel,
                         maxSteps,
-                        ct,
-                        state)
+                        state,
+                        ct)
                     .ConfigureAwait(false);
                 UiScheduler.Default.Post(() =>
                 {
@@ -201,8 +201,8 @@ public sealed partial class AutonomousAgentSessionViewModel : ObservableObject
                         capturedState.Objective,
                         capturedState.SafetyLevel,
                         capturedState.MaxSteps,
-                        ct,
-                        capturedState)
+                        capturedState,
+                        ct)
                     .ConfigureAwait(false);
                 UiScheduler.Default.Post(() =>
                 {
