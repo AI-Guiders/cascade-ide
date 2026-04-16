@@ -70,7 +70,7 @@ internal static class IdeCommandsDoc
         ["get_ui_modes_diagnostics"] = "Диагностика загрузки UI-режимов: пути к UiModes, TOML vs встроенный fallback, список id в меню (почему может не быть Flight). returns: json.",
         ["get_ui_theme"] = "Снимок темы UI и лэйаута (включая resolved-ресурсы). returns: json.",
         ["get_workspace_navigation_context"] = "Контекст навигации (ADR 0039): связанные файлы или мини-подграф. Виды связей — partial_peer project_peer xaml_codebehind_pair test_counterpart same_namespace same_directory. Имена preset — из settings.toml workspace_navigation_context.presets. args: mode:string, file_path?:string, line?:integer, column?:integer, max_related?:integer, max_nodes?:integer, max_edges?:integer, preset?:string, include_kinds?:string[], exclude_kinds?:string[]; returns: json; example: {\"mode\":\"related\",\"file_path\":\"src/Foo.cs\",\"preset\":\"no_namespace_noise\"}.",
-        ["get_workspace_state"] = "Единая сводка состояния IDE (solution/editor/build/diagnostics...). returns: json.",
+        ["get_workspace_state"] = "Единая сводка состояния IDE (solution/editor/build/diagnostics...), плюс cockpit_surface (CDS). returns: json.",
         ["git_branch"] = "Git branch в каталоге решения/workspace. args: action?:string, name?:string, start_point?:string, force?:boolean; returns: json; example: {\"action\":\"list\"}.",
         ["git_commit"] = "Git commit в каталоге решения/workspace. args: message:string, paths?:string[]; returns: text; example: {\"message\":\"chore: update\",\"paths\":[\"a.txt\"]}.",
         ["git_diff"] = "Git diff в каталоге решения/workspace. args: path?:string, staged?:boolean; returns: json; example: {\"path\":\"README.md\",\"staged\":false}.",

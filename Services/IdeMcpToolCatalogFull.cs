@@ -201,7 +201,7 @@ internal static class IdeMcpToolCatalogFull
             new()
             {
                 Name = "ide_get_workspace_state",
-                Description = "Одна сводка состояния IDE: solution/current file/selection/debug/build output/diagnostics. JSON. Удобно, чтобы агент получил основной контекст одним вызовом.",
+                Description = "Одна сводка состояния IDE: solution/current file/selection/debug/build output/diagnostics и cockpit_surface (CDS, тот же снимок, что BuildCockpitSurfaceSnapshot/Skia). JSON.",
                 InputSchema = Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
             },
             new()

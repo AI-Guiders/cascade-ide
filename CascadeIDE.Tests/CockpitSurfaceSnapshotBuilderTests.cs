@@ -74,4 +74,22 @@ public sealed class CockpitSurfaceSnapshotBuilderTests
         Assert.Equal("Terminal", back.SecondaryShell.CurrentPage);
         Assert.Single(back.Instruments);
     }
+
+    /// <summary>
+    /// Паритет MCP <c>ide_get_workspace_state</c> с CDS: вложенный объект сериализуется так же, как отдельный снимок.
+    /// </summary>
+    [Fact]
+    public void Workspace_state_shape_serializes_cockpit_surface_like_standalone_snapshot()
+    {
+        var vm = new MainWindowViewModel();
+        var cockpit = vm.BuildCockpitSurfaceSnapshot();
+        var wrapped = new { cockpit_surface = cockpit };
+        var json = JsonSerializer.Serialize(wrapped);
+        using var doc = JsonDocument.Parse(json);
+        Assert.True(doc.RootElement.TryGetProperty("cockpit_surface", out var el));
+        var roundtrip = JsonSerializer.Deserialize<CockpitSurfaceState>(el.GetRawText());
+        Assert.NotNull(roundtrip);
+        Assert.Equal(cockpit.SchemaVersion, roundtrip!.SchemaVersion);
+        Assert.Equal(JsonSerializer.Serialize(cockpit), JsonSerializer.Serialize(roundtrip));
+    }
 }

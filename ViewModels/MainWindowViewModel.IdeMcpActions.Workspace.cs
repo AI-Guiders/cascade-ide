@@ -1,8 +1,5 @@
 using System.Text.Json;
-using Avalonia.Threading;
-using CascadeIDE.Features.Instrumentation;
 using CascadeIDE.Features.UiChrome;
-using CascadeIDE.Services;
 
 namespace CascadeIDE.ViewModels;
 
@@ -110,7 +107,8 @@ public partial class MainWindowViewModel
                 editor_group_count = EditorGroupCount,
                 agent_trace_step_count = InstrumentationPanel.AgentTraceSteps.Count,
                 is_autonomous_running = Autonomous.IsAutonomousRunning,
-                diagnostics
+                diagnostics,
+                cockpit_surface = BuildCockpitSurfaceSnapshot()
             };
             return JsonSerializer.Serialize(state);
         });
