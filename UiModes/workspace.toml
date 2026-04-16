@@ -13,7 +13,7 @@ markdown_preview_placement = "forward_split"
 # ADR 0021/0051: маршрутизация интентов внимания к зоне (канонические id: forward, pfd, mfd, eicas, hud).
 # Источник истины: bundle `UiModes/workspace.toml` + репо `.cascade/workspace.toml`; в сессии не меняется.
 [attention_routing]
-solution_explorer = "pfd"
+solution_explorer = "mfd"
 chat = "mfd"
 git = "mfd"
 terminal = "mfd"
@@ -21,4 +21,5 @@ editor = "forward"
 
 # ADR 0050: какой инструмент в основных слотах (alias — без сырых instrument_id в TOML).
 [instrument_routing]
-pfd_primary = "solution_explorer"
+pfd_primary = "workspace_map"
+mfd_primary = "solution_explorer"
