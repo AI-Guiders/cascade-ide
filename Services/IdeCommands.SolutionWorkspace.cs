@@ -13,6 +13,8 @@ public static partial class IdeCommands
     public const string GetCurrentFileDiagnostics = "get_current_file_diagnostics";
     /// <summary>Единая сводка состояния IDE (solution/editor/build/diagnostics...). returns: json.</summary>
     public const string GetWorkspaceState = "get_workspace_state";
+    /// <summary>Только CDS (<c>CockpitSurfaceState</c>): тот же payload, что поле <c>cockpit_surface</c> в <c>get_workspace_state</c>. returns: json. Для <c>--agent-contract</c> без полной сводки.</summary>
+    public const string GetCockpitSurface = "get_cockpit_surface";
     /// <summary>Диагностика загрузки UI-режимов: пути к UiModes, TOML vs встроенный fallback, список id в меню (почему может не быть Flight). returns: json.</summary>
     public const string GetUiModesDiagnostics = "get_ui_modes_diagnostics";
     /// <summary>Контекст навигации (ADR 0039): связанные файлы или мини-подграф. Виды связей — partial_peer project_peer xaml_codebehind_pair test_counterpart same_namespace same_directory. Имена preset — из settings.toml workspace_navigation_context.presets. args: mode:string, file_path?:string, line?:integer, column?:integer, max_related?:integer, max_nodes?:integer, max_edges?:integer, preset?:string, include_kinds?:string[], exclude_kinds?:string[]; returns: json; example: {"mode":"related","file_path":"src/Foo.cs","preset":"no_namespace_noise"}.</summary>

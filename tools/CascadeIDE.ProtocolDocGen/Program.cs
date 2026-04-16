@@ -277,6 +277,7 @@ internal static class IdeMcpCommandExecutorEmitter
         // Workspace / solution info
         sb.AppendLine("        add(Services.IdeCommands.GetSolutionInfo, async (_, _) => await Task.FromResult(((IIdeMcpActions)_vm).GetSolutionInfo()));");
         sb.AppendLine("        add(Services.IdeCommands.GetWorkspaceState, async (_, _) => await ((IIdeMcpActions)_vm).GetWorkspaceStateAsync());");
+        sb.AppendLine("        add(Services.IdeCommands.GetCockpitSurface, async (_, _) => await ((IIdeMcpActions)_vm).GetCockpitSurfaceAsync());");
         sb.AppendLine("        add(Services.IdeCommands.GetUiModesDiagnostics, async (_, _) => await ((IIdeMcpActions)_vm).GetUiModesDiagnosticsAsync());");
         sb.AppendLine("        add(Services.IdeCommands.GetSolutionFiles, async (_, _) => await ((IIdeMcpActions)_vm).GetSolutionFilesAsync());");
         sb.AppendLine("        add(Services.IdeCommands.SearchWorkspaceText, async (args, _) => await ((IIdeMcpActions)_vm).SearchWorkspaceTextAsync(McpCommandJsonArgs.String(args, \"pattern\") ?? \"\", McpCommandJsonArgs.String(args, \"subpath\"), McpCommandJsonArgs.Bool(args, \"fixed_string\"), McpCommandJsonArgs.String(args, \"glob\"), McpCommandJsonArgs.Int(args, \"max_matches\", 200), McpCommandJsonArgs.String(args, \"rg_path\")));");

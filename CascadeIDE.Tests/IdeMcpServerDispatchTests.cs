@@ -122,6 +122,7 @@ public sealed class IdeMcpServerDispatchTests
         public Task<string> RunCodeCleanupAsync(string? includePath = null) => throw new NotImplementedException();
         public Task<string> GetCodeMetricsAsync(string? scope = null, string? path = null) => throw new NotImplementedException();
         public Task<string> GetWorkspaceStateAsync() => throw new NotImplementedException();
+        public Task<string> GetCockpitSurfaceAsync() => throw new NotImplementedException();
         public Task<string> GetUiModesDiagnosticsAsync() => throw new NotImplementedException();
         public Task<string> GitStatusAsync() => throw new NotImplementedException();
         public Task<string> GitDiffAsync(string? path = null, bool staged = false) => throw new NotImplementedException();

@@ -110,6 +110,14 @@ public static class AgentContractRunner
             case IdeCommands.GitShow:
                 return await GitShowAsync(workspace, tail, cancellationToken).ConfigureAwait(false);
 
+            case IdeCommands.GetCockpitSurface:
+                RequireEmptyTail(tail, command);
+                return AgentContractHeadlessRuntime.GetCockpitSurfaceJson();
+
+            case IdeCommands.GetWorkspaceState:
+                RequireEmptyTail(tail, command);
+                return AgentContractHeadlessRuntime.GetWorkspaceStateJson();
+
             default:
                 throw new InvalidOperationException(
                     $"Unknown agent contract command: {command}. See --agent-contract --help.");
@@ -359,6 +367,8 @@ public static class AgentContractRunner
             Commands (no workspace):
               get_supported_editor_languages   Same payload as ide_get_supported_editor_languages
               get_ui_modes_diagnostics        Same payload as ide_get_ui_modes_diagnostics
+              get_cockpit_surface             CDS only (CockpitSurfaceState), same as cockpit_surface in ide_get_workspace_state
+              get_workspace_state             Same payload as ide_get_workspace_state (headless VM; slower)
 
             Commands (git — same JSON as ide_git_*):
               git_status

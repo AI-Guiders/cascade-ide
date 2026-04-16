@@ -114,6 +114,9 @@ public partial class MainWindowViewModel
         });
     }
 
+    Task<string> Services.IIdeMcpActions.GetCockpitSurfaceAsync() =>
+        UiScheduler.Default.InvokeAsync(() => JsonSerializer.Serialize(BuildCockpitSurfaceSnapshot()));
+
     async Task<string> Services.IIdeMcpActions.GetCodeMetricsAsync(string? scope, string? path)
     {
         var files = await UiScheduler.Default.InvokeAsync(() =>

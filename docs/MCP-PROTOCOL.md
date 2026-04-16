@@ -17,7 +17,7 @@
 
 ### CLI контракта без MCP (ADR 0052)
 
-Без GUI и без stdio можно вывести **тот же JSON**, что вернул бы соответствующий тул: `CascadeIDE.exe --agent-contract [--workspace <dir>] <command>`. Команды без workspace: `get_ui_modes_diagnostics`, `get_supported_editor_languages`. Read-only git (тот же JSON, что `ide_git_*`): `git_status`, `git_diff`, `git_log`, `git_branch` (list), `git_show` — для них `--workspace` задаёт корень репозитория (по умолчанию текущий каталог). В CI привык **`dotnet script`** (как в других проектах репо) — см. [`docs/samples/agent-contract-ci.csx`](samples/agent-contract-ci.csx); вариант на PowerShell: [`docs/samples/agent-contract-ci.ps1`](samples/agent-contract-ci.ps1). Подробности и снапшот-тесты: [ADR 0052](adr/0052-agent-contract-cli-and-snapshot-tests.md).
+Без GUI и без stdio можно вывести **тот же JSON**, что вернул бы соответствующий тул: `CascadeIDE.exe --agent-contract [--workspace <dir>] <command>`. Команды без workspace: `get_ui_modes_diagnostics`, `get_supported_editor_languages`, `get_cockpit_surface` (только CDS — тот же объект, что поле `cockpit_surface` в ответе ниже), `get_workspace_state` (полная сводка, паритет с `ide_get_workspace_state`). Read-only git (тот же JSON, что `ide_git_*`): `git_status`, `git_diff`, `git_log`, `git_branch` (list), `git_show` — для них `--workspace` задаёт корень репозитория (по умолчанию текущий каталог). В CI привык **`dotnet script`** (как в других проектах репо) — см. [`docs/samples/agent-contract-ci.csx`](samples/agent-contract-ci.csx); вариант на PowerShell: [`docs/samples/agent-contract-ci.ps1`](samples/agent-contract-ci.ps1). Подробности и снапшот-тесты: [ADR 0052](adr/0052-agent-contract-cli-and-snapshot-tests.md).
 
 ### Видимость MCP для агента (на будущее: свои MCP в IDE)
 
@@ -315,12 +315,13 @@
 | `chat_select_message` | Выбрать сообщение в чате по индексу (0-based), в т.ч. для Skia-поверхности. args: index:integer; returns: text; example: {"index":0}. |
 | `close_document` | Закрыть документ. args: file_path:string; returns: text; example: {"file_path":"C:\\\\tmp\\\\a.cs"}. |
 | `focus_editor` | Передать фокус в редактор (чтобы клавиши/ввод шли в него). returns: text. |
+| `get_cockpit_surface` | Только CDS (`CockpitSurfaceState`): тот же payload, что поле `cockpit_surface` в `get_workspace_state`. returns: json. Для `--agent-contract` без полной сводки. |
 | `get_current_file_diagnostics` | Диагностики текущего открытого .cs (ошибки/предупреждения). returns: json. |
 | `get_solution_files` | Список файлов и дерево решения (Solution Explorer). returns: json. |
 | `get_solution_info` | Короткая информация о текущем решении/файле/выделении в дереве. returns: json. |
 | `get_ui_modes_diagnostics` | Диагностика загрузки UI-режимов: пути к UiModes, TOML vs встроенный fallback, список id в меню (почему может не быть Flight). returns: json. |
 | `get_workspace_navigation_context` | Контекст навигации (ADR 0039): связанные файлы или мини-подграф. Виды связей — partial_peer project_peer xaml_codebehind_pair test_counterpart same_namespace same_directory. Имена preset — из settings.toml workspace_navigation_context.presets. args: mode:string, file_path?:string, line?:integer, column?:integer, max_related?:integer, max_nodes?:integer, max_edges?:integer, preset?:string, include_kinds?:string[], exclude_kinds?:string[]; returns: json; example: {"mode":"related","file_path":"src/Foo.cs","preset":"no_namespace_noise"}. |
-| `get_workspace_state` | Единая сводка состояния IDE (solution/editor/build/diagnostics...), плюс `cockpit_surface` (CDS). returns: json. |
+| `get_workspace_state` | Единая сводка состояния IDE (solution/editor/build/diagnostics...). returns: json. |
 | `move_document_to_group_1` | Переместить документ в группу 1. args: file_path:string; returns: text; example: {"file_path":"C:\\\\tmp\\\\a.cs"}. |
 | `move_document_to_group_2` | Переместить документ в группу 2. args: file_path:string; returns: text; example: {"file_path":"C:\\\\tmp\\\\a.cs"}. |
 | `move_document_to_group_3` | Переместить документ в группу 3. args: file_path:string; returns: text; example: {"file_path":"C:\\\\tmp\\\\a.cs"}. |

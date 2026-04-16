@@ -56,6 +56,7 @@ internal static class IdeCommandsContractGenerated
         ["focus_rollback"] = IdeReturnKind.Text,
         ["fork_chat_thread"] = IdeReturnKind.Text,
         ["get_build_output"] = IdeReturnKind.Json,
+        ["get_cockpit_surface"] = IdeReturnKind.Json,
         ["get_code_metrics"] = IdeReturnKind.Json,
         ["get_colors_under_cursor"] = IdeReturnKind.Json,
         ["get_control_appearance"] = IdeReturnKind.Json,
