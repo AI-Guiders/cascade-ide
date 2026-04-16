@@ -1,4 +1,3 @@
-using System.IO;
 using System.Text.Json;
 using GitMcp.Core;
 
@@ -16,17 +15,17 @@ public partial class MainWindowViewModel
     Task<string> Services.IIdeMcpActions.GitLogAsync(int n) =>
         RunGitCommandJsonAsync(GitCommandBuilder.Log(n));
 
-    Task<string> Services.IIdeMcpActions.GitFetchAsync(string? remote, bool all, bool prune)
+    Task<string> Services.IIdeMcpActions.GitFetchAsync(string? remote, bool all, bool prune, bool dryRun)
     {
-        var r = GitCommandBuilder.Fetch(all, prune, remote);
+        var r = GitCommandBuilder.Fetch(all, prune, remote, dryRun);
         return r.IsSuccess
             ? RunGitCommandJsonAsync(r.Args!)
             : Task.FromResult(GitValidationError(r.Error!));
     }
 
-    Task<string> Services.IIdeMcpActions.GitPullAsync(string? remote, string? branch, bool ffOnly)
+    Task<string> Services.IIdeMcpActions.GitPullAsync(string? remote, string? branch, bool ffOnly, bool dryRun)
     {
-        var r = GitCommandBuilder.Pull(remote, branch, ffOnly);
+        var r = GitCommandBuilder.Pull(remote, branch, ffOnly, dryRun);
         return r.IsSuccess
             ? RunGitCommandJsonAsync(r.Args!)
             : Task.FromResult(GitValidationError(r.Error!));
@@ -98,10 +97,11 @@ public partial class MainWindowViewModel
         });
     }
 
-    Task<string> Services.IIdeMcpActions.GitPushAsync(string? remote, string? branch)
+    Task<string> Services.IIdeMcpActions.GitPushAsync(string? remote, string? branch, bool dryRun)
     {
-        var args = GitCommandBuilder.Push(remote, branch, defaultOriginWhenRemoteEmpty: false);
-        _ = RefreshGitSummaryAsync();
+        var args = GitCommandBuilder.Push(remote, branch, defaultOriginWhenRemoteEmpty: false, dryRun);
+        if (!dryRun)
+            _ = RefreshGitSummaryAsync();
         return RunGitCommandJsonAsync(args);
     }
 

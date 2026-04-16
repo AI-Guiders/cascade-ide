@@ -57,14 +57,14 @@ public interface IIdeMcpActions
     Task<string> GitDiffAsync(string? path = null, bool staged = false);
     /// <summary>Git commit в каталоге решения/workspace: message обязателен, paths опциональны (иначе add -A). JSON.</summary>
     Task<string> GitCommitAsync(string message, IReadOnlyList<string>? paths = null);
-    /// <summary>Git push в каталоге решения/workspace. Опционально remote/branch. JSON.</summary>
-    Task<string> GitPushAsync(string? remote = null, string? branch = null);
+    /// <summary>Git push в каталоге решения/workspace. Опционально remote/branch; dry_run — <c>git push --dry-run</c>. JSON.</summary>
+    Task<string> GitPushAsync(string? remote = null, string? branch = null, bool dryRun = false);
     /// <summary>Git log (--oneline). Опционально n (число коммитов). JSON.</summary>
     Task<string> GitLogAsync(int n = 20);
-    /// <summary>Git fetch. Опционально remote, all, prune. JSON.</summary>
-    Task<string> GitFetchAsync(string? remote = null, bool all = false, bool prune = false);
-    /// <summary>Git pull. Оба remote и branch или ни одного; ff_only по умолчанию true. JSON.</summary>
-    Task<string> GitPullAsync(string? remote = null, string? branch = null, bool ffOnly = true);
+    /// <summary>Git fetch. Опционально remote, all, prune; dry_run — <c>git fetch --dry-run</c>. JSON.</summary>
+    Task<string> GitFetchAsync(string? remote = null, bool all = false, bool prune = false, bool dryRun = false);
+    /// <summary>Git pull. Оба remote и branch или ни одного; ff_only по умолчанию true; dry_run — <c>git pull --dry-run</c> (Git 2.27+). JSON.</summary>
+    Task<string> GitPullAsync(string? remote = null, string? branch = null, bool ffOnly = true, bool dryRun = false);
     /// <summary>Git branch: list | create | delete. JSON.</summary>
     Task<string> GitBranchAsync(string? action = null, string? name = null, string? startPoint = null, bool force = false);
     /// <summary>Git show. rev обязателен. JSON.</summary>

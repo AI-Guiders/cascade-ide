@@ -327,14 +327,15 @@ internal static class IdeMcpToolCatalogFull
             new()
             {
                 Name = "ide_git_push",
-                Description = "Сделать git push в каталоге решения/workspace. Опционально remote и branch (как git push без лишних аргументов). JSON: success, exit_code, output.",
+                Description = "Сделать git push в каталоге решения/workspace. Опционально remote и branch (как git push без лишних аргументов). dry_run=true — git push --dry-run (без отправки). JSON: success, exit_code, output.",
                 InputSchema = Schema(new
                 {
                     type = "object",
                     properties = new
                     {
                         remote = new { type = "string", description = "Опционально: remote." },
-                        branch = new { type = "string", description = "Опционально: branch." }
+                        branch = new { type = "string", description = "Опционально: branch." },
+                        dry_run = new { type = "boolean", description = "true — только предпросмотр (--dry-run)." }
                     },
                     required = Array.Empty<string>()
                 })
@@ -353,7 +354,7 @@ internal static class IdeMcpToolCatalogFull
             new()
             {
                 Name = "ide_git_fetch",
-                Description = "Git fetch в workspace. Опционально remote, all, prune. JSON: success, exit_code, output.",
+                Description = "Git fetch в workspace. Опционально remote, all, prune. dry_run=true — git fetch --dry-run. JSON: success, exit_code, output.",
                 InputSchema = Schema(new
                 {
                     type = "object",
@@ -361,7 +362,8 @@ internal static class IdeMcpToolCatalogFull
                     {
                         remote = new { type = "string", description = "Опционально: remote (не сочетать с all=true)." },
                         all = new { type = "boolean", description = "true — fetch --all." },
-                        prune = new { type = "boolean", description = "true — --prune." }
+                        prune = new { type = "boolean", description = "true — --prune." },
+                        dry_run = new { type = "boolean", description = "true — только предпросмотр (--dry-run)." }
                     },
                     required = Array.Empty<string>()
                 })
@@ -369,7 +371,7 @@ internal static class IdeMcpToolCatalogFull
             new()
             {
                 Name = "ide_git_pull",
-                Description = "Git pull в workspace. Оба remote+branch или ни одного; ff_only по умолчанию true. JSON: success, exit_code, output.",
+                Description = "Git pull в workspace. Оба remote+branch или ни одного; ff_only по умолчанию true. dry_run=true — git pull --dry-run (Git 2.27+). JSON: success, exit_code, output.",
                 InputSchema = Schema(new
                 {
                     type = "object",
@@ -377,7 +379,8 @@ internal static class IdeMcpToolCatalogFull
                     {
                         remote = new { type = "string", description = "Вместе с branch или оба пустые." },
                         branch = new { type = "string", description = "Вместе с remote." },
-                        ff_only = new { type = "boolean", description = "По умолчанию true (--ff-only)." }
+                        ff_only = new { type = "boolean", description = "По умолчанию true (--ff-only)." },
+                        dry_run = new { type = "boolean", description = "true — только предпросмотр (--dry-run)." }
                     },
                     required = Array.Empty<string>()
                 })

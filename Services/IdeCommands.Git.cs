@@ -9,9 +9,9 @@ public static partial class IdeCommands
     public const string GitDiff = "git_diff";
     /// <summary>Git log в каталоге решения/workspace. args: n?:integer; returns: json; example: {"n":20}.</summary>
     public const string GitLog = "git_log";
-    /// <summary>Git fetch в каталоге решения/workspace. args: remote?:string, all?:boolean, prune?:boolean; returns: json; example: {"prune":true}.</summary>
+    /// <summary>Git fetch в каталоге решения/workspace. args: remote?:string, all?:boolean, prune?:boolean, dry_run?:boolean; returns: json; example: {"prune":true,"dry_run":true}.</summary>
     public const string GitFetch = "git_fetch";
-    /// <summary>Git pull в каталоге решения/workspace. args: remote?:string, branch?:string, ff_only?:boolean; returns: json; example: {"ff_only":true}.</summary>
+    /// <summary>Git pull в каталоге решения/workspace. args: remote?:string, branch?:string, ff_only?:boolean, dry_run?:boolean; returns: json; example: {"ff_only":true}.</summary>
     public const string GitPull = "git_pull";
     /// <summary>Git branch в каталоге решения/workspace. args: action?:string, name?:string, start_point?:string, force?:boolean; returns: json; example: {"action":"list"}.</summary>
     public const string GitBranch = "git_branch";
@@ -21,6 +21,6 @@ public static partial class IdeCommands
     public const string GitSubmodule = "git_submodule";
     /// <summary>Git commit в каталоге решения/workspace. args: message:string, paths?:string[]; returns: text; example: {"message":"chore: update","paths":["a.txt"]}.</summary>
     public const string GitCommit = "git_commit";
-    /// <summary>Git push в каталоге решения/workspace. args: remote?:string, branch?:string; returns: text; example: {"remote":"origin","branch":"main"}.</summary>
+    /// <summary>Git push в каталоге решения/workspace. args: remote?:string, branch?:string, dry_run?:boolean; returns: text; example: {"remote":"origin","branch":"main","dry_run":true}.</summary>
     public const string GitPush = "git_push";
 }

@@ -24,8 +24,8 @@ internal sealed partial class IdeMcpCommandExecutor
         add(Services.IdeCommands.GitStatus, async (_, _) => await ((IIdeMcpActions)_vm).GitStatusAsync());
         add(Services.IdeCommands.GitDiff, async (args, _) => await ((IIdeMcpActions)_vm).GitDiffAsync(McpCommandJsonArgs.String(args, "path"), McpCommandJsonArgs.Bool(args, "staged")));
         add(Services.IdeCommands.GitLog, async (args, _) => await ((IIdeMcpActions)_vm).GitLogAsync(McpCommandJsonArgs.Int(args, "n", 20)));
-        add(Services.IdeCommands.GitFetch, async (args, _) => await ((IIdeMcpActions)_vm).GitFetchAsync(McpCommandJsonArgs.String(args, "remote"), McpCommandJsonArgs.Bool(args, "all"), McpCommandJsonArgs.Bool(args, "prune")));
-        add(Services.IdeCommands.GitPull, async (args, _) => await ((IIdeMcpActions)_vm).GitPullAsync(McpCommandJsonArgs.String(args, "remote"), McpCommandJsonArgs.String(args, "branch"), McpCommandJsonArgs.Bool(args, "ff_only", true)));
+        add(Services.IdeCommands.GitFetch, async (args, _) => await ((IIdeMcpActions)_vm).GitFetchAsync(McpCommandJsonArgs.String(args, "remote"), McpCommandJsonArgs.Bool(args, "all"), McpCommandJsonArgs.Bool(args, "prune"), McpCommandJsonArgs.Bool(args, "dry_run")));
+        add(Services.IdeCommands.GitPull, async (args, _) => await ((IIdeMcpActions)_vm).GitPullAsync(McpCommandJsonArgs.String(args, "remote"), McpCommandJsonArgs.String(args, "branch"), McpCommandJsonArgs.Bool(args, "ff_only", true), McpCommandJsonArgs.Bool(args, "dry_run")));
         add(Services.IdeCommands.GitBranch, async (args, _) => await ((IIdeMcpActions)_vm).GitBranchAsync(McpCommandJsonArgs.String(args, "action"), McpCommandJsonArgs.String(args, "name"), McpCommandJsonArgs.String(args, "start_point"), McpCommandJsonArgs.Bool(args, "force")));
         add(Services.IdeCommands.GitShow, async (args, _) =>
         {
@@ -39,7 +39,7 @@ internal sealed partial class IdeMcpCommandExecutor
             if (string.IsNullOrWhiteSpace(McpCommandJsonArgs.String(args, "message"))) return "Missing message";
             return await ((IIdeMcpActions)_vm).GitCommitAsync(McpCommandJsonArgs.String(args, "message")!, McpCommandJsonArgs.StringList(args, "paths"));
         });
-        add(Services.IdeCommands.GitPush, async (args, _) => await ((IIdeMcpActions)_vm).GitPushAsync(McpCommandJsonArgs.String(args, "remote"), McpCommandJsonArgs.String(args, "branch")));
+        add(Services.IdeCommands.GitPush, async (args, _) => await ((IIdeMcpActions)_vm).GitPushAsync(McpCommandJsonArgs.String(args, "remote"), McpCommandJsonArgs.String(args, "branch"), McpCommandJsonArgs.Bool(args, "dry_run")));
         add(Services.IdeCommands.GetBuildOutput, async (_, _) => await Task.FromResult(((IIdeMcpActions)_vm).GetBuildOutput()));
         add(Services.IdeCommands.GetUiTheme, async (_, _) => await Task.FromResult(((IIdeMcpActions)_vm).GetUiTheme()));
         add(Services.IdeCommands.SetUiTheme, async (args, _) => await ((IIdeMcpActions)_vm).SetUiThemeAsync(McpCommandJsonArgs.String(args, "theme") ?? ""));

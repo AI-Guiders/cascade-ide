@@ -126,10 +126,10 @@ public sealed class IdeMcpServerDispatchTests
         public Task<string> GitStatusAsync() => throw new NotImplementedException();
         public Task<string> GitDiffAsync(string? path = null, bool staged = false) => throw new NotImplementedException();
         public Task<string> GitCommitAsync(string message, IReadOnlyList<string>? paths = null) => throw new NotImplementedException();
-        public Task<string> GitPushAsync(string? remote = null, string? branch = null) => throw new NotImplementedException();
+        public Task<string> GitPushAsync(string? remote = null, string? branch = null, bool dryRun = false) => throw new NotImplementedException();
         public Task<string> GitLogAsync(int n = 20) => throw new NotImplementedException();
-        public Task<string> GitFetchAsync(string? remote = null, bool all = false, bool prune = false) => throw new NotImplementedException();
-        public Task<string> GitPullAsync(string? remote = null, string? branch = null, bool ffOnly = true) => throw new NotImplementedException();
+        public Task<string> GitFetchAsync(string? remote = null, bool all = false, bool prune = false, bool dryRun = false) => throw new NotImplementedException();
+        public Task<string> GitPullAsync(string? remote = null, string? branch = null, bool ffOnly = true, bool dryRun = false) => throw new NotImplementedException();
         public Task<string> GitBranchAsync(string? action = null, string? name = null, string? startPoint = null, bool force = false) => throw new NotImplementedException();
         public Task<string> GitShowAsync(string rev, string? path = null, bool statOnly = false) => throw new NotImplementedException();
         public Task<string> GitSubmoduleAsync(string? action = null, string? path = null, bool recursive = true) => throw new NotImplementedException();

@@ -1,10 +1,10 @@
 # ADR 0052: CLI для контракта агента (паритет с MCP) и снапшот-тесты
 
-**Статус:** Accepted · Implemented (частично: `get_ui_modes_diagnostics`; расширение списка команд — по этапам ниже)  
+**Статус:** Accepted · Implemented (`get_ui_modes_diagnostics`, `get_supported_editor_languages`, read-only `git_*` с `--workspace`)  
 **Дата:** 2026-04-17  
 **Принят:** 2026-04-16  
 
-**Реализация:** [`Services/AgentContract/AgentContractRunner.cs`](../../Services/AgentContract/AgentContractRunner.cs), вход `CascadeIDE.exe --agent-contract <command>` в [`Program.cs`](../../Program.cs); тесты [`CascadeIDE.Tests/AgentContractRunnerTests.cs`](../../CascadeIDE.Tests/AgentContractRunnerTests.cs). Команда MCP: `ide_get_ui_modes_diagnostics`.
+**Реализация:** [`Services/AgentContract/AgentContractRunner.cs`](../../Services/AgentContract/AgentContractRunner.cs), вход `CascadeIDE.exe --agent-contract [--workspace <dir>] <command>` в [`Program.cs`](../../Program.cs); тесты [`CascadeIDE.Tests/AgentContractRunnerTests.cs`](../../CascadeIDE.Tests/AgentContractRunnerTests.cs). Паритет с MCP: `ide_get_ui_modes_diagnostics`, `ide_get_supported_editor_languages`, `ide_git_*` (те же JSON-поля, что и в `MainWindowViewModel` / `GitCommandBuilder` + `GitCommandRunner`).
 
 **Связь:** [MCP-PROTOCOL.md](../MCP-PROTOCOL.md) (команды IDE / stdio MCP), [0002](0002-debug-human-agent-parity.md) (паритет «человек ↔ агент»), [0008](0008-mcp-contracts-and-testable-infrastructure.md) (MCP-контракты и тестируемая инфраструктура), [0043](0043-mcp-transport-recovery-human-agent-parity.md) (транспорт MCP и паритет). Цель — **тот же JSON**, что агент получает через тулы, без обязательного GUI и без дублирования сериализации; при том что **релевантные для кабины/раскладки поля** в этом JSON совпадают по смыслу с тем, что питает UI (см. [0047](0047-cockpit-instrument-descriptor-and-slot-composition.md), CDS/снимки поверхности).
 
@@ -25,6 +25,8 @@
 1. **Вызывает те же** публичные/внутренние **сборщики данных и сериализацию JSON**, что и обработчики MCP для выбранных `ide_*` команд — **без второй копии логики** (общий слой: сервисы, `IdeMcpCommandExecutor` хелперы, билдеры снимков и т.д., вынесенные так, чтобы их можно было дернуть и из процесса IDE, и из CLI).
 2. Принимает на вход **явный контекст**: как минимум `--workspace` (корень workspace), при необходимости путь к решению, флаги «какой тул эмулировать» и параметры args (по схеме MCP).
 3. Пишет **в stdout** тот же JSON (или тот же **нормализованный** вид), что вернул бы соответствующий тул в MCP.
+
+**CI:** в репозитории уже принят **`dotnet script`** (глобальный `dotnet-script`, см. `Financial/finplan/update-finplan-pdf.csx`, `agents-and-humans-book/update-agents-humans-pdf.csx`). Для вызова `--agent-contract` из пайплайна естественно использовать тот же контур: [`docs/samples/agent-contract-ci.csx`](../samples/agent-contract-ci.csx) — `ProcessStartInfo`, код выхода, без сюрпризов с `$LASTEXITCODE`. Альтернатива на **PowerShell**: [`docs/samples/agent-contract-ci.ps1`](../samples/agent-contract-ci.ps1) (`pwsh` 7+ или `Start-Process -PassThru.ExitCode` в Windows PowerShell 5.1).
 
 **Тесты:**
 
