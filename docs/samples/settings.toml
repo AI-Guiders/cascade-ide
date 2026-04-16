@@ -40,11 +40,9 @@ sa_score = 0.75
 performance_score = 0.72
 workload_score = 0.28
 
-# ADR 0050: пользовательский слой карты instrument -> slot -> surface.
-[[display.instrument_placement_rules]]
-surface_id = "main_window_docked_grid"
-slot_id = "pfd"
-instrument_id = "workspace_navigation_map"
+# ADR 0050: пользовательский слой основных слотов (alias или канонический instrument_id).
+[display.instrument_routing]
+pfd_primary = "workspace_map"
 
 [ai]
 default_ollama_model = "qwen2.5-coder:7b"
@@ -64,6 +62,12 @@ chat_mcp_only = false
 # Cursor ACP: подмешивать stdio MCP IDE (cascade-ide) в session/new без дублирования в external_servers_json (ADR 0048 §7).
 acp_auto_inject_ide_mcp = true
 external_servers_json = "[]"
+# Опционально: путь к JSON-файлу с тем же массивом серверов (абсолютный или относительно %LocalAppData%\\CascadeIDE\\).
+# Если непустой и файл читается — подставляется вместо external_servers_json; иначе — inline выше.
+external_servers_json_path = ""
+# Примеры:
+# external_servers_json_path = "D:/Experiments/mcp-servers.json"
+# external_servers_json_path = "mcp-servers.json"
 
 [workspace_ui]
 show_solution_explorer = true

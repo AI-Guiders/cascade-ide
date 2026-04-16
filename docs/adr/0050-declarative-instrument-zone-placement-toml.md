@@ -1,6 +1,6 @@
 # ADR 0050: Декларативная карта «инструмент → зона/слот» в TOML
 
-**Статус:** Accepted (реализовано в runtime: merge bundle/repo/user, приоритет `prefer_repo_instruments_placement`, подключено в HostSurface compositor).  
+**Статус:** Accepted (реализовано: merge bundle/repo/user, `[instrument_routing]` с alias, приоритет `prefer_repo_instruments_placement`, резолв в `InstrumentPlacementRuntime` + `MainWindowHostSurfaceCompositor`).  
 **Дата:** 2026-04-16  
 
 **Связь:** [0017](0017-multi-window-workspace-and-agent-surfaces.md) (строка **`presentation`** — **топология** физических дисплеев и якорей, не наполнение слотов), [0047](0047-cockpit-instrument-descriptor-and-slot-composition.md) ( **`CockpitInstrumentDescriptor`**: `instrument_id` + `slot_id`; композитор хоста без дерева контролов), [0028](0028-user-settings-toml-localappdata-and-secrets.md) (личный **`settings.toml`**), [0010](0010-ui-modes-toml-configuration.md) (режимы UI и бандлы `UiModes/`), [0036](0036-cds-channel-compositor-surface-pipeline.md) / [`cds-contract-v0.md`](../design/cds-contract-v0.md) (CDS и список инструментов на поверхности). Аналогия по **слоям данных:** пресеты [`workspace_navigation_context`](../samples/settings.toml) (бандл + репо + пользователь).
@@ -15,31 +15,59 @@
 
 ## Решение
 
-**Принять** отдельный **конфигурируемый слой** — **карта размещения инструментов** (instrument → zone/slot, с привязкой к **поверхности** рантайма), хранимый в **TOML** и сливаемый по фиксированным правилам приоритета.
+**Принять** отдельный **конфигурируемый слой** — **карта размещения инструментов** для основных слотов кабины, хранимый в **TOML** и сливаемый по фиксированным правилам приоритета.
 
-**Инвариант 1 — граница с `presentation`:** строка **`presentation`** / **`[presentation_grammar]`** ([0017](0017-multi-window-workspace-and-agent-surfaces.md)) по-прежнему определяет только **топологию** (сколько групп `(…)`, какие якоря на каком дисплее, опциональные веса колонок). Карта инструментов **не** задаёт число мониторов и **не** заменяет якоря; она отвечает на вопрос: *при уже выбранной топологии и известном `surface_id` какой `instrument_id` считается выбранным для слота `pfd` / `mfd` / …*.
+**Инвариант 1 — граница с `presentation`:** строка **`presentation`** / **`[presentation_grammar]`** ([0017](0017-multi-window-workspace-and-agent-surfaces.md)) по-прежнему определяет только **топологию** (сколько групп `(…)`, какие якоря на каком дисплее, опциональные веса колонок). Карта инструментов **не** задаёт число мониторов и **не** заменяет якоря; рантайм сопоставляет **семантические слоты** (`pfd_primary`, `mfd_primary`) с конкретными парами **`surface_id` + `slot_id`** внутри продукта (в т.ч. при смене окна-хоста MFD), без требования писать `surface_id` в пользовательском/репозиторном TOML.
 
-**Инвариант 2 — стабильные ключи:** записи ссылаются на уже принятые в продукте идентификаторы: **`instrument_id`** (например `solution_explorer_tree`, `workspace_navigation_map` — см. [0047](0047-cockpit-instrument-descriptor-and-slot-composition.md), `CockpitStandardInstrumentIds`), **`slot_id`** (`CockpitSlotIds`: `pfd`, `mfd`, …), **`surface_id`** (как в CDS / mount style: `main_window_docked_grid`, `main_window_plus_mfd_host_top_level`, …). Это согласует конфиг с MCP, CDS и политиками mount без второго набора имён.
+**Инвариант 2 — публичные значения (alias):** в `workspace.toml` и в `[display.instrument_routing]` задаются **человекочитаемые** токены, которые рантайм приводит к каноническим **`instrument_id`** (`CockpitStandardInstrumentIds`):
 
-**Инвариант 3 — слои merge и конфликт одного ключа `(surface_id, slot_id)`:**
+| Значение в TOML | Канонический `instrument_id` |
+|-----------------|-------------------------------|
+| `solution_explorer` | `solution_explorer_tree` |
+| `workspace_map` | `workspace_navigation_map` |
+| `workspace_health` | `workspace_health_status_v1` |
+
+Допустимо также указать **уже канонический** `instrument_id` (как в CDS), если нужен копипаст из диагностик.
+
+**Инвариант 3 — слои merge и конфликт одного ключа:**
 
 Три источника данных (от общего к частному):
 
-1. Встроенный **бандл** IDE (дефолт продуктовой карты для режима / семьи UI).  
-2. **Репозиторный** слой — например **`.cascade/workspace.toml`** или выделенный фрагмент рядом с уже существующим merge workspace ([0017](0017-multi-window-workspace-and-agent-surfaces.md) § про слои, [0021](0021-pfd-mfd-cockpit-attention-model.md) §2.1).  
-3. **Пользовательский** слой — **`%LocalAppData%\CascadeIDE\settings.toml`** ([0028](0028-user-settings-toml-localappdata-and-secrets.md)).
+1. Встроенный **бандл** IDE (дефолт продуктовой карты).  
+2. **Репозиторный** слой — **`.cascade/workspace.toml`** с merge поверх бандла ([0021](0021-pfd-mfd-cockpit-attention-model.md) §2.1).  
+3. **Пользовательский** слой — **`[display.instrument_routing]`** в `%LocalAppData%\CascadeIDE\settings.toml` ([0028](0028-user-settings-toml-localappdata-and-secrets.md)).
 
-**Внутри одного источника** несколько строк, задающих один и тот же `(surface_id, slot_id)`, разрешаются **порядком в массиве TOML**: действует **последняя** подходящая запись (аналог каскада CSS: «дописал в конец — актуально»).
+**Внутри одного слоя-таблицы** `[instrument_routing]` ключи уникальны (`pfd_primary`, `mfd_primary`).
 
-**Между источниками** по умолчанию действует классическое правило IDE: **пользовательский слой сильнее репозиторного, репозиторный сильнее бандла** (`user > repo > bundle`) для одного и того же ключа — чтобы локальные исключения (эксперимент, доступность) не требовали правки репозитория.
+**Между источниками** по умолчанию: **пользовательский слой сильнее репозиторного, репозиторный сильше бандла** (`user > repo > bundle`) для одной и той же семантики слота.
 
-**Ортогонально:** топология экранов задаётся строкой **`presentation`** и остаётся **личной** ([0017](0017-multi-window-workspace-and-agent-surfaces.md)); карта инструментов — иной предмет: команда выигрывает от **одинаковой семантики слотов** на проекте (что в каком слоте при сопоставимой топологии), поэтому канон разумно держать в **репозитории** и подтягивать у всех через VCS.
+**Флаг в пользовательском `settings.toml`:** **`prefer_repo_instruments_placement`** (bool). При **`true`** для совпадающих ключей побеждает **репозиторный/bundle** слой; при **`false`** или если ключ не задан — **`user > repo`**.
 
-**Флаг в пользовательском `settings.toml`:** ключ **`prefer_repo_instruments_placement`** (bool). При **`true`** для конфликта «та же пара `(surface_id, slot_id)` и в репо, и в user» побеждает **репозиторная** запись; при **`false`** или если ключ не задан — сохраняется правило **`user > repo`**. Так команда может включить **режим согласованности с репо** без отказа от личного файла для остальных ключей; сольный разработчик выключает флаг и снова получает приоритет личных строк.
+**Инвариант 4 — валидация:** неизвестный ключ слота, неизвестный alias/`instrument_id` — **явная диагностика** при загрузке настроек (валидация `[display]`); для workspace — отладочный лог при игнорировании строки.
 
-Точный синтаксис секции с плейсментами (одна таблица vs массив `[[…]]`) — **деталь реализации**; порядок слоёв, **`prefer_repo_instruments_placement`** и разбор ключей — **фиксируются в спеке загрузчика**.
+**Инвариант 5 — без `surface_id` в публичном TOML:** пользователь и репозиторий задают только **`[instrument_routing]`** / **`[display.instrument_routing]`**; соответствие поверхностям `main_window_docked_grid` / `main_window_plus_mfd_host_top_level` выполняется в `InstrumentPlacementRuntime`.
 
-**Инвариант 4 — валидация:** при загрузке конфигурации запись с **неизвестным** `instrument_id` / несовместимой парой **slot + surface** / дублирующим приоритетом для одного и того же ключа должна давать **явную диагностику** (лог / статус в UI режима), а не молчаливый fallback — иначе отладка «почему в PFD не тот вид» станет невозможной.
+### Публичный v1-контракт
+
+**Бандл / репо** (`UiModes/workspace.toml`, `.cascade/workspace.toml`):
+
+```toml
+[instrument_routing]
+pfd_primary = "solution_explorer"
+mfd_primary = "workspace_map"
+```
+
+**Пользователь** (`settings.toml`):
+
+```toml
+[display.instrument_routing]
+pfd_primary = "workspace_map"
+```
+
+- `pfd_primary` и `mfd_primary` — ключи уровня продукта.  
+- Значения — **alias** из таблицы выше или канонический `instrument_id`.
+
+Низкоуровневый массив `[[instrument_placement_rules]]` с полями `surface_id` / `slot_id` **не используется** в публичном контракте v1 (внешних потребителей нет; DX — только таблица выше).
 
 ## Почему не только код
 
@@ -57,19 +85,19 @@
 
 ## Последствия
 
-- Композитор хоста и провайдер привязок слотов должны **читать эффективную карту** после merge, а не единственный захардкоженный список.  
-- Тесты: минимум **unit** на merge и разрешение конфликтов; **интеграционный** сценарий «другой инструмент в `pfd` при том же `presentation`».  
-- Документация для пользователя: короткий подраздел в cookbook / samples рядом с `settings.toml`, без дублирования всего ADR.
+- Композитор хоста читает **эффективную карту** после merge.  
+- Тесты: unit на merge словаря, alias-резолвер, сценарий «другой инструмент в PFD при том же `presentation`».  
+- Документация: samples рядом с `settings.toml`.
 
 ## Статус реализации
 
 **Реализовано**:
-- bundle/repo слой: `UiModes/workspace.toml` + `.cascade/workspace.toml` через `UiWorkspaceTomlMerger` и `UiModeCatalog.ApplyRepositoryWorkspaceOverlay`;
-- user слой: `[[display.instrument_placement_rules]]` и `prefer_repo_instruments_placement` в `%LocalAppData%\CascadeIDE\settings.toml`;
-- единый runtime-резолв в `InstrumentPlacementRuntime`, используемый `MainWindowHostSurfaceCompositor` для построения `CockpitInstrumentDescriptor`.
+- bundle/repo: `UiModes/workspace.toml` + `.cascade/workspace.toml` через `UiWorkspaceTomlMerger` и `UiModeCatalog.ApplyRepositoryWorkspaceOverlay`;
+- user: `[display.instrument_routing]` и `prefer_repo_instruments_placement` в `%LocalAppData%\CascadeIDE\settings.toml`;
+- единый runtime: `InstrumentRoutingAliasResolver`, `InstrumentPlacementRuntime`, `MainWindowHostSurfaceCompositor`.
 
 ## Открытые вопросы
 
-- **Числовой приоритет** у строки не требуется в v1: достаточно **порядка в массиве внутри слоя** (последняя побеждает) и **слоя merge** между бандл / репо / user; при необходимости тонкой настройки в одном файле — позже, отдельным полем.  
+- **Числовой приоритет** у строки не требуется в v1: достаточно **слоя merge** между бандл / репо / user; при необходимости тонкой настройки в одном файле — позже, отдельным полем.  
 - Нужно ли версионирование схемы секции (`schema_version` внутри блока) для миграций.  
-- Связь с **mount-слоем** (`ZoneInstrumentMountView`, **`InstrumentMountPolicyRules`** / `IInstrumentMountPolicyResolver`, в `[display]` — **`use_skia_instrument_mount`** и style **`instrument_mount_v1`**): одна таблица с картой плейсмента или **ортогональные секции** (рекомендация: **ортогонально** — style остаётся про *визуал и правила резолва style*, декларативная **карта инструментов** из этого ADR — про *какой* `instrument_id` занимает слот).
+- Связь с **mount-слоем** (`InstrumentMountPolicyRules`, `use_skia_instrument_mount`): **ортогонально** — style остаётся про визуал, карта из этого ADR — про *какой* `instrument_id` в слоте.

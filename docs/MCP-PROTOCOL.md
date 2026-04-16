@@ -27,6 +27,19 @@
 
 **Паритет восстановления транспорта** (человек перезапускает MCP в хосте vs что может агент) — отдельная ось от паритета отладки; границы хоста и направление решений: [ADR 0043](adr/0043-mcp-transport-recovery-human-agent-parity.md).
 
+### Внешние MCP в IDE (`settings.toml`): inline JSON или отдельный файл
+
+В `%LocalAppData%\CascadeIDE\settings.toml` в секции **`[mcp]`** задаётся inline JSON массива серверов (`external_servers_json`). В той же секции опционально **`external_servers_json_path`** — путь к **JSON-файлу** того же формата (массив объектов с `name`, `command`, `arguments`, `enabled`, опционально `toolPrefix`). Если путь непустой и файл **успешно читается**, его содержимое **подставляется вместо** inline JSON для `McpClientService` и Cursor ACP; иначе используется inline. Относительные пути считаются от каталога настроек (`…\CascadeIDE\`). Пример: [samples/settings.toml](samples/settings.toml). (Ранний вариант с отдельной секцией `[mcp_external_file]` заменён: ключ перенесён в `[mcp]`.)
+
+### Переопубликация для Cursor (`mcp.json`)
+
+Чтобы процесс в Cursor указывал на свежий бинарник **без пробелов в пути**, в корне каталога **CascadeIDE** (рядом с `CascadeIDE.csproj`; в монорепе обычно `Financial/software/open/cascade-ide/`):
+
+- **`publish-and-deploy-debug.ps1`** — `dotnet publish` **Debug**, self-contained **win-x64**, вывод в `publish-debug/`, затем зеркалирование в **`D:\cascade-ide-debug`** по умолчанию (удобная цель для `command` в `mcp.json`).
+- **`publish-and-deploy.ps1`** — то же для **Release** и цели **`D:\cascade-ide`** по умолчанию.
+
+Запуск из каталога проекта CascadeIDE: `.\publish-and-deploy-debug.ps1`. Опции **`-SkipDocGen`** и **`-Target`** — в комментариях у скриптов; пример фрагмента конфигурации — [mcp-cursor-example.json](mcp-cursor-example.json).
+
 ## Инструменты IDE (tools)
 
 | Имя | Описание | Аргументы |

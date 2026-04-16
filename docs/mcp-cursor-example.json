@@ -1,4 +1,5 @@
 {
+  "_comment": "Переопубликовать exe под эти пути: в корне исходников CascadeIDE (open/cascade-ide) скрипты publish-and-deploy-debug.ps1 и publish-and-deploy.ps1 — см. docs/MCP-PROTOCOL.md раздел «Переопубликация для Cursor». Ключ _comment не для боевого mcp.json — удали перед вставкой.",
   "mcpServers": {
     "cascade-ide": {
       "command": "D:\\cascade-ide\\CascadeIDE.exe",
