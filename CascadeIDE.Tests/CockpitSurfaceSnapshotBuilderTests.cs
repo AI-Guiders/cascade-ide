@@ -29,7 +29,7 @@ public sealed class CockpitSurfaceSnapshotBuilderTests
     {
         var state = new CockpitSurfaceState(
             SchemaVersion: "0.2",
-            UiMode: "Balanced",
+            UiMode: "Flight",
             PresentationEffectiveLine: "(PFD|Forward|MFD)",
             PresentationParseSuccess: true,
             Topology: new CockpitSurfaceTopology(
@@ -51,7 +51,7 @@ public sealed class CockpitSurfaceSnapshotBuilderTests
 
         var json = JsonSerializer.Serialize(state);
         Assert.Contains("\"schema_version\":\"0.2\"", json);
-        Assert.Contains("\"ui_mode\":\"Balanced\"", json);
+        Assert.Contains("\"ui_mode\":\"Flight\"", json);
         Assert.Contains("\"presentation_effective_line\"", json);
         Assert.Contains("\"surface_kind\":\"main_window_docked_grid\"", json);
         Assert.Contains("\"mfd_host_window_open\":false", json);

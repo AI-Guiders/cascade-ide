@@ -15,7 +15,7 @@ public sealed record UiModeCapabilities(
     int WorkspaceHealthMainColumnSpan,
     /// <summary>Вкладки инструментирования (события/тесты/…), когда док включён.</summary>
     bool InstrumentationTabs,
-    /// <summary>Вкладка «Гипотезы» (семья Debug и док).</summary>
+    /// <summary>Вкладка «Гипотезы» в доке / страница MFD (не привязана к отдельному UI-режиму).</summary>
     bool HypothesesTab,
     bool RiskSummaryCard,
     bool ResultSummaryCard,
@@ -69,7 +69,7 @@ public sealed record UiModeCapabilities(
             WorkspaceHealthOnTerminalTab: false,
             WorkspaceHealthMainColumnSpan: power ? 3 : 5,
             InstrumentationTabs: focus || balanced || flight || power || agentChat || debug,
-            HypothesesTab: debug,
+            HypothesesTab: flight,
             RiskSummaryCard: !focus && !agentChat,
             ResultSummaryCard: !focus && !agentChat,
             WorkspaceHealthStripVisible: true,

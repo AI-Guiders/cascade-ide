@@ -135,15 +135,12 @@
 | `toggle_instrumentation_dock` | Переключить видимость дока инструментирования (toggle). returns: text. |
 | `toggle_mfd_region_expanded` | Переключить развёрнут/свёрнут регион Mfd (toggle). returns: text. |
 
-### Вид: режим (дублируют хоткеи Alt+1/2/3, Ctrl+Alt+M)
+### Вид: режим
 
 | command_id | Описание |
 |-----------:|----------|
 | `close_environment_readiness_page` | Перейти с страницы «готовность окружения» на первую другую разрешённую страницу вторичного контура. returns: text. |
 | `cycle_ui_mode` | Циклически переключить UI mode (hotkey). returns: text. |
-| `set_balanced_mode` | Установить Balanced UI mode (hotkey). returns: text. |
-| `set_focus_mode` | Установить Focus UI mode (hotkey). returns: text. |
-| `set_power_mode` | Установить Power UI mode (hotkey). returns: text. |
 | `set_secondary_shell_page` | Активная страница вторичного контура оболочки: имя значения SecondaryShellPage (Chat, Terminal, …). Якорь на экране — пресет (v1 — колонка зоны Mfd). args: page:string; returns: text; example: {"page":"Chat"}. |
 | `show_environment_readiness_page` | Показать страницу «готовность окружения» во вторичном контуре (зона Mfd; ADR 0023). Разворачивает регион Mfd при необходимости. returns: text. |
 | `toggle_command_palette` | Открыть или закрыть палитру команд (как Ctrl+Q / пункт меню «Вид»). returns: text. |
@@ -314,7 +311,7 @@
 | `search_workspace_text` | Поиск текста по workspace через ripgrep: вызывается команда `rg` из PATH (Windows/Linux/macOS — поставь пакетом или с релиза). Явный путь: только `rg_path`. args: pattern:string, subpath?:string, fixed_string?:boolean, glob?:string, max_matches?:integer, rg_path?:string; returns: json; example: {\"pattern\":\"LoadSolution\",\"glob\":\"*.cs\",\"max_matches\":50}. |
 | `set_build_output_visible` | Явно показать/скрыть журнал сборки. args: visible:boolean; returns: text; example: {"visible":true}. |
 | `set_terminal_visible` | Явно показать/скрыть терминал (без переключения). args: visible:boolean; returns: text; example: {"visible":true}. |
-| `set_ui_mode` | Режим UI (как меню «Вид → Режим интерфейса»). args: mode:string; returns: text; example: {"mode":"Power"}. |
+| `set_ui_mode` | Режим UI (как меню «Вид → Режим интерфейса»). args: mode:string; returns: text; example: {"mode":"Flight"}. |
 | `toggle_build_output` | Как меню «Вид → Вывод сборки». returns: text. |
 | `toggle_pfd_region_expanded` | Переключить развёрнут/свёрнут регион Pfd (как меню «Вид → Semantic Map (PFD)»). returns: text. |
 | `toggle_pin_document` | Закрепить/открепить документ (pin). args: file_path:string; returns: text; example: {"file_path":"C:\\\\tmp\\\\a.cs"}. |

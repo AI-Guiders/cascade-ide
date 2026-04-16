@@ -60,29 +60,13 @@ public sealed partial class UiChromeViewModel : ObservableObject
 
     private static IBrush PickUiModeBloomBrush(string mode)
     {
-        if (string.Equals(mode, "Power", StringComparison.OrdinalIgnoreCase))
-            return new SolidColorBrush(Color.FromArgb(200, 110, 60, 210));
-        if (string.Equals(mode, "Focus", StringComparison.OrdinalIgnoreCase))
-            return new SolidColorBrush(Color.FromArgb(150, 25, 120, 185));
-        if (string.Equals(mode, "AgentChat", StringComparison.OrdinalIgnoreCase))
-            return new SolidColorBrush(Color.FromArgb(140, 40, 180, 140));
-        if (string.Equals(mode, "Debug", StringComparison.OrdinalIgnoreCase))
-            return new SolidColorBrush(Color.FromArgb(150, 200, 120, 40));
+        if (string.Equals(mode, "Flight", StringComparison.OrdinalIgnoreCase))
+            return new SolidColorBrush(Color.FromArgb(150, 60, 160, 220));
         return new SolidColorBrush(Color.FromArgb(120, 255, 235, 200));
     }
 
-    private static double BloomPeakOpacity(string normalizedMode)
-    {
-        if (string.Equals(normalizedMode, "Power", StringComparison.OrdinalIgnoreCase))
-            return 0.2;
-        if (string.Equals(normalizedMode, "Focus", StringComparison.OrdinalIgnoreCase))
-            return 0.13;
-        if (string.Equals(normalizedMode, "AgentChat", StringComparison.OrdinalIgnoreCase))
-            return 0.12;
-        if (string.Equals(normalizedMode, "Debug", StringComparison.OrdinalIgnoreCase))
-            return 0.12;
-        return 0.11;
-    }
+    private static double BloomPeakOpacity(string normalizedMode) =>
+        string.Equals(normalizedMode, "Flight", StringComparison.OrdinalIgnoreCase) ? 0.14 : 0.11;
 
     private async Task RunUiModeBloomAsync(CancellationToken ct, string normalizedMode)
     {

@@ -142,7 +142,7 @@ public sealed class UiModeCatalogTests : IDisposable
             Path.Combine(dir, "index.toml"),
             """
             schema_version = 1
-            modes = [ "Balanced", "Debug", "Power", "Focus", "AgentChat" ]
+            modes = [ "Balanced", "Debug", "Power", "Focus", "AgentChat", "Flight" ]
             """);
 
         UiModeCatalog.Initialize(dir);
@@ -155,8 +155,11 @@ public sealed class UiModeCatalogTests : IDisposable
 
         var debug = UiModeCatalog.GetCapabilities("Debug");
         Assert.False(debug.QuickActions);
-        Assert.True(debug.HypothesesTab);
+        Assert.False(debug.HypothesesTab);
         Assert.True(debug.RiskSummaryCard);
+
+        var flight = UiModeCatalog.GetCapabilities("Flight");
+        Assert.True(flight.HypothesesTab);
 
         var power = UiModeCatalog.GetCapabilities("Power");
         Assert.True(power.AgentTrace);
@@ -237,6 +240,7 @@ public sealed class UiModeCatalogTests : IDisposable
             Path.Combine(dir, "Editor.toml"),
             """
             family = "Editor"
+            instrumentation_dock_visible = false
             """);
 
         UiModeCatalog.Initialize(dir);
@@ -301,6 +305,6 @@ public sealed class UiModeCatalogTests : IDisposable
 
         Assert.Equal(UiModesBundleSource.BuiltinRegistry, UiModeCatalog.ActiveBundleSource);
         Assert.Equal(UiModeLayoutRegistry.OrderedModeIds, UiModeCatalog.OrderedModeIds);
-        Assert.Equal("Balanced", UiModeCatalog.NormalizeUiMode("nope"));
+        Assert.Equal("Flight", UiModeCatalog.NormalizeUiMode("nope"));
     }
 }

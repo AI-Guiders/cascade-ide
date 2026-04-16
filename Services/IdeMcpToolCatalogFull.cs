@@ -657,7 +657,7 @@ internal static class IdeMcpToolCatalogFull
             new()
             {
                 Name = "ide_execute_command",
-                Description = "Выполнить команду IDE по коду. command_id — как в IdeCommands (в т.ч. паритет с меню/тулбаром: open_solution_dialog, apply_light_theme, set_focus_mode, build_solution_ui, send_chat, explain_trace_step+step_index, …). args — плоские поля (path, file_path, visible, mode, culture, message, step_index, …). Полная таблица: docs/MCP-PROTOCOL.md.",
+                Description = "Выполнить команду IDE по коду. command_id — как в IdeCommands (в т.ч. паритет с меню/тулбаром: open_solution_dialog, apply_light_theme, build_solution_ui, send_chat, explain_trace_step+step_index, …). args — плоские поля (path, file_path, visible, mode, culture, message, step_index, …). Полная таблица: docs/MCP-PROTOCOL.md.",
                 InputSchema = Schema(new
                 {
                     type = "object",

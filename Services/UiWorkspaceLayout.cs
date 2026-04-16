@@ -25,29 +25,22 @@ public static class UiWorkspaceLayout
             mainGrid,
             visible ? UiWorkspaceLayoutRuntimeMetrics.PfdRegionDefaultWidthPixels : 0);
 
-    /// <summary>Колонки 3–4 MainGrid и нижней строки Workspace Health: регион Mfd и сплиттер перед ним.</summary>
+    /// <summary>Колонка 2 MainGrid: ширина региона Mfd (px); при 0 — колонка схлопнута.</summary>
     public static void ApplyMfdRegionColumns(Grid mainGrid, Grid? workspaceHealthColumnsGrid, double mfdRegionWidthPixels)
     {
         var w = Math.Max(0, mfdRegionWidthPixels);
-        var splitter = w > 0 ? UiWorkspaceLayoutRuntimeMetrics.MainGridColumnSplitterWidthPixels : 0;
 
-        if (mainGrid.ColumnDefinitions.Count > 4)
-        {
-            mainGrid.ColumnDefinitions[3].Width = new GridLength(splitter);
-            mainGrid.ColumnDefinitions[4].Width = new GridLength(w);
-        }
+        if (mainGrid.ColumnDefinitions.Count > 2)
+            mainGrid.ColumnDefinitions[2].Width = new GridLength(w);
 
-        if (workspaceHealthColumnsGrid is { ColumnDefinitions.Count: > 4 } inner)
-        {
-            inner.ColumnDefinitions[3].Width = new GridLength(splitter);
-            inner.ColumnDefinitions[4].Width = new GridLength(w);
-        }
+        if (workspaceHealthColumnsGrid is { ColumnDefinitions.Count: > 2 } inner)
+            inner.ColumnDefinitions[2].Width = new GridLength(w);
     }
 
     /// <summary>Найти MainGrid и WorkspaceHealthColumnsGrid по корню окна и применить ширину региона Mfd.</summary>
     public static bool TryApplyMfdRegionColumnsFromRoot(Visual root, double mfdRegionWidthPixels)
     {
-        if (UiControlAppearance.FindControlByName(root, "MainGrid") is not Grid main || main.ColumnDefinitions.Count <= 4)
+        if (UiControlAppearance.FindControlByName(root, "MainGrid") is not Grid main || main.ColumnDefinitions.Count <= 2)
             return false;
         var inner = UiControlAppearance.FindControlByName(root, "WorkspaceHealthColumnsGrid") as Grid;
         ApplyMfdRegionColumns(main, inner, mfdRegionWidthPixels);

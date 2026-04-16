@@ -361,7 +361,7 @@ public static class UiModeCatalog
         if (stack.Exists(x => string.Equals(x, modeId, StringComparison.OrdinalIgnoreCase)))
         {
             global::System.Diagnostics.Debug.WriteLine($"UiModeCatalog: inherits cycle at {modeId}");
-            var fb = ResolvedMode.FromRegistry("Balanced");
+            var fb = ResolvedMode.FromRegistry("Flight");
             memo[modeId] = fb;
             return fb;
         }
@@ -589,7 +589,7 @@ public static class UiModeCatalog
             "AgentChat" => UiModeFamily.AgentChat,
             "Debug" => UiModeFamily.Debug,
             "Flight" => UiModeFamily.Flight,
-            _ => UiModeFamily.Balanced,
+            _ => UiModeFamily.Flight,
         };
 
     public static UiModeLayoutSpec GetSpec(string normalizedMode)
@@ -656,11 +656,11 @@ public static class UiModeCatalog
         }
     }
 
-    /// <summary>Нормализует id к каноническому виду из индекса; неизвестный режим → Balanced.</summary>
+    /// <summary>Нормализует id к каноническому виду из индекса; неизвестный режим → Flight.</summary>
     public static string NormalizeUiMode(string? mode)
     {
         if (string.IsNullOrWhiteSpace(mode))
-            return "Balanced";
+            return "Flight";
 
         lock (Gate)
         {
@@ -671,7 +671,7 @@ public static class UiModeCatalog
             }
         }
 
-        return "Balanced";
+        return "Flight";
     }
 
     public static UiModeFamily GetFamily(string normalizedMode)

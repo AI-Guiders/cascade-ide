@@ -19,7 +19,7 @@ public sealed class PresentationMainGridLayoutFrameBuilderTests
             dedicatedMfdSecondScreen: false,
             mfdColumnSuppressedForHost: false);
 
-        Assert.Equal("0.2*,4,0.3*,4,0.5*", frame.ColumnDefinitions);
+        Assert.Equal("0.2*,0.3*,0.5*", frame.ColumnDefinitions);
         Assert.Equal(3, frame.ContentZoneCount);
         Assert.True(frame.HasExplicitWeights);
         Assert.Equal(3, frame.NormalizedZoneWeights.Count);
@@ -46,7 +46,7 @@ public sealed class PresentationMainGridLayoutFrameBuilderTests
             dedicatedMfdSecondScreen: true,
             mfdColumnSuppressedForHost: true);
 
-        Assert.Equal("0.25*,4,0.75*,4,0", frame.ColumnDefinitions);
+        Assert.Equal("0.25*,0.75*,0", frame.ColumnDefinitions);
         Assert.Equal(2, frame.ContentZoneCount);
         Assert.True(frame.HasExplicitWeights);
         Assert.Equal(2, frame.ZoneBounds.Count);

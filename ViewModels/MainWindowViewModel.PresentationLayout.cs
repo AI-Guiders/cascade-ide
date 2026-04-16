@@ -78,13 +78,6 @@ public partial class MainWindowViewModel
     public bool IsMfdHostWindowShellOpen => _suppressMfdColumnForMfdHostWindow;
 
     /// <summary>
-    /// Центральная зона (forward): строка рабочей области <c>MainGrid</c> отводит место под колонку редактора (CDS v0.1).
-    /// </summary>
-    public bool IsForwardZoneVisible =>
-        MainGridRowHeights.Workspace.IsStar
-        || (MainGridRowHeights.Workspace.IsAbsolute && MainGridRowHeights.Workspace.Value > 0);
-
-    /// <summary>
     /// Окно-хост зоны Mfd показывает <c>SecondaryShellView</c> (чат, терминал, обозреватель решения и т.д.) — скрываем колонку Mfd в главном окне, чтобы не дублировать контур.
     /// </summary>
     public void SetMfdHostWindowShellOpen(bool isOpen)

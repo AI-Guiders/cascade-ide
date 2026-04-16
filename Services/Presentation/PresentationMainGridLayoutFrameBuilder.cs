@@ -8,10 +8,8 @@ namespace CascadeIDE.Services.Presentation;
 /// </summary>
 public static class PresentationMainGridLayoutFrameBuilder
 {
-    private const double SplitterWidthPx = 4;
-
-    /// <summary>Дефолт без весов/валидной конфигурации в первом экране.</summary>
-    public const string DefaultColumnDefinitions = "220,4,*,4,340";
+    /// <summary>Дефолт без весов/валидной конфигурации в первом экране (три колонки контента, без отдельных сплиттеров).</summary>
+    public const string DefaultColumnDefinitions = "220,*,340";
 
     public static PresentationMainGridLayoutFrame Build(
         PresentationParseResult parse,
@@ -70,12 +68,12 @@ public static class PresentationMainGridLayoutFrameBuilder
     }
 
     private static string FormatTriple(double wP, double wF, double wM) =>
-        $"{FormatWeight(wP)}*,{SplitterWidthPx},{FormatWeight(wF)}*,{SplitterWidthPx},{FormatWeight(wM)}*";
+        $"{FormatWeight(wP)}*,{FormatWeight(wF)}*,{FormatWeight(wM)}*";
 
     private static string FormatDual(double w0, double w1, bool dedicatedMfdSecondScreen, bool mfdColumnSuppressedForHost)
     {
         var tail = dedicatedMfdSecondScreen && mfdColumnSuppressedForHost ? "0" : "340";
-        return $"{FormatWeight(w0)}*,{SplitterWidthPx},{FormatWeight(w1)}*,{SplitterWidthPx},{tail}";
+        return $"{FormatWeight(w0)}*,{FormatWeight(w1)}*,{tail}";
     }
 
     private static string FormatWeight(double w) => w.ToString("0.########", CultureInfo.InvariantCulture);

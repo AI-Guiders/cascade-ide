@@ -31,7 +31,7 @@ public static class CockpitSurfaceSnapshotBuilder
                 CurrentPage: vm.CurrentSecondaryShellPage.ToString()),
             Zones: new CockpitSurfaceZones(
                 PfdVisible: vm.IsPfdColumnVisible,
-                ForwardVisible: vm.IsForwardZoneVisible,
+                ForwardVisible: true,
                 MfdVisible: vm.IsMfdColumnVisible,
                 PfdRequiredByPresentation: layout.PfdRequiredByPresentation,
                 ForwardRequiredByPresentation: layout.ForwardRequiredByPresentation,

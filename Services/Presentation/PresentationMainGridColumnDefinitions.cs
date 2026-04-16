@@ -2,7 +2,7 @@ namespace CascadeIDE.Services.Presentation;
 
 /// <summary>
 /// Строка колонок Avalonia <c>Grid</c> для строки рабочей области главного окна:
-/// пять колонок — контент PFD, сплиттер 4px, Forward, сплиттер 4px, MFD (см. <c>MainWindow.axaml</c>).
+/// три колонки контента — PFD, Forward, MFD (см. <c>MainWindow.axaml</c>).
 /// При заданных весах в <c>presentation</c> контент-колонки получают звёздочные доли (<c>*</c>).
 /// </summary>
 public static class PresentationMainGridColumnDefinitions

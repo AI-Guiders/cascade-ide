@@ -17,6 +17,6 @@ public static partial class IdeCommands
     public const string SetTerminalVisible = "set_terminal_visible";
     /// <summary>Явно показать/скрыть журнал сборки. args: visible:boolean; returns: text; example: {"visible":true}.</summary>
     public const string SetBuildOutputVisible = "set_build_output_visible";
-    /// <summary>Режим UI (как меню «Вид → Режим интерфейса»). args: mode:string; returns: text; example: {"mode":"Power"}.</summary>
+    /// <summary>Режим UI (как меню «Вид → Режим интерфейса»). args: mode:string; returns: text; example: {"mode":"Flight"}.</summary>
     public const string SetUiMode = "set_ui_mode";
 }

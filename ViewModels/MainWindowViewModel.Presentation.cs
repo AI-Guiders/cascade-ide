@@ -156,9 +156,6 @@ public partial class MainWindowViewModel
     public bool ShowWorkspaceBottomChrome =>
         ShowWorkspaceHealthStrip || ShowEicasAlertsBar || IsBottomPanelVisible;
 
-    /// <summary>Чат в одной строке с PFD/Forward; MFD не пересекает нижнюю строку MainGrid.</summary>
-    public int MfdZoneMainGridRowSpan => 1;
-
     public string TelemetryButtonText => IsTerminalVisible ? "Telemetry: on" : "Show telemetry";
     public bool ShowEditorGroup2 => EditorGroupCount >= 2;
     public bool ShowEditorGroup3 => EditorGroupCount >= 3;
@@ -167,7 +164,7 @@ public partial class MainWindowViewModel
     public bool InstrumentationTabs =>
         IsInstrumentationDockVisible && Capabilities.InstrumentationTabs;
 
-    /// <summary>Вкладка «Гипотезы» — семья Debug и capabilities (ADR 0003, ADR 0010).</summary>
+    /// <summary>Вкладка «Гипотезы» / страница MFD — capabilities (гипотезы не привязаны к отдельному UI-режиму).</summary>
     public bool HypothesesTab =>
         IsInstrumentationDockVisible
         && Capabilities.InstrumentationTabs

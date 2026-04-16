@@ -10,7 +10,7 @@ public sealed class WorkspaceUiSettings
     public bool ShowInstrumentation { get; set; } = true;
 
     /// <summary>Focus, Balanced, Power, Debug, AgentChat, Flight (TOML: <c>mode</c>).</summary>
-    public string Mode { get; set; } = "Balanced";
+    public string Mode { get; set; } = "Flight";
 
     /// <summary><c>ru-RU</c>, <c>en-US</c>; пусто — системная локаль (TOML: <c>culture</c>).</summary>
     public string Culture { get; set; } = "";

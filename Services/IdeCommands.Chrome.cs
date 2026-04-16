@@ -29,13 +29,7 @@ public static partial class IdeCommands
     /// <summary>Переключить развёрнут/свёрнут регион Mfd (toggle). returns: text.</summary>
     public const string ToggleMfdRegionExpanded = "toggle_mfd_region_expanded";
 
-    // ——— Вид: режим (дублируют хоткеи Alt+1/2/3, Ctrl+Alt+M)
-    /// <summary>Установить Focus UI mode (hotkey). returns: text.</summary>
-    public const string SetFocusModeUi = "set_focus_mode";
-    /// <summary>Установить Balanced UI mode (hotkey). returns: text.</summary>
-    public const string SetBalancedModeUi = "set_balanced_mode";
-    /// <summary>Установить Power UI mode (hotkey). returns: text.</summary>
-    public const string SetPowerModeUi = "set_power_mode";
+    // ——— Вид: режим
     /// <summary>Циклически переключить UI mode (hotkey). returns: text.</summary>
     public const string CycleUiMode = "cycle_ui_mode";
 

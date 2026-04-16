@@ -20,86 +20,38 @@ public sealed record UiModeLayoutSpec(
     bool InstrumentationDockVisible);
 
 /// <summary>
-/// Встроенные режимы UI: порядок в списке UI, раскладка при <c>ApplyUiModeLayout</c>, ширина региона Mfd.
-/// Новый режим — новая запись в словаре (позже можно подменить загрузкой из JSON тем же типом).
+/// Встроенный режим UI: порядок в списке UI, раскладка при <c>ApplyUiModeLayout</c>, ширина региона Mfd.
+/// Продуктовый бандл — только <c>Flight</c> (<c>UiModes/</c>); неизвестный id трактуется как Flight.
 /// </summary>
 public static class UiModeLayoutRegistry
 {
-    /// <summary>Стабильный порядок пунктов «Режим интерфейса» и комбо.</summary>
-    public static readonly IReadOnlyList<string> OrderedModeIds =
-        ["Focus", "Editor", "Balanced", "Power", "AgentChat", "Debug"];
+    /// <summary>Стабильный порядок пункта «Режим интерфейса» и комбо.</summary>
+    public static readonly IReadOnlyList<string> OrderedModeIds = ["Flight"];
 
     private static readonly Dictionary<string, UiModeLayoutSpec> ByNormalizedMode =
         new(StringComparer.OrdinalIgnoreCase)
         {
-            ["Focus"] = new UiModeLayoutSpec(
-                PfdRegionExpanded: true,
-                BuildOutputVisible: false,
-                TerminalVisible: false,
-                MfdRegionExpanded: true,
-                EditorGroupCount: 1,
-                ThemeSlot: UiModeThemeSlot.Dark,
-                SelectTerminalTabWhenTerminalShown: false,
-                InstrumentationDockVisible: true),
-            // Три якоря PFD | Forward | MFD видны сразу (ADR 0021); «лёгкий» Editor — через capabilities/TOML, не через схлопывание колонок.
-            ["Editor"] = new UiModeLayoutSpec(
-                PfdRegionExpanded: true,
-                BuildOutputVisible: false,
-                TerminalVisible: false,
-                MfdRegionExpanded: true,
-                EditorGroupCount: 1,
-                ThemeSlot: UiModeThemeSlot.Dark,
-                SelectTerminalTabWhenTerminalShown: false,
-                InstrumentationDockVisible: false),
-            ["Balanced"] = new UiModeLayoutSpec(
+            // Базовая «рабочая» раскладка (раньше Balanced): терминал/сборка, два редактора, MFD.
+            ["Flight"] = new UiModeLayoutSpec(
                 PfdRegionExpanded: true,
                 BuildOutputVisible: true,
                 TerminalVisible: true,
                 MfdRegionExpanded: true,
                 EditorGroupCount: 2,
                 ThemeSlot: UiModeThemeSlot.CursorLike,
-                SelectTerminalTabWhenTerminalShown: false,
-                InstrumentationDockVisible: true),
-            ["Power"] = new UiModeLayoutSpec(
-                PfdRegionExpanded: true,
-                BuildOutputVisible: true,
-                TerminalVisible: true,
-                MfdRegionExpanded: true,
-                EditorGroupCount: 3,
-                ThemeSlot: UiModeThemeSlot.PowerCockpit,
-                SelectTerminalTabWhenTerminalShown: true,
-                InstrumentationDockVisible: true),
-            ["AgentChat"] = new UiModeLayoutSpec(
-                PfdRegionExpanded: false,
-                BuildOutputVisible: false,
-                TerminalVisible: false,
-                MfdRegionExpanded: true,
-                EditorGroupCount: 1,
-                ThemeSlot: UiModeThemeSlot.CursorLike,
-                SelectTerminalTabWhenTerminalShown: false,
-                InstrumentationDockVisible: true),
-            ["Debug"] = new UiModeLayoutSpec(
-                PfdRegionExpanded: true,
-                BuildOutputVisible: false,
-                TerminalVisible: false,
-                MfdRegionExpanded: true,
-                EditorGroupCount: 2,
-                ThemeSlot: UiModeThemeSlot.Dark,
                 SelectTerminalTabWhenTerminalShown: false,
                 InstrumentationDockVisible: true),
         };
 
-    /// <summary>Спека для режима; неизвестный режим трактуется как Balanced.</summary>
+    /// <summary>Спека для режима; неизвестный режим — как Flight.</summary>
     public static UiModeLayoutSpec Get(string normalizedMode) =>
         ByNormalizedMode.TryGetValue(normalizedMode, out var spec)
             ? spec
-            : ByNormalizedMode["Balanced"];
+            : ByNormalizedMode["Flight"];
 
     /// <summary>Ширина развёрнутого региона Mfd в пикселях для нормализованного режима (с учётом <c>workspace.toml</c> через <see cref="UiWorkspaceLayoutRuntimeMetrics"/>).</summary>
     public static int GetMfdRegionExpandedWidthPixels(string normalizedMode) => normalizedMode switch
     {
-        "Power" => UiWorkspaceLayoutRuntimeMetrics.MfdRegionExpandedPowerWidthPixels,
-        "AgentChat" => UiWorkspaceLayoutRuntimeMetrics.MfdRegionExpandedAgentChatWidthPixels,
         _ => UiWorkspaceLayoutRuntimeMetrics.MfdRegionExpandedDefaultWidthPixels,
     };
 }

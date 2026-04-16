@@ -29,10 +29,7 @@ public static partial class IdeCommandRegistry
         AddPalette(b, "set_dual_editor_group", IdeCommands.SetDualEditorGroup, "Две группы редакторов", "Вид");
         AddPalette(b, "set_triple_editor_group", IdeCommands.SetTripleEditorGroup, "Три группы редакторов", "Вид");
 
-        // ——— Вид: режим (Focus / Balanced / Power, cycle, set_ui_mode)
-        AddPalette(b, "set_focus_mode", IdeCommands.SetFocusModeUi, "Режим: Focus", "Вид");
-        AddPalette(b, "set_balanced_mode", IdeCommands.SetBalancedModeUi, "Режим: Balanced", "Вид");
-        AddPalette(b, "set_power_mode", IdeCommands.SetPowerModeUi, "Режим: Power", "Вид");
+        // ——— Вид: режим (единственный продуктовый — Flight; cycle и хоткеи Alt+N сохранены)
         AddPalette(
             b,
             "cycle_ui_mode",
@@ -43,12 +40,6 @@ public static partial class IdeCommandRegistry
             access: CommandAccessibleFrom.AgentAndUI,
             window: new MainWindowHotkeyVmBinding(MainWindowHotkeyVmBindingKind.CycleUiMode));
 
-        AddPalette(b, "set_ui_mode_Focus", IdeCommands.SetUiMode, "Режим интерфейса: Focus", "Вид", """{"mode":"Focus"}""");
-        AddPalette(b, "set_ui_mode_Editor", IdeCommands.SetUiMode, "Режим интерфейса: Editor", "Вид", """{"mode":"Editor"}""");
-        AddPalette(b, "set_ui_mode_Balanced", IdeCommands.SetUiMode, "Режим интерфейса: Balanced", "Вид", """{"mode":"Balanced"}""");
-        AddPalette(b, "set_ui_mode_Power", IdeCommands.SetUiMode, "Режим интерфейса: Power", "Вид", """{"mode":"Power"}""");
-        AddPalette(b, "set_ui_mode_AgentChat", IdeCommands.SetUiMode, "Режим интерфейса: Agent Chat", "Вид", """{"mode":"AgentChat"}""");
-        AddPalette(b, "set_ui_mode_Debug", IdeCommands.SetUiMode, "Режим интерфейса: Debug", "Вид", """{"mode":"Debug"}""");
         AddPalette(b, "set_ui_mode_Flight", IdeCommands.SetUiMode, "Режим интерфейса: Flight", "Вид", """{"mode":"Flight"}""");
 
         // ——— Вид: тема

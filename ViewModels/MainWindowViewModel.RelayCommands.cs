@@ -311,7 +311,7 @@ public partial class MainWindowViewModel
 
         if (idx < 0 || ids.Count == 0)
         {
-            UiMode = "Focus";
+            UiMode = "Flight";
             return;
         }
 
