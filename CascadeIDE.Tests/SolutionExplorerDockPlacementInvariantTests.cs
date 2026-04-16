@@ -8,8 +8,7 @@ namespace CascadeIDE.Tests;
 
 /// <summary>
 /// Регрессии вида «открыли решение — дерево не там»: одна карта инструментов (<see cref="InstrumentPlacementRuntime"/> + <see cref="DisplaySettings"/>)
-/// должна давать тот же смысл, что и кадр композитора и что и флаги привязки в <c>MainWindowViewModel.DockInstrumentSlots</c>.
-/// Логика разрешения слотов ниже должна совпадать с приватными методами в <c>MainWindowViewModel</c> (surface DockedGrid).
+/// должна давать тот же смысл, что и кадр композитора и что и <see cref="MainWindowDockedGridInstrumentSlots"/> (те же биндинги, что у <c>MainWindowViewModel</c>).
 /// </summary>
 [Collection("UiModeCatalog")]
 public sealed class SolutionExplorerDockPlacementInvariantTests : IDisposable
@@ -22,50 +21,6 @@ public sealed class SolutionExplorerDockPlacementInvariantTests : IDisposable
 
     public void Dispose() =>
         InstrumentPlacementRuntime.ResetToCodeDefaults();
-
-    /// <summary>Копия <see cref="MainWindowViewModel.ResolveDockedPfdInstrumentId"/> / Mfd для surface DockedGrid.</summary>
-    private static string ResolveDockedPfdInstrumentId(DisplaySettings display)
-    {
-        if (InstrumentPlacementRuntime.TryResolveInstrument(
-                MainWindowHostSurfaceIds.DockedGrid,
-                CockpitSlotIds.Pfd,
-                display,
-                out var id)
-            && !string.IsNullOrWhiteSpace(id))
-            return id;
-
-        return CockpitStandardInstrumentIds.SolutionExplorerTree;
-    }
-
-    private static string ResolveDockedMfdInstrumentId(DisplaySettings display)
-    {
-        if (InstrumentPlacementRuntime.TryResolveInstrument(
-                MainWindowHostSurfaceIds.DockedGrid,
-                CockpitSlotIds.Mfd,
-                display,
-                out var id)
-            && !string.IsNullOrWhiteSpace(id))
-            return id;
-
-        return "";
-    }
-
-    private static bool IsDockedPfdSolutionExplorerTree(DisplaySettings d) =>
-        string.Equals(
-            ResolveDockedPfdInstrumentId(d),
-            CockpitStandardInstrumentIds.SolutionExplorerTree,
-            StringComparison.OrdinalIgnoreCase);
-
-    private static bool IsDockedMfdSolutionExplorerTree(DisplaySettings d) =>
-        string.Equals(
-            ResolveDockedMfdInstrumentId(d),
-            CockpitStandardInstrumentIds.SolutionExplorerTree,
-            StringComparison.OrdinalIgnoreCase)
-        && !IsDockedPfdSolutionExplorerTree(d);
-
-    /// <summary>Страница «Обозреватель» на вторичном контуре разрешена только если дерево в слоте MFD (см. <c>IsSecondaryShellPageAllowed</c>).</summary>
-    private static bool SecondaryShellSolutionExplorerPageAllowed(DisplaySettings d) =>
-        IsDockedMfdSolutionExplorerTree(d);
 
     private static MainWindowHostSurfaceFrame Compose(
         string presentationLine,
@@ -104,9 +59,8 @@ public sealed class SolutionExplorerDockPlacementInvariantTests : IDisposable
         var display = new DisplaySettings();
         var frame = Compose("(P+F) (M)", intentSolutionExplorerVisible: true, display);
 
-        Assert.True(IsDockedPfdSolutionExplorerTree(display));
-        Assert.False(IsDockedMfdSolutionExplorerTree(display));
-        Assert.False(SecondaryShellSolutionExplorerPageAllowed(display));
+        Assert.True(MainWindowDockedGridInstrumentSlots.IsDockedPfdSolutionExplorerTree(display));
+        Assert.False(MainWindowDockedGridInstrumentSlots.IsDockedMfdSolutionExplorerTree(display));
 
         Assert.Equal(CockpitStandardInstrumentIds.SolutionExplorerTree, InstrumentInSlot(frame, CockpitSlotIds.Pfd));
         Assert.Null(InstrumentInSlot(frame, CockpitSlotIds.Mfd));
@@ -127,9 +81,8 @@ public sealed class SolutionExplorerDockPlacementInvariantTests : IDisposable
         // Якорь M на первом экране — иначе (P+F) (M) даёт MfdColumnVisibleInMainGrid=false и слот MFD в main не монтируется.
         var frame = Compose("(P+F+M)", intentSolutionExplorerVisible: true, display);
 
-        Assert.False(IsDockedPfdSolutionExplorerTree(display));
-        Assert.True(IsDockedMfdSolutionExplorerTree(display));
-        Assert.True(SecondaryShellSolutionExplorerPageAllowed(display));
+        Assert.False(MainWindowDockedGridInstrumentSlots.IsDockedPfdSolutionExplorerTree(display));
+        Assert.True(MainWindowDockedGridInstrumentSlots.IsDockedMfdSolutionExplorerTree(display));
 
         Assert.Equal(CockpitStandardInstrumentIds.WorkspaceNavigationMap, InstrumentInSlot(frame, CockpitSlotIds.Pfd));
         Assert.Equal(CockpitStandardInstrumentIds.SolutionExplorerTree, InstrumentInSlot(frame, CockpitSlotIds.Mfd));
@@ -149,8 +102,8 @@ public sealed class SolutionExplorerDockPlacementInvariantTests : IDisposable
 
         var frame = Compose("(P+F) (M)", intentSolutionExplorerVisible: true, display);
 
-        var pfdResolved = ResolveDockedPfdInstrumentId(display);
-        var mfdResolved = ResolveDockedMfdInstrumentId(display);
+        var pfdResolved = MainWindowDockedGridInstrumentSlots.ResolvePfdInstrumentId(display);
+        var mfdResolved = MainWindowDockedGridInstrumentSlots.ResolveMfdInstrumentId(display);
 
         if (frame.Shell.PfdSurfaceVisible)
         {
@@ -181,7 +134,7 @@ public sealed class SolutionExplorerDockPlacementInvariantTests : IDisposable
             var display = new DisplaySettings { PreferRepoInstrumentsPlacement = true };
             var frame = Compose("(P+F) (M)", intentSolutionExplorerVisible: true, display);
 
-            Assert.False(IsDockedPfdSolutionExplorerTree(display));
+            Assert.False(MainWindowDockedGridInstrumentSlots.IsDockedPfdSolutionExplorerTree(display));
             Assert.Equal(CockpitStandardInstrumentIds.WorkspaceNavigationMap, InstrumentInSlot(frame, CockpitSlotIds.Pfd));
         }
         finally
