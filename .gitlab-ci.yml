@@ -1,0 +1,24 @@
+# CascadeIDE: win-x64 WinExe + Avalonia headless tests — ожидается runner с Windows и установленным .NET SDK 10+.
+# Если у проекта нет тега `windows`, уберите `default.tags` или задайте свой тег в GitLab CI/CD → Variables / настройках runner.
+stages: [test]
+
+variables:
+  CONFIGURATION: Release
+  DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+
+default:
+  tags:
+    - windows
+
+test:
+  stage: test
+  script:
+    - dotnet restore CascadeIDE.sln
+    - dotnet build CascadeIDE.sln -c $env:CONFIGURATION --no-restore
+    - dotnet test CascadeIDE.Tests\CascadeIDE.Tests.csproj -c $env:CONFIGURATION --no-build --verbosity minimal
+    # Smoke: тот же контур, что docs/samples/agent-contract-ci.csx (без dotnet-script)
+    - dotnet run --project CascadeIDE.csproj -c $env:CONFIGURATION --no-build -- --agent-contract get_ui_modes_diagnostics
+    - dotnet run --project CascadeIDE.csproj -c $env:CONFIGURATION --no-build -- --agent-contract get_supported_editor_languages
+    - dotnet run --project CascadeIDE.csproj -c $env:CONFIGURATION --no-build -- --agent-contract get_solution_info
+    - dotnet run --project CascadeIDE.csproj -c $env:CONFIGURATION --no-build -- --agent-contract get_cockpit_surface
+    - dotnet run --project CascadeIDE.csproj -c $env:CONFIGURATION --no-build -- --agent-contract get_workspace_state

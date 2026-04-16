@@ -110,6 +110,10 @@ public static class AgentContractRunner
             case IdeCommands.GitShow:
                 return await GitShowAsync(workspace, tail, cancellationToken).ConfigureAwait(false);
 
+            case IdeCommands.GetSolutionInfo:
+                RequireEmptyTail(tail, command);
+                return AgentContractHeadlessRuntime.GetSolutionInfoJson();
+
             case IdeCommands.GetCockpitSurface:
                 RequireEmptyTail(tail, command);
                 return AgentContractHeadlessRuntime.GetCockpitSurfaceJson();
@@ -367,6 +371,7 @@ public static class AgentContractRunner
             Commands (no workspace):
               get_supported_editor_languages   Same payload as ide_get_supported_editor_languages
               get_ui_modes_diagnostics        Same payload as ide_get_ui_modes_diagnostics
+              get_solution_info                Same payload as ide_get_solution_info (headless VM)
               get_cockpit_surface             CDS only (CockpitSurfaceState), same as cockpit_surface in ide_get_workspace_state
               get_workspace_state             Same payload as ide_get_workspace_state (headless VM; slower)
 

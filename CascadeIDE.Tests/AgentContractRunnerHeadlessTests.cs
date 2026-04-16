@@ -32,4 +32,24 @@ public sealed class AgentContractRunnerHeadlessTests
         Assert.NotNull(parsed);
         Assert.Equal(CockpitSurfaceSnapshotBuilder.CurrentSchemaVersion, parsed!.SchemaVersion);
     }
+
+    [AvaloniaFact]
+    public void Get_solution_info_returns_json_with_expected_keys()
+    {
+        var json = AgentContractRunner.GetContractJson(IdeCommands.GetSolutionInfo);
+        using var doc = JsonDocument.Parse(json);
+        Assert.True(doc.RootElement.TryGetProperty("solution_path", out _));
+        Assert.True(doc.RootElement.TryGetProperty("current_file_path", out _));
+        Assert.True(doc.RootElement.TryGetProperty("project_paths", out _));
+    }
+
+    [AvaloniaFact]
+    public void Get_workspace_state_redacted_matches_on_two_calls()
+    {
+        var a = AgentContractWorkspaceStateRedaction.RedactForStableCompare(
+            AgentContractRunner.GetContractJson(IdeCommands.GetWorkspaceState));
+        var b = AgentContractWorkspaceStateRedaction.RedactForStableCompare(
+            AgentContractRunner.GetContractJson(IdeCommands.GetWorkspaceState));
+        Assert.Equal(a, b);
+    }
 }

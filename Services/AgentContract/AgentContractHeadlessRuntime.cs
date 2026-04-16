@@ -16,6 +16,17 @@ internal static class AgentContractHeadlessRuntime
     private static readonly object Gate = new();
     private static bool _initialized;
 
+    /// <summary>Короткая сводка решения — тот же JSON, что MCP <c>ide_get_solution_info</c> / <see cref="IIdeMcpActions.GetSolutionInfo"/>.</summary>
+    public static string GetSolutionInfoJson()
+    {
+        EnsureInitialized();
+        return Dispatcher.UIThread.Invoke(() =>
+        {
+            var vm = new MainWindowViewModel();
+            return ((IIdeMcpActions)vm).GetSolutionInfo();
+        });
+    }
+
     /// <summary>CDS JSON — тот же объект, что <c>cockpit_surface</c> в <see cref="IIdeMcpActions.GetWorkspaceStateAsync"/>.</summary>
     public static string GetCockpitSurfaceJson()
     {

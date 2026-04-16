@@ -6,6 +6,7 @@
 
 using System.Diagnostics;
 using System.Text;
+using System.Text.Json;
 
 static string[] GetArgsAfterCsx()
 {
@@ -83,8 +84,31 @@ if (string.IsNullOrWhiteSpace(json)) { Console.Error.WriteLine("empty stdout fro
 code = RunAgentContract(cascadeExe, ["--agent-contract", "get_supported_editor_languages"], out json, out err);
 if (code != 0) { Console.Error.WriteLine(err); Environment.Exit(code); }
 
+code = RunAgentContract(cascadeExe, ["--agent-contract", "get_solution_info"], out json, out err);
+if (code != 0) { Console.Error.WriteLine(err); Environment.Exit(code); }
+try { JsonDocument.Parse(json); }
+catch (Exception ex) { Console.Error.WriteLine($"get_solution_info: invalid JSON: {ex.Message}"); Environment.Exit(3); }
+
+code = RunAgentContract(cascadeExe, ["--agent-contract", "get_cockpit_surface"], out json, out err);
+if (code != 0) { Console.Error.WriteLine(err); Environment.Exit(code); }
+try { JsonDocument.Parse(json); }
+catch (Exception ex) { Console.Error.WriteLine($"get_cockpit_surface: invalid JSON: {ex.Message}"); Environment.Exit(3); }
+
+code = RunAgentContract(cascadeExe, ["--agent-contract", "get_workspace_state"], out json, out err);
+if (code != 0) { Console.Error.WriteLine(err); Environment.Exit(code); }
+try
+{
+    using var doc = JsonDocument.Parse(json);
+    if (!doc.RootElement.TryGetProperty("cockpit_surface", out _))
+    {
+        Console.Error.WriteLine("get_workspace_state: missing cockpit_surface");
+        Environment.Exit(3);
+    }
+}
+catch (Exception ex) { Console.Error.WriteLine($"get_workspace_state: invalid JSON: {ex.Message}"); Environment.Exit(3); }
+
 code = RunAgentContract(cascadeExe, ["--agent-contract", "--workspace", workspace, "git_status"], out json, out err);
 if (code != 0) { Console.Error.WriteLine(err); Environment.Exit(code); }
 
-Console.WriteLine("OK: agent-contract checks passed (ui_modes, languages, git_status).");
+Console.WriteLine("OK: agent-contract checks passed (ui_modes, languages, solution_info, cockpit, workspace_state, git_status).");
 Environment.Exit(0);

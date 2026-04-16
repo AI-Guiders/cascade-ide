@@ -1,6 +1,6 @@
 # ADR 0052: CLI для контракта агента (паритет с MCP) и снапшот-тесты
 
-**Статус:** Accepted · Implemented (`get_ui_modes_diagnostics`, `get_supported_editor_languages`, `get_cockpit_surface`, `get_workspace_state`, read-only `git_*` с `--workspace`)  
+**Статус:** Accepted · Implemented (`get_ui_modes_diagnostics`, `get_supported_editor_languages`, `get_solution_info`, `get_cockpit_surface`, `get_workspace_state`, read-only `git_*` с `--workspace`; CI: `.gitlab-ci.yml` — `dotnet test` + smoke `--agent-contract`)  
 **Дата:** 2026-04-17  
 **Принят:** 2026-04-16  
 
@@ -26,7 +26,7 @@
 2. Принимает на вход **явный контекст**: как минимум `--workspace` (корень workspace), при необходимости путь к решению, флаги «какой тул эмулировать» и параметры args (по схеме MCP).
 3. Пишет **в stdout** тот же JSON (или тот же **нормализованный** вид), что вернул бы соответствующий тул в MCP.
 
-**CI:** в репозитории уже принят **`dotnet script`** (глобальный `dotnet-script`, см. `Financial/finplan/update-finplan-pdf.csx`, `agents-and-humans-book/update-agents-humans-pdf.csx`). Для вызова `--agent-contract` из пайплайна естественно использовать тот же контур: [`docs/samples/agent-contract-ci.csx`](../samples/agent-contract-ci.csx) — `ProcessStartInfo`, код выхода, без сюрпризов с `$LASTEXITCODE`. Альтернатива на **PowerShell**: [`docs/samples/agent-contract-ci.ps1`](../samples/agent-contract-ci.ps1) (`pwsh` 7+ или `Start-Process -PassThru.ExitCode` в Windows PowerShell 5.1).
+**CI:** в корне репозитория — [`.gitlab-ci.yml`](../../.gitlab-ci.yml): `dotnet build` / `dotnet test` и последовательный smoke `dotnet run --project CascadeIDE -- --agent-contract …` (ожидается **Windows** runner с .NET 10 SDK и тег `windows`; при другом окружении — поправить `default.tags`). Дополнительно в репозитории принят **`dotnet script`** (глобальный `dotnet-script`, см. `Financial/finplan/update-finplan-pdf.csx`, `agents-and-humans-book/update-agents-humans-pdf.csx`). Для вызова `--agent-contract` из пайплайна с собранным `CascadeIDE.exe`: [`docs/samples/agent-contract-ci.csx`](../samples/agent-contract-ci.csx) — `ProcessStartInfo`, код выхода, без сюрпризов с `$LASTEXITCODE`. Альтернатива на **PowerShell**: [`docs/samples/agent-contract-ci.ps1`](../samples/agent-contract-ci.ps1) (`pwsh` 7+ или `Start-Process -PassThru.ExitCode` в Windows PowerShell 5.1).
 
 **Тесты:**
 

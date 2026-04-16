@@ -1,6 +1,6 @@
 # ADR 0051: Intent-based attention routing (TOML)
 
-**Статус:** Proposed  
+**Статус:** Accepted · Implemented (секция `[attention_routing]` в bundle `UiModes/workspace.toml` и оверлее `.cascade/workspace.toml`; intent-id — `AttentionRoutingIntentIds`)  
 **Дата:** 2026-04-16  
 
 **Связь:** [0021](0021-pfd-mfd-cockpit-attention-model.md) (модель зон внимания и их канонические id), [0017](0017-multi-window-workspace-and-agent-surfaces.md) (топология `presentation`), [0050](0050-declarative-instrument-zone-placement-toml.md) (декларативный placement `instrument_id` по `surface_id+slot_id`).

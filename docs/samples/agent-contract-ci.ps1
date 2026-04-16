@@ -38,7 +38,17 @@ if ([string]::IsNullOrWhiteSpace($uiModesJson)) { throw "empty JSON from get_ui_
 
 $langJson = Invoke-AgentContract -Arguments @("--agent-contract", "get_supported_editor_languages")
 
+$solutionJson = Invoke-AgentContract -Arguments @("--agent-contract", "get_solution_info")
+$null = $solutionJson | ConvertFrom-Json
+
+$cockpitJson = Invoke-AgentContract -Arguments @("--agent-contract", "get_cockpit_surface")
+$null = $cockpitJson | ConvertFrom-Json
+
+$workspaceJson = Invoke-AgentContract -Arguments @("--agent-contract", "get_workspace_state")
+$wsObj = $workspaceJson | ConvertFrom-Json
+if (-not $wsObj.PSObject.Properties.Match('cockpit_surface')) { throw "get_workspace_state: missing cockpit_surface" }
+
 # Git — явный корень репозитория (как в MCP)
 $gitJson = Invoke-AgentContract -Arguments @("--agent-contract", "--workspace", $Workspace, "git_status")
 
-Write-Host "OK: ui_modes length=$($uiModesJson.Length), languages length=$($langJson.Length), git_status length=$($gitJson.Length)"
+Write-Host "OK: ui_modes=$($uiModesJson.Length) lang=$($langJson.Length) solution=$($solutionJson.Length) cockpit=$($cockpitJson.Length) workspace=$($workspaceJson.Length) git=$($gitJson.Length)"
