@@ -89,6 +89,9 @@ public static partial class IdeCommands
     public const string ShowBuildOutputPanel = "show_build_output_panel";
     /// <summary>Развернуть регион Mfd и перейти на страницу Chat (toolbar). returns: text.</summary>
     public const string ShowChatPage = "show_chat_page";
+
+    /// <summary>Развернуть регион Mfd и перейти на страницу обозревателя решения (toolbar). returns: text.</summary>
+    public const string ShowSolutionExplorerPage = "show_solution_explorer_page";
     /// <summary>Явно показать терминал (toolbar). returns: text.</summary>
     public const string ShowTerminalPanel = "show_terminal_panel";
     /// <summary>Скрыть панель вывода сборки (toolbar). returns: text.</summary>

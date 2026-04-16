@@ -22,4 +22,7 @@ public enum SecondaryShellPage
     AiChatSettings = 10,
     /// <summary>Готовность окружения (LSP, dotnet…) — ADR 0023; страница вторичного контура, не оверлей.</summary>
     EnvironmentReadiness = 11,
+
+    /// <summary>Обозреватель решения (дерево проектов/файлов) — контент вторичного контура, не отдельная колонка вне shell.</summary>
+    SolutionExplorer = 12,
 }

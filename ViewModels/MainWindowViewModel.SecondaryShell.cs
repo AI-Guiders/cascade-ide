@@ -2,13 +2,18 @@ using CascadeIDE.Models;
 
 namespace CascadeIDE.ViewModels;
 
-/// <summary>Вторичный контур оболочки: одна активная страница; навигация — команды и палитра. Якорь на экране — пресет (v1: зона Mfd).</summary>
+/// <summary>Вторичный контур оболочки: одна активная страница; навигация — команды и палитра. Якорь на экране задаётся presentation (зона Mfd в main и/или окно-хост).</summary>
 public partial class MainWindowViewModel
 {
+    /// <summary>Дерево решения: показывать при развёрнутом регионе MFD или на странице <see cref="SecondaryShellPage.SolutionExplorer"/>.</summary>
+    public bool IsSolutionExplorerTreeChromeVisible =>
+        IsMfdRegionExpanded || CurrentSecondaryShellPage == SecondaryShellPage.SolutionExplorer;
+
     /// <summary>Детерминированный порядок обхода при выборе первой доступной страницы.</summary>
     internal static readonly SecondaryShellPage[] SecondaryShellPageOrder =
     [
         SecondaryShellPage.WorkspaceHealth,
+        SecondaryShellPage.SolutionExplorer,
         SecondaryShellPage.Chat,
         SecondaryShellPage.AiChatSettings,
         SecondaryShellPage.EnvironmentReadiness,
@@ -45,6 +50,7 @@ public partial class MainWindowViewModel
     private bool IsSecondaryShellPageAllowed(SecondaryShellPage page) => page switch
     {
         SecondaryShellPage.WorkspaceHealth => ShowWorkspaceHealthSecondaryPage,
+        SecondaryShellPage.SolutionExplorer => true,
         SecondaryShellPage.Chat => true,
         SecondaryShellPage.AiChatSettings => true,
         SecondaryShellPage.EnvironmentReadiness => true,

@@ -85,7 +85,7 @@ public partial class MainWindowViewModel
         || (MainGridRowHeights.Workspace.IsAbsolute && MainGridRowHeights.Workspace.Value > 0);
 
     /// <summary>
-    /// Окно-хост зоны Mfd показывает <c>SecondaryShellView</c> — скрываем колонку Mfd в главном окне, чтобы не дублировать контур.
+    /// Окно-хост зоны Mfd показывает <c>SecondaryShellView</c> (чат, терминал, обозреватель решения и т.д.) — скрываем колонку Mfd в главном окне, чтобы не дублировать контур.
     /// </summary>
     public void SetMfdHostWindowShellOpen(bool isOpen)
     {

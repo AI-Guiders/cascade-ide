@@ -183,6 +183,7 @@
 | `show_build_output_panel` | Явно показать панель вывода сборки (toolbar). returns: text. |
 | `show_chat_page` | Развернуть регион Mfd и перейти на страницу Chat (toolbar). returns: text. |
 | `show_pfd_region_panel` | Развернуть регион Pfd / Semantic Map (toolbar). returns: text. |
+| `show_solution_explorer_page` | Развернуть регион Mfd и перейти на страницу обозревателя решения (toolbar). returns: text. |
 | `show_terminal_panel` | Явно показать терминал (toolbar). returns: text. |
 
 ### Тулбар: группы редакторов

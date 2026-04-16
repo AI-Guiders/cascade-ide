@@ -156,6 +156,7 @@ internal static class IdeCommandsContractGenerated
         ["show_environment_readiness_page"] = IdeReturnKind.Text,
         ["show_pfd_region_panel"] = IdeReturnKind.Text,
         ["show_preview"] = IdeReturnKind.Text,
+        ["show_solution_explorer_page"] = IdeReturnKind.Text,
         ["show_terminal_panel"] = IdeReturnKind.Text,
         ["start_autonomous"] = IdeReturnKind.Text,
         ["toggle_build_output"] = IdeReturnKind.Text,

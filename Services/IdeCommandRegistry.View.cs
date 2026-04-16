@@ -20,6 +20,7 @@ public static partial class IdeCommandRegistry
         AddPalette(b, "show_pfd_region_panel", IdeCommands.ShowPfdRegionPanel, "Развернуть регион Pfd", "Вид");
         AddPalette(b, "show_build_output_panel", IdeCommands.ShowBuildOutputPanel, "Показать вывод сборки", "Вид");
         AddPalette(b, "show_chat_page", IdeCommands.ShowChatPage, "Страница Chat (регион Mfd)", "Вид");
+        AddPalette(b, "show_solution_explorer_page", IdeCommands.ShowSolutionExplorerPage, "Страница обозревателя решения (регион Mfd)", "Вид");
         AddPalette(b, "show_terminal_panel", IdeCommands.ShowTerminalPanel, "Показать терминал", "Вид");
         AddPalette(b, "hide_build_output_panel", IdeCommands.HideBuildOutputPanel, "Скрыть вывод сборки", "Вид");
 

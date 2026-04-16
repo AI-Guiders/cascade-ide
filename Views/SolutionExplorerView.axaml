@@ -53,7 +53,7 @@
             <Setter Property="Height" Value="20"/>
         </Style>
     </UserControl.Styles>
-    <Panel IsVisible="{Binding IsMfdRegionExpanded}">
+    <Panel IsVisible="{Binding IsSolutionExplorerTreeChromeVisible}">
         <Border IsVisible="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Power}"
                 IsHitTestVisible="False"
                 Background="{DynamicResource CascadeTheme.PowerSolutionIslandFrameBrush}"

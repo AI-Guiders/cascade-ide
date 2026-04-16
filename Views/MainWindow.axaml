@@ -244,7 +244,7 @@
             </MenuItem>
         </Menu>
 
-        <!-- Строка 3 — рабочая область (якоря PFD | Forward | MFD в MainGrid; AttentionLayoutSurfaceKind.MainWindowDockedGrid). В колонке MFD сейчас SecondaryShellView: страницы вторичного контура (WORKSPACE/чат/терминал/…) и полоса EICAS сверху — не синоним «зона MFD», а хост по умолчанию (пресет). -->
+        <!-- Строка 3 — рабочая область (якоря PFD | Forward | MFD в MainGrid). Колонка MFD: только вторичный контур (в т.ч. страница «Решение»); раскладка по экранам — presentation. -->
         <Grid x:Name="MainGrid" ColumnDefinitions="220,4,*,4,340">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -283,15 +283,11 @@
                       Width="4" ResizeDirection="Columns" Background="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"
                       IsVisible="{Binding IsMfdColumnVisible}"/>
 
-        <!-- Якорь зоны MFD: дерево решения + вторичный контур (SecondaryShellView); состав страниц ≠ сама зона (ADR 0021). -->
+        <!-- Якорь зоны MFD: вторичный контур (SecondaryShellView); дерево решения — страница SolutionExplorer внутри shell. -->
         <chrome:AttentionZoneContainer Zone="Mfd" Grid.Row="3" Grid.Column="4" Grid.RowSpan="{Binding MfdZoneMainGridRowSpan}"
                                        IsVisible="{Binding IsMfdColumnVisible}">
-            <Grid RowDefinitions="*,2*">
-                <views:SolutionExplorerView Grid.Row="0" MinHeight="120"/>
-                <views:SecondaryShellView Grid.Row="1"
-                                          DataContext="{Binding DataContext, ElementName=RootWindow}"
-                                          MinHeight="0"/>
-            </Grid>
+            <views:SecondaryShellView DataContext="{Binding DataContext, ElementName=RootWindow}"
+                                      MinHeight="0"/>
         </chrome:AttentionZoneContainer>
 
         <!-- W2: preview контуров зон поверх контента (без изменения содержимого). -->

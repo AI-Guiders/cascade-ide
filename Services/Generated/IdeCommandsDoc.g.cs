@@ -156,6 +156,7 @@ internal static class IdeCommandsDoc
         ["show_environment_readiness_page"] = "Показать страницу «готовность окружения» во вторичном контуре (зона Mfd; ADR 0023). Разворачивает регион Mfd при необходимости. returns: text.",
         ["show_pfd_region_panel"] = "Развернуть регион Pfd / Semantic Map (toolbar). returns: text.",
         ["show_preview"] = "Показать Markdown-превью в отдельном окне. args: title:string, content:string; returns: text; example: {\"title\":\"Plan\",\"content\":\"- step 1\\n- step 2\"}.",
+        ["show_solution_explorer_page"] = "Развернуть регион Mfd и перейти на страницу обозревателя решения (toolbar). returns: text.",
         ["show_terminal_panel"] = "Явно показать терминал (toolbar). returns: text.",
         ["start_autonomous"] = "Запустить автономный режим (agent run). returns: text.",
         ["toggle_build_output"] = "Как меню «Вид → Вывод сборки». returns: text.",

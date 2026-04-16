@@ -248,6 +248,13 @@ public partial class MainWindowViewModel
     }
 
     [RelayCommand]
+    private void ShowSolutionExplorerPage()
+    {
+        IsMfdRegionExpanded = true;
+        TryNavigateToSecondaryShellPage(SecondaryShellPage.SolutionExplorer);
+    }
+
+    [RelayCommand]
     private void ShowTerminalPanel()
     {
         IsTerminalVisible = true;

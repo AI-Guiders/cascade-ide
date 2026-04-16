@@ -21,12 +21,13 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(IsMfdWorkspaceHealthMountVisible))]
     [NotifyPropertyChangedFor(nameof(PfdWorkspaceHealthMountContext))]
     [NotifyPropertyChangedFor(nameof(MfdWorkspaceHealthMountContext))]
+    [NotifyPropertyChangedFor(nameof(IsSolutionExplorerTreeChromeVisible))]
     [NotifyCanExecuteChangedFor(nameof(ToggleMfdRegionExpandedCommand))]
     private bool _isMfdRegionExpanded = true;
 
     /// <summary>
     /// Intent геометрии: регион Pfd в <c>MainGrid</c> развёрнут (ширина по workspace/режиму) или свёрнут.
-    /// Дерево решения — <see cref="Views.SolutionExplorerView"/> в зоне Pfd; отдельно от страниц вторичного контура.
+    /// Semantic Map — <see cref="Views.WorkspaceNavigationMapView"/> в зоне Pfd; дерево решения — страница <see cref="SecondaryShellPage.SolutionExplorer"/> во вторичном контуре.
     /// </summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsPfdColumnVisible))]
@@ -167,6 +168,7 @@ public partial class MainWindowViewModel
 
     /// <summary>Какая страница показана во вторичном контуре оболочки (без TabControl; v1 — колонка зоны Mfd).</summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsSolutionExplorerTreeChromeVisible))]
     private SecondaryShellPage _currentSecondaryShellPage = SecondaryShellPage.Terminal;
 
     [ObservableProperty]

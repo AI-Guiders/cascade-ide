@@ -42,6 +42,9 @@
             <Border IsVisible="{Binding CurrentSecondaryShellPage, Converter={StaticResource SecondaryShellPageEq}, ConverterParameter=WorkspaceHealth}">
                     <views:WorkspaceHealthSecondaryPageView/>
             </Border>
+            <Border IsVisible="{Binding CurrentSecondaryShellPage, Converter={StaticResource SecondaryShellPageEq}, ConverterParameter=SolutionExplorer}">
+                    <views:SolutionExplorerView MinHeight="120"/>
+            </Border>
             <Border IsVisible="{Binding CurrentSecondaryShellPage, Converter={StaticResource SecondaryShellPageEq}, ConverterParameter=Chat}">
                     <views:ChatPanelView DataContext="{Binding ChatPanel}"/>
             </Border>
