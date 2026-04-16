@@ -1,3 +1,4 @@
+using CascadeIDE.Cockpit.Composition.HostSurface;
 using CascadeIDE.ViewModels;
 
 namespace CascadeIDE.Cockpit.Cds;
@@ -41,8 +42,8 @@ public static class CockpitSurfaceSnapshotBuilder
     internal static string ToCdsSurfaceKind(AttentionLayoutSurfaceKind kind) =>
         kind switch
         {
-            AttentionLayoutSurfaceKind.MainWindowDockedGrid => "main_window_docked_grid",
-            AttentionLayoutSurfaceKind.MainWindowPlusMfdHostTopLevel => "main_window_plus_mfd_host_top_level",
+            AttentionLayoutSurfaceKind.MainWindowDockedGrid => MainWindowHostSurfaceIds.DockedGrid,
+            AttentionLayoutSurfaceKind.MainWindowPlusMfdHostTopLevel => MainWindowHostSurfaceIds.PlusMfdHostTopLevel,
             _ => kind.ToString(),
         };
 }

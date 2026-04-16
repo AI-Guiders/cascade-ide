@@ -263,14 +263,12 @@
             <Grid>
                 <views:WorkspaceNavigationMapView />
                 <!-- Wave 3: mount-layer host preview для PFD (единая точка подключения мини-инструмента). -->
-                <views:ZoneInstrumentMountView IsVisible="{Binding UseSkiaInstrumentWave3Preview}"
+                <views:ZoneInstrumentMountView IsVisible="{Binding DataContext.IsPfdWorkspaceHealthMountVisible, ElementName=RootWindow}"
+                                               DataContext="{Binding DataContext.PfdWorkspaceHealthMountContext, ElementName=RootWindow}"
                                                HorizontalAlignment="Right"
                                                VerticalAlignment="Top"
                                                Margin="8"
                                                Width="250"
-                                               InstrumentId="workspace_health_status_v1"
-                                               SlotId="pfd"
-                                               SlotPolicy="{Binding PfdInstrumentMountSlotPolicy}"
                                                ZIndex="415"/>
             </Grid>
         </chrome:AttentionZoneContainer>

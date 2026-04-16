@@ -6,6 +6,7 @@
         xmlns:vm="using:CascadeIDE.ViewModels"
         mc:Ignorable="d" d:DesignWidth="560" d:DesignHeight="400"
         x:Class="CascadeIDE.Views.MfdHostWindow"
+        x:Name="MfdHostRoot"
         x:DataType="vm:MainWindowViewModel"
         Title="Cascade — вторичный контур (Mfd)"
         Width="560" Height="400"
@@ -17,14 +18,12 @@
     <Grid>
         <views:SecondaryShellView DataContext="{Binding}" MinHeight="0"/>
         <!-- W3: mount-layer host preview для MFD (паритет с PFD-host). -->
-        <views:ZoneInstrumentMountView IsVisible="{Binding UseSkiaInstrumentWave3Preview}"
+        <views:ZoneInstrumentMountView IsVisible="{Binding DataContext.IsMfdHostWindowWorkspaceHealthMountVisible, ElementName=MfdHostRoot}"
+                                       DataContext="{Binding DataContext.MfdWorkspaceHealthMountContext, ElementName=MfdHostRoot}"
                                        HorizontalAlignment="Right"
                                        VerticalAlignment="Top"
                                        Margin="8"
                                        Width="250"
-                                       InstrumentId="workspace_health_status_v1"
-                                       SlotId="mfd"
-                                       SlotPolicy="{Binding MfdInstrumentMountSlotPolicy}"
                                        ZIndex="415"/>
         <!-- W2: preview контура зоны MFD в отдельном окне-хосте. -->
         <Border x:Name="SkiaZonePreviewMfdHost"

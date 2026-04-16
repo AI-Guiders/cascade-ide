@@ -15,8 +15,8 @@ internal static class CockpitInstrumentPlacementRules
             CockpitSlotIds.Pfd,
             new AndInstrumentPlacementSpecification(
                 new AllowedSurfaceSpecification(
-                    "main_window_docked_grid",
-                    "main_window_plus_mfd_host_top_level"),
+                    MainWindowHostSurfaceIds.DockedGrid,
+                    MainWindowHostSurfaceIds.PlusMfdHostTopLevel),
                 new AllowedSlotSpecification(CockpitSlotIds.Pfd),
                 new AllowedSafetyLevelsSpecification("L1", "L2", "L3"))),
         // Дерево решения — слот Mfd (колонка вторичного контура), см. MainWindow Mfd grid.
@@ -25,8 +25,8 @@ internal static class CockpitInstrumentPlacementRules
             CockpitSlotIds.Mfd,
             new AndInstrumentPlacementSpecification(
                 new AllowedSurfaceSpecification(
-                    "main_window_docked_grid",
-                    "main_window_plus_mfd_host_top_level"),
+                    MainWindowHostSurfaceIds.DockedGrid,
+                    MainWindowHostSurfaceIds.PlusMfdHostTopLevel),
                 new AllowedSlotSpecification(CockpitSlotIds.Mfd),
                 new AllowedSafetyLevelsSpecification("L1", "L2", "L3")))
     ];

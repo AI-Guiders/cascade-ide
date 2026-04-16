@@ -17,8 +17,8 @@ public static class MainWindowHostSurfaceCompositor
     {
         var shell = MainWindowShellSurfaceCompositor.Compose(input);
         var surfaceId = input.SuppressMfdColumnForMfdHostWindow
-            ? "main_window_plus_mfd_host_top_level"
-            : "main_window_docked_grid";
+            ? MainWindowHostSurfaceIds.PlusMfdHostTopLevel
+            : MainWindowHostSurfaceIds.DockedGrid;
 
         var provider = slotInstrumentBindingProvider ?? DefaultSurfaceSlotInstrumentBindingProvider.Instance;
         var instruments = provider.GetBindings(

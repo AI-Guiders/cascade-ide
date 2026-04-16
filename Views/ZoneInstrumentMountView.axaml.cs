@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
+using CascadeIDE.Cockpit.Composition.HostSurface;
 
 namespace CascadeIDE.Views;
 
@@ -44,6 +45,23 @@ public partial class ZoneInstrumentMountView : UserControl
     {
         InitializeComponent();
         ApplyPolicyDefaults();
+    }
+
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
+        if (change.Property == DataContextProperty)
+            SyncFromMountContext();
+    }
+
+    private void SyncFromMountContext()
+    {
+        if (DataContext is WorkspaceHealthStatusMountContext ctx)
+        {
+            InstrumentId = ctx.InstrumentId;
+            SlotId = ctx.SlotId;
+            SlotPolicy = ctx.SlotPolicy;
+        }
     }
 
     public string InstrumentId

@@ -6,6 +6,25 @@ namespace CascadeIDE.ViewModels;
 /// <summary>ADR 0017: строка <c>presentation</c> и второй <c>TopLevel</c> — <see cref="Views.MfdHostWindow"/> с полным вторичным контуром (п. 8).</summary>
 public partial class MainWindowViewModel
 {
+    /// <summary>Свойства, зависящие от <c>_suppressMfdColumnForMfdHostWindow</c> при открытии/закрытии окна-хоста MFD.</summary>
+    private static readonly string[] MfdHostShellOpenInvalidatedPropertyNames =
+    [
+        nameof(IsMfdHostWindowShellOpen),
+        nameof(IsMfdColumnVisible),
+        nameof(IsSkiaZonePreviewMfdVisible),
+        nameof(MfdRegionPixelWidth),
+        nameof(IsMfdRegionVisible),
+        nameof(ActiveAttentionLayoutSurface),
+        nameof(MainGridColumnDefinitions),
+        nameof(IsPfdWorkspaceHealthMountVisible),
+        nameof(IsMfdWorkspaceHealthMountVisible),
+        nameof(IsMfdHostWindowWorkspaceHealthMountVisible),
+        nameof(PfdWorkspaceHealthMountContext),
+        nameof(MfdWorkspaceHealthMountContext),
+        nameof(PfdInstrumentMountSlotPolicy),
+        nameof(MfdInstrumentMountSlotPolicy),
+    ];
+
     /// <summary>Строка <c>presentation</c> с учётом оверлеев — та же, что уходит в <see cref="PresentationParse"/>.</summary>
     public string EffectivePresentationLine => _settings.GetEffectivePresentationLine();
 
@@ -74,19 +93,8 @@ public partial class MainWindowViewModel
             return;
 
         _suppressMfdColumnForMfdHostWindow = isOpen;
-        OnPropertyChanged(nameof(IsMfdHostWindowShellOpen));
-        OnPropertyChanged(nameof(IsMfdColumnVisible));
-        OnPropertyChanged(nameof(IsSkiaZonePreviewMfdVisible));
-        OnPropertyChanged(nameof(MfdRegionPixelWidth));
-        OnPropertyChanged(nameof(IsMfdRegionVisible));
-        OnPropertyChanged(nameof(ActiveAttentionLayoutSurface));
-        OnPropertyChanged(nameof(MainGridColumnDefinitions));
-        OnPropertyChanged(nameof(IsPfdWorkspaceHealthMountVisible));
-        OnPropertyChanged(nameof(IsMfdWorkspaceHealthMountVisible));
-        OnPropertyChanged(nameof(PfdWorkspaceHealthMountContext));
-        OnPropertyChanged(nameof(MfdWorkspaceHealthMountContext));
-        OnPropertyChanged(nameof(PfdInstrumentMountSlotPolicy));
-        OnPropertyChanged(nameof(MfdInstrumentMountSlotPolicy));
+        foreach (var name in MfdHostShellOpenInvalidatedPropertyNames)
+            OnPropertyChanged(name);
     }
 
     /// <summary>Сохранённая геометрия <see cref="Views.MfdHostWindow"/> в <c>settings.toml</c> (ADR 0017).</summary>

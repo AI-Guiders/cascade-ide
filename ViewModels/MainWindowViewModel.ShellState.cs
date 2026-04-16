@@ -60,6 +60,7 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(UseSkiaInstrumentWave3Preview))]
     [NotifyPropertyChangedFor(nameof(IsPfdWorkspaceHealthMountVisible))]
     [NotifyPropertyChangedFor(nameof(IsMfdWorkspaceHealthMountVisible))]
+    [NotifyPropertyChangedFor(nameof(IsMfdHostWindowWorkspaceHealthMountVisible))]
     [NotifyPropertyChangedFor(nameof(PfdWorkspaceHealthMountContext))]
     [NotifyPropertyChangedFor(nameof(MfdWorkspaceHealthMountContext))]
     [NotifyPropertyChangedFor(nameof(ShowTaskBar))]

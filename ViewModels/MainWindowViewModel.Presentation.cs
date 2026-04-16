@@ -91,32 +91,19 @@ public partial class MainWindowViewModel
             ? "wave3_preview_v1"
             : _settings.Display.InstrumentMountSlotPolicy.Trim();
 
-    /// <summary>Резолв policy для mount в слоте PFD с учётом registry-правил.</summary>
-    public string PfdInstrumentMountSlotPolicy => ResolveInstrumentMountSlotPolicy(
-        MountPolicyRuntimeSurfaceId,
-        "pfd",
-        "workspace_health_status_v1");
+    /// <summary>Резолв policy для mount в слоте PFD — тот же <see cref="SlotPolicy"/>, что в <see cref="PfdWorkspaceHealthMountContext"/>.</summary>
+    public string PfdInstrumentMountSlotPolicy => PfdWorkspaceHealthMountContext.SlotPolicy;
 
-    /// <summary>Резолв policy для mount в слоте MFD с учётом registry-правил.</summary>
-    public string MfdInstrumentMountSlotPolicy => ResolveInstrumentMountSlotPolicy(
-        MountPolicyRuntimeSurfaceId,
-        "mfd",
-        "workspace_health_status_v1");
+    /// <summary>Резолв policy для mount в слоте MFD — тот же <see cref="SlotPolicy"/>, что в <see cref="MfdWorkspaceHealthMountContext"/>.</summary>
+    public string MfdInstrumentMountSlotPolicy => MfdWorkspaceHealthMountContext.SlotPolicy;
 
     /// <summary>Нормализованный runtime-контекст топологии для резолва slot-policy из реестра.</summary>
     private string MountPolicyRuntimeSurfaceId => ActiveAttentionLayoutSurface switch
     {
-        AttentionLayoutSurfaceKind.MainWindowDockedGrid => "main_window_docked_grid",
-        AttentionLayoutSurfaceKind.MainWindowPlusMfdHostTopLevel => "main_window_plus_mfd_host_top_level",
-        _ => "main_window_docked_grid"
+        AttentionLayoutSurfaceKind.MainWindowDockedGrid => MainWindowHostSurfaceIds.DockedGrid,
+        AttentionLayoutSurfaceKind.MainWindowPlusMfdHostTopLevel => MainWindowHostSurfaceIds.PlusMfdHostTopLevel,
+        _ => MainWindowHostSurfaceIds.DockedGrid
     };
-
-    private string ResolveInstrumentMountSlotPolicy(string surfaceId, string slotId, string instrumentId) =>
-        _instrumentMountPolicyResolver.Resolve(
-            _settings.Display,
-            surfaceId,
-            slotId,
-            instrumentId);
     /// <summary>Полоса активной задачи / Task Cockpit — из <c>UiModes/&lt;id&gt;.toml</c> (<c>active_task_strip</c>); по умолчанию скрыто для семьи Debug.</summary>
     public bool ShowTaskBar => UiModeCatalog.GetShowTaskBar(NormalizeUiMode(UiMode));
 
@@ -277,19 +264,25 @@ public partial class MainWindowViewModel
     public bool IsMfdWorkspaceHealthMountVisible =>
         UseSkiaInstrumentWave3Preview && IsMfdColumnVisible;
 
+    /// <summary>Wave-3 preview WH в отдельном окне <see cref="Views.MfdHostWindow"/> (колонка MFD в main скрыта).</summary>
+    public bool IsMfdHostWindowWorkspaceHealthMountVisible =>
+        UseSkiaInstrumentWave3Preview && IsMfdHostWindowShellOpen;
+
     /// <summary>Контекст mount для PFD (policy + payload).</summary>
     public WorkspaceHealthStatusMountContext PfdWorkspaceHealthMountContext =>
-        new(
-            CockpitStandardInstrumentIds.WorkspaceHealthStatusV1,
+        WorkspaceHealthMountContextFactory.Create(
+            _instrumentMountPolicyResolver,
+            _settings.Display,
+            MountPolicyRuntimeSurfaceId,
             CockpitSlotIds.Pfd,
-            PfdInstrumentMountSlotPolicy,
             WorkspaceHealthMountPayload);
 
     /// <summary>Контекст mount для MFD (policy + payload).</summary>
     public WorkspaceHealthStatusMountContext MfdWorkspaceHealthMountContext =>
-        new(
-            CockpitStandardInstrumentIds.WorkspaceHealthStatusV1,
+        WorkspaceHealthMountContextFactory.Create(
+            _instrumentMountPolicyResolver,
+            _settings.Display,
+            MountPolicyRuntimeSurfaceId,
             CockpitSlotIds.Mfd,
-            MfdInstrumentMountSlotPolicy,
             WorkspaceHealthMountPayload);
 }
