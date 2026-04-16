@@ -1,4 +1,4 @@
 using Xunit;
 
-// InstrumentPlacementRuntime и UiModeCatalog держат статическое состояние карты инструментов.
+// Параллельный прогон отключён: статика InstrumentPlacementRuntime / UiModeCatalog и Avalonia headless ([AvaloniaFact]).
 [assembly: CollectionBehavior(DisableTestParallelization = true)]
