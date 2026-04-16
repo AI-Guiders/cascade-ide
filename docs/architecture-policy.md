@@ -80,6 +80,9 @@
 | Инструмент кабины: дескриптор слота композитора (`CockpitInstrumentDescriptor`), не Avalonia-контрол; SE vs Semantic Map как разные `instrument_id` в PFD | [0047](adr/0047-cockpit-instrument-descriptor-and-slot-composition.md) (Accepted) |
 | Чат Cursor ACP в IDE: `mcpServers`, авто IDE MCP; приложения — пробелы тулов, разбор хоста Cursor (`mcp.json`) ↔ `ide_*` | [0048](adr/0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) (Proposed) |
 | Rollout Skia по CIDE: Avalonia остается host/fuselage, Skia расширяется в surface-слое волнами (dual-path, fallback до стабилизации) | [0049](adr/0049-skia-surface-rollout-over-avalonia-host.md) (Proposed) |
+| Карта «инструмент → зона/слот» в TOML: merge bundle/repo/user, `[instrument_routing]`, alias, `InstrumentPlacementRuntime` | [0050](adr/0050-declarative-instrument-zone-placement-toml.md) (Accepted · Implemented) |
+| Intent-based attention routing из TOML (маршрутизация внимания) | [0051](adr/0051-intent-based-attention-routing-toml.md) (Proposed) |
+| CLI для контракта агента (паритет с MCP) и снапшот-тесты | [0052](adr/0052-agent-contract-cli-and-snapshot-tests.md) (Accepted · Implemented частично) |
 
 Полный индекс: [docs/adr/README.md](adr/README.md).
 
@@ -182,4 +185,7 @@
 - **v1.75** — [0046](adr/0046-presentation-layout-authority-and-cockpit-invariants.md): заголовок, §«Решение» и индексы приведены к канону CDS (`CockpitPresentationLayoutPolicy`); уточнено, что статический слой в `Services/Presentation` снят, на границе VM — только intent `Apply*`.
 - **v1.76** — Roslyn **CASCOPE003** ([`CascadeIDE.ArchitectureAnalyzers`](../CascadeIDE.ArchitectureAnalyzers/README.md)): запрет прямых присваиваний intent P/M вне белого списка файлов; см. [0046](adr/0046-presentation-layout-authority-and-cockpit-invariants.md).
 - **v1.77** — добавлен [0049](adr/0049-skia-surface-rollout-over-avalonia-host.md): поэтапный rollout Skia-поверхностей по CIDE при сохранении Avalonia как host; волновая миграция, dual-path и fallback до стабилизации.
+- **v1.78** — в индекс ADR: [0050](adr/0050-declarative-instrument-zone-placement-toml.md) (карта инструментов в TOML), [0051](adr/0051-intent-based-attention-routing-toml.md) (intent routing), [0052](adr/0052-agent-contract-cli-and-snapshot-tests.md) (CLI контракта агента и снапшот-тесты).
+- **v1.79** — [0052](adr/0052-agent-contract-cli-and-snapshot-tests.md): статус **Accepted** (направление CLI + снапшот-тесты; открытых вопросов нет).
+- **v1.80** — [0052](adr/0052-agent-contract-cli-and-snapshot-tests.md): первая поставка — `--agent-contract get_ui_modes_diagnostics`, `AgentContractRunner`, тесты; MCP-PROTOCOL §CLI контракта.
 - Изменения направления — отдельным коммитом: обновление этого файла и при необходимости новый ADR в [docs/adr/README.md](adr/README.md).

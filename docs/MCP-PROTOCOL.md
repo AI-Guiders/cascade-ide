@@ -15,6 +15,10 @@
 
 - **stdio**: агент или **ProcessHost** (внешний процесс вроде Cursor, поднимающий процесс IDE) запускает CascadeIDE с аргументом `--mcp-stdio`. Обмен идёт по stdin/stdout процесса IDE. Так Cursor может добавить CascadeIDE как MCP-сервер в настройках и вызывать тулы от имени агента. **ProcessHost** здесь — про жизненный цикл процесса и транспорт, не про контролы кокпита (`EicasAlertsBarView` и т.д.); словарь: [ADR 0021 §1.1](adr/0021-pfd-mfd-cockpit-attention-model.md#glossary-channel-presentation).
 
+### CLI контракта без MCP (ADR 0052)
+
+Без GUI и без stdio можно вывести **тот же JSON**, что вернул бы соответствующий тул: `CascadeIDE.exe --agent-contract <command>`. Сейчас: `get_ui_modes_diagnostics` — payload как у `ide_get_ui_modes_diagnostics`. Подробности и снапшот-тесты: [ADR 0052](adr/0052-agent-contract-cli-and-snapshot-tests.md).
+
 ### Видимость MCP для агента (на будущее: свои MCP в IDE)
 
 У внешних хостов (например Cursor) встречается рассинхрон: сервер **подключён** (список тулов в UI есть), а **конкретный чат с ассистентом** не получает те же MCP в tool calling. Это не обязательно ошибка транспорта — разные контуры: глобальные настройки, воркспейс, режим Agent/Composer.

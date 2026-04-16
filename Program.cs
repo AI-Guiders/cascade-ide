@@ -1,5 +1,5 @@
 using Avalonia;
-using System;
+using CascadeIDE.Services.AgentContract;
 
 namespace CascadeIDE;
 
@@ -11,6 +11,14 @@ sealed class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        if (args.Length > 0 && string.Equals(args[0], "--agent-contract", StringComparison.OrdinalIgnoreCase))
+        {
+            var tail = args.AsSpan(1);
+            var argv = tail.Length == 0 ? Array.Empty<string>() : tail.ToArray();
+            Environment.Exit(AgentContractRunner.Run(argv));
+            return;
+        }
+
         App.RunMcpStdio = args.Contains("--mcp-stdio");
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
     }
