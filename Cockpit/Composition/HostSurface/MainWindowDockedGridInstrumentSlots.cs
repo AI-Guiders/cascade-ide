@@ -13,7 +13,7 @@ public static class MainWindowDockedGridInstrumentSlots
         if (InstrumentPlacementRuntime.TryResolveInstrument(
                 MainWindowHostSurfaceIds.DockedGrid,
                 CockpitSlotIds.Pfd,
-                display!,
+                display,
                 out var id)
             && !string.IsNullOrWhiteSpace(id))
             return id;
@@ -26,7 +26,7 @@ public static class MainWindowDockedGridInstrumentSlots
         if (InstrumentPlacementRuntime.TryResolveInstrument(
                 MainWindowHostSurfaceIds.DockedGrid,
                 CockpitSlotIds.Mfd,
-                display!,
+                display,
                 out var id)
             && !string.IsNullOrWhiteSpace(id))
             return id;

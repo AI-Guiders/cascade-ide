@@ -33,10 +33,11 @@ public static class InstrumentPlacementRuntime
         }
     }
 
+    /// <param name="display">Если <c>null</c>, используется только workspace-карта (как при отсутствии user-слоя).</param>
     public static bool TryResolveInstrument(
         string surfaceId,
         string slotId,
-        DisplaySettings display,
+        DisplaySettings? display,
         out string instrumentId)
     {
         instrumentId = "";
