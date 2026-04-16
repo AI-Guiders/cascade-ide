@@ -49,6 +49,7 @@ public sealed class AttentionZonePanelRuntimeTests : IDisposable
     public void Toml_deserializes_attention_routing_table()
     {
         const string toml = """
+            [workspace_chrome]
             solution_explorer_default_width_pixels = 220
 
             [attention_routing]
@@ -66,5 +67,35 @@ public sealed class AttentionZonePanelRuntimeTests : IDisposable
         Assert.Equal(AttentionZone.Mfd, g);
         Assert.True(AttentionZonePanelRuntime.TryGetZone(AttentionPanelIds.Terminal, out var term));
         Assert.Equal(AttentionZone.Pfd, term);
+    }
+
+    [Fact]
+    public void ApplyWorkspaceToml_rejects_non_spatial_zone_for_terminal_intent()
+    {
+        AttentionZonePanelRuntime.ApplyWorkspaceToml(new UiWorkspaceToml
+        {
+            AttentionRouting = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                [AttentionRoutingIntentIds.Terminal] = AttentionZoneIds.Hud,
+            },
+        });
+
+        Assert.True(AttentionZonePanelRuntime.TryGetZone(AttentionPanelIds.Terminal, out var term));
+        Assert.Equal(AttentionZone.Mfd, term);
+    }
+
+    [Fact]
+    public void ApplyWorkspaceToml_does_not_allow_editor_hud_override_via_attention_routing()
+    {
+        AttentionZonePanelRuntime.ApplyWorkspaceToml(new UiWorkspaceToml
+        {
+            AttentionRouting = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["editor_hud"] = AttentionZoneIds.Mfd,
+            },
+        });
+
+        Assert.True(AttentionZonePanelRuntime.TryGetZone(AttentionPanelIds.EditorHud, out var hud));
+        Assert.Equal(AttentionZone.Hud, hud);
     }
 }

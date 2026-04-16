@@ -41,6 +41,7 @@ public sealed partial class CascadeIdeSettings
             {
                 ExternalServersJson = Mcp.ExternalServersJson,
                 AcpAutoInjectIdeMcp = Mcp.AcpAutoInjectIdeMcp,
+                ExternalServersJsonPath = Mcp.ExternalServersJsonPath,
             },
             WorkspaceUi = new WorkspaceUiSettings
             {
@@ -98,14 +99,9 @@ public sealed partial class CascadeIdeSettings
                         WorkloadScore = r.WorkloadScore,
                     })
                     .ToList(),
-                InstrumentPlacementRules = Display.InstrumentPlacementRules
-                    .Select(static r => new InstrumentPlacementRuleSettings
-                    {
-                        SurfaceId = r.SurfaceId,
-                        SlotId = r.SlotId,
-                        InstrumentId = r.InstrumentId,
-                    })
-                    .ToList(),
+                InstrumentRouting = Display.InstrumentRouting is { Count: > 0 } ir
+                    ? new Dictionary<string, string>(ir, StringComparer.OrdinalIgnoreCase)
+                    : null,
             },
             PresentationGrammar = new PresentationGrammarSettings
             {
@@ -151,7 +147,8 @@ public sealed partial class CascadeIdeSettings
         if (a is null || b is null)
             return a == b;
         return a.ExternalServersJson.Is(b.ExternalServersJson)
-            && a.AcpAutoInjectIdeMcp == b.AcpAutoInjectIdeMcp;
+            && a.AcpAutoInjectIdeMcp == b.AcpAutoInjectIdeMcp
+            && a.ExternalServersJsonPath.Is(b.ExternalServersJsonPath);
     }
 
     private static bool WorkspaceUiEquals(WorkspaceUiSettings? a, WorkspaceUiSettings? b)
@@ -208,7 +205,7 @@ public sealed partial class CascadeIdeSettings
             && a.RequireInstrumentMountPolicyScores == b.RequireInstrumentMountPolicyScores
             && a.PreferRepoInstrumentsPlacement == b.PreferRepoInstrumentsPlacement
             && InstrumentMountPolicyRulesEqual(a.InstrumentMountPolicyRules, b.InstrumentMountPolicyRules)
-            && InstrumentPlacementRulesEqual(a.InstrumentPlacementRules, b.InstrumentPlacementRules);
+            && StringDictionaryEqualOrdinalIgnoreCase(a.InstrumentRouting, b.InstrumentRouting);
     }
 
     private static bool InstrumentMountPolicyRulesEqual(
@@ -237,26 +234,29 @@ public sealed partial class CascadeIdeSettings
         return true;
     }
 
-    private static bool InstrumentPlacementRulesEqual(
-        IReadOnlyList<InstrumentPlacementRuleSettings>? x,
-        IReadOnlyList<InstrumentPlacementRuleSettings>? y)
+    private static bool StringDictionaryEqualOrdinalIgnoreCase(
+        IReadOnlyDictionary<string, string>? a,
+        IReadOnlyDictionary<string, string>? y)
     {
-        if (x is null && y is null)
+        if (a is null && y is null)
             return true;
-        if (x is null || y is null)
-            return false;
-        if (x.Count != y.Count)
+        if (a is null || y is null)
             return false;
 
-        static string Normalize(string? value) => (value ?? string.Empty).Trim();
-        static string Key(InstrumentPlacementRuleSettings r) =>
-            $"{Normalize(r.SurfaceId)}|{Normalize(r.SlotId)}|{Normalize(r.InstrumentId)}";
+        var na = a
+            .Where(static kv => !string.IsNullOrWhiteSpace(kv.Key))
+            .ToDictionary(static kv => kv.Key.Trim(), static kv => kv.Value ?? "", StringComparer.OrdinalIgnoreCase);
+        var ny = y
+            .Where(static kv => !string.IsNullOrWhiteSpace(kv.Key))
+            .ToDictionary(static kv => kv.Key.Trim(), static kv => kv.Value ?? "", StringComparer.OrdinalIgnoreCase);
+        if (na.Count != ny.Count)
+            return false;
 
-        var left = x.Select(Key).OrderBy(static s => s, StringComparer.Ordinal).ToList();
-        var right = y.Select(Key).OrderBy(static s => s, StringComparer.Ordinal).ToList();
-        for (var i = 0; i < left.Count; i++)
+        foreach (var kv in na)
         {
-            if (!string.Equals(left[i], right[i], StringComparison.Ordinal))
+            if (!ny.TryGetValue(kv.Key, out var other))
+                return false;
+            if (!string.Equals(kv.Value, other, StringComparison.OrdinalIgnoreCase))
                 return false;
         }
 

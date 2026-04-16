@@ -10,10 +10,9 @@ public sealed class UiModesIndexToml
 }
 
 /// <summary>
-/// Корень <c>UiModes/workspace.toml</c> и тот же формат для репо-файла <c>.cascade/workspace.toml</c> (без собственного schema_version).
-/// Секция <see cref="WorkspaceNavigationContext"/> — опционально в репозитории (ADR 0039): командные пресеты навигации.
+/// Секция <c>[workspace_chrome]</c> в <c>workspace.toml</c>: глобальные метрики хрома и размещение Markdown-превью (ADR 0010).
 /// </summary>
-public sealed class UiWorkspaceToml
+public sealed class UiWorkspaceChromeToml
 {
     public int? PfdRegionDefaultWidthPixels { get; set; }
     public double? MainGridColumnSplitterWidthPixels { get; set; }
@@ -28,6 +27,16 @@ public sealed class UiWorkspaceToml
     /// TOML: <c>markdown_preview_placement</c>.
     /// </summary>
     public string? MarkdownPreviewPlacement { get; set; }
+}
+
+/// <summary>
+/// Корень <c>UiModes/workspace.toml</c> и тот же формат для репо-файла <c>.cascade/workspace.toml</c> (без собственного schema_version).
+/// Секция <see cref="WorkspaceNavigationContext"/> — опционально в репозитории (ADR 0039): командные пресеты навигации.
+/// </summary>
+public sealed class UiWorkspaceToml
+{
+    /// <summary>Метрики хрома и превью Markdown; TOML: <c>[workspace_chrome]</c>.</summary>
+    public UiWorkspaceChromeToml? WorkspaceChrome { get; set; }
 
     /// <summary>
     /// Маршрутизация интентов внимания (например <c>solution_explorer</c>, <c>chat</c>, <c>terminal</c>) к зоне внимания
@@ -37,10 +46,10 @@ public sealed class UiWorkspaceToml
     public Dictionary<string, string>? AttentionRouting { get; set; }
 
     /// <summary>
-    /// Репозиторный/бандловый слой карты размещения инструментов.
-    /// TOML: <c>[[instrument_placement_rules]]</c>.
+    /// Репозиторный/бандловый слой: основные слоты PFD/MFD без <c>surface_id</c> в TOML.
+    /// TOML: <c>[instrument_routing]</c> (ADR 0050); значения — alias (<c>solution_explorer</c> и т.д.) или канонический <c>instrument_id</c>.
     /// </summary>
-    public List<InstrumentPlacementRuleSettings>? InstrumentPlacementRules { get; set; }
+    public Dictionary<string, string>? InstrumentRouting { get; set; }
 
     /// <summary>
     /// Пресеты навигации для репозитория (тот же контракт, что <c>[workspace_navigation_context]</c> в <c>settings.toml</c>).

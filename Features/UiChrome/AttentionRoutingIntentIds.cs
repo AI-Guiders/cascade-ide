@@ -10,5 +10,4 @@ public static class AttentionRoutingIntentIds
     public const string Git = "git";
     public const string Terminal = "terminal";
     public const string Editor = "editor";
-    public const string EditorHud = "editor_hud";
 }

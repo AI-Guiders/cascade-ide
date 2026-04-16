@@ -79,8 +79,8 @@ public sealed class DisplaySettings
     public bool PreferRepoInstrumentsPlacement { get; set; }
 
     /// <summary>
-    /// Пользовательский слой карты размещения инструментов по слотам.
-    /// TOML: <c>[[display.instrument_placement_rules]]</c>.
+    /// Пользовательский слой: какой инструмент в основных слотах PFD/MFD (alias или канонический id).
+    /// TOML: <c>[display.instrument_routing]</c> (ADR 0050).
     /// </summary>
-    public List<InstrumentPlacementRuleSettings> InstrumentPlacementRules { get; set; } = [];
+    public Dictionary<string, string>? InstrumentRouting { get; set; }
 }

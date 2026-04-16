@@ -1,3 +1,4 @@
+using CascadeIDE.Cockpit.Composition.HostSurface;
 using CascadeIDE.Models;
 
 namespace CascadeIDE.Services;
@@ -33,15 +34,28 @@ internal sealed class DisplaySettingsValidationSpecification : ISettingsValidati
                 yield return $"[display.instrument_mount_policy_rules][{i}] workload_score must be in [0..1].";
         }
 
-        for (var i = 0; i < display.InstrumentPlacementRules.Count; i++)
+        if (display.InstrumentRouting is { Count: > 0 } routing)
         {
-            var rule = display.InstrumentPlacementRules[i];
-            if (string.IsNullOrWhiteSpace(rule.SurfaceId))
-                yield return $"[display.instrument_placement_rules][{i}] surface_id is required.";
-            if (string.IsNullOrWhiteSpace(rule.SlotId))
-                yield return $"[display.instrument_placement_rules][{i}] slot_id is required.";
-            if (string.IsNullOrWhiteSpace(rule.InstrumentId))
-                yield return $"[display.instrument_placement_rules][{i}] instrument_id is required.";
+            foreach (var kv in routing)
+            {
+                if (string.IsNullOrWhiteSpace(kv.Key))
+                {
+                    yield return "[display.instrument_routing] key must not be empty.";
+                    continue;
+                }
+
+                var k = kv.Key.Trim();
+                if (!k.Equals(InstrumentRoutingSlotKeys.PfdPrimary, StringComparison.OrdinalIgnoreCase)
+                    && !k.Equals(InstrumentRoutingSlotKeys.MfdPrimary, StringComparison.OrdinalIgnoreCase))
+                {
+                    yield return $"[display.instrument_routing] unknown key '{k}' (expected {InstrumentRoutingSlotKeys.PfdPrimary} or {InstrumentRoutingSlotKeys.MfdPrimary}).";
+                }
+
+                if (string.IsNullOrWhiteSpace(kv.Value))
+                    yield return $"[display.instrument_routing] value for '{k}' is required.";
+                else if (!InstrumentRoutingAliasResolver.TryResolve(kv.Value, out _))
+                    yield return $"[display.instrument_routing] unknown instrument alias or id for '{k}'.";
+            }
         }
     }
 

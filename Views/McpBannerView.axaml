@@ -6,9 +6,16 @@
     <Border Background="{DynamicResource CascadeTheme.McpBannerBackground}"
             Padding="8,4"
             IsVisible="{Binding IsMcpServerMode}">
-        <TextBlock Text="Управляется агентом (MCP). Не закрывайте окно — подключение будет потеряно."
-                   Foreground="{DynamicResource CascadeTheme.McpBannerForeground}"
-                   FontSize="12"
-                   VerticalAlignment="Center"/>
+        <StackPanel Spacing="2">
+            <TextBlock Text="Управляется агентом (MCP). Не закрывайте окно — подключение будет потеряно."
+                       Foreground="{DynamicResource CascadeTheme.McpBannerForeground}"
+                       FontSize="12"
+                       VerticalAlignment="Center"/>
+            <TextBlock Text="Обновить exe под Cursor: в исходниках каталог open/cascade-ide (рядом с CascadeIDE.csproj) — publish-and-deploy-debug.ps1 (Debug) и publish-and-deploy.ps1 (Release); см. docs/MCP-PROTOCOL.md, раздел «Переопубликация для Cursor»."
+                       Foreground="{DynamicResource CascadeTheme.McpBannerForeground}"
+                       FontSize="11"
+                       Opacity="0.88"
+                       TextWrapping="Wrap"/>
+        </StackPanel>
     </Border>
 </UserControl>

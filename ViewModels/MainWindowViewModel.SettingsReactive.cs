@@ -23,7 +23,7 @@ public partial class MainWindowViewModel
 
         // External MCP connectivity affects autonomous tool list/calls.
         Autonomous.CancelForHostReconfiguration();
-        _mcpClientService = new Services.McpClientService(_settings.Mcp.ExternalServersJson);
+        _mcpClientService = new Services.McpClientService(Services.McpExternalServersJsonResolver.ResolveEffectiveJson(_settings));
         _autonomousAgentService = CreateAutonomousAgentService(_mcpClientService);
         Autonomous.ReplaceAgentService(_autonomousAgentService);
         ChatPanel.DisposeCursorAcpSession();

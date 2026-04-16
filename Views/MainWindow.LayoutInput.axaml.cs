@@ -70,7 +70,7 @@ public partial class MainWindow
         if (this.FindControl<Grid>("MainGrid") is not { } main)
             return;
         var inner = this.FindControl<Grid>("WorkspaceHealthColumnsGrid");
-        // Колонки 3–4 — сплиттер и зона MFD (чат/вторичный контур). Пока зона скрыта (в т.ч. Mfd на отдельном TopLevel),
+        // MainGrid: сплиттер и MFD — см. UiWorkspaceLayoutDimensions.MainWindowMainGridColumns (индексы 3 и 4). Пока зона скрыта (в т.ч. Mfd на отдельном TopLevel),
         // не оставляем ширину по «чату» — иначе серая полоса без контента при пресете «P+F на первом дисплее».
         var w = vm.IsMfdColumnVisible ? vm.MfdRegionPixelWidth : 0;
         UiWorkspaceLayout.ApplyMfdRegionColumns(main, inner, w);

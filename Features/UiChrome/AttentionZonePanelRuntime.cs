@@ -15,7 +15,6 @@ public static class AttentionZonePanelRuntime
         [AttentionRoutingIntentIds.Git] = AttentionPanelIds.Git,
         [AttentionRoutingIntentIds.Terminal] = AttentionPanelIds.Terminal,
         [AttentionRoutingIntentIds.Editor] = AttentionPanelIds.Editor,
-        [AttentionRoutingIntentIds.EditorHud] = AttentionPanelIds.EditorHud,
     };
 
     private static ImmutableDictionary<string, AttentionZone> _byPanel = BuildDefaultMap();
@@ -57,7 +56,13 @@ public static class AttentionZonePanelRuntime
                 if (string.IsNullOrEmpty(raw))
                     continue;
                 if (AttentionZoneExtensions.TryParseCanonicalId(raw, out var zone))
-                    b[panelId] = zone;
+                {
+                    if (IsIntentZoneAllowed(intent, zone))
+                        b[panelId] = zone;
+                    else
+                        global::System.Diagnostics.Debug.WriteLine(
+                            $"AttentionZonePanelRuntime: zone '{raw}' is not allowed for intent '{intent}'");
+                }
                 else
                     global::System.Diagnostics.Debug.WriteLine($"AttentionZonePanelRuntime: unknown zone id — {raw} (intent {intent})");
             }
@@ -74,4 +79,12 @@ public static class AttentionZonePanelRuntime
 
     /// <summary>Текущая карта (после загрузки <c>workspace.toml</c>).</summary>
     public static IReadOnlyDictionary<string, AttentionZone> CurrentMap => _byPanel;
+
+    private static bool IsIntentZoneAllowed(string intent, AttentionZone zone)
+    {
+        if (string.Equals(intent, AttentionRoutingIntentIds.Editor, StringComparison.OrdinalIgnoreCase))
+            return zone == AttentionZone.Forward;
+
+        return zone.IsSpatialAnchor();
+    }
 }

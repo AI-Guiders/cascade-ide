@@ -63,15 +63,10 @@ public sealed class MainWindowHostSurfaceCompositorTests
 
         var display = new DisplaySettings
         {
-            InstrumentPlacementRules =
-            [
-                new InstrumentPlacementRuleSettings
-                {
-                    SurfaceId = MainWindowHostSurfaceIds.DockedGrid,
-                    SlotId = CockpitSlotIds.Pfd,
-                    InstrumentId = CockpitStandardInstrumentIds.WorkspaceNavigationMap
-                }
-            ]
+            InstrumentRouting = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                [InstrumentRoutingSlotKeys.PfdPrimary] = "workspace_map"
+            }
         };
 
         var frame = MainWindowHostSurfaceCompositor.ComposeFrame(

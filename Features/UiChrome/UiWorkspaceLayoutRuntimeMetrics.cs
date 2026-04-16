@@ -42,19 +42,22 @@ public static class UiWorkspaceLayoutRuntimeMetrics
         ResetToCodeDefaults();
         if (w is null)
             return;
-        if (w.PfdRegionDefaultWidthPixels is { } se)
+        var c = w.WorkspaceChrome;
+        if (c is null)
+            return;
+        if (c.PfdRegionDefaultWidthPixels is { } se)
             PfdRegionDefaultWidthPixels = se;
-        if (w.MainGridColumnSplitterWidthPixels is { } sp)
+        if (c.MainGridColumnSplitterWidthPixels is { } sp)
             MainGridColumnSplitterWidthPixels = sp;
-        if (w.BottomPanelMinRowPixels is { } bp)
+        if (c.BottomPanelMinRowPixels is { } bp)
             BottomPanelMinRowPixels = bp;
-        if (w.MfdRegionCollapsedWidthPixels is { } cc)
+        if (c.MfdRegionCollapsedWidthPixels is { } cc)
             MfdRegionCollapsedWidthPixels = cc;
-        if (w.MfdRegionExpandedDefaultWidthPixels is { } cd)
+        if (c.MfdRegionExpandedDefaultWidthPixels is { } cd)
             MfdRegionExpandedDefaultWidthPixels = cd;
-        if (w.MfdRegionExpandedPowerWidthPixels is { } cp)
+        if (c.MfdRegionExpandedPowerWidthPixels is { } cp)
             MfdRegionExpandedPowerWidthPixels = cp;
-        if (w.MfdRegionExpandedAgentChatWidthPixels is { } ca)
+        if (c.MfdRegionExpandedAgentChatWidthPixels is { } ca)
             MfdRegionExpandedAgentChatWidthPixels = ca;
     }
 }

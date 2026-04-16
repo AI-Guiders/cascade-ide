@@ -23,13 +23,12 @@ public static class InstrumentPlacementRuntime
             _workspaceMap = BuildCodeDefaults();
     }
 
-    internal static void ApplyWorkspaceRules(IReadOnlyList<InstrumentPlacementRuleSettings> rules)
+    internal static void ApplyWorkspaceInstrumentRouting(IReadOnlyDictionary<string, string>? routing)
     {
         lock (Gate)
         {
             var map = BuildCodeDefaults();
-            if (rules.Count > 0)
-                ApplyRules(map, rules, "workspace");
+            ApplyRoutingOverlay(map, routing, "workspace");
             _workspaceMap = map;
         }
     }
@@ -45,7 +44,7 @@ public static class InstrumentPlacementRuntime
         if (display is null)
             return TryResolveWorkspaceOnly(surfaceId, slotId, out instrumentId);
 
-        var userMap = BuildUserMap(display.InstrumentPlacementRules);
+        var userMap = BuildUserPlacementMap(display);
         var key = BuildKey(surfaceId, slotId);
         var preferRepo = display.PreferRepoInstrumentsPlacement;
 
@@ -100,69 +99,56 @@ public static class InstrumentPlacementRuntime
         return false;
     }
 
-    private static Dictionary<string, string> BuildUserMap(List<InstrumentPlacementRuleSettings> rules)
+    private static Dictionary<string, string> BuildUserPlacementMap(DisplaySettings display)
     {
         var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        if (rules.Count > 0)
-            ApplyRules(map, rules, "user");
+        ApplyRoutingOverlay(map, display.InstrumentRouting, "user");
         return map;
     }
 
-    private static void ApplyRules(
+    /// <summary>
+    /// Расширяет <c>pfd_primary</c>/<c>mfd_primary</c> в конкретные ключи поверхностей рантайма (без <c>surface_id</c> в TOML).
+    /// </summary>
+    internal static void ApplyRoutingOverlay(
         Dictionary<string, string> map,
-        IReadOnlyList<InstrumentPlacementRuleSettings> rules,
+        IReadOnlyDictionary<string, string>? routing,
         string source)
     {
-        for (var i = 0; i < rules.Count; i++)
+        if (routing is null || routing.Count == 0)
+            return;
+
+        foreach (var kv in routing)
         {
-            var rule = rules[i];
-            if (!TryNormalizeRule(rule, out var surfaceId, out var slotId, out var instrumentId))
+            var routeKey = kv.Key.Trim();
+            var raw = kv.Value?.Trim() ?? "";
+            if (routeKey.Length == 0 || raw.Length == 0)
+                continue;
+
+            if (!InstrumentRoutingAliasResolver.TryResolve(raw, out var canonical))
             {
                 global::System.Diagnostics.Debug.WriteLine(
-                    $"InstrumentPlacementRuntime: invalid {source} rule at index {i}");
+                    $"InstrumentPlacementRuntime: unknown instrument alias or id '{raw}' for '{routeKey}' ({source})");
                 continue;
             }
 
-            if (!IsKnownSlot(slotId))
+            if (routeKey.Equals(InstrumentRoutingSlotKeys.PfdPrimary, StringComparison.OrdinalIgnoreCase))
+            {
+                map[BuildKey(MainWindowHostSurfaceIds.DockedGrid, CockpitSlotIds.Pfd)] = canonical;
+                map[BuildKey(MainWindowHostSurfaceIds.PlusMfdHostTopLevel, CockpitSlotIds.Pfd)] = canonical;
+            }
+            else if (routeKey.Equals(InstrumentRoutingSlotKeys.MfdPrimary, StringComparison.OrdinalIgnoreCase))
+            {
+                map[BuildKey(MainWindowHostSurfaceIds.DockedGrid, CockpitSlotIds.Mfd)] = canonical;
+                map[BuildKey(MainWindowHostSurfaceIds.PlusMfdHostTopLevel, CockpitSlotIds.Mfd)] = canonical;
+            }
+            else
             {
                 global::System.Diagnostics.Debug.WriteLine(
-                    $"InstrumentPlacementRuntime: unknown slot_id '{slotId}' in {source} rule at index {i}");
-                continue;
+                    $"InstrumentPlacementRuntime: unknown routing key '{routeKey}' ({source})");
             }
-
-            if (!IsKnownInstrument(instrumentId))
-            {
-                global::System.Diagnostics.Debug.WriteLine(
-                    $"InstrumentPlacementRuntime: unknown instrument_id '{instrumentId}' in {source} rule at index {i}");
-                continue;
-            }
-
-            map[BuildKey(surfaceId, slotId)] = instrumentId;
         }
-    }
-
-    private static bool TryNormalizeRule(
-        InstrumentPlacementRuleSettings rule,
-        out string surfaceId,
-        out string slotId,
-        out string instrumentId)
-    {
-        surfaceId = rule?.SurfaceId?.Trim() ?? "";
-        slotId = rule?.SlotId?.Trim() ?? "";
-        instrumentId = rule?.InstrumentId?.Trim() ?? "";
-        return surfaceId.Length > 0 && slotId.Length > 0 && instrumentId.Length > 0;
     }
 
     private static string BuildKey(string surfaceId, string slotId) =>
         $"{surfaceId.Trim().ToLowerInvariant()}::{slotId.Trim().ToLowerInvariant()}";
-
-    private static bool IsKnownSlot(string slotId) =>
-        string.Equals(slotId, CockpitSlotIds.Pfd, StringComparison.OrdinalIgnoreCase)
-        || string.Equals(slotId, CockpitSlotIds.Mfd, StringComparison.OrdinalIgnoreCase)
-        || string.Equals(slotId, CockpitSlotIds.Forward, StringComparison.OrdinalIgnoreCase);
-
-    private static bool IsKnownInstrument(string instrumentId) =>
-        string.Equals(instrumentId, CockpitStandardInstrumentIds.SolutionExplorerTree, StringComparison.OrdinalIgnoreCase)
-        || string.Equals(instrumentId, CockpitStandardInstrumentIds.WorkspaceNavigationMap, StringComparison.OrdinalIgnoreCase)
-        || string.Equals(instrumentId, CockpitStandardInstrumentIds.WorkspaceHealthStatusV1, StringComparison.OrdinalIgnoreCase);
 }

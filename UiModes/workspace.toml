@@ -1,4 +1,5 @@
-# Глобальные метрики хрома (без отдельного schema_version — см. index.toml).
+# Глобальные метрики хрома и превью Markdown (без отдельного schema_version — см. index.toml).
+[workspace_chrome]
 solution_explorer_default_width_pixels = 220
 main_grid_column_splitter_width_pixels = 4
 bottom_panel_min_row_pixels = 80
@@ -6,8 +7,7 @@ chat_panel_collapsed_width_pixels = 0
 chat_panel_expanded_default_width_pixels = 340
 chat_panel_expanded_power_width_pixels = 420
 chat_panel_expanded_agent_chat_width_pixels = 520
-
-# Превью Markdown: forward_split (колонка у редактора, если есть EditorContentGrid), mfd (пока fallback — окно), separate_window.
+# forward_split | mfd | separate_window (или window)
 markdown_preview_placement = "forward_split"
 
 # ADR 0021/0051: маршрутизация интентов внимания к зоне (канонические id: forward, pfd, mfd, eicas, hud).
@@ -18,14 +18,7 @@ chat = "mfd"
 git = "mfd"
 terminal = "mfd"
 editor = "forward"
-editor_hud = "hud"
 
-[[instrument_placement_rules]]
-surface_id = "main_window_docked_grid"
-slot_id = "pfd"
-instrument_id = "solution_explorer_tree"
-
-[[instrument_placement_rules]]
-surface_id = "main_window_plus_mfd_host_top_level"
-slot_id = "pfd"
-instrument_id = "solution_explorer_tree"
+# ADR 0050: какой инструмент в основных слотах (alias — без сырых instrument_id в TOML).
+[instrument_routing]
+pfd_primary = "solution_explorer"

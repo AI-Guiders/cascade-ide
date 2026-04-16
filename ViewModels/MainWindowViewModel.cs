@@ -106,7 +106,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             () => EditorText,
             GetWorkspacePath,
             () => CursorAcpAgentPath,
-            () => ExternalMcpServersJson,
+            () => Services.McpExternalServersJsonResolver.ResolveEffectiveJson(_settings),
             () => AcpAutoInjectIdeMcp,
             appendAcpTerminal: text => UiScheduler.Default.Post(() => TerminalPanel.AppendOutput(text)),
             showAcpTerminal: () => UiScheduler.Default.Post(() =>
@@ -138,7 +138,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _markdownLspExecutable = _settings.MarkdownLsp.Executable ?? "";
         _markdownLspArguments = _settings.MarkdownLsp.Arguments ?? "";
 
-        _mcpClientService = new Services.McpClientService(_settings.Mcp.ExternalServersJson);
+        _mcpClientService = new Services.McpClientService(Services.McpExternalServersJsonResolver.ResolveEffectiveJson(_settings));
         _autonomousAgentService = CreateAutonomousAgentService(_mcpClientService);
         Autonomous = new AutonomousAgentSessionViewModel(_autonomousAgentService, this);
         _dapDebug = new Services.IdeDapDebugSession((file, line, stack, vars) =>

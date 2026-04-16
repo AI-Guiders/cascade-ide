@@ -195,7 +195,7 @@ public static class UiModeCatalog
             UiWorkspaceLayoutRuntimeMetrics.ApplyWorkspaceToml(merged);
             AttentionZonePanelRuntime.ApplyWorkspaceToml(merged);
             MarkdownPreviewPlacementRuntime.ApplyWorkspaceToml(merged);
-            InstrumentPlacementRuntime.ApplyWorkspaceRules(merged?.InstrumentPlacementRules ?? []);
+            InstrumentPlacementRuntime.ApplyWorkspaceInstrumentRouting(merged?.InstrumentRouting);
         }
     }
 
@@ -270,7 +270,7 @@ public static class UiModeCatalog
                 UiWorkspaceLayoutRuntimeMetrics.ApplyWorkspaceToml(w);
                 AttentionZonePanelRuntime.ApplyWorkspaceToml(w);
                 MarkdownPreviewPlacementRuntime.ApplyWorkspaceToml(w);
-                InstrumentPlacementRuntime.ApplyWorkspaceRules(w?.InstrumentPlacementRules ?? []);
+                InstrumentPlacementRuntime.ApplyWorkspaceInstrumentRouting(w?.InstrumentRouting);
             }
             catch (Exception ex)
             {
