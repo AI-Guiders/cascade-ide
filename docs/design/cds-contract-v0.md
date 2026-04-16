@@ -96,8 +96,8 @@
 
 | Этап | Содержание |
 |------|------------|
-| **Сейчас** | DTO `CockpitSurfaceState` и вложенные записи в `Cockpit/Cds/CockpitSurfaceState.cs`; сборка — `Cockpit/Cds/CockpitSurfaceSnapshotBuilder.Build(MainWindowViewModel)`; точка входа на VM — `MainWindowViewModel.BuildCockpitSurfaceSnapshot()` (см. также `EffectivePresentationLine`, `IsMfdHostWindowShellOpen`, `IsForwardZoneVisible`). В `schema_version=0.3` добавлен список `instruments` (`instrument_id`, `slot_id`, `schema_version`) как проекция HostSurface-кадра для MCP/наблюдаемости. |
-| **Дальше** | Проброс в MCP (`ide_get_cockpit_state` или расширение существующего инструмента) и стабилизация полей по обратной связи агента/тестов. |
+| **Сейчас** | DTO `CockpitSurfaceState` и вложенные записи в `Cockpit/Cds/CockpitSurfaceState.cs`; сборка — `Cockpit/Cds/CockpitSurfaceSnapshotBuilder.Build(MainWindowViewModel)`; точка входа на VM — `MainWindowViewModel.BuildCockpitSurfaceSnapshot()` (см. также `EffectivePresentationLine`, `IsMfdHostWindowShellOpen`, `IsForwardZoneVisible`). В `schema_version=0.3` добавлен список `instruments` (`instrument_id`, `slot_id`, `schema_version`) как проекция HostSurface-кадра для MCP/наблюдаемости. **MCP:** тот же объект вложен в `ide_get_workspace_state` как поле `cockpit_surface` (паритет со Skia/UI). |
+| **Дальше** | При необходимости — отдельный тул `ide_get_cockpit_state` (если понадобится без полной сводки); стабилизация полей по обратной связи агента/тестов. |
 
 ---
 

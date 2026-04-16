@@ -56,7 +56,7 @@
 | `ide_apply_edit` | Применить правку в открытом файле | `file_path`, `start_line`, `start_column`, `end_line`, `end_column`, `new_text` (1-based) |
 | `ide_go_to_position` | Перейти на позицию (и опционально выделить) | `file_path`, `line`, `column`; опционально `end_line`, `end_column` |
 | `ide_get_solution_info` | Информация о решении и открытом файле | —; возвращает JSON (solution_path, current_file_path, project_paths) |
-| `ide_get_workspace_state` | Единая сводка состояния IDE: solution/current file/selection/debug/build output/diagnostics | —; возвращает JSON |
+| `ide_get_workspace_state` | Единая сводка состояния IDE: solution/current file/selection/debug/build output/diagnostics; **`cockpit_surface`** — CDS-снимок кабины (тот же `CockpitSurfaceState`, что `BuildCockpitSurfaceSnapshot` / Skia) | —; возвращает JSON |
 | `ide_get_ui_modes_diagnostics` | Диагностика загрузки UI-режимов: путь к `UiModes`, наличие `index.toml`/`Flight.toml`, источник бандла (TOML vs встроенный fallback), `ordered_mode_ids`, признак Flight в меню | —; возвращает JSON |
 | `ide_build` | Запустить сборку решения (dotnet build). **Структурированный результат:** JSON: success, exit_code, errors[] (file, line, column?, code?, message), warnings[], raw_output (обрезано). Агент получает ошибки без парсинга лога. | —; возвращает JSON |
 | `ide_get_build_output` | Текст панели «Вывод сборки» и цвета (background, foreground) | —; возвращает JSON: text, theme |
@@ -320,7 +320,7 @@
 | `get_solution_info` | Короткая информация о текущем решении/файле/выделении в дереве. returns: json. |
 | `get_ui_modes_diagnostics` | Диагностика загрузки UI-режимов: пути к UiModes, TOML vs встроенный fallback, список id в меню (почему может не быть Flight). returns: json. |
 | `get_workspace_navigation_context` | Контекст навигации (ADR 0039): связанные файлы или мини-подграф. Виды связей — partial_peer project_peer xaml_codebehind_pair test_counterpart same_namespace same_directory. Имена preset — из settings.toml workspace_navigation_context.presets. args: mode:string, file_path?:string, line?:integer, column?:integer, max_related?:integer, max_nodes?:integer, max_edges?:integer, preset?:string, include_kinds?:string[], exclude_kinds?:string[]; returns: json; example: {"mode":"related","file_path":"src/Foo.cs","preset":"no_namespace_noise"}. |
-| `get_workspace_state` | Единая сводка состояния IDE (solution/editor/build/diagnostics...). returns: json. |
+| `get_workspace_state` | Единая сводка состояния IDE (solution/editor/build/diagnostics...), плюс `cockpit_surface` (CDS). returns: json. |
 | `move_document_to_group_1` | Переместить документ в группу 1. args: file_path:string; returns: text; example: {"file_path":"C:\\\\tmp\\\\a.cs"}. |
 | `move_document_to_group_2` | Переместить документ в группу 2. args: file_path:string; returns: text; example: {"file_path":"C:\\\\tmp\\\\a.cs"}. |
 | `move_document_to_group_3` | Переместить документ в группу 3. args: file_path:string; returns: text; example: {"file_path":"C:\\\\tmp\\\\a.cs"}. |
@@ -337,7 +337,7 @@
 
 **Семантическая навигация (`get_workspace_navigation_context`):** пресеты задаются в `%LocalAppData%\CascadeIDE\settings.toml` в секции `[workspace_navigation_context]` (поле `presets`, JSON). В ответе смотри `kind_filter` (эффективные списки) и в режиме `subgraph` — `kind` на узлах и `related_kind` на рёбрах. Подробный cookbook: [workspace-navigation-mcp-cookbook.md](design/workspace-navigation-mcp-cookbook.md).
 
-Проверка: `ide_get_workspace_state` — помимо `terminal.is_visible`, `ui_mode`, есть `panels` (видимость колонок), `safety_level`, `editor_group_count`, `agent_trace_step_count`, `is_autonomous_running`.
+Проверка: `ide_get_workspace_state` — помимо `terminal.is_visible`, `ui_mode`, есть `panels` (видимость колонок), `safety_level`, `editor_group_count`, `agent_trace_step_count`, `is_autonomous_running`, **`cockpit_surface`** (CDS: `schema_version`, зоны, топология, `instruments` и т.д., см. `docs/design/cds-contract-v0.md`).
 
 ## Подключение из Cursor
 
