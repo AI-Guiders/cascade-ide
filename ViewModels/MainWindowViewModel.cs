@@ -188,6 +188,8 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             && Services.Presentation.PresentationLayoutAnalyzer.IsTriplePfdForwardMfdPreset(_presentationParse.Screens);
         _presentationMfdHostTopology = _presentationDedicatedMfdSecondScreen || _presentationTriplePfdForwardMfd;
         _instrumentMountPolicyResolver = new SettingsBackedInstrumentMountPolicyResolver();
+
+        NotifyDockedInstrumentSlotBindings();
     }
 
     private void OnChromePropertyChangedForWorkspaceHealth(object? _, PropertyChangedEventArgs e)
@@ -369,6 +371,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             ClearStartupProjectInMemoryOnly();
 
         UiModeCatalog.ApplyRepositoryWorkspaceOverlay(GetWorkspacePath(value));
+        NotifyDockedInstrumentSlotBindings();
         OnPropertyChanged(nameof(ChatPanelColumnPixelWidth));
         OnPropertyChanged(nameof(IsChatPanelColumnVisible));
         OnPropertyChanged(nameof(IsMfdColumnVisible));

@@ -258,10 +258,11 @@
 
         <views:TaskCockpitView Grid.Row="2" Grid.ColumnSpan="5"/>
 
-        <!-- Якорь зоны PFD (канон id pfd): по дефолтной карте — SolutionExplorerView; переопределение — attention_zone_panels / AttentionZonePanelRuntime -->
+        <!-- Якорь зоны PFD: контент по InstrumentPlacementRuntime + Display / workspace.toml (pfd_primary), без дубля с SecondaryShellView. -->
         <chrome:AttentionZoneContainer Zone="Pfd" Grid.Row="3" Grid.Column="0">
             <Grid>
-                <views:SolutionExplorerView />
+                <views:SolutionExplorerView IsVisible="{Binding IsDockedPfdSolutionExplorerTree}"/>
+                <views:WorkspaceNavigationMapView IsVisible="{Binding IsDockedPfdWorkspaceNavigationMap}"/>
                 <!-- Wave 3: mount-layer host preview для PFD (единая точка подключения мини-инструмента). -->
                 <views:ZoneInstrumentMountView IsVisible="{Binding UseSkiaInstrumentMount}"
                                                HorizontalAlignment="Right"
