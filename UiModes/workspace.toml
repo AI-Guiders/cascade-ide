@@ -10,8 +10,8 @@ chat_panel_expanded_agent_chat_width_pixels = 520
 # Превью Markdown: forward_split (колонка у редактора, если есть EditorContentGrid), mfd (пока fallback — окно), separate_window.
 markdown_preview_placement = "forward_split"
 
-# ADR 0021: привязка поверхностей к зонам внимания (канонические id: forward, pfd, mfd, eicas, hud).
-# Переопределение только здесь / в пользовательском бандле UiModes — не drag-and-drop в сессии.
+# ADR 0021: привязка панелей (panel_id) к зоне внимания (канонические id: forward, pfd, mfd, eicas, hud).
+# Источник истины: bundle `UiModes/workspace.toml` + репо `.cascade/workspace.toml`; в сессии не меняется.
 [attention_zone_panels]
 solution_explorer = "pfd"
 chat_panel = "mfd"

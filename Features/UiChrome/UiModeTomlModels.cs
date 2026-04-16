@@ -29,7 +29,10 @@ public sealed class UiWorkspaceToml
     /// </summary>
     public string? MarkdownPreviewPlacement { get; set; }
 
-    /// <summary>Привязка id поверхности к каноническому id зоны; TOML: <c>[attention_zone_panels]</c> (ADR 0021).</summary>
+    /// <summary>
+    /// Привязка panel_id (например <c>solution_explorer</c>) к зоне внимания (канонический id: <c>pfd</c>/<c>mfd</c>/<c>forward</c> и т.д.).
+    /// TOML: <c>[attention_zone_panels]</c> (ADR 0021).
+    /// </summary>
     public Dictionary<string, string>? AttentionZonePanels { get; set; }
 
     /// <summary>
