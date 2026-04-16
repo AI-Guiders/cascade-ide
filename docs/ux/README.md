@@ -2,6 +2,8 @@
 
 Каталог для макетов, описаний раскладки и контрактов интерфейса Cascade IDE. Эталон реализации — код в `Views/MainWindow.axaml` и темы в `Themes/`.
 
+**Актуальная линия (ветка Skia, ~2026):** в поставке один продуктовый UI-режим — **Flight** (`UiModes/index.toml`); топология зон PFD / Forward / MFD и мультиоконность — **[ADR 0017](../adr/0017-multi-window-workspace-and-agent-surfaces.md)**, модель внимания — **[ADR 0021](../adr/0021-pfd-mfd-cockpit-attention-model.md)**, конфиг режимов — **[ADR 0010](../adr/0010-ui-modes-toml-configuration.md)**. PNG ниже и старые тексты про Focus / Balanced / Power — **архив ранних референсов**; с текущим кодом они намеренно могут расходиться.
+
 ## Содержимое
 
 | Файл                                    | Назначение                                                                                                       |
@@ -44,6 +46,6 @@
 
 ## Связь с кодом
 
-- **Режимы UI:** встроенные пресеты Focus / Balanced / Power / Agent Chat / Debug — меню «Вид → Режим интерфейса», комбо в тулбаре, хоткеи цикла `Alt+1` / `Alt+2` / `Alt+3`, `Ctrl+Alt+M`. Поведение и данные: **`ui-modes-overview-v1.md`**, контракт TOML — **[ADR 0010](../adr/0010-ui-modes-toml-configuration.md)**. В Power — task bar, Quick Actions (capability), телеметрия кокпита; в Focus — минимум отвлечений.
-- **Темы:** меню «Вид → Тема» (светлая, тёмная, как Cursor, **Power классическая (циан)**); при входе в режим **Power** по умолчанию подставляется **`Themes/power-cockpit-concept-theme.json`** (палитра ближе к `concept-generated/cascadeide-ui-concept-power.png`); прежняя циановая Power — пункт меню. Тул `ide_set_ui_theme` меняет тему из MCP.
+- **Режимы UI:** в поставке — **Flight**; меню «Вид» и MCP отражают один id (см. **`ui-modes-overview-v1.md`** — там по-прежнему объясняются семья/наследование TOML для кастомных оверлеев; контракт бандла — **[ADR 0010](../adr/0010-ui-modes-toml-configuration.md)**). Цикл режимов и `Alt+1…9` остаются механически, пока в индексе один режим.
+- **Темы:** меню «Вид → Тема» (светлая, тёмная, как Cursor, **Power классическая (циан)** — отдельный пресет цветов, не режим UI). Тул `ide_set_ui_theme` меняет тему из MCP.
 - **Панели:** Solution Explorer, Build Output, Chat, Terminal — скрываемые; имена контролов для MCP см. в `cascade-ide-ui-layout-v1.md`.
