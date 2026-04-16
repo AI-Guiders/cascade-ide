@@ -10,7 +10,7 @@ public static class AttentionPanelCanonicalIds
     public const string SolutionExplorer = "solution_explorer";
     public const string ChatPanel = "chat_panel";
     public const string Git = "git";
-    public const string TerminalDock = "terminal_dock";
+    public const string Terminal = "terminal";
     public const string Editor = "editor";
     public const string EditorHud = "editor_hud";
 
@@ -20,12 +20,12 @@ public static class AttentionPanelCanonicalIds
         SolutionExplorer,
         ChatPanel,
         Git,
-        TerminalDock,
+        Terminal,
         Editor,
         EditorHud
     ];
 
     /// <summary>Строгое совпадение с одним из канонических id панели.</summary>
     public static bool IsKnownPanelId(string? value) =>
-        value is SolutionExplorer or ChatPanel or Git or TerminalDock or Editor or EditorHud;
+        value is SolutionExplorer or ChatPanel or Git or Terminal or Editor or EditorHud;
 }

@@ -12,7 +12,7 @@ public sealed class AttentionPanelCanonicalIdsTests
         Assert.Equal(AttentionPanelCanonicalIds.SolutionExplorer, AttentionPanelIds.SolutionExplorer);
         Assert.Equal(AttentionPanelCanonicalIds.ChatPanel, AttentionPanelIds.ChatPanel);
         Assert.Equal(AttentionPanelCanonicalIds.Git, AttentionPanelIds.Git);
-        Assert.Equal(AttentionPanelCanonicalIds.TerminalDock, AttentionPanelIds.TerminalDock);
+        Assert.Equal(AttentionPanelCanonicalIds.Terminal, AttentionPanelIds.Terminal);
         Assert.Equal(AttentionPanelCanonicalIds.Editor, AttentionPanelIds.Editor);
         Assert.Equal(AttentionPanelCanonicalIds.EditorHud, AttentionPanelIds.EditorHud);
         Assert.Equal(6, AttentionPanelCanonicalIds.All.Length);

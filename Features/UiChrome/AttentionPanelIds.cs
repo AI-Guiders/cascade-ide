@@ -11,7 +11,7 @@ public static class AttentionPanelIds
     public const string SolutionExplorer = AttentionPanelCanonicalIds.SolutionExplorer;
     public const string ChatPanel = AttentionPanelCanonicalIds.ChatPanel;
     public const string Git = AttentionPanelCanonicalIds.Git;
-    public const string TerminalDock = AttentionPanelCanonicalIds.TerminalDock;
+    public const string Terminal = AttentionPanelCanonicalIds.Terminal;
     public const string Editor = AttentionPanelCanonicalIds.Editor;
 
     /// <summary>Полоса HUD над текстом редактора (слой внутри лобового, не отдельный якорь-колонка).</summary>

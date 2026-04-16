@@ -3,11 +3,21 @@ using System.Collections.Immutable;
 namespace CascadeIDE.Features.UiChrome;
 
 /// <summary>
-/// Карта «поверхность → зона внимания», загружаемая из <c>UiModes/workspace.toml</c> (секция <c>attention_zone_panels</c>, ADR 0021).
+/// Карта «поверхность → зона внимания», загружаемая из <c>UiModes/workspace.toml</c> (секция <c>attention_routing</c>, ADR 0021/0051).
 /// Дефолты совпадают с семантикой ADR; TOML накладывает переопределения.
 /// </summary>
 public static class AttentionZonePanelRuntime
 {
+    private static readonly IReadOnlyDictionary<string, string> IntentToPanelId = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+    {
+        [AttentionRoutingIntentIds.SolutionExplorer] = AttentionPanelIds.SolutionExplorer,
+        [AttentionRoutingIntentIds.Chat] = AttentionPanelIds.ChatPanel,
+        [AttentionRoutingIntentIds.Git] = AttentionPanelIds.Git,
+        [AttentionRoutingIntentIds.Terminal] = AttentionPanelIds.Terminal,
+        [AttentionRoutingIntentIds.Editor] = AttentionPanelIds.Editor,
+        [AttentionRoutingIntentIds.EditorHud] = AttentionPanelIds.EditorHud,
+    };
+
     private static ImmutableDictionary<string, AttentionZone> _byPanel = BuildDefaultMap();
 
     private static ImmutableDictionary<string, AttentionZone> BuildDefaultMap()
@@ -16,7 +26,7 @@ public static class AttentionZonePanelRuntime
         b.Add(AttentionPanelIds.SolutionExplorer, AttentionZone.Pfd);
         b.Add(AttentionPanelIds.ChatPanel, AttentionZone.Mfd);
         b.Add(AttentionPanelIds.Git, AttentionZone.Mfd);
-        b.Add(AttentionPanelIds.TerminalDock, AttentionZone.Mfd);
+        b.Add(AttentionPanelIds.Terminal, AttentionZone.Mfd);
         b.Add(AttentionPanelIds.Editor, AttentionZone.Forward);
         b.Add(AttentionPanelIds.EditorHud, AttentionZone.Hud);
         return b.ToImmutable();
@@ -30,21 +40,26 @@ public static class AttentionZonePanelRuntime
     internal static void ApplyWorkspaceToml(UiWorkspaceToml? w)
     {
         var map = BuildDefaultMap();
-        if (w?.AttentionZonePanels is { Count: > 0 } overrides)
+        if (w?.AttentionRouting is { Count: > 0 } overrides)
         {
             var b = map.ToBuilder();
             foreach (var kv in overrides)
             {
-                var key = kv.Key.Trim();
-                if (key.Length == 0)
+                var intent = kv.Key.Trim();
+                if (intent.Length == 0)
                     continue;
+                if (!IntentToPanelId.TryGetValue(intent, out var panelId))
+                {
+                    global::System.Diagnostics.Debug.WriteLine($"AttentionZonePanelRuntime: unknown attention intent — {intent}");
+                    continue;
+                }
                 var raw = kv.Value?.Trim();
                 if (string.IsNullOrEmpty(raw))
                     continue;
                 if (AttentionZoneExtensions.TryParseCanonicalId(raw, out var zone))
-                    b[key] = zone;
+                    b[panelId] = zone;
                 else
-                    global::System.Diagnostics.Debug.WriteLine($"AttentionZonePanelRuntime: unknown zone id — {raw} (panel {key})");
+                    global::System.Diagnostics.Debug.WriteLine($"AttentionZonePanelRuntime: unknown zone id — {raw} (intent {intent})");
             }
 
             map = b.ToImmutable();

@@ -30,10 +30,11 @@ public sealed class UiWorkspaceToml
     public string? MarkdownPreviewPlacement { get; set; }
 
     /// <summary>
-    /// Привязка panel_id (например <c>solution_explorer</c>) к зоне внимания (канонический id: <c>pfd</c>/<c>mfd</c>/<c>forward</c> и т.д.).
-    /// TOML: <c>[attention_zone_panels]</c> (ADR 0021).
+    /// Маршрутизация интентов внимания (например <c>solution_explorer</c>, <c>chat</c>, <c>terminal</c>) к зоне внимания
+    /// (канонический id: <c>pfd</c>/<c>mfd</c>/<c>forward</c> и т.д.).
+    /// TOML: <c>[attention_routing]</c> (ADR 0021, ADR 0051).
     /// </summary>
-    public Dictionary<string, string>? AttentionZonePanels { get; set; }
+    public Dictionary<string, string>? AttentionRouting { get; set; }
 
     /// <summary>
     /// Репозиторный/бандловый слой карты размещения инструментов.

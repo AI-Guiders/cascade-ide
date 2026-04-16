@@ -42,29 +42,29 @@ public sealed class UiWorkspaceTomlMergerTests
     }
 
     [Fact]
-    public void Merge_attention_zone_panels_union_higher_wins_key()
+    public void Merge_attention_routing_union_higher_wins_key()
     {
         var lower = new UiWorkspaceToml
         {
-            AttentionZonePanels = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            AttentionRouting = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 ["solution_explorer"] = "pfd",
-                ["chat_panel"] = "mfd"
+                ["chat"] = "mfd"
             }
         };
         var higher = new UiWorkspaceToml
         {
-            AttentionZonePanels = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            AttentionRouting = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 ["solution_explorer"] = "mfd",
                 ["git"] = "pfd"
             }
         };
         var m = UiWorkspaceTomlMerger.Merge(lower, higher);
-        Assert.NotNull(m!.AttentionZonePanels);
-        Assert.Equal("mfd", m.AttentionZonePanels!["solution_explorer"]);
-        Assert.Equal("mfd", m.AttentionZonePanels["chat_panel"]);
-        Assert.Equal("pfd", m.AttentionZonePanels["git"]);
+        Assert.NotNull(m!.AttentionRouting);
+        Assert.Equal("mfd", m.AttentionRouting!["solution_explorer"]);
+        Assert.Equal("mfd", m.AttentionRouting["chat"]);
+        Assert.Equal("pfd", m.AttentionRouting["git"]);
     }
 
     [Fact]

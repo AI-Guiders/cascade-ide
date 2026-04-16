@@ -163,7 +163,7 @@ public static class UiModeCatalog
     }
 
     /// <summary>
-    /// Накладывает <c>.cascade/workspace.toml</c> из корня открытого решения на метрики и <c>attention_zone_panels</c> бандла.
+    /// Накладывает <c>.cascade/workspace.toml</c> из корня открытого решения на метрики и <c>attention_routing</c> бандла.
     /// Вызывать с UI-потока при смене <see cref="SolutionWorkspaceViewModel.SolutionPath"/>; при пустом пути — только бандл.
     /// </summary>
     public static void ApplyRepositoryWorkspaceOverlay(string? solutionDirectory)

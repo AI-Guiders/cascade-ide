@@ -20,6 +20,8 @@ public sealed class AttentionZonePanelRuntimeTests : IDisposable
         Assert.Equal(AttentionZone.Pfd, se);
         Assert.True(AttentionZonePanelRuntime.TryGetZone(AttentionPanelIds.ChatPanel, out var ch));
         Assert.Equal(AttentionZone.Mfd, ch);
+        Assert.True(AttentionZonePanelRuntime.TryGetZone(AttentionPanelIds.Terminal, out var term));
+        Assert.Equal(AttentionZone.Mfd, term);
         Assert.True(AttentionZonePanelRuntime.TryGetZone(AttentionPanelIds.Editor, out var ed));
         Assert.Equal(AttentionZone.Forward, ed);
         Assert.True(AttentionZonePanelRuntime.TryGetZone(AttentionPanelIds.EditorHud, out var hud));
@@ -31,9 +33,9 @@ public sealed class AttentionZonePanelRuntimeTests : IDisposable
     {
         AttentionZonePanelRuntime.ApplyWorkspaceToml(new UiWorkspaceToml
         {
-            AttentionZonePanels = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            AttentionRouting = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
-                [AttentionPanelIds.SolutionExplorer] = AttentionZoneIds.Mfd,
+                [AttentionRoutingIntentIds.SolutionExplorer] = AttentionZoneIds.Mfd,
             },
         });
 
@@ -44,22 +46,25 @@ public sealed class AttentionZonePanelRuntimeTests : IDisposable
     }
 
     [Fact]
-    public void Toml_deserializes_attention_zone_panels_table()
+    public void Toml_deserializes_attention_routing_table()
     {
         const string toml = """
             solution_explorer_default_width_pixels = 220
 
-            [attention_zone_panels]
+            [attention_routing]
             solution_explorer = "pfd"
             git = "mfd"
+            terminal = "pfd"
             """;
 
         var w = CascadeTomlSerializer.Deserialize<UiWorkspaceToml>(toml);
         Assert.NotNull(w);
-        Assert.NotNull(w!.AttentionZonePanels);
-        Assert.Equal("pfd", w.AttentionZonePanels!["solution_explorer"]);
+        Assert.NotNull(w!.AttentionRouting);
+        Assert.Equal("pfd", w.AttentionRouting!["solution_explorer"]);
         AttentionZonePanelRuntime.ApplyWorkspaceToml(w);
         Assert.True(AttentionZonePanelRuntime.TryGetZone(AttentionPanelIds.Git, out var g));
         Assert.Equal(AttentionZone.Mfd, g);
+        Assert.True(AttentionZonePanelRuntime.TryGetZone(AttentionPanelIds.Terminal, out var term));
+        Assert.Equal(AttentionZone.Pfd, term);
     }
 }

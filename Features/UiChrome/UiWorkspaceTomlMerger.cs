@@ -1,7 +1,7 @@
 namespace CascadeIDE.Features.UiChrome;
 
 /// <summary>
-/// Слияние слоёв <see cref="UiWorkspaceToml"/> (ADR 0021 §2.1): верхний слой переопределяет нижний по полям и по ключам <c>attention_zone_panels</c>.
+/// Слияние слоёв <see cref="UiWorkspaceToml"/> (ADR 0021 §2.1): верхний слой переопределяет нижний по полям и по ключам <c>attention_routing</c>.
 /// </summary>
 public static class UiWorkspaceTomlMerger
 {
@@ -22,12 +22,12 @@ public static class UiWorkspaceTomlMerger
             MfdRegionExpandedPowerWidthPixels = higher?.MfdRegionExpandedPowerWidthPixels ?? lower?.MfdRegionExpandedPowerWidthPixels,
             MfdRegionExpandedAgentChatWidthPixels = higher?.MfdRegionExpandedAgentChatWidthPixels ?? lower?.MfdRegionExpandedAgentChatWidthPixels,
             MarkdownPreviewPlacement = higher?.MarkdownPreviewPlacement ?? lower?.MarkdownPreviewPlacement,
-            AttentionZonePanels = MergeAttentionPanels(lower?.AttentionZonePanels, higher?.AttentionZonePanels),
+            AttentionRouting = MergeAttentionRouting(lower?.AttentionRouting, higher?.AttentionRouting),
             InstrumentPlacementRules = MergeInstrumentPlacementRules(lower?.InstrumentPlacementRules, higher?.InstrumentPlacementRules)
         };
     }
 
-    private static Dictionary<string, string>? MergeAttentionPanels(
+    private static Dictionary<string, string>? MergeAttentionRouting(
         Dictionary<string, string>? lower,
         Dictionary<string, string>? higher)
     {
