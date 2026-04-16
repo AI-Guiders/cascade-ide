@@ -3,7 +3,7 @@ using CascadeIDE.Models;
 namespace CascadeIDE.Cockpit.Composition.HostSurface;
 
 /// <summary>
-/// Settings-backed strategy for mount slot-policy resolution.
+/// Settings-backed strategy for mount mount-style resolution.
 /// Priority order:
 /// 1) exact current surface (slot+instrument -> slot/* -> */instrument -> */*)
 /// 2) global surface wildcard with the same specificity ladder.
@@ -21,9 +21,9 @@ public sealed class SettingsBackedInstrumentMountPolicyResolver : IInstrumentMou
     {
         static string Normalize(string? value) => (value ?? string.Empty).Trim().ToLowerInvariant();
 
-        var normalizedDefault = string.IsNullOrWhiteSpace(displaySettings.InstrumentMountSlotPolicy)
-            ? "wave3_preview_v1"
-            : displaySettings.InstrumentMountSlotPolicy.Trim();
+        var normalizedDefault = string.IsNullOrWhiteSpace(displaySettings.InstrumentMountStyle)
+            ? InstrumentMountPolicyIds.V1
+            : displaySettings.InstrumentMountStyle.Trim();
         var rules = displaySettings.InstrumentMountPolicyRules;
         if (rules is null || rules.Count == 0)
             return normalizedDefault;
@@ -44,7 +44,7 @@ public sealed class SettingsBackedInstrumentMountPolicyResolver : IInstrumentMou
             var match = rules.FirstOrDefault(rule =>
                 RuleMatches.IsSatisfiedBy(rule, in context)
                 && RuleEligibility.IsSatisfiedBy(rule, displaySettings));
-            return string.IsNullOrWhiteSpace(match?.SlotPolicy) ? string.Empty : match.SlotPolicy.Trim();
+            return string.IsNullOrWhiteSpace(match?.MountStyle) ? string.Empty : match.MountStyle.Trim();
         }
 
         if (TryResolveForSurface(surfaceExact: true, out var surfaceSpecific))

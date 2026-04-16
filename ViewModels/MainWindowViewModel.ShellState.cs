@@ -58,7 +58,7 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(IsSkiaZonePreviewPfdVisible))]
     [NotifyPropertyChangedFor(nameof(IsSkiaZonePreviewForwardVisible))]
     [NotifyPropertyChangedFor(nameof(IsSkiaZonePreviewMfdVisible))]
-    [NotifyPropertyChangedFor(nameof(UseSkiaInstrumentWave3Preview))]
+    [NotifyPropertyChangedFor(nameof(UseSkiaInstrumentMount))]
     [NotifyPropertyChangedFor(nameof(IsPfdWorkspaceHealthMountVisible))]
     [NotifyPropertyChangedFor(nameof(IsMfdWorkspaceHealthMountVisible))]
     [NotifyPropertyChangedFor(nameof(IsMfdHostWindowWorkspaceHealthMountVisible))]

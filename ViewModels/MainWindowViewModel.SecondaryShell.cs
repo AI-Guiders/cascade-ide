@@ -5,9 +5,12 @@ namespace CascadeIDE.ViewModels;
 /// <summary>Вторичный контур оболочки: одна активная страница; навигация — команды и палитра. Якорь на экране задаётся presentation (зона Mfd в main и/или окно-хост).</summary>
 public partial class MainWindowViewModel
 {
-    /// <summary>Дерево решения: показывать при развёрнутом регионе MFD или на странице <see cref="SecondaryShellPage.SolutionExplorer"/>.</summary>
+    /// <summary>
+    /// Дерево решения в PFD-панели: показывать, пока та же страница не открыта во вторичном контуре.
+    /// Это убирает визуальный дубль «Solution Explorer и в PFD, и в MFD» при выбранной странице MFD.
+    /// </summary>
     public bool IsSolutionExplorerTreeChromeVisible =>
-        IsMfdRegionExpanded || CurrentSecondaryShellPage == SecondaryShellPage.SolutionExplorer;
+        IsPfdRegionExpanded && CurrentSecondaryShellPage != SecondaryShellPage.SolutionExplorer;
 
     /// <summary>Детерминированный порядок обхода при выборе первой доступной страницы.</summary>
     internal static readonly SecondaryShellPage[] SecondaryShellPageOrder =

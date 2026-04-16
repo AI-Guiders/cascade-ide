@@ -1,7 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
-using CascadeIDE.Cockpit.Composition.HostSurface;
+using CascadeIDE.Models;
 
 namespace CascadeIDE.Views;
 
@@ -13,8 +13,8 @@ public partial class ZoneInstrumentMountView : UserControl
     public static readonly StyledProperty<string> SlotIdProperty =
         AvaloniaProperty.Register<ZoneInstrumentMountView, string>(nameof(SlotId), "pfd");
 
-    public static readonly StyledProperty<string> SlotPolicyProperty =
-        AvaloniaProperty.Register<ZoneInstrumentMountView, string>(nameof(SlotPolicy), "wave3_preview_v1");
+    public static readonly StyledProperty<string> MountStyleProperty =
+        AvaloniaProperty.Register<ZoneInstrumentMountView, string>(nameof(MountStyle), InstrumentMountPolicyIds.V1);
 
     public static readonly StyledProperty<string> HeaderTextProperty =
         AvaloniaProperty.Register<ZoneInstrumentMountView, string>(nameof(HeaderText), string.Empty);
@@ -38,30 +38,13 @@ public partial class ZoneInstrumentMountView : UserControl
     {
         InstrumentIdProperty.Changed.AddClassHandler<ZoneInstrumentMountView>((x, _) => x.ApplyPolicyDefaults());
         SlotIdProperty.Changed.AddClassHandler<ZoneInstrumentMountView>((x, _) => x.ApplyPolicyDefaults());
-        SlotPolicyProperty.Changed.AddClassHandler<ZoneInstrumentMountView>((x, _) => x.ApplyPolicyDefaults());
+        MountStyleProperty.Changed.AddClassHandler<ZoneInstrumentMountView>((x, _) => x.ApplyPolicyDefaults());
     }
 
     public ZoneInstrumentMountView()
     {
         InitializeComponent();
         ApplyPolicyDefaults();
-    }
-
-    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
-    {
-        base.OnPropertyChanged(change);
-        if (change.Property == DataContextProperty)
-            SyncFromMountContext();
-    }
-
-    private void SyncFromMountContext()
-    {
-        if (DataContext is WorkspaceHealthStatusMountContext ctx)
-        {
-            InstrumentId = ctx.InstrumentId;
-            SlotId = ctx.SlotId;
-            SlotPolicy = ctx.SlotPolicy;
-        }
     }
 
     public string InstrumentId
@@ -76,10 +59,10 @@ public partial class ZoneInstrumentMountView : UserControl
         set => SetValue(SlotIdProperty, value);
     }
 
-    public string SlotPolicy
+    public string MountStyle
     {
-        get => GetValue(SlotPolicyProperty);
-        set => SetValue(SlotPolicyProperty, value);
+        get => GetValue(MountStyleProperty);
+        set => SetValue(MountStyleProperty, value);
     }
 
     public string HeaderText
@@ -120,7 +103,7 @@ public partial class ZoneInstrumentMountView : UserControl
 
     private void ApplyPolicyDefaults()
     {
-        var skin = ZoneInstrumentMountPolicy.Resolve(InstrumentId, SlotId, SlotPolicy);
+        var skin = ZoneInstrumentMountPolicy.Resolve(InstrumentId, SlotId, MountStyle);
         HeaderText = skin.HeaderText;
         HostBorderBrush = skin.HostBorderBrush;
         HeaderBrush = skin.HeaderBrush;
@@ -138,27 +121,27 @@ internal static class ZoneInstrumentMountPolicy
         var normalizedSlot = (slotId ?? string.Empty).Trim().ToLowerInvariant();
         var normalizedInstrument = (instrumentId ?? string.Empty).Trim().ToLowerInvariant();
 
-        if (normalizedPolicy != "wave3_preview_v1")
+        if (normalizedPolicy != InstrumentMountPolicyIds.V1)
             return DefaultSkin(normalizedSlot, normalizedInstrument);
 
         return normalizedSlot switch
         {
             "mfd" => BuildSkin(
-                "MFD STATUS PREVIEW",
+                "MFD STATUS",
                 "#6E5A8C",
                 "#DCC1FF",
                 "#BEA7D6",
                 "#EDE4F8",
                 "#F2E8FF"),
             "forward" => BuildSkin(
-                "FORWARD STATUS PREVIEW",
+                "FORWARD STATUS",
                 "#8C7A5A",
                 "#FFE2AD",
                 "#D9BE8D",
                 "#F7EFD8",
                 "#FFF0CF"),
             _ => BuildSkin(
-                "PFD STATUS PREVIEW",
+                "PFD STATUS",
                 "#5A6E8C",
                 "#A9D9FF",
                 "#9FB4C9",
@@ -171,9 +154,9 @@ internal static class ZoneInstrumentMountPolicy
     {
         var fallbackHeader = slotId switch
         {
-            "mfd" => "MFD STATUS PREVIEW",
-            "forward" => "FORWARD STATUS PREVIEW",
-            _ => "PFD STATUS PREVIEW"
+            "mfd" => "MFD STATUS",
+            "forward" => "FORWARD STATUS",
+            _ => "PFD STATUS"
         };
 
         if (instrumentId == "workspace_health_status_v1")

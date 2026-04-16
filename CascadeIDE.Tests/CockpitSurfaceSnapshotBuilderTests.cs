@@ -1,5 +1,6 @@
 using System.Text.Json;
 using CascadeIDE.Cockpit.Cds;
+using CascadeIDE.Cockpit.Composition.HostSurface;
 using CascadeIDE.ViewModels;
 using Xunit;
 
@@ -18,9 +19,10 @@ public sealed class CockpitSurfaceSnapshotBuilderTests
         Assert.Equal("main_window_docked_grid", state.Topology.SurfaceKind);
         Assert.False(state.Topology.MfdHostWindowOpen);
         Assert.True(state.Zones.ForwardVisible);
-        Assert.Equal(2, state.Instruments.Count);
-        Assert.Contains(state.Instruments, x => x.InstrumentId == "workspace_navigation_map" && x.SlotId == "pfd");
-        Assert.Contains(state.Instruments, x => x.InstrumentId == "solution_explorer_tree" && x.SlotId == "mfd");
+        Assert.Single(state.Instruments);
+        Assert.Contains(
+            state.Instruments,
+            x => x.InstrumentId == CockpitStandardInstrumentIds.SolutionExplorerTree && x.SlotId == CockpitSlotIds.Pfd);
         Assert.Equal(vm.EffectivePresentationLine, state.PresentationEffectiveLine);
     }
 

@@ -21,8 +21,8 @@ public partial class MainWindowViewModel
         nameof(IsMfdHostWindowWorkspaceHealthMountVisible),
         nameof(PfdWorkspaceHealthMountContext),
         nameof(MfdWorkspaceHealthMountContext),
-        nameof(PfdInstrumentMountSlotPolicy),
-        nameof(MfdInstrumentMountSlotPolicy),
+        nameof(PfdInstrumentMountStyle),
+        nameof(MfdInstrumentMountStyle),
     ];
 
     /// <summary>Строка <c>presentation</c> с учётом оверлеев — та же, что уходит в <see cref="PresentationParse"/>.</summary>

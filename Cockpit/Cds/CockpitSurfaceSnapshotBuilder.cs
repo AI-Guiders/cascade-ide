@@ -1,3 +1,4 @@
+using CascadeIDE.Cockpit.Composition;
 using CascadeIDE.Cockpit.Composition.HostSurface;
 using CascadeIDE.ViewModels;
 
@@ -15,8 +16,8 @@ public static class CockpitSurfaceSnapshotBuilder
     {
         var surfaceKind = ToCdsSurfaceKind(vm.ActiveAttentionLayoutSurface);
         var layout = CockpitPresentationLayoutPolicy.InvariantsFromPresentation(vm.PresentationParse);
-        var instruments = vm.MainWindowSurfaceSlotBindings
-            .Select(static i => new CockpitSurfaceInstrument(i.InstrumentId, i.SlotId, i.SchemaVersion))
+        var instruments = vm.MainWindowHostSurfaceInstruments
+            .Select(static (CockpitInstrumentDescriptor i) => new CockpitSurfaceInstrument(i.InstrumentId, i.SlotId, i.SchemaVersion))
             .ToArray();
         return new CockpitSurfaceState(
             SchemaVersion: CurrentSchemaVersion,

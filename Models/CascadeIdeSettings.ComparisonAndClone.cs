@@ -78,23 +78,32 @@ public sealed partial class CascadeIdeSettings
                 MfdHostWindowWidth = Display.MfdHostWindowWidth,
                 MfdHostWindowHeight = Display.MfdHostWindowHeight,
                 UseSkiaZoneGeometryPreview = Display.UseSkiaZoneGeometryPreview,
-                UseSkiaInstrumentWave3Preview = Display.UseSkiaInstrumentWave3Preview,
-                InstrumentMountSlotPolicy = Display.InstrumentMountSlotPolicy,
+                UseSkiaInstrumentMount = Display.UseSkiaInstrumentMount,
+                InstrumentMountStyle = Display.InstrumentMountStyle,
                 EnforceInstrumentMountPolicyEligibility = Display.EnforceInstrumentMountPolicyEligibility,
                 InstrumentMountPolicyMinSaScore = Display.InstrumentMountPolicyMinSaScore,
                 InstrumentMountPolicyMinPerformanceScore = Display.InstrumentMountPolicyMinPerformanceScore,
                 InstrumentMountPolicyMaxWorkloadScore = Display.InstrumentMountPolicyMaxWorkloadScore,
                 RequireInstrumentMountPolicyScores = Display.RequireInstrumentMountPolicyScores,
+                PreferRepoInstrumentsPlacement = Display.PreferRepoInstrumentsPlacement,
                 InstrumentMountPolicyRules = Display.InstrumentMountPolicyRules
                     .Select(static r => new InstrumentMountPolicyRuleSettings
                     {
                         SurfaceId = r.SurfaceId,
                         SlotId = r.SlotId,
                         InstrumentId = r.InstrumentId,
-                        SlotPolicy = r.SlotPolicy,
+                        MountStyle = r.MountStyle,
                         SaScore = r.SaScore,
                         PerformanceScore = r.PerformanceScore,
                         WorkloadScore = r.WorkloadScore,
+                    })
+                    .ToList(),
+                InstrumentPlacementRules = Display.InstrumentPlacementRules
+                    .Select(static r => new InstrumentPlacementRuleSettings
+                    {
+                        SurfaceId = r.SurfaceId,
+                        SlotId = r.SlotId,
+                        InstrumentId = r.InstrumentId,
                     })
                     .ToList(),
             },
@@ -190,14 +199,16 @@ public sealed partial class CascadeIdeSettings
             && Nullable.Equals(a.MfdHostWindowWidth, b.MfdHostWindowWidth)
             && Nullable.Equals(a.MfdHostWindowHeight, b.MfdHostWindowHeight)
             && a.UseSkiaZoneGeometryPreview == b.UseSkiaZoneGeometryPreview
-            && a.UseSkiaInstrumentWave3Preview == b.UseSkiaInstrumentWave3Preview
-            && a.InstrumentMountSlotPolicy.Is(b.InstrumentMountSlotPolicy)
+            && a.UseSkiaInstrumentMount == b.UseSkiaInstrumentMount
+            && a.InstrumentMountStyle.Is(b.InstrumentMountStyle)
             && a.EnforceInstrumentMountPolicyEligibility == b.EnforceInstrumentMountPolicyEligibility
             && a.InstrumentMountPolicyMinSaScore.Equals(b.InstrumentMountPolicyMinSaScore)
             && a.InstrumentMountPolicyMinPerformanceScore.Equals(b.InstrumentMountPolicyMinPerformanceScore)
             && a.InstrumentMountPolicyMaxWorkloadScore.Equals(b.InstrumentMountPolicyMaxWorkloadScore)
             && a.RequireInstrumentMountPolicyScores == b.RequireInstrumentMountPolicyScores
-            && InstrumentMountPolicyRulesEqual(a.InstrumentMountPolicyRules, b.InstrumentMountPolicyRules);
+            && a.PreferRepoInstrumentsPlacement == b.PreferRepoInstrumentsPlacement
+            && InstrumentMountPolicyRulesEqual(a.InstrumentMountPolicyRules, b.InstrumentMountPolicyRules)
+            && InstrumentPlacementRulesEqual(a.InstrumentPlacementRules, b.InstrumentPlacementRules);
     }
 
     private static bool InstrumentMountPolicyRulesEqual(
@@ -213,7 +224,33 @@ public sealed partial class CascadeIdeSettings
 
         static string Normalize(string? value) => (value ?? string.Empty).Trim();
         static string Key(InstrumentMountPolicyRuleSettings r) =>
-            $"{Normalize(r.SurfaceId)}|{Normalize(r.SlotId)}|{Normalize(r.InstrumentId)}|{Normalize(r.SlotPolicy)}|{r.SaScore}|{r.PerformanceScore}|{r.WorkloadScore}";
+            $"{Normalize(r.SurfaceId)}|{Normalize(r.SlotId)}|{Normalize(r.InstrumentId)}|{Normalize(r.MountStyle)}|{r.SaScore}|{r.PerformanceScore}|{r.WorkloadScore}";
+
+        var left = x.Select(Key).OrderBy(static s => s, StringComparer.Ordinal).ToList();
+        var right = y.Select(Key).OrderBy(static s => s, StringComparer.Ordinal).ToList();
+        for (var i = 0; i < left.Count; i++)
+        {
+            if (!string.Equals(left[i], right[i], StringComparison.Ordinal))
+                return false;
+        }
+
+        return true;
+    }
+
+    private static bool InstrumentPlacementRulesEqual(
+        IReadOnlyList<InstrumentPlacementRuleSettings>? x,
+        IReadOnlyList<InstrumentPlacementRuleSettings>? y)
+    {
+        if (x is null && y is null)
+            return true;
+        if (x is null || y is null)
+            return false;
+        if (x.Count != y.Count)
+            return false;
+
+        static string Normalize(string? value) => (value ?? string.Empty).Trim();
+        static string Key(InstrumentPlacementRuleSettings r) =>
+            $"{Normalize(r.SurfaceId)}|{Normalize(r.SlotId)}|{Normalize(r.InstrumentId)}";
 
         var left = x.Select(Key).OrderBy(static s => s, StringComparer.Ordinal).ToList();
         var right = y.Select(Key).OrderBy(static s => s, StringComparer.Ordinal).ToList();

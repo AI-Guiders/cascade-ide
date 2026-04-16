@@ -23,6 +23,24 @@ public partial class MainWindowViewModel
     [ObservableProperty]
     private string _workspaceNavigationMapAnchorLabel = "—";
 
+    /// <summary>Число строк related в Semantic Map (для UI и SkiaHost accent).</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(WorkspaceNavigationMapRelatedBadge))]
+    [NotifyPropertyChangedFor(nameof(WorkspaceNavigationMapHasRelated))]
+    private int _workspaceNavigationMapRelatedCount;
+
+    /// <summary>Короткая подпись к количеству связей для шапки SM.</summary>
+    public string WorkspaceNavigationMapRelatedBadge =>
+        WorkspaceNavigationMapRelatedCount switch
+        {
+            0 => "",
+            1 => "1 связь",
+            _ => $"{WorkspaceNavigationMapRelatedCount} связей"
+        };
+
+    /// <summary>Есть ли ненулевой список related (для видимости бейджа).</summary>
+    public bool WorkspaceNavigationMapHasRelated => WorkspaceNavigationMapRelatedCount > 0;
+
     /// <summary>Открыть связанный файл из Semantic Map.</summary>
     [RelayCommand]
     private void OpenWorkspaceNavigationRelated(string? path)
@@ -156,6 +174,7 @@ public partial class MainWindowViewModel
                 return;
             WorkspaceNavigationMapAnchorLabel = anchorLabel;
             WorkspaceNavigationMapStatus = status;
+            WorkspaceNavigationMapRelatedCount = rows.Count;
             WorkspaceNavigationMapItems.Clear();
             foreach (var r in rows)
                 WorkspaceNavigationMapItems.Add(r);

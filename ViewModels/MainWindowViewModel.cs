@@ -289,7 +289,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     /// <summary>Панель Git (нижняя вкладка); состояние и команды вынесены из <see cref="MainWindowViewModel"/>.</summary>
     public GitPanelViewModel GitPanel { get; }
 
-    /// <summary>Чат с LLM: история, ввод, отправка (контент страницы <see cref="Models.SecondaryShellPage.Chat"/> во вторичном контуре).</summary>
+    /// <summary>Чат с LLM (правая колонка): история, ввод, отправка.</summary>
     public ChatPanelViewModel ChatPanel { get; }
 
     /// <summary>Инструментирование: трасса агента, события, тесты, стек MCP-отладки. В разметке — <c>DataContext="{Binding InstrumentationPanel}"</c>.</summary>
@@ -369,8 +369,8 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             ClearStartupProjectInMemoryOnly();
 
         UiModeCatalog.ApplyRepositoryWorkspaceOverlay(GetWorkspacePath(value));
-        OnPropertyChanged(nameof(MfdRegionPixelWidth));
-        OnPropertyChanged(nameof(IsMfdRegionVisible));
+        OnPropertyChanged(nameof(ChatPanelColumnPixelWidth));
+        OnPropertyChanged(nameof(IsChatPanelColumnVisible));
         OnPropertyChanged(nameof(IsMfdColumnVisible));
         OnPropertyChanged(nameof(IsPfdRegionExpanded));
         OnPropertyChanged(nameof(IsPfdColumnVisible));
@@ -384,7 +384,6 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _ = RestartCSharpLanguageServerAsync();
         _ = RestartMarkdownLanguageServerAsync();
         HypothesesPanel.LoadFromWorkspace();
-        ScheduleWorkspaceNavigationMapRefresh();
     }
 
     /// <summary>MCP и агент вызывают с фона; весь разбор команд и доступ к VM — на UI-потоке. Тяжёлые операции внутри хендлеров сами уходят с UI (<c>ConfigureAwait(false)</c>, <c>Task.Run</c>, <c>Post</c> обратно).</summary>

@@ -36,34 +36,34 @@ public sealed class DisplaySettings
     public bool UseSkiaZoneGeometryPreview { get; set; }
 
     /// <summary>
-    /// Wave 3: включить лёгкий preview контента инструмента в mount-слое P/F/M.
+    /// Wave 3: включить отрисовку инструмента в Skia mount-слое зон P/F/M.
     /// </summary>
-    public bool UseSkiaInstrumentWave3Preview { get; set; }
+    public bool UseSkiaInstrumentMount { get; set; }
 
     /// <summary>
-    /// Идентификатор slot-policy для mount preview-инструмента (декларативный контракт Wave 3).
-    /// Пример: <c>wave3_preview_v1</c>.
+    /// Идентификатор mount-style для mount-инструмента (декларативный контракт Wave 3).
+    /// Пример: <see cref="InstrumentMountPolicyIds.V1"/>.
     /// </summary>
-    public string InstrumentMountSlotPolicy { get; set; } = "wave3_preview_v1";
+    public string InstrumentMountStyle { get; set; } = InstrumentMountPolicyIds.V1;
 
     /// <summary>
-    /// Реестр правил резолва policy по тройке <c>surface_id + slot_id + instrument_id</c>.
-    /// Если пусто — используется <see cref="InstrumentMountSlotPolicy"/> как fallback.
+    /// Реестр правил резолва style по тройке <c>surface_id + slot_id + instrument_id</c>.
+    /// Если пусто — используется <see cref="InstrumentMountStyle"/> как fallback.
     /// </summary>
     public List<InstrumentMountPolicyRuleSettings> InstrumentMountPolicyRules { get; set; } = [];
 
     /// <summary>
-    /// Включить eligibility-gate для rollout policy: правило применяется только если проходит SA/perf/workload проверки.
+    /// Включить eligibility-gate для rollout style: правило применяется только если проходит SA/perf/workload проверки.
     /// </summary>
     public bool EnforceInstrumentMountPolicyEligibility { get; set; }
 
-    /// <summary>Минимальный SA score (0..1) для допуска policy-rule при <see cref="EnforceInstrumentMountPolicyEligibility"/>.</summary>
+    /// <summary>Минимальный SA score (0..1) для допуска style-rule при <see cref="EnforceInstrumentMountPolicyEligibility"/>.</summary>
     public double InstrumentMountPolicyMinSaScore { get; set; } = 0.6;
 
-    /// <summary>Минимальный performance score (0..1) для допуска policy-rule при <see cref="EnforceInstrumentMountPolicyEligibility"/>.</summary>
+    /// <summary>Минимальный performance score (0..1) для допуска style-rule при <see cref="EnforceInstrumentMountPolicyEligibility"/>.</summary>
     public double InstrumentMountPolicyMinPerformanceScore { get; set; } = 0.6;
 
-    /// <summary>Максимальный workload score (0..1, меньше лучше) для допуска policy-rule при <see cref="EnforceInstrumentMountPolicyEligibility"/>.</summary>
+    /// <summary>Максимальный workload score (0..1, меньше лучше) для допуска style-rule при <see cref="EnforceInstrumentMountPolicyEligibility"/>.</summary>
     public double InstrumentMountPolicyMaxWorkloadScore { get; set; } = 0.5;
 
     /// <summary>
@@ -71,4 +71,16 @@ public sealed class DisplaySettings
     /// Если <see langword="false"/>, отсутствие score допускается (gate не блокирует rule).
     /// </summary>
     public bool RequireInstrumentMountPolicyScores { get; set; }
+
+    /// <summary>
+    /// Если <see langword="true"/>, репозиторная карта инструментов (workspace.toml) имеет приоритет над пользовательской
+    /// для одинакового ключа <c>surface_id + slot_id</c>.
+    /// </summary>
+    public bool PreferRepoInstrumentsPlacement { get; set; }
+
+    /// <summary>
+    /// Пользовательский слой карты размещения инструментов по слотам.
+    /// TOML: <c>[[display.instrument_placement_rules]]</c>.
+    /// </summary>
+    public List<InstrumentPlacementRuleSettings> InstrumentPlacementRules { get; set; } = [];
 }

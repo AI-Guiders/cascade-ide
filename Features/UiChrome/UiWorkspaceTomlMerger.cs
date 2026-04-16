@@ -22,7 +22,8 @@ public static class UiWorkspaceTomlMerger
             MfdRegionExpandedPowerWidthPixels = higher?.MfdRegionExpandedPowerWidthPixels ?? lower?.MfdRegionExpandedPowerWidthPixels,
             MfdRegionExpandedAgentChatWidthPixels = higher?.MfdRegionExpandedAgentChatWidthPixels ?? lower?.MfdRegionExpandedAgentChatWidthPixels,
             MarkdownPreviewPlacement = higher?.MarkdownPreviewPlacement ?? lower?.MarkdownPreviewPlacement,
-            AttentionZonePanels = MergeAttentionPanels(lower?.AttentionZonePanels, higher?.AttentionZonePanels)
+            AttentionZonePanels = MergeAttentionPanels(lower?.AttentionZonePanels, higher?.AttentionZonePanels),
+            InstrumentPlacementRules = MergeInstrumentPlacementRules(lower?.InstrumentPlacementRules, higher?.InstrumentPlacementRules)
         };
     }
 
@@ -57,6 +58,56 @@ public static class UiWorkspaceTomlMerger
             }
         }
 
+        return merged.Count > 0 ? merged : null;
+    }
+
+    private static List<Models.InstrumentPlacementRuleSettings>? MergeInstrumentPlacementRules(
+        List<Models.InstrumentPlacementRuleSettings>? lower,
+        List<Models.InstrumentPlacementRuleSettings>? higher)
+    {
+        if (lower is not { Count: > 0 } && higher is not { Count: > 0 })
+            return null;
+
+        var merged = new List<Models.InstrumentPlacementRuleSettings>();
+        var byKey = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+        static string BuildKey(Models.InstrumentPlacementRuleSettings r) =>
+            $"{r.SurfaceId.Trim().ToLowerInvariant()}::{r.SlotId.Trim().ToLowerInvariant()}";
+
+        static bool IsValid(Models.InstrumentPlacementRuleSettings r) =>
+            !string.IsNullOrWhiteSpace(r.SurfaceId)
+            && !string.IsNullOrWhiteSpace(r.SlotId)
+            && !string.IsNullOrWhiteSpace(r.InstrumentId);
+
+        void AddRange(List<Models.InstrumentPlacementRuleSettings>? source)
+        {
+            if (source is not { Count: > 0 })
+                return;
+
+            foreach (var row in source)
+            {
+                if (row is null || !IsValid(row))
+                    continue;
+
+                var normalized = new Models.InstrumentPlacementRuleSettings
+                {
+                    SurfaceId = row.SurfaceId.Trim(),
+                    SlotId = row.SlotId.Trim(),
+                    InstrumentId = row.InstrumentId.Trim()
+                };
+                var key = BuildKey(normalized);
+                if (byKey.TryGetValue(key, out var existingIndex))
+                    merged[existingIndex] = normalized;
+                else
+                {
+                    byKey[key] = merged.Count;
+                    merged.Add(normalized);
+                }
+            }
+        }
+
+        AddRange(lower);
+        AddRange(higher);
         return merged.Count > 0 ? merged : null;
     }
 }

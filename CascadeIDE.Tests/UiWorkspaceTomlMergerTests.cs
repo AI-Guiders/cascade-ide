@@ -1,4 +1,5 @@
 using CascadeIDE.Features.UiChrome;
+using CascadeIDE.Models;
 using Xunit;
 
 namespace CascadeIDE.Tests;
@@ -64,5 +65,57 @@ public sealed class UiWorkspaceTomlMergerTests
         Assert.Equal("mfd", m.AttentionZonePanels!["solution_explorer"]);
         Assert.Equal("mfd", m.AttentionZonePanels["chat_panel"]);
         Assert.Equal("pfd", m.AttentionZonePanels["git"]);
+    }
+
+    [Fact]
+    public void Merge_instrument_placement_rules_higher_wins_same_surface_slot()
+    {
+        var lower = new UiWorkspaceToml
+        {
+            InstrumentPlacementRules =
+            [
+                new InstrumentPlacementRuleSettings
+                {
+                    SurfaceId = "main_window_docked_grid",
+                    SlotId = "pfd",
+                    InstrumentId = "solution_explorer_tree"
+                },
+                new InstrumentPlacementRuleSettings
+                {
+                    SurfaceId = "main_window_docked_grid",
+                    SlotId = "mfd",
+                    InstrumentId = "workspace_navigation_map"
+                }
+            ]
+        };
+        var higher = new UiWorkspaceToml
+        {
+            InstrumentPlacementRules =
+            [
+                new InstrumentPlacementRuleSettings
+                {
+                    SurfaceId = "main_window_docked_grid",
+                    SlotId = "pfd",
+                    InstrumentId = "workspace_navigation_map"
+                }
+            ]
+        };
+
+        var merged = UiWorkspaceTomlMerger.Merge(lower, higher);
+        Assert.NotNull(merged?.InstrumentPlacementRules);
+        Assert.Collection(
+            merged!.InstrumentPlacementRules!,
+            first =>
+            {
+                Assert.Equal("main_window_docked_grid", first.SurfaceId);
+                Assert.Equal("pfd", first.SlotId);
+                Assert.Equal("workspace_navigation_map", first.InstrumentId);
+            },
+            second =>
+            {
+                Assert.Equal("main_window_docked_grid", second.SurfaceId);
+                Assert.Equal("mfd", second.SlotId);
+                Assert.Equal("workspace_navigation_map", second.InstrumentId);
+            });
     }
 }

@@ -10,6 +10,7 @@
         xmlns:chrome="using:CascadeIDE.Features.UiChrome"
         xmlns:lang="using:CascadeIDE.Lang"
         xmlns:dock="clr-namespace:Dock.Avalonia.Controls;assembly=Dock.Avalonia"
+        xmlns:Ease="using:Avalonia.Animation.Easings"
         mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="600"
         x:Class="CascadeIDE.Views.MainWindow"
         x:Name="RootWindow"
@@ -62,12 +63,97 @@
             <Setter Property="Padding" Value="10,8"/>
             <Setter Property="CornerRadius" Value="6"/>
         </Style>
+        <Style Selector="Border#ModeBadge">
+            <Setter Property="Background" Value="#29437A"/>
+            <Setter Property="BorderBrush" Value="#4D72D5"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
+            <Setter Property="RenderTransform" Value="scale(1)"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="BorderBrush" Duration="0:0:0.35">
+                        <BrushTransition.Easing>
+                            <Ease:CubicEaseOut/>
+                        </BrushTransition.Easing>
+                    </BrushTransition>
+                    <BrushTransition Property="Background" Duration="0:0:0.35">
+                        <BrushTransition.Easing>
+                            <Ease:CubicEaseOut/>
+                        </BrushTransition.Easing>
+                    </BrushTransition>
+                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.28">
+                        <TransformOperationsTransition.Easing>
+                            <Ease:CubicEaseOut/>
+                        </TransformOperationsTransition.Easing>
+                    </TransformOperationsTransition>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Border#ModeBadge.power">
+            <Setter Property="Background" Value="#36256D"/>
+            <Setter Property="BorderBrush" Value="#8A65FF"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="RenderTransform" Value="scale(1.04)"/>
+        </Style>
+        <Style Selector="Border#ModeBadge.agentchat">
+            <Setter Property="Background" Value="#1E4D3A"/>
+            <Setter Property="BorderBrush" Value="#3DCC8C"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="RenderTransform" Value="scale(1.02)"/>
+        </Style>
+        <Style Selector="Border#ModeBadge.debug">
+            <Setter Property="Background" Value="#3A2E1E"/>
+            <Setter Property="BorderBrush" Value="#C88A2A"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="RenderTransform" Value="scale(1.02)"/>
+        </Style>
         <Style Selector="Border.modeCard">
             <Setter Property="Background" Value="{DynamicResource CascadeTheme.ChatMessageBubbleBackground}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="6"/>
             <Setter Property="Padding" Value="8"/>
+        </Style>
+        <!-- Визуальные якоря PFD | Forward | MFD (отладка раскладки; классы задаёт AttentionZoneContainer). -->
+        <Style Selector="chrome|AttentionZoneContainer.attention-zone-pfd">
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="BorderBrush" Value="#00ACC1"/>
+            <Setter Property="Background" Value="#1400ACC1"/>
+            <Setter Property="ToolTip.Tip" Value="Якорь: PFD"/>
+        </Style>
+        <Style Selector="chrome|AttentionZoneContainer.attention-zone-forward">
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="BorderBrush" Value="#FFB300"/>
+            <Setter Property="Background" Value="#18FFB300"/>
+            <Setter Property="ToolTip.Tip" Value="Якорь: Forward"/>
+        </Style>
+        <Style Selector="chrome|AttentionZoneContainer.attention-zone-mfd">
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="BorderBrush" Value="#7E57C2"/>
+            <Setter Property="Background" Value="#147E57C2"/>
+            <Setter Property="ToolTip.Tip" Value="Якорь: MFD"/>
+        </Style>
+        <Style Selector="chrome|AttentionZoneContainer.attention-layer-hud">
+            <Setter Property="ToolTip.Tip" Value="Слой: HUD (над редактором, ADR 0021 §9)"/>
+        </Style>
+        <Style Selector="Border#SkiaZonePreviewPfd, Border#SkiaZonePreviewForward, Border#SkiaZonePreviewMfd">
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Background" Value="#04000000"/>
+            <Setter Property="IsHitTestVisible" Value="False"/>
+        </Style>
+        <Style Selector="Border#SkiaZonePreviewPfd">
+            <Setter Property="BorderBrush" Value="#48C8F4"/>
+        </Style>
+        <Style Selector="Border#SkiaZonePreviewForward">
+            <Setter Property="BorderBrush" Value="#FFC75A"/>
+        </Style>
+        <Style Selector="Border#SkiaZonePreviewMfd">
+            <Setter Property="BorderBrush" Value="#B38CFF"/>
         </Style>
     </Window.Styles>
 
@@ -102,7 +188,7 @@
             <MenuItem Header="_Вид">
                 <MenuItem x:Name="MenuCommandPalette" Header="Палитра _команд" Command="{Binding ToggleCommandPaletteCommand}"/>
                 <Separator/>
-                <MenuItem Header="Карта _workspace (PFD)" ToggleType="CheckBox" IsChecked="{Binding IsPfdRegionExpanded, Mode=TwoWay}"/>
+                <MenuItem Header="Обозреватель _решения" ToggleType="CheckBox" IsChecked="{Binding IsPfdRegionExpanded, Mode=TwoWay}"/>
                 <MenuItem Header="_Вывод сборки" ToggleType="CheckBox" IsChecked="{Binding IsBuildOutputVisible, Mode=TwoWay}"/>
                 <MenuItem Header="_Чат" ToggleType="CheckBox" IsChecked="{Binding IsMfdRegionExpanded, Mode=TwoWay}"/>
                 <MenuItem Header="_Терминал" ToggleType="CheckBox" IsChecked="{Binding IsTerminalVisible, Mode=TwoWay}"/>
@@ -111,7 +197,24 @@
                           ToggleType="CheckBox"
                           IsChecked="{Binding IsInstrumentationDockVisible, Mode=TwoWay}"
                           IsVisible="{Binding ShowInstrumentationLayoutMenu}"/>
-                <MenuItem Header="_Режим интерфейса: Flight" IsEnabled="False"/>
+                <Separator/>
+                <MenuItem Header="_Режим интерфейса" ItemsSource="{Binding UiModeOptionsList}">
+                    <MenuItem.ItemTemplate>
+                        <DataTemplate x:DataType="x:String">
+                            <MenuItem Header="{Binding}"
+                                      ToggleType="Radio"
+                                      Command="{Binding DataContext.SetUiModeByIdCommand, ElementName=RootWindow}"
+                                      CommandParameter="{Binding}">
+                                <MenuItem.IsChecked>
+                                    <MultiBinding Converter="{StaticResource UiModeIdEqMulti}">
+                                        <Binding Path="DataContext.UiMode" ElementName="RootWindow" Mode="OneWay"/>
+                                        <Binding Mode="OneWay"/>
+                                    </MultiBinding>
+                                </MenuItem.IsChecked>
+                            </MenuItem>
+                        </DataTemplate>
+                    </MenuItem.ItemTemplate>
+                </MenuItem>
                 <Separator/>
                 <MenuItem Header="_Тема">
                     <MenuItem Header="_Светлая" Command="{Binding ApplyLightThemeCommand}"/>
@@ -141,35 +244,107 @@
             </MenuItem>
         </Menu>
 
-        <!-- Рабочая область: три колонки PFD | Forward | MFD (без отдельных сплиттеров). -->
-        <Grid x:Name="MainGrid" ColumnDefinitions="220,*,340">
+        <!-- Строка 3 — рабочая область (якоря PFD | Forward | MFD в MainGrid; AttentionLayoutSurfaceKind.MainWindowDockedGrid). В колонке MFD сейчас SecondaryShellView: страницы вторичного контура (WORKSPACE/чат/терминал/…) и полоса EICAS сверху — не синоним «зона MFD», а хост по умолчанию (пресет). -->
+        <Grid x:Name="MainGrid" ColumnDefinitions="220,4,*,4,340">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <views:McpBannerView Grid.Row="0" Grid.ColumnSpan="3"/>
-        <views:ToolbarView Grid.Row="1" Grid.ColumnSpan="3" IsVisible="{Binding ShowMainToolbar}"/>
+        <!-- Подсказка при работе как MCP-сервер -->
+        <views:McpBannerView Grid.Row="0" Grid.ColumnSpan="5"/>
+        <views:ToolbarView Grid.Row="1" Grid.ColumnSpan="5" IsVisible="{Binding ShowMainToolbar}"/>
 
-        <views:TaskCockpitView Grid.Row="2" Grid.ColumnSpan="3"/>
+        <views:TaskCockpitView Grid.Row="2" Grid.ColumnSpan="5"/>
 
+        <!-- Якорь зоны PFD (канон id pfd): по дефолтной карте — SolutionExplorerView; переопределение — attention_zone_panels / AttentionZonePanelRuntime -->
         <chrome:AttentionZoneContainer Zone="Pfd" Grid.Row="3" Grid.Column="0">
-            <views:WorkspaceNavigationMapView />
+            <Grid>
+                <views:SolutionExplorerView />
+                <!-- Wave 3: mount-layer host preview для PFD (единая точка подключения мини-инструмента). -->
+                <views:ZoneInstrumentMountView IsVisible="{Binding UseSkiaInstrumentMount}"
+                                               HorizontalAlignment="Right"
+                                               VerticalAlignment="Top"
+                                               Margin="8"
+                                               Width="250"
+                                               InstrumentId="workspace_health_status_v1"
+                                               SlotId="pfd"
+                                               MountStyle="{Binding PfdInstrumentMountStyle}"
+                                               ZIndex="415"/>
+            </Grid>
         </chrome:AttentionZoneContainer>
+        <GridSplitter Grid.Row="3" Grid.Column="1" Width="4" ResizeDirection="Columns" Background="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}" IsVisible="{Binding IsPfdColumnVisible}"/>
 
-        <chrome:AttentionZoneContainer Zone="Forward" Grid.Row="3" Grid.Column="1">
+        <!-- Лобовое: редактор (forward) -->
+        <chrome:AttentionZoneContainer Zone="Forward" Grid.Row="3" Grid.Column="2">
             <views:DocumentsDockView />
         </chrome:AttentionZoneContainer>
+        <GridSplitter Grid.Row="3" Grid.Column="3"
+                      Grid.RowSpan="{Binding ChatPanelMainGridRowSpan}"
+                      Width="4" ResizeDirection="Columns" Background="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"
+                      IsVisible="{Binding IsMfdColumnVisible}"/>
 
-        <chrome:AttentionZoneContainer Zone="Mfd" Grid.Row="3" Grid.Column="2"
+        <!-- Якорь зоны MFD: вторичный контур оболочки (SecondaryShellView) — WORKSPACE / чат / терминал / сборка / …; состав страниц ≠ сама зона (ADR 0021). -->
+        <chrome:AttentionZoneContainer Zone="Mfd" Grid.Row="3" Grid.Column="4" Grid.RowSpan="{Binding ChatPanelMainGridRowSpan}"
                                        IsVisible="{Binding IsMfdColumnVisible}">
-            <views:SecondaryShellView DataContext="{Binding DataContext, ElementName=RootWindow}"
-                                      MinHeight="0"/>
+            <views:SecondaryShellView DataContext="{Binding DataContext, ElementName=RootWindow}" MinHeight="0"/>
         </chrome:AttentionZoneContainer>
 
-        <!-- Оверлей подсветки контрола (ide_highlight_control, MCP) -->
-        <Canvas x:Name="AgentHighlightLayer" Grid.Row="0" Grid.RowSpan="4" Grid.Column="0" Grid.ColumnSpan="3" IsHitTestVisible="False" ZIndex="1000">
+        <!-- W2: preview контуров зон поверх контента (без изменения содержимого). -->
+        <Border x:Name="SkiaZonePreviewPfd"
+                Grid.Row="3"
+                Grid.Column="0"
+                IsVisible="{Binding IsSkiaZonePreviewPfdVisible}"
+                ZIndex="410">
+            <TextBlock Text="PFD"
+                       Margin="6,4,0,0"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Top"
+                       Foreground="#C6F2FF"/>
+        </Border>
+        <Border x:Name="SkiaZonePreviewForward"
+                Grid.Row="3"
+                Grid.Column="2"
+                IsVisible="{Binding IsSkiaZonePreviewForwardVisible}"
+                ZIndex="410">
+            <TextBlock Text="FORWARD"
+                       Margin="6,4,0,0"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Top"
+                       Foreground="#FFE7A6"/>
+        </Border>
+        <Border x:Name="SkiaZonePreviewMfd"
+                Grid.Row="3"
+                Grid.Column="4"
+                Grid.RowSpan="{Binding ChatPanelMainGridRowSpan}"
+                IsVisible="{Binding IsSkiaZonePreviewMfdVisible}"
+                ZIndex="410">
+            <TextBlock Text="MFD"
+                       Margin="6,4,0,0"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Top"
+                       Foreground="#E6D8FF"/>
+        </Border>
+        <!-- Bloom только над task bar + рабочей областью (строки 2–3). -->
+        <Border x:Name="UiModeBloomOverlay"
+                Grid.Row="2" Grid.RowSpan="2" Grid.Column="0" Grid.ColumnSpan="5"
+                ZIndex="400"
+                IsHitTestVisible="False"
+                Background="{Binding Chrome.UiModeBloomBrush}"
+                Opacity="{Binding Chrome.UiModeBloomOpacity}">
+            <Border.Transitions>
+                <Transitions>
+                    <DoubleTransition Property="Opacity" Duration="0:0:0.42">
+                        <DoubleTransition.Easing>
+                            <Ease:CubicEaseOut/>
+                        </DoubleTransition.Easing>
+                    </DoubleTransition>
+                </Transitions>
+            </Border.Transitions>
+        </Border>
+        <!-- Оверлей подсветки эффективного контрола (ide_highlight_control, как в Comet) -->
+        <Canvas x:Name="AgentHighlightLayer" Grid.Row="0" Grid.RowSpan="4" Grid.Column="0" Grid.ColumnSpan="5" IsHitTestVisible="False" ZIndex="1000">
             <Border x:Name="AgentHighlightOverlay" IsVisible="False" BorderBrush="#FF6B9D" BorderThickness="2" Background="#10000000"/>
         </Canvas>
         </Grid>

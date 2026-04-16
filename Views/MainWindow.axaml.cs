@@ -101,6 +101,8 @@ public partial class MainWindow : Window
             SetupEditorAndTextMate();
             TryApplyHotkeys();
             ApplyMainGridColumnDefinitions(vm);
+            AttachSkiaHostRenderers();
+            InvalidateSkiaHosts();
         }
         else
         {

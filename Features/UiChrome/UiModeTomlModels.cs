@@ -33,6 +33,12 @@ public sealed class UiWorkspaceToml
     public Dictionary<string, string>? AttentionZonePanels { get; set; }
 
     /// <summary>
+    /// Репозиторный/бандловый слой карты размещения инструментов.
+    /// TOML: <c>[[instrument_placement_rules]]</c>.
+    /// </summary>
+    public List<InstrumentPlacementRuleSettings>? InstrumentPlacementRules { get; set; }
+
+    /// <summary>
     /// Пресеты навигации для репозитория (тот же контракт, что <c>[workspace_navigation_context]</c> в <c>settings.toml</c>).
     /// TOML: <c>[[workspace_navigation_context.presets]]</c>.
     /// </summary>

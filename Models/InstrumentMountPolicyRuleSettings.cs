@@ -1,8 +1,8 @@
 namespace CascadeIDE.Models;
 
 /// <summary>
-/// Правило резолва slot-policy для mount-слоя инструмента.
-/// В <c>settings.toml</c>: <c>[[display.instrument_mount_policy_rules]]</c>.
+/// Правило резолва mount-style для mount-слоя инструмента.
+/// В <c>settings.toml</c>: <c>[[display.instrument_mount_style_rules]]</c>.
 /// </summary>
 public sealed class InstrumentMountPolicyRuleSettings
 {
@@ -19,21 +19,21 @@ public sealed class InstrumentMountPolicyRuleSettings
     public string InstrumentId { get; set; } = "*";
 
     /// <summary>Policy-id, который должен быть применён для пары <c>slot + instrument</c>.</summary>
-    public string SlotPolicy { get; set; } = "wave3_preview_v1";
+    public string MountStyle { get; set; } = InstrumentMountPolicyIds.V1;
 
     /// <summary>
-    /// SA score (0..1) для rollout-оценки policy в данном правиле.
+    /// SA score (0..1) для rollout-оценки style в данном правиле.
     /// Если не задано — правило считается "без доказательства" и обрабатывается по настройкам gate.
     /// </summary>
     public double? SaScore { get; set; }
 
     /// <summary>
-    /// Performance score (0..1) для rollout-оценки policy в данном правиле.
+    /// Performance score (0..1) для rollout-оценки style в данном правиле.
     /// </summary>
     public double? PerformanceScore { get; set; }
 
     /// <summary>
-    /// Workload score (0..1, меньше лучше) для rollout-оценки policy в данном правиле.
+    /// Workload score (0..1, меньше лучше) для rollout-оценки style в данном правиле.
     /// </summary>
     public double? WorkloadScore { get; set; }
 }

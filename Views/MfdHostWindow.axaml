@@ -6,7 +6,6 @@
         xmlns:vm="using:CascadeIDE.ViewModels"
         mc:Ignorable="d" d:DesignWidth="560" d:DesignHeight="400"
         x:Class="CascadeIDE.Views.MfdHostWindow"
-        x:Name="MfdHostRoot"
         x:DataType="vm:MainWindowViewModel"
         Title="Cascade — вторичный контур (Mfd)"
         Width="560" Height="400"
@@ -14,16 +13,18 @@
         Icon="/Assets/avalonia-logo.ico"
         Background="{DynamicResource CascadeTheme.MainWindowBackground}">
 
-    <!-- ADR 0017 п. 8: только SecondaryShellView — хост вторичного контура. Дерево/прочий контент — страницы внутри shell, не отдельная колонка в этом TopLevel. -->
+    <!-- ADR 0017 п. 8: полный SecondaryShellView (все страницы), как колонка Mfd в MainWindow. -->
     <Grid>
         <views:SecondaryShellView DataContext="{Binding}" MinHeight="0"/>
         <!-- W3: mount-layer host preview для MFD (паритет с PFD-host). -->
-        <views:ZoneInstrumentMountView IsVisible="{Binding DataContext.IsMfdHostWindowWorkspaceHealthMountVisible, ElementName=MfdHostRoot}"
-                                       DataContext="{Binding DataContext.MfdWorkspaceHealthMountContext, ElementName=MfdHostRoot}"
+        <views:ZoneInstrumentMountView IsVisible="{Binding UseSkiaInstrumentMount}"
                                        HorizontalAlignment="Right"
                                        VerticalAlignment="Top"
                                        Margin="8"
                                        Width="250"
+                                       InstrumentId="workspace_health_status_v1"
+                                       SlotId="mfd"
+                                       MountStyle="{Binding MfdInstrumentMountStyle}"
                                        ZIndex="415"/>
         <!-- W2: preview контура зоны MFD в отдельном окне-хосте. -->
         <Border x:Name="SkiaZonePreviewMfdHost"

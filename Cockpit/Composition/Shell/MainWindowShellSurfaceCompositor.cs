@@ -1,4 +1,5 @@
 using CascadeIDE.Cockpit.Cds;
+using CascadeIDE.Models;
 using CascadeIDE.Services.Presentation;
 
 namespace CascadeIDE.Cockpit.Composition.Shell;
@@ -14,11 +15,11 @@ public static class MainWindowShellSurfaceCompositor
     {
         var pfdVisible = CockpitPresentationLayoutPolicy.CoercePfdRegionExpanded(
             input.PresentationParse,
-            input.IntentPfdRegionExpanded);
+            input.IntentSolutionExplorerVisible);
 
         var mfdExpanded = CockpitPresentationLayoutPolicy.CoerceMfdRegionExpanded(
             input.PresentationParse,
-            input.IntentMfdRegionExpanded);
+            input.IntentChatPanelExpanded);
 
         var mfdColumnInMain = !input.SuppressMfdColumnForMfdHostWindow && mfdExpanded;
 
@@ -37,11 +38,12 @@ public static class MainWindowShellSurfaceCompositor
 /// <summary>Вход композитора: intent пользователя, пресет, подавление колонки MFD в main при открытом хосте, числа ширин из UI-режима.</summary>
 public readonly record struct MainWindowShellSurfaceCompositionInput(
     PresentationParseResult PresentationParse,
-    bool IntentPfdRegionExpanded,
-    bool IntentMfdRegionExpanded,
+    bool IntentSolutionExplorerVisible,
+    bool IntentChatPanelExpanded,
     bool SuppressMfdColumnForMfdHostWindow,
     int ExpandedMfdWidthPixels,
     int CollapsedMfdWidthPixels,
+    DisplaySettings DisplaySettings,
     string SafetyLevel);
 
 /// <summary>Результат: что отдать слою поверхности (привязки VM / code-behind) для колонок PFD/MFD.</summary>

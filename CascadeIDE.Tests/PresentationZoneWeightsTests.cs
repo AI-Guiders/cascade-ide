@@ -63,7 +63,7 @@ public sealed class PresentationZoneWeightsTests
             dedicatedMfdSecondScreen: false,
             mfdColumnSuppressedForHost: false);
 
-        Assert.Equal("0.5*,0.3*,0.2*", result);
+        Assert.Equal("0.5*,4,0.3*,4,0.2*", result);
     }
 }
 

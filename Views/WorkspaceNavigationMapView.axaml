@@ -12,9 +12,25 @@
                 Padding="8"
                 Background="{DynamicResource CascadeTheme.TerminalBackground}">
             <Grid RowDefinitions="Auto,Auto,Auto,*">
-                <views:PanelChromeHeader Grid.Row="0"
-                                         Title="Semantic Map · workspace"
-                                         UppercaseTitle="True"/>
+                <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+                    <views:PanelChromeHeader Grid.Column="0"
+                                             Title="Semantic Map · workspace"
+                                             UppercaseTitle="True"/>
+                    <Border Grid.Column="1"
+                            VerticalAlignment="Center"
+                            Margin="8,0,0,0"
+                            Padding="6,2"
+                            CornerRadius="4"
+                            Background="#22000000"
+                            BorderBrush="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"
+                            BorderThickness="1"
+                            IsVisible="{Binding WorkspaceNavigationMapHasRelated}">
+                        <TextBlock FontSize="10"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                                   Text="{Binding WorkspaceNavigationMapRelatedBadge}"/>
+                    </Border>
+                </Grid>
                 <StackPanel Grid.Row="1" Margin="0,6,0,0" Spacing="2">
                     <StackPanel Orientation="Horizontal" Spacing="4">
                         <TextBlock FontSize="11"

@@ -109,6 +109,9 @@ public partial class MainWindowViewModel
                 Workspace.SolutionRoots.Clear();
                 Workspace.SolutionRoots.Add(root);
                 RefreshStartupProjectAfterSolutionLoad();
+                // Дерево решения — страница вторичного контура (MFD / MfdHostWindow), не отдельный сплит.
+                // По умолчанию там Terminal; после открытия .sln/.slnx показываем обозреватель на том же якоре.
+                TryNavigateToSecondaryShellPage(SecondaryShellPage.SolutionExplorer);
             });
         }
         catch (Exception ex)

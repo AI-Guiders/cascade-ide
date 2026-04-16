@@ -4,6 +4,7 @@ using CascadeIDE.Cockpit.Composition.HostSurface;
 using CascadeIDE.Cockpit.Composition.Shell;
 using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Lang;
+using CascadeIDE.Models;
 
 namespace CascadeIDE.ViewModels;
 
@@ -28,7 +29,7 @@ public partial class MainWindowViewModel
             _ => "CascadeIDE",
         };
 
-    /// <summary>Композитор: intent + CDS policy → кадр хоста (колонки + инструменты слотов; ADR 0036 п.3, 0047).</summary>
+    /// <summary>Композитор: intent + CDS style → кадр хоста (колонки + инструменты слотов; ADR 0036 п.3, 0047).</summary>
     private MainWindowHostSurfaceFrame HostSurfaceFrame =>
         MainWindowHostSurfaceCompositor.ComposeFrame(
             new MainWindowShellSurfaceCompositionInput(
@@ -38,18 +39,19 @@ public partial class MainWindowViewModel
                 _suppressMfdColumnForMfdHostWindow,
                 UiModeCatalog.GetMfdRegionExpandedWidthPixels(NormalizeUiMode(UiMode)),
                 UiWorkspaceLayoutRuntimeMetrics.MfdRegionCollapsedWidthPixels,
+                _settings.Display,
                 SafetyLevel));
 
     private MainWindowShellSurfaceComposition ShellSurfaceComposition => HostSurfaceFrame.Shell;
 
-    /// <summary>Привязки слот → инструмент для главного окна (кадр хоста); CDS/Skia сопоставляют <c>instrument_id</c> разметке.</summary>
-    public IReadOnlyList<CockpitInstrumentDescriptor> MainWindowSurfaceSlotBindings => HostSurfaceFrame.Instruments;
+    /// <summary>Логические инструменты по слотам для главного окна; хост (Avalonia/Skia) сопоставляет <c>instrument_id</c> разметке.</summary>
+    public IReadOnlyList<CockpitInstrumentDescriptor> MainWindowHostSurfaceInstruments => HostSurfaceFrame.Instruments;
 
-    /// <summary>Ширина региона Mfd в main grid (пиксели); 0 если регион не выделяется (хост MFD и т.п.).</summary>
-    public int MfdRegionPixelWidth => ShellSurfaceComposition.MfdColumnPixelWidthInMainGrid;
+    /// <summary>Ширина региона MFD в main grid (пиксели); 0 если колонка не выделяется (хост MFD и т.п.).</summary>
+    public int ChatPanelColumnPixelWidth => ShellSurfaceComposition.MfdColumnPixelWidthInMainGrid;
 
-    /// <summary>Регион Mfd в main grid имеет ненулевую ширину (есть сплиттер). Не путать со страницей <see cref="Models.SecondaryShellPage.Chat"/>.</summary>
-    public bool IsMfdRegionVisible => MfdRegionPixelWidth > 0;
+    /// <summary>Есть правая колонка MFD и сплиттер перед ней (ширина &gt; 0 в main).</summary>
+    public bool IsChatPanelColumnVisible => ChatPanelColumnPixelWidth > 0;
 
     /// <summary>
     /// Какая топология размещения зон сейчас активна. Свойства <see cref="IsPfdColumnVisible"/> / <see cref="IsMfdColumnVisible"/>
@@ -69,7 +71,7 @@ public partial class MainWindowViewModel
 
     /// <summary>
     /// Видна ли колонка <c>MainGrid</c> под правый якорь при <see cref="ActiveAttentionLayoutSurface"/> (в этой разметке — зона MFD).
-    /// Не путать с вкладками MFD или картой панелей — <see cref="AttentionZonePanelRuntime"/>; место в сетке совпадает с <see cref="IsMfdRegionVisible"/>.
+    /// Не путать с вкладками MFD или картой панелей — <see cref="AttentionZonePanelRuntime"/>; место в сетке совпадает с <see cref="IsChatPanelColumnVisible"/>.
     /// </summary>
     public bool IsMfdColumnVisible => ShellSurfaceComposition.MfdColumnVisibleInMainGrid;
 
@@ -82,28 +84,41 @@ public partial class MainWindowViewModel
 
     public bool IsSkiaZonePreviewMfdVisible => UseSkiaZoneGeometryPreview && IsMfdColumnVisible;
 
-    /// <summary>Wave 3: включить отрисовку лёгкого instrument-content preview в PFD.</summary>
-    public bool UseSkiaInstrumentWave3Preview => _settings.Display.UseSkiaInstrumentWave3Preview;
+    /// <summary>Wave 3: включить отрисовку инструмента в Skia mount-слое зон P/F/M.</summary>
+    public bool UseSkiaInstrumentMount => _settings.Display.UseSkiaInstrumentMount;
 
-    /// <summary>Декларативный slot-policy mount preview-инструмента (идёт из <c>[display]</c>).</summary>
-    public string InstrumentMountSlotPolicy =>
-        string.IsNullOrWhiteSpace(_settings.Display.InstrumentMountSlotPolicy)
-            ? "wave3_preview_v1"
-            : _settings.Display.InstrumentMountSlotPolicy.Trim();
+    /// <summary>Декларативный mount-style mount-инструмента (идёт из <c>[display]</c>).</summary>
+    public string InstrumentMountStyle =>
+        string.IsNullOrWhiteSpace(_settings.Display.InstrumentMountStyle)
+            ? InstrumentMountPolicyIds.V1
+            : _settings.Display.InstrumentMountStyle.Trim();
 
-    /// <summary>Резолв policy для mount в слоте PFD — тот же <see cref="SlotPolicy"/>, что в <see cref="PfdWorkspaceHealthMountContext"/>.</summary>
-    public string PfdInstrumentMountSlotPolicy => PfdWorkspaceHealthMountContext.SlotPolicy;
+    /// <summary>Резолв style для mount в слоте PFD с учётом registry-правил.</summary>
+    public string PfdInstrumentMountStyle => ResolveInstrumentMountStyle(
+        MountPolicyRuntimeSurfaceId,
+        "pfd",
+        "workspace_health_status_v1");
 
-    /// <summary>Резолв policy для mount в слоте MFD — тот же <see cref="SlotPolicy"/>, что в <see cref="MfdWorkspaceHealthMountContext"/>.</summary>
-    public string MfdInstrumentMountSlotPolicy => MfdWorkspaceHealthMountContext.SlotPolicy;
+    /// <summary>Резолв style для mount в слоте MFD с учётом registry-правил.</summary>
+    public string MfdInstrumentMountStyle => ResolveInstrumentMountStyle(
+        MountPolicyRuntimeSurfaceId,
+        "mfd",
+        "workspace_health_status_v1");
 
-    /// <summary>Нормализованный runtime-контекст топологии для резолва slot-policy из реестра.</summary>
+    /// <summary>Нормализованный runtime-контекст топологии для резолва mount-style из реестра.</summary>
     private string MountPolicyRuntimeSurfaceId => ActiveAttentionLayoutSurface switch
     {
-        AttentionLayoutSurfaceKind.MainWindowDockedGrid => MainWindowHostSurfaceIds.DockedGrid,
-        AttentionLayoutSurfaceKind.MainWindowPlusMfdHostTopLevel => MainWindowHostSurfaceIds.PlusMfdHostTopLevel,
-        _ => MainWindowHostSurfaceIds.DockedGrid
+        AttentionLayoutSurfaceKind.MainWindowDockedGrid => "main_window_docked_grid",
+        AttentionLayoutSurfaceKind.MainWindowPlusMfdHostTopLevel => "main_window_plus_mfd_host_top_level",
+        _ => "main_window_docked_grid"
     };
+
+    private string ResolveInstrumentMountStyle(string surfaceId, string slotId, string instrumentId) =>
+        _instrumentMountPolicyResolver.Resolve(
+            _settings.Display,
+            surfaceId,
+            slotId,
+            instrumentId);
     /// <summary>Полоса активной задачи / Task Cockpit — из <c>UiModes/&lt;id&gt;.toml</c> (<c>active_task_strip</c>); по умолчанию скрыто для семьи Debug.</summary>
     public bool ShowTaskBar => UiModeCatalog.GetShowTaskBar(NormalizeUiMode(UiMode));
 
@@ -156,6 +171,9 @@ public partial class MainWindowViewModel
     public bool ShowWorkspaceBottomChrome =>
         ShowWorkspaceHealthStrip || ShowEicasAlertsBar || IsBottomPanelVisible;
 
+    /// <summary>Чат в одной строке с PFD/Forward; MFD не пересекает нижнюю строку MainGrid.</summary>
+    public int ChatPanelMainGridRowSpan => 1;
+
     public string TelemetryButtonText => IsTerminalVisible ? "Telemetry: on" : "Show telemetry";
     public bool ShowEditorGroup2 => EditorGroupCount >= 2;
     public bool ShowEditorGroup3 => EditorGroupCount >= 3;
@@ -164,7 +182,7 @@ public partial class MainWindowViewModel
     public bool InstrumentationTabs =>
         IsInstrumentationDockVisible && Capabilities.InstrumentationTabs;
 
-    /// <summary>Вкладка «Гипотезы» / страница MFD — capabilities (гипотезы не привязаны к отдельному UI-режиму).</summary>
+    /// <summary>Вкладка «Гипотезы» — семья Debug и capabilities (ADR 0003, ADR 0010).</summary>
     public bool HypothesesTab =>
         IsInstrumentationDockVisible
         && Capabilities.InstrumentationTabs
@@ -235,51 +253,74 @@ public partial class MainWindowViewModel
     /// <summary>Короткий статус отладки для Power.</summary>
     public string WorkspaceHealthDebugCockpitShort => _workspaceHealth.GetSnapshot().Debug.CockpitShort;
 
-    public string MfdRegionToggleButtonText => IsMfdRegionExpanded ? "◀" : "▶";
+    public string ChatPanelToggleButtonText => IsMfdRegionExpanded ? "◀" : "▶";
+
     public bool IsPfdRegionCollapsed => !IsPfdRegionExpanded;
-    public bool IsBuildPanelHidden => !IsBuildOutputVisible;
+
     public bool IsMfdRegionCollapsed => !IsMfdRegionExpanded;
+
+    public bool IsSolutionPanelHidden => !IsPfdRegionExpanded;
+    public bool IsBuildPanelHidden => !IsBuildOutputVisible;
+    public bool IsChatPanelHidden => !IsMfdRegionExpanded;
     public bool IsTerminalPanelHidden => !IsTerminalVisible;
     public bool IsProblemsPanelVisible => Capabilities.ProblemsPanelVisible;
 
     public bool IsBottomPanelVisible =>
         IsProblemsPanelVisible || IsTerminalVisible || IsBuildOutputVisible || InstrumentationTabs || IsGitPanelVisible;
 
-    /// <summary>Снимок канала WH для mount preview (Wave 3); уведомления — при пересборке полосы и связанных полях.</summary>
-    public WorkspaceHealthStatusMountPayload WorkspaceHealthMountPayload =>
-        new(
-            WorkspaceHealthBuildCockpitShort,
-            WorkspaceHealthTestsCockpitShort,
-            WorkspaceHealthDebugCockpitShort,
-            SafetyLevel);
+    /// <summary>Совместимость: старые имена региона MFD в main grid (см. <see cref="ChatPanelColumnPixelWidth"/> и т.д.).</summary>
+    public int MfdRegionPixelWidth => ChatPanelColumnPixelWidth;
 
-    /// <summary>Показывать ли Wave-3 preview WH в слоте PFD при видимости колонки в main grid.</summary>
+    public bool IsMfdRegionVisible => IsChatPanelColumnVisible;
+
+    public string MfdRegionToggleButtonText => ChatPanelToggleButtonText;
+
+    public WorkspaceHealthStatusMountPayload WorkspaceHealthMountPayload => new(
+        WorkspaceHealthBuildCockpitShort,
+        WorkspaceHealthTestsCockpitShort,
+        WorkspaceHealthDebugCockpitShort,
+        SafetyLevel);
+
     public bool IsPfdWorkspaceHealthMountVisible =>
-        UseSkiaInstrumentWave3Preview && IsPfdColumnVisible;
+        UseSkiaInstrumentMount && IsPfdColumnVisible;
 
-    /// <summary>Показывать ли Wave-3 preview WH в слоте MFD при видимости колонки в main grid.</summary>
     public bool IsMfdWorkspaceHealthMountVisible =>
-        UseSkiaInstrumentWave3Preview && IsMfdColumnVisible;
+        UseSkiaInstrumentMount && IsMfdColumnVisible;
 
-    /// <summary>Wave-3 preview WH в отдельном окне <see cref="Views.MfdHostWindow"/> (колонка MFD в main скрыта).</summary>
     public bool IsMfdHostWindowWorkspaceHealthMountVisible =>
-        UseSkiaInstrumentWave3Preview && IsMfdHostWindowShellOpen;
+        UseSkiaInstrumentMount && IsMfdHostWindowShellOpen;
 
-    /// <summary>Контекст mount для PFD (policy + payload).</summary>
-    public WorkspaceHealthStatusMountContext PfdWorkspaceHealthMountContext =>
-        WorkspaceHealthMountContextFactory.Create(
-            _instrumentMountPolicyResolver,
-            _settings.Display,
-            MountPolicyRuntimeSurfaceId,
-            CockpitSlotIds.Pfd,
-            WorkspaceHealthMountPayload);
+    public WorkspaceHealthStatusMountContext? PfdWorkspaceHealthMountContext =>
+        IsPfdWorkspaceHealthMountVisible
+            ? WorkspaceHealthMountContextFactory.Create(
+                _instrumentMountPolicyResolver,
+                _settings.Display,
+                MountPolicyRuntimeSurfaceId,
+                CockpitSlotIds.Pfd,
+                WorkspaceHealthMountPayload)
+            : null;
 
-    /// <summary>Контекст mount для MFD (policy + payload).</summary>
-    public WorkspaceHealthStatusMountContext MfdWorkspaceHealthMountContext =>
-        WorkspaceHealthMountContextFactory.Create(
-            _instrumentMountPolicyResolver,
-            _settings.Display,
-            MountPolicyRuntimeSurfaceId,
-            CockpitSlotIds.Mfd,
-            WorkspaceHealthMountPayload);
+    public WorkspaceHealthStatusMountContext? MfdWorkspaceHealthMountContext
+    {
+        get
+        {
+            if (!UseSkiaInstrumentMount)
+                return null;
+            if (IsMfdHostWindowShellOpen)
+                return WorkspaceHealthMountContextFactory.Create(
+                    _instrumentMountPolicyResolver,
+                    _settings.Display,
+                    "main_window_plus_mfd_host_top_level",
+                    CockpitSlotIds.Mfd,
+                    WorkspaceHealthMountPayload);
+            if (IsMfdColumnVisible)
+                return WorkspaceHealthMountContextFactory.Create(
+                    _instrumentMountPolicyResolver,
+                    _settings.Display,
+                    MountPolicyRuntimeSurfaceId,
+                    CockpitSlotIds.Mfd,
+                    WorkspaceHealthMountPayload);
+            return null;
+        }
+    }
 }

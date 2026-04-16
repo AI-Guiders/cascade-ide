@@ -19,3 +19,13 @@ git = "mfd"
 terminal_dock = "mfd"
 editor = "forward"
 editor_hud = "hud"
+
+[[instrument_placement_rules]]
+surface_id = "main_window_docked_grid"
+slot_id = "pfd"
+instrument_id = "solution_explorer_tree"
+
+[[instrument_placement_rules]]
+surface_id = "main_window_plus_mfd_host_top_level"
+slot_id = "pfd"
+instrument_id = "solution_explorer_tree"

@@ -1,5 +1,6 @@
 using CascadeIDE.Cockpit.Composition.HostSurface;
 using CascadeIDE.Cockpit.Composition.Shell;
+using CascadeIDE.Models;
 using CascadeIDE.Services.Presentation;
 using Xunit;
 
@@ -11,7 +12,7 @@ public sealed class MainWindowHostSurfaceCompositorTests
         PresentationGrammarTokens.FromSettings("()", " ", "+", "P", "F", "M");
 
     [Fact]
-    public void WhenPfdColumnVisible_IncludesWorkspaceNavigationMapInPfdSlot()
+    public void WhenPfdColumnVisible_IncludesSolutionExplorerInstrumentInPfdSlot()
     {
         var parse = PresentationParser.Parse("(P+F) (M)", DefaultGrammar());
         Assert.True(parse.IsSuccess);
@@ -19,40 +20,18 @@ public sealed class MainWindowHostSurfaceCompositorTests
         var frame = MainWindowHostSurfaceCompositor.ComposeFrame(
             new MainWindowShellSurfaceCompositionInput(
                 parse,
-                IntentPfdRegionExpanded: true,
-                IntentMfdRegionExpanded: false,
+                IntentSolutionExplorerVisible: true,
+                IntentChatPanelExpanded: false,
                 SuppressMfdColumnForMfdHostWindow: false,
                 ExpandedMfdWidthPixels: 300,
                 CollapsedMfdWidthPixels: 12,
+                DisplaySettings: new DisplaySettings(),
                 SafetyLevel: "L2"));
 
         Assert.True(frame.Shell.PfdSurfaceVisible);
         Assert.Single(frame.Instruments);
-        Assert.Equal(CockpitStandardInstrumentIds.WorkspaceNavigationMap, frame.Instruments[0].InstrumentId);
-        Assert.Equal(CockpitSlotIds.Pfd, frame.Instruments[0].SlotId);
-    }
-
-    [Fact]
-    public void WhenMfdColumnVisible_IncludesSolutionExplorerInMfdSlot()
-    {
-        var parse = PresentationParser.Parse("(F)(P+M)", DefaultGrammar());
-        Assert.True(parse.IsSuccess);
-
-        var frame = MainWindowHostSurfaceCompositor.ComposeFrame(
-            new MainWindowShellSurfaceCompositionInput(
-                parse,
-                IntentPfdRegionExpanded: false,
-                IntentMfdRegionExpanded: true,
-                SuppressMfdColumnForMfdHostWindow: false,
-                ExpandedMfdWidthPixels: 300,
-                CollapsedMfdWidthPixels: 12,
-                SafetyLevel: "L2"));
-
-        Assert.False(frame.Shell.PfdSurfaceVisible);
-        Assert.True(frame.Shell.MfdColumnVisibleInMainGrid);
-        Assert.Single(frame.Instruments);
         Assert.Equal(CockpitStandardInstrumentIds.SolutionExplorerTree, frame.Instruments[0].InstrumentId);
-        Assert.Equal(CockpitSlotIds.Mfd, frame.Instruments[0].SlotId);
+        Assert.Equal(CockpitSlotIds.Pfd, frame.Instruments[0].SlotId);
     }
 
     [Fact]
@@ -64,14 +43,51 @@ public sealed class MainWindowHostSurfaceCompositorTests
         var frame = MainWindowHostSurfaceCompositor.ComposeFrame(
             new MainWindowShellSurfaceCompositionInput(
                 parse,
-                IntentPfdRegionExpanded: false,
-                IntentMfdRegionExpanded: false,
+                IntentSolutionExplorerVisible: false,
+                IntentChatPanelExpanded: false,
                 SuppressMfdColumnForMfdHostWindow: false,
                 ExpandedMfdWidthPixels: 300,
                 CollapsedMfdWidthPixels: 12,
+                DisplaySettings: new DisplaySettings(),
                 SafetyLevel: "L2"));
 
         Assert.False(frame.Shell.PfdSurfaceVisible);
         Assert.Empty(frame.Instruments);
+    }
+
+    [Fact]
+    public void UserPlacementRule_OverridesDefaultInstrumentForPfdSlot()
+    {
+        var parse = PresentationParser.Parse("(P+F) (M)", DefaultGrammar());
+        Assert.True(parse.IsSuccess);
+
+        var display = new DisplaySettings
+        {
+            InstrumentPlacementRules =
+            [
+                new InstrumentPlacementRuleSettings
+                {
+                    SurfaceId = MainWindowHostSurfaceIds.DockedGrid,
+                    SlotId = CockpitSlotIds.Pfd,
+                    InstrumentId = CockpitStandardInstrumentIds.WorkspaceNavigationMap
+                }
+            ]
+        };
+
+        var frame = MainWindowHostSurfaceCompositor.ComposeFrame(
+            new MainWindowShellSurfaceCompositionInput(
+                parse,
+                IntentSolutionExplorerVisible: true,
+                IntentChatPanelExpanded: false,
+                SuppressMfdColumnForMfdHostWindow: false,
+                ExpandedMfdWidthPixels: 300,
+                CollapsedMfdWidthPixels: 12,
+                DisplaySettings: display,
+                SafetyLevel: "L2"));
+
+        Assert.True(frame.Shell.PfdSurfaceVisible);
+        Assert.Single(frame.Instruments);
+        Assert.Equal(CockpitStandardInstrumentIds.WorkspaceNavigationMap, frame.Instruments[0].InstrumentId);
+        Assert.Equal(CockpitSlotIds.Pfd, frame.Instruments[0].SlotId);
     }
 }

@@ -1,4 +1,5 @@
 using CascadeIDE.Cockpit.Composition.Shell;
+using CascadeIDE.Models;
 using CascadeIDE.Services.Presentation;
 using Xunit;
 
@@ -18,11 +19,12 @@ public sealed class MainWindowShellSurfaceCompositorTests
         var c = MainWindowShellSurfaceCompositor.Compose(
             new MainWindowShellSurfaceCompositionInput(
                 parse,
-                IntentPfdRegionExpanded: true,
-                IntentMfdRegionExpanded: true,
+                IntentSolutionExplorerVisible: true,
+                IntentChatPanelExpanded: true,
                 SuppressMfdColumnForMfdHostWindow: true,
                 ExpandedMfdWidthPixels: 340,
                 CollapsedMfdWidthPixels: 8,
+                DisplaySettings: new DisplaySettings(),
                 SafetyLevel: "L2"));
 
         Assert.True(c.PfdSurfaceVisible);
@@ -40,11 +42,12 @@ public sealed class MainWindowShellSurfaceCompositorTests
         var c = MainWindowShellSurfaceCompositor.Compose(
             new MainWindowShellSurfaceCompositionInput(
                 parse,
-                IntentPfdRegionExpanded: true,
-                IntentMfdRegionExpanded: false,
+                IntentSolutionExplorerVisible: true,
+                IntentChatPanelExpanded: false,
                 SuppressMfdColumnForMfdHostWindow: false,
                 ExpandedMfdWidthPixels: 300,
                 CollapsedMfdWidthPixels: 12,
+                DisplaySettings: new DisplaySettings(),
                 SafetyLevel: "L2"));
 
         Assert.True(c.MfdSurfaceExpanded);

@@ -350,6 +350,8 @@ public partial class MainWindow
         }
         if (e.PropertyName == nameof(ViewModels.MainWindowViewModel.MainGridColumnDefinitions) && sender is ViewModels.MainWindowViewModel gridVm)
             ApplyMainGridColumnDefinitions(gridVm);
+        if (IsSkiaHostRelatedProperty(e.PropertyName))
+            InvalidateSkiaHosts();
     }
 
     /// <summary>Клик по полю слева от текста (номера строк / брейкпоинты) — переключить брейкпоинт в .dotnet-debug-mcp-breakpoints.json.</summary>

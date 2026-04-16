@@ -15,7 +15,7 @@ public static class WorkspaceHealthMountContextFactory
         WorkspaceHealthStatusMountPayload payload)
     {
         var instrumentId = CockpitStandardInstrumentIds.WorkspaceHealthStatusV1;
-        var policy = resolver.Resolve(displaySettings, surfaceId, slotId, instrumentId);
-        return new WorkspaceHealthStatusMountContext(instrumentId, slotId, policy, payload);
+        var style = resolver.Resolve(displaySettings, surfaceId, slotId, instrumentId);
+        return new WorkspaceHealthStatusMountContext(instrumentId, slotId, style, payload);
     }
 }

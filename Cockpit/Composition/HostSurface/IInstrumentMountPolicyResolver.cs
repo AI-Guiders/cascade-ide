@@ -3,7 +3,7 @@ using CascadeIDE.Models;
 namespace CascadeIDE.Cockpit.Composition.HostSurface;
 
 /// <summary>
-/// Strategy for resolving mount slot-policy by runtime surface context and instrument placement.
+/// Strategy for resolving mount mount-style by runtime surface context and instrument placement.
 /// </summary>
 public interface IInstrumentMountPolicyResolver
 {

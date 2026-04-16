@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
-using CascadeIDE.Services;
+using CascadeIDE.Cockpit.Composition.HostSurface;
 
 namespace CascadeIDE.Features.UiChrome;
 
@@ -158,6 +158,7 @@ public static class UiModeCatalog
             UiWorkspaceLayoutRuntimeMetrics.ResetToCodeDefaults();
             AttentionZonePanelRuntime.ResetToCodeDefaults();
             MarkdownPreviewPlacementRuntime.ResetToCodeDefaults();
+            InstrumentPlacementRuntime.ResetToCodeDefaults();
         }
     }
 
@@ -194,6 +195,7 @@ public static class UiModeCatalog
             UiWorkspaceLayoutRuntimeMetrics.ApplyWorkspaceToml(merged);
             AttentionZonePanelRuntime.ApplyWorkspaceToml(merged);
             MarkdownPreviewPlacementRuntime.ApplyWorkspaceToml(merged);
+            InstrumentPlacementRuntime.ApplyWorkspaceRules(merged?.InstrumentPlacementRules ?? []);
         }
     }
 
@@ -231,6 +233,7 @@ public static class UiModeCatalog
         UiWorkspaceLayoutRuntimeMetrics.ResetToCodeDefaults();
         AttentionZonePanelRuntime.ResetToCodeDefaults();
         MarkdownPreviewPlacementRuntime.ResetToCodeDefaults();
+        InstrumentPlacementRuntime.ResetToCodeDefaults();
 
         if (!TryReadUiModesFile(uiModesDirectory, "index.toml", out var indexTomlText))
         {
@@ -267,6 +270,7 @@ public static class UiModeCatalog
                 UiWorkspaceLayoutRuntimeMetrics.ApplyWorkspaceToml(w);
                 AttentionZonePanelRuntime.ApplyWorkspaceToml(w);
                 MarkdownPreviewPlacementRuntime.ApplyWorkspaceToml(w);
+                InstrumentPlacementRuntime.ApplyWorkspaceRules(w?.InstrumentPlacementRules ?? []);
             }
             catch (Exception ex)
             {
