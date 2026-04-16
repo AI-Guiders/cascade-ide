@@ -42,14 +42,14 @@
 | `MainWindowViewModel.LayoutNotifications.cs` | 20 | Инвалидация производных высот `MainGrid` без длинных цепочек `NotifyPropertyChangedFor` в ShellState. |
 | `MainWindowViewModel.MarkdownExport.cs` | 55 | Экспорт Markdown. |
 | `MainWindowViewModel.MarkdownLsp.cs` | 95 | Запуск/перезапуск Markdown LSP. |
-| `MainWindowViewModel.Presentation.cs` | 234 | Вычисляемые свойства разметки, Workspace Health и видимости панелей (режимы UI). |
-| `MainWindowViewModel.PresentationLayout.cs` | 102 | ADR 0017: строка `presentation` и второй `TopLevel` — `MfdHostWindow` с полным вторичным контуром (п. 8). |
+| `MainWindowViewModel.Presentation.cs` | 227 | Вычисляемые свойства разметки, Workspace Health и видимости панелей (режимы UI). |
+| `MainWindowViewModel.PresentationLayout.cs` | 109 | ADR 0017: строка `presentation` и второй `TopLevel` — `MfdHostWindow` с полным вторичным контуром (п. 8). |
 | `MainWindowViewModel.PresentationLayoutAuthority.cs` | 14 | Запись intent видимости панелей (семантика «хочу»); фактическая поверхность — `MainWindowShellSurfaceCompositor`. |
 | `MainWindowViewModel.RelayCommands.cs` | 276 | Relay-команды. |
 | `MainWindowViewModel.RelayCommands.Debug.cs` | 120 | Relay: отладка. |
 | `MainWindowViewModel.SecondaryShell.cs` | 69 | Вторичный контур оболочки: одна активная страница; навигация — команды и палитра. Якорь на экране — пресет (v1: зона Mfd). |
 | `MainWindowViewModel.SettingsReactive.cs` | 127 | Реакции на изменение полей настроек и ключей API: диск, автономный агент, панели. |
-| `MainWindowViewModel.ShellState.cs` | 231 | Раскладка панелей, нижняя зона, Workspace Health / автономный агент, ключи провайдеров и чата. |
+| `MainWindowViewModel.ShellState.cs` | 232 | Раскладка панелей, нижняя зона, Workspace Health / автономный агент, ключи провайдеров и чата. |
 | `MainWindowViewModel.SolutionBuild.cs` | 172 | Сборка, `BuildOutputPanel`. |
 | `MainWindowViewModel.StartupProject.cs` | 120 | Стартовый проект. |
 | `MainWindowViewModel.UiGitWorkspace.cs` | 138 | Git + workspace UI. |
