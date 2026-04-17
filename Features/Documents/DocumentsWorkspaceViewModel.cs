@@ -111,9 +111,10 @@ public sealed partial class DocumentsWorkspaceViewModel : ObservableObject
         await UiScheduler.Default.InvokeAsync(() =>
         {
             var value = _workspace.SelectedSolutionItem;
-            if (value?.FullPath is not { } path || !File.Exists(path))
+            if (value?.FullPath is not { } path)
                 return;
-            var normalizedPath = Path.GetFullPath(path);
+            if (!SolutionTreePath.TryGetFullPath(path, out var normalizedPath) || !File.Exists(normalizedPath))
+                return;
             if (string.Equals(_host.CurrentFilePath, normalizedPath, StringComparison.OrdinalIgnoreCase)
                 && !string.IsNullOrEmpty(_host.EditorText))
                 return;
@@ -125,10 +126,10 @@ public sealed partial class DocumentsWorkspaceViewModel : ObservableObject
 
     public void OpenOrActivateDocument(string filePath)
     {
-        if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
+        if (string.IsNullOrWhiteSpace(filePath))
             return;
-
-        var normalized = Path.GetFullPath(filePath);
+        if (!SolutionTreePath.TryGetFullPath(filePath, out var normalized) || !File.Exists(normalized))
+            return;
         var existing = OpenDocuments.FirstOrDefault(d => string.Equals(d.FilePath, normalized, StringComparison.OrdinalIgnoreCase));
         var targetGroup = Math.Clamp(ActiveEditorGroup, 1, 3);
         if (existing is null)
@@ -353,24 +354,11 @@ public sealed partial class DocumentsWorkspaceViewModel : ObservableObject
         var current = _host.CurrentFilePath;
         if (string.IsNullOrEmpty(current))
             return;
-        var normalized = Path.GetFullPath(current);
-        var item = FindSolutionItemByPath(_workspace.SolutionRoots, normalized);
+        if (!SolutionTreePath.TryGetFullPath(current, out var normalized))
+            return;
+        var item = SolutionTreePath.FindItemByFullPath(_workspace.SolutionRoots, normalized);
         if (item is not null)
             _workspace.SelectedSolutionItem = item;
-    }
-
-    private static SolutionItem? FindSolutionItemByPath(IEnumerable<SolutionItem> items, string fullPath)
-    {
-        foreach (var node in items)
-        {
-            if (node.FullPath is not null && string.Equals(Path.GetFullPath(node.FullPath), fullPath, StringComparison.OrdinalIgnoreCase))
-                return node;
-            var found = FindSolutionItemByPath(node.Children, fullPath);
-            if (found is not null)
-                return found;
-        }
-
-        return null;
     }
 
     private static string SafeReadFile(string path)
