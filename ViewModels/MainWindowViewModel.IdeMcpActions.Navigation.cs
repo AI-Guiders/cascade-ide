@@ -14,10 +14,20 @@ public partial class MainWindowViewModel
         int? maxEdges,
         string? preset,
         IReadOnlyList<string>? includeKinds,
-        IReadOnlyList<string>? excludeKinds) =>
-        UiScheduler.Default.InvokeAsync(() =>
+        IReadOnlyList<string>? excludeKinds,
+        string? level)
+    {
+        var requestedMode = string.IsNullOrWhiteSpace(mode) ? "related" : mode.Trim().ToLowerInvariant();
+        if (requestedMode is not ("related" or "subgraph"))
+            return Task.FromResult("""{"error":"invalid_mode","message":"mode must be related or subgraph."}""");
+
+        var configuredLevel = _settings.SemanticMap.Level;
+        var effectiveLevel = Models.SemanticMapLevelKind.Normalize(string.IsNullOrWhiteSpace(level) ? configuredLevel : level);
+        var effectiveMode = effectiveLevel == Models.SemanticMapLevelKind.ControlFlow ? "subgraph" : requestedMode;
+
+        return UiScheduler.Default.InvokeAsync(() =>
             WorkspaceNavigationContextBuilder.BuildJson(
-                mode,
+                effectiveMode,
                 filePath,
                 CurrentFilePath,
                 Workspace.SolutionRoots,
@@ -31,4 +41,5 @@ public partial class MainWindowViewModel
                 excludeKinds,
                 preset,
                 _settings.WorkspaceNavigationContext));
+    }
 }

@@ -198,7 +198,7 @@ internal static class IdeCommandsContractGenerated
         ["get_control_appearance"] = "{\"name\":\"BuildButton\"}",
         ["get_editor_content_range"] = "{\"start_line\":1,\"end_line\":40}",
         ["get_editor_state"] = "{\"max_preview_chars\":0}",
-        ["get_workspace_navigation_context"] = "{\"mode\":\"related\",\"file_path\":\"src/Foo.cs\",\"preset\":\"no_namespace_noise\"}",
+        ["get_workspace_navigation_context"] = "{\"mode\":\"related\",\"file_path\":\"src/Foo.cs\",\"preset\":\"no_namespace_noise\",\"level\":\"controlFlow\"}",
         ["git_branch"] = "{\"action\":\"list\"}",
         ["git_commit"] = "{\"message\":\"chore: update\",\"paths\":[\"a.txt\"]}",
         ["git_diff"] = "{\"path\":\"README.md\",\"staged\":false}",

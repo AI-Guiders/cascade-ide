@@ -33,8 +33,8 @@ public interface IIdeMcpActions
     Task<string> SearchWorkspaceTextAsync(string pattern, string? subPath, bool fixedString, string? glob, int maxMatches, string? rgPath);
     /// <summary>Диагностики текущего открытого .cs файла (ошибки/предупреждения Roslyn). JSON: массив { id, message, severity, line, column }. Не-C# — [].</summary>
     Task<string> GetCurrentFileDiagnosticsAsync();
-    /// <summary>Семантическая навигация (ADR 0039): режим <c>related</c> — список связанных файлов; <c>subgraph</c> — узлы и рёбра с капами. Без <c>file_path</c> — якорь = текущий файл. Опционально <c>preset</c> (имя из <c>settings.toml</c>), <c>include_kinds</c> / <c>exclude_kinds</c>. JSON.</summary>
-    Task<string> GetWorkspaceNavigationContextAsync(string mode, string? filePath, int? line, int? column, int? maxRelated, int? maxNodes, int? maxEdges, string? preset, IReadOnlyList<string>? includeKinds, IReadOnlyList<string>? excludeKinds);
+    /// <summary>Семантическая навигация (ADR 0039): режим <c>related</c> — список связанных файлов; <c>subgraph</c> — узлы и рёбра с капами. Без <c>file_path</c> — якорь = текущий файл. Опционально <c>preset</c> (имя из <c>settings.toml</c>), <c>include_kinds</c> / <c>exclude_kinds</c>; <c>level</c> (file/controlFlow) — override уровня карты на один вызов. JSON.</summary>
+    Task<string> GetWorkspaceNavigationContextAsync(string mode, string? filePath, int? line, int? column, int? maxRelated, int? maxNodes, int? maxEdges, string? preset, IReadOnlyList<string>? includeKinds, IReadOnlyList<string>? excludeKinds, string? level);
     /// <summary>Запустить сборку решения, вернуть вывод.</summary>
     Task<string> BuildAsync();
     /// <summary>Запустить сборку и вернуть структурированный результат: success, exit_code, errors[], warnings[], raw_output (обрезано). JSON.</summary>
