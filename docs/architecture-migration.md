@@ -73,7 +73,7 @@
 | `IdeMcpCommandExecutor.Handlers.DebuggerUi.cs` | 62 | Поверхность отладки. |
 | `IdeMcpCommandExecutor.Handlers.Editor.cs` | 108 | Редактор. |
 | `IdeMcpCommandExecutor.Handlers.PowerDocuments.cs` | 224 | Power / документы. |
-| `Generated/IdeMcpCommandExecutor.Generated.g.cs` | 66 | Сгенерированные хендлеры MCP → `IIdeMcpActions` (`CascadeIDE.ProtocolDocGen`). |
+| `Generated/IdeMcpCommandExecutor.Generated.g.cs` | 67 | Сгенерированные хендлеры MCP → `IIdeMcpActions` (`CascadeIDE.ProtocolDocGen`). |
 
 <!-- AUTO:MAIN-WINDOW-SLICE:EXEC-TABLE:END -->
 
