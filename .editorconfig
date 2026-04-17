@@ -70,3 +70,7 @@ dotnet_diagnostic.IDE0073.severity = none
 # Quiet hints while baseline stabilizes.
 dotnet_diagnostic.IDE0031.severity = silent
 dotnet_diagnostic.IDE0071.severity = silent
+
+# Тесты: имена методов с подчёркиваниями (стиль xUnit / читаемые сценарии).
+[CascadeIDE.Tests/**/*.cs]
+dotnet_diagnostic.CA1707.severity = none
