@@ -2,9 +2,10 @@
 
 **Статус:** черновик границ продукта (не ADR).  
 **Обновлено:** 2026-04-13 — **приоритет ближайших итераций:** комфортный переход **из Cursor** (MCP, наблюдаемость, привычный контур агента + IDE); **паритет с Visual Studio** и «уйти с VS полностью» — **долгий горизонт**, не критерий скорости первых выпусков.  
+**Обновлено:** 2026-04-15 — продуктовый принцип **keyboard-first** (ниже и в [ADR 0013](../adr/0013-command-surface-and-discoverability.md)).  
 **Обновлено:** 2026-04-16 — граница «не polyglot IDE»; ссылка на [ADR 0039](../adr/0039-workspace-navigation-affordances.md#adr0039-language-scope).  
-**Связь:** [architecture-policy.md](../architecture-policy.md), [architecture-migration.md](../architecture-migration.md), [ADR 0002](../adr/0002-debug-human-agent-parity.md), [ADR 0017](../adr/0017-multi-window-workspace-and-agent-surfaces.md), [ADR 0039](../adr/0039-workspace-navigation-affordances.md) (навигация; C# / .NET как north-star по языкам), [ADR 0043](../adr/0043-mcp-transport-recovery-human-agent-parity.md) (MCP-транспорт и граница хоста; ортогонально 0002), [MCP-PROTOCOL.md](../MCP-PROTOCOL.md).  
-**Позиционирование:** **CascadeIDE** изначально и по смыслу — **agent-first IDE**: агент не «приложение сбоку» от редактора, а **опорная ось** продукта — общий наблюдаемый контур с человеком (MCP, паритет отладки — [ADR 0002](../adr/0002-debug-human-agent-parity.md)); модель кокпита и зон внимания задаёт рамку фокуса и **не противоречит** agent-first.  
+**Связь:** [architecture-policy.md](../architecture-policy.md), [architecture-migration.md](../architecture-migration.md), [ADR 0002](../adr/0002-debug-human-agent-parity.md), [ADR 0013](../adr/0013-command-surface-and-discoverability.md) (палитра команд, discoverability — опора для keyboard-first), [ADR 0017](../adr/0017-multi-window-workspace-and-agent-surfaces.md), [ADR 0039](../adr/0039-workspace-navigation-affordances.md) (навигация; C# / .NET как north-star по языкам), [ADR 0043](../adr/0043-mcp-transport-recovery-human-agent-parity.md) (MCP-транспорт и граница хоста; ортогонально 0002), [MCP-PROTOCOL.md](../MCP-PROTOCOL.md).  
+**Позиционирование:** **CascadeIDE** изначально и по смыслу — **agent-first IDE**: агент не «приложение сбоку» от редактора, а **опорная ось** продукта — общий наблюдаемый контур с человеком (MCP, паритет отладки — [ADR 0002](../adr/0002-debug-human-agent-parity.md)); модель кокпита и зон внимания задаёт рамку фокуса и **не противоречит** agent-first. Параллельно продукт **запланирован как keyboard-first**: основные сценарии — без обязательной мыши; клавиатура и **палитра команд** — опорные пути ([ADR 0013](../adr/0013-command-surface-and-discoverability.md), реестр хоткеев — [ADR 0030](../adr/0030-command-ids-hotkeys-and-ui-registry-layers.md)), а не «сначала тулбар и клики».  
 **Память агента (KB):** устойчивое знание живёт **в каноне решения** и в MCP-командах, а не в «контексте весов» модели: knowledge (`read_knowledge_file`, `write_knowledge_file`, `list_knowledge_files`, секции, ревизии…), заметки сессии (`ide_read_agent_notes`, `ide_write_agent_notes`) — каноничные имена и аргументы в [MCP-PROTOCOL.md](../MCP-PROTOCOL.md).
 
 ## Северная звезда (формулировка)
@@ -23,6 +24,8 @@
 
 Это **не отменяет** необходимости «скучных километров» редактора, отладки и языковых сервисов. Но продуктовый смысл — **не клонировать VS**, а дать **иную повседневную работу** тем, кому важнее ясность и устойчивый фокус, чем максимум встроенных инструментов на экране.
 
+**Keyboard-first:** на уровне замысла CascadeIDE **не** задумывается как IDE, где обязателен постоянный «охват мышью» по плотным панелям. Ориентир — **клавиатура + палитра команд + осмысленные хоткеи** (и согласованность с автоматизацией через те же `IdeCommands`), а широкие панели и тулбар — вторичны к этому контуру; детали поверхности — [ADR 0013](../adr/0013-command-surface-and-discoverability.md).
+
 **JetBrains:** для .NET честнее сравнивать Cascade не с IntelliJ IDEA, а с **JetBrains Rider** — тот же контур (решение, отладка, рефакторинги в экосистеме .NET). Ось дифференциации та же: не «ещё один насыщенный IDE-стол», а кокпит и иерархия внимания; по глубине и зрелости функций Rider остаётся сильным ориентиром в своей нише.
 
 **Связь:** [0021 — модель внимания кокпита](../adr/0021-pfd-mfd-cockpit-attention-model.md), режимы и пресеты UI [0010](../adr/0010-ui-modes-toml-configuration.md); паритет человек/агент по отладке — [0002](../adr/0002-debug-human-agent-parity.md).
@@ -35,6 +38,7 @@
 | **MCP как мост** между агентом (Cursor и др.) и IDE: команды, снимок UI, действия с редактором/сборкой/тестами | Реализация и контракт — [MCP-PROTOCOL.md](../MCP-PROTOCOL.md), исполнение через `IIdeMcpActions` / маршалинг UI ([architecture-migration.md](../architecture-migration.md) фаза 5). |
 | **Knowledge base (KB) и заметки агента** | Файлы knowledge в workspace решения; MCP API — [MCP-PROTOCOL.md](../MCP-PROTOCOL.md) (разделы knowledge и agent-notes); коды команд — `IdeCommands.Knowledge` / agent-notes в исполнителе MCP. |
 | **Наблюдаемость** | Хотя бы: позиция останова, список брейкпоинтов, панель отладки/инструментирования, вывод сборки и тестов — доступны и с клавиатуры IDE, и через MCP там, где это уже проведено. |
+| **Keyboard-first (принцип)** | Типовой рабочий контур — **без зависимости от мыши** для главных действий: навигация по командам через палитру и хоткеи ([0013](../adr/0013-command-surface-and-discoverability.md), [0030](../adr/0030-command-ids-hotkeys-and-ui-registry-layers.md)); мышь не запрещена, но не является главным обещанием UX. |
 | **Рабочий цикл без VS для типовых задач агента** | Редактирование, сборка, тесты, git по репозиторию, отладка подключённого сценария — в одном окне Cascade, пока хватает возможностей редактора и отладчика. |
 | **Мультиоконность / зоны экрана** по железу пользователя | Семантика `presentation`, второй TopLevel под MFD и т.д. — [ADR 0017](../adr/0017-multi-window-workspace-and-agent-surfaces.md). |
 
@@ -70,6 +74,7 @@
 | **Мультиоконность / MFD** | `MfdHostWindow`, `presentation`, сохранение геометрии ([ADR 0017](../adr/0017-multi-window-workspace-and-agent-surfaces.md)). | Политика закрытия главного окна, fallback при смене мониторов, подтверждения агента при нескольких TopLevel — открытые пункты ADR. |
 | **Агент ↔ человек: внимание** | Модель зон [0021](../adr/0021-pfd-mfd-cockpit-attention-model.md), UX чата [0031](../adr/0031-agent-chat-clarification-batches-and-threading.md) (частично). | Единая картина «затык / жду ввода / критично» без перегруза модалками ([ADR 0017 п. 6](../adr/0017-multi-window-workspace-and-agent-surfaces.md#adr0017-p6)). |
 | **Кокпит / Dark Cockpit** | Режимы UI, полосы health/EICAS в концепции [0021](../adr/0021-pfd-mfd-cockpit-attention-model.md), Power/Flight ([0010](../adr/0010-ui-modes-toml-configuration.md)). | Сплошной опыт «не утонуть» при росте функций; согласовать плотность UI с north star выше. |
+| **Палитра / keyboard UX** | Реестр команд и хоткеев ([0030](../adr/0030-command-ids-hotkeys-and-ui-registry-layers.md)); направление палитры и минимального toolbar — [0013](../adr/0013-command-surface-and-discoverability.md). | Довести до полного **keyboard-first**: предсказуемые хоткеи, покрытие частых действий без охота за кнопками, единая дисциплина имён с MCP. |
 
 ## Следующий шаг документа
 
