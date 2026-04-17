@@ -11,6 +11,25 @@ namespace CascadeIDE.Tests;
 public sealed class AgentContractRunnerHeadlessTests
 {
     [AvaloniaFact]
+    public void Get_cockpit_surface_stable_slice_matches_golden_file()
+    {
+        var approvedPath = Path.Combine(
+            AppContext.BaseDirectory,
+            "TestData",
+            "AgentContract",
+            "cockpit_surface_contract_slice.approved.json");
+        Assert.True(File.Exists(approvedPath), $"Missing golden: {approvedPath}");
+
+        var approved = File.ReadAllText(approvedPath);
+        var expectedNorm = AgentContractCockpitContractSlice.ToStableSliceJson(approved);
+
+        var actual = AgentContractRunner.GetContractJson(IdeCommands.GetCockpitSurface);
+        var actualNorm = AgentContractCockpitContractSlice.ToStableSliceJson(actual);
+
+        Assert.Equal(expectedNorm, actualNorm);
+    }
+
+    [AvaloniaFact]
     public void Get_cockpit_surface_matches_standalone_cds_json()
     {
         var fromRunner = AgentContractRunner.GetContractJson(IdeCommands.GetCockpitSurface);
