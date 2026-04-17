@@ -82,6 +82,8 @@ workspace_splitters_locked = false
 # Semantic Map (зона PFD): list | graph | both — см. ADR 0039. Дальнейшие ключи карты/графа — сюда же.
 [semantic_map]
 presentation = "list"
+# file | controlFlow — уровень карты (ADR 0053).
+level = "file"
 
 [csharp_lsp]
 # ParseOnly | OmniSharp | CSharpLs | Custom

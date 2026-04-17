@@ -94,6 +94,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _lastSavedAiKeys = (AiKeys)_aiKeys.Clone();
 
         _semanticMapPresentation = SemanticMapPresentationKind.Normalize(_settings.SemanticMap.Presentation);
+        _semanticMapLevel = SemanticMapLevelKind.Normalize(_settings.SemanticMap.Level);
         _workspaceSplittersLocked = _settings.WorkspaceUi.WorkspaceSplittersLocked;
 
         BuildOutputPanel = new BuildOutputPanelViewModel();

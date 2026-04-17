@@ -81,8 +81,21 @@ public sealed class SemanticMapMiniMapControl : Control
             return;
 
         var edgePen = new Pen(new SolidColorBrush(Color.FromArgb(180, 140, 140, 160)), 1);
+        var multibranchPen = new Pen(new SolidColorBrush(Color.FromArgb(200, 110, 195, 255)), 1)
+        {
+            DashStyle = new DashStyle([2, 2], 0)
+        };
+        var loopPen = new Pen(new SolidColorBrush(Color.FromArgb(220, 120, 230, 255)), 1.4);
         foreach (var edge in scene.Edges)
-            context.DrawLine(edgePen, edge.From, edge.To);
+        {
+            if (IsLoopEdge(edge.Kind))
+            {
+                DrawLoopEdge(context, edge, edgePen, loopPen);
+                continue;
+            }
+
+            context.DrawLine(IsMultiBranchEdge(edge.Kind) ? multibranchPen : edgePen, edge.From, edge.To);
+        }
 
         foreach (var n in scene.Nodes)
         {
@@ -92,5 +105,35 @@ public sealed class SemanticMapMiniMapControl : Control
             var stroke = new SolidColorBrush(Color.Parse("#22000000"));
             context.DrawEllipse(fill, new Pen(stroke, 1), n.Center, n.Radius, n.Radius);
         }
+    }
+
+    private static bool IsLoopEdge(string? kind) =>
+        !string.IsNullOrWhiteSpace(kind)
+        && kind.Contains("loop", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsMultiBranchEdge(string? kind) =>
+        !string.IsNullOrWhiteSpace(kind)
+        && kind.Contains("multibranch", StringComparison.OrdinalIgnoreCase);
+
+    private static void DrawLoopEdge(DrawingContext context, SemanticMapGraphEdgeLayout edge, Pen linePen, Pen loopPen)
+    {
+        var vx = edge.To.X - edge.From.X;
+        var vy = edge.To.Y - edge.From.Y;
+        var len = Math.Sqrt(vx * vx + vy * vy);
+        if (len < 1)
+        {
+            context.DrawLine(loopPen, edge.From, edge.To);
+            return;
+        }
+
+        var nx = vx / len;
+        var ny = vy / len;
+        var entry = new Point(
+            edge.To.X - nx * (edge.ToRadius + 10),
+            edge.To.Y - ny * (edge.ToRadius + 10));
+        context.DrawLine(linePen, edge.From, entry);
+
+        var loopRadius = edge.ToRadius + 8;
+        context.DrawEllipse(null, loopPen, edge.To, loopRadius, loopRadius);
     }
 }

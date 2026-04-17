@@ -24,6 +24,11 @@ public sealed class SemanticMapGraphNodeLayout
 
 public sealed class SemanticMapGraphEdgeLayout
 {
+    public required string FromNodeId { get; init; }
+    public required string ToNodeId { get; init; }
     public required Point From { get; init; }
     public required Point To { get; init; }
+    public required double ToRadius { get; init; }
+    public string? Kind { get; init; }
+    public string? RelatedKind { get; init; }
 }

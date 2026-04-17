@@ -29,12 +29,14 @@ public sealed class WorkspaceNavigationStarGraphLayoutEngine : IWorkspaceNavigat
         var layouts = new List<SemanticMapGraphNodeLayout>();
         Point? anchorCenter = null;
         var idToCenter = new Dictionary<string, Point>(StringComparer.OrdinalIgnoreCase);
+        var idToRadius = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
 
         if (anchor is not null)
         {
             var ac = new Point(cx, cy);
             anchorCenter = ac;
             idToCenter[anchor.Id] = ac;
+            idToRadius[anchor.Id] = anchorR;
             layouts.Add(new SemanticMapGraphNodeLayout
             {
                 Id = anchor.Id,
@@ -55,6 +57,7 @@ public sealed class WorkspaceNavigationStarGraphLayoutEngine : IWorkspaceNavigat
             var py = cy + orbit * Math.Sin(angle);
             var p = new Point(px, py);
             idToCenter[sat.Id] = p;
+            idToRadius[sat.Id] = satR;
             layouts.Add(new SemanticMapGraphNodeLayout
             {
                 Id = sat.Id,
@@ -73,14 +76,32 @@ public sealed class WorkspaceNavigationStarGraphLayoutEngine : IWorkspaceNavigat
                 continue;
             if (!idToCenter.TryGetValue(e.ToId, out var b))
                 continue;
-            edgeLayouts.Add(new SemanticMapGraphEdgeLayout { From = a, To = b });
+            edgeLayouts.Add(new SemanticMapGraphEdgeLayout
+            {
+                FromNodeId = e.FromId,
+                ToNodeId = e.ToId,
+                From = a,
+                To = b,
+                ToRadius = idToRadius.TryGetValue(e.ToId, out var toR) ? toR : satR,
+                Kind = e.Kind,
+                RelatedKind = e.RelatedKind
+            });
         }
 
         // Если рёбер нет, но есть якорь и спутники — линии от центра.
         if (edgeLayouts.Count == 0 && anchorCenter is { } ac0)
         {
             foreach (var s in layouts.Where(x => !x.IsAnchor))
-                edgeLayouts.Add(new SemanticMapGraphEdgeLayout { From = ac0, To = s.Center });
+                edgeLayouts.Add(new SemanticMapGraphEdgeLayout
+                {
+                    FromNodeId = anchor?.Id ?? "n0",
+                    ToNodeId = s.Id,
+                    From = ac0,
+                    To = s.Center,
+                    ToRadius = s.Radius,
+                    Kind = null,
+                    RelatedKind = null
+                });
         }
 
         return new SemanticMapGraphSceneVm { Nodes = layouts, Edges = edgeLayouts };

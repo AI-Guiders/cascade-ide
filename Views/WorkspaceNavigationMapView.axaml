@@ -47,6 +47,15 @@
                                   ItemsSource="{Binding SemanticMapPresentationOptions}"
                                   SelectedItem="{Binding SemanticMapPresentation}"/>
                     </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock VerticalAlignment="Center"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                                   Text="Уровень:"/>
+                        <ComboBox MinWidth="120"
+                                  ItemsSource="{Binding SemanticMapLevelOptions}"
+                                  SelectedItem="{Binding SemanticMapLevel}"/>
+                    </StackPanel>
                     <StackPanel Orientation="Horizontal" Spacing="4">
                         <TextBlock FontSize="11"
                                    Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"

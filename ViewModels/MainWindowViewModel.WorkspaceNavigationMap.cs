@@ -22,6 +22,10 @@ public partial class MainWindowViewModel
     public string[] SemanticMapPresentationOptions { get; } =
         [SemanticMapPresentationKind.List, SemanticMapPresentationKind.Graph, SemanticMapPresentationKind.Both];
 
+    /// <summary>Варианты уровня карты: файловый и control flow.</summary>
+    public string[] SemanticMapLevelOptions { get; } =
+        [SemanticMapLevelKind.File, SemanticMapLevelKind.ControlFlow];
+
     /// <summary>Сцена мини-карты (подграф + укладка звездой).</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(WorkspaceNavigationMapHasRelated))]
@@ -35,6 +39,10 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(SemanticMapListAreaRowHeight))]
     [NotifyPropertyChangedFor(nameof(ShowSemanticMapGraphClickHint))]
     private string _semanticMapPresentation = SemanticMapPresentationKind.List;
+
+    /// <summary><c>file</c> | <c>controlFlow</c> — уровень построения карты (секция <c>[semantic_map]</c>).</summary>
+    [ObservableProperty]
+    private string _semanticMapLevel = SemanticMapLevelKind.File;
 
     /// <summary>Сообщение об ошибке или пустом состоянии (не null).</summary>
     [ObservableProperty]
@@ -117,6 +125,7 @@ public partial class MainWindowViewModel
         string? solutionPath = null;
         WorkspaceNavigationContextSettings? navSettings = null;
         var presentation = SemanticMapPresentationKind.List;
+        var level = SemanticMapLevelKind.File;
         await UiScheduler.Default.InvokeAsync(() =>
         {
             rawPaths = McpSolutionTree.CollectFileEntries(Workspace.SolutionRoots).Select(e => e.FullPath).ToList();
@@ -124,6 +133,7 @@ public partial class MainWindowViewModel
             solutionPath = Workspace.SolutionPath;
             navSettings = _settings.WorkspaceNavigationContext;
             presentation = SemanticMapPresentationKind.Normalize(_settings.SemanticMap.Presentation);
+            level = SemanticMapLevelKind.Normalize(_settings.SemanticMap.Level);
         });
 
         if (ct.IsCancellationRequested)
@@ -132,13 +142,15 @@ public partial class MainWindowViewModel
         var wantList = presentation is SemanticMapPresentationKind.List or SemanticMapPresentationKind.Both;
         var wantGraph = presentation is SemanticMapPresentationKind.Graph or SemanticMapPresentationKind.Both;
 
+        var useSubgraphMode = level == SemanticMapLevelKind.ControlFlow || wantGraph;
+
         string json;
         try
         {
             json = await Task.Run(
                     () =>
                     {
-                        if (wantGraph)
+                        if (useSubgraphMode)
                         {
                             return WorkspaceNavigationContextBuilder.BuildJson(
                                 "subgraph",
@@ -202,7 +214,7 @@ public partial class MainWindowViewModel
                 if (code == "no_file" && string.IsNullOrEmpty(currentPath))
                     status = "Откройте файл из дерева решения — здесь появятся связанные.";
             }
-            else if (wantGraph && WorkspaceNavigationSubgraphJson.TryParse(json, out var subgraph, out _))
+            else if (useSubgraphMode && WorkspaceNavigationSubgraphJson.TryParse(json, out var subgraph, out _))
             {
                 scene = _workspaceNavigationGraphLayout.Layout(subgraph!, 280, 120);
                 var satCount = Math.Max(0, scene.Nodes.Count - 1);

@@ -159,6 +159,20 @@ public partial class MainWindowViewModel
         ScheduleWorkspaceNavigationMapRefresh();
     }
 
+    partial void OnSemanticMapLevelChanged(string value)
+    {
+        var normalized = SemanticMapLevelKind.Normalize(value);
+        if (!string.Equals(normalized, value, StringComparison.Ordinal))
+        {
+            SemanticMapLevel = normalized;
+            return;
+        }
+
+        _settings.SemanticMap.Level = normalized;
+        SaveSettingsIfChanged();
+        ScheduleWorkspaceNavigationMapRefresh();
+    }
+
     partial void OnWorkspaceSplittersLockedChanged(bool value)
     {
         _settings.WorkspaceUi.WorkspaceSplittersLocked = value;
