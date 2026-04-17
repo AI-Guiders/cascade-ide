@@ -72,6 +72,8 @@ public partial class DockDocumentView : UserControl
         }
 
         _editor.Document.Changed += OnEditorDocumentChanged;
+        _editor.TextArea.Caret.PositionChanged += OnEditorCaretOrSelectionChanged;
+        _editor.TextArea.SelectionChanged += OnEditorCaretOrSelectionChanged;
 
         _vmHandler = (_, args) =>
         {
@@ -115,6 +117,7 @@ public partial class DockDocumentView : UserControl
         SyncFromVmIfActive();
         InstallVisualAdornersOnce();
         UpdateMcpProvidersIfActive();
+        SyncCaretContextToVmIfActive();
     }
 
     private void Teardown()
@@ -132,6 +135,8 @@ public partial class DockDocumentView : UserControl
             }
 
             _editor.Document.Changed -= OnEditorDocumentChanged;
+            _editor.TextArea.Caret.PositionChanged -= OnEditorCaretOrSelectionChanged;
+            _editor.TextArea.SelectionChanged -= OnEditorCaretOrSelectionChanged;
 
             if (_vm?.WorkspaceDiagnostics is not null && _diagHubHandler is not null)
                 _vm.WorkspaceDiagnostics.DiagnosticsChanged -= _diagHubHandler;
@@ -351,6 +356,20 @@ public partial class DockDocumentView : UserControl
         var newText = _editor.Document.Text ?? "";
         if (!string.Equals(_vm.EditorText, newText, StringComparison.Ordinal))
             _vm.EditorText = newText;
+    }
+
+    private void OnEditorCaretOrSelectionChanged(object? sender, EventArgs e) => SyncCaretContextToVmIfActive();
+
+    private void SyncCaretContextToVmIfActive()
+    {
+        if (!IsActive() || _vm is null || _editor is null)
+            return;
+
+        var doc = _editor.Document;
+        var offset = _editor.TextArea.Caret.Offset;
+        if (offset < 0 || offset > doc.TextLength)
+            offset = 0;
+        _vm.UpdateSemanticMapCaretOffset(offset);
     }
 
     private void UpdateMcpProvidersIfActive()

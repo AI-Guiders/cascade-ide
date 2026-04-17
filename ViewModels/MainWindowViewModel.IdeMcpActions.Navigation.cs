@@ -1,3 +1,4 @@
+#nullable enable
 namespace CascadeIDE.ViewModels;
 
 /// <summary>MCP: семантическая навигация (ADR 0039).</summary>
@@ -27,12 +28,23 @@ public partial class MainWindowViewModel
 
         if (effectiveLevel == Models.SemanticMapLevelKind.ControlFlow)
         {
+            var effectiveLine = line;
+            var effectiveColumn = column;
+            if (effectiveLine is null || effectiveLine <= 0 || effectiveColumn is null || effectiveColumn <= 0)
+            {
+                var (derivedLine, derivedColumn) = ComputeLineColumn(EditorText, _editorCaretOffset ?? EditorSelectionStart);
+                if (effectiveLine is null || effectiveLine <= 0)
+                    effectiveLine = derivedLine;
+                if (effectiveColumn is null || effectiveColumn <= 0)
+                    effectiveColumn = derivedColumn;
+            }
+
             return UiScheduler.Default.InvokeAsync(() =>
                 Services.Navigation.WorkspaceNavigationControlFlowSubgraphBuilder.BuildJson(
                     string.IsNullOrWhiteSpace(filePath) ? CurrentFilePath : filePath,
                     EditorText,
-                    line,
-                    column,
+                    effectiveLine,
+                    effectiveColumn,
                     maxNodes ?? WorkspaceNavigationContextBuilder.DefaultMaxNodes,
                     maxEdges ?? WorkspaceNavigationContextBuilder.DefaultMaxEdges));
         }

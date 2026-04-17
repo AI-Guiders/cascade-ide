@@ -1,8 +1,10 @@
 using System.Collections.ObjectModel;
 using System.Text.Json;
 using Avalonia.Controls;
+using CascadeIDE.Cockpit.Cds;
+using CascadeIDE.Cockpit.Channels.TraceFlow;
+using CascadeIDE.Cockpit.Composition.TraceFlow;
 using CascadeIDE.Models;
-using CascadeIDE.Services;
 using CascadeIDE.Services.Navigation;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -12,9 +14,24 @@ namespace CascadeIDE.ViewModels;
 /// <summary>Semantic Map в слоте Pfd: тот же контракт, что <see cref="WorkspaceNavigationContextBuilder"/> / MCP.</summary>
 public partial class MainWindowViewModel
 {
-    private readonly IWorkspaceNavigationGraphLayoutEngine _workspaceNavigationGraphLayout = new WorkspaceNavigationStarGraphLayoutEngine();
+    private readonly SemanticMapCompositor _semanticMapCompositor = new();
+    private readonly TraceFlowChannelCoordinator _traceFlowChannelCoordinator = new(
+        [
+            new CodeFlowTraceChannel(),
+            new UnitTestTraceChannel()
+        ]);
+    private readonly ITraceFlowCdsRouter _traceFlowCdsRouter = new TraceFlowCdsRouter();
+    private readonly ITraceFlowSurfaceCompositor _traceFlowSurfaceCompositor = new TraceFlowSurfaceCompositor();
+    private int? _editorCaretOffset;
 
     private CancellationTokenSource? _workspaceNavigationMapRefreshCts;
+
+    internal void UpdateSemanticMapCaretOffset(int? offset)
+    {
+        _editorCaretOffset = offset;
+        if (SemanticMapLevel == SemanticMapLevelKind.ControlFlow)
+            ScheduleWorkspaceNavigationMapRefresh();
+    }
 
     /// <summary>Связанные файлы для текущего якоря (режим списка).</summary>
     public ObservableCollection<WorkspaceNavigationMapItemVm> WorkspaceNavigationMapItems { get; } = new();
@@ -27,10 +44,13 @@ public partial class MainWindowViewModel
     public string[] SemanticMapLevelOptions { get; } =
         [SemanticMapLevelKind.File, SemanticMapLevelKind.ControlFlow];
 
-    /// <summary>Сцена мини-карты (подграф + укладка звездой).</summary>
+    /// <summary>Сцена мини-карты (подграф + укладка по выбранному уровню карты).</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(WorkspaceNavigationMapHasRelated))]
     private SemanticMapGraphSceneVm? _semanticMapGraphScene;
+
+    [ObservableProperty]
+    private double _semanticMapGraphHeight = SemanticMapCompositor.DefaultHeightFile;
 
     /// <summary><c>list</c> | <c>graph</c> | <c>both</c> — синхронизируется с <c>[semantic_map]</c>.</summary>
     [ObservableProperty]
@@ -136,7 +156,7 @@ public partial class MainWindowViewModel
             currentPath = CurrentFilePath;
             solutionPath = Workspace.SolutionPath;
             editorText = EditorText;
-            var (line, column) = ComputeLineColumn(EditorText, EditorSelectionStart);
+            var (line, column) = ComputeLineColumn(EditorText, _editorCaretOffset ?? EditorSelectionStart);
             cursorLine = line;
             cursorColumn = column;
             navSettings = _settings.WorkspaceNavigationContext;
@@ -219,6 +239,7 @@ public partial class MainWindowViewModel
         string status = "";
         string anchorLabel = "—";
         SemanticMapGraphSceneVm? scene = null;
+        var graphHeight = SemanticMapCompositor.DefaultHeightFile;
         var accentCount = 0;
 
         try
@@ -235,7 +256,24 @@ public partial class MainWindowViewModel
             }
             else if (useSubgraphMode && WorkspaceNavigationSubgraphJson.TryParse(json, out var subgraph, out _))
             {
-                scene = _workspaceNavigationGraphLayout.Layout(subgraph!, 280, 120);
+                var composed = _semanticMapCompositor.Compose(
+                    new SemanticMapCompositionIntent(subgraph!, level),
+                    new Services.SkiaInstruments.SkiaInstrumentViewport(SemanticMapCompositor.DefaultWidth, SemanticMapGraphHeight));
+                if (level == SemanticMapLevelKind.ControlFlow)
+                {
+                    var channelPayload = _traceFlowChannelCoordinator.Build(new TraceFlowChannelContext(
+                        subgraph!,
+                        ImpactedTestsBadge,
+                        LastTestSummary));
+                    var cds = CockpitSurfaceSnapshotBuilder.Build(this);
+                    var cdsDecision = _traceFlowCdsRouter.Route(new TraceFlowCdsRouteInput(cds, level));
+                    scene = _traceFlowSurfaceCompositor.Compose(composed.Scene, channelPayload, cdsDecision);
+                }
+                else
+                {
+                    scene = composed.Scene;
+                }
+                graphHeight = composed.PreferredHeight;
                 var satCount = Math.Max(0, scene.Nodes.Count - 1);
                 accentCount = satCount;
                 anchorLabel = string.IsNullOrEmpty(subgraph!.AnchorPath)
@@ -314,6 +352,7 @@ public partial class MainWindowViewModel
             WorkspaceNavigationMapStatus = status;
             WorkspaceNavigationMapRelatedCount = accentCount;
             SemanticMapGraphScene = scene;
+            SemanticMapGraphHeight = graphHeight;
             WorkspaceNavigationMapItems.Clear();
             foreach (var r in rows)
                 WorkspaceNavigationMapItems.Add(r);

@@ -63,6 +63,10 @@
 | [0051](0051-intent-based-attention-routing-toml.md) | Intent-based attention routing (TOML) | Accepted · Implemented |
 | [0052](0052-agent-contract-cli-and-snapshot-tests.md) | CLI для контракта агента (паритет с MCP) и снапшот-тесты | Accepted · Implemented |
 | [0053](0053-semantic-map-control-flow-pfd.md) | Semantic Map и поток управления на PFD (control flow, KISS, subgraph) | Accepted · Implemented |
+| [0054](0054-benchmarking-methodology-and-baselines.md) | Бенчмарки производительности и baseline-метрики для CIDE | Proposed |
+| [0055](0055-skia-instrument-composition-pipeline.md) | Общий pipeline композиции Skia-инструментов (Intent -> Declutter -> Layout -> Render) | Accepted |
+| [0056](0056-semantic-map-pipeline-adoption.md) | Semantic Map: внедрение общего Skia pipeline (композитор, controlFlow layout, cursor semantics) | Accepted · Implemented |
+| [0057](0057-chat-surface-pipeline-adoption.md) | Chat surface: adoption общего Skia pipeline (threads, confirmations, dual-path rollout) | Accepted |
 
 ## Соглашения
 

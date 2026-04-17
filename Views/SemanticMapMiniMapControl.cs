@@ -1,4 +1,5 @@
 using System.Windows.Input;
+using System.Globalization;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -10,6 +11,10 @@ namespace CascadeIDE.Views;
 /// <summary>Мини-карта Semantic Map: рёбра и узлы (звезда); клик по узлу открывает файл; подписи строк — в списке (режим list/both) (ADR 0039).</summary>
 public sealed class SemanticMapMiniMapControl : Control
 {
+    private const string ConditionStepKind = "condition_step";
+    private const string ExitStepKind = "exit_step";
+    private static readonly SemanticMapVisualTheme VisualTheme = SemanticMapVisualTheme.Default;
+
     public static readonly StyledProperty<SemanticMapGraphSceneVm?> SceneProperty =
         AvaloniaProperty.Register<SemanticMapMiniMapControl, SemanticMapGraphSceneVm?>(nameof(Scene));
 
@@ -80,31 +85,92 @@ public sealed class SemanticMapMiniMapControl : Control
         if (w <= 0 || h <= 0)
             return;
 
-        var edgePen = new Pen(new SolidColorBrush(Color.FromArgb(180, 140, 140, 160)), 1);
-        var multibranchPen = new Pen(new SolidColorBrush(Color.FromArgb(200, 110, 195, 255)), 1)
-        {
-            DashStyle = new DashStyle([2, 2], 0)
-        };
-        var loopPen = new Pen(new SolidColorBrush(Color.FromArgb(220, 120, 230, 255)), 1.4);
+        DrawEdges(context, scene);
+        DrawNodes(context, scene);
+    }
+
+    private static void DrawEdges(DrawingContext context, SemanticMapGraphSceneVm scene)
+    {
+        var previousWasLoop = false;
         foreach (var edge in scene.Edges)
         {
-            if (IsLoopEdge(edge.Kind))
+            var isHighlighted = scene.HighlightedEdgeKeys.Contains(edge.Key);
+            var isLoop = IsLoopEdge(edge.Kind);
+            if (isLoop && !previousWasLoop)
             {
-                DrawLoopEdge(context, edge, edgePen, loopPen);
+                var basePen = isHighlighted ? VisualTheme.HighlightedEdgePen : VisualTheme.BaseEdgePen;
+                var loopPen = isHighlighted ? VisualTheme.HighlightedLoopEdgePen : VisualTheme.LoopEdgePen;
+                DrawLoopEdge(context, edge, basePen, loopPen);
+                previousWasLoop = true;
                 continue;
             }
 
-            context.DrawLine(IsMultiBranchEdge(edge.Kind) ? multibranchPen : edgePen, edge.From, edge.To);
+            var edgeStyle = ResolveEdgePen(edge.Kind, isHighlighted);
+            context.DrawLine(edgeStyle, edge.From, edge.To);
+            previousWasLoop = isLoop;
         }
+    }
 
+    private static void DrawNodes(DrawingContext context, SemanticMapGraphSceneVm scene)
+    {
         foreach (var n in scene.Nodes)
         {
-            var fill = n.IsAnchor
-                ? new SolidColorBrush(Color.Parse("#7CC9FF"))
-                : new SolidColorBrush(Color.Parse("#9B8CFF"));
-            var stroke = new SolidColorBrush(Color.Parse("#22000000"));
-            context.DrawEllipse(fill, new Pen(stroke, 1), n.Center, n.Radius, n.Radius);
+            var highlighted = scene.HighlightedNodeIds.Contains(n.Id);
+            context.DrawEllipse(ResolveNodeFill(n), VisualTheme.NodeStrokePen, n.Center, n.Radius, n.Radius);
+            if (highlighted)
+                context.DrawEllipse(null, VisualTheme.HighlightedNodePen, n.Center, n.Radius + 3, n.Radius + 3);
+
+            var glyph = BuildNodeGlyph(n);
+            var glyphText = new FormattedText(
+                glyph,
+                CultureInfo.InvariantCulture,
+                FlowDirection.LeftToRight,
+                VisualTheme.GlyphTypeface,
+                Math.Max(8, n.Radius - 2),
+                VisualTheme.GlyphBrush);
+            var glyphOrigin = new Point(
+                n.Center.X - glyphText.Width / 2,
+                n.Center.Y - glyphText.Height / 2);
+            context.DrawText(glyphText, glyphOrigin);
+
+            var fullLabel = BuildNodeFullLabel(n);
+            if (!string.IsNullOrWhiteSpace(fullLabel))
+            {
+                var labelText = new FormattedText(
+                    fullLabel,
+                    CultureInfo.InvariantCulture,
+                    FlowDirection.LeftToRight,
+                    VisualTheme.SideLabelTypeface,
+                    11,
+                    VisualTheme.SideLabelBrush);
+                var labelOrigin = new Point(
+                    n.Center.X + n.Radius + 6,
+                    n.Center.Y - labelText.Height / 2);
+                context.DrawText(labelText, labelOrigin);
+            }
         }
+    }
+
+    private static Pen ResolveEdgePen(string? kind, bool highlighted)
+    {
+        if (highlighted)
+            return VisualTheme.HighlightedEdgePen;
+        if (IsMultiBranchEdge(kind))
+            return VisualTheme.MultiBranchEdgePen;
+        if (IsConditionalEdge(kind))
+            return VisualTheme.ConditionalEdgePen;
+        return VisualTheme.BaseEdgePen;
+    }
+
+    private static IBrush ResolveNodeFill(SemanticMapGraphNodeLayout node)
+    {
+        if (node.IsAnchor)
+            return VisualTheme.AnchorFill;
+        if (IsConditionNode(node))
+            return VisualTheme.ConditionFill;
+        if (IsExitNode(node))
+            return VisualTheme.ExitFill;
+        return VisualTheme.CallFill;
     }
 
     private static bool IsLoopEdge(string? kind) =>
@@ -133,7 +199,38 @@ public sealed class SemanticMapMiniMapControl : Control
             edge.To.Y - ny * (edge.ToRadius + 10));
         context.DrawLine(linePen, edge.From, entry);
 
-        var loopRadius = edge.ToRadius + 8;
+        var loopRadius = edge.ToRadius + 11;
         context.DrawEllipse(null, loopPen, edge.To, loopRadius, loopRadius);
     }
+
+    private static string BuildNodeGlyph(SemanticMapGraphNodeLayout node)
+    {
+        if (node.IsAnchor)
+            return "A";
+        if (IsConditionNode(node))
+            return "?";
+        if (IsExitNode(node))
+            return "↗";
+        return "•";
+    }
+
+    private static string? BuildNodeFullLabel(SemanticMapGraphNodeLayout node)
+    {
+        if (node.IsAnchor || IsConditionNode(node) || IsExitNode(node))
+            return null;
+        var label = node.Label?.Trim();
+        if (string.IsNullOrWhiteSpace(label))
+            return null;
+        return label;
+    }
+
+    private static bool IsExitNode(SemanticMapGraphNodeLayout node) =>
+        string.Equals(node.Kind, ExitStepKind, StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsConditionNode(SemanticMapGraphNodeLayout node) =>
+        string.Equals(node.Kind, ConditionStepKind, StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsConditionalEdge(string? kind) =>
+        !string.IsNullOrWhiteSpace(kind)
+        && kind.Contains("conditional", StringComparison.OrdinalIgnoreCase);
 }

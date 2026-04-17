@@ -15,6 +15,7 @@ public partial class MainWindowViewModel
 
     partial void OnCurrentFilePathChanged(string? value)
     {
+        UpdateSemanticMapCaretOffset(null);
         RefreshComplexityBadgeFromCurrentFile();
         RefreshEditorHudBannerFromDiagnostics();
         ScheduleWorkspaceNavigationMapRefresh();

@@ -40,6 +40,7 @@ public sealed class WorkspaceNavigationStarGraphLayoutEngine : IWorkspaceNavigat
             layouts.Add(new SemanticMapGraphNodeLayout
             {
                 Id = anchor.Id,
+                Kind = anchor.Kind,
                 FullPath = anchor.Path,
                 Label = TruncateLabel(anchor.Label),
                 Center = ac,
@@ -61,6 +62,7 @@ public sealed class WorkspaceNavigationStarGraphLayoutEngine : IWorkspaceNavigat
             layouts.Add(new SemanticMapGraphNodeLayout
             {
                 Id = sat.Id,
+                Kind = sat.Kind,
                 FullPath = sat.Path,
                 Label = TruncateLabel(sat.Label),
                 Center = p,

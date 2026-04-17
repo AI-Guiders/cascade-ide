@@ -86,6 +86,7 @@
 | Intent-based attention routing из TOML (маршрутизация внимания) | [0051](adr/0051-intent-based-attention-routing-toml.md) (Accepted · Implemented) |
 | CLI для контракта агента (паритет с MCP) и снапшот-тесты | [0052](adr/0052-agent-contract-cli-and-snapshot-tests.md) (Accepted · Implemented: CLI, CI smoke, golden slice CDS) |
 | Semantic Map на PFD: поток управления в методе (условные ветки, схождение), KISS; Roslyn CFG как источник; расширение subgraph / MCP | [0053](adr/0053-semantic-map-control-flow-pfd.md) (Accepted · Implemented) |
+| Бенчмарки производительности CIDE: сценарии, метрики, baseline и протокол измерения | [0054](adr/0054-benchmarking-methodology-and-baselines.md) (Proposed) |
 
 Полный индекс: [docs/adr/README.md](adr/README.md).
 
@@ -194,4 +195,5 @@
 - **v1.81** — [adr/status-lifecycle.md](adr/status-lifecycle.md): договорённость по статусам ADR (**Accepted · Implemented** для внедрённого кода); каталог `.cursor/` в репозитории в `.gitignore` — при желании продублируй суть в локальных правилах Cursor. Строка [0051](adr/0051-intent-based-attention-routing-toml.md) в таблице ниже — **Accepted · Implemented**.
 - **v1.82** — таблица ADR выше: пометки **Accepted · Implemented** выровнены с заголовками ADR и [adr/README.md](adr/README.md) для уже внедрённых решений (в т.ч. [0008](adr/0008-mcp-contracts-and-testable-infrastructure.md), [0010](adr/0010-ui-modes-toml-configuration.md), [0015](adr/0015-editor-toml-syntax-highlighting.md)–[0017](adr/0017-multi-window-workspace-and-agent-surfaces.md), [0019](adr/0019-shared-git-core-ide-and-git-mcp.md), [0028](adr/0028-user-settings-toml-localappdata-and-secrets.md)–[0029](adr/0029-configuration-toml-canonical-ui-facade.md), [0036](adr/0036-cds-channel-compositor-surface-pipeline.md), [0039](adr/0039-workspace-navigation-affordances.md)–[0040](adr/0040-lsp-launch-line-settings-toml-presets-and-environment.md), [0046](adr/0046-presentation-layout-authority-and-cockpit-invariants.md)–[0047](adr/0047-cockpit-instrument-descriptor-and-slot-composition.md)).
 - **v1.83** — [0053](adr/0053-semantic-map-control-flow-pfd.md): Semantic Map и поток управления на PFD (условные ветки, KISS, Roslyn CFG, subgraph/MCP); статус **Accepted · Implemented**.
+- **v1.84** — добавлен [0054](adr/0054-benchmarking-methodology-and-baselines.md): протокол бенчмарков CIDE (сценарии, метрики, baseline, правила сравнения); статус **Proposed**.
 - Изменения направления — отдельным коммитом: обновление этого файла и при необходимости новый ADR в [docs/adr/README.md](adr/README.md).

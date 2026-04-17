@@ -4,7 +4,7 @@
              xmlns:views="using:CascadeIDE.Views"
              x:Class="CascadeIDE.Views.WorkspaceNavigationMapView"
              x:DataType="vm:MainWindowViewModel">
-    <!-- Semantic Map (ADR 0039 / 0047): слот Pfd; list | graph | both; подграф = тот же JSON, что MCP subgraph + звезда укладки. -->
+    <!-- Semantic Map (ADR 0039 / 0047): слот Pfd; list | graph | both; подграф = тот же JSON, что MCP subgraph + компоновка через SemanticMapCompositor. -->
     <Panel IsVisible="{Binding IsPfdRegionExpanded}">
         <Border BorderBrush="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"
                 BorderThickness="1"
@@ -65,7 +65,7 @@
                                    Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
                                    Text="{Binding WorkspaceNavigationMapAnchorLabel}"/>
                     </StackPanel>
-                    <views:SemanticMapMiniMapControl Height="120"
+                    <views:SemanticMapMiniMapControl Height="{Binding SemanticMapGraphHeight}"
                                                      Margin="0,4,0,0"
                                                      Cursor="Hand"
                                                      IsVisible="{Binding ShowSemanticMapGraph}"
