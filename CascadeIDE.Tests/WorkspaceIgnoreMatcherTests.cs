@@ -69,6 +69,112 @@ public sealed class WorkspaceIgnoreMatcherTests
         }
     }
 
+    [Fact]
+    public void GetOrCreate_negation_unignores_in_same_gitignore()
+    {
+        WorkspaceIgnoreMatcher.ClearCacheForTests();
+        var tmp = Directory.CreateTempSubdirectory("cascade_matcher_neg_");
+        try
+        {
+            File.WriteAllText(
+                Path.Combine(tmp.FullName, ".gitignore"),
+                """
+                *.tmp
+                !keep.tmp
+
+                """);
+            var m = WorkspaceIgnoreMatcher.GetOrCreate(tmp.FullName);
+            Assert.False(m.IsIgnored(Path.Combine(tmp.FullName, "keep.tmp")), "last match !keep.tmp");
+            Assert.True(m.IsIgnored(Path.Combine(tmp.FullName, "other.tmp")));
+        }
+        finally
+        {
+            try
+            {
+                Directory.Delete(tmp.FullName, recursive: true);
+            }
+            catch
+            {
+                // ignore
+            }
+
+            WorkspaceIgnoreMatcher.ClearCacheForTests();
+        }
+    }
+
+    [Fact]
+    public void GetOrCreate_nested_gitignore_negation_unignores_file()
+    {
+        WorkspaceIgnoreMatcher.ClearCacheForTests();
+        var tmp = Directory.CreateTempSubdirectory("cascade_matcher_nested_");
+        try
+        {
+            var sub = Path.Combine(tmp.FullName, "sub");
+            Directory.CreateDirectory(sub);
+            File.WriteAllText(Path.Combine(tmp.FullName, ".gitignore"), "*.tmp\n");
+            File.WriteAllText(Path.Combine(sub, ".gitignore"), "!keep.tmp\n");
+            File.WriteAllText(Path.Combine(sub, "keep.tmp"), "");
+            File.WriteAllText(Path.Combine(sub, "drop.tmp"), "");
+
+            var m = WorkspaceIgnoreMatcher.GetOrCreate(tmp.FullName);
+            Assert.False(m.IsIgnored(Path.Combine(sub, "keep.tmp")), "nested !keep.tmp after root *.tmp");
+            Assert.True(m.IsIgnored(Path.Combine(sub, "drop.tmp")));
+        }
+        finally
+        {
+            try
+            {
+                Directory.Delete(tmp.FullName, recursive: true);
+            }
+            catch
+            {
+                // ignore
+            }
+
+            WorkspaceIgnoreMatcher.ClearCacheForTests();
+        }
+    }
+
+    [Fact]
+    public void Folder_workspace_nested_gitignore_shows_unignored_tmp()
+    {
+        WorkspaceIgnoreMatcher.ClearCacheForTests();
+        var tmp = Directory.CreateTempSubdirectory("cascade_ws_nested_");
+        try
+        {
+            var sub = Path.Combine(tmp.FullName, "sub");
+            Directory.CreateDirectory(sub);
+            File.WriteAllText(Path.Combine(tmp.FullName, ".gitignore"), "*.tmp\n");
+            File.WriteAllText(Path.Combine(sub, ".gitignore"), "!keep.tmp\n");
+            File.WriteAllText(Path.Combine(tmp.FullName, "gone.tmp"), "");
+            File.WriteAllText(Path.Combine(sub, "keep.tmp"), "");
+            File.WriteAllText(Path.Combine(sub, "gone2.tmp"), "");
+            File.WriteAllText(Path.Combine(tmp.FullName, "ok.cs"), "//");
+
+            var root = FolderWorkspaceTreeBuilder.TryBuild(tmp.FullName, out var err);
+            Assert.Null(err);
+            Assert.NotNull(root);
+            var names = CollectFileNames(root).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            Assert.Contains("ok.cs", names);
+            Assert.Contains("keep.tmp", names);
+            Assert.DoesNotContain("gone.tmp", names);
+            Assert.DoesNotContain("gone2.tmp", names);
+        }
+        finally
+        {
+            try
+            {
+                Directory.Delete(tmp.FullName, recursive: true);
+            }
+            catch
+            {
+                // ignore
+            }
+
+            WorkspaceIgnoreMatcher.ClearCacheForTests();
+        }
+    }
+
     private static IEnumerable<string> CollectFileNames(SolutionItem node)
     {
         if (node.FullPath is { } p && File.Exists(p))

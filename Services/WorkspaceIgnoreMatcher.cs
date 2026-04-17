@@ -4,20 +4,42 @@ using DotNet.Globbing;
 namespace CascadeIDE.Services;
 
 /// <summary>
-/// Правила из <c>.gitignore</c> и <c>.cascadeignore</c> в корне репозитория (аналог подавления лишнего в дереве, как .gitignore / VS).
-/// Сопоставление путей — упрощённое подмножество gitignore (без полной семантики negation-слоёв).
+/// Правила из вложенных <c>.gitignore</c> и <c>.cascadeignore</c> (в каждом каталоге свой файл).
+/// Семантика близка к git: последнее совпадение побеждает; <c>!</c> снимает игнор.
 /// </summary>
 public sealed class WorkspaceIgnoreMatcher
 {
     private static readonly ConcurrentDictionary<string, WorkspaceIgnoreMatcher> Cache = new(StringComparer.OrdinalIgnoreCase);
 
     private readonly string _repositoryRoot;
-    private readonly Glob[] _globs;
+    private readonly CompiledRule[] _rules;
 
-    private WorkspaceIgnoreMatcher(string repositoryRoot, IReadOnlyList<Glob> globs)
+    private WorkspaceIgnoreMatcher(string repositoryRoot, IReadOnlyList<CompiledRule> rules)
     {
         _repositoryRoot = repositoryRoot;
-        _globs = globs.Count > 0 ? globs.ToArray() : Array.Empty<Glob>();
+        _rules = rules.Count > 0 ? rules.ToArray() : Array.Empty<CompiledRule>();
+    }
+
+    private sealed class CompiledRule
+    {
+        public required string BaseDir { get; init; }
+        public required Glob[] Globs { get; init; }
+        /// <summary>Строка была с префиксом <c>!</c> — совпадение отменяет игнор.</summary>
+        public required bool Negation { get; init; }
+
+        public bool Matches(string relativePathFromBaseDir)
+        {
+            relativePathFromBaseDir = relativePathFromBaseDir.Replace('\\', '/');
+            if (relativePathFromBaseDir.StartsWith("..", StringComparison.Ordinal))
+                return false;
+            foreach (var g in Globs)
+            {
+                if (g.IsMatch(relativePathFromBaseDir))
+                    return true;
+            }
+
+            return false;
+        }
     }
 
     /// <summary>Корень репозитория Git или <paramref name="fallbackStartDirectory"/>.</summary>
@@ -61,43 +83,137 @@ public sealed class WorkspaceIgnoreMatcher
 
     private static WorkspaceIgnoreMatcher Load(string repositoryRoot)
     {
-        var globs = new List<Glob>();
         var options = new GlobOptions { Evaluation = new EvaluationOptions { CaseInsensitive = true } };
+        var rules = new List<CompiledRule>();
 
-        void AppendFile(string path)
+        foreach (var ignoreFile in EnumerateIgnoreFilesSorted(repositoryRoot))
         {
-            if (!File.Exists(path))
-                return;
             string text;
             try
             {
-                text = File.ReadAllText(path);
+                text = File.ReadAllText(ignoreFile);
             }
             catch
             {
-                return;
+                continue;
+            }
+
+            var baseDir = Path.GetDirectoryName(ignoreFile);
+            if (string.IsNullOrEmpty(baseDir))
+                continue;
+            try
+            {
+                baseDir = Path.GetFullPath(baseDir);
+            }
+            catch
+            {
+                continue;
             }
 
             foreach (var line in text.Replace("\r\n", "\n").Split('\n'))
             {
-                foreach (var pattern in GitIgnoreLineToGlobPatterns(line))
+                if (!TryParseGitIgnoreLine(line, out var negation, out var patternBodies))
+                    continue;
+
+                foreach (var pl in patternBodies)
                 {
-                    try
+                    var globs = new List<Glob>();
+                    foreach (var pattern in GitIgnoreLineToGlobPatterns(pl))
                     {
-                        globs.Add(Glob.Parse(pattern, options));
+                        try
+                        {
+                            globs.Add(Glob.Parse(pattern, options));
+                        }
+                        catch
+                        {
+                            // пропускаем неподдерживаемые шаблоны
+                        }
                     }
-                    catch
+
+                    if (globs.Count > 0)
                     {
-                        // пропускаем неподдерживаемые шаблоны
+                        rules.Add(new CompiledRule
+                        {
+                            BaseDir = baseDir,
+                            Globs = globs.ToArray(),
+                            Negation = negation,
+                        });
                     }
                 }
             }
         }
 
-        AppendFile(Path.Combine(repositoryRoot, ".gitignore"));
-        AppendFile(Path.Combine(repositoryRoot, ".cascadeignore"));
+        return new WorkspaceIgnoreMatcher(repositoryRoot, rules);
+    }
 
-        return new WorkspaceIgnoreMatcher(repositoryRoot, globs);
+    /// <summary>Все <c>.gitignore</c> и <c>.cascadeignore</c> под корнем, без захода в <c>.git</c>; в каталоге сначала gitignore, потом cascade.</summary>
+    internal static IReadOnlyList<string> EnumerateIgnoreFilesSorted(string repositoryRoot)
+    {
+        var list = new List<string>();
+        string root;
+        try
+        {
+            root = Path.GetFullPath(repositoryRoot.Trim());
+        }
+        catch
+        {
+            return list;
+        }
+
+        if (!Directory.Exists(root))
+            return list;
+
+        CollectIgnoreFiles(root, list);
+        list.Sort(IgnoreFileComparer);
+
+        return list;
+    }
+
+    private static void CollectIgnoreFiles(string directory, List<string> list)
+    {
+        foreach (var name in new[] { ".gitignore", ".cascadeignore" })
+        {
+            var p = Path.Combine(directory, name);
+            if (File.Exists(p))
+                list.Add(Path.GetFullPath(p));
+        }
+
+        string[] subs;
+        try
+        {
+            subs = Directory.GetDirectories(directory);
+        }
+        catch
+        {
+            return;
+        }
+
+        foreach (var sub in subs)
+        {
+            if (string.Equals(Path.GetFileName(sub), ".git", StringComparison.OrdinalIgnoreCase))
+                continue;
+            CollectIgnoreFiles(sub, list);
+        }
+    }
+
+    private static int IgnoreFileComparer(string a, string b)
+    {
+        var da = Path.GetDirectoryName(a) ?? "";
+        var db = Path.GetDirectoryName(b) ?? "";
+        var c = string.Compare(da, db, StringComparison.OrdinalIgnoreCase);
+        if (c != 0)
+            return c;
+
+        var fa = Path.GetFileName(a);
+        var fb = Path.GetFileName(b);
+        if (string.Equals(fa, ".gitignore", StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(fb, ".cascadeignore", StringComparison.OrdinalIgnoreCase))
+            return -1;
+        if (string.Equals(fa, ".cascadeignore", StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(fb, ".gitignore", StringComparison.OrdinalIgnoreCase))
+            return 1;
+
+        return string.Compare(a, b, StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>Очистка кэша (тесты).</summary>
@@ -106,41 +222,72 @@ public sealed class WorkspaceIgnoreMatcher
     /// <param name="fullPath">Абсолютный путь к файлу или каталогу.</param>
     public bool IsIgnored(string fullPath)
     {
-        if (_globs.Length == 0)
+        if (_rules.Length == 0)
             return false;
 
-        string rel;
         try
         {
-            rel = Path.GetRelativePath(_repositoryRoot, fullPath);
+            fullPath = Path.GetFullPath(fullPath);
         }
         catch
         {
             return false;
         }
 
-        rel = rel.Replace('\\', '/');
-        if (rel.StartsWith("..", StringComparison.Ordinal))
-            return false;
-
-        foreach (var g in _globs)
+        bool? lastIgnored = null;
+        foreach (var rule in _rules)
         {
-            if (g.IsMatch(rel))
-                return true;
+            string rel;
+            try
+            {
+                rel = Path.GetRelativePath(rule.BaseDir, fullPath);
+            }
+            catch
+            {
+                continue;
+            }
+
+            rel = rel.Replace('\\', '/');
+            if (rel.StartsWith("..", StringComparison.Ordinal))
+                continue;
+
+            if (!rule.Matches(rel))
+                continue;
+
+            // Совпало: позитивное правило → игнор; negation → не игнор
+            lastIgnored = !rule.Negation;
         }
 
-        return false;
+        return lastIgnored == true;
     }
 
-    /// <summary>Преобразование строки gitignore в один или несколько glob-паттернов DotNet.Glob.</summary>
-    internal static IEnumerable<string> GitIgnoreLineToGlobPatterns(string rawLine)
+    /// <summary>Разбор одной строки: комментарии и пустые — false.</summary>
+    internal static bool TryParseGitIgnoreLine(string rawLine, out bool negation, out IReadOnlyList<string> patternBodies)
     {
+        negation = false;
+        patternBodies = Array.Empty<string>();
         var line = rawLine.Trim();
         if (line.Length == 0 || line[0] == '#')
-            yield break;
+            return false;
 
-        // Negation — в v1 не поддерживаем (нужен порядок правил как в git)
         if (line[0] == '!')
+        {
+            negation = true;
+            line = line[1..].Trim();
+        }
+
+        if (line.Length == 0 || line[0] == '#')
+            return false;
+
+        patternBodies = new[] { line };
+        return true;
+    }
+
+    /// <summary>Преобразование тела строки gitignore (без <c>!</c>) в glob-паттерны DotNet.Glob.</summary>
+    internal static IEnumerable<string> GitIgnoreLineToGlobPatterns(string lineAfterNegationStripped)
+    {
+        var line = lineAfterNegationStripped.Trim();
+        if (line.Length == 0 || line[0] == '#')
             yield break;
 
         var anchored = line[0] == '/';
@@ -186,7 +333,6 @@ public sealed class WorkspaceIgnoreMatcher
             yield break;
         }
 
-        // Нет слэша — шаблон применяется в любом каталоге
         if (dirOnly)
         {
             yield return "**/" + line + "/**";
