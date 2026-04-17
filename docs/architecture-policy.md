@@ -3,6 +3,8 @@
 **Статус:** действующая.  
 **Назначение этого файла:** краткий **живой навигатор** — куда смотреть и какие решения уже зафиксированы. Детальная **логика решений** (контекст, выбор, последствия, отклонённые варианты) — в [ADR](adr/README.md), не дублируем здесь длинными разделами.
 
+**Статусы ADR** (Proposed / Accepted / …, второй тег **`Implemented`** для внедрённого кода): [adr/status-lifecycle.md](adr/status-lifecycle.md).
+
 **Связь:** [git-and-submodules-v1.md](git-and-submodules-v1.md), [MCP-PROTOCOL.md](MCP-PROTOCOL.md), [debug-human-agent-parity-v1.md](debug-human-agent-parity-v1.md), [architecture-migration.md](architecture-migration.md), черновик границ продукта [north-star-cursor-mcp-cascade-workbench-v1.md](design/north-star-cursor-mcp-cascade-workbench-v1.md) (Cursor + MCP + Cascade).
 
 ---
@@ -81,7 +83,7 @@
 | Чат Cursor ACP в IDE: `mcpServers`, авто IDE MCP; приложения — пробелы тулов, разбор хоста Cursor (`mcp.json`) ↔ `ide_*` | [0048](adr/0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) (Proposed) |
 | Rollout Skia по CIDE: Avalonia остается host/fuselage, Skia расширяется в surface-слое волнами (dual-path, fallback до стабилизации) | [0049](adr/0049-skia-surface-rollout-over-avalonia-host.md) (Proposed) |
 | Карта «инструмент → зона/слот» в TOML: merge bundle/repo/user, `[instrument_routing]`, alias, `InstrumentPlacementRuntime` | [0050](adr/0050-declarative-instrument-zone-placement-toml.md) (Accepted · Implemented) |
-| Intent-based attention routing из TOML (маршрутизация внимания) | [0051](adr/0051-intent-based-attention-routing-toml.md) (Proposed) |
+| Intent-based attention routing из TOML (маршрутизация внимания) | [0051](adr/0051-intent-based-attention-routing-toml.md) (Accepted · Implemented) |
 | CLI для контракта агента (паритет с MCP) и снапшот-тесты | [0052](adr/0052-agent-contract-cli-and-snapshot-tests.md) (Accepted · Implemented: CLI, CI smoke, golden slice CDS) |
 
 Полный индекс: [docs/adr/README.md](adr/README.md).
@@ -188,4 +190,5 @@
 - **v1.78** — в индекс ADR: [0050](adr/0050-declarative-instrument-zone-placement-toml.md) (карта инструментов в TOML), [0051](adr/0051-intent-based-attention-routing-toml.md) (intent routing), [0052](adr/0052-agent-contract-cli-and-snapshot-tests.md) (CLI контракта агента и снапшот-тесты).
 - **v1.79** — [0052](adr/0052-agent-contract-cli-and-snapshot-tests.md): статус **Accepted** (направление CLI + снапшот-тесты; открытых вопросов нет).
 - **v1.80** — [0052](adr/0052-agent-contract-cli-and-snapshot-tests.md): первая поставка — `--agent-contract get_ui_modes_diagnostics`, `AgentContractRunner`, тесты; MCP-PROTOCOL §CLI контракта.
+- **v1.81** — [adr/status-lifecycle.md](adr/status-lifecycle.md): договорённость по статусам ADR (**Accepted · Implemented** для внедрённого кода); каталог `.cursor/` в репозитории в `.gitignore` — при желании продублируй суть в локальных правилах Cursor. Строка [0051](adr/0051-intent-based-attention-routing-toml.md) в таблице ниже — **Accepted · Implemented**.
 - Изменения направления — отдельным коммитом: обновление этого файла и при необходимости новый ADR в [docs/adr/README.md](adr/README.md).
