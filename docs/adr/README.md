@@ -62,6 +62,7 @@
 | [0050](0050-declarative-instrument-zone-placement-toml.md) | Декларативная карта «инструмент → зона/слот» в TOML | Accepted · Implemented |
 | [0051](0051-intent-based-attention-routing-toml.md) | Intent-based attention routing (TOML) | Accepted · Implemented |
 | [0052](0052-agent-contract-cli-and-snapshot-tests.md) | CLI для контракта агента (паритет с MCP) и снапшот-тесты | Accepted · Implemented |
+| [0053](0053-semantic-map-control-flow-pfd.md) | Semantic Map и поток управления на PFD (control flow, KISS, subgraph) | Accepted · Implemented |
 
 ## Соглашения
 
