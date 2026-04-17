@@ -111,7 +111,7 @@ public static class SolutionParser
                 var fullPath = Path.GetFullPath(Path.Combine(baseDir, projectPath.Replace('/', Path.DirectorySeparatorChar)));
                 var title = Path.GetFileName(projectPath);
                 var projectNode = SolutionItem.CreateProject(title, fullPath);
-                ProjectFileTreeBuilder.AddProjectFileChildren(projectNode, fullPath);
+                ProjectFileTreeBuilder.AddProjectFileChildren(projectNode, fullPath, baseDir);
 
                 SolutionItem parent = root;
                 try
@@ -181,7 +181,7 @@ public static class SolutionParser
                 var fullPath = Path.GetFullPath(Path.Combine(baseDir, path.Replace('/', Path.DirectorySeparatorChar)));
                 var title = Path.GetFileName(path);
                 var projectNode = SolutionItem.CreateProject(title, fullPath);
-                ProjectFileTreeBuilder.AddProjectFileChildren(projectNode, fullPath);
+                ProjectFileTreeBuilder.AddProjectFileChildren(projectNode, fullPath, baseDir);
                 parentFolder.Children.Add(projectNode);
             }
         }
@@ -210,7 +210,7 @@ public static class SolutionParser
             var fullPath = Path.GetFullPath(Path.Combine(baseDir, path.Replace('\\', Path.DirectorySeparatorChar)));
             var title = Path.GetFileName(path);
             var projectNode = SolutionItem.CreateProject(title, fullPath);
-            ProjectFileTreeBuilder.AddProjectFileChildren(projectNode, fullPath);
+            ProjectFileTreeBuilder.AddProjectFileChildren(projectNode, fullPath, baseDir);
             root.Children.Add(projectNode);
         }
 

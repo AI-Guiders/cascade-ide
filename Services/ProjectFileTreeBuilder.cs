@@ -9,12 +9,18 @@ namespace CascadeIDE.Services;
 /// </summary>
 public static class ProjectFileTreeBuilder
 {
-    public static void AddProjectFileChildren(SolutionItem projectNode, string projectPath)
+    /// <param name="solutionBaseDirectoryForIgnore">Каталог с <c>.sln</c> — для поиска корня репозитория и загрузки <c>.gitignore</c> / <c>.cascadeignore</c>.</param>
+    public static void AddProjectFileChildren(SolutionItem projectNode, string projectPath, string? solutionBaseDirectoryForIgnore = null)
     {
         if (!File.Exists(projectPath))
             return;
 
         var projectDir = Path.GetDirectoryName(projectPath) ?? "";
+        var hintForRepo = string.IsNullOrWhiteSpace(solutionBaseDirectoryForIgnore)
+            ? projectDir
+            : solutionBaseDirectoryForIgnore.Trim();
+        var repoRoot = WorkspaceIgnoreMatcher.ResolveRepositoryRoot(hintForRepo);
+        var ignore = WorkspaceIgnoreMatcher.GetOrCreate(repoRoot);
         var fileEntries = new List<(string RelativePath, string FullPath)>();
 
         try
@@ -47,6 +53,8 @@ public static class ProjectFileTreeBuilder
 
                     var normalizedInclude = include.Replace('\\', Path.DirectorySeparatorChar);
                     var fullPath = Path.GetFullPath(Path.Combine(projectDir, normalizedInclude));
+                    if (ignore.IsIgnored(fullPath))
+                        continue;
                     if (item.Attribute("Include") is not null &&
                         included.Add(fullPath) && File.Exists(fullPath))
                         fileEntries.Add((normalizedInclude, fullPath));
@@ -76,6 +84,8 @@ public static class ProjectFileTreeBuilder
                         rel.StartsWith("bin", StringComparison.OrdinalIgnoreCase))
                         continue;
                     var fp = Path.GetFullPath(f);
+                    if (ignore.IsIgnored(fp))
+                        continue;
                     if (!included.Add(fp))
                         continue;
                     fileEntries.Add((rel, fp));

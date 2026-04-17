@@ -54,13 +54,15 @@ public static class FolderWorkspaceTreeBuilder
             title = normalized;
 
         var root = SolutionItem.CreateFolderWorkspaceRoot(title, normalized);
+        var repoRoot = WorkspaceIgnoreMatcher.ResolveRepositoryRoot(normalized);
+        var ignore = WorkspaceIgnoreMatcher.GetOrCreate(repoRoot);
         var count = 0;
-        AddChildren(root, normalized, MaxDepth, ref count);
+        AddChildren(root, normalized, MaxDepth, ref count, ignore);
         ProjectFileTreeBuilder.SortSolutionItemChildren(root, StringComparer.OrdinalIgnoreCase);
         return root;
     }
 
-    private static void AddChildren(SolutionItem parent, string dir, int depthRemaining, ref int nodeCount)
+    private static void AddChildren(SolutionItem parent, string dir, int depthRemaining, ref int nodeCount, WorkspaceIgnoreMatcher ignore)
     {
         if (depthRemaining <= 0 || nodeCount >= MaxNodes)
             return;
@@ -80,10 +82,16 @@ public static class FolderWorkspaceTreeBuilder
                 {
                     if (ExcludedDirectoryNames.Contains(name))
                         continue;
+                    if (ignore.IsIgnored(entry))
+                        continue;
                     dirs.Add(entry);
                 }
                 else if (File.Exists(entry))
+                {
+                    if (ignore.IsIgnored(entry))
+                        continue;
                     files.Add(entry);
+                }
             }
         }
         catch
@@ -101,7 +109,7 @@ public static class FolderWorkspaceTreeBuilder
             var folderNode = SolutionItem.CreateFolder(Path.GetFileName(d));
             parent.Children.Add(folderNode);
             nodeCount++;
-            AddChildren(folderNode, d, depthRemaining - 1, ref nodeCount);
+            AddChildren(folderNode, d, depthRemaining - 1, ref nodeCount, ignore);
         }
 
         foreach (var f in files)
