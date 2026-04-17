@@ -4,7 +4,7 @@ namespace CascadeIDE.Cockpit.Channels.WorkspaceHealth;
 /// Слой <strong>канала</strong> Workspace Health (ADR 0036 п.1): собирает <see cref="WorkspaceHealthInputSnapshot"/> из скаляров и делегатов.
 /// Не ссылается на <c>UiChromeViewModel</c>, Instrumentation VM и прочие фичи — их подставляет корень композиции (<see cref="ViewModels.MainWindowViewModel"/>).
 /// </summary>
-public sealed class WorkspaceHealthProvider : IWorkspaceHealthProvider
+public sealed class WorkspaceHealthProvider : IWorkspaceHealthChannel
 {
     private readonly Func<bool> _isBuilding;
     private readonly Func<string> _lastTestSummary;
@@ -35,7 +35,7 @@ public sealed class WorkspaceHealthProvider : IWorkspaceHealthProvider
         _workspaceHealthGitCockpitShort = workspaceHealthGitCockpitShort;
     }
 
-    public WorkspaceHealthInputSnapshot GetSnapshot() =>
+    public WorkspaceHealthInputSnapshot Build(in WorkspaceHealthChannelContext context) =>
         WorkspaceHealthFormat.Compose(
             _isBuilding(),
             _lastTestSummary(),

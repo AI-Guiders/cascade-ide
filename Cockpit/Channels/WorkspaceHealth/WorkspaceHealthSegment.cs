@@ -1,7 +1,7 @@
 namespace CascadeIDE.Cockpit.Channels.WorkspaceHealth;
 
 /// <summary>
-/// Один сегмент полосы build/tests/debug/git после <see cref="WorkspaceHealthSegmentBuilder"/> (композитор, ADR 0036 п.3): текст для полосы/кокпита и флаги для шаблона поверхности.
+/// Один сегмент полосы build/tests/debug/git после <see cref="WorkspaceHealthSurfaceCompositor"/> (композитор, ADR 0036 п.3): текст для полосы/кокпита и флаги для шаблона поверхности.
 /// </summary>
 public sealed class WorkspaceHealthSegment
 {

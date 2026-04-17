@@ -1,4 +1,5 @@
 using CascadeIDE.Cockpit.Cds;
+using CascadeIDE.Cockpit.Channels.WorkspaceHealth;
 using CascadeIDE.Cockpit.Composition;
 using CascadeIDE.Cockpit.Composition.HostSurface;
 using CascadeIDE.Cockpit.Composition.Shell;
@@ -225,16 +226,16 @@ public partial class MainWindowViewModel
     public bool IsImpactedTestsBadgeVisible => ImpactedTestsBadge > 0;
     public bool IsActiveTaskProgressVisible => ActiveTaskProgress > 0;
 
-    /// <summary>Строки из <see cref="IWorkspaceHealthProvider"/> (форматирование в <see cref="WorkspaceHealthFormat"/>).</summary>
-    public string WorkspaceHealthBuildText => _workspaceHealth.GetSnapshot().Build.LineText;
+    /// <summary>Строки из канала Workspace Health (форматирование в <see cref="WorkspaceHealthFormat"/>).</summary>
+    public string WorkspaceHealthBuildText => _workspaceHealth.Build(WorkspaceHealthChannelContext.Default).Build.LineText;
 
     /// <summary>Короткий статус для «кольца» сборки в Power cockpit.</summary>
-    public string WorkspaceHealthBuildCockpitShort => _workspaceHealth.GetSnapshot().Build.CockpitShort;
+    public string WorkspaceHealthBuildCockpitShort => _workspaceHealth.Build(WorkspaceHealthChannelContext.Default).Build.CockpitShort;
 
-    public string WorkspaceHealthTestsText => _workspaceHealth.GetSnapshot().Tests.LineText;
+    public string WorkspaceHealthTestsText => _workspaceHealth.Build(WorkspaceHealthChannelContext.Default).Tests.LineText;
 
     /// <summary>Компактная строка тестов для полосы Power.</summary>
-    public string WorkspaceHealthTestsCockpitShort => _workspaceHealth.GetSnapshot().Tests.CockpitShort;
+    public string WorkspaceHealthTestsCockpitShort => _workspaceHealth.Build(WorkspaceHealthChannelContext.Default).Tests.CockpitShort;
 
     /// <summary>Есть активная DAP-сессия (режим отладки, как в VS).</summary>
     public bool HasDebugSession => _dapDebug.HasActiveSession;
@@ -245,10 +246,10 @@ public partial class MainWindowViewModel
     /// <summary>Процесс запущен под отладчиком, выполнение идёт.</summary>
     public bool IsDebugExecutionRunning => _dapDebug.HasActiveSession && !_dapDebug.IsExecutionStopped;
 
-    public string WorkspaceHealthDebugText => _workspaceHealth.GetSnapshot().Debug.LineText;
+    public string WorkspaceHealthDebugText => _workspaceHealth.Build(WorkspaceHealthChannelContext.Default).Debug.LineText;
 
     /// <summary>Короткий статус отладки для Power.</summary>
-    public string WorkspaceHealthDebugCockpitShort => _workspaceHealth.GetSnapshot().Debug.CockpitShort;
+    public string WorkspaceHealthDebugCockpitShort => _workspaceHealth.Build(WorkspaceHealthChannelContext.Default).Debug.CockpitShort;
 
     public string ChatPanelToggleButtonText => IsMfdRegionExpanded ? "◀" : "▶";
 

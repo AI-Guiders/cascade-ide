@@ -1,11 +1,12 @@
 using System.Collections.ObjectModel;
 using CascadeIDE.Cockpit.Channels.Eicas;
+using CascadeIDE.Cockpit.Composition.WorkspaceHealth;
 
 namespace CascadeIDE.Cockpit.Composition.Eicas;
 
 /// <summary>
 /// Композитор поверхности для канала EICAS (ADR 0036 п.3): упорядочивает <see cref="EicasMessage"/> по серьёзности и времени
-/// перед привязкой к полосе/представлению. Отделён от <see cref="WorkspaceHealthSegmentBuilder"/> (композитор канала Workspace Health).
+/// перед привязкой к полосе/представлению. Отделён от <see cref="WorkspaceHealthSurfaceCompositor"/> (композитор канала Workspace Health).
 /// </summary>
 public static class EicasMessageSorter
 {

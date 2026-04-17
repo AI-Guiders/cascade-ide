@@ -1,12 +1,13 @@
 using CascadeIDE.Cockpit.Composition;
 using CascadeIDE.Cockpit.Composition.HostSurface;
+using CascadeIDE.Cockpit.Composition.WorkspaceHealth;
 using CascadeIDE.ViewModels;
 
 namespace CascadeIDE.Cockpit.Cds;
 
 /// <summary>
 /// Сборка CDS-снимка (ADR 0036 п.2) из публичного состояния <see cref="MainWindowViewModel"/>; ортогонально
-/// <see cref="UiLayoutSnapshot"/> (дерево UI, п.4) и композиторам каналов (<see cref="WorkspaceHealthSegmentBuilder"/>, <see cref="EicasMessageSorter"/>, п.3).
+/// <see cref="UiLayoutSnapshot"/> (дерево UI, п.4) и композиторам каналов (<see cref="WorkspaceHealthSurfaceCompositor"/>, <see cref="EicasMessageSorter"/>, п.3).
 /// </summary>
 public static class CockpitSurfaceSnapshotBuilder
 {

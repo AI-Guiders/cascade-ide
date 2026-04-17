@@ -11,7 +11,10 @@ using CascadeIDE.Features.Git;
 using CascadeIDE.Features.Instrumentation;
 using CascadeIDE.Features.Terminal;
 using CascadeIDE.Cockpit.Channels.Eicas;
+using CascadeIDE.Cockpit.Channels.EnvironmentReadiness;
 using CascadeIDE.Cockpit.Channels.WorkspaceHealth;
+using CascadeIDE.Cockpit.Composition.EnvironmentReadiness;
+using CascadeIDE.Cockpit.Composition.WorkspaceHealth;
 using CascadeIDE.Cockpit.Composition.HostSurface;
 using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Models;
@@ -44,8 +47,11 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private MarkdownLspDiagnosticsHost? _markdownLspHost;
     private readonly IdeMcpCommandExecutor _ideMcpExecutor;
     private readonly Services.IdeDapDebugSession _dapDebug;
-    private readonly IWorkspaceHealthProvider _workspaceHealth;
+    private readonly IWorkspaceHealthChannel _workspaceHealth;
+    private readonly IWorkspaceHealthSurfaceCompositor _workspaceHealthSurfaceCompositor;
     private readonly IEicasFeed _eicasFeed;
+    private readonly IEnvironmentReadinessChannel _environmentReadinessChannel;
+    private readonly IEnvironmentReadinessSurfaceCompositor _environmentReadinessSurfaceCompositor;
     private readonly Services.Presentation.PresentationParseResult _presentationParse;
     private readonly bool _presentationDedicatedMfdSecondScreen;
     private readonly bool _presentationTriplePfdForwardMfd;
@@ -167,9 +173,12 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             () => InstrumentationPanel.DebugVariables.Count,
             () => Chrome.WorkspaceHealthGitText,
             () => Chrome.WorkspaceHealthGitCockpitShort);
+        _workspaceHealthSurfaceCompositor = new WorkspaceHealthSurfaceCompositor();
 
         _eicasFeed = new EmptyEicasFeed();
         _eicasFeed.MessagesChanged += (_, _) => RebuildEicas();
+        _environmentReadinessChannel = new EnvironmentReadinessChannel();
+        _environmentReadinessSurfaceCompositor = new EnvironmentReadinessSurfaceCompositor();
 
         Workspace.PropertyChanged += (_, e) => OnWorkspacePropertyChanged(e.PropertyName);
         Chrome.PropertyChanged += OnChromePropertyChangedForWorkspaceHealth;

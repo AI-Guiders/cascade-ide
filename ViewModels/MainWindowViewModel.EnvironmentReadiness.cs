@@ -1,4 +1,6 @@
 using System.Collections.ObjectModel;
+using CascadeIDE.Cockpit.Channels.EnvironmentReadiness;
+using CascadeIDE.Cockpit.Composition.EnvironmentReadiness;
 using CascadeIDE.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -42,17 +44,19 @@ public partial class MainWindowViewModel
     [RelayCommand]
     private async Task RefreshEnvironmentReadinessAsync()
     {
-        var rows = await EnvironmentReadinessSnapshotBuilder.BuildAllRowsAsync(
-            _settings,
-            Workspace.SolutionPath,
-            _csharpLspHost,
-            _markdownLspHost).ConfigureAwait(false);
+        var rows = await _environmentReadinessChannel.Build(new EnvironmentReadinessChannelContext(
+                _settings,
+                Workspace.SolutionPath,
+                _csharpLspHost,
+                _markdownLspHost))
+            .ConfigureAwait(false);
 
         await UiScheduler.Default.InvokeAsync(() =>
         {
-            EnvironmentReadinessItems.Clear();
-            foreach (var row in rows)
-                EnvironmentReadinessItems.Add(row);
+            _environmentReadinessSurfaceCompositor.Compose(
+                EnvironmentReadinessItems,
+                rows,
+                new EnvironmentReadinessSurfaceDecision(Enabled: true));
             EnvironmentReadinessUpdatedText = $"Обновлено: {DateTime.Now:HH:mm:ss}";
         });
     }

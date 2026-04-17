@@ -5,19 +5,22 @@ using Xunit;
 
 namespace CascadeIDE.Tests;
 
-public sealed class WorkspaceHealthSegmentBuilderTests
+public sealed class WorkspaceHealthSurfaceCompositorTests
 {
+    private static readonly IWorkspaceHealthSurfaceCompositor SurfaceCompositor = new WorkspaceHealthSurfaceCompositor();
+
     [Fact]
     public void Rebuild_fills_four_segments_in_order_build_tests_debug_git()
     {
         var col = new ObservableCollection<WorkspaceHealthSegment>();
-        WorkspaceHealthSegmentBuilder.Rebuild(
+        SurfaceCompositor.Compose(
             col,
-            new WorkspaceHealthInputSnapshot(
+            payload: new WorkspaceHealthInputSnapshot(
                 Build: new WorkspaceHealthSegmentInput("Build: idle", "READY", IsBuildRunning: false),
                 Tests: new WorkspaceHealthSegmentInput("Tests: x", "imp 0"),
                 Debug: new WorkspaceHealthSegmentInput("Debug: idle", "DBG · —"),
-                Git: new WorkspaceHealthSegmentInput("Git: 0 staged", "main · Δ0")));
+                Git: new WorkspaceHealthSegmentInput("Git: 0 staged", "main · Δ0")),
+            decision: new WorkspaceHealthSurfaceDecision(Enabled: true));
 
         Assert.Equal(4, col.Count);
         Assert.Equal(WorkspaceHealthSource.Build, col[0].Source);
@@ -33,13 +36,14 @@ public sealed class WorkspaceHealthSegmentBuilderTests
     public void Rebuild_sets_IsBuildRunning_on_build_segment()
     {
         var col = new ObservableCollection<WorkspaceHealthSegment>();
-        WorkspaceHealthSegmentBuilder.Rebuild(
+        SurfaceCompositor.Compose(
             col,
-            new WorkspaceHealthInputSnapshot(
+            payload: new WorkspaceHealthInputSnapshot(
                 Build: new WorkspaceHealthSegmentInput("Build: running…", "BUILD…", IsBuildRunning: true),
                 Tests: new WorkspaceHealthSegmentInput("Tests: a", "a"),
                 Debug: new WorkspaceHealthSegmentInput("Debug: idle", "—"),
-                Git: new WorkspaceHealthSegmentInput("Git: a", "a")));
+                Git: new WorkspaceHealthSegmentInput("Git: a", "a")),
+            decision: new WorkspaceHealthSurfaceDecision(Enabled: true));
 
         Assert.True(col[0].IsBuildRunning);
         Assert.True(col[0].IsBuildSource);
@@ -50,13 +54,14 @@ public sealed class WorkspaceHealthSegmentBuilderTests
     public void Rebuild_ignores_IsBuildRunning_on_non_build_segments()
     {
         var col = new ObservableCollection<WorkspaceHealthSegment>();
-        WorkspaceHealthSegmentBuilder.Rebuild(
+        SurfaceCompositor.Compose(
             col,
-            new WorkspaceHealthInputSnapshot(
+            payload: new WorkspaceHealthInputSnapshot(
                 Build: new WorkspaceHealthSegmentInput("Build: idle", "READY", IsBuildRunning: false),
                 Tests: new WorkspaceHealthSegmentInput("Tests: x", "t", IsBuildRunning: true),
                 Debug: new WorkspaceHealthSegmentInput("Debug: idle", "d"),
-                Git: new WorkspaceHealthSegmentInput("Git: a", "g")));
+                Git: new WorkspaceHealthSegmentInput("Git: a", "g")),
+            decision: new WorkspaceHealthSurfaceDecision(Enabled: true));
 
         Assert.False(col[1].IsBuildRunning);
         Assert.False(col[2].IsBuildRunning);
