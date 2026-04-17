@@ -25,6 +25,18 @@ public partial class MainWindowViewModel
         var effectiveLevel = Models.SemanticMapLevelKind.Normalize(string.IsNullOrWhiteSpace(level) ? configuredLevel : level);
         var effectiveMode = effectiveLevel == Models.SemanticMapLevelKind.ControlFlow ? "subgraph" : requestedMode;
 
+        if (effectiveLevel == Models.SemanticMapLevelKind.ControlFlow)
+        {
+            return UiScheduler.Default.InvokeAsync(() =>
+                Services.Navigation.WorkspaceNavigationControlFlowSubgraphBuilder.BuildJson(
+                    string.IsNullOrWhiteSpace(filePath) ? CurrentFilePath : filePath,
+                    EditorText,
+                    line,
+                    column,
+                    maxNodes ?? WorkspaceNavigationContextBuilder.DefaultMaxNodes,
+                    maxEdges ?? WorkspaceNavigationContextBuilder.DefaultMaxEdges));
+        }
+
         return UiScheduler.Default.InvokeAsync(() =>
             WorkspaceNavigationContextBuilder.BuildJson(
                 effectiveMode,

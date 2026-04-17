@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Text.Json;
 using Avalonia.Controls;
 using CascadeIDE.Models;
+using CascadeIDE.Services;
 using CascadeIDE.Services.Navigation;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -123,6 +124,9 @@ public partial class MainWindowViewModel
         List<string> rawPaths = [];
         string? currentPath = null;
         string? solutionPath = null;
+        string? editorText = null;
+        int? cursorLine = null;
+        int? cursorColumn = null;
         WorkspaceNavigationContextSettings? navSettings = null;
         var presentation = SemanticMapPresentationKind.List;
         var level = SemanticMapLevelKind.File;
@@ -131,6 +135,10 @@ public partial class MainWindowViewModel
             rawPaths = McpSolutionTree.CollectFileEntries(Workspace.SolutionRoots).Select(e => e.FullPath).ToList();
             currentPath = CurrentFilePath;
             solutionPath = Workspace.SolutionPath;
+            editorText = EditorText;
+            var (line, column) = ComputeLineColumn(EditorText, EditorSelectionStart);
+            cursorLine = line;
+            cursorColumn = column;
             navSettings = _settings.WorkspaceNavigationContext;
             presentation = SemanticMapPresentationKind.Normalize(_settings.SemanticMap.Presentation);
             level = SemanticMapLevelKind.Normalize(_settings.SemanticMap.Level);
@@ -150,6 +158,17 @@ public partial class MainWindowViewModel
             json = await Task.Run(
                     () =>
                     {
+                        if (level == SemanticMapLevelKind.ControlFlow)
+                        {
+                            return WorkspaceNavigationControlFlowSubgraphBuilder.BuildJson(
+                                currentPath,
+                                editorText,
+                                cursorLine,
+                                cursorColumn,
+                                WorkspaceNavigationContextBuilder.DefaultMaxNodes,
+                                WorkspaceNavigationContextBuilder.DefaultMaxEdges);
+                        }
+
                         if (useSubgraphMode)
                         {
                             return WorkspaceNavigationContextBuilder.BuildJson(
@@ -299,5 +318,27 @@ public partial class MainWindowViewModel
             foreach (var r in rows)
                 WorkspaceNavigationMapItems.Add(r);
         });
+    }
+
+    private static (int line, int column) ComputeLineColumn(string? text, int? offset)
+    {
+        var source = text ?? string.Empty;
+        var pos = Math.Clamp(offset ?? 0, 0, source.Length);
+        var line = 1;
+        var col = 1;
+        for (var i = 0; i < pos; i++)
+        {
+            if (source[i] == '\n')
+            {
+                line++;
+                col = 1;
+            }
+            else
+            {
+                col++;
+            }
+        }
+
+        return (line, col);
     }
 }
