@@ -1,6 +1,6 @@
 # ADR 0028: Пользовательские настройки — `settings.toml`, каталог `%LocalAppData%\CascadeIDE\`, секреты отдельно
 
-**Статус:** Accepted  
+**Статус:** Accepted · Implemented (`SettingsService`, `%LocalAppData%\CascadeIDE\`, `settings.toml`, `ai-keys.toml`)  
 **Дата:** 2026-04-08  
 **Обновлено:** 2026-04-11 — до публичного релиза **автоматические миграции схемы** `settings.toml` **не** вводим (команда = единственные потребители); политика — подраздел **«До публичного релиза»** в [README](../README.md). 2026-04-11 — ссылка на [0017](0017-multi-window-workspace-and-agent-surfaces.md): `presentation` — прежде всего **`settings.toml`**, не командный репо. 2026-04-08 — `workspace.toml` (merge/LocalAppData).  
 **Обновлено:** 2026-04-08 — ветка миграции `settings.json` → TOML **удалена** из кода: поддерживаемых legacy-профилей нет, канон только `settings.toml`.  

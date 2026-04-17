@@ -39,19 +39,19 @@
 |------|-----|
 | Слои, срезы фич, роль `MainWindowViewModel`, модели списков | [0006](adr/0006-presentation-layers-and-feature-slices.md) |
 | Сигналы, слабая связность, очереди/батчинг; ссылка на UI-поток | [0007](adr/0007-signals-coupling-and-ui-backpressure.md) + [0004](adr/0004-ui-thread-marshaling.md) |
-| Контракты MCP, тестируемые абстракции для git/процессов | [0008](adr/0008-mcp-contracts-and-testable-infrastructure.md) |
+| Контракты MCP, тестируемые абстракции для git/процессов | [0008](adr/0008-mcp-contracts-and-testable-infrastructure.md) (Accepted · Implemented) |
 | Strangler-миграция, когда можно отклоняться от политики | [0009](adr/0009-strangler-migration-and-exceptions.md) |
 | Динамические плагины (MEF) — не ближайшая цель | [0005](adr/0005-defer-dynamic-plugins-mef.md) |
 | Отладка: паритет человек/агент; Debug UI; гипотезы в JSON; осведомлённость без «только нижняя панель» | [0002](adr/0002-debug-human-agent-parity.md), [0003](adr/0003-debug-ui-mode-separate-from-power.md), [0001](adr/0001-debug-hypotheses-json-storage.md), [0011](adr/0011-debug-situational-awareness.md) |
-| Конфигурация UI-режимов (TOML), принято; реализация — по ADR | [0010](adr/0010-ui-modes-toml-configuration.md) |
+| Конфигурация UI-режимов (TOML) | [0010](adr/0010-ui-modes-toml-configuration.md) (Accepted · Implemented) |
 | Плавающий/отцепляемый хром workspace (нижняя зона, телеметрия; не floating доки в v1) | [0012](adr/0012-floating-workspace-chrome.md) |
 | Поверхность команд, палитра, минимальный toolbar; не смешивать с размещением хрома | [0013](adr/0013-command-surface-and-discoverability.md) |
 | Ситуационные чеклисты (каталог, триггеры, карточка UI) | [0014](adr/0014-situational-checklists.md) |
-| Подсветка TOML в редакторе (шипнутый TextMate-пакет; LSP — отдельно) | [0015](adr/0015-editor-toml-syntax-highlighting.md) |
-| Внешний агент по ACP (stdio, Cursor CLI), не путать с MCP-сервером IDE | [0016](adr/0016-agent-client-protocol-external-agent.md) |
-| Мультиоконность workspace, вторые поверхности агента, зоны экрана; MCP — несколько корней в scope фичи | [0017](adr/0017-multi-window-workspace-and-agent-surfaces.md) (Accepted) |
+| Подсветка TOML в редакторе (шипнутый TextMate-пакет; LSP — отдельно) | [0015](adr/0015-editor-toml-syntax-highlighting.md) (Accepted · Implemented) |
+| Внешний агент по ACP (stdio, Cursor CLI), не путать с MCP-сервером IDE | [0016](adr/0016-agent-client-protocol-external-agent.md) (Accepted · Implemented) |
+| Мультиоконность workspace, вторые поверхности агента, зоны экрана; MCP — несколько корней в scope фичи | [0017](adr/0017-multi-window-workspace-and-agent-surfaces.md) (Accepted · Implemented) |
 | Реестр `IdeCommands`: каноничные XML-доки (`summary` / `param` / `returns` / `example`) для ProtocolDocGen; миграция с мини-языка в summary | [0018](adr/0018-ide-commands-canonical-xml-documentation.md) (Proposed) |
-| Git: общая библиотека логики для встроенных `ide_git_*` и отдельного git-mcp; паритет семантики | [0019](adr/0019-shared-git-core-ide-and-git-mcp.md) (Accepted) |
+| Git: общая библиотека логики для встроенных `ide_git_*` и отдельного git-mcp; паритет семантики | [0019](adr/0019-shared-git-core-ide-and-git-mcp.md) (Accepted · Implemented) |
 | Агент: слои видимости рассуждения (ответ, трасс инструментов, опционально сырой лог); ограничения API провайдеров — явно, без имитации «полного мыслительного процесса» | [0020](adr/0020-agent-reasoning-visibility-and-provider-limits.md) (Proposed) |
 | PFD / MFD / лобовое / EICAS / HUD — модель внимания кокпита | [0021](adr/0021-pfd-mfd-cockpit-attention-model.md) (Proposed) |
 | Визуальная поверхность UI (AXAML / Blazor): превью и дизайн-тайм на MFD / втором мониторе; не цель Blend | [0022](adr/0022-mfd-visual-design-surface-axaml-blazor.md) (Proposed) |
@@ -60,26 +60,26 @@
 | SDK и зоны внимания: канон PFD/MFD/… в метаданных capabilities; overlay презентации без подмены семантики | [0025](adr/0025-sdk-attention-zones-and-capabilities.md) (Proposed) |
 | Превью Markdown: где монтируется виджет (`forward_split` / окно / MFD), ключ в `workspace.toml`; внутренние отсылки (peek) — см. тот же ADR | [0026](adr/0026-markdown-preview-surfaces-and-placement.md) (Accepted, частично) |
 | Продуктовый фокус: малая команда vs готовность к открытию — оси «границы/контракты» и «очередь/discoverability» | [0027](adr/0027-small-team-focus-vs-public-maturity.md) (Accepted) |
-| Пользовательские настройки: путь `settings.toml`, TOML/snake_case, секреты в отдельном `ai-keys.toml` | [0028](adr/0028-user-settings-toml-localappdata-and-secrets.md) (Accepted) |
-| Конфигурация: канон на диске (TOML); центр настроек deferred; точечный UI — фасад канона | [0029](adr/0029-configuration-toml-canonical-ui-facade.md) (Accepted) |
+| Пользовательские настройки: путь `settings.toml`, TOML/snake_case, секреты в отдельном `ai-keys.toml` | [0028](adr/0028-user-settings-toml-localappdata-and-secrets.md) (Accepted · Implemented) |
+| Конфигурация: канон на диске (TOML); центр настроек deferred; точечный UI — фасад канона | [0029](adr/0029-configuration-toml-canonical-ui-facade.md) (Accepted · Implemented) |
 | Команды: слои `IdeCommands` / палитра / `hotkeys.toml` / мост VM; единый UI-каталог — чертёж, не обязателен сразу | [0030](adr/0030-command-ids-hotkeys-and-ui-registry-layers.md) (Accepted · Implemented) |
 | Чат агента: пакеты уточнений (не одна строка), структура ответов; треды — опционально; ортогонально PFD-подтверждениям | [0031](adr/0031-agent-chat-clarification-batches-and-threading.md) (Proposed) |
 | HUD над редактором: что показывать и в каком виде — в `settings.toml`; опциональная грамматика по образцу `presentation` / `[presentation_grammar]` | [0032](adr/0032-hud-banner-configuration-and-grammar.md) (Proposed) |
 | Интернационализация: ResX, культура UI; TOML не словарь всего интерфейса; ортогонально конфигу и HUD | [0033](adr/0033-internationalization-resx-avalonia.md) (Proposed) |
 | Оператор недоступен (Incapacitation): Emergency Mode; EICAS + класс сигналов КВС; liveness, HUD по контексту внимания, interlock опасных команд; сенсоры — opt-in | [0034](adr/0034-pilot-incapacitation-emergency-mode-and-presence-sensing.md) (Proposed) |
 | MFD: встроенный WebView2, внешние веб-LLM; веб не равно MCP-клиент; явная передача контекста; мост веб↔MCP — отдельная линия | [0035](adr/0035-mfd-embedded-webview-external-llm-and-mcp-boundary.md) (Proposed) |
-| CDS: канал → контракт кабины → композитор слота → поверхность (Avalonia); не ARINC 661 целиком | [0036](adr/0036-cds-channel-compositor-surface-pipeline.md) (Accepted) |
+| CDS: канал → контракт кабины → композитор слота → поверхность (Avalonia); не ARINC 661 целиком | [0036](adr/0036-cds-channel-compositor-surface-pipeline.md) (Accepted · Implemented) |
 | PFD: инварианты поверхности (weight, input lock, каналы) и Roslyn; канон `[PfdStrict]` / `PfdStrictControl` | [0037](adr/0037-pfd-surface-invariants-and-roslyn-enforcement.md) (Proposed) |
 | Фасад агента: провайдеры LLM (`AiProviderManager`), чат, ACP, автономный режим; внешние MCP; направление развития | [0038](adr/0038-agent-facade-ai-provider-and-tool-orchestration.md) (Accepted · Implemented) |
-| Навигация по workspace: C#-first / .NET north-star; несколько представлений, граф/semantic map; PFD/MFD; MCP: `get_workspace_navigation_context` (пресеты, `kind_filter`, subgraph) | [0039](adr/0039-workspace-navigation-affordances.md) (Proposed · MCP implemented) |
-| LSP C#/Markdown: пресеты и опциональные `executable`/`arguments` в `settings.toml`; явный флаг чтения из окружения — по [0040](adr/0040-lsp-launch-line-settings-toml-presets-and-environment.md) | [0040](adr/0040-lsp-launch-line-settings-toml-presets-and-environment.md) (Accepted · Proposed) |
+| Навигация по workspace: C#-first / .NET north-star; несколько представлений, граф/semantic map; PFD/MFD; MCP: `get_workspace_navigation_context` (пресеты, `kind_filter`, subgraph) | [0039](adr/0039-workspace-navigation-affordances.md) (Accepted · Implemented) |
+| LSP C#/Markdown: пресеты и опциональные `executable`/`arguments` в `settings.toml`; явный флаг чтения из окружения — по [0040](adr/0040-lsp-launch-line-settings-toml-presets-and-environment.md) | [0040](adr/0040-lsp-launch-line-settings-toml-presets-and-environment.md) (Accepted · Implemented) |
 | Protobuf vs JSON: когда уместен бинарный IDL для агента/IDE; границы с MCP и `IdeCommands`; критерии пилота | [0041](adr/0041-protobuf-for-agent-and-ide-messages.md) (Proposed) |
 | Pre-flight briefing: Planned Changes и Review Before Apply; семантический слой перед записью на диск; частичное одобрение; отказ без артефактов | [0042](adr/0042-pre-flight-planned-changes-and-review-before-apply.md) (Proposed) |
 | MCP-транспорт: паритет «человек может перезапустить MCP в хосте ↔ агент видит сбой и восстановление»; уровни хост / CascadeIDE / наблюдаемость; не смешивать с паритетом отладки | [0043](adr/0043-mcp-transport-recovery-human-agent-parity.md) (Proposed) |
 | Чат агента: модель диалога первична, затем UI; Avalonia как фюзеляж, Skia — гипотеза слоя отрисовки; спайк после/параллельно модели | [0044](adr/0044-avalonia-host-skia-agent-chat-surface.md) (Proposed) |
 | Чат агента: persistence через append-only event log (`*.events.ndjson`) + `meta.json`; проекции для UI отдельно | [0045](adr/0045-agent-chat-persistence-event-log-and-projections.md) (Proposed) |
-| Раскладка кабины: `presentation` как инвариант P/F/M; канон в CDS — `CockpitPresentationLayoutPolicy`; coercion для меню/MCP/UI-режимов и реактивного слоя | [0046](adr/0046-presentation-layout-authority-and-cockpit-invariants.md) (Proposed) |
-| Инструмент кабины: дескриптор слота композитора (`CockpitInstrumentDescriptor`), не Avalonia-контрол; SE vs Semantic Map как разные `instrument_id` в PFD | [0047](adr/0047-cockpit-instrument-descriptor-and-slot-composition.md) (Accepted) |
+| Раскладка кабины: `presentation` как инвариант P/F/M; канон в CDS — `CockpitPresentationLayoutPolicy`; coercion для меню/MCP/UI-режимов и реактивного слоя | [0046](adr/0046-presentation-layout-authority-and-cockpit-invariants.md) (Accepted · Implemented) |
+| Инструмент кабины: дескриптор слота композитора (`CockpitInstrumentDescriptor`), не Avalonia-контрол; SE vs Semantic Map как разные `instrument_id` в PFD | [0047](adr/0047-cockpit-instrument-descriptor-and-slot-composition.md) (Accepted · Implemented) |
 | Чат Cursor ACP в IDE: `mcpServers`, авто IDE MCP; приложения — пробелы тулов, разбор хоста Cursor (`mcp.json`) ↔ `ide_*` | [0048](adr/0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) (Proposed) |
 | Rollout Skia по CIDE: Avalonia остается host/fuselage, Skia расширяется в surface-слое волнами (dual-path, fallback до стабилизации) | [0049](adr/0049-skia-surface-rollout-over-avalonia-host.md) (Proposed) |
 | Карта «инструмент → зона/слот» в TOML: merge bundle/repo/user, `[instrument_routing]`, alias, `InstrumentPlacementRuntime` | [0050](adr/0050-declarative-instrument-zone-placement-toml.md) (Accepted · Implemented) |
@@ -191,4 +191,5 @@
 - **v1.79** — [0052](adr/0052-agent-contract-cli-and-snapshot-tests.md): статус **Accepted** (направление CLI + снапшот-тесты; открытых вопросов нет).
 - **v1.80** — [0052](adr/0052-agent-contract-cli-and-snapshot-tests.md): первая поставка — `--agent-contract get_ui_modes_diagnostics`, `AgentContractRunner`, тесты; MCP-PROTOCOL §CLI контракта.
 - **v1.81** — [adr/status-lifecycle.md](adr/status-lifecycle.md): договорённость по статусам ADR (**Accepted · Implemented** для внедрённого кода); каталог `.cursor/` в репозитории в `.gitignore` — при желании продублируй суть в локальных правилах Cursor. Строка [0051](adr/0051-intent-based-attention-routing-toml.md) в таблице ниже — **Accepted · Implemented**.
+- **v1.82** — таблица ADR выше: пометки **Accepted · Implemented** выровнены с заголовками ADR и [adr/README.md](adr/README.md) для уже внедрённых решений (в т.ч. [0008](adr/0008-mcp-contracts-and-testable-infrastructure.md), [0010](adr/0010-ui-modes-toml-configuration.md), [0015](adr/0015-editor-toml-syntax-highlighting.md)–[0017](adr/0017-multi-window-workspace-and-agent-surfaces.md), [0019](adr/0019-shared-git-core-ide-and-git-mcp.md), [0028](adr/0028-user-settings-toml-localappdata-and-secrets.md)–[0029](adr/0029-configuration-toml-canonical-ui-facade.md), [0036](adr/0036-cds-channel-compositor-surface-pipeline.md), [0039](adr/0039-workspace-navigation-affordances.md)–[0040](adr/0040-lsp-launch-line-settings-toml-presets-and-environment.md), [0046](adr/0046-presentation-layout-authority-and-cockpit-invariants.md)–[0047](adr/0047-cockpit-instrument-descriptor-and-slot-composition.md)).
 - Изменения направления — отдельным коммитом: обновление этого файла и при необходимости новый ADR в [docs/adr/README.md](adr/README.md).

@@ -1,6 +1,6 @@
 # ADR 0036: Канал → CDS → композитор поверхности → поверхность (Agent-first отображение)
 
-**Статус:** Accepted (архитектурная ось принята; детали полей CDS — [`cds-contract-v0.md`](../design/cds-contract-v0.md), эволюция полей — по дорожной карте). **Уже в коде:** слои `Cockpit/Cds`, `Cockpit/Channels`, `Cockpit/Composition`, `Cockpit/Surface` — см. [`cds-contract-v0.md`](../design/cds-contract-v0.md) §6–7, [`Features/README.md`](../Features/README.md).  
+**Статус:** Accepted · Implemented (слои `Cockpit/Cds`, `Cockpit/Channels`, `Cockpit/Composition`, `Cockpit/Surface`; чертёж полей — [`cds-contract-v0.md`](../design/cds-contract-v0.md) §6–7, [`Features/README.md`](../Features/README.md))  
 **Дата:** 2026-04-11  
 **Связь:** [0021](0021-pfd-mfd-cockpit-attention-model.md) (зоны внимания, глоссарий CDS vs `UiLayoutSnapshot`), [0017](0017-multi-window-workspace-and-agent-surfaces.md) (`presentation`, топология окон), [0008](0008-mcp-contracts-and-testable-infrastructure.md) (контракты и тестируемые границы), [0035](0035-mfd-embedded-webview-external-llm-and-mcp-boundary.md) (веб-поверхность ≠ MCP). Чертёж полей и DTO: [`cds-contract-v0.md`](../design/cds-contract-v0.md).
 

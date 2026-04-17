@@ -1,6 +1,6 @@
 # ADR 0029: Конфигурация — **TOML-first** (канон на диске); **целостный** UI настроек — **deferred**; точечный UI — **фасад канона**, не вторая правда
 
-**Статус:** Accepted  
+**Статус:** Accepted · Implemented (TOML-first на диске; целостный UI настроек — deferred; точечный UI — фасад)  
 **Дата:** 2026-04-08  
 **Обновлено:** 2026-04-08 — целостный центр deferred; подраздел «Зачем точечный UI»; перспектива динамического UI от модели; точечный UI = вес кода.  
 **Связь:** [0028](0028-user-settings-toml-localappdata-and-secrets.md) (путь и формат `settings.toml`), [0010](0010-ui-modes-toml-configuration.md) (режимы и merge `workspace.toml`), [0015](0015-editor-toml-syntax-highlighting.md) (TOML во встроенном редакторе; внешний редактор с богатым тулингом — осознанный вариант), [0013](0013-command-surface-and-discoverability.md) (палитра, хоткеи отдельным файлом), [0027](0027-small-team-focus-vs-public-maturity.md) (ось B: отдельное приложение настроек и тяжёлый онбординг — в отложенном бэклоге до триггеров), [0026](0026-markdown-preview-surfaces-and-placement.md) (часть ключей в merged `workspace.toml` — канон для команды в репо). Реализация: `CascadeIdeSettings`, `SettingsService`, привязки в `MainWindowViewModel`.

@@ -1,6 +1,6 @@
 # ADR 0040: LSP (C# / Markdown) — командная строка в `settings.toml`: пресеты, опциональные ключи, переопределение через окружение
 
-**Статус:** Accepted (поведение пресетов и опциональность ключей `executable` / `arguments` в TOML) · Proposed (явный флаг чтения пути и аргументов из переменных окружения)  
+**Статус:** Accepted · Implemented (пресеты LSP и опциональные `executable` / `arguments` в `settings.toml`, хосты диагностик); открыто: явный флаг чтения из окружения — см. § «Решение»  
 **Дата:** 2026-04-13  
 **Связь:** [0028](0028-user-settings-toml-localappdata-and-secrets.md) (где лежит `settings.toml`, snake_case, модель `CascadeIdeSettings`), [0029](0029-configuration-toml-canonical-ui-facade.md) (TOML как канон; UI — фасад), [0023 environment readiness](0023-environment-readiness-glance.md) (краткие подсказки по LSP без дампа `environ`), [0023 markdown tooling](0023-markdown-diagrams-language-tooling.md) (Markdown как first-class; LSP в долгой перспективе). Реализация пресетов: `Services/Lsp/CSharpLspLaunchSpec.cs`, `Services/Lsp/MarkdownLspLaunchSpec.cs`, хосты `*LspDiagnosticsHost`, строки readiness — `Services/EnvironmentReadinessSnapshotBuilder.cs`.
 

@@ -1,6 +1,6 @@
 # ADR 0046: Cockpit CDS — policy раскладки (`CockpitPresentationLayoutPolicy`) и инварианты P/F/M
 
-**Статус:** Proposed  
+**Статус:** Accepted · Implemented (инварианты P/F/M и coercion intent в VM; `CockpitPresentationLayoutPolicy` / CASCOPE003 — см. § «Решение»)  
 **Дата:** 2026-04-14  
 **Связь:** [0017](0017-multi-window-workspace-and-agent-surfaces.md) (presentation и мультиоконность), [0021](0021-pfd-mfd-cockpit-attention-model.md) (модель внимания), [0044](0044-avalonia-host-skia-agent-chat-surface.md) (UI не источник истины по смыслу).
 

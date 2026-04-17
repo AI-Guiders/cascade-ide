@@ -1,6 +1,6 @@
 # ADR 0016: Внешний агент по Agent Client Protocol (stdio, Cursor CLI)
 
-**Статус:** Accepted  
+**Статус:** Accepted · Implemented (Cursor ACP / stdio в чате и настройках; ортогонально MCP — см. текст)  
 **Дата:** 2026-04-05  
 **Связь:** [note-acp-cascade-cursor-v1.md](../ux/note-acp-cascade-cursor-v1.md) (терминология и ссылки на спецификацию), [0008-mcp-contracts-and-testable-infrastructure.md](0008-mcp-contracts-and-testable-infrastructure.md) (MCP — **другой** контур: сервер инструментов IDE; не путать с ACP), концепт [concept-pfd-mfd-cascade-v1.md](../ux/concept-pfd-mfd-cascade-v1.md) §8–§9 (PFD/MFD и внешний агент **ортогональны** протоколу ACP).
 

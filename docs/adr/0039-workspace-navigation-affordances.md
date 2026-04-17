@@ -1,6 +1,6 @@
 # ADR 0039: Навигация по workspace — несколько представлений и «текущий файл + связанные»
 
-**Статус:** Proposed  
+**Статус:** Accepted · Implemented (MCP `get_workspace_navigation_context`, пресеты и фильтры в `settings.toml`; полноценный UI Semantic Map / `ILayoutEngine` — по плану, см. текст ADR)  
 **Дата:** 2026-04-16  
 **Реализация (MCP-слой):** зафиксирована в коде (2026-04): пресеты в `settings.toml`, эхо фильтра, семантика subgraph; см. [§ Agent/MCP](#adr0039-mcp-workspace-navigation). Полноценная Semantic Map в UI и `ILayoutEngine` — вне этого статуса.  
 **Обновлено:** 2026-04-13 — расширен контракт MCP: [именованные пресеты](#adr0039-mcp-workspace-navigation), [`kind_filter`](#adr0039-mcp-workspace-navigation), [subgraph: `kind` / `related_kind`](#adr0039-mcp-workspace-navigation); cookbook: [workspace-navigation-mcp-cookbook.md](../design/workspace-navigation-mcp-cookbook.md). Ранее: [Agent/MCP: `get_workspace_navigation_context`](#adr0039-mcp-workspace-navigation). Ранее: 2026-04-11 — [Semantic Map: источник истины и слой конфигурации](#adr0039-semantic-map-data-layer) (зафиксировано). Ранее: блок [открытые vs закрытые вопросы](#adr0039-open-questions); [канон `(PFD)(Forward)(MFD)`](#adr0039-layout-canon) (scan pattern; уточнение: [строка `presentation` ≠ токен `window`](#adr0039-presentation-vs-toplevel)); [Semantic Map: `ILayoutEngine`](#adr0039-semantic-map-layout). Ещё ранее: 2026-04-16 — [область языков](#adr0039-language-scope); [«Продуктовая метафора»](#adr0039-product-metaphor).  

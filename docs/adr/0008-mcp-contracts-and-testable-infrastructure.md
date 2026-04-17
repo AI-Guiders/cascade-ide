@@ -1,6 +1,6 @@
 # ADR 0008: Стабильные контракты MCP и тестируемая инфраструктура
 
-**Статус:** Accepted  
+**Статус:** Accepted · Implemented (`IIdeMcpActions`, исполнитель MCP, контракты в MCP-PROTOCOL)  
 **Дата:** 2026-04-02  
 **Связь:** [MCP-PROTOCOL.md](../MCP-PROTOCOL.md), `IIdeMcpActions`.
 
