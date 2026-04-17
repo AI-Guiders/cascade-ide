@@ -20,5 +20,5 @@
 |------|-------------------|----------------|
 | Канал (п.1) | `Cockpit/Channels/**` | `WorkspaceHealthInputSnapshot`, `WorkspaceHealthProvider`, `IEicasFeed` |
 | CDS (п.2) | `Cockpit/Cds/` (`CascadeIDE.Cockpit.Cds`) | `CockpitSurfaceState`, `CockpitSurfaceSnapshotBuilder`, `AttentionLayoutSurfaceKind` |
-| Композитор (п.3) | `Cockpit/Composition/**` | `WorkspaceHealthSegmentBuilder`, `EicasMessageSorter` |
+| Композитор (п.3) | `Cockpit/Composition/**` | `WorkspaceHealthSurfaceCompositor`, `EicasMessageSorter` |
 | Поверхность (п.4) | `Views/*`, `Cockpit/Surface/UiLayoutSnapshot` | дерево контролов, MCP `ide_get_ui_layout` |
