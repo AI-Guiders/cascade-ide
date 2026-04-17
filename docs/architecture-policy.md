@@ -82,7 +82,7 @@
 | Rollout Skia по CIDE: Avalonia остается host/fuselage, Skia расширяется в surface-слое волнами (dual-path, fallback до стабилизации) | [0049](adr/0049-skia-surface-rollout-over-avalonia-host.md) (Proposed) |
 | Карта «инструмент → зона/слот» в TOML: merge bundle/repo/user, `[instrument_routing]`, alias, `InstrumentPlacementRuntime` | [0050](adr/0050-declarative-instrument-zone-placement-toml.md) (Accepted · Implemented) |
 | Intent-based attention routing из TOML (маршрутизация внимания) | [0051](adr/0051-intent-based-attention-routing-toml.md) (Proposed) |
-| CLI для контракта агента (паритет с MCP) и снапшот-тесты | [0052](adr/0052-agent-contract-cli-and-snapshot-tests.md) (Accepted · Implemented частично) |
+| CLI для контракта агента (паритет с MCP) и снапшот-тесты | [0052](adr/0052-agent-contract-cli-and-snapshot-tests.md) (Accepted · Implemented: CLI, CI smoke, golden slice CDS) |
 
 Полный индекс: [docs/adr/README.md](adr/README.md).
 
