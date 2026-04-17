@@ -76,6 +76,12 @@ show_git = false
 show_instrumentation = true
 mode = "Flight"
 culture = ""
+# Все сплиттеры рабочей области (MainGrid, обозреватель решения, панель Git и т.д.): true — не двигать («Take Off»)
+workspace_splitters_locked = false
+
+# Semantic Map (зона PFD): list | graph | both — см. ADR 0039. Дальнейшие ключи карты/графа — сюда же.
+[semantic_map]
+presentation = "list"
 
 [csharp_lsp]
 # ParseOnly | OmniSharp | CSharpLs | Custom

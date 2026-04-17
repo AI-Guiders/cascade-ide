@@ -164,9 +164,6 @@ public partial class MainWindowViewModel
     /// <summary>Область разметки над нижним доком: Workspace Health и/или полоса EICAS (<see cref="Views.WorkspaceChromeBandView"/>).</summary>
     public bool ShowWorkspaceChromeBand => ShowWorkspaceHealthStrip || ShowEicasAlertsBar;
 
-    /// <summary>Панель инструментов под меню — из capabilities (<c>main_toolbar</c> в TOML).</summary>
-    public bool ShowMainToolbar => Capabilities.MainToolbarVisible;
-
     /// <summary>Зона под чатом в MFD: полоса EICAS / Workspace Health и/или док (терминал, сборка, Problems, Git, инструменты).</summary>
     public bool ShowWorkspaceBottomChrome =>
         ShowWorkspaceHealthStrip || ShowEicasAlertsBar || IsBottomPanelVisible;

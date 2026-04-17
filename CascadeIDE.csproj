@@ -42,12 +42,14 @@
     <Content Include="Themes\cursor-like-theme.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="Themes\power-theme.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="Themes\power-cockpit-concept-theme.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <!-- UiModes: без этой копии приложение всё равно грузит пресеты из EmbeddedResource (см. ниже); папка рядом с exe — опциональный override. -->
     <Content Include="UiModes\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="Hotkeys\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="WorkspaceNavigation\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <!-- Шипнутые дефолты: копия на диске (override) + встроенный ресурс, если файла нет. -->
     <EmbeddedResource Include="WorkspaceNavigation\presets.toml" />
     <EmbeddedResource Include="Themes\*.json" />
+    <!-- Обязательно для деплоя без шипнутой папки: BundledAppContent / TryReadUiModesFile fallback. -->
     <EmbeddedResource Include="UiModes\*.toml" />
     <EmbeddedResource Include="Hotkeys\hotkeys.toml" />
     <EmbeddedResource Include="TextMateGrammars\toml\package.json" />

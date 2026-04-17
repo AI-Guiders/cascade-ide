@@ -199,7 +199,7 @@ public static class UiModeCatalog
         }
     }
 
-    /// <summary>Сначала файл в <paramref name="uiModesDirectory"/>, иначе встроенный ресурс <c>UiModes/…</c>.</summary>
+    /// <summary>Сначала файл в <paramref name="uiModesDirectory"/> (опциональный override), иначе <c>EmbeddedResource</c> в сборке — без папки <c>UiModes</c> рядом с exe достаточно манифеста.</summary>
     private static bool TryReadUiModesFile(string uiModesDirectory, string fileName, [NotNullWhen(true)] out string? text)
     {
         text = null;
@@ -353,6 +353,48 @@ public static class UiModeCatalog
         }
     }
 
+    /// <summary>
+    /// Дефолты capabilities для семьи Editor до <see cref="Initialize"/> и вне словаря каталога.
+    /// Источник — только <see cref="BundledAppContent.TryReadEmbeddedText"/> (EmbeddedResource в манифесте сборки);
+    /// диск и <c>Content</c> копия рядом с exe <b>не</b> используются — работает и без шипнутой папки <c>UiModes/</c>.
+    /// </summary>
+    internal static bool TryGetEditorCapabilitiesFromEmbeddedResource([NotNullWhen(true)] out UiModeCapabilities? caps)
+    {
+        caps = null;
+        if (!BundledAppContent.TryReadEmbeddedText("UiModes/Flight.toml", out var flightText)
+            || !BundledAppContent.TryReadEmbeddedText("UiModes/Editor.toml", out var editorText))
+            return false;
+
+        UiModeFileToml? flightFile;
+        UiModeFileToml? editorFile;
+        try
+        {
+            flightFile = CascadeTomlSerializer.Deserialize<UiModeFileToml>(flightText);
+            editorFile = CascadeTomlSerializer.Deserialize<UiModeFileToml>(editorText);
+        }
+        catch
+        {
+            return false;
+        }
+
+        if (editorFile is null
+            || string.IsNullOrWhiteSpace(editorFile.Inherits)
+            || !string.Equals(editorFile.Inherits.Trim(), "Flight", StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        var flightCaps = ResolveCapabilities(flightFile, null, null, UiModeFamily.Flight);
+        var fakeFlightParent = new ResolvedMode(
+            UiModeLayoutRegistry.Get("Flight"),
+            UiModeFamily.Flight,
+            UiModeLayoutRegistry.GetMfdRegionExpandedWidthPixels("Flight"),
+            true,
+            flightCaps,
+            null);
+
+        caps = ResolveCapabilities(editorFile, "Flight", fakeFlightParent, UiModeFamily.Editor);
+        return true;
+    }
+
     private static ResolvedMode ResolveMode(
         string modeId,
         string uiModesDirectory,
@@ -498,7 +540,6 @@ public static class UiModeCatalog
             ResultSummaryCard: modeFile.ResultSummaryCard ?? baseCaps.ResultSummaryCard,
             WorkspaceHealthStripVisible: modeFile.WorkspaceHealthStrip ?? baseCaps.WorkspaceHealthStripVisible,
             WorkspaceHealthSurface: surface,
-            MainToolbarVisible: modeFile.MainToolbar ?? baseCaps.MainToolbarVisible,
             ProblemsPanelVisible: modeFile.ProblemsPanel ?? baseCaps.ProblemsPanelVisible,
             EicasAlertsBarEnabled: modeFile.EicasAlertsBar ?? baseCaps.EicasAlertsBarEnabled);
     }

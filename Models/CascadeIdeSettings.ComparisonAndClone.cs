@@ -12,6 +12,7 @@ public sealed partial class CascadeIdeSettings
         return AiEquals(Ai, o.Ai)
             && McpEquals(Mcp, o.Mcp)
             && WorkspaceUiEquals(WorkspaceUi, o.WorkspaceUi)
+            && SemanticMapEquals(SemanticMap, o.SemanticMap)
             && CSharpLspEquals(CSharpLsp, o.CSharpLsp)
             && MarkdownLspEquals(MarkdownLsp, o.MarkdownLsp)
             && MarkdownDiagramsEquals(MarkdownDiagrams, o.MarkdownDiagrams)
@@ -51,7 +52,9 @@ public sealed partial class CascadeIdeSettings
                 ShowInstrumentation = WorkspaceUi.ShowInstrumentation,
                 Mode = WorkspaceUi.Mode,
                 Culture = WorkspaceUi.Culture,
+                WorkspaceSplittersLocked = WorkspaceUi.WorkspaceSplittersLocked,
             },
+            SemanticMap = new SemanticMapSettings { Presentation = SemanticMap.Presentation },
             CSharpLsp = new CSharpLspSettings
             {
                 Provider = CSharpLsp.Provider,
@@ -160,7 +163,15 @@ public sealed partial class CascadeIdeSettings
             && a.ShowGit == b.ShowGit
             && a.ShowInstrumentation == b.ShowInstrumentation
             && a.Mode.Is(b.Mode)
-            && a.Culture.Is(b.Culture);
+            && a.Culture.Is(b.Culture)
+            && a.WorkspaceSplittersLocked == b.WorkspaceSplittersLocked;
+    }
+
+    private static bool SemanticMapEquals(SemanticMapSettings? a, SemanticMapSettings? b)
+    {
+        if (a is null || b is null)
+            return a == b;
+        return a.Presentation.Is(b.Presentation);
     }
 
     private static bool CSharpLspEquals(CSharpLspSettings? a, CSharpLspSettings? b)

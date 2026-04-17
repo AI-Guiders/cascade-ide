@@ -1,19 +1,40 @@
 using System.Collections.ObjectModel;
 using System.Text.Json;
-using Avalonia.Threading;
+using Avalonia.Controls;
 using CascadeIDE.Models;
+using CascadeIDE.Services.Navigation;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 namespace CascadeIDE.ViewModels;
 
-/// <summary>Semantic Map в слоте Pfd: связанные файлы через <see cref="WorkspaceNavigationContextBuilder"/>.</summary>
+/// <summary>Semantic Map в слоте Pfd: тот же контракт, что <see cref="WorkspaceNavigationContextBuilder"/> / MCP.</summary>
 public partial class MainWindowViewModel
 {
+    private readonly IWorkspaceNavigationGraphLayoutEngine _workspaceNavigationGraphLayout = new WorkspaceNavigationStarGraphLayoutEngine();
+
     private CancellationTokenSource? _workspaceNavigationMapRefreshCts;
 
-    /// <summary>Связанные файлы для текущего якоря (режим <c>related</c>).</summary>
+    /// <summary>Связанные файлы для текущего якоря (режим списка).</summary>
     public ObservableCollection<WorkspaceNavigationMapItemVm> WorkspaceNavigationMapItems { get; } = new();
+
+    /// <summary>Варианты <see cref="SemanticMapPresentationKind"/> для ComboBox.</summary>
+    public string[] SemanticMapPresentationOptions { get; } =
+        [SemanticMapPresentationKind.List, SemanticMapPresentationKind.Graph, SemanticMapPresentationKind.Both];
+
+    /// <summary>Сцена мини-карты (подграф + укладка звездой).</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(WorkspaceNavigationMapHasRelated))]
+    private SemanticMapGraphSceneVm? _semanticMapGraphScene;
+
+    /// <summary><c>list</c> | <c>graph</c> | <c>both</c> — синхронизируется с <c>[semantic_map]</c>.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowSemanticMapList))]
+    [NotifyPropertyChangedFor(nameof(ShowSemanticMapGraph))]
+    [NotifyPropertyChangedFor(nameof(WorkspaceNavigationMapHasRelated))]
+    [NotifyPropertyChangedFor(nameof(SemanticMapListAreaRowHeight))]
+    [NotifyPropertyChangedFor(nameof(ShowSemanticMapGraphClickHint))]
+    private string _semanticMapPresentation = SemanticMapPresentationKind.List;
 
     /// <summary>Сообщение об ошибке или пустом состоянии (не null).</summary>
     [ObservableProperty]
@@ -23,11 +44,31 @@ public partial class MainWindowViewModel
     [ObservableProperty]
     private string _workspaceNavigationMapAnchorLabel = "—";
 
-    /// <summary>Число строк related в Semantic Map (для UI и SkiaHost accent).</summary>
+    /// <summary>Число связей для бейджа и Skia accent.</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(WorkspaceNavigationMapRelatedBadge))]
     [NotifyPropertyChangedFor(nameof(WorkspaceNavigationMapHasRelated))]
     private int _workspaceNavigationMapRelatedCount;
+
+    /// <summary>Показать список связанных файлов.</summary>
+    public bool ShowSemanticMapList =>
+        SemanticMapPresentation == SemanticMapPresentationKind.List
+        || SemanticMapPresentation == SemanticMapPresentationKind.Both;
+
+    /// <summary>Показать мини-карту подграфа.</summary>
+    public bool ShowSemanticMapGraph =>
+        SemanticMapPresentation == SemanticMapPresentationKind.Graph
+        || SemanticMapPresentation == SemanticMapPresentationKind.Both;
+
+    /// <summary>
+    /// Высота нижней строки Grid под список: звезда только если список виден; иначе 0 —
+    /// иначе строка <c>*</c> с невидимым <c>ScrollViewer</c> съедает всё место под графом.
+    /// </summary>
+    public GridLength SemanticMapListAreaRowHeight =>
+        ShowSemanticMapList ? new GridLength(1, GridUnitType.Star) : new GridLength(0);
+
+    /// <summary>Режим только графа: подсказка, что узлы кликабельны (в списке кнопки скрыты).</summary>
+    public bool ShowSemanticMapGraphClickHint => ShowSemanticMapGraph && !ShowSemanticMapList;
 
     /// <summary>Короткая подпись к количеству связей для шапки SM.</summary>
     public string WorkspaceNavigationMapRelatedBadge =>
@@ -38,8 +79,10 @@ public partial class MainWindowViewModel
             _ => $"{WorkspaceNavigationMapRelatedCount} связей"
         };
 
-    /// <summary>Есть ли ненулевой список related (для видимости бейджа).</summary>
-    public bool WorkspaceNavigationMapHasRelated => WorkspaceNavigationMapRelatedCount > 0;
+    /// <summary>Есть ли контекст для accent (список или подграф с соседями).</summary>
+    public bool WorkspaceNavigationMapHasRelated =>
+        WorkspaceNavigationMapRelatedCount > 0
+        || (SemanticMapGraphScene?.Nodes.Count > 1);
 
     /// <summary>Открыть связанный файл из Semantic Map.</summary>
     [RelayCommand]
@@ -73,36 +116,63 @@ public partial class MainWindowViewModel
         string? currentPath = null;
         string? solutionPath = null;
         WorkspaceNavigationContextSettings? navSettings = null;
+        var presentation = SemanticMapPresentationKind.List;
         await UiScheduler.Default.InvokeAsync(() =>
         {
             rawPaths = McpSolutionTree.CollectFileEntries(Workspace.SolutionRoots).Select(e => e.FullPath).ToList();
             currentPath = CurrentFilePath;
             solutionPath = Workspace.SolutionPath;
             navSettings = _settings.WorkspaceNavigationContext;
+            presentation = SemanticMapPresentationKind.Normalize(_settings.SemanticMap.Presentation);
         });
 
         if (ct.IsCancellationRequested)
             return;
 
+        var wantList = presentation is SemanticMapPresentationKind.List or SemanticMapPresentationKind.Both;
+        var wantGraph = presentation is SemanticMapPresentationKind.Graph or SemanticMapPresentationKind.Both;
+
         string json;
         try
         {
             json = await Task.Run(
-                    () => WorkspaceNavigationContextBuilder.BuildJson(
-                        "related",
-                        null,
-                        currentPath,
-                        rawPaths,
-                        solutionPath,
-                        null,
-                        null,
-                        WorkspaceNavigationContextBuilder.DefaultMaxRelated,
-                        WorkspaceNavigationContextBuilder.DefaultMaxNodes,
-                        WorkspaceNavigationContextBuilder.DefaultMaxEdges,
-                        null,
-                        null,
-                        null,
-                        navSettings ?? new WorkspaceNavigationContextSettings()),
+                    () =>
+                    {
+                        if (wantGraph)
+                        {
+                            return WorkspaceNavigationContextBuilder.BuildJson(
+                                "subgraph",
+                                null,
+                                currentPath,
+                                rawPaths,
+                                solutionPath,
+                                null,
+                                null,
+                                WorkspaceNavigationContextBuilder.DefaultMaxRelated,
+                                WorkspaceNavigationContextBuilder.DefaultMaxNodes,
+                                WorkspaceNavigationContextBuilder.DefaultMaxEdges,
+                                null,
+                                null,
+                                null,
+                                navSettings ?? new WorkspaceNavigationContextSettings());
+                        }
+
+                        return WorkspaceNavigationContextBuilder.BuildJson(
+                            "related",
+                            null,
+                            currentPath,
+                            rawPaths,
+                            solutionPath,
+                            null,
+                            null,
+                            WorkspaceNavigationContextBuilder.DefaultMaxRelated,
+                            WorkspaceNavigationContextBuilder.DefaultMaxNodes,
+                            WorkspaceNavigationContextBuilder.DefaultMaxEdges,
+                            null,
+                            null,
+                            null,
+                            navSettings ?? new WorkspaceNavigationContextSettings());
+                    },
                     ct)
                 .ConfigureAwait(false);
         }
@@ -117,6 +187,8 @@ public partial class MainWindowViewModel
         List<WorkspaceNavigationMapItemVm> rows = [];
         string status = "";
         string anchorLabel = "—";
+        SemanticMapGraphSceneVm? scene = null;
+        var accentCount = 0;
 
         try
         {
@@ -130,7 +202,40 @@ public partial class MainWindowViewModel
                 if (code == "no_file" && string.IsNullOrEmpty(currentPath))
                     status = "Откройте файл из дерева решения — здесь появятся связанные.";
             }
-            else
+            else if (wantGraph && WorkspaceNavigationSubgraphJson.TryParse(json, out var subgraph, out _))
+            {
+                scene = _workspaceNavigationGraphLayout.Layout(subgraph!, 280, 120);
+                var satCount = Math.Max(0, scene.Nodes.Count - 1);
+                accentCount = satCount;
+                anchorLabel = string.IsNullOrEmpty(subgraph!.AnchorPath)
+                    ? "—"
+                    : Path.GetFileName(subgraph.AnchorPath);
+
+                if (wantList)
+                {
+                    foreach (var n in subgraph.Nodes)
+                    {
+                        if (string.Equals(n.Kind, "anchor", StringComparison.OrdinalIgnoreCase))
+                            continue;
+                        var rel = string.IsNullOrEmpty(n.RelativePath)
+                            ? McpSolutionTree.GetRelativePath(solutionPath, n.Path)
+                            : n.RelativePath!;
+                        rows.Add(new WorkspaceNavigationMapItemVm
+                        {
+                            FullPath = n.Path,
+                            RelativePath = rel ?? n.Path,
+                            Kind = n.Kind,
+                            Rationale = n.Rationale ?? ""
+                        });
+                    }
+
+                    accentCount = Math.Max(accentCount, rows.Count);
+                }
+
+                if (rows.Count == 0 && string.IsNullOrEmpty(status) && wantList)
+                    status = "Нет связанных файлов по текущим эвристикам.";
+            }
+            else if (wantList)
             {
                 if (root.TryGetProperty("anchor_path", out var ap) && ap.ValueKind == JsonValueKind.String)
                 {
@@ -159,6 +264,8 @@ public partial class MainWindowViewModel
                     }
                 }
 
+                accentCount = rows.Count;
+
                 if (rows.Count == 0 && string.IsNullOrEmpty(status))
                     status = "Нет связанных файлов по текущим эвристикам.";
             }
@@ -174,7 +281,8 @@ public partial class MainWindowViewModel
                 return;
             WorkspaceNavigationMapAnchorLabel = anchorLabel;
             WorkspaceNavigationMapStatus = status;
-            WorkspaceNavigationMapRelatedCount = rows.Count;
+            WorkspaceNavigationMapRelatedCount = accentCount;
+            SemanticMapGraphScene = scene;
             WorkspaceNavigationMapItems.Clear();
             foreach (var r in rows)
                 WorkspaceNavigationMapItems.Add(r);

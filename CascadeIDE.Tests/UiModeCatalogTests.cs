@@ -239,8 +239,26 @@ public sealed class UiModeCatalogTests : IDisposable
         File.WriteAllText(
             Path.Combine(dir, "Editor.toml"),
             """
+            inherits = "Flight"
             family = "Editor"
+
             instrumentation_dock_visible = false
+            active_task_strip = false
+
+            quick_actions = false
+            agent_operations_panel = false
+            agent_trace = false
+            autonomous_agent_telemetry = false
+            workspace_health_on_terminal_tab = false
+            workspace_health_main_column_span = 5
+            instrumentation_tabs = false
+            hypotheses_tab = false
+            risk_summary_card = false
+            result_summary_card = false
+            workspace_health_strip = false
+            workspace_health_surface = "bottom_strip"
+            problems_panel = false
+            eicas_alerts_bar = false
             """);
 
         UiModeCatalog.Initialize(dir);
@@ -255,7 +273,6 @@ public sealed class UiModeCatalogTests : IDisposable
 
         var caps = UiModeCatalog.GetCapabilities("Editor");
         Assert.False(caps.WorkspaceHealthStripVisible);
-        Assert.False(caps.MainToolbarVisible);
         Assert.False(caps.ProblemsPanelVisible);
     }
 
@@ -292,6 +309,7 @@ public sealed class UiModeCatalogTests : IDisposable
 
         Assert.Equal(UiModesBundleSource.TomlBundle, UiModeCatalog.ActiveBundleSource);
         Assert.Contains("Flight", UiModeCatalog.OrderedModeIds);
+        Assert.Contains("Editor", UiModeCatalog.OrderedModeIds);
     }
 
     [Fact]

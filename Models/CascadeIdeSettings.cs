@@ -16,6 +16,9 @@ public sealed partial class CascadeIdeSettings : ModelBase
     /// <summary>Параметры панелей и UI-режима workspace (<c>[workspace_ui]</c>).</summary>
     public WorkspaceUiSettings WorkspaceUi { get; set; } = new();
 
+    /// <summary>Semantic Map в зоне PFD (<c>[semantic_map]</c>).</summary>
+    public SemanticMapSettings SemanticMap { get; set; } = new();
+
     /// <summary>C# LSP — секция <c>[csharp_lsp]</c>.</summary>
     public CSharpLspSettings CSharpLsp { get; set; } = new();
 

@@ -23,8 +23,6 @@ public sealed record UiModeCapabilities(
     bool WorkspaceHealthStripVisible,
     /// <summary>Нижняя полоса vs страница зоны; TOML: <c>workspace_health_surface</c>.</summary>
     WorkspaceHealthUiSurface WorkspaceHealthSurface,
-    /// <summary>Панель инструментов под меню.</summary>
-    bool MainToolbarVisible,
     /// <summary>Вкладка Problems и учёт в <see cref="MainWindowViewModel.IsBottomPanelVisible"/>.</summary>
     bool ProblemsPanelVisible,
     /// <summary>Разрешить полосу оповещений EICAS при наличии сообщений; TOML: <c>eicas_alerts_bar</c>. См. ADR 0021 §5, §1.1.</summary>
@@ -35,22 +33,10 @@ public sealed record UiModeCapabilities(
     {
         if (family.IsEditorFamily())
         {
-            return new UiModeCapabilities(
-                QuickActions: false,
-                AgentOperationsPanel: false,
-                AgentTrace: false,
-                AutonomousAgentTelemetry: false,
-                WorkspaceHealthOnTerminalTab: false,
-                WorkspaceHealthMainColumnSpan: 5,
-                InstrumentationTabs: false,
-                HypothesesTab: false,
-                RiskSummaryCard: false,
-                ResultSummaryCard: false,
-                WorkspaceHealthStripVisible: false,
-                WorkspaceHealthSurface: WorkspaceHealthUiSurface.BottomStrip,
-                MainToolbarVisible: false,
-                ProblemsPanelVisible: false,
-                EicasAlertsBarEnabled: false);
+            if (UiModeCatalog.TryGetEditorCapabilitiesFromEmbeddedResource(out var embedded))
+                return embedded;
+            throw new InvalidOperationException(
+                "Семья Editor: не удалось загрузить capabilities из EmbeddedResource (UiModes/Flight.toml, UiModes/Editor.toml). Проверь CascadeIDE.csproj и манифест сборки.");
         }
 
         var balanced = family.IsBalancedFamily();
@@ -74,7 +60,6 @@ public sealed record UiModeCapabilities(
             ResultSummaryCard: !focus && !agentChat,
             WorkspaceHealthStripVisible: true,
             WorkspaceHealthSurface: WorkspaceHealthUiSurface.BottomStrip,
-            MainToolbarVisible: true,
             ProblemsPanelVisible: true,
             EicasAlertsBarEnabled: true);
     }

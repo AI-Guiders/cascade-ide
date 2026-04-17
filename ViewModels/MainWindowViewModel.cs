@@ -93,6 +93,9 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _lastSavedSettings = (CascadeIdeSettings)_settings.Clone();
         _lastSavedAiKeys = (AiKeys)_aiKeys.Clone();
 
+        _semanticMapPresentation = SemanticMapPresentationKind.Normalize(_settings.SemanticMap.Presentation);
+        _workspaceSplittersLocked = _settings.WorkspaceUi.WorkspaceSplittersLocked;
+
         BuildOutputPanel = new BuildOutputPanelViewModel();
         TerminalPanel = new TerminalPanelViewModel(() => Workspace.SolutionPath);
         GitPanel = new GitPanelViewModel(_gitRunner, GetWorkspacePath, this, LoadSolution, RefreshGitSummaryAsync);

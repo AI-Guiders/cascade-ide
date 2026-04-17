@@ -21,7 +21,7 @@ public sealed record UiModeLayoutSpec(
 
 /// <summary>
 /// Встроенный режим UI: порядок в списке UI, раскладка при <c>ApplyUiModeLayout</c>, ширина региона Mfd.
-/// Продуктовый бандл — только <c>Flight</c> (<c>UiModes/</c>); неизвестный id трактуется как Flight.
+/// Шипнутый бандл <c>UiModes/index.toml</c> задаёт id (в т.ч. <c>Flight</c>, <c>Editor</c>); неизвестный id в спеке — как Flight.
 /// </summary>
 public static class UiModeLayoutRegistry
 {

@@ -144,4 +144,25 @@ public partial class MainWindowViewModel
     {
         _appData.Put("SendMessageKey", value);
     }
+
+    partial void OnSemanticMapPresentationChanged(string value)
+    {
+        var normalized = SemanticMapPresentationKind.Normalize(value);
+        if (!string.Equals(normalized, value, StringComparison.Ordinal))
+        {
+            SemanticMapPresentation = normalized;
+            return;
+        }
+
+        _settings.SemanticMap.Presentation = normalized;
+        SaveSettingsIfChanged();
+        ScheduleWorkspaceNavigationMapRefresh();
+    }
+
+    partial void OnWorkspaceSplittersLockedChanged(bool value)
+    {
+        _settings.WorkspaceUi.WorkspaceSplittersLocked = value;
+        if (_lastSavedSettings is not null)
+            SaveSettingsIfChanged();
+    }
 }

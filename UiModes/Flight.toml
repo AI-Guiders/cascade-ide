@@ -26,7 +26,4 @@ result_summary_card = true
 # Удобно отлаживать раскладку: Workspace Health отдельной страницей в MFD.
 workspace_health_surface = "dedicated_page"
 
-# Верхняя панель с кнопками не нужна — палитра команд (Quick Command) покрывает сценарии.
-main_toolbar = false
-
 main_window_title = "CascadeIDE — Flight (layout lab)"

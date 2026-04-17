@@ -107,7 +107,8 @@
                           Height="4"
                           ResizeDirection="Rows"
                           Background="{DynamicResource CascadeTheme.PowerSolutionPanelBorderSubtle}"
-                          IsVisible="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Power}"/>
+                          IsVisible="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Power}"
+                          IsEnabled="{Binding WorkspaceSplittersUnlocked}"/>
             <Border Grid.Row="3"
                     IsVisible="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Power}"
                     MaxHeight="200"

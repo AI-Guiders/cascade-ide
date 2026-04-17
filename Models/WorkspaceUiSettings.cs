@@ -14,4 +14,9 @@ public sealed class WorkspaceUiSettings
 
     /// <summary><c>ru-RU</c>, <c>en-US</c>; пусто — системная локаль (TOML: <c>culture</c>).</summary>
     public string Culture { get; set; } = "";
+
+    /// <summary>
+    /// Заблокировать сплиттеры рабочей области: колонки MainGrid (PFD | Forward | MFD), обозреватель решения, панель Git и т.д. TOML: <c>workspace_splitters_locked</c>.
+    /// </summary>
+    public bool WorkspaceSplittersLocked { get; set; }
 }

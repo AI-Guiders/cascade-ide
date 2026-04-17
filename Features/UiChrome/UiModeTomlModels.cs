@@ -106,9 +106,6 @@ public sealed class UiModeFileToml
     /// <summary><c>bottom_strip</c> | <c>dedicated_page</c>; TOML: <c>workspace_health_surface</c>.</summary>
     public string? WorkspaceHealthSurface { get; set; }
 
-    /// <summary>Панель инструментов под меню; TOML: <c>main_toolbar</c>.</summary>
-    public bool? MainToolbar { get; set; }
-
     /// <summary>Вкладка Problems в нижнем доке; TOML: <c>problems_panel</c>.</summary>
     public bool? ProblemsPanel { get; set; }
 

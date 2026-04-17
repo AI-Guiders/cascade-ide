@@ -241,7 +241,8 @@
                             </DockPanel>
                         </Border>
                         <GridSplitter Grid.Row="6" Grid.Column="1" Width="4" ResizeDirection="Columns"
-                                      Background="{DynamicResource CascadeTheme.BuildOutputBorderBrush}"/>
+                                      Background="{DynamicResource CascadeTheme.BuildOutputBorderBrush}"
+                                      IsEnabled="{Binding DataContext.WorkspaceSplittersUnlocked, ElementName=SecondaryShellRoot}"/>
                         <ScrollViewer Grid.Row="6" Grid.Column="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
                             <TextBox Text="{Binding GitDiffText, Mode=OneWay}"
                                      IsReadOnly="True"
