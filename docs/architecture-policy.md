@@ -91,6 +91,7 @@
 | Бенчмарки производительности CIDE: сценарии, метрики, baseline и протокол измерения | [0054](adr/0054-benchmarking-methodology-and-baselines.md) (Proposed) |
 | Сопряжение агента и Roslyn MCP в `settings.toml`: лимиты, виды узлов, таймауты, пресеты запросов; ортогонально `[semantic_map]` и пресетам навигации [0039](adr/0039-workspace-navigation-affordances.md) | [0058](adr/0058-agent-roslyn-mcp-coupling-settings-toml.md) (Proposed) |
 | Профили Roslyn MCP, Manager: тактика на PFD; EFB / GlobalMap на **MFD** (не PFD); Auto-Focus / Combat / Echelon | [0059](adr/0059-roslyn-mcp-profiles-manager-tactical-strategic-efb.md) (Proposed) |
+| Keyboard-first: аккордный слой (CascadeChord / Ctrl+K), FMS-style S/T, overlay-подсказки, MODE на PFD; палитра Ctrl+Q не заменяется | [0060](adr/0060-keyboard-chord-stack-fms-tactical-strategic.md) (Proposed; расширение [0013](adr/0013-command-surface-and-discoverability.md)) |
 
 Полный индекс: [docs/adr/README.md](adr/README.md).
 
@@ -206,4 +207,5 @@
 - **v1.88** — разделение: [0058](adr/0058-agent-roslyn-mcp-coupling-settings-toml.md) — только ключи/оси TOML для сопряжения MCP; [0059](adr/0059-roslyn-mcp-profiles-manager-tactical-strategic-efb.md) — профили, Manager, режимы, EFB (перенос из бывших §6–§7 у 0058).
 - **v1.89** — [0059](adr/0059-roslyn-mcp-profiles-manager-tactical-strategic-efb.md): режим спокойного ввода переименован **Glide Slope → Echelon** (меньше путаницы с ILS glide path).
 - **v1.90** — [0059](adr/0059-roslyn-mcp-profiles-manager-tactical-strategic-efb.md): **EFB = MFD**, не PFD; гистерезис только для тактического контура (§2); EFB статичен / по намерению.
+- **v1.91** — добавлен [0060](adr/0060-keyboard-chord-stack-fms-tactical-strategic.md): аккордный слой и FMS-style (**S/T**), overlay, индикация MODE; расширение [0013](adr/0013-command-surface-and-discoverability.md); **Ctrl+K** vs палитра **Ctrl+Q**.
 - Изменения направления — отдельным коммитом: обновление этого файла и при необходимости новый ADR в [docs/adr/README.md](adr/README.md).

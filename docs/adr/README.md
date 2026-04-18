@@ -69,6 +69,7 @@
 | [0057](0057-chat-surface-pipeline-adoption.md) | Chat surface: adoption общего Skia pipeline (threads, confirmations, dual-path rollout) | Accepted |
 | [0058](0058-agent-roslyn-mcp-coupling-settings-toml.md) | Сопряжение агента и Roslyn MCP в `settings.toml` (лимиты, виды узлов, таймауты, пресеты) | Proposed |
 | [0059](0059-roslyn-mcp-profiles-manager-tactical-strategic-efb.md) | Профили Roslyn MCP, Manager, тактика (PFD) / EFB на MFD, Auto-Focus / Combat / Echelon | Proposed |
+| [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md) | Аккордный слой (Ctrl+K), FMS-style, S/T, overlay; расширение ADR 0013 | Proposed |
 
 ## Соглашения
 
