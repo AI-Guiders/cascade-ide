@@ -3,7 +3,7 @@
 **Статус:** Accepted · Implemented  
 **Дата:** 2026-04-17  
 
-**Связь:** [0021](0021-pfd-mfd-cockpit-attention-model.md) (зоны внимания, PFD как «приборы»), [0051](0051-intent-based-attention-routing-toml.md) (маршрутизация внимания), subgraph / `WorkspaceNavigationSubgraph*` (`Services/WorkspaceNavigationSubgraphModels.cs`), режим **Flight** как полигон раскладки.
+**Связь:** [0021](0021-pfd-mfd-cockpit-attention-model.md) (зоны внимания, PFD как «приборы»), [0051](0051-intent-based-attention-routing-toml.md) (маршрутизация внимания), subgraph / `SemanticMapSubgraph*` (`Services/SemanticMapSubgraphModels.cs`), режим **Flight** как полигон раскладки.
 
 ---
 
@@ -87,7 +87,7 @@ void A() {
 
 ## Данные и контракт (направление)
 
-Существующие модели subgraph (`WorkspaceNavigationSubgraphNode`, `WorkspaceNavigationSubgraphEdge`) расширяются осмысленно, например:
+Существующие модели subgraph (`SemanticMapSubgraphNode`, `SemanticMapSubgraphEdge`) расширяются осмысленно, например:
 
 | Идея | Назначение |
 |------|------------|

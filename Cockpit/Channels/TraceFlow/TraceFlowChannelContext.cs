@@ -7,6 +7,6 @@ namespace CascadeIDE.Cockpit.Channels.TraceFlow;
 /// Shared channel context for trace-flow family.
 /// </summary>
 public readonly record struct TraceFlowChannelContext(
-    WorkspaceNavigationSubgraphDocument Subgraph,
+    SemanticMapSubgraphDocument Subgraph,
     int ImpactedTestsBadge,
     string LastTestSummary);

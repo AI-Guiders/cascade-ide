@@ -1,28 +1,30 @@
 #nullable enable
+using CascadeIDE.Cockpit.PrimitivesKit;
 using CascadeIDE.Models;
 using CascadeIDE.Services.SkiaInstruments;
 
 namespace CascadeIDE.Services.Navigation;
 
 /// <summary>
-/// Оркестратор компоновки Semantic Map: уровень карты -> движок раскладки + политика высоты.
-/// Surface compositor решает только размещение инструмента в слотах, а не внутреннюю геометрию графа.
+/// Оркестратор компоновки <b>семантической карты</b> (граф → сцена для отрисовки): уровень карты → движок раскладки + политика высоты.
+/// «Карта кода» (control flow) — <b>CodeNavigation</b>; режим файлов/связей — <b>WorkspaceNavigation</b> (см. <see cref="Models.SemanticMapLevelKind"/>).
+/// Поверхность Skia compositor занимается размещением в слотах кокпита, а не смыслом узлов.
 /// </summary>
 public sealed class SemanticMapCompositor : ISemanticMapCompositor
 {
-    public const double DefaultWidth = 280;
-    public const double DefaultHeightFile = 120;
-    public const double DefaultHeightControlFlow = 220;
-    /// <summary>Верхний предел «интринсик»-высоты и слияния с viewport; сама карта заполняет высоту инструмента, если она передана в SkiaInstrumentViewport.</summary>
-    public const double MaxHeightControlFlow = 640;
+    public const double DefaultWidth = SemanticMapGraphPrimitives.DefaultViewportWidth;
+    public const double DefaultHeightFile = SemanticMapGraphPrimitives.DefaultViewportHeightFile;
+    public const double DefaultHeightControlFlow = SemanticMapGraphPrimitives.DefaultViewportHeightControlFlow;
+    /// <summary>Верхний предел «интринсик»-высоты и слияния с viewport; сцена карты заполняет высоту области, если она передана в SkiaInstrumentViewport.</summary>
+    public const double MaxHeightControlFlow = SemanticMapGraphPrimitives.MaxViewportHeightControlFlow;
 
     private readonly ISemanticMapIntentStage _intentStage;
     private readonly ISemanticMapDeclutterStage _declutterStage;
     private readonly ISemanticMapLayoutStage _layoutStage;
 
     public SemanticMapCompositor(
-        IWorkspaceNavigationGraphLayoutEngine? fileLayout = null,
-        IWorkspaceNavigationGraphLayoutEngine? controlFlowLayout = null,
+        ISemanticMapSubgraphLayoutEngine? fileLayout = null,
+        ISemanticMapSubgraphLayoutEngine? controlFlowLayout = null,
         ISemanticMapIntentStage? intentStage = null,
         ISemanticMapDeclutterStage? declutterStage = null,
         ISemanticMapLayoutStage? layoutStage = null)
@@ -45,7 +47,7 @@ public sealed class SemanticMapCompositor : ISemanticMapCompositor
     }
 
     public SemanticMapCompositionResult Compose(
-        WorkspaceNavigationSubgraphDocument doc,
+        SemanticMapSubgraphDocument doc,
         string semanticMapLevel,
         double availableWidth,
         double availableHeight,

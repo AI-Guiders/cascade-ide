@@ -1,5 +1,6 @@
 #nullable enable
 using CascadeIDE.Services;
+using CascadeIDE.Services.CodeNavigation;
 
 namespace CascadeIDE.ViewModels;
 
@@ -42,7 +43,7 @@ public partial class MainWindowViewModel
             }
 
             return UiScheduler.Default.InvokeAsync(() =>
-                Services.Navigation.WorkspaceNavigationControlFlowSubgraphBuilder.BuildJson(
+                CodeNavigationControlFlowSubgraphBuilder.BuildJson(
                     string.IsNullOrWhiteSpace(filePath) ? CurrentFilePath : filePath,
                     EditorText,
                     effectiveLine,

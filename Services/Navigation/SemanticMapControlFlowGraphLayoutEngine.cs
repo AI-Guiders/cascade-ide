@@ -1,5 +1,6 @@
 #nullable enable
 using Avalonia;
+using CascadeIDE.Cockpit.PrimitivesKit;
 using CascadeIDE.ViewModels;
 
 namespace CascadeIDE.Services.Navigation;
@@ -8,9 +9,9 @@ namespace CascadeIDE.Services.Navigation;
 /// Укладка control-flow в формате "полётного плана": основной поток сверху вниз,
 /// а узлы одного шага по глубине — в сторону от центральной оси.
 /// </summary>
-public sealed class WorkspaceNavigationControlFlowGraphLayoutEngine : IWorkspaceNavigationGraphLayoutEngine
+public sealed class SemanticMapControlFlowGraphLayoutEngine : ISemanticMapSubgraphLayoutEngine
 {
-    public SemanticMapGraphSceneVm Layout(WorkspaceNavigationSubgraphDocument doc, double width, double height)
+    public SemanticMapGraphSceneVm Layout(SemanticMapSubgraphDocument doc, double width, double height)
     {
         if (width <= 0 || height <= 0)
             return new SemanticMapGraphSceneVm { Nodes = [], Edges = [], Legend = [], LegendColumnLeft = width };
@@ -40,15 +41,15 @@ public sealed class WorkspaceNavigationControlFlowGraphLayoutEngine : IWorkspace
             .OrderBy(g => g.Key)
             .ToDictionary(g => g.Key, g => g.Select(kv => kv.Key).ToList());
 
-        const double topPadding = 10;
-        const double bottomPadding = 10;
-        const double sidePadding = 10;
-        const double legendGap = 4;
+        var topPadding = SemanticMapGraphPrimitives.ControlFlowTopPadding;
+        var bottomPadding = SemanticMapGraphPrimitives.ControlFlowBottomPadding;
+        var sidePadding = SemanticMapGraphPrimitives.ControlFlowSidePadding;
+        var legendGap = SemanticMapGraphPrimitives.ControlFlowLegendGap;
 
-        static bool IsExitStep(WorkspaceNavigationSubgraphNode n) =>
+        static bool IsExitStep(SemanticMapSubgraphNode n) =>
             string.Equals(n.Kind, "exit_step", StringComparison.OrdinalIgnoreCase);
 
-        static bool IsConditionStep(WorkspaceNavigationSubgraphNode n) =>
+        static bool IsConditionStep(SemanticMapSubgraphNode n) =>
             string.Equals(n.Kind, "condition_step", StringComparison.OrdinalIgnoreCase);
 
         var hasLegendRows = doc.Nodes.Any(static n =>
@@ -59,8 +60,15 @@ public sealed class WorkspaceNavigationControlFlowGraphLayoutEngine : IWorkspace
         var showLegendReturnKey = doc.Nodes.Any(IsExitStep);
         var useLegendColumn = hasLegendRows || showLegendConditionKey || showLegendReturnKey;
         // Резерв под колонку текста справа (минимум читаемой ширины для строк легенды).
-        var legendReserve = useLegendColumn ? Math.Clamp(width * 0.30, 96, 200) : 0;
-        var graphWidth = Math.Max(40, width - legendReserve - (useLegendColumn ? legendGap : 0));
+        var legendReserve = useLegendColumn
+            ? Math.Clamp(
+                width * SemanticMapGraphPrimitives.ControlFlowLegendReserveWidthFraction,
+                SemanticMapGraphPrimitives.ControlFlowLegendReserveMin,
+                SemanticMapGraphPrimitives.ControlFlowLegendReserveMax)
+            : 0;
+        var graphWidth = Math.Max(
+            SemanticMapGraphPrimitives.ControlFlowMinGraphWidth,
+            width - legendReserve - (useLegendColumn ? legendGap : 0));
 
         var legendRows = hasLegendRows
             ? doc.Nodes
@@ -74,8 +82,7 @@ public sealed class WorkspaceNavigationControlFlowGraphLayoutEngine : IWorkspace
             : (IReadOnlyList<SemanticMapLegendEntry>)[];
 
         // Узлы на одном уровне не разъезжаются на всю ширину слота — ограниченная «полоса чтения», по центру области графа.
-        const double maxReadableGraphBandWidth = 380;
-        var bandW = Math.Min(graphWidth, maxReadableGraphBandWidth);
+        var bandW = Math.Min(graphWidth, SemanticMapGraphPrimitives.ControlFlowMaxReadableBandWidth);
         var bandLeft = (graphWidth - bandW) * 0.5;
         var centerX = bandLeft + bandW * 0.5;
 
@@ -86,22 +93,19 @@ public sealed class WorkspaceNavigationControlFlowGraphLayoutEngine : IWorkspace
         var innerH = height - topPadding - bottomPadding;
         var slotCount = Math.Max(1, levelCount - 1);
         var rawYStep = innerH / slotCount;
-        var minYStep = levelCount switch
-        {
-            >= 16 => 10,
-            >= 12 => 12,
-            >= 9 => 14,
-            >= 6 => 16,
-            _ => 18
-        };
-        const double maxReadableYStep = 40;
-        var yStep = Math.Clamp(rawYStep, minYStep, maxReadableYStep);
+        var minYStep = SemanticMapGraphPrimitives.MinVerticalStepForLevelCount(levelCount);
+        var yStep = Math.Clamp(
+            rawYStep,
+            minYStep,
+            SemanticMapGraphPrimitives.ControlFlowMaxReadableVerticalStep);
         var verticalSpan = Math.Max(0, levelCount - 1) * yStep;
         var yStart = topPadding + (innerH - verticalSpan) * 0.5;
-        const double refStep = 34;
-        var radiusMul = Math.Clamp(yStep / refStep, 0.4, 1.12);
-        var anchorR = 14 * radiusMul;
-        var nodeR = 12 * radiusMul;
+        var radiusMul = Math.Clamp(
+            yStep / SemanticMapGraphPrimitives.ControlFlowRefVerticalStep,
+            SemanticMapGraphPrimitives.ControlFlowRadiusScaleMin,
+            SemanticMapGraphPrimitives.ControlFlowRadiusScaleMax);
+        var anchorR = SemanticMapGraphPrimitives.ControlFlowAnchorRadiusBase * radiusMul;
+        var nodeR = SemanticMapGraphPrimitives.ControlFlowNodeRadiusBase * radiusMul;
 
         var idToCenter = new Dictionary<string, Point>(StringComparer.OrdinalIgnoreCase);
         var idToRadius = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
@@ -133,7 +137,7 @@ public sealed class WorkspaceNavigationControlFlowGraphLayoutEngine : IWorkspace
                 idToRadius[id] = radius;
                 var isAnchor = string.Equals(n.Id, anchor.Id, StringComparison.OrdinalIgnoreCase);
                 var shape = !isAnchor && string.Equals(n.Kind, "condition_step", StringComparison.OrdinalIgnoreCase)
-                    ? SemanticMapNodeShape.Diamond
+                    ? SemanticMapNodeShape.Condition
                     : SemanticMapNodeShape.Circle;
                 nodeLayouts.Add(new SemanticMapGraphNodeLayout
                 {
@@ -183,7 +187,7 @@ public sealed class WorkspaceNavigationControlFlowGraphLayoutEngine : IWorkspace
         };
     }
 
-    private static Dictionary<string, List<string>> BuildOutgoing(IReadOnlyList<WorkspaceNavigationSubgraphEdge> edges)
+    private static Dictionary<string, List<string>> BuildOutgoing(IReadOnlyList<SemanticMapSubgraphEdge> edges)
     {
         var outgoing = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
         foreach (var e in edges)
@@ -230,8 +234,8 @@ public sealed class WorkspaceNavigationControlFlowGraphLayoutEngine : IWorkspace
 
     private static string TruncateLabel(string label)
     {
-        if (label.Length <= 22)
+        if (label.Length <= SemanticMapGraphPrimitives.ControlFlowLabelMaxLength)
             return label;
-        return label[..19] + "…";
+        return label[..SemanticMapGraphPrimitives.ControlFlowLabelTruncateLength] + "…";
     }
 }

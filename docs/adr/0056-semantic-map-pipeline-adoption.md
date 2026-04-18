@@ -66,15 +66,15 @@
 - `Services/Navigation/ISemanticMapCompositor.cs`
 - `ViewModels/MainWindowViewModel.WorkspaceNavigationMap.cs`
 - `Views/WorkspaceNavigationMapView.axaml`
-- `Services/Navigation/WorkspaceNavigationControlFlowGraphLayoutEngine.cs`
-- `Services/Navigation/WorkspaceNavigationControlFlowSubgraphBuilder.cs`
+- `Services/Navigation/SemanticMapControlFlowGraphLayoutEngine.cs`
+- `Services/CodeNavigation/CodeNavigationControlFlowSubgraphBuilder.cs`
 
 ---
 
 ## Тесты
 
 - `SemanticMapCompositorTests`
-- `WorkspaceNavigationControlFlowGraphLayoutEngineTests`
-- `WorkspaceNavigationControlFlowSubgraphBuilderTests`
-- `WorkspaceNavigationControlFlowMcpCursorFallbackTests`
+- `SemanticMapControlFlowGraphLayoutEngineTests`
+- `CodeNavigationControlFlowSubgraphBuilderTests`
+- `CodeNavigationControlFlowMcpCursorFallbackTests`
 

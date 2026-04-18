@@ -32,8 +32,11 @@ public sealed class SemanticMapLegendEntry
 
 public enum SemanticMapNodeShape
 {
+    /// <summary>Обычный шаг (круг).</summary>
     Circle,
-    Diamond
+
+    /// <summary>Условие / ветвление в CFG; на карте — ромб (не имя геометрии в API).</summary>
+    Condition
 }
 
 public sealed class SemanticMapGraphNodeLayout

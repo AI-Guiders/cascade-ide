@@ -49,7 +49,7 @@ public sealed class CodeFlowTraceChannel : ITraceFlowChannel
     private static bool IsExit(string? kind) =>
         string.Equals(kind, "Exit", StringComparison.OrdinalIgnoreCase);
 
-    private static WorkspaceNavigationSubgraphEdge PickDominantEdge(IReadOnlyList<WorkspaceNavigationSubgraphEdge> edges)
+    private static SemanticMapSubgraphEdge PickDominantEdge(IReadOnlyList<SemanticMapSubgraphEdge> edges)
     {
         if (edges.Count == 1)
             return edges[0];

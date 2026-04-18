@@ -5,9 +5,9 @@ using CascadeIDE.ViewModels;
 namespace CascadeIDE.Services.Navigation;
 
 /// <summary>Звезда: якорь в центре, спутники по окружности (тот же подграф, что отдаёт MCP в режиме <c>subgraph</c>).</summary>
-public sealed class WorkspaceNavigationStarGraphLayoutEngine : IWorkspaceNavigationGraphLayoutEngine
+public sealed class SemanticMapStarGraphLayoutEngine : ISemanticMapSubgraphLayoutEngine
 {
-    public SemanticMapGraphSceneVm Layout(WorkspaceNavigationSubgraphDocument doc, double width, double height)
+    public SemanticMapGraphSceneVm Layout(SemanticMapSubgraphDocument doc, double width, double height)
     {
         if (width <= 0 || height <= 0)
             return new SemanticMapGraphSceneVm { Nodes = [], Edges = [], Legend = [], LegendColumnLeft = width };

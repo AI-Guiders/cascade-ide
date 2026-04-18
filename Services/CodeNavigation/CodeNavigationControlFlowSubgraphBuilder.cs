@@ -1,13 +1,17 @@
 #nullable enable
 using System.Text.Json;
+using CascadeIDE.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace CascadeIDE.Services.Navigation;
+namespace CascadeIDE.Services.CodeNavigation;
 
-/// <summary>Строит subgraph для Semantic Map на основе синтаксиса метода (control flow).</summary>
-public static class WorkspaceNavigationControlFlowSubgraphBuilder
+/// <summary>
+/// Строит subgraph control flow из синтаксиса метода (Roslyn). Домен — <b>навигация по коду</b>, не структура workspace/git;
+/// wire-документ — <see cref="SemanticMapSubgraphDocument"/> (та же семантическая карта, что отображается в кокпите; см. ADR 0039, 0053).
+/// </summary>
+public static class CodeNavigationControlFlowSubgraphBuilder
 {
     public static string BuildJson(
         string? filePath,
@@ -117,23 +121,21 @@ public static class WorkspaceNavigationControlFlowSubgraphBuilder
     private sealed class ControlFlowGraphBuilder
     {
         private readonly string _filePath;
-        private readonly int _nodeCap;
-        private readonly int _edgeCap;
-        private int _nextId = 1;
-        private int _legendSerial;
+        private readonly SemanticMapSubgraphBlueprint _graph;
 
-        public List<NodeRecord> Nodes { get; }
-        public List<EdgeRecord> Edges { get; } = [];
+        public List<SubgraphBuildNode> Nodes => _graph.Nodes;
+
+        public List<SubgraphBuildEdge> Edges => _graph.Edges;
 
         public ControlFlowGraphBuilder(string filePath, string methodName, int nodeCap, int edgeCap)
         {
             _filePath = filePath;
-            _nodeCap = nodeCap;
-            _edgeCap = edgeCap;
-            Nodes =
-            [
-                new NodeRecord("n0", filePath, "anchor", Path.GetFileName(filePath), "", $"method {methodName}", null, null)
-            ];
+            _graph = new SemanticMapSubgraphBlueprint(
+                filePath,
+                nodeCap,
+                edgeCap,
+                Path.GetFileName(filePath),
+                $"method {methodName}");
         }
 
         public void Build(MethodDeclarationSyntax method)
@@ -178,12 +180,10 @@ public static class WorkspaceNavigationControlFlowSubgraphBuilder
 
         private List<string> BuildIfStatement(IfStatementSyntax ifStatement, List<string> incoming)
         {
-            var condLine = SanitizeLegendLine(ifStatement.Condition.ToString(), 200);
-            var conditionId = AddNode("condition_step", "IF", "if condition", condLine);
+            var conditionId = AddConditionStep(ifStatement.Condition.ToString(), incoming);
             if (conditionId is null)
                 return incoming;
 
-            AddEdges(incoming, conditionId, "ConditionalCall", "ConditionalCall");
             var fromCondition = new List<string> { conditionId };
 
             var thenContinuation = BuildStatement(ifStatement.Statement, fromCondition);
@@ -197,7 +197,21 @@ public static class WorkspaceNavigationControlFlowSubgraphBuilder
                 .ToList();
         }
 
-        private List<string> BuildReturnStatement(List<string> incoming)
+        private List<string> BuildReturnStatement(List<string> incoming) => AddReturnExit(incoming);
+
+        /// <summary>Высокоуровневый шаг: узел условия (ромб) и рёбра от входящих потоков.</summary>
+        private string? AddConditionStep(string conditionExpressionText, List<string> incoming)
+        {
+            var condLine = SemanticMapSubgraphBlueprint.SanitizeLegendLine(conditionExpressionText, 200);
+            var conditionId = AddNode("condition_step", "IF", "if condition", condLine);
+            if (conditionId is null)
+                return null;
+            AddEdges(incoming, conditionId, "ConditionalCall", "ConditionalCall");
+            return conditionId;
+        }
+
+        /// <summary>Высокоуровневый шаг: return — выход из метода; продолжение потока пустое.</summary>
+        private List<string> AddReturnExit(List<string> incoming)
         {
             var returnId = AddNode("exit_step", "RET", "return", "return");
             if (returnId is null)
@@ -223,7 +237,7 @@ public static class WorkspaceNavigationControlFlowSubgraphBuilder
             foreach (var invocation in invocations)
             {
                 var label = ExtractInvocationLabel(invocation);
-                var legend = SanitizeLegendLine(invocation.ToString(), 200);
+                var legend = SemanticMapSubgraphBlueprint.SanitizeLegendLine(invocation.ToString(), 200);
                 var nodeId = AddNode("call_step", label, $"call {label}", legend);
                 if (nodeId is null)
                     return continuation;
@@ -236,48 +250,11 @@ public static class WorkspaceNavigationControlFlowSubgraphBuilder
             return continuation;
         }
 
-        private string? AddNode(string kind, string label, string rationale, string? legendLine = null)
-        {
-            if (Nodes.Count >= _nodeCap)
-                return null;
+        private string? AddNode(string kind, string label, string rationale, string? legendLine = null) =>
+            _graph.TryAddNode(kind, _filePath, label, "", rationale, legendLine, assignControlFlowLegendIndex: true);
 
-            var id = $"n{_nextId++}";
-            var leg = string.IsNullOrWhiteSpace(legendLine)
-                ? SanitizeLegendLine(rationale, 200)
-                : SanitizeLegendLine(legendLine, 200);
-            _legendSerial++;
-            var idx = _legendSerial;
-            Nodes.Add(new NodeRecord(id, _filePath, kind, label, "", rationale, idx, string.IsNullOrEmpty(leg) ? null : leg));
-            return id;
-        }
-
-        private static string SanitizeLegendLine(string? text, int maxLen)
-        {
-            if (string.IsNullOrWhiteSpace(text))
-                return "";
-            var s = text.Replace('\r', ' ').Replace('\n', ' ');
-            while (s.Contains("  ", StringComparison.Ordinal))
-                s = s.Replace("  ", " ", StringComparison.Ordinal);
-            s = s.Trim();
-            if (s.Length <= maxLen)
-                return s;
-            return s[..(maxLen - 1)] + "…";
-        }
-
-        private void AddEdges(List<string> fromIds, string toId, string kind, string relatedKind)
-        {
-            if (fromIds.Count == 0)
-                return;
-
-            var edgeKind = fromIds.Count > 1 ? "Merge" : kind;
-            foreach (var fromId in fromIds)
-            {
-                if (Edges.Count >= _edgeCap)
-                    break;
-
-                Edges.Add(new EdgeRecord(fromId, toId, edgeKind, relatedKind));
-            }
-        }
+        private void AddEdges(List<string> fromIds, string toId, string kind, string relatedKind) =>
+            _graph.AddEdges(fromIds, toId, kind, relatedKind);
     }
 
     private static string DetectEdgeKind(InvocationExpressionSyntax invocation)
@@ -332,19 +309,4 @@ public static class WorkspaceNavigationControlFlowSubgraphBuilder
         return string.Equals(member.Expression.ToString(), "Diagnostic", StringComparison.Ordinal);
     }
 
-    private readonly record struct NodeRecord(
-        string Id,
-        string Path,
-        string Kind,
-        string Label,
-        string RelativePath,
-        string Rationale,
-        int? LegendIndex,
-        string? LegendText);
-
-    private readonly record struct EdgeRecord(
-        string FromId,
-        string ToId,
-        string Kind,
-        string RelatedKind);
 }

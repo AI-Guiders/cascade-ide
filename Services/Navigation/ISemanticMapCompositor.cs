@@ -13,7 +13,7 @@ public interface ISemanticMapCompositor
     : ISkiaInstrumentCompositor<SemanticMapCompositionIntent, SemanticMapCompositionResult>
 {
     SemanticMapCompositionResult Compose(
-        WorkspaceNavigationSubgraphDocument doc,
+        SemanticMapSubgraphDocument doc,
         string semanticMapLevel,
         double availableWidth,
         double availableHeight,
@@ -24,6 +24,6 @@ public sealed record SemanticMapCompositionResult(SemanticMapGraphSceneVm Scene,
 
 /// <param name="DetailLevel">Политика Declutter + метрики Layout (ADR 0055); источник — <c>[semantic_map].detail_level</c>.</param>
 public sealed record SemanticMapCompositionIntent(
-    WorkspaceNavigationSubgraphDocument Subgraph,
+    SemanticMapSubgraphDocument Subgraph,
     string SemanticMapLevel,
     SemanticMapDetailLevel DetailLevel = SemanticMapDetailLevel.Normal);

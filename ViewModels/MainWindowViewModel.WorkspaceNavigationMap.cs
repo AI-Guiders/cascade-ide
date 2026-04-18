@@ -6,13 +6,17 @@ using CascadeIDE.Cockpit.Channels.TraceFlow;
 using CascadeIDE.Cockpit.Composition.TraceFlow;
 using CascadeIDE.Models;
 using CascadeIDE.Services;
+using CascadeIDE.Services.CodeNavigation;
 using CascadeIDE.Services.Navigation;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 namespace CascadeIDE.ViewModels;
 
-/// <summary>Semantic Map в слоте Pfd: тот же контракт, что <see cref="CodeNavigationContextBuilder"/> / MCP.</summary>
+/// <summary>
+/// Слот Pfd: <b>отображение</b> семантической карты (те же данные, что JSON MCP). Semantic Map — граф связей, не название прибора.
+/// По доменам: <b>карта кода</b> (в т.ч. control flow) — CodeNavigation; <b>зависимости файлов</b> — WorkspaceNavigation; <b>submodules</b> — дерево/GitMap (ADR 0062).
+/// </summary>
 public partial class MainWindowViewModel
 {
     private readonly SemanticMapCompositor _semanticMapCompositor = new();
@@ -197,7 +201,7 @@ public partial class MainWindowViewModel
                     {
                         if (level == SemanticMapLevelKind.ControlFlow)
                         {
-                            return WorkspaceNavigationControlFlowSubgraphBuilder.BuildJson(
+                            return CodeNavigationControlFlowSubgraphBuilder.BuildJson(
                                 currentPath,
                                 editorText,
                                 cursorLine,
@@ -271,7 +275,7 @@ public partial class MainWindowViewModel
                 if (code == "no_file" && string.IsNullOrEmpty(currentPath))
                     status = "Откройте файл из дерева решения — здесь появятся связанные.";
             }
-            else if (useSubgraphMode && WorkspaceNavigationSubgraphJson.TryParse(json, out var subgraph, out _))
+            else if (useSubgraphMode && SemanticMapSubgraphJson.TryParse(json, out var subgraph, out _))
             {
                 var composed = _semanticMapCompositor.Compose(
                     new SemanticMapCompositionIntent(
