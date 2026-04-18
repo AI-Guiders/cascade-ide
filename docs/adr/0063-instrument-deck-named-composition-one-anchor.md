@@ -7,6 +7,8 @@
 
 **Связь:** [0021](0021-pfd-mfd-cockpit-attention-model.md) (якоря PFD/MFD/лобовое; композиция **внутри** региона; не переносить инструменты между якорями без смены пресета), [0050](0050-declarative-instrument-zone-placement-toml.md) (`[instrument_routing]` — **какой** инструмент в **семантическом** слоте `pfd_primary` / `mfd_primary`), [0046](0046-presentation-layout-authority-and-cockpit-invariants.md) / [0047](0047-cockpit-instrument-descriptor-and-slot-composition.md) (политика layout, `Instrument`, слоты), [0010](0010-ui-modes-toml-configuration.md) (UiModes / пресеты). Чертёж WH: [`workspace-health-implementation-map-v1.md`](../design/workspace-health-implementation-map-v1.md). **Различие терминов:** [0021 § «Архитектура зон»](0021-pfd-mfd-cockpit-attention-model.md#anchor-pfd-mfd-content-vs-telemetry-page).
 
+**См. также:** [0064](0064-deck-primitives-visual-language-render-layer-and-palette.md) — единое графическое воплощение **видов индикаторов**, библиотека отрисовки, семантическая палитра (vs токены метрик сцены).
+
 ---
 
 ## Контекст

@@ -73,6 +73,8 @@
 | [0061](0061-context-aware-adr-map-pfd-knowledge-indicator.md) | Контекстная карта ADR ↔ пути в `workspace.toml`, индикатор на PFD, intent/tooltip, advisory для агента (GPWS для доков) | Proposed (реализация отложена) |
 | [0062](0062-git-submodules-semantic-map-subgraph.md) | **GitMap:** submodules и git-границы **отдельно** от WSNC/Semantic Map; общий Skia pipeline; собственный контракт/MCP; [git-and-submodules-v1](../git-and-submodules-v1.md) | Proposed |
 | [0063](0063-instrument-deck-named-composition-one-anchor.md) | **Instrument deck** + **`ContentRepresentation`**; таксономия примитивов (в т.ч. Readout, Trend, Gauge, Presence); **Presence/Activity vs Dark Cockpit**; `DedicatedPage` — режим Page для WH, не deck | Accepted |
+| [0064](0064-deck-primitives-visual-language-render-layer-and-palette.md) | **Виды индикаторов** deck: единое графическое воплощение; **библиотека отрисовки** + **семантическая палитра**; без лишнего архитектурного слоя; `DeckPrimitiveKind` = каталог видов | Accepted |
+| [0065](0065-instrument-categories-domain-taxonomy.md) | **Категории инструментов** и **типы графов** (`graph_kind`): домен ортогонально слоту/`instrument_id`; Semantic Map = карта **намерений кода**; см. таблицу `graph_kind` | Accepted |
 
 ## Соглашения
 

@@ -95,6 +95,8 @@
 | ADR как слой осведомлённости: карта путь → ADR в `workspace.toml`, индикатор на PFD, краткий intent; агент — advisory при отклонении от привязанного ADR | [0061](adr/0061-context-aware-adr-map-pfd-knowledge-indicator.md) (Proposed; реализация отложена) |
 | **GitMap** (отдельно от CNC): git submodules / границы репо; не смешивать с `get_code_navigation_context`; переиспользование Skia pipeline; см. [git-and-submodules-v1](git-and-submodules-v1.md) | [0062](adr/0062-git-submodules-semantic-map-subgraph.md) (Proposed) |
 | Именованная композиция в якоре (**instrument deck**); ось формы **`ContentRepresentation`**; таксономия примитивов (в т.ч. Presence/Activity) и **Dark Cockpit**; не смешивать с v1 `[instrument_routing]` | [0063](adr/0063-instrument-deck-named-composition-one-anchor.md) (Accepted) |
+| **Виды индикаторов** deck: единое графическое воплощение; **библиотека отрисовки** (`PrimitivesKit`); **семантическая палитра**; вид индикатора ≠ токены метрик целой сцены; отдельный runtime-слой не вводится | [0064](adr/0064-deck-primitives-visual-language-render-layer-and-palette.md) (Accepted) |
+| **Категории инструментов** и **типы графов** (`graph_kind`): ось домена + структура подграфа; Semantic Map = **карта намерений кода** (не «любой граф связей»); опциональные поля дескриптора / JSON — по дорожной карте | [0065](adr/0065-instrument-categories-domain-taxonomy.md) (Accepted) |
 
 Полный индекс: [docs/adr/README.md](adr/README.md).
 
@@ -217,4 +219,8 @@
 - **v1.95** — [0063](adr/0063-instrument-deck-named-composition-one-anchor.md): направление **типы индикаторов** в deck — **Lamp / Bar / Sign** (компактные страницы; не контракт кода v1).
 - **v1.96** — [0063](adr/0063-instrument-deck-named-composition-one-anchor.md): расширенная таксономия примитивов; **Presence/Activity** и согласование с **Dark Cockpit** ([0021](adr/0021-pfd-mfd-cockpit-attention-model.md) §6).
 - **v1.97** — [0063](adr/0063-instrument-deck-named-composition-one-anchor.md): статус **Accepted** (терминология **instrument deck** / **`ContentRepresentation`**; ключи топологии дисплеев — [0017](adr/0017-multi-window-workspace-and-agent-surfaces.md) § `display.screens` / `topology`).
+- **v1.98** — добавлен [0064](adr/0064-deck-primitives-visual-language-render-layer-and-palette.md): продуктовые примитивы deck — единое графическое представление; слой графики (`Cockpit/PrimitivesKit`); семантическая палитра и Dark Cockpit; продуктовый примитив vs токены сцены; статус **Accepted**.
+- **v1.99** — [0064](adr/0064-deck-primitives-visual-language-render-layer-and-palette.md): канон **«вид индикатора»** / **форма сигнала**; лексикон продукт ↔ код (`DeckPrimitiveKind`); **библиотека отрисовки** вместо «ещё одного слоя»; отдельный runtime-tier **не** вводится.
+- **v2.00** — добавлен [0065](adr/0065-instrument-categories-domain-taxonomy.md): **категории инструментов** как ось домена (CodeNavigation / WorkspaceNavigation / топология repo); ортогонально слоту и `instrument_id`; Semantic Map — граф, не прибор; опциональное `instrument_category` в дескрипторе — по мере необходимости; статус **Accepted**.
+- **v2.01** — [0065](adr/0065-instrument-categories-domain-taxonomy.md): Semantic Map в узком смысле — **карта намерений кода**; введена ось **`graph_kind`** (тип графа в wire/MCP); таблица минимальных значений.
 - Изменения направления — отдельным коммитом: обновление этого файла и при необходимости новый ADR в [docs/adr/README.md](adr/README.md).
