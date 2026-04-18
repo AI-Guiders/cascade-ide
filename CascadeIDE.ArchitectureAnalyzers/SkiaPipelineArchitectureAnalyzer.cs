@@ -29,7 +29,7 @@ public sealed class SkiaPipelineArchitectureAnalyzer : DiagnosticAnalyzer
     private static readonly DiagnosticDescriptor SemanticMapStageFlowRule = new(
         SemanticMapStageFlowId,
         "SemanticMapCompositor must execute Intent -> Declutter -> Layout",
-        "SemanticMapCompositor.Compose(...) must call _intentStage.Resolve, _declutterStage.Apply and _layoutStage.Layout.",
+        "SemanticMapCompositor.Compose(...) must call _intentStage.Resolve, _declutterStage.Apply and _layoutStage.Layout",
         "Architecture",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true,
@@ -38,7 +38,7 @@ public sealed class SkiaPipelineArchitectureAnalyzer : DiagnosticAnalyzer
     private static readonly DiagnosticDescriptor LayoutBypassRule = new(
         LayoutBypassId,
         "Layout engines must be used only in SemanticMapLayoutStage",
-        "Direct usage of '{0}' is allowed only inside SemanticMapLayoutStage to avoid pipeline bypass.",
+        "Direct usage of '{0}' is allowed only inside SemanticMapLayoutStage to avoid pipeline bypass",
         "Architecture",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true,

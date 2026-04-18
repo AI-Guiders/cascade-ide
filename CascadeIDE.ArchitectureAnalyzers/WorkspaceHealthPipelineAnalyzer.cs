@@ -19,7 +19,7 @@ public sealed class WorkspaceHealthPipelineAnalyzer : DiagnosticAnalyzer
     private static readonly DiagnosticDescriptor LegacyGetSnapshotRule = new(
         LegacyGetSnapshotId,
         "Workspace Health: legacy GetSnapshot path is forbidden",
-        "Use Workspace Health channel Build(context) instead of legacy GetSnapshot() in MainWindowViewModel pipeline.",
+        "Use Workspace Health channel Build(context) instead of legacy GetSnapshot() in MainWindowViewModel pipeline",
         "Architecture",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true,
@@ -28,7 +28,7 @@ public sealed class WorkspaceHealthPipelineAnalyzer : DiagnosticAnalyzer
     private static readonly DiagnosticDescriptor LegacySegmentBuilderRule = new(
         LegacySegmentBuilderId,
         "Workspace Health: legacy SegmentBuilder usage is forbidden",
-        "Use WorkspaceHealthSurfaceCompositor.Compose(...) instead of WorkspaceHealthSegmentBuilder.",
+        "Use WorkspaceHealthSurfaceCompositor.Compose(...) instead of WorkspaceHealthSegmentBuilder",
         "Architecture",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true,

@@ -18,7 +18,7 @@ public sealed class EnvironmentReadinessPipelineAnalyzer : DiagnosticAnalyzer
     private static readonly DiagnosticDescriptor LegacySnapshotBuilderRule = new(
         LegacySnapshotBuilderId,
         "Environment Readiness: direct snapshot builder usage is forbidden in MainWindowViewModel",
-        "Use IEnvironmentReadinessChannel.Build(...) and IEnvironmentReadinessSurfaceCompositor.Compose(...) instead of EnvironmentReadinessSnapshotBuilder in MainWindowViewModel pipeline.",
+        "Use IEnvironmentReadinessChannel.Build(...) and IEnvironmentReadinessSurfaceCompositor.Compose(...) instead of EnvironmentReadinessSnapshotBuilder in MainWindowViewModel pipeline",
         "Architecture",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true,
