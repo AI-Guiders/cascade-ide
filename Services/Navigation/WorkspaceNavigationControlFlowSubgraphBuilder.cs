@@ -60,7 +60,9 @@ public static class WorkspaceNavigationControlFlowSubgraphBuilder
                 kind = n.Kind,
                 label = n.Label,
                 relative_path = n.RelativePath,
-                rationale = n.Rationale
+                rationale = n.Rationale,
+                legend_index = n.LegendIndex,
+                legend_text = n.LegendText
             }).ToList(),
             edges = graph.Edges.Select(e => new
             {
@@ -118,6 +120,7 @@ public static class WorkspaceNavigationControlFlowSubgraphBuilder
         private readonly int _nodeCap;
         private readonly int _edgeCap;
         private int _nextId = 1;
+        private int _legendSerial;
 
         public List<NodeRecord> Nodes { get; }
         public List<EdgeRecord> Edges { get; } = [];
@@ -129,7 +132,7 @@ public static class WorkspaceNavigationControlFlowSubgraphBuilder
             _edgeCap = edgeCap;
             Nodes =
             [
-                new NodeRecord("n0", filePath, "anchor", Path.GetFileName(filePath), "", $"method {methodName}")
+                new NodeRecord("n0", filePath, "anchor", Path.GetFileName(filePath), "", $"method {methodName}", null, null)
             ];
         }
 
@@ -175,7 +178,8 @@ public static class WorkspaceNavigationControlFlowSubgraphBuilder
 
         private List<string> BuildIfStatement(IfStatementSyntax ifStatement, List<string> incoming)
         {
-            var conditionId = AddNode("condition_step", "IF", "if condition");
+            var condLine = SanitizeLegendLine(ifStatement.Condition.ToString(), 200);
+            var conditionId = AddNode("condition_step", "IF", "if condition", condLine);
             if (conditionId is null)
                 return incoming;
 
@@ -195,7 +199,7 @@ public static class WorkspaceNavigationControlFlowSubgraphBuilder
 
         private List<string> BuildReturnStatement(List<string> incoming)
         {
-            var returnId = AddNode("exit_step", "RET", "return");
+            var returnId = AddNode("exit_step", "RET", "return", "return");
             if (returnId is null)
                 return incoming;
 
@@ -219,7 +223,8 @@ public static class WorkspaceNavigationControlFlowSubgraphBuilder
             foreach (var invocation in invocations)
             {
                 var label = ExtractInvocationLabel(invocation);
-                var nodeId = AddNode("call_step", label, $"call {label}");
+                var legend = SanitizeLegendLine(invocation.ToString(), 200);
+                var nodeId = AddNode("call_step", label, $"call {label}", legend);
                 if (nodeId is null)
                     return continuation;
 
@@ -231,14 +236,32 @@ public static class WorkspaceNavigationControlFlowSubgraphBuilder
             return continuation;
         }
 
-        private string? AddNode(string kind, string label, string rationale)
+        private string? AddNode(string kind, string label, string rationale, string? legendLine = null)
         {
             if (Nodes.Count >= _nodeCap)
                 return null;
 
             var id = $"n{_nextId++}";
-            Nodes.Add(new NodeRecord(id, _filePath, kind, label, "", rationale));
+            var leg = string.IsNullOrWhiteSpace(legendLine)
+                ? SanitizeLegendLine(rationale, 200)
+                : SanitizeLegendLine(legendLine, 200);
+            _legendSerial++;
+            var idx = _legendSerial;
+            Nodes.Add(new NodeRecord(id, _filePath, kind, label, "", rationale, idx, string.IsNullOrEmpty(leg) ? null : leg));
             return id;
+        }
+
+        private static string SanitizeLegendLine(string? text, int maxLen)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+                return "";
+            var s = text.Replace('\r', ' ').Replace('\n', ' ');
+            while (s.Contains("  ", StringComparison.Ordinal))
+                s = s.Replace("  ", " ", StringComparison.Ordinal);
+            s = s.Trim();
+            if (s.Length <= maxLen)
+                return s;
+            return s[..(maxLen - 1)] + "…";
         }
 
         private void AddEdges(List<string> fromIds, string toId, string kind, string relatedKind)
@@ -315,7 +338,9 @@ public static class WorkspaceNavigationControlFlowSubgraphBuilder
         string Kind,
         string Label,
         string RelativePath,
-        string Rationale);
+        string Rationale,
+        int? LegendIndex,
+        string? LegendText);
 
     private readonly record struct EdgeRecord(
         string FromId,

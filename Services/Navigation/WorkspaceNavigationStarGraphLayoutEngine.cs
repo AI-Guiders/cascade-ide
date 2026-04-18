@@ -10,7 +10,7 @@ public sealed class WorkspaceNavigationStarGraphLayoutEngine : IWorkspaceNavigat
     public SemanticMapGraphSceneVm Layout(WorkspaceNavigationSubgraphDocument doc, double width, double height)
     {
         if (width <= 0 || height <= 0)
-            return new SemanticMapGraphSceneVm { Nodes = [], Edges = [] };
+            return new SemanticMapGraphSceneVm { Nodes = [], Edges = [], Legend = [], LegendColumnLeft = width };
 
         var anchor = doc.Nodes.FirstOrDefault(n => string.Equals(n.Kind, "anchor", StringComparison.OrdinalIgnoreCase))
                      ?? doc.Nodes.FirstOrDefault(n => n.Id.Equals("n0", StringComparison.OrdinalIgnoreCase));
@@ -45,7 +45,8 @@ public sealed class WorkspaceNavigationStarGraphLayoutEngine : IWorkspaceNavigat
                 Label = TruncateLabel(anchor.Label),
                 Center = ac,
                 Radius = anchorR,
-                IsAnchor = true
+                IsAnchor = true,
+                Shape = SemanticMapNodeShape.Circle
             });
         }
 
@@ -67,7 +68,8 @@ public sealed class WorkspaceNavigationStarGraphLayoutEngine : IWorkspaceNavigat
                 Label = TruncateLabel(sat.Label),
                 Center = p,
                 Radius = satR,
-                IsAnchor = false
+                IsAnchor = false,
+                Shape = SemanticMapNodeShape.Circle
             });
         }
 
@@ -106,7 +108,14 @@ public sealed class WorkspaceNavigationStarGraphLayoutEngine : IWorkspaceNavigat
                 });
         }
 
-        return new SemanticMapGraphSceneVm { Nodes = layouts, Edges = edgeLayouts };
+        return new SemanticMapGraphSceneVm
+        {
+            Nodes = layouts,
+            Edges = edgeLayouts,
+            Legend = [],
+            UseLegendColumn = false,
+            LegendColumnLeft = width
+        };
     }
 
     private static string TruncateLabel(string label)

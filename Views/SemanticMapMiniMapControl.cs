@@ -9,6 +9,9 @@ using CascadeIDE.ViewModels;
 namespace CascadeIDE.Views;
 
 /// <summary>Мини-карта Semantic Map: рёбра и узлы (звезда); клик по узлу открывает файл; подписи строк — в списке (режим list/both) (ADR 0039).</summary>
+/// <remarks>
+/// Порядок отрисовки базовой сцены (ADR 0055 §4): рёбра → узлы (фигуры и глифы) → легенда. Подсветки TraceFlow приходят в <see cref="SemanticMapGraphSceneVm"/> и рисуются вместе с рёбрами/узлами по флагам highlight.
+/// </remarks>
 public sealed class SemanticMapMiniMapControl : Control
 {
     private const string ConditionStepKind = "condition_step";
@@ -50,9 +53,7 @@ public sealed class SemanticMapMiniMapControl : Control
         var p = e.GetPosition(this);
         foreach (var n in scene.Nodes)
         {
-            var dx = p.X - n.Center.X;
-            var dy = p.Y - n.Center.Y;
-            if (Math.Sqrt(dx * dx + dy * dy) > n.Radius + 6)
+            if (!HitTestNode(n, p))
                 continue;
             var path = n.FullPath;
             if (string.IsNullOrWhiteSpace(path))
@@ -85,8 +86,26 @@ public sealed class SemanticMapMiniMapControl : Control
         if (w <= 0 || h <= 0)
             return;
 
+        // Базовая сцена: см. ADR 0055 §4 (рёбра → узлы → легенда).
         DrawEdges(context, scene);
         DrawNodes(context, scene);
+        DrawLegend(context, scene, w, h);
+    }
+
+    private static bool HitTestNode(SemanticMapGraphNodeLayout n, Point p)
+    {
+        if (n.Shape == SemanticMapNodeShape.Diamond)
+            return HitDiamond(n.Center, n.Radius, p, tolerance: 6);
+        var dx = p.X - n.Center.X;
+        var dy = p.Y - n.Center.Y;
+        return Math.Sqrt(dx * dx + dy * dy) <= n.Radius + 6;
+    }
+
+    private static bool HitDiamond(Point center, double r, Point p, double tolerance)
+    {
+        var dx = Math.Abs(p.X - center.X);
+        var dy = Math.Abs(p.Y - center.Y);
+        return dx + dy <= r + tolerance;
     }
 
     private static void DrawEdges(DrawingContext context, SemanticMapGraphSceneVm scene)
@@ -114,27 +133,36 @@ public sealed class SemanticMapMiniMapControl : Control
 
     private static void DrawNodes(DrawingContext context, SemanticMapGraphSceneVm scene)
     {
+        var useLegend = scene.UseLegendColumn;
         foreach (var n in scene.Nodes)
         {
             var highlighted = scene.HighlightedNodeIds.Contains(n.Id);
-            context.DrawEllipse(ResolveNodeFill(n), VisualTheme.NodeStrokePen, n.Center, n.Radius, n.Radius);
-            if (highlighted)
-                context.DrawEllipse(null, VisualTheme.HighlightedNodePen, n.Center, n.Radius + 3, n.Radius + 3);
+            if (n.Shape == SemanticMapNodeShape.Diamond)
+                DrawDiamondNode(context, n, highlighted);
+            else
+            {
+                context.DrawEllipse(ResolveNodeFill(n), VisualTheme.NodeStrokePen, n.Center, n.Radius, n.Radius);
+                if (highlighted)
+                    context.DrawEllipse(null, VisualTheme.HighlightedNodePen, n.Center, n.Radius + 3, n.Radius + 3);
+            }
 
-            var glyph = BuildNodeGlyph(n);
+            var glyph = BuildNodeGlyph(n, useLegend);
+            var fontSize = Math.Max(
+                SemanticMapRenderInvariants.MinGlyphFontSize,
+                Math.Min(n.Radius - 1, n.LegendIndex is > 99 ? SemanticMapRenderInvariants.MinGlyphFontSize : 9));
             var glyphText = new FormattedText(
                 glyph,
                 CultureInfo.InvariantCulture,
                 FlowDirection.LeftToRight,
                 VisualTheme.GlyphTypeface,
-                Math.Max(8, n.Radius - 2),
+                fontSize,
                 VisualTheme.GlyphBrush);
             var glyphOrigin = new Point(
                 n.Center.X - glyphText.Width / 2,
                 n.Center.Y - glyphText.Height / 2);
             context.DrawText(glyphText, glyphOrigin);
 
-            var fullLabel = BuildNodeFullLabel(n);
+            var fullLabel = BuildNodeFullLabel(n, useLegend);
             if (!string.IsNullOrWhiteSpace(fullLabel))
             {
                 var labelText = new FormattedText(
@@ -142,7 +170,7 @@ public sealed class SemanticMapMiniMapControl : Control
                     CultureInfo.InvariantCulture,
                     FlowDirection.LeftToRight,
                     VisualTheme.SideLabelTypeface,
-                    11,
+                    SemanticMapRenderInvariants.MinSideLabelFontSize,
                     VisualTheme.SideLabelBrush);
                 var labelOrigin = new Point(
                     n.Center.X + n.Radius + 6,
@@ -150,6 +178,203 @@ public sealed class SemanticMapMiniMapControl : Control
                 context.DrawText(labelText, labelOrigin);
             }
         }
+    }
+
+    private static void DrawDiamondNode(DrawingContext context, SemanticMapGraphNodeLayout n, bool highlighted)
+    {
+        var geo = new StreamGeometry();
+        var c = n.Center;
+        var r = n.Radius;
+        using (var ig = geo.Open())
+        {
+            ig.BeginFigure(new Point(c.X, c.Y - r), true);
+            ig.LineTo(new Point(c.X + r, c.Y));
+            ig.LineTo(new Point(c.X, c.Y + r));
+            ig.LineTo(new Point(c.X - r, c.Y));
+            ig.EndFigure(true);
+        }
+
+        context.DrawGeometry(ResolveNodeFill(n), VisualTheme.NodeStrokePen, geo);
+        if (highlighted)
+        {
+            var hr = r + 3;
+            var hgeo = new StreamGeometry();
+            using (var ig = hgeo.Open())
+            {
+                ig.BeginFigure(new Point(c.X, c.Y - hr), true);
+                ig.LineTo(new Point(c.X + hr, c.Y));
+                ig.LineTo(new Point(c.X, c.Y + hr));
+                ig.LineTo(new Point(c.X - hr, c.Y));
+                ig.EndFigure(true);
+            }
+
+            context.DrawGeometry(null, VisualTheme.HighlightedNodePen, hgeo);
+        }
+    }
+
+    private static void DrawLegend(DrawingContext context, SemanticMapGraphSceneVm scene, double w, double h)
+    {
+        if (!scene.UseLegendColumn || scene.LegendColumnLeft >= w - 24 || h < 40)
+            return;
+
+        var x0 = scene.LegendColumnLeft;
+        var y = 8d;
+        const double lineH = 13;
+        const double keyRowH = 17d;
+        const double gapBeforeKeys = 6d;
+        var captionSize = SemanticMapRenderInvariants.MinLegendCaptionFontSize;
+        const double colGap = 10d;
+
+        double idxColW = 0;
+        foreach (var row in scene.Legend)
+        {
+            var idxTxt = row.Index.ToString(CultureInfo.InvariantCulture);
+            var idxFt = new FormattedText(
+                idxTxt,
+                CultureInfo.InvariantCulture,
+                FlowDirection.LeftToRight,
+                VisualTheme.SideLabelTypeface,
+                captionSize,
+                VisualTheme.SideLabelBrush);
+            idxColW = Math.Max(idxColW, idxFt.Width);
+        }
+
+        idxColW += 4;
+        var textX = x0 + idxColW + colGap;
+        var textMaxW = Math.Max(24, w - textX - 4);
+
+        foreach (var row in scene.Legend)
+        {
+            if (y + lineH > h - 4)
+                return;
+            var idxTxt = row.Index.ToString(CultureInfo.InvariantCulture);
+            var idxFt = new FormattedText(
+                idxTxt,
+                CultureInfo.InvariantCulture,
+                FlowDirection.LeftToRight,
+                VisualTheme.SideLabelTypeface,
+                captionSize,
+                VisualTheme.SideLabelBrush);
+            context.DrawText(idxFt, new Point(x0 + idxColW - idxFt.Width, y));
+
+            var body = TruncateLegendCellText(row.Text, textMaxW, captionSize);
+            var bodyFt = new FormattedText(
+                body,
+                CultureInfo.InvariantCulture,
+                FlowDirection.LeftToRight,
+                VisualTheme.SideLabelTypeface,
+                captionSize,
+                VisualTheme.SideLabelBrush);
+            context.DrawText(bodyFt, new Point(textX, y));
+            y += lineH;
+        }
+
+        var hasShapeKeys = scene.ShowLegendReturnKey || scene.ShowLegendConditionKey;
+        if (!hasShapeKeys)
+            return;
+
+        if (scene.Legend.Count > 0)
+            y += gapBeforeKeys;
+
+        if (scene.ShowLegendReturnKey)
+        {
+            if (y + keyRowH > h - 4)
+                return;
+            DrawLegendReturnKeyRow(context, x0, y, keyRowH, captionSize);
+            y += keyRowH + 2;
+        }
+
+        if (scene.ShowLegendConditionKey)
+        {
+            if (y + keyRowH > h - 4)
+                return;
+            DrawLegendConditionKeyRow(context, x0, y, keyRowH, captionSize);
+        }
+    }
+
+    private static void DrawLegendReturnKeyRow(DrawingContext context, double x0, double y, double rowH, double captionSize)
+    {
+        const double iconR = 5.5;
+        var cy = y + rowH / 2;
+        var cx = x0 + iconR + 1;
+        context.DrawEllipse(VisualTheme.ExitFill, VisualTheme.NodeStrokePen, new Point(cx, cy), iconR, iconR);
+        var arrow = new FormattedText(
+            "↗",
+            CultureInfo.InvariantCulture,
+            FlowDirection.LeftToRight,
+            VisualTheme.GlyphTypeface,
+            Math.Max(6, captionSize - 2),
+            VisualTheme.GlyphBrush);
+        context.DrawText(arrow, new Point(cx - arrow.Width / 2, cy - arrow.Height / 2));
+
+        var cap = new FormattedText(
+            "return",
+            CultureInfo.InvariantCulture,
+            FlowDirection.LeftToRight,
+            VisualTheme.SideLabelTypeface,
+            captionSize,
+            VisualTheme.SideLabelBrush);
+        context.DrawText(cap, new Point(x0 + iconR * 2 + 10, y + (rowH - cap.Height) / 2));
+    }
+
+    private static void DrawLegendConditionKeyRow(DrawingContext context, double x0, double y, double rowH, double captionSize)
+    {
+        const double r = 5.5;
+        var cy = y + rowH / 2;
+        var cx = x0 + r + 1;
+        var geo = new StreamGeometry();
+        using (var ig = geo.Open())
+        {
+            ig.BeginFigure(new Point(cx, cy - r), true);
+            ig.LineTo(new Point(cx + r, cy));
+            ig.LineTo(new Point(cx, cy + r));
+            ig.LineTo(new Point(cx - r, cy));
+            ig.EndFigure(true);
+        }
+
+        context.DrawGeometry(VisualTheme.ConditionFill, VisualTheme.NodeStrokePen, geo);
+
+        var cap = new FormattedText(
+            "условие",
+            CultureInfo.InvariantCulture,
+            FlowDirection.LeftToRight,
+            VisualTheme.SideLabelTypeface,
+            captionSize,
+            VisualTheme.SideLabelBrush);
+        context.DrawText(cap, new Point(x0 + r * 2 + 10, y + (rowH - cap.Height) / 2));
+    }
+
+    private static string TruncateLegendCellText(string text, double maxWidth, double fontSize)
+    {
+        if (string.IsNullOrEmpty(text))
+            return "";
+        var t = text.Replace('\r', ' ').Replace('\n', ' ');
+        while (t.Contains("  ", StringComparison.Ordinal))
+            t = t.Replace("  ", " ", StringComparison.Ordinal);
+        t = t.Trim();
+        if (t.Length > 400)
+            t = t[..397] + "…";
+
+        static double Measure(string s, double fs) =>
+            new FormattedText(
+                    s,
+                    CultureInfo.InvariantCulture,
+                    FlowDirection.LeftToRight,
+                    VisualTheme.SideLabelTypeface,
+                    fs,
+                    VisualTheme.SideLabelBrush)
+                .Width;
+
+        if (Measure(t, fontSize) <= maxWidth)
+            return t;
+        for (var len = t.Length - 1; len > 0; len--)
+        {
+            var candidate = t[..len].TrimEnd() + "…";
+            if (Measure(candidate, fontSize) <= maxWidth)
+                return candidate;
+        }
+
+        return "…";
     }
 
     private static Pen ResolveEdgePen(string? kind, bool highlighted)
@@ -251,6 +476,7 @@ public sealed class SemanticMapMiniMapControl : Control
         if (elen < 6)
         {
             context.DrawLine(pen, start, end);
+            DrawArrowHeadAtTip(context, pen, end, ex / elen, ey / elen);
             return;
         }
 
@@ -268,12 +494,57 @@ public sealed class SemanticMapMiniMapControl : Control
         }
 
         context.DrawGeometry(null, pen, geometry);
+        // Касательная к кубической Безье в t=1: B'(1) = 3·(P₃ − P₂) — направление входа в целевой узел.
+        var tdx = end.X - c2.X;
+        var tdy = end.Y - c2.Y;
+        var tlen = Math.Sqrt(tdx * tdx + tdy * tdy);
+        if (tlen < 1e-6)
+        {
+            tdx = end.X - start.X;
+            tdy = end.Y - start.Y;
+            tlen = Math.Sqrt(tdx * tdx + tdy * tdy);
+        }
+
+        if (tlen >= 1e-6)
+            DrawArrowHeadAtTip(context, pen, end, tdx / tlen, tdy / tlen);
     }
 
-    private static string BuildNodeGlyph(SemanticMapGraphNodeLayout node)
+    /// <summary>Рисует наконечник у конца ребра; (dirX, dirY) — единичный вектор направления потока в сторону целевого узла.</summary>
+    private static void DrawArrowHeadAtTip(DrawingContext context, Pen pen, Point tip, double dirX, double dirY)
+    {
+        var brush = pen.Brush ?? Brushes.White;
+        var thickness = pen.Thickness;
+        if (thickness <= 0)
+            thickness = 1;
+        var arrowLen = 6 + Math.Min(5, thickness * 1.8);
+        var halfW = arrowLen * 0.45;
+        var bx = tip.X - dirX * arrowLen;
+        var by = tip.Y - dirY * arrowLen;
+        var px = -dirY;
+        var py = dirX;
+        var p0 = new Point(bx + px * halfW, by + py * halfW);
+        var p1 = new Point(bx - px * halfW, by - py * halfW);
+        var geo = new StreamGeometry();
+        using (var ig = geo.Open())
+        {
+            ig.BeginFigure(tip, true);
+            ig.LineTo(p0);
+            ig.LineTo(p1);
+            ig.EndFigure(true);
+        }
+
+        context.DrawGeometry(brush, null, geo);
+    }
+
+    private static string BuildNodeGlyph(SemanticMapGraphNodeLayout node, bool useLegendColumn)
     {
         if (node.IsAnchor)
             return "A";
+        // В колонке легенды у выхода — стрелка (направление «наружу»), не дублируем номер строки таблицы.
+        if (useLegendColumn && IsExitNode(node))
+            return "↗";
+        if (node.LegendIndex is { } idx && useLegendColumn)
+            return idx.ToString(CultureInfo.InvariantCulture);
         if (IsConditionNode(node))
             return "?";
         if (IsExitNode(node))
@@ -281,8 +552,10 @@ public sealed class SemanticMapMiniMapControl : Control
         return "•";
     }
 
-    private static string? BuildNodeFullLabel(SemanticMapGraphNodeLayout node)
+    private static string? BuildNodeFullLabel(SemanticMapGraphNodeLayout node, bool useLegendColumn)
     {
+        if (useLegendColumn)
+            return null;
         if (node.IsAnchor || IsConditionNode(node) || IsExitNode(node))
             return null;
         var label = node.Label?.Trim();

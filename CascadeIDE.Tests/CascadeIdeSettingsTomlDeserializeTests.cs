@@ -65,6 +65,7 @@ public sealed class CascadeIdeSettingsTomlDeserializeTests
             [semantic_map]
             view = "both"
             depth = "controlFlow"
+            detail_level = "glance"
             """;
 
         var s = Deserialize(text);
@@ -73,5 +74,6 @@ public sealed class CascadeIdeSettingsTomlDeserializeTests
         Assert.True(s.SemanticMap.IsControlFlowDepth);
         Assert.Equal("both", SemanticMapSettings.NormalizeView(s.SemanticMap.View));
         Assert.Equal(SemanticMapLevelKind.ControlFlow, SemanticMapSettings.NormalizeDepth(s.SemanticMap.Depth));
+        Assert.Equal(SemanticMapDetailLevel.Glance, s.SemanticMap.NormalizedDetailLevel);
     }
 }

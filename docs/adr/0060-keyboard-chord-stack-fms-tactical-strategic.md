@@ -3,7 +3,7 @@
 **Статус:** Proposed  
 **Дата:** 2026-04-19  
 
-**Связь:** [0013](0013-command-surface-and-discoverability.md) (палитра, toolbar, discoverability — **этот ADR не заменяет** палитру), [0008](0008-mcp-contracts-and-testable-infrastructure.md) (MCP и команды), [0030](0030-command-ids-hotkeys-and-ui-registry-layers.md) (`IdeCommands`, `hotkeys.toml`, реестр), [0017](0017-multi-window-workspace-and-agent-surfaces.md) (мультиоконность, фокус), [0021](0021-pfd-mfd-cockpit-attention-model.md) (PFD / MFD), [0032](0032-hud-banner-configuration-and-grammar.md) (HUD / подписи режима — опционально), [0055](0055-skia-instrument-composition-pipeline.md) (Skia — overlay), [0059](0059-roslyn-mcp-profiles-manager-tactical-strategic-efb.md) (тактика / EFB на MFD, Manager), [north-star — keyboard-first](../design/north-star-cursor-mcp-cascade-workbench-v1.md).
+**Связь:** [0013](0013-command-surface-and-discoverability.md) (палитра, toolbar, discoverability — **этот ADR не заменяет** палитру), [0008](0008-mcp-contracts-and-testable-infrastructure.md) (MCP и команды), [0030](0030-command-ids-hotkeys-and-ui-registry-layers.md) (`IdeCommands`, `hotkeys.toml`, реестр), [0017](0017-multi-window-workspace-and-agent-surfaces.md) (мультиоконность, фокус), [0021](0021-pfd-mfd-cockpit-attention-model.md) (PFD / MFD), [0032](0032-hud-banner-configuration-and-grammar.md) (HUD / подписи режима — опционально), [0055](0055-skia-instrument-composition-pipeline.md) (Skia — overlay), [0059](0059-roslyn-mcp-profiles-manager-tactical-strategic-efb.md) (тактика / EFB на MFD, Manager), [north-star — keyboard-first](../design/north-star-cursor-mcp-cascade-workbench-v1.md). **Нотация жестов в текстах** (`<C-k>`, последовательности, FMS-имена): [chord-notation-cascadeide.md](../chord-notation-cascadeide.md).
 
 ---
 
@@ -102,6 +102,31 @@
 | Опционально: `chord_timeout_ms`, `chord_overlay_enabled` | **`settings.toml`** или секция рядом с UI — **не** дублировать полную карту клавиш в `settings.toml` ([0013](0013-command-surface-and-discoverability.md) — отклонённый вариант хранить все хоткеи только в settings) |
 
 **Порядок работ (рекомендация):** сначала **идентификаторы команд и машина аккорда** в C#; затем строки в **`hotkeys.toml`**; затем overlay и MODE-строка.
+
+<a id="adr0060-p9"></a>
+
+### 9. Логика миграции команд и эволюция шагов (реализация)
+
+**Что не переносим на аккорд без отдельного обсуждения**
+
+- **Стандарт редактора / ОС**, с которыми пользователи считают клавиатуру «как везде»: сохранение (**Ctrl+S**), отмена/повтор (**Ctrl+Z** / **Ctrl+Y**), вырезать/копировать/вставить, часто **Ctrl+W** / закрытие вкладки, **Ctrl+F** внутри редактора. Их оставляем на прямых жестах или настройке редактора; не загонять в **CascadeChord** только ради единообразия.
+- **Уже закреплённые глобальные хоткеи IDE** из `hotkeys.toml` (**Ctrl+Q** палитра, **F5** отладка, …) не ломаем: аккорд — **второй** вход, не замена.
+
+**Целевая слоистая схема (после v0)**
+
+1. **CascadeChord** (префикс, напр. **Ctrl+K**).
+2. **Первый буквенный шаг — масштаб S / T** (§2): тактика vs стратегия; привязка к профилю Roslyn MCP / контур внимания ([0059](0059-roslyn-mcp-profiles-manager-tactical-strategic-efb.md)).
+3. **Второй шаг — подсистема** (буквы-«страницы»): например **M** = Semantic Map (**P** / **F** / **D**), **B** = build/тесты, **G** = Git и т.д. Так не смешиваем на одном уровне десяток несвязных букв и масштаб мышления.
+
+**Текущая многошаговая схема (код)**
+
+- **Префикс** → **M** → **M / P / F**: зоны кокпита — **MFD** (развернуть регион), **PFD** (развернуть регион), **Forward** (фокус в редактор). Метафора «настройки/фокус зоны» без второго корня **Ctrl+M**: вторая буква — **M** сразу после префикса (как FMS-страница), третья — выбор зоны.
+- **Префикс** → **S** → **P / F / D**: Semantic Map — вид / уровень / детализация (как в [0055](0055-skia-instrument-composition-pipeline.md)).
+- Оверлей показывает допустимые клавиши **для текущего шага**; таймаут и **Esc** сбрасывают машину (§5).
+
+**Правило discoverability**
+
+- Любая команда, доступная только с аккорда, должна иметь **тот же `command_id`** в палитре и MCP ([0008](0008-mcp-contracts-and-testable-infrastructure.md)), чтобы «забыл букву» ≠ «потерял действие».
 
 ---
 

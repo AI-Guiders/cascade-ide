@@ -1,6 +1,8 @@
+using CascadeIDE.Models;
 using CascadeIDE.Services;
 using CascadeIDE.Services.Navigation;
 using CascadeIDE.Services.SkiaInstruments;
+using CascadeIDE.ViewModels;
 using Xunit;
 
 namespace CascadeIDE.Tests;
@@ -33,9 +35,91 @@ public sealed class SemanticMapCompositorTests
             ]
         };
 
-        var result = compositor.Compose(doc, CascadeIDE.Models.SemanticMapLevelKind.ControlFlow, 280, 120);
+        var result = compositor.Compose(doc, SemanticMapLevelKind.ControlFlow, 280, 120);
         Assert.True(result.PreferredHeight >= SemanticMapCompositor.DefaultHeightControlFlow);
+        Assert.True(result.PreferredHeight <= SemanticMapCompositor.MaxHeightControlFlow);
         Assert.Equal(doc.Nodes.Count, result.Scene.Nodes.Count);
+    }
+
+    [Fact]
+    public void Compose_ControlFlow_LongFlow_CapsPreferredHeight()
+    {
+        var compositor = new SemanticMapCompositor();
+        var nodes = new List<WorkspaceNavigationSubgraphNode>
+        {
+            new() { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" }
+        };
+        var edges = new List<WorkspaceNavigationSubgraphEdge>();
+        for (var i = 1; i <= 25; i++)
+        {
+            nodes.Add(new WorkspaceNavigationSubgraphNode
+            {
+                Id = $"n{i}",
+                Path = @"D:\w\A.cs",
+                Kind = "call_step",
+                Label = $"S{i}"
+            });
+            edges.Add(new WorkspaceNavigationSubgraphEdge { FromId = $"n{i - 1}", ToId = $"n{i}", Kind = "Call" });
+        }
+
+        var doc = new WorkspaceNavigationSubgraphDocument
+        {
+            AnchorPath = @"D:\w\A.cs",
+            Nodes = nodes,
+            Edges = edges
+        };
+
+        var result = compositor.Compose(doc, SemanticMapLevelKind.ControlFlow, 280, 120);
+        Assert.Equal(SemanticMapCompositor.MaxHeightControlFlow, result.PreferredHeight);
+    }
+
+    [Fact]
+    public void Compose_ControlFlow_TallViewport_KeepsIntrinsicPreferredHeightAndReadableStep()
+    {
+        var compositor = new SemanticMapCompositor();
+        var doc = new WorkspaceNavigationSubgraphDocument
+        {
+            AnchorPath = @"D:\w\A.cs",
+            Nodes =
+            [
+                new WorkspaceNavigationSubgraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" },
+                new WorkspaceNavigationSubgraphNode { Id = "n1", Path = @"D:\w\A.cs", Kind = "call_step", Label = "S1" }
+            ],
+            Edges = [new WorkspaceNavigationSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "Call" }]
+        };
+
+        var result = compositor.Compose(doc, SemanticMapLevelKind.ControlFlow, 280, 420);
+        Assert.True(result.PreferredHeight < 350);
+        var n0 = result.Scene.Nodes.First(n => n.Id == "n0");
+        var n1 = result.Scene.Nodes.First(n => n.Id == "n1");
+        var dy = Math.Abs(n1.Center.Y - n0.Center.Y);
+        Assert.InRange(dy, 18, 45);
+    }
+
+    [Fact]
+    public void ControlFlowLayout_WideGraphArea_CentersReadableBand()
+    {
+        var engine = new WorkspaceNavigationControlFlowGraphLayoutEngine();
+        var doc = new WorkspaceNavigationSubgraphDocument
+        {
+            AnchorPath = @"D:\w\A.cs",
+            Nodes =
+            [
+                new WorkspaceNavigationSubgraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" },
+                new WorkspaceNavigationSubgraphNode { Id = "n1", Path = @"D:\w\A.cs", Kind = "condition_step", Label = "L", LegendIndex = 1, LegendText = "a" },
+                new WorkspaceNavigationSubgraphNode { Id = "n2", Path = @"D:\w\A.cs", Kind = "condition_step", Label = "R", LegendIndex = 2, LegendText = "b" }
+            ],
+            Edges =
+            [
+                new WorkspaceNavigationSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "Call" },
+                new WorkspaceNavigationSubgraphEdge { FromId = "n0", ToId = "n2", Kind = "Call" }
+            ]
+        };
+
+        var scene = engine.Layout(doc, 920, 280);
+        var n1 = scene.Nodes.First(n => n.Id == "n1");
+        var n2 = scene.Nodes.First(n => n.Id == "n2");
+        Assert.True(Math.Abs(n2.Center.X - n1.Center.X) < 400);
     }
 
     [Fact]
@@ -53,7 +137,7 @@ public sealed class SemanticMapCompositorTests
             Edges = [new WorkspaceNavigationSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "related_to" }]
         };
 
-        var result = compositor.Compose(doc, CascadeIDE.Models.SemanticMapLevelKind.File, 280, 120);
+        var result = compositor.Compose(doc, SemanticMapLevelKind.File, 280, 120);
         Assert.Equal(120, result.PreferredHeight, 0.1);
         Assert.Equal(2, result.Scene.Nodes.Count);
     }
@@ -70,7 +154,7 @@ public sealed class SemanticMapCompositorTests
         };
 
         var result = compositor.Compose(
-            new SemanticMapCompositionIntent(doc, CascadeIDE.Models.SemanticMapLevelKind.File),
+            new SemanticMapCompositionIntent(doc, SemanticMapLevelKind.File),
             new SkiaInstrumentViewport(280, 120));
         Assert.Single(result.Scene.Nodes);
     }
@@ -92,10 +176,147 @@ public sealed class SemanticMapCompositorTests
 
         var state = stage.Resolve(new SemanticMapPipelineContext(
             doc,
-            CascadeIDE.Models.SemanticMapLevelKind.ControlFlow,
+            SemanticMapLevelKind.ControlFlow,
             new SkiaInstrumentViewport(280, 120)));
 
         Assert.Equal(1, state.LoopEdgeCount);
-        Assert.Equal(CascadeIDE.Models.SemanticMapLevelKind.ControlFlow, state.SemanticMapLevel);
+        Assert.Equal(SemanticMapLevelKind.ControlFlow, state.SemanticMapLevel);
+    }
+
+    [Fact]
+    public void Compose_ControlFlow_Glance_FiltersMultibranchOnlyBranch()
+    {
+        var compositor = new SemanticMapCompositor();
+        var doc = new WorkspaceNavigationSubgraphDocument
+        {
+            AnchorPath = @"D:\w\A.cs",
+            Nodes =
+            [
+                new WorkspaceNavigationSubgraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A" },
+                new WorkspaceNavigationSubgraphNode { Id = "n1", Path = @"D:\w\A.cs", Kind = "call_step", Label = "S1" },
+                new WorkspaceNavigationSubgraphNode { Id = "n2", Path = @"D:\w\A.cs", Kind = "call_step", Label = "S2" }
+            ],
+            Edges =
+            [
+                new WorkspaceNavigationSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "Call" },
+                new WorkspaceNavigationSubgraphEdge { FromId = "n0", ToId = "n2", Kind = "multibranch" }
+            ]
+        };
+
+        var glance = compositor.Compose(doc, SemanticMapLevelKind.ControlFlow, 280, 120, SemanticMapDetailLevel.Glance);
+        var inspect = compositor.Compose(doc, SemanticMapLevelKind.ControlFlow, 280, 120, SemanticMapDetailLevel.Inspect);
+        Assert.Equal(2, glance.Scene.Nodes.Count);
+        Assert.Equal(3, inspect.Scene.Nodes.Count);
+    }
+
+    [Fact]
+    public void Compose_ControlFlow_GlanceVsInspect_PreferredHeightInspectIsTallerWhenIntrinsicExceedsMinClamp()
+    {
+        var compositor = new SemanticMapCompositor();
+        var nodes = new List<WorkspaceNavigationSubgraphNode>
+        {
+            new() { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" }
+        };
+        var edges = new List<WorkspaceNavigationSubgraphEdge>();
+        for (var i = 1; i <= 17; i++)
+        {
+            nodes.Add(new WorkspaceNavigationSubgraphNode
+            {
+                Id = $"n{i}",
+                Path = @"D:\w\A.cs",
+                Kind = "call_step",
+                Label = $"S{i}"
+            });
+            edges.Add(new WorkspaceNavigationSubgraphEdge { FromId = $"n{i - 1}", ToId = $"n{i}", Kind = "Call" });
+        }
+
+        var doc = new WorkspaceNavigationSubgraphDocument
+        {
+            AnchorPath = @"D:\w\A.cs",
+            Nodes = nodes,
+            Edges = edges
+        };
+
+        var glance = compositor.Compose(doc, SemanticMapLevelKind.ControlFlow, 280, 120, SemanticMapDetailLevel.Glance);
+        var inspect = compositor.Compose(doc, SemanticMapLevelKind.ControlFlow, 280, 120, SemanticMapDetailLevel.Inspect);
+        Assert.True(inspect.PreferredHeight > glance.PreferredHeight);
+    }
+
+    [Fact]
+    public void ControlFlowLayout_WithLegend_ReservesColumnAndDiamondCondition()
+    {
+        var engine = new WorkspaceNavigationControlFlowGraphLayoutEngine();
+        var doc = new WorkspaceNavigationSubgraphDocument
+        {
+            AnchorPath = @"D:\w\A.cs",
+            Nodes =
+            [
+                new WorkspaceNavigationSubgraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" },
+                new WorkspaceNavigationSubgraphNode
+                {
+                    Id = "n1",
+                    Path = @"D:\w\A.cs",
+                    Kind = "condition_step",
+                    Label = "IF",
+                    LegendIndex = 1,
+                    LegendText = "x > 0"
+                }
+            ],
+            Edges = [new WorkspaceNavigationSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "Call" }]
+        };
+
+        var scene = engine.Layout(doc, 400, 200);
+        Assert.Single(scene.Legend);
+        Assert.Equal(1, scene.Legend[0].Index);
+        Assert.Equal("x > 0", scene.Legend[0].Text);
+        Assert.True(scene.UseLegendColumn);
+        Assert.True(scene.ShowLegendConditionKey);
+        Assert.False(scene.ShowLegendReturnKey);
+        Assert.True(scene.LegendColumnLeft < 400);
+        var cond = scene.Nodes.First(n => n.Id == "n1");
+        Assert.Equal(SemanticMapNodeShape.Diamond, cond.Shape);
+    }
+
+    [Fact]
+    public void ControlFlowLayout_SkipsReturnInLegendRows_ShowsReturnShapeKey()
+    {
+        var engine = new WorkspaceNavigationControlFlowGraphLayoutEngine();
+        var doc = new WorkspaceNavigationSubgraphDocument
+        {
+            AnchorPath = @"D:\w\A.cs",
+            Nodes =
+            [
+                new WorkspaceNavigationSubgraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" },
+                new WorkspaceNavigationSubgraphNode
+                {
+                    Id = "n1",
+                    Path = @"D:\w\A.cs",
+                    Kind = "exit_step",
+                    Label = "RET",
+                    LegendIndex = 1,
+                    LegendText = "return"
+                }
+            ],
+            Edges = [new WorkspaceNavigationSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "Exit" }]
+        };
+
+        var scene = engine.Layout(doc, 400, 200);
+        Assert.Empty(scene.Legend);
+        Assert.True(scene.UseLegendColumn);
+        Assert.True(scene.ShowLegendReturnKey);
+        Assert.False(scene.ShowLegendConditionKey);
+        Assert.True(scene.LegendColumnLeft < 400);
+    }
+
+    [Fact]
+    public void SubgraphJson_ParsesLegendFields()
+    {
+        const string json =
+            """{"mode":"subgraph","anchor_path":"D:\\a.cs","nodes":[{"id":"n0","path":"D:\\a.cs","kind":"anchor","label":"a.cs","relative_path":"","rationale":""},{"id":"n1","path":"D:\\a.cs","kind":"condition_step","label":"IF","relative_path":"","rationale":"","legend_index":1,"legend_text":"x > 0"}],"edges":[]}""";
+        Assert.True(WorkspaceNavigationSubgraphJson.TryParse(json, out var doc, out _));
+        Assert.NotNull(doc);
+        var n1 = doc!.Nodes.First(n => n.Id == "n1");
+        Assert.Equal(1, n1.LegendIndex);
+        Assert.Equal("x > 0", n1.LegendText);
     }
 }

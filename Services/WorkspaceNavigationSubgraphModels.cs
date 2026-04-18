@@ -18,6 +18,10 @@ public sealed class WorkspaceNavigationSubgraphNode
     public required string Label { get; init; }
     public string? RelativePath { get; init; }
     public string? Rationale { get; init; }
+    /// <summary>Номер в легенде control flow (1-based); только для узлов подграфа с подписью в JSON.</summary>
+    public int? LegendIndex { get; init; }
+    /// <summary>Строка для колонки легенды (предикат, вызов, return).</summary>
+    public string? LegendText { get; init; }
 }
 
 public sealed class WorkspaceNavigationSubgraphEdge

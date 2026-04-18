@@ -81,7 +81,8 @@ public sealed class TraceFlowSurfaceCompositorTests
         Label = id,
         Center = new Point(0, 0),
         Radius = 10,
-        IsAnchor = anchor
+        IsAnchor = anchor,
+        Shape = SemanticMapNodeShape.Circle
     };
 
     private static SemanticMapGraphEdgeLayout Edge(string from, string to, string kind) => new()

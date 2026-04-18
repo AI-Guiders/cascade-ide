@@ -314,6 +314,9 @@
 | `chat_get_selected_message` | Получить выбранное сообщение чата (индекс, роль, контент) в JSON. returns: json. |
 | `chat_select_message` | Выбрать сообщение в чате по индексу (0-based), в т.ч. для Skia-поверхности. args: index:integer; returns: text; example: {"index":0}. |
 | `close_document` | Закрыть документ. args: file_path:string; returns: text; example: {"file_path":"C:\\\\tmp\\\\a.cs"}. |
+| `cycle_semantic_map_detail_level` | Semantic Map: цикл детализации glance → normal → inspect (Ctrl+K → S → D). returns: text. |
+| `cycle_semantic_map_level` | Semantic Map: переключить уровень file ↔ controlFlow (Ctrl+K → S → F). returns: text. |
+| `cycle_semantic_map_presentation` | Semantic Map: цикл вида list → graph → both (палитра; быстрый путь — Ctrl+K → S → P). returns: text. |
 | `focus_editor` | Передать фокус в редактор (чтобы клавиши/ввод шли в него). returns: text. |
 | `get_cockpit_surface` | Только CDS (`CockpitSurfaceState`): тот же payload, что поле `cockpit_surface` в `get_workspace_state`. returns: json. Для `--agent-contract` без полной сводки. |
 | `get_current_file_diagnostics` | Диагностики текущего открытого .cs (ошибки/предупреждения). returns: json. |

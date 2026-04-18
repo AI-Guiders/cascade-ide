@@ -8,10 +8,32 @@ public sealed class SemanticMapGraphSceneVm
 {
     public required IReadOnlyList<SemanticMapGraphNodeLayout> Nodes { get; init; }
     public required IReadOnlyList<SemanticMapGraphEdgeLayout> Edges { get; init; }
+    public IReadOnlyList<SemanticMapLegendEntry> Legend { get; init; } = [];
+    /// <summary>Резервировать колонку под легенду (номера шагов и/или обозначения фигур).</summary>
+    public bool UseLegendColumn { get; init; }
+    /// <summary>Показать в легенде расшифровку: ромб — условие.</summary>
+    public bool ShowLegendConditionKey { get; init; }
+    /// <summary>Показать в легенде расшифровку: круг со стрелкой — return.</summary>
+    public bool ShowLegendReturnKey { get; init; }
+    /// <summary>Левая граница колонки легенды (X); если легенды нет — равна ширине области (не рисуем).</summary>
+    public double LegendColumnLeft { get; init; } = double.PositiveInfinity;
     public IReadOnlySet<string> HighlightedNodeIds { get; init; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
     public IReadOnlySet<string> HighlightedEdgeKeys { get; init; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
     public bool IsEmpty => Nodes.Count == 0;
+}
+
+/// <summary>Строка легенды control flow: номер ↔ одна строка кода/предиката.</summary>
+public sealed class SemanticMapLegendEntry
+{
+    public int Index { get; init; }
+    public required string Text { get; init; }
+}
+
+public enum SemanticMapNodeShape
+{
+    Circle,
+    Diamond
 }
 
 public sealed class SemanticMapGraphNodeLayout
@@ -23,6 +45,9 @@ public sealed class SemanticMapGraphNodeLayout
     public required Point Center { get; init; }
     public required double Radius { get; init; }
     public required bool IsAnchor { get; init; }
+    public SemanticMapNodeShape Shape { get; init; } = SemanticMapNodeShape.Circle;
+    public int? LegendIndex { get; init; }
+    public string? LegendLine { get; init; }
 }
 
 public sealed class SemanticMapGraphEdgeLayout

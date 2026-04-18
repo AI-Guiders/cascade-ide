@@ -12,6 +12,8 @@ public partial class MainWindow
     {
         if (DataContext is not ViewModels.MainWindowViewModel vm)
             return;
+        if (vm.TryConsumeCascadeChordKeyDown(e))
+            return;
         Services.MainWindowHotkeyService.TryHandleTunnelShortcuts(e, vm);
     }
 }

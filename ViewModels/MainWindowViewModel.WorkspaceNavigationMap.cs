@@ -36,14 +36,6 @@ public partial class MainWindowViewModel
     /// <summary>Связанные файлы для текущего якоря (режим списка).</summary>
     public ObservableCollection<WorkspaceNavigationMapItemVm> WorkspaceNavigationMapItems { get; } = new();
 
-    /// <summary>Варианты <see cref="SemanticMapPresentationKind"/> для ComboBox.</summary>
-    public string[] SemanticMapPresentationOptions { get; } =
-        [SemanticMapPresentationKind.List, SemanticMapPresentationKind.Graph, SemanticMapPresentationKind.Both];
-
-    /// <summary>Варианты уровня карты: файловый и control flow.</summary>
-    public string[] SemanticMapLevelOptions { get; } =
-        [SemanticMapLevelKind.File, SemanticMapLevelKind.ControlFlow];
-
     /// <summary>Сцена мини-карты (подграф + укладка по выбранному уровню карты).</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(WorkspaceNavigationMapHasRelated))]
@@ -52,6 +44,10 @@ public partial class MainWindowViewModel
     [ObservableProperty]
     private double _semanticMapGraphHeight = SemanticMapCompositor.DefaultHeightFile;
 
+    /// <summary>Ширина области компоновки (совпадает с фактической шириной мини-карты в PFD).</summary>
+    [ObservableProperty]
+    private double _semanticMapGraphWidth = SemanticMapCompositor.DefaultWidth;
+
     /// <summary><c>list</c> | <c>graph</c> | <c>both</c> — синхронизируется с <c>[semantic_map]</c>.</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowSemanticMapList))]
@@ -59,10 +55,12 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(WorkspaceNavigationMapHasRelated))]
     [NotifyPropertyChangedFor(nameof(SemanticMapListAreaRowHeight))]
     [NotifyPropertyChangedFor(nameof(ShowSemanticMapGraphClickHint))]
+    [NotifyPropertyChangedFor(nameof(SemanticMapSettingsSummaryLine))]
     private string _semanticMapPresentation = SemanticMapPresentationKind.List;
 
     /// <summary><c>file</c> | <c>controlFlow</c> — уровень построения карты (секция <c>[semantic_map]</c>).</summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SemanticMapSettingsSummaryLine))]
     private string _semanticMapLevel = SemanticMapLevelKind.File;
 
     /// <summary>Сообщение об ошибке или пустом состоянии (не null).</summary>
@@ -128,6 +126,18 @@ public partial class MainWindowViewModel
         var cts = new CancellationTokenSource();
         _workspaceNavigationMapRefreshCts = cts;
         _ = RunWorkspaceNavigationMapRefreshAsync(cts.Token);
+    }
+
+    /// <summary>Вызывается из <c>WorkspaceNavigationMapView</c> при изменении ширины мини-карты.</summary>
+    internal void NotifySemanticMapGraphViewportWidthChanged(double width)
+    {
+        if (double.IsNaN(width) || width < 40)
+            return;
+        var clamped = Math.Clamp(width, 80, 2400);
+        if (Math.Abs(clamped - SemanticMapGraphWidth) < 3)
+            return;
+        SemanticMapGraphWidth = clamped;
+        ScheduleWorkspaceNavigationMapRefresh();
     }
 
     private async Task RunWorkspaceNavigationMapRefreshAsync(CancellationToken ct)
@@ -257,8 +267,11 @@ public partial class MainWindowViewModel
             else if (useSubgraphMode && WorkspaceNavigationSubgraphJson.TryParse(json, out var subgraph, out _))
             {
                 var composed = _semanticMapCompositor.Compose(
-                    new SemanticMapCompositionIntent(subgraph!, level),
-                    new Services.SkiaInstruments.SkiaInstrumentViewport(SemanticMapCompositor.DefaultWidth, SemanticMapGraphHeight));
+                    new SemanticMapCompositionIntent(
+                        subgraph!,
+                        level,
+                        _settings.SemanticMap.NormalizedDetailLevel),
+                    new Services.SkiaInstruments.SkiaInstrumentViewport(SemanticMapGraphWidth, SemanticMapGraphHeight));
                 if (level == SemanticMapLevelKind.ControlFlow)
                 {
                     var channelPayload = _traceFlowChannelCoordinator.Build(new TraceFlowChannelContext(

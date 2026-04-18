@@ -60,4 +60,18 @@ public sealed class SemanticMapSettingsTests
         Assert.Equal(expectedWantList, normalized is "list" or "both");
         Assert.Equal(expectedWantGraph, normalized is "graph" or "both");
     }
+
+    [Theory]
+    [InlineData("glance", SemanticMapDetailLevel.Glance)]
+    [InlineData("GLANCE", SemanticMapDetailLevel.Glance)]
+    [InlineData("inspect", SemanticMapDetailLevel.Inspect)]
+    [InlineData("normal", SemanticMapDetailLevel.Normal)]
+    [InlineData("", SemanticMapDetailLevel.Normal)]
+    [InlineData("unknown", SemanticMapDetailLevel.Normal)]
+    public void NormalizeDetailLevel_ReturnsKnownValue(string? raw, SemanticMapDetailLevel expected)
+    {
+        Assert.Equal(expected, SemanticMapSettings.NormalizeDetailLevel(raw));
+        var map = new SemanticMapSettings { DetailLevel = raw ?? "" };
+        Assert.Equal(expected, map.NormalizedDetailLevel);
+    }
 }

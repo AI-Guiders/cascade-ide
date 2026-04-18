@@ -1,4 +1,5 @@
 #nullable enable
+using CascadeIDE.Models;
 using CascadeIDE.ViewModels;
 using CascadeIDE.Services.SkiaInstruments;
 
@@ -15,8 +16,14 @@ public interface ISemanticMapCompositor
         WorkspaceNavigationSubgraphDocument doc,
         string semanticMapLevel,
         double availableWidth,
-        double availableHeight);
+        double availableHeight,
+        SemanticMapDetailLevel detailLevel = SemanticMapDetailLevel.Normal);
 }
 
 public sealed record SemanticMapCompositionResult(SemanticMapGraphSceneVm Scene, double PreferredHeight);
-public sealed record SemanticMapCompositionIntent(WorkspaceNavigationSubgraphDocument Subgraph, string SemanticMapLevel);
+
+/// <param name="DetailLevel">Политика Declutter + метрики Layout (ADR 0055); источник — <c>[semantic_map].detail_level</c>.</param>
+public sealed record SemanticMapCompositionIntent(
+    WorkspaceNavigationSubgraphDocument Subgraph,
+    string SemanticMapLevel,
+    SemanticMapDetailLevel DetailLevel = SemanticMapDetailLevel.Normal);

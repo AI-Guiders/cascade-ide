@@ -47,6 +47,21 @@ internal sealed partial class IdeMcpCommandExecutor
                 _vm.TogglePfdRegionExpandedCommand.Execute(null);
             return "OK";
         });
+        add(CycleSemanticMapPresentation, async (_, _) =>
+        {
+            _vm.CycleSemanticMapPresentation();
+            return "OK";
+        });
+        add(CycleSemanticMapLevel, async (_, _) =>
+        {
+            _vm.CycleSemanticMapLevel();
+            return "OK";
+        });
+        add(CycleSemanticMapDetailLevel, async (_, _) =>
+        {
+            _vm.CycleSemanticMapDetailLevel();
+            return "OK";
+        });
 
         add(SetTerminalVisible, async (args, _) =>
         {

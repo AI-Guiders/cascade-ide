@@ -49,6 +49,11 @@ public static class WorkspaceNavigationSubgraphJson
                     var label = el.TryGetProperty("label", out var lEl) ? lEl.GetString() ?? Path.GetFileName(path) : Path.GetFileName(path);
                     var rel = el.TryGetProperty("relative_path", out var rEl) ? rEl.GetString() : null;
                     var rat = el.TryGetProperty("rationale", out var raEl) ? raEl.GetString() : null;
+                    int? legendIndex = null;
+                    if (el.TryGetProperty("legend_index", out var liEl) && liEl.ValueKind == JsonValueKind.Number
+                        && liEl.TryGetInt32(out var li))
+                        legendIndex = li;
+                    var legendText = el.TryGetProperty("legend_text", out var ltEl) ? ltEl.GetString() : null;
                     nodes.Add(new WorkspaceNavigationSubgraphNode
                     {
                         Id = id,
@@ -56,7 +61,9 @@ public static class WorkspaceNavigationSubgraphJson
                         Kind = kind,
                         Label = string.IsNullOrEmpty(label) ? Path.GetFileName(path) : label,
                         RelativePath = rel,
-                        Rationale = rat
+                        Rationale = rat,
+                        LegendIndex = legendIndex,
+                        LegendText = legendText
                     });
                 }
             }

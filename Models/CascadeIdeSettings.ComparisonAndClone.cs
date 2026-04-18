@@ -57,6 +57,7 @@ public sealed partial class CascadeIdeSettings
             {
                 View = SemanticMap.View,
                 Depth = SemanticMap.Depth,
+                DetailLevel = SemanticMap.DetailLevel,
             },
             Languages = new LanguagesSettings
             {
@@ -201,7 +202,7 @@ public sealed partial class CascadeIdeSettings
     {
         if (a is null || b is null)
             return a == b;
-        return a.View.Is(b.View) && a.Depth.Is(b.Depth);
+        return a.View.Is(b.View) && a.Depth.Is(b.Depth) && a.DetailLevel.Is(b.DetailLevel);
     }
 
     private static bool LanguagesEquals(LanguagesSettings? a, LanguagesSettings? b)

@@ -1,15 +1,8 @@
 #nullable enable
+using CascadeIDE.Models;
 using CascadeIDE.Services.SkiaInstruments;
 
 namespace CascadeIDE.Services.Navigation;
-
-/// <summary>Уровень детализации композиции Semantic Map.</summary>
-public enum SemanticMapDetailLevel
-{
-    Glance,
-    Normal,
-    Inspect
-}
 
 /// <summary>Контекст запроса на композицию Semantic Map.</summary>
 public readonly record struct SemanticMapPipelineContext(
@@ -121,14 +114,99 @@ public sealed class SemanticMapIntentStage : ISemanticMapIntentStage
 }
 
 /// <summary>
-/// Declutter stage v1: пока без агрессивной фильтрации. Слой выделен отдельно для будущих профилей glance/inspect.
+/// Declutter: политика «что показывать» до геометрии (ADR 0055). Glance + control flow: убираем второстепенные multibranch-связи.
 /// </summary>
-public sealed class SemanticMapDeclutterStage : ISemanticMapDeclutterStage
+public sealed class SemanticMapDeclutterStage(ISemanticMapIntentStage intentStage) : ISemanticMapDeclutterStage
 {
+    private readonly ISemanticMapIntentStage _intentStage = intentStage;
+
     public SemanticMapPipelineState Apply(in SemanticMapPipelineState state)
     {
-        // V1: структура графа не меняется. Слой нужен как отдельная граница политики шума.
-        return state;
+        var filtered = TryGlanceFilterControlFlow(state);
+        if (filtered is null)
+            return state;
+
+        var ctx = new SemanticMapPipelineContext(
+            filtered,
+            state.SemanticMapLevel,
+            state.Viewport,
+            state.DetailLevel);
+        return _intentStage.Resolve(ctx);
+    }
+
+    /// <summary>Glance: исключаем рёбра multibranch и недостижимые от anchor узлы; метрики пересчитываются через Intent.</summary>
+    private static WorkspaceNavigationSubgraphDocument? TryGlanceFilterControlFlow(in SemanticMapPipelineState state)
+    {
+        if (state.DetailLevel != SemanticMapDetailLevel.Glance)
+            return null;
+        if (!string.Equals(state.SemanticMapLevel, SemanticMapLevelKind.ControlFlow, StringComparison.Ordinal))
+            return null;
+
+        var doc = state.Subgraph;
+        var edgesWithoutMulti = doc.Edges.Where(e => !IsMultibranchEdge(e)).ToList();
+        if (edgesWithoutMulti.Count == doc.Edges.Count)
+            return null;
+
+        var anchorId = FindAnchorNodeId(doc);
+        var reachable = ReachableForward(anchorId, edgesWithoutMulti);
+        var nodes = doc.Nodes.Where(n => reachable.Contains(n.Id)).ToList();
+        var kept = new HashSet<string>(reachable, StringComparer.OrdinalIgnoreCase);
+        var finalEdges = edgesWithoutMulti.Where(e => kept.Contains(e.FromId) && kept.Contains(e.ToId)).ToList();
+
+        return new WorkspaceNavigationSubgraphDocument
+        {
+            AnchorPath = doc.AnchorPath,
+            Nodes = nodes,
+            Edges = finalEdges
+        };
+    }
+
+    private static bool IsMultibranchEdge(WorkspaceNavigationSubgraphEdge e) =>
+        !string.IsNullOrWhiteSpace(e.Kind)
+        && e.Kind.Contains("multibranch", StringComparison.OrdinalIgnoreCase);
+
+    private static string FindAnchorNodeId(WorkspaceNavigationSubgraphDocument doc)
+    {
+        var anchor = doc.Nodes.FirstOrDefault(n => string.Equals(n.Kind, "anchor", StringComparison.OrdinalIgnoreCase));
+        if (anchor is not null)
+            return anchor.Id;
+        var n0 = doc.Nodes.FirstOrDefault(n => n.Id.Equals("n0", StringComparison.OrdinalIgnoreCase));
+        if (n0 is not null)
+            return n0.Id;
+        return doc.Nodes[0].Id;
+    }
+
+    private static HashSet<string> ReachableForward(string anchorId, IReadOnlyList<WorkspaceNavigationSubgraphEdge> edges)
+    {
+        var outgoing = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+        foreach (var e in edges)
+        {
+            if (!outgoing.TryGetValue(e.FromId, out var list))
+            {
+                list = [];
+                outgoing[e.FromId] = list;
+            }
+
+            list.Add(e.ToId);
+        }
+
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var queue = new Queue<string>();
+        queue.Enqueue(anchorId);
+        seen.Add(anchorId);
+        while (queue.Count > 0)
+        {
+            var id = queue.Dequeue();
+            if (!outgoing.TryGetValue(id, out var next))
+                continue;
+            foreach (var t in next)
+            {
+                if (seen.Add(t))
+                    queue.Enqueue(t);
+            }
+        }
+
+        return seen;
     }
 }
 
@@ -155,15 +233,17 @@ public sealed class SemanticMapLayoutStage(
 
         var spacingPerLevel = state.DetailLevel switch
         {
-            SemanticMapDetailLevel.Glance => 28,
-            SemanticMapDetailLevel.Inspect => 40,
-            _ => 34
+            SemanticMapDetailLevel.Glance => 26,
+            SemanticMapDetailLevel.Inspect => 36,
+            _ => 32
         };
-        var computedHeight = 42 + Math.Max(1, state.EstimatedLevelCount) * spacingPerLevel;
+        var levelBands = Math.Max(1, state.EstimatedLevelCount);
+        var computedHeight = 28 + Math.Max(0, levelBands - 1) * spacingPerLevel;
+        // Высота панели от «читаемого» интринсика, не от растягивания под весь слот — иначе рёбра и шаг становятся нечитаемыми.
         var preferredCfHeight = Math.Clamp(
-            viewport.Height > 0 ? Math.Max(viewport.Height, computedHeight) : computedHeight,
+            computedHeight,
             SemanticMapCompositor.DefaultHeightControlFlow,
-            420);
+            SemanticMapCompositor.MaxHeightControlFlow);
 
         var cfScene = _controlFlowLayout.Layout(state.Subgraph, width, preferredCfHeight);
         return new SemanticMapCompositionResult(cfScene, preferredCfHeight);

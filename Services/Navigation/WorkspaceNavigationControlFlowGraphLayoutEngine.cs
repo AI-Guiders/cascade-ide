@@ -13,13 +13,13 @@ public sealed class WorkspaceNavigationControlFlowGraphLayoutEngine : IWorkspace
     public SemanticMapGraphSceneVm Layout(WorkspaceNavigationSubgraphDocument doc, double width, double height)
     {
         if (width <= 0 || height <= 0)
-            return new SemanticMapGraphSceneVm { Nodes = [], Edges = [] };
+            return new SemanticMapGraphSceneVm { Nodes = [], Edges = [], Legend = [], LegendColumnLeft = width };
 
         var anchor = doc.Nodes.FirstOrDefault(n => string.Equals(n.Kind, "anchor", StringComparison.OrdinalIgnoreCase))
                      ?? doc.Nodes.FirstOrDefault(n => n.Id.Equals("n0", StringComparison.OrdinalIgnoreCase))
                      ?? (doc.Nodes.Count > 0 ? doc.Nodes[0] : null);
         if (anchor is null)
-            return new SemanticMapGraphSceneVm { Nodes = [], Edges = [] };
+            return new SemanticMapGraphSceneVm { Nodes = [], Edges = [], Legend = [], LegendColumnLeft = width };
 
         var nodeById = doc.Nodes.ToDictionary(n => n.Id, StringComparer.OrdinalIgnoreCase);
         var outgoing = BuildOutgoing(doc.Edges);
@@ -40,15 +40,68 @@ public sealed class WorkspaceNavigationControlFlowGraphLayoutEngine : IWorkspace
             .OrderBy(g => g.Key)
             .ToDictionary(g => g.Key, g => g.Select(kv => kv.Key).ToList());
 
-        const double topPadding = 14;
-        const double bottomPadding = 14;
-        const double sidePadding = 14;
-        const double anchorR = 14;
-        const double nodeR = 12;
+        const double topPadding = 10;
+        const double bottomPadding = 10;
+        const double sidePadding = 10;
+        const double legendGap = 4;
+
+        static bool IsExitStep(WorkspaceNavigationSubgraphNode n) =>
+            string.Equals(n.Kind, "exit_step", StringComparison.OrdinalIgnoreCase);
+
+        static bool IsConditionStep(WorkspaceNavigationSubgraphNode n) =>
+            string.Equals(n.Kind, "condition_step", StringComparison.OrdinalIgnoreCase);
+
+        var hasLegendRows = doc.Nodes.Any(static n =>
+            !IsExitStep(n)
+            && n.LegendIndex is > 0
+            && !string.IsNullOrWhiteSpace(n.LegendText));
+        var showLegendConditionKey = doc.Nodes.Any(IsConditionStep);
+        var showLegendReturnKey = doc.Nodes.Any(IsExitStep);
+        var useLegendColumn = hasLegendRows || showLegendConditionKey || showLegendReturnKey;
+        // Резерв под колонку текста справа (минимум читаемой ширины для строк легенды).
+        var legendReserve = useLegendColumn ? Math.Clamp(width * 0.30, 96, 200) : 0;
+        var graphWidth = Math.Max(40, width - legendReserve - (useLegendColumn ? legendGap : 0));
+
+        var legendRows = hasLegendRows
+            ? doc.Nodes
+                .Where(n =>
+                    !IsExitStep(n)
+                    && n.LegendIndex is > 0
+                    && !string.IsNullOrWhiteSpace(n.LegendText))
+                .OrderBy(n => n.LegendIndex.GetValueOrDefault())
+                .Select(n => new SemanticMapLegendEntry { Index = n.LegendIndex!.Value, Text = n.LegendText!.Trim() })
+                .ToList()
+            : (IReadOnlyList<SemanticMapLegendEntry>)[];
+
+        // Узлы на одном уровне не разъезжаются на всю ширину слота — ограниченная «полоса чтения», по центру области графа.
+        const double maxReadableGraphBandWidth = 380;
+        var bandW = Math.Min(graphWidth, maxReadableGraphBandWidth);
+        var bandLeft = (graphWidth - bandW) * 0.5;
+        var centerX = bandLeft + bandW * 0.5;
+
+        // Легенда сразу справа от нарисованного графа, а не от края всей левой половины (иначе огромный зазор).
+        var legendColumnLeft = useLegendColumn ? bandLeft + bandW + legendGap : width;
 
         var levelCount = Math.Max(1, levels.Count);
-        var yStep = Math.Max(24, (height - topPadding - bottomPadding) / Math.Max(1, levelCount - 1));
-        var centerX = width / 2;
+        var innerH = height - topPadding - bottomPadding;
+        var slotCount = Math.Max(1, levelCount - 1);
+        var rawYStep = innerH / slotCount;
+        var minYStep = levelCount switch
+        {
+            >= 16 => 10,
+            >= 12 => 12,
+            >= 9 => 14,
+            >= 6 => 16,
+            _ => 18
+        };
+        const double maxReadableYStep = 40;
+        var yStep = Math.Clamp(rawYStep, minYStep, maxReadableYStep);
+        var verticalSpan = Math.Max(0, levelCount - 1) * yStep;
+        var yStart = topPadding + (innerH - verticalSpan) * 0.5;
+        const double refStep = 34;
+        var radiusMul = Math.Clamp(yStep / refStep, 0.4, 1.12);
+        var anchorR = 14 * radiusMul;
+        var nodeR = 12 * radiusMul;
 
         var idToCenter = new Dictionary<string, Point>(StringComparer.OrdinalIgnoreCase);
         var idToRadius = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
@@ -56,15 +109,15 @@ public sealed class WorkspaceNavigationControlFlowGraphLayoutEngine : IWorkspace
 
         foreach (var (depth, ids) in levels)
         {
-            var y = topPadding + depth * yStep;
+            var y = yStart + depth * yStep;
             var orderedIds = ids
                 .OrderBy(id => string.Equals(id, anchor.Id, StringComparison.OrdinalIgnoreCase) ? 0 : 1)
                 .ThenBy(id => id, StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
             var count = orderedIds.Count;
-            var minX = sidePadding + nodeR;
-            var maxX = Math.Max(minX, width - sidePadding - nodeR);
+            var minX = bandLeft + sidePadding + nodeR;
+            var maxX = Math.Max(minX, bandLeft + bandW - sidePadding - nodeR);
             for (var i = 0; i < count; i++)
             {
                 var id = orderedIds[i];
@@ -78,6 +131,10 @@ public sealed class WorkspaceNavigationControlFlowGraphLayoutEngine : IWorkspace
                 var point = new Point(x, y);
                 idToCenter[id] = point;
                 idToRadius[id] = radius;
+                var isAnchor = string.Equals(n.Id, anchor.Id, StringComparison.OrdinalIgnoreCase);
+                var shape = !isAnchor && string.Equals(n.Kind, "condition_step", StringComparison.OrdinalIgnoreCase)
+                    ? SemanticMapNodeShape.Diamond
+                    : SemanticMapNodeShape.Circle;
                 nodeLayouts.Add(new SemanticMapGraphNodeLayout
                 {
                     Id = n.Id,
@@ -86,7 +143,10 @@ public sealed class WorkspaceNavigationControlFlowGraphLayoutEngine : IWorkspace
                     Label = TruncateLabel(n.Label),
                     Center = point,
                     Radius = radius,
-                    IsAnchor = string.Equals(n.Id, anchor.Id, StringComparison.OrdinalIgnoreCase)
+                    IsAnchor = isAnchor,
+                    Shape = shape,
+                    LegendIndex = n.LegendIndex,
+                    LegendLine = n.LegendText
                 });
             }
         }
@@ -111,7 +171,16 @@ public sealed class WorkspaceNavigationControlFlowGraphLayoutEngine : IWorkspace
             });
         }
 
-        return new SemanticMapGraphSceneVm { Nodes = nodeLayouts, Edges = edgeLayouts };
+        return new SemanticMapGraphSceneVm
+        {
+            Nodes = nodeLayouts,
+            Edges = edgeLayouts,
+            Legend = legendRows,
+            UseLegendColumn = useLegendColumn,
+            ShowLegendConditionKey = showLegendConditionKey,
+            ShowLegendReturnKey = showLegendReturnKey,
+            LegendColumnLeft = legendColumnLeft
+        };
     }
 
     private static Dictionary<string, List<string>> BuildOutgoing(IReadOnlyList<WorkspaceNavigationSubgraphEdge> edges)

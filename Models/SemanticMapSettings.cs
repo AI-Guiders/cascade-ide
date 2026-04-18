@@ -9,6 +9,9 @@ public sealed class SemanticMapSettings
     /// <summary><c>file</c> | <c>controlFlow</c>.</summary>
     public string Depth { get; set; } = SemanticMapLevelKind.File;
 
+    /// <summary><c>glance</c> | <c>normal</c> | <c>inspect</c> — детализация композиции (ADR 0055).</summary>
+    public string DetailLevel { get; set; } = "normal";
+
     /// <summary>
     /// Режим Control Flow по <see cref="Depth"/> — тот же критерий, что ветка CF в
     /// <c>RunWorkspaceNavigationMapRefreshAsync</c> и обновление карты по курсору (<c>UpdateSemanticMapCaretOffset</c>).
@@ -36,5 +39,19 @@ public sealed class SemanticMapSettings
         if (string.Equals(v, SemanticMapLevelKind.ControlFlow, StringComparison.OrdinalIgnoreCase))
             return SemanticMapLevelKind.ControlFlow;
         return SemanticMapLevelKind.File;
+    }
+
+    /// <summary>Соответствует <see cref="DetailLevel"/> и вызову композитора Semantic Map.</summary>
+    public SemanticMapDetailLevel NormalizedDetailLevel => NormalizeDetailLevel(DetailLevel);
+
+    public static SemanticMapDetailLevel NormalizeDetailLevel(string? value)
+    {
+        var v = (value ?? "").Trim().ToLowerInvariant();
+        return v switch
+        {
+            "glance" => SemanticMapDetailLevel.Glance,
+            "inspect" => SemanticMapDetailLevel.Inspect,
+            _ => SemanticMapDetailLevel.Normal
+        };
     }
 }

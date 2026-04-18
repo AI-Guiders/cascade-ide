@@ -27,6 +27,11 @@ public sealed class TraceFlowSurfaceCompositor : ITraceFlowSurfaceCompositor
         {
             Nodes = scene.Nodes,
             Edges = scene.Edges,
+            Legend = scene.Legend,
+            UseLegendColumn = scene.UseLegendColumn,
+            ShowLegendConditionKey = scene.ShowLegendConditionKey,
+            ShowLegendReturnKey = scene.ShowLegendReturnKey,
+            LegendColumnLeft = scene.LegendColumnLeft,
             HighlightedNodeIds = snapshot.HighlightedNodeIds,
             HighlightedEdgeKeys = snapshot.HighlightedEdgeKeys
         };
