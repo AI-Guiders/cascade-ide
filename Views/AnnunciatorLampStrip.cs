@@ -83,7 +83,7 @@ public sealed class AnnunciatorLampStrip : Control
         if (items.Count == 0)
             return new Size(0, 0);
 
-        var sz = AnnunciatorLampPrimitives.MeasureGrid(items.Count);
+        var sz = AnnunciatorLampPrimitives.MeasureStrip(items.Count);
         var aw = availableSize.Width;
         if (double.IsNaN(aw) || double.IsInfinity(aw))
             aw = sz.Width;
@@ -111,7 +111,7 @@ public sealed class AnnunciatorLampStrip : Control
         var panel = new Rect(0, 0, w, h);
         AnnunciatorLampPrimitives.DrawPanelBackground(context, panel);
 
-        var columns = AnnunciatorLampPrimitives.DefaultGridColumns;
+        var columnsPerRow = AnnunciatorLampPrimitives.DefaultStripColumns;
         var pad = AnnunciatorLampPrimitives.DefaultPanelPadding;
         var gap = AnnunciatorLampPrimitives.DefaultGap;
         var cellW = AnnunciatorLampPrimitives.DefaultCellWidth;
@@ -120,8 +120,8 @@ public sealed class AnnunciatorLampStrip : Control
         for (var i = 0; i < items.Count; i++)
         {
             var item = items[i];
-            var col = i % columns;
-            var row = i / columns;
+            var col = i % columnsPerRow;
+            var row = i / columnsPerRow;
             var x = pad + col * (cellW + gap);
             var y = pad + row * (cellH + gap);
             var outer = new Rect(x, y, cellW, cellH);

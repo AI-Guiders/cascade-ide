@@ -18,31 +18,31 @@ public static class AnnunciatorLampPrimitives
     public const double DefaultCellHeight = 40;
     public const double DefaultGap = 4;
     public const double DefaultPanelPadding = 6;
-    /// <summary>Для полосы glance (напр. 4 лампы готовности окружения) — одна строка; при большем числе ячеек сетка переносится.</summary>
-    public const int DefaultGridColumns = 4;
+    /// <summary>Ламп в одной строке полосы (напр. 4 для готовности окружения). Больше ячеек — перенос строки в этом контроле; отдельные группы — вторая полоса ниже, без скролла.</summary>
+    public const int DefaultStripColumns = 4;
     public const double LabelFontSize = 9;
 
     private static readonly Typeface LabelTypeface = new(FontFamily.Default, FontStyle.Normal, FontWeight.Bold);
 
-    /// <summary>Размер прямоугольника сетки (с паддингом панели) для заданного числа ячеек.</summary>
-    public static Size MeasureGrid(
+    /// <summary>Размер прямоугольника полосы (с паддингом панели) для заданного числа ячеек.</summary>
+    public static Size MeasureStrip(
         int itemCount,
-        int columns = DefaultGridColumns,
+        int columnsPerRow = DefaultStripColumns,
         double cellW = DefaultCellWidth,
         double cellH = DefaultCellHeight,
         double gap = DefaultGap,
         double panelPadding = DefaultPanelPadding)
     {
-        if (itemCount <= 0 || columns <= 0)
+        if (itemCount <= 0 || columnsPerRow <= 0)
             return new Size(0, 0);
 
-        var rowCount = (itemCount + columns - 1) / columns;
-        var w = panelPadding * 2 + columns * cellW + (columns - 1) * gap;
+        var rowCount = (itemCount + columnsPerRow - 1) / columnsPerRow;
+        var w = panelPadding * 2 + columnsPerRow * cellW + (columnsPerRow - 1) * gap;
         var h = panelPadding * 2 + rowCount * cellH + (rowCount - 1) * gap;
         return new Size(w, h);
     }
 
-    /// <summary>Фон панели под сеткой ламп (рамка «корпуса»).</summary>
+    /// <summary>Фон панели под полосой ламп (рамка «корпуса»).</summary>
     public static void DrawPanelBackground(DrawingContext context, Rect bounds)
     {
         context.DrawRectangle(new SolidColorBrush(PanelBackground), new Pen(new SolidColorBrush(BezelOuter), 1), bounds);
