@@ -15,6 +15,8 @@ public static class InstrumentPlacementRuntime
         {
             [BuildKey(MainWindowHostSurfaceIds.DockedGrid, CockpitSlotIds.Pfd)] = CockpitStandardInstrumentIds.SolutionExplorerTree,
             [BuildKey(MainWindowHostSurfaceIds.PlusMfdHostTopLevel, CockpitSlotIds.Pfd)] = CockpitStandardInstrumentIds.SolutionExplorerTree,
+            [BuildKey(MainWindowHostSurfaceIds.PlusPfdHostTopLevel, CockpitSlotIds.Pfd)] = CockpitStandardInstrumentIds.SolutionExplorerTree,
+            [BuildKey(MainWindowHostSurfaceIds.PlusPfdMfdHostTopLevel, CockpitSlotIds.Pfd)] = CockpitStandardInstrumentIds.SolutionExplorerTree,
         };
 
     internal static void ResetToCodeDefaults()
@@ -47,7 +49,7 @@ public static class InstrumentPlacementRuntime
 
         var userMap = BuildUserPlacementMap(display);
         var key = BuildKey(surfaceId, slotId);
-        var preferRepo = display.PreferRepoInstrumentsPlacement;
+        var preferRepo = display.PreferRepoInstruments;
 
         lock (Gate)
         {
@@ -103,7 +105,7 @@ public static class InstrumentPlacementRuntime
     private static Dictionary<string, string> BuildUserPlacementMap(DisplaySettings display)
     {
         var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        ApplyRoutingOverlay(map, display.InstrumentRouting, "user");
+        ApplyRoutingOverlay(map, display.Instruments, "user");
         return map;
     }
 
@@ -136,11 +138,15 @@ public static class InstrumentPlacementRuntime
             {
                 map[BuildKey(MainWindowHostSurfaceIds.DockedGrid, CockpitSlotIds.Pfd)] = canonical;
                 map[BuildKey(MainWindowHostSurfaceIds.PlusMfdHostTopLevel, CockpitSlotIds.Pfd)] = canonical;
+                map[BuildKey(MainWindowHostSurfaceIds.PlusPfdHostTopLevel, CockpitSlotIds.Pfd)] = canonical;
+                map[BuildKey(MainWindowHostSurfaceIds.PlusPfdMfdHostTopLevel, CockpitSlotIds.Pfd)] = canonical;
             }
             else if (routeKey.Equals(InstrumentRoutingSlotKeys.MfdPrimary, StringComparison.OrdinalIgnoreCase))
             {
                 map[BuildKey(MainWindowHostSurfaceIds.DockedGrid, CockpitSlotIds.Mfd)] = canonical;
                 map[BuildKey(MainWindowHostSurfaceIds.PlusMfdHostTopLevel, CockpitSlotIds.Mfd)] = canonical;
+                map[BuildKey(MainWindowHostSurfaceIds.PlusPfdHostTopLevel, CockpitSlotIds.Mfd)] = canonical;
+                map[BuildKey(MainWindowHostSurfaceIds.PlusPfdMfdHostTopLevel, CockpitSlotIds.Mfd)] = canonical;
             }
             else
             {

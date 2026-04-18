@@ -17,4 +17,10 @@ public enum AttentionLayoutSurfaceKind
 
     /// <summary>Главное окно без колонки Mfd + отдельный <c>TopLevel</c> с <c>SecondaryShellView</c> (ADR 0017).</summary>
     MainWindowPlusMfdHostTopLevel = 1,
+
+    /// <summary>Главное окно без колонки Pfd + отдельный <c>TopLevel</c> с зоной PFD (ADR 0017).</summary>
+    MainWindowPlusPfdHostTopLevel = 2,
+
+    /// <summary>Оба хоста PFD и MFD вынесены в отдельные <c>TopLevel</c>; в main остаётся лобовое (ADR 0017).</summary>
+    MainWindowPlusPfdMfdHostTopLevel = 3,
 }

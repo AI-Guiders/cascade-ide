@@ -13,9 +13,10 @@ public static class MainWindowShellSurfaceCompositor
 {
     public static MainWindowShellSurfaceComposition Compose(in MainWindowShellSurfaceCompositionInput input)
     {
-        var pfdVisible = CockpitPresentationLayoutPolicy.CoercePfdRegionExpanded(
+        var pfdCoerced = CockpitPresentationLayoutPolicy.CoercePfdRegionExpanded(
             input.PresentationParse,
             input.IntentSolutionExplorerVisible);
+        var pfdVisible = pfdCoerced && !input.SuppressPfdColumnForPfdHostWindow;
 
         var mfdExpanded = CockpitPresentationLayoutPolicy.CoerceMfdRegionExpanded(
             input.PresentationParse,
@@ -35,11 +36,12 @@ public static class MainWindowShellSurfaceCompositor
     }
 }
 
-/// <summary>Вход композитора: intent пользователя, пресет, подавление колонки MFD в main при открытом хосте, числа ширин из UI-режима.</summary>
+/// <summary>Вход композитора: intent пользователя, пресет, подавление колонок PFD/MFD в main при открытых хостах, числа ширин из UI-режима.</summary>
 public readonly record struct MainWindowShellSurfaceCompositionInput(
     PresentationParseResult PresentationParse,
     bool IntentSolutionExplorerVisible,
     bool IntentChatPanelExpanded,
+    bool SuppressPfdColumnForPfdHostWindow,
     bool SuppressMfdColumnForMfdHostWindow,
     int ExpandedMfdWidthPixels,
     int CollapsedMfdWidthPixels,

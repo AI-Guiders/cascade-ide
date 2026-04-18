@@ -19,9 +19,9 @@ internal sealed class InstrumentMountPolicyRuleMatchesSpecification : IInstrumen
 {
     public bool IsSatisfiedBy(InstrumentMountPolicyRuleSettings rule, in InstrumentMountPolicyMatchContext context)
     {
-        var ruleSurface = Normalize(rule.SurfaceId);
-        var ruleSlot = Normalize(rule.SlotId);
-        var ruleInstrument = Normalize(rule.InstrumentId);
+        var ruleSurface = Normalize(rule.Surface);
+        var ruleSlot = Normalize(rule.Slot);
+        var ruleInstrument = Normalize(rule.Instrument);
 
         var surfaceMatches = context.SurfaceExact
             ? ruleSurface == context.SurfaceId

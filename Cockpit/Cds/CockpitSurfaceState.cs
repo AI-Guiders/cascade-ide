@@ -19,6 +19,7 @@ public sealed record CockpitSurfaceState(
 public sealed record CockpitSurfaceTopology(
     [property: JsonPropertyName("surface_kind")] string SurfaceKind,
     [property: JsonPropertyName("mfd_host_window_open")] bool MfdHostWindowOpen,
+    [property: JsonPropertyName("pfd_host_window_open")] bool PfdHostWindowOpen,
     [property: JsonPropertyName("mfd_column_visible_in_main")] bool MfdColumnVisibleInMain);
 
 public sealed record CockpitSurfaceSecondaryShell(

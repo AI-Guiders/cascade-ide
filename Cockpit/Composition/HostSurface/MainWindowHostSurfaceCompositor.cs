@@ -12,11 +12,20 @@ public static class MainWindowHostSurfaceCompositor
     public static MainWindowHostSurfaceFrame ComposeFrame(in MainWindowShellSurfaceCompositionInput input)
     {
         var shell = MainWindowShellSurfaceCompositor.Compose(input);
-        var surfaceId = input.SuppressMfdColumnForMfdHostWindow
-            ? MainWindowHostSurfaceIds.PlusMfdHostTopLevel
-            : MainWindowHostSurfaceIds.DockedGrid;
+        var surfaceId = ResolveSurfaceId(input);
         var instruments = BuildInstruments(shell, surfaceId, input);
         return new MainWindowHostSurfaceFrame(shell, instruments);
+    }
+
+    private static string ResolveSurfaceId(in MainWindowShellSurfaceCompositionInput input)
+    {
+        if (input.SuppressPfdColumnForPfdHostWindow && input.SuppressMfdColumnForMfdHostWindow)
+            return MainWindowHostSurfaceIds.PlusPfdMfdHostTopLevel;
+        if (input.SuppressPfdColumnForPfdHostWindow)
+            return MainWindowHostSurfaceIds.PlusPfdHostTopLevel;
+        if (input.SuppressMfdColumnForMfdHostWindow)
+            return MainWindowHostSurfaceIds.PlusMfdHostTopLevel;
+        return MainWindowHostSurfaceIds.DockedGrid;
     }
 
     private static IReadOnlyList<CockpitInstrumentDescriptor> BuildInstruments(

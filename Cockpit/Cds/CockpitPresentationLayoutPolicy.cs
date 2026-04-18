@@ -25,12 +25,30 @@ public static class CockpitPresentationLayoutPolicy
     public static bool CoerceMfdRegionExpanded(PresentationParseResult parse, bool desired) =>
         RequiresMfdRegionInMainWindow(parse) ? true : desired;
 
-    /// <summary>Флаги «якорь обязателен на первом экране» для сериализации в <see cref="CockpitSurfaceZones"/>.</summary>
+    /// <summary>Флаги «якорь присутствует в строке <c>presentation</c>» для сериализации в <see cref="CockpitSurfaceZones"/>.</summary>
     public static CockpitPresentationLayoutInvariants InvariantsFromPresentation(PresentationParseResult parse) =>
         new(
-            RequiresPfdRegionInMainWindow(parse),
-            RequiresForwardOnFirstScreen(parse),
-            RequiresMfdRegionInMainWindow(parse));
+            AnyScreenContains(parse, PresentationAnchorKind.Pfd),
+            AnyScreenContains(parse, PresentationAnchorKind.Forward),
+            AnyScreenContains(parse, PresentationAnchorKind.Mfd));
+
+    private static bool AnyScreenContains(PresentationParseResult parse, PresentationAnchorKind kind)
+    {
+        if (!parse.IsSuccess)
+            return false;
+
+        for (var s = 0; s < parse.Screens.Count; s++)
+        {
+            var screen = parse.Screens[s];
+            for (var i = 0; i < screen.Count; i++)
+            {
+                if (screen[i].Kind == kind)
+                    return true;
+            }
+        }
+
+        return false;
+    }
 
     private static bool FirstScreenContains(PresentationParseResult parse, PresentationAnchorKind kind)
     {

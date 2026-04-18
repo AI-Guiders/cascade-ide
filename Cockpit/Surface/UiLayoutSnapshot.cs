@@ -61,7 +61,9 @@ public static class UiLayoutSnapshot
             ? "main"
             : win is MfdHostWindow
                 ? "mfd_host"
-                : "other";
+                : win is PfdHostWindow
+                    ? "pfd_host"
+                    : "other";
 
     private static Dictionary<string, object?> BuildWindowEntry(Window win, Window mainWindow)
     {

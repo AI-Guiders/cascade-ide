@@ -28,6 +28,7 @@ public static class CockpitSurfaceSnapshotBuilder
             Topology: new CockpitSurfaceTopology(
                 SurfaceKind: surfaceKind,
                 MfdHostWindowOpen: vm.IsMfdHostWindowShellOpen,
+                PfdHostWindowOpen: vm.IsPfdHostWindowShellOpen,
                 MfdColumnVisibleInMain: vm.IsMfdColumnVisible),
             SecondaryShell: new CockpitSurfaceSecondaryShell(
                 CurrentPage: vm.CurrentSecondaryShellPage.ToString()),
@@ -46,6 +47,8 @@ public static class CockpitSurfaceSnapshotBuilder
         {
             AttentionLayoutSurfaceKind.MainWindowDockedGrid => MainWindowHostSurfaceIds.DockedGrid,
             AttentionLayoutSurfaceKind.MainWindowPlusMfdHostTopLevel => MainWindowHostSurfaceIds.PlusMfdHostTopLevel,
+            AttentionLayoutSurfaceKind.MainWindowPlusPfdHostTopLevel => MainWindowHostSurfaceIds.PlusPfdHostTopLevel,
+            AttentionLayoutSurfaceKind.MainWindowPlusPfdMfdHostTopLevel => MainWindowHostSurfaceIds.PlusPfdMfdHostTopLevel,
             _ => kind.ToString(),
         };
 }

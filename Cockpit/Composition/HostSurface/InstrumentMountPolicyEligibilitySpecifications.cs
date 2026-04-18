@@ -11,18 +11,19 @@ internal sealed class RolloutMetricsEligibilitySpecification : IInstrumentMountP
 {
     public bool IsSatisfiedBy(InstrumentMountPolicyRuleSettings rule, DisplaySettings displaySettings)
     {
-        if (!displaySettings.EnforceInstrumentMountPolicyEligibility)
+        var m = displaySettings.Mount;
+        if (!m.EnforceEligibility)
             return true;
 
-        if (displaySettings.RequireInstrumentMountPolicyScores
+        if (m.RequireScores
             && (rule.SaScore is null || rule.PerformanceScore is null || rule.WorkloadScore is null))
             return false;
 
-        if (rule.SaScore is { } sa && sa < displaySettings.InstrumentMountPolicyMinSaScore)
+        if (rule.SaScore is { } sa && sa < m.MinSa)
             return false;
-        if (rule.PerformanceScore is { } perf && perf < displaySettings.InstrumentMountPolicyMinPerformanceScore)
+        if (rule.PerformanceScore is { } perf && perf < m.MinPerformance)
             return false;
-        if (rule.WorkloadScore is { } workload && workload > displaySettings.InstrumentMountPolicyMaxWorkloadScore)
+        if (rule.WorkloadScore is { } workload && workload > m.MaxWorkload)
             return false;
 
         return true;

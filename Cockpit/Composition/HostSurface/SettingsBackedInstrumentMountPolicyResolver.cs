@@ -21,10 +21,11 @@ public sealed class SettingsBackedInstrumentMountPolicyResolver : IInstrumentMou
     {
         static string Normalize(string? value) => (value ?? string.Empty).Trim().ToLowerInvariant();
 
-        var normalizedDefault = string.IsNullOrWhiteSpace(displaySettings.InstrumentMountStyle)
+        var mount = displaySettings.Mount;
+        var normalizedDefault = string.IsNullOrWhiteSpace(mount.DefaultStyle)
             ? InstrumentMountPolicyIds.V1
-            : displaySettings.InstrumentMountStyle.Trim();
-        var rules = displaySettings.InstrumentMountPolicyRules;
+            : mount.DefaultStyle.Trim();
+        var rules = mount.Rules;
         if (rules is null || rules.Count == 0)
             return normalizedDefault;
 
@@ -44,7 +45,7 @@ public sealed class SettingsBackedInstrumentMountPolicyResolver : IInstrumentMou
             var match = rules.FirstOrDefault(rule =>
                 RuleMatches.IsSatisfiedBy(rule, in context)
                 && RuleEligibility.IsSatisfiedBy(rule, displaySettings));
-            return string.IsNullOrWhiteSpace(match?.MountStyle) ? string.Empty : match.MountStyle.Trim();
+            return string.IsNullOrWhiteSpace(match?.Style) ? string.Empty : match.Style.Trim();
         }
 
         if (TryResolveForSurface(surfaceExact: true, out var surfaceSpecific))
