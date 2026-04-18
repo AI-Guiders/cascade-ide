@@ -57,9 +57,9 @@ public partial class MainWindowViewModel
         if (!persist)
             return;
 
-        _settings.WorkspaceUi.Mode = normalized;
-        _settings.WorkspaceUi.PfdRegionExpanded = IsPfdRegionExpanded;
-        _settings.WorkspaceUi.ShowTerminal = IsTerminalVisible;
+        _settings.Workspace.Mode = normalized;
+        _settings.Workspace.PfdExpanded = IsPfdRegionExpanded;
+        _settings.Workspace.ShowTerminal = IsTerminalVisible;
         SaveSettingsIfChanged();
     }
 

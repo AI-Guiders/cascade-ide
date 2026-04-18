@@ -54,10 +54,11 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private readonly IEnvironmentReadinessSurfaceCompositor _environmentReadinessSurfaceCompositor;
     private readonly Services.Presentation.PresentationParseResult _presentationParse;
     private readonly bool _presentationDedicatedMfdSecondScreen;
-    private readonly bool _presentationTriplePfdForwardMfd;
+    private readonly bool _presentationTripleOneAnchorPerZone;
     private readonly bool _presentationMfdHostTopology;
     private readonly IInstrumentMountPolicyResolver _instrumentMountPolicyResolver;
     private bool _suppressMfdColumnForMfdHostWindow;
+    private bool _suppressPfdColumnForPfdHostWindow;
 
     private Services.McpClientService _mcpClientService;
     private AutonomousAgentService _autonomousAgentService;
@@ -72,10 +73,10 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _contextMinimizer = new Services.ContextMinimizer(_csharpLanguageService);
         _aiProviderManager = new Services.AiProviderManager(_contextMinimizer, ResolveProvider);
         _acpAutoInjectIdeMcp = _settings.Mcp.AcpAutoInjectIdeMcp;
-        _markdownKrokiEnabled = _settings.MarkdownDiagrams.KrokiEnabled;
-        _markdownKrokiBaseUrl = string.IsNullOrWhiteSpace(_settings.MarkdownDiagrams.KrokiBaseUrl)
+        _markdownKrokiEnabled = _settings.Markdown.Diagrams.Kroki;
+        _markdownKrokiBaseUrl = string.IsNullOrWhiteSpace(_settings.Markdown.Diagrams.KrokiUrl)
             ? "https://kroki.io"
-            : _settings.MarkdownDiagrams.KrokiBaseUrl.Trim();
+            : _settings.Markdown.Diagrams.KrokiUrl.Trim();
         _externalMcpServersJson = _settings.Mcp.ExternalServersJson;
         _activeAiProvider = _settings.Ai.Provider;
         _chatMcpOnly = _settings.Ai.ChatMcpOnly;
@@ -83,11 +84,11 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _anthropicApiKey = _aiKeys.AnthropicApiKey ?? "";
         _openAiApiKey = _aiKeys.OpenAiApiKey ?? "";
         _deepSeekApiKey = _aiKeys.DeepSeekApiKey ?? "";
-        _isPfdRegionExpanded = _settings.WorkspaceUi.PfdRegionExpanded;
-        _isTerminalVisible = _settings.WorkspaceUi.ShowTerminal;
-        _isGitPanelVisible = _settings.WorkspaceUi.ShowGit;
-        _isInstrumentationDockVisible = _settings.WorkspaceUi.ShowInstrumentation;
-        _uiMode = NormalizeUiMode(_settings.WorkspaceUi.Mode);
+        _isPfdRegionExpanded = _settings.Workspace.PfdExpanded;
+        _isTerminalVisible = _settings.Workspace.ShowTerminal;
+        _isGitPanelVisible = _settings.Workspace.ShowGit;
+        _isInstrumentationDockVisible = _settings.Workspace.ShowInstrumentation;
+        _uiMode = NormalizeUiMode(_settings.Workspace.Mode);
         InitializeAgentUiDefaults();
         RegisterAgentFeedHandlers();
         ApplyUiModeLayout(_uiMode, persist: false);
@@ -99,9 +100,9 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _lastSavedSettings = (CascadeIdeSettings)_settings.Clone();
         _lastSavedAiKeys = (AiKeys)_aiKeys.Clone();
 
-        _semanticMapPresentation = SemanticMapPresentationKind.Normalize(_settings.SemanticMap.Presentation);
-        _semanticMapLevel = SemanticMapLevelKind.Normalize(_settings.SemanticMap.Level);
-        _workspaceSplittersLocked = _settings.WorkspaceUi.WorkspaceSplittersLocked;
+        _semanticMapPresentation = SemanticMapPresentationKind.Normalize(_settings.SemanticMap.View);
+        _semanticMapLevel = SemanticMapLevelKind.Normalize(_settings.SemanticMap.Depth);
+        _workspaceSplittersLocked = _settings.Workspace.SplittersLocked;
 
         BuildOutputPanel = new BuildOutputPanelViewModel();
         TerminalPanel = new TerminalPanelViewModel(() => Workspace.SolutionPath);
@@ -137,16 +138,16 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         new UiChromeCapabilitiesModule().Register(_capabilities);
         new Features.Markdown.MarkdownCapabilitiesModule().Register(_capabilities);
 
-        _csharpLspProvider = string.IsNullOrEmpty(_settings.CSharpLsp.Provider)
+        _csharpLspProvider = string.IsNullOrEmpty(_settings.Languages.CSharp.Provider)
             ? CSharpLspProviderIds.ParseOnly
-            : _settings.CSharpLsp.Provider;
-        _csharpLspExecutable = _settings.CSharpLsp.Executable ?? "";
-        _csharpLspArguments = _settings.CSharpLsp.Arguments ?? "";
-        _markdownLspProvider = string.IsNullOrEmpty(_settings.MarkdownLsp.Provider)
+            : _settings.Languages.CSharp.Provider;
+        _csharpLspExecutable = _settings.Languages.CSharp.Executable ?? "";
+        _csharpLspArguments = _settings.Languages.CSharp.Arguments ?? "";
+        _markdownLspProvider = string.IsNullOrEmpty(_settings.Languages.Markdown.Provider)
             ? MarkdownLspProviderIds.Off
-            : _settings.MarkdownLsp.Provider;
-        _markdownLspExecutable = _settings.MarkdownLsp.Executable ?? "";
-        _markdownLspArguments = _settings.MarkdownLsp.Arguments ?? "";
+            : _settings.Languages.Markdown.Provider;
+        _markdownLspExecutable = _settings.Languages.Markdown.Executable ?? "";
+        _markdownLspArguments = _settings.Languages.Markdown.Arguments ?? "";
 
         _mcpClientService = new Services.McpClientService(Services.McpExternalServersJsonResolver.ResolveEffectiveJson(_settings));
         _autonomousAgentService = CreateAutonomousAgentService(_mcpClientService);
@@ -186,20 +187,20 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         RebuildEicas();
 
         // Топология presentation / колонки MainGrid — снимок на старте; смена строки в settings.toml — после перезапуска (ADR 0017).
-        var pg = _settings.PresentationGrammar;
+        var pg = _settings.Presentation.Grammar;
         var grammar = Services.Presentation.PresentationGrammarTokens.FromSettings(
-            pg.ScreenMarkers,
-            pg.ScreenSeparator,
-            pg.ZoneSeparator,
-            pg.PfdZoneIdentifier,
-            pg.ForwardZoneIdentifier,
-            pg.MfdZoneIdentifier);
+            pg.Brackets,
+            pg.BetweenScreens,
+            pg.BetweenZones,
+            pg.Pfd,
+            pg.Forward,
+            pg.Mfd);
         _presentationParse = Services.Presentation.PresentationParser.Parse(_settings.GetEffectivePresentationLine(), grammar);
         _presentationDedicatedMfdSecondScreen = _presentationParse.IsSuccess
             && Services.Presentation.PresentationLayoutAnalyzer.IsDedicatedMfdSecondScreenPreset(_presentationParse.Screens);
-        _presentationTriplePfdForwardMfd = _presentationParse.IsSuccess
-            && Services.Presentation.PresentationLayoutAnalyzer.IsTriplePfdForwardMfdPreset(_presentationParse.Screens);
-        _presentationMfdHostTopology = _presentationDedicatedMfdSecondScreen || _presentationTriplePfdForwardMfd;
+        _presentationTripleOneAnchorPerZone = _presentationParse.IsSuccess
+            && Services.Presentation.PresentationLayoutAnalyzer.IsTripleOneAnchorPerZonePreset(_presentationParse.Screens);
+        _presentationMfdHostTopology = _presentationDedicatedMfdSecondScreen || _presentationTripleOneAnchorPerZone;
         _instrumentMountPolicyResolver = new SettingsBackedInstrumentMountPolicyResolver();
 
         NotifyDockedInstrumentSlotBindings();

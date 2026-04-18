@@ -140,19 +140,19 @@
         <Style Selector="chrome|AttentionZoneContainer.attention-layer-hud">
             <Setter Property="ToolTip.Tip" Value="Слой: HUD (над редактором, ADR 0021 §9)"/>
         </Style>
-        <Style Selector="Border#SkiaZonePreviewPfd, Border#SkiaZonePreviewForward, Border#SkiaZonePreviewMfd">
+        <Style Selector="Border#SkiaZoneGeometryOverlayPfd, Border#SkiaZoneGeometryOverlayForward, Border#SkiaZoneGeometryOverlayMfd">
             <Setter Property="BorderThickness" Value="2"/>
             <Setter Property="CornerRadius" Value="4"/>
             <Setter Property="Background" Value="#04000000"/>
             <Setter Property="IsHitTestVisible" Value="False"/>
         </Style>
-        <Style Selector="Border#SkiaZonePreviewPfd">
+        <Style Selector="Border#SkiaZoneGeometryOverlayPfd">
             <Setter Property="BorderBrush" Value="#48C8F4"/>
         </Style>
-        <Style Selector="Border#SkiaZonePreviewForward">
+        <Style Selector="Border#SkiaZoneGeometryOverlayForward">
             <Setter Property="BorderBrush" Value="#FFC75A"/>
         </Style>
-        <Style Selector="Border#SkiaZonePreviewMfd">
+        <Style Selector="Border#SkiaZoneGeometryOverlayMfd">
             <Setter Property="BorderBrush" Value="#B38CFF"/>
         </Style>
     </Window.Styles>
@@ -291,11 +291,11 @@
             <views:SecondaryShellView DataContext="{Binding DataContext, ElementName=RootWindow}" MinHeight="0"/>
         </chrome:AttentionZoneContainer>
 
-        <!-- W2: preview контуров зон поверх контента (без изменения содержимого). -->
-        <Border x:Name="SkiaZonePreviewPfd"
+        <!-- W2: overlay контуров зон поверх контента (без изменения содержимого). -->
+        <Border x:Name="SkiaZoneGeometryOverlayPfd"
                 Grid.Row="2"
                 Grid.Column="0"
-                IsVisible="{Binding IsSkiaZonePreviewPfdVisible}"
+                IsVisible="{Binding IsSkiaZoneGeometryOverlayPfdVisible}"
                 ZIndex="410">
             <TextBlock Text="PFD"
                        Margin="6,4,0,0"
@@ -303,10 +303,10 @@
                        VerticalAlignment="Top"
                        Foreground="#C6F2FF"/>
         </Border>
-        <Border x:Name="SkiaZonePreviewForward"
+        <Border x:Name="SkiaZoneGeometryOverlayForward"
                 Grid.Row="2"
                 Grid.Column="2"
-                IsVisible="{Binding IsSkiaZonePreviewForwardVisible}"
+                IsVisible="{Binding IsSkiaZoneGeometryOverlayForwardVisible}"
                 ZIndex="410">
             <TextBlock Text="FORWARD"
                        Margin="6,4,0,0"
@@ -314,11 +314,11 @@
                        VerticalAlignment="Top"
                        Foreground="#FFE7A6"/>
         </Border>
-        <Border x:Name="SkiaZonePreviewMfd"
+        <Border x:Name="SkiaZoneGeometryOverlayMfd"
                 Grid.Row="2"
                 Grid.Column="4"
                 Grid.RowSpan="{Binding ChatPanelMainGridRowSpan}"
-                IsVisible="{Binding IsSkiaZonePreviewMfdVisible}"
+                IsVisible="{Binding IsSkiaZoneGeometryOverlayMfdVisible}"
                 ZIndex="410">
             <TextBlock Text="MFD"
                        Margin="6,4,0,0"

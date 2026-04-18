@@ -40,6 +40,7 @@ public partial class MainWindow : Window
             WindowState = WindowState.Maximized;
 
         TryApplyHotkeys();
+        TryOpenPfdHostWindowOnStartup();
         TryOpenMfdHostWindowOnStartup();
     }
 
@@ -67,6 +68,7 @@ public partial class MainWindow : Window
             vm.RequestShowAbout = ShowAbout;
             vm.RequestOpenSettings = ShowSettingsWindow;
             vm.RequestToggleMfdHostWindow = ToggleMfdHostWindow;
+            vm.RequestTogglePfdHostWindow = TogglePfdHostWindow;
             vm.RequestOpenThemeFile = ShowOpenThemeFileDialogAsync;
             vm.RequestShowMarkdownPreviewWindow = ShowMarkdownPreviewWindow;
             vm.RequestShowMarkdownPreviewForEditor = ShowMarkdownPreviewForEditor;
@@ -114,6 +116,7 @@ public partial class MainWindow : Window
                 _boundMainVm = null;
             }
 
+            ClosePfdHostWindowIfOpen();
             CloseMfdHostWindowIfOpen();
         }
     }

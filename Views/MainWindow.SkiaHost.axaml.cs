@@ -32,10 +32,10 @@ public partial class MainWindow
     }
 
     internal static bool IsSkiaHostRelatedProperty(string? propertyName) =>
-        propertyName is nameof(ViewModels.MainWindowViewModel.UseSkiaZoneGeometryPreview)
-            or nameof(ViewModels.MainWindowViewModel.IsSkiaZonePreviewPfdVisible)
-            or nameof(ViewModels.MainWindowViewModel.IsSkiaZonePreviewForwardVisible)
-            or nameof(ViewModels.MainWindowViewModel.IsSkiaZonePreviewMfdVisible)
+        propertyName is nameof(ViewModels.MainWindowViewModel.ShowSkiaZoneGeometryOverlay)
+            or nameof(ViewModels.MainWindowViewModel.IsSkiaZoneGeometryOverlayPfdVisible)
+            or nameof(ViewModels.MainWindowViewModel.IsSkiaZoneGeometryOverlayForwardVisible)
+            or nameof(ViewModels.MainWindowViewModel.IsSkiaZoneGeometryOverlayMfdVisible)
             or nameof(ViewModels.MainWindowViewModel.IsPfdColumnVisible)
             or nameof(ViewModels.MainWindowViewModel.IsMfdColumnVisible)
             or nameof(ViewModels.MainWindowViewModel.MainGridColumnDefinitions)

@@ -104,7 +104,7 @@ public partial class MainWindowViewModel
             var culture = CultureInfo.GetCultureInfo(cultureName.Trim());
             LocViewModel.Current?.SetCulture(culture);
             OnPropertyChanged(nameof(SafetyLevelDescription));
-            _settings.WorkspaceUi.Culture = culture.Name;
+            _settings.Workspace.Culture = culture.Name;
             SaveSettingsIfChanged();
         }
         catch (CultureNotFoundException)
@@ -116,7 +116,7 @@ public partial class MainWindowViewModel
     [RelayCommand]
     private void ResetUiLanguageToSystem()
     {
-        _settings.WorkspaceUi.Culture = "";
+        _settings.Workspace.Culture = "";
         UiCulture.ApplyFromSystem();
         OnPropertyChanged(nameof(SafetyLevelDescription));
         SaveSettingsIfChanged();

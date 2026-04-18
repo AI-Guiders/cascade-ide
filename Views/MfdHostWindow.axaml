@@ -27,8 +27,8 @@
                                        MountStyle="{Binding MfdInstrumentMountStyle}"
                                        ZIndex="415"/>
         <!-- W2: preview контура зоны MFD в отдельном окне-хосте. -->
-        <Border x:Name="SkiaZonePreviewMfdHost"
-                IsVisible="{Binding UseSkiaZoneGeometryPreview}"
+        <Border x:Name="SkiaZoneGeometryOverlayMfdHost"
+                IsVisible="{Binding ShowSkiaZoneGeometryOverlay}"
                 ZIndex="410"
                 BorderThickness="2"
                 BorderBrush="#B38CFF"

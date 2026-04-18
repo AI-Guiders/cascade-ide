@@ -29,6 +29,8 @@ public partial class MainWindowViewModel
     public Action? RequestOpenSettings { get; set; }
     /// <summary>Открыть или активировать окно-хост зоны Mfd — второй <c>TopLevel</c> (см. ADR 0017).</summary>
     public Action? RequestToggleMfdHostWindow { get; set; }
+    /// <summary>Открыть или активировать окно-хост зоны Pfd при тройном пресете (ADR 0017).</summary>
+    public Action? RequestTogglePfdHostWindow { get; set; }
     /// <summary>Показать диалог выбора файла темы (.json). Возвращает путь к файлу или null.</summary>
     public Func<Task<string?>>? RequestOpenThemeFile { get; set; }
     /// <summary>Показать превью Markdown в отдельном окне (контент от агента).</summary>

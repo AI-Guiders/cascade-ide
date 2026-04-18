@@ -70,12 +70,15 @@ public sealed partial class MarkdownPreviewWindowViewModel : ObservableObject
 
         var snapshot = new CascadeIdeSettings
         {
-            MarkdownDiagrams = new MarkdownDiagramSettings
+            Markdown = new MarkdownSettings
             {
-                KrokiEnabled = _editorVm.MarkdownKrokiEnabled,
-                KrokiBaseUrl = string.IsNullOrWhiteSpace(_editorVm.MarkdownKrokiBaseUrl)
-                    ? "https://kroki.io"
-                    : _editorVm.MarkdownKrokiBaseUrl.Trim()
+                Diagrams = new MarkdownDiagramSettings
+                {
+                    Kroki = _editorVm.MarkdownKrokiEnabled,
+                    KrokiUrl = string.IsNullOrWhiteSpace(_editorVm.MarkdownKrokiBaseUrl)
+                        ? "https://kroki.io"
+                        : _editorVm.MarkdownKrokiBaseUrl.Trim()
+                }
             }
         };
         ApplyMarkdownWithDiagrams(raw, snapshot);
@@ -84,7 +87,7 @@ public sealed partial class MarkdownPreviewWindowViewModel : ObservableObject
     private void ApplyMarkdownWithDiagrams(string raw, CascadeIdeSettings settings)
     {
         _diagramPreviewCts?.Cancel();
-        if (!settings.MarkdownDiagrams.KrokiEnabled)
+        if (!settings.Markdown.Diagrams.Kroki)
             return;
 
         _diagramPreviewCts = new CancellationTokenSource();

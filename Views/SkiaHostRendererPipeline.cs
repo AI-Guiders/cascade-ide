@@ -77,7 +77,9 @@ public sealed class CockpitSkiaSceneRenderer : ISkiaSceneRenderer
         var cds = vm.BuildCockpitSurfaceSnapshot();
         var visible = slot switch
         {
-            SkiaHostSlot.Pfd => cds.Zones.PfdVisible,
+            SkiaHostSlot.Pfd => surface == SkiaHostSurface.PfdHostWindow
+                ? vm.IsPfdHostWindowShellOpen
+                : cds.Zones.PfdVisible,
             SkiaHostSlot.Forward => cds.Zones.ForwardVisible,
             SkiaHostSlot.Mfd => surface == SkiaHostSurface.MfdHostWindow
                 ? vm.IsMfdHostWindowShellOpen
@@ -99,7 +101,8 @@ public sealed class CockpitSkiaSceneRenderer : ISkiaSceneRenderer
 public enum SkiaHostSurface
 {
     MainWindow,
-    MfdHostWindow
+    MfdHostWindow,
+    PfdHostWindow
 }
 
 public readonly record struct SkiaHostRenderFrame(

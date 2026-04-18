@@ -147,7 +147,7 @@ public partial class MainWindowViewModel
         string? editorText = null;
         int? cursorLine = null;
         int? cursorColumn = null;
-        WorkspaceNavigationContextSettings? navSettings = null;
+        NavigationSettings? navSettings = null;
         var presentation = SemanticMapPresentationKind.List;
         var level = SemanticMapLevelKind.File;
         await UiScheduler.Default.InvokeAsync(() =>
@@ -159,9 +159,9 @@ public partial class MainWindowViewModel
             var (line, column) = ComputeLineColumn(EditorText, _editorCaretOffset ?? EditorSelectionStart);
             cursorLine = line;
             cursorColumn = column;
-            navSettings = _settings.WorkspaceNavigationContext;
-            presentation = SemanticMapPresentationKind.Normalize(_settings.SemanticMap.Presentation);
-            level = SemanticMapLevelKind.Normalize(_settings.SemanticMap.Level);
+            navSettings = _settings.WorkspaceNavigation;
+            presentation = SemanticMapPresentationKind.Normalize(_settings.SemanticMap.View);
+            level = SemanticMapLevelKind.Normalize(_settings.SemanticMap.Depth);
         });
 
         if (ct.IsCancellationRequested)
@@ -205,7 +205,7 @@ public partial class MainWindowViewModel
                                 null,
                                 null,
                                 null,
-                                navSettings ?? new WorkspaceNavigationContextSettings());
+                                navSettings ?? new NavigationSettings());
                         }
 
                         return WorkspaceNavigationContextBuilder.BuildJson(
@@ -222,7 +222,7 @@ public partial class MainWindowViewModel
                             null,
                             null,
                             null,
-                            navSettings ?? new WorkspaceNavigationContextSettings());
+                            navSettings ?? new NavigationSettings());
                     },
                     ct)
                 .ConfigureAwait(false);

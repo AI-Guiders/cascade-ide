@@ -1,0 +1,53 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:views="using:CascadeIDE.Views"
+        xmlns:vm="using:CascadeIDE.ViewModels"
+        xmlns:chrome="using:CascadeIDE.Features.UiChrome"
+        mc:Ignorable="d" d:DesignWidth="420" d:DesignHeight="600"
+        x:Class="CascadeIDE.Views.PfdHostWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="Cascade — зона PFD (хост)"
+        Width="420" Height="600"
+        MinWidth="280" MinHeight="240"
+        Icon="/Assets/avalonia-logo.ico"
+        Background="{DynamicResource CascadeTheme.MainWindowBackground}">
+
+    <!-- ADR 0017: контент колонки PFD главного окна (дерево / semantic map), тот же DataContext. -->
+    <Grid>
+        <chrome:AttentionZoneContainer Zone="Pfd">
+            <Grid>
+                <views:SolutionExplorerView IsVisible="{Binding IsDockedPfdSolutionExplorerTree}"/>
+                <views:WorkspaceNavigationMapView IsVisible="{Binding IsDockedPfdWorkspaceNavigationMap}"/>
+                <views:ZoneInstrumentMountView IsVisible="{Binding UseSkiaInstrumentMount}"
+                                               HorizontalAlignment="Right"
+                                               VerticalAlignment="Top"
+                                               Margin="8"
+                                               Width="250"
+                                               InstrumentId="workspace_health_status_v1"
+                                               SlotId="pfd"
+                                               MountStyle="{Binding PfdInstrumentMountStyle}"
+                                               ZIndex="415"/>
+            </Grid>
+        </chrome:AttentionZoneContainer>
+        <Border x:Name="SkiaZoneGeometryOverlayPfdHost"
+                IsVisible="{Binding ShowSkiaZoneGeometryOverlay}"
+                ZIndex="410"
+                BorderThickness="2"
+                BorderBrush="#7CC9FF"
+                CornerRadius="4"
+                Background="#04000000"
+                IsHitTestVisible="False">
+            <TextBlock Text="PFD"
+                       Margin="6,4,0,0"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Top"
+                       Foreground="#C6F2FF"/>
+        </Border>
+        <Canvas x:Name="AgentHighlightLayer" ZIndex="1000" IsHitTestVisible="False"
+                HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <Border x:Name="AgentHighlightOverlay" IsVisible="False" BorderBrush="#FF6B9D" BorderThickness="2" Background="#10000000"/>
+        </Canvas>
+    </Grid>
+</Window>

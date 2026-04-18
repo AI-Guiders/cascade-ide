@@ -37,6 +37,7 @@ public partial class MainWindowViewModel
                 _presentationParse,
                 IsPfdRegionExpanded,
                 IsMfdRegionExpanded,
+                _suppressPfdColumnForPfdHostWindow,
                 _suppressMfdColumnForMfdHostWindow,
                 UiModeCatalog.GetMfdRegionExpandedWidthPixels(NormalizeUiMode(UiMode)),
                 UiWorkspaceLayoutRuntimeMetrics.MfdRegionCollapsedWidthPixels,
@@ -58,10 +59,21 @@ public partial class MainWindowViewModel
     /// Какая топология размещения зон сейчас активна. Свойства <see cref="IsPfdColumnVisible"/> / <see cref="IsMfdColumnVisible"/>
     /// имеют смысл только для <see cref="AttentionLayoutSurfaceKind.MainWindowDockedGrid"/>; иные варианты — ADR 0021 §13, 0017.
     /// </summary>
-    public AttentionLayoutSurfaceKind ActiveAttentionLayoutSurface =>
-        _suppressMfdColumnForMfdHostWindow && _presentationMfdHostTopology
-            ? AttentionLayoutSurfaceKind.MainWindowPlusMfdHostTopLevel
-            : AttentionLayoutSurfaceKind.MainWindowDockedGrid;
+    public AttentionLayoutSurfaceKind ActiveAttentionLayoutSurface
+    {
+        get
+        {
+            if (_suppressPfdColumnForPfdHostWindow
+                && _suppressMfdColumnForMfdHostWindow
+                && PresentationRequestsPfdHostWindow)
+                return AttentionLayoutSurfaceKind.MainWindowPlusPfdMfdHostTopLevel;
+            if (_suppressPfdColumnForPfdHostWindow && PresentationRequestsPfdHostWindow)
+                return AttentionLayoutSurfaceKind.MainWindowPlusPfdHostTopLevel;
+            if (_suppressMfdColumnForMfdHostWindow && _presentationMfdHostTopology)
+                return AttentionLayoutSurfaceKind.MainWindowPlusMfdHostTopLevel;
+            return AttentionLayoutSurfaceKind.MainWindowDockedGrid;
+        }
+    }
 
     /// <summary>
     /// Видна ли колонка <c>MainGrid</c> под левый якорь при <see cref="ActiveAttentionLayoutSurface"/> (в этой разметке — зона PFD).
@@ -76,23 +88,23 @@ public partial class MainWindowViewModel
     /// </summary>
     public bool IsMfdColumnVisible => ShellSurfaceComposition.MfdColumnVisibleInMainGrid;
 
-    /// <summary>Включён debug-preview контуров зон (ручная валидация геометрии W2).</summary>
-    public bool UseSkiaZoneGeometryPreview => _settings.Display.UseSkiaZoneGeometryPreview;
+    /// <summary>Включён debug-overlay контуров зон (ручная валидация геометрии W2).</summary>
+    public bool ShowSkiaZoneGeometryOverlay => _settings.Display.Skia.ZoneGeometryOverlay;
 
-    public bool IsSkiaZonePreviewPfdVisible => UseSkiaZoneGeometryPreview && IsPfdColumnVisible;
+    public bool IsSkiaZoneGeometryOverlayPfdVisible => ShowSkiaZoneGeometryOverlay && IsPfdColumnVisible;
 
-    public bool IsSkiaZonePreviewForwardVisible => UseSkiaZoneGeometryPreview;
+    public bool IsSkiaZoneGeometryOverlayForwardVisible => ShowSkiaZoneGeometryOverlay;
 
-    public bool IsSkiaZonePreviewMfdVisible => UseSkiaZoneGeometryPreview && IsMfdColumnVisible;
+    public bool IsSkiaZoneGeometryOverlayMfdVisible => ShowSkiaZoneGeometryOverlay && IsMfdColumnVisible;
 
     /// <summary>Wave 3: включить отрисовку инструмента в Skia mount-слое зон P/F/M.</summary>
-    public bool UseSkiaInstrumentMount => _settings.Display.UseSkiaInstrumentMount;
+    public bool UseSkiaInstrumentMount => _settings.Display.Skia.InstrumentMount;
 
-    /// <summary>Декларативный mount-style mount-инструмента (идёт из <c>[display]</c>).</summary>
+    /// <summary>Декларативный mount-style mount-инструмента (идёт из <c>[display.mount]</c>).</summary>
     public string InstrumentMountStyle =>
-        string.IsNullOrWhiteSpace(_settings.Display.InstrumentMountStyle)
+        string.IsNullOrWhiteSpace(_settings.Display.Mount.DefaultStyle)
             ? InstrumentMountPolicyIds.V1
-            : _settings.Display.InstrumentMountStyle.Trim();
+            : _settings.Display.Mount.DefaultStyle.Trim();
 
     /// <summary>Резолв style для mount в слоте PFD с учётом registry-правил.</summary>
     public string PfdInstrumentMountStyle => ResolveInstrumentMountStyle(
@@ -111,6 +123,8 @@ public partial class MainWindowViewModel
     {
         AttentionLayoutSurfaceKind.MainWindowDockedGrid => "main_window_docked_grid",
         AttentionLayoutSurfaceKind.MainWindowPlusMfdHostTopLevel => "main_window_plus_mfd_host_top_level",
+        AttentionLayoutSurfaceKind.MainWindowPlusPfdHostTopLevel => "main_window_plus_pfd_host_top_level",
+        AttentionLayoutSurfaceKind.MainWindowPlusPfdMfdHostTopLevel => "main_window_plus_pfd_mfd_host_top_level",
         _ => "main_window_docked_grid"
     };
 
@@ -288,15 +302,32 @@ public partial class MainWindowViewModel
     public bool IsMfdHostWindowWorkspaceHealthMountVisible =>
         UseSkiaInstrumentMount && IsMfdHostWindowShellOpen;
 
-    public WorkspaceHealthStatusMountContext? PfdWorkspaceHealthMountContext =>
-        IsPfdWorkspaceHealthMountVisible
-            ? WorkspaceHealthMountContextFactory.Create(
-                _instrumentMountPolicyResolver,
-                _settings.Display,
-                MountPolicyRuntimeSurfaceId,
-                CockpitSlotIds.Pfd,
-                WorkspaceHealthMountPayload)
-            : null;
+    public bool IsPfdHostWindowWorkspaceHealthMountVisible =>
+        UseSkiaInstrumentMount && IsPfdHostWindowShellOpen;
+
+    public WorkspaceHealthStatusMountContext? PfdWorkspaceHealthMountContext
+    {
+        get
+        {
+            if (!UseSkiaInstrumentMount)
+                return null;
+            if (IsPfdHostWindowShellOpen)
+                return WorkspaceHealthMountContextFactory.Create(
+                    _instrumentMountPolicyResolver,
+                    _settings.Display,
+                    "main_window_plus_pfd_host_top_level",
+                    CockpitSlotIds.Pfd,
+                    WorkspaceHealthMountPayload);
+            if (IsPfdColumnVisible)
+                return WorkspaceHealthMountContextFactory.Create(
+                    _instrumentMountPolicyResolver,
+                    _settings.Display,
+                    MountPolicyRuntimeSurfaceId,
+                    CockpitSlotIds.Pfd,
+                    WorkspaceHealthMountPayload);
+            return null;
+        }
+    }
 
     public WorkspaceHealthStatusMountContext? MfdWorkspaceHealthMountContext
     {

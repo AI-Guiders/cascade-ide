@@ -6,12 +6,15 @@ namespace CascadeIDE.ViewModels;
 /// <summary>ADR 0017: строка <c>presentation</c> и второй <c>TopLevel</c> — <see cref="Views.MfdHostWindow"/> с полным вторичным контуром (п. 8).</summary>
 public partial class MainWindowViewModel
 {
-    /// <summary>Свойства, зависящие от <c>_suppressMfdColumnForMfdHostWindow</c> при открытии/закрытии окна-хоста MFD.</summary>
-    private static readonly string[] MfdHostShellOpenInvalidatedPropertyNames =
+    /// <summary>Свойства, зависящие от подавления колонок PFD/MFD в main при открытых окнах-хостах (ADR 0017).</summary>
+    private static readonly string[] HostShellOpenInvalidatedPropertyNames =
     [
         nameof(IsMfdHostWindowShellOpen),
+        nameof(IsPfdHostWindowShellOpen),
+        nameof(IsPfdColumnVisible),
         nameof(IsMfdColumnVisible),
-        nameof(IsSkiaZonePreviewMfdVisible),
+        nameof(IsSkiaZoneGeometryOverlayPfdVisible),
+        nameof(IsSkiaZoneGeometryOverlayMfdVisible),
         nameof(MfdRegionPixelWidth),
         nameof(IsMfdRegionVisible),
         nameof(ActiveAttentionLayoutSurface),
@@ -19,6 +22,7 @@ public partial class MainWindowViewModel
         nameof(IsPfdWorkspaceHealthMountVisible),
         nameof(IsMfdWorkspaceHealthMountVisible),
         nameof(IsMfdHostWindowWorkspaceHealthMountVisible),
+        nameof(IsPfdHostWindowWorkspaceHealthMountVisible),
         nameof(PfdWorkspaceHealthMountContext),
         nameof(MfdWorkspaceHealthMountContext),
         nameof(PfdInstrumentMountStyle),
@@ -42,7 +46,9 @@ public partial class MainWindowViewModel
         PresentationMainGridLayoutFrameBuilder.Build(
             _presentationParse,
             _presentationDedicatedMfdSecondScreen,
-            _suppressMfdColumnForMfdHostWindow);
+            _suppressMfdColumnForMfdHostWindow,
+            _presentationTripleOneAnchorPerZone,
+            _suppressPfdColumnForPfdHostWindow);
 
     /// <summary>
     /// Пресет требует развернуть главное окно на весь экран при старте — см.
@@ -55,8 +61,11 @@ public partial class MainWindowViewModel
     /// <summary>Пресет «первый экран — PFD+Forward без MFD, второй — только MFD».</summary>
     public bool PresentationRequestsDedicatedMfdSecondScreen => _presentationDedicatedMfdSecondScreen;
 
-    /// <summary>Три дисплея: <c>(PFD) (Forward) (MFD)</c>.</summary>
-    public bool PresentationRequestsTriplePfdForwardMfd => _presentationTriplePfdForwardMfd;
+    /// <summary>Три дисплея: по одному якорю — <c>(P) (F) (M)</c> в любом порядке групп (ADR 0017).</summary>
+    public bool PresentationRequestsTriplePfdForwardMfd => _presentationTripleOneAnchorPerZone;
+
+    /// <summary>Пресет «три экрана по одной зоне» — требуются отдельные хосты PFD и MFD вместе с main (ADR 0017).</summary>
+    public bool PresentationRequestsPfdHostWindow => _presentationTripleOneAnchorPerZone;
 
     /// <summary>Пресет с выносом MFD на отдельный <c>TopLevel</c> (два или три дисплея по строке <c>presentation</c>).</summary>
     public bool PresentationRequestsMfdHostWindow => _presentationMfdHostTopology;
@@ -71,11 +80,31 @@ public partial class MainWindowViewModel
             ? idx
             : null;
 
+    /// <summary>
+    /// Индекс дисплея для <see cref="Views.PfdHostWindow"/> в порядке
+    /// <see cref="PresentationMonitorTopology.OrderScreensForPresentation"/>; <c>null</c> если строка не задаёт семантику хоста.
+    /// </summary>
+    public int? PfdHostPresentationScreenIndex =>
+        _presentationParse.IsSuccess
+        && PresentationLayoutAnalyzer.TryGetPfdHostPresentationScreenIndex(_presentationParse.Screens, out var pIdx)
+            ? pIdx
+            : null;
+
     /// <summary>Открывать окно-хост Mfd при старте (если есть ≥2 мониторов и пресет подходит).</summary>
     public bool OpenMfdHostWindowOnStartup => _settings.OpenMfdHostWindowOnStartup;
 
+    /// <summary>Открывать окно-хост Pfd при старте (если мониторов достаточно и пресет тройной).</summary>
+    public bool OpenPfdHostWindowOnStartup => _settings.OpenPfdHostWindowOnStartup;
+
+    /// <summary>Окна <c>PfdHostWindow</c>/<c>MfdHostWindow</c> на своём дисплее — максимизировать (иначе размер по рабочей области).</summary>
+    public bool MaximizePresentationHostWindowsOnDedicatedScreens =>
+        _settings.MaximizePresentationHostWindowsOnDedicatedScreens;
+
     /// <summary>Окно-хост Mfd открыло полный вторичный контур — колонка Mfd в главном окне скрыта (см. <see cref="SetMfdHostWindowShellOpen"/>).</summary>
     public bool IsMfdHostWindowShellOpen => _suppressMfdColumnForMfdHostWindow;
+
+    /// <summary>Окно-хост Pfd открыто — колонка Pfd в главном окне скрыта (см. <see cref="SetPfdHostWindowShellOpen"/>).</summary>
+    public bool IsPfdHostWindowShellOpen => _suppressPfdColumnForPfdHostWindow;
 
     /// <summary>
     /// Окно-хост зоны Mfd показывает <c>SecondaryShellView</c> (чат, терминал, обозреватель решения и т.д.) — скрываем колонку Mfd в главном окне, чтобы не дублировать контур.
@@ -86,12 +115,23 @@ public partial class MainWindowViewModel
             return;
 
         _suppressMfdColumnForMfdHostWindow = isOpen;
-        foreach (var name in MfdHostShellOpenInvalidatedPropertyNames)
+        foreach (var name in HostShellOpenInvalidatedPropertyNames)
+            OnPropertyChanged(name);
+    }
+
+    /// <summary>Окно-хост зоны Pfd показывает дерево/semantic map — скрываем колонку Pfd в главном окне.</summary>
+    public void SetPfdHostWindowShellOpen(bool isOpen)
+    {
+        if (_suppressPfdColumnForPfdHostWindow == isOpen)
+            return;
+
+        _suppressPfdColumnForPfdHostWindow = isOpen;
+        foreach (var name in HostShellOpenInvalidatedPropertyNames)
             OnPropertyChanged(name);
     }
 
     /// <summary>Сохранённая геометрия <see cref="Views.MfdHostWindow"/> в <c>settings.toml</c> (ADR 0017).</summary>
-    internal bool TryGetSavedMfdHostWindowBounds(out Services.MfdHostWindowPlacement.MfdHostWindowBounds bounds)
+    internal bool TryGetSavedMfdHostWindowBounds(out Services.PresentationHostWindowPlacement.PresentationHostWindowBounds bounds)
     {
         var x = _settings.MfdHostWindowPixelX;
         var y = _settings.MfdHostWindowPixelY;
@@ -103,7 +143,7 @@ public partial class MainWindowViewModel
             return false;
         }
 
-        bounds = new Services.MfdHostWindowPlacement.MfdHostWindowBounds(x.Value, y.Value, ww.Value, wh.Value);
+        bounds = new Services.PresentationHostWindowPlacement.PresentationHostWindowBounds(x.Value, y.Value, ww.Value, wh.Value);
         return true;
     }
 
@@ -114,6 +154,33 @@ public partial class MainWindowViewModel
         _settings.MfdHostWindowPixelY = pixelY;
         _settings.MfdHostWindowWidth = width;
         _settings.MfdHostWindowHeight = height;
+        SaveSettingsIfChanged();
+    }
+
+    /// <summary>Сохранённая геометрия <see cref="Views.PfdHostWindow"/> в <c>settings.toml</c> (ADR 0017).</summary>
+    internal bool TryGetSavedPfdHostWindowBounds(out Services.PresentationHostWindowPlacement.PresentationHostWindowBounds bounds)
+    {
+        var x = _settings.PfdHostWindowPixelX;
+        var y = _settings.PfdHostWindowPixelY;
+        var ww = _settings.PfdHostWindowWidth;
+        var wh = _settings.PfdHostWindowHeight;
+        if (x is null || y is null || ww is null || wh is null)
+        {
+            bounds = default;
+            return false;
+        }
+
+        bounds = new Services.PresentationHostWindowPlacement.PresentationHostWindowBounds(x.Value, y.Value, ww.Value, wh.Value);
+        return true;
+    }
+
+    /// <summary>Записать геометрию окна-хоста Pfd и при необходимости сбросить на диск.</summary>
+    internal void PersistPfdHostWindowBounds(int pixelX, int pixelY, double width, double height)
+    {
+        _settings.PfdHostWindowPixelX = pixelX;
+        _settings.PfdHostWindowPixelY = pixelY;
+        _settings.PfdHostWindowWidth = width;
+        _settings.PfdHostWindowHeight = height;
         SaveSettingsIfChanged();
     }
 

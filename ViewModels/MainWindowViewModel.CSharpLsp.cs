@@ -28,7 +28,7 @@ public partial class MainWindowViewModel
             var v = string.IsNullOrWhiteSpace(value) ? CSharpLspProviderIds.ParseOnly : value.Trim();
             if (!SetProperty(ref _csharpLspProvider, v))
                 return;
-            _settings.CSharpLsp.Provider = v;
+            _settings.Languages.CSharp.Provider = v;
             SaveSettingsIfChanged();
             OnPropertyChanged(nameof(IsCSharpLspProcessSelected));
             _ = RestartCSharpLanguageServerAsync();
@@ -43,7 +43,7 @@ public partial class MainWindowViewModel
             var v = value ?? "";
             if (!SetProperty(ref _csharpLspExecutable, v))
                 return;
-            _settings.CSharpLsp.Executable = v;
+            _settings.Languages.CSharp.Executable = v;
             SaveSettingsIfChanged();
             _ = RestartCSharpLanguageServerAsync();
         }
@@ -57,7 +57,7 @@ public partial class MainWindowViewModel
             var v = value ?? "";
             if (!SetProperty(ref _csharpLspArguments, v))
                 return;
-            _settings.CSharpLsp.Arguments = v;
+            _settings.Languages.CSharp.Arguments = v;
             SaveSettingsIfChanged();
             _ = RestartCSharpLanguageServerAsync();
         }
@@ -72,9 +72,9 @@ public partial class MainWindowViewModel
             _csharpLspHost = null;
             return (
                 Workspace.SolutionPath ?? "",
-                _settings.CSharpLsp.Provider,
-                _settings.CSharpLsp.Executable,
-                _settings.CSharpLsp.Arguments);
+                _settings.Languages.CSharp.Provider,
+                _settings.Languages.CSharp.Executable,
+                _settings.Languages.CSharp.Arguments);
         });
 
         if (string.Equals(snap.Item2, CSharpLspProviderIds.ParseOnly, StringComparison.OrdinalIgnoreCase))

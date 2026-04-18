@@ -7,13 +7,13 @@ public partial class MainWindowViewModel
 {
     partial void OnMarkdownKrokiEnabledChanged(bool value)
     {
-        _settings.MarkdownDiagrams.KrokiEnabled = value;
+        _settings.Markdown.Diagrams.Kroki = value;
         SaveSettingsIfChanged();
     }
 
     partial void OnMarkdownKrokiBaseUrlChanged(string value)
     {
-        _settings.MarkdownDiagrams.KrokiBaseUrl = string.IsNullOrWhiteSpace(value) ? "https://kroki.io" : value.Trim();
+        _settings.Markdown.Diagrams.KrokiUrl = string.IsNullOrWhiteSpace(value) ? "https://kroki.io" : value.Trim();
         SaveSettingsIfChanged();
     }
 
@@ -40,7 +40,7 @@ public partial class MainWindowViewModel
 
     partial void OnIsPfdRegionExpandedChanged(bool value)
     {
-        _settings.WorkspaceUi.PfdRegionExpanded = value;
+        _settings.Workspace.PfdExpanded = value;
         OnPropertyChanged(nameof(IsPfdRegionCollapsed));
         SaveSettingsIfChanged();
         if (value)
@@ -49,7 +49,7 @@ public partial class MainWindowViewModel
 
     partial void OnIsTerminalVisibleChanged(bool value)
     {
-        _settings.WorkspaceUi.ShowTerminal = value;
+        _settings.Workspace.ShowTerminal = value;
         OnPropertyChanged(nameof(IsTerminalPanelHidden));
         OnPropertyChanged(nameof(IsBottomPanelVisible));
         SaveSettingsIfChanged();
@@ -71,7 +71,7 @@ public partial class MainWindowViewModel
 
     partial void OnIsInstrumentationDockVisibleChanged(bool value)
     {
-        _settings.WorkspaceUi.ShowInstrumentation = value;
+        _settings.Workspace.ShowInstrumentation = value;
         SaveSettingsIfChanged();
         if (value)
         {
@@ -128,7 +128,7 @@ public partial class MainWindowViewModel
 
     partial void OnIsGitPanelVisibleChanged(bool value)
     {
-        _settings.WorkspaceUi.ShowGit = value;
+        _settings.Workspace.ShowGit = value;
         OnPropertyChanged(nameof(IsBottomPanelVisible));
         SaveSettingsIfChanged();
         if (value)
@@ -154,7 +154,7 @@ public partial class MainWindowViewModel
             return;
         }
 
-        _settings.SemanticMap.Presentation = normalized;
+        _settings.SemanticMap.View = normalized;
         SaveSettingsIfChanged();
         ScheduleWorkspaceNavigationMapRefresh();
     }
@@ -168,14 +168,14 @@ public partial class MainWindowViewModel
             return;
         }
 
-        _settings.SemanticMap.Level = normalized;
+        _settings.SemanticMap.Depth = normalized;
         SaveSettingsIfChanged();
         ScheduleWorkspaceNavigationMapRefresh();
     }
 
     partial void OnWorkspaceSplittersLockedChanged(bool value)
     {
-        _settings.WorkspaceUi.WorkspaceSplittersLocked = value;
+        _settings.Workspace.SplittersLocked = value;
         if (_lastSavedSettings is not null)
             SaveSettingsIfChanged();
     }
