@@ -68,7 +68,7 @@
 | [0056](0056-semantic-map-pipeline-adoption.md) | Semantic Map: внедрение общего Skia pipeline (композитор, controlFlow layout, cursor semantics) | Accepted · Implemented |
 | [0057](0057-chat-surface-pipeline-adoption.md) | Chat surface: adoption общего Skia pipeline (threads, confirmations, dual-path rollout) | Accepted |
 | [0058](0058-agent-roslyn-mcp-coupling-settings-toml.md) | Сопряжение агента и Roslyn MCP в `settings.toml` (лимиты, виды узлов, таймауты, пресеты) | Proposed |
-| [0059](0059-roslyn-mcp-profiles-manager-tactical-strategic-efb.md) | Профили Roslyn MCP, Manager, Auto-Focus / Combat / Glide, EFB на третьем мониторе | Proposed |
+| [0059](0059-roslyn-mcp-profiles-manager-tactical-strategic-efb.md) | Профили Roslyn MCP, Manager, Auto-Focus / Combat / Echelon, EFB на третьем мониторе | Proposed |
 
 ## Соглашения
 

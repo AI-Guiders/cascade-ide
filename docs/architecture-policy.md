@@ -90,7 +90,7 @@
 | Semantic Map на PFD: поток управления в методе (условные ветки, схождение), KISS; Roslyn CFG как источник; расширение subgraph / MCP | [0053](adr/0053-semantic-map-control-flow-pfd.md) (Accepted · Implemented) |
 | Бенчмарки производительности CIDE: сценарии, метрики, baseline и протокол измерения | [0054](adr/0054-benchmarking-methodology-and-baselines.md) (Proposed) |
 | Сопряжение агента и Roslyn MCP в `settings.toml`: лимиты, виды узлов, таймауты, пресеты запросов; ортогонально `[semantic_map]` и пресетам навигации [0039](adr/0039-workspace-navigation-affordances.md) | [0058](adr/0058-agent-roslyn-mcp-coupling-settings-toml.md) (Proposed) |
-| Профили Roslyn MCP, Manager, режимы Auto-Focus / Combat / Glide, стратегический EFB на третьем мониторе | [0059](adr/0059-roslyn-mcp-profiles-manager-tactical-strategic-efb.md) (Proposed) |
+| Профили Roslyn MCP, Manager, режимы Auto-Focus / Combat / Echelon, стратегический EFB на третьем мониторе | [0059](adr/0059-roslyn-mcp-profiles-manager-tactical-strategic-efb.md) (Proposed) |
 
 Полный индекс: [docs/adr/README.md](adr/README.md).
 
@@ -201,7 +201,8 @@
 - **v1.83** — [0053](adr/0053-semantic-map-control-flow-pfd.md): Semantic Map и поток управления на PFD (условные ветки, KISS, Roslyn CFG, subgraph/MCP); статус **Accepted · Implemented**.
 - **v1.84** — добавлен [0054](adr/0054-benchmarking-methodology-and-baselines.md): протокол бенчмарков CIDE (сценарии, метрики, baseline, правила сравнения); статус **Proposed**.
 - **v1.85** — добавлен [0058](adr/0058-agent-roslyn-mcp-coupling-settings-toml.md): сопряжение агент ↔ Roslyn MCP в `settings.toml` (лимиты, виды узлов, таймауты, пресеты); таблица потребителей; v0 vs отложенное; статус **Proposed**.
-- **v1.86** — [0058](adr/0058-agent-roslyn-mcp-coupling-settings-toml.md): §6 — именованные профили, Manager, Auto-Focus / Combat / Glide Slope; связь с [0010](adr/0010-ui-modes-toml-configuration.md), [0051](adr/0051-intent-based-attention-routing-toml.md), [0055](adr/0055-skia-instrument-composition-pipeline.md).
+- **v1.86** — [0058](adr/0058-agent-roslyn-mcp-coupling-settings-toml.md): §6 — именованные профили, Manager, Auto-Focus / Combat / Echelon (тогда Glide Slope); связь с [0010](adr/0010-ui-modes-toml-configuration.md), [0051](adr/0051-intent-based-attention-routing-toml.md), [0055](adr/0055-skia-instrument-composition-pipeline.md).
 - **v1.87** — [0058](adr/0058-agent-roslyn-mcp-coupling-settings-toml.md): §7 — третий монитор как EFB / стратегический `Profile.GlobalMap` vs тактический PFD; [0017](adr/0017-multi-window-workspace-and-agent-surfaces.md), [0021](adr/0021-pfd-mfd-cockpit-attention-model.md).
 - **v1.88** — разделение: [0058](adr/0058-agent-roslyn-mcp-coupling-settings-toml.md) — только ключи/оси TOML для сопряжения MCP; [0059](adr/0059-roslyn-mcp-profiles-manager-tactical-strategic-efb.md) — профили, Manager, режимы, EFB (перенос из бывших §6–§7 у 0058).
+- **v1.89** — [0059](adr/0059-roslyn-mcp-profiles-manager-tactical-strategic-efb.md): режим спокойного ввода переименован **Glide Slope → Echelon** (меньше путаницы с ILS glide path).
 - Изменения направления — отдельным коммитом: обновление этого файла и при необходимости новый ADR в [docs/adr/README.md](adr/README.md).
