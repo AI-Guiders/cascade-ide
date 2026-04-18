@@ -13,7 +13,7 @@ namespace CascadeIDE.Services;
 /// Парето-реализация контекста навигации (ADR 0039): режимы <c>related</c> и <c>subgraph</c> для MCP и будущего UI.
 /// Источник файлов — дерево решения; семантика — эвристики + partial-классы без полного MSBuildWorkspace.
 /// </summary>
-public static class WorkspaceNavigationContextBuilder
+public static class CodeNavigationContextBuilder
 {
     public const int DefaultMaxRelated = 32;
     public const int DefaultMaxNodes = 12;
@@ -28,7 +28,7 @@ public static class WorkspaceNavigationContextBuilder
         IReadOnlyList<string> NavFiles,
         IReadOnlyList<string> MarkupPaths,
         string? SolutionPath,
-        WorkspaceNavigationKindFilter KindFilter,
+        CodeNavigationKindFilter KindFilter,
         string? PresetRequested);
 
     /// <summary>Снимок путей из дерева решения (UI-поток); тяжёлый <see cref="BuildJson"/> можно вызывать в фоне после этого.</summary>
@@ -46,7 +46,7 @@ public static class WorkspaceNavigationContextBuilder
         IReadOnlyList<string>? includeKinds = null,
         IReadOnlyList<string>? excludeKinds = null,
         string? preset = null,
-        NavigationSettings? workspaceNavigation = null)
+        CodeNavigationSettings? codeNavigation = null)
     {
         var rawPaths = McpSolutionTree.CollectFileEntries(roots).Select(e => e.FullPath);
         return BuildJson(
@@ -63,7 +63,7 @@ public static class WorkspaceNavigationContextBuilder
             includeKinds,
             excludeKinds,
             preset,
-            workspaceNavigation);
+            codeNavigation);
     }
 
     /// <param name="knownFilePathsFromSolution">Пути из дерева (как из <see cref="McpSolutionTree.CollectFileEntries"/>), до нормализации.</param>
@@ -81,7 +81,7 @@ public static class WorkspaceNavigationContextBuilder
         IReadOnlyList<string>? includeKinds = null,
         IReadOnlyList<string>? excludeKinds = null,
         string? preset = null,
-        NavigationSettings? workspaceNavigation = null)
+        CodeNavigationSettings? codeNavigation = null)
     {
         if (!TryPrepareNavigationInputs(
                 anchorPath,
@@ -91,7 +91,7 @@ public static class WorkspaceNavigationContextBuilder
                 includeKinds,
                 excludeKinds,
                 preset,
-                workspaceNavigation,
+                codeNavigation,
                 out var prepared,
                 out var errorJson))
             return errorJson;
@@ -132,23 +132,23 @@ public static class WorkspaceNavigationContextBuilder
         IReadOnlyList<string>? includeKinds,
         IReadOnlyList<string>? excludeKinds,
         string? preset,
-        NavigationSettings? workspaceNavigation,
+        CodeNavigationSettings? codeNavigation,
         out PreparedNavigationInputs prepared,
         out string errorJson)
     {
         prepared = default!;
         errorJson = "";
-        var pj = WorkspaceNavigationPresetsLoader.GetEffectivePresetsJson(
-            workspaceNavigation ?? new NavigationSettings(),
+        var pj = CodeNavigationPresetsLoader.GetEffectivePresetsJson(
+            codeNavigation ?? new CodeNavigationSettings(),
             solutionPath);
-        var (mergedInc, mergedExc, presetErr) = WorkspaceNavigationPresetMerge.Merge(preset, pj, includeKinds, excludeKinds);
+        var (mergedInc, mergedExc, presetErr) = CodeNavigationPresetMerge.Merge(preset, pj, includeKinds, excludeKinds);
         if (presetErr is not null)
         {
             errorJson = JsonSerializer.Serialize(new { error = "bad_preset", message = presetErr, preset });
             return false;
         }
 
-        var kindFilter = WorkspaceNavigationKindFilter.Create(mergedInc, mergedExc);
+        var kindFilter = CodeNavigationKindFilter.Create(mergedInc, mergedExc);
         var anchor = !string.IsNullOrWhiteSpace(anchorPath)
             ? anchorPath.Trim()
             : fallbackCurrentPath?.Trim();

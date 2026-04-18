@@ -17,7 +17,7 @@ public sealed partial class CascadeIdeSettings
             && MarkdownEquals(Markdown, o.Markdown)
             && DisplayEquals(Display, o.Display)
             && PresentationLayoutEquals(Presentation, o.Presentation)
-            && WorkspaceNavigationEquals(WorkspaceNavigation, o.WorkspaceNavigation);
+            && CodeNavigationEquals(CodeNavigation, o.CodeNavigation);
     }
 
     public override ModelBase Clone()
@@ -146,10 +146,10 @@ public sealed partial class CascadeIdeSettings
                     Mfd = Presentation.Grammar.Mfd,
                 },
             },
-            WorkspaceNavigation = new NavigationSettings
+            CodeNavigation = new CodeNavigationSettings
             {
-                Presets = WorkspaceNavigation.Presets
-                    .Select(p => new WorkspaceNavigationPresetEntry
+                Presets = CodeNavigation.Presets
+                    .Select(p => new CodeNavigationPresetEntry
                     {
                         Id = p.Id,
                         IncludeKinds = p.IncludeKinds?.ToList(),
@@ -338,16 +338,16 @@ public sealed partial class CascadeIdeSettings
         return true;
     }
 
-    private static bool WorkspaceNavigationEquals(NavigationSettings? a, NavigationSettings? b)
+    private static bool CodeNavigationEquals(CodeNavigationSettings? a, CodeNavigationSettings? b)
     {
         if (a is null || b is null)
             return a == b;
-        return WorkspaceNavigationPresetListsEqual(a.Presets, b.Presets);
+        return CodeNavigationPresetListsEqual(a.Presets, b.Presets);
     }
 
-    private static bool WorkspaceNavigationPresetListsEqual(
-        IReadOnlyList<WorkspaceNavigationPresetEntry> a,
-        IReadOnlyList<WorkspaceNavigationPresetEntry> b)
+    private static bool CodeNavigationPresetListsEqual(
+        IReadOnlyList<CodeNavigationPresetEntry> a,
+        IReadOnlyList<CodeNavigationPresetEntry> b)
     {
         var da = a.Where(p => !string.IsNullOrWhiteSpace(p.Id)).ToDictionary(x => x.Id.Trim(), StringComparer.OrdinalIgnoreCase);
         var db = b.Where(p => !string.IsNullOrWhiteSpace(p.Id)).ToDictionary(x => x.Id.Trim(), StringComparer.OrdinalIgnoreCase);
@@ -357,14 +357,14 @@ public sealed partial class CascadeIdeSettings
         {
             if (!db.TryGetValue(kv.Key, out var other))
                 return false;
-            if (!WorkspaceNavigationPresetEntryEquals(kv.Value, other))
+            if (!CodeNavigationPresetEntryEquals(kv.Value, other))
                 return false;
         }
 
         return true;
     }
 
-    private static bool WorkspaceNavigationPresetEntryEquals(WorkspaceNavigationPresetEntry a, WorkspaceNavigationPresetEntry b)
+    private static bool CodeNavigationPresetEntryEquals(CodeNavigationPresetEntry a, CodeNavigationPresetEntry b)
     {
         if (!string.Equals(a.Id?.Trim(), b.Id?.Trim(), StringComparison.Ordinal))
             return false;

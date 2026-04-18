@@ -5,13 +5,14 @@ using CascadeIDE.Cockpit.Cds;
 using CascadeIDE.Cockpit.Channels.TraceFlow;
 using CascadeIDE.Cockpit.Composition.TraceFlow;
 using CascadeIDE.Models;
+using CascadeIDE.Services;
 using CascadeIDE.Services.Navigation;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 namespace CascadeIDE.ViewModels;
 
-/// <summary>Semantic Map в слоте Pfd: тот же контракт, что <see cref="WorkspaceNavigationContextBuilder"/> / MCP.</summary>
+/// <summary>Semantic Map в слоте Pfd: тот же контракт, что <see cref="CodeNavigationContextBuilder"/> / MCP.</summary>
 public partial class MainWindowViewModel
 {
     private readonly SemanticMapCompositor _semanticMapCompositor = new();
@@ -36,6 +37,14 @@ public partial class MainWindowViewModel
     /// <summary>Связанные файлы для текущего якоря (режим списка).</summary>
     public ObservableCollection<WorkspaceNavigationMapItemVm> WorkspaceNavigationMapItems { get; } = new();
 
+    /// <summary>Варианты <see cref="SemanticMapPresentationKind"/> для ComboBox.</summary>
+    public string[] SemanticMapPresentationOptions { get; } =
+        [SemanticMapPresentationKind.List, SemanticMapPresentationKind.Graph, SemanticMapPresentationKind.Both];
+
+    /// <summary>Варианты уровня карты: файловый и control flow.</summary>
+    public string[] SemanticMapLevelOptions { get; } =
+        [SemanticMapLevelKind.File, SemanticMapLevelKind.ControlFlow];
+
     /// <summary>Сцена мини-карты (подграф + укладка по выбранному уровню карты).</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(WorkspaceNavigationMapHasRelated))]
@@ -55,12 +64,10 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(WorkspaceNavigationMapHasRelated))]
     [NotifyPropertyChangedFor(nameof(SemanticMapListAreaRowHeight))]
     [NotifyPropertyChangedFor(nameof(ShowSemanticMapGraphClickHint))]
-    [NotifyPropertyChangedFor(nameof(SemanticMapSettingsSummaryLine))]
     private string _semanticMapPresentation = SemanticMapPresentationKind.List;
 
     /// <summary><c>file</c> | <c>controlFlow</c> — уровень построения карты (секция <c>[semantic_map]</c>).</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(SemanticMapSettingsSummaryLine))]
     private string _semanticMapLevel = SemanticMapLevelKind.File;
 
     /// <summary>Сообщение об ошибке или пустом состоянии (не null).</summary>
@@ -157,7 +164,7 @@ public partial class MainWindowViewModel
         string? editorText = null;
         int? cursorLine = null;
         int? cursorColumn = null;
-        NavigationSettings? navSettings = null;
+        CodeNavigationSettings? navSettings = null;
         var wantList = false;
         var wantGraph = false;
         var level = SemanticMapLevelKind.File;
@@ -170,7 +177,7 @@ public partial class MainWindowViewModel
             var (line, column) = ComputeLineColumn(EditorText, _editorCaretOffset ?? EditorSelectionStart);
             cursorLine = line;
             cursorColumn = column;
-            navSettings = _settings.WorkspaceNavigation;
+            navSettings = _settings.CodeNavigation;
             var sm = _settings.SemanticMap;
             wantList = sm.WantsSemanticMapList;
             wantGraph = sm.WantsSemanticMapGraph;
@@ -195,13 +202,13 @@ public partial class MainWindowViewModel
                                 editorText,
                                 cursorLine,
                                 cursorColumn,
-                                WorkspaceNavigationContextBuilder.DefaultMaxNodes,
-                                WorkspaceNavigationContextBuilder.DefaultMaxEdges);
+                                CodeNavigationContextBuilder.DefaultMaxNodes,
+                                CodeNavigationContextBuilder.DefaultMaxEdges);
                         }
 
                         if (useSubgraphMode)
                         {
-                            return WorkspaceNavigationContextBuilder.BuildJson(
+                            return CodeNavigationContextBuilder.BuildJson(
                                 "subgraph",
                                 null,
                                 currentPath,
@@ -209,16 +216,16 @@ public partial class MainWindowViewModel
                                 solutionPath,
                                 null,
                                 null,
-                                WorkspaceNavigationContextBuilder.DefaultMaxRelated,
-                                WorkspaceNavigationContextBuilder.DefaultMaxNodes,
-                                WorkspaceNavigationContextBuilder.DefaultMaxEdges,
+                                CodeNavigationContextBuilder.DefaultMaxRelated,
+                                CodeNavigationContextBuilder.DefaultMaxNodes,
+                                CodeNavigationContextBuilder.DefaultMaxEdges,
                                 null,
                                 null,
                                 null,
-                                navSettings ?? new NavigationSettings());
+                                navSettings ?? new CodeNavigationSettings());
                         }
 
-                        return WorkspaceNavigationContextBuilder.BuildJson(
+                        return CodeNavigationContextBuilder.BuildJson(
                             "related",
                             null,
                             currentPath,
@@ -226,13 +233,13 @@ public partial class MainWindowViewModel
                             solutionPath,
                             null,
                             null,
-                            WorkspaceNavigationContextBuilder.DefaultMaxRelated,
-                            WorkspaceNavigationContextBuilder.DefaultMaxNodes,
-                            WorkspaceNavigationContextBuilder.DefaultMaxEdges,
+                            CodeNavigationContextBuilder.DefaultMaxRelated,
+                            CodeNavigationContextBuilder.DefaultMaxNodes,
+                            CodeNavigationContextBuilder.DefaultMaxEdges,
                             null,
                             null,
                             null,
-                            navSettings ?? new NavigationSettings());
+                            navSettings ?? new CodeNavigationSettings());
                     },
                     ct)
                 .ConfigureAwait(false);

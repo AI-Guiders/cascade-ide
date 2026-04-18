@@ -2,7 +2,7 @@
 
 namespace CascadeIDE.Services;
 
-/// <summary>Разобранный ответ режима <c>subgraph</c> из <see cref="WorkspaceNavigationContextBuilder"/> (тот же JSON, что MCP).</summary>
+/// <summary>Разобранный ответ режима <c>subgraph</c> из <see cref="CodeNavigationContextBuilder"/> (тот же JSON, что MCP).</summary>
 public sealed class WorkspaceNavigationSubgraphDocument
 {
     public required string AnchorPath { get; init; }

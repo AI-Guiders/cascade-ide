@@ -28,9 +28,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>samples\MarkdownExamples\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </None>
-    <None Include="..\WorkspaceNavigation\presets.toml">
+    <None Include="..\CodeNavigation\presets.toml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Link>WorkspaceNavigation\presets.toml</Link>
+      <Link>CodeNavigation\presets.toml</Link>
     </None>
     <None Include="TestData\AgentContract\cockpit_surface_contract_slice.approved.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

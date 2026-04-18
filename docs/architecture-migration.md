@@ -56,7 +56,7 @@
 | `MainWindowViewModel.UiGitWorkspace.cs` | 138 | Git + workspace UI. |
 | `MainWindowViewModel.ViewBridge.cs` | 60 | Колбэки и провайдеры, которые View подставляет в главный VM (диалоги, UI automation). |
 | `MainWindowViewModel.WorkspaceHealth.cs` | 21 | Связка с Workspace Health. |
-| `MainWindowViewModel.WorkspaceNavigationMap.cs` | 341 | Semantic Map в слоте Pfd: тот же контракт, что `WorkspaceNavigationContextBuilder` / MCP. |
+| `MainWindowViewModel.WorkspaceNavigationMap.cs` | 341 | Semantic Map в слоте Pfd: тот же контракт, что `CodeNavigationContextBuilder` / MCP. |
 | `MainWindowViewModel.WorkspaceSplitters.cs` | 30 | Сплиттеры рабочей области (MainGrid, обозреватель решения, Git и т.д.): режим «взлёт» — блокировка перетаскивания. |
 
 <!-- AUTO:MAIN-WINDOW-SLICE:MWVM-TABLE:END -->

@@ -24,8 +24,8 @@ public sealed partial class CascadeIdeSettings : ModelBase
     /// <summary>Строка топологии дисплеев и грамматика (ADR 0017). TOML: <c>[presentation]</c>.</summary>
     public PresentationLayoutSettings Presentation { get; set; } = new();
 
-    /// <summary>Пресеты семантической навигации по workspace (ADR 0039). TOML: <c>[workspace_navigation]</c>.</summary>
-    public NavigationSettings WorkspaceNavigation { get; set; } = new();
+    /// <summary>Пресеты навигации по коду / решению (ADR 0039, Code Navigation Context). TOML: <c>[code_navigation]</c>.</summary>
+    public CodeNavigationSettings CodeNavigation { get; set; } = new();
 
     /// <summary>
     /// При пресете «Mfd на втором экране» и >=2 мониторах — открыть окно-хост зоны Mfd при старте (ADR 0017 v1).

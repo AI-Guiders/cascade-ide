@@ -102,8 +102,8 @@ arguments = ""
 kroki = true
 kroki_url = "https://kroki.io"
 
-[workspace_navigation]
-# Пресеты: бандл WorkspaceNavigation/presets.toml + .cascade/workspace.toml + этот файл ([[workspace_navigation.presets]]).
-# [[workspace_navigation.presets]]
+[code_navigation]
+# Пресеты: бандл CodeNavigation/presets.toml + .cascade/workspace.toml + этот файл ([[code_navigation.presets]]).
+# [[code_navigation.presets]]
 # id = "my_preset"
 # exclude_kinds = ["same_namespace"]

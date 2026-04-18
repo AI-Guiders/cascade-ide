@@ -17,8 +17,8 @@ public static partial class IdeCommands
     public const string GetCockpitSurface = "get_cockpit_surface";
     /// <summary>Диагностика загрузки UI-режимов: пути к UiModes, TOML vs встроенный fallback, список id в меню (почему может не быть Flight). returns: json.</summary>
     public const string GetUiModesDiagnostics = "get_ui_modes_diagnostics";
-    /// <summary>Контекст навигации (ADR 0039): связанные файлы или мини-подграф. Виды связей — partial_peer project_peer xaml_codebehind_pair test_counterpart same_namespace same_directory. Имена preset — из settings.toml workspace_navigation_context.presets. args: mode:string, file_path?:string, line?:integer, column?:integer, max_related?:integer, max_nodes?:integer, max_edges?:integer, preset?:string, include_kinds?:string[], exclude_kinds?:string[], level?:string; returns: json; example: {"mode":"related","file_path":"src/Foo.cs","preset":"no_namespace_noise","level":"controlFlow"}.</summary>
-    public const string GetWorkspaceNavigationContext = "get_workspace_navigation_context";
+    /// <summary>Контекст навигации по коду (ADR 0039, CNC): связанные файлы или мини-подграф. Виды связей — partial_peer project_peer xaml_codebehind_pair test_counterpart same_namespace same_directory. Имена preset — из settings.toml <c>[code_navigation]</c> / <c>[[code_navigation.presets]]</c>. args: mode:string, file_path?:string, line?:integer, column?:integer, max_related?:integer, max_nodes?:integer, max_edges?:integer, preset?:string, include_kinds?:string[], exclude_kinds?:string[], level?:string; returns: json; example: {"mode":"related","file_path":"src/Foo.cs","preset":"no_namespace_noise","level":"controlFlow"}.</summary>
+    public const string GetCodeNavigationContext = "get_code_navigation_context";
     /// <summary>Выбрать сообщение в чате по индексу (0-based), в т.ч. для Skia-поверхности. args: index:integer; returns: text; example: {"index":0}.</summary>
     public const string ChatSelectMessage = "chat_select_message";
     /// <summary>Получить выбранное сообщение чата (индекс, роль, контент) в JSON. returns: json.</summary>

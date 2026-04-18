@@ -1,15 +1,15 @@
-[[workspace_navigation.presets]]
+[[code_navigation.presets]]
 id = "peers_only"
 include_kinds = ["partial_peer", "project_peer"]
 
-[[workspace_navigation.presets]]
+[[code_navigation.presets]]
 id = "no_namespace_noise"
 exclude_kinds = ["same_namespace", "same_directory"]
 
-[[workspace_navigation.presets]]
+[[code_navigation.presets]]
 id = "tests_and_peers"
 include_kinds = ["partial_peer", "project_peer", "test_counterpart"]
 
-[[workspace_navigation.presets]]
+[[code_navigation.presets]]
 id = "structure_only"
 include_kinds = ["partial_peer", "project_peer", "xaml_codebehind_pair", "same_directory"]

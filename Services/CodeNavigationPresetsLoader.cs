@@ -9,21 +9,21 @@ namespace CascadeIDE.Services;
 
 /// <summary>
 /// Шипнутые пресеты: по умолчанию — встроенный ресурс (и опционально файл рядом с exe); затем overlay репозитория
-/// <c>.cascade/workspace.toml</c> (<c>[[workspace_navigation.presets]]</c>); затем пользовательский <c>settings.toml</c>.
-/// Merge по <see cref="WorkspaceNavigationPresetEntry.Id"/> на каждом шаге (последний слой побеждает).
-/// Внутренняя цепочка <see cref="WorkspaceNavigationPresetMerge"/> по-прежнему получает JSON-строку (контракт merge не менялся).
+/// <c>.cascade/workspace.toml</c> (<c>[[code_navigation.presets]]</c>); затем пользовательский <c>settings.toml</c>.
+/// Merge по <see cref="CodeNavigationPresetEntry.Id"/> на каждом шаге (последний слой побеждает).
+/// Внутренняя цепочка <see cref="CodeNavigationPresetMerge"/> по-прежнему получает JSON-строку (контракт merge не менялся).
 /// </summary>
-public static class WorkspaceNavigationPresetsLoader
+public static class CodeNavigationPresetsLoader
 {
     private static readonly JsonSerializerOptions s_mergeJson = new() { WriteIndented = false };
 
     /// <summary>Относительный путь от <see cref="AppContext.BaseDirectory"/> (опциональный override поверх встроенного бандла).</summary>
-    public const string BundledRelativePath = "WorkspaceNavigation/presets.toml";
+    public const string BundledRelativePath = "CodeNavigation/presets.toml";
 
-    /// <summary>Корень шипнутого TOML (<c>[workspace_navigation]</c> / <c>[[workspace_navigation.presets]]</c>).</summary>
+    /// <summary>Корень шипнутого TOML (<c>[code_navigation]</c> / <c>[[code_navigation.presets]]</c>).</summary>
     private sealed class BundledPresetsRoot
     {
-        public NavigationSettings? WorkspaceNavigation { get; set; }
+        public CodeNavigationSettings? CodeNavigation { get; set; }
     }
 
     private sealed class PresetMergeWire
@@ -39,28 +39,28 @@ public static class WorkspaceNavigationPresetsLoader
     /// <exception cref="InvalidOperationException">Ресурс не встроен в сборку (ошибка сборки).</exception>
     public static string GetEmbeddedBundledPresetsToml()
     {
-        if (!BundledAppContent.TryReadEmbeddedText("WorkspaceNavigation/presets.toml", out var text))
-            throw new InvalidOperationException("Missing embedded resource WorkspaceNavigation/presets.toml.");
+        if (!BundledAppContent.TryReadEmbeddedText("CodeNavigation/presets.toml", out var text))
+            throw new InvalidOperationException("Missing embedded resource CodeNavigation/presets.toml.");
         return text;
     }
 
     /// <summary>
-    /// Тот же JSON, что внутри уходит в <see cref="WorkspaceNavigationPresetMerge.Merge"/> после разбора бандла без пользовательского overlay.
+    /// Тот же JSON, что внутри уходит в <see cref="CodeNavigationPresetMerge.Merge"/> после разбора бандла без пользовательского overlay.
     /// </summary>
     public static string ToPresetMergeJsonFromBundledToml(string bundledToml)
     {
         var root = CascadeTomlSerializer.Deserialize<BundledPresetsRoot>(bundledToml.Trim());
-        if (root?.WorkspaceNavigation?.Presets is not { Count: > 0 })
+        if (root?.CodeNavigation?.Presets is not { Count: > 0 })
             return "{}";
 
-        var merged = MergeBundledWithUser(root.WorkspaceNavigation.Presets, []);
+        var merged = MergeBundledWithUser(root.CodeNavigation.Presets, []);
         return PresetEntriesToMergeJson(merged);
     }
 
-    /// <summary>JSON для <see cref="WorkspaceNavigationPresetMerge"/>: бандл → репо → пользовательские настройки.</summary>
+    /// <summary>JSON для <see cref="CodeNavigationPresetMerge"/>: бандл → репо → пользовательские настройки.</summary>
     /// <param name="settings">Из <c>%LocalAppData%\CascadeIDE\settings.toml</c>.</param>
     /// <param name="solutionPath">Путь к <c>.sln</c> или к каталогу репозитория; для <c>.cascade/workspace.toml</c>. Пусто — только бандл + пользователь.</param>
-    public static string GetEffectivePresetsJson(NavigationSettings settings, string? solutionPath = null)
+    public static string GetEffectivePresetsJson(CodeNavigationSettings settings, string? solutionPath = null)
     {
         var bundled = LoadBundledEntriesOrFallback();
         var repository = LoadRepositoryPresetsFromSolutionDirectory(solutionPath);
@@ -71,7 +71,7 @@ public static class WorkspaceNavigationPresetsLoader
 
     /// <summary>Читает <c>.cascade/workspace.toml</c> в корне репозитория; возвращает пресеты навигации или пустой список.</summary>
     /// <param name="solutionPath">Путь к <c>.sln</c> или к каталогу репозитория.</param>
-    public static IReadOnlyList<WorkspaceNavigationPresetEntry> LoadRepositoryPresetsFromSolutionDirectory(string? solutionPath)
+    public static IReadOnlyList<CodeNavigationPresetEntry> LoadRepositoryPresetsFromSolutionDirectory(string? solutionPath)
     {
         var dir = NormalizeRepositoryRoot(solutionPath);
         if (dir is null)
@@ -85,10 +85,10 @@ public static class WorkspaceNavigationPresetsLoader
 
             var text = File.ReadAllText(path);
             var ui = CascadeTomlSerializer.Deserialize<UiWorkspaceToml>(text);
-            if (ui?.WorkspaceNavigation?.Presets is not { Count: > 0 })
+            if (ui?.CodeNavigation?.Presets is not { Count: > 0 })
                 return [];
 
-            return ui.WorkspaceNavigation.Presets;
+            return ui.CodeNavigation.Presets;
         }
         catch
         {
@@ -114,15 +114,15 @@ public static class WorkspaceNavigationPresetsLoader
         }
     }
 
-    public static IReadOnlyList<WorkspaceNavigationPresetEntry> LoadBundledEntriesOrFallback()
+    public static IReadOnlyList<CodeNavigationPresetEntry> LoadBundledEntriesOrFallback()
     {
         if (!BundledAppContent.TryReadDiskThenEmbedded(BundledRelativePath, out var raw))
             return [];
         try
         {
             var root = CascadeTomlSerializer.Deserialize<BundledPresetsRoot>(raw.Trim());
-            if (root?.WorkspaceNavigation?.Presets is { Count: > 0 })
-                return root.WorkspaceNavigation.Presets;
+            if (root?.CodeNavigation?.Presets is { Count: > 0 })
+                return root.CodeNavigation.Presets;
         }
         catch
         {
@@ -132,12 +132,12 @@ public static class WorkspaceNavigationPresetsLoader
         return [];
     }
 
-    /// <summary>Пользовательские пресеты перекрывают бандл по совпадающему <see cref="WorkspaceNavigationPresetEntry.Id"/>.</summary>
-    public static List<WorkspaceNavigationPresetEntry> MergeBundledWithUser(
-        IReadOnlyList<WorkspaceNavigationPresetEntry> bundled,
-        IReadOnlyList<WorkspaceNavigationPresetEntry> user)
+    /// <summary>Пользовательские пресеты перекрывают бандл по совпадающему <see cref="CodeNavigationPresetEntry.Id"/>.</summary>
+    public static List<CodeNavigationPresetEntry> MergeBundledWithUser(
+        IReadOnlyList<CodeNavigationPresetEntry> bundled,
+        IReadOnlyList<CodeNavigationPresetEntry> user)
     {
-        var dict = new Dictionary<string, WorkspaceNavigationPresetEntry>(StringComparer.OrdinalIgnoreCase);
+        var dict = new Dictionary<string, CodeNavigationPresetEntry>(StringComparer.OrdinalIgnoreCase);
         foreach (var e in bundled)
         {
             if (string.IsNullOrWhiteSpace(e.Id))
@@ -155,7 +155,7 @@ public static class WorkspaceNavigationPresetsLoader
         return dict.Values.OrderBy(x => x.Id, StringComparer.Ordinal).ToList();
     }
 
-    private static WorkspaceNavigationPresetEntry CloneEntry(WorkspaceNavigationPresetEntry e) =>
+    private static CodeNavigationPresetEntry CloneEntry(CodeNavigationPresetEntry e) =>
         new()
         {
             Id = e.Id,
@@ -163,7 +163,7 @@ public static class WorkspaceNavigationPresetsLoader
             ExcludeKinds = e.ExcludeKinds?.ToList()
         };
 
-    private static string PresetEntriesToMergeJson(IReadOnlyList<WorkspaceNavigationPresetEntry> merged)
+    private static string PresetEntriesToMergeJson(IReadOnlyList<CodeNavigationPresetEntry> merged)
     {
         var dict = new Dictionary<string, PresetMergeWire>(StringComparer.OrdinalIgnoreCase);
         foreach (var e in merged)

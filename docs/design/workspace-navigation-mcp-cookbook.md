@@ -1,10 +1,10 @@
-# Cookbook: семантическая навигация через MCP (`get_workspace_navigation_context`)
+# Cookbook: семантическая навигация через MCP (`get_code_navigation_context`)
 
 Контекст: [ADR 0039](../adr/0039-workspace-navigation-affordances.md).
 
 ## Зачем
 
-Команда `ide_execute_command` с `command_id` = `get_workspace_navigation_context` возвращает JSON со связанными файлами (`mode`: `related`) или компактным подграфом (`mode`: `subgraph`). Агенту нужны **стабильные имена видов связей** и **эхо фильтра**, чтобы не гадать, что реально применилось после пресета и `include_kinds` / `exclude_kinds`.
+Команда `ide_execute_command` с `command_id` = `get_code_navigation_context` возвращает JSON со связанными файлами (`mode`: `related`) или компактным подграфом (`mode`: `subgraph`). Агенту нужны **стабильные имена видов связей** и **эхо фильтра**, чтобы не гадать, что реально применилось после пресета и `include_kinds` / `exclude_kinds`.
 
 ## Виды связей (канон)
 
@@ -12,16 +12,16 @@
 
 ## Базовые пресеты (бандл) и overlay в `settings.toml`
 
-**Шипнутый файл** `WorkspaceNavigation/presets.toml` рядом с `CascadeIDE.exe` задаёт пресеты по умолчанию (`peers_only`, `no_namespace_noise`, `tests_and_peers`, `structure_only`), по тому же принципу, что `UiModes/` и темы; если файла нет, используется тот же текст из **встроенного ресурса** сборки.
+**Шипнутый файл** `CodeNavigation/presets.toml` рядом с `CascadeIDE.exe` задаёт пресеты по умолчанию (`peers_only`, `no_namespace_noise`, `tests_and_peers`, `structure_only`), по тому же принципу, что `UiModes/` и темы; если файла нет, используется тот же текст из **встроенного ресурса** сборки.
 
-**Overlay репозитория** — опционально в **`.cascade/workspace.toml`** в корне решения: те же **`[[workspace_navigation_context.presets]]`**, merge по **`id`** поверх шипнутого бандла (как [ADR 0021](../adr/0021-pfd-mfd-cockpit-attention-model.md) для метрик UI).
+**Overlay репозитория** — опционально в **`.cascade/workspace.toml`** в корне решения: те же **`[[code_navigation.presets]]`**, merge по **`id`** поверх шипнутого бандла (как [ADR 0021](../adr/0021-pfd-mfd-cockpit-attention-model.md) для метрик UI).
 
-**Пользовательский overlay** — в `%LocalAppData%\CascadeIDE\settings.toml` (ADR 0028), массив таблиц **`[[workspace_navigation_context.presets]]`**: у каждой записи поля **`id`**, опционально **`include_kinds`** / **`exclude_kinds`** (массивы строк). Запись с тем же **`id`** **перекрывает** и бандл, и репо; новые **`id`** добавляются. Порядок слоёв: **бандл → `.cascade/workspace.toml` → settings**.
+**Пользовательский overlay** — в `%LocalAppData%\CascadeIDE\settings.toml` (ADR 0028), секция **`[code_navigation]`** и массив таблиц **`[[code_navigation.presets]]`**: у каждой записи поля **`id`**, опционально **`include_kinds`** / **`exclude_kinds`** (массивы строк). Запись с тем же **`id`** **перекрывает** и бандл, и репо; новые **`id`** добавляются. Порядок слоёв: **бандл → `.cascade/workspace.toml` → settings**.
 
 Пример (как у `[[sources]]` в других конфигах — нативный TOML):
 
 ```toml
-[[workspace_navigation_context.presets]]
+[[code_navigation.presets]]
 id = "my_focus"
 include_kinds = ["partial_peer", "project_peer"]
 exclude_kinds = ["same_namespace"]
@@ -60,7 +60,7 @@ exclude_kinds = ["same_namespace"]
 Только пресет:
 
 ```json
-{ "command_id": "get_workspace_navigation_context", "args": { "mode": "related", "preset": "no_namespace_noise" } }
+{ "command_id": "get_code_navigation_context", "args": { "mode": "related", "preset": "no_namespace_noise" } }
 ```
 
 Якорь + явный exclude поверх дефолтного пресета (exclude в запросе объединяется с пресетом, если пресет задаёт exclude):

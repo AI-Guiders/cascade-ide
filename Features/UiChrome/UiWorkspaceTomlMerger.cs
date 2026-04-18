@@ -4,7 +4,7 @@ using CascadeIDE.Services;
 namespace CascadeIDE.Features.UiChrome;
 
 /// <summary>
-/// Слияние слоёв <see cref="UiWorkspaceToml"/> (ADR 0021 §2.1): <c>chrome</c>, <c>routing</c>, <c>workspace_navigation.presets</c>.
+/// Слияние слоёв <see cref="UiWorkspaceToml"/> (ADR 0021 §2.1): <c>chrome</c>, <c>routing</c>, <c>code_navigation.presets</c>.
 /// </summary>
 public static class UiWorkspaceTomlMerger
 {
@@ -17,7 +17,7 @@ public static class UiWorkspaceTomlMerger
         {
             Chrome = MergeWorkspaceChrome(lower?.Chrome, higher?.Chrome),
             Routing = MergeRouting(lower?.Routing, higher?.Routing),
-            WorkspaceNavigation = MergeWorkspaceNavigation(lower?.WorkspaceNavigation, higher?.WorkspaceNavigation),
+            CodeNavigation = MergeCodeNavigation(lower?.CodeNavigation, higher?.CodeNavigation),
         };
     }
 
@@ -91,14 +91,14 @@ public static class UiWorkspaceTomlMerger
         return merged.Count > 0 ? merged : null;
     }
 
-    private static NavigationSettings? MergeWorkspaceNavigation(NavigationSettings? lower, NavigationSettings? higher)
+    private static CodeNavigationSettings? MergeCodeNavigation(CodeNavigationSettings? lower, CodeNavigationSettings? higher)
     {
         if (lower is null && higher is null)
             return null;
 
-        var merged = WorkspaceNavigationPresetsLoader.MergeBundledWithUser(
+        var merged = CodeNavigationPresetsLoader.MergeBundledWithUser(
             lower?.Presets ?? [],
             higher?.Presets ?? []);
-        return new NavigationSettings { Presets = merged };
+        return new CodeNavigationSettings { Presets = merged };
     }
 }

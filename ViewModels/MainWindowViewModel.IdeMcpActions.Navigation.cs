@@ -1,11 +1,13 @@
 #nullable enable
+using CascadeIDE.Services;
+
 namespace CascadeIDE.ViewModels;
 
 /// <summary>MCP: семантическая навигация (ADR 0039).</summary>
 public partial class MainWindowViewModel
 {
     /// <inheritdoc />
-    Task<string> Services.IIdeMcpActions.GetWorkspaceNavigationContextAsync(
+    Task<string> Services.IIdeMcpActions.GetCodeNavigationContextAsync(
         string mode,
         string? filePath,
         int? line,
@@ -45,12 +47,12 @@ public partial class MainWindowViewModel
                     EditorText,
                     effectiveLine,
                     effectiveColumn,
-                    maxNodes ?? WorkspaceNavigationContextBuilder.DefaultMaxNodes,
-                    maxEdges ?? WorkspaceNavigationContextBuilder.DefaultMaxEdges));
+                    maxNodes ?? CodeNavigationContextBuilder.DefaultMaxNodes,
+                    maxEdges ?? CodeNavigationContextBuilder.DefaultMaxEdges));
         }
 
         return UiScheduler.Default.InvokeAsync(() =>
-            WorkspaceNavigationContextBuilder.BuildJson(
+            CodeNavigationContextBuilder.BuildJson(
                 effectiveMode,
                 filePath,
                 CurrentFilePath,
@@ -58,12 +60,12 @@ public partial class MainWindowViewModel
                 Workspace.SolutionPath,
                 line,
                 column,
-                maxRelated ?? WorkspaceNavigationContextBuilder.DefaultMaxRelated,
-                maxNodes ?? WorkspaceNavigationContextBuilder.DefaultMaxNodes,
-                maxEdges ?? WorkspaceNavigationContextBuilder.DefaultMaxEdges,
+                maxRelated ?? CodeNavigationContextBuilder.DefaultMaxRelated,
+                maxNodes ?? CodeNavigationContextBuilder.DefaultMaxNodes,
+                maxEdges ?? CodeNavigationContextBuilder.DefaultMaxEdges,
                 includeKinds,
                 excludeKinds,
                 preset,
-                _settings.WorkspaceNavigation));
+                _settings.CodeNavigation));
     }
 }

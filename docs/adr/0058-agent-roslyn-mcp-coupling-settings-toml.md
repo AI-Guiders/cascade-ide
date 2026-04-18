@@ -16,7 +16,7 @@
 **Уже есть (не отменяется):**
 
 - `[semantic_map]` — вид/глубина UI — [0039](0039-workspace-navigation-affordances.md), [0053](0053-semantic-map-control-flow-pfd.md).
-- Пресеты **`get_workspace_navigation_context`** — [0039 § Agent/MCP](0039-workspace-navigation-affordances.md#adr0039-mcp-workspace-navigation).
+- Пресеты **`get_code_navigation_context`** — [0039 § Agent/MCP](0039-workspace-navigation-affordances.md#adr0039-mcp-workspace-navigation).
 
 Этот ADR — **слой параметров сопряжения агент ↔ Roslyn MCP** в TOML. Поведение **профилей**, **Manager**, тактика/стратегия, третий монитор — **[0059](0059-roslyn-mcp-profiles-manager-tactical-strategic-efb.md)**.
 
@@ -53,7 +53,7 @@
 
 ### 3. Размещение в TOML
 
-Целевая секция, например **`[agent.roslyn_mcp]`**, отдельно от `[semantic_map]` и от **`[[workspace_navigation_context.presets]]`** ([0039](0039-workspace-navigation-affordances.md)) без явного маппинга. Точные ключи — после прототипа; здесь зафиксированы **оси**.
+Целевая секция, например **`[agent.roslyn_mcp]`**, отдельно от `[semantic_map]` и от **`[[code_navigation.presets]]`** ([0039](0039-workspace-navigation-affordances.md)) без явного маппинга. Точные ключи — после прототипа; здесь зафиксированы **оси**.
 
 <a id="adr0058-p4"></a>
 

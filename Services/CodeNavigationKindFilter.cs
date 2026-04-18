@@ -2,8 +2,8 @@
 
 namespace CascadeIDE.Services;
 
-/// <summary>Имена видов связей в ответе <c>get_workspace_navigation_context</c> (режим <c>related</c> / основа <c>subgraph</c>).</summary>
-public static class WorkspaceNavigationRelatedKinds
+/// <summary>Имена видов связей в ответе <c>get_code_navigation_context</c> (режим <c>related</c> / основа <c>subgraph</c>).</summary>
+public static class CodeNavigationRelatedKinds
 {
     public const string PartialPeer = "partial_peer";
     public const string ProjectPeer = "project_peer";
@@ -42,12 +42,12 @@ public static class WorkspaceNavigationRelatedKinds
 /// Фильтр по видам связей: <c>include_kinds</c> — белый список (если задан и непустой);
 /// <c>exclude_kinds</c> — вычитание. Неизвестные токены в списках игнорируются; если в <c>include</c> не осталось ни одного известного вида — считается «без ограничения по include».
 /// </summary>
-public readonly struct WorkspaceNavigationKindFilter
+public readonly struct CodeNavigationKindFilter
 {
     private readonly HashSet<string>? _include;
     private readonly HashSet<string> _exclude;
 
-    private WorkspaceNavigationKindFilter(HashSet<string>? include, HashSet<string> exclude)
+    private CodeNavigationKindFilter(HashSet<string>? include, HashSet<string> exclude)
     {
         _include = include;
         _exclude = exclude;
@@ -61,14 +61,14 @@ public readonly struct WorkspaceNavigationKindFilter
     public IReadOnlyList<string> EffectiveExcludeKinds =>
         _exclude.Count == 0 ? Array.Empty<string>() : _exclude.OrderBy(x => x, StringComparer.Ordinal).ToList();
 
-    public static WorkspaceNavigationKindFilter Create(IReadOnlyList<string>? includeKinds, IReadOnlyList<string>? excludeKinds)
+    public static CodeNavigationKindFilter Create(IReadOnlyList<string>? includeKinds, IReadOnlyList<string>? excludeKinds)
     {
         var exclude = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         if (excludeKinds is not null)
         {
             foreach (var t in excludeKinds)
             {
-                var c = WorkspaceNavigationRelatedKinds.TryCanonicalKind(t);
+                var c = CodeNavigationRelatedKinds.TryCanonicalKind(t);
                 if (c is not null)
                     exclude.Add(c);
             }
@@ -80,7 +80,7 @@ public readonly struct WorkspaceNavigationKindFilter
             include = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             foreach (var t in includeKinds)
             {
-                var c = WorkspaceNavigationRelatedKinds.TryCanonicalKind(t);
+                var c = CodeNavigationRelatedKinds.TryCanonicalKind(t);
                 if (c is not null)
                     include.Add(c);
             }
@@ -89,7 +89,7 @@ public readonly struct WorkspaceNavigationKindFilter
                 include = null;
         }
 
-        return new WorkspaceNavigationKindFilter(include, exclude);
+        return new CodeNavigationKindFilter(include, exclude);
     }
 
     public bool Allows(string kind)

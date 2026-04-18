@@ -35,7 +35,7 @@ public sealed class UiWorkspaceChromeToml
 
 /// <summary>
 /// Корень <c>UiModes/workspace.toml</c> и <c>.cascade/workspace.toml</c>.
-/// TOML: <c>[chrome]</c>, <c>[routing.attention]</c>, <c>[routing.instruments]</c>, <c>[[workspace_navigation.presets]]</c>.
+/// TOML: <c>[chrome]</c>, <c>[routing.attention]</c>, <c>[routing.instruments]</c>, <c>[[code_navigation.presets]]</c>.
 /// </summary>
 public sealed class UiWorkspaceToml
 {
@@ -44,8 +44,8 @@ public sealed class UiWorkspaceToml
 
     public UiWorkspaceRoutingToml? Routing { get; set; }
 
-    /// <summary>Пресеты навигации (ADR 0039).</summary>
-    public NavigationSettings? WorkspaceNavigation { get; set; }
+    /// <summary>Пресеты навигации по коду (ADR 0039, CNC).</summary>
+    public CodeNavigationSettings? CodeNavigation { get; set; }
 }
 
 /// <summary>TOML: <c>[meta]</c> — наследование, семья, заголовок, тема.</summary>

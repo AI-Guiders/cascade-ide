@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 namespace CascadeIDE.Services;
 
 /// <summary>Слияние именованного пресета из JSON настроек с аргументами MCP.</summary>
-public static class WorkspaceNavigationPresetMerge
+public static class CodeNavigationPresetMerge
 {
     private sealed class PresetDto
     {
@@ -43,14 +43,14 @@ public static class WorkspaceNavigationPresetMerge
                 var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 foreach (var x in pExc)
                 {
-                    var c = WorkspaceNavigationRelatedKinds.TryCanonicalKind(x);
+                    var c = CodeNavigationRelatedKinds.TryCanonicalKind(x);
                     if (c is not null)
                         set.Add(c);
                 }
 
                 foreach (var x in requestExclude)
                 {
-                    var c = WorkspaceNavigationRelatedKinds.TryCanonicalKind(x);
+                    var c = CodeNavigationRelatedKinds.TryCanonicalKind(x);
                     if (c is not null)
                         set.Add(c);
                 }
@@ -88,7 +88,7 @@ public static class WorkspaceNavigationPresetMerge
                 var list = new List<string>();
                 foreach (var t in dto.IncludeKinds)
                 {
-                    var c = WorkspaceNavigationRelatedKinds.TryCanonicalKind(t);
+                    var c = CodeNavigationRelatedKinds.TryCanonicalKind(t);
                     if (c is not null)
                         list.Add(c);
                 }
@@ -101,7 +101,7 @@ public static class WorkspaceNavigationPresetMerge
                 var list = new List<string>();
                 foreach (var t in dto.ExcludeKinds)
                 {
-                    var c = WorkspaceNavigationRelatedKinds.TryCanonicalKind(t);
+                    var c = CodeNavigationRelatedKinds.TryCanonicalKind(t);
                     if (c is not null)
                         list.Add(c);
                 }

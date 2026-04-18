@@ -78,4 +78,4 @@ min_performance = 0.6
 max_workload = 0.5
 require_scores = false
 
-[workspace_navigation]
+[code_navigation]

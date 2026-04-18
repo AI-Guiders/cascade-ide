@@ -9,7 +9,7 @@ namespace CascadeIDE.Tests;
 public sealed class WorkspaceNavigationControlFlowMcpCursorFallbackTests
 {
     [AvaloniaFact]
-    public async Task GetWorkspaceNavigationContext_ControlFlow_UsesCurrentCursorWhenLineColumnNotProvided()
+    public async Task GetCodeNavigationContext_ControlFlow_UsesCurrentCursorWhenLineColumnNotProvided()
     {
         var vm = new MainWindowViewModel
         {
@@ -33,7 +33,7 @@ class Demo
         vm.EditorSelectionStart = offset;
 
         IIdeMcpActions mcp = vm;
-        var json = await mcp.GetWorkspaceNavigationContextAsync(
+        var json = await mcp.GetCodeNavigationContextAsync(
             mode: "related",
             filePath: null,
             line: null,
