@@ -6,6 +6,7 @@ namespace CascadeIDE.Cockpit.Composition.WorkspaceHealth;
 
 /// <summary>
 /// Composes Workspace Health channel snapshot into ordered surface segments.
+/// Порядок сегментов согласован с <see cref="WorkspaceHealthInstrumentDeck"/> (ADR 0063, ось композиции канала WH).
 /// </summary>
 public sealed class WorkspaceHealthSurfaceCompositor : IWorkspaceHealthSurfaceCompositor
 {

@@ -1,3 +1,4 @@
+using CascadeIDE.Cockpit;
 using CascadeIDE.Cockpit.Cds;
 using CascadeIDE.Cockpit.Channels.WorkspaceHealth;
 using CascadeIDE.Cockpit.Composition;
@@ -160,6 +161,9 @@ public partial class MainWindowViewModel
 
     /// <summary>Куда вести Workspace Health: нижняя полоса или страница зоны — из capabilities (<c>workspace_health_surface</c>).</summary>
     public WorkspaceHealthUiSurface WorkspaceHealthUiSurface => Capabilities.WorkspaceHealthSurface;
+
+    /// <summary>Форма представления канала Workspace Health на оси <see cref="ContentRepresentation"/> (ADR 0063).</summary>
+    public ContentRepresentation WorkspaceHealthContentRepresentation => Capabilities.WorkspaceHealthContentRepresentation;
 
     /// <summary>Полоска build/tests/debug/git — при <c>workspace_health_strip</c> и <c>bottom_strip</c>; рисуется в <see cref="Views.WorkspaceChromeBandView"/> внутри MFD.</summary>
     public bool ShowWorkspaceHealthStrip =>

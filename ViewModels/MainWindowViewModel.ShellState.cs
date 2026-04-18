@@ -69,6 +69,7 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(ShowEicasAlertsBar))]
     [NotifyPropertyChangedFor(nameof(ShowWorkspaceChromeBand))]
     [NotifyPropertyChangedFor(nameof(WorkspaceHealthUiSurface))]
+    [NotifyPropertyChangedFor(nameof(WorkspaceHealthContentRepresentation))]
     [NotifyPropertyChangedFor(nameof(ShowWorkspaceBottomChrome))]
     [NotifyPropertyChangedFor(nameof(QuickActions))]
     [NotifyPropertyChangedFor(nameof(ShowAgentOperations))]

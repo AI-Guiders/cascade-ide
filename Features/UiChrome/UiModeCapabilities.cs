@@ -1,3 +1,5 @@
+using CascadeIDE.Cockpit;
+
 namespace CascadeIDE.Features.UiChrome;
 
 /// <summary>
@@ -28,6 +30,9 @@ public sealed record UiModeCapabilities(
     /// <summary>Разрешить полосу оповещений EICAS при наличии сообщений; TOML: <c>eicas_alerts_bar</c>. См. ADR 0021 §5, §1.1.</summary>
     bool EicasAlertsBarEnabled)
 {
+    /// <summary>Ось формы представления для канала Workspace Health (ADR 0063); дублирует <see cref="WorkspaceHealthSurface"/> через <see cref="WorkspaceHealthUiSurfaceExtensions.ToContentRepresentation"/>.</summary>
+    public ContentRepresentation WorkspaceHealthContentRepresentation => WorkspaceHealthSurface.ToContentRepresentation();
+
     /// <summary>Дефолты по семье, если в TOML нет переопределений и нет наследуемого родителя.</summary>
     public static UiModeCapabilities DefaultsForFamily(UiModeFamily family)
     {
