@@ -14,10 +14,18 @@ public static class PresentationMainGridLayoutFrameBuilder
     public static PresentationMainGridLayoutFrame Build(
         PresentationParseResult parse,
         bool dedicatedMfdSecondScreen,
-        bool mfdColumnSuppressedForHost)
+        bool mfdColumnSuppressedForHost,
+        bool tripleOneAnchorPerZone,
+        bool suppressPfdColumnForPfdHostWindow)
     {
         if (!parse.IsSuccess || parse.Screens.Count == 0)
             return DefaultFrame(0);
+
+        if (tripleOneAnchorPerZone
+            && PresentationLayoutAnalyzer.IsTripleOneAnchorPerZonePreset(parse.Screens))
+        {
+            return BuildTripleMainWindowFrame(mfdColumnSuppressedForHost, suppressPfdColumnForPfdHostWindow);
+        }
 
         var first = parse.Screens[0];
         if (first.Count is < 2 or > 3)
@@ -55,6 +63,26 @@ public static class PresentationMainGridLayoutFrameBuilder
 
     private static PresentationMainGridLayoutFrame DefaultFrame(int contentZoneCount) =>
         new(DefaultColumnDefinitions, contentZoneCount, false, Array.Empty<double>(), Array.Empty<PresentationZoneBound>());
+
+    /// <summary>
+    /// Три физических экрана под <c>P</c>/<c>F</c>/<c>M</c>: в главном окне остаётся лобовое; колонки P/M — по флагам подавления хостов.
+    /// </summary>
+    private static PresentationMainGridLayoutFrame BuildTripleMainWindowFrame(
+        bool mfdColumnSuppressedForHost,
+        bool suppressPfdColumnForPfdHostWindow)
+    {
+        const string defaultPfd = "220";
+        const string defaultMfdTail = "340";
+        var pfdCol = suppressPfdColumnForPfdHostWindow ? "0" : defaultPfd;
+        var mfdCol = mfdColumnSuppressedForHost ? "0" : defaultMfdTail;
+        var columns = $"{pfdCol},4,*,4,{mfdCol}";
+        return new PresentationMainGridLayoutFrame(
+            columns,
+            3,
+            false,
+            Array.Empty<double>(),
+            Array.Empty<PresentationZoneBound>());
+    }
 
     private static bool HasExplicitWeights(IReadOnlyList<PresentationAnchorSlot> first)
     {

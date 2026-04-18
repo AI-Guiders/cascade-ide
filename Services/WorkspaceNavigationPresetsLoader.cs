@@ -9,8 +9,8 @@ namespace CascadeIDE.Services;
 
 /// <summary>
 /// Шипнутые пресеты: по умолчанию — встроенный ресурс (и опционально файл рядом с exe); затем overlay репозитория
-/// <c>.cascade/workspace.toml</c> (<c>[[workspace_navigation_context.presets]]</c>, как в settings); затем пользовательский
-/// <c>settings.toml</c>. Merge по <see cref="WorkspaceNavigationPresetEntry.Id"/> на каждом шаге (последний слой побеждает).
+/// <c>.cascade/workspace.toml</c> (<c>[[workspace_navigation.presets]]</c>); затем пользовательский <c>settings.toml</c>.
+/// Merge по <see cref="WorkspaceNavigationPresetEntry.Id"/> на каждом шаге (последний слой побеждает).
 /// Внутренняя цепочка <see cref="WorkspaceNavigationPresetMerge"/> по-прежнему получает JSON-строку (контракт merge не менялся).
 /// </summary>
 public static class WorkspaceNavigationPresetsLoader
@@ -20,11 +20,10 @@ public static class WorkspaceNavigationPresetsLoader
     /// <summary>Относительный путь от <see cref="AppContext.BaseDirectory"/> (опциональный override поверх встроенного бандла).</summary>
     public const string BundledRelativePath = "WorkspaceNavigation/presets.toml";
 
-    /// <summary>Корень шипнутого TOML (<c>[[presets]]</c>).</summary>
+    /// <summary>Корень шипнутого TOML (<c>[workspace_navigation]</c> / <c>[[workspace_navigation.presets]]</c>).</summary>
     private sealed class BundledPresetsRoot
     {
-        [JsonPropertyName("presets")]
-        public List<WorkspaceNavigationPresetEntry> Presets { get; set; } = new();
+        public NavigationSettings? WorkspaceNavigation { get; set; }
     }
 
     private sealed class PresetMergeWire
@@ -50,18 +49,18 @@ public static class WorkspaceNavigationPresetsLoader
     /// </summary>
     public static string ToPresetMergeJsonFromBundledToml(string bundledToml)
     {
-        var root = TomlSerializer.Deserialize<BundledPresetsRoot>(bundledToml.Trim());
-        if (root?.Presets is not { Count: > 0 })
+        var root = CascadeTomlSerializer.Deserialize<BundledPresetsRoot>(bundledToml.Trim());
+        if (root?.WorkspaceNavigation?.Presets is not { Count: > 0 })
             return "{}";
 
-        var merged = MergeBundledWithUser(root.Presets, []);
+        var merged = MergeBundledWithUser(root.WorkspaceNavigation.Presets, []);
         return PresetEntriesToMergeJson(merged);
     }
 
     /// <summary>JSON для <see cref="WorkspaceNavigationPresetMerge"/>: бандл → репо → пользовательские настройки.</summary>
     /// <param name="settings">Из <c>%LocalAppData%\CascadeIDE\settings.toml</c>.</param>
     /// <param name="solutionPath">Путь к <c>.sln</c> или к каталогу репозитория; для <c>.cascade/workspace.toml</c>. Пусто — только бандл + пользователь.</param>
-    public static string GetEffectivePresetsJson(WorkspaceNavigationContextSettings settings, string? solutionPath = null)
+    public static string GetEffectivePresetsJson(NavigationSettings settings, string? solutionPath = null)
     {
         var bundled = LoadBundledEntriesOrFallback();
         var repository = LoadRepositoryPresetsFromSolutionDirectory(solutionPath);
@@ -86,10 +85,10 @@ public static class WorkspaceNavigationPresetsLoader
 
             var text = File.ReadAllText(path);
             var ui = CascadeTomlSerializer.Deserialize<UiWorkspaceToml>(text);
-            if (ui?.WorkspaceNavigationContext?.Presets is not { Count: > 0 })
+            if (ui?.WorkspaceNavigation?.Presets is not { Count: > 0 })
                 return [];
 
-            return ui.WorkspaceNavigationContext.Presets;
+            return ui.WorkspaceNavigation.Presets;
         }
         catch
         {
@@ -121,9 +120,9 @@ public static class WorkspaceNavigationPresetsLoader
             return [];
         try
         {
-            var root = TomlSerializer.Deserialize<BundledPresetsRoot>(raw.Trim());
-            if (root?.Presets is { Count: > 0 })
-                return root.Presets;
+            var root = CascadeTomlSerializer.Deserialize<BundledPresetsRoot>(raw.Trim());
+            if (root?.WorkspaceNavigation?.Presets is { Count: > 0 })
+                return root.WorkspaceNavigation.Presets;
         }
         catch
         {

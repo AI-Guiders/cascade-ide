@@ -21,6 +21,16 @@ public static class WorkspaceNavigationContextBuilder
 
     private static readonly JsonSerializerOptions s_compactJson = new() { WriteIndented = false };
 
+    /// <summary>Общие входы после валидации пресета, якоря и списков файлов дерева.</summary>
+    private sealed record PreparedNavigationInputs(
+        string Anchor,
+        IReadOnlyList<string> AllCs,
+        IReadOnlyList<string> NavFiles,
+        IReadOnlyList<string> MarkupPaths,
+        string? SolutionPath,
+        WorkspaceNavigationKindFilter KindFilter,
+        string? PresetRequested);
+
     /// <summary>Снимок путей из дерева решения (UI-поток); тяжёлый <see cref="BuildJson"/> можно вызывать в фоне после этого.</summary>
     public static string BuildJson(
         string mode,
@@ -36,7 +46,7 @@ public static class WorkspaceNavigationContextBuilder
         IReadOnlyList<string>? includeKinds = null,
         IReadOnlyList<string>? excludeKinds = null,
         string? preset = null,
-        WorkspaceNavigationContextSettings? workspaceNavigation = null)
+        NavigationSettings? workspaceNavigation = null)
     {
         var rawPaths = McpSolutionTree.CollectFileEntries(roots).Select(e => e.FullPath);
         return BuildJson(
@@ -71,60 +81,26 @@ public static class WorkspaceNavigationContextBuilder
         IReadOnlyList<string>? includeKinds = null,
         IReadOnlyList<string>? excludeKinds = null,
         string? preset = null,
-        WorkspaceNavigationContextSettings? workspaceNavigation = null)
+        NavigationSettings? workspaceNavigation = null)
     {
-        var pj = WorkspaceNavigationPresetsLoader.GetEffectivePresetsJson(
-            workspaceNavigation ?? new WorkspaceNavigationContextSettings(),
-            solutionPath);
-        var (mergedInc, mergedExc, presetErr) = WorkspaceNavigationPresetMerge.Merge(preset, pj, includeKinds, excludeKinds);
-        if (presetErr is not null)
-        {
-            return JsonSerializer.Serialize(new { error = "bad_preset", message = presetErr, preset });
-        }
-
-        var kindFilter = WorkspaceNavigationKindFilter.Create(mergedInc, mergedExc);
-        var anchor = !string.IsNullOrWhiteSpace(anchorPath)
-            ? anchorPath.Trim()
-            : fallbackCurrentPath?.Trim();
-        if (string.IsNullOrEmpty(anchor))
-        {
-            return JsonSerializer.Serialize(new { error = "no_file", message = "Укажите file_path или откройте файл в редакторе." });
-        }
-
-        try
-        {
-            anchor = Path.GetFullPath(anchor);
-        }
-        catch
-        {
-            return JsonSerializer.Serialize(new { error = "bad_path", message = anchor });
-        }
-
-        var allKnownFiles = NormalizeKnownFilePaths(knownFilePathsFromSolution);
-
-        var known = new HashSet<string>(allKnownFiles, StringComparer.OrdinalIgnoreCase);
-        if (!known.Contains(anchor))
-        {
-            return JsonSerializer.Serialize(new { error = "file_not_in_solution", message = "Файл не из загруженного решения.", path = anchor });
-        }
-
-        // Исключаем obj/bin из семантических списков (остаётся в known для редкого якоря в артефактах).
-        var navFiles = allKnownFiles.Where(f => !McpSolutionTree.IsBuildArtifactPath(f)).ToList();
-        var allCs = navFiles.Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)).ToList();
-        if (allCs.Count == 0)
-        {
-            return JsonSerializer.Serialize(new { error = "no_solution_files", message = "Нет .cs в дереве решения." });
-        }
-
-        var markupPaths = navFiles
-            .Where(f => f.EndsWith(".axaml", StringComparison.OrdinalIgnoreCase) || f.EndsWith(".xaml", StringComparison.OrdinalIgnoreCase))
-            .ToList();
+        if (!TryPrepareNavigationInputs(
+                anchorPath,
+                fallbackCurrentPath,
+                knownFilePathsFromSolution,
+                solutionPath,
+                includeKinds,
+                excludeKinds,
+                preset,
+                workspaceNavigation,
+                out var prepared,
+                out var errorJson))
+            return errorJson;
 
         var m = mode.Trim().ToLowerInvariant();
         return m switch
         {
-            "related" => BuildRelated(anchor, allCs, navFiles, markupPaths, solutionPath, kindFilter, preset, maxRelated, line, column),
-            "subgraph" => BuildSubgraph(anchor, allCs, navFiles, markupPaths, solutionPath, kindFilter, preset, maxNodes, maxEdges, line, column),
+            "related" => BuildRelated(prepared, maxRelated, line, column),
+            "subgraph" => BuildSubgraph(prepared, maxNodes, maxEdges, line, column),
             _ => JsonSerializer.Serialize(new { error = "bad_mode", message = "mode: related | subgraph", mode })
         };
     }
@@ -148,18 +124,111 @@ public static class WorkspaceNavigationContextBuilder
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
 
-    private static string BuildRelated(
-        string anchor,
-        IReadOnlyList<string> allCs,
-        IReadOnlyList<string> allKnownFiles,
-        IReadOnlyList<string> markupPaths,
+    private static bool TryPrepareNavigationInputs(
+        string? anchorPath,
+        string? fallbackCurrentPath,
+        IEnumerable<string> knownFilePathsFromSolution,
         string? solutionPath,
-        WorkspaceNavigationKindFilter kindFilter,
-        string? presetRequested,
+        IReadOnlyList<string>? includeKinds,
+        IReadOnlyList<string>? excludeKinds,
+        string? preset,
+        NavigationSettings? workspaceNavigation,
+        out PreparedNavigationInputs prepared,
+        out string errorJson)
+    {
+        prepared = default!;
+        errorJson = "";
+        var pj = WorkspaceNavigationPresetsLoader.GetEffectivePresetsJson(
+            workspaceNavigation ?? new NavigationSettings(),
+            solutionPath);
+        var (mergedInc, mergedExc, presetErr) = WorkspaceNavigationPresetMerge.Merge(preset, pj, includeKinds, excludeKinds);
+        if (presetErr is not null)
+        {
+            errorJson = JsonSerializer.Serialize(new { error = "bad_preset", message = presetErr, preset });
+            return false;
+        }
+
+        var kindFilter = WorkspaceNavigationKindFilter.Create(mergedInc, mergedExc);
+        var anchor = !string.IsNullOrWhiteSpace(anchorPath)
+            ? anchorPath.Trim()
+            : fallbackCurrentPath?.Trim();
+        if (string.IsNullOrEmpty(anchor))
+        {
+            errorJson = JsonSerializer.Serialize(new { error = "no_file", message = "Укажите file_path или откройте файл в редакторе." });
+            return false;
+        }
+
+        try
+        {
+            anchor = Path.GetFullPath(anchor);
+        }
+        catch
+        {
+            errorJson = JsonSerializer.Serialize(new { error = "bad_path", message = anchor });
+            return false;
+        }
+
+        var allKnownFiles = NormalizeKnownFilePaths(knownFilePathsFromSolution);
+
+        var known = new HashSet<string>(allKnownFiles, StringComparer.OrdinalIgnoreCase);
+        if (!known.Contains(anchor))
+        {
+            errorJson = JsonSerializer.Serialize(new { error = "file_not_in_solution", message = "Файл не из загруженного решения.", path = anchor });
+            return false;
+        }
+
+        var navFiles = allKnownFiles.Where(f => !McpSolutionTree.IsBuildArtifactPath(f)).ToList();
+        var allCs = navFiles.Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)).ToList();
+        if (allCs.Count == 0)
+        {
+            errorJson = JsonSerializer.Serialize(new { error = "no_solution_files", message = "Нет .cs в дереве решения." });
+            return false;
+        }
+
+        var markupPaths = navFiles
+            .Where(f => f.EndsWith(".axaml", StringComparison.OrdinalIgnoreCase) || f.EndsWith(".xaml", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        prepared = new PreparedNavigationInputs(anchor, allCs, navFiles, markupPaths, solutionPath, kindFilter, preset);
+        return true;
+    }
+
+    private static string BuildRelated(
+        PreparedNavigationInputs ctx,
         int maxRelated,
         int? line,
         int? column)
     {
+        var items = CollectRelatedItems(ctx, maxRelated);
+        var kindFilterPayload = new
+        {
+            preset = ctx.PresetRequested,
+            include_kinds_effective = ctx.KindFilter.EffectiveIncludeKinds,
+            exclude_kinds_effective = ctx.KindFilter.EffectiveExcludeKinds
+        };
+
+        var payload = new
+        {
+            mode = "related",
+            anchor_path = ctx.Anchor,
+            line,
+            column,
+            max_related = maxRelated,
+            kind_filter = kindFilterPayload,
+            items
+        };
+        return JsonSerializer.Serialize(payload, s_compactJson);
+    }
+
+    private static List<object> CollectRelatedItems(PreparedNavigationInputs ctx, int maxRelated)
+    {
+        var anchor = ctx.Anchor;
+        var allCs = ctx.AllCs;
+        var allKnownFiles = ctx.NavFiles;
+        var markupPaths = ctx.MarkupPaths;
+        var solutionPath = ctx.SolutionPath;
+        var kindFilter = ctx.KindFilter;
+
         var owningCache = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
         string? Owning(string path)
         {
@@ -219,7 +288,6 @@ public static class WorkspaceNavigationContextBuilder
 
         AfterPartial:
 
-        // project_peer: тот же MSBuild-проект (ближайший .csproj вверх по диску), а не узел дерева решения.
         var anchorProj = Owning(anchor);
         if (items.Count < maxRelated && !string.IsNullOrEmpty(anchorProj))
         {
@@ -235,7 +303,6 @@ public static class WorkspaceNavigationContextBuilder
             }
         }
 
-        // xaml_codebehind_pair
         if (items.Count < maxRelated)
         {
             foreach (var p in FindXamlCodeBehindPairs(anchor, allCs, markupPaths))
@@ -246,7 +313,6 @@ public static class WorkspaceNavigationContextBuilder
             }
         }
 
-        // test_counterpart
         if (items.Count < maxRelated && anchorIsCs)
         {
             foreach (var p in FindTestCounterparts(anchor, allCs))
@@ -257,7 +323,6 @@ public static class WorkspaceNavigationContextBuilder
             }
         }
 
-        // same_namespace
         if (items.Count < maxRelated && anchorIsCs)
         {
             var anchorNs = ExtractNamespaces(anchor);
@@ -280,7 +345,6 @@ public static class WorkspaceNavigationContextBuilder
             }
         }
 
-        // same_directory: любые файлы из дерева в том же каталоге
         if (items.Count < maxRelated)
         {
             var dir = Path.GetDirectoryName(anchor);
@@ -297,51 +361,30 @@ public static class WorkspaceNavigationContextBuilder
             }
         }
 
-        var kindFilterPayload = new
-        {
-            preset = presetRequested,
-            include_kinds_effective = kindFilter.EffectiveIncludeKinds,
-            exclude_kinds_effective = kindFilter.EffectiveExcludeKinds
-        };
-
-        var payload = new
-        {
-            mode = "related",
-            anchor_path = anchor,
-            line,
-            column,
-            max_related = maxRelated,
-            kind_filter = kindFilterPayload,
-            items
-        };
-        return JsonSerializer.Serialize(payload, s_compactJson);
+        return items;
     }
 
     private static string BuildSubgraph(
-        string anchor,
-        IReadOnlyList<string> allCs,
-        IReadOnlyList<string> allKnownFiles,
-        IReadOnlyList<string> markupPaths,
-        string? solutionPath,
-        WorkspaceNavigationKindFilter kindFilter,
-        string? presetRequested,
+        PreparedNavigationInputs ctx,
         int maxNodes,
         int maxEdges,
         int? line,
         int? column)
     {
-        var relatedJson = BuildRelated(anchor, allCs, allKnownFiles, markupPaths, solutionPath, kindFilter, presetRequested, Math.Max(maxNodes * 2, DefaultMaxRelated), line, column);
+        var relatedJson = BuildRelated(ctx, Math.Max(maxNodes * 2, DefaultMaxRelated), line, column);
         using var doc = JsonDocument.Parse(relatedJson);
         if (doc.RootElement.TryGetProperty("error", out _))
             return relatedJson;
 
         var kindFilterPayload = new
         {
-            preset = presetRequested,
-            include_kinds_effective = kindFilter.EffectiveIncludeKinds,
-            exclude_kinds_effective = kindFilter.EffectiveExcludeKinds
+            preset = ctx.PresetRequested,
+            include_kinds_effective = ctx.KindFilter.EffectiveIncludeKinds,
+            exclude_kinds_effective = ctx.KindFilter.EffectiveExcludeKinds
         };
 
+        var anchor = ctx.Anchor;
+        var solutionPath = ctx.SolutionPath;
         var items = doc.RootElement.GetProperty("items").EnumerateArray().ToList();
         var nodes = new List<object>
         {

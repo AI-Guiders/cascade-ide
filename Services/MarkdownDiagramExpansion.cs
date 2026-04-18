@@ -29,12 +29,12 @@ public static class MarkdownDiagramExpansion
     /// <summary>Расширить markdown: блоки mermaid/plantuml → <c>![…](data:image/svg+xml;base64,…)</c>.</summary>
     public static async Task<string> ExpandAsync(string markdown, CascadeIdeSettings settings, CancellationToken cancellationToken = default)
     {
-        if (!settings.MarkdownDiagrams.KrokiEnabled || string.IsNullOrEmpty(markdown))
+        if (!settings.Markdown.Diagrams.Kroki || string.IsNullOrEmpty(markdown))
             return markdown;
 
-        var baseUrl = string.IsNullOrWhiteSpace(settings.MarkdownDiagrams.KrokiBaseUrl)
+        var baseUrl = string.IsNullOrWhiteSpace(settings.Markdown.Diagrams.KrokiUrl)
             ? "https://kroki.io"
-            : settings.MarkdownDiagrams.KrokiBaseUrl.Trim();
+            : settings.Markdown.Diagrams.KrokiUrl.Trim();
 
         var matches = DiagramFenceRegex.Matches(markdown);
         if (matches.Count == 0)

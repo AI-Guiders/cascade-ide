@@ -28,8 +28,17 @@ public sealed class SemanticMapCompositor : ISemanticMapCompositor
         _layoutStage = layoutStage ?? new SemanticMapLayoutStage(fileLayout, controlFlowLayout);
     }
 
-    public SemanticMapCompositionResult Compose(SemanticMapCompositionIntent intent, in SkiaInstrumentViewport viewport) =>
-        Compose(intent.Subgraph, intent.SemanticMapLevel, viewport.Width, viewport.Height);
+    public SemanticMapCompositionResult Compose(SemanticMapCompositionIntent intent, in SkiaInstrumentViewport viewport)
+    {
+        var context = new SemanticMapPipelineContext(
+            intent.Subgraph,
+            intent.SemanticMapLevel,
+            viewport,
+            SemanticMapDetailLevel.Normal);
+        var resolved = _intentStage.Resolve(context);
+        var decluttered = _declutterStage.Apply(resolved);
+        return _layoutStage.Layout(decluttered);
+    }
 
     public SemanticMapCompositionResult Compose(
         WorkspaceNavigationSubgraphDocument doc,
@@ -42,8 +51,8 @@ public sealed class SemanticMapCompositor : ISemanticMapCompositor
             semanticMapLevel,
             new SkiaInstrumentViewport(availableWidth, availableHeight),
             SemanticMapDetailLevel.Normal);
-        var intent = _intentStage.Resolve(context);
-        var decluttered = _declutterStage.Apply(intent);
+        var resolved = _intentStage.Resolve(context);
+        var decluttered = _declutterStage.Apply(resolved);
         return _layoutStage.Layout(decluttered);
     }
 }

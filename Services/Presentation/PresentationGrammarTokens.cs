@@ -12,20 +12,20 @@ public readonly record struct PresentationGrammarTokens(
 {
     public static PresentationGrammarTokens Default => new('(', ')', " ", "+", "PFD", "Forward", "MFD");
 
-    /// <summary>Разбор полей TOML; пустые строки заменяются дефолтами. Короткие имена — через один литерал на зону (<c>pfd_zone_identifier = "P"</c>). При дубликатах между тремя идентификаторами — сброс на дефолт.</summary>
+    /// <summary>Разбор полей TOML; пустые строки заменяются дефолтами. При дубликатах между тремя идентификаторами якорей — сброс на дефолт.</summary>
     public static PresentationGrammarTokens FromSettings(
-        string? screenMarkers,
-        string? screenSeparator,
-        string? zoneSeparator,
+        string? brackets,
+        string? betweenScreens,
+        string? betweenZones,
         string? pfdZoneIdentifier = null,
         string? forwardZoneIdentifier = null,
         string? mfdZoneIdentifier = null)
     {
-        var markers = string.IsNullOrEmpty(screenMarkers) ? "()" : screenMarkers.Trim();
+        var markers = string.IsNullOrEmpty(brackets) ? "()" : brackets.Trim();
         if (markers.Length != 2)
             markers = "()";
-        var sep = string.IsNullOrEmpty(screenSeparator) ? " " : screenSeparator;
-        var zone = string.IsNullOrEmpty(zoneSeparator) ? "+" : zoneSeparator;
+        var sep = string.IsNullOrEmpty(betweenScreens) ? " " : betweenScreens;
+        var zone = string.IsNullOrEmpty(betweenZones) ? "+" : betweenZones;
 
         var def = Default;
         var pfd = NormId(pfdZoneIdentifier, def.PfdZoneIdentifier);
