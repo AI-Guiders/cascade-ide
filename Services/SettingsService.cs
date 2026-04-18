@@ -9,6 +9,12 @@ public static class SettingsService
         new DisplaySettingsValidationSpecification()
     ];
 
+    /// <summary>
+    /// UTC mtime <c>settings.toml</c> на момент последнего успешного <see cref="Load"/> (или <see cref="DateTime.MinValue"/>, если файла не было).
+    /// Если перед <see cref="Save"/> файл новее — подмешиваем <c>[presentation]</c> с диска, чтобы ручные правки не затирались.
+    /// </summary>
+    private static DateTime _settingsFileMtimeUtcAtLastLoad = DateTime.MinValue;
+
     public static string GetSettingsDirectory()
     {
         var appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
@@ -22,19 +28,26 @@ public static class SettingsService
 
     public static CascadeIdeSettings Load()
     {
+        var tomlPath = GetSettingsPath();
         try
         {
-            var tomlPath = GetSettingsPath();
             if (!File.Exists(tomlPath))
+            {
+                _settingsFileMtimeUtcAtLastLoad = DateTime.MinValue;
                 return ValidateAndReturn(new CascadeIdeSettings());
+            }
 
             var toml = File.ReadAllText(tomlPath);
             var settings = CascadeTomlSerializer.Deserialize<CascadeIdeSettings>(toml) ?? new CascadeIdeSettings();
+            _settingsFileMtimeUtcAtLastLoad = File.GetLastWriteTimeUtc(tomlPath);
             return ValidateAndReturn(settings);
         }
         catch
         {
-            return new CascadeIdeSettings();
+            _settingsFileMtimeUtcAtLastLoad = File.Exists(tomlPath)
+                ? File.GetLastWriteTimeUtc(tomlPath)
+                : DateTime.MinValue;
+            return ValidateAndReturn(new CascadeIdeSettings());
         }
     }
 
@@ -43,13 +56,51 @@ public static class SettingsService
         try
         {
             var path = GetSettingsPath();
+            if (File.Exists(path))
+            {
+                var mtimeNow = File.GetLastWriteTimeUtc(path);
+                if (mtimeNow > _settingsFileMtimeUtcAtLastLoad)
+                {
+                    try
+                    {
+                        var diskToml = File.ReadAllText(path);
+                        var disk = CascadeTomlSerializer.Deserialize<CascadeIdeSettings>(diskToml);
+                        if (disk is not null)
+                            ApplyPresentationFromDisk(settings, disk);
+                    }
+                    catch
+                    {
+                        // merge не обязателен для сохранения остальных полей
+                    }
+                }
+            }
+
             var toml = CascadeTomlSerializer.Serialize(settings);
             File.WriteAllText(path, toml);
+            _settingsFileMtimeUtcAtLastLoad = File.GetLastWriteTimeUtc(path);
         }
         catch
         {
             // Игнорируем ошибки записи
         }
+    }
+
+    /// <summary>Перезаписать секцию presentation в <paramref name="target"/> из <paramref name="disk"/> (клон полей).</summary>
+    internal static void ApplyPresentationFromDisk(CascadeIdeSettings target, CascadeIdeSettings disk)
+    {
+        var p = disk.Presentation;
+        target.Presentation.Line = p.Line;
+        target.Presentation.LineAlias = p.LineAlias;
+        var g = p.Grammar;
+        target.Presentation.Grammar = new PresentationGrammarSettings
+        {
+            Brackets = g.Brackets,
+            BetweenScreens = g.BetweenScreens,
+            BetweenZones = g.BetweenZones,
+            Pfd = g.Pfd,
+            Forward = g.Forward,
+            Mfd = g.Mfd,
+        };
     }
 
     private static CascadeIdeSettings ValidateAndReturn(CascadeIdeSettings settings)
