@@ -92,6 +92,7 @@
 | Сопряжение агента и Roslyn MCP в `settings.toml`: лимиты, виды узлов, таймауты, пресеты запросов; ортогонально `[semantic_map]` и пресетам навигации [0039](adr/0039-workspace-navigation-affordances.md) | [0058](adr/0058-agent-roslyn-mcp-coupling-settings-toml.md) (Proposed) |
 | Профили Roslyn MCP, Manager: тактика на PFD; EFB / GlobalMap на **MFD** (не PFD); Auto-Focus / Combat / Echelon | [0059](adr/0059-roslyn-mcp-profiles-manager-tactical-strategic-efb.md) (Proposed) |
 | Keyboard-first: аккордный слой (CascadeChord / Ctrl+K), FMS-style S/T, overlay-подсказки, MODE на PFD; палитра Ctrl+Q не заменяется | [0060](adr/0060-keyboard-chord-stack-fms-tactical-strategic.md) (Proposed; расширение [0013](adr/0013-command-surface-and-discoverability.md)) |
+| ADR как слой осведомлённости: карта путь → ADR в `workspace.toml`, индикатор на PFD, краткий intent; агент — advisory при отклонении от привязанного ADR | [0061](adr/0061-context-aware-adr-map-pfd-knowledge-indicator.md) (Proposed; реализация отложена) |
 
 Полный индекс: [docs/adr/README.md](adr/README.md).
 
@@ -208,4 +209,5 @@
 - **v1.89** — [0059](adr/0059-roslyn-mcp-profiles-manager-tactical-strategic-efb.md): режим спокойного ввода переименован **Glide Slope → Echelon** (меньше путаницы с ILS glide path).
 - **v1.90** — [0059](adr/0059-roslyn-mcp-profiles-manager-tactical-strategic-efb.md): **EFB = MFD**, не PFD; гистерезис только для тактического контура (§2); EFB статичен / по намерению.
 - **v1.91** — добавлен [0060](adr/0060-keyboard-chord-stack-fms-tactical-strategic.md): аккордный слой и FMS-style (**S/T**), overlay, индикация MODE; расширение [0013](adr/0013-command-surface-and-discoverability.md); **Ctrl+K** vs палитра **Ctrl+Q**.
+- **v1.92** — добавлен [0061](adr/0061-context-aware-adr-map-pfd-knowledge-indicator.md): контекстная карта ADR ↔ пути в `workspace.toml`, индикатор на PFD, intent/tooltip, advisory агента; статус **Proposed** (реализация отложена).
 - Изменения направления — отдельным коммитом: обновление этого файла и при необходимости новый ADR в [docs/adr/README.md](adr/README.md).
