@@ -94,7 +94,7 @@
 | Keyboard-first: аккордный слой (CascadeChord / Ctrl+K), FMS-style S/T, overlay-подсказки, MODE на PFD; палитра Ctrl+Q не заменяется | [0060](adr/0060-keyboard-chord-stack-fms-tactical-strategic.md) (Proposed; расширение [0013](adr/0013-command-surface-and-discoverability.md)) |
 | ADR как слой осведомлённости: карта путь → ADR в `workspace.toml`, индикатор на PFD, краткий intent; агент — advisory при отклонении от привязанного ADR | [0061](adr/0061-context-aware-adr-map-pfd-knowledge-indicator.md) (Proposed; реализация отложена) |
 | **GitMap** (отдельно от CNC): git submodules / границы репо; не смешивать с `get_code_navigation_context`; переиспользование Skia pipeline; см. [git-and-submodules-v1](git-and-submodules-v1.md) | [0062](adr/0062-git-submodules-semantic-map-subgraph.md) (Proposed) |
-| Именованная композиция в якоре (**instrument deck**); ось формы **`ContentRepresentation`**; таксономия примитивов (в т.ч. Presence/Activity) и **Dark Cockpit**; не смешивать с v1 `[instrument_routing]` | [0063](adr/0063-instrument-deck-named-composition-one-anchor.md) (Proposed) |
+| Именованная композиция в якоре (**instrument deck**); ось формы **`ContentRepresentation`**; таксономия примитивов (в т.ч. Presence/Activity) и **Dark Cockpit**; не смешивать с v1 `[instrument_routing]` | [0063](adr/0063-instrument-deck-named-composition-one-anchor.md) (Accepted) |
 
 Полный индекс: [docs/adr/README.md](adr/README.md).
 
@@ -216,4 +216,5 @@
 - **v1.94** — [0063](adr/0063-instrument-deck-named-composition-one-anchor.md): ось **форма представления** — канон **`ContentRepresentation`** (Strip/Page); `DedicatedPage` у WH — режим Page на этой оси; ось **композиция** — deck / порядок сегментов WH; чертёж [workspace-health-implementation-map-v1](design/workspace-health-implementation-map-v1.md) §1.
 - **v1.95** — [0063](adr/0063-instrument-deck-named-composition-one-anchor.md): направление **типы индикаторов** в deck — **Lamp / Bar / Sign** (компактные страницы; не контракт кода v1).
 - **v1.96** — [0063](adr/0063-instrument-deck-named-composition-one-anchor.md): расширенная таксономия примитивов; **Presence/Activity** и согласование с **Dark Cockpit** ([0021](adr/0021-pfd-mfd-cockpit-attention-model.md) §6).
+- **v1.97** — [0063](adr/0063-instrument-deck-named-composition-one-anchor.md): статус **Accepted** (терминология **instrument deck** / **`ContentRepresentation`**; ключи топологии дисплеев — [0017](adr/0017-multi-window-workspace-and-agent-surfaces.md) § `display.screens` / `topology`).
 - Изменения направления — отдельным коммитом: обновление этого файла и при необходимости новый ADR в [docs/adr/README.md](adr/README.md).
