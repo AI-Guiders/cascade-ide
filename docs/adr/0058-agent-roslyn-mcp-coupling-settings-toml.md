@@ -53,7 +53,7 @@
 
 ### 3. Размещение в TOML
 
-Целевая секция, например **`[agent.roslyn_mcp]`**, отдельно от `[semantic_map]` и от `[[workspace_navigation.presets]]` без явного маппинга. Точные ключи — после прототипа; здесь зафиксированы **оси**.
+Целевая секция, например **`[agent.roslyn_mcp]`**, отдельно от `[semantic_map]` и от **`[[workspace_navigation_context.presets]]`** ([0039](0039-workspace-navigation-affordances.md)) без явного маппинга. Точные ключи — после прототипа; здесь зафиксированы **оси**.
 
 <a id="adr0058-p4"></a>
 
