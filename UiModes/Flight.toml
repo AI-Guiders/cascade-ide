@@ -1,17 +1,21 @@
 # Единственный продуктовый UI-режим: полигон раскладки (PFD/MFD, мультиоконность).
 # Гипотезы — отдельная страница вторичного контура (MFD), не отдельный «режим Debug».
-family = "Flight"
 
-solution_explorer_visible = true
+[meta]
+family = "Flight"
+main_window_title = "CascadeIDE — Flight (layout lab)"
+theme_slot = "CursorLike"
+
+[layout]
+pfd_region_expanded = true
 build_output_visible = true
 terminal_visible = true
-chat_panel_expanded = true
+mfd_region_expanded = true
 editor_group_count = 2
-theme_slot = "CursorLike"
 select_terminal_tab_when_terminal_shown = false
-
 active_task_strip = true
 
+[capabilities]
 quick_actions = true
 agent_operations_panel = true
 agent_trace = false
@@ -25,5 +29,3 @@ result_summary_card = true
 
 # Удобно отлаживать раскладку: Workspace Health отдельной страницей в MFD.
 workspace_health_surface = "dedicated_page"
-
-main_window_title = "CascadeIDE — Flight (layout lab)"

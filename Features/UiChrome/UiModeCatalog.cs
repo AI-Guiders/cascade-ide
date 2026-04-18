@@ -163,7 +163,7 @@ public static class UiModeCatalog
     }
 
     /// <summary>
-    /// Накладывает <c>.cascade/workspace.toml</c> из корня открытого решения на метрики и <c>attention_routing</c> бандла.
+    /// Накладывает <c>.cascade/workspace.toml</c> из корня открытого решения на метрики и <c>routing</c> бандла.
     /// Вызывать с UI-потока при смене <see cref="SolutionWorkspaceViewModel.SolutionPath"/>; при пустом пути — только бандл.
     /// </summary>
     public static void ApplyRepositoryWorkspaceOverlay(string? solutionDirectory)
@@ -195,7 +195,7 @@ public static class UiModeCatalog
             UiWorkspaceLayoutRuntimeMetrics.ApplyWorkspaceToml(merged);
             AttentionZonePanelRuntime.ApplyWorkspaceToml(merged);
             MarkdownPreviewPlacementRuntime.ApplyWorkspaceToml(merged);
-            InstrumentPlacementRuntime.ApplyWorkspaceInstrumentRouting(merged?.InstrumentRouting);
+            InstrumentPlacementRuntime.ApplyWorkspaceInstrumentRouting(merged?.Routing?.Instruments);
         }
     }
 
@@ -254,7 +254,7 @@ public static class UiModeCatalog
             return;
         }
 
-        if (index is null || index.SchemaVersion < 1 || index.Modes is null || index.Modes.Count == 0)
+        if (index?.Bundle is null || index.Bundle.SchemaVersion < 1 || index.Bundle.Modes is null || index.Bundle.Modes.Count == 0)
         {
             global::System.Diagnostics.Debug.WriteLine("UiModeCatalog: index invalid or empty modes");
             ApplyBuiltinOnly();
@@ -270,7 +270,7 @@ public static class UiModeCatalog
                 UiWorkspaceLayoutRuntimeMetrics.ApplyWorkspaceToml(w);
                 AttentionZonePanelRuntime.ApplyWorkspaceToml(w);
                 MarkdownPreviewPlacementRuntime.ApplyWorkspaceToml(w);
-                InstrumentPlacementRuntime.ApplyWorkspaceInstrumentRouting(w?.InstrumentRouting);
+                InstrumentPlacementRuntime.ApplyWorkspaceInstrumentRouting(w?.Routing?.Instruments);
             }
             catch (Exception ex)
             {
@@ -278,7 +278,7 @@ public static class UiModeCatalog
             }
         }
 
-        _orderedModeIds = index.Modes
+        _orderedModeIds = index.Bundle.Modes
             .Select(m => m.Trim())
             .Where(m => m.Length > 0)
             .ToList();
@@ -378,8 +378,8 @@ public static class UiModeCatalog
         }
 
         if (editorFile is null
-            || string.IsNullOrWhiteSpace(editorFile.Inherits)
-            || !string.Equals(editorFile.Inherits.Trim(), "Flight", StringComparison.OrdinalIgnoreCase))
+            || string.IsNullOrWhiteSpace(editorFile.Meta?.Inherits)
+            || !string.Equals(editorFile.Meta.Inherits.Trim(), "Flight", StringComparison.OrdinalIgnoreCase))
             return false;
 
         var flightCaps = ResolveCapabilities(flightFile, null, null, UiModeFamily.Flight);
@@ -428,7 +428,7 @@ public static class UiModeCatalog
                 }
             }
 
-            var inherits = string.IsNullOrWhiteSpace(file?.Inherits) ? null : file!.Inherits!.Trim();
+            var inherits = string.IsNullOrWhiteSpace(file?.Meta?.Inherits) ? null : file!.Meta!.Inherits!.Trim();
 
             ResolvedMode? parentResolved = null;
             UiModeLayoutSpec baseSpec;
@@ -469,7 +469,7 @@ public static class UiModeCatalog
         UiModeLayoutSpec merged)
     {
         _ = merged;
-        if (file?.MfdRegionExpandedWidthPixels is { } w && w >= 0)
+        if (file?.Layout?.MfdRegionExpandedWidthPixels is { } w && w >= 0)
             return w;
 
         if (inherits is not null && parentResolved is not null)
@@ -484,7 +484,7 @@ public static class UiModeCatalog
         ResolvedMode? parentResolved,
         UiModeFamily family)
     {
-        if (file?.ActiveTaskStrip is { } st)
+        if (file?.Layout?.ActiveTaskStrip is { } st)
             return st;
 
         if (inherits is not null && parentResolved is not null)
@@ -520,33 +520,34 @@ public static class UiModeCatalog
 
         var modeFile = file!;
 
+        var cap = modeFile.Capabilities;
         var span = baseCaps.WorkspaceHealthMainColumnSpan;
-        if (modeFile.WorkspaceHealthMainColumnSpan is { } s && s >= 1 && s <= 12)
+        if (cap?.WorkspaceHealthMainColumnSpan is { } s && s >= 1 && s <= 12)
             span = s;
 
-        var surface = ResolveWorkspaceHealthSurface(modeFile.WorkspaceHealthSurface, baseCaps.WorkspaceHealthSurface);
+        var surface = ResolveWorkspaceHealthSurface(cap?.WorkspaceHealthSurface, baseCaps.WorkspaceHealthSurface);
 
         return new UiModeCapabilities(
-            QuickActions: modeFile.QuickActions ?? baseCaps.QuickActions,
-            AgentOperationsPanel: modeFile.AgentOperationsPanel ?? baseCaps.AgentOperationsPanel,
-            AgentTrace: modeFile.AgentTrace ?? baseCaps.AgentTrace,
-            AutonomousAgentTelemetry: modeFile.AutonomousAgentTelemetry ?? baseCaps.AutonomousAgentTelemetry,
-            WorkspaceHealthOnTerminalTab: modeFile.WorkspaceHealthOnTerminalTab
+            QuickActions: cap?.QuickActions ?? baseCaps.QuickActions,
+            AgentOperationsPanel: cap?.AgentOperationsPanel ?? baseCaps.AgentOperationsPanel,
+            AgentTrace: cap?.AgentTrace ?? baseCaps.AgentTrace,
+            AutonomousAgentTelemetry: cap?.AutonomousAgentTelemetry ?? baseCaps.AutonomousAgentTelemetry,
+            WorkspaceHealthOnTerminalTab: cap?.WorkspaceHealthOnTerminalTab
                 ?? baseCaps.WorkspaceHealthOnTerminalTab,
             WorkspaceHealthMainColumnSpan: span,
-            InstrumentationTabs: modeFile.InstrumentationTabs ?? baseCaps.InstrumentationTabs,
-            HypothesesTab: modeFile.HypothesesTab ?? baseCaps.HypothesesTab,
-            RiskSummaryCard: modeFile.RiskSummaryCard ?? baseCaps.RiskSummaryCard,
-            ResultSummaryCard: modeFile.ResultSummaryCard ?? baseCaps.ResultSummaryCard,
-            WorkspaceHealthStripVisible: modeFile.WorkspaceHealthStrip ?? baseCaps.WorkspaceHealthStripVisible,
+            InstrumentationTabs: cap?.InstrumentationTabs ?? baseCaps.InstrumentationTabs,
+            HypothesesTab: cap?.HypothesesTab ?? baseCaps.HypothesesTab,
+            RiskSummaryCard: cap?.RiskSummaryCard ?? baseCaps.RiskSummaryCard,
+            ResultSummaryCard: cap?.ResultSummaryCard ?? baseCaps.ResultSummaryCard,
+            WorkspaceHealthStripVisible: cap?.WorkspaceHealthStrip ?? baseCaps.WorkspaceHealthStripVisible,
             WorkspaceHealthSurface: surface,
-            ProblemsPanelVisible: modeFile.ProblemsPanel ?? baseCaps.ProblemsPanelVisible,
-            EicasAlertsBarEnabled: modeFile.EicasAlertsBar ?? baseCaps.EicasAlertsBarEnabled);
+            ProblemsPanelVisible: cap?.ProblemsPanel ?? baseCaps.ProblemsPanelVisible,
+            EicasAlertsBarEnabled: cap?.EicasAlertsBar ?? baseCaps.EicasAlertsBarEnabled);
     }
 
     private static string? ResolveWindowTitle(UiModeFileToml? file, string? inherits, ResolvedMode? parentResolved)
     {
-        var title = file?.MainWindowTitle;
+        var title = file?.Meta?.MainWindowTitle;
         if (!string.IsNullOrWhiteSpace(title))
             return title.Trim();
 
@@ -562,7 +563,7 @@ public static class UiModeCatalog
         string? inherits,
         ResolvedMode? parentResolved)
     {
-        if (TryParseFamily(file?.Family) is { } explicitFamily)
+        if (TryParseFamily(file?.Meta?.Family) is { } explicitFamily)
             return explicitFamily;
 
         if (inherits is not null && parentResolved is not null)
@@ -577,15 +578,15 @@ public static class UiModeCatalog
             return baseSpec;
 
         return new UiModeLayoutSpec(
-            PfdRegionExpanded: o.PfdRegionExpanded ?? baseSpec.PfdRegionExpanded,
-            BuildOutputVisible: o.BuildOutputVisible ?? baseSpec.BuildOutputVisible,
-            TerminalVisible: o.TerminalVisible ?? baseSpec.TerminalVisible,
-            MfdRegionExpanded: o.MfdRegionExpanded ?? baseSpec.MfdRegionExpanded,
-            EditorGroupCount: o.EditorGroupCount ?? baseSpec.EditorGroupCount,
-            ThemeSlot: ParseThemeSlot(o.ThemeSlot) ?? baseSpec.ThemeSlot,
-            SelectTerminalTabWhenTerminalShown: o.SelectTerminalTabWhenTerminalShown
+            PfdRegionExpanded: o.Layout?.PfdRegionExpanded ?? baseSpec.PfdRegionExpanded,
+            BuildOutputVisible: o.Layout?.BuildOutputVisible ?? baseSpec.BuildOutputVisible,
+            TerminalVisible: o.Layout?.TerminalVisible ?? baseSpec.TerminalVisible,
+            MfdRegionExpanded: o.Layout?.MfdRegionExpanded ?? baseSpec.MfdRegionExpanded,
+            EditorGroupCount: o.Layout?.EditorGroupCount ?? baseSpec.EditorGroupCount,
+            ThemeSlot: ParseThemeSlot(o.Meta?.ThemeSlot) ?? baseSpec.ThemeSlot,
+            SelectTerminalTabWhenTerminalShown: o.Layout?.SelectTerminalTabWhenTerminalShown
                 ?? baseSpec.SelectTerminalTabWhenTerminalShown,
-            InstrumentationDockVisible: o.InstrumentationDockVisible ?? baseSpec.InstrumentationDockVisible);
+            InstrumentationDockVisible: o.Layout?.InstrumentationDockVisible ?? baseSpec.InstrumentationDockVisible);
     }
 
     private static UiModeThemeSlot? ParseThemeSlot(string? s)

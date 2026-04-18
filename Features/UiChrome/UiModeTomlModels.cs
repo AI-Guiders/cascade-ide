@@ -2,16 +2,20 @@ using CascadeIDE.Models;
 
 namespace CascadeIDE.Features.UiChrome;
 
-/// <summary>Корень <c>UiModes/index.toml</c> (schema_version только здесь).</summary>
+/// <summary>Корень <c>UiModes/index.toml</c>: <c>[bundle]</c> со списком режимов.</summary>
 public sealed class UiModesIndexToml
+{
+    public UiModesBundleToml? Bundle { get; set; }
+}
+
+/// <summary>TOML: <c>[bundle]</c>.</summary>
+public sealed class UiModesBundleToml
 {
     public int SchemaVersion { get; set; }
     public List<string> Modes { get; set; } = [];
 }
 
-/// <summary>
-/// Секция <c>[workspace_chrome]</c> в <c>workspace.toml</c>: глобальные метрики хрома и размещение Markdown-превью (ADR 0010).
-/// </summary>
+/// <summary>Секция <c>[chrome]</c> в <c>workspace.toml</c> (ADR 0010).</summary>
 public sealed class UiWorkspaceChromeToml
 {
     public int? PfdRegionDefaultWidthPixels { get; set; }
@@ -30,85 +34,66 @@ public sealed class UiWorkspaceChromeToml
 }
 
 /// <summary>
-/// Корень <c>UiModes/workspace.toml</c> и тот же формат для репо-файла <c>.cascade/workspace.toml</c> (без собственного schema_version).
-/// Секция <see cref="WorkspaceNavigationContext"/> — опционально в репозитории (ADR 0039): командные пресеты навигации.
+/// Корень <c>UiModes/workspace.toml</c> и <c>.cascade/workspace.toml</c>.
+/// TOML: <c>[chrome]</c>, <c>[routing.attention]</c>, <c>[routing.instruments]</c>, <c>[[workspace_navigation.presets]]</c>.
 /// </summary>
 public sealed class UiWorkspaceToml
 {
-    /// <summary>Метрики хрома и превью Markdown; TOML: <c>[workspace_chrome]</c>.</summary>
-    public UiWorkspaceChromeToml? WorkspaceChrome { get; set; }
+    /// <summary>Метрики хрома и превью Markdown.</summary>
+    public UiWorkspaceChromeToml? Chrome { get; set; }
 
-    /// <summary>
-    /// Маршрутизация интентов внимания (например <c>solution_explorer</c>, <c>chat</c>, <c>terminal</c>) к зоне внимания
-    /// (канонический id: <c>pfd</c>/<c>mfd</c>/<c>forward</c> и т.д.).
-    /// TOML: <c>[attention_routing]</c> (ADR 0021, ADR 0051).
-    /// </summary>
-    public Dictionary<string, string>? AttentionRouting { get; set; }
+    public UiWorkspaceRoutingToml? Routing { get; set; }
 
-    /// <summary>
-    /// Репозиторный/бандловый слой: основные слоты PFD/MFD без <c>surface_id</c> в TOML.
-    /// TOML: <c>[instrument_routing]</c> (ADR 0050); значения — alias (<c>solution_explorer</c> и т.д.) или канонический <c>instrument_id</c>.
-    /// </summary>
-    public Dictionary<string, string>? InstrumentRouting { get; set; }
-
-    /// <summary>
-    /// Пресеты навигации для репозитория (тот же контракт, что <c>[workspace_navigation_context]</c> в <c>settings.toml</c>).
-    /// TOML: <c>[[workspace_navigation_context.presets]]</c>.
-    /// </summary>
-    public WorkspaceNavigationContextSettings? WorkspaceNavigationContext { get; set; }
+    /// <summary>Пресеты навигации (ADR 0039).</summary>
+    public NavigationSettings? WorkspaceNavigation { get; set; }
 }
 
-/// <summary>
-/// Один режим: <c>UiModes/&lt;Id&gt;.toml</c>.
-/// Имена свойств в PascalCase; <see cref="Services.CascadeTomlSerializer"/> маппит ключи snake_case (как в <c>workspace.toml</c>).
-/// Ключи по смыслу интерфейса, не именам полей VM.
-/// </summary>
-public sealed class UiModeFileToml
+/// <summary>TOML: <c>[meta]</c> — наследование, семья, заголовок, тема.</summary>
+public sealed class UiModeMetaToml
 {
     public string? Inherits { get; set; }
     public string? Family { get; set; }
+    public string? MainWindowTitle { get; set; }
+    public string? ThemeSlot { get; set; }
+}
+
+/// <summary>TOML: <c>[layout]</c> — видимость панелей и раскладка.</summary>
+public sealed class UiModeLayoutToml
+{
     public bool? PfdRegionExpanded { get; set; }
     public bool? BuildOutputVisible { get; set; }
     public bool? TerminalVisible { get; set; }
     public bool? MfdRegionExpanded { get; set; }
     public int? EditorGroupCount { get; set; }
-    public string? ThemeSlot { get; set; }
     public bool? SelectTerminalTabWhenTerminalShown { get; set; }
     public int? MfdRegionExpandedWidthPixels { get; set; }
-
-    /// <summary>Нижний док с вкладками событий/тестов и т.д.; TOML: <c>instrumentation_dock_visible</c>.</summary>
     public bool? InstrumentationDockVisible { get; set; }
-
-    /// <summary>Полоса активной задачи под тулбаром; TOML: <c>active_task_strip</c>.</summary>
     public bool? ActiveTaskStrip { get; set; }
+}
 
-    /// <summary>Заголовок главного окна; TOML: <c>main_window_title</c>.</summary>
-    public string? MainWindowTitle { get; set; }
-
-    // --- capabilities (ADR 0010)
-
+/// <summary>TOML: <c>[capabilities]</c> (ADR 0010).</summary>
+public sealed class UiModeCapabilitiesToml
+{
     public bool? QuickActions { get; set; }
     public bool? AgentOperationsPanel { get; set; }
     public bool? AgentTrace { get; set; }
     public bool? AutonomousAgentTelemetry { get; set; }
-    /// <summary>Дубль Workspace Health на вкладке «Терминал» в Power; TOML: <c>workspace_health_on_terminal_tab</c>.</summary>
     public bool? WorkspaceHealthOnTerminalTab { get; set; }
-    /// <summary>Column span нижней зоны Workspace Health в основной сетке (Power); TOML: <c>workspace_health_main_column_span</c>.</summary>
     public int? WorkspaceHealthMainColumnSpan { get; set; }
     public bool? InstrumentationTabs { get; set; }
     public bool? HypothesesTab { get; set; }
     public bool? RiskSummaryCard { get; set; }
     public bool? ResultSummaryCard { get; set; }
-
-    /// <summary>Полоса Workspace Health под редактором; TOML: <c>workspace_health_strip</c>.</summary>
     public bool? WorkspaceHealthStrip { get; set; }
-
-    /// <summary><c>bottom_strip</c> | <c>dedicated_page</c>; TOML: <c>workspace_health_surface</c>.</summary>
     public string? WorkspaceHealthSurface { get; set; }
-
-    /// <summary>Вкладка Problems в нижнем доке; TOML: <c>problems_panel</c>.</summary>
     public bool? ProblemsPanel { get; set; }
-
-    /// <summary>Включить полосу оповещений EICAS (W/C/A); TOML: <c>eicas_alerts_bar</c>. См. ADR 0021 §5, §1.1.</summary>
     public bool? EicasAlertsBar { get; set; }
+}
+
+/// <summary>Один режим: <c>UiModes/&lt;Id&gt;.toml</c> — <c>[meta]</c>, <c>[layout]</c>, <c>[capabilities]</c>.</summary>
+public sealed class UiModeFileToml
+{
+    public UiModeMetaToml? Meta { get; set; }
+    public UiModeLayoutToml? Layout { get; set; }
+    public UiModeCapabilitiesToml? Capabilities { get; set; }
 }

@@ -1,7 +1,7 @@
 namespace CascadeIDE.Features.UiChrome;
 
 /// <summary>
-/// Публичные intent-id для секции <c>[attention_routing]</c> в workspace TOML.
+/// Публичные intent-id для карты <c>routing.attention</c> в workspace TOML.
 /// </summary>
 public static class AttentionRoutingIntentIds
 {

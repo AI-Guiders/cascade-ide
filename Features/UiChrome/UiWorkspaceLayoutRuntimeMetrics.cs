@@ -42,7 +42,7 @@ public static class UiWorkspaceLayoutRuntimeMetrics
         ResetToCodeDefaults();
         if (w is null)
             return;
-        var c = w.WorkspaceChrome;
+        var c = w.Chrome;
         if (c is null)
             return;
         if (c.PfdRegionDefaultWidthPixels is { } se)

@@ -3,7 +3,7 @@ using System.Collections.Immutable;
 namespace CascadeIDE.Features.UiChrome;
 
 /// <summary>
-/// Карта «поверхность → зона внимания», загружаемая из <c>UiModes/workspace.toml</c> (секция <c>attention_routing</c>, ADR 0021/0051).
+/// Карта «поверхность → зона внимания», загружаемая из <c>UiModes/workspace.toml</c> (<c>[routing.attention]</c>, ADR 0021/0051).
 /// Дефолты совпадают с семантикой ADR; TOML накладывает переопределения.
 /// </summary>
 public static class AttentionZonePanelRuntime
@@ -39,7 +39,7 @@ public static class AttentionZonePanelRuntime
     internal static void ApplyWorkspaceToml(UiWorkspaceToml? w)
     {
         var map = BuildDefaultMap();
-        if (w?.AttentionRouting is { Count: > 0 } overrides)
+        if (w?.Routing?.Attention is { Count: > 0 } overrides)
         {
             var b = map.ToBuilder();
             foreach (var kv in overrides)

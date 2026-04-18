@@ -1,24 +1,17 @@
-# Глобальные метрики хрома и превью Markdown (без отдельного schema_version — см. index.toml).
-[workspace_chrome]
-solution_explorer_default_width_pixels = 220
+# Глобальные метрики хрома и превью Markdown (schema_version — в index.toml [bundle]).
+[chrome]
+pfd_region_default_width_pixels = 220
 main_grid_column_splitter_width_pixels = 4
 bottom_panel_min_row_pixels = 80
-chat_panel_collapsed_width_pixels = 0
-chat_panel_expanded_default_width_pixels = 340
-chat_panel_expanded_power_width_pixels = 420
-chat_panel_expanded_agent_chat_width_pixels = 520
+mfd_region_collapsed_width_pixels = 0
+mfd_region_expanded_default_width_pixels = 340
+mfd_region_expanded_power_width_pixels = 420
+mfd_region_expanded_agent_chat_width_pixels = 520
 # forward_split | mfd | separate_window (или window)
 markdown_preview_placement = "forward_split"
 
-# ADR 0021/0051: маршрутизация интентов внимания к зоне (канонические id: forward, pfd, mfd, eicas, hud).
-# Источник истины: bundle `UiModes/workspace.toml` + репо `.cascade/workspace.toml`; в сессии не меняется.
-[attention_routing]
-solution_explorer = "pfd"
-chat = "mfd"
-git = "mfd"
-terminal = "mfd"
-editor = "forward"
-
-# ADR 0050: какой инструмент в основных слотах (alias — без сырых instrument_id в TOML).
-[instrument_routing]
-pfd_primary = "solution_explorer"
+# ADR 0021/0051 + ADR 0050: одна таблица [routing] — иначе Tomlyn при двух [routing.*] перезаписывает вложенный объект.
+# Канонические intent-id: forward, pfd, mfd, eicas, hud; слоты — alias без сырых instrument_id.
+[routing]
+attention = { solution_explorer = "pfd", chat = "mfd", git = "mfd", terminal = "mfd", editor = "forward" }
+instruments = { pfd_primary = "solution_explorer" }

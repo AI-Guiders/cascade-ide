@@ -17,7 +17,7 @@ public static class MarkdownPreviewPlacementRuntime
         ResetToCodeDefaults();
         if (w is null)
             return;
-        var placement = w.WorkspaceChrome?.MarkdownPreviewPlacement;
+        var placement = w.Chrome?.MarkdownPreviewPlacement;
         if (!string.IsNullOrWhiteSpace(placement))
             Current = MarkdownPreviewPlacementParser.ParseOrDefault(placement, DefaultPlacement);
     }
