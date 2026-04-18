@@ -1,6 +1,5 @@
 using System.Text.Json.Serialization;
 using OutWit.Common.Abstract;
-using OutWit.Common.Values;
 
 namespace CascadeIDE.Models;
 
@@ -109,9 +108,34 @@ public sealed partial class CascadeIdeSettings : ModelBase
 
     public string GetEffectivePresentationLine()
     {
+        var fromScreens = Display.Screens.Topology?.Trim() ?? "";
+        if (fromScreens.Length > 0)
+            return fromScreens;
         var a = Presentation.Line?.Trim() ?? "";
         if (a.Length > 0)
             return a;
         return Presentation.LineAlias?.Trim() ?? "";
+    }
+
+    /// <summary>
+    /// Грамматика для <see cref="GetEffectivePresentationLine"/>: при непустом <c>display.screens.topology</c> — из
+    /// <see cref="DisplayScreensSettings.Grammar"/>; иначе из <see cref="PresentationLayoutSettings.Grammar"/>.
+    /// </summary>
+    public PresentationGrammarSettings GetEffectivePresentationGrammar()
+    {
+        static PresentationGrammarSettings Copy(PresentationGrammarSettings g) => new()
+        {
+            Brackets = g.Brackets,
+            BetweenScreens = g.BetweenScreens,
+            BetweenZones = g.BetweenZones,
+            Pfd = g.Pfd,
+            Forward = g.Forward,
+            Mfd = g.Mfd,
+        };
+
+        var topology = Display.Screens.Topology?.Trim() ?? "";
+        if (topology.Length > 0)
+            return Copy(Display.Screens.Grammar);
+        return Copy(Presentation.Grammar);
     }
 }

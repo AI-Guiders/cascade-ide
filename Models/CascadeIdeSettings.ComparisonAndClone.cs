@@ -131,6 +131,19 @@ public sealed partial class CascadeIdeSettings
                         })
                         .ToList(),
                 },
+                Screens = new DisplayScreensSettings
+                {
+                    Topology = Display.Screens.Topology,
+                    Grammar = new PresentationGrammarSettings
+                    {
+                        Brackets = Display.Screens.Grammar.Brackets,
+                        BetweenScreens = Display.Screens.Grammar.BetweenScreens,
+                        BetweenZones = Display.Screens.Grammar.BetweenZones,
+                        Pfd = Display.Screens.Grammar.Pfd,
+                        Forward = Display.Screens.Grammar.Forward,
+                        Mfd = Display.Screens.Grammar.Mfd,
+                    },
+                },
             },
             Presentation = new PresentationLayoutSettings
             {
@@ -259,7 +272,17 @@ public sealed partial class CascadeIdeSettings
             && a.Mount.MaxWorkload.Equals(b.Mount.MaxWorkload)
             && a.Mount.RequireScores == b.Mount.RequireScores
             && InstrumentMountPolicyRulesEqual(a.Mount.Rules, b.Mount.Rules)
-            && StringDictionaryEqualOrdinalIgnoreCase(a.Instruments, b.Instruments);
+            && StringDictionaryEqualOrdinalIgnoreCase(a.Instruments, b.Instruments)
+            && DisplayScreensEquals(a.Screens, b.Screens);
+    }
+
+    private static bool DisplayScreensEquals(DisplayScreensSettings? a, DisplayScreensSettings? b)
+    {
+        if (a is null || b is null)
+            return a == b;
+        if (!a.Topology.Is(b.Topology))
+            return false;
+        return PresentationGrammarEquals(a.Grammar, b.Grammar);
     }
 
     private static bool PresentationLayoutEquals(PresentationLayoutSettings? a, PresentationLayoutSettings? b)

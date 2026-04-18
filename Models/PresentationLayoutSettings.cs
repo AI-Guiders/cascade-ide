@@ -2,7 +2,7 @@ namespace CascadeIDE.Models;
 
 /// <summary>
 /// Строка топологии дисплеев и токены грамматики (ADR 0017).
-/// TOML: <c>[presentation]</c>, <c>[presentation.grammar]</c>.
+/// TOML: <c>[presentation]</c>, <c>[presentation.grammar]</c> (legacy; канон топологии — <c>[display.screens]</c> в <see cref="DisplayScreensSettings"/>).
 /// </summary>
 public sealed class PresentationLayoutSettings
 {

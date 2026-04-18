@@ -14,6 +14,17 @@ pfd = "P"
 forward = "F"
 mfd = "M"
 
+# Канон топологии экранов (ADR 0017 § display.screens): при непустом topology строка выше из [presentation] не используется.
+# [display.screens]
+# topology = "(0.25P + 0.75F) (M)"
+# [display.screens.grammar]
+# brackets = "()"
+# between_screens = " "
+# between_zones = "+"
+# pfd = "P"
+# forward = "F"
+# mfd = "M"
+
 [display]
 maximize_hosts_on_dedicated_screens = true
 prefer_repo_instruments = false

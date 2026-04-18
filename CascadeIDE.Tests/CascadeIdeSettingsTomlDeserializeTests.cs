@@ -58,6 +58,32 @@ public sealed class CascadeIdeSettingsTomlDeserializeTests
     }
 
     [Fact]
+    public void Deserialize_DisplayScreensTopology_TakesPriorityOverPresentationLine()
+    {
+        const string text =
+            """
+            [presentation]
+            line = "(legacy)"
+
+            [display.screens]
+            topology = "(P)(F)(M)"
+
+            [display.screens.grammar]
+            pfd = "P"
+            forward = "F"
+            mfd = "M"
+            """;
+
+        var s = Deserialize(text);
+        Assert.Equal("(P)(F)(M)", s.GetEffectivePresentationLine());
+        Assert.Equal("legacy", s.Presentation.Line);
+        var g = s.GetEffectivePresentationGrammar();
+        Assert.Equal("P", g.Pfd);
+        Assert.Equal("F", g.Forward);
+        Assert.Equal("M", g.Mfd);
+    }
+
+    [Fact]
     public void Deserialize_SemanticMapSection_ParsesViewAndDepth()
     {
         const string text =

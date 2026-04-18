@@ -20,4 +20,7 @@ public sealed class DisplaySettings
     public DisplaySkiaSettings Skia { get; set; } = new();
 
     public DisplayMountSettings Mount { get; set; } = new();
+
+    /// <summary>Топология пресета по экранам (ADR 0017). TOML: <c>[display.screens]</c>.</summary>
+    public DisplayScreensSettings Screens { get; set; } = new();
 }

@@ -78,4 +78,15 @@ min_performance = 0.6
 max_workload = 0.5
 require_scores = false
 
+# Канон (ADR 0017): [display.screens].topology при непустом значении заменяет [presentation].line для разбора.
+# [display.screens]
+# topology = "(0.55P+0.45F)(M)"
+# [display.screens.grammar]
+# brackets = "()"
+# between_screens = " "
+# between_zones = "+"
+# pfd = "P"
+# forward = "F"
+# mfd = "M"
+
 [code_navigation]
