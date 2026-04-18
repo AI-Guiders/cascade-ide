@@ -100,13 +100,14 @@ public sealed class SemanticMapMiniMapControl : Control
             {
                 var basePen = isHighlighted ? VisualTheme.HighlightedEdgePen : VisualTheme.BaseEdgePen;
                 var loopPen = isHighlighted ? VisualTheme.HighlightedLoopEdgePen : VisualTheme.LoopEdgePen;
-                DrawLoopEdge(context, edge, basePen, loopPen);
+                DrawLoopEdge(context, scene, edge, basePen, loopPen);
                 previousWasLoop = true;
                 continue;
             }
 
             var edgeStyle = ResolveEdgePen(edge.Kind, isHighlighted);
-            context.DrawLine(edgeStyle, edge.From, edge.To);
+            var fromR = GetNodeRadius(scene, edge.FromNodeId, fallback: 12);
+            DrawCubicEdge(context, edgeStyle, edge.From, fromR, edge.To, edge.ToRadius);
             previousWasLoop = isLoop;
         }
     }
@@ -181,7 +182,12 @@ public sealed class SemanticMapMiniMapControl : Control
         !string.IsNullOrWhiteSpace(kind)
         && kind.Contains("multibranch", StringComparison.OrdinalIgnoreCase);
 
-    private static void DrawLoopEdge(DrawingContext context, SemanticMapGraphEdgeLayout edge, Pen linePen, Pen loopPen)
+    private static void DrawLoopEdge(
+        DrawingContext context,
+        SemanticMapGraphSceneVm scene,
+        SemanticMapGraphEdgeLayout edge,
+        Pen linePen,
+        Pen loopPen)
     {
         var vx = edge.To.X - edge.From.X;
         var vy = edge.To.Y - edge.From.Y;
@@ -197,10 +203,71 @@ public sealed class SemanticMapMiniMapControl : Control
         var entry = new Point(
             edge.To.X - nx * (edge.ToRadius + 10),
             edge.To.Y - ny * (edge.ToRadius + 10));
-        context.DrawLine(linePen, edge.From, entry);
+        var fromR = GetNodeRadius(scene, edge.FromNodeId, fallback: 12);
+        DrawCubicEdge(context, linePen, edge.From, fromR, entry, toRadius: null);
 
         var loopRadius = edge.ToRadius + 11;
         context.DrawEllipse(null, loopPen, edge.To, loopRadius, loopRadius);
+    }
+
+    /// <summary>Радиус узла-источника для обрезки (edge не хранит FromRadius).</summary>
+    private static double GetNodeRadius(SemanticMapGraphSceneVm scene, string nodeId, double fallback)
+    {
+        foreach (var n in scene.Nodes)
+        {
+            if (string.Equals(n.Id, nodeId, StringComparison.OrdinalIgnoreCase))
+                return n.Radius;
+        }
+
+        return fallback;
+    }
+
+    /// <summary>Кубическая Безье между узлами: обрезка по окружностям, лёгкий изгиб (не ломаная линия через центры).</summary>
+    private static void DrawCubicEdge(
+        DrawingContext context,
+        Pen pen,
+        Point fromCenter,
+        double fromRadius,
+        Point to,
+        double? toRadius)
+    {
+        var dx = to.X - fromCenter.X;
+        var dy = to.Y - fromCenter.Y;
+        var len = Math.Sqrt(dx * dx + dy * dy);
+        if (len < 1e-6)
+            return;
+        var ux = dx / len;
+        var uy = dy / len;
+        var start = new Point(fromCenter.X + ux * fromRadius, fromCenter.Y + uy * fromRadius);
+        Point end = toRadius is { } tr
+            ? new Point(to.X - ux * tr, to.Y - uy * tr)
+            : to;
+
+        var ex = end.X - start.X;
+        var ey = end.Y - start.Y;
+        var elen = Math.Sqrt(ex * ex + ey * ey);
+        if (elen < 1e-6)
+            return;
+        if (elen < 6)
+        {
+            context.DrawLine(pen, start, end);
+            return;
+        }
+
+        var bend = Math.Min(42, elen * 0.2);
+        var px = -ey / elen;
+        var py = ex / elen;
+        var c1 = new Point(start.X + ex / 3 + px * bend, start.Y + ey / 3 + py * bend);
+        var c2 = new Point(end.X - ex / 3 + px * bend, end.Y - ey / 3 + py * bend);
+
+        var geometry = new StreamGeometry();
+        using (var ig = geometry.Open())
+        {
+            ig.BeginFigure(start, false);
+            ig.CubicBezierTo(c1, c2, end);
+        }
+
+        context.DrawGeometry(null, pen, geometry);
     }
 
     private static string BuildNodeGlyph(SemanticMapGraphNodeLayout node)
