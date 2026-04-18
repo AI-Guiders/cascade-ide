@@ -36,5 +36,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>TestData\AgentContract\cockpit_surface_contract_slice.approved.json</Link>
     </None>
+    <None Include="TestData\Visual\*.approved.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>TestData\Visual\%(Filename)%(Extension)</Link>
+    </None>
   </ItemGroup>
 </Project>

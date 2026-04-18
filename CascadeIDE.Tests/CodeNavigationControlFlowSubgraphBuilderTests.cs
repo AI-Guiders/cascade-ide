@@ -1,10 +1,11 @@
 using System.Text.Json;
+using CascadeIDE.Services.CodeNavigation;
 using CascadeIDE.Services.Navigation;
 using Xunit;
 
 namespace CascadeIDE.Tests;
 
-public sealed class WorkspaceNavigationControlFlowSubgraphBuilderTests
+public sealed class CodeNavigationControlFlowSubgraphBuilderTests
 {
     [Fact]
     public void BuildJson_EmitsLoopAndMultiBranchEdgeKinds()
@@ -40,7 +41,7 @@ class Demo {
 }
 """;
 
-        var json = WorkspaceNavigationControlFlowSubgraphBuilder.BuildJson(
+        var json = CodeNavigationControlFlowSubgraphBuilder.BuildJson(
             filePath: @"D:\w\Demo.cs",
             sourceText: source,
             line: 5,
@@ -72,7 +73,7 @@ class Demo {
 }
 """;
 
-        var json = WorkspaceNavigationControlFlowSubgraphBuilder.BuildJson(
+        var json = CodeNavigationControlFlowSubgraphBuilder.BuildJson(
             filePath: @"D:\w\Demo.cs",
             sourceText: source,
             line: 7,
@@ -103,7 +104,7 @@ class Demo {
 }
 """;
 
-        var json = WorkspaceNavigationControlFlowSubgraphBuilder.BuildJson(
+        var json = CodeNavigationControlFlowSubgraphBuilder.BuildJson(
             filePath: @"D:\w\Demo.cs",
             sourceText: source,
             line: 4,
@@ -127,7 +128,7 @@ class Demo {
 }
 """;
 
-        var json = WorkspaceNavigationControlFlowSubgraphBuilder.BuildJson(
+        var json = CodeNavigationControlFlowSubgraphBuilder.BuildJson(
             filePath: @"D:\w\Demo.cs",
             sourceText: source,
             line: 1,
@@ -163,7 +164,7 @@ class Demo {
 }
 """;
 
-        var json = WorkspaceNavigationControlFlowSubgraphBuilder.BuildJson(
+        var json = CodeNavigationControlFlowSubgraphBuilder.BuildJson(
             filePath: @"D:\w\Demo.cs",
             sourceText: source,
             line: 4,
@@ -203,7 +204,7 @@ class Demo {
 }
 """;
 
-        var json = WorkspaceNavigationControlFlowSubgraphBuilder.BuildJson(
+        var json = CodeNavigationControlFlowSubgraphBuilder.BuildJson(
             filePath: @"D:\w\Demo.cs",
             sourceText: source,
             line: 4,
@@ -261,7 +262,7 @@ class Demo {
 }
 """;
 
-        var json = WorkspaceNavigationControlFlowSubgraphBuilder.BuildJson(
+        var json = CodeNavigationControlFlowSubgraphBuilder.BuildJson(
             filePath: @"D:\w\Demo.cs",
             sourceText: source,
             line: 10,

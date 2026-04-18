@@ -6,7 +6,7 @@ using Xunit;
 
 namespace CascadeIDE.Tests;
 
-public sealed class WorkspaceNavigationControlFlowMcpCursorFallbackTests
+public sealed class CodeNavigationControlFlowMcpCursorFallbackTests
 {
     [AvaloniaFact]
     public async Task GetCodeNavigationContext_ControlFlow_UsesCurrentCursorWhenLineColumnNotProvided()

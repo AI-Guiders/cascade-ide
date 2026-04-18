@@ -13,25 +13,25 @@ public sealed class SemanticMapCompositorTests
     public void Compose_ControlFlow_ExpandsPreferredHeightForLongFlow()
     {
         var compositor = new SemanticMapCompositor();
-        var doc = new WorkspaceNavigationSubgraphDocument
+        var doc = new SemanticMapSubgraphDocument
         {
             AnchorPath = @"D:\w\A.cs",
             Nodes =
             [
-                new WorkspaceNavigationSubgraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" },
-                new WorkspaceNavigationSubgraphNode { Id = "n1", Path = @"D:\w\A.cs", Kind = "call_step", Label = "S1" },
-                new WorkspaceNavigationSubgraphNode { Id = "n2", Path = @"D:\w\A.cs", Kind = "call_step", Label = "S2" },
-                new WorkspaceNavigationSubgraphNode { Id = "n3", Path = @"D:\w\A.cs", Kind = "call_step", Label = "S3" },
-                new WorkspaceNavigationSubgraphNode { Id = "n4", Path = @"D:\w\A.cs", Kind = "call_step", Label = "S4" },
-                new WorkspaceNavigationSubgraphNode { Id = "n5", Path = @"D:\w\A.cs", Kind = "call_step", Label = "S5" }
+                new SemanticMapSubgraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" },
+                new SemanticMapSubgraphNode { Id = "n1", Path = @"D:\w\A.cs", Kind = "call_step", Label = "S1" },
+                new SemanticMapSubgraphNode { Id = "n2", Path = @"D:\w\A.cs", Kind = "call_step", Label = "S2" },
+                new SemanticMapSubgraphNode { Id = "n3", Path = @"D:\w\A.cs", Kind = "call_step", Label = "S3" },
+                new SemanticMapSubgraphNode { Id = "n4", Path = @"D:\w\A.cs", Kind = "call_step", Label = "S4" },
+                new SemanticMapSubgraphNode { Id = "n5", Path = @"D:\w\A.cs", Kind = "call_step", Label = "S5" }
             ],
             Edges =
             [
-                new WorkspaceNavigationSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "Call" },
-                new WorkspaceNavigationSubgraphEdge { FromId = "n1", ToId = "n2", Kind = "Call" },
-                new WorkspaceNavigationSubgraphEdge { FromId = "n2", ToId = "n3", Kind = "Call" },
-                new WorkspaceNavigationSubgraphEdge { FromId = "n3", ToId = "n4", Kind = "Call" },
-                new WorkspaceNavigationSubgraphEdge { FromId = "n4", ToId = "n5", Kind = "Call" }
+                new SemanticMapSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "Call" },
+                new SemanticMapSubgraphEdge { FromId = "n1", ToId = "n2", Kind = "Call" },
+                new SemanticMapSubgraphEdge { FromId = "n2", ToId = "n3", Kind = "Call" },
+                new SemanticMapSubgraphEdge { FromId = "n3", ToId = "n4", Kind = "Call" },
+                new SemanticMapSubgraphEdge { FromId = "n4", ToId = "n5", Kind = "Call" }
             ]
         };
 
@@ -45,24 +45,24 @@ public sealed class SemanticMapCompositorTests
     public void Compose_ControlFlow_LongFlow_CapsPreferredHeight()
     {
         var compositor = new SemanticMapCompositor();
-        var nodes = new List<WorkspaceNavigationSubgraphNode>
+        var nodes = new List<SemanticMapSubgraphNode>
         {
             new() { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" }
         };
-        var edges = new List<WorkspaceNavigationSubgraphEdge>();
+        var edges = new List<SemanticMapSubgraphEdge>();
         for (var i = 1; i <= 25; i++)
         {
-            nodes.Add(new WorkspaceNavigationSubgraphNode
+            nodes.Add(new SemanticMapSubgraphNode
             {
                 Id = $"n{i}",
                 Path = @"D:\w\A.cs",
                 Kind = "call_step",
                 Label = $"S{i}"
             });
-            edges.Add(new WorkspaceNavigationSubgraphEdge { FromId = $"n{i - 1}", ToId = $"n{i}", Kind = "Call" });
+            edges.Add(new SemanticMapSubgraphEdge { FromId = $"n{i - 1}", ToId = $"n{i}", Kind = "Call" });
         }
 
-        var doc = new WorkspaceNavigationSubgraphDocument
+        var doc = new SemanticMapSubgraphDocument
         {
             AnchorPath = @"D:\w\A.cs",
             Nodes = nodes,
@@ -77,15 +77,15 @@ public sealed class SemanticMapCompositorTests
     public void Compose_ControlFlow_TallViewport_KeepsIntrinsicPreferredHeightAndReadableStep()
     {
         var compositor = new SemanticMapCompositor();
-        var doc = new WorkspaceNavigationSubgraphDocument
+        var doc = new SemanticMapSubgraphDocument
         {
             AnchorPath = @"D:\w\A.cs",
             Nodes =
             [
-                new WorkspaceNavigationSubgraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" },
-                new WorkspaceNavigationSubgraphNode { Id = "n1", Path = @"D:\w\A.cs", Kind = "call_step", Label = "S1" }
+                new SemanticMapSubgraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" },
+                new SemanticMapSubgraphNode { Id = "n1", Path = @"D:\w\A.cs", Kind = "call_step", Label = "S1" }
             ],
-            Edges = [new WorkspaceNavigationSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "Call" }]
+            Edges = [new SemanticMapSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "Call" }]
         };
 
         var result = compositor.Compose(doc, SemanticMapLevelKind.ControlFlow, 280, 420);
@@ -99,20 +99,20 @@ public sealed class SemanticMapCompositorTests
     [Fact]
     public void ControlFlowLayout_WideGraphArea_CentersReadableBand()
     {
-        var engine = new WorkspaceNavigationControlFlowGraphLayoutEngine();
-        var doc = new WorkspaceNavigationSubgraphDocument
+        var engine = new SemanticMapControlFlowGraphLayoutEngine();
+        var doc = new SemanticMapSubgraphDocument
         {
             AnchorPath = @"D:\w\A.cs",
             Nodes =
             [
-                new WorkspaceNavigationSubgraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" },
-                new WorkspaceNavigationSubgraphNode { Id = "n1", Path = @"D:\w\A.cs", Kind = "condition_step", Label = "L", LegendIndex = 1, LegendText = "a" },
-                new WorkspaceNavigationSubgraphNode { Id = "n2", Path = @"D:\w\A.cs", Kind = "condition_step", Label = "R", LegendIndex = 2, LegendText = "b" }
+                new SemanticMapSubgraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" },
+                new SemanticMapSubgraphNode { Id = "n1", Path = @"D:\w\A.cs", Kind = "condition_step", Label = "L", LegendIndex = 1, LegendText = "a" },
+                new SemanticMapSubgraphNode { Id = "n2", Path = @"D:\w\A.cs", Kind = "condition_step", Label = "R", LegendIndex = 2, LegendText = "b" }
             ],
             Edges =
             [
-                new WorkspaceNavigationSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "Call" },
-                new WorkspaceNavigationSubgraphEdge { FromId = "n0", ToId = "n2", Kind = "Call" }
+                new SemanticMapSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "Call" },
+                new SemanticMapSubgraphEdge { FromId = "n0", ToId = "n2", Kind = "Call" }
             ]
         };
 
@@ -126,15 +126,15 @@ public sealed class SemanticMapCompositorTests
     public void Compose_File_KeepsCompactHeight()
     {
         var compositor = new SemanticMapCompositor();
-        var doc = new WorkspaceNavigationSubgraphDocument
+        var doc = new SemanticMapSubgraphDocument
         {
             AnchorPath = @"D:\w\A.cs",
             Nodes =
             [
-                new WorkspaceNavigationSubgraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" },
-                new WorkspaceNavigationSubgraphNode { Id = "n1", Path = @"D:\w\B.cs", Kind = "project_peer", Label = "B.cs" }
+                new SemanticMapSubgraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" },
+                new SemanticMapSubgraphNode { Id = "n1", Path = @"D:\w\B.cs", Kind = "project_peer", Label = "B.cs" }
             ],
-            Edges = [new WorkspaceNavigationSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "related_to" }]
+            Edges = [new SemanticMapSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "related_to" }]
         };
 
         var result = compositor.Compose(doc, SemanticMapLevelKind.File, 280, 120);
@@ -146,10 +146,10 @@ public sealed class SemanticMapCompositorTests
     public void Compose_GenericPipelineEntryPoint_ProducesScene()
     {
         var compositor = new SemanticMapCompositor();
-        var doc = new WorkspaceNavigationSubgraphDocument
+        var doc = new SemanticMapSubgraphDocument
         {
             AnchorPath = @"D:\w\A.cs",
-            Nodes = [new WorkspaceNavigationSubgraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" }],
+            Nodes = [new SemanticMapSubgraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" }],
             Edges = []
         };
 
@@ -163,15 +163,15 @@ public sealed class SemanticMapCompositorTests
     public void IntentStage_DetectsLoopEdgeMetrics()
     {
         var stage = new SemanticMapIntentStage();
-        var doc = new WorkspaceNavigationSubgraphDocument
+        var doc = new SemanticMapSubgraphDocument
         {
             AnchorPath = @"D:\w\A.cs",
             Nodes =
             [
-                new WorkspaceNavigationSubgraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" },
-                new WorkspaceNavigationSubgraphNode { Id = "n1", Path = @"D:\w\A.cs", Kind = "call_step", Label = "B" }
+                new SemanticMapSubgraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" },
+                new SemanticMapSubgraphNode { Id = "n1", Path = @"D:\w\A.cs", Kind = "call_step", Label = "B" }
             ],
-            Edges = [new WorkspaceNavigationSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "LoopCall" }]
+            Edges = [new SemanticMapSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "LoopCall" }]
         };
 
         var state = stage.Resolve(new SemanticMapPipelineContext(
@@ -187,19 +187,19 @@ public sealed class SemanticMapCompositorTests
     public void Compose_ControlFlow_Glance_FiltersMultibranchOnlyBranch()
     {
         var compositor = new SemanticMapCompositor();
-        var doc = new WorkspaceNavigationSubgraphDocument
+        var doc = new SemanticMapSubgraphDocument
         {
             AnchorPath = @"D:\w\A.cs",
             Nodes =
             [
-                new WorkspaceNavigationSubgraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A" },
-                new WorkspaceNavigationSubgraphNode { Id = "n1", Path = @"D:\w\A.cs", Kind = "call_step", Label = "S1" },
-                new WorkspaceNavigationSubgraphNode { Id = "n2", Path = @"D:\w\A.cs", Kind = "call_step", Label = "S2" }
+                new SemanticMapSubgraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A" },
+                new SemanticMapSubgraphNode { Id = "n1", Path = @"D:\w\A.cs", Kind = "call_step", Label = "S1" },
+                new SemanticMapSubgraphNode { Id = "n2", Path = @"D:\w\A.cs", Kind = "call_step", Label = "S2" }
             ],
             Edges =
             [
-                new WorkspaceNavigationSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "Call" },
-                new WorkspaceNavigationSubgraphEdge { FromId = "n0", ToId = "n2", Kind = "multibranch" }
+                new SemanticMapSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "Call" },
+                new SemanticMapSubgraphEdge { FromId = "n0", ToId = "n2", Kind = "multibranch" }
             ]
         };
 
@@ -213,24 +213,24 @@ public sealed class SemanticMapCompositorTests
     public void Compose_ControlFlow_GlanceVsInspect_PreferredHeightInspectIsTallerWhenIntrinsicExceedsMinClamp()
     {
         var compositor = new SemanticMapCompositor();
-        var nodes = new List<WorkspaceNavigationSubgraphNode>
+        var nodes = new List<SemanticMapSubgraphNode>
         {
             new() { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" }
         };
-        var edges = new List<WorkspaceNavigationSubgraphEdge>();
+        var edges = new List<SemanticMapSubgraphEdge>();
         for (var i = 1; i <= 17; i++)
         {
-            nodes.Add(new WorkspaceNavigationSubgraphNode
+            nodes.Add(new SemanticMapSubgraphNode
             {
                 Id = $"n{i}",
                 Path = @"D:\w\A.cs",
                 Kind = "call_step",
                 Label = $"S{i}"
             });
-            edges.Add(new WorkspaceNavigationSubgraphEdge { FromId = $"n{i - 1}", ToId = $"n{i}", Kind = "Call" });
+            edges.Add(new SemanticMapSubgraphEdge { FromId = $"n{i - 1}", ToId = $"n{i}", Kind = "Call" });
         }
 
-        var doc = new WorkspaceNavigationSubgraphDocument
+        var doc = new SemanticMapSubgraphDocument
         {
             AnchorPath = @"D:\w\A.cs",
             Nodes = nodes,
@@ -243,16 +243,16 @@ public sealed class SemanticMapCompositorTests
     }
 
     [Fact]
-    public void ControlFlowLayout_WithLegend_ReservesColumnAndDiamondCondition()
+    public void ControlFlowLayout_WithLegend_ReservesColumnAndConditionBranch()
     {
-        var engine = new WorkspaceNavigationControlFlowGraphLayoutEngine();
-        var doc = new WorkspaceNavigationSubgraphDocument
+        var engine = new SemanticMapControlFlowGraphLayoutEngine();
+        var doc = new SemanticMapSubgraphDocument
         {
             AnchorPath = @"D:\w\A.cs",
             Nodes =
             [
-                new WorkspaceNavigationSubgraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" },
-                new WorkspaceNavigationSubgraphNode
+                new SemanticMapSubgraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" },
+                new SemanticMapSubgraphNode
                 {
                     Id = "n1",
                     Path = @"D:\w\A.cs",
@@ -262,7 +262,7 @@ public sealed class SemanticMapCompositorTests
                     LegendText = "x > 0"
                 }
             ],
-            Edges = [new WorkspaceNavigationSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "Call" }]
+            Edges = [new SemanticMapSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "Call" }]
         };
 
         var scene = engine.Layout(doc, 400, 200);
@@ -274,20 +274,20 @@ public sealed class SemanticMapCompositorTests
         Assert.False(scene.ShowLegendReturnKey);
         Assert.True(scene.LegendColumnLeft < 400);
         var cond = scene.Nodes.First(n => n.Id == "n1");
-        Assert.Equal(SemanticMapNodeShape.Diamond, cond.Shape);
+        Assert.Equal(SemanticMapNodeShape.Condition, cond.Shape);
     }
 
     [Fact]
     public void ControlFlowLayout_SkipsReturnInLegendRows_ShowsReturnShapeKey()
     {
-        var engine = new WorkspaceNavigationControlFlowGraphLayoutEngine();
-        var doc = new WorkspaceNavigationSubgraphDocument
+        var engine = new SemanticMapControlFlowGraphLayoutEngine();
+        var doc = new SemanticMapSubgraphDocument
         {
             AnchorPath = @"D:\w\A.cs",
             Nodes =
             [
-                new WorkspaceNavigationSubgraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" },
-                new WorkspaceNavigationSubgraphNode
+                new SemanticMapSubgraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" },
+                new SemanticMapSubgraphNode
                 {
                     Id = "n1",
                     Path = @"D:\w\A.cs",
@@ -297,7 +297,7 @@ public sealed class SemanticMapCompositorTests
                     LegendText = "return"
                 }
             ],
-            Edges = [new WorkspaceNavigationSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "Exit" }]
+            Edges = [new SemanticMapSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "Exit" }]
         };
 
         var scene = engine.Layout(doc, 400, 200);
@@ -313,7 +313,7 @@ public sealed class SemanticMapCompositorTests
     {
         const string json =
             """{"mode":"subgraph","anchor_path":"D:\\a.cs","nodes":[{"id":"n0","path":"D:\\a.cs","kind":"anchor","label":"a.cs","relative_path":"","rationale":""},{"id":"n1","path":"D:\\a.cs","kind":"condition_step","label":"IF","relative_path":"","rationale":"","legend_index":1,"legend_text":"x > 0"}],"edges":[]}""";
-        Assert.True(WorkspaceNavigationSubgraphJson.TryParse(json, out var doc, out _));
+        Assert.True(SemanticMapSubgraphJson.TryParse(json, out var doc, out _));
         Assert.NotNull(doc);
         var n1 = doc!.Nodes.First(n => n.Id == "n1");
         Assert.Equal(1, n1.LegendIndex);

@@ -4,32 +4,32 @@ using Xunit;
 
 namespace CascadeIDE.Tests;
 
-public sealed class WorkspaceNavigationControlFlowGraphLayoutEngineTests
+public sealed class SemanticMapControlFlowGraphLayoutEngineTests
 {
     [Fact]
     public void Layout_PlacesFlowTopToBottom_ByDepth()
     {
-        var engine = new WorkspaceNavigationControlFlowGraphLayoutEngine();
-        var doc = new WorkspaceNavigationSubgraphDocument
+        var engine = new SemanticMapControlFlowGraphLayoutEngine();
+        var doc = new SemanticMapSubgraphDocument
         {
             AnchorPath = @"D:\w\A.cs",
             Nodes =
             [
-                new WorkspaceNavigationSubgraphNode
+                new SemanticMapSubgraphNode
                 {
                     Id = "n0",
                     Path = @"D:\w\A.cs",
                     Kind = "anchor",
                     Label = "A.cs"
                 },
-                new WorkspaceNavigationSubgraphNode
+                new SemanticMapSubgraphNode
                 {
                     Id = "n1",
                     Path = @"D:\w\A.cs",
                     Kind = "call_step",
                     Label = "B"
                 },
-                new WorkspaceNavigationSubgraphNode
+                new SemanticMapSubgraphNode
                 {
                     Id = "n2",
                     Path = @"D:\w\A.cs",
@@ -39,8 +39,8 @@ public sealed class WorkspaceNavigationControlFlowGraphLayoutEngineTests
             ],
             Edges =
             [
-                new WorkspaceNavigationSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "Call" },
-                new WorkspaceNavigationSubgraphEdge { FromId = "n1", ToId = "n2", Kind = "Call" }
+                new SemanticMapSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "Call" },
+                new SemanticMapSubgraphEdge { FromId = "n1", ToId = "n2", Kind = "Call" }
             ]
         };
 
@@ -60,27 +60,27 @@ public sealed class WorkspaceNavigationControlFlowGraphLayoutEngineTests
     [Fact]
     public void Layout_PlacesSameDepthBranchesSideBySide()
     {
-        var engine = new WorkspaceNavigationControlFlowGraphLayoutEngine();
-        var doc = new WorkspaceNavigationSubgraphDocument
+        var engine = new SemanticMapControlFlowGraphLayoutEngine();
+        var doc = new SemanticMapSubgraphDocument
         {
             AnchorPath = @"D:\w\A.cs",
             Nodes =
             [
-                new WorkspaceNavigationSubgraphNode
+                new SemanticMapSubgraphNode
                 {
                     Id = "n0",
                     Path = @"D:\w\A.cs",
                     Kind = "anchor",
                     Label = "A.cs"
                 },
-                new WorkspaceNavigationSubgraphNode
+                new SemanticMapSubgraphNode
                 {
                     Id = "n1",
                     Path = @"D:\w\A.cs",
                     Kind = "call_step",
                     Label = "LeftBranch"
                 },
-                new WorkspaceNavigationSubgraphNode
+                new SemanticMapSubgraphNode
                 {
                     Id = "n2",
                     Path = @"D:\w\A.cs",
@@ -90,8 +90,8 @@ public sealed class WorkspaceNavigationControlFlowGraphLayoutEngineTests
             ],
             Edges =
             [
-                new WorkspaceNavigationSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "ConditionalCall" },
-                new WorkspaceNavigationSubgraphEdge { FromId = "n0", ToId = "n2", Kind = "ConditionalCall" }
+                new SemanticMapSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "ConditionalCall" },
+                new SemanticMapSubgraphEdge { FromId = "n0", ToId = "n2", Kind = "ConditionalCall" }
             ]
         };
 

@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using CascadeIDE.Cockpit;
 using CascadeIDE.Cockpit.Channels.WorkspaceHealth;
 using CascadeIDE.Cockpit.Composition.WorkspaceHealth;
 using Xunit;
@@ -30,6 +31,21 @@ public sealed class WorkspaceHealthSurfaceCompositorTests
         Assert.Equal(WorkspaceHealthSource.Tests, col[1].Source);
         Assert.Equal(WorkspaceHealthSource.Debug, col[2].Source);
         Assert.Equal(WorkspaceHealthSource.Git, col[3].Source);
+    }
+
+    [Fact]
+    public void Instrument_deck_descriptor_matches_compositor_segment_order()
+    {
+        var deck = WorkspaceHealthInstrumentDeck.Default;
+        Assert.Equal(WorkspaceHealthInstrumentDeck.DeckId, deck.DeckId);
+        Assert.Equal(WorkspaceHealthInstrumentDeck.SemanticAnchorId, deck.SemanticAnchorId);
+        Assert.Equal(InstrumentDeckLayoutPattern.Grid, deck.LayoutPattern);
+        Assert.Equal(4, deck.OrderedInstrumentIds.Count);
+        Assert.Equal(WorkspaceHealthSegmentIds.Build, deck.OrderedInstrumentIds[0]);
+        Assert.Equal(WorkspaceHealthSegmentIds.Tests, deck.OrderedInstrumentIds[1]);
+        Assert.Equal(WorkspaceHealthSegmentIds.Debug, deck.OrderedInstrumentIds[2]);
+        Assert.Equal(WorkspaceHealthSegmentIds.Git, deck.OrderedInstrumentIds[3]);
+        Assert.Same(WorkspaceHealthInstrumentDeck.OrderedSegmentIds, deck.OrderedInstrumentIds);
     }
 
     [Fact]

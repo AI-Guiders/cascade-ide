@@ -9,7 +9,7 @@ public sealed class CodeFlowTraceChannelTests
     [Fact]
     public void Build_PrefersNonExitBranch()
     {
-        var doc = new WorkspaceNavigationSubgraphDocument
+        var doc = new SemanticMapSubgraphDocument
         {
             AnchorPath = @"D:\w\A.cs",
             Nodes =
@@ -38,7 +38,7 @@ public sealed class CodeFlowTraceChannelTests
         Assert.DoesNotContain("n1->n2", snapshot.HighlightedEdgeKeys);
     }
 
-    private static WorkspaceNavigationSubgraphNode Node(string id, string kind) => new()
+    private static SemanticMapSubgraphNode Node(string id, string kind) => new()
     {
         Id = id,
         Path = @"D:\w\A.cs",
@@ -46,7 +46,7 @@ public sealed class CodeFlowTraceChannelTests
         Label = id
     };
 
-    private static WorkspaceNavigationSubgraphEdge Edge(string from, string to, string kind) => new()
+    private static SemanticMapSubgraphEdge Edge(string from, string to, string kind) => new()
     {
         FromId = from,
         ToId = to,
