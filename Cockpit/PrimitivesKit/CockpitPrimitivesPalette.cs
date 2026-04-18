@@ -16,6 +16,15 @@ public static class CockpitPrimitivesPalette
     /// Канал EICAS / CAS: три уровня W/C/A (ADR 0021 §5). Канон для текста полосы, бейджей и сопоставимых уровней ламп.
     /// Значения совпадают с прежними hex в <c>EicasSeverityToBrushConverter</c>.
     /// </summary>
+    /// <remarks>
+    /// Бытовые слова в доках и UI («ошибка», «предупреждение», «информация») ↔ авиационные ярусы:
+    /// <list type="bullet">
+    /// <item><b>Error</b> / критичная поломка / «надо срочно» → <see cref="Warning"/> (красный) = EICAS <b>W</b> (Warning).</item>
+    /// <item><b>Warning</b> в смысле IDE «внимание, не катастрофа» → <see cref="Caution"/> (янтарь) = EICAS <b>C</b> (Caution); у ламп см. <see cref="AnnunciatorLampLevel.Warning"/>.</item>
+    /// <item><b>Information</b> / справочное → <see cref="Advisory"/> (синий) = EICAS <b>A</b> (Advisory); у ламп — <see cref="AnnunciatorLampLevel.Info"/>.</item>
+    /// </list>
+    /// Четвёртый уровень «I» в палитре не вводим: «информация» здесь совпадает с <b>Advisory</b> (A).
+    /// </remarks>
     public static class Eicas
     {
         public static readonly Color Warning = Color.Parse("#C02828");
@@ -32,6 +41,10 @@ public static class CockpitPrimitivesPalette
     }
 
     /// <summary>Annunciator / Korry: корпус, линзы, акценты списка.</summary>
+    /// <remarks>
+    /// <see cref="AnnunciatorLampLevel"/> по цвету стыкуется с <see cref="Eicas"/>: <b>Unavailable</b> → EICAS Warning (красный);
+    /// <b>Warning</b> → Caution (янтарь); <b>Info</b> → Advisory (синий). Имена enum исторические; см. ADR 0021 §5 и комментарии к <see cref="Eicas"/>.
+    /// </remarks>
     public static class Annunciator
     {
         public static readonly Color BezelOuter = Color.Parse("#3A3A3A");

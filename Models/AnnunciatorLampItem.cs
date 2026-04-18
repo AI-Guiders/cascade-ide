@@ -1,18 +1,22 @@
 namespace CascadeIDE.Models;
 
 /// <summary>Состояние подсветки лампы на полосе (annunciator / Korry): <see cref="Ok"/> — «выкл.» / нет тревоги.</summary>
+/// <remarks>
+/// Цвета из <c>CockpitPrimitivesPalette</c> сопоставлены с EICAS W/C/A (ADR 0021 §5): в бытовой речи «Error» ≈ <see cref="Unavailable"/>,
+/// «Warning» (внимание без катастрофы) ≈ <see cref="Warning"/>, «Information» ≈ <see cref="Info"/>.
+/// </remarks>
 public enum AnnunciatorLampLevel
 {
     /// <summary>Лампа не горит (норма).</summary>
     Ok,
 
-    /// <summary>Предупреждение (например внимание к LSP).</summary>
+    /// <summary>Внимание без критики (янтарь) — в терминах EICAS: Caution (C); не путать с красным EICAS Warning.</summary>
     Warning,
 
-    /// <summary>Информация.</summary>
+    /// <summary>Информация (синий) — в терминах EICAS: Advisory (A).</summary>
     Info,
 
-    /// <summary>Недоступно / ошибка.</summary>
+    /// <summary>Недоступно / критичная ошибка (красный) — в терминах EICAS: Warning (W).</summary>
     Unavailable
 }
 
