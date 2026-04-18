@@ -11,7 +11,7 @@
 | Волна | Что даёт | Ключи / точки входа | Примечание |
 |-------|-----------|---------------------|------------|
 | **1** | Топология колонок **P / Forward / M** на главном окне: видимость регионов, ширины, связь с пресетом и хостом MFD | `[display].presentation` / `zone_screen_layout`, грамматика `[presentation_grammar]`, разбор в `PresentationParser`, колонки `MainGrid` через `PresentationMainGridColumnDefinitions` и композитор shell | Источник истины — **ADR 0017**; Skia здесь **не обязателен** — это Avalonia-layout и модель намерений (expand/collapse регионов). |
-| **2** | **Отладочные контуры** зон поверх текущего layout — проверить геометрию без смены контента слотов | `[display].use_skia_zone_geometry_preview` → `DisplaySettings.UseSkiaZoneGeometryPreview`, привязки `IsSkiaZonePreviewPfdVisible` и т.д., оверлеи `SkiaZonePreviewPfd` / `Forward` / `Mfd` в `MainWindow.axaml`, аналог в `MfdHostWindow.axaml` | Включено временно для валидации; по умолчанию выключено. |
+| **2** | **Отладочные контуры** зон поверх текущего layout — проверить геометрию без смены контента слотов | `[display].show_skia_zone_geometry_overlay` → `DisplaySettings.ShowSkiaZoneGeometryOverlay`, привязки `IsSkiaZoneGeometryOverlayPfdVisible` и т.д., оверлеи `SkiaZoneGeometryOverlayPfd` / `Forward` / `Mfd` в `MainWindow.axaml`, аналог в `MfdHostWindow.axaml` | Включено временно для валидации; по умолчанию выключено. |
 | **3** | **Mount-слой** инструмента (контент карточки и т.п.) в зоне **поверх** базового контента слота, плюс декларативный style/registry | `[display].use_skia_instrument_mount`, `instrument_mount_style`, `[[display.instrument_mount_style_rules]]` — см. раздел ниже | Ортогонально карте «какой `instrument_id` в слоте» ([ADR 0050](../adr/0050-declarative-instrument-zone-placement-toml.md)). |
 
 Волны **накладываются**: 1 задаёт *где* рамки зон; 2 — *нарисовать рамки для глаз*; 3 — *что показать в mount поверх* при уже разрешённой геометрии.
@@ -26,10 +26,10 @@
 
 ---
 
-## Волна 2 — preview контуров зон (отладка геометрии)
+## Волна 2 — overlay контуров зон (отладка геометрии)
 
 - Назначение: **визуально сверить** границы P/F/M с моделью презентации**, не меняя** привязанный к слотам контент.
-- Реализация: полупрозрачные **Border**-оверлеи и флаги видимости из VM (`UseSkiaZoneGeometryPreview`, `IsSkiaZonePreview*`).
+- Реализация: полупрозрачные **Border**-оверлеи и флаги видимости из VM (`ShowSkiaZoneGeometryOverlay`, `IsSkiaZoneGeometryOverlay*`).
 - Не путать с **волной 3**: контуры — только рамки; mount — данные инструмента (Workspace Health и т.д.).
 
 ---

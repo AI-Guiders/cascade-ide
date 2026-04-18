@@ -1,47 +1,61 @@
 # Пример пользовательского settings.toml (ADR 0028: %LocalAppData%\CascadeIDE\settings.toml).
-# Ключи — snake_case (CascadeTomlSerializer / Tomlyn). Секции — логические группы.
-# Раскладка дисплеев и Mfd-host — секция [display].
+# Ключи — snake_case (CascadeTomlSerializer / Tomlyn). Секции — вложенные таблицы.
+
+# Строка топологии и грамматика якорей (ADR 0017).
+[presentation]
+line = "(0.25P + 0.75F) (M)"
+line_alias = ""
+
+[presentation.grammar]
+brackets = "()"
+between_screens = " "
+between_zones = "+"
+pfd = "P"
+forward = "F"
+mfd = "M"
 
 [display]
-# Раскладка по дисплеям (ADR 0017). Пробелы внутри (…) допустимы — парсер их убирает.
-presentation = "(0.25P + 0.75F) (M)"
-# W2: debug-preview контуров зон поверх MainGrid (только визуализация геометрии, без замены контента).
-use_skia_zone_geometry_preview = false
-# W3: инструмент в Skia mount-слое зон P/F/M.
-use_skia_instrument_mount = false
-# W3: style-id для mount (instrument_id + slot_id + mount_style).
-instrument_mount_style = "instrument_mount_v1"
-# ADR 0050: при true для одинакового (surface_id,slot_id) побеждает repo-layer из .cascade/workspace.toml.
-prefer_repo_instruments_placement = false
-# W3 rollout gate: применять style-rule только при проходе SA/perf/workload.
-enforce_instrument_mount_style_eligibility = false
-instrument_mount_style_min_sa_score = 0.6
-instrument_mount_style_min_performance_score = 0.6
-instrument_mount_style_max_workload_score = 0.5
-require_instrument_mount_style_scores = false
-# W3: registry правил (приоритет:
-# surface+exact -> surface+slot/* -> surface+*/instrument -> surface+*/*
-# -> global+exact -> global+slot/* -> global+*/instrument -> global+*/*).
-[[display.instrument_mount_style_rules]]
-surface_id = "main_window_docked_grid"
-slot_id = "pfd"
-instrument_id = "workspace_health_status_v1"
-mount_style = "instrument_mount_v1"
+maximize_hosts_on_dedicated_screens = true
+prefer_repo_instruments = false
+
+[display.pfd]
+open_on_startup = true
+
+[display.mfd]
+open_on_startup = true
+
+[display.skia]
+zone_geometry_overlay = false
+instrument_mount = false
+
+[display.mount]
+default_style = "instrument_mount_v1"
+enforce_eligibility = false
+min_sa = 0.6
+min_performance = 0.6
+max_workload = 0.5
+require_scores = false
+
+[[display.mount.rules]]
+surface = "main_window_docked_grid"
+slot = "pfd"
+instrument = "workspace_health_status_v1"
+style = "instrument_mount_v1"
 sa_score = 0.8
 performance_score = 0.8
 workload_score = 0.2
 
-[[display.instrument_mount_style_rules]]
-surface_id = "main_window_plus_mfd_host_top_level"
-slot_id = "mfd"
-instrument_id = "workspace_health_status_v1"
-mount_style = "instrument_mount_v1"
+[[display.mount.rules]]
+surface = "main_window_plus_mfd_host_top_level"
+slot = "mfd"
+instrument = "workspace_health_status_v1"
+style = "instrument_mount_v1"
 sa_score = 0.75
 performance_score = 0.72
 workload_score = 0.28
 
-# ADR 0050: пользовательский слой основных слотов (alias или канонический instrument_id).
-[display.instrument_routing]
+# Основные слоты PFD/MFD (ADR 0050): alias или канонический instrument_id.
+[display.instruments]
 pfd_primary = "workspace_map"
 
 [ai]
@@ -53,60 +67,43 @@ open_ai_model = "gpt-4o"
 deep_seek_base_url = "https://api.deepseek.com"
 deep_seek_model = "deepseek-chat"
 cursor_acp_path = ""
-# mfd — страница параметров AI во вторичном контуре; window — отдельное окно настроек (ADR 0021 / 0028).
 ai_chat_settings_presentation = "mfd"
-# Не вызывать встроенный LLM после отправки; ответы — через MCP (send_chat role=assistant).
 chat_mcp_only = false
 
 [mcp]
-# Cursor ACP: подмешивать stdio MCP IDE (cascade-ide) в session/new без дублирования в external_servers_json (ADR 0048 §7).
 acp_auto_inject_ide_mcp = true
 external_servers_json = "[]"
-# Опционально: путь к JSON-файлу с тем же массивом серверов (абсолютный или относительно %LocalAppData%\\CascadeIDE\\).
-# Если непустой и файл читается — подставляется вместо external_servers_json; иначе — inline выше.
 external_servers_json_path = ""
-# Примеры:
-# external_servers_json_path = "D:/Experiments/mcp-servers.json"
-# external_servers_json_path = "mcp-servers.json"
 
-[workspace_ui]
-show_solution_explorer = true
+[workspace]
+pfd_expanded = true
 show_terminal = true
 show_git = false
 show_instrumentation = true
 mode = "Flight"
 culture = ""
-# Все сплиттеры рабочей области (MainGrid, обозреватель решения, панель Git и т.д.): true — не двигать («Take Off»)
-workspace_splitters_locked = false
+splitters_locked = false
 
-# Semantic Map (зона PFD): list | graph | both — см. ADR 0039. Дальнейшие ключи карты/графа — сюда же.
 [semantic_map]
-presentation = "list"
-# file | controlFlow — уровень карты (ADR 0053).
-level = "file"
+view = "list"
+depth = "file"
 
-[csharp_lsp]
-# ParseOnly | OmniSharp | CSharpLs | Custom
+[languages.csharp]
 provider = "OmniSharp"
 executable = ""
 arguments = ""
 
-[markdown_lsp]
-# Off | Marksman | Custom
+[languages.markdown]
 provider = "Marksman"
 executable = ""
 arguments = ""
 
-[markdown_diagrams]
-kroki_enabled = true
-kroki_base_url = "https://kroki.io"
+[markdown.diagrams]
+kroki = true
+kroki_url = "https://kroki.io"
 
-[presentation_grammar]
-pfd_zone_identifier = "P"
-forward_zone_identifier = "F"
-mfd_zone_identifier = "M"
-
-# Пресеты навигации: бандл в WorkspaceNavigation/presets.toml (и embedded); опционально команда — .cascade/workspace.toml; здесь — личный overlay ([[workspace_navigation_context.presets]], merge по id поверх бандла и репо).
-# [[workspace_navigation_context.presets]]
+[workspace_navigation]
+# Пресеты: бандл WorkspaceNavigation/presets.toml + .cascade/workspace.toml + этот файл ([[workspace_navigation.presets]]).
+# [[workspace_navigation.presets]]
 # id = "my_preset"
 # exclude_kinds = ["same_namespace"]

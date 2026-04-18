@@ -4,7 +4,7 @@
 
 ## Цель
 
-Довести геометрию до явных zone-bounds и добавить визуальный preview контуров зон без изменения контента.
+Довести геометрию до явных zone-bounds и добавить визуальный overlay контуров зон без изменения контента.
 
 ## Что сделано
 
@@ -13,12 +13,12 @@
    - `PresentationZoneBound` описывает `Zone`, `StartNormalized`, `WidthNormalized`.
 2. Расчёт bounds встроен в `PresentationMainGridLayoutFrameBuilder`:
    - bounds строятся для первого экрана в порядке якорей.
-3. Добавлен preview контуров зон в `MainWindow.axaml`:
-   - overlay `SkiaZonePreviewPfd` / `SkiaZonePreviewForward` / `SkiaZonePreviewMfd`;
+3. Добавлен overlay контуров зон в `MainWindow.axaml`:
+   - `SkiaZoneGeometryOverlayPfd` / `SkiaZoneGeometryOverlayForward` / `SkiaZoneGeometryOverlayMfd`;
    - не меняет содержимое зон, только визуально подсвечивает границы.
 4. Добавлена настройка пользователя:
-   - `[display].use_skia_zone_geometry_preview` (модель `DisplaySettings`).
-   - VM-свойства видимости preview учитывают текущую геометрию колонок.
+   - `[display].show_skia_zone_geometry_overlay` (модель `DisplaySettings`).
+   - VM-свойства видимости overlay учитывают текущую геометрию колонок.
 5. Усилен debug snapshot log:
    - `[MainGridGeometry]` теперь логирует и `bounds=[...]`.
 6. Тесты дополнены проверкой zone-bounds:

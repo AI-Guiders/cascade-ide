@@ -1,0 +1,81 @@
+# CascadeIDE — пользовательский settings.toml (вложенные секции, ADR 0028). format: nested-v2
+# Источник для копирования на диск: см. также docs/samples/settings.toml
+
+[ai]
+default_ollama_model = "qwen2.5-coder:7b"
+provider = "Ollama"
+anthropic_model = "claude-sonnet-4-20250514"
+open_ai_base_url = "https://api.openai.com"
+open_ai_model = "gpt-4o"
+deep_seek_base_url = "https://api.deepseek.com"
+deep_seek_model = "deepseek-chat"
+cursor_acp_path = ""
+ai_chat_settings_presentation = "mfd"
+chat_mcp_only = true
+
+[mcp]
+external_servers_json = "[]"
+acp_auto_inject_ide_mcp = true
+
+[workspace]
+pfd_expanded = true
+show_terminal = true
+show_git = true
+show_instrumentation = true
+mode = "Flight"
+culture = ""
+splitters_locked = false
+
+[semantic_map]
+view = "list"
+
+[languages.csharp]
+provider = "ParseOnly"
+executable = ""
+arguments = ""
+
+[languages.markdown]
+provider = "Marksman"
+executable = ""
+arguments = ""
+
+[markdown.diagrams]
+kroki = true
+kroki_url = "https://kroki.io"
+
+[presentation]
+line = "(0.55P+0.45F)(M)"
+line_alias = ""
+
+[presentation.grammar]
+brackets = "()"
+between_screens = " "
+between_zones = "+"
+pfd = "P"
+forward = "F"
+mfd = "M"
+
+[display]
+maximize_hosts_on_dedicated_screens = true
+prefer_repo_instruments = false
+
+[display.mfd]
+open_on_startup = true
+pixel_x = 1920
+pixel_y = 0
+width = 1280.0
+height = 649.3333333333334
+
+[display.skia]
+zone_geometry_overlay = false
+instrument_mount = false
+
+[display.mount]
+default_style = "instrument_mount_v1"
+enforce_eligibility = false
+min_sa = 0.6
+min_performance = 0.6
+max_workload = 0.5
+require_scores = false
+
+[workspace_navigation]

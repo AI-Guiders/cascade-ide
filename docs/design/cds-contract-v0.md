@@ -111,8 +111,8 @@
 - `Cockpit/Surface/UiLayoutSnapshot.cs` — дерево UI (другой слой, ADR 0036 п.4).
 - Каналы и композиторы по ADR 0036 — `Cockpit/Channels/**`, `Cockpit/Composition/**`.
 - `Services/Presentation/PresentationParser.cs`, `PresentationLayoutAnalyzer.cs` — презентация.
-- `Views/MainWindow.axaml`, `MainWindow.MfdHostWindow.axaml.cs` — геометрия окон.
+- `Views/MainWindow.axaml`, `MainWindow.PresentationHostWindows.axaml.cs` — геометрия и жизненный цикл вторичных `TopLevel` (PFD/MFD).
 
 ---
 
-**Версия документа:** 2026-04-16 — подраздел «Источник правды сегодня и как сблизить с CDS» (проекция из VM, инкрементальное улучшение). Ранее: 2026-04-15 — v0.3: список `instruments` в CDS-снимке + реестр монтирования в Surface-слое.
+**Версия документа:** 2026-04-17 — список файлов UI: `MainWindow.PresentationHostWindows.axaml.cs` для вторичных TopLevel (PFD/MFD). Ранее: 2026-04-16 — подраздел «Источник правды сегодня и как сблизить с CDS» (проекция из VM, инкрементальное улучшение). Ещё ранее: 2026-04-15 — v0.3: список `instruments` в CDS-снимке + реестр монтирования в Surface-слое.

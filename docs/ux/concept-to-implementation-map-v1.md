@@ -3,11 +3,11 @@
 Scope: **CascadeIDE UI concepts** (Focus/Balanced/Power) mapped to current implementation in:
 
 - `Views/MainWindow.axaml`
-- `Views/MainWindow.axaml.cs` (+ `MainWindow.MfdHostWindow.axaml.cs` — второй `TopLevel`)
+- `Views/MainWindow.axaml.cs` (+ `MainWindow.PresentationHostWindows.axaml.cs` — вторичные `TopLevel` PFD/MFD)
 - `ViewModels/MainWindowViewModel.cs` (partial-классы)
 - `Views/TaskCockpitView.axaml`, `Views/ChatPanelView.axaml`, `Views/SolutionExplorerView.axaml`, `Views/WorkspaceHealthStripView.axaml`, `Views/BottomPanelView.axaml`
 
-Отдельно [§6](#6-мультиоконность-adr-0017--второй-toplevel-mfd): **ADR 0017** — `presentation`, `MfdHostWindow`, топология мониторов.
+Отдельно [§6](#6-мультиоконность-adr-0017--второй-toplevel-mfd): **ADR 0017** — `presentation`, хосты `PfdHostWindow` / `MfdHostWindow`, топология мониторов.
 
 This map is intended to drive incremental alignment work with clear acceptance checks.
 
@@ -99,7 +99,7 @@ This map is intended to drive incremental alignment work with clear acceptance c
 
 <a id="6-мультиоконность-adr-0017--второй-toplevel-mfd"></a>
 
-## 6) Мультиоконность (ADR 0017) — второй `TopLevel` (MFD)
+## 6) Мультиоконность (ADR 0017) — вторичные `TopLevel` (PFD / MFD)
 
 Норматив: [ADR 0017](../adr/0017-multi-window-workspace-and-agent-surfaces.md), подробная таблица «что в коде» — [«Состояние реализации»](../adr/0017-multi-window-workspace-and-agent-surfaces.md#adr0017-implementation-status).
 
@@ -108,15 +108,16 @@ This map is intended to drive incremental alignment work with clear acceptance c
 | Строка `presentation` / `zone_screen_layout` + `[presentation_grammar]` | `CascadeIdeSettings`, merge в VM | `GetEffectivePresentationLine()`, `PresentationParse` | ✅ | Парсер: `Services/Presentation/PresentationParser.cs`, внутри экрана — `PresentationInnerEtoGrammar` (Eto.Parse). |
 | Главное окно на весь экран по топологии `presentation` | `MainWindow` `Loaded` | `PresentationRequestsMainWindowMaximized` ← `PresentationLayoutAnalyzer.ShouldMaximizeMainWindowAtStartup` (P+F на первом экране — в т.ч. `(P+F+M)`; `(P)(F)(M)` на трёх экранах) | ✅ | `WindowState.Maximized`; иначе дефолт размера из XAML. |
 | Второе окно зоны Mfd (полный вторичный контур) | `Views/MfdHostWindow.axaml` → `SecondaryShellView` | `DataContext` = `MainWindowViewModel` (тот же, что у `MainWindow`) | ✅ | ADR п. 8: не «узкий» одностраничный хост. |
-| Автозапуск хоста; MCP `toggle_mfd_host_window` только при топологии с выносом Mfd | `MainWindow.MfdHostWindow.axaml.cs` | `ToggleMfdHostWindowCommand` (`CanExecute` ← `PresentationRequestsMfdHostWindow`), `TryOpenMfdHostWindowOnStartup`, `OpenMfdHostWindowOnStartup` | ✅ | Отдельного пункта меню нет — раскладка в `settings.toml`. |
-| Колонка Mfd в главном окне при открытом хосте | `MainWindow` / layout | `SetMfdHostWindowShellOpen` → скрыть дубль колонки | ✅ | `AttentionLayoutSurfaceKind.MainWindowPlusMfdHostTopLevel`. |
-| Плейсмент на дисплее | `MfdHostWindowPlacement.PlaceOrRestore` / `PlaceNearMain` | `MfdHostPresentationScreenIndex` из разбора `presentation` | ✅ | Топология экранов: `PresentationMonitorTopology.OrderScreensForPresentation`. Fallback: «другой экран», не главный. |
-| Сохранение геометрии хоста | `Closing` → `PersistMfdHostWindowBounds` | `MfdHostWindowPixelX/Y`, `MfdHostWindowWidth/Height` в `settings.toml` | ✅ | Восстановление с clamp к `WorkingArea`. |
-| MCP / агент | `UiLayoutSnapshot`, highlight | `role: mfd_host`, паритет подсветки | ✅ | `ide_get_ui_layout` — все top-level. |
+| Окно зоны Pfd (Semantic Map / PFD) | `Views/PfdHostWindow.axaml` | тот же `MainWindowViewModel` | ✅ | Тройной пресет `(P)(F)(M)` — PFD на отдельном экране; см. ADR 0017. |
+| Автозапуск и переключение хостов; MCP `toggle_mfd_host_window` при топологии с выносом Mfd | `MainWindow.PresentationHostWindows.axaml.cs` | MFD: `ToggleMfdHostWindowCommand` (`CanExecute` ← `PresentationRequestsMfdHostWindow`), `TryOpenMfdHostWindowOnStartup`, `OpenMfdHostWindowOnStartup`. PFD: `TogglePfdHostWindow` / `TryOpenPfdHostWindowOnStartup`, `OpenPfdHostWindowOnStartup` | ✅ | Отдельного пункта меню нет — раскладка в `settings.toml`. |
+| Колонки Pfd/Mfd в главном окне при открытых хостах | `MainWindow` / layout | `SetPfdHostWindowShellOpen` / `SetMfdHostWindowShellOpen` → скрыть дубль колонки | ✅ | `AttentionLayoutSurfaceKind.MainWindowPlusPfdHostTopLevel`, `MainWindowPlusMfdHostTopLevel`, `MainWindowPlusPfdMfdHostTopLevel`. |
+| Плейсмент на дисплее (общий для обоих хостов) | `PresentationHostWindowPlacement.PlaceOrRestore` / `PlaceNearMain` | `PfdHostPresentationScreenIndex` / `MfdHostPresentationScreenIndex` из разбора `presentation`; `[display]` `maximize_presentation_host_windows_on_dedicated_screens` | ✅ | Топология экранов: `PresentationMonitorTopology.OrderScreensForPresentation`. Fallback: «другой экран», не главный. При `false` — заполнение рабочей области без `Maximized`. |
+| Сохранение геометрии хостов | `Closing` → `PersistPfdHostWindowBounds` / `PersistMfdHostWindowBounds` | `PfdHostWindow*` / `MfdHostWindow*` (пиксели и размер) в `settings.toml` | ✅ | Восстановление с clamp к `WorkingArea`. |
+| MCP / агент | `UiLayoutSnapshot`, highlight | роли `pfd_host` / `mfd_host`, паритет подсветки | ✅ | `ide_get_ui_layout` — все top-level. |
 | Параметры AI и чата в зоне Mfd | `SecondaryShellView` → страница `AiChatSettings` → `AiChatSettingsPanelView` | `OpenSettingsCommand` → `TryNavigateToSecondaryShellPage` при `ai_chat_settings_presentation = mfd` в `settings.toml`; иначе `SettingsWindow` | ✅ | Палитра: «Вторичный контур: Параметры AI…»; полное окно — кнопка на странице или `window`. |
 
 **Остаётся вне этой таблицы (roadmap ADR):** продуктовая доводка UX на втором экране, полнота fallback при смене мониторов, детали подтверждений агента при двух окнах — см. [открытые вопросы 0017](../adr/0017-multi-window-workspace-and-agent-surfaces.md#adr0017-open-questions).
 
 ---
 
-Версия карты: **2026-04-02** (термины режима: `UiModeFamily` / capabilities вместо `Is*Mode`; §4.1 без изменений по смыслу). **2026-04-11** — в русских таблицах канон терминов: **Workspace Health** / «состояние воркспейса» вместо разговорной «телеметрии» для этого канала. **2026-04-11** — [ADR 0017](../adr/0017-multi-window-workspace-and-agent-surfaces.md) **Accepted**. **2026-04-11** — добавлен **§6** (второй `TopLevel`, `MfdHostWindow`, сервисы топологии/плейсмента); устаревшая оговорка «в репозитории ещё нет второго окна» снята. **2026-04-11** — §6: страница **AI и чата** во вторичном контуре (`SecondaryShellPage.AiChatSettings`), ключ `ai_chat_settings_presentation` (`mfd` / `window`).
+Версия карты: **2026-04-02** (термины режима: `UiModeFamily` / capabilities вместо `Is*Mode`; §4.1 без изменений по смыслу). **2026-04-11** — в русских таблицах канон терминов: **Workspace Health** / «состояние воркспейса» вместо разговорной «телеметрии» для этого канала. **2026-04-11** — [ADR 0017](../adr/0017-multi-window-workspace-and-agent-surfaces.md) **Accepted**. **2026-04-11** — добавлен **§6** (второй `TopLevel`, `MfdHostWindow`, сервисы топологии/плейсмента); устаревшая оговорка «в репозитории ещё нет второго окна» снята. **2026-04-11** — §6: страница **AI и чата** во вторичном контуре (`SecondaryShellPage.AiChatSettings`), ключ `ai_chat_settings_presentation` (`mfd` / `window`). **2026-04-17** — §6: `PfdHostWindow`, общий `PresentationHostWindows` partial и `PresentationHostWindowPlacement`; роли `pfd_host` / `mfd_host` в снимках.
