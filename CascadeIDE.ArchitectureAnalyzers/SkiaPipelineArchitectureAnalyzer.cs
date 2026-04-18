@@ -137,8 +137,8 @@ public sealed class SkiaPipelineArchitectureAnalyzer : DiagnosticAnalyzer
         if (context.Node is not ObjectCreationExpressionSyntax create)
             return;
         var typeName = create.Type.ToString();
-        if (!string.Equals(typeName, "WorkspaceNavigationStarGraphLayoutEngine", StringComparison.Ordinal)
-            && !string.Equals(typeName, "WorkspaceNavigationControlFlowGraphLayoutEngine", StringComparison.Ordinal))
+        if (!string.Equals(typeName, "SemanticMapStarGraphLayoutEngine", StringComparison.Ordinal)
+            && !string.Equals(typeName, "SemanticMapControlFlowGraphLayoutEngine", StringComparison.Ordinal))
             return;
 
         var enclosingType = create.Ancestors().OfType<TypeDeclarationSyntax>().FirstOrDefault()?.Identifier.ValueText ?? "";

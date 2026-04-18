@@ -76,9 +76,9 @@ public sealed class SkiaPipelineArchitectureAnalyzerTests
             namespace CascadeIDE.Services.Navigation;
             public sealed class AnyCompositor
             {
-                public object X() => new WorkspaceNavigationStarGraphLayoutEngine();
+                public object X() => new SemanticMapStarGraphLayoutEngine();
             }
-            public sealed class WorkspaceNavigationStarGraphLayoutEngine { }
+            public sealed class SemanticMapStarGraphLayoutEngine { }
             """));
 
         var d = Assert.Single(diags);
