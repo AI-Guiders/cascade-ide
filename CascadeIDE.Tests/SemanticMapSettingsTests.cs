@@ -16,4 +16,48 @@ public sealed class SemanticMapSettingsTests
         var actual = SemanticMapSettings.NormalizeDepth(input);
         Assert.Equal(expected, actual);
     }
+
+    /// <summary>
+    /// Регресс: обновление Semantic Map по курсору в CF должно опираться на <c>[semantic_map].depth</c>,
+    /// как и основной refresh — иначе <c>SemanticMapLevel</c> на VM и Depth расходятся, карта не следует за методом.
+    /// </summary>
+    [Theory]
+    [InlineData("controlFlow", true)]
+    [InlineData("CONTROLFLOW", true)]
+    [InlineData("file", false)]
+    [InlineData("unknown", false)]
+    public void IsControlFlowDepth_MatchesNormalizeDepth(string depth, bool expectedControlFlow)
+    {
+        var map = new SemanticMapSettings { Depth = depth };
+        Assert.Equal(expectedControlFlow, map.IsControlFlowDepth);
+        Assert.Equal(
+            SemanticMapSettings.NormalizeDepth(depth) == SemanticMapLevelKind.ControlFlow,
+            map.IsControlFlowDepth);
+    }
+
+    /// <summary>
+    /// Параметр <c>[semantic_map].view</c> в <c>RunWorkspaceNavigationMapRefreshAsync</c> даёт
+    /// <c>wantList</c> / <c>wantGraph</c> — при расхождении с привязкой ComboBox к VM снова получится «тихий» баг UI.
+    /// </summary>
+    [Theory]
+    [InlineData("list", true, false)]
+    [InlineData("LIST", true, false)]
+    [InlineData("graph", false, true)]
+    [InlineData("GRAPH", false, true)]
+    [InlineData("both", true, true)]
+    [InlineData("BOTH", true, true)]
+    [InlineData("nonsense", true, false)]
+    [InlineData("", true, false)]
+    public void NormalizeView_MatchesWorkspaceRefreshWantListWantGraph(
+        string rawView,
+        bool expectedWantList,
+        bool expectedWantGraph)
+    {
+        var map = new SemanticMapSettings { View = rawView };
+        Assert.Equal(expectedWantList, map.WantsSemanticMapList);
+        Assert.Equal(expectedWantGraph, map.WantsSemanticMapGraph);
+        var normalized = SemanticMapSettings.NormalizeView(rawView);
+        Assert.Equal(expectedWantList, normalized is "list" or "both");
+        Assert.Equal(expectedWantGraph, normalized is "graph" or "both");
+    }
 }

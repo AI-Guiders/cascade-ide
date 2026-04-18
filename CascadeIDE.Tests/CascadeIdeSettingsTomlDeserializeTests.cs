@@ -56,4 +56,22 @@ public sealed class CascadeIdeSettingsTomlDeserializeTests
         var roundtrip = Deserialize(toml);
         Assert.Equal("(0.5PFD + 0.5Forward) (MFD)", roundtrip.GetEffectivePresentationLine());
     }
+
+    [Fact]
+    public void Deserialize_SemanticMapSection_ParsesViewAndDepth()
+    {
+        const string text =
+            """
+            [semantic_map]
+            view = "both"
+            depth = "controlFlow"
+            """;
+
+        var s = Deserialize(text);
+        Assert.True(s.SemanticMap.WantsSemanticMapList);
+        Assert.True(s.SemanticMap.WantsSemanticMapGraph);
+        Assert.True(s.SemanticMap.IsControlFlowDepth);
+        Assert.Equal("both", SemanticMapSettings.NormalizeView(s.SemanticMap.View));
+        Assert.Equal(SemanticMapLevelKind.ControlFlow, SemanticMapSettings.NormalizeDepth(s.SemanticMap.Depth));
+    }
 }

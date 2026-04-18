@@ -29,7 +29,7 @@ public partial class MainWindowViewModel
     internal void UpdateSemanticMapCaretOffset(int? offset)
     {
         _editorCaretOffset = offset;
-        if (SemanticMapLevel == SemanticMapLevelKind.ControlFlow)
+        if (_settings.SemanticMap.IsControlFlowDepth)
             ScheduleWorkspaceNavigationMapRefresh();
     }
 
@@ -148,7 +148,8 @@ public partial class MainWindowViewModel
         int? cursorLine = null;
         int? cursorColumn = null;
         NavigationSettings? navSettings = null;
-        var presentation = SemanticMapPresentationKind.List;
+        var wantList = false;
+        var wantGraph = false;
         var level = SemanticMapLevelKind.File;
         await UiScheduler.Default.InvokeAsync(() =>
         {
@@ -160,15 +161,14 @@ public partial class MainWindowViewModel
             cursorLine = line;
             cursorColumn = column;
             navSettings = _settings.WorkspaceNavigation;
-            presentation = SemanticMapPresentationKind.Normalize(_settings.SemanticMap.View);
-            level = SemanticMapLevelKind.Normalize(_settings.SemanticMap.Depth);
+            var sm = _settings.SemanticMap;
+            wantList = sm.WantsSemanticMapList;
+            wantGraph = sm.WantsSemanticMapGraph;
+            level = SemanticMapLevelKind.Normalize(sm.Depth);
         });
 
         if (ct.IsCancellationRequested)
             return;
-
-        var wantList = presentation is SemanticMapPresentationKind.List or SemanticMapPresentationKind.Both;
-        var wantGraph = presentation is SemanticMapPresentationKind.Graph or SemanticMapPresentationKind.Both;
 
         var useSubgraphMode = level == SemanticMapLevelKind.ControlFlow || wantGraph;
 
