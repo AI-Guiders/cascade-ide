@@ -9,21 +9,30 @@ namespace CascadeIDE.Services;
 /// </summary>
 public static class EnvironmentReadinessSnapshotBuilder
 {
+    /// <summary>Заглушка для ячейки «агент»: отдельная проверка MCP/ACP — по мере появления контракта.</summary>
+    private static AnnunciatorLampItem BuildAgentRow() =>
+        new(
+            EnvironmentReadinessCellIds.Agent,
+            "Агент (AI)",
+            "Канал к агенту и MCP задаётся сессией IDE; отдельный health-check на этой странице пока не выполняется.",
+            AnnunciatorLampLevel.Info,
+            LampShortLabel: "AI");
+
     /// <summary>Статическая часть: C# LSP, Markdown LSP (без сетевого вызова).</summary>
-    public static IReadOnlyList<EnvironmentReadinessItem> BuildLspRows(
+    public static IReadOnlyList<AnnunciatorLampItem> BuildLspRows(
         CascadeIdeSettings settings,
         string? solutionPath,
         CSharpLspDiagnosticsHost? csharpHost,
         MarkdownLspDiagnosticsHost? markdownHost)
     {
-        var list = new List<EnvironmentReadinessItem>(4);
+        var list = new List<AnnunciatorLampItem>(4);
         list.Add(BuildCSharpRow(settings, solutionPath, csharpHost));
         list.Add(BuildMarkdownRow(settings, solutionPath, markdownHost));
         return list;
     }
 
     /// <summary>Проверка <c>dotnet</c> в PATH (как при сборке).</summary>
-    public static async Task<EnvironmentReadinessItem> ProbeDotnetAsync(CancellationToken cancellationToken = default)
+    public static async Task<AnnunciatorLampItem> ProbeDotnetAsync(CancellationToken cancellationToken = default)
     {
         try
         {
@@ -38,10 +47,12 @@ public static class EnvironmentReadinessSnapshotBuilder
 
             using var process = Process.Start(psi);
             if (process is null)
-                return new EnvironmentReadinessItem(
+                return new AnnunciatorLampItem(
+                    EnvironmentReadinessCellIds.DotnetSdk,
                     "dotnet (SDK / CLI)",
                     "Не удалось запустить процесс dotnet.",
-                    EnvironmentReadinessLevel.Unavailable);
+                    AnnunciatorLampLevel.Unavailable,
+                    LampShortLabel: ".NET");
 
             var outTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
             var errTask = process.StandardError.ReadToEndAsync(cancellationToken);
@@ -50,16 +61,20 @@ public static class EnvironmentReadinessSnapshotBuilder
             var err = (await errTask.ConfigureAwait(false)).Trim();
 
             if (process.ExitCode == 0 && !string.IsNullOrWhiteSpace(ver))
-                return new EnvironmentReadinessItem(
+                return new AnnunciatorLampItem(
+                    EnvironmentReadinessCellIds.DotnetSdk,
                     "dotnet (SDK / CLI)",
                     $"Версия: {ver}",
-                    EnvironmentReadinessLevel.Ok);
+                    AnnunciatorLampLevel.Ok,
+                    LampShortLabel: ".NET");
 
             var tail = string.IsNullOrWhiteSpace(err) ? $"код выхода {process.ExitCode}" : err;
-            return new EnvironmentReadinessItem(
+            return new AnnunciatorLampItem(
+                EnvironmentReadinessCellIds.DotnetSdk,
                 "dotnet (SDK / CLI)",
                 $"dotnet --version не удался ({tail}). Добавь dotnet в PATH или установи SDK.",
-                EnvironmentReadinessLevel.Unavailable);
+                AnnunciatorLampLevel.Unavailable,
+                LampShortLabel: ".NET");
         }
         catch (OperationCanceledException)
         {
@@ -67,14 +82,16 @@ public static class EnvironmentReadinessSnapshotBuilder
         }
         catch (Exception ex)
         {
-            return new EnvironmentReadinessItem(
+            return new AnnunciatorLampItem(
+                EnvironmentReadinessCellIds.DotnetSdk,
                 "dotnet (SDK / CLI)",
                 $"Не удалось выполнить dotnet --version: {ex.Message}",
-                EnvironmentReadinessLevel.Unavailable);
+                AnnunciatorLampLevel.Unavailable,
+                LampShortLabel: ".NET");
         }
     }
 
-    private static EnvironmentReadinessItem BuildCSharpRow(
+    private static AnnunciatorLampItem BuildCSharpRow(
         CascadeIdeSettings settings,
         string? solutionPath,
         CSharpLspDiagnosticsHost? host)
@@ -85,19 +102,23 @@ public static class EnvironmentReadinessSnapshotBuilder
 
         if (string.Equals(provider, CSharpLspProviderIds.ParseOnly, StringComparison.OrdinalIgnoreCase))
         {
-            return new EnvironmentReadinessItem(
+            return new AnnunciatorLampItem(
+                EnvironmentReadinessCellIds.CSharpLsp,
                 "C# LSP",
                 "Режим «только парсер»: отдельный процесс language server не используется (Roslyn в процессе IDE).",
-                EnvironmentReadinessLevel.Info);
+                AnnunciatorLampLevel.Info,
+                LampShortLabel: "C#");
         }
 
         var slnOk = !string.IsNullOrWhiteSpace(solutionPath) && File.Exists(solutionPath);
         if (!slnOk)
         {
-            return new EnvironmentReadinessItem(
+            return new AnnunciatorLampItem(
+                EnvironmentReadinessCellIds.CSharpLsp,
                 "C# LSP",
                 $"Провайдер: {provider}. Открой файл решения (.sln/.slnx), чтобы IDE могла запустить LSP.",
-                EnvironmentReadinessLevel.Warning);
+                AnnunciatorLampLevel.Warning,
+                LampShortLabel: "C#");
         }
 
         var (exe, _) = CSharpLspProviderIds.ResolveProcessArgs(
@@ -110,27 +131,33 @@ public static class EnvironmentReadinessSnapshotBuilder
 
         if (host is null)
         {
-            return new EnvironmentReadinessItem(
+            return new AnnunciatorLampItem(
+                EnvironmentReadinessCellIds.CSharpLsp,
                 "C# LSP",
                 $"{exeHint}. Процесс не запущен — проверь путь к исполняемому файлу и аргументы в настройках.",
-                EnvironmentReadinessLevel.Warning);
+                AnnunciatorLampLevel.Warning,
+                LampShortLabel: "C#");
         }
 
         if (host.IsActive)
         {
-            return new EnvironmentReadinessItem(
+            return new AnnunciatorLampItem(
+                EnvironmentReadinessCellIds.CSharpLsp,
                 "C# LSP",
                 $"{exeHint}. Процесс активен.",
-                EnvironmentReadinessLevel.Ok);
+                AnnunciatorLampLevel.Ok,
+                LampShortLabel: "C#");
         }
 
-        return new EnvironmentReadinessItem(
+        return new AnnunciatorLampItem(
+            EnvironmentReadinessCellIds.CSharpLsp,
             "C# LSP",
             $"{exeHint}. Процесс не активен (завершился или не прошёл handshake).",
-            EnvironmentReadinessLevel.Warning);
+            AnnunciatorLampLevel.Warning,
+            LampShortLabel: "C#");
     }
 
-    private static EnvironmentReadinessItem BuildMarkdownRow(
+    private static AnnunciatorLampItem BuildMarkdownRow(
         CascadeIdeSettings settings,
         string? solutionPath,
         MarkdownLspDiagnosticsHost? host)
@@ -141,19 +168,23 @@ public static class EnvironmentReadinessSnapshotBuilder
 
         if (string.Equals(provider, MarkdownLspProviderIds.Off, StringComparison.OrdinalIgnoreCase))
         {
-            return new EnvironmentReadinessItem(
+            return new AnnunciatorLampItem(
+                EnvironmentReadinessCellIds.MarkdownLsp,
                 "Markdown LSP",
                 "Выключено (диагностики Markdown из отдельного сервера не используются).",
-                EnvironmentReadinessLevel.Info);
+                AnnunciatorLampLevel.Info,
+                LampShortLabel: "MD");
         }
 
         var slnOk = !string.IsNullOrWhiteSpace(solutionPath) && File.Exists(solutionPath);
         if (!slnOk)
         {
-            return new EnvironmentReadinessItem(
+            return new AnnunciatorLampItem(
+                EnvironmentReadinessCellIds.MarkdownLsp,
                 "Markdown LSP",
                 $"Провайдер: {provider}. Нужен открытый файл решения, чтобы запустить сервер.",
-                EnvironmentReadinessLevel.Warning);
+                AnnunciatorLampLevel.Warning,
+                LampShortLabel: "MD");
         }
 
         var (exe, args) = MarkdownLspProviderIds.ResolveProcessArgs(
@@ -166,40 +197,48 @@ public static class EnvironmentReadinessSnapshotBuilder
 
         if (host is null)
         {
-            return new EnvironmentReadinessItem(
+            return new AnnunciatorLampItem(
+                EnvironmentReadinessCellIds.MarkdownLsp,
                 "Markdown LSP",
                 $"{exeHint}. Процесс не запущен — проверь установку (например Marksman в PATH) или путь в настройках.",
-                EnvironmentReadinessLevel.Warning);
+                AnnunciatorLampLevel.Warning,
+                LampShortLabel: "MD");
         }
 
         if (host.IsActive)
         {
-            return new EnvironmentReadinessItem(
+            return new AnnunciatorLampItem(
+                EnvironmentReadinessCellIds.MarkdownLsp,
                 "Markdown LSP",
                 $"{exeHint}. Процесс активен.",
-                EnvironmentReadinessLevel.Ok);
+                AnnunciatorLampLevel.Ok,
+                LampShortLabel: "MD");
         }
 
-        return new EnvironmentReadinessItem(
+        return new AnnunciatorLampItem(
+            EnvironmentReadinessCellIds.MarkdownLsp,
             "Markdown LSP",
             $"{exeHint}. Процесс не активен.",
-            EnvironmentReadinessLevel.Warning);
+            AnnunciatorLampLevel.Warning,
+            LampShortLabel: "MD");
     }
 
     /// <summary>
     /// Полный набор строк для страницы «готовность окружения» (ADR 0023): LSP, затем проверка <c>dotnet</c>.
     /// Дополнительные проверки (MCP, переменные окружения и т.д.) добавлять сюда, чтобы не раздувать ViewModel.
     /// </summary>
-    public static async Task<IReadOnlyList<EnvironmentReadinessItem>> BuildAllRowsAsync(
+    public static async Task<IReadOnlyList<AnnunciatorLampItem>> BuildAllRowsAsync(
         CascadeIdeSettings settings,
         string? solutionPath,
         CSharpLspDiagnosticsHost? csharpHost,
         MarkdownLspDiagnosticsHost? markdownHost,
         CancellationToken cancellationToken = default)
     {
+        var agent = BuildAgentRow();
         var lsp = BuildLspRows(settings, solutionPath, csharpHost, markdownHost);
         var dotnet = await ProbeDotnetAsync(cancellationToken).ConfigureAwait(false);
-        var combined = new List<EnvironmentReadinessItem>(lsp.Count + 1);
+        var combined = new List<AnnunciatorLampItem>(lsp.Count + 2);
+        combined.Add(agent);
         combined.AddRange(lsp);
         combined.Add(dotnet);
         return combined;

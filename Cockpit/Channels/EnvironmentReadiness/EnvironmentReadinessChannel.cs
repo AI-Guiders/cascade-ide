@@ -9,7 +9,7 @@ namespace CascadeIDE.Cockpit.Channels.EnvironmentReadiness;
 /// </summary>
 public sealed class EnvironmentReadinessChannel : IEnvironmentReadinessChannel
 {
-    public ValueTask<IReadOnlyList<EnvironmentReadinessItem>> Build(in EnvironmentReadinessChannelContext context) =>
+    public ValueTask<IReadOnlyList<AnnunciatorLampItem>> Build(in EnvironmentReadinessChannelContext context) =>
         new(EnvironmentReadinessSnapshotBuilder.BuildAllRowsAsync(
             context.Settings,
             context.SolutionPath,

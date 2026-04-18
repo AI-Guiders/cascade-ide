@@ -1,8 +1,8 @@
 using System.Collections.ObjectModel;
+using CascadeIDE.Cockpit;
 using CascadeIDE.Cockpit.Channels.EnvironmentReadiness;
 using CascadeIDE.Cockpit.Composition.EnvironmentReadiness;
 using CascadeIDE.Models;
-using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 namespace CascadeIDE.ViewModels;
@@ -10,10 +10,13 @@ namespace CascadeIDE.ViewModels;
 /// <summary>Снимок «готовность окружения» (ADR 0023), отдельно от Workspace Health.</summary>
 public partial class MainWindowViewModel
 {
-    public ObservableCollection<EnvironmentReadinessItem> EnvironmentReadinessItems { get; } = [];
+    public ObservableCollection<AnnunciatorLampItem> EnvironmentReadinessItems { get; } = [];
 
-    [ObservableProperty]
-    private string _environmentReadinessUpdatedText = "";
+    /// <summary>ADR 0063: компактный deck — ряд ламп (короткие подписи в <see cref="AnnunciatorLampItem.LampShortLabel"/>; примитив <see cref="DeckPrimitiveKind.Lamp"/>).</summary>
+    public InstrumentDeckDescriptor EnvironmentReadinessCompactDeck => EnvironmentReadinessInstrumentDeck.CompactLampStrip;
+
+    /// <summary>ADR 0063: текстовый deck — те же ячейки, развёрнутая детализация в списке ниже.</summary>
+    public InstrumentDeckDescriptor EnvironmentReadinessTextualDeck => EnvironmentReadinessInstrumentDeck.TextualDetail;
 
     partial void OnCurrentSecondaryShellPageChanged(SecondaryShellPage value)
     {
@@ -57,7 +60,6 @@ public partial class MainWindowViewModel
                 EnvironmentReadinessItems,
                 rows,
                 new EnvironmentReadinessSurfaceDecision(Enabled: true));
-            EnvironmentReadinessUpdatedText = $"Обновлено: {DateTime.Now:HH:mm:ss}";
         });
     }
 }

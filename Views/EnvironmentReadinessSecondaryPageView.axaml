@@ -6,28 +6,25 @@
              x:Class="CascadeIDE.Views.EnvironmentReadinessSecondaryPageView"
              x:DataType="vm:MainWindowViewModel">
     <UserControl.Resources>
-        <views:EnvironmentReadinessLevelToBrushConverter x:Key="EnvLevelBrush"/>
-        <views:EnvironmentReadinessLevelToGlyphTextConverter x:Key="EnvLevelGlyph"/>
+        <views:AnnunciatorLampLevelToBrushConverter x:Key="EnvLevelBrush"/>
+        <views:AnnunciatorLampLevelToGlyphTextConverter x:Key="EnvLevelGlyph"/>
     </UserControl.Resources>
     <DockPanel Margin="0,4,0,0">
         <views:PanelChromeHeader DockPanel.Dock="Top" Title="Готовность окружения · LSP и инструменты" UppercaseTitle="True"/>
-        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="8" Margin="0,0,0,8">
-            <Button Content="Другая страница вторичного контура…" Command="{Binding CloseEnvironmentReadinessPageCommand}" Padding="8,4"/>
-            <Button Content="Обновить" Command="{Binding RefreshEnvironmentReadinessCommand}" Padding="8,4"/>
-            <Button Content="Параметры…" Command="{Binding OpenSettingsCommand}" Padding="8,4"/>
-            <TextBlock Text="{Binding EnvironmentReadinessUpdatedText}"
-                       VerticalAlignment="Center"
-                       FontSize="11"
-                       Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-        </StackPanel>
+        <!-- ADR 0055 / 0063: компактный deck — отрисовка annunciator через DrawingContext (тот же контур, что SkiaHost / CockpitSkiaSceneRenderer). -->
+        <views:AnnunciatorLampStrip DockPanel.Dock="Top"
+                                                    Margin="0,0,0,8"
+                                                    Items="{Binding EnvironmentReadinessItems}"
+                                                    HorizontalAlignment="Left"
+                                                    VerticalAlignment="Top"/>
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-            <!-- Два режима раскладки страницы зоны MFD по ширине контейнера (см. code-behind; не семантический композитор — см. docs/design/workspace-health-implementation-map-v1.md §1). -->
+            <!-- Два режима текстового deck по ширине контейнера (см. code-behind). -->
             <Panel>
                 <!-- Узкая зона: текстовые карточки (удобно при (P|F|M) и узком MFD). -->
                 <Grid x:Name="CompactLayoutRoot" IsVisible="True">
                     <ItemsControl ItemsSource="{Binding EnvironmentReadinessItems}">
                         <ItemsControl.ItemTemplate>
-                            <DataTemplate DataType="models:EnvironmentReadinessItem">
+                            <DataTemplate DataType="models:AnnunciatorLampItem">
                                 <Border Classes="modeCard"
                                         Padding="8,6"
                                         Margin="0,0,0,6"
@@ -78,7 +75,7 @@
                     </Grid>
                     <ItemsControl Grid.Row="1" ItemsSource="{Binding EnvironmentReadinessItems}">
                         <ItemsControl.ItemTemplate>
-                            <DataTemplate DataType="models:EnvironmentReadinessItem">
+                            <DataTemplate DataType="models:AnnunciatorLampItem">
                                 <Border Classes="modeCard"
                                         Padding="8,8"
                                         Margin="0,0,0,6"

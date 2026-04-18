@@ -8,6 +8,6 @@ namespace CascadeIDE.Cockpit.Composition.EnvironmentReadiness;
 /// <summary>
 /// Surface compositor contract for Environment Readiness page.
 /// </summary>
-public interface IEnvironmentReadinessSurfaceCompositor : ISurfaceCompositor<ObservableCollection<EnvironmentReadinessItem>, IReadOnlyList<EnvironmentReadinessItem>, EnvironmentReadinessSurfaceDecision, ObservableCollection<EnvironmentReadinessItem>>
+public interface IEnvironmentReadinessSurfaceCompositor : ISurfaceCompositor<ObservableCollection<AnnunciatorLampItem>, IReadOnlyList<AnnunciatorLampItem>, EnvironmentReadinessSurfaceDecision, ObservableCollection<AnnunciatorLampItem>>
 {
 }

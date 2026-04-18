@@ -3,8 +3,8 @@ using Avalonia.Controls;
 namespace CascadeIDE.Views;
 
 /// <summary>
-/// Готовность окружения: раскладка страницы зоны MFD — компактные карточки при узкой колонке,
-/// таблица при достаточной ширине. Состав списка задаётся снимком/VM; здесь только геометрия (см. ADR 0021 / workspace-health implementation map §1 «chrome layout»).
+/// Готовность окружения: ADR 0063 — полоса ламп (компактный deck) и ниже текстовый deck
+/// (карточки при узкой колонке, таблица при ширине ≥ <see cref="WideLayoutMinWidth"/>).
 /// </summary>
 public partial class EnvironmentReadinessSecondaryPageView : UserControl
 {

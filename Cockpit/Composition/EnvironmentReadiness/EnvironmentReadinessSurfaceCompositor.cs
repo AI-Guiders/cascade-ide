@@ -9,9 +9,9 @@ namespace CascadeIDE.Cockpit.Composition.EnvironmentReadiness;
 /// </summary>
 public sealed class EnvironmentReadinessSurfaceCompositor : IEnvironmentReadinessSurfaceCompositor
 {
-    public ObservableCollection<EnvironmentReadinessItem> Compose(
-        ObservableCollection<EnvironmentReadinessItem> scene,
-        IReadOnlyList<EnvironmentReadinessItem> payload,
+    public ObservableCollection<AnnunciatorLampItem> Compose(
+        ObservableCollection<AnnunciatorLampItem> scene,
+        IReadOnlyList<AnnunciatorLampItem> payload,
         in EnvironmentReadinessSurfaceDecision decision)
     {
         if (!decision.Enabled)
