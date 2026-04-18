@@ -201,4 +201,5 @@
 - **v1.84** — добавлен [0054](adr/0054-benchmarking-methodology-and-baselines.md): протокол бенчмарков CIDE (сценарии, метрики, baseline, правила сравнения); статус **Proposed**.
 - **v1.85** — добавлен [0058](adr/0058-agent-roslyn-mcp-coupling-settings-toml.md): сопряжение агент ↔ Roslyn MCP в `settings.toml` (лимиты, виды узлов, таймауты, пресеты); таблица потребителей; v0 vs отложенное; статус **Proposed**.
 - **v1.86** — [0058](adr/0058-agent-roslyn-mcp-coupling-settings-toml.md): §6 — именованные профили, Manager, Auto-Focus / Combat / Glide Slope; связь с [0010](adr/0010-ui-modes-toml-configuration.md), [0051](adr/0051-intent-based-attention-routing-toml.md), [0055](adr/0055-skia-instrument-composition-pipeline.md).
+- **v1.87** — [0058](adr/0058-agent-roslyn-mcp-coupling-settings-toml.md): §7 — третий монитор как EFB / стратегический `Profile.GlobalMap` vs тактический PFD; [0017](adr/0017-multi-window-workspace-and-agent-surfaces.md), [0021](adr/0021-pfd-mfd-cockpit-attention-model.md).
 - Изменения направления — отдельным коммитом: обновление этого файла и при необходимости новый ADR в [docs/adr/README.md](adr/README.md).
