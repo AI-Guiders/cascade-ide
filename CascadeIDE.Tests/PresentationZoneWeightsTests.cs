@@ -61,7 +61,9 @@ public sealed class PresentationZoneWeightsTests
         var result = PresentationMainGridColumnDefinitions.Get(
             parse,
             dedicatedMfdSecondScreen: false,
-            mfdColumnSuppressedForHost: false);
+            mfdColumnSuppressedForHost: false,
+            tripleOneAnchorPerZone: false,
+            suppressPfdColumnForPfdHostWindow: false);
 
         Assert.Equal("0.5*,4,0.3*,4,0.2*", result);
     }

@@ -62,8 +62,26 @@ public sealed class PresentationParserTests
         Assert.True(r.IsSuccess);
         Assert.Equal(3, r.Screens.Count);
         Assert.True(PresentationLayoutAnalyzer.IsTriplePfdForwardMfdPreset(r.Screens));
+        Assert.True(PresentationLayoutAnalyzer.IsTripleOneAnchorPerZonePreset(r.Screens));
         Assert.True(PresentationLayoutAnalyzer.TryGetMfdHostPresentationScreenIndex(r.Screens, out var mfdIdx));
         Assert.Equal(2, mfdIdx);
+        Assert.True(PresentationLayoutAnalyzer.TryGetPfdHostPresentationScreenIndex(r.Screens, out var pfdIdx));
+        Assert.Equal(0, pfdIdx);
+    }
+
+    [Fact]
+    public void ThreeScreens_permuted_M_F_P_resolves_anchor_screen_indices()
+    {
+        var g = PresentationGrammarTokens.FromSettings("()", " ", "+", "P", "F", "M");
+        var r = PresentationParser.Parse("(M) (F) (P)", g);
+        Assert.True(r.IsSuccess);
+        Assert.Equal(3, r.Screens.Count);
+        Assert.True(PresentationLayoutAnalyzer.IsTripleOneAnchorPerZonePreset(r.Screens));
+        Assert.False(PresentationLayoutAnalyzer.IsTriplePfdForwardMfdPreset(r.Screens));
+        Assert.True(PresentationLayoutAnalyzer.TryGetMfdHostPresentationScreenIndex(r.Screens, out var mIdx));
+        Assert.Equal(0, mIdx);
+        Assert.True(PresentationLayoutAnalyzer.TryGetPfdHostPresentationScreenIndex(r.Screens, out var pIdx));
+        Assert.Equal(2, pIdx);
     }
 
     [Fact]

@@ -18,6 +18,7 @@ public sealed class CockpitSurfaceSnapshotBuilderTests
         Assert.False(string.IsNullOrWhiteSpace(state.UiMode));
         Assert.Equal("main_window_docked_grid", state.Topology.SurfaceKind);
         Assert.False(state.Topology.MfdHostWindowOpen);
+        Assert.False(state.Topology.PfdHostWindowOpen);
         Assert.True(state.Zones.ForwardVisible);
         Assert.Single(state.Instruments);
         Assert.Contains(
@@ -37,6 +38,7 @@ public sealed class CockpitSurfaceSnapshotBuilderTests
             Topology: new CockpitSurfaceTopology(
                 "main_window_docked_grid",
                 MfdHostWindowOpen: false,
+                PfdHostWindowOpen: false,
                 MfdColumnVisibleInMain: true),
             SecondaryShell: new CockpitSurfaceSecondaryShell("Terminal"),
             Zones: new CockpitSurfaceZones(
@@ -57,6 +59,7 @@ public sealed class CockpitSurfaceSnapshotBuilderTests
         Assert.Contains("\"presentation_effective_line\"", json);
         Assert.Contains("\"surface_kind\":\"main_window_docked_grid\"", json);
         Assert.Contains("\"mfd_host_window_open\":false", json);
+        Assert.Contains("\"pfd_host_window_open\":false", json);
         Assert.Contains("\"current_page\":\"Terminal\"", json);
         Assert.Contains("\"pfd_visible\":true", json);
         Assert.Contains("\"forward_visible\":true", json);

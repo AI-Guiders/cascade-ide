@@ -10,7 +10,10 @@ public class MarkdownDiagramExpansionTests
     public async Task ExpandAsync_KrokiDisabled_LeavesMermaidFenceUntouched()
     {
         var md = "```mermaid\ngraph LR\n  A-->B\n```";
-        var settings = new CascadeIdeSettings { MarkdownDiagrams = new MarkdownDiagramSettings { KrokiEnabled = false } };
+        var settings = new CascadeIdeSettings
+        {
+            Markdown = new MarkdownSettings { Diagrams = new MarkdownDiagramSettings { Kroki = false } }
+        };
         var result = await MarkdownDiagramExpansion.ExpandAsync(md, settings);
         Assert.Equal(md, result);
     }
@@ -21,7 +24,10 @@ public class MarkdownDiagramExpansionTests
         var md = "# Title\n\n```csharp\nvar x = 1;\n```\n";
         var settings = new CascadeIdeSettings
         {
-            MarkdownDiagrams = new MarkdownDiagramSettings { KrokiEnabled = true, KrokiBaseUrl = "https://kroki.io" }
+            Markdown = new MarkdownSettings
+            {
+                Diagrams = new MarkdownDiagramSettings { Kroki = true, KrokiUrl = "https://kroki.io" }
+            }
         };
         var result = await MarkdownDiagramExpansion.ExpandAsync(md, settings);
         Assert.Equal(md, result);

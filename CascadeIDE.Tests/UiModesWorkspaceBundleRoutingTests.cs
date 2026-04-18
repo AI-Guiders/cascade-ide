@@ -31,7 +31,7 @@ public sealed class UiModesWorkspaceBundleRoutingTests
 
         var text = File.ReadAllText(path);
         var w = CascadeTomlSerializer.Deserialize<UiWorkspaceToml>(text);
-        Assert.NotNull(w?.AttentionRouting);
+        Assert.NotNull(w?.Routing?.Attention);
 
         foreach (var intent in new[]
                  {
@@ -43,8 +43,8 @@ public sealed class UiModesWorkspaceBundleRoutingTests
                  })
         {
             Assert.True(
-                w!.AttentionRouting!.ContainsKey(intent),
-                $"UiModes/workspace.toml [attention_routing] should define intent '{intent}'.");
+                w!.Routing!.Attention!.ContainsKey(intent),
+                $"UiModes/workspace.toml [routing.attention] should define intent '{intent}'.");
         }
     }
 }

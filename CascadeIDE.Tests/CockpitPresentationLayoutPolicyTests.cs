@@ -8,9 +8,9 @@ public sealed class CockpitPresentationLayoutPolicyTests
 {
     private static PresentationGrammarTokens DefaultGrammar() =>
         PresentationGrammarTokens.FromSettings(
-            screenMarkers: "()",
-            screenSeparator: " ",
-            zoneSeparator: "+",
+            brackets: "()",
+            betweenScreens: " ",
+            betweenZones: "+",
             pfdZoneIdentifier: "P",
             forwardZoneIdentifier: "F",
             mfdZoneIdentifier: "M");

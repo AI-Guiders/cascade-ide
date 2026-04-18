@@ -13,7 +13,7 @@ public sealed class SemanticMapSettingsTests
     [InlineData("unknown", SemanticMapLevelKind.File)]
     public void NormalizeLevel_ReturnsKnownValue(string input, string expected)
     {
-        var actual = SemanticMapSettings.NormalizeLevel(input);
+        var actual = SemanticMapSettings.NormalizeDepth(input);
         Assert.Equal(expected, actual);
     }
 }

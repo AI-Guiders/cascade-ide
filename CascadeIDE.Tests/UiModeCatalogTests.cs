@@ -20,12 +20,14 @@ public sealed class UiModeCatalogTests : IDisposable
         File.WriteAllText(
             Path.Combine(dir, "index.toml"),
             """
+            [bundle]
             schema_version = 1
             modes = [ "Focus", "Balanced", "Power", "AgentChat", "Debug", "MySuperDebug" ]
             """);
         File.WriteAllText(
             Path.Combine(dir, "MySuperDebug.toml"),
             """
+            [meta]
             inherits = "Debug"
             """);
 
@@ -52,17 +54,20 @@ public sealed class UiModeCatalogTests : IDisposable
         File.WriteAllText(
             Path.Combine(dir, "index.toml"),
             """
+            [bundle]
             schema_version = 1
             modes = [ "Balanced", "DerivedBalanced" ]
             """);
         File.WriteAllText(
             Path.Combine(dir, "Balanced.toml"),
             """
+            [layout]
             mfd_region_expanded_width_pixels = 555
             """);
         File.WriteAllText(
             Path.Combine(dir, "DerivedBalanced.toml"),
             """
+            [meta]
             inherits = "Balanced"
             """);
 
@@ -80,6 +85,7 @@ public sealed class UiModeCatalogTests : IDisposable
         File.WriteAllText(
             Path.Combine(dir, "index.toml"),
             """
+            [bundle]
             schema_version = 1
             modes = [ "Debug" ]
             """);
@@ -97,12 +103,14 @@ public sealed class UiModeCatalogTests : IDisposable
         File.WriteAllText(
             Path.Combine(dir, "index.toml"),
             """
+            [bundle]
             schema_version = 1
             modes = [ "Debug" ]
             """);
         File.WriteAllText(
             Path.Combine(dir, "Debug.toml"),
             """
+            [layout]
             active_task_strip = true
             """);
 
@@ -119,12 +127,14 @@ public sealed class UiModeCatalogTests : IDisposable
         File.WriteAllText(
             Path.Combine(dir, "index.toml"),
             """
+            [bundle]
             schema_version = 1
             modes = [ "Focus", "MySuperDebug" ]
             """);
         File.WriteAllText(
             Path.Combine(dir, "MySuperDebug.toml"),
             """
+            [meta]
             inherits = "Focus"
             """);
 
@@ -141,6 +151,7 @@ public sealed class UiModeCatalogTests : IDisposable
         File.WriteAllText(
             Path.Combine(dir, "index.toml"),
             """
+            [bundle]
             schema_version = 1
             modes = [ "Balanced", "Debug", "Power", "Focus", "AgentChat", "Flight" ]
             """);
@@ -178,12 +189,14 @@ public sealed class UiModeCatalogTests : IDisposable
         File.WriteAllText(
             Path.Combine(dir, "index.toml"),
             """
+            [bundle]
             schema_version = 1
             modes = [ "Balanced", "Flight" ]
             """);
         File.WriteAllText(
             Path.Combine(dir, "Flight.toml"),
             """
+            [meta]
             inherits = "Balanced"
             family = "Flight"
             main_window_title = "CascadeIDE — Flight (test)"
@@ -205,15 +218,19 @@ public sealed class UiModeCatalogTests : IDisposable
         File.WriteAllText(
             Path.Combine(dir, "index.toml"),
             """
+            [bundle]
             schema_version = 1
             modes = [ "Debug" ]
             """);
         File.WriteAllText(
             Path.Combine(dir, "Debug.toml"),
             """
+            [capabilities]
             hypotheses_tab = false
-            main_window_title = "IDE — Debug (custom)"
             workspace_health_main_column_span = 4
+
+            [meta]
+            main_window_title = "IDE — Debug (custom)"
             """);
 
         UiModeCatalog.Initialize(dir);
@@ -233,18 +250,22 @@ public sealed class UiModeCatalogTests : IDisposable
         File.WriteAllText(
             Path.Combine(dir, "index.toml"),
             """
+            [bundle]
             schema_version = 1
             modes = [ "Editor" ]
             """);
         File.WriteAllText(
             Path.Combine(dir, "Editor.toml"),
             """
+            [meta]
             inherits = "Flight"
             family = "Editor"
 
+            [layout]
             instrumentation_dock_visible = false
             active_task_strip = false
 
+            [capabilities]
             quick_actions = false
             agent_operations_panel = false
             agent_trace = false
@@ -284,12 +305,14 @@ public sealed class UiModeCatalogTests : IDisposable
         File.WriteAllText(
             Path.Combine(dir, "index.toml"),
             """
+            [bundle]
             schema_version = 1
             modes = [ "Balanced" ]
             """);
         File.WriteAllText(
             Path.Combine(dir, "Balanced.toml"),
             """
+            [capabilities]
             workspace_health_surface = "dedicated_page"
             """);
 

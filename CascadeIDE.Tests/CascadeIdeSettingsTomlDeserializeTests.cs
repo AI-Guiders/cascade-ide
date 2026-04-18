@@ -6,8 +6,7 @@ using Xunit;
 namespace CascadeIDE.Tests;
 
 /// <summary>
-/// Контракт TOML: ключи между <c>[markdown_diagrams]</c> и следующей секцией относятся к <c>markdown_diagrams</c>,
-/// а не к корню <see cref="CascadeIdeSettings"/> — иначе <c>presentation</c> не попадает в модель.
+/// Контракт TOML: вложенные секции (<c>[markdown.diagrams]</c>, <c>[presentation.grammar]</c>) и snake_case.
 /// </summary>
 public sealed class CascadeIdeSettingsTomlDeserializeTests
 {
@@ -20,87 +19,40 @@ public sealed class CascadeIdeSettingsTomlDeserializeTests
         TomlSerializer.Deserialize<CascadeIdeSettings>(text, Options)
         ?? throw new InvalidOperationException("Deserialize returned null");
 
-    private const string SampleLikeUserFile =
-        """
-        [markdown_diagrams]
-        kroki_enabled = true
-        kroki_base_url = "https://kroki.io"
-
-        presentation = "(0.25P + 0.75F) (M)"
-        zone_screen_layout = ""
-
-        [presentation_grammar]
-        pfd_zone_identifier = "P"
-        forward_zone_identifier = "F"
-        mfd_zone_identifier = "M"
-        """;
-
-    private const string PresentationAtRoot =
-        """
-        presentation = "(0.25P + 0.75F) (M)"
-        zone_screen_layout = ""
-
-        [markdown_diagrams]
-        kroki_enabled = true
-        kroki_base_url = "https://kroki.io"
-
-        [presentation_grammar]
-        pfd_zone_identifier = "P"
-        forward_zone_identifier = "F"
-        mfd_zone_identifier = "M"
-        """;
-
-    private const string DisplaySection =
-        """
-        [display]
-        presentation = "(0.25P + 0.75F) (M)"
-        zone_screen_layout = ""
-
-        [markdown_diagrams]
-        kroki_enabled = true
-        kroki_base_url = "https://kroki.io"
-
-        [presentation_grammar]
-        pfd_zone_identifier = "P"
-        forward_zone_identifier = "F"
-        mfd_zone_identifier = "M"
-        """;
-
     [Fact]
-    public void Deserialize_WhenPresentationNestedUnderMarkdownDiagrams_PresentationIsEmpty()
+    public void Deserialize_PresentationAndMarkdownNested_ParsesExpected()
     {
-        var s = Deserialize(SampleLikeUserFile);
-        Assert.Equal("", s.Presentation);
-        Assert.Equal("P", s.PresentationGrammar.PfdZoneIdentifier);
+        const string text =
+            """
+            [presentation]
+            line = "(P+F) (M)"
+
+            [presentation.grammar]
+            pfd = "P"
+            forward = "F"
+            mfd = "M"
+
+            [markdown.diagrams]
+            kroki = true
+            kroki_url = "https://kroki.io"
+            """;
+
+        var s = Deserialize(text);
+        Assert.Equal("(P+F) (M)", s.Presentation.Line);
+        Assert.Equal("P", s.Presentation.Grammar.Pfd);
+        Assert.True(s.Markdown.Diagrams.Kroki);
+        Assert.Equal("https://kroki.io", s.Markdown.Diagrams.KrokiUrl);
     }
 
     [Fact]
-    public void Deserialize_WhenPresentationOnlyAtRoot_IgnoredMustUseDisplaySection()
-    {
-        var s = Deserialize(PresentationAtRoot);
-        Assert.Equal("", s.Presentation);
-        Assert.Equal("", s.Display.Presentation);
-        Assert.Equal("P", s.PresentationGrammar.PfdZoneIdentifier);
-    }
-
-    [Fact]
-    public void Deserialize_WhenDisplaySection_PresentationIsSet()
-    {
-        var s = Deserialize(DisplaySection);
-        Assert.Equal("(0.25P + 0.75F) (M)", s.Display.Presentation);
-        Assert.Equal("(0.25P + 0.75F) (M)", s.Presentation);
-        Assert.Equal("P", s.PresentationGrammar.PfdZoneIdentifier);
-    }
-
-    [Fact]
-    public void Serialize_RoundTrip_PrefersDisplaySection()
+    public void Serialize_RoundTrip_PreservesPresentationLine()
     {
         var original = new CascadeIdeSettings
         {
-            Display = new DisplaySettings { Presentation = "(0.5PFD + 0.5Forward) (MFD)" }
+            Presentation = new PresentationLayoutSettings { Line = "(0.5PFD + 0.5Forward) (MFD)" },
         };
         var toml = TomlSerializer.Serialize(original, Options);
-        Assert.Contains("[display]", toml, StringComparison.Ordinal);
+        Assert.Contains("[presentation]", toml, StringComparison.Ordinal);
         var roundtrip = Deserialize(toml);
         Assert.Equal("(0.5PFD + 0.5Forward) (MFD)", roundtrip.GetEffectivePresentationLine());
     }

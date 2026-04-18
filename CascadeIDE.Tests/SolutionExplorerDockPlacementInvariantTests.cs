@@ -35,6 +35,7 @@ public sealed class SolutionExplorerDockPlacementInvariantTests : IDisposable
                 parse,
                 IntentSolutionExplorerVisible: intentSolutionExplorerVisible,
                 IntentChatPanelExpanded: false,
+                SuppressPfdColumnForPfdHostWindow: false,
                 SuppressMfdColumnForMfdHostWindow: false,
                 ExpandedMfdWidthPixels: 300,
                 CollapsedMfdWidthPixels: 12,
@@ -71,7 +72,7 @@ public sealed class SolutionExplorerDockPlacementInvariantTests : IDisposable
     {
         var display = new DisplaySettings
         {
-            InstrumentRouting = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            Instruments = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 [InstrumentRoutingSlotKeys.PfdPrimary] = "workspace_map",
                 [InstrumentRoutingSlotKeys.MfdPrimary] = "solution_explorer_tree",
@@ -93,11 +94,11 @@ public sealed class SolutionExplorerDockPlacementInvariantTests : IDisposable
     {
         var display = new DisplaySettings
         {
-            InstrumentRouting = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            Instruments = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 [InstrumentRoutingSlotKeys.PfdPrimary] = "workspace_map",
             },
-            PreferRepoInstrumentsPlacement = false,
+            PreferRepoInstruments = false,
         };
 
         var frame = Compose("(P+F) (M)", intentSolutionExplorerVisible: true, display);
@@ -131,7 +132,7 @@ public sealed class SolutionExplorerDockPlacementInvariantTests : IDisposable
                     [InstrumentRoutingSlotKeys.PfdPrimary] = "workspace_map",
                 });
 
-            var display = new DisplaySettings { PreferRepoInstrumentsPlacement = true };
+            var display = new DisplaySettings { PreferRepoInstruments = true };
             var frame = Compose("(P+F) (M)", intentSolutionExplorerVisible: true, display);
 
             Assert.False(MainWindowDockedGridInstrumentSlots.IsDockedPfdSolutionExplorerTree(display));

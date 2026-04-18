@@ -17,7 +17,9 @@ public sealed class PresentationMainGridLayoutFrameBuilderTests
         var frame = PresentationMainGridLayoutFrameBuilder.Build(
             parse,
             dedicatedMfdSecondScreen: false,
-            mfdColumnSuppressedForHost: false);
+            mfdColumnSuppressedForHost: false,
+            tripleOneAnchorPerZone: false,
+            suppressPfdColumnForPfdHostWindow: false);
 
         Assert.Equal("0.2*,4,0.3*,4,0.5*", frame.ColumnDefinitions);
         Assert.Equal(3, frame.ContentZoneCount);
@@ -44,7 +46,9 @@ public sealed class PresentationMainGridLayoutFrameBuilderTests
         var frame = PresentationMainGridLayoutFrameBuilder.Build(
             parse,
             dedicatedMfdSecondScreen: true,
-            mfdColumnSuppressedForHost: true);
+            mfdColumnSuppressedForHost: true,
+            tripleOneAnchorPerZone: false,
+            suppressPfdColumnForPfdHostWindow: false);
 
         Assert.Equal("0.25*,4,0.75*,4,0", frame.ColumnDefinitions);
         Assert.Equal(2, frame.ContentZoneCount);
@@ -67,7 +71,9 @@ public sealed class PresentationMainGridLayoutFrameBuilderTests
         var frame = PresentationMainGridLayoutFrameBuilder.Build(
             parse,
             dedicatedMfdSecondScreen: false,
-            mfdColumnSuppressedForHost: false);
+            mfdColumnSuppressedForHost: false,
+            tripleOneAnchorPerZone: false,
+            suppressPfdColumnForPfdHostWindow: false);
 
         Assert.Equal(PresentationMainGridLayoutFrameBuilder.DefaultColumnDefinitions, frame.ColumnDefinitions);
         Assert.Equal(3, frame.ContentZoneCount);

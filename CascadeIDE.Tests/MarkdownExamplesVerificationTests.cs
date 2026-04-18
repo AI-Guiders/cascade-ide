@@ -40,7 +40,10 @@ public sealed class MarkdownExamplesVerificationTests
     {
         var md = File.ReadAllText(SampleMdPath);
         var expanded = MarkdownIncludeExpansion.ExpandMarkdown(md, SampleMdPath);
-        var settings = new CascadeIdeSettings { MarkdownDiagrams = new MarkdownDiagramSettings { KrokiEnabled = false } };
+        var settings = new CascadeIdeSettings
+        {
+            Markdown = new MarkdownSettings { Diagrams = new MarkdownDiagramSettings { Kroki = false } }
+        };
         var after = await MarkdownDiagramExpansion.ExpandAsync(expanded, settings);
 
         Assert.Contains("```mermaid", after, StringComparison.Ordinal);

@@ -31,10 +31,11 @@ public sealed class InstrumentPlacementWorkspaceRoutingTests
                     parse,
                     IntentSolutionExplorerVisible: true,
                     IntentChatPanelExpanded: false,
+                    SuppressPfdColumnForPfdHostWindow: false,
                     SuppressMfdColumnForMfdHostWindow: false,
                     ExpandedMfdWidthPixels: 300,
                     CollapsedMfdWidthPixels: 12,
-                    DisplaySettings: new DisplaySettings { PreferRepoInstrumentsPlacement = true },
+                    DisplaySettings: new DisplaySettings { PreferRepoInstruments = true },
                     SafetyLevel: "L2"));
 
             Assert.Single(frame.Instruments);

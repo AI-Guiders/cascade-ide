@@ -17,7 +17,7 @@ public sealed class UiWorkspaceTomlMergerTests
     {
         var lower = new UiWorkspaceToml
         {
-            WorkspaceChrome = new UiWorkspaceChromeToml
+            Chrome = new UiWorkspaceChromeToml
             {
                 PfdRegionDefaultWidthPixels = 300,
                 BottomPanelMinRowPixels = 80
@@ -25,8 +25,8 @@ public sealed class UiWorkspaceTomlMergerTests
         };
         var m = UiWorkspaceTomlMerger.Merge(lower, null);
         Assert.NotNull(m);
-        Assert.Equal(300, m!.WorkspaceChrome!.PfdRegionDefaultWidthPixels);
-        Assert.Equal(80, m.WorkspaceChrome.BottomPanelMinRowPixels);
+        Assert.Equal(300, m!.Chrome!.PfdRegionDefaultWidthPixels);
+        Assert.Equal(80, m.Chrome.BottomPanelMinRowPixels);
     }
 
     [Fact]
@@ -34,14 +34,14 @@ public sealed class UiWorkspaceTomlMergerTests
     {
         var lower = new UiWorkspaceToml
         {
-            WorkspaceChrome = new UiWorkspaceChromeToml { PfdRegionDefaultWidthPixels = 300 }
+            Chrome = new UiWorkspaceChromeToml { PfdRegionDefaultWidthPixels = 300 }
         };
         var higher = new UiWorkspaceToml
         {
-            WorkspaceChrome = new UiWorkspaceChromeToml { PfdRegionDefaultWidthPixels = 400 }
+            Chrome = new UiWorkspaceChromeToml { PfdRegionDefaultWidthPixels = 400 }
         };
         var m = UiWorkspaceTomlMerger.Merge(lower, higher);
-        Assert.Equal(400, m!.WorkspaceChrome!.PfdRegionDefaultWidthPixels);
+        Assert.Equal(400, m!.Chrome!.PfdRegionDefaultWidthPixels);
     }
 
     [Fact]
@@ -49,7 +49,7 @@ public sealed class UiWorkspaceTomlMergerTests
     {
         var lower = new UiWorkspaceToml
         {
-            WorkspaceChrome = new UiWorkspaceChromeToml
+            Chrome = new UiWorkspaceChromeToml
             {
                 PfdRegionDefaultWidthPixels = 300,
                 BottomPanelMinRowPixels = 90
@@ -57,11 +57,11 @@ public sealed class UiWorkspaceTomlMergerTests
         };
         var higher = new UiWorkspaceToml
         {
-            WorkspaceChrome = new UiWorkspaceChromeToml { BottomPanelMinRowPixels = 100 }
+            Chrome = new UiWorkspaceChromeToml { BottomPanelMinRowPixels = 100 }
         };
         var m = UiWorkspaceTomlMerger.Merge(lower, higher);
-        Assert.Equal(300, m!.WorkspaceChrome!.PfdRegionDefaultWidthPixels);
-        Assert.Equal(100, m.WorkspaceChrome.BottomPanelMinRowPixels);
+        Assert.Equal(300, m!.Chrome!.PfdRegionDefaultWidthPixels);
+        Assert.Equal(100, m.Chrome.BottomPanelMinRowPixels);
     }
 
     [Fact]
@@ -69,25 +69,31 @@ public sealed class UiWorkspaceTomlMergerTests
     {
         var lower = new UiWorkspaceToml
         {
-            AttentionRouting = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            Routing = new UiWorkspaceRoutingToml
             {
-                ["solution_explorer"] = "pfd",
-                ["chat"] = "mfd"
+                Attention = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["solution_explorer"] = "pfd",
+                    ["chat"] = "mfd"
+                }
             }
         };
         var higher = new UiWorkspaceToml
         {
-            AttentionRouting = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            Routing = new UiWorkspaceRoutingToml
             {
-                ["solution_explorer"] = "mfd",
-                ["git"] = "pfd"
+                Attention = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["solution_explorer"] = "mfd",
+                    ["git"] = "pfd"
+                }
             }
         };
         var m = UiWorkspaceTomlMerger.Merge(lower, higher);
-        Assert.NotNull(m!.AttentionRouting);
-        Assert.Equal("mfd", m.AttentionRouting!["solution_explorer"]);
-        Assert.Equal("mfd", m.AttentionRouting["chat"]);
-        Assert.Equal("pfd", m.AttentionRouting["git"]);
+        Assert.NotNull(m!.Routing?.Attention);
+        Assert.Equal("mfd", m.Routing.Attention!["solution_explorer"]);
+        Assert.Equal("mfd", m.Routing.Attention["chat"]);
+        Assert.Equal("pfd", m.Routing.Attention["git"]);
     }
 
     [Fact]
@@ -95,23 +101,29 @@ public sealed class UiWorkspaceTomlMergerTests
     {
         var lower = new UiWorkspaceToml
         {
-            InstrumentRouting = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            Routing = new UiWorkspaceRoutingToml
             {
-                [InstrumentRoutingSlotKeys.PfdPrimary] = "solution_explorer",
-                [InstrumentRoutingSlotKeys.MfdPrimary] = "workspace_map"
+                Instruments = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    [InstrumentRoutingSlotKeys.PfdPrimary] = "solution_explorer",
+                    [InstrumentRoutingSlotKeys.MfdPrimary] = "workspace_map"
+                }
             }
         };
         var higher = new UiWorkspaceToml
         {
-            InstrumentRouting = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            Routing = new UiWorkspaceRoutingToml
             {
-                [InstrumentRoutingSlotKeys.PfdPrimary] = "workspace_map"
+                Instruments = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    [InstrumentRoutingSlotKeys.PfdPrimary] = "workspace_map"
+                }
             }
         };
 
         var merged = UiWorkspaceTomlMerger.Merge(lower, higher);
-        Assert.NotNull(merged?.InstrumentRouting);
-        Assert.Equal("workspace_map", merged!.InstrumentRouting![InstrumentRoutingSlotKeys.PfdPrimary]);
-        Assert.Equal("workspace_map", merged.InstrumentRouting[InstrumentRoutingSlotKeys.MfdPrimary]);
+        Assert.NotNull(merged?.Routing?.Instruments);
+        Assert.Equal("workspace_map", merged!.Routing!.Instruments![InstrumentRoutingSlotKeys.PfdPrimary]);
+        Assert.Equal("workspace_map", merged.Routing.Instruments[InstrumentRoutingSlotKeys.MfdPrimary]);
     }
 }

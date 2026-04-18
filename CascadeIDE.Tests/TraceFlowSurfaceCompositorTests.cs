@@ -47,7 +47,7 @@ public sealed class TraceFlowSurfaceCompositorTests
             UiMode: "flight",
             PresentationEffectiveLine: "line",
             PresentationParseSuccess: true,
-            Topology: new CockpitSurfaceTopology("main", false, true),
+            Topology: new CockpitSurfaceTopology("main", false, false, true),
             SecondaryShell: new CockpitSurfaceSecondaryShell("none"),
             Zones: new CockpitSurfaceZones(true, true, true, true, true, true),
             Instruments: []);

@@ -57,21 +57,19 @@ public sealed class WorkspaceNavigationPresetsLoaderTests
         File.WriteAllText(
             Path.Combine(tmp, ".cascade", "workspace.toml"),
             """
-            [workspace_navigation_context]
-
-            [[workspace_navigation_context.presets]]
+            [[workspace_navigation.presets]]
             id = "peers_only"
             include_kinds = ["same_namespace"]
             """);
 
-        var jsonRepoOnly = WorkspaceNavigationPresetsLoader.GetEffectivePresetsJson(new WorkspaceNavigationContextSettings(), tmp);
+        var jsonRepoOnly = WorkspaceNavigationPresetsLoader.GetEffectivePresetsJson(new NavigationSettings(), tmp);
         using (var doc = JsonDocument.Parse(jsonRepoOnly))
         {
             var inc = doc.RootElement.GetProperty("peers_only").GetProperty("include_kinds").EnumerateArray().Select(x => x.GetString()).ToArray();
             Assert.Contains("same_namespace", inc);
         }
 
-        var user = new WorkspaceNavigationContextSettings
+        var user = new NavigationSettings
         {
             Presets =
             [

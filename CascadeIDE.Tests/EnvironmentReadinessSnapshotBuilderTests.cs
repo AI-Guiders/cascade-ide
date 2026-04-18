@@ -10,7 +10,13 @@ public sealed class EnvironmentReadinessSnapshotBuilderTests
     [Fact]
     public void BuildLspRows_ParseOnly_NoHost_IsInfo()
     {
-        var settings = new CascadeIdeSettings { CSharpLsp = new CSharpLspSettings { Provider = CSharpLspProviderIds.ParseOnly } };
+        var settings = new CascadeIdeSettings
+        {
+            Languages = new LanguagesSettings
+            {
+                CSharp = new LanguageServerProfile { Provider = CSharpLspProviderIds.ParseOnly }
+            }
+        };
         var rows = EnvironmentReadinessSnapshotBuilder.BuildLspRows(
             settings,
             solutionPath: null,
@@ -25,8 +31,11 @@ public sealed class EnvironmentReadinessSnapshotBuilderTests
     {
         var settings = new CascadeIdeSettings
         {
-            CSharpLsp = new CSharpLspSettings { Provider = CSharpLspProviderIds.ParseOnly },
-            MarkdownLsp = new MarkdownLspSettings { Provider = MarkdownLspProviderIds.Off }
+            Languages = new LanguagesSettings
+            {
+                CSharp = new LanguageServerProfile { Provider = CSharpLspProviderIds.ParseOnly },
+                Markdown = new LanguageServerProfile { Provider = MarkdownLspProviderIds.Off }
+            }
         };
         var rows = EnvironmentReadinessSnapshotBuilder.BuildLspRows(settings, null, null, null);
 
@@ -36,7 +45,13 @@ public sealed class EnvironmentReadinessSnapshotBuilderTests
     [Fact]
     public void BuildLspRows_CSharpProcess_NoSolution_IsWarning()
     {
-        var settings = new CascadeIdeSettings { CSharpLsp = new CSharpLspSettings { Provider = CSharpLspProviderIds.CSharpLs } };
+        var settings = new CascadeIdeSettings
+        {
+            Languages = new LanguagesSettings
+            {
+                CSharp = new LanguageServerProfile { Provider = CSharpLspProviderIds.CSharpLs }
+            }
+        };
         var rows = EnvironmentReadinessSnapshotBuilder.BuildLspRows(settings, null, null, null);
 
         var row = Assert.Single(rows, r => r.Title == "C# LSP");

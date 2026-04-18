@@ -13,7 +13,7 @@ public sealed class PresentationMainGridColumnDefinitionsTests
     {
         var parse = PresentationParser.Parse("(P+F+M)", ShortGrammar);
         Assert.True(parse.IsSuccess);
-        var s = PresentationMainGridColumnDefinitions.Get(parse, false, false);
+        var s = PresentationMainGridColumnDefinitions.Get(parse, false, false, false, false);
         Assert.Equal(PresentationMainGridColumnDefinitions.Default, s);
     }
 
@@ -22,7 +22,7 @@ public sealed class PresentationMainGridColumnDefinitionsTests
     {
         var parse = PresentationParser.Parse("(0.2P+0.3F+0.5M)", ShortGrammar);
         Assert.True(parse.IsSuccess);
-        var s = PresentationMainGridColumnDefinitions.Get(parse, false, false);
+        var s = PresentationMainGridColumnDefinitions.Get(parse, false, false, false, false);
         Assert.Equal("0.2*,4,0.3*,4,0.5*", s);
     }
 
@@ -31,7 +31,12 @@ public sealed class PresentationMainGridColumnDefinitionsTests
     {
         var parse = PresentationParser.Parse("(0.25P+0.75F)(M)", ShortGrammar);
         Assert.True(parse.IsSuccess);
-        var s = PresentationMainGridColumnDefinitions.Get(parse, dedicatedMfdSecondScreen: true, mfdColumnSuppressedForHost: false);
+        var s = PresentationMainGridColumnDefinitions.Get(
+            parse,
+            dedicatedMfdSecondScreen: true,
+            mfdColumnSuppressedForHost: false,
+            tripleOneAnchorPerZone: false,
+            suppressPfdColumnForPfdHostWindow: false);
         Assert.Equal("0.25*,4,0.75*,4,340", s);
     }
 
@@ -40,7 +45,12 @@ public sealed class PresentationMainGridColumnDefinitionsTests
     {
         var parse = PresentationParser.Parse("(0.25P+0.75F)(M)", ShortGrammar);
         Assert.True(parse.IsSuccess);
-        var s = PresentationMainGridColumnDefinitions.Get(parse, dedicatedMfdSecondScreen: true, mfdColumnSuppressedForHost: true);
+        var s = PresentationMainGridColumnDefinitions.Get(
+            parse,
+            dedicatedMfdSecondScreen: true,
+            mfdColumnSuppressedForHost: true,
+            tripleOneAnchorPerZone: false,
+            suppressPfdColumnForPfdHostWindow: false);
         Assert.Equal("0.25*,4,0.75*,4,0", s);
     }
 }

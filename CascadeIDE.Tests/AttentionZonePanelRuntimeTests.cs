@@ -33,10 +33,13 @@ public sealed class AttentionZonePanelRuntimeTests : IDisposable
     {
         AttentionZonePanelRuntime.ApplyWorkspaceToml(new UiWorkspaceToml
         {
-            AttentionRouting = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            Routing = new UiWorkspaceRoutingToml
             {
-                [AttentionRoutingIntentIds.SolutionExplorer] = AttentionZoneIds.Mfd,
-            },
+                Attention = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    [AttentionRoutingIntentIds.SolutionExplorer] = AttentionZoneIds.Mfd,
+                }
+            }
         });
 
         Assert.True(AttentionZonePanelRuntime.TryGetZone(AttentionPanelIds.SolutionExplorer, out var z));
@@ -49,19 +52,17 @@ public sealed class AttentionZonePanelRuntimeTests : IDisposable
     public void Toml_deserializes_attention_routing_table()
     {
         const string toml = """
-            [workspace_chrome]
-            solution_explorer_default_width_pixels = 220
+            [chrome]
+            pfd_region_default_width_pixels = 220
 
-            [attention_routing]
-            solution_explorer = "pfd"
-            git = "mfd"
-            terminal = "pfd"
+            [routing]
+            attention = { solution_explorer = "pfd", git = "mfd", terminal = "pfd" }
             """;
 
         var w = CascadeTomlSerializer.Deserialize<UiWorkspaceToml>(toml);
         Assert.NotNull(w);
-        Assert.NotNull(w!.AttentionRouting);
-        Assert.Equal("pfd", w.AttentionRouting!["solution_explorer"]);
+        Assert.NotNull(w!.Routing?.Attention);
+        Assert.Equal("pfd", w.Routing.Attention!["solution_explorer"]);
         AttentionZonePanelRuntime.ApplyWorkspaceToml(w);
         Assert.True(AttentionZonePanelRuntime.TryGetZone(AttentionPanelIds.Git, out var g));
         Assert.Equal(AttentionZone.Mfd, g);
@@ -74,10 +75,13 @@ public sealed class AttentionZonePanelRuntimeTests : IDisposable
     {
         AttentionZonePanelRuntime.ApplyWorkspaceToml(new UiWorkspaceToml
         {
-            AttentionRouting = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            Routing = new UiWorkspaceRoutingToml
             {
-                [AttentionRoutingIntentIds.Terminal] = AttentionZoneIds.Hud,
-            },
+                Attention = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    [AttentionRoutingIntentIds.Terminal] = AttentionZoneIds.Hud,
+                }
+            }
         });
 
         Assert.True(AttentionZonePanelRuntime.TryGetZone(AttentionPanelIds.Terminal, out var term));
@@ -89,10 +93,13 @@ public sealed class AttentionZonePanelRuntimeTests : IDisposable
     {
         AttentionZonePanelRuntime.ApplyWorkspaceToml(new UiWorkspaceToml
         {
-            AttentionRouting = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            Routing = new UiWorkspaceRoutingToml
             {
-                ["editor_hud"] = AttentionZoneIds.Mfd,
-            },
+                Attention = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["editor_hud"] = AttentionZoneIds.Mfd,
+                }
+            }
         });
 
         Assert.True(AttentionZonePanelRuntime.TryGetZone(AttentionPanelIds.EditorHud, out var hud));

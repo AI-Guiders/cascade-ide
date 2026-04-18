@@ -22,6 +22,7 @@ public sealed class MainWindowHostSurfaceCompositorTests
                 parse,
                 IntentSolutionExplorerVisible: true,
                 IntentChatPanelExpanded: false,
+                SuppressPfdColumnForPfdHostWindow: false,
                 SuppressMfdColumnForMfdHostWindow: false,
                 ExpandedMfdWidthPixels: 300,
                 CollapsedMfdWidthPixels: 12,
@@ -45,6 +46,7 @@ public sealed class MainWindowHostSurfaceCompositorTests
                 parse,
                 IntentSolutionExplorerVisible: false,
                 IntentChatPanelExpanded: false,
+                SuppressPfdColumnForPfdHostWindow: false,
                 SuppressMfdColumnForMfdHostWindow: false,
                 ExpandedMfdWidthPixels: 300,
                 CollapsedMfdWidthPixels: 12,
@@ -63,7 +65,7 @@ public sealed class MainWindowHostSurfaceCompositorTests
 
         var display = new DisplaySettings
         {
-            InstrumentRouting = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            Instruments = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 [InstrumentRoutingSlotKeys.PfdPrimary] = "workspace_map"
             }
@@ -74,6 +76,7 @@ public sealed class MainWindowHostSurfaceCompositorTests
                 parse,
                 IntentSolutionExplorerVisible: true,
                 IntentChatPanelExpanded: false,
+                SuppressPfdColumnForPfdHostWindow: false,
                 SuppressMfdColumnForMfdHostWindow: false,
                 ExpandedMfdWidthPixels: 300,
                 CollapsedMfdWidthPixels: 12,
