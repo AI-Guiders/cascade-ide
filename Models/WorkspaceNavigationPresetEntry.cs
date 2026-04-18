@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace CascadeIDE.Models;
 
-/// <summary>Один пресет фильтра навигации (TOML: <c>[[workspace_navigation_context.presets]]</c>).</summary>
+/// <summary>Один пресет фильтра навигации (TOML: <c>[[workspace_navigation.presets]]</c>).</summary>
 public sealed class WorkspaceNavigationPresetEntry
 {
     /// <summary>Идентификатор пресета (ключ в merge).</summary>

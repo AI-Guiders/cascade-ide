@@ -1,26 +1,26 @@
 namespace CascadeIDE.Models;
 
 /// <summary>
-/// Токены грамматики строк <c>presentation</c> / <c>zone_screen_layout</c> (ADR 0017).
-/// В <c>settings.toml</c> — секция <c>[presentation_grammar]</c>.
+/// Токены грамматики строки топологии (ADR 0017).
+/// TOML: <c>[presentation.grammar]</c>.
 /// </summary>
 public sealed class PresentationGrammarSettings
 {
-    /// <summary>Маркеры границы одного экрана (два символа), по умолчанию <c>()</c>.</summary>
-    public string ScreenMarkers { get; set; } = "()";
+    /// <summary>Два символа границы одного экрана (по умолчанию <c>()</c>).</summary>
+    public string Brackets { get; set; } = "()";
 
     /// <summary>Разделитель между группами экранов.</summary>
-    public string ScreenSeparator { get; set; } = " ";
+    public string BetweenScreens { get; set; } = " ";
 
-    /// <summary>Разделитель якорей внутри одного экрана (часто <c>+</c>).</summary>
-    public string ZoneSeparator { get; set; } = "+";
+    /// <summary>Разделитель якорей внутри экрана (часто <c>+</c>).</summary>
+    public string BetweenZones { get; set; } = "+";
 
-    /// <summary>Литерал якоря PFD в строке презентации.</summary>
-    public string PfdZoneIdentifier { get; set; } = "PFD";
+    /// <summary>Литерал якоря PFD в строке.</summary>
+    public string Pfd { get; set; } = "PFD";
 
-    /// <summary>Литерал якоря лобового экрана.</summary>
-    public string ForwardZoneIdentifier { get; set; } = "Forward";
+    /// <summary>Литерал якоря Forward.</summary>
+    public string Forward { get; set; } = "Forward";
 
     /// <summary>Литерал якоря MFD.</summary>
-    public string MfdZoneIdentifier { get; set; } = "MFD";
+    public string Mfd { get; set; } = "MFD";
 }

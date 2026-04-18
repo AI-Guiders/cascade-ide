@@ -11,14 +11,13 @@ public sealed partial class CascadeIdeSettings
             return false;
         return AiEquals(Ai, o.Ai)
             && McpEquals(Mcp, o.Mcp)
-            && WorkspaceUiEquals(WorkspaceUi, o.WorkspaceUi)
+            && WorkspaceEquals(Workspace, o.Workspace)
             && SemanticMapEquals(SemanticMap, o.SemanticMap)
-            && CSharpLspEquals(CSharpLsp, o.CSharpLsp)
-            && MarkdownLspEquals(MarkdownLsp, o.MarkdownLsp)
-            && MarkdownDiagramsEquals(MarkdownDiagrams, o.MarkdownDiagrams)
+            && LanguagesEquals(Languages, o.Languages)
+            && MarkdownEquals(Markdown, o.Markdown)
             && DisplayEquals(Display, o.Display)
-            && PresentationGrammarEquals(o.PresentationGrammar)
-            && WorkspaceNavigationContextEquals(WorkspaceNavigationContext, o.WorkspaceNavigationContext);
+            && PresentationLayoutEquals(Presentation, o.Presentation)
+            && WorkspaceNavigationEquals(WorkspaceNavigation, o.WorkspaceNavigation);
     }
 
     public override ModelBase Clone()
@@ -44,87 +43,118 @@ public sealed partial class CascadeIdeSettings
                 AcpAutoInjectIdeMcp = Mcp.AcpAutoInjectIdeMcp,
                 ExternalServersJsonPath = Mcp.ExternalServersJsonPath,
             },
-            WorkspaceUi = new WorkspaceUiSettings
+            Workspace = new WorkspaceSettings
             {
-                PfdRegionExpanded = WorkspaceUi.PfdRegionExpanded,
-                ShowTerminal = WorkspaceUi.ShowTerminal,
-                ShowGit = WorkspaceUi.ShowGit,
-                ShowInstrumentation = WorkspaceUi.ShowInstrumentation,
-                Mode = WorkspaceUi.Mode,
-                Culture = WorkspaceUi.Culture,
-                WorkspaceSplittersLocked = WorkspaceUi.WorkspaceSplittersLocked,
+                PfdExpanded = Workspace.PfdExpanded,
+                ShowTerminal = Workspace.ShowTerminal,
+                ShowGit = Workspace.ShowGit,
+                ShowInstrumentation = Workspace.ShowInstrumentation,
+                Mode = Workspace.Mode,
+                Culture = Workspace.Culture,
+                SplittersLocked = Workspace.SplittersLocked,
             },
-            SemanticMap = new SemanticMapSettings { Presentation = SemanticMap.Presentation },
-            CSharpLsp = new CSharpLspSettings
+            SemanticMap = new SemanticMapSettings
             {
-                Provider = CSharpLsp.Provider,
-                Executable = CSharpLsp.Executable,
-                Arguments = CSharpLsp.Arguments,
+                View = SemanticMap.View,
+                Depth = SemanticMap.Depth,
             },
-            MarkdownLsp = new MarkdownLspSettings
+            Languages = new LanguagesSettings
             {
-                Provider = MarkdownLsp.Provider,
-                Executable = MarkdownLsp.Executable,
-                Arguments = MarkdownLsp.Arguments,
+                CSharp = new LanguageServerProfile
+                {
+                    Provider = Languages.CSharp.Provider,
+                    Executable = Languages.CSharp.Executable,
+                    Arguments = Languages.CSharp.Arguments,
+                },
+                Markdown = new LanguageServerProfile
+                {
+                    Provider = Languages.Markdown.Provider,
+                    Executable = Languages.Markdown.Executable,
+                    Arguments = Languages.Markdown.Arguments,
+                },
             },
-            MarkdownDiagrams = new MarkdownDiagramSettings
+            Markdown = new MarkdownSettings
             {
-                KrokiEnabled = MarkdownDiagrams.KrokiEnabled,
-                KrokiBaseUrl = MarkdownDiagrams.KrokiBaseUrl,
+                Diagrams = new MarkdownDiagramSettings
+                {
+                    Kroki = Markdown.Diagrams.Kroki,
+                    KrokiUrl = Markdown.Diagrams.KrokiUrl,
+                },
             },
             Display = new DisplaySettings
             {
-                Presentation = Display.Presentation,
-                ZoneScreenLayout = Display.ZoneScreenLayout,
-                OpenMfdHostWindowOnStartup = Display.OpenMfdHostWindowOnStartup,
-                MfdHostWindowPixelX = Display.MfdHostWindowPixelX,
-                MfdHostWindowPixelY = Display.MfdHostWindowPixelY,
-                MfdHostWindowWidth = Display.MfdHostWindowWidth,
-                MfdHostWindowHeight = Display.MfdHostWindowHeight,
-                UseSkiaZoneGeometryPreview = Display.UseSkiaZoneGeometryPreview,
-                UseSkiaInstrumentMount = Display.UseSkiaInstrumentMount,
-                InstrumentMountStyle = Display.InstrumentMountStyle,
-                EnforceInstrumentMountPolicyEligibility = Display.EnforceInstrumentMountPolicyEligibility,
-                InstrumentMountPolicyMinSaScore = Display.InstrumentMountPolicyMinSaScore,
-                InstrumentMountPolicyMinPerformanceScore = Display.InstrumentMountPolicyMinPerformanceScore,
-                InstrumentMountPolicyMaxWorkloadScore = Display.InstrumentMountPolicyMaxWorkloadScore,
-                RequireInstrumentMountPolicyScores = Display.RequireInstrumentMountPolicyScores,
-                PreferRepoInstrumentsPlacement = Display.PreferRepoInstrumentsPlacement,
-                InstrumentMountPolicyRules = Display.InstrumentMountPolicyRules
-                    .Select(static r => new InstrumentMountPolicyRuleSettings
-                    {
-                        SurfaceId = r.SurfaceId,
-                        SlotId = r.SlotId,
-                        InstrumentId = r.InstrumentId,
-                        MountStyle = r.MountStyle,
-                        SaScore = r.SaScore,
-                        PerformanceScore = r.PerformanceScore,
-                        WorkloadScore = r.WorkloadScore,
-                    })
-                    .ToList(),
-                InstrumentRouting = Display.InstrumentRouting is { Count: > 0 } ir
+                MaximizeHostsOnDedicatedScreens = Display.MaximizeHostsOnDedicatedScreens,
+                PreferRepoInstruments = Display.PreferRepoInstruments,
+                Instruments = Display.Instruments is { Count: > 0 } ir
                     ? new Dictionary<string, string>(ir, StringComparer.OrdinalIgnoreCase)
                     : null,
+                Pfd = new DisplayPfdHostSettings
+                {
+                    OpenOnStartup = Display.Pfd.OpenOnStartup,
+                    PixelX = Display.Pfd.PixelX,
+                    PixelY = Display.Pfd.PixelY,
+                    Width = Display.Pfd.Width,
+                    Height = Display.Pfd.Height,
+                },
+                Mfd = new DisplayMfdHostSettings
+                {
+                    OpenOnStartup = Display.Mfd.OpenOnStartup,
+                    PixelX = Display.Mfd.PixelX,
+                    PixelY = Display.Mfd.PixelY,
+                    Width = Display.Mfd.Width,
+                    Height = Display.Mfd.Height,
+                },
+                Skia = new DisplaySkiaSettings
+                {
+                    ZoneGeometryOverlay = Display.Skia.ZoneGeometryOverlay,
+                    InstrumentMount = Display.Skia.InstrumentMount,
+                },
+                Mount = new DisplayMountSettings
+                {
+                    DefaultStyle = Display.Mount.DefaultStyle,
+                    EnforceEligibility = Display.Mount.EnforceEligibility,
+                    MinSa = Display.Mount.MinSa,
+                    MinPerformance = Display.Mount.MinPerformance,
+                    MaxWorkload = Display.Mount.MaxWorkload,
+                    RequireScores = Display.Mount.RequireScores,
+                    Rules = Display.Mount.Rules
+                        .Select(static r => new InstrumentMountPolicyRuleSettings
+                        {
+                            Surface = r.Surface,
+                            Slot = r.Slot,
+                            Instrument = r.Instrument,
+                            Style = r.Style,
+                            SaScore = r.SaScore,
+                            PerformanceScore = r.PerformanceScore,
+                            WorkloadScore = r.WorkloadScore,
+                        })
+                        .ToList(),
+                },
             },
-            PresentationGrammar = new PresentationGrammarSettings
+            Presentation = new PresentationLayoutSettings
             {
-                ScreenMarkers = PresentationGrammar.ScreenMarkers,
-                ScreenSeparator = PresentationGrammar.ScreenSeparator,
-                ZoneSeparator = PresentationGrammar.ZoneSeparator,
-                PfdZoneIdentifier = PresentationGrammar.PfdZoneIdentifier,
-                ForwardZoneIdentifier = PresentationGrammar.ForwardZoneIdentifier,
-                MfdZoneIdentifier = PresentationGrammar.MfdZoneIdentifier,
+                Line = Presentation.Line,
+                LineAlias = Presentation.LineAlias,
+                Grammar = new PresentationGrammarSettings
+                {
+                    Brackets = Presentation.Grammar.Brackets,
+                    BetweenScreens = Presentation.Grammar.BetweenScreens,
+                    BetweenZones = Presentation.Grammar.BetweenZones,
+                    Pfd = Presentation.Grammar.Pfd,
+                    Forward = Presentation.Grammar.Forward,
+                    Mfd = Presentation.Grammar.Mfd,
+                },
             },
-            WorkspaceNavigationContext = new WorkspaceNavigationContextSettings
+            WorkspaceNavigation = new NavigationSettings
             {
-                Presets = WorkspaceNavigationContext.Presets
+                Presets = WorkspaceNavigation.Presets
                     .Select(p => new WorkspaceNavigationPresetEntry
                     {
                         Id = p.Id,
                         IncludeKinds = p.IncludeKinds?.ToList(),
-                        ExcludeKinds = p.ExcludeKinds?.ToList()
+                        ExcludeKinds = p.ExcludeKinds?.ToList(),
                     })
-                    .ToList()
+                    .ToList(),
             },
         };
     }
@@ -154,69 +184,102 @@ public sealed partial class CascadeIdeSettings
             && a.ExternalServersJsonPath.Is(b.ExternalServersJsonPath);
     }
 
-    private static bool WorkspaceUiEquals(WorkspaceUiSettings? a, WorkspaceUiSettings? b)
+    private static bool WorkspaceEquals(WorkspaceSettings? a, WorkspaceSettings? b)
     {
         if (a is null || b is null)
             return a == b;
-        return a.PfdRegionExpanded == b.PfdRegionExpanded
+        return a.PfdExpanded == b.PfdExpanded
             && a.ShowTerminal == b.ShowTerminal
             && a.ShowGit == b.ShowGit
             && a.ShowInstrumentation == b.ShowInstrumentation
             && a.Mode.Is(b.Mode)
             && a.Culture.Is(b.Culture)
-            && a.WorkspaceSplittersLocked == b.WorkspaceSplittersLocked;
+            && a.SplittersLocked == b.SplittersLocked;
     }
 
     private static bool SemanticMapEquals(SemanticMapSettings? a, SemanticMapSettings? b)
     {
         if (a is null || b is null)
             return a == b;
-        return a.Presentation.Is(b.Presentation);
+        return a.View.Is(b.View) && a.Depth.Is(b.Depth);
     }
 
-    private static bool CSharpLspEquals(CSharpLspSettings? a, CSharpLspSettings? b)
+    private static bool LanguagesEquals(LanguagesSettings? a, LanguagesSettings? b)
+    {
+        if (a is null || b is null)
+            return a == b;
+        return LanguageServerProfileEquals(a.CSharp, b.CSharp)
+            && LanguageServerProfileEquals(a.Markdown, b.Markdown);
+    }
+
+    private static bool LanguageServerProfileEquals(LanguageServerProfile? a, LanguageServerProfile? b)
     {
         if (a is null || b is null)
             return a == b;
         return a.Provider.Is(b.Provider) && a.Executable.Is(b.Executable) && a.Arguments.Is(b.Arguments);
     }
 
-    private static bool MarkdownLspEquals(MarkdownLspSettings? a, MarkdownLspSettings? b)
+    private static bool MarkdownEquals(MarkdownSettings? a, MarkdownSettings? b)
     {
         if (a is null || b is null)
             return a == b;
-        return a.Provider.Is(b.Provider) && a.Executable.Is(b.Executable) && a.Arguments.Is(b.Arguments);
+        return MarkdownDiagramsEquals(a.Diagrams, b.Diagrams);
     }
 
     private static bool MarkdownDiagramsEquals(MarkdownDiagramSettings? a, MarkdownDiagramSettings? b)
     {
         if (a is null || b is null)
             return a == b;
-        return a.KrokiEnabled == b.KrokiEnabled && a.KrokiBaseUrl.Is(b.KrokiBaseUrl);
+        return a.Kroki == b.Kroki && a.KrokiUrl.Is(b.KrokiUrl);
     }
 
     private static bool DisplayEquals(DisplaySettings? a, DisplaySettings? b)
     {
         if (a is null || b is null)
             return a == b;
-        return a.Presentation.Is(b.Presentation)
-            && a.ZoneScreenLayout.Is(b.ZoneScreenLayout)
-            && a.OpenMfdHostWindowOnStartup == b.OpenMfdHostWindowOnStartup
-            && a.MfdHostWindowPixelX == b.MfdHostWindowPixelX
-            && a.MfdHostWindowPixelY == b.MfdHostWindowPixelY
-            && Nullable.Equals(a.MfdHostWindowWidth, b.MfdHostWindowWidth)
-            && Nullable.Equals(a.MfdHostWindowHeight, b.MfdHostWindowHeight)
-            && a.UseSkiaZoneGeometryPreview == b.UseSkiaZoneGeometryPreview
-            && a.UseSkiaInstrumentMount == b.UseSkiaInstrumentMount
-            && a.InstrumentMountStyle.Is(b.InstrumentMountStyle)
-            && a.EnforceInstrumentMountPolicyEligibility == b.EnforceInstrumentMountPolicyEligibility
-            && a.InstrumentMountPolicyMinSaScore.Equals(b.InstrumentMountPolicyMinSaScore)
-            && a.InstrumentMountPolicyMinPerformanceScore.Equals(b.InstrumentMountPolicyMinPerformanceScore)
-            && a.InstrumentMountPolicyMaxWorkloadScore.Equals(b.InstrumentMountPolicyMaxWorkloadScore)
-            && a.RequireInstrumentMountPolicyScores == b.RequireInstrumentMountPolicyScores
-            && a.PreferRepoInstrumentsPlacement == b.PreferRepoInstrumentsPlacement
-            && InstrumentMountPolicyRulesEqual(a.InstrumentMountPolicyRules, b.InstrumentMountPolicyRules)
-            && StringDictionaryEqualOrdinalIgnoreCase(a.InstrumentRouting, b.InstrumentRouting);
+        return a.MaximizeHostsOnDedicatedScreens == b.MaximizeHostsOnDedicatedScreens
+            && a.PreferRepoInstruments == b.PreferRepoInstruments
+            && a.Pfd.OpenOnStartup == b.Pfd.OpenOnStartup
+            && a.Pfd.PixelX == b.Pfd.PixelX
+            && a.Pfd.PixelY == b.Pfd.PixelY
+            && Nullable.Equals(a.Pfd.Width, b.Pfd.Width)
+            && Nullable.Equals(a.Pfd.Height, b.Pfd.Height)
+            && a.Mfd.OpenOnStartup == b.Mfd.OpenOnStartup
+            && a.Mfd.PixelX == b.Mfd.PixelX
+            && a.Mfd.PixelY == b.Mfd.PixelY
+            && Nullable.Equals(a.Mfd.Width, b.Mfd.Width)
+            && Nullable.Equals(a.Mfd.Height, b.Mfd.Height)
+            && a.Skia.ZoneGeometryOverlay == b.Skia.ZoneGeometryOverlay
+            && a.Skia.InstrumentMount == b.Skia.InstrumentMount
+            && a.Mount.DefaultStyle.Is(b.Mount.DefaultStyle)
+            && a.Mount.EnforceEligibility == b.Mount.EnforceEligibility
+            && a.Mount.MinSa.Equals(b.Mount.MinSa)
+            && a.Mount.MinPerformance.Equals(b.Mount.MinPerformance)
+            && a.Mount.MaxWorkload.Equals(b.Mount.MaxWorkload)
+            && a.Mount.RequireScores == b.Mount.RequireScores
+            && InstrumentMountPolicyRulesEqual(a.Mount.Rules, b.Mount.Rules)
+            && StringDictionaryEqualOrdinalIgnoreCase(a.Instruments, b.Instruments);
+    }
+
+    private static bool PresentationLayoutEquals(PresentationLayoutSettings? a, PresentationLayoutSettings? b)
+    {
+        if (a is null || b is null)
+            return a == b;
+        if (!a.Line.Is(b.Line) || !a.LineAlias.Is(b.LineAlias))
+            return false;
+        return PresentationGrammarEquals(a.Grammar, b.Grammar);
+    }
+
+    private static bool PresentationGrammarEquals(PresentationGrammarSettings? a, PresentationGrammarSettings? b)
+    {
+        if (a is null || b is null)
+            return a == b;
+        return a.Brackets.Is(b.Brackets)
+            && a.BetweenScreens.Is(b.BetweenScreens)
+            && a.BetweenZones.Is(b.BetweenZones)
+            && a.Pfd.Is(b.Pfd)
+            && a.Forward.Is(b.Forward)
+            && a.Mfd.Is(b.Mfd);
     }
 
     private static bool InstrumentMountPolicyRulesEqual(
@@ -232,7 +295,7 @@ public sealed partial class CascadeIdeSettings
 
         static string Normalize(string? value) => (value ?? string.Empty).Trim();
         static string Key(InstrumentMountPolicyRuleSettings r) =>
-            $"{Normalize(r.SurfaceId)}|{Normalize(r.SlotId)}|{Normalize(r.InstrumentId)}|{Normalize(r.MountStyle)}|{r.SaScore}|{r.PerformanceScore}|{r.WorkloadScore}";
+            $"{Normalize(r.Surface)}|{Normalize(r.Slot)}|{Normalize(r.Instrument)}|{Normalize(r.Style)}|{r.SaScore}|{r.PerformanceScore}|{r.WorkloadScore}";
 
         var left = x.Select(Key).OrderBy(static s => s, StringComparer.Ordinal).ToList();
         var right = y.Select(Key).OrderBy(static s => s, StringComparer.Ordinal).ToList();
@@ -274,7 +337,7 @@ public sealed partial class CascadeIdeSettings
         return true;
     }
 
-    private static bool WorkspaceNavigationContextEquals(WorkspaceNavigationContextSettings? a, WorkspaceNavigationContextSettings? b)
+    private static bool WorkspaceNavigationEquals(NavigationSettings? a, NavigationSettings? b)
     {
         if (a is null || b is null)
             return a == b;
@@ -328,18 +391,5 @@ public sealed partial class CascadeIdeSettings
         }
 
         return true;
-    }
-
-    private bool PresentationGrammarEquals(PresentationGrammarSettings? o)
-    {
-        if (o is null)
-            return false;
-        var a = PresentationGrammar;
-        return a.ScreenMarkers.Is(o.ScreenMarkers)
-            && a.ScreenSeparator.Is(o.ScreenSeparator)
-            && a.ZoneSeparator.Is(o.ZoneSeparator)
-            && a.PfdZoneIdentifier.Is(o.PfdZoneIdentifier)
-            && a.ForwardZoneIdentifier.Is(o.ForwardZoneIdentifier)
-            && a.MfdZoneIdentifier.Is(o.MfdZoneIdentifier);
     }
 }

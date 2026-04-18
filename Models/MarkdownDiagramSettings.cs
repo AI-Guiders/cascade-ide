@@ -1,9 +1,9 @@
 namespace CascadeIDE.Models;
 
-/// <summary>Kroki и превью диаграмм в Markdown (<c>[markdown_diagrams]</c> в <c>settings.toml</c>).</summary>
+/// <summary>Kroki и превью диаграмм в Markdown.</summary>
 public sealed class MarkdownDiagramSettings
 {
-    public bool KrokiEnabled { get; set; } = true;
+    public bool Kroki { get; set; } = true;
 
-    public string KrokiBaseUrl { get; set; } = "https://kroki.io";
+    public string KrokiUrl { get; set; } = "https://kroki.io";
 }
