@@ -89,6 +89,7 @@
 | CLI для контракта агента (паритет с MCP) и снапшот-тесты | [0052](adr/0052-agent-contract-cli-and-snapshot-tests.md) (Accepted · Implemented: CLI, CI smoke, golden slice CDS) |
 | Semantic Map на PFD: поток управления в методе (условные ветки, схождение), KISS; Roslyn CFG как источник; расширение subgraph / MCP | [0053](adr/0053-semantic-map-control-flow-pfd.md) (Accepted · Implemented) |
 | Бенчмарки производительности CIDE: сценарии, метрики, baseline и протокол измерения | [0054](adr/0054-benchmarking-methodology-and-baselines.md) (Proposed) |
+| Сопряжение агента и Roslyn MCP в `settings.toml`: лимиты выдачи, фильтр видов узлов, таймауты и согласованность семантики, именованные пресеты запросов; ортогонально `[semantic_map]` и пресетам навигации [0039](adr/0039-workspace-navigation-affordances.md) | [0058](adr/0058-agent-roslyn-mcp-coupling-settings-toml.md) (Proposed) |
 
 Полный индекс: [docs/adr/README.md](adr/README.md).
 
@@ -198,4 +199,5 @@
 - **v1.82** — таблица ADR выше: пометки **Accepted · Implemented** выровнены с заголовками ADR и [adr/README.md](adr/README.md) для уже внедрённых решений (в т.ч. [0008](adr/0008-mcp-contracts-and-testable-infrastructure.md), [0010](adr/0010-ui-modes-toml-configuration.md), [0015](adr/0015-editor-toml-syntax-highlighting.md)–[0017](adr/0017-multi-window-workspace-and-agent-surfaces.md), [0019](adr/0019-shared-git-core-ide-and-git-mcp.md), [0028](adr/0028-user-settings-toml-localappdata-and-secrets.md)–[0029](adr/0029-configuration-toml-canonical-ui-facade.md), [0036](adr/0036-cds-channel-compositor-surface-pipeline.md), [0039](adr/0039-workspace-navigation-affordances.md)–[0040](adr/0040-lsp-launch-line-settings-toml-presets-and-environment.md), [0046](adr/0046-presentation-layout-authority-and-cockpit-invariants.md)–[0047](adr/0047-cockpit-instrument-descriptor-and-slot-composition.md)).
 - **v1.83** — [0053](adr/0053-semantic-map-control-flow-pfd.md): Semantic Map и поток управления на PFD (условные ветки, KISS, Roslyn CFG, subgraph/MCP); статус **Accepted · Implemented**.
 - **v1.84** — добавлен [0054](adr/0054-benchmarking-methodology-and-baselines.md): протокол бенчмарков CIDE (сценарии, метрики, baseline, правила сравнения); статус **Proposed**.
+- **v1.85** — добавлен [0058](adr/0058-agent-roslyn-mcp-coupling-settings-toml.md): сопряжение агент ↔ Roslyn MCP в `settings.toml` (лимиты, виды узлов, таймауты, пресеты); таблица потребителей; v0 vs отложенное; статус **Proposed**.
 - Изменения направления — отдельным коммитом: обновление этого файла и при необходимости новый ADR в [docs/adr/README.md](adr/README.md).
