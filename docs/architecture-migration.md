@@ -7,7 +7,7 @@
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:BEGIN -->
 
-`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~5.6k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~4.6k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1k**); счётчики — ориентир по состоянию репозитория (авто: 2026-04). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
+`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~5.9k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~4.9k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1k**); счётчики — ориентир по состоянию репозитория (авто: 2026-04). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:END -->
 
@@ -22,6 +22,7 @@
 | `MainWindowViewModel.AutonomousAgent.cs` | 113 | Автономный агент (Power). |
 | `MainWindowViewModel.Breakpoints.cs` | 135 | Брейкпоинты (IDE + .dotnet-debug-mcp-breakpoints.json + отладчик) и подсветка строки остановки. |
 | `MainWindowViewModel.Capabilities.cs` | 23 | Реестр capabilities. |
+| `MainWindowViewModel.CascadeChord.cs` | 263 | Аккордный слой ADR 0060: корень `cascade_chord` из hotkeys.toml (по умолчанию Ctrl+K), затем цепочка без Ctrl/Alt. K → M → (M¦P¦F) — зоны кокпита: MFD / PFD / Forward (фокус редактора). K → S → (P¦F¦D) — Semantic Map: вид / уровень / детализация. |
 | `MainWindowViewModel.CommandPalette.cs` | 385 | Палитра команд. |
 | `MainWindowViewModel.cs` | 357 | Главный композитор окна (partial-класс, несколько `MainWindowViewModel*.cs`). Карта файлов и ответственности — `docs/architecture-migration.md`, раздел «Срез MainWindowViewModel». |
 | `MainWindowViewModel.CSharpLsp.cs` | 112 | Запуск/перезапуск C# LSP. |
@@ -37,7 +38,7 @@
 | `MainWindowViewModel.IdeMcpActions.DebuggerPanel.cs` | 52 | MCP: панель отладки. |
 | `MainWindowViewModel.IdeMcpActions.Editor.cs` | 170 | MCP: редактор. |
 | `MainWindowViewModel.IdeMcpActions.Git.cs` | 119 | MCP: git. |
-| `MainWindowViewModel.IdeMcpActions.Navigation.cs` | 64 | MCP: семантическая навигация (ADR 0039). |
+| `MainWindowViewModel.IdeMcpActions.Navigation.cs` | 65 | MCP: семантическая навигация (ADR 0039). |
 | `MainWindowViewModel.IdeMcpActions.UiAutomation.cs` | 169 | MCP: UI automation. |
 | `MainWindowViewModel.IdeMcpActions.Workspace.cs` | 116 | MCP: workspace. |
 | `MainWindowViewModel.LayoutNotifications.cs` | 17 | Инвалидация производных высот `MainGrid` без длинных цепочек `NotifyPropertyChangedFor` в ShellState. |
@@ -56,7 +57,7 @@
 | `MainWindowViewModel.UiGitWorkspace.cs` | 138 | Git + workspace UI. |
 | `MainWindowViewModel.ViewBridge.cs` | 60 | Колбэки и провайдеры, которые View подставляет в главный VM (диалоги, UI automation). |
 | `MainWindowViewModel.WorkspaceHealth.cs` | 21 | Связка с Workspace Health. |
-| `MainWindowViewModel.WorkspaceNavigationMap.cs` | 341 | Semantic Map в слоте Pfd: тот же контракт, что `CodeNavigationContextBuilder` / MCP. |
+| `MainWindowViewModel.WorkspaceNavigationMap.cs` | 360 | Semantic Map в слоте Pfd: тот же контракт, что `CodeNavigationContextBuilder` / MCP. |
 | `MainWindowViewModel.WorkspaceSplitters.cs` | 30 | Сплиттеры рабочей области (MainGrid, обозреватель решения, Git и т.д.): режим «взлёт» — блокировка перетаскивания. |
 
 <!-- AUTO:MAIN-WINDOW-SLICE:MWVM-TABLE:END -->
@@ -69,7 +70,7 @@
 |------|------------|------------|
 | `IdeMcpCommandExecutor.cs` | 64 | Диспетчер MCP-команд IDE: разбор args и вызов `IIdeMcpActions` / UI-команд главного окна. |
 | `IdeMcpCommandExecutor.Handlers.AgentNotes.cs` | 70 | Хендлеры agent-notes. |
-| `IdeMcpCommandExecutor.Handlers.Chrome.cs` | 315 | Хендлеры хрома / видимости. |
+| `IdeMcpCommandExecutor.Handlers.Chrome.cs` | 330 | Хендлеры хрома / видимости. |
 | `IdeMcpCommandExecutor.Handlers.DapDebug.cs` | 88 | DAP / отладка. |
 | `IdeMcpCommandExecutor.Handlers.DebuggerUi.cs` | 62 | Поверхность отладки. |
 | `IdeMcpCommandExecutor.Handlers.Editor.cs` | 108 | Редактор. |
