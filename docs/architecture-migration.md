@@ -7,7 +7,7 @@
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:BEGIN -->
 
-`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~6k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~4.9k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1k**); счётчики — ориентир по состоянию репозитория (авто: 2026-04). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
+`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~6k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~5k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1k**); счётчики — ориентир по состоянию репозитория (авто: 2026-04). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:END -->
 
@@ -23,7 +23,7 @@
 | `MainWindowViewModel.Breakpoints.cs` | 135 | Брейкпоинты (IDE + .dotnet-debug-mcp-breakpoints.json + отладчик) и подсветка строки остановки. |
 | `MainWindowViewModel.Capabilities.cs` | 23 | Реестр capabilities. |
 | `MainWindowViewModel.CascadeChord.cs` | 261 | Аккордный слой ADR 0060: корень `cascade_chord` из hotkeys.toml (по умолчанию Ctrl+K), затем цепочка без Ctrl/Alt. K → M → (M¦P¦F) — зоны кокпита: MFD / PFD / Forward (фокус редактора). K → S → (P¦F¦D) — Semantic Map: вид / уровень / детализация. |
-| `MainWindowViewModel.CommandPalette.cs` | 385 | Палитра команд. |
+| `MainWindowViewModel.CommandPalette.cs` | 404 | Палитра команд. |
 | `MainWindowViewModel.cs` | 361 | Главный композитор окна (partial-класс, несколько `MainWindowViewModel*.cs`). Карта файлов и ответственности — `docs/architecture-migration.md`, раздел «Срез MainWindowViewModel». |
 | `MainWindowViewModel.CSharpLsp.cs` | 112 | Запуск/перезапуск C# LSP. |
 | `MainWindowViewModel.CursorAcp.cs` | 22 | Путь Cursor ACP. |
@@ -39,7 +39,7 @@
 | `MainWindowViewModel.IdeMcpActions.Editor.cs` | 170 | MCP: редактор. |
 | `MainWindowViewModel.IdeMcpActions.Git.cs` | 119 | MCP: git. |
 | `MainWindowViewModel.IdeMcpActions.Navigation.cs` | 66 | MCP: семантическая навигация (ADR 0039). |
-| `MainWindowViewModel.IdeMcpActions.UiAutomation.cs` | 181 | MCP: UI automation. |
+| `MainWindowViewModel.IdeMcpActions.UiAutomation.cs` | 179 | MCP: UI automation. |
 | `MainWindowViewModel.IdeMcpActions.Workspace.cs` | 116 | MCP: workspace. |
 | `MainWindowViewModel.LayoutNotifications.cs` | 17 | Инвалидация производных высот `MainGrid` без длинных цепочек `NotifyPropertyChangedFor` в ShellState. |
 | `MainWindowViewModel.MarkdownExport.cs` | 55 | Экспорт Markdown. |
@@ -74,7 +74,7 @@
 | `IdeMcpCommandExecutor.Handlers.DapDebug.cs` | 88 | DAP / отладка. |
 | `IdeMcpCommandExecutor.Handlers.DebuggerUi.cs` | 62 | Поверхность отладки. |
 | `IdeMcpCommandExecutor.Handlers.Editor.cs` | 108 | Редактор. |
-| `IdeMcpCommandExecutor.Handlers.PowerDocuments.cs` | 224 | Power / документы. |
+| `IdeMcpCommandExecutor.Handlers.PowerDocuments.cs` | 233 | Power / документы. |
 | `Generated/IdeMcpCommandExecutor.Generated.g.cs` | 67 | Сгенерированные хендлеры MCP → `IIdeMcpActions` (`CascadeIDE.ProtocolDocGen`). |
 
 <!-- AUTO:MAIN-WINDOW-SLICE:EXEC-TABLE:END -->
