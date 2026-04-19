@@ -22,7 +22,7 @@
 | `MainWindowViewModel.AutonomousAgent.cs` | 113 | Автономный агент (Power). |
 | `MainWindowViewModel.Breakpoints.cs` | 135 | Брейкпоинты (IDE + .dotnet-debug-mcp-breakpoints.json + отладчик) и подсветка строки остановки. |
 | `MainWindowViewModel.Capabilities.cs` | 23 | Реестр capabilities. |
-| `MainWindowViewModel.CascadeChord.cs` | 263 | Аккордный слой ADR 0060: корень `cascade_chord` из hotkeys.toml (по умолчанию Ctrl+K), затем цепочка без Ctrl/Alt. K → M → (M¦P¦F) — зоны кокпита: MFD / PFD / Forward (фокус редактора). K → S → (P¦F¦D) — Semantic Map: вид / уровень / детализация. |
+| `MainWindowViewModel.CascadeChord.cs` | 254 | Аккордный слой ADR 0060: корень `cascade_chord` из hotkeys.toml (по умолчанию Ctrl+K), затем цепочка без Ctrl/Alt. K → M → (M¦P¦F) — зоны кокпита: MFD / PFD / Forward (фокус редактора). K → S → (P¦F¦D) — Semantic Map: вид / уровень / детализация. |
 | `MainWindowViewModel.CommandPalette.cs` | 385 | Палитра команд. |
 | `MainWindowViewModel.cs` | 357 | Главный композитор окна (partial-класс, несколько `MainWindowViewModel*.cs`). Карта файлов и ответственности — `docs/architecture-migration.md`, раздел «Срез MainWindowViewModel». |
 | `MainWindowViewModel.CSharpLsp.cs` | 112 | Запуск/перезапуск C# LSP. |
