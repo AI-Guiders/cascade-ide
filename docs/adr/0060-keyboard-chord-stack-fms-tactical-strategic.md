@@ -3,7 +3,7 @@
 **Статус:** Proposed  
 **Дата:** 2026-04-19  
 
-**Связь:** [0013](0013-command-surface-and-discoverability.md) (палитра, toolbar, discoverability — **этот ADR не заменяет** палитру), [0008](0008-mcp-contracts-and-testable-infrastructure.md) (MCP и команды), [0030](0030-command-ids-hotkeys-and-ui-registry-layers.md) (`IdeCommands`, `hotkeys.toml`, реестр), [0017](0017-multi-window-workspace-and-agent-surfaces.md) (мультиоконность, фокус), [0021](0021-pfd-mfd-cockpit-attention-model.md) (PFD / MFD), [0032](0032-hud-banner-configuration-and-grammar.md) (HUD / подписи режима — опционально), [0055](0055-skia-instrument-composition-pipeline.md) (Skia — overlay), [0059](0059-roslyn-mcp-profiles-manager-tactical-strategic-efb.md) (тактика / EFB на MFD, Manager), [north-star — keyboard-first](../design/north-star-cursor-mcp-cascade-workbench-v1.md). **Нотация жестов в текстах** (`<C-k>`, последовательности, FMS-имена): [chord-notation-cascadeide.md](../chord-notation-cascadeide.md).
+**Связь:** [0013](0013-command-surface-and-discoverability.md) (палитра, toolbar, discoverability — **этот ADR не заменяет** палитру), [0070](0070-command-palette-direct-overlay-surface.md) (палитра как overlay surface), [0008](0008-mcp-contracts-and-testable-infrastructure.md) (MCP и команды), [0030](0030-command-ids-hotkeys-and-ui-registry-layers.md) (`IdeCommands`, `hotkeys.toml`, реестр), [0017](0017-multi-window-workspace-and-agent-surfaces.md) (мультиоконность, фокус), [0021](0021-pfd-mfd-cockpit-attention-model.md) (PFD / MFD), [0032](0032-hud-banner-configuration-and-grammar.md) (HUD / подписи режима — опционально), [0055](0055-skia-instrument-composition-pipeline.md) (Skia — overlay), [0059](0059-roslyn-mcp-profiles-manager-tactical-strategic-efb.md) (тактика / EFB на MFD, Manager), [north-star — keyboard-first](../design/north-star-cursor-mcp-cascade-workbench-v1.md). **Нотация жестов в текстах** (`<C-k>`, последовательности, FMS-имена): [chord-notation-cascadeide.md](../chord-notation-cascadeide.md).
 
 ---
 
@@ -25,8 +25,9 @@
 |------|------------|------------------------------------------------------------------|
 | **Палитра команд** (хоткей по умолчанию **Ctrl+Q** в шипнутом `hotkeys.toml`) | Полный каталог, поиск по имени, недавние | Решение §2 пункт 2 |
 | **Корень аккорда** — рабочее имя **`CascadeChord`** (хоткей по умолчанию **Ctrl+K** в поставке; переопределение — пользовательский `hotkeys.toml`) | Короткий FMS-поток: префикс → вторая клавиша → исполнение **одной** команды из заранее ограниченного набора «кокпитных» действий | Расширение keyboard-first **без** отмены палитры |
+| **Тот же `command_id` текстом в палитре** — префикс **`c:`** (**Command Melody**, [§11](#adr0060-p11)) | Компактный mnemonic (`c: gs`, …) без смены окна; fuzzy по title/id как прежде | Не третий «физический» вход: по-прежнему **Ctrl+Q**, расширенный строкой запроса |
 
-**Правило:** **Ctrl+K** не заменяет **Ctrl+Q**; пользователь выбирает «искать по имени» или «идти по известной букве». Конфликт с хоткеями редактора/ОС — отлавливать при загрузке и отражать в UX (см. открытые вопросы).
+**Правило:** **Ctrl+K** не заменяет **Ctrl+Q**; пользователь выбирает «искать по имени», «идти по известной букве» аккорда или ввести **melody** после открытия палитры. Конфликт с хоткеями редактора/ОС — отлавливать при загрузке и отражать в UX (см. открытые вопросы).
 
 <a id="adr0060-p2"></a>
 
@@ -156,11 +157,108 @@
 
 **См. также:** продуктовый нарратив «невидимый инструмент» vs класс риска облачного ассистента — [cascadeide-philosophy-v1.md](../design/cascadeide-philosophy-v1.md), [ADR 0071](0071-ai-assistance-sovereignty-locality-invisibility.md).
 
+<a id="adr0060-p11"></a>
+
+### 11. Command Melody (`c:`) — палитра, mnemonic alias и мост к аккорду
+
+**Назначение.** Префикс **`c:`** вводит в **command palette** ([0013](0013-command-surface-and-discoverability.md), [0070](0070-command-palette-direct-overlay-surface.md)) специальный режим **melody**: короткие **mnemonic alias** в developer-first словаре. Пользователь может ввести компактную форму вроде `c: gs`, `c: gc`, `c: gm` и сразу получить нужную команду, не полагаясь только на fuzzy search по длинному заголовку.
+
+**Цель.** Режим нужен **не** для замены обычного поиска, а для **быстрого семантического входа**, общего для:
+
+- палитры (строка запроса);
+- аккордного слоя (**CascadeChord**);
+- канонического **`command_id`** в реестре ([0030](0030-command-ids-hotkeys-and-ui-registry-layers.md));
+- вызова через MCP / агента ([0008](0008-mcp-contracts-and-testable-infrastructure.md)) — тот же идентификатор.
+
+**Три представления одной команды**
+
+| Слой | Пример |
+|------|--------|
+| Human title | `Git: Status` |
+| Melody alias | `c: gs` |
+| Canonical id | `git.status` *(или эквивалент в `IdeCommands`; точная строка — реестр [0030](0030-command-ids-hotkeys-and-ui-registry-layers.md))* |
+
+Палитра **должна** находить и показывать команду по **любому** из этих представлений (title, alias, id).
+
+**Синтаксис**
+
+- Общий префикс namespace: **`c:`** — вход в melody.
+- После `c:` допускается **один или несколько** mnemonic token; **базовая форма v1** — **двухбуквенная**: первая буква = **family**, вторая = **action**.
+- Примеры (логические имена; фактический `command_id` — по реестру):
+
+| Ввод | Назначение (смысл) |
+|------|---------------------|
+| `c: gs` | Git → Status |
+| `c: gc` | Git → Commit |
+| `c: gm` | Git → Submodules |
+| `c: br` | Build → Run / Rebuild (по принятой терминологии в реестре) |
+| `c: bt` | Build → Test |
+| `c: dc` | Debug → Continue |
+| `c: dr` | Debug → Run / Start debugging |
+
+**Семейства v1 (узкий старт, узнаваемые домены)**
+
+| Буква | Family |
+|-------|--------|
+| **g** | Git |
+| **b** | Build |
+| **d** | Debug |
+| **r** | Run |
+| **e** | Editor |
+| **m** | Map (Semantic Map / навигация карты) |
+
+Это согласуется с **intent-first**: разработчик мыслит **доменом задачи**, а не топологией IDE ([§10](#adr0060-p10)).
+
+**Принципы выбора alias**
+
+1. Alias **узнаваем** разработчиком без отдельного обучения.
+2. Alias **короче** human title, но не «шифр» уровня shell-golf.
+3. Alias **стабилен**, даже если формулировка в UI слегка меняется.
+4. Alias выражает **намерение**, а не **размещение на поверхности** (плохой базовый пример: привязка к «primary deck» вместо смысла команды).
+
+**Разрешение конфликтов**
+
+1. В пределах одного **workspace** один melody alias → ровно **один** canonical `command_id`.
+2. При конфликте: либо **фиксируется** одно отображение в реестре, остальные показываются как secondary matches; либо требуется **трёхбуквенная** форма; либо конфликтный alias помечается **invalid** до разруливания.
+3. **Human title** и **canonical id** остаются **всегда** валидными путями поиска, даже если alias неоднозначен.
+
+**Поведение палитры в melody mode**
+
+- При вводе `c:` палитра переключается в melody mode: при пустом хвосте после `c:` — **help** и **top families**; при `c: g` — доступные команды Git и хвосты; при `c: gs` — прямое совпадение (напр. Git: Status).
+- В строке результата отображаются **human title**, **alias** и опционально **chord hint** (см. ниже). Пример строки:  
+  `Git: Status — c: gs — git.status`
+
+**Связь с аккордным слоем (один семантический путь)**
+
+Melody **не живёт отдельно** от аккорда: тот же путь, что `c: gs` в палитре, в ментальной модели intent-first выражается аккордом **`Ctrl+K` → `G` → `S`** (буквы семейства и действия), а в реестре — тем же **`command_id`**. Палитра даёт **текстовую** компактную форму; аккорд — **клавиатурную**; MCP — **идентификатор**.
+
+**UX-ограничения**
+
+- `c:` — **ускоритель**, не единственный способ: команда обязана находиться и **обычным fuzzy** по human title.
+- В UI **рядом с командой** показывать alias (и при необходимости подсказку аккорда), чтобы язык усваивался постепенно.
+- Overlay / help может предлагать подсказку вида: «Try `c: gs` for Git Status» ([§6](#adr0060-p6)).
+
+**Минимальный словарь v1 (стартовый набор)**
+
+| Alias | Логический смысл (canonical id — уточнить в реестре) |
+|-------|------------------------------------------------------|
+| `c: gs` | git.status |
+| `c: gc` | git.commit |
+| `c: gm` | git.submodules |
+| `c: bt` | build.test |
+| `c: br` | build.run или build.rebuild |
+| `c: dr` | debug.run / start debugging |
+| `c: dc` | debug.continue |
+| `c: ms` | map.semantic / show semantic map (по принятому именованию) |
+
+Расширение словаря — по мере появления команд в `IdeCommands`; дубликаты и конфликты — по правилам выше.
+
 ---
 
 ## Последствия
 
 - Появляется **второй UX-паттерн** рядом с палитрой; документация пользователя должна объяснять **Q vs K**.
+- Реестр команд ([0030](0030-command-ids-hotkeys-and-ui-registry-layers.md)) получает слой **melody alias** и правила конфликтов; палитра ([0070](0070-command-palette-direct-overlay-surface.md)) — режим **`c:`** и отображение тройки title / alias / id.
 - Тесты: сценарии таймаута, Esc, конфликт хоткеев, MCP `ide_execute_command` для тех же `command_id`.
 - Зависимость от [0059](0059-roslyn-mcp-profiles-manager-tactical-strategic-efb.md): тактика/стратегия должны быть согласованы по смыслу с командами аккорда.
 
@@ -171,6 +269,7 @@
 - Зарезервирован ли **Ctrl+K** под редактор (Vim/Emacs-подобные плагины в будущем)?
 - Одна глобальная машина аккорда на приложение или учёт **второго TopLevel** ([0017](0017-multi-window-workspace-and-agent-surfaces.md))?
 - Локализация букв на overlay (EN-only в v0?).
+- Как в одной машине состояний сочетаются **ось S/T** (§2) и **intent-first G/B/D/…** ([§11](#adr0060-p11)): два пресета аккорда, переключатель режима или последовательная миграция?
 
 ---
 
