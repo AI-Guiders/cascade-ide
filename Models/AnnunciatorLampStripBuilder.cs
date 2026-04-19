@@ -9,7 +9,7 @@ namespace CascadeIDE.Models;
 /// <code>
 /// var items = AnnunciatorLampStripBuilder.Create()
 ///     .AddLamp(EnvironmentReadinessCellIds.MarkdownLsp, "MD", AnnunciatorLampLevel.Ok, "Markdown LSP", "")
-///     .AddLamp(EnvironmentReadinessCellIds.CSharpLsp, "C#", AnnunciatorLampLevel.Warning, "C# LSP", "Не поднят")
+///     .AddLamp(EnvironmentReadinessCellIds.CSharpLsp, "C#", AnnunciatorLampLevel.Caution, "C# LSP", "Не поднят")
 ///     .Build();
 /// </code>
 /// </example>

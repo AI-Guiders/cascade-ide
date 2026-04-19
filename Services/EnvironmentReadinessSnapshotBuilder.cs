@@ -15,7 +15,7 @@ public static class EnvironmentReadinessSnapshotBuilder
             EnvironmentReadinessCellIds.Agent,
             "Агент (AI)",
             "Канал к агенту и MCP задаётся сессией IDE; отдельный health-check на этой странице пока не выполняется.",
-            AnnunciatorLampLevel.Info,
+            AnnunciatorLampLevel.Advisory,
             LampShortLabel: "AI");
 
     /// <summary>Статическая часть: C# LSP, Markdown LSP (без сетевого вызова).</summary>
@@ -51,7 +51,7 @@ public static class EnvironmentReadinessSnapshotBuilder
                     EnvironmentReadinessCellIds.DotnetSdk,
                     "dotnet (SDK / CLI)",
                     "Не удалось запустить процесс dotnet.",
-                    AnnunciatorLampLevel.Unavailable,
+                    AnnunciatorLampLevel.Critical,
                     LampShortLabel: ".NET");
 
             var outTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
@@ -73,7 +73,7 @@ public static class EnvironmentReadinessSnapshotBuilder
                 EnvironmentReadinessCellIds.DotnetSdk,
                 "dotnet (SDK / CLI)",
                 $"dotnet --version не удался ({tail}). Добавь dotnet в PATH или установи SDK.",
-                AnnunciatorLampLevel.Unavailable,
+                AnnunciatorLampLevel.Critical,
                 LampShortLabel: ".NET");
         }
         catch (OperationCanceledException)
@@ -86,7 +86,7 @@ public static class EnvironmentReadinessSnapshotBuilder
                 EnvironmentReadinessCellIds.DotnetSdk,
                 "dotnet (SDK / CLI)",
                 $"Не удалось выполнить dotnet --version: {ex.Message}",
-                AnnunciatorLampLevel.Unavailable,
+                AnnunciatorLampLevel.Critical,
                 LampShortLabel: ".NET");
         }
     }
@@ -106,7 +106,7 @@ public static class EnvironmentReadinessSnapshotBuilder
                 EnvironmentReadinessCellIds.CSharpLsp,
                 "C# LSP",
                 "Режим «только парсер»: отдельный процесс language server не используется (Roslyn в процессе IDE).",
-                AnnunciatorLampLevel.Info,
+                AnnunciatorLampLevel.Advisory,
                 LampShortLabel: "C#");
         }
 
@@ -117,7 +117,7 @@ public static class EnvironmentReadinessSnapshotBuilder
                 EnvironmentReadinessCellIds.CSharpLsp,
                 "C# LSP",
                 $"Провайдер: {provider}. Открой файл решения (.sln/.slnx), чтобы IDE могла запустить LSP.",
-                AnnunciatorLampLevel.Warning,
+                AnnunciatorLampLevel.Caution,
                 LampShortLabel: "C#");
         }
 
@@ -135,7 +135,7 @@ public static class EnvironmentReadinessSnapshotBuilder
                 EnvironmentReadinessCellIds.CSharpLsp,
                 "C# LSP",
                 $"{exeHint}. Процесс не запущен — проверь путь к исполняемому файлу и аргументы в настройках.",
-                AnnunciatorLampLevel.Warning,
+                AnnunciatorLampLevel.Caution,
                 LampShortLabel: "C#");
         }
 
@@ -153,7 +153,7 @@ public static class EnvironmentReadinessSnapshotBuilder
             EnvironmentReadinessCellIds.CSharpLsp,
             "C# LSP",
             $"{exeHint}. Процесс не активен (завершился или не прошёл handshake).",
-            AnnunciatorLampLevel.Warning,
+            AnnunciatorLampLevel.Caution,
             LampShortLabel: "C#");
     }
 
@@ -172,7 +172,7 @@ public static class EnvironmentReadinessSnapshotBuilder
                 EnvironmentReadinessCellIds.MarkdownLsp,
                 "Markdown LSP",
                 "Выключено (диагностики Markdown из отдельного сервера не используются).",
-                AnnunciatorLampLevel.Info,
+                AnnunciatorLampLevel.Advisory,
                 LampShortLabel: "MD");
         }
 
@@ -183,7 +183,7 @@ public static class EnvironmentReadinessSnapshotBuilder
                 EnvironmentReadinessCellIds.MarkdownLsp,
                 "Markdown LSP",
                 $"Провайдер: {provider}. Нужен открытый файл решения, чтобы запустить сервер.",
-                AnnunciatorLampLevel.Warning,
+                AnnunciatorLampLevel.Caution,
                 LampShortLabel: "MD");
         }
 
@@ -201,7 +201,7 @@ public static class EnvironmentReadinessSnapshotBuilder
                 EnvironmentReadinessCellIds.MarkdownLsp,
                 "Markdown LSP",
                 $"{exeHint}. Процесс не запущен — проверь установку (например Marksman в PATH) или путь в настройках.",
-                AnnunciatorLampLevel.Warning,
+                AnnunciatorLampLevel.Caution,
                 LampShortLabel: "MD");
         }
 
@@ -219,7 +219,7 @@ public static class EnvironmentReadinessSnapshotBuilder
             EnvironmentReadinessCellIds.MarkdownLsp,
             "Markdown LSP",
             $"{exeHint}. Процесс не активен.",
-            AnnunciatorLampLevel.Warning,
+            AnnunciatorLampLevel.Caution,
             LampShortLabel: "MD");
     }
 

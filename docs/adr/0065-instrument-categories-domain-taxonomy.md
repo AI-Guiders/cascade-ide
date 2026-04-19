@@ -4,7 +4,7 @@
 **Дата:** 2026-04-18  
 **Обновлено:** 2026-04-18 — уточнение: **Semantic Map** = карта **намерений кода**; введена ось **типов графов** (`graph_kind`).
 
-**Связь:** [0047](0047-cockpit-instrument-descriptor-and-slot-composition.md) (`Instrument`, `CockpitInstrumentDescriptor`, слот vs композитор vs поверхность), [0063](0063-instrument-deck-named-composition-one-anchor.md) (две оси: форма представления vs композиция в якоре), [0039](0039-workspace-navigation-affordances.md) (навигация, MCP, subgraph), [0053](0053-semantic-map-control-flow-pfd.md) / [0056](0056-semantic-map-pipeline-adoption.md) (Semantic Map, control flow), [0062](0062-git-submodules-semantic-map-subgraph.md) (GitMap / дерево submodules), [0055](0055-skia-instrument-composition-pipeline.md) (pipeline внутри Skia-инструмента).
+**Связь:** [0047](0047-cockpit-instrument-descriptor-and-slot-composition.md) (`Instrument`, `CockpitInstrumentDescriptor`, слот vs композитор vs поверхность), [0063](0063-instrument-deck-named-composition-one-anchor.md) (две оси: форма представления vs композиция в якоре), [0039](0039-workspace-navigation-affordances.md) (навигация, MCP, subgraph), [0053](0053-semantic-map-control-flow-pfd.md) / [0056](0056-semantic-map-pipeline-adoption.md) (Semantic Map, control flow), [0062](0062-git-submodules-semantic-map-subgraph.md) (GitMap / дерево submodules), [0055](0055-skia-instrument-composition-pipeline.md) (pipeline внутри Skia-инструмента), [0067](0067-graph-backed-surfaces-contract.md) (общий контракт **graph-backed surface**; `graph_kind` — ось данных внутри семейства).
 
 ---
 

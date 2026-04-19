@@ -10,7 +10,7 @@ namespace CascadeIDE.Cockpit.PrimitivesKit;
 /// Метрики и отрисовка примитива <see cref="CascadeIDE.Cockpit.DeckPrimitiveKind.Lamp"/> в стиле annunciator / Korry
 /// (ADR 0063, общий контур <see cref="DrawingContext"/> с ADR 0055).
 /// Ячейка — квадрат: объёмная рамка и квадратная линза по центру; <see cref="AnnunciatorLampLevel.Ok"/> = «выключено» (тёмная линза),
-/// предупреждение и прочие уровни — подсветка цветом уровня (жёлтый = проблема внимания).
+/// остальные уровни — подсветка по <see cref="AnnunciatorLampLevel"/> (ADR 0021 §5).
 /// </summary>
 public static class AnnunciatorLampPrimitives
 {

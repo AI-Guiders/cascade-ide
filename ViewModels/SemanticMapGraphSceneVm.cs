@@ -3,11 +3,24 @@ using Avalonia;
 
 namespace CascadeIDE.ViewModels;
 
+/// <summary>Какой доменный граф рисуем на мини-карте: CFG vs связанные файлы (ADR 0067).</summary>
+public enum SemanticMapGraphPresentationKind
+{
+    /// <summary>Control flow / CFG (полётный план по коду).</summary>
+    CodeControlFlow = 0,
+
+    /// <summary>Якорь и связанные файлы проекта (звезда / workspace).</summary>
+    WorkspaceRelatedFiles = 1
+}
+
 /// <summary>Сцена мини-карты Semantic Map (узлы с центром в логических пикселях контрола).</summary>
 public sealed class SemanticMapGraphSceneVm
 {
     public required IReadOnlyList<SemanticMapGraphNodeLayout> Nodes { get; init; }
     public required IReadOnlyList<SemanticMapGraphEdgeLayout> Edges { get; init; }
+
+    /// <summary>Визуальный язык сцены; <see cref="CascadeIDE.Cockpit.PrimitivesKit.SemanticMapVisualTheme.ForPresentation"/>.</summary>
+    public SemanticMapGraphPresentationKind Presentation { get; init; } = SemanticMapGraphPresentationKind.CodeControlFlow;
     public IReadOnlyList<SemanticMapLegendEntry> Legend { get; init; } = [];
     /// <summary>Резервировать колонку под легенду (номера шагов и/или обозначения фигур).</summary>
     public bool UseLegendColumn { get; init; }
@@ -21,6 +34,26 @@ public sealed class SemanticMapGraphSceneVm
     public IReadOnlySet<string> HighlightedEdgeKeys { get; init; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
     public bool IsEmpty => Nodes.Count == 0;
+
+    /// <summary>Подмена только <see cref="Presentation"/> (после укладки графа из wire <c>graph_kind</c>).</summary>
+    public static SemanticMapGraphSceneVm WithPresentationKind(SemanticMapGraphSceneVm scene, SemanticMapGraphPresentationKind presentation)
+    {
+        if (scene.Presentation == presentation)
+            return scene;
+        return new SemanticMapGraphSceneVm
+        {
+            Nodes = scene.Nodes,
+            Edges = scene.Edges,
+            Presentation = presentation,
+            Legend = scene.Legend,
+            UseLegendColumn = scene.UseLegendColumn,
+            ShowLegendConditionKey = scene.ShowLegendConditionKey,
+            ShowLegendReturnKey = scene.ShowLegendReturnKey,
+            LegendColumnLeft = scene.LegendColumnLeft,
+            HighlightedNodeIds = scene.HighlightedNodeIds,
+            HighlightedEdgeKeys = scene.HighlightedEdgeKeys
+        };
+    }
 }
 
 /// <summary>Строка легенды control flow: номер ↔ одна строка кода/предиката.</summary>

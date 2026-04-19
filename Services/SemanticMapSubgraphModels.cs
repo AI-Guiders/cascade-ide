@@ -2,9 +2,27 @@
 
 namespace CascadeIDE.Services;
 
+/// <summary>Канонические строки <c>graph_kind</c> в JSON subgraph (ADR 0065 §6).</summary>
+public static class SemanticMapGraphKindWire
+{
+    public const string CodeIntentSemanticMap = "code_intent_semantic_map";
+    public const string RelatedFiles = "related_files";
+    public const string RepositoryModuleTree = "repository_module_tree";
+}
+
+/// <summary>Тип графа в wire-модели; дублирует <see cref="SemanticMapGraphKindWire"/>.</summary>
+public enum SemanticMapGraphKind : byte
+{
+    /// <summary>Не указано в JSON — клиент выводит по уровню карты (см. <see cref="Navigation.SemanticMapPresentationResolver"/>).</summary>
+    Unspecified = 0,
+    CodeIntentSemanticMap = 1,
+    RelatedFiles = 2,
+    RepositoryModuleTree = 3
+}
+
 /// <summary>
 /// Wire-модель подграфа для композиции сцены (тот же JSON, что MCP <c>get_code_navigation_context</c>, режим <c>subgraph</c>).
-/// Продуктовый термин <b>Semantic Map</b> — это <b>семантическая карта намерений кода</b>, не общий «граф смысловых связей»; тот же контейнер может нести и другие графы (связанные файлы, дерево модулей) — см. ADR 0065, ось <c>graph_kind</c> (в контракте пока косвенно: уровень карты, виды узлов).
+/// Продуктовый термин <b>Semantic Map</b> — это <b>семантическая карта намерений кода</b>, не общий «граф смысловых связей»; тот же контейнер может нести и другие графы (связанные файлы, дерево модулей) — см. ADR 0065, ось <c>graph_kind</c>.
 /// <list type="bullet">
 /// <item><description><b>Карта кода</b> (control flow, шаги метода, предикаты) — домен <b>CodeNavigation</b> (<see cref="CodeNavigationContextBuilder"/>, <see cref="CodeNavigation.CodeNavigationControlFlowSubgraphBuilder"/>).</description></item>
 /// <item><description><b>Зависимости / связанные файлы</b> по эвристикам дерева решения — <b>WorkspaceNavigation</b> (см. те же поля в JSON).</description></item>
@@ -15,6 +33,10 @@ namespace CascadeIDE.Services;
 public sealed class SemanticMapSubgraphDocument
 {
     public required string AnchorPath { get; init; }
+
+    /// <summary>Тип графа в payload (<c>graph_kind</c>); при <see cref="SemanticMapGraphKind.Unspecified"/> презентация выводится по уровню карты.</summary>
+    public SemanticMapGraphKind GraphKind { get; init; } = SemanticMapGraphKind.Unspecified;
+
     public required IReadOnlyList<SemanticMapSubgraphNode> Nodes { get; init; }
     public required IReadOnlyList<SemanticMapSubgraphEdge> Edges { get; init; }
 }

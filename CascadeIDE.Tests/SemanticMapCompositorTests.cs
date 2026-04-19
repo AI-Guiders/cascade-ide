@@ -39,6 +39,7 @@ public sealed class SemanticMapCompositorTests
         Assert.True(result.PreferredHeight >= SemanticMapCompositor.DefaultHeightControlFlow);
         Assert.True(result.PreferredHeight <= SemanticMapCompositor.MaxHeightControlFlow);
         Assert.Equal(doc.Nodes.Count, result.Scene.Nodes.Count);
+        Assert.Equal(SemanticMapGraphPresentationKind.CodeControlFlow, result.Scene.Presentation);
     }
 
     [Fact]
@@ -140,6 +141,7 @@ public sealed class SemanticMapCompositorTests
         var result = compositor.Compose(doc, SemanticMapLevelKind.File, 280, 120);
         Assert.Equal(120, result.PreferredHeight, 0.1);
         Assert.Equal(2, result.Scene.Nodes.Count);
+        Assert.Equal(SemanticMapGraphPresentationKind.WorkspaceRelatedFiles, result.Scene.Presentation);
     }
 
     [Fact]
@@ -312,10 +314,11 @@ public sealed class SemanticMapCompositorTests
     public void SubgraphJson_ParsesLegendFields()
     {
         const string json =
-            """{"mode":"subgraph","anchor_path":"D:\\a.cs","nodes":[{"id":"n0","path":"D:\\a.cs","kind":"anchor","label":"a.cs","relative_path":"","rationale":""},{"id":"n1","path":"D:\\a.cs","kind":"condition_step","label":"IF","relative_path":"","rationale":"","legend_index":1,"legend_text":"x > 0"}],"edges":[]}""";
+            """{"mode":"subgraph","graph_kind":"code_intent_semantic_map","anchor_path":"D:\\a.cs","nodes":[{"id":"n0","path":"D:\\a.cs","kind":"anchor","label":"a.cs","relative_path":"","rationale":""},{"id":"n1","path":"D:\\a.cs","kind":"condition_step","label":"IF","relative_path":"","rationale":"","legend_index":1,"legend_text":"x > 0"}],"edges":[]}""";
         Assert.True(SemanticMapSubgraphJson.TryParse(json, out var doc, out _));
         Assert.NotNull(doc);
-        var n1 = doc!.Nodes.First(n => n.Id == "n1");
+        Assert.Equal(SemanticMapGraphKind.CodeIntentSemanticMap, doc!.GraphKind);
+        var n1 = doc.Nodes.First(n => n.Id == "n1");
         Assert.Equal(1, n1.LegendIndex);
         Assert.Equal("x > 0", n1.LegendText);
     }

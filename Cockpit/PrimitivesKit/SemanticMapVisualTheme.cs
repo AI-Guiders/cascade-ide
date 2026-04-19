@@ -1,34 +1,99 @@
 using Avalonia.Media;
+using CascadeIDE.ViewModels;
 
 namespace CascadeIDE.Cockpit.PrimitivesKit;
 
 /// <summary>
-/// Цвета и перья сцены Semantic Map (control flow / звезда). Единый источник для <see cref="SemanticMapSceneDrawing"/> (ADR 0064, 0055).
+/// Цвета и перья сцены Semantic Map (control flow / звезда). Единый источник для <see cref="SemanticMapSceneDrawing"/> (ADR 0064, 0055, 0067).
 /// </summary>
 public sealed class SemanticMapVisualTheme
 {
-    public static SemanticMapVisualTheme Default { get; } = new();
+    private SemanticMapVisualTheme(
+        Color anchorFill,
+        Color conditionFill,
+        Color exitFill,
+        Color callFill,
+        Color sideLabel,
+        Color baseEdge,
+        Color conditionalEdge,
+        Color multiBranchEdge,
+        Color loopEdge,
+        Color highlightedEdge,
+        Color highlightedLoopEdge,
+        Color highlightedNode,
+        Color nodeStroke)
+    {
+        AnchorFill = new SolidColorBrush(anchorFill);
+        ConditionFill = new SolidColorBrush(conditionFill);
+        ExitFill = new SolidColorBrush(exitFill);
+        CallFill = new SolidColorBrush(callFill);
+        SideLabelBrush = new SolidColorBrush(sideLabel);
+        BaseEdgePen = new(new SolidColorBrush(baseEdge), 1);
+        ConditionalEdgePen = new(new SolidColorBrush(conditionalEdge), 1.2)
+        {
+            DashStyle = new DashStyle([3, 2], 0)
+        };
+        MultiBranchEdgePen = new(new SolidColorBrush(multiBranchEdge), 1)
+        {
+            DashStyle = new DashStyle([2, 2], 0)
+        };
+        LoopEdgePen = new(new SolidColorBrush(loopEdge), 1.8);
+        HighlightedEdgePen = new(new SolidColorBrush(highlightedEdge), 1.8);
+        HighlightedLoopEdgePen = new(new SolidColorBrush(highlightedLoopEdge), 2.2);
+        HighlightedNodePen = new(new SolidColorBrush(highlightedNode), 1.2);
+        NodeStrokePen = new(new SolidColorBrush(nodeStroke), 1);
+    }
 
-    public IBrush AnchorFill { get; } = new SolidColorBrush(CockpitPrimitivesPalette.SemanticMap.AnchorFill);
-    public IBrush ConditionFill { get; } = new SolidColorBrush(CockpitPrimitivesPalette.SemanticMap.ConditionFill);
-    public IBrush ExitFill { get; } = new SolidColorBrush(CockpitPrimitivesPalette.SemanticMap.ExitFill);
-    public IBrush CallFill { get; } = new SolidColorBrush(CockpitPrimitivesPalette.SemanticMap.CallFill);
+    /// <summary>Тема по умолчанию: CFG / control flow.</summary>
+    public static SemanticMapVisualTheme Default { get; } = new(
+        CockpitPrimitivesPalette.SemanticMap.AnchorFill,
+        CockpitPrimitivesPalette.SemanticMap.ConditionFill,
+        CockpitPrimitivesPalette.SemanticMap.ExitFill,
+        CockpitPrimitivesPalette.SemanticMap.CallFill,
+        CockpitPrimitivesPalette.SemanticMap.SideLabel,
+        CockpitPrimitivesPalette.SemanticMap.BaseEdge,
+        CockpitPrimitivesPalette.SemanticMap.ConditionalEdge,
+        CockpitPrimitivesPalette.SemanticMap.MultiBranchEdge,
+        CockpitPrimitivesPalette.SemanticMap.LoopEdge,
+        CockpitPrimitivesPalette.SemanticMap.HighlightedEdge,
+        CockpitPrimitivesPalette.SemanticMap.HighlightedLoopEdge,
+        CockpitPrimitivesPalette.SemanticMap.HighlightedNode,
+        CockpitPrimitivesPalette.SemanticMap.NodeStroke);
+
+    private static readonly SemanticMapVisualTheme WorkspaceRelated = new(
+        CockpitPrimitivesPalette.SemanticMapWorkspace.AnchorFill,
+        CockpitPrimitivesPalette.SemanticMapWorkspace.ConditionFill,
+        CockpitPrimitivesPalette.SemanticMapWorkspace.ExitFill,
+        CockpitPrimitivesPalette.SemanticMapWorkspace.PeerFill,
+        CockpitPrimitivesPalette.SemanticMapWorkspace.SideLabel,
+        CockpitPrimitivesPalette.SemanticMapWorkspace.BaseEdge,
+        CockpitPrimitivesPalette.SemanticMapWorkspace.ConditionalEdge,
+        CockpitPrimitivesPalette.SemanticMapWorkspace.MultiBranchEdge,
+        CockpitPrimitivesPalette.SemanticMapWorkspace.LoopEdge,
+        CockpitPrimitivesPalette.SemanticMapWorkspace.HighlightedEdge,
+        CockpitPrimitivesPalette.SemanticMapWorkspace.HighlightedLoopEdge,
+        CockpitPrimitivesPalette.SemanticMapWorkspace.HighlightedNode,
+        CockpitPrimitivesPalette.SemanticMapWorkspace.NodeStroke);
+
+    public static SemanticMapVisualTheme ForPresentation(SemanticMapGraphPresentationKind presentation) =>
+        presentation == SemanticMapGraphPresentationKind.WorkspaceRelatedFiles
+            ? WorkspaceRelated
+            : Default;
+
+    public IBrush AnchorFill { get; }
+    public IBrush ConditionFill { get; }
+    public IBrush ExitFill { get; }
+    public IBrush CallFill { get; }
     public IBrush GlyphBrush { get; } = Brushes.White;
-    public IBrush SideLabelBrush { get; } = new SolidColorBrush(CockpitPrimitivesPalette.SemanticMap.SideLabel);
-    public Pen BaseEdgePen { get; } = new(new SolidColorBrush(CockpitPrimitivesPalette.SemanticMap.BaseEdge), 1);
-    public Pen ConditionalEdgePen { get; } = new(new SolidColorBrush(CockpitPrimitivesPalette.SemanticMap.ConditionalEdge), 1.2)
-    {
-        DashStyle = new DashStyle([3, 2], 0)
-    };
-    public Pen MultiBranchEdgePen { get; } = new(new SolidColorBrush(CockpitPrimitivesPalette.SemanticMap.MultiBranchEdge), 1)
-    {
-        DashStyle = new DashStyle([2, 2], 0)
-    };
-    public Pen LoopEdgePen { get; } = new(new SolidColorBrush(CockpitPrimitivesPalette.SemanticMap.LoopEdge), 1.8);
-    public Pen HighlightedEdgePen { get; } = new(new SolidColorBrush(CockpitPrimitivesPalette.SemanticMap.HighlightedEdge), 1.8);
-    public Pen HighlightedLoopEdgePen { get; } = new(new SolidColorBrush(CockpitPrimitivesPalette.SemanticMap.HighlightedLoopEdge), 2.2);
-    public Pen HighlightedNodePen { get; } = new(new SolidColorBrush(CockpitPrimitivesPalette.SemanticMap.HighlightedNode), 1.2);
-    public Pen NodeStrokePen { get; } = new(new SolidColorBrush(CockpitPrimitivesPalette.SemanticMap.NodeStroke), 1);
+    public IBrush SideLabelBrush { get; }
+    public Pen BaseEdgePen { get; }
+    public Pen ConditionalEdgePen { get; }
+    public Pen MultiBranchEdgePen { get; }
+    public Pen LoopEdgePen { get; }
+    public Pen HighlightedEdgePen { get; }
+    public Pen HighlightedLoopEdgePen { get; }
+    public Pen HighlightedNodePen { get; }
+    public Pen NodeStrokePen { get; }
     public Typeface GlyphTypeface { get; } = new("Segoe UI", FontStyle.Normal, FontWeight.SemiBold);
     public Typeface SideLabelTypeface { get; } = new("Segoe UI", FontStyle.Normal, FontWeight.Medium);
 }

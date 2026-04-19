@@ -75,6 +75,9 @@
 | [0063](0063-instrument-deck-named-composition-one-anchor.md) | **Instrument deck** + **`ContentRepresentation`**; таксономия примитивов (в т.ч. Readout, Trend, Gauge, Presence); **Presence/Activity vs Dark Cockpit**; `DedicatedPage` — режим Page для WH, не deck | Accepted |
 | [0064](0064-deck-primitives-visual-language-render-layer-and-palette.md) | **Виды индикаторов** deck: единое графическое воплощение; **библиотека отрисовки** + **семантическая палитра**; без лишнего архитектурного слоя; `DeckPrimitiveKind` = каталог видов | Accepted |
 | [0065](0065-instrument-categories-domain-taxonomy.md) | **Категории инструментов** и **типы графов** (`graph_kind`): домен ортогонально слоту/`instrument_id`; Semantic Map = карта **намерений кода**; см. таблицу `graph_kind` | Accepted |
+| [0066](0066-cockpit-ui-vs-ide-presentation-layer.md) | **Cockpit UI** vs **presentation IDE** (хром, оверлеи, тема): две опоры; не смешивать приборы/deck с оболочкой; `PrimitivesKit` vs `UiChrome` | Accepted |
+| [0067](0067-graph-backed-surfaces-contract.md) | **Graph-backed surfaces:** общий контракт для семейства графовых экранов (данные, взаимодействие, навигация, layout, выделение, sync); Semantic Map, GitMap, будущие графы | Accepted |
+| [0068](0068-deck-row-payload-and-presentation-projection.md) | **Полезная нагрузка строки канала** vs **проекция представления** vs **слот**: таблица/полоса ≠ тип ячейки; v1 — один DTO; гетерогенность — дискриминатор и шаблоны | Accepted |
 
 ## Соглашения
 

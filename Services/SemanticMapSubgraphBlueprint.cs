@@ -16,9 +16,11 @@ public sealed class SemanticMapSubgraphBlueprint
         int maxNodes,
         int maxEdges,
         string anchorLabel,
-        string anchorRationale)
+        string anchorRationale,
+        SemanticMapGraphKind graphKind = SemanticMapGraphKind.Unspecified)
     {
         AnchorPath = anchorPath;
+        GraphKind = graphKind;
         MaxNodes = maxNodes;
         MaxEdges = maxEdges;
         Nodes.Add(new SubgraphBuildNode(
@@ -36,6 +38,9 @@ public sealed class SemanticMapSubgraphBlueprint
     public string AnchorPath { get; }
 
     public string AnchorNodeId { get; } = "n0";
+
+    /// <summary>Тип графа для <see cref="ToDocument"/> и JSON MCP (<c>graph_kind</c>).</summary>
+    public SemanticMapGraphKind GraphKind { get; }
 
     public int MaxNodes { get; }
 
@@ -142,6 +147,7 @@ public sealed class SemanticMapSubgraphBlueprint
         new()
         {
             AnchorPath = AnchorPath,
+            GraphKind = GraphKind,
             Nodes = Nodes.Select(n => new SemanticMapSubgraphNode
             {
                 Id = n.Id,

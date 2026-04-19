@@ -32,7 +32,8 @@ public sealed class ControlFlowSceneSketch
             maxNodes,
             maxEdges,
             DefaultAnchorLabel,
-            anchorRationale);
+            anchorRationale,
+            SemanticMapGraphKind.CodeIntentSemanticMap);
     }
 
     public string AnchorPath { get; }

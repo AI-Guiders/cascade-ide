@@ -15,9 +15,9 @@ public sealed class AnnunciatorLampLevelToGlyphTextConverter : IValueConverter
         return level switch
         {
             AnnunciatorLampLevel.Ok => "✓",
-            AnnunciatorLampLevel.Warning => "⚠",
-            AnnunciatorLampLevel.Info => "ℹ",
-            AnnunciatorLampLevel.Unavailable => "✕",
+            AnnunciatorLampLevel.Caution => "⚠",
+            AnnunciatorLampLevel.Advisory => "ℹ",
+            AnnunciatorLampLevel.Critical => "✕",
             _ => "·"
         };
     }

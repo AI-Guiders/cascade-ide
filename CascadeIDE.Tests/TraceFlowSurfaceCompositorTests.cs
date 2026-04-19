@@ -22,6 +22,21 @@ public sealed class TraceFlowSurfaceCompositorTests
 
         Assert.Contains("n1", result.HighlightedNodeIds);
         Assert.Contains("n0->n1", result.HighlightedEdgeKeys);
+        Assert.Equal(SemanticMapGraphPresentationKind.CodeControlFlow, result.Presentation);
+    }
+
+    [Fact]
+    public void Compose_WhenEnabled_PreservesWorkspacePresentation()
+    {
+        var scene = BuildScene(SemanticMapGraphPresentationKind.WorkspaceRelatedFiles);
+        var snapshot = new TraceFlowChannelSnapshot(
+            new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "n0" },
+            new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "n0->n1" });
+        var compositor = new TraceFlowSurfaceCompositor();
+
+        var result = compositor.Compose(scene, snapshot, new TraceFlowCdsDecision(true, "pfd", "normal"));
+
+        Assert.Equal(SemanticMapGraphPresentationKind.WorkspaceRelatedFiles, result.Presentation);
     }
 
     [Fact]
@@ -60,18 +75,21 @@ public sealed class TraceFlowSurfaceCompositorTests
         Assert.False(disabled.Enabled);
     }
 
-    private static SemanticMapGraphSceneVm BuildScene() => new()
-    {
-        Nodes =
-        [
-            Node("n0", true),
-            Node("n1")
-        ],
-        Edges =
-        [
-            Edge("n0", "n1", "Call")
-        ]
-    };
+    private static SemanticMapGraphSceneVm BuildScene(
+        SemanticMapGraphPresentationKind presentation = SemanticMapGraphPresentationKind.CodeControlFlow) =>
+        new()
+        {
+            Nodes =
+            [
+                Node("n0", true),
+                Node("n1")
+            ],
+            Edges =
+            [
+                Edge("n0", "n1", "Call")
+            ],
+            Presentation = presentation
+        };
 
     private static SemanticMapGraphNodeLayout Node(string id, bool anchor = false) => new()
     {

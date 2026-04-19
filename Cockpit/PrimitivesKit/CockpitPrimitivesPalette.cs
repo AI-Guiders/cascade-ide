@@ -15,16 +15,8 @@ public static class CockpitPrimitivesPalette
     /// <summary>
     /// Канал EICAS / CAS: три уровня W/C/A (ADR 0021 §5). Канон для текста полосы, бейджей и сопоставимых уровней ламп.
     /// Значения совпадают с прежними hex в <c>EicasSeverityToBrushConverter</c>.
+    /// Соответствие бытовым словам (Error / Warning / Information) и <see cref="AnnunciatorLampLevel"/> — таблица в ADR 0021 §5.
     /// </summary>
-    /// <remarks>
-    /// Бытовые слова в доках и UI («ошибка», «предупреждение», «информация») ↔ авиационные ярусы:
-    /// <list type="bullet">
-    /// <item><b>Error</b> / критичная поломка / «надо срочно» → <see cref="Warning"/> (красный) = EICAS <b>W</b> (Warning).</item>
-    /// <item><b>Warning</b> в смысле IDE «внимание, не катастрофа» → <see cref="Caution"/> (янтарь) = EICAS <b>C</b> (Caution); у ламп см. <see cref="AnnunciatorLampLevel.Warning"/>.</item>
-    /// <item><b>Information</b> / справочное → <see cref="Advisory"/> (синий) = EICAS <b>A</b> (Advisory); у ламп — <see cref="AnnunciatorLampLevel.Info"/>.</item>
-    /// </list>
-    /// Четвёртый уровень «I» в палитре не вводим: «информация» здесь совпадает с <b>Advisory</b> (A).
-    /// </remarks>
     public static class Eicas
     {
         public static readonly Color Warning = Color.Parse("#C02828");
@@ -40,11 +32,7 @@ public static class CockpitPrimitivesPalette
             };
     }
 
-    /// <summary>Annunciator / Korry: корпус, линзы, акценты списка.</summary>
-    /// <remarks>
-    /// <see cref="AnnunciatorLampLevel"/> по цвету стыкуется с <see cref="Eicas"/>: <b>Unavailable</b> → EICAS Warning (красный);
-    /// <b>Warning</b> → Caution (янтарь); <b>Info</b> → Advisory (синий). Имена enum исторические; см. ADR 0021 §5 и комментарии к <see cref="Eicas"/>.
-    /// </remarks>
+    /// <summary>Annunciator / Korry: корпус, линзы, акценты списка. Маппинг уровней — ADR 0021 §5, таблица.</summary>
     public static class Annunciator
     {
         public static readonly Color BezelOuter = Color.Parse("#3A3A3A");
@@ -61,17 +49,17 @@ public static class CockpitPrimitivesPalette
         public static readonly Color OutlinedTextStrokeDim = Color.Parse("#121212");
         public static readonly Color OutlinedTextStrokeLit = Color.Parse("#0A0A0A");
 
-        /// <summary>Подсвеченная линза (не <see cref="AnnunciatorLampLevel.Ok"/>). Уровни согласованы с <see cref="Eicas"/> (W/C/A).</summary>
-        public static readonly Color LitLensWarning = Eicas.Caution;
-        public static readonly Color LitLensInfo = Eicas.Advisory;
-        public static readonly Color LitLensUnavailable = Eicas.Warning;
+        /// <summary>Подсвеченная линза (не <see cref="AnnunciatorLampLevel.Ok"/>).</summary>
+        public static readonly Color LitLensCaution = Eicas.Caution;
+        public static readonly Color LitLensAdvisory = Eicas.Advisory;
+        public static readonly Color LitLensCritical = Eicas.Warning;
         public static readonly Color LitLensUnknown = Color.Parse("#888888");
 
         /// <summary>Акцент строки таблицы / списка по уровню (иконка, заголовок; Ok = «норма», не линза).</summary>
         public static readonly Color RowAccentOk = Color.Parse("#2D8A5A");
-        public static readonly Color RowAccentWarning = Eicas.Caution;
-        public static readonly Color RowAccentInfo = Eicas.Advisory;
-        public static readonly Color RowAccentUnavailable = Eicas.Warning;
+        public static readonly Color RowAccentCaution = Eicas.Caution;
+        public static readonly Color RowAccentAdvisory = Eicas.Advisory;
+        public static readonly Color RowAccentCritical = Eicas.Warning;
         public static readonly Color RowAccentUnknown = Color.Parse("#888888");
 
         public static readonly Color TooltipDetailForeground = Color.Parse("#D0D0D0");
@@ -79,9 +67,9 @@ public static class CockpitPrimitivesPalette
         public static Color LitLens(AnnunciatorLampLevel level) =>
             level switch
             {
-                AnnunciatorLampLevel.Warning => LitLensWarning,
-                AnnunciatorLampLevel.Info => LitLensInfo,
-                AnnunciatorLampLevel.Unavailable => LitLensUnavailable,
+                AnnunciatorLampLevel.Caution => LitLensCaution,
+                AnnunciatorLampLevel.Advisory => LitLensAdvisory,
+                AnnunciatorLampLevel.Critical => LitLensCritical,
                 AnnunciatorLampLevel.Ok => throw new InvalidOperationException("Ok is drawn as off; no lit fill color."),
                 _ => LitLensUnknown,
             };
@@ -90,9 +78,9 @@ public static class CockpitPrimitivesPalette
             level switch
             {
                 AnnunciatorLampLevel.Ok => RowAccentOk,
-                AnnunciatorLampLevel.Warning => RowAccentWarning,
-                AnnunciatorLampLevel.Info => RowAccentInfo,
-                AnnunciatorLampLevel.Unavailable => RowAccentUnavailable,
+                AnnunciatorLampLevel.Caution => RowAccentCaution,
+                AnnunciatorLampLevel.Advisory => RowAccentAdvisory,
+                AnnunciatorLampLevel.Critical => RowAccentCritical,
                 _ => RowAccentUnknown,
             };
     }
@@ -112,6 +100,26 @@ public static class CockpitPrimitivesPalette
         public static readonly Color HighlightedEdge = Color.FromArgb(245, 255, 255, 190);
         public static readonly Color HighlightedLoopEdge = Color.FromArgb(250, 255, 255, 200);
         public static readonly Color HighlightedNode = Color.FromArgb(230, 255, 255, 200);
+        public static readonly Color NodeStroke = Color.Parse("#22000000");
+    }
+
+    /// <summary>
+    /// Semantic Map в режиме «связанные файлы» — отдельный акцент от CFG (тот же примитивный рендер, другая палитра; ADR 0067).
+    /// </summary>
+    public static class SemanticMapWorkspace
+    {
+        public static readonly Color AnchorFill = Color.Parse("#4A9FD8");
+        public static readonly Color ConditionFill = Color.FromArgb(235, 230, 195, 130);
+        public static readonly Color ExitFill = Color.FromArgb(225, 150, 165, 185);
+        public static readonly Color PeerFill = Color.FromArgb(235, 130, 175, 210);
+        public static readonly Color SideLabel = Color.FromArgb(215, 210, 225, 240);
+        public static readonly Color BaseEdge = Color.FromArgb(175, 100, 140, 175);
+        public static readonly Color ConditionalEdge = Color.FromArgb(215, 220, 195, 130);
+        public static readonly Color MultiBranchEdge = Color.FromArgb(195, 95, 175, 220);
+        public static readonly Color LoopEdge = Color.FromArgb(225, 110, 200, 235);
+        public static readonly Color HighlightedEdge = Color.FromArgb(240, 255, 250, 185);
+        public static readonly Color HighlightedLoopEdge = Color.FromArgb(245, 255, 252, 195);
+        public static readonly Color HighlightedNode = Color.FromArgb(225, 255, 252, 200);
         public static readonly Color NodeStroke = Color.Parse("#22000000");
     }
 }

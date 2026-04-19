@@ -10,7 +10,7 @@ public sealed class AnnunciatorLampStripBuilderTests
     {
         var list = AnnunciatorLampStripBuilder.Create()
             .AddLamp("a", "MD", AnnunciatorLampLevel.Ok)
-            .AddLamp("b", "C#", AnnunciatorLampLevel.Warning, "C# LSP", "x")
+            .AddLamp("b", "C#", AnnunciatorLampLevel.Caution, "C# LSP", "x")
             .Build();
 
         Assert.Equal(2, list.Count);

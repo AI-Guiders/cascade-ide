@@ -56,6 +56,7 @@ public static class CodeNavigationControlFlowSubgraphBuilder
         var payload = new
         {
             mode = "subgraph",
+            graph_kind = SemanticMapGraphKindWire.CodeIntentSemanticMap,
             anchor_path = filePath,
             nodes = graph.Nodes.Select(n => new
             {
@@ -84,6 +85,7 @@ public static class CodeNavigationControlFlowSubgraphBuilder
         var payload = new
         {
             mode = "subgraph",
+            graph_kind = SemanticMapGraphKindWire.CodeIntentSemanticMap,
             anchor_path = filePath,
             nodes = new[]
             {
@@ -135,7 +137,8 @@ public static class CodeNavigationControlFlowSubgraphBuilder
                 nodeCap,
                 edgeCap,
                 Path.GetFileName(filePath),
-                $"method {methodName}");
+                $"method {methodName}",
+                SemanticMapGraphKind.CodeIntentSemanticMap);
         }
 
         public void Build(MethodDeclarationSyntax method)

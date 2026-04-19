@@ -14,13 +14,25 @@ public sealed class SemanticMapControlFlowGraphLayoutEngine : ISemanticMapSubgra
     public SemanticMapGraphSceneVm Layout(SemanticMapSubgraphDocument doc, double width, double height)
     {
         if (width <= 0 || height <= 0)
-            return new SemanticMapGraphSceneVm { Nodes = [], Edges = [], Legend = [], LegendColumnLeft = width };
+            return new SemanticMapGraphSceneVm
+            {
+                Nodes = [],
+                Edges = [],
+                Legend = [],
+                LegendColumnLeft = width
+            };
 
         var anchor = doc.Nodes.FirstOrDefault(n => string.Equals(n.Kind, "anchor", StringComparison.OrdinalIgnoreCase))
                      ?? doc.Nodes.FirstOrDefault(n => n.Id.Equals("n0", StringComparison.OrdinalIgnoreCase))
                      ?? (doc.Nodes.Count > 0 ? doc.Nodes[0] : null);
         if (anchor is null)
-            return new SemanticMapGraphSceneVm { Nodes = [], Edges = [], Legend = [], LegendColumnLeft = width };
+            return new SemanticMapGraphSceneVm
+            {
+                Nodes = [],
+                Edges = [],
+                Legend = [],
+                LegendColumnLeft = width
+            };
 
         var nodeById = doc.Nodes.ToDictionary(n => n.Id, StringComparer.OrdinalIgnoreCase);
         var outgoing = BuildOutgoing(doc.Edges);

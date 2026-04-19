@@ -15,8 +15,6 @@ namespace CascadeIDE.Views;
 /// </remarks>
 public sealed class SemanticMapMiniMapControl : Control
 {
-    private static readonly SemanticMapVisualTheme VisualTheme = SemanticMapVisualTheme.Default;
-
     public static readonly StyledProperty<SemanticMapGraphSceneVm?> SceneProperty =
         AvaloniaProperty.Register<SemanticMapMiniMapControl, SemanticMapGraphSceneVm?>(nameof(Scene));
 
@@ -85,6 +83,7 @@ public sealed class SemanticMapMiniMapControl : Control
         if (w <= 0 || h <= 0)
             return;
 
-        SemanticMapSceneDrawing.DrawScene(context, scene, VisualTheme, w, h);
+        var theme = SemanticMapVisualTheme.ForPresentation(scene.Presentation);
+        SemanticMapSceneDrawing.DrawScene(context, scene, theme, w, h);
     }
 }

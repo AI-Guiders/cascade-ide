@@ -4,7 +4,7 @@
 **Дата:** 2026-04-19  
 **Принято:** 2026-04-19  
 
-**Связь:** [0063](0063-instrument-deck-named-composition-one-anchor.md) (§ [типы индикаторов](0063-instrument-deck-named-composition-one-anchor.md#adr0063-indicator-kinds), **`DeckPrimitiveKind`** в коде — перечисление **видов** индикатора; Presence/Dark Cockpit), [0055](0055-skia-instrument-composition-pipeline.md) (стадия **Render**), [0021](0021-pfd-mfd-cockpit-attention-model.md) (**Dark Cockpit**), [0046](0046-presentation-layout-authority-and-cockpit-invariants.md). Черновик реализации: `Cockpit/PrimitivesKit/` (отрисовка annunciator / лампы, токены раскладки semantic map).
+**Связь:** [0063](0063-instrument-deck-named-composition-one-anchor.md) (§ [типы индикаторов](0063-instrument-deck-named-composition-one-anchor.md#adr0063-indicator-kinds), **`DeckPrimitiveKind`** в коде — перечисление **видов** индикатора; Presence/Dark Cockpit), [0055](0055-skia-instrument-composition-pipeline.md) (стадия **Render**), [0021](0021-pfd-mfd-cockpit-attention-model.md) (**Dark Cockpit**), [0046](0046-presentation-layout-authority-and-cockpit-invariants.md), [0066](0066-cockpit-ui-vs-ide-presentation-layer.md) (граница **Cockpit UI** vs хром IDE — этот ADR про палитру и отрисовку **кабины**, не про оверлеи shell). Черновик реализации: `Cockpit/PrimitivesKit/` (отрисовка annunciator / лампы, токены раскладки semantic map).
 
 ---
 
@@ -71,7 +71,7 @@
 - согласование с **Dark Cockpit** ([0021](0021-pfd-mfd-cockpit-attention-model.md), [0063 § Presence](0063-instrument-deck-named-composition-one-anchor.md#adr0063-presence-dark-cockpit)): в норме **не** размножать яркие пиксели и анимацию «для красоты»;
 - при необходимости **a11y** (не только цвет) — расширения той же семантики (иконка, штриховка), а не отдельная «вторая палитра» без правил.
 
-Конкретные значения токенов могут жить в теме/ресурсах, но **маппинг «роль → отображение»** остаётся **единым** и согласованным с слоем из [п. 2](#adr0064-p2). Соответствие **EICAS W/C/A** бытовым «Error / Warning / Information» и уровням ламп — в [0021 §5](0021-pfd-mfd-cockpit-attention-model.md) и в комментариях к `CockpitPrimitivesPalette.Eicas` / `Annunciator` в коде.
+Конкретные значения токенов могут жить в теме/ресурсах, но **маппинг «роль → отображение»** остаётся **единым** и согласованным с слоем из [п. 2](#adr0064-p2). Соответствие **EICAS W/C/A** бытовым «Error / Warning / Information» и `AnnunciatorLampLevel` — таблица в [0021 §5](0021-pfd-mfd-cockpit-attention-model.md).
 
 <a id="adr0064-p4"></a>
 

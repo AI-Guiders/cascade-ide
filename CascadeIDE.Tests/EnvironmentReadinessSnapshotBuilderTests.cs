@@ -24,7 +24,7 @@ public sealed class EnvironmentReadinessSnapshotBuilderTests
             csharpHost: null,
             markdownHost: null);
 
-        Assert.Contains(rows, r => r.Title == "C# LSP" && r.Level == AnnunciatorLampLevel.Info);
+        Assert.Contains(rows, r => r.Title == "C# LSP" && r.Level == AnnunciatorLampLevel.Advisory);
     }
 
     [Fact]
@@ -40,7 +40,7 @@ public sealed class EnvironmentReadinessSnapshotBuilderTests
         };
         var rows = EnvironmentReadinessSnapshotBuilder.BuildLspRows(settings, null, null, null);
 
-        Assert.Contains(rows, r => r.Title == "Markdown LSP" && r.Level == AnnunciatorLampLevel.Info);
+        Assert.Contains(rows, r => r.Title == "Markdown LSP" && r.Level == AnnunciatorLampLevel.Advisory);
     }
 
     [Fact]
@@ -56,7 +56,7 @@ public sealed class EnvironmentReadinessSnapshotBuilderTests
         var rows = EnvironmentReadinessSnapshotBuilder.BuildLspRows(settings, null, null, null);
 
         var row = Assert.Single(rows, r => r.Title == "C# LSP");
-        Assert.Equal(AnnunciatorLampLevel.Warning, row.Level);
+        Assert.Equal(AnnunciatorLampLevel.Caution, row.Level);
     }
 
     [Fact]

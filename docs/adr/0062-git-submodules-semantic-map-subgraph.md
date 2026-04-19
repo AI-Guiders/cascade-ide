@@ -4,7 +4,7 @@
 **Дата:** 2026-04-17  
 **Обновлено:** 2026-04-17 — зафиксировано **намеренное разделение** с Semantic Map / WSNC (см. [Почему не WSNC](#adr0062-not-wsnc)).
 
-**Связь:** [0039](0039-workspace-navigation-affordances.md) (контекст навигации по коду решения), [0019](0019-shared-git-core-ide-and-git-mcp.md) (общий Git core), [0055](0055-skia-instrument-composition-pipeline.md) / [0056](0056-semantic-map-pipeline-adoption.md) (переиспользование **пайплайна** отрисовки), продуктовый контур [git-and-submodules-v1.md](../git-and-submodules-v1.md).
+**Связь:** [0039](0039-workspace-navigation-affordances.md) (контекст навигации по коду решения), [0019](0019-shared-git-core-ide-and-git-mcp.md) (общий Git core), [0055](0055-skia-instrument-composition-pipeline.md) / [0056](0056-semantic-map-pipeline-adoption.md) (переиспользование **пайплайна** отрисовки), [0067](0067-graph-backed-surfaces-contract.md) (GitMap как **graph-backed surface** — тот же класс UI, другой домен данных), продуктовый контур [git-and-submodules-v1.md](../git-and-submodules-v1.md).
 
 <a id="adr0062-not-wsnc"></a>
 

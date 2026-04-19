@@ -2,6 +2,7 @@
 using CascadeIDE.Cockpit.PrimitivesKit;
 using CascadeIDE.Models;
 using CascadeIDE.Services.SkiaInstruments;
+using CascadeIDE.ViewModels;
 
 namespace CascadeIDE.Services.Navigation;
 
@@ -157,6 +158,7 @@ public sealed class SemanticMapDeclutterStage(ISemanticMapIntentStage intentStag
         return new SemanticMapSubgraphDocument
         {
             AnchorPath = doc.AnchorPath,
+            GraphKind = doc.GraphKind,
             Nodes = nodes,
             Edges = finalEdges
         };
@@ -229,6 +231,9 @@ public sealed class SemanticMapLayoutStage(
         {
             var preferredHeight = viewport.Height > 0 ? viewport.Height : SemanticMapCompositor.DefaultHeightFile;
             var scene = _fileLayout.Layout(state.Subgraph, width, preferredHeight);
+            scene = SemanticMapGraphSceneVm.WithPresentationKind(
+                scene,
+                SemanticMapPresentationResolver.Resolve(state.Subgraph, state.SemanticMapLevel));
             return new SemanticMapCompositionResult(scene, preferredHeight);
         }
 
@@ -242,6 +247,9 @@ public sealed class SemanticMapLayoutStage(
             SemanticMapGraphPrimitives.MaxViewportHeightControlFlow);
 
         var cfScene = _controlFlowLayout.Layout(state.Subgraph, width, preferredCfHeight);
-        return new SemanticMapCompositionResult(cfScene, preferredCfHeight);
+        var presented = SemanticMapGraphSceneVm.WithPresentationKind(
+            cfScene,
+            SemanticMapPresentationResolver.Resolve(state.Subgraph, state.SemanticMapLevel));
+        return new SemanticMapCompositionResult(presented, preferredCfHeight);
     }
 }

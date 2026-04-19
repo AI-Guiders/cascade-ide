@@ -10,7 +10,13 @@ public sealed class SemanticMapStarGraphLayoutEngine : ISemanticMapSubgraphLayou
     public SemanticMapGraphSceneVm Layout(SemanticMapSubgraphDocument doc, double width, double height)
     {
         if (width <= 0 || height <= 0)
-            return new SemanticMapGraphSceneVm { Nodes = [], Edges = [], Legend = [], LegendColumnLeft = width };
+            return new SemanticMapGraphSceneVm
+            {
+                Nodes = [],
+                Edges = [],
+                Legend = [],
+                LegendColumnLeft = width
+            };
 
         var anchor = doc.Nodes.FirstOrDefault(n => string.Equals(n.Kind, "anchor", StringComparison.OrdinalIgnoreCase))
                      ?? doc.Nodes.FirstOrDefault(n => n.Id.Equals("n0", StringComparison.OrdinalIgnoreCase));

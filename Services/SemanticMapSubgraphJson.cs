@@ -36,6 +36,8 @@ public static class SemanticMapSubgraphJson
                 return false;
             }
 
+            var graphKind = TryParseGraphKind(root);
+
             var nodes = new List<SemanticMapSubgraphNode>();
             if (root.TryGetProperty("nodes", out var nodesEl) && nodesEl.ValueKind == JsonValueKind.Array)
             {
@@ -86,6 +88,7 @@ public static class SemanticMapSubgraphJson
             doc = new SemanticMapSubgraphDocument
             {
                 AnchorPath = anchor,
+                GraphKind = graphKind,
                 Nodes = nodes,
                 Edges = edges
             };
@@ -96,5 +99,21 @@ public static class SemanticMapSubgraphJson
             error = ex.Message;
             return false;
         }
+    }
+
+    private static SemanticMapGraphKind TryParseGraphKind(JsonElement root)
+    {
+        if (!root.TryGetProperty("graph_kind", out var g) || g.ValueKind != JsonValueKind.String)
+            return SemanticMapGraphKind.Unspecified;
+        var s = g.GetString();
+        if (string.IsNullOrEmpty(s))
+            return SemanticMapGraphKind.Unspecified;
+        if (string.Equals(s, SemanticMapGraphKindWire.CodeIntentSemanticMap, StringComparison.Ordinal))
+            return SemanticMapGraphKind.CodeIntentSemanticMap;
+        if (string.Equals(s, SemanticMapGraphKindWire.RelatedFiles, StringComparison.Ordinal))
+            return SemanticMapGraphKind.RelatedFiles;
+        if (string.Equals(s, SemanticMapGraphKindWire.RepositoryModuleTree, StringComparison.Ordinal))
+            return SemanticMapGraphKind.RepositoryModuleTree;
+        return SemanticMapGraphKind.Unspecified;
     }
 }
