@@ -1,4 +1,4 @@
-# Publish Debug and copy to a fixed path without spaces (for Cursor MCP).
+# Publish Debug (self-contained win-x64) and mirror to a fixed path without spaces (for Cursor MCP).
 # Run from repo:  cd ...\cascade-ide  ;  .\publish-and-deploy-debug.ps1
 # Optional: -SkipDocGen  (faster when IdeCommands XML-doc / MCP markdown codegen not changed)
 # Optional: -Target "D:\cascade-ide-debug"
@@ -57,9 +57,9 @@ try {
     Write-Host ""
     Write-Host "OK: $exe  (UTC $ts)"
     Write-Host ""
-    Write-Host "Cursor MCP (debug): paste into mcp.json ->"
+    Write-Host "Cursor MCP (Debug): paste into mcp.json ->"
     Write-Host @"
-  "cascade-ide-debug": {
+  "cascade-ide": {
     "command": "$exeJson",
     "args": ["--mcp-stdio"]
   }
