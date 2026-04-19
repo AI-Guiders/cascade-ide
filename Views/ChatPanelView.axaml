@@ -1,7 +1,6 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:chat="using:CascadeIDE.Features.Chat"
-             xmlns:vm="using:CascadeIDE.ViewModels"
              xmlns:views="using:CascadeIDE.Views"
              x:Class="CascadeIDE.Views.ChatPanelView"
              x:DataType="chat:ChatPanelViewModel">
@@ -84,56 +83,17 @@
 
         <Border Grid.Row="2" Classes="section">
             <DockPanel>
-                <DockPanel DockPanel.Dock="Top" LastChildFill="False" Margin="0,0,0,6">
-                    <TextBlock DockPanel.Dock="Left"
-                               Text="Диалог"
-                               FontSize="12"
-                               Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-                    <CheckBox DockPanel.Dock="Right"
-                              Content="Skia spike"
-                              IsChecked="{Binding UseSkiaSurface, Mode=TwoWay}"
-                              Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-                </DockPanel>
+                <TextBlock DockPanel.Dock="Top"
+                           Text="Диалог"
+                           Margin="0,0,0,6"
+                           FontSize="12"
+                           Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
 
-                <!-- Grid, а не соседи в DockPanel: иначе Skia с Dock.Left получает desired width ≈ 0 и лента невидима. -->
                 <Grid MinHeight="220">
-                    <views:SkiaChatSurfaceControl IsVisible="{Binding UseSkiaSurface}"
-                                                  HorizontalAlignment="Stretch"
+                    <views:SkiaChatSurfaceControl HorizontalAlignment="Stretch"
                                                   VerticalAlignment="Stretch"
-                                                  Messages="{Binding ChatMessages}"
-                                                  HasActiveClarification="{Binding HasActiveClarificationBatch}"
-                                                  ClarificationTitle="{Binding ActiveClarificationTitle}"
+                                                  Snapshot="{Binding ChatSurfaceSnapshot}"
                                                   SelectedMessageIndex="{Binding SelectedMessageIndex, Mode=TwoWay}"/>
-
-                    <ScrollViewer VerticalScrollBarVisibility="Auto"
-                                  IsVisible="{Binding !UseSkiaSurface}">
-                        <StackPanel Spacing="6">
-                            <TextBlock IsVisible="{Binding !HasChatMessages}"
-                                       Text="Пока пусто. Задай вопрос или команду."
-                                       Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
-                                       FontSize="11"/>
-                            <ItemsControl ItemsSource="{Binding ChatMessages}" IsVisible="{Binding HasChatMessages}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate DataType="vm:ChatMessageViewModel">
-                                        <Border CornerRadius="6"
-                                                Padding="8"
-                                                Margin="0,0,0,4"
-                                                Background="{DynamicResource CascadeTheme.ChatMessageBubbleBackground}">
-                                            <StackPanel Spacing="2">
-                                                <TextBlock Text="{Binding Role}"
-                                                           FontSize="11"
-                                                           FontWeight="SemiBold"
-                                                           Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-                                                <TextBlock Text="{Binding Content}"
-                                                           TextWrapping="Wrap"
-                                                           Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
-                                            </StackPanel>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </StackPanel>
-                    </ScrollViewer>
                 </Grid>
             </DockPanel>
         </Border>

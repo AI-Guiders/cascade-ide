@@ -14,6 +14,11 @@ public partial class MainWindow
         if (vm is null)
             return;
         vm.CommandPaletteHost = ViewModels.CommandPaletteHost.MainWindow;
+        if (e.Handled)
+        {
+            Services.MainWindowHotkeyService.LogTunnelEvent(nameof(MainWindow), e, vm, "window-entry-already-handled");
+            return;
+        }
         Services.MainWindowHotkeyService.LogTunnelEvent(nameof(MainWindow), e, vm, "window-entry");
         Services.MainWindowHotkeyService.TryHandleTunnelKeyDownForMainVm(e, vm);
     }

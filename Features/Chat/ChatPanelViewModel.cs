@@ -1,7 +1,8 @@
+#nullable enable
 using System.Collections.ObjectModel;
-using System.IO;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Text.Json;
-using Avalonia.Threading;
 using CascadeIDE.Models.AgentChat;
 using CascadeIDE.Services.CursorAcp;
 using CascadeIDE.ViewModels;
@@ -31,6 +32,7 @@ public partial class ChatPanelViewModel : ViewModelBase
     private readonly Action<string>? _appendAcpTerminal;
     private readonly Action? _showAcpTerminal;
     private readonly ChatSessionStore _sessionStore;
+    private readonly ChatSurfaceCompositor _chatSurfaceCompositor = new();
 
     private CursorAcpChatConnection? _cursorAcp;
     private ClarificationBatch? _activeClarificationBatch;
@@ -69,8 +71,9 @@ public partial class ChatPanelViewModel : ViewModelBase
         _showAcpTerminal = showAcpTerminal;
         _sessionStore = new ChatSessionStore(_getWorkspaceRoot());
         _sessionId = _sessionStore.EnsureSessionId();
-        ChatMessages.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasChatMessages));
+        ChatMessages.CollectionChanged += OnChatMessagesCollectionChanged;
         _ = InitializeSessionAsync();
+        RefreshChatSurfaceSnapshot();
     }
 
     /// <summary>Сброс stdio-сессии Cursor ACP (смена провайдера, пути к агенту или корня workspace).</summary>
@@ -102,17 +105,51 @@ public partial class ChatPanelViewModel : ViewModelBase
     private bool _isChatLoading;
 
     [ObservableProperty]
-    private bool _useSkiaSurface = true;
-
-    [ObservableProperty]
     private string _clarificationStatusText = "";
 
     [ObservableProperty]
     private int _selectedMessageIndex = -1;
 
+    [ObservableProperty]
+    private ChatSurfaceSnapshot _chatSurfaceSnapshot = ChatSurfaceSnapshot.Empty;
+
     /// <summary>Подсказка по активной ветке (короткий id).</summary>
     [ObservableProperty]
     private string _threadBranchHint = "";
+
+    partial void OnSelectedMessageIndexChanged(int value)
+    {
+        RefreshChatSurfaceSnapshot();
+    }
+
+    partial void OnThreadBranchHintChanged(string value)
+    {
+        RefreshChatSurfaceSnapshot();
+    }
+
+    private void OnChatMessagesCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        if (e.OldItems is not null)
+        {
+            foreach (var item in e.OldItems.OfType<ChatMessageViewModel>())
+                item.PropertyChanged -= OnChatMessagePropertyChanged;
+        }
+
+        if (e.NewItems is not null)
+        {
+            foreach (var item in e.NewItems.OfType<ChatMessageViewModel>())
+                item.PropertyChanged += OnChatMessagePropertyChanged;
+        }
+
+        OnPropertyChanged(nameof(HasChatMessages));
+        RefreshChatSurfaceSnapshot();
+    }
+
+    private void OnChatMessagePropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is nameof(ChatMessageViewModel.Content))
+            RefreshChatSurfaceSnapshot();
+    }
 
     public void ShowClarificationBatch(ClarificationBatch batch)
     {
@@ -126,9 +163,29 @@ public partial class ChatPanelViewModel : ViewModelBase
         OnPropertyChanged(nameof(ActiveClarificationTitle));
         SubmitClarificationResponseCommand.NotifyCanExecuteChanged();
         DismissClarificationBatchCommand.NotifyCanExecuteChanged();
+        RefreshChatSurfaceSnapshot();
         _ = PersistEventAsync(
             ChatHistoryEventKind.ClarificationBatchOpened,
             new { batch.Id, batch.Title, Items = batch.Items.Select(x => new { x.Id, x.Prompt, x.AnswerStyle, x.ChoiceOptions }) });
+    }
+
+    public string OpenClarificationBatchFromJson(string batchJson)
+    {
+        if (string.IsNullOrWhiteSpace(batchJson))
+            return "Missing batch_json";
+
+        try
+        {
+            var batch = JsonSerializer.Deserialize<ClarificationBatch>(batchJson, ChatPanelJson);
+            if (batch is null)
+                return "Invalid clarification batch";
+            ShowClarificationBatch(batch);
+            return "OK";
+        }
+        catch (JsonException ex)
+        {
+            return $"Invalid clarification batch JSON: {ex.Message}";
+        }
     }
 
     [RelayCommand(CanExecute = nameof(CanSubmitClarificationResponse))]
@@ -145,18 +202,7 @@ public partial class ChatPanelViewModel : ViewModelBase
             return;
         }
 
-        var payload = string.Join("; ", ClarificationDraftItems.Select(x => $"{x.Id}: {x.Answer?.Trim()}"));
-        var clarifyMsg = new ChatMessageViewModel("user", $"[clarification] {payload}", threadId: _activeThreadId);
-        ChatMessages.Add(clarifyMsg);
-        _ = PersistEventAsync(ChatHistoryEventKind.MessageAdded, MessageSnapshot(clarifyMsg));
-        _activeClarificationBatch = null;
-        ClarificationDraftItems.Clear();
-        ClarificationStatusText = "Пакет уточнений сохранен в диалог.";
-        OnPropertyChanged(nameof(HasActiveClarificationBatch));
-        OnPropertyChanged(nameof(ActiveClarificationTitle));
-        SubmitClarificationResponseCommand.NotifyCanExecuteChanged();
-        DismissClarificationBatchCommand.NotifyCanExecuteChanged();
-        _ = PersistEventAsync(ChatHistoryEventKind.ClarificationAnswerSubmitted, new { Answers = answers });
+        ApplyClarificationResponse(response, answers);
     }
 
     [RelayCommand(CanExecute = nameof(CanDismissClarificationBatch))]
@@ -169,6 +215,7 @@ public partial class ChatPanelViewModel : ViewModelBase
         OnPropertyChanged(nameof(ActiveClarificationTitle));
         SubmitClarificationResponseCommand.NotifyCanExecuteChanged();
         DismissClarificationBatchCommand.NotifyCanExecuteChanged();
+        RefreshChatSurfaceSnapshot();
     }
 
     [RelayCommand(CanExecute = nameof(CanSendChat))]
@@ -281,6 +328,32 @@ public partial class ChatPanelViewModel : ViewModelBase
         if (string.Equals(r, "assistant", StringComparison.Ordinal))
             _ = PersistEventAsync(ChatHistoryEventKind.MessageCompleted, MessageSnapshot(vm));
         return "OK";
+    }
+
+    public string SubmitClarificationResponseFromJson(string responseJson)
+    {
+        if (_activeClarificationBatch is null)
+            return "No active clarification batch";
+        if (string.IsNullOrWhiteSpace(responseJson))
+            return "Missing response_json";
+
+        try
+        {
+            var response = JsonSerializer.Deserialize<ClarificationResponse>(responseJson, ChatPanelJson);
+            if (response is null)
+                return "Invalid clarification response";
+            if (response.BatchId != _activeClarificationBatch.Id)
+                return "Batch mismatch";
+            if (!ClarificationBatchValidation.TryValidate(_activeClarificationBatch, response, out var error))
+                return error ?? "Invalid clarification response";
+
+            ApplyClarificationResponse(response, response.AnswersByItemId);
+            return "OK";
+        }
+        catch (JsonException ex)
+        {
+            return $"Invalid clarification response JSON: {ex.Message}";
+        }
     }
 
     public string SelectMessageByIndex(int index)
@@ -396,6 +469,7 @@ public partial class ChatPanelViewModel : ViewModelBase
                 parent_message_id = parentMessageId?.ToString("N"),
             },
             envelopeThreadId: _activeThreadId);
+        RefreshChatSurfaceSnapshot();
         return "OK";
     }
 
@@ -423,6 +497,7 @@ public partial class ChatPanelViewModel : ViewModelBase
                 foreach (var row in rows)
                     ChatMessages.Add(new ChatMessageViewModel(row.Role, row.Content, row.MessageId, row.ThreadId, row.ParentMessageId));
                 ClarificationStatusText = $"Восстановлено сообщений: {rows.Count}";
+                RefreshChatSurfaceSnapshot();
             });
         }
         catch
@@ -454,5 +529,64 @@ public partial class ChatPanelViewModel : ViewModelBase
         {
             // intentionally ignored (best-effort persistence).
         }
+    }
+
+    private void ApplyClarificationResponse(ClarificationResponse response, IReadOnlyDictionary<string, string> answers)
+    {
+        var clarifyMsg = new ChatMessageViewModel(
+            "user",
+            BuildClarificationTranscriptMessage(_activeClarificationBatch, answers),
+            threadId: _activeThreadId);
+        ChatMessages.Add(clarifyMsg);
+        _ = PersistEventAsync(ChatHistoryEventKind.MessageAdded, MessageSnapshot(clarifyMsg));
+        _ = PersistEventAsync(
+            ChatHistoryEventKind.ClarificationAnswerSubmitted,
+            new
+            {
+                response.BatchId,
+                Answers = answers
+            });
+
+        _activeClarificationBatch = null;
+        ClarificationDraftItems.Clear();
+        ClarificationStatusText = "Пакет уточнений сохранен в диалог.";
+        OnPropertyChanged(nameof(HasActiveClarificationBatch));
+        OnPropertyChanged(nameof(ActiveClarificationTitle));
+        SubmitClarificationResponseCommand.NotifyCanExecuteChanged();
+        DismissClarificationBatchCommand.NotifyCanExecuteChanged();
+        RefreshChatSurfaceSnapshot();
+    }
+
+    private void RefreshChatSurfaceSnapshot()
+    {
+        ChatSurfaceSnapshot = _chatSurfaceCompositor.Compose(new ChatSurfaceIntent(
+            BuildConversationMessages(),
+            _activeClarificationBatch,
+            SelectedMessageIndex,
+            _mainThreadId,
+            _activeThreadId,
+            ThreadBranchHint));
+    }
+
+    private IReadOnlyList<ChatConversationMessage> BuildConversationMessages() =>
+        ChatMessages
+            .Select((message, index) => new ChatConversationMessage(
+                message.MessageId,
+                message.Role,
+                message.Content,
+                message.ThreadId,
+                message.ParentMessageId,
+                index))
+            .ToList();
+
+    private static string BuildClarificationTranscriptMessage(
+        ClarificationBatch? batch,
+        IReadOnlyDictionary<string, string> answers)
+    {
+        var title = string.IsNullOrWhiteSpace(batch?.Title) ? "Уточнения" : batch!.Title.Trim();
+        var lines = new List<string> { $"{title}:", "" };
+        foreach (var pair in answers)
+            lines.Add($"- {pair.Key}: {pair.Value}");
+        return string.Join(Environment.NewLine, lines);
     }
 }

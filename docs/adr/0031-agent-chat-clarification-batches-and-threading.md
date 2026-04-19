@@ -3,8 +3,9 @@
 **Статус:** Proposed (черновик направления до переработки UI чата; детали протокола и экранов — по итерациям)  
 **Дата:** 2026-04-12  
 **Обновлено:** 2026-04-13 — v0 доменной модели пакетов уточнений и валидации в коде: `Models/AgentChat/` (`ClarificationBatch`, `ClarificationItem`, `ClarificationResponse`, `ClarificationBatchValidation`); UI чата пока не подключён.  
+**Обновлено:** 2026-04-19 — chat surface переведён на pipeline snapshot (`ChatSurfaceCompositor`: `Intent -> Declutter -> Layout -> Render`), Skia закреплён как единый продуктовый path; `ClarificationBatch` / `ClarificationResponse` подключены к реальному chat flow и MCP-командам `open_chat_clarification_batch` / `submit_chat_clarification_response`.  
 **Обновлено (ранее):** 2026-04-12 — «тема → подтемы», **обзор размаха на одном экране** vs глубокий скролл; смесь подзадач в одной сессии (ADR + ответвления) как норма.  
-**Связь:** [0016](0016-agent-client-protocol-external-agent.md) (ACP / внешний агент), [0017](0017-multi-window-workspace-and-agent-surfaces.md) (зона MFD, `MfdShellView`, второе окно), [0021](0021-pfd-mfd-cockpit-attention-model.md) (модель внимания; чат во вторичном контуре), [0020](0020-agent-reasoning-visibility-and-provider-limits.md) (слои ответа и трасс), [0008](0008-mcp-contracts-and-testable-infrastructure.md) (контракты и паритет при расширении), [0044](0044-avalonia-host-skia-agent-chat-surface.md) (разделение Avalonia / слой отрисовки чата; Skia как гипотеза).
+**Связь:** [0016](0016-agent-client-protocol-external-agent.md) (ACP / внешний агент), [0017](0017-multi-window-workspace-and-agent-surfaces.md) (зона MFD, `MfdShellView`, второе окно), [0021](0021-pfd-mfd-cockpit-attention-model.md) (модель внимания; чат во вторичном контуре), [0020](0020-agent-reasoning-visibility-and-provider-limits.md) (слои ответа и трасс), [0008](0008-mcp-contracts-and-testable-infrastructure.md) (контракты и паритет при расширении), [0044](0044-avalonia-host-skia-agent-chat-surface.md) (разделение Avalonia / слой отрисовки чата; Skia как гипотеза), [0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md) (UX-модель topic cards / drill-in/back и intent-навигация по темам).
 
 ## Контекст
 
@@ -37,9 +38,9 @@
    - опционально **тип ответа** (краткий текст / выбор из вариантов / да–нет) на пункт;
    - опционально **одно общее поле** в дополнение к пунктам («как я хочу в сумме»), если сценарий это оправдывает.
 
-3. **Треды / темы** — отдельная ось: иметь смысл, когда пользователь ведёт **несколько параллельных линий** рассуждения или долгоживущие ветки. Для **одного** пакета вопросов в рамках одного шага плана чаще достаточно **одного блока с N полями** без полноценной модели тредов; треды не обязательны в v1 структурированных уточнений.
+3. **Треды / темы** — отдельная ось: это не reply-thread ради reply-thread, а карта устойчивых линий работы. `ThreadNode` представляет тему / ответвление / отдельное исследование; обычные шаги внутри линии — `MessageNode`. Для **одного** пакета вопросов чаще достаточно остаться внутри текущей ветки; `ClarificationBatch` не создаёт новую ветку автоматически.
 
-4. **Транспорт (ACP и др.):** расширение контракта сообщений/инструментов под структурированные пакеты — **в scope** вместе с поставкой UI, по аналогии с правилами [0008](0008-mcp-contracts-and-testable-infrastructure.md); до согласования — не подменять «настоящую» структуру одной строкой в метаданных.
+4. **Транспорт (ACP и др.):** расширение контракта сообщений/инструментов под структурированные пакеты — **в scope** вместе с поставкой UI, по аналогии с правилами [0008](0008-mcp-contracts-and-testable-infrastructure.md). Каноническая правда должна жить в structured event flow (`ClarificationBatchOpened`, `ClarificationAnswerSubmitted`) и MCP entrypoints, а не только в одной схлопнутой строке.
 
 5. **Связь с зонами:** основной чат остаётся во **вторичном контуре / MFD** ([0021](0021-pfd-mfd-cockpit-attention-model.md)); вынесение на второй монитор — [0017](0017-multi-window-workspace-and-agent-surfaces.md). Критичные подтверждения, требующие внимания PFD, — по политике [0017 п. 6](0017-multi-window-workspace-and-agent-surfaces.md#adr0017-p6), не через замаскированный «чат-да/нет».
 
@@ -60,7 +61,7 @@
 
 ## Последствия
 
-- Переработка **Chat**-поверхности и, при необходимости, слоя состояния диалога в VM.
+- Переработка **Chat**-поверхности и слоя состояния диалога в VM вокруг канонического snapshot, а не прямой Avalonia-ленты.
 - Тесты UI и сценарии агента с **структурированным** телом пакета уточнений.
 - Документация для пользователя: как отвечать на пакет вопросов, как это отличается от обычного сообщения и от подтверждений безопасности.
 

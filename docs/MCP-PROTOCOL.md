@@ -293,6 +293,7 @@
 | `fork_chat_thread` | Новая ветка чата: args: parent_message_id?:string. Пишет thread_forked; следующее user-сообщение может ссылаться на родителя. returns: text; example: {} |
 | `install_ollama_model` | Скачать модель Ollama (как в настройках). args: model:string; returns: text; example: {"model":"qwen2.5-coder:7b"}. |
 | `investigate_nullref` | Quick action: расследовать NullReferenceException. returns: text. |
+| `open_chat_clarification_batch` | Открыть structured clarification batch в чате. args: batch_json:string. returns: text; example: {"batch_json":"{\"id\":\"...\",\"title\":\"Нужно уточнить\",\"items\":[]}"}. |
 | `pause_autonomous` | Поставить автономный режим на паузу. returns: text. |
 | `prepare_commit` | Quick action: подготовить коммит (сводка/план/проверки). returns: text. |
 | `refresh_workspace_snapshot` | Обновить снимок рабочего состояния (Power cockpit). returns: text. |
@@ -303,6 +304,7 @@
 | `set_safety_l2` | Установить Safety L2. returns: text. |
 | `set_safety_l3` | Установить Safety L3. returns: text. |
 | `start_autonomous` | Запустить автономный режим (agent run). returns: text. |
+| `submit_chat_clarification_response` | Отправить structured clarification response для активного batch. args: response_json:string. returns: text; example: {"response_json":"{\"batchId\":\"...\",\"answersByItemId\":{\"scope\":\"mfd\"}}"}. |
 
 ### Документы
 

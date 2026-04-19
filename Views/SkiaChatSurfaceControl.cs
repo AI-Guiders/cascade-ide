@@ -1,5 +1,4 @@
-using System.Collections.Specialized;
-using System.ComponentModel;
+#nullable enable
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -7,55 +6,34 @@ using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Rendering.SceneGraph;
 using Avalonia.Skia;
-using CascadeIDE.ViewModels;
+using CascadeIDE.Features.Chat;
 using SkiaSharp;
 
 namespace CascadeIDE.Views;
 
 /// <summary>
-/// Лента чата на Skia: скролл, тема из <see cref="TryGetResource"/>, выбор сообщения по клику.
+/// Skia-центричный chat surface: overview веток, секции тредов и карточки сообщений/уточнений.
 /// </summary>
 public sealed class SkiaChatSurfaceControl : Control
 {
     private const double WheelPixelsPerDelta = 48;
 
-    private readonly List<BubbleHit> _bubbleHits = [];
-    private int _hoveredBubble = -1;
-    private int _selectedBubble = -1;
-    private INotifyCollectionChanged? _messagesCollection;
-    private readonly List<ChatMessageViewModel> _wiredMessages = [];
+    private readonly List<HitTarget> _hitTargets = [];
     private double _scrollOffset;
     private double _cachedContentHeight;
-    private SkiaChatTheme _theme;
+    private int _hoveredItem = -1;
+    private SkiaChatTheme _theme = SkiaChatTheme.DarkFallback;
 
-    public static readonly StyledProperty<IEnumerable<ChatMessageViewModel>?> MessagesProperty =
-        AvaloniaProperty.Register<SkiaChatSurfaceControl, IEnumerable<ChatMessageViewModel>?>(nameof(Messages));
-
-    public static readonly StyledProperty<bool> HasActiveClarificationProperty =
-        AvaloniaProperty.Register<SkiaChatSurfaceControl, bool>(nameof(HasActiveClarification));
-
-    public static readonly StyledProperty<string?> ClarificationTitleProperty =
-        AvaloniaProperty.Register<SkiaChatSurfaceControl, string?>(nameof(ClarificationTitle));
+    public static readonly StyledProperty<ChatSurfaceSnapshot> SnapshotProperty =
+        AvaloniaProperty.Register<SkiaChatSurfaceControl, ChatSurfaceSnapshot>(nameof(Snapshot), ChatSurfaceSnapshot.Empty);
 
     public static readonly StyledProperty<int> SelectedMessageIndexProperty =
         AvaloniaProperty.Register<SkiaChatSurfaceControl, int>(nameof(SelectedMessageIndex), -1);
 
-    public IEnumerable<ChatMessageViewModel>? Messages
+    public ChatSurfaceSnapshot Snapshot
     {
-        get => GetValue(MessagesProperty);
-        set => SetValue(MessagesProperty, value);
-    }
-
-    public bool HasActiveClarification
-    {
-        get => GetValue(HasActiveClarificationProperty);
-        set => SetValue(HasActiveClarificationProperty, value);
-    }
-
-    public string? ClarificationTitle
-    {
-        get => GetValue(ClarificationTitleProperty);
-        set => SetValue(ClarificationTitleProperty, value);
+        get => GetValue(SnapshotProperty);
+        set => SetValue(SnapshotProperty, value);
     }
 
     public int SelectedMessageIndex
@@ -66,16 +44,11 @@ public sealed class SkiaChatSurfaceControl : Control
 
     static SkiaChatSurfaceControl()
     {
-        AffectsRender<SkiaChatSurfaceControl>(
-            MessagesProperty,
-            HasActiveClarificationProperty,
-            ClarificationTitleProperty,
-            SelectedMessageIndexProperty);
+        AffectsRender<SkiaChatSurfaceControl>(SnapshotProperty, SelectedMessageIndexProperty);
     }
 
     public SkiaChatSurfaceControl()
     {
-        _theme = SkiaChatTheme.DarkFallback;
         AddHandler(PointerMovedEvent, OnPointerMoved, RoutingStrategies.Bubble);
         AddHandler(PointerPressedEvent, OnPointerPressed, RoutingStrategies.Bubble);
         AddHandler(PointerExitedEvent, OnPointerExited, RoutingStrategies.Bubble);
@@ -92,8 +65,48 @@ public sealed class SkiaChatSurfaceControl : Control
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
         ActualThemeVariantChanged -= OnActualThemeVariantChanged;
-        UnwireMessages();
         base.OnDetachedFromVisualTree(e);
+    }
+
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
+        if (change.Property == SnapshotProperty)
+        {
+            ClampScrollToContent();
+            InvalidateVisual();
+        }
+    }
+
+    protected override void OnSizeChanged(SizeChangedEventArgs e)
+    {
+        base.OnSizeChanged(e);
+        ClampScrollToContent();
+        InvalidateVisual();
+    }
+
+    public override void Render(DrawingContext context)
+    {
+        RefreshTheme();
+
+        var snapshot = BuildItemsSnapshot();
+        var width = Math.Max(160, Bounds.Width);
+        var contentWidth = (float)(width - 24);
+        var maxChars = Math.Max(18, (int)(contentWidth / 7.1f));
+        var layouts = SkiaChatLayout.BuildLayout(snapshot, contentWidth, maxChars);
+        _cachedContentHeight = SkiaChatLayout.TotalHeight(layouts, snapshot.Length);
+        ClampScrollToContent();
+
+        context.Custom(new DrawOperation(
+            new Rect(Bounds.Size),
+            snapshot,
+            layouts,
+            (float)_scrollOffset,
+            _theme,
+            SelectedMessageIndex,
+            _hoveredItem,
+            _hitTargets));
+        base.Render(context);
     }
 
     private void OnActualThemeVariantChanged(object? sender, EventArgs e)
@@ -107,153 +120,62 @@ public sealed class SkiaChatSurfaceControl : Control
         _theme = SkiaChatTheme.Resolve(this);
     }
 
-    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    private ItemSnapshot[] BuildItemsSnapshot()
     {
-        base.OnPropertyChanged(change);
-        if (change.Property == MessagesProperty)
-            RebindMessages(change.NewValue as IEnumerable<ChatMessageViewModel>);
-    }
+        var snapshot = Snapshot ?? ChatSurfaceSnapshot.Empty;
+        var items = new List<ItemSnapshot>();
 
-    protected override void OnSizeChanged(SizeChangedEventArgs e)
-    {
-        base.OnSizeChanged(e);
-        ClampScrollToContent();
-        InvalidateVisual();
-    }
-
-    private void RebindMessages(IEnumerable<ChatMessageViewModel>? newMsgs)
-    {
-        UnwireMessages();
-        if (newMsgs is null)
-            return;
-        if (newMsgs is INotifyCollectionChanged ncc)
+        if (snapshot.Layout.Overview.Count > 0)
         {
-            _messagesCollection = ncc;
-            ncc.CollectionChanged += OnMessagesCollectionChanged;
+            var overviewText = string.Join(" | ", snapshot.Layout.Overview.Select(item =>
+            {
+                var prefix = item.Depth > 0 ? new string('>', item.Depth) + " " : "";
+                var suffix = item.IsActive ? " [active]" : "";
+                return $"{prefix}{item.Title} ({item.ItemCount}){suffix}";
+            }));
+            items.Add(new ItemSnapshot(
+                ItemKind.Overview,
+                "Сессия",
+                string.IsNullOrWhiteSpace(overviewText) ? "Пока нет веток." : overviewText,
+                Accent: "overview",
+                MessageIndex: null,
+                IsSelected: false,
+                IsPending: false,
+                StartsBranch: false));
         }
 
-        foreach (var vm in newMsgs)
-            WireMessage(vm);
-    }
-
-    private void UnwireMessages()
-    {
-        if (_messagesCollection is not null)
+        foreach (var lane in snapshot.Layout.Lanes.OrderBy(lane => lane.Thread.Order))
         {
-            _messagesCollection.CollectionChanged -= OnMessagesCollectionChanged;
-            _messagesCollection = null;
+            var meta = lane.Thread.IsMainThread ? "основная линия" : $"ветка depth {lane.Thread.Depth}";
+            if (lane.Thread.IsActive)
+                meta += " | активная";
+            items.Add(new ItemSnapshot(
+                ItemKind.ThreadHeader,
+                lane.Thread.Title,
+                meta,
+                Accent: lane.Thread.IsActive ? "active-thread" : "thread",
+                MessageIndex: null,
+                IsSelected: false,
+                IsPending: false,
+                StartsBranch: false));
+
+            items.AddRange(lane.Entries.Select(entry => new ItemSnapshot(
+                entry.Kind == ChatSurfaceEntryKind.Message ? ItemKind.Message : ItemKind.Confirmation,
+                entry.Title,
+                entry.Body,
+                entry.Accent,
+                entry.MessageIndex,
+                entry.IsSelected,
+                entry.IsPending,
+                entry.StartsBranch)));
         }
 
-        foreach (var vm in _wiredMessages.ToArray())
-        {
-            vm.PropertyChanged -= OnMessageVmPropertyChanged;
-            _wiredMessages.Remove(vm);
-        }
-    }
-
-    private void OnMessagesCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-    {
-        var viewport = Math.Max(1, Bounds.Height);
-        var prevContent = _cachedContentHeight;
-        var oldMax = Math.Max(0, prevContent - viewport);
-
-        ResyncMessageItemSubscriptions();
-
-        var newContent = MeasureContentHeight();
-        var newMax = Math.Max(0, newContent - viewport);
-        if (_scrollOffset >= oldMax - 2 || oldMax < 1)
-            _scrollOffset = newMax;
-        else
-            _scrollOffset = Math.Min(_scrollOffset, newMax);
-
-        InvalidateVisual();
-    }
-
-    private void ResyncMessageItemSubscriptions()
-    {
-        foreach (var vm in _wiredMessages.ToArray())
-        {
-            vm.PropertyChanged -= OnMessageVmPropertyChanged;
-            _wiredMessages.Remove(vm);
-        }
-
-        if (Messages is null)
-            return;
-        foreach (var vm in Messages)
-            WireMessage(vm);
-    }
-
-    private void WireMessage(ChatMessageViewModel vm)
-    {
-        if (_wiredMessages.Contains(vm))
-            return;
-        vm.PropertyChanged += OnMessageVmPropertyChanged;
-        _wiredMessages.Add(vm);
-    }
-
-    private void OnMessageVmPropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName is null
-            || e.PropertyName == nameof(ChatMessageViewModel.Content)
-            || e.PropertyName == nameof(ChatMessageViewModel.Role))
-            InvalidateVisual();
-    }
-
-    private double MeasureContentHeight()
-    {
-        var width = Math.Max(120, Bounds.Width);
-        var contentWidth = (float)(width - 24);
-        var maxChars = Math.Max(16, (int)(contentWidth / 7.2f));
-        var snapshot = BuildSnapshot();
-        return SkiaChatLayout.TotalHeight(SkiaChatLayout.BuildLayout(snapshot, contentWidth, maxChars), snapshot.Length);
-    }
-
-    private MessageSnapshot[] BuildSnapshot()
-    {
-        if (Messages is null)
-            return [];
-        return Messages.Select(m => new MessageSnapshot(m.Role ?? "", m.Content ?? "")).ToArray();
-    }
-
-    private void ClampScrollToContent()
-    {
-        var viewport = Math.Max(1, Bounds.Height);
-        var content = MeasureContentHeight();
-        var max = Math.Max(0, content - viewport);
-        if (_scrollOffset > max)
-            _scrollOffset = max;
-        if (_scrollOffset < 0)
-            _scrollOffset = 0;
-    }
-
-    public override void Render(DrawingContext context)
-    {
-        var snapshot = BuildSnapshot();
-        var width = Math.Max(120, Bounds.Width);
-        var contentWidth = (float)(width - 24);
-        var maxChars = Math.Max(16, (int)(contentWidth / 7.2f));
-        var layouts = SkiaChatLayout.BuildLayout(snapshot, contentWidth, maxChars);
-        _cachedContentHeight = SkiaChatLayout.TotalHeight(layouts, snapshot.Length);
-        ClampScrollToContent();
-
-        RefreshTheme();
-
-        context.Custom(new DrawOperation(
-            new Rect(Bounds.Size),
-            snapshot,
-            layouts,
-            (float)_scrollOffset,
-            _theme,
-            SelectedMessageIndex >= 0 ? SelectedMessageIndex : _selectedBubble,
-            _hoveredBubble,
-            _bubbleHits));
-        base.Render(context);
+        return [.. items];
     }
 
     private void OnPointerWheelChanged(object? sender, PointerWheelEventArgs e)
     {
-        var delta = e.Delta.Y * WheelPixelsPerDelta;
-        _scrollOffset -= delta;
+        _scrollOffset -= e.Delta.Y * WheelPixelsPerDelta;
         ClampScrollToContent();
         e.Handled = true;
         InvalidateVisual();
@@ -261,50 +183,76 @@ public sealed class SkiaChatSurfaceControl : Control
 
     private void OnPointerMoved(object? sender, PointerEventArgs e)
     {
-        var p = e.GetPosition(this);
-        var index = FindHit(p);
-        if (index == _hoveredBubble)
+        var index = FindHit(e.GetPosition(this));
+        if (index == _hoveredItem)
             return;
-        _hoveredBubble = index;
-        Cursor = _hoveredBubble >= 0 ? new Cursor(StandardCursorType.Hand) : new Cursor(StandardCursorType.Arrow);
+        _hoveredItem = index;
+        Cursor = _hoveredItem >= 0 ? new Cursor(StandardCursorType.Hand) : new Cursor(StandardCursorType.Arrow);
         InvalidateVisual();
     }
 
     private void OnPointerPressed(object? sender, PointerPressedEventArgs e)
     {
-        var p = e.GetPosition(this);
-        var index = FindHit(p);
+        var index = FindHit(e.GetPosition(this));
         if (index < 0)
             return;
-        _selectedBubble = index;
-        SelectedMessageIndex = index;
-        InvalidateVisual();
+        if (_hitTargets[index].MessageIndex is { } messageIndex)
+            SelectedMessageIndex = messageIndex;
         e.Handled = true;
+        InvalidateVisual();
     }
 
     private void OnPointerExited(object? sender, PointerEventArgs e)
     {
-        if (_hoveredBubble < 0)
+        if (_hoveredItem < 0)
             return;
-        _hoveredBubble = -1;
+        _hoveredItem = -1;
         Cursor = new Cursor(StandardCursorType.Arrow);
         InvalidateVisual();
     }
 
-    private int FindHit(Point p)
+    private int FindHit(Point point)
     {
-        for (var i = 0; i < _bubbleHits.Count; i++)
+        for (var i = 0; i < _hitTargets.Count; i++)
         {
-            if (_bubbleHits[i].Bounds.Contains(p))
-                return _bubbleHits[i].Index;
+            if (_hitTargets[i].Bounds.Contains(point))
+                return i;
         }
 
         return -1;
     }
 
-    private sealed record MessageSnapshot(string Role, string Content);
+    private void ClampScrollToContent()
+    {
+        var viewport = Math.Max(1, Bounds.Height);
+        var max = Math.Max(0, _cachedContentHeight - viewport);
+        if (_scrollOffset > max)
+            _scrollOffset = max;
+        if (_scrollOffset < 0)
+            _scrollOffset = 0;
+    }
 
-    private sealed record BubbleHit(Rect Bounds, int Index);
+    private enum ItemKind
+    {
+        Overview = 0,
+        ThreadHeader = 1,
+        Message = 2,
+        Confirmation = 3
+    }
+
+    private sealed record ItemSnapshot(
+        ItemKind Kind,
+        string Title,
+        string Content,
+        string Accent,
+        int? MessageIndex,
+        bool IsSelected,
+        bool IsPending,
+        bool StartsBranch);
+
+    private sealed record HitTarget(Rect Bounds, int? MessageIndex);
+
+    private readonly record struct BubbleLayout(float Top, float Height, IReadOnlyList<string> ContentLines);
 
     private readonly record struct SkiaChatTheme(
         SKColor Surface,
@@ -328,41 +276,41 @@ public sealed class SkiaChatSurfaceControl : Control
             Content: new SKColor(223, 228, 236),
             EmptyHint: new SKColor(160, 160, 160));
 
-        public static SkiaChatTheme Resolve(StyledElement el)
+        public static SkiaChatTheme Resolve(StyledElement element)
         {
-            var t = DarkFallback;
-            if (TrySkColor(el, "CascadeTheme.ChatMessageBubbleBackground", out var bubble))
-                t = t with { BubbleAssistant = bubble, Surface = Darken(bubble, 0.92f) };
-            if (TrySkColor(el, "CascadeTheme.ChatLabelForeground", out var label))
-                t = t with { Role = label, EmptyHint = label };
-            if (TrySkColor(el, "CascadeTheme.ChatMessageContentForeground", out var body))
-                t = t with { Content = body };
-            if (TrySkColor(el, "CascadeTheme.EditorColumnBorderBrush", out var edge))
+            var theme = DarkFallback;
+            if (TrySkColor(element, "CascadeTheme.ChatMessageBubbleBackground", out var bubble))
+                theme = theme with { BubbleAssistant = bubble, Surface = Darken(bubble, 0.92f) };
+            if (TrySkColor(element, "CascadeTheme.ChatLabelForeground", out var label))
+                theme = theme with { Role = label, EmptyHint = label };
+            if (TrySkColor(element, "CascadeTheme.ChatMessageContentForeground", out var body))
+                theme = theme with { Content = body };
+            if (TrySkColor(element, "CascadeTheme.EditorColumnBorderBrush", out var edge))
             {
-                t = t with { Border = edge };
-                t = t with { BubbleUser = Blend(t.BubbleAssistant, edge, 0.42f) };
+                theme = theme with { Border = edge };
+                theme = theme with { BubbleUser = Blend(theme.BubbleAssistant, edge, 0.42f) };
             }
 
-            if (TrySkColor(el, "CascadeTheme.PanelChromeAccentBrush", out var accent))
+            if (TrySkColor(element, "CascadeTheme.PanelChromeAccentBrush", out var accent))
             {
-                t = t with { HoverBorder = accent };
-                t = t with { SelectedBorder = Blend(accent, new SKColor(255, 255, 255), 0.35f) };
+                theme = theme with { HoverBorder = accent };
+                theme = theme with { SelectedBorder = Blend(accent, new SKColor(255, 255, 255), 0.35f) };
             }
 
-            return t;
+            return theme;
         }
 
-        private static SKColor Darken(SKColor c, float amount)
+        private static SKColor Darken(SKColor color, float amount)
         {
             amount = Math.Clamp(amount, 0, 1);
             return new SKColor(
-                (byte)(c.Red * amount),
-                (byte)(c.Green * amount),
-                (byte)(c.Blue * amount),
-                c.Alpha);
+                (byte)(color.Red * amount),
+                (byte)(color.Green * amount),
+                (byte)(color.Blue * amount),
+                color.Alpha);
         }
 
-        private static SKColor Blend(SKColor a, SKColor b, float t)
+        public static SKColor Blend(SKColor a, SKColor b, float t)
         {
             t = Math.Clamp(t, 0, 1);
             return new SKColor(
@@ -372,11 +320,11 @@ public sealed class SkiaChatSurfaceControl : Control
                 (byte)(a.Alpha + (b.Alpha - a.Alpha) * t));
         }
 
-        private static bool TrySkColor(StyledElement el, string key, out SKColor color)
+        private static bool TrySkColor(StyledElement element, string key, out SKColor color)
         {
-            if (el.TryGetResource(key, el.ActualThemeVariant, out var o) && o is IBrush b)
+            if (element.TryGetResource(key, element.ActualThemeVariant, out var resource) && resource is IBrush brush)
             {
-                color = BrushToSkColor(b);
+                color = BrushToSkColor(brush);
                 return true;
             }
 
@@ -386,42 +334,38 @@ public sealed class SkiaChatSurfaceControl : Control
 
         private static SKColor BrushToSkColor(IBrush brush)
         {
-            if (brush is SolidColorBrush scb)
-                return new SKColor(scb.Color.R, scb.Color.G, scb.Color.B, scb.Color.A);
+            if (brush is SolidColorBrush solid)
+                return new SKColor(solid.Color.R, solid.Color.G, solid.Color.B, solid.Color.A);
             return new SKColor(45, 45, 48);
         }
     }
 
     private static class SkiaChatLayout
     {
-        public static List<BubbleLayout> BuildLayout(
-            MessageSnapshot[] messages,
-            float contentWidth,
-            int maxChars)
+        public static List<BubbleLayout> BuildLayout(ItemSnapshot[] items, float contentWidth, int maxChars)
         {
-            var list = new List<BubbleLayout>();
+            var layouts = new List<BubbleLayout>();
             var y = 8f;
-            for (var i = 0; i < messages.Length; i++)
+            foreach (var item in items)
             {
-                var lines = WrapChatText(TrimChatText(messages[i].Content, 32_000), maxChars);
-                var lineCount = Math.Max(1, lines.Count);
-                var boxHeight = 22 + lineCount * 16 + 8;
-                list.Add(new BubbleLayout(i, y, boxHeight));
+                var lines = WrapChatText(TrimChatText(item.Content, 32_000), maxChars);
+                var titleHeight = string.IsNullOrWhiteSpace(item.Title) ? 0 : 16;
+                var boxHeight = 18 + titleHeight + Math.Max(1, lines.Count) * 16 + 10;
+                layouts.Add(new BubbleLayout(y, boxHeight, lines));
                 y += boxHeight + 8;
             }
 
-            return list;
+            return layouts;
         }
 
-        public static double TotalHeight(List<BubbleLayout> layouts, int messageCount)
+        public static double TotalHeight(IReadOnlyList<BubbleLayout> layouts, int itemCount)
         {
-            if (messageCount == 0)
-                return 48;
-            return layouts[^1].Top + layouts[^1].Height + 8;
+            if (itemCount == 0)
+                return 56;
+            var last = layouts[^1];
+            return last.Top + last.Height + 8;
         }
     }
-
-    private readonly record struct BubbleLayout(int Index, float Top, float Height);
 
     private static string TrimChatText(string text, int maxLen) =>
         text.Length <= maxLen ? text : text[..maxLen] + "...";
@@ -430,25 +374,26 @@ public sealed class SkiaChatSurfaceControl : Control
     {
         if (string.IsNullOrWhiteSpace(text))
             return [""];
+
         var words = text.Replace("\r", "").Replace("\n", " ").Split(' ', StringSplitOptions.RemoveEmptyEntries);
         var lines = new List<string>();
         var current = "";
-        foreach (var w in words)
+        foreach (var word in words)
         {
             if (current.Length == 0)
             {
-                current = w;
+                current = word;
                 continue;
             }
 
-            if (current.Length + 1 + w.Length <= maxChars)
+            if (current.Length + 1 + word.Length <= maxChars)
             {
-                current += " " + w;
+                current += " " + word;
                 continue;
             }
 
             lines.Add(current);
-            current = w;
+            current = word;
         }
 
         if (current.Length > 0)
@@ -458,32 +403,32 @@ public sealed class SkiaChatSurfaceControl : Control
 
     private sealed class DrawOperation : ICustomDrawOperation
     {
-        private readonly MessageSnapshot[] _messages;
-        private readonly List<BubbleLayout> _layouts;
+        private readonly ItemSnapshot[] _items;
+        private readonly IReadOnlyList<BubbleLayout> _layouts;
         private readonly float _scrollOffset;
         private readonly SkiaChatTheme _theme;
-        private readonly int _selectedBubble;
-        private readonly int _hoveredBubble;
-        private readonly List<BubbleHit> _hitTargetSink;
+        private readonly int _selectedMessageIndex;
+        private readonly int _hoveredItem;
+        private readonly List<HitTarget> _hitTargets;
 
         public DrawOperation(
             Rect bounds,
-            MessageSnapshot[] messages,
-            List<BubbleLayout> layouts,
+            ItemSnapshot[] items,
+            IReadOnlyList<BubbleLayout> layouts,
             float scrollOffset,
             SkiaChatTheme theme,
-            int selectedBubble,
-            int hoveredBubble,
-            List<BubbleHit> hitTargetSink)
+            int selectedMessageIndex,
+            int hoveredItem,
+            List<HitTarget> hitTargets)
         {
             Bounds = bounds;
-            _messages = messages;
+            _items = items;
             _layouts = layouts;
             _scrollOffset = scrollOffset;
             _theme = theme;
-            _selectedBubble = selectedBubble;
-            _hoveredBubble = hoveredBubble;
-            _hitTargetSink = hitTargetSink;
+            _selectedMessageIndex = selectedMessageIndex;
+            _hoveredItem = hoveredItem;
+            _hitTargets = hitTargets;
         }
 
         public Rect Bounds { get; }
@@ -499,59 +444,62 @@ public sealed class SkiaChatSurfaceControl : Control
             canvas.Save();
             canvas.Clear(_theme.Surface);
 
-            var width = Math.Max(120f, (float)Bounds.Width);
+            var width = Math.Max(160f, (float)Bounds.Width);
             var height = Math.Max(1f, (float)Bounds.Height);
             var x = 12f;
             var contentWidth = width - 24f;
-
             canvas.ClipRect(new SKRect(0, 0, width, height), antialias: false);
             canvas.Translate(0, -_scrollOffset);
 
             using var stroke = new SKPaint { Color = _theme.Border, IsAntialias = true, Style = SKPaintStyle.Stroke, StrokeWidth = 1 };
             using var hoverStroke = new SKPaint { Color = _theme.HoverBorder, IsAntialias = true, Style = SKPaintStyle.Stroke, StrokeWidth = 2 };
             using var selectedStroke = new SKPaint { Color = _theme.SelectedBorder, IsAntialias = true, Style = SKPaintStyle.Stroke, StrokeWidth = 2.2f };
-            using var roleFont = new SKFont(SKTypeface.FromFamilyName("Segoe UI", SKFontStyle.Bold), 10);
-            using var rolePaint = new SKPaint { IsAntialias = true, Color = _theme.Role };
+            using var titleFont = new SKFont(SKTypeface.FromFamilyName("Segoe UI", SKFontStyle.Bold), 10);
+            using var titlePaint = new SKPaint { IsAntialias = true, Color = _theme.Role };
             using var contentFont = new SKFont(SKTypeface.FromFamilyName("Consolas"), 12);
             using var contentPaint = new SKPaint { IsAntialias = true, Color = _theme.Content };
             using var emptyFont = new SKFont(SKTypeface.FromFamilyName("Segoe UI"), 11);
             using var emptyPaint = new SKPaint { IsAntialias = true, Color = _theme.EmptyHint };
 
-            _hitTargetSink.Clear();
+            _hitTargets.Clear();
 
-            if (_messages.Length == 0)
+            if (_items.Length == 0)
             {
                 canvas.DrawText("Пока пусто. Задай вопрос или команду.", x, 28, SKTextAlign.Left, emptyFont, emptyPaint);
                 canvas.Restore();
                 return;
             }
 
-            var maxChars = Math.Max(16, (int)(contentWidth / 7.2f));
-            for (var i = 0; i < _messages.Length && i < _layouts.Count; i++)
+            for (var i = 0; i < _items.Length; i++)
             {
-                var msg = _messages[i];
+                var item = _items[i];
                 var layout = _layouts[i];
-                var lines = WrapChatText(TrimChatText(msg.Content, 32_000), maxChars);
-                var r = new SKRect(x, layout.Top, x + contentWidth, layout.Top + layout.Height);
-                var bg = string.Equals(msg.Role, "user", StringComparison.OrdinalIgnoreCase)
-                    ? _theme.BubbleUser
-                    : _theme.BubbleAssistant;
-                canvas.DrawRoundRect(r, 7, 7, new SKPaint { Color = bg, IsAntialias = true });
-                canvas.DrawRoundRect(r, 7, 7, stroke);
-                if (_hoveredBubble == i)
-                    canvas.DrawRoundRect(r, 7, 7, hoverStroke);
-                if (_selectedBubble == i)
-                    canvas.DrawRoundRect(r, 7, 7, selectedStroke);
-                canvas.DrawText(msg.Role.ToUpperInvariant(), x + 10, layout.Top + 14, SKTextAlign.Left, roleFont, rolePaint);
+                var rect = new SKRect(x, layout.Top, x + contentWidth, layout.Top + layout.Height);
+
+                using var fill = new SKPaint
+                {
+                    Color = ResolveBubbleColor(item),
+                    IsAntialias = true,
+                    Style = SKPaintStyle.Fill
+                };
+                canvas.DrawRoundRect(rect, 7, 7, fill);
+                canvas.DrawRoundRect(rect, 7, 7, stroke);
+                if (_hoveredItem == i)
+                    canvas.DrawRoundRect(rect, 7, 7, hoverStroke);
+                if (item.IsSelected || (item.MessageIndex is not null && item.MessageIndex == _selectedMessageIndex))
+                    canvas.DrawRoundRect(rect, 7, 7, selectedStroke);
+
+                canvas.DrawText(item.Title, x + 10, layout.Top + 14, SKTextAlign.Left, titleFont, titlePaint);
                 var textY = layout.Top + 30;
-                foreach (var line in lines)
+                foreach (var line in layout.ContentLines)
                 {
                     canvas.DrawText(line, x + 10, textY, SKTextAlign.Left, contentFont, contentPaint);
                     textY += 16;
                 }
 
-                var topInControl = layout.Top - _scrollOffset;
-                _hitTargetSink.Add(new BubbleHit(new Rect(r.Left, topInControl, r.Width, r.Height), i));
+                _hitTargets.Add(new HitTarget(
+                    new Rect(rect.Left, rect.Top - _scrollOffset, rect.Width, rect.Height),
+                    item.MessageIndex));
             }
 
             canvas.Restore();
@@ -563,6 +511,21 @@ public sealed class SkiaChatSurfaceControl : Control
 
         public void Dispose()
         {
+        }
+
+        private SKColor ResolveBubbleColor(ItemSnapshot item)
+        {
+            return item.Kind switch
+            {
+                ItemKind.Overview => SkiaChatTheme.Blend(_theme.Surface, _theme.Border, 0.45f),
+                ItemKind.ThreadHeader => SkiaChatTheme.Blend(_theme.Surface, _theme.HoverBorder, 0.22f),
+                ItemKind.Confirmation => SkiaChatTheme.Blend(_theme.BubbleAssistant, _theme.HoverBorder, item.IsPending ? 0.32f : 0.18f),
+                _ => string.Equals(item.Accent, "user", StringComparison.OrdinalIgnoreCase)
+                    ? _theme.BubbleUser
+                    : item.StartsBranch
+                        ? SkiaChatTheme.Blend(_theme.BubbleAssistant, _theme.SelectedBorder, 0.24f)
+                        : _theme.BubbleAssistant
+            };
         }
     }
 }

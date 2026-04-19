@@ -44,6 +44,10 @@ public static partial class IdeCommands
     public const string SendChat = "send_chat";
     /// <summary>Новая ветка чата: args: parent_message_id?:string. Пишет thread_forked; следующее user-сообщение может ссылаться на родителя. returns: text; example: {}</summary>
     public const string ForkChatThread = "fork_chat_thread";
+    /// <summary>Открыть structured clarification batch в чате. args: batch_json:string. returns: text; example: {"batch_json":"{\"id\":\"...\",\"title\":\"Нужно уточнить\",\"items\":[]}"}.</summary>
+    public const string OpenChatClarificationBatch = "open_chat_clarification_batch";
+    /// <summary>Отправить structured clarification response для активного batch. args: response_json:string. returns: text; example: {"response_json":"{\"batchId\":\"...\",\"answersByItemId\":{\"scope\":\"mfd\"}}"}.</summary>
+    public const string SubmitChatClarificationResponse = "submit_chat_clarification_response";
     /// <summary>Скачать модель Ollama (как в настройках). args: model:string; returns: text; example: {"model":"qwen2.5-coder:7b"}.</summary>
     public const string InstallOllamaModel = "install_ollama_model";
 

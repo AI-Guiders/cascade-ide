@@ -1,5 +1,4 @@
 using System.Text.Json;
-using CascadeIDE.Services;
 
 namespace CascadeIDE.ViewModels;
 
@@ -154,6 +153,16 @@ internal sealed partial class IdeMcpCommandExecutor
             if (!string.IsNullOrEmpty(raw) && Guid.TryParse(raw, out var pid))
                 parent = pid;
             return _vm.ChatPanel.ForkThread(parent);
+        });
+        add(Services.IdeCommands.OpenChatClarificationBatch, async (args, _) =>
+        {
+            var batchJson = McpCommandJsonArgs.String(args, "batch_json");
+            return _vm.ChatPanel.OpenClarificationBatchFromJson(batchJson ?? "");
+        });
+        add(Services.IdeCommands.SubmitChatClarificationResponse, async (args, _) =>
+        {
+            var responseJson = McpCommandJsonArgs.String(args, "response_json");
+            return _vm.ChatPanel.SubmitClarificationResponseFromJson(responseJson ?? "");
         });
 
         add(Services.IdeCommands.InstallOllamaModel, async (args, _) =>

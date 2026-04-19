@@ -3,7 +3,7 @@
 **Статус:** Accepted  
 **Дата:** 2026-04-17
 
-**Связь:** [0031](0031-agent-chat-clarification-batches-and-threading.md) (пакеты уточнений, threading), [0044](0044-avalonia-host-skia-agent-chat-surface.md) (Skia в чате как направление), [0049](0049-skia-surface-rollout-over-avalonia-host.md) (поэтапный rollout), [0055](0055-skia-instrument-composition-pipeline.md) (общий pipeline), [0056](0056-semantic-map-pipeline-adoption.md) (первый внедрённый consumer).
+**Связь:** [0031](0031-agent-chat-clarification-batches-and-threading.md) (пакеты уточнений, threading), [0044](0044-avalonia-host-skia-agent-chat-surface.md) (ранняя гипотеза host/render split), [0055](0055-skia-instrument-composition-pipeline.md) (общий pipeline), [0056](0056-semantic-map-pipeline-adoption.md) (первый внедрённый consumer), [0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md) (overview/detail layout и keyboard-first intent для тем поверх pipeline).
 
 ---
 
@@ -15,14 +15,15 @@
 - подтверждения (confirmations),
 - приоритизация и declutter в режиме высокой плотности событий.
 
-Текущий чат в `MfdShellView` построен на Avalonia control-tree (`ChatPanelView`) и остаётся рабочим baseline.  
-Новый слой Skia нужен не для "замены ради замены", а для сценариев, где линейная лента не даёт достаточной ситуационной читаемости.
+Чат в `MfdShellView` остаётся продуктовой MFD-поверхностью, но канонический surface теперь строится вокруг Skia pipeline snapshot, а не вокруг Avalonia list/tree.  
+Новый слой Skia нужен не для "замены ради замены", а для сценариев, где линейная лента не даёт достаточной ситуационной читаемости и не показывает ширину ветвления.
 
 ---
 
 ## Решение
 
 <a id="adr0057-p1"></a>
+
 ### 1) Принять chat surface как следующий pipeline-consumer
 
 Чат переводится на тот же composition-подход из [0055](0055-skia-instrument-composition-pipeline.md):
@@ -33,16 +34,19 @@
 4. **Render**: Skia-отрисовка сцены.
 
 <a id="adr0057-p2"></a>
-### 2) Сохранить dual-path на этапе rollout
 
-До стабилизации:
+### 2) Зафиксировать single product path через Skia surface
 
-- Avalonia `ChatPanelView` остаётся fallback/каноническим путём;
-- Skia chat surface внедряется волнами и включается по флагам rollout.
+После появления snapshot-композитора:
 
-Это соответствует [0049](0049-skia-surface-rollout-over-avalonia-host.md): host остаётся Avalonia, новый surface-слой подключается постепенно.
+- `ChatPanelView` остаётся host-контейнером и формой ввода, но не альтернативной лентой;
+- продуктовый рендер чата идёт через единый Skia surface;
+- legacy Avalonia list-path не считается обязательным fallback.
+
+Avalonia остаётся shell/host-слоем, а не параллельной продуктовой реализацией chat scene.
 
 <a id="adr0057-p3"></a>
+
 ### 3) Выделить чатовые intent-единицы как first-class
 
 Минимальный набор доменных сущностей для v1:
@@ -67,13 +71,13 @@
 ### Минусы
 
 - Увеличивается сложность chat-подсистемы.
-- Нужен период dual-path поддержки (Avalonia + Skia) до стабилизации UX.
+- Требуется держать строгие snapshot/contract tests, потому что surface больше не дублируется вторым UI-путём.
 
 ---
 
 ## Не-цели
 
-- Не удалять текущий Avalonia-чат немедленно.
+- Не возвращать параллельный Avalonia list-path как "страховочный" baseline без новой ADR.
 - Не фиксировать здесь итоговый visual language (цвета, типографика, анимации) — это отдельные UX-итерации.
 - Не менять MCP-контракты чата в этой ADR без отдельной контрактной фиксации.
 
@@ -82,7 +86,6 @@
 ## План внедрения (минимум)
 
 1. Ввести каркас `ChatSurfaceCompositor` и stage-контракты (`Intent/Declutter/Layout`) в стиле 0055.
-2. Поднять минимальный intent-слой: thread + confirmation graph из текущей модели чата.
-3. Добавить snapshot/contract-тесты композиции (стабильность сцены при одинаковом входе).
-4. Включить feature-flag rollout и сравнение с Avalonia baseline на типовых сценариях.
-
+2. Поднять intent-слой: `ThreadNode` / `MessageNode` / `ConfirmationNode` / `DecisionEdge` поверх канонической истории диалога.
+3. Подключить `ClarificationBatch` / `ClarificationResponse` к реальному chat flow и MCP entrypoints, без строкового схлопывания как единственной правды.
+4. Добавить snapshot/contract-тесты композиции и threading/clarification сценариев.
