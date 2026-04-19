@@ -155,6 +155,7 @@ internal static class IdeCommandsDoc
         ["show_debug_state"] = "Показать стек/переменные отладки в панели Debug. args: stack_frames?:object[], variables?:object[]; returns: text; example: {\"stack_frames\":[],\"variables\":[]}.",
         ["show_editor_preview"] = "Показать превью текущего файла из редактора в отдельном окне (контент берётся из IDE). returns: text.",
         ["show_environment_readiness_page"] = "Показать страницу «готовность окружения» во вторичном контуре (зона Mfd; ADR 0023). Разворачивает регион Mfd при необходимости. returns: text.",
+        ["show_markdown_preview_page"] = "Показать Markdown preview как страницу во вторичном контуре/MFD. returns: text.",
         ["show_pfd_region_panel"] = "Развернуть регион Pfd / Semantic Map (toolbar). returns: text.",
         ["show_preview"] = "Показать Markdown-превью в отдельном окне. args: title:string, content:string; returns: text; example: {\"title\":\"Plan\",\"content\":\"- step 1\\n- step 2\"}.",
         ["show_solution_explorer_page"] = "Развернуть регион Mfd и перейти на страницу обозревателя решения (toolbar). returns: text.",

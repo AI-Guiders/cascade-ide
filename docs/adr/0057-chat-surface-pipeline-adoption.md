@@ -15,7 +15,7 @@
 - подтверждения (confirmations),
 - приоритизация и declutter в режиме высокой плотности событий.
 
-Текущий чат в `SecondaryShellView` построен на Avalonia control-tree (`ChatPanelView`) и остаётся рабочим baseline.  
+Текущий чат в `MfdShellView` построен на Avalonia control-tree (`ChatPanelView`) и остаётся рабочим baseline.  
 Новый слой Skia нужен не для "замены ради замены", а для сценариев, где линейная лента не даёт достаточной ситуационной читаемости.
 
 ---

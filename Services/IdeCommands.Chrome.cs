@@ -36,6 +36,9 @@ public static partial class IdeCommands
     /// <summary>Открыть или закрыть палитру команд (как Ctrl+Q / пункт меню «Вид»). returns: text.</summary>
     public const string ToggleCommandPalette = "toggle_command_palette";
 
+    /// <summary>Показать Markdown preview как страницу во вторичном контуре/MFD. returns: text.</summary>
+    public const string ShowMarkdownPreviewPage = "show_markdown_preview_page";
+
     /// <summary>Показать страницу «готовность окружения» во вторичном контуре (зона Mfd; ADR 0023). Разворачивает регион Mfd при необходимости. returns: text.</summary>
     public const string ShowEnvironmentReadinessPage = "show_environment_readiness_page";
 

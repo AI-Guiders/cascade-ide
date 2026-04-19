@@ -10,6 +10,7 @@ public partial class MainWindowViewModel
     [
         SecondaryShellPage.WorkspaceHealth,
         SecondaryShellPage.SolutionExplorer,
+        SecondaryShellPage.MarkdownPreview,
         SecondaryShellPage.Chat,
         SecondaryShellPage.AiChatSettings,
         SecondaryShellPage.EnvironmentReadiness,
@@ -47,6 +48,7 @@ public partial class MainWindowViewModel
     {
         SecondaryShellPage.WorkspaceHealth => ShowWorkspaceHealthSecondaryPage,
         SecondaryShellPage.SolutionExplorer => IsDockedMfdSolutionExplorerTree,
+        SecondaryShellPage.MarkdownPreview => true,
         SecondaryShellPage.Chat => true,
         SecondaryShellPage.AiChatSettings => true,
         SecondaryShellPage.EnvironmentReadiness => true,

@@ -155,6 +155,7 @@ internal static class IdeCommandsContractGenerated
         ["show_debug_state"] = IdeReturnKind.Text,
         ["show_editor_preview"] = IdeReturnKind.Text,
         ["show_environment_readiness_page"] = IdeReturnKind.Text,
+        ["show_markdown_preview_page"] = IdeReturnKind.Text,
         ["show_pfd_region_panel"] = IdeReturnKind.Text,
         ["show_preview"] = IdeReturnKind.Text,
         ["show_solution_explorer_page"] = IdeReturnKind.Text,

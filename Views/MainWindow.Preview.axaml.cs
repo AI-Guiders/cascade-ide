@@ -1,8 +1,7 @@
+#nullable enable
 using System.IO;
 using Avalonia.Controls;
-using Avalonia.Threading;
 using AvaloniaEdit;
-using CascadeIDE.Features.UiChrome;
 using TextMateSharp.Grammars;
 
 namespace CascadeIDE.Views;
@@ -35,16 +34,6 @@ public partial class MainWindow
         if (DataContext is not ViewModels.MainWindowViewModel mainVm)
             return;
 
-        if (MarkdownPreviewPlacementRuntime.Current == MarkdownPreviewPlacement.ForwardSplit
-            && TryGetActiveDockDocumentView()?.FindControl<Grid>("EditorContentGrid") is not null
-            && mainVm.IsMarkdownFile)
-        {
-            UpdateMarkdownPreviewColumn(true);
-            UpdateInlineMarkdownPreview();
-            return;
-        }
-
-        // separate_window, mfd (пока без вкладки в MFD), forward_split без сетки — отдельное окно.
         EnsurePreviewWindow();
         _previewVm!.AttachToEditor(mainVm);
         _previewWindow!.Show(this);

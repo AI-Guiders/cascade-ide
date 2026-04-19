@@ -7,8 +7,8 @@ mfd_region_collapsed_width_pixels = 0
 mfd_region_expanded_default_width_pixels = 340
 mfd_region_expanded_power_width_pixels = 420
 mfd_region_expanded_agent_chat_width_pixels = 520
-# forward_split | mfd | separate_window (или window)
-markdown_preview_placement = "forward_split"
+# mfd | separate_window (или window)
+markdown_preview_placement = "mfd"
 
 # ADR 0021/0051 + ADR 0050: одна таблица [routing] — иначе Tomlyn при двух [routing.*] перезаписывает вложенный объект.
 # Канонические intent-id: forward, pfd, mfd, eicas, hud; слоты — alias без сырых instrument_id.

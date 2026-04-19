@@ -13,9 +13,9 @@
         Icon="/Assets/avalonia-logo.ico"
         Background="{DynamicResource CascadeTheme.MainWindowBackground}">
 
-    <!-- ADR 0017 п. 8: полный SecondaryShellView (все страницы), как колонка Mfd в MainWindow. -->
+    <!-- ADR 0017 п. 8: полный MfdShellView (все страницы), как колонка Mfd в MainWindow. -->
     <Grid>
-        <views:SecondaryShellView DataContext="{Binding}" MinHeight="0"/>
+        <views:MfdShellView DataContext="{Binding}" MinHeight="0"/>
         <!-- W3: mount-layer host preview для MFD (паритет с PFD-host). -->
         <views:ZoneInstrumentMountView IsVisible="{Binding UseSkiaInstrumentMount}"
                                        HorizontalAlignment="Right"

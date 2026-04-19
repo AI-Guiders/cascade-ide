@@ -107,7 +107,7 @@ public partial class MainWindowViewModel
     public bool IsPfdHostWindowShellOpen => _suppressPfdColumnForPfdHostWindow;
 
     /// <summary>
-    /// Окно-хост зоны Mfd показывает <c>SecondaryShellView</c> (чат, терминал, обозреватель решения и т.д.) — скрываем колонку Mfd в главном окне, чтобы не дублировать контур.
+    /// Окно-хост зоны Mfd показывает <c>MfdShellView</c> (чат, терминал, обозреватель решения и т.д.) — скрываем колонку Mfd в главном окне, чтобы не дублировать контур.
     /// </summary>
     public void SetMfdHostWindowShellOpen(bool isOpen)
     {

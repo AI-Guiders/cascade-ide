@@ -1,6 +1,5 @@
-using System.IO;
-using Avalonia.Threading;
-using CascadeIDE.Services;
+#nullable enable
+using CascadeIDE.Models;
 using CommunityToolkit.Mvvm.Input;
 
 namespace CascadeIDE.ViewModels;
@@ -65,7 +64,19 @@ public partial class MainWindowViewModel
 
     void Services.IIdeMcpActions.ShowEditorPreview()
     {
-        UiScheduler.Default.Post(() => RequestShowMarkdownPreviewForEditor?.Invoke());
+        UiScheduler.Default.Post(() =>
+        {
+            if (ShowMarkdownPreviewPageCommand.CanExecute(null))
+                ShowMarkdownPreviewPageCommand.Execute(null);
+        });
+    }
+
+    [RelayCommand]
+    private void ShowMarkdownPreviewPage()
+    {
+        ApplyMfdRegionExpanded(true);
+        MarkdownPreviewTool.RefreshFromEditor();
+        TryNavigateToSecondaryShellPage(SecondaryShellPage.MarkdownPreview);
     }
 
     [RelayCommand]

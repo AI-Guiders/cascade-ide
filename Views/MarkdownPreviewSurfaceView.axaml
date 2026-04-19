@@ -1,0 +1,23 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CascadeIDE.ViewModels"
+             x:Class="CascadeIDE.Views.MarkdownPreviewSurfaceView"
+             x:DataType="vm:MarkdownPreviewSurfaceViewModel">
+    <Grid RowDefinitions="Auto,*">
+        <Border x:Name="PreviewStatusBanner"
+                Grid.Row="0"
+                Margin="12,12,12,0"
+                Padding="10,8"
+                CornerRadius="6"
+                BorderThickness="1"
+                BorderBrush="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"
+                Background="{DynamicResource CascadeTheme.ChatMessageBubbleBackground}"
+                IsVisible="False">
+            <TextBlock x:Name="PreviewStatusText"
+                       TextWrapping="Wrap"/>
+        </Border>
+
+        <ContentControl x:Name="PreviewHost"
+                        Grid.Row="1"/>
+    </Grid>
+</UserControl>

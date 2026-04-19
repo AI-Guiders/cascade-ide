@@ -3,7 +3,7 @@ namespace CascadeIDE.Models;
 /// <summary>
 /// Какая страница показана во <strong>вторичном контуре оболочки</strong> (одна активная поверхность без TabControl).
 /// Семантика — пресетно-независимая; <strong>где</strong> на экране рисуется этот контур, задаётся пресетом/якорем (ADR 0021).
-/// В текущей разметке v1 хост по умолчанию — колонка зоны Mfd (тип представления <c>SecondaryShellView</c>).
+/// В текущей разметке v1 хост по умолчанию — колонка зоны Mfd (тип представления <c>MfdShellView</c>).
 /// Числовые значения — исторические (бывшие индексы вкладок нижнего региона).
 /// </summary>
 public enum SecondaryShellPage
@@ -25,4 +25,6 @@ public enum SecondaryShellPage
 
     /// <summary>Обозреватель решения (дерево проектов/файлов) — контент вторичного контура, не отдельная колонка вне shell.</summary>
     SolutionExplorer = 12,
+    /// <summary>Markdown preview как MFD-first tool surface.</summary>
+    MarkdownPreview = 13,
 }

@@ -5,15 +5,15 @@
              xmlns:dbg="using:CascadeIDE.Features.Debug"
              xmlns:models="using:CascadeIDE.Models"
              xmlns:views="using:CascadeIDE.Views"
-             x:Class="CascadeIDE.Views.SecondaryShellView"
-             x:Name="SecondaryShellRoot"
+             x:Class="CascadeIDE.Views.MfdShellView"
+             x:Name="MfdShellRoot"
              Classes.power="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Power}"
              x:DataType="vm:MainWindowViewModel">
     <UserControl.Styles>
         <Style Selector="Border#BottomPanelShell">
             <Setter Property="CornerRadius" Value="0"/>
         </Style>
-        <Style Selector="views|SecondaryShellView.power Border#BottomPanelShell">
+        <Style Selector="views|MfdShellView.power Border#BottomPanelShell">
             <Setter Property="CornerRadius" Value="12,12,0,0"/>
             <Setter Property="BoxShadow" Value="0 -8 32 0 #4000C8E8, 0 -2 20 0 #20000000"/>
         </Style>
@@ -44,6 +44,9 @@
             </Border>
             <Border IsVisible="{Binding CurrentSecondaryShellPage, Converter={StaticResource SecondaryShellPageEq}, ConverterParameter=SolutionExplorer}">
                     <views:SolutionExplorerView MinHeight="120"/>
+            </Border>
+            <Border IsVisible="{Binding CurrentSecondaryShellPage, Converter={StaticResource SecondaryShellPageEq}, ConverterParameter=MarkdownPreview}">
+                    <views:MarkdownPreviewToolView DataContext="{Binding MarkdownPreviewTool}"/>
             </Border>
             <Border IsVisible="{Binding CurrentSecondaryShellPage, Converter={StaticResource SecondaryShellPageEq}, ConverterParameter=Chat}">
                     <views:ChatPanelView DataContext="{Binding ChatPanel}"/>
@@ -242,7 +245,7 @@
                         </Border>
                         <GridSplitter Grid.Row="6" Grid.Column="1" Width="4" ResizeDirection="Columns"
                                       Background="{DynamicResource CascadeTheme.BuildOutputBorderBrush}"
-                                      IsEnabled="{Binding DataContext.WorkspaceSplittersUnlocked, ElementName=SecondaryShellRoot}"/>
+                                      IsEnabled="{Binding DataContext.WorkspaceSplittersUnlocked, ElementName=MfdShellRoot}"/>
                         <ScrollViewer Grid.Row="6" Grid.Column="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
                             <TextBox Text="{Binding GitDiffText, Mode=OneWay}"
                                      IsReadOnly="True"

@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
+using Avalonia.VisualTree;
 using CascadeIDE.Services;
 using CascadeIDE.ViewModels;
 using CascadeIDE.Views;
@@ -50,6 +51,53 @@ public sealed class MainWindowHotkeyRoutingHeadlessTests
         {
             MainWindowHotkeyService.ReplaceMergedMapForTests(null);
         }
+    }
+
+    [AvaloniaFact]
+    public void CommandPalette_IsVisibleOnlyInMatchingHostWindow()
+    {
+        var vm = new MainWindowViewModel();
+        var mainWindow = new MainWindow { DataContext = vm };
+        var pfdWindow = new PfdHostWindow { DataContext = vm };
+        var mfdWindow = new MfdHostWindow { DataContext = vm };
+
+        mainWindow.Show();
+        pfdWindow.Show();
+        mfdWindow.Show();
+
+        var mainPalette = FindDescendant<CommandPaletteView>(mainWindow);
+        var pfdPalette = FindDescendant<CommandPaletteView>(pfdWindow);
+        var mfdPalette = FindDescendant<CommandPaletteView>(mfdWindow);
+
+        Assert.NotNull(mainPalette);
+        Assert.NotNull(pfdPalette);
+        Assert.NotNull(mfdPalette);
+
+        vm.IsCommandPaletteOpen = true;
+        vm.CommandPaletteHost = CommandPaletteHost.MainWindow;
+        Assert.True(mainPalette!.IsVisible);
+        Assert.False(pfdPalette!.IsVisible);
+        Assert.False(mfdPalette!.IsVisible);
+
+        vm.CommandPaletteHost = CommandPaletteHost.PfdHost;
+        Assert.False(mainPalette.IsVisible);
+        Assert.True(pfdPalette.IsVisible);
+        Assert.False(mfdPalette.IsVisible);
+
+        vm.CommandPaletteHost = CommandPaletteHost.MfdHost;
+        Assert.False(mainPalette.IsVisible);
+        Assert.False(pfdPalette.IsVisible);
+        Assert.True(mfdPalette.IsVisible);
+
+        mainWindow.Close();
+        pfdWindow.Close();
+        mfdWindow.Close();
+    }
+
+    private static T? FindDescendant<T>(TopLevel root)
+        where T : class
+    {
+        return root.GetVisualDescendants().OfType<T>().FirstOrDefault();
     }
 
 }

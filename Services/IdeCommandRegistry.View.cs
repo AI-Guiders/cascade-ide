@@ -53,6 +53,7 @@ public static partial class IdeCommandRegistry
         AddPalette(b, "open_theme_file_dialog", IdeCommands.OpenThemeFileDialog, "Открыть файл темы…", "Вид");
 
         // ——— Вид: превью Markdown
+        AddPalette(b, "show_markdown_preview_page", IdeCommands.ShowMarkdownPreviewPage, "Показать Markdown preview (MFD)", "Вид");
         AddPalette(b, "open_preview_window", IdeCommands.OpenPreviewWindow, "Превью в отдельном окне", "Вид");
 
         // ——— Вид: палитра команд (глобальный хоткей окна)

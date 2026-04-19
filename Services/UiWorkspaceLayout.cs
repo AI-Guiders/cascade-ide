@@ -3,7 +3,6 @@ using Avalonia.Controls;
 using Avalonia.Layout;
 using CascadeIDE.Features.UiChrome;
 using MainDockCols = CascadeIDE.Features.UiChrome.UiWorkspaceLayoutDimensions.MainWindowMainGridColumns;
-using EditorDockCols = CascadeIDE.Features.UiChrome.UiWorkspaceLayoutDimensions.EditorContentGridColumns;
 
 namespace CascadeIDE.Services;
 
@@ -69,14 +68,4 @@ public static class UiWorkspaceLayout
         editorColumnGrid.RowDefinitions[3].Height = new GridLength(h);
     }
 
-    /// <summary>Вторая колонка <c>EditorContentGrid</c>: превью Markdown рядом с редактором.</summary>
-    public static void ApplyMarkdownPreviewColumn(Grid editorContentGrid, bool showPreview)
-    {
-        if (editorContentGrid.ColumnDefinitions.Count <= EditorDockCols.MarkdownPreview)
-            return;
-        var previewCol = EditorDockCols.MarkdownPreview;
-        editorContentGrid.ColumnDefinitions[previewCol].Width = showPreview
-            ? new GridLength(1, GridUnitType.Star)
-            : new GridLength(0, GridUnitType.Pixel);
-    }
 }

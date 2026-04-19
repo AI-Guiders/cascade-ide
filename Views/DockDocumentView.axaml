@@ -13,29 +13,15 @@
                                  UppercaseTitle="False"
                                  Margin="4,4,4,0"/>
 
-        <!-- EditorContentGrid: вторая колонка — inline Markdown (TOML: markdown_preview_placement = forward_split). -->
         <Grid Grid.Row="1"
               x:Name="EditorContentGrid">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <!-- До ApplyMarkdownPreviewColumn превью скрыто (forward_split). -->
-                <ColumnDefinition Width="0"/>
-            </Grid.ColumnDefinitions>
-            <ae:TextEditor Grid.Column="0"
+            <ae:TextEditor
                            x:Name="Editor"
                            Classes="EditorBox"
                            ShowLineNumbers="True"
                            FontFamily="Consolas,Cascadia Code,monospace"
                            FontSize="13"
                            Padding="8"/>
-            <Border Grid.Column="1"
-                    Background="{DynamicResource CascadeTheme.MarkdownPreviewPanelBackground}"
-                    BorderBrush="{DynamicResource CascadeTheme.MarkdownPreviewPanelBorderBrush}"
-                    BorderThickness="1,0,0,0"
-                    Padding="8"
-                    IsVisible="True">
-                <ContentControl x:Name="InlineMarkdownPreviewHost"/>
-            </Border>
         </Grid>
     </Grid>
 </UserControl>

@@ -1,4 +1,5 @@
 using Avalonia.Headless.XUnit;
+using Avalonia.Controls;
 using CascadeIDE.ViewModels;
 using CascadeIDE.Views;
 using Xunit;
@@ -16,5 +17,16 @@ public sealed class ViewLocatorTests
         var control = locator.Build(vm);
 
         Assert.IsType<DockDocumentView>(control);
+    }
+
+    [AvaloniaFact]
+    public void Build_MarkdownDockDocumentViewModel_DoesNotRequireInlinePreviewHost()
+    {
+        var locator = new ViewLocator();
+        var vm = new DockDocumentViewModel(new OpenDocumentViewModel("note.md", "note.md", "# Title"));
+
+        var control = Assert.IsType<DockDocumentView>(locator.Build(vm));
+
+        Assert.Null(control.FindControl<ContentControl>("InlineMarkdownPreviewHost"));
     }
 }

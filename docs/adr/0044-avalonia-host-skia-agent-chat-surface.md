@@ -3,7 +3,7 @@
 **Статус:** Proposed  
 **Дата:** 2026-04-13  
 **Обновлено:** 2026-04-13 — порядок итераций: **модель первична**, UI и спайк отрисовки следом.  
-**Связь:** [north-star — переход из Cursor](../design/north-star-cursor-mcp-cascade-workbench-v1.md) (снять трение), [0031](0031-agent-chat-clarification-batches-and-threading.md) (пакеты уточнений, выход за линейную ленту), [0039](0039-workspace-navigation-affordances.md) (Semantic Map; `ILayoutEngine`, Skia в перспективе), [0017](0017-multi-window-workspace-and-agent-surfaces.md) (зона MFD, `SecondaryShellView`), [0038](0038-agent-facade-ai-provider-and-tool-orchestration.md) (фасад агента). **Ортогонально:** [0043](0043-mcp-transport-recovery-human-agent-parity.md) (транспорт MCP) — этот ADR про **поверхность** разговора в IDE, не про канал MCP.
+**Связь:** [north-star — переход из Cursor](../design/north-star-cursor-mcp-cascade-workbench-v1.md) (снять трение), [0031](0031-agent-chat-clarification-batches-and-threading.md) (пакеты уточнений, выход за линейную ленту), [0039](0039-workspace-navigation-affordances.md) (Semantic Map; `ILayoutEngine`, Skia в перспективе), [0017](0017-multi-window-workspace-and-agent-surfaces.md) (зона MFD, `MfdShellView`), [0038](0038-agent-facade-ai-provider-and-tool-orchestration.md) (фасад агента). **Ортогонально:** [0043](0043-mcp-transport-recovery-human-agent-parity.md) (транспорт MCP) — этот ADR про **поверхность** разговора в IDE, не про канал MCP.
 
 ## Контекст
 

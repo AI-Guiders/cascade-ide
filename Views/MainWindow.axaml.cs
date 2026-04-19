@@ -22,7 +22,6 @@ public partial class MainWindow : PointerTrackingWindow
     private TextEditor? _marginPointerEditor;
     private ViewModels.MainWindowViewModel? _boundMainVm;
     private bool _workspaceEventsAttached;
-    private CancellationTokenSource? _markdownDiagramPreviewCts;
     private static readonly object HighlightLogLock = new();
 
     public MainWindow()
@@ -101,7 +100,6 @@ public partial class MainWindow : PointerTrackingWindow
             vm.SetPanelSizeProvider = (panel, width, height) => Services.UiPanelResize.Resize(this, panel, width, height);
             UpdateChatColumnWidth(vm);
             UpdateSolutionColumnWidth(vm.IsPfdColumnVisible);
-            UpdateMarkdownPreviewColumn(vm.IsMarkdownFile);
             SetupChatInputKeyHandler();
             SetupTerminalKeyHandler();
             SetupEditorAndTextMate();

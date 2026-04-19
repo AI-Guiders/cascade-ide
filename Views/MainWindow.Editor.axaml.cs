@@ -314,20 +314,8 @@ public partial class MainWindow
             or nameof(ViewModels.MainWindowViewModel.IsMfdColumnVisible))
             && DataContext is ViewModels.MainWindowViewModel vmChat)
             UpdateChatColumnWidth(vmChat);
-        if (e.PropertyName is nameof(ViewModels.MainWindowViewModel.IsMarkdownPreviewVisible) && DataContext is ViewModels.MainWindowViewModel vmMd)
-        {
-            UpdateMarkdownPreviewColumn(vmMd.IsMarkdownPreviewVisible);
-            UpdateInlineMarkdownPreview();
-        }
-        if (e.PropertyName is nameof(ViewModels.MainWindowViewModel.IsMarkdownFile))
-            UpdateInlineMarkdownPreview();
-        if (e.PropertyName is nameof(ViewModels.MainWindowViewModel.MarkdownKrokiEnabled)
-            or nameof(ViewModels.MainWindowViewModel.MarkdownKrokiBaseUrl))
-            UpdateInlineMarkdownPreview();
         if (e.PropertyName is nameof(ViewModels.MainWindowViewModel.IsCommandPaletteOpen) && DataContext is ViewModels.MainWindowViewModel vmPalette)
             HandleCommandPaletteOpenStateChanged(vmPalette.IsCommandPaletteOpen);
-        if (e.PropertyName is nameof(ViewModels.MainWindowViewModel.EditorText))
-            UpdateInlineMarkdownPreview();
         if (e.PropertyName is nameof(ViewModels.MainWindowViewModel.SelectedOllamaModel) && DataContext is ViewModels.MainWindowViewModel vm2
             && vm2.SelectedOllamaModel == ViewModels.MainWindowViewModel.InstallNewSentinel)
             _ = ShowInstallModelDialogAsync(vm2);

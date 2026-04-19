@@ -1,12 +1,12 @@
 namespace CascadeIDE.Features.UiChrome;
 
 /// <summary>
-/// Текущее размещение превью Markdown из merged <c>workspace.toml</c> (бандл + <c>.cascade/workspace.toml</c>).
+/// Текущее размещение preview Markdown из merged <c>workspace.toml</c> (бандл + <c>.cascade/workspace.toml</c>).
 /// </summary>
 public static class MarkdownPreviewPlacementRuntime
 {
     /// <summary>Значение по умолчанию до загрузки TOML и при сбросе тестов.</summary>
-    public const MarkdownPreviewPlacement DefaultPlacement = MarkdownPreviewPlacement.ForwardSplit;
+    public const MarkdownPreviewPlacement DefaultPlacement = MarkdownPreviewPlacement.Mfd;
 
     public static MarkdownPreviewPlacement Current { get; private set; } = DefaultPlacement;
 

@@ -5,7 +5,6 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:models="using:CascadeIDE.Models"
         xmlns:ae="using:AvaloniaEdit"
-        xmlns:md="using:Markdown.Avalonia"
         xmlns:views="using:CascadeIDE.Views"
         xmlns:chrome="using:CascadeIDE.Features.UiChrome"
         xmlns:lang="using:CascadeIDE.Lang"
@@ -234,6 +233,7 @@
                     <MenuItem Header="{Binding Lang_Menu_FollowSystem, Source={StaticResource Loc}, DataType={x:Type lang:LocViewModel}}"
                               Command="{Binding ResetUiLanguageToSystemCommand}"/>
                 </MenuItem>
+                <MenuItem Header="Показать Markdown preview в _MFD" Command="{Binding ShowMarkdownPreviewPageCommand}"/>
                 <MenuItem Header="Превью в отдельном _окне" Command="{Binding OpenPreviewWindowCommand}"/>
             </MenuItem>
             <MenuItem Header="_Настройки">
@@ -244,7 +244,7 @@
             </MenuItem>
         </Menu>
 
-        <!-- Строка 2 — рабочая область (якоря PFD | Forward | MFD в MainGrid; AttentionLayoutSurfaceKind.MainWindowDockedGrid). В колонке MFD сейчас SecondaryShellView: страницы вторичного контура (WORKSPACE/чат/терминал/…) и полоса EICAS сверху — не синоним «зона MFD», а хост по умолчанию (пресет). -->
+        <!-- Строка 2 — рабочая область (якоря PFD | Forward | MFD в MainGrid; AttentionLayoutSurfaceKind.MainWindowDockedGrid). В колонке MFD сейчас MfdShellView: страницы вторичного контура (WORKSPACE/чат/терминал/…) и полоса EICAS сверху — не синоним «зона MFD», а хост по умолчанию (пресет). -->
         <Grid x:Name="MainGrid" ColumnDefinitions="220,4,*,4,340">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -256,7 +256,7 @@
 
         <views:TaskCockpitView Grid.Row="1" Grid.ColumnSpan="5"/>
 
-        <!-- Якорь зоны PFD: контент по InstrumentPlacementRuntime + Display / workspace.toml (pfd_primary), без дубля с SecondaryShellView. -->
+        <!-- Якорь зоны PFD: контент по InstrumentPlacementRuntime + Display / workspace.toml (pfd_primary), без дубля с MfdShellView. -->
         <chrome:AttentionZoneContainer Zone="Pfd" Grid.Row="2" Grid.Column="0">
             <Grid>
                 <views:SolutionExplorerView IsVisible="{Binding IsDockedPfdSolutionExplorerTree}"/>
@@ -285,10 +285,10 @@
                       IsVisible="{Binding IsMfdColumnVisible}"
                       IsEnabled="{Binding WorkspaceSplittersUnlocked}"/>
 
-        <!-- Якорь зоны MFD: вторичный контур оболочки (SecondaryShellView) — WORKSPACE / чат / терминал / сборка / …; состав страниц ≠ сама зона (ADR 0021). -->
+        <!-- Якорь зоны MFD: вторичный контур оболочки (MfdShellView) — WORKSPACE / чат / терминал / сборка / …; состав страниц ≠ сама зона (ADR 0021). -->
         <chrome:AttentionZoneContainer Zone="Mfd" Grid.Row="2" Grid.Column="4" Grid.RowSpan="{Binding ChatPanelMainGridRowSpan}"
                                        IsVisible="{Binding IsMfdColumnVisible}">
-            <views:SecondaryShellView DataContext="{Binding DataContext, ElementName=RootWindow}" MinHeight="0"/>
+            <views:MfdShellView DataContext="{Binding DataContext, ElementName=RootWindow}" MinHeight="0"/>
         </chrome:AttentionZoneContainer>
 
         <!-- W2: overlay контуров зон поверх контента (без изменения содержимого). -->

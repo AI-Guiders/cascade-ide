@@ -161,6 +161,12 @@ internal sealed partial class IdeMcpCommandExecutor
                 _vm.CloseEnvironmentReadinessPageCommand.Execute(null);
             return await Task.FromResult("OK");
         });
+        add(ShowMarkdownPreviewPage, async (_, _) =>
+        {
+            if (_vm.ShowMarkdownPreviewPageCommand.CanExecute(null))
+                _vm.ShowMarkdownPreviewPageCommand.Execute(null);
+            return await Task.FromResult("OK");
+        });
 
         add(SetSecondaryShellPage, async (args, _) =>
         {

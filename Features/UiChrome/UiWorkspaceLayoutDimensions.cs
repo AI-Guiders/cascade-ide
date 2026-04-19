@@ -22,11 +22,10 @@ public static class UiWorkspaceLayoutDimensions
         public const int Count = MfdRegion + 1;
     }
 
-    /// <summary>Колонки <c>EditorContentGrid</c> во вкладке документа (редактор | превью Markdown).</summary>
+    /// <summary>Колонки <c>EditorContentGrid</c> во вкладке документа.</summary>
     public static class EditorContentGridColumns
     {
         public const int Editor = 0;
-        public const int MarkdownPreview = 1;
     }
 
     public const int PfdRegionDefaultWidthPixels = 220;

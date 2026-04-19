@@ -1,0 +1,13 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CascadeIDE.ViewModels"
+             xmlns:views="using:CascadeIDE.Views"
+             x:Class="CascadeIDE.Views.MarkdownPreviewToolView"
+             x:DataType="vm:MarkdownPreviewToolViewModel">
+    <DockPanel>
+        <views:PanelChromeHeader DockPanel.Dock="Top"
+                                 Title="{Binding Title}"
+                                 UppercaseTitle="False"/>
+        <views:MarkdownPreviewSurfaceView DataContext="{Binding}"/>
+    </DockPanel>
+</UserControl>

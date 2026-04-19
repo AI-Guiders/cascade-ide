@@ -27,7 +27,7 @@ public sealed class UiWorkspaceChromeToml
     public int? MfdRegionExpandedAgentChatWidthPixels { get; set; }
 
     /// <summary>
-    /// Куда показывать превью Markdown: <c>forward_split</c>, <c>mfd</c>, <c>separate_window</c> (или <c>window</c>);
+    /// Куда показывать preview Markdown: <c>mfd</c>, <c>separate_window</c> (или <c>window</c>);
     /// TOML: <c>markdown_preview_placement</c>.
     /// </summary>
     public string? MarkdownPreviewPlacement { get; set; }

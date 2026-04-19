@@ -133,6 +133,8 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _workspaceDiagnostics = new Services.WorkspaceDiagnosticsCoordinator(_csharpLanguageService, ProblemsPanel);
         _workspaceDiagnostics.Attach(this);
         _workspaceDiagnostics.DiagnosticsChanged += OnWorkspaceDiagnosticsChangedForHud;
+        MarkdownPreviewTool = new MarkdownPreviewToolViewModel();
+        MarkdownPreviewTool.AttachToEditor(this);
 
         // Capabilities: v1 registry (code-first, explicit module list).
         new UiChromeCapabilitiesModule().Register(_capabilities);
@@ -298,6 +300,9 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
 
     /// <summary>Ошибки и предупреждения по открытым .cs (Roslyn).</summary>
     public ProblemsPanelViewModel ProblemsPanel { get; }
+
+    /// <summary>Markdown preview как shared state для MFD page/tool.</summary>
+    public MarkdownPreviewToolViewModel MarkdownPreviewTool { get; }
 
     /// <summary>Терминал (нижняя вкладка Terminal).</summary>
     public TerminalPanelViewModel TerminalPanel { get; }

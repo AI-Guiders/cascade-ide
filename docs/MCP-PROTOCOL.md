@@ -160,6 +160,7 @@
 | `cycle_ui_mode` | Циклически переключить UI mode (hotkey). returns: text. |
 | `set_secondary_shell_page` | Активная страница вторичного контура оболочки: имя значения SecondaryShellPage (Chat, Terminal, …). Якорь на экране — пресет (v1 — колонка зоны Mfd). args: page:string; returns: text; example: {"page":"Chat"}. |
 | `show_environment_readiness_page` | Показать страницу «готовность окружения» во вторичном контуре (зона Mfd; ADR 0023). Разворачивает регион Mfd при необходимости. returns: text. |
+| `show_markdown_preview_page` | Показать Markdown preview как страницу во вторичном контуре/MFD. returns: text. |
 | `toggle_command_palette` | Открыть или закрыть палитру команд (как Ctrl+Q / пункт меню «Вид»). returns: text. |
 
 ### Вид: тема
