@@ -510,33 +510,18 @@ public sealed class SkiaChatSurfaceControl : Control
             using var stroke = new SKPaint { Color = _theme.Border, IsAntialias = true, Style = SKPaintStyle.Stroke, StrokeWidth = 1 };
             using var hoverStroke = new SKPaint { Color = _theme.HoverBorder, IsAntialias = true, Style = SKPaintStyle.Stroke, StrokeWidth = 2 };
             using var selectedStroke = new SKPaint { Color = _theme.SelectedBorder, IsAntialias = true, Style = SKPaintStyle.Stroke, StrokeWidth = 2.2f };
-            using var rolePaint = new SKPaint
-            {
-                IsAntialias = true,
-                Color = _theme.Role,
-                TextSize = 10,
-                Typeface = SKTypeface.FromFamilyName("Segoe UI", SKFontStyle.Bold)
-            };
-            using var contentPaint = new SKPaint
-            {
-                IsAntialias = true,
-                Color = _theme.Content,
-                TextSize = 12,
-                Typeface = SKTypeface.FromFamilyName("Consolas")
-            };
-            using var emptyPaint = new SKPaint
-            {
-                IsAntialias = true,
-                Color = _theme.EmptyHint,
-                TextSize = 11,
-                Typeface = SKTypeface.FromFamilyName("Segoe UI")
-            };
+            using var roleFont = new SKFont(SKTypeface.FromFamilyName("Segoe UI", SKFontStyle.Bold), 10);
+            using var rolePaint = new SKPaint { IsAntialias = true, Color = _theme.Role };
+            using var contentFont = new SKFont(SKTypeface.FromFamilyName("Consolas"), 12);
+            using var contentPaint = new SKPaint { IsAntialias = true, Color = _theme.Content };
+            using var emptyFont = new SKFont(SKTypeface.FromFamilyName("Segoe UI"), 11);
+            using var emptyPaint = new SKPaint { IsAntialias = true, Color = _theme.EmptyHint };
 
             _hitTargetSink.Clear();
 
             if (_messages.Length == 0)
             {
-                canvas.DrawText("Пока пусто. Задай вопрос или команду.", x, 28, emptyPaint);
+                canvas.DrawText("Пока пусто. Задай вопрос или команду.", x, 28, SKTextAlign.Left, emptyFont, emptyPaint);
                 canvas.Restore();
                 return;
             }
@@ -557,11 +542,11 @@ public sealed class SkiaChatSurfaceControl : Control
                     canvas.DrawRoundRect(r, 7, 7, hoverStroke);
                 if (_selectedBubble == i)
                     canvas.DrawRoundRect(r, 7, 7, selectedStroke);
-                canvas.DrawText(msg.Role.ToUpperInvariant(), x + 10, layout.Top + 14, rolePaint);
+                canvas.DrawText(msg.Role.ToUpperInvariant(), x + 10, layout.Top + 14, SKTextAlign.Left, roleFont, rolePaint);
                 var textY = layout.Top + 30;
                 foreach (var line in lines)
                 {
-                    canvas.DrawText(line, x + 10, textY, contentPaint);
+                    canvas.DrawText(line, x + 10, textY, SKTextAlign.Left, contentFont, contentPaint);
                     textY += 16;
                 }
 

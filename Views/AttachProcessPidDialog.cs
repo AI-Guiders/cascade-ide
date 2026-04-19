@@ -19,7 +19,7 @@ internal static class AttachProcessPidDialog
             WindowStartupLocation = WindowStartupLocation.CenterOwner
         };
 
-        var box = new TextBox { Watermark = "PID (целое число)", Margin = new Thickness(0, 0, 0, 8) };
+        var box = new TextBox { PlaceholderText = "PID (целое число)", Margin = new Thickness(0, 0, 0, 8) };
         int? result = null;
 
         var ok = new Button { Content = "OK", MinWidth = 90 };

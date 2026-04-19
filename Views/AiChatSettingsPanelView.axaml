@@ -22,21 +22,21 @@
 
         <StackPanel Spacing="6" IsVisible="{Binding IsAnthropicSelected}">
             <TextBlock Text="Anthropic API key:" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-            <TextBox Text="{Binding AnthropicApiKey, Mode=TwoWay}" PasswordChar="*" Watermark="sk-ant-..." MinWidth="280"/>
+            <TextBox Text="{Binding AnthropicApiKey, Mode=TwoWay}" PasswordChar="*" PlaceholderText="sk-ant-..." MinWidth="280"/>
         </StackPanel>
         <StackPanel Spacing="6" IsVisible="{Binding IsOpenAiSelected}">
             <TextBlock Text="OpenAI API key:" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-            <TextBox Text="{Binding OpenAiApiKey, Mode=TwoWay}" PasswordChar="*" Watermark="sk-..." MinWidth="280"/>
+            <TextBox Text="{Binding OpenAiApiKey, Mode=TwoWay}" PasswordChar="*" PlaceholderText="sk-..." MinWidth="280"/>
         </StackPanel>
         <StackPanel Spacing="6" IsVisible="{Binding IsDeepSeekSelected}">
             <TextBlock Text="DeepSeek API key:" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-            <TextBox Text="{Binding DeepSeekApiKey, Mode=TwoWay}" PasswordChar="*" Watermark="sk-..." MinWidth="280"/>
+            <TextBox Text="{Binding DeepSeekApiKey, Mode=TwoWay}" PasswordChar="*" PlaceholderText="sk-..." MinWidth="280"/>
         </StackPanel>
 
         <StackPanel Spacing="6" IsVisible="{Binding IsCursorAcpSelected}">
             <TextBlock Text="Cursor ACP: путь к cursor-agent.cmd или к папке с dist-package" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" TextWrapping="Wrap"/>
             <TextBox Text="{Binding CursorAcpAgentPath, Mode=TwoWay}"
-                     Watermark="...\dist-package  или  ...\cursor-agent.cmd"
+                     PlaceholderText="...\dist-package  или  ...\cursor-agent.cmd"
                      MinWidth="280"
                      TextWrapping="Wrap"/>
         </StackPanel>

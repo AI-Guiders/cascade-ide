@@ -55,7 +55,7 @@
                           ColumnSpacing="8">
                         <TextBox Grid.Column="0"
                                  Text="{Binding Autonomous.AutonomousObjective, Mode=TwoWay}"
-                                 Watermark="Autonomous objective"
+                                 PlaceholderText="Autonomous objective"
                                  FontFamily="Consolas,monospace"
                                  FontSize="11"/>
                         <TextBlock Grid.Column="1"

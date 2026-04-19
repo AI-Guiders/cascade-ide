@@ -106,7 +106,7 @@
                             <TextBox x:Name="TerminalInputBox"
                                      DockPanel.Dock="Bottom"
                                      Text="{Binding TerminalInput, Mode=TwoWay}"
-                                     Watermark="Команда (Enter — выполнить)"
+                                     PlaceholderText="Команда (Enter — выполнить)"
                                      FontFamily="Consolas,monospace"
                                      FontSize="12"
                                      Background="{DynamicResource CascadeTheme.TerminalInputBackground}"
@@ -207,7 +207,7 @@
                                      Background="Transparent"
                                      Foreground="{DynamicResource CascadeTheme.TerminalForeground}"
                                      BorderThickness="0"
-                                     Watermark="Вывод submodule update / sync…"/>
+                                     PlaceholderText="Вывод submodule update / sync…"/>
                         </ScrollViewer>
                         <Border Grid.Row="6" Grid.Column="0" BorderBrush="{DynamicResource CascadeTheme.EditorColumnBorderBrush}" BorderThickness="1" Padding="4">
                             <DockPanel>
@@ -252,7 +252,7 @@
                                      Background="{DynamicResource CascadeTheme.BuildOutputBackground}"
                                      Foreground="{DynamicResource CascadeTheme.TerminalForeground}"
                                      BorderThickness="0"
-                                     Watermark="Выберите строку статуса слева — покажется diff."/>
+                                     PlaceholderText="Выберите строку статуса слева — покажется diff."/>
                         </ScrollViewer>
                         <views:PanelChromeHeader Grid.Row="7" Grid.ColumnSpan="3" Classes="terminal" Title="git submodule status" UppercaseTitle="True" Margin="0,8,0,0"/>
                         <ScrollViewer Grid.Row="8" Grid.ColumnSpan="3" VerticalScrollBarVisibility="Auto">
@@ -268,7 +268,7 @@
                         <views:PanelChromeHeader Grid.Row="9" Grid.ColumnSpan="3" Classes="terminal" Title="Сообщение коммита" UppercaseTitle="True" Margin="0,4,0,0"/>
                         <TextBox Grid.Row="10" Grid.ColumnSpan="3"
                                  Text="{Binding GitCommitMessage, Mode=TwoWay}"
-                                 Watermark="Сообщение коммита"
+                                 PlaceholderText="Сообщение коммита"
                                  FontFamily="Consolas,monospace"
                                  FontSize="12"
                                  MinHeight="36"
@@ -314,7 +314,7 @@
                         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
                                       DataContext="{Binding InstrumentationPanel}" x:DataType="feat:InstrumentationPanelViewModel">
                             <TextBox Text="{Binding TestResultsOutput, Mode=OneWay}"
-                                     Watermark="Здесь появится вывод dotnet test после запуска тестов из IDE или агента."
+                                     PlaceholderText="Здесь появится вывод dotnet test после запуска тестов из IDE или агента."
                                      IsReadOnly="True"
                                      TextWrapping="Wrap"
                                      FontFamily="Consolas,monospace"
@@ -349,7 +349,7 @@
                                                          MinHeight="48"
                                                          FontFamily="Consolas,monospace"
                                                          FontSize="12"
-                                                         Watermark="Формулировка гипотезы…"/>
+                                                         PlaceholderText="Формулировка гипотезы…"/>
                                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                                     <Button Content="Открыта" Command="{Binding SetOpenCommand}" Padding="6,2"/>
                                                     <Button Content="Не подтвердилась" Command="{Binding SetRejectedCommand}" Padding="6,2"/>

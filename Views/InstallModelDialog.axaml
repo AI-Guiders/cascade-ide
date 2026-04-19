@@ -31,7 +31,7 @@
         </ScrollViewer>
         <TextBlock Text="Или введите имя модели:" Foreground="#333"/>
         <TextBox Text="{Binding CustomModelName, Mode=TwoWay}"
-                 Watermark="Например: qwen2.5-coder:7b"
+                 PlaceholderText="Например: qwen2.5-coder:7b"
                  IsEnabled="{Binding !IsPulling}"/>
         <StackPanel Orientation="Horizontal" Spacing="8">
             <Button Content="Установить" Command="{Binding InstallCommand}" Background="#4CAF50" Foreground="White" Padding="12,6"/>

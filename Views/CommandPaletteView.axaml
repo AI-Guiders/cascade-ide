@@ -17,7 +17,7 @@
           PointerPressed="OnPanelPressed">
       <TextBox x:Name="SearchTextBox"
                Grid.Row="0"
-               Watermark="Команда… · f: файл · t: тип · m: член · x: текст"
+               PlaceholderText="Команда… · f: файл · t: тип · m: член · x: текст"
                Text="{Binding CommandPaletteQuery, Mode=TwoWay}"/>
       <ListBox Grid.Row="1"
                Margin="0,8,0,0"

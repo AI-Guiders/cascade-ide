@@ -59,7 +59,7 @@
                                              AcceptsReturn="True"
                                              MinHeight="56"
                                              TextWrapping="Wrap"
-                                             Watermark="Ответ..."/>
+                                             PlaceholderText="Ответ..."/>
 
                                     <ComboBox ItemsSource="{Binding ChoiceOptions}"
                                               SelectedItem="{Binding Answer, Mode=TwoWay}"
@@ -143,7 +143,7 @@
                 <TextBox x:Name="ChatInputBox"
                          Grid.Column="0"
                          Text="{Binding ChatInput, Mode=TwoWay}"
-                         Watermark="Сообщение агенту..."
+                         PlaceholderText="Сообщение агенту..."
                          AcceptsReturn="True"
                          MinHeight="52"
                          TextWrapping="Wrap"

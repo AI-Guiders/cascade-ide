@@ -28,7 +28,7 @@
             <CheckBox Content="Включить Kroki для Mermaid / PlantUML" IsChecked="{Binding MarkdownKrokiEnabled}" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
             <StackPanel Spacing="4">
                 <TextBlock Text="Базовый URL Kroki:" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-                <TextBox Text="{Binding MarkdownKrokiBaseUrl, Mode=TwoWay}" Watermark="https://kroki.io" MinWidth="280"/>
+                <TextBox Text="{Binding MarkdownKrokiBaseUrl, Mode=TwoWay}" PlaceholderText="https://kroki.io" MinWidth="280"/>
             </StackPanel>
 
             <TextBlock Text="C# / LSP" FontWeight="SemiBold" FontSize="16" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" Margin="0,8,0,0"/>
@@ -39,9 +39,9 @@
             </StackPanel>
             <StackPanel Spacing="6" IsVisible="{Binding IsCSharpLspProcessSelected}">
                 <TextBlock Text="Исполняемый файл (пусто = по умолчанию: OmniSharp / csharp-ls):" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" TextWrapping="Wrap"/>
-                <TextBox Text="{Binding CSharpLspExecutable, Mode=TwoWay}" Watermark="C:\Tools\OmniSharp.exe" MinWidth="280"/>
+                <TextBox Text="{Binding CSharpLspExecutable, Mode=TwoWay}" PlaceholderText="C:\Tools\OmniSharp.exe" MinWidth="280"/>
                 <TextBlock Text="Доп. аргументы:" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-                <TextBox Text="{Binding CSharpLspArguments, Mode=TwoWay}" Watermark="" MinWidth="280"/>
+                <TextBox Text="{Binding CSharpLspArguments, Mode=TwoWay}" PlaceholderText="" MinWidth="280"/>
             </StackPanel>
 
             <TextBlock Text="Markdown LSP" FontWeight="SemiBold" FontSize="16" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" Margin="0,8,0,0"/>
@@ -52,9 +52,9 @@
             </StackPanel>
             <StackPanel Spacing="6" IsVisible="{Binding IsMarkdownLspProcessSelected}">
                 <TextBlock Text="Исполняемый файл (пусто = marksman в PATH):" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" TextWrapping="Wrap"/>
-                <TextBox Text="{Binding MarkdownLspExecutable, Mode=TwoWay}" Watermark="marksman" MinWidth="280"/>
+                <TextBox Text="{Binding MarkdownLspExecutable, Mode=TwoWay}" PlaceholderText="marksman" MinWidth="280"/>
                 <TextBlock Text="Доп. аргументы:" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-                <TextBox Text="{Binding MarkdownLspArguments, Mode=TwoWay}" Watermark="" MinWidth="280"/>
+                <TextBox Text="{Binding MarkdownLspArguments, Mode=TwoWay}" PlaceholderText="" MinWidth="280"/>
             </StackPanel>
 
             <Button x:Name="CloseButton" Content="Закрыть" HorizontalAlignment="Right" MinWidth="100" Margin="0,8,0,0"/>
