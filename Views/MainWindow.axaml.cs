@@ -27,7 +27,7 @@ public partial class MainWindow : PointerTrackingWindow
     public MainWindow()
     {
         InitializeComponent();
-        // Глобальные хоткеи — только tunnel + KeyGestureChordMatching (не Window.KeyBindings: см. MainWindowHotkeyService).
+        // Глобальные хоткеи: tunnel + KeyGestureChordMatching + KeyBindings (см. MainWindowHotkeyService).
         AddHandler(InputElement.KeyDownEvent, OnDebugShortcutKeyDown, RoutingStrategies.Tunnel, handledEventsToo: true);
         DataContextChanged += OnDataContextChanged;
         Loaded += OnMainWindowLoaded;
@@ -43,6 +43,7 @@ public partial class MainWindow : PointerTrackingWindow
         }
 
         TryApplyHotkeys();
+
         TryOpenPfdHostWindowOnStartup();
         TryOpenMfdHostWindowOnStartup();
     }

@@ -64,6 +64,12 @@ public static class CockpitPrimitivesPalette
 
         public static readonly Color TooltipDetailForeground = Color.Parse("#D0D0D0");
 
+        /// <summary>CascadeChord toolbar: лампа «CMD + полоса» в armed (ADR 0060/0064), не EICAS W/C/A.</summary>
+        public static readonly Color CommandArmedLabelAmber = Color.Parse("#FFB000");
+
+        /// <summary>Нижняя полоса активности (armed) — зелёный индикатор «вкл».</summary>
+        public static readonly Color CommandArmedStripGreen = Color.Parse("#00E676");
+
         public static Color LitLens(AnnunciatorLampLevel level) =>
             level switch
             {

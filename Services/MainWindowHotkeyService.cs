@@ -1,3 +1,5 @@
+#nullable enable
+using System.Text.Json;
 using System.Windows.Input;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -52,15 +54,46 @@ public static class MainWindowHotkeyService
         }
     }
 
+    private static void LogTunnelExecutionError(string commandId, Exception ex)
+    {
+        try
+        {
+            var dir = Path.Combine(AppContext.BaseDirectory, ".cascade-ide");
+            Directory.CreateDirectory(dir);
+            var path = Path.Combine(dir, "hotkey-log.txt");
+            var line = $"[{DateTimeOffset.Now:O}] source=HotkeyService stage=command-fault command={commandId} error={ex.Message}{Environment.NewLine}";
+            lock (HotkeyLogLock)
+                File.AppendAllText(path, line);
+        }
+        catch
+        {
+            // Never break input processing because of debug logging.
+        }
+    }
+
     public static void ApplyAll(Window window, MainWindowViewModel vm)
     {
         var map = HotkeyTomlLoader.LoadMergedDictionary();
         _mergedMap = map;
-        ApplyWindowKeyBindings(window);
+        ApplyWindowKeyBindings(window, vm, map);
         ApplyMenuHotKeys(window, map);
     }
 
-    private static void ApplyWindowKeyBindings(Window window) => window.KeyBindings.Clear();
+    private static void ApplyWindowKeyBindings(Window window, MainWindowViewModel vm, IReadOnlyDictionary<string, string> map)
+    {
+        window.KeyBindings.Clear();
+
+        var seenTomlKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var entry in IdeCommandRegistry.AllEntries)
+        {
+            var tomlKey = entry.EffectiveHotkeysTomlKey;
+            if (!seenTomlKeys.Add(tomlKey))
+                continue;
+            if (!TryBuildKeyBinding(vm, map, entry, out var binding))
+                continue;
+            window.KeyBindings.Add(binding);
+        }
+    }
 
     private static (ICommand Command, object? Parameter) ResolveWindowCommand(MainWindowViewModel vm, IdeCommandRegistry.MainWindowHotkeyVmBinding b) =>
         b.Kind switch
@@ -146,53 +179,177 @@ public static class MainWindowHotkeyService
     public static bool TryHandleTunnelShortcuts(KeyEventArgs e, MainWindowViewModel vm)
     {
         var map = GetMergedMap();
+        var explicitTomlKeys = new HashSet<string>(IdeCommandRegistry.TunnelShortcutKeyOrder, StringComparer.OrdinalIgnoreCase);
 
         foreach (var tomlKey in IdeCommandRegistry.TunnelShortcutKeyOrder)
         {
             if (!IdeCommandRegistry.WindowHotkeyByTomlKey.TryGetValue(tomlKey, out var entry))
                 continue;
-            if (entry.WindowHotkey is not { } wh)
-                continue;
-            if (!map.TryGetValue(tomlKey, out var s) || string.IsNullOrWhiteSpace(s))
-                continue;
-            KeyGesture g;
-            try
-            {
-                g = KeyGesture.Parse(s.Trim());
-            }
-            catch
-            {
-                continue;
-            }
-
-            if (!KeyGestureChordMatching.Matches(g, e))
-                continue;
-
-            if (tomlKey.Equals("toggle_command_palette", StringComparison.OrdinalIgnoreCase))
-            {
-                if (!vm.ToggleCommandPaletteCommand.CanExecute(null))
-                {
-                    LogTunnelEvent("HotkeyService", e, vm, $"matched-{tomlKey}-cannot-execute");
-                    return false;
-                }
-                vm.ToggleCommandPaletteCommand.Execute(null);
-                e.Handled = true;
-                LogTunnelEvent("HotkeyService", e, vm, $"matched-{tomlKey}");
+            if (TryExecuteTunnelShortcutEntry(e, vm, map, tomlKey, entry))
                 return true;
-            }
+        }
 
-            var (cmd, param) = ResolveWindowCommand(vm, wh);
-            if (!cmd.CanExecute(param))
-            {
-                LogTunnelEvent("HotkeyService", e, vm, $"matched-{tomlKey}-cannot-execute");
-                return false;
-            }
-            cmd.Execute(param);
+        var seenTomlKeys = new HashSet<string>(explicitTomlKeys, StringComparer.OrdinalIgnoreCase);
+        foreach (var entry in IdeCommandRegistry.AllEntries)
+        {
+            var tomlKey = entry.EffectiveHotkeysTomlKey;
+            if (!seenTomlKeys.Add(tomlKey))
+                continue;
+            if (TryExecuteTunnelShortcutEntry(e, vm, map, tomlKey, entry))
+                return true;
+        }
+
+        return false;
+    }
+
+    private static bool TryExecuteTunnelShortcutEntry(
+        KeyEventArgs e,
+        MainWindowViewModel vm,
+        IReadOnlyDictionary<string, string> map,
+        string tomlKey,
+        IdeCommandRegistry.IdeCommandRegistryEntry entry)
+    {
+        if (!map.TryGetValue(tomlKey, out var gestureText) || string.IsNullOrWhiteSpace(gestureText))
+            return false;
+
+        KeyGesture gesture;
+        try
+        {
+            gesture = KeyGesture.Parse(gestureText.Trim());
+        }
+        catch
+        {
+            return false;
+        }
+
+        if (!KeyGestureChordMatching.Matches(gesture, e))
+            return false;
+
+        if (entry.WindowHotkey is { } windowHotkey)
+            return ExecuteWindowHotkeyBinding(e, vm, tomlKey, windowHotkey);
+
+        if (!string.IsNullOrWhiteSpace(entry.CommandId))
+        {
+            ExecuteRegistryCommandAsync(vm, entry.CommandId, IdeCommandRegistry.ParseArgs(entry.ArgsJson));
             e.Handled = true;
             LogTunnelEvent("HotkeyService", e, vm, $"matched-{tomlKey}");
             return true;
         }
 
         return false;
+    }
+
+    private static bool ExecuteWindowHotkeyBinding(
+        KeyEventArgs e,
+        MainWindowViewModel vm,
+        string tomlKey,
+        IdeCommandRegistry.MainWindowHotkeyVmBinding windowHotkey)
+    {
+        if (tomlKey.Equals("toggle_command_palette", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!vm.ToggleCommandPaletteCommand.CanExecute(null))
+            {
+                LogTunnelEvent("HotkeyService", e, vm, $"matched-{tomlKey}-cannot-execute");
+                return false;
+            }
+
+            vm.ToggleCommandPaletteCommand.Execute(null);
+            e.Handled = true;
+            LogTunnelEvent("HotkeyService", e, vm, $"matched-{tomlKey}");
+            return true;
+        }
+
+        var (cmd, param) = ResolveWindowCommand(vm, windowHotkey);
+        if (!cmd.CanExecute(param))
+        {
+            LogTunnelEvent("HotkeyService", e, vm, $"matched-{tomlKey}-cannot-execute");
+            return false;
+        }
+
+        cmd.Execute(param);
+        e.Handled = true;
+        LogTunnelEvent("HotkeyService", e, vm, $"matched-{tomlKey}");
+        return true;
+    }
+
+    private static void ExecuteRegistryCommandAsync(
+        MainWindowViewModel vm,
+        string commandId,
+        IReadOnlyDictionary<string, JsonElement>? args)
+    {
+        _ = RunAsync();
+
+        async Task RunAsync()
+        {
+            try
+            {
+                await ((IIdeMcpActions)vm).ExecuteCommandAsync(commandId, args).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                LogTunnelExecutionError(commandId, ex);
+            }
+        }
+    }
+
+    private static bool TryBuildKeyBinding(
+        MainWindowViewModel vm,
+        IReadOnlyDictionary<string, string> map,
+        IdeCommandRegistry.IdeCommandRegistryEntry entry,
+        out KeyBinding binding)
+    {
+        binding = null!;
+        var tomlKey = entry.EffectiveHotkeysTomlKey;
+        if (!map.TryGetValue(tomlKey, out var gestureText) || string.IsNullOrWhiteSpace(gestureText))
+            return false;
+
+        KeyGesture gesture;
+        try
+        {
+            gesture = KeyGesture.Parse(gestureText.Trim());
+        }
+        catch
+        {
+            return false;
+        }
+
+        ICommand? command = null;
+        object? parameter = null;
+
+        if (entry.WindowHotkey is { } windowHotkey)
+        {
+            (command, parameter) = ResolveWindowCommand(vm, windowHotkey);
+        }
+        else if (!string.IsNullOrWhiteSpace(entry.CommandId))
+        {
+            command = new DelegateCommand(
+                execute: _ => ExecuteRegistryCommandAsync(vm, entry.CommandId, IdeCommandRegistry.ParseArgs(entry.ArgsJson)),
+                canExecute: _ => true);
+        }
+
+        if (command is null)
+            return false;
+
+        binding = new KeyBinding
+        {
+            Gesture = gesture,
+            Command = command
+        };
+        if (parameter is not null)
+            binding.CommandParameter = parameter;
+        return true;
+    }
+
+    private sealed class DelegateCommand(Action<object?> execute, Predicate<object?> canExecute) : ICommand
+    {
+        public event EventHandler? CanExecuteChanged
+        {
+            add { }
+            remove { }
+        }
+
+        public bool CanExecute(object? parameter) => canExecute(parameter);
+
+        public void Execute(object? parameter) => execute(parameter);
     }
 }

@@ -22,6 +22,18 @@ public sealed class IntentMelodyAliasesTests
         Assert.Equal(IdeCommands.GitStatus, IntentMelodyAliases.TryResolveExactCommandId("gs"));
 
     [Fact]
+    public void TryResolveExact_so_IsOpenSolutionDialog() =>
+        Assert.Equal(IdeCommands.OpenSolutionDialog, IntentMelodyAliases.TryResolveExactCommandId("so"));
+
+    [Fact]
     public void FilterByTailPrefix_g_Matches_gs_gc_gp_gsu() =>
         Assert.Equal(4, IntentMelodyAliases.FilterByTailPrefix("g").Count);
+
+    [Fact]
+    public void HasStrictLongerAliasPrefix_gs_true_gsu_extends() =>
+        Assert.True(IntentMelodyAliases.HasStrictLongerAliasPrefix("gs"));
+
+    [Fact]
+    public void HasStrictLongerAliasPrefix_so_false() =>
+        Assert.False(IntentMelodyAliases.HasStrictLongerAliasPrefix("so"));
 }

@@ -90,6 +90,7 @@
 | `gp` | Git → Push |
 | `gm` | Git → Merge |
 | `gsu` | Git → Submodules *(трёхбуквенное — реже, чем merge/push; освобождает `gm` под merge)* |
+| `so` | Solution → Open (диалог выбора .sln / .slnx) |
 
 **Сейчас:** короткие коды задаются **реестром и ревью** (качественный консенсус по Git / build / debug / test), без сбора частот из продукта.
 

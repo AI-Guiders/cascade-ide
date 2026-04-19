@@ -119,7 +119,7 @@ public partial class MainWindowViewModel
         get
         {
             var h = HotkeyGestureMap.GetDisplayHint("toggle_command_palette");
-            var nav = "f: файл · t: тип · m: член · x: текст · c: melody (gs, br, …)";
+            var nav = "f: файл · t: тип · m: член · x: текст · c: melody (gs, br, so, …)";
             return !string.IsNullOrEmpty(h)
                 ? $"↑↓ выбор · Enter выполнить · Esc закрыть · PgUp/PgDn страница · {h} выделить запрос · {nav}"
                 : $"↑↓ выбор · Enter выполнить · Esc закрыть · PgUp/PgDn страница · {nav}";

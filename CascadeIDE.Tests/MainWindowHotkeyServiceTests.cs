@@ -1,6 +1,9 @@
+using Avalonia.Headless.XUnit;
 using Avalonia.Input;
+using Avalonia.Threading;
 using CascadeIDE.Services;
 using CascadeIDE.ViewModels;
+using CascadeIDE.Views;
 using Xunit;
 
 namespace CascadeIDE.Tests;
@@ -106,6 +109,76 @@ public sealed class MainWindowHotkeyServiceTests
             Assert.True(MainWindowHotkeyService.TryHandleTunnelKeyDownForMainVm(e, vm));
             Assert.True(e.Handled);
             Assert.False(vm.IsCommandPaletteOpen);
+        }
+        finally
+        {
+            MainWindowHotkeyService.ReplaceMergedMapForTests(null);
+        }
+    }
+
+    [AvaloniaFact]
+    public async Task TryHandleTunnelKeyDownForMainVm_CtrlShiftO_ExecutesRegistryCommand_WhenPaletteOpen()
+    {
+        MainWindowHotkeyService.ReplaceMergedMapForTests(
+            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["open_solution_dialog"] = "Ctrl+Shift+O"
+            });
+
+        try
+        {
+            var vm = new MainWindowViewModel
+            {
+                IsCommandPaletteOpen = true
+            };
+
+            var requested = false;
+            vm.RequestOpenSolution = () => requested = true;
+
+            var e = new KeyEventArgs
+            {
+                RoutedEvent = InputElement.KeyDownEvent,
+                Key = Key.O,
+                KeyModifiers = KeyModifiers.Control | KeyModifiers.Shift,
+                PhysicalKey = PhysicalKey.O
+            };
+
+            var handled = MainWindowHotkeyService.TryHandleTunnelKeyDownForMainVm(e, vm);
+            await Dispatcher.UIThread.InvokeAsync(() => { });
+
+            Assert.True(handled);
+            Assert.True(e.Handled);
+            Assert.True(requested);
+        }
+        finally
+        {
+            MainWindowHotkeyService.ReplaceMergedMapForTests(null);
+        }
+    }
+
+    [AvaloniaFact]
+    public void ApplyAll_AddsWindowKeyBinding_ForRegistryCommandHotkey()
+    {
+        MainWindowHotkeyService.ReplaceMergedMapForTests(
+            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["open_solution_dialog"] = "Ctrl+Shift+O"
+            });
+
+        try
+        {
+            var vm = new MainWindowViewModel();
+            var window = new MainWindow
+            {
+                DataContext = vm
+            };
+
+            MainWindowHotkeyService.ApplyAll(window, vm);
+
+            var binding = Assert.Single(window.KeyBindings, kb => kb.Gesture is KeyGesture gesture
+                && gesture.Key == Key.O
+                && gesture.KeyModifiers == (KeyModifiers.Control | KeyModifiers.Shift));
+            Assert.NotNull(binding.Command);
         }
         finally
         {

@@ -17,6 +17,8 @@ public static class IntentMelodyAliases
         ["da"] = IdeCommands.DebugAttach,
         ["dr"] = IdeCommands.DebugLaunch,
         ["dc"] = IdeCommands.DebugContinue,
+        // so = Solution Open — диалог .sln / .slnx (ADR 0060 §11).
+        ["so"] = IdeCommands.OpenSolutionDialog,
     };
 
     /// <summary>Строка палитры начинается с <c>c:</c> (регистр первой буквы допускается).</summary>
@@ -59,5 +61,22 @@ public static class IntentMelodyAliases
         if (string.IsNullOrEmpty(tailNormalized))
             return null;
         return AliasToCommandId.TryGetValue(tailNormalized, out var id) ? id : null;
+    }
+
+    /// <summary>
+    /// Есть ли alias длиннее <paramref name="tailNormalized"/>, который начинается с этого хвоста (например <c>gs</c> vs <c>gsu</c>).
+    /// Нужно для аккорда без Enter: не исполнять точное совпадение, пока возможно продолжение.
+    /// </summary>
+    public static bool HasStrictLongerAliasPrefix(string tailNormalized)
+    {
+        if (string.IsNullOrEmpty(tailNormalized))
+            return false;
+        foreach (var kv in AliasToCommandId.Keys)
+        {
+            if (kv.Length > tailNormalized.Length && kv.StartsWith(tailNormalized, StringComparison.Ordinal))
+                return true;
+        }
+
+        return false;
     }
 }

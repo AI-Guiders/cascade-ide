@@ -47,4 +47,20 @@ public sealed class KeyGestureChordMatchingTests
         };
         Assert.True(KeyGestureChordMatching.Matches(gesture, e));
     }
+
+    /// <summary>Регрессия: Ctrl+Shift+буква в TOML — жест должен матчиться с реальным KeyDown (mods включают Shift).</summary>
+    [Fact]
+    public void Matches_CtrlShiftO_SyntheticEvent_Matches()
+    {
+        var gesture = KeyGesture.Parse("Ctrl+Shift+O");
+        var e = new KeyEventArgs
+        {
+            RoutedEvent = InputElement.KeyDownEvent,
+            Key = Key.O,
+            KeyModifiers = KeyModifiers.Control | KeyModifiers.Shift,
+            PhysicalKey = PhysicalKey.O
+        };
+        Assert.True(KeyGestureChordMatching.Matches(gesture, e));
+    }
+
 }

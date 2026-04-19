@@ -7,7 +7,7 @@ namespace CascadeIDE.Services;
 public static class MelodyInterpreter
 {
     public const string EmptyTailHintTitle =
-        "Command Melody: введи хвост после c: (например gs, br, dc). Док: docs/intent-melody-language-v1.md";
+        "Command Melody: введи хвост после c: (например gs, br, so). Док: docs/intent-melody-language-v1.md";
 
     public const string EmptyTailHintCategory = "c:";
 

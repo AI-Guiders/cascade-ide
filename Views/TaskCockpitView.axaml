@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:CascadeIDE.ViewModels"
+             xmlns:views="using:CascadeIDE.Views"
              x:Class="CascadeIDE.Views.TaskCockpitView"
              x:DataType="vm:MainWindowViewModel">
     <StackPanel Spacing="0">
@@ -16,6 +17,10 @@
                         Background="{Binding WorkspaceSplitterLockButtonBackgroundBrush}"
                         Foreground="White"
                         BorderBrush="#40FFFFFF"/>
+                <!-- ADR 0060/0064: лампа CascadeChord — PrimitivesKit + Views; не дублировать палитру в AXAML (0066). -->
+                <views:CommandArmedStripLampCell IsArmed="{Binding IsCascadeChordOverlayVisible}"
+                                                 ToolTip.Tip="{Binding CommandArmedLampToolTip}"
+                                                 VerticalAlignment="Center"/>
             </StackPanel>
         </Border>
     <Border Margin="8,0,8,4"

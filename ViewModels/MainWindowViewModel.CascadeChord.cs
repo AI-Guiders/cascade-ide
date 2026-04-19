@@ -6,28 +6,24 @@ using CommunityToolkit.Mvvm.Input;
 namespace CascadeIDE.ViewModels;
 
 /// <summary>
-/// Аккордный слой ADR 0060: корень <c>cascade_chord</c> из hotkeys.toml (по умолчанию Ctrl+K), затем цепочка без Ctrl/Alt.
-/// <list type="bullet">
-/// <item><b>K → M → (M|P|F)</b> — зоны кокпита: MFD / PFD / Forward (фокус редактора).</item>
-/// <item><b>K → S → (P|F|D)</b> — Semantic Map: вид / уровень / детализация.</item>
-/// </list>
+/// Аккордный слой ADR 0060: корень <c>cascade_chord</c> из hotkeys.toml (по умолчанию Ctrl+K), затем <b>тот же хвост мелодии</b>, что после <c>c:</c> в палитре (см. <see cref="IntentMelodyAliases"/>), без префикса <c>c:</c> и без Enter — если alias однозначен (например <c>so</c>).
+/// При конфликте префиксов (например <c>gs</c> vs <c>gsu</c>) точное совпадение после полного ввода или по клавише Enter.
 /// </summary>
 public partial class MainWindowViewModel
 {
-    private const double CascadeChordTimeoutSeconds = 4;
+    /// <summary>Таймаут ожидания следующей клавиши без Ctrl/Alt (секунды; лампа и оверлей).</summary>
+    private const double CascadeChordTimeoutSeconds = 8;
 
     private enum CascadeChordPhase
     {
         Idle,
-        /// <summary>После Ctrl+K.</summary>
-        AwaitFirstKey,
-        /// <summary>После K → M: выбор зоны MFD / PFD / Forward.</summary>
-        AwaitZoneKey,
-        /// <summary>После K → S: параметры Semantic Map.</summary>
-        AwaitSemanticMapKey
+        /// <summary>После Ctrl+K — набор буквенно-цифрового хвоста как у <c>c:</c>.</summary>
+        AwaitMelodyTail
     }
 
     private CascadeChordPhase _cascadeChordPhase;
+    /// <summary>Нормализованный хвост мелодии (нижний регистр), как после <c>c:</c>.</summary>
+    private string _cascadeChordMelodyTail = "";
     private DateTimeOffset _cascadeChordDeadline = DateTimeOffset.MinValue;
     private DispatcherTimer? _cascadeChordTimer;
 
@@ -37,37 +33,41 @@ public partial class MainWindowViewModel
     /// <summary>Текст подсказки для текущего шага машины аккорда.</summary>
     public string CascadeChordOverlayHintText => BuildCascadeChordOverlayHint();
 
-    /// <summary>Сводка настроек Semantic Map (без ComboBox; смена через Ctrl+K → S → P/F/D или палитру).</summary>
+    /// <summary>Подсказка для лампы Command на тулбаре: в покое — кратко; при armed — полный контекст аккорда.</summary>
+    public string CommandArmedLampToolTip =>
+        IsCascadeChordOverlayVisible
+            ? "Command (armed) — ввод по аккорду; транспорт CascadeChord (Ctrl+K).\n\n" + BuildCascadeChordOverlayHint()
+            : "Command: в покое. Ctrl+K — режим armed (CascadeChord).";
+
+    /// <summary>Сводка настроек Semantic Map (без ComboBox; смена через палитру или MCP).</summary>
     public string SemanticMapSettingsSummaryLine =>
-        $"Вид: {SemanticMapPresentation} · уровень: {SemanticMapLevel} · детализация: {_settings.SemanticMap.DetailLevel.Trim()} · Ctrl+K → S → P / F / D";
+        $"Вид: {SemanticMapPresentation} · уровень: {SemanticMapLevel} · детализация: {_settings.SemanticMap.DetailLevel.Trim()} · палитра / MCP";
 
     private string BuildCascadeChordOverlayHint()
     {
         var timeout = (int)CascadeChordTimeoutSeconds;
-        return _cascadeChordPhase switch
+        var buf = _cascadeChordMelodyTail;
+        var bufLine = string.IsNullOrEmpty(buf)
+            ? "Набрано: (пусто) — тот же хвост, что после c: в палитре (например so)."
+            : $"Набрано: «{buf}»";
+
+        if (_cascadeChordPhase != CascadeChordPhase.AwaitMelodyTail)
         {
-            CascadeChordPhase.AwaitFirstKey =>
-                "CascadeChord · шаг 1 (без Ctrl/Alt):\n" +
-                "  M — зоны кокпита → далее M / P / F (MFD / PFD / Forward)\n" +
-                "  S — Semantic Map → далее P / F / D (вид / уровень / детализация)\n" +
-                "  Esc — отмена · таймаут " + timeout + " с\n" +
-                "Палитра Ctrl+Q — полный каталог.",
-            CascadeChordPhase.AwaitZoneKey =>
-                "CascadeChord · зона кокпита (после K → M):\n" +
-                "  M — MFD (развернуть регион)\n" +
-                "  P — PFD (развернуть регион)\n" +
-                "  F — Forward (фокус в редактор)\n" +
-                "  Esc — отмена · таймаут " + timeout + " с",
-            CascadeChordPhase.AwaitSemanticMapKey =>
-                "CascadeChord · Semantic Map (после K → S):\n" +
-                "  P — вид (list → graph → both)\n" +
-                "  F — уровень (file ↔ controlFlow)\n" +
-                "  D — детализация (glance → normal → inspect)\n" +
-                "  Esc — отмена · таймаут " + timeout + " с",
-            _ =>
-                "CascadeChord\n" +
-                "  Esc — отмена · таймаут " + timeout + " с"
-        };
+            return "CascadeChord\n" +
+                   "  Esc — отмена · таймаут " + timeout + " с";
+        }
+
+        var matches = IntentMelodyAliases.FilterByTailPrefix(buf);
+        var matchLine = matches.Count == 0
+            ? "Нет alias с таким префиксом."
+            : "Совпадения: " + string.Join(", ", matches.Select(m => m.Alias));
+
+        return "CascadeChord · мелодия (как c:… без префикса и без Enter, если alias однозначен)\n" +
+               bufLine + "\n" +
+               matchLine + "\n" +
+               "  Enter — выполнить, если хвост — точный alias (нужно при gs vs gsu)\n" +
+               "  Backspace — стереть символ · Esc — отмена · таймаут " + timeout + " с\n" +
+               "Палитра Ctrl+Q, c: — тот же каталог.";
     }
 
     private void EnsureCascadeChordTimer()
@@ -83,8 +83,7 @@ public partial class MainWindowViewModel
             _cascadeChordTimer.Stop();
             if (_cascadeChordPhase == CascadeChordPhase.Idle)
                 return;
-            _cascadeChordPhase = CascadeChordPhase.Idle;
-            NotifyCascadeChordOverlayProperties();
+            EndCascadeChordIdle();
         };
     }
 
@@ -104,11 +103,13 @@ public partial class MainWindowViewModel
     {
         OnPropertyChanged(nameof(IsCascadeChordOverlayVisible));
         OnPropertyChanged(nameof(CascadeChordOverlayHintText));
+        OnPropertyChanged(nameof(CommandArmedLampToolTip));
     }
 
     private void BeginCascadeChordRoot()
     {
-        _cascadeChordPhase = CascadeChordPhase.AwaitFirstKey;
+        _cascadeChordPhase = CascadeChordPhase.AwaitMelodyTail;
+        _cascadeChordMelodyTail = "";
         _cascadeChordDeadline = DateTimeOffset.UtcNow.AddSeconds(CascadeChordTimeoutSeconds);
         RestartCascadeChordTimer();
         NotifyCascadeChordOverlayProperties();
@@ -139,17 +140,13 @@ public partial class MainWindowViewModel
 
         if (DateTimeOffset.UtcNow > _cascadeChordDeadline)
         {
-            _cascadeChordPhase = CascadeChordPhase.Idle;
-            StopCascadeChordTimer();
-            NotifyCascadeChordOverlayProperties();
+            EndCascadeChordIdle();
             return false;
         }
 
         if (e.Key == Key.Escape)
         {
-            _cascadeChordPhase = CascadeChordPhase.Idle;
-            StopCascadeChordTimer();
-            NotifyCascadeChordOverlayProperties();
+            EndCascadeChordIdle();
             e.Handled = true;
             return true;
         }
@@ -157,88 +154,115 @@ public partial class MainWindowViewModel
         var mods = e.KeyModifiers;
         if (mods.HasFlag(KeyModifiers.Control) || mods.HasFlag(KeyModifiers.Alt) || mods.HasFlag(KeyModifiers.Meta))
         {
-            _cascadeChordPhase = CascadeChordPhase.Idle;
-            StopCascadeChordTimer();
-            NotifyCascadeChordOverlayProperties();
+            EndCascadeChordIdle();
             return false;
         }
 
-        switch (_cascadeChordPhase)
+        if (_cascadeChordPhase == CascadeChordPhase.AwaitMelodyTail)
+            return HandleCascadeChordMelodyKeyDown(e);
+
+        return false;
+    }
+
+    private bool HandleCascadeChordMelodyKeyDown(KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter)
         {
-            case CascadeChordPhase.AwaitFirstKey:
-                switch (e.Key)
-                {
-                    case Key.M:
-                        _cascadeChordPhase = CascadeChordPhase.AwaitZoneKey;
-                        break;
-                    case Key.S:
-                        _cascadeChordPhase = CascadeChordPhase.AwaitSemanticMapKey;
-                        break;
-                    default:
-                        _cascadeChordPhase = CascadeChordPhase.Idle;
-                        StopCascadeChordTimer();
-                        NotifyCascadeChordOverlayProperties();
-                        return false;
-                }
+            var cmdEnter = IntentMelodyAliases.TryResolveExactCommandId(_cascadeChordMelodyTail);
+            if (cmdEnter != null)
+                _ = ExecuteCascadeChordCommandAsync(cmdEnter);
+            EndCascadeChordIdle();
+            e.Handled = true;
+            return true;
+        }
 
-                _cascadeChordDeadline = DateTimeOffset.UtcNow.AddSeconds(CascadeChordTimeoutSeconds);
-                RestartCascadeChordTimer();
-                NotifyCascadeChordOverlayProperties();
-                e.Handled = true;
-                return true;
+        if (e.Key == Key.Back)
+        {
+            if (_cascadeChordMelodyTail.Length > 0)
+                _cascadeChordMelodyTail = _cascadeChordMelodyTail[..^1];
+            else
+                EndCascadeChordIdle();
+            _cascadeChordDeadline = DateTimeOffset.UtcNow.AddSeconds(CascadeChordTimeoutSeconds);
+            RestartCascadeChordTimer();
+            NotifyCascadeChordOverlayProperties();
+            e.Handled = true;
+            return true;
+        }
 
-            case CascadeChordPhase.AwaitZoneKey:
-                switch (e.Key)
-                {
-                    case Key.M:
-                        ApplyMfdRegionExpanded(true);
-                        break;
-                    case Key.P:
-                        ApplyPfdRegionExpanded(true);
-                        break;
-                    case Key.F:
-                        ((IIdeMcpActions)this).FocusEditor();
-                        break;
-                    default:
-                        _cascadeChordPhase = CascadeChordPhase.Idle;
-                        StopCascadeChordTimer();
-                        NotifyCascadeChordOverlayProperties();
-                        return false;
-                }
+        if (!TryMapMelodyKeyToChar(e.Key, out var ch))
+        {
+            EndCascadeChordIdle();
+            e.Handled = true;
+            return true;
+        }
 
-                _cascadeChordPhase = CascadeChordPhase.Idle;
-                StopCascadeChordTimer();
-                NotifyCascadeChordOverlayProperties();
-                e.Handled = true;
-                return true;
+        var newTail = _cascadeChordMelodyTail + ch;
+        var exact = IntentMelodyAliases.TryResolveExactCommandId(newTail);
+        var hasLonger = IntentMelodyAliases.HasStrictLongerAliasPrefix(newTail);
+        if (exact != null && !hasLonger)
+        {
+            _ = ExecuteCascadeChordCommandAsync(exact);
+            EndCascadeChordIdle();
+            e.Handled = true;
+            return true;
+        }
 
-            case CascadeChordPhase.AwaitSemanticMapKey:
-                switch (e.Key)
-                {
-                    case Key.P:
-                        CycleSemanticMapPresentation();
-                        break;
-                    case Key.F:
-                        CycleSemanticMapLevel();
-                        break;
-                    case Key.D:
-                        CycleSemanticMapDetailLevel();
-                        break;
-                    default:
-                        _cascadeChordPhase = CascadeChordPhase.Idle;
-                        StopCascadeChordTimer();
-                        NotifyCascadeChordOverlayProperties();
-                        return false;
-                }
+        if (IntentMelodyAliases.FilterByTailPrefix(newTail).Count == 0)
+        {
+            EndCascadeChordIdle();
+            e.Handled = true;
+            return true;
+        }
 
-                _cascadeChordPhase = CascadeChordPhase.Idle;
-                StopCascadeChordTimer();
-                NotifyCascadeChordOverlayProperties();
-                e.Handled = true;
-                return true;
+        _cascadeChordMelodyTail = newTail;
+        _cascadeChordDeadline = DateTimeOffset.UtcNow.AddSeconds(CascadeChordTimeoutSeconds);
+        RestartCascadeChordTimer();
+        NotifyCascadeChordOverlayProperties();
+        e.Handled = true;
+        return true;
+    }
 
-            default:
-                return false;
+    private void EndCascadeChordIdle()
+    {
+        _cascadeChordPhase = CascadeChordPhase.Idle;
+        _cascadeChordMelodyTail = "";
+        StopCascadeChordTimer();
+        NotifyCascadeChordOverlayProperties();
+    }
+
+    private static bool TryMapMelodyKeyToChar(Key key, out char ch)
+    {
+        ch = default;
+        if (key >= Key.A && key <= Key.Z)
+        {
+            ch = (char)('a' + (key - Key.A));
+            return true;
+        }
+
+        if (key >= Key.D0 && key <= Key.D9)
+        {
+            ch = (char)('0' + (key - Key.D0));
+            return true;
+        }
+
+        if (key >= Key.NumPad0 && key <= Key.NumPad9)
+        {
+            ch = (char)('0' + (key - Key.NumPad0));
+            return true;
+        }
+
+        return false;
+    }
+
+    private async Task ExecuteCascadeChordCommandAsync(string commandId)
+    {
+        try
+        {
+            await ((Services.IIdeMcpActions)this).ExecuteCommandAsync(commandId, null, CancellationToken.None).ConfigureAwait(false);
+        }
+        catch
+        {
+            // Исключения из хендлеров команд логируются внутри исполнителя; аккорд уже сброшен.
         }
     }
 
