@@ -3,15 +3,12 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Input;
 using Avalonia.Media;
-using Avalonia.VisualTree;
 
 namespace CascadeIDE.Services;
 
 /// <summary>
-/// Цвета элемента под курсором (PointerOverElement). Вызывать из UI-потока.
+/// Цвета элемента под курсором (хит-тест по последней позиции указателя). Вызывать из UI-потока.
 /// Для ide_get_colors_under_cursor — мгновенный фон и текст под мышью.
 /// Учитываются все открытые окна IDE (главное, настройки, превью и т.д.).
 /// </summary>
@@ -48,35 +45,9 @@ public static class UiColorsUnderCursor
         return JsonSerializer.Serialize(obj, Options);
     }
 
-    /// <summary>Ищет Control под курсором во всех открытых окнах IDE; при недоступности списка окон — только в переданном TopLevel.</summary>
-    private static Control? FindControlUnderCursor(TopLevel fallbackTopLevel)
-    {
-        if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-        {
-            foreach (var window in desktop.Windows)
-            {
-                if (window is not IInputRoot root)
-                    continue;
-                var over = root.PointerOverElement;
-                var control = over as Control ?? FindAncestorControl(over as Visual);
-                if (control is not null)
-                    return control;
-            }
-        }
-
-        var overFallback = (fallbackTopLevel as IInputRoot)?.PointerOverElement;
-        return overFallback as Control ?? FindAncestorControl(overFallback as Visual);
-    }
-
-    private static Control? FindAncestorControl(Visual? visual)
-    {
-        for (var v = visual?.GetVisualParent(); v is not null; v = v.GetVisualParent())
-        {
-            if (v is Control c)
-                return c;
-        }
-        return null;
-    }
+    private static Control? FindControlUnderCursor(TopLevel fallbackTopLevel) =>
+        UiPointerClientPosition.TryGetPointerOverControlAnywhere()
+        ?? UiPointerClientPosition.TryGetControlUnderPointer(fallbackTopLevel);
 
     private static IBrush? GetBrush(Control control, string propertyName)
     {

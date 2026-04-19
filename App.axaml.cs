@@ -1,6 +1,5 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Lang;
@@ -26,7 +25,6 @@ public partial class App : Application
         UiModeCatalog.Initialize();
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            DisableAvaloniaDataAnnotationValidation();
             var vm = new MainWindowViewModel();
             vm.IsMcpServerMode = RunMcpStdio;
             desktop.MainWindow = new MainWindow { DataContext = vm };
@@ -52,16 +50,4 @@ public partial class App : Application
         }
     }
 
-    private static void DisableAvaloniaDataAnnotationValidation()
-    {
-        // Get an array of plugins to remove
-        var dataValidationPluginsToRemove =
-            BindingPlugins.DataValidators.OfType<DataAnnotationsValidationPlugin>().ToArray();
-
-        // remove each entry found
-        foreach (var plugin in dataValidationPluginsToRemove)
-        {
-            BindingPlugins.DataValidators.Remove(plugin);
-        }
-    }
 }

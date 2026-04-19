@@ -26,8 +26,7 @@ public static class UiControlSendKeys
         }
         else
         {
-            var over = (topLevel as IInputRoot)?.PointerOverElement;
-            control = over as Control ?? FindAncestorControl(over as Visual);
+            control = UiPointerClientPosition.TryGetControlUnderPointer(topLevel);
             if (control is null)
                 return "No control under cursor. Specify name or focus the target first.";
         }
@@ -98,11 +97,4 @@ public static class UiControlSendKeys
         return true;
     }
 
-    private static Control? FindAncestorControl(Visual? visual)
-    {
-        for (var v = visual?.GetVisualParent(); v is not null; v = v.GetVisualParent())
-            if (v is Control c)
-                return c;
-        return null;
-    }
 }

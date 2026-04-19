@@ -39,13 +39,12 @@ public static class UiControlAppearance
         }
         else
         {
-            var over = (topLevel as IInputRoot)?.PointerOverElement;
-            control = over as Control ?? FindAncestorControl(over as Visual);
+            control = UiPointerClientPosition.TryGetControlUnderPointer(topLevel);
             if (control is null)
                 return JsonSerializer.Serialize(new { hint = "Нет контрола под курсором. Укажите name из ide_get_ui_layout." }, Options);
         }
 
-        var root = (control.GetVisualRoot() ?? topLevel) as Visual;
+        var root = (TopLevel.GetTopLevel(control) as Visual) ?? (topLevel as Visual);
         var snapshot = BuildSnapshot(control, root);
         return JsonSerializer.Serialize(snapshot, Options);
     }
@@ -87,16 +86,6 @@ public static class UiControlAppearance
             }
         }
 
-        return null;
-    }
-
-    private static Control? FindAncestorControl(Visual? visual)
-    {
-        for (var v = visual?.GetVisualParent(); v is not null; v = v.GetVisualParent())
-        {
-            if (v is Control c)
-                return c;
-        }
         return null;
     }
 
@@ -198,7 +187,19 @@ public static class UiControlAppearance
         try
         {
             var typeface = new Typeface(family);
-            using var fallbackLayout = new TextLayout(content!, typeface, null, size, null, TextAlignment.Left, TextWrapping.NoWrap, null, null, FlowDirection.LeftToRight, double.PositiveInfinity, double.PositiveInfinity);
+            using var fallbackLayout = new TextLayout(
+                content!,
+                typeface,
+                fontFeatures: null,
+                fontSize: size,
+                foreground: null,
+                textAlignment: TextAlignment.Left,
+                textWrapping: TextWrapping.NoWrap,
+                textTrimming: null,
+                textDecorations: null,
+                flowDirection: FlowDirection.LeftToRight,
+                maxWidth: double.PositiveInfinity,
+                maxHeight: double.PositiveInfinity);
             var textWidth = fallbackLayout.Width;
             return textWidth > availableWidth;
         }

@@ -1,7 +1,8 @@
-<Window xmlns="https://github.com/avaloniaui"
+<views:PointerTrackingWindow xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:CascadeIDE.ViewModels"
         xmlns:models="using:CascadeIDE.Models"
+        xmlns:views="using:CascadeIDE.Views"
         x:Class="CascadeIDE.Views.InstallModelDialog"
         x:Name="ThisDialog"
         x:DataType="vm:InstallModelDialogViewModel"
@@ -39,4 +40,4 @@
         <TextBlock Text="{Binding ProgressText}" Foreground="#666" FontSize="11" TextWrapping="Wrap"/>
         <TextBlock Text="{Binding ErrorText}" Foreground="#C00" FontSize="11" TextWrapping="Wrap"/>
     </StackPanel>
-</Window>
+</views:PointerTrackingWindow>

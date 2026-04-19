@@ -1,0 +1,17 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="CascadeIDE.Features.UiChrome.ModalOverlay"
+             x:Name="Root">
+  <Border x:Name="Dimmer"
+          Background="{Binding DimmerBrush, ElementName=Root}"
+          PointerPressed="OnDimmerPointerPressed">
+    <Grid MaxWidth="{Binding MaxPanelWidth, ElementName=Root}"
+          MaxHeight="{Binding MaxPanelHeight, ElementName=Root}"
+          Margin="{Binding PanelMargin, ElementName=Root}"
+          HorizontalAlignment="Center"
+          VerticalAlignment="Center"
+          PointerPressed="OnPanelPointerPressed">
+      <ContentPresenter Content="{Binding Child, ElementName=Root}" />
+    </Grid>
+  </Border>
+</UserControl>

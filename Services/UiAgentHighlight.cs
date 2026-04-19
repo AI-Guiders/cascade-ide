@@ -1,10 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
 using Avalonia.Threading;
-using Avalonia.VisualTree;
-
 namespace CascadeIDE.Services;
 
 /// <summary>
@@ -18,7 +15,7 @@ public static class UiAgentHighlight
 
     public static string ShowForControl(Control control)
     {
-        var hostWindow = control.GetVisualRoot() as Window;
+        var hostWindow = TopLevel.GetTopLevel(control) as Window;
         if (hostWindow is null)
             return "No host window for control.";
 
@@ -55,32 +52,7 @@ public static class UiAgentHighlight
     }
 
     /// <summary>Контрол под курсором в любом окне приложения (паритет с <see cref="UiColorsUnderCursor"/>).</summary>
-    public static Control? FindControlUnderCursorAnyWindow(Window fallbackMainWindow)
-    {
-        if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-        {
-            foreach (var window in desktop.Windows)
-            {
-                if (window is not IInputRoot root)
-                    continue;
-                var over = root.PointerOverElement;
-                var control = over as Control ?? FindAncestorControl(over as Visual);
-                if (control is not null)
-                    return control;
-            }
-        }
-
-        var overFallback = (fallbackMainWindow as IInputRoot)?.PointerOverElement;
-        return overFallback as Control ?? FindAncestorControl(overFallback as Visual);
-    }
-
-    private static Control? FindAncestorControl(Visual? visual)
-    {
-        for (var v = visual?.GetVisualParent(); v is not null; v = v.GetVisualParent())
-        {
-            if (v is Control c)
-                return c;
-        }
-        return null;
-    }
+    public static Control? FindControlUnderCursorAnyWindow(Window fallbackMainWindow) =>
+        UiPointerClientPosition.TryGetPointerOverControlAnywhere()
+        ?? UiPointerClientPosition.TryGetControlUnderPointer(fallbackMainWindow);
 }

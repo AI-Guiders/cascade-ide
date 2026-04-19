@@ -1,4 +1,4 @@
-<Window xmlns="https://github.com/avaloniaui"
+<views:PointerTrackingWindow xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -50,4 +50,4 @@
             <Border x:Name="AgentHighlightOverlay" IsVisible="False" BorderBrush="#FF6B9D" BorderThickness="2" Background="#10000000"/>
         </Canvas>
     </Grid>
-</Window>
+</views:PointerTrackingWindow>

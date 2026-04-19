@@ -76,7 +76,7 @@ public sealed class CascadeIdeSettingsTomlDeserializeTests
 
         var s = Deserialize(text);
         Assert.Equal("(P)(F)(M)", s.GetEffectivePresentationLine());
-        Assert.Equal("legacy", s.Presentation.Line);
+        Assert.Equal("(legacy)", s.Presentation.Line);
         var g = s.GetEffectivePresentationGrammar();
         Assert.Equal("P", g.Pfd);
         Assert.Equal("F", g.Forward);

@@ -1,4 +1,4 @@
-<Window xmlns="https://github.com/avaloniaui"
+<views:PointerTrackingWindow xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:CascadeIDE.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -350,29 +350,28 @@
         </Grid>
     </DockPanel>
     <views:CommandPaletteView ZIndex="5000"/>
-    <!-- ADR 0060 §6: подсказки после CascadeChord (Ctrl+K); не перехватывает мышь — только инфо. -->
-    <Border ZIndex="4800"
-            VerticalAlignment="Bottom"
-            HorizontalAlignment="Center"
-            Margin="0,0,0,20"
-            Padding="14,10"
-            MaxWidth="720"
-            CornerRadius="10"
-            BorderThickness="1"
-            BorderBrush="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"
-            Background="#E8151820"
-            IsVisible="{Binding IsCascadeChordOverlayVisible}"
-            IsHitTestVisible="False">
-        <StackPanel Spacing="4">
-            <TextBlock FontWeight="SemiBold"
-                       FontSize="12"
-                       Foreground="{DynamicResource CascadeTheme.SolutionExplorerHeaderForeground}"
-                       Text="CascadeChord"/>
-            <TextBlock FontSize="11"
-                       Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
-                       Text="{Binding CascadeChordOverlayHintText}"
-                       TextWrapping="Wrap"/>
-        </StackPanel>
-    </Border>
+    <!-- ADR 0060 §6: CascadeChord (Ctrl+K) — тот же каркас, что палитра (ModalOverlay), без перехвата мыши. -->
+    <chrome:ModalOverlay ZIndex="4800"
+                         PassThroughInput="True"
+                         IsVisible="{Binding IsCascadeChordOverlayVisible}">
+        <Border Padding="16,14"
+                CornerRadius="10"
+                BorderThickness="1"
+                BorderBrush="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"
+                Background="#E8151820"
+                VerticalAlignment="Center">
+            <StackPanel Spacing="10">
+                <TextBlock FontWeight="SemiBold"
+                           FontSize="16"
+                           Foreground="{DynamicResource CascadeTheme.SolutionExplorerHeaderForeground}"
+                           Text="CascadeChord"/>
+                <TextBlock FontSize="13"
+                           LineHeight="20"
+                           Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                           Text="{Binding CascadeChordOverlayHintText}"
+                           TextWrapping="Wrap"/>
+            </StackPanel>
+        </Border>
+    </chrome:ModalOverlay>
     </Grid>
-</Window>
+</views:PointerTrackingWindow>

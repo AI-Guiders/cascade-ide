@@ -1,6 +1,7 @@
 using Avalonia.Input;
 using Avalonia.Threading;
 using CascadeIDE.Models;
+using CascadeIDE.Services;
 
 namespace CascadeIDE.ViewModels;
 
@@ -112,20 +113,9 @@ public partial class MainWindowViewModel
     public bool TryConsumeCascadeChordKeyDown(KeyEventArgs e)
     {
         var map = MainWindowHotkeyService.GetMergedMap();
-        if (!map.TryGetValue("cascade_chord", out var chordRoot) || string.IsNullOrWhiteSpace(chordRoot))
-            chordRoot = "Ctrl+K";
+        var rootGesture = CascadeChordHotkey.ResolveRootGesture(map);
 
-        KeyGesture rootGesture;
-        try
-        {
-            rootGesture = KeyGesture.Parse(chordRoot.Trim());
-        }
-        catch
-        {
-            return false;
-        }
-
-        if (rootGesture.Matches(e))
+        if (CascadeChordHotkey.RootGestureMatches(rootGesture, e))
         {
             _cascadeChordPhase = CascadeChordPhase.AwaitFirstKey;
             _cascadeChordDeadline = DateTimeOffset.UtcNow.AddSeconds(CascadeChordTimeoutSeconds);

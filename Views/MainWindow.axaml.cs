@@ -10,7 +10,7 @@ using CascadeIDE.Cockpit.Surface;
 
 namespace CascadeIDE.Views;
 
-public partial class MainWindow : Window
+public partial class MainWindow : PointerTrackingWindow
 {
     private RegistryOptions? _registryOptions;
     private readonly ConditionalWeakTable<TextEditor, TextMate.Installation> _textMateByEditor = new();

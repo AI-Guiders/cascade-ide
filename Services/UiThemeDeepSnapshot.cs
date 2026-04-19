@@ -132,7 +132,7 @@ internal static class UiThemeDeepSnapshot
             ["client_width"] = Math.Round(w.ClientSize.Width, 1),
             ["client_height"] = Math.Round(w.ClientSize.Height, 1),
             ["extend_client_area_to_decorations"] = w.ExtendClientAreaToDecorationsHint,
-            ["extend_client_area_chrome_hints"] = w.ExtendClientAreaChromeHints.ToString(),
+            ["window_decorations"] = w.WindowDecorations.ToString(),
             ["extend_client_area_title_bar_height_hint"] = w.ExtendClientAreaTitleBarHeightHint,
             ["transparency_level_hint"] = w.TransparencyLevelHint.ToString(),
             ["actual_theme_variant"] = app.ActualThemeVariant.Key.ToString(),

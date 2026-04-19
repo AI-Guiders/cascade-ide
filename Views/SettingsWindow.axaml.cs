@@ -2,7 +2,7 @@ using Avalonia.Controls;
 
 namespace CascadeIDE.Views;
 
-public partial class SettingsWindow : Window
+public partial class SettingsWindow : PointerTrackingWindow
 {
     public SettingsWindow()
     {
