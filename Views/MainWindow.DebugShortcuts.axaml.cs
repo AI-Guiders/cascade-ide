@@ -13,6 +13,7 @@ public partial class MainWindow
         var vm = _boundMainVm ?? DataContext as ViewModels.MainWindowViewModel;
         if (vm is null)
             return;
+        vm.CommandPaletteHost = ViewModels.CommandPaletteHost.MainWindow;
         Services.MainWindowHotkeyService.LogTunnelEvent(nameof(MainWindow), e, vm, "window-entry");
         Services.MainWindowHotkeyService.TryHandleTunnelKeyDownForMainVm(e, vm);
     }

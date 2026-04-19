@@ -4,9 +4,19 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace CascadeIDE.ViewModels;
 
+public enum CommandPaletteHost
+{
+    MainWindow,
+    PfdHost,
+    MfdHost,
+}
+
 /// <summary>Раскладка панелей, нижняя зона, Workspace Health / автономный агент, ключи провайдеров и чата.</summary>
 public partial class MainWindowViewModel
 {
+    [ObservableProperty]
+    private CommandPaletteHost _commandPaletteHost = CommandPaletteHost.MainWindow;
+
     /// <summary>
     /// Intent геометрии: регион Mfd в <c>MainGrid</c> развёрнут (ширина по режиму) или свёрнут.
     /// Страница «Чат» — <see cref="SecondaryShellPage.Chat"/> через <see cref="CurrentSecondaryShellPage"/>, отдельно.

@@ -16,6 +16,7 @@ public partial class MfdHostWindow : PointerTrackingWindow
         InitializeComponent();
         AddHandler(InputElement.KeyDownEvent, OnTunnelKeyDown, RoutingStrategies.Tunnel, handledEventsToo: true);
         DataContextChanged += OnDataContextChanged;
+        Activated += OnActivated;
         Closed += (_, _) =>
         {
             if (_boundVm is not null)
@@ -28,8 +29,15 @@ public partial class MfdHostWindow : PointerTrackingWindow
     {
         if (DataContext is not ViewModels.MainWindowViewModel vm)
             return;
+        vm.CommandPaletteHost = ViewModels.CommandPaletteHost.MfdHost;
         MainWindowHotkeyService.LogTunnelEvent(nameof(MfdHostWindow), e, vm, "window-entry");
         MainWindowHotkeyService.TryHandleTunnelKeyDownForMainVm(e, vm);
+    }
+
+    private void OnActivated(object? sender, EventArgs e)
+    {
+        if (DataContext is ViewModels.MainWindowViewModel vm)
+            vm.CommandPaletteHost = ViewModels.CommandPaletteHost.MfdHost;
     }
 
     private void OnDataContextChanged(object? sender, EventArgs e)
