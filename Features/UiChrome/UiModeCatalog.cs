@@ -218,7 +218,25 @@ public static class UiModeCatalog
         }
 
         var bundledRel = $"UiModes/{fileName.Replace('\\', '/')}";
-        return BundledAppContent.TryReadEmbeddedText(bundledRel, out text);
+        if (BundledAppContent.TryReadEmbeddedText(bundledRel, out text))
+            return true;
+
+        // Как шипнутый Content рядом с exe: при устаревшей копии CascadeIDE.dll без EmbeddedResource (напр. только main пересобран).
+        var shipped = Path.Combine(AppContext.BaseDirectory, "UiModes", fileName);
+        try
+        {
+            if (File.Exists(shipped))
+            {
+                text = File.ReadAllText(shipped);
+                return !string.IsNullOrWhiteSpace(text);
+            }
+        }
+        catch
+        {
+            // ignore
+        }
+
+        return false;
     }
 
     private static void LoadFromDirectory(string uiModesDirectory)

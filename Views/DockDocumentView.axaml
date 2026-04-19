@@ -3,7 +3,6 @@
              xmlns:vm="using:CascadeIDE.ViewModels"
              xmlns:ae="using:AvaloniaEdit"
              xmlns:views="using:CascadeIDE.Views"
-             xmlns:md="using:Markdown.Avalonia"
              x:Class="CascadeIDE.Views.DockDocumentView"
              x:DataType="vm:DockDocumentViewModel">
 
@@ -35,7 +34,7 @@
                     BorderThickness="1,0,0,0"
                     Padding="8"
                     IsVisible="True">
-                <md:MarkdownScrollViewer x:Name="InlineMarkdownPreview"/>
+                <ContentControl x:Name="InlineMarkdownPreviewHost"/>
             </Border>
         </Grid>
     </Grid>

@@ -1,7 +1,6 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:CascadeIDE.ViewModels"
-        xmlns:md="using:Markdown.Avalonia"
         x:Class="CascadeIDE.Views.MarkdownPreviewWindow"
         x:DataType="vm:MarkdownPreviewWindowViewModel"
         Title="{Binding Title}"
@@ -10,7 +9,7 @@
         WindowStartupLocation="CenterOwner">
 
     <Border Padding="16" Background="{DynamicResource CascadeTheme.PreviewWindowBackground}">
-        <md:MarkdownScrollViewer Markdown="{Binding Markdown}"/>
+        <ContentControl x:Name="PreviewHost"/>
     </Border>
 
 </Window>

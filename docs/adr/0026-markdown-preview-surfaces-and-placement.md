@@ -1,6 +1,6 @@
 # ADR 0026: Markdown — поверхности превью и размещение (`workspace.toml`)
 
-**Статус:** Accepted (частично: `forward_split`, отдельное окно; `mfd` — зафиксировано как целевое размещение, до UI — fallback на окно)  
+**Статус:** Superseded by [0069](0069-markdown-preview-tool-surface-and-renderer-decoupling.md)  
 **Дата:** 2026-04-08  
 **Обновлено:** 2026-04-11 — подраздел **«Внутренние отсылки»** (hover/peek по «см. п. N» и якорям); ортогонально [0023](0023-markdown-diagrams-language-tooling.md). 2026-04-08 — подраздел «Глубина превью»: целевая планка v1, non-goals, приоритет export из [0023](0023-markdown-diagrams-language-tooling.md).  
 **Связь:** [0010](0010-ui-modes-toml-configuration.md) (`workspace.toml`, merge бандла `UiModes/` и overlay репозитория `.cascade/workspace.toml`), [0021](0021-pfd-mfd-cockpit-attention-model.md) (превью как вторичная поверхность относительно лобового редактирования), [0017](0017-multi-window-workspace-and-agent-surfaces.md) (отдельное окно как второй `TopLevel`), [0022](0022-mfd-visual-design-surface-axaml-blazor.md) (перспектива вкладки/региона на MFD), [0023](0023-markdown-diagrams-language-tooling.md) (LSP, диаграммы, Kroki, export — **ортогонально** размещению виджета превью).
@@ -9,7 +9,8 @@
 
 ## Замена прежних формулировок
 
-- **Канон по размещению превью Markdown** — этот ADR.
+- **Этот ADR superseded** новым каноном в [0069](0069-markdown-preview-tool-surface-and-renderer-decoupling.md): preview больше рассматривается как отдельный tool surface с renderer/placement decoupling, а `forward_split` снят с канона.
+- **Исторический канон по размещению превью Markdown** — этот ADR; актуальный канон для surface/renderer-decoupling — [0069](0069-markdown-preview-tool-surface-and-renderer-decoupling.md).
 - Ранее единственное упоминание «Markdown preview» в контексте UX в [0023](0023-markdown-diagrams-language-tooling.md) § «Детали UX» **снято с канона** там и **заменено ссылкой сюда** ([0023](0023-markdown-diagrams-language-tooling.md) остаётся про языковой опыт и диаграммы).
 - [0023](0023-markdown-diagrams-language-tooling.md) **не** superseded целиком — только пересечение по «где показывать превью».
 

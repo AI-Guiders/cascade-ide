@@ -34,14 +34,15 @@ public static class CascadeChordHotkey
     /// <see cref="KeyEventArgs.KeyModifiers"/>, что у <paramref name="resolved"/>.
     /// Иначе при русской (и др.) раскладке <c>e.Key</c> ≠ <c>Key.K</c>, хотя нажата та же физическая клавиша — корень не срабатывал.
     /// </summary>
-    public static bool RootGestureMatches(KeyGesture resolved, KeyEventArgs e)
-    {
-        if (resolved.Matches(e))
-            return true;
-        return MatchesPhysicalKeyFallback(resolved, e.PhysicalKey, e.KeyModifiers);
-    }
+    public static bool RootGestureMatches(KeyGesture resolved, KeyEventArgs e) =>
+        KeyGestureChordMatching.Matches(resolved, e);
 
-    /// <summary>Вторая ветка <see cref="RootGestureMatches"/> — для тестов и ясности контракта.</summary>
-    public static bool MatchesPhysicalKeyFallback(KeyGesture resolved, PhysicalKey physicalKey, KeyModifiers modifiers) =>
-        physicalKey == PhysicalKey.K && modifiers == resolved.KeyModifiers;
+    /// <summary>Вторая ветка сопоставления (тесты): нормализованные модификаторы + физическая K.</summary>
+    public static bool MatchesPhysicalKeyFallback(KeyGesture resolved, PhysicalKey physicalKey, KeyModifiers modifiers)
+    {
+        if (KeyGestureChordMatching.NormalizeChordModifiers(modifiers) !=
+            KeyGestureChordMatching.NormalizeChordModifiers(resolved.KeyModifiers))
+            return false;
+        return physicalKey == PhysicalKey.K && resolved.Key == Key.K;
+    }
 }

@@ -60,7 +60,7 @@
 | Markdown + диаграммы (Mermaid/PlantUML): first-class опыт через LSP и workflow; инъекция LSP в fenced-блоки — отдельная фаза | [0023](adr/0023-markdown-diagrams-language-tooling.md) (Proposed) |
 | SDK для IDE: стабильные контракты и capability‑модель для внутреннего расширения; plugin-host остаётся deferred | [0024](adr/0024-ide-sdk-and-stable-contracts.md) (Proposed) |
 | SDK и зоны внимания: канон PFD/MFD/… в метаданных capabilities; overlay презентации без подмены семантики | [0025](adr/0025-sdk-attention-zones-and-capabilities.md) (Proposed) |
-| Превью Markdown: где монтируется виджет (`forward_split` / окно / MFD), ключ в `workspace.toml`; внутренние отсылки (peek) — см. тот же ADR | [0026](adr/0026-markdown-preview-surfaces-and-placement.md) (Accepted, частично) |
+| Markdown Preview: отдельный tool surface; primary placement — MFD, secondary — окно; renderer decoupled от placement; authoring-расширение ортогонально preview | [0069](adr/0069-markdown-preview-tool-surface-and-renderer-decoupling.md) (Accepted) |
 | Продуктовый фокус: малая команда vs готовность к открытию — оси «границы/контракты» и «очередь/discoverability» | [0027](adr/0027-small-team-focus-vs-public-maturity.md) (Accepted) |
 | Пользовательские настройки: путь `settings.toml`, TOML/snake_case, секреты в отдельном `ai-keys.toml` | [0028](adr/0028-user-settings-toml-localappdata-and-secrets.md) (Accepted · Implemented) |
 | Конфигурация: канон на диске (TOML); центр настроек deferred; точечный UI — фасад канона | [0029](adr/0029-configuration-toml-canonical-ui-facade.md) (Accepted · Implemented) |
@@ -144,6 +144,7 @@
 - **v1.18** — playbook [attention-zone-panel-playbook-v1](design/attention-zone-panel-playbook-v1.md); в [0025](adr/0025-sdk-attention-zones-and-capabilities.md): `HostAttentionPanelId`, `CapabilityAttentionConsistency`.  
 - **v1.19** — [vertical-slice-attention-capabilities-v1](design/vertical-slice-attention-capabilities-v1.md); регистрация `ui.chrome.surface.solution_explorer` для сквозной проверки.  
 - **v1.20** — добавлен [0026](adr/0026-markdown-preview-surfaces-and-placement.md) (превью Markdown: поверхности и TOML); UX размещения снят с канона в [0023](adr/0023-markdown-diagrams-language-tooling.md) (там — язык и диаграммы).  
+- **v1.20a** — добавлен [0069](adr/0069-markdown-preview-tool-surface-and-renderer-decoupling.md): preview переосмыслен как отдельный MFD-first tool surface; `0026` superseded в части inline/`forward_split`; authoring-расширение Markdown зафиксировано как ортогональная линия.  
 - **v1.21** — добавлен [0027](adr/0027-small-team-focus-vs-public-maturity.md) (узкая команда vs зрелость для открытия: две оси; Proposed).  
 - **v1.22** — [0027](adr/0027-small-team-focus-vs-public-maturity.md) принят (Accepted); минимум discoverability (дока, примеры, ADR) + ссылка на [onboarding-first-run-v1](design/onboarding-first-run-v1.md); триггеры вывода задач оси B из бэклога.  
 - **v1.23** — добавлен [0028](adr/0028-user-settings-toml-localappdata-and-secrets.md) (пользовательский `settings.toml`, `%LocalAppData%\CascadeIDE\`, `ai-keys.json`; отличие от [0010](adr/0010-ui-modes-toml-configuration.md)).  

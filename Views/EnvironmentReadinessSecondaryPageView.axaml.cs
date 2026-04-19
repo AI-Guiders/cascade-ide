@@ -1,15 +1,16 @@
 using Avalonia.Controls;
+using CascadeIDE.Cockpit.Composition.EnvironmentReadiness;
 
 namespace CascadeIDE.Views;
 
 /// <summary>
-/// Готовность окружения: ADR 0063 — полоса ламп (компактный deck) и ниже текстовый deck
-/// (карточки при узкой колонке, таблица при ширине ≥ <see cref="WideLayoutMinWidth"/>).
+/// Готовность окружения: ADR 0063/0068 — одна коллекция payload; проекция «карточки» vs «таблица с лампой в первой колонке»
+/// (<see cref="EnvironmentReadinessPresentationResolver"/>).
 /// </summary>
 public partial class EnvironmentReadinessSecondaryPageView : UserControl
 {
-    /// <summary>Минимальная ширина контрола для режима «таблица» (px).</summary>
-    public const double WideLayoutMinWidth = 420;
+    /// <summary>Минимальная ширина контрола для режима «таблица» (px); синхрон с <see cref="EnvironmentReadinessPresentationResolver.DefaultWideLayoutMinWidthPx"/>.</summary>
+    public const double WideLayoutMinWidth = EnvironmentReadinessPresentationResolver.DefaultWideLayoutMinWidthPx;
 
     public EnvironmentReadinessSecondaryPageView()
     {
@@ -37,8 +38,8 @@ public partial class EnvironmentReadinessSecondaryPageView : UserControl
         if (width <= 0)
             return;
 
-        var useWide = width >= WideLayoutMinWidth;
-        WideLayoutRoot.IsVisible = useWide;
-        CompactLayoutRoot.IsVisible = !useWide;
+        var kind = EnvironmentReadinessPresentationResolver.Resolve(width);
+        WideLayoutRoot.IsVisible = kind == EnvironmentReadinessPresentationKind.WideTable;
+        CompactLayoutRoot.IsVisible = kind == EnvironmentReadinessPresentationKind.CompactCards;
     }
 }

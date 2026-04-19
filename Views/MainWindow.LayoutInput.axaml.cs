@@ -1,12 +1,9 @@
-using System.Threading;
-using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Models;
-using CascadeIDE.Services;
 using CommunityToolkit.Mvvm.Input;
 
 namespace CascadeIDE.Views;
@@ -112,7 +109,7 @@ public partial class MainWindow
             return;
 
         var dock = TryGetActiveDockDocumentView();
-        var viewer = dock?.FindControl<Markdown.Avalonia.MarkdownScrollViewer>("InlineMarkdownPreview");
+        var viewer = dock is null ? null : EnsureInlineMarkdownPreviewViewer(dock);
         if (viewer is null)
             return;
 
@@ -140,6 +137,33 @@ public partial class MainWindow
         };
 
         _ = ExpandInlineMarkdownPreviewAsync(viewer, raw, krokiSnapshot, token);
+    }
+
+    private static Markdown.Avalonia.MarkdownScrollViewer? EnsureInlineMarkdownPreviewViewer(DockDocumentView dock)
+    {
+        var host = dock.FindControl<ContentControl>("InlineMarkdownPreviewHost");
+        if (host is null)
+            return null;
+        if (host.Content is Markdown.Avalonia.MarkdownScrollViewer existing)
+            return existing;
+
+        try
+        {
+            var viewer = new Markdown.Avalonia.MarkdownScrollViewer();
+            host.Content = viewer;
+            return viewer;
+        }
+        catch (Exception ex)
+        {
+            LogHighlight($"InlineMarkdownPreview: FAILED: {ex}");
+            host.Content ??= new TextBlock
+            {
+                Text = "Markdown preview unavailable in this build.",
+                Opacity = 0.7,
+                TextWrapping = Avalonia.Media.TextWrapping.Wrap
+            };
+            return null;
+        }
     }
 
     private static async Task ExpandInlineMarkdownPreviewAsync(

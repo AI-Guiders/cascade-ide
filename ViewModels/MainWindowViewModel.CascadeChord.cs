@@ -1,7 +1,7 @@
 using Avalonia.Input;
 using Avalonia.Threading;
 using CascadeIDE.Models;
-using CascadeIDE.Services;
+using CommunityToolkit.Mvvm.Input;
 
 namespace CascadeIDE.ViewModels;
 
@@ -106,6 +106,18 @@ public partial class MainWindowViewModel
         OnPropertyChanged(nameof(CascadeChordOverlayHintText));
     }
 
+    private void BeginCascadeChordRoot()
+    {
+        _cascadeChordPhase = CascadeChordPhase.AwaitFirstKey;
+        _cascadeChordDeadline = DateTimeOffset.UtcNow.AddSeconds(CascadeChordTimeoutSeconds);
+        RestartCascadeChordTimer();
+        NotifyCascadeChordOverlayProperties();
+    }
+
+    /// <summary>Корень аккорда (hotkeys.toml <c>cascade_chord</c>): обрабатывается tunnel KeyDown главного окна (как палитра Ctrl+Q).</summary>
+    [RelayCommand]
+    private void CascadeChordRoot() => BeginCascadeChordRoot();
+
     /// <summary>
     /// Обрабатывает аккорд Cascade: возвращает <see langword="true"/>, если событие поглощено (в т.ч. корень Ctrl+K).
     /// Вызывать из tunnel <see cref="Views.MainWindow"/> до <see cref="MainWindowHotkeyService.TryHandleTunnelShortcuts"/>.
@@ -117,10 +129,7 @@ public partial class MainWindowViewModel
 
         if (CascadeChordHotkey.RootGestureMatches(rootGesture, e))
         {
-            _cascadeChordPhase = CascadeChordPhase.AwaitFirstKey;
-            _cascadeChordDeadline = DateTimeOffset.UtcNow.AddSeconds(CascadeChordTimeoutSeconds);
-            RestartCascadeChordTimer();
-            NotifyCascadeChordOverlayProperties();
+            BeginCascadeChordRoot();
             e.Handled = true;
             return true;
         }

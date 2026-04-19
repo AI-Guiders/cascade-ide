@@ -11,14 +11,9 @@
     </UserControl.Resources>
     <DockPanel Margin="0,4,0,0">
         <views:PanelChromeHeader DockPanel.Dock="Top" Title="Готовность окружения · LSP и инструменты" UppercaseTitle="True"/>
-        <!-- ADR 0055 / 0063: компактный deck — отрисовка annunciator через DrawingContext (тот же контур, что SkiaHost / CockpitSkiaSceneRenderer). -->
-        <views:AnnunciatorLampStrip DockPanel.Dock="Top"
-                                                    Margin="0,0,0,8"
-                                                    Items="{Binding EnvironmentReadinessItems}"
-                                                    HorizontalAlignment="Left"
-                                                    VerticalAlignment="Top"/>
+        <!-- ADR 0063/0068: полоса ламп сверху убрана; в широкой таблице тот же payload — примитив Korry в первой колонке. Компакт — карточки с глифом. -->
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-            <!-- Два режима текстового deck по ширине контейнера (см. code-behind). -->
+            <!-- Два режима текстового deck по ширине контейнера (см. code-behind + EnvironmentReadinessPresentationResolver). -->
             <Panel>
                 <!-- Узкая зона: текстовые карточки (удобно при (P|F|M) и узком MFD). -->
                 <Grid x:Name="CompactLayoutRoot" IsVisible="True">
@@ -55,10 +50,10 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                 </Grid>
-                <!-- Достаточная ширина: таблица с шапкой. -->
+                <!-- Достаточная ширина: таблица с шапкой; первая колонка — лампа (та же отрисовка, что у полосы). -->
                 <Grid x:Name="WideLayoutRoot" IsVisible="False" RowDefinitions="Auto,*">
                     <Grid Grid.Row="0"
-                          ColumnDefinitions="44,160,*"
+                          ColumnDefinitions="52,160,*"
                           Margin="0,0,0,6"
                           Opacity="0.85">
                         <TextBlock Grid.Column="0" Text="" HorizontalAlignment="Center"/>
@@ -82,14 +77,11 @@
                                         BorderBrush="{DynamicResource CascadeTheme.EditorColumnBorderBrush}"
                                         BorderThickness="1"
                                         CornerRadius="4">
-                                    <Grid ColumnDefinitions="44,160,*" RowDefinitions="Auto">
-                                        <TextBlock Grid.Column="0"
-                                                   VerticalAlignment="Center"
-                                                   HorizontalAlignment="Center"
-                                                   FontSize="16"
-                                                   FontWeight="SemiBold"
-                                                   Text="{Binding Level, Converter={StaticResource EnvLevelGlyph}}"
-                                                   Foreground="{Binding Level, Converter={StaticResource EnvLevelBrush}}"/>
+                                    <Grid ColumnDefinitions="52,160,*" RowDefinitions="Auto">
+                                        <views:AnnunciatorLampCell Grid.Column="0"
+                                                                   Item="{Binding}"
+                                                                   HorizontalAlignment="Center"
+                                                                   VerticalAlignment="Center"/>
                                         <TextBlock Grid.Column="1"
                                                    Text="{Binding Title}"
                                                    TextWrapping="Wrap"

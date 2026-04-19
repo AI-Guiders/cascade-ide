@@ -35,6 +35,16 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>CodeNavigation\presets.toml</Link>
     </None>
+    <!-- Как у exe: Hotkeys/hotkeys.toml для тестов MainWindowHotkeyService (toggle_command_palette и т.д.). -->
+    <None Include="..\Hotkeys\hotkeys.toml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>Hotkeys\hotkeys.toml</Link>
+    </None>
+    <!-- Паритет с Content CascadeIDE: fallback UiModeCatalog при отсутствии ресурсов в устаревшей CascadeIDE.dll (см. TryReadUiModesFile). -->
+    <None Include="..\UiModes\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>UiModes\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </None>
     <None Include="TestData\AgentContract\cockpit_surface_contract_slice.approved.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>TestData\AgentContract\cockpit_surface_contract_slice.approved.json</Link>

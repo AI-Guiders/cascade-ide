@@ -19,6 +19,9 @@ public partial class MainWindowViewModel
     /// <summary>Семейство текущего UI-режима (одна ось вместо булевых Is*Mode).</summary>
     public UiModeFamily UiModeFamily => UiModeFamilyResolver.FromNormalizedMode(NormalizeUiMode(UiMode));
 
+    /// <summary>Настройки отображения для композиторов кабины (mount, Skia, instrument routing).</summary>
+    public DisplaySettings DisplaySettings => _settings.Display;
+
     /// <summary>Заголовок главного окна (в Power — подпись «Autonomous Agent Cockpit»); из TOML — <c>main_window_title</c>.</summary>
     public string WindowTitle =>
         UiModeCatalog.GetWindowTitleOverride(NormalizeUiMode(UiMode))
@@ -33,17 +36,10 @@ public partial class MainWindowViewModel
 
     /// <summary>Композитор: intent + CDS style → кадр хоста (колонки + инструменты слотов; ADR 0036 п.3, 0047).</summary>
     private MainWindowHostSurfaceFrame HostSurfaceFrame =>
-        MainWindowHostSurfaceCompositor.ComposeFrame(
-            new MainWindowShellSurfaceCompositionInput(
-                _presentationParse,
-                IsPfdRegionExpanded,
-                IsMfdRegionExpanded,
-                _suppressPfdColumnForPfdHostWindow,
-                _suppressMfdColumnForMfdHostWindow,
-                UiModeCatalog.GetMfdRegionExpandedWidthPixels(NormalizeUiMode(UiMode)),
-                UiWorkspaceLayoutRuntimeMetrics.MfdRegionCollapsedWidthPixels,
-                _settings.Display,
-                SafetyLevel));
+        MainWindowHostSurfaceProjection.ComposeFrame(
+            this,
+            UiModeCatalog.GetMfdRegionExpandedWidthPixels(NormalizeUiMode(UiMode)),
+            UiWorkspaceLayoutRuntimeMetrics.MfdRegionCollapsedWidthPixels);
 
     private MainWindowShellSurfaceComposition ShellSurfaceComposition => HostSurfaceFrame.Shell;
 

@@ -1,4 +1,6 @@
 using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Interactivity;
 using System.ComponentModel;
 
 namespace CascadeIDE.Views;
@@ -12,6 +14,7 @@ public partial class MfdHostWindow : PointerTrackingWindow
     public MfdHostWindow()
     {
         InitializeComponent();
+        AddHandler(InputElement.KeyDownEvent, OnTunnelKeyDown, RoutingStrategies.Tunnel, handledEventsToo: true);
         DataContextChanged += OnDataContextChanged;
         Closed += (_, _) =>
         {
@@ -19,6 +22,14 @@ public partial class MfdHostWindow : PointerTrackingWindow
                 _boundVm.PropertyChanged -= OnVmPropertyChanged;
             _boundVm = null;
         };
+    }
+
+    private void OnTunnelKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (DataContext is not ViewModels.MainWindowViewModel vm)
+            return;
+        MainWindowHotkeyService.LogTunnelEvent(nameof(MfdHostWindow), e, vm, "window-entry");
+        MainWindowHotkeyService.TryHandleTunnelKeyDownForMainVm(e, vm);
     }
 
     private void OnDataContextChanged(object? sender, EventArgs e)

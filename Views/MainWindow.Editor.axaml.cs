@@ -81,18 +81,20 @@ public partial class MainWindow
             return;
         }
 
+        var textMateOk = false;
         try
         {
             EnsureTextMateOnEditor(editor);
+            textMateOk = true;
             LogHighlight($"TextMate: ensured for active editor, file='{vmSetup.CurrentFilePath ?? "<null>"}'.");
         }
         catch (Exception ex)
         {
             LogHighlight($"InstallTextMate: FAILED: {ex}");
-            throw;
         }
 
-        ApplyGrammarByFilePath(editor, vmSetup.CurrentFilePath);
+        if (textMateOk)
+            ApplyGrammarByFilePath(editor, vmSetup.CurrentFilePath);
 
         _editorIntelligence?.Detach();
         _editorIntelligence = new Services.EditorIntelligence(editor, _languageService!, () =>

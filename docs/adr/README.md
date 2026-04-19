@@ -35,7 +35,7 @@
 | [0023](0023-markdown-diagrams-language-tooling.md) | Markdown + диаграммы (Mermaid/PlantUML) — first-class опыт через LSP и workflow | Proposed |
 | [0024](0024-ide-sdk-and-stable-contracts.md) | SDK для CascadeIDE — стабильные контракты для внутреннего расширения и будущих плагинов | Proposed |
 | [0025](0025-sdk-attention-zones-and-capabilities.md) | SDK: привязка capabilities к зонам внимания (PFD/MFD/Forward/EICAS/HUD) | Proposed |
-| [0026](0026-markdown-preview-surfaces-and-placement.md) | Превью Markdown: поверхности и размещение (`workspace.toml`); внутренние отсылки (peek по «п. N»/якорям); не смешивать с языковым ADR 0023 | Accepted (частично) |
+| [0026](0026-markdown-preview-surfaces-and-placement.md) | Превью Markdown: поверхности и размещение (`workspace.toml`); внутренние отсылки (peek по «п. N»/якорям); не смешивать с языковым ADR 0023 | Superseded |
 | [0027](0027-small-team-focus-vs-public-maturity.md) | Узкая команда (человек + ассистент) vs зрелость «для открытия»: две оси (границы vs очередь) | Accepted |
 | [0028](0028-user-settings-toml-localappdata-and-secrets.md) | Пользовательские настройки: `settings.toml`, `%LocalAppData%\CascadeIDE\`, секреты в `ai-keys.toml` | Accepted · Implemented |
 | [0029](0029-configuration-toml-canonical-ui-facade.md) | Конфигурация: TOML-first; целостный UI настроек deferred; точечный UI — фасад канона | Accepted · Implemented |
@@ -78,6 +78,7 @@
 | [0066](0066-cockpit-ui-vs-ide-presentation-layer.md) | **Cockpit UI** vs **presentation IDE** (хром, оверлеи, тема): две опоры; не смешивать приборы/deck с оболочкой; `PrimitivesKit` vs `UiChrome` | Accepted |
 | [0067](0067-graph-backed-surfaces-contract.md) | **Graph-backed surfaces:** общий контракт для семейства графовых экранов (данные, взаимодействие, навигация, layout, выделение, sync); Semantic Map, GitMap, будущие графы | Accepted |
 | [0068](0068-deck-row-payload-and-presentation-projection.md) | **Полезная нагрузка строки канала** vs **проекция представления** vs **слот**: таблица/полоса ≠ тип ячейки; v1 — один DTO; гетерогенность — дискриминатор и шаблоны | Accepted |
+| [0069](0069-markdown-preview-tool-surface-and-renderer-decoupling.md) | **Markdown Preview:** MFD tool как primary surface, native Markdig renderer first, WebView как optional adaptor; authoring-расширение ортогонально preview | Accepted |
 
 ## Соглашения
 

@@ -7,6 +7,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using AvaloniaEdit;
 using AvaloniaEdit.Rendering;
 using CascadeIDE.Features.Documents;
@@ -37,6 +38,7 @@ public partial class DockDocumentView : UserControl
     {
         InitializeComponent();
         DataContextChanged += (_, _) => TrySetup();
+        AttachedToVisualTree += (_, _) => TrySetup();
         UiScheduler.Default.Post(TrySetup);
     }
 
@@ -48,12 +50,33 @@ public partial class DockDocumentView : UserControl
         if (_docVm is null)
             return;
 
-        if (VisualRoot is not Window w)
-            return;
+        // Avalonia 12: VisualRoot может быть не Window; DataContext главного окна всё равно нужен для документа и TextMate.
+        var top = TopLevel.GetTopLevel(this);
+        _vm = top?.DataContext as MainWindowViewModel;
+        if (_vm is null)
+        {
+            for (Visual? v = this; v is not null; v = v.GetVisualParent())
+            {
+                if (v is MainWindow mw)
+                {
+                    _vm = mw.DataContext as MainWindowViewModel;
+                    break;
+                }
+            }
+        }
 
-        _vm = w.DataContext as MainWindowViewModel;
         if (_vm is null)
             return;
+
+        MainWindow? mainWindow = null;
+        for (Visual? v = this; v is not null; v = v.GetVisualParent())
+        {
+            if (v is MainWindow mw)
+            {
+                mainWindow = mw;
+                break;
+            }
+        }
 
         _editor = this.FindControl<TextEditor>("Editor");
         if (_editor is null)
@@ -108,7 +131,7 @@ public partial class DockDocumentView : UserControl
         };
         _vm.Documents.PropertyChanged += _documentsHandler;
 
-        if (w is MainWindow mainWindow)
+        if (mainWindow is not null)
         {
             mainWindow.EnsureTextMateOnEditor(_editor);
             mainWindow.AttachTextMateWhenEditorReady();

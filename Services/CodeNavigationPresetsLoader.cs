@@ -3,7 +3,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Models;
-using Tomlyn;
 
 namespace CascadeIDE.Services;
 
@@ -35,12 +34,16 @@ public static class CodeNavigationPresetsLoader
         public List<string>? ExcludeKinds { get; set; }
     }
 
-    /// <summary>Текст встроенного <c>presets.toml</c> (единый источник с файлом в репозитории).</summary>
-    /// <exception cref="InvalidOperationException">Ресурс не встроен в сборку (ошибка сборки).</exception>
+    /// <summary>
+    /// Текст шипнутого <c>CodeNavigation/presets.toml</c>: как в рантайме — сначала файл под <see cref="AppContext.BaseDirectory"/>,
+    /// иначе <see cref="BundledAppContent"/> (EmbeddedResource). Так тесты и агенты не зависят от устаревшей копии <c>CascadeIDE.dll</c> без ресурсов.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Нет ни файла рядом с процессом, ни встроенного ресурса.</exception>
     public static string GetEmbeddedBundledPresetsToml()
     {
-        if (!BundledAppContent.TryReadEmbeddedText("CodeNavigation/presets.toml", out var text))
-            throw new InvalidOperationException("Missing embedded resource CodeNavigation/presets.toml.");
+        if (!BundledAppContent.TryReadDiskThenEmbedded(BundledRelativePath, out var text) || string.IsNullOrWhiteSpace(text))
+            throw new InvalidOperationException(
+                $"Missing bundled {BundledRelativePath} (disk under AppContext.BaseDirectory or embedded resource in CascadeIDE assembly).");
         return text;
     }
 

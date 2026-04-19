@@ -1,5 +1,7 @@
 using Avalonia;
 using Avalonia.Themes.Fluent;
+using CascadeIDE.Lang;
+using CascadeIDE.Views;
 
 namespace CascadeIDE.Tests;
 
@@ -9,5 +11,8 @@ public sealed class HeadlessTestApplication : Application
     public override void Initialize()
     {
         Styles.Add(new FluentTheme());
+        Resources["Loc"] = new LocViewModel();
+        Resources["UiModeFamilyEq"] = new UiModeFamilyEqualsConverter();
+        Resources["UiModeFamilyNe"] = new UiModeFamilyNotEqualsConverter();
     }
 }

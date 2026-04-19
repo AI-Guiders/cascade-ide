@@ -57,11 +57,19 @@ public sealed class CascadeChordHotkeyTests
     }
 
     [Fact]
-    public void MatchesPhysicalKeyFallback_CtrlK_RequiresExactModifiers()
+    public void MatchesPhysicalKeyFallback_CtrlK_NormalizedModifiers()
     {
         var resolved = KeyGesture.Parse("Ctrl+K");
         Assert.True(CascadeChordHotkey.MatchesPhysicalKeyFallback(resolved, PhysicalKey.K, KeyModifiers.Control));
         Assert.False(CascadeChordHotkey.MatchesPhysicalKeyFallback(resolved, PhysicalKey.K, KeyModifiers.Control | KeyModifiers.Shift));
         Assert.False(CascadeChordHotkey.MatchesPhysicalKeyFallback(resolved, PhysicalKey.J, KeyModifiers.Control));
+    }
+
+    [Fact]
+    public void NormalizeChordModifiers_StripsBitsOutsideChordMask()
+    {
+        var stripped = KeyGestureChordMatching.NormalizeChordModifiers(
+            KeyModifiers.Control | (KeyModifiers)0x10000);
+        Assert.Equal(KeyModifiers.Control, stripped);
     }
 }

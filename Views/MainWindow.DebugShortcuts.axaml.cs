@@ -5,15 +5,15 @@ namespace CascadeIDE.Views;
 public partial class MainWindow
 {
     /// <summary>
-    /// Дублирует жесты из hotkeys.toml (Window.KeyBindings): при фокусе в редакторе Avalonia не всегда
-    /// доставляет их до команд — tunnel на окне срабатывает до дочерних контролов.
+    /// Глобальные жесты из hotkeys.toml: tunnel KeyDown на окне + <see cref="Services.KeyGestureChordMatching"/>
+    /// (handledEventsToo: true — после фазы KeyBinding в Avalonia, если нужно тот же жест).
     /// </summary>
     private void OnDebugShortcutKeyDown(object? sender, KeyEventArgs e)
     {
-        if (DataContext is not ViewModels.MainWindowViewModel vm)
+        var vm = _boundMainVm ?? DataContext as ViewModels.MainWindowViewModel;
+        if (vm is null)
             return;
-        if (vm.TryConsumeCascadeChordKeyDown(e))
-            return;
-        Services.MainWindowHotkeyService.TryHandleTunnelShortcuts(e, vm);
+        Services.MainWindowHotkeyService.LogTunnelEvent(nameof(MainWindow), e, vm, "window-entry");
+        Services.MainWindowHotkeyService.TryHandleTunnelKeyDownForMainVm(e, vm);
     }
 }

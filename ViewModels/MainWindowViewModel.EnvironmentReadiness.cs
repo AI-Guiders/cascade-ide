@@ -12,10 +12,10 @@ public partial class MainWindowViewModel
 {
     public ObservableCollection<AnnunciatorLampItem> EnvironmentReadinessItems { get; } = [];
 
-    /// <summary>ADR 0063: компактный deck — ряд ламп (короткие подписи в <see cref="AnnunciatorLampItem.LampShortLabel"/>; примитив <see cref="DeckPrimitiveKind.Lamp"/>).</summary>
+    /// <summary>ADR 0063: семантический deck «компакт» (сетка ламп в метаданных); в UI узкая проекция — карточки с глифом (ADR 0068).</summary>
     public InstrumentDeckDescriptor EnvironmentReadinessCompactDeck => EnvironmentReadinessInstrumentDeck.CompactLampStrip;
 
-    /// <summary>ADR 0063: текстовый deck — те же ячейки, развёрнутая детализация в списке ниже.</summary>
+    /// <summary>ADR 0063: тот же порядок ячеек; широкая проекция — таблица с лампой Korry в первой колонке (ADR 0068).</summary>
     public InstrumentDeckDescriptor EnvironmentReadinessTextualDeck => EnvironmentReadinessInstrumentDeck.TextualDetail;
 
     partial void OnCurrentSecondaryShellPageChanged(SecondaryShellPage value)

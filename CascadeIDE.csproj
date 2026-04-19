@@ -23,6 +23,10 @@
   <PropertyGroup Condition="'$(GenerateIdeProtocolDocs)'=='true'">
     <DefineConstants>$(DefineConstants);IDE_COMMANDS_CODEGEN</DefineConstants>
   </PropertyGroup>
+  <!-- Быстрая итерация: dotnet build -p:FastBuild=true — без dotnet run ProtocolDocGen (инкрементальная сборка ~секунды вместо десятков). Полная CI: без FastBuild. -->
+  <PropertyGroup Condition="'$(FastBuild)'=='true'">
+    <GenerateIdeProtocolDocs>false</GenerateIdeProtocolDocs>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Remove="**/obj/**" />
     <Compile Remove="**/bin/**" />

@@ -28,16 +28,20 @@ public partial class MainWindow : PointerTrackingWindow
     public MainWindow()
     {
         InitializeComponent();
-        // KeyBindings на Window не доходят до команд, когда фокус в TextEditor — дублируем жесты из hotkeys.toml в tunnel.
-        AddHandler(InputElement.KeyDownEvent, OnDebugShortcutKeyDown, RoutingStrategies.Tunnel);
+        // Глобальные хоткеи — только tunnel + KeyGestureChordMatching (не Window.KeyBindings: см. MainWindowHotkeyService).
+        AddHandler(InputElement.KeyDownEvent, OnDebugShortcutKeyDown, RoutingStrategies.Tunnel, handledEventsToo: true);
         DataContextChanged += OnDataContextChanged;
         Loaded += OnMainWindowLoaded;
     }
 
     private void OnMainWindowLoaded(object? sender, RoutedEventArgs e)
     {
-        if (DataContext is ViewModels.MainWindowViewModel vm && vm.PresentationRequestsMainWindowMaximized)
-            WindowState = WindowState.Maximized;
+        if (DataContext is ViewModels.MainWindowViewModel vm)
+        {
+            _boundMainVm = vm;
+            if (vm.PresentationRequestsMainWindowMaximized)
+                WindowState = WindowState.Maximized;
+        }
 
         TryApplyHotkeys();
         TryOpenPfdHostWindowOnStartup();

@@ -6,8 +6,13 @@ using CascadeIDE.ViewModels;
 namespace CascadeIDE.Services;
 
 /// <summary>
-/// Жесты главного окна из merged <c>hotkeys.toml</c>: <see cref="Window.KeyBindings"/>, подсказки в меню,
-/// tunnel при фокусе в редакторе. Источник привязок id → VM — <see cref="IdeCommandRegistry"/>.
+/// Жесты главного окна из merged <c>hotkeys.toml</c>: подсказки в меню,
+/// tunnel <see cref="InputElement.KeyDownEvent"/> на главном окне (см. <see cref="TryHandleTunnelShortcuts"/>).
+/// Глобальные команды не дублируем через <see cref="Window.KeyBindings"/>: в Avalonia обработка KeyBinding идёт до
+/// <c>RaiseEvent</c> и при успехе ставит <see cref="RoutedEventArgs.Handled"/> — туннельный обработчик на окне
+/// с <c>handledEventsToo: false</c> тогда не вызывается, а строгий <see cref="KeyGesture.Matches"/> не совпадает
+/// с <see cref="KeyGestureChordMatching"/> (модификаторы, раскладка).
+/// Источник привязок id → VM — <see cref="IdeCommandRegistry"/>.
 /// </summary>
 public static class MainWindowHotkeyService
 {
@@ -15,50 +20,47 @@ public static class MainWindowHotkeyService
     public const string DebugStartOrContinueId = IdeCommandRegistry.DebugStartOrContinueHotkeyId;
 
     private static IReadOnlyDictionary<string, string>? _mergedMap;
+    private static readonly object HotkeyLogLock = new();
+
+    /// <summary>Сброс кэша merged TOML (только тесты: изоляция и подмена файлов в <see cref="AppContext.BaseDirectory"/>).</summary>
+    internal static void ClearMergedHotkeyMapCacheForTests() => _mergedMap = null;
+
+    /// <summary>
+    /// Только тесты: подменить merged map без диска (изоляция от <c>%LocalAppData%\CascadeIDE\hotkeys.toml</c>).
+    /// <see langword="null"/> — сброс, следующий <see cref="GetMergedMap"/> загрузит с диска.
+    /// </summary>
+    internal static void ReplaceMergedMapForTests(IReadOnlyDictionary<string, string>? map) => _mergedMap = map;
 
     public static IReadOnlyDictionary<string, string> GetMergedMap() =>
         _mergedMap ??= HotkeyTomlLoader.LoadMergedDictionary();
+
+    internal static void LogTunnelEvent(string source, KeyEventArgs e, MainWindowViewModel vm, string stage)
+    {
+        try
+        {
+            var dir = Path.Combine(AppContext.BaseDirectory, ".cascade-ide");
+            Directory.CreateDirectory(dir);
+            var path = Path.Combine(dir, "hotkey-log.txt");
+            var line =
+                $"[{DateTimeOffset.Now:O}] source={source} stage={stage} key={e.Key} physical={e.PhysicalKey} mods={e.KeyModifiers} handled={e.Handled} paletteOpen={vm.IsCommandPaletteOpen}{Environment.NewLine}";
+            lock (HotkeyLogLock)
+                File.AppendAllText(path, line);
+        }
+        catch
+        {
+            // Never break input processing because of debug logging.
+        }
+    }
 
     public static void ApplyAll(Window window, MainWindowViewModel vm)
     {
         var map = HotkeyTomlLoader.LoadMergedDictionary();
         _mergedMap = map;
-        ApplyWindowKeyBindings(window, vm, map);
+        ApplyWindowKeyBindings(window);
         ApplyMenuHotKeys(window, map);
     }
 
-    private static void ApplyWindowKeyBindings(
-        Window window,
-        MainWindowViewModel vm,
-        IReadOnlyDictionary<string, string> map)
-    {
-        window.KeyBindings.Clear();
-        foreach (var e in IdeCommandRegistry.AllEntries)
-        {
-            if (e.WindowHotkey is not { } wh)
-                continue;
-            if (!map.TryGetValue(e.EffectiveHotkeysTomlKey, out var s) || string.IsNullOrWhiteSpace(s))
-                continue;
-            var (cmd, param) = ResolveWindowCommand(vm, wh);
-            TryAddKeyBinding(window, s, cmd, param);
-        }
-    }
-
-    private static void TryAddKeyBinding(Window window, string gestureString, ICommand command, object? parameter)
-    {
-        try
-        {
-            var g = KeyGesture.Parse(gestureString.Trim());
-            var kb = new KeyBinding { Gesture = g, Command = command };
-            if (parameter is not null)
-                kb.CommandParameter = parameter;
-            window.KeyBindings.Add(kb);
-        }
-        catch
-        {
-            // неверная строка жеста в TOML — пропускаем
-        }
-    }
+    private static void ApplyWindowKeyBindings(Window window) => window.KeyBindings.Clear();
 
     private static (ICommand Command, object? Parameter) ResolveWindowCommand(MainWindowViewModel vm, IdeCommandRegistry.MainWindowHotkeyVmBinding b) =>
         b.Kind switch
@@ -84,6 +86,39 @@ public static class MainWindowHotkeyService
         SetMenuHotKey(window, "MenuCommandPalette", map, "toggle_command_palette");
     }
 
+    /// <summary>
+    /// Tunnel KeyDown для любого <see cref="Window"/> с тем же <see cref="MainWindowViewModel"/> (главное окно, PFD/MFD-хосты):
+    /// CascadeChord → Esc закрывает палитру (путь туннеля до фокуса в редакторе не проходит через <c>CommandPaletteView</c>) → жесты из TOML.
+    /// </summary>
+    public static bool TryHandleTunnelKeyDownForMainVm(KeyEventArgs e, MainWindowViewModel vm)
+    {
+        if (vm.TryConsumeCascadeChordKeyDown(e))
+        {
+            LogTunnelEvent("HotkeyService", e, vm, "cascade-consumed");
+            return true;
+        }
+
+        if (vm.IsCommandPaletteOpen
+            && e.Key == Key.Escape
+            && KeyGestureChordMatching.NormalizeChordModifiers(e.KeyModifiers) == KeyModifiers.None)
+        {
+            if (!vm.CloseCommandPaletteCommand.CanExecute(null))
+            {
+                LogTunnelEvent("HotkeyService", e, vm, "palette-esc-cannot-execute");
+                return false;
+            }
+            vm.CloseCommandPaletteCommand.Execute(null);
+            e.Handled = true;
+            LogTunnelEvent("HotkeyService", e, vm, "palette-esc-closed");
+            return true;
+        }
+
+        var handled = TryHandleTunnelShortcuts(e, vm);
+        if (!handled && (e.KeyModifiers != KeyModifiers.None || e.Key is Key.Escape or Key.F5 or Key.F10 or Key.F11))
+            LogTunnelEvent("HotkeyService", e, vm, "no-match");
+        return handled;
+    }
+
     private static void SetMenuHotKey(Window window, string controlName, IReadOnlyDictionary<string, string> map, string id)
     {
         if (window.FindControl<MenuItem>(controlName) is not { } item)
@@ -105,7 +140,7 @@ public static class MainWindowHotkeyService
     }
 
     /// <summary>
-    /// Дублирует <see cref="Window.KeyBindings"/> в tunnel: при фокусе в редакторе жесты до команд не всегда доходят.
+    /// Единственный путь выполнения глобальных хоткеев окна (TOML + <see cref="KeyGestureChordMatching"/>).
     /// </summary>
     /// <returns><see langword="true"/>, если событие обработано (выполнена команда).</returns>
     public static bool TryHandleTunnelShortcuts(KeyEventArgs e, MainWindowViewModel vm)
@@ -130,25 +165,31 @@ public static class MainWindowHotkeyService
                 continue;
             }
 
-            if (!g.Matches(e))
+            if (!KeyGestureChordMatching.Matches(g, e))
                 continue;
 
             if (tomlKey.Equals("toggle_command_palette", StringComparison.OrdinalIgnoreCase))
             {
-                if (vm.IsCommandPaletteOpen)
-                    return false;
                 if (!vm.ToggleCommandPaletteCommand.CanExecute(null))
+                {
+                    LogTunnelEvent("HotkeyService", e, vm, $"matched-{tomlKey}-cannot-execute");
                     return false;
+                }
                 vm.ToggleCommandPaletteCommand.Execute(null);
                 e.Handled = true;
+                LogTunnelEvent("HotkeyService", e, vm, $"matched-{tomlKey}");
                 return true;
             }
 
             var (cmd, param) = ResolveWindowCommand(vm, wh);
             if (!cmd.CanExecute(param))
+            {
+                LogTunnelEvent("HotkeyService", e, vm, $"matched-{tomlKey}-cannot-execute");
                 return false;
+            }
             cmd.Execute(param);
             e.Handled = true;
+            LogTunnelEvent("HotkeyService", e, vm, $"matched-{tomlKey}");
             return true;
         }
 
