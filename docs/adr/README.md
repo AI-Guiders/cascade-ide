@@ -81,6 +81,7 @@
 | [0069](0069-markdown-preview-tool-surface-and-renderer-decoupling.md) | **Markdown Preview:** MFD tool как primary surface, native Markdig renderer first, WebView как optional adaptor; authoring-расширение ортогонально preview | Accepted |
 | [0070](0070-command-palette-direct-overlay-surface.md) | **Command Palette:** прямой overlay surface в host, маршрутизация в активный `TopLevel`; `ModalOverlay` не канон для palette baseline | Accepted |
 | [0071](0071-ai-assistance-sovereignty-locality-invisibility.md) | **AI / ассистент в IDE:** суверенитет, локальность, невидимость; анти-паттерн «облачный inline по умолчанию без контроля»; нарратив — [cascadeide-philosophy-v1](../design/cascadeide-philosophy-v1.md) | Proposed |
+| [0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md) | **Чат:** topic cards, drill-in/back, adaptive default; intent-based Melody/Chords v1 для навигации по темам; уточняет [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md) в chat-domain | Proposed |
 
 ## Соглашения
 
