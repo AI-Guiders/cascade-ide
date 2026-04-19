@@ -79,6 +79,8 @@
 | [0067](0067-graph-backed-surfaces-contract.md) | **Graph-backed surfaces:** общий контракт для семейства графовых экранов (данные, взаимодействие, навигация, layout, выделение, sync); Semantic Map, GitMap, будущие графы | Accepted |
 | [0068](0068-deck-row-payload-and-presentation-projection.md) | **Полезная нагрузка строки канала** vs **проекция представления** vs **слот**: таблица/полоса ≠ тип ячейки; v1 — один DTO; гетерогенность — дискриминатор и шаблоны | Accepted |
 | [0069](0069-markdown-preview-tool-surface-and-renderer-decoupling.md) | **Markdown Preview:** MFD tool как primary surface, native Markdig renderer first, WebView как optional adaptor; authoring-расширение ортогонально preview | Accepted |
+| [0070](0070-command-palette-direct-overlay-surface.md) | **Command Palette:** прямой overlay surface в host, маршрутизация в активный `TopLevel`; `ModalOverlay` не канон для palette baseline | Accepted |
+| [0071](0071-ai-assistance-sovereignty-locality-invisibility.md) | **AI / ассистент в IDE:** суверенитет, локальность, невидимость; анти-паттерн «облачный inline по умолчанию без контроля»; нарратив — [cascadeide-philosophy-v1](../design/cascadeide-philosophy-v1.md) | Proposed |
 
 ## Соглашения
 
