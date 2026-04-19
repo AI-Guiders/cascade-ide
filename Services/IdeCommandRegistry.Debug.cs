@@ -51,5 +51,7 @@ public static partial class IdeCommandRegistry
             CommandAccessibleFrom.AgentAndUI,
             new MainWindowHotkeyVmBinding(MainWindowHotkeyVmBindingKind.DebugStop));
         AddPalette(b, "debug_ping", IdeCommands.DebugPing, "Отладка: ping", "Отладка", null, ImmutableArray.Create(UiModeFamily.Debug));
+        AddPalette(b, "debug_launch", IdeCommands.DebugLaunch, "Отладка: запуск", "Отладка", null, ImmutableArray.Create(UiModeFamily.Debug));
+        AddPalette(b, "debug_attach", IdeCommands.DebugAttach, "Отладка: attach к процессу", "Отладка", null, ImmutableArray.Create(UiModeFamily.Debug));
     }
 }

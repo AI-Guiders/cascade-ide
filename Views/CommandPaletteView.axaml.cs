@@ -137,6 +137,8 @@ public partial class CommandPaletteView : UserControl
         if (SearchBox is not { } searchBox)
             return;
 
+        // Иначе IME/ввод может «съедать» Ctrl+Shift+буква до routed KeyDown (см. hotkey-log: только модификаторы).
+        InputMethod.SetIsInputMethodEnabled(searchBox, false);
         searchBox.Focus();
         searchBox.SelectAll();
     }

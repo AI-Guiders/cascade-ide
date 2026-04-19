@@ -18,13 +18,16 @@ public sealed class IdeCommandPaletteRowViewModel : ViewModelBase
     public IdeCommandPaletteRowViewModel(
         IdeCommandPaletteCatalog.Entry entry,
         string? hotkeyHint,
-        UiModeFamily currentFamily)
+        UiModeFamily currentFamily,
+        string? melodyAliasTail = null)
     {
         RowKind = IdeCommandPaletteRowKind.Command;
         PaletteId = entry.PaletteId;
         CommandId = entry.CommandId;
         Title = entry.Title;
-        Category = entry.Category;
+        Category = string.IsNullOrEmpty(melodyAliasTail)
+            ? entry.Category
+            : $"c:{melodyAliasTail} · {entry.Category}";
         ArgsJson = entry.ArgsJson;
         HotkeyHint = hotkeyHint;
         IsAvailable = IdeCommandPaletteMatch.IsEntryAvailable(entry, currentFamily);
@@ -102,13 +105,13 @@ public partial class MainWindowViewModel
     private long _commandPaletteGoToSeq;
 
     [ObservableProperty]
-    private bool _isCommandPaletteOpen;
+    public partial bool IsCommandPaletteOpen { get; set; }
 
     [ObservableProperty]
-    private string _commandPaletteQuery = "";
+    public partial string CommandPaletteQuery { get; set; } = "";
 
     [ObservableProperty]
-    private int _commandPaletteSelectedIndex = -1;
+    public partial int CommandPaletteSelectedIndex { get; set; } = -1;
 
     /// <summary>Подсказка внизу палитры; жест «выделить запрос» из <c>hotkeys.toml</c> (<c>toggle_command_palette</c>).</summary>
     public string CommandPaletteFooterHint
@@ -116,7 +119,7 @@ public partial class MainWindowViewModel
         get
         {
             var h = HotkeyGestureMap.GetDisplayHint("toggle_command_palette");
-            var nav = "f: файл · t: тип · m: член · x: текст (как в VS Go to All)";
+            var nav = "f: файл · t: тип · m: член · x: текст · c: melody (gs, br, …)";
             return !string.IsNullOrEmpty(h)
                 ? $"↑↓ выбор · Enter выполнить · Esc закрыть · PgUp/PgDn страница · {h} выделить запрос · {nav}"
                 : $"↑↓ выбор · Enter выполнить · Esc закрыть · PgUp/PgDn страница · {nav}";
@@ -125,11 +128,7 @@ public partial class MainWindowViewModel
 
     public ObservableCollection<IdeCommandPaletteRowViewModel> FilteredCommandPaletteEntries { get; } = new();
 
-    partial void OnCommandPaletteQueryChanged(string value)
-    {
-        RefreshCommandPaletteFilter();
-        CommandPaletteSelectedIndex = FilteredCommandPaletteEntries.Count > 0 ? 0 : -1;
-    }
+    partial void OnCommandPaletteQueryChanged(string value) => RefreshCommandPaletteFilter();
 
     partial void OnIsCommandPaletteOpenChanged(bool value)
     {
@@ -210,6 +209,14 @@ public partial class MainWindowViewModel
     private void RefreshCommandPaletteFilter()
     {
         var raw = CommandPaletteQuery;
+        if (IntentMelodyAliases.TryGetTail(raw, out var melodyTail))
+        {
+            _commandPaletteGoToCts?.Cancel();
+            _commandPaletteGoToCts = null;
+            RefreshMelodyPaletteFilter(melodyTail);
+            return;
+        }
+
         if (GoToAllQueryParser.TryParse(raw) is { } goTo)
         {
             RefreshGoToPaletteFilter(goTo);
@@ -228,8 +235,23 @@ public partial class MainWindowViewModel
         foreach (var e in ranked)
             FilteredCommandPaletteEntries.Add(new IdeCommandPaletteRowViewModel(e, hotkeys.GetDisplayHint(e.CommandId), family));
 
-        if (CommandPaletteSelectedIndex >= FilteredCommandPaletteEntries.Count)
-            CommandPaletteSelectedIndex = Math.Max(0, FilteredCommandPaletteEntries.Count - 1);
+        CommandPaletteSelectedIndex = FilteredCommandPaletteEntries.Count > 0 ? 0 : -1;
+    }
+
+    /// <summary>Режим <c>c:</c> (Command Melody) — см. <see cref="IntentMelodyAliases"/>, <see cref="MelodyInterpreter"/>.</summary>
+    private void RefreshMelodyPaletteFilter(string tailNormalized)
+    {
+        FilteredCommandPaletteEntries.Clear();
+        var hotkeys = HotkeyGestureMap;
+        var family = UiModeFamily;
+        var plan = MelodyInterpreter.BuildPalette(tailNormalized);
+        foreach (var line in plan.Lines)
+        {
+            if (line.ToCommandPaletteRow(hotkeys, family) is { } row)
+                FilteredCommandPaletteEntries.Add(row);
+        }
+
+        CommandPaletteSelectedIndex = plan.SelectedIndex;
     }
 
     private void RefreshGoToPaletteFilter(GoToAllQuery q)
