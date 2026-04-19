@@ -161,7 +161,7 @@
 
 ### 11. Command Melody (`c:`) — палитра, mnemonic alias и мост к аккорду
 
-**Происхождение:** спецификация melody (`c:`) сформулирована в **линии Comet** (внешний диалог); здесь — норматив продукта. Указатель в личном каноне KB (agent-notes) — `knowledge/personal/comet-command-melody-cascade-palette-2026-04-19.md`.
+**Происхождение:** спецификация melody (`c:`) сформулирована в **линии Comet** (внешний диалог); здесь — норматив продукта. Указатель в личном каноне KB (agent-notes) — `knowledge/personal/assistantLines/comet/comet-command-melody-cascade-palette-2026-04-19.md`.
 
 **Назначение.** Префикс **`c:`** вводит в **command palette** ([0013](0013-command-surface-and-discoverability.md), [0070](0070-command-palette-direct-overlay-surface.md)) специальный режим **melody**: короткие **mnemonic alias** в developer-first словаре. Пользователь может ввести компактную форму вроде `c: gs`, `c: gc`, `c: gm` и сразу получить нужную команду, не полагаясь только на fuzzy search по длинному заголовку.
 
