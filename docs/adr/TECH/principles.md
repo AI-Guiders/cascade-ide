@@ -42,7 +42,10 @@
 |------|-------------------|
 | Внешний агент по ACP; ортогонально MCP IDE | [0016](../0016-agent-client-protocol-external-agent.md) |
 | Чат через Cursor ACP: `mcpServers`, паритет с IDE MCP | [0048](../0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) |
+| ACP в GUI: MCP IDE в том же процессе (loopback), не второй `CascadeIDE` | [0082](../0082-acp-ide-mcp-loopback-single-process.md) |
 | Фасад агента: провайдеры, оркестрация тулов | [0038](../0038-agent-facade-ai-provider-and-tool-orchestration.md) |
+| `settings.toml` — `[ai].mode` и вложенные секции (local / acp / mcp_only / cloud) | [0083](../0083-ai-mode-and-nested-settings-toml.md) |
+| Правки агента: источник правды — буфер редактора; чат — намерение; присутствие отдельно | [0084](../0084-agent-edits-editor-source-of-truth-presence-channel.md) |
 | Видимость рассуждения (слои ответа/трассы/лога), честные лимиты провайдеров | [0020](../0020-agent-reasoning-visibility-and-provider-limits.md) |
 | Навигация workspace; MCP `get_code_navigation_context`, пресеты, subgraph | [0039](../0039-workspace-navigation-affordances.md) |
 | Агент ↔ Roslyn MCP: ключи в `settings.toml` | [0058](../0058-agent-roslyn-mcp-coupling-settings-toml.md) |

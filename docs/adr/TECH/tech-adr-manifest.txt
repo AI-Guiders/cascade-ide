@@ -13,8 +13,11 @@
 0011-debug-situational-awareness.md
 0016-agent-client-protocol-external-agent.md
 0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md
+0082-acp-ide-mcp-loopback-single-process.md
 0019-shared-git-core-ide-and-git-mcp.md
 0038-agent-facade-ai-provider-and-tool-orchestration.md
+0083-ai-mode-and-nested-settings-toml.md
+0084-agent-edits-editor-source-of-truth-presence-channel.md
 0020-agent-reasoning-visibility-and-provider-limits.md
 0039-workspace-navigation-affordances.md
 0040-lsp-launch-line-settings-toml-presets-and-environment.md

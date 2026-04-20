@@ -37,6 +37,7 @@
 |------|-------------------|
 | Аккордный слой, FMS-style, S/T; расширение поверхности команд | [0060](../0060-keyboard-chord-stack-fms-tactical-strategic.md) |
 | Чат: topic cards, drill-in; Melody/Chords в **chat-domain** | [0072](../0072-chat-topic-cards-intent-melody-keyboard-contract.md) |
+| Агент: текст правок в редакторе; чат не основной дифф; присутствие (курсор, «пишет») | [0084](../0084-agent-edits-editor-source-of-truth-presence-channel.md) |
 | IML как язык намерений — вне ADR | [../../intent-melody-language-v1.md](../../intent-melody-language-v1.md) |
 
 ---

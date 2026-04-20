@@ -19,6 +19,8 @@
 | **Cockpit UI** vs presentation IDE (хром, тема) | [0066](../0066-cockpit-ui-vs-ide-presentation-layer.md) |
 | Полезная нагрузка строки vs **проекция представления** (таблица/список ≠ смена payload) | [0068](../0068-deck-row-payload-and-presentation-projection.md) |
 | Палитра, **Command Melody (`c:`)**, аккорды — keyboard-first | [0060](../0060-keyboard-chord-stack-fms-tactical-strategic.md) |
+| Параметрические мелодии (**диапазон строк** редактора после alias) | [0081](../0081-parametric-intent-melodies-editor-line-ranges.md) |
+| **Агент и редактор:** текст правок в буфере; чат — намерение; присутствие (курсор, «пишет») | [0084](../0084-agent-edits-editor-source-of-truth-presence-channel.md) |
 | Чат: topic navigation, Melody/Chords **в chat-domain** | [0072](../0072-chat-topic-cards-intent-melody-keyboard-contract.md) |
 | **Настройки:** компактность, якорь MFD, нехватка места | [0074](../0074-settings-ui-mfd-compact-layout-overflow.md) |
 | **Тема «UI-ADR»:** указатель + соглашения по MFD-страницам | [0075](../0075-ui-topic-index-and-mfd-page-conventions.md) |

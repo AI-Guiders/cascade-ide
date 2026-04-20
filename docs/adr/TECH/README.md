@@ -24,8 +24,11 @@
 | Debug UI отдельно от Power; гипотезы JSON; ситуационная осведомлённость | [0003](../0003-debug-ui-mode-separate-from-power.md), [0001](../0001-debug-hypotheses-json-storage.md), [0011](../0011-debug-situational-awareness.md) |
 | Внешний агент ACP (stdio, Cursor CLI) | [0016](../0016-agent-client-protocol-external-agent.md) |
 | Чат Cursor ACP в IDE: `mcpServers`, паритет тулов | [0048](../0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) |
+| ACP: MCP IDE **в том же процессе** (loopback), не второй `CascadeIDE` | [0082](../0082-acp-ide-mcp-loopback-single-process.md) |
 | Общий Git Core: IDE и git-mcp | [0019](../0019-shared-git-core-ide-and-git-mcp.md) |
 | Фасад агента: провайдеры, чат, ACP, MCP | [0038](../0038-agent-facade-ai-provider-and-tool-orchestration.md) |
+| **`[ai]` в settings.toml:** `mode` + вложенные секции (local / acp / mcp_only / cloud) | [0083](../0083-ai-mode-and-nested-settings-toml.md) |
+| Правки агента в редакторе как источник правды; присутствие отдельно; чат — не основной дифф | [0084](../0084-agent-edits-editor-source-of-truth-presence-channel.md) |
 | Видимость рассуждения агента, лимиты провайдеров | [0020](../0020-agent-reasoning-visibility-and-provider-limits.md) |
 | Навигация по workspace; MCP `get_code_navigation_context` | [0039](../0039-workspace-navigation-affordances.md) |
 | LSP: пресеты и командная строка в `settings.toml` | [0040](../0040-lsp-launch-line-settings-toml-presets-and-environment.md) |

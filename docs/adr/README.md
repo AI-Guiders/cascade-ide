@@ -93,6 +93,7 @@
 | [0081](0081-parametric-intent-melodies-editor-line-ranges.md) | **Параметрические Intent Melody:** суффикс `:startLine:endLine` для операций над текстом редактора; валидация; рефакторинги по диапазону; UX (индикатор, chord vs палитра) | Proposed |
 | [0082](0082-acp-ide-mcp-loopback-single-process.md) | **ACP + IDE MCP:** одна копия процесса — loopback HTTP/SSE вместо второго `CascadeIDE --mcp-stdio`; безопасность localhost; stdio для внешнего хоста сохранить | Proposed |
 | [0083](0083-ai-mode-and-nested-settings-toml.md) | **`[ai]` в settings.toml:** `mode` = local \| acp \| mcp_only \| cloud; вложенные секции; без обратной совместимости со старым `provider` | Accepted · Implemented |
+| [0084](0084-agent-edits-editor-source-of-truth-presence-channel.md) | **Правки агента:** единственный текст в редакторе; чат — намерение/статус; слой присутствия (курсор, «пишет»); дифф в чате не основной; без обязательного CRDT | Proposed |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 
