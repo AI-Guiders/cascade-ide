@@ -9,6 +9,7 @@ public static partial class IdeCommandRegistry
     {
         // ——— Git
         AddPalette(b, "git_status", IdeCommands.GitStatus, "Git: статус", "Git");
+        AddPalette(b, "git_preflight", IdeCommands.GitPreflight, "Git: preflight", "Git");
         AddPalette(b, "git_commit", IdeCommands.GitCommit, "Git: commit", "Git");
         AddPalette(b, "git_push", IdeCommands.GitPush, "Git: push", "Git");
         AddPalette(b, "git_submodule", IdeCommands.GitSubmodule, "Git: submodule", "Git");

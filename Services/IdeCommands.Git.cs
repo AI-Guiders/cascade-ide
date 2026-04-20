@@ -19,6 +19,8 @@ public static partial class IdeCommands
     public const string GitShow = "git_show";
     /// <summary>Git submodule в каталоге решения/workspace. args: action?:string, path?:string, recursive?:boolean; returns: json; example: {"action":"status"}.</summary>
     public const string GitSubmodule = "git_submodule";
+    /// <summary>Git preflight в каталоге решения/workspace. args: staged?:boolean, include_patches?:boolean; returns: json; example: {"staged":false,"include_patches":true}.</summary>
+    public const string GitPreflight = "git_preflight";
     /// <summary>Git commit в каталоге решения/workspace. args: message:string, paths?:string[]; returns: text; example: {"message":"chore: update","paths":["a.txt"]}.</summary>
     public const string GitCommit = "git_commit";
     /// <summary>Git push в каталоге решения/workspace. args: remote?:string, branch?:string, dry_run?:boolean; returns: text; example: {"remote":"origin","branch":"main","dry_run":true}.</summary>

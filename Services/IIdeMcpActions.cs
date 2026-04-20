@@ -73,6 +73,8 @@ public interface IIdeMcpActions
     Task<string> GitShowAsync(string rev, string? path = null, bool statOnly = false);
     /// <summary>Git submodule: status | update. JSON.</summary>
     Task<string> GitSubmoduleAsync(string? action = null, string? path = null, bool recursive = true);
+    /// <summary>Git preflight: классификация изменений на semantic/whitespace/eol/bom. JSON.</summary>
+    Task<string> GitPreflightAsync(bool staged = false, bool includePatches = true);
     /// <summary>Текущий текст панели «Вывод сборки» и цвета её оформления (background, foreground). JSON. Чтобы агент видел содержимое панели.</summary>
     string GetBuildOutput();
     void SetBreakpoint(string filePath, int line, string? condition = null);

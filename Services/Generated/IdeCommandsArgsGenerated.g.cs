@@ -37,6 +37,7 @@ internal static class IdeCommandsArgsGenerated
         ["git_diff"] = new IdeCommandsArgs.Arg[] { new("path", "string", false, false, null), new("staged", "boolean", false, false, null) },
         ["git_fetch"] = new IdeCommandsArgs.Arg[] { new("remote", "string", false, false, null), new("all", "boolean", false, false, null), new("prune", "boolean", false, false, null), new("dry_run", "boolean", false, false, null) },
         ["git_log"] = new IdeCommandsArgs.Arg[] { new("n", "integer", false, false, null) },
+        ["git_preflight"] = new IdeCommandsArgs.Arg[] { new("staged", "boolean", false, false, null), new("include_patches", "boolean", false, false, null) },
         ["git_pull"] = new IdeCommandsArgs.Arg[] { new("remote", "string", false, false, null), new("branch", "string", false, false, null), new("ff_only", "boolean", false, false, null), new("dry_run", "boolean", false, false, null) },
         ["git_push"] = new IdeCommandsArgs.Arg[] { new("remote", "string", false, false, null), new("branch", "string", false, false, null), new("dry_run", "boolean", false, false, null) },
         ["git_show"] = new IdeCommandsArgs.Arg[] { new("rev", "string", true, false, null), new("path", "string", false, false, null), new("stat_only", "boolean", false, false, null) },

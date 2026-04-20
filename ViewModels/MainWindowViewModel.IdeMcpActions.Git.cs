@@ -78,6 +78,53 @@ public partial class MainWindowViewModel
         }
     }
 
+    async Task<string> Services.IIdeMcpActions.GitPreflightAsync(bool staged, bool includePatches)
+    {
+        var changedOutput = await RunGitCommandAsync(GitCommandBuilder.DiffNameOnly(staged)).ConfigureAwait(false);
+        if (!changedOutput.Success)
+            return JsonSerializer.Serialize(new { success = false, exit_code = changedOutput.ExitCode, output = TruncateOutput(changedOutput.Output, 4000) });
+
+        var ignoreCrOutput = await RunGitCommandAsync(GitCommandBuilder.DiffNameOnly(staged, ignoreCrAtEol: true)).ConfigureAwait(false);
+        if (!ignoreCrOutput.Success)
+            return JsonSerializer.Serialize(new { success = false, exit_code = ignoreCrOutput.ExitCode, output = TruncateOutput(ignoreCrOutput.Output, 4000) });
+
+        var ignoreWsOutput = await RunGitCommandAsync(GitCommandBuilder.DiffNameOnly(staged, ignoreWhitespace: true, ignoreCrAtEol: true)).ConfigureAwait(false);
+        if (!ignoreWsOutput.Success)
+            return JsonSerializer.Serialize(new { success = false, exit_code = ignoreWsOutput.ExitCode, output = TruncateOutput(ignoreWsOutput.Output, 4000) });
+
+        var changed = GitPreflight.ParseNameOnlyOutput(changedOutput.Output);
+        var ignoreCr = GitPreflight.ParseNameOnlyOutput(ignoreCrOutput.Output);
+        var ignoreWs = GitPreflight.ParseNameOnlyOutput(ignoreWsOutput.Output);
+
+        Dictionary<string, string>? patches = null;
+        if (includePatches && changed.Count > 0)
+        {
+            patches = new Dictionary<string, string>(StringComparer.Ordinal);
+            foreach (var file in changed)
+            {
+                var patchArgs = GitCommandBuilder.DiffPatchForPath(staged, file);
+                if (!patchArgs.IsSuccess)
+                    continue;
+                var patchResult = await RunGitCommandAsync(patchArgs.Args!).ConfigureAwait(false);
+                if (patchResult.Success)
+                    patches[file] = patchResult.Output;
+            }
+        }
+
+        var report = GitPreflight.BuildReport(changed, ignoreCr, ignoreWs, patches);
+        return JsonSerializer.Serialize(new
+        {
+            success = true,
+            staged,
+            changed_files = report.ChangedFiles,
+            semantic_files = report.SemanticFiles,
+            whitespace_only_files = report.WhitespaceOnlyFiles,
+            eol_only_files = report.EolOnlyFiles,
+            bom_only_files = report.BomOnlyFiles,
+            suggested_safe_fix_commands = report.SuggestedSafeFixCommands
+        });
+    }
+
     async Task<string> Services.IIdeMcpActions.GitCommitAsync(string message, IReadOnlyList<string>? paths)
     {
         if (string.IsNullOrWhiteSpace(message))

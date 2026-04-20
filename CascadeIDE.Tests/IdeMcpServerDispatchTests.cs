@@ -134,6 +134,7 @@ public sealed class IdeMcpServerDispatchTests
         public Task<string> GitBranchAsync(string? action = null, string? name = null, string? startPoint = null, bool force = false) => throw new NotImplementedException();
         public Task<string> GitShowAsync(string rev, string? path = null, bool statOnly = false) => throw new NotImplementedException();
         public Task<string> GitSubmoduleAsync(string? action = null, string? path = null, bool recursive = true) => throw new NotImplementedException();
+        public Task<string> GitPreflightAsync(bool staged = false, bool includePatches = true) => throw new NotImplementedException();
         public string GetBuildOutput() => throw new NotImplementedException();
         public void SetBreakpoint(string filePath, int line, string? condition = null) => throw new NotImplementedException();
         public void RemoveBreakpoint(string filePath, int line) => throw new NotImplementedException();

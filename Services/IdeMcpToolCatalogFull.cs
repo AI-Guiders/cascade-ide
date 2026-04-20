@@ -436,6 +436,21 @@ internal static class IdeMcpToolCatalogFull
             },
             new()
             {
+                Name = "ide_git_preflight",
+                Description = "Git preflight в workspace: классификация изменений на semantic/whitespace-only/eol-only/bom-only + safe fix suggestions. JSON.",
+                InputSchema = Schema(new
+                {
+                    type = "object",
+                    properties = new
+                    {
+                        staged = new { type = "boolean", description = "true — анализ staged изменений." },
+                        include_patches = new { type = "boolean", description = "true (по умолчанию) — BOM-only эвристика по патчам." }
+                    },
+                    required = Array.Empty<string>()
+                })
+            },
+            new()
+            {
                 Name = "ide_focus_editor",
                 Description = "Передать фокус в редактор.",
                 InputSchema = Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
