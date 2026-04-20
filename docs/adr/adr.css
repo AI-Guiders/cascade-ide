@@ -1,0 +1,50 @@
+/* Pandoc standalone HTML для сборки ADR (build-adr.csx) */
+:root {
+  --text: #1a1a1a;
+  --muted: #555;
+  --border: #ccc;
+  --accent: #0b57d0;
+}
+
+html {
+  font-family: "Segoe UI", "Helvetica Neue", system-ui, sans-serif;
+  font-size: 11pt;
+  line-height: 1.5;
+  color: var(--text);
+  max-width: 210mm;
+  margin: 0 auto;
+  padding: 1rem 1.25rem 2rem;
+}
+
+header#title-block-header {
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid var(--border);
+}
+
+#TOC {
+  background: #f8f9fa;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  margin: 1rem 0 1.5rem;
+  font-size: 0.95rem;
+}
+#TOC ul { padding-left: 1.25rem; }
+#TOC a { color: var(--accent); text-decoration: none; }
+#TOC a:hover { text-decoration: underline; }
+
+h1, h2, h3 { font-weight: 600; margin-top: 1.25em; }
+h1 { font-size: 1.35rem; }
+h2 { font-size: 1.15rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.25rem; }
+h3 { font-size: 1.05rem; }
+
+table { border-collapse: collapse; width: 100%; margin: 0.75rem 0; font-size: 0.92rem; }
+th, td { border: 1px solid var(--border); padding: 0.35rem 0.5rem; text-align: left; }
+th { background: #f0f0f0; }
+
+code { font-family: Consolas, "Segoe UI Mono", monospace; font-size: 0.9em; background: #f4f4f4; padding: 0.1em 0.35em; border-radius: 3px; }
+pre code { background: transparent; padding: 0; }
+pre { background: #f6f8fa; border: 1px solid #e1e4e8; border-radius: 6px; padding: 0.75rem; overflow-x: auto; }
+
+hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }

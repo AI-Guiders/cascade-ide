@@ -1,0 +1,4 @@
+# Сборка ADR (dotnet script build-adr.csx): артефакты не в git
+/build/*
+!/build/README.md
+/out/

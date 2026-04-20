@@ -1,0 +1,24 @@
+# Порядок тематической сборки TECH-ADR: сначала центр принципов, затем исходные ADR по темам.
+# Пути относительно docs/adr/
+
+0077-tech-principles-hub.md
+0006-presentation-layers-and-feature-slices.md
+0007-signals-coupling-and-ui-backpressure.md
+0004-ui-thread-marshaling.md
+0008-mcp-contracts-and-testable-infrastructure.md
+0009-strangler-migration-and-exceptions.md
+0002-debug-human-agent-parity.md
+0003-debug-ui-mode-separate-from-power.md
+0001-debug-hypotheses-json-storage.md
+0011-debug-situational-awareness.md
+0016-agent-client-protocol-external-agent.md
+0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md
+0019-shared-git-core-ide-and-git-mcp.md
+0038-agent-facade-ai-provider-and-tool-orchestration.md
+0020-agent-reasoning-visibility-and-provider-limits.md
+0039-workspace-navigation-affordances.md
+0040-lsp-launch-line-settings-toml-presets-and-environment.md
+0058-agent-roslyn-mcp-coupling-settings-toml.md
+0059-roslyn-mcp-profiles-manager-tactical-strategic-efb.md
+0043-mcp-transport-recovery-human-agent-parity.md
+0052-agent-contract-cli-and-snapshot-tests.md

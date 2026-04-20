@@ -1,0 +1,17 @@
+# Порядок тематической сборки UI-ADR: сначала центр принципов, затем исходные ADR по темам.
+# Пути относительно docs/adr/
+
+0076-ui-ux-principles-hub.md
+0021-pfd-mfd-cockpit-attention-model.md
+0066-cockpit-ui-vs-ide-presentation-layer.md
+0068-deck-row-payload-and-presentation-projection.md
+0063-instrument-deck-named-composition-one-anchor.md
+0064-deck-primitives-visual-language-render-layer-and-palette.md
+0013-command-surface-and-discoverability.md
+0030-command-ids-hotkeys-and-ui-registry-layers.md
+0060-keyboard-chord-stack-fms-tactical-strategic.md
+0072-chat-topic-cards-intent-melody-keyboard-contract.md
+0069-markdown-preview-tool-surface-and-renderer-decoupling.md
+0026-markdown-preview-surfaces-and-placement.md
+0074-settings-ui-mfd-compact-layout-overflow.md
+0075-ui-topic-index-and-mfd-page-conventions.md

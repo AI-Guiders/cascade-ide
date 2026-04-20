@@ -84,20 +84,23 @@
 | [0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md) | **Чат:** topic cards, drill-in/back, adaptive default; intent-based Melody/Chords v1 для навигации по темам; уточняет [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md) в chat-domain | Proposed |
 | [0073](0073-pfd-instrument-deck.md) | **PFD instrument deck:** каталог вариантов состава (SA, code metrics, Semantic Map, ADR indicator…); критерии «PFD vs по запросу»; живой черновик до выбора пресета | Proposed |
 | [0074](0074-settings-ui-mfd-compact-layout-overflow.md) | **Настройки:** компактнее, якорь на **MFD**; нехватка места в **P+F+M** — таблица стратегий (scroll, min width, fallback-окно, …) | Proposed |
+| [0075](0075-ui-topic-index-and-mfd-page-conventions.md) | **UI:** тематический указатель [`UI/README.md`](UI/README.md); соглашения по страницам MFD (payload vs проекция, keyboard-first); не заменяет плоский индекс | Proposed |
+| [0076](0076-ui-ux-principles-hub.md) | **UI/UX:** центр принципов — связный текст из [`snippets/ui/`](snippets/ui/README.md) (внимание/кокпит, философия продукта); не заменяет исходные ADR | Proposed |
+| [0077](0077-tech-principles-hub.md) | **TECH:** центр принципов — связный текст из [`snippets/tech/`](snippets/tech/README.md) (границы/контракты, агент/отладка/наблюдаемость); не заменяет исходные ADR | Proposed |
+
+## Сборка в один документ (HTML, TXT, PDF)
+
+Склейка нумерованных ADR и те же директивы **INCLUDE** / **INCLUDE_MANIFEST** / **INCLUDE_GLOB**, что в `resume/` (без DOCX). Запуск из этого каталога: `dotnet script build-adr.csx`. Зависимости и выходные пути — в [build/README.md](build/README.md).
 
 ## Соглашения
 
 - **Имя файла:** `NNNN-краткий-kebab-title.md`, четыре цифры с ведущими нулями.
 - **Статусы:** в шапке ADR и в колонке «Статус» — см. [status-lifecycle.md](status-lifecycle.md). Кратко: первый тег (**Proposed** / **Accepted** / **Superseded** / **Deprecated**); для **внедрённого в код** решения — **`Accepted · Implemented`** (второй тег через **` · `**). Без подпапок по статусу — один `docs/adr/`.
+- **Тематические подпапки** (не по статусу): опционально указатель по теме — [0075](0075-ui-topic-index-and-mfd-page-conventions.md) и [`UI/README.md`](UI/README.md); **TECH** — [`TECH/README.md`](TECH/README.md) и [0077](0077-tech-principles-hub.md).
 - Новый ADR добавляет строку в таблицу выше и при необходимости строку в таблицу в [architecture-policy.md](../architecture-policy.md).
 
 <a id="adr-anchors-policy"></a>
 
 ### Внутренние якоря и отсылки (чтобы «см. п. N» работали как ссылки)
 
-- **Не полагаться** только на голый текст «см. п. 6 выше» — в GitHub, IDE и превью Markdown переход по **[см. п. 6](#adrNNNN-p6)** должен существовать.
-- **Идентификаторы:** для нумерованных пунктов в разделе **«Решение»** — `adrNNNN-pK`, где `NNNN` — номер ADR, `K` — номер пункта (например `adr0017-p6`). Для подпунктов при необходимости: `adr0017-p6-confirmations`.
-- **Разметка:** отдельная строка **перед** началом пункта: `<a id="adr0017-p6"></a>` (HTML допустим в CommonMark; работает в GitHub и большинстве превью). Альтернатива — заголовок `### 6. …` с явным id, если рендер поддерживает атрибуты заголовка.
-- **Кросс-ADR:** `[0017 п. 6](0017-multi-window-workspace-and-agent-surfaces.md#adr0017-p6)` — полный путь к файлу и фрагменту.
-- **Стабильность:** при вставке нового пункта выше нумерация сдвигается — **предпочтительно** дублировать смысл в якоре по смыслу (`-confirmations`), а не только по номеру; номер в тексте обновлять вместе с пунктом.
-- Детали превью и hover — [0026](0026-markdown-preview-surfaces-and-placement.md) (подраздел «Внутренние отсылки»).
+Канон текста — [snippets/adr-anchors-policy.md](snippets/adr-anchors-policy.md) (в сборке `build-adr.csx` можно подключать через `{{ INCLUDE: snippets/adr-anchors-policy.md }}` из `adr-book.md`).
