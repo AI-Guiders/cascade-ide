@@ -27,9 +27,19 @@ public sealed class IdeCommandPaletteRowViewModel : ViewModelBase
         RowKind = IdeCommandPaletteRowKind.Command;
         PaletteId = entry.PaletteId;
         CommandId = entry.CommandId;
-        Title = entry.Title;
         Category = entry.Category;
-        Subtitle = BuildCommandPaletteSubtitle(entry.CommandId, melodyAliasTail, entry.Category);
+        if (!string.IsNullOrEmpty(melodyAliasTail))
+        {
+            // Режим c: — акцент на мелодии (первая строка), не на command_id.
+            Title = $"c:{melodyAliasTail}";
+            Subtitle = BuildMelodyPaletteSecondaryLine(entry.Title, entry.CommandId, entry.Category);
+        }
+        else
+        {
+            Title = entry.Title;
+            Subtitle = BuildCommandPaletteSubtitle(entry.CommandId, entry.Category);
+        }
+        IsMelodyAccentRow = !string.IsNullOrEmpty(melodyAliasTail);
         ArgsJson = entry.ArgsJson;
         HotkeyHint = hotkeyHint;
         IsAvailable = IdeCommandPaletteMatch.IsEntryAvailable(entry, currentFamily);
@@ -58,6 +68,7 @@ public sealed class IdeCommandPaletteRowViewModel : ViewModelBase
         NavigateColumn = column;
         IsAvailable = true;
         UnavailableHint = null;
+        IsMelodyAccentRow = false;
     }
 
     public IdeCommandPaletteRowViewModel(string title, string category)
@@ -72,6 +83,7 @@ public sealed class IdeCommandPaletteRowViewModel : ViewModelBase
         HotkeyHint = null;
         IsAvailable = false;
         UnavailableHint = null;
+        IsMelodyAccentRow = false;
     }
 
     /// <summary>
@@ -86,25 +98,32 @@ public sealed class IdeCommandPaletteRowViewModel : ViewModelBase
         RowKind = IdeCommandPaletteRowKind.Command;
         PaletteId = commandId;
         CommandId = commandId;
-        Title = titleFromDoc;
+        Title = $"c:{melodyAliasTail}";
         Category = "ide_execute_command";
-        Subtitle = $"{commandId} · c:{melodyAliasTail} · ide_execute_command";
+        Subtitle = $"{titleFromDoc} · {commandId} · ide_execute_command";
         ArgsJson = null;
         HotkeyHint = hotkeyHint;
         IsAvailable = true;
         UnavailableHint = null;
+        IsMelodyAccentRow = true;
     }
 
     public IdeCommandPaletteRowKind RowKind { get; }
 
     public bool ShowUnavailableHint => RowKind == IdeCommandPaletteRowKind.Command && !IsAvailable && !string.IsNullOrEmpty(UnavailableHint);
 
+    /// <summary>Строка из режима <c>c:</c> — увеличенный шрифт заголовка в палитре.</summary>
+    public bool IsMelodyAccentRow { get; }
+
+    /// <summary>Размер шрифта первой строки: чуть крупнее для мелодии <c>c:</c>.</summary>
+    public double PaletteTitleFontSize => IsMelodyAccentRow ? 14.0 : 12.0;
+
     public string PaletteId { get; }
     public string CommandId { get; }
     public string Title { get; }
     /// <summary>Сырой тег группы из каталога (раздел палитры); для подписи в UI см. <see cref="Subtitle"/>.</summary>
     public string Category { get; }
-    /// <summary>Вторая строка палитры: <c>command_id · …</c> (melody, раздел, пояснение go-to).</summary>
+    /// <summary>Вторая строка палитры: в обычном режиме <c>command_id · раздел</c>; в <c>c:</c> — подпись команды и id под мелодией.</summary>
     public string Subtitle { get; }
     public string? ArgsJson { get; }
     public string? HotkeyHint { get; }
@@ -116,14 +135,19 @@ public sealed class IdeCommandPaletteRowViewModel : ViewModelBase
     public int NavigateLine { get; }
     public int NavigateColumn { get; } = 1;
 
-    private static string BuildCommandPaletteSubtitle(string commandId, string? melodyAliasTail, string category)
+    private static string BuildCommandPaletteSubtitle(string commandId, string category)
     {
         var tail = string.IsNullOrEmpty(category) ? "" : category.Trim();
-        if (string.IsNullOrEmpty(melodyAliasTail))
-            return string.IsNullOrEmpty(tail) ? commandId : $"{commandId} · {tail}";
-        return string.IsNullOrEmpty(tail)
-            ? $"{commandId} · c:{melodyAliasTail}"
-            : $"{commandId} · c:{melodyAliasTail} · {tail}";
+        return string.IsNullOrEmpty(tail) ? commandId : $"{commandId} · {tail}";
+    }
+
+    /// <summary>Вторая строка в режиме <c>c:</c> (мелодия уже в <see cref="Title"/>).</summary>
+    private static string BuildMelodyPaletteSecondaryLine(string entryTitle, string commandId, string category)
+    {
+        var tail = string.IsNullOrEmpty(category) ? "" : category.Trim();
+        if (string.IsNullOrEmpty(tail))
+            return $"{entryTitle} · {commandId}";
+        return $"{entryTitle} · {commandId} · {tail}";
     }
 }
 

@@ -65,8 +65,7 @@
                 <StackPanel Grid.Column="0" Orientation="Vertical" Spacing="4">
                   <TextBlock Text="{Binding Title}"
                              FontWeight="SemiBold"
-                             FontSize="12"
-                             LineHeight="16"
+                             FontSize="{Binding PaletteTitleFontSize}"
                              Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
                   <TextBlock Text="{Binding Subtitle}"
                              FontSize="12.5"

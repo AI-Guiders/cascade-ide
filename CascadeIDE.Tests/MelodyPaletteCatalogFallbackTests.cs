@@ -18,6 +18,7 @@ public sealed class MelodyPaletteCatalogFallbackTests
         var row = line.ToCommandPaletteRow(HotkeyGestureMap.Load(), UiModeFamily.Balanced);
         Assert.NotNull(row);
         Assert.Equal("get_workspace_state", row!.CommandId);
-        Assert.Contains("сводка", row.Title, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("c:test_ws", row.Title);
+        Assert.Contains("сводка", row.Subtitle, StringComparison.OrdinalIgnoreCase);
     }
 }
