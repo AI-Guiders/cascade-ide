@@ -138,7 +138,7 @@ internal static class IdeCommandsDoc
         ["select"] = "Выделить диапазон в редакторе (1-based). args: file_path:string, start_line:integer, start_column:integer, end_line:integer, end_column:integer; returns: text; example: {\"file_path\":\"C:\\\\tmp\\\\a.cs\",\"start_line\":1,\"start_column\":1,\"end_line\":1,\"end_column\":10}.",
         ["send_chat"] = "Чат: args: message?:string, role?:string. role assistant — только строка ассистента из MCP; иначе user и отправка; при chat_mcp_only локальный LLM не вызывается. returns: text; example: {\"message\":\"hello\"}.",
         ["send_keys"] = "Отправить хоткей в контрол. args: keys:string, name?:string; returns: text; example: {\"keys\":\"Ctrl+S\"}.",
-        ["set_breakpoint"] = "Поставить брейкпоинт. args: file_path:string, line:integer, condition?:string; returns: text; example: {\"file_path\":\"C:\\\\tmp\\\\a.cs\",\"line\":42}.",
+        ["set_breakpoint"] = "Поставить брейкпоинт: при необходимости загрузка найденного .sln/.slnx/.slnf, запись в JSON отладки, открытие файла и переход к строке. args: file_path:string, line:integer, condition?:string; returns: text или File not found / Missing…; example: {\"file_path\":\"C:\\\\tmp\\\\a.cs\",\"line\":42}.",
         ["set_build_output_visible"] = "Явно показать/скрыть журнал сборки. args: visible:boolean; returns: text; example: {\"visible\":true}.",
         ["set_control_layout"] = "Изменить раскладку/позицию контрола. args: name:string, layout:string; returns: text; example: {\"name\":\"BuildButton\",\"layout\":\"{}\"}.",
         ["set_control_text"] = "Установить текст в контроле ввода. args: name:string, text:string; returns: text; example: {\"name\":\"ChatInput\",\"text\":\"hi\"}.",

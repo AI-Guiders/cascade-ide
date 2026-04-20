@@ -54,7 +54,7 @@ internal static class IdeMcpToolCatalogFull
             new()
             {
                 Name = "ide_set_breakpoint",
-                Description = "Поставить брейкпоинт в файле на указанной строке.",
+                Description = "Поставить брейкпоинт: при необходимости загрузить решение (.sln/.slnx/.slnf) над файлом, записать точку для dotnet-debug-mcp, открыть файл и перейти к строке (точка видна в редакторе).",
                 InputSchema = Schema(new
                 {
                     type = "object",

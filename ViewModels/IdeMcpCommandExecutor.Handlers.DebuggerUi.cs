@@ -10,10 +10,13 @@ internal sealed partial class IdeMcpCommandExecutor
     {
         add(Services.IdeCommands.SetBreakpoint, async (args, ct) =>
         {
-            var a = (IIdeMcpActions)_vm;
-            if (args is null || string.IsNullOrEmpty(McpCommandJsonArgs.String(args, "file_path")) || !args.TryGetValue("line", out _)) return "Missing file_path or line";
-            a.SetBreakpoint(McpCommandJsonArgs.String(args, "file_path")!, McpCommandJsonArgs.Int(args, "line", 1), McpCommandJsonArgs.String(args, "condition"));
-            return "OK";
+            if (args is null || string.IsNullOrEmpty(McpCommandJsonArgs.String(args, "file_path")) || !args.TryGetValue("line", out _))
+                return "Missing file_path or line";
+            return await _vm.CompleteMcpSetBreakpointAsync(
+                McpCommandJsonArgs.String(args, "file_path")!,
+                McpCommandJsonArgs.Int(args, "line", 1),
+                McpCommandJsonArgs.String(args, "condition"),
+                ct).ConfigureAwait(false);
         });
         add(Services.IdeCommands.RemoveBreakpoint, async (args, ct) =>
         {

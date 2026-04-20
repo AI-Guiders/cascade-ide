@@ -82,7 +82,7 @@
 | `ide_highlight_control` | Подсветить эффективный контрол рамкой (как в Comet), чтобы пользователь видел, где агент | опционально `name` |
 | `ide_set_panel_size` | Изменить размер панели: pfd_region/mfd_region — width (px); build_output/terminal — height (px) | `panel`; опционально `width`, `height` |
 | `ide_add_control` | **(Только Debug)** Добавить контрол в конец панели: Button, TextBlock или Border. parent_name, control_type, content, опционально name | `parent_name`, `control_type`; опционально `content`, `name` |
-| `ide_set_breakpoint` | Поставить брейкпоинт | `file_path`, `line` (1-based), опционально `condition` |
+| `ide_set_breakpoint` | Поставить брейкпоинт: при необходимости загрузить найденное решение над файлом, записать точку для отладки MCP, открыть файл и перейти к строке | `file_path`, `line` (1-based), опционально `condition` |
 | `ide_remove_breakpoint` | Снять брейкпоинт | `file_path`, `line` (1-based) |
 | `ide_show_preview` | Показать Markdown в отдельном окне превью (планы, заметки, отчёты) | `title`, `content` (Markdown) |
 | `ide_show_editor_preview` | Показать превью **текущего файла из редактора** в отдельном окне. Контент берётся из IDE (не передаётся по MCP) — удобно для длинных .md с таблицами. | — |
@@ -277,7 +277,7 @@
 | `remove_breakpoint` | Снять брейкпоинт. args: file_path:string, line:integer; returns: text; example: {"file_path":"C:\\tmp\\a.cs","line":42}. |
 | `request_confirmation` | Запросить подтверждение у пользователя. args: message:string; returns: text; example: {"message":"Продолжить?"}. Возвращает `ok`/`cancel`. |
 | `select` | Выделить диапазон в редакторе (1-based). args: file_path:string, start_line:integer, start_column:integer, end_line:integer, end_column:integer; returns: text; example: {"file_path":"C:\\tmp\\a.cs","start_line":1,"start_column":1,"end_line":1,"end_column":10}. |
-| `set_breakpoint` | Поставить брейкпоинт. args: file_path:string, line:integer, condition?:string; returns: text; example: {"file_path":"C:\\tmp\\a.cs","line":42}. |
+| `set_breakpoint` | Поставить брейкпоинт (загрузка решения при необходимости, открытие файла, переход к строке). args: file_path:string, line:integer, condition?:string; returns: text или `File not found` / `Missing file_path or line`; example: {"file_path":"C:\\tmp\\a.cs","line":42}. |
 | `show_editor_preview` | Показать превью текущего файла из редактора в отдельном окне (контент берётся из IDE). returns: text. |
 | `show_preview` | Показать Markdown-превью в отдельном окне. args: title:string, content:string; returns: text; example: {"title":"Plan","content":"- step 1\n- step 2"}. |
 
