@@ -16,7 +16,6 @@ public sealed partial class CascadeIdeSettings
             && LanguagesEquals(Languages, o.Languages)
             && MarkdownEquals(Markdown, o.Markdown)
             && DisplayEquals(Display, o.Display)
-            && PresentationLayoutEquals(Presentation, o.Presentation)
             && CodeNavigationEquals(CodeNavigation, o.CodeNavigation);
     }
 
@@ -26,17 +25,38 @@ public sealed partial class CascadeIdeSettings
         {
             Ai = new AiSettings
             {
-                DefaultOllamaModel = Ai.DefaultOllamaModel,
-                Provider = Ai.Provider,
-                AnthropicModel = Ai.AnthropicModel,
-                OpenAiBaseUrl = Ai.OpenAiBaseUrl,
-                OpenAiModel = Ai.OpenAiModel,
-                DeepSeekBaseUrl = Ai.DeepSeekBaseUrl,
-                DeepSeekModel = Ai.DeepSeekModel,
-                CursorAcpPath = Ai.CursorAcpPath,
-                AiChatSettingsPresentation = Ai.AiChatSettingsPresentation,
-                ChatMcpOnly = Ai.ChatMcpOnly,
-                ShowThinkingInHistory = Ai.ShowThinkingInHistory,
+                Mode = Ai.Mode,
+                Local = new AiLocalSettings
+                {
+                    Backend = Ai.Local.Backend,
+                    Ollama = new AiLocalOllamaSettings { Model = Ai.Local.Ollama.Model },
+                },
+                Acp = new AiAcpSettings
+                {
+                    CursorAcpPath = Ai.Acp.CursorAcpPath,
+                    CursorAcpModelId = Ai.Acp.CursorAcpModelId,
+                },
+                McpOnly = new AiMcpOnlySettings(),
+                Cloud = new AiCloudSettings
+                {
+                    ActiveProvider = Ai.Cloud.ActiveProvider,
+                    Anthropic = new AiCloudAnthropicSettings { Model = Ai.Cloud.Anthropic.Model },
+                    OpenAi = new AiCloudOpenAiSettings
+                    {
+                        BaseUrl = Ai.Cloud.OpenAi.BaseUrl,
+                        Model = Ai.Cloud.OpenAi.Model,
+                    },
+                    DeepSeek = new AiCloudDeepSeekSettings
+                    {
+                        BaseUrl = Ai.Cloud.DeepSeek.BaseUrl,
+                        Model = Ai.Cloud.DeepSeek.Model,
+                    },
+                },
+                Chat = new AiChatSettings
+                {
+                    SettingsPresentation = Ai.Chat.SettingsPresentation,
+                    ShowThinkingInHistory = Ai.Chat.ShowThinkingInHistory,
+                },
             },
             Mcp = new McpSettings
             {
@@ -146,20 +166,6 @@ public sealed partial class CascadeIdeSettings
                     },
                 },
             },
-            Presentation = new PresentationLayoutSettings
-            {
-                Line = Presentation.Line,
-                LineAlias = Presentation.LineAlias,
-                Grammar = new PresentationGrammarSettings
-                {
-                    Brackets = Presentation.Grammar.Brackets,
-                    BetweenScreens = Presentation.Grammar.BetweenScreens,
-                    BetweenZones = Presentation.Grammar.BetweenZones,
-                    Pfd = Presentation.Grammar.Pfd,
-                    Forward = Presentation.Grammar.Forward,
-                    Mfd = Presentation.Grammar.Mfd,
-                },
-            },
             CodeNavigation = new CodeNavigationSettings
             {
                 Presets = CodeNavigation.Presets
@@ -178,17 +184,19 @@ public sealed partial class CascadeIdeSettings
     {
         if (a is null || b is null)
             return a == b;
-        return a.DefaultOllamaModel.Is(b.DefaultOllamaModel)
-            && a.Provider.Is(b.Provider)
-            && a.AnthropicModel.Is(b.AnthropicModel)
-            && a.OpenAiBaseUrl.Is(b.OpenAiBaseUrl)
-            && a.OpenAiModel.Is(b.OpenAiModel)
-            && a.DeepSeekBaseUrl.Is(b.DeepSeekBaseUrl)
-            && a.DeepSeekModel.Is(b.DeepSeekModel)
-            && a.CursorAcpPath.Is(b.CursorAcpPath)
-            && a.AiChatSettingsPresentation.Is(b.AiChatSettingsPresentation)
-            && a.ChatMcpOnly == b.ChatMcpOnly
-            && a.ShowThinkingInHistory == b.ShowThinkingInHistory;
+        return a.Mode.Is(b.Mode)
+            && a.Local.Backend.Is(b.Local.Backend)
+            && a.Local.Ollama.Model.Is(b.Local.Ollama.Model)
+            && a.Acp.CursorAcpPath.Is(b.Acp.CursorAcpPath)
+            && a.Acp.CursorAcpModelId.Is(b.Acp.CursorAcpModelId)
+            && a.Cloud.ActiveProvider.Is(b.Cloud.ActiveProvider)
+            && a.Cloud.Anthropic.Model.Is(b.Cloud.Anthropic.Model)
+            && a.Cloud.OpenAi.BaseUrl.Is(b.Cloud.OpenAi.BaseUrl)
+            && a.Cloud.OpenAi.Model.Is(b.Cloud.OpenAi.Model)
+            && a.Cloud.DeepSeek.BaseUrl.Is(b.Cloud.DeepSeek.BaseUrl)
+            && a.Cloud.DeepSeek.Model.Is(b.Cloud.DeepSeek.Model)
+            && a.Chat.SettingsPresentation.Is(b.Chat.SettingsPresentation)
+            && a.Chat.ShowThinkingInHistory == b.Chat.ShowThinkingInHistory;
     }
 
     private static bool McpEquals(McpSettings? a, McpSettings? b)
@@ -283,15 +291,6 @@ public sealed partial class CascadeIdeSettings
         if (a is null || b is null)
             return a == b;
         if (!a.Topology.Is(b.Topology))
-            return false;
-        return PresentationGrammarEquals(a.Grammar, b.Grammar);
-    }
-
-    private static bool PresentationLayoutEquals(PresentationLayoutSettings? a, PresentationLayoutSettings? b)
-    {
-        if (a is null || b is null)
-            return a == b;
-        if (!a.Line.Is(b.Line) || !a.LineAlias.Is(b.LineAlias))
             return false;
         return PresentationGrammarEquals(a.Grammar, b.Grammar);
     }

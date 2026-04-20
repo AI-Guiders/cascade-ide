@@ -90,26 +90,40 @@ public partial class MainWindowViewModel
         // Активная страница вторичного контура — отдельно (CurrentMfdShellPage); не переключаем её здесь.
     }
 
-    partial void OnChatMcpOnlyChanged(bool value)
+    partial void OnShowThinkingInHistoryChanged(bool value)
     {
-        _settings.Ai.ChatMcpOnly = value;
+        _settings.Ai.Chat.ShowThinkingInHistory = value;
         SaveSettingsIfChanged();
+    }
+
+    partial void OnAiModeChanged(string value)
+    {
+        var n = AiSettings.NormalizeMode(value);
+        if (!string.Equals(value, n, StringComparison.Ordinal))
+        {
+            AiMode = n;
+            return;
+        }
+
+        _settings.Ai.Mode = n;
+        OnPropertyChanged(nameof(ActiveAiProvider));
+        SaveSettingsIfChanged();
+        ChatPanel.DisposeCursorAcpSession();
         ChatPanel.RefreshSendChatCommandState();
     }
 
-    partial void OnShowThinkingInHistoryChanged(bool value)
+    partial void OnCloudActiveProviderChanged(string value)
     {
-        _settings.Ai.ShowThinkingInHistory = value;
-        SaveSettingsIfChanged();
-    }
-
-    partial void OnActiveAiProviderChanged(string value)
-    {
-        if (!string.IsNullOrEmpty(value))
+        var n = AiSettings.NormalizeCloudProvider(value);
+        if (!string.Equals(value, n, StringComparison.Ordinal))
         {
-            _settings.Ai.Provider = value;
-            SaveSettingsIfChanged();
+            CloudActiveProvider = n;
+            return;
         }
+
+        _settings.Ai.Cloud.ActiveProvider = n;
+        OnPropertyChanged(nameof(ActiveAiProvider));
+        SaveSettingsIfChanged();
         ChatPanel.DisposeCursorAcpSession();
         ChatPanel.RefreshSendChatCommandState();
     }

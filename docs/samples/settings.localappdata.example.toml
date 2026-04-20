@@ -2,16 +2,37 @@
 # Источник для копирования на диск: см. также docs/samples/settings.toml
 
 [ai]
-default_ollama_model = "qwen2.5-coder:7b"
-provider = "Ollama"
-anthropic_model = "claude-sonnet-4-20250514"
-open_ai_base_url = "https://api.openai.com"
-open_ai_model = "gpt-4o"
-deep_seek_base_url = "https://api.deepseek.com"
-deep_seek_model = "deepseek-chat"
+mode = "mcp_only"
+
+[ai.local]
+backend = "ollama"
+
+[ai.local.ollama]
+model = "qwen2.5-coder:7b"
+
+[ai.acp]
 cursor_acp_path = ""
-ai_chat_settings_presentation = "mfd"
-chat_mcp_only = true
+cursor_acp_model_id = ""
+
+[ai.mcp_only]
+
+[ai.cloud]
+active_provider = "anthropic"
+
+[ai.cloud.anthropic]
+model = "claude-sonnet-4-20250514"
+
+[ai.cloud.openai]
+base_url = "https://api.openai.com"
+model = "gpt-4o"
+
+[ai.cloud.deepseek]
+base_url = "https://api.deepseek.com"
+model = "deepseek-chat"
+
+[ai.chat]
+settings_presentation = "mfd"
+show_thinking_in_history = true
 
 [mcp]
 external_servers_json = "[]"
@@ -43,11 +64,10 @@ arguments = ""
 kroki = true
 kroki_url = "https://kroki.io"
 
-[presentation]
-line = "(0.55P+0.45F)(M)"
-line_alias = ""
+[display.screens]
+topology = "(0.55P+0.45F)(M)"
 
-[presentation.grammar]
+[display.screens.grammar]
 brackets = "()"
 between_screens = " "
 between_zones = "+"
@@ -77,16 +97,5 @@ min_sa = 0.6
 min_performance = 0.6
 max_workload = 0.5
 require_scores = false
-
-# Канон (ADR 0017): [display.screens].topology при непустом значении заменяет [presentation].line для разбора.
-# [display.screens]
-# topology = "(0.55P+0.45F)(M)"
-# [display.screens.grammar]
-# brackets = "()"
-# between_screens = " "
-# between_zones = "+"
-# pfd = "P"
-# forward = "F"
-# mfd = "M"
 
 [code_navigation]

@@ -25,7 +25,7 @@ public partial class MainWindowViewModel
     public Action? RequestClose { get; set; }
     /// <summary>Показать «О программе» (View подставит диалог).</summary>
     public Action? RequestShowAbout { get; set; }
-    /// <summary>Полное окно настроек (все секции): при <c>ai_chat_settings_presentation = window</c>, из кнопки «Все настройки…» на странице AI во вторичном контуре.</summary>
+    /// <summary>Полное окно настроек (все секции): при <c>[ai.chat].settings_presentation = window</c>, из кнопки «Все настройки…» на странице AI во вторичном контуре.</summary>
     public Action? RequestOpenSettings { get; set; }
     /// <summary>Открыть или активировать окно-хост зоны Mfd — второй <c>TopLevel</c> (см. ADR 0017).</summary>
     public Action? RequestToggleMfdHostWindow { get; set; }

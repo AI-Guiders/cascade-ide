@@ -274,10 +274,12 @@
 | `list_tools` | Список MCP-тулов, которые IDE публикует (name/description/inputSchema). returns: json. |
 | `load_solution` | Загрузить решение (.sln/.slnx/.slnf) или каталог как workspace (дерево файлов без .sln) и обновить обозреватель. args: path:string; returns: text; example: {"path":"D:\\repo\\CascadeIDE.slnx"}. |
 | `open_file` | Открыть файл в редакторе IDE. args: path:string; returns: text; example: {"path":"C:\\tmp\\a.txt"}. |
+| `ping` | Живость MCP-хоста IDE (без аргументов). Имя MCP-тула: `ide_ping`. returns: json. |
 | `remove_breakpoint` | Снять брейкпоинт. args: file_path:string, line:integer; returns: text; example: {"file_path":"C:\\tmp\\a.cs","line":42}. |
 | `request_confirmation` | Запросить подтверждение у пользователя. args: message:string; returns: text; example: {"message":"Продолжить?"}. Возвращает `ok`/`cancel`. |
+| `restart_mcp_clients` | Пересоздать клиентов внешних MCP и сбросить сессию Cursor ACP (после сбоев транспорта). Имя MCP-тула: `ide_restart_mcp_clients`. returns: json. |
 | `select` | Выделить диапазон в редакторе (1-based). args: file_path:string, start_line:integer, start_column:integer, end_line:integer, end_column:integer; returns: text; example: {"file_path":"C:\\tmp\\a.cs","start_line":1,"start_column":1,"end_line":1,"end_column":10}. |
-| `set_breakpoint` | Поставить брейкпоинт (загрузка решения при необходимости, открытие файла, переход к строке). args: file_path:string, line:integer, condition?:string; returns: text или `File not found` / `Missing file_path or line`; example: {"file_path":"C:\\tmp\\a.cs","line":42}. |
+| `set_breakpoint` | Поставить брейкпоинт: при необходимости загрузка найденного .sln/.slnx/.slnf, запись в JSON отладки, открытие файла и переход к строке. args: file_path:string, line:integer, condition?:string; returns: text; example: {"file_path":"C:\\tmp\\a.cs","line":42}. |
 | `show_editor_preview` | Показать превью текущего файла из редактора в отдельном окне (контент берётся из IDE). returns: text. |
 | `show_preview` | Показать Markdown-превью в отдельном окне. args: title:string, content:string; returns: text; example: {"title":"Plan","content":"- step 1\n- step 2"}. |
 
@@ -302,7 +304,7 @@
 | `refresh_workspace_snapshot` | Обновить снимок рабочего состояния (Power cockpit). returns: text. |
 | `resume_autonomous` | Продолжить автономный режим после паузы. returns: text. |
 | `rollback_trace_step` | Откатить состояние по шагу трассы. args: step_index:integer; returns: text; example: {"step_index":0}. |
-| `send_chat` | Чат: args: message?:string, role?:string. role assistant — только строка ассистента из MCP; иначе user и отправка; при chat_mcp_only локальный LLM не вызывается. returns: text; example: {"message":"hello"}. |
+| `send_chat` | Чат: args: message?:string, role?:string. role assistant — только строка ассистента из MCP; иначе user и отправка; при `ai.mode = "mcp_only"` встроенный LLM не вызывается. returns: text; example: {"message":"hello"}. |
 | `set_safety_l1` | Установить Safety L1. returns: text. |
 | `set_safety_l2` | Установить Safety L2. returns: text. |
 | `set_safety_l3` | Установить Safety L3. returns: text. |

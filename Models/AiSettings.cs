@@ -1,35 +1,122 @@
+using System.Text.Json.Serialization;
+
 namespace CascadeIDE.Models;
 
-/// <summary>AI-провайдеры, модели и путь Cursor ACP (<c>[ai]</c> в <c>settings.toml</c>).</summary>
+/// <summary>Контур AI в <c>[ai]</c> (<c>settings.toml</c>). ADR 0083: <c>mode</c> и вложенные таблицы.</summary>
 public sealed class AiSettings
 {
-    /// <summary>Ollama-модель по умолчанию для чата (TOML: <c>default_ollama_model</c>).</summary>
-    public string DefaultOllamaModel { get; set; } = "qwen2.5-coder:7b";
+    /// <summary>Один из: <c>local</c>, <c>acp</c>, <c>mcp_only</c>, <c>cloud</c>.</summary>
+    public string Mode { get; set; } = "local";
 
-    /// <summary>Активный провайдер: Ollama, Anthropic, OpenAI, DeepSeek, CursorACP (TOML: <c>provider</c>).</summary>
-    public string Provider { get; set; } = "Ollama";
+    public AiLocalSettings Local { get; set; } = new();
 
-    public string AnthropicModel { get; set; } = "claude-sonnet-4-20250514";
-    public string OpenAiBaseUrl { get; set; } = "https://api.openai.com";
-    public string OpenAiModel { get; set; } = "gpt-4o";
-    public string DeepSeekBaseUrl { get; set; } = "https://api.deepseek.com";
-    public string DeepSeekModel { get; set; } = "deepseek-chat";
+    public AiAcpSettings Acp { get; set; } = new();
 
-    /// <summary>Путь к <c>cursor-agent.cmd</c> или каталогу с <c>dist-package\\cursor-agent.cmd</c>; если пусто — поиск <c>cursor-agent</c> в PATH (TOML: <c>cursor_acp_path</c>).</summary>
+    public AiMcpOnlySettings McpOnly { get; set; } = new();
+
+    public AiCloudSettings Cloud { get; set; } = new();
+
+    public AiChatSettings Chat { get; set; } = new();
+
+    /// <summary>Ключ провайдера для существующего кода чата (Ollama, Anthropic, …).</summary>
+    public string ResolveEffectiveProviderUiKey()
+    {
+        return NormalizeMode(Mode) switch
+        {
+            "local" => "Ollama",
+            "acp" => "CursorACP",
+            "mcp_only" => "Ollama",
+            "cloud" => NormalizeCloudProvider(Cloud.ActiveProvider) switch
+            {
+                "anthropic" => "Anthropic",
+                "openai" => "OpenAI",
+                "deepseek" => "DeepSeek",
+                _ => "Anthropic"
+            },
+            _ => "Ollama"
+        };
+    }
+
+    public static string NormalizeMode(string? mode)
+    {
+        var m = (mode ?? "local").Trim().ToLowerInvariant();
+        return m is "local" or "acp" or "mcp_only" or "cloud" ? m : "local";
+    }
+
+    public static string NormalizeCloudProvider(string? p)
+    {
+        var x = (p ?? "anthropic").Trim().ToLowerInvariant();
+        return x is "anthropic" or "openai" or "deepseek" ? x : "anthropic";
+    }
+}
+
+/// <summary>TOML: <c>[ai.local]</c> и <c>[ai.local.ollama]</c>.</summary>
+public sealed class AiLocalSettings
+{
+    /// <summary>Например <c>ollama</c>; должен совпадать с активной подтаблицей.</summary>
+    public string Backend { get; set; } = "ollama";
+
+    public AiLocalOllamaSettings Ollama { get; set; } = new();
+}
+
+/// <summary>TOML: <c>[ai.local.ollama]</c>.</summary>
+public sealed class AiLocalOllamaSettings
+{
+    public string Model { get; set; } = "qwen2.5-coder:7b";
+}
+
+/// <summary>TOML: <c>[ai.acp]</c>.</summary>
+public sealed class AiAcpSettings
+{
     public string CursorAcpPath { get; set; } = "";
 
-    /// <summary>
-    /// Где показывать «Параметры AI и чата»: <c>mfd</c> — страница вторичного контура (зона Mfd); <c>window</c> — отдельное окно со всеми настройками (TOML: <c>ai_chat_settings_presentation</c>).
-    /// </summary>
-    public string AiChatSettingsPresentation { get; set; } = "mfd";
+    public string CursorAcpModelId { get; set; } = "";
+}
 
-    /// <summary>
-    /// Не вызывать встроенный провайдер (Ollama/облако/Cursor ACP) после отправки user-сообщения — ответы только через внешний MCP (<c>send_chat</c> с <c>role=assistant</c>). TOML: <c>chat_mcp_only</c>.
-    /// </summary>
-    public bool ChatMcpOnly { get; set; }
+/// <summary>TOML: <c>[ai.mcp_only]</c> — зарезервировано под флаги режима.</summary>
+public sealed class AiMcpOnlySettings
+{
+}
 
-    /// <summary>
-    /// Показывать reasoning/thinking сообщения в истории после завершения ответа. Если false — thinking виден только во время стриминга. TOML: <c>show_thinking_in_history</c>.
-    /// </summary>
+/// <summary>TOML: <c>[ai.cloud]</c> и <c>[ai.cloud.*]</c>.</summary>
+public sealed class AiCloudSettings
+{
+    public string ActiveProvider { get; set; } = "anthropic";
+
+    [JsonPropertyName("anthropic")]
+    public AiCloudAnthropicSettings Anthropic { get; set; } = new();
+
+    [JsonPropertyName("openai")]
+    public AiCloudOpenAiSettings OpenAi { get; set; } = new();
+
+    [JsonPropertyName("deepseek")]
+    public AiCloudDeepSeekSettings DeepSeek { get; set; } = new();
+}
+
+public sealed class AiCloudAnthropicSettings
+{
+    public string Model { get; set; } = "claude-sonnet-4-20250514";
+}
+
+public sealed class AiCloudOpenAiSettings
+{
+    public string BaseUrl { get; set; } = "https://api.openai.com";
+
+    public string Model { get; set; } = "gpt-4o";
+}
+
+public sealed class AiCloudDeepSeekSettings
+{
+    public string BaseUrl { get; set; } = "https://api.deepseek.com";
+
+    public string Model { get; set; } = "deepseek-chat";
+}
+
+/// <summary>TOML: <c>[ai.chat]</c>.</summary>
+public sealed class AiChatSettings
+{
+    /// <summary><c>mfd</c> | <c>window</c>.</summary>
+    public string SettingsPresentation { get; set; } = "mfd";
+
     public bool ShowThinkingInHistory { get; set; } = true;
 }

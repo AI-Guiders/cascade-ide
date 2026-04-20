@@ -40,7 +40,7 @@ public static partial class IdeCommands
     public const string InvestigateNullref = "investigate_nullref";
     /// <summary>Quick action: подготовить коммит (сводка/план/проверки). returns: text.</summary>
     public const string PrepareCommit = "prepare_commit";
-    /// <summary>Чат: args: message?:string, role?:string. role assistant — только строка ассистента из MCP; иначе user и отправка; при chat_mcp_only локальный LLM не вызывается. returns: text; example: {"message":"hello"}.</summary>
+    /// <summary>Чат: args: message?:string, role?:string. role assistant — только строка ассистента из MCP; иначе user и отправка; при ai.mode = mcp_only встроенный LLM не вызывается. returns: text; example: {"message":"hello"}.</summary>
     public const string SendChat = "send_chat";
     /// <summary>Новая ветка чата: args: parent_message_id?:string. Пишет thread_forked; следующее user-сообщение может ссылаться на родителя. returns: text; example: {}</summary>
     public const string ForkChatThread = "fork_chat_thread";

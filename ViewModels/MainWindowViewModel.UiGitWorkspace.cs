@@ -76,7 +76,7 @@ public partial class MainWindowViewModel
         if (!string.IsNullOrEmpty(value))
         {
             LastSelectedRealModel = value;
-            _settings.Ai.DefaultOllamaModel = value;
+            _settings.Ai.Local.Ollama.Model = value;
             SaveSettingsIfChanged();
             _ = LoadModelDetailsAsync(value);
         }
@@ -138,7 +138,7 @@ public partial class MainWindowViewModel
                 OllamaModelChoices.Add(n);
             }
             OllamaModelChoices.Add(InstallNewSentinel);
-            var preferred = _settings.Ai.DefaultOllamaModel?.Trim();
+            var preferred = _settings.Ai.Local.Ollama.Model?.Trim();
             SelectedOllamaModel = !string.IsNullOrEmpty(preferred) && OllamaModels.Contains(preferred)
                 ? preferred
                 : OllamaModels.FirstOrDefault();

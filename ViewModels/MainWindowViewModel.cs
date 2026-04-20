@@ -36,8 +36,15 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private CascadeIdeSettings? _lastSavedSettings;
     private AiKeys? _lastSavedAiKeys;
 
-    public static readonly IReadOnlyList<string> AiProviderKeys = ["Ollama", "Anthropic", "OpenAI", "DeepSeek", "CursorACP"];
-    public IReadOnlyList<string> AiProviderKeysList => AiProviderKeys;
+    /// <summary>ADR 0083: значения <c>ai.mode</c> в TOML.</summary>
+    public static readonly IReadOnlyList<string> AiModeOptions = ["local", "acp", "mcp_only", "cloud"];
+
+    public IReadOnlyList<string> AiModeOptionsList => AiModeOptions;
+
+    /// <summary>Для <c>mode = cloud</c>: <c>ai.cloud.active_provider</c>.</summary>
+    public static readonly IReadOnlyList<string> AiCloudProviderKeys = ["anthropic", "openai", "deepseek"];
+
+    public IReadOnlyList<string> AiCloudProviderKeysList => AiCloudProviderKeys;
 
     private readonly Services.CSharpLanguageService _csharpLanguageService;
     private readonly Services.ContextMinimizer _contextMinimizer;
@@ -78,10 +85,13 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             ? "https://kroki.io"
             : _settings.Markdown.Diagrams.KrokiUrl.Trim();
         _externalMcpServersJson = _settings.Mcp.ExternalServersJson;
-        _activeAiProvider = _settings.Ai.Provider;
-        _chatMcpOnly = _settings.Ai.ChatMcpOnly;
-        _showThinkingInHistory = _settings.Ai.ShowThinkingInHistory;
-        _cursorAcpAgentPath = _settings.Ai.CursorAcpPath ?? "";
+#pragma warning disable MVVMTK0034 // Bootstrap from disk before first UI bind; avoid SaveSettings from OnAiModeChanged.
+        _aiMode = AiSettings.NormalizeMode(_settings.Ai.Mode);
+        _cloudActiveProvider = AiSettings.NormalizeCloudProvider(_settings.Ai.Cloud.ActiveProvider);
+#pragma warning restore MVVMTK0034
+        _showThinkingInHistory = _settings.Ai.Chat.ShowThinkingInHistory;
+        _cursorAcpAgentPath = _settings.Ai.Acp.CursorAcpPath ?? "";
+        _cursorAcpModelId = _settings.Ai.Acp.CursorAcpModelId ?? "";
         _anthropicApiKey = _aiKeys.AnthropicApiKey ?? "";
         _openAiApiKey = _aiKeys.OpenAiApiKey ?? "";
         _deepSeekApiKey = _aiKeys.DeepSeekApiKey ?? "";
@@ -121,6 +131,8 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             () => CursorAcpAgentPath,
             () => Services.McpExternalServersJsonResolver.ResolveEffectiveJson(_settings),
             () => AcpAutoInjectIdeMcp,
+            () => string.IsNullOrWhiteSpace(CursorAcpModelId) ? null : CursorAcpModelId.Trim(),
+            id => CursorAcpModelId = id ?? "",
             appendAcpTerminal: text => UiScheduler.Default.Post(() => TerminalPanel.AppendOutput(text)),
             showAcpTerminal: () => UiScheduler.Default.Post(() =>
             {
@@ -347,14 +359,14 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
 
     private (Services.IAiChatProvider? Provider, string Model) ResolveProvider(string providerKey)
     {
-        var key = providerKey ?? _settings.Ai.Provider;
+        var key = providerKey ?? _settings.Ai.ResolveEffectiveProviderUiKey();
         return key switch
         {
-            "Anthropic" => (new Services.AnthropicProvider(_aiKeys.AnthropicApiKey ?? "", _settings.Ai.AnthropicModel), _settings.Ai.AnthropicModel),
-            "OpenAI" => (new Services.OpenAiCompatibleProvider(_settings.Ai.OpenAiBaseUrl, _aiKeys.OpenAiApiKey ?? "", _settings.Ai.OpenAiModel), _settings.Ai.OpenAiModel),
-            "DeepSeek" => (new Services.OpenAiCompatibleProvider(_settings.Ai.DeepSeekBaseUrl, _aiKeys.DeepSeekApiKey ?? "", _settings.Ai.DeepSeekModel), _settings.Ai.DeepSeekModel),
+            "Anthropic" => (new Services.AnthropicProvider(_aiKeys.AnthropicApiKey ?? "", _settings.Ai.Cloud.Anthropic.Model), _settings.Ai.Cloud.Anthropic.Model),
+            "OpenAI" => (new Services.OpenAiCompatibleProvider(_settings.Ai.Cloud.OpenAi.BaseUrl, _aiKeys.OpenAiApiKey ?? "", _settings.Ai.Cloud.OpenAi.Model), _settings.Ai.Cloud.OpenAi.Model),
+            "DeepSeek" => (new Services.OpenAiCompatibleProvider(_settings.Ai.Cloud.DeepSeek.BaseUrl, _aiKeys.DeepSeekApiKey ?? "", _settings.Ai.Cloud.DeepSeek.Model), _settings.Ai.Cloud.DeepSeek.Model),
             "CursorACP" => (null, ""),
-            _ => (new Services.OllamaProvider(_ollama), SelectedOllamaModel ?? _settings.Ai.DefaultOllamaModel)
+            _ => (new Services.OllamaProvider(_ollama), SelectedOllamaModel ?? _settings.Ai.Local.Ollama.Model)
         };
     }
 

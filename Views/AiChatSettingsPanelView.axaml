@@ -7,8 +7,13 @@
         <TextBlock Text="AI и чат" FontWeight="SemiBold" FontSize="16" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
 
         <StackPanel Spacing="6">
-            <TextBlock Text="Провайдер:" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-            <ComboBox ItemsSource="{Binding AiProviderKeysList}" SelectedItem="{Binding ActiveAiProvider}" MinWidth="200"/>
+            <TextBlock Text="Режим AI (settings.toml: ai.mode):" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+            <ComboBox ItemsSource="{Binding AiModeOptionsList}" SelectedItem="{Binding AiMode}" MinWidth="200"/>
+        </StackPanel>
+
+        <StackPanel Spacing="6" IsVisible="{Binding IsAiCloudMode}">
+            <TextBlock Text="Облако: провайдер (ai.cloud.active_provider):" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+            <ComboBox ItemsSource="{Binding AiCloudProviderKeysList}" SelectedItem="{Binding CloudActiveProvider}" MinWidth="200"/>
         </StackPanel>
 
         <StackPanel Spacing="6" IsVisible="{Binding IsOllamaSelected}">
@@ -39,6 +44,11 @@
                      PlaceholderText="...\dist-package  или  ...\cursor-agent.cmd"
                      MinWidth="280"
                      TextWrapping="Wrap"/>
+            <TextBlock Text="Модель Cursor ACP (список подставляется после первого ответа в чате; предпочтение сохраняется в настройках)" FontSize="11" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" TextWrapping="Wrap"/>
+            <ComboBox ItemsSource="{Binding ChatPanel.CursorAcpModelPicks}"
+                      SelectedItem="{Binding ChatPanel.SelectedCursorAcpModelPick}"
+                      MinWidth="280"
+                      PlaceholderText="Нет данных — отправь сообщение в чат"/>
         </StackPanel>
 
         <StackPanel Spacing="6">
@@ -47,9 +57,6 @@
         </StackPanel>
 
         <CheckBox Content="Минимальный контекст (только диагностики и сигнатуры)" IsChecked="{Binding UseMinimizedContext}" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-        <CheckBox Content="Чат только через MCP (не вызывать встроенный LLM; ответ ассистента — send_chat с role=assistant)"
-                  IsChecked="{Binding ChatMcpOnly}"
-                  Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
         <CheckBox Content="Показывать thinking/reasoning в истории (если выключено — только live во время ответа)"
                   IsChecked="{Binding ShowThinkingInHistory}"
                   Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
