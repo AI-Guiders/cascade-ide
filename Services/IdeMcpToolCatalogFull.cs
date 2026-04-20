@@ -444,7 +444,22 @@ internal static class IdeMcpToolCatalogFull
                     properties = new
                     {
                         staged = new { type = "boolean", description = "true — анализ staged изменений." },
+                        include_untracked = new { type = "boolean", description = "true (по умолчанию) — включать untracked_files." },
                         include_patches = new { type = "boolean", description = "true (по умолчанию) — BOM-only эвристика по патчам." }
+                    },
+                    required = Array.Empty<string>()
+                })
+            },
+            new()
+            {
+                Name = "ide_git_preflight_fix_safe",
+                Description = "Git preflight safe-fix: применить git add --renormalize . и вернуть обновлённую классификацию. JSON.",
+                InputSchema = Schema(new
+                {
+                    type = "object",
+                    properties = new
+                    {
+                        include_patches = new { type = "boolean", description = "true (по умолчанию) — BOM-only эвристика по патчам после фикса." }
                     },
                     required = Array.Empty<string>()
                 })

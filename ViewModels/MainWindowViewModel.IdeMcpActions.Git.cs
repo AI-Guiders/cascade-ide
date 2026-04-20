@@ -78,7 +78,7 @@ public partial class MainWindowViewModel
         }
     }
 
-    async Task<string> Services.IIdeMcpActions.GitPreflightAsync(bool staged, bool includePatches)
+    async Task<string> Services.IIdeMcpActions.GitPreflightAsync(bool staged, bool includeUntracked, bool includePatches)
     {
         var changedOutput = await RunGitCommandAsync(GitCommandBuilder.DiffNameOnly(staged)).ConfigureAwait(false);
         if (!changedOutput.Success)
@@ -93,6 +93,9 @@ public partial class MainWindowViewModel
             return JsonSerializer.Serialize(new { success = false, exit_code = ignoreWsOutput.ExitCode, output = TruncateOutput(ignoreWsOutput.Output, 4000) });
 
         var changed = GitPreflight.ParseNameOnlyOutput(changedOutput.Output);
+        var untracked = includeUntracked
+            ? GitPreflight.ParseNameOnlyOutput((await RunGitCommandAsync(GitCommandBuilder.ListUntracked()).ConfigureAwait(false)).Output)
+            : [];
         var ignoreCr = GitPreflight.ParseNameOnlyOutput(ignoreCrOutput.Output);
         var ignoreWs = GitPreflight.ParseNameOnlyOutput(ignoreWsOutput.Output);
 
@@ -111,17 +114,50 @@ public partial class MainWindowViewModel
             }
         }
 
-        var report = GitPreflight.BuildReport(changed, ignoreCr, ignoreWs, patches);
+        var report = GitPreflight.BuildReport(changed, untracked, ignoreCr, ignoreWs, patches);
         return JsonSerializer.Serialize(new
         {
             success = true,
             staged,
             changed_files = report.ChangedFiles,
+            untracked_files = report.UntrackedFiles,
             semantic_files = report.SemanticFiles,
             whitespace_only_files = report.WhitespaceOnlyFiles,
             eol_only_files = report.EolOnlyFiles,
             bom_only_files = report.BomOnlyFiles,
             suggested_safe_fix_commands = report.SuggestedSafeFixCommands
+        });
+    }
+
+    async Task<string> Services.IIdeMcpActions.GitPreflightFixSafeAsync(bool includePatches)
+    {
+        var renormResult = await RunGitCommandAsync(GitCommandBuilder.AddRenormalize()).ConfigureAwait(false);
+        if (!renormResult.Success)
+            return JsonSerializer.Serialize(new { success = false, exit_code = renormResult.ExitCode, output = TruncateOutput(renormResult.Output, 4000) });
+
+        var post = await ((Services.IIdeMcpActions)this).GitPreflightAsync(staged: false, includeUntracked: true, includePatches: includePatches).ConfigureAwait(false);
+        using var doc = JsonDocument.Parse(post);
+        if (!doc.RootElement.TryGetProperty("success", out var ok) || ok.ValueKind != JsonValueKind.True)
+            return post;
+
+        var changed = doc.RootElement.GetProperty("changed_files");
+        var untracked = doc.RootElement.GetProperty("untracked_files");
+        var semantic = doc.RootElement.GetProperty("semantic_files");
+        var ws = doc.RootElement.GetProperty("whitespace_only_files");
+        var eol = doc.RootElement.GetProperty("eol_only_files");
+        var bom = doc.RootElement.GetProperty("bom_only_files");
+        var safe = doc.RootElement.GetProperty("suggested_safe_fix_commands");
+        return JsonSerializer.Serialize(new
+        {
+            success = true,
+            applied = new[] { "git add --renormalize ." },
+            changed_files = changed,
+            untracked_files = untracked,
+            semantic_files = semantic,
+            whitespace_only_files = ws,
+            eol_only_files = eol,
+            bom_only_files = bom,
+            suggested_safe_fix_commands = safe
         });
     }
 

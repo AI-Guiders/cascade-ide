@@ -240,7 +240,8 @@
 | `git_diff` | Git diff в каталоге решения/workspace. args: path?:string, staged?:boolean; returns: json; example: {"path":"README.md","staged":false}. |
 | `git_fetch` | Git fetch в каталоге решения/workspace. args: remote?:string, all?:boolean, prune?:boolean, dry_run?:boolean; returns: json; example: {"prune":true,"dry_run":true}. |
 | `git_log` | Git log в каталоге решения/workspace. args: n?:integer; returns: json; example: {"n":20}. |
-| `git_preflight` | Git preflight в каталоге решения/workspace. args: staged?:boolean, include_patches?:boolean; returns: json; example: {"staged":false,"include_patches":true}. |
+| `git_preflight` | Git preflight в каталоге решения/workspace. args: staged?:boolean, include_untracked?:boolean, include_patches?:boolean; returns: json; example: {"staged":false,"include_untracked":true,"include_patches":true}. |
+| `git_preflight_fix_safe` | Git preflight safe-fix (renormalize) в каталоге решения/workspace. args: include_patches?:boolean; returns: json; example: {"include_patches":true}. |
 | `git_pull` | Git pull в каталоге решения/workspace. args: remote?:string, branch?:string, ff_only?:boolean, dry_run?:boolean; returns: json; example: {"ff_only":true}. |
 | `git_push` | Git push в каталоге решения/workspace. args: remote?:string, branch?:string, dry_run?:boolean; returns: text; example: {"remote":"origin","branch":"main","dry_run":true}. |
 | `git_show` | Git show в каталоге решения/workspace. args: rev:string, path?:string, stat_only?:boolean; returns: json; example: {"rev":"HEAD","stat_only":true}. |
