@@ -1,6 +1,6 @@
 # CascadeIDE.ArchitectureAnalyzers
 
-Roslyn-анализаторы для границ [ADR 0036](../docs/adr/0036-cds-channel-compositor-surface-pipeline.md). Подключён к `CascadeIDE.csproj` как `Analyzer` (`ReferenceOutputAssembly=false`), **кроме** загрузки через **RoslynMcp**: при `RoslynMcpWorkspace=true` ссылка на этот проект отключается, чтобы процесс MCP не блокировал `bin\…\CascadeIDE.ArchitectureAnalyzers.dll` во время `dotnet build` (общий механизм — раздел «RoslynMcpWorkspace» в [roslyn-mcp README](../../roslyn-mcp/README.md)).
+Roslyn-анализаторы для границ [ADR 0036](../docs/adr/0036-cds-channel-compositor-surface-pipeline.md) (CDS / кабина) и [ADR 0079](../docs/adr/0079-ide-display-system-ids-overlay-pipeline.md) (IDS / `IdeDisplay/`). Подключён к `CascadeIDE.csproj` как `Analyzer` (`ReferenceOutputAssembly=false`), **кроме** загрузки через **RoslynMcp**: при `RoslynMcpWorkspace=true` ссылка на этот проект отключается, чтобы процесс MCP не блокировал `bin\…\CascadeIDE.ArchitectureAnalyzers.dll` во время `dotnet build` (общий механизм — раздел «RoslynMcpWorkspace» в [roslyn-mcp README](../../roslyn-mcp/README.md)).
 
 **Поведение:** обычный `dotnet build` / CI без `RoslynMcpWorkspace` по-прежнему получают CASCOPE*; в MCP по главному приложению эти диагностики из локального проекта анализатора не подмешиваются — для проверки правил ориентируйся на **`dotnet build`** или на этот проект отдельно. Если в тулы передаётся полный **`CascadeIDE.sln`**, проект анализатора всё ещё может подгружаться; для MCP достаточно контекста приложения — предпочтительнее путь к **`CascadeIDE.csproj`**.
 
@@ -11,5 +11,9 @@ Roslyn-анализаторы для границ [ADR 0036](../docs/adr/0036-cd
 | **CASCOPE003** | Error | Прямые присваивания `IsPfdRegionExpanded` / `IsMfdRegionExpanded` (и полям `_is*`) у `MainWindowViewModel` только в белом списке файлов (`PresentationLayoutAuthority`, relay-команды, ctor, `ShellState`, `UiGitWorkspace`); иначе — дрейф от ADR 0046 (используй `Apply*` / relay). |
 | **CASCOPE011** | Error | В `Features/UiChrome/` запрещён `using CascadeIDE.Cockpit.PrimitivesKit` (ADR 0066: хром IDE отдельно от отрисовки deck/кабины). |
 | **CASCOPE012** | Error | В `Cockpit/PrimitivesKit/` запрещён `using CascadeIDE.Features.UiChrome` (ADR 0066: примитивы кабины не тянут зоны/хром). |
+| **CASCOPE013** | Error | В `IdeDisplay/` запрещён `using CascadeIDE.Cockpit…` и типы из `CascadeIDE.Cockpit` в сигнатурах членов (ADR 0079: IDS ортогонален CDS/кабине). |
+| **CASCOPE014** | Error | В `IdeDisplay/` запрещены Avalonia UI (как у CASCOPE001: `using Avalonia…` и типы в членах). |
+| **CASCOPE015** | Error | В `IdeDisplay/` запрещён `using CascadeIDE.Features.UiChrome` и типы из этого пространства в членах (семантика оверлея отдельно от хрома shell). |
+| **CASCOPE016** | Error | В `Cockpit/` запрещён `using CascadeIDE.IdeDisplay…` (кабина не зависит от IDS). |
 
 Расширение правил: новые диагностики в этом проекте, версии `Microsoft.CodeAnalysis.CSharp` держать совместимыми с SDK.

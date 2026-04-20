@@ -59,11 +59,20 @@
 
 Снимки IDS (например, состав строк палитры и выбранный индекс) могут поставляться в MCP/контракт агента **отдельно** от `cockpit_surface`, либо тонким полем «overlay» в общей сводке — решение по полю JSON не фиксирует этот ADR; фиксируется только **разделение семантики** CDS vs IDS.
 
+### 6. Roslyn-guardrails (CASCOPE013–016)
+
+На сборке [`CascadeIDE.ArchitectureAnalyzers`](../../CascadeIDE.ArchitectureAnalyzers/README.md):
+
+- **CASCOPE013** / **CASCOPE014** / **CASCOPE015** — в каталоге `IdeDisplay/` запрещены зависимости от `CascadeIDE.Cockpit…`, от Avalonia UI и от `CascadeIDE.Features.UiChrome` (в т.ч. типы в членах классов в `CascadeIDE.IdeDisplay.*`).
+- **CASCOPE016** — в `Cockpit/` запрещён `using CascadeIDE.IdeDisplay…` (кабина не тянет IDS).
+
+Полные формулировки и уровни — в README анализаторов.
+
 ---
 
 ## Состояние реализации (фиксация на дату ADR)
 
-- **Сделано:** контракт `IIdsSurfaceCompositor<TIntent, TSnapshot>`; для палитры — `CommandPaletteSurfaceIntent`, `CommandPaletteSurfaceSnapshot`, `CommandPaletteSurfaceCompositor`; обновление снимка из `MainWindowViewModel` при открытой палитре; тесты композитора.
+- **Сделано:** контракт `IIdsSurfaceCompositor<TIntent, TSnapshot>`; для палитры — `CommandPaletteSurfaceIntent`, `CommandPaletteSurfaceSnapshot`, `CommandPaletteSurfaceCompositor`; обновление снимка из `MainWindowViewModel` при открытой палитре; тесты композитора; Roslyn **CASCOPE013–016** (см. §6).
 - **По плану (strangler):** единый `IdsOverlayHost` / router ввода; опциональные `IdsSurfaceSlot` при втором оверлее; при необходимости — проекция в MCP без смешения с CDS.
 
 ---

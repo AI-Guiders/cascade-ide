@@ -88,7 +88,7 @@
 | [0076](0076-ui-ux-principles-hub.md) | **UI/UX:** центр принципов — связный текст из [`snippets/ui/`](snippets/ui/README.md) (внимание/кокпит, философия продукта); не заменяет исходные ADR | Proposed |
 | [0077](0077-tech-principles-hub.md) | **TECH:** центр принципов — связный текст из [`snippets/tech/`](snippets/tech/README.md) (границы/контракты, агент/отладка/наблюдаемость); не заменяет исходные ADR | Proposed |
 | [0078](0078-git-preflight-and-noise-control-for-cide.md) | **Git preflight:** шум-контроль (EOL/BOM/whitespace), safe fixes, подсказки логических коммитов и post-push отчёт | Proposed |
-| [0079](0079-ide-display-system-ids-overlay-pipeline.md) | **IDS (Ide Display System):** пайплайн IDE-оверлеев (intent → композитор → снимок → поверхность), ортогонально CDS; единый input host и слоты — по плану | Accepted |
+| [0079](0079-ide-display-system-ids-overlay-pipeline.md) | **IDS (Ide Display System):** пайплайн IDE-оверлеев (intent → композитор → снимок → поверхность), ортогонально CDS; единый input host и слоты — по плану; Roslyn **CASCOPE013–016** | Accepted |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 
