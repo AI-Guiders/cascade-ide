@@ -89,7 +89,7 @@
 | [0077](0077-tech-principles-hub.md) | **TECH:** центр принципов — связный текст из [`snippets/tech/`](snippets/tech/README.md) (границы/контракты, агент/отладка/наблюдаемость); не заменяет исходные ADR | Proposed |
 | [0078](0078-git-preflight-and-noise-control-for-cide.md) | **Git preflight:** шум-контроль (EOL/BOM/whitespace), safe fixes, подсказки логических коммитов и post-push отчёт | Proposed |
 | [0079](0079-ide-display-system-ids-overlay-pipeline.md) | **IDS (Ide Display System):** пайплайн IDE-оверлеев (intent → композитор → снимок → поверхность), ортогонально CDS; единый input host и слоты — по плану; Roslyn **CASCOPE013–016** | Accepted |
-| [0080](0080-intercomm-naming-and-multi-party-channel-model.md) | **Intercomm:** продуктовое имя канала связи вместо узкого «чат»; агент + команда + системные реплики; **внешний** командный контур vs своя «гора»; discoverability/i18n; strangler для кода | Proposed |
+| [0080](0080-intercom-naming-and-multi-party-channel-model.md) | **Intercom:** продуктовое имя канала связи вместо узкого «чат»; агент + команда + системные реплики; **внешний** командный контур vs своя «гора»; discoverability/i18n; strangler для кода | Proposed |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 
