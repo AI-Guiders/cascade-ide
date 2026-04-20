@@ -11,7 +11,8 @@ public sealed class EnvironmentReadinessEnvProbeTests
     public void BuildEnvProbeRows_unset_notes_ok_canon_and_dbg_advisory()
     {
         var rows = EnvironmentReadinessSnapshotBuilder.BuildEnvProbeRows(
-            new EnvironmentReadinessEnvSnapshot(null, null, null));
+            new EnvironmentReadinessEnvSnapshot(null, null, null),
+            tryResolveNetcoreDbgWhenUnset: static () => null);
 
         Assert.Equal(3, rows.Count);
         Assert.Equal(EnvironmentReadinessCellIds.AgentNotesFile, rows[0].Id);
@@ -23,6 +24,18 @@ public sealed class EnvironmentReadinessEnvProbeTests
 
         Assert.Equal(EnvironmentReadinessCellIds.NetcoreDbgPath, rows[2].Id);
         Assert.Equal(AnnunciatorLampLevel.Advisory, rows[2].Level);
+    }
+
+    [Fact]
+    public void BuildEnvProbeRows_unset_netcoredbg_resolved_from_path_ok()
+    {
+        var rows = EnvironmentReadinessSnapshotBuilder.BuildEnvProbeRows(
+            new EnvironmentReadinessEnvSnapshot(null, null, null),
+            tryResolveNetcoreDbgWhenUnset: static () => @"C:\fake\netcoredbg.exe");
+
+        var dbg = Assert.Single(rows, r => r.Id == EnvironmentReadinessCellIds.NetcoreDbgPath);
+        Assert.Equal(AnnunciatorLampLevel.Ok, dbg.Level);
+        Assert.Contains("PATH", dbg.Detail, StringComparison.Ordinal);
     }
 
     [Fact]

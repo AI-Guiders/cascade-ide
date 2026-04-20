@@ -63,11 +63,18 @@ public static class EnvironmentReadinessSnapshotBuilder
     }
 
     /// <summary>Переменные окружения и пути, которые IDE читает для agent-notes / knowledge / netcoredbg (значения в UI не показываем).</summary>
-    public static IReadOnlyList<AnnunciatorLampItem> BuildEnvProbeRows(EnvironmentReadinessEnvSnapshot env) =>
+    /// <param name="tryResolveNetcoreDbgWhenUnset">
+    /// Опционально: подмена результата поиска <c>netcoredbg</c>, когда <c>NETCOREDBG_PATH</c> пуста (только для тестов).
+    /// Если параметр не передан — вызывается <see cref="EnvironmentReadinessExecutablePathProbe.TryResolveExecutablePath"/> для имени <c>netcoredbg</c>.
+    /// Если делегат передан — используется только его возврат (в т.ч. <see langword="null"/> = «не найден»), без обращения к реальному PATH.
+    /// </param>
+    public static IReadOnlyList<AnnunciatorLampItem> BuildEnvProbeRows(
+        EnvironmentReadinessEnvSnapshot env,
+        Func<string?>? tryResolveNetcoreDbgWhenUnset = null) =>
     [
         BuildAgentNotesFileRow(env.AgentNotesFile),
         BuildAgentNotesCanonRow(env.AgentNotesCanonPath),
-        BuildNetcoreDbgRow(env.NetcoreDbgPath),
+        BuildNetcoreDbgRow(env.NetcoreDbgPath, tryResolveNetcoreDbgWhenUnset),
     ];
 
     /// <summary>
@@ -216,15 +223,28 @@ public static class EnvironmentReadinessSnapshotBuilder
         }
     }
 
-    private static AnnunciatorLampItem BuildNetcoreDbgRow(string? raw)
+    private static AnnunciatorLampItem BuildNetcoreDbgRow(string? raw, Func<string?>? tryResolveNetcoreDbgWhenUnset = null)
     {
         const string title = WellKnownEnv.NetcoreDbgPath;
         if (string.IsNullOrWhiteSpace(raw))
         {
+            var onPath = tryResolveNetcoreDbgWhenUnset is not null
+                ? tryResolveNetcoreDbgWhenUnset.Invoke()
+                : EnvironmentReadinessExecutablePathProbe.TryResolveExecutablePath("netcoredbg");
+            if (onPath is not null)
+            {
+                return new AnnunciatorLampItem(
+                    EnvironmentReadinessCellIds.NetcoreDbgPath,
+                    title,
+                    "Не задана: netcoredbg найден в PATH.",
+                    AnnunciatorLampLevel.Ok,
+                    LampShortLabel: "Dbg");
+            }
+
             return new AnnunciatorLampItem(
                 EnvironmentReadinessCellIds.NetcoreDbgPath,
                 title,
-                "Не задана: используется имя netcoredbg из PATH (или передай путь при запуске отладки).",
+                "Не задана: netcoredbg в PATH не найден — задай NETCOREDBG_PATH или установи netcoredbg.",
                 AnnunciatorLampLevel.Advisory,
                 LampShortLabel: "Dbg");
         }
