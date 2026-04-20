@@ -2,6 +2,8 @@ using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 using CascadeIDE.Features.UiChrome;
+using CascadeIDE.IdeDisplay;
+using CascadeIDE.IdeDisplay.CommandPalette;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -26,9 +28,8 @@ public sealed class IdeCommandPaletteRowViewModel : ViewModelBase
         PaletteId = entry.PaletteId;
         CommandId = entry.CommandId;
         Title = entry.Title;
-        Category = string.IsNullOrEmpty(melodyAliasTail)
-            ? entry.Category
-            : $"c:{melodyAliasTail} · {entry.Category}";
+        Category = entry.Category;
+        Subtitle = BuildCommandPaletteSubtitle(entry.CommandId, melodyAliasTail, entry.Category);
         ArgsJson = entry.ArgsJson;
         HotkeyHint = hotkeyHint;
         IsAvailable = IdeCommandPaletteMatch.IsEntryAvailable(entry, currentFamily);
@@ -49,6 +50,7 @@ public sealed class IdeCommandPaletteRowViewModel : ViewModelBase
         CommandId = "__goto__";
         Title = title;
         Category = category;
+        Subtitle = category;
         ArgsJson = null;
         HotkeyHint = prefixHint;
         NavigateFilePath = fullPath;
@@ -65,6 +67,7 @@ public sealed class IdeCommandPaletteRowViewModel : ViewModelBase
         CommandId = "__hint__";
         Title = title;
         Category = category;
+        Subtitle = category;
         ArgsJson = null;
         HotkeyHint = null;
         IsAvailable = false;
@@ -84,7 +87,8 @@ public sealed class IdeCommandPaletteRowViewModel : ViewModelBase
         PaletteId = commandId;
         CommandId = commandId;
         Title = titleFromDoc;
-        Category = $"c:{melodyAliasTail} · ide_execute_command";
+        Category = "ide_execute_command";
+        Subtitle = $"{commandId} · c:{melodyAliasTail} · ide_execute_command";
         ArgsJson = null;
         HotkeyHint = hotkeyHint;
         IsAvailable = true;
@@ -98,7 +102,10 @@ public sealed class IdeCommandPaletteRowViewModel : ViewModelBase
     public string PaletteId { get; }
     public string CommandId { get; }
     public string Title { get; }
+    /// <summary>Сырой тег группы из каталога (раздел палитры); для подписи в UI см. <see cref="Subtitle"/>.</summary>
     public string Category { get; }
+    /// <summary>Вторая строка палитры: <c>command_id · …</c> (melody, раздел, пояснение go-to).</summary>
+    public string Subtitle { get; }
     public string? ArgsJson { get; }
     public string? HotkeyHint { get; }
     public bool IsAvailable { get; }
@@ -108,6 +115,16 @@ public sealed class IdeCommandPaletteRowViewModel : ViewModelBase
     public string? NavigateFilePath { get; }
     public int NavigateLine { get; }
     public int NavigateColumn { get; } = 1;
+
+    private static string BuildCommandPaletteSubtitle(string commandId, string? melodyAliasTail, string category)
+    {
+        var tail = string.IsNullOrEmpty(category) ? "" : category.Trim();
+        if (string.IsNullOrEmpty(melodyAliasTail))
+            return string.IsNullOrEmpty(tail) ? commandId : $"{commandId} · {tail}";
+        return string.IsNullOrEmpty(tail)
+            ? $"{commandId} · c:{melodyAliasTail}"
+            : $"{commandId} · c:{melodyAliasTail} · {tail}";
+    }
 }
 
 /// <summary>Палитра команд.</summary>
@@ -124,6 +141,9 @@ public partial class MainWindowViewModel
 
     private CancellationTokenSource? _commandPaletteGoToCts;
     private long _commandPaletteGoToSeq;
+    private readonly IIdsSurfaceCompositor<CommandPaletteSurfaceIntent, CommandPaletteSurfaceSnapshot> _commandPaletteSurfaceCompositor =
+        new CommandPaletteSurfaceCompositor();
+    private CommandPaletteSurfaceSnapshot _commandPaletteSurfaceSnapshot = CommandPaletteSurfaceSnapshot.Empty;
 
     [ObservableProperty]
     public partial bool IsCommandPaletteOpen { get; set; }
@@ -133,6 +153,13 @@ public partial class MainWindowViewModel
 
     [ObservableProperty]
     public partial int CommandPaletteSelectedIndex { get; set; } = -1;
+
+    /// <summary>IDS v0 снимок оверлея Ctrl+Q (канал -> композитор -> поверхность).</summary>
+    public CommandPaletteSurfaceSnapshot CommandPaletteSurfaceSnapshot
+    {
+        get => _commandPaletteSurfaceSnapshot;
+        private set => SetProperty(ref _commandPaletteSurfaceSnapshot, value);
+    }
 
     /// <summary>Подсказка внизу палитры; жест «выделить запрос» из <c>hotkeys.toml</c> (<c>toggle_command_palette</c>).</summary>
     public string CommandPaletteFooterHint
@@ -167,13 +194,19 @@ public partial class MainWindowViewModel
 
     partial void OnCommandPaletteQueryChanged(string value) => RefreshCommandPaletteFilter();
 
+    partial void OnCommandPaletteSelectedIndexChanged(int value) => RefreshCommandPaletteSurfaceSnapshot();
+
     partial void OnIsCommandPaletteOpenChanged(bool value)
     {
         if (!value)
         {
             _commandPaletteGoToCts?.Cancel();
             _commandPaletteGoToCts = null;
+            CommandPaletteSurfaceSnapshot = CommandPaletteSurfaceSnapshot.Empty;
+            return;
         }
+
+        RefreshCommandPaletteSurfaceSnapshot();
     }
 
     [RelayCommand]
@@ -273,6 +306,7 @@ public partial class MainWindowViewModel
             FilteredCommandPaletteEntries.Add(new IdeCommandPaletteRowViewModel(e, hotkeys.GetDisplayHint(e.CommandId), family));
 
         CommandPaletteSelectedIndex = FilteredCommandPaletteEntries.Count > 0 ? 0 : -1;
+        RefreshCommandPaletteSurfaceSnapshot();
     }
 
     /// <summary>Режим <c>c:</c> (Command Melody) — см. <see cref="IntentMelodyAliases"/>, <see cref="MelodyInterpreter"/>.</summary>
@@ -289,6 +323,7 @@ public partial class MainWindowViewModel
         }
 
         CommandPaletteSelectedIndex = plan.SelectedIndex;
+        RefreshCommandPaletteSurfaceSnapshot();
     }
 
     private void RefreshGoToPaletteFilter(GoToAllQuery q)
@@ -335,6 +370,7 @@ public partial class MainWindowViewModel
 
         if (CommandPaletteSelectedIndex >= FilteredCommandPaletteEntries.Count)
             CommandPaletteSelectedIndex = Math.Max(0, FilteredCommandPaletteEntries.Count - 1);
+        RefreshCommandPaletteSurfaceSnapshot();
     }
 
     private void FillGoToFileEntries(string term)
@@ -452,6 +488,7 @@ public partial class MainWindowViewModel
                 }
 
                 CommandPaletteSelectedIndex = FilteredCommandPaletteEntries.Count > 0 ? 0 : -1;
+                RefreshCommandPaletteSurfaceSnapshot();
             });
         }
         catch (OperationCanceledException)
@@ -489,5 +526,20 @@ public partial class MainWindowViewModel
     {
         if (IsCommandPaletteOpen)
             RefreshCommandPaletteFilter();
+    }
+
+    private void RefreshCommandPaletteSurfaceSnapshot()
+    {
+        if (!IsCommandPaletteOpen)
+        {
+            CommandPaletteSurfaceSnapshot = CommandPaletteSurfaceSnapshot.Empty;
+            return;
+        }
+
+        var intent = new CommandPaletteSurfaceIntent(
+            CommandPaletteQuery,
+            CommandPaletteSelectedIndex,
+            FilteredCommandPaletteEntries);
+        CommandPaletteSurfaceSnapshot = _commandPaletteSurfaceCompositor.Compose(intent);
     }
 }

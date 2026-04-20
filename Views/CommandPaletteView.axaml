@@ -6,30 +6,55 @@
              Focusable="True"
              IsVisible="False">
   <UserControl.Styles>
+    <Style Selector="ListBoxItem">
+      <Setter Property="Padding" Value="8,6"/>
+      <Setter Property="Margin" Value="0,2,0,2"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="CornerRadius" Value="6"/>
+    </Style>
+    <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#223A465C"/>
+    </Style>
     <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
-      <Setter Property="Background" Value="{DynamicResource CascadeTheme.MenuBackground}"/>
+      <Setter Property="Background" Value="#2A4A617E"/>
+    </Style>
+    <Style Selector="TextBox.palette-query">
+      <Setter Property="FontSize" Value="14"/>
+      <Setter Property="Padding" Value="10,8"/>
+      <Setter Property="Background" Value="#141B26"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.PanelTitleAccentBrush}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="6"/>
+    </Style>
+    <Style Selector="Border.hotkey-pill">
+      <Setter Property="CornerRadius" Value="10"/>
+      <Setter Property="Padding" Value="8,2"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="BorderBrush" Value="#5B6E87"/>
+      <Setter Property="Background" Value="#1A2333"/>
     </Style>
   </UserControl.Styles>
   <Border Background="#AA000000"
           PointerPressed="OnDimmerPressed">
-    <Border MaxWidth="720"
-            MaxHeight="480"
+    <Border MaxWidth="860"
+            MaxHeight="620"
             Margin="40"
-            Padding="14"
+            Padding="16"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            Background="{DynamicResource CascadeTheme.ChatMessageBubbleBackground}"
+            Background="#11161F"
             BorderBrush="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"
             BorderThickness="1"
             CornerRadius="8"
             PointerPressed="OnPanelPressed">
       <Grid RowDefinitions="Auto,*,Auto">
         <TextBox x:Name="SearchTextBox"
+                 Classes="palette-query"
                  Grid.Row="0"
                  PlaceholderText="{Binding CommandPalettePlaceholderText}"
                  Text="{Binding CommandPaletteQuery, Mode=TwoWay}"/>
         <ListBox Grid.Row="1"
-                 Margin="0,8,0,0"
+                 Margin="0,10,0,0"
                  ItemsSource="{Binding FilteredCommandPaletteEntries}"
                  SelectedIndex="{Binding CommandPaletteSelectedIndex, Mode=TwoWay}"
                  Background="Transparent">
@@ -37,27 +62,44 @@
             <DataTemplate DataType="vm:IdeCommandPaletteRowViewModel">
               <Grid ColumnDefinitions="*,Auto"
                     Opacity="{Binding RowOpacity}">
-                <StackPanel Grid.Column="0" Orientation="Vertical" Spacing="2">
-                  <TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>
-                  <TextBlock Text="{Binding Category}" Opacity="0.7" FontSize="11"/>
+                <StackPanel Grid.Column="0" Orientation="Vertical" Spacing="4">
+                  <TextBlock Text="{Binding Title}"
+                             FontWeight="SemiBold"
+                             FontSize="12"
+                             LineHeight="16"
+                             Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
+                  <TextBlock Text="{Binding Subtitle}"
+                             FontSize="12.5"
+                             FontFamily="Consolas,Cascadia Mono,Courier New,monospace"
+                             TextWrapping="Wrap"
+                             Opacity="0.93"
+                             Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
                   <TextBlock Text="{Binding UnavailableHint}"
                              IsVisible="{Binding ShowUnavailableHint}"
-                             Opacity="0.85"
-                             FontSize="11"/>
+                             Opacity="0.98"
+                             FontSize="12"
+                             Foreground="#F2C078"/>
                 </StackPanel>
-                <TextBlock Grid.Column="1"
-                           Text="{Binding HotkeyHint}"
-                           Opacity="0.65"
-                           VerticalAlignment="Center"
-                           Margin="12,0,0,0"/>
+                <Border Grid.Column="1"
+                        Classes="hotkey-pill">
+                  <TextBlock Text="{Binding HotkeyHint}"
+                             FontSize="10.5"
+                             FontFamily="Consolas,Cascadia Mono,Courier New,monospace"
+                             Opacity="0.92"
+                             VerticalAlignment="Center"
+                             Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+                </Border>
               </Grid>
             </DataTemplate>
           </ListBox.ItemTemplate>
         </ListBox>
         <TextBlock Grid.Row="2"
-                   Margin="0,8,0,0"
-                   FontSize="11"
-                   Opacity="0.65"
+                   Margin="0,10,0,0"
+                   FontSize="12"
+                   LineHeight="17"
+                   TextWrapping="Wrap"
+                   Opacity="0.92"
+                   Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
                    Text="{Binding CommandPaletteFooterHint}"/>
       </Grid>
     </Border>
