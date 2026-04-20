@@ -51,7 +51,9 @@ public partial class MainWindowViewModel
                 _settings,
                 Workspace.SolutionPath,
                 _csharpLspHost,
-                _markdownLspHost))
+                _markdownLspHost,
+                IsMcpStdioHost: IsMcpServerMode,
+                ActiveAiProvider: ActiveAiProvider))
             .ConfigureAwait(false);
 
         await UiScheduler.Default.InvokeAsync(() =>

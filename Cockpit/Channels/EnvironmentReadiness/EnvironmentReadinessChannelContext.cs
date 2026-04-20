@@ -12,4 +12,6 @@ public readonly record struct EnvironmentReadinessChannelContext(
     string? SolutionPath,
     CSharpLspDiagnosticsHost? CSharpHost,
     MarkdownLspDiagnosticsHost? MarkdownHost,
+    bool IsMcpStdioHost = false,
+    string? ActiveAiProvider = null,
     CancellationToken CancellationToken = default);

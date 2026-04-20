@@ -9,6 +9,6 @@ public enum EnvironmentReadinessPresentationKind
     /// <summary>Узкая колонка: карточки с текстовым глифом уровня (не полоса ламп сверху).</summary>
     CompactCards,
 
-    /// <summary>Широкая зона: таблица; примитив лампы Korry в первой колонке строки.</summary>
+    /// <summary>Широкая зона: тот же вертикальный список карточек, увеличенные отступы и шрифт.</summary>
     WideTable,
 }

@@ -9,14 +9,269 @@ namespace CascadeIDE.Services;
 /// </summary>
 public static class EnvironmentReadinessSnapshotBuilder
 {
-    /// <summary>Заглушка для ячейки «агент»: отдельная проверка MCP/ACP — по мере появления контракта.</summary>
-    private static AnnunciatorLampItem BuildAgentRow() =>
-        new(
+    /// <summary>Сводная строка блока Dev Tools: агент, LSP, dotnet — лампа «DEV» гаснет, если по всем деталям только Ok/Advisory.</summary>
+    public static AnnunciatorLampItem BuildDevToolsSectionRow(IReadOnlyList<AnnunciatorLampItem> devToolsDetailRows)
+    {
+        if (devToolsDetailRows.Count == 0)
+            throw new ArgumentException("Expected at least one detail row.", nameof(devToolsDetailRows));
+
+        var worst = devToolsDetailRows[0].Level;
+        for (var i = 1; i < devToolsDetailRows.Count; i++)
+            worst = WorstAnnunciatorLevel(worst, devToolsDetailRows[i].Level);
+
+        var level = AggregateSectionLampLevelFromWorstChild(worst);
+        var detail = level == AnnunciatorLampLevel.Ok
+            ? ""
+            : "Есть замечания уровня Caution или выше — см. строки ниже.";
+        return new AnnunciatorLampItem(
+            EnvironmentReadinessCellIds.DevToolsSection,
+            "Dev Tools",
+            detail,
+            level,
+            LampShortLabel: "DEV");
+    }
+
+    /// <summary>Ячейка «агент»: режим моста MCP (stdio) / ACP / без внешнего моста (Off = <see cref="AnnunciatorLampLevel.Caution"/>).</summary>
+    private static AnnunciatorLampItem BuildAgentRow(bool isMcpStdioHost, string? activeAiProvider)
+    {
+        if (isMcpStdioHost)
+        {
+            return new AnnunciatorLampItem(
+                EnvironmentReadinessCellIds.Agent,
+                "Агент (MCP)",
+                "Запуск с --mcp-stdio: внешний хост вызывает инструменты этой сессии CascadeIDE (см. MCP-PROTOCOL.md).",
+                AnnunciatorLampLevel.Advisory,
+                LampShortLabel: "MCP");
+        }
+
+        if (string.Equals(activeAiProvider, "CursorACP", StringComparison.Ordinal))
+        {
+            return new AnnunciatorLampItem(
+                EnvironmentReadinessCellIds.Agent,
+                "Агент (ACP)",
+                "Чат через Cursor ACP: сессия cursor-agent и mcpServers из настроек ([mcp], ADR 0048).",
+                AnnunciatorLampLevel.Advisory,
+                LampShortLabel: "ACP");
+        }
+
+        return new AnnunciatorLampItem(
             EnvironmentReadinessCellIds.Agent,
-            "Агент (AI)",
-            "Канал к агенту и MCP задаётся сессией IDE; отдельный health-check на этой странице пока не выполняется.",
-            AnnunciatorLampLevel.Advisory,
-            LampShortLabel: "AI");
+            "Агент (нет моста)",
+            "Нет ни --mcp-stdio, ни провайдера Cursor ACP: внешний контур агента к этой IDE не подключён (встроенные провайдеры — без моста к хосту).",
+            AnnunciatorLampLevel.Caution,
+            LampShortLabel: "Off");
+    }
+
+    /// <summary>Переменные окружения и пути, которые IDE читает для agent-notes / knowledge / netcoredbg (значения в UI не показываем).</summary>
+    public static IReadOnlyList<AnnunciatorLampItem> BuildEnvProbeRows(EnvironmentReadinessEnvSnapshot env) =>
+    [
+        BuildAgentNotesFileRow(env.AgentNotesFile),
+        BuildAgentNotesCanonRow(env.AgentNotesCanonPath),
+        BuildNetcoreDbgRow(env.NetcoreDbgPath),
+    ];
+
+    /// <summary>
+    /// Сводная строка блока env: лампа «ENV» гаснет (<see cref="AnnunciatorLampLevel.Ok"/>), если по трём проверкам нет Caution/Critical
+    /// (только Ok и Advisory — опционально не задано).
+    /// </summary>
+    public static AnnunciatorLampItem BuildEnvSectionRow(IReadOnlyList<AnnunciatorLampItem> envProbeRows)
+    {
+        if (envProbeRows.Count != 3)
+            throw new ArgumentOutOfRangeException(nameof(envProbeRows), envProbeRows.Count, "Expected Notes, KB, Dbg.");
+
+        var level = AggregateEnvBlockLevel(envProbeRows[0].Level, envProbeRows[1].Level, envProbeRows[2].Level);
+        var detail = level == AnnunciatorLampLevel.Ok
+            ? ""
+            : "Есть замечания уровня Caution или выше — см. строки ниже.";
+        return new AnnunciatorLampItem(
+            EnvironmentReadinessCellIds.EnvSection,
+            "Переменные окружения",
+            detail,
+            level,
+            LampShortLabel: "ENV");
+    }
+
+    /// <summary>Worst of three env rows, но Advisory не зажигает сводную лампу: только Caution/Critical.</summary>
+    internal static AnnunciatorLampLevel AggregateEnvBlockLevel(
+        AnnunciatorLampLevel notes,
+        AnnunciatorLampLevel canon,
+        AnnunciatorLampLevel dbg) =>
+        AggregateSectionLampLevelFromWorstChild(
+            WorstAnnunciatorLevel(WorstAnnunciatorLevel(notes, canon), dbg));
+
+    private static AnnunciatorLampLevel WorstAnnunciatorLevel(AnnunciatorLampLevel a, AnnunciatorLampLevel b) =>
+        AnnunciatorLevelOrdinal(a) >= AnnunciatorLevelOrdinal(b) ? a : b;
+
+    private static int AnnunciatorLevelOrdinal(AnnunciatorLampLevel l) => l switch
+    {
+        AnnunciatorLampLevel.Ok => 0,
+        AnnunciatorLampLevel.Advisory => 1,
+        AnnunciatorLampLevel.Caution => 2,
+        AnnunciatorLampLevel.Critical => 3,
+        _ => 0,
+    };
+
+    /// <summary>Для сводной лампы секции: Caution/Critical сохраняют уровень, Ok/Advisory — «норма» (лампа не горит).</summary>
+    internal static AnnunciatorLampLevel AggregateSectionLampLevelFromWorstChild(AnnunciatorLampLevel worstChild) =>
+        worstChild is AnnunciatorLampLevel.Caution or AnnunciatorLampLevel.Critical
+            ? worstChild
+            : AnnunciatorLampLevel.Ok;
+
+    private static AnnunciatorLampItem BuildAgentNotesFileRow(string? raw)
+    {
+        const string title = WellKnownEnv.AgentNotesFile;
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            return new AnnunciatorLampItem(
+                EnvironmentReadinessCellIds.AgentNotesFile,
+                title,
+                "Не задана: заметки в workspace/.cascade-ide/agent-notes.md при открытом решении; либо задай эту переменную для одного глобального файла.",
+                AnnunciatorLampLevel.Ok,
+                LampShortLabel: "Notes");
+        }
+
+        try
+        {
+            var full = Path.GetFullPath(raw.Trim());
+            var parent = Path.GetDirectoryName(full);
+            if (!string.IsNullOrEmpty(parent) && Directory.Exists(parent))
+            {
+                return new AnnunciatorLampItem(
+                    EnvironmentReadinessCellIds.AgentNotesFile,
+                    title,
+                    "Задана: каталог для глобального файла заметок существует.",
+                    AnnunciatorLampLevel.Ok,
+                    LampShortLabel: "Notes");
+            }
+
+            if (File.Exists(full))
+            {
+                return new AnnunciatorLampItem(
+                    EnvironmentReadinessCellIds.AgentNotesFile,
+                    title,
+                    "Задана: глобальный файл заметок существует.",
+                    AnnunciatorLampLevel.Ok,
+                    LampShortLabel: "Notes");
+            }
+
+            return new AnnunciatorLampItem(
+                EnvironmentReadinessCellIds.AgentNotesFile,
+                title,
+                "Родительский каталог для пути не найден — проверь AGENT_NOTES_FILE.",
+                AnnunciatorLampLevel.Caution,
+                LampShortLabel: "Notes");
+        }
+        catch
+        {
+            return new AnnunciatorLampItem(
+                EnvironmentReadinessCellIds.AgentNotesFile,
+                title,
+                "Некорректный путь в AGENT_NOTES_FILE.",
+                AnnunciatorLampLevel.Critical,
+                LampShortLabel: "Notes");
+        }
+    }
+
+    private static AnnunciatorLampItem BuildAgentNotesCanonRow(string? raw)
+    {
+        const string title = WellKnownEnv.AgentNotesCanonPath;
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            return new AnnunciatorLampItem(
+                EnvironmentReadinessCellIds.AgentNotesCanonPath,
+                title,
+                "Не задана: для knowledge передавай canon_path в MCP или задай корень репозитория agent-notes здесь.",
+                AnnunciatorLampLevel.Advisory,
+                LampShortLabel: "KB");
+        }
+
+        try
+        {
+            var full = Path.GetFullPath(raw.Trim());
+            if (Directory.Exists(full))
+            {
+                return new AnnunciatorLampItem(
+                    EnvironmentReadinessCellIds.AgentNotesCanonPath,
+                    title,
+                    "Каталог канона knowledge существует.",
+                    AnnunciatorLampLevel.Ok,
+                    LampShortLabel: "KB");
+            }
+
+            return new AnnunciatorLampItem(
+                EnvironmentReadinessCellIds.AgentNotesCanonPath,
+                title,
+                "Каталог не найден — проверь AGENT_NOTES_CANON_PATH.",
+                AnnunciatorLampLevel.Caution,
+                LampShortLabel: "KB");
+        }
+        catch
+        {
+            return new AnnunciatorLampItem(
+                EnvironmentReadinessCellIds.AgentNotesCanonPath,
+                title,
+                "Некорректный путь в AGENT_NOTES_CANON_PATH.",
+                AnnunciatorLampLevel.Critical,
+                LampShortLabel: "KB");
+        }
+    }
+
+    private static AnnunciatorLampItem BuildNetcoreDbgRow(string? raw)
+    {
+        const string title = WellKnownEnv.NetcoreDbgPath;
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            return new AnnunciatorLampItem(
+                EnvironmentReadinessCellIds.NetcoreDbgPath,
+                title,
+                "Не задана: используется имя netcoredbg из PATH (или передай путь при запуске отладки).",
+                AnnunciatorLampLevel.Advisory,
+                LampShortLabel: "Dbg");
+        }
+
+        var trimmed = raw.Trim();
+        var resolved = EnvironmentReadinessExecutablePathProbe.TryResolveExecutablePath(trimmed);
+        if (resolved is not null)
+        {
+            return new AnnunciatorLampItem(
+                EnvironmentReadinessCellIds.NetcoreDbgPath,
+                title,
+                "Исполняемый файл найден (существующий путь или имя в PATH).",
+                AnnunciatorLampLevel.Ok,
+                LampShortLabel: "Dbg");
+        }
+
+        try
+        {
+            _ = Path.GetFullPath(trimmed);
+        }
+        catch
+        {
+            return new AnnunciatorLampItem(
+                EnvironmentReadinessCellIds.NetcoreDbgPath,
+                title,
+                "Некорректный путь в NETCOREDBG_PATH.",
+                AnnunciatorLampLevel.Critical,
+                LampShortLabel: "Dbg");
+        }
+
+        if (EnvironmentReadinessExecutablePathProbe.IsBareExecutableName(trimmed))
+        {
+            return new AnnunciatorLampItem(
+                EnvironmentReadinessCellIds.NetcoreDbgPath,
+                title,
+                "Имя без полного пути: в каталогах PATH исполняемый файл не найден.",
+                AnnunciatorLampLevel.Caution,
+                LampShortLabel: "Dbg");
+        }
+
+        return new AnnunciatorLampItem(
+            EnvironmentReadinessCellIds.NetcoreDbgPath,
+            title,
+            "Файл по NETCOREDBG_PATH не найден.",
+            AnnunciatorLampLevel.Caution,
+            LampShortLabel: "Dbg");
+    }
 
     /// <summary>Статическая часть: C# LSP, Markdown LSP (без сетевого вызова).</summary>
     public static IReadOnlyList<AnnunciatorLampItem> BuildLspRows(
@@ -224,23 +479,35 @@ public static class EnvironmentReadinessSnapshotBuilder
     }
 
     /// <summary>
-    /// Полный набор строк для страницы «готовность окружения» (ADR 0023): LSP, затем проверка <c>dotnet</c>.
-    /// Дополнительные проверки (MCP, переменные окружения и т.д.) добавлять сюда, чтобы не раздувать ViewModel.
+    /// Полный набор строк для страницы «готовность окружения» (ADR 0023): блок Dev Tools (агент, LSP, dotnet), затем env, затем переменные.
+    /// Дополнительные проверки добавлять сюда, чтобы не раздувать ViewModel.
     /// </summary>
     public static async Task<IReadOnlyList<AnnunciatorLampItem>> BuildAllRowsAsync(
         CascadeIdeSettings settings,
         string? solutionPath,
         CSharpLspDiagnosticsHost? csharpHost,
         MarkdownLspDiagnosticsHost? markdownHost,
+        bool isMcpStdioHost = false,
+        string? activeAiProvider = null,
         CancellationToken cancellationToken = default)
     {
-        var agent = BuildAgentRow();
+        var agent = BuildAgentRow(isMcpStdioHost, activeAiProvider);
+        var envRows = BuildEnvProbeRows(EnvironmentReadinessEnvSnapshot.FromCurrentProcess());
         var lsp = BuildLspRows(settings, solutionPath, csharpHost, markdownHost);
         var dotnet = await ProbeDotnetAsync(cancellationToken).ConfigureAwait(false);
-        var combined = new List<AnnunciatorLampItem>(lsp.Count + 2);
-        combined.Add(agent);
-        combined.AddRange(lsp);
-        combined.Add(dotnet);
+
+        var devToolDetails = new List<AnnunciatorLampItem>(1 + lsp.Count + 1) { agent };
+        devToolDetails.AddRange(lsp);
+        devToolDetails.Add(dotnet);
+
+        var devToolsSection = BuildDevToolsSectionRow(devToolDetails);
+        var envSection = BuildEnvSectionRow(envRows);
+
+        var combined = new List<AnnunciatorLampItem>(devToolDetails.Count + envRows.Count + 2);
+        combined.Add(devToolsSection);
+        combined.AddRange(devToolDetails);
+        combined.Add(envSection);
+        combined.AddRange(envRows);
         return combined;
     }
 }

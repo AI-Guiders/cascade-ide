@@ -15,5 +15,7 @@ public sealed class EnvironmentReadinessChannel : IEnvironmentReadinessChannel
             context.SolutionPath,
             context.CSharpHost,
             context.MarkdownHost,
+            context.IsMcpStdioHost,
+            context.ActiveAiProvider,
             context.CancellationToken));
 }

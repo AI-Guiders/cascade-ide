@@ -7,101 +7,168 @@
              x:DataType="vm:MainWindowViewModel">
     <UserControl.Resources>
         <views:AnnunciatorLampLevelToBrushConverter x:Key="EnvLevelBrush"/>
-        <views:AnnunciatorLampLevelToGlyphTextConverter x:Key="EnvLevelGlyph"/>
+        <views:EnvironmentReadinessIsSectionRowConverter x:Key="ErsIsSectionRow"/>
+        <views:StringNotEmptyToBoolConverter x:Key="ErsDetailVisible"/>
     </UserControl.Resources>
     <DockPanel Margin="0,4,0,0">
-        <views:PanelChromeHeader DockPanel.Dock="Top" Title="Готовность окружения · LSP и инструменты" UppercaseTitle="True"/>
-        <!-- ADR 0063/0068: полоса ламп сверху убрана; в широкой таблице тот же payload — примитив Korry в первой колонке. Компакт — карточки с глифом. -->
-        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-            <!-- Два режима текстового deck по ширине контейнера (см. code-behind + EnvironmentReadinessPresentationResolver). -->
+        <views:PanelChromeHeader DockPanel.Dock="Top"
+                                 Title="Готовность окружения · LSP, инструменты и переменные"
+                                 UppercaseTitle="True"/>
+        <!-- ADR 0063/0068: одна коллекция; порядок строк — payload (секции и детали). Список карточек, без таблицы. -->
+        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
             <Panel>
-                <!-- Узкая зона: текстовые карточки (удобно при (P|F|M) и узком MFD). -->
-                <Grid x:Name="CompactLayoutRoot" IsVisible="True">
+                <!-- Узкий MFD: компактные карточки -->
+                <Border x:Name="CompactLayoutRoot"
+                        IsVisible="True"
+                        Margin="0,0,0,4"
+                        BorderBrush="{DynamicResource CascadeTheme.EditorColumnBorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="4"
+                        Background="{DynamicResource CascadeTheme.PanelBackgroundBrush}">
                     <ItemsControl ItemsSource="{Binding EnvironmentReadinessItems}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Vertical"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="models:AnnunciatorLampItem">
-                                <Border Classes="modeCard"
-                                        Padding="8,6"
-                                        Margin="0,0,0,6"
-                                        BorderBrush="{DynamicResource CascadeTheme.EditorColumnBorderBrush}"
-                                        BorderThickness="1"
-                                        CornerRadius="4">
-                                    <StackPanel Spacing="4">
-                                        <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <TextBlock VerticalAlignment="Center"
-                                                       FontSize="15"
-                                                       FontWeight="SemiBold"
-                                                       Text="{Binding Level, Converter={StaticResource EnvLevelGlyph}}"
-                                                       Foreground="{Binding Level, Converter={StaticResource EnvLevelBrush}}"/>
-                                            <TextBlock Text="{Binding Title}"
-                                                       TextWrapping="Wrap"
-                                                       FontWeight="SemiBold"
-                                                       FontSize="12"
-                                                       VerticalAlignment="Center"
-                                                       Foreground="{Binding Level, Converter={StaticResource EnvLevelBrush}}"/>
-                                        </StackPanel>
-                                        <TextBlock Text="{Binding Detail}"
-                                                   TextWrapping="Wrap"
-                                                   FontSize="11"
-                                                   Foreground="{DynamicResource CascadeTheme.TerminalForeground}"/>
-                                    </StackPanel>
-                                </Border>
+                                <Panel>
+                                    <Border IsVisible="{Binding Id, Converter={StaticResource ErsIsSectionRow}}"
+                                            Padding="8,8"
+                                            Margin="0,8,0,0"
+                                            CornerRadius="4"
+                                            BorderThickness="1"
+                                            BorderBrush="{DynamicResource CascadeTheme.EditorColumnBorderBrush}"
+                                            Background="{DynamicResource CascadeTheme.MarkdownPreviewPanelBackground}">
+                                        <Grid ColumnDefinitions="Auto,*">
+                                            <views:AnnunciatorLampCell Grid.Column="0"
+                                                                       Item="{Binding}"
+                                                                       VerticalAlignment="Top"
+                                                                       HorizontalAlignment="Center"
+                                                                       Margin="0,0,10,0"/>
+                                            <StackPanel Grid.Column="1" Spacing="4">
+                                                <TextBlock Text="{Binding Title}"
+                                                           TextWrapping="Wrap"
+                                                           FontWeight="SemiBold"
+                                                           FontSize="12"
+                                                           Foreground="{Binding Level, Converter={StaticResource EnvLevelBrush}}"/>
+                                                <TextBlock Text="{Binding Detail}"
+                                                           TextWrapping="Wrap"
+                                                           FontSize="10"
+                                                           IsVisible="{Binding Detail, Converter={StaticResource ErsDetailVisible}}"
+                                                           Foreground="{DynamicResource CascadeTheme.TerminalForeground}"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    <Border IsVisible="{Binding Id, Converter={StaticResource ErsIsSectionRow}, ConverterParameter=Invert}"
+                                            Padding="8,6"
+                                            Margin="0,0,0,6"
+                                            CornerRadius="4"
+                                            BorderThickness="1"
+                                            BorderBrush="{DynamicResource CascadeTheme.EditorColumnBorderBrush}"
+                                            Background="{DynamicResource CascadeTheme.PanelBackgroundBrush}">
+                                        <Grid ColumnDefinitions="Auto,*">
+                                            <views:AnnunciatorLampCell Grid.Column="0"
+                                                                       Item="{Binding}"
+                                                                       VerticalAlignment="Top"
+                                                                       HorizontalAlignment="Center"
+                                                                       Margin="0,0,10,0"/>
+                                            <StackPanel Grid.Column="1" Spacing="2">
+                                                <TextBlock Text="{Binding Title}"
+                                                           TextWrapping="Wrap"
+                                                           FontWeight="SemiBold"
+                                                           FontSize="11"
+                                                           Foreground="{Binding Level, Converter={StaticResource EnvLevelBrush}}"/>
+                                                <TextBlock Text="{Binding Detail}"
+                                                           TextWrapping="Wrap"
+                                                           FontSize="10"
+                                                           Foreground="{DynamicResource CascadeTheme.TerminalForeground}"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </Panel>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
-                </Grid>
-                <!-- Достаточная ширина: таблица с шапкой; первая колонка — лампа (та же отрисовка, что у полосы). -->
-                <Grid x:Name="WideLayoutRoot" IsVisible="False" RowDefinitions="Auto,*">
-                    <Grid Grid.Row="0"
-                          ColumnDefinitions="52,160,*"
-                          Margin="0,0,0,6"
-                          Opacity="0.85">
-                        <TextBlock Grid.Column="0" Text="" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Column="1"
-                                   Text="Компонент"
-                                   FontSize="11"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-                        <TextBlock Grid.Column="2"
-                                   Text="Сведения"
-                                   FontSize="11"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-                    </Grid>
-                    <ItemsControl Grid.Row="1" ItemsSource="{Binding EnvironmentReadinessItems}">
+                </Border>
+
+                <!-- Широкая зона: тот же список, крупнее типографика -->
+                <Border x:Name="WideLayoutRoot"
+                        IsVisible="False"
+                        Margin="0,0,0,4"
+                        BorderBrush="{DynamicResource CascadeTheme.EditorColumnBorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="4"
+                        Background="{DynamicResource CascadeTheme.PanelBackgroundBrush}">
+                    <ItemsControl ItemsSource="{Binding EnvironmentReadinessItems}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Vertical"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="models:AnnunciatorLampItem">
-                                <Border Classes="modeCard"
-                                        Padding="8,8"
-                                        Margin="0,0,0,6"
-                                        BorderBrush="{DynamicResource CascadeTheme.EditorColumnBorderBrush}"
-                                        BorderThickness="1"
-                                        CornerRadius="4">
-                                    <Grid ColumnDefinitions="52,160,*" RowDefinitions="Auto">
-                                        <views:AnnunciatorLampCell Grid.Column="0"
-                                                                   Item="{Binding}"
-                                                                   HorizontalAlignment="Center"
-                                                                   VerticalAlignment="Center"/>
-                                        <TextBlock Grid.Column="1"
-                                                   Text="{Binding Title}"
-                                                   TextWrapping="Wrap"
-                                                   FontWeight="SemiBold"
-                                                   FontSize="12"
-                                                   VerticalAlignment="Center"
-                                                   Margin="4,0,8,0"
-                                                   Foreground="{Binding Level, Converter={StaticResource EnvLevelBrush}}"/>
-                                        <TextBlock Grid.Column="2"
-                                                   Text="{Binding Detail}"
-                                                   TextWrapping="Wrap"
-                                                   FontSize="11"
-                                                   VerticalAlignment="Center"
-                                                   Foreground="{DynamicResource CascadeTheme.TerminalForeground}"/>
-                                    </Grid>
-                                </Border>
+                                <Panel>
+                                    <Border IsVisible="{Binding Id, Converter={StaticResource ErsIsSectionRow}}"
+                                            Padding="12,10"
+                                            Margin="0,10,0,0"
+                                            CornerRadius="6"
+                                            BorderThickness="1"
+                                            BorderBrush="{DynamicResource CascadeTheme.EditorColumnBorderBrush}"
+                                            Background="{DynamicResource CascadeTheme.MarkdownPreviewPanelBackground}">
+                                        <Grid ColumnDefinitions="Auto,*">
+                                            <views:AnnunciatorLampCell Grid.Column="0"
+                                                                       Item="{Binding}"
+                                                                       VerticalAlignment="Top"
+                                                                       HorizontalAlignment="Center"
+                                                                       Margin="0,0,12,0"/>
+                                            <StackPanel Grid.Column="1" Spacing="6">
+                                                <TextBlock Text="{Binding Title}"
+                                                           TextWrapping="Wrap"
+                                                           FontWeight="SemiBold"
+                                                           FontSize="14"
+                                                           Foreground="{Binding Level, Converter={StaticResource EnvLevelBrush}}"/>
+                                                <TextBlock Text="{Binding Detail}"
+                                                           TextWrapping="Wrap"
+                                                           FontSize="12"
+                                                           IsVisible="{Binding Detail, Converter={StaticResource ErsDetailVisible}}"
+                                                           Foreground="{DynamicResource CascadeTheme.TerminalForeground}"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    <Border IsVisible="{Binding Id, Converter={StaticResource ErsIsSectionRow}, ConverterParameter=Invert}"
+                                            Padding="10,8"
+                                            Margin="0,0,0,8"
+                                            CornerRadius="6"
+                                            BorderThickness="1"
+                                            BorderBrush="{DynamicResource CascadeTheme.EditorColumnBorderBrush}"
+                                            Background="{DynamicResource CascadeTheme.PanelBackgroundBrush}">
+                                        <Grid ColumnDefinitions="Auto,*">
+                                            <views:AnnunciatorLampCell Grid.Column="0"
+                                                                       Item="{Binding}"
+                                                                       VerticalAlignment="Top"
+                                                                       HorizontalAlignment="Center"
+                                                                       Margin="0,0,12,0"/>
+                                            <StackPanel Grid.Column="1" Spacing="4">
+                                                <TextBlock Text="{Binding Title}"
+                                                           TextWrapping="Wrap"
+                                                           FontWeight="SemiBold"
+                                                           FontSize="13"
+                                                           Foreground="{Binding Level, Converter={StaticResource EnvLevelBrush}}"/>
+                                                <TextBlock Text="{Binding Detail}"
+                                                           TextWrapping="Wrap"
+                                                           FontSize="12"
+                                                           Foreground="{DynamicResource CascadeTheme.TerminalForeground}"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </Panel>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
-                </Grid>
+                </Border>
             </Panel>
         </ScrollViewer>
     </DockPanel>

@@ -4,7 +4,7 @@ using CascadeIDE.Cockpit.Composition.EnvironmentReadiness;
 namespace CascadeIDE.Views;
 
 /// <summary>
-/// Готовность окружения: ADR 0063/0068 — одна коллекция payload; проекция «карточки» vs «таблица с лампой в первой колонке»
+/// Готовность окружения: ADR 0063/0068 — одна коллекция payload; проекция «компактный список карточек» vs «тот же список, крупнее»
 /// (<see cref="EnvironmentReadinessPresentationResolver"/>).
 /// </summary>
 public partial class EnvironmentReadinessMfdPageView : UserControl

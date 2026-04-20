@@ -18,10 +18,15 @@ public static class EnvironmentReadinessInstrumentDeck
     /// <summary>Порядок ячеек совпадает с <see cref="CascadeIDE.Services.EnvironmentReadinessSnapshotBuilder.BuildAllRowsAsync"/>.</summary>
     public static readonly IReadOnlyList<string> OrderedCellIds =
     [
+        EnvironmentReadinessCellIds.DevToolsSection,
         EnvironmentReadinessCellIds.Agent,
         EnvironmentReadinessCellIds.CSharpLsp,
         EnvironmentReadinessCellIds.MarkdownLsp,
         EnvironmentReadinessCellIds.DotnetSdk,
+        EnvironmentReadinessCellIds.EnvSection,
+        EnvironmentReadinessCellIds.AgentNotesFile,
+        EnvironmentReadinessCellIds.AgentNotesCanonPath,
+        EnvironmentReadinessCellIds.NetcoreDbgPath,
     ];
 
     /// <summary>Сетка ламп в одну строку (компактный glance).</summary>
