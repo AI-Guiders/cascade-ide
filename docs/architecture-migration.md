@@ -23,12 +23,12 @@
 | `MainWindowViewModel.Breakpoints.cs` | 135 | Брейкпоинты (IDE + .dotnet-debug-mcp-breakpoints.json + отладчик) и подсветка строки остановки. |
 | `MainWindowViewModel.Capabilities.cs` | 23 | Реестр capabilities. |
 | `MainWindowViewModel.CascadeChord.cs` | 274 | Аккордный слой ADR 0060: корень `cascade_chord` из hotkeys.toml (по умолчанию Ctrl+K), затем тот же хвост мелодии, что после `c:` в палитре (см. `IntentMelodyAliases`), без префикса `c:` и без Enter — если alias однозначен (например `so`). При конфликте префиксов (например `gs` vs `gsu`) точное совпадение после полного ввода или по клавише Enter. |
-| `MainWindowViewModel.CommandPalette.cs` | 404 | Палитра команд. |
+| `MainWindowViewModel.CommandPalette.cs` | 439 | Палитра команд. |
 | `MainWindowViewModel.cs` | 361 | Главный композитор окна (partial-класс, несколько `MainWindowViewModel*.cs`). Карта файлов и ответственности — `docs/architecture-migration.md`, раздел «Срез MainWindowViewModel». |
 | `MainWindowViewModel.CSharpLsp.cs` | 112 | Запуск/перезапуск C# LSP. |
 | `MainWindowViewModel.CursorAcp.cs` | 22 | Путь Cursor ACP. |
 | `MainWindowViewModel.DockInstrumentSlots.cs` | 27 | Какой инструмент показан в слотах PFD/MFD главного окна — по `InstrumentPlacementRuntime` и `DisplaySettings` (в т.ч. `[display.instrument_routing]` и merge `workspace.toml`). Логика — `MainWindowDockedGridInstrumentSlots`. |
-| `MainWindowViewModel.DocumentsDock.cs` | 46 | Документы / dock. |
+| `MainWindowViewModel.DocumentsDock.cs` | 42 | Документы / dock. |
 | `MainWindowViewModel.EditorHud.cs` | 48 | Полоса HUD над редактором (ADR 0021 §9): баннеры без отдельного якоря-колонки. Основной сценарий продукта — внешний агент (например Cursor) + Cascade; текст сюда задаётся явно (MCP, диагностика, позже — встроенная автономия), а не «по умолчанию» от автономного цикла Power. |
 | `MainWindowViewModel.EditorOllama.cs` | 43 | Состояние редактора, Markdown и выбора модели Ollama. |
 | `MainWindowViewModel.Eicas.cs` | 17 | Канал EICAS / CAS — отдельно от полосы телеметрии контура работы (ADR 0021, вариант A). |
@@ -44,14 +44,14 @@
 | `MainWindowViewModel.LayoutNotifications.cs` | 17 | Инвалидация производных высот `MainGrid` без длинных цепочек `NotifyPropertyChangedFor` в ShellState. |
 | `MainWindowViewModel.MarkdownExport.cs` | 55 | Экспорт Markdown. |
 | `MainWindowViewModel.MarkdownLsp.cs` | 95 | Запуск/перезапуск Markdown LSP. |
-| `MainWindowViewModel.Presentation.cs` | 285 | Вычисляемые свойства разметки, Workspace Health и видимости панелей (режимы UI). |
+| `MainWindowViewModel.MfdShell.cs` | 73 | Оболочка Mfd: одна активная страница; навигация — команды и палитра. Якорь на экране задаётся presentation (зона Mfd в main и/или окно-хост). |
+| `MainWindowViewModel.Presentation.cs` | 286 | Вычисляемые свойства разметки, Workspace Health и видимости панелей (режимы UI). |
 | `MainWindowViewModel.PresentationLayout.cs` | 160 | ADR 0017: строка `presentation` и второй `TopLevel` — `MfdHostWindow` с полным вторичным контуром (п. 8). |
 | `MainWindowViewModel.PresentationLayoutAuthority.cs` | 14 | Запись intent видимости панелей (семантика «хочу»); фактическая поверхность — `MainWindowShellSurfaceCompositor`. |
 | `MainWindowViewModel.RelayCommands.cs` | 282 | Relay-команды. |
 | `MainWindowViewModel.RelayCommands.Debug.cs` | 120 | Relay: отладка. |
-| `MainWindowViewModel.MfdShell.cs` | 73 | Оболочка Mfd: одна активная страница; навигация — команды и палитра. Якорь на экране задаётся presentation (зона Mfd в main и/или окно-хост). |
 | `MainWindowViewModel.SettingsReactive.cs` | 157 | Реакции на изменение полей настроек и ключей API: диск, автономный агент, панели. |
-| `MainWindowViewModel.ShellState.cs` | 240 | Раскладка панелей, нижняя зона, Workspace Health / автономный агент, ключи провайдеров и чата. |
+| `MainWindowViewModel.ShellState.cs` | 245 | Раскладка панелей, нижняя зона, Workspace Health / автономный агент, ключи провайдеров и чата. |
 | `MainWindowViewModel.SolutionBuild.cs` | 175 | Сборка, `BuildOutputPanel`. |
 | `MainWindowViewModel.StartupProject.cs` | 120 | Стартовый проект. |
 | `MainWindowViewModel.UiGitWorkspace.cs` | 138 | Git + workspace UI. |
@@ -70,7 +70,7 @@
 |------|------------|------------|
 | `IdeMcpCommandExecutor.cs` | 64 | Диспетчер MCP-команд IDE: разбор args и вызов `IIdeMcpActions` / UI-команд главного окна. |
 | `IdeMcpCommandExecutor.Handlers.AgentNotes.cs` | 70 | Хендлеры agent-notes. |
-| `IdeMcpCommandExecutor.Handlers.Chrome.cs` | 336 | Хендлеры хрома / видимости. |
+| `IdeMcpCommandExecutor.Handlers.Chrome.cs` | 338 | Хендлеры хрома / видимости. |
 | `IdeMcpCommandExecutor.Handlers.DapDebug.cs` | 88 | DAP / отладка. |
 | `IdeMcpCommandExecutor.Handlers.DebuggerUi.cs` | 62 | Поверхность отладки. |
 | `IdeMcpCommandExecutor.Handlers.Editor.cs` | 108 | Редактор. |
