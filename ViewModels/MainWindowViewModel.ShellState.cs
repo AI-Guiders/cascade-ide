@@ -225,6 +225,10 @@ public partial class MainWindowViewModel
     [ObservableProperty]
     private bool _chatMcpOnly;
 
+    /// <summary>Показывать thinking/reasoning в истории после завершения ответа.</summary>
+    [ObservableProperty]
+    private bool _showThinkingInHistory = true;
+
     /// <summary>Отправлять только диагностики и сигнатуры текущего файла (минимальный контекст).</summary>
     [ObservableProperty]
     private bool _useMinimizedContext = true;

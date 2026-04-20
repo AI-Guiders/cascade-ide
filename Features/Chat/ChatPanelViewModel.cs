@@ -17,11 +17,13 @@ namespace CascadeIDE.Features.Chat;
 public partial class ChatPanelViewModel : ViewModelBase
 {
     private static readonly JsonSerializerOptions ChatPanelJson = new(JsonSerializerDefaults.Web);
+    private const string CollapsedThinkingPrefix = "[thinking свернут] ";
 
     private readonly Services.AiProviderManager _aiProviderManager;
     private readonly Func<string> _getActiveAiProvider;
     private readonly Func<string?> _getSelectedOllamaModel;
     private readonly Func<bool> _getChatMcpOnly;
+    private readonly Func<bool> _getShowThinkingInHistory;
     private readonly Func<bool> _getUseMinimizedContext;
     private readonly Func<string?> _getCurrentFilePath;
     private readonly Func<string> _getEditorText;
@@ -33,6 +35,7 @@ public partial class ChatPanelViewModel : ViewModelBase
     private readonly Action? _showAcpTerminal;
     private readonly ChatSessionStore _sessionStore;
     private readonly ChatSurfaceCompositor _chatSurfaceCompositor = new();
+    private readonly Dictionary<Guid, string> _collapsedThinkingByMessageId = new();
 
     private CursorAcpChatConnection? _cursorAcp;
     private ClarificationBatch? _activeClarificationBatch;
@@ -40,12 +43,16 @@ public partial class ChatPanelViewModel : ViewModelBase
     private Guid _mainThreadId;
     private Guid _activeThreadId;
     private Guid? _pendingParentForNextMessage;
+    private int _acpWaitWatchdogGeneration;
+    private DateTimeOffset _lastAcpActivityUtc;
+    private string _chatLoadingStageBaseText = "";
 
     public ChatPanelViewModel(
         Services.AiProviderManager aiProviderManager,
         Func<string> getActiveAiProvider,
         Func<string?> getSelectedOllamaModel,
         Func<bool> getChatMcpOnly,
+        Func<bool> getShowThinkingInHistory,
         Func<bool> getUseMinimizedContext,
         Func<string?> getCurrentFilePath,
         Func<string> getEditorText,
@@ -60,6 +67,7 @@ public partial class ChatPanelViewModel : ViewModelBase
         _getActiveAiProvider = getActiveAiProvider;
         _getSelectedOllamaModel = getSelectedOllamaModel;
         _getChatMcpOnly = getChatMcpOnly;
+        _getShowThinkingInHistory = getShowThinkingInHistory;
         _getUseMinimizedContext = getUseMinimizedContext;
         _getCurrentFilePath = getCurrentFilePath;
         _getEditorText = getEditorText;
@@ -105,6 +113,9 @@ public partial class ChatPanelViewModel : ViewModelBase
     private bool _isChatLoading;
 
     [ObservableProperty]
+    private string _chatLoadingStatusText = "";
+
+    [ObservableProperty]
     private string _clarificationStatusText = "";
 
     [ObservableProperty]
@@ -117,12 +128,28 @@ public partial class ChatPanelViewModel : ViewModelBase
     [ObservableProperty]
     private string _threadBranchHint = "";
 
+    [ObservableProperty]
+    private Guid _selectedChatThreadId = Guid.Empty;
+
+    [ObservableProperty]
+    private bool _isChatOverviewMode;
+
     partial void OnSelectedMessageIndexChanged(int value)
     {
         RefreshChatSurfaceSnapshot();
     }
 
     partial void OnThreadBranchHintChanged(string value)
+    {
+        RefreshChatSurfaceSnapshot();
+    }
+
+    partial void OnSelectedChatThreadIdChanged(Guid value)
+    {
+        RefreshChatSurfaceSnapshot();
+    }
+
+    partial void OnIsChatOverviewModeChanged(bool value)
     {
         RefreshChatSurfaceSnapshot();
     }
@@ -232,6 +259,7 @@ public partial class ChatPanelViewModel : ViewModelBase
         ChatMessages.Add(userMsg);
         _ = PersistEventAsync(ChatHistoryEventKind.MessageAdded, MessageSnapshot(userMsg));
         IsChatLoading = true;
+        ChatLoadingStatusText = "Модель отвечает…";
 
         try
         {
@@ -242,10 +270,28 @@ public partial class ChatPanelViewModel : ViewModelBase
             {
                 var assistantMsg = new ChatMessageViewModel("assistant", "", threadId: _activeThreadId);
                 ChatMessages.Add(assistantMsg);
+                ChatMessageViewModel? thoughtMsg = null;
+                ChatMessageViewModel? toolMsg = null;
                 try
                 {
+                    await UiScheduler.Default.InvokeAsync(() =>
+                    {
+                        SetChatLoadingStage("Подключение к Cursor ACP…");
+                        MarkAcpActivity();
+                        RestartAcpWaitWatchdog();
+                    });
                     _cursorAcp ??= new CursorAcpChatConnection();
-                    _cursorAcp.SetIdeTerminalCallbacks(_appendAcpTerminal, _showAcpTerminal);
+                    _cursorAcp.SetIdeTerminalCallbacks(
+                        text =>
+                        {
+                            _appendAcpTerminal?.Invoke(text);
+                            UiScheduler.Default.Post(() =>
+                            {
+                                SetChatLoadingStage("Выполняю инструмент…");
+                                MarkAcpActivity();
+                            });
+                        },
+                        _showAcpTerminal);
                     var workspace = _getWorkspaceRoot().Trim();
                     if (string.IsNullOrEmpty(workspace))
                         workspace = Environment.CurrentDirectory;
@@ -255,14 +301,49 @@ public partial class ChatPanelViewModel : ViewModelBase
                         _getExternalMcpServersJson(),
                         _getAcpAutoInjectIdeMcp(),
                         input,
-                        t => UiScheduler.Default.Post(() => assistantMsg.Content += t),
+                        appendMessageChunk: t => UiScheduler.Default.Post(() =>
+                        {
+                            assistantMsg.Content += t;
+                            SetChatLoadingStage("Формирую ответ…");
+                            MarkAcpActivity();
+                        }),
+                        appendThoughtChunk: t => UiScheduler.Default.Post(() =>
+                        {
+                            thoughtMsg ??= CreateThoughtMessage();
+                            thoughtMsg.Content += t;
+                            SetChatLoadingStage("Модель думает…");
+                            MarkAcpActivity();
+                        }),
+                        onStage: stage => UiScheduler.Default.Post(() =>
+                        {
+                            if (stage == CursorAcpStreamStage.ToolCall)
+                                toolMsg ??= CreateToolMessage();
+                            SetChatLoadingStage(stage switch
+                            {
+                                CursorAcpStreamStage.ThoughtChunk => "Модель думает…",
+                                CursorAcpStreamStage.ToolCall => "Выполняю инструмент…",
+                                _ => "Формирую ответ…"
+                            });
+                            MarkAcpActivity();
+                        }),
                         CancellationToken.None).ConfigureAwait(false);
+                    await UiScheduler.Default.InvokeAsync(() =>
+                    {
+                        FinalizeThinkingMessage(thoughtMsg);
+                        FinalizeToolMessage(toolMsg, isError: false);
+                    });
                     _ = PersistEventAsync(ChatHistoryEventKind.MessageCompleted, MessageSnapshot(assistantMsg));
                 }
                 catch (Exception ex)
                 {
                     await UiScheduler.Default.InvokeAsync(() =>
-                        assistantMsg.Content = "[Cursor ACP] " + ex.Message);
+                    {
+                        var mapped = MapCursorAcpError(ex);
+                        assistantMsg.Content = mapped.UserMessage;
+                        FinalizeThinkingMessage(thoughtMsg);
+                        FinalizeToolMessage(toolMsg, isError: true);
+                        SetChatLoadingStage(mapped.StageText);
+                    });
                 }
             }
             else
@@ -290,8 +371,131 @@ public partial class ChatPanelViewModel : ViewModelBase
         }
         finally
         {
-            await UiScheduler.Default.InvokeAsync(() => IsChatLoading = false);
+            await UiScheduler.Default.InvokeAsync(() =>
+            {
+                StopAcpWaitWatchdog();
+                IsChatLoading = false;
+                ChatLoadingStatusText = "";
+            });
         }
+    }
+
+    private ChatMessageViewModel CreateThoughtMessage()
+    {
+        var vm = new ChatMessageViewModel("thinking", "", threadId: _activeThreadId);
+        ChatMessages.Add(vm);
+        return vm;
+    }
+
+    private ChatMessageViewModel CreateToolMessage()
+    {
+        var vm = new ChatMessageViewModel("tool", "Вызов инструментов ACP…", threadId: _activeThreadId);
+        ChatMessages.Add(vm);
+        return vm;
+    }
+
+    private void FinalizeThinkingMessage(ChatMessageViewModel? thoughtMsg)
+    {
+        if (thoughtMsg is null)
+            return;
+        if (!_getShowThinkingInHistory())
+        {
+            ChatMessages.Remove(thoughtMsg);
+            return;
+        }
+
+        var full = thoughtMsg.Content;
+        if (string.IsNullOrWhiteSpace(full))
+            return;
+        var normalized = full.Trim();
+        _collapsedThinkingByMessageId[thoughtMsg.MessageId] = normalized;
+        thoughtMsg.Content = BuildCollapsedThinkingPreview(normalized);
+    }
+
+    private static void FinalizeToolMessage(ChatMessageViewModel? toolMsg, bool isError)
+    {
+        if (toolMsg is null)
+            return;
+        toolMsg.Content = isError
+            ? "Инструменты ACP завершились с ошибкой."
+            : "Инструменты ACP выполнены.";
+    }
+
+    private void SetChatLoadingStage(string stageText)
+    {
+        _chatLoadingStageBaseText = stageText;
+        ChatLoadingStatusText = stageText;
+    }
+
+    private void MarkAcpActivity() => _lastAcpActivityUtc = DateTimeOffset.UtcNow;
+
+    private void RestartAcpWaitWatchdog()
+    {
+        var generation = ++_acpWaitWatchdogGeneration;
+        _ = Task.Run(async () =>
+        {
+            while (generation == _acpWaitWatchdogGeneration)
+            {
+                try
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
+                }
+                catch
+                {
+                    return;
+                }
+
+                var elapsed = DateTimeOffset.UtcNow - _lastAcpActivityUtc;
+                if (elapsed < TimeSpan.FromSeconds(8))
+                    continue;
+                await UiScheduler.Default.InvokeAsync(() =>
+                {
+                    if (!IsChatLoading || generation != _acpWaitWatchdogGeneration)
+                        return;
+                    var seconds = Math.Max(8, (int)elapsed.TotalSeconds);
+                    ChatLoadingStatusText = $"{_chatLoadingStageBaseText} Ждём ответ… {seconds}с";
+                });
+            }
+        });
+    }
+
+    private void StopAcpWaitWatchdog() => _acpWaitWatchdogGeneration++;
+
+    private static (string UserMessage, string StageText) MapCursorAcpError(Exception ex)
+    {
+        var message = ex.Message?.Trim() ?? "Неизвестная ошибка.";
+        if (ContainsAny(message, "upgrade", "plan", "billing", "quota", "rate limit", "credits"))
+        {
+            return (
+                "[Cursor ACP / provider-limit] Доступ к модели ограничен тарифом или квотой. Проверь план/биллинг в Cursor, либо выбери другую модель.",
+                "Ошибка провайдера (план/квота)");
+        }
+
+        if (ContainsAny(message, "timeout", "timed out", "deadline", "network", "connection"))
+        {
+            return (
+                "[Cursor ACP / network] Не удалось дождаться ответа от провайдера. Попробуй повторить запрос.",
+                "Сетевая ошибка провайдера");
+        }
+
+        return ($"[Cursor ACP] {message}", "Ошибка ACP");
+    }
+
+    private static bool ContainsAny(string text, params string[] needles)
+    {
+        foreach (var needle in needles)
+        {
+            if (text.Contains(needle, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+
+        return false;
+    }
+
+    private static string BuildCollapsedThinkingPreview(string fullThinking)
+    {
+        var preview = fullThinking.Length <= 180 ? fullThinking : fullThinking[..180].TrimEnd() + "…";
+        return CollapsedThinkingPrefix + preview;
     }
 
     private bool CanSendChat()
@@ -361,6 +565,85 @@ public partial class ChatPanelViewModel : ViewModelBase
         if (index < 0 || index >= ChatMessages.Count)
             return $"Index out of range: {index}. Count={ChatMessages.Count}.";
         SelectedMessageIndex = index;
+        return "OK";
+    }
+
+    /// <summary>Сдвинуть выбор в ленте сообщений на delta (-1/ +1) для keyboard-first сценария.</summary>
+    public string SelectMessageByOffset(int delta)
+    {
+        if (ChatMessages.Count == 0)
+            return "No messages";
+        var current = SelectedMessageIndex;
+        if (current < 0)
+            current = delta >= 0 ? 0 : ChatMessages.Count - 1;
+        var next = Math.Clamp(current + delta, 0, ChatMessages.Count - 1);
+        SelectedMessageIndex = next;
+        return "OK";
+    }
+
+    /// <summary>Сдвинуть выбор темы в overview по циклу.</summary>
+    public string NavigateThreadSelection(int delta)
+    {
+        var threads = ChatSurfaceSnapshot.Layout.Overview;
+        if (threads.Count == 0)
+            return "No threads";
+        var current = -1;
+        for (var i = 0; i < threads.Count; i++)
+        {
+            if (threads[i].ThreadId == SelectedChatThreadId)
+            {
+                current = i;
+                break;
+            }
+        }
+        if (current < 0)
+        {
+            for (var i = 0; i < threads.Count; i++)
+            {
+                if (!threads[i].IsActive)
+                    continue;
+                current = i;
+                break;
+            }
+        }
+        if (current < 0)
+            current = 0;
+        var next = (current + delta) % threads.Count;
+        if (next < 0)
+            next += threads.Count;
+        SelectedChatThreadId = threads[next].ThreadId;
+        return "OK";
+    }
+
+    public string OpenSelectedThreadDetail()
+    {
+        if (SelectedChatThreadId == Guid.Empty)
+            return "No selected thread";
+        IsChatOverviewMode = false;
+        return "OK";
+    }
+
+    public string ShowThreadOverview()
+    {
+        IsChatOverviewMode = true;
+        return "OK";
+    }
+
+    /// <summary>Переключить выбранный thinking-блок между свёрнутым и полным видом.</summary>
+    public string ToggleSelectedThinkingDetails()
+    {
+        if (SelectedMessageIndex < 0 || SelectedMessageIndex >= ChatMessages.Count)
+            return "No selected message";
+        var selected = ChatMessages[SelectedMessageIndex];
+        if (!string.Equals(selected.Role, "thinking", StringComparison.OrdinalIgnoreCase))
+            return "Selected message is not thinking";
+        if (!_collapsedThinkingByMessageId.TryGetValue(selected.MessageId, out var full))
+            return "Thinking message has no stored details";
+
+        if (selected.Content.StartsWith(CollapsedThinkingPrefix, StringComparison.Ordinal))
+            selected.Content = full;
+        else
+            selected.Content = BuildCollapsedThinkingPreview(full);
         return "OK";
     }
 
@@ -566,6 +849,26 @@ public partial class ChatPanelViewModel : ViewModelBase
             _mainThreadId,
             _activeThreadId,
             ThreadBranchHint));
+
+        var overview = ChatSurfaceSnapshot.Layout.Overview;
+        if (overview.Count == 0)
+        {
+            SelectedChatThreadId = Guid.Empty;
+            return;
+        }
+
+        if (SelectedChatThreadId == Guid.Empty || !overview.Any(x => x.ThreadId == SelectedChatThreadId))
+        {
+            var preferred = Guid.Empty;
+            foreach (var thread in overview)
+            {
+                if (thread.ThreadId != _activeThreadId)
+                    continue;
+                preferred = thread.ThreadId;
+                break;
+            }
+            SelectedChatThreadId = preferred != Guid.Empty ? preferred : overview[0].ThreadId;
+        }
     }
 
     private IReadOnlyList<ChatConversationMessage> BuildConversationMessages() =>

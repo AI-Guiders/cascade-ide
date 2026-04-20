@@ -14,7 +14,7 @@ public static class CursorAcpAgentPath
         cmdPath = "";
         workingDirectory = "";
         if (string.IsNullOrWhiteSpace(configured))
-            return false;
+            return TryResolveFromPath(out cmdPath, out workingDirectory);
 
         var trimmed = configured.Trim();
         if (File.Exists(trimmed))
@@ -42,6 +42,25 @@ public static class CursorAcpAgentPath
                 workingDirectory = Path.GetDirectoryName(cmdPath) ?? dir;
                 return true;
             }
+        }
+
+        return false;
+    }
+
+    private static bool TryResolveFromPath(out string cmdPath, out string workingDirectory)
+    {
+        cmdPath = "";
+        workingDirectory = "";
+
+        foreach (var candidate in new[] { "cursor-agent", "cursor-agent.cmd", "cursor-agent.bat" })
+        {
+            var resolved = EnvironmentReadinessExecutablePathProbe.TryResolveExecutablePath(candidate);
+            if (string.IsNullOrWhiteSpace(resolved))
+                continue;
+
+            cmdPath = resolved;
+            workingDirectory = Path.GetDirectoryName(resolved) ?? "";
+            return true;
         }
 
         return false;
@@ -78,13 +97,15 @@ public sealed class CursorAcpChatConnection : IDisposable
         string externalMcpServersJson,
         bool acpAutoInjectIdeMcp,
         string userText,
-        Action<string> appendChunk,
+        Action<string>? appendMessageChunk,
+        Action<string>? appendThoughtChunk,
+        Action<CursorAcpStreamStage>? onStage,
         CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
         if (!CursorAcpAgentPath.TryResolve(configuredAgentPath, out var cmdPath, out var workDir))
             throw new InvalidOperationException(
-                "Укажи путь к cursor-agent.cmd или к каталогу с dist-package в настройках (Cursor ACP).");
+                "Укажи путь к cursor-agent.cmd/каталогу dist-package в настройках или добавь cursor-agent в PATH.");
 
         if (string.IsNullOrWhiteSpace(workspaceRoot))
             workspaceRoot = workDir;
@@ -95,7 +116,7 @@ public sealed class CursorAcpChatConnection : IDisposable
         if (_connection is null || string.IsNullOrEmpty(_sessionId))
             throw new InvalidOperationException("ACP: нет активной сессии.");
 
-        _client.SetChunkHandler(appendChunk);
+        _client.SetChunkHandlers(appendMessageChunk, appendThoughtChunk, onStage);
         try
         {
             await _connection.PromptAsync(new PromptRequest
@@ -106,7 +127,7 @@ public sealed class CursorAcpChatConnection : IDisposable
         }
         finally
         {
-            _client.SetChunkHandler(null);
+            _client.SetChunkHandlers(null, null, null);
         }
     }
 
@@ -239,7 +260,7 @@ public sealed class CursorAcpChatConnection : IDisposable
         if (IsDisposed)
             return;
         IsDisposed = true;
-        _client.SetChunkHandler(null);
+        _client.SetChunkHandlers(null, null, null);
         DisposeProcessAndConnection();
     }
 }
@@ -247,13 +268,23 @@ public sealed class CursorAcpChatConnection : IDisposable
 internal sealed class CursorAcpIdeClient : IAcpClient
 {
     private string _workspaceRoot = "";
-    private Action<string>? _chunk;
+    private Action<string>? _messageChunk;
+    private Action<string>? _thoughtChunk;
+    private Action<CursorAcpStreamStage>? _onStage;
     private AcpTerminalHost? _terminalHost;
 
     public void ConfigureWorkspaceRoot(string workspaceRoot) =>
         _workspaceRoot = Path.GetFullPath(workspaceRoot.Trim());
 
-    public void SetChunkHandler(Action<string>? chunk) => _chunk = chunk;
+    public void SetChunkHandlers(
+        Action<string>? messageChunk,
+        Action<string>? thoughtChunk,
+        Action<CursorAcpStreamStage>? onStage)
+    {
+        _messageChunk = messageChunk;
+        _thoughtChunk = thoughtChunk;
+        _onStage = onStage;
+    }
 
     public void SetTerminalCallbacks(Action<string>? appendUi, Action? showTerminalPanel, string workspaceRoot) =>
         _terminalHost = new AcpTerminalHost(workspaceRoot, appendUi, showTerminalPanel);
@@ -306,10 +337,12 @@ internal sealed class CursorAcpIdeClient : IAcpClient
         switch (update)
         {
             case AgentMessageChunkSessionUpdate m when m.Content is TextContentBlock text:
-                _chunk?.Invoke(text.Text);
+                _onStage?.Invoke(CursorAcpStreamStage.MessageChunk);
+                _messageChunk?.Invoke(text.Text);
                 break;
             case AgentThoughtChunkSessionUpdate th when th.Content is TextContentBlock tt:
-                _chunk?.Invoke(tt.Text);
+                _onStage?.Invoke(CursorAcpStreamStage.ThoughtChunk);
+                _thoughtChunk?.Invoke(tt.Text);
                 break;
         }
 
@@ -354,6 +387,7 @@ internal sealed class CursorAcpIdeClient : IAcpClient
 
     public ValueTask<CreateTerminalResponse> CreateTerminalAsync(CreateTerminalRequest request, CancellationToken cancellationToken = default)
     {
+        _onStage?.Invoke(CursorAcpStreamStage.ToolCall);
         if (_terminalHost is null)
             throw new InvalidOperationException("ACP terminal: хост не инициализирован.");
         return ValueTask.FromResult(_terminalHost.Create(request));
@@ -361,6 +395,7 @@ internal sealed class CursorAcpIdeClient : IAcpClient
 
     public ValueTask<TerminalOutputResponse> TerminalOutputAsync(TerminalOutputRequest request, CancellationToken cancellationToken = default)
     {
+        _onStage?.Invoke(CursorAcpStreamStage.ToolCall);
         if (_terminalHost is null)
         {
             return ValueTask.FromResult(new TerminalOutputResponse
@@ -384,6 +419,7 @@ internal sealed class CursorAcpIdeClient : IAcpClient
         WaitForTerminalExitRequest request,
         CancellationToken cancellationToken = default)
     {
+        _onStage?.Invoke(CursorAcpStreamStage.ToolCall);
         if (_terminalHost is null)
             return new WaitForTerminalExitResponse();
         return await _terminalHost.WaitForExitAsync(request, cancellationToken).ConfigureAwait(false);
@@ -391,6 +427,7 @@ internal sealed class CursorAcpIdeClient : IAcpClient
 
     public ValueTask<KillTerminalCommandResponse> KillTerminalCommandAsync(KillTerminalCommandRequest request, CancellationToken cancellationToken = default)
     {
+        _onStage?.Invoke(CursorAcpStreamStage.ToolCall);
         if (_terminalHost is null)
             return ValueTask.FromResult(new KillTerminalCommandResponse());
         return ValueTask.FromResult(_terminalHost.Kill(request));
@@ -401,4 +438,11 @@ internal sealed class CursorAcpIdeClient : IAcpClient
 
     public ValueTask ExtNotificationAsync(string method, JsonElement notification, CancellationToken cancellationToken = default)
         => ValueTask.CompletedTask;
+}
+
+public enum CursorAcpStreamStage
+{
+    ThoughtChunk = 0,
+    MessageChunk = 1,
+    ToolCall = 2
 }

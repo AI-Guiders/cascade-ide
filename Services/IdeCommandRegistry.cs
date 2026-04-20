@@ -81,6 +81,7 @@ public static partial class IdeCommandRegistry
         RegisterBuildPalette(b);
         RegisterDebugPalette(b);
         RegisterGitPalette(b);
+        RegisterChatPalette(b);
         RegisterDocumentsPalette(b);
         RegisterSettingsAndHelpPalette(b);
         RegisterMfdShellPalette(b);

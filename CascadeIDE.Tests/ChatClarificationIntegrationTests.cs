@@ -56,6 +56,7 @@ public sealed class ChatClarificationIntegrationTests
             getActiveAiProvider: () => "CursorACP",
             getSelectedOllamaModel: () => null,
             getChatMcpOnly: () => true,
+            getShowThinkingInHistory: () => true,
             getUseMinimizedContext: () => false,
             getCurrentFilePath: () => null,
             getEditorText: () => "",

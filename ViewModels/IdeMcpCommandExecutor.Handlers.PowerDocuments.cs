@@ -164,6 +164,39 @@ internal sealed partial class IdeMcpCommandExecutor
             var responseJson = McpCommandJsonArgs.String(args, "response_json");
             return _vm.ChatPanel.SubmitClarificationResponseFromJson(responseJson ?? "");
         });
+        add(Services.IdeCommands.ChatSelectPrevMessage, async (_, _) =>
+        {
+            return _vm.ChatPanel.SelectMessageByOffset(-1);
+        });
+        add(Services.IdeCommands.ChatSelectNextMessage, async (_, _) =>
+        {
+            return _vm.ChatPanel.SelectMessageByOffset(+1);
+        });
+        add(Services.IdeCommands.ChatToggleSelectedThinking, async (_, _) =>
+        {
+            return _vm.ChatPanel.ToggleSelectedThinkingDetails();
+        });
+        add(Services.IdeCommands.ChatToggleShowThinkingInHistory, async (_, _) =>
+        {
+            _vm.ShowThinkingInHistory = !_vm.ShowThinkingInHistory;
+            return _vm.ShowThinkingInHistory ? "ShowThinkingInHistory=on" : "ShowThinkingInHistory=off";
+        });
+        add(Services.IdeCommands.ChatSelectPrevThread, async (_, _) =>
+        {
+            return _vm.ChatPanel.NavigateThreadSelection(-1);
+        });
+        add(Services.IdeCommands.ChatSelectNextThread, async (_, _) =>
+        {
+            return _vm.ChatPanel.NavigateThreadSelection(+1);
+        });
+        add(Services.IdeCommands.ChatOpenSelectedThread, async (_, _) =>
+        {
+            return _vm.ChatPanel.OpenSelectedThreadDetail();
+        });
+        add(Services.IdeCommands.ChatShowThreadOverview, async (_, _) =>
+        {
+            return _vm.ChatPanel.ShowThreadOverview();
+        });
 
         add(Services.IdeCommands.InstallOllamaModel, async (args, _) =>
         {

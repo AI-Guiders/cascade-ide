@@ -27,7 +27,7 @@
                 <Border DockPanel.Dock="Right" CornerRadius="10" Padding="8,3"
                         Background="#2E3A52" BorderBrush="#50658C" BorderThickness="1"
                         IsVisible="{Binding IsChatLoading}">
-                    <TextBlock Text="Модель отвечает..." FontSize="11" Foreground="#D8E4FF"/>
+                    <TextBlock Text="{Binding ChatLoadingStatusText}" FontSize="11" Foreground="#D8E4FF"/>
                 </Border>
             </DockPanel>
         </Border>
@@ -93,7 +93,9 @@
                     <views:SkiaChatSurfaceControl HorizontalAlignment="Stretch"
                                                   VerticalAlignment="Stretch"
                                                   Snapshot="{Binding ChatSurfaceSnapshot}"
-                                                  SelectedMessageIndex="{Binding SelectedMessageIndex, Mode=TwoWay}"/>
+                                                  SelectedMessageIndex="{Binding SelectedMessageIndex, Mode=TwoWay}"
+                                                  DetailThreadId="{Binding SelectedChatThreadId, Mode=TwoWay}"
+                                                  OverviewMode="{Binding IsChatOverviewMode, Mode=TwoWay}"/>
                 </Grid>
             </DockPanel>
         </Border>

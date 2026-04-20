@@ -36,6 +36,7 @@ public sealed partial class CascadeIdeSettings
                 CursorAcpPath = Ai.CursorAcpPath,
                 AiChatSettingsPresentation = Ai.AiChatSettingsPresentation,
                 ChatMcpOnly = Ai.ChatMcpOnly,
+                ShowThinkingInHistory = Ai.ShowThinkingInHistory,
             },
             Mcp = new McpSettings
             {
@@ -186,7 +187,8 @@ public sealed partial class CascadeIdeSettings
             && a.DeepSeekModel.Is(b.DeepSeekModel)
             && a.CursorAcpPath.Is(b.CursorAcpPath)
             && a.AiChatSettingsPresentation.Is(b.AiChatSettingsPresentation)
-            && a.ChatMcpOnly == b.ChatMcpOnly;
+            && a.ChatMcpOnly == b.ChatMcpOnly
+            && a.ShowThinkingInHistory == b.ShowThinkingInHistory;
     }
 
     private static bool McpEquals(McpSettings? a, McpSettings? b)

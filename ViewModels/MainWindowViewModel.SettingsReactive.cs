@@ -97,6 +97,12 @@ public partial class MainWindowViewModel
         ChatPanel.RefreshSendChatCommandState();
     }
 
+    partial void OnShowThinkingInHistoryChanged(bool value)
+    {
+        _settings.Ai.ShowThinkingInHistory = value;
+        SaveSettingsIfChanged();
+    }
+
     partial void OnActiveAiProviderChanged(string value)
     {
         if (!string.IsNullOrEmpty(value))

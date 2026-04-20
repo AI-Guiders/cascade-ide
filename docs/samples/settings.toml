@@ -78,8 +78,10 @@ open_ai_model = "gpt-4o"
 deep_seek_base_url = "https://api.deepseek.com"
 deep_seek_model = "deepseek-chat"
 cursor_acp_path = ""
+# Пусто = искать cursor-agent в PATH.
 ai_chat_settings_presentation = "mfd"
 chat_mcp_only = false
+show_thinking_in_history = true
 
 [mcp]
 acp_auto_inject_ide_mcp = true

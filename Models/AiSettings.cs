@@ -15,7 +15,7 @@ public sealed class AiSettings
     public string DeepSeekBaseUrl { get; set; } = "https://api.deepseek.com";
     public string DeepSeekModel { get; set; } = "deepseek-chat";
 
-    /// <summary>Путь к <c>cursor-agent.cmd</c> или каталогу с <c>dist-package\\cursor-agent.cmd</c> (TOML: <c>cursor_acp_path</c>).</summary>
+    /// <summary>Путь к <c>cursor-agent.cmd</c> или каталогу с <c>dist-package\\cursor-agent.cmd</c>; если пусто — поиск <c>cursor-agent</c> в PATH (TOML: <c>cursor_acp_path</c>).</summary>
     public string CursorAcpPath { get; set; } = "";
 
     /// <summary>
@@ -27,4 +27,9 @@ public sealed class AiSettings
     /// Не вызывать встроенный провайдер (Ollama/облако/Cursor ACP) после отправки user-сообщения — ответы только через внешний MCP (<c>send_chat</c> с <c>role=assistant</c>). TOML: <c>chat_mcp_only</c>.
     /// </summary>
     public bool ChatMcpOnly { get; set; }
+
+    /// <summary>
+    /// Показывать reasoning/thinking сообщения в истории после завершения ответа. Если false — thinking виден только во время стриминга. TOML: <c>show_thinking_in_history</c>.
+    /// </summary>
+    public bool ShowThinkingInHistory { get; set; } = true;
 }

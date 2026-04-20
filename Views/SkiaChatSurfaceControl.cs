@@ -23,12 +23,17 @@ public sealed class SkiaChatSurfaceControl : Control
     private double _cachedContentHeight;
     private int _hoveredItem = -1;
     private SkiaChatTheme _theme = SkiaChatTheme.DarkFallback;
-
     public static readonly StyledProperty<ChatSurfaceSnapshot> SnapshotProperty =
         AvaloniaProperty.Register<SkiaChatSurfaceControl, ChatSurfaceSnapshot>(nameof(Snapshot), ChatSurfaceSnapshot.Empty);
 
     public static readonly StyledProperty<int> SelectedMessageIndexProperty =
         AvaloniaProperty.Register<SkiaChatSurfaceControl, int>(nameof(SelectedMessageIndex), -1);
+
+    public static readonly StyledProperty<Guid> DetailThreadIdProperty =
+        AvaloniaProperty.Register<SkiaChatSurfaceControl, Guid>(nameof(DetailThreadId), Guid.Empty);
+
+    public static readonly StyledProperty<bool> OverviewModeProperty =
+        AvaloniaProperty.Register<SkiaChatSurfaceControl, bool>(nameof(OverviewMode), false);
 
     public ChatSurfaceSnapshot Snapshot
     {
@@ -42,9 +47,21 @@ public sealed class SkiaChatSurfaceControl : Control
         set => SetValue(SelectedMessageIndexProperty, value);
     }
 
+    public Guid DetailThreadId
+    {
+        get => GetValue(DetailThreadIdProperty);
+        set => SetValue(DetailThreadIdProperty, value);
+    }
+
+    public bool OverviewMode
+    {
+        get => GetValue(OverviewModeProperty);
+        set => SetValue(OverviewModeProperty, value);
+    }
+
     static SkiaChatSurfaceControl()
     {
-        AffectsRender<SkiaChatSurfaceControl>(SnapshotProperty, SelectedMessageIndexProperty);
+        AffectsRender<SkiaChatSurfaceControl>(SnapshotProperty, SelectedMessageIndexProperty, DetailThreadIdProperty, OverviewModeProperty);
     }
 
     public SkiaChatSurfaceControl()
@@ -73,6 +90,11 @@ public sealed class SkiaChatSurfaceControl : Control
         base.OnPropertyChanged(change);
         if (change.Property == SnapshotProperty)
         {
+            var next = Snapshot ?? ChatSurfaceSnapshot.Empty;
+            if (DetailThreadId == Guid.Empty && next.State.ActiveThreadId != Guid.Empty)
+                DetailThreadId = next.State.ActiveThreadId;
+            if (DetailThreadId != Guid.Empty && !next.Layout.Lanes.Any(lane => lane.Thread.ThreadId == DetailThreadId))
+                DetailThreadId = next.State.ActiveThreadId;
             ClampScrollToContent();
             InvalidateVisual();
         }
@@ -127,24 +149,48 @@ public sealed class SkiaChatSurfaceControl : Control
 
         if (snapshot.Layout.Overview.Count > 0)
         {
-            var overviewText = string.Join(" | ", snapshot.Layout.Overview.Select(item =>
+            if (!OverviewMode)
+            {
+                items.Add(new ItemSnapshot(
+                    ItemKind.Overview,
+                    "Темы",
+                    "Назад к обзору всех веток",
+                    Accent: "overview",
+                    MessageIndex: null,
+                    IsSelected: false,
+                    IsPending: false,
+                    StartsBranch: false,
+                    SelectThreadId: null,
+                    ResetDetailMode: true));
+            }
+
+            foreach (var item in snapshot.Layout.Overview)
             {
                 var prefix = item.Depth > 0 ? new string('>', item.Depth) + " " : "";
-                var suffix = item.IsActive ? " [active]" : "";
-                return $"{prefix}{item.Title} ({item.ItemCount}){suffix}";
-            }));
-            items.Add(new ItemSnapshot(
-                ItemKind.Overview,
-                "Сессия",
-                string.IsNullOrWhiteSpace(overviewText) ? "Пока нет веток." : overviewText,
-                Accent: "overview",
-                MessageIndex: null,
-                IsSelected: false,
-                IsPending: false,
-                StartsBranch: false));
+                var active = item.IsActive ? " · active" : "";
+                var main = item.IsMainThread ? " · main" : "";
+                items.Add(new ItemSnapshot(
+                    ItemKind.Overview,
+                    prefix + item.Title,
+                    $"Сообщений: {item.ItemCount}{active}{main}",
+                    Accent: DetailThreadId == item.ThreadId ? "active-thread" : "overview",
+                    MessageIndex: null,
+                    IsSelected: false,
+                    IsPending: false,
+                    StartsBranch: false,
+                    SelectThreadId: item.ThreadId,
+                    ResetDetailMode: false));
+            }
         }
 
-        foreach (var lane in snapshot.Layout.Lanes.OrderBy(lane => lane.Thread.Order))
+        if (OverviewMode)
+            return [.. items];
+
+        var lanes = snapshot.Layout.Lanes.OrderBy(lane => lane.Thread.Order);
+        if (DetailThreadId != Guid.Empty)
+            lanes = lanes.Where(lane => lane.Thread.ThreadId == DetailThreadId).OrderBy(lane => lane.Thread.Order);
+
+        foreach (var lane in lanes)
         {
             var meta = lane.Thread.IsMainThread ? "основная линия" : $"ветка depth {lane.Thread.Depth}";
             if (lane.Thread.IsActive)
@@ -157,7 +203,9 @@ public sealed class SkiaChatSurfaceControl : Control
                 MessageIndex: null,
                 IsSelected: false,
                 IsPending: false,
-                StartsBranch: false));
+                StartsBranch: false,
+                SelectThreadId: lane.Thread.ThreadId,
+                ResetDetailMode: false));
 
             items.AddRange(lane.Entries.Select(entry => new ItemSnapshot(
                 entry.Kind == ChatSurfaceEntryKind.Message ? ItemKind.Message : ItemKind.Confirmation,
@@ -167,7 +215,9 @@ public sealed class SkiaChatSurfaceControl : Control
                 entry.MessageIndex,
                 entry.IsSelected,
                 entry.IsPending,
-                entry.StartsBranch)));
+                entry.StartsBranch,
+                SelectThreadId: null,
+                ResetDetailMode: false)));
         }
 
         return [.. items];
@@ -196,8 +246,20 @@ public sealed class SkiaChatSurfaceControl : Control
         var index = FindHit(e.GetPosition(this));
         if (index < 0)
             return;
-        if (_hitTargets[index].MessageIndex is { } messageIndex)
+        var hit = _hitTargets[index];
+        if (hit.ResetDetailMode)
+        {
+            OverviewMode = true;
+        }
+        else if (hit.SelectThreadId is { } threadId)
+        {
+            DetailThreadId = threadId;
+            OverviewMode = false;
+        }
+        else if (hit.MessageIndex is { } messageIndex)
+        {
             SelectedMessageIndex = messageIndex;
+        }
         e.Handled = true;
         InvalidateVisual();
     }
@@ -248,9 +310,11 @@ public sealed class SkiaChatSurfaceControl : Control
         int? MessageIndex,
         bool IsSelected,
         bool IsPending,
-        bool StartsBranch);
+        bool StartsBranch,
+        Guid? SelectThreadId,
+        bool ResetDetailMode);
 
-    private sealed record HitTarget(Rect Bounds, int? MessageIndex);
+    private sealed record HitTarget(Rect Bounds, int? MessageIndex, Guid? SelectThreadId, bool ResetDetailMode);
 
     private readonly record struct BubbleLayout(float Top, float Height, IReadOnlyList<string> ContentLines);
 
@@ -499,7 +563,9 @@ public sealed class SkiaChatSurfaceControl : Control
 
                 _hitTargets.Add(new HitTarget(
                     new Rect(rect.Left, rect.Top - _scrollOffset, rect.Width, rect.Height),
-                    item.MessageIndex));
+                    item.MessageIndex,
+                    item.SelectThreadId,
+                    item.ResetDetailMode));
             }
 
             canvas.Restore();
@@ -520,6 +586,10 @@ public sealed class SkiaChatSurfaceControl : Control
                 ItemKind.Overview => SkiaChatTheme.Blend(_theme.Surface, _theme.Border, 0.45f),
                 ItemKind.ThreadHeader => SkiaChatTheme.Blend(_theme.Surface, _theme.HoverBorder, 0.22f),
                 ItemKind.Confirmation => SkiaChatTheme.Blend(_theme.BubbleAssistant, _theme.HoverBorder, item.IsPending ? 0.32f : 0.18f),
+                _ when string.Equals(item.Accent, "thinking", StringComparison.OrdinalIgnoreCase) =>
+                    SkiaChatTheme.Blend(_theme.BubbleAssistant, _theme.HoverBorder, 0.26f),
+                _ when string.Equals(item.Accent, "tool", StringComparison.OrdinalIgnoreCase) =>
+                    SkiaChatTheme.Blend(_theme.BubbleAssistant, _theme.Border, 0.35f),
                 _ => string.Equals(item.Accent, "user", StringComparison.OrdinalIgnoreCase)
                     ? _theme.BubbleUser
                     : item.StartsBranch

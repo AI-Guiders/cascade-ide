@@ -318,7 +318,15 @@
 | `chat_edit_message` | Заменить текст ответа ассистента по стабильному message_id; в лог пишется message_edited. args: message_id:string, new_content:string, reason?:string; returns: json; example: {"message_id":"a1b2c3d4e5f6789012345678901234ab","new_content":"fixed text"}. |
 | `chat_export_readable` | Экспорт текущего чата в читаемый Markdown (роли, индексы, message_id). Поддерживаемый сценарий — явно подвести итоги длинной сессии: экспорт, затем краткое смысловое резюме и согласование с пользователем (см. MCP-PROTOCOL.md, раздел «Подведение итогов сессии чата»). args: write_file?:boolean, file_name?:string; returns: json; example: {"write_file":true}. |
 | `chat_get_selected_message` | Получить выбранное сообщение чата (индекс, роль, контент) в JSON. returns: json. |
+| `chat_open_selected_thread` | Открыть detail выбранной темы. returns: text. |
 | `chat_select_message` | Выбрать сообщение в чате по индексу (0-based), в т.ч. для Skia-поверхности. args: index:integer; returns: text; example: {"index":0}. |
+| `chat_select_next_message` | Сместить выбор на следующее сообщение чата (keyboard-first). returns: text. |
+| `chat_select_next_thread` | Выбрать следующую тему в overview (циклически). returns: text. |
+| `chat_select_prev_message` | Сместить выбор на предыдущее сообщение чата (keyboard-first). returns: text. |
+| `chat_select_prev_thread` | Выбрать предыдущую тему в overview (циклически). returns: text. |
+| `chat_show_thread_overview` | Вернуться в overview тем (карточки). returns: text. |
+| `chat_toggle_selected_thinking` | Переключить у выбранного thinking-сообщения свёрнутый/полный вид. returns: text. |
+| `chat_toggle_show_thinking_in_history` | Переключить настройку show_thinking_in_history (keyboard-first toggle). returns: text. |
 | `close_document` | Закрыть документ. args: file_path:string; returns: text; example: {"file_path":"C:\\\\tmp\\\\a.cs"}. |
 | `cycle_semantic_map_detail_level` | Semantic Map: цикл детализации glance → normal → inspect (Ctrl+K → S → D). returns: text. |
 | `cycle_semantic_map_level` | Semantic Map: переключить уровень file ↔ controlFlow (Ctrl+K → S → F). returns: text. |

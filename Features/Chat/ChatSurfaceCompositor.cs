@@ -319,6 +319,8 @@ public sealed class ChatSurfaceLayoutStage : IChatSurfaceLayoutStage
         {
             "user" => "Ты",
             "assistant" => "Агент",
+            "thinking" => "Размышление",
+            "tool" => "Инструмент",
             _ => message.Role
         };
     }

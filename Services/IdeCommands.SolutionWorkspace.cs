@@ -21,6 +21,22 @@ public static partial class IdeCommands
     public const string GetCodeNavigationContext = "get_code_navigation_context";
     /// <summary>Выбрать сообщение в чате по индексу (0-based), в т.ч. для Skia-поверхности. args: index:integer; returns: text; example: {"index":0}.</summary>
     public const string ChatSelectMessage = "chat_select_message";
+    /// <summary>Сместить выбор на предыдущее сообщение чата (keyboard-first). returns: text.</summary>
+    public const string ChatSelectPrevMessage = "chat_select_prev_message";
+    /// <summary>Сместить выбор на следующее сообщение чата (keyboard-first). returns: text.</summary>
+    public const string ChatSelectNextMessage = "chat_select_next_message";
+    /// <summary>Переключить у выбранного thinking-сообщения свёрнутый/полный вид. returns: text.</summary>
+    public const string ChatToggleSelectedThinking = "chat_toggle_selected_thinking";
+    /// <summary>Переключить настройку show_thinking_in_history (keyboard-first toggle). returns: text.</summary>
+    public const string ChatToggleShowThinkingInHistory = "chat_toggle_show_thinking_in_history";
+    /// <summary>Выбрать предыдущую тему в overview (циклически). returns: text.</summary>
+    public const string ChatSelectPrevThread = "chat_select_prev_thread";
+    /// <summary>Выбрать следующую тему в overview (циклически). returns: text.</summary>
+    public const string ChatSelectNextThread = "chat_select_next_thread";
+    /// <summary>Открыть detail выбранной темы. returns: text.</summary>
+    public const string ChatOpenSelectedThread = "chat_open_selected_thread";
+    /// <summary>Вернуться в overview тем (карточки). returns: text.</summary>
+    public const string ChatShowThreadOverview = "chat_show_thread_overview";
     /// <summary>Получить выбранное сообщение чата (индекс, роль, контент) в JSON. returns: json.</summary>
     public const string ChatGetSelectedMessage = "chat_get_selected_message";
     /// <summary>Заменить текст ответа ассистента по стабильному message_id; в лог пишется message_edited. args: message_id:string, new_content:string, reason?:string; returns: json; example: {"message_id":"a1b2c3d4e5f6789012345678901234ab","new_content":"fixed text"}.</summary>

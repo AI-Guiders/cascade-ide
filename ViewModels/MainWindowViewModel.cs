@@ -80,6 +80,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _externalMcpServersJson = _settings.Mcp.ExternalServersJson;
         _activeAiProvider = _settings.Ai.Provider;
         _chatMcpOnly = _settings.Ai.ChatMcpOnly;
+        _showThinkingInHistory = _settings.Ai.ShowThinkingInHistory;
         _cursorAcpAgentPath = _settings.Ai.CursorAcpPath ?? "";
         _anthropicApiKey = _aiKeys.AnthropicApiKey ?? "";
         _openAiApiKey = _aiKeys.OpenAiApiKey ?? "";
@@ -112,6 +113,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             () => ActiveAiProvider,
             () => SelectedOllamaModel,
             () => ChatMcpOnly,
+            () => ShowThinkingInHistory,
             () => UseMinimizedContext,
             () => CurrentFilePath,
             () => EditorText,

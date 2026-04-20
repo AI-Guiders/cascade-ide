@@ -36,6 +36,14 @@ public sealed class IntentMelodyAliasesTests
         Assert.Equal(IdeCommands.SendChat, IntentMelodyAliases.TryResolveExactCommandId("cs"));
         Assert.Equal(IdeCommands.ChatExportReadable, IntentMelodyAliases.TryResolveExactCommandId("cex"));
         Assert.Equal(IdeCommands.ForkChatThread, IntentMelodyAliases.TryResolveExactCommandId("ctf"));
+        Assert.Equal(IdeCommands.ChatSelectPrevMessage, IntentMelodyAliases.TryResolveExactCommandId("cp"));
+        Assert.Equal(IdeCommands.ChatSelectNextMessage, IntentMelodyAliases.TryResolveExactCommandId("cn"));
+        Assert.Equal(IdeCommands.ChatToggleSelectedThinking, IntentMelodyAliases.TryResolveExactCommandId("ctt"));
+        Assert.Equal(IdeCommands.ChatToggleShowThinkingInHistory, IntentMelodyAliases.TryResolveExactCommandId("cth"));
+        Assert.Equal(IdeCommands.ChatSelectPrevThread, IntentMelodyAliases.TryResolveExactCommandId("ctp"));
+        Assert.Equal(IdeCommands.ChatSelectNextThread, IntentMelodyAliases.TryResolveExactCommandId("ctn"));
+        Assert.Equal(IdeCommands.ChatOpenSelectedThread, IntentMelodyAliases.TryResolveExactCommandId("cto"));
+        Assert.Equal(IdeCommands.ChatShowThreadOverview, IntentMelodyAliases.TryResolveExactCommandId("ctb"));
     }
 
     [Fact]
@@ -64,8 +72,8 @@ public sealed class IntentMelodyAliasesTests
         Assert.True(IntentMelodyAliases.HasStrictLongerAliasPrefix("ce"));
 
     [Fact]
-    public void FilterByTailPrefix_c_Matches_cps_cs_cex_ctf() =>
-        Assert.Equal(4, IntentMelodyAliases.FilterByTailPrefix("c").Count);
+    public void FilterByTailPrefix_c_Matches_chat_melodies() =>
+        Assert.Equal(12, IntentMelodyAliases.FilterByTailPrefix("c").Count);
 
     [Fact]
     public void FilterByTailPrefix_g_Matches_gs_gc_gp_gsu() =>
