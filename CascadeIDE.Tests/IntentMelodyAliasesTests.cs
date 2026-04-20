@@ -30,20 +30,20 @@ public sealed class IntentMelodyAliasesTests
         Assert.Equal(IdeCommands.OpenSolutionDialog, IntentMelodyAliases.TryResolveExactCommandId("so"));
 
     [Fact]
-    public void TryResolveExact_chat_melodies_map_to_commands()
+    public void TryResolveExact_chat_and_agent_melodies_map_to_commands()
     {
         Assert.Equal(IdeCommands.ShowChatPage, IntentMelodyAliases.TryResolveExactCommandId("cps"));
         Assert.Equal(IdeCommands.SendChat, IntentMelodyAliases.TryResolveExactCommandId("cs"));
         Assert.Equal(IdeCommands.ChatExportReadable, IntentMelodyAliases.TryResolveExactCommandId("cex"));
         Assert.Equal(IdeCommands.ForkChatThread, IntentMelodyAliases.TryResolveExactCommandId("ctf"));
-        Assert.Equal(IdeCommands.ChatSelectPrevMessage, IntentMelodyAliases.TryResolveExactCommandId("cp"));
-        Assert.Equal(IdeCommands.ChatSelectNextMessage, IntentMelodyAliases.TryResolveExactCommandId("cn"));
-        Assert.Equal(IdeCommands.ChatToggleSelectedThinking, IntentMelodyAliases.TryResolveExactCommandId("ctt"));
-        Assert.Equal(IdeCommands.ChatToggleShowThinkingInHistory, IntentMelodyAliases.TryResolveExactCommandId("cth"));
-        Assert.Equal(IdeCommands.ChatSelectPrevThread, IntentMelodyAliases.TryResolveExactCommandId("ctp"));
-        Assert.Equal(IdeCommands.ChatSelectNextThread, IntentMelodyAliases.TryResolveExactCommandId("ctn"));
-        Assert.Equal(IdeCommands.ChatOpenSelectedThread, IntentMelodyAliases.TryResolveExactCommandId("cto"));
-        Assert.Equal(IdeCommands.ChatShowThreadOverview, IntentMelodyAliases.TryResolveExactCommandId("ctb"));
+        Assert.Equal(IdeCommands.ChatSelectPrevMessage, IntentMelodyAliases.TryResolveExactCommandId("amp"));
+        Assert.Equal(IdeCommands.ChatSelectNextMessage, IntentMelodyAliases.TryResolveExactCommandId("amn"));
+        Assert.Equal(IdeCommands.ChatToggleSelectedThinking, IntentMelodyAliases.TryResolveExactCommandId("amt"));
+        Assert.Equal(IdeCommands.ChatToggleShowThinkingInHistory, IntentMelodyAliases.TryResolveExactCommandId("amh"));
+        Assert.Equal(IdeCommands.ChatSelectPrevThread, IntentMelodyAliases.TryResolveExactCommandId("atp"));
+        Assert.Equal(IdeCommands.ChatSelectNextThread, IntentMelodyAliases.TryResolveExactCommandId("atn"));
+        Assert.Equal(IdeCommands.ChatOpenSelectedThread, IntentMelodyAliases.TryResolveExactCommandId("ato"));
+        Assert.Equal(IdeCommands.ChatShowThreadOverview, IntentMelodyAliases.TryResolveExactCommandId("atb"));
     }
 
     [Fact]
@@ -72,8 +72,12 @@ public sealed class IntentMelodyAliasesTests
         Assert.True(IntentMelodyAliases.HasStrictLongerAliasPrefix("ce"));
 
     [Fact]
-    public void FilterByTailPrefix_c_Matches_chat_melodies() =>
-        Assert.Equal(12, IntentMelodyAliases.FilterByTailPrefix("c").Count);
+    public void FilterByTailPrefix_c_Matches_chat_core_melodies() =>
+        Assert.Equal(4, IntentMelodyAliases.FilterByTailPrefix("c").Count);
+
+    [Fact]
+    public void FilterByTailPrefix_a_Matches_agent_navigation_melodies() =>
+        Assert.Equal(8, IntentMelodyAliases.FilterByTailPrefix("a").Count);
 
     [Fact]
     public void FilterByTailPrefix_g_Matches_gs_gc_gp_gsu() =>
