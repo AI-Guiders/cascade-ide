@@ -90,6 +90,9 @@
 | [0078](0078-git-preflight-and-noise-control-for-cide.md) | **Git preflight:** шум-контроль (EOL/BOM/whitespace), safe fixes, подсказки логических коммитов и post-push отчёт | Proposed |
 | [0079](0079-ide-display-system-ids-overlay-pipeline.md) | **IDS (Ide Display System):** пайплайн IDE-оверлеев (intent → композитор → снимок → поверхность), ортогонально CDS; единый input host и слоты — по плану; Roslyn **CASCOPE013–016** | Accepted |
 | [0080](0080-intercom-naming-and-multi-party-channel-model.md) | **Intercom:** продуктовое имя канала связи вместо узкого «чат»; агент + команда + системные реплики; **внешний** командный контур vs своя «гора»; discoverability/i18n; strangler для кода | Proposed |
+| [0081](0081-parametric-intent-melodies-editor-line-ranges.md) | **Параметрические Intent Melody:** суффикс `:startLine:endLine` для операций над текстом редактора; валидация; рефакторинги по диапазону; UX (индикатор, chord vs палитра) | Proposed |
+| [0082](0082-acp-ide-mcp-loopback-single-process.md) | **ACP + IDE MCP:** одна копия процесса — loopback HTTP/SSE вместо второго `CascadeIDE --mcp-stdio`; безопасность localhost; stdio для внешнего хоста сохранить | Proposed |
+| [0083](0083-ai-mode-and-nested-settings-toml.md) | **`[ai]` в settings.toml:** `mode` = local \| acp \| mcp_only \| cloud; вложенные секции; без обратной совместимости со старым `provider` | Accepted · Implemented |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 
