@@ -87,6 +87,7 @@
 | [0075](0075-ui-topic-index-and-mfd-page-conventions.md) | **UI:** тематический указатель [`UI/README.md`](UI/README.md); соглашения по страницам MFD (payload vs проекция, keyboard-first); не заменяет плоский индекс | Proposed |
 | [0076](0076-ui-ux-principles-hub.md) | **UI/UX:** центр принципов — связный текст из [`snippets/ui/`](snippets/ui/README.md) (внимание/кокпит, философия продукта); не заменяет исходные ADR | Proposed |
 | [0077](0077-tech-principles-hub.md) | **TECH:** центр принципов — связный текст из [`snippets/tech/`](snippets/tech/README.md) (границы/контракты, агент/отладка/наблюдаемость); не заменяет исходные ADR | Proposed |
+| [0078](0078-git-preflight-and-noise-control-for-cide.md) | **Git preflight:** шум-контроль (EOL/BOM/whitespace), safe fixes, подсказки логических коммитов и post-push отчёт | Proposed |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 
