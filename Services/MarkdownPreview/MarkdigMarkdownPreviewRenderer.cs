@@ -258,7 +258,12 @@ public sealed class MarkdigMarkdownPreviewRenderer : IMarkdownPreviewRenderer
             return "";
 
         var sb = new StringBuilder();
-        AppendInlineText(sb, inline);
+        // LinkInline is a ContainerInline. AppendInlineText starting at the link node hits `case LinkInline`
+        // and calls ExtractInlineText(link) again → stack overflow. Inner text lives under FirstChild.
+        if (inline is LinkInline link)
+            AppendInlineText(sb, link.FirstChild);
+        else
+            AppendInlineText(sb, inline);
         return sb.ToString().TrimEnd();
     }
 

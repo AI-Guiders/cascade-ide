@@ -43,6 +43,24 @@ public sealed class MarkdigMarkdownPreviewRendererTests
     }
 
     [Fact]
+    public void Render_DoesNotStackOverflow_OnMarkdownLink()
+    {
+        const string md = "See [docs](https://example.com) and ![alt](img.png).";
+        var doc = Markdown.Parse(md, Pipeline);
+        var payload = new MarkdownPreviewPayload(
+            "link.md",
+            md,
+            md,
+            null,
+            doc,
+            [],
+            null);
+        var r = new MarkdigMarkdownPreviewRenderer();
+        var control = r.Render(payload);
+        Assert.NotNull(control);
+    }
+
+    [Fact]
     public void Render_Fallback_OnNullDocument_StillReturnsControl()
     {
         var payload = new MarkdownPreviewPayload("x", "", "", null, null, [], "parse error");
