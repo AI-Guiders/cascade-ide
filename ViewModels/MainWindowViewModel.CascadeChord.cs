@@ -48,7 +48,7 @@ public partial class MainWindowViewModel
         var timeout = (int)CascadeChordTimeoutSeconds;
         var buf = _cascadeChordMelodyTail;
         var bufLine = string.IsNullOrEmpty(buf)
-            ? "Набрано: (пусто) — тот же хвост, что после c: в палитре (например so)."
+            ? "Набрано: (пусто) — тот же хвост, что после c: в палитре (например cps, cs, so)."
             : $"Набрано: «{buf}»";
 
         if (_cascadeChordPhase != CascadeChordPhase.AwaitMelodyTail)

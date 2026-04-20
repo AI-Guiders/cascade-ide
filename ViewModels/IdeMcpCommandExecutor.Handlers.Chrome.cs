@@ -152,7 +152,7 @@ internal sealed partial class IdeMcpCommandExecutor
         add(ShowEnvironmentReadinessPage, async (_, _) =>
         {
             _vm.ApplyMfdRegionExpanded(true);
-            _vm.TryNavigateToSecondaryShellPage(SecondaryShellPage.EnvironmentReadiness);
+            _vm.TryNavigateToMfdShellPage(MfdShellPage.EnvironmentReadiness);
             return await Task.FromResult("OK");
         });
         add(CloseEnvironmentReadinessPage, async (_, _) =>
@@ -168,16 +168,18 @@ internal sealed partial class IdeMcpCommandExecutor
             return await Task.FromResult("OK");
         });
 
-        add(SetSecondaryShellPage, async (args, _) =>
+        Handler setMfdShellPageHandler = async (args, _) =>
         {
             var raw = McpCommandJsonArgs.String(args, "page");
             if (string.IsNullOrWhiteSpace(raw))
-                return "Missing page (string, SecondaryShellPage: Chat, Terminal, Build, SolutionExplorer, …)";
-            if (!Enum.TryParse<SecondaryShellPage>(raw.Trim(), ignoreCase: true, out var page))
-                return $"Unknown SecondaryShellPage: {raw}";
-            _vm.TryNavigateToSecondaryShellPage(page);
+                return "Missing page (string, MfdShellPage: Chat, Terminal, Build, SolutionExplorer, …)";
+            if (!Enum.TryParse<MfdShellPage>(raw.Trim(), ignoreCase: true, out var page))
+                return $"Unknown MfdShellPage: {raw}";
+            _vm.TryNavigateToMfdShellPage(page);
             return await Task.FromResult("OK");
-        });
+        };
+        add(SetMfdShellPage, setMfdShellPageHandler);
+        add(SetMfdShellPageLegacy, setMfdShellPageHandler);
     }
 
     private void RegisterMenuAndToolbarCommands(Action<string, Handler> add)

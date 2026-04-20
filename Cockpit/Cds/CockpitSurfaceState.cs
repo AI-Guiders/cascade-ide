@@ -12,7 +12,7 @@ public sealed record CockpitSurfaceState(
     [property: JsonPropertyName("presentation_effective_line")] string PresentationEffectiveLine,
     [property: JsonPropertyName("presentation_parse_success")] bool PresentationParseSuccess,
     [property: JsonPropertyName("topology")] CockpitSurfaceTopology Topology,
-    [property: JsonPropertyName("secondary_shell")] CockpitSurfaceSecondaryShell SecondaryShell,
+    [property: JsonPropertyName("mfd_shell")] CockpitSurfaceMfdShell MfdShell,
     [property: JsonPropertyName("zones")] CockpitSurfaceZones Zones,
     [property: JsonPropertyName("instruments")] IReadOnlyList<CockpitSurfaceInstrument> Instruments);
 
@@ -22,7 +22,7 @@ public sealed record CockpitSurfaceTopology(
     [property: JsonPropertyName("pfd_host_window_open")] bool PfdHostWindowOpen,
     [property: JsonPropertyName("mfd_column_visible_in_main")] bool MfdColumnVisibleInMain);
 
-public sealed record CockpitSurfaceSecondaryShell(
+public sealed record CockpitSurfaceMfdShell(
     [property: JsonPropertyName("current_page")] string CurrentPage);
 
 public sealed record CockpitSurfaceZones(

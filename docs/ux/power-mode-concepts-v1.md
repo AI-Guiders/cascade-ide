@@ -75,7 +75,7 @@ General daily work mode: editor remains primary, but secondary panels help with 
   - **Dependency Mini‑Map** (graph view of touched dependencies).
 - **Center**:
   - Code editor with optional top sub‑strip showing badges:
-    - `Complexity: 12`
+    - `LOC: 12`
     - `Impacted tests: 5`
     - `Files changed: 3`
 - **Right**:

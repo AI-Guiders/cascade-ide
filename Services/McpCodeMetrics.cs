@@ -80,7 +80,7 @@ public static class McpCodeMetrics
             var root = await tree.GetRootAsync(cancellationToken).ConfigureAwait(false);
             var methods = root.DescendantNodes().OfType<BaseMethodDeclarationSyntax>().ToList();
             var classes = root.DescendantNodes().OfType<ClassDeclarationSyntax>().Count();
-            var fileLoc = text.Split('\n').Count(static l => !string.IsNullOrWhiteSpace(l));
+            var fileLoc = SourceLineMetrics.CountNonEmptyLines(text);
 
             int fileComplexity = 0;
             int fileMaxMethodComplexity = 0;

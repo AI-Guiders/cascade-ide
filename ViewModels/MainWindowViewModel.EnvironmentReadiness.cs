@@ -18,30 +18,30 @@ public partial class MainWindowViewModel
     /// <summary>ADR 0063: тот же порядок ячеек; широкая проекция — таблица с лампой Korry в первой колонке (ADR 0068).</summary>
     public InstrumentDeckDescriptor EnvironmentReadinessTextualDeck => EnvironmentReadinessInstrumentDeck.TextualDetail;
 
-    partial void OnCurrentSecondaryShellPageChanged(SecondaryShellPage value)
+    partial void OnCurrentMfdShellPageChanged(MfdShellPage value)
     {
-        if (value == SecondaryShellPage.EnvironmentReadiness)
+        if (value == MfdShellPage.EnvironmentReadiness)
             _ = RefreshEnvironmentReadinessAsync();
     }
 
-    /// <summary>Уйти со страницы готовности окружения на первую другую разрешённую страницу вторичного контура.</summary>
+    /// <summary>Уйти со страницы готовности окружения на первую другую разрешённую страницу оболочки Mfd.</summary>
     [RelayCommand]
     private void CloseEnvironmentReadinessPage()
     {
-        if (CurrentSecondaryShellPage != SecondaryShellPage.EnvironmentReadiness)
+        if (CurrentMfdShellPage != MfdShellPage.EnvironmentReadiness)
             return;
-        foreach (var p in SecondaryShellPageOrder)
+        foreach (var p in MfdShellPageOrder)
         {
-            if (p == SecondaryShellPage.EnvironmentReadiness)
+            if (p == MfdShellPage.EnvironmentReadiness)
                 continue;
-            if (IsSecondaryShellPageAllowed(p))
+            if (IsMfdShellPageAllowed(p))
             {
-                CurrentSecondaryShellPage = p;
+                CurrentMfdShellPage = p;
                 return;
             }
         }
 
-        CurrentSecondaryShellPage = SecondaryShellPage.Chat;
+        CurrentMfdShellPage = MfdShellPage.Chat;
     }
 
     [RelayCommand]

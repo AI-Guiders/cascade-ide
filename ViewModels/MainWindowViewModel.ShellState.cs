@@ -19,7 +19,7 @@ public partial class MainWindowViewModel
 
     /// <summary>
     /// Intent геометрии: регион Mfd в <c>MainGrid</c> развёрнут (ширина по режиму) или свёрнут.
-    /// Страница «Чат» — <see cref="SecondaryShellPage.Chat"/> через <see cref="CurrentSecondaryShellPage"/>, отдельно.
+    /// Страница «Чат» — <see cref="MfdShellPage.Chat"/> через <see cref="CurrentMfdShellPage"/>, отдельно.
     /// </summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(MfdRegionToggleButtonText))]
@@ -75,7 +75,7 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(MfdWorkspaceHealthMountContext))]
     [NotifyPropertyChangedFor(nameof(ShowTaskBar))]
     [NotifyPropertyChangedFor(nameof(ShowWorkspaceHealthStrip))]
-    [NotifyPropertyChangedFor(nameof(ShowWorkspaceHealthSecondaryPage))]
+    [NotifyPropertyChangedFor(nameof(ShowWorkspaceHealthMfdPage))]
     [NotifyPropertyChangedFor(nameof(ShowEicasAlertsBar))]
     [NotifyPropertyChangedFor(nameof(ShowWorkspaceChromeBand))]
     [NotifyPropertyChangedFor(nameof(WorkspaceHealthUiSurface))]
@@ -149,8 +149,14 @@ public partial class MainWindowViewModel
     private string _safetyLevel = "L2";
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsComplexityBadgeVisible))]
-    private int _complexityBadge;
+    [NotifyPropertyChangedFor(nameof(IsLocBadgeVisible))]
+    [NotifyPropertyChangedFor(nameof(LocBadgeSummary))]
+    private int _locBadge;
+
+    /// <summary>Подпись уровня Low/Medium/High для <see cref="LocBadgeSummary"/>.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(LocBadgeSummary))]
+    private string _locTierLabel = "";
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsImpactedTestsBadgeVisible))]
@@ -175,9 +181,9 @@ public partial class MainWindowViewModel
 
     public ObservableCollection<FocusPlanItemViewModel> FocusPlanItems { get; } = [];
 
-    /// <summary>Какая страница показана во вторичном контуре оболочки (без TabControl; v1 — колонка зоны Mfd).</summary>
+    /// <summary>Какая страница показана в оболочке Mfd (без TabControl; v1 — колонка зоны Mfd).</summary>
     [ObservableProperty]
-    private SecondaryShellPage _currentSecondaryShellPage = SecondaryShellPage.Terminal;
+    private MfdShellPage _currentMfdShellPage = MfdShellPage.Terminal;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(BuildSolutionCommand))]

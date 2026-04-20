@@ -9,7 +9,7 @@ public partial class MainWindowViewModel
 
     /// <summary>
     /// Intent ширины региона Mfd в <c>MainGrid</c> (развёрнут/свёрнут в смысле геометрии раскладки).
-    /// Страница «Чат» — <see cref="Models.SecondaryShellPage.Chat"/> через <see cref="MainWindowViewModel.CurrentSecondaryShellPage"/>, отдельно.
+    /// Страница «Чат» — <see cref="Models.MfdShellPage.Chat"/> через <see cref="MainWindowViewModel.CurrentMfdShellPage"/>, отдельно.
     /// </summary>
     public void ApplyMfdRegionExpanded(bool desired) =>
         IsMfdRegionExpanded = desired;

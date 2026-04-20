@@ -37,24 +37,24 @@
         <ThemeVariantScope RequestedThemeVariant="Dark">
             <Grid>
                 <Grid.Resources>
-                    <views:SecondaryShellPageEqualsConverter x:Key="SecondaryShellPageEq"/>
+                    <views:MfdShellPageEqualsConverter x:Key="MfdShellPageEq"/>
                 </Grid.Resources>
-            <Border IsVisible="{Binding CurrentSecondaryShellPage, Converter={StaticResource SecondaryShellPageEq}, ConverterParameter=WorkspaceHealth}">
-                    <views:WorkspaceHealthSecondaryPageView/>
+            <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=WorkspaceHealth}">
+                    <views:WorkspaceHealthMfdPageView/>
             </Border>
-            <Border IsVisible="{Binding CurrentSecondaryShellPage, Converter={StaticResource SecondaryShellPageEq}, ConverterParameter=SolutionExplorer}">
+            <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=SolutionExplorer}">
                     <views:SolutionExplorerView MinHeight="120"/>
             </Border>
-            <Border IsVisible="{Binding CurrentSecondaryShellPage, Converter={StaticResource SecondaryShellPageEq}, ConverterParameter=MarkdownPreview}">
+            <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=MarkdownPreview}">
                     <views:MarkdownPreviewToolView DataContext="{Binding MarkdownPreviewTool}"/>
             </Border>
-            <Border IsVisible="{Binding CurrentSecondaryShellPage, Converter={StaticResource SecondaryShellPageEq}, ConverterParameter=Chat}">
+            <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=Chat}">
                     <views:ChatPanelView DataContext="{Binding ChatPanel}"/>
             </Border>
-            <Border IsVisible="{Binding CurrentSecondaryShellPage, Converter={StaticResource SecondaryShellPageEq}, ConverterParameter=EnvironmentReadiness}">
-                    <views:EnvironmentReadinessSecondaryPageView/>
+            <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=EnvironmentReadiness}">
+                    <views:EnvironmentReadinessMfdPageView/>
             </Border>
-            <Border IsVisible="{Binding CurrentSecondaryShellPage, Converter={StaticResource SecondaryShellPageEq}, ConverterParameter=AiChatSettings}">
+            <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=AiChatSettings}">
                     <DockPanel>
                         <views:PanelChromeHeader DockPanel.Dock="Top" Title="Параметры AI и чата" UppercaseTitle="False"/>
                         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
@@ -67,7 +67,7 @@
                         </ScrollViewer>
                     </DockPanel>
             </Border>
-            <Border IsVisible="{Binding CurrentSecondaryShellPage, Converter={StaticResource SecondaryShellPageEq}, ConverterParameter=Terminal}">
+            <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=Terminal}">
                     <DockPanel>
                         <Border DockPanel.Dock="Top" IsVisible="{Binding WorkspaceHealthOnTerminalTab}" Classes="modeCard" Margin="0,0,0,4">
                             <StackPanel Spacing="4">
@@ -132,7 +132,7 @@
                         </DockPanel>
                     </DockPanel>
             </Border>
-            <Border IsVisible="{Binding CurrentSecondaryShellPage, Converter={StaticResource SecondaryShellPageEq}, ConverterParameter=Build}">
+            <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=Build}">
                     <DockPanel DataContext="{Binding BuildOutputPanel}">
                         <views:PanelChromeHeader DockPanel.Dock="Top" Title="Журнал сборки · MSBuild / Roslyn" UppercaseTitle="True"/>
                         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" MinHeight="96">
@@ -147,7 +147,7 @@
                         </ScrollViewer>
                     </DockPanel>
             </Border>
-            <Border IsVisible="{Binding CurrentSecondaryShellPage, Converter={StaticResource SecondaryShellPageEq}, ConverterParameter=Problems}">
+            <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=Problems}">
                     <DockPanel DataContext="{Binding ProblemsPanel}">
                         <views:PanelChromeHeader DockPanel.Dock="Top" Title="{Binding SummaryText}" UppercaseTitle="False"/>
                         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" MinHeight="96">
@@ -170,7 +170,7 @@
                         </ScrollViewer>
                     </DockPanel>
             </Border>
-            <Border IsVisible="{Binding CurrentSecondaryShellPage, Converter={StaticResource SecondaryShellPageEq}, ConverterParameter=Git}">
+            <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=Git}">
                     <Grid DataContext="{Binding GitPanel}"
                           ColumnDefinitions="280,4,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,*,Auto,120,Auto,Auto,Auto">
                         <TextBlock Grid.Row="0" Grid.ColumnSpan="3"
@@ -284,7 +284,7 @@
                         </StackPanel>
                     </Grid>
             </Border>
-            <Border IsVisible="{Binding CurrentSecondaryShellPage, Converter={StaticResource SecondaryShellPageEq}, ConverterParameter=Events}">
+            <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=Events}">
                     <DockPanel>
                         <views:PanelChromeHeader DockPanel.Dock="Top" Classes="terminal" Title="Лента событий · агент и сборка" UppercaseTitle="True"/>
                         <DockPanel DataContext="{Binding InstrumentationPanel}" x:DataType="feat:InstrumentationPanelViewModel">
@@ -311,7 +311,7 @@
                         </DockPanel>
                     </DockPanel>
             </Border>
-            <Border IsVisible="{Binding CurrentSecondaryShellPage, Converter={StaticResource SecondaryShellPageEq}, ConverterParameter=Tests}">
+            <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=Tests}">
                     <DockPanel>
                         <views:PanelChromeHeader DockPanel.Dock="Top" Classes="terminal" Title="{Binding LastTestSummary, StringFormat=Последний прогон: {0}}" UppercaseTitle="False"/>
                         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
@@ -328,7 +328,7 @@
                         </ScrollViewer>
                     </DockPanel>
             </Border>
-            <Border IsVisible="{Binding CurrentSecondaryShellPage, Converter={StaticResource SecondaryShellPageEq}, ConverterParameter=Hypotheses}">
+            <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=Hypotheses}">
                     <DockPanel DataContext="{Binding HypothesesPanel}" x:DataType="dbg:HypothesesPanelViewModel">
                         <views:PanelChromeHeader DockPanel.Dock="Top" Classes="terminal" Title="Гипотезы · workspace JSON" UppercaseTitle="True"/>
                         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="8" Margin="0,0,0,6">
@@ -367,7 +367,7 @@
                         </ScrollViewer>
                     </DockPanel>
             </Border>
-            <Border IsVisible="{Binding CurrentSecondaryShellPage, Converter={StaticResource SecondaryShellPageEq}, ConverterParameter=DebugStack}">
+            <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=DebugStack}">
                     <Grid DataContext="{Binding InstrumentationPanel}" x:DataType="feat:InstrumentationPanelViewModel"
                           RowDefinitions="Auto,*,4,Auto,*" Margin="0,4,0,0">
                         <views:PanelChromeHeader Grid.Row="0" Classes="terminal" Title="Стек вызовов · отладчик" UppercaseTitle="True"/>

@@ -10,6 +10,12 @@ mfd_region_expanded_agent_chat_width_pixels = 520
 # mfd | separate_window (или window)
 markdown_preview_placement = "mfd"
 
+# Ось размера файла для бейджа LOC (непустые строки; не путать с EICAS W/C/A).
+# Low: loc < medium_min; Medium: medium_min <= loc < high_min; High: loc >= high_min.
+[loc_limits]
+medium_min = 300
+high_min = 800
+
 # ADR 0021/0051 + ADR 0050: одна таблица [routing] — иначе Tomlyn при двух [routing.*] перезаписывает вложенный объект.
 # Канонические intent-id: forward, pfd, mfd, eicas, hud; слоты — alias без сырых instrument_id.
 [routing]

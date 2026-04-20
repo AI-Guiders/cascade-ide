@@ -7,12 +7,12 @@ namespace CascadeIDE.Views;
 /// Готовность окружения: ADR 0063/0068 — одна коллекция payload; проекция «карточки» vs «таблица с лампой в первой колонке»
 /// (<see cref="EnvironmentReadinessPresentationResolver"/>).
 /// </summary>
-public partial class EnvironmentReadinessSecondaryPageView : UserControl
+public partial class EnvironmentReadinessMfdPageView : UserControl
 {
     /// <summary>Минимальная ширина контрола для режима «таблица» (px); синхрон с <see cref="EnvironmentReadinessPresentationResolver.DefaultWideLayoutMinWidthPx"/>.</summary>
     public const double WideLayoutMinWidth = EnvironmentReadinessPresentationResolver.DefaultWideLayoutMinWidthPx;
 
-    public EnvironmentReadinessSecondaryPageView()
+    public EnvironmentReadinessMfdPageView()
     {
         InitializeComponent();
         SizeChanged += OnSizeChanged;

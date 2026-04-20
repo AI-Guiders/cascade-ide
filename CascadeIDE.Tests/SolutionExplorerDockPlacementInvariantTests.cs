@@ -55,7 +55,7 @@ public sealed class SolutionExplorerDockPlacementInvariantTests : IDisposable
     }
 
     [Fact]
-    public void DefaultRouting_tree_in_pfd_slot_matches_frame_and_secondary_shell_is_not_the_tree_host()
+    public void DefaultRouting_tree_in_pfd_slot_matches_frame_and_mfd_shell_is_not_the_tree_host()
     {
         var display = new DisplaySettings();
         var frame = Compose("(P+F) (M)", intentSolutionExplorerVisible: true, display);
@@ -68,7 +68,7 @@ public sealed class SolutionExplorerDockPlacementInvariantTests : IDisposable
     }
 
     [Fact]
-    public void Pfd_workspace_map_mfd_tree_secondary_shell_can_show_solution_explorer_page()
+    public void Pfd_workspace_map_mfd_tree_mfd_shell_can_show_solution_explorer_page()
     {
         var display = new DisplaySettings
         {

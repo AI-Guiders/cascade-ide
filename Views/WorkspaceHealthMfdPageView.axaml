@@ -2,7 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:CascadeIDE.ViewModels"
              xmlns:cockpitWh="using:CascadeIDE.Cockpit.Channels.WorkspaceHealth"
-             x:Class="CascadeIDE.Views.WorkspaceHealthSecondaryPageView"
+             x:Class="CascadeIDE.Views.WorkspaceHealthMfdPageView"
              Classes.power="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Power}"
              x:DataType="vm:MainWindowViewModel">
     <Border Classes="modeCard"

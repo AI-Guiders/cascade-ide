@@ -40,7 +40,7 @@ public sealed class CockpitSurfaceSnapshotBuilderTests
                 MfdHostWindowOpen: false,
                 PfdHostWindowOpen: false,
                 MfdColumnVisibleInMain: true),
-            SecondaryShell: new CockpitSurfaceSecondaryShell("Terminal"),
+            MfdShell: new CockpitSurfaceMfdShell("Terminal"),
             Zones: new CockpitSurfaceZones(
                 PfdVisible: true,
                 ForwardVisible: true,
@@ -74,7 +74,7 @@ public sealed class CockpitSurfaceSnapshotBuilderTests
         var back = JsonSerializer.Deserialize<CockpitSurfaceState>(json);
         Assert.NotNull(back);
         Assert.Equal("0.2", back!.SchemaVersion);
-        Assert.Equal("Terminal", back.SecondaryShell.CurrentPage);
+        Assert.Equal("Terminal", back.MfdShell.CurrentPage);
         Assert.Single(back.Instruments);
     }
 

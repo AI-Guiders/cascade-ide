@@ -1,6 +1,6 @@
 # Workspace Health — полоса и страница (реализация: `WorkspaceHealth*`) — implementation map (v1)
 
-**Статус:** живой чертёж (не ADR). **Обновлено:** 2026-04-17 — legacy-слой удалён; канон теперь `IWorkspaceHealthChannel.Build(...) -> WorkspaceHealthSurfaceCompositor.Compose(...)`. Ранее: 2026-04-11 — **имя файла:** `workspace-health-implementation-map-v1.md` (ранее `workspace-health-compositor-implementation-v1.md` — переименовано: документ про **канал** Workspace Health и карту кода, а не про «композитор стекла» IDE целиком). Ранее: 2026-04-11 — каноническое имя контура: **Workspace Health**; типы в коде: `WorkspaceHealth*`; §1: «слот презентации vs канал»; ссылка на ADR 0021 §1.2. Ранее: 2026-04-06 — `WorkspaceHealthSecondaryPageView` + строка в §3/§4; отсылка к ADR: [содержимое якоря PFD/MFD vs Page канала](../adr/0021-pfd-mfd-cockpit-attention-model.md#anchor-pfd-mfd-content-vs-telemetry-page). Ранее: 2026-04-05 — §7.1: **решение v1 = вариант A** (отдельный контур EICAS); ранее — union types / вариант B, углубление, фазы.  
+**Статус:** живой чертёж (не ADR). **Обновлено:** 2026-04-17 — legacy-слой удалён; канон теперь `IWorkspaceHealthChannel.Build(...) -> WorkspaceHealthSurfaceCompositor.Compose(...)`. Ранее: 2026-04-11 — **имя файла:** `workspace-health-implementation-map-v1.md` (ранее `workspace-health-compositor-implementation-v1.md` — переименовано: документ про **канал** Workspace Health и карту кода, а не про «композитор стекла» IDE целиком). Ранее: 2026-04-11 — каноническое имя контура: **Workspace Health**; типы в коде: `WorkspaceHealth*`; §1: «слот презентации vs канал»; ссылка на ADR 0021 §1.2. Ранее: 2026-04-06 — `WorkspaceHealthSecondaryPageView` (ныне `WorkspaceHealthMfdPageView`) + строка в §3/§4; отсылка к ADR: [содержимое якоря PFD/MFD vs Page канала](../adr/0021-pfd-mfd-cockpit-attention-model.md#anchor-pfd-mfd-content-vs-telemetry-page). Ранее: 2026-04-05 — §7.1: **решение v1 = вариант A** (отдельный контур EICAS); ранее — union types / вариант B, углубление, фазы.  
 **Решения и термины** — в [ADR 0021](../adr/0021-pfd-mfd-cockpit-attention-model.md) (PFD/MFD/EICAS, ARINC 661-идеи); **канонический словарь** «канал / слой представления / имена в коде» — [§1.1](../adr/0021-pfd-mfd-cockpit-attention-model.md#glossary-channel-presentation). Лексикон **Workspace Health** и эволюция имён — [ADR 0022](../adr/0022-workspace-health-lexicon.md). Здесь — **где в коде** и **что дальше**, чтобы не раздувать ADR.
 
 ---
@@ -27,7 +27,7 @@
 | **Слот презентации** | Геометрия и роль поверхности: полоса vs **полная страница** региона MFD/PFD и т.д. | Разговорное «dedicated page» как «отдельная страница» часто про этот уровень. |
 | **Канал содержимого** | Какой поток данных заполняет слот | Workspace Health (этот документ), EICAS, статус окружения, другие инструменты — **разные** каналы. |
 
-**`DedicatedPage` в пресете Workspace Health** (`workspace_health_surface`, enum `WorkspaceHealthUiSurface`) относится **только** к **каналу Workspace Health**: те же `WorkspaceHealthSegments`, другая разметка ([`WorkspaceHealthSecondaryPageView`](../../Views/WorkspaceHealthSecondaryPageView.axaml)). Это **не** имя для «любой» полноэкранной страницы вторичного контура. Полное разведение терминов и рекомендуемые формулировки — [ADR 0021 §1.2](../adr/0021-pfd-mfd-cockpit-attention-model.md#glossary-presentation-vs-channel).
+**`DedicatedPage` в пресете Workspace Health** (`workspace_health_surface`, enum `WorkspaceHealthUiSurface`) относится **только** к **каналу Workspace Health**: те же `WorkspaceHealthSegments`, другая разметка ([`WorkspaceHealthMfdPageView`](../../Views/WorkspaceHealthMfdPageView.axaml)). Это **не** имя для «любой» полноэкранной страницы оболочки Mfd. Полное разведение терминов и рекомендуемые формулировки — [ADR 0021 §1.2](../adr/0021-pfd-mfd-cockpit-attention-model.md#glossary-presentation-vs-channel).
 
 ---
 
@@ -53,7 +53,7 @@
 | Свойства для UI | `ViewModels/MainWindowViewModel.Presentation.cs` | `WorkspaceHealthBuild*` / `WorkspaceHealthTests*` / `WorkspaceHealthDebug*` читают сегменты из `_workspaceHealth.Build(...)`; флаги сессии отладки по-прежнему из DAP. |
 | Полоса хрома над нижним доком | `Views/WorkspaceChromeBandView.axaml` | Сетка колонок как у `MainGrid` (0–4); слот `EicasAlertsBarView` и вложенный `WorkspaceHealthStripView`. Включение полосы Workspace Health: `ShowWorkspaceHealthStrip` (`workspace_health_strip` + `WorkspaceHealthUiSurface.BottomStrip` в capabilities). По смыслу — контейнер **представления** нижней зоны (EICAS + Strip), не «хост событий». |
 | UI полосы | `Views/WorkspaceHealthStripView.axaml` | `ItemsControl` по `WorkspaceHealthSegments`; разные шаблоны для Power vs остальные режимы. |
-| Страница вторичного контура (v1 — зона Mfd) | `Views/WorkspaceHealthSecondaryPageView.axaml` | Тот же `WorkspaceHealthSegments` при `ShowWorkspaceHealthSecondaryPage` (`workspace_health_strip` + `DedicatedPage`); в `MainWindow` — над `ChatPanelView` в колонке зоны Mfd. |
+| Страница оболочки Mfd (v1 — зона Mfd) | `Views/WorkspaceHealthMfdPageView.axaml` | Тот же `WorkspaceHealthSegments` при `ShowWorkspaceHealthMfdPage` (`workspace_health_strip` + `DedicatedPage`); в `MainWindow` — над `ChatPanelView` в колонке зоны Mfd. |
 | Тесты | `CascadeIDE.Tests/WorkspaceHealthSurfaceCompositorTests.cs`, `WorkspaceHealthFormatTests.cs` | Композитор поверхности: порядок, `IsBuildRunning`. Формат: сегменты и `Compose` для снимка. |
 
 ---
@@ -63,7 +63,7 @@
 1. Состояние меняется (сборка, тесты, DAP, git, …).
 2. Свойства `WorkspaceHealth*` уведомляют UI (частично через `[NotifyPropertyChangedFor]`, частично явный `OnPropertyChanged` для отладки).
 3. `RebuildWorkspaceHealth()` берёт снимок через `_workspaceHealth.Build(...)` (внутри — делегаты/DAP/`UiChromeViewModel` + `WorkspaceHealthFormat`) и вызывает `_workspaceHealthSurfaceCompositor.Compose(...)`.
-4. `WorkspaceHealthSegments` обновляется; привязка к `WorkspaceHealthStripView` (через `WorkspaceChromeBandView`) или к `WorkspaceHealthSecondaryPageView` в колонке зоны Mfd при `DedicatedPage`.
+4. `WorkspaceHealthSegments` обновляется; привязка к `WorkspaceHealthStripView` (через `WorkspaceChromeBandView`) или к `WorkspaceHealthMfdPageView` в колонке зоны Mfd при `DedicatedPage`.
 
 Альтернативная реализация канала (агент, MCP, моки в тестах VM) подменяет только сбор снимка, не `WorkspaceHealthSurfaceCompositor` и не разметку полосы.
 

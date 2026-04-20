@@ -82,6 +82,8 @@
 | [0070](0070-command-palette-direct-overlay-surface.md) | **Command Palette:** прямой overlay surface в host, маршрутизация в активный `TopLevel`; `ModalOverlay` не канон для palette baseline | Accepted |
 | [0071](0071-ai-assistance-sovereignty-locality-invisibility.md) | **AI / ассистент в IDE:** суверенитет, локальность, невидимость; анти-паттерн «облачный inline по умолчанию без контроля»; нарратив — [cascadeide-philosophy-v1](../design/cascadeide-philosophy-v1.md) | Proposed |
 | [0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md) | **Чат:** topic cards, drill-in/back, adaptive default; intent-based Melody/Chords v1 для навигации по темам; уточняет [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md) в chat-domain | Proposed |
+| [0073](0073-pfd-instrument-deck.md) | **PFD instrument deck:** каталог вариантов состава (SA, code metrics, Semantic Map, ADR indicator…); критерии «PFD vs по запросу»; живой черновик до выбора пресета | Proposed |
+| [0074](0074-settings-ui-mfd-compact-layout-overflow.md) | **Настройки:** компактнее, якорь на **MFD**; нехватка места в **P+F+M** — таблица стратегий (scroll, min width, fallback-окно, …) | Proposed |
 
 ## Соглашения
 

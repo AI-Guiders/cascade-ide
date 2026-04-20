@@ -1,0 +1,28 @@
+# Command Melody (c:) — хвост после c: → command_id (канон из IdeCommands / MCP).
+# Оверлей: файл рядом с exe — IntentMelody/intent-melody-aliases.toml (как Hotkeys/hotkeys.toml).
+# Норматив: docs/intent-melody-language-v1.md, ADR 0060 §11.
+
+[aliases]
+# Git
+gs = "git_status"
+gc = "git_commit"
+gp = "git_push"
+gsu = "git_submodule"
+# Build / test
+br = "build"
+bt = "run_tests"
+# Debug
+da = "debug_attach"
+dl = "debug_launch"
+dc = "debug_continue"
+# Workspace
+so = "open_solution_dialog"
+# Chat (домен c…)
+cps = "show_chat_page"
+cs = "send_chat"
+cex = "chat_export_readable"
+ctf = "fork_chat_thread"
+# Environment readiness (домен e…)
+ers = "show_environment_readiness_page"
+# Terminal (домен t…)
+ts = "show_terminal_panel"

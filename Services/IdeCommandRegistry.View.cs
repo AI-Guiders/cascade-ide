@@ -32,19 +32,6 @@ public static partial class IdeCommandRegistry
         AddPalette(b, "set_dual_editor_group", IdeCommands.SetDualEditorGroup, "Две группы редакторов", "Вид");
         AddPalette(b, "set_triple_editor_group", IdeCommands.SetTripleEditorGroup, "Три группы редакторов", "Вид");
 
-        // ——— Вид: режим (единственный продуктовый — Flight; cycle и хоткеи Alt+N сохранены)
-        AddPalette(
-            b,
-            "cycle_ui_mode",
-            IdeCommands.CycleUiMode,
-            "Следующий UI-режим",
-            "Вид",
-            allowed: null,
-            access: CommandAccessibleFrom.AgentAndUI,
-            window: new MainWindowHotkeyVmBinding(MainWindowHotkeyVmBindingKind.CycleUiMode));
-
-        AddPalette(b, "set_ui_mode_Flight", IdeCommands.SetUiMode, "Режим интерфейса: Flight", "Вид", """{"mode":"Flight"}""");
-
         // ——— Вид: тема
         AddPalette(b, "apply_light_theme", IdeCommands.ApplyLightTheme, "Тема: светлая", "Вид");
         AddPalette(b, "apply_dark_theme", IdeCommands.ApplyDarkTheme, "Тема: тёмная", "Вид");

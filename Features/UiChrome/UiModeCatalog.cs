@@ -158,6 +158,7 @@ public static class UiModeCatalog
             UiWorkspaceLayoutRuntimeMetrics.ResetToCodeDefaults();
             AttentionZonePanelRuntime.ResetToCodeDefaults();
             MarkdownPreviewPlacementRuntime.ResetToCodeDefaults();
+            LocLimitsRuntime.ResetToCodeDefaults();
             InstrumentPlacementRuntime.ResetToCodeDefaults();
         }
     }
@@ -195,6 +196,7 @@ public static class UiModeCatalog
             UiWorkspaceLayoutRuntimeMetrics.ApplyWorkspaceToml(merged);
             AttentionZonePanelRuntime.ApplyWorkspaceToml(merged);
             MarkdownPreviewPlacementRuntime.ApplyWorkspaceToml(merged);
+            LocLimitsRuntime.ApplyWorkspaceToml(merged);
             InstrumentPlacementRuntime.ApplyWorkspaceInstrumentRouting(merged?.Routing?.Instruments);
         }
     }
@@ -251,6 +253,7 @@ public static class UiModeCatalog
         UiWorkspaceLayoutRuntimeMetrics.ResetToCodeDefaults();
         AttentionZonePanelRuntime.ResetToCodeDefaults();
         MarkdownPreviewPlacementRuntime.ResetToCodeDefaults();
+        LocLimitsRuntime.ResetToCodeDefaults();
         InstrumentPlacementRuntime.ResetToCodeDefaults();
 
         if (!TryReadUiModesFile(uiModesDirectory, "index.toml", out var indexTomlText))
@@ -288,6 +291,7 @@ public static class UiModeCatalog
                 UiWorkspaceLayoutRuntimeMetrics.ApplyWorkspaceToml(w);
                 AttentionZonePanelRuntime.ApplyWorkspaceToml(w);
                 MarkdownPreviewPlacementRuntime.ApplyWorkspaceToml(w);
+                LocLimitsRuntime.ApplyWorkspaceToml(w);
                 InstrumentPlacementRuntime.ApplyWorkspaceInstrumentRouting(w?.Routing?.Instruments);
             }
             catch (Exception ex)

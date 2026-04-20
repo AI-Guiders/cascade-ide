@@ -1,3 +1,4 @@
+#nullable enable
 using System.Text;
 using Avalonia.Controls;
 using Avalonia.Controls.Documents;
@@ -17,31 +18,43 @@ public sealed class MarkdigMarkdownPreviewRenderer : IMarkdownPreviewRenderer
         if (payload.Document is null)
             return BuildFallback(payload);
 
-        var body = new StackPanel
+        try
         {
-            Spacing = 12,
-            Margin = new Avalonia.Thickness(16)
-        };
-
-        foreach (var block in payload.Document)
-            body.Children.Add(RenderBlock(block));
-
-        if (body.Children.Count == 0)
-        {
-            body.Children.Add(new TextBlock
+            var body = new StackPanel
             {
-                Text = "Markdown document is empty.",
-                Opacity = 0.7,
-                TextWrapping = TextWrapping.Wrap
+                Spacing = 12,
+                Margin = new Avalonia.Thickness(16)
+            };
+
+            foreach (var block in payload.Document)
+                body.Children.Add(RenderBlock(block));
+
+            if (body.Children.Count == 0)
+            {
+                body.Children.Add(new TextBlock
+                {
+                    Text = "Markdown document is empty.",
+                    Opacity = 0.7,
+                    TextWrapping = TextWrapping.Wrap
+                });
+            }
+
+            return new ScrollViewer
+            {
+                VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
+                Content = body
+            };
+        }
+        catch (Exception ex)
+        {
+            return BuildFallback(payload with
+            {
+                ErrorMessage = string.IsNullOrWhiteSpace(payload.ErrorMessage)
+                    ? $"Preview render failed: {ex.Message}"
+                    : $"{payload.ErrorMessage} | Render: {ex.Message}"
             });
         }
-
-        return new ScrollViewer
-        {
-            VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
-            HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
-            Content = body
-        };
     }
 
     private static Control BuildFallback(MarkdownPreviewPayload payload)
@@ -139,7 +152,11 @@ public sealed class MarkdigMarkdownPreviewRenderer : IMarkdownPreviewRenderer
         {
             TextWrapping = TextWrapping.Wrap
         };
-        PopulateInlines(text.Inlines!, paragraph.Inline);
+        // Avalonia 12: Inlines is nullable on TextBlock; ctor usually sets it, but themes/styling may leave it unset.
+        if (text.Inlines is { } inlines)
+            PopulateInlines(inlines, paragraph.Inline);
+        else
+            text.Text = ExtractInlineText(paragraph.Inline);
         return text;
     }
 

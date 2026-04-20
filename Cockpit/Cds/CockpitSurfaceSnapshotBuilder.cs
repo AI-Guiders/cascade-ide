@@ -30,8 +30,8 @@ public static class CockpitSurfaceSnapshotBuilder
                 MfdHostWindowOpen: vm.IsMfdHostWindowShellOpen,
                 PfdHostWindowOpen: vm.IsPfdHostWindowShellOpen,
                 MfdColumnVisibleInMain: vm.IsMfdColumnVisible),
-            SecondaryShell: new CockpitSurfaceSecondaryShell(
-                CurrentPage: vm.CurrentSecondaryShellPage.ToString()),
+            MfdShell: new CockpitSurfaceMfdShell(
+                CurrentPage: vm.CurrentMfdShellPage.ToString()),
             Zones: new CockpitSurfaceZones(
                 PfdVisible: vm.IsPfdColumnVisible,
                 ForwardVisible: true,

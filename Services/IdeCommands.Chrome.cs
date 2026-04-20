@@ -45,8 +45,11 @@ public static partial class IdeCommands
     /// <summary>Перейти с страницы «готовность окружения» на первую другую разрешённую страницу вторичного контура. returns: text.</summary>
     public const string CloseEnvironmentReadinessPage = "close_environment_readiness_page";
 
-    /// <summary>Активная страница вторичного контура оболочки: имя значения SecondaryShellPage (Chat, Terminal, …). Якорь на экране — пресет (v1 — колонка зоны Mfd). args: page:string; returns: text; example: {"page":"Chat"}.</summary>
-    public const string SetSecondaryShellPage = "set_secondary_shell_page";
+    /// <summary>Активная страница оболочки Mfd: имя значения MfdShellPage (Chat, Terminal, …). Якорь на экране — пресет (v1 — колонка зоны Mfd). args: page:string; returns: text; example: {"page":"Chat"}.</summary>
+    public const string SetMfdShellPage = "set_mfd_shell_page";
+
+    /// <summary>Устаревший идентификатор MCP-команды; поведение совпадает с <c>set_mfd_shell_page</c>. args: page:string; returns: text; example: {"page":"Chat"}.</summary>
+    public const string SetMfdShellPageLegacy = "set_secondary_shell_page";
 
     // ——— Вид: тема
     /// <summary>Применить светлую тему. returns: text.</summary>

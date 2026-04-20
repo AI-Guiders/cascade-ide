@@ -32,7 +32,7 @@ public partial class MainWindowViewModel
 
         // Один канонический лог — только «Сборка · вывод» (и MCP get_build_output). Терминал не дублируем:
         // в Power переключаем MFD на вывод сборки, чтобы лог был на глазах без второй копии текста.
-        CurrentSecondaryShellPage = SecondaryShellPage.Build;
+        CurrentMfdShellPage = MfdShellPage.Build;
 
         var header = $"Сборка: {solutionPath}\r\n";
         BuildOutputPanel.Set(header);
@@ -110,8 +110,8 @@ public partial class MainWindowViewModel
                 Workspace.SolutionRoots.Add(root);
                 RefreshStartupProjectAfterSolutionLoad();
                 // Страница «Обозреватель» во вторичном контуре — только если карта инструментов назначает дерево в слот Mfd (без дубля с колонкой PFD).
-                TryNavigateToSecondaryShellPage(
-                    IsDockedMfdSolutionExplorerTree ? SecondaryShellPage.SolutionExplorer : SecondaryShellPage.Terminal);
+                TryNavigateToMfdShellPage(
+                    IsDockedMfdSolutionExplorerTree ? MfdShellPage.SolutionExplorer : MfdShellPage.Terminal);
             });
         }
         catch (Exception ex)

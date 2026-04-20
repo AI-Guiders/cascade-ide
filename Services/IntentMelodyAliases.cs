@@ -1,25 +1,48 @@
 namespace CascadeIDE.Services;
 
 /// <summary>
-/// Минимальный слой <b>Command Melody</b> (<c>c:</c>) — alias → <see cref="IdeCommands"/> id.
-/// Норматив: <c>docs/intent-melody-language-v1.md</c>, ADR 0060 §11.
+/// <b>Command Melody</b> (<c>c:</c>) — alias → <see cref="IdeCommands"/> id.
+/// Источник: <see cref="BundledRelativePath"/> (файл рядом с exe, иначе EmbeddedResource), см. <c>docs/intent-melody-language-v1.md</c>, ADR 0060 §11.
 /// </summary>
 public static class IntentMelodyAliases
 {
-    private static readonly Dictionary<string, string> AliasToCommandId = new(StringComparer.OrdinalIgnoreCase)
+    /// <summary>Относительно <see cref="AppContext.BaseDirectory"/>; оверлей поверх встроенного TOML.</summary>
+    public const string BundledRelativePath = "IntentMelody/intent-melody-aliases.toml";
+
+    private static readonly Lazy<Dictionary<string, string>> AliasToCommandIdLazy = new(Load, LazyThreadSafetyMode.ExecutionAndPublication);
+
+    private sealed class IntentMelodyAliasesTomlRoot
     {
-        ["gs"] = IdeCommands.GitStatus,
-        ["gc"] = IdeCommands.GitCommit,
-        ["gp"] = IdeCommands.GitPush,
-        ["gsu"] = IdeCommands.GitSubmodule,
-        ["br"] = IdeCommands.Build,
-        ["bt"] = IdeCommands.RunTests,
-        ["da"] = IdeCommands.DebugAttach,
-        ["dr"] = IdeCommands.DebugLaunch,
-        ["dc"] = IdeCommands.DebugContinue,
-        // so = Solution Open — диалог .sln / .slnx (ADR 0060 §11).
-        ["so"] = IdeCommands.OpenSolutionDialog,
-    };
+        public Dictionary<string, string>? Aliases { get; set; }
+    }
+
+    private static Dictionary<string, string> Load()
+    {
+        if (!BundledAppContent.TryReadDiskThenEmbedded(BundledRelativePath, out var text) || string.IsNullOrWhiteSpace(text))
+            throw new InvalidOperationException(
+                $"Missing {BundledRelativePath} (file under AppContext.BaseDirectory or embedded resource in CascadeIDE assembly).");
+
+        var root = CascadeTomlSerializer.Deserialize<IntentMelodyAliasesTomlRoot>(text.Trim());
+        if (root?.Aliases is not { Count: > 0 })
+            throw new InvalidOperationException($"Invalid {BundledRelativePath}: expected [aliases] with at least one entry.");
+
+        var d = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var kv in root.Aliases)
+        {
+            var key = kv.Key?.Trim();
+            var val = kv.Value?.Trim();
+            if (string.IsNullOrEmpty(key) || string.IsNullOrEmpty(val))
+                continue;
+            d[key.ToLowerInvariant()] = val;
+        }
+
+        if (d.Count == 0)
+            throw new InvalidOperationException($"No valid alias entries in {BundledRelativePath}.");
+
+        return d;
+    }
+
+    private static Dictionary<string, string> AliasToCommandId => AliasToCommandIdLazy.Value;
 
     /// <summary>Строка палитры начинается с <c>c:</c> (регистр первой буквы допускается).</summary>
     public static bool TryGetTail(string? raw, out string tailNormalized)
@@ -40,6 +63,24 @@ public static class IntentMelodyAliases
             .OrderBy(kv => kv.Key, StringComparer.Ordinal)
             .Select(kv => (kv.Key, kv.Value))
             .ToList();
+
+    /// <summary>
+    /// Первые <paramref name="maxAliases"/> alias (по имени) для плейсхолдера палитры и подсказки «c: melody (…)»;
+    /// если alias больше — добавляется «…».
+    /// </summary>
+    public static string SampleAliasesForFooter(int maxAliases = 8)
+    {
+        if (maxAliases <= 0)
+            return "";
+        var pairs = AllPairs();
+        if (pairs.Count == 0)
+            return "";
+        var take = Math.Min(maxAliases, pairs.Count);
+        var s = string.Join(", ", pairs.Take(take).Select(p => p.Alias));
+        if (pairs.Count > maxAliases)
+            s += ", …";
+        return s;
+    }
 
     /// <summary>Alias, чей хвост начинается с <paramref name="tailNormalized"/> (включая пустой — всё).</summary>
     public static IReadOnlyList<(string Alias, string CommandId)> FilterByTailPrefix(string tailNormalized)

@@ -28,14 +28,14 @@
 
 | Слой | Вопрос | Типичные источники в коде |
 |------|--------|---------------------------|
-| **CDS** | Какая **кабина** сейчас: пресет, зоны, окна, страница MFD | `presentation`, `PresentationParseResult`, флаги VM колонок/хоста, `CurrentSecondaryShellPage`, `AttentionLayoutSurfaceKind` |
+| **CDS** | Какая **кабина** сейчас: пресет, зоны, окна, страница MFD | `presentation`, `PresentationParseResult`, флаги VM колонок/хоста, `CurrentMfdShellPage`, `AttentionLayoutSurfaceKind` |
 | **Дерево UI** | **Что** нарисовано в виде контролов | `UiLayoutSnapshot`, MCP `ide_get_ui_layout` |
 | **Каналы** | **Что** в полосах и списках | `Cockpit/Channels/**` (данные), `Cockpit/Composition/**` (порядок/разметка для VM): `Composition/Shell/MainWindowShellSurfaceCompositor` — только **колонки** PFD/MFD в main grid; `Composition/HostSurface/MainWindowHostSurfaceCompositor` — **кадр хоста** (shell + список `CockpitInstrumentDescriptor`, ADR 0047) без деревьев контролов — удобная граница перед Skia в слотах. |
 | **Avalonia (хост)** | Окна, фокус, ввод, DPI; **фюзеляж** для тяжёлых контролов (редактор и т.д.); **не** канон смысла зон — см. [architecture-policy.md](../architecture-policy.md) (раздел «Avalonia и слой кабины») | `MainWindow`, `MfdHostWindow`, привязки VM; отрисовка слотов кабины — поверх хоста (в т.ч. Skia) по кадру композитора |
 
 ### Источник правды сегодня и как сблизить с CDS
 
-**Сейчас** каноническое **состояние кабины** в рантайме по-прежнему живёт в **свойствах `MainWindowViewModel`** (видимость колонок, страница вторичного контура, хост Mfd и т.д.); **CDS** — **проекция** в `CockpitSurfaceState` через [`CockpitSurfaceSnapshotBuilder`](../../Cockpit/Cds/CockpitSurfaceSnapshotBuilder.cs) — это уже **язык для агента, тестов и наблюдаемости** ([ADR 0036 п. 2](../adr/0036-cds-channel-compositor-surface-pipeline.md#adr0036-p2)), не дубль «второй источник правды», если снимок **детерминирован** от VM.
+**Сейчас** каноническое **состояние кабины** в рантайме по-прежнему живёт в **свойствах `MainWindowViewModel`** (видимость колонок, активная страница оболочки Mfd, хост Mfd и т.д.); **CDS** — **проекция** в `CockpitSurfaceState` через [`CockpitSurfaceSnapshotBuilder`](../../Cockpit/Cds/CockpitSurfaceSnapshotBuilder.cs) — это уже **язык для агента, тестов и наблюдаемости** ([ADR 0036 п. 2](../adr/0036-cds-channel-compositor-surface-pipeline.md#adr0036-p2)), не дубль «второй источник правды», если снимок **детерминирован** от VM.
 
 **Улучшать** имеет смысл инкрементально:
 
@@ -60,7 +60,7 @@
     "mfd_host_window_open": false,
     "mfd_column_visible_in_main": true
   },
-  "secondary_shell": {
+  "mfd_shell": {
     "current_page": "WorkspaceHealth | Chat | Terminal | …"
   },
   "zones": {

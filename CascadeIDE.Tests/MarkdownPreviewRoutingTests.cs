@@ -21,7 +21,7 @@ public sealed class MarkdownPreviewRoutingTests
         vm.ShowMarkdownPreviewPageCommand.Execute(null);
 
         Assert.True(vm.IsMfdRegionExpanded);
-        Assert.Equal(SecondaryShellPage.MarkdownPreview, vm.CurrentSecondaryShellPage);
+        Assert.Equal(MfdShellPage.MarkdownPreview, vm.CurrentMfdShellPage);
         Assert.Equal("note.md", vm.MarkdownPreviewTool.Title);
     }
 
@@ -37,6 +37,6 @@ public sealed class MarkdownPreviewRoutingTests
         ((IIdeMcpActions)vm).ShowEditorPreview();
         await Dispatcher.UIThread.InvokeAsync(() => { });
 
-        Assert.Equal(SecondaryShellPage.MarkdownPreview, vm.CurrentSecondaryShellPage);
+        Assert.Equal(MfdShellPage.MarkdownPreview, vm.CurrentMfdShellPage);
     }
 }

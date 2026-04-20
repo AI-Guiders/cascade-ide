@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 using CascadeIDE.Features.UiChrome;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -70,6 +71,26 @@ public sealed class IdeCommandPaletteRowViewModel : ViewModelBase
         UnavailableHint = null;
     }
 
+    /// <summary>
+    /// Melody: команда исполняется через MCP, но нет строки в <see cref="IdeCommandPaletteCatalog"/> — заголовок из дока протокола.
+    /// </summary>
+    public IdeCommandPaletteRowViewModel(
+        string commandId,
+        string melodyAliasTail,
+        string titleFromDoc,
+        string? hotkeyHint)
+    {
+        RowKind = IdeCommandPaletteRowKind.Command;
+        PaletteId = commandId;
+        CommandId = commandId;
+        Title = titleFromDoc;
+        Category = $"c:{melodyAliasTail} · ide_execute_command";
+        ArgsJson = null;
+        HotkeyHint = hotkeyHint;
+        IsAvailable = true;
+        UnavailableHint = null;
+    }
+
     public IdeCommandPaletteRowKind RowKind { get; }
 
     public bool ShowUnavailableHint => RowKind == IdeCommandPaletteRowKind.Command && !IsAvailable && !string.IsNullOrEmpty(UnavailableHint);
@@ -119,10 +140,26 @@ public partial class MainWindowViewModel
         get
         {
             var h = HotkeyGestureMap.GetDisplayHint("toggle_command_palette");
-            var nav = "f: файл · t: тип · m: член · x: текст · c: melody (gs, br, so, …)";
+            var melody = IntentMelodyAliases.SampleAliasesForFooter(8);
+            var nav = string.IsNullOrEmpty(melody)
+                ? "f: файл · t: тип · m: член · x: текст · c: melody"
+                : $"f: файл · t: тип · m: член · x: текст · c: melody ({melody})";
             return !string.IsNullOrEmpty(h)
                 ? $"↑↓ выбор · Enter выполнить · Esc закрыть · PgUp/PgDn страница · {h} выделить запрос · {nav}"
                 : $"↑↓ выбор · Enter выполнить · Esc закрыть · PgUp/PgDn страница · {nav}";
+        }
+    }
+
+    /// <summary>Плейсхолдер поля поиска; примеры melody из <c>IntentMelody/intent-melody-aliases.toml</c>.</summary>
+    [SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "Привязка Avalonia к экземпляру MainWindowViewModel (DataContext).")]
+    public string CommandPalettePlaceholderText
+    {
+        get
+        {
+            var melody = IntentMelodyAliases.SampleAliasesForFooter(6);
+            return string.IsNullOrEmpty(melody)
+                ? "Команда… · f: файл · t: тип · m: член · x: текст · c: melody"
+                : $"Команда… · f: файл · t: тип · m: член · x: текст · c: melody ({melody})";
         }
     }
 

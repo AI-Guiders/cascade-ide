@@ -126,4 +126,21 @@ public sealed class UiWorkspaceTomlMergerTests
         Assert.Equal("workspace_map", merged!.Routing!.Instruments![InstrumentRoutingSlotKeys.PfdPrimary]);
         Assert.Equal("workspace_map", merged.Routing.Instruments[InstrumentRoutingSlotKeys.MfdPrimary]);
     }
+
+    [Fact]
+    public void Merge_loc_limits_higher_overrides_partial_scalars()
+    {
+        var lower = new UiWorkspaceToml
+        {
+            LocLimits = new UiWorkspaceLocLimitsToml { MediumMin = 300, HighMin = 800 }
+        };
+        var higher = new UiWorkspaceToml
+        {
+            LocLimits = new UiWorkspaceLocLimitsToml { HighMin = 900 }
+        };
+        var m = UiWorkspaceTomlMerger.Merge(lower, higher);
+        Assert.NotNull(m?.LocLimits);
+        Assert.Equal(300, m!.LocLimits!.MediumMin);
+        Assert.Equal(900, m.LocLimits.HighMin);
+    }
 }

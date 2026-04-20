@@ -53,7 +53,7 @@ public partial class MainWindowViewModel
 
         // Зона Mfd (или окно-хост Mfd на втором экране, ADR 0017): страница параметров AI.
         IsMfdRegionExpanded = true;
-        TryNavigateToSecondaryShellPage(SecondaryShellPage.AiChatSettings);
+        TryNavigateToMfdShellPage(MfdShellPage.AiChatSettings);
     }
 
     /// <summary>Полное окно настроек (все секции), в т.ч. из страницы AI во вторичном контуре.</summary>
@@ -142,7 +142,7 @@ public partial class MainWindowViewModel
     {
         IsBuildOutputVisible = !IsBuildOutputVisible;
         if (IsBuildOutputVisible)
-            TryNavigateToSecondaryShellPage(SecondaryShellPage.Build);
+            TryNavigateToMfdShellPage(MfdShellPage.Build);
     }
 
     [RelayCommand]
@@ -150,7 +150,7 @@ public partial class MainWindowViewModel
     {
         IsTerminalVisible = !IsTerminalVisible;
         if (IsTerminalVisible)
-            TryNavigateToSecondaryShellPage(SecondaryShellPage.Terminal);
+            TryNavigateToMfdShellPage(MfdShellPage.Terminal);
     }
 
     [RelayCommand]
@@ -237,28 +237,28 @@ public partial class MainWindowViewModel
     private void ShowBuildOutputPanel()
     {
         IsBuildOutputVisible = true;
-        TryNavigateToSecondaryShellPage(SecondaryShellPage.Build);
+        TryNavigateToMfdShellPage(MfdShellPage.Build);
     }
 
     [RelayCommand]
     private void ShowChatPage()
     {
         IsMfdRegionExpanded = true;
-        TryNavigateToSecondaryShellPage(SecondaryShellPage.Chat);
+        TryNavigateToMfdShellPage(MfdShellPage.Chat);
     }
 
     [RelayCommand]
     private void ShowSolutionExplorerPage()
     {
         IsMfdRegionExpanded = true;
-        TryNavigateToSecondaryShellPage(SecondaryShellPage.SolutionExplorer);
+        TryNavigateToMfdShellPage(MfdShellPage.SolutionExplorer);
     }
 
     [RelayCommand]
     private void ShowTerminalPanel()
     {
         IsTerminalVisible = true;
-        TryNavigateToSecondaryShellPage(SecondaryShellPage.Terminal);
+        TryNavigateToMfdShellPage(MfdShellPage.Terminal);
     }
 
     /// <summary>Переключение режима по id из каталога (<see cref="UiModeCatalog.OrderedModeIds"/>), меню и MCP.</summary>

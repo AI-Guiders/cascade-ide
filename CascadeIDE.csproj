@@ -49,6 +49,7 @@
     <!-- UiModes: без этой копии приложение всё равно грузит пресеты из EmbeddedResource (см. ниже); папка рядом с exe — опциональный override. -->
     <Content Include="UiModes\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="Hotkeys\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="IntentMelody\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="CodeNavigation\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <!-- Шипнутые дефолты: копия на диске (override) + встроенный ресурс, если файла нет. -->
     <EmbeddedResource Include="CodeNavigation\presets.toml" />
@@ -56,6 +57,7 @@
     <!-- Обязательно для деплоя без шипнутой папки: BundledAppContent / TryReadUiModesFile fallback. -->
     <EmbeddedResource Include="UiModes\*.toml" />
     <EmbeddedResource Include="Hotkeys\hotkeys.toml" />
+    <EmbeddedResource Include="IntentMelody\intent-melody-aliases.toml" />
     <EmbeddedResource Include="TextMateGrammars\toml\package.json" />
     <EmbeddedResource Include="TextMateGrammars\toml\syntaxes\toml.tmLanguage.json" />
     <Content Include="TextMateGrammars\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />

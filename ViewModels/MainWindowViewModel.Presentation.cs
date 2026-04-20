@@ -13,9 +13,6 @@ namespace CascadeIDE.ViewModels;
 /// <summary>Вычисляемые свойства разметки, Workspace Health и видимости панелей (режимы UI).</summary>
 public partial class MainWindowViewModel
 {
-    public static IReadOnlyList<string> UiModeOptions => UiModeCatalog.OrderedModeIds;
-    public IReadOnlyList<string> UiModeOptionsList => UiModeOptions;
-
     /// <summary>Семейство текущего UI-режима (одна ось вместо булевых Is*Mode).</summary>
     public UiModeFamily UiModeFamily => UiModeFamilyResolver.FromNormalizedMode(NormalizeUiMode(UiMode));
 
@@ -165,8 +162,8 @@ public partial class MainWindowViewModel
     public bool ShowWorkspaceHealthStrip =>
         Capabilities.WorkspaceHealthStripVisible && Capabilities.WorkspaceHealthSurface == WorkspaceHealthUiSurface.BottomStrip;
 
-    /// <summary>Workspace Health на странице вторичного контура (вместо нижней полосы) — при <c>workspace_health_strip</c> и <c>workspace_health_surface = dedicated_page</c> (v1 — колонка зоны Mfd).</summary>
-    public bool ShowWorkspaceHealthSecondaryPage =>
+    /// <summary>Workspace Health на странице оболочки Mfd (вместо нижней полосы) — при <c>workspace_health_strip</c> и <c>workspace_health_surface = dedicated_page</c> (v1 — колонка зоны Mfd).</summary>
+    public bool ShowWorkspaceHealthMfdPage =>
         Capabilities.WorkspaceHealthStripVisible && Capabilities.WorkspaceHealthSurface == WorkspaceHealthUiSurface.DedicatedPage;
 
     /// <summary>
@@ -236,7 +233,11 @@ public partial class MainWindowViewModel
 
     public bool IsResultCardVisible =>
         Capabilities.ResultSummaryCard && IsResultSummaryVisible;
-    public bool IsComplexityBadgeVisible => ComplexityBadge > 0;
+    public bool IsLocBadgeVisible => LocBadge > 0;
+
+    /// <summary>Строка бейджа LOC: число непустых строк и ось Low/Medium/High (пороги из <c>[loc_limits]</c>).</summary>
+    public string LocBadgeSummary =>
+        LocBadge <= 0 ? "" : $"LOC: {LocBadge} · {LocTierLabel}";
     public bool IsImpactedTestsBadgeVisible => ImpactedTestsBadge > 0;
     public bool IsActiveTaskProgressVisible => ActiveTaskProgress > 0;
 

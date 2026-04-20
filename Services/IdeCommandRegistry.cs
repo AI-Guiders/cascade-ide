@@ -15,9 +15,6 @@ public static partial class IdeCommandRegistry
     /// <summary>Нет отдельного <c>IdeCommands</c>-id: только UI «Начать или продолжить» (F5); агент — <c>debug_launch</c> / <c>debug_continue</c> и т.д.</summary>
     public const string DebugStartOrContinueHotkeyId = "debug_start_or_continue";
 
-    /// <summary>Последний индекс для <c>set_ui_mode_by_index_*</c> и tunnel-порядка (включительно).</summary>
-    private const int SetUiModeByIndexMaxInclusive = 8;
-
     public enum CommandAccessibleFrom
     {
         /// <summary>MCP <c>ide_execute_command</c> + палитра/хоткеи (где подключено).</summary>
@@ -86,8 +83,7 @@ public static partial class IdeCommandRegistry
         RegisterGitPalette(b);
         RegisterDocumentsPalette(b);
         RegisterSettingsAndHelpPalette(b);
-        RegisterSecondaryShellPalette(b);
-        RegisterWindowOnlyHotkeys(b);
+        RegisterMfdShellPalette(b);
         return b.ToImmutable();
     }
 
@@ -116,41 +112,11 @@ public static partial class IdeCommandRegistry
             hotkeysTomlKey));
     }
 
-    private static void AddWindowOnly(
-        ImmutableArray<IdeCommandRegistryEntry>.Builder b,
-        string paletteId,
-        string? commandId,
-        MainWindowHotkeyVmBinding window,
-        CommandAccessibleFrom access,
-        string? hotkeysTomlKey = null)
-    {
-        b.Add(new IdeCommandRegistryEntry(
-            paletteId,
-            commandId,
-            Title: "",
-            Category: "",
-            ArgsJson: null,
-            AllowedFamilies: null,
-            access,
-            IncludeInPalette: false,
-            window,
-            hotkeysTomlKey));
-    }
-
-    /// <summary>Единственное место, где задаётся порядок и состав ключей для tunnel (в т.ч. <c>set_ui_mode_by_index_*</c>).</summary>
+    /// <summary>Единственное место, где задаётся порядок tunnel (приоритет при пересечении жестов).</summary>
     private static ImmutableArray<string> BuildTunnelKeyPriorityOrder()
     {
-        var builder = ImmutableArray.CreateBuilder<string>();
-        builder.Add("toggle_command_palette");
-        builder.Add(DebugStartOrContinueHotkeyId);
-        builder.Add(IdeCommands.DebugStop);
-        builder.Add(IdeCommands.DebugStepOver);
-        builder.Add(IdeCommands.DebugStepInto);
-        builder.Add(IdeCommands.DebugStepOut);
-        builder.Add("cycle_ui_mode");
-        for (var i = 0; i <= SetUiModeByIndexMaxInclusive; i++)
-            builder.Add($"set_ui_mode_by_index_{i}");
-        return builder.ToImmutable();
+        // Только палитра: остальные команды — через Command Melody (c:) или CascadeChord (корень из hotkeys.toml).
+        return ImmutableArray.Create("toggle_command_palette");
     }
 
     private static Dictionary<string, IdeCommandRegistryEntry> BuildWindowHotkeyIndex()

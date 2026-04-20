@@ -42,9 +42,9 @@ public partial class MainWindowViewModel
         EditorGroupCount = spec.EditorGroupCount;
         IsInstrumentationDockVisible = spec.InstrumentationDockVisible;
 
-        CoerceSecondaryShellPageToAllowed();
+        CoerceMfdShellPageToAllowed();
         if (spec.SelectTerminalTabWhenTerminalShown && IsTerminalVisible)
-            CurrentSecondaryShellPage = SecondaryShellPage.Terminal;
+            CurrentMfdShellPage = MfdShellPage.Terminal;
 
         _ = spec.ThemeSlot switch
         {

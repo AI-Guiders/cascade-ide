@@ -103,7 +103,7 @@ public partial class MainWindowViewModel
                     combined = combined[^maxLogChars..];
                 InstrumentationPanel.TestResultsOutput = combined;
                 if (InstrumentationTabs)
-                    CurrentSecondaryShellPage = SecondaryShellPage.Tests;
+                    CurrentMfdShellPage = MfdShellPage.Tests;
             });
             return outcome.JsonPayload;
         }

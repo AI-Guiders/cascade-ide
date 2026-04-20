@@ -3,7 +3,7 @@
              xmlns:vm="using:CascadeIDE.ViewModels"
              xmlns:models="using:CascadeIDE.Models"
              xmlns:views="using:CascadeIDE.Views"
-             x:Class="CascadeIDE.Views.EnvironmentReadinessSecondaryPageView"
+             x:Class="CascadeIDE.Views.EnvironmentReadinessMfdPageView"
              x:DataType="vm:MainWindowViewModel">
     <UserControl.Resources>
         <views:AnnunciatorLampLevelToBrushConverter x:Key="EnvLevelBrush"/>

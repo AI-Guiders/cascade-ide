@@ -75,6 +75,7 @@ internal static class IdeCommandsArgsGenerated
         ["set_git_panel_visible"] = new IdeCommandsArgs.Arg[] { new("visible", "boolean", true, false, null) },
         ["set_instrumentation_dock_visible"] = new IdeCommandsArgs.Arg[] { new("visible", "boolean", true, false, null) },
         ["set_mfd_region_expanded"] = new IdeCommandsArgs.Arg[] { new("visible", "boolean", true, false, null) },
+        ["set_mfd_shell_page"] = new IdeCommandsArgs.Arg[] { new("page", "string", true, false, null) },
         ["set_panel_size"] = new IdeCommandsArgs.Arg[] { new("panel", "string", true, false, null), new("width", "integer", false, false, null), new("height", "integer", false, false, null) },
         ["set_pfd_region_expanded"] = new IdeCommandsArgs.Arg[] { new("visible", "boolean", true, false, null) },
         ["set_secondary_shell_page"] = new IdeCommandsArgs.Arg[] { new("page", "string", true, false, null) },

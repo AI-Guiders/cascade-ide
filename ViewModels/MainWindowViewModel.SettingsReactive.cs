@@ -54,9 +54,9 @@ public partial class MainWindowViewModel
         OnPropertyChanged(nameof(IsBottomPanelVisible));
         SaveSettingsIfChanged();
         if (value)
-            TryNavigateToSecondaryShellPage(SecondaryShellPage.Terminal);
-        else if (CurrentSecondaryShellPage == SecondaryShellPage.Terminal)
-            CoerceSecondaryShellPageToAllowed();
+            TryNavigateToMfdShellPage(MfdShellPage.Terminal);
+        else if (CurrentMfdShellPage == MfdShellPage.Terminal)
+            CoerceMfdShellPageToAllowed();
     }
 
     partial void OnIsBuildOutputVisibleChanged(bool value)
@@ -64,9 +64,9 @@ public partial class MainWindowViewModel
         OnPropertyChanged(nameof(IsBuildPanelHidden));
         OnPropertyChanged(nameof(IsBottomPanelVisible));
         if (value)
-            TryNavigateToSecondaryShellPage(SecondaryShellPage.Build);
-        else if (CurrentSecondaryShellPage == SecondaryShellPage.Build)
-            CoerceSecondaryShellPageToAllowed();
+            TryNavigateToMfdShellPage(MfdShellPage.Build);
+        else if (CurrentMfdShellPage == MfdShellPage.Build)
+            CoerceMfdShellPageToAllowed();
     }
 
     partial void OnIsInstrumentationDockVisibleChanged(bool value)
@@ -75,19 +75,19 @@ public partial class MainWindowViewModel
         SaveSettingsIfChanged();
         if (value)
         {
-            TryNavigateToSecondaryShellPage(SecondaryShellPage.Events);
+            TryNavigateToMfdShellPage(MfdShellPage.Events);
             return;
         }
 
-        if (CurrentSecondaryShellPage is SecondaryShellPage.Events or SecondaryShellPage.Tests or SecondaryShellPage.Hypotheses or SecondaryShellPage.DebugStack)
-            CoerceSecondaryShellPageToAllowed();
+        if (CurrentMfdShellPage is MfdShellPage.Events or MfdShellPage.Tests or MfdShellPage.Hypotheses or MfdShellPage.DebugStack)
+            CoerceMfdShellPageToAllowed();
     }
 
     partial void OnIsMfdRegionExpandedChanged(bool value)
     {
         OnPropertyChanged(nameof(IsMfdRegionCollapsed));
         // Intent «развёрнут/свёрнут регион Mfd» в раскладке (ширина в MainGrid через композитор).
-        // Активная страница вторичного контура — отдельно (CurrentSecondaryShellPage); не переключаем её здесь.
+        // Активная страница вторичного контура — отдельно (CurrentMfdShellPage); не переключаем её здесь.
     }
 
     partial void OnChatMcpOnlyChanged(bool value)
@@ -133,11 +133,11 @@ public partial class MainWindowViewModel
         SaveSettingsIfChanged();
         if (value)
         {
-            TryNavigateToSecondaryShellPage(SecondaryShellPage.Git);
+            TryNavigateToMfdShellPage(MfdShellPage.Git);
             _ = GitPanel.RefreshGitPanelAsync();
         }
-        else if (CurrentSecondaryShellPage == SecondaryShellPage.Git)
-            CoerceSecondaryShellPageToAllowed();
+        else if (CurrentMfdShellPage == MfdShellPage.Git)
+            CoerceMfdShellPageToAllowed();
     }
 
     partial void OnSendMessageKeyChanged(string value)

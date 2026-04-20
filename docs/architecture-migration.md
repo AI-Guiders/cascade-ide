@@ -49,7 +49,7 @@
 | `MainWindowViewModel.PresentationLayoutAuthority.cs` | 14 | Запись intent видимости панелей (семантика «хочу»); фактическая поверхность — `MainWindowShellSurfaceCompositor`. |
 | `MainWindowViewModel.RelayCommands.cs` | 282 | Relay-команды. |
 | `MainWindowViewModel.RelayCommands.Debug.cs` | 120 | Relay: отладка. |
-| `MainWindowViewModel.SecondaryShell.cs` | 73 | Вторичный контур оболочки: одна активная страница; навигация — команды и палитра. Якорь на экране задаётся presentation (зона Mfd в main и/или окно-хост). |
+| `MainWindowViewModel.MfdShell.cs` | 73 | Оболочка Mfd: одна активная страница; навигация — команды и палитра. Якорь на экране задаётся presentation (зона Mfd в main и/или окно-хост). |
 | `MainWindowViewModel.SettingsReactive.cs` | 157 | Реакции на изменение полей настроек и ключей API: диск, автономный агент, панели. |
 | `MainWindowViewModel.ShellState.cs` | 240 | Раскладка панелей, нижняя зона, Workspace Health / автономный агент, ключи провайдеров и чата. |
 | `MainWindowViewModel.SolutionBuild.cs` | 175 | Сборка, `BuildOutputPanel`. |

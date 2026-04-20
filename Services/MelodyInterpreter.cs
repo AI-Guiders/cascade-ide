@@ -6,10 +6,11 @@ namespace CascadeIDE.Services;
 /// </summary>
 public static class MelodyInterpreter
 {
-    public const string EmptyTailHintTitle =
-        "Command Melody: введи хвост после c: (например gs, br, so). Док: docs/intent-melody-language-v1.md";
-
     public const string EmptyTailHintCategory = "c:";
+
+    /// <summary>Подсказка для пустого хвоста после <c>c:</c>; примеры alias подставляются из реестра.</summary>
+    public static string BuildEmptyTailHintTitle() =>
+        $"Command Melody: введи хвост после c: (например {IntentMelodyAliases.SampleAliasesForFooter(6)}). Док: docs/intent-melody-language-v1.md";
 
     public const string NoMatchHintTitle = "Нет alias для этого хвоста";
 
@@ -22,7 +23,7 @@ public static class MelodyInterpreter
         {
             MelodyPaletteLine[] lines =
             [
-                new MelodyPaletteHint(EmptyTailHintTitle, EmptyTailHintCategory),
+                new MelodyPaletteHint(BuildEmptyTailHintTitle(), EmptyTailHintCategory),
                 ..IntentMelodyAliases.AllPairs().Select(p => new MelodyPaletteCommand(p.Alias, p.CommandId)),
             ];
             var selected = lines.Length > 1 ? 1 : (lines.Length > 0 ? 0 : -1);

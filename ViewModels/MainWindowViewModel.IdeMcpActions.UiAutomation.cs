@@ -76,7 +76,7 @@ public partial class MainWindowViewModel
     {
         ApplyMfdRegionExpanded(true);
         MarkdownPreviewTool.RefreshFromEditor();
-        TryNavigateToSecondaryShellPage(SecondaryShellPage.MarkdownPreview);
+        TryNavigateToMfdShellPage(MfdShellPage.MarkdownPreview);
     }
 
     [RelayCommand]

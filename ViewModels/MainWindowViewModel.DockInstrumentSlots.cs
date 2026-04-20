@@ -27,6 +27,6 @@ public partial class MainWindowViewModel
         OnPropertyChanged(nameof(IsDockedPfdSolutionExplorerTree));
         OnPropertyChanged(nameof(IsDockedPfdWorkspaceNavigationMap));
         OnPropertyChanged(nameof(IsDockedMfdSolutionExplorerTree));
-        CoerceSecondaryShellPageToAllowed();
+        CoerceMfdShellPageToAllowed();
     }
 }

@@ -157,12 +157,12 @@ public sealed class MainWindowHotkeyServiceTests
     }
 
     [AvaloniaFact]
-    public void ApplyAll_AddsWindowKeyBinding_ForRegistryCommandHotkey()
+    public void ApplyAll_AddsWindowKeyBinding_ForToggleCommandPalette()
     {
         MainWindowHotkeyService.ReplaceMergedMapForTests(
             new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
-                ["open_solution_dialog"] = "Ctrl+Shift+O"
+                ["toggle_command_palette"] = "Ctrl+Q"
             });
 
         try
@@ -176,8 +176,8 @@ public sealed class MainWindowHotkeyServiceTests
             MainWindowHotkeyService.ApplyAll(window, vm);
 
             var binding = Assert.Single(window.KeyBindings, kb => kb.Gesture is KeyGesture gesture
-                && gesture.Key == Key.O
-                && gesture.KeyModifiers == (KeyModifiers.Control | KeyModifiers.Shift));
+                && gesture.Key == Key.Q
+                && gesture.KeyModifiers == KeyModifiers.Control);
             Assert.NotNull(binding.Command);
         }
         finally

@@ -1,4 +1,5 @@
 using CascadeIDE.Features.UiChrome;
+using CascadeIDE.Services;
 
 namespace CascadeIDE.ViewModels;
 
@@ -13,7 +14,11 @@ public static class MelodyPaletteLineCommandPaletteExtensions
                 MelodyPaletteHint hint => new IdeCommandPaletteRowViewModel(hint.Title, hint.Category),
                 MelodyPaletteCommand cmd => IdeCommandPaletteCatalog.All.FirstOrDefault(e => e.CommandId == cmd.CommandId) is { } entry
                     ? new IdeCommandPaletteRowViewModel(entry, hotkeys.GetDisplayHint(entry.CommandId), family, cmd.Alias)
-                    : null,
+                    : new IdeCommandPaletteRowViewModel(
+                        cmd.CommandId,
+                        cmd.Alias,
+                        IdeCommandDocDisplay.ShortTitleForCommandId(cmd.CommandId),
+                        hotkeys.GetDisplayHint(cmd.CommandId)),
                 _ => throw new InvalidOperationException($"Unknown melody line: {line.GetType().Name}"),
             };
     }

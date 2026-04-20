@@ -1,4 +1,4 @@
 [bundle]
 schema_version = 1
-# Порядок — пункты меню «Режим интерфейса». Режимы без своего *.toml берут спеку из UiModeLayoutRegistry (см. ADR 0010).
-modes = [ "Flight", "Editor" ]
+# Пока один продуктовый режим (Flight). Доп. id — когда появится UI переключения режимов.
+modes = [ "Flight" ]

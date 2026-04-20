@@ -56,7 +56,7 @@
 
 ## 5. Реализация
 
-**MVP (код):** `Views/EnvironmentReadinessSecondaryPageView.axaml` — страница `SecondaryShellPage.EnvironmentReadiness` во вторичном контуре (`MfdShellView`, v1 — колонка зоны Mfd); открытие: палитра `show_environment_readiness_page` («Готовность окружения…»), MCP `show_environment_readiness_page`, или `set_secondary_shell_page` с `page=EnvironmentReadiness`; закрытие: `close_environment_readiness_page` или кнопка «Другая страница вторичного контура…». Снимок строк: `Models/AnnunciatorLampItem`, сборка — `Services/EnvironmentReadinessSnapshotBuilder`. Тесты: `CascadeIDE.Tests/EnvironmentReadinessSnapshotBuilderTests.cs`.
+**MVP (код):** `Views/EnvironmentReadinessMfdPageView.axaml` — страница `MfdShellPage.EnvironmentReadiness` в оболочке Mfd (`MfdShellView`, v1 — колонка зоны Mfd); открытие: палитра `show_environment_readiness_page` («Готовность окружения…»), MCP `show_environment_readiness_page`, или `set_mfd_shell_page` с `page=EnvironmentReadiness` (устаревший идентификатор: `set_secondary_shell_page`); закрытие: `close_environment_readiness_page` или кнопка «Другая страница вторичного контура…». Снимок строк: `Models/AnnunciatorLampItem`, сборка — `Services/EnvironmentReadinessSnapshotBuilder`. Тесты: `CascadeIDE.Tests/EnvironmentReadinessSnapshotBuilderTests.cs`.
 
 Расширения (позже): внешние MCP, агрегат чата, дополнительные переменные — только те, что IDE реально читает.
 

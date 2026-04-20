@@ -1,5 +1,5 @@
-using System.IO;
 using System.Text;
+using CascadeIDE.Features.UiChrome;
 
 namespace CascadeIDE.ViewModels;
 
@@ -16,37 +16,32 @@ public partial class MainWindowViewModel
     partial void OnCurrentFilePathChanged(string? value)
     {
         UpdateSemanticMapCaretOffset(null);
-        RefreshComplexityBadgeFromCurrentFile();
+        RefreshLocBadgeFromCurrentFile();
         RefreshEditorHudBannerFromDiagnostics();
         ScheduleWorkspaceNavigationMapRefresh();
     }
 
-    /// <summary>Прокси «сложности» для task cockpit: число строк текущего файла на диске (при переключении документа).</summary>
-    private void RefreshComplexityBadgeFromCurrentFile()
+    /// <summary>LOC для task cockpit: непустые строки текущего файла на диске (как <c>get_code_metrics</c> <c>loc</c>), при смене документа.</summary>
+    private void RefreshLocBadgeFromCurrentFile()
     {
         try
         {
             if (string.IsNullOrEmpty(CurrentFilePath) || !File.Exists(CurrentFilePath))
             {
-                ComplexityBadge = 0;
+                LocBadge = 0;
+                LocTierLabel = "";
                 return;
             }
 
-            const int maxLines = 95_000;
-            var lines = 0;
-            using var sr = new StreamReader(CurrentFilePath, Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
-            while (sr.ReadLine() is not null)
-            {
-                lines++;
-                if (lines >= maxLines)
-                    break;
-            }
-
-            ComplexityBadge = lines;
+            var text = File.ReadAllText(CurrentFilePath, Encoding.UTF8);
+            var n = SourceLineMetrics.CountNonEmptyLines(text);
+            LocBadge = n;
+            LocTierLabel = n > 0 ? LocLimitsRuntime.TierFor(n).ToString() : "";
         }
         catch
         {
-            ComplexityBadge = 0;
+            LocBadge = 0;
+            LocTierLabel = "";
         }
     }
 }

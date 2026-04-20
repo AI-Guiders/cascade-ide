@@ -4,7 +4,7 @@ using CascadeIDE.Services;
 namespace CascadeIDE.Features.UiChrome;
 
 /// <summary>
-/// Слияние слоёв <see cref="UiWorkspaceToml"/> (ADR 0021 §2.1): <c>chrome</c>, <c>routing</c>, <c>code_navigation.presets</c>.
+/// Слияние слоёв <see cref="UiWorkspaceToml"/> (ADR 0021 §2.1): <c>chrome</c>, <c>loc_limits</c>, <c>routing</c>, <c>code_navigation.presets</c>.
 /// </summary>
 public static class UiWorkspaceTomlMerger
 {
@@ -16,6 +16,7 @@ public static class UiWorkspaceTomlMerger
         return new UiWorkspaceToml
         {
             Chrome = MergeWorkspaceChrome(lower?.Chrome, higher?.Chrome),
+            LocLimits = MergeLocLimits(lower?.LocLimits, higher?.LocLimits),
             Routing = MergeRouting(lower?.Routing, higher?.Routing),
             CodeNavigation = MergeCodeNavigation(lower?.CodeNavigation, higher?.CodeNavigation),
         };
@@ -38,6 +39,20 @@ public static class UiWorkspaceTomlMerger
             MfdRegionExpandedPowerWidthPixels = higher?.MfdRegionExpandedPowerWidthPixels ?? lower?.MfdRegionExpandedPowerWidthPixels,
             MfdRegionExpandedAgentChatWidthPixels = higher?.MfdRegionExpandedAgentChatWidthPixels ?? lower?.MfdRegionExpandedAgentChatWidthPixels,
             MarkdownPreviewPlacement = higher?.MarkdownPreviewPlacement ?? lower?.MarkdownPreviewPlacement
+        };
+    }
+
+    private static UiWorkspaceLocLimitsToml? MergeLocLimits(
+        UiWorkspaceLocLimitsToml? lower,
+        UiWorkspaceLocLimitsToml? higher)
+    {
+        if (lower is null && higher is null)
+            return null;
+
+        return new UiWorkspaceLocLimitsToml
+        {
+            MediumMin = higher?.MediumMin ?? lower?.MediumMin,
+            HighMin = higher?.HighMin ?? lower?.HighMin
         };
     }
 

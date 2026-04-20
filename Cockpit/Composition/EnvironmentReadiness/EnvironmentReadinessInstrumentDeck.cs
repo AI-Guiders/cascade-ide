@@ -10,7 +10,7 @@ namespace CascadeIDE.Cockpit.Composition.EnvironmentReadiness;
 public static class EnvironmentReadinessInstrumentDeck
 {
     /// <summary>Якорь вторичного контура (страница MFD), не слот Pfd/Mfd главной сетки.</summary>
-    public const string SemanticAnchorId = "secondary_shell_environment_readiness";
+    public const string SemanticAnchorId = "mfd_shell_environment_readiness";
 
     public const string CompactDeckId = "environment_readiness_compact_lamps_v1";
     public const string TextualDeckId = "environment_readiness_textual_detail_v1";

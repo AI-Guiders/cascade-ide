@@ -197,24 +197,6 @@
                           IsChecked="{Binding IsInstrumentationDockVisible, Mode=TwoWay}"
                           IsVisible="{Binding ShowInstrumentationLayoutMenu}"/>
                 <Separator/>
-                <MenuItem Header="_Режим интерфейса" ItemsSource="{Binding UiModeOptionsList}">
-                    <MenuItem.ItemTemplate>
-                        <DataTemplate x:DataType="x:String">
-                            <MenuItem Header="{Binding}"
-                                      ToggleType="Radio"
-                                      Command="{Binding DataContext.SetUiModeByIdCommand, ElementName=RootWindow}"
-                                      CommandParameter="{Binding}">
-                                <MenuItem.IsChecked>
-                                    <MultiBinding Converter="{StaticResource UiModeIdEqMulti}">
-                                        <Binding Path="DataContext.UiMode" ElementName="RootWindow" Mode="OneWay"/>
-                                        <Binding Mode="OneWay"/>
-                                    </MultiBinding>
-                                </MenuItem.IsChecked>
-                            </MenuItem>
-                        </DataTemplate>
-                    </MenuItem.ItemTemplate>
-                </MenuItem>
-                <Separator/>
                 <MenuItem Header="_Тема">
                     <MenuItem Header="_Светлая" Command="{Binding ApplyLightThemeCommand}"/>
                     <MenuItem Header="_Тёмная" Command="{Binding ApplyDarkThemeCommand}"/>

@@ -340,8 +340,7 @@ public sealed class UiModeCatalogTests : IDisposable
         UiModeCatalog.Initialize(dir);
 
         Assert.Equal(UiModesBundleSource.TomlBundle, UiModeCatalog.ActiveBundleSource);
-        Assert.Contains("Flight", UiModeCatalog.OrderedModeIds);
-        Assert.Contains("Editor", UiModeCatalog.OrderedModeIds);
+        Assert.Equal(new[] { "Flight" }, UiModeCatalog.OrderedModeIds.ToArray());
     }
 
     [Fact]

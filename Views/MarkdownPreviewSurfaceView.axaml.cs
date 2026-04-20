@@ -47,9 +47,21 @@ public partial class MarkdownPreviewSurfaceView : UserControl
             return;
 
         var vm = ViewModel;
-        host.Content = vm?.Payload is { } payload
-            ? Renderer.Render(payload)
-            : BuildPlaceholder(vm);
+        if (vm?.Payload is not { } payload)
+        {
+            host.Content = BuildPlaceholder(vm);
+        }
+        else
+        {
+            try
+            {
+                host.Content = Renderer.Render(payload);
+            }
+            catch (Exception ex)
+            {
+                host.Content = BuildRenderErrorPlaceholder(vm, ex);
+            }
+        }
 
         if (this.FindControl<Border>("PreviewStatusBanner") is not { } banner
             || this.FindControl<TextBlock>("PreviewStatusText") is not { } text)
@@ -75,6 +87,46 @@ public partial class MarkdownPreviewSurfaceView : UserControl
                 Opacity = 0.8,
                 TextWrapping = Avalonia.Media.TextWrapping.Wrap
             }
+        };
+    }
+
+    private static Control BuildRenderErrorPlaceholder(MarkdownPreviewSurfaceViewModel? vm, Exception ex)
+    {
+        var panel = new StackPanel
+        {
+            Spacing = 8,
+            Margin = new Avalonia.Thickness(16),
+            Children =
+            {
+                new TextBlock
+                {
+                    Text = "Markdown preview failed to render.",
+                    FontWeight = Avalonia.Media.FontWeight.SemiBold,
+                    TextWrapping = Avalonia.Media.TextWrapping.Wrap
+                },
+                new TextBlock
+                {
+                    Text = ex.Message,
+                    Opacity = 0.85,
+                    TextWrapping = Avalonia.Media.TextWrapping.Wrap
+                }
+            }
+        };
+        if (!string.IsNullOrWhiteSpace(vm?.StatusText))
+        {
+            panel.Children.Add(new TextBlock
+            {
+                Text = vm!.StatusText,
+                Opacity = 0.7,
+                TextWrapping = Avalonia.Media.TextWrapping.Wrap
+            });
+        }
+
+        return new ScrollViewer
+        {
+            VerticalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto,
+            HorizontalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto,
+            Content = panel
         };
     }
 

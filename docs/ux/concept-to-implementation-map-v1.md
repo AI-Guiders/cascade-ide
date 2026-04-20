@@ -49,7 +49,7 @@ This map is intended to drive incremental alignment work with clear acceptance c
 | Concept element | XAML control | VM property/command | Status | Notes |
 |---|---|---|---|---|
 | Quick actions | `TaskCockpitView` | `FixFailingTestsCommand`, …, `QuickActions` | ✅ | **`QuickActions`** на VM из **`Capabilities.QuickActions`** (TOML `quick_actions`, дефолты по семье; у Balanced обычно true). |
-| Editor badges (Complexity / Impacted / Files) | `TaskCockpitView` | `ComplexityBadge`, `ImpactedTestsBadge`, `FilesChangedBadge` | 🟨 | **Реальные эвристики:** строки текущего файла на диске; упавшие тесты последнего `dotnet test`; число путей из `git status --short`. Подсказки на бейджах в XAML. |
+| Editor badges (LOC / Impacted / Files) | `TaskCockpitView` | `LocBadgeSummary` (`LocBadge` + Low/Medium/High), `ImpactedTestsBadge`, `FilesChangedBadge` | 🟨 | **LOC:** непустые строки (как `get_code_metrics` `loc`); ось размера по `[loc_limits]` в `workspace.toml` (`medium_min`, `high_min`). Остальное: упавшие тесты последнего `dotnet test`; число путей из `git status --short`. |
 | Agent operations card | `ChatPanelView` row 2 | `ShowAgentOperationsBlock` | ✅ | Balanced only. |
 | Build/Test/Debug + event timeline | `WorkspaceHealthStripView` (Power cockpit) + вкладка «События» | `EventTimeline`, `IsTerminalVisible` | ✅ | В Power дубль Workspace Health на вкладке «Терминал» отключён (`WorkspaceHealthOnTerminalTab`), чтобы не сжимать консоль; лента — «События». |
 | Dependency mini-map / solution graph | — | — | ❌ | Не реализовано; см. шаг 4 в «Next steps». |

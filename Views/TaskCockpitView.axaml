@@ -123,9 +123,9 @@
                     <Button Content="Fix failing tests" Command="{Binding Autonomous.FixFailingTestsCommand}" IsVisible="{Binding QuickActions}" Margin="0,0,6,0"/>
                     <Button Content="Investigate nullref" Command="{Binding Autonomous.InvestigateNullrefCommand}" IsVisible="{Binding QuickActions}" Margin="0,0,6,0"/>
                     <Button Content="Prepare commit" Command="{Binding Autonomous.PrepareCommitCommand}" IsVisible="{Binding QuickActions}" Margin="0,0,6,0"/>
-                    <Border Classes="modeCard" Padding="6,2" Margin="0,0,6,0" IsVisible="{Binding IsComplexityBadgeVisible}"
-                            ToolTip.Tip="Прокси по концепту: число строк текущего файла на диске (обновляется при смене документа), не цикломатика.">
-                        <TextBlock Text="{Binding ComplexityBadge, StringFormat='{}Complexity: {0}'}" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
+                    <Border Classes="modeCard" Padding="6,2" Margin="0,0,6,0" IsVisible="{Binding IsLocBadgeVisible}"
+                            ToolTip.Tip="LOC: непустые строки файла на диске (как get_code_metrics), ось Low/Medium/High по [loc_limits] в workspace.toml. Несохранённый буфер не учитывается.">
+                        <TextBlock Text="{Binding LocBadgeSummary}" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
                     </Border>
                     <Border Classes="modeCard" Padding="6,2" Margin="0,0,6,0" IsVisible="{Binding IsImpactedTestsBadgeVisible}"
                             ToolTip.Tip="Упавшие тесты в последнем прогоне dotnet test (IDE/MCP).">
