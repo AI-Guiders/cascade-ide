@@ -255,4 +255,5 @@
 - **v2.15** — добавлен [0080](adr/0080-intercom-naming-and-multi-party-channel-model.md): **Intercom** как продуктовое имя канала связи (агент, команда, система); открытые вопросы UI/i18n; **Proposed**; строка в таблице «Где что зафиксировано».
 - **v2.16** — [0080](adr/0080-intercom-naming-and-multi-party-channel-model.md): §5 готовый командный контур (интеграция/API) vs собственная реализация; ссылка на [0035](adr/0035-mfd-embedded-webview-external-llm-and-mcp-boundary.md) для риска WebView; открытый вопрос п.5; индекс README и строка навигатора уточнены.
 - **v2.17** — [0080](adr/0080-intercom-naming-and-multi-party-channel-model.md): канон письма **Intercom** (одна **m**); файл ADR переименован с `0080-intercomm-…` на `0080-intercom-…`; **Intercomm** как опечатка в §4.
+- **v2.18** — [0080 § идеи развития](adr/0080-intercom-naming-and-multi-party-channel-model.md#adr0080-future-modalities): async голос в тред, выразительный TTS (в т.ч. OpenTTS), дуплекс/«радио» как отдельный класс требований; без коммита на v1.
 - Изменения направления — отдельным коммитом: обновление этого файла и при необходимости новый ADR в [docs/adr/README.md](adr/README.md).
