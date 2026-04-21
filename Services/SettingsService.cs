@@ -11,7 +11,7 @@ public static class SettingsService
 
     /// <summary>
     /// UTC mtime <c>settings.toml</c> на момент последнего успешного <see cref="Load"/> (или <see cref="DateTime.MinValue"/>, если файла не было).
-    /// Если перед <see cref="Save"/> файл новее — подмешиваем <c>[presentation]</c> и <c>[display.screens]</c> с диска, чтобы ручные правки не затирались.
+    /// Если перед <see cref="Save"/> файл новее — подмешиваем <c>[display.screens]</c> с диска, чтобы ручные правки не затирались.
     /// </summary>
     private static DateTime _settingsFileMtimeUtcAtLastLoad = DateTime.MinValue;
 
@@ -85,23 +85,9 @@ public static class SettingsService
         }
     }
 
-    /// <summary>Перезаписать секции <c>presentation</c> и <c>display.screens</c> в <paramref name="target"/> из <paramref name="disk"/> (клон полей).</summary>
+    /// <summary>Перезаписать <c>[display.screens]</c> в <paramref name="target"/> из <paramref name="disk"/> (клон полей).</summary>
     internal static void ApplyPresentationFromDisk(CascadeIdeSettings target, CascadeIdeSettings disk)
     {
-        var p = disk.Presentation;
-        target.Presentation.Line = p.Line;
-        target.Presentation.LineAlias = p.LineAlias;
-        var g = p.Grammar;
-        target.Presentation.Grammar = new PresentationGrammarSettings
-        {
-            Brackets = g.Brackets,
-            BetweenScreens = g.BetweenScreens,
-            BetweenZones = g.BetweenZones,
-            Pfd = g.Pfd,
-            Forward = g.Forward,
-            Mfd = g.Mfd,
-        };
-
         var s = disk.Display.Screens;
         target.Display.Screens.Topology = s.Topology;
         target.Display.Screens.Grammar = new PresentationGrammarSettings

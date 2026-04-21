@@ -184,6 +184,7 @@ internal static class IdeCommandsDoc
         ["toggle_mfd_region_expanded"] = "Переключить развёрнут/свёрнут регион Mfd (toggle). returns: text.",
         ["toggle_pfd_region_expanded"] = "Переключить развёрнут/свёрнут регион Pfd (как меню «Вид → Semantic Map (PFD)»). returns: text.",
         ["toggle_pin_document"] = "Закрепить/открепить документ (pin). args: file_path:string; returns: text; example: {\"file_path\":\"C:\\\\\\\\tmp\\\\\\\\a.cs\"}.",
+        ["toggle_pm_split_host_window"] = "Открыть или активировать окно сплита P+M при пресете `(xP+yM)(F)` / `(F)(xP+yM)` (ADR 0017). returns: text.",
         ["toggle_terminal"] = "Как меню «Вид → Терминал» (переключатель). returns: text.",
         ["upsert_agent_notes_section"] = "Вставить/обновить секцию заметок агента по section_id (маркерный блок). args: section_id:string, content:string; returns: text; example: {\"section_id\":\"active\",\"content\":\"ActiveProjectId: cascade-ide\"}.",
         ["upsert_knowledge_section"] = "Вставить/обновить секцию в knowledge-файле по section_id. args: file_path:string, section_id:string, content:string, canon_path?:string, save_revision?:boolean; returns: text; example: {\"file_path\":\"index.md\",\"section_id\":\"foo\",\"content\":\"body\"}.",

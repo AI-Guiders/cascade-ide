@@ -148,6 +148,7 @@ public partial class CommandPaletteView : UserControl
         {
             MfdHostWindow => CommandPaletteHost.MfdHost,
             PfdHostWindow => CommandPaletteHost.PfdHost,
+            PmSplitHostWindow => CommandPaletteHost.PmSplitHost,
             _ => CommandPaletteHost.MainWindow,
         };
 

@@ -63,6 +63,8 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private readonly bool _presentationDedicatedMfdSecondScreen;
     private readonly bool _presentationTripleOneAnchorPerZone;
     private readonly bool _presentationMfdHostTopology;
+    private readonly bool _presentationPmForwardTwoScreen;
+    private readonly bool _presentationPmHostTopology;
     private readonly IInstrumentMountPolicyResolver _instrumentMountPolicyResolver;
     private bool _suppressMfdColumnForMfdHostWindow;
     private bool _suppressPfdColumnForPfdHostWindow;
@@ -217,6 +219,9 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _presentationTripleOneAnchorPerZone = _presentationParse.IsSuccess
             && Services.Presentation.PresentationLayoutAnalyzer.IsTripleOneAnchorPerZonePreset(_presentationParse.Screens);
         _presentationMfdHostTopology = _presentationDedicatedMfdSecondScreen || _presentationTripleOneAnchorPerZone;
+        _presentationPmForwardTwoScreen = _presentationParse.IsSuccess
+            && Services.Presentation.PresentationLayoutAnalyzer.IsPmPlusForwardTwoScreenPreset(_presentationParse.Screens);
+        _presentationPmHostTopology = _presentationPmForwardTwoScreen;
         _instrumentMountPolicyResolver = new SettingsBackedInstrumentMountPolicyResolver();
 
         NotifyDockedInstrumentSlotBindings();

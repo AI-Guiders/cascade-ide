@@ -7,17 +7,20 @@ namespace CascadeIDE.Cockpit.Cds;
 /// </summary>
 public static class CockpitPresentationLayoutPolicy
 {
-    /// <summary>На первом экране есть якорь PFD — регион Pfd в главном окне не может быть свёрнут в ноль.</summary>
+    /// <summary>
+    /// На экране, который в <c>presentation</c> отдан под главное окно (лобовое), есть якорь PFD — регион Pfd в главном окне не может быть свёрнут в ноль.
+    /// Для <c>(xP+yM)(F)</c> якоря P/M на экране сплита — в main не требуются (ADR 0017).
+    /// </summary>
     public static bool RequiresPfdRegionInMainWindow(PresentationParseResult parse) =>
-        FirstScreenContains(parse, PresentationAnchorKind.Pfd);
+        MainWindowPresentationScreenContains(parse, PresentationAnchorKind.Pfd);
 
-    /// <summary>На первом экране есть якорь MFD — регион Mfd в главном окне не может быть свёрнут в ноль.</summary>
+    /// <summary>См. <see cref="RequiresPfdRegionInMainWindow"/> — для MFD в главном окне.</summary>
     public static bool RequiresMfdRegionInMainWindow(PresentationParseResult parse) =>
-        FirstScreenContains(parse, PresentationAnchorKind.Mfd);
+        MainWindowPresentationScreenContains(parse, PresentationAnchorKind.Mfd);
 
-    /// <summary>На первом экране есть якорь Forward — для симметрии и будущих проверок (v1 нет отдельного «выкл. forward»).</summary>
+    /// <summary>На экране главного окна в строке <c>presentation</c> есть якорь Forward (симметрия и будущие проверки).</summary>
     public static bool RequiresForwardOnFirstScreen(PresentationParseResult parse) =>
-        FirstScreenContains(parse, PresentationAnchorKind.Forward);
+        MainWindowPresentationScreenContains(parse, PresentationAnchorKind.Forward);
 
     public static bool CoercePfdRegionExpanded(PresentationParseResult parse, bool desired) =>
         RequiresPfdRegionInMainWindow(parse) ? true : desired;
@@ -50,15 +53,19 @@ public static class CockpitPresentationLayoutPolicy
         return false;
     }
 
-    private static bool FirstScreenContains(PresentationParseResult parse, PresentationAnchorKind kind)
+    private static bool MainWindowPresentationScreenContains(PresentationParseResult parse, PresentationAnchorKind kind)
     {
         if (!parse.IsSuccess || parse.Screens.Count == 0)
             return false;
 
-        var first = parse.Screens[0];
-        for (var i = 0; i < first.Count; i++)
+        var idx = PresentationLayoutAnalyzer.GetMainWindowPresentationScreenIndexOrDefault(parse);
+        if ((uint)idx >= (uint)parse.Screens.Count)
+            return false;
+
+        var screen = parse.Screens[idx];
+        for (var i = 0; i < screen.Count; i++)
         {
-            if (first[i].Kind == kind)
+            if (screen[i].Kind == kind)
                 return true;
         }
 

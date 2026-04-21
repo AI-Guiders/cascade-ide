@@ -81,8 +81,14 @@ public sealed class CursorAcpChatConnection : IDisposable
     private string? _cachedExternalMcpJson;
     private bool _cachedAcpAutoInjectIdeMcp = true;
     private string? _cachedProcessPathForMcp;
+    private string? _cachedPreferredCursorAcpModelId;
+    private string? _lastAppliedPreferredCursorAcpModelId;
+    private SessionModelState? _lastSessionModels;
 
     public bool IsDisposed { get; private set; }
+
+    /// <summary>Снимок <c>session/new</c> (модели), обновляется при новой сессии.</summary>
+    public SessionModelState? LastSessionModels => _lastSessionModels;
 
     /// <summary>Зеркалирование вывода ACP-терминала в нижнюю панель (и опционально показ вкладки Terminal).</summary>
     public void SetIdeTerminalCallbacks(Action<string>? appendTerminalUi, Action? showTerminalPanel)
@@ -96,10 +102,12 @@ public sealed class CursorAcpChatConnection : IDisposable
         string configuredAgentPath,
         string externalMcpServersJson,
         bool acpAutoInjectIdeMcp,
+        string? preferredCursorAcpModelId,
         string userText,
         Action<string>? appendMessageChunk,
         Action<string>? appendThoughtChunk,
         Action<CursorAcpStreamStage>? onStage,
+        Action<SessionModelState?>? onSessionModels,
         CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
@@ -111,7 +119,15 @@ public sealed class CursorAcpChatConnection : IDisposable
             workspaceRoot = workDir;
 
         workspaceRoot = Path.GetFullPath(workspaceRoot);
-        await EnsureSessionAsync(workspaceRoot, cmdPath, workDir, externalMcpServersJson, acpAutoInjectIdeMcp, cancellationToken).ConfigureAwait(false);
+        await EnsureSessionAsync(
+            workspaceRoot,
+            cmdPath,
+            workDir,
+            externalMcpServersJson,
+            acpAutoInjectIdeMcp,
+            preferredCursorAcpModelId,
+            onSessionModels,
+            cancellationToken).ConfigureAwait(false);
 
         if (_connection is null || string.IsNullOrEmpty(_sessionId))
             throw new InvalidOperationException("ACP: нет активной сессии.");
@@ -137,10 +153,15 @@ public sealed class CursorAcpChatConnection : IDisposable
         string agentWorkingDirectory,
         string externalMcpServersJson,
         bool acpAutoInjectIdeMcp,
+        string? preferredCursorAcpModelId,
+        Action<SessionModelState?>? onSessionModels,
         CancellationToken cancellationToken)
     {
         var mcpJson = externalMcpServersJson ?? "";
         var processPath = Environment.ProcessPath ?? "";
+        var pref = preferredCursorAcpModelId?.Trim() ?? "";
+        _cachedPreferredCursorAcpModelId = pref;
+
         if (_connection is not null
             && _process is { HasExited: false }
             && !string.IsNullOrEmpty(_sessionId)
@@ -149,7 +170,10 @@ public sealed class CursorAcpChatConnection : IDisposable
             && string.Equals(_cachedExternalMcpJson, mcpJson, StringComparison.Ordinal)
             && _cachedAcpAutoInjectIdeMcp == acpAutoInjectIdeMcp
             && string.Equals(_cachedProcessPathForMcp, processPath, StringComparison.OrdinalIgnoreCase))
+        {
+            await TryApplyPreferredModelAndNotifyAsync(pref, onSessionModels, cancellationToken).ConfigureAwait(false);
             return;
+        }
 
         DisposeProcessAndConnection();
         _cachedWorkspaceRoot = workspaceRoot;
@@ -210,8 +234,66 @@ public sealed class CursorAcpChatConnection : IDisposable
         }, cancellationToken).ConfigureAwait(false);
 
         _sessionId = sessionResult.SessionId;
+        _lastSessionModels = sessionResult.Models;
         _client.SetExpectedSessionId(_sessionId);
         _client.ConfigureWorkspaceRoot(workspaceRoot);
+        await TryApplyPreferredModelAndNotifyAsync(pref, onSessionModels, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>Выбор модели после <c>session/new</c> (например из UI).</summary>
+    public async Task<bool> TrySetSessionModelAsync(string modelId, CancellationToken cancellationToken = default)
+    {
+        ObjectDisposedException.ThrowIf(IsDisposed, this);
+        if (_connection is null || string.IsNullOrEmpty(_sessionId) || string.IsNullOrWhiteSpace(modelId))
+            return false;
+
+        await _connection.SetSessionModelAsync(
+            new SetSessionModelRequest { SessionId = _sessionId, ModelId = modelId.Trim() },
+            cancellationToken).ConfigureAwait(false);
+        _lastAppliedPreferredCursorAcpModelId = modelId.Trim();
+        return true;
+    }
+
+    private async Task TryApplyPreferredModelAndNotifyAsync(
+        string preferredModelId,
+        Action<SessionModelState?>? onSessionModels,
+        CancellationToken cancellationToken)
+    {
+        if (_connection is null || string.IsNullOrEmpty(_sessionId))
+            return;
+
+        if (string.IsNullOrEmpty(preferredModelId))
+        {
+            onSessionModels?.Invoke(_lastSessionModels);
+            return;
+        }
+
+        if (string.Equals(_lastAppliedPreferredCursorAcpModelId, preferredModelId, StringComparison.Ordinal))
+        {
+            onSessionModels?.Invoke(_lastSessionModels);
+            return;
+        }
+
+        if (_lastSessionModels?.AvailableModels is not { Length: > 0 } list
+            || !list.Any(m => string.Equals(m.ModelId, preferredModelId, StringComparison.Ordinal)))
+        {
+            onSessionModels?.Invoke(_lastSessionModels);
+            return;
+        }
+
+        try
+        {
+            await _connection.SetSessionModelAsync(
+                new SetSessionModelRequest { SessionId = _sessionId, ModelId = preferredModelId },
+                cancellationToken).ConfigureAwait(false);
+            _lastAppliedPreferredCursorAcpModelId = preferredModelId;
+        }
+        catch
+        {
+            // оставляем сессию; UI может сменить модель вручную
+        }
+
+        onSessionModels?.Invoke(_lastSessionModels);
     }
 
     private void DisposeProcessAndConnection()
@@ -229,6 +311,8 @@ public sealed class CursorAcpChatConnection : IDisposable
         _connection = null;
         _sessionId = null;
         _cachedExternalMcpJson = null;
+        _lastSessionModels = null;
+        _lastAppliedPreferredCursorAcpModelId = null;
 
         try
         {

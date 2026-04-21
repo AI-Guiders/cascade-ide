@@ -9,6 +9,9 @@ internal sealed partial class IdeMcpCommandExecutor
 {
     private void RegisterOutputAndFocus(Action<string, Handler> add)
     {
+        add(IdePing, async (_, _) => await Task.FromResult(MainWindowViewModel.PingIdeMcpHostJson()));
+        add(IdeRestartMcpClients, async (_, ct) => await _vm.RestartMcpClientsForAgentAsync(ct));
+
         add(FocusEditor, async (_, _) =>
         {
             ((IIdeMcpActions)_vm).FocusEditor();
@@ -237,6 +240,13 @@ internal sealed partial class IdeMcpCommandExecutor
             if (!_vm.ToggleMfdHostWindowCommand.CanExecute(null))
                 return "Skipped: presentation does not request Mfd host window; set presentation / zone_screen_layout in settings.toml (ADR 0017).";
             _vm.ToggleMfdHostWindowCommand.Execute(null);
+            return "OK";
+        });
+        add(TogglePmSplitHostWindow, async (_, _) =>
+        {
+            if (!_vm.TogglePmSplitHostWindowCommand.CanExecute(null))
+                return "Skipped: presentation does not request P+M split host; use (xP+yM)(F) or (F)(xP+yM) in settings.toml (ADR 0017).";
+            _vm.TogglePmSplitHostWindowCommand.Execute(null);
             return "OK";
         });
 

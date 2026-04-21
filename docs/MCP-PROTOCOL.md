@@ -190,6 +190,7 @@
 | `open_preview_window` | Открыть отдельное окно превью (Markdown). returns: text. |
 | `open_settings` | Открыть окно настроек. returns: text. |
 | `toggle_mfd_host_window` | Открыть или активировать окно-хост зоны Mfd, если строка `presentation` / `zone_screen_layout` задаёт топологию с выносом Mfd (ADR 0017); иначе не выполняется. Отдельного пункта меню нет — источник истины раскладка. returns: text. |
+| `toggle_pm_split_host_window` | Открыть или активировать окно сплита P+M при пресете `(xP+yM)(F)` / `(F)(xP+yM)` (ADR 0017). returns: text. |
 
 ### Тулбар: показать панели / скрыть вывод сборки
 
@@ -304,7 +305,7 @@
 | `refresh_workspace_snapshot` | Обновить снимок рабочего состояния (Power cockpit). returns: text. |
 | `resume_autonomous` | Продолжить автономный режим после паузы. returns: text. |
 | `rollback_trace_step` | Откатить состояние по шагу трассы. args: step_index:integer; returns: text; example: {"step_index":0}. |
-| `send_chat` | Чат: args: message?:string, role?:string. role assistant — только строка ассистента из MCP; иначе user и отправка; при `ai.mode = "mcp_only"` встроенный LLM не вызывается. returns: text; example: {"message":"hello"}. |
+| `send_chat` | Чат: args: message?:string, role?:string. role assistant — только строка ассистента из MCP; иначе user и отправка; при ai.mode = mcp_only встроенный LLM не вызывается. returns: text; example: {"message":"hello"}. |
 | `set_safety_l1` | Установить Safety L1. returns: text. |
 | `set_safety_l2` | Установить Safety L2. returns: text. |
 | `set_safety_l3` | Установить Safety L3. returns: text. |

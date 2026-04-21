@@ -11,12 +11,17 @@ public static class PresentationMainGridLayoutFrameBuilder
     /// <summary>Дефолт без весов/валидной конфигурации в первом экране (5 колонок MainGrid: PFD, splitter, Forward, splitter, MFD).</summary>
     public const string DefaultColumnDefinitions = "220,4,*,4,340";
 
+    /// <param name="mainWindowPresentationScreenIndex">
+    /// Индекс группы <c>(…)</c> в строке <c>presentation</c>, которой соответствует главное окно (лобовое).
+    /// Для <c>(xP+yM)(F)</c> — группа с <c>F</c> (не всегда экран 0). Иначе используйте <c>0</c>.
+    /// </param>
     public static PresentationMainGridLayoutFrame Build(
         PresentationParseResult parse,
         bool dedicatedMfdSecondScreen,
         bool mfdColumnSuppressedForHost,
         bool tripleOneAnchorPerZone,
-        bool suppressPfdColumnForPfdHostWindow)
+        bool suppressPfdColumnForPfdHostWindow,
+        int mainWindowPresentationScreenIndex = 0)
     {
         if (!parse.IsSuccess || parse.Screens.Count == 0)
             return DefaultFrame(0);
@@ -27,26 +32,34 @@ public static class PresentationMainGridLayoutFrameBuilder
             return BuildTripleMainWindowFrame(mfdColumnSuppressedForHost, suppressPfdColumnForPfdHostWindow);
         }
 
-        var first = parse.Screens[0];
-        if (first.Count is < 2 or > 3)
-            return DefaultFrame(first.Count);
+        var clampedMain = Math.Clamp(mainWindowPresentationScreenIndex, 0, parse.Screens.Count - 1);
+        var mainScreen = parse.Screens[clampedMain];
 
-        if (!PresentationZoneWeights.TryNormalize(first, out var normalized))
-            return DefaultFrame(first.Count);
+        if (PresentationLayoutAnalyzer.IsPmPlusForwardTwoScreenPreset(parse.Screens)
+            && IsForwardOnlyMainScreen(mainScreen))
+        {
+            return BuildForwardOnlyMainWindowFrame();
+        }
 
-        var hasExplicitWeights = HasExplicitWeights(first);
+        if (mainScreen.Count is < 2 or > 3)
+            return DefaultFrame(mainScreen.Count);
+
+        if (!PresentationZoneWeights.TryNormalize(mainScreen, out var normalized))
+            return DefaultFrame(mainScreen.Count);
+
+        var hasExplicitWeights = HasExplicitWeights(mainScreen);
         if (!hasExplicitWeights)
         {
             // Для пресетов без коэффициентов сохраняем исторический layout.
             return new PresentationMainGridLayoutFrame(
                 DefaultColumnDefinitions,
-                first.Count,
+                mainScreen.Count,
                 hasExplicitWeights,
                 normalized,
-                BuildZoneBounds(first, normalized));
+                BuildZoneBounds(mainScreen, normalized));
         }
 
-        var columns = first.Count switch
+        var columns = mainScreen.Count switch
         {
             3 => FormatTriple(normalized[0], normalized[1], normalized[2]),
             2 => FormatDual(normalized[0], normalized[1], dedicatedMfdSecondScreen, mfdColumnSuppressedForHost),
@@ -55,11 +68,23 @@ public static class PresentationMainGridLayoutFrameBuilder
 
         return new PresentationMainGridLayoutFrame(
             columns,
-            first.Count,
+            mainScreen.Count,
             hasExplicitWeights,
             normalized,
-            BuildZoneBounds(first, normalized));
+            BuildZoneBounds(mainScreen, normalized));
     }
+
+    private static bool IsForwardOnlyMainScreen(IReadOnlyList<PresentationAnchorSlot> mainScreen) =>
+        mainScreen.Count == 1 && mainScreen[0].Kind == PresentationAnchorKind.Forward;
+
+    /// <summary>Только лобовое: колонки PFD/MFD нулевые, центральная <c>*</c>.</summary>
+    private static PresentationMainGridLayoutFrame BuildForwardOnlyMainWindowFrame() =>
+        new(
+            "0,4,*,4,0",
+            1,
+            false,
+            new[] { 1.0 },
+            new[] { new PresentationZoneBound(PresentationAnchorKind.Forward, 0.0, 1.0) });
 
     private static PresentationMainGridLayoutFrame DefaultFrame(int contentZoneCount) =>
         new(DefaultColumnDefinitions, contentZoneCount, false, Array.Empty<double>(), Array.Empty<PresentationZoneBound>());

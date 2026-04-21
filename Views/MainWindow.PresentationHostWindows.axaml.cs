@@ -1,6 +1,7 @@
 using System;
 using Avalonia.Controls;
 using CascadeIDE.Services;
+using CascadeIDE.Services.Presentation;
 
 namespace CascadeIDE.Views;
 
@@ -9,6 +10,7 @@ public partial class MainWindow
 {
     private MfdHostWindow? _mfdHostWindow;
     private PfdHostWindow? _pfdHostWindow;
+    private PmSplitHostWindow? _pmSplitHostWindow;
 
     private static bool TryActivateSecondary(Window? window)
     {
@@ -74,6 +76,37 @@ public partial class MainWindow
         w.Show(this);
     }
 
+    private void TogglePmSplitHostWindow()
+    {
+        if (DataContext is not ViewModels.MainWindowViewModel vm)
+            return;
+
+        if (TryActivateSecondary(_pmSplitHostWindow))
+            return;
+
+        var w = new PmSplitHostWindow { DataContext = vm };
+        w.Closing += (_, _) =>
+        {
+            vm.PersistPmSplitHostWindowBounds(w.Position.X, w.Position.Y, w.Width, w.Height);
+        };
+        w.Closed += (_, _) =>
+        {
+            if (ReferenceEquals(_pmSplitHostWindow, w))
+                _pmSplitHostWindow = null;
+        };
+        PresentationHostWindowPlacement.PresentationHostWindowBounds? savedBounds =
+            vm.TryGetSavedPmSplitHostWindowBounds(out var pb) ? pb : null;
+        var pmPlacementIndex = ResolvePmSplitHostPlacementScreenIndex(vm);
+        PresentationHostWindowPlacement.PlaceOrRestore(
+            this,
+            w,
+            savedBounds,
+            pmPlacementIndex,
+            vm.MaximizePresentationHostWindowsOnDedicatedScreens);
+        _pmSplitHostWindow = w;
+        w.Show(this);
+    }
+
     private void TogglePfdHostWindow()
     {
         if (DataContext is not ViewModels.MainWindowViewModel vm)
@@ -120,6 +153,21 @@ public partial class MainWindow
         return min;
     }
 
+    private int MinScreensForPmSplitHostStartup(ViewModels.MainWindowViewModel vm)
+    {
+        if (PresentationPmPlusForwardPlacement.TryGetOrderedIndices(Screens, vm.PresentationParse.Screens, out var forwardIdx, out var pmIdx))
+            return Math.Max(forwardIdx, pmIdx) + 1;
+        return vm.PmSplitHostPresentationScreenIndex is int idx ? idx + 1 : 2;
+    }
+
+    /// <summary>Индекс дисплея для <see cref="PmSplitHostWindow"/> в порядке LTR-топологии; primary+сосед для симметрии <c>(F)(P+M)</c>/<c>(P+M)(F)</c>.</summary>
+    private int? ResolvePmSplitHostPlacementScreenIndex(ViewModels.MainWindowViewModel vm)
+    {
+        if (PresentationPmPlusForwardPlacement.TryGetOrderedIndices(Screens, vm.PresentationParse.Screens, out _, out var pmIdx))
+            return pmIdx;
+        return vm.PmSplitHostPresentationScreenIndex;
+    }
+
     private void TryOpenMfdHostWindowOnStartup()
     {
         if (DataContext is not ViewModels.MainWindowViewModel vm)
@@ -142,9 +190,36 @@ public partial class MainWindow
         TogglePfdHostWindow();
     }
 
+    private void TryOpenPmSplitHostWindowOnStartup()
+    {
+        if (DataContext is not ViewModels.MainWindowViewModel vm)
+            return;
+        if (!vm.PresentationRequestsPmSplitHostWindow || !vm.OpenPmSplitHostWindowOnStartup)
+            return;
+        if (Screens.All.Count < MinScreensForPmSplitHostStartup(vm))
+            return;
+        TogglePmSplitHostWindow();
+    }
+
     private void CloseMfdHostWindowIfOpen() =>
         CloseSecondaryHostWindow(ref _mfdHostWindow, static vm => vm.SetMfdHostWindowShellOpen(false));
 
     private void ClosePfdHostWindowIfOpen() =>
         CloseSecondaryHostWindow(ref _pfdHostWindow, static vm => vm.SetPfdHostWindowShellOpen(false));
+
+    private void ClosePmSplitHostWindowIfOpen()
+    {
+        if (_pmSplitHostWindow is null)
+            return;
+        try
+        {
+            _pmSplitHostWindow.Close();
+        }
+        catch
+        {
+            // окно уже уничтожено
+        }
+
+        _pmSplitHostWindow = null;
+    }
 }

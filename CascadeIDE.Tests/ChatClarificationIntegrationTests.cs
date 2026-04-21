@@ -63,6 +63,7 @@ public sealed class ChatClarificationIntegrationTests
             getWorkspaceRoot: () => workspace,
             getCursorAcpAgentPath: () => "",
             getExternalMcpServersJson: () => "",
-            getAcpAutoInjectIdeMcp: () => false);
+            getAcpAutoInjectIdeMcp: () => false,
+            getCursorAcpPreferredModelId: () => null);
     }
 }

@@ -13,7 +13,7 @@ public static partial class IdeCommands
     public const string LoadSolution = "load_solution";
     /// <summary>Выделить диапазон в редакторе (1-based). args: file_path:string, start_line:integer, start_column:integer, end_line:integer, end_column:integer; returns: text; example: {"file_path":"C:\\tmp\\a.cs","start_line":1,"start_column":1,"end_line":1,"end_column":10}.</summary>
     public const string Select = "select";
-    /// <summary>Поставить брейкпоинт: при необходимости загрузка найденного .sln/.slnx/.slnf, запись в JSON отладки, открытие файла и переход к строке. args: file_path:string, line:integer, condition?:string; returns: text или File not found / Missing…; example: {"file_path":"C:\\tmp\\a.cs","line":42}.</summary>
+    /// <summary>Поставить брейкпоинт: при необходимости загрузка найденного .sln/.slnx/.slnf, запись в JSON отладки, открытие файла и переход к строке. args: file_path:string, line:integer, condition?:string; returns: text; example: {"file_path":"C:\\tmp\\a.cs","line":42}.</summary>
     public const string SetBreakpoint = "set_breakpoint";
     /// <summary>Снять брейкпоинт. args: file_path:string, line:integer; returns: text; example: {"file_path":"C:\\tmp\\a.cs","line":42}.</summary>
     public const string RemoveBreakpoint = "remove_breakpoint";
@@ -33,4 +33,10 @@ public static partial class IdeCommands
     public const string ApplyEdit = "apply_edit";
     /// <summary>Перейти на позицию (и опционально выделить диапазон). args: file_path:string, line:integer, column:integer, end_line?:integer, end_column?:integer; returns: text; example: {"file_path":"C:\\tmp\\a.cs","line":10,"column":1}.</summary>
     public const string GoToPosition = "go_to_position";
+
+    /// <summary>Живость MCP-хоста IDE (без аргументов). Имя MCP-тула: <c>ide_ping</c>. returns: json.</summary>
+    public const string IdePing = "ping";
+
+    /// <summary>Пересоздать клиентов внешних MCP и сбросить сессию Cursor ACP (после сбоев транспорта). Имя MCP-тула: <c>ide_restart_mcp_clients</c>. returns: json.</summary>
+    public const string IdeRestartMcpClients = "restart_mcp_clients";
 }

@@ -48,7 +48,8 @@ public partial class MainWindowViewModel
             _presentationDedicatedMfdSecondScreen,
             _suppressMfdColumnForMfdHostWindow,
             _presentationTripleOneAnchorPerZone,
-            _suppressPfdColumnForPfdHostWindow);
+            _suppressPfdColumnForPfdHostWindow,
+            PresentationLayoutAnalyzer.GetMainWindowPresentationScreenIndexOrDefault(_presentationParse));
 
     /// <summary>
     /// Пресет требует развернуть главное окно на весь экран при старте — см.
@@ -69,6 +70,34 @@ public partial class MainWindowViewModel
 
     /// <summary>Пресет с выносом MFD на отдельный <c>TopLevel</c> (два или три дисплея по строке <c>presentation</c>).</summary>
     public bool PresentationRequestsMfdHostWindow => _presentationMfdHostTopology;
+
+    /// <summary>Пресет <c>(xP+yM)(F)</c> / <c>(F)(xP+yM)</c> — отдельное окно сплита P+M (ADR 0017).</summary>
+    public bool PresentationRequestsPmSplitHostWindow => _presentationPmHostTopology;
+
+    /// <summary>
+    /// Индекс дисплея для окна сплита P+M в порядке <see cref="PresentationMonitorTopology.OrderScreensForPresentation"/>.
+    /// </summary>
+    public int? PmSplitHostPresentationScreenIndex =>
+        _presentationParse.IsSuccess
+        && PresentationLayoutAnalyzer.TryGetPmSplitHostPresentationScreenIndex(_presentationParse.Screens, out var idx)
+            ? idx
+            : null;
+
+    /// <summary>Индекс группы <c>presentation</c> для главного окна (лобовое); для <c>(xP+yM)(F)</c> — экран с <c>F</c>.</summary>
+    public int MainWindowPresentationScreenIndex =>
+        PresentationLayoutAnalyzer.GetMainWindowPresentationScreenIndexOrDefault(_presentationParse);
+
+    /// <summary>Колонки <c>Grid</c> окна сплита P+M (строка для <c>ColumnDefinitions.Parse</c>).</summary>
+    public string PmSplitHostColumnDefinitions =>
+        _presentationParse.IsSuccess && PmSplitHostPresentationScreenIndex is int pmIdx
+            ? PresentationPmSplitHostColumnBuilder.Build(_presentationParse, pmIdx)
+            : PresentationPmSplitHostColumnBuilder.Build(_presentationParse, 0);
+
+    /// <summary>Строка <c>presentation</c> задаёт <c>(xP+yM)(F)</c> — выровнять главное окно по экрану с <c>F</c> (см. <see cref="MainWindowPresentationScreenIndex"/>).</summary>
+    public bool PresentationRequestsPmSplitMainWindowScreenPlacement => _presentationPmForwardTwoScreen;
+
+    /// <summary>Открывать <see cref="Views.PmSplitHostWindow"/> при старте при подходящей топологии.</summary>
+    public bool OpenPmSplitHostWindowOnStartup => _settings.OpenPmSplitHostWindowOnStartup;
 
     /// <summary>
     /// Индекс физического дисплея для <see cref="Views.MfdHostWindow"/> в порядке
@@ -181,6 +210,33 @@ public partial class MainWindowViewModel
         _settings.PfdHostWindowPixelY = pixelY;
         _settings.PfdHostWindowWidth = width;
         _settings.PfdHostWindowHeight = height;
+        SaveSettingsIfChanged();
+    }
+
+    /// <summary>Сохранённая геометрия <see cref="Views.PmSplitHostWindow"/> в <c>settings.toml</c> (ADR 0017).</summary>
+    internal bool TryGetSavedPmSplitHostWindowBounds(out Services.PresentationHostWindowPlacement.PresentationHostWindowBounds bounds)
+    {
+        var x = _settings.PmSplitHostWindowPixelX;
+        var y = _settings.PmSplitHostWindowPixelY;
+        var ww = _settings.PmSplitHostWindowWidth;
+        var wh = _settings.PmSplitHostWindowHeight;
+        if (x is null || y is null || ww is null || wh is null)
+        {
+            bounds = default;
+            return false;
+        }
+
+        bounds = new Services.PresentationHostWindowPlacement.PresentationHostWindowBounds(x.Value, y.Value, ww.Value, wh.Value);
+        return true;
+    }
+
+    /// <summary>Записать геометрию окна сплита P+M и при необходимости сбросить на диск.</summary>
+    internal void PersistPmSplitHostWindowBounds(int pixelX, int pixelY, double width, double height)
+    {
+        _settings.PmSplitHostWindowPixelX = pixelX;
+        _settings.PmSplitHostWindowPixelY = pixelY;
+        _settings.PmSplitHostWindowWidth = width;
+        _settings.PmSplitHostWindowHeight = height;
         SaveSettingsIfChanged();
     }
 

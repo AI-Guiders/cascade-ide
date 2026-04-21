@@ -31,6 +31,8 @@ public partial class MainWindowViewModel
     public Action? RequestToggleMfdHostWindow { get; set; }
     /// <summary>Открыть или активировать окно-хост зоны Pfd при тройном пресете (ADR 0017).</summary>
     public Action? RequestTogglePfdHostWindow { get; set; }
+    /// <summary>Открыть или активировать окно сплита P+M при пресете <c>(xP+yM)(F)</c> (ADR 0017).</summary>
+    public Action? RequestTogglePmSplitHostWindow { get; set; }
     /// <summary>Показать диалог выбора файла темы (.json). Возвращает путь к файлу или null.</summary>
     public Func<Task<string?>>? RequestOpenThemeFile { get; set; }
     /// <summary>Показать превью Markdown в отдельном окне (контент от агента).</summary>

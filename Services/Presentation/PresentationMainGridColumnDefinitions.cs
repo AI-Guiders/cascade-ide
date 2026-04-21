@@ -13,13 +13,15 @@ public static class PresentationMainGridColumnDefinitions
     /// <param name="mfdColumnSuppressedForHost">Колонка MFD в главном окне свёрнута — узкий хвост для двухякорного пресета с весами.</param>
     /// <param name="tripleOneAnchorPerZone">Тройной пресет <c>(P)(F)(M)</c> (любой порядок) — отдельная ветка колонок под хосты.</param>
     /// <param name="suppressPfdColumnForPfdHostWindow">Колонка PFD в main скрыта — контент в <c>PfdHostWindow</c>.</param>
+    /// <param name="mainWindowPresentationScreenIndex">См. <see cref="PresentationMainGridLayoutFrameBuilder.Build"/>.</param>
     public static string Get(
         PresentationParseResult parse,
         bool dedicatedMfdSecondScreen,
         bool mfdColumnSuppressedForHost,
         bool tripleOneAnchorPerZone,
-        bool suppressPfdColumnForPfdHostWindow)
+        bool suppressPfdColumnForPfdHostWindow,
+        int mainWindowPresentationScreenIndex = 0)
         => PresentationMainGridLayoutFrameBuilder
-            .Build(parse, dedicatedMfdSecondScreen, mfdColumnSuppressedForHost, tripleOneAnchorPerZone, suppressPfdColumnForPfdHostWindow)
+            .Build(parse, dedicatedMfdSecondScreen, mfdColumnSuppressedForHost, tripleOneAnchorPerZone, suppressPfdColumnForPfdHostWindow, mainWindowPresentationScreenIndex)
             .ColumnDefinitions;
 }

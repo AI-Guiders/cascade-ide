@@ -31,6 +31,16 @@ public partial class MainWindow : PointerTrackingWindow
         AddHandler(InputElement.KeyDownEvent, OnDebugShortcutKeyDown, RoutingStrategies.Tunnel, handledEventsToo: true);
         DataContextChanged += OnDataContextChanged;
         Loaded += OnMainWindowLoaded;
+        // Хосты PFD/MFD/PM: после первого показа главного окна — иначе Show(child, owner) падает, пока owner ещё не visible (headless/тесты).
+        Opened += OnMainWindowOpenedPresentationHosts;
+    }
+
+    private void OnMainWindowOpenedPresentationHosts(object? sender, EventArgs e)
+    {
+        Opened -= OnMainWindowOpenedPresentationHosts;
+        TryOpenPfdHostWindowOnStartup();
+        TryOpenMfdHostWindowOnStartup();
+        TryOpenPmSplitHostWindowOnStartup();
     }
 
     private void OnMainWindowLoaded(object? sender, RoutedEventArgs e)
@@ -43,9 +53,6 @@ public partial class MainWindow : PointerTrackingWindow
         }
 
         TryApplyHotkeys();
-
-        TryOpenPfdHostWindowOnStartup();
-        TryOpenMfdHostWindowOnStartup();
     }
 
     private void TryApplyHotkeys()
@@ -73,6 +80,7 @@ public partial class MainWindow : PointerTrackingWindow
             vm.RequestOpenSettings = ShowSettingsWindow;
             vm.RequestToggleMfdHostWindow = ToggleMfdHostWindow;
             vm.RequestTogglePfdHostWindow = TogglePfdHostWindow;
+            vm.RequestTogglePmSplitHostWindow = TogglePmSplitHostWindow;
             vm.RequestOpenThemeFile = ShowOpenThemeFileDialogAsync;
             vm.RequestShowMarkdownPreviewWindow = ShowMarkdownPreviewWindow;
             vm.RequestShowMarkdownPreviewForEditor = ShowMarkdownPreviewForEditor;
@@ -121,6 +129,7 @@ public partial class MainWindow : PointerTrackingWindow
 
             ClosePfdHostWindowIfOpen();
             CloseMfdHostWindowIfOpen();
+            ClosePmSplitHostWindowIfOpen();
         }
     }
 }

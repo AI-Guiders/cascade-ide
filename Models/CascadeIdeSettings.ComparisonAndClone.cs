@@ -126,6 +126,14 @@ public sealed partial class CascadeIdeSettings
                     Width = Display.Mfd.Width,
                     Height = Display.Mfd.Height,
                 },
+                Pm = new DisplayPmHostSettings
+                {
+                    OpenOnStartup = Display.Pm.OpenOnStartup,
+                    PixelX = Display.Pm.PixelX,
+                    PixelY = Display.Pm.PixelY,
+                    Width = Display.Pm.Width,
+                    Height = Display.Pm.Height,
+                },
                 Skia = new DisplaySkiaSettings
                 {
                     ZoneGeometryOverlay = Display.Skia.ZoneGeometryOverlay,
@@ -273,6 +281,11 @@ public sealed partial class CascadeIdeSettings
             && a.Mfd.PixelY == b.Mfd.PixelY
             && Nullable.Equals(a.Mfd.Width, b.Mfd.Width)
             && Nullable.Equals(a.Mfd.Height, b.Mfd.Height)
+            && a.Pm.OpenOnStartup == b.Pm.OpenOnStartup
+            && a.Pm.PixelX == b.Pm.PixelX
+            && a.Pm.PixelY == b.Pm.PixelY
+            && Nullable.Equals(a.Pm.Width, b.Pm.Width)
+            && Nullable.Equals(a.Pm.Height, b.Pm.Height)
             && a.Skia.ZoneGeometryOverlay == b.Skia.ZoneGeometryOverlay
             && a.Skia.InstrumentMount == b.Skia.InstrumentMount
             && a.Mount.DefaultStyle.Is(b.Mount.DefaultStyle)

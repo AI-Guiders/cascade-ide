@@ -3,6 +3,8 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Text.Json;
+using AgentClientProtocol;
+using CascadeIDE.Models;
 using CascadeIDE.Models.AgentChat;
 using CascadeIDE.Services.CursorAcp;
 using CascadeIDE.ViewModels;
@@ -31,6 +33,8 @@ public partial class ChatPanelViewModel : ViewModelBase
     private readonly Func<string> _getCursorAcpAgentPath;
     private readonly Func<string> _getExternalMcpServersJson;
     private readonly Func<bool> _getAcpAutoInjectIdeMcp;
+    private readonly Func<string?> _getCursorAcpPreferredModelId;
+    private readonly Action<string?>? _onUserSelectedCursorAcpModelId;
     private readonly Action<string>? _appendAcpTerminal;
     private readonly Action? _showAcpTerminal;
     private readonly ChatSessionStore _sessionStore;
@@ -46,6 +50,7 @@ public partial class ChatPanelViewModel : ViewModelBase
     private int _acpWaitWatchdogGeneration;
     private DateTimeOffset _lastAcpActivityUtc;
     private string _chatLoadingStageBaseText = "";
+    private bool _suppressCursorAcpModelPickChanged;
 
     public ChatPanelViewModel(
         Services.AiProviderManager aiProviderManager,
@@ -60,6 +65,8 @@ public partial class ChatPanelViewModel : ViewModelBase
         Func<string> getCursorAcpAgentPath,
         Func<string> getExternalMcpServersJson,
         Func<bool> getAcpAutoInjectIdeMcp,
+        Func<string?> getCursorAcpPreferredModelId,
+        Action<string?>? onUserSelectedCursorAcpModelId = null,
         Action<string>? appendAcpTerminal = null,
         Action? showAcpTerminal = null)
     {
@@ -75,6 +82,8 @@ public partial class ChatPanelViewModel : ViewModelBase
         _getCursorAcpAgentPath = getCursorAcpAgentPath;
         _getExternalMcpServersJson = getExternalMcpServersJson;
         _getAcpAutoInjectIdeMcp = getAcpAutoInjectIdeMcp;
+        _getCursorAcpPreferredModelId = getCursorAcpPreferredModelId;
+        _onUserSelectedCursorAcpModelId = onUserSelectedCursorAcpModelId;
         _appendAcpTerminal = appendAcpTerminal;
         _showAcpTerminal = showAcpTerminal;
         _sessionStore = new ChatSessionStore(_getWorkspaceRoot());
@@ -89,6 +98,24 @@ public partial class ChatPanelViewModel : ViewModelBase
     {
         _cursorAcp?.Dispose();
         _cursorAcp = null;
+        void clearPicks()
+        {
+            _suppressCursorAcpModelPickChanged = true;
+            try
+            {
+                CursorAcpModelPicks.Clear();
+                SelectedCursorAcpModelPick = null;
+            }
+            finally
+            {
+                _suppressCursorAcpModelPickChanged = false;
+            }
+        }
+
+        if (UiScheduler.Default.CheckAccess())
+            clearPicks();
+        else
+            UiScheduler.Default.Post(clearPicks);
     }
 
     /// <summary>Вызвать из главного окна при смене провайдера/модели, влияющих на <see cref="CanSendChat"/>.</summary>
@@ -96,6 +123,7 @@ public partial class ChatPanelViewModel : ViewModelBase
 
     public ObservableCollection<ChatMessageViewModel> ChatMessages { get; } = [];
     public ObservableCollection<ClarificationDraftItemViewModel> ClarificationDraftItems { get; } = [];
+    public ObservableCollection<CursorAcpModelPick> CursorAcpModelPicks { get; } = [];
 
     public bool HasChatMessages => ChatMessages.Count > 0;
     public bool HasActiveClarificationBatch => _activeClarificationBatch is not null;
@@ -134,6 +162,10 @@ public partial class ChatPanelViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isChatOverviewMode;
 
+    /// <summary>Текущая модель Cursor ACP (после <c>session/new</c>).</summary>
+    [ObservableProperty]
+    private CursorAcpModelPick? _selectedCursorAcpModelPick;
+
     partial void OnSelectedMessageIndexChanged(int value)
     {
         RefreshChatSurfaceSnapshot();
@@ -152,6 +184,13 @@ public partial class ChatPanelViewModel : ViewModelBase
     partial void OnIsChatOverviewModeChanged(bool value)
     {
         RefreshChatSurfaceSnapshot();
+    }
+
+    partial void OnSelectedCursorAcpModelPickChanged(CursorAcpModelPick? value)
+    {
+        if (_suppressCursorAcpModelPickChanged || value is null || _cursorAcp is null)
+            return;
+        _ = ApplyUserSelectedCursorAcpModelAsync(value);
     }
 
     private void OnChatMessagesCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -300,6 +339,7 @@ public partial class ChatPanelViewModel : ViewModelBase
                         _getCursorAcpAgentPath(),
                         _getExternalMcpServersJson(),
                         _getAcpAutoInjectIdeMcp(),
+                        _getCursorAcpPreferredModelId(),
                         input,
                         appendMessageChunk: t => UiScheduler.Default.Post(() =>
                         {
@@ -326,6 +366,7 @@ public partial class ChatPanelViewModel : ViewModelBase
                             });
                             MarkAcpActivity();
                         }),
+                        onSessionModels: state => UiScheduler.Default.Post(() => ApplyCursorAcpSessionModels(state)),
                         CancellationToken.None).ConfigureAwait(false);
                     await UiScheduler.Default.InvokeAsync(() =>
                     {
@@ -460,6 +501,64 @@ public partial class ChatPanelViewModel : ViewModelBase
     }
 
     private void StopAcpWaitWatchdog() => _acpWaitWatchdogGeneration++;
+
+    private void ApplyCursorAcpSessionModels(SessionModelState? state)
+    {
+        if (state?.AvailableModels is not { Length: > 0 } models)
+        {
+            _suppressCursorAcpModelPickChanged = true;
+            try
+            {
+                CursorAcpModelPicks.Clear();
+                SelectedCursorAcpModelPick = null;
+            }
+            finally
+            {
+                _suppressCursorAcpModelPickChanged = false;
+            }
+
+            return;
+        }
+
+        _suppressCursorAcpModelPickChanged = true;
+        try
+        {
+            CursorAcpModelPicks.Clear();
+            foreach (var m in models)
+            {
+                var label = string.IsNullOrWhiteSpace(m.Description)
+                    ? m.Name
+                    : $"{m.Name} — {m.Description}";
+                CursorAcpModelPicks.Add(new CursorAcpModelPick(m.ModelId, label));
+            }
+
+            var currentId = state.CurrentModelId;
+            SelectedCursorAcpModelPick = CursorAcpModelPicks.FirstOrDefault(p =>
+                string.Equals(p.ModelId, currentId, StringComparison.Ordinal))
+                ?? CursorAcpModelPicks[0];
+        }
+        finally
+        {
+            _suppressCursorAcpModelPickChanged = false;
+        }
+    }
+
+    private async Task ApplyUserSelectedCursorAcpModelAsync(CursorAcpModelPick pick)
+    {
+        if (_cursorAcp is null)
+            return;
+        try
+        {
+            var ok = await _cursorAcp.TrySetSessionModelAsync(pick.ModelId, CancellationToken.None).ConfigureAwait(false);
+            if (!ok)
+                return;
+            await UiScheduler.Default.InvokeAsync(() => _onUserSelectedCursorAcpModelId?.Invoke(pick.ModelId));
+        }
+        catch
+        {
+            // сессия может быть сброшена параллельно
+        }
+    }
 
     private static (string UserMessage, string StageText) MapCursorAcpError(Exception ex)
     {

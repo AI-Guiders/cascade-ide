@@ -20,9 +20,6 @@ public sealed partial class CascadeIdeSettings : ModelBase
 
     public DisplaySettings Display { get; set; } = new();
 
-    /// <summary>Строка топологии дисплеев и грамматика (ADR 0017). TOML: <c>[presentation]</c>.</summary>
-    public PresentationLayoutSettings Presentation { get; set; } = new();
-
     /// <summary>Пресеты навигации по коду / решению (ADR 0039, Code Navigation Context). TOML: <c>[code_navigation]</c>.</summary>
     public CodeNavigationSettings CodeNavigation { get; set; } = new();
 
@@ -100,30 +97,54 @@ public sealed partial class CascadeIdeSettings : ModelBase
     }
 
     [JsonIgnore]
+    public bool OpenPmSplitHostWindowOnStartup
+    {
+        get => Display.Pm.OpenOnStartup;
+        set => Display.Pm.OpenOnStartup = value;
+    }
+
+    [JsonIgnore]
+    public int? PmSplitHostWindowPixelX
+    {
+        get => Display.Pm.PixelX;
+        set => Display.Pm.PixelX = value;
+    }
+
+    [JsonIgnore]
+    public int? PmSplitHostWindowPixelY
+    {
+        get => Display.Pm.PixelY;
+        set => Display.Pm.PixelY = value;
+    }
+
+    [JsonIgnore]
+    public double? PmSplitHostWindowWidth
+    {
+        get => Display.Pm.Width;
+        set => Display.Pm.Width = value;
+    }
+
+    [JsonIgnore]
+    public double? PmSplitHostWindowHeight
+    {
+        get => Display.Pm.Height;
+        set => Display.Pm.Height = value;
+    }
+
+    [JsonIgnore]
     public bool MaximizePresentationHostWindowsOnDedicatedScreens
     {
         get => Display.MaximizeHostsOnDedicatedScreens;
         set => Display.MaximizeHostsOnDedicatedScreens = value;
     }
 
-    public string GetEffectivePresentationLine()
-    {
-        var fromScreens = Display.Screens.Topology?.Trim() ?? "";
-        if (fromScreens.Length > 0)
-            return fromScreens;
-        var a = Presentation.Line?.Trim() ?? "";
-        if (a.Length > 0)
-            return a;
-        return Presentation.LineAlias?.Trim() ?? "";
-    }
+    public string GetEffectivePresentationLine() => Display.Screens.Topology?.Trim() ?? "";
 
-    /// <summary>
-    /// Грамматика для <see cref="GetEffectivePresentationLine"/>: при непустом <c>display.screens.topology</c> — из
-    /// <see cref="DisplayScreensSettings.Grammar"/>; иначе из <see cref="PresentationLayoutSettings.Grammar"/>.
-    /// </summary>
+    /// <summary>Грамматика для <see cref="GetEffectivePresentationLine"/> — <see cref="DisplayScreensSettings.Grammar"/>.</summary>
     public PresentationGrammarSettings GetEffectivePresentationGrammar()
     {
-        static PresentationGrammarSettings Copy(PresentationGrammarSettings g) => new()
+        var g = Display.Screens.Grammar;
+        return new PresentationGrammarSettings
         {
             Brackets = g.Brackets,
             BetweenScreens = g.BetweenScreens,
@@ -132,10 +153,5 @@ public sealed partial class CascadeIdeSettings : ModelBase
             Forward = g.Forward,
             Mfd = g.Mfd,
         };
-
-        var topology = Display.Screens.Topology?.Trim() ?? "";
-        if (topology.Length > 0)
-            return Copy(Display.Screens.Grammar);
-        return Copy(Presentation.Grammar);
     }
 }

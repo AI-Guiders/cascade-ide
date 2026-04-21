@@ -69,6 +69,14 @@ public partial class MainWindowViewModel
 
     private bool CanToggleMfdHostWindow() => PresentationRequestsMfdHostWindow;
 
+    [RelayCommand(CanExecute = nameof(CanTogglePmSplitHostWindow))]
+    private void TogglePmSplitHostWindow()
+    {
+        RequestTogglePmSplitHostWindow?.Invoke();
+    }
+
+    private bool CanTogglePmSplitHostWindow() => PresentationRequestsPmSplitHostWindow;
+
     [RelayCommand]
     private async Task ApplyDarkThemeAsync()
     {

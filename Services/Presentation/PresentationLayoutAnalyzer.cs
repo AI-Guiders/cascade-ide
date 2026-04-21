@@ -40,11 +40,99 @@ public static class PresentationLayoutAnalyzer
     /// <summary>
     /// Главное окно при старте разворачиваем на рабочую область дисплея (не дефолт 1000×600):
     /// на первом экране есть и PFD, и Forward — <c>(xP+yF)</c>, <c>(xP+yF+zM)</c> в одной группе и т.п.;
-    /// либо три дисплея <c>(P)(F)(M)</c> — первое окно только под PFD на первом мониторе (ADR 0017).
+    /// либо три дисплея <c>(P)(F)(M)</c> — первое окно только под PFD на первом мониторе (ADR 0017);
+    /// либо два экрана <c>(xP+yM)(F)</c> / <c>(F)(xP+yM)</c> — на главном только Forward.
     /// Веса <c>x</c>/<c>y</c> меняют только доли колонок; условие по составу якорей не зависит от чисел.
     /// </summary>
     public static bool ShouldMaximizeMainWindowAtStartup(IReadOnlyList<IReadOnlyList<PresentationAnchorSlot>> screens) =>
-        IsPfdForwardCombinedOnFirstScreen(screens) || IsTripleOneAnchorPerZonePreset(screens);
+        IsPfdForwardCombinedOnFirstScreen(screens)
+        || IsTripleOneAnchorPerZonePreset(screens)
+        || IsPmPlusForwardTwoScreenPreset(screens);
+
+    /// <summary>
+    /// Два дисплея: на одном — только Forward, на другом — только PFD+MFD (без лобового), с весами <c>xP+yM</c>.
+    /// Симметрично <c>(F)(xP+yM)</c> и <c>(xP+yM)(F)</c> (ADR 0017).
+    /// </summary>
+    public static bool IsPmPlusForwardTwoScreenPreset(IReadOnlyList<IReadOnlyList<PresentationAnchorSlot>> screens)
+    {
+        if (screens.Count != 2)
+            return false;
+
+        var a = screens[0];
+        var b = screens[1];
+        return IsPmCombinedScreen(a) && IsForwardOnlyScreen(b)
+            || IsForwardOnlyScreen(a) && IsPmCombinedScreen(b);
+    }
+
+    /// <summary>
+    /// Индекс группы, на которой показывается только Forward в пресете <see cref="IsPmPlusForwardTwoScreenPreset"/>; иначе <c>false</c>.
+    /// Главное окно (лобовое) сопоставляется с этим экраном в порядке <see cref="PresentationMonitorTopology.OrderScreensForPresentation"/>.
+    /// </summary>
+    public static bool TryGetMainWindowPresentationScreenIndex(
+        IReadOnlyList<IReadOnlyList<PresentationAnchorSlot>> screens,
+        out int index)
+    {
+        index = -1;
+        if (!IsPmPlusForwardTwoScreenPreset(screens))
+            return false;
+
+        if (IsForwardOnlyScreen(screens[0]))
+        {
+            index = 0;
+            return true;
+        }
+
+        if (IsForwardOnlyScreen(screens[1]))
+        {
+            index = 1;
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>Индекс экрана с объединённым <c>P+M</c> для окна-хоста сплита (симметрично <c>(F)</c>).</summary>
+    public static bool TryGetPmSplitHostPresentationScreenIndex(
+        IReadOnlyList<IReadOnlyList<PresentationAnchorSlot>> screens,
+        out int index)
+    {
+        index = -1;
+        if (!IsPmPlusForwardTwoScreenPreset(screens))
+            return false;
+
+        if (IsPmCombinedScreen(screens[0]))
+        {
+            index = 0;
+            return true;
+        }
+
+        if (IsPmCombinedScreen(screens[1]))
+        {
+            index = 1;
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Индекс группы главного окна (лобовое): для <see cref="IsPmPlusForwardTwoScreenPreset"/> — экран с <c>F</c>, иначе <c>0</c>.
+    /// </summary>
+    public static int GetMainWindowPresentationScreenIndexOrDefault(PresentationParseResult parse)
+    {
+        if (!parse.IsSuccess || parse.Screens.Count == 0)
+            return 0;
+        return TryGetMainWindowPresentationScreenIndex(parse.Screens, out var idx) ? idx : 0;
+    }
+
+    private static bool IsForwardOnlyScreen(IReadOnlyList<PresentationAnchorSlot> screen) =>
+        screen.Count == 1 && screen[0].Kind == PresentationAnchorKind.Forward;
+
+    /// <summary>На экране есть и PFD, и MFD, и нет лобового (одна группа <c>xP+yM</c>).</summary>
+    private static bool IsPmCombinedScreen(IReadOnlyList<PresentationAnchorSlot> screen) =>
+        ContainsAnchor(screen, PresentationAnchorKind.Pfd)
+        && ContainsAnchor(screen, PresentationAnchorKind.Mfd)
+        && !ContainsAnchor(screen, PresentationAnchorKind.Forward);
 
     /// <summary>Три дисплея: по одному якорю — <c>(PFD) (Forward) (MFD)</c> в этом порядке (ADR 0017).</summary>
     public static bool IsTriplePfdForwardMfdPreset(IReadOnlyList<IReadOnlyList<PresentationAnchorSlot>> screens)

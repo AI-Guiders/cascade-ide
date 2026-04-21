@@ -9,6 +9,8 @@ public enum CommandPaletteHost
     MainWindow,
     PfdHost,
     MfdHost,
+    /// <summary>Окно сплита P+M — тот же <see cref="MainWindowViewModel"/>, отдельный TopLevel (ADR 0017).</summary>
+    PmSplitHost,
 }
 
 /// <summary>Раскладка панелей, нижняя зона, Workspace Health / автономный агент, ключи провайдеров и чата.</summary>

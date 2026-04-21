@@ -77,6 +77,8 @@ public static partial class IdeCommands
     public const string OpenPreviewWindow = "open_preview_window";
     /// <summary>Открыть или активировать окно-хост зоны Mfd, если строка <c>presentation</c> / <c>zone_screen_layout</c> задаёт топологию с выносом Mfd (ADR 0017); иначе не выполняется. Отдельного пункта меню нет — источник истины раскладка. returns: text.</summary>
     public const string ToggleMfdHostWindow = "toggle_mfd_host_window";
+    /// <summary>Открыть или активировать окно сплита P+M при пресете <c>(xP+yM)(F)</c> / <c>(F)(xP+yM)</c> (ADR 0017). returns: text.</summary>
+    public const string TogglePmSplitHostWindow = "toggle_pm_split_host_window";
     /// <summary>Открыть окно настроек. returns: text.</summary>
     public const string OpenSettings = "open_settings";
     /// <summary>Показать диалог «О программе». returns: text.</summary>

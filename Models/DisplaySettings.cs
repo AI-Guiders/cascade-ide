@@ -17,6 +17,9 @@ public sealed class DisplaySettings
 
     public DisplayMfdHostSettings Mfd { get; set; } = new();
 
+    /// <summary>Сплит P+M на отдельном TopLevel при двухгрупповом пресете <c>(xP+yM)(F)</c>.</summary>
+    public DisplayPmHostSettings Pm { get; set; } = new();
+
     public DisplaySkiaSettings Skia { get; set; } = new();
 
     public DisplayMountSettings Mount { get; set; } = new();

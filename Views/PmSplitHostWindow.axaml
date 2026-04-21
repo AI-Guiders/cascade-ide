@@ -1,0 +1,76 @@
+<views:PointerTrackingWindow xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:views="using:CascadeIDE.Views"
+        xmlns:vm="using:CascadeIDE.ViewModels"
+        xmlns:chrome="using:CascadeIDE.Features.UiChrome"
+        mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="600"
+        x:Class="CascadeIDE.Views.PmSplitHostWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="Cascade — PFD + MFD (сплит)"
+        Width="900" Height="600"
+        MinWidth="480" MinHeight="320"
+        Icon="/Assets/avalonia-logo.ico"
+        Background="{DynamicResource CascadeTheme.MainWindowBackground}">
+
+    <!-- Две зоны на одном экране — как колонки PFD | MFD в MainWindow без Forward (ADR 0017). -->
+    <Grid x:Name="PmSplitRootGrid" ColumnDefinitions="220,4,340">
+        <chrome:AttentionZoneContainer Zone="Pfd" Grid.Column="0">
+            <Grid>
+                <views:SolutionExplorerView IsVisible="{Binding IsDockedPfdSolutionExplorerTree}"/>
+                <views:WorkspaceNavigationMapView IsVisible="{Binding IsDockedPfdWorkspaceNavigationMap}"/>
+                <views:ZoneInstrumentMountView IsVisible="{Binding UseSkiaInstrumentMount}"
+                                               HorizontalAlignment="Right"
+                                               VerticalAlignment="Top"
+                                               Margin="8"
+                                               Width="250"
+                                               InstrumentId="workspace_health_status_v1"
+                                               SlotId="pfd"
+                                               MountStyle="{Binding PfdInstrumentMountStyle}"
+                                               ZIndex="415"/>
+            </Grid>
+        </chrome:AttentionZoneContainer>
+        <GridSplitter Grid.Column="1" Width="4" ResizeDirection="Columns"
+                      Background="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"
+                      IsEnabled="{Binding WorkspaceSplittersUnlocked}"/>
+        <chrome:AttentionZoneContainer Zone="Mfd" Grid.Column="2">
+            <views:MfdShellView DataContext="{Binding}" MinHeight="0"/>
+        </chrome:AttentionZoneContainer>
+        <Border x:Name="SkiaZoneGeometryOverlayPfdPm"
+                Grid.Column="0"
+                IsVisible="{Binding ShowSkiaZoneGeometryOverlay}"
+                ZIndex="410"
+                BorderThickness="2"
+                BorderBrush="#7CC9FF"
+                CornerRadius="4"
+                Background="#04000000"
+                IsHitTestVisible="False">
+            <TextBlock Text="PFD"
+                       Margin="6,4,0,0"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Top"
+                       Foreground="#C6F2FF"/>
+        </Border>
+        <Border x:Name="SkiaZoneGeometryOverlayMfdPm"
+                Grid.Column="2"
+                IsVisible="{Binding ShowSkiaZoneGeometryOverlay}"
+                ZIndex="410"
+                BorderThickness="2"
+                BorderBrush="#B38CFF"
+                CornerRadius="4"
+                Background="#04000000"
+                IsHitTestVisible="False">
+            <TextBlock Text="MFD"
+                       Margin="6,4,0,0"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Top"
+                       Foreground="#E6D8FF"/>
+        </Border>
+        <Canvas x:Name="AgentHighlightLayer" Grid.Column="0" Grid.ColumnSpan="3" ZIndex="1000" IsHitTestVisible="False"
+                HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <Border x:Name="AgentHighlightOverlay" IsVisible="False" BorderBrush="#FF6B9D" BorderThickness="2" Background="#10000000"/>
+        </Canvas>
+        <views:CommandPaletteView Grid.Column="0" Grid.ColumnSpan="3" ZIndex="5000"/>
+    </Grid>
+</views:PointerTrackingWindow>
