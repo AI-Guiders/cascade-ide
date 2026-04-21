@@ -124,7 +124,20 @@ public static partial class SemanticMapSceneDrawing
             return;
         }
 
-        var bend = Math.Min(42, elen * 0.2);
+        // Для почти вертикальных/последовательных шагов (1->2->3->4) рисуем прямую,
+        // иначе «дуга из-за нехватки места» визуально читается как лишний обход.
+        var horizontalDrift = Math.Abs(ex);
+        var isNearStraightFlow = horizontalDrift <= Math.Max(8, elen * 0.08);
+        if (isNearStraightFlow)
+        {
+            context.DrawLine(pen, start, end);
+            DrawArrowHeadAtTip(context, pen, end, ex / elen, ey / elen);
+            return;
+        }
+
+        var bendByDistance = Math.Min(42, elen * 0.2);
+        var bendByHorizontalRoom = Math.Max(0, horizontalDrift * 0.45);
+        var bend = Math.Min(bendByDistance, bendByHorizontalRoom);
         var px = -ey / elen;
         var py = ex / elen;
         var c1 = new Point(start.X + ex / 3 + px * bend, start.Y + ey / 3 + py * bend);

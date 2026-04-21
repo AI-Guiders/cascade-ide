@@ -34,7 +34,8 @@ public sealed class TraceFlowSurfaceCompositor : ITraceFlowSurfaceCompositor
             LegendColumnLeft = scene.LegendColumnLeft,
             Presentation = scene.Presentation,
             HighlightedNodeIds = snapshot.HighlightedNodeIds,
-            HighlightedEdgeKeys = snapshot.HighlightedEdgeKeys
+            HighlightedEdgeKeys = snapshot.HighlightedEdgeKeys,
+            SideLabelFontSizePx = scene.SideLabelFontSizePx
         };
     }
 }

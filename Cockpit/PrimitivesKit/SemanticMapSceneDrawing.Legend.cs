@@ -14,11 +14,14 @@ public static partial class SemanticMapSceneDrawing
 
         var x0 = scene.LegendColumnLeft;
         var y = 8d;
-        const double lineH = 13;
-        const double keyRowH = 17d;
+        // Согласуем с боковыми подписями узлов; не оставляем легенду мельче основного текста графа.
+        var captionSize = scene.SideLabelFontSizePx is { } s
+            ? Math.Clamp(s, 11, SemanticMapRenderInvariants.MaxSideLabelFontSize)
+            : 12;
+        var lineH = Math.Max(15, captionSize * 1.2);
+        var keyRowH = Math.Max(17d, captionSize + 5);
         const double gapBeforeKeys = 6d;
-        var captionSize = SemanticMapRenderInvariants.MinLegendCaptionFontSize;
-        const double colGap = 10d;
+        const double colGap = 6d;
 
         double idxColW = 0;
         foreach (var row in scene.Legend)

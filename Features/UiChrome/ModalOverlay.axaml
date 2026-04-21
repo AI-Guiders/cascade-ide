@@ -9,7 +9,7 @@
           MaxHeight="{Binding MaxPanelHeight, ElementName=Root}"
           Margin="{Binding PanelMargin, ElementName=Root}"
           HorizontalAlignment="Center"
-          VerticalAlignment="Center"
+          VerticalAlignment="{Binding PanelVerticalAlignment, ElementName=Root}"
           PointerPressed="OnPanelPointerPressed">
       <ContentPresenter Content="{Binding Child, ElementName=Root}" />
     </Grid>

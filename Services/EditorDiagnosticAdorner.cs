@@ -23,11 +23,18 @@ public sealed class EditorDiagnosticBackgroundRenderer(Func<IReadOnlyList<Editor
         if (textView.Document is null)
             return;
 
-        var errPen = new Pen(new SolidColorBrush(Color.FromRgb(220, 70, 70)), 1.25);
-        var warnPen = new Pen(new SolidColorBrush(Color.FromRgb(190, 150, 40)), 1.05);
+        // Спокойнее дефолтного «кровавого» красного: приглушённая роза / пыльный янтарь (читаемо, без крика).
+        var errPen = new Pen(new SolidColorBrush(Color.FromRgb(178, 92, 98)), 1.05);
+        var warnPen = new Pen(new SolidColorBrush(Color.FromRgb(168, 138, 72)), 1.0);
+        var infoPen = new Pen(new SolidColorBrush(Color.FromRgb(96, 130, 150)), 0.95);
         foreach (var strip in getStrips())
         {
-            var pen = strip.Severity == DiagnosticSeverity.Error ? errPen : warnPen;
+            var pen = strip.Severity switch
+            {
+                DiagnosticSeverity.Error => errPen,
+                DiagnosticSeverity.Warning => warnPen,
+                _ => infoPen
+            };
             var seg = new DiagnosticTextSegment(strip.Start, strip.Length);
             foreach (var rect in BackgroundGeometryBuilder.GetRectsForSegment(textView, seg))
                 DrawWavyUnderline(drawingContext, pen, rect.Left, rect.Bottom - 0.5, rect.Width);

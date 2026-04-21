@@ -82,6 +82,12 @@ public partial class DockDocumentView : UserControl
         if (_editor is null)
             return;
 
+        // Иначе тултип якорится к огромному TextEditor и «прыгает» в углу; Pointer — у курсора (как в IDE).
+        ToolTip.SetPlacement(_editor, PlacementMode.Pointer);
+        ToolTip.SetShowDelay(_editor, 280);
+        ToolTip.SetVerticalOffset(_editor, 10);
+        ToolTip.SetHorizontalOffset(_editor, 10);
+
         _suppress = true;
         try
         {

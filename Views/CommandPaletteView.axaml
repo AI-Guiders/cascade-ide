@@ -6,35 +6,41 @@
              Focusable="True"
              IsVisible="False">
   <UserControl.Styles>
+    <!-- Плотные строки: keyboard-first, иерархия title > meta > hotkey pill -->
     <Style Selector="ListBoxItem">
-      <Setter Property="Padding" Value="8,6"/>
-      <Setter Property="Margin" Value="0,2,0,2"/>
+      <Setter Property="Padding" Value="8,5"/>
+      <Setter Property="Margin" Value="0,1"/>
       <Setter Property="Background" Value="Transparent"/>
       <Setter Property="CornerRadius" Value="6"/>
     </Style>
     <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
-      <Setter Property="Background" Value="#223A465C"/>
+      <Setter Property="Background" Value="{DynamicResource CascadeTheme.CommandPaletteItemHoverBackground}"/>
     </Style>
     <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
-      <Setter Property="Background" Value="#2A4A617E"/>
+      <Setter Property="Background" Value="{DynamicResource CascadeTheme.CommandPaletteItemSelectedBackground}"/>
     </Style>
     <Style Selector="TextBox.palette-query">
       <Setter Property="FontSize" Value="14"/>
       <Setter Property="Padding" Value="10,8"/>
-      <Setter Property="Background" Value="#141B26"/>
+      <Setter Property="Background" Value="{DynamicResource CascadeTheme.CommandPaletteQueryBackground}"/>
+      <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.CommandPaletteQueryForeground}"/>
+      <Setter Property="CaretBrush" Value="{DynamicResource CascadeTheme.CommandPaletteQueryCaretBrush}"/>
       <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.PanelTitleAccentBrush}"/>
       <Setter Property="BorderThickness" Value="1"/>
       <Setter Property="CornerRadius" Value="6"/>
+    </Style>
+    <Style Selector="TextBox.palette-query /template/ TextBlock#PART_Watermark">
+      <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.CommandPaletteQueryPlaceholderForeground}"/>
     </Style>
     <Style Selector="Border.hotkey-pill">
       <Setter Property="CornerRadius" Value="10"/>
       <Setter Property="Padding" Value="8,2"/>
       <Setter Property="BorderThickness" Value="1"/>
-      <Setter Property="BorderBrush" Value="#5B6E87"/>
-      <Setter Property="Background" Value="#1A2333"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.CommandPaletteHotkeyPillBorderBrush}"/>
+      <Setter Property="Background" Value="{DynamicResource CascadeTheme.CommandPaletteHotkeyPillBackground}"/>
     </Style>
   </UserControl.Styles>
-  <Border Background="#AA000000"
+  <Border Background="{DynamicResource CascadeTheme.CommandPaletteDimmerOverlay}"
           PointerPressed="OnDimmerPressed">
     <Border MaxWidth="860"
             MaxHeight="620"
@@ -42,10 +48,11 @@
             Padding="16"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            Background="#11161F"
-            BorderBrush="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"
+            Background="{DynamicResource CascadeTheme.CommandPaletteSurfaceBackground}"
+            BorderBrush="{DynamicResource CascadeTheme.CommandPaletteSurfaceBorderBrush}"
             BorderThickness="1"
             CornerRadius="8"
+            BoxShadow="0 10 40 0 #50000000"
             PointerPressed="OnPanelPressed">
       <Grid RowDefinitions="Auto,*,Auto">
         <TextBox x:Name="SearchTextBox"
@@ -62,31 +69,31 @@
             <DataTemplate DataType="vm:IdeCommandPaletteRowViewModel">
               <Grid ColumnDefinitions="*,Auto"
                     Opacity="{Binding RowOpacity}">
-                <StackPanel Grid.Column="0" Orientation="Vertical" Spacing="4">
+                <StackPanel Grid.Column="0" Orientation="Vertical" Spacing="3">
                   <TextBlock Text="{Binding Title}"
                              FontWeight="SemiBold"
                              FontSize="{Binding PaletteTitleFontSize}"
-                             Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
+                             Foreground="{DynamicResource CascadeTheme.CommandPaletteTitleForeground}"/>
                   <TextBlock Text="{Binding Subtitle}"
                              FontSize="12.5"
                              FontFamily="Consolas,Cascadia Mono,Courier New,monospace"
                              TextWrapping="Wrap"
-                             Opacity="0.93"
-                             Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+                             Opacity="0.95"
+                             Foreground="{DynamicResource CascadeTheme.CommandPaletteMetaForeground}"/>
                   <TextBlock Text="{Binding UnavailableHint}"
                              IsVisible="{Binding ShowUnavailableHint}"
                              Opacity="0.98"
                              FontSize="12"
-                             Foreground="#F2C078"/>
+                             Foreground="{DynamicResource CascadeTheme.CommandPaletteUnavailableForeground}"/>
                 </StackPanel>
                 <Border Grid.Column="1"
                         Classes="hotkey-pill">
                   <TextBlock Text="{Binding HotkeyHint}"
                              FontSize="10.5"
                              FontFamily="Consolas,Cascadia Mono,Courier New,monospace"
-                             Opacity="0.92"
+                             Opacity="0.95"
                              VerticalAlignment="Center"
-                             Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+                             Foreground="{DynamicResource CascadeTheme.CommandPaletteHotkeyPillForeground}"/>
                 </Border>
               </Grid>
             </DataTemplate>
@@ -98,7 +105,7 @@
                    LineHeight="17"
                    TextWrapping="Wrap"
                    Opacity="0.92"
-                   Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                   Foreground="{DynamicResource CascadeTheme.CommandPaletteMetaForeground}"
                    Text="{Binding CommandPaletteFooterHint}"/>
       </Grid>
     </Border>

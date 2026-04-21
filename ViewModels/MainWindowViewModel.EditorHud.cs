@@ -25,10 +25,14 @@ public partial class MainWindowViewModel
     /// <summary>Показать полосу <see cref="EditorHudBannerText"/> под зоной HUD.</summary>
     public bool IsEditorHudBannerVisible => !string.IsNullOrWhiteSpace(_editorHudBannerText);
 
-    private void OnWorkspaceDiagnosticsChangedForHud() => RefreshEditorHudBannerFromDiagnostics();
+    private void OnWorkspaceDiagnosticsChangedForHud() => RefreshEditorHudBanner();
 
-    /// <summary>Сводка по ошибкам/предупреждениям активного .cs в полосе HUD (ADR 0021 §9).</summary>
-    private void RefreshEditorHudBannerFromDiagnostics()
+    /// <summary>
+    /// Сводка для активного <c>.cs</c>: диагностики из <see cref="WorkspaceDiagnostics"/>
+    /// (Roslyn по открытому файлу + внешний C# LSP, например OmniSharp, когда подключён) и
+    /// опционально число вхождений символа под курсором в этом файле (тот же Roslyn, что подсветка вхождений).
+    /// </summary>
+    private void RefreshEditorHudBanner()
     {
         var path = CurrentFilePath;
         if (string.IsNullOrEmpty(path) || !path.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
@@ -40,17 +44,45 @@ public partial class MainWindowViewModel
         var strips = WorkspaceDiagnostics.GetStripsForFile(path);
         var errors = strips.Count(s => s.Severity == DiagnosticSeverity.Error);
         var warns = strips.Count(s => s.Severity == DiagnosticSeverity.Warning);
-        if (errors == 0 && warns == 0)
+
+        string? diagPart = null;
+        if (errors > 0 && warns > 0)
+            diagPart = $"{errors} ошибок, {warns} предупреждений";
+        else if (errors > 0)
+            diagPart = errors == 1 ? "1 ошибка" : $"{errors} ошибок";
+        else if (warns > 0)
+            diagPart = warns == 1 ? "1 предупреждение" : $"{warns} предупреждений";
+
+        string? refPart = null;
+        var text = EditorText;
+        if (!string.IsNullOrEmpty(text))
+        {
+            var (line, column) = ComputeLineColumn(text, _editorCaretOffset ?? EditorSelectionStart);
+            try
+            {
+                var spans = _csharpLanguageService.GetHighlightSpans(path, text, line, column);
+                if (spans.Count > 0)
+                {
+                    refPart = spans.Count == 1
+                        ? "1 вхождение в файле"
+                        : $"{spans.Count} вхождений в файле";
+                }
+            }
+            catch
+            {
+                // одиночный файл / парсинг: не блокируем HUD
+            }
+        }
+
+        if (diagPart is null && refPart is null)
         {
             EditorHudBannerText = null;
             return;
         }
 
-        if (errors > 0 && warns > 0)
-            EditorHudBannerText = $"{errors} ошибок, {warns} предупреждений";
-        else if (errors > 0)
-            EditorHudBannerText = errors == 1 ? "1 ошибка" : $"{errors} ошибок";
+        if (diagPart is not null && refPart is not null)
+            EditorHudBannerText = $"{diagPart} · {refPart}";
         else
-            EditorHudBannerText = warns == 1 ? "1 предупреждение" : $"{warns} предупреждений";
+            EditorHudBannerText = diagPart ?? refPart;
     }
 }

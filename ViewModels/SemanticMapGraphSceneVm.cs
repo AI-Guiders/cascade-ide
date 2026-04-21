@@ -33,6 +33,11 @@ public sealed class SemanticMapGraphSceneVm
     public IReadOnlySet<string> HighlightedNodeIds { get; init; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
     public IReadOnlySet<string> HighlightedEdgeKeys { get; init; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>
+    /// Размер шрифта боковых подписей узлов (call_step), согласованный с укладкой; null — взять <see cref="CascadeIDE.Cockpit.PrimitivesKit.SemanticMapRenderInvariants.MinSideLabelFontSize"/> при отрисовке.
+    /// </summary>
+    public double? SideLabelFontSizePx { get; init; }
+
     public bool IsEmpty => Nodes.Count == 0;
 
     /// <summary>Подмена только <see cref="Presentation"/> (после укладки графа из wire <c>graph_kind</c>).</summary>
@@ -51,7 +56,8 @@ public sealed class SemanticMapGraphSceneVm
             ShowLegendReturnKey = scene.ShowLegendReturnKey,
             LegendColumnLeft = scene.LegendColumnLeft,
             HighlightedNodeIds = scene.HighlightedNodeIds,
-            HighlightedEdgeKeys = scene.HighlightedEdgeKeys
+            HighlightedEdgeKeys = scene.HighlightedEdgeKeys,
+            SideLabelFontSizePx = scene.SideLabelFontSizePx
         };
     }
 }

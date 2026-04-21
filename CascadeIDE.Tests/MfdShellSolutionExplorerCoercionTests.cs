@@ -1,0 +1,46 @@
+using Avalonia.Headless.XUnit;
+using CascadeIDE.Models;
+using CascadeIDE.ViewModels;
+using Xunit;
+
+namespace CascadeIDE.Tests;
+
+/// <summary>
+/// Регрессия: дерево в колонке PFD и страница «Обозреватель» в MfdShell не должны показываться одновременно из‑за прямого присвоения <see cref="MainWindowViewModel.CurrentMfdShellPage"/>.
+/// </summary>
+public sealed class MfdShellSolutionExplorerCoercionTests
+{
+    [AvaloniaFact]
+    public void Direct_assignment_to_solution_explorer_shell_page_is_coerced_when_tree_is_pfd_docked()
+    {
+        var vm = new MainWindowViewModel();
+
+        Assert.True(vm.IsDockedPfdSolutionExplorerTree);
+        Assert.False(vm.IsDockedMfdSolutionExplorerTree);
+
+        vm.CurrentMfdShellPage = MfdShellPage.SolutionExplorer;
+
+        Assert.NotEqual(MfdShellPage.SolutionExplorer, vm.CurrentMfdShellPage);
+        Assert.False(vm.IsMfdShellSolutionExplorerPageActive);
+    }
+
+    [AvaloniaFact]
+    public void Solution_explorer_shell_page_stays_when_tree_is_mfd_docked()
+    {
+        var vm = new MainWindowViewModel();
+        vm.DisplaySettings.Instruments = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            [InstrumentRoutingSlotKeys.PfdPrimary] = "workspace_map",
+            [InstrumentRoutingSlotKeys.MfdPrimary] = "solution_explorer_tree",
+        };
+        vm.NotifyDockedInstrumentSlotBindings();
+
+        Assert.False(vm.IsDockedPfdSolutionExplorerTree);
+        Assert.True(vm.IsDockedMfdSolutionExplorerTree);
+
+        vm.TryNavigateToMfdShellPage(MfdShellPage.SolutionExplorer);
+
+        Assert.Equal(MfdShellPage.SolutionExplorer, vm.CurrentMfdShellPage);
+        Assert.True(vm.IsMfdShellSolutionExplorerPageActive);
+    }
+}

@@ -17,7 +17,9 @@
 0019-shared-git-core-ide-and-git-mcp.md
 0038-agent-facade-ai-provider-and-tool-orchestration.md
 0083-ai-mode-and-nested-settings-toml.md
+0086-ui-theme-toml-canonical-json-mcp-wire.md
 0084-agent-edits-editor-source-of-truth-presence-channel.md
+0085-editor-hud-inline-layer-and-hud-banner.md
 0020-agent-reasoning-visibility-and-provider-limits.md
 0039-workspace-navigation-affordances.md
 0040-lsp-launch-line-settings-toml-presets-and-environment.md

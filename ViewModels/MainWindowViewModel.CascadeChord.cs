@@ -1,6 +1,8 @@
+using System.Linq;
 using Avalonia.Input;
 using Avalonia.Threading;
 using CascadeIDE.Models;
+using CascadeIDE.Services;
 using CommunityToolkit.Mvvm.Input;
 
 namespace CascadeIDE.ViewModels;
@@ -32,6 +34,28 @@ public partial class MainWindowViewModel
 
     /// <summary>Текст подсказки для текущего шага машины аккорда.</summary>
     public string CascadeChordOverlayHintText => BuildCascadeChordOverlayHint();
+
+    /// <summary>До двух команд, подходящих под текущий префикс мелодии (компактная полоса сверху).</summary>
+    public IReadOnlyList<CascadeChordOverlaySuggestion> CascadeChordOverlaySuggestions =>
+        BuildCascadeChordSuggestionRows(_cascadeChordPhase, _cascadeChordMelodyTail);
+
+    /// <summary>Набранный хвост (пусто — «…»).</summary>
+    public string CascadeChordOverlayBufferLine =>
+        _cascadeChordPhase != CascadeChordPhase.AwaitMelodyTail
+            ? ""
+            : string.IsNullOrEmpty(_cascadeChordMelodyTail)
+                ? "…"
+                : "«" + _cascadeChordMelodyTail + "»";
+
+    /// <summary>Нижняя строка подсказки в полосе.</summary>
+    public string CascadeChordOverlayCompactFooter =>
+        "Esc — отмена · таймаут " + (int)CascadeChordTimeoutSeconds + " с · Ctrl+Q — палитра";
+
+    /// <summary>При вводе неверного префикса до сброса (редко видно — машина часто сразу выходит).</summary>
+    public bool CascadeChordOverlayNoMatches =>
+        _cascadeChordPhase == CascadeChordPhase.AwaitMelodyTail
+        && !string.IsNullOrEmpty(_cascadeChordMelodyTail)
+        && IntentMelodyAliases.FilterByTailPrefix(_cascadeChordMelodyTail).Count == 0;
 
     /// <summary>Подсказка для лампы Command на тулбаре: в покое — кратко; при armed — полный контекст аккорда.</summary>
     public string CommandArmedLampToolTip =>
@@ -70,6 +94,30 @@ public partial class MainWindowViewModel
                "Палитра Ctrl+Q, c: — тот же каталог.";
     }
 
+    private static IReadOnlyList<CascadeChordOverlaySuggestion> BuildCascadeChordSuggestionRows(
+        CascadeChordPhase phase,
+        string tailNormalized)
+    {
+        if (phase != CascadeChordPhase.AwaitMelodyTail)
+            return [];
+
+        var matches = IntentMelodyAliases.FilterByTailPrefix(tailNormalized);
+        return matches
+            .Take(2)
+            .Select(m => new CascadeChordOverlaySuggestion(
+                m.Alias,
+                TruncateChordTitle(IdeCommandDocDisplay.ShortTitleForCommandId(m.CommandId))))
+            .ToList();
+    }
+
+    private static string TruncateChordTitle(string s, int maxChars = 52)
+    {
+        if (string.IsNullOrEmpty(s))
+            return "";
+        s = s.Trim();
+        return s.Length <= maxChars ? s : s[..(maxChars - 1)] + "…";
+    }
+
     private void EnsureCascadeChordTimer()
     {
         if (_cascadeChordTimer is not null)
@@ -103,6 +151,10 @@ public partial class MainWindowViewModel
     {
         OnPropertyChanged(nameof(IsCascadeChordOverlayVisible));
         OnPropertyChanged(nameof(CascadeChordOverlayHintText));
+        OnPropertyChanged(nameof(CascadeChordOverlaySuggestions));
+        OnPropertyChanged(nameof(CascadeChordOverlayBufferLine));
+        OnPropertyChanged(nameof(CascadeChordOverlayNoMatches));
+        OnPropertyChanged(nameof(CascadeChordOverlayCompactFooter));
         OnPropertyChanged(nameof(CommandArmedLampToolTip));
     }
 

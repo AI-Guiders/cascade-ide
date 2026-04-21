@@ -10,6 +10,7 @@
 |------|-------------------|
 | Вторичный контур **MFD**, лобовой **Forward**, полоска **PFD**; превью и вспомогательные поверхности не конкурируют с набором текста как первичным действием | [0021](../0021-pfd-mfd-cockpit-attention-model.md) |
 | **Cockpit UI** (приборы, deck, зоны) отдельно от **presentation IDE** (хром, тема, оверлеи) — не смешивать слои | [0066](../0066-cockpit-ui-vs-ide-presentation-layer.md) |
+| **Editor HUD** (inline: каретка, текст, gutter) vs **HUD banner** (file-level полоса); глобальные оверлеи — IDS, не Editor HUD | [0085](../0085-editor-hud-inline-layer-and-hud-banner.md) |
 
 ---
 

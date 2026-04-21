@@ -28,9 +28,9 @@ public sealed class SemanticMapStarGraphLayoutEngine : ISemanticMapSubgraphLayou
         var cy = height / 2;
         const double anchorR = 16;
         const double satR = 13;
-        var orbit = Math.Min(width, height) * 0.36;
-        if (orbit < 24)
-            orbit = 24;
+        var minDim = Math.Min(width, height);
+        // Одно кольцо — чуть компактнее, чтобы граф не «разъезжался» на всю зону; при плотности — два кольца (не одна орбита).
+        const int singleRingMaxSatellites = 8;
 
         var layouts = new List<SemanticMapGraphNodeLayout>();
         Point? anchorCenter = null;
@@ -57,10 +57,37 @@ public sealed class SemanticMapStarGraphLayoutEngine : ISemanticMapSubgraphLayou
         }
 
         var nSat = satellites.Count;
+        var useTwoRings = nSat > singleRingMaxSatellites;
+        var innerCount = useTwoRings ? (nSat + 1) / 2 : nSat;
+        var orbitInner = Math.Max(22, minDim * (useTwoRings ? 0.26 : 0.32));
+        var orbitOuter = useTwoRings
+            ? Math.Max(orbitInner + satR * 2 + 8, Math.Min(minDim * 0.40, orbitInner + minDim * 0.18))
+            : orbitInner;
+
         for (var i = 0; i < nSat; i++)
         {
             var sat = satellites[i];
-            var angle = nSat == 0 ? 0 : (2 * Math.PI * i / nSat) - Math.PI / 2;
+            double orbit;
+            double angle;
+            if (!useTwoRings)
+            {
+                orbit = orbitInner;
+                angle = nSat == 0 ? 0 : (2 * Math.PI * i / nSat) - Math.PI / 2;
+            }
+            else if (i < innerCount)
+            {
+                orbit = orbitInner;
+                angle = innerCount == 0 ? 0 : (2 * Math.PI * i / innerCount) - Math.PI / 2;
+            }
+            else
+            {
+                var outerN = nSat - innerCount;
+                var j = i - innerCount;
+                orbit = orbitOuter;
+                var stagger = innerCount > 0 ? Math.PI / innerCount : 0;
+                angle = outerN == 0 ? 0 : (2 * Math.PI * j / outerN) - Math.PI / 2 + stagger;
+            }
+
             var px = cx + orbit * Math.Cos(angle);
             var py = cy + orbit * Math.Sin(angle);
             var p = new Point(px, py);

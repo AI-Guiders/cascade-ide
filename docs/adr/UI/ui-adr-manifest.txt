@@ -3,6 +3,7 @@
 
 0076-ui-ux-principles-hub.md
 0021-pfd-mfd-cockpit-attention-model.md
+0085-editor-hud-inline-layer-and-hud-banner.md
 0066-cockpit-ui-vs-ide-presentation-layer.md
 0068-deck-row-payload-and-presentation-projection.md
 0063-instrument-deck-named-composition-one-anchor.md

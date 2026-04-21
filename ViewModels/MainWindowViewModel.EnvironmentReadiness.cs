@@ -20,6 +20,13 @@ public partial class MainWindowViewModel
 
     partial void OnCurrentMfdShellPageChanged(MfdShellPage value)
     {
+        // Прямые присвоения CurrentMfdShellPage (сборка, отладка, …) обходят TryNavigateToMfdShellPage — не оставляем запрещённую страницу (в т.ч. SE в Mfd при дереве в PFD).
+        if (!IsMfdShellPageAllowed(value))
+        {
+            CoerceMfdShellPageToAllowed();
+            return;
+        }
+
         if (value == MfdShellPage.EnvironmentReadiness)
             _ = RefreshEnvironmentReadinessAsync();
     }

@@ -28,6 +28,7 @@
 | Общий Git Core: IDE и git-mcp | [0019](../0019-shared-git-core-ide-and-git-mcp.md) |
 | Фасад агента: провайдеры, чат, ACP, MCP | [0038](../0038-agent-facade-ai-provider-and-tool-orchestration.md) |
 | **`[ai]` в settings.toml:** `mode` + вложенные секции (local / acp / mcp_only / cloud) | [0083](../0083-ai-mode-and-nested-settings-toml.md) |
+| **Тема UI:** канон кистей в TOML; JSON в MCP как транспорт; strangler `Themes/*.json` | [0086](../0086-ui-theme-toml-canonical-json-mcp-wire.md) |
 | Правки агента в редакторе как источник правды; присутствие отдельно; чат — не основной дифф | [0084](../0084-agent-edits-editor-source-of-truth-presence-channel.md) |
 | Видимость рассуждения агента, лимиты провайдеров | [0020](../0020-agent-reasoning-visibility-and-provider-limits.md) |
 | Навигация по workspace; MCP `get_code_navigation_context` | [0039](../0039-workspace-navigation-affordances.md) |

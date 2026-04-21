@@ -16,6 +16,7 @@
 |------|-----|
 | **Центр UI/UX** — вводные принципы (кокпит, философия продукта); текст в [`snippets/ui/`](../snippets/ui/README.md) | [0076](../0076-ui-ux-principles-hub.md) |
 | Модель внимания кокпита, якоря **PFD / Forward / MFD** | [0021](../0021-pfd-mfd-cockpit-attention-model.md) |
+| **Editor HUD** (inline у кода) vs **HUD banner** (полоса над текстом) | [0085](../0085-editor-hud-inline-layer-and-hud-banner.md) |
 | **Cockpit UI** vs presentation IDE (хром, тема) | [0066](../0066-cockpit-ui-vs-ide-presentation-layer.md) |
 | Полезная нагрузка строки vs **проекция представления** (таблица/список ≠ смена payload) | [0068](../0068-deck-row-payload-and-presentation-projection.md) |
 | Палитра, **Command Melody (`c:`)**, аккорды — keyboard-first | [0060](../0060-keyboard-chord-stack-fms-tactical-strategic.md) |

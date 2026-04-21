@@ -41,12 +41,13 @@ public static partial class SemanticMapSceneDrawing
             var fullLabel = BuildNodeFullLabel(n, useLegend);
             if (!string.IsNullOrWhiteSpace(fullLabel))
             {
+                var sideFont = scene.SideLabelFontSizePx ?? SemanticMapRenderInvariants.MinSideLabelFontSize;
                 var labelText = new FormattedText(
                     fullLabel,
                     CultureInfo.InvariantCulture,
                     FlowDirection.LeftToRight,
                     theme.SideLabelTypeface,
-                    SemanticMapRenderInvariants.MinSideLabelFontSize,
+                    sideFont,
                     theme.SideLabelBrush);
                 var labelOrigin = new Point(
                     n.Center.X + n.Radius + 6,

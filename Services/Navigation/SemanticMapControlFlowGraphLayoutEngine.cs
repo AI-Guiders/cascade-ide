@@ -94,9 +94,10 @@ public sealed class SemanticMapControlFlowGraphLayoutEngine : ISemanticMapSubgra
             : (IReadOnlyList<SemanticMapLegendEntry>)[];
 
         // Узлы на одном уровне не разъезжаются на всю ширину слота — ограниченная «полоса чтения», по центру области графа.
-        var bandW = Math.Min(graphWidth, SemanticMapGraphPrimitives.ControlFlowMaxReadableBandWidth);
+        var bandW = SemanticMapGraphPrimitives.ResolveControlFlowReadableBandWidth(graphWidth);
         var bandLeft = (graphWidth - bandW) * 0.5;
         var centerX = bandLeft + bandW * 0.5;
+        var labelCharBudget = SemanticMapGraphPrimitives.ResolveControlFlowLabelCharBudget(bandW);
 
         // Легенда сразу справа от нарисованного графа, а не от края всей левой половины (иначе огромный зазор).
         var legendColumnLeft = useLegendColumn ? bandLeft + bandW + legendGap : width;
@@ -106,16 +107,22 @@ public sealed class SemanticMapControlFlowGraphLayoutEngine : ISemanticMapSubgra
         var slotCount = Math.Max(1, levelCount - 1);
         var rawYStep = innerH / slotCount;
         var minYStep = SemanticMapGraphPrimitives.MinVerticalStepForLevelCount(levelCount);
-        var yStep = Math.Clamp(
-            rawYStep,
-            minYStep,
-            SemanticMapGraphPrimitives.ControlFlowMaxReadableVerticalStep);
+        var maxYStep = Math.Min(
+            SemanticMapGraphPrimitives.ControlFlowMaxReadableVerticalStepCap,
+            Math.Max(SemanticMapGraphPrimitives.ControlFlowMaxReadableVerticalStep, rawYStep));
+        var yStep = Math.Clamp(rawYStep, minYStep, maxYStep);
         var verticalSpan = Math.Max(0, levelCount - 1) * yStep;
         var yStart = topPadding + (innerH - verticalSpan) * 0.5;
         var radiusMul = Math.Clamp(
             yStep / SemanticMapGraphPrimitives.ControlFlowRefVerticalStep,
             SemanticMapGraphPrimitives.ControlFlowRadiusScaleMin,
             SemanticMapGraphPrimitives.ControlFlowRadiusScaleMax);
+        var horizontalRadiusScale = Math.Clamp(
+            bandW / SemanticMapGraphPrimitives.ControlFlowMaxReadableBandWidth,
+            SemanticMapGraphPrimitives.ControlFlowHorizontalRadiusScaleMin,
+            1.0);
+        radiusMul *= horizontalRadiusScale;
+        var sideLabelFontPx = SemanticMapGraphPrimitives.ResolveControlFlowSideLabelFontSize(bandW, yStep);
         var anchorR = SemanticMapGraphPrimitives.ControlFlowAnchorRadiusBase * radiusMul;
         var nodeR = SemanticMapGraphPrimitives.ControlFlowNodeRadiusBase * radiusMul;
 
@@ -156,7 +163,7 @@ public sealed class SemanticMapControlFlowGraphLayoutEngine : ISemanticMapSubgra
                     Id = n.Id,
                     Kind = n.Kind,
                     FullPath = n.Path,
-                    Label = TruncateLabel(n.Label),
+                    Label = TruncateLabel(n.Label, labelCharBudget),
                     Center = point,
                     Radius = radius,
                     IsAnchor = isAnchor,
@@ -195,7 +202,8 @@ public sealed class SemanticMapControlFlowGraphLayoutEngine : ISemanticMapSubgra
             UseLegendColumn = useLegendColumn,
             ShowLegendConditionKey = showLegendConditionKey,
             ShowLegendReturnKey = showLegendReturnKey,
-            LegendColumnLeft = legendColumnLeft
+            LegendColumnLeft = legendColumnLeft,
+            SideLabelFontSizePx = sideLabelFontPx
         };
     }
 
@@ -244,10 +252,11 @@ public sealed class SemanticMapControlFlowGraphLayoutEngine : ISemanticMapSubgra
         return depthById;
     }
 
-    private static string TruncateLabel(string label)
+    private static string TruncateLabel(string label, int maxChars)
     {
-        if (label.Length <= SemanticMapGraphPrimitives.ControlFlowLabelMaxLength)
+        if (label.Length <= maxChars)
             return label;
-        return label[..SemanticMapGraphPrimitives.ControlFlowLabelTruncateLength] + "…";
+        var take = Math.Max(1, maxChars - 1);
+        return label[..take] + "…";
     }
 }

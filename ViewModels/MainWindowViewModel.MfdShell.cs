@@ -78,4 +78,11 @@ public partial class MainWindowViewModel
             return;
         CurrentMfdShellPage = GetFirstAllowedMfdShellPage();
     }
+
+    /// <summary>
+    /// Контент страницы «Обозреватель» в <c>MfdShellView</c> — только если карта реально монтирует дерево в слот MFD
+    /// (см. <see cref="IsDockedMfdSolutionExplorerTree"/>). Иначе, даже при устаревшем <see cref="CurrentMfdShellPage"/>, дубль с колонкой PFD не показываем.
+    /// </summary>
+    public bool IsMfdShellSolutionExplorerPageActive =>
+        CurrentMfdShellPage == MfdShellPage.SolutionExplorer && IsDockedMfdSolutionExplorerTree;
 }

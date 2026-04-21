@@ -18,10 +18,15 @@
             <ae:TextEditor
                            x:Name="Editor"
                            Classes="EditorBox"
+                           Cursor="IBeam"
                            ShowLineNumbers="True"
                            FontFamily="Consolas,Cascadia Code,monospace"
                            FontSize="13"
-                           Padding="8"/>
+                           Padding="8"
+                           ToolTip.Placement="Pointer"
+                           ToolTip.ShowDelay="280"
+                           ToolTip.VerticalOffset="10"
+                           ToolTip.HorizontalOffset="10"/>
         </Grid>
     </Grid>
 </UserControl>

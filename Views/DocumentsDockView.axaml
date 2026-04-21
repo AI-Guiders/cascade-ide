@@ -44,15 +44,17 @@
                 <!-- ADR 0021 §9: HUD — слой на лобовом; визуальный хост — только при непустом баннере. -->
                 <chrome:AttentionZoneContainer Zone="Hud" Grid.Row="0"
                                                IsVisible="{Binding IsEditorHudBannerVisible}">
-                    <Border Background="#1AFFB300"
-                            BorderBrush="#45FFB300"
+                    <Border Background="{DynamicResource CascadeTheme.HudBannerBackground}"
+                            BorderBrush="{DynamicResource CascadeTheme.HudBannerBorderBrush}"
                             BorderThickness="0,0,0,1"
-                            Padding="8,4"
+                            Padding="10,6"
                             CornerRadius="6,6,0,0">
                         <TextBlock Text="{Binding EditorHudBannerText}"
                                    TextTrimming="CharacterEllipsis"
-                                   Foreground="{DynamicResource CascadeTheme.EditorForeground}"
-                                   FontSize="12"/>
+                                   Foreground="{DynamicResource CascadeTheme.HudBannerForeground}"
+                                   Opacity="0.95"
+                                   FontSize="11.5"
+                                   LineHeight="16"/>
                     </Border>
                 </chrome:AttentionZoneContainer>
                 <dock:DockControl x:Name="DocumentsDock"

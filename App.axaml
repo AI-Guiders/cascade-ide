@@ -52,6 +52,30 @@
             <SolidColorBrush x:Key="CascadeTheme.TerminalInputBackground">#2D2D2D</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.McpBannerBackground">#E3F2FD</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.McpBannerForeground">#1565C0</SolidColorBrush>
+            <!-- Тултипы IDE: спокойный тёмный хром (не «жёлтый Win95») -->
+            <SolidColorBrush x:Key="CascadeTheme.ToolTipBackground">#2A303C</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.ToolTipForeground">#E6ECF4</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.ToolTipBorderBrush">#4A5568</SolidColorBrush>
+            <!-- Полоса HUD над редактором: без кислотно-жёлтого, в ритме панелей -->
+            <SolidColorBrush x:Key="CascadeTheme.HudBannerBackground">#180C1018</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.HudBannerBorderBrush">#354050</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.HudBannerForeground">#D8DEE8</SolidColorBrush>
+            <!-- Палитра команд (IDS overlay): плотный контрастный слой поверх Fluent; токены вместо «магических» # в разметке -->
+            <SolidColorBrush x:Key="CascadeTheme.CommandPaletteDimmerOverlay">#AA000000</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.CommandPaletteSurfaceBackground">#11161F</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.CommandPaletteSurfaceBorderBrush">#3D4A5C</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.CommandPaletteQueryBackground">#141B26</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.CommandPaletteQueryForeground">#E8EDF4</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.CommandPaletteQueryPlaceholderForeground">#6B7788</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.CommandPaletteQueryCaretBrush">#A8C8FF</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.CommandPaletteTitleForeground">#F0F4FA</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.CommandPaletteMetaForeground">#9AA6B8</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.CommandPaletteItemHoverBackground">#283445</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.CommandPaletteItemSelectedBackground">#324560</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.CommandPaletteHotkeyPillBackground">#1A2333</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.CommandPaletteHotkeyPillBorderBrush">#4A5C72</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.CommandPaletteHotkeyPillForeground">#C5D0E0</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.CommandPaletteUnavailableForeground">#E8B86A</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.PreviewWindowBackground">#F0F0F0</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.PowerNeonBorder">#00C8E8</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.PowerNeonAccent">#BF5FFF</SolidColorBrush>
@@ -212,6 +236,36 @@
         </Style>
         <Style Selector="views|PanelChromeHeader.compact Button.panelChromeOverflowBtn:pointerover">
             <Setter Property="Background" Value="#18000000"/>
+        </Style>
+        <!-- Глобально: тултипы ближе к VS/Cursor, чем к дефолтному Fluent-желту -->
+        <Style Selector="ToolTip">
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="MaxWidth" Value="480"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ToolTipForeground}"/>
+            <Setter Property="Background" Value="{DynamicResource CascadeTheme.ToolTipBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.ToolTipBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+        <Style Selector="ToolTip TextBlock">
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+        <!-- Контекстные меню и всплывающие подменю: тот же хром, что у меню окна (Fluent + токены) -->
+        <Style Selector="ContextMenu">
+            <Setter Property="Background" Value="{DynamicResource CascadeTheme.MenuBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.MenuForeground}"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="4"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+        <Style Selector="MenuFlyoutPresenter">
+            <Setter Property="Background" Value="{DynamicResource CascadeTheme.MenuBackground}"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="4"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
         </Style>
     </Application.Styles>
 </Application>

@@ -94,6 +94,8 @@
 | [0082](0082-acp-ide-mcp-loopback-single-process.md) | **ACP + IDE MCP:** одна копия процесса — loopback HTTP/SSE вместо второго `CascadeIDE --mcp-stdio`; безопасность localhost; stdio для внешнего хоста сохранить | Proposed |
 | [0083](0083-ai-mode-and-nested-settings-toml.md) | **`[ai]` в settings.toml:** `mode` = local \| acp \| mcp_only \| cloud; вложенные секции; без обратной совместимости со старым `provider` | Accepted · Implemented |
 | [0084](0084-agent-edits-editor-source-of-truth-presence-channel.md) | **Правки агента:** единственный текст в редакторе; чат — намерение/статус; слой присутствия (курсор, «пишет»); дифф в чате не основной; без обязательного CRDT | Proposed |
+| [0085](0085-editor-hud-inline-layer-and-hud-banner.md) | **Editor HUD:** inline-слой в редакторе (каретка, текст, gutter) vs **HUD banner** (полоса над текстом); IDS оверлеи отдельно; конфиг баннера — [0032](0032-hud-banner-configuration-and-grammar.md) | Proposed |
+| [0086](0086-ui-theme-toml-canonical-json-mcp-wire.md) | **Тема UI:** канон кистей в `settings.toml`; JSON для `ide_get/set_ui_theme` как транспорт; strangler `Themes/*.json` | Proposed |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 

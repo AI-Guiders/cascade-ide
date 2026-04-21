@@ -11,13 +11,14 @@ public partial class MainWindowViewModel
         Documents.ApplyEditorTextFromHost(value);
         OnPropertyChanged(nameof(EditorTextGroup2));
         OnPropertyChanged(nameof(EditorTextGroup3));
+        RefreshEditorHudBanner();
     }
 
     partial void OnCurrentFilePathChanged(string? value)
     {
         UpdateSemanticMapCaretOffset(null);
         RefreshLocBadgeFromCurrentFile();
-        RefreshEditorHudBannerFromDiagnostics();
+        RefreshEditorHudBanner();
         ScheduleWorkspaceNavigationMapRefresh();
     }
 

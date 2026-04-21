@@ -185,6 +185,7 @@ public partial class MainWindowViewModel
 
     /// <summary>Какая страница показана в оболочке Mfd (без TabControl; v1 — колонка зоны Mfd).</summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsMfdShellSolutionExplorerPageActive))]
     private MfdShellPage _currentMfdShellPage = MfdShellPage.Terminal;
 
     [ObservableProperty]

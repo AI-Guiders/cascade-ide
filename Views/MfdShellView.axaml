@@ -42,7 +42,7 @@
             <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=WorkspaceHealth}">
                     <views:WorkspaceHealthMfdPageView/>
             </Border>
-            <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=SolutionExplorer}">
+            <Border IsVisible="{Binding IsMfdShellSolutionExplorerPageActive}">
                     <views:SolutionExplorerView MinHeight="120"/>
             </Border>
             <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=MarkdownPreview}">

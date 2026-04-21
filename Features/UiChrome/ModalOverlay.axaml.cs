@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Layout;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
@@ -36,6 +37,10 @@ public partial class ModalOverlay : UserControl
     public static readonly StyledProperty<Thickness> PanelMarginProperty =
         AvaloniaProperty.Register<ModalOverlay, Thickness>(nameof(PanelMargin), new Thickness(40));
 
+    /// <summary>Положение панели с содержимым по вертикали (палитра — по центру; лёгкий оверлей аккорда — сверху).</summary>
+    public static readonly StyledProperty<VerticalAlignment> PanelVerticalAlignmentProperty =
+        AvaloniaProperty.Register<ModalOverlay, VerticalAlignment>(nameof(PanelVerticalAlignment), VerticalAlignment.Center);
+
     public static readonly StyledProperty<IBrush?> DimmerBrushProperty =
         AvaloniaProperty.Register<ModalOverlay, IBrush?>(nameof(DimmerBrush), new SolidColorBrush(Color.Parse("#AA000000")));
 
@@ -62,6 +67,12 @@ public partial class ModalOverlay : UserControl
     {
         get => GetValue(PanelMarginProperty);
         set => SetValue(PanelMarginProperty, value);
+    }
+
+    public VerticalAlignment PanelVerticalAlignment
+    {
+        get => GetValue(PanelVerticalAlignmentProperty);
+        set => SetValue(PanelVerticalAlignmentProperty, value);
     }
 
     public IBrush? DimmerBrush

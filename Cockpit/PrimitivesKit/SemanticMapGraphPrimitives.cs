@@ -44,7 +44,8 @@ public static class SemanticMapGraphPrimitives
     public const double ControlFlowTopPadding = 10;
     public const double ControlFlowBottomPadding = 10;
     public const double ControlFlowSidePadding = 10;
-    public const double ControlFlowLegendGap = 4;
+    /// <summary>Зазор между правым краем полосы графа и колонкой легенды (DIP).</summary>
+    public const double ControlFlowLegendGap = 2;
     public const double ControlFlowMinGraphWidth = 40;
     public const double ControlFlowMaxReadableBandWidth = 380;
     public const double ControlFlowLegendReserveWidthFraction = 0.30;
@@ -52,11 +53,16 @@ public static class SemanticMapGraphPrimitives
     public const double ControlFlowLegendReserveMax = 200;
 
     public const double ControlFlowRefVerticalStep = 34;
+    /// <summary>Нижняя «комфортная» граница шага; при большой высоте слота фактический шаг может быть выше до <see cref="ControlFlowMaxReadableVerticalStepCap"/>.</summary>
     public const double ControlFlowMaxReadableVerticalStep = 40;
+    /// <summary>Верхняя граница шага между уровнями при высоком слоте (не сжимать всё к 40 px, если места много).</summary>
+    public const double ControlFlowMaxReadableVerticalStepCap = 88;
     public const double ControlFlowAnchorRadiusBase = 14;
     public const double ControlFlowNodeRadiusBase = 12;
     public const double ControlFlowRadiusScaleMin = 0.4;
     public const double ControlFlowRadiusScaleMax = 1.12;
+    /// <summary>Дополнительное сжатие радиуса узлов при узкой читаемой полосе (не растягиваем круги на всю ширину слота).</summary>
+    public const double ControlFlowHorizontalRadiusScaleMin = 0.74;
 
     /// <summary>Минимальный шаг по Y между уровнями в зависимости от числа уровней (плотность графа).</summary>
     public static double MinVerticalStepForLevelCount(int levelCount) =>
@@ -71,6 +77,38 @@ public static class SemanticMapGraphPrimitives
 
     public const int ControlFlowLabelMaxLength = 22;
     public const int ControlFlowLabelTruncateLength = 19;
+    public const int ControlFlowLabelCharBudgetMin = 8;
+
+    /// <summary>
+    /// Читаемая ширина полосы графа: верхняя граница — не «простирать» линию на весь широкий viewport;
+    /// при узком <paramref name="graphWidth"/> полоса сужается вместе с ним.
+    /// </summary>
+    public static double ResolveControlFlowReadableBandWidth(double graphWidth) =>
+        Math.Clamp(graphWidth, ControlFlowMinGraphWidth, ControlFlowMaxReadableBandWidth);
+
+    /// <summary>
+    /// Бюджет символов для боковой подписи call_step (без легенды) от ширины полосы — короче в узком слоте, длиннее при широкой полосе.
+    /// </summary>
+    public static int ResolveControlFlowLabelCharBudget(double bandWidth)
+    {
+        // ~7px на символ при Segoe ~11pt; вычитаем запас под круг и отступ.
+        var approx = (int)Math.Floor((bandWidth - 52) / 7.0);
+        return Math.Clamp(approx, ControlFlowLabelCharBudgetMin, ControlFlowLabelMaxLength);
+    }
+
+    /// <summary>
+    /// Размер боковой подписи: от вертикального шага и ширины полосы (плотность), без растягивания на весь viewport.
+    /// </summary>
+    public static double ResolveControlFlowSideLabelFontSize(double bandWidth, double verticalStep)
+    {
+        var widthFactor = Math.Clamp(bandWidth / 220.0, 0.68, 1.06);
+        var stepFactor = Math.Clamp(verticalStep / ControlFlowRefVerticalStep, 0.82, 1.08);
+        var combined = SemanticMapRenderInvariants.MinSideLabelFontSize * widthFactor * stepFactor;
+        return Math.Clamp(
+            combined,
+            SemanticMapRenderInvariants.CompactSideLabelFontSizeFloor,
+            SemanticMapRenderInvariants.MaxSideLabelFontSize);
+    }
 
     #endregion
 }

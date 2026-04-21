@@ -36,6 +36,7 @@ public partial class MainWindowViewModel
         _editorCaretOffset = offset;
         if (_settings.SemanticMap.IsControlFlowDepth)
             ScheduleWorkspaceNavigationMapRefresh();
+        RefreshEditorHudBanner();
     }
 
     /// <summary>Связанные файлы для текущего якоря (режим списка).</summary>
@@ -72,6 +73,7 @@ public partial class MainWindowViewModel
 
     /// <summary><c>file</c> | <c>controlFlow</c> — уровень построения карты (секция <c>[semantic_map]</c>).</summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowSemanticMapGraphClickHint))]
     private string _semanticMapLevel = SemanticMapLevelKind.File;
 
     /// <summary>Сообщение об ошибке или пустом состоянии (не null).</summary>
@@ -105,8 +107,13 @@ public partial class MainWindowViewModel
     public GridLength SemanticMapListAreaRowHeight =>
         ShowSemanticMapList ? new GridLength(1, GridUnitType.Star) : new GridLength(0);
 
-    /// <summary>Режим только графа: подсказка, что узлы кликабельны (в списке кнопки скрыты).</summary>
-    public bool ShowSemanticMapGraphClickHint => ShowSemanticMapGraph && !ShowSemanticMapList;
+    /// <summary>
+    /// Режим только графа на уровне <c>file</c>: подсказка «открыть файл» (в control flow клик ведёт к строке, не к файлу).
+    /// </summary>
+    public bool ShowSemanticMapGraphClickHint =>
+        ShowSemanticMapGraph
+        && !ShowSemanticMapList
+        && string.Equals(SemanticMapLevelKind.Normalize(SemanticMapLevel), SemanticMapLevelKind.File, StringComparison.Ordinal);
 
     /// <summary>Короткая подпись к количеству связей для шапки SM.</summary>
     public string WorkspaceNavigationMapRelatedBadge =>
