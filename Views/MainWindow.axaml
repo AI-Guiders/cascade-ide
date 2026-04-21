@@ -342,11 +342,12 @@
                          MaxPanelWidth="960"
                          MaxPanelHeight="140">
         <Border Padding="10,8"
+                MinWidth="760"
                 CornerRadius="8"
                 BorderThickness="1"
                 BoxShadow="0 4 20 0 #48000000"
-                BorderBrush="{DynamicResource CascadeTheme.CommandPaletteSurfaceBorderBrush}"
-                Background="{DynamicResource CascadeTheme.CommandPaletteQueryBackground}"
+                BorderBrush="#9AFFFFFF"
+                Background="#EE1B1B1B"
                 HorizontalAlignment="Center">
             <Grid ColumnDefinitions="Auto,Auto,*,Auto"
                   RowDefinitions="Auto,Auto">
@@ -357,13 +358,22 @@
                            Margin="0,0,10,0"
                            Foreground="{DynamicResource CascadeTheme.SolutionExplorerHeaderForeground}"
                            Text="CascadeChord"/>
-                <TextBlock Grid.Row="0" Grid.Column="1"
-                           FontFamily="Consolas,Cascadia Mono,Courier New,monospace"
-                           FontSize="13"
-                           VerticalAlignment="Center"
-                           Margin="0,0,12,0"
-                           Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
-                           Text="{Binding CascadeChordOverlayBufferLine}"/>
+                <TextBox Grid.Row="0" Grid.Column="1"
+                         Width="220"
+                         Height="30"
+                         Margin="0,0,12,0"
+                         IsReadOnly="True"
+                         IsHitTestVisible="False"
+                         VerticalContentAlignment="Center"
+                         FontFamily="Consolas,Cascadia Mono,Courier New,monospace"
+                         FontSize="13"
+                         Foreground="#FFF2F2F2"
+                         Background="#292929"
+                         BorderBrush="#7A7A7A"
+                         BorderThickness="1"
+                         CaretBrush="{DynamicResource CascadeTheme.CommandPaletteQueryForeground}"
+                         PlaceholderText="type melody tail…"
+                         Text="{Binding CascadeChordOverlayInputText}"/>
                 <ItemsControl Grid.Row="0" Grid.Column="2"
                               HorizontalAlignment="Left"
                               ItemsSource="{Binding CascadeChordOverlaySuggestions}">
