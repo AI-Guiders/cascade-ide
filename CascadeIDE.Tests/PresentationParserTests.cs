@@ -7,6 +7,9 @@ public sealed class PresentationParserTests
 {
     private static readonly PresentationGrammarTokens Default = PresentationGrammarTokens.Default;
 
+    private static readonly PresentationGrammarTokens FullWordGrammar =
+        PresentationGrammarTokens.FromSettings("()", " ", "+", "PFD", "Forward", "MFD");
+
     private static PresentationAnchorSlot[] Unweighted(params PresentationAnchorKind[] kinds) =>
         kinds.Select(k => new PresentationAnchorSlot(k, null)).ToArray();
 
@@ -21,7 +24,7 @@ public sealed class PresentationParserTests
     [Fact]
     public void SingleScreen_ThreeAnchors_Plus()
     {
-        var r = PresentationParser.Parse("(PFD+Forward+MFD)", Default);
+        var r = PresentationParser.Parse("(P+F+M)", Default);
         Assert.True(r.IsSuccess);
         Assert.Single(r.Screens);
         Assert.Equal(Unweighted(PresentationAnchorKind.Pfd, PresentationAnchorKind.Forward, PresentationAnchorKind.Mfd), r.Screens[0]);
@@ -30,7 +33,7 @@ public sealed class PresentationParserTests
     [Fact]
     public void SingleScreen_ThreeAnchors_WithZoneSeparator_Pipe()
     {
-        var g = PresentationGrammarTokens.FromSettings("()", " ", "|");
+        var g = PresentationGrammarTokens.FromSettings("()", " ", "|", "PFD", "Forward", "MFD");
         var r = PresentationParser.Parse("(PFD|Forward|MFD)", g);
         Assert.True(r.IsSuccess);
         Assert.Equal(Unweighted(PresentationAnchorKind.Pfd, PresentationAnchorKind.Forward, PresentationAnchorKind.Mfd), r.Screens[0]);
@@ -46,7 +49,7 @@ public sealed class PresentationParserTests
     [Fact]
     public void TwoScreens_DedicatedMfd()
     {
-        var r = PresentationParser.Parse("(PFD+Forward) (MFD)", Default);
+        var r = PresentationParser.Parse("(PFD+Forward) (MFD)", FullWordGrammar);
         Assert.True(r.IsSuccess);
         Assert.Equal(2, r.Screens.Count);
         Assert.Equal(Unweighted(PresentationAnchorKind.Pfd, PresentationAnchorKind.Forward), r.Screens[0]);
@@ -58,7 +61,7 @@ public sealed class PresentationParserTests
     [Fact]
     public void ThreeScreens_Pfd_Forward_Mfd_Yields_MfdIndex2()
     {
-        var r = PresentationParser.Parse("(PFD) (Forward) (MFD)", Default);
+        var r = PresentationParser.Parse("(PFD) (Forward) (MFD)", FullWordGrammar);
         Assert.True(r.IsSuccess);
         Assert.Equal(3, r.Screens.Count);
         Assert.True(PresentationLayoutAnalyzer.IsTriplePfdForwardMfdPreset(r.Screens));
@@ -168,7 +171,7 @@ public sealed class PresentationParserTests
     [Fact]
     public void CustomScreenMarkers()
     {
-        var g = PresentationGrammarTokens.FromSettings("[]", " ", "+");
+        var g = PresentationGrammarTokens.FromSettings("[]", " ", "+", "PFD", "Forward", "MFD");
         var r = PresentationParser.Parse("[PFD+Forward] [MFD]", g);
         Assert.True(r.IsSuccess);
         Assert.Equal(2, r.Screens.Count);
@@ -177,9 +180,9 @@ public sealed class PresentationParserTests
     [Fact]
     public void LegacySpellings_forward_Mfd_AreInvalid()
     {
-        Assert.False(PresentationParser.Parse("(PFD+forward+MFD)", Default).IsSuccess);
-        Assert.False(PresentationParser.Parse("(PFD+Forward+Mfd)", Default).IsSuccess);
-        Assert.False(PresentationParser.Parse("(PFD+Forward+mfd)", Default).IsSuccess);
+        Assert.False(PresentationParser.Parse("(PFD+forward+MFD)", FullWordGrammar).IsSuccess);
+        Assert.False(PresentationParser.Parse("(PFD+Forward+Mfd)", FullWordGrammar).IsSuccess);
+        Assert.False(PresentationParser.Parse("(PFD+Forward+mfd)", FullWordGrammar).IsSuccess);
     }
 
     [Fact]
@@ -216,14 +219,14 @@ public sealed class PresentationParserTests
             pfdZoneIdentifier: "P",
             forwardZoneIdentifier: "P",
             mfdZoneIdentifier: "MFD");
-        var r = PresentationParser.Parse("(PFD+Forward+MFD)", g);
+        var r = PresentationParser.Parse("(P+F+M)", g);
         Assert.True(r.IsSuccess);
     }
 
     [Fact]
     public void Invalid_UnknownToken()
     {
-        var r = PresentationParser.Parse("(PFD+oops)", Default);
+        var r = PresentationParser.Parse("(PFD+oops)", FullWordGrammar);
         Assert.False(r.IsSuccess);
         Assert.NotNull(r.Error);
     }

@@ -2,7 +2,7 @@ namespace CascadeIDE.Models;
 
 /// <summary>
 /// Токены грамматики строки топологии (ADR 0017).
-/// TOML: <c>[presentation.grammar]</c>.
+/// TOML: <c>[display.screens.grammar]</c>.
 /// </summary>
 public sealed class PresentationGrammarSettings
 {
@@ -15,12 +15,12 @@ public sealed class PresentationGrammarSettings
     /// <summary>Разделитель якорей внутри экрана (часто <c>+</c>).</summary>
     public string BetweenZones { get; set; } = "+";
 
-    /// <summary>Литерал якоря PFD в строке.</summary>
-    public string Pfd { get; set; } = "PFD";
+    /// <summary>Литерал якоря PFD в строке (по умолчанию короткий, как в samples ADR 0017).</summary>
+    public string Pfd { get; set; } = "P";
 
     /// <summary>Литерал якоря Forward.</summary>
-    public string Forward { get; set; } = "Forward";
+    public string Forward { get; set; } = "F";
 
     /// <summary>Литерал якоря MFD.</summary>
-    public string Mfd { get; set; } = "MFD";
+    public string Mfd { get; set; } = "M";
 }

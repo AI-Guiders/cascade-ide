@@ -10,7 +10,8 @@ public readonly record struct PresentationGrammarTokens(
     string ForwardZoneIdentifier,
     string MfdZoneIdentifier)
 {
-    public static PresentationGrammarTokens Default => new('(', ')', " ", "+", "PFD", "Forward", "MFD");
+    /// <summary>Канон для встроенных тестов и поведения «только <c>topology</c> без <c>[display.screens.grammar]</c>» — совпадает с samples.</summary>
+    public static PresentationGrammarTokens Default => new('(', ')', " ", "+", "P", "F", "M");
 
     /// <summary>Разбор полей TOML; пустые строки заменяются дефолтами. При дубликатах между тремя идентификаторами якорей — сброс на дефолт.</summary>
     public static PresentationGrammarTokens FromSettings(

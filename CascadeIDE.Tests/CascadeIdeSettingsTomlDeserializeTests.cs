@@ -1,5 +1,6 @@
 using System.Text.Json;
 using CascadeIDE.Models;
+using CascadeIDE.Services.Presentation;
 using Tomlyn;
 using Xunit;
 
@@ -103,6 +104,30 @@ public sealed class CascadeIdeSettingsTomlDeserializeTests
         Assert.Equal("both", SemanticMapSettings.NormalizeView(s.SemanticMap.View));
         Assert.Equal(SemanticMapLevelKind.ControlFlow, SemanticMapSettings.NormalizeDepth(s.SemanticMap.Depth));
         Assert.Equal(SemanticMapDetailLevel.Glance, s.SemanticMap.NormalizedDetailLevel);
+    }
+
+    [Fact]
+    public void Deserialize_DisplayScreensTopology_WithoutGrammar_ParsesAsTwoScreens()
+    {
+        const string text =
+            """
+            [display.screens]
+            topology = "(P+F) (M)"
+            """;
+
+        var s = Deserialize(text);
+        Assert.Equal("(P+F) (M)", s.GetEffectivePresentationLine());
+        var grammar = PresentationGrammarTokens.FromSettings(
+            s.Display.Screens.Grammar.Brackets,
+            s.Display.Screens.Grammar.BetweenScreens,
+            s.Display.Screens.Grammar.BetweenZones,
+            s.Display.Screens.Grammar.Pfd,
+            s.Display.Screens.Grammar.Forward,
+            s.Display.Screens.Grammar.Mfd);
+        var parse = PresentationParser.Parse(s.GetEffectivePresentationLine(), grammar);
+        Assert.True(parse.IsSuccess);
+        Assert.Equal(2, parse.Screens.Count);
+        Assert.True(PresentationLayoutAnalyzer.IsDedicatedMfdSecondScreenPreset(parse.Screens));
     }
 
     [Fact]
