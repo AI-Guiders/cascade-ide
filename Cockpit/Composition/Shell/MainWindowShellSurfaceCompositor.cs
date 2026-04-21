@@ -13,16 +13,24 @@ public static class MainWindowShellSurfaceCompositor
 {
     public static MainWindowShellSurfaceComposition Compose(in MainWindowShellSurfaceCompositionInput input)
     {
+        // Видимость слотов PFD/MFD в main: если в presentation задан хотя бы один экран, колонки показываем
+        // только когда соответствующий якорь на лобовом экране (при (xP+yM)(F) P/M на другом TopLevel).
+        // Пустая строка topology (0 экранов при успешном разборе) — прежнее поведение: колонки от intent, без гейта.
+        var presentationSpecifiesScreens = input.PresentationParse.IsSuccess && input.PresentationParse.Screens.Count > 0;
+        var pfdRequiredOnMain = !presentationSpecifiesScreens
+            || CockpitPresentationLayoutPolicy.RequiresPfdRegionInMainWindow(input.PresentationParse);
         var pfdCoerced = CockpitPresentationLayoutPolicy.CoercePfdRegionExpanded(
             input.PresentationParse,
             input.IntentSolutionExplorerVisible);
-        var pfdVisible = pfdCoerced && !input.SuppressPfdColumnForPfdHostWindow;
+        var pfdVisible = pfdRequiredOnMain && pfdCoerced && !input.SuppressPfdColumnForPfdHostWindow;
 
+        var mfdRequiredOnMain = !presentationSpecifiesScreens
+            || CockpitPresentationLayoutPolicy.RequiresMfdRegionInMainWindow(input.PresentationParse);
         var mfdExpanded = CockpitPresentationLayoutPolicy.CoerceMfdRegionExpanded(
             input.PresentationParse,
             input.IntentChatPanelExpanded);
 
-        var mfdColumnInMain = !input.SuppressMfdColumnForMfdHostWindow && mfdExpanded;
+        var mfdColumnInMain = mfdRequiredOnMain && !input.SuppressMfdColumnForMfdHostWindow && mfdExpanded;
 
         var width = mfdColumnInMain
             ? (mfdExpanded ? input.ExpandedMfdWidthPixels : input.CollapsedMfdWidthPixels)
