@@ -94,7 +94,8 @@ public sealed class SemanticMapCompositorTests
         var n0 = result.Scene.Nodes.First(n => n.Id == "n0");
         var n1 = result.Scene.Nodes.First(n => n.Id == "n1");
         var dy = Math.Abs(n1.Center.Y - n0.Center.Y);
-        Assert.InRange(dy, 18, 45);
+        // Высокий viewport разрешает увеличенный вертикальный шаг (см. ControlFlowMaxReadableVerticalStepCap).
+        Assert.InRange(dy, 18, 95);
     }
 
     [Fact]

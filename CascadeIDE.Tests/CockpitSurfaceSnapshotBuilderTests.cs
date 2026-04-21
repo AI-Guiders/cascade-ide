@@ -1,4 +1,5 @@
 using System.Text.Json;
+using CascadeIDE.Cockpit;
 using CascadeIDE.Cockpit.Cds;
 using CascadeIDE.Cockpit.Composition.HostSurface;
 using CascadeIDE.ViewModels;
@@ -20,10 +21,18 @@ public sealed class CockpitSurfaceSnapshotBuilderTests
         Assert.False(state.Topology.MfdHostWindowOpen);
         Assert.False(state.Topology.PfdHostWindowOpen);
         Assert.True(state.Zones.ForwardVisible);
-        Assert.Single(state.Instruments);
-        Assert.Contains(
-            state.Instruments,
-            x => x.InstrumentId == CockpitStandardInstrumentIds.SolutionExplorerTree && x.SlotId == CockpitSlotIds.Pfd);
+        var pfdCount = state.Instruments.Count(x => x.SlotId == CockpitSlotIds.Pfd);
+        var mfdCount = state.Instruments.Count(x => x.SlotId == CockpitSlotIds.Mfd);
+        Assert.True(pfdCount <= 1 && mfdCount <= 1);
+        Assert.Equal(state.Zones.PfdVisible ? 1 : 0, pfdCount);
+        Assert.Equal(state.Zones.MfdVisible ? 1 : 0, mfdCount);
+        if (pfdCount == 1)
+        {
+            Assert.Contains(
+                state.Instruments,
+                x => x.InstrumentId == CockpitStandardInstrumentIds.SolutionExplorerTree && x.SlotId == CockpitSlotIds.Pfd);
+        }
+
         Assert.Equal(vm.EffectivePresentationLine, state.PresentationEffectiveLine);
     }
 

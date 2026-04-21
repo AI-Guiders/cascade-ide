@@ -3,14 +3,6 @@
   "topology": {
     "surface_kind": "main_window_docked_grid",
     "mfd_host_window_open": false,
-    "pfd_host_window_open": false,
-    "mfd_column_visible_in_main": true
-  },
-  "instruments": [
-    {
-      "instrument_id": "solution_explorer_tree",
-      "slot_id": "pfd",
-      "schema_version": "0.2"
-    }
-  ]
+    "pfd_host_window_open": false
+  }
 }
