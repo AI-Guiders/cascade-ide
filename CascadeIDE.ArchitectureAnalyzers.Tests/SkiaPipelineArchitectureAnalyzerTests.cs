@@ -42,13 +42,13 @@ public sealed class SkiaPipelineArchitectureAnalyzerTests
     }
 
     [Fact]
-    public async Task CASCOPE008_SemanticMapCompositor_MissingDeclutter_Reports()
+    public async Task CASCOPE008_CodeNavigationMapCompositor_MissingDeclutter_Reports()
     {
         var diags = await RunAnalyzerAsync((
-            @"D:\repo\Services\Navigation\SemanticMapCompositor.cs",
+            @"D:\repo\Services\Navigation\CodeNavigationMapCompositor.cs",
             """
             namespace CascadeIDE.Services.Navigation;
-            public sealed class SemanticMapCompositor
+            public sealed class CodeNavigationMapCompositor
             {
                 private readonly Intent _intentStage = new();
                 private readonly Layout _layoutStage = new();
@@ -76,9 +76,9 @@ public sealed class SkiaPipelineArchitectureAnalyzerTests
             namespace CascadeIDE.Services.Navigation;
             public sealed class AnyCompositor
             {
-                public object X() => new SemanticMapStarGraphLayoutEngine();
+                public object X() => new CodeNavigationMapStarGraphLayoutEngine();
             }
-            public sealed class SemanticMapStarGraphLayoutEngine { }
+            public sealed class CodeNavigationMapStarGraphLayoutEngine { }
             """));
 
         var d = Assert.Single(diags);
@@ -95,12 +95,12 @@ public sealed class SkiaPipelineArchitectureAnalyzerTests
             namespace CascadeIDE.Views;
             public sealed class SkiaHostRendererPipeline
             {
-                public void Render(SemanticMapPipelineState state) { }
+                public void Render(CodeNavigationMapPipelineState state) { }
             }
 
             namespace CascadeIDE.Services.Navigation
             {
-                public struct SemanticMapPipelineState { }
+                public struct CodeNavigationMapPipelineState { }
             }
             """));
 

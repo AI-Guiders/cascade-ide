@@ -52,7 +52,7 @@ class Demo {
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
         Assert.Equal("subgraph", root.GetProperty("mode").GetString());
-        Assert.Equal("code_intent_semantic_map", root.GetProperty("graph_kind").GetString());
+        Assert.Equal("code_intent_code_navigation_map", root.GetProperty("graph_kind").GetString());
         var edges = root.GetProperty("edges").EnumerateArray().ToList();
         Assert.Contains(edges, e => string.Equals(e.GetProperty("kind").GetString(), "LoopCall", StringComparison.Ordinal));
         Assert.Contains(edges, e => string.Equals(e.GetProperty("kind").GetString(), "MultiBranch", StringComparison.Ordinal));

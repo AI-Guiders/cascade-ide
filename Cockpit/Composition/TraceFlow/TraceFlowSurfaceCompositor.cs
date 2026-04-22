@@ -9,21 +9,21 @@ namespace CascadeIDE.Cockpit.Composition.TraceFlow;
 /// <summary>
 /// Surface compositor for trace-flow channel (ADR 0036 p.3): maps channel payload into view scene highlights.
 /// </summary>
-public interface ITraceFlowSurfaceCompositor : ISurfaceCompositor<SemanticMapGraphSceneVm, TraceFlowChannelSnapshot, TraceFlowCdsDecision, SemanticMapGraphSceneVm>
+public interface ITraceFlowSurfaceCompositor : ISurfaceCompositor<CodeNavigationMapGraphSceneVm, TraceFlowChannelSnapshot, TraceFlowCdsDecision, CodeNavigationMapGraphSceneVm>
 {
 }
 
 public sealed class TraceFlowSurfaceCompositor : ITraceFlowSurfaceCompositor
 {
-    public SemanticMapGraphSceneVm Compose(
-        SemanticMapGraphSceneVm scene,
+    public CodeNavigationMapGraphSceneVm Compose(
+        CodeNavigationMapGraphSceneVm scene,
         TraceFlowChannelSnapshot snapshot,
         in TraceFlowCdsDecision cdsDecision)
     {
         if (!cdsDecision.Enabled || scene.IsEmpty)
             return scene;
 
-        return new SemanticMapGraphSceneVm
+        return new CodeNavigationMapGraphSceneVm
         {
             Nodes = scene.Nodes,
             Edges = scene.Edges,

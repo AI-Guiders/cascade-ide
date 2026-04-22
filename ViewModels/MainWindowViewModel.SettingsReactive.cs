@@ -165,30 +165,30 @@ public partial class MainWindowViewModel
         _appData.Put("SendMessageKey", value);
     }
 
-    partial void OnSemanticMapPresentationChanged(string value)
+    partial void OnCodeNavigationMapPresentationChanged(string value)
     {
-        var normalized = SemanticMapPresentationKind.Normalize(value);
+        var normalized = CodeNavigationMapPresentationKind.Normalize(value);
         if (!string.Equals(normalized, value, StringComparison.Ordinal))
         {
-            SemanticMapPresentation = normalized;
+            CodeNavigationMapPresentation = normalized;
             return;
         }
 
-        _settings.SemanticMap.View = normalized;
+        _settings.CodeNavigationMap.View = normalized;
         SaveSettingsIfChanged();
         ScheduleWorkspaceNavigationMapRefresh();
     }
 
-    partial void OnSemanticMapLevelChanged(string value)
+    partial void OnCodeNavigationMapLevelChanged(string value)
     {
-        var normalized = SemanticMapLevelKind.Normalize(value);
+        var normalized = CodeNavigationMapLevelKind.Normalize(value);
         if (!string.Equals(normalized, value, StringComparison.Ordinal))
         {
-            SemanticMapLevel = normalized;
+            CodeNavigationMapLevel = normalized;
             return;
         }
 
-        _settings.SemanticMap.Depth = normalized;
+        _settings.CodeNavigationMap.Depth = normalized;
         SaveSettingsIfChanged();
         ScheduleWorkspaceNavigationMapRefresh();
     }

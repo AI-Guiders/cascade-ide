@@ -113,8 +113,8 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _lastSavedSettings = (CascadeIdeSettings)_settings.Clone();
         _lastSavedAiKeys = (AiKeys)_aiKeys.Clone();
 
-        _semanticMapPresentation = SemanticMapPresentationKind.Normalize(_settings.SemanticMap.View);
-        _semanticMapLevel = SemanticMapLevelKind.Normalize(_settings.SemanticMap.Depth);
+        _codeNavigationMapPresentation = CodeNavigationMapPresentationKind.Normalize(_settings.CodeNavigationMap.View);
+        _codeNavigationMapLevel = CodeNavigationMapLevelKind.Normalize(_settings.CodeNavigationMap.Depth);
         _workspaceSplittersLocked = _settings.Workspace.SplittersLocked;
 
         BuildOutputPanel = new BuildOutputPanelViewModel();

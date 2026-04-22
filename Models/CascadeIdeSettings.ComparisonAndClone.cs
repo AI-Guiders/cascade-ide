@@ -12,7 +12,7 @@ public sealed partial class CascadeIdeSettings
         return AiEquals(Ai, o.Ai)
             && McpEquals(Mcp, o.Mcp)
             && WorkspaceEquals(Workspace, o.Workspace)
-            && SemanticMapEquals(SemanticMap, o.SemanticMap)
+            && CodeNavigationMapEquals(CodeNavigationMap, o.CodeNavigationMap)
             && LanguagesEquals(Languages, o.Languages)
             && MarkdownEquals(Markdown, o.Markdown)
             && DisplayEquals(Display, o.Display)
@@ -74,11 +74,11 @@ public sealed partial class CascadeIdeSettings
                 Culture = Workspace.Culture,
                 SplittersLocked = Workspace.SplittersLocked,
             },
-            SemanticMap = new SemanticMapSettings
+            CodeNavigationMap = new CodeNavigationMapSettings
             {
-                View = SemanticMap.View,
-                Depth = SemanticMap.Depth,
-                DetailLevel = SemanticMap.DetailLevel,
+                View = CodeNavigationMap.View,
+                Depth = CodeNavigationMap.Depth,
+                DetailLevel = CodeNavigationMap.DetailLevel,
             },
             Languages = new LanguagesSettings
             {
@@ -229,7 +229,7 @@ public sealed partial class CascadeIdeSettings
             && a.SplittersLocked == b.SplittersLocked;
     }
 
-    private static bool SemanticMapEquals(SemanticMapSettings? a, SemanticMapSettings? b)
+    private static bool CodeNavigationMapEquals(CodeNavigationMapSettings? a, CodeNavigationMapSettings? b)
     {
         if (a is null || b is null)
             return a == b;

@@ -22,7 +22,7 @@
 <a id="adr0056-p1"></a>
 ### 1) Перевести Semantic Map на отдельный композитор инструмента
 
-Введён `SemanticMapCompositor` как первый доменный адаптер общего подхода из ADR 0055:
+Введён `CodeNavigationMapCompositor` как первый доменный адаптер общего подхода из ADR 0055:
 
 - выбор layout по `semantic_map.level`;
 - вычисление рекомендуемой высоты viewport для читаемости;
@@ -62,19 +62,19 @@
 
 ## Реализация (срез)
 
-- `Services/Navigation/SemanticMapCompositor.cs`
-- `Services/Navigation/ISemanticMapCompositor.cs`
+- `Services/Navigation/CodeNavigationMapCompositor.cs`
+- `Services/Navigation/ICodeNavigationMapCompositor.cs`
 - `ViewModels/MainWindowViewModel.WorkspaceNavigationMap.cs`
 - `Views/WorkspaceNavigationMapView.axaml`
-- `Services/Navigation/SemanticMapControlFlowGraphLayoutEngine.cs`
+- `Services/Navigation/CodeNavigationMapControlFlowGraphLayoutEngine.cs`
 - `Services/CodeNavigation/CodeNavigationControlFlowSubgraphBuilder.cs`
 
 ---
 
 ## Тесты
 
-- `SemanticMapCompositorTests`
-- `SemanticMapControlFlowGraphLayoutEngineTests`
+- `CodeNavigationMapCompositorTests`
+- `CodeNavigationMapControlFlowGraphLayoutEngineTests`
 - `CodeNavigationControlFlowSubgraphBuilderTests`
 - `CodeNavigationControlFlowMcpCursorFallbackTests`
 

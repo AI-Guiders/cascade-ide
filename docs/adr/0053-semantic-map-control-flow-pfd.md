@@ -87,7 +87,7 @@ void A() {
 
 ## Данные и контракт (направление)
 
-Существующие модели subgraph (`SemanticMapSubgraphNode`, `SemanticMapSubgraphEdge`) расширяются осмысленно, например:
+Существующие модели subgraph (`CodeNavigationMapSubgraphNode`, `CodeNavigationMapSubgraphEdge`) расширяются осмысленно, например:
 
 | Идея | Назначение |
 |------|------------|

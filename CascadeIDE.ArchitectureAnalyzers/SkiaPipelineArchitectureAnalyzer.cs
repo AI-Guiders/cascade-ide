@@ -28,17 +28,17 @@ public sealed class SkiaPipelineArchitectureAnalyzer : DiagnosticAnalyzer
 
     private static readonly DiagnosticDescriptor SemanticMapStageFlowRule = new(
         SemanticMapStageFlowId,
-        "SemanticMapCompositor must execute Intent -> Declutter -> Layout",
-        "SemanticMapCompositor.Compose(...) must call _intentStage.Resolve, _declutterStage.Apply and _layoutStage.Layout",
+        "CodeNavigationMapCompositor must execute Intent -> Declutter -> Layout",
+        "CodeNavigationMapCompositor.Compose(...) must call _intentStage.Resolve, _declutterStage.Apply and _layoutStage.Layout",
         "Architecture",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true,
-        description: "ADR 0055 canonical stage chain must be explicit in SemanticMapCompositor.");
+        description: "ADR 0055 canonical stage chain must be explicit in CodeNavigationMapCompositor.");
 
     private static readonly DiagnosticDescriptor LayoutBypassRule = new(
         LayoutBypassId,
-        "Layout engines must be used only in SemanticMapLayoutStage",
-        "Direct usage of '{0}' is allowed only inside SemanticMapLayoutStage to avoid pipeline bypass",
+        "Layout engines must be used only in CodeNavigationMapLayoutStage",
+        "Direct usage of '{0}' is allowed only inside CodeNavigationMapLayoutStage to avoid pipeline bypass",
         "Architecture",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true,
@@ -94,11 +94,11 @@ public sealed class SkiaPipelineArchitectureAnalyzer : DiagnosticAnalyzer
             return;
 
         var name = id.Identifier.ValueText;
-        if (name is "ISemanticMapIntentStage"
-            or "ISemanticMapDeclutterStage"
-            or "ISemanticMapLayoutStage"
-            or "SemanticMapPipelineState"
-            or "SemanticMapPipelineContext")
+        if (name is "ICodeNavigationMapIntentStage"
+            or "ICodeNavigationMapDeclutterStage"
+            or "ICodeNavigationMapLayoutStage"
+            or "CodeNavigationMapPipelineState"
+            or "CodeNavigationMapPipelineContext")
         {
             context.ReportDiagnostic(Diagnostic.Create(SkiaViewDomainLeakRule, id.GetLocation(), name));
         }
@@ -112,7 +112,7 @@ public sealed class SkiaPipelineArchitectureAnalyzer : DiagnosticAnalyzer
             return;
 
         var type = method.Parent as TypeDeclarationSyntax;
-        if (type is null || !string.Equals(type.Identifier.ValueText, "SemanticMapCompositor", StringComparison.Ordinal))
+        if (type is null || !string.Equals(type.Identifier.ValueText, "CodeNavigationMapCompositor", StringComparison.Ordinal))
             return;
 
         var hasIntent = method.DescendantNodes().OfType<MemberAccessExpressionSyntax>()
@@ -137,12 +137,12 @@ public sealed class SkiaPipelineArchitectureAnalyzer : DiagnosticAnalyzer
         if (context.Node is not ObjectCreationExpressionSyntax create)
             return;
         var typeName = create.Type.ToString();
-        if (!string.Equals(typeName, "SemanticMapStarGraphLayoutEngine", StringComparison.Ordinal)
-            && !string.Equals(typeName, "SemanticMapControlFlowGraphLayoutEngine", StringComparison.Ordinal))
+        if (!string.Equals(typeName, "CodeNavigationMapStarGraphLayoutEngine", StringComparison.Ordinal)
+            && !string.Equals(typeName, "CodeNavigationMapControlFlowGraphLayoutEngine", StringComparison.Ordinal))
             return;
 
         var enclosingType = create.Ancestors().OfType<TypeDeclarationSyntax>().FirstOrDefault()?.Identifier.ValueText ?? "";
-        if (string.Equals(enclosingType, "SemanticMapLayoutStage", StringComparison.Ordinal))
+        if (string.Equals(enclosingType, "CodeNavigationMapLayoutStage", StringComparison.Ordinal))
             return;
 
         context.ReportDiagnostic(Diagnostic.Create(LayoutBypassRule, create.GetLocation(), typeName));

@@ -3,21 +3,21 @@
 namespace CascadeIDE.Services;
 
 /// <summary>
-/// Общий изменяемый чертёж subgraph (узлы/рёбра в том же смысле, что <see cref="SemanticMapSubgraphDocument"/> и JSON MCP).
+/// Общий изменяемый чертёж subgraph (узлы/рёбра в том же смысле, что <see cref="CodeNavigationMapSubgraphDocument"/> и JSON MCP).
 /// Один механический API для разных <b>источников</b>: control flow и связи кода (CodeNavigation), связанные файлы (WorkspaceNavigation), submodule-дерево (GitMap, ADR 0062) — без дублирования капов и Merge-логики рёбер.
 /// </summary>
-public sealed class SemanticMapSubgraphBlueprint
+public sealed class CodeNavigationMapSubgraphBlueprint
 {
     private int _nextId = 1;
     private int _legendSerial;
 
-    public SemanticMapSubgraphBlueprint(
+    public CodeNavigationMapSubgraphBlueprint(
         string anchorPath,
         int maxNodes,
         int maxEdges,
         string anchorLabel,
         string anchorRationale,
-        SemanticMapGraphKind graphKind = SemanticMapGraphKind.Unspecified)
+        CodeNavigationMapGraphKind graphKind = CodeNavigationMapGraphKind.Unspecified)
     {
         AnchorPath = anchorPath;
         GraphKind = graphKind;
@@ -40,7 +40,7 @@ public sealed class SemanticMapSubgraphBlueprint
     public string AnchorNodeId { get; } = "n0";
 
     /// <summary>Тип графа для <see cref="ToDocument"/> и JSON MCP (<c>graph_kind</c>).</summary>
-    public SemanticMapGraphKind GraphKind { get; }
+    public CodeNavigationMapGraphKind GraphKind { get; }
 
     public int MaxNodes { get; }
 
@@ -143,12 +143,12 @@ public sealed class SemanticMapSubgraphBlueprint
     #endregion
 
     /// <summary>Снимок для композитора Semantic Map и разбора subgraph без повторного копирования полей.</summary>
-    public SemanticMapSubgraphDocument ToDocument() =>
+    public CodeNavigationMapSubgraphDocument ToDocument() =>
         new()
         {
             AnchorPath = AnchorPath,
             GraphKind = GraphKind,
-            Nodes = Nodes.Select(n => new SemanticMapSubgraphNode
+            Nodes = Nodes.Select(n => new CodeNavigationMapSubgraphNode
             {
                 Id = n.Id,
                 Path = n.Path,
@@ -159,7 +159,7 @@ public sealed class SemanticMapSubgraphBlueprint
                 LegendIndex = n.LegendIndex,
                 LegendText = n.LegendText
             }).ToList(),
-            Edges = Edges.Select(e => new SemanticMapSubgraphEdge
+            Edges = Edges.Select(e => new CodeNavigationMapSubgraphEdge
             {
                 FromId = e.FromId,
                 ToId = e.ToId,

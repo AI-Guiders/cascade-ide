@@ -5,9 +5,9 @@ using System.Text.Json;
 namespace CascadeIDE.Services;
 
 /// <summary>Парсинг JSON режима <c>subgraph</c> без дублирования логики построения графа.</summary>
-public static class SemanticMapSubgraphJson
+public static class CodeNavigationMapSubgraphJson
 {
-    public static bool TryParse(string json, out SemanticMapSubgraphDocument? doc, out string? error)
+    public static bool TryParse(string json, out CodeNavigationMapSubgraphDocument? doc, out string? error)
     {
         doc = null;
         error = null;
@@ -38,7 +38,7 @@ public static class SemanticMapSubgraphJson
 
             var graphKind = TryParseGraphKind(root);
 
-            var nodes = new List<SemanticMapSubgraphNode>();
+            var nodes = new List<CodeNavigationMapSubgraphNode>();
             if (root.TryGetProperty("nodes", out var nodesEl) && nodesEl.ValueKind == JsonValueKind.Array)
             {
                 foreach (var el in nodesEl.EnumerateArray())
@@ -56,7 +56,7 @@ public static class SemanticMapSubgraphJson
                         && liEl.TryGetInt32(out var li))
                         legendIndex = li;
                     var legendText = el.TryGetProperty("legend_text", out var ltEl) ? ltEl.GetString() : null;
-                    nodes.Add(new SemanticMapSubgraphNode
+                    nodes.Add(new CodeNavigationMapSubgraphNode
                     {
                         Id = id,
                         Path = path,
@@ -70,7 +70,7 @@ public static class SemanticMapSubgraphJson
                 }
             }
 
-            var edges = new List<SemanticMapSubgraphEdge>();
+            var edges = new List<CodeNavigationMapSubgraphEdge>();
             if (root.TryGetProperty("edges", out var edgesEl) && edgesEl.ValueKind == JsonValueKind.Array)
             {
                 foreach (var el in edgesEl.EnumerateArray())
@@ -81,11 +81,11 @@ public static class SemanticMapSubgraphJson
                         continue;
                     var k = el.TryGetProperty("kind", out var ke) ? ke.GetString() : null;
                     var rk = el.TryGetProperty("related_kind", out var rke) ? rke.GetString() : null;
-                    edges.Add(new SemanticMapSubgraphEdge { FromId = from, ToId = to, Kind = k, RelatedKind = rk });
+                    edges.Add(new CodeNavigationMapSubgraphEdge { FromId = from, ToId = to, Kind = k, RelatedKind = rk });
                 }
             }
 
-            doc = new SemanticMapSubgraphDocument
+            doc = new CodeNavigationMapSubgraphDocument
             {
                 AnchorPath = anchor,
                 GraphKind = graphKind,
@@ -101,19 +101,20 @@ public static class SemanticMapSubgraphJson
         }
     }
 
-    private static SemanticMapGraphKind TryParseGraphKind(JsonElement root)
+    private static CodeNavigationMapGraphKind TryParseGraphKind(JsonElement root)
     {
         if (!root.TryGetProperty("graph_kind", out var g) || g.ValueKind != JsonValueKind.String)
-            return SemanticMapGraphKind.Unspecified;
+            return CodeNavigationMapGraphKind.Unspecified;
         var s = g.GetString();
         if (string.IsNullOrEmpty(s))
-            return SemanticMapGraphKind.Unspecified;
-        if (string.Equals(s, SemanticMapGraphKindWire.CodeIntentSemanticMap, StringComparison.Ordinal))
-            return SemanticMapGraphKind.CodeIntentSemanticMap;
-        if (string.Equals(s, SemanticMapGraphKindWire.RelatedFiles, StringComparison.Ordinal))
-            return SemanticMapGraphKind.RelatedFiles;
-        if (string.Equals(s, SemanticMapGraphKindWire.RepositoryModuleTree, StringComparison.Ordinal))
-            return SemanticMapGraphKind.RepositoryModuleTree;
-        return SemanticMapGraphKind.Unspecified;
+            return CodeNavigationMapGraphKind.Unspecified;
+        if (string.Equals(s, CodeNavigationMapGraphKindWire.CodeIntent, StringComparison.Ordinal)
+            || string.Equals(s, CodeNavigationMapGraphKindWire.CodeIntentLegacy, StringComparison.Ordinal))
+            return CodeNavigationMapGraphKind.CodeIntent;
+        if (string.Equals(s, CodeNavigationMapGraphKindWire.RelatedFiles, StringComparison.Ordinal))
+            return CodeNavigationMapGraphKind.RelatedFiles;
+        if (string.Equals(s, CodeNavigationMapGraphKindWire.RepositoryModuleTree, StringComparison.Ordinal))
+            return CodeNavigationMapGraphKind.RepositoryModuleTree;
+        return CodeNavigationMapGraphKind.Unspecified;
     }
 }

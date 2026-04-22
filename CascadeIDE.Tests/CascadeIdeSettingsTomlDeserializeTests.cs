@@ -87,23 +87,23 @@ public sealed class CascadeIdeSettingsTomlDeserializeTests
     }
 
     [Fact]
-    public void Deserialize_SemanticMapSection_ParsesViewAndDepth()
+    public void Deserialize_CodeNavigationMapSection_ParsesViewAndDepth()
     {
         const string text =
             """
-            [semantic_map]
+            [code_navigation_map]
             view = "both"
             depth = "controlFlow"
             detail_level = "glance"
             """;
 
         var s = Deserialize(text);
-        Assert.True(s.SemanticMap.WantsSemanticMapList);
-        Assert.True(s.SemanticMap.WantsSemanticMapGraph);
-        Assert.True(s.SemanticMap.IsControlFlowDepth);
-        Assert.Equal("both", SemanticMapSettings.NormalizeView(s.SemanticMap.View));
-        Assert.Equal(SemanticMapLevelKind.ControlFlow, SemanticMapSettings.NormalizeDepth(s.SemanticMap.Depth));
-        Assert.Equal(SemanticMapDetailLevel.Glance, s.SemanticMap.NormalizedDetailLevel);
+        Assert.True(s.CodeNavigationMap.WantsCodeNavigationMapList);
+        Assert.True(s.CodeNavigationMap.WantsCodeNavigationMapGraph);
+        Assert.True(s.CodeNavigationMap.IsControlFlowDepth);
+        Assert.Equal("both", CodeNavigationMapSettings.NormalizeView(s.CodeNavigationMap.View));
+        Assert.Equal(CodeNavigationMapLevelKind.ControlFlow, CodeNavigationMapSettings.NormalizeDepth(s.CodeNavigationMap.Depth));
+        Assert.Equal(CodeNavigationMapDetailLevel.Glance, s.CodeNavigationMap.NormalizedDetailLevel);
     }
 
     [Fact]

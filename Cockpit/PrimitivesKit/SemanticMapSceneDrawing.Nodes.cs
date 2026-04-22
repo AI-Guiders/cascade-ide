@@ -7,13 +7,13 @@ namespace CascadeIDE.Cockpit.PrimitivesKit;
 
 public static partial class SemanticMapSceneDrawing
 {
-    private static void DrawNodes(DrawingContext context, SemanticMapGraphSceneVm scene, SemanticMapVisualTheme theme)
+    private static void DrawNodes(DrawingContext context, CodeNavigationMapGraphSceneVm scene, SemanticMapVisualTheme theme)
     {
         var useLegend = scene.UseLegendColumn;
         foreach (var n in scene.Nodes)
         {
             var highlighted = scene.HighlightedNodeIds.Contains(n.Id);
-            if (n.Shape == SemanticMapNodeShape.Condition)
+            if (n.Shape == CodeNavigationMapNodeShape.Condition)
                 DrawConditionBranch(context, theme, n, highlighted);
             else
             {
@@ -67,7 +67,7 @@ public static partial class SemanticMapSceneDrawing
     }
 
     /// <summary>Узел условия в control-flow: заливка и обводка ромба (классический знак ветвления).</summary>
-    private static void DrawConditionBranch(DrawingContext context, SemanticMapVisualTheme theme, SemanticMapGraphNodeLayout n, bool highlighted)
+    private static void DrawConditionBranch(DrawingContext context, SemanticMapVisualTheme theme, CodeNavigationMapGraphNodeLayout n, bool highlighted)
     {
         var geo = new StreamGeometry();
         var c = n.Center;
@@ -99,7 +99,7 @@ public static partial class SemanticMapSceneDrawing
         }
     }
 
-    private static IBrush ResolveNodeFill(SemanticMapVisualTheme theme, SemanticMapGraphNodeLayout node)
+    private static IBrush ResolveNodeFill(SemanticMapVisualTheme theme, CodeNavigationMapGraphNodeLayout node)
     {
         if (node.IsAnchor)
             return theme.AnchorFill;
@@ -112,7 +112,7 @@ public static partial class SemanticMapSceneDrawing
         return theme.CallFill;
     }
 
-    private static string BuildNodeGlyph(SemanticMapGraphNodeLayout node, bool useLegendColumn)
+    private static string BuildNodeGlyph(CodeNavigationMapGraphNodeLayout node, bool useLegendColumn)
     {
         if (node.IsAnchor)
             return "A";
@@ -129,7 +129,7 @@ public static partial class SemanticMapSceneDrawing
         return "•";
     }
 
-    private static string? BuildNodeFullLabel(SemanticMapGraphNodeLayout node, bool useLegendColumn)
+    private static string? BuildNodeFullLabel(CodeNavigationMapGraphNodeLayout node, bool useLegendColumn)
     {
         if (useLegendColumn)
             return null;
@@ -141,12 +141,12 @@ public static partial class SemanticMapSceneDrawing
         return label;
     }
 
-    private static bool IsExitNode(SemanticMapGraphNodeLayout node) =>
+    private static bool IsExitNode(CodeNavigationMapGraphNodeLayout node) =>
         string.Equals(node.Kind, ExitStepKind, StringComparison.OrdinalIgnoreCase);
 
-    private static bool IsConditionNode(SemanticMapGraphNodeLayout node) =>
+    private static bool IsConditionNode(CodeNavigationMapGraphNodeLayout node) =>
         string.Equals(node.Kind, ConditionStepKind, StringComparison.OrdinalIgnoreCase);
 
-    private static bool IsHandlerNode(SemanticMapGraphNodeLayout node) =>
+    private static bool IsHandlerNode(CodeNavigationMapGraphNodeLayout node) =>
         string.Equals(node.Kind, "handler_step", StringComparison.OrdinalIgnoreCase);
 }

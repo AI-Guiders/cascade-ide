@@ -25,11 +25,11 @@ public partial class MainWindowViewModel
         if (requestedMode is not ("related" or "subgraph"))
             return Task.FromResult("""{"error":"invalid_mode","message":"mode must be related or subgraph."}""");
 
-        var configuredLevel = _settings.SemanticMap.Depth;
-        var effectiveLevel = Models.SemanticMapLevelKind.Normalize(string.IsNullOrWhiteSpace(level) ? configuredLevel : level);
-        var effectiveMode = effectiveLevel == Models.SemanticMapLevelKind.ControlFlow ? "subgraph" : requestedMode;
+        var configuredLevel = _settings.CodeNavigationMap.Depth;
+        var effectiveLevel = Models.CodeNavigationMapLevelKind.Normalize(string.IsNullOrWhiteSpace(level) ? configuredLevel : level);
+        var effectiveMode = effectiveLevel == Models.CodeNavigationMapLevelKind.ControlFlow ? "subgraph" : requestedMode;
 
-        if (effectiveLevel == Models.SemanticMapLevelKind.ControlFlow)
+        if (effectiveLevel == Models.CodeNavigationMapLevelKind.ControlFlow)
         {
             var effectiveLine = line;
             var effectiveColumn = column;

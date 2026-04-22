@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using CascadeIDE.Models;
+using CascadeIDE.Models.Shell;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace CascadeIDE.ViewModels;
@@ -186,6 +187,7 @@ public partial class MainWindowViewModel
     /// <summary>Какая страница показана в оболочке Mfd (без TabControl; v1 — колонка зоны Mfd).</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsMfdShellSolutionExplorerPageActive))]
+    [NotifyPropertyChangedFor(nameof(CurrentMfdShellPageAsShell))]
     private MfdShellPage _currentMfdShellPage = MfdShellPage.Terminal;
 
     [ObservableProperty]

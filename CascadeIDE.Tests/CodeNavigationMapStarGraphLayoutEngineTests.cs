@@ -5,32 +5,32 @@ using Xunit;
 
 namespace CascadeIDE.Tests;
 
-public sealed class SemanticMapStarGraphLayoutEngineTests
+public sealed class CodeNavigationMapStarGraphLayoutEngineTests
 {
     [Fact]
     public void Layout_PlacesAnchorCenterAndSatellitesOnOrbit()
     {
-        var engine = new SemanticMapStarGraphLayoutEngine();
-        var doc = new SemanticMapSubgraphDocument
+        var engine = new CodeNavigationMapStarGraphLayoutEngine();
+        var doc = new CodeNavigationMapSubgraphDocument
         {
             AnchorPath = @"D:\w\A.cs",
             Nodes =
             [
-                new SemanticMapSubgraphNode
+                new CodeNavigationMapSubgraphNode
                 {
                     Id = "n0",
                     Path = @"D:\w\A.cs",
                     Kind = "anchor",
                     Label = "A.cs"
                 },
-                new SemanticMapSubgraphNode
+                new CodeNavigationMapSubgraphNode
                 {
                     Id = "n1",
                     Path = @"D:\w\B.cs",
                     Kind = "project_peer",
                     Label = "B.cs"
                 },
-                new SemanticMapSubgraphNode
+                new CodeNavigationMapSubgraphNode
                 {
                     Id = "n2",
                     Path = @"D:\w\C.cs",
@@ -40,8 +40,8 @@ public sealed class SemanticMapStarGraphLayoutEngineTests
             ],
             Edges =
             [
-                new SemanticMapSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "related_to" },
-                new SemanticMapSubgraphEdge { FromId = "n0", ToId = "n2", Kind = "related_to" }
+                new CodeNavigationMapSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "related_to" },
+                new CodeNavigationMapSubgraphEdge { FromId = "n0", ToId = "n2", Kind = "related_to" }
             ]
         };
 

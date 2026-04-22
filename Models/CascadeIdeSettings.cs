@@ -12,7 +12,7 @@ public sealed partial class CascadeIdeSettings : ModelBase
 
     public WorkspaceSettings Workspace { get; set; } = new();
 
-    public SemanticMapSettings SemanticMap { get; set; } = new();
+    public CodeNavigationMapSettings CodeNavigationMap { get; set; } = new();
 
     public LanguagesSettings Languages { get; set; } = new();
 

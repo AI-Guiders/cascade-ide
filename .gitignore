@@ -28,6 +28,9 @@ Data/
 # Локальные скрипты правок ADR (не шипить)
 docs/adr/_patch_*.py
 
+# Одноразовые скрипты массового rename (не шипить)
+tools/_rename-semanticmap*.ps1
+
 # Cursor agent CLI (качается с downloads.cursor.com / снимок реестра ACP)
 .tools/cursor-agent-win-x64.zip
 .tools/cursor-agent-package/

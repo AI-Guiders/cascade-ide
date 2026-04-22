@@ -42,5 +42,5 @@ public partial class MainWindow
             or nameof(ViewModels.MainWindowViewModel.IsPfdRegionExpanded)
             or nameof(ViewModels.MainWindowViewModel.WorkspaceNavigationMapRelatedCount)
             or nameof(ViewModels.MainWindowViewModel.WorkspaceNavigationMapHasRelated)
-            or nameof(ViewModels.MainWindowViewModel.SemanticMapGraphScene);
+            or nameof(ViewModels.MainWindowViewModel.CodeNavigationMapGraphScene);
 }

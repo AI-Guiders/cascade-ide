@@ -413,7 +413,7 @@ public partial class DockDocumentView : UserControl
         var offset = _editor.TextArea.Caret.Offset;
         if (offset < 0 || offset > doc.TextLength)
             offset = 0;
-        _vm.UpdateSemanticMapCaretOffset(offset);
+        _vm.UpdateCodeNavigationMapCaretOffset(offset);
     }
 
     private void UpdateMcpProvidersIfActive()

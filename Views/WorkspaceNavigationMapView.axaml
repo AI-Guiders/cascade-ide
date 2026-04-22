@@ -4,7 +4,7 @@
              xmlns:views="using:CascadeIDE.Views"
              x:Class="CascadeIDE.Views.WorkspaceNavigationMapView"
              x:DataType="vm:MainWindowViewModel">
-    <!-- Semantic Map (ADR 0039 / 0047): слот Pfd; list | graph | both; подграф = тот же JSON, что MCP subgraph + компоновка через SemanticMapCompositor. -->
+    <!-- Semantic Map (ADR 0039 / 0047 / 0088): слот Pfd — граф подграфа; список related — страница MFD RelatedFiles. -->
     <Panel IsVisible="{Binding IsPfdRegionExpanded}">
         <Border BorderBrush="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"
                 BorderThickness="1"
@@ -16,11 +16,11 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="{Binding SemanticMapListAreaRowHeight}"/>
+                    <RowDefinition Height="{Binding CodeNavigationMapListAreaRowHeight}"/>
                 </Grid.RowDefinitions>
                 <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
                     <views:PanelChromeHeader Grid.Column="0"
-                                             Title="Semantic Map · workspace"
+                                             Title="Semantic Map · граф"
                                              UppercaseTitle="True"/>
                     <Border Grid.Column="1"
                             VerticalAlignment="Center"
@@ -42,7 +42,7 @@
                                TextWrapping="Wrap"
                                Opacity="0.9"
                                Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
-                               Text="{Binding SemanticMapSettingsSummaryLine}"/>
+                               Text="{Binding CodeNavigationMapSettingsSummaryLine}"/>
                     <StackPanel Orientation="Horizontal" Spacing="4">
                         <TextBlock FontSize="11"
                                    Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
@@ -52,20 +52,20 @@
                                    Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
                                    Text="{Binding WorkspaceNavigationMapAnchorLabel}"/>
                     </StackPanel>
-                    <views:SemanticMapMiniMapControl x:Name="SemanticMapMiniMap"
-                                                     Height="{Binding SemanticMapGraphHeight}"
+                    <views:CodeNavigationMapMiniMapControl x:Name="CodeNavigationMapMiniMap"
+                                                     Height="{Binding CodeNavigationMapGraphHeight}"
                                                      HorizontalAlignment="Stretch"
                                                      Margin="0,4,0,0"
                                                      Cursor="Hand"
-                                                     IsVisible="{Binding ShowSemanticMapGraph}"
-                                                     Scene="{Binding SemanticMapGraphScene}"
+                                                     IsVisible="{Binding ShowCodeNavigationMapGraph}"
+                                                     Scene="{Binding CodeNavigationMapGraphScene}"
                                                      OpenFileCommand="{Binding OpenWorkspaceNavigationRelatedCommand}"/>
                     <TextBlock Margin="0,2,0,0"
                                FontSize="10"
                                Opacity="0.85"
                                Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
                                TextWrapping="Wrap"
-                               IsVisible="{Binding ShowSemanticMapGraphClickHint}"
+                               IsVisible="{Binding ShowCodeNavigationMapGraphClickHint}"
                                Text="Клик по узлу — открыть файл."/>
                     <TextBlock Text="{Binding WorkspaceNavigationMapStatus}"
                                FontSize="11"
@@ -74,12 +74,12 @@
                 </StackPanel>
                 <Border Grid.Row="2" Height="1" Margin="0,8,0,0"
                         Background="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"
-                        IsVisible="{Binding ShowSemanticMapList}"/>
+                        IsVisible="{Binding ShowCodeNavigationMapListOnPfd}"/>
                 <ScrollViewer Grid.Row="3"
                               Margin="0,8,0,0"
                               HorizontalScrollBarVisibility="Disabled"
                               VerticalScrollBarVisibility="Auto"
-                              IsVisible="{Binding ShowSemanticMapList}">
+                              IsVisible="{Binding ShowCodeNavigationMapListOnPfd}">
                     <ItemsControl ItemsSource="{Binding WorkspaceNavigationMapItems}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="vm:WorkspaceNavigationMapItemVm">

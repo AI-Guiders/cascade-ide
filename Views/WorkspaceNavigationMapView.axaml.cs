@@ -15,13 +15,13 @@ public partial class WorkspaceNavigationMapView : UserControl
     private void OnLoaded(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
         Loaded -= OnLoaded;
-        if (SemanticMapMiniMap is null)
+        if (CodeNavigationMapMiniMap is null)
             return;
-        SemanticMapMiniMap.SizeChanged += OnSemanticMapMiniMapSizeChanged;
-        PushViewportWidth(SemanticMapMiniMap);
+        CodeNavigationMapMiniMap.SizeChanged += OnCodeNavigationMapMiniMapSizeChanged;
+        PushViewportWidth(CodeNavigationMapMiniMap);
     }
 
-    private void OnSemanticMapMiniMapSizeChanged(object? sender, SizeChangedEventArgs e)
+    private void OnCodeNavigationMapMiniMapSizeChanged(object? sender, SizeChangedEventArgs e)
     {
         if (sender is Control c)
             PushViewportWidth(c);
@@ -34,6 +34,6 @@ public partial class WorkspaceNavigationMapView : UserControl
         var w = miniMap.Bounds.Width;
         if (w <= 0)
             return;
-        vm.NotifySemanticMapGraphViewportWidthChanged(w);
+        vm.NotifyCodeNavigationMapGraphViewportWidthChanged(w);
     }
 }

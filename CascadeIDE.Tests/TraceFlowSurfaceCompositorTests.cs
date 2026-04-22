@@ -22,13 +22,13 @@ public sealed class TraceFlowSurfaceCompositorTests
 
         Assert.Contains("n1", result.HighlightedNodeIds);
         Assert.Contains("n0->n1", result.HighlightedEdgeKeys);
-        Assert.Equal(SemanticMapGraphPresentationKind.CodeControlFlow, result.Presentation);
+        Assert.Equal(CodeNavigationMapGraphPresentationKind.CodeControlFlow, result.Presentation);
     }
 
     [Fact]
     public void Compose_WhenEnabled_PreservesWorkspacePresentation()
     {
-        var scene = BuildScene(SemanticMapGraphPresentationKind.WorkspaceRelatedFiles);
+        var scene = BuildScene(CodeNavigationMapGraphPresentationKind.WorkspaceRelatedFiles);
         var snapshot = new TraceFlowChannelSnapshot(
             new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "n0" },
             new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "n0->n1" });
@@ -36,7 +36,7 @@ public sealed class TraceFlowSurfaceCompositorTests
 
         var result = compositor.Compose(scene, snapshot, new TraceFlowCdsDecision(true, "pfd", "normal"));
 
-        Assert.Equal(SemanticMapGraphPresentationKind.WorkspaceRelatedFiles, result.Presentation);
+        Assert.Equal(CodeNavigationMapGraphPresentationKind.WorkspaceRelatedFiles, result.Presentation);
     }
 
     [Fact]
@@ -75,8 +75,8 @@ public sealed class TraceFlowSurfaceCompositorTests
         Assert.False(disabled.Enabled);
     }
 
-    private static SemanticMapGraphSceneVm BuildScene(
-        SemanticMapGraphPresentationKind presentation = SemanticMapGraphPresentationKind.CodeControlFlow) =>
+    private static CodeNavigationMapGraphSceneVm BuildScene(
+        CodeNavigationMapGraphPresentationKind presentation = CodeNavigationMapGraphPresentationKind.CodeControlFlow) =>
         new()
         {
             Nodes =
@@ -91,7 +91,7 @@ public sealed class TraceFlowSurfaceCompositorTests
             Presentation = presentation
         };
 
-    private static SemanticMapGraphNodeLayout Node(string id, bool anchor = false) => new()
+    private static CodeNavigationMapGraphNodeLayout Node(string id, bool anchor = false) => new()
     {
         Id = id,
         Kind = anchor ? "anchor" : "call_step",
@@ -100,10 +100,10 @@ public sealed class TraceFlowSurfaceCompositorTests
         Center = new Point(0, 0),
         Radius = 10,
         IsAnchor = anchor,
-        Shape = SemanticMapNodeShape.Circle
+        Shape = CodeNavigationMapNodeShape.Circle
     };
 
-    private static SemanticMapGraphEdgeLayout Edge(string from, string to, string kind) => new()
+    private static CodeNavigationMapGraphEdgeLayout Edge(string from, string to, string kind) => new()
     {
         FromNodeId = from,
         ToNodeId = to,

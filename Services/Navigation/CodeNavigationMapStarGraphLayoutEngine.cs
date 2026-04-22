@@ -5,12 +5,12 @@ using CascadeIDE.ViewModels;
 namespace CascadeIDE.Services.Navigation;
 
 /// <summary>Звезда: якорь в центре, спутники по окружности (тот же подграф, что отдаёт MCP в режиме <c>subgraph</c>).</summary>
-public sealed class SemanticMapStarGraphLayoutEngine : ISemanticMapSubgraphLayoutEngine
+public sealed class CodeNavigationMapStarGraphLayoutEngine : ICodeNavigationMapSubgraphLayoutEngine
 {
-    public SemanticMapGraphSceneVm Layout(SemanticMapSubgraphDocument doc, double width, double height)
+    public CodeNavigationMapGraphSceneVm Layout(CodeNavigationMapSubgraphDocument doc, double width, double height)
     {
         if (width <= 0 || height <= 0)
-            return new SemanticMapGraphSceneVm
+            return new CodeNavigationMapGraphSceneVm
             {
                 Nodes = [],
                 Edges = [],
@@ -33,7 +33,7 @@ public sealed class SemanticMapStarGraphLayoutEngine : ISemanticMapSubgraphLayou
         // Одно кольцо — чуть компактнее, чтобы граф не «разъезжался» на всю зону; при плотности — два кольца (не одна орбита).
         const int singleRingMaxSatellites = 8;
 
-        var layouts = new List<SemanticMapGraphNodeLayout>();
+        var layouts = new List<CodeNavigationMapGraphNodeLayout>();
         Point? anchorCenter = null;
         var idToCenter = new Dictionary<string, Point>(StringComparer.OrdinalIgnoreCase);
         var idToRadius = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
@@ -44,7 +44,7 @@ public sealed class SemanticMapStarGraphLayoutEngine : ISemanticMapSubgraphLayou
             anchorCenter = ac;
             idToCenter[anchor.Id] = ac;
             idToRadius[anchor.Id] = anchorR;
-            layouts.Add(new SemanticMapGraphNodeLayout
+            layouts.Add(new CodeNavigationMapGraphNodeLayout
             {
                 Id = anchor.Id,
                 Kind = anchor.Kind,
@@ -53,7 +53,7 @@ public sealed class SemanticMapStarGraphLayoutEngine : ISemanticMapSubgraphLayou
                 Center = ac,
                 Radius = anchorR,
                 IsAnchor = true,
-                Shape = SemanticMapNodeShape.Circle
+                Shape = CodeNavigationMapNodeShape.Circle
             });
         }
 
@@ -94,7 +94,7 @@ public sealed class SemanticMapStarGraphLayoutEngine : ISemanticMapSubgraphLayou
             var p = new Point(px, py);
             idToCenter[sat.Id] = p;
             idToRadius[sat.Id] = satR;
-            layouts.Add(new SemanticMapGraphNodeLayout
+            layouts.Add(new CodeNavigationMapGraphNodeLayout
             {
                 Id = sat.Id,
                 Kind = sat.Kind,
@@ -103,18 +103,18 @@ public sealed class SemanticMapStarGraphLayoutEngine : ISemanticMapSubgraphLayou
                 Center = p,
                 Radius = satR,
                 IsAnchor = false,
-                Shape = SemanticMapNodeShape.Circle
+                Shape = CodeNavigationMapNodeShape.Circle
             });
         }
 
-        var edgeLayouts = new List<SemanticMapGraphEdgeLayout>();
+        var edgeLayouts = new List<CodeNavigationMapGraphEdgeLayout>();
         foreach (var e in doc.Edges)
         {
             if (!idToCenter.TryGetValue(e.FromId, out var a))
                 continue;
             if (!idToCenter.TryGetValue(e.ToId, out var b))
                 continue;
-            edgeLayouts.Add(new SemanticMapGraphEdgeLayout
+            edgeLayouts.Add(new CodeNavigationMapGraphEdgeLayout
             {
                 FromNodeId = e.FromId,
                 ToNodeId = e.ToId,
@@ -130,7 +130,7 @@ public sealed class SemanticMapStarGraphLayoutEngine : ISemanticMapSubgraphLayou
         if (edgeLayouts.Count == 0 && anchorCenter is { } ac0)
         {
             foreach (var s in layouts.Where(x => !x.IsAnchor))
-                edgeLayouts.Add(new SemanticMapGraphEdgeLayout
+                edgeLayouts.Add(new CodeNavigationMapGraphEdgeLayout
                 {
                     FromNodeId = anchor?.Id ?? "n0",
                     ToNodeId = s.Id,
@@ -142,7 +142,7 @@ public sealed class SemanticMapStarGraphLayoutEngine : ISemanticMapSubgraphLayou
                 });
         }
 
-        return new SemanticMapGraphSceneVm
+        return new CodeNavigationMapGraphSceneVm
         {
             Nodes = layouts,
             Edges = edgeLayouts,

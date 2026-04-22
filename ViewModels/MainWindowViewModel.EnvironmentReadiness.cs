@@ -29,6 +29,9 @@ public partial class MainWindowViewModel
 
         if (value == MfdShellPage.EnvironmentReadiness)
             _ = RefreshEnvironmentReadinessAsync();
+
+        if (value == MfdShellPage.RelatedFiles)
+            ScheduleWorkspaceNavigationMapRefresh();
     }
 
     /// <summary>Уйти со страницы готовности окружения на первую другую разрешённую страницу оболочки Mfd.</summary>

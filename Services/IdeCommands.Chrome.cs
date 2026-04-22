@@ -94,6 +94,8 @@ public static partial class IdeCommands
 
     /// <summary>Развернуть регион Mfd и перейти на страницу обозревателя решения (toolbar). returns: text.</summary>
     public const string ShowSolutionExplorerPage = "show_solution_explorer_page";
+    /// <summary>Развернуть регион Mfd и открыть страницу «Связанные файлы» (related; workspace). returns: text.</summary>
+    public const string ShowRelatedFilesMfdPage = "show_related_files_mfd_page";
     /// <summary>Явно показать терминал (toolbar). returns: text.</summary>
     public const string ShowTerminalPanel = "show_terminal_panel";
     /// <summary>Скрыть панель вывода сборки (toolbar). returns: text.</summary>

@@ -19,7 +19,7 @@ namespace CascadeIDE.ViewModels;
 /// </summary>
 public partial class MainWindowViewModel
 {
-    private readonly SemanticMapCompositor _semanticMapCompositor = new();
+    private readonly CodeNavigationMapCompositor _codeNavigationMapCompositor = new();
     private readonly TraceFlowChannelCoordinator _traceFlowChannelCoordinator = new(
         [
             new CodeFlowTraceChannel(),
@@ -31,10 +31,10 @@ public partial class MainWindowViewModel
 
     private CancellationTokenSource? _workspaceNavigationMapRefreshCts;
 
-    internal void UpdateSemanticMapCaretOffset(int? offset)
+    internal void UpdateCodeNavigationMapCaretOffset(int? offset)
     {
         _editorCaretOffset = offset;
-        if (_settings.SemanticMap.IsControlFlowDepth)
+        if (_settings.CodeNavigationMap.IsControlFlowDepth)
             ScheduleWorkspaceNavigationMapRefresh();
         ScheduleEditorHudBannerRefresh();
     }
@@ -42,39 +42,40 @@ public partial class MainWindowViewModel
     /// <summary>Связанные файлы для текущего якоря (режим списка).</summary>
     public ObservableCollection<WorkspaceNavigationMapItemVm> WorkspaceNavigationMapItems { get; } = new();
 
-    /// <summary>Варианты <see cref="SemanticMapPresentationKind"/> для ComboBox.</summary>
-    public string[] SemanticMapPresentationOptions { get; } =
-        [SemanticMapPresentationKind.List, SemanticMapPresentationKind.Graph, SemanticMapPresentationKind.Both];
+    /// <summary>Варианты <see cref="CodeNavigationMapPresentationKind"/> для ComboBox.</summary>
+    public string[] CodeNavigationMapPresentationOptions { get; } =
+        [CodeNavigationMapPresentationKind.List, CodeNavigationMapPresentationKind.Graph, CodeNavigationMapPresentationKind.Both];
 
     /// <summary>Варианты уровня карты: файловый и control flow.</summary>
-    public string[] SemanticMapLevelOptions { get; } =
-        [SemanticMapLevelKind.File, SemanticMapLevelKind.ControlFlow];
+    public string[] CodeNavigationMapLevelOptions { get; } =
+        [CodeNavigationMapLevelKind.File, CodeNavigationMapLevelKind.ControlFlow];
 
     /// <summary>Сцена мини-карты (подграф + укладка по выбранному уровню карты).</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(WorkspaceNavigationMapHasRelated))]
-    private SemanticMapGraphSceneVm? _semanticMapGraphScene;
+    private CodeNavigationMapGraphSceneVm? _codeNavigationMapGraphScene;
 
     [ObservableProperty]
-    private double _semanticMapGraphHeight = SemanticMapCompositor.DefaultHeightFile;
+    private double _codeNavigationMapGraphHeight = CodeNavigationMapCompositor.DefaultHeightFile;
 
     /// <summary>Ширина области компоновки (совпадает с фактической шириной мини-карты в PFD).</summary>
     [ObservableProperty]
-    private double _semanticMapGraphWidth = SemanticMapCompositor.DefaultWidth;
+    private double _codeNavigationMapGraphWidth = CodeNavigationMapCompositor.DefaultWidth;
 
-    /// <summary><c>list</c> | <c>graph</c> | <c>both</c> — синхронизируется с <c>[semantic_map]</c>.</summary>
+    /// <summary><c>list</c> | <c>graph</c> | <c>both</c> — синхронизируется с <c>[code_navigation_map]</c>.</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ShowSemanticMapList))]
-    [NotifyPropertyChangedFor(nameof(ShowSemanticMapGraph))]
+    [NotifyPropertyChangedFor(nameof(ShowCodeNavigationMapList))]
+    [NotifyPropertyChangedFor(nameof(ShowCodeNavigationMapGraph))]
     [NotifyPropertyChangedFor(nameof(WorkspaceNavigationMapHasRelated))]
-    [NotifyPropertyChangedFor(nameof(SemanticMapListAreaRowHeight))]
-    [NotifyPropertyChangedFor(nameof(ShowSemanticMapGraphClickHint))]
-    private string _semanticMapPresentation = SemanticMapPresentationKind.List;
+    [NotifyPropertyChangedFor(nameof(CodeNavigationMapListAreaRowHeight))]
+    [NotifyPropertyChangedFor(nameof(ShowCodeNavigationMapListOnPfd))]
+    [NotifyPropertyChangedFor(nameof(ShowCodeNavigationMapGraphClickHint))]
+    private string _codeNavigationMapPresentation = CodeNavigationMapPresentationKind.List;
 
-    /// <summary><c>file</c> | <c>controlFlow</c> — уровень построения карты (секция <c>[semantic_map]</c>).</summary>
+    /// <summary><c>file</c> | <c>controlFlow</c> — уровень построения карты (секция <c>[code_navigation_map]</c>).</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ShowSemanticMapGraphClickHint))]
-    private string _semanticMapLevel = SemanticMapLevelKind.File;
+    [NotifyPropertyChangedFor(nameof(ShowCodeNavigationMapGraphClickHint))]
+    private string _codeNavigationMapLevel = CodeNavigationMapLevelKind.File;
 
     /// <summary>Сообщение об ошибке или пустом состоянии (не null).</summary>
     [ObservableProperty]
@@ -90,30 +91,34 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(WorkspaceNavigationMapHasRelated))]
     private int _workspaceNavigationMapRelatedCount;
 
-    /// <summary>Показать список связанных файлов.</summary>
-    public bool ShowSemanticMapList =>
-        SemanticMapPresentation == SemanticMapPresentationKind.List
-        || SemanticMapPresentation == SemanticMapPresentationKind.Both;
+    /// <summary>Настройка <c>list</c>/<c>both</c>: список связанных ренерится на странице MFD <see cref="MfdShellPage.RelatedFiles"/>, не в колонке PFD.</summary>
+    public bool ShowCodeNavigationMapList =>
+        CodeNavigationMapPresentation == CodeNavigationMapPresentationKind.List
+        || CodeNavigationMapPresentation == CodeNavigationMapPresentationKind.Both;
+
+    /// <summary>Списка related на PFD нет (см. <see cref="MfdShellPage.RelatedFiles"/>).</summary>
+    public bool ShowCodeNavigationMapListOnPfd => false;
 
     /// <summary>Показать мини-карту подграфа.</summary>
-    public bool ShowSemanticMapGraph =>
-        SemanticMapPresentation == SemanticMapPresentationKind.Graph
-        || SemanticMapPresentation == SemanticMapPresentationKind.Both;
+    public bool ShowCodeNavigationMapGraph =>
+        CodeNavigationMapPresentation == CodeNavigationMapPresentationKind.Graph
+        || CodeNavigationMapPresentation == CodeNavigationMapPresentationKind.Both;
 
     /// <summary>
-    /// Высота нижней строки Grid под список: звезда только если список виден; иначе 0 —
-    /// иначе строка <c>*</c> с невидимым <c>ScrollViewer</c> съедает всё место под графом.
+    /// Высота нижней строки Grid под список на PFD: список перенесён в MFD — всегда 0.
     /// </summary>
-    public GridLength SemanticMapListAreaRowHeight =>
-        ShowSemanticMapList ? new GridLength(1, GridUnitType.Star) : new GridLength(0);
+    public GridLength CodeNavigationMapListAreaRowHeight =>
+        (ShowCodeNavigationMapList && ShowCodeNavigationMapListOnPfd)
+            ? new GridLength(1, GridUnitType.Star)
+            : new GridLength(0);
 
     /// <summary>
-    /// Режим только графа на уровне <c>file</c>: подсказка «открыть файл» (в control flow клик ведёт к строке, не к файлу).
+    /// Режим <c>file</c>: подсказка «открыть файл» (в control flow клик ведёт к строке, не к файлу).
     /// </summary>
-    public bool ShowSemanticMapGraphClickHint =>
-        ShowSemanticMapGraph
-        && !ShowSemanticMapList
-        && string.Equals(SemanticMapLevelKind.Normalize(SemanticMapLevel), SemanticMapLevelKind.File, StringComparison.Ordinal);
+    public bool ShowCodeNavigationMapGraphClickHint =>
+        ShowCodeNavigationMapGraph
+        && string.Equals(CodeNavigationMapLevelKind.Normalize(CodeNavigationMapLevel), CodeNavigationMapLevelKind.File, StringComparison.Ordinal)
+        && CodeNavigationMapPresentation != CodeNavigationMapPresentationKind.List;
 
     /// <summary>Короткая подпись к количеству связей для шапки SM.</summary>
     public string WorkspaceNavigationMapRelatedBadge =>
@@ -127,7 +132,7 @@ public partial class MainWindowViewModel
     /// <summary>Есть ли контекст для accent (список или подграф с соседями).</summary>
     public bool WorkspaceNavigationMapHasRelated =>
         WorkspaceNavigationMapRelatedCount > 0
-        || (SemanticMapGraphScene?.Nodes.Count > 1);
+        || (CodeNavigationMapGraphScene?.Nodes.Count > 1);
 
     /// <summary>Открыть связанный файл из Semantic Map.</summary>
     [RelayCommand]
@@ -147,14 +152,14 @@ public partial class MainWindowViewModel
     }
 
     /// <summary>Вызывается из <c>WorkspaceNavigationMapView</c> при изменении ширины мини-карты.</summary>
-    internal void NotifySemanticMapGraphViewportWidthChanged(double width)
+    internal void NotifyCodeNavigationMapGraphViewportWidthChanged(double width)
     {
         if (double.IsNaN(width) || width < 40)
             return;
         var clamped = Math.Clamp(width, 80, 2400);
-        if (Math.Abs(clamped - SemanticMapGraphWidth) < 3)
+        if (Math.Abs(clamped - CodeNavigationMapGraphWidth) < 3)
             return;
-        SemanticMapGraphWidth = clamped;
+        CodeNavigationMapGraphWidth = clamped;
         ScheduleWorkspaceNavigationMapRefresh();
     }
 
@@ -178,7 +183,7 @@ public partial class MainWindowViewModel
         CodeNavigationSettings? navSettings = null;
         var wantList = false;
         var wantGraph = false;
-        var level = SemanticMapLevelKind.File;
+        var level = CodeNavigationMapLevelKind.File;
         await UiScheduler.Default.InvokeAsync(() =>
         {
             rawPaths = McpSolutionTree.CollectFileEntries(Workspace.SolutionRoots).Select(e => e.FullPath).ToList();
@@ -189,16 +194,16 @@ public partial class MainWindowViewModel
             cursorLine = line;
             cursorColumn = column;
             navSettings = _settings.CodeNavigation;
-            var sm = _settings.SemanticMap;
-            wantList = sm.WantsSemanticMapList;
-            wantGraph = sm.WantsSemanticMapGraph;
-            level = SemanticMapLevelKind.Normalize(sm.Depth);
+            var sm = _settings.CodeNavigationMap;
+            wantList = sm.WantsCodeNavigationMapList;
+            wantGraph = sm.WantsCodeNavigationMapGraph;
+            level = CodeNavigationMapLevelKind.Normalize(sm.Depth);
         });
 
         if (ct.IsCancellationRequested)
             return;
 
-        var useSubgraphMode = level == SemanticMapLevelKind.ControlFlow || wantGraph;
+        var useSubgraphMode = level == CodeNavigationMapLevelKind.ControlFlow || wantGraph;
 
         string json;
         try
@@ -206,7 +211,7 @@ public partial class MainWindowViewModel
             json = await Task.Run(
                     () =>
                     {
-                        if (level == SemanticMapLevelKind.ControlFlow)
+                        if (level == CodeNavigationMapLevelKind.ControlFlow)
                         {
                             return CodeNavigationControlFlowSubgraphBuilder.BuildJson(
                                 currentPath,
@@ -266,8 +271,8 @@ public partial class MainWindowViewModel
         List<WorkspaceNavigationMapItemVm> rows = [];
         string status = "";
         string anchorLabel = "—";
-        SemanticMapGraphSceneVm? scene = null;
-        var graphHeight = SemanticMapCompositor.DefaultHeightFile;
+        CodeNavigationMapGraphSceneVm? scene = null;
+        var graphHeight = CodeNavigationMapCompositor.DefaultHeightFile;
         var accentCount = 0;
 
         try
@@ -282,15 +287,15 @@ public partial class MainWindowViewModel
                 if (code == "no_file" && string.IsNullOrEmpty(currentPath))
                     status = "Откройте файл из дерева решения — здесь появятся связанные.";
             }
-            else if (useSubgraphMode && SemanticMapSubgraphJson.TryParse(json, out var subgraph, out _))
+            else if (useSubgraphMode && CodeNavigationMapSubgraphJson.TryParse(json, out var subgraph, out _))
             {
-                var composed = _semanticMapCompositor.Compose(
-                    new SemanticMapCompositionIntent(
+                var composed = _codeNavigationMapCompositor.Compose(
+                    new CodeNavigationMapCompositionIntent(
                         subgraph!,
                         level,
-                        _settings.SemanticMap.NormalizedDetailLevel),
-                    new Services.SkiaInstruments.SkiaInstrumentViewport(SemanticMapGraphWidth, SemanticMapGraphHeight));
-                if (level == SemanticMapLevelKind.ControlFlow)
+                        _settings.CodeNavigationMap.NormalizedDetailLevel),
+                    new Services.SkiaInstruments.SkiaInstrumentViewport(CodeNavigationMapGraphWidth, CodeNavigationMapGraphHeight));
+                if (level == CodeNavigationMapLevelKind.ControlFlow)
                 {
                     var channelPayload = _traceFlowChannelCoordinator.Build(new TraceFlowChannelContext(
                         subgraph!,
@@ -382,8 +387,8 @@ public partial class MainWindowViewModel
             WorkspaceNavigationMapAnchorLabel = anchorLabel;
             WorkspaceNavigationMapStatus = status;
             WorkspaceNavigationMapRelatedCount = accentCount;
-            SemanticMapGraphScene = scene;
-            SemanticMapGraphHeight = graphHeight;
+            CodeNavigationMapGraphScene = scene;
+            CodeNavigationMapGraphHeight = graphHeight;
             WorkspaceNavigationMapItems.Clear();
             foreach (var r in rows)
                 WorkspaceNavigationMapItems.Add(r);

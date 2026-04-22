@@ -3,23 +3,23 @@ using Xunit;
 
 namespace CascadeIDE.Tests;
 
-public sealed class SemanticMapSettingsTests
+public sealed class CodeNavigationMapSettingsTests
 {
     [Theory]
-    [InlineData("file", SemanticMapLevelKind.File)]
-    [InlineData("FILE", SemanticMapLevelKind.File)]
-    [InlineData("controlFlow", SemanticMapLevelKind.ControlFlow)]
-    [InlineData("CONTROLFLOW", SemanticMapLevelKind.ControlFlow)]
-    [InlineData("unknown", SemanticMapLevelKind.File)]
+    [InlineData("file", CodeNavigationMapLevelKind.File)]
+    [InlineData("FILE", CodeNavigationMapLevelKind.File)]
+    [InlineData("controlFlow", CodeNavigationMapLevelKind.ControlFlow)]
+    [InlineData("CONTROLFLOW", CodeNavigationMapLevelKind.ControlFlow)]
+    [InlineData("unknown", CodeNavigationMapLevelKind.File)]
     public void NormalizeLevel_ReturnsKnownValue(string input, string expected)
     {
-        var actual = SemanticMapSettings.NormalizeDepth(input);
+        var actual = CodeNavigationMapSettings.NormalizeDepth(input);
         Assert.Equal(expected, actual);
     }
 
     /// <summary>
     /// Регресс: обновление Semantic Map по курсору в CF должно опираться на <c>[semantic_map].depth</c>,
-    /// как и основной refresh — иначе <c>SemanticMapLevel</c> на VM и Depth расходятся, карта не следует за методом.
+    /// как и основной refresh — иначе <c>CodeNavigationMapLevel</c> на VM и Depth расходятся, карта не следует за методом.
     /// </summary>
     [Theory]
     [InlineData("controlFlow", true)]
@@ -28,10 +28,10 @@ public sealed class SemanticMapSettingsTests
     [InlineData("unknown", false)]
     public void IsControlFlowDepth_MatchesNormalizeDepth(string depth, bool expectedControlFlow)
     {
-        var map = new SemanticMapSettings { Depth = depth };
+        var map = new CodeNavigationMapSettings { Depth = depth };
         Assert.Equal(expectedControlFlow, map.IsControlFlowDepth);
         Assert.Equal(
-            SemanticMapSettings.NormalizeDepth(depth) == SemanticMapLevelKind.ControlFlow,
+            CodeNavigationMapSettings.NormalizeDepth(depth) == CodeNavigationMapLevelKind.ControlFlow,
             map.IsControlFlowDepth);
     }
 
@@ -53,25 +53,25 @@ public sealed class SemanticMapSettingsTests
         bool expectedWantList,
         bool expectedWantGraph)
     {
-        var map = new SemanticMapSettings { View = rawView };
-        Assert.Equal(expectedWantList, map.WantsSemanticMapList);
-        Assert.Equal(expectedWantGraph, map.WantsSemanticMapGraph);
-        var normalized = SemanticMapSettings.NormalizeView(rawView);
+        var map = new CodeNavigationMapSettings { View = rawView };
+        Assert.Equal(expectedWantList, map.WantsCodeNavigationMapList);
+        Assert.Equal(expectedWantGraph, map.WantsCodeNavigationMapGraph);
+        var normalized = CodeNavigationMapSettings.NormalizeView(rawView);
         Assert.Equal(expectedWantList, normalized is "list" or "both");
         Assert.Equal(expectedWantGraph, normalized is "graph" or "both");
     }
 
     [Theory]
-    [InlineData("glance", SemanticMapDetailLevel.Glance)]
-    [InlineData("GLANCE", SemanticMapDetailLevel.Glance)]
-    [InlineData("inspect", SemanticMapDetailLevel.Inspect)]
-    [InlineData("normal", SemanticMapDetailLevel.Normal)]
-    [InlineData("", SemanticMapDetailLevel.Normal)]
-    [InlineData("unknown", SemanticMapDetailLevel.Normal)]
-    public void NormalizeDetailLevel_ReturnsKnownValue(string? raw, SemanticMapDetailLevel expected)
+    [InlineData("glance", CodeNavigationMapDetailLevel.Glance)]
+    [InlineData("GLANCE", CodeNavigationMapDetailLevel.Glance)]
+    [InlineData("inspect", CodeNavigationMapDetailLevel.Inspect)]
+    [InlineData("normal", CodeNavigationMapDetailLevel.Normal)]
+    [InlineData("", CodeNavigationMapDetailLevel.Normal)]
+    [InlineData("unknown", CodeNavigationMapDetailLevel.Normal)]
+    public void NormalizeDetailLevel_ReturnsKnownValue(string? raw, CodeNavigationMapDetailLevel expected)
     {
-        Assert.Equal(expected, SemanticMapSettings.NormalizeDetailLevel(raw));
-        var map = new SemanticMapSettings { DetailLevel = raw ?? "" };
+        Assert.Equal(expected, CodeNavigationMapSettings.NormalizeDetailLevel(raw));
+        var map = new CodeNavigationMapSettings { DetailLevel = raw ?? "" };
         Assert.Equal(expected, map.NormalizedDetailLevel);
     }
 }

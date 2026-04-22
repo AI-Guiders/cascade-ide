@@ -10,9 +10,9 @@ public static partial class IdeCommandRegistry
         // ——— Вид: фокус и панели (переключатели)
         AddPalette(b, "focus_editor", IdeCommands.FocusEditor, "Фокус в редактор", "Вид");
         AddPalette(b, "toggle_pfd_region_expanded", IdeCommands.TogglePfdRegionExpanded, "Переключить регион Pfd (Semantic Map)", "Вид");
-        AddPalette(b, "cycle_semantic_map_presentation", IdeCommands.CycleSemanticMapPresentation, "Semantic Map: цикл вида (list / graph / both)", "Вид");
-        AddPalette(b, "cycle_semantic_map_level", IdeCommands.CycleSemanticMapLevel, "Semantic Map: уровень file ↔ control flow", "Вид");
-        AddPalette(b, "cycle_semantic_map_detail_level", IdeCommands.CycleSemanticMapDetailLevel, "Semantic Map: детализация glance / normal / inspect", "Вид");
+        AddPalette(b, "cycle_code_navigation_map_presentation", IdeCommands.CycleCodeNavigationMapPresentation, "Semantic Map: цикл вида (list / graph / both)", "Вид");
+        AddPalette(b, "cycle_code_navigation_map_level", IdeCommands.CycleCodeNavigationMapLevel, "Semantic Map: уровень file ↔ control flow", "Вид");
+        AddPalette(b, "cycle_code_navigation_map_detail_level", IdeCommands.CycleCodeNavigationMapDetailLevel, "Semantic Map: детализация glance / normal / inspect", "Вид");
         AddPalette(b, "toggle_build_output", IdeCommands.ToggleBuildOutput, "Переключить вывод сборки", "Вид");
         AddPalette(b, "toggle_terminal", IdeCommands.ToggleTerminal, "Переключить терминал", "Вид");
         AddPalette(b, "toggle_workspace_splitters_lock", IdeCommands.ToggleWorkspaceSplittersLock, "TOL: ON GND / IN AIR (сплиттеры рабочей области)", "Вид");
@@ -25,6 +25,7 @@ public static partial class IdeCommandRegistry
         AddPalette(b, "show_build_output_panel", IdeCommands.ShowBuildOutputPanel, "Показать вывод сборки", "Вид");
         AddPalette(b, "show_chat_page", IdeCommands.ShowChatPage, "Страница Chat (регион Mfd)", "Вид");
         AddPalette(b, "show_solution_explorer_page", IdeCommands.ShowSolutionExplorerPage, "Страница обозревателя решения (регион Mfd)", "Вид");
+        AddPalette(b, "show_related_files_mfd_page", IdeCommands.ShowRelatedFilesMfdPage, "Страница «Связанные файлы» (регион Mfd)", "Вид");
         AddPalette(b, "show_terminal_panel", IdeCommands.ShowTerminalPanel, "Показать терминал", "Вид");
         AddPalette(b, "hide_build_output_panel", IdeCommands.HideBuildOutputPanel, "Скрыть вывод сборки", "Вид");
 

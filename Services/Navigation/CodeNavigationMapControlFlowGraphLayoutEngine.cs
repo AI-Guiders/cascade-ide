@@ -9,18 +9,18 @@ namespace CascadeIDE.Services.Navigation;
 /// Укладка control-flow в формате "полётного плана": основной поток сверху вниз,
 /// а узлы одного шага по глубине — в сторону от центральной оси.
 /// </summary>
-public sealed class SemanticMapControlFlowGraphLayoutEngine : ISemanticMapSubgraphLayoutEngine
+public sealed class CodeNavigationMapControlFlowGraphLayoutEngine : ICodeNavigationMapSubgraphLayoutEngine
 {
-    public SemanticMapGraphSceneVm Layout(SemanticMapSubgraphDocument doc, double width, double height)
+    public CodeNavigationMapGraphSceneVm Layout(CodeNavigationMapSubgraphDocument doc, double width, double height)
     {
         if (width <= 0 || height <= 0)
-            return new SemanticMapGraphSceneVm
+            return new CodeNavigationMapGraphSceneVm
             {
                 Nodes = [],
                 Edges = [],
                 Legend = [],
                 LegendColumnLeft = width,
-                LegendPlacement = SemanticMapLegendBlockPlacement.BesideGraph,
+                LegendPlacement = CodeNavigationMapLegendBlockPlacement.BesideGraph,
                 LegendBlockTopY = 0
             };
 
@@ -28,13 +28,13 @@ public sealed class SemanticMapControlFlowGraphLayoutEngine : ISemanticMapSubgra
                      ?? doc.Nodes.FirstOrDefault(n => n.Id.Equals("n0", StringComparison.OrdinalIgnoreCase))
                      ?? (doc.Nodes.Count > 0 ? doc.Nodes[0] : null);
         if (anchor is null)
-            return new SemanticMapGraphSceneVm
+            return new CodeNavigationMapGraphSceneVm
             {
                 Nodes = [],
                 Edges = [],
                 Legend = [],
                 LegendColumnLeft = width,
-                LegendPlacement = SemanticMapLegendBlockPlacement.BesideGraph,
+                LegendPlacement = CodeNavigationMapLegendBlockPlacement.BesideGraph,
                 LegendBlockTopY = 0
             };
 
@@ -57,15 +57,15 @@ public sealed class SemanticMapControlFlowGraphLayoutEngine : ISemanticMapSubgra
             .OrderBy(g => g.Key)
             .ToDictionary(g => g.Key, g => g.Select(kv => kv.Key).ToList());
 
-        var topPadding = SemanticMapGraphPrimitives.ControlFlowTopPadding;
-        var bottomPadding = SemanticMapGraphPrimitives.ControlFlowBottomPadding;
-        var sidePadding = SemanticMapGraphPrimitives.ControlFlowSidePadding;
-        var legendGap = SemanticMapGraphPrimitives.ControlFlowLegendGap;
+        var topPadding = CodeNavigationMapGraphPrimitives.ControlFlowTopPadding;
+        var bottomPadding = CodeNavigationMapGraphPrimitives.ControlFlowBottomPadding;
+        var sidePadding = CodeNavigationMapGraphPrimitives.ControlFlowSidePadding;
+        var legendGap = CodeNavigationMapGraphPrimitives.ControlFlowLegendGap;
 
-        static bool IsExitStep(SemanticMapSubgraphNode n) =>
+        static bool IsExitStep(CodeNavigationMapSubgraphNode n) =>
             string.Equals(n.Kind, "exit_step", StringComparison.OrdinalIgnoreCase);
 
-        static bool IsConditionStep(SemanticMapSubgraphNode n) =>
+        static bool IsConditionStep(CodeNavigationMapSubgraphNode n) =>
             string.Equals(n.Kind, "condition_step", StringComparison.OrdinalIgnoreCase);
 
         var hasLegendRows = doc.Nodes.Any(static n =>
@@ -89,9 +89,9 @@ public sealed class SemanticMapControlFlowGraphLayoutEngine : ISemanticMapSubgra
                     && n.LegendIndex is > 0
                     && !string.IsNullOrWhiteSpace(n.LegendText))
                 .OrderBy(n => n.LegendIndex.GetValueOrDefault())
-                .Select(n => new SemanticMapLegendEntry { Index = n.LegendIndex!.Value, Text = n.LegendText!.Trim() })
+                .Select(n => new CodeNavigationMapLegendEntry { Index = n.LegendIndex!.Value, Text = n.LegendText!.Trim() })
                 .ToList()
-            : new List<SemanticMapLegendEntry>();
+            : new List<CodeNavigationMapLegendEntry>();
 
         var contentLegendNeed = EstimateLegendColumnContentWidth(
             legendRowsPreview,
@@ -99,56 +99,56 @@ public sealed class SemanticMapControlFlowGraphLayoutEngine : ISemanticMapSubgra
             showLegendConditionKey,
             showLegendExceptionFlowKey,
             showLegendEdgeStyleKey);
-        var fallbackFraction = width * SemanticMapGraphPrimitives.ControlFlowLegendReserveWidthFraction;
-        var legendReserveCap = SemanticMapGraphPrimitives.ResolveControlFlowLegendReserveCap(width);
-        var legendReserveLo = Math.Min(SemanticMapGraphPrimitives.ControlFlowLegendReserveMin, legendReserveCap);
+        var fallbackFraction = width * CodeNavigationMapGraphPrimitives.ControlFlowLegendReserveWidthFraction;
+        var legendReserveCap = CodeNavigationMapGraphPrimitives.ResolveControlFlowLegendReserveCap(width);
+        var legendReserveLo = Math.Min(CodeNavigationMapGraphPrimitives.ControlFlowLegendReserveMin, legendReserveCap);
         var firstLegendReserve = useLegendColumn
             ? Math.Clamp(
                 Math.Max(fallbackFraction, contentLegendNeed),
                 legendReserveLo,
                 legendReserveCap)
             : 0;
-        IReadOnlyList<SemanticMapLegendEntry> legendRows = legendRowsPreview;
+        IReadOnlyList<CodeNavigationMapLegendEntry> legendRows = legendRowsPreview;
 
-        SemanticMapGraphSceneVm BuildFor(double heightForY, double legendResForWidth)
+        CodeNavigationMapGraphSceneVm BuildFor(double heightForY, double legendResForWidth)
         {
         var graphWidth = Math.Max(
-            SemanticMapGraphPrimitives.ControlFlowMinGraphWidth,
+            CodeNavigationMapGraphPrimitives.ControlFlowMinGraphWidth,
             width - legendResForWidth - (useLegendColumn ? legendGap : 0));
 
         // Узлы на одном уровне не разъезжаются на всю ширину слота — ограниченная «полоса чтения», по центру области графа.
-        var bandW = SemanticMapGraphPrimitives.ResolveControlFlowReadableBandWidth(graphWidth);
+        var bandW = CodeNavigationMapGraphPrimitives.ResolveControlFlowReadableBandWidth(graphWidth);
         var bandLeft = (graphWidth - bandW) * 0.5;
         var centerX = bandLeft + bandW * 0.5;
-        var labelCharBudget = SemanticMapGraphPrimitives.ResolveControlFlowLabelCharBudget(bandW);
+        var labelCharBudget = CodeNavigationMapGraphPrimitives.ResolveControlFlowLabelCharBudget(bandW);
 
         var levelCount = Math.Max(1, levels.Count);
         var innerH = heightForY - topPadding - bottomPadding;
         var slotCount = Math.Max(1, levelCount - 1);
         var rawYStep = innerH / slotCount;
-        var minYStep = SemanticMapGraphPrimitives.MinVerticalStepForLevelCount(levelCount);
+        var minYStep = CodeNavigationMapGraphPrimitives.MinVerticalStepForLevelCount(levelCount);
         var maxYStep = Math.Min(
-            SemanticMapGraphPrimitives.ControlFlowMaxReadableVerticalStepCap,
-            Math.Max(SemanticMapGraphPrimitives.ControlFlowMaxReadableVerticalStep, rawYStep));
+            CodeNavigationMapGraphPrimitives.ControlFlowMaxReadableVerticalStepCap,
+            Math.Max(CodeNavigationMapGraphPrimitives.ControlFlowMaxReadableVerticalStep, rawYStep));
         var yStep = Math.Clamp(rawYStep, minYStep, maxYStep);
         var verticalSpan = Math.Max(0, levelCount - 1) * yStep;
         var yStart = topPadding + (innerH - verticalSpan) * 0.5;
         var radiusMul = Math.Clamp(
-            yStep / SemanticMapGraphPrimitives.ControlFlowRefVerticalStep,
-            SemanticMapGraphPrimitives.ControlFlowRadiusScaleMin,
-            SemanticMapGraphPrimitives.ControlFlowRadiusScaleMax);
+            yStep / CodeNavigationMapGraphPrimitives.ControlFlowRefVerticalStep,
+            CodeNavigationMapGraphPrimitives.ControlFlowRadiusScaleMin,
+            CodeNavigationMapGraphPrimitives.ControlFlowRadiusScaleMax);
         var horizontalRadiusScale = Math.Clamp(
-            bandW / SemanticMapGraphPrimitives.ControlFlowMaxReadableBandWidth,
-            SemanticMapGraphPrimitives.ControlFlowHorizontalRadiusScaleMin,
+            bandW / CodeNavigationMapGraphPrimitives.ControlFlowMaxReadableBandWidth,
+            CodeNavigationMapGraphPrimitives.ControlFlowHorizontalRadiusScaleMin,
             1.0);
         radiusMul *= horizontalRadiusScale;
-        var sideLabelFontPx = SemanticMapGraphPrimitives.ResolveControlFlowSideLabelFontSize(bandW, yStep);
-        var anchorR = SemanticMapGraphPrimitives.ControlFlowAnchorRadiusBase * radiusMul;
-        var nodeR = SemanticMapGraphPrimitives.ControlFlowNodeRadiusBase * radiusMul;
+        var sideLabelFontPx = CodeNavigationMapGraphPrimitives.ResolveControlFlowSideLabelFontSize(bandW, yStep);
+        var anchorR = CodeNavigationMapGraphPrimitives.ControlFlowAnchorRadiusBase * radiusMul;
+        var nodeR = CodeNavigationMapGraphPrimitives.ControlFlowNodeRadiusBase * radiusMul;
 
         var idToCenter = new Dictionary<string, Point>(StringComparer.OrdinalIgnoreCase);
         var idToRadius = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
-        var nodeLayouts = new List<SemanticMapGraphNodeLayout>(doc.Nodes.Count);
+        var nodeLayouts = new List<CodeNavigationMapGraphNodeLayout>(doc.Nodes.Count);
 
         foreach (var (depth, ids) in levels)
         {
@@ -176,9 +176,9 @@ public sealed class SemanticMapControlFlowGraphLayoutEngine : ISemanticMapSubgra
                 idToRadius[id] = radius;
                 var isAnchor = string.Equals(n.Id, anchor.Id, StringComparison.OrdinalIgnoreCase);
                 var shape = !isAnchor && string.Equals(n.Kind, "condition_step", StringComparison.OrdinalIgnoreCase)
-                    ? SemanticMapNodeShape.Condition
-                    : SemanticMapNodeShape.Circle;
-                nodeLayouts.Add(new SemanticMapGraphNodeLayout
+                    ? CodeNavigationMapNodeShape.Condition
+                    : CodeNavigationMapNodeShape.Circle;
+                nodeLayouts.Add(new CodeNavigationMapGraphNodeLayout
                 {
                     Id = n.Id,
                     Kind = n.Kind,
@@ -194,7 +194,7 @@ public sealed class SemanticMapControlFlowGraphLayoutEngine : ISemanticMapSubgra
             }
         }
 
-        var edgeLayouts = new List<SemanticMapGraphEdgeLayout>(doc.Edges.Count);
+        var edgeLayouts = new List<CodeNavigationMapGraphEdgeLayout>(doc.Edges.Count);
         foreach (var e in doc.Edges)
         {
             if (!idToCenter.TryGetValue(e.FromId, out var from))
@@ -202,7 +202,7 @@ public sealed class SemanticMapControlFlowGraphLayoutEngine : ISemanticMapSubgra
             if (!idToCenter.TryGetValue(e.ToId, out var to))
                 continue;
 
-            edgeLayouts.Add(new SemanticMapGraphEdgeLayout
+            edgeLayouts.Add(new CodeNavigationMapGraphEdgeLayout
             {
                 FromNodeId = e.FromId,
                 ToNodeId = e.ToId,
@@ -221,8 +221,8 @@ public sealed class SemanticMapControlFlowGraphLayoutEngine : ISemanticMapSubgra
         {
             if (nodeLayouts.Count > 0)
             {
-                var inkSlack = SemanticMapGraphPrimitives.ControlFlowBesideLegendInkSlack;
-                var minClear = Math.Max(legendGap, SemanticMapGraphPrimitives.ControlFlowLegendBesideMinClearance);
+                var inkSlack = CodeNavigationMapGraphPrimitives.ControlFlowBesideLegendInkSlack;
+                var minClear = Math.Max(legendGap, CodeNavigationMapGraphPrimitives.ControlFlowLegendBesideMinClearance);
                 var maxInkRight = 0.0;
                 foreach (var n in nodeLayouts)
                     maxInkRight = Math.Max(maxInkRight, n.Center.X + n.Radius + inkSlack);
@@ -230,12 +230,12 @@ public sealed class SemanticMapControlFlowGraphLayoutEngine : ISemanticMapSubgra
             }
             else
             {
-                var minClear = Math.Max(legendGap, SemanticMapGraphPrimitives.ControlFlowLegendBesideMinClearance);
+                var minClear = Math.Max(legendGap, CodeNavigationMapGraphPrimitives.ControlFlowLegendBesideMinClearance);
                 legendColumnLeft = bandLeft + bandW + minClear;
             }
         }
 
-        return new SemanticMapGraphSceneVm
+        return new CodeNavigationMapGraphSceneVm
         {
             Nodes = nodeLayouts,
             Edges = edgeLayouts,
@@ -246,7 +246,7 @@ public sealed class SemanticMapControlFlowGraphLayoutEngine : ISemanticMapSubgra
             ShowLegendExceptionFlowKey = showLegendExceptionFlowKey,
             ShowLegendEdgeStyleKey = showLegendEdgeStyleKey,
             LegendColumnLeft = legendColumnLeft,
-            LegendPlacement = SemanticMapLegendBlockPlacement.BesideGraph,
+            LegendPlacement = CodeNavigationMapLegendBlockPlacement.BesideGraph,
             LegendBlockTopY = 0,
             SideLabelFontSizePx = sideLabelFontPx
         };
@@ -260,21 +260,21 @@ public sealed class SemanticMapControlFlowGraphLayoutEngine : ISemanticMapSubgra
         // Колонка у правого края вьюпорта — соседняя невозможна без наложения на граф/обрезки.
         var besideUnusable = sceneBeside.LegendColumnLeft + 8 >= width;
         var needBelow = besideUnusable
-            || textRoomBeside < SemanticMapGraphPrimitives.ControlFlowLegendSideColumnMinTextWidth
+            || textRoomBeside < CodeNavigationMapGraphPrimitives.ControlFlowLegendSideColumnMinTextWidth
             || contentLegendNeed > textRoomBeside + 0.5;
         if (!needBelow)
             return sceneBeside;
 
         var hasShapeKeyRows = showLegendReturnKey || showLegendConditionKey || showLegendExceptionFlowKey;
         var capEst = sceneBeside.SideLabelFontSizePx ?? 11.0;
-        var estimatedLegendH = SemanticMapGraphPrimitives.EstimateControlFlowLegendBlockHeight(
+        var estimatedLegendH = CodeNavigationMapGraphPrimitives.EstimateControlFlowLegendBlockHeight(
             legendRows.Count,
             hasShapeKeyRows,
             edgeStyleLegendRowCount,
             capEst);
-        var belowGap = SemanticMapGraphPrimitives.ControlFlowLegendBelowBlockGap;
+        var belowGap = CodeNavigationMapGraphPrimitives.ControlFlowLegendBelowBlockGap;
         var graphH = height - estimatedLegendH - belowGap;
-        if (graphH < SemanticMapGraphPrimitives.ControlFlowMinGraphHeightForBelowLegend)
+        if (graphH < CodeNavigationMapGraphPrimitives.ControlFlowMinGraphHeightForBelowLegend)
             return sceneBeside;
 
         var sceneBelow = BuildFor(graphH, 0);
@@ -288,7 +288,7 @@ public sealed class SemanticMapControlFlowGraphLayoutEngine : ISemanticMapSubgra
         if (legendTopY + estimatedLegendH > height + 1.0)
             return sceneBeside;
 
-        return new SemanticMapGraphSceneVm
+        return new CodeNavigationMapGraphSceneVm
         {
             Nodes = sceneBelow.Nodes,
             Edges = sceneBelow.Edges,
@@ -299,7 +299,7 @@ public sealed class SemanticMapControlFlowGraphLayoutEngine : ISemanticMapSubgra
             ShowLegendExceptionFlowKey = showLegendExceptionFlowKey,
             ShowLegendEdgeStyleKey = showLegendEdgeStyleKey,
             LegendColumnLeft = sidePadding,
-            LegendPlacement = SemanticMapLegendBlockPlacement.BelowGraph,
+            LegendPlacement = CodeNavigationMapLegendBlockPlacement.BelowGraph,
             LegendBlockTopY = legendTopY,
             SideLabelFontSizePx = sceneBelow.SideLabelFontSizePx
         };
@@ -307,7 +307,7 @@ public sealed class SemanticMapControlFlowGraphLayoutEngine : ISemanticMapSubgra
 
     /// <summary>Оценка минимальной ширины колонки легенды (индекс + текст + блок ключей фигур).</summary>
     private static double EstimateLegendColumnContentWidth(
-        IReadOnlyList<SemanticMapLegendEntry> rows,
+        IReadOnlyList<CodeNavigationMapLegendEntry> rows,
         bool showReturnKey,
         bool showConditionKey,
         bool showExceptionKey,
@@ -332,7 +332,7 @@ public sealed class SemanticMapControlFlowGraphLayoutEngine : ISemanticMapSubgra
 
     /// <summary>Блок «стили рёбер» в легенде: только если в графе есть нестандартные рёбра (пунктир, цикл).</summary>
     private static void ComputeEdgeStyleLegend(
-        IReadOnlyList<SemanticMapSubgraphEdge> edges,
+        IReadOnlyList<CodeNavigationMapSubgraphEdge> edges,
         out bool show,
         out int rowCount)
     {
@@ -361,7 +361,7 @@ public sealed class SemanticMapControlFlowGraphLayoutEngine : ISemanticMapSubgra
             rowCount++;
     }
 
-    private static Dictionary<string, List<string>> BuildOutgoing(IReadOnlyList<SemanticMapSubgraphEdge> edges)
+    private static Dictionary<string, List<string>> BuildOutgoing(IReadOnlyList<CodeNavigationMapSubgraphEdge> edges)
     {
         var outgoing = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
         foreach (var e in edges)

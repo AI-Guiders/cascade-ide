@@ -17,13 +17,13 @@ public static partial class IdeCommands
     public const string TogglePfdRegionExpanded = "toggle_pfd_region_expanded";
 
     /// <summary>Semantic Map: цикл вида list → graph → both (палитра; быстрый путь — Ctrl+K → S → P). returns: text.</summary>
-    public const string CycleSemanticMapPresentation = "cycle_semantic_map_presentation";
+    public const string CycleCodeNavigationMapPresentation = "cycle_code_navigation_map_presentation";
 
     /// <summary>Semantic Map: переключить уровень file ↔ controlFlow (Ctrl+K → S → F). returns: text.</summary>
-    public const string CycleSemanticMapLevel = "cycle_semantic_map_level";
+    public const string CycleCodeNavigationMapLevel = "cycle_code_navigation_map_level";
 
     /// <summary>Semantic Map: цикл детализации glance → normal → inspect (Ctrl+K → S → D). returns: text.</summary>
-    public const string CycleSemanticMapDetailLevel = "cycle_semantic_map_detail_level";
+    public const string CycleCodeNavigationMapDetailLevel = "cycle_code_navigation_map_detail_level";
     /// <summary>Явно показать/скрыть терминал (без переключения). args: visible:boolean; returns: text; example: {"visible":true}.</summary>
     public const string SetTerminalVisible = "set_terminal_visible";
     /// <summary>Явно показать/скрыть журнал сборки. args: visible:boolean; returns: text; example: {"visible":true}.</summary>

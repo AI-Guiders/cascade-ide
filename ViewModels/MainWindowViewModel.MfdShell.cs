@@ -1,15 +1,23 @@
 using CascadeIDE.Models;
+using CascadeIDE.Models.Shell;
 
 namespace CascadeIDE.ViewModels;
 
 /// <summary>Оболочка Mfd: одна активная страница; навигация — команды и палитра. Якорь на экране задаётся presentation (зона Mfd в main и/или окно-хост).</summary>
 public partial class MainWindowViewModel
 {
+    /// <summary>Та же <see cref="CurrentMfdShellPage"/>, в контракте <see cref="IShellPage"/>; Pfd — <see cref="PfdLayout"/>.</summary>
+    public IMfdShellPage CurrentMfdShellPageAsShell => new MfdShellPageDescriptor(CurrentMfdShellPage);
+
+    /// <summary>v1 — единый расклад; будущий декларативный пресет — смена id (ADR 0088).</summary>
+    public IPfdLayout PfdLayout => PfdLayouts.Default;
+
     /// <summary>Детерминированный порядок обхода при выборе первой доступной страницы.</summary>
     internal static readonly MfdShellPage[] MfdShellPageOrder =
     [
         MfdShellPage.WorkspaceHealth,
         MfdShellPage.SolutionExplorer,
+        MfdShellPage.RelatedFiles,
         MfdShellPage.MarkdownPreview,
         MfdShellPage.Chat,
         MfdShellPage.AiChatSettings,
@@ -48,6 +56,7 @@ public partial class MainWindowViewModel
     {
         MfdShellPage.WorkspaceHealth => ShowWorkspaceHealthMfdPage,
         MfdShellPage.SolutionExplorer => IsDockedMfdSolutionExplorerTree,
+        MfdShellPage.RelatedFiles => true,
         MfdShellPage.MarkdownPreview => true,
         MfdShellPage.Chat => true,
         MfdShellPage.AiChatSettings => true,

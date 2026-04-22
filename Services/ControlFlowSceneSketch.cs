@@ -3,7 +3,7 @@
 namespace CascadeIDE.Services;
 
 /// <summary>
-/// Короткий сценарный API для <b>карты кода</b> (CodeNavigation) поверх <see cref="SemanticMapSubgraphBlueprint"/> (те же виды шагов, что и у
+/// Короткий сценарный API для <b>карты кода</b> (CodeNavigation) поверх <see cref="CodeNavigationMapSubgraphBlueprint"/> (те же виды шагов, что и у
 /// <see cref="CascadeIDE.Services.CodeNavigation.CodeNavigationControlFlowSubgraphBuilder"/>):
 /// <list type="bullet">
 /// <item><description><see cref="DrawFunction"/> — <c>call_step</c>, ребро <c>Call</c>;</description></item>
@@ -17,7 +17,7 @@ public sealed class ControlFlowSceneSketch
 {
     private const string DefaultAnchorLabel = "file";
 
-    private readonly SemanticMapSubgraphBlueprint _blueprint;
+    private readonly CodeNavigationMapSubgraphBlueprint _blueprint;
     private readonly Dictionary<string, string> _stepKeyToNodeId = new(StringComparer.Ordinal);
 
     public ControlFlowSceneSketch(
@@ -27,13 +27,13 @@ public sealed class ControlFlowSceneSketch
         int maxEdges = 128)
     {
         AnchorPath = anchorPath;
-        _blueprint = new SemanticMapSubgraphBlueprint(
+        _blueprint = new CodeNavigationMapSubgraphBlueprint(
             anchorPath,
             maxNodes,
             maxEdges,
             DefaultAnchorLabel,
             anchorRationale,
-            SemanticMapGraphKind.CodeIntentSemanticMap);
+            CodeNavigationMapGraphKind.CodeIntent);
     }
 
     public string AnchorPath { get; }
@@ -152,10 +152,10 @@ public sealed class ControlFlowSceneSketch
     }
 
     /// <summary>
-    /// Документ для <see cref="Navigation.SemanticMapCompositor"/> (перегрузка с <see cref="SemanticMapSubgraphDocument"/> и уровнем <c>SemanticMapLevelKind.ControlFlow</c>):
+    /// Документ для <see cref="Navigation.CodeNavigationMapCompositor"/> (перегрузка с <see cref="CodeNavigationMapSubgraphDocument"/> и уровнем <c>CodeNavigationMapLevelKind.ControlFlow</c>):
     /// раскладка идёт через Intent → Declutter → Layout, без обхода пайплайна (ADR 0055).
     /// </summary>
-    public SemanticMapSubgraphDocument ToDocument() => _blueprint.ToDocument();
+    public CodeNavigationMapSubgraphDocument ToDocument() => _blueprint.ToDocument();
 
     private string AddCallBranch(string stepKey)
     {

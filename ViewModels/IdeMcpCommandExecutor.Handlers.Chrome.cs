@@ -56,19 +56,19 @@ internal sealed partial class IdeMcpCommandExecutor
                 _vm.TogglePfdRegionExpandedCommand.Execute(null);
             return "OK";
         });
-        add(CycleSemanticMapPresentation, async (_, _) =>
+        add(CycleCodeNavigationMapPresentation, async (_, _) =>
         {
-            _vm.CycleSemanticMapPresentation();
+            _vm.CycleCodeNavigationMapPresentation();
             return "OK";
         });
-        add(CycleSemanticMapLevel, async (_, _) =>
+        add(CycleCodeNavigationMapLevel, async (_, _) =>
         {
-            _vm.CycleSemanticMapLevel();
+            _vm.CycleCodeNavigationMapLevel();
             return "OK";
         });
-        add(CycleSemanticMapDetailLevel, async (_, _) =>
+        add(CycleCodeNavigationMapDetailLevel, async (_, _) =>
         {
-            _vm.CycleSemanticMapDetailLevel();
+            _vm.CycleCodeNavigationMapDetailLevel();
             return "OK";
         });
 
@@ -325,6 +325,12 @@ internal sealed partial class IdeMcpCommandExecutor
         {
             if (_vm.ShowSolutionExplorerPageCommand.CanExecute(null))
                 _vm.ShowSolutionExplorerPageCommand.Execute(null);
+            return "OK";
+        });
+        add(ShowRelatedFilesMfdPage, async (_, _) =>
+        {
+            if (_vm.ShowRelatedFilesMfdPageCommand.CanExecute(null))
+                _vm.ShowRelatedFilesMfdPageCommand.Execute(null);
             return "OK";
         });
         add(ShowTerminalPanel, async (_, _) =>

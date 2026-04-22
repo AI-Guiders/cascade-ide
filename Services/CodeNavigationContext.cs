@@ -425,7 +425,7 @@ public static class CodeNavigationContextBuilder
         return JsonSerializer.Serialize(new
         {
             mode = "subgraph",
-            graph_kind = SemanticMapGraphKindWire.RelatedFiles,
+            graph_kind = CodeNavigationMapGraphKindWire.RelatedFiles,
             anchor_path = anchor,
             line,
             column,

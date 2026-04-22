@@ -10,15 +10,15 @@ public interface ITraceFlowCdsRouter : ICdsRouter<TraceFlowCdsRouteInput, TraceF
 {
 }
 
-public readonly record struct TraceFlowCdsRouteInput(CockpitSurfaceState Cds, string SemanticMapLevel);
+public readonly record struct TraceFlowCdsRouteInput(CockpitSurfaceState Cds, string MapLevel);
 public readonly record struct TraceFlowCdsDecision(bool Enabled, string ZoneId, string DetailLevel);
 
 public sealed class TraceFlowCdsRouter : ITraceFlowCdsRouter
 {
     public TraceFlowCdsDecision Route(TraceFlowCdsRouteInput input)
     {
-        var level = SemanticMapLevelKind.Normalize(input.SemanticMapLevel);
-        var enabled = level == SemanticMapLevelKind.ControlFlow && input.Cds.Zones.PfdVisible;
+        var level = CodeNavigationMapLevelKind.Normalize(input.MapLevel);
+        var enabled = level == CodeNavigationMapLevelKind.ControlFlow && input.Cds.Zones.PfdVisible;
         return new TraceFlowCdsDecision(
             Enabled: enabled,
             ZoneId: enabled ? "pfd" : "none",

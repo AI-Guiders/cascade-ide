@@ -263,6 +263,13 @@ public partial class MainWindowViewModel
     }
 
     [RelayCommand]
+    private void ShowRelatedFilesMfdPage()
+    {
+        IsMfdRegionExpanded = true;
+        TryNavigateToMfdShellPage(MfdShellPage.RelatedFiles);
+    }
+
+    [RelayCommand]
     private void ShowTerminalPanel()
     {
         IsTerminalVisible = true;

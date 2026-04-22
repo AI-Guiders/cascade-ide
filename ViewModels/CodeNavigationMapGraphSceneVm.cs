@@ -4,7 +4,7 @@ using Avalonia;
 namespace CascadeIDE.ViewModels;
 
 /// <summary>Какой доменный граф рисуем на мини-карте: CFG vs связанные файлы (ADR 0067).</summary>
-public enum SemanticMapGraphPresentationKind
+public enum CodeNavigationMapGraphPresentationKind
 {
     /// <summary>Control flow / CFG (полётный план по коду).</summary>
     CodeControlFlow = 0,
@@ -14,7 +14,7 @@ public enum SemanticMapGraphPresentationKind
 }
 
 /// <summary>Как смонтирован блок легенды (номера шагов / ключи фигур) относительно графа control-flow — на уровне блока, а не пиксельной «подтяжки».</summary>
-public enum SemanticMapLegendBlockPlacement
+public enum CodeNavigationMapLegendBlockPlacement
 {
     /// <summary>Колонка справа от графа, текст — в оставшейся ширине (классический split).</summary>
     BesideGraph = 0,
@@ -24,14 +24,14 @@ public enum SemanticMapLegendBlockPlacement
 }
 
 /// <summary>Сцена мини-карты Semantic Map (узлы с центром в логических пикселях контрола).</summary>
-public sealed class SemanticMapGraphSceneVm
+public sealed class CodeNavigationMapGraphSceneVm
 {
-    public required IReadOnlyList<SemanticMapGraphNodeLayout> Nodes { get; init; }
-    public required IReadOnlyList<SemanticMapGraphEdgeLayout> Edges { get; init; }
+    public required IReadOnlyList<CodeNavigationMapGraphNodeLayout> Nodes { get; init; }
+    public required IReadOnlyList<CodeNavigationMapGraphEdgeLayout> Edges { get; init; }
 
     /// <summary>Визуальный язык сцены; <see cref="CascadeIDE.Cockpit.PrimitivesKit.SemanticMapVisualTheme.ForPresentation"/>.</summary>
-    public SemanticMapGraphPresentationKind Presentation { get; init; } = SemanticMapGraphPresentationKind.CodeControlFlow;
-    public IReadOnlyList<SemanticMapLegendEntry> Legend { get; init; } = [];
+    public CodeNavigationMapGraphPresentationKind Presentation { get; init; } = CodeNavigationMapGraphPresentationKind.CodeControlFlow;
+    public IReadOnlyList<CodeNavigationMapLegendEntry> Legend { get; init; } = [];
     /// <summary>Резервировать колонку под легенду (номера шагов и/или обозначения фигур).</summary>
     public bool UseLegendColumn { get; init; }
     /// <summary>Показать в легенде расшифровку: ромб — условие.</summary>
@@ -42,14 +42,14 @@ public sealed class SemanticMapGraphSceneVm
     public bool ShowLegendExceptionFlowKey { get; init; }
     /// <summary>Показать в легенде стили рёбер: сплошная / пунктир (условие, multibranch, loop).</summary>
     public bool ShowLegendEdgeStyleKey { get; init; }
-    /// <summary>Левая граница колонки легенды (X); если легенды нет — равна ширине области (не рисуем). При <see cref="LegendPlacement"/> = <see cref="SemanticMapLegendBlockPlacement.BelowGraph"/> — левый отступ текста (как у графа).</summary>
+    /// <summary>Левая граница колонки легенды (X); если легенды нет — равна ширине области (не рисуем). При <see cref="LegendPlacement"/> = <see cref="CodeNavigationMapLegendBlockPlacement.BelowGraph"/> — левый отступ текста (как у графа).</summary>
     public double LegendColumnLeft { get; init; } = double.PositiveInfinity;
 
     /// <summary>Кладка легенды: рядом с графом или снизу (control-flow; для звёзд не используется).</summary>
-    public SemanticMapLegendBlockPlacement LegendPlacement { get; init; } = SemanticMapLegendBlockPlacement.BesideGraph;
+    public CodeNavigationMapLegendBlockPlacement LegendPlacement { get; init; } = CodeNavigationMapLegendBlockPlacement.BesideGraph;
 
     /// <summary>
-    /// Y начала блока легенды при <see cref="LegendPlacement"/> = <see cref="SemanticMapLegendBlockPlacement.BelowGraph"/>;
+    /// Y начала блока легенды при <see cref="LegendPlacement"/> = <see cref="CodeNavigationMapLegendBlockPlacement.BelowGraph"/>;
     /// иначе не используется.
     /// </summary>
     public double LegendBlockTopY { get; init; }
@@ -64,11 +64,11 @@ public sealed class SemanticMapGraphSceneVm
     public bool IsEmpty => Nodes.Count == 0;
 
     /// <summary>Подмена только <see cref="Presentation"/> (после укладки графа из wire <c>graph_kind</c>).</summary>
-    public static SemanticMapGraphSceneVm WithPresentationKind(SemanticMapGraphSceneVm scene, SemanticMapGraphPresentationKind presentation)
+    public static CodeNavigationMapGraphSceneVm WithPresentationKind(CodeNavigationMapGraphSceneVm scene, CodeNavigationMapGraphPresentationKind presentation)
     {
         if (scene.Presentation == presentation)
             return scene;
-        return new SemanticMapGraphSceneVm
+        return new CodeNavigationMapGraphSceneVm
         {
             Nodes = scene.Nodes,
             Edges = scene.Edges,
@@ -90,13 +90,13 @@ public sealed class SemanticMapGraphSceneVm
 }
 
 /// <summary>Строка легенды control flow: номер ↔ одна строка кода/предиката.</summary>
-public sealed class SemanticMapLegendEntry
+public sealed class CodeNavigationMapLegendEntry
 {
     public int Index { get; init; }
     public required string Text { get; init; }
 }
 
-public enum SemanticMapNodeShape
+public enum CodeNavigationMapNodeShape
 {
     /// <summary>Обычный шаг (круг).</summary>
     Circle,
@@ -105,7 +105,7 @@ public enum SemanticMapNodeShape
     Condition
 }
 
-public sealed class SemanticMapGraphNodeLayout
+public sealed class CodeNavigationMapGraphNodeLayout
 {
     public required string Id { get; init; }
     public required string Kind { get; init; }
@@ -114,12 +114,12 @@ public sealed class SemanticMapGraphNodeLayout
     public required Point Center { get; init; }
     public required double Radius { get; init; }
     public required bool IsAnchor { get; init; }
-    public SemanticMapNodeShape Shape { get; init; } = SemanticMapNodeShape.Circle;
+    public CodeNavigationMapNodeShape Shape { get; init; } = CodeNavigationMapNodeShape.Circle;
     public int? LegendIndex { get; init; }
     public string? LegendLine { get; init; }
 }
 
-public sealed class SemanticMapGraphEdgeLayout
+public sealed class CodeNavigationMapGraphEdgeLayout
 {
     public required string FromNodeId { get; init; }
     public required string ToNodeId { get; init; }

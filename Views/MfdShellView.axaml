@@ -45,6 +45,9 @@
             <Border IsVisible="{Binding IsMfdShellSolutionExplorerPageActive}">
                     <views:SolutionExplorerView MinHeight="120"/>
             </Border>
+            <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=RelatedFiles}">
+                    <views:RelatedFilesMfdPageView MinHeight="120"/>
+            </Border>
             <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=MarkdownPreview}">
                     <views:MarkdownPreviewToolView DataContext="{Binding MarkdownPreviewTool}"/>
             </Border>

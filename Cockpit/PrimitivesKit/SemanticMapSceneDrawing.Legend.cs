@@ -8,12 +8,12 @@ namespace CascadeIDE.Cockpit.PrimitivesKit;
 
 public static partial class SemanticMapSceneDrawing
 {
-    private static void DrawLegend(DrawingContext context, SemanticMapGraphSceneVm scene, SemanticMapVisualTheme theme, double w, double h)
+    private static void DrawLegend(DrawingContext context, CodeNavigationMapGraphSceneVm scene, SemanticMapVisualTheme theme, double w, double h)
     {
         if (!scene.UseLegendColumn || h < 40)
             return;
 
-        var isBelow = scene.LegendPlacement == SemanticMapLegendBlockPlacement.BelowGraph;
+        var isBelow = scene.LegendPlacement == CodeNavigationMapLegendBlockPlacement.BelowGraph;
         if (isBelow)
         {
             if (scene.LegendBlockTopY <= 0 || scene.LegendBlockTopY >= h - 12)
@@ -125,7 +125,7 @@ public static partial class SemanticMapSceneDrawing
         }
     }
 
-    private static double MeasureIndexColumnWidth(SemanticMapVisualTheme theme, IReadOnlyList<SemanticMapLegendEntry> rows, double captionSize)
+    private static double MeasureIndexColumnWidth(SemanticMapVisualTheme theme, IReadOnlyList<CodeNavigationMapLegendEntry> rows, double captionSize)
     {
         var idxColW = 0d;
         foreach (var row in rows)
@@ -146,7 +146,7 @@ public static partial class SemanticMapSceneDrawing
 
     private static double FitLegendCaptionSize(
         SemanticMapVisualTheme theme,
-        IReadOnlyList<SemanticMapLegendEntry> rows,
+        IReadOnlyList<CodeNavigationMapLegendEntry> rows,
         double textMaxW,
         double captionSize,
         double viewportH)
@@ -273,7 +273,7 @@ public static partial class SemanticMapSceneDrawing
         double keyRowH,
         double captionSize,
         double viewportBottom,
-        IReadOnlyList<SemanticMapGraphEdgeLayout> edges)
+        IReadOnlyList<CodeNavigationMapGraphEdgeLayout> edges)
     {
         static bool KindContains(string? kind, string needle) =>
             !string.IsNullOrEmpty(kind) && kind.Contains(needle, StringComparison.OrdinalIgnoreCase);

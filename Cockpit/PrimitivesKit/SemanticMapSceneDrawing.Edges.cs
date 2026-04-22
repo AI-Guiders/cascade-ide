@@ -6,7 +6,7 @@ namespace CascadeIDE.Cockpit.PrimitivesKit;
 
 public static partial class SemanticMapSceneDrawing
 {
-    private static void DrawEdges(DrawingContext context, SemanticMapGraphSceneVm scene, SemanticMapVisualTheme theme)
+    private static void DrawEdges(DrawingContext context, CodeNavigationMapGraphSceneVm scene, SemanticMapVisualTheme theme)
     {
         var previousWasLoop = false;
         foreach (var edge in scene.Edges)
@@ -60,9 +60,9 @@ public static partial class SemanticMapSceneDrawing
 
     private static void DrawLoopEdge(
         DrawingContext context,
-        SemanticMapGraphSceneVm scene,
+        CodeNavigationMapGraphSceneVm scene,
         SemanticMapVisualTheme theme,
-        SemanticMapGraphEdgeLayout edge,
+        CodeNavigationMapGraphEdgeLayout edge,
         Pen linePen,
         Pen loopPen)
     {
@@ -87,7 +87,7 @@ public static partial class SemanticMapSceneDrawing
         context.DrawEllipse(null, loopPen, edge.To, loopRadius, loopRadius);
     }
 
-    private static double GetNodeRadius(SemanticMapGraphSceneVm scene, string nodeId, double fallback)
+    private static double GetNodeRadius(CodeNavigationMapGraphSceneVm scene, string nodeId, double fallback)
     {
         foreach (var n in scene.Nodes)
         {

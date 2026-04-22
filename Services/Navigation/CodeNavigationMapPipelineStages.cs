@@ -1,52 +1,53 @@
 #nullable enable
 using CascadeIDE.Cockpit.PrimitivesKit;
 using CascadeIDE.Models;
+using CascadeIDE.Services.CodeNavigation;
 using CascadeIDE.Services.SkiaInstruments;
 using CascadeIDE.ViewModels;
 
 namespace CascadeIDE.Services.Navigation;
 
 /// <summary>Контекст запроса на композицию Semantic Map.</summary>
-public readonly record struct SemanticMapPipelineContext(
-    SemanticMapSubgraphDocument Subgraph,
-    string SemanticMapLevel,
+public readonly record struct CodeNavigationMapPipelineContext(
+    CodeNavigationMapSubgraphDocument Subgraph,
+    string MapLevel,
     SkiaInstrumentViewport Viewport,
-    SemanticMapDetailLevel DetailLevel = SemanticMapDetailLevel.Normal);
+    CodeNavigationMapDetailLevel DetailLevel = CodeNavigationMapDetailLevel.Normal);
 
 /// <summary>Промежуточное состояние pipeline Semantic Map.</summary>
-public readonly record struct SemanticMapPipelineState(
-    SemanticMapSubgraphDocument Subgraph,
-    string SemanticMapLevel,
+public readonly record struct CodeNavigationMapPipelineState(
+    CodeNavigationMapSubgraphDocument Subgraph,
+    string MapLevel,
     SkiaInstrumentViewport Viewport,
-    SemanticMapDetailLevel DetailLevel,
+    CodeNavigationMapDetailLevel DetailLevel,
     int EstimatedLevelCount,
     int LoopEdgeCount,
     int MultiBranchEdgeCount,
     bool IsDense);
 
-public interface ISemanticMapIntentStage
+public interface ICodeNavigationMapIntentStage
 {
-    SemanticMapPipelineState Resolve(in SemanticMapPipelineContext context);
+    CodeNavigationMapPipelineState Resolve(in CodeNavigationMapPipelineContext context);
 }
 
-public interface ISemanticMapDeclutterStage
+public interface ICodeNavigationMapDeclutterStage
 {
-    SemanticMapPipelineState Apply(in SemanticMapPipelineState state);
+    CodeNavigationMapPipelineState Apply(in CodeNavigationMapPipelineState state);
 }
 
-public interface ISemanticMapLayoutStage
+public interface ICodeNavigationMapLayoutStage
 {
-    SemanticMapCompositionResult Layout(in SemanticMapPipelineState state);
+    CodeNavigationMapCompositionResult Layout(in CodeNavigationMapPipelineState state);
 }
 
 /// <summary>
 /// Intent stage v1: нормализация уровня и сбор базовых метрик графа для последующих стадий.
 /// </summary>
-public sealed class SemanticMapIntentStage : ISemanticMapIntentStage
+public sealed class CodeNavigationMapIntentStage : ICodeNavigationMapIntentStage
 {
-    public SemanticMapPipelineState Resolve(in SemanticMapPipelineContext context)
+    public CodeNavigationMapPipelineState Resolve(in CodeNavigationMapPipelineContext context)
     {
-        var level = Models.SemanticMapLevelKind.Normalize(context.SemanticMapLevel);
+        var level = Models.CodeNavigationMapLevelKind.Normalize(context.MapLevel);
         var doc = context.Subgraph;
         var loopEdgeCount = 0;
         var multiBranchEdgeCount = 0;
@@ -60,7 +61,7 @@ public sealed class SemanticMapIntentStage : ISemanticMapIntentStage
 
         var estimatedLevelCount = EstimateLevelCount(doc);
         var isDense = doc.Nodes.Count > 8 || estimatedLevelCount > 6;
-        return new SemanticMapPipelineState(
+        return new CodeNavigationMapPipelineState(
             doc,
             level,
             context.Viewport,
@@ -71,7 +72,7 @@ public sealed class SemanticMapIntentStage : ISemanticMapIntentStage
             isDense);
     }
 
-    private static int EstimateLevelCount(SemanticMapSubgraphDocument doc)
+    private static int EstimateLevelCount(CodeNavigationMapSubgraphDocument doc)
     {
         if (doc.Nodes.Count <= 1)
             return 1;
@@ -118,30 +119,30 @@ public sealed class SemanticMapIntentStage : ISemanticMapIntentStage
 /// <summary>
 /// Declutter: политика «что показывать» до геометрии (ADR 0055). Glance + control flow: убираем второстепенные multibranch-связи.
 /// </summary>
-public sealed class SemanticMapDeclutterStage(ISemanticMapIntentStage intentStage) : ISemanticMapDeclutterStage
+public sealed class CodeNavigationMapDeclutterStage(ICodeNavigationMapIntentStage intentStage) : ICodeNavigationMapDeclutterStage
 {
-    private readonly ISemanticMapIntentStage _intentStage = intentStage;
+    private readonly ICodeNavigationMapIntentStage _intentStage = intentStage;
 
-    public SemanticMapPipelineState Apply(in SemanticMapPipelineState state)
+    public CodeNavigationMapPipelineState Apply(in CodeNavigationMapPipelineState state)
     {
         var filtered = TryGlanceFilterControlFlow(state);
         if (filtered is null)
             return state;
 
-        var ctx = new SemanticMapPipelineContext(
+        var ctx = new CodeNavigationMapPipelineContext(
             filtered,
-            state.SemanticMapLevel,
+            state.MapLevel,
             state.Viewport,
             state.DetailLevel);
         return _intentStage.Resolve(ctx);
     }
 
     /// <summary>Glance: исключаем рёбра multibranch и недостижимые от anchor узлы; метрики пересчитываются через Intent.</summary>
-    private static SemanticMapSubgraphDocument? TryGlanceFilterControlFlow(in SemanticMapPipelineState state)
+    private static CodeNavigationMapSubgraphDocument? TryGlanceFilterControlFlow(in CodeNavigationMapPipelineState state)
     {
-        if (state.DetailLevel != SemanticMapDetailLevel.Glance)
+        if (state.DetailLevel != CodeNavigationMapDetailLevel.Glance)
             return null;
-        if (!string.Equals(state.SemanticMapLevel, SemanticMapLevelKind.ControlFlow, StringComparison.Ordinal))
+        if (!string.Equals(state.MapLevel, CodeNavigationMapLevelKind.ControlFlow, StringComparison.Ordinal))
             return null;
 
         var doc = state.Subgraph;
@@ -155,7 +156,7 @@ public sealed class SemanticMapDeclutterStage(ISemanticMapIntentStage intentStag
         var kept = new HashSet<string>(reachable, StringComparer.OrdinalIgnoreCase);
         var finalEdges = edgesWithoutMulti.Where(e => kept.Contains(e.FromId) && kept.Contains(e.ToId)).ToList();
 
-        return new SemanticMapSubgraphDocument
+        return new CodeNavigationMapSubgraphDocument
         {
             AnchorPath = doc.AnchorPath,
             GraphKind = doc.GraphKind,
@@ -164,11 +165,11 @@ public sealed class SemanticMapDeclutterStage(ISemanticMapIntentStage intentStag
         };
     }
 
-    private static bool IsMultibranchEdge(SemanticMapSubgraphEdge e) =>
+    private static bool IsMultibranchEdge(CodeNavigationMapSubgraphEdge e) =>
         !string.IsNullOrWhiteSpace(e.Kind)
         && e.Kind.Contains("multibranch", StringComparison.OrdinalIgnoreCase);
 
-    private static string FindAnchorNodeId(SemanticMapSubgraphDocument doc)
+    private static string FindAnchorNodeId(CodeNavigationMapSubgraphDocument doc)
     {
         var anchor = doc.Nodes.FirstOrDefault(n => string.Equals(n.Kind, "anchor", StringComparison.OrdinalIgnoreCase));
         if (anchor is not null)
@@ -179,7 +180,7 @@ public sealed class SemanticMapDeclutterStage(ISemanticMapIntentStage intentStag
         return doc.Nodes[0].Id;
     }
 
-    private static HashSet<string> ReachableForward(string anchorId, IReadOnlyList<SemanticMapSubgraphEdge> edges)
+    private static HashSet<string> ReachableForward(string anchorId, IReadOnlyList<CodeNavigationMapSubgraphEdge> edges)
     {
         var outgoing = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
         foreach (var e in edges)
@@ -214,42 +215,48 @@ public sealed class SemanticMapDeclutterStage(ISemanticMapIntentStage intentStag
 }
 
 /// <summary>Layout stage v1: выбирает движок и рассчитывает рекомендуемую высоту viewport.</summary>
-public sealed class SemanticMapLayoutStage(
-    ISemanticMapSubgraphLayoutEngine? fileLayout = null,
-    ISemanticMapSubgraphLayoutEngine? controlFlowLayout = null) : ISemanticMapLayoutStage
+public sealed class CodeNavigationMapLayoutStage(
+    ICodeNavigationMapSubgraphLayoutEngine? fileLayout = null,
+    ICodeNavigationMapSubgraphLayoutEngine? controlFlowLayout = null) : ICodeNavigationMapLayoutStage
 {
-    private readonly ISemanticMapSubgraphLayoutEngine _fileLayout = fileLayout ?? new SemanticMapStarGraphLayoutEngine();
-    private readonly ISemanticMapSubgraphLayoutEngine _controlFlowLayout = controlFlowLayout ?? new SemanticMapControlFlowGraphLayoutEngine();
+    private readonly ICodeNavigationMapSubgraphLayoutEngine _fileLayout = fileLayout ?? new CodeNavigationMapStarGraphLayoutEngine();
+    private readonly ICodeNavigationMapSubgraphLayoutEngine _controlFlowLayout = controlFlowLayout ?? new CodeNavigationMapControlFlowGraphLayoutEngine();
 
-    public SemanticMapCompositionResult Layout(in SemanticMapPipelineState state)
+    public CodeNavigationMapCompositionResult Layout(in CodeNavigationMapPipelineState state)
     {
         var viewport = state.Viewport;
-        var width = viewport.Width > 0 ? viewport.Width : SemanticMapCompositor.DefaultWidth;
-        var isControlFlow = string.Equals(state.SemanticMapLevel, Models.SemanticMapLevelKind.ControlFlow, StringComparison.Ordinal);
+        var width = viewport.Width > 0 ? viewport.Width : CodeNavigationMapCompositor.DefaultWidth;
+        var isControlFlow = string.Equals(state.MapLevel, Models.CodeNavigationMapLevelKind.ControlFlow, StringComparison.Ordinal);
 
         if (!isControlFlow)
         {
-            var preferredHeight = viewport.Height > 0 ? viewport.Height : SemanticMapCompositor.DefaultHeightFile;
+            var preferredHeight = viewport.Height > 0 ? viewport.Height : CodeNavigationMapCompositor.DefaultHeightFile;
             var scene = _fileLayout.Layout(state.Subgraph, width, preferredHeight);
-            scene = SemanticMapGraphSceneVm.WithPresentationKind(
+            scene = CodeNavigationMapGraphSceneVm.WithPresentationKind(
                 scene,
-                SemanticMapPresentationResolver.Resolve(state.Subgraph, state.SemanticMapLevel));
-            return new SemanticMapCompositionResult(scene, preferredHeight);
+                CodeNavigationMapPresentationResolver.Resolve(state.Subgraph, state.MapLevel));
+            return new CodeNavigationMapCompositionResult(
+                scene,
+                preferredHeight,
+                Array.Empty<CodeNavigationMapInstrumentBlockDescriptor>());
         }
 
-        var computedHeight = SemanticMapGraphPrimitives.EstimateControlFlowPreferredHeight(
+        var computedHeight = CodeNavigationMapGraphPrimitives.EstimateControlFlowPreferredHeight(
             state.EstimatedLevelCount,
             state.DetailLevel);
         // Высота панели от «читаемого» интринсика, не от растягивания под весь слот — иначе рёбра и шаг становятся нечитаемыми.
         var preferredCfHeight = Math.Clamp(
             computedHeight,
-            SemanticMapGraphPrimitives.DefaultViewportHeightControlFlow,
-            SemanticMapGraphPrimitives.MaxViewportHeightControlFlow);
+            CodeNavigationMapGraphPrimitives.DefaultViewportHeightControlFlow,
+            CodeNavigationMapGraphPrimitives.MaxViewportHeightControlFlow);
 
         var cfScene = _controlFlowLayout.Layout(state.Subgraph, width, preferredCfHeight);
-        var presented = SemanticMapGraphSceneVm.WithPresentationKind(
+        var presented = CodeNavigationMapGraphSceneVm.WithPresentationKind(
             cfScene,
-            SemanticMapPresentationResolver.Resolve(state.Subgraph, state.SemanticMapLevel));
-        return new SemanticMapCompositionResult(presented, preferredCfHeight);
+            CodeNavigationMapPresentationResolver.Resolve(state.Subgraph, state.MapLevel));
+        return new CodeNavigationMapCompositionResult(
+            presented,
+            preferredCfHeight,
+            Array.Empty<CodeNavigationMapInstrumentBlockDescriptor>());
     }
 }

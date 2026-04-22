@@ -9,7 +9,7 @@ public sealed class UnitTestTraceChannelTests
     [Fact]
     public void Build_WhenImpactedTestsPresent_HighlightsExitFlow()
     {
-        var doc = new SemanticMapSubgraphDocument
+        var doc = new CodeNavigationMapSubgraphDocument
         {
             AnchorPath = @"D:\w\A.cs",
             Nodes =
@@ -37,7 +37,7 @@ public sealed class UnitTestTraceChannelTests
     [Fact]
     public void Build_WhenNoImpactedTests_DoesNotHighlight()
     {
-        var doc = new SemanticMapSubgraphDocument
+        var doc = new CodeNavigationMapSubgraphDocument
         {
             AnchorPath = @"D:\w\A.cs",
             Nodes = [Node("n0", "anchor"), Node("n1", "exit_step")],
@@ -51,7 +51,7 @@ public sealed class UnitTestTraceChannelTests
         Assert.Empty(snapshot.HighlightedEdgeKeys);
     }
 
-    private static SemanticMapSubgraphNode Node(string id, string kind) => new()
+    private static CodeNavigationMapSubgraphNode Node(string id, string kind) => new()
     {
         Id = id,
         Path = @"D:\w\A.cs",
@@ -59,7 +59,7 @@ public sealed class UnitTestTraceChannelTests
         Label = id
     };
 
-    private static SemanticMapSubgraphEdge Edge(string from, string to, string kind) => new()
+    private static CodeNavigationMapSubgraphEdge Edge(string from, string to, string kind) => new()
     {
         FromId = from,
         ToId = to,

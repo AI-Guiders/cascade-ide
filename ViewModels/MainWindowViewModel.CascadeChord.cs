@@ -117,8 +117,8 @@ public partial class MainWindowViewModel
             : "Command: в покое. Ctrl+K — режим armed (CascadeChord).";
 
     /// <summary>Сводка настроек Semantic Map (без ComboBox; смена через палитру или MCP).</summary>
-    public string SemanticMapSettingsSummaryLine =>
-        $"Вид: {SemanticMapPresentation} · уровень: {SemanticMapLevel} · детализация: {_settings.SemanticMap.DetailLevel.Trim()} · палитра / MCP";
+    public string CodeNavigationMapSettingsSummaryLine =>
+        $"Вид: {CodeNavigationMapPresentation} · уровень: {CodeNavigationMapLevel} · детализация: {_settings.CodeNavigationMap.DetailLevel.Trim()} · палитра / MCP";
 
     private string BuildCascadeChordOverlayHint()
     {
@@ -445,49 +445,49 @@ public partial class MainWindowViewModel
     }
 
     /// <summary>Команда палитры / MCP: list → graph → both.</summary>
-    public void CycleSemanticMapPresentation()
+    public void CycleCodeNavigationMapPresentation()
     {
         var order = new[]
         {
-            SemanticMapPresentationKind.List,
-            SemanticMapPresentationKind.Graph,
-            SemanticMapPresentationKind.Both
+            CodeNavigationMapPresentationKind.List,
+            CodeNavigationMapPresentationKind.Graph,
+            CodeNavigationMapPresentationKind.Both
         };
-        var cur = SemanticMapPresentationKind.Normalize(SemanticMapPresentation);
+        var cur = CodeNavigationMapPresentationKind.Normalize(CodeNavigationMapPresentation);
         var i = Array.IndexOf(order, cur);
         if (i < 0)
             i = 0;
-        SemanticMapPresentation = order[(i + 1) % order.Length];
+        CodeNavigationMapPresentation = order[(i + 1) % order.Length];
     }
 
     /// <summary>Команда палитры / MCP: file ↔ controlFlow.</summary>
-    public void CycleSemanticMapLevel()
+    public void CycleCodeNavigationMapLevel()
     {
-        SemanticMapLevel = string.Equals(SemanticMapLevel, SemanticMapLevelKind.File, StringComparison.OrdinalIgnoreCase)
-            ? SemanticMapLevelKind.ControlFlow
-            : SemanticMapLevelKind.File;
+        CodeNavigationMapLevel = string.Equals(CodeNavigationMapLevel, CodeNavigationMapLevelKind.File, StringComparison.OrdinalIgnoreCase)
+            ? CodeNavigationMapLevelKind.ControlFlow
+            : CodeNavigationMapLevelKind.File;
     }
 
     /// <summary>Команда палитры / MCP: glance → normal → inspect.</summary>
-    public void CycleSemanticMapDetailLevel()
+    public void CycleCodeNavigationMapDetailLevel()
     {
-        var cur = _settings.SemanticMap.NormalizedDetailLevel;
+        var cur = _settings.CodeNavigationMap.NormalizedDetailLevel;
         var next = cur switch
         {
-            SemanticMapDetailLevel.Glance => SemanticMapDetailLevel.Normal,
-            SemanticMapDetailLevel.Normal => SemanticMapDetailLevel.Inspect,
-            SemanticMapDetailLevel.Inspect => SemanticMapDetailLevel.Glance,
-            _ => SemanticMapDetailLevel.Normal
+            CodeNavigationMapDetailLevel.Glance => CodeNavigationMapDetailLevel.Normal,
+            CodeNavigationMapDetailLevel.Normal => CodeNavigationMapDetailLevel.Inspect,
+            CodeNavigationMapDetailLevel.Inspect => CodeNavigationMapDetailLevel.Glance,
+            _ => CodeNavigationMapDetailLevel.Normal
         };
-        _settings.SemanticMap.DetailLevel = next switch
+        _settings.CodeNavigationMap.DetailLevel = next switch
         {
-            SemanticMapDetailLevel.Glance => "glance",
-            SemanticMapDetailLevel.Normal => "normal",
-            SemanticMapDetailLevel.Inspect => "inspect",
+            CodeNavigationMapDetailLevel.Glance => "glance",
+            CodeNavigationMapDetailLevel.Normal => "normal",
+            CodeNavigationMapDetailLevel.Inspect => "inspect",
             _ => "normal"
         };
         SaveSettingsIfChanged();
         ScheduleWorkspaceNavigationMapRefresh();
-        OnPropertyChanged(nameof(SemanticMapSettingsSummaryLine));
+        OnPropertyChanged(nameof(CodeNavigationMapSettingsSummaryLine));
     }
 }

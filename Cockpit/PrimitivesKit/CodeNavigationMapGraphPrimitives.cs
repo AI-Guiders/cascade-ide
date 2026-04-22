@@ -5,7 +5,7 @@ namespace CascadeIDE.Cockpit.PrimitivesKit;
 /// <summary>
 /// Единые токены геометрии и viewport для Semantic Map (ADR 0055, 0056): пайплайн композиции и раскладка control-flow.
 /// </summary>
-public static class SemanticMapGraphPrimitives
+public static class CodeNavigationMapGraphPrimitives
 {
     #region Viewport / слот инструмента
 
@@ -21,16 +21,16 @@ public static class SemanticMapGraphPrimitives
 
     public const double ControlFlowIntrinsicHeightBasePx = 28;
 
-    public static double VerticalSpacingForDetailLevel(SemanticMapDetailLevel detailLevel) =>
+    public static double VerticalSpacingForDetailLevel(CodeNavigationMapDetailLevel detailLevel) =>
         detailLevel switch
         {
-            SemanticMapDetailLevel.Glance => 26,
-            SemanticMapDetailLevel.Inspect => 36,
+            CodeNavigationMapDetailLevel.Glance => 26,
+            CodeNavigationMapDetailLevel.Inspect => 36,
             _ => 32,
         };
 
     /// <summary>Оценка предпочтительной высоты панели по числу уровней и детализации (до clamp к <see cref="MaxViewportHeightControlFlow"/>).</summary>
-    public static double EstimateControlFlowPreferredHeight(int estimatedLevelCount, SemanticMapDetailLevel detailLevel)
+    public static double EstimateControlFlowPreferredHeight(int estimatedLevelCount, CodeNavigationMapDetailLevel detailLevel)
     {
         var spacing = VerticalSpacingForDetailLevel(detailLevel);
         var levelBands = Math.Max(1, estimatedLevelCount);

@@ -52,7 +52,7 @@ public static partial class SemanticMapSceneDrawing
 
     public static void DrawScene(
         DrawingContext context,
-        SemanticMapGraphSceneVm scene,
+        CodeNavigationMapGraphSceneVm scene,
         SemanticMapVisualTheme theme,
         double width,
         double height)
@@ -66,9 +66,9 @@ public static partial class SemanticMapSceneDrawing
     }
 
     /// <summary>Hit-test узла для pointer routing (узел условия — ромб, манхэттенское расстояние до ромба).</summary>
-    public static bool HitTestNode(SemanticMapGraphNodeLayout n, Point p, double tolerance = 6)
+    public static bool HitTestNode(CodeNavigationMapGraphNodeLayout n, Point p, double tolerance = 6)
     {
-        if (n.Shape == SemanticMapNodeShape.Condition)
+        if (n.Shape == CodeNavigationMapNodeShape.Condition)
             return HitConditionBranchOutline(n.Center, n.Radius, p, tolerance);
         var dx = p.X - n.Center.X;
         var dy = p.Y - n.Center.Y;

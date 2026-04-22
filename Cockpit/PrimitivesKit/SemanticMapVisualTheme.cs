@@ -79,8 +79,8 @@ public sealed class SemanticMapVisualTheme
         CockpitPrimitivesPalette.SemanticMapWorkspace.HighlightedNode,
         CockpitPrimitivesPalette.SemanticMapWorkspace.NodeStroke);
 
-    public static SemanticMapVisualTheme ForPresentation(SemanticMapGraphPresentationKind presentation) =>
-        presentation == SemanticMapGraphPresentationKind.WorkspaceRelatedFiles
+    public static SemanticMapVisualTheme ForPresentation(CodeNavigationMapGraphPresentationKind presentation) =>
+        presentation == CodeNavigationMapGraphPresentationKind.WorkspaceRelatedFiles
             ? WorkspaceRelated
             : Default;
 

@@ -10,25 +10,25 @@ namespace CascadeIDE.Views;
 
 /// <summary>Мини-карта Semantic Map: рёбра и узлы (звезда); клик по узлу открывает файл; подписи строк — в списке (режим list/both) (ADR 0039).</summary>
 /// <remarks>
-/// Порядок отрисовки базовой сцены (ADR 0055 §4): рёбра → узлы (фигуры и глифы) → легенда. Подсветки TraceFlow приходят в <see cref="SemanticMapGraphSceneVm"/> и рисуются вместе с рёбрами/узлами по флагам highlight.
+/// Порядок отрисовки базовой сцены (ADR 0055 §4): рёбра → узлы (фигуры и глифы) → легенда. Подсветки TraceFlow приходят в <see cref="CodeNavigationMapGraphSceneVm"/> и рисуются вместе с рёбрами/узлами по флагам highlight.
 /// Отрисовка — <see cref="SemanticMapSceneDrawing"/> (ADR 0064).
 /// </remarks>
-public sealed class SemanticMapMiniMapControl : Control
+public sealed class CodeNavigationMapMiniMapControl : Control
 {
-    public static readonly StyledProperty<SemanticMapGraphSceneVm?> SceneProperty =
-        AvaloniaProperty.Register<SemanticMapMiniMapControl, SemanticMapGraphSceneVm?>(nameof(Scene));
+    public static readonly StyledProperty<CodeNavigationMapGraphSceneVm?> SceneProperty =
+        AvaloniaProperty.Register<CodeNavigationMapMiniMapControl, CodeNavigationMapGraphSceneVm?>(nameof(Scene));
 
     public static readonly StyledProperty<ICommand?> OpenFileCommandProperty =
-        AvaloniaProperty.Register<SemanticMapMiniMapControl, ICommand?>(nameof(OpenFileCommand));
+        AvaloniaProperty.Register<CodeNavigationMapMiniMapControl, ICommand?>(nameof(OpenFileCommand));
 
-    static SemanticMapMiniMapControl()
+    static CodeNavigationMapMiniMapControl()
     {
-        AffectsRender<SemanticMapMiniMapControl>(SceneProperty);
-        HeightProperty.OverrideDefaultValue<SemanticMapMiniMapControl>(SemanticMapGraphPrimitives.DefaultViewportHeightFile);
-        MinWidthProperty.OverrideDefaultValue<SemanticMapMiniMapControl>(200);
+        AffectsRender<CodeNavigationMapMiniMapControl>(SceneProperty);
+        HeightProperty.OverrideDefaultValue<CodeNavigationMapMiniMapControl>(CodeNavigationMapGraphPrimitives.DefaultViewportHeightFile);
+        MinWidthProperty.OverrideDefaultValue<CodeNavigationMapMiniMapControl>(200);
     }
 
-    public SemanticMapGraphSceneVm? Scene
+    public CodeNavigationMapGraphSceneVm? Scene
     {
         get => GetValue(SceneProperty);
         set => SetValue(SceneProperty, value);

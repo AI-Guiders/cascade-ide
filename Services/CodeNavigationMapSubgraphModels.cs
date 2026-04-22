@@ -3,19 +3,24 @@
 namespace CascadeIDE.Services;
 
 /// <summary>Канонические строки <c>graph_kind</c> в JSON subgraph (ADR 0065 §6).</summary>
-public static class SemanticMapGraphKindWire
+public static class CodeNavigationMapGraphKindWire
 {
-    public const string CodeIntentSemanticMap = "code_intent_semantic_map";
+    /// <summary>Каноническое <c>graph_kind</c> для карты намерений кода (control flow); домен CodeNavigation.</summary>
+    public const string CodeIntent = "code_intent_code_navigation_map";
+
+    /// <summary>Устаревшее имя; <see cref="CodeNavigationMapSubgraphJson"/> принимает для совместимости.</summary>
+    public const string CodeIntentLegacy = "code_intent_semantic_map";
+
     public const string RelatedFiles = "related_files";
     public const string RepositoryModuleTree = "repository_module_tree";
 }
 
-/// <summary>Тип графа в wire-модели; дублирует <see cref="SemanticMapGraphKindWire"/>.</summary>
-public enum SemanticMapGraphKind : byte
+/// <summary>Тип графа в wire-модели; дублирует <see cref="CodeNavigationMapGraphKindWire"/>.</summary>
+public enum CodeNavigationMapGraphKind : byte
 {
-    /// <summary>Не указано в JSON — клиент выводит по уровню карты (см. <see cref="Navigation.SemanticMapPresentationResolver"/>).</summary>
+    /// <summary>Не указано в JSON — клиент выводит по уровню карты (см. <see cref="Navigation.CodeNavigationMapPresentationResolver"/>).</summary>
     Unspecified = 0,
-    CodeIntentSemanticMap = 1,
+    CodeIntent = 1,
     RelatedFiles = 2,
     RepositoryModuleTree = 3
 }
@@ -30,18 +35,18 @@ public enum SemanticMapGraphKind : byte
 /// </list>
 /// Префикс <c>SemanticMap*</c> указывает на эту <b>карту и пайплайн композиции сцены</b>, а не на домен; сценарий задаёт <see cref="Kind"/> и источник данных.
 /// </summary>
-public sealed class SemanticMapSubgraphDocument
+public sealed class CodeNavigationMapSubgraphDocument
 {
     public required string AnchorPath { get; init; }
 
-    /// <summary>Тип графа в payload (<c>graph_kind</c>); при <see cref="SemanticMapGraphKind.Unspecified"/> презентация выводится по уровню карты.</summary>
-    public SemanticMapGraphKind GraphKind { get; init; } = SemanticMapGraphKind.Unspecified;
+    /// <summary>Тип графа в payload (<c>graph_kind</c>); при <see cref="CodeNavigationMapGraphKind.Unspecified"/> презентация выводится по уровню карты.</summary>
+    public CodeNavigationMapGraphKind GraphKind { get; init; } = CodeNavigationMapGraphKind.Unspecified;
 
-    public required IReadOnlyList<SemanticMapSubgraphNode> Nodes { get; init; }
-    public required IReadOnlyList<SemanticMapSubgraphEdge> Edges { get; init; }
+    public required IReadOnlyList<CodeNavigationMapSubgraphNode> Nodes { get; init; }
+    public required IReadOnlyList<CodeNavigationMapSubgraphEdge> Edges { get; init; }
 }
 
-public sealed class SemanticMapSubgraphNode
+public sealed class CodeNavigationMapSubgraphNode
 {
     public required string Id { get; init; }
     public required string Path { get; init; }
@@ -55,7 +60,7 @@ public sealed class SemanticMapSubgraphNode
     public string? LegendText { get; init; }
 }
 
-public sealed class SemanticMapSubgraphEdge
+public sealed class CodeNavigationMapSubgraphEdge
 {
     public required string FromId { get; init; }
     public required string ToId { get; init; }
