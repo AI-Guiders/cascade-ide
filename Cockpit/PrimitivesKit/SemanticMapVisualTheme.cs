@@ -13,6 +13,7 @@ public sealed class SemanticMapVisualTheme
         Color conditionFill,
         Color exitFill,
         Color callFill,
+        Color handlerFill,
         Color sideLabel,
         Color baseEdge,
         Color conditionalEdge,
@@ -27,6 +28,7 @@ public sealed class SemanticMapVisualTheme
         ConditionFill = new SolidColorBrush(conditionFill);
         ExitFill = new SolidColorBrush(exitFill);
         CallFill = new SolidColorBrush(callFill);
+        HandlerFill = new SolidColorBrush(handlerFill);
         SideLabelBrush = new SolidColorBrush(sideLabel);
         BaseEdgePen = new(new SolidColorBrush(baseEdge), 1);
         ConditionalEdgePen = new(new SolidColorBrush(conditionalEdge), 1.2)
@@ -50,6 +52,7 @@ public sealed class SemanticMapVisualTheme
         CockpitPrimitivesPalette.SemanticMap.ConditionFill,
         CockpitPrimitivesPalette.SemanticMap.ExitFill,
         CockpitPrimitivesPalette.SemanticMap.CallFill,
+        CockpitPrimitivesPalette.SemanticMap.HandlerFill,
         CockpitPrimitivesPalette.SemanticMap.SideLabel,
         CockpitPrimitivesPalette.SemanticMap.BaseEdge,
         CockpitPrimitivesPalette.SemanticMap.ConditionalEdge,
@@ -65,6 +68,7 @@ public sealed class SemanticMapVisualTheme
         CockpitPrimitivesPalette.SemanticMapWorkspace.ConditionFill,
         CockpitPrimitivesPalette.SemanticMapWorkspace.ExitFill,
         CockpitPrimitivesPalette.SemanticMapWorkspace.PeerFill,
+        CockpitPrimitivesPalette.SemanticMapWorkspace.HandlerFill,
         CockpitPrimitivesPalette.SemanticMapWorkspace.SideLabel,
         CockpitPrimitivesPalette.SemanticMapWorkspace.BaseEdge,
         CockpitPrimitivesPalette.SemanticMapWorkspace.ConditionalEdge,
@@ -84,6 +88,7 @@ public sealed class SemanticMapVisualTheme
     public IBrush ConditionFill { get; }
     public IBrush ExitFill { get; }
     public IBrush CallFill { get; }
+    public IBrush HandlerFill { get; }
     public IBrush GlyphBrush { get; } = Brushes.White;
     public IBrush SideLabelBrush { get; }
     public Pen BaseEdgePen { get; }

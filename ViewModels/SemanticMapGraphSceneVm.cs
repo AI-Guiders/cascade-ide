@@ -13,6 +13,16 @@ public enum SemanticMapGraphPresentationKind
     WorkspaceRelatedFiles = 1
 }
 
+/// <summary>Как смонтирован блок легенды (номера шагов / ключи фигур) относительно графа control-flow — на уровне блока, а не пиксельной «подтяжки».</summary>
+public enum SemanticMapLegendBlockPlacement
+{
+    /// <summary>Колонка справа от графа, текст — в оставшейся ширине (классический split).</summary>
+    BesideGraph = 0,
+
+    /// <summary>Блок под графом, с выравниванием слева на всю ширину вьюпорта.</summary>
+    BelowGraph = 1
+}
+
 /// <summary>Сцена мини-карты Semantic Map (узлы с центром в логических пикселях контрола).</summary>
 public sealed class SemanticMapGraphSceneVm
 {
@@ -28,8 +38,19 @@ public sealed class SemanticMapGraphSceneVm
     public bool ShowLegendConditionKey { get; init; }
     /// <summary>Показать в легенде расшифровку: круг со стрелкой — return.</summary>
     public bool ShowLegendReturnKey { get; init; }
-    /// <summary>Левая граница колонки легенды (X); если легенды нет — равна ширине области (не рисуем).</summary>
+    /// <summary>Показать в легенде расшифровку: обработчик исключений (catch) / ребро ExceptionFlow.</summary>
+    public bool ShowLegendExceptionFlowKey { get; init; }
+    /// <summary>Левая граница колонки легенды (X); если легенды нет — равна ширине области (не рисуем). При <see cref="LegendPlacement"/> = <see cref="SemanticMapLegendBlockPlacement.BelowGraph"/> — левый отступ текста (как у графа).</summary>
     public double LegendColumnLeft { get; init; } = double.PositiveInfinity;
+
+    /// <summary>Кладка легенды: рядом с графом или снизу (control-flow; для звёзд не используется).</summary>
+    public SemanticMapLegendBlockPlacement LegendPlacement { get; init; } = SemanticMapLegendBlockPlacement.BesideGraph;
+
+    /// <summary>
+    /// Y начала блока легенды при <see cref="LegendPlacement"/> = <see cref="SemanticMapLegendBlockPlacement.BelowGraph"/>;
+    /// иначе не используется.
+    /// </summary>
+    public double LegendBlockTopY { get; init; }
     public IReadOnlySet<string> HighlightedNodeIds { get; init; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
     public IReadOnlySet<string> HighlightedEdgeKeys { get; init; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -54,7 +75,10 @@ public sealed class SemanticMapGraphSceneVm
             UseLegendColumn = scene.UseLegendColumn,
             ShowLegendConditionKey = scene.ShowLegendConditionKey,
             ShowLegendReturnKey = scene.ShowLegendReturnKey,
+            ShowLegendExceptionFlowKey = scene.ShowLegendExceptionFlowKey,
             LegendColumnLeft = scene.LegendColumnLeft,
+            LegendPlacement = scene.LegendPlacement,
+            LegendBlockTopY = scene.LegendBlockTopY,
             HighlightedNodeIds = scene.HighlightedNodeIds,
             HighlightedEdgeKeys = scene.HighlightedEdgeKeys,
             SideLabelFontSizePx = scene.SideLabelFontSizePx

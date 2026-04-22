@@ -25,6 +25,8 @@
             <SolidColorBrush x:Key="CascadeTheme.ToolbarErrorForeground">#C00</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.EditorBackground">#FFF</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.EditorForeground">#1A1A1A</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.EditorSelectionBrush" Color="#55225679"/>
+            <SolidColorBrush x:Key="CascadeTheme.EditorSelectionForeground">#1A1A1A</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.EditorColumnBorderBrush">#CCC</SolidColorBrush>
             <!-- Рамки колонок (решение / редактор / чат), вертикальные сплиттеры, шов с нижней панелью -->
             <SolidColorBrush x:Key="CascadeTheme.WorkspacePanelBorderBrush">#CCC</SolidColorBrush>
@@ -34,10 +36,10 @@
             <SolidColorBrush x:Key="CascadeTheme.MarkdownPreviewPanelBorderBrush">#E0E0E0</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.SolutionExplorerBorderBrush">#CCC</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.SolutionExplorerHeaderForeground">#1A1A1A</SolidColorBrush>
-            <SolidColorBrush x:Key="CascadeTheme.PanelChromeTitleForeground">#1A1A1A</SolidColorBrush>
-            <SolidColorBrush x:Key="CascadeTheme.PanelTitleAccentBrush">#5B4FC9</SolidColorBrush>
-            <SolidColorBrush x:Key="CascadeTheme.PanelChromeHeaderBackground">#E8E8EC</SolidColorBrush>
-            <SolidColorBrush x:Key="CascadeTheme.PanelChromeHeaderSeparatorBrush">#C8C8D0</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.PanelChromeTitleForeground">#1E2433</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.PanelTitleAccentBrush">#4B6BFB</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.PanelChromeHeaderBackground">#E4E9F2</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.PanelChromeHeaderSeparatorBrush">#B8C4D8</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.PanelChromeMenuGlyphForeground">#666</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.BuildOutputBackground">#F8F8F8</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.BuildOutputBorderBrush">#CCC</SolidColorBrush>
@@ -128,9 +130,9 @@
             <Setter Property="Background" Value="{DynamicResource CascadeTheme.PanelChromeHeaderBackground}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.PanelChromeHeaderSeparatorBrush}"/>
             <Setter Property="BorderThickness" Value="0,0,0,1"/>
-            <Setter Property="Padding" Value="12,10,10,10"/>
+            <Setter Property="Padding" Value="12,8,10,8"/>
             <Setter Property="CornerRadius" Value="4"/>
-            <Setter Property="Margin" Value="0,0,0,8"/>
+            <Setter Property="Margin" Value="0,0,0,6"/>
         </Style>
         <Style Selector="Border.panelTitleAccent">
             <Setter Property="Width" Value="4"/>
@@ -142,9 +144,9 @@
             <Setter Property="Background" Value="{DynamicResource CascadeTheme.PanelTitleAccentBrush}"/>
         </Style>
         <Style Selector="TextBlock.panelChromeTitle">
-            <Setter Property="FontSize" Value="12"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="LetterSpacing" Value="1.05"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="LetterSpacing" Value="0.85"/>
             <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.PanelChromeTitleForeground}"/>
         </Style>
         <Style Selector="TextBlock.panelChromeTitleCaps">
@@ -180,7 +182,7 @@
             <Setter Property="Background" Value="#28FFFFFF"/>
         </Style>
         <Style Selector="TextBlock.panelDocumentPathTitle">
-            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontSize" Value="11"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="LetterSpacing" Value="0.2"/>
             <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.PanelChromeTitleForeground}"/>

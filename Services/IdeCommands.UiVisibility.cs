@@ -9,6 +9,8 @@ public static partial class IdeCommands
     public const string CaptureWindow = "capture_window";
     /// <summary>Как меню «Вид → Терминал» (переключатель). returns: text.</summary>
     public const string ToggleTerminal = "toggle_terminal";
+    /// <summary>Сплиттеры рабочей области: переключить ON GND / IN AIR (мелодия tol, лампа TOL в task cockpit). returns: text.</summary>
+    public const string ToggleWorkspaceSplittersLock = "toggle_workspace_splitters_lock";
     /// <summary>Как меню «Вид → Вывод сборки». returns: text.</summary>
     public const string ToggleBuildOutput = "toggle_build_output";
     /// <summary>Переключить развёрнут/свёрнут регион Pfd (как меню «Вид → Semantic Map (PFD)»). returns: text.</summary>

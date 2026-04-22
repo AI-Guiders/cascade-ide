@@ -33,6 +33,7 @@ public partial class DockDocumentView : UserControl
     private Point _lastPointerInTextView;
     private string? _lastTipText;
     private int _tooltipSeq;
+    private bool _editorThemeSubscribed;
 
     public DockDocumentView()
     {
@@ -81,6 +82,14 @@ public partial class DockDocumentView : UserControl
         _editor = this.FindControl<TextEditor>("Editor");
         if (_editor is null)
             return;
+
+        if (!_editorThemeSubscribed)
+        {
+            UiThemeApply.ThemeApplied += OnThemeAppliedRefreshEditorSelection;
+            _editorThemeSubscribed = true;
+        }
+
+        EditorSelectionChrome.Apply(_editor);
 
         // Иначе тултип якорится к огромному TextEditor и «прыгает» в углу; Pointer — у курсора (как в IDE).
         ToolTip.SetPlacement(_editor, PlacementMode.Pointer);
@@ -151,6 +160,12 @@ public partial class DockDocumentView : UserControl
 
     private void Teardown()
     {
+        if (_editorThemeSubscribed)
+        {
+            UiThemeApply.ThemeApplied -= OnThemeAppliedRefreshEditorSelection;
+            _editorThemeSubscribed = false;
+        }
+
         _diagTipDebounce?.Stop();
         _diagTipDebounce = null;
 
@@ -411,6 +426,12 @@ public partial class DockDocumentView : UserControl
         _vm.SetApplyEdit((path, sl, sc, el, ec, newText) =>
             EditorHelpers.ApplyEditInEditor(_editor, _vm, path, sl, sc, el, ec, newText));
         _vm.SetFocusEditor(() => _editor.Focus());
+    }
+
+    private void OnThemeAppliedRefreshEditorSelection(object? sender, EventArgs e)
+    {
+        if (_editor is not null)
+            EditorSelectionChrome.Apply(_editor);
     }
 }
 

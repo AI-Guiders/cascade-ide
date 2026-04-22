@@ -1,3 +1,4 @@
+using Avalonia.Threading;
 using Microsoft.CodeAnalysis;
 
 namespace CascadeIDE.ViewModels;
@@ -27,6 +28,31 @@ public partial class MainWindowViewModel
 
     private void OnWorkspaceDiagnosticsChangedForHud() => RefreshEditorHudBanner();
 
+    private IDisposable? _editorHudBannerDebounce;
+
+    private void StopEditorHudBannerDebounce()
+    {
+        _editorHudBannerDebounce?.Dispose();
+        _editorHudBannerDebounce = null;
+    }
+
+    /// <summary>
+    /// Как при перетаскивании выделения <see cref="Cursor"/> двигается плотным потоком событий;
+    /// <see cref="RefreshEditorHudBanner"/> (Roslyn + вхождения) на каждом — джанк вёрстки. Откладываем
+    /// до «тишины» ~100ms после последнего сдвига.
+    /// </summary>
+    /// <remarks>
+    /// Долгоживущий <see cref="DispatcherTimer"/> в VM рядом со стартом приложения иногда приводил к падению
+    /// (создание таймера до готовности dispatcher / неверный поток). <see cref="DispatcherTimer.RunOnce"/> тот же API, что в <see cref="UiAgentHighlight"/>.
+    /// </remarks>
+    private void ScheduleEditorHudBannerRefresh()
+    {
+        StopEditorHudBannerDebounce();
+        _editorHudBannerDebounce = DispatcherTimer.RunOnce(
+            () => RefreshEditorHudBanner(),
+            TimeSpan.FromMilliseconds(100));
+    }
+
     /// <summary>
     /// Сводка для активного <c>.cs</c>: диагностики из <see cref="WorkspaceDiagnostics"/>
     /// (Roslyn по открытому файлу + внешний C# LSP, например OmniSharp, когда подключён) и
@@ -34,6 +60,8 @@ public partial class MainWindowViewModel
     /// </summary>
     private void RefreshEditorHudBanner()
     {
+        StopEditorHudBannerDebounce();
+
         var path = CurrentFilePath;
         if (string.IsNullOrEmpty(path) || !path.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
         {

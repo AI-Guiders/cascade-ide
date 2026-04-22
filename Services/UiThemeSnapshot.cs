@@ -81,6 +81,8 @@ public static class UiThemeSnapshot
             {
                 background = H(res, UiThemeApply.Keys.EditorBackground),
                 foreground = H(res, UiThemeApply.Keys.EditorForeground),
+                selection_brush = H(res, UiThemeApply.Keys.EditorSelectionBrush),
+                selection_foreground = H(res, UiThemeApply.Keys.EditorSelectionForeground),
                 font_family = "Consolas, Cascadia Code, monospace",
                 font_size = 13
             },
@@ -216,6 +218,8 @@ public static class UiThemeSnapshot
             {
                 background = "#FFF",
                 foreground = "#1A1A1A",
+                selection_brush = "#55225679",
+                selection_foreground = "#1A1A1A",
                 font_family = "Consolas, Cascadia Code, monospace",
                 font_size = 13
             },

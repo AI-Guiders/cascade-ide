@@ -1,8 +1,7 @@
-using System.Linq;
+using System.Text;
 using Avalonia.Input;
 using Avalonia.Threading;
 using CascadeIDE.Models;
-using CascadeIDE.Services;
 using CommunityToolkit.Mvvm.Input;
 
 namespace CascadeIDE.ViewModels;
@@ -28,6 +27,11 @@ public partial class MainWindowViewModel
     private string _cascadeChordMelodyTail = "";
     private DateTimeOffset _cascadeChordDeadline = DateTimeOffset.MinValue;
     private DispatcherTimer? _cascadeChordTimer;
+    /// <summary>Фокус в полоске HUD над редактором: туннель не перехватывает буквы — ввод идёт в <see cref="CascadeChordHudMelodyText"/>.</summary>
+    private bool _cascadeChordHudTextHasFocus;
+
+    /// <summary>Пользователь закрыл выпадающий список (light dismiss) — не открывать снова, пока хвост не изменится или не вернётся фокус.</summary>
+    private bool _cascadeChordDropdownUserDismissed;
 
     /// <summary>Показать оверлей с подсказками (ADR 0060 §6) пока активна машина аккорда.</summary>
     public bool IsCascadeChordOverlayVisible => _cascadeChordPhase != CascadeChordPhase.Idle;
@@ -35,17 +39,66 @@ public partial class MainWindowViewModel
     /// <summary>Текст подсказки для текущего шага машины аккорда.</summary>
     public string CascadeChordOverlayHintText => BuildCascadeChordOverlayHint();
 
-    /// <summary>До двух команд, подходящих под текущий префикс мелодии (компактная полоса сверху).</summary>
+    /// <summary>Команды, подходящие под префикс (выпадающий список, до 25).</summary>
     public IReadOnlyList<CascadeChordOverlaySuggestion> CascadeChordOverlaySuggestions =>
-        BuildCascadeChordSuggestionRows(_cascadeChordPhase, _cascadeChordMelodyTail);
+        BuildCascadeChordSuggestionRows(_cascadeChordPhase, _cascadeChordMelodyTail, MaxChordDropdownItems);
 
-    /// <summary>Набранный хвост (пусто — «…»).</summary>
-    public string CascadeChordOverlayBufferLine =>
+    private const int MaxChordDropdownItems = 25;
+
+    /// <summary>Выпадающий список под полем ввода: пока armed, есть префикс и совпадения или явное «нет совпадений».</summary>
+    public bool IsCascadeChordDropdownOpen =>
+        _cascadeChordPhase == CascadeChordPhase.AwaitMelodyTail
+        && !_cascadeChordDropdownUserDismissed
+        && !string.IsNullOrEmpty(_cascadeChordMelodyTail)
+        && (FilterCascadeChordEligibleMatches(_cascadeChordMelodyTail).Count > 0 || CascadeChordOverlayNoMatches);
+
+    /// <summary>Есть строки в выпадающем списке (для «нет совпадений» — отдельный текст).</summary>
+    public bool HasChordDropdownItems =>
+        _cascadeChordPhase == CascadeChordPhase.AwaitMelodyTail && CascadeChordOverlaySuggestions.Count > 0;
+
+    /// <summary>Подпись поля ввода рядом с CMD: в покое и при armed.</summary>
+    public string CascadeChordHudWatermark =>
+        IsCascadeChordOverlayVisible
+            ? "мелодия (как после c:)"
+            : "Ctrl+K — команда по мелодии";
+
+    /// <summary>Набранный хвост для визуального поля ввода в оверлее (find-bar style).</summary>
+    public string CascadeChordOverlayInputText =>
+        _cascadeChordPhase == CascadeChordPhase.AwaitMelodyTail
+            ? _cascadeChordMelodyTail
+            : "";
+
+    /// <summary>Двусторонняя привязка к полю ввода в полоске над редактором (только фаза armed).</summary>
+    public string CascadeChordHudMelodyText
+    {
+        get => _cascadeChordPhase == CascadeChordPhase.AwaitMelodyTail ? _cascadeChordMelodyTail : "";
+        set
+        {
+            if (_cascadeChordPhase != CascadeChordPhase.AwaitMelodyTail)
+                return;
+            var n = NormalizeCascadeChordMelodyInput(value);
+            if (string.Equals(n, _cascadeChordMelodyTail, StringComparison.Ordinal))
+                return;
+            ApplyCascadeChordMelodyTail(n);
+        }
+    }
+
+    /// <summary>После Ctrl+K — сфокусировать поле в полоске task cockpit (см. <see cref="Views.CascadeChordHudStripView"/>).</summary>
+    public event Action? CascadeChordHudFocusRequested;
+
+    /// <summary>Одна строка для полоски: плейсхолдер при пустом хвосте или набранный хвост (без двух <c>IsVisible</c>).</summary>
+    public string CascadeChordOverlayFindBarLine =>
         _cascadeChordPhase != CascadeChordPhase.AwaitMelodyTail
             ? ""
             : string.IsNullOrEmpty(_cascadeChordMelodyTail)
-                ? "…"
-                : "«" + _cascadeChordMelodyTail + "»";
+                ? "мелодия (как после c:) — полоска под тулбаром"
+                : _cascadeChordMelodyTail;
+
+    /// <summary>Плейсхолдер в полоске — чуть приглушить через прозрачность текста.</summary>
+    public double CascadeChordOverlayFindBarOpacity =>
+        _cascadeChordPhase == CascadeChordPhase.AwaitMelodyTail && string.IsNullOrEmpty(_cascadeChordMelodyTail)
+            ? 0.72
+            : 1.0;
 
     /// <summary>Нижняя строка подсказки в полосе.</summary>
     public string CascadeChordOverlayCompactFooter =>
@@ -55,7 +108,7 @@ public partial class MainWindowViewModel
     public bool CascadeChordOverlayNoMatches =>
         _cascadeChordPhase == CascadeChordPhase.AwaitMelodyTail
         && !string.IsNullOrEmpty(_cascadeChordMelodyTail)
-        && IntentMelodyAliases.FilterByTailPrefix(_cascadeChordMelodyTail).Count == 0;
+        && FilterCascadeChordEligibleMatches(_cascadeChordMelodyTail).Count == 0;
 
     /// <summary>Подсказка для лампы Command на тулбаре: в покое — кратко; при armed — полный контекст аккорда.</summary>
     public string CommandArmedLampToolTip =>
@@ -81,7 +134,7 @@ public partial class MainWindowViewModel
                    "  Esc — отмена · таймаут " + timeout + " с";
         }
 
-        var matches = IntentMelodyAliases.FilterByTailPrefix(buf);
+        var matches = FilterCascadeChordEligibleMatches(buf);
         var matchLine = matches.Count == 0
             ? "Нет alias с таким префиксом."
             : "Совпадения: " + string.Join(", ", matches.Select(m => m.Alias));
@@ -96,19 +149,25 @@ public partial class MainWindowViewModel
 
     private static IReadOnlyList<CascadeChordOverlaySuggestion> BuildCascadeChordSuggestionRows(
         CascadeChordPhase phase,
-        string tailNormalized)
+        string tailNormalized,
+        int maxItems)
     {
         if (phase != CascadeChordPhase.AwaitMelodyTail)
             return [];
 
-        var matches = IntentMelodyAliases.FilterByTailPrefix(tailNormalized);
+        var matches = FilterCascadeChordEligibleMatches(tailNormalized);
         return matches
-            .Take(2)
+            .Take(maxItems)
             .Select(m => new CascadeChordOverlaySuggestion(
                 m.Alias,
                 TruncateChordTitle(IdeCommandDocDisplay.ShortTitleForCommandId(m.CommandId))))
             .ToList();
     }
+
+    private static IReadOnlyList<(string Alias, string CommandId)> FilterCascadeChordEligibleMatches(string tailNormalized) =>
+        IntentMelodyAliases.FilterByTailPrefix(tailNormalized)
+            .Where(m => ParametricIntentMelody.IsChordEligibleAlias(m.Alias))
+            .ToList();
 
     private static string TruncateChordTitle(string s, int maxChars = 52)
     {
@@ -152,19 +211,107 @@ public partial class MainWindowViewModel
         OnPropertyChanged(nameof(IsCascadeChordOverlayVisible));
         OnPropertyChanged(nameof(CascadeChordOverlayHintText));
         OnPropertyChanged(nameof(CascadeChordOverlaySuggestions));
-        OnPropertyChanged(nameof(CascadeChordOverlayBufferLine));
+        OnPropertyChanged(nameof(CascadeChordOverlayInputText));
+        OnPropertyChanged(nameof(CascadeChordOverlayFindBarLine));
+        OnPropertyChanged(nameof(CascadeChordOverlayFindBarOpacity));
         OnPropertyChanged(nameof(CascadeChordOverlayNoMatches));
         OnPropertyChanged(nameof(CascadeChordOverlayCompactFooter));
+        OnPropertyChanged(nameof(CascadeChordHudMelodyText));
+        OnPropertyChanged(nameof(IsCascadeChordDropdownOpen));
+        OnPropertyChanged(nameof(HasChordDropdownItems));
+        OnPropertyChanged(nameof(CascadeChordHudWatermark));
         OnPropertyChanged(nameof(CommandArmedLampToolTip));
+    }
+
+    /// <summary>Вызывается из полоски HUD: фокус ввода — туннель не должен съедать буквы до TextBox.</summary>
+    public void SetCascadeChordHudTextHasFocus(bool hasFocus)
+    {
+        _cascadeChordHudTextHasFocus = hasFocus;
+        if (hasFocus)
+            _cascadeChordDropdownUserDismissed = false;
+        OnPropertyChanged(nameof(IsCascadeChordDropdownOpen));
+    }
+
+    /// <summary>Popup закрыт кликом вне списка (Avalonia light dismiss).</summary>
+    public void NotifyCascadeChordDropdownDismissed()
+    {
+        _cascadeChordDropdownUserDismissed = true;
+        OnPropertyChanged(nameof(IsCascadeChordDropdownOpen));
+    }
+
+    /// <summary>Выбор строки из выпадающего списка.</summary>
+    public void PickCascadeChordSuggestion(CascadeChordOverlaySuggestion? item)
+    {
+        if (item is null || _cascadeChordPhase != CascadeChordPhase.AwaitMelodyTail)
+            return;
+        ApplyCascadeChordMelodyTail(item.Alias);
+    }
+
+
+    /// <summary>Esc из поля ввода или снаружи (после снятия фокуса с HUD).</summary>
+    public void CancelCascadeChord() => EndCascadeChordIdle();
+
+    /// <summary>Enter в поле HUD: как в туннеле — точный alias или сброс.</summary>
+    public void OnCascadeChordHudEnter()
+    {
+        if (_cascadeChordPhase != CascadeChordPhase.AwaitMelodyTail)
+            return;
+        var cmdEnter = IntentMelodyAliases.TryResolveExactCommandId(_cascadeChordMelodyTail);
+        if (cmdEnter != null)
+            _ = ExecuteCascadeChordCommandAsync(cmdEnter);
+        EndCascadeChordIdle();
+    }
+
+    private static string NormalizeCascadeChordMelodyInput(string? s)
+    {
+        if (string.IsNullOrEmpty(s))
+            return "";
+        var sb = new StringBuilder(s.Length);
+        foreach (var c in s.ToLowerInvariant())
+        {
+            if (c is >= 'a' and <= 'z' or >= '0' and <= '9')
+                sb.Append(c);
+        }
+        return sb.ToString();
+    }
+
+    /// <summary>Общая логика хвоста: однозначное совпадение → выполнить; ноль префиксов при непустом → выход.</summary>
+    private void ApplyCascadeChordMelodyTail(string newTail)
+    {
+        _cascadeChordDropdownUserDismissed = false;
+        var matches = FilterCascadeChordEligibleMatches(newTail);
+        var exact = matches.FirstOrDefault(m => string.Equals(m.Alias, newTail, StringComparison.Ordinal));
+        var hasLonger = matches.Any(m => m.Alias.Length > newTail.Length);
+        if (exact.CommandId != null && !hasLonger && newTail.Length > 0)
+        {
+            _cascadeChordMelodyTail = newTail;
+            _ = ExecuteCascadeChordCommandAsync(exact.CommandId);
+            EndCascadeChordIdle();
+            return;
+        }
+
+        if (matches.Count == 0 && newTail.Length > 0)
+        {
+            EndCascadeChordIdle();
+            return;
+        }
+
+        _cascadeChordMelodyTail = newTail;
+        _cascadeChordDeadline = DateTimeOffset.UtcNow.AddSeconds(CascadeChordTimeoutSeconds);
+        RestartCascadeChordTimer();
+        NotifyCascadeChordOverlayProperties();
     }
 
     private void BeginCascadeChordRoot()
     {
         _cascadeChordPhase = CascadeChordPhase.AwaitMelodyTail;
         _cascadeChordMelodyTail = "";
+        _cascadeChordHudTextHasFocus = false;
+        _cascadeChordDropdownUserDismissed = false;
         _cascadeChordDeadline = DateTimeOffset.UtcNow.AddSeconds(CascadeChordTimeoutSeconds);
         RestartCascadeChordTimer();
         NotifyCascadeChordOverlayProperties();
+        CascadeChordHudFocusRequested?.Invoke();
     }
 
     /// <summary>Корень аккорда (hotkeys.toml <c>cascade_chord</c>): обрабатывается tunnel KeyDown главного окна (как палитра Ctrl+Q).</summary>
@@ -203,6 +350,9 @@ public partial class MainWindowViewModel
             return true;
         }
 
+        if (_cascadeChordHudTextHasFocus)
+            return false;
+
         var mods = e.KeyModifiers;
         if (mods.HasFlag(KeyModifiers.Control) || mods.HasFlag(KeyModifiers.Alt) || mods.HasFlag(KeyModifiers.Meta))
         {
@@ -220,10 +370,7 @@ public partial class MainWindowViewModel
     {
         if (e.Key == Key.Enter)
         {
-            var cmdEnter = IntentMelodyAliases.TryResolveExactCommandId(_cascadeChordMelodyTail);
-            if (cmdEnter != null)
-                _ = ExecuteCascadeChordCommandAsync(cmdEnter);
-            EndCascadeChordIdle();
+            OnCascadeChordHudEnter();
             e.Handled = true;
             return true;
         }
@@ -231,12 +378,9 @@ public partial class MainWindowViewModel
         if (e.Key == Key.Back)
         {
             if (_cascadeChordMelodyTail.Length > 0)
-                _cascadeChordMelodyTail = _cascadeChordMelodyTail[..^1];
+                ApplyCascadeChordMelodyTail(_cascadeChordMelodyTail[..^1]);
             else
                 EndCascadeChordIdle();
-            _cascadeChordDeadline = DateTimeOffset.UtcNow.AddSeconds(CascadeChordTimeoutSeconds);
-            RestartCascadeChordTimer();
-            NotifyCascadeChordOverlayProperties();
             e.Handled = true;
             return true;
         }
@@ -249,27 +393,7 @@ public partial class MainWindowViewModel
         }
 
         var newTail = _cascadeChordMelodyTail + ch;
-        var exact = IntentMelodyAliases.TryResolveExactCommandId(newTail);
-        var hasLonger = IntentMelodyAliases.HasStrictLongerAliasPrefix(newTail);
-        if (exact != null && !hasLonger)
-        {
-            _ = ExecuteCascadeChordCommandAsync(exact);
-            EndCascadeChordIdle();
-            e.Handled = true;
-            return true;
-        }
-
-        if (IntentMelodyAliases.FilterByTailPrefix(newTail).Count == 0)
-        {
-            EndCascadeChordIdle();
-            e.Handled = true;
-            return true;
-        }
-
-        _cascadeChordMelodyTail = newTail;
-        _cascadeChordDeadline = DateTimeOffset.UtcNow.AddSeconds(CascadeChordTimeoutSeconds);
-        RestartCascadeChordTimer();
-        NotifyCascadeChordOverlayProperties();
+        ApplyCascadeChordMelodyTail(newTail);
         e.Handled = true;
         return true;
     }
@@ -278,6 +402,8 @@ public partial class MainWindowViewModel
     {
         _cascadeChordPhase = CascadeChordPhase.Idle;
         _cascadeChordMelodyTail = "";
+        _cascadeChordHudTextHasFocus = false;
+        _cascadeChordDropdownUserDismissed = false;
         StopCascadeChordTimer();
         NotifyCascadeChordOverlayProperties();
     }

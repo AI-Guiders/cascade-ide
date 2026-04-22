@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using Avalonia.Media;
@@ -12,6 +13,9 @@ namespace CascadeIDE.Services;
 public static class UiThemeApply
 {
     private static (string path, DateTime lastWrite, string json)? _themeCache;
+
+    /// <summary>После успешного обновления <see cref="Application.Current"/>.<c>Resources</c> (смена пресета / MCP).</summary>
+    public static event EventHandler? ThemeApplied;
 
     /// <summary>Загружает тему из файла рядом с приложением; при отсутствии — из встроенного ресурса (<see cref="BundledAppContent"/>). Перечитывает с диска только если изменились путь или дата модификации.</summary>
     public static string GetThemeJsonFromFile(string filePath)
@@ -88,6 +92,8 @@ public static class UiThemeApply
         public const string ToolbarErrorForeground = "CascadeTheme.ToolbarErrorForeground";
         public const string EditorBackground = "CascadeTheme.EditorBackground";
         public const string EditorForeground = "CascadeTheme.EditorForeground";
+        public const string EditorSelectionBrush = "CascadeTheme.EditorSelectionBrush";
+        public const string EditorSelectionForeground = "CascadeTheme.EditorSelectionForeground";
         public const string EditorColumnBorderBrush = "CascadeTheme.EditorColumnBorderBrush";
         public const string WorkspacePanelBorderBrush = "CascadeTheme.WorkspacePanelBorderBrush";
         public const string EditorColumnBackground = "CascadeTheme.EditorColumnBackground";
@@ -164,6 +170,8 @@ public static class UiThemeApply
             Set(res, Keys.ToolbarErrorForeground, GetColor(root, "toolbar_text", "error_foreground"));
             Set(res, Keys.EditorBackground, GetColor(root, "editor", "background"));
             Set(res, Keys.EditorForeground, GetColor(root, "editor", "foreground"));
+            Set(res, Keys.EditorSelectionBrush, GetColor(root, "editor", "selection_brush"));
+            Set(res, Keys.EditorSelectionForeground, GetColor(root, "editor", "selection_foreground"));
             Set(res, Keys.EditorColumnBorderBrush, GetColor(root, "editor_column", "border_brush"));
             Set(res, Keys.WorkspacePanelBorderBrush, GetWorkspacePanelBorderBrush(root));
             Set(res, Keys.EditorColumnBackground, GetColor(root, "editor_column", "background"));
@@ -203,6 +211,8 @@ public static class UiThemeApply
                 Set(res, Keys.PowerSafetyL3, GetColorFrom(pc, "safety_l3"));
                 Set(res, Keys.PowerEmergency, GetColorFrom(pc, "emergency"));
             }
+
+            ThemeApplied?.Invoke(null, EventArgs.Empty);
             return "OK";
         }
     }

@@ -46,11 +46,34 @@ public static class SemanticMapGraphPrimitives
     public const double ControlFlowSidePadding = 10;
     /// <summary>Зазор между правым краем полосы графа и колонкой легенды (DIP).</summary>
     public const double ControlFlowLegendGap = 2;
+
+    /// <summary>Запас вправо от геометрии узла: кольцо highlight, обводка (см. отрисовку узла), без пересечения с текстом.</summary>
+    public const double ControlFlowBesideLegendInkSlack = 4;
+
+    /// <summary>Минимальное смещение вправо от «чернила+slack» до левой границы колонки (не 2px — иначе касание рёбер/текста).</summary>
+    public const double ControlFlowLegendBesideMinClearance = 6;
+
+    /// <summary>Минимальная оставшаяся ширина под текст легенды в режиме «колонка рядом»; иначе — блок «снизу».</summary>
+    public const double ControlFlowLegendSideColumnMinTextWidth = 100;
+
+    /// <summary>Зазор между нижним краем графа (узлы) и верхом легенды в блочном режиме «снизу».</summary>
+    public const double ControlFlowLegendBelowBlockGap = 6;
+
+    /// <summary>Нижняя граница высоты зоны графа, ниже которой не переносим легенду вниз (остаётся «рядом»).
+    /// Держим низким, иначе при стандартной высоте слота (~220) и плотной легенде (много строк + ключи)
+    /// оценка <see cref="EstimateControlFlowLegendBlockHeight"/> съедает граф, <c>graphH</c> падает ниже порога
+    /// и алгоритм вечно откатывается в «рядом», хотя снизу панели место под блок есть.</summary>
+    public const double ControlFlowMinGraphHeightForBelowLegend = 50;
     public const double ControlFlowMinGraphWidth = 40;
     public const double ControlFlowMaxReadableBandWidth = 380;
     public const double ControlFlowLegendReserveWidthFraction = 0.30;
-    public const double ControlFlowLegendReserveMin = 96;
-    public const double ControlFlowLegendReserveMax = 200;
+    public const double ControlFlowLegendReserveMin = 88;
+    /// <summary>Верхняя граница резерва под легенду; фактический резерв считается от контента и ширины слота.</summary>
+    public const double ControlFlowLegendReserveHardCap = 340;
+
+    /// <summary>Максимум ширины резерва легенды от доступной ширины viewport (не съедать весь граф).</summary>
+    public static double ResolveControlFlowLegendReserveCap(double viewportWidth) =>
+        Math.Min(ControlFlowLegendReserveHardCap, viewportWidth * 0.52);
 
     public const double ControlFlowRefVerticalStep = 34;
     /// <summary>Нижняя «комфортная» граница шага; при большой высоте слота фактический шаг может быть выше до <see cref="ControlFlowMaxReadableVerticalStepCap"/>.</summary>
@@ -108,6 +131,25 @@ public static class SemanticMapGraphPrimitives
             combined,
             SemanticMapRenderInvariants.CompactSideLabelFontSizeFloor,
             SemanticMapRenderInvariants.MaxSideLabelFontSize);
+    }
+
+    /// <summary>Оценка высоты блока легенды (строки + при необходимости ключи фигур) для резервирования при укладке «снизу».</summary>
+    public static double EstimateControlFlowLegendBlockHeight(
+        int rowCount,
+        bool hasShapeKeys,
+        double captionSize = 11)
+    {
+        var lineH = Math.Max(15, captionSize * 1.2);
+        const double keyRowHBase = 17d;
+        var keyRowH = Math.Max(keyRowHBase, captionSize + 5);
+        const double gapBeforeKeys = 6d;
+        // До трёх строк ключей (return, условие, handler) — визуальный максимум.
+        var keyBlockH = hasShapeKeys ? (keyRowH * 3 + gapBeforeKeys + 8) : 0d;
+        var rowBlock = rowCount * lineH;
+        if (rowCount == 0 && hasShapeKeys)
+            return keyBlockH + 12d;
+        var between = rowCount > 0 && hasShapeKeys ? gapBeforeKeys : 0d;
+        return rowBlock + between + keyBlockH + 12d;
     }
 
     #endregion

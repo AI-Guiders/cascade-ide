@@ -36,8 +36,8 @@ public sealed class AnnunciatorLampCell : Control
             return new Size(0, 0);
 
         return new Size(
-            AnnunciatorLampPrimitives.DefaultCellWidth + 4,
-            AnnunciatorLampPrimitives.DefaultCellHeight + 4);
+            AnnunciatorLampMetrics.DefaultCellWidth + 4,
+            AnnunciatorLampMetrics.DefaultCellHeight + 4);
     }
 
     public override void Render(DrawingContext context)
@@ -52,11 +52,11 @@ public sealed class AnnunciatorLampCell : Control
         if (w <= 0 || h <= 0)
             return;
 
-        var cell = AnnunciatorLampPrimitives.DefaultCellWidth;
+        var cell = AnnunciatorLampMetrics.DefaultCellWidth;
         var x = (w - cell) / 2;
         var y = (h - cell) / 2;
         var outer = new Rect(x, y, cell, cell);
-        AnnunciatorLampPrimitives.DrawLampCell(context, outer, item.LampShortLabel, item.Level);
+        new LabeledAnnunciatorLampFace(item.LampShortLabel, item.Level).Draw(context, outer);
     }
 
     protected override void OnPointerMoved(PointerEventArgs e)

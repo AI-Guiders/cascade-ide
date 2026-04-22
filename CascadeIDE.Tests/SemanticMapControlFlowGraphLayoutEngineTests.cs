@@ -1,6 +1,7 @@
 using CascadeIDE.Cockpit.PrimitivesKit;
 using CascadeIDE.Services;
 using CascadeIDE.Services.Navigation;
+using CascadeIDE.ViewModels;
 using Xunit;
 
 namespace CascadeIDE.Tests;
@@ -144,5 +145,71 @@ public sealed class SemanticMapControlFlowGraphLayoutEngineTests
         var narrow = SemanticMapGraphPrimitives.ResolveControlFlowLabelCharBudget(118);
         var wide = SemanticMapGraphPrimitives.ResolveControlFlowLabelCharBudget(360);
         Assert.True(wide > narrow);
+    }
+
+    [Fact]
+    public void Layout_LegendColumnLeft_StartsAtMaxInkRightPlusGap_NotReadableBandRight()
+    {
+        var engine = new SemanticMapControlFlowGraphLayoutEngine();
+        var doc = new SemanticMapSubgraphDocument
+        {
+            AnchorPath = @"D:\w\A.cs",
+            Nodes =
+            [
+                new SemanticMapSubgraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A" },
+                new SemanticMapSubgraphNode
+                {
+                    Id = "n1",
+                    Path = @"D:\w\A.cs",
+                    Kind = "condition_step",
+                    Label = "IF",
+                    LegendIndex = 1,
+                    LegendText = "x > 0"
+                }
+            ],
+            Edges = [new SemanticMapSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "Call" }]
+        };
+        const double viewportW = 400;
+        var scene = engine.Layout(doc, viewportW, 200);
+        Assert.True(scene.UseLegendColumn);
+        var inkSl = SemanticMapGraphPrimitives.ControlFlowBesideLegendInkSlack;
+        var minCl = Math.Max(
+            SemanticMapGraphPrimitives.ControlFlowLegendGap,
+            SemanticMapGraphPrimitives.ControlFlowLegendBesideMinClearance);
+        var inkR = 0.0;
+        foreach (var n in scene.Nodes)
+            inkR = Math.Max(inkR, n.Center.X + n.Radius + inkSl);
+        var expected = inkR + minCl;
+        Assert.Equal(expected, scene.LegendColumnLeft, 0.6);
+    }
+
+    [Fact]
+    public void Layout_NarrowWidth_PlacesLegendBlockBelowGraph_FullWidthText()
+    {
+        var engine = new SemanticMapControlFlowGraphLayoutEngine();
+        var doc = new SemanticMapSubgraphDocument
+        {
+            AnchorPath = @"D:\w\A.cs",
+            Nodes =
+            [
+                new SemanticMapSubgraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A" },
+                new SemanticMapSubgraphNode
+                {
+                    Id = "n1",
+                    Path = @"D:\w\A.cs",
+                    Kind = "condition_step",
+                    Label = "IF",
+                    LegendIndex = 1,
+                    LegendText = "pred"
+                }
+            ],
+            Edges = [new SemanticMapSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "Call" }]
+        };
+        // Мало места справа от «чернила» — блок легенды уходит вниз на полную ширину.
+        var scene = engine.Layout(doc, 130, 200);
+        Assert.True(scene.UseLegendColumn);
+        Assert.Equal(SemanticMapLegendBlockPlacement.BelowGraph, scene.LegendPlacement);
+        Assert.True(scene.LegendBlockTopY > 0);
+        Assert.Equal(SemanticMapGraphPrimitives.ControlFlowSidePadding, scene.LegendColumnLeft, 0.01);
     }
 }

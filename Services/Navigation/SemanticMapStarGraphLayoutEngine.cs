@@ -26,9 +26,10 @@ public sealed class SemanticMapStarGraphLayoutEngine : ISemanticMapSubgraphLayou
 
         var cx = width / 2;
         var cy = height / 2;
-        const double anchorR = 16;
-        const double satR = 13;
         var minDim = Math.Min(width, height);
+        var scale = Math.Clamp(minDim / 220.0, 0.58, 1.22);
+        var anchorR = 16 * scale;
+        var satR = 13 * scale;
         // Одно кольцо — чуть компактнее, чтобы граф не «разъезжался» на всю зону; при плотности — два кольца (не одна орбита).
         const int singleRingMaxSatellites = 8;
 

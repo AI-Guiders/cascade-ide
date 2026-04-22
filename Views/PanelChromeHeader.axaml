@@ -8,7 +8,7 @@
         <views:PanelChromeTitleDisplayConverter x:Key="PanelChromeTitleDisplayConverter"/>
     </UserControl.Resources>
     <Border Classes="panelChromeHeaderStrip">
-        <Grid ColumnDefinitions="Auto,*,Auto,Auto" MinHeight="34">
+        <Grid ColumnDefinitions="Auto,*,Auto,Auto" MinHeight="30">
             <Border Grid.Column="0" Classes="panelTitleAccent" VerticalAlignment="Center"/>
             <TextBlock x:Name="TitleText"
                        Grid.Column="1"

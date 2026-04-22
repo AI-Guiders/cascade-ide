@@ -57,6 +57,7 @@
                                    LineHeight="16"/>
                     </Border>
                 </chrome:AttentionZoneContainer>
+                <!-- CascadeChord: полоска ввода — TaskCockpitView (видна без открытого документа). -->
                 <dock:DockControl x:Name="DocumentsDock"
                                   Grid.Row="1"
                                   DefaultContext="{Binding}"

@@ -287,4 +287,44 @@ class Demo {
         Assert.DoesNotContain("ToString", text, StringComparison.Ordinal);
         Assert.DoesNotContain("GetLocation", text, StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void BuildJson_TryCatch_EmitsProtectedHandlerAndExceptionFlowEdges()
+    {
+        const string source = """
+using System;
+class Demo {
+    void A()
+    {
+        try
+        {
+            B();
+        }
+        catch (InvalidOperationException)
+        {
+            C();
+        }
+    }
+
+    void B() { }
+    void C() { }
+}
+""";
+
+        var json = CodeNavigationControlFlowSubgraphBuilder.BuildJson(
+            filePath: @"D:\w\Demo.cs",
+            sourceText: source,
+            line: 5,
+            column: 10,
+            maxNodes: 48,
+            maxEdges: 96);
+
+        using var doc = JsonDocument.Parse(json);
+        var nodes = doc.RootElement.GetProperty("nodes").EnumerateArray().ToList();
+        var edges = doc.RootElement.GetProperty("edges").EnumerateArray().ToList();
+
+        Assert.Contains(nodes, n => string.Equals(n.GetProperty("kind").GetString(), "protected_step", StringComparison.Ordinal));
+        Assert.Contains(nodes, n => string.Equals(n.GetProperty("kind").GetString(), "handler_step", StringComparison.Ordinal));
+        Assert.Contains(edges, e => string.Equals(e.GetProperty("kind").GetString(), "ExceptionFlow", StringComparison.Ordinal));
+    }
 }

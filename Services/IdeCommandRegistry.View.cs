@@ -15,6 +15,7 @@ public static partial class IdeCommandRegistry
         AddPalette(b, "cycle_semantic_map_detail_level", IdeCommands.CycleSemanticMapDetailLevel, "Semantic Map: детализация glance / normal / inspect", "Вид");
         AddPalette(b, "toggle_build_output", IdeCommands.ToggleBuildOutput, "Переключить вывод сборки", "Вид");
         AddPalette(b, "toggle_terminal", IdeCommands.ToggleTerminal, "Переключить терминал", "Вид");
+        AddPalette(b, "toggle_workspace_splitters_lock", IdeCommands.ToggleWorkspaceSplittersLock, "TOL: ON GND / IN AIR (сплиттеры рабочей области)", "Вид");
         AddPalette(b, "toggle_mfd_region_expanded", IdeCommands.ToggleMfdRegionExpanded, "Переключить регион Mfd", "Вид");
         AddPalette(b, "toggle_git_panel", IdeCommands.ToggleGitPanel, "Переключить панель Git", "Вид");
         AddPalette(b, "toggle_instrumentation_dock", IdeCommands.ToggleInstrumentationDock, "Переключить док инструментирования", "Вид");

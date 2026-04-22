@@ -18,13 +18,7 @@ public partial class PfdHostWindow : PointerTrackingWindow
         if (DataContext is not ViewModels.MainWindowViewModel vm)
             return;
         vm.CommandPaletteHost = ViewModels.CommandPaletteHost.PfdHost;
-        if (e.Handled)
-        {
-            MainWindowHotkeyService.LogTunnelEvent(nameof(PfdHostWindow), e, vm, "window-entry-already-handled");
-            return;
-        }
-        MainWindowHotkeyService.LogTunnelEvent(nameof(PfdHostWindow), e, vm, "window-entry");
-        MainWindowHotkeyService.TryHandleTunnelKeyDownForMainVm(e, vm);
+        MainWindowHotkeyService.TryHandleTunnelKeyDownFromWindow(nameof(PfdHostWindow), e, vm);
     }
 
     private void OnActivated(object? sender, EventArgs e)

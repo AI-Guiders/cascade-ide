@@ -124,6 +124,8 @@ internal static class ControlFlowSubgraphTextPresenter
             "anchor" => "A",
             "condition_step" => "?",
             "exit_step" => "R",
+            "protected_step" => "T",
+            "handler_step" => "!",
             _ => node.GetProperty("label").GetString() ?? "?"
         };
     }

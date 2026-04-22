@@ -19,7 +19,9 @@ public sealed class SemanticMapControlFlowGraphLayoutEngine : ISemanticMapSubgra
                 Nodes = [],
                 Edges = [],
                 Legend = [],
-                LegendColumnLeft = width
+                LegendColumnLeft = width,
+                LegendPlacement = SemanticMapLegendBlockPlacement.BesideGraph,
+                LegendBlockTopY = 0
             };
 
         var anchor = doc.Nodes.FirstOrDefault(n => string.Equals(n.Kind, "anchor", StringComparison.OrdinalIgnoreCase))
@@ -31,7 +33,9 @@ public sealed class SemanticMapControlFlowGraphLayoutEngine : ISemanticMapSubgra
                 Nodes = [],
                 Edges = [],
                 Legend = [],
-                LegendColumnLeft = width
+                LegendColumnLeft = width,
+                LegendPlacement = SemanticMapLegendBlockPlacement.BesideGraph,
+                LegendBlockTopY = 0
             };
 
         var nodeById = doc.Nodes.ToDictionary(n => n.Id, StringComparer.OrdinalIgnoreCase);
@@ -70,19 +74,10 @@ public sealed class SemanticMapControlFlowGraphLayoutEngine : ISemanticMapSubgra
             && !string.IsNullOrWhiteSpace(n.LegendText));
         var showLegendConditionKey = doc.Nodes.Any(IsConditionStep);
         var showLegendReturnKey = doc.Nodes.Any(IsExitStep);
-        var useLegendColumn = hasLegendRows || showLegendConditionKey || showLegendReturnKey;
-        // Резерв под колонку текста справа (минимум читаемой ширины для строк легенды).
-        var legendReserve = useLegendColumn
-            ? Math.Clamp(
-                width * SemanticMapGraphPrimitives.ControlFlowLegendReserveWidthFraction,
-                SemanticMapGraphPrimitives.ControlFlowLegendReserveMin,
-                SemanticMapGraphPrimitives.ControlFlowLegendReserveMax)
-            : 0;
-        var graphWidth = Math.Max(
-            SemanticMapGraphPrimitives.ControlFlowMinGraphWidth,
-            width - legendReserve - (useLegendColumn ? legendGap : 0));
-
-        var legendRows = hasLegendRows
+        var showLegendExceptionFlowKey = doc.Nodes.Any(static n =>
+            string.Equals(n.Kind, "handler_step", StringComparison.OrdinalIgnoreCase));
+        var useLegendColumn = hasLegendRows || showLegendConditionKey || showLegendReturnKey || showLegendExceptionFlowKey;
+        var legendRowsPreview = hasLegendRows
             ? doc.Nodes
                 .Where(n =>
                     !IsExitStep(n)
@@ -91,7 +86,29 @@ public sealed class SemanticMapControlFlowGraphLayoutEngine : ISemanticMapSubgra
                 .OrderBy(n => n.LegendIndex.GetValueOrDefault())
                 .Select(n => new SemanticMapLegendEntry { Index = n.LegendIndex!.Value, Text = n.LegendText!.Trim() })
                 .ToList()
-            : (IReadOnlyList<SemanticMapLegendEntry>)[];
+            : new List<SemanticMapLegendEntry>();
+
+        var contentLegendNeed = EstimateLegendColumnContentWidth(
+            legendRowsPreview,
+            showLegendReturnKey,
+            showLegendConditionKey,
+            showLegendExceptionFlowKey);
+        var fallbackFraction = width * SemanticMapGraphPrimitives.ControlFlowLegendReserveWidthFraction;
+        var legendReserveCap = SemanticMapGraphPrimitives.ResolveControlFlowLegendReserveCap(width);
+        var legendReserveLo = Math.Min(SemanticMapGraphPrimitives.ControlFlowLegendReserveMin, legendReserveCap);
+        var firstLegendReserve = useLegendColumn
+            ? Math.Clamp(
+                Math.Max(fallbackFraction, contentLegendNeed),
+                legendReserveLo,
+                legendReserveCap)
+            : 0;
+        IReadOnlyList<SemanticMapLegendEntry> legendRows = legendRowsPreview;
+
+        SemanticMapGraphSceneVm BuildFor(double heightForY, double legendResForWidth)
+        {
+        var graphWidth = Math.Max(
+            SemanticMapGraphPrimitives.ControlFlowMinGraphWidth,
+            width - legendResForWidth - (useLegendColumn ? legendGap : 0));
 
         // Узлы на одном уровне не разъезжаются на всю ширину слота — ограниченная «полоса чтения», по центру области графа.
         var bandW = SemanticMapGraphPrimitives.ResolveControlFlowReadableBandWidth(graphWidth);
@@ -99,11 +116,8 @@ public sealed class SemanticMapControlFlowGraphLayoutEngine : ISemanticMapSubgra
         var centerX = bandLeft + bandW * 0.5;
         var labelCharBudget = SemanticMapGraphPrimitives.ResolveControlFlowLabelCharBudget(bandW);
 
-        // Легенда сразу справа от нарисованного графа, а не от края всей левой половины (иначе огромный зазор).
-        var legendColumnLeft = useLegendColumn ? bandLeft + bandW + legendGap : width;
-
         var levelCount = Math.Max(1, levels.Count);
-        var innerH = height - topPadding - bottomPadding;
+        var innerH = heightForY - topPadding - bottomPadding;
         var slotCount = Math.Max(1, levelCount - 1);
         var rawYStep = innerH / slotCount;
         var minYStep = SemanticMapGraphPrimitives.MinVerticalStepForLevelCount(levelCount);
@@ -194,6 +208,27 @@ public sealed class SemanticMapControlFlowGraphLayoutEngine : ISemanticMapSubgra
             });
         }
 
+        // Колонка легенды: сразу справа от фактического «чернильного» правого края узлов, а не от правой границы
+        // полосы чтения (bandW может быть 380px при одном столбце узлов — тогда зазор до текста нелепо большой).
+        var legendColumnLeft = width;
+        if (useLegendColumn)
+        {
+            if (nodeLayouts.Count > 0)
+            {
+                var inkSlack = SemanticMapGraphPrimitives.ControlFlowBesideLegendInkSlack;
+                var minClear = Math.Max(legendGap, SemanticMapGraphPrimitives.ControlFlowLegendBesideMinClearance);
+                var maxInkRight = 0.0;
+                foreach (var n in nodeLayouts)
+                    maxInkRight = Math.Max(maxInkRight, n.Center.X + n.Radius + inkSlack);
+                legendColumnLeft = maxInkRight + minClear;
+            }
+            else
+            {
+                var minClear = Math.Max(legendGap, SemanticMapGraphPrimitives.ControlFlowLegendBesideMinClearance);
+                legendColumnLeft = bandLeft + bandW + minClear;
+            }
+        }
+
         return new SemanticMapGraphSceneVm
         {
             Nodes = nodeLayouts,
@@ -202,9 +237,85 @@ public sealed class SemanticMapControlFlowGraphLayoutEngine : ISemanticMapSubgra
             UseLegendColumn = useLegendColumn,
             ShowLegendConditionKey = showLegendConditionKey,
             ShowLegendReturnKey = showLegendReturnKey,
+            ShowLegendExceptionFlowKey = showLegendExceptionFlowKey,
             LegendColumnLeft = legendColumnLeft,
+            LegendPlacement = SemanticMapLegendBlockPlacement.BesideGraph,
+            LegendBlockTopY = 0,
             SideLabelFontSizePx = sideLabelFontPx
         };
+        }
+
+        var sceneBeside = BuildFor(height, firstLegendReserve);
+        if (!useLegendColumn)
+            return sceneBeside;
+
+        var textRoomBeside = width - sceneBeside.LegendColumnLeft - 4;
+        // Колонка у правого края вьюпорта — соседняя невозможна без наложения на граф/обрезки.
+        var besideUnusable = sceneBeside.LegendColumnLeft + 8 >= width;
+        var needBelow = besideUnusable
+            || textRoomBeside < SemanticMapGraphPrimitives.ControlFlowLegendSideColumnMinTextWidth
+            || contentLegendNeed > textRoomBeside + 0.5;
+        if (!needBelow)
+            return sceneBeside;
+
+        var hasShapeKeyRows = showLegendReturnKey || showLegendConditionKey || showLegendExceptionFlowKey;
+        var capEst = sceneBeside.SideLabelFontSizePx ?? 11.0;
+        var estimatedLegendH = SemanticMapGraphPrimitives.EstimateControlFlowLegendBlockHeight(
+            legendRows.Count,
+            hasShapeKeyRows,
+            capEst);
+        var belowGap = SemanticMapGraphPrimitives.ControlFlowLegendBelowBlockGap;
+        var graphH = height - estimatedLegendH - belowGap;
+        if (graphH < SemanticMapGraphPrimitives.ControlFlowMinGraphHeightForBelowLegend)
+            return sceneBeside;
+
+        var sceneBelow = BuildFor(graphH, 0);
+        if (sceneBelow.Nodes.Count == 0)
+            return sceneBeside;
+
+        var maxBottom = 0.0;
+        foreach (var n in sceneBelow.Nodes)
+            maxBottom = Math.Max(maxBottom, n.Center.Y + n.Radius);
+        var legendTopY = maxBottom + belowGap;
+        if (legendTopY + estimatedLegendH > height + 1.0)
+            return sceneBeside;
+
+        return new SemanticMapGraphSceneVm
+        {
+            Nodes = sceneBelow.Nodes,
+            Edges = sceneBelow.Edges,
+            Legend = sceneBelow.Legend,
+            UseLegendColumn = useLegendColumn,
+            ShowLegendConditionKey = showLegendConditionKey,
+            ShowLegendReturnKey = showLegendReturnKey,
+            ShowLegendExceptionFlowKey = showLegendExceptionFlowKey,
+            LegendColumnLeft = sidePadding,
+            LegendPlacement = SemanticMapLegendBlockPlacement.BelowGraph,
+            LegendBlockTopY = legendTopY,
+            SideLabelFontSizePx = sceneBelow.SideLabelFontSizePx
+        };
+    }
+
+    /// <summary>Оценка минимальной ширины колонки легенды (индекс + текст + блок ключей фигур).</summary>
+    private static double EstimateLegendColumnContentWidth(
+        IReadOnlyList<SemanticMapLegendEntry> rows,
+        bool showReturnKey,
+        bool showConditionKey,
+        bool showExceptionKey)
+    {
+        const double charPx = 6.15;
+        const double idxPad = 36;
+        const double margin = 20;
+        var maxLine = 0;
+        foreach (var row in rows)
+            maxLine = Math.Max(maxLine, Math.Min(row.Text.Length, 220));
+
+        var body = idxPad + maxLine * charPx;
+        var keys = 0d;
+        if (showReturnKey || showConditionKey || showExceptionKey)
+            keys = idxPad + 96;
+
+        return Math.Max(body, keys) + margin;
     }
 
     private static Dictionary<string, List<string>> BuildOutgoing(IReadOnlyList<SemanticMapSubgraphEdge> edges)

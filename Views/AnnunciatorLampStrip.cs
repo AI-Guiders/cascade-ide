@@ -11,7 +11,7 @@ using CascadeIDE.Models;
 namespace CascadeIDE.Views;
 
 /// <summary>
-/// Полоса ламп annunciator / Korry по коллекции <see cref="AnnunciatorLampItem"/>; отрисовка через <see cref="DrawingContext"/>,
+/// Полоса ламп annunciator / Korry по коллекции <see cref="AnnunciatorLampItem"/>; метрики <see cref="AnnunciatorLampMetrics"/>, ячейки <see cref="LabeledAnnunciatorLampFace"/>; отрисовка через <see cref="DrawingContext"/>,
 /// тот же контур, что <see cref="CockpitSkiaSceneRenderer"/> и <see cref="SkiaHost"/> (ADR 0055, 0063).
 /// Без раздувания под доступную высоту — фиксированная геометрия ячеек.
 /// </summary>
@@ -83,7 +83,7 @@ public sealed class AnnunciatorLampStrip : Control
         if (items.Count == 0)
             return new Size(0, 0);
 
-        var sz = AnnunciatorLampPrimitives.MeasureStrip(items.Count);
+        var sz = AnnunciatorLampMetrics.MeasureStrip(items.Count);
         var aw = availableSize.Width;
         if (double.IsNaN(aw) || double.IsInfinity(aw))
             aw = sz.Width;
@@ -109,13 +109,13 @@ public sealed class AnnunciatorLampStrip : Control
             return;
 
         var panel = new Rect(0, 0, w, h);
-        AnnunciatorLampPrimitives.DrawPanelBackground(context, panel);
+        AnnunciatorLampMetrics.DrawPanelBackground(context, panel);
 
-        var columnsPerRow = AnnunciatorLampPrimitives.DefaultStripColumns;
-        var pad = AnnunciatorLampPrimitives.DefaultPanelPadding;
-        var gap = AnnunciatorLampPrimitives.DefaultGap;
-        var cellW = AnnunciatorLampPrimitives.DefaultCellWidth;
-        var cellH = AnnunciatorLampPrimitives.DefaultCellHeight;
+        var columnsPerRow = AnnunciatorLampMetrics.DefaultStripColumns;
+        var pad = AnnunciatorLampMetrics.DefaultPanelPadding;
+        var gap = AnnunciatorLampMetrics.DefaultGap;
+        var cellW = AnnunciatorLampMetrics.DefaultCellWidth;
+        var cellH = AnnunciatorLampMetrics.DefaultCellHeight;
 
         for (var i = 0; i < items.Count; i++)
         {
@@ -126,11 +126,7 @@ public sealed class AnnunciatorLampStrip : Control
             var y = pad + row * (cellH + gap);
             var outer = new Rect(x, y, cellW, cellH);
 
-            AnnunciatorLampPrimitives.DrawLampCell(
-                context,
-                outer,
-                item.LampShortLabel,
-                item.Level);
+            new LabeledAnnunciatorLampFace(item.LampShortLabel, item.Level).Draw(context, outer);
 
             _hitCells.Add((outer, item));
         }

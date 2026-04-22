@@ -38,6 +38,12 @@ internal sealed partial class IdeMcpCommandExecutor
                 _vm.ToggleTerminalCommand.Execute(null);
             return "OK";
         });
+        add(ToggleWorkspaceSplittersLock, async (_, _) =>
+        {
+            if (_vm.ToggleWorkspaceSplittersLockCommand.CanExecute(null))
+                _vm.ToggleWorkspaceSplittersLockCommand.Execute(null);
+            return "OK";
+        });
         add(ToggleBuildOutput, async (_, _) =>
         {
             if (_vm.ToggleBuildOutputCommand.CanExecute(null))

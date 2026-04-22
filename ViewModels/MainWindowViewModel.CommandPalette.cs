@@ -22,7 +22,8 @@ public sealed class IdeCommandPaletteRowViewModel : ViewModelBase
         IdeCommandPaletteCatalog.Entry entry,
         string? hotkeyHint,
         UiModeFamily currentFamily,
-        string? melodyAliasTail = null)
+        string? melodyAliasTail = null,
+        string? argsJsonOverride = null)
     {
         RowKind = IdeCommandPaletteRowKind.Command;
         PaletteId = entry.PaletteId;
@@ -40,7 +41,7 @@ public sealed class IdeCommandPaletteRowViewModel : ViewModelBase
             Subtitle = BuildCommandPaletteSubtitle(entry.CommandId, entry.Category);
         }
         IsMelodyAccentRow = !string.IsNullOrEmpty(melodyAliasTail);
-        ArgsJson = entry.ArgsJson;
+        ArgsJson = argsJsonOverride ?? entry.ArgsJson;
         HotkeyHint = hotkeyHint;
         IsAvailable = IdeCommandPaletteMatch.IsEntryAvailable(entry, currentFamily);
         UnavailableHint = IdeCommandPaletteMatch.UnavailableHint(entry, currentFamily);
@@ -93,7 +94,8 @@ public sealed class IdeCommandPaletteRowViewModel : ViewModelBase
         string commandId,
         string melodyAliasTail,
         string titleFromDoc,
-        string? hotkeyHint)
+        string? hotkeyHint,
+        string? argsJson = null)
     {
         RowKind = IdeCommandPaletteRowKind.Command;
         PaletteId = commandId;
@@ -101,7 +103,7 @@ public sealed class IdeCommandPaletteRowViewModel : ViewModelBase
         Title = $"c:{melodyAliasTail}";
         Category = "ide_execute_command";
         Subtitle = $"{titleFromDoc} · {commandId} · ide_execute_command";
-        ArgsJson = null;
+        ArgsJson = argsJson;
         HotkeyHint = hotkeyHint;
         IsAvailable = true;
         UnavailableHint = null;
@@ -339,6 +341,19 @@ public partial class MainWindowViewModel
         FilteredCommandPaletteEntries.Clear();
         var hotkeys = HotkeyGestureMap;
         var family = UiModeFamily;
+        if (TryBuildParametricMelodyPlan(tailNormalized) is { } paramPlan)
+        {
+            foreach (var line in paramPlan.Lines)
+            {
+                if (line.ToCommandPaletteRow(hotkeys, family) is { } row)
+                    FilteredCommandPaletteEntries.Add(row);
+            }
+
+            CommandPaletteSelectedIndex = paramPlan.SelectedIndex;
+            RefreshCommandPaletteSurfaceSnapshot();
+            return;
+        }
+
         var plan = MelodyInterpreter.BuildPalette(tailNormalized);
         foreach (var line in plan.Lines)
         {
@@ -348,6 +363,41 @@ public partial class MainWindowViewModel
 
         CommandPaletteSelectedIndex = plan.SelectedIndex;
         RefreshCommandPaletteSurfaceSnapshot();
+    }
+
+    private MelodyPalettePlan? TryBuildParametricMelodyPlan(string tailNormalized)
+    {
+        if (ParametricIntentMelody.TryParseLineRangeTail(tailNormalized, out var parsed) && parsed is not null)
+        {
+            if (ParametricIntentMelody.TryBuildExecutionArgs(
+                    parsed,
+                    CurrentFilePath,
+                    EditorText,
+                    out var commandId,
+                    out var argsJson,
+                    out var error))
+            {
+                return new MelodyPalettePlan(
+                    [new MelodyPaletteCommand(parsed.DisplayTail, commandId, argsJson)],
+                    0);
+            }
+
+            return new MelodyPalettePlan(
+                [new MelodyPaletteHint(error, ParametricIntentMelody.BuildAliasUsageHint(parsed.Alias))],
+                0);
+        }
+
+        var aliasBeforeColon = ParametricIntentMelody.TryGetAliasPrefixBeforeColon(tailNormalized);
+        if (!string.IsNullOrEmpty(aliasBeforeColon) && ParametricIntentMelody.IsPaletteOnlyAlias(aliasBeforeColon))
+        {
+            return new MelodyPalettePlan(
+                [new MelodyPaletteHint(
+                    ParametricIntentMelody.BuildAliasUsageHint(aliasBeforeColon),
+                    ParametricIntentMelody.BuildAliasUsageCategory(aliasBeforeColon))],
+                0);
+        }
+
+        return null;
     }
 
     private void RefreshGoToPaletteFilter(GoToAllQuery q)

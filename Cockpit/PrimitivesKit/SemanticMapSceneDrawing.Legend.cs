@@ -9,37 +9,40 @@ public static partial class SemanticMapSceneDrawing
 {
     private static void DrawLegend(DrawingContext context, SemanticMapGraphSceneVm scene, SemanticMapVisualTheme theme, double w, double h)
     {
-        if (!scene.UseLegendColumn || scene.LegendColumnLeft >= w - 24 || h < 40)
+        if (!scene.UseLegendColumn || h < 40)
             return;
 
+        var isBelow = scene.LegendPlacement == SemanticMapLegendBlockPlacement.BelowGraph;
+        if (isBelow)
+        {
+            if (scene.LegendBlockTopY <= 0 || scene.LegendBlockTopY >= h - 12)
+                return;
+        }
+        else if (scene.LegendColumnLeft >= w - 24)
+        {
+            return;
+        }
+
         var x0 = scene.LegendColumnLeft;
-        var y = 8d;
-        // Согласуем с боковыми подписями узлов; не оставляем легенду мельче основного текста графа.
+        var y = isBelow ? scene.LegendBlockTopY : 8d;
+        var legendViewportH = h - y - 4;
+        if (legendViewportH < 12)
+            return;
+
         var captionSize = scene.SideLabelFontSizePx is { } s
-            ? Math.Clamp(s, 11, SemanticMapRenderInvariants.MaxSideLabelFontSize)
+            ? Math.Clamp(s, SemanticMapRenderInvariants.MinLegendCaptionFontSize, SemanticMapRenderInvariants.MaxSideLabelFontSize)
             : 12;
+
+        var idxColW = MeasureIndexColumnWidth(theme, scene.Legend, captionSize);
+        const double colGap = 6d;
+        var textX = x0 + idxColW + colGap;
+        var textMaxW = Math.Max(24, w - textX - 4);
+
+        captionSize = FitLegendCaptionSize(theme, scene.Legend, textMaxW, captionSize, legendViewportH);
+
         var lineH = Math.Max(15, captionSize * 1.2);
         var keyRowH = Math.Max(17d, captionSize + 5);
         const double gapBeforeKeys = 6d;
-        const double colGap = 6d;
-
-        double idxColW = 0;
-        foreach (var row in scene.Legend)
-        {
-            var idxTxt = row.Index.ToString(CultureInfo.InvariantCulture);
-            var idxFt = new FormattedText(
-                idxTxt,
-                CultureInfo.InvariantCulture,
-                FlowDirection.LeftToRight,
-                theme.SideLabelTypeface,
-                captionSize,
-                theme.SideLabelBrush);
-            idxColW = Math.Max(idxColW, idxFt.Width);
-        }
-
-        idxColW += 4;
-        var textX = x0 + idxColW + colGap;
-        var textMaxW = Math.Max(24, w - textX - 4);
 
         foreach (var row in scene.Legend)
         {
@@ -55,7 +58,13 @@ public static partial class SemanticMapSceneDrawing
                 theme.SideLabelBrush);
             context.DrawText(idxFt, new Point(x0 + idxColW - idxFt.Width, y));
 
-            var body = TruncateLegendCellText(theme, row.Text, textMaxW, captionSize);
+            var body = row.Text.Replace('\r', ' ').Replace('\n', ' ');
+            while (body.Contains("  ", StringComparison.Ordinal))
+                body = body.Replace("  ", " ", StringComparison.Ordinal);
+            body = body.Trim();
+            if (body.Length > 400)
+                body = body[..397] + "…";
+
             var bodyFt = new FormattedText(
                 body,
                 CultureInfo.InvariantCulture,
@@ -67,7 +76,7 @@ public static partial class SemanticMapSceneDrawing
             y += lineH;
         }
 
-        var hasShapeKeys = scene.ShowLegendReturnKey || scene.ShowLegendConditionKey;
+        var hasShapeKeys = scene.ShowLegendReturnKey || scene.ShowLegendConditionKey || scene.ShowLegendExceptionFlowKey;
         if (!hasShapeKeys)
             return;
 
@@ -87,7 +96,84 @@ public static partial class SemanticMapSceneDrawing
             if (y + keyRowH > h - 4)
                 return;
             DrawLegendConditionKeyRow(context, theme, x0, y, keyRowH, captionSize);
+            y += keyRowH + 2;
         }
+
+        if (scene.ShowLegendExceptionFlowKey)
+        {
+            if (y + keyRowH > h - 4)
+                return;
+            DrawLegendExceptionFlowKeyRow(context, theme, x0, y, keyRowH, captionSize);
+        }
+    }
+
+    private static double MeasureIndexColumnWidth(SemanticMapVisualTheme theme, IReadOnlyList<SemanticMapLegendEntry> rows, double captionSize)
+    {
+        var idxColW = 0d;
+        foreach (var row in rows)
+        {
+            var idxTxt = row.Index.ToString(CultureInfo.InvariantCulture);
+            var idxFt = new FormattedText(
+                idxTxt,
+                CultureInfo.InvariantCulture,
+                FlowDirection.LeftToRight,
+                theme.SideLabelTypeface,
+                captionSize,
+                theme.SideLabelBrush);
+            idxColW = Math.Max(idxColW, idxFt.Width);
+        }
+
+        return idxColW + 4;
+    }
+
+    private static double FitLegendCaptionSize(
+        SemanticMapVisualTheme theme,
+        IReadOnlyList<SemanticMapLegendEntry> rows,
+        double textMaxW,
+        double captionSize,
+        double viewportH)
+    {
+        var size = captionSize;
+        const double floor = 9;
+        while (size >= floor)
+        {
+            var lineH = Math.Max(15, size * 1.2);
+            var used = 8d + rows.Count * lineH;
+            if (used > viewportH - 8 && rows.Count > 0)
+            {
+                size -= 0.5;
+                continue;
+            }
+
+            var fits = true;
+            foreach (var row in rows)
+            {
+                var t = row.Text.Replace('\r', ' ').Replace('\n', ' ');
+                while (t.Contains("  ", StringComparison.Ordinal))
+                    t = t.Replace("  ", " ", StringComparison.Ordinal);
+                t = t.Trim();
+                if (t.Length > 400)
+                    t = t[..397] + "…";
+                var w = new FormattedText(
+                    t,
+                    CultureInfo.InvariantCulture,
+                    FlowDirection.LeftToRight,
+                    theme.SideLabelTypeface,
+                    size,
+                    theme.SideLabelBrush).Width;
+                if (w > textMaxW)
+                {
+                    fits = false;
+                    break;
+                }
+            }
+
+            if (fits)
+                return size;
+            size -= 0.5;
+        }
+
+        return floor;
     }
 
     private static void DrawLegendReturnKeyRow(DrawingContext context, SemanticMapVisualTheme theme, double x0, double y, double rowH, double captionSize)
@@ -96,14 +182,8 @@ public static partial class SemanticMapSceneDrawing
         var cy = y + rowH / 2;
         var cx = x0 + iconR + 1;
         context.DrawEllipse(theme.ExitFill, theme.NodeStrokePen, new Point(cx, cy), iconR, iconR);
-        var arrow = new FormattedText(
-            "↗",
-            CultureInfo.InvariantCulture,
-            FlowDirection.LeftToRight,
-            theme.GlyphTypeface,
-            Math.Max(6, captionSize - 2),
-            theme.GlyphBrush);
-        context.DrawText(arrow, new Point(cx - arrow.Width / 2, cy - arrow.Height / 2));
+        var arrowLen = Math.Max(4.5, Math.Min(iconR * 1.35, captionSize * 0.55));
+        DrawNorthEastExitArrowShaftCentered(context, theme.GlyphBrush, new Point(cx, cy), arrowLen, 1.2);
 
         var cap = new FormattedText(
             "return",
@@ -142,36 +222,28 @@ public static partial class SemanticMapSceneDrawing
         context.DrawText(cap, new Point(x0 + r * 2 + 10, y + (rowH - cap.Height) / 2));
     }
 
-    private static string TruncateLegendCellText(SemanticMapVisualTheme theme, string text, double maxWidth, double fontSize)
+    private static void DrawLegendExceptionFlowKeyRow(DrawingContext context, SemanticMapVisualTheme theme, double x0, double y, double rowH, double captionSize)
     {
-        if (string.IsNullOrEmpty(text))
-            return "";
-        var t = text.Replace('\r', ' ').Replace('\n', ' ');
-        while (t.Contains("  ", StringComparison.Ordinal))
-            t = t.Replace("  ", " ", StringComparison.Ordinal);
-        t = t.Trim();
-        if (t.Length > 400)
-            t = t[..397] + "…";
+        const double iconR = 5.5;
+        var cy = y + rowH / 2;
+        var cx = x0 + iconR + 1;
+        context.DrawEllipse(theme.HandlerFill, theme.NodeStrokePen, new Point(cx, cy), iconR, iconR);
+        var ex = new FormattedText(
+            "!",
+            CultureInfo.InvariantCulture,
+            FlowDirection.LeftToRight,
+            theme.GlyphTypeface,
+            Math.Max(7, captionSize - 1),
+            theme.GlyphBrush);
+        context.DrawText(ex, new Point(cx - ex.Width / 2, cy - ex.Height / 2));
 
-        static double Measure(SemanticMapVisualTheme th, string s, double fs) =>
-            new FormattedText(
-                    s,
-                    CultureInfo.InvariantCulture,
-                    FlowDirection.LeftToRight,
-                    th.SideLabelTypeface,
-                    fs,
-                    th.SideLabelBrush)
-                .Width;
-
-        if (Measure(theme, t, fontSize) <= maxWidth)
-            return t;
-        for (var len = t.Length - 1; len > 0; len--)
-        {
-            var candidate = t[..len].TrimEnd() + "…";
-            if (Measure(theme, candidate, fontSize) <= maxWidth)
-                return candidate;
-        }
-
-        return "…";
+        var cap = new FormattedText(
+            "catch / handler",
+            CultureInfo.InvariantCulture,
+            FlowDirection.LeftToRight,
+            theme.SideLabelTypeface,
+            captionSize,
+            theme.SideLabelBrush);
+        context.DrawText(cap, new Point(x0 + iconR * 2 + 10, y + (rowH - cap.Height) / 2));
     }
 }

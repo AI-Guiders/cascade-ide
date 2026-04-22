@@ -116,6 +116,37 @@ public sealed class MainWindowHotkeyServiceTests
         }
     }
 
+    [Fact]
+    public void TryHandleTunnelKeyDownFromWindow_CtrlK_StartsCascadeChord_EvenWhenHandledAlready()
+    {
+        MainWindowHotkeyService.ReplaceMergedMapForTests(
+            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                [CascadeChordHotkey.TomlKey] = "Ctrl+K"
+            });
+        try
+        {
+            var vm = new MainWindowViewModel();
+            var e = new KeyEventArgs
+            {
+                RoutedEvent = InputElement.KeyDownEvent,
+                Key = Key.K,
+                KeyModifiers = KeyModifiers.Control,
+                PhysicalKey = PhysicalKey.K,
+                Handled = true
+            };
+
+            MainWindowHotkeyService.TryHandleTunnelKeyDownFromWindow("TestWindow", e, vm);
+
+            Assert.True(vm.IsCascadeChordOverlayVisible);
+            Assert.Equal("", vm.CascadeChordOverlayInputText);
+        }
+        finally
+        {
+            MainWindowHotkeyService.ReplaceMergedMapForTests(null);
+        }
+    }
+
     [AvaloniaFact]
     public async Task TryHandleTunnelKeyDownForMainVm_CtrlShiftO_ExecutesRegistryCommand_WhenPaletteOpen()
     {

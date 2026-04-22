@@ -3,6 +3,9 @@
 # Норматив: docs/intent-melody-language-v1.md, ADR 0060 §11.
 
 [aliases]
+# Editor -> Line (ADR 0081; параметрический хвост в палитре c:)
+els = "select"
+eld = "apply_edit"
 # Git
 gs = "git_status"
 gc = "git_commit"
@@ -17,6 +20,8 @@ dl = "debug_launch"
 dc = "debug_continue"
 # Workspace
 so = "open_solution_dialog"
+# Task cockpit: Take Off / Landing (сплиттеры)
+tol = "toggle_workspace_splitters_lock"
 # Chat (домен c…)
 cps = "show_chat_page"
 cs = "send_chat"

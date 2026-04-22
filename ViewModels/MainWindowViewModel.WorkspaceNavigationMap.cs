@@ -36,7 +36,7 @@ public partial class MainWindowViewModel
         _editorCaretOffset = offset;
         if (_settings.SemanticMap.IsControlFlowDepth)
             ScheduleWorkspaceNavigationMapRefresh();
-        RefreshEditorHudBanner();
+        ScheduleEditorHudBannerRefresh();
     }
 
     /// <summary>Связанные файлы для текущего якоря (режим списка).</summary>

@@ -30,13 +30,7 @@ public partial class PmSplitHostWindow : PointerTrackingWindow
         if (DataContext is not ViewModels.MainWindowViewModel vm)
             return;
         vm.CommandPaletteHost = ViewModels.CommandPaletteHost.PmSplitHost;
-        if (e.Handled)
-        {
-            MainWindowHotkeyService.LogTunnelEvent(nameof(PmSplitHostWindow), e, vm, "window-entry-already-handled");
-            return;
-        }
-        MainWindowHotkeyService.LogTunnelEvent(nameof(PmSplitHostWindow), e, vm, "window-entry");
-        MainWindowHotkeyService.TryHandleTunnelKeyDownForMainVm(e, vm);
+        MainWindowHotkeyService.TryHandleTunnelKeyDownFromWindow(nameof(PmSplitHostWindow), e, vm);
     }
 
     private void OnActivated(object? sender, EventArgs e)

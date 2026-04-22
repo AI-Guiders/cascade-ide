@@ -37,6 +37,8 @@ public static partial class SemanticMapSceneDrawing
             return theme.MultiBranchEdgePen;
         if (IsConditionalEdge(kind))
             return theme.ConditionalEdgePen;
+        if (IsExceptionFlowEdge(kind))
+            return theme.ConditionalEdgePen;
         return theme.BaseEdgePen;
     }
 
@@ -51,6 +53,10 @@ public static partial class SemanticMapSceneDrawing
     private static bool IsConditionalEdge(string? kind) =>
         !string.IsNullOrWhiteSpace(kind)
         && kind.Contains("conditional", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsExceptionFlowEdge(string? kind) =>
+        !string.IsNullOrWhiteSpace(kind)
+        && kind.Contains("exception", StringComparison.OrdinalIgnoreCase);
 
     private static void DrawLoopEdge(
         DrawingContext context,
@@ -135,7 +141,8 @@ public static partial class SemanticMapSceneDrawing
             return;
         }
 
-        var bendByDistance = Math.Min(42, elen * 0.2);
+        var bendCap = Math.Clamp(elen * 0.22, 18, 56);
+        var bendByDistance = Math.Min(bendCap, elen * 0.2);
         var bendByHorizontalRoom = Math.Max(0, horizontalDrift * 0.45);
         var bend = Math.Min(bendByDistance, bendByHorizontalRoom);
         var px = -ey / elen;

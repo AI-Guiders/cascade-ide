@@ -30,6 +30,10 @@ public sealed class IntentMelodyAliasesTests
         Assert.Equal(IdeCommands.OpenSolutionDialog, IntentMelodyAliases.TryResolveExactCommandId("so"));
 
     [Fact]
+    public void TryResolveExact_tol_IsToggleWorkspaceSplittersLock() =>
+        Assert.Equal(IdeCommands.ToggleWorkspaceSplittersLock, IntentMelodyAliases.TryResolveExactCommandId("tol"));
+
+    [Fact]
     public void TryResolveExact_chat_and_agent_melodies_map_to_commands()
     {
         Assert.Equal(IdeCommands.ShowChatPage, IntentMelodyAliases.TryResolveExactCommandId("cps"));
@@ -51,6 +55,8 @@ public sealed class IntentMelodyAliasesTests
     {
         Assert.Equal(IdeCommands.ShowEnvironmentReadinessPage, IntentMelodyAliases.TryResolveExactCommandId("ers"));
         Assert.Equal(IdeCommands.ShowTerminalPanel, IntentMelodyAliases.TryResolveExactCommandId("ts"));
+        Assert.Equal(IdeCommands.Select, IntentMelodyAliases.TryResolveExactCommandId("els"));
+        Assert.Equal(IdeCommands.ApplyEdit, IntentMelodyAliases.TryResolveExactCommandId("eld"));
     }
 
     [Fact]
@@ -65,6 +71,9 @@ public sealed class IntentMelodyAliasesTests
         Assert.Contains("ers = \"show_environment_readiness_page\"", text, StringComparison.Ordinal);
         Assert.Contains("ts = \"show_terminal_panel\"", text, StringComparison.Ordinal);
         Assert.Contains("dl = \"debug_launch\"", text, StringComparison.Ordinal);
+        Assert.Contains("els = \"select\"", text, StringComparison.Ordinal);
+        Assert.Contains("eld = \"apply_edit\"", text, StringComparison.Ordinal);
+        Assert.Contains("tol = \"toggle_workspace_splitters_lock\"", text, StringComparison.Ordinal);
     }
 
     [Fact]

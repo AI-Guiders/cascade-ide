@@ -11,7 +11,12 @@
   },
   "toolbar": { "background": "#E8E8E8" },
   "toolbar_text": { "foreground": "#333", "error_foreground": "#C00" },
-  "editor": { "background": "#FFF", "foreground": "#1A1A1A" },
+  "editor": {
+    "background": "#FFF",
+    "foreground": "#1A1A1A",
+    "selection_brush": "#55225679",
+    "selection_foreground": "#1A1A1A"
+  },
   "editor_column": {
     "border_brush": "#CCC",
     "background": "#FFF",
@@ -21,11 +26,11 @@
   "markdown_preview_panel": { "background": "#FAFAFA", "border_brush": "#E0E0E0" },
   "solution_explorer": { "border_brush": "#CCC", "header_foreground": "#1A1A1A" },
   "panel_chrome": {
-    "title_foreground": "#1A1A1A",
-    "accent_brush": "#5B4FC9",
-    "header_background": "#E8E8EC",
-    "header_separator": "#C8C8D0",
-    "menu_glyph_foreground": "#555555"
+    "title_foreground": "#1E2433",
+    "accent_brush": "#4B6BFB",
+    "header_background": "#E4E9F2",
+    "header_separator": "#B8C4D8",
+    "menu_glyph_foreground": "#4A5568"
   },
   "build_output": {
     "background": "#F8F8F8",

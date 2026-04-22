@@ -354,6 +354,7 @@
 | `toggle_pfd_region_expanded` | Переключить развёрнут/свёрнут регион Pfd (как меню «Вид → Semantic Map (PFD)»). returns: text. |
 | `toggle_pin_document` | Закрепить/открепить документ (pin). args: file_path:string; returns: text; example: {"file_path":"C:\\\\tmp\\\\a.cs"}. |
 | `toggle_terminal` | Как меню «Вид → Терминал» (переключатель). returns: text. |
+| `toggle_workspace_splitters_lock` | Сплиттеры рабочей области: переключить ON GND / IN AIR (мелодия tol, лампа TOL в task cockpit). returns: text. |
 <!-- GENERATED:IdeCommands END -->
 
 **Семантическая навигация (`get_code_navigation_context`):** пресеты задаются в `%LocalAppData%\CascadeIDE\settings.toml` в секции `[code_navigation]` (`[[code_navigation.presets]]` в TOML). В ответе смотри `kind_filter` (эффективные списки) и в режиме `subgraph` — `kind` на узлах и `related_kind` на рёбрах. Подробный cookbook: [workspace-navigation-mcp-cookbook.md](design/workspace-navigation-mcp-cookbook.md).

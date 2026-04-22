@@ -98,6 +98,8 @@ public static class CockpitPrimitivesPalette
         public static readonly Color ConditionFill = Color.FromArgb(240, 255, 210, 120);
         public static readonly Color ExitFill = Color.FromArgb(230, 165, 175, 190);
         public static readonly Color CallFill = Color.Parse("#9B8CFF");
+        /// <summary>Обработчик исключений (catch) / «защищённый» участок (ADR 0053).</summary>
+        public static readonly Color HandlerFill = Color.FromArgb(235, 70, 175, 155);
         public static readonly Color SideLabel = Color.FromArgb(220, 225, 235, 255);
         public static readonly Color BaseEdge = Color.FromArgb(180, 140, 140, 160);
         public static readonly Color ConditionalEdge = Color.FromArgb(220, 255, 210, 120);
@@ -118,6 +120,7 @@ public static class CockpitPrimitivesPalette
         public static readonly Color ConditionFill = Color.FromArgb(235, 230, 195, 130);
         public static readonly Color ExitFill = Color.FromArgb(225, 150, 165, 185);
         public static readonly Color PeerFill = Color.FromArgb(235, 130, 175, 210);
+        public static readonly Color HandlerFill = Color.FromArgb(230, 55, 165, 145);
         public static readonly Color SideLabel = Color.FromArgb(215, 210, 225, 240);
         public static readonly Color BaseEdge = Color.FromArgb(175, 100, 140, 175);
         public static readonly Color ConditionalEdge = Color.FromArgb(215, 220, 195, 130);

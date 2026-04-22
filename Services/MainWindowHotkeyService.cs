@@ -120,6 +120,29 @@ public static class MainWindowHotkeyService
     }
 
     /// <summary>
+    /// Вход туннеля с окна (Main / PFD / MFD / PmSplit): при <see cref="RoutedEventArgs.Handled"/> всё равно пробуем
+    /// <see cref="MainWindowViewModel.TryConsumeCascadeChordKeyDown"/> — иначе корень Ctrl+K из hotkeys.toml может
+    /// не дойти до VM, если KeyBinding или дочерний контрол отметили KeyDown раньше.
+    /// </summary>
+    public static void TryHandleTunnelKeyDownFromWindow(string windowName, KeyEventArgs e, MainWindowViewModel vm)
+    {
+        if (e.Handled)
+        {
+            if (vm.TryConsumeCascadeChordKeyDown(e))
+            {
+                LogTunnelEvent(windowName, e, vm, "cascade-consumed-after-handled");
+                return;
+            }
+
+            LogTunnelEvent(windowName, e, vm, "window-entry-already-handled");
+            return;
+        }
+
+        LogTunnelEvent(windowName, e, vm, "window-entry");
+        _ = TryHandleTunnelKeyDownForMainVm(e, vm);
+    }
+
+    /// <summary>
     /// Tunnel KeyDown для любого <see cref="Window"/> с тем же <see cref="MainWindowViewModel"/> (главное окно, PFD/MFD-хосты):
     /// CascadeChord → Esc закрывает палитру (путь туннеля до фокуса в редакторе не проходит через <c>CommandPaletteView</c>) → жесты из TOML.
     /// </summary>

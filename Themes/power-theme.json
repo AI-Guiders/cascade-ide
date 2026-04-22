@@ -11,7 +11,12 @@
   },
   "toolbar": { "background": "#060C18" },
   "toolbar_text": { "foreground": "#C4E8FF", "error_foreground": "#FF7A9A" },
-  "editor": { "background": "#040814", "foreground": "#EAF2FF" },
+  "editor": {
+    "background": "#040814",
+    "foreground": "#EAF2FF",
+    "selection_brush": "#6600C8E8",
+    "selection_foreground": "#F0FAFF"
+  },
   "editor_column": {
     "border_brush": "#00A8CC",
     "background": "#070E1C",

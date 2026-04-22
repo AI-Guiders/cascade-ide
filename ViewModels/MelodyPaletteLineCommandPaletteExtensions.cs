@@ -1,5 +1,5 @@
+#nullable enable
 using CascadeIDE.Features.UiChrome;
-using CascadeIDE.Services;
 
 namespace CascadeIDE.ViewModels;
 
@@ -12,13 +12,18 @@ public static class MelodyPaletteLineCommandPaletteExtensions
             line switch
             {
                 MelodyPaletteHint hint => new IdeCommandPaletteRowViewModel(hint.Title, hint.Category),
+                MelodyPaletteCommand cmd when ParametricIntentMelody.IsPaletteOnlyAlias(cmd.Alias) && string.IsNullOrWhiteSpace(cmd.ArgsJson) =>
+                    new IdeCommandPaletteRowViewModel(
+                        ParametricIntentMelody.BuildAliasUsageHint(cmd.Alias),
+                        ParametricIntentMelody.BuildAliasUsageCategory(cmd.Alias)),
                 MelodyPaletteCommand cmd => IdeCommandPaletteCatalog.All.FirstOrDefault(e => e.CommandId == cmd.CommandId) is { } entry
-                    ? new IdeCommandPaletteRowViewModel(entry, hotkeys.GetDisplayHint(entry.CommandId), family, cmd.Alias)
+                    ? new IdeCommandPaletteRowViewModel(entry, hotkeys.GetDisplayHint(entry.CommandId), family, cmd.Alias, cmd.ArgsJson)
                     : new IdeCommandPaletteRowViewModel(
                         cmd.CommandId,
                         cmd.Alias,
                         IdeCommandDocDisplay.ShortTitleForCommandId(cmd.CommandId),
-                        hotkeys.GetDisplayHint(cmd.CommandId)),
+                        hotkeys.GetDisplayHint(cmd.CommandId),
+                        cmd.ArgsJson),
                 _ => throw new InvalidOperationException($"Unknown melody line: {line.GetType().Name}"),
             };
     }

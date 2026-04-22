@@ -49,4 +49,4 @@ public abstract record MelodyPaletteLine;
 
 public sealed record MelodyPaletteHint(string Title, string Category) : MelodyPaletteLine;
 
-public sealed record MelodyPaletteCommand(string Alias, string CommandId) : MelodyPaletteLine;
+public sealed record MelodyPaletteCommand(string Alias, string CommandId, string? ArgsJson = null) : MelodyPaletteLine;

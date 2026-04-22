@@ -23,20 +23,29 @@ public static partial class SemanticMapSceneDrawing
             }
 
             var glyph = BuildNodeGlyph(n, useLegend);
-            var fontSize = Math.Max(
-                SemanticMapRenderInvariants.MinGlyphFontSize,
-                Math.Min(n.Radius - 1, n.LegendIndex is > 99 ? SemanticMapRenderInvariants.MinGlyphFontSize : 9));
-            var glyphText = new FormattedText(
-                glyph,
-                CultureInfo.InvariantCulture,
-                FlowDirection.LeftToRight,
-                theme.GlyphTypeface,
-                fontSize,
-                theme.GlyphBrush);
-            var glyphOrigin = new Point(
-                n.Center.X - glyphText.Width / 2,
-                n.Center.Y - glyphText.Height / 2);
-            context.DrawText(glyphText, glyphOrigin);
+            if (IsExitNode(n))
+            {
+                var arrowLen = Math.Clamp(n.Radius * 0.95, 4.5, 12);
+                DrawNorthEastExitArrowShaftCentered(context, theme.GlyphBrush, n.Center, arrowLen, 1.15);
+            }
+            else if (!string.IsNullOrEmpty(glyph))
+            {
+                var maxGlyph = Math.Max(SemanticMapRenderInvariants.MinGlyphFontSize, n.Radius * 0.92);
+                var fontSize = n.LegendIndex is > 99
+                    ? SemanticMapRenderInvariants.MinGlyphFontSize
+                    : Math.Clamp(maxGlyph, SemanticMapRenderInvariants.MinGlyphFontSize, 11);
+                var glyphText = new FormattedText(
+                    glyph,
+                    CultureInfo.InvariantCulture,
+                    FlowDirection.LeftToRight,
+                    theme.GlyphTypeface,
+                    fontSize,
+                    theme.GlyphBrush);
+                var glyphOrigin = new Point(
+                    n.Center.X - glyphText.Width / 2,
+                    n.Center.Y - glyphText.Height / 2);
+                context.DrawText(glyphText, glyphOrigin);
+            }
 
             var fullLabel = BuildNodeFullLabel(n, useLegend);
             if (!string.IsNullOrWhiteSpace(fullLabel))
@@ -98,6 +107,8 @@ public static partial class SemanticMapSceneDrawing
             return theme.ConditionFill;
         if (IsExitNode(node))
             return theme.ExitFill;
+        if (IsHandlerNode(node))
+            return theme.HandlerFill;
         return theme.CallFill;
     }
 
@@ -105,14 +116,16 @@ public static partial class SemanticMapSceneDrawing
     {
         if (node.IsAnchor)
             return "A";
-        if (useLegendColumn && IsExitNode(node))
-            return "↗";
+        if (string.Equals(node.Kind, "protected_step", StringComparison.OrdinalIgnoreCase))
+            return "T";
+        if (IsExitNode(node))
+            return "";
         if (node.LegendIndex is { } idx && useLegendColumn)
             return idx.ToString(CultureInfo.InvariantCulture);
         if (IsConditionNode(node))
             return "?";
-        if (IsExitNode(node))
-            return "↗";
+        if (IsHandlerNode(node))
+            return "!";
         return "•";
     }
 
@@ -133,4 +146,7 @@ public static partial class SemanticMapSceneDrawing
 
     private static bool IsConditionNode(SemanticMapGraphNodeLayout node) =>
         string.Equals(node.Kind, ConditionStepKind, StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsHandlerNode(SemanticMapGraphNodeLayout node) =>
+        string.Equals(node.Kind, "handler_step", StringComparison.OrdinalIgnoreCase);
 }

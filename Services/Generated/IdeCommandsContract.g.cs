@@ -186,6 +186,7 @@ internal static class IdeCommandsContractGenerated
         ["toggle_pin_document"] = IdeReturnKind.Text,
         ["toggle_pm_split_host_window"] = IdeReturnKind.Text,
         ["toggle_terminal"] = IdeReturnKind.Text,
+        ["toggle_workspace_splitters_lock"] = IdeReturnKind.Text,
         ["upsert_agent_notes_section"] = IdeReturnKind.Text,
         ["upsert_knowledge_section"] = IdeReturnKind.Text,
         ["write_agent_notes"] = IdeReturnKind.Text,

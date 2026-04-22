@@ -90,10 +90,28 @@ public partial class ModalOverlay : UserControl
         PassThroughInputProperty.Changed.AddClassHandler<ModalOverlay>((o, _) => o.SyncDimmerHitTest());
     }
 
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
+        if (change.Property == DataContextProperty || change.Property == ChildProperty)
+            SyncChildDataContext();
+    }
+
     protected override void OnLoaded(RoutedEventArgs e)
     {
         base.OnLoaded(e);
         SyncDimmerHitTest();
+        SyncChildDataContext();
+    }
+
+    /// <summary>
+    /// Логическое содержимое задаётся в <see cref="Child"/> и попадает в шаблон через <c>ContentPresenter</c>;
+    /// у корневого <see cref="Child"/> иначе может не быть того же DataContext, что у окна — биндинги «молчат».
+    /// </summary>
+    private void SyncChildDataContext()
+    {
+        if (Child is Control c)
+            c.DataContext = DataContext;
     }
 
     private void SyncDimmerHitTest()

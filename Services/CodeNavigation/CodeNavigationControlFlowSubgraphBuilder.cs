@@ -176,9 +176,54 @@ public static class CodeNavigationControlFlowSubgraphBuilder
             {
                 BlockSyntax block => BuildStatementList(block.Statements, incoming),
                 IfStatementSyntax ifStatement => BuildIfStatement(ifStatement, incoming),
+                TryStatementSyntax tryStatement => BuildTryStatement(tryStatement, incoming),
                 ReturnStatementSyntax => BuildReturnStatement(incoming),
                 _ => BuildExpressionInvocations(statement, incoming)
             };
+        }
+
+        private List<string> BuildTryStatement(TryStatementSyntax tryStatement, List<string> incoming)
+        {
+            if (incoming.Count == 0)
+                return incoming;
+
+            var hubId = AddNode("protected_step", "try", "try { … }", "try");
+            if (hubId is null)
+                return BuildStatementList(tryStatement.Block.Statements, incoming);
+
+            AddEdges(incoming, hubId, "Sequential", "Sequential");
+            var afterTry = BuildStatementList(tryStatement.Block.Statements, new List<string> { hubId });
+            var merge = new List<string>(afterTry);
+
+            foreach (var catchClause in tryStatement.Catches)
+            {
+                var legend = CatchLegend(catchClause);
+                var catchId = AddNode("handler_step", "catch", "catch", legend);
+                if (catchId is null)
+                    continue;
+
+                AddEdges(new List<string> { hubId }, catchId, "ExceptionFlow", "ExceptionFlow");
+                var catchOut = BuildStatementList(catchClause.Block.Statements, new List<string> { catchId });
+                foreach (var id in catchOut)
+                {
+                    if (!merge.Exists(x => string.Equals(x, id, StringComparison.OrdinalIgnoreCase)))
+                        merge.Add(id);
+                }
+            }
+
+            if (tryStatement.Finally is not null)
+                merge = BuildStatementList(tryStatement.Finally.Block.Statements, merge);
+
+            return merge;
+        }
+
+        private static string CatchLegend(CatchClauseSyntax catchClause)
+        {
+            if (catchClause.Declaration is { } d)
+                return SemanticMapSubgraphBlueprint.SanitizeLegendLine($"catch ({d})", 200);
+            if (catchClause.Filter is { } f)
+                return SemanticMapSubgraphBlueprint.SanitizeLegendLine($"catch when ({f.FilterExpression})", 200);
+            return "catch";
         }
 
         private List<string> BuildIfStatement(IfStatementSyntax ifStatement, List<string> incoming)

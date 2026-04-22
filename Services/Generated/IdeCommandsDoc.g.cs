@@ -186,6 +186,7 @@ internal static class IdeCommandsDoc
         ["toggle_pin_document"] = "Закрепить/открепить документ (pin). args: file_path:string; returns: text; example: {\"file_path\":\"C:\\\\\\\\tmp\\\\\\\\a.cs\"}.",
         ["toggle_pm_split_host_window"] = "Открыть или активировать окно сплита P+M при пресете `(xP+yM)(F)` / `(F)(xP+yM)` (ADR 0017). returns: text.",
         ["toggle_terminal"] = "Как меню «Вид → Терминал» (переключатель). returns: text.",
+        ["toggle_workspace_splitters_lock"] = "Сплиттеры рабочей области: переключить ON GND / IN AIR (мелодия tol, лампа TOL в task cockpit). returns: text.",
         ["upsert_agent_notes_section"] = "Вставить/обновить секцию заметок агента по section_id (маркерный блок). args: section_id:string, content:string; returns: text; example: {\"section_id\":\"active\",\"content\":\"ActiveProjectId: cascade-ide\"}.",
         ["upsert_knowledge_section"] = "Вставить/обновить секцию в knowledge-файле по section_id. args: file_path:string, section_id:string, content:string, canon_path?:string, save_revision?:boolean; returns: text; example: {\"file_path\":\"index.md\",\"section_id\":\"foo\",\"content\":\"body\"}.",
         ["write_agent_notes"] = "Записать заметки агента в каталог решения. args: content:string; returns: text; example: {\"content\":\"notes\"}.",
