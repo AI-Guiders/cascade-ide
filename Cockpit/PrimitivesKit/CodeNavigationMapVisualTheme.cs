@@ -4,7 +4,7 @@ using CascadeIDE.ViewModels;
 namespace CascadeIDE.Cockpit.PrimitivesKit;
 
 /// <summary>
-/// Цвета и перья сцены мини-карты (control flow / звезда; продукт «Semantic Map» в UI). Единый источник для <see cref="CodeNavigationMapSceneDrawing"/> (ADR 0064, 0055, 0067).
+/// Цвета и перья сцены мини-карты (control flow / звезда; в UI — «Карта кода»). Единый источник для <see cref="CodeNavigationMapSceneDrawing"/> (ADR 0064, 0055, 0067).
 /// </summary>
 public sealed class CodeNavigationMapVisualTheme
 {

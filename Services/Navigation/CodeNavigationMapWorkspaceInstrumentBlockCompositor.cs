@@ -4,14 +4,14 @@ using CascadeIDE.ViewModels;
 
 namespace CascadeIDE.Services.Navigation;
 
-/// <summary>Стабильные id внутренних блоков прибора Semantic Map (ADR 0088 §2.4) — не путать с <c>cell_id</c> deck региона.</summary>
+/// <summary>Стабильные id внутренних блоков прибора карты кода (ADR 0088 §2.4) — не путать с <c>cell_id</c> deck региона.</summary>
 public static class CodeNavigationMapWorkspaceInstrumentBlockIds
 {
     public const string Graph = "code_navigation.workspace_instrument.block.graph";
     public const string Legend = "code_navigation.workspace_instrument.block.legend";
 }
 
-/// <summary>Вид внутреннего блока кабинного прибора Semantic Map.</summary>
+/// <summary>Вид внутреннего блока кабинного прибора карты кода.</summary>
 public enum CodeNavigationMapWorkspaceInstrumentBlockKind
 {
     /// <summary>Подграф (узлы, рёбра) в зарезервированной области графа.</summary>

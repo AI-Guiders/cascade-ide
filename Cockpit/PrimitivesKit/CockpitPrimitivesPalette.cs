@@ -91,7 +91,7 @@ public static class CockpitPrimitivesPalette
             };
     }
 
-    /// <summary>Мини-карта навигации по коду (control flow / звезда) — узлы, рёбра, подписи (продукт «Semantic Map» в UI).</summary>
+    /// <summary>Мини-карта навигации по коду (control flow / звезда) — узлы, рёбра, подписи; в UI — «Карта кода».</summary>
     public static class CodeNavigationMap
     {
         public static readonly Color AnchorFill = Color.Parse("#7CC9FF");

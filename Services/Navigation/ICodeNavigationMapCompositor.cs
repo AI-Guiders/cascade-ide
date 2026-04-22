@@ -7,7 +7,7 @@ using CascadeIDE.Services.SkiaInstruments;
 namespace CascadeIDE.Services.Navigation;
 
 /// <summary>
-/// Композитор Semantic Map: выбирает layout по уровню карты и возвращает сцену
+/// Композитор карты кода: выбирает layout по уровню карты и возвращает сцену
 /// вместе с рекомендуемой высотой viewport для читаемой отрисовки.
 /// </summary>
 public interface ICodeNavigationMapCompositor

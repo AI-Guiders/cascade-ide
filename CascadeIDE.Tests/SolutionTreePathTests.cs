@@ -5,7 +5,7 @@ using Xunit;
 namespace CascadeIDE.Tests;
 
 /// <summary>
-/// Регрессия: <see cref="Path.GetFullPath"/> на кривых строках в дереве решения не должен ронять синхронизацию выбора / открытие из Semantic Map.
+/// Регрессия: <see cref="Path.GetFullPath"/> на кривых строках в дереве решения не должен ронять синхронизацию выбора / открытие из карты кода.
 /// </summary>
 public sealed class SolutionTreePathTests
 {

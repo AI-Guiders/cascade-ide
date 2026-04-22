@@ -9,10 +9,10 @@ public static partial class IdeCommandRegistry
     {
         // ——— Вид: фокус и панели (переключатели)
         AddPalette(b, "focus_editor", IdeCommands.FocusEditor, "Фокус в редактор", "Вид");
-        AddPalette(b, "toggle_pfd_region_expanded", IdeCommands.TogglePfdRegionExpanded, "Переключить регион Pfd (Semantic Map)", "Вид");
-        AddPalette(b, "cycle_code_navigation_map_presentation", IdeCommands.CycleCodeNavigationMapPresentation, "Semantic Map: цикл вида (list / graph / both)", "Вид");
-        AddPalette(b, "cycle_code_navigation_map_level", IdeCommands.CycleCodeNavigationMapLevel, "Semantic Map: уровень file ↔ control flow", "Вид");
-        AddPalette(b, "cycle_code_navigation_map_detail_level", IdeCommands.CycleCodeNavigationMapDetailLevel, "Semantic Map: детализация glance / normal / inspect", "Вид");
+        AddPalette(b, "toggle_pfd_region_expanded", IdeCommands.TogglePfdRegionExpanded, "Переключить регион Pfd (карта кода)", "Вид");
+        AddPalette(b, "cycle_code_navigation_map_presentation", IdeCommands.CycleCodeNavigationMapPresentation, "Карта кода: цикл вида (list / graph / both)", "Вид");
+        AddPalette(b, "cycle_code_navigation_map_level", IdeCommands.CycleCodeNavigationMapLevel, "Карта кода: уровень file ↔ control flow", "Вид");
+        AddPalette(b, "cycle_code_navigation_map_detail_level", IdeCommands.CycleCodeNavigationMapDetailLevel, "Карта кода: детализация glance / normal / inspect", "Вид");
         AddPalette(b, "toggle_build_output", IdeCommands.ToggleBuildOutput, "Переключить вывод сборки", "Вид");
         AddPalette(b, "toggle_terminal", IdeCommands.ToggleTerminal, "Переключить терминал", "Вид");
         AddPalette(b, "toggle_workspace_splitters_lock", IdeCommands.ToggleWorkspaceSplittersLock, "TOL: ON GND / IN AIR (сплиттеры рабочей области)", "Вид");

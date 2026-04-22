@@ -23,7 +23,7 @@ public enum CodeNavigationMapLegendBlockPlacement
     BelowGraph = 1
 }
 
-/// <summary>Сцена мини-карты Semantic Map (узлы с центром в логических пикселях контрола).</summary>
+/// <summary>Сцена мини-карты навигации по коду (узлы с центром в логических пикселях контрола).</summary>
 public sealed class CodeNavigationMapGraphSceneVm
 {
     public required IReadOnlyList<CodeNavigationMapGraphNodeLayout> Nodes { get; init; }

@@ -8,7 +8,7 @@ using CascadeIDE.ViewModels;
 
 namespace CascadeIDE.Views;
 
-/// <summary>Мини-карта Semantic Map: рёбра и узлы (звезда); клик по узлу открывает файл; подписи строк — в списке (режим list/both) (ADR 0039).</summary>
+/// <summary>Мини-карта навигации по коду: рёбра и узлы (звезда); клик по узлу открывает файл; подписи строк — в списке (режим list/both) (ADR 0039).</summary>
 /// <remarks>
 /// Порядок отрисовки базовой сцены (ADR 0055 §4): рёбра → узлы (фигуры и глифы) → легенда. Подсветки TraceFlow приходят в <see cref="CodeNavigationMapGraphSceneVm"/> и рисуются вместе с рёбрами/узлами по флагам highlight.
 /// Отрисовка — <see cref="CodeNavigationMapSceneDrawing"/> (ADR 0064).

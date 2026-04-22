@@ -13,7 +13,7 @@ public partial class MainWindowViewModel
     public bool IsDockedPfdSolutionExplorerTree =>
         MainWindowDockedGridInstrumentSlots.IsDockedPfdSolutionExplorerTree(_settings.Display);
 
-    /// <summary>Semantic Map в колонке PFD — если карта назначает workspace map в слот Pfd.</summary>
+    /// <summary>Карта кода в колонке PFD — если карта назначает workspace map в слот Pfd.</summary>
     public bool IsDockedPfdWorkspaceNavigationMap =>
         MainWindowDockedGridInstrumentSlots.IsDockedPfdWorkspaceNavigationMap(_settings.Display);
 

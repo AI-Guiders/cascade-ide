@@ -27,7 +27,7 @@ public enum CodeNavigationMapGraphKind : byte
 
 /// <summary>
 /// Wire-модель подграфа для композиции сцены (тот же JSON, что MCP <c>get_code_navigation_context</c>, режим <c>subgraph</c>).
-/// Продуктовый термин <b>Semantic Map</b> — это <b>семантическая карта намерений кода</b>, не общий «граф смысловых связей»; тот же контейнер может нести и другие графы (связанные файлы, дерево модулей) — см. ADR 0065, ось <c>graph_kind</c>.
+/// Продуктово в UI — <b>карта кода</b> (семантическая карта <b>намерений кода</b>), не общий «граф смысловых связей»; тот же контейнер может нести и другие графы (связанные файлы, дерево модулей) — см. ADR 0065, ось <c>graph_kind</c>.
 /// <list type="bullet">
 /// <item><description><b>Карта кода</b> (control flow, шаги метода, предикаты) — домен <b>CodeNavigation</b> (<see cref="CodeNavigationContextBuilder"/>, <see cref="CodeNavigation.CodeNavigationControlFlowSubgraphBuilder"/>).</description></item>
 /// <item><description><b>Зависимости / связанные файлы</b> по эвристикам дерева решения — <b>WorkspaceNavigation</b> (см. те же поля в JSON).</description></item>

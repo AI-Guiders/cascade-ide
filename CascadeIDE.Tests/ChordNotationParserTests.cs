@@ -14,7 +14,7 @@ public sealed class ChordNotationParserTests
     }
 
     [Fact]
-    public void CascadeChord_semantic_map_and_zones_examples()
+    public void CascadeChord_ctrl_k_palette_steps_for_map_and_mfd()
     {
         var r = ChordNotationParser.Parse("<C-k> s p");
         Assert.True(r.IsSuccess);

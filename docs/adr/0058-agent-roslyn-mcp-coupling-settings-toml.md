@@ -3,7 +3,7 @@
 **Статус:** Proposed  
 **Дата:** 2026-04-18  
 
-**Связь:** [0008](0008-mcp-contracts-and-testable-infrastructure.md) (контракты MCP), [0028](0028-user-settings-toml-localappdata-and-secrets.md) (`settings.toml`), [0039](0039-workspace-navigation-affordances.md) (навигация, пресеты MCP; Semantic Map в UI), [0040](0040-lsp-launch-line-settings-toml-presets-and-environment.md) (паттерн TOML), [0053](0053-semantic-map-control-flow-pfd.md) (Semantic Map на PFD), [0059](0059-roslyn-mcp-profiles-manager-tactical-strategic-efb.md) (профили, Manager, режимы Auto-Focus / Combat / Echelon, EFB на третьем мониторе — **отдельный ADR**).
+**Связь:** [0008](0008-mcp-contracts-and-testable-infrastructure.md) (контракты MCP), [0028](0028-user-settings-toml-localappdata-and-secrets.md) (`settings.toml`), [0039](0039-workspace-navigation-affordances.md) (навигация, пресеты MCP; карта кода в UI), [0040](0040-lsp-launch-line-settings-toml-presets-and-environment.md) (паттерн TOML), [0053](0053-semantic-map-control-flow-pfd.md) (карта кода на PFD), [0059](0059-roslyn-mcp-profiles-manager-tactical-strategic-efb.md) (профили, Manager, режимы Auto-Focus / Combat / Echelon, EFB на третьем мониторе — **отдельный ADR**).
 
 ---
 

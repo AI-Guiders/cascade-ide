@@ -3,7 +3,7 @@ using CascadeIDE.Models;
 namespace CascadeIDE.Cockpit.PrimitivesKit;
 
 /// <summary>
-/// Единые токены геометрии и viewport для Semantic Map (ADR 0055, 0056): пайплайн композиции и раскладка control-flow.
+/// Единые токены геометрии и viewport для карты кода (ADR 0055, 0056): пайплайн композиции и раскладка control-flow.
 /// </summary>
 public static class CodeNavigationMapGraphPrimitives
 {

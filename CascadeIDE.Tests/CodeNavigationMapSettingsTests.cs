@@ -18,7 +18,7 @@ public sealed class CodeNavigationMapSettingsTests
     }
 
     /// <summary>
-    /// Регресс: обновление Semantic Map по курсору в CF должно опираться на <c>[semantic_map].depth</c>,
+    /// Регресс: обновление карты кода по курсору в CF должно опираться на <c>[code_navigation_map].depth</c>,
     /// как и основной refresh — иначе <c>CodeNavigationMapLevel</c> на VM и Depth расходятся, карта не следует за методом.
     /// </summary>
     [Theory]
@@ -36,7 +36,7 @@ public sealed class CodeNavigationMapSettingsTests
     }
 
     /// <summary>
-    /// Параметр <c>[semantic_map].view</c> в <c>RunWorkspaceNavigationMapRefreshAsync</c> даёт
+    /// Параметр <c>[code_navigation_map].view</c> в <c>RunWorkspaceNavigationMapRefreshAsync</c> даёт
     /// <c>wantList</c> / <c>wantGraph</c> — при расхождении с привязкой ComboBox к VM снова получится «тихий» баг UI.
     /// </summary>
     [Theory]

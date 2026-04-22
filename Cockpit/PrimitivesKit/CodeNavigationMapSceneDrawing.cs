@@ -5,7 +5,7 @@ using CascadeIDE.ViewModels;
 namespace CascadeIDE.Cockpit.PrimitivesKit;
 
 /// <summary>
-/// Точка входа: отрисовка сцены мини-карты навигации по коду (продукт «Semantic Map» в UI). Геометрия — partial (рёбра / узлы / легенда).
+/// Точка входа: отрисовка сцены мини-карты навигации по коду (в UI — «Карта кода»). Геометрия — partial (рёбра / узлы / легенда).
 /// </summary>
 public static partial class CodeNavigationMapSceneDrawing
 {

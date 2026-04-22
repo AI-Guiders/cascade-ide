@@ -4,7 +4,7 @@
              xmlns:views="using:CascadeIDE.Views"
              x:Class="CascadeIDE.Views.WorkspaceNavigationMapView"
              x:DataType="vm:MainWindowViewModel">
-    <!-- Semantic Map (ADR 0039 / 0047 / 0088): слот Pfd — граф подграфа; список related — страница MFD RelatedFiles. -->
+    <!-- Карта кода / CodeNavigationMap (ADR 0039 / 0047 / 0088): слот Pfd — граф подграфа; список related — страница MFD RelatedFiles. -->
     <Panel IsVisible="{Binding IsPfdRegionExpanded}">
         <Border BorderBrush="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"
                 BorderThickness="1"
@@ -20,7 +20,7 @@
                 </Grid.RowDefinitions>
                 <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
                     <views:PanelChromeHeader Grid.Column="0"
-                                             Title="Semantic Map · граф"
+                                             Title="Карта кода · граф"
                                              UppercaseTitle="True"/>
                     <Border Grid.Column="1"
                             VerticalAlignment="Center"

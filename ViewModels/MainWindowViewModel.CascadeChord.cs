@@ -116,7 +116,7 @@ public partial class MainWindowViewModel
             ? "Command (armed) — ввод по аккорду; транспорт CascadeChord (Ctrl+K).\n\n" + BuildCascadeChordOverlayHint()
             : "Command: в покое. Ctrl+K — режим armed (CascadeChord).";
 
-    /// <summary>Сводка настроек Semantic Map (без ComboBox; смена через палитру или MCP).</summary>
+    /// <summary>Сводка настроек карты кода (без ComboBox; смена через палитру или MCP).</summary>
     public string CodeNavigationMapSettingsSummaryLine =>
         $"Вид: {CodeNavigationMapPresentation} · уровень: {CodeNavigationMapLevel} · детализация: {_settings.CodeNavigationMap.DetailLevel.Trim()} · палитра / MCP";
 

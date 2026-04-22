@@ -7,7 +7,7 @@ namespace CascadeIDE.Features.Documents;
 /// </summary>
 internal static class SolutionTreePath
 {
-    /// <summary><see cref="Path.GetFullPath"/> без исключений на невалидных строках (дерево, MCP, Semantic Map).</summary>
+    /// <summary><see cref="Path.GetFullPath"/> без исключений на невалидных строках (дерево, MCP, карта кода).</summary>
     public static bool TryGetFullPath(string path, out string fullPath)
     {
         fullPath = "";

@@ -1,7 +1,7 @@
 namespace CascadeIDE.Cockpit.PrimitivesKit;
 
 /// <summary>
-/// Нижние пороги читаемости мини-карты (Glance; продукт «Semantic Map» в UI; ADR 0055 §4).
+/// Нижние пороги читаемости мини-карты (Glance; карта кода в UI; ADR 0055 §4).
 /// Цвета и стили пера — <see cref="CodeNavigationMapVisualTheme"/>; здесь только размеры/толщины, чтобы не «ломать» глифы при сжатии viewport.
 /// </summary>
 public static class CodeNavigationMapRenderInvariants

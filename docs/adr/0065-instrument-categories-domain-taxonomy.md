@@ -2,9 +2,9 @@
 
 **Статус:** Accepted  
 **Дата:** 2026-04-18  
-**Обновлено:** 2026-04-18 — уточнение: **Semantic Map** = карта **намерений кода**; введена ось **типов графов** (`graph_kind`).
+**Обновлено:** 2026-04-18 — уточнение: продукт **«Карта кода»** = карта **намерений кода**; введена ось **типов графов** (`graph_kind`).
 
-**Связь:** [0047](0047-cockpit-instrument-descriptor-and-slot-composition.md) (`Instrument`, `CockpitInstrumentDescriptor`, слот vs композитор vs поверхность), [0063](0063-instrument-deck-named-composition-one-anchor.md) (две оси: форма представления vs композиция в якоре), [0039](0039-workspace-navigation-affordances.md) (навигация, MCP, subgraph), [0053](0053-semantic-map-control-flow-pfd.md) / [0056](0056-semantic-map-pipeline-adoption.md) (Semantic Map, control flow), [0062](0062-git-submodules-semantic-map-subgraph.md) (GitMap / дерево submodules), [0055](0055-skia-instrument-composition-pipeline.md) (pipeline внутри Skia-инструмента), [0067](0067-graph-backed-surfaces-contract.md) (общий контракт **graph-backed surface**; `graph_kind` — ось данных внутри семейства).
+**Связь:** [0047](0047-cockpit-instrument-descriptor-and-slot-composition.md) (`Instrument`, `CockpitInstrumentDescriptor`, слот vs композитор vs поверхность), [0063](0063-instrument-deck-named-composition-one-anchor.md) (две оси: форма представления vs композиция в якоре), [0039](0039-workspace-navigation-affordances.md) (навигация, MCP, subgraph), [0053](0053-semantic-map-control-flow-pfd.md) / [0056](0056-semantic-map-pipeline-adoption.md) (карта кода, control flow), [0062](0062-git-submodules-semantic-map-subgraph.md) (GitMap / дерево submodules), [0055](0055-skia-instrument-composition-pipeline.md) (pipeline внутри Skia-инструмента), [0067](0067-graph-backed-surfaces-contract.md) (общий контракт **graph-backed surface**; `graph_kind` — ось данных внутри семейства).
 
 ---
 
@@ -15,9 +15,9 @@
 - **`slot_id`** (куда в зоне внимания — PFD, MFD, …) — см. [0047 §1](0047-cockpit-instrument-descriptor-and-slot-composition.md#adr0047-p1);
 - **`instrument_id`** (какой именованный выбор смонтировать в слот) — см. [0047 §1–2](0047-cockpit-instrument-descriptor-and-slot-composition.md#adr0047-p1);
 - **данные** (граф навигации, CFG, git-дерево, канал CDS);
-- **продуктовые имена** («Semantic Map» в меню, `workspace_navigation_map` в коде).
+- **продуктовые имена** («Карта кода» в меню, `workspace_navigation_map` в коде).
 
-[0047](0047-cockpit-instrument-descriptor-and-slot-composition.md) уже развёл **инструмент** и **`Control`**, но **не вводит** явной оси «**какого рода смысл** у этого инструмента для пилота и агента». В результате одно и то же слово («workspace», «semantic map») читается то как **домен данных**, то как **id прибора**, то как **название графа**.
+[0047](0047-cockpit-instrument-descriptor-and-slot-composition.md) уже развёл **инструмент** и **`Control`**, но **не вводит** явной оси «**какого рода смысл** у этого инструмента для пилота и агента». В результате одно и то же слово («workspace», «карта кода» / устар. *semantic map*) читается то как **домен данных**, то как **id прибора**, то как **название графа**.
 
 Нужна **устойчивая, узкая таксономия категорий** — не замена `instrument_id` и не дублирование [0063](0063-instrument-deck-named-composition-one-anchor.md) (там другие оси: `ContentRepresentation` vs deck).
 
@@ -36,7 +36,7 @@
 
 <a id="adr0065-p2"></a>
 
-2. **Semantic Map** в узком продуктовом смысле — это **семантическая карта намерений кода** (какие шаги, ветви и намерения в потоке метода/фрагмента кода отражены на карте), **не** «любой граф смысловых связей» вообще и **не** синоним `Instrument` и **не** место отрисовки. Отображение по-прежнему через инструмент (например `workspace_navigation_map` в слоте PFD) и pipeline [0055](0055-skia-instrument-composition-pipeline.md). Общий wire-контейнер (`CodeNavigationMapSubgraphDocument` и JSON MCP) может нести **разные виды графов** — см. [п.6](#adr0065-p6).
+2. **«Карта кода»** в узком продуктовом смысле — это **семантическая карта намерений кода** (какие шаги, ветви и намерения в потоке метода/фрагмента кода отражены на карте), **не** «любой граф смысловых связей» вообще и **не** синоним `Instrument` и **не** место отрисовки. Отображение по-прежнему через инструмент (например `workspace_navigation_map` в слоте PFD) и pipeline [0055](0055-skia-instrument-composition-pipeline.md). Общий wire-контейнер (`CodeNavigationMapSubgraphDocument` и JSON MCP) может нести **разные виды графов** — см. [п.6](#adr0065-p6).
 
 <a id="adr0065-p3"></a>
 
@@ -64,7 +64,7 @@
 
    | `graph_kind` | Смысл |
    |----------------|--------|
-   | `code_intent_code_navigation_map` | **Семантическая карта намерений кода** — узкий смысл продукта **Semantic Map**: какие намерения и шаги в потоке кода отражены на карте; отображение control flow на PFD — в этом же контексте ([0053](0053-semantic-map-control-flow-pfd.md)). (Устар. имя `code_intent_semantic_map` в парсере по-прежнему принимается.) |
+   | `code_intent_code_navigation_map` | **Семантическая карта намерений кода** — узкий смысл продукта **«Карта кода»**: какие намерения и шаги в потоке кода отражены на карте; отображение control flow на PFD — в этом же контексте ([0053](0053-semantic-map-control-flow-pfd.md)). (Устар. имя `code_intent_semantic_map` в парсере по-прежнему принимается.) |
    | `related_files` | Граф **связанных файлов** (peer, тест, XAML и т.д.), не «карта намерений кода». |
    | `repository_module_tree` | **Дерево модулей / submodules** ([0062](0062-git-submodules-semantic-map-subgraph.md)). |
 

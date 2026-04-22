@@ -78,7 +78,7 @@
                            Opacity="0.85"
                            Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
                            IsVisible="{Binding !ShowCodeNavigationMapList}"
-                           Text="Список отключён: в [semantic_map] view задай list или both. Граф остаётся на PFD (Semantic Map)."/>
+                           Text="Список отключён: в [code_navigation_map] view задай list или both. Граф остаётся на PFD (карта кода)."/>
             </Panel>
         </Grid>
     </Grid>
