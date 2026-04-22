@@ -7,7 +7,7 @@
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:BEGIN -->
 
-`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~6.5k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~5.4k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.1k**); счётчики — ориентир по состоянию репозитория (авто: 2026-04). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
+`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~6.7k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~5.6k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.1k**); счётчики — ориентир по состоянию репозитория (авто: 2026-04). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:END -->
 
@@ -22,14 +22,14 @@
 | `MainWindowViewModel.AutonomousAgent.cs` | 113 | Автономный агент (Power). |
 | `MainWindowViewModel.Breakpoints.cs` | 135 | Брейкпоинты (IDE + .dotnet-debug-mcp-breakpoints.json + отладчик) и подсветка строки остановки. |
 | `MainWindowViewModel.Capabilities.cs` | 23 | Реестр capabilities. |
-| `MainWindowViewModel.CascadeChord.cs` | 319 | Аккордный слой ADR 0060: корень `cascade_chord` из hotkeys.toml (по умолчанию Ctrl+K), затем тот же хвост мелодии, что после `c:` в палитре (см. `IntentMelodyAliases`), без префикса `c:` и без Enter — если alias однозначен (например `so`). При конфликте префиксов (например `gs` vs `gsu`) точное совпадение после полного ввода или по клавише Enter. |
-| `MainWindowViewModel.CommandPalette.cs` | 506 | Палитра команд. |
+| `MainWindowViewModel.CascadeChord.cs` | 426 | Аккордный слой ADR 0060: корень `cascade_chord` из hotkeys.toml (по умолчанию Ctrl+K), затем тот же хвост мелодии, что после `c:` в палитре (см. `IntentMelodyAliases`), без префикса `c:` и без Enter — если alias однозначен (например `so`). При конфликте префиксов (например `gs` vs `gsu`) точное совпадение после полного ввода или по клавише Enter. |
+| `MainWindowViewModel.CommandPalette.cs` | 550 | Палитра команд. |
 | `MainWindowViewModel.cs` | 377 | Главный композитор окна (partial-класс, несколько `MainWindowViewModel*.cs`). Карта файлов и ответственности — `docs/architecture-migration.md`, раздел «Срез MainWindowViewModel». |
 | `MainWindowViewModel.CSharpLsp.cs` | 112 | Запуск/перезапуск C# LSP. |
 | `MainWindowViewModel.CursorAcp.cs` | 36 | Путь Cursor ACP и предпочитаемая модель. |
 | `MainWindowViewModel.DockInstrumentSlots.cs` | 28 | Какой инструмент показан в слотах PFD/MFD главного окна — по `InstrumentPlacementRuntime` и `DisplaySettings` (в т.ч. `[display.instrument_routing]` и merge `workspace.toml`). Логика — `MainWindowDockedGridInstrumentSlots`. |
 | `MainWindowViewModel.DocumentsDock.cs` | 43 | Документы / dock. |
-| `MainWindowViewModel.EditorHud.cs` | 77 | Полоса HUD над редактором (ADR 0021 §9): баннеры без отдельного якоря-колонки. Основной сценарий продукта — внешний агент (например Cursor) + Cascade; текст сюда задаётся явно (MCP, диагностика, позже — встроенная автономия), а не «по умолчанию» от автономного цикла Power. |
+| `MainWindowViewModel.EditorHud.cs` | 101 | Полоса HUD над редактором (ADR 0021 §9): баннеры без отдельного якоря-колонки. Основной сценарий продукта — внешний агент (например Cursor) + Cascade; текст сюда задаётся явно (MCP, диагностика, позже — встроенная автономия), а не «по умолчанию» от автономного цикла Power. |
 | `MainWindowViewModel.EditorOllama.cs` | 43 | Состояние редактора, Markdown и выбора модели Ollama. |
 | `MainWindowViewModel.Eicas.cs` | 17 | Канал EICAS / CAS — отдельно от полосы телеметрии контура работы (ADR 0021, вариант A). |
 | `MainWindowViewModel.EnvironmentReadiness.cs` | 64 | Снимок «готовность окружения» (ADR 0023), отдельно от Workspace Health. |
@@ -60,7 +60,7 @@
 | `MainWindowViewModel.ViewBridge.cs` | 62 | Колбэки и провайдеры, которые View подставляет в главный VM (диалоги, UI automation). |
 | `MainWindowViewModel.WorkspaceHealth.cs` | 21 | Связка с Workspace Health. |
 | `MainWindowViewModel.WorkspaceNavigationMap.cs` | 371 | Слот Pfd: отображение семантической карты (те же данные, что JSON MCP). Semantic Map — граф связей, не название прибора. По доменам: карта кода (в т.ч. control flow) — CodeNavigation; зависимости файлов — WorkspaceNavigation; submodules — дерево/GitMap (ADR 0062). |
-| `MainWindowViewModel.WorkspaceSplitters.cs` | 30 | Сплиттеры рабочей области (MainGrid, обозреватель решения, Git и т.д.): режим «взлёт» — блокировка перетаскивания. |
+| `MainWindowViewModel.WorkspaceSplitters.cs` | 23 | Сплиттеры рабочей области (MainGrid, обозреватель решения, Git и т.д.): режим «взлёт» — блокировка перетаскивания. |
 
 <!-- AUTO:MAIN-WINDOW-SLICE:MWVM-TABLE:END -->
 
@@ -72,7 +72,7 @@
 |------|------------|------------|
 | `IdeMcpCommandExecutor.cs` | 64 | Диспетчер MCP-команд IDE: разбор args и вызов `IIdeMcpActions` / UI-команд главного окна. |
 | `IdeMcpCommandExecutor.Handlers.AgentNotes.cs` | 70 | Хендлеры agent-notes. |
-| `IdeMcpCommandExecutor.Handlers.Chrome.cs` | 347 | Хендлеры хрома / видимости. |
+| `IdeMcpCommandExecutor.Handlers.Chrome.cs` | 353 | Хендлеры хрома / видимости. |
 | `IdeMcpCommandExecutor.Handlers.DapDebug.cs` | 88 | DAP / отладка. |
 | `IdeMcpCommandExecutor.Handlers.DebuggerUi.cs` | 65 | Поверхность отладки. |
 | `IdeMcpCommandExecutor.Handlers.Editor.cs` | 108 | Редактор. |
