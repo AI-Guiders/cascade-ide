@@ -3,7 +3,7 @@
 namespace CascadeIDE.Services;
 
 /// <summary>
-/// Короткий сценарный API для <b>карты кода</b> (CodeNavigation) поверх <see cref="CodeNavigationMapSubgraphBlueprint"/> (те же виды шагов, что и у
+/// Короткий сценарный API для <b>карты намерений</b> (CodeNavigation) поверх <see cref="CodeNavigationMapSubgraphBlueprint"/> (те же виды шагов, что и у
 /// <see cref="CascadeIDE.Services.CodeNavigation.CodeNavigationControlFlowSubgraphBuilder"/>):
 /// <list type="bullet">
 /// <item><description><see cref="DrawFunction"/> — <c>call_step</c>, ребро <c>Call</c>;</description></item>

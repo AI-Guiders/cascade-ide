@@ -8,7 +8,7 @@ namespace CascadeIDE.Services.Navigation;
 
 /// <summary>
 /// Оркестратор компоновки <b>семантической карты</b> (граф → сцена для отрисовки): уровень карты → движок раскладки + политика высоты.
-/// «Карта кода» (control flow) — <b>CodeNavigation</b>; режим файлов/связей — <b>WorkspaceNavigation</b> (см. <see cref="Models.CodeNavigationMapLevelKind"/>).
+/// «Карта намерений» (control flow) — <b>CodeNavigation</b>; режим файлов/связей — <b>WorkspaceNavigation</b> (см. <see cref="Models.CodeNavigationMapLevelKind"/>).
 /// Поверхность Skia compositor занимается размещением в слотах кокпита, а не смыслом узлов.
 /// </summary>
 public sealed class CodeNavigationMapCompositor : ICodeNavigationMapCompositor

@@ -27,6 +27,6 @@ public enum MfdShellPage
     SolutionExplorer = 12,
     /// <summary>Markdown preview как MFD-first tool surface.</summary>
     MarkdownPreview = 13,
-    /// <summary>Связанные файлы (related) по якорю — <b>WorkspaceNavigation</b> списком; не дублирует колонку PFD с картой кода (граф/CF — <b>CodeNavigation</b>, ADR 0088).</summary>
+    /// <summary>Связанные файлы (related) по якорю — <b>WorkspaceNavigation</b> списком; не дублирует колонку PFD с картой намерений (граф/CF — <b>CodeNavigation</b>, ADR 0088).</summary>
     RelatedFiles = 14,
 }

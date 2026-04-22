@@ -56,33 +56,33 @@
 | [0044](0044-avalonia-host-skia-agent-chat-surface.md) | Avalonia как хост (фюзеляж), кастомная отрисовка чата (Skia — гипотеза); **модель первична**, спайк следом; см. ADR 0031 | Proposed |
 | [0045](0045-agent-chat-persistence-event-log-and-projections.md) | Persistence истории чата: append-only NDJSON события + метаданные и проекции; UI/рендер не источник правды | Proposed |
 | [0046](0046-presentation-layout-authority-and-cockpit-invariants.md) | CDS: `CockpitPresentationLayoutPolicy` и инварианты P/F/M; `presentation` как источник истины для меню/MCP/режимов/реактивного слоя | Accepted · Implemented |
-| [0047](0047-cockpit-instrument-descriptor-and-slot-composition.md) | Инструмент кабины (`Instrument`): дескриптор слота (`CockpitInstrumentDescriptor`), не `Control`; SE vs карта кода как примеры | Accepted · Implemented |
+| [0047](0047-cockpit-instrument-descriptor-and-slot-composition.md) | Инструмент кабины (`Instrument`): дескриптор слота (`CockpitInstrumentDescriptor`), не `Control`; SE vs карта намерений как примеры | Accepted · Implemented |
 | [0048](0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) | Чат через Cursor ACP в IDE: `mcpServers`, авто IDE MCP; приложения — пробелы тулов, разбор `mcp.json` ↔ CIDE | Proposed |
 | [0049](0049-skia-surface-rollout-over-avalonia-host.md) | Поэтапный rollout Skia-поверхностей по CIDE при Avalonia-host; миграция волнами и dual-path | Proposed |
 | [0050](0050-declarative-instrument-zone-placement-toml.md) | Декларативная карта «инструмент → зона/слот» в TOML | Accepted · Implemented |
 | [0051](0051-intent-based-attention-routing-toml.md) | Intent-based attention routing (TOML) | Accepted · Implemented |
 | [0052](0052-agent-contract-cli-and-snapshot-tests.md) | CLI для контракта агента (паритет с MCP) и снапшот-тесты | Accepted · Implemented |
-| [0053](0053-semantic-map-control-flow-pfd.md) | Карта кода и поток управления на PFD (control flow, KISS, subgraph) | Accepted · Implemented |
+| [0053](0053-semantic-map-control-flow-pfd.md) | Карта намерений и поток управления на PFD (control flow, KISS, subgraph) | Accepted · Implemented |
 | [0054](0054-benchmarking-methodology-and-baselines.md) | Бенчмарки производительности и baseline-метрики для CIDE | Proposed |
 | [0055](0055-skia-instrument-composition-pipeline.md) | Общий pipeline композиции Skia-инструментов (Intent -> Declutter -> Layout -> Render) | Accepted |
-| [0056](0056-semantic-map-pipeline-adoption.md) | Карта кода: внедрение общего Skia pipeline (композитор, controlFlow layout, cursor semantics) | Accepted · Implemented |
+| [0056](0056-semantic-map-pipeline-adoption.md) | Карта намерений: внедрение общего Skia pipeline (композитор, controlFlow layout, cursor semantics) | Accepted · Implemented |
 | [0057](0057-chat-surface-pipeline-adoption.md) | Chat surface: adoption общего Skia pipeline (threads, confirmations, dual-path rollout) | Accepted |
 | [0058](0058-agent-roslyn-mcp-coupling-settings-toml.md) | Сопряжение агента и Roslyn MCP в `settings.toml` (лимиты, виды узлов, таймауты, пресеты) | Proposed |
 | [0059](0059-roslyn-mcp-profiles-manager-tactical-strategic-efb.md) | Профили Roslyn MCP, Manager, тактика (PFD) / EFB на MFD, Auto-Focus / Combat / Echelon | Proposed |
 | [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md) | Аккордный слой (Ctrl+K), FMS-style, S/T, overlay; расширение ADR 0013 | Proposed |
 | [0061](0061-context-aware-adr-map-pfd-knowledge-indicator.md) | Контекстная карта ADR ↔ пути в `workspace.toml`, индикатор на PFD, intent/tooltip, advisory для агента (GPWS для доков) | Proposed (реализация отложена) |
-| [0062](0062-git-submodules-semantic-map-subgraph.md) | **GitMap:** submodules и git-границы **отдельно** от WSNC/карты кода; общий Skia pipeline; собственный контракт/MCP; [git-and-submodules-v1](../git-and-submodules-v1.md) | Proposed |
+| [0062](0062-git-submodules-semantic-map-subgraph.md) | **GitMap:** submodules и git-границы **отдельно** от WSNC/карты намерений; общий Skia pipeline; собственный контракт/MCP; [git-and-submodules-v1](../git-and-submodules-v1.md) | Proposed |
 | [0063](0063-instrument-deck-named-composition-one-anchor.md) | **Instrument deck** + **`ContentRepresentation`**; таксономия примитивов (в т.ч. Readout, Trend, Gauge, Presence); **Presence/Activity vs Dark Cockpit**; `DedicatedPage` — режим Page для WH, не deck | Accepted |
 | [0064](0064-deck-primitives-visual-language-render-layer-and-palette.md) | **Виды индикаторов** deck: единое графическое воплощение; **библиотека отрисовки** + **семантическая палитра**; без лишнего архитектурного слоя; `DeckPrimitiveKind` = каталог видов | Accepted |
-| [0065](0065-instrument-categories-domain-taxonomy.md) | **Категории инструментов** и **типы графов** (`graph_kind`): домен ортогонально слоту/`instrument_id`; «Карта кода» = карта **намерений кода**; см. таблицу `graph_kind` | Accepted |
+| [0065](0065-instrument-categories-domain-taxonomy.md) | **Категории инструментов** и **типы графов** (`graph_kind`): домен ортогонально слоту/`instrument_id`; «Карта намерений» = карта **намерений кода**; см. таблицу `graph_kind` | Accepted |
 | [0066](0066-cockpit-ui-vs-ide-presentation-layer.md) | **Cockpit UI** vs **presentation IDE** (хром, оверлеи, тема): две опоры; не смешивать приборы/deck с оболочкой; `PrimitivesKit` vs `UiChrome` | Accepted |
-| [0067](0067-graph-backed-surfaces-contract.md) | **Graph-backed surfaces:** общий контракт для семейства графовых экранов (данные, взаимодействие, навигация, layout, выделение, sync); карта кода, GitMap, будущие графы | Accepted |
+| [0067](0067-graph-backed-surfaces-contract.md) | **Graph-backed surfaces:** общий контракт для семейства графовых экранов (данные, взаимодействие, навигация, layout, выделение, sync); карта намерений, GitMap, будущие графы | Accepted |
 | [0068](0068-deck-row-payload-and-presentation-projection.md) | **Полезная нагрузка строки канала** vs **проекция представления** vs **слот**: таблица/полоса ≠ тип ячейки; v1 — один DTO; гетерогенность — дискриминатор и шаблоны | Accepted |
 | [0069](0069-markdown-preview-tool-surface-and-renderer-decoupling.md) | **Markdown Preview:** MFD tool как primary surface, native Markdig renderer first, WebView как optional adaptor; authoring-расширение ортогонально preview | Accepted |
 | [0070](0070-command-palette-direct-overlay-surface.md) | **Command Palette:** прямой overlay surface в host, маршрутизация в активный `TopLevel`; `ModalOverlay` не канон для palette baseline | Accepted |
 | [0071](0071-ai-assistance-sovereignty-locality-invisibility.md) | **AI / ассистент в IDE:** суверенитет, локальность, невидимость; анти-паттерн «облачный inline по умолчанию без контроля»; нарратив — [cascadeide-philosophy-v1](../design/cascadeide-philosophy-v1.md) | Proposed |
 | [0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md) | **Чат:** topic cards, drill-in/back, adaptive default; intent-based Melody/Chords v1 для навигации по темам; уточняет [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md) в chat-domain | Proposed |
-| [0073](0073-pfd-instrument-deck.md) | **PFD instrument deck:** каталог вариантов состава (SA, code metrics, карта кода, ADR indicator…); критерии «PFD vs по запросу»; живой черновик до выбора пресета | Proposed |
+| [0073](0073-pfd-instrument-deck.md) | **PFD instrument deck:** каталог вариантов состава (SA, code metrics, карта намерений, ADR indicator…); критерии «PFD vs по запросу»; живой черновик до выбора пресета | Proposed |
 | [0074](0074-settings-ui-mfd-compact-layout-overflow.md) | **Настройки:** компактнее, якорь на **MFD**; нехватка места в **P+F+M** — таблица стратегий (scroll, min width, fallback-окно, …) | Proposed |
 | [0075](0075-ui-topic-index-and-mfd-page-conventions.md) | **UI:** тематический указатель [`UI/README.md`](UI/README.md); соглашения по страницам MFD (payload vs проекция, keyboard-first); не заменяет плоский индекс | Proposed |
 | [0076](0076-ui-ux-principles-hub.md) | **UI/UX:** центр принципов — связный текст из [`snippets/ui/`](snippets/ui/README.md) (внимание/кокпит, философия продукта); не заменяет исходные ADR | Proposed |

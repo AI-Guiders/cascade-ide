@@ -41,7 +41,7 @@ public sealed class CodeNavigationMapSettings
         return CodeNavigationMapLevelKind.File;
     }
 
-    /// <summary>Соответствует <see cref="DetailLevel"/> и вызову композитора карты кода.</summary>
+    /// <summary>Соответствует <see cref="DetailLevel"/> и вызову композитора карты намерений.</summary>
     public CodeNavigationMapDetailLevel NormalizedDetailLevel => NormalizeDetailLevel(DetailLevel);
 
     public static CodeNavigationMapDetailLevel NormalizeDetailLevel(string? value)

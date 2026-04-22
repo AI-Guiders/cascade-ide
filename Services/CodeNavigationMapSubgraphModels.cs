@@ -27,11 +27,11 @@ public enum CodeNavigationMapGraphKind : byte
 
 /// <summary>
 /// Wire-модель подграфа для композиции сцены (тот же JSON, что MCP <c>get_code_navigation_context</c>, режим <c>subgraph</c>).
-/// Продуктово в UI — <b>карта кода</b> (семантическая карта <b>намерений кода</b>), не общий «граф смысловых связей»; тот же контейнер может нести и другие графы (связанные файлы, дерево модулей) — см. ADR 0065, ось <c>graph_kind</c>.
+/// Продуктово в UI — <b>карта намерений</b>: подграф вокруг якоря (семантика <b>намерений кода</b> и потока), не карта всего решения и не общий «граф смысловых связей»; тот же контейнер может нести и другие графы (связанные файлы, дерево модулей) — см. ADR 0065, ось <c>graph_kind</c>.
 /// <list type="bullet">
-/// <item><description><b>Карта кода</b> (control flow, шаги метода, предикаты) — домен <b>CodeNavigation</b> (<see cref="CodeNavigationContextBuilder"/>, <see cref="CodeNavigation.CodeNavigationControlFlowSubgraphBuilder"/>).</description></item>
+/// <item><description><b>Карта намерений</b> (control flow, шаги метода, предикаты) — домен <b>CodeNavigation</b> (<see cref="CodeNavigationContextBuilder"/>, <see cref="CodeNavigation.CodeNavigationControlFlowSubgraphBuilder"/>).</description></item>
 /// <item><description><b>Зависимости / связанные файлы</b> по эвристикам дерева решения — <b>WorkspaceNavigation</b> (см. те же поля в JSON).</description></item>
-/// <item><description><b>Git submodules</b> — отдельно: <b>дерево</b> / GitMap (ADR 0062), не путать с «картой кода» и не с картой файловых зависимостей.</description></item>
+/// <item><description><b>Git submodules</b> — отдельно: <b>дерево</b> / GitMap (ADR 0062), не путать с «картой намерений» и не с картой файловых зависимостей.</description></item>
 /// </list>
 /// Префикс типов <c>CodeNavigationMap*</c> (в т.ч. сцена/рендер) указывает на <b>карту и композицию</b>; сценарий данных задаёт <see cref="Kind"/> и источник.
 /// </summary>

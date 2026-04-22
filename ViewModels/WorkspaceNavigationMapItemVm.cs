@@ -1,6 +1,6 @@
 namespace CascadeIDE.ViewModels;
 
-/// <summary>Строка списка карты кода (режим <c>related</c>, ADR 0039).</summary>
+/// <summary>Строка списка карты намерений (режим <c>related</c>, ADR 0039).</summary>
 public sealed class WorkspaceNavigationMapItemVm
 {
     public required string FullPath { get; init; }

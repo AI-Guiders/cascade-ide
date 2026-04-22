@@ -28,7 +28,7 @@
 
 **Рабочее имя:** **GitMap** — мини-карта (и при необходимости список) **git-соседей**: родительский репозиторий, вложенные submodules, рёбра «содержит / вложен».
 
-**Переиспользование:** тот же **Skia pipeline** композиции, что и у Semantic Map ([0055](0055-skia-instrument-composition-pipeline.md), [0056](0056-semantic-map-pipeline-adoption.md)): Intent → (опционально) Declutter → Layout → Render — с **другим** источником графа (git-метаданные, не `CodeNavigationContextBuilder`) и, при необходимости, **другим** инструментом/слотом в PFD ([0047](0047-cockpit-instrument-descriptor-and-slot-composition.md)), чтобы не смешивать «карту кода» и «карту репозиториев» в одном виджете.
+**Переиспользование:** тот же **Skia pipeline** композиции, что и у Semantic Map ([0055](0055-skia-instrument-composition-pipeline.md), [0056](0056-semantic-map-pipeline-adoption.md)): Intent → (опционально) Declutter → Layout → Render — с **другим** источником графа (git-метаданные, не `CodeNavigationContextBuilder`) и, при необходимости, **другим** инструментом/слотом в PFD ([0047](0047-cockpit-instrument-descriptor-and-slot-composition.md)), чтобы не смешивать «карту намерений» и «карту репозиториев» в одном виджете.
 
 Семантическая карта (**Semantic Map**) остаётся про **код и задачу**; **GitMap** — про **где в git-дереве я и что за соседние репозитории**.
 

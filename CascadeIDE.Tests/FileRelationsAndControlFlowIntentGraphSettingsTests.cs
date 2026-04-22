@@ -18,7 +18,7 @@ public sealed class FileRelationsAndControlFlowIntentGraphSettingsTests
     }
 
     /// <summary>
-    /// Регресс: обновление карты кода по курсору в CF должно опираться на
+    /// Регресс: обновление карты намерений по курсору в CF должно опираться на
     /// <c>[code_navigation.file_relations_and_control_flow_intent_graph].depth</c>, как и основной refresh.
     /// </summary>
     [Theory]

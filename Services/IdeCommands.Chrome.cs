@@ -14,7 +14,7 @@ public static partial class IdeCommands
     public const string ExitApplication = "exit_application";
 
     // ——— Вид: панели (явная установка + переключатели)
-    /// <summary>Развернуть/свернуть регион Pfd в main grid (карта кода в зоне Pfd). args: visible:boolean; returns: text; example: {"visible":true}.</summary>
+    /// <summary>Развернуть/свернуть регион Pfd в main grid (карта намерений в зоне Pfd). args: visible:boolean; returns: text; example: {"visible":true}.</summary>
     public const string SetPfdRegionExpanded = "set_pfd_region_expanded";
     /// <summary>Развернуть/свернуть регион Mfd в main grid. args: visible:boolean; returns: text; example: {"visible":true}.</summary>
     public const string SetMfdRegionExpanded = "set_mfd_region_expanded";
@@ -85,7 +85,7 @@ public static partial class IdeCommands
     public const string About = "about";
 
     // ——— Тулбар: показать панели / скрыть вывод сборки
-    /// <summary>Развернуть регион Pfd / карту кода (toolbar). returns: text.</summary>
+    /// <summary>Развернуть регион Pfd / карту намерений (toolbar). returns: text.</summary>
     public const string ShowPfdRegionPanel = "show_pfd_region_panel";
     /// <summary>Явно показать панель вывода сборки (toolbar). returns: text.</summary>
     public const string ShowBuildOutputPanel = "show_build_output_panel";

@@ -142,7 +142,7 @@ public sealed class CodeNavigationMapSubgraphBlueprint
 
     #endregion
 
-    /// <summary>Снимок для композитора карты кода и разбора subgraph без повторного копирования полей.</summary>
+    /// <summary>Снимок для композитора карты намерений и разбора subgraph без повторного копирования полей.</summary>
     public CodeNavigationMapSubgraphDocument ToDocument() =>
         new()
         {

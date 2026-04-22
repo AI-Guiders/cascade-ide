@@ -4,7 +4,7 @@ using CascadeIDE.ViewModels;
 
 namespace CascadeIDE.Services.CodeNavigation;
 
-/// <summary>Стабильные id внутренних блоков прибора карты кода (ADR 0088 §2.4) — не путать с <c>cell_id</c> deck региона.</summary>
+/// <summary>Стабильные id внутренних блоков прибора карты намерений (ADR 0088 §2.4) — не путать с <c>cell_id</c> deck региона.</summary>
 public static class CodeNavigationMapInstrumentBlockIds
 {
     public const string Graph = "code_navigation.pfd_instrument.block.graph";

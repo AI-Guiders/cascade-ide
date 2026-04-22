@@ -14,8 +14,8 @@ using CommunityToolkit.Mvvm.Input;
 namespace CascadeIDE.ViewModels;
 
 /// <summary>
-/// Слот Pfd: <b>отображение</b> карты кода / <see cref="CodeNavigationMapSubgraphDocument"/> (те же данные, что JSON MCP). Граф подграфа — не синоним <c>instrument_id</c>, см. ADR 0065.
-/// По доменам: <b>карта кода</b> (в т.ч. control flow) — CodeNavigation; <b>зависимости файлов</b> — WorkspaceNavigation; <b>submodules</b> — дерево/GitMap (ADR 0062).
+/// Слот Pfd: <b>отображение</b> карты намерений / <see cref="CodeNavigationMapSubgraphDocument"/> (те же данные, что JSON MCP). Граф подграфа — не синоним <c>instrument_id</c>, см. ADR 0065.
+/// По доменам: <b>карта намерений</b> (в т.ч. control flow) — CodeNavigation; <b>зависимости файлов</b> — WorkspaceNavigation; <b>submodules</b> — дерево/GitMap (ADR 0062).
 /// </summary>
 public partial class MainWindowViewModel
 {
@@ -134,7 +134,7 @@ public partial class MainWindowViewModel
         WorkspaceNavigationMapRelatedCount > 0
         || (CodeNavigationMapGraphScene?.Nodes.Count > 1);
 
-    /// <summary>Открыть связанный файл из карты кода (список related / узел графа).</summary>
+    /// <summary>Открыть связанный файл из карты намерений (список related / узел графа).</summary>
     [RelayCommand]
     private void OpenWorkspaceNavigationRelated(string? path)
     {

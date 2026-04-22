@@ -7,14 +7,14 @@ using CascadeIDE.ViewModels;
 
 namespace CascadeIDE.Services.Navigation;
 
-/// <summary>Контекст запроса на композицию карты кода.</summary>
+/// <summary>Контекст запроса на композицию карты намерений.</summary>
 public readonly record struct CodeNavigationMapPipelineContext(
     CodeNavigationMapSubgraphDocument Subgraph,
     string MapLevel,
     SkiaInstrumentViewport Viewport,
     CodeNavigationMapDetailLevel DetailLevel = CodeNavigationMapDetailLevel.Normal);
 
-/// <summary>Промежуточное состояние pipeline карты кода.</summary>
+/// <summary>Промежуточное состояние pipeline карты намерений.</summary>
 public readonly record struct CodeNavigationMapPipelineState(
     CodeNavigationMapSubgraphDocument Subgraph,
     string MapLevel,

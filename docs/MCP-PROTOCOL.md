@@ -147,7 +147,7 @@
 | `set_git_panel_visible` | Показать/скрыть панель Git (нижняя вкладка). args: visible:boolean; returns: text; example: {"visible":true}. |
 | `set_instrumentation_dock_visible` | Показать/скрыть док инструментирования (Events/Tests/Debug). args: visible:boolean; returns: text; example: {"visible":true}. |
 | `set_mfd_region_expanded` | Развернуть/свернуть регион Mfd в main grid. args: visible:boolean; returns: text; example: {"visible":true}. |
-| `set_pfd_region_expanded` | Развернуть/свернуть регион Pfd в main grid (карта кода в зоне Pfd). args: visible:boolean; returns: text; example: {"visible":true}. |
+| `set_pfd_region_expanded` | Развернуть/свернуть регион Pfd в main grid (карта намерений в зоне Pfd). args: visible:boolean; returns: text; example: {"visible":true}. |
 | `toggle_git_panel` | Переключить видимость панели Git (toggle). returns: text. |
 | `toggle_instrumentation_dock` | Переключить видимость дока инструментирования (toggle). returns: text. |
 | `toggle_mfd_region_expanded` | Переключить развёрнут/свёрнут регион Mfd (toggle). returns: text. |
@@ -199,7 +199,7 @@
 | `hide_build_output_panel` | Скрыть панель вывода сборки (toolbar). returns: text. |
 | `show_build_output_panel` | Явно показать панель вывода сборки (toolbar). returns: text. |
 | `show_chat_page` | Развернуть регион Mfd и перейти на страницу Chat (toolbar). returns: text. |
-| `show_pfd_region_panel` | Развернуть регион Pfd / карту кода (toolbar). returns: text. |
+| `show_pfd_region_panel` | Развернуть регион Pfd / карту намерений (toolbar). returns: text. |
 | `show_related_files_mfd_page` | Развернуть регион Mfd и открыть страницу «Связанные файлы» (related; workspace). returns: text. |
 | `show_solution_explorer_page` | Развернуть регион Mfd и перейти на страницу обозревателя решения (toolbar). returns: text. |
 | `show_terminal_panel` | Явно показать терминал (toolbar). returns: text. |
@@ -332,9 +332,9 @@
 | `chat_toggle_selected_thinking` | Переключить у выбранного thinking-сообщения свёрнутый/полный вид. returns: text. |
 | `chat_toggle_show_thinking_in_history` | Переключить настройку show_thinking_in_history (keyboard-first toggle). returns: text. |
 | `close_document` | Закрыть документ. args: file_path:string; returns: text; example: {"file_path":"C:\\\\tmp\\\\a.cs"}. |
-| `cycle_code_navigation_map_detail_level` | Карта кода: цикл детализации glance → normal → inspect (Ctrl+K → S → D). returns: text. |
-| `cycle_code_navigation_map_level` | Карта кода: переключить уровень file ↔ controlFlow (Ctrl+K → S → F). returns: text. |
-| `cycle_code_navigation_map_presentation` | Карта кода: цикл вида list → graph → both (палитра; быстрый путь — Ctrl+K → S → P). returns: text. |
+| `cycle_code_navigation_map_detail_level` | Карта намерений: цикл детализации glance → normal → inspect (Ctrl+K → S → D). returns: text. |
+| `cycle_code_navigation_map_level` | Карта намерений: переключить уровень file ↔ controlFlow (Ctrl+K → S → F). returns: text. |
+| `cycle_code_navigation_map_presentation` | Карта намерений: цикл вида list → graph → both (палитра; быстрый путь — Ctrl+K → S → P). returns: text. |
 | `focus_editor` | Передать фокус в редактор (чтобы клавиши/ввод шли в него). returns: text. |
 | `get_cockpit_surface` | Только CDS (`CockpitSurfaceState`): тот же payload, что поле `cockpit_surface` в `get_workspace_state`. returns: json. Для `--agent-contract` без полной сводки. |
 | `get_code_navigation_context` | Контекст навигации по коду (ADR 0039, CNC): связанные файлы или мини-подграф. Виды связей — partial_peer project_peer xaml_codebehind_pair test_counterpart same_namespace same_directory. Имена preset — из settings.toml `[code_navigation]` / `[[code_navigation.presets]]`. args: mode:string, file_path?:string, line?:integer, column?:integer, max_related?:integer, max_nodes?:integer, max_edges?:integer, preset?:string, include_kinds?:string[], exclude_kinds?:string[], level?:string; returns: json; example: {"mode":"related","file_path":"src/Foo.cs","preset":"no_namespace_noise","level":"controlFlow"}. |
@@ -352,7 +352,7 @@
 | `set_terminal_visible` | Явно показать/скрыть терминал (без переключения). args: visible:boolean; returns: text; example: {"visible":true}. |
 | `set_ui_mode` | Режим UI (как меню «Вид → Режим интерфейса»). args: mode:string; returns: text; example: {"mode":"Flight"}. |
 | `toggle_build_output` | Как меню «Вид → Вывод сборки». returns: text. |
-| `toggle_pfd_region_expanded` | Переключить развёрнут/свёрнут регион Pfd (как меню «Вид → Карта кода (PFD)»). returns: text. |
+| `toggle_pfd_region_expanded` | Переключить развёрнут/свёрнут регион Pfd (как меню «Вид → Карта намерений (PFD)»). returns: text. |
 | `toggle_pin_document` | Закрепить/открепить документ (pin). args: file_path:string; returns: text; example: {"file_path":"C:\\\\tmp\\\\a.cs"}. |
 | `toggle_terminal` | Как меню «Вид → Терминал» (переключатель). returns: text. |
 | `toggle_workspace_splitters_lock` | Сплиттеры рабочей области: переключить ON GND / IN AIR (мелодия tol, лампа TOL в task cockpit). returns: text. |

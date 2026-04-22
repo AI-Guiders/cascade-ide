@@ -2,7 +2,7 @@ using CascadeIDE.Models;
 
 namespace CascadeIDE.ViewModels;
 
-/// <summary>Режим панели карты кода: список, мини-граф или оба (ADR 0039, <c>[code_navigation_map].view</c>).</summary>
+/// <summary>Режим панели карты намерений: список, мини-граф или оба (ADR 0039, <c>[code_navigation_map].view</c>).</summary>
 public static class CodeNavigationMapPresentationKind
 {
     public const string List = "list";

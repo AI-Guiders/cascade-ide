@@ -18,7 +18,7 @@ public sealed class CodeNavigationMapSettingsTests
     }
 
     /// <summary>
-    /// Регресс: обновление карты кода по курсору в CF должно опираться на <c>[code_navigation_map].depth</c>,
+    /// Регресс: обновление карты намерений по курсору в CF должно опираться на <c>[code_navigation_map].depth</c>,
     /// как и основной refresh — иначе <c>CodeNavigationMapLevel</c> на VM и Depth расходятся, карта не следует за методом.
     /// </summary>
     [Theory]
