@@ -76,7 +76,12 @@ public sealed class SemanticMapControlFlowGraphLayoutEngine : ISemanticMapSubgra
         var showLegendReturnKey = doc.Nodes.Any(IsExitStep);
         var showLegendExceptionFlowKey = doc.Nodes.Any(static n =>
             string.Equals(n.Kind, "handler_step", StringComparison.OrdinalIgnoreCase));
-        var useLegendColumn = hasLegendRows || showLegendConditionKey || showLegendReturnKey || showLegendExceptionFlowKey;
+        ComputeEdgeStyleLegend(
+            doc.Edges,
+            out var showLegendEdgeStyleKey,
+            out var edgeStyleLegendRowCount);
+        var useLegendColumn = hasLegendRows || showLegendConditionKey || showLegendReturnKey
+            || showLegendExceptionFlowKey || showLegendEdgeStyleKey;
         var legendRowsPreview = hasLegendRows
             ? doc.Nodes
                 .Where(n =>
@@ -92,7 +97,8 @@ public sealed class SemanticMapControlFlowGraphLayoutEngine : ISemanticMapSubgra
             legendRowsPreview,
             showLegendReturnKey,
             showLegendConditionKey,
-            showLegendExceptionFlowKey);
+            showLegendExceptionFlowKey,
+            showLegendEdgeStyleKey);
         var fallbackFraction = width * SemanticMapGraphPrimitives.ControlFlowLegendReserveWidthFraction;
         var legendReserveCap = SemanticMapGraphPrimitives.ResolveControlFlowLegendReserveCap(width);
         var legendReserveLo = Math.Min(SemanticMapGraphPrimitives.ControlFlowLegendReserveMin, legendReserveCap);
@@ -238,6 +244,7 @@ public sealed class SemanticMapControlFlowGraphLayoutEngine : ISemanticMapSubgra
             ShowLegendConditionKey = showLegendConditionKey,
             ShowLegendReturnKey = showLegendReturnKey,
             ShowLegendExceptionFlowKey = showLegendExceptionFlowKey,
+            ShowLegendEdgeStyleKey = showLegendEdgeStyleKey,
             LegendColumnLeft = legendColumnLeft,
             LegendPlacement = SemanticMapLegendBlockPlacement.BesideGraph,
             LegendBlockTopY = 0,
@@ -263,6 +270,7 @@ public sealed class SemanticMapControlFlowGraphLayoutEngine : ISemanticMapSubgra
         var estimatedLegendH = SemanticMapGraphPrimitives.EstimateControlFlowLegendBlockHeight(
             legendRows.Count,
             hasShapeKeyRows,
+            edgeStyleLegendRowCount,
             capEst);
         var belowGap = SemanticMapGraphPrimitives.ControlFlowLegendBelowBlockGap;
         var graphH = height - estimatedLegendH - belowGap;
@@ -289,6 +297,7 @@ public sealed class SemanticMapControlFlowGraphLayoutEngine : ISemanticMapSubgra
             ShowLegendConditionKey = showLegendConditionKey,
             ShowLegendReturnKey = showLegendReturnKey,
             ShowLegendExceptionFlowKey = showLegendExceptionFlowKey,
+            ShowLegendEdgeStyleKey = showLegendEdgeStyleKey,
             LegendColumnLeft = sidePadding,
             LegendPlacement = SemanticMapLegendBlockPlacement.BelowGraph,
             LegendBlockTopY = legendTopY,
@@ -301,7 +310,8 @@ public sealed class SemanticMapControlFlowGraphLayoutEngine : ISemanticMapSubgra
         IReadOnlyList<SemanticMapLegendEntry> rows,
         bool showReturnKey,
         bool showConditionKey,
-        bool showExceptionKey)
+        bool showExceptionKey,
+        bool showEdgeStyleKey = false)
     {
         const double charPx = 6.15;
         const double idxPad = 36;
@@ -314,8 +324,41 @@ public sealed class SemanticMapControlFlowGraphLayoutEngine : ISemanticMapSubgra
         var keys = 0d;
         if (showReturnKey || showConditionKey || showExceptionKey)
             keys = idxPad + 96;
+        if (showEdgeStyleKey)
+            keys = Math.Max(keys, idxPad + 220);
 
         return Math.Max(body, keys) + margin;
+    }
+
+    /// <summary>Блок «стили рёбер» в легенде: только если в графе есть нестандартные рёбра (пунктир, цикл).</summary>
+    private static void ComputeEdgeStyleLegend(
+        IReadOnlyList<SemanticMapSubgraphEdge> edges,
+        out bool show,
+        out int rowCount)
+    {
+        static bool KindContains(string? kind, string needle) =>
+            !string.IsNullOrEmpty(kind) && kind.Contains(needle, StringComparison.OrdinalIgnoreCase);
+
+        var needsNonSolidLegend = edges.Any(e =>
+            KindContains(e.Kind, "conditional")
+            || KindContains(e.Kind, "exception")
+            || KindContains(e.Kind, "multibranch")
+            || KindContains(e.Kind, "loop"));
+        if (!needsNonSolidLegend)
+        {
+            show = false;
+            rowCount = 0;
+            return;
+        }
+
+        show = true;
+        rowCount = 1; // сплошная — контраст с пунктиром
+        if (edges.Any(e => KindContains(e.Kind, "conditional") || KindContains(e.Kind, "exception")))
+            rowCount++;
+        if (edges.Any(e => KindContains(e.Kind, "multibranch")))
+            rowCount++;
+        if (edges.Any(e => KindContains(e.Kind, "loop")))
+            rowCount++;
     }
 
     private static Dictionary<string, List<string>> BuildOutgoing(IReadOnlyList<SemanticMapSubgraphEdge> edges)

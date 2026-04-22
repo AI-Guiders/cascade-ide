@@ -32,6 +32,7 @@ public sealed class TraceFlowSurfaceCompositor : ITraceFlowSurfaceCompositor
             ShowLegendConditionKey = scene.ShowLegendConditionKey,
             ShowLegendReturnKey = scene.ShowLegendReturnKey,
             ShowLegendExceptionFlowKey = scene.ShowLegendExceptionFlowKey,
+            ShowLegendEdgeStyleKey = scene.ShowLegendEdgeStyleKey,
             LegendColumnLeft = scene.LegendColumnLeft,
             LegendPlacement = scene.LegendPlacement,
             LegendBlockTopY = scene.LegendBlockTopY,

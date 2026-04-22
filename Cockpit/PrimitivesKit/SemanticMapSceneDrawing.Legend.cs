@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Globalization;
 using Avalonia;
 using Avalonia.Media;
@@ -77,10 +78,27 @@ public static partial class SemanticMapSceneDrawing
         }
 
         var hasShapeKeys = scene.ShowLegendReturnKey || scene.ShowLegendConditionKey || scene.ShowLegendExceptionFlowKey;
-        if (!hasShapeKeys)
+        var hasAnyKeys = hasShapeKeys || scene.ShowLegendEdgeStyleKey;
+        if (!hasAnyKeys)
             return;
 
-        if (scene.Legend.Count > 0)
+        if (scene.Legend.Count > 0 && (scene.ShowLegendEdgeStyleKey || hasShapeKeys))
+            y += gapBeforeKeys;
+
+        if (scene.ShowLegendEdgeStyleKey)
+        {
+            y = DrawLegendEdgeStyleKeyBlock(
+                context,
+                theme,
+                x0,
+                y,
+                keyRowH,
+                captionSize,
+                h,
+                scene.Edges);
+        }
+
+        if (hasShapeKeys && scene.ShowLegendEdgeStyleKey)
             y += gapBeforeKeys;
 
         if (scene.ShowLegendReturnKey)
@@ -245,5 +263,61 @@ public static partial class SemanticMapSceneDrawing
             captionSize,
             theme.SideLabelBrush);
         context.DrawText(cap, new Point(x0 + iconR * 2 + 10, y + (rowH - cap.Height) / 2));
+    }
+
+    private static double DrawLegendEdgeStyleKeyBlock(
+        DrawingContext context,
+        SemanticMapVisualTheme theme,
+        double x0,
+        double y,
+        double keyRowH,
+        double captionSize,
+        double viewportBottom,
+        IReadOnlyList<SemanticMapGraphEdgeLayout> edges)
+    {
+        static bool KindContains(string? kind, string needle) =>
+            !string.IsNullOrEmpty(kind) && kind.Contains(needle, StringComparison.OrdinalIgnoreCase);
+
+        var hasNonSolid = edges.Any(e =>
+            KindContains(e.Kind, "conditional")
+            || KindContains(e.Kind, "exception")
+            || KindContains(e.Kind, "multibranch")
+            || KindContains(e.Kind, "loop"));
+        if (!hasNonSolid)
+            return y;
+
+        const double lineLen = 34d;
+        var lineLeft = x0 + 2;
+        var textX = lineLeft + lineLen + 10;
+
+        void OneRow(Pen pen, string text, ref double yRow)
+        {
+            if (yRow + keyRowH > viewportBottom - 4)
+                return;
+            var cy = yRow + keyRowH / 2;
+            context.DrawLine(
+                pen,
+                new Point(lineLeft, cy),
+                new Point(lineLeft + lineLen, cy));
+            var cap = new FormattedText(
+                text,
+                CultureInfo.InvariantCulture,
+                FlowDirection.LeftToRight,
+                theme.SideLabelTypeface,
+                captionSize,
+                theme.SideLabelBrush);
+            context.DrawText(cap, new Point(textX, yRow + (keyRowH - cap.Height) / 2));
+            yRow += keyRowH + 2;
+        }
+
+        // Совпадает с <see cref="SemanticMapSceneDrawing.Edges"/>: solid — основной поток.
+        OneRow(theme.BaseEdgePen, "основной поток (вызовы, return, последовательно)", ref y);
+        if (edges.Any(e => KindContains(e.Kind, "conditional") || KindContains(e.Kind, "exception")))
+            OneRow(theme.ConditionalEdgePen, "длинные штрихи — ветвления, catch, исключения", ref y);
+        if (edges.Any(e => KindContains(e.Kind, "multibranch")))
+            OneRow(theme.MultiBranchEdgePen, "короткие штрихи — switch", ref y);
+        if (edges.Any(e => KindContains(e.Kind, "loop")))
+            OneRow(theme.LoopEdgePen, "толстая линия / кольцо — тело цикла", ref y);
+        return y;
     }
 }

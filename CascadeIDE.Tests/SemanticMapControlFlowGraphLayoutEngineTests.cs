@@ -60,6 +60,40 @@ public sealed class SemanticMapControlFlowGraphLayoutEngineTests
     }
 
     [Fact]
+    public void Layout_ShowsEdgeStyleLegend_WhenGraphHasNonSolidEdges()
+    {
+        var engine = new SemanticMapControlFlowGraphLayoutEngine();
+        var doc = new SemanticMapSubgraphDocument
+        {
+            AnchorPath = @"D:\w\A.cs",
+            Nodes =
+            [
+                new SemanticMapSubgraphNode
+                {
+                    Id = "n0",
+                    Path = @"D:\w\A.cs",
+                    Kind = "anchor",
+                    Label = "A.cs"
+                },
+                new SemanticMapSubgraphNode
+                {
+                    Id = "n1",
+                    Path = @"D:\w\A.cs",
+                    Kind = "call_step",
+                    Label = "B"
+                }
+            ],
+            Edges =
+            [
+                new SemanticMapSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "ConditionalCall" }
+            ]
+        };
+
+        var scene = engine.Layout(doc, 400, 200);
+        Assert.True(scene.ShowLegendEdgeStyleKey);
+    }
+
+    [Fact]
     public void Layout_PlacesSameDepthBranchesSideBySide()
     {
         var engine = new SemanticMapControlFlowGraphLayoutEngine();

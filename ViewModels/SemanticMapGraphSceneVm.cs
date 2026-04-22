@@ -40,6 +40,8 @@ public sealed class SemanticMapGraphSceneVm
     public bool ShowLegendReturnKey { get; init; }
     /// <summary>Показать в легенде расшифровку: обработчик исключений (catch) / ребро ExceptionFlow.</summary>
     public bool ShowLegendExceptionFlowKey { get; init; }
+    /// <summary>Показать в легенде стили рёбер: сплошная / пунктир (условие, multibranch, loop).</summary>
+    public bool ShowLegendEdgeStyleKey { get; init; }
     /// <summary>Левая граница колонки легенды (X); если легенды нет — равна ширине области (не рисуем). При <see cref="LegendPlacement"/> = <see cref="SemanticMapLegendBlockPlacement.BelowGraph"/> — левый отступ текста (как у графа).</summary>
     public double LegendColumnLeft { get; init; } = double.PositiveInfinity;
 
@@ -76,6 +78,7 @@ public sealed class SemanticMapGraphSceneVm
             ShowLegendConditionKey = scene.ShowLegendConditionKey,
             ShowLegendReturnKey = scene.ShowLegendReturnKey,
             ShowLegendExceptionFlowKey = scene.ShowLegendExceptionFlowKey,
+            ShowLegendEdgeStyleKey = scene.ShowLegendEdgeStyleKey,
             LegendColumnLeft = scene.LegendColumnLeft,
             LegendPlacement = scene.LegendPlacement,
             LegendBlockTopY = scene.LegendBlockTopY,

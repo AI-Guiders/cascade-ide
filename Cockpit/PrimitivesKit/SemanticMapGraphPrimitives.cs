@@ -137,6 +137,7 @@ public static class SemanticMapGraphPrimitives
     public static double EstimateControlFlowLegendBlockHeight(
         int rowCount,
         bool hasShapeKeys,
+        int edgeStyleKeyRowCount = 0,
         double captionSize = 11)
     {
         var lineH = Math.Max(15, captionSize * 1.2);
@@ -144,11 +145,20 @@ public static class SemanticMapGraphPrimitives
         var keyRowH = Math.Max(keyRowHBase, captionSize + 5);
         const double gapBeforeKeys = 6d;
         // До трёх строк ключей (return, условие, handler) — визуальный максимум.
-        var keyBlockH = hasShapeKeys ? (keyRowH * 3 + gapBeforeKeys + 8) : 0d;
+        var shapeKeyBlockH = hasShapeKeys ? (keyRowH * 3 + gapBeforeKeys + 8) : 0d;
+        var edgeStyleBlockH = edgeStyleKeyRowCount > 0
+            ? edgeStyleKeyRowCount * keyRowH + 8d
+            : 0d;
+        const double betweenEdgeAndShape = 6d;
+        var betweenBlocks = 0d;
+        if (edgeStyleKeyRowCount > 0 && hasShapeKeys)
+            betweenBlocks = betweenEdgeAndShape;
+        var keyBlockH = edgeStyleBlockH + betweenBlocks + shapeKeyBlockH;
         var rowBlock = rowCount * lineH;
-        if (rowCount == 0 && hasShapeKeys)
+        var hasAnyKeyBlock = hasShapeKeys || edgeStyleKeyRowCount > 0;
+        if (rowCount == 0 && hasAnyKeyBlock)
             return keyBlockH + 12d;
-        var between = rowCount > 0 && hasShapeKeys ? gapBeforeKeys : 0d;
+        var between = rowCount > 0 && hasAnyKeyBlock ? gapBeforeKeys : 0d;
         return rowBlock + between + keyBlockH + 12d;
     }
 
