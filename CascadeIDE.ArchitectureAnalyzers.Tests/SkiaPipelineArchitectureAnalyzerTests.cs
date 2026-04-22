@@ -64,7 +64,7 @@ public sealed class SkiaPipelineArchitectureAnalyzerTests
             """));
 
         var d = Assert.Single(diags);
-        Assert.Equal(SkiaPipelineArchitectureAnalyzer.SemanticMapStageFlowId, d.Id);
+        Assert.Equal(SkiaPipelineArchitectureAnalyzer.CodeNavigationMapCompositorStageFlowId, d.Id);
     }
 
     [Fact]

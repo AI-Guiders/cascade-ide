@@ -13,7 +13,7 @@ namespace CascadeIDE.ArchitectureAnalyzers;
 public sealed class SkiaPipelineArchitectureAnalyzer : DiagnosticAnalyzer
 {
     public const string SkiaBoundaryId = "CASCOPE007";
-    public const string SemanticMapStageFlowId = "CASCOPE008";
+    public const string CodeNavigationMapCompositorStageFlowId = "CASCOPE008";
     public const string LayoutBypassId = "CASCOPE009";
     public const string SkiaViewDomainLeakId = "CASCOPE010";
 
@@ -26,8 +26,8 @@ public sealed class SkiaPipelineArchitectureAnalyzer : DiagnosticAnalyzer
         isEnabledByDefault: true,
         description: "ADR 0055 boundary: Skia instrument contracts do not reference Avalonia/ViewModels.");
 
-    private static readonly DiagnosticDescriptor SemanticMapStageFlowRule = new(
-        SemanticMapStageFlowId,
+    private static readonly DiagnosticDescriptor CodeNavigationMapCompositorStageFlowRule = new(
+        CodeNavigationMapCompositorStageFlowId,
         "CodeNavigationMapCompositor must execute Intent -> Declutter -> Layout",
         "CodeNavigationMapCompositor.Compose(...) must call _intentStage.Resolve, _declutterStage.Apply and _layoutStage.Layout",
         "Architecture",
@@ -46,7 +46,7 @@ public sealed class SkiaPipelineArchitectureAnalyzer : DiagnosticAnalyzer
 
     private static readonly DiagnosticDescriptor SkiaViewDomainLeakRule = new(
         SkiaViewDomainLeakId,
-        "Skia views must not depend on SemanticMap stage-domain APIs",
+        "Skia views must not depend on CodeNavigationMap stage-domain APIs",
         "View under Views/*Skia* must not reference '{0}'. Keep stage-domain logic in Services/Navigation.",
         "Architecture",
         DiagnosticSeverity.Error,
@@ -54,7 +54,7 @@ public sealed class SkiaPipelineArchitectureAnalyzer : DiagnosticAnalyzer
         description: "ADR 0055 boundary: Views render scene and do not depend on pipeline stage-domain contracts.");
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
-        ImmutableArray.Create(SkiaBoundaryRule, SemanticMapStageFlowRule, LayoutBypassRule, SkiaViewDomainLeakRule);
+        ImmutableArray.Create(SkiaBoundaryRule, CodeNavigationMapCompositorStageFlowRule, LayoutBypassRule, SkiaViewDomainLeakRule);
 
     public override void Initialize(AnalysisContext context)
     {
@@ -129,7 +129,7 @@ public sealed class SkiaPipelineArchitectureAnalyzer : DiagnosticAnalyzer
                       && m.Name.Identifier.ValueText == "Layout");
 
         if (!hasIntent || !hasDeclutter || !hasLayout)
-            context.ReportDiagnostic(Diagnostic.Create(SemanticMapStageFlowRule, method.Identifier.GetLocation()));
+            context.ReportDiagnostic(Diagnostic.Create(CodeNavigationMapCompositorStageFlowRule, method.Identifier.GetLocation()));
     }
 
     private static void AnalyzeObjectCreation(SyntaxNodeAnalysisContext context)

@@ -11,7 +11,7 @@ namespace CascadeIDE.Views;
 /// <summary>Мини-карта Semantic Map: рёбра и узлы (звезда); клик по узлу открывает файл; подписи строк — в списке (режим list/both) (ADR 0039).</summary>
 /// <remarks>
 /// Порядок отрисовки базовой сцены (ADR 0055 §4): рёбра → узлы (фигуры и глифы) → легенда. Подсветки TraceFlow приходят в <see cref="CodeNavigationMapGraphSceneVm"/> и рисуются вместе с рёбрами/узлами по флагам highlight.
-/// Отрисовка — <see cref="SemanticMapSceneDrawing"/> (ADR 0064).
+/// Отрисовка — <see cref="CodeNavigationMapSceneDrawing"/> (ADR 0064).
 /// </remarks>
 public sealed class CodeNavigationMapMiniMapControl : Control
 {
@@ -50,7 +50,7 @@ public sealed class CodeNavigationMapMiniMapControl : Control
         var p = e.GetPosition(this);
         foreach (var n in scene.Nodes)
         {
-            if (!SemanticMapSceneDrawing.HitTestNode(n, p))
+            if (!CodeNavigationMapSceneDrawing.HitTestNode(n, p))
                 continue;
             var path = n.FullPath;
             if (string.IsNullOrWhiteSpace(path))
@@ -83,7 +83,7 @@ public sealed class CodeNavigationMapMiniMapControl : Control
         if (w <= 0 || h <= 0)
             return;
 
-        var theme = SemanticMapVisualTheme.ForPresentation(scene.Presentation);
-        SemanticMapSceneDrawing.DrawScene(context, scene, theme, w, h);
+        var theme = CodeNavigationMapVisualTheme.ForPresentation(scene.Presentation);
+        CodeNavigationMapSceneDrawing.DrawScene(context, scene, theme, w, h);
     }
 }

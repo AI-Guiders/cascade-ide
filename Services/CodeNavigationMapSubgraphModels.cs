@@ -33,7 +33,7 @@ public enum CodeNavigationMapGraphKind : byte
 /// <item><description><b>Зависимости / связанные файлы</b> по эвристикам дерева решения — <b>WorkspaceNavigation</b> (см. те же поля в JSON).</description></item>
 /// <item><description><b>Git submodules</b> — отдельно: <b>дерево</b> / GitMap (ADR 0062), не путать с «картой кода» и не с картой файловых зависимостей.</description></item>
 /// </list>
-/// Префикс <c>SemanticMap*</c> указывает на эту <b>карту и пайплайн композиции сцены</b>, а не на домен; сценарий задаёт <see cref="Kind"/> и источник данных.
+/// Префикс типов <c>CodeNavigationMap*</c> (в т.ч. сцена/рендер) указывает на <b>карту и композицию</b>; сценарий данных задаёт <see cref="Kind"/> и источник.
 /// </summary>
 public sealed class CodeNavigationMapSubgraphDocument
 {

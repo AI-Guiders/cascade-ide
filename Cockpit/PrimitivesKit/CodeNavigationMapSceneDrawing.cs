@@ -5,9 +5,9 @@ using CascadeIDE.ViewModels;
 namespace CascadeIDE.Cockpit.PrimitivesKit;
 
 /// <summary>
-/// Точка входа: отрисовка сцены Semantic Map. Геометрия разнесена по partial-файлам (рёбра / узлы / легенда).
+/// Точка входа: отрисовка сцены мини-карты навигации по коду (продукт «Semantic Map» в UI). Геометрия — partial (рёбра / узлы / легенда).
 /// </summary>
-public static partial class SemanticMapSceneDrawing
+public static partial class CodeNavigationMapSceneDrawing
 {
     private const string ConditionStepKind = "condition_step";
     private const string ExitStepKind = "exit_step";
@@ -53,7 +53,7 @@ public static partial class SemanticMapSceneDrawing
     public static void DrawScene(
         DrawingContext context,
         CodeNavigationMapGraphSceneVm scene,
-        SemanticMapVisualTheme theme,
+        CodeNavigationMapVisualTheme theme,
         double width,
         double height)
     {

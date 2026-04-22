@@ -126,11 +126,11 @@ public static class CodeNavigationMapGraphPrimitives
     {
         var widthFactor = Math.Clamp(bandWidth / 220.0, 0.68, 1.06);
         var stepFactor = Math.Clamp(verticalStep / ControlFlowRefVerticalStep, 0.82, 1.08);
-        var combined = SemanticMapRenderInvariants.MinSideLabelFontSize * widthFactor * stepFactor;
+        var combined = CodeNavigationMapRenderInvariants.MinSideLabelFontSize * widthFactor * stepFactor;
         return Math.Clamp(
             combined,
-            SemanticMapRenderInvariants.CompactSideLabelFontSizeFloor,
-            SemanticMapRenderInvariants.MaxSideLabelFontSize);
+            CodeNavigationMapRenderInvariants.CompactSideLabelFontSizeFloor,
+            CodeNavigationMapRenderInvariants.MaxSideLabelFontSize);
     }
 
     /// <summary>Оценка высоты блока легенды (строки + при необходимости ключи фигур) для резервирования при укладке «снизу».</summary>

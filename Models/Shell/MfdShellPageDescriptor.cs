@@ -5,7 +5,7 @@ namespace CascadeIDE.Models.Shell;
 /// <summary>Дескриптор страницы Mfd для API, не заменяет enum в состоянии VM.</summary>
 public readonly record struct MfdShellPageDescriptor(MfdShellPage Page) : IMfdShellPage
 {
-    public string ShellSurfaceId => "mfd." + Page.ToString("G", System.Globalization.CultureInfo.InvariantCulture).ToLowerInvariant();
+    public string ShellSurfaceId => "mfd." + Page.ToString("G").ToLowerInvariant();
 }
 
 public static class MfdShellPageShellExtensions

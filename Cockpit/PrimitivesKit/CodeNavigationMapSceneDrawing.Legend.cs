@@ -6,9 +6,9 @@ using CascadeIDE.ViewModels;
 
 namespace CascadeIDE.Cockpit.PrimitivesKit;
 
-public static partial class SemanticMapSceneDrawing
+public static partial class CodeNavigationMapSceneDrawing
 {
-    private static void DrawLegend(DrawingContext context, CodeNavigationMapGraphSceneVm scene, SemanticMapVisualTheme theme, double w, double h)
+    private static void DrawLegend(DrawingContext context, CodeNavigationMapGraphSceneVm scene, CodeNavigationMapVisualTheme theme, double w, double h)
     {
         if (!scene.UseLegendColumn || h < 40)
             return;
@@ -31,7 +31,7 @@ public static partial class SemanticMapSceneDrawing
             return;
 
         var captionSize = scene.SideLabelFontSizePx is { } s
-            ? Math.Clamp(s, SemanticMapRenderInvariants.MinLegendCaptionFontSize, SemanticMapRenderInvariants.MaxSideLabelFontSize)
+            ? Math.Clamp(s, CodeNavigationMapRenderInvariants.MinLegendCaptionFontSize, CodeNavigationMapRenderInvariants.MaxSideLabelFontSize)
             : 12;
 
         var idxColW = MeasureIndexColumnWidth(theme, scene.Legend, captionSize);
@@ -125,7 +125,7 @@ public static partial class SemanticMapSceneDrawing
         }
     }
 
-    private static double MeasureIndexColumnWidth(SemanticMapVisualTheme theme, IReadOnlyList<CodeNavigationMapLegendEntry> rows, double captionSize)
+    private static double MeasureIndexColumnWidth(CodeNavigationMapVisualTheme theme, IReadOnlyList<CodeNavigationMapLegendEntry> rows, double captionSize)
     {
         var idxColW = 0d;
         foreach (var row in rows)
@@ -145,7 +145,7 @@ public static partial class SemanticMapSceneDrawing
     }
 
     private static double FitLegendCaptionSize(
-        SemanticMapVisualTheme theme,
+        CodeNavigationMapVisualTheme theme,
         IReadOnlyList<CodeNavigationMapLegendEntry> rows,
         double textMaxW,
         double captionSize,
@@ -194,7 +194,7 @@ public static partial class SemanticMapSceneDrawing
         return floor;
     }
 
-    private static void DrawLegendReturnKeyRow(DrawingContext context, SemanticMapVisualTheme theme, double x0, double y, double rowH, double captionSize)
+    private static void DrawLegendReturnKeyRow(DrawingContext context, CodeNavigationMapVisualTheme theme, double x0, double y, double rowH, double captionSize)
     {
         const double iconR = 5.5;
         var cy = y + rowH / 2;
@@ -213,7 +213,7 @@ public static partial class SemanticMapSceneDrawing
         context.DrawText(cap, new Point(x0 + iconR * 2 + 10, y + (rowH - cap.Height) / 2));
     }
 
-    private static void DrawLegendConditionKeyRow(DrawingContext context, SemanticMapVisualTheme theme, double x0, double y, double rowH, double captionSize)
+    private static void DrawLegendConditionKeyRow(DrawingContext context, CodeNavigationMapVisualTheme theme, double x0, double y, double rowH, double captionSize)
     {
         const double r = 5.5;
         var cy = y + rowH / 2;
@@ -240,7 +240,7 @@ public static partial class SemanticMapSceneDrawing
         context.DrawText(cap, new Point(x0 + r * 2 + 10, y + (rowH - cap.Height) / 2));
     }
 
-    private static void DrawLegendExceptionFlowKeyRow(DrawingContext context, SemanticMapVisualTheme theme, double x0, double y, double rowH, double captionSize)
+    private static void DrawLegendExceptionFlowKeyRow(DrawingContext context, CodeNavigationMapVisualTheme theme, double x0, double y, double rowH, double captionSize)
     {
         const double iconR = 5.5;
         var cy = y + rowH / 2;
@@ -267,7 +267,7 @@ public static partial class SemanticMapSceneDrawing
 
     private static double DrawLegendEdgeStyleKeyBlock(
         DrawingContext context,
-        SemanticMapVisualTheme theme,
+        CodeNavigationMapVisualTheme theme,
         double x0,
         double y,
         double keyRowH,
@@ -310,7 +310,7 @@ public static partial class SemanticMapSceneDrawing
             yRow += keyRowH + 2;
         }
 
-        // Совпадает с <see cref="SemanticMapSceneDrawing.Edges"/>: solid — основной поток.
+        // Совпадает с <see cref="CodeNavigationMapSceneDrawing.Edges"/>: solid — основной поток.
         OneRow(theme.BaseEdgePen, "основной поток (вызовы, return, последовательно)", ref y);
         if (edges.Any(e => KindContains(e.Kind, "conditional") || KindContains(e.Kind, "exception")))
             OneRow(theme.ConditionalEdgePen, "длинные штрихи — ветвления, catch, исключения", ref y);

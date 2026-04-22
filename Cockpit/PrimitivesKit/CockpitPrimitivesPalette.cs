@@ -91,8 +91,8 @@ public static class CockpitPrimitivesPalette
             };
     }
 
-    /// <summary>Semantic Map (control flow / звезда) — узлы, рёбра, подписи.</summary>
-    public static class SemanticMap
+    /// <summary>Мини-карта навигации по коду (control flow / звезда) — узлы, рёбра, подписи (продукт «Semantic Map» в UI).</summary>
+    public static class CodeNavigationMap
     {
         public static readonly Color AnchorFill = Color.Parse("#7CC9FF");
         public static readonly Color ConditionFill = Color.FromArgb(240, 255, 210, 120);
@@ -112,9 +112,9 @@ public static class CockpitPrimitivesPalette
     }
 
     /// <summary>
-    /// Semantic Map в режиме «связанные файлы» — отдельный акцент от CFG (тот же примитивный рендер, другая палитра; ADR 0067).
+    /// Мини-карта в режиме «связанные файлы» — отдельный акцент от CFG (тот же примитивный рендер, другая палитра; ADR 0067).
     /// </summary>
-    public static class SemanticMapWorkspace
+    public static class CodeNavigationMapWorkspace
     {
         public static readonly Color AnchorFill = Color.Parse("#4A9FD8");
         public static readonly Color ConditionFill = Color.FromArgb(235, 230, 195, 130);

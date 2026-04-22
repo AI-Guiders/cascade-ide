@@ -4,9 +4,9 @@ using CascadeIDE.ViewModels;
 
 namespace CascadeIDE.Cockpit.PrimitivesKit;
 
-public static partial class SemanticMapSceneDrawing
+public static partial class CodeNavigationMapSceneDrawing
 {
-    private static void DrawEdges(DrawingContext context, CodeNavigationMapGraphSceneVm scene, SemanticMapVisualTheme theme)
+    private static void DrawEdges(DrawingContext context, CodeNavigationMapGraphSceneVm scene, CodeNavigationMapVisualTheme theme)
     {
         var previousWasLoop = false;
         foreach (var edge in scene.Edges)
@@ -29,7 +29,7 @@ public static partial class SemanticMapSceneDrawing
         }
     }
 
-    private static Pen ResolveEdgePen(SemanticMapVisualTheme theme, string? kind, bool highlighted)
+    private static Pen ResolveEdgePen(CodeNavigationMapVisualTheme theme, string? kind, bool highlighted)
     {
         if (highlighted)
             return theme.HighlightedEdgePen;
@@ -61,7 +61,7 @@ public static partial class SemanticMapSceneDrawing
     private static void DrawLoopEdge(
         DrawingContext context,
         CodeNavigationMapGraphSceneVm scene,
-        SemanticMapVisualTheme theme,
+        CodeNavigationMapVisualTheme theme,
         CodeNavigationMapGraphEdgeLayout edge,
         Pen linePen,
         Pen loopPen)

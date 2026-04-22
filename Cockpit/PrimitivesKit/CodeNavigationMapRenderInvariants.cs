@@ -1,10 +1,10 @@
 namespace CascadeIDE.Cockpit.PrimitivesKit;
 
 /// <summary>
-/// Нижние пороги читаемости мини-карты Semantic Map в режиме Glance (ADR 0055 §4).
-/// Цвета и стили пера — <see cref="SemanticMapVisualTheme"/>; здесь только размеры/толщины, чтобы не «ломать» глифы при сжатии viewport.
+/// Нижние пороги читаемости мини-карты (Glance; продукт «Semantic Map» в UI; ADR 0055 §4).
+/// Цвета и стили пера — <see cref="CodeNavigationMapVisualTheme"/>; здесь только размеры/толщины, чтобы не «ломать» глифы при сжатии viewport.
 /// </summary>
-public static class SemanticMapRenderInvariants
+public static class CodeNavigationMapRenderInvariants
 {
     public const double MinGlyphFontSize = 7;
     /// <summary>Базовый размер боковой подписи при нормальной плотности (control flow без легенды).</summary>

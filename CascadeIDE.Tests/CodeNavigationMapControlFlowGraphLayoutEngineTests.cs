@@ -167,7 +167,7 @@ public sealed class CodeNavigationMapControlFlowGraphLayoutEngineTests
 
         var scene = engine.Layout(doc, 118, 200);
         Assert.NotNull(scene.SideLabelFontSizePx);
-        Assert.InRange(scene.SideLabelFontSizePx!.Value, SemanticMapRenderInvariants.CompactSideLabelFontSizeFloor, SemanticMapRenderInvariants.MaxSideLabelFontSize);
+        Assert.InRange(scene.SideLabelFontSizePx!.Value, CodeNavigationMapRenderInvariants.CompactSideLabelFontSizeFloor, CodeNavigationMapRenderInvariants.MaxSideLabelFontSize);
         var n1 = scene.Nodes.Single(n => n.Id == "n1");
         Assert.True(n1.Label.Length < 40);
         Assert.EndsWith("…", n1.Label);

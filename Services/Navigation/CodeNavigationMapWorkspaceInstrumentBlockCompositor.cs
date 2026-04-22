@@ -32,7 +32,7 @@ public sealed record CodeNavigationMapWorkspaceInstrumentBlockDescriptor(
 
 /// <summary>
 /// Композитор <b>внутренних</b> блоков прибора: по уже уложенной <see cref="CodeNavigationMapGraphSceneVm"/> и размеру вьюпорта
-/// вычисляет осмысленные прямоугольники «граф / легенда» (тот же смысл, что разнесение в <see cref="Cockpit.PrimitivesKit.SemanticMapSceneDrawing"/>).
+/// вычисляет осмысленные прямоугольники «граф / легенда» (тот же смысл, что разнесение в <see cref="Cockpit.PrimitivesKit.CodeNavigationMapSceneDrawing"/>).
 /// </summary>
 public static class CodeNavigationMapWorkspaceInstrumentBlockCompositor
 {

@@ -4,11 +4,11 @@ using CascadeIDE.ViewModels;
 namespace CascadeIDE.Cockpit.PrimitivesKit;
 
 /// <summary>
-/// Цвета и перья сцены Semantic Map (control flow / звезда). Единый источник для <see cref="SemanticMapSceneDrawing"/> (ADR 0064, 0055, 0067).
+/// Цвета и перья сцены мини-карты (control flow / звезда; продукт «Semantic Map» в UI). Единый источник для <see cref="CodeNavigationMapSceneDrawing"/> (ADR 0064, 0055, 0067).
 /// </summary>
-public sealed class SemanticMapVisualTheme
+public sealed class CodeNavigationMapVisualTheme
 {
-    private SemanticMapVisualTheme(
+    private CodeNavigationMapVisualTheme(
         Color anchorFill,
         Color conditionFill,
         Color exitFill,
@@ -47,39 +47,39 @@ public sealed class SemanticMapVisualTheme
     }
 
     /// <summary>Тема по умолчанию: CFG / control flow.</summary>
-    public static SemanticMapVisualTheme Default { get; } = new(
-        CockpitPrimitivesPalette.SemanticMap.AnchorFill,
-        CockpitPrimitivesPalette.SemanticMap.ConditionFill,
-        CockpitPrimitivesPalette.SemanticMap.ExitFill,
-        CockpitPrimitivesPalette.SemanticMap.CallFill,
-        CockpitPrimitivesPalette.SemanticMap.HandlerFill,
-        CockpitPrimitivesPalette.SemanticMap.SideLabel,
-        CockpitPrimitivesPalette.SemanticMap.BaseEdge,
-        CockpitPrimitivesPalette.SemanticMap.ConditionalEdge,
-        CockpitPrimitivesPalette.SemanticMap.MultiBranchEdge,
-        CockpitPrimitivesPalette.SemanticMap.LoopEdge,
-        CockpitPrimitivesPalette.SemanticMap.HighlightedEdge,
-        CockpitPrimitivesPalette.SemanticMap.HighlightedLoopEdge,
-        CockpitPrimitivesPalette.SemanticMap.HighlightedNode,
-        CockpitPrimitivesPalette.SemanticMap.NodeStroke);
+    public static CodeNavigationMapVisualTheme Default { get; } = new(
+        CockpitPrimitivesPalette.CodeNavigationMap.AnchorFill,
+        CockpitPrimitivesPalette.CodeNavigationMap.ConditionFill,
+        CockpitPrimitivesPalette.CodeNavigationMap.ExitFill,
+        CockpitPrimitivesPalette.CodeNavigationMap.CallFill,
+        CockpitPrimitivesPalette.CodeNavigationMap.HandlerFill,
+        CockpitPrimitivesPalette.CodeNavigationMap.SideLabel,
+        CockpitPrimitivesPalette.CodeNavigationMap.BaseEdge,
+        CockpitPrimitivesPalette.CodeNavigationMap.ConditionalEdge,
+        CockpitPrimitivesPalette.CodeNavigationMap.MultiBranchEdge,
+        CockpitPrimitivesPalette.CodeNavigationMap.LoopEdge,
+        CockpitPrimitivesPalette.CodeNavigationMap.HighlightedEdge,
+        CockpitPrimitivesPalette.CodeNavigationMap.HighlightedLoopEdge,
+        CockpitPrimitivesPalette.CodeNavigationMap.HighlightedNode,
+        CockpitPrimitivesPalette.CodeNavigationMap.NodeStroke);
 
-    private static readonly SemanticMapVisualTheme WorkspaceRelated = new(
-        CockpitPrimitivesPalette.SemanticMapWorkspace.AnchorFill,
-        CockpitPrimitivesPalette.SemanticMapWorkspace.ConditionFill,
-        CockpitPrimitivesPalette.SemanticMapWorkspace.ExitFill,
-        CockpitPrimitivesPalette.SemanticMapWorkspace.PeerFill,
-        CockpitPrimitivesPalette.SemanticMapWorkspace.HandlerFill,
-        CockpitPrimitivesPalette.SemanticMapWorkspace.SideLabel,
-        CockpitPrimitivesPalette.SemanticMapWorkspace.BaseEdge,
-        CockpitPrimitivesPalette.SemanticMapWorkspace.ConditionalEdge,
-        CockpitPrimitivesPalette.SemanticMapWorkspace.MultiBranchEdge,
-        CockpitPrimitivesPalette.SemanticMapWorkspace.LoopEdge,
-        CockpitPrimitivesPalette.SemanticMapWorkspace.HighlightedEdge,
-        CockpitPrimitivesPalette.SemanticMapWorkspace.HighlightedLoopEdge,
-        CockpitPrimitivesPalette.SemanticMapWorkspace.HighlightedNode,
-        CockpitPrimitivesPalette.SemanticMapWorkspace.NodeStroke);
+    private static readonly CodeNavigationMapVisualTheme WorkspaceRelated = new(
+        CockpitPrimitivesPalette.CodeNavigationMapWorkspace.AnchorFill,
+        CockpitPrimitivesPalette.CodeNavigationMapWorkspace.ConditionFill,
+        CockpitPrimitivesPalette.CodeNavigationMapWorkspace.ExitFill,
+        CockpitPrimitivesPalette.CodeNavigationMapWorkspace.PeerFill,
+        CockpitPrimitivesPalette.CodeNavigationMapWorkspace.HandlerFill,
+        CockpitPrimitivesPalette.CodeNavigationMapWorkspace.SideLabel,
+        CockpitPrimitivesPalette.CodeNavigationMapWorkspace.BaseEdge,
+        CockpitPrimitivesPalette.CodeNavigationMapWorkspace.ConditionalEdge,
+        CockpitPrimitivesPalette.CodeNavigationMapWorkspace.MultiBranchEdge,
+        CockpitPrimitivesPalette.CodeNavigationMapWorkspace.LoopEdge,
+        CockpitPrimitivesPalette.CodeNavigationMapWorkspace.HighlightedEdge,
+        CockpitPrimitivesPalette.CodeNavigationMapWorkspace.HighlightedLoopEdge,
+        CockpitPrimitivesPalette.CodeNavigationMapWorkspace.HighlightedNode,
+        CockpitPrimitivesPalette.CodeNavigationMapWorkspace.NodeStroke);
 
-    public static SemanticMapVisualTheme ForPresentation(CodeNavigationMapGraphPresentationKind presentation) =>
+    public static CodeNavigationMapVisualTheme ForPresentation(CodeNavigationMapGraphPresentationKind presentation) =>
         presentation == CodeNavigationMapGraphPresentationKind.WorkspaceRelatedFiles
             ? WorkspaceRelated
             : Default;

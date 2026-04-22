@@ -5,9 +5,9 @@ using CascadeIDE.ViewModels;
 
 namespace CascadeIDE.Cockpit.PrimitivesKit;
 
-public static partial class SemanticMapSceneDrawing
+public static partial class CodeNavigationMapSceneDrawing
 {
-    private static void DrawNodes(DrawingContext context, CodeNavigationMapGraphSceneVm scene, SemanticMapVisualTheme theme)
+    private static void DrawNodes(DrawingContext context, CodeNavigationMapGraphSceneVm scene, CodeNavigationMapVisualTheme theme)
     {
         var useLegend = scene.UseLegendColumn;
         foreach (var n in scene.Nodes)
@@ -30,10 +30,10 @@ public static partial class SemanticMapSceneDrawing
             }
             else if (!string.IsNullOrEmpty(glyph))
             {
-                var maxGlyph = Math.Max(SemanticMapRenderInvariants.MinGlyphFontSize, n.Radius * 0.92);
+                var maxGlyph = Math.Max(CodeNavigationMapRenderInvariants.MinGlyphFontSize, n.Radius * 0.92);
                 var fontSize = n.LegendIndex is > 99
-                    ? SemanticMapRenderInvariants.MinGlyphFontSize
-                    : Math.Clamp(maxGlyph, SemanticMapRenderInvariants.MinGlyphFontSize, 11);
+                    ? CodeNavigationMapRenderInvariants.MinGlyphFontSize
+                    : Math.Clamp(maxGlyph, CodeNavigationMapRenderInvariants.MinGlyphFontSize, 11);
                 var glyphText = new FormattedText(
                     glyph,
                     CultureInfo.InvariantCulture,
@@ -50,7 +50,7 @@ public static partial class SemanticMapSceneDrawing
             var fullLabel = BuildNodeFullLabel(n, useLegend);
             if (!string.IsNullOrWhiteSpace(fullLabel))
             {
-                var sideFont = scene.SideLabelFontSizePx ?? SemanticMapRenderInvariants.MinSideLabelFontSize;
+                var sideFont = scene.SideLabelFontSizePx ?? CodeNavigationMapRenderInvariants.MinSideLabelFontSize;
                 var labelText = new FormattedText(
                     fullLabel,
                     CultureInfo.InvariantCulture,
@@ -67,7 +67,7 @@ public static partial class SemanticMapSceneDrawing
     }
 
     /// <summary>Узел условия в control-flow: заливка и обводка ромба (классический знак ветвления).</summary>
-    private static void DrawConditionBranch(DrawingContext context, SemanticMapVisualTheme theme, CodeNavigationMapGraphNodeLayout n, bool highlighted)
+    private static void DrawConditionBranch(DrawingContext context, CodeNavigationMapVisualTheme theme, CodeNavigationMapGraphNodeLayout n, bool highlighted)
     {
         var geo = new StreamGeometry();
         var c = n.Center;
@@ -99,7 +99,7 @@ public static partial class SemanticMapSceneDrawing
         }
     }
 
-    private static IBrush ResolveNodeFill(SemanticMapVisualTheme theme, CodeNavigationMapGraphNodeLayout node)
+    private static IBrush ResolveNodeFill(CodeNavigationMapVisualTheme theme, CodeNavigationMapGraphNodeLayout node)
     {
         if (node.IsAnchor)
             return theme.AnchorFill;

@@ -3,7 +3,7 @@
 **Статус:** Accepted · Implemented  
 **Дата:** 2026-04-17  
 
-**Связь:** [0021](0021-pfd-mfd-cockpit-attention-model.md) (зоны внимания, PFD как «приборы»), [0051](0051-intent-based-attention-routing-toml.md) (маршрутизация внимания), subgraph / `SemanticMapSubgraph*` (`Services/SemanticMapSubgraphModels.cs`), режим **Flight** как полигон раскладки.
+**Связь:** [0021](0021-pfd-mfd-cockpit-attention-model.md) (зоны внимания, PFD как «приборы»), [0051](0051-intent-based-attention-routing-toml.md) (маршрутизация внимания), subgraph / `CodeNavigationMapSubgraph*` (`Services/CodeNavigationMapSubgraphModels.cs`), режим **Flight** как полигон раскладки.
 
 ---
 
