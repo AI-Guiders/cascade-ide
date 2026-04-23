@@ -4,21 +4,26 @@ using DotnetDebug.Core;
 
 namespace CascadeIDE.Services;
 
-/// <summary>Одна активная DAP-сессия (netcoredbg) для IDE: launch/attach, шаги, обновление панели отладки при stopped.</summary>
+/// <summary>Одна активная DAP-сессия (netcoredbg) для IDE: launch/attach, шаги, канонический <see cref="DebugSessionSnapshot"/>.</summary>
 public sealed class IdeDapDebugSession
 {
-    private readonly Action<string?, int, IReadOnlyList<(string Name, string? File, int Line)>, IReadOnlyList<(string Name, string Value)>> _onStoppedUi;
+    private readonly Action? _onSnapshotChanged;
 
     private DapClient? _client;
     private int _lastStoppedThreadId;
     private string? _lastExceptionText;
     private TaskCompletionSource? _stoppedWaitTcs;
     private readonly object _stoppedLock = new();
+    private readonly object _snapshotLock = new();
+    private DebugSessionSnapshot _snapshot = DebugSessionSnapshot.Empty;
+    private string? _sessionWorkspacePath;
+    private string? _sessionTargetPath;
+    /// <summary>Кадр стека, для которого в снимке загружены <see cref="DebugSessionSnapshot.VariableRootScopes"/> (UI / MCP).</summary>
+    private int _variablesFrameIndex;
 
-    public IdeDapDebugSession(
-        Action<string?, int, IReadOnlyList<(string Name, string? File, int Line)>, IReadOnlyList<(string Name, string Value)>> onStoppedUi)
+    public IdeDapDebugSession(Action? onSnapshotChanged)
     {
-        _onStoppedUi = onStoppedUi;
+        _onSnapshotChanged = onSnapshotChanged;
     }
 
     /// <summary>Есть активный DAP-клиент (launch или attach).</summary>
@@ -27,8 +32,55 @@ public sealed class IdeDapDebugSession
     /// <summary>Выполнение остановлено (есть threadId от последнего stopped).</summary>
     public bool IsExecutionStopped => _lastStoppedThreadId != 0;
 
+    /// <summary>Канонический снимок для UI, omni, MCP (ADR 0002).</summary>
+    public DebugSessionSnapshot GetSnapshot()
+    {
+        lock (_snapshotLock)
+            return _snapshot;
+    }
+
     /// <summary>Смена клиента или stopped/continued — для обновления CanExecute у команд UI.</summary>
     public event EventHandler? StateChanged;
+
+    private void SetSnapshot(DebugSessionSnapshot snapshot)
+    {
+        lock (_snapshotLock)
+            _snapshot = snapshot;
+        _onSnapshotChanged?.Invoke();
+    }
+
+    private void UpdateSnapshot(Func<DebugSessionSnapshot, DebugSessionSnapshot> update)
+    {
+        var current = GetSnapshot();
+        SetSnapshot(update(current));
+    }
+
+    private static IReadOnlyList<DebugBreakpointSnapshot> LoadBreakpointSnapshot(string workspacePath, string? targetPath)
+    {
+        if (string.IsNullOrWhiteSpace(workspacePath))
+            return Array.Empty<DebugBreakpointSnapshot>();
+
+        var workspaceRoot = Path.GetFullPath(workspacePath.Trim());
+        if (File.Exists(workspaceRoot))
+            workspaceRoot = Path.GetDirectoryName(workspaceRoot) ?? workspaceRoot;
+
+        return BreakpointsStorage.GetBreakpoints(workspacePath, targetPath)
+            .Select(b => new DebugBreakpointSnapshot(
+                DapShared.ResolveBreakpointFilePath(workspaceRoot, b.File),
+                b.Line,
+                b.Condition))
+            .OrderBy(b => b.File, StringComparer.OrdinalIgnoreCase)
+            .ThenBy(b => b.Line)
+            .ToList();
+    }
+
+    public void RefreshBreakpointSnapshotFromStorage(string? workspacePath, string? targetPath = null)
+    {
+        var breakpoints = string.IsNullOrWhiteSpace(workspacePath)
+            ? Array.Empty<DebugBreakpointSnapshot>()
+            : LoadBreakpointSnapshot(workspacePath!, targetPath);
+        UpdateSnapshot(current => current with { Breakpoints = breakpoints });
+    }
 
     private void PrepareStoppedWait()
     {
@@ -40,6 +92,7 @@ public sealed class IdeDapDebugSession
     {
         _lastStoppedThreadId = threadId;
         _lastExceptionText = exceptionText;
+        _variablesFrameIndex = 0;
         lock (_stoppedLock)
         {
             var t = _stoppedWaitTcs;
@@ -53,6 +106,33 @@ public sealed class IdeDapDebugSession
     {
         _lastStoppedThreadId = 0;
         _lastExceptionText = null;
+        _variablesFrameIndex = 0;
+        if (HasActiveSession)
+        {
+            var breakpoints = GetSnapshot().Breakpoints;
+            SetSnapshot(new DebugSessionSnapshot(
+                HasActiveSession: true,
+                IsExecutionStopped: false,
+                StoppedFile: null,
+                StoppedLine: 0,
+                ExceptionText: null,
+                Breakpoints: breakpoints,
+                StackFrames: Array.Empty<(string Name, string? File, int Line)>(),
+                VariableRootScopes: Array.Empty<DebugVariableRootScope>(),
+                VariablesFrameIndex: 0));
+        }
+        else
+            UpdateSnapshot(current => current with
+            {
+                HasActiveSession = false,
+                IsExecutionStopped = false,
+                StoppedFile = null,
+                StoppedLine = 0,
+                ExceptionText = null,
+                StackFrames = Array.Empty<(string Name, string? File, int Line)>(),
+                VariableRootScopes = Array.Empty<DebugVariableRootScope>(),
+                VariablesFrameIndex = 0
+            });
         RaiseStateChanged();
     }
 
@@ -148,6 +228,19 @@ public sealed class IdeDapDebugSession
                 _client = null;
                 _lastStoppedThreadId = 0;
                 _lastExceptionText = null;
+                _sessionWorkspacePath = null;
+                _sessionTargetPath = null;
+                UpdateSnapshot(current => current with
+                {
+                    HasActiveSession = false,
+                    IsExecutionStopped = false,
+                    StoppedFile = null,
+                    StoppedLine = 0,
+                    ExceptionText = null,
+                    StackFrames = Array.Empty<(string Name, string? File, int Line)>(),
+                    VariableRootScopes = Array.Empty<DebugVariableRootScope>(),
+                    VariablesFrameIndex = 0
+                });
                 NotifySessionClientChanged();
             }
         };
@@ -196,6 +289,9 @@ public sealed class IdeDapDebugSession
         }
 
         _client = client;
+        _sessionWorkspacePath = workspacePath;
+        _sessionTargetPath = targetPath;
+        RefreshBreakpointSnapshotFromStorage(workspacePath, targetPath);
         NotifySessionClientChanged();
         await EnsureThreadIdAfterLaunchAsync(client).ConfigureAwait(false);
 
@@ -243,6 +339,19 @@ public sealed class IdeDapDebugSession
                 _client = null;
                 _lastStoppedThreadId = 0;
                 _lastExceptionText = null;
+                _sessionWorkspacePath = null;
+                _sessionTargetPath = null;
+                UpdateSnapshot(current => current with
+                {
+                    HasActiveSession = false,
+                    IsExecutionStopped = false,
+                    StoppedFile = null,
+                    StoppedLine = 0,
+                    ExceptionText = null,
+                    StackFrames = Array.Empty<(string Name, string? File, int Line)>(),
+                    VariableRootScopes = Array.Empty<DebugVariableRootScope>(),
+                    VariablesFrameIndex = 0
+                });
                 NotifySessionClientChanged();
             }
         };
@@ -290,6 +399,11 @@ public sealed class IdeDapDebugSession
         }
 
         _client = client;
+        _sessionWorkspacePath = workspacePath;
+        _sessionTargetPath = string.IsNullOrWhiteSpace(targetPath)
+            ? BreakpointsFileService.GetBundledSampleDebugTargetDllPath(workspacePath)
+            : targetPath;
+        RefreshBreakpointSnapshotFromStorage(workspacePath, _sessionTargetPath);
         NotifySessionClientChanged();
         await EnsureThreadIdAfterLaunchAsync(client).ConfigureAwait(false);
 
@@ -335,7 +449,9 @@ public sealed class IdeDapDebugSession
     {
         try
         {
-            var (stackFrames, variables) = await BuildStackAndVariablesAsync(client, threadId, frameIndex: 0).ConfigureAwait(false);
+            var (stackFrames, variableRootScopes, resolvedIdx) =
+                await BuildStackAndVariablesAsync(client, threadId, _variablesFrameIndex).ConfigureAwait(false);
+            _variablesFrameIndex = resolvedIdx;
             string? file = null;
             var line = 0;
             if (stackFrames.Count > 0)
@@ -343,7 +459,16 @@ public sealed class IdeDapDebugSession
                 file = stackFrames[0].File;
                 line = stackFrames[0].Line;
             }
-            _onStoppedUi(file, line, stackFrames, variables);
+            SetSnapshot(new DebugSessionSnapshot(
+                HasActiveSession: true,
+                IsExecutionStopped: true,
+                StoppedFile: file,
+                StoppedLine: line,
+                ExceptionText: _lastExceptionText,
+                Breakpoints: GetSnapshot().Breakpoints,
+                StackFrames: stackFrames,
+                VariableRootScopes: variableRootScopes,
+                VariablesFrameIndex: resolvedIdx));
         }
         catch
         {
@@ -351,13 +476,73 @@ public sealed class IdeDapDebugSession
         }
     }
 
-    private static async Task<(List<(string Name, string? File, int Line)> Stack, List<(string Name, string Value)> Vars)> BuildStackAndVariablesAsync(
+    /// <summary>Выбрать кадр стека для Locals (панель Mfd) и обновить снимок. Игнор без активной остановки.</summary>
+    public async Task SetVariablesFrameIndexAsync(int frameIndex, CancellationToken cancellationToken = default)
+    {
+        var client = _client;
+        if (client == null)
+            return;
+        var threadId = _lastStoppedThreadId;
+        if (threadId == 0)
+            return;
+        _variablesFrameIndex = frameIndex;
+        await RefreshStoppedUiAsync(client, threadId).ConfigureAwait(false);
+    }
+
+    /// <summary>Дети переменной по DAP (ленивый expand в панели Locals).</summary>
+    public async Task<IReadOnlyList<DebugVariableRow>> ExpandVariableChildrenAsync(
+        int variablesReference,
+        int? indexedHint,
+        int? namedHint,
+        CancellationToken cancellationToken = default)
+    {
+        var client = _client;
+        if (client == null || variablesReference == 0)
+            return Array.Empty<DebugVariableRow>();
+        if (_lastStoppedThreadId == 0)
+            return Array.Empty<DebugVariableRow>();
+
+        var body = await DapVariableExpansion.FetchChildVariablesBodyAsync(
+            client,
+            variablesReference,
+            namedHint,
+            indexedHint,
+            DapVariableExpansion.DefaultMaxChildrenPerNode,
+            cancellationToken).ConfigureAwait(false);
+        if (body == null || !body.Value.TryGetProperty("variables", out var vars))
+            return Array.Empty<DebugVariableRow>();
+        return MapTopLevelVariableRoots(vars);
+    }
+
+    private static List<DebugVariableRow> MapTopLevelVariableRoots(JsonElement variablesArray)
+    {
+        var list = new List<DebugVariableRow>();
+        foreach (var v in variablesArray.EnumerateArray())
+        {
+            var d = DapVariableDescriptor.FromVariableJson(v);
+            list.Add(
+                new DebugVariableRow(
+                    d.Name,
+                    d.Value,
+                    d.Type,
+                    d.VariablesReference,
+                    d.NamedVariables,
+                    d.IndexedVariables));
+        }
+
+        return list;
+    }
+
+    private static async Task<(
+        List<(string Name, string? File, int Line)> Stack,
+        List<DebugVariableRootScope> VariableRootScopes,
+        int ResolvedFrameIndex)> BuildStackAndVariablesAsync(
         DapClient client,
         int threadId,
         int frameIndex)
     {
         var stackFrames = new List<(string Name, string? File, int Line)>();
-        var variables = new List<(string Name, string Value)>();
+        var rootScopes = new List<DebugVariableRootScope>();
 
         JsonElement? stackBody;
         try
@@ -366,10 +551,10 @@ public sealed class IdeDapDebugSession
         }
         catch
         {
-            return (stackFrames, variables);
+            return (stackFrames, rootScopes, 0);
         }
         if (stackBody == null || !stackBody.Value.TryGetProperty("stackFrames", out var frames))
-            return (stackFrames, variables);
+            return (stackFrames, rootScopes, 0);
 
         foreach (var f in frames.EnumerateArray())
         {
@@ -381,15 +566,14 @@ public sealed class IdeDapDebugSession
             stackFrames.Add((name, path, line));
         }
 
-        if (stackFrames.Count == 0 || frameIndex < 0 || frameIndex >= stackFrames.Count)
-            return (stackFrames, variables);
+        if (stackFrames.Count == 0)
+            return (stackFrames, rootScopes, 0);
 
+        var idx = Math.Clamp(frameIndex, 0, stackFrames.Count - 1);
         var frameList = frames.EnumerateArray().ToList();
-        if (frameIndex >= frameList.Count)
-            return (stackFrames, variables);
-        var frame = frameList[frameIndex];
+        var frame = frameList[idx];
         if (!frame.TryGetProperty("id", out var idEl))
-            return (stackFrames, variables);
+            return (stackFrames, rootScopes, idx);
         var frameId = idEl.GetInt32();
 
         var usedScopes = false;
@@ -407,16 +591,7 @@ public sealed class IdeDapDebugSession
                     if (varsBody == null || !varsBody.Value.TryGetProperty("variables", out var vars))
                         continue;
                     usedScopes = true;
-                    variables.Add(($"{scopeName}:", ""));
-                    await DapVariableExpansion.CollectExpandedVariablesAsync(
-                        client,
-                        variables,
-                        vars,
-                        indent: "  ",
-                        depth: 0,
-                        maxDepth: DapVariableExpansion.DefaultMaxDepth,
-                        maxChildrenPerNode: DapVariableExpansion.DefaultMaxChildrenPerNode,
-                        cancellationToken: CancellationToken.None).ConfigureAwait(false);
+                    rootScopes.Add(new DebugVariableRootScope(scopeName ?? "?", MapTopLevelVariableRoots(vars)));
                 }
             }
         }
@@ -431,17 +606,7 @@ public sealed class IdeDapDebugSession
             {
                 var varsBody = await DapShared.WithRetryAsync(() => client.VariablesAsync(frameId)).ConfigureAwait(false);
                 if (varsBody != null && varsBody.Value.TryGetProperty("variables", out var vars))
-                {
-                    await DapVariableExpansion.CollectExpandedVariablesAsync(
-                        client,
-                        variables,
-                        vars,
-                        indent: "  ",
-                        depth: 0,
-                        maxDepth: DapVariableExpansion.DefaultMaxDepth,
-                        maxChildrenPerNode: DapVariableExpansion.DefaultMaxChildrenPerNode,
-                        cancellationToken: CancellationToken.None).ConfigureAwait(false);
-                }
+                    rootScopes.Add(new DebugVariableRootScope("Variables", MapTopLevelVariableRoots(vars)));
             }
             catch
             {
@@ -449,7 +614,44 @@ public sealed class IdeDapDebugSession
             }
         }
 
-        return (stackFrames, variables);
+        return (stackFrames, rootScopes, idx);
+    }
+
+    /// <summary>Повторно применить брейкпоинты из <see cref="BreakpointsStorage"/> к активной сессии (изменения в JSON / UI во время отладки).</summary>
+    public async Task ResyncBreakpointsFromStorageAsync(CancellationToken cancellationToken = default)
+    {
+        var client = _client;
+        var ws = _sessionWorkspacePath;
+        if (string.IsNullOrEmpty(ws))
+            return;
+        var target = _sessionTargetPath;
+        if (string.IsNullOrEmpty(target))
+            target = BreakpointsFileService.GetBundledSampleDebugTargetDllPath(ws);
+
+        var previousFiles = GetSnapshot().Breakpoints
+            .Select(b => b.File)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        RefreshBreakpointSnapshotFromStorage(ws, target);
+        if (client == null)
+            return;
+
+        var workspaceRoot = Path.GetFullPath(ws.Trim());
+        if (File.Exists(workspaceRoot))
+            workspaceRoot = Path.GetDirectoryName(workspaceRoot) ?? workspaceRoot;
+        var breakpoints = BreakpointsStorage.GetBreakpoints(ws, target).ToList();
+        var byFile = breakpoints
+            .GroupBy(b => DapShared.ResolveBreakpointFilePath(workspaceRoot, b.File))
+            .ToDictionary(g => g.Key, g => g.Select(b => (b.Line, b.Condition)).ToList());
+
+        foreach (var file in previousFiles.Union(byFile.Keys, StringComparer.OrdinalIgnoreCase))
+        {
+            var list = byFile.TryGetValue(file, out var resolved)
+                ? resolved
+                : [];
+            await client.SetBreakpointsAsync(file, list, cancellationToken).ConfigureAwait(false);
+        }
     }
 
     public async Task<string> ContinueAsync(CancellationToken cancellationToken = default)
@@ -504,6 +706,19 @@ public sealed class IdeDapDebugSession
         _client = null;
         _lastStoppedThreadId = 0;
         _lastExceptionText = null;
+        _sessionWorkspacePath = null;
+        _sessionTargetPath = null;
+        _variablesFrameIndex = 0;
+        UpdateSnapshot(current => new DebugSessionSnapshot(
+            HasActiveSession: false,
+            IsExecutionStopped: false,
+            StoppedFile: null,
+            StoppedLine: 0,
+            ExceptionText: null,
+            Breakpoints: current.Breakpoints,
+            StackFrames: Array.Empty<(string Name, string? File, int Line)>(),
+            VariableRootScopes: Array.Empty<DebugVariableRootScope>(),
+            VariablesFrameIndex: 0));
         NotifySessionClientChanged();
         if (threadId != 0)
         {
@@ -513,41 +728,50 @@ public sealed class IdeDapDebugSession
         await client.DisposeAsync().ConfigureAwait(false);
     }
 
-    public async Task<string> StackTraceAsync(CancellationToken cancellationToken = default)
+    public Task<string> StackTraceFromSnapshotAsync(CancellationToken cancellationToken = default)
     {
-        try { await WaitForStoppedAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(false); }
-        catch (TimeoutException) { return "# Timeout (5s) waiting for execution to stop."; }
-        var (client, threadId) = GetSessionAndThreadId();
-        JsonElement? body;
-        try
-        {
-            body = await DapShared.WithRetryAsync(() => client.StackTraceAsync(threadId, 0, 20, cancellationToken)).ConfigureAwait(false);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return "# " + ex.Message;
-        }
-        if (body == null || !body.Value.TryGetProperty("stackFrames", out var frames))
-            return "# No stack frames.";
+        var snap = GetSnapshot();
+        if (!snap.HasActiveSession)
+            return Task.FromResult("# No active debug session.");
+        if (!snap.IsExecutionStopped)
+            return Task.FromResult("# Execution is not stopped.");
         var sb = new StringBuilder();
         sb.AppendLine("# Stack trace");
         var i = 0;
-        foreach (var f in frames.EnumerateArray())
+        foreach (var (name, path, line) in snap.StackFrames)
         {
-            var name = f.TryGetProperty("name", out var n) ? n.GetString() : "?";
-            var line = f.TryGetProperty("line", out var ln) ? ln.GetInt32() : 0;
-            var path = "";
-            if (f.TryGetProperty("source", out var src) && src.TryGetProperty("path", out var p))
-                path = p.GetString() ?? "";
-            var id = f.TryGetProperty("id", out var idEl) ? idEl.GetInt32() : 0;
-            sb.AppendLine($"  [{i}] {name} — {path}:{line} (id={id})");
+            sb.AppendLine($"  [{i}] {name} — {path ?? ""}:{line}");
             i++;
         }
-        return sb.ToString();
+        return Task.FromResult(sb.ToString());
     }
 
     public async Task<string> VariablesAsync(int frameIndex, CancellationToken cancellationToken = default)
     {
+        var snap0 = GetSnapshot();
+        if (snap0.HasActiveSession && snap0.IsExecutionStopped && frameIndex == snap0.VariablesFrameIndex)
+        {
+            var snap = snap0;
+            var sb = new StringBuilder();
+            sb.AppendLine($"# Variables (frame {frameIndex} — снимок IDE, корневой уровень; дети — в UI по expand).");
+            foreach (var g in snap.VariableRootScopes)
+            {
+                sb.AppendLine($"## {g.ScopeName}");
+                foreach (var r in g.Roots)
+                {
+                    var typePart = string.IsNullOrEmpty(r.Type) ? "" : $" :: {r.Type}";
+                    var expand = r.VariablesReference != 0 ? " [+]" : "";
+                    sb.AppendLine($"{r.Name} = {r.Value}{typePart}{expand}");
+                }
+            }
+            return sb.ToString();
+        }
+
+        if (!snap0.HasActiveSession)
+            return "# No active debug session.";
+        if (!snap0.IsExecutionStopped)
+            return "# Execution is not stopped.";
+
         try { await WaitForStoppedAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(false); }
         catch (TimeoutException) { return "# Timeout (5s) waiting for execution to stop."; }
         var (client, threadId) = GetSessionAndThreadId();
@@ -569,8 +793,8 @@ public sealed class IdeDapDebugSession
         if (!frame.TryGetProperty("id", out var idEl))
             return "# Frame has no id.";
         var frameId = idEl.GetInt32();
-        var sb = new StringBuilder();
-        sb.AppendLine($"# Variables (frame {frameIndex})");
+        var sb2 = new StringBuilder();
+        sb2.AppendLine($"# Variables (frame {frameIndex})");
 
         var usedScopes = false;
         try
@@ -587,10 +811,10 @@ public sealed class IdeDapDebugSession
                     if (varsBody == null || !varsBody.Value.TryGetProperty("variables", out var vars))
                         continue;
                     usedScopes = true;
-                    sb.AppendLine($"## {scopeName}");
+                    sb2.AppendLine($"## {scopeName}");
                     await DapVariableExpansion.AppendExpandedVariablesAsync(
                         client,
-                        sb,
+                        sb2,
                         vars,
                         indent: "  ",
                         depth: 0,
@@ -620,7 +844,7 @@ public sealed class IdeDapDebugSession
                 return "# No variables for this frame.";
             await DapVariableExpansion.AppendExpandedVariablesAsync(
                 client,
-                sb,
+                sb2,
                 vars,
                 indent: "  ",
                 depth: 0,
@@ -629,7 +853,7 @@ public sealed class IdeDapDebugSession
                 cancellationToken).ConfigureAwait(false);
         }
 
-        return sb.ToString();
+        return sb2.ToString();
     }
 
     public static string Ping() =>

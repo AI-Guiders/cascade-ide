@@ -26,6 +26,15 @@ public sealed class IntentMelodyAliasesTests
         Assert.Equal(IdeCommands.DebugLaunch, IntentMelodyAliases.TryResolveExactCommandId("dl"));
 
     [Fact]
+    public void TryResolveExact_debug_step_melodies_map_to_dap_commands()
+    {
+        Assert.Equal(IdeCommands.DebugStepOver, IntentMelodyAliases.TryResolveExactCommandId("dn"));
+        Assert.Equal(IdeCommands.DebugStepInto, IntentMelodyAliases.TryResolveExactCommandId("di"));
+        Assert.Equal(IdeCommands.DebugStepOut, IntentMelodyAliases.TryResolveExactCommandId("df"));
+        Assert.Equal(IdeCommands.DebugStop, IntentMelodyAliases.TryResolveExactCommandId("dx"));
+    }
+
+    [Fact]
     public void TryResolveExact_so_IsOpenSolutionDialog() =>
         Assert.Equal(IdeCommands.OpenSolutionDialog, IntentMelodyAliases.TryResolveExactCommandId("so"));
 
@@ -71,6 +80,8 @@ public sealed class IntentMelodyAliasesTests
         Assert.Contains("ers = \"show_environment_readiness_page\"", text, StringComparison.Ordinal);
         Assert.Contains("ts = \"show_terminal_panel\"", text, StringComparison.Ordinal);
         Assert.Contains("dl = \"debug_launch\"", text, StringComparison.Ordinal);
+        Assert.Contains("dn = \"debug_step_over\"", text, StringComparison.Ordinal);
+        Assert.Contains("df = \"debug_step_out\"", text, StringComparison.Ordinal);
         Assert.Contains("els = \"select\"", text, StringComparison.Ordinal);
         Assert.Contains("eld = \"apply_edit\"", text, StringComparison.Ordinal);
         Assert.Contains("tol = \"toggle_workspace_splitters_lock\"", text, StringComparison.Ordinal);

@@ -96,6 +96,11 @@
 | [0084](0084-agent-edits-editor-source-of-truth-presence-channel.md) | **Правки агента:** единственный текст в редакторе; чат — намерение/статус; слой присутствия (курсор, «пишет»); дифф в чате не основной; без обязательного CRDT | Proposed |
 | [0085](0085-editor-hud-inline-layer-and-hud-banner.md) | **Editor HUD:** inline-слой в редакторе (каретка, текст, gutter) vs **HUD banner** (полоса над текстом); IDS оверлеи отдельно; конфиг баннера — [0032](0032-hud-banner-configuration-and-grammar.md) | Proposed |
 | [0086](0086-ui-theme-toml-canonical-json-mcp-wire.md) | **Тема UI:** канон кистей в `settings.toml`; JSON для `ide_get/set_ui_theme` как транспорт; strangler `Themes/*.json` | Proposed |
+| [0087](0087-microsoft-agent-framework-builtin-agent-orchestration.md) | **Microsoft Agent Framework (MAF):** ориентир на оркестрацию встроенного агентного контура; след. шаг — PoC | Accepted · **след. шаг: PoC** |
+| [0088](0088-host-slot-region-deck-cell-taxonomy.md) | **Host slot / регион / ячейка deck** — таксономия уровней; не смешивать | Proposed |
+| [0089](0089-ide-omnibus-naming-and-ide-health-channel-rename.md) | **`get_ide_state`** вместо `get_workspace_state`; канал **IDE Health** вместо Workspace Health; ортогонально ADR 0002 | Proposed |
+| [0090](0090-launch-profiles-and-debug-startup-configurations.md) | Профили запуска / несколько стартовых конфигураций отладки (как launch profiles в VS), хранение, MCP, миграция с `startup-project.json` | Proposed |
+| [0091](0091-pfd-debug-situational-deck-hypothesis.md) | Гипотеза: PFD **instrument deck** в режиме отладки — одной страницы Mfd (DebugStack) может не хватить; PFD = краткая сводка, Mfd = детали | Proposed |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 

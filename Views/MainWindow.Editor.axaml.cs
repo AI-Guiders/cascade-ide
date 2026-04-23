@@ -320,8 +320,6 @@ public partial class MainWindow
             && vm2.SelectedOllamaModel == ViewModels.MainWindowViewModel.InstallNewSentinel)
             _ = ShowInstallModelDialogAsync(vm2);
         if (e.PropertyName is nameof(ViewModels.MainWindowViewModel.BreakpointLinesInCurrentFile)
-            or nameof(ViewModels.MainWindowViewModel.DebuggerBreakpointLinesInCurrentFile)
-            or nameof(ViewModels.MainWindowViewModel.McpFileBreakpointLinesInCurrentFile)
             or nameof(ViewModels.MainWindowViewModel.AllBreakpointLinesInCurrentFile)
             or nameof(ViewModels.MainWindowViewModel.CurrentFilePath)
             or nameof(ViewModels.MainWindowViewModel.DebugCurrentLineInCurrentFile)

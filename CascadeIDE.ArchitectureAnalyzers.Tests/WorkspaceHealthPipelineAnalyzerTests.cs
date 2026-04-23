@@ -51,6 +51,29 @@ public sealed class WorkspaceHealthPipelineAnalyzerTests
     }
 
     [Fact]
+    public async Task DapDebug_GetSnapshot_InMainWindowViewModel_DoesNotReport()
+    {
+        var diags = await RunAnalyzerAsync((
+            @"D:\repo\ViewModels\MainWindowViewModel.Debugger.cs",
+            """
+            namespace CascadeIDE.ViewModels;
+
+            public sealed class DapSessionMock
+            {
+                public int GetSnapshot() => 0;
+            }
+
+            public sealed class MainWindowViewModel
+            {
+                private DapSessionMock DapDebug { get; } = new();
+                private void Apply() { _ = DapDebug.GetSnapshot(); }
+            }
+            """));
+
+        Assert.Empty(diags);
+    }
+
+    [Fact]
     public async Task Build_InMainWindowViewModel_DoesNotReport()
     {
         var diags = await RunAnalyzerAsync((

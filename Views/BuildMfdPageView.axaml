@@ -1,0 +1,20 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CascadeIDE.ViewModels"
+             xmlns:views="using:CascadeIDE.Views"
+             x:Class="CascadeIDE.Views.BuildMfdPageView"
+             x:DataType="vm:MainWindowViewModel">
+    <DockPanel DataContext="{Binding BuildOutputPanel}">
+        <views:PanelChromeHeader DockPanel.Dock="Top" Title="Журнал сборки · MSBuild / Roslyn" UppercaseTitle="True"/>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" MinHeight="96">
+            <TextBox Text="{Binding BuildOutput, Mode=OneWay}"
+                     IsReadOnly="True"
+                     TextWrapping="NoWrap"
+                     FontFamily="Consolas,monospace"
+                     FontSize="12"
+                     Background="{DynamicResource CascadeTheme.BuildOutputBackground}"
+                     Foreground="{DynamicResource CascadeTheme.TerminalForeground}"
+                     BorderThickness="0"/>
+        </ScrollViewer>
+    </DockPanel>
+</UserControl>

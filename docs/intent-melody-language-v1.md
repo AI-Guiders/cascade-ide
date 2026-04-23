@@ -87,6 +87,10 @@
 | `da` | Debug → Attach |
 | `dl` | Debug → Launch (`debug_launch`) |
 | `dc` | Debug → Continue |
+| `dn` | Debug → **next** (шаг с обходом, `debug_step_over`) |
+| `di` | Debug → **into** (шаг с заходом, `debug_step_into`) |
+| `df` | Debug → **finish** (шаг с выходом из кадра, `debug_step_out`) |
+| `dx` | Debug → e**X**it / остановить сессию (`debug_stop`) |
 | `gs` | Git → Status |
 | `gc` | Git → Commit |
 | `gp` | Git → Push |

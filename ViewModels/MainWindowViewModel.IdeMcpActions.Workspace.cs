@@ -64,6 +64,7 @@ public partial class MainWindowViewModel
             if (buildText.Length > 2000)
                 buildText = buildText[..2000] + "\n... (output truncated)";
 
+            var dbg = DapDebug.GetSnapshot();
             var state = new
             {
                 solution_path = Workspace.SolutionPath,
@@ -78,14 +79,16 @@ public partial class MainWindowViewModel
                 breakpoints = new
                 {
                     current_file = AllBreakpointLinesInCurrentFile,
-                    debugger_count = _debuggerBreakpoints.Count
+                    total_count = dbg.Breakpoints.Count
                 },
                 debug = new
                 {
-                    position_file = DebugPositionFile,
-                    position_line = DebugPositionLine,
-                    stack_count = InstrumentationPanel.DebugStackFrames.Count,
-                    variables_count = InstrumentationPanel.DebugVariables.Count
+                    position_file = dbg.StoppedFile,
+                    position_line = dbg.StoppedLine,
+                    has_active_session = dbg.HasActiveSession,
+                    is_stopped = dbg.IsExecutionStopped,
+                    stack_count = dbg.StackFrames.Count,
+                    variables_count = dbg.VariableRootScopes.Sum(g => g.Roots.Count)
                 },
                 build = new
                 {

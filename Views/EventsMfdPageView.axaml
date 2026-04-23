@@ -1,0 +1,33 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CascadeIDE.ViewModels"
+             xmlns:feat="using:CascadeIDE.Features.Instrumentation"
+             xmlns:views="using:CascadeIDE.Views"
+             x:Class="CascadeIDE.Views.EventsMfdPageView"
+             x:DataType="vm:MainWindowViewModel">
+    <DockPanel>
+        <views:PanelChromeHeader DockPanel.Dock="Top" Classes="terminal" Title="Лента событий · агент и сборка" UppercaseTitle="True"/>
+        <DockPanel DataContext="{Binding InstrumentationPanel}" x:DataType="feat:InstrumentationPanelViewModel">
+            <TextBlock DockPanel.Dock="Top" Text="События появятся при работе агента и сборке."
+                       IsVisible="{Binding !HasEventTimeline}"
+                       Foreground="{DynamicResource CascadeTheme.TerminalForeground}"
+                       FontSize="11"
+                       Margin="0,0,0,4"/>
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                          IsVisible="{Binding HasEventTimeline}">
+                <ItemsControl ItemsSource="{Binding EventTimeline}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding}" Foreground="{DynamicResource CascadeTheme.TerminalForeground}" FontSize="11" Margin="0,0,10,0"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </DockPanel>
+    </DockPanel>
+</UserControl>

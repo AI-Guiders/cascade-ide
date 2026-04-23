@@ -1,0 +1,23 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CascadeIDE.ViewModels"
+             xmlns:feat="using:CascadeIDE.Features.Instrumentation"
+             xmlns:views="using:CascadeIDE.Views"
+             x:Class="CascadeIDE.Views.TestsMfdPageView"
+             x:DataType="vm:MainWindowViewModel">
+    <DockPanel>
+        <views:PanelChromeHeader DockPanel.Dock="Top" Classes="terminal" Title="{Binding LastTestSummary, StringFormat=Последний прогон: {0}}" UppercaseTitle="False"/>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                      DataContext="{Binding InstrumentationPanel}" x:DataType="feat:InstrumentationPanelViewModel">
+            <TextBox Text="{Binding TestResultsOutput, Mode=OneWay}"
+                     PlaceholderText="Здесь появится вывод dotnet test после запуска тестов из IDE или агента."
+                     IsReadOnly="True"
+                     TextWrapping="Wrap"
+                     FontFamily="Consolas,monospace"
+                     FontSize="12"
+                     Background="{DynamicResource CascadeTheme.BuildOutputBackground}"
+                     Foreground="{DynamicResource CascadeTheme.TerminalForeground}"
+                     BorderThickness="0"/>
+        </ScrollViewer>
+    </DockPanel>
+</UserControl>

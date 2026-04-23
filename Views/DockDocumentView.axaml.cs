@@ -123,8 +123,6 @@ public partial class DockDocumentView : UserControl
             }
 
             if (args.PropertyName is nameof(MainWindowViewModel.BreakpointLinesInCurrentFile)
-                or nameof(MainWindowViewModel.DebuggerBreakpointLinesInCurrentFile)
-                or nameof(MainWindowViewModel.McpFileBreakpointLinesInCurrentFile)
                 or nameof(MainWindowViewModel.AllBreakpointLinesInCurrentFile)
                 or nameof(MainWindowViewModel.DebugCurrentLineInCurrentFile)
                 or nameof(MainWindowViewModel.DebugPositionFile)

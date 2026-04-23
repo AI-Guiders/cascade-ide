@@ -1,0 +1,60 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CascadeIDE.ViewModels"
+             xmlns:views="using:CascadeIDE.Views"
+             x:Class="CascadeIDE.Views.MfdShellPageStack"
+             x:DataType="vm:MainWindowViewModel">
+    <!-- Тёмная тема Fluent для зоны Mfd. Конвертер + оверлей-набор страниц; навигация снаружи — MfdShellView. -->
+    <ThemeVariantScope RequestedThemeVariant="Dark">
+        <Grid>
+            <Grid.Resources>
+                <views:MfdShellPageEqualsConverter x:Key="MfdShellPageEq"/>
+            </Grid.Resources>
+            <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=WorkspaceHealth}">
+                <views:WorkspaceHealthMfdPageView/>
+            </Border>
+            <Border IsVisible="{Binding IsMfdShellSolutionExplorerPageActive}">
+                <views:SolutionExplorerMfdPageView/>
+            </Border>
+            <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=RelatedFiles}">
+                <views:RelatedFilesMfdPageView MinHeight="120"/>
+            </Border>
+            <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=MarkdownPreview}">
+                <views:MarkdownPreviewMfdPageView/>
+            </Border>
+            <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=Chat}">
+                <views:ChatMfdPageView/>
+            </Border>
+            <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=EnvironmentReadiness}">
+                <views:EnvironmentReadinessMfdPageView/>
+            </Border>
+            <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=AiChatSettings}">
+                <views:AiChatSettingsMfdPageView/>
+            </Border>
+            <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=Terminal}">
+                <views:TerminalMfdPageView/>
+            </Border>
+            <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=Build}">
+                <views:BuildMfdPageView/>
+            </Border>
+            <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=Problems}">
+                <views:ProblemsMfdPageView/>
+            </Border>
+            <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=Git}">
+                <views:GitMfdPageView/>
+            </Border>
+            <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=Events}">
+                <views:EventsMfdPageView/>
+            </Border>
+            <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=Tests}">
+                <views:TestsMfdPageView/>
+            </Border>
+            <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=Hypotheses}">
+                <views:HypothesesMfdPageView/>
+            </Border>
+            <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=DebugStack}">
+                <views:DebugStackMfdPageView/>
+            </Border>
+        </Grid>
+    </ThemeVariantScope>
+</UserControl>

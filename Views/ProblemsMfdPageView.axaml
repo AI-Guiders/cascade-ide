@@ -1,0 +1,28 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CascadeIDE.ViewModels"
+             xmlns:views="using:CascadeIDE.Views"
+             x:Class="CascadeIDE.Views.ProblemsMfdPageView"
+             x:DataType="vm:MainWindowViewModel">
+    <DockPanel DataContext="{Binding ProblemsPanel}">
+        <views:PanelChromeHeader DockPanel.Dock="Top" Title="{Binding SummaryText}" UppercaseTitle="False"/>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" MinHeight="96">
+            <ListBox x:Name="ProblemsListBox"
+                     ItemsSource="{Binding Items}"
+                     Background="Transparent"
+                     DoubleTapped="ProblemsList_OnDoubleTapped">
+                <ListBox.ItemTemplate>
+                    <DataTemplate DataType="vm:ProblemListItem">
+                        <StackPanel Orientation="Vertical" Spacing="2" Margin="0,2">
+                            <TextBlock Text="{Binding HeaderLine}"
+                                       FontFamily="Consolas,monospace" FontSize="11"
+                                       Foreground="{DynamicResource CascadeTheme.TerminalForeground}"/>
+                            <TextBlock Text="{Binding Message}" TextWrapping="Wrap" FontSize="11"
+                                       Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </ScrollViewer>
+    </DockPanel>
+</UserControl>

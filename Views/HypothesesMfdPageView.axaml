@@ -1,0 +1,46 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CascadeIDE.ViewModels"
+             xmlns:dbg="using:CascadeIDE.Features.Debug"
+             xmlns:views="using:CascadeIDE.Views"
+             x:Class="CascadeIDE.Views.HypothesesMfdPageView"
+             x:DataType="vm:MainWindowViewModel">
+    <!-- Страница Mfd «Гипотезы»; DataContext снаружи — MainWindowViewModel. -->
+    <DockPanel DataContext="{Binding HypothesesPanel}" x:DataType="dbg:HypothesesPanelViewModel">
+        <views:PanelChromeHeader DockPanel.Dock="Top" Classes="terminal" Title="Гипотезы · workspace JSON" UppercaseTitle="True"/>
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="8" Margin="0,0,0,6">
+            <Button Content="Добавить гипотезу" Command="{Binding AddHypothesisCommand}" Padding="8,4"/>
+            <TextBlock Text=".cascade-ide/debug-hypotheses.json"
+                       VerticalAlignment="Center"
+                       FontSize="11"
+                       Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+        </StackPanel>
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{Binding Items}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="dbg:HypothesisRowViewModel">
+                        <Border Padding="6" Margin="0,0,0,6"
+                                BorderBrush="{DynamicResource CascadeTheme.EditorColumnBorderBrush}"
+                                BorderThickness="1" CornerRadius="4">
+                            <StackPanel Spacing="6">
+                                <TextBox Text="{Binding Text, Mode=TwoWay}"
+                                         AcceptsReturn="True"
+                                         TextWrapping="Wrap"
+                                         MinHeight="48"
+                                         FontFamily="Consolas,monospace"
+                                         FontSize="12"
+                                         PlaceholderText="Формулировка гипотезы…"/>
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <Button Content="Открыта" Command="{Binding SetOpenCommand}" Padding="6,2"/>
+                                    <Button Content="Не подтвердилась" Command="{Binding SetRejectedCommand}" Padding="6,2"/>
+                                    <Button Content="Подтвердилась" Command="{Binding SetConfirmedCommand}" Padding="6,2"/>
+                                    <Button Content="Удалить" Command="{Binding RemoveCommand}" Padding="6,2" Margin="12,0,0,0"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </DockPanel>
+</UserControl>

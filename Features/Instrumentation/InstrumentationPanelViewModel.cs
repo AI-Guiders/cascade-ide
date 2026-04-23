@@ -17,7 +17,7 @@ public sealed partial class InstrumentationPanelViewModel : ViewModelBase
         PowerTaskQueueItems.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasPowerTaskQueueItems));
         EventTimeline.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasEventTimeline));
         DebugStackFrames.CollectionChanged += (_, _) => OnDebugCollectionsChanged();
-        DebugVariables.CollectionChanged += (_, _) => OnDebugCollectionsChanged();
+        DebugVariableRoots.CollectionChanged += (_, _) => OnDebugCollectionsChanged();
     }
 
     private void OnDebugCollectionsChanged()
@@ -36,9 +36,9 @@ public sealed partial class InstrumentationPanelViewModel : ViewModelBase
     public bool HasEventTimeline => EventTimeline.Count > 0;
 
     public ObservableCollection<DebugStackFrameViewModel> DebugStackFrames { get; } = [];
-    public ObservableCollection<DebugVariableViewModel> DebugVariables { get; } = [];
+    public ObservableCollection<DebugVariableNodeViewModel> DebugVariableRoots { get; } = [];
 
-    public bool IsDebugPanelVisible => DebugStackFrames.Count > 0 || DebugVariables.Count > 0;
+    public bool IsDebugPanelVisible => DebugStackFrames.Count > 0 || DebugVariableRoots.Count > 0;
 
     /// <summary>Накопленный текстовый лог прогонов тестов для вкладки «Тесты».</summary>
     [ObservableProperty]

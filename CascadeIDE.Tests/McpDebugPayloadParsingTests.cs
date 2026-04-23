@@ -53,7 +53,7 @@ public sealed class McpDebugPayloadParsingTests
             }),
             ["variables"] = JsonSerializer.SerializeToElement(new[]
             {
-                new { name = "x", value = "1" }
+                new { name = "x", value = "1", type = "int" }
             })
         };
 
@@ -65,5 +65,6 @@ public sealed class McpDebugPayloadParsingTests
         Assert.Single(v);
         Assert.Equal("x", v[0].Name);
         Assert.Equal("1", v[0].Value);
+        Assert.Equal("int", v[0].Type);
     }
 }

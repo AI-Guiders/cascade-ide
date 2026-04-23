@@ -8,7 +8,7 @@ using Microsoft.VisualStudio.SolutionPersistence.Serializer;
 namespace CascadeIDE.Services;
 
 /// <summary>
-/// Загрузка .sln / .slnx / .slnf и построение дерева <see cref="SolutionItem"/>.
+/// Загрузка .sln / .slnx / .slnf, либо одного .csproj/.fsproj (без solution-файла), и построение дерева <see cref="SolutionItem"/>.
 /// Файлы внутри .csproj — <see cref="ProjectFileTreeBuilder"/>.
 /// </summary>
 public static class SolutionParser
@@ -63,8 +63,36 @@ public static class SolutionParser
             return LoadSln(normalized, dir, name);
         }
 
-        error = "Расширение не .slnx, не .sln и не .slnf.";
+        if (string.Equals(ext, ".csproj", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(ext, ".fsproj", StringComparison.OrdinalIgnoreCase))
+            return LoadStandaloneProject(normalized, dir, name, out error);
+
+        error = "Расширение не поддерживается: ожидается .sln, .slnx, .slnf или .csproj/.fsproj.";
         return null;
+    }
+
+    /// <summary>Один файл проекта без .sln: корень обозревателя — виртуальное «решение» с одним проектом и деревом файлов.</summary>
+    private static SolutionItem? LoadStandaloneProject(
+        string projectPath,
+        string projectParentDir,
+        string projectNameWithoutExt,
+        out string? error)
+    {
+        error = null;
+        try
+        {
+            var root = SolutionItem.CreateSolution(projectNameWithoutExt, projectPath);
+            var projectNode = SolutionItem.CreateProject(Path.GetFileName(projectPath), projectPath);
+            ProjectFileTreeBuilder.AddProjectFileChildren(projectNode, projectPath, projectParentDir);
+            root.Children.Add(projectNode);
+            ProjectFileTreeBuilder.SortSolutionItemChildren(root, StringComparer.OrdinalIgnoreCase);
+            return root;
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+            return null;
+        }
     }
 
     private static SolutionItem? TryLoadWithSolutionPersistence(

@@ -2,6 +2,11 @@
   <ItemGroup>
     <InternalsVisibleTo Include="CascadeIDE.Tests" />
   </ItemGroup>
+  <ItemGroup>
+    <!-- MfdShellViewXamlLeanAnalyzer (CASCOPE017/018): граница размера и inline-контролов -->
+    <AdditionalFiles Include="Views\MfdShellView.axaml" />
+    <AdditionalFiles Include="Views\MfdShellPageStack.axaml" />
+  </ItemGroup>
   <PropertyGroup>
     <!-- RS1038/RS1041/RS1036/RS2008: ложные срабатывания на встроенном анализаторе при ссылке на Microsoft.CodeAnalysis.Workspaces в этом же приложении -->
     <NoWarn>$(NoWarn);RS1038;RS1041;RS1036;RS2008</NoWarn>

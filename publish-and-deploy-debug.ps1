@@ -1,4 +1,5 @@
 # Publish Debug and copy to a fixed path without spaces (for Cursor MCP).
+# Сначала собирает samples/DebugTarget (тестовая цель для DAP).
 # Run from repo:  cd ...\cascade-ide  ;  .\publish-and-deploy-debug.ps1
 # Optional: -SkipDocGen  (faster when IdeCommands XML-doc / MCP markdown codegen not changed)
 # Optional: -Target "D:\cascade-ide-debug"
@@ -17,9 +18,18 @@ if (-not (Test-Path -LiteralPath $csproj)) {
 }
 
 $outDir = Join-Path $here "publish-debug"
+$debugTargetProj = Join-Path $here "samples\DebugTarget\DebugTarget.csproj"
 
 Push-Location $here
 try {
+    # Тестовая цель отладки (тот же относительный путь, что в BreakpointsFileService.BundledSampleDebugTargetDllRelativeToRepoRoot)
+    if (-not (Test-Path -LiteralPath $debugTargetProj)) {
+        Write-Error "DebugTarget project not found: $debugTargetProj"
+        exit 1
+    }
+    & dotnet build $debugTargetProj -c Debug -v minimal
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
     $publishArgs = @(
         "publish", $csproj,
         "-c", "Debug",

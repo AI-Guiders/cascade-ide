@@ -16,21 +16,6 @@ internal sealed partial class IdeMcpCommandExecutor
         _handlers = BuildHandlers();
     }
 
-    private static string ParseAndShowDebugBreakpoints(IIdeMcpActions actions, IReadOnlyDictionary<string, JsonElement>? args)
-    {
-        if (!McpDebugPayloadParsing.TryParseBreakpoints(args, out var list, out var error))
-            return error;
-        actions.ShowDebugBreakpoints(list);
-        return "OK";
-    }
-
-    private static string ParseAndShowDebugState(IIdeMcpActions actions, IReadOnlyDictionary<string, JsonElement>? args)
-    {
-        McpDebugPayloadParsing.ParseDebugState(args, out var stackFrames, out var variables);
-        actions.ShowDebugState(stackFrames, variables);
-        return "OK";
-    }
-
     /// <summary>Вход с MCP/агента маршалится на UI в <see cref="MainWindowViewModel"/> до вызова хендлеров; UI-операции выполнять напрямую без вложенного маршалинга.</summary>
     public async Task<string> ExecuteAsync(string commandId, IReadOnlyDictionary<string, JsonElement>? args, CancellationToken cancellationToken)
     {

@@ -157,9 +157,7 @@ public sealed class IdeMcpServerDispatchTests
         public Task<string> HighlightControlAsync(string? controlName) => throw new NotImplementedException();
         public Task<string> SetPanelSizeAsync(string panel, double? width, double? height) => throw new NotImplementedException();
         public string GetSupportedEditorLanguages() => throw new NotImplementedException();
-        public void ShowDebugBreakpoints(IReadOnlyList<(string FilePath, int Line)> breakpoints) => throw new NotImplementedException();
-        public void ShowDebugPosition(string? filePath, int line) => throw new NotImplementedException();
-        public void ShowDebugState(IReadOnlyList<(string Name, string? File, int Line)> stackFrames, IReadOnlyList<(string Name, string Value)> variables) => throw new NotImplementedException();
+        public Task<string> GetDebugSnapshotAsync(CancellationToken cancellationToken = default) => throw new NotImplementedException();
         public Task<string> WriteAgentNotesAsync(string content, CancellationToken cancellationToken = default) => throw new NotImplementedException();
         public Task<string> ReadAgentNotesAsync(CancellationToken cancellationToken = default) => throw new NotImplementedException();
         public Task<string> AppendAgentNotesAsync(string content, CancellationToken cancellationToken = default) => throw new NotImplementedException();

@@ -44,7 +44,7 @@
 | Контракты MCP, тестируемые абстракции для git/процессов | [0008](adr/0008-mcp-contracts-and-testable-infrastructure.md) (Accepted · Implemented) |
 | Strangler-миграция, когда можно отклоняться от политики | [0009](adr/0009-strangler-migration-and-exceptions.md) |
 | Динамические плагины (MEF) — не ближайшая цель | [0005](adr/0005-defer-dynamic-plugins-mef.md) |
-| Отладка: паритет человек/агент; Debug UI; гипотезы в JSON; осведомлённость без «только нижняя панель» | [0002](adr/0002-debug-human-agent-parity.md), [0003](adr/0003-debug-ui-mode-separate-from-power.md), [0001](adr/0001-debug-hypotheses-json-storage.md), [0011](adr/0011-debug-situational-awareness.md) |
+| Отладка: паритет человек/агент; Debug UI; гипотезы в JSON; осведомлённость без «только нижняя панель»; **профили запуска (несколько стартовых конфигураций)**; **гипотеза PFD-deck при отладке (плотность Mfd)** | [0002](adr/0002-debug-human-agent-parity.md), [0003](adr/0003-debug-ui-mode-separate-from-power.md), [0001](adr/0001-debug-hypotheses-json-storage.md), [0011](adr/0011-debug-situational-awareness.md), [0090](adr/0090-launch-profiles-and-debug-startup-configurations.md) (Proposed), [0091](adr/0091-pfd-debug-situational-deck-hypothesis.md) (Proposed) |
 | Конфигурация UI-режимов (TOML) | [0010](adr/0010-ui-modes-toml-configuration.md) (Accepted · Implemented) |
 | Плавающий/отцепляемый хром workspace (нижняя зона, телеметрия; не floating доки в v1) | [0012](adr/0012-floating-workspace-chrome.md) |
 | Поверхность команд, палитра, минимальный toolbar; не смешивать с размещением хрома | [0013](adr/0013-command-surface-and-discoverability.md) |
@@ -74,6 +74,7 @@
 | Продуктовый фокус: малая команда vs готовность к открытию — оси «границы/контракты» и «очередь/discoverability» | [0027](adr/0027-small-team-focus-vs-public-maturity.md) (Accepted) |
 | Пользовательские настройки: путь `settings.toml`, TOML/snake_case, секреты в отдельном `ai-keys.toml` | [0028](adr/0028-user-settings-toml-localappdata-and-secrets.md) (Accepted · Implemented) |
 | **Тема UI:** канон кистей в TOML; JSON в MCP (`ide_get/set_ui_theme`) — транспорт; пресеты `Themes/*.json` — strangler | [0086](adr/0086-ui-theme-toml-canonical-json-mcp-wire.md) (Proposed) |
+| **Именование:** омнибус агента `get_ide_state` (вместо `get_workspace_state`); канал **IDE Health** (вместо Workspace Health); ортогонально [0002](adr/0002-debug-human-agent-parity.md) | [0089](adr/0089-ide-omnibus-naming-and-ide-health-channel-rename.md) (Proposed) |
 | Конфигурация: канон на диске (TOML); центр настроек deferred; точечный UI — фасад канона | [0029](adr/0029-configuration-toml-canonical-ui-facade.md) (Accepted · Implemented) |
 | UI настроек: компактная вёрстка, целевой якорь **MFD**; политика при нехватке места в **P+F+M** (scroll, ресайз, fallback-окно — см. ADR) | [0074](adr/0074-settings-ui-mfd-compact-layout-overflow.md) (Proposed; не отменяет канон [0029](adr/0029-configuration-toml-canonical-ui-facade.md)) |
 | Тематический указатель **UI** (`docs/adr/UI/`), соглашения по страницам MFD (payload vs проекция, keyboard-first) | [0075](adr/0075-ui-topic-index-and-mfd-page-conventions.md) (Proposed) |

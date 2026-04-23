@@ -1,4 +1,5 @@
-using CascadeIDE.Services;
+using System.Collections.ObjectModel;
+using CascadeIDE.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -37,31 +38,127 @@ public partial class MainWindowViewModel
         if (string.IsNullOrEmpty(sln) || Workspace.SolutionRoots.Count == 0)
             return;
 
-        if (!StartupProjectStore.TryLoad(sln, out var rel) || string.IsNullOrEmpty(rel))
-            return;
-
         var solutionDir = Services.BreakpointsFileService.GetWorkspaceRoot(sln);
         if (string.IsNullOrEmpty(solutionDir))
             return;
 
-        var full = Path.GetFullPath(Path.Combine(solutionDir, rel));
-        if (!File.Exists(full))
-        {
-            StartupProjectStore.Clear(sln);
-            return;
-        }
-
         var projects = McpSolutionTree.CollectProjectPaths(Workspace.SolutionRoots)
-            .Select(Path.GetFullPath)
+            .Select(static p => Path.GetFullPath(p))
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        if (!projects.Contains(full))
+        var fromStore = false;
+        if (StartupProjectStore.TryLoad(sln, out var rel) && !string.IsNullOrEmpty(rel))
         {
-            StartupProjectStore.Clear(sln);
+            var full = Path.GetFullPath(Path.Combine(solutionDir, rel));
+            if (File.Exists(full) && projects.Contains(full))
+            {
+                ApplyStartupProject(full);
+                fromStore = true;
+            }
+            else
+                StartupProjectStore.Clear(sln);
+        }
+
+        if (!fromStore)
+            TryApplyDefaultSingleProjectStartup(sln, solutionDir, projects);
+    }
+
+    /// <summary>Единственный <c>.csproj</c> в дереве — считаем его стартовым и сохраняем, чтобы F5 не открывал диалог выбора DLL.</summary>
+    private void TryApplyDefaultSingleProjectStartup(string sln, string solutionDir, HashSet<string> projectPathSet)
+    {
+        var csprojs = CollectDistinctProjectFilePaths(Workspace.SolutionRoots);
+        if (csprojs.Count != 1)
+            return;
+
+        var only = csprojs[0];
+        if (!projectPathSet.Contains(only))
+            return;
+
+        try
+        {
+            var rel = Path.GetRelativePath(solutionDir, only);
+            if (rel.StartsWith("..", StringComparison.Ordinal))
+                return;
+            StartupProjectStore.Save(sln, rel);
+        }
+        catch
+        {
+            // сохранение опционально — в памяти стартовый проект всё равно будет
+        }
+
+        ApplyStartupProject(only);
+    }
+
+    private static List<string> CollectDistinctProjectFilePaths(ObservableCollection<SolutionItem> roots)
+    {
+        return McpSolutionTree.CollectProjectPaths(roots)
+            .Where(static p => p.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase) ||
+                              p.EndsWith(".fsproj", StringComparison.OrdinalIgnoreCase))
+            .Select(static p => Path.GetFullPath(p))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    /// <summary>
+    /// Перед MSBuild: если стартовый не задан или битой ссылкой, выбрать единственный проект, проект по активному файлу
+    /// или выбранный в обозревателе <c>.csproj</c> (как ожидается от F5 / «текущий код»).
+    /// </summary>
+    private void TryApplyInferredStartupProjectForDebug()
+    {
+        if (!string.IsNullOrEmpty(StartupProjectCsprojFullPath) && File.Exists(StartupProjectCsprojFullPath))
+            return;
+
+        if (Workspace.SolutionRoots.Count == 0)
+            return;
+
+        var csprojs = CollectDistinctProjectFilePaths(Workspace.SolutionRoots);
+        var set = csprojs.ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        if (csprojs.Count == 1)
+        {
+            ApplyStartupProject(csprojs[0]);
             return;
         }
 
-        ApplyStartupProject(full);
+        var fp = CurrentFilePath;
+        if (!string.IsNullOrEmpty(fp))
+        {
+            try
+            {
+                var full = Path.GetFullPath(fp);
+                if (File.Exists(full) && !McpSolutionTree.IsBuildArtifactPath(full))
+                {
+                    if (McpSolutionTree.MapFileToProject(Workspace.SolutionRoots).TryGetValue(full, out var treeProj) &&
+                        !string.IsNullOrEmpty(treeProj) && set.Contains(treeProj))
+                    {
+                        ApplyStartupProject(treeProj);
+                        return;
+                    }
+
+                    var disk = McpSolutionTree.ResolveOwningProjectPath(full);
+                    if (!string.IsNullOrEmpty(disk) && set.Contains(disk))
+                    {
+                        ApplyStartupProject(disk);
+                        return;
+                    }
+                }
+            }
+            catch
+            {
+                // ignore
+            }
+        }
+
+        var sel = Workspace.SelectedSolutionItem?.FullPath;
+        if (!string.IsNullOrEmpty(sel) &&
+            (sel.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase) ||
+             sel.EndsWith(".fsproj", StringComparison.OrdinalIgnoreCase)) &&
+            File.Exists(sel))
+        {
+            var p = Path.GetFullPath(sel);
+            if (set.Contains(p))
+                ApplyStartupProject(p);
+        }
     }
 
     private void ApplyStartupProject(string csprojFullPath)
@@ -132,6 +229,8 @@ public partial class MainWindowViewModel
 
     private async Task<string?> TryResolveStartupDebugTargetAsync()
     {
+        TryApplyInferredStartupProjectForDebug();
+
         var csproj = StartupProjectCsprojFullPath;
         if (string.IsNullOrEmpty(csproj) || !File.Exists(csproj))
             return null;

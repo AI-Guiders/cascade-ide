@@ -50,15 +50,6 @@ internal sealed partial class IdeMcpCommandExecutor
 
     private void RegisterDebugUiSurface(Action<string, Handler> add)
     {
-        add(Services.IdeCommands.ShowBreakpoints, async (args, _) => await Task.FromResult(ParseAndShowDebugBreakpoints((IIdeMcpActions)_vm, args)));
-        add(Services.IdeCommands.ShowDebugPosition, async (args, _) =>
-        {
-            var a = (IIdeMcpActions)_vm;
-            a.ShowDebugPosition(McpCommandJsonArgs.String(args, "file_path"), McpCommandJsonArgs.Int(args, "line"));
-            return await Task.FromResult("OK");
-        });
-        add(Services.IdeCommands.ShowDebugState, async (args, _) => await Task.FromResult(ParseAndShowDebugState((IIdeMcpActions)_vm, args)));
-
 #if DEBUG
         add(Services.IdeCommands.AddControl, async (args, _) =>
         {

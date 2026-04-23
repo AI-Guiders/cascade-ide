@@ -15,5 +15,9 @@ Roslyn-анализаторы для границ [ADR 0036](../docs/adr/0036-cd
 | **CASCOPE014** | Error | В `IdeDisplay/` запрещены Avalonia UI (как у CASCOPE001: `using Avalonia…` и типы в членах). |
 | **CASCOPE015** | Error | В `IdeDisplay/` запрещён `using CascadeIDE.Features.UiChrome` и типы из этого пространства в членах (семантика оверлея отдельно от хрома shell). |
 | **CASCOPE016** | Error | В `Cockpit/` запрещён `using CascadeIDE.IdeDisplay…` (кабина не зависит от IDS). |
+| **CASCOPE017** | Error | Лимит строк: `Views/MfdShellView.axaml` (каркас EICAS + `BottomPanelShell` + `MfdShellPageStack`) — см. `MaxLineCountMfdShellView` в анализаторе; `Views/MfdShellPageStack.axaml` (набор страниц Mfd) — `MaxLineCountMfdShellPageStack`. Детальная вёрстка — в *MfdPageView. |
+| **CASCOPE018** | Error | В обоих файлах (см. **CASCOPE017**) запрещены тяжёлые inline-паттерны (`ListBox`, `TextBox`, `ItemsControl`, `GridSplitter`, `DataTemplate`, многостолбцовая `ColumnDefinitions=…`) — вынос в *MfdPageView. |
+
+`MfdShellView.axaml` и `MfdShellPageStack.axaml` — в `<AdditionalFiles>` в `CascadeIDE.csproj` (**CASCOPE017**/**018**). Без записи проверка не сработает.
 
 Расширение правил: новые диагностики в этом проекте, версии `Microsoft.CodeAnalysis.CSharp` держать совместимыми с SDK.

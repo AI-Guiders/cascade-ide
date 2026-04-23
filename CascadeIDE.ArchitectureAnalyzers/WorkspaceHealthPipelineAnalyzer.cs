@@ -56,6 +56,10 @@ public sealed class WorkspaceHealthPipelineAnalyzer : DiagnosticAnalyzer
             return;
         if (!string.Equals(memberAccess.Name.Identifier.ValueText, "GetSnapshot", StringComparison.Ordinal))
             return;
+        // DapDebug.GetSnapshot() is IdeDapDebugSession, not legacy workspace health.
+        if (memberAccess.Expression is IdentifierNameSyntax id &&
+            string.Equals(id.Identifier.ValueText, "DapDebug", StringComparison.Ordinal))
+            return;
 
         context.ReportDiagnostic(Diagnostic.Create(LegacyGetSnapshotRule, memberAccess.Name.GetLocation()));
     }

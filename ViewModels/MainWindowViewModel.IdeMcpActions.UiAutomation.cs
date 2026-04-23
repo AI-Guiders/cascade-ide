@@ -20,13 +20,12 @@ public partial class MainWindowViewModel
         if (string.IsNullOrEmpty(filePath) || line < 1)
             return;
         var path = Path.GetFullPath(filePath);
-        _ = _breakpoints.RemoveAll(b => string.Equals(Path.GetFullPath(b.FilePath), path, StringComparison.OrdinalIgnoreCase) && b.Line == line) > 0;
         var ws = GetWorkspacePath();
         if (!string.IsNullOrEmpty(ws))
-            BreakpointsFileService.RemoveBreakpointForDefaultTarget(ws, path, line);
+            BreakpointsFileService.RemoveBreakpointForBundledSampleTarget(ws, path, line);
         OnPropertyChanged(nameof(BreakpointLinesInCurrentFile));
-        OnPropertyChanged(nameof(McpFileBreakpointLinesInCurrentFile));
         OnPropertyChanged(nameof(AllBreakpointLinesInCurrentFile));
+        ResyncDapBreakpointsFireAndForget();
     }
 
     /// <summary>Переключить брейкпоинт в .dotnet-debug-mcp-breakpoints.json для текущего файла и строки (клик по полю в редакторе).</summary>
@@ -38,8 +37,9 @@ public partial class MainWindowViewModel
         if (string.IsNullOrEmpty(ws))
             return;
         BreakpointsFileService.ToggleBreakpoint(ws, CurrentFilePath, line);
-        OnPropertyChanged(nameof(McpFileBreakpointLinesInCurrentFile));
+        OnPropertyChanged(nameof(BreakpointLinesInCurrentFile));
         OnPropertyChanged(nameof(AllBreakpointLinesInCurrentFile));
+        ResyncDapBreakpointsFireAndForget();
     }
 
     void Services.IIdeMcpActions.ShowPreview(string title, string content)

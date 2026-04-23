@@ -25,11 +25,11 @@ internal static class IdeMcpToolCatalogFull
             new()
             {
                 Name = "ide_load_solution",
-                Description = "Загрузить решение по пути (.sln, .slnx или .slnf). Дерево проектов в IDE обновится.",
+                Description = "Загрузить workspace: решение (.sln/.slnx/.slnf), один проект (.csproj/.fsproj) или каталог. Дерево в обозревателе обновится.",
                 InputSchema = Schema(new
                 {
                     type = "object",
-                    properties = new { path = new { type = "string", description = "Полный путь к файлу решения." } },
+                    properties = new { path = new { type = "string", description = "Полный путь к .sln/.slnx/.slnf, к .csproj/.fsproj или к каталогу." } },
                     required = new[] { "path" }
                 })
             },
@@ -628,47 +628,9 @@ internal static class IdeMcpToolCatalogFull
             },
             new()
             {
-                Name = "ide_show_breakpoints",
-                Description = "Показать в IDE брейкпоинты отладчика (из debug_set_breakpoints). Агент вызывает после установки брейкпоинтов, чтобы пользователь видел их в редакторе.",
-                InputSchema = Schema(new
-                {
-                    type = "object",
-                    properties = new
-                    {
-                        breakpoints = new { type = "array", description = "Массив { file_path, line } (1-based).", items = new { type = "object", properties = new { file_path = new { type = "string" }, line = new { type = "integer" } }, required = new[] { "file_path", "line" } } }
-                    },
-                    required = new[] { "breakpoints" }
-                })
-            },
-            new()
-            {
-                Name = "ide_show_debug_position",
-                Description = "Показать текущую позицию отладки (файл, строка). IDE откроет файл при необходимости и подсветит строку. Сброс: file_path = null или пустая строка.",
-                InputSchema = Schema(new
-                {
-                    type = "object",
-                    properties = new
-                    {
-                        file_path = new { type = "string", description = "Полный путь к файлу (null/пусто = сбросить подсветку)." },
-                        line = new { type = "integer", description = "Номер строки (1-based)." }
-                    },
-                    required = Array.Empty<string>()
-                })
-            },
-            new()
-            {
-                Name = "ide_show_debug_state",
-                Description = "Показать в панели отладки стек вызовов и переменные (после остановки на брейкпоинте). Агент передаёт данные из debug_stack_trace и debug_variables.",
-                InputSchema = Schema(new
-                {
-                    type = "object",
-                    properties = new
-                    {
-                        stack_frames = new { type = "array", description = "Массив { name, file?, line }.", items = new { type = "object", properties = new { name = new { type = "string" }, file = new { type = "string" }, line = new { type = "integer" } } } },
-                        variables = new { type = "array", description = "Массив { name, value }.", items = new { type = "object", properties = new { name = new { type = "string" }, value = new { type = "string" } }, required = new[] { "name", "value" } } }
-                    },
-                    required = Array.Empty<string>()
-                })
+                Name = "ide_get_debug_snapshot",
+                Description = "JSON: канонический снимок DAP (стек, переменные, останов, брейкпоинты из storage в снимке) — тот же источник, что UI; заменяет синтетические ide_show_debug_* (ADR 0002).",
+                InputSchema = Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
             },
             new()
             {

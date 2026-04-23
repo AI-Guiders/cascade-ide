@@ -18,6 +18,10 @@ bt = "run_tests"
 da = "debug_attach"
 dl = "debug_launch"
 dc = "debug_continue"
+dn = "debug_step_over"
+di = "debug_step_into"
+df = "debug_step_out"
+dx = "debug_stop"
 # Workspace
 so = "open_solution_dialog"
 # Task cockpit: Take Off / Landing (сплиттеры)

@@ -170,13 +170,9 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _mcpClientService = new Services.McpClientService(Services.McpExternalServersJsonResolver.ResolveEffectiveJson(_settings));
         _autonomousAgentService = CreateAutonomousAgentService(_mcpClientService);
         Autonomous = new AutonomousAgentSessionViewModel(_autonomousAgentService, this);
-        _dapDebug = new Services.IdeDapDebugSession((file, line, stack, vars) =>
+        _dapDebug = new Services.IdeDapDebugSession(() =>
         {
-            UiScheduler.Default.Post(() =>
-            {
-                ((Services.IIdeMcpActions)this).ShowDebugPosition(file, line);
-                ((Services.IIdeMcpActions)this).ShowDebugState(stack, vars);
-            });
+            UiScheduler.Default.Post(ApplyDapDebugSnapshotToUi);
         });
         _dapDebug.StateChanged += (_, _) => NotifyDebugRelayCommandsChanged();
         _ideMcpExecutor = new IdeMcpCommandExecutor(this);
@@ -188,8 +184,6 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             () => LastTestSummary,
             () => ImpactedTestsBadge,
             _dapDebug,
-            () => InstrumentationPanel.DebugStackFrames.Count,
-            () => InstrumentationPanel.DebugVariables.Count,
             () => Chrome.WorkspaceHealthGitText,
             () => Chrome.WorkspaceHealthGitCockpitShort);
         _workspaceHealthSurfaceCompositor = new WorkspaceHealthSurfaceCompositor();
@@ -265,7 +259,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         switch (propertyName)
         {
             case nameof(SolutionWorkspaceViewModel.SolutionPath):
-                OnPropertyChanged(nameof(McpFileBreakpointLinesInCurrentFile));
+                OnPropertyChanged(nameof(BreakpointLinesInCurrentFile));
                 OnPropertyChanged(nameof(AllBreakpointLinesInCurrentFile));
                 BuildSolutionCommand.NotifyCanExecuteChanged();
                 HandleSolutionPathChanged(Workspace.SolutionPath);

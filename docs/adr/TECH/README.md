@@ -21,6 +21,7 @@
 | Контракты MCP, тестируемая инфраструктура | [0008](../0008-mcp-contracts-and-testable-infrastructure.md) |
 | Strangler-миграция, исключения для spike | [0009](../0009-strangler-migration-and-exceptions.md) |
 | Отладка: паритет человек/агент | [0002](../0002-debug-human-agent-parity.md) |
+| **Профили запуска** (несколько стартовых конфигураций, MCP, миграция с `startup-project.json`) | [0090](../0090-launch-profiles-and-debug-startup-configurations.md) (Proposed) |
 | Debug UI отдельно от Power; гипотезы JSON; ситуационная осведомлённость | [0003](../0003-debug-ui-mode-separate-from-power.md), [0001](../0001-debug-hypotheses-json-storage.md), [0011](../0011-debug-situational-awareness.md) |
 | Внешний агент ACP (stdio, Cursor CLI) | [0016](../0016-agent-client-protocol-external-agent.md) |
 | Чат Cursor ACP в IDE: `mcpServers`, паритет тулов | [0048](../0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) |

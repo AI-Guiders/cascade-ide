@@ -11,7 +11,7 @@ public interface IIdeMcpActions
     Task<string> ExecuteCommandAsync(string commandId, IReadOnlyDictionary<string, JsonElement>? args, CancellationToken cancellationToken = default);
 
     void OpenFile(string path);
-    /// <summary>Загрузить решение по пути (.sln / .slnx). Дерево проектов обновится.</summary>
+    /// <summary>Загрузить решение (.sln / .slnx / .slnf), один проект (.csproj / .fsproj) или каталог — дерево в обозревателе обновится.</summary>
     void LoadSolution(string path);
     /// <summary>Выделить диапазон в редакторе (1-based line/column). Если файл не открыт — открыть.</summary>
     void SelectInEditor(string? filePath, int startLine, int startColumn, int endLine, int endColumn);
@@ -123,12 +123,8 @@ public interface IIdeMcpActions
     /// <summary>Список языков/расширений редактора с подсветкой синтаксиса. JSON: массив { "extension", "language" }.</summary>
     string GetSupportedEditorLanguages();
 
-    /// <summary>Показать в IDE брейкпоинты отладчика (из debug_set_breakpoints). breakpoints — массив { file_path, line }.</summary>
-    void ShowDebugBreakpoints(IReadOnlyList<(string FilePath, int Line)> breakpoints);
-    /// <summary>Показать текущую позицию отладки (файл, строка). Если file_path не null — открыть файл и подсветить строку; null — сбросить подсветку.</summary>
-    void ShowDebugPosition(string? filePath, int line);
-    /// <summary>Показать в панели отладки стек вызовов и переменные. stacks — массив { name, file, line }; variables — массив { name, value }.</summary>
-    void ShowDebugState(IReadOnlyList<(string Name, string? File, int Line)> stackFrames, IReadOnlyList<(string Name, string Value)> variables);
+    /// <summary>JSON: канонический снимок встроенной DAP-сессии (стек, переменные, останов) — тот же источник, что UI (ADR 0002).</summary>
+    Task<string> GetDebugSnapshotAsync(CancellationToken cancellationToken = default);
 
     /// <summary>Записать заметки агента. Формат и структура на усмотрение агента. Хранятся в каталоге решения в .cascade-ide/agent-notes (расширение не задано — агент может писать markdown, json, текст). Без открытого решения — ошибка.</summary>
     Task<string> WriteAgentNotesAsync(string content, CancellationToken cancellationToken = default);

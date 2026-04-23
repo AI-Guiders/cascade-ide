@@ -1,0 +1,71 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CascadeIDE.ViewModels"
+             xmlns:feat="using:CascadeIDE.Features.Instrumentation"
+             xmlns:views="using:CascadeIDE.Views"
+             x:Class="CascadeIDE.Views.TerminalMfdPageView"
+             x:DataType="vm:MainWindowViewModel">
+    <DockPanel>
+        <Border DockPanel.Dock="Top" IsVisible="{Binding WorkspaceHealthOnTerminalTab}" Classes="modeCard" Margin="0,0,0,4">
+            <StackPanel Spacing="4">
+                <WrapPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding WorkspaceHealthBuildText}" Foreground="{DynamicResource CascadeTheme.TerminalForeground}" Margin="0,0,12,0"/>
+                    <TextBlock Text="{Binding ResultSummary}"
+                               IsVisible="{Binding IsResultSummaryVisible}"
+                               Foreground="{DynamicResource CascadeTheme.TerminalForeground}" Margin="0,0,12,0" MaxWidth="320" TextTrimming="CharacterEllipsis"/>
+                    <TextBlock Text="{Binding RiskSummary}"
+                               IsVisible="{Binding IsRiskSummaryVisible}"
+                               Foreground="{DynamicResource CascadeTheme.TerminalForeground}" Margin="0,0,12,0" MaxWidth="320" TextTrimming="CharacterEllipsis"/>
+                </WrapPanel>
+                <StackPanel DataContext="{Binding InstrumentationPanel}" x:DataType="feat:InstrumentationPanelViewModel" Spacing="0">
+                    <TextBlock Text="События появятся при работе агента и сборке."
+                               IsVisible="{Binding !HasEventTimeline}"
+                               Foreground="{DynamicResource CascadeTheme.TerminalForeground}"
+                               FontSize="11"
+                               Margin="0,0,0,4"/>
+                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
+                                  IsVisible="{Binding HasEventTimeline}">
+                        <ItemsControl ItemsSource="{Binding EventTimeline}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding}" Foreground="{DynamicResource CascadeTheme.TerminalForeground}" FontSize="11" Margin="0,0,10,0"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+        <DockPanel DataContext="{Binding TerminalPanel}">
+            <views:PanelChromeHeader DockPanel.Dock="Top" Classes="terminal" Title="Консоль · ввод и вывод" UppercaseTitle="True"/>
+            <TextBox x:Name="TerminalInputBox"
+                     DockPanel.Dock="Bottom"
+                     Text="{Binding TerminalInput, Mode=TwoWay}"
+                     PlaceholderText="Команда (Enter — выполнить)"
+                     FontFamily="Consolas,monospace"
+                     FontSize="12"
+                     Background="{DynamicResource CascadeTheme.TerminalInputBackground}"
+                     Foreground="{DynamicResource CascadeTheme.TerminalForeground}"
+                     Margin="0,4,0,0">
+                <TextBox.KeyBindings>
+                    <KeyBinding Gesture="Enter" Command="{Binding RunTerminalCommandCommand}"/>
+                </TextBox.KeyBindings>
+            </TextBox>
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" MinHeight="96">
+                <TextBox Text="{Binding TerminalOutput, Mode=OneWay}"
+                         IsReadOnly="True"
+                         TextWrapping="NoWrap"
+                         FontFamily="Consolas,monospace"
+                         FontSize="12"
+                         Background="Transparent"
+                         Foreground="{DynamicResource CascadeTheme.TerminalForeground}"
+                         BorderThickness="0"/>
+            </ScrollViewer>
+        </DockPanel>
+    </DockPanel>
+</UserControl>

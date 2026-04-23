@@ -28,7 +28,7 @@ public partial class MainWindowViewModel
     private Task ShowDebugInfoAsync(string title, string message) =>
         RequestShowInfoAsync != null ? RequestShowInfoAsync(title, message) : Task.CompletedTask;
 
-    /// <summary>F5: продолжить при остановке; иначе запустить стартовый проект (если задан) или выбрать .dll/.exe в диалоге.</summary>
+    /// <summary>F5: продолжить при остановке; иначе старт — сохранённый/единственный в решении/по активному .cs, при полном провале — диалог .dll/.exe.</summary>
     [RelayCommand(CanExecute = nameof(CanDebugStartOrContinue))]
     private async Task DebugStartOrContinueAsync()
     {
@@ -136,4 +136,13 @@ public partial class MainWindowViewModel
     }
 
     private bool CanDebugStep() => _dapDebug.HasActiveSession && _dapDebug.IsExecutionStopped;
+
+    /// <summary>
+    /// <c>debug_launch</c> без JSON-аргументов (мелодия <c>dl</c>, CascadeChord, палитра): тот же поток, что F5 (старт / continue / диалог цели).
+    /// </summary>
+    internal async Task<string> DebugLaunchInteractiveAsync()
+    {
+        await DebugStartOrContinueAsync().ConfigureAwait(true);
+        return "OK";
+    }
 }

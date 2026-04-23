@@ -49,7 +49,7 @@
 | Имя | Описание | Аргументы |
 |-----|----------|-----------|
 | `ide_open_file` | Открыть файл в редакторе | `path` — полный путь к файлу |
-| `ide_load_solution` | Загрузить решение (.sln / .slnx), обновить дерево проектов | `path` — полный путь к решению |
+| `ide_load_solution` | Загрузить workspace: решение (.sln/.slnx/.slnf), проект (.csproj/.fsproj) или каталог; обновить обозреватель | `path` — полный путь |
 | `ide_select` | Выделить диапазон в редакторе | `file_path`, `start_line`, `start_column`, `end_line`, `end_column` (1-based) |
 | `ide_get_editor_state` | Состояние редактора (файл, каретка, выделение) | —; возвращает JSON |
 | `ide_get_open_document_text` | Полный текст любой **открытой** вкладки из модели документа (не только активной) | опционально `file_path` (иначе текущий), `max_chars` для обрезки; JSON: `file_path`, `length`, `truncated`, `is_dirty`, `text` или `error` |
@@ -222,7 +222,7 @@
 | `click_control` | Клик по кнопке (под курсором или по имени). args: name?:string; returns: text; example: {"name":"BuildButton"}. |
 | `debug_attach` | Подключиться к процессу по PID. args: workspace_path:string, process_id:integer, target_path?:string, netcoredbg_path?:string; returns: text; example: {"workspace_path":"D:\\\\proj","process_id":12345}. |
 | `debug_continue` | Продолжить выполнение (DAP continue). returns: text. |
-| `debug_launch` | Запустить отладку (netcoredbg DAP): workspace_path, target_path (.dll/.exe) — цель задаёшь явно; опционально netcoredbg_path, program_args. Пример target — тестовая samples/DebugTarget, чтобы не дебажить саму IDE. returns: text; example: {"workspace_path":"D:\\\\proj","target_path":"samples\\\\DebugTarget\\\\bin\\\\Debug\\\\net10.0\\\\DebugTarget.dll"}. |
+| `debug_launch` | Запустить отладку (netcoredbg DAP): с путями — workspace_path, target_path (.dll/.exe); без путей (мелодия dl / аккорд) — как F5: стартовый проект или диалог .dll/.exe. Опционально netcoredbg_path, program_args. returns: text; example: {"workspace_path":"D:\\\\proj","target_path":"samples\\\\DebugTarget\\\\bin\\\\Debug\\\\net10.0\\\\DebugTarget.dll"}. |
 | `debug_ping` | Проверка доступности встроенной отладки. returns: text. |
 | `debug_stack_trace` | Стек вызовов (DAP stackTrace). returns: text. |
 | `debug_step_into` | Шаг с заходом (DAP stepIn). returns: text. |
@@ -234,6 +234,7 @@
 | `delete_knowledge_section` | Удалить секцию из knowledge-файла. args: file_path:string, section_id:string, canon_path?:string; returns: text; example: {"file_path":"index.md","section_id":"foo"}. |
 | `get_colors_under_cursor` | Цвета под курсором (прямые и effective). returns: json. |
 | `get_control_appearance` | Снимок внешнего вида контрола (под курсором или по имени). args: name?:string; returns: json; example: {"name":"BuildButton"}. |
+| `get_debug_snapshot` | JSON: канонический снимок встроенной DAP-сессии (ADR 0002). returns: json. |
 | `get_supported_editor_languages` | Список поддерживаемых языков подсветки редактора. returns: json. |
 | `get_ui_layout` | Дерево UI по всем окнам верхнего уровня: JSON с массивом windows (role, window_type, title, is_active, root — то же дерево, что раньше для MainWindow). returns: json. |
 | `get_ui_theme` | Снимок темы UI и лэйаута (включая resolved-ресурсы). returns: json. |
@@ -258,9 +259,6 @@
 | `set_focus` | Передать фокус контролу (под курсором или по имени). args: name?:string; returns: text; example: {"name":"Editor"}. |
 | `set_panel_size` | Изменить размер панели. args: panel:string, width?:integer, height?:integer; returns: text; example: {"panel":"terminal","height":300}. |
 | `set_ui_theme` | Применить тему UI из JSON. args: theme:string; returns: text; example: {"theme":"{}"}. |
-| `show_breakpoints` | Показать брейкпоинты отладчика в IDE. args: breakpoints:object[]; returns: text; example: {"breakpoints":[]}. |
-| `show_debug_position` | Показать текущую позицию отладки (файл/строка). args: file_path?:string, line?:integer; returns: text; example: {"file_path":"C:\\\\tmp\\\\a.cs","line":1}. |
-| `show_debug_state` | Показать стек/переменные отладки в панели Debug. args: stack_frames?:object[], variables?:object[]; returns: text; example: {"stack_frames":[],"variables":[]}. |
 | `upsert_knowledge_section` | Вставить/обновить секцию в knowledge-файле по section_id. args: file_path:string, section_id:string, content:string, canon_path?:string, save_revision?:boolean; returns: text; example: {"file_path":"index.md","section_id":"foo","content":"body"}. |
 | `write_knowledge_file` | Записать knowledge-файл в канон (полная замена). args: file_path:string, content:string, canon_path?:string, save_revision?:boolean; returns: text; example: {"file_path":"META/x.md","content":"# Hi","save_revision":true}. |
 
@@ -274,7 +272,7 @@
 | `get_open_document_text` | Полный текст открытого документа по пути (или текущего). Модель вкладки, не снимок темы. returns: text. |
 | `go_to_position` | Перейти на позицию (и опционально выделить диапазон). args: file_path:string, line:integer, column:integer, end_line?:integer, end_column?:integer; returns: text; example: {"file_path":"C:\\tmp\\a.cs","line":10,"column":1}. |
 | `list_tools` | Список MCP-тулов, которые IDE публикует (name/description/inputSchema). returns: json. |
-| `load_solution` | Загрузить решение (.sln/.slnx/.slnf) или каталог как workspace (дерево файлов без .sln) и обновить обозреватель. args: path:string; returns: text; example: {"path":"D:\\repo\\CascadeIDE.slnx"}. |
+| `load_solution` | Загрузить решение (.sln/.slnx/.slnf), один проект (.csproj/.fsproj) или каталог как workspace (дерево без .sln) — обновить обозреватель. args: path:string; returns: text; example: {"path":"D:\\repo\\MyApp.csproj"}. |
 | `open_file` | Открыть файл в редакторе IDE. args: path:string; returns: text; example: {"path":"C:\\tmp\\a.txt"}. |
 | `ping` | Живость MCP-хоста IDE (без аргументов). Имя MCP-тула: `ide_ping`. returns: json. |
 | `remove_breakpoint` | Снять брейкпоинт. args: file_path:string, line:integer; returns: text; example: {"file_path":"C:\\tmp\\a.cs","line":42}. |

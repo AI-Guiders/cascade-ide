@@ -15,7 +15,7 @@ internal sealed partial class IdeMcpCommandExecutor
             var ws = McpCommandJsonArgs.String(args, "workspace_path");
             var target = McpCommandJsonArgs.String(args, "target_path");
             if (string.IsNullOrWhiteSpace(ws) || string.IsNullOrWhiteSpace(target))
-                return "workspace_path and target_path are required.";
+                return await _vm.DebugLaunchInteractiveAsync().ConfigureAwait(false);
             try
             {
                 return await _vm.DapDebug.LaunchAsync(
@@ -85,8 +85,14 @@ internal sealed partial class IdeMcpCommandExecutor
 
         add(Services.IdeCommands.DebugStackTrace, async (_, ct) =>
         {
-            try { return await _vm.DapDebug.StackTraceAsync(ct).ConfigureAwait(false); }
+            try { return await _vm.DapDebug.StackTraceFromSnapshotAsync(ct).ConfigureAwait(false); }
             catch (Exception ex) { return "# " + ex.Message; }
+        });
+
+        add(Services.IdeCommands.GetDebugSnapshot, async (_, ct) =>
+        {
+            try { return await ((IIdeMcpActions)_vm).GetDebugSnapshotAsync(ct).ConfigureAwait(false); }
+            catch (Exception ex) { return "# Error: " + ex.Message; }
         });
 
         add(Services.IdeCommands.DebugVariables, async (args, ct) =>

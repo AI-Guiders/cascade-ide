@@ -1,3 +1,5 @@
+using System.Linq;
+
 namespace CascadeIDE.Cockpit.Channels.WorkspaceHealth;
 
 /// <summary>
@@ -10,8 +12,6 @@ public sealed class WorkspaceHealthProvider : IWorkspaceHealthChannel
     private readonly Func<string> _lastTestSummary;
     private readonly Func<int> _impactedTestsBadge;
     private readonly Services.IdeDapDebugSession _dapDebug;
-    private readonly Func<int> _debugStackFrameCount;
-    private readonly Func<int> _debugVariableCount;
     private readonly Func<string> _workspaceHealthGitLine;
     private readonly Func<string> _workspaceHealthGitCockpitShort;
 
@@ -20,8 +20,6 @@ public sealed class WorkspaceHealthProvider : IWorkspaceHealthChannel
         Func<string> lastTestSummary,
         Func<int> impactedTestsBadge,
         Services.IdeDapDebugSession dapDebug,
-        Func<int> debugStackFrameCount,
-        Func<int> debugVariableCount,
         Func<string> workspaceHealthGitLine,
         Func<string> workspaceHealthGitCockpitShort)
     {
@@ -29,8 +27,6 @@ public sealed class WorkspaceHealthProvider : IWorkspaceHealthChannel
         _lastTestSummary = lastTestSummary;
         _impactedTestsBadge = impactedTestsBadge;
         _dapDebug = dapDebug;
-        _debugStackFrameCount = debugStackFrameCount;
-        _debugVariableCount = debugVariableCount;
         _workspaceHealthGitLine = workspaceHealthGitLine;
         _workspaceHealthGitCockpitShort = workspaceHealthGitCockpitShort;
     }
@@ -40,10 +36,10 @@ public sealed class WorkspaceHealthProvider : IWorkspaceHealthChannel
             _isBuilding(),
             _lastTestSummary(),
             _impactedTestsBadge(),
-            _dapDebug.HasActiveSession,
-            _dapDebug.IsExecutionStopped,
-            _debugStackFrameCount(),
-            _debugVariableCount(),
+            _dapDebug.GetSnapshot().HasActiveSession,
+            _dapDebug.GetSnapshot().IsExecutionStopped,
+            _dapDebug.GetSnapshot().StackFrames.Count,
+            _dapDebug.GetSnapshot().VariableRootScopes.Sum(s => s.Roots.Count),
             _workspaceHealthGitLine(),
             _workspaceHealthGitCockpitShort());
 }

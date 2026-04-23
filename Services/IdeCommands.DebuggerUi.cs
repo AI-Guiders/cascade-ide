@@ -30,12 +30,6 @@ public static partial class IdeCommands
     /// <summary>Список поддерживаемых языков подсветки редактора. returns: json.</summary>
     public const string GetSupportedEditorLanguages = "get_supported_editor_languages";
 
-    /// <summary>Показать брейкпоинты отладчика в IDE. args: breakpoints:object[]; returns: text; example: {"breakpoints":[]}.</summary>
-    public const string ShowBreakpoints = "show_breakpoints";
-    /// <summary>Показать текущую позицию отладки (файл/строка). args: file_path?:string, line?:integer; returns: text; example: {"file_path":"C:\\\\tmp\\\\a.cs","line":1}.</summary>
-    public const string ShowDebugPosition = "show_debug_position";
-    /// <summary>Показать стек/переменные отладки в панели Debug. args: stack_frames?:object[], variables?:object[]; returns: text; example: {"stack_frames":[],"variables":[]}.</summary>
-    public const string ShowDebugState = "show_debug_state";
     /// <summary>Добавить контрол в UI (Debug). args: parent_name:string, control_type:string, content?:string, name?:string; returns: text; example: {"parent_name":"Root","control_type":"TextBlock","content":"Hi"}.</summary>
     public const string AddControl = "add_control";
 }

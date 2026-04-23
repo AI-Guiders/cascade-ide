@@ -37,8 +37,8 @@ public partial class MainWindow
         };
         if (DataContext is ViewModels.MainWindowViewModel vm && !string.IsNullOrEmpty(vm.Workspace.SolutionPath))
         {
-            var defaultDll = BreakpointsFileService.GetDefaultDebugTargetPath(vm.Workspace.SolutionPath);
-            var binDir = Path.GetDirectoryName(defaultDll);
+            var bundledSampleDll = BreakpointsFileService.GetBundledSampleDebugTargetDllPath(vm.Workspace.SolutionPath);
+            var binDir = Path.GetDirectoryName(bundledSampleDll);
             if (!string.IsNullOrEmpty(binDir) && Directory.Exists(binDir))
             {
                 var folder = await StorageProvider.TryGetFolderFromPathAsync(binDir).ConfigureAwait(true);
@@ -92,11 +92,11 @@ public partial class MainWindow
         var storageProvider = StorageProvider;
         var files = await storageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
-            Title = "Открыть решение",
+            Title = "Открыть решение или проект",
             AllowMultiple = false,
             FileTypeFilter =
             [
-                new FilePickerFileType("Решение") { Patterns = ["*.slnx", "*.sln"] }
+                new FilePickerFileType("Решение / проект") { Patterns = ["*.slnx", "*.sln", "*.slnf", "*.csproj", "*.fsproj"] }
             ]
         });
         if (files.Count > 0 && DataContext is ViewModels.MainWindowViewModel vm)

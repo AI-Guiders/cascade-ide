@@ -45,7 +45,7 @@ public static class McpDebugPayloadParsing
     public static void ParseDebugState(
         IReadOnlyDictionary<string, JsonElement>? args,
         out List<(string Name, string? File, int Line)> stackFrames,
-        out List<(string Name, string Value)> variables)
+        out List<(string Name, string Value, string? Type)> variables)
     {
         stackFrames = [];
         variables = [];
@@ -67,8 +67,10 @@ public static class McpDebugPayloadParsing
         {
             foreach (var item in v.EnumerateArray())
             {
-                if (item.TryGetProperty("name", out var vn) && item.TryGetProperty("value", out var vv))
-                    variables.Add((vn.GetString() ?? "", vv.GetString() ?? ""));
+                if (!item.TryGetProperty("name", out var vn) || !item.TryGetProperty("value", out var vv))
+                    continue;
+                var t = item.TryGetProperty("type", out var vt) ? vt.GetString() : null;
+                variables.Add((vn.GetString() ?? "", vv.GetString() ?? "", t));
             }
         }
     }
