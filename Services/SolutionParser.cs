@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Xml.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
@@ -117,19 +118,7 @@ public static class SolutionParser
             var root = SolutionItem.CreateSolution(solutionName, solutionPath);
             // Try to restore solution folder hierarchy when available.
             // The public model surface has evolved; use minimal reflection to map parent folders.
-            var folderCache = new Dictionary<object, SolutionItem>(ReferenceEqualityComparer.Instance);
-
-            SolutionItem GetOrCreateFolderNode(object folderObj)
-            {
-                if (folderCache.TryGetValue(folderObj, out var existing))
-                    return existing;
-
-                var folderName = TryGetStringProperty(folderObj, "Name", "FolderName", "Path") ?? "Folder";
-                var folderNode = EnsureSolutionFolders(root, folderName);
-                folderCache[folderObj] = folderNode;
-                return folderNode;
-            }
-
+            var folderFactory = new SolutionFolderNodeFactory(root);
             foreach (var project in model.SolutionProjects)
             {
                 var projectPath = project.FilePath;
@@ -150,7 +139,7 @@ public static class SolutionParser
                         TryGetProperty(project, "SolutionFolder");
 
                     if (parentObj is not null)
-                        parent = GetOrCreateFolderNode(parentObj);
+                        parent = folderFactory.GetOrCreate(parentObj);
                 }
                 catch
                 {
@@ -167,6 +156,26 @@ public static class SolutionParser
         {
             error = ex.Message;
             return null;
+        }
+    }
+
+    /// <summary>Кэш папок решения по объектам API SolutionPersistence (сравнение по ссылке).</summary>
+    private sealed class SolutionFolderNodeFactory
+    {
+        private readonly SolutionItem _root;
+        private readonly Dictionary<object, SolutionItem> _cache = new(ReferenceEqualityComparer.Instance);
+
+        public SolutionFolderNodeFactory(SolutionItem root) => _root = root;
+
+        public SolutionItem GetOrCreate(object folderObj)
+        {
+            if (_cache.TryGetValue(folderObj, out var existing))
+                return existing;
+
+            var folderName = TryGetStringProperty(folderObj, "Name", "FolderName", "Path") ?? "Folder";
+            var folderNode = EnsureSolutionFolders(_root, folderName);
+            _cache[folderObj] = folderNode;
+            return folderNode;
         }
     }
 
@@ -252,42 +261,10 @@ public static class SolutionParser
         {
             using var stream = File.OpenRead(slnfPath);
             var doc = JsonDocument.Parse(stream);
-            if (!doc.RootElement.TryGetProperty("solution", out var solutionEl))
+            if (!TryGetSlnfBaseSolutionAndAllowedProjects(doc, baseDir, out var baseSolutionPath, out var allowedProjects, out var parseError))
             {
-                error = "Некорректный .slnf: нет поля solution.";
+                error = parseError;
                 return null;
-            }
-
-            string baseSolutionRel = "";
-            if (solutionEl.TryGetProperty("path", out var pathEl) && pathEl.ValueKind == JsonValueKind.String)
-                baseSolutionRel = pathEl.GetString() ?? "";
-
-            if (string.IsNullOrWhiteSpace(baseSolutionRel))
-            {
-                error = "Некорректный .slnf: solution.path пуст.";
-                return null;
-            }
-
-            var baseSolutionPath = Path.GetFullPath(Path.Combine(baseDir, baseSolutionRel.Replace('/', Path.DirectorySeparatorChar)));
-            if (!File.Exists(baseSolutionPath))
-            {
-                error = "Базовый solution не найден: " + baseSolutionPath;
-                return null;
-            }
-
-            var allowedProjects = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            if (solutionEl.TryGetProperty("projects", out var projectsEl) && projectsEl.ValueKind == JsonValueKind.Array)
-            {
-                foreach (var p in projectsEl.EnumerateArray())
-                {
-                    if (p.ValueKind != JsonValueKind.String)
-                        continue;
-                    var rel = (p.GetString() ?? "").Trim();
-                    if (rel.Length == 0)
-                        continue;
-                    var full = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(baseSolutionPath) ?? baseDir, rel.Replace('/', Path.DirectorySeparatorChar)));
-                    allowedProjects.Add(full);
-                }
             }
 
             // Parse base solution and then filter its project set.
@@ -332,6 +309,61 @@ public static class SolutionParser
             error = ex.Message;
             return null;
         }
+    }
+
+    /// <summary>Читает <c>solution.path</c> и набор путей проектов из .slnf (относительно каталога базового .sln).</summary>
+    private static bool TryGetSlnfBaseSolutionAndAllowedProjects(
+        JsonDocument doc,
+        string slnfBaseDir,
+        [NotNullWhen(true)] out string? baseSolutionPath,
+        [NotNullWhen(true)] out HashSet<string>? allowedProjects,
+        [NotNullWhen(false)] out string? error)
+    {
+        error = null;
+        baseSolutionPath = null;
+        allowedProjects = null;
+        if (!doc.RootElement.TryGetProperty("solution", out var solutionEl))
+        {
+            error = "Некорректный .slnf: нет поля solution.";
+            return false;
+        }
+
+        string baseSolutionRel = "";
+        if (solutionEl.TryGetProperty("path", out var pathEl) && pathEl.ValueKind == JsonValueKind.String)
+            baseSolutionRel = pathEl.GetString() ?? "";
+
+        if (string.IsNullOrWhiteSpace(baseSolutionRel))
+        {
+            error = "Некорректный .slnf: solution.path пуст.";
+            return false;
+        }
+
+        var resolvedBase = Path.GetFullPath(Path.Combine(slnfBaseDir, baseSolutionRel.Replace('/', Path.DirectorySeparatorChar)));
+        if (!File.Exists(resolvedBase))
+        {
+            error = "Базовый solution не найден: " + resolvedBase;
+            return false;
+        }
+
+        var allowed = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        if (solutionEl.TryGetProperty("projects", out var projectsEl) && projectsEl.ValueKind == JsonValueKind.Array)
+        {
+            var baseSlnDir = Path.GetDirectoryName(resolvedBase) ?? slnfBaseDir;
+            foreach (var p in projectsEl.EnumerateArray())
+            {
+                if (p.ValueKind != JsonValueKind.String)
+                    continue;
+                var rel = (p.GetString() ?? "").Trim();
+                if (rel.Length == 0)
+                    continue;
+                var full = Path.GetFullPath(Path.Combine(baseSlnDir, rel.Replace('/', Path.DirectorySeparatorChar)));
+                allowed.Add(full);
+            }
+        }
+
+        baseSolutionPath = resolvedBase;
+        allowedProjects = allowed;
+        return true;
     }
 
     private static bool PruneTreeToAllowedProjects(SolutionItem node, HashSet<string> allowedProjects)

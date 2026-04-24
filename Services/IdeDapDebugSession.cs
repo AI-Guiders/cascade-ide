@@ -60,9 +60,7 @@ public sealed class IdeDapDebugSession
         if (string.IsNullOrWhiteSpace(workspacePath))
             return Array.Empty<DebugBreakpointSnapshot>();
 
-        var workspaceRoot = Path.GetFullPath(workspacePath.Trim());
-        if (File.Exists(workspaceRoot))
-            workspaceRoot = Path.GetDirectoryName(workspaceRoot) ?? workspaceRoot;
+        var workspaceRoot = GetWorkspaceRootFromPath(workspacePath);
 
         return BreakpointsStorage.GetBreakpoints(workspacePath, targetPath)
             .Select(b => new DebugBreakpointSnapshot(
@@ -195,6 +193,79 @@ public sealed class IdeDapDebugSession
         return fallback;
     }
 
+    private static string GetWorkspaceRootFromPath(string workspacePath)
+    {
+        var workspaceRoot = Path.GetFullPath(workspacePath.Trim());
+        if (File.Exists(workspaceRoot))
+            workspaceRoot = Path.GetDirectoryName(workspaceRoot) ?? workspaceRoot;
+        return workspaceRoot;
+    }
+
+    private static List<BreakpointsStorage.BreakpointEntry> LoadBreakpointEntries(
+        string workspacePath,
+        string workspaceRoot,
+        string? targetPath,
+        out Dictionary<string, List<(int Line, string? Condition)>> byFile)
+    {
+        if (string.IsNullOrWhiteSpace(targetPath))
+        {
+            byFile = new Dictionary<string, List<(int Line, string? Condition)>>(StringComparer.OrdinalIgnoreCase);
+            return new List<BreakpointsStorage.BreakpointEntry>();
+        }
+
+        var breakpoints = BreakpointsStorage.GetBreakpoints(workspacePath, targetPath).ToList();
+        byFile = breakpoints
+            .GroupBy(b => DapShared.ResolveBreakpointFilePath(workspaceRoot, b.File))
+            .ToDictionary(g => g.Key, g => g.Select(b => (b.Line, b.Condition)).ToList());
+        return breakpoints;
+    }
+
+    private void RegisterDapSessionHandlers(DapClient client, TaskCompletionSource stoppedTcs)
+    {
+        client.OnConnectionLost = () => HandleDapConnectionLost(client);
+        client.OnEvent = (eventName, body) => HandleDapSessionEvent(eventName, body, client, stoppedTcs);
+    }
+
+    private void HandleDapConnectionLost(DapClient client)
+    {
+        if (_client != client)
+            return;
+        _client = null;
+        _lastStoppedThreadId = 0;
+        _lastExceptionText = null;
+        _sessionWorkspacePath = null;
+        _sessionTargetPath = null;
+        UpdateSnapshot(current => current with
+        {
+            HasActiveSession = false,
+            IsExecutionStopped = false,
+            StoppedFile = null,
+            StoppedLine = 0,
+            ExceptionText = null,
+            StackFrames = Array.Empty<(string Name, string? File, int Line)>(),
+            VariableRootScopes = Array.Empty<DebugVariableRootScope>(),
+            VariablesFrameIndex = 0
+        });
+        NotifySessionClientChanged();
+    }
+
+    private void HandleDapSessionEvent(string eventName, JsonElement body, DapClient client, TaskCompletionSource stoppedTcs)
+    {
+        if (eventName == "stopped" && body.TryGetProperty("threadId", out var tid))
+        {
+            var reason = body.TryGetProperty("reason", out var r) ? r.GetString() : null;
+            var exceptionText = (reason == "exception" && body.TryGetProperty("text", out var txt)) ? txt.GetString() : null;
+            OnStoppedEvent(tid.GetInt32(), exceptionText);
+            stoppedTcs.TrySetResult();
+            var tidVal = tid.GetInt32();
+            _ = RefreshStoppedUiAsync(client, tidVal);
+        }
+        else if (eventName == "continued")
+        {
+            OnContinuedEvent();
+        }
+    }
+
     /// <summary>Текст для MCP-ответа; UI обновляется в событии stopped.</summary>
     public async Task<string> LaunchAsync(
         string workspacePath,
@@ -206,62 +277,21 @@ public sealed class IdeDapDebugSession
         CancellationToken cancellationToken = default)
     {
         var netcoredbg = ResolveNetcoreDbgPath(netcoredbgPath);
-        var workspaceRoot = Path.GetFullPath(workspacePath.Trim());
-        if (File.Exists(workspaceRoot))
-            workspaceRoot = Path.GetDirectoryName(workspaceRoot) ?? workspaceRoot;
+        var workspaceRoot = GetWorkspaceRootFromPath(workspacePath);
         var programPath = Path.IsPathRooted(targetPath.Trim())
             ? Path.GetFullPath(targetPath)
             : Path.GetFullPath(Path.Combine(workspaceRoot, targetPath.Trim()));
         if (!File.Exists(programPath))
             throw new ArgumentException($"Target not found: {programPath}");
 
-        var breakpoints = BreakpointsStorage.GetBreakpoints(workspacePath, targetPath).ToList();
-        var byFile = breakpoints
-            .GroupBy(b => DapShared.ResolveBreakpointFilePath(workspaceRoot, b.File))
-            .ToDictionary(g => g.Key, g => g.Select(b => (b.Line, b.Condition)).ToList());
+        var breakpoints = LoadBreakpointEntries(workspacePath, workspaceRoot, targetPath, out var byFile);
 
         await StopInternalAsync().ConfigureAwait(false);
 
         var client = await DapClient.StartAsync(netcoredbg, cancellationToken, clientId: "cascade-ide", clientName: "CascadeIDE").ConfigureAwait(false);
-        client.OnConnectionLost = () =>
-        {
-            if (_client == client)
-            {
-                _client = null;
-                _lastStoppedThreadId = 0;
-                _lastExceptionText = null;
-                _sessionWorkspacePath = null;
-                _sessionTargetPath = null;
-                UpdateSnapshot(current => current with
-                {
-                    HasActiveSession = false,
-                    IsExecutionStopped = false,
-                    StoppedFile = null,
-                    StoppedLine = 0,
-                    ExceptionText = null,
-                    StackFrames = Array.Empty<(string Name, string? File, int Line)>(),
-                    VariableRootScopes = Array.Empty<DebugVariableRootScope>(),
-                    VariablesFrameIndex = 0
-                });
-                NotifySessionClientChanged();
-            }
-        };
         PrepareStoppedWait();
         var stoppedTcs = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        client.OnEvent = (eventName, body) =>
-        {
-            if (eventName == "stopped" && body.TryGetProperty("threadId", out var tid))
-            {
-                var reason = body.TryGetProperty("reason", out var r) ? r.GetString() : null;
-                var exceptionText = (reason == "exception" && body.TryGetProperty("text", out var txt)) ? txt.GetString() : null;
-                OnStoppedEvent(tid.GetInt32(), exceptionText);
-                stoppedTcs.TrySetResult();
-                var tidVal = tid.GetInt32();
-                _ = RefreshStoppedUiAsync(client, tidVal);
-            }
-            else if (eventName == "continued")
-                OnContinuedEvent();
-        };
+        RegisterDapSessionHandlers(client, stoppedTcs);
 
         var exceptionBpsOk = false;
         try
@@ -326,62 +356,15 @@ public sealed class IdeDapDebugSession
         CancellationToken cancellationToken = default)
     {
         var netcoredbg = ResolveNetcoreDbgPath(netcoredbgPath);
-        var workspaceRoot = Path.GetFullPath(workspacePath.Trim());
-        if (File.Exists(workspaceRoot))
-            workspaceRoot = Path.GetDirectoryName(workspaceRoot) ?? workspaceRoot;
-
-        var breakpoints = new List<BreakpointsStorage.BreakpointEntry>();
-        var byFile = new Dictionary<string, List<(int Line, string? Condition)>>();
-        if (!string.IsNullOrWhiteSpace(targetPath))
-        {
-            breakpoints = BreakpointsStorage.GetBreakpoints(workspacePath, targetPath).ToList();
-            byFile = breakpoints
-                .GroupBy(b => DapShared.ResolveBreakpointFilePath(workspaceRoot, b.File))
-                .ToDictionary(g => g.Key, g => g.Select(b => (b.Line, b.Condition)).ToList());
-        }
+        var workspaceRoot = GetWorkspaceRootFromPath(workspacePath);
+        var breakpoints = LoadBreakpointEntries(workspacePath, workspaceRoot, targetPath, out var byFile);
 
         await StopInternalAsync().ConfigureAwait(false);
 
         var client = await DapClient.StartAsync(netcoredbg, cancellationToken, clientId: "cascade-ide", clientName: "CascadeIDE").ConfigureAwait(false);
-        client.OnConnectionLost = () =>
-        {
-            if (_client == client)
-            {
-                _client = null;
-                _lastStoppedThreadId = 0;
-                _lastExceptionText = null;
-                _sessionWorkspacePath = null;
-                _sessionTargetPath = null;
-                UpdateSnapshot(current => current with
-                {
-                    HasActiveSession = false,
-                    IsExecutionStopped = false,
-                    StoppedFile = null,
-                    StoppedLine = 0,
-                    ExceptionText = null,
-                    StackFrames = Array.Empty<(string Name, string? File, int Line)>(),
-                    VariableRootScopes = Array.Empty<DebugVariableRootScope>(),
-                    VariablesFrameIndex = 0
-                });
-                NotifySessionClientChanged();
-            }
-        };
         PrepareStoppedWait();
         var stoppedTcs = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        client.OnEvent = (eventName, body) =>
-        {
-            if (eventName == "stopped" && body.TryGetProperty("threadId", out var tid))
-            {
-                var reason = body.TryGetProperty("reason", out var r) ? r.GetString() : null;
-                var exceptionText = (reason == "exception" && body.TryGetProperty("text", out var txt)) ? txt.GetString() : null;
-                OnStoppedEvent(tid.GetInt32(), exceptionText);
-                stoppedTcs.TrySetResult();
-                var tidVal = tid.GetInt32();
-                _ = RefreshStoppedUiAsync(client, tidVal);
-            }
-            else if (eventName == "continued")
-                OnContinuedEvent();
-        };
+        RegisterDapSessionHandlers(client, stoppedTcs);
 
         var attachExceptionBpsOk = false;
         try
@@ -648,9 +631,7 @@ public sealed class IdeDapDebugSession
         if (client == null)
             return;
 
-        var workspaceRoot = Path.GetFullPath(ws.Trim());
-        if (File.Exists(workspaceRoot))
-            workspaceRoot = Path.GetDirectoryName(workspaceRoot) ?? workspaceRoot;
+        var workspaceRoot = GetWorkspaceRootFromPath(ws);
         var breakpoints = BreakpointsStorage.GetBreakpoints(ws, target).ToList();
         var byFile = breakpoints
             .GroupBy(b => DapShared.ResolveBreakpointFilePath(workspaceRoot, b.File))

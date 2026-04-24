@@ -1,6 +1,5 @@
 #nullable enable
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 
 namespace CascadeIDE.Services;
 
@@ -40,7 +39,7 @@ public static class LaunchProfilesStore
         error = null;
         if (!TryLoadDocument(solutionPath, out var doc, out var err) || doc is null)
         {
-            error = string.IsNullOrEmpty(err) ? "launch_profiles_unavailable" : err;
+            error = UnavailabilityOrError(err);
             return false;
         }
 
@@ -78,7 +77,7 @@ public static class LaunchProfilesStore
         error = null;
         if (!TryLoadDocument(solutionPath, out var doc, out var err) || doc is null)
         {
-            error = string.IsNullOrEmpty(err) ? "launch_profiles_unavailable" : err;
+            error = UnavailabilityOrError(err);
             return false;
         }
 
@@ -102,32 +101,7 @@ public static class LaunchProfilesStore
             return false;
         }
 
-        var rel = p.Project!.Trim().Replace('/', Path.DirectorySeparatorChar);
-        var config = string.IsNullOrWhiteSpace(p.Configuration) ? DefaultConfiguration : p.Configuration!.Trim();
-        var programArgs = p.ProgramArgs is { Count: > 0 } ? p.ProgramArgs : null;
-        var cwdRel = string.IsNullOrWhiteSpace(p.WorkingDirectory) ? null : p.WorkingDirectory!.Trim().Replace('/', Path.DirectorySeparatorChar);
-
-        var env = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        if (p.Env is not null)
-        {
-            foreach (var (k, v) in p.Env)
-            {
-                if (string.IsNullOrEmpty(k) || v is null)
-                    continue;
-                env[k] = v;
-            }
-        }
-
-        if (!string.IsNullOrWhiteSpace(p.ApplicationUrls) &&
-            !env.ContainsKey("ASPNETCORE_URLS") &&
-            !env.ContainsKey("ASPNETCORE__URLS"))
-        {
-            env["ASPNETCORE_URLS"] = p.ApplicationUrls!.Trim();
-        }
-
-        var openBrowser = p.LaunchBrowser == true;
-        var launchUrl = string.IsNullOrWhiteSpace(p.LaunchUrl) ? null : p.LaunchUrl.Trim();
-        data = new LaunchProfileData(id, rel, config, programArgs, cwdRel, env, openBrowser, launchUrl);
+        data = BuildLaunchProfileData(id, p);
         return true;
     }
 
@@ -147,7 +121,7 @@ public static class LaunchProfilesStore
 
         if (!TryLoadDocument(solutionPath, out var doc, out var err) || doc is null)
         {
-            error = string.IsNullOrEmpty(err) ? "launch_profiles_unavailable" : err;
+            error = UnavailabilityOrError(err);
             return false;
         }
 
@@ -172,7 +146,7 @@ public static class LaunchProfilesStore
         error = null;
         if (!TryLoadDocument(solutionPath, out var doc, out var err) || doc is null)
         {
-            error = string.IsNullOrEmpty(err) ? "launch_profiles_unavailable" : err;
+            error = UnavailabilityOrError(err);
             return false;
         }
 
@@ -196,7 +170,7 @@ public static class LaunchProfilesStore
         error = null;
         if (!TryLoadDocument(solutionPath, out var doc, out var err) || doc is null)
         {
-            error = string.IsNullOrEmpty(err) ? "launch_profiles_unavailable" : err;
+            error = UnavailabilityOrError(err);
             return false;
         }
 
@@ -221,15 +195,12 @@ public static class LaunchProfilesStore
     {
         profilesWritten = 0;
         error = null;
-        var solDir = BreakpointsFileService.GetWorkspaceRoot(solutionPath);
-        if (string.IsNullOrEmpty(solDir))
+        if (!TryGetLaunchSettingsJsonPath(solutionPath, projectPathRelativeToSolution, out var jsonPath, out var loadError))
         {
-            error = "workspace_root_unresolved";
+            error = loadError;
             return false;
         }
 
-        var projDir = Path.GetDirectoryName(projectPathRelativeToSolution.Trim().Replace('/', Path.DirectorySeparatorChar));
-        var jsonPath = Path.Combine(solDir, projDir ?? string.Empty, "Properties", "launchSettings.json");
         if (!File.Exists(jsonPath))
         {
             error = "launch_settings_not_found: " + jsonPath;
@@ -263,6 +234,27 @@ public static class LaunchProfilesStore
             doc.ActiveProfile = list[0].Name;
 
         WriteDocument(solutionPath, doc);
+        return true;
+    }
+
+    /// <summary>Корень workspace и путь к <c>Properties/launchSettings.json</c> проекта.</summary>
+    private static bool TryGetLaunchSettingsJsonPath(
+        string solutionPath,
+        string projectPathRelativeToSolution,
+        [NotNullWhen(true)] out string? jsonPath,
+        [NotNullWhen(false)] out string? error)
+    {
+        jsonPath = null;
+        error = null;
+        var solDir = BreakpointsFileService.GetWorkspaceRoot(solutionPath);
+        if (string.IsNullOrEmpty(solDir))
+        {
+            error = "workspace_root_unresolved";
+            return false;
+        }
+
+        var projDir = Path.GetDirectoryName(projectPathRelativeToSolution.Trim().Replace('/', Path.DirectorySeparatorChar));
+        jsonPath = Path.Combine(solDir, projDir ?? string.Empty, "Properties", "launchSettings.json");
         return true;
     }
 
@@ -318,26 +310,14 @@ public static class LaunchProfilesStore
 
         if (File.Exists(path))
         {
-            try
+            if (TryParseTomlFile(path, out var fromDisk, out var parseError))
             {
-                var text = File.ReadAllText(path);
-                var model = CascadeTomlSerializer.Deserialize<LaunchProfilesTomlModel>(text);
-                if (model is null)
-                {
-                    error = "launch_profiles_parse_failed";
-                    return false;
-                }
-
-                if (model.Version < 1)
-                    model.Version = 1;
-                doc = model;
+                doc = fromDisk;
                 return true;
             }
-            catch (Exception ex)
-            {
-                error = "launch_profiles_parse_failed: " + ex.Message;
-                return false;
-            }
+
+            error = parseError;
+            return false;
         }
 
         if (MigrateFromLegacyJson(solutionPath, out var migrated))
@@ -348,6 +328,66 @@ public static class LaunchProfilesStore
 
         error = "launch_profiles_not_found";
         return false;
+    }
+
+    private static string UnavailabilityOrError(string? loadError) =>
+        string.IsNullOrEmpty(loadError) ? "launch_profiles_unavailable" : loadError!;
+
+    private static bool TryParseTomlFile(
+        string filePath,
+        [NotNullWhen(true)] out LaunchProfilesTomlModel? model,
+        [NotNullWhen(false)] out string? error)
+    {
+        model = null;
+        error = null;
+        try
+        {
+            var text = File.ReadAllText(filePath);
+            var m = CascadeTomlSerializer.Deserialize<LaunchProfilesTomlModel>(text);
+            if (m is null)
+            {
+                error = "launch_profiles_parse_failed";
+                return false;
+            }
+
+            if (m.Version < 1)
+                m.Version = 1;
+            model = m;
+            return true;
+        }
+        catch (Exception ex)
+        {
+            error = "launch_profiles_parse_failed: " + ex.Message;
+            return false;
+        }
+    }
+
+    private static LaunchProfileData BuildLaunchProfileData(string id, LaunchProfileModel p)
+    {
+        var rel = p.Project!.Trim().Replace('/', Path.DirectorySeparatorChar);
+        var config = string.IsNullOrWhiteSpace(p.Configuration) ? DefaultConfiguration : p.Configuration!.Trim();
+        var programArgs = p.ProgramArgs is { Count: > 0 } ? p.ProgramArgs : null;
+        var cwdRel = string.IsNullOrWhiteSpace(p.WorkingDirectory) ? null : p.WorkingDirectory!.Trim().Replace('/', Path.DirectorySeparatorChar);
+
+        var env = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        if (p.Env is not null)
+        {
+            foreach (var (k, v) in p.Env)
+            {
+                if (string.IsNullOrEmpty(k) || v is null)
+                    continue;
+                env[k] = v;
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(p.ApplicationUrls) &&
+            !env.ContainsKey("ASPNETCORE_URLS") &&
+            !env.ContainsKey("ASPNETCORE__URLS"))
+            env["ASPNETCORE_URLS"] = p.ApplicationUrls!.Trim();
+
+        var openBrowser = p.LaunchBrowser == true;
+        var launchUrl = string.IsNullOrWhiteSpace(p.LaunchUrl) ? null : p.LaunchUrl.Trim();
+        return new LaunchProfileData(id, rel, config, programArgs, cwdRel, env, openBrowser, launchUrl);
     }
 
     private static bool MigrateFromLegacyJson(string solutionPath, [NotNullWhen(true)] out LaunchProfilesTomlModel? doc)

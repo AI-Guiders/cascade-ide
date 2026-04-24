@@ -87,63 +87,66 @@ public sealed class WorkspaceIgnoreMatcher
         var rules = new List<CompiledRule>();
 
         foreach (var ignoreFile in EnumerateIgnoreFilesSorted(repositoryRoot))
+            AppendRulesFromIgnoreFile(ignoreFile, options, rules);
+
+        return new WorkspaceIgnoreMatcher(repositoryRoot, rules);
+    }
+
+    private static void AppendRulesFromIgnoreFile(string ignoreFile, GlobOptions options, List<CompiledRule> rules)
+    {
+        string text;
+        try
         {
-            string text;
-            try
-            {
-                text = File.ReadAllText(ignoreFile);
-            }
-            catch
-            {
-                continue;
-            }
+            text = File.ReadAllText(ignoreFile);
+        }
+        catch
+        {
+            return;
+        }
 
-            var baseDir = Path.GetDirectoryName(ignoreFile);
-            if (string.IsNullOrEmpty(baseDir))
-                continue;
-            try
-            {
-                baseDir = Path.GetFullPath(baseDir);
-            }
-            catch
-            {
-                continue;
-            }
+        var baseDir = Path.GetDirectoryName(ignoreFile);
+        if (string.IsNullOrEmpty(baseDir))
+            return;
+        try
+        {
+            baseDir = Path.GetFullPath(baseDir);
+        }
+        catch
+        {
+            return;
+        }
 
-            foreach (var line in text.Replace("\r\n", "\n").Split('\n'))
-            {
-                if (!TryParseGitIgnoreLine(line, out var negation, out var patternBodies))
-                    continue;
+        foreach (var line in text.Replace("\r\n", "\n").Split('\n'))
+        {
+            if (!TryParseGitIgnoreLine(line, out var negation, out var patternBodies))
+                continue;
 
-                foreach (var pl in patternBodies)
+            foreach (var pl in patternBodies)
+            {
+                var globs = new List<Glob>();
+                foreach (var pattern in GitIgnoreLineToGlobPatterns(pl))
                 {
-                    var globs = new List<Glob>();
-                    foreach (var pattern in GitIgnoreLineToGlobPatterns(pl))
+                    try
                     {
-                        try
-                        {
-                            globs.Add(Glob.Parse(pattern, options));
-                        }
-                        catch
-                        {
-                            // пропускаем неподдерживаемые шаблоны
-                        }
+                        globs.Add(Glob.Parse(pattern, options));
                     }
+                    catch
+                    {
+                        // пропускаем неподдерживаемые шаблоны
+                    }
+                }
 
-                    if (globs.Count > 0)
+                if (globs.Count > 0)
+                {
+                    rules.Add(new CompiledRule
                     {
-                        rules.Add(new CompiledRule
-                        {
-                            BaseDir = baseDir,
-                            Globs = globs.ToArray(),
-                            Negation = negation,
-                        });
-                    }
+                        BaseDir = baseDir,
+                        Globs = globs.ToArray(),
+                        Negation = negation,
+                    });
                 }
             }
         }
-
-        return new WorkspaceIgnoreMatcher(repositoryRoot, rules);
     }
 
     /// <summary>Все <c>.gitignore</c> и <c>.cascadeignore</c> под корнем, без захода в <c>.git</c>; в каталоге сначала gitignore, потом cascade.</summary>
