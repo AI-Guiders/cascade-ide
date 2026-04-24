@@ -17,6 +17,7 @@
 | **Центр TECH** — вводные принципы (границы, контракты, агент, отладка); текст в [`snippets/tech/`](../snippets/tech/README.md) | [0077](../0077-tech-principles-hub.md) |
 | Слои, срезы фич, роль `MainWindowViewModel` | [0006](../0006-presentation-layers-and-feature-slices.md) |
 | Сигналы, слабая связность, backpressure на UI | [0007](../0007-signals-coupling-and-ui-backpressure.md) |
+| **Шина доставки в UI** (аналогия AFDX): `Channel<T>`, батчинг; ортогонально CDS-«каналу»; журнал сборки / терминал — strangler | [0094](../0094-ingestion-bus-afdx-analogy-and-threading-channels.md) (Proposed) |
 | Маршалинг UI (`IUiScheduler`, strangler) | [0004](../0004-ui-thread-marshaling.md) |
 | Контракты MCP, тестируемая инфраструктура | [0008](../0008-mcp-contracts-and-testable-infrastructure.md) |
 | Strangler-миграция, исключения для spike | [0009](../0009-strangler-migration-and-exceptions.md) |

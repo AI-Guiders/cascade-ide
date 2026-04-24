@@ -4,6 +4,7 @@
 0077-tech-principles-hub.md
 0006-presentation-layers-and-feature-slices.md
 0007-signals-coupling-and-ui-backpressure.md
+0094-ingestion-bus-afdx-analogy-and-threading-channels.md
 0004-ui-thread-marshaling.md
 0008-mcp-contracts-and-testable-infrastructure.md
 0009-strangler-migration-and-exceptions.md

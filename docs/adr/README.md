@@ -103,6 +103,7 @@
 | [0091](0091-pfd-debug-situational-deck-hypothesis.md) | Гипотеза: PFD **instrument deck** в режиме отладки — одной страницы Mfd (DebugStack) может не хватить; PFD = краткая сводка, Mfd = детали | Proposed |
 | [0092](0092-visual-ui-designer-major-track.md) | Трек **Visual UI** (дизайнер разметки): отдельная крупная программная линия; норматив по UX — [0022](0022-mfd-visual-design-surface-axaml-blazor.md); приоритет Avalonia → Blazor → (опц.) Razor | Accepted (направление) |
 | [0093](0093-mfd-embedded-browser-for-launch-url.md) | Расширение [0090](0090-launch-profiles-and-debug-startup-configurations.md): **опциональный** встроенный просмотр URL Kestrel на MFD рядом с отладкой; внешний браузер остаётся default; WebView2 / кроссплатформа — в roadmap | Proposed |
+| [0094](0094-ingestion-bus-afdx-analogy-and-threading-channels.md) | **Шина доставки в UI** (аналогия **AFDX**): `Channel<T>`, батчинг, backpressure; ортогонально CDS-«каналу»; strangler с журнала сборки | Proposed |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 
