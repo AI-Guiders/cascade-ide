@@ -44,11 +44,11 @@ $null = $solutionJson | ConvertFrom-Json
 $cockpitJson = Invoke-AgentContract -Arguments @("--agent-contract", "get_cockpit_surface")
 $null = $cockpitJson | ConvertFrom-Json
 
-$workspaceJson = Invoke-AgentContract -Arguments @("--agent-contract", "get_workspace_state")
-$wsObj = $workspaceJson | ConvertFrom-Json
-if (-not $wsObj.PSObject.Properties.Match('cockpit_surface')) { throw "get_workspace_state: missing cockpit_surface" }
+$ideStateJson = Invoke-AgentContract -Arguments @("--agent-contract", "get_ide_state")
+$wsObj = $ideStateJson | ConvertFrom-Json
+if (-not $wsObj.PSObject.Properties.Match('cockpit_surface')) { throw "get_ide_state: missing cockpit_surface" }
 
 # Git — явный корень репозитория (как в MCP)
 $gitJson = Invoke-AgentContract -Arguments @("--agent-contract", "--workspace", $Workspace, "git_status")
 
-Write-Host "OK: ui_modes=$($uiModesJson.Length) lang=$($langJson.Length) solution=$($solutionJson.Length) cockpit=$($cockpitJson.Length) workspace=$($workspaceJson.Length) git=$($gitJson.Length)"
+Write-Host "OK: ui_modes=$($uiModesJson.Length) lang=$($langJson.Length) solution=$($solutionJson.Length) cockpit=$($cockpitJson.Length) ide_state=$($ideStateJson.Length) git=$($gitJson.Length)"

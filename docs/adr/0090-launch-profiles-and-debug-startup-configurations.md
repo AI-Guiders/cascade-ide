@@ -1,6 +1,6 @@
 # ADR 0090: Профили запуска и несколько стартовых конфигураций отладки (как launch profiles в VS)
 
-**Статус:** Proposed  
+**Статус:** Accepted  
 **Дата:** 2026-04-23  
 **Связь:** [0002](0002-debug-human-agent-parity.md) (единый слой отладки для человека и агента), [MCP-PROTOCOL.md](../MCP-PROTOCOL.md) (`debug_launch` и родственные тулы), текущее хранилище `StartupProjectStore` / `startup-project.json`, резолвер [MsBuildDebugTargetResolver.cs](../../Services/MsBuildDebugTargetResolver.cs), политика конфигурации TOML-first в [0028](0028-user-settings-toml-localappdata-and-secrets.md) / [0029](0029-configuration-toml-canonical-ui-facade.md).
 
@@ -56,10 +56,19 @@
 - Команды: «управление профилями» (добавить/удалить/дублировать) — MFD или модалка по объёму ([0074](0074-settings-ui-mfd-compact-layout-overflow.md) как политика нехватки места).
 - F5 / «запустить отладку» используют **активный профиль**, без диалога выбора `.dll`, если резолв успешен (согласуется с паритетом [0002](0002-debug-human-agent-parity.md)).
 
-### Паритет агента (MCP)
+### Паритет агента (MCP / IdeCommands) — контракт v1
 
-- `debug_launch` (и снимок отладки) должны уметь ссылаться на **имя профиля** (параметр), а не только на «сырое» `target_path`. При отсутствии имени — активный профиль, как у человека ([0002](0002-debug-human-agent-parity.md)).
-- Документация в [MCP-PROTOCOL.md](../MCP-PROTOCOL.md) — одновременно с реализацией или коротким «черновиком параметров» в ADR.
+Контракт запуска отладки фиксируется на уровне `IdeCommands.DebugLaunch` и `MCP-PROTOCOL`:
+
+- Команда: `debug_launch`.
+- Режим A (явная цель): `workspace_path` + `target_path` (как сейчас, backward compatible).
+- Режим B (профиль): `profile_name` (опционально) + контекст открытого workspace/solution.
+  - если `profile_name` не задан, используется `active_profile`;
+  - если профиль не найден — явная ошибка контракта (не молчаливый fallback на «случайный» startup).
+- Доп. параметры остаются: `netcoredbg_path`, `program_args`.
+- При одновременной передаче `target_path` и `profile_name` приоритет у `target_path` (явный путь агента сильнее профиля).
+
+Это позволяет человеку и агенту использовать один смысл F5/Launch: «запуск по активному профилю», а для точечных сценариев сохраняется прямой запуск по `target_path`.
 
 ### Согласование с .NET
 
@@ -83,4 +92,22 @@
 
 ## Статус внедрения
 
-По мере реализации: сменить статус на **Accepted** и при появлении кода в репозитории добавить **· Implemented** согласно [status-lifecycle.md](status-lifecycle.md).
+- Этот ADR зафиксирован как **Accepted**: решение и контракт приняты.
+- Техническая реализация ведётся по чеклисту ниже; после merge кода добавить отметку **· Implemented** согласно [status-lifecycle.md](status-lifecycle.md).
+
+## Implementation checklist (из решения в код)
+
+1. Ввести `.cascade-ide/launch-profiles.toml` (список профилей + `active_profile`) и миграцию из `startup-project.json`.
+2. Обновить резолв отладки: `MsBuildDebugTargetResolver` получает `Configuration` из профиля (не только `Debug`).
+3. Обновить `debug_launch` pipeline:
+   - поддержка `profile_name`,
+   - однозначные ошибки (`profile_not_found`, `active_profile_missing`, `profile_target_unresolved`),
+   - совместимость с текущим `workspace_path + target_path`.
+4. Синхронизировать документацию:
+   - XML-doc `IdeCommands.DebugLaunch`,
+   - `docs/MCP-PROTOCOL.md` (сгенерированный блок),
+   - при необходимости ADR-индекс/ссылки.
+5. Test plan (минимум):
+   - консольный проект: профили `Debug`/`Release` с разными аргументами;
+   - ASP.NET Core (Kestrel): импорт `applicationUrl`/env и запуск по профилю;
+   - негатив: отсутствующий профиль и неразрешимая цель дают явную ошибку.

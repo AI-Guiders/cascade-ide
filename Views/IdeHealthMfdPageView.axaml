@@ -27,7 +27,7 @@
                           IsVisible="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyNe}, ConverterParameter=Power}">
                 <ItemsControl ItemsSource="{Binding WorkspaceHealthSegments}">
                     <ItemsControl.ItemTemplate>
-                        <DataTemplate x:DataType="cockpitWh:WorkspaceHealthSegment">
+                        <DataTemplate x:DataType="cockpitWh:IdeHealthSegment">
                             <Border Classes="modeCard" Padding="8,6" Margin="0,0,0,6">
                                 <TextBlock Text="{Binding LineText}"
                                            TextWrapping="Wrap"
@@ -46,7 +46,7 @@
                 <StackPanel Spacing="8">
                     <ItemsControl ItemsSource="{Binding WorkspaceHealthSegments}">
                         <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="cockpitWh:WorkspaceHealthSegment">
+                            <DataTemplate x:DataType="cockpitWh:IdeHealthSegment">
                                 <Panel Margin="0,0,0,6">
                                     <Border IsVisible="{Binding IsBuildSource}"
                                             Padding="8,6"

@@ -515,15 +515,15 @@ public static class UiModeCatalog
         return DefaultShowTaskBarForFamily(family);
     }
 
-    private static WorkspaceHealthUiSurface ResolveWorkspaceHealthSurface(string? fromFile, WorkspaceHealthUiSurface inherited)
+    private static IdeHealthUiSurface ResolveWorkspaceHealthSurface(string? fromFile, IdeHealthUiSurface inherited)
     {
         if (string.IsNullOrWhiteSpace(fromFile))
             return inherited;
         var v = fromFile.Trim();
         if (string.Equals(v, "dedicated_page", StringComparison.OrdinalIgnoreCase))
-            return WorkspaceHealthUiSurface.DedicatedPage;
+            return IdeHealthUiSurface.DedicatedPage;
         if (string.Equals(v, "bottom_strip", StringComparison.OrdinalIgnoreCase))
-            return WorkspaceHealthUiSurface.BottomStrip;
+            return IdeHealthUiSurface.BottomStrip;
         return inherited;
     }
 

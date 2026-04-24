@@ -247,7 +247,7 @@ public sealed partial class AutonomousAgentSessionViewModel : ObservableObject
     [RelayCommand]
     private void FixFailingTests()
     {
-        var objective = "Fix failing tests using minimal-risk changes. Use get_workspace_state / run_affected_tests, then propose safe fixes.";
+        var objective = "Fix failing tests using minimal-risk changes. Use get_ide_state / run_affected_tests, then propose safe fixes.";
         if (AutonomousCockpitActive)
         {
             StartAutonomousFlow(objective, maxSteps: 10);

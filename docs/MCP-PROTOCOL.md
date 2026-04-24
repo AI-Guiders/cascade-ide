@@ -17,7 +17,7 @@
 
 ### CLI контракта без MCP (ADR 0052)
 
-Без GUI и без stdio можно вывести **тот же JSON**, что вернул бы соответствующий тул: `CascadeIDE.exe --agent-contract [--workspace <dir>] <command>`. Команды без workspace: `get_ui_modes_diagnostics`, `get_supported_editor_languages`, `get_solution_info` (краткая сводка решения, паритет с `ide_get_solution_info`), `get_cockpit_surface` (только CDS — тот же объект, что поле `cockpit_surface` в ответе ниже), `get_workspace_state` (полная сводка, паритет с `ide_get_workspace_state`). Read-only git (тот же JSON, что `ide_git_*`): `git_status`, `git_diff`, `git_log`, `git_branch` (list), `git_show` — для них `--workspace` задаёт корень репозитория (по умолчанию текущий каталог). В CI: см. `.gitlab-ci.yml` (Windows runner), плюс привычный **`dotnet script`** — [`docs/samples/agent-contract-ci.csx`](samples/agent-contract-ci.csx); вариант на PowerShell: [`docs/samples/agent-contract-ci.ps1`](samples/agent-contract-ci.ps1). Подробности и снапшот-тесты: [ADR 0052](adr/0052-agent-contract-cli-and-snapshot-tests.md).
+Без GUI и без stdio можно вывести **тот же JSON**, что вернул бы соответствующий тул: `CascadeIDE.exe --agent-contract [--workspace <dir>] <command>`. Команды без workspace: `get_ui_modes_diagnostics`, `get_supported_editor_languages`, `get_solution_info` (краткая сводка решения, паритет с `ide_get_solution_info`), `get_cockpit_surface` (только CDS — тот же объект, что поле `cockpit_surface` в ответе ниже), `get_ide_state` (полная сводка, паритет с `ide_get_ide_state`). Read-only git (тот же JSON, что `ide_git_*`): `git_status`, `git_diff`, `git_log`, `git_branch` (list), `git_show` — для них `--workspace` задаёт корень репозитория (по умолчанию текущий каталог). В CI: см. `.gitlab-ci.yml` (Windows runner), плюс привычный **`dotnet script`** — [`docs/samples/agent-contract-ci.csx`](samples/agent-contract-ci.csx); вариант на PowerShell: [`docs/samples/agent-contract-ci.ps1`](samples/agent-contract-ci.ps1). Подробности и снапшот-тесты: [ADR 0052](adr/0052-agent-contract-cli-and-snapshot-tests.md).
 
 ### Видимость MCP для агента (на будущее: свои MCP в IDE)
 
@@ -56,7 +56,7 @@
 | `ide_apply_edit` | Применить правку в открытом файле | `file_path`, `start_line`, `start_column`, `end_line`, `end_column`, `new_text` (1-based) |
 | `ide_go_to_position` | Перейти на позицию (и опционально выделить) | `file_path`, `line`, `column`; опционально `end_line`, `end_column` |
 | `ide_get_solution_info` | Информация о решении и открытом файле | —; возвращает JSON (solution_path, current_file_path, project_paths) |
-| `ide_get_workspace_state` | Единая сводка состояния IDE: solution/current file/selection/debug/build output/diagnostics; **`cockpit_surface`** — CDS-снимок кабины (тот же `CockpitSurfaceState`, что `BuildCockpitSurfaceSnapshot` / Skia) | —; возвращает JSON |
+| `ide_get_ide_state` | Единая сводка состояния IDE: solution/current file/selection/debug/build output/diagnostics; **`cockpit_surface`** — CDS-снимок кабины (тот же `CockpitSurfaceState`, что `BuildCockpitSurfaceSnapshot` / Skia) | —; возвращает JSON |
 | `ide_get_ui_modes_diagnostics` | Диагностика загрузки UI-режимов: путь к `UiModes`, наличие `index.toml`/`Flight.toml`, источник бандла (TOML vs встроенный fallback), `ordered_mode_ids`, признак Flight в меню | —; возвращает JSON |
 | `ide_build` | Запустить сборку решения (dotnet build). **Структурированный результат:** JSON: success, exit_code, errors[] (file, line, column?, code?, message), warnings[], raw_output (обрезано). Агент получает ошибки без парсинга лога. | —; возвращает JSON |
 | `ide_get_build_output` | Текст панели «Вывод сборки» и цвета (background, foreground) | —; возвращает JSON: text, theme |
@@ -222,7 +222,7 @@
 | `click_control` | Клик по кнопке (под курсором или по имени). args: name?:string; returns: text; example: {"name":"BuildButton"}. |
 | `debug_attach` | Подключиться к процессу по PID. args: workspace_path:string, process_id:integer, target_path?:string, netcoredbg_path?:string; returns: text; example: {"workspace_path":"D:\\\\proj","process_id":12345}. |
 | `debug_continue` | Продолжить выполнение (DAP continue). returns: text. |
-| `debug_launch` | Запустить отладку (netcoredbg DAP): с путями — workspace_path, target_path (.dll/.exe); без путей (мелодия dl / аккорд) — как F5: стартовый проект или диалог .dll/.exe. Опционально netcoredbg_path, program_args. returns: text; example: {"workspace_path":"D:\\\\proj","target_path":"samples\\\\DebugTarget\\\\bin\\\\Debug\\\\net10.0\\\\DebugTarget.dll"}. |
+| `debug_launch` | Запустить отладку (netcoredbg DAP). Контракт: (A) явная цель — workspace_path + target_path (.dll/.exe); (B) профиль — profile_name (или active_profile, если не задан) по ADR 0090; target_path имеет приоритет над profile_name. Если нет путей/профиля (мелодия dl / аккорд) — интерактивный поток как F5: стартовый проект или диалог .dll/.exe. Опционально netcoredbg_path, program_args. returns: text; example: {"workspace_path":"D:\\\\proj","target_path":"samples\\\\DebugTarget\\\\bin\\\\Debug\\\\net10.0\\\\DebugTarget.dll"}. |
 | `debug_ping` | Проверка доступности встроенной отладки. returns: text. |
 | `debug_stack_trace` | Стек вызовов (DAP stackTrace). returns: text. |
 | `debug_step_into` | Шаг с заходом (DAP stepIn). returns: text. |
@@ -334,13 +334,13 @@
 | `cycle_code_navigation_map_level` | Карта намерений: переключить уровень file ↔ controlFlow (Ctrl+K → S → F). returns: text. |
 | `cycle_code_navigation_map_presentation` | Карта намерений: цикл вида list → graph → both (палитра; быстрый путь — Ctrl+K → S → P). returns: text. |
 | `focus_editor` | Передать фокус в редактор (чтобы клавиши/ввод шли в него). returns: text. |
-| `get_cockpit_surface` | Только CDS (`CockpitSurfaceState`): тот же payload, что поле `cockpit_surface` в `get_workspace_state`. returns: json. Для `--agent-contract` без полной сводки. |
+| `get_cockpit_surface` | Только CDS (`CockpitSurfaceState`): тот же payload, что поле `cockpit_surface` в `get_ide_state`. returns: json. Для `--agent-contract` без полной сводки. |
 | `get_code_navigation_context` | Контекст навигации по коду (ADR 0039, CNC): связанные файлы или мини-подграф. Виды связей — partial_peer project_peer xaml_codebehind_pair test_counterpart same_namespace same_directory. Имена preset — из settings.toml `[code_navigation]` / `[[code_navigation.presets]]`. args: mode:string, file_path?:string, line?:integer, column?:integer, max_related?:integer, max_nodes?:integer, max_edges?:integer, preset?:string, include_kinds?:string[], exclude_kinds?:string[], level?:string; returns: json; example: {"mode":"related","file_path":"src/Foo.cs","preset":"no_namespace_noise","level":"controlFlow"}. |
 | `get_current_file_diagnostics` | Диагностики текущего открытого .cs (ошибки/предупреждения). returns: json. |
+| `get_ide_state` | Единая сводка состояния IDE (solution/editor/build/diagnostics...). returns: json. |
 | `get_solution_files` | Список файлов и дерево решения (Solution Explorer). returns: json. |
 | `get_solution_info` | Короткая информация о текущем решении/файле/выделении в дереве. returns: json. |
 | `get_ui_modes_diagnostics` | Диагностика загрузки UI-режимов: пути к UiModes, TOML vs встроенный fallback, список id в меню (почему может не быть Flight). returns: json. |
-| `get_workspace_state` | Единая сводка состояния IDE (solution/editor/build/diagnostics...). returns: json. |
 | `move_document_to_group_1` | Переместить документ в группу 1. args: file_path:string; returns: text; example: {"file_path":"C:\\\\tmp\\\\a.cs"}. |
 | `move_document_to_group_2` | Переместить документ в группу 2. args: file_path:string; returns: text; example: {"file_path":"C:\\\\tmp\\\\a.cs"}. |
 | `move_document_to_group_3` | Переместить документ в группу 3. args: file_path:string; returns: text; example: {"file_path":"C:\\\\tmp\\\\a.cs"}. |
@@ -358,7 +358,7 @@
 
 **Семантическая навигация (`get_code_navigation_context`):** пресеты задаются в `%LocalAppData%\CascadeIDE\settings.toml` в секции `[code_navigation]` (`[[code_navigation.presets]]` в TOML). В ответе смотри `kind_filter` (эффективные списки) и в режиме `subgraph` — `kind` на узлах и `related_kind` на рёбрах. Подробный cookbook: [workspace-navigation-mcp-cookbook.md](design/workspace-navigation-mcp-cookbook.md).
 
-Проверка: `ide_get_workspace_state` — помимо `terminal.is_visible`, `ui_mode`, есть `panels` (видимость колонок), `safety_level`, `editor_group_count`, `agent_trace_step_count`, `is_autonomous_running`, **`cockpit_surface`** (CDS: `schema_version`, зоны, топология, `instruments` и т.д., см. `docs/design/cds-contract-v0.md`).
+Проверка: `ide_get_ide_state` — помимо `terminal.is_visible`, `ui_mode`, есть `panels` (видимость колонок), `safety_level`, `editor_group_count`, `agent_trace_step_count`, `is_autonomous_running`, **`cockpit_surface`** (CDS: `schema_version`, зоны, топология, `instruments` и т.д., см. `docs/design/cds-contract-v0.md`).
 
 ## Подключение из Cursor
 

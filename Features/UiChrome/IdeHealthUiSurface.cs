@@ -7,7 +7,7 @@ namespace CascadeIDE.Features.UiChrome;
 /// Канал-специфичные имена TOML <c>workspace_health_surface</c>; абстрактная ось формы — <see cref="ContentRepresentation"/> (ADR 0063).
 /// Не шина событий и не маршрутизация сообщений — только выбор разметки; данные (<see cref="WorkspaceHealthInputSnapshot"/>) от выбора не зависят.
 /// </summary>
-public enum WorkspaceHealthUiSurface
+public enum IdeHealthUiSurface
 {
     /// <summary>Полоса под workspace (<c>WorkspaceHealthStripView</c>); <see cref="ContentRepresentation.Strip"/>.</summary>
     BottomStrip = 0,
@@ -17,14 +17,14 @@ public enum WorkspaceHealthUiSurface
 }
 
 /// <summary>ADR 0063: соответствие поверхности WH общей оси <see cref="ContentRepresentation"/>.</summary>
-public static class WorkspaceHealthUiSurfaceExtensions
+public static class IdeHealthUiSurfaceExtensions
 {
     /// <summary>BottomStrip → Strip, DedicatedPage → Page.</summary>
-    public static ContentRepresentation ToContentRepresentation(this WorkspaceHealthUiSurface surface) =>
+    public static ContentRepresentation ToContentRepresentation(this IdeHealthUiSurface surface) =>
         surface switch
         {
-            WorkspaceHealthUiSurface.BottomStrip => ContentRepresentation.Strip,
-            WorkspaceHealthUiSurface.DedicatedPage => ContentRepresentation.Page,
+            IdeHealthUiSurface.BottomStrip => ContentRepresentation.Strip,
+            IdeHealthUiSurface.DedicatedPage => ContentRepresentation.Page,
             _ => throw new ArgumentOutOfRangeException(nameof(surface), surface, null),
         };
 }

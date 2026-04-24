@@ -118,9 +118,9 @@ public static class AgentContractRunner
                 RequireEmptyTail(tail, command);
                 return AgentContractHeadlessRuntime.GetCockpitSurfaceJson();
 
-            case IdeCommands.GetWorkspaceState:
+            case IdeCommands.GetIdeState:
                 RequireEmptyTail(tail, command);
-                return AgentContractHeadlessRuntime.GetWorkspaceStateJson();
+                return AgentContractHeadlessRuntime.GetIdeStateJson();
 
             default:
                 throw new InvalidOperationException(
@@ -372,8 +372,8 @@ public static class AgentContractRunner
               get_supported_editor_languages   Same payload as ide_get_supported_editor_languages
               get_ui_modes_diagnostics        Same payload as ide_get_ui_modes_diagnostics
               get_solution_info                Same payload as ide_get_solution_info (headless VM)
-              get_cockpit_surface             CDS only (CockpitSurfaceState), same as cockpit_surface in ide_get_workspace_state
-              get_workspace_state             Same payload as ide_get_workspace_state (headless VM; slower)
+              get_cockpit_surface             CDS only (CockpitSurfaceState), same as cockpit_surface in ide_get_ide_state
+              get_ide_state                   Same payload as ide_get_ide_state (headless VM; slower)
 
             Commands (git — same JSON as ide_git_*):
               git_status

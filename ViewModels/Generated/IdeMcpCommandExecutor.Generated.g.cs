@@ -9,7 +9,7 @@ internal sealed partial class IdeMcpCommandExecutor
     partial void RegisterGenerated(Action<string, Handler> add)
     {
         add(Services.IdeCommands.GetSolutionInfo, async (_, _) => await Task.FromResult(((IIdeMcpActions)_vm).GetSolutionInfo()));
-        add(Services.IdeCommands.GetWorkspaceState, async (_, _) => await ((IIdeMcpActions)_vm).GetWorkspaceStateAsync());
+        add(Services.IdeCommands.GetIdeState, async (_, _) => await ((IIdeMcpActions)_vm).GetIdeStateAsync());
         add(Services.IdeCommands.GetCockpitSurface, async (_, _) => await ((IIdeMcpActions)_vm).GetCockpitSurfaceAsync());
         add(Services.IdeCommands.GetUiModesDiagnostics, async (_, _) => await ((IIdeMcpActions)_vm).GetUiModesDiagnosticsAsync());
         add(Services.IdeCommands.GetSolutionFiles, async (_, _) => await ((IIdeMcpActions)_vm).GetSolutionFilesAsync());

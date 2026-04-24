@@ -48,8 +48,8 @@ public interface IIdeMcpActions
     /// <summary>Посчитать метрики кода (LOC, классы, методы, cyclomatic complexity) для current_file/file/path/solution. JSON.</summary>
     Task<string> GetCodeMetricsAsync(string? scope = null, string? path = null);
     /// <summary>Одна сводка состояния IDE: solution/current file/selection/debug/build output/diagnostics. JSON.</summary>
-    Task<string> GetWorkspaceStateAsync();
-    /// <summary>Только CDS (<c>CockpitSurfaceState</c>): тот же JSON, что поле <c>cockpit_surface</c> в <see cref="GetWorkspaceStateAsync"/>.</summary>
+    Task<string> GetIdeStateAsync();
+    /// <summary>Только CDS (<c>CockpitSurfaceState</c>): тот же JSON, что поле <c>cockpit_surface</c> в <see cref="GetIdeStateAsync"/>.</summary>
     Task<string> GetCockpitSurfaceAsync();
     /// <summary>Диагностика загрузки UI-режимов (UiModes TOML vs встроенный список, Flight в меню). JSON.</summary>
     Task<string> GetUiModesDiagnosticsAsync();

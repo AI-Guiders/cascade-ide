@@ -4,14 +4,14 @@ using System.Text.Json.Nodes;
 namespace CascadeIDE.Tests;
 
 /// <summary>
-/// Убирает машинно-зависимые и «шумные» поля из <c>get_workspace_state</c> для сравнения в тестах (ADR 0052).
+/// Убирает машинно-зависимые и «шумные» поля из <c>get_ide_state</c> для сравнения в тестах (ADR 0052).
 /// </summary>
-public static class AgentContractWorkspaceStateRedaction
+public static class AgentContractIdeStateRedaction
 {
     /// <summary>Детерминированный вид для assert: два подряд вызова headless после редукции должны совпасть.</summary>
-    public static string RedactForStableCompare(string workspaceStateJson)
+    public static string RedactForStableCompare(string ideStateJson)
     {
-        var node = JsonNode.Parse(workspaceStateJson) as JsonObject
+        var node = JsonNode.Parse(ideStateJson) as JsonObject
             ?? throw new InvalidOperationException("Expected JSON object.");
         RedactRoot(node);
         return node.ToJsonString(new JsonSerializerOptions { WriteIndented = false });

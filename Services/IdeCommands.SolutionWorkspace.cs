@@ -12,8 +12,8 @@ public static partial class IdeCommands
     /// <summary>Диагностики текущего открытого .cs (ошибки/предупреждения). returns: json.</summary>
     public const string GetCurrentFileDiagnostics = "get_current_file_diagnostics";
     /// <summary>Единая сводка состояния IDE (solution/editor/build/diagnostics...). returns: json.</summary>
-    public const string GetWorkspaceState = "get_workspace_state";
-    /// <summary>Только CDS (<c>CockpitSurfaceState</c>): тот же payload, что поле <c>cockpit_surface</c> в <c>get_workspace_state</c>. returns: json. Для <c>--agent-contract</c> без полной сводки.</summary>
+    public const string GetIdeState = "get_ide_state";
+    /// <summary>Только CDS (<c>CockpitSurfaceState</c>): тот же payload, что поле <c>cockpit_surface</c> в <c>get_ide_state</c>. returns: json. Для <c>--agent-contract</c> без полной сводки.</summary>
     public const string GetCockpitSurface = "get_cockpit_surface";
     /// <summary>Диагностика загрузки UI-режимов: пути к UiModes, TOML vs встроенный fallback, список id в меню (почему может не быть Flight). returns: json.</summary>
     public const string GetUiModesDiagnostics = "get_ui_modes_diagnostics";

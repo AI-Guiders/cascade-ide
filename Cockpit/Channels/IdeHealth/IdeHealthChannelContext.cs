@@ -5,7 +5,7 @@ namespace CascadeIDE.Cockpit.Channels.WorkspaceHealth;
 /// <summary>
 /// Context for Workspace Health channel build.
 /// </summary>
-public readonly record struct WorkspaceHealthChannelContext
+public readonly record struct IdeHealthChannelContext
 {
-    public static WorkspaceHealthChannelContext Default => default;
+    public static IdeHealthChannelContext Default => default;
 }

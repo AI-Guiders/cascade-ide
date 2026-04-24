@@ -7,7 +7,7 @@ namespace CascadeIDE.Cockpit.Cds;
 
 /// <summary>
 /// Сборка CDS-снимка (ADR 0036 п.2) из публичного состояния <see cref="MainWindowViewModel"/>; ортогонально
-/// <see cref="UiLayoutSnapshot"/> (дерево UI, п.4) и композиторам каналов (<see cref="WorkspaceHealthSurfaceCompositor"/>, <see cref="EicasMessageSorter"/>, п.3).
+/// <see cref="UiLayoutSnapshot"/> (дерево UI, п.4) и композиторам каналов (<see cref="IdeHealthSurfaceCompositor"/>, <see cref="EicasMessageSorter"/>, п.3).
 /// </summary>
 public static class CockpitSurfaceSnapshotBuilder
 {

@@ -51,7 +51,7 @@ public partial class MainWindowViewModel
             CancellationToken.None).ConfigureAwait(false);
     }
 
-    async Task<string> Services.IIdeMcpActions.GetWorkspaceStateAsync()
+    async Task<string> Services.IIdeMcpActions.GetIdeStateAsync()
     {
         var diagnosticsJson = await ((Services.IIdeMcpActions)this).GetCurrentFileDiagnosticsAsync().ConfigureAwait(false);
         JsonElement diagnostics;

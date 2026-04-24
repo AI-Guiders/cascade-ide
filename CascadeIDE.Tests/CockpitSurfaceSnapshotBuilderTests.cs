@@ -88,7 +88,7 @@ public sealed class CockpitSurfaceSnapshotBuilderTests
     }
 
     /// <summary>
-    /// Паритет MCP <c>ide_get_workspace_state</c> с CDS: вложенный объект сериализуется так же, как отдельный снимок.
+    /// Паритет MCP <c>ide_get_ide_state</c> с CDS: вложенный объект сериализуется так же, как отдельный снимок.
     /// </summary>
     [Fact]
     public void Workspace_state_shape_serializes_cockpit_surface_like_standalone_snapshot()

@@ -1,6 +1,6 @@
 # ADR 0089: Именование омнибуса агента (`get_ide_state`) и канал **IDE Health** (вместо Workspace Health)
 
-**Статус:** Proposed  
+**Статус:** Accepted  
 **Дата:** 2026-04-23  
 
 **Связь:** [0002](0002-debug-human-agent-parity.md) (паритет отладки — **отдельное** решение; этот ADR **не** меняет семантику DAP/snapshot, только имена и границы терминов), [0036](0036-cds-channel-compositor-surface-pipeline.md) (канал → CDS → композитор → surface; **конвейер** тот же), [MCP-PROTOCOL.md](../MCP-PROTOCOL.md), [0008](0008-mcp-contracts-and-testable-infrastructure.md) (контракты, тесты), [0052](0052-agent-contract-cli-and-snapshot-tests.md) (снапшоты контракта агента).
@@ -17,7 +17,7 @@
 
 ## 2. Решение
 
-1. **MCP / `IdeCommands`:** публичное имя инструмента и `command_id` / wire-имя вести к **`get_ide_state`** (точная строка `ide_get_*` — по [MCP-PROTOCOL.md](../MCP-PROTOCOL.md) и [0030](0030-command-ids-hotkeys-and-ui-registry-layers.md)); внутренний метод `IIdeMcpActions` по соглашению (`GetIdeStateAsync` или оставить реализацию с переименованием только на границе MCP).
+1. **MCP / `IdeCommands`:** публичное имя инструмента и `command_id` — **`get_ide_state`**, тул MCP — **`ide_get_ide_state`** (см. [MCP-PROTOCOL.md](../MCP-PROTOCOL.md), [0030](0030-command-ids-hotkeys-and-ui-registry-layers.md)); внутренний метод — **`IIdeMcpActions.GetIdeStateAsync`**.
 2. **Канал health:** переименовать **Workspace Health** → **IDE Health**: неймспейсы `Cockpit/Channels/…`, типы `IWorkspaceHealthChannel` → `IIdeHealthChannel` (или иное единообразное имя), провайдер, композитор, строки UI, ссылки в ADR/README. **Семантика channel → CDS → compositor** из [0036](0036-cds-channel-compositor-surface-pipeline.md) **не** меняется.
 3. **Документация и тесты:** [MCP-PROTOCOL.md](../MCP-PROTOCOL.md), [architecture-migration.md](../architecture-migration.md) при ссылке на тул, golden/approved JSON из [0052](0052-agent-contract-cli-and-snapshot-tests.md), при необходимости — одна строка в [architecture-policy.md](../architecture-policy.md).
 
@@ -33,7 +33,7 @@
 
 ## 5. Последствия
 
-- **Breaking change** для внешних клиентов MCP, которые вызывали `ide_get_workspace_state` (или эквивалент): обновить конфиги и скрипты; legacy-окно не требуется, если продукт так решит.
+- **Breaking change** для внешних клиентов MCP, которые вызывали `ide_get_workspace_state` / `get_workspace_state`: обновить на `ide_get_ide_state` / `get_ide_state`; алиасов нет.
 - Крупный, но **механический** рефакторинг в `Cockpit/Channels` и строках — по возможности **отдельные логические коммиты** (омнибус MCP vs переименование канала vs доки).
 
 ## 6. Отклонённые альтернативы

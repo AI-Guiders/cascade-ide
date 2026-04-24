@@ -21,4 +21,4 @@ test:
     - dotnet run --project CascadeIDE.csproj -c $env:CONFIGURATION --no-build -- --agent-contract get_supported_editor_languages
     - dotnet run --project CascadeIDE.csproj -c $env:CONFIGURATION --no-build -- --agent-contract get_solution_info
     - dotnet run --project CascadeIDE.csproj -c $env:CONFIGURATION --no-build -- --agent-contract get_cockpit_surface
-    - dotnet run --project CascadeIDE.csproj -c $env:CONFIGURATION --no-build -- --agent-contract get_workspace_state
+    - dotnet run --project CascadeIDE.csproj -c $env:CONFIGURATION --no-build -- --agent-contract get_ide_state

@@ -25,7 +25,7 @@
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
-                    <DataTemplate x:DataType="cockpitWh:WorkspaceHealthSegment">
+                    <DataTemplate x:DataType="cockpitWh:IdeHealthSegment">
                         <Border Classes="modeCard" Padding="6,2" Margin="0,0,8,0">
                             <TextBlock Text="{Binding LineText}" Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
                         </Border>
@@ -54,7 +54,7 @@
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="cockpitWh:WorkspaceHealthSegment">
+                            <DataTemplate x:DataType="cockpitWh:IdeHealthSegment">
                                 <Panel>
                                     <Border IsVisible="{Binding IsBuildSource}"
                                             Margin="0,0,8,0"

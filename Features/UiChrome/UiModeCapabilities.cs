@@ -24,13 +24,13 @@ public sealed record UiModeCapabilities(
     /// <summary>Полоса build/tests/debug/git под редактором.</summary>
     bool WorkspaceHealthStripVisible,
     /// <summary>Нижняя полоса vs страница зоны; TOML: <c>workspace_health_surface</c>.</summary>
-    WorkspaceHealthUiSurface WorkspaceHealthSurface,
+    IdeHealthUiSurface WorkspaceHealthSurface,
     /// <summary>Вкладка Problems и учёт в <see cref="MainWindowViewModel.IsBottomPanelVisible"/>.</summary>
     bool ProblemsPanelVisible,
     /// <summary>Разрешить полосу оповещений EICAS при наличии сообщений; TOML: <c>eicas_alerts_bar</c>. См. ADR 0021 §5, §1.1.</summary>
     bool EicasAlertsBarEnabled)
 {
-    /// <summary>Ось формы представления для канала Workspace Health (ADR 0063); дублирует <see cref="WorkspaceHealthSurface"/> через <see cref="WorkspaceHealthUiSurfaceExtensions.ToContentRepresentation"/>.</summary>
+    /// <summary>Ось формы представления для канала Workspace Health (ADR 0063); дублирует <see cref="WorkspaceHealthSurface"/> через <see cref="IdeHealthUiSurfaceExtensions.ToContentRepresentation"/>.</summary>
     public ContentRepresentation WorkspaceHealthContentRepresentation => WorkspaceHealthSurface.ToContentRepresentation();
 
     /// <summary>Дефолты по семье, если в TOML нет переопределений и нет наследуемого родителя.</summary>
@@ -64,7 +64,7 @@ public sealed record UiModeCapabilities(
             RiskSummaryCard: !focus && !agentChat,
             ResultSummaryCard: !focus && !agentChat,
             WorkspaceHealthStripVisible: true,
-            WorkspaceHealthSurface: WorkspaceHealthUiSurface.BottomStrip,
+            WorkspaceHealthSurface: IdeHealthUiSurface.BottomStrip,
             ProblemsPanelVisible: true,
             EicasAlertsBarEnabled: true);
     }

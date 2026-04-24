@@ -27,7 +27,7 @@ internal static class AgentContractHeadlessRuntime
         });
     }
 
-    /// <summary>CDS JSON — тот же объект, что <c>cockpit_surface</c> в <see cref="IIdeMcpActions.GetWorkspaceStateAsync"/>.</summary>
+    /// <summary>CDS JSON — тот же объект, что <c>cockpit_surface</c> в <see cref="IIdeMcpActions.GetIdeStateAsync"/>.</summary>
     public static string GetCockpitSurfaceJson()
     {
         EnsureInitialized();
@@ -38,22 +38,22 @@ internal static class AgentContractHeadlessRuntime
         });
     }
 
-    /// <summary>Полная сводка — тот же JSON, что MCP <c>ide_get_workspace_state</c>.</summary>
+    /// <summary>Полная сводка — тот же JSON, что MCP <c>ide_get_ide_state</c>.</summary>
     /// <remarks>
     /// Внутри — вложенные <c>UiScheduler.InvokeAsync</c>; без прокрутки очереди (<see cref="Dispatcher.RunJobs"/>) задача не завершится.
     /// </remarks>
-    public static string GetWorkspaceStateJson()
+    public static string GetIdeStateJson()
     {
         EnsureInitialized();
         return Dispatcher.UIThread.Invoke(() =>
         {
             var vm = new MainWindowViewModel();
             IIdeMcpActions mcp = vm;
-            var task = mcp.GetWorkspaceStateAsync();
+            var task = mcp.GetIdeStateAsync();
             for (var n = 0; !task.IsCompleted; n++)
             {
                 if (n > 500_000)
-                    throw new InvalidOperationException("get_workspace_state: dispatcher did not drain (possible deadlock).");
+                    throw new InvalidOperationException("get_ide_state: dispatcher did not drain (possible deadlock).");
                 Dispatcher.UIThread.RunJobs();
             }
 

@@ -3,10 +3,10 @@ using System.Linq;
 namespace CascadeIDE.Cockpit.Channels.WorkspaceHealth;
 
 /// <summary>
-/// Слой <strong>канала</strong> Workspace Health (ADR 0036 п.1): собирает <see cref="WorkspaceHealthInputSnapshot"/> из скаляров и делегатов.
+/// Слой <strong>канала</strong> Workspace Health (ADR 0036 п.1): собирает <see cref="IdeHealthInputSnapshot"/> из скаляров и делегатов.
 /// Не ссылается на <c>UiChromeViewModel</c>, Instrumentation VM и прочие фичи — их подставляет корень композиции (<see cref="ViewModels.MainWindowViewModel"/>).
 /// </summary>
-public sealed class WorkspaceHealthProvider : IWorkspaceHealthChannel
+public sealed class IdeHealthProvider : IIdeHealthChannel
 {
     private readonly Func<bool> _isBuilding;
     private readonly Func<string> _lastTestSummary;
@@ -15,7 +15,7 @@ public sealed class WorkspaceHealthProvider : IWorkspaceHealthChannel
     private readonly Func<string> _workspaceHealthGitLine;
     private readonly Func<string> _workspaceHealthGitCockpitShort;
 
-    public WorkspaceHealthProvider(
+    public IdeHealthProvider(
         Func<bool> isBuilding,
         Func<string> lastTestSummary,
         Func<int> impactedTestsBadge,
@@ -31,8 +31,8 @@ public sealed class WorkspaceHealthProvider : IWorkspaceHealthChannel
         _workspaceHealthGitCockpitShort = workspaceHealthGitCockpitShort;
     }
 
-    public WorkspaceHealthInputSnapshot Build(in WorkspaceHealthChannelContext context) =>
-        WorkspaceHealthFormat.Compose(
+    public IdeHealthInputSnapshot Build(in IdeHealthChannelContext context) =>
+        IdeHealthFormat.Compose(
             _isBuilding(),
             _lastTestSummary(),
             _impactedTestsBadge(),

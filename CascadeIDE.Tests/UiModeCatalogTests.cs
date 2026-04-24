@@ -320,15 +320,15 @@ public sealed class UiModeCatalogTests : IDisposable
         UiModeCatalog.Initialize(dir);
 
         var caps = UiModeCatalog.GetCapabilities("Balanced");
-        Assert.Equal(WorkspaceHealthUiSurface.DedicatedPage, caps.WorkspaceHealthSurface);
+        Assert.Equal(IdeHealthUiSurface.DedicatedPage, caps.WorkspaceHealthSurface);
         Assert.Equal(ContentRepresentation.Page, caps.WorkspaceHealthContentRepresentation);
     }
 
     [Fact]
     public void Workspace_health_ui_surface_maps_to_content_representation_axis()
     {
-        Assert.Equal(ContentRepresentation.Strip, WorkspaceHealthUiSurface.BottomStrip.ToContentRepresentation());
-        Assert.Equal(ContentRepresentation.Page, WorkspaceHealthUiSurface.DedicatedPage.ToContentRepresentation());
+        Assert.Equal(ContentRepresentation.Strip, IdeHealthUiSurface.BottomStrip.ToContentRepresentation());
+        Assert.Equal(ContentRepresentation.Page, IdeHealthUiSurface.DedicatedPage.ToContentRepresentation());
     }
 
     [Fact]

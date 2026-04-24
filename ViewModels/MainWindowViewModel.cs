@@ -54,8 +54,8 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private MarkdownLspDiagnosticsHost? _markdownLspHost;
     private readonly IdeMcpCommandExecutor _ideMcpExecutor;
     private readonly Services.IdeDapDebugSession _dapDebug;
-    private readonly IWorkspaceHealthChannel _workspaceHealth;
-    private readonly IWorkspaceHealthSurfaceCompositor _workspaceHealthSurfaceCompositor;
+    private readonly IIdeHealthChannel _workspaceHealth;
+    private readonly IIdeHealthSurfaceCompositor _workspaceHealthSurfaceCompositor;
     private readonly IEicasFeed _eicasFeed;
     private readonly IEnvironmentReadinessChannel _environmentReadinessChannel;
     private readonly IEnvironmentReadinessSurfaceCompositor _environmentReadinessSurfaceCompositor;
@@ -179,14 +179,14 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _mcpBuildTest = new Services.McpDotnetBuildTestService(_dotnetRunner);
         _mcpAgentNotes = new Services.McpAgentNotesService();
 
-        _workspaceHealth = new WorkspaceHealthProvider(
+        _workspaceHealth = new IdeHealthProvider(
             () => IsBuilding,
             () => LastTestSummary,
             () => ImpactedTestsBadge,
             _dapDebug,
             () => Chrome.WorkspaceHealthGitText,
             () => Chrome.WorkspaceHealthGitCockpitShort);
-        _workspaceHealthSurfaceCompositor = new WorkspaceHealthSurfaceCompositor();
+        _workspaceHealthSurfaceCompositor = new IdeHealthSurfaceCompositor();
 
         _eicasFeed = new EmptyEicasFeed();
         _eicasFeed.MessagesChanged += (_, _) => RebuildEicas();

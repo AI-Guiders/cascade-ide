@@ -8,6 +8,6 @@ namespace CascadeIDE.Cockpit.Composition.WorkspaceHealth;
 /// <summary>
 /// Surface compositor contract for Workspace Health segments.
 /// </summary>
-public interface IWorkspaceHealthSurfaceCompositor : ISurfaceCompositor<ObservableCollection<WorkspaceHealthSegment>, WorkspaceHealthInputSnapshot, WorkspaceHealthSurfaceDecision, ObservableCollection<WorkspaceHealthSegment>>
+public interface IIdeHealthSurfaceCompositor : ISurfaceCompositor<ObservableCollection<IdeHealthSegment>, IdeHealthInputSnapshot, IdeHealthSurfaceDecision, ObservableCollection<IdeHealthSegment>>
 {
 }

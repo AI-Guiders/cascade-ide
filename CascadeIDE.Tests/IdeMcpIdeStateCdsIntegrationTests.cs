@@ -8,18 +8,18 @@ using Xunit;
 namespace CascadeIDE.Tests;
 
 /// <summary>
-/// Паритет MCP <c>ide_get_workspace_state</c> с CDS: поле <c>cockpit_surface</c> совпадает с <see cref="MainWindowViewModel.BuildCockpitSurfaceSnapshot"/>.
-/// Требует headless Avalonia (<see cref="AvaloniaFact"/>), т.к. <see cref="IIdeMcpActions.GetWorkspaceStateAsync"/> маршалит на UI-поток.
+/// Паритет MCP <c>ide_get_ide_state</c> с CDS: поле <c>cockpit_surface</c> совпадает с <see cref="MainWindowViewModel.BuildCockpitSurfaceSnapshot"/>.
+/// Требует headless Avalonia (<see cref="AvaloniaFact"/>), т.к. <see cref="IIdeMcpActions.GetIdeStateAsync"/> маршалит на UI-поток.
 /// </summary>
-public sealed class IdeMcpWorkspaceStateCdsIntegrationTests
+public sealed class IdeMcpIdeStateCdsIntegrationTests
 {
     [AvaloniaFact]
-    public async Task Get_workspace_state_cockpit_surface_matches_BuildCockpitSurfaceSnapshot()
+    public async Task Get_ide_state_cockpit_surface_matches_BuildCockpitSurfaceSnapshot()
     {
         var vm = new MainWindowViewModel();
         IIdeMcpActions mcp = vm;
 
-        var json = await mcp.GetWorkspaceStateAsync();
+        var json = await mcp.GetIdeStateAsync();
 
         using var doc = JsonDocument.Parse(json);
         Assert.True(doc.RootElement.TryGetProperty("cockpit_surface", out var cockpitEl));

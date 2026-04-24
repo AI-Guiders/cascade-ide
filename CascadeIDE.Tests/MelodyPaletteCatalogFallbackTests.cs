@@ -12,12 +12,12 @@ public sealed class MelodyPaletteCatalogFallbackTests
     {
         Assert.DoesNotContain(
             IdeCommandPaletteCatalog.All,
-            e => e.CommandId == "get_workspace_state");
+            e => e.CommandId == "get_ide_state");
 
-        var line = new MelodyPaletteCommand("test_ws", "get_workspace_state");
+        var line = new MelodyPaletteCommand("test_ws", "get_ide_state");
         var row = line.ToCommandPaletteRow(HotkeyGestureMap.Load(), UiModeFamily.Balanced);
         Assert.NotNull(row);
-        Assert.Equal("get_workspace_state", row!.CommandId);
+        Assert.Equal("get_ide_state", row!.CommandId);
         Assert.Equal("c:test_ws", row.Title);
         Assert.Contains("сводка", row.Subtitle, StringComparison.OrdinalIgnoreCase);
     }

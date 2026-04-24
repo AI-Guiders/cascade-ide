@@ -175,7 +175,7 @@ public sealed class AutonomousAgentService
         var ideCommands = new[]
         {
             "get_editor_state",
-            "get_workspace_state",
+            "get_ide_state",
             "get_current_file_diagnostics",
             "build_structured",
             "run_tests",

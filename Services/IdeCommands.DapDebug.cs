@@ -6,7 +6,7 @@ public static partial class IdeCommands
     // ——— DAP / netcoredbg (паритет с dotnet-debug-mcp)
     /// <summary>Проверка доступности встроенной отладки. returns: text.</summary>
     public const string DebugPing = "debug_ping";
-    /// <summary>Запустить отладку (netcoredbg DAP): с путями — workspace_path, target_path (.dll/.exe); без путей (мелодия dl / аккорд) — как F5: стартовый проект или диалог .dll/.exe. Опционально netcoredbg_path, program_args. returns: text; example: {"workspace_path":"D:\\\\proj","target_path":"samples\\\\DebugTarget\\\\bin\\\\Debug\\\\net10.0\\\\DebugTarget.dll"}.</summary>
+    /// <summary>Запустить отладку (netcoredbg DAP). Контракт: (A) явная цель — workspace_path + target_path (.dll/.exe); (B) профиль — profile_name (или active_profile, если не задан) по ADR 0090; target_path имеет приоритет над profile_name. Если нет путей/профиля (мелодия dl / аккорд) — интерактивный поток как F5: стартовый проект или диалог .dll/.exe. Опционально netcoredbg_path, program_args. returns: text; example: {"workspace_path":"D:\\\\proj","target_path":"samples\\\\DebugTarget\\\\bin\\\\Debug\\\\net10.0\\\\DebugTarget.dll"}.</summary>
     public const string DebugLaunch = "debug_launch";
     /// <summary>Подключиться к процессу по PID. args: workspace_path:string, process_id:integer, target_path?:string, netcoredbg_path?:string; returns: text; example: {"workspace_path":"D:\\\\proj","process_id":12345}.</summary>
     public const string DebugAttach = "debug_attach";

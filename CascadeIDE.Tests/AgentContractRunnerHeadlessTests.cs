@@ -38,10 +38,10 @@ public sealed class AgentContractRunnerHeadlessTests
     }
 
     [AvaloniaFact]
-    public void Get_workspace_state_includes_cockpit_surface_same_as_get_cockpit_surface_command()
+    public void Get_ide_state_includes_cockpit_surface_same_as_get_cockpit_surface_command()
     {
         var cockpitOnly = AgentContractRunner.GetContractJson(IdeCommands.GetCockpitSurface);
-        var full = AgentContractRunner.GetContractJson(IdeCommands.GetWorkspaceState);
+        var full = AgentContractRunner.GetContractJson(IdeCommands.GetIdeState);
 
         using var fullDoc = JsonDocument.Parse(full);
         Assert.True(fullDoc.RootElement.TryGetProperty("cockpit_surface", out var nested));
@@ -63,12 +63,12 @@ public sealed class AgentContractRunnerHeadlessTests
     }
 
     [AvaloniaFact]
-    public void Get_workspace_state_redacted_matches_on_two_calls()
+    public void Get_ide_state_redacted_matches_on_two_calls()
     {
-        var a = AgentContractWorkspaceStateRedaction.RedactForStableCompare(
-            AgentContractRunner.GetContractJson(IdeCommands.GetWorkspaceState));
-        var b = AgentContractWorkspaceStateRedaction.RedactForStableCompare(
-            AgentContractRunner.GetContractJson(IdeCommands.GetWorkspaceState));
+        var a = AgentContractIdeStateRedaction.RedactForStableCompare(
+            AgentContractRunner.GetContractJson(IdeCommands.GetIdeState));
+        var b = AgentContractIdeStateRedaction.RedactForStableCompare(
+            AgentContractRunner.GetContractJson(IdeCommands.GetIdeState));
         Assert.Equal(a, b);
     }
 }
