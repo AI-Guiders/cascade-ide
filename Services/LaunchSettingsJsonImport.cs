@@ -53,68 +53,111 @@ internal static class LaunchSettingsJsonImport
     private static bool TryMapProjectProfile(JsonElement el, string projectRelative, [NotNullWhen(true)] out LaunchProfileModel? model)
     {
         model = null;
+        if (!IsKestrelProjectProfile(el))
+            return false;
+
+        var m = CreateBaseProfileModel(projectRelative);
+        ApplyCommandLineArgs(el, m);
+        ApplyApplicationUrl(el, m);
+        ApplyLaunchUrl(el, m);
+        ApplyLaunchBrowserFlag(el, m);
+        m.Env = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        ApplyEnvironmentVariables(el, m);
+        ApplyKestrelBrowserHeuristic(m);
+
+        model = m;
+        return true;
+    }
+
+    private static bool IsKestrelProjectProfile(JsonElement el)
+    {
         if (el.ValueKind != JsonValueKind.Object)
             return false;
-
         if (!el.TryGetProperty("commandName", out var cn) || cn.ValueKind != JsonValueKind.String)
             return false;
+        return string.Equals(cn.GetString(), "Project", StringComparison.Ordinal);
+    }
 
-        if (!string.Equals(cn.GetString(), "Project", StringComparison.Ordinal))
-            return false;
-
-        var m = new LaunchProfileModel
+    private static LaunchProfileModel CreateBaseProfileModel(string projectRelative) =>
+        new()
         {
             Project = projectRelative,
             Configuration = LaunchProfilesStore.DefaultConfiguration
         };
 
-        if (el.TryGetProperty("commandLineArgs", out var cla) && cla.ValueKind == JsonValueKind.String)
-        {
-            var s = cla.GetString();
-            if (!string.IsNullOrWhiteSpace(s))
-            {
-                var t = s.Trim();
-                if (t.Length > 0)
-                    m.ProgramArgs = t.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
-            }
-        }
+    // Семантика как у SDK: токенизация по пробелу без кавычек; аргументы с пробелами в кавычках не разбираем.
+    private static void ApplyCommandLineArgs(JsonElement el, LaunchProfileModel m)
+    {
+        if (!el.TryGetProperty("commandLineArgs", out var cla) || cla.ValueKind != JsonValueKind.String)
+            return;
+        var s = cla.GetString();
+        if (string.IsNullOrWhiteSpace(s))
+            return;
+        var t = s.Trim();
+        if (t.Length == 0)
+            return;
+        m.ProgramArgs = t.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
+    }
 
-        if (el.TryGetProperty("applicationUrl", out var au) && au.ValueKind == JsonValueKind.String)
-        {
-            var u = au.GetString();
-            if (!string.IsNullOrWhiteSpace(u))
-                m.ApplicationUrls = u!.Trim();
-        }
+    private static void ApplyApplicationUrl(JsonElement el, LaunchProfileModel m)
+    {
+        if (!el.TryGetProperty("applicationUrl", out var au) || au.ValueKind != JsonValueKind.String)
+            return;
+        var u = au.GetString();
+        if (!string.IsNullOrWhiteSpace(u))
+            m.ApplicationUrls = u.Trim();
+    }
 
-        if (el.TryGetProperty("launchUrl", out var lurl) && lurl.ValueKind == JsonValueKind.String)
-        {
-            var s = lurl.GetString();
-            if (!string.IsNullOrWhiteSpace(s))
-                m.LaunchUrl = s!.Trim();
-        }
+    private static void ApplyLaunchUrl(JsonElement el, LaunchProfileModel m)
+    {
+        if (!el.TryGetProperty("launchUrl", out var lurl) || lurl.ValueKind != JsonValueKind.String)
+            return;
+        var s = lurl.GetString();
+        if (!string.IsNullOrWhiteSpace(s))
+            m.LaunchUrl = s.Trim();
+    }
 
-        if (el.TryGetProperty("launchBrowser", out var lb) && (lb.ValueKind == JsonValueKind.True || lb.ValueKind == JsonValueKind.False))
-            m.LaunchBrowser = lb.GetBoolean();
-        m.Env = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        if (el.TryGetProperty("environmentVariables", out var ev) && ev.ValueKind == JsonValueKind.Object)
-        {
-            foreach (var v in ev.EnumerateObject())
-            {
-                var val = v.Value.ValueKind == JsonValueKind.String
-                    ? (v.Value.GetString() ?? "")
-                    : v.Value.ToString();
-                if (!string.IsNullOrEmpty(v.Name))
-                    m.Env[v.Name] = val;
-            }
-        }
+    private static void ApplyLaunchBrowserFlag(JsonElement el, LaunchProfileModel m)
+    {
+        if (!el.TryGetProperty("launchBrowser", out var lb) ||
+            (lb.ValueKind != JsonValueKind.True && lb.ValueKind != JsonValueKind.False))
+            return;
+        m.LaunchBrowser = lb.GetBoolean();
+    }
 
-        if (m.LaunchBrowser is not true &&
-            m.ApplicationUrls is { Length: > 0 } && m.ApplicationUrls.Contains("htt", StringComparison.OrdinalIgnoreCase))
+    private static void ApplyEnvironmentVariables(JsonElement el, LaunchProfileModel m)
+    {
+        if (!el.TryGetProperty("environmentVariables", out var ev) || ev.ValueKind != JsonValueKind.Object)
+            return;
+        foreach (var v in ev.EnumerateObject())
         {
+            if (string.IsNullOrEmpty(v.Name))
+                continue;
+            var val = v.Value.ValueKind == JsonValueKind.String
+                ? (v.Value.GetString() ?? "")
+                : v.Value.ToString();
+            m.Env![v.Name] = val;
+        }
+    }
+
+    private static void ApplyKestrelBrowserHeuristic(LaunchProfileModel m)
+    {
+        if (m.LaunchBrowser is not true && ApplicationUrlsSuggestKestrelListener(m.ApplicationUrls))
             m.LaunchBrowser = true;
+    }
+
+    /// <summary>Любой сегмент в <c>applicationUrl</c> (через <c>;</c> как у ASPNETCORE_URLS) с префиксом http(s).</summary>
+    internal static bool ApplicationUrlsSuggestKestrelListener(string? applicationUrls)
+    {
+        if (string.IsNullOrWhiteSpace(applicationUrls))
+            return false;
+        foreach (var part in applicationUrls.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            if (part.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+                part.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                return true;
         }
 
-        model = m;
-        return true;
+        return false;
     }
 }

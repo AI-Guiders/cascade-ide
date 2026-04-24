@@ -25,17 +25,20 @@ public static class KestrelLaunchBrowser
     {
         if (string.IsNullOrWhiteSpace(launchUrl))
             return GetFirstHttpOrHttpsFromApplicationUrls(environment);
+        return ResolveNonEmptyLaunchUrl(environment, launchUrl.Trim());
+    }
 
-        var trimmed = launchUrl.Trim();
-
-        if (TryNormalizeAbsoluteHttpUrl(trimmed, out var absolute))
+    /// <summary>Не пустой <paramref name="trimmedLaunchUrl"/>: абсолютный http(s) либо относительный путь к базе из <c>ASPNETCORE_URLS</c>.</summary>
+    private static string? ResolveNonEmptyLaunchUrl(
+        IReadOnlyDictionary<string, string>? environment,
+        string trimmedLaunchUrl)
+    {
+        if (TryNormalizeAbsoluteHttpUrl(trimmedLaunchUrl, out var absolute))
             return absolute;
-
         var baseFromEnv = GetFirstHttpOrHttpsFromApplicationUrls(environment);
         if (string.IsNullOrEmpty(baseFromEnv))
             return null;
-
-        return CombineBaseWithPath(baseFromEnv, trimmed);
+        return CombineBaseWithPath(baseFromEnv, trimmedLaunchUrl);
     }
 
     private static void TryStartBrowser(string url)
@@ -44,9 +47,9 @@ public static class KestrelLaunchBrowser
         {
             Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
         }
-        catch
+        catch (Exception ex)
         {
-            // ignore
+            Trace.WriteLine("[KestrelLaunchBrowser] Process.Start: " + ex);
         }
     }
 
@@ -81,8 +84,9 @@ public static class KestrelLaunchBrowser
 
             return builder.Uri.ToString();
         }
-        catch
+        catch (Exception ex)
         {
+            Trace.WriteLine("[KestrelLaunchBrowser] CombineBaseWithPath: " + ex);
             return null;
         }
     }

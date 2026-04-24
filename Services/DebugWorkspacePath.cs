@@ -15,22 +15,28 @@ public static class DebugWorkspacePath
 
         var full = Path.GetFullPath(workspacePath.Trim());
         if (File.Exists(full))
-        {
-            var ext = Path.GetExtension(full);
-            if (ext.Equals(".sln", StringComparison.OrdinalIgnoreCase) ||
-                ext.Equals(".slnx", StringComparison.OrdinalIgnoreCase) ||
-                ext.Equals(".slnf", StringComparison.OrdinalIgnoreCase))
-                return full;
-
-            var dir = Path.GetDirectoryName(full);
-            if (string.IsNullOrEmpty(dir))
-                return null;
-            return SolutionFileLocator.TryFindSolutionInDirectory(dir);
-        }
+            return TryResolveWhenEntryIsFile(full);
 
         if (Directory.Exists(full))
             return SolutionFileLocator.TryFindSolutionInDirectory(full);
 
         return null;
     }
+
+    private static string? TryResolveWhenEntryIsFile(string fullPath)
+    {
+        if (IsSolutionFilePath(fullPath))
+            return fullPath;
+
+        var dir = Path.GetDirectoryName(fullPath);
+        return string.IsNullOrEmpty(dir) ? null : SolutionFileLocator.TryFindSolutionInDirectory(dir);
+    }
+
+    private static bool IsSolutionFilePath(string fullPath) =>
+        Path.GetExtension(fullPath) is var ext && IsSolutionFileExtension(ext);
+
+    private static bool IsSolutionFileExtension(string extension) =>
+        extension.Equals(".sln", StringComparison.OrdinalIgnoreCase) ||
+        extension.Equals(".slnx", StringComparison.OrdinalIgnoreCase) ||
+        extension.Equals(".slnf", StringComparison.OrdinalIgnoreCase);
 }

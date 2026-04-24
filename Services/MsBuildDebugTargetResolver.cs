@@ -1,3 +1,4 @@
+#nullable enable
 using System.Text.Json;
 
 namespace CascadeIDE.Services;
@@ -21,16 +22,8 @@ public static class MsBuildDebugTargetResolver
         if (string.IsNullOrEmpty(projectDir))
             return (null, "Не удалось определить каталог проекта.");
 
-        var config = string.IsNullOrWhiteSpace(configuration) ? "Debug" : configuration.Trim();
-        var args = new[]
-        {
-            "msbuild",
-            csprojFullPath,
-            "-nologo",
-            "-p:Configuration=" + config,
-            "-getProperty:OutputType",
-            "-getProperty:TargetPath"
-        };
+        var config = NormalizeConfiguration(configuration);
+        var args = BuildMsBuildGetPropertyArguments(csprojFullPath, config);
 
         var (success, exitCode, output) = await dotnet.RunAsync(args, projectDir, cancellationToken).ConfigureAwait(false);
         if (!success)
@@ -42,10 +35,27 @@ public static class MsBuildDebugTargetResolver
         if (string.Equals(outputType, "Library", StringComparison.OrdinalIgnoreCase))
             return (null, "Проект с выходом Library не подходит как стартовый для отладки (нужен Exe / WinExe).");
 
-        var full = Path.GetFullPath(targetPath);
+        return ValidateBuiltDllExists(targetPath!);
+    }
+
+    private static string NormalizeConfiguration(string configuration) =>
+        string.IsNullOrWhiteSpace(configuration) ? "Debug" : configuration.Trim();
+
+    private static string[] BuildMsBuildGetPropertyArguments(string csprojFullPath, string configuration) =>
+    [
+        "msbuild",
+        csprojFullPath,
+        "-nologo",
+        "-p:Configuration=" + configuration,
+        "-getProperty:OutputType",
+        "-getProperty:TargetPath"
+    ];
+
+    private static (string? TargetPath, string? Error) ValidateBuiltDllExists(string targetPathFromMsbuild)
+    {
+        var full = Path.GetFullPath(targetPathFromMsbuild);
         if (!File.Exists(full))
             return (null, $"Сборка ещё не найдена: {full}. Собери решение (Собрать) и повтори.");
-
         return (full, null);
     }
 
@@ -59,6 +69,7 @@ public static class MsBuildDebugTargetResolver
             return false;
 
         var start = s.IndexOf('{');
+
         if (start < 0)
             return false;
 

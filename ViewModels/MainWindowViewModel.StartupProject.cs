@@ -240,14 +240,6 @@ public partial class MainWindowViewModel
 
     private bool CanClearStartupProject() => HasStartupProject;
 
-    private readonly record struct DebugLaunchResolution(
-        string TargetDllPath,
-        IReadOnlyList<string>? ProgramArgs,
-        IReadOnlyDictionary<string, string>? Environment,
-        string? WorkingDirectoryRelativeToSolution,
-        bool OpenLaunchBrowser,
-        string? LaunchUrl);
-
     /// <summary>MSBuild + launch profile (ADR 0090) или унаследованный стартовый <c>.csproj</c>.</summary>
     private async Task<DebugLaunchResolution?> TryResolveDebugLaunchForF5Async()
     {
@@ -261,31 +253,18 @@ public partial class MainWindowViewModel
             return null;
 
         if (LaunchProfilesStore.TryResolveProfileForLaunch(sln, profileName: null, out var prof, out _) &&
-            !string.IsNullOrWhiteSpace(prof.ProjectRelativeToSolution))
+            !string.IsNullOrWhiteSpace(prof.ProjectRelativeToSolution) &&
+            DebugLaunchFromProfile.TryGetExistingCsprojFullPath(solutionDir, prof.ProjectRelativeToSolution, out var csprojFull))
         {
-            var csprojFull = Path.GetFullPath(Path.Combine(solutionDir, prof.ProjectRelativeToSolution));
-            if (File.Exists(csprojFull))
-            {
-                IReadOnlyDictionary<string, string>? env =
-                    prof.Environment is { Count: > 0 } d ? d : null;
-                var (target, err) = await MsBuildDebugTargetResolver
-                    .TryResolveAsync(csprojFull, _dotnetRunner, prof.Configuration)
-                    .ConfigureAwait(false);
-                if (!string.IsNullOrEmpty(target))
-                {
-                    return new DebugLaunchResolution(
-                        target,
-                        prof.ProgramArgs is { Count: > 0 } ? prof.ProgramArgs : null,
-                        env,
-                        string.IsNullOrEmpty(prof.WorkingDirectoryRelative) ? null : prof.WorkingDirectoryRelative,
-                        prof.OpenLaunchBrowser,
-                        prof.LaunchUrl);
-                }
+            var (target, err) = await MsBuildDebugTargetResolver
+                .TryResolveAsync(csprojFull, _dotnetRunner, prof.Configuration)
+                .ConfigureAwait(false);
+            if (!string.IsNullOrEmpty(target))
+                return DebugLaunchFromProfile.ToResolution(prof, target);
 
-                if (!string.IsNullOrEmpty(err))
-                    await ShowDebugInfoAsync("Стартовый проект", err).ConfigureAwait(false);
-                return null;
-            }
+            if (!string.IsNullOrEmpty(err))
+                await ShowDebugInfoAsync("Стартовый проект", err).ConfigureAwait(false);
+            return null;
         }
 
         var csproj = StartupProjectCsprojFullPath;
@@ -337,9 +316,11 @@ public partial class MainWindowViewModel
         if (string.IsNullOrEmpty(solutionDir))
             return "# Error: workspace_root_unresolved.";
 
-        var csprojFull = Path.GetFullPath(Path.Combine(solutionDir, prof.ProjectRelativeToSolution));
-        if (!File.Exists(csprojFull))
-            return "# Error: project_not_found: " + csprojFull;
+        if (!DebugLaunchFromProfile.TryGetExistingCsprojFullPath(solutionDir, prof.ProjectRelativeToSolution, out var csprojFull))
+        {
+            var candidate = Path.GetFullPath(Path.Combine(solutionDir, prof.ProjectRelativeToSolution));
+            return "# Error: project_not_found: " + candidate;
+        }
 
         var (target, err) = await MsBuildDebugTargetResolver
             .TryResolveAsync(csprojFull, _dotnetRunner, prof.Configuration, cancellationToken)
@@ -348,7 +329,7 @@ public partial class MainWindowViewModel
             return "# Error: " + (err ?? "msbuild_unresolved");
 
         var prg = mcpProgramArgs is { Count: > 0 } ? mcpProgramArgs : prof.ProgramArgs;
-        IReadOnlyDictionary<string, string>? env = prof.Environment is { Count: > 0 } ? prof.Environment : null;
+        IReadOnlyDictionary<string, string>? env = DebugLaunchFromProfile.NonEmptyEnvironmentOrNull(prof);
         var launchResult = await DapDebug.LaunchAsync(
             workspacePath,
             target,
@@ -358,7 +339,9 @@ public partial class MainWindowViewModel
             prof.WorkingDirectoryRelative,
             cancellationToken).ConfigureAwait(false);
         if (prof.OpenLaunchBrowser)
-            Services.KestrelLaunchBrowser.TryOpenAfterLaunch(prof.Environment, prof.LaunchUrl);
+            KestrelLaunchBrowser.TryOpenAfterLaunch(
+                DebugLaunchFromProfile.NonEmptyEnvironmentOrNull(prof),
+                prof.LaunchUrl);
         return launchResult;
     }
 }
