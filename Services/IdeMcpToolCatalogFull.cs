@@ -15,9 +15,40 @@ internal static class IdeMcpToolCatalogFull
         required = Array.Empty<string>()
     });
 
-    private static List<Tool> CreateStandardTools() =>
-        new List<Tool>
-        {
+    // CA1861: кэш для повторяющихся массивов имён required в схемах (каталог строится редко, но анализатор требует).
+    private static readonly string[] s_reqPath = ["path"];
+    private static readonly string[] s_reqFileSelectRange = ["file_path", "start_line", "start_column", "end_line", "end_column"];
+    private static readonly string[] s_reqFilePathLine = ["file_path", "line"];
+    private static readonly string[] s_reqTitleContent = ["title", "content"];
+    private static readonly string[] s_reqMessage = ["message"];
+    private static readonly string[] s_reqStartLineEndLine = ["start_line", "end_line"];
+    private static readonly string[] s_reqEditChunk = ["file_path", "start_line", "start_column", "end_line", "end_column", "new_text"];
+    private static readonly string[] s_reqFilePathLineColumn = ["file_path", "line", "column"];
+    private static readonly string[] s_reqRev = ["rev"];
+    private static readonly string[] s_reqTheme = ["theme"];
+    private static readonly string[] s_reqNameLayout = ["name", "layout"];
+    private static readonly string[] s_reqNameText = ["name", "text"];
+    private static readonly string[] s_reqKeys = ["keys"];
+    private static readonly string[] s_reqPanel = ["panel"];
+    private static readonly string[] s_reqContent = ["content"];
+    private static readonly string[] s_reqCommandId = ["command_id"];
+    private static readonly string[] s_reqParentNameControlType = ["parent_name", "control_type"];
+
+    private static List<Tool> CreateStandardTools()
+    {
+        var t = new List<Tool>();
+        AddFileEditorAndWorkspaceQueryTools(t);
+        AddBuildTestMetricsTools(t);
+        AddGitTools(t);
+        AddUiAndThemeTools(t);
+        AddDebugAndAgentCommandTools(t);
+        return t;
+    }
+
+    /// <summary>Файл, решение, дерево, диагностика по текущему файлу.</summary>
+    private static void AddFileEditorAndWorkspaceQueryTools(List<Tool> t) =>
+        t.AddRange(
+        [
             new()
             {
                 Name = "ide_open_file",
@@ -26,7 +57,7 @@ internal static class IdeMcpToolCatalogFull
                 {
                     type = "object",
                     properties = new { path = new { type = "string", description = "Полный путь к файлу." } },
-                    required = new[] { "path" }
+                    required = s_reqPath
                 })
             },
             new()
@@ -37,7 +68,7 @@ internal static class IdeMcpToolCatalogFull
                 {
                     type = "object",
                     properties = new { path = new { type = "string", description = "Полный путь к .sln/.slnx/.slnf, к .csproj/.fsproj или к каталогу." } },
-                    required = new[] { "path" }
+                    required = s_reqPath
                 })
             },
             new()
@@ -55,7 +86,7 @@ internal static class IdeMcpToolCatalogFull
                         end_line = new { type = "integer", description = "Конечная строка (1-based)." },
                         end_column = new { type = "integer", description = "Конечный столбец (1-based)." }
                     },
-                    required = new[] { "file_path", "start_line", "start_column", "end_line", "end_column" }
+                    required = s_reqFileSelectRange
                 })
             },
             new()
@@ -71,7 +102,7 @@ internal static class IdeMcpToolCatalogFull
                         line = new { type = "integer", description = "Номер строки (1-based)." },
                         condition = new { type = "string", description = "Опциональное условие." }
                     },
-                    required = new[] { "file_path", "line" }
+                    required = s_reqFilePathLine
                 })
             },
             new()
@@ -86,7 +117,7 @@ internal static class IdeMcpToolCatalogFull
                         file_path = new { type = "string" },
                         line = new { type = "integer", description = "Номер строки (1-based)." }
                     },
-                    required = new[] { "file_path", "line" }
+                    required = s_reqFilePathLine
                 })
             },
             new()
@@ -101,7 +132,7 @@ internal static class IdeMcpToolCatalogFull
                         title = new { type = "string", description = "Заголовок окна." },
                         content = new { type = "string", description = "Текст в формате Markdown." }
                     },
-                    required = new[] { "title", "content" }
+                    required = s_reqTitleContent
                 })
             },
             new()
@@ -118,7 +149,7 @@ internal static class IdeMcpToolCatalogFull
                 {
                     type = "object",
                     properties = new { message = new { type = "string" } },
-                    required = new[] { "message" }
+                    required = s_reqMessage
                 })
             },
             new()
@@ -144,7 +175,7 @@ internal static class IdeMcpToolCatalogFull
                         start_line = new { type = "integer", description = "Начальная строка (1-based)." },
                         end_line = new { type = "integer", description = "Конечная строка (1-based)." }
                     },
-                    required = new[] { "start_line", "end_line" }
+                    required = s_reqStartLineEndLine
                 })
             },
             new()
@@ -178,7 +209,7 @@ internal static class IdeMcpToolCatalogFull
                         end_column = new { type = "integer" },
                         new_text = new { type = "string" }
                     },
-                    required = new[] { "file_path", "start_line", "start_column", "end_line", "end_column", "new_text" }
+                    required = s_reqEditChunk
                 })
             },
             new()
@@ -196,7 +227,7 @@ internal static class IdeMcpToolCatalogFull
                         end_line = new { type = "integer", description = "Опционально." },
                         end_column = new { type = "integer", description = "Опционально." }
                     },
-                    required = new[] { "file_path", "line", "column" }
+                    required = s_reqFilePathLineColumn
                 })
             },
             new()
@@ -228,7 +259,12 @@ internal static class IdeMcpToolCatalogFull
                 Name = "ide_get_current_file_diagnostics",
                 Description = "Диагностики (ошибки и предупреждения) по текущему открытому файлу. Только .cs; для остальных — []. JSON: массив { id, message, severity, line, column } (line/column 1-based). Live-анализ Roslyn по содержимому редактора.",
                 InputSchema = s_emptyObjectInputSchema
-            },
+            }
+        ]);
+
+    private static void AddBuildTestMetricsTools(List<Tool> t) =>
+        t.AddRange(
+        [
             new()
             {
                 Name = "ide_build",
@@ -294,7 +330,12 @@ internal static class IdeMcpToolCatalogFull
                     },
                     required = Array.Empty<string>()
                 })
-            },
+            }
+        ]);
+
+    private static void AddGitTools(List<Tool> t) =>
+        t.AddRange(
+        [
             new()
             {
                 Name = "ide_git_status",
@@ -328,7 +369,7 @@ internal static class IdeMcpToolCatalogFull
                         message = new { type = "string", description = "Сообщение коммита." },
                         paths = new { type = "array", items = new { type = "string" }, description = "Опционально: пути для git add." }
                     },
-                    required = new[] { "message" }
+                    required = s_reqMessage
                 })
             },
             new()
@@ -422,7 +463,7 @@ internal static class IdeMcpToolCatalogFull
                         path = new { type = "string", description = "Опционально: файл в ревизии." },
                         stat_only = new { type = "boolean", description = "Только --stat." }
                     },
-                    required = new[] { "rev" }
+                    required = s_reqRev
                 })
             },
             new()
@@ -470,7 +511,12 @@ internal static class IdeMcpToolCatalogFull
                     },
                     required = Array.Empty<string>()
                 })
-            },
+            }
+        ]);
+
+    private static void AddUiAndThemeTools(List<Tool> t) =>
+        t.AddRange(
+        [
             new()
             {
                 Name = "ide_focus_editor",
@@ -491,7 +537,7 @@ internal static class IdeMcpToolCatalogFull
                 {
                     type = "object",
                     properties = new { theme = new { type = "string", description = "JSON темы (…, panel_chrome: title_foreground, accent_brush, header_background, header_separator, menu_glyph_foreground — полоса заголовка панелей)." } },
-                    required = new[] { "theme" }
+                    required = s_reqTheme
                 })
             },
             new()
@@ -529,7 +575,7 @@ internal static class IdeMcpToolCatalogFull
                         name = new { type = "string", description = "Имя контрола." },
                         layout = new { type = "string", description = "JSON объект: margin, grid_row, grid_column, canvas_left, canvas_top, dock и т.д." }
                     },
-                    required = new[] { "name", "layout" }
+                    required = s_reqNameLayout
                 })
             },
             new()
@@ -544,7 +590,7 @@ internal static class IdeMcpToolCatalogFull
                         name = new { type = "string", description = "Имя контрола (TextBox или с writable Content)." },
                         text = new { type = "string", description = "Новый текст." }
                     },
-                    required = new[] { "name", "text" }
+                    required = s_reqNameText
                 })
             },
             new()
@@ -570,7 +616,7 @@ internal static class IdeMcpToolCatalogFull
                         name = new { type = "string", description = "Имя контрола (опционально; если не задано — элемент под курсором)." },
                         keys = new { type = "string", description = "Сочетание, например Ctrl+Enter, Alt+F4." }
                     },
-                    required = new[] { "keys" }
+                    required = s_reqKeys
                 })
             },
             new()
@@ -624,7 +670,7 @@ internal static class IdeMcpToolCatalogFull
                         width = new { type = "number", description = "Ширина в пикселях (для solution_explorer, chat)." },
                         height = new { type = "number", description = "Высота в пикселях (для build_output, terminal)." }
                     },
-                    required = new[] { "panel" }
+                    required = s_reqPanel
                 })
             },
             new()
@@ -632,7 +678,12 @@ internal static class IdeMcpToolCatalogFull
                 Name = "ide_get_supported_editor_languages",
                 Description = "Список языков редактора с подсветкой синтаксиса. JSON: массив объектов { \"extension\": \".cs\", \"language\": \"C#\" }. Чтобы знать, для каких расширений файлов есть подсветка.",
                 InputSchema = s_emptyObjectInputSchema
-            },
+            }
+        ]);
+
+    private static void AddDebugAndAgentCommandTools(List<Tool> t) =>
+        t.AddRange(
+        [
             new()
             {
                 Name = "ide_get_debug_snapshot",
@@ -647,7 +698,7 @@ internal static class IdeMcpToolCatalogFull
                 {
                     type = "object",
                     properties = new { content = new { type = "string", description = "Полное содержимое заметок (перезаписывает файл)." } },
-                    required = new[] { "content" }
+                    required = s_reqContent
                 })
             },
             new()
@@ -668,38 +719,39 @@ internal static class IdeMcpToolCatalogFull
                         command_id = new { type = "string", description = "Код команды: см. IdeCommands и docs/MCP-PROTOCOL.md (меню «Вид», Файл, тулбар, чат, трасса)." },
                         args = new { type = "object", description = "Аргументы команды (path, file_path, line, start_line, …). Опционально." }
                     },
-                    required = new[] { "command_id" }
+                    required = s_reqCommandId
                 })
             }
-        };
+        ]);
+
+#if DEBUG
+    private static void AddDebugOnlyExperimentalControlTool(List<Tool> tools) =>
+        tools.Add(new()
+        {
+            Name = "ide_add_control",
+            Description = "[Только Debug-сборка] Добавить контрол в конец панели на лету. parent_name — имя Panel (из ide_get_ui_layout), control_type — Button, TextBlock или Border, content — текст, name — опциональное имя нового контрола. Для экспериментов с UI.",
+            InputSchema = Schema(new
+            {
+                type = "object",
+                properties = new
+                {
+                    parent_name = new { type = "string", description = "Имя родительской панели (Panel)." },
+                    control_type = new { type = "string", description = "Button, TextBlock или Border." },
+                    content = new { type = "string", description = "Текст (Content/Text)." },
+                    name = new { type = "string", description = "Имя нового контрола (опционально)." }
+                },
+                required = s_reqParentNameControlType
+            })
+        });
+#endif
 
     public static List<Tool> BuildRichTools(bool includeDebugTools)
     {
         var toolsList = CreateStandardTools();
 #if DEBUG
         if (includeDebugTools)
-        {
-            toolsList.Add(new()
-            {
-                Name = "ide_add_control",
-                Description = "[Только Debug-сборка] Добавить контрол в конец панели на лету. parent_name — имя Panel (из ide_get_ui_layout), control_type — Button, TextBlock или Border, content — текст, name — опциональное имя нового контрола. Для экспериментов с UI.",
-                InputSchema = Schema(new
-                {
-                    type = "object",
-                    properties = new
-                    {
-                        parent_name = new { type = "string", description = "Имя родительской панели (Panel)." },
-                        control_type = new { type = "string", description = "Button, TextBlock или Border." },
-                        content = new { type = "string", description = "Текст (Content/Text)." },
-                        name = new { type = "string", description = "Имя нового контрола (опционально)." }
-                    },
-                    required = new[] { "parent_name", "control_type" }
-                })
-            });
-        }
+            AddDebugOnlyExperimentalControlTool(toolsList);
 #endif
-
         return toolsList;
     }
 }
-
