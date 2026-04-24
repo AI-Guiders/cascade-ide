@@ -7,9 +7,16 @@ internal static class IdeMcpToolCatalogFull
 {
     private static JsonElement Schema(object schema) => JsonSerializer.SerializeToElement(schema);
 
-    public static List<Tool> BuildRichTools(bool includeDebugTools)
+    /// <summary>Общая схема <c>{ "type": "object", "properties": {}, "required": [] }</c> для инструментов без аргументов.</summary>
+    private static readonly JsonElement s_emptyObjectInputSchema = Schema(new
     {
-        var toolsList = new List<Tool>
+        type = "object",
+        properties = new { },
+        required = Array.Empty<string>()
+    });
+
+    private static List<Tool> CreateStandardTools() =>
+        new List<Tool>
         {
             new()
             {
@@ -101,7 +108,7 @@ internal static class IdeMcpToolCatalogFull
             {
                 Name = "ide_show_editor_preview",
                 Description = "Показать превью текущего файла из редактора в отдельном окне. Контент берётся из IDE (не передаётся по MCP) — удобно для длинных .md с таблицами. Если открыт не .md — окно покажет текущий текст редактора.",
-                InputSchema = Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
+                InputSchema = s_emptyObjectInputSchema
             },
             new()
             {
@@ -196,49 +203,49 @@ internal static class IdeMcpToolCatalogFull
             {
                 Name = "ide_get_solution_info",
                 Description = "Информация о решении: solution_path, current_file_path, project_paths, selected_solution_path (путь узла, выделенного в обозревателе). JSON.",
-                InputSchema = Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
+                InputSchema = s_emptyObjectInputSchema
             },
             new()
             {
                 Name = "ide_get_ide_state",
                 Description = "Одна сводка состояния IDE: solution/current file/selection/debug/build output/diagnostics и cockpit_surface (CDS, тот же снимок, что BuildCockpitSurfaceSnapshot/Skia). JSON.",
-                InputSchema = Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
+                InputSchema = s_emptyObjectInputSchema
             },
             new()
             {
                 Name = "ide_get_ui_modes_diagnostics",
                 Description = "Диагностика загрузки UI-режимов: app_base_directory, путь к UiModes, наличие index.toml/Flight.toml, bundle_source (TomlBundle vs BuiltinRegistry), ordered_mode_ids, builtin_registry_fallback_ids, flight_listed_in_menu, hint (если Flight нет в меню).",
-                InputSchema = Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
+                InputSchema = s_emptyObjectInputSchema
             },
             new()
             {
                 Name = "ide_get_solution_files",
                 Description = "Файлы и дерево решения. file_entries — массив { path, title, relative_path } (relative_path от каталога решения). solution_tree — иерархия (solution → projects → folders → files) с теми же полями. Для поиска .md или узла по пути и открытия через ide_open_file.",
-                InputSchema = Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
+                InputSchema = s_emptyObjectInputSchema
             },
             new()
             {
                 Name = "ide_get_current_file_diagnostics",
                 Description = "Диагностики (ошибки и предупреждения) по текущему открытому файлу. Только .cs; для остальных — []. JSON: массив { id, message, severity, line, column } (line/column 1-based). Live-анализ Roslyn по содержимому редактора.",
-                InputSchema = Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
+                InputSchema = s_emptyObjectInputSchema
             },
             new()
             {
                 Name = "ide_build",
                 Description = "Запустить сборку решения (dotnet build). Возвращает JSON: success, exit_code, errors[] (file, line, column?, code?, message), warnings[], raw_output (обрезано до 4000 символов). Агент получает структурированные ошибки без парсинга лога.",
-                InputSchema = Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
+                InputSchema = s_emptyObjectInputSchema
             },
             new()
             {
                 Name = "ide_get_build_output",
                 Description = "Текущее содержимое панели «Вывод сборки»: полный текст вывода и цвета оформления (background, foreground). JSON: text, theme. Чтобы агент видел, что сейчас отображается в панели сборки.",
-                InputSchema = Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
+                InputSchema = s_emptyObjectInputSchema
             },
             new()
             {
                 Name = "ide_run_tests",
                 Description = "Запустить тесты решения (dotnet test; при необходимости выполняет сборку). Возвращает JSON: success, total, passed, failed, skipped, failed_tests[] (name, message?, duration_ms?). Агент получает структурированный список упавших тестов без парсинга лога.",
-                InputSchema = Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
+                InputSchema = s_emptyObjectInputSchema
             },
             new()
             {
@@ -292,7 +299,7 @@ internal static class IdeMcpToolCatalogFull
             {
                 Name = "ide_git_status",
                 Description = "Git status (branch + short status) в каталоге решения/workspace. JSON: success, exit_code, output.",
-                InputSchema = Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
+                InputSchema = s_emptyObjectInputSchema
             },
             new()
             {
@@ -468,13 +475,13 @@ internal static class IdeMcpToolCatalogFull
             {
                 Name = "ide_focus_editor",
                 Description = "Передать фокус в редактор.",
-                InputSchema = Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
+                InputSchema = s_emptyObjectInputSchema
             },
             new()
             {
                 Name = "ide_get_ui_theme",
                 Description = "Полный снимок темы и лэйаута. Ресурсы: секции как у ide_set_ui_theme + solution_explorer_tree_power + power_island_frame_brushes. Дополнительно: cascade_theme_resolved — все ключи CascadeTheme.*, разрешённые через TryGetResource под actual_theme_variant (solid и linear(...) для градиентов); window_frame — заголовок, client/bounds, extend_client_area*, transparency, фон окна; layout_regions — по именам (RootWindow, MainGrid, DockIslandInner, DocumentsDock, SolutionIslandInner, ChatIslandInner, ChatPanelRoot, BottomPanelShell, ModeBadge, UiModeBloomOverlay, ChatInputBox, TerminalInputBox): bounds, видимость, effective_*, background_brush/border_brush_display (в т.ч. градиенты), corner_radius/box_shadow для Border; dock_open_documents — все открытые вкладки из VM (tab_index, file_path, dock_title, display_title, is_active, is_dirty, model_content_length, model_text_preview ~240 симв., editor_in_visual_tree); dock_text_editors — только вкладки, у которых TextEditor уже в визуальном дереве (часто одна активная): file_path, dock_title, matches_main_window_current_file, document_length, model_content_length, length_matches_model, line_count, bounds, шрифт, кисти, effective_*, text_preview ~240 симв.; top_levels — все открытые окна процесса (role: main|mfd_host|other, window_type, title, position_x/y, client_width/height, window_state, is_active). ide_set_ui_theme игнорирует новые корневые ключи.",
-                InputSchema = Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
+                InputSchema = s_emptyObjectInputSchema
             },
             new()
             {
@@ -491,13 +498,13 @@ internal static class IdeMcpToolCatalogFull
             {
                 Name = "ide_get_ui_layout",
                 Description = "Дерево UI по всем окнам верхнего уровня: JSON с массивом windows — у каждого элемента role (main|mfd_host|other), window_type, title, is_active, root (то же дерево контролов: тип, имя, bounds относительно окна, content, children). Окно-хост зоны Mfd (`MfdHostWindow`) и прочие Window входят в ответ; кнопки/панели главного окна как раньше.",
-                InputSchema = Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
+                InputSchema = s_emptyObjectInputSchema
             },
             new()
             {
                 Name = "ide_get_colors_under_cursor",
                 Description = "Получить цвета под курсором: прямые (background, foreground) и эффективные (effective_background, effective_foreground — с учётом поддерева и предков, как на экране). JSON: type, name, background, foreground, effective_background, effective_foreground (hex #AARRGGBB).",
-                InputSchema = Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
+                InputSchema = s_emptyObjectInputSchema
             },
             new()
             {
@@ -624,13 +631,13 @@ internal static class IdeMcpToolCatalogFull
             {
                 Name = "ide_get_supported_editor_languages",
                 Description = "Список языков редактора с подсветкой синтаксиса. JSON: массив объектов { \"extension\": \".cs\", \"language\": \"C#\" }. Чтобы знать, для каких расширений файлов есть подсветка.",
-                InputSchema = Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
+                InputSchema = s_emptyObjectInputSchema
             },
             new()
             {
                 Name = "ide_get_debug_snapshot",
                 Description = "JSON: канонический снимок DAP (стек, переменные, останов, брейкпоинты из storage в снимке) — тот же источник, что UI; заменяет синтетические ide_show_debug_* (ADR 0002).",
-                InputSchema = Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
+                InputSchema = s_emptyObjectInputSchema
             },
             new()
             {
@@ -647,7 +654,7 @@ internal static class IdeMcpToolCatalogFull
             {
                 Name = "ide_read_agent_notes",
                 Description = "Прочитать заметки агента из .cascade-ide/agent-notes в каталоге решения. Возвращает содержимое или пустую строку, если файла нет или решение не загружено. Агент восстанавливает контекст в новом чате.",
-                InputSchema = Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
+                InputSchema = s_emptyObjectInputSchema
             },
             new()
             {
@@ -666,6 +673,9 @@ internal static class IdeMcpToolCatalogFull
             }
         };
 
+    public static List<Tool> BuildRichTools(bool includeDebugTools)
+    {
+        var toolsList = CreateStandardTools();
 #if DEBUG
         if (includeDebugTools)
         {
