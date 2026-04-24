@@ -2,7 +2,7 @@
 
 **Статус:** Proposed  
 **Дата:** 2026-04-06  
-**Обновлено:** 2026-04-06 — связь с [0021 §«Плагины и модель внимания»](0021-pfd-mfd-cockpit-attention-model.md#plugins-attention-binding). Ранее: превью **только** в MFD одного окна; **без** отдельного `TopLevel`; второй монитор = тот же экземпляр IDE, не окно по [0017](0017-multi-window-workspace-and-agent-surfaces.md).  
+**Обновлено:** 2026-04-24 — организация работы как **отдельного крупного трека** — [0092](0092-visual-ui-designer-major-track.md) (приоритет стеков: Avalonia → Blazor; продуктовые правила — по-прежнему в этом ADR). Ранее 2026-04-06: связь с [0021 §«Плагины и модель внимания»](0021-pfd-mfd-cockpit-attention-model.md#plugins-attention-binding). Превью **только** в MFD одного окна; **без** отдельного `TopLevel`; второй монитор = тот же экземпляр IDE, не окно по [0017](0017-multi-window-workspace-and-agent-surfaces.md).  
 **Связь:** [0021](0021-pfd-mfd-cockpit-attention-model.md) (PFD / MFD / `forward`; [§«Плагины и модель внимания»](0021-pfd-mfd-cockpit-attention-model.md#plugins-attention-binding) — будущие расширения тоже привязываются к модели), [0010](0010-ui-modes-toml-configuration.md) (пресеты режимов и слоты панелей). [0017](0017-multi-window-workspace-and-agent-surfaces.md) — мультиоконность приложения **ортогональна**: для визуальной поверхности разметки **отдельное окно не предполагается** (см. раздел «Решение»: [п. 2](0017-multi-window-workspace-and-agent-surfaces.md#adr0017-p2), [п. 3](0017-multi-window-workspace-and-agent-surfaces.md#adr0017-p3)).
 
 ---
