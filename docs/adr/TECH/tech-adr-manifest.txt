@@ -9,6 +9,7 @@
 0009-strangler-migration-and-exceptions.md
 0002-debug-human-agent-parity.md
 0090-launch-profiles-and-debug-startup-configurations.md
+0093-mfd-embedded-browser-for-launch-url.md
 0003-debug-ui-mode-separate-from-power.md
 0001-debug-hypotheses-json-storage.md
 0011-debug-situational-awareness.md

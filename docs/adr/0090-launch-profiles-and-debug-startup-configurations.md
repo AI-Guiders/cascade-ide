@@ -1,8 +1,8 @@
 # ADR 0090: Профили запуска и несколько стартовых конфигураций отладки (как launch profiles в VS)
 
-**Статус:** Accepted  
+**Статус:** Accepted · Implemented  
 **Дата:** 2026-04-23  
-**Связь:** [0002](0002-debug-human-agent-parity.md) (единый слой отладки для человека и агента), [MCP-PROTOCOL.md](../MCP-PROTOCOL.md) (`debug_launch` и родственные тулы), текущее хранилище `StartupProjectStore` / `startup-project.json`, резолвер [MsBuildDebugTargetResolver.cs](../../Services/MsBuildDebugTargetResolver.cs), политика конфигурации TOML-first в [0028](0028-user-settings-toml-localappdata-and-secrets.md) / [0029](0029-configuration-toml-canonical-ui-facade.md).
+**Связь:** [0002](0002-debug-human-agent-parity.md) (единый слой отладки для человека и агента), [MCP-PROTOCOL.md](../MCP-PROTOCOL.md) (`debug_launch` и родственные тулы), текущее хранилище `StartupProjectStore` / `startup-project.json`, резолвер [MsBuildDebugTargetResolver.cs](../../Services/MsBuildDebugTargetResolver.cs), политика конфигурации TOML-first в [0028](0028-user-settings-toml-localappdata-and-secrets.md) / [0029](0029-configuration-toml-canonical-ui-facade.md). **Расширение (опц. встроенный просмотр URL на MFD):** [0093](0093-mfd-embedded-browser-for-launch-url.md).
 
 ## Контекст
 
@@ -92,8 +92,7 @@
 
 ## Статус внедрения
 
-- Этот ADR зафиксирован как **Accepted**: решение и контракт приняты.
-- Техническая реализация ведётся по чеклисту ниже; после merge кода добавить отметку **· Implemented** согласно [status-lifecycle.md](status-lifecycle.md).
+- Канон хранения: `.cascade-ide/launch-profiles.toml`, миграция из `startup-project.json`, `MsBuildDebugTargetResolver` с конфигурацией из профиля, DAP `launch` с `env` и опциональным cwd, `debug_launch` с `profile_name` и явными ошибками контракта; тесты `LaunchProfilesStoreTests`, документация `IdeCommands` / `MCP-PROTOCOL.md`.
 
 ## Implementation checklist (из решения в код)
 

@@ -99,9 +99,10 @@
 | [0087](0087-microsoft-agent-framework-builtin-agent-orchestration.md) | **Microsoft Agent Framework (MAF):** ориентир на оркестрацию встроенного агентного контура; след. шаг — PoC | Accepted · **след. шаг: PoC** |
 | [0088](0088-host-slot-region-deck-cell-taxonomy.md) | **Host slot / регион / ячейка deck** — таксономия уровней; не смешивать | Proposed |
 | [0089](0089-ide-omnibus-naming-and-ide-health-channel-rename.md) | **`get_ide_state`** вместо `get_workspace_state`; канал **IDE Health** вместо Workspace Health; ортогонально ADR 0002 | Accepted |
-| [0090](0090-launch-profiles-and-debug-startup-configurations.md) | Профили запуска / несколько стартовых конфигураций отладки (как launch profiles в VS), хранение, MCP, миграция с `startup-project.json` | Proposed |
+| [0090](0090-launch-profiles-and-debug-startup-configurations.md) | Профили запуска / несколько стартовых конфигураций отладки (как launch profiles в VS), хранение, MCP, миграция с `startup-project.json` | Accepted · Implemented |
 | [0091](0091-pfd-debug-situational-deck-hypothesis.md) | Гипотеза: PFD **instrument deck** в режиме отладки — одной страницы Mfd (DebugStack) может не хватить; PFD = краткая сводка, Mfd = детали | Proposed |
 | [0092](0092-visual-ui-designer-major-track.md) | Трек **Visual UI** (дизайнер разметки): отдельная крупная программная линия; норматив по UX — [0022](0022-mfd-visual-design-surface-axaml-blazor.md); приоритет Avalonia → Blazor → (опц.) Razor | Accepted (направление) |
+| [0093](0093-mfd-embedded-browser-for-launch-url.md) | Расширение [0090](0090-launch-profiles-and-debug-startup-configurations.md): **опциональный** встроенный просмотр URL Kestrel на MFD рядом с отладкой; внешний браузер остаётся default; WebView2 / кроссплатформа — в roadmap | Proposed |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 
