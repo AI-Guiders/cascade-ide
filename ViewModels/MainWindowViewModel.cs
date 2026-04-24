@@ -262,11 +262,13 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
                 OnPropertyChanged(nameof(BreakpointLinesInCurrentFile));
                 OnPropertyChanged(nameof(AllBreakpointLinesInCurrentFile));
                 BuildSolutionCommand.NotifyCanExecuteChanged();
+                ImportLaunchSettingsFromSelectionCommand.NotifyCanExecuteChanged();
                 HandleSolutionPathChanged(Workspace.SolutionPath);
                 break;
             case nameof(SolutionWorkspaceViewModel.SelectedSolutionItem):
                 HandleSelectedSolutionItemChanged(Workspace.SelectedSolutionItem);
                 SetStartupProjectFromSelectionCommand.NotifyCanExecuteChanged();
+                ImportLaunchSettingsFromSelectionCommand.NotifyCanExecuteChanged();
                 break;
         }
     }
@@ -400,7 +402,10 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private void HandleSolutionPathChanged(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
+        {
             ClearStartupProjectInMemoryOnly();
+            RefreshLaunchProfilePickerFromStore();
+        }
 
         UiModeCatalog.ApplyRepositoryWorkspaceOverlay(GetWorkspacePath(value));
         NotifyDockedInstrumentSlotBindings();

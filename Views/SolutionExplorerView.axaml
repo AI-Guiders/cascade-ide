@@ -73,6 +73,19 @@
                            Opacity="0.8"
                            Foreground="{DynamicResource CascadeTheme.SolutionExplorerHeaderForeground}"
                            IsVisible="{Binding HasStartupProject}"/>
+                <StackPanel Orientation="Horizontal" Spacing="6" Margin="2,4,0,0"
+                            IsVisible="{Binding ShowLaunchProfilePicker}">
+                    <TextBlock Text="Профиль запуска"
+                               FontSize="11"
+                               VerticalAlignment="Center"
+                               Opacity="0.8"
+                               Foreground="{DynamicResource CascadeTheme.SolutionExplorerHeaderForeground}"/>
+                    <ComboBox MinWidth="140"
+                              MaxWidth="280"
+                              FontSize="11"
+                              ItemsSource="{Binding LaunchProfileIds}"
+                              SelectedItem="{Binding SelectedLaunchProfileId, Mode=TwoWay}"/>
+                </StackPanel>
             </StackPanel>
             <TreeView Grid.Row="1"
                       ItemsSource="{Binding Workspace.SolutionRoots}"
@@ -84,6 +97,8 @@
                                   Command="{Binding SetStartupProjectFromSelectionCommand}"/>
                         <MenuItem Header="Сбросить стартовый проект"
                                   Command="{Binding ClearStartupProjectCommand}"/>
+                        <MenuItem Header="Импорт профилей из launchSettings.json"
+                                  Command="{Binding ImportLaunchSettingsFromSelectionCommand}"/>
                     </ContextMenu>
                 </TreeView.ContextMenu>
                 <TreeView.Styles>

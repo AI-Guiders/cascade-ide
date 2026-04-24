@@ -45,7 +45,7 @@ internal static class IdeCommandsDoc
         ["cycle_ui_mode"] = "Циклически переключить UI mode (hotkey). returns: text.",
         ["debug_attach"] = "Подключиться к процессу по PID. args: workspace_path:string, process_id:integer, target_path?:string, netcoredbg_path?:string; returns: text; example: {\"workspace_path\":\"D:\\\\\\\\proj\",\"process_id\":12345}.",
         ["debug_continue"] = "Продолжить выполнение (DAP continue). returns: text.",
-        ["debug_launch"] = "Запустить отладку (netcoredbg DAP). Контракт: (A) явная цель — workspace_path + target_path (.dll/.exe); (B) профиль — profile_name (или active_profile, если не задан) по ADR 0090; target_path имеет приоритет над profile_name. Если нет путей/профиля (мелодия dl / аккорд) — интерактивный поток как F5: стартовый проект или диалог .dll/.exe. Опционально netcoredbg_path, program_args. returns: text; example: {\"workspace_path\":\"D:\\\\\\\\proj\",\"target_path\":\"samples\\\\\\\\DebugTarget\\\\\\\\bin\\\\\\\\Debug\\\\\\\\net10.0\\\\\\\\DebugTarget.dll\"}.",
+        ["debug_launch"] = "Запустить отладку (netcoredbg DAP). args: workspace_path?:string, target_path?:string, profile_name?:string, netcoredbg_path?:string, program_args?:string[] . returns: text; example: {\"workspace_path\":\"D:\\\\\\\\proj\",\"target_path\":\"samples\\\\\\\\DebugTarget\\\\\\\\bin\\\\\\\\Debug\\\\\\\\net10.0\\\\\\\\DebugTarget.dll\"}.",
         ["debug_ping"] = "Проверка доступности встроенной отладки. returns: text.",
         ["debug_stack_trace"] = "Стек вызовов (DAP stackTrace). returns: text.",
         ["debug_step_into"] = "Шаг с заходом (DAP stepIn). returns: text.",

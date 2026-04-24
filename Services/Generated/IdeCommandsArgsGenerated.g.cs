@@ -21,6 +21,7 @@ internal static class IdeCommandsArgsGenerated
         ["close_document"] = new IdeCommandsArgs.Arg[] { new("file_path", "string", true, false, null) },
         ["compact_hot_context"] = new IdeCommandsArgs.Arg[] { new("apply", "boolean", false, false, null) },
         ["debug_attach"] = new IdeCommandsArgs.Arg[] { new("workspace_path", "string", true, false, null), new("process_id", "integer", true, false, null), new("target_path", "string", false, false, null), new("netcoredbg_path", "string", false, false, null) },
+        ["debug_launch"] = new IdeCommandsArgs.Arg[] { new("workspace_path", "string", false, false, null), new("target_path", "string", false, false, null), new("profile_name", "string", false, false, null), new("netcoredbg_path", "string", false, false, null), new("program_args", "string", false, true, "string") },
         ["debug_variables"] = new IdeCommandsArgs.Arg[] { new("frame_index", "integer", false, false, null) },
         ["delete_knowledge_file"] = new IdeCommandsArgs.Arg[] { new("file_path", "string", true, false, null), new("canon_path", "string", false, false, null) },
         ["delete_knowledge_section"] = new IdeCommandsArgs.Arg[] { new("file_path", "string", true, false, null), new("section_id", "string", true, false, null), new("canon_path", "string", false, false, null) },

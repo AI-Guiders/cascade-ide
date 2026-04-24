@@ -201,6 +201,8 @@ public sealed class IdeDapDebugSession
         string targetPath,
         string? netcoredbgPath,
         IReadOnlyList<string>? programArgs,
+        IReadOnlyDictionary<string, string>? environment = null,
+        string? workingDirectoryOverride = null,
         CancellationToken cancellationToken = default)
     {
         var netcoredbg = ResolveNetcoreDbgPath(netcoredbgPath);
@@ -264,8 +266,17 @@ public sealed class IdeDapDebugSession
         var exceptionBpsOk = false;
         try
         {
-            var launchCwd = ResolveLaunchWorkingDirectory(programPath, workspaceRoot, programArgs);
-            await client.LaunchAsync(programPath, launchCwd, programArgs, cancellationToken).ConfigureAwait(false);
+            string launchCwd;
+            if (!string.IsNullOrWhiteSpace(workingDirectoryOverride))
+            {
+                var w = workingDirectoryOverride.Trim();
+                launchCwd = Path.IsPathRooted(w)
+                    ? Path.GetFullPath(w)
+                    : Path.GetFullPath(Path.Combine(workspaceRoot, w));
+            }
+            else
+                launchCwd = ResolveLaunchWorkingDirectory(programPath, workspaceRoot, programArgs);
+            await client.LaunchAsync(programPath, launchCwd, programArgs, environment, cancellationToken).ConfigureAwait(false);
             foreach (var (file, list) in byFile)
             {
                 if (list.Count > 0)

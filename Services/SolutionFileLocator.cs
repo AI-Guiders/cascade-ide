@@ -27,7 +27,8 @@ public static class SolutionFileLocator
         return null;
     }
 
-    private static string? TryFindSolutionInDirectory(string directory)
+    /// <summary>Ищет один файл решения в каталоге (без подъёма вверх по дереву).</summary>
+    public static string? TryFindSolutionInDirectory(string directory)
     {
         if (!Directory.Exists(directory))
             return null;

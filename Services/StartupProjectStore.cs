@@ -2,7 +2,10 @@ using System.Text.Json;
 
 namespace CascadeIDE.Services;
 
-/// <summary>Сохранение выбранного стартового проекта для отладки (на решение, файл рядом с .sln/.slnx).</summary>
+/// <summary>
+/// Сохранение выбранного стартового проекта для отладки; канон — <c>LaunchProfilesStore</c> / <c>launch-profiles.toml</c> (ADR 0090),
+/// <c>startup-project.json</c> — зеркалирование для совместимости.
+/// </summary>
 public static class StartupProjectStore
 {
     private const string FileName = "startup-project.json";
@@ -16,6 +19,19 @@ public static class StartupProjectStore
     }
 
     public static bool TryLoad(string solutionPath, out string? projectPathRelative)
+    {
+        if (LaunchProfilesStore.TryGetActiveProjectRelativePath(solutionPath, out var fromToml, out _) &&
+            !string.IsNullOrEmpty(fromToml))
+        {
+            projectPathRelative = fromToml;
+            return true;
+        }
+
+        return TryLoadLegacyJsonOnly(solutionPath, out projectPathRelative);
+    }
+
+    /// <summary>Только <c>startup-project.json</c>, без чтения TOML (миграция / fallback).</summary>
+    internal static bool TryLoadLegacyJsonOnly(string solutionPath, out string? projectPathRelative)
     {
         projectPathRelative = null;
         var storePath = GetStorePath(solutionPath);
@@ -40,6 +56,7 @@ public static class StartupProjectStore
 
     public static void Save(string solutionPath, string projectPathRelativeToSolution)
     {
+        LaunchProfilesStore.UpsertActiveProject(solutionPath, projectPathRelativeToSolution);
         var storePath = GetStorePath(solutionPath);
         if (string.IsNullOrEmpty(storePath))
             return;
@@ -54,6 +71,7 @@ public static class StartupProjectStore
 
     public static void Clear(string solutionPath)
     {
+        LaunchProfilesStore.Delete(solutionPath);
         var storePath = GetStorePath(solutionPath);
         if (!string.IsNullOrEmpty(storePath) && File.Exists(storePath))
         {

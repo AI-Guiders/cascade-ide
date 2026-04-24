@@ -18,7 +18,11 @@ public partial class MainWindowViewModel
     public bool HasStartupProject => !string.IsNullOrEmpty(StartupProjectCsprojFullPath);
 
     public string StartupProjectBanner =>
-        HasStartupProject ? $"Старт отладки (F5): {StartupProjectShortLabel}" : "";
+        HasStartupProject
+            ? (ShowLaunchProfilePicker && !string.IsNullOrEmpty(SelectedLaunchProfileId)
+                ? $"Старт отладки (F5): {StartupProjectShortLabel} · {SelectedLaunchProfileId}"
+                : $"Старт отладки (F5): {StartupProjectShortLabel}")
+            : "";
 
     partial void OnStartupProjectCsprojFullPathChanged(string? value)
     {
@@ -28,7 +32,10 @@ public partial class MainWindowViewModel
         ClearStartupProjectCommand.NotifyCanExecuteChanged();
     }
 
-    /// <summary>После загрузки дерева: прочитать <c>.cascade-ide/startup-project.json</c> и проверить, что путь есть в решении.</summary>
+    partial void OnStartupProjectShortLabelChanged(string value) =>
+        OnPropertyChanged(nameof(StartupProjectBanner));
+
+    /// <summary>После загрузки дерева: прочитать <c>launch-profiles.toml</c> (миграция с <c>startup-project.json</c>) и проверить, что путь есть в решении.</summary>
     public void RefreshStartupProjectAfterSolutionLoad()
     {
         StartupProjectCsprojFullPath = null;
@@ -36,7 +43,10 @@ public partial class MainWindowViewModel
 
         var sln = Workspace.SolutionPath;
         if (string.IsNullOrEmpty(sln) || Workspace.SolutionRoots.Count == 0)
+        {
+            RefreshLaunchProfilePickerFromStore();
             return;
+        }
 
         var solutionDir = Services.BreakpointsFileService.GetWorkspaceRoot(sln);
         if (string.IsNullOrEmpty(solutionDir))
@@ -61,6 +71,8 @@ public partial class MainWindowViewModel
 
         if (!fromStore)
             TryApplyDefaultSingleProjectStartup(sln, solutionDir, projects);
+
+        RefreshLaunchProfilePickerFromStore();
     }
 
     /// <summary>Единственный <c>.csproj</c> в дереве — считаем его стартовым и сохраняем, чтобы F5 не открывал диалог выбора DLL.</summary>
@@ -203,6 +215,7 @@ public partial class MainWindowViewModel
 
             StartupProjectStore.Save(sln, rel);
             ApplyStartupProject(full);
+            RefreshLaunchProfilePickerFromStore();
         }
         catch (Exception ex)
         {
@@ -227,20 +240,125 @@ public partial class MainWindowViewModel
 
     private bool CanClearStartupProject() => HasStartupProject;
 
-    private async Task<string?> TryResolveStartupDebugTargetAsync()
+    private readonly record struct DebugLaunchResolution(
+        string TargetDllPath,
+        IReadOnlyList<string>? ProgramArgs,
+        IReadOnlyDictionary<string, string>? Environment,
+        string? WorkingDirectoryRelativeToSolution,
+        bool OpenLaunchBrowser,
+        string? LaunchUrl);
+
+    /// <summary>MSBuild + launch profile (ADR 0090) или унаследованный стартовый <c>.csproj</c>.</summary>
+    private async Task<DebugLaunchResolution?> TryResolveDebugLaunchForF5Async()
     {
         TryApplyInferredStartupProjectForDebug();
+        var sln = Workspace.SolutionPath;
+        if (string.IsNullOrEmpty(sln))
+            return null;
+
+        var solutionDir = Services.BreakpointsFileService.GetWorkspaceRoot(sln);
+        if (string.IsNullOrEmpty(solutionDir))
+            return null;
+
+        if (LaunchProfilesStore.TryResolveProfileForLaunch(sln, profileName: null, out var prof, out _) &&
+            !string.IsNullOrWhiteSpace(prof.ProjectRelativeToSolution))
+        {
+            var csprojFull = Path.GetFullPath(Path.Combine(solutionDir, prof.ProjectRelativeToSolution));
+            if (File.Exists(csprojFull))
+            {
+                IReadOnlyDictionary<string, string>? env =
+                    prof.Environment is { Count: > 0 } d ? d : null;
+                var (target, err) = await MsBuildDebugTargetResolver
+                    .TryResolveAsync(csprojFull, _dotnetRunner, prof.Configuration)
+                    .ConfigureAwait(false);
+                if (!string.IsNullOrEmpty(target))
+                {
+                    return new DebugLaunchResolution(
+                        target,
+                        prof.ProgramArgs is { Count: > 0 } ? prof.ProgramArgs : null,
+                        env,
+                        string.IsNullOrEmpty(prof.WorkingDirectoryRelative) ? null : prof.WorkingDirectoryRelative,
+                        prof.OpenLaunchBrowser,
+                        prof.LaunchUrl);
+                }
+
+                if (!string.IsNullOrEmpty(err))
+                    await ShowDebugInfoAsync("Стартовый проект", err).ConfigureAwait(false);
+                return null;
+            }
+        }
 
         var csproj = StartupProjectCsprojFullPath;
         if (string.IsNullOrEmpty(csproj) || !File.Exists(csproj))
             return null;
 
-        var (target, err) = await MsBuildDebugTargetResolver.TryResolveAsync(csproj, _dotnetRunner).ConfigureAwait(false);
-        if (!string.IsNullOrEmpty(target))
-            return target;
+        var (t2, e2) = await MsBuildDebugTargetResolver
+            .TryResolveAsync(csproj, _dotnetRunner, LaunchProfilesStore.DefaultConfiguration)
+            .ConfigureAwait(false);
+        if (!string.IsNullOrEmpty(t2))
+            return new DebugLaunchResolution(t2, null, null, null, OpenLaunchBrowser: false, LaunchUrl: null);
 
-        if (!string.IsNullOrEmpty(err))
-            await ShowDebugInfoAsync("Стартовый проект", err).ConfigureAwait(false);
+        if (!string.IsNullOrEmpty(e2))
+            await ShowDebugInfoAsync("Стартовый проект", e2).ConfigureAwait(false);
         return null;
+    }
+
+    /// <summary>
+    /// Режим B <c>debug_launch</c> (MCP): <paramref name="profileName"/> или активный профиль; при явном <paramref name="mcpProgramArgs"/> — вместо аргументов из профиля.
+    /// </summary>
+    internal async Task<string> DebugLaunchByProfileOrResolvedTargetAsync(
+        string workspacePath,
+        string? targetPath,
+        string? profileName,
+        string? netcoredbgPath,
+        IReadOnlyList<string>? mcpProgramArgs,
+        CancellationToken cancellationToken = default)
+    {
+        if (!string.IsNullOrWhiteSpace(targetPath))
+        {
+            return await DapDebug.LaunchAsync(
+                workspacePath,
+                targetPath!,
+                netcoredbgPath,
+                mcpProgramArgs,
+                environment: null,
+                workingDirectoryOverride: null,
+                cancellationToken).ConfigureAwait(false);
+        }
+
+        var sln = DebugWorkspacePath.TryResolveWorkspaceToSolutionPath(workspacePath);
+        if (string.IsNullOrEmpty(sln))
+            return "# Error: no_solution_in_workspace: укажи каталог с .sln или путь к .sln, либо target_path к .dll.";
+
+        if (!LaunchProfilesStore.TryResolveProfileForLaunch(sln, profileName, out var prof, out var perr))
+            return "# Error: " + perr;
+
+        var solutionDir = Services.BreakpointsFileService.GetWorkspaceRoot(sln);
+        if (string.IsNullOrEmpty(solutionDir))
+            return "# Error: workspace_root_unresolved.";
+
+        var csprojFull = Path.GetFullPath(Path.Combine(solutionDir, prof.ProjectRelativeToSolution));
+        if (!File.Exists(csprojFull))
+            return "# Error: project_not_found: " + csprojFull;
+
+        var (target, err) = await MsBuildDebugTargetResolver
+            .TryResolveAsync(csprojFull, _dotnetRunner, prof.Configuration, cancellationToken)
+            .ConfigureAwait(false);
+        if (string.IsNullOrEmpty(target))
+            return "# Error: " + (err ?? "msbuild_unresolved");
+
+        var prg = mcpProgramArgs is { Count: > 0 } ? mcpProgramArgs : prof.ProgramArgs;
+        IReadOnlyDictionary<string, string>? env = prof.Environment is { Count: > 0 } ? prof.Environment : null;
+        var launchResult = await DapDebug.LaunchAsync(
+            workspacePath,
+            target,
+            netcoredbgPath,
+            prg,
+            env,
+            prof.WorkingDirectoryRelative,
+            cancellationToken).ConfigureAwait(false);
+        if (prof.OpenLaunchBrowser)
+            Services.KestrelLaunchBrowser.TryOpenAfterLaunch(prof.Environment, prof.LaunchUrl);
+        return launchResult;
     }
 }

@@ -52,17 +52,28 @@ public partial class MainWindowViewModel
             return;
         }
 
-        var target = await TryResolveStartupDebugTargetAsync().ConfigureAwait(false);
-        if (string.IsNullOrEmpty(target))
-            target = RequestPickDebugTarget != null ? await RequestPickDebugTarget().ConfigureAwait(false) : null;
-        if (string.IsNullOrEmpty(target))
-            return;
+        var res = await TryResolveDebugLaunchForF5Async().ConfigureAwait(false);
+        if (res is not { } r)
+        {
+            var target = RequestPickDebugTarget != null ? await RequestPickDebugTarget().ConfigureAwait(false) : null;
+            if (string.IsNullOrEmpty(target))
+                return;
+            r = new DebugLaunchResolution(target, null, null, null, OpenLaunchBrowser: false, LaunchUrl: null);
+        }
 
         try
         {
             IsInstrumentationDockVisible = true;
             CurrentMfdShellPage = MfdShellPage.DebugStack;
-            _ = await _dapDebug.LaunchAsync(ws, target, netcoredbgPath: null, programArgs: null).ConfigureAwait(false);
+            _ = await _dapDebug.LaunchAsync(
+                ws,
+                r.TargetDllPath,
+                netcoredbgPath: null,
+                r.ProgramArgs,
+                r.Environment,
+                r.WorkingDirectoryRelativeToSolution).ConfigureAwait(false);
+            if (r.OpenLaunchBrowser)
+                KestrelLaunchBrowser.TryOpenAfterLaunch(r.Environment, r.LaunchUrl);
         }
         catch (Exception ex)
         {

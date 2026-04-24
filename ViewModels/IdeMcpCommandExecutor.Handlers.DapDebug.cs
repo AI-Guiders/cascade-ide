@@ -14,8 +14,26 @@ internal sealed partial class IdeMcpCommandExecutor
         {
             var ws = McpCommandJsonArgs.String(args, "workspace_path");
             var target = McpCommandJsonArgs.String(args, "target_path");
-            if (string.IsNullOrWhiteSpace(ws) || string.IsNullOrWhiteSpace(target))
+            if (string.IsNullOrWhiteSpace(ws))
                 return await _vm.DebugLaunchInteractiveAsync().ConfigureAwait(false);
+            if (string.IsNullOrWhiteSpace(target))
+            {
+                try
+                {
+                    return await _vm.DebugLaunchByProfileOrResolvedTargetAsync(
+                        ws!,
+                        targetPath: null,
+                        McpCommandJsonArgs.String(args, "profile_name"),
+                        McpCommandJsonArgs.String(args, "netcoredbg_path"),
+                        McpCommandJsonArgs.StringList(args, "program_args"),
+                        ct).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    return "# Error: " + ex.Message;
+                }
+            }
+
             try
             {
                 return await _vm.DapDebug.LaunchAsync(
@@ -23,6 +41,8 @@ internal sealed partial class IdeMcpCommandExecutor
                     target!,
                     McpCommandJsonArgs.String(args, "netcoredbg_path"),
                     McpCommandJsonArgs.StringList(args, "program_args"),
+                    environment: null,
+                    workingDirectoryOverride: null,
                     ct).ConfigureAwait(false);
             }
             catch (Exception ex)

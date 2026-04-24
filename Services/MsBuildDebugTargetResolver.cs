@@ -11,6 +11,7 @@ public static class MsBuildDebugTargetResolver
     public static async Task<(string? TargetPath, string? Error)> TryResolveAsync(
         string csprojFullPath,
         IDotnetCommandRunner dotnet,
+        string configuration = "Debug",
         CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(csprojFullPath) || !File.Exists(csprojFullPath))
@@ -20,12 +21,13 @@ public static class MsBuildDebugTargetResolver
         if (string.IsNullOrEmpty(projectDir))
             return (null, "Не удалось определить каталог проекта.");
 
+        var config = string.IsNullOrWhiteSpace(configuration) ? "Debug" : configuration.Trim();
         var args = new[]
         {
             "msbuild",
             csprojFullPath,
             "-nologo",
-            "-p:Configuration=Debug",
+            "-p:Configuration=" + config,
             "-getProperty:OutputType",
             "-getProperty:TargetPath"
         };
