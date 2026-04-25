@@ -58,7 +58,7 @@
 ### 2.3. Instrument deck и ячейка deck (deck cell)
 
 - **Определение [0063]:** **именованная** композиция: упорядоченный набор **ячеек** (сетка, стек, полоса) под **`SemanticAnchorId`**.
-- **Ячейка deck (deck cell):** **одна** позиция в раскладке: стабильный **`cell_id`** (как `EnvironmentReadinessInstrumentDeck.OrderedCellIds`, `WorkspaceHealthInstrumentDeck.OrderedSegmentIds` для **канала** WH — аналог по **роли**).
+- **Ячейка deck (deck cell):** **одна** позиция в раскладке: стабильный **`cell_id`** (как `EnvironmentReadinessInstrumentDeck.OrderedCellIds`, `IdeHealthInstrumentDeck.OrderedSegmentIds` для **канала** IDE Health — аналог по **роли**).
 - **Критично:** ячейка deck **не** является `CockpitSlotIds` **в текущем** контракте [0047], пока не введён явный **mapping** «ячейка → host slot / вложенный маршрут».
 - **Назначение:** **несколько** индикаторов/инструментов **внутри** географии одного PFD-региона (при product decision) — через **другой** слой: либо **составной** `UserControl` (внутренняя раскладка = не deck в смысле host), либо будущий **deck host** / **PFD surface deck compositor** (см. §3).
 

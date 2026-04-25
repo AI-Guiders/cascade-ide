@@ -2,7 +2,7 @@
 
 **Статус:** живой чертёж (не ADR). **Назначение:** зафиксировать **контрактный смысл CDS** до разрастания кода и MCP, чтобы новые фичи расширяли **один** семантический слой, а не плодили параллельные «снимки внимания».
 
-**Связь:** [ADR 0036 — цепочка канал → CDS → композитор → поверхность](../adr/0036-cds-channel-compositor-surface-pipeline.md) (нормативная ось). [ADR 0021 §1.1 — CDS / `UiLayoutSnapshot`](../adr/0021-pfd-mfd-cockpit-attention-model.md#glossary-cds-contract), [0017](../adr/0017-multi-window-workspace-and-agent-surfaces.md) (мультиоконность, `presentation`), [workspace-health-implementation-map-v1](workspace-health-implementation-map-v1.md) (канал Workspace Health — ортогонален CDS).
+**Связь:** [ADR 0036 — цепочка канал → CDS → композитор → поверхность](../adr/0036-cds-channel-compositor-surface-pipeline.md) (нормативная ось). [ADR 0021 §1.1 — CDS / `UiLayoutSnapshot`](../adr/0021-pfd-mfd-cockpit-attention-model.md#glossary-cds-contract), [0017](../adr/0017-multi-window-workspace-and-agent-surfaces.md) (мультиоконность, `presentation`), [workspace-health-implementation-map-v1](workspace-health-implementation-map-v1.md) (канал IDE Health — ортогонален CDS).
 
 ---
 
@@ -19,7 +19,7 @@
 |--------|--------|
 | **CDS (контракт)** | Снимок **семантики** отображения: зоны, топология, окна, активный вторичный контур. Не реализация ARINC 661 и не один God-class в репозитории. |
 | **Cockpit surface state** (рабочее имя DTO) | Условное имя будущей структуры/JSON, агрегирующей поля ниже; версионируется (`schema_version`). |
-| **Канал** | Поток данных внутри слота (Workspace Health, EICAS, readiness) — **не** входит в CDS целиком; в CDS только **какие слоты/страницы активны**, без полного текста сегментов. |
+| **Канал** | Поток данных внутри слота (IDE Health, EICAS, readiness) — **не** входит в CDS целиком; в CDS только **какие слоты/страницы активны**, без полного текста сегментов. |
 | **Instrument (кабинный)** | Именованный выбор **представления в слоте внимания** (результат композитора); не `Control` Avalonia. Термин сознательно в духе PFD/MFD; в бытовом английском *instrument* многозначно — в глоссарии закреплено значение «логическая единица кабины», см. [ADR 0047](../adr/0047-cockpit-instrument-descriptor-and-slot-composition.md). Дескриптор в коде — `CockpitInstrumentDescriptor` (`Cockpit/Composition/CockpitInstrumentDescriptor.cs`). Пример слота PFD: дерево решения vs Semantic Map — два разных `instrument_id`. |
 
 ---
@@ -61,7 +61,7 @@
     "mfd_column_visible_in_main": true
   },
   "mfd_shell": {
-    "current_page": "WorkspaceHealth | Chat | Terminal | …"
+    "current_page": "IdeHealth | Chat | Terminal | …"
   },
   "zones": {
     "pfd_visible": true,

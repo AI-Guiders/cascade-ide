@@ -22,7 +22,7 @@
 
 - **ViewModel:** вычисляемое **`UiModeFamily`** из нормализованного `UiMode` (резолвер + каталог TOML).
 - **Тонкие флаги «что показать»** (Quick Actions, гипотезы, trace Power и т.д.) — объект **`Capabilities`** на VM (после мержа TOML и дефолтов по семье).
-- **XAML:** вместо старых булевых `Is*Mode` — привязки к **`UiModeFamily`** через конвертеры **`UiModeFamilyEq`** / **`UiModeFamilyNe`** и параметр (`Power`, `Focus`, …). Пример: компактная полоса Workspace Health под редактором — когда семья **не** Power (`WorkspaceHealthStripView`).
+- **XAML:** вместо старых булевых `Is*Mode` — привязки к **`UiModeFamily`** через конвертеры **`UiModeFamilyEq`** / **`UiModeFamilyNe`** и параметр (`Power`, `Focus`, …). Пример: компактная полоса IDE Health под редактором — когда семья **не** Power (`IdeHealthStripView`).
 
 ## Связанные UX-документы
 

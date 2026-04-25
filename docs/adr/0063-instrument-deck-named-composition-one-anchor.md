@@ -3,9 +3,9 @@
 **Статус:** Accepted  
 **Дата:** 2026-04-17  
 **Принято:** 2026-04-19  
-**Обновлено:** 2026-04-18 — согласовано: **instrument deck** остаётся отдельной осью (композиция инструментов / порядок во вкладках и т.д.), ортогонально оси **`ContentRepresentation`** (Strip/Page). Ранее: то же по смыслу, что неформальное имя **CompositionPage** (см. [§ синоним](#adr0063-composition-page-synonym)). Ранее: [§ типы индикаторов](#adr0063-indicator-kinds) — направление **Lamp / Bar / Sign** для компактных deck-страниц. Ранее: [§ примитив vs инструмент](#adr0063-primitive-vs-instrument). Ранее: расширенная таксономия примитивов + [§ Presence и Dark Cockpit](#adr0063-presence-dark-cockpit). Ранее: статический Presence по геометрии — **Lamp**/Sign, не отдельный примитив. Ранее: [§ ContentRepresentation и код](#adr0063-content-representation-code) — вопрос про enum закрыт формулировкой ADR. Ранее: [§ deck в пресетах](#adr0063-deck-presets-evolution) — эволюционно, без обязательной сущности в TOML на старте. Ранее: [§ Page + deck](#adr0063-page-plus-deck-pfd) — один экран региона, несколько инструментов (образ PFD). Ранее: [§ CDS не presentation](#adr0063-cds-not-presentation). Ранее: ключи топологии дисплеев / `display.screens` — нормативно [0017 §](0017-multi-window-workspace-and-agent-surfaces.md#adr0017-display-screens-topology-naming).
+**Обновлено:** 2026-04-24 — [§ deck страницы MFD](#adr0063-mfd-page-deck): композиция **внутри** одной страницы оболочки Mfd, ортогонально навигации между `MfdShellPage`. Ранее: 2026-04-18 — согласовано: **instrument deck** остаётся отдельной осью (композиция инструментов / порядок во вкладках и т.д.), ортогонально оси **`ContentRepresentation`** (Strip/Page). Ранее: то же по смыслу, что неформальное имя **CompositionPage** (см. [§ синоним](#adr0063-composition-page-synonym)). Ранее: [§ типы индикаторов](#adr0063-indicator-kinds) — направление **Lamp / Bar / Sign** для компактных deck-страниц. Ранее: [§ примитив vs инструмент](#adr0063-primitive-vs-instrument). Ранее: расширенная таксономия примитивов + [§ Presence и Dark Cockpit](#adr0063-presence-dark-cockpit). Ранее: статический Presence по геометрии — **Lamp**/Sign, не отдельный примитив. Ранее: [§ ContentRepresentation и код](#adr0063-content-representation-code) — вопрос про enum закрыт формулировкой ADR. Ранее: [§ deck в пресетах](#adr0063-deck-presets-evolution) — эволюционно, без обязательной сущности в TOML на старте. Ранее: [§ Page + deck](#adr0063-page-plus-deck-pfd) — один экран региона, несколько инструментов (образ PFD). Ранее: [§ CDS не presentation](#adr0063-cds-not-presentation). Ранее: ключи топологии дисплеев / `display.screens` — нормативно [0017 §](0017-multi-window-workspace-and-agent-surfaces.md#adr0017-display-screens-topology-naming).
 
-**Связь:** [0021](0021-pfd-mfd-cockpit-attention-model.md) (якоря PFD/MFD/лобовое; композиция **внутри** региона; не переносить инструменты между якорями без смены пресета), [0050](0050-declarative-instrument-zone-placement-toml.md) (`[instrument_routing]` — **какой** инструмент в **семантическом** слоте `pfd_primary` / `mfd_primary`), [0046](0046-presentation-layout-authority-and-cockpit-invariants.md) / [0047](0047-cockpit-instrument-descriptor-and-slot-composition.md) (политика layout, `Instrument`, слоты), [0010](0010-ui-modes-toml-configuration.md) (UiModes / пресеты). Чертёж WH: [`workspace-health-implementation-map-v1.md`](../design/workspace-health-implementation-map-v1.md). **Различие терминов:** [0021 § «Архитектура зон»](0021-pfd-mfd-cockpit-attention-model.md#anchor-pfd-mfd-content-vs-telemetry-page).
+**Связь:** [0021](0021-pfd-mfd-cockpit-attention-model.md) (якоря PFD/MFD/лобовое; композиция **внутри** региона; не переносить инструменты между якорями без смены пресета), [0050](0050-declarative-instrument-zone-placement-toml.md) (`[instrument_routing]` — **какой** инструмент в **семантическом** слоте `pfd_primary` / `mfd_primary`), [0046](0046-presentation-layout-authority-and-cockpit-invariants.md) / [0047](0047-cockpit-instrument-descriptor-and-slot-composition.md) (политика layout, `Instrument`, слоты), [0010](0010-ui-modes-toml-configuration.md) (UiModes / пресеты). Чертёж IDE Health: [`workspace-health-implementation-map-v1.md`](../design/workspace-health-implementation-map-v1.md). **Различие терминов:** [0021 § «Архитектура зон»](0021-pfd-mfd-cockpit-attention-model.md#anchor-pfd-mfd-content-vs-telemetry-page).
 
 **См. также:** [0064](0064-deck-primitives-visual-language-render-layer-and-palette.md) — единое графическое воплощение **видов индикаторов**, библиотека отрисовки, семантическая палитра (vs токены метрик сцены).
 
@@ -18,45 +18,45 @@
 1. **Форма представления** — *как* показать контент в разметке: полоса (**Strip**), блок «страницы» региона (**Page**), компактный индикатор и т.д.  
 2. **Композиционная единица** — *что* и в *каком порядке*: набор инструментов / сегментов канала / индикаторов (вкладки, стек, split, порядок в композиторе).
 
-В текущем продукте **`DedicatedPage`** / **`bottom_strip`** в пресете канала Workspace Health (`workspace_health_surface` → `WorkspaceHealthUiSurface.DedicatedPage` / `BottomStrip`) относятся к **оси 1** (форма представления того же логического канала WH), а не к «именованной колоде инструментов целикого якоря». Имя **`DedicatedPage`** канал-специфично; абстрактно это режим **`ContentRepresentation.Page`** для WH ([§ «Две оси»](#adr0063-two-axes) ниже).
+В текущем продукте **`DedicatedPage`** / **`bottom_strip`** в пресете канала IDE Health (`workspace_health_surface` → `IdeHealthUiSurface.DedicatedPage` / `BottomStrip`) относятся к **оси 1** (форма представления того же логического канала IDE Health), а не к «именованной колоде инструментов целикого якоря». Имя **`DedicatedPage`** канал-специфично; абстрактно это режим **`ContentRepresentation.Page`** для IDE Health ([§ «Две оси»](#adr0063-two-axes) ниже).
 
 Отдельно: в разговоре о кокпите часто хочется сказать **«страница»** в смысле оси **2** — *упорядоченный набор инструментов и раскладка в одном месте*. Это пересекается с словом **Page** на оси **1** → нужны **разные имена** ([0021](0021-pfd-mfd-cockpit-attention-model.md#anchor-pfd-mfd-content-vs-telemetry-page)).
 
 Нужны **явные термины**, чтобы документация, TOML и обсуждения не смешивали:
 - **форму представления** канала (Strip / Page / …),
 - **пресет** UiMode (вся картина окон и якорей),
-- **именованную композицию инструментов** в одном якоре — **instrument deck** (ось 2 для инструментов; для WH порядок сегментов — композитор канала, ортогонально Strip/Page).
+- **именованную композицию инструментов** в одном якоре — **instrument deck** (ось 2 для инструментов; для IDE Health порядок сегментов — композитор канала, ортогонально Strip/Page).
 
 <a id="adr0063-two-axes"></a>
 <a id="две-ортогональные-оси-representation-vs-composition"></a>
 
 ## Две ортогональные оси: representation vs composition
 
-Смысл **deck** здесь: не дублировать имя **Page** на оси A (форма контейнера в регионе), а назвать ось B — **«какие сущности и в каком порядке/раскладке»** в этом контейнере: инструменты, сегменты канала, ячейки сетки. У канала WH на оси B — порядок сегментов в композиторе, **независимо** от Strip/Page.
+Смысл **deck** здесь: не дублировать имя **Page** на оси A (форма контейнера в регионе), а назвать ось B — **«какие сущности и в каком порядке/раскладке»** в этом контейнере: инструменты, сегменты канала, ячейки сетки. У канала IDE Health на оси B — порядок сегментов в композиторе, **независимо** от Strip/Page.
 
 | | **Ось A — форма представления** | **Ось B — композиция** |
 |---|-------------------------------|-------------------------|
 | **Вопрос** | *Каким шаблоном/контейнером* показать контент в регионе (полоса vs блок «страницы» региона …) | *Что* на этом контейнере и *в какой раскладке*: несколько инструментов на одном экране, сегменты канала, вкладки/стек, сетка … |
-| **Каноническое имя (этот ADR)** | Перечисление **`ContentRepresentation`**: минимум **`Strip`**, **`Page`**. Дополнительные значения (например **`Indicator`**) — по мере продуктовой необходимости, не фиксируем полный список в Proposed. | Для инструментов в якоре — **`instrument deck`** (ниже). Для канала WH — порядок сегментов в `WorkspaceHealthSurfaceCompositor`, **независимо** от Strip/Page ([чертёж](../design/workspace-health-implementation-map-v1.md)). |
-| **Workspace Health сегодня** | TOML `workspace_health_surface`: `bottom_strip` ↔ **`Strip`**, `dedicated_page` ↔ **`Page`**. В коде — `WorkspaceHealthUiSurface.BottomStrip` / `DedicatedPage` (**не** синоним «любой страницы MFD**). | `WorkspaceHealthSurfaceCompositor`: Build → Tests → Debug → Git. |
+| **Каноническое имя (этот ADR)** | Перечисление **`ContentRepresentation`**: минимум **`Strip`**, **`Page`**. Дополнительные значения (например **`Indicator`**) — по мере продуктовой необходимости, не фиксируем полный список в Proposed. | Для инструментов в якоре — **`instrument deck`** (ниже). Для канала IDE Health — порядок сегментов в `IdeHealthSurfaceCompositor`, **независимо** от Strip/Page ([чертёж](../design/workspace-health-implementation-map-v1.md)). |
+| **IDE Health сегодня** | TOML `workspace_health_surface`: `bottom_strip` ↔ **`Strip`**, `dedicated_page` ↔ **`Page`**. В коде — `IdeHealthUiSurface.BottomStrip` / `DedicatedPage` (**не** синоним «любой страницы MFD**). | `IdeHealthSurfaceCompositor`: Build → Tests → Debug → Git. |
 
-**Инвариант:** смена **`ContentRepresentation`** для WH **не** меняет снимок `WorkspaceHealthInputSnapshot` и логику композитора сегментов — только выбор **какой View** (полоса vs вторичная страница) привязать к тем же `WorkspaceHealthSegments` ([0021](0021-pfd-mfd-cockpit-attention-model.md#glossary-presentation-vs-channel), [чертёж](../design/workspace-health-implementation-map-v1.md)).
+**Инвариант:** смена **`ContentRepresentation`** для IDE Health **не** меняет снимок `IdeHealthInputSnapshot` и логику композитора сегментов — только выбор **какой View** (полоса vs вторичная страница) привязать к тем же `WorkspaceHealthSegments` ([0021](0021-pfd-mfd-cockpit-attention-model.md#glossary-presentation-vs-channel), [чертёж](../design/workspace-health-implementation-map-v1.md)).
 
 <a id="adr0063-page-plus-deck-pfd"></a>
 
 **`ContentRepresentation.Page` и instrument deck — вместе:** типичный образ — **один экран региона** (например зона **PFD**), на котором **одновременно** видны **несколько инструментов** в раскладке — как на реальном PFD: альтиметр, указатель скорости, крен и т.д. на **одном** приборном поле. Здесь **`Page`** (ось A) задаёт **форму**: контент канала/якоря показан **блоком страницы региона**, а не узкой полосой (**`Strip`**). **`Instrument deck`** (ось B) задаёт **именно эту** композицию: **какие** инструменты и **как** размещены (сетка, доли колонок, приоритет ячеек). Оси **не смешиваются**, но **складываются**: «страница региона» без колоды была бы пустым контейнером; колода без выбора формы не определяет, полоса это или полный блок.
 
-**Узкий случай WH:** для **одного канала** Workspace Health **`DedicatedPage`** — это **`ContentRepresentation.Page`** только для **данных WH** (те же сегменты, другой View), а не обязательно «весь PFD как авиа-приборная доска»; deck **всего** якоря PFD в продукте может включать **и** WH, **и** другие инструменты — см. [0021](0021-pfd-mfd-cockpit-attention-model.md#anchor-pfd-mfd-content-vs-telemetry-page).
+**Узкий случай IDE Health:** для **одного канала** IDE Health **`DedicatedPage`** — это **`ContentRepresentation.Page`** только для **данных IDE Health** (те же сегменты, другой View), а не обязательно «весь PFD как авиа-приборная доска»; deck **всего** якоря PFD в продукте может включать **и** IDE Health, **и** другие инструменты — см. [0021](0021-pfd-mfd-cockpit-attention-model.md#anchor-pfd-mfd-content-vs-telemetry-page).
 
 **Вкладки / стек** — **частный случай** deck, когда инструменты **не** показаны одновременно, а переключаются; для образа «один экран — много приборов» важнее **совместная** сетка на **`Page`**.
 
 <a id="adr0063-content-representation-code"></a>
 
-**ContentRepresentation и код (направление; вопрос закрыт):** канон **имени** оси **формы представления** контента в регионе — **`ContentRepresentation`** (`Strip`, `Page`, …). У канала Workspace Health это сегодня выражено **`WorkspaceHealthUiSurface`** и TOML `workspace_health_surface` — **не отдельная «ось канала»**, а выбор **шаблона размещения** (полоса vs блок страницы) для **данных WH**; соответствие **`Strip`/`Page`** — в таблице выше.
+**ContentRepresentation и код (направление; вопрос закрыт):** канон **имени** оси **формы представления** контента в регионе — **`ContentRepresentation`** (`Strip`, `Page`, …). У канала IDE Health это сегодня выражено **`IdeHealthUiSurface`** и TOML `workspace_health_surface` — **не отдельная «ось канала»**, а выбор **шаблона размещения** (полоса vs блок страницы) для **данных IDE Health**; соответствие **`Strip`/`Page`** — в таблице выше.
 
 Когда для **другого потока данных** (другой канал в смысле [0021](0021-pfd-mfd-cockpit-attention-model.md)) понадобится **тот же** выбор «полоса или страница региона», переиспользуется **та же** ось **`ContentRepresentation`**. Каналы задают **что** показать; **форма** (Strip/Page) — **общая** ось представления, её не смешивают с «осями канала».
 
-Рефакторинг в коде: ввести enum `ContentRepresentation` и маппить на него `WorkspaceHealthUiSurface` (или со временем переименовать тип) — **шаг реализации**, не открытый архитектурный выбор после этого ADR.
+Рефакторинг в коде: ввести enum `ContentRepresentation` и маппить на него `IdeHealthUiSurface` (или со временем переименовать тип) — **шаг реализации**, не открытый архитектурный выбор после этого ADR.
 
 <a id="adr0063-deck-presets-evolution"></a>
 
@@ -78,7 +78,7 @@
 
 <a id="adr0063-p3"></a>
 
-**3. Оси A и B не подменяют друг друга:** **`Strip` vs `Page`** — про **контейнер**; **deck** — про **наполнение и раскладку**. Для канала WH **`DedicatedPage` / `bottom_strip`** — это только выбор формы **для WH** ([выше](#adr0063-two-axes)); это **не** отменяет того, что для якоря целиком **`Page` + instrument deck** — нормальный способ описать **несколько инструментов на одном экране** ([§](#adr0063-page-plus-deck-pfd)).
+**3. Оси A и B не подменяют друг друга:** **`Strip` vs `Page`** — про **контейнер**; **deck** — про **наполнение и раскладку**. Для канала IDE Health **`DedicatedPage` / `bottom_strip`** — это только выбор формы **для IDE Health** ([выше](#adr0063-two-axes)); это **не** отменяет того, что для якоря целиком **`Page` + instrument deck** — нормальный способ описать **несколько инструментов на одном экране** ([§](#adr0063-page-plus-deck-pfd)).
 
 <a id="adr0063-p4"></a>
 
@@ -86,7 +86,19 @@
 
 <a id="adr0063-p5"></a>
 
-**5. Именование в документации:** в русских текстах избегать голого «страница» без уточнения. Для **оси A** — **«форма Page» / «режим Strip»** или **`ContentRepresentation.Page`**, для **оси B** — **deck / колода / композиция слота**. Для WH явно: **«Workspace Health в режиме Page (DedicatedPage)»** vs **«полоса WH (Strip)»** — не смешивать с deck целого якоря.
+**5. Именование в документации:** в русских текстах избегать голого «страница» без уточнения. Для **оси A** — **«форма Page» / «режим Strip»** или **`ContentRepresentation.Page`**, для **оси B** — **deck / колода / композиция слота**. Для IDE Health явно: **«IDE Health в режиме Page (DedicatedPage)»** vs **«полоса IDE Health (Strip)»** — не смешивать с deck целого якоря.
+
+<a id="adr0063-mfd-page-deck"></a>
+
+### Deck страницы MFD (вложенный уровень)
+
+**Оболочка Mfd** ([0017](0017-multi-window-workspace-and-agent-surfaces.md), `MfdShellView` / `MfdShellPageStack`) в продукте v1 переключает **одну активную страницу** из перечисления `MfdShellPage` (чат, терминал, сборка, …) — это **навигация верхнего уровня** внутри якоря **Mfd**, а не сам по себе **instrument deck** всего региона.
+
+**Deck страницы MFD** — отдельная ось: **именованная композиция инструментов внутри выбранной страницы** (сетка сегментов, вкладки внутри страницы, порядок ячеек — ось B по смыслу [§ две оси](#adr0063-two-axes)), **ортогонально** смене `MfdShellPage`. Якорь внимания по-прежнему **регион Mfd** в смысле [0021](0021-pfd-mfd-cockpit-attention-model.md); **вложенность** — «страница оболочки → при необходимости свой deck».
+
+**Уже в коде (частные случаи):** на странице Workspace Health — композитор сегментов IDE Health и `IdeHealthInstrumentDeck`; на странице Environment Readiness — `EnvironmentReadinessInstrumentDeck`. **Направление реализации:** явно моделировать «у страницы MFD опционально свой `InstrumentDeckDescriptor`» и не смешивать в доках **смену страницы** с **колодой внутри страницы**. Таксономия **host / slot / region / cell** при детализации ячеек — [0088](0088-host-slot-region-deck-cell-taxonomy.md).
+
+**Пресеты каталога оболочки Mfd** (какие `MfdShellPage` доступны, порядок в палитре, страница по умолчанию) — **технически допустимы**, но по **тем же причинам отсрочки**, что и декларативный instrument deck в пользовательском TOML ([§ deck в пресетах](#adr0063-deck-presets-evolution)): merge, валидация, версия схемы, UI — пока не стабилизирована **страница → deck** в коде и не ясны сценарии. Публичный контракт на «сборку страниц MFD из пресета» — **отдельный шаг**, не обязательство этого ADR.
 
 ## Не-цели (на момент Proposed)
 
@@ -102,9 +114,9 @@
 
 | Вариант | Плюсы | Минусы |
 |--------|--------|--------|
-| Оставить только «страница» | Привычно | Коллизия с WH Page и с веб-терминологией |
+| Оставить только «страница» | Привычно | Коллизия с IDE Health Page и с веб-терминологией |
 | **Deck** / колода | Коротко, авиа-кокпит метафоры не противоречит; отдельно от Page | Новый жаргон — нужен глоссарий |
-| **CompositionPage** (составная «страница» слота) | Понятно «это про композицию», не про Strip/Page | Слово **Page** тянет путаницу с **`ContentRepresentation.Page`** и с WH `DedicatedPage` — в ADR **не** канон |
+| **CompositionPage** (составная «страница» слота) | Понятно «это про композицию», не про Strip/Page | Слово **Page** тянет путаницу с **`ContentRepresentation.Page`** и с IDE Health `DedicatedPage` — в ADR **не** канон |
 | Scene / сцена | Понятно «состав кадра» | Пересечение с «сценой» 3D/игр |
 | Layout bundle | Технически ясно | Длинно, «bundle» уже занят UiModes |
 
@@ -112,7 +124,7 @@
 
 <a id="adr0063-composition-page-synonym"></a>
 
-**CompositionPage и deck:** если **CompositionPage** означает **именованную упорядоченную композицию содержимого слота** (инструменты, порядок, вкладки/стек — ось B), это **то же самое**, что **instrument deck**; отличие только в имени. Канон в нормативных текстах — **deck**, чтобы не смешивать с **Page** на оси формы (**`ContentRepresentation`**) и с **`DedicatedPage`** у канала WH.
+**CompositionPage и deck:** если **CompositionPage** означает **именованную упорядоченную композицию содержимого слота** (инструменты, порядок, вкладки/стек — ось B), это **то же самое**, что **instrument deck**; отличие только в имени. Канон в нормативных текстах — **deck**, чтобы не смешивать с **Page** на оси формы (**`ContentRepresentation`**) и с **`DedicatedPage`** у канала IDE Health.
 
 <a id="adr0063-indicator-kinds"></a>
 
@@ -179,10 +191,11 @@
 
 ## Последствия
 
-- Вопрос «вводить ли `ContentRepresentation` в код» считается **снятым по смыслу ADR**: канон имени оси формы — **`ContentRepresentation`**; `WorkspaceHealthUiSurface` — текущая привязка WH; обобщение на другие каналы данных — **та же ось формы**, не «вторая ось канала» — см. [§](#adr0063-content-representation-code).
+- Вопрос «вводить ли `ContentRepresentation` в код» считается **снятым по смыслу ADR**: канон имени оси формы — **`ContentRepresentation`**; `IdeHealthUiSurface` — текущая привязка IDE Health; обобщение на другие каналы данных — **та же ось формы**, не «вторая ось канала» — см. [§](#adr0063-content-representation-code).
 - Вопрос «deck в пресетах vs только внутри композитора» закрыт **эволюционно**: сначала внутренний чертёж; декларативные именованные колоды — позже и отдельным контрактом; локальный эксперимент допустим — см. [§](#adr0063-deck-presets-evolution).
-- Связка **`ContentRepresentation.Page` + instrument deck** зафиксирована как образ **одного экрана с несколькими приборами** (PFD); узкий случай WH — см. [§](#adr0063-page-plus-deck-pfd). Сочетание **intent** и deck — см. [§](#adr0063-intent-and-deck).
-- Документация и ADR, где фигурирует «страница» в смысле композиции инструментов, могут со временем **сослаться на этот ADR** и уточнить, речь о **deck** или о **WH Page**.
+- Связка **`ContentRepresentation.Page` + instrument deck** зафиксирована как образ **одного экрана с несколькими приборами** (PFD); узкий случай IDE Health — см. [§](#adr0063-page-plus-deck-pfd). Сочетание **intent** и deck — см. [§](#adr0063-intent-and-deck).
+- **MFD:** навигация между страницами оболочки (`MfdShellPage`) и **deck внутри страницы** разведены нормативно — см. [§ deck страницы MFD](#adr0063-mfd-page-deck); декларативные пресеты **каталога** страниц Mfd отложены **в той же логике**, что [§ deck в пресетах](#adr0063-deck-presets-evolution).
+- Документация и ADR, где фигурирует «страница» в смысле композиции инструментов, могут со временем **сослаться на этот ADR** и уточнить, речь о **deck** или о **IDE Health Page**.
 - Реализация композиции в слоте (сетка на **`Page`**, вкладки, порядок) получает **стабильное имя** для обсуждения и тестов без смешения с маршрутизацией [0050](0050-declarative-instrument-zone-placement-toml.md).
 - Появляется **общий словарь** для компактных deck-экранов: какие **виды** индикаторов допустимы в ячейке, не смешивая с **формой** канала (Strip/Page) и с **deck** как списком инструментов.
 - Зафиксировано правило: **примитив = атомарный glance**, **инструмент = сценарий с состоянием** — см. [§](#adr0063-primitive-vs-instrument).

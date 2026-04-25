@@ -30,7 +30,7 @@
 
 - Назначение: **визуально сверить** границы P/F/M с моделью презентации**, не меняя** привязанный к слотам контент.
 - Реализация: полупрозрачные **Border**-оверлеи и флаги видимости из VM (`ShowSkiaZoneGeometryOverlay`, `IsSkiaZoneGeometryOverlay*`).
-- Не путать с **волной 3**: контуры — только рамки; mount — данные инструмента (Workspace Health и т.д.).
+- Не путать с **волной 3**: контуры — только рамки; mount — данные инструмента (IDE Health и т.д.).
 
 ---
 
@@ -88,7 +88,7 @@
 
 ### Следующий шаг (волна 3)
 
-1. Перевести content-binding с фиксированных VM-полей на декларативный контракт payload (через `instrument_id` и typed data-source), чтобы mount не знал про конкретные поля `WorkspaceHealth*`.
+1. Перевести content-binding с фиксированных VM-полей на декларативный контракт payload (через `instrument_id` и typed data-source), чтобы mount не знал про конкретные поля `IdeHealth*`.
 2. Перенести resolver из VM в отдельный surface/style service рядом с `CockpitInstrumentDescriptor`, а не только в UI binding.
 
 ---

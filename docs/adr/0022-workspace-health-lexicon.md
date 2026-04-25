@@ -1,8 +1,8 @@
-# ADR 0022: Лексикон и канон имён — Workspace Health (эволюция названий)
+# ADR 0022: Лексикон и канон имён — IDE Health (эволюция названий; файл ADR сохранён как 0022)
 
 **Статус:** Accepted  
 **Дата:** 2026-04-11  
-**Связь:** [0021](0021-pfd-mfd-cockpit-attention-model.md) (модель внимания, канал vs слот презентации), [0010](0010-ui-modes-toml-configuration.md) (ключи TOML и capabilities), [0012](0012-floating-workspace-chrome.md) (размещение полосы и нижней зоны), чертёж [`workspace-health-compositor-implementation-v1.md`](../design/workspace-health-compositor-implementation-v1.md) (код и поток данных).
+**Связь:** [0021](0021-pfd-mfd-cockpit-attention-model.md) (модель внимания, канал vs слот презентации), [0010](0010-ui-modes-toml-configuration.md) (ключи TOML и capabilities), [0012](0012-floating-workspace-chrome.md) (размещение полосы и нижней зоны), [0089](0089-ide-omnibus-naming-and-ide-health-channel-rename.md) (**переименование** продукта и типов: *Workspace Health* → **IDE Health**, `WorkspaceHealth*` → `IdeHealth*`), чертёж [`workspace-health-implementation-map-v1.md`](../design/workspace-health-implementation-map-v1.md) (код и поток данных).
 
 ---
 
@@ -10,7 +10,7 @@
 
 Имена канала **build / tests / debug / git** и связанного UI жили в черновиках, коде и UX-доках под разными словами («телеметрия работы», `WorkspaceTelemetry*`, `telemetry_*` в TOML). Читателю неочевидно, **один ли это контур** и как он соотносится с другими словами «telemetry» в продукте. Этот документ — **одна точка входа**: канон сейчас, краткая эволюция и что **намеренно не смешиваем**.
 
-Подробная семантика зон PFD/MFD/EICAS — в **0021**; детальная таблица ключей режимов — в **0010**.
+Подробная семантика зон PFD/MFD/EICAS — в **0021**; детальная таблица ключей режимов — в **0010**. Продуктовое имя канала после **0089** — **IDE Health**; прежнее имя *Workspace Health* используется только в историческом контексте и в ссылках на этот ADR по номеру.
 
 ---
 
@@ -18,7 +18,7 @@
 
 1. Слово **telemetry** в английском UI и в инженерной речи перегружено: продуктовая аналитика, «телеметрия агента», приборные показания в метафоре кокпита и т.д.
 2. Канал **состояния задачи в workspace** (сборка, тесты, сессия отладки, git) нужен был с **устойчивым именем** в коде, конфиге и ADR без коллизий.
-3. Переименование **без обратной совместимости** для ключей TOML и типов уже проведено в репозитории; этот ADR фиксирует **решение и рамки**, а не пошаговую миграцию.
+3. Переименование **без обратной совместимости** для ключей TOML и типов уже проведено в репозитории; этот ADR фиксирует **решение и рамки**, а не пошаговую миграцию. Дополнительно **0089** зафиксировал смену **продуктового** имени на **IDE Health** и префикс типов **`IdeHealth*`**, сохранив стабильные ключи `workspace_health_*` в TOML.
 
 ---
 
@@ -26,20 +26,20 @@
 
 | Слой | Канон | Русские формулировки в UI/доках | Где зафиксировано |
 |------|--------|----------------------------------|-------------------|
-| Продукт / ADR | **Workspace Health** | Рядом уместно **состояние воркспейса** (то же по смыслу, мягче по звучанию) | Этот ADR, **0021** §1.1–1.2 |
-| Код | Префикс типов **`WorkspaceHealth*`** (`WorkspaceHealthCompositor`, `WorkspaceHealthStripView`, …) | — | Репозиторий, чертёж compositor |
-| Конфиг режимов | Ключи **`workspace_health_*`** (`workspace_health_strip`, `workspace_health_surface`, `workspace_health_on_terminal_tab`, `workspace_health_main_column_span`) | — | **0010**, `UiModes/*.toml` |
+| Продукт / ADR | **IDE Health** (ранее *Workspace Health*) | Рядом уместно **состояние IDE** / «сводка сборки и среды» (избегать путаницы с каталогом *workspace* на диске) | **0089**, этот ADR, **0021** §1.1–1.2 |
+| Код | Префикс типов **`IdeHealth*`** (`IdeHealthSurfaceCompositor`, `IdeHealthStripView`, …); часть имён VM/привязок может ещё содержать `WorkspaceHealth*` до зачистки | — | Репозиторий, чертёж implementation map |
+| Конфиг режимов | Ключи **`workspace_health_*`** (`workspace_health_strip`, `workspace_health_surface`, `workspace_health_on_terminal_tab`, `workspace_health_main_column_span`) — **стабильный wire-формат** | — | **0010**, `UiModes/*.toml` |
 
-**Семантика:** один **канал смысла** (что происходит с задачей: build/tests/debug/git), несколько **слоёв представления** (полоса под редактором, страница MFD, дубль на вкладке терминала — по пресету). Композитор смысла — `WorkspaceHealthCompositor`; зона экрана и хром — по **0021** и пресетам.
+**Семантика:** один **канал смысла** (что происходит с задачей: build/tests/debug/git), несколько **слоёв представления** (полоса под редактором, страница MFD, дубль на вкладке терминала — по пресету). Композитор смысла — `IdeHealthSurfaceCompositor`; зона экрана и хром — по **0021** и пресетам.
 
 ---
 
-## Не путать с Workspace Health
+## Не путать с IDE Health
 
 | Имя / ключ | Смысл | Почему не переименовывали в тот же заход |
 |------------|--------|------------------------------------------|
 | **`autonomous_agent_telemetry`** (TOML), **`AutonomousAgentTelemetry`** (capabilities) | Кокпит Power: явный доступ к **выводу** (терминал), подсказки при скрытом терминале | Другой продуктовый контур; слово *telemetry* здесь про «приборку/вывод сессии», не про канал build/tests/debug/git. См. **0010** и UX-таблицы. |
-| Строки вроду **«Telemetry: on»** в UI | Привязка к терминалу в Power | Локализация и переименование свойств VM — отдельная задача. |
+| Строки вроде **«Telemetry: on»** в UI | Привязка к терминалу в Power | Локализация и переименование свойств VM — отдельная задача. |
 | Стабильные **id якорей** в markdown (напр. `#anchor-pfd-mfd-content-vs-telemetry-page`) | Постоянные ссылки из других доков | Менять ломает внешние ссылки; смысл якоря описан в **0021**. |
 
 ---
@@ -48,10 +48,11 @@
 
 | Было (устарело) | Стало (канон) |
 |-----------------|---------------|
-| Черновики: «телеметрия работы», «операционная телеметрия» | **Workspace Health** / состояние воркспейса |
-| `WorkspaceTelemetry*` | `WorkspaceHealth*` |
+| Черновики: «телеметрия работы», «операционная телеметрия» | **IDE Health** / состояние IDE |
+| `WorkspaceTelemetry*` | `IdeHealth*` (типы); ключи TOML `workspace_health_*` |
 | Ключи `telemetry_*` в TOML режимов | `workspace_health_*` |
-| Чертёж `workspace-telemetry-compositor-implementation-v1.md` | [`workspace-health-compositor-implementation-v1.md`](../design/workspace-health-compositor-implementation-v1.md) |
+| Чертёж `workspace-telemetry-compositor-implementation-v1.md` | [`workspace-health-implementation-map-v1.md`](../design/workspace-health-implementation-map-v1.md) |
+| Продуктовое имя *Workspace Health* | **IDE Health** ([0089](0089-ide-omnibus-naming-and-ide-health-channel-rename.md)) |
 
 История формулировок в шапках **0021** и в UX-доках может ссылаться на старые имена в **прошедшем времени** — это норма.
 
@@ -59,8 +60,8 @@
 
 ## Последствия
 
-- Новые фичи и ключи для этого канала — только имена **`workspace_health_*`** / **`WorkspaceHealth*`**, если не заведено отдельное ADR с иной мотивацией.
-- Обзорные UX-доки: [`cascade-ide-ui-layout-v1.md`](../ux/cascade-ide-ui-layout-v1.md), [`concept-to-implementation-map-v1.md`](../ux/concept-to-implementation-map-v1.md), [`ui-modes-overview-v1.md`](../ux/ui-modes-overview-v1.md) — выровнены по термину **Workspace Health**; при расхождении **приоритет у этого ADR и 0021**.
+- Новые фичи для этого канала — имена типов **`IdeHealth*`**, ключи TOML по-прежнему **`workspace_health_*`**, если не заведено отдельное ADR с иной мотивацией.
+- Обзорные UX-доки: [`cascade-ide-ui-layout-v1.md`](../ux/cascade-ide-ui-layout-v1.md), [`concept-to-implementation-map-v1.md`](../ux/concept-to-implementation-map-v1.md), [`ui-modes-overview-v1.md`](../ux/ui-modes-overview-v1.md) — выровнены по термину **IDE Health**; при расхождении **приоритет у 0089, этого ADR и 0021**.
 
 ---
 
@@ -68,3 +69,4 @@
 
 - Отдельное переименование **`autonomous_agent_*`** / строк UI, если продукт выберет единый английский глоссарий без «telemetry» для кокпита Power.
 - Локализация RU/EN для всех видимых строк — вне скоупа этого ADR.
+- Полная зачистка остаточных имён `WorkspaceHealth*` в VM/AXAML при отсутствии необходимости сохранять wire-совместимость для внешних интеграций.

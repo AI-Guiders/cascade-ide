@@ -1,8 +1,8 @@
 # Готовность окружения IDE — glance (v1, чертёж)
 
-**Статус:** живой чертёж (не ADR). **ADR решения:** [0023](../adr/0023-environment-readiness-glance.md). **Назначение:** детализировать канал **отдельно от [Workspace Health](workspace-health-compositor-implementation-v1.md)** (build/tests/debug/git).
+**Статус:** живой чертёж (не ADR). **ADR решения:** [0023](../adr/0023-environment-readiness-glance.md). **Назначение:** детализировать канал **отдельно от [IDE Health](workspace-health-implementation-map-v1.md)** (build/tests/debug/git).
 
-**Связь:** [ADR 0021 §1.2](../adr/0021-pfd-mfd-cockpit-attention-model.md) — слот презентации vs канал содержимого; «статус окружения» в таблице каналов — **про этот смысл**, не про `WorkspaceHealth*`.
+**Связь:** [ADR 0021 §1.2](../adr/0021-pfd-mfd-cockpit-attention-model.md) — слот презентации vs канал содержимого; «статус окружения» в таблице каналов — **про этот смысл**, не про `IdeHealth*`.
 
 ---
 
@@ -50,7 +50,7 @@
 - **полноэкранная страница в регионе MFD** (оверлей поверх вкладок нижней панели), без отдельной вкладки — переключение осознанно, в т.ч. через **палитру команд** (one page at a time);
 - компактные **бейджи PFD** + раскрытие (позже).
 
-Канал **не** смешивается с полосой **`WorkspaceHealthStripView`** и не использует префикс `workspace_health_*`.
+Канал **не** смешивается с полосой **`IdeHealthStripView`** и не использует префикс `workspace_health_*`.
 
 ---
 
@@ -65,4 +65,4 @@
 ## 6. Связанные документы
 
 - [ADR 0021](../adr/0021-pfd-mfd-cockpit-attention-model.md) — модель внимания, каналы vs слоты.
-- [Workspace Health — implementation map](workspace-health-compositor-implementation-v1.md) — **другой** канал (задача в workspace).
+- [IDE Health — implementation map](workspace-health-implementation-map-v1.md) — **другой** канал (задача в workspace).
