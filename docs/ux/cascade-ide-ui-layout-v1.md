@@ -95,6 +95,8 @@
 
 Высота — сплиттер (строка 4). `ide_set_panel_size(panel: "terminal", height: …)`.
 
+**Ожидания по «Терминал»:** визуально это вкладка с вводом/выводом, но **не** полноценный встроенный shell (PowerShell, PTY, ANSI); нынешняя реализация — заглушка **одна команда → текст**. Подробно и с путями в код — **[mfd-terminal-stub-vs-integrated-shell-v1.md](mfd-terminal-stub-vs-integrated-shell-v1.md)** (не ADR).
+
 **Power (семья `Power`):** на корне `BottomPanelView` — `Classes.power` через привязку к **`UiModeFamily`** и конвертер **`UiModeFamilyEq`** с параметром `Power` (в `MainWindow` у контрола `DataContext` — `MainWindowViewModel`, чтобы биндинг не терялся). У `Border#BottomPanelShell` в Power — скругление верхних углов и усиленная тень (`views|BottomPanelView.power` в стилях). Сборка/тесты/отладка/Git — в `IdeHealthStripView` под редактором (канал **IDE Health**); дубль на вкладке «Терминал» не показывается (`WorkspaceHealthOnTerminalTab`), при входе в Power выбирается вкладка «Терминал» (`BottomPanelTabIndex = 0`).
 
 ---

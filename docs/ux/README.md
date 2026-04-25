@@ -10,6 +10,7 @@
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | `README.md`                             | Этот файл — оглавление UX-набора.                                                                                |
 | `cascade-ide-ui-layout-v1.md`           | Описание макета главного окна: зоны, панели, грид, режимы, ключевые контролы для MCP. |
+| `mfd-terminal-stub-vs-integrated-shell-v1.md` | **Не ADR:** нынешний «терминал» = заглушка (`cmd`/`sh` one-shot, два TextBox), не Integrated Shell; отдельный трек на ConPTY/PS/UX; ссылка на ADR 0094/0021/0066. |
 | `ui-modes-overview-v1.md`               | Краткий обзор режимов: id vs семья, TOML, связь с VM/XAML; детали — ADR 0010. |
 | `cascade-ide-main-window-wireframe.png` | Макет-картинка (wireframe) главного окна.                                                                        |
 | `concept-screens/`                      | Скрины из чатов: референсы детального хрома UI. См. `concept-screens/README.md` (напр. `power-project-explorer-tree-concept.png`). |
