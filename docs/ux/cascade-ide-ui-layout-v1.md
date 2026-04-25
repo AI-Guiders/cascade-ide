@@ -1,154 +1,109 @@
 # Cascade IDE — макет главного окна (v1)
 
-Описание раскладки главного окна для согласования с MCP и онбординга. Соответствует `Views/MainWindow.axaml` и текущему поведению. Режимы интерфейса (id, семья, TOML): см. **[ui-modes-overview-v1.md](ui-modes-overview-v1.md)** и [ADR 0010](../adr/0010-ui-modes-toml-configuration.md).
+Описание раскладки главного окна для согласования с MCP и онбординга. **Эталон —** `Views/MainWindow.axaml` и связанные view (в т.ч. `DocumentsDockView`, `MfdShellView`).
+
+**Режим UI:** в поставке один id в **`UiModes/index.toml`** — **Flight** (полигон PFD · Forward · MFD). Отдельных продуктовых пресетов **Focus / Balanced / Power** и переключателя «режим интерфейса» в меню **нет**. Семья **`UiModeFamily.Flight`** и capabilities — в TOML режима; контракт — **[ADR 0010](../adr/0010-ui-modes-toml-configuration.md)**, обзор — **[ui-modes-overview-v1.md](ui-modes-overview-v1.md)**, внимание и зоны — **[ADR 0021](../adr/0021-pfd-mfd-cockpit-attention-model.md)**.
 
 ---
 
 ## 1. Общая структура
 
-Окно: **DockPanel** → сверху **Menu**, ниже **Grid** (`MainGrid`) с строками и колонками.
+Окно: **Grid** (корень) → внутри **DockPanel** — сверху **Menu**, ниже **`MainGrid`** (одна сетка рабочей области).
 
-**Размер по умолчанию:** 1000×600. Ресайз по границам окна и сплиттеры между панелями.
+**Размер по умолчанию:** 1000×600. Ресайз по границе окна и **сплиттерам** между колонками PFD / Forward / MFD.
 
----
-
-## 2. Верхняя полоса (DockPanel.Top)
-
-- **Меню (Menu):**
-  
-  - **Файл:** Открыть решение…, Выход.
-  - **Вид:** Обозреватель решения, Вывод сборки, Чат, Терминал, док инструментирования (вкладки «События / Тесты / Отладка» при включённом доке — во всех режимах, в т.ч. Focus); Режим интерфейса (Focus / Balanced / Power / Agent Chat / Debug — радио); Тема (Светлая, Тёмная, Как Cursor, Открыть файл темы…); Превью в отдельном окне.
-  - **Настройки:** Параметры AI и чата…
-  - **Справка:** О программе.
-
-- **Баннер MCP (опционально):** если IDE запущена как MCP-сервер — полоска под меню: «Управляется агентом (MCP). Не закрывайте окно — подключение будет потеряно.»
+Поверх — **CommandPalette** (`ZIndex` 5000), при необходимости оверлеи зон/подсветки.
 
 ---
 
-## 3. MainGrid — сетка
+## 2. Меню (`Menu`, DockPanel.Top)
 
-**Строки (RowDefinitions):** `Auto, Auto, Auto, *, Auto, 4, Auto`
+Актуальный состав (см. код):
+
+- **Файл:** открыть решение / папку / файл, экспорт Markdown, выход.
+- **Отладка:** шаг F5/старт, стартовый проект, attach, остановка, шаги (over/into/out).
+- **Вид:** палитра команд; чекбоксы видимости **PFD** (обозреватель / карта — по раскладке), **вывод сборки** (страница MFD), **MFD** (колонка), **терминал** (страница MFD), **Git** (страница MFD), **док инструментирования**; подменю **Тема**; язык интерфейса; Markdown preview в MFD; превью в отдельном окне.
+- **Настройки:** параметры AI и чата.
+- **Справка:** о программе.
+
+**MCP-баннер:** `McpBannerView` в строке 0 `MainGrid` (не в меню), если IDE в режиме MCP-сервера.
+
+---
+
+## 3. `MainGrid` — сетка
+
+**Строки (RowDefinitions):** три строки — `Auto`, `Auto`, `*`.
 
 | Row | Содержимое |
 | --- | --- |
-| 0   | Баннер MCP (при `IsMcpServerMode`) |
-| 1   | Toolbar |
-| 2   | Task cockpit (`TaskCockpitView`): задача, прогресс, Quick Actions (Balanced), бейджи, блок Autonomous (Power); `ShowTaskBar` всегда true |
-| 3   | **Основная область** — Solution Explorer, редактор (Dock), чат |
-| 4   | Полоса IDE Health (`IdeHealthStripView`): Build/Test/Debug/Git в Focus/Balanced; кокпит Power в Power |
-| 5–6 | Нижняя панель (`BottomPanelView`, `RowSpan=2`): сплиттер + вкладки Terminal / Build / Git / События / Тесты / Отладка |
+| 0 | `McpBannerView` (при `IsMcpServerMode`) |
+| 1 | **`TaskCockpitView`** — полоса задач, CascadeChord, быстрые действия (по capabilities) |
+| 2 | **Три зоны внимания:** PFD · Forward · MFD (см. ниже) |
 
-**Колонки (ColumnDefinitions):** `220, 4, *, 4, 340`
+**Колонки (ColumnDefinitions):** `220, 4, *, 4, 340` (базовые ширины; PFD и MFD могут схлопываться по привязкам).
 
-| Column | Содержимое                                                                                                                                                                                      |
-| ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 0      | **Solution Explorer** (ширина 220): дерево «Решение»; в **Power** под деревом — **очередь задач** (`PowerTaskQueueItems`).                                                 |
-| 1      | GridSplitter (4px)                                                                                                                                                                              |
-| 2      | **Колонка редактора** — вкладки документов, редактор (AvaloniaEdit), опционально 2-я и 3-я группы (2-up, 3-up), вывод сборки, панель отладки (стек + переменные). Контроль: `EditorColumnGrid`. |
-| 3      | GridSplitter (4px)                                                                                                                                                                              |
-| 4      | **Чат** — правая панель 340px. Agent Operations, Agent Trace, Safety Level (по режиму); список сообщений; поле ввода и кнопка «Отправить». Контроль: `ChatPanel`.                               |
+| Col | Содержимое |
+| --- | --- |
+| 0 | **PFD** — `AttentionZoneContainer Zone="Pfd"`: обозреватель решения и/или карта навигации workspace (по runtime/placement), опциональный mount инструмента. |
+| 1 | `GridSplitter` (видимость/блокировка с VM) |
+| 2 | **Forward** — `AttentionZoneContainer Zone="Forward"`: **`DocumentsDockView`** (Avalonia Dock — вкладки документов, редактор). |
+| 3 | `GridSplitter` |
+| 4 | **MFD** — `AttentionZoneContainer Zone="Mfd"`: **`MfdShellView`** (вторичный контур: полоса сверху + стек **страниц**). |
 
----
+Оверлей геометрии зон (отладка раскладки): `SkiaZoneGeometryOverlayPfd` / `Forward` / `Mfd`. Подсветка агента: `AgentHighlightLayer` на весь `MainGrid`.
 
-## 4. Колонка редактора (детально)
-
-Внутри — **Grid** по строкам:
-
-- **Вкладки группы 1** (горизонтальный скролл) + кнопка «Reopen closed».
-- **Путь текущего файла** (TextBlock).
-- **Область редактора:** 1–3 группы (Group1/2/3) со сплиттерами; в группе 1 — TextEditor + опционально Inline Markdown Preview.
-- **GridSplitter** (вывод сборки).
-- **Вывод сборки** — кнопка «Скрыть вывод», TextBox с логом. Контроль видимости: `IsBuildOutputVisible`.
-- **GridSplitter** (панель отладки).
-- **Панель отладки** — «Стек вызовов» и «Переменные» (списки). Данные: `InstrumentationPanel`; видимость смысловая — `InstrumentationPanel.IsDebugPanelVisible`.
-
-Имена для MCP: вкладки — `Group1Tabs`, `Group2Tabs`, `Group3Tabs`; редактор — `Editor`; превью — `InlinePreviewBorder`; вывод сборки и отладка — по привязкам в layout.
+`UiModeBloomOverlay` — декоративный bloom по настройкам хрома (семья/тема из TOML).
 
 ---
 
-## 5. Чат (правая панель)
+## 4. Зона Forward (`DocumentsDockView`)
 
-- Сверху вниз (при включённых блоках): Agent Operations, Agent Trace Timeline, Safety Level Control.
-- Сплиттер и область сообщений (ItemsControl `ChatMessages`).
-- Кнопка «▶ Чат» для разворота свёрнутой панели.
-- Поле ввода: `ChatInputBox`; кнопка «Отправить».
+- **HUD** (стр. [ADR 0021](../adr/0021-pfd-mfd-cockpit-attention-model.md) §9): при непустом баннере — полоса над доком.
+- **Док-менеджер:** `DockControl` — factory/layout из ViewModel, группы редакторов, **без** привязки «журнал сборки внизу колонки» к старому макету: длинные логи — на **страницах MFD** (сборка, тесты, терминал, …).
 
-Ширина панели по умолчанию 340px; меняется сплиттером между колонкой редактора и чатом. `ide_set_panel_size(panel: "chat", width: …)`.
+Имена для MCP: по возможности совпадают с `Name` в XAML док-контролов (см. `DocumentsDockView` и фабрику доков).
 
 ---
 
-## 6. Нижняя панель (`BottomPanelView`)
+## 5. Зона MFD (`MfdShellView` + `MfdShellPageStack`)
 
-**TabControl** (индексы `BottomPanelTabIndex`): при необходимости показываются только вкладки с `IsVisible=true`.
+Сверху вниз внутри колонки MFD:
 
-| Индекс | Вкладка | Видимость | Содержимое |
-| ------ | ------- | --------- | ----------- |
-| 0 | Terminal | `IsTerminalVisible` | Опционально Telemetry (Power), вывод, `TerminalInputBox`. |
-| 1 | Build output | `IsBuildOutputVisible` | Текст `BuildOutput`. |
-| 2 | Git | `IsGitPanelVisible` | Ветка, корень git vs каталог решения, `git status --short`, diff, submodule update/sync, открытие `.sln` в submodule, `git submodule status`, коммит/push (меню **Вид → Git**). |
-| 3 | События | `ShowInstrumentationTabs` | Лента `EventTimeline` (Balanced/Power, не Focus). |
-| 4 | Тесты | `ShowInstrumentationTabs` | Накопленный лог `TestResultsOutput` после `dotnet test`. |
-| 5 | Отладка | `ShowInstrumentationTabs` | `DebugStackFrames`, `DebugVariables`. |
+1. **`WorkspaceChromeBandView`** — полоса в духе EICAS / IDE Health (видимость и содержимое — по TOML и VM).
+2. **`BottomPanelShell`** — контейнер со **`MfdShellPageStack`**: одна **активная страница** (`CurrentMfdShellPage`), например:
+   - Workspace Health (выделенная страница), обозреватель в MFD, related files, превью Markdown, чат, настройки AI, **терминал**, **журнал сборки**, Problems, **Git**, события, тесты, гипотезы, стек отладки, …
 
-`ShowInstrumentationTabs` = Balanced или Power, не Focus, и `IsInstrumentationDockVisible` (меню **Вид → Док инструментирования**).  
-`IsBottomPanelVisible` = терминал или сборка или `ShowInstrumentationTabs` или **Git** (`IsGitPanelVisible`).
+Переключение страниц — из VM/команд/меню (не отдельный `TabControl` нижней панели **главного** окна: его в текущем `MainWindow` **нет**).
 
-Высота — сплиттер (строка 4). `ide_set_panel_size(panel: "terminal", height: …)`.
-
-**Ожидания по «Терминал»:** визуально это вкладка с вводом/выводом, но **не** полноценный встроенный shell (PowerShell, PTY, ANSI); нынешняя реализация — заглушка **одна команда → текст**. Подробно и с путями в код — **[mfd-terminal-stub-vs-integrated-shell-v1.md](mfd-terminal-stub-vs-integrated-shell-v1.md)** (не ADR).
-
-**Power (семья `Power`):** на корне `BottomPanelView` — `Classes.power` через привязку к **`UiModeFamily`** и конвертер **`UiModeFamilyEq`** с параметром `Power` (в `MainWindow` у контрола `DataContext` — `MainWindowViewModel`, чтобы биндинг не терялся). У `Border#BottomPanelShell` в Power — скругление верхних углов и усиленная тень (`views|BottomPanelView.power` в стилях). Сборка/тесты/отладка/Git — в `IdeHealthStripView` под редактором (канал **IDE Health**); дубль на вкладке «Терминал» не показывается (`WorkspaceHealthOnTerminalTab`), при входе в Power выбирается вкладка «Терминал» (`BottomPanelTabIndex = 0`).
+**Терминал** на странице MFD — заглушка «одна команда → вывод»; не Integrated Shell — **[mfd-terminal-stub-vs-integrated-shell-v1.md](mfd-terminal-stub-vs-integrated-shell-v1.md)**.
 
 ---
 
-## 7. Режимы интерфейса (встроенные пресеты)
+## 6. Ключевые контролы и MCP
 
-Шорткаты по умолчанию: Alt+1…3 циклируют Focus / Balanced / Power; полный список id — в комбо и в меню (в т.ч. **Agent Chat**, **Debug**). Детали оси семьи и данных TOML — **[ui-modes-overview-v1.md](ui-modes-overview-v1.md)**.
+| Зона / смысл | Имя / примечание |
+| --- | --- |
+| Корень окна | `RootWindow` |
+| Сетка | `MainGrid` |
+| Чат (страница MFD) | внутри `ChatMfdPageView` / стека |
+| Ввод в чат | `ChatInputBox` (на странице чата) |
+| Терминал (ввод) | `TerminalInputBox` (`TerminalMfdPageView`) |
+| Подсветка агента | `AgentHighlightOverlay` на `AgentHighlightLayer` |
 
-| Режим (id)   | Хоткей (часть цикла) | Особенности                                                                                                                                      |
-| ------------ | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Focus**    | Alt+1                | Правый столбец: **План** (чеклист), **Следующий шаг**, **Подтверждение** (Подтвердить/Отменить + объяснение/стоп); тулбар: Запуск (сборка), Контрольная точка, Откат; полоска IDE Health (build/tests/debug/git) видна. Блок «Agent Operations» скрыт (есть в Balanced/Power). |
-| **Balanced** | Alt+2                | Дерево, 2 группы редактора, чат; нижняя панель: **терминал и журнал сборки включены по умолчанию** (меню «Вид» можно снять), плюс вкладки **События / Тесты / Отладка** при включённом доке инструментирования. |
-| **Power**    | Alt+3                | Заголовок окна «Power Mode [Autonomous Agent Cockpit]»; task bar, Quick Actions, бейджи; слева очередь задач под деревом; справа **Agent Trace** (таймстемпы, объяснить/откат по шагу), **Safety**; полоса IDE Health + **снимок workspace (JSON)**. |
-| **AgentChat**| —                    | Акцент на чате агента; отдельные метрики ширины чата и оформление бейджа режима (см. `workspace.toml` / темы). |
-| **Debug**    | —                    | Инструментирование и гипотезы; полоса задачи и заголовок окна под отладку (см. шипнутый `UiModes/Debug.toml`). |
-
-Переключение: меню «Вид → Режим интерфейса» или комбобокс в тулбаре; бейдж режима (`ModeBadge`) подсвечивает классами `.power` / `.agentchat` / `.debug` в зависимости от **`UiModeFamily`**.
-
----
-
-## 8. Ключевые контролы для MCP
-
-| Контроль              | Имя / примечание                                 |
-| --------------------- | ------------------------------------------------ |
-| Дерево решения        | `SolutionExplorerBorder`                         |
-| Колонка редактора     | `EditorColumnGrid`                               |
-| Редактор кода         | `Editor` (AvaloniaEdit)                          |
-| Вкладки документов    | `Group1Tabs`, `Group2Tabs`, `Group3Tabs`         |
-| Чат                   | `ChatPanel`                                      |
-| Поле ввода чата       | `ChatInputBox`                                   |
-| Терминал (ввод)       | `TerminalInputBox`                               |
-| Подсветка под агентом | `AgentHighlightOverlay` на `AgentHighlightLayer` |
-
-Панели для `ide_set_panel_size`: `solution_explorer`, `chat`, `build_output`, `terminal`.
+`ide_set_panel_size` и аналоги — по актуальному контракту MCP; геометрия сейчас опирается на **сплиттеры трёх колонок** и настройки из `workspace.toml` / capabilities.
 
 ---
 
-## 9. Оверлей подсветки
+## 7. Оверлей подсветки
 
-Слой `AgentHighlightLayer` (Canvas, ZIndex 1000) поверх всего грида; внутри `AgentHighlightOverlay` — рамка вокруг контрола, на который указывает агент (`ide_highlight_control`). IsHitTestVisible=false, чтобы не перехватывать клики.
-
----
-
-## 10. Концепт Power: визуал ≠ код (острова уже есть, хром списков — нет)
-
-Раскладка и **рамки островов** (градиенты, скругления, тени) в Power уже близки к `concept-generated/cascadeide-ui-concept-power.png`. **Внутри колонок** многие списки и редактор всё ещё на **дефолтном стиле Avalonia Fluent**, тогда как на детальных PNG (например **`docs/ux/concept-screens/power-project-explorer-tree-concept.png`**) видны:
-
-- дерево: **своя** строка выделения (часто **вертикальный cyan/teal accent** слева), больше **padding** по вертикали, другой заголовок панели;
-- редактор / трасса / IDE Health: иные акценты и плотность, чем в текущих `TreeView` / AvaloniaEdit / `IdeHealthStripView`.
-
-Полная сводка по зонам: **`concept-to-implementation-map-v1.md` §4.1**. План доработок — тот же файл, раздел **5** (пп. 5–6).
+`AgentHighlightLayer` (Canvas, `ZIndex` 1000) поверх сетки; `AgentHighlightOverlay` — рамка вокруг целевого контрола (`ide_highlight_control`). `IsHitTestVisible=false`, чтобы не перехватывать клики.
 
 ---
 
-*Версия: 1.1. Соответствует MainWindow.axaml по состоянию на 2026-04. При изменении разметки обновить этот документ.*
+## 8. Исторический контекст (не эталон раскладки)
+
+Ранние макеты с **нижней панелью** главного окна (вкладки Terminal / Build / … в одном `BottomPanelView`) и пресетами **Focus / Balanced / Power** относятся к **старой** топологии. Текущий **Flight** — **PFD | Forward | MFD** в одной сетке, длинные потоки — **страницы MFD**. Уточнения по старым PNG — `concept-to-implementation-map-v1.md`, `concept-generated/`; визуал концептов **не** обязан совпадать с кодом.
+
+---
+
+*Версия документа: 2.0. Соответствует `MainWindow.axaml` и `UiModes/index.toml` (только **Flight**). При смене разметки — обновить этот файл.*

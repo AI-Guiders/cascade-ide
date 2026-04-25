@@ -2,7 +2,7 @@
 
 Каталог для макетов, описаний раскладки и контрактов интерфейса Cascade IDE. Эталон реализации — код в `Views/MainWindow.axaml` и темы в `Themes/`.
 
-**Актуальная линия (ветка Skia, ~2026):** в поставке один продуктовый UI-режим — **Flight** (`UiModes/index.toml`); топология зон PFD / Forward / MFD и мультиоконность — **[ADR 0017](../adr/0017-multi-window-workspace-and-agent-surfaces.md)**, модель внимания — **[ADR 0021](../adr/0021-pfd-mfd-cockpit-attention-model.md)**, конфиг режимов — **[ADR 0010](../adr/0010-ui-modes-toml-configuration.md)**. PNG ниже и старые тексты про Focus / Balanced / Power — **архив ранних референсов**; с текущим кодом они намеренно могут расходиться.
+**Актуальная линия (~2026):** в поставке один продуктовый UI-режим — **Flight** (`UiModes/index.toml`); топология **PFD | Forward | MFD** в `MainWindow` — см. **`cascade-ide-ui-layout-v1.md`**; мультиоконность — **[ADR 0017](../adr/0017-multi-window-workspace-and-agent-surfaces.md)**; внимание — **[ADR 0021](../adr/0021-pfd-mfd-cockpit-attention-model.md)**; TOML — **[ADR 0010](../adr/0010-ui-modes-toml-configuration.md)**. Старые PNG/тексты про Focus / Balanced / Power — **архив**; с кодом не сверяем.
 
 ## Содержимое
 
@@ -10,7 +10,7 @@
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | `README.md`                             | Этот файл — оглавление UX-набора.                                                                                |
 | `cascade-ide-ui-layout-v1.md`           | Описание макета главного окна: зоны, панели, грид, режимы, ключевые контролы для MCP. |
-| `mfd-terminal-stub-vs-integrated-shell-v1.md` | **Не ADR:** нынешний «терминал» = заглушка (`cmd`/`sh` one-shot, два TextBox), не Integrated Shell; отдельный трек на ConPTY/PS/UX; ссылка на ADR 0094/0021/0066. |
+| `mfd-terminal-stub-vs-integrated-shell-v1.md` | **Не ADR:** нынешний «терминал» на странице MFD = заглушка (`cmd`/`sh` one-shot); не Integrated Shell; трек ConPTY/PS/UX; ADR 0094/0021/0066. |
 | `ui-modes-overview-v1.md`               | Краткий обзор режимов: id vs семья, TOML, связь с VM/XAML; детали — ADR 0010. |
 | `cascade-ide-main-window-wireframe.png` | Макет-картинка (wireframe) главного окна.                                                                        |
 | `concept-screens/`                      | Скрины из чатов: референсы детального хрома UI. См. `concept-screens/README.md` (напр. `power-project-explorer-tree-concept.png`). |

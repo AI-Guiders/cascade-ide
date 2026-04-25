@@ -1,11 +1,11 @@
-# MFD / нижняя панель: «терминал»-заглушка и отдельный трек Integrated Shell (v1)
+# MFD: «терминал»-заглушка и отдельный трек Integrated Shell (v1)
 
 **Не ADR** — рабочая заметка, чтобы не путать нынешний UI с полноценной встроенной оболочкой. Код — источник правды.
 
 ## Что в продукте сейчас
 
 - **Страница MFD:** `Views/TerminalMfdPageView.axaml` — read-only `TextBox` (вывод) + однострочный `TextBox` (ввод, Enter → команда). Это **не** эмулятор терминала: нет PTY, нет рендера escape-последовательностей, нет интерактивной сессии shell.
-- **Нижняя панель** (`BottomPanelView`, вкладка Terminal): тот же контур `TerminalPanel` / `TerminalInputBox` (см. [cascade-ide-ui-layout-v1.md](cascade-ide-ui-layout-v1.md)).
+- Макет главного окна **без** отдельной нижней полосы вкладок: терминал — **страница MFD** (`TerminalMfdPageView` в стеке `MfdShellPageStack`). Тот же `TerminalPanel` / `TerminalInputBox` (см. [cascade-ide-ui-layout-v1.md](cascade-ide-ui-layout-v1.md)).
 - **Логика:** `Features/Terminal/TerminalPanelViewModel.cs` — запуск **одноразовой** команды через `cmd /c` (Windows) или `sh -c` (иначе), перенаправленный stdout/stderr в накопитель строки. Это **«выполни и допиши в буфер»**, а не **Integrated Shell** в духе встроенного PowerShell / Windows Terminal / ConPTY.
 
 ## Чем это не является (без сарказма к коду)
@@ -19,7 +19,7 @@
 ## Зачем так можно было сделать
 
 - Дать **точку вывода** и **одиночные команды** в каталоге решения без внедрения всего стека ConPTY+рендер+кроссплатформа.
-- Сохранить **место в MFD** и в нижней панели под будущий нормальный shell.
+- Сохранить **точку в MFD** (страница) под будущий нормальный shell.
 
 ## Куда смотреть, когда будем делать «по-взрослому»
 
