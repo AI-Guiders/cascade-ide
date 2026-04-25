@@ -3,7 +3,7 @@
 **Статус:** Proposed  
 **Дата:** 2026-04-24  
 
-**Связь:** [0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md) (topic cards, overview/detail, drill-in/back, **main thread** как одна из карточек; keyboard intents), [0080](0080-intercom-naming-and-multi-party-channel-model.md) (Intercom как канал, не «окно к боту»), [0057](0057-chat-surface-pipeline-adoption.md) (chat surface pipeline), [0045](0045-agent-chat-persistence-event-log-and-projections.md) (события и проекции — куда класть summary и метки линии), [0048](0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) (чат в IDE), [0021](0021-pfd-mfd-cockpit-attention-model.md) (зона Mfd / внимание), [0095](0095-workspace-solution-ide-health-stratification.md) (пример сквозной продуктовой линии в одной сессии работы).
+**Связь:** [0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md) (topic cards, overview/detail, drill-in/back, **main thread** как одна из карточек; keyboard intents), [0080](0080-intercom-naming-and-multi-party-channel-model.md) (Intercom как канал, не «окно к боту»), [0057](0057-chat-surface-pipeline-adoption.md) (chat surface pipeline), [0045](0045-agent-chat-persistence-event-log-and-projections.md) (события и проекции — куда класть summary и метки линии), [0048](0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) (чат в IDE; **что** попадает в контекст агента — политика поверхности), [0021](0021-pfd-mfd-cockpit-attention-model.md) (зона Mfd / внимание), [0095](0095-workspace-solution-ide-health-stratification.md) (пример сквозной продуктовой линии в одной сессии работы).
 
 **Отношение к [0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md):** 0072 остаётся каноном **навигации** (overview карточек тем ↔ detail треда, intent-команды, привязка к `ChatSurfaceLayout`). **0096** фиксирует **продуктовую семантику содержимого карточки** и **вторую ось** — **сквозную линию (spine)** работы над продуктом / проектом сессии поверх тем — **без** замены pipeline и без отмены drill-in/back. **Cascade IDE (CIDE)** в тексте ниже — **типичный пример** для основного репозитория; в другом workspace spine — та же абстракция для **его** продуктовой линии.
 
@@ -44,6 +44,17 @@
 - Пайплайн [0057](0057-chat-surface-pipeline-adoption.md) уже выделяет **overview**: `ChatThreadOverviewItem` в [`ChatSurfaceSnapshot`](../../Features/Chat/ChatSurfaceSnapshot.cs) — естественное место для поля **summary** (и при необходимости метки привязки к **spine** / продуктовой линии) при реализации [0072 план](0072-chat-topic-cards-intent-melody-keyboard-contract.md).
 - [`ChatPanelViewModel`](../../Features/Chat/ChatPanelViewModel.cs): режим overview/detail (`IsChatOverviewMode`, выбранный тред) — расширяется под **визуал картотеки** и отдельный UI-контур сквозной линии **после** стабилизации карточек по 0072.
 
+<a id="adr0096-p4"></a>
+
+### 4. Spine и **контекст агента**: не раздувать промпт по умолчанию
+
+Spine полезен **оператору** как компас; у агента контекст **ограничен и дорогой**, поэтому UX и политика подачи в ACP/MCP ([0048](0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md)) должны расходиться с «положить всё в один тред».
+
+- **По умолчанию** в рабочий запрос к агенту разумно класть **активную тему**: последние реплики / выделение / summary карточки — **не** полную историю spine и **не** все параллельные темы.
+- **Spine в промпте** — **сжатый срез** (текущая веха, 1–3 буллета «что уже решили», блокеры) или **включение по явному действию** оператора («добавить линию в контекст», отдельный intent) — детали реализации не фиксируются здесь, принцип: spine **не обязан** автоматически дублироваться целиком в каждый вызов.
+- **Перенос в тему (carry-forward):** когда в spine зафиксировано решение, в связанном треде достаточно **краткого мостика** (одно–три предложения + ссылка на ADR/коммит/якорь spine), чтобы агент **работал в теме** без обязательного «переключения» в отдельный контур spine; spine остаётся **каноническим местом** вехи, тред — **рабочей памятью** с локальным контекстом.
+- **Артефакты вне чата** (ADR, тикет) уже разгружают чат: в промпт — **ссылка и одна строка резюме**, а не вставка полного текста документа, если только оператор не выбрал иное.
+
 ---
 
 ## Не-цели
@@ -51,6 +62,8 @@
 - Заменить [0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md) или [0057](0057-chat-surface-pipeline-adoption.md).
 - Ввести в этом ADR полный JSON-схему событий или MCP-поля для spine.
 - Обещать паритет с внешними продуктами (Comet и т.д.) — см. [0072 Provenance](0072-chat-topic-cards-intent-melody-keyboard-contract.md).
+- Считать, что **полный текст spine** обязан неявно входить в **каждый** запрос к агенту — напротив, это **анти-паттерн** для объёма контекста (см. [§4](#adr0096-p4)).
+- Дублировать **длинный** spine в **каждую** связанную тему без сжатия: перенос — **краткий**, иначе снова «острова» из объёма, а не из смысла.
 
 ---
 
@@ -59,9 +72,11 @@
 - При реализации topic overview **карточка** трактуется как **заголовок + summary**, а не как последний bubble.
 - Появляется явный продуктовый слой **spine (сквозная линия продукта)** в UX-доках и backlog, согласованный с Intercom ([0080](0080-intercom-naming-and-multi-party-channel-model.md)); для репозитория Cascade IDE **CIDE** остаётся удобным **рабочим именем** примера, не жёсткой привязкой схемы данных.
 - Расширение `ChatThreadOverviewItem` (или эквивалента) и тестов overview — ожидаемый шаг после/вместе с [0072 план внедрения](0072-chat-topic-cards-intent-melody-keyboard-contract.md).
+- Политика **подачи контекста агенту** (что из spine/summary/треда попадает в ACP по умолчанию и по команде) должна быть **явной** в продукте и в связке с [0048](0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md), иначе spine рискует раздувать промпт (см. [§4](#adr0096-p4)).
 
 ---
 
 ## Обновлено
 
 - **2026-04-24** — каноническое имя файла ADR: `0096-intercom-topic-card-summary-and-product-spine.md` (нейтральный slug `product-spine`). [Прежнее имя файла](0096-intercom-topic-card-summary-and-cide-spine.md) оставлено как короткий stub для внешних закладок.
+- **2026-04-25** — [§4](#adr0096-p4): spine vs контекст агента; carry-forward; не-цели и последствия по объёму промпта.
