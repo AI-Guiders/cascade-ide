@@ -41,7 +41,7 @@ public sealed class MelodyInterpreterTests
         Assert.Single(plan.Lines);
         var c = Assert.IsType<MelodyPaletteCommand>(plan.Lines[0]);
         Assert.Equal("br", c.Alias);
-        Assert.Equal(IdeCommands.Build, c.CommandId);
+        Assert.Equal(IdeCommands.BuildSolutionUi, c.CommandId);
         Assert.Equal(0, plan.SelectedIndex);
     }
 }

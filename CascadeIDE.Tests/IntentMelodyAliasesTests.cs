@@ -62,6 +62,8 @@ public sealed class IntentMelodyAliasesTests
     [Fact]
     public void TryResolveExact_environment_and_terminal_surface_melodies()
     {
+        Assert.Equal(IdeCommands.BuildSolutionUi, IntentMelodyAliases.TryResolveExactCommandId("br"));
+        Assert.Equal(IdeCommands.BuildStructured, IntentMelodyAliases.TryResolveExactCommandId("bs"));
         Assert.Equal(IdeCommands.ShowEnvironmentReadinessPage, IntentMelodyAliases.TryResolveExactCommandId("ers"));
         Assert.Equal(IdeCommands.ShowTerminalPanel, IntentMelodyAliases.TryResolveExactCommandId("ts"));
         Assert.Equal(IdeCommands.Select, IntentMelodyAliases.TryResolveExactCommandId("els"));

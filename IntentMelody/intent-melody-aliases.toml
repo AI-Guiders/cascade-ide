@@ -12,7 +12,8 @@ gc = "git_commit"
 gp = "git_push"
 gsu = "git_submodule"
 # Build / test
-br = "build"
+br = "build_solution_ui"
+bs = "build_structured"
 bt = "run_tests"
 # Debug
 da = "debug_attach"

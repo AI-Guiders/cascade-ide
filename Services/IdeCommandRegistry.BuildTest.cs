@@ -9,7 +9,7 @@ public static partial class IdeCommandRegistry
     {
         // ——— Сборка
         AddPalette(b, "build_solution_ui", IdeCommands.BuildSolutionUi, "Собрать решение (UI)", "Сборка");
-        AddPalette(b, "build", IdeCommands.Build, "Сборка (structured)", "Сборка");
+        AddPalette(b, "build_structured", IdeCommands.BuildStructured, "Сборка (JSON/structured)", "Сборка");
         AddPalette(b, "run_tests", IdeCommands.RunTests, "Запустить тесты", "Сборка");
     }
 }
