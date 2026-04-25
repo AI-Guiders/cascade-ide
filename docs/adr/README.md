@@ -105,7 +105,7 @@
 | [0093](0093-mfd-embedded-browser-for-launch-url.md) | Расширение [0090](0090-launch-profiles-and-debug-startup-configurations.md): **опциональный** встроенный просмотр URL Kestrel на MFD рядом с отладкой; внешний браузер остаётся default; WebView2 / кроссплатформа — в roadmap | Proposed |
 | [0094](0094-ingestion-bus-afdx-analogy-and-threading-channels.md) | **Шина доставки в UI** (аналогия **AFDX**): `Channel<T>`, батчинг, backpressure; ортогонально CDS-«каналу»; strangler с журнала сборки | Proposed |
 | [0095](0095-workspace-solution-ide-health-stratification.md) | Три уровня Health: **Workspace** (папки, Git) · **Solution** (сборка, тесты) · **IDE** (LSP, MCP, окружение); таксономия для каналов/CDS/MCP; strangler от текущего IDE Health | Proposed |
-| [0096](0096-intercom-topic-card-summary-and-cide-spine.md) | **Intercom:** карточка темы = заголовок + **сводка** (картотека); **сквозная линия CIDE** ортогональна main thread; дополняет [0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md) | Proposed |
+| [0096](0096-intercom-topic-card-summary-and-cide-spine.md) | **Intercom:** карточка темы = заголовок + **сводка** (картотека); **spine** продуктовой линии ортогональна main thread (CIDE — пример); дополняет [0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md) | Proposed |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 

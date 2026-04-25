@@ -22,7 +22,7 @@
 | Палитра, **Command Melody (`c:`)**, аккорды — keyboard-first | [0060](../0060-keyboard-chord-stack-fms-tactical-strategic.md) |
 | Параметрические мелодии (**диапазон строк** редактора после alias) | [0081](../0081-parametric-intent-melodies-editor-line-ranges.md) |
 | **Агент и редактор:** текст правок в буфере; чат — намерение; присутствие (курсор, «пишет») | [0084](../0084-agent-edits-editor-source-of-truth-presence-channel.md) |
-| Чат / **Intercom:** topic navigation ([0072](../0072-chat-topic-cards-intent-melody-keyboard-contract.md)); карточка со **сводкой** (картотека) и сквозная линия CIDE ([0096](../0096-intercom-topic-card-summary-and-cide-spine.md)); имя канала ([0080](../0080-intercom-naming-and-multi-party-channel-model.md)) |
+| Чат / **Intercom:** topic navigation ([0072](../0072-chat-topic-cards-intent-melody-keyboard-contract.md)); карточка со **сводкой** (картотека) и **spine** продуктовой линии ([0096](../0096-intercom-topic-card-summary-and-cide-spine.md); CIDE — пример для основного репо); имя канала ([0080](../0080-intercom-naming-and-multi-party-channel-model.md)) |
 | **Настройки:** компактность, якорь MFD, нехватка места | [0074](../0074-settings-ui-mfd-compact-layout-overflow.md) |
 | **Тема «UI-ADR»:** указатель + соглашения по MFD-страницам | [0075](../0075-ui-topic-index-and-mfd-page-conventions.md) |
 | **Принципы UI — карта канона** (таблицы «идея → ADR») | [principles.md](principles.md) |
