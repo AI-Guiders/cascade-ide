@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Threading.Channels;
 
 namespace CascadeIDE.Services;
 
@@ -61,6 +62,119 @@ public sealed class DotnetCommandRunner : IDotnetCommandRunner
         catch (Exception ex)
         {
             return (false, -1, ex.Message);
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task<(bool Success, int ExitCode)> RunWithChunkWriterAsync(
+        IReadOnlyList<string> args,
+        string workingDirectory,
+        ChannelWriter<string> chunkWriter,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(chunkWriter);
+
+        if (string.IsNullOrWhiteSpace(workingDirectory) || !Directory.Exists(workingDirectory))
+        {
+            chunkWriter.TryComplete();
+            return (false, -1);
+        }
+
+        try
+        {
+            var psi = new ProcessStartInfo("dotnet")
+            {
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WorkingDirectory = workingDirectory
+            };
+            foreach (var arg in args)
+                psi.ArgumentList.Add(arg);
+
+            using var process = Process.Start(psi);
+            if (process is null)
+            {
+                chunkWriter.TryComplete();
+                return (false, -1);
+            }
+
+            static void TryKillEntireProcessTree(Process? p)
+            {
+                if (p is null) return;
+                try
+                {
+                    if (!p.HasExited)
+                        p.Kill(true);
+                }
+                catch
+                {
+                    // ignore
+                }
+            }
+
+            using (cancellationToken.Register(() => TryKillEntireProcessTree(process), useSynchronizationContext: false))
+            {
+                async Task PumpAsync(StreamReader reader)
+                {
+                    var buffer = new char[4096];
+                    while (true)
+                    {
+                        var read = await reader.ReadAsync(buffer, cancellationToken).ConfigureAwait(false);
+                        if (read <= 0)
+                            break;
+                        var chunk = new string(buffer, 0, read);
+                        await chunkWriter.WriteAsync(chunk, cancellationToken).ConfigureAwait(false);
+                    }
+                }
+
+                var pumpOut = PumpAsync(process.StandardOutput);
+                var pumpErr = PumpAsync(process.StandardError);
+                try
+                {
+                    await Task.WhenAll(pumpOut, pumpErr).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    TryKillEntireProcessTree(process);
+                    try
+                    {
+                        chunkWriter.TryComplete(ex);
+                    }
+                    catch
+                    {
+                        // channel may be closed
+                    }
+                    return (false, -1);
+                }
+
+                await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
+                return (process.ExitCode == 0, process.ExitCode);
+            }
+        }
+        catch (Exception ex)
+        {
+            try
+            {
+                chunkWriter.TryComplete(ex);
+            }
+            catch
+            {
+                // channel may be closed
+            }
+            return (false, -1);
+        }
+        finally
+        {
+            try
+            {
+                _ = chunkWriter.TryComplete();
+            }
+            catch
+            {
+                // ignore
+            }
         }
     }
 }

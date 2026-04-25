@@ -3,6 +3,7 @@ using System.IO;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using CascadeIDE.Services;
 using Avalonia.Threading;
 using CascadeIDE.Models;
 using CommunityToolkit.Mvvm.Input;
@@ -42,11 +43,25 @@ public partial class MainWindowViewModel
         try
         {
             var workDir = Path.GetDirectoryName(solutionPath) ?? "";
-            // Без ConfigureAwait(false): иначе после await — пул потоков, finally с IsBuilding и вывод
-            // в панель идут с фона → Avalonia: Call from invalid thread.
-            var (success, exitCode, output) = await _dotnetRunner.RunAsync(["build", solutionPath], workDir);
+            var channel = BuildLogIngestion.CreateBuildLogChannel();
 
-            AppendBuildChunk(output + "\r\n");
+            var drainTask = BuildLogIngestion.DrainToAppendAsync(
+                channel.Reader,
+                AppendBuildChunk,
+                maxBatchChars: 8192,
+                cancellationToken: CancellationToken.None);
+
+            var runTask = _dotnetRunner.RunWithChunkWriterAsync(
+                ["build", solutionPath],
+                workDir,
+                channel.Writer,
+                CancellationToken.None);
+
+            // Без ConfigureAwait(false) на границе с UI: finally с IsBuilding остаётся согласованным с диспетчером.
+            await Task.WhenAll(drainTask, runTask);
+            var (success, exitCode) = await runTask;
+
+            AppendBuildChunk("\r\n");
             if (!success && exitCode != 0)
                 AppendBuildChunk($"\r\nКод выхода: {exitCode}");
         }
