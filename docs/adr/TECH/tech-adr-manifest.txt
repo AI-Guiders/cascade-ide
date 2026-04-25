@@ -7,7 +7,7 @@
 0094-ingestion-bus-afdx-analogy-and-threading-channels.md
 0095-workspace-solution-ide-health-stratification.md
 0097-cockpit-compute-units-transport-to-channel-dto.md
-0099-semantic-first-document-as-projection.md
+0098-semantic-first-document-as-projection.md
 0004-ui-thread-marshaling.md
 0008-mcp-contracts-and-testable-infrastructure.md
 0009-strangler-migration-and-exceptions.md

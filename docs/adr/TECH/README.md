@@ -41,7 +41,7 @@
 | MCP-транспорт: восстановление, паритет человек/агент | [0043](../0043-mcp-transport-recovery-human-agent-parity.md) |
 | CLI контракта агента и снапшот-тесты | [0052](../0052-agent-contract-cli-and-snapshot-tests.md) |
 | **Принципы TECH — карта канона** (таблицы «идея → ADR») | [principles.md](principles.md) |
-| **Semantic-first** (смысл первичен; файлы/репо — проекции; не отмена git; strangler) | [0099](../0099-semantic-first-document-as-projection.md) (Proposed) |
+| **Semantic-first** (смысл первичен; файлы/репо — проекции; не отмена git; strangler) | [0098](../0098-semantic-first-document-as-projection.md) (Proposed) |
 
 ---
 
