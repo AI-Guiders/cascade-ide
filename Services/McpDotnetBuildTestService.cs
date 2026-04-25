@@ -11,22 +11,42 @@ namespace CascadeIDE.Services;
 public sealed class McpDotnetBuildTestService(IDotnetCommandRunner dotnetRunner)
 {
     private static readonly JsonSerializerOptions JsonCompact = new() { WriteIndented = false };
+
+    /// <summary><c>dotnet build</c> + binlog: поток в панель «Сборка» батчами (ADR 0094), в возврате — полный сырой лог (парсер, MCP).</summary>
+    /// <param name="appendBatchedToLog">Снято с канала и сбатчено (~8K) в панель; с фона безопасно вызывать <c>BuildOutputPanel.Append</c>.</param>
     public async Task<(string Output, bool Success, int ExitCode, string BinlogPath)> BuildWithBinlogAsync(
         string solutionPath,
+        Action<string> appendBatchedToLog,
         CancellationToken cancellationToken = default)
     {
         var artifactsDir = Path.Combine(Path.GetDirectoryName(solutionPath) ?? "", ".cascade-ide", "build-artifacts");
         Directory.CreateDirectory(artifactsDir);
         var binlogPath = Path.Combine(artifactsDir, $"build-{DateTime.UtcNow:yyyyMMdd-HHmmss-fff}.binlog");
         var workDir = Path.GetDirectoryName(solutionPath) ?? "";
-        var (success, exitCode, output) = await dotnetRunner
-            .RunAsync(["build", solutionPath, $"-bl:{binlogPath}"], workDir, cancellationToken)
-            .ConfigureAwait(false);
+        var acc = new OutputAccumulator(DotnetCommandRunner.MaxOutputChars);
+        var channel = BuildLogIngestion.CreateBuildLogChannel();
+        var drain = BuildLogIngestion.DrainToAppendAsync(
+            channel.Reader,
+            appendBatchedToLog,
+            8192,
+            onEachDequeuedChunk: c => acc.Append(c.AsSpan()),
+            cancellationToken);
+        var run = dotnetRunner.RunWithChunkWriterAsync(
+            ["build", solutionPath, $"-bl:{binlogPath}"],
+            workDir,
+            channel.Writer,
+            cancellationToken);
+        await Task.WhenAll(drain, run).ConfigureAwait(false);
+        var (success, exitCode) = await run.ConfigureAwait(false);
 
-        var outStr = output;
         if (!success && exitCode != 0)
-            outStr += $"\r\nExit code: {exitCode}";
-        return (outStr, success, exitCode, binlogPath);
+        {
+            var suffix = $"\r\nExit code: {exitCode}";
+            acc.Append(suffix.AsSpan());
+            appendBatchedToLog(suffix);
+        }
+
+        return (acc.ToStringAndTrim(), success, exitCode, binlogPath);
     }
 
     public static string SerializeStructuredBuild(string rawOutput, string? binlogPath)
@@ -112,9 +132,12 @@ public sealed class McpDotnetBuildTestService(IDotnetCommandRunner dotnetRunner)
     public static string SerializeTestRunFailure(string message, string mode, string? filterExpression) =>
         JsonSerializer.Serialize(new { success = false, error = message, mode, filter = filterExpression });
 
+    /// <summary><c>dotnet format</c> на решение: поток в панель батчами, полный вывод в <c>RawOutput</c> (JSON MCP).</summary>
+    /// <param name="appendBatchedToLog">Батч в панель «Сборка»; с фона безопасен.</param>
     public async Task<(bool Success, int ExitCode, string RawOutput)> RunCodeCleanupAsync(
         string solutionPath,
         string? includePath,
+        Action<string> appendBatchedToLog,
         CancellationToken cancellationToken = default)
     {
         var workDir = Path.GetDirectoryName(solutionPath) ?? "";
@@ -142,8 +165,18 @@ public sealed class McpDotnetBuildTestService(IDotnetCommandRunner dotnetRunner)
             args.Add(includeArg);
         }
 
-        var (success, exitCode, outStr) = await dotnetRunner.RunAsync(args, workDir, cancellationToken).ConfigureAwait(false);
-        return (success, exitCode, outStr);
+        var acc = new OutputAccumulator(DotnetCommandRunner.MaxOutputChars);
+        var channel = BuildLogIngestion.CreateBuildLogChannel();
+        var drain = BuildLogIngestion.DrainToAppendAsync(
+            channel.Reader,
+            appendBatchedToLog,
+            8192,
+            onEachDequeuedChunk: c => acc.Append(c.AsSpan()),
+            cancellationToken);
+        var run = dotnetRunner.RunWithChunkWriterAsync(args, workDir, channel.Writer, cancellationToken);
+        await Task.WhenAll(drain, run).ConfigureAwait(false);
+        var (success, exitCode) = await run.ConfigureAwait(false);
+        return (success, exitCode, acc.ToStringAndTrim());
     }
 
     public static TestParseResult? TryParseTrx(string trxPath)

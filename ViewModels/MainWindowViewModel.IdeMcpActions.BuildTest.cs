@@ -40,12 +40,21 @@ public partial class MainWindowViewModel
         }
         try
         {
-            var (outStr, _, _, binlogPath) = await _mcpBuildTest.BuildWithBinlogAsync(path).ConfigureAwait(false);
             var pathCopy = path;
             await UiScheduler.Default.InvokeAsync(() =>
             {
-                BuildOutputPanel.Set($"Сборка: {pathCopy}\r\n{outStr}");
+                BuildOutputPanel.Set($"Сборка: {pathCopy}\r\n");
                 IsBuildOutputVisible = true;
+            }).ConfigureAwait(false);
+
+            void AppendBuildChunk(string chunk) => BuildOutputPanel.Append(chunk);
+            var (outStr, _, _, binlogPath) = await _mcpBuildTest
+                .BuildWithBinlogAsync(path, AppendBuildChunk, cancellationToken: default)
+                .ConfigureAwait(false);
+
+            await UiScheduler.Default.InvokeAsync(() =>
+            {
+                BuildOutputPanel.FlushPending();
                 _lastBuildBinlogPath = binlogPath;
             }).ConfigureAwait(false);
             return outStr;
@@ -131,16 +140,21 @@ public partial class MainWindowViewModel
 
         try
         {
-            var (success, exitCode, outStr) = await _mcpBuildTest.RunCodeCleanupAsync(path, includePath).ConfigureAwait(false);
+            var pathCopy = path;
+            await UiScheduler.Default.InvokeAsync(() =>
+            {
+                BuildOutputPanel.Set($"Code cleanup: {pathCopy}\r\n");
+                IsBuildOutputVisible = true;
+            }).ConfigureAwait(false);
+
+            void AppendBuildChunk(string chunk) => BuildOutputPanel.Append(chunk);
+            var (success, exitCode, outStr) = await _mcpBuildTest
+                .RunCodeCleanupAsync(path, includePath, AppendBuildChunk, cancellationToken: default)
+                .ConfigureAwait(false);
             const int maxRawChars = 4000;
             var rawTruncated = outStr.Length > maxRawChars ? outStr[..maxRawChars] + "\n... (output truncated)" : outStr;
 
-            var pathCopy = path;
-            UiScheduler.Default.Post(() =>
-            {
-                BuildOutputPanel.Set($"Code cleanup: {pathCopy}\r\n{outStr}");
-                IsBuildOutputVisible = true;
-            });
+            await UiScheduler.Default.InvokeAsync(() => BuildOutputPanel.FlushPending()).ConfigureAwait(false);
 
             return JsonSerializer.Serialize(new
             {
