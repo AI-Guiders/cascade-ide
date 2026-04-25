@@ -106,8 +106,9 @@
 | [0094](0094-ingestion-bus-afdx-analogy-and-threading-channels.md) | **Шина доставки в UI** (аналогия **AFDX**): `Channel<T>`, батчинг, backpressure; ортогонально CDS-«каналу»; strangler с журнала сборки | Proposed |
 | [0095](0095-workspace-solution-ide-health-stratification.md) | Три уровня Health: **Workspace** (папки, Git) · **Solution** (сборка, тесты) · **IDE** (LSP, MCP, окружение); таксономия для каналов/CDS/MCP; strangler от текущего IDE Health | Proposed |
 | [0096](0096-intercom-topic-card-summary-and-product-spine.md) | **Intercom:** карточка темы = заголовок + **сводка** (картотека); **spine** продуктовой линии ортогональна main thread (CIDE — пример); дополняет [0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md) | Proposed |
-| [0097](0097-cockpit-compute-units-transport-to-channel-dto.md) | **Вычислительные блоки кабины (CCU)**, аналог LRU *Unit*: свёртка сырья → DTO/снимок канала; ортогонально [0094](0094-ingestion-bus-afdx-analogy-and-threading-channels.md) (транспорт) и CDS; IDE Health в коде — эталон цепочки | Proposed |
+| [0097](0097-cockpit-compute-units-transport-to-channel-dto.md) | **Вычислительные блоки кабины (CCU)**, аналог LRU *Unit*: свёртка сырья → DTO/снимок канала; ортогонально [0094](0094-ingestion-bus-afdx-analogy-and-threading-channels.md) (транспорт) и CDS; IDE Health в коде — эталон цепочки | Accepted · Implemented |
 | [0098](0098-semantic-first-document-as-projection.md) | **Semantic-first:** первична семантическая карта; код/доки/git — проекции; согласование с [0084](0084-agent-edits-editor-source-of-truth-presence-channel.md) по сессии правок; strangler | Proposed |
+| [0099](0099-ide-databus-typed-events-and-projections.md) | **IDE DataBus:** типизированные события в процессе IDE; развязка источников и проекций, без подмены 0094 (transport) и 0097 (CCU) | Accepted · Implemented |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 

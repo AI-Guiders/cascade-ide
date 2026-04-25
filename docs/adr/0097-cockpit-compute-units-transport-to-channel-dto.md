@@ -1,7 +1,8 @@
 # ADR 0097: Вычислительные блоки кабины (CCU; аналог LRU *Unit*) — слой между транспортом, смыслом и каналом
 
-**Статус:** Proposed  
+**Статус:** Accepted · Implemented  
 **Дата:** 2026-04-24  
+**Актуализировано:** 2026-04-25 — второй тег: эталон CCU в канале IDE Health (§5), граница `Build` в **CASCOPE019** (см. [0099](0099-ide-databus-typed-events-and-projections.md) и `IdeHealthPipelineAnalyzer`).
 
 **Связь:** [0036](0036-cds-channel-compositor-surface-pipeline.md) (канал → CDS → композитор поверхности → поверхность), [0094](0094-ingestion-bus-afdx-analogy-and-threading-channels.md) (шина **доставки** в UI, аналогия AFDX), [0095](0095-workspace-solution-ide-health-stratification.md) (три **уровня** смысла A/B/C и поле `stratum`), [0068](0068-deck-row-payload-and-presentation-projection.md) (полезная нагрузка vs проекция), [0021](0021-pfd-mfd-cockpit-attention-model.md) (зоны внимания; EICAS отдельно от «работы»), [0089](0089-ide-omnibus-naming-and-ide-health-channel-rename.md) (IDE Health как продуктовый канал), чертёж [`workspace-health-implementation-map-v1.md`](../design/workspace-health-implementation-map-v1.md) (фактическая цепочка IDE Health), [0055](0055-skia-instrument-composition-pipeline.md) (другой контур **compute** для Skia-инструментов), [`CascadeIDE.ArchitectureAnalyzers/README.md`](../../CascadeIDE.ArchitectureAnalyzers/README.md) (Roslyn **CASCOPE*** — закрепление границ слоёв на сборке; CCU — см. §4).
 
@@ -42,7 +43,7 @@
 
 - Нет **единого термина** для «LRU-подобного» модуля между ingestion и каналом.
 - Нет явного **инварианта**: «транспорт не считает смысл», «CDS не строит законы из сырого MSBuild», «VM в идеале оркестрирует, а не содержит всю математику сводки».
-- Для **CCU** пока нет отдельного набора CASCOPE* (в отличие от уже закреплённых границ канала/CDS/IDS): риск остаётся **документарным**, пока правило не перенесено в анализатор.
+- Для **CCU** как общего слоя полный набор **CASCOPE*** ещё впереди; для **IDE Health** уже действует **CASCOPE019** (единая точка `IIdeHealthChannel.Build(...)` в `MainWindowViewModel.IdeHealth`, см. [0099](0099-ide-databus-typed-events-and-projections.md)). Для остальных каналов риск частично остаётся **документарным**, пока анти-паттерны не оформлены в анализаторах ([§3](0097-cockpit-compute-units-transport-to-channel-dto.md#3-направление-на-реализацию-strangler)).
 
 Этот ADR закрывает формулировку и связку с 0036 / 0094 / 0095 **без** обязательного массового переименования типов.
 
@@ -105,7 +106,7 @@
 | Сбор снимка из делегатов / DAP | `IdeHealthSnapshotUnit` → `IIdeHealthChannel` (`ICockpitComputeUnit`) |
 | Композиция сегментов для канала | `IIdeHealthSurfaceCompositor` / `IdeHealthSurfaceCompositor` (`ICockpitComputeUnit`, `Cockpit/Composition/IdeHealth/`) |
 
-Новые каналы наблюдаемости — по той же дисциплине: отдельный снимок, чистая свёртка, композиция, **без** смешения с [0094](0094-ingestion-bus-afdx-analogy-and-threading-channels.md). **CASCOPE** для CCU — [§3](0097-cockpit-compute-units-transport-to-channel-dto.md#3-направление-на-реализацию-strangler) (по мере анти-паттернов).
+Новые каналы наблюдаемости — по той же дисциплине: отдельный снимок, чистая свёртка, композиция, **без** смешения с [0094](0094-ingestion-bus-afdx-analogy-and-threading-channels.md). Для IDE Health **CASCOPE019** уже закрепляет одну из инвариантных границ; **прочие** **CASCOPE** под CCU — [§3](0097-cockpit-compute-units-transport-to-channel-dto.md#3-направление-на-реализацию-strangler) (по мере устойчивых анти-паттернов).
 
 ---
 
