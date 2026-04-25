@@ -40,7 +40,7 @@
 | **Каноническое имя (этот ADR)** | Перечисление **`ContentRepresentation`**: минимум **`Strip`**, **`Page`**. Дополнительные значения (например **`Indicator`**) — по мере продуктовой необходимости, не фиксируем полный список в Proposed. | Для инструментов в якоре — **`instrument deck`** (ниже). Для канала IDE Health — порядок сегментов в `IdeHealthSurfaceCompositor`, **независимо** от Strip/Page ([чертёж](../design/workspace-health-implementation-map-v1.md)). |
 | **IDE Health сегодня** | TOML `workspace_health_surface`: `bottom_strip` ↔ **`Strip`**, `dedicated_page` ↔ **`Page`**. В коде — `IdeHealthUiSurface.BottomStrip` / `DedicatedPage` (**не** синоним «любой страницы MFD**). | `IdeHealthSurfaceCompositor`: Build → Tests → Debug → Git. |
 
-**Инвариант:** смена **`ContentRepresentation`** для IDE Health **не** меняет снимок `IdeHealthInputSnapshot` и логику композитора сегментов — только выбор **какой View** (полоса vs вторичная страница) привязать к тем же `WorkspaceHealthSegments` ([0021](0021-pfd-mfd-cockpit-attention-model.md#glossary-presentation-vs-channel), [чертёж](../design/workspace-health-implementation-map-v1.md)).
+**Инвариант:** смена **`ContentRepresentation`** для IDE Health **не** меняет снимок `IdeHealthInputSnapshot` и логику композитора сегментов — только выбор **какой View** (полоса vs вторичная страница) привязать к тем же `IdeHealthSegments` ([0021](0021-pfd-mfd-cockpit-attention-model.md#glossary-presentation-vs-channel), [чертёж](../design/workspace-health-implementation-map-v1.md)).
 
 <a id="adr0063-page-plus-deck-pfd"></a>
 

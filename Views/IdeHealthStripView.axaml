@@ -18,7 +18,7 @@
         <Border Padding="8,6"
                 Classes="modeCard"
                 IsVisible="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyNe}, ConverterParameter=Power}">
-            <ItemsControl ItemsSource="{Binding WorkspaceHealthSegments}">
+            <ItemsControl ItemsSource="{Binding IdeHealthSegments}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <WrapPanel Orientation="Horizontal" ItemHeight="28" VerticalAlignment="Center"/>
@@ -46,7 +46,7 @@
                 <Grid ColumnDefinitions="*,Auto"
                       RowDefinitions="Auto">
                     <ItemsControl Grid.Column="0"
-                                  ItemsSource="{Binding WorkspaceHealthSegments}"
+                                  ItemsSource="{Binding IdeHealthSegments}"
                                   HorizontalAlignment="Left">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>

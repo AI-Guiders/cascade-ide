@@ -194,8 +194,8 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _environmentReadinessSurfaceCompositor = new EnvironmentReadinessSurfaceCompositor();
 
         Workspace.PropertyChanged += (_, e) => OnWorkspacePropertyChanged(e.PropertyName);
-        Chrome.PropertyChanged += OnChromePropertyChangedForWorkspaceHealth;
-        RebuildWorkspaceHealth();
+        Chrome.PropertyChanged += OnChromePropertyChangedForIdeHealth;
+        RebuildIdeHealth();
         RebuildEicas();
 
         // Топология presentation / колонки MainGrid — снимок на старте; смена строки в settings.toml — после перезапуска (ADR 0017).
@@ -221,11 +221,11 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         NotifyDockedInstrumentSlotBindings();
     }
 
-    private void OnChromePropertyChangedForWorkspaceHealth(object? _, PropertyChangedEventArgs e)
+    private void OnChromePropertyChangedForIdeHealth(object? _, PropertyChangedEventArgs e)
     {
         if (e.PropertyName is nameof(UiChromeViewModel.WorkspaceHealthGitText)
             or nameof(UiChromeViewModel.WorkspaceHealthGitCockpitShort))
-            RebuildWorkspaceHealth();
+            RebuildIdeHealth();
     }
 
     /// <summary>DAP-сессия (netcoredbg): launch/attach и обновление панели отладки.</summary>

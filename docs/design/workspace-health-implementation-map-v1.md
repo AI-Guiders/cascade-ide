@@ -1,6 +1,6 @@
 # IDE Health — полоса и страница (реализация: `IdeHealth*`) — implementation map (v1)
 
-**Статус:** живой чертёж (не ADR). **Обновлено:** 2026-04-24 — продуктовое имя и типы в документе выровнены с [ADR 0089](../adr/0089-ide-omnibus-naming-and-ide-health-channel-rename.md) (**IDE Health**, `IdeHealth*`); ключи TOML `workspace_health_*` и свойство VM `WorkspaceHealthSegments` остаются как в коде. Ранее: 2026-04-17 — legacy-слой удалён; канон `IIdeHealthChannel.Build(...) -> IdeHealthSurfaceCompositor.Compose(...)`. Ранее: 2026-04-11 — **имя файла:** `workspace-health-implementation-map-v1.md` (ранее `workspace-health-compositor-implementation-v1.md` — переименовано: документ про **канал** IDE Health и карту намерений, а не про «композитор стекла» IDE целиком). Ранее: 2026-04-11 — каноническое имя контура: **IDE Health** (ранее *Workspace Health*); §1: «слот презентации vs канал»; ссылка на ADR 0021 §1.2. Ранее: 2026-04-06 — `WorkspaceHealthSecondaryPageView` (ныне `IdeHealthMfdPageView`) + строка в §3/§4; отсылка к ADR: [содержимое якоря PFD/MFD vs Page канала](../adr/0021-pfd-mfd-cockpit-attention-model.md#anchor-pfd-mfd-content-vs-telemetry-page). Ранее: 2026-04-05 — §7.1: **решение v1 = вариант A** (отдельный контур EICAS); ранее — union types / вариант B, углубление, фазы.  
+**Статус:** живой чертёж (не ADR). **Обновлено:** 2026-04-25 — в коде VM: **`IdeHealthSegments`**, метод **`RebuildIdeHealth()`** (ранее `WorkspaceHealthSegments` / `RebuildWorkspaceHealth`). 2026-04-24 — продуктовое имя и типы в документе выровнены с [ADR 0089](../adr/0089-ide-omnibus-naming-and-ide-health-channel-rename.md) (**IDE Health**, `IdeHealth*`); ключи TOML `workspace_health_*` остаются как в коде. Ранее: 2026-04-17 — legacy-слой удалён; канон `IIdeHealthChannel.Build(...) -> IdeHealthSurfaceCompositor.Compose(...)`. Ранее: 2026-04-11 — **имя файла:** `workspace-health-implementation-map-v1.md` (ранее `workspace-health-compositor-implementation-v1.md` — переименовано: документ про **канал** IDE Health и карту намерений, а не про «композитор стекла» IDE целиком). Ранее: 2026-04-11 — каноническое имя контура: **IDE Health** (ранее *Workspace Health*); §1: «слот презентации vs канал»; ссылка на ADR 0021 §1.2. Ранее: 2026-04-06 — `WorkspaceHealthSecondaryPageView` (ныне `IdeHealthMfdPageView`) + строка в §3/§4; отсылка к ADR: [содержимое якоря PFD/MFD vs Page канала](../adr/0021-pfd-mfd-cockpit-attention-model.md#anchor-pfd-mfd-content-vs-telemetry-page). Ранее: 2026-04-05 — §7.1: **решение v1 = вариант A** (отдельный контур EICAS); ранее — union types / вариант B, углубление, фазы.  
 **Решения и термины** — в [ADR 0021](../adr/0021-pfd-mfd-cockpit-attention-model.md) (PFD/MFD/EICAS, ARINC 661-идеи); **канонический словарь** «канал / слой представления / имена в коде» — [§1.1](../adr/0021-pfd-mfd-cockpit-attention-model.md#glossary-channel-presentation). Лексикон и эволюция имён — [ADR 0022](../adr/0022-workspace-health-lexicon.md), переименование канала — [ADR 0089](../adr/0089-ide-omnibus-naming-and-ide-health-channel-rename.md). Здесь — **где в коде** и **что дальше**, чтобы не раздувать ADR.
 
 ---
@@ -27,7 +27,7 @@
 | **Слот презентации** | Геометрия и роль поверхности: полоса vs **полная страница** региона MFD/PFD и т.д. | Разговорное «dedicated page» как «отдельная страница» часто про этот уровень. |
 | **Канал содержимого** | Какой поток данных заполняет слот | IDE Health (этот документ), EICAS, статус окружения, другие инструменты — **разные** каналы. |
 
-**`DedicatedPage` в пресете IDE Health** (`workspace_health_surface`, enum `IdeHealthUiSurface`) относится **только** к **каналу IDE Health**: те же `WorkspaceHealthSegments` (имя свойства VM), другая разметка ([`IdeHealthMfdPageView`](../../Views/IdeHealthMfdPageView.axaml)). Это **не** имя для «любой» полноэкранной страницы оболочки Mfd. Полное разведение терминов и рекомендуемые формулировки — [ADR 0021 §1.2](../adr/0021-pfd-mfd-cockpit-attention-model.md#glossary-presentation-vs-channel).
+**`DedicatedPage` в пресете IDE Health** (`workspace_health_surface`, enum `IdeHealthUiSurface`) относится **только** к **каналу IDE Health**: те же **`IdeHealthSegments`**, другая разметка ([`IdeHealthMfdPageView`](../../Views/IdeHealthMfdPageView.axaml)). Это **не** имя для «любой» полноэкранной страницы оболочки Mfd. Полное разведение терминов и рекомендуемые формулировки — [ADR 0021 §1.2](../adr/0021-pfd-mfd-cockpit-attention-model.md#glossary-presentation-vs-channel).
 
 ---
 
@@ -47,13 +47,13 @@
 | Источник enum | `Cockpit/Channels/IdeHealth/IdeHealthSource.cs` | `Build`, `Tests`, `Debug`, `Git`. |
 | Форматирование строк | `Cockpit/Channels/IdeHealth/IdeHealthFormat.cs` | Статические сегменты `BuildSegment` / `TestsSegment` / `DebugSegment` / `GitSegment` и `Compose(...)` — чистая логика без VM/DAP; удобно для юнит-тестов. |
 | Канал снимка | `Cockpit/Channels/IdeHealth/IIdeHealthChannel.cs`, `IdeHealthProvider.cs` | `Build(IdeHealthChannelContext)` собирает входы из делегатов и DAP (строки git и счётчики отладки подставляет `MainWindowViewModel` с `Chrome` / `InstrumentationPanel`). Сам канал **не** ссылается на `UiChromeViewModel`. |
-| VM | `ViewModels/MainWindowViewModel.IdeHealth.cs` | `RebuildWorkspaceHealth()` вызывает `_workspaceHealth.Build(...)` и `_workspaceHealthSurfaceCompositor.Compose(...)`. |
-| Инвалидация | `ViewModels/MainWindowViewModel.LayoutNotifications.cs` | `RebuildWorkspaceHealth` при смене данных build/tests/debug. |
+| VM | `ViewModels/MainWindowViewModel.IdeHealth.cs` | `RebuildIdeHealth()` вызывает `_workspaceHealth.Build(...)` и `_workspaceHealthSurfaceCompositor.Compose(...)`. |
+| Инвалидация | `ViewModels/MainWindowViewModel.LayoutNotifications.cs` | `RebuildIdeHealth` при смене данных build/tests/debug. |
 | Git-строки | `Features/UiChrome/UiChromeViewModel.cs` | `WorkspaceHealthGitText`, `WorkspaceHealthGitCockpitShort`; подписка в `MainWindowViewModel` на `Chrome.PropertyChanged`. |
 | Свойства для UI | `ViewModels/MainWindowViewModel.Presentation.cs` | `WorkspaceHealthBuild*` / `WorkspaceHealthTests*` / `WorkspaceHealthDebug*` читают сегменты из `_workspaceHealth.Build(...)`; флаги сессии отладки по-прежнему из DAP. |
 | Полоса хрома над нижним доком | `Views/WorkspaceChromeBandView.axaml` | Сетка колонок как у `MainGrid` (0–4); слот `EicasAlertsBarView` и вложенный `IdeHealthStripView`. Включение полосы IDE Health: `ShowWorkspaceHealthStrip` (`workspace_health_strip` + `IdeHealthUiSurface.BottomStrip` в capabilities). По смыслу — контейнер **представления** нижней зоны (EICAS + Strip), не «хост событий». |
-| UI полосы | `Views/IdeHealthStripView.axaml` | `ItemsControl` по `WorkspaceHealthSegments`; разные шаблоны для Power vs остальные режимы. |
-| Страница оболочки Mfd (v1 — зона Mfd) | `Views/IdeHealthMfdPageView.axaml` | Тот же `WorkspaceHealthSegments` при `ShowWorkspaceHealthMfdPage` (`workspace_health_strip` + `DedicatedPage`); в `MainWindow` — над `ChatPanelView` в колонке зоны Mfd. |
+| UI полосы | `Views/IdeHealthStripView.axaml` | `ItemsControl` по `IdeHealthSegments`; разные шаблоны для Power vs остальные режимы. |
+| Страница оболочки Mfd (v1 — зона Mfd) | `Views/IdeHealthMfdPageView.axaml` | Тот же `IdeHealthSegments` при `ShowWorkspaceHealthMfdPage` (`workspace_health_strip` + `DedicatedPage`); в `MainWindow` — над `ChatPanelView` в колонке зоны Mfd. |
 | Тесты | `CascadeIDE.Tests/IdeHealthSurfaceCompositorTests.cs`, `IdeHealthFormatTests.cs` | Композитор поверхности: порядок, `IsBuildRunning`. Формат: сегменты и `Compose` для снимка. |
 
 ---
@@ -62,8 +62,8 @@
 
 1. Состояние меняется (сборка, тесты, DAP, git, …).
 2. Свойства `WorkspaceHealth*` / `IdeHealth*` уведомляют UI (частично через `[NotifyPropertyChangedFor]`, частично явный `OnPropertyChanged` для отладки).
-3. `RebuildWorkspaceHealth()` берёт снимок через `_workspaceHealth.Build(...)` (внутри — делегаты/DAP/`UiChromeViewModel` + `IdeHealthFormat`) и вызывает `_workspaceHealthSurfaceCompositor.Compose(...)`.
-4. `WorkspaceHealthSegments` обновляется; привязка к `IdeHealthStripView` (через `WorkspaceChromeBandView`) или к `IdeHealthMfdPageView` в колонке зоны Mfd при `DedicatedPage`.
+3. `RebuildIdeHealth()` берёт снимок через `_workspaceHealth.Build(...)` (внутри — делегаты/DAP/`UiChromeViewModel` + `IdeHealthFormat`) и вызывает `_workspaceHealthSurfaceCompositor.Compose(...)`.
+4. `IdeHealthSegments` обновляется; привязка к `IdeHealthStripView` (через `WorkspaceChromeBandView`) или к `IdeHealthMfdPageView` в колонке зоны Mfd при `DedicatedPage`.
 
 Альтернативная реализация канала (агент, MCP, моки в тестах VM) подменяет только сбор снимка, не `IdeHealthSurfaceCompositor` и не разметку полосы.
 
@@ -119,7 +119,7 @@ flowchart LR
   subgraph work [IDE Health]
     Snap[IdeHealthInputSnapshot]
     Comp[IdeHealthSurfaceCompositor]
-    Seg[WorkspaceHealthSegments]
+    Seg[IdeHealthSegments]
   end
   subgraph eicas [EICAS]
     Feed[EicasFeed / провайдер]

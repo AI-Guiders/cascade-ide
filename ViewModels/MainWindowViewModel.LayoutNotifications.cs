@@ -14,6 +14,6 @@ public partial class MainWindowViewModel
             or nameof(WorkspaceHealthBuildCockpitShort)
             or nameof(WorkspaceHealthTestsCockpitShort)
             or nameof(WorkspaceHealthDebugCockpitShort))
-            RebuildWorkspaceHealth();
+            RebuildIdeHealth();
     }
 }
