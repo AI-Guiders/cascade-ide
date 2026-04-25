@@ -14,6 +14,7 @@
 0081-parametric-intent-melodies-editor-line-ranges.md
 0084-agent-edits-editor-source-of-truth-presence-channel.md
 0072-chat-topic-cards-intent-melody-keyboard-contract.md
+0096-intercom-topic-card-summary-and-cide-spine.md
 0069-markdown-preview-tool-surface-and-renderer-decoupling.md
 0026-markdown-preview-surfaces-and-placement.md
 0074-settings-ui-mfd-compact-layout-overflow.md

@@ -3,7 +3,7 @@
 **Статус:** Proposed  
 **Дата:** 2026-04-20  
 
-**Связь:** [0076](0076-ui-ux-principles-hub.md) (центр UI/UX-принципов; связный вводный текст), [0021](0021-pfd-mfd-cockpit-attention-model.md) (вторичный контур / MFD), [0068](0068-deck-row-payload-and-presentation-projection.md) (payload vs проекция), [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md) (keyboard-first, Command Melody), [0074](0074-settings-ui-mfd-compact-layout-overflow.md) (плотность и место в MFD), [0013](0013-command-surface-and-discoverability.md) (палитра), [0030](0030-command-ids-hotkeys-and-ui-registry-layers.md) (`command_id`). Тематический срез **TECH** (контракты, агент, отладка): [0077](0077-tech-principles-hub.md), [`TECH/README.md`](TECH/README.md).
+**Связь:** [0076](0076-ui-ux-principles-hub.md) (центр UI/UX-принципов; связный вводный текст), [0021](0021-pfd-mfd-cockpit-attention-model.md) (вторичный контур / MFD), [0068](0068-deck-row-payload-and-presentation-projection.md) (payload vs проекция), [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md) (keyboard-first, Command Melody), [0074](0074-settings-ui-mfd-compact-layout-overflow.md) (плотность и место в MFD), [0013](0013-command-surface-and-discoverability.md) (палитра), [0030](0030-command-ids-hotkeys-and-ui-registry-layers.md) (`command_id`), [0096](0096-intercom-topic-card-summary-and-cide-spine.md) (картотека тем в Intercom, сводка на карточке). Тематический срез **TECH** (контракты, агент, отладка): [0077](0077-tech-principles-hub.md), [`TECH/README.md`](TECH/README.md).
 
 ---
 

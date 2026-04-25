@@ -1,0 +1,61 @@
+# ADR 0096: Intercom — сводка на карточке темы (картотека) и сквозная линия CIDE
+
+**Статус:** Proposed  
+**Дата:** 2026-04-24  
+
+**Связь:** [0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md) (topic cards, overview/detail, drill-in/back, **main thread** как одна из карточек; keyboard intents), [0080](0080-intercom-naming-and-multi-party-channel-model.md) (Intercom как канал, не «окно к боту»), [0057](0057-chat-surface-pipeline-adoption.md) (chat surface pipeline), [0045](0045-agent-chat-persistence-event-log-and-projections.md) (события и проекции — куда класть summary и метки линии), [0048](0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) (чат в IDE), [0021](0021-pfd-mfd-cockpit-attention-model.md) (зона Mfd / внимание), [0095](0095-workspace-solution-ide-health-stratification.md) (пример сквозной продуктовой линии в одной сессии работы).
+
+**Отношение к [0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md):** 0072 остаётся каноном **навигации** (overview карточек тем ↔ detail треда, intent-команды, привязка к `ChatSurfaceLayout`). **0096** фиксирует **продуктовую семантику содержимого карточки** и **вторую ось** — «линию Cascade IDE» поверх тем — **без** замены pipeline и без отмены drill-in/back.
+
+---
+
+## Контекст
+
+В обсуждении Intercom уточнено: карточка темы — это **не** сжатый плоский пузырь последнего сообщения, а **картотечная** запись: **заголовок темы** (например «Пресеты MFD», «Разведение каналов / stratum», «`System.Threading.Channel`») плюс **краткая сводка** — что за тема и где мы в ней остановились, **до** провала в полный тред.
+
+Параллельно темы в одной сессии часто лежат на **одной продуктовой линии** — работа над **Cascade IDE** (ADR, кокпит, MCP, инфраструктура). Только **набор карточек** рискует дать «острова» без связки; оператору нужна ещё **сквозная линия**: куда движется общая работа CIDE, даже когда активна другая карточка.
+
+---
+
+## Решение (направление)
+
+<a id="adr0096-p1"></a>
+
+### 1. Карточка темы = заголовок + **summary** (картотека)
+
+- **Заголовок** — человекочитаемая метка темы (из `ThreadNode.Title`, переименование треда, или политика генерации из первого якоря — как в [0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md)).
+- **Сводка (summary)** — короткий текст **на карточке** (ориентир: одна–три строки в типографике overview), **не** замена detail-таймлайна: при drill-in показывается полная переписка темы.
+- Источник summary на v1+ — **направление реализации**: явное поле в метаданных треда / проекция из последнего значимого сообщения / краткая ручная фиксация; детальный контракт событий — [0045](0045-agent-chat-persistence-event-log-and-projections.md). **Не-цель:** обязательный **NLP-автосводчик** как база UX ([0072 § не-цели](0072-chat-topic-cards-intent-melody-keyboard-contract.md)).
+
+<a id="adr0096-p2"></a>
+
+### 2. Сквозная линия CIDE **ортогональна** main thread чата
+
+- **Main thread** в смысле [0072 §1](0072-chat-topic-cards-intent-melody-keyboard-contract.md) — это **один из тредов** сессии (линия переписки).
+- **Сквозная линия CIDE** — **продуктовый нарратив** сессии: куда в целом движется работа над IDE (например цепочка решений ADR, крупные вехи, «сейчас фокус — health/stratum»). Это **не обязано** совпадать с хронологией main thread **один в один**; может отображаться как:
+  - закреплённая **полоса** или **карточка-якорь** в overview;
+  - или свёрнутая **хронология вех** со ссылками на артефакты (ADR, коммиты) — конкретная вёрстка не фиксируется этим ADR.
+- **Инвариант:** сквозная линия **не подменяет** карточки тем и **не** дублирует весь главный тред; она отвечает на вопрос «**в каком месте общей траектории CIDE мы**», а карточки тем — на «**что обсуждаем по отдельным нитям**».
+
+<a id="adr0096-p3"></a>
+
+### 3. Связь с кодом (текущее и следующий шаг)
+
+- Пайплайн [0057](0057-chat-surface-pipeline-adoption.md) уже выделяет **overview**: `ChatThreadOverviewItem` в [`ChatSurfaceSnapshot`](../../Features/Chat/ChatSurfaceSnapshot.cs) — естественное место для поля **summary** (и при необходимости метки «входит в линию CIDE») при реализации [0072 план](0072-chat-topic-cards-intent-melody-keyboard-contract.md).
+- [`ChatPanelViewModel`](../../Features/Chat/ChatPanelViewModel.cs): режим overview/detail (`IsChatOverviewMode`, выбранный тред) — расширяется под **визуал картотеки** и отдельный UI-контур сквозной линии **после** стабилизации карточек по 0072.
+
+---
+
+## Не-цели
+
+- Заменить [0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md) или [0057](0057-chat-surface-pipeline-adoption.md).
+- Ввести в этом ADR полный JSON-схему событий или MCP-поля для spine.
+- Обещать паритет с внешними продуктами (Comet и т.д.) — см. [0072 Provenance](0072-chat-topic-cards-intent-melody-keyboard-contract.md).
+
+---
+
+## Последствия
+
+- При реализации topic overview **карточка** трактуется как **заголовок + summary**, а не как последний bubble.
+- Появляется явный продуктовый слой **«линия CIDE»** в UX-доках и backlog, согласованный с Intercom ([0080](0080-intercom-naming-and-multi-party-channel-model.md)).
+- Расширение `ChatThreadOverviewItem` (или эквивалента) и тестов overview — ожидаемый шаг после/вместе с [0072 план внедрения](0072-chat-topic-cards-intent-melody-keyboard-contract.md).
