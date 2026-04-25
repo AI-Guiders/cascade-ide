@@ -3,7 +3,7 @@
 **Статус:** Proposed  
 **Дата:** 2026-04-24  
 
-**Связь:** [0036](0036-cds-channel-compositor-surface-pipeline.md) (канал → CDS → композитор поверхности → поверхность), [0094](0094-ingestion-bus-afdx-analogy-and-threading-channels.md) (шина **доставки** в UI, аналогия AFDX), [0095](0095-workspace-solution-ide-health-stratification.md) (три **уровня** смысла A/B/C и поле `stratum`), [0068](0068-deck-row-payload-and-presentation-projection.md) (полезная нагрузка vs проекция), [0021](0021-pfd-mfd-cockpit-attention-model.md) (зоны внимания; EICAS отдельно от «работы»), [0089](0089-ide-omnibus-naming-and-ide-health-channel-rename.md) (IDE Health как продуктовый канал), чертёж [`workspace-health-implementation-map-v1.md`](../design/workspace-health-implementation-map-v1.md) (фактическая цепочка IDE Health), [0055](0055-skia-instrument-composition-pipeline.md) (другой контур **compute** для Skia-инструментов).
+**Связь:** [0036](0036-cds-channel-compositor-surface-pipeline.md) (канал → CDS → композитор поверхности → поверхность), [0094](0094-ingestion-bus-afdx-analogy-and-threading-channels.md) (шина **доставки** в UI, аналогия AFDX), [0095](0095-workspace-solution-ide-health-stratification.md) (три **уровня** смысла A/B/C и поле `stratum`), [0068](0068-deck-row-payload-and-presentation-projection.md) (полезная нагрузка vs проекция), [0021](0021-pfd-mfd-cockpit-attention-model.md) (зоны внимания; EICAS отдельно от «работы»), [0089](0089-ide-omnibus-naming-and-ide-health-channel-rename.md) (IDE Health как продуктовый канал), чертёж [`workspace-health-implementation-map-v1.md`](../design/workspace-health-implementation-map-v1.md) (фактическая цепочка IDE Health), [0055](0055-skia-instrument-composition-pipeline.md) (другой контур **compute** для Skia-инструментов), [`CascadeIDE.ArchitectureAnalyzers/README.md`](../../CascadeIDE.ArchitectureAnalyzers/README.md) (Roslyn **CASCOPE*** — закрепление границ слоёв на сборке; CCU — см. §4).
 
 ---
 
@@ -23,6 +23,7 @@
 | Семантика «о чём сигнал» (папка vs решение vs процесс IDE) | [0095](0095-workspace-solution-ide-health-stratification.md) | *К какому уровню* (A/B/C) отнести поле контракта |
 | Канал кабины → маршрут внимания → композиция слота → контролы | [0036](0036-cds-channel-compositor-surface-pipeline.md) | *Куда в кабине* и *как связать слот с представлением* |
 | Полезная нагрузка строки vs то, как её рисуют | [0068](0068-deck-row-payload-and-presentation-projection.md) | Разделение DTO канала и **проекции** в шаблон |
+| Guardrails слоёв на **сборке** (импорты, чувствительные места) | [`CascadeIDE.ArchitectureAnalyzers`](../../CascadeIDE.ArchitectureAnalyzers/README.md) (**CASCOPE***, в т.ч. в духе [0036](0036-cds-channel-compositor-surface-pipeline.md), [0066](0066-cockpit-ui-vs-ide-presentation-layer.md), [0079](0079-ide-display-system-ids-overlay-pipeline.md)) | Меньше **дрейфа** архитектуры при рефакторинге (человек и агент): нарушение — **диагностика компилятора**, не только заметка в ревью |
 
 Между **сырьём** (лог сборки, события DAP, git, LSP) и **DTO канала / снимком для CDS** часто нужен ещё один смысл: **агрегация, нормализация, разрешение конфликтов, дебаунс смысла** — это не всё автоматически делает ни шина 0094, ни таблица уровней 0095.
 
@@ -41,6 +42,7 @@
 
 - Нет **единого термина** для «LRU-подобного» модуля между ingestion и каналом.
 - Нет явного **инварианта**: «транспорт не считает смысл», «CDS не строит законы из сырого MSBuild», «VM в идеале оркестрирует, а не содержит всю математику сводки».
+- Для **CCU** пока нет отдельного набора CASCOPE* (в отличие от уже закреплённых границ канала/CDS/IDS): риск остаётся **документарным**, пока правило не перенесено в анализатор.
 
 Этот ADR закрывает формулировку и связку с 0036 / 0094 / 0095 **без** обязательного массового переименования типов.
 
@@ -77,12 +79,14 @@
 1. Новые агрегаты наблюдаемости и расширения MCP/CDS — проектировать как **цепочку юнитов** (возможно, один юнит на v1), с документированным входом/выходом.
 2. Существующий IDE Health **не обязан** переименовывать классы в `*ComputeUnit` в одном PR; достаточно **явно ссылаться** на этот ADR в ревью как на канон границ.
 3. Если юнит питается от ingestion ([0094](0094-ingestion-bus-afdx-analogy-and-threading-channels.md)), граница: **на выходе ingestion — типизированные события/чанки**; **на выходе юнита — смысловой снимок/DTO канала**.
+4. Когда паттерн нарушений стабилизируется (свёртка «забылась» в типе транспорта, запрещённые `using` между CCU и Avalonia/`UiChrome`/ingestion и т.п.) — оформлять правило в **[`CascadeIDE.ArchitectureAnalyzers`](../../CascadeIDE.ArchitectureAnalyzers/README.md)** (новые или расширение существующих **CASCOPE***, с тестами диагностик по образцу проекта анализаторов). Ограничения загрузки анализаторов при **RoslynMcpWorkspace** — как в README анализаторов; **канон проверки границ** для человека и CI — обычный **`dotnet build`**.
 
 ---
 
 ## 4. Последствия
 
-- Появляется **короткое слово** для ревью: «это должно быть в **CCU**, не в транспорте» / «не в CDS».
+- Появляется **короткое слово** для ревью: «это должно быть в **CCU** (юните), не в транспорте» / «не в CDS».
+- **Roslyn:** тот же контур, что уже даёт **архитектурную строгость** для кабины и IDS (**CASCOPE*** в [`CascadeIDE.ArchitectureAnalyzers`](../../CascadeIDE.ArchitectureAnalyzers/README.md)), естественно расширяется на **границы CCU**: отдельные диагностики увеличивают число правил на сборке, зато **меньше тихого дрейфа** — и у тебя в IDE, и у агента, который правит код без полного контекста ADR; markdown остаётся нормативом, **компилятор — сторожем**.
 - Меньше риска дублировать сводку для UI и для MCP в двух местах без общего **снимка**.
 - Дополнительная дисциплина документации: новые ADR про наблюдаемость могут ссылаться на **0095 + 0097** вместе.
 
