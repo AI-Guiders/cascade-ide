@@ -51,6 +51,20 @@
 2. **MCP / `get_ide_state`:** при расширении ответа — **не** добавлять поля «в общую кучу»; новые блоки должны быть помечены **`stratum`** (и при необходимости источником, например `diagnostic_source`) или вынесены в отдельные тулы, если смешение сохраняет путаницу ([0089](0089-ide-omnibus-naming-and-ide-health-channel-rename.md), [0052](0052-agent-contract-cli-and-snapshot-tests.md)).
 3. **Код текущего IDE Health:** поэтапно разнести сборку входного снимка ([`workspace-health-implementation-map-v1.md`](../design/workspace-health-implementation-map-v1.md)) на провайдеры по уровням A/B/C с **одной** точкой композиции для UI; ключи TOML `workspace_health_*` и имена VM **остаются** до отдельного ADR о миграции конфигов (как обсуждалось при 0089). Архитектурная роль «свёртки» в снимок/DTO — см. [0097](0097-cockpit-compute-units-transport-to-channel-dto.md).
 
+<a id="adr0095-stratum-ccu-examples"></a>
+
+### Пример: отдельные вычислители по стратам (не God-object)
+
+Один **God-object**, который тянет и Git, и MSBuild, и LSP в одном методе, **не** целевой паттерн. Нормативное направление — **несколько [cockpit compute units](0097-cockpit-compute-units-transport-to-channel-dto.md) (CCU)** с узким контрактом входа/выхода и **одна** точка композиции для канала/UI. Ниже — **рабочие инженерные** имена-сокращения (обсуждения, ревью, комментарии); **не** требование так назвать типы в C# в ближайшем коммите.
+
+| Уровень | Рабочее имя (англ.) | Сокращение | Типичный смысл свёртки |
+|--------|----------------------|------------|-------------------------|
+| **A** | Workspace Status Computation Unit | **WSCU** | каталог(и) workspace, VCS, субмодули, «грязь» дерева |
+| **B** | Solution Status Computation Unit | **SSCU** | открытое решение, сборка, тесты, TFM/конфигурация |
+| **C** | IDE Status Computation Unit | **ISCU** | процесс IDE, LSP, MCP, окружение ([0023](0023-environment-readiness-glance.md)) |
+
+**ISCU** — про **уровень C** и *статус хоста/IDE*; **не** путать с **IDS** ([0079](0079-ide-display-system-ids-overlay-pipeline.md) — *Ide Display System*, оверлеи). При письме «в одном предложении с IDS» лучше писать **ISCU** полностью или явно дискриминировать аббревиатуру.
+
 ---
 
 ## Границы и открытые вопросы
