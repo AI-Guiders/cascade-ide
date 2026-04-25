@@ -28,7 +28,7 @@ public partial class MainWindowViewModel
             var v = string.IsNullOrWhiteSpace(value) ? MarkdownLspProviderIds.Off : value.Trim();
             if (!SetProperty(ref _markdownLspProvider, v))
                 return;
-            _settings.Languages.Markdown.Provider = v;
+            _settings.Languages.Markdown.SetMode(v);
             SaveSettingsIfChanged();
             OnPropertyChanged(nameof(IsMarkdownLspProcessSelected));
             _ = RestartMarkdownLanguageServerAsync();
@@ -43,7 +43,7 @@ public partial class MainWindowViewModel
             var v = value ?? "";
             if (!SetProperty(ref _markdownLspExecutable, v))
                 return;
-            _settings.Languages.Markdown.Executable = v;
+            _settings.Languages.Markdown.SetLaunchOverrides(_markdownLspProvider, v, _markdownLspArguments);
             SaveSettingsIfChanged();
             _ = RestartMarkdownLanguageServerAsync();
         }
@@ -57,7 +57,7 @@ public partial class MainWindowViewModel
             var v = value ?? "";
             if (!SetProperty(ref _markdownLspArguments, v))
                 return;
-            _settings.Languages.Markdown.Arguments = v;
+            _settings.Languages.Markdown.SetLaunchOverrides(_markdownLspProvider, _markdownLspExecutable, v);
             SaveSettingsIfChanged();
             _ = RestartMarkdownLanguageServerAsync();
         }
@@ -70,11 +70,12 @@ public partial class MainWindowViewModel
             _workspaceDiagnostics.SetMarkdownLspDiagnosticsHost(null);
             _markdownLspHost?.Dispose();
             _markdownLspHost = null;
+            var markdownLsp = _settings.Languages.Markdown.ResolveForRuntime();
             return (
                 Workspace.SolutionPath ?? "",
-                _settings.Languages.Markdown.Provider,
-                _settings.Languages.Markdown.Executable,
-                _settings.Languages.Markdown.Arguments);
+                markdownLsp.Mode,
+                markdownLsp.Executable,
+                markdownLsp.Arguments);
         });
 
         if (string.Equals(snap.Item2, MarkdownLspProviderIds.Off, StringComparison.OrdinalIgnoreCase))

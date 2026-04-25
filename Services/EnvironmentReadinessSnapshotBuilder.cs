@@ -371,9 +371,8 @@ public static class EnvironmentReadinessSnapshotBuilder
         string? solutionPath,
         CSharpLspDiagnosticsHost? host)
     {
-        var provider = string.IsNullOrWhiteSpace(settings.Languages.CSharp.Provider)
-            ? CSharpLspProviderIds.ParseOnly
-            : settings.Languages.CSharp.Provider.Trim();
+        var csharpLsp = settings.Languages.CSharp.ResolveForRuntime();
+        var provider = csharpLsp.Mode;
 
         if (string.Equals(provider, CSharpLspProviderIds.ParseOnly, StringComparison.OrdinalIgnoreCase))
         {
@@ -399,8 +398,8 @@ public static class EnvironmentReadinessSnapshotBuilder
         var (exe, _) = CSharpLspProviderIds.ResolveProcessArgs(
             provider,
             solutionPath,
-            settings.Languages.CSharp.Executable,
-            settings.Languages.CSharp.Arguments);
+            csharpLsp.Executable,
+            csharpLsp.Arguments);
 
         var exeHint = string.IsNullOrWhiteSpace(exe) ? provider : $"{provider}: {exe}";
 
@@ -437,9 +436,8 @@ public static class EnvironmentReadinessSnapshotBuilder
         string? solutionPath,
         MarkdownLspDiagnosticsHost? host)
     {
-        var provider = string.IsNullOrWhiteSpace(settings.Languages.Markdown.Provider)
-            ? MarkdownLspProviderIds.Off
-            : settings.Languages.Markdown.Provider.Trim();
+        var markdownLsp = settings.Languages.Markdown.ResolveForRuntime();
+        var provider = markdownLsp.Mode;
 
         if (string.Equals(provider, MarkdownLspProviderIds.Off, StringComparison.OrdinalIgnoreCase))
         {
@@ -464,8 +462,8 @@ public static class EnvironmentReadinessSnapshotBuilder
 
         var (exe, args) = MarkdownLspProviderIds.ResolveProcessArgs(
             provider,
-            settings.Languages.Markdown.Executable,
-            settings.Languages.Markdown.Arguments);
+            markdownLsp.Executable,
+            markdownLsp.Arguments);
 
         var argHint = string.IsNullOrWhiteSpace(args) ? "" : $" {args}";
         var exeHint = string.IsNullOrWhiteSpace(exe) ? $"{provider}" : $"{provider}: {exe}{argHint}";

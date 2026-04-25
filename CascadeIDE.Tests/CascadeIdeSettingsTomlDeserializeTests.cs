@@ -156,4 +156,45 @@ public sealed class CascadeIdeSettingsTomlDeserializeTests
         Assert.Equal("mfd", s.Ai.Chat.SettingsPresentation);
         Assert.True(s.Ai.Chat.ShowThinkingInHistory);
     }
+
+    [Fact]
+    public void Deserialize_LanguagesCSharpNestedMode_ParsesExpected()
+    {
+        const string text =
+            """
+            [languages.csharp]
+            mode = "OmniSharp"
+
+            [languages.csharp.omni_sharp]
+            executable = "C:\\omnisharp-win-x64-net6.0\\OmniSharp.exe"
+            arguments = "--languageserver --hostPID 1234"
+            """;
+
+        var s = Deserialize(text);
+        var runtime = s.Languages.CSharp.ResolveForRuntime();
+        Assert.Equal("OmniSharp", runtime.Mode);
+        Assert.Equal("C:\\omnisharp-win-x64-net6.0\\OmniSharp.exe", runtime.Executable);
+        Assert.Equal("--languageserver --hostPID 1234", runtime.Arguments);
+    }
+
+    [Fact]
+    public void Deserialize_LanguagesMarkdownNestedMode_ParsesExpected()
+    {
+        const string text =
+            """
+            [languages.markdown]
+            mode = "Marksman"
+
+            [languages.markdown.marksman]
+            executable = "C:\\tools\\marksman.exe"
+            arguments = "--stdio"
+            """;
+
+        var s = Deserialize(text);
+        var runtime = s.Languages.Markdown.ResolveForRuntime();
+        Assert.Equal("Marksman", runtime.Mode);
+        Assert.Equal("C:\\tools\\marksman.exe", runtime.Executable);
+        Assert.Equal("--stdio", runtime.Arguments);
+    }
+
 }

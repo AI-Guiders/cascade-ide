@@ -15,7 +15,7 @@ public sealed class EnvironmentReadinessSnapshotBuilderTests
         {
             Languages = new LanguagesSettings
             {
-                CSharp = new LanguageServerProfile { Provider = CSharpLspProviderIds.ParseOnly }
+                CSharp = new CSharpLanguageServerSettings { Mode = CSharpLspProviderIds.ParseOnly }
             }
         };
         var rows = EnvironmentReadinessSnapshotBuilder.BuildLspRows(
@@ -34,8 +34,8 @@ public sealed class EnvironmentReadinessSnapshotBuilderTests
         {
             Languages = new LanguagesSettings
             {
-                CSharp = new LanguageServerProfile { Provider = CSharpLspProviderIds.ParseOnly },
-                Markdown = new LanguageServerProfile { Provider = MarkdownLspProviderIds.Off }
+                CSharp = new CSharpLanguageServerSettings { Mode = CSharpLspProviderIds.ParseOnly },
+                Markdown = new MarkdownLanguageServerSettings { Mode = MarkdownLspProviderIds.Off }
             }
         };
         var rows = EnvironmentReadinessSnapshotBuilder.BuildLspRows(settings, null, null, null);
@@ -50,7 +50,7 @@ public sealed class EnvironmentReadinessSnapshotBuilderTests
         {
             Languages = new LanguagesSettings
             {
-                CSharp = new LanguageServerProfile { Provider = CSharpLspProviderIds.CSharpLs }
+                CSharp = new CSharpLanguageServerSettings { Mode = CSharpLspProviderIds.CSharpLs }
             }
         };
         var rows = EnvironmentReadinessSnapshotBuilder.BuildLspRows(settings, null, null, null);
@@ -66,8 +66,8 @@ public sealed class EnvironmentReadinessSnapshotBuilderTests
         {
             Languages = new LanguagesSettings
             {
-                CSharp = new LanguageServerProfile { Provider = CSharpLspProviderIds.ParseOnly },
-                Markdown = new LanguageServerProfile { Provider = MarkdownLspProviderIds.Off }
+                CSharp = new CSharpLanguageServerSettings { Mode = CSharpLspProviderIds.ParseOnly },
+                Markdown = new MarkdownLanguageServerSettings { Mode = MarkdownLspProviderIds.Off }
             }
         };
 
@@ -170,8 +170,8 @@ public sealed class EnvironmentReadinessSnapshotBuilderTests
         {
             Languages = new LanguagesSettings
             {
-                CSharp = new LanguageServerProfile { Provider = CSharpLspProviderIds.ParseOnly },
-                Markdown = new LanguageServerProfile { Provider = MarkdownLspProviderIds.Off }
+                CSharp = new CSharpLanguageServerSettings { Mode = CSharpLspProviderIds.ParseOnly },
+                Markdown = new MarkdownLanguageServerSettings { Mode = MarkdownLspProviderIds.Off }
             }
         };
 
@@ -192,8 +192,8 @@ public sealed class EnvironmentReadinessSnapshotBuilderTests
         {
             Languages = new LanguagesSettings
             {
-                CSharp = new LanguageServerProfile { Provider = CSharpLspProviderIds.ParseOnly },
-                Markdown = new LanguageServerProfile { Provider = MarkdownLspProviderIds.Off }
+                CSharp = new CSharpLanguageServerSettings { Mode = CSharpLspProviderIds.ParseOnly },
+                Markdown = new MarkdownLanguageServerSettings { Mode = MarkdownLspProviderIds.Off }
             }
         };
 

@@ -51,12 +51,16 @@ splitters_locked = false
 view = "list"
 
 [languages.csharp]
-provider = "ParseOnly"
+mode = "ParseOnly"
+
+[languages.csharp.parse_only]
 executable = ""
 arguments = ""
 
 [languages.markdown]
-provider = "Marksman"
+mode = "Marksman"
+
+[languages.markdown.marksman]
 executable = ""
 arguments = ""
 

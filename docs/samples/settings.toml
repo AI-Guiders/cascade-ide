@@ -110,12 +110,16 @@ view = "list"
 depth = "file"
 
 [languages.csharp]
-provider = "OmniSharp"
+mode = "OmniSharp"
+
+[languages.csharp.omni_sharp]
 executable = ""
 arguments = ""
 
 [languages.markdown]
-provider = "Marksman"
+mode = "Marksman"
+
+[languages.markdown.marksman]
 executable = ""
 arguments = ""
 

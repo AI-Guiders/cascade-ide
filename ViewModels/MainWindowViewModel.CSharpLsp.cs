@@ -28,7 +28,7 @@ public partial class MainWindowViewModel
             var v = string.IsNullOrWhiteSpace(value) ? CSharpLspProviderIds.ParseOnly : value.Trim();
             if (!SetProperty(ref _csharpLspProvider, v))
                 return;
-            _settings.Languages.CSharp.Provider = v;
+            _settings.Languages.CSharp.SetMode(v);
             SaveSettingsIfChanged();
             OnPropertyChanged(nameof(IsCSharpLspProcessSelected));
             _ = RestartCSharpLanguageServerAsync();
@@ -43,7 +43,7 @@ public partial class MainWindowViewModel
             var v = value ?? "";
             if (!SetProperty(ref _csharpLspExecutable, v))
                 return;
-            _settings.Languages.CSharp.Executable = v;
+            _settings.Languages.CSharp.SetLaunchOverrides(_csharpLspProvider, v, _csharpLspArguments);
             SaveSettingsIfChanged();
             _ = RestartCSharpLanguageServerAsync();
         }
@@ -57,7 +57,7 @@ public partial class MainWindowViewModel
             var v = value ?? "";
             if (!SetProperty(ref _csharpLspArguments, v))
                 return;
-            _settings.Languages.CSharp.Arguments = v;
+            _settings.Languages.CSharp.SetLaunchOverrides(_csharpLspProvider, _csharpLspExecutable, v);
             SaveSettingsIfChanged();
             _ = RestartCSharpLanguageServerAsync();
         }
@@ -70,11 +70,12 @@ public partial class MainWindowViewModel
             _workspaceDiagnostics.SetLspDiagnosticsHost(null);
             _csharpLspHost?.Dispose();
             _csharpLspHost = null;
+            var csharpLsp = _settings.Languages.CSharp.ResolveForRuntime();
             return (
                 Workspace.SolutionPath ?? "",
-                _settings.Languages.CSharp.Provider,
-                _settings.Languages.CSharp.Executable,
-                _settings.Languages.CSharp.Arguments);
+                csharpLsp.Mode,
+                csharpLsp.Executable,
+                csharpLsp.Arguments);
         });
 
         if (string.Equals(snap.Item2, CSharpLspProviderIds.ParseOnly, StringComparison.OrdinalIgnoreCase))

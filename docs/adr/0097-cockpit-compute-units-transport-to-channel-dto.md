@@ -32,9 +32,9 @@
 По [`workspace-health-implementation-map-v1.md`](../design/workspace-health-implementation-map-v1.md) цепочка уже разведена:
 
 - **`IdeHealthInputSnapshot`** — нормализованные входы до композиции сегментов.
-- **`IdeHealthFormat`** — чистая логика строк (unit-test без VM).
+- **`IdeHealthFormattingUnit`** — чистая логика строк (unit-test без VM).
 - **`IdeHealthSurfaceCompositor`** — порядок и состав сегментов для канала.
-- **`IIdeHealthChannel` / `IdeHealthProvider`** — сбор снимка из делегатов и окружения.
+- **`IIdeHealthChannel` / `IdeHealthSnapshotUnit`** — сбор снимка из делегатов и окружения.
 
 То есть **юниты свёртки уже есть**, но **именованный архитектурный слой** в глоссарии ADR не был выделен; новые фичи рискуют снова свалить свёртку в `MainWindowViewModel` или в транспорт 0094 «по пути».
 
@@ -64,11 +64,11 @@
 2. **Юнит не подменяет CDS:** не решает, в какой регион кабины «имеет право» попасть канал — это контур [0036](0036-cds-channel-compositor-surface-pipeline.md) п.2.
 3. **Юнит не является поверхностью Avalonia:** не владеет деревом контролов; публикация результата на UI — через существующие VM/планировщик ([0004](0004-ui-thread-marshaling.md)).
 4. **Выход, если относится к Health-подобным данным,** при расширении контрактов должен быть совместим с дисциплиной [0095](0095-workspace-solution-ide-health-stratification.md) (не сваливать A/B/C в одно непомеченное поле без осознанного исключения).
-5. **Тестируемость:** предпочтительно тестировать юнит **без** загрузки `MainWindow` и без полного дерева UI (как `IdeHealthFormat` и композитор в тестах из чертежа IDE Health).
+5. **Тестируемость:** предпочтительно тестировать юнит **без** загрузки `MainWindow` и без полного дерева UI (как `IdeHealthFormattingUnit` и композитор в тестах из чертежа IDE Health).
 
 ### 2.3 Роль `MainWindowViewModel` и оркестраторов
 
-Подписка на `PropertyChanged`, вызов `RebuildIdeHealth()` и связывание делегатов с `IdeHealthProvider` — это **оркестрация** (клей между миром IDE и каналом). По мере роста правил **свёртки** их следует **опускать вниз** в `Cockpit/*` (или выделенные сервисы снимков), оставляя VM тоньше — в духе уже принятого разделения в чертеже IDE Health.
+Подписка на `PropertyChanged`, вызов `RebuildIdeHealth()` и связывание делегатов с `IdeHealthSnapshotUnit` — это **оркестрация** (клей между миром IDE и каналом). По мере роста правил **свёртки** их следует **опускать вниз** в `Cockpit/*` (или выделенные сервисы снимков), оставляя VM тоньше — в духе уже принятого разделения в чертеже IDE Health.
 
 ### 2.4 Другие контуры
 
@@ -94,7 +94,22 @@
 
 ---
 
-## 5. Не цели
+## 5. Состояние реализации (эталон в коде)
+
+**Канал IDE Health** уже реализует паттерн CCU end-to-end **без** суффикса `*ComputeUnit` в именах типов (см. §3 ADR: strangler). В коде закреплены контракты `ICockpitComputeUnit` и `ICockpitComputeUnitPayload` (`Cockpit/ComputingUnits/ICockpitComputeUnit.cs`). Карта файлов и поток: [`workspace-health-implementation-map-v1.md`](../design/workspace-health-implementation-map-v1.md); краткий указатель: [`Cockpit/Channels/IdeHealth/README.md`](../../Cockpit/Channels/IdeHealth/README.md).
+
+| Слой 0097 | Реализация |
+|-----------|------------|
+| Вход → снимок | `IdeHealthInputSnapshot` (`ICockpitComputeUnitPayload`) / `IdeHealthSegmentInput` + `IdeHealthStratum` (ADR 0095) |
+| Свёртка текста (pure) | `IdeHealthFormattingUnit` (`ICockpitComputeUnit`, `Default`) |
+| Сбор снимка из делегатов / DAP | `IdeHealthSnapshotUnit` → `IIdeHealthChannel` (`ICockpitComputeUnit`) |
+| Композиция сегментов для канала | `IIdeHealthSurfaceCompositor` / `IdeHealthSurfaceCompositor` (`ICockpitComputeUnit`, `Cockpit/Composition/IdeHealth/`) |
+
+Новые каналы наблюдаемости — по той же дисциплине: отдельный снимок, чистая свёртка, композиция, **без** смешения с [0094](0094-ingestion-bus-afdx-analogy-and-threading-channels.md). **CASCOPE** для CCU — [§3](0097-cockpit-compute-units-transport-to-channel-dto.md#3-направление-на-реализацию-strangler) (по мере анти-паттернов).
+
+---
+
+## 6. Не цели
 
 - Сертификация, DO-178, физические LRU.
 - Обязательное введение нового namespace или суффикса во всех типах `Cockpit/`.
@@ -102,8 +117,8 @@
 
 ---
 
-## 6. Отклонённые альтернативы
+## 7. Отклонённые альтернативы
 
 - **Называть любой сервис «юнитом»** — отклонено: без контракта снимка/DTO термин бессмыслен.
 - **Расширять 0094, чтобы он же строил сводки Health** — отклонено: смешивает транспорт и вычисление смысла.
-- **Вкладывать всю математику в «композитор» из 0036** — отклонено: в 0036 композитор отвечает на связку **слота и представления** канала; чистая свёрка сырья в снимок логичнее как **предыдущий** или **вложенный** шаг (как `IdeHealthFormat` до `IdeHealthSurfaceCompositor`).
+- **Вкладывать всю математику в «композитор» из 0036** — отклонено: в 0036 композитор отвечает на связку **слота и представления** канала; чистая свёрка сырья в снимок логичнее как **предыдущий** или **вложенный** шаг (как `IdeHealthFormattingUnit` до `IdeHealthSurfaceCompositor`).

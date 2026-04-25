@@ -82,17 +82,48 @@ public sealed partial class CascadeIdeSettings
             },
             Languages = new LanguagesSettings
             {
-                CSharp = new LanguageServerProfile
+                CSharp = new CSharpLanguageServerSettings
                 {
-                    Provider = Languages.CSharp.Provider,
-                    Executable = Languages.CSharp.Executable,
-                    Arguments = Languages.CSharp.Arguments,
+                    Mode = Languages.CSharp.Mode,
+                    ParseOnly = new LanguageServerLaunchProfile
+                    {
+                        Executable = Languages.CSharp.ParseOnly.Executable,
+                        Arguments = Languages.CSharp.ParseOnly.Arguments,
+                    },
+                    OmniSharp = new LanguageServerLaunchProfile
+                    {
+                        Executable = Languages.CSharp.OmniSharp.Executable,
+                        Arguments = Languages.CSharp.OmniSharp.Arguments,
+                    },
+                    CSharpLs = new LanguageServerLaunchProfile
+                    {
+                        Executable = Languages.CSharp.CSharpLs.Executable,
+                        Arguments = Languages.CSharp.CSharpLs.Arguments,
+                    },
+                    Custom = new LanguageServerLaunchProfile
+                    {
+                        Executable = Languages.CSharp.Custom.Executable,
+                        Arguments = Languages.CSharp.Custom.Arguments,
+                    },
                 },
-                Markdown = new LanguageServerProfile
+                Markdown = new MarkdownLanguageServerSettings
                 {
-                    Provider = Languages.Markdown.Provider,
-                    Executable = Languages.Markdown.Executable,
-                    Arguments = Languages.Markdown.Arguments,
+                    Mode = Languages.Markdown.Mode,
+                    Off = new LanguageServerLaunchProfile
+                    {
+                        Executable = Languages.Markdown.Off.Executable,
+                        Arguments = Languages.Markdown.Off.Arguments,
+                    },
+                    Marksman = new LanguageServerLaunchProfile
+                    {
+                        Executable = Languages.Markdown.Marksman.Executable,
+                        Arguments = Languages.Markdown.Marksman.Arguments,
+                    },
+                    Custom = new LanguageServerLaunchProfile
+                    {
+                        Executable = Languages.Markdown.Custom.Executable,
+                        Arguments = Languages.Markdown.Custom.Arguments,
+                    },
                 },
             },
             Markdown = new MarkdownSettings
@@ -240,15 +271,36 @@ public sealed partial class CascadeIdeSettings
     {
         if (a is null || b is null)
             return a == b;
-        return LanguageServerProfileEquals(a.CSharp, b.CSharp)
-            && LanguageServerProfileEquals(a.Markdown, b.Markdown);
+        return CSharpLanguageServerSettingsEquals(a.CSharp, b.CSharp)
+            && MarkdownLanguageServerSettingsEquals(a.Markdown, b.Markdown);
     }
 
-    private static bool LanguageServerProfileEquals(LanguageServerProfile? a, LanguageServerProfile? b)
+    private static bool CSharpLanguageServerSettingsEquals(CSharpLanguageServerSettings? a, CSharpLanguageServerSettings? b)
     {
         if (a is null || b is null)
             return a == b;
-        return a.Provider.Is(b.Provider) && a.Executable.Is(b.Executable) && a.Arguments.Is(b.Arguments);
+        return a.Mode.Is(b.Mode)
+            && LanguageServerLaunchProfileEquals(a.ParseOnly, b.ParseOnly)
+            && LanguageServerLaunchProfileEquals(a.OmniSharp, b.OmniSharp)
+            && LanguageServerLaunchProfileEquals(a.CSharpLs, b.CSharpLs)
+            && LanguageServerLaunchProfileEquals(a.Custom, b.Custom);
+    }
+
+    private static bool LanguageServerLaunchProfileEquals(LanguageServerLaunchProfile? a, LanguageServerLaunchProfile? b)
+    {
+        if (a is null || b is null)
+            return a == b;
+        return a.Executable.Is(b.Executable) && a.Arguments.Is(b.Arguments);
+    }
+
+    private static bool MarkdownLanguageServerSettingsEquals(MarkdownLanguageServerSettings? a, MarkdownLanguageServerSettings? b)
+    {
+        if (a is null || b is null)
+            return a == b;
+        return a.Mode.Is(b.Mode)
+            && LanguageServerLaunchProfileEquals(a.Off, b.Off)
+            && LanguageServerLaunchProfileEquals(a.Marksman, b.Marksman)
+            && LanguageServerLaunchProfileEquals(a.Custom, b.Custom);
     }
 
     private static bool MarkdownEquals(MarkdownSettings? a, MarkdownSettings? b)

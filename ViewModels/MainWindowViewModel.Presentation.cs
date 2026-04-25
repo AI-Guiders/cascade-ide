@@ -1,6 +1,8 @@
 using CascadeIDE.Cockpit;
 using CascadeIDE.Cockpit.Cds;
 using CascadeIDE.Cockpit.Channels.WorkspaceHealth;
+using CascadeIDE.Cockpit.ComputingUnits;
+using CascadeIDE.Cockpit.ComputingUnits.IdeHealth;
 using CascadeIDE.Cockpit.Composition;
 using CascadeIDE.Cockpit.Composition.HostSurface;
 using CascadeIDE.Cockpit.Composition.Shell;
@@ -241,7 +243,7 @@ public partial class MainWindowViewModel
     public bool IsImpactedTestsBadgeVisible => ImpactedTestsBadge > 0;
     public bool IsActiveTaskProgressVisible => ActiveTaskProgress > 0;
 
-    /// <summary>Строки из канала Workspace Health (форматирование в <see cref="IdeHealthFormat"/>).</summary>
+    /// <summary>Строки из канала IDE Health (свёртка <see cref="IdeHealthFormattingUnit"/> / <see cref="ICockpitComputeUnit"/>).</summary>
     public string WorkspaceHealthBuildText => _workspaceHealth.Build(IdeHealthChannelContext.Default).Build.LineText;
 
     /// <summary>Короткий статус для «кольца» сборки в Power cockpit.</summary>

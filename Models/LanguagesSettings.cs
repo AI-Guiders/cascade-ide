@@ -1,25 +1,133 @@
+using System.Text.Json.Serialization;
+
 namespace CascadeIDE.Models;
 
 /// <summary>Языковые серверы. TOML: <c>[languages.csharp]</c>, <c>[languages.markdown]</c>.</summary>
 public sealed class LanguagesSettings
 {
-    public LanguageServerProfile CSharp { get; set; } = new()
-    {
-        Provider = "ParseOnly"
-    };
+    [JsonPropertyName("csharp")]
+    public CSharpLanguageServerSettings CSharp { get; set; } = new();
 
-    public LanguageServerProfile Markdown { get; set; } = new()
-    {
-        Provider = "Off"
-    };
+    [JsonPropertyName("markdown")]
+    public MarkdownLanguageServerSettings Markdown { get; set; } = new();
 }
 
-/// <summary>Профиль запуска LSP (C# / Markdown).</summary>
-public sealed class LanguageServerProfile
+/// <summary>C# LSP c дискриминатором режима и вложенными профилями запуска.</summary>
+public sealed class CSharpLanguageServerSettings
 {
-    public string Provider { get; set; } = "";
+    /// <summary>Дискриминатор режима (ParseOnly / OmniSharp / CSharpLs / Custom).</summary>
+    [JsonPropertyName("mode")]
+    public string Mode { get; set; } = "ParseOnly";
 
+    [JsonPropertyName("parse_only")]
+    public LanguageServerLaunchProfile ParseOnly { get; set; } = new();
+
+    [JsonPropertyName("omni_sharp")]
+    public LanguageServerLaunchProfile OmniSharp { get; set; } = new();
+
+    [JsonPropertyName("csharp_ls")]
+    public LanguageServerLaunchProfile CSharpLs { get; set; } = new();
+
+    [JsonPropertyName("custom")]
+    public LanguageServerLaunchProfile Custom { get; set; } = new();
+
+    public string GetNormalizedMode()
+    {
+        var mode = Mode;
+        if (string.IsNullOrWhiteSpace(mode))
+            return "ParseOnly";
+        return mode.Trim();
+    }
+
+    public (string Mode, string Executable, string Arguments) ResolveForRuntime()
+    {
+        var mode = GetNormalizedMode();
+        var profile = GetProfileForMode(mode);
+        return (mode, profile.Executable ?? "", profile.Arguments ?? "");
+    }
+
+    public void SetMode(string mode)
+    {
+        var normalized = string.IsNullOrWhiteSpace(mode) ? "ParseOnly" : mode.Trim();
+        Mode = normalized;
+    }
+
+    public void SetLaunchOverrides(string mode, string executable, string arguments)
+    {
+        var profile = GetProfileForMode(mode);
+        profile.Executable = executable ?? "";
+        profile.Arguments = arguments ?? "";
+    }
+
+    private LanguageServerLaunchProfile GetProfileForMode(string mode)
+    {
+        return mode switch
+        {
+            "OmniSharp" => OmniSharp,
+            "CSharpLs" => CSharpLs,
+            "Custom" => Custom,
+            _ => ParseOnly,
+        };
+    }
+}
+
+public sealed class LanguageServerLaunchProfile
+{
     public string Executable { get; set; } = "";
 
     public string Arguments { get; set; } = "";
+}
+
+/// <summary>Markdown LSP c дискриминатором режима и вложенными профилями запуска.</summary>
+public sealed class MarkdownLanguageServerSettings
+{
+    [JsonPropertyName("mode")]
+    public string Mode { get; set; } = "Off";
+
+    [JsonPropertyName("off")]
+    public LanguageServerLaunchProfile Off { get; set; } = new();
+
+    [JsonPropertyName("marksman")]
+    public LanguageServerLaunchProfile Marksman { get; set; } = new();
+
+    [JsonPropertyName("custom")]
+    public LanguageServerLaunchProfile Custom { get; set; } = new();
+
+    public string GetNormalizedMode()
+    {
+        var mode = Mode;
+        if (string.IsNullOrWhiteSpace(mode))
+            return "Off";
+        return mode.Trim();
+    }
+
+    public (string Mode, string Executable, string Arguments) ResolveForRuntime()
+    {
+        var mode = GetNormalizedMode();
+        var profile = GetProfileForMode(mode);
+        return (mode, profile.Executable ?? "", profile.Arguments ?? "");
+    }
+
+    public void SetMode(string mode)
+    {
+        var normalized = string.IsNullOrWhiteSpace(mode) ? "Off" : mode.Trim();
+        Mode = normalized;
+    }
+
+    public void SetLaunchOverrides(string mode, string executable, string arguments)
+    {
+        var profile = GetProfileForMode(mode);
+        profile.Executable = executable ?? "";
+        profile.Arguments = arguments ?? "";
+    }
+
+    private LanguageServerLaunchProfile GetProfileForMode(string mode)
+    {
+        return mode switch
+        {
+            "Marksman" => Marksman,
+            "Custom" => Custom,
+            _ => Off,
+        };
+    }
 }

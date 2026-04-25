@@ -13,6 +13,7 @@ using CascadeIDE.Features.Terminal;
 using CascadeIDE.Cockpit.Channels.Eicas;
 using CascadeIDE.Cockpit.Channels.EnvironmentReadiness;
 using CascadeIDE.Cockpit.Channels.WorkspaceHealth;
+using CascadeIDE.Cockpit.ComputingUnits.IdeHealth;
 using CascadeIDE.Cockpit.Composition.EnvironmentReadiness;
 using CascadeIDE.Cockpit.Composition.WorkspaceHealth;
 using CascadeIDE.Cockpit.Composition.HostSurface;
@@ -156,16 +157,14 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         new UiChromeCapabilitiesModule().Register(_capabilities);
         new Features.Markdown.MarkdownCapabilitiesModule().Register(_capabilities);
 
-        _csharpLspProvider = string.IsNullOrEmpty(_settings.Languages.CSharp.Provider)
-            ? CSharpLspProviderIds.ParseOnly
-            : _settings.Languages.CSharp.Provider;
-        _csharpLspExecutable = _settings.Languages.CSharp.Executable ?? "";
-        _csharpLspArguments = _settings.Languages.CSharp.Arguments ?? "";
-        _markdownLspProvider = string.IsNullOrEmpty(_settings.Languages.Markdown.Provider)
-            ? MarkdownLspProviderIds.Off
-            : _settings.Languages.Markdown.Provider;
-        _markdownLspExecutable = _settings.Languages.Markdown.Executable ?? "";
-        _markdownLspArguments = _settings.Languages.Markdown.Arguments ?? "";
+        var csharpLsp = _settings.Languages.CSharp.ResolveForRuntime();
+        _csharpLspProvider = csharpLsp.Mode;
+        _csharpLspExecutable = csharpLsp.Executable;
+        _csharpLspArguments = csharpLsp.Arguments;
+        var markdownLsp = _settings.Languages.Markdown.ResolveForRuntime();
+        _markdownLspProvider = markdownLsp.Mode;
+        _markdownLspExecutable = markdownLsp.Executable;
+        _markdownLspArguments = markdownLsp.Arguments;
 
         _mcpClientService = new Services.McpClientService(Services.McpExternalServersJsonResolver.ResolveEffectiveJson(_settings));
         _autonomousAgentService = CreateAutonomousAgentService(_mcpClientService);
@@ -179,10 +178,11 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _mcpBuildTest = new Services.McpDotnetBuildTestService(_dotnetRunner);
         _mcpAgentNotes = new Services.McpAgentNotesService();
 
-        _workspaceHealth = new IdeHealthProvider(
+        _workspaceHealth = new IdeHealthSnapshotUnit(
             () => IsBuilding,
             () => LastTestSummary,
             () => ImpactedTestsBadge,
+            () => StartupProjectCsprojFullPath,
             _dapDebug,
             () => Chrome.WorkspaceHealthGitText,
             () => Chrome.WorkspaceHealthGitCockpitShort);
