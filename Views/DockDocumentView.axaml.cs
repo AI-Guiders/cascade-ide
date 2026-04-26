@@ -163,6 +163,7 @@ public partial class DockDocumentView : UserControl
 
         _stabilizedInputCts = new CancellationTokenSource();
         _editorSurface = new AvaloniaEditSurfaceAdapter(_editor, _docVm.Doc.FilePath);
+        _hudEngine.ConfigureDiagnostics(p => _vm!.WorkspaceDiagnostics.GetStripsForFile(p));
         _stabilizedInput = new EditorStabilizedInputThrottler(UiScheduler.Default, TimeSpan.FromMilliseconds(24));
         _stabilizedInput.Start(
             d =>
@@ -234,6 +235,7 @@ public partial class DockDocumentView : UserControl
                 // ignore
             }
         }
+        _hudEngine.ConfigureDiagnostics(null);
         _stabilizedInputCts?.Dispose();
         _stabilizedInput = null;
         _stabilizedInputCts = null;
