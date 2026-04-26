@@ -1,9 +1,9 @@
 #nullable enable
 
-namespace CascadeIDE.Services;
+namespace CascadeIDE.Features.EnvironmentReadiness.DataAcquisition;
 
 /// <summary>
-/// Проверка существования исполняемого файла: явный путь или поиск по PATH (+ PATHEXT на Windows), как для NETCOREDBG_PATH.
+/// Проверка существования исполняемого файла: явный путь или поиск по PATH (+ PATHEXT на Windows), как для NETCOREDBG_PATH (ADR 0023, DAL).
 /// </summary>
 public static class EnvironmentReadinessExecutablePathProbe
 {

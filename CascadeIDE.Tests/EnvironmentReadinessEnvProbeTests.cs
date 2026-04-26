@@ -1,6 +1,5 @@
 using CascadeIDE.Cockpit.Composition.EnvironmentReadiness;
 using CascadeIDE.Models;
-using CascadeIDE.Services;
 using Xunit;
 
 namespace CascadeIDE.Tests;

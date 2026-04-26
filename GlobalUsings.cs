@@ -1,5 +1,6 @@
 global using CascadeIDE.Services;
 global using CascadeIDE.Features.EnvironmentReadiness.Application;
+global using CascadeIDE.Features.EnvironmentReadiness.DataAcquisition;
 global using CascadeIDE.Cockpit.ComputingUnits.Launch;
 global using CascadeIDE.Features.Launch.DataAcquisition;
 global using CascadeIDE.Features.Git.DataAcquisition;

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using CascadeIDE.Cockpit.DataBus;
 using CascadeIDE.Models;
 using CascadeIDE.Services.Lsp;
@@ -127,170 +128,118 @@ public static class EnvironmentReadinessSnapshotBuilder
     private static AnnunciatorLampItem BuildAgentNotesFileRow(string? raw)
     {
         const string title = WellKnownEnv.AgentNotesFile;
-        if (string.IsNullOrWhiteSpace(raw))
+        return EnvironmentReadinessPathAcquisition.ClassifyAgentNotesFilePath(raw) switch
         {
-            return new AnnunciatorLampItem(
+            AgentNotesFilePathKind.Unset => new AnnunciatorLampItem(
                 EnvironmentReadinessCellIds.AgentNotesFile,
                 title,
                 "Не задана: заметки в workspace/.cascade-ide/agent-notes.md при открытом решении; либо задай эту переменную для одного глобального файла.",
                 AnnunciatorLampLevel.Ok,
-                LampShortLabel: "Notes");
-        }
-
-        try
-        {
-            var full = Path.GetFullPath(raw.Trim());
-            var parent = Path.GetDirectoryName(full);
-            if (!string.IsNullOrEmpty(parent) && Directory.Exists(parent))
-            {
-                return new AnnunciatorLampItem(
-                    EnvironmentReadinessCellIds.AgentNotesFile,
-                    title,
-                    "Задана: каталог для глобального файла заметок существует.",
-                    AnnunciatorLampLevel.Ok,
-                    LampShortLabel: "Notes");
-            }
-
-            if (File.Exists(full))
-            {
-                return new AnnunciatorLampItem(
-                    EnvironmentReadinessCellIds.AgentNotesFile,
-                    title,
-                    "Задана: глобальный файл заметок существует.",
-                    AnnunciatorLampLevel.Ok,
-                    LampShortLabel: "Notes");
-            }
-
-            return new AnnunciatorLampItem(
+                LampShortLabel: "Notes"),
+            AgentNotesFilePathKind.ParentDirForGlobalFile => new AnnunciatorLampItem(
+                EnvironmentReadinessCellIds.AgentNotesFile,
+                title,
+                "Задана: каталог для глобального файла заметок существует.",
+                AnnunciatorLampLevel.Ok,
+                LampShortLabel: "Notes"),
+            AgentNotesFilePathKind.FileExists => new AnnunciatorLampItem(
+                EnvironmentReadinessCellIds.AgentNotesFile,
+                title,
+                "Задана: глобальный файл заметок существует.",
+                AnnunciatorLampLevel.Ok,
+                LampShortLabel: "Notes"),
+            AgentNotesFilePathKind.ParentMissing => new AnnunciatorLampItem(
                 EnvironmentReadinessCellIds.AgentNotesFile,
                 title,
                 "Родительский каталог для пути не найден — проверь AGENT_NOTES_FILE.",
                 AnnunciatorLampLevel.Caution,
-                LampShortLabel: "Notes");
-        }
-        catch
-        {
-            return new AnnunciatorLampItem(
+                LampShortLabel: "Notes"),
+            AgentNotesFilePathKind.InvalidPath => new AnnunciatorLampItem(
                 EnvironmentReadinessCellIds.AgentNotesFile,
                 title,
                 "Некорректный путь в AGENT_NOTES_FILE.",
                 AnnunciatorLampLevel.Critical,
-                LampShortLabel: "Notes");
-        }
+                LampShortLabel: "Notes"),
+            _ => throw new UnreachableException()
+        };
     }
 
     private static AnnunciatorLampItem BuildAgentNotesCanonRow(string? raw)
     {
         const string title = WellKnownEnv.AgentNotesCanonPath;
-        if (string.IsNullOrWhiteSpace(raw))
+        return EnvironmentReadinessPathAcquisition.ClassifyAgentNotesCanonPath(raw) switch
         {
-            return new AnnunciatorLampItem(
+            AgentNotesCanonPathKind.Unset => new AnnunciatorLampItem(
                 EnvironmentReadinessCellIds.AgentNotesCanonPath,
                 title,
                 "Не задана: для knowledge передавай canon_path в MCP или задай корень репозитория agent-notes здесь.",
                 AnnunciatorLampLevel.Advisory,
-                LampShortLabel: "KB");
-        }
-
-        try
-        {
-            var full = Path.GetFullPath(raw.Trim());
-            if (Directory.Exists(full))
-            {
-                return new AnnunciatorLampItem(
-                    EnvironmentReadinessCellIds.AgentNotesCanonPath,
-                    title,
-                    "Каталог канона knowledge существует.",
-                    AnnunciatorLampLevel.Ok,
-                    LampShortLabel: "KB");
-            }
-
-            return new AnnunciatorLampItem(
+                LampShortLabel: "KB"),
+            AgentNotesCanonPathKind.DirectoryExists => new AnnunciatorLampItem(
+                EnvironmentReadinessCellIds.AgentNotesCanonPath,
+                title,
+                "Каталог канона knowledge существует.",
+                AnnunciatorLampLevel.Ok,
+                LampShortLabel: "KB"),
+            AgentNotesCanonPathKind.DirectoryMissing => new AnnunciatorLampItem(
                 EnvironmentReadinessCellIds.AgentNotesCanonPath,
                 title,
                 "Каталог не найден — проверь AGENT_NOTES_CANON_PATH.",
                 AnnunciatorLampLevel.Caution,
-                LampShortLabel: "KB");
-        }
-        catch
-        {
-            return new AnnunciatorLampItem(
+                LampShortLabel: "KB"),
+            AgentNotesCanonPathKind.InvalidPath => new AnnunciatorLampItem(
                 EnvironmentReadinessCellIds.AgentNotesCanonPath,
                 title,
                 "Некорректный путь в AGENT_NOTES_CANON_PATH.",
                 AnnunciatorLampLevel.Critical,
-                LampShortLabel: "KB");
-        }
+                LampShortLabel: "KB"),
+            _ => throw new UnreachableException()
+        };
     }
 
     private static AnnunciatorLampItem BuildNetcoreDbgRow(string? raw, Func<string?>? tryResolveNetcoreDbgWhenUnset = null)
     {
         const string title = WellKnownEnv.NetcoreDbgPath;
-        if (string.IsNullOrWhiteSpace(raw))
+        return EnvironmentReadinessPathAcquisition.ClassifyNetcoreDbgPath(raw, tryResolveNetcoreDbgWhenUnset) switch
         {
-            var onPath = tryResolveNetcoreDbgWhenUnset is not null
-                ? tryResolveNetcoreDbgWhenUnset.Invoke()
-                : EnvironmentReadinessExecutablePathProbe.TryResolveExecutablePath("netcoredbg");
-            if (onPath is not null)
-            {
-                return new AnnunciatorLampItem(
-                    EnvironmentReadinessCellIds.NetcoreDbgPath,
-                    title,
-                    "Не задана: netcoredbg найден в PATH.",
-                    AnnunciatorLampLevel.Ok,
-                    LampShortLabel: "Dbg");
-            }
-
-            return new AnnunciatorLampItem(
+            NetcoreDbgPathKind.UnsetFoundOnPath => new AnnunciatorLampItem(
+                EnvironmentReadinessCellIds.NetcoreDbgPath,
+                title,
+                "Не задана: netcoredbg найден в PATH.",
+                AnnunciatorLampLevel.Ok,
+                LampShortLabel: "Dbg"),
+            NetcoreDbgPathKind.UnsetNotOnPath => new AnnunciatorLampItem(
                 EnvironmentReadinessCellIds.NetcoreDbgPath,
                 title,
                 "Не задана: netcoredbg в PATH не найден — задай NETCOREDBG_PATH или установи netcoredbg.",
                 AnnunciatorLampLevel.Advisory,
-                LampShortLabel: "Dbg");
-        }
-
-        var trimmed = raw.Trim();
-        var resolved = EnvironmentReadinessExecutablePathProbe.TryResolveExecutablePath(trimmed);
-        if (resolved is not null)
-        {
-            return new AnnunciatorLampItem(
+                LampShortLabel: "Dbg"),
+            NetcoreDbgPathKind.ExplicitResolved => new AnnunciatorLampItem(
                 EnvironmentReadinessCellIds.NetcoreDbgPath,
                 title,
                 "Исполняемый файл найден (существующий путь или имя в PATH).",
                 AnnunciatorLampLevel.Ok,
-                LampShortLabel: "Dbg");
-        }
-
-        try
-        {
-            _ = Path.GetFullPath(trimmed);
-        }
-        catch
-        {
-            return new AnnunciatorLampItem(
+                LampShortLabel: "Dbg"),
+            NetcoreDbgPathKind.InvalidPath => new AnnunciatorLampItem(
                 EnvironmentReadinessCellIds.NetcoreDbgPath,
                 title,
                 "Некорректный путь в NETCOREDBG_PATH.",
                 AnnunciatorLampLevel.Critical,
-                LampShortLabel: "Dbg");
-        }
-
-        if (EnvironmentReadinessExecutablePathProbe.IsBareExecutableName(trimmed))
-        {
-            return new AnnunciatorLampItem(
+                LampShortLabel: "Dbg"),
+            NetcoreDbgPathKind.ExplicitBareNameNotInPath => new AnnunciatorLampItem(
                 EnvironmentReadinessCellIds.NetcoreDbgPath,
                 title,
                 "Имя без полного пути: в каталогах PATH исполняемый файл не найден.",
                 AnnunciatorLampLevel.Caution,
-                LampShortLabel: "Dbg");
-        }
-
-        return new AnnunciatorLampItem(
-            EnvironmentReadinessCellIds.NetcoreDbgPath,
-            title,
-            "Файл по NETCOREDBG_PATH не найден.",
-            AnnunciatorLampLevel.Caution,
-            LampShortLabel: "Dbg");
+                LampShortLabel: "Dbg"),
+            NetcoreDbgPathKind.ExplicitFilePathMissing => new AnnunciatorLampItem(
+                EnvironmentReadinessCellIds.NetcoreDbgPath,
+                title,
+                "Файл по NETCOREDBG_PATH не найден.",
+                AnnunciatorLampLevel.Caution,
+                LampShortLabel: "Dbg"),
+            _ => throw new UnreachableException()
+        };
     }
 
     /// <summary>Статическая часть: C# LSP, Markdown LSP (без сетевого вызова). Состояние — <see cref="IdeHostStateChanged"/> (тот же снимок, что на DataBus для IDE Health).</summary>
@@ -368,8 +317,7 @@ public static class EnvironmentReadinessSnapshotBuilder
                 LampShortLabel: "C#");
         }
 
-        var slnOk = !string.IsNullOrWhiteSpace(solutionPath) && File.Exists(solutionPath);
-        if (!slnOk)
+        if (!EnvironmentReadinessFileFacts.SolutionPathIsExistingFile(solutionPath))
         {
             return new AnnunciatorLampItem(
                 EnvironmentReadinessCellIds.CSharpLsp,
@@ -434,8 +382,7 @@ public static class EnvironmentReadinessSnapshotBuilder
                 LampShortLabel: "MD");
         }
 
-        var slnOk = !string.IsNullOrWhiteSpace(solutionPath) && File.Exists(solutionPath);
-        if (!slnOk)
+        if (!EnvironmentReadinessFileFacts.SolutionPathIsExistingFile(solutionPath))
         {
             return new AnnunciatorLampItem(
                 EnvironmentReadinessCellIds.MarkdownLsp,

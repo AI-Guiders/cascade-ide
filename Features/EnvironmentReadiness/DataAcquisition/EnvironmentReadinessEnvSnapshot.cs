@@ -1,9 +1,9 @@
 #nullable enable
 
-namespace CascadeIDE.Services;
+namespace CascadeIDE.Features.EnvironmentReadiness.DataAcquisition;
 
 /// <summary>
-/// Снимок переменных окружения, которые Cascade IDE реально читает для заметок/knowledge и отладки (ADR 0023).
+/// Снимок переменных окружения, которые Cascade IDE реально читает для заметок/knowledge и отладки (ADR 0023, DAL).
 /// Значения не логируем целиком в UI — только факты проверки пути.
 /// </summary>
 public readonly record struct EnvironmentReadinessEnvSnapshot(
