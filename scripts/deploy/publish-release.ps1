@@ -1,5 +1,5 @@
 # Publish Release (self-contained win-x64) and mirror to a fixed path without spaces (for Cursor MCP).
-# Run from repo:  cd ...\cascade-ide  ;  .\publish-and-deploy.ps1
+# Run from repo root:  cd ...\cascade-ide  ;  .\scripts\deploy\publish-release.ps1
 # Optional: -SkipDocGen  (faster when IdeCommands XML-doc / MCP markdown codegen not changed)
 # Optional: -Target "D:\cascade-ide"
 [CmdletBinding()]
@@ -9,16 +9,16 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-$here = $PSScriptRoot
-$csproj = Join-Path $here "CascadeIDE.csproj"
+$repoRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot "..\.."))
+$csproj = Join-Path $repoRoot "CascadeIDE.csproj"
 if (-not (Test-Path -LiteralPath $csproj)) {
-    Write-Error "CascadeIDE.csproj not found. Run this script from the cascade-ide directory (PSScriptRoot=$here)."
+    Write-Error "CascadeIDE.csproj not found. Run from cascade-ide repo (resolved root=$repoRoot)."
     exit 1
 }
 
-$outDir = Join-Path $here "publish"
+$outDir = Join-Path $repoRoot "publish"
 
-Push-Location $here
+Push-Location $repoRoot
 try {
     $publishArgs = @(
         "publish", $csproj,

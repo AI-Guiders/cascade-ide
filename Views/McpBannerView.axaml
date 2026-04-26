@@ -11,7 +11,7 @@
                        Foreground="{DynamicResource CascadeTheme.McpBannerForeground}"
                        FontSize="12"
                        VerticalAlignment="Center"/>
-            <TextBlock Text="Обновить exe под Cursor: в исходниках каталог open/cascade-ide (рядом с CascadeIDE.csproj) — publish-and-deploy-debug.ps1 (Debug) и publish-and-deploy.ps1 (Release); см. docs/MCP-PROTOCOL.md, раздел «Переопубликация для Cursor»."
+            <TextBlock Text="Обновить exe под Cursor: в исходниках каталог open/cascade-ide (рядом с CascadeIDE.csproj) — scripts/deploy/publish-debug.ps1 (Debug) и scripts/deploy/publish-release.ps1 (Release); см. docs/MCP-PROTOCOL.md, раздел «Переопубликация для Cursor»."
                        Foreground="{DynamicResource CascadeTheme.McpBannerForeground}"
                        FontSize="11"
                        Opacity="0.88"

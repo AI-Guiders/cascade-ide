@@ -39,10 +39,10 @@
 
 Чтобы процесс в Cursor указывал на свежий бинарник **без пробелов в пути**, в корне каталога **CascadeIDE** (рядом с `CascadeIDE.csproj`; в монорепе обычно `Financial/software/open/cascade-ide/`):
 
-- **`publish-and-deploy-debug.ps1`** — `dotnet publish` **Debug**, self-contained **win-x64**, вывод в `publish-debug/`, затем зеркалирование в **`D:\cascade-ide-debug`** по умолчанию (удобная цель для `command` в `mcp.json`).
-- **`publish-and-deploy.ps1`** — то же для **Release** и цели **`D:\cascade-ide`** по умолчанию.
+- **`scripts/deploy/publish-debug.ps1`** — `dotnet publish` **Debug**, self-contained **win-x64**, вывод в `publish-debug/`, затем зеркалирование в **`D:\cascade-ide-debug`** по умолчанию (удобная цель для `command` в `mcp.json`).
+- **`scripts/deploy/publish-release.ps1`** — то же для **Release** и цели **`D:\cascade-ide`** по умолчанию.
 
-Запуск из каталога проекта CascadeIDE: `.\publish-and-deploy-debug.ps1`. Опции **`-SkipDocGen`** и **`-Target`** — в комментариях у скриптов; пример фрагмента конфигурации — [mcp-cursor-example.json](mcp-cursor-example.json).
+Запуск из каталога проекта CascadeIDE: `.\scripts\deploy\publish-debug.ps1`. Опции **`-SkipDocGen`** и **`-Target`** — в комментариях у скриптов; пример фрагмента конфигурации — [mcp-cursor-example.json](mcp-cursor-example.json).
 
 ## Инструменты IDE (tools)
 
@@ -363,8 +363,8 @@
 ## Подключение из Cursor
 
 1. **Self-contained exe (рекомендуется):** в корне проекта заданы `RuntimeIdentifier=win-x64` и `SelfContained=true`.
-   - **Release:** из каталога `cascade-ide` запусти **`.\publish-and-deploy.ps1`** — публикует в `publish` и зеркалит в **`D:\cascade-ide`** (копирование; путь без пробелов для Cursor). В конце печатается фрагмент для `mcp.json`. Без регенерации MCP-док из `IdeCommands`: **`.\publish-and-deploy.ps1 -SkipDocGen`**. Вручную то же самое: `dotnet publish -c Release -r win-x64 --self-contained true -o publish` и копирование в `D:\cascade-ide` (или junction на каталог `publish`).
-   - **Debug (отладка MCP-обработчиков):** **`.\publish-and-deploy-debug.ps1`** — вывод в `publish-debug`, зеркало **`D:\cascade-ide-debug`**. В Cursor: `command` — `D:\cascade-ide-debug\CascadeIDE.exe`, **`args`: `["--mcp-stdio"]`**. Ускоренная сборка: **`.\publish-and-deploy-debug.ps1 -SkipDocGen`**.
+   - **Release:** из каталога `cascade-ide` запусти **`.\scripts\deploy\publish-release.ps1`** — публикует в `publish` и зеркалит в **`D:\cascade-ide`** (копирование; путь без пробелов для Cursor). В конце печатается фрагмент для `mcp.json`. Без регенерации MCP-док из `IdeCommands`: **`.\scripts\deploy\publish-release.ps1 -SkipDocGen`**. Вручную то же самое: `dotnet publish -c Release -r win-x64 --self-contained true -o publish` и копирование в `D:\cascade-ide` (или junction на каталог `publish`).
+   - **Debug (отладка MCP-обработчиков):** **`.\scripts\deploy\publish-debug.ps1`** — вывод в `publish-debug`, зеркало **`D:\cascade-ide-debug`**. В Cursor: `command` — `D:\cascade-ide-debug\CascadeIDE.exe`, **`args`: `["--mcp-stdio"]`**. Ускоренная сборка: **`.\scripts\deploy\publish-debug.ps1 -SkipDocGen`**.
 
 2. В настройках MCP Cursor (например, `.cursor/mcp.json` или глобальные настройки) добавьте сервер:
 

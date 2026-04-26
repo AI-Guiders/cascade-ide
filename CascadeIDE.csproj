@@ -20,7 +20,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>CascadeIDE</RootNamespace>
     <AssemblyName>CascadeIDE</AssemblyName>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>

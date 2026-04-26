@@ -1,6 +1,6 @@
 # Publish Debug and copy to a fixed path without spaces (for Cursor MCP).
-# Сначала собирает samples/DebugTarget (тестовая цель для DAP).
-# Run from repo:  cd ...\cascade-ide  ;  .\publish-and-deploy-debug.ps1
+# Also builds samples/DebugTarget first (test target for DAP).
+# Run from repo root:  cd ...\cascade-ide  ;  .\scripts\deploy\publish-debug.ps1
 # Optional: -SkipDocGen  (faster when IdeCommands XML-doc / MCP markdown codegen not changed)
 # Optional: -Target "D:\cascade-ide-debug"
 [CmdletBinding()]
@@ -10,19 +10,18 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-$here = $PSScriptRoot
-$csproj = Join-Path $here "CascadeIDE.csproj"
+$repoRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot "..\.."))
+$csproj = Join-Path $repoRoot "CascadeIDE.csproj"
 if (-not (Test-Path -LiteralPath $csproj)) {
-    Write-Error "CascadeIDE.csproj not found. Run this script from the cascade-ide directory (PSScriptRoot=$here)."
+    Write-Error "CascadeIDE.csproj not found. Run from cascade-ide repo (resolved root=$repoRoot)."
     exit 1
 }
 
-$outDir = Join-Path $here "publish-debug"
-$debugTargetProj = Join-Path $here "samples\DebugTarget\DebugTarget.csproj"
+$outDir = Join-Path $repoRoot "publish-debug"
+$debugTargetProj = Join-Path $repoRoot "samples\DebugTarget\DebugTarget.csproj"
 
-Push-Location $here
+Push-Location $repoRoot
 try {
-    # Тестовая цель отладки (тот же относительный путь, что в BreakpointsFileService.BundledSampleDebugTargetDllRelativeToRepoRoot)
     if (-not (Test-Path -LiteralPath $debugTargetProj)) {
         Write-Error "DebugTarget project not found: $debugTargetProj"
         exit 1
