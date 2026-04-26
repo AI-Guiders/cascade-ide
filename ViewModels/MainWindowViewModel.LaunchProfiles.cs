@@ -26,7 +26,7 @@ public partial class MainWindowViewModel
         var sln = Workspace.SolutionPath;
         if (string.IsNullOrEmpty(sln) || string.IsNullOrEmpty(value))
             return;
-        _ = Services.LaunchProfilesStore.TrySetActiveProfile(sln, value, out _);
+        _ = LaunchProfilesStore.TrySetActiveProfile(sln, value, out _);
         OnPropertyChanged(nameof(StartupProjectBanner));
     }
 
@@ -43,7 +43,7 @@ public partial class MainWindowViewModel
                 return;
             }
 
-            if (!Services.LaunchProfilesStore.TryGetOrderedProfileIds(sln, out var names, out _))
+            if (!LaunchProfilesStore.TryGetOrderedProfileIds(sln, out var names, out _))
             {
                 SelectedLaunchProfileId = null;
                 return;
@@ -52,7 +52,7 @@ public partial class MainWindowViewModel
             foreach (var n in names)
                 LaunchProfileIds.Add(n);
 
-            if (Services.LaunchProfilesStore.TryGetActiveProfileName(sln, out var active, out _) && !string.IsNullOrEmpty(active))
+            if (LaunchProfilesStore.TryGetActiveProfileName(sln, out var active, out _) && !string.IsNullOrEmpty(active))
             {
                 var match = LaunchProfileIds.FirstOrDefault(x => string.Equals(x, active, StringComparison.OrdinalIgnoreCase));
                 SelectedLaunchProfileId = match ?? LaunchProfileIds[0];
@@ -91,14 +91,14 @@ public partial class MainWindowViewModel
             return;
         }
 
-        if (!Services.LaunchProfilesStore.TryImportFromLaunchSettings(sln, rel, out var n, out var err) || !string.IsNullOrEmpty(err))
+        if (!LaunchProfilesStore.TryImportFromLaunchSettings(sln, rel, out var n, out var err) || !string.IsNullOrEmpty(err))
         {
             await ShowDebugInfoAsync("Импорт launch profiles", err ?? "import_failed").ConfigureAwait(false);
             return;
         }
 
         RefreshLaunchProfilePickerFromStore();
-        await ShowDebugInfoAsync("Импорт launch profiles", $"Скопировано профилей (Kestrel/Project) в {Services.LaunchProfilesStore.FileName}: {n}.").ConfigureAwait(false);
+        await ShowDebugInfoAsync("Импорт launch profiles", $"Скопировано профилей (Kestrel/Project) в {LaunchProfilesStore.FileName}: {n}.").ConfigureAwait(false);
     }
 
     /// <summary>Путь к <c>.csproj</c> относительно корня каталога решения; ошибка, если путь вне дерева.</summary>

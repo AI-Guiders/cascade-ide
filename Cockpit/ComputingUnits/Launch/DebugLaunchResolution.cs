@@ -1,6 +1,6 @@
 #nullable enable
 
-namespace CascadeIDE.Services;
+namespace CascadeIDE.Cockpit.ComputingUnits.Launch;
 
 /// <summary>Резолв целевой DLL, аргументов и среды из launch profile (F5, MCP) перед DAP.</summary>
 public readonly record struct DebugLaunchResolution(

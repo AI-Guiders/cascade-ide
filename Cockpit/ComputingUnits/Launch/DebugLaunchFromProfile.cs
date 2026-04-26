@@ -1,7 +1,7 @@
 #nullable enable
 using System.Diagnostics.CodeAnalysis;
 
-namespace CascadeIDE.Services;
+namespace CascadeIDE.Cockpit.ComputingUnits.Launch;
 
 /// <summary>Общие шаги: путь к .csproj, карта <see cref="LaunchProfileData"/> в <see cref="DebugLaunchResolution"/> (ADR 0090).</summary>
 public static class DebugLaunchFromProfile

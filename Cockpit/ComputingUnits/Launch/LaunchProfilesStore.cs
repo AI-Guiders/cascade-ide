@@ -1,7 +1,7 @@
 #nullable enable
 using System.Diagnostics.CodeAnalysis;
 
-namespace CascadeIDE.Services;
+namespace CascadeIDE.Cockpit.ComputingUnits.Launch;
 
 /// <summary>
 /// <c>.cascade-ide/launch-profiles.toml</c> — каталог launch profiles (ADR 0090), миграция с <c>startup-project.json</c>.
