@@ -9,6 +9,22 @@ namespace CascadeIDE.Features.IdeMcp.Application;
 /// </summary>
 public static class IdeMcpGitOrchestrator
 {
+    public static string WorkspaceUnavailableMessage() =>
+        "Workspace path is not available.";
+
+    public static string BuildInvalidGitBranchActionError() =>
+        BuildValidationError("git_branch: action must be list, create, or delete.");
+
+    public static string BuildInvalidGitSubmoduleActionError() =>
+        BuildValidationError("git_submodule: action must be status or update.");
+
+    public static string TruncateOutput(string? text, int maxChars)
+    {
+        if (string.IsNullOrEmpty(text))
+            return "";
+        return text.Length > maxChars ? text[..maxChars] + "\n... (output truncated)" : text;
+    }
+
     public static string BuildValidationError(string error) =>
         JsonSerializer.Serialize(new { success = false, error });
 

@@ -51,7 +51,7 @@ public partial class MainWindowViewModel
                     ? await RunGitCommandJsonAsync(dr.Args!).ConfigureAwait(false)
                     : IdeMcpGitOrchestrator.BuildValidationError(dr.Error!);
             default:
-                return IdeMcpGitOrchestrator.BuildValidationError("git_branch: action must be list, create, or delete.");
+                return IdeMcpGitOrchestrator.BuildInvalidGitBranchActionError();
         }
     }
 
@@ -76,7 +76,7 @@ public partial class MainWindowViewModel
                     ? RunGitCommandJsonAsync(r.Args!)
                     : Task.FromResult(IdeMcpGitOrchestrator.BuildValidationError(r.Error!));
             default:
-                return Task.FromResult(IdeMcpGitOrchestrator.BuildValidationError("git_submodule: action must be status or update."));
+                return Task.FromResult(IdeMcpGitOrchestrator.BuildInvalidGitSubmoduleActionError());
         }
     }
 
@@ -84,15 +84,15 @@ public partial class MainWindowViewModel
     {
         var changedOutput = await RunGitCommandAsync(GitCommandBuilder.DiffNameOnly(staged)).ConfigureAwait(false);
         if (!changedOutput.Success)
-            return IdeMcpGitOrchestrator.BuildCommandResult(false, changedOutput.ExitCode, TruncateOutput(changedOutput.Output, 4000));
+            return IdeMcpGitOrchestrator.BuildCommandResult(false, changedOutput.ExitCode, IdeMcpGitOrchestrator.TruncateOutput(changedOutput.Output, 4000));
 
         var ignoreCrOutput = await RunGitCommandAsync(GitCommandBuilder.DiffNameOnly(staged, ignoreCrAtEol: true)).ConfigureAwait(false);
         if (!ignoreCrOutput.Success)
-            return IdeMcpGitOrchestrator.BuildCommandResult(false, ignoreCrOutput.ExitCode, TruncateOutput(ignoreCrOutput.Output, 4000));
+            return IdeMcpGitOrchestrator.BuildCommandResult(false, ignoreCrOutput.ExitCode, IdeMcpGitOrchestrator.TruncateOutput(ignoreCrOutput.Output, 4000));
 
         var ignoreWsOutput = await RunGitCommandAsync(GitCommandBuilder.DiffNameOnly(staged, ignoreWhitespace: true, ignoreCrAtEol: true)).ConfigureAwait(false);
         if (!ignoreWsOutput.Success)
-            return IdeMcpGitOrchestrator.BuildCommandResult(false, ignoreWsOutput.ExitCode, TruncateOutput(ignoreWsOutput.Output, 4000));
+            return IdeMcpGitOrchestrator.BuildCommandResult(false, ignoreWsOutput.ExitCode, IdeMcpGitOrchestrator.TruncateOutput(ignoreWsOutput.Output, 4000));
 
         var changed = GitPreflight.ParseNameOnlyOutput(changedOutput.Output);
         var untracked = includeUntracked
@@ -124,7 +124,7 @@ public partial class MainWindowViewModel
     {
         var renormResult = await RunGitCommandAsync(GitCommandBuilder.AddRenormalize()).ConfigureAwait(false);
         if (!renormResult.Success)
-            return IdeMcpGitOrchestrator.BuildCommandResult(false, renormResult.ExitCode, TruncateOutput(renormResult.Output, 4000));
+            return IdeMcpGitOrchestrator.BuildCommandResult(false, renormResult.ExitCode, IdeMcpGitOrchestrator.TruncateOutput(renormResult.Output, 4000));
 
         var post = await ((Services.IIdeMcpActions)this).GitPreflightAsync(staged: false, includeUntracked: true, includePatches: includePatches).ConfigureAwait(false);
         return IdeMcpGitOrchestrator.BuildPreflightFixSafeResult(post, GitPreflightSafeFixAppliedCommands);
@@ -141,7 +141,7 @@ public partial class MainWindowViewModel
 
         var commitResult = await RunGitCommandAsync(GitCommandBuilder.Commit(message)).ConfigureAwait(false);
         _ = RefreshGitSummaryAsync();
-        return IdeMcpGitOrchestrator.BuildCommitResult(commitResult.Success, commitResult.ExitCode, TruncateOutput(commitResult.Output, 4000));
+        return IdeMcpGitOrchestrator.BuildCommitResult(commitResult.Success, commitResult.ExitCode, IdeMcpGitOrchestrator.TruncateOutput(commitResult.Output, 4000));
     }
 
     Task<string> Services.IIdeMcpActions.GitPushAsync(string? remote, string? branch, bool dryRun)
@@ -155,21 +155,14 @@ public partial class MainWindowViewModel
     private async Task<string> RunGitCommandJsonAsync(IReadOnlyList<string> args)
     {
         var result = await RunGitCommandAsync(args).ConfigureAwait(false);
-        return IdeMcpGitOrchestrator.BuildCommandResult(result.Success, result.ExitCode, TruncateOutput(result.Output, 4000));
+        return IdeMcpGitOrchestrator.BuildCommandResult(result.Success, result.ExitCode, IdeMcpGitOrchestrator.TruncateOutput(result.Output, 4000));
     }
 
     private async Task<(bool Success, int ExitCode, string Output)> RunGitCommandAsync(IReadOnlyList<string> args)
     {
         var workspace = GetWorkspacePath();
         if (string.IsNullOrWhiteSpace(workspace) || !Directory.Exists(workspace))
-            return (false, -1, "Workspace path is not available.");
+            return (false, -1, IdeMcpGitOrchestrator.WorkspaceUnavailableMessage());
         return await _gitRunner.RunAsync(args, workspace).ConfigureAwait(false);
-    }
-
-    private static string TruncateOutput(string? text, int maxChars)
-    {
-        if (string.IsNullOrEmpty(text))
-            return "";
-        return text.Length > maxChars ? text[..maxChars] + "\n... (output truncated)" : text;
     }
 }
