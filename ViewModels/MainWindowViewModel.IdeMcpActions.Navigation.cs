@@ -1,6 +1,7 @@
 #nullable enable
 using CascadeIDE.Services.CodeNavigation;
 using CascadeIDE.Features.IdeMcp.Application;
+using CascadeIDE.Features.WorkspaceNavigation.Application;
 
 namespace CascadeIDE.ViewModels;
 
@@ -35,7 +36,7 @@ public partial class MainWindowViewModel
             var effectiveColumn = column;
             if (effectiveLine is null || effectiveLine <= 0 || effectiveColumn is null || effectiveColumn <= 0)
             {
-                var (derivedLine, derivedColumn) = ComputeLineColumn(EditorText, _editorCaretOffset ?? EditorSelectionStart);
+                var (derivedLine, derivedColumn) = WorkspaceNavigationMapOrchestrator.ComputeLineColumn(EditorText, _editorCaretOffset ?? EditorSelectionStart);
                 (effectiveLine, effectiveColumn) = IdeMcpNavigationOrchestrator.ResolveLineColumnForControlFlow(
                     effectiveLine,
                     effectiveColumn,

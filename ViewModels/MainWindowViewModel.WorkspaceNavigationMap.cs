@@ -4,8 +4,8 @@ using Avalonia.Controls;
 using CascadeIDE.Cockpit.Cds;
 using CascadeIDE.Cockpit.Channels.TraceFlow;
 using CascadeIDE.Cockpit.Composition.TraceFlow;
+using CascadeIDE.Features.WorkspaceNavigation.Application;
 using CascadeIDE.Models;
-using CascadeIDE.Services;
 using CascadeIDE.Services.CodeNavigation;
 using CascadeIDE.Services.Navigation;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -190,7 +190,7 @@ public partial class MainWindowViewModel
             currentPath = CurrentFilePath;
             solutionPath = Workspace.SolutionPath;
             editorText = EditorText;
-            var (line, column) = ComputeLineColumn(EditorText, _editorCaretOffset ?? EditorSelectionStart);
+            var (line, column) = WorkspaceNavigationMapOrchestrator.ComputeLineColumn(EditorText, _editorCaretOffset ?? EditorSelectionStart);
             cursorLine = line;
             cursorColumn = column;
             navSettings = _settings.CodeNavigation;
@@ -279,13 +279,9 @@ public partial class MainWindowViewModel
         {
             using var doc = JsonDocument.Parse(json);
             var root = doc.RootElement;
-            if (root.TryGetProperty("error", out var errEl))
+            if (root.TryGetProperty("error", out _))
             {
-                var code = errEl.GetString() ?? "";
-                var msg = root.TryGetProperty("message", out var mEl) ? mEl.GetString() ?? "" : "";
-                status = string.IsNullOrEmpty(msg) ? code : msg;
-                if (code == "no_file" && string.IsNullOrEmpty(currentPath))
-                    status = "Откройте файл из дерева решения — здесь появятся связанные.";
+                status = WorkspaceNavigationMapOrchestrator.ResolveErrorStatus(root, currentPath);
             }
             else if (useSubgraphMode && CodeNavigationMapSubgraphJson.TryParse(json, out var subgraph, out _))
             {
@@ -312,67 +308,43 @@ public partial class MainWindowViewModel
                 graphHeight = composed.PreferredHeight;
                 var satCount = Math.Max(0, scene.Nodes.Count - 1);
                 accentCount = satCount;
-                anchorLabel = string.IsNullOrEmpty(subgraph!.AnchorPath)
-                    ? "—"
-                    : Path.GetFileName(subgraph.AnchorPath);
+                anchorLabel = WorkspaceNavigationMapOrchestrator.ResolveAnchorLabelFromSubgraph(subgraph!);
 
                 if (wantList)
                 {
-                    foreach (var n in subgraph.Nodes)
+                    var parsedRows = WorkspaceNavigationMapOrchestrator.BuildRowsFromSubgraph(subgraph!, solutionPath);
+                    foreach (var parsed in parsedRows)
                     {
-                        if (string.Equals(n.Kind, "anchor", StringComparison.OrdinalIgnoreCase))
-                            continue;
-                        var rel = string.IsNullOrEmpty(n.RelativePath)
-                            ? McpSolutionTree.GetRelativePath(solutionPath, n.Path)
-                            : n.RelativePath!;
                         rows.Add(new WorkspaceNavigationMapItemVm
                         {
-                            FullPath = n.Path,
-                            RelativePath = rel ?? n.Path,
-                            Kind = n.Kind,
-                            Rationale = n.Rationale ?? ""
+                            FullPath = parsed.FullPath,
+                            RelativePath = parsed.RelativePath,
+                            Kind = parsed.Kind,
+                            Rationale = parsed.Rationale
                         });
                     }
 
                     accentCount = Math.Max(accentCount, rows.Count);
+                    status = WorkspaceNavigationMapOrchestrator.ResolveEmptyStatus(parsedRows, status, wantList: true);
                 }
-
-                if (rows.Count == 0 && string.IsNullOrEmpty(status) && wantList)
-                    status = "Нет связанных файлов по текущим эвристикам.";
             }
             else if (wantList)
             {
-                if (root.TryGetProperty("anchor_path", out var ap) && ap.ValueKind == JsonValueKind.String)
+                anchorLabel = WorkspaceNavigationMapOrchestrator.ResolveAnchorLabelFromRelatedRoot(root);
+                var parsedRows = WorkspaceNavigationMapOrchestrator.BuildRowsFromRelatedRoot(root);
+                foreach (var parsed in parsedRows)
                 {
-                    var apStr = ap.GetString();
-                    if (!string.IsNullOrEmpty(apStr))
-                        anchorLabel = Path.GetFileName(apStr);
-                }
-
-                if (root.TryGetProperty("items", out var items) && items.ValueKind == JsonValueKind.Array)
-                {
-                    foreach (var el in items.EnumerateArray())
+                    rows.Add(new WorkspaceNavigationMapItemVm
                     {
-                        var fp = el.TryGetProperty("path", out var pEl) ? pEl.GetString() ?? "" : "";
-                        var rel = el.TryGetProperty("relative_path", out var rEl) ? rEl.GetString() ?? "" : "";
-                        var kind = el.TryGetProperty("kind", out var kEl) ? kEl.GetString() ?? "" : "";
-                        var rationale = el.TryGetProperty("rationale", out var raEl) ? raEl.GetString() ?? "" : "";
-                        if (string.IsNullOrEmpty(fp))
-                            continue;
-                        rows.Add(new WorkspaceNavigationMapItemVm
-                        {
-                            FullPath = fp,
-                            RelativePath = string.IsNullOrEmpty(rel) ? fp : rel,
-                            Kind = kind,
-                            Rationale = rationale
-                        });
-                    }
+                        FullPath = parsed.FullPath,
+                        RelativePath = parsed.RelativePath,
+                        Kind = parsed.Kind,
+                        Rationale = parsed.Rationale
+                    });
                 }
 
                 accentCount = rows.Count;
-
-                if (rows.Count == 0 && string.IsNullOrEmpty(status))
-                    status = "Нет связанных файлов по текущим эвристикам.";
+                status = WorkspaceNavigationMapOrchestrator.ResolveEmptyStatus(parsedRows, status, wantList: true);
             }
         }
         catch
@@ -395,25 +367,4 @@ public partial class MainWindowViewModel
         });
     }
 
-    private static (int line, int column) ComputeLineColumn(string? text, int? offset)
-    {
-        var source = text ?? string.Empty;
-        var pos = Math.Clamp(offset ?? 0, 0, source.Length);
-        var line = 1;
-        var col = 1;
-        for (var i = 0; i < pos; i++)
-        {
-            if (source[i] == '\n')
-            {
-                line++;
-                col = 1;
-            }
-            else
-            {
-                col++;
-            }
-        }
-
-        return (line, col);
-    }
 }

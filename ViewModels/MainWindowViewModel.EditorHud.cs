@@ -1,4 +1,5 @@
 using Avalonia.Threading;
+using CascadeIDE.Features.WorkspaceNavigation.Application;
 using Microsoft.CodeAnalysis;
 
 namespace CascadeIDE.ViewModels;
@@ -85,7 +86,7 @@ public partial class MainWindowViewModel
         var text = EditorText;
         if (!string.IsNullOrEmpty(text))
         {
-            var (line, column) = ComputeLineColumn(text, _editorCaretOffset ?? EditorSelectionStart);
+            var (line, column) = WorkspaceNavigationMapOrchestrator.ComputeLineColumn(text, _editorCaretOffset ?? EditorSelectionStart);
             try
             {
                 var spans = _csharpLanguageService.GetHighlightSpans(path, text, line, column);
