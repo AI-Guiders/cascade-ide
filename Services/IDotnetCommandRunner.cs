@@ -3,7 +3,8 @@ using System.Threading.Channels;
 namespace CascadeIDE.Services;
 
 /// <summary>
-/// Запуск <c>dotnet</c> CLI в указанном рабочем каталоге.
+/// Порт: запуск <c>dotnet</c> CLI в указанном рабочем каталоге.
+/// Реализация (DAL, внешний процесс): <c>CascadeIDE.Features.Build.DataAcquisition.DotnetCommandRunner</c>.
 /// </summary>
 public interface IDotnetCommandRunner
 {

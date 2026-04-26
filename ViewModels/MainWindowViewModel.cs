@@ -362,8 +362,8 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     }
 
     private readonly Services.AppDataService _appData = new();
-    private readonly Services.IGitCommandRunner _gitRunner = new Services.GitCommandRunner();
-    private readonly Services.IDotnetCommandRunner _dotnetRunner = new Services.DotnetCommandRunner();
+    private readonly IGitCommandRunner _gitRunner = new GitCommandRunner();
+    private readonly IDotnetCommandRunner _dotnetRunner = new DotnetCommandRunner();
     private readonly Services.McpDotnetBuildTestService _mcpBuildTest;
     private readonly Services.McpAgentNotesService _mcpAgentNotes;
 

@@ -1,13 +1,13 @@
 using System.Diagnostics;
 using System.Text.Json;
 
-namespace CascadeIDE.Services;
+namespace CascadeIDE.Features.Search.DataAcquisition;
 
 /// <summary>Одно совпадение <c>rg --json</c> (полный путь к файлу, 1-based строка).</summary>
 public readonly record struct RipgrepWorkspaceMatch(string Path, int LineNumber, string LineText);
 
 /// <summary>
-/// Поиск по файлам в каталоге workspace через внешний <see href="https://github.com/BurntSushi/ripgrep">ripgrep</see> (<c>rg</c>).
+/// DAL: поиск по файлам в каталоге workspace через внешний <see href="https://github.com/BurntSushi/ripgrep">ripgrep</see> (<c>rg</c>).
 /// </summary>
 /// <remarks>
 /// По умолчанию запускается имя <c>rg</c> (разрешение через PATH ОС). Отдельный бинарь в составе IDE не поставляется —

@@ -1,8 +1,11 @@
 using System.Diagnostics;
 using System.Threading.Channels;
 
-namespace CascadeIDE.Services;
+namespace CascadeIDE.Features.Build.DataAcquisition;
 
+/// <summary>
+/// DAL: запуск внешнего <c>dotnet</c> CLI в рабочем каталоге (процесс, чтение stdout/stderr, опционально потоковая передача).
+/// </summary>
 /// <inheritdoc cref="IDotnetCommandRunner" />
 public sealed class DotnetCommandRunner : IDotnetCommandRunner
 {
@@ -178,4 +181,3 @@ public sealed class DotnetCommandRunner : IDotnetCommandRunner
         }
     }
 }
-

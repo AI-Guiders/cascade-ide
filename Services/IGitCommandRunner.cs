@@ -1,7 +1,8 @@
 namespace CascadeIDE.Services;
 
 /// <summary>
-/// Запуск <c>git</c> в указанном рабочем каталоге. Общий для Git-панели, телеметрии и MCP.
+/// Порт: запуск <c>git</c> в указанном рабочем каталоге. Общий для Git-панели, телеметрии и MCP.
+/// Реализация (DAL, внешний процесс): <c>CascadeIDE.Features.Git.DataAcquisition.GitCommandRunner</c>.
 /// </summary>
 public interface IGitCommandRunner
 {

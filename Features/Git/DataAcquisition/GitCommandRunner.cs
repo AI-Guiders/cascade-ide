@@ -1,7 +1,10 @@
 using System.Diagnostics;
 
-namespace CascadeIDE.Services;
+namespace CascadeIDE.Features.Git.DataAcquisition;
 
+/// <summary>
+/// DAL: запуск внешнего <c>git</c> в рабочем каталоге (процесс, чтение stdout/stderr).
+/// </summary>
 /// <inheritdoc cref="IGitCommandRunner" />
 public sealed class GitCommandRunner : IGitCommandRunner
 {
