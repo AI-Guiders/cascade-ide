@@ -174,7 +174,11 @@ public partial class DockDocumentView : UserControl
     private Action<EditorInputDelta> StabilizedHudAction =>
         _stabilizedHudAction ??= OnStabilizedHud;
 
-    private void OnStabilizedHud(EditorInputDelta d) => _hudEngine.OnStabilizedInput(d);
+    private void OnStabilizedHud(EditorInputDelta d)
+    {
+        _hudEngine.OnStabilizedInput(d);
+        _vm?.SetStabilizedEditorSemanticSnapshotForHud(d.FilePath, _hudEngine.LastSnapshot);
+    }
 
     private void UpdateStabilizedHudRegistration()
     {
@@ -228,6 +232,7 @@ public partial class DockDocumentView : UserControl
         if (_vm is not null)
         {
             _vm.ClearActiveEditorStabilizedHudHandlerIfEquals(StabilizedHudAction);
+            _vm.SetStabilizedEditorSemanticSnapshotForHud(null, null);
             if (_vmHandler is not null)
                 _vm.PropertyChanged -= _vmHandler;
             if (_documentsHandler is not null)

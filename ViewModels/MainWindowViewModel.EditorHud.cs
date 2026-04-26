@@ -1,6 +1,6 @@
 using Avalonia.Threading;
+using CascadeIDE.Features.Editor.Application;
 using CascadeIDE.Features.WorkspaceNavigation.Application;
-using Microsoft.CodeAnalysis;
 
 namespace CascadeIDE.ViewModels;
 
@@ -11,6 +11,13 @@ namespace CascadeIDE.ViewModels;
 /// </summary>
 public partial class MainWindowViewModel
 {
+    /// <summary>
+    /// После стабилизированного ввода (ADR 0103): снимок счётчиков диагностик по файлу, пока нет
+    /// нового события <see cref="Services.WorkspaceDiagnosticsCoordinator.DiagnosticsChanged"/>.
+    /// </summary>
+    private string? _hudStabilizedDiagPath;
+
+    private EditorSemanticSnapshot? _hudStabilizedDiagSnapshot;
     private string? _editorHudBannerText;
 
     /// <summary>Текст баннера; пусто — полоса скрыта (Dark Cockpit).</summary>
@@ -27,7 +34,11 @@ public partial class MainWindowViewModel
     /// <summary>Показать полосу <see cref="EditorHudBannerText"/> под зоной HUD.</summary>
     public bool IsEditorHudBannerVisible => !string.IsNullOrWhiteSpace(_editorHudBannerText);
 
-    private void OnWorkspaceDiagnosticsChangedForHud() => RefreshEditorHudBanner();
+    private void OnWorkspaceDiagnosticsChangedForHud()
+    {
+        InvalidateStabilizedHudDiagnosticSnapshot();
+        RefreshEditorHudBanner();
+    }
 
     private IDisposable? _editorHudBannerDebounce;
 
@@ -54,6 +65,27 @@ public partial class MainWindowViewModel
             TimeSpan.FromMilliseconds(100));
     }
 
+    /// <summary>Инвалидация: при смене диагностик снимок из hi-freq контура устарел.</summary>
+    private void InvalidateStabilizedHudDiagnosticSnapshot()
+    {
+        _hudStabilizedDiagPath = null;
+        _hudStabilizedDiagSnapshot = null;
+    }
+
+    /// <summary>Вызывается из активной <c>DockDocumentView</c> после <see cref="EditorHudEngine.OnStabilizedInput"/> (ADR 0103).</summary>
+    internal void SetStabilizedEditorSemanticSnapshotForHud(string? filePath, EditorSemanticSnapshot? snapshot)
+    {
+        if (string.IsNullOrEmpty(filePath) || snapshot is null)
+        {
+            _hudStabilizedDiagPath = null;
+            _hudStabilizedDiagSnapshot = null;
+            return;
+        }
+
+        _hudStabilizedDiagPath = filePath;
+        _hudStabilizedDiagSnapshot = snapshot;
+    }
+
     /// <summary>
     /// Сводка для активного <c>.cs</c>: диагностики из <see cref="WorkspaceDiagnostics"/>
     /// (Roslyn по открытому файлу + внешний C# LSP, например OmniSharp, когда подключён) и
@@ -66,13 +98,27 @@ public partial class MainWindowViewModel
         var path = CurrentFilePath;
         if (string.IsNullOrEmpty(path) || !path.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
         {
+            InvalidateStabilizedHudDiagnosticSnapshot();
             EditorHudBannerText = null;
             return;
         }
 
-        var strips = WorkspaceDiagnostics.GetStripsForFile(path);
-        var errors = strips.Count(s => s.Severity == DiagnosticSeverity.Error);
-        var warns = strips.Count(s => s.Severity == DiagnosticSeverity.Warning);
+        int errors;
+        int warns;
+        if (!string.IsNullOrEmpty(_hudStabilizedDiagPath)
+            && string.Equals(_hudStabilizedDiagPath, path, StringComparison.OrdinalIgnoreCase)
+            && _hudStabilizedDiagSnapshot is { } held)
+        {
+            errors = held.ErrorCount;
+            warns = held.WarningCount;
+        }
+        else
+        {
+            var strips = WorkspaceDiagnostics.GetStripsForFile(path);
+            var snap = SemanticProjectionPipeline.FromDiagnosticStrips(strips);
+            errors = snap.ErrorCount;
+            warns = snap.WarningCount;
+        }
 
         string? diagPart = null;
         if (errors > 0 && warns > 0)
