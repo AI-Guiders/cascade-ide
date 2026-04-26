@@ -1,8 +1,6 @@
 using System;
 using System.ComponentModel;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -12,6 +10,7 @@ using AvaloniaEdit;
 using AvaloniaEdit.Rendering;
 using CascadeIDE.Features.Documents;
 using CascadeIDE.Features.Editor.Application;
+using CascadeIDE.Features.Editor.Application.Presentation;
 using CascadeIDE.Services;
 using CascadeIDE.ViewModels;
 
@@ -30,10 +29,7 @@ public partial class DockDocumentView : UserControl
     private EditorDiagnosticBackgroundRenderer? _diagRenderer;
     private Action? _diagHubHandler;
     private bool _diagPointerHooked;
-    private DispatcherTimer? _diagTipDebounce;
-    private Point _lastPointerInTextView;
-    private string? _lastTipText;
-    private int _tooltipSeq;
+    private EditorInlineHoverToolTipController? _inlineHoverToolTip;
     private bool _editorThemeSubscribed;
 
     // ADR 0103: hi-freq → bounded + throttle на уровне MainWindowViewModel, не DataBus
@@ -195,17 +191,18 @@ public partial class DockDocumentView : UserControl
             _editorThemeSubscribed = false;
         }
 
-        _diagTipDebounce?.Stop();
-        _diagTipDebounce = null;
-
         if (_editor is not null)
         {
-            if (_diagPointerHooked)
+            if (_diagPointerHooked && _inlineHoverToolTip is not null)
             {
-                _editor.TextArea.PointerMoved -= OnPointerMovedDiagnosticTip;
-                _editor.TextArea.PointerExited -= OnPointerExitedDiagnosticTip;
+                _inlineHoverToolTip.StopDebounce();
+                _editor.TextArea.PointerMoved -= _inlineHoverToolTip.OnPointerMoved;
+                _editor.TextArea.PointerExited -= _inlineHoverToolTip.OnPointerExited;
                 _diagPointerHooked = false;
             }
+
+            _inlineHoverToolTip?.Dispose();
+            _inlineHoverToolTip = null;
 
             _editor.Document.Changed -= OnEditorDocumentChanged;
             _editor.TextArea.Caret.PositionChanged -= OnEditorCaretOrSelectionChanged;
@@ -246,7 +243,6 @@ public partial class DockDocumentView : UserControl
         _vmHandler = null;
         _documentsHandler = null;
         _renderersInstalled = false;
-        _lastTipText = null;
     }
 
     private bool IsActive()
@@ -281,132 +277,23 @@ public partial class DockDocumentView : UserControl
         };
         _vm.WorkspaceDiagnostics.DiagnosticsChanged += _diagHubHandler;
 
+        _inlineHoverToolTip = new EditorInlineHoverToolTipController(
+            _editor,
+            TimeSpan.FromMilliseconds(120),
+            () => _docVm.Doc.FilePath,
+            () => _vm.WorkspaceDiagnostics.GetStripsForFile(_docVm.Doc.FilePath),
+            (path, text, line, col, ct) => _vm.GetEditorQuickInfoAsync(path, text, line, col, ct),
+            (path, text, line, col) => _vm.CSharpLanguage.GetQuickInfo(path, text, line, col),
+            static p => p.EndsWith(".cs", StringComparison.OrdinalIgnoreCase));
+
         if (!_diagPointerHooked)
         {
-            _editor.TextArea.PointerMoved += OnPointerMovedDiagnosticTip;
-            _editor.TextArea.PointerExited += OnPointerExitedDiagnosticTip;
+            _editor.TextArea.PointerMoved += _inlineHoverToolTip.OnPointerMoved;
+            _editor.TextArea.PointerExited += _inlineHoverToolTip.OnPointerExited;
             _diagPointerHooked = true;
         }
 
-        _diagTipDebounce = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(120) };
-        _diagTipDebounce.Tick += (_, _) =>
-        {
-            _diagTipDebounce?.Stop();
-            UpdateDiagnosticToolTip();
-        };
-
         _renderersInstalled = true;
-    }
-
-    private void OnPointerMovedDiagnosticTip(object? sender, PointerEventArgs e)
-    {
-        if (_editor is null)
-            return;
-        _lastPointerInTextView = e.GetPosition(_editor.TextArea.TextView);
-        _diagTipDebounce?.Stop();
-        _diagTipDebounce?.Start();
-    }
-
-    private void OnPointerExitedDiagnosticTip(object? sender, PointerEventArgs e)
-    {
-        if (_editor is not null)
-            ToolTip.SetTip(_editor, null);
-        _lastTipText = null;
-        _tooltipSeq++;
-    }
-
-    private void UpdateDiagnosticToolTip()
-    {
-        if (_editor is null || _vm is null || _docVm is null)
-            return;
-        if (!_docVm.Doc.FilePath.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
-        {
-            ToolTip.SetTip(_editor, null);
-            return;
-        }
-
-        var seq = ++_tooltipSeq;
-
-        var tv = _editor.TextArea.TextView;
-        var pos = tv.GetPosition(_lastPointerInTextView);
-        if (pos is null)
-        {
-            if (_lastTipText is not null)
-            {
-                ToolTip.SetTip(_editor, null);
-                _lastTipText = null;
-            }
-
-            return;
-        }
-
-        int offset;
-        try
-        {
-            offset = _editor.Document.GetOffset(pos.Value.Line, pos.Value.Column);
-        }
-        catch
-        {
-            ToolTip.SetTip(_editor, null);
-            return;
-        }
-
-        var strips = _vm.WorkspaceDiagnostics.GetStripsForFile(_docVm.Doc.FilePath);
-        var text = _editor.Document.Text ?? "";
-        var hit = WorkspaceDiagnosticsCoordinator.HitTestForToolTip(
-            strips,
-            offset,
-            pos.Value.Line,
-            pos.Value.Column,
-            text);
-        if (hit is not null)
-        {
-            var tip = $"{hit.Id}: {hit.Message}";
-            if (seq != _tooltipSeq)
-                return;
-            if (string.Equals(tip, _lastTipText, StringComparison.Ordinal))
-                return;
-            _lastTipText = tip;
-            ToolTip.SetTip(_editor, tip);
-            return;
-        }
-
-        var path = _docVm.Doc.FilePath;
-        var line = pos.Value.Line;
-        var col = pos.Value.Column;
-        _ = Task.Run(async () =>
-        {
-            string? q;
-            try
-            {
-                q = await _vm.GetEditorQuickInfoAsync(path, text, line, col, CancellationToken.None).ConfigureAwait(false);
-            }
-            catch
-            {
-                q = _vm.CSharpLanguage.GetQuickInfo(path, text, line, col);
-            }
-
-            UiScheduler.Default.Post(() =>
-            {
-                if (seq != _tooltipSeq)
-                    return;
-                if (string.IsNullOrEmpty(q))
-                {
-                    if (_lastTipText is not null)
-                    {
-                        ToolTip.SetTip(_editor, null);
-                        _lastTipText = null;
-                    }
-
-                    return;
-                }
-
-                if (string.Equals(q, _lastTipText, StringComparison.Ordinal))
-                    return;
-                _lastTipText = q;
-                ToolTip.SetTip(_editor, q);
-            });
-        });
     }
 
     private void SyncFromVmIfActive()

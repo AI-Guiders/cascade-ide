@@ -1,11 +1,12 @@
 namespace CascadeIDE.Features.Editor.Application;
 
 /// <summary>
-/// Зарезервировано под **Editor HUD** (inline) в смысле ADR 0085:
-/// squiggles, inlays, Quick Info, gutter — плоскость документа, не <see cref="Presentation.EditorHudBannerTextComposer"/> (file-level баннер).
-/// Данные — стабилизированные снимки и LSP/DAL; рендер сейчас в <c>Views/DockDocumentView</c> (strangler).
+/// Фасад **Editor HUD (inline)** по ADR 0085 / 0103: squiggles, hover/Quick Info, gutter — не file-level баннер
+/// (<see cref="Presentation.EditorHudBannerTextComposer"/>).
+/// Реализации: <see cref="Presentation.EditorInlineHoverToolTipController"/>; полная инвентаризация —
+/// <c>docs/design/editor-hud-inline-migration-inventory-v1.md</c>.
 /// </summary>
 public static class EditorInlineHudLayer
 {
-    // Намеренно пусто: якорь для расширения без смешения с HUD banner.
+    // Доп. фабрики (напр. установка IBackgroundRenderer) — по мере strangler; см. inventory.
 }
