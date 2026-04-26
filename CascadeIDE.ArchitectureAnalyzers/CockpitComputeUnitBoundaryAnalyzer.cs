@@ -33,7 +33,7 @@ public sealed class CockpitComputeUnitBoundaryAnalyzer : DiagnosticAnalyzer
         "CCU не должен добывать внешние данные напрямую",
         "В Cockpit/ComputingUnits запрещён прямой доступ к внешнему источнику через '{0}' (ADR 0097 + ADR 0102 DAL)",
         "Architecture",
-        DiagnosticSeverity.Warning,
+        DiagnosticSeverity.Error,
         isEnabledByDefault: true,
         description: "CCU должен работать с подготовленными входными данными; fs/process/http/json parsing — в Data Acquisition Layer.");
 
@@ -42,7 +42,7 @@ public sealed class CockpitComputeUnitBoundaryAnalyzer : DiagnosticAnalyzer
         "CCU не должен зависеть от UI-слоёв",
         "В Cockpit/ComputingUnits запрещён using '{0}' (CCU должен быть независим от ViewModels/Views/UI)",
         "Architecture",
-        DiagnosticSeverity.Warning,
+        DiagnosticSeverity.Error,
         isEnabledByDefault: true,
         description: "Compute units не импортируют UI-представления и UI-фреймворки.");
 
