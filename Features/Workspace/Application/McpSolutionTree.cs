@@ -2,7 +2,7 @@
 using System.Collections.ObjectModel;
 using CascadeIDE.Models;
 
-namespace CascadeIDE.Services;
+namespace CascadeIDE.Features.Workspace.Application;
 
 /// <summary>
 /// Обход дерева <see cref="SolutionItem"/> для MCP: проекты, файлы, относительные пути, дерево для JSON.

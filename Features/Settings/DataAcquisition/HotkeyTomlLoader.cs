@@ -1,7 +1,7 @@
-namespace CascadeIDE.Services;
+namespace CascadeIDE.Features.Settings.DataAcquisition;
 
 /// <summary>
-/// Загрузка merged-словаря из штатного <c>Hotkeys/hotkeys.toml</c> и
+/// DAL: merged-словарь из штатного <c>Hotkeys/hotkeys.toml</c> и
 /// <c>%LocalAppData%\CascadeIDE\hotkeys.toml</c> (оверлей поверх).
 /// </summary>
 public static class HotkeyTomlLoader
@@ -9,12 +9,9 @@ public static class HotkeyTomlLoader
     public static Dictionary<string, string> LoadMergedDictionary()
     {
         var merged = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        var basePath = Path.Combine(AppContext.BaseDirectory, "Hotkeys", "hotkeys.toml");
+        var basePath = UserSettingsPaths.GetBundledHotkeysFilePath();
         MergeFromFile(merged, basePath, "Hotkeys/hotkeys.toml");
-        var userPath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "CascadeIDE",
-            "hotkeys.toml");
+        var userPath = UserSettingsPaths.GetHotkeysUserFilePath();
         MergeFromFile(merged, userPath, embeddedRelativeFallback: null);
         return merged;
     }

@@ -1,4 +1,3 @@
-using CascadeIDE.Services;
 using Xunit;
 
 namespace CascadeIDE.Tests;
@@ -24,7 +23,7 @@ public sealed class McpSolutionTreeTests
         var testsCsproj = Path.Combine(root, "CascadeIDE.Tests", "CascadeIDE.Tests.csproj");
         var contractsCsproj = Path.Combine(root, "CascadeIDE.Contracts", "CascadeIDE.Contracts.csproj");
 
-        var mainFile = Path.Combine(root, "Services", "McpSolutionTree.cs");
+        var mainFile = Path.Combine(root, "Features", "Workspace", "Application", "McpSolutionTree.cs");
         var testFile = Path.Combine(root, "CascadeIDE.Tests", "McpSolutionTreeTests.cs");
         var contractsFile = Path.Combine(root, "CascadeIDE.Contracts", "ApiStability.cs");
 

@@ -1,7 +1,8 @@
 using System.Xml.Linq;
 using CascadeIDE.Models;
+using CascadeIDE.Services;
 
-namespace CascadeIDE.Services;
+namespace CascadeIDE.Features.Workspace.DataAcquisition;
 
 /// <summary>
 /// Дерево файлов проекта для обозревателя: разбор .csproj (Compile/None/…), SDK-glob,

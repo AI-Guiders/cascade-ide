@@ -1,5 +1,5 @@
 #nullable enable
-namespace CascadeIDE.Services;
+namespace CascadeIDE.Features.Workspace.DataAcquisition;
 
 /// <summary>Поиск файла решения (.slnx / .sln / .slnf) относительно пути к исходнику.</summary>
 public static class SolutionFileLocator
@@ -54,6 +54,18 @@ public static class SolutionFileLocator
         if (string.IsNullOrWhiteSpace(currentWorkspaceSolutionPath))
             return true;
         var current = Path.GetFullPath(currentWorkspaceSolutionPath.Trim());
-        return !EditorTextCoordinateUtilities.PathsReferToSameFile(candidate, current);
+        return !PathsReferToSameFile(candidate, current);
+    }
+
+    private static bool PathsReferToSameFile(string a, string b)
+    {
+        try
+        {
+            return string.Equals(Path.GetFullPath(a), Path.GetFullPath(b), StringComparison.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            return string.Equals(a, b, StringComparison.OrdinalIgnoreCase);
+        }
     }
 }

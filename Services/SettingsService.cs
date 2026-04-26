@@ -15,16 +15,9 @@ public static class SettingsService
     /// </summary>
     private static DateTime _settingsFileMtimeUtcAtLastLoad = DateTime.MinValue;
 
-    public static string GetSettingsDirectory()
-    {
-        var appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        var dir = Path.Combine(appData, "CascadeIDE");
-        if (!Directory.Exists(dir))
-            Directory.CreateDirectory(dir);
-        return dir;
-    }
+    public static string GetSettingsDirectory() => UserSettingsPaths.GetSettingsDirectory();
 
-    public static string GetSettingsPath() => Path.Combine(GetSettingsDirectory(), "settings.toml");
+    public static string GetSettingsPath() => UserSettingsPaths.GetSettingsFilePath();
 
     public static CascadeIdeSettings Load()
     {

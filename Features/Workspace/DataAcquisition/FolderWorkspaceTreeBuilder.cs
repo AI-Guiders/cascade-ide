@@ -1,6 +1,6 @@
 using CascadeIDE.Models;
 
-namespace CascadeIDE.Services;
+namespace CascadeIDE.Features.Workspace.DataAcquisition;
 
 /// <summary>
 /// Дерево обозревателя для режима «папка как workspace» (без .sln): каталоги и файлы с отсечением по глубине/числу узлов.

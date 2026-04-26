@@ -69,11 +69,11 @@ public sealed partial class SolutionWorkspaceViewModel : ViewModelBase
 
                 if (Directory.Exists(normalizedProbe))
                 {
-                    var r = Services.FolderWorkspaceTreeBuilder.TryBuild(normalizedProbe, out var err);
+                    var r = FolderWorkspaceTreeBuilder.TryBuild(normalizedProbe, out var err);
                     return (r, err);
                 }
 
-                var sln = Services.SolutionParser.Load(trimmed, out var err2);
+                var sln = SolutionParser.Load(trimmed, out var err2);
                 return (sln, err2);
             }, cancellationToken).ConfigureAwait(false);
 

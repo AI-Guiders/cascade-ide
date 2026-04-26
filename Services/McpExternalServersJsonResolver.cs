@@ -20,17 +20,11 @@ public static class McpExternalServersJsonResolver
         var expanded = Environment.ExpandEnvironmentVariables(path);
         var fullPath = Path.IsPathRooted(expanded)
             ? Path.GetFullPath(expanded)
-            : Path.GetFullPath(Path.Combine(SettingsService.GetSettingsDirectory(), expanded));
+            : Path.GetFullPath(Path.Combine(UserSettingsPaths.GetSettingsDirectory(), expanded));
 
-        try
-        {
-            if (File.Exists(fullPath))
-                return File.ReadAllText(fullPath);
-        }
-        catch
-        {
-            // Файл недоступен — fallback на inline.
-        }
+        var fromFile = TextFileReadWrite.TryReadAllTextIfExists(fullPath);
+        if (fromFile is not null)
+            return fromFile;
 
         return settings.Mcp.ExternalServersJson ?? "[]";
     }

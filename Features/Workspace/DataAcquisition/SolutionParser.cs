@@ -6,7 +6,7 @@ using CascadeIDE.Models;
 using Microsoft.VisualStudio.SolutionPersistence.Model;
 using Microsoft.VisualStudio.SolutionPersistence.Serializer;
 
-namespace CascadeIDE.Services;
+namespace CascadeIDE.Features.Workspace.DataAcquisition;
 
 /// <summary>
 /// Загрузка .sln / .slnx / .slnf, либо одного .csproj/.fsproj (без solution-файла), и построение дерева <see cref="SolutionItem"/>.
