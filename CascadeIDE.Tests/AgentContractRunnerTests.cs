@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using CascadeIDE.Features.Git.DataAcquisition;
 using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Services;
 using CascadeIDE.Services.AgentContract;
@@ -107,19 +108,9 @@ public sealed class AgentContractRunnerTests : IDisposable
 
     private static async Task RunGitAsync(string workingDirectory, params string[] args)
     {
-        var psi = new System.Diagnostics.ProcessStartInfo("git")
-        {
-            WorkingDirectory = workingDirectory,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
-            CreateNoWindow = true,
-        };
-        foreach (var a in args)
-            psi.ArgumentList.Add(a);
-        using var p = System.Diagnostics.Process.Start(psi);
-        Assert.NotNull(p);
-        await p.WaitForExitAsync().ConfigureAwait(false);
-        Assert.Equal(0, p.ExitCode);
+        var git = new GitCommandRunner();
+        var (success, exitCode, _) = await git.RunAsync(args, workingDirectory).ConfigureAwait(false);
+        Assert.True(success);
+        Assert.Equal(0, exitCode);
     }
 }

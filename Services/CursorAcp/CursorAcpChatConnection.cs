@@ -183,33 +183,10 @@ public sealed class CursorAcpChatConnection : IDisposable
         _cachedAcpAutoInjectIdeMcp = acpAutoInjectIdeMcp;
         _cachedProcessPathForMcp = processPath;
 
-        var psi = new ProcessStartInfo
-        {
-            FileName = cmdPath,
-            Arguments = "acp",
-            WorkingDirectory = string.IsNullOrEmpty(agentWorkingDirectory) ? Path.GetDirectoryName(cmdPath) ?? "" : agentWorkingDirectory,
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            RedirectStandardInput = true,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            // Иначе на Windows берётся OEM-кодировка консоли — JSON/UTF-8 от агента даёт «кракозябры» в чате.
-            StandardInputEncoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false),
-            StandardOutputEncoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false),
-            StandardErrorEncoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false),
-        };
-
-        _process = new Process { StartInfo = psi };
-        _process.ErrorDataReceived += (_, e) =>
-        {
-            if (!string.IsNullOrEmpty(e.Data))
-                Debug.WriteLine("[cursor-acp stderr] " + e.Data);
-        };
-
-        if (!_process.Start())
-            throw new InvalidOperationException("Не удалось запустить cursor-agent (ACP).");
-
-        _process.BeginErrorReadLine();
+        _process = CursorAcpChatAgentProcess.Start(
+            cmdPath,
+            agentWorkingDirectory,
+            line => Debug.WriteLine("[cursor-acp stderr] " + line));
 
         _connection = new ClientSideConnection(_ => _client, _process.StandardOutput, _process.StandardInput);
         _connection.Open();
