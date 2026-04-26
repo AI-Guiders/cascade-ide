@@ -1,7 +1,7 @@
 using System.Text.Json;
 using CascadeIDE.Cockpit.DataBus;
+using CascadeIDE.Features.IdeMcp.Application;
 using CascadeIDE.Models;
-using CascadeIDE.Services;
 
 namespace CascadeIDE.ViewModels;
 
@@ -96,19 +96,15 @@ public partial class MainWindowViewModel
 
     async Task<string> Services.IIdeMcpActions.RunAffectedTestsAsync(IReadOnlyList<string>? changedPaths)
     {
-        var tokens = Services.McpDotnetBuildTestService.BuildAffectedTestTokens(changedPaths);
-        if (tokens.Count == 0)
-            return await RunTestsInternalAsync(filterExpression: null, mode: "fallback_all").ConfigureAwait(false);
-
-        var filter = string.Join('|', tokens.Select(t => $"FullyQualifiedName~{t}"));
-        return await RunTestsInternalAsync(filter, mode: "affected", tokens).ConfigureAwait(false);
+        var request = IdeMcpBuildTestOrchestrator.BuildAffectedTestsRequest(changedPaths);
+        return await RunTestsInternalAsync(request.filterExpression, request.mode, request.tokens).ConfigureAwait(false);
     }
 
     private async Task<string> RunTestsInternalAsync(string? filterExpression, string mode, IReadOnlyList<string>? tokens = null)
     {
         var path = await UiScheduler.Default.InvokeAsync(() => Workspace.SolutionPath ?? "");
         if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
-            return JsonSerializer.Serialize(new { success = false, error = "No solution loaded or file not found.", mode });
+            return IdeMcpBuildTestOrchestrator.SerializeMissingSolutionError(mode);
 
         try
         {
@@ -122,12 +118,11 @@ public partial class MainWindowViewModel
                 ImpactedTestsBadge = parsed.Failed;
                 PublishToIdeDataBusAndRebuild(new TestsStateChanged(LastTestSummary, ImpactedTestsBadge));
                 const int maxLogChars = 120_000;
-                var stamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-                var block = $"=== {stamp} ===\n{LastTestSummary}\n\n{outStr}\n\n";
-                var combined = InstrumentationPanel.TestResultsOutput + block;
-                if (combined.Length > maxLogChars)
-                    combined = combined[^maxLogChars..];
-                InstrumentationPanel.TestResultsOutput = combined;
+                var block = IdeMcpBuildTestOrchestrator.BuildTestResultLogBlock(LastTestSummary, outStr);
+                InstrumentationPanel.TestResultsOutput = IdeMcpBuildTestOrchestrator.AppendLogWithLimit(
+                    InstrumentationPanel.TestResultsOutput,
+                    block,
+                    maxLogChars);
                 if (InstrumentationTabs)
                     CurrentMfdShellPage = MfdShellPage.Tests;
             });
@@ -139,12 +134,11 @@ public partial class MainWindowViewModel
             {
                 PublishToIdeDataBusAndRebuild(new TestsStateChanged("", 0));
                 const int maxLogChars = 120_000;
-                var stamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-                var block = $"=== {stamp} (ошибка) ===\n{ex.Message}\n\n";
-                var combined = InstrumentationPanel.TestResultsOutput + block;
-                if (combined.Length > maxLogChars)
-                    combined = combined[^maxLogChars..];
-                InstrumentationPanel.TestResultsOutput = combined;
+                var block = IdeMcpBuildTestOrchestrator.BuildTestErrorLogBlock(ex.Message);
+                InstrumentationPanel.TestResultsOutput = IdeMcpBuildTestOrchestrator.AppendLogWithLimit(
+                    InstrumentationPanel.TestResultsOutput,
+                    block,
+                    maxLogChars);
             });
             return Services.McpDotnetBuildTestService.SerializeTestRunFailure(ex.Message, mode, filterExpression);
         }
