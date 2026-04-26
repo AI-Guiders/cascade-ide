@@ -7,7 +7,6 @@ using Avalonia.Input;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using AvaloniaEdit;
-using AvaloniaEdit.Rendering;
 using CascadeIDE.Features.Documents;
 using CascadeIDE.Features.Editor.Application;
 using CascadeIDE.Features.Editor.Application.Presentation;
@@ -26,7 +25,7 @@ public partial class DockDocumentView : UserControl
     private PropertyChangedEventHandler? _documentsHandler;
 
     private bool _renderersInstalled;
-    private EditorDiagnosticBackgroundRenderer? _diagRenderer;
+    private EditorDocumentBackgroundVisualsHandle? _backgroundVisuals;
     private Action? _diagHubHandler;
     private bool _diagPointerHooked;
     private EditorInlineHoverToolTipController? _inlineHoverToolTip;
@@ -204,6 +203,9 @@ public partial class DockDocumentView : UserControl
             _inlineHoverToolTip?.Dispose();
             _inlineHoverToolTip = null;
 
+            _backgroundVisuals?.Dispose();
+            _backgroundVisuals = null;
+
             _editor.Document.Changed -= OnEditorDocumentChanged;
             _editor.TextArea.Caret.PositionChanged -= OnEditorCaretOrSelectionChanged;
             _editor.TextArea.SelectionChanged -= OnEditorCaretOrSelectionChanged;
@@ -211,16 +213,6 @@ public partial class DockDocumentView : UserControl
             if (_vm?.WorkspaceDiagnostics is not null && _diagHubHandler is not null)
                 _vm.WorkspaceDiagnostics.DiagnosticsChanged -= _diagHubHandler;
             _diagHubHandler = null;
-
-            if (_renderersInstalled && _editor.TextArea.TextView.BackgroundRenderers is { } br)
-            {
-                for (var i = br.Count - 1; i >= 0; i--)
-                {
-                    if (br[i] is BreakpointLineRenderer or DebugCurrentLineRenderer or DebugInstructionArrowRenderer
-                        or EditorDiagnosticBackgroundRenderer)
-                        br.RemoveAt(i);
-                }
-            }
         }
 
         if (_vm is not null)
@@ -236,7 +228,6 @@ public partial class DockDocumentView : UserControl
         _documentHudLayer.ConfigureDiagnostics(null);
         _editorSurface = null;
 
-        _diagRenderer = null;
         _editor = null;
         _vm = null;
         _docVm = null;
@@ -259,16 +250,11 @@ public partial class DockDocumentView : UserControl
         if (_renderersInstalled || _vm is null || _editor is null || _docVm is null)
             return;
 
-        var textView = _editor.TextArea.TextView;
-        textView.BackgroundRenderers.Add(new BreakpointLineRenderer(() =>
-            _vm.GetAllBreakpointLinesForFile(_docVm.Doc.FilePath)));
-        textView.BackgroundRenderers.Add(new DebugCurrentLineRenderer(() =>
-            _vm.GetDebugCurrentLineForFile(_docVm.Doc.FilePath)));
-        textView.BackgroundRenderers.Add(new DebugInstructionArrowRenderer(() =>
-            _vm.GetDebugCurrentLineForFile(_docVm.Doc.FilePath)));
-
-        _diagRenderer = new EditorDiagnosticBackgroundRenderer(() => _vm.WorkspaceDiagnostics.GetStripsForFile(_docVm.Doc.FilePath));
-        textView.BackgroundRenderers.Add(_diagRenderer);
+        _backgroundVisuals = EditorInlineHudLayer.InstallDocumentBackgroundVisuals(
+            _editor,
+            () => _vm.GetAllBreakpointLinesForFile(_docVm.Doc.FilePath),
+            () => _vm.GetDebugCurrentLineForFile(_docVm.Doc.FilePath),
+            () => _vm.WorkspaceDiagnostics.GetStripsForFile(_docVm.Doc.FilePath));
 
         _diagHubHandler = () =>
         {

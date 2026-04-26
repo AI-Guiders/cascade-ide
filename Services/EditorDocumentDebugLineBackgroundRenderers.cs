@@ -4,9 +4,10 @@ using Avalonia.Media;
 using AvaloniaEdit.Document;
 using AvaloniaEdit.Rendering;
 
-namespace CascadeIDE.Views;
+namespace CascadeIDE.Services;
 
-internal sealed class BreakpointLineRenderer(Func<IReadOnlyList<int>> getBreakpointLines) : IBackgroundRenderer
+/// <summary>Фоновые подсветки строк: брейкпоинты и текущая строка отладчика (не LSP-диагностики).</summary>
+public sealed class BreakpointLineBackgroundRenderer(Func<IReadOnlyList<int>> getBreakpointLines) : IBackgroundRenderer
 {
     private const double SymbolRadius = 5;
     private static readonly SolidColorBrush s_backBrush = new(Color.FromArgb(40, 200, 80, 80));
@@ -18,12 +19,15 @@ internal sealed class BreakpointLineRenderer(Func<IReadOnlyList<int>> getBreakpo
     public void Draw(TextView textView, DrawingContext drawingContext)
     {
         var document = textView.Document;
-        if (document is null) return;
+        if (document is null)
+            return;
         var lines = getBreakpointLines();
-        if (lines.Count == 0) return;
+        if (lines.Count == 0)
+            return;
         foreach (var lineNumber in lines)
         {
-            if (lineNumber < 1 || lineNumber > document.LineCount) continue;
+            if (lineNumber < 1 || lineNumber > document.LineCount)
+                continue;
             var line = document.GetLineByNumber(lineNumber);
             var first = true;
             foreach (var rect in BackgroundGeometryBuilder.GetRectsForSegment(textView, line))
@@ -33,7 +37,10 @@ internal sealed class BreakpointLineRenderer(Func<IReadOnlyList<int>> getBreakpo
                 {
                     var centerX = rect.Left + SymbolRadius + 2;
                     var centerY = rect.Top + rect.Height / 2;
-                    drawingContext.DrawEllipse(s_symbolBrush, s_symbolPen, new Rect(centerX - SymbolRadius, centerY - SymbolRadius, SymbolRadius * 2, SymbolRadius * 2));
+                    drawingContext.DrawEllipse(
+                        s_symbolBrush,
+                        s_symbolPen,
+                        new Rect(centerX - SymbolRadius, centerY - SymbolRadius, SymbolRadius * 2, SymbolRadius * 2));
                     first = false;
                 }
             }
@@ -41,16 +48,18 @@ internal sealed class BreakpointLineRenderer(Func<IReadOnlyList<int>> getBreakpo
     }
 }
 
-internal sealed class DebugCurrentLineRenderer(Func<int> getCurrentLine) : IBackgroundRenderer
+public sealed class DebugCurrentLineBackgroundRenderer(Func<int> getCurrentLine) : IBackgroundRenderer
 {
     public KnownLayer Layer => KnownLayer.Background;
 
     public void Draw(TextView textView, DrawingContext drawingContext)
     {
         var lineNumber = getCurrentLine();
-        if (lineNumber < 1) return;
+        if (lineNumber < 1)
+            return;
         var document = textView.Document;
-        if (document is null || lineNumber > document.LineCount) return;
+        if (document is null || lineNumber > document.LineCount)
+            return;
         var line = document.GetLineByNumber(lineNumber);
         var brush = new SolidColorBrush(Color.FromArgb(60, 255, 200, 80));
         foreach (var rect in BackgroundGeometryBuilder.GetRectsForSegment(textView, line))
@@ -59,7 +68,7 @@ internal sealed class DebugCurrentLineRenderer(Func<int> getCurrentLine) : IBack
 }
 
 /// <summary>Стрелка текущей инструкции в духе VS (жёлтый треугольник у левого края строки).</summary>
-internal sealed class DebugInstructionArrowRenderer(Func<int> getCurrentLine) : IBackgroundRenderer
+public sealed class DebugInstructionArrowBackgroundRenderer(Func<int> getCurrentLine) : IBackgroundRenderer
 {
     private static readonly SolidColorBrush s_fill = new(Color.FromRgb(255, 215, 48));
     private static readonly Pen s_stroke = new(new SolidColorBrush(Color.FromRgb(160, 120, 0)), 0.85);
@@ -69,9 +78,11 @@ internal sealed class DebugInstructionArrowRenderer(Func<int> getCurrentLine) : 
     public void Draw(TextView textView, DrawingContext drawingContext)
     {
         var lineNumber = getCurrentLine();
-        if (lineNumber < 1) return;
+        if (lineNumber < 1)
+            return;
         var document = textView.Document;
-        if (document is null || lineNumber > document.LineCount) return;
+        if (document is null || lineNumber > document.LineCount)
+            return;
         var line = document.GetLineByNumber(lineNumber);
         foreach (var rect in BackgroundGeometryBuilder.GetRectsForSegment(textView, line))
         {

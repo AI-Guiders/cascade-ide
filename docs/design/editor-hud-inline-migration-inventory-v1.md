@@ -26,7 +26,7 @@
 | Squiggles (волны под текстом) | `EditorDiagnosticBackgroundRenderer` + `InstallVisualAdornersOnce` | Editor HUD inline | `Features/Editor` — **фасад установки** рендереров; сам рендерер сейчас `Services/EditorDiagnosticAdorner.cs` (можно позже co-locate с inline-слоем) |
 | Tooltip: диагностика hit-test | `WorkspaceDiagnosticsCoordinator.HitTestForToolTip` + `ToolTip` на `TextEditor` | inline hover | `EditorInlineHoverToolTipController` (Presentation) — **логика** debounce/seq; View только подключает pointer |
 | Tooltip: Quick Info (Roslyn / async) | `GetEditorQuickInfoAsync` + fallback `CSharpLanguage.GetQuickInfo` | Quick Info = Editor HUD | Те же колбэки в контроллер; **не** тащить VM в `Features/Editor` — только `Func<…>` / интерфейс с оркестрацией снаружи |
-| Debug / breakpoints визуально | `BreakpointLineRenderer`, `DebugCurrentLineRenderer`, `DebugInstructionArrowRenderer` | Не «Editor HUD» в смысле 0085 (диагностика языка), но **документные** адорнеры | Оставить в View **или** вынести в `Features/Editor/DebugDocumentAdorners` при желании — **отдельный** шаг от LSP-диагностик |
+| Debug / breakpoints визуально | `BreakpointLineBackgroundRenderer`, `DebugCurrentLineBackgroundRenderer`, `DebugInstructionArrowBackgroundRenderer` в `Services/EditorDocumentDebugLineBackgroundRenderers.cs` | Не LSP-диагностики; документные адорнеры | Регистрация через `EditorDocumentBackgroundVisualsHandle` / `EditorInlineHudLayer.InstallDocumentBackgroundVisuals` (не в `MainWindow` code-behind) |
 | ToolTip layout (placement, delay) | `DockDocumentView.axaml` + code-behind `ToolTip.Set*` | Презентация | Позже — общая политика с [0079](../adr/0079-ide-display-system-ids-overlay-pipeline.md) / roadmap §6 |
 | TextMate, selection chrome | `MainWindow.EnsureTextMate*`, `EditorSelectionChrome` | Подсветка синтаксиса, не HUD | Вне **inline HUD**-миграции (отдельная тема surface) |
 | Провайдеры MCP / состояние редактора | `SetEditorStateProvider`, `SetApplyEdit`, … | Интеграция агента, не визуальный HUD | Остаётся в VM + View wiring |
@@ -43,8 +43,8 @@
 
 ## Следующие шаги (логичный порядок)
 
-1. ~~Вынести тултип-контроллер из code-behind~~ — см. `EditorInlineHoverToolTipController` (шаг 1+).
-2. Тонкий **фасад** `EditorInlineHudLayer.InstallDocumentVisuals(...)` для регистрации `EditorDiagnosticBackgroundRenderer` + debug-рендереров (без раздувания сигнатур).
+1. ~~Вынести тултип-контроллер из code-behind~~ — `EditorInlineHoverToolTipController`.
+2. ~~Тонкий фасад для `IBackgroundRenderer` (диагностики + брейкпоинты + отладка)~~ — `EditorDocumentBackgroundVisualsHandle` + `EditorInlineHudLayer.InstallDocumentBackgroundVisuals` (`Services/EditorDocumentDebugLineBackgroundRenderers.cs` переносит бывший `MainWindow.LineRenderers`).
 3. **Политика 0085** + токены MFD/Forward — [editor-hud-banner-inline-policy-v1](editor-hud-banner-inline-policy-v1.md) и [roadmap](../ux/editor-forward-ui-cleanup-roadmap-v1.md) §4–6.
 
 ---
