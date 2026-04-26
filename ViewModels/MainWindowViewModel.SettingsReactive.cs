@@ -1,4 +1,5 @@
 using CascadeIDE.Models;
+using CascadeIDE.Features.Shell.Application;
 
 namespace CascadeIDE.ViewModels;
 
@@ -13,13 +14,13 @@ public partial class MainWindowViewModel
 
     partial void OnMarkdownKrokiBaseUrlChanged(string value)
     {
-        _settings.Markdown.Diagrams.KrokiUrl = string.IsNullOrWhiteSpace(value) ? "https://kroki.io" : value.Trim();
+        _settings.Markdown.Diagrams.KrokiUrl = ShellSettingsOrchestrator.NormalizeKrokiBaseUrl(value);
         SaveSettingsIfChanged();
     }
 
     partial void OnExternalMcpServersJsonChanged(string value)
     {
-        _settings.Mcp.ExternalServersJson = value ?? "[]";
+        _settings.Mcp.ExternalServersJson = ShellSettingsOrchestrator.NormalizeExternalMcpServersJson(value);
 
         // External MCP connectivity affects autonomous tool list/calls.
         Autonomous.CancelForHostReconfiguration();
@@ -55,7 +56,7 @@ public partial class MainWindowViewModel
         SaveSettingsIfChanged();
         if (value)
             TryNavigateToMfdShellPage(MfdShellPage.Terminal);
-        else if (CurrentMfdShellPage == MfdShellPage.Terminal)
+        else if (ShellSettingsOrchestrator.ShouldCoerceCurrentPageWhenHidden(CurrentMfdShellPage, MfdShellPage.Terminal))
             CoerceMfdShellPageToAllowed();
     }
 
@@ -65,7 +66,7 @@ public partial class MainWindowViewModel
         OnPropertyChanged(nameof(IsBottomPanelVisible));
         if (value)
             TryNavigateToMfdShellPage(MfdShellPage.Build);
-        else if (CurrentMfdShellPage == MfdShellPage.Build)
+        else if (ShellSettingsOrchestrator.ShouldCoerceCurrentPageWhenHidden(CurrentMfdShellPage, MfdShellPage.Build))
             CoerceMfdShellPageToAllowed();
     }
 
@@ -79,7 +80,7 @@ public partial class MainWindowViewModel
             return;
         }
 
-        if (CurrentMfdShellPage is MfdShellPage.Events or MfdShellPage.Tests or MfdShellPage.Hypotheses or MfdShellPage.DebugStack)
+        if (ShellSettingsOrchestrator.ShouldCoerceWhenInstrumentationHidden(CurrentMfdShellPage))
             CoerceMfdShellPageToAllowed();
     }
 
@@ -98,8 +99,8 @@ public partial class MainWindowViewModel
 
     partial void OnAiModeChanged(string value)
     {
-        var n = AiSettings.NormalizeMode(value);
-        if (!string.Equals(value, n, StringComparison.Ordinal))
+        var n = ShellSettingsOrchestrator.NormalizeAiMode(value);
+        if (ShellSettingsOrchestrator.ShouldRewriteWithNormalizedValue(value, n))
         {
             AiMode = n;
             return;
@@ -114,8 +115,8 @@ public partial class MainWindowViewModel
 
     partial void OnCloudActiveProviderChanged(string value)
     {
-        var n = AiSettings.NormalizeCloudProvider(value);
-        if (!string.Equals(value, n, StringComparison.Ordinal))
+        var n = ShellSettingsOrchestrator.NormalizeCloudProvider(value);
+        if (ShellSettingsOrchestrator.ShouldRewriteWithNormalizedValue(value, n))
         {
             CloudActiveProvider = n;
             return;
@@ -130,19 +131,19 @@ public partial class MainWindowViewModel
 
     partial void OnAnthropicApiKeyChanged(string value)
     {
-        _aiKeys.AnthropicApiKey = string.IsNullOrEmpty(value) ? null : value;
+        _aiKeys.AnthropicApiKey = ShellSettingsOrchestrator.NormalizeOptionalSecret(value);
         SaveAiKeysIfChanged();
     }
 
     partial void OnOpenAiApiKeyChanged(string value)
     {
-        _aiKeys.OpenAiApiKey = string.IsNullOrEmpty(value) ? null : value;
+        _aiKeys.OpenAiApiKey = ShellSettingsOrchestrator.NormalizeOptionalSecret(value);
         SaveAiKeysIfChanged();
     }
 
     partial void OnDeepSeekApiKeyChanged(string value)
     {
-        _aiKeys.DeepSeekApiKey = string.IsNullOrEmpty(value) ? null : value;
+        _aiKeys.DeepSeekApiKey = ShellSettingsOrchestrator.NormalizeOptionalSecret(value);
         SaveAiKeysIfChanged();
     }
 
@@ -156,7 +157,7 @@ public partial class MainWindowViewModel
             TryNavigateToMfdShellPage(MfdShellPage.Git);
             _ = GitPanel.RefreshGitPanelAsync();
         }
-        else if (CurrentMfdShellPage == MfdShellPage.Git)
+        else if (ShellSettingsOrchestrator.ShouldCoerceCurrentPageWhenHidden(CurrentMfdShellPage, MfdShellPage.Git))
             CoerceMfdShellPageToAllowed();
     }
 
@@ -168,7 +169,7 @@ public partial class MainWindowViewModel
     partial void OnCodeNavigationMapPresentationChanged(string value)
     {
         var normalized = CodeNavigationMapPresentationKind.Normalize(value);
-        if (!string.Equals(normalized, value, StringComparison.Ordinal))
+        if (ShellSettingsOrchestrator.ShouldRewriteWithNormalizedValue(value, normalized))
         {
             CodeNavigationMapPresentation = normalized;
             return;
@@ -182,7 +183,7 @@ public partial class MainWindowViewModel
     partial void OnCodeNavigationMapLevelChanged(string value)
     {
         var normalized = CodeNavigationMapLevelKind.Normalize(value);
-        if (!string.Equals(normalized, value, StringComparison.Ordinal))
+        if (ShellSettingsOrchestrator.ShouldRewriteWithNormalizedValue(value, normalized))
         {
             CodeNavigationMapLevel = normalized;
             return;
