@@ -1,4 +1,3 @@
-using System.Text.Json;
 using CascadeIDE.Cockpit.DataBus;
 using CascadeIDE.Features.IdeMcp.Application;
 using CascadeIDE.Models;
@@ -27,7 +26,7 @@ public partial class MainWindowViewModel
                 relative_path = McpSolutionTree.GetRelativePath(solutionPath, e.FullPath)
             }).ToList();
             var tree = Workspace.SolutionRoots.Select(r => McpSolutionTree.BuildSolutionTreeNode(r, solutionPath)).ToList();
-            return JsonSerializer.Serialize(new { file_entries = entries, solution_tree = tree });
+            return IdeMcpBuildTestOrchestrator.SerializeSolutionFilesPayload(entries, tree);
         });
 
     async Task<string> Services.IIdeMcpActions.BuildAsync()
@@ -148,7 +147,7 @@ public partial class MainWindowViewModel
     {
         var path = await UiScheduler.Default.InvokeAsync(() => Workspace.SolutionPath ?? "");
         if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
-            return JsonSerializer.Serialize(new { success = false, error = "No solution loaded or file not found." });
+            return IdeMcpBuildTestOrchestrator.SerializeCodeCleanupFailure("No solution loaded or file not found.");
 
         try
         {
@@ -163,21 +162,15 @@ public partial class MainWindowViewModel
             var (success, exitCode, outStr) = await _mcpBuildTest
                 .RunCodeCleanupAsync(path, includePath, AppendBuildChunk, cancellationToken: default)
                 .ConfigureAwait(false);
-            const int maxRawChars = 4000;
-            var rawTruncated = outStr.Length > maxRawChars ? outStr[..maxRawChars] + "\n... (output truncated)" : outStr;
+            var rawTruncated = IdeMcpBuildTestOrchestrator.BuildTruncatedRawOutput(outStr, 4000);
 
             await UiScheduler.Default.InvokeAsync(() => BuildOutputPanel.FlushPending()).ConfigureAwait(false);
 
-            return JsonSerializer.Serialize(new
-            {
-                success,
-                exit_code = exitCode,
-                raw_output = rawTruncated
-            });
+            return IdeMcpBuildTestOrchestrator.SerializeCodeCleanupResult(success, exitCode, rawTruncated);
         }
         catch (Exception ex)
         {
-            return JsonSerializer.Serialize(new { success = false, error = ex.Message });
+            return IdeMcpBuildTestOrchestrator.SerializeCodeCleanupFailure(ex.Message);
         }
     }
 }

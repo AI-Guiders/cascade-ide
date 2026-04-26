@@ -1,5 +1,6 @@
 #nullable enable
 using CascadeIDE.Models;
+using CascadeIDE.Features.IdeMcp.Application;
 using CommunityToolkit.Mvvm.Input;
 
 namespace CascadeIDE.ViewModels;
@@ -89,24 +90,24 @@ public partial class MainWindowViewModel
     {
         var provider = GetUiLayoutProvider;
         if (provider is null)
-            return "{}";
-        return await UiScheduler.Default.InvokeAsync(() => provider() ?? "{}");
+            return IdeMcpUiAutomationOrchestrator.DefaultJsonObject();
+        return await UiScheduler.Default.InvokeAsync(() => provider() ?? IdeMcpUiAutomationOrchestrator.DefaultJsonObject());
     }
 
     async Task<string> Services.IIdeMcpActions.GetColorsUnderCursorAsync()
     {
         var provider = GetColorsUnderCursorProvider;
         if (provider is null)
-            return "{}";
-        return await UiScheduler.Default.InvokeAsync(() => provider() ?? "{}");
+            return IdeMcpUiAutomationOrchestrator.DefaultJsonObject();
+        return await UiScheduler.Default.InvokeAsync(() => provider() ?? IdeMcpUiAutomationOrchestrator.DefaultJsonObject());
     }
 
     async Task<string> Services.IIdeMcpActions.GetControlAppearanceAsync(string? name)
     {
         var provider = GetControlAppearanceProvider;
         if (provider is null)
-            return "{}";
-        return await UiScheduler.Default.InvokeAsync(() => provider(name) ?? "{}");
+            return IdeMcpUiAutomationOrchestrator.DefaultJsonObject();
+        return await UiScheduler.Default.InvokeAsync(() => provider(name) ?? IdeMcpUiAutomationOrchestrator.DefaultJsonObject());
     }
 
     async Task<string> Services.IIdeMcpActions.SetControlLayoutAsync(string controlName, string layoutJson)
@@ -114,7 +115,8 @@ public partial class MainWindowViewModel
         var provider = SetControlLayoutProvider;
         if (provider is null)
             return "No layout provider.";
-        return await UiScheduler.Default.InvokeAsync(() => provider(controlName, layoutJson ?? "{}"));
+        return await UiScheduler.Default.InvokeAsync(() =>
+            provider(controlName, IdeMcpUiAutomationOrchestrator.NormalizeJsonInput(layoutJson)));
     }
 
     async Task<string> Services.IIdeMcpActions.AddControlAsync(string parentName, string controlType, string? content, string? name)
@@ -129,15 +131,16 @@ public partial class MainWindowViewModel
     {
         var provider = SetControlTextProvider;
         if (provider is null)
-            return "No provider.";
-        return await UiScheduler.Default.InvokeAsync(() => provider(controlName, text ?? ""));
+            return IdeMcpUiAutomationOrchestrator.DefaultProviderMissingMessage();
+        return await UiScheduler.Default.InvokeAsync(() =>
+            provider(controlName, IdeMcpUiAutomationOrchestrator.NormalizeTextInput(text)));
     }
 
     async Task<string> Services.IIdeMcpActions.ClickControlAsync(string? controlName)
     {
         var provider = ClickControlProvider;
         if (provider is null)
-            return "No provider.";
+            return IdeMcpUiAutomationOrchestrator.DefaultProviderMissingMessage();
         return await UiScheduler.Default.InvokeAsync(() => provider(controlName));
     }
 
@@ -145,8 +148,9 @@ public partial class MainWindowViewModel
     {
         var provider = SendKeysProvider;
         if (provider is null)
-            return "No provider.";
-        return await UiScheduler.Default.InvokeAsync(() => provider(controlName, keys ?? ""));
+            return IdeMcpUiAutomationOrchestrator.DefaultProviderMissingMessage();
+        return await UiScheduler.Default.InvokeAsync(() =>
+            provider(controlName, IdeMcpUiAutomationOrchestrator.NormalizeTextInput(keys)));
     }
 
     async Task<string> Services.IIdeMcpActions.SelectChatMessageAsync(int index) =>
@@ -159,8 +163,8 @@ public partial class MainWindowViewModel
         await UiScheduler.Default.InvokeAsync(() =>
         {
             if (!Guid.TryParse(messageId, out var id))
-                return """{"ok":false,"error":"invalid_message_id"}""";
-            return ChatPanel.EditAssistantMessageById(id, newContent ?? "", reason);
+                return IdeMcpUiAutomationOrchestrator.InvalidMessageIdJson();
+            return ChatPanel.EditAssistantMessageById(id, IdeMcpUiAutomationOrchestrator.NormalizeTextInput(newContent), reason);
         });
 
     async Task<string> Services.IIdeMcpActions.ExportChatReadableAsync(bool writeFile, string? fileName) =>
@@ -170,7 +174,7 @@ public partial class MainWindowViewModel
     {
         var provider = SetFocusProvider;
         if (provider is null)
-            return "No provider.";
+            return IdeMcpUiAutomationOrchestrator.DefaultProviderMissingMessage();
         return await UiScheduler.Default.InvokeAsync(() => provider(controlName));
     }
 
@@ -178,7 +182,7 @@ public partial class MainWindowViewModel
     {
         var provider = HighlightControlProvider;
         if (provider is null)
-            return "No provider.";
+            return IdeMcpUiAutomationOrchestrator.DefaultProviderMissingMessage();
         return await UiScheduler.Default.InvokeAsync(() => provider(controlName));
     }
 
@@ -186,7 +190,7 @@ public partial class MainWindowViewModel
     {
         var provider = SetPanelSizeProvider;
         if (provider is null)
-            return "No provider.";
+            return IdeMcpUiAutomationOrchestrator.DefaultProviderMissingMessage();
         return await UiScheduler.Default.InvokeAsync(() => provider(panel, width, height));
     }
 

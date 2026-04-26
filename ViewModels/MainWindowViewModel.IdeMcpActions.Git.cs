@@ -1,4 +1,4 @@
-using System.Text.Json;
+using CascadeIDE.Features.IdeMcp.Application;
 using GitMcp.Core;
 
 namespace CascadeIDE.ViewModels;
@@ -6,6 +6,8 @@ namespace CascadeIDE.ViewModels;
 /// <summary>MCP: git.</summary>
 public partial class MainWindowViewModel
 {
+    private static readonly string[] GitPreflightSafeFixAppliedCommands = ["git add --renormalize ."];
+
     Task<string> Services.IIdeMcpActions.GitStatusAsync() =>
         RunGitCommandJsonAsync(GitCommandBuilder.StatusShortBranch());
 
@@ -20,7 +22,7 @@ public partial class MainWindowViewModel
         var r = GitCommandBuilder.Fetch(all, prune, remote, dryRun);
         return r.IsSuccess
             ? RunGitCommandJsonAsync(r.Args!)
-            : Task.FromResult(GitValidationError(r.Error!));
+            : Task.FromResult(IdeMcpGitOrchestrator.BuildValidationError(r.Error!));
     }
 
     Task<string> Services.IIdeMcpActions.GitPullAsync(string? remote, string? branch, bool ffOnly, bool dryRun)
@@ -28,13 +30,13 @@ public partial class MainWindowViewModel
         var r = GitCommandBuilder.Pull(remote, branch, ffOnly, dryRun);
         return r.IsSuccess
             ? RunGitCommandJsonAsync(r.Args!)
-            : Task.FromResult(GitValidationError(r.Error!));
+            : Task.FromResult(IdeMcpGitOrchestrator.BuildValidationError(r.Error!));
     }
 
     async Task<string> Services.IIdeMcpActions.GitBranchAsync(string? action, string? name, string? startPoint, bool force)
     {
-        var a = string.IsNullOrWhiteSpace(action) ? "list" : action.Trim();
-        switch (a.ToLowerInvariant())
+        var a = IdeMcpGitOrchestrator.NormalizeAction(action, "list");
+        switch (a)
         {
             case "list":
                 return await RunGitCommandJsonAsync(GitCommandBuilder.BranchList().Args!).ConfigureAwait(false);
@@ -42,14 +44,14 @@ public partial class MainWindowViewModel
                 var cr = GitCommandBuilder.BranchCreate(name ?? "", startPoint);
                 return cr.IsSuccess
                     ? await RunGitCommandJsonAsync(cr.Args!).ConfigureAwait(false)
-                    : GitValidationError(cr.Error!);
+                    : IdeMcpGitOrchestrator.BuildValidationError(cr.Error!);
             case "delete":
                 var dr = GitCommandBuilder.BranchDelete(name ?? "", force);
                 return dr.IsSuccess
                     ? await RunGitCommandJsonAsync(dr.Args!).ConfigureAwait(false)
-                    : GitValidationError(dr.Error!);
+                    : IdeMcpGitOrchestrator.BuildValidationError(dr.Error!);
             default:
-                return GitValidationError("git_branch: action must be list, create, or delete.");
+                return IdeMcpGitOrchestrator.BuildValidationError("git_branch: action must be list, create, or delete.");
         }
     }
 
@@ -58,13 +60,13 @@ public partial class MainWindowViewModel
         var r = GitCommandBuilder.Show(rev, path, statOnly);
         return r.IsSuccess
             ? RunGitCommandJsonAsync(r.Args!)
-            : Task.FromResult(GitValidationError(r.Error!));
+            : Task.FromResult(IdeMcpGitOrchestrator.BuildValidationError(r.Error!));
     }
 
     Task<string> Services.IIdeMcpActions.GitSubmoduleAsync(string? action, string? path, bool recursive)
     {
-        var a = string.IsNullOrWhiteSpace(action) ? "status" : action.Trim();
-        switch (a.ToLowerInvariant())
+        var a = IdeMcpGitOrchestrator.NormalizeAction(action, "status");
+        switch (a)
         {
             case "status":
                 return RunGitCommandJsonAsync(GitCommandBuilder.SubmoduleStatus().Args!);
@@ -72,9 +74,9 @@ public partial class MainWindowViewModel
                 var r = GitCommandBuilder.SubmoduleUpdate(recursive, path);
                 return r.IsSuccess
                     ? RunGitCommandJsonAsync(r.Args!)
-                    : Task.FromResult(GitValidationError(r.Error!));
+                    : Task.FromResult(IdeMcpGitOrchestrator.BuildValidationError(r.Error!));
             default:
-                return Task.FromResult(GitValidationError("git_submodule: action must be status or update."));
+                return Task.FromResult(IdeMcpGitOrchestrator.BuildValidationError("git_submodule: action must be status or update."));
         }
     }
 
@@ -82,15 +84,15 @@ public partial class MainWindowViewModel
     {
         var changedOutput = await RunGitCommandAsync(GitCommandBuilder.DiffNameOnly(staged)).ConfigureAwait(false);
         if (!changedOutput.Success)
-            return JsonSerializer.Serialize(new { success = false, exit_code = changedOutput.ExitCode, output = TruncateOutput(changedOutput.Output, 4000) });
+            return IdeMcpGitOrchestrator.BuildCommandResult(false, changedOutput.ExitCode, TruncateOutput(changedOutput.Output, 4000));
 
         var ignoreCrOutput = await RunGitCommandAsync(GitCommandBuilder.DiffNameOnly(staged, ignoreCrAtEol: true)).ConfigureAwait(false);
         if (!ignoreCrOutput.Success)
-            return JsonSerializer.Serialize(new { success = false, exit_code = ignoreCrOutput.ExitCode, output = TruncateOutput(ignoreCrOutput.Output, 4000) });
+            return IdeMcpGitOrchestrator.BuildCommandResult(false, ignoreCrOutput.ExitCode, TruncateOutput(ignoreCrOutput.Output, 4000));
 
         var ignoreWsOutput = await RunGitCommandAsync(GitCommandBuilder.DiffNameOnly(staged, ignoreWhitespace: true, ignoreCrAtEol: true)).ConfigureAwait(false);
         if (!ignoreWsOutput.Success)
-            return JsonSerializer.Serialize(new { success = false, exit_code = ignoreWsOutput.ExitCode, output = TruncateOutput(ignoreWsOutput.Output, 4000) });
+            return IdeMcpGitOrchestrator.BuildCommandResult(false, ignoreWsOutput.ExitCode, TruncateOutput(ignoreWsOutput.Output, 4000));
 
         var changed = GitPreflight.ParseNameOnlyOutput(changedOutput.Output);
         var untracked = includeUntracked
@@ -115,69 +117,31 @@ public partial class MainWindowViewModel
         }
 
         var report = GitPreflight.BuildReport(changed, untracked, ignoreCr, ignoreWs, patches);
-        return JsonSerializer.Serialize(new
-        {
-            success = true,
-            staged,
-            changed_files = report.ChangedFiles,
-            untracked_files = report.UntrackedFiles,
-            semantic_files = report.SemanticFiles,
-            whitespace_only_files = report.WhitespaceOnlyFiles,
-            eol_only_files = report.EolOnlyFiles,
-            bom_only_files = report.BomOnlyFiles,
-            suggested_safe_fix_commands = report.SuggestedSafeFixCommands
-        });
+        return IdeMcpGitOrchestrator.BuildPreflightReport(staged, report);
     }
 
     async Task<string> Services.IIdeMcpActions.GitPreflightFixSafeAsync(bool includePatches)
     {
         var renormResult = await RunGitCommandAsync(GitCommandBuilder.AddRenormalize()).ConfigureAwait(false);
         if (!renormResult.Success)
-            return JsonSerializer.Serialize(new { success = false, exit_code = renormResult.ExitCode, output = TruncateOutput(renormResult.Output, 4000) });
+            return IdeMcpGitOrchestrator.BuildCommandResult(false, renormResult.ExitCode, TruncateOutput(renormResult.Output, 4000));
 
         var post = await ((Services.IIdeMcpActions)this).GitPreflightAsync(staged: false, includeUntracked: true, includePatches: includePatches).ConfigureAwait(false);
-        using var doc = JsonDocument.Parse(post);
-        if (!doc.RootElement.TryGetProperty("success", out var ok) || ok.ValueKind != JsonValueKind.True)
-            return post;
-
-        var changed = doc.RootElement.GetProperty("changed_files");
-        var untracked = doc.RootElement.GetProperty("untracked_files");
-        var semantic = doc.RootElement.GetProperty("semantic_files");
-        var ws = doc.RootElement.GetProperty("whitespace_only_files");
-        var eol = doc.RootElement.GetProperty("eol_only_files");
-        var bom = doc.RootElement.GetProperty("bom_only_files");
-        var safe = doc.RootElement.GetProperty("suggested_safe_fix_commands");
-        return JsonSerializer.Serialize(new
-        {
-            success = true,
-            applied = new[] { "git add --renormalize ." },
-            changed_files = changed,
-            untracked_files = untracked,
-            semantic_files = semantic,
-            whitespace_only_files = ws,
-            eol_only_files = eol,
-            bom_only_files = bom,
-            suggested_safe_fix_commands = safe
-        });
+        return IdeMcpGitOrchestrator.BuildPreflightFixSafeResult(post, GitPreflightSafeFixAppliedCommands);
     }
 
     async Task<string> Services.IIdeMcpActions.GitCommitAsync(string message, IReadOnlyList<string>? paths)
     {
         if (string.IsNullOrWhiteSpace(message))
-            return JsonSerializer.Serialize(new { success = false, error = "Commit message is required." });
+            return IdeMcpGitOrchestrator.BuildMissingCommitMessageError();
 
         var addResult = await RunGitCommandAsync(GitCommandBuilder.Add(paths)).ConfigureAwait(false);
         if (!addResult.Success)
-            return JsonSerializer.Serialize(new { success = false, step = "add", exit_code = addResult.ExitCode, output = addResult.Output });
+            return IdeMcpGitOrchestrator.BuildStepFailure("add", addResult.ExitCode, addResult.Output);
 
         var commitResult = await RunGitCommandAsync(GitCommandBuilder.Commit(message)).ConfigureAwait(false);
         _ = RefreshGitSummaryAsync();
-        return JsonSerializer.Serialize(new
-        {
-            success = commitResult.Success,
-            exit_code = commitResult.ExitCode,
-            output = TruncateOutput(commitResult.Output, 4000)
-        });
+        return IdeMcpGitOrchestrator.BuildCommitResult(commitResult.Success, commitResult.ExitCode, TruncateOutput(commitResult.Output, 4000));
     }
 
     Task<string> Services.IIdeMcpActions.GitPushAsync(string? remote, string? branch, bool dryRun)
@@ -188,18 +152,10 @@ public partial class MainWindowViewModel
         return RunGitCommandJsonAsync(args);
     }
 
-    private static string GitValidationError(string error) =>
-        JsonSerializer.Serialize(new { success = false, error });
-
     private async Task<string> RunGitCommandJsonAsync(IReadOnlyList<string> args)
     {
         var result = await RunGitCommandAsync(args).ConfigureAwait(false);
-        return JsonSerializer.Serialize(new
-        {
-            success = result.Success,
-            exit_code = result.ExitCode,
-            output = TruncateOutput(result.Output, 4000)
-        });
+        return IdeMcpGitOrchestrator.BuildCommandResult(result.Success, result.ExitCode, TruncateOutput(result.Output, 4000));
     }
 
     private async Task<(bool Success, int ExitCode, string Output)> RunGitCommandAsync(IReadOnlyList<string> args)

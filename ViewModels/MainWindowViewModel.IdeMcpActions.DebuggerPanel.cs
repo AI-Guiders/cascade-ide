@@ -1,4 +1,4 @@
-using System.Text.Json;
+using CascadeIDE.Features.IdeMcp.Application;
 using CascadeIDE.Models;
 
 namespace CascadeIDE.ViewModels;
@@ -72,28 +72,6 @@ public partial class MainWindowViewModel
         {
             cancellationToken.ThrowIfCancellationRequested();
             var s = DapDebug.GetSnapshot();
-            return JsonSerializer.Serialize(new
-            {
-                s.HasActiveSession,
-                s.IsExecutionStopped,
-                position = new { file = s.StoppedFile, line = s.StoppedLine },
-                exception = s.ExceptionText,
-                breakpoints = s.Breakpoints.Take(500).Select(b => new { file = b.File, line = b.Line, condition = b.Condition }).ToList(),
-                stack_frames = s.StackFrames.Select(frame => new { frame.Name, frame.File, frame.Line }).ToList(),
-                variables_frame_index = s.VariablesFrameIndex,
-                variable_root_scopes = s.VariableRootScopes.Take(50).Select(g => new
-                {
-                    scope = g.ScopeName,
-                    roots = g.Roots.Take(200).Select(v => new
-                    {
-                        v.Name,
-                        v.Value,
-                        v.Type,
-                        variables_reference = v.VariablesReference,
-                        v.NamedVariables,
-                        v.IndexedVariables
-                    }).ToList()
-                }).ToList()
-            });
+            return IdeMcpDebugOrchestrator.SerializeDebugSnapshot(s);
         });
 }

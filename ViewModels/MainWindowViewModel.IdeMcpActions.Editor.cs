@@ -1,6 +1,4 @@
-using System.IO;
-using System.Text.Json;
-using Dock.Model.Mvvm.Controls;
+using CascadeIDE.Features.IdeMcp.Application;
 
 namespace CascadeIDE.ViewModels;
 
@@ -70,7 +68,7 @@ public partial class MainWindowViewModel
             try
             {
                 var dto = _editorStateProvider?.Invoke(preview) ?? new Services.EditorStateDto();
-                tcs.SetResult(JsonSerializer.Serialize(dto));
+                tcs.SetResult(IdeMcpEditorOrchestrator.SerializeEditorState(dto));
             }
             catch (Exception ex)
             {
@@ -88,14 +86,7 @@ public partial class MainWindowViewModel
             try
             {
                 var content = _editorContentRangeProvider?.Invoke(startLine, endLine);
-                var obj = new
-                {
-                    file_path = CurrentFilePath,
-                    start_line = startLine,
-                    end_line = endLine,
-                    content = content ?? ""
-                };
-                tcs.SetResult(JsonSerializer.Serialize(obj));
+                tcs.SetResult(IdeMcpEditorOrchestrator.SerializeEditorContentRange(CurrentFilePath, startLine, endLine, content));
             }
             catch (Exception ex)
             {
@@ -115,40 +106,17 @@ public partial class MainWindowViewModel
                 var target = string.IsNullOrWhiteSpace(filePath) ? CurrentFilePath : filePath.Trim();
                 if (string.IsNullOrEmpty(target))
                 {
-                    tcs.SetResult(JsonSerializer.Serialize(new { error = "no_path", message = "file_path не задан и нет текущего открытого файла." }));
+                    tcs.SetResult(IdeMcpEditorOrchestrator.SerializeOpenDocumentMissingPathError());
                     return;
                 }
 
                 var doc = FindOpenDocumentModelByPath(target);
                 if (doc is null)
                 {
-                    tcs.SetResult(JsonSerializer.Serialize(new
-                    {
-                        error = "not_open",
-                        message = "Файл не среди открытых вкладок.",
-                        file_path_requested = target
-                    }));
+                    tcs.SetResult(IdeMcpEditorOrchestrator.SerializeOpenDocumentNotOpenError(target));
                     return;
                 }
-
-                var fullText = doc.Content ?? "";
-                var len = fullText.Length;
-                var truncated = false;
-                var outText = fullText;
-                if (maxChars is > 0 && len > maxChars.Value)
-                {
-                    outText = fullText[..maxChars.Value];
-                    truncated = true;
-                }
-
-                tcs.SetResult(JsonSerializer.Serialize(new
-                {
-                    file_path = doc.FilePath,
-                    length = len,
-                    truncated,
-                    is_dirty = doc.IsDirty,
-                    text = outText
-                }));
+                tcs.SetResult(IdeMcpEditorOrchestrator.SerializeOpenDocumentText(doc.FilePath, doc.Content, doc.IsDirty, maxChars));
             }
             catch (Exception ex)
             {

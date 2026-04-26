@@ -9,6 +9,9 @@ namespace CascadeIDE.Features.IdeMcp.Application;
 /// </summary>
 public static class IdeMcpBuildTestOrchestrator
 {
+    public static string SerializeSolutionFilesPayload<TEntry, TNode>(IReadOnlyList<TEntry> fileEntries, IReadOnlyList<TNode> solutionTree) =>
+        JsonSerializer.Serialize(new { file_entries = fileEntries, solution_tree = solutionTree });
+
     public static (string? filterExpression, string mode, IReadOnlyList<string>? tokens) BuildAffectedTestsRequest(
         IReadOnlyList<string>? changedPaths)
     {
@@ -22,6 +25,20 @@ public static class IdeMcpBuildTestOrchestrator
 
     public static string SerializeMissingSolutionError(string mode) =>
         JsonSerializer.Serialize(new { success = false, error = "No solution loaded or file not found.", mode });
+
+    public static string SerializeCodeCleanupFailure(string error) =>
+        JsonSerializer.Serialize(new { success = false, error });
+
+    public static string BuildTruncatedRawOutput(string output, int maxChars) =>
+        output.Length > maxChars ? output[..maxChars] + "\n... (output truncated)" : output;
+
+    public static string SerializeCodeCleanupResult(bool success, int exitCode, string rawOutput) =>
+        JsonSerializer.Serialize(new
+        {
+            success,
+            exit_code = exitCode,
+            raw_output = rawOutput
+        });
 
     public static string BuildTestResultLogBlock(string summary, string consoleOutput)
     {

@@ -1,6 +1,6 @@
 #nullable enable
-using CascadeIDE.Services;
 using CascadeIDE.Services.CodeNavigation;
+using CascadeIDE.Features.IdeMcp.Application;
 
 namespace CascadeIDE.ViewModels;
 
@@ -21,13 +21,13 @@ public partial class MainWindowViewModel
         IReadOnlyList<string>? excludeKinds,
         string? level)
     {
-        var requestedMode = string.IsNullOrWhiteSpace(mode) ? "related" : mode.Trim().ToLowerInvariant();
-        if (requestedMode is not ("related" or "subgraph"))
-            return Task.FromResult("""{"error":"invalid_mode","message":"mode must be related or subgraph."}""");
+        if (!IdeMcpNavigationOrchestrator.TryNormalizeRequestedMode(mode, out var requestedMode))
+            return Task.FromResult(IdeMcpNavigationOrchestrator.BuildInvalidModeJson());
 
-        var configuredLevel = _settings.CodeNavigationMap.Depth;
-        var effectiveLevel = Models.CodeNavigationMapLevelKind.Normalize(string.IsNullOrWhiteSpace(level) ? configuredLevel : level);
-        var effectiveMode = effectiveLevel == Models.CodeNavigationMapLevelKind.ControlFlow ? "subgraph" : requestedMode;
+        var (effectiveLevel, effectiveMode) = IdeMcpNavigationOrchestrator.ResolveEffectiveLevelAndMode(
+            level,
+            _settings.CodeNavigationMap.Depth,
+            requestedMode);
 
         if (effectiveLevel == Models.CodeNavigationMapLevelKind.ControlFlow)
         {
@@ -36,10 +36,11 @@ public partial class MainWindowViewModel
             if (effectiveLine is null || effectiveLine <= 0 || effectiveColumn is null || effectiveColumn <= 0)
             {
                 var (derivedLine, derivedColumn) = ComputeLineColumn(EditorText, _editorCaretOffset ?? EditorSelectionStart);
-                if (effectiveLine is null || effectiveLine <= 0)
-                    effectiveLine = derivedLine;
-                if (effectiveColumn is null || effectiveColumn <= 0)
-                    effectiveColumn = derivedColumn;
+                (effectiveLine, effectiveColumn) = IdeMcpNavigationOrchestrator.ResolveLineColumnForControlFlow(
+                    effectiveLine,
+                    effectiveColumn,
+                    derivedLine,
+                    derivedColumn);
             }
 
             return UiScheduler.Default.InvokeAsync(() =>

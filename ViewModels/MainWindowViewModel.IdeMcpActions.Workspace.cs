@@ -1,4 +1,4 @@
-using System.Text.Json;
+using CascadeIDE.Features.IdeMcp.Application;
 using CascadeIDE.Features.UiChrome;
 
 namespace CascadeIDE.ViewModels;
@@ -8,17 +8,18 @@ public partial class MainWindowViewModel
 {
     string Services.IIdeMcpActions.GetSolutionInfo()
     {
-        var path = Workspace.SolutionPath ?? "";
-        var current = CurrentFilePath ?? "";
         var projects = McpSolutionTree.CollectProjectPaths(Workspace.SolutionRoots).ToList();
-        var selected = Workspace.SelectedSolutionItem?.FullPath ?? "";
-        return JsonSerializer.Serialize(new { solution_path = path, current_file_path = current, project_paths = projects, selected_solution_path = selected });
+        return IdeMcpWorkspaceOrchestrator.SerializeSolutionInfo(
+            Workspace.SolutionPath,
+            CurrentFilePath,
+            projects,
+            Workspace.SelectedSolutionItem?.FullPath);
     }
 
     string Services.IIdeMcpActions.GetBuildOutput()
     {
         var (bg, fg) = Services.UiThemeSnapshot.GetBuildOutputTheme();
-        return JsonSerializer.Serialize(new { text = BuildOutputPanel.BuildOutput ?? "", theme = new { background = bg, foreground = fg } });
+        return IdeMcpWorkspaceOrchestrator.SerializeBuildOutput(BuildOutputPanel.BuildOutput, bg, fg);
     }
 
     Task<string> Services.IIdeMcpActions.GetUiModesDiagnosticsAsync() =>
@@ -34,11 +35,11 @@ public partial class MainWindowViewModel
     {
         var solutionPath = await UiScheduler.Default.InvokeAsync(() => Workspace.SolutionPath ?? "");
         if (string.IsNullOrWhiteSpace(solutionPath))
-            return JsonSerializer.Serialize(new { error = "No workspace loaded." });
+            return IdeMcpWorkspaceOrchestrator.SerializeWorkspaceNotLoadedError();
 
         var root = BreakpointsFileService.GetWorkspaceRoot(solutionPath);
         if (string.IsNullOrEmpty(root) || !Directory.Exists(root))
-            return JsonSerializer.Serialize(new { error = "Invalid workspace root." });
+            return IdeMcpWorkspaceOrchestrator.SerializeInvalidWorkspaceRootError();
 
         return await RipgrepWorkspaceSearchService.SearchAsync(
             root,
@@ -54,15 +55,11 @@ public partial class MainWindowViewModel
     async Task<string> Services.IIdeMcpActions.GetIdeStateAsync()
     {
         var diagnosticsJson = await ((Services.IIdeMcpActions)this).GetCurrentFileDiagnosticsAsync().ConfigureAwait(false);
-        JsonElement diagnostics;
-        try { diagnostics = JsonSerializer.Deserialize<JsonElement>(diagnosticsJson); }
-        catch { diagnostics = JsonSerializer.SerializeToElement(Array.Empty<object>()); }
+        var diagnostics = IdeMcpWorkspaceOrchestrator.ParseDiagnosticsOrEmpty(diagnosticsJson);
 
         return await UiScheduler.Default.InvokeAsync(() =>
         {
-            var buildText = BuildOutputPanel.BuildOutput ?? "";
-            if (buildText.Length > 2000)
-                buildText = buildText[..2000] + "\n... (output truncated)";
+            var buildText = IdeMcpWorkspaceOrchestrator.BuildTruncatedOutputPreview(BuildOutputPanel.BuildOutput, 2000);
 
             var dbg = DapDebug.GetSnapshot();
             var state = new
@@ -113,12 +110,12 @@ public partial class MainWindowViewModel
                 diagnostics,
                 cockpit_surface = BuildCockpitSurfaceSnapshot()
             };
-            return JsonSerializer.Serialize(state);
+            return IdeMcpWorkspaceOrchestrator.SerializeIdeState(state);
         });
     }
 
     Task<string> Services.IIdeMcpActions.GetCockpitSurfaceAsync() =>
-        UiScheduler.Default.InvokeAsync(() => JsonSerializer.Serialize(BuildCockpitSurfaceSnapshot()));
+        UiScheduler.Default.InvokeAsync(() => IdeMcpWorkspaceOrchestrator.SerializeCockpitSurface(BuildCockpitSurfaceSnapshot()));
 
     async Task<string> Services.IIdeMcpActions.GetCodeMetricsAsync(string? scope, string? path)
     {
