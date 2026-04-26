@@ -36,11 +36,10 @@ public partial class DockDocumentView : UserControl
     private int _tooltipSeq;
     private bool _editorThemeSubscribed;
 
-    // ADR 0103: hi-freq → bounded + throttle, не DataBus
+    // ADR 0103: hi-freq → bounded + throttle на уровне MainWindowViewModel, не DataBus
     private IEditorSurfaceAdapter? _editorSurface;
-    private EditorStabilizedInputThrottler? _stabilizedInput;
     private readonly EditorHudEngine _hudEngine = new();
-    private CancellationTokenSource? _stabilizedInputCts;
+    private Action<EditorInputDelta>? _stabilizedHudAction;
 
     public DockDocumentView()
     {
@@ -129,6 +128,9 @@ public partial class DockDocumentView : UserControl
                 UpdateMcpProvidersIfActive();
             }
 
+            if (args.PropertyName == nameof(MainWindowViewModel.CurrentFilePath))
+                UpdateStabilizedHudRegistration();
+
             if (args.PropertyName is nameof(MainWindowViewModel.BreakpointLinesInCurrentFile)
                 or nameof(MainWindowViewModel.AllBreakpointLinesInCurrentFile)
                 or nameof(MainWindowViewModel.DebugCurrentLineInCurrentFile)
@@ -147,6 +149,7 @@ public partial class DockDocumentView : UserControl
             {
                 SyncFromVmIfActive();
                 UpdateMcpProvidersIfActive();
+                UpdateStabilizedHudRegistration();
             }
         };
         _vm.Documents.PropertyChanged += _documentsHandler;
@@ -161,19 +164,26 @@ public partial class DockDocumentView : UserControl
         InstallVisualAdornersOnce();
         UpdateMcpProvidersIfActive();
 
-        _stabilizedInputCts = new CancellationTokenSource();
         _editorSurface = new AvaloniaEditSurfaceAdapter(_editor, _docVm.Doc.FilePath);
         _hudEngine.ConfigureDiagnostics(p => _vm!.WorkspaceDiagnostics.GetStripsForFile(p));
-        _stabilizedInput = new EditorStabilizedInputThrottler(UiScheduler.Default, TimeSpan.FromMilliseconds(24));
-        _stabilizedInput.Start(
-            d =>
-            {
-                _hudEngine.OnStabilizedInput(d);
-                _vm?.UpdateCodeNavigationMapCaretOffset(d.CaretOffset);
-            },
-            _stabilizedInputCts.Token);
+        UpdateStabilizedHudRegistration();
         if (_vm is not null)
             _vm.UpdateCodeNavigationMapCaretOffset(_editorSurface.CaretOffset);
+    }
+
+    private Action<EditorInputDelta> StabilizedHudAction =>
+        _stabilizedHudAction ??= OnStabilizedHud;
+
+    private void OnStabilizedHud(EditorInputDelta d) => _hudEngine.OnStabilizedInput(d);
+
+    private void UpdateStabilizedHudRegistration()
+    {
+        if (_vm is null)
+            return;
+        if (IsActive())
+            _vm.SetActiveEditorStabilizedHudHandler(StabilizedHudAction);
+        else
+            _vm.ClearActiveEditorStabilizedHudHandlerIfEquals(StabilizedHudAction);
     }
 
     private void Teardown()
@@ -217,28 +227,14 @@ public partial class DockDocumentView : UserControl
 
         if (_vm is not null)
         {
+            _vm.ClearActiveEditorStabilizedHudHandlerIfEquals(StabilizedHudAction);
             if (_vmHandler is not null)
                 _vm.PropertyChanged -= _vmHandler;
             if (_documentsHandler is not null)
                 _vm.Documents.PropertyChanged -= _documentsHandler;
         }
 
-        if (_stabilizedInput is not null)
-        {
-            _stabilizedInputCts?.Cancel();
-            try
-            {
-                _stabilizedInput.DisposeAsync().AsTask().GetAwaiter().GetResult();
-            }
-            catch
-            {
-                // ignore
-            }
-        }
         _hudEngine.ConfigureDiagnostics(null);
-        _stabilizedInputCts?.Dispose();
-        _stabilizedInput = null;
-        _stabilizedInputCts = null;
         _editorSurface = null;
 
         _diagRenderer = null;
@@ -449,11 +445,11 @@ public partial class DockDocumentView : UserControl
 
     private void PostStabilizedEditorInputIfActive(EditorInputDeltaKind kind)
     {
-        if (!IsActive() || _vm is null || _editorSurface is null || _stabilizedInput is null)
+        if (!IsActive() || _vm is null || _editorSurface is null)
             return;
         _editorSurface.GetSelection(out var selStart, out var selLen);
         var d = new EditorInputDelta(_docVm?.Doc.FilePath, _editorSurface.CaretOffset, selStart, selLen, kind);
-        _stabilizedInput.TryPost(d);
+        _vm.TryPostEditorStabilizedInput(d);
     }
 
     private void UpdateMcpProvidersIfActive()

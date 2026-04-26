@@ -47,7 +47,10 @@ public partial class MainWindow : PointerTrackingWindow
     private void OnMainWindowClosing(object? sender, WindowClosingEventArgs e)
     {
         if (DataContext is ViewModels.MainWindowViewModel vm)
+        {
+            vm.ShutdownEditorStabilizedInput();
             vm.ReleaseWorkspaceHealthChannel();
+        }
     }
 
     private void OnMainWindowLoaded(object? sender, RoutedEventArgs e)
