@@ -15,7 +15,7 @@ public static class EnvironmentReadinessInstrumentDeck
     public const string CompactDeckId = "environment_readiness_compact_lamps_v1";
     public const string TextualDeckId = "environment_readiness_textual_detail_v1";
 
-    /// <summary>Порядок ячеек совпадает с <see cref="CascadeIDE.Services.EnvironmentReadinessSnapshotBuilder.BuildAllRowsAsync"/>.</summary>
+    /// <summary>Порядок ячеек совпадает с <see cref="CascadeIDE.Features.EnvironmentReadiness.Application.EnvironmentReadinessSnapshotBuilder.BuildAllRowsAsync"/>.</summary>
     public static readonly IReadOnlyList<string> OrderedCellIds =
     [
         EnvironmentReadinessCellIds.DevToolsSection,

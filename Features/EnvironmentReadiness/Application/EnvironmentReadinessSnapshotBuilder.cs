@@ -2,7 +2,7 @@ using CascadeIDE.Cockpit.DataBus;
 using CascadeIDE.Models;
 using CascadeIDE.Services.Lsp;
 
-namespace CascadeIDE.Services;
+namespace CascadeIDE.Features.EnvironmentReadiness.Application;
 
 /// <summary>
 /// Сборка снимка «готовность окружения» из настроек и проекции <see cref="IdeHostStateChanged"/> (тот же снимок, что на DataBus; без дампа environ).

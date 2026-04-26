@@ -57,20 +57,15 @@ public partial class MainWindowViewModel
     [RelayCommand]
     private async Task RefreshEnvironmentReadinessAsync()
     {
-        var rows = await _environmentReadinessChannel.Build(new EnvironmentReadinessChannelContext(
+        await EnvironmentReadinessRefreshOrchestrator.RunAsync(
+            _environmentReadinessChannel,
+            _environmentReadinessSurfaceCompositor,
+            EnvironmentReadinessItems,
+            new EnvironmentReadinessChannelContext(
                 _settings,
                 Workspace.SolutionPath,
                 Lsp: CaptureIdeHostLspState(),
                 IsMcpStdioHost: IsMcpServerMode,
-                ActiveAiProvider: ActiveAiProvider))
-            .ConfigureAwait(false);
-
-        await UiScheduler.Default.InvokeAsync(() =>
-        {
-            _environmentReadinessSurfaceCompositor.Compose(
-                EnvironmentReadinessItems,
-                rows,
-                new EnvironmentReadinessSurfaceDecision(Enabled: true));
-        });
+                ActiveAiProvider: ActiveAiProvider));
     }
 }
