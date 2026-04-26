@@ -4,3 +4,5 @@ global using CascadeIDE.Features.Launch.DataAcquisition;
 global using CascadeIDE.Features.Git.DataAcquisition;
 global using CascadeIDE.Features.Build.DataAcquisition;
 global using CascadeIDE.Features.Search.DataAcquisition;
+global using CascadeIDE.Features.Lsp.DataAcquisition;
+global using CascadeIDE.Features.Terminal.DataAcquisition;

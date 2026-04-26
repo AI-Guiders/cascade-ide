@@ -5,11 +5,12 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using Avalonia.Threading;
 using CascadeIDE.Services;
+using CascadeIDE.Services.Lsp;
 using Microsoft.CodeAnalysis;
 
 #nullable enable
 
-namespace CascadeIDE.Services.Lsp;
+namespace CascadeIDE.Features.Lsp.DataAcquisition;
 
 /// <summary>
 /// Один процесс Markdown LSP (stdio), по умолчанию Marksman: корень workspace = каталог решения,

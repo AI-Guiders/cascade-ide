@@ -4,6 +4,7 @@ namespace CascadeIDE.Services.Lsp;
 /// Контракт источника диагностик с C# language server (LSP <c>textDocument/publishDiagnostics</c>).
 /// In-process Roslyn сейчас идёт через <see cref="WorkspaceDiagnosticsCoordinator"/>; позже можно
 /// реализовать этот интерфейс поверх OmniSharp-клиента и объединять полосы в одном координаторе.
+/// Текущие stdio-реализации: <c>Features/Lsp/DataAcquisition</c> (<c>CSharpLspDiagnosticsHost</c>, <c>MarkdownLspDiagnosticsHost</c>).
 /// </summary>
 public interface ILspDiagnosticSource : IDisposable
 {

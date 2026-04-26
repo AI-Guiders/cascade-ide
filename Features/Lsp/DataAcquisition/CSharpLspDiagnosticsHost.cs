@@ -4,11 +4,12 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Avalonia.Threading;
+using CascadeIDE.Services.Lsp;
 using Microsoft.CodeAnalysis;
 
 #nullable enable
 
-namespace CascadeIDE.Services.Lsp;
+namespace CascadeIDE.Features.Lsp.DataAcquisition;
 
 /// <summary>
 /// Один процесс C# LSP (stdio): <see cref="textDocument/publishDiagnostics"/> → полосы в UI,
@@ -392,7 +393,7 @@ public sealed class CSharpLspDiagnosticsHost : ILspDiagnosticSource
 
     /// <summary>
     /// Коалесит <see cref="DiagnosticsChanged"/> в один <see cref="IUiScheduler.Post"/> на серию
-    /// <c>textDocument/publishDiagnostics</c> (как <see cref="Features.Build.BuildOutputPanelViewModel.Append"/>).
+    /// <c>textDocument/publishDiagnostics</c> (как <see cref="global::CascadeIDE.Features.Build.BuildOutputPanelViewModel.Append"/>).
     /// </summary>
     private void ScheduleDiagnosticsNotify()
     {

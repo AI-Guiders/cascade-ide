@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
-namespace CascadeIDE.Services;
+namespace CascadeIDE.Features.Launch.DataAcquisition;
 
 /// <summary>Открытие URL после старта Kestrel: <c>launchUrl</c> (как в VS) или первый <c>http(s)</c> из <c>ASPNETCORE_URLS</c>.</summary>
 public static class KestrelLaunchBrowser
@@ -156,5 +156,5 @@ public static class KestrelLaunchBrowser
         aspNetCoreUrls
             .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .FirstOrDefault(u => u.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
-                                  u.StartsWith("https://", StringComparison.OrdinalIgnoreCase));
+                                 u.StartsWith("https://", StringComparison.OrdinalIgnoreCase));
 }

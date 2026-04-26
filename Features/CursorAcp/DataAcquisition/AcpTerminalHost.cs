@@ -2,7 +2,7 @@ using System.Diagnostics;
 using System.Text;
 using AgentClientProtocol;
 
-namespace CascadeIDE.Services.CursorAcp;
+namespace CascadeIDE.Features.CursorAcp.DataAcquisition;
 
 /// <summary>
 /// Процессы ACP <c>terminal/*</c>: вывод в буфер для опроса агентом и зеркалирование в UI нижней панели.

@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using AgentClientProtocol;
+using CascadeIDE.Features.CursorAcp.DataAcquisition;
 
 namespace CascadeIDE.Services.CursorAcp;
 

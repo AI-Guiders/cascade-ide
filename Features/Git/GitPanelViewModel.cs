@@ -1,5 +1,4 @@
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Text;
 using Avalonia.Threading;
 using CascadeIDE.Models;
@@ -395,14 +394,7 @@ public partial class GitPanelViewModel : ViewModelBase
         if (!Directory.Exists(full))
             return;
 
-        try
-        {
-            Process.Start(new ProcessStartInfo { FileName = full, UseShellExecute = true });
-        }
-        catch (Exception ex)
-        {
-            GitPanelStatusText = ex.Message;
-        }
+        ShellOpenPathLauncher.TryOpenInDefaultShell(full, e => GitPanelStatusText = e);
     }
 
     private bool CanOpenSubmoduleFolder()

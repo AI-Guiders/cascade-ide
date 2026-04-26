@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using CascadeIDE.Cockpit.DataBus;
 using CascadeIDE.Models;
 using CascadeIDE.Services.Lsp;
@@ -309,61 +308,45 @@ public static class EnvironmentReadinessSnapshotBuilder
     /// <summary>Проверка <c>dotnet</c> в PATH (как при сборке).</summary>
     public static async Task<AnnunciatorLampItem> ProbeDotnetAsync(CancellationToken cancellationToken = default)
     {
-        try
-        {
-            var psi = new ProcessStartInfo("dotnet")
-            {
-                Arguments = "--version",
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-            };
-
-            using var process = Process.Start(psi);
-            if (process is null)
-                return new AnnunciatorLampItem(
-                    EnvironmentReadinessCellIds.DotnetSdk,
-                    "dotnet (SDK / CLI)",
-                    "Не удалось запустить процесс dotnet.",
-                    AnnunciatorLampLevel.Critical,
-                    LampShortLabel: ".NET");
-
-            var outTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
-            var errTask = process.StandardError.ReadToEndAsync(cancellationToken);
-            await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
-            var ver = (await outTask.ConfigureAwait(false)).Trim();
-            var err = (await errTask.ConfigureAwait(false)).Trim();
-
-            if (process.ExitCode == 0 && !string.IsNullOrWhiteSpace(ver))
-                return new AnnunciatorLampItem(
-                    EnvironmentReadinessCellIds.DotnetSdk,
-                    "dotnet (SDK / CLI)",
-                    $"Версия: {ver}",
-                    AnnunciatorLampLevel.Ok,
-                    LampShortLabel: ".NET");
-
-            var tail = string.IsNullOrWhiteSpace(err) ? $"код выхода {process.ExitCode}" : err;
-            return new AnnunciatorLampItem(
-                EnvironmentReadinessCellIds.DotnetSdk,
-                "dotnet (SDK / CLI)",
-                $"dotnet --version не удался ({tail}). Добавь dotnet в PATH или установи SDK.",
-                AnnunciatorLampLevel.Critical,
-                LampShortLabel: ".NET");
-        }
-        catch (OperationCanceledException)
-        {
-            throw;
-        }
-        catch (Exception ex)
+        var r = await DotnetSdkVersionProbe.RunAsync(cancellationToken).ConfigureAwait(false);
+        if (r.Outcome == DotnetSdkVersionProbeOutcome.Success && !string.IsNullOrWhiteSpace(r.Version))
         {
             return new AnnunciatorLampItem(
                 EnvironmentReadinessCellIds.DotnetSdk,
                 "dotnet (SDK / CLI)",
-                $"Не удалось выполнить dotnet --version: {ex.Message}",
+                $"Версия: {r.Version}",
+                AnnunciatorLampLevel.Ok,
+                LampShortLabel: ".NET");
+        }
+
+        if (r.Outcome == DotnetSdkVersionProbeOutcome.ProcessNull)
+        {
+            return new AnnunciatorLampItem(
+                EnvironmentReadinessCellIds.DotnetSdk,
+                "dotnet (SDK / CLI)",
+                "Не удалось запустить процесс dotnet.",
                 AnnunciatorLampLevel.Critical,
                 LampShortLabel: ".NET");
         }
+
+        if (r.Outcome == DotnetSdkVersionProbeOutcome.Exception)
+        {
+            return new AnnunciatorLampItem(
+                EnvironmentReadinessCellIds.DotnetSdk,
+                "dotnet (SDK / CLI)",
+                $"Не удалось выполнить dotnet --version: {r.ExceptionMessage ?? "unknown error"}",
+                AnnunciatorLampLevel.Critical,
+                LampShortLabel: ".NET");
+        }
+
+        // NonZeroExit
+        var tail = string.IsNullOrWhiteSpace(r.StdErr) ? $"код выхода {r.ExitCode}" : r.StdErr;
+        return new AnnunciatorLampItem(
+            EnvironmentReadinessCellIds.DotnetSdk,
+            "dotnet (SDK / CLI)",
+            $"dotnet --version не удался ({tail}). Добавь dotnet в PATH или установи SDK.",
+            AnnunciatorLampLevel.Critical,
+            LampShortLabel: ".NET");
     }
 
     private static AnnunciatorLampItem BuildCSharpRow(

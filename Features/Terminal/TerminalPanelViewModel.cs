@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using CascadeIDE.Services;
 using CascadeIDE.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -73,20 +72,10 @@ public partial class TerminalPanelViewModel : ViewModelBase
         AppendOutput($"> {cmd}\r\n");
         try
         {
-            var isWin = Environment.OSVersion.Platform == PlatformID.Win32NT;
-            var psi = new ProcessStartInfo(isWin ? "cmd" : "sh")
-            {
-                ArgumentList = { isWin ? "/c" : "-c", cmd },
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                WorkingDirectory = workDir
-            };
-            using var process = Process.Start(psi);
+            using var process = AdHocShellCommandProcess.TryStart(workDir, cmd, out var startError);
             if (process is null)
             {
-                AppendOutput("Не удалось запустить процесс.\r\n");
+                AppendOutput((startError is not null ? startError + "\r\n" : "") + "Не удалось запустить процесс.\r\n");
                 return;
             }
 
