@@ -166,6 +166,31 @@
 1. Новый код фич — **в срезе** `Features/<Имя>/`, не в конец `MainWindowViewModel`. Панельный VM вешаем на UI через **`DataContext="{Binding ИмяПанели}"`** (и при compiled bindings — **`x:DataType`** на том же элементе), а не через десятки прокси-свойств на главном VM.
 2. Повторное использование **git** — только через `IGitCommandRunner` (или обёртки), не копировать `Process`.
 3. Изменения в `MainWindowViewModel` по старым фичам — по возможности сопровождать **микро-выносом** в сервис/панельный VM.
+4. Добыча внешних данных (fs/process/json/toml/wire) — в **Data Acquisition Layer** (`Features/<Feature>/DataAcquisition`), а не в `Cockpit/ComputingUnits/*` (см. ADR 0102).
+
+## Wave 1: MCP thinning (практический срез)
+
+Цель волны: уменьшить плотность логики в `MainWindowViewModel.IdeMcpActions.*`, сохранив `MainWindowViewModel` как orchestration-слой.
+
+- Вынести из `IdeMcpActions.*` подготовку payload/парсинг/валидацию в feature-application сервисы с узкими интерфейсами.
+- Оставить в `MainWindowViewModel` только:
+  - проверку preconditions контекста окна;
+  - вызов соответствующего application-сервиса;
+  - публикацию DataBus/UI обновлений.
+- Порядок первой волны: `IdeMcpActions.Editor` -> `IdeMcpActions.Navigation` -> `IdeMcpActions.BuildTest`.
+
+## Wave 1: UI clusters thinning
+
+Цель волны: сократить связность крупных partial-кластеров `MainWindowViewModel` без big-bang.
+
+- Кластер `Presentation*`:
+  - удерживать вычисления раскладки/видимости в compositor/policy-сервисах;
+  - на VM оставить свойства-проекции и orchestration вызовы.
+- Кластер `ShellState`:
+  - состояния панелей и режимов — в отдельные state-модули по доменам, не в один monolith-файл.
+- Кластер `WorkspaceNavigationMap`:
+  - graph/data трансформации — в сервисы/CCU;
+  - в VM оставить binding-state и команды поверхности.
 
 ## Версионирование
 
@@ -184,3 +209,4 @@
 - **v1.12** — обозреватель решения: вложенность файлов как в VS — `<DependentUpon>` из `.csproj` + эвристика для SDK-glob (`Stem.*.cs` → родитель `Stem.cs` в той же папке). Формат `.sln` вложенность не задаёт.
 - **v1.13** — рефакторинг: дерево файлов проекта вынесено в `Services/ProjectFileTreeBuilder.cs`, `SolutionParser` — только загрузка решения и сортировка узлов.
 - **v1.14** — план B (примитивы MCP): `McpCommandJsonArgs` в `Services/` вместо вложенного класса в `IdeMcpCommandExecutor`; генератор `ProtocolDocGen` и `IdeMcpCommandExecutor.Generated.g.cs` синхронизированы; тесты на контракт чтения args.
+- **v1.15** — зафиксирован слой **Data Acquisition Layer** (fs/process/parse outside CCU), добавлены wave-планы `MCP thinning` и `UI clusters thinning` для следующей итерации strangler.

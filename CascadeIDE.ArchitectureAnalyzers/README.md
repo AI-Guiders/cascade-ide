@@ -18,7 +18,11 @@ Roslyn-анализаторы для границ [ADR 0036](../docs/adr/0036-cd
 | **CASCOPE017** | Error | Лимит строк: `Views/MfdShellView.axaml` (каркас EICAS + `BottomPanelShell` + `MfdShellPageStack`) — см. `MaxLineCountMfdShellView` в анализаторе; `Views/MfdShellPageStack.axaml` (набор страниц Mfd) — `MaxLineCountMfdShellPageStack`. Детальная вёрстка — в *MfdPageView. |
 | **CASCOPE018** | Error | В обоих файлах (см. **CASCOPE017**) запрещены тяжёлые inline-паттерны (`ListBox`, `TextBox`, `ItemsControl`, `GridSplitter`, `DataTemplate`, многостолбцовая `ColumnDefinitions=…`) — вынос в *MfdPageView. |
 | **CASCOPE019** | Error | Во всех `MainWindowViewModel*.cs`, кроме `MainWindowViewModel.IdeHealth.cs`, запрещён вызов `_workspaceHealth.Build(...)` (единая точка свёртки в `RebuildIdeHealth`, строки в UI — из кэша; см. [ADR 0099](../docs/adr/0099-ide-databus-typed-events-and-projections.md)). |
+| **CASCOPE020** | Warning | В `Cockpit/ComputingUnits/*` запрещён прямой доступ к внешним источникам (`File`, `Directory`, `Process`, `HttpClient`, `JsonDocument/Serializer` и др.): добыча данных — в DAL ([ADR 0102](../docs/adr/0102-data-acquisition-layer-boundary-and-contract.md)). |
+| **CASCOPE021** | Warning | В `Cockpit/ComputingUnits/*` запрещены UI-зависимости через `using` (`CascadeIDE.ViewModels`, `CascadeIDE.Views`, `CascadeIDE.Features.Ui*`, `Avalonia*`). |
 
 `MfdShellView.axaml` и `MfdShellPageStack.axaml` — в `<AdditionalFiles>` в `CascadeIDE.csproj` (**CASCOPE017**/**018**). Без записи проверка не сработает.
 
 Расширение правил: новые диагностики в этом проекте, версии `Microsoft.CodeAnalysis.CSharp` держать совместимыми с SDK.
+
+Rollout для новых правил границ DAL/CCU: сначала `Warning` (baseline и очистка), затем перевод в `Error` после стабилизации.

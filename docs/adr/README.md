@@ -111,6 +111,7 @@
 | [0099](0099-ide-databus-typed-events-and-projections.md) | **IDE DataBus:** типизированные события в процессе IDE; развязка источников и проекций, без подмены 0094 (transport) и 0097 (CCU) | Accepted · Implemented |
 | [0100](0100-project-constitution.md) | **Конституция проекта:** долговременные принципы, архитектурные инварианты, governance и порядок изменений основания проекта | Proposed |
 | [0101](0101-licensing-and-commercialization-strategy.md) | Лицензирование и коммерциализация: матрица лицензий, правила зависимостей, guardrails для copyleft и план внедрения | Proposed |
+| [0102](0102-data-acquisition-layer-boundary-and-contract.md) | **Data Acquisition Layer (DAL):** явная граница добычи внешних данных и контракт DAL ↔ CCU ↔ UI | Proposed |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 
