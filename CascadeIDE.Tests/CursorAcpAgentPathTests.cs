@@ -1,4 +1,4 @@
-using CascadeIDE.Services.CursorAcp;
+using CascadeIDE.Features.CursorAcp.DataAcquisition;
 using Xunit;
 
 namespace CascadeIDE.Tests;

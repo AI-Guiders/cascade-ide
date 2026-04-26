@@ -1,72 +1,8 @@
 using System.Diagnostics;
-using System.Text;
 using System.Text.Json;
 using AgentClientProtocol;
-using CascadeIDE.Features.CursorAcp.DataAcquisition;
 
 namespace CascadeIDE.Services.CursorAcp;
-
-/// <summary>Сопоставление пути из настроек с <c>cursor-agent.cmd</c> из пакета Cursor ACP.</summary>
-public static class CursorAcpAgentPath
-{
-    /// <summary>Возвращает полный путь к cmd и рабочий каталог для процесса.</summary>
-    public static bool TryResolve(string? configured, out string cmdPath, out string workingDirectory)
-    {
-        cmdPath = "";
-        workingDirectory = "";
-        if (string.IsNullOrWhiteSpace(configured))
-            return TryResolveFromPath(out cmdPath, out workingDirectory);
-
-        var trimmed = configured.Trim();
-        if (File.Exists(trimmed))
-        {
-            var ext = Path.GetExtension(trimmed);
-            if (string.Equals(ext, ".cmd", StringComparison.OrdinalIgnoreCase)
-                || string.Equals(ext, ".bat", StringComparison.OrdinalIgnoreCase))
-            {
-                cmdPath = Path.GetFullPath(trimmed);
-                workingDirectory = Path.GetDirectoryName(cmdPath) ?? "";
-                return true;
-            }
-        }
-
-        if (!Directory.Exists(trimmed))
-            return false;
-
-        var dir = Path.GetFullPath(trimmed);
-        foreach (var rel in new[] { Path.Combine("dist-package", "cursor-agent.cmd"), "cursor-agent.cmd" })
-        {
-            var p = Path.Combine(dir, rel);
-            if (File.Exists(p))
-            {
-                cmdPath = Path.GetFullPath(p);
-                workingDirectory = Path.GetDirectoryName(cmdPath) ?? dir;
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private static bool TryResolveFromPath(out string cmdPath, out string workingDirectory)
-    {
-        cmdPath = "";
-        workingDirectory = "";
-
-        foreach (var candidate in new[] { "cursor-agent", "cursor-agent.cmd", "cursor-agent.bat" })
-        {
-            var resolved = EnvironmentReadinessExecutablePathProbe.TryResolveExecutablePath(candidate);
-            if (string.IsNullOrWhiteSpace(resolved))
-                continue;
-
-            cmdPath = resolved;
-            workingDirectory = Path.GetDirectoryName(resolved) ?? "";
-            return true;
-        }
-
-        return false;
-    }
-}
 
 /// <summary>stdio-процесс Cursor agent + <see cref="ClientSideConnection"/>: один сеанс ACP на жизненный цикл подключения.</summary>
 public sealed class CursorAcpChatConnection : IDisposable
@@ -413,38 +349,14 @@ internal sealed class CursorAcpIdeClient : IAcpClient
 
     public ValueTask<WriteTextFileResponse> WriteTextFileAsync(WriteTextFileRequest request, CancellationToken cancellationToken = default)
     {
-        var path = SafeResolvePath(request.Path);
-        if (path is null)
-            return ValueTask.FromResult(new WriteTextFileResponse());
-
-        var dir = Path.GetDirectoryName(path);
-        if (!string.IsNullOrEmpty(dir))
-            Directory.CreateDirectory(dir);
-        File.WriteAllText(path, request.Content ?? "");
+        CursorAcpWorkspaceFileAccess.WriteTextFileUnderWorkspace(_workspaceRoot, request.Path, request.Content);
         return ValueTask.FromResult(new WriteTextFileResponse());
     }
 
     public ValueTask<ReadTextFileResponse> ReadTextFileAsync(ReadTextFileRequest request, CancellationToken cancellationToken = default)
     {
-        var path = SafeResolvePath(request.Path);
-        if (path is null || !File.Exists(path))
-            return ValueTask.FromResult(new ReadTextFileResponse { Content = "" });
-        var text = File.ReadAllText(path);
+        var text = CursorAcpWorkspaceFileAccess.ReadTextFileOrEmpty(_workspaceRoot, request.Path);
         return ValueTask.FromResult(new ReadTextFileResponse { Content = text });
-    }
-
-    private string? SafeResolvePath(string? path)
-    {
-        if (string.IsNullOrWhiteSpace(path))
-            return null;
-        var full = Path.IsPathRooted(path)
-            ? Path.GetFullPath(path)
-            : Path.GetFullPath(Path.Combine(_workspaceRoot, path));
-        var root = Path.GetFullPath(_workspaceRoot.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
-            + Path.DirectorySeparatorChar);
-        if (!full.StartsWith(root, StringComparison.OrdinalIgnoreCase))
-            return null;
-        return full;
     }
 
     public ValueTask<CreateTerminalResponse> CreateTerminalAsync(CreateTerminalRequest request, CancellationToken cancellationToken = default)

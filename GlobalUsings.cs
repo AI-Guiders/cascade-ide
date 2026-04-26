@@ -8,3 +8,4 @@ global using CascadeIDE.Features.Build.DataAcquisition;
 global using CascadeIDE.Features.Search.DataAcquisition;
 global using CascadeIDE.Features.Lsp.DataAcquisition;
 global using CascadeIDE.Features.Terminal.DataAcquisition;
+global using CascadeIDE.Features.CursorAcp.DataAcquisition;
