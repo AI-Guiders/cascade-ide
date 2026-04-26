@@ -14,6 +14,7 @@ using CascadeIDE.Cockpit.Channels.Eicas;
 using CascadeIDE.Cockpit.Channels.EnvironmentReadiness;
 using CascadeIDE.Cockpit.Channels.WorkspaceHealth;
 using CascadeIDE.Cockpit.ComputingUnits.IdeHealth;
+using CascadeIDE.Cockpit.DataBus;
 using CascadeIDE.Cockpit.Composition.EnvironmentReadiness;
 using CascadeIDE.Cockpit.Composition.WorkspaceHealth;
 using CascadeIDE.Cockpit.Composition.HostSurface;
@@ -55,6 +56,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private MarkdownLspDiagnosticsHost? _markdownLspHost;
     private readonly IdeMcpCommandExecutor _ideMcpExecutor;
     private readonly Services.IdeDapDebugSession _dapDebug;
+    private readonly IDataBus _ideDataBus;
     private readonly IIdeHealthChannel _workspaceHealth;
     private readonly IIdeHealthSurfaceCompositor _workspaceHealthSurfaceCompositor;
     private readonly IEicasFeed _eicasFeed;
@@ -169,23 +171,19 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _mcpClientService = new Services.McpClientService(Services.McpExternalServersJsonResolver.ResolveEffectiveJson(_settings));
         _autonomousAgentService = CreateAutonomousAgentService(_mcpClientService);
         Autonomous = new AutonomousAgentSessionViewModel(_autonomousAgentService, this);
+        _ideDataBus = new InMemoryDataBus(asynchronousDispatch: false);
         _dapDebug = new Services.IdeDapDebugSession(() =>
         {
             UiScheduler.Default.Post(ApplyDapDebugSnapshotToUi);
-        });
+        }, _ideDataBus);
         _dapDebug.StateChanged += (_, _) => NotifyDebugRelayCommandsChanged();
         _ideMcpExecutor = new IdeMcpCommandExecutor(this);
         _mcpBuildTest = new Services.McpDotnetBuildTestService(_dotnetRunner);
         _mcpAgentNotes = new Services.McpAgentNotesService();
 
-        _workspaceHealth = new IdeHealthSnapshotUnit(
-            () => IsBuilding,
-            () => LastTestSummary,
-            () => ImpactedTestsBadge,
-            () => StartupProjectCsprojFullPath,
-            _dapDebug,
-            () => Chrome.WorkspaceHealthGitText,
-            () => Chrome.WorkspaceHealthGitCockpitShort);
+        _workspaceHealth = new IdeHealthSnapshotUnit(_ideDataBus);
+        SeedIdeHealthDataBus();
+        Chrome.AfterGitWorkspaceHealthSummaryApplied = PublishGitToIdeDataBusAndRebuildIdeHealth;
         _workspaceHealthSurfaceCompositor = new IdeHealthSurfaceCompositor();
 
         _eicasFeed = new EmptyEicasFeed();
@@ -194,7 +192,6 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _environmentReadinessSurfaceCompositor = new EnvironmentReadinessSurfaceCompositor();
 
         Workspace.PropertyChanged += (_, e) => OnWorkspacePropertyChanged(e.PropertyName);
-        Chrome.PropertyChanged += OnChromePropertyChangedForIdeHealth;
         RebuildIdeHealth();
         RebuildEicas();
 
@@ -219,13 +216,6 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _instrumentMountPolicyResolver = new SettingsBackedInstrumentMountPolicyResolver();
 
         NotifyDockedInstrumentSlotBindings();
-    }
-
-    private void OnChromePropertyChangedForIdeHealth(object? _, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName is nameof(UiChromeViewModel.WorkspaceHealthGitText)
-            or nameof(UiChromeViewModel.WorkspaceHealthGitCockpitShort))
-            RebuildIdeHealth();
     }
 
     /// <summary>DAP-сессия (netcoredbg): launch/attach и обновление панели отладки.</summary>
@@ -306,8 +296,8 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     {
         if (e.PropertyName != nameof(InstrumentationPanelViewModel.IsDebugPanelVisible))
             return;
-        OnPropertyChanged(nameof(WorkspaceHealthDebugText));
-        OnPropertyChanged(nameof(WorkspaceHealthDebugCockpitShort));
+        OnPropertyChanged(nameof(IdeHealthDebugText));
+        OnPropertyChanged(nameof(IdeHealthDebugCockpitShort));
     }
 
     /// <summary>Вывод сборки (нижняя вкладка Build output).</summary>
