@@ -11,7 +11,7 @@
 
 ## Roadmap (в порядке strangler)
 
-**Чекпойнт (2026-04-26):** инвентаризация `DockDocumentView` + граница DAL/презентации — [editor-hud-inline-migration-inventory-v1](../design/editor-hud-inline-migration-inventory-v1.md); политика дублирования баннер/inline — [editor-hud-banner-inline-policy-v1](../design/editor-hud-banner-inline-policy-v1.md); hover tooltip вынесен в `EditorInlineHoverToolTipController` (`Features/Editor/.../Presentation`).
+**Чекпойнт (2026-04-26):** инвентаризация `DockDocumentView` + граница DAL/презентации — [editor-hud-inline-migration-inventory-v1](../design/editor-hud-inline-migration-inventory-v1.md); политика дублирования баннер/inline — [editor-hud-banner-inline-policy-v1](../design/editor-hud-banner-inline-policy-v1.md); hover tooltip вынесен в `EditorInlineHoverToolTipController` (`Features/Editor/.../Presentation`). **Обновление:** squiggle/Problems sRGB в `EditorHudDiagnosticsChroma` + ресурсы `App.axaml` `EditorHud.Severity*`; EOL inlay для `var` (`GetVarInlayHintsForFile` + `EditorInlayHintBackgroundRenderer`); токен padding `EditorForwardDocumentChrome`. Escape снимает inline тултип.
 
 1. **Согласовать с [architecture-migration.md](../architecture-migration.md):** при выносе editor HUD **не** раздувать DAL внутри view models. LSP/файлы/настройки → DAL; снимки для UI → CCU или `Features/*/Application` + тонкий оркестратор.
 
