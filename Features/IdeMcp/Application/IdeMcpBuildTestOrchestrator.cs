@@ -9,6 +9,21 @@ namespace CascadeIDE.Features.IdeMcp.Application;
 /// </summary>
 public static class IdeMcpBuildTestOrchestrator
 {
+    public static string MissingSolutionMessage() =>
+        "No solution loaded or file not found.";
+
+    public static string BuildOperationHeader(string operation, string path) =>
+        $"{operation}: {path}\r\n";
+
+    public static string BuildErrorMessage(string exceptionMessage) =>
+        "Error: " + exceptionMessage;
+
+    public static string BuildPanelLine(string text) =>
+        text + "\r\n";
+
+    public static string BuildTestSummary(int passed, int total, int failed) =>
+        $"{passed}/{total} passed, {failed} failed";
+
     public static string SerializeSolutionFilesPayload<TEntry, TNode>(IReadOnlyList<TEntry> fileEntries, IReadOnlyList<TNode> solutionTree) =>
         JsonSerializer.Serialize(new { file_entries = fileEntries, solution_tree = solutionTree });
 
@@ -57,4 +72,31 @@ public static class IdeMcpBuildTestOrchestrator
         var combined = existing + block;
         return combined.Length > maxChars ? combined[^maxChars..] : combined;
     }
+
+    public static string BuildUpdatedTestResultsOutput(string existingOutput, string summary, string consoleOutput) =>
+        AppendLogWithLimit(existingOutput, BuildTestResultLogBlock(summary, consoleOutput), 120_000);
+
+    public static string BuildUpdatedTestErrorOutput(string existingOutput, string errorMessage) =>
+        AppendLogWithLimit(existingOutput, BuildTestErrorLogBlock(errorMessage), 120_000);
+
+    public static bool ShouldOpenTestsPage(bool instrumentationTabsEnabled) =>
+        instrumentationTabsEnabled;
+
+    public static (string summary, int impactedTestsBadge, string updatedOutput, bool shouldOpenTestsPage)
+        BuildTestUiOutcome(
+            int passed,
+            int total,
+            int failed,
+            string existingOutput,
+            string consoleOutput,
+            bool instrumentationTabsEnabled)
+    {
+        var summary = BuildTestSummary(passed, total, failed);
+        var updatedOutput = BuildUpdatedTestResultsOutput(existingOutput, summary, consoleOutput);
+        return (summary, failed, updatedOutput, ShouldOpenTestsPage(instrumentationTabsEnabled));
+    }
+
+    public static (string summary, int impactedTestsBadge, string updatedOutput)
+        BuildTestErrorUiOutcome(string existingOutput, string errorMessage) =>
+        ("", 0, BuildUpdatedTestErrorOutput(existingOutput, errorMessage));
 }

@@ -34,8 +34,12 @@ public partial class MainWindowViewModel
         var path = await UiScheduler.Default.InvokeAsync(() => Workspace.SolutionPath ?? "");
         if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
         {
-            var msg = "No solution loaded or file not found.";
-            UiScheduler.Default.Post(() => { BuildOutputPanel.Set(msg + "\r\n"); IsBuildOutputVisible = true; });
+            var msg = IdeMcpBuildTestOrchestrator.MissingSolutionMessage();
+            UiScheduler.Default.Post(() =>
+            {
+                BuildOutputPanel.Set(IdeMcpBuildTestOrchestrator.BuildPanelLine(msg));
+                IsBuildOutputVisible = true;
+            });
             return msg;
         }
         int? lastExitCode = null;
@@ -45,7 +49,7 @@ public partial class MainWindowViewModel
             var pathCopy = path;
             await UiScheduler.Default.InvokeAsync(() =>
             {
-                BuildOutputPanel.Set($"Сборка: {pathCopy}\r\n");
+                BuildOutputPanel.Set(IdeMcpBuildTestOrchestrator.BuildOperationHeader("Сборка", pathCopy));
                 IsBuildOutputVisible = true;
             }).ConfigureAwait(false);
             await UiScheduler.Default.InvokeAsync(() => PublishToIdeDataBusAndRebuild(new BuildStateChanged(true)))
@@ -67,8 +71,12 @@ public partial class MainWindowViewModel
         }
         catch (Exception ex)
         {
-            var msg = "Error: " + ex.Message;
-            UiScheduler.Default.Post(() => { BuildOutputPanel.Set(msg + "\r\n"); IsBuildOutputVisible = true; });
+            var msg = IdeMcpBuildTestOrchestrator.BuildErrorMessage(ex.Message);
+            UiScheduler.Default.Post(() =>
+            {
+                BuildOutputPanel.Set(IdeMcpBuildTestOrchestrator.BuildPanelLine(msg));
+                IsBuildOutputVisible = true;
+            });
             lastSucceeded = false;
             return msg;
         }
@@ -113,16 +121,18 @@ public partial class MainWindowViewModel
 
             UiScheduler.Default.Post(() =>
             {
-                LastTestSummary = $"{parsed.Passed}/{parsed.Total} passed, {parsed.Failed} failed";
-                ImpactedTestsBadge = parsed.Failed;
-                PublishToIdeDataBusAndRebuild(new TestsStateChanged(LastTestSummary, ImpactedTestsBadge));
-                const int maxLogChars = 120_000;
-                var block = IdeMcpBuildTestOrchestrator.BuildTestResultLogBlock(LastTestSummary, outStr);
-                InstrumentationPanel.TestResultsOutput = IdeMcpBuildTestOrchestrator.AppendLogWithLimit(
+                var uiOutcome = IdeMcpBuildTestOrchestrator.BuildTestUiOutcome(
+                    parsed.Passed,
+                    parsed.Total,
+                    parsed.Failed,
                     InstrumentationPanel.TestResultsOutput,
-                    block,
-                    maxLogChars);
-                if (InstrumentationTabs)
+                    outStr,
+                    InstrumentationTabs);
+                LastTestSummary = uiOutcome.summary;
+                ImpactedTestsBadge = uiOutcome.impactedTestsBadge;
+                PublishToIdeDataBusAndRebuild(new TestsStateChanged(LastTestSummary, ImpactedTestsBadge));
+                InstrumentationPanel.TestResultsOutput = uiOutcome.updatedOutput;
+                if (uiOutcome.shouldOpenTestsPage)
                     CurrentMfdShellPage = MfdShellPage.Tests;
             });
             return outcome.JsonPayload;
@@ -131,13 +141,9 @@ public partial class MainWindowViewModel
         {
             UiScheduler.Default.Post(() =>
             {
-                PublishToIdeDataBusAndRebuild(new TestsStateChanged("", 0));
-                const int maxLogChars = 120_000;
-                var block = IdeMcpBuildTestOrchestrator.BuildTestErrorLogBlock(ex.Message);
-                InstrumentationPanel.TestResultsOutput = IdeMcpBuildTestOrchestrator.AppendLogWithLimit(
-                    InstrumentationPanel.TestResultsOutput,
-                    block,
-                    maxLogChars);
+                var uiOutcome = IdeMcpBuildTestOrchestrator.BuildTestErrorUiOutcome(InstrumentationPanel.TestResultsOutput, ex.Message);
+                PublishToIdeDataBusAndRebuild(new TestsStateChanged(uiOutcome.summary, uiOutcome.impactedTestsBadge));
+                InstrumentationPanel.TestResultsOutput = uiOutcome.updatedOutput;
             });
             return Services.McpDotnetBuildTestService.SerializeTestRunFailure(ex.Message, mode, filterExpression);
         }
@@ -147,14 +153,14 @@ public partial class MainWindowViewModel
     {
         var path = await UiScheduler.Default.InvokeAsync(() => Workspace.SolutionPath ?? "");
         if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
-            return IdeMcpBuildTestOrchestrator.SerializeCodeCleanupFailure("No solution loaded or file not found.");
+            return IdeMcpBuildTestOrchestrator.SerializeCodeCleanupFailure(IdeMcpBuildTestOrchestrator.MissingSolutionMessage());
 
         try
         {
             var pathCopy = path;
             await UiScheduler.Default.InvokeAsync(() =>
             {
-                BuildOutputPanel.Set($"Code cleanup: {pathCopy}\r\n");
+                BuildOutputPanel.Set(IdeMcpBuildTestOrchestrator.BuildOperationHeader("Code cleanup", pathCopy));
                 IsBuildOutputVisible = true;
             }).ConfigureAwait(false);
 
