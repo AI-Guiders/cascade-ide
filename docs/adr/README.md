@@ -109,6 +109,8 @@
 | [0097](0097-cockpit-compute-units-transport-to-channel-dto.md) | **Вычислительные блоки кабины (CCU)**, аналог LRU *Unit*: свёртка сырья → DTO/снимок канала; ортогонально [0094](0094-ingestion-bus-afdx-analogy-and-threading-channels.md) (транспорт) и CDS; IDE Health в коде — эталон цепочки | Accepted · Implemented |
 | [0098](0098-semantic-first-document-as-projection.md) | **Semantic-first:** первична семантическая карта; код/доки/git — проекции; согласование с [0084](0084-agent-edits-editor-source-of-truth-presence-channel.md) по сессии правок; strangler | Proposed |
 | [0099](0099-ide-databus-typed-events-and-projections.md) | **IDE DataBus:** типизированные события в процессе IDE; развязка источников и проекций, без подмены 0094 (transport) и 0097 (CCU) | Accepted · Implemented |
+| [0100](0100-project-constitution.md) | **Конституция проекта:** долговременные принципы, архитектурные инварианты, governance и порядок изменений основания проекта | Proposed |
+| [0101](0101-licensing-and-commercialization-strategy.md) | Лицензирование и коммерциализация: матрица лицензий, правила зависимостей, guardrails для copyleft и план внедрения | Proposed |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 
