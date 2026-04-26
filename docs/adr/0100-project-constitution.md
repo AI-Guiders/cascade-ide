@@ -1,6 +1,6 @@
 # ADR 0100: Конституция проекта
 
-**Status:** Proposed  
+**Status:** Accepted  
 **Date:** 2026-04-26
 
 **Related:** [0006](0006-presentation-layers-and-feature-slices.md), [0009](0009-strangler-migration-and-exceptions.md), [0027](0027-small-team-focus-vs-public-maturity.md), [0036](0036-cds-channel-compositor-surface-pipeline.md), [0079](0079-ide-display-system-ids-overlay-pipeline.md), [0097](0097-cockpit-compute-units-transport-to-channel-dto.md), [0099](0099-ide-databus-typed-events-and-projections.md), [architecture-policy.md](../architecture-policy.md)

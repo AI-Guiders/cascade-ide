@@ -1,6 +1,6 @@
 # ADR 0101: Лицензирование и стратегия коммерциализации
 
-**Status:** Proposed  
+**Status:** Accepted  
 **Date:** 2026-04-26
 
 **Related:** [0009](0009-strangler-migration-and-exceptions.md), [0024](0024-ide-sdk-and-stable-contracts.md), [0027](0027-small-team-focus-vs-public-maturity.md), [architecture-policy.md](../architecture-policy.md)
