@@ -83,7 +83,7 @@
 
 <!-- AUTO:MAIN-WINDOW-SLICE:EXEC-TABLE:END -->
 
-**Техдолг по главному VM (не блокирует развитие):** крупные куски MCP по-прежнему рядом с VM (`IdeMcpActions.*`); дальнейший вынос — по мере изменений. **План B по примитивам MCP для текущего объёма закрыт:** координаты/пути редактора (`EditorTextCoordinateUtilities`), разбор JSON панели отладки (`McpDebugPayloadParsing`), чтение полей args MCP (`McpCommandJsonArgs` в `Services/`) — вне `ViewModels/`. **Готовность окружения ([ADR 0023](adr/0023-environment-readiness-glance.md)):** полный список строк для страницы — `EnvironmentReadinessSnapshotBuilder.BuildAllRowsAsync` (`Services/`); VM только маршалит на UI и заполняет коллекцию.
+**Техдолг по главному VM (не блокирует развитие):** крупные куски MCP по-прежнему рядом с VM (`IdeMcpActions.*`); дальнейший вынос — по мере изменений. **План B по примитивам MCP для текущего объёма закрыт:** координаты/пути редактора (`EditorTextCoordinateUtilities`), разбор JSON панели отладки (`McpDebugPayloadParsing`), чтение полей args MCP (`McpCommandJsonArgs` в `Services/`) — вне `ViewModels/`. **Готовность окружения ([ADR 0023](adr/0023-environment-readiness-glance.md)):** полный список строк — `EnvironmentReadinessSnapshotBuilder.BuildAllRowsAsync` в `Features/EnvironmentReadiness/Application/` (DAL/канал CCU, ADR 0102); обновление страницы — `EnvironmentReadinessRefreshOrchestrator` (канал → compositor на UI), главный VM вызывает только оркестратор.
 
 ## Целевая карта срезов
 
@@ -210,3 +210,4 @@
 - **v1.13** — рефакторинг: дерево файлов проекта вынесено в `Services/ProjectFileTreeBuilder.cs`, `SolutionParser` — только загрузка решения и сортировка узлов.
 - **v1.14** — план B (примитивы MCP): `McpCommandJsonArgs` в `Services/` вместо вложенного класса в `IdeMcpCommandExecutor`; генератор `ProtocolDocGen` и `IdeMcpCommandExecutor.Generated.g.cs` синхронизированы; тесты на контракт чтения args.
 - **v1.15** — зафиксирован слой **Data Acquisition Layer** (fs/process/parse outside CCU), добавлены wave-планы `MCP thinning` и `UI clusters thinning` для следующей итерации strangler.
+- **v1.16** — готовность окружения: `EnvironmentReadinessSnapshotBuilder` и `EnvironmentReadinessRefreshOrchestrator` в `Features/EnvironmentReadiness/Application/`; сценарий refresh вынесен из `MainWindowViewModel`; **CASCOPE020** / **CASCOPE021** (граница CCU) — severity **Error** при чистом baseline.
