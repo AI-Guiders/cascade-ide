@@ -1,67 +1,67 @@
-# Editor surface candidates — comparison (v1)
+# Сравнение кандидатов на поверхность редактора (v1)
 
-**Status:** design companion to [ADR 0103](../adr/0103-editor-hud-substrate-semantic-projection-and-surface-adapter.md)  
-**Date:** 2026-04-26
+**Статус:** чертеж-компаньон к [ADR 0103](../adr/0103-editor-hud-substrate-semantic-projection-and-surface-adapter.md)  
+**Дата:** 2026-04-26
 
-**Related:** [0085](../adr/0085-editor-hud-inline-layer-and-hud-banner.md), [0098](../adr/0098-semantic-first-document-as-projection.md), [0035](../adr/0035-mfd-embedded-webview-external-llm-and-mcp-boundary.md), [concept-to-implementation-map-v1](../ux/concept-to-implementation-map-v1.md), [LANGUAGE-SERVICES-PLAN.md](../LANGUAGE-SERVICES-PLAN.md)
+**Связь:** [0085](../adr/0085-editor-hud-inline-layer-and-hud-banner.md), [0098](../adr/0098-semantic-first-document-as-projection.md), [0035](../adr/0035-mfd-embedded-webview-external-llm-and-mcp-boundary.md), [concept-to-implementation-map-v1](../ux/concept-to-implementation-map-v1.md), [LANGUAGE-SERVICES-PLAN.md](../LANGUAGE-SERVICES-PLAN.md)
 
-This document is a **comparative appendix** for the **Forward** document editor host. It does **not** change product baseline: **AvaloniaEdit** remains the default stack in this repository.
+Документ — **сравнительный аппендикс** к хосту документного редактора в зоне **Forward**. Он **не** меняет продуктовый baseline: **AvaloniaEdit** остаётся стеком по умолчанию в репозитории.
 
 ---
 
-## 1. Current stack (baseline)
+## 1. Текущий стек (baseline)
 
-| Dimension | AvaloniaEdit (today) |
+| Измерение | AvaloniaEdit (сейчас) |
 |-----------|------------------------|
-| **Integration** | Native Avalonia; `DockDocumentView` host; TextMate via AvaloniaEdit.TextMate |
-| **LSP / semantics** | Wired in app code (DAL direction per [0102](../adr/0102-data-acquisition-layer-boundary-and-contract.md)); not free from glue code |
-| **Inline HUD** | Adorners, custom renderers, tooltips — feasible; full VS-class inlays/ghost need ongoing work |
-| **Performance** | Good for many files; very large files depend on host usage |
-| **Theming** | Can track app theme; parity with MFD/cockpit requires explicit work ([0066](../adr/0066-cockpit-ui-vs-ide-presentation-layer.md)) |
-| **Hi-freq** | Direct events; must still route through [0103](../adr/0103-editor-hud-substrate-semantic-projection-and-surface-adapter.md) hi-freq **bounded** path, not DataBus |
-| **Risk** | Lower platform variance on Windows; no embedded browser in Forward |
+| **Интеграция** | Нативный Avalonia; хост `DockDocumentView`; TextMate через AvaloniaEdit.TextMate |
+| **LSP / семантика** | Склейка в коде приложения (направление DAL — [0102](../adr/0102-data-acquisition-layer-boundary-and-contract.md)); «клей» не исчезает сам |
+| **Inline HUD** | Adorners, свои renderers, tooltips — реализуемо; полноценные inlays/ghost уровня VS — предмет доработок |
+| **Производительность** | Для типичных файлов хорошо; для очень больших — от способа использования хоста |
+| **Тема** | Может следовать теме приложения; паритет с MFD/кабиной — отдельная работа ([0066](../adr/0066-cockpit-ui-vs-ide-presentation-layer.md)) |
+| **High-frequency** | События напрямую; всё равно вести через **bounded**-контур [0103](../adr/0103-editor-hud-substrate-semantic-projection-and-surface-adapter.md), а не в DataBus |
+| **Риск** | Меньше разброса платформы на Windows; нет встроенного браузера во Forward |
 
 ---
 
-## 2. Web editor in WebView2 (e.g. Monaco)
+## 2. Веб-редактор в WebView2 (например Monaco)
 
-| Dimension | Monaco (or similar) in WebView2 |
+| Измерение | Monaco (или аналог) в WebView2 |
 |-----------|----------------------------------|
-| **What it is** | Embedded **Edge** webview in a **native** process — **not** an Electron app shell. Different tradeoffs (interop, C++/WinRT, two heaps) from Chromium+Node bundling. |
-| **Inline HUD** | Rich ecosystem (Monaco: decorations, codelens patterns); work remains for **C#-specific** LSP alignment and interop **IPC** to DAL/IDE |
-| **Theming** | Two theme systems: web CSS vs Avalonia `PrimitivesKit` / cockpit — **duplication** risk |
-| **Performance** | Can be strong; large-doc and **alloc** profile depends on integration |
-| **Platform** | WebView2 is Windows-first; cross-platform MFD already calls out [0093](../adr/0093-mfd-embedded-browser-for-launch-url.md) for secondary surfaces, not a mandate for the **code** editor |
-| **Policy** | [ADR 0103](../adr/0103-editor-hud-substrate-semantic-projection-and-surface-adapter.md): **not** baseline Forward; optional research track only. WebView2 as **MFD** tool stays [0035](../adr/0035-mfd-embedded-webview-external-llm-and-mcp-boundary.md). |
+| **Что это** | Встроенный **Edge** webview в **нативном** процессе — **не** оболочка Electron-приложения. Иные компромиссы (interop, C++/WinRT, два кучи) vs связка Chromium+Node. |
+| **Inline HUD** | Богатая экосистема (у Monaco: decorations, codelens-паттерны); остаётся работа по **C#-специфичной** стыковке LSP и **IPC** к DAL/IDE |
+| **Тема** | Две системы: веб-CSS и Avalonia `PrimitivesKit` / кабина — риск **дублирования** |
+| **Производительность** | Может быть сильной; large-doc и **alloc** — от интеграции |
+| **Платформа** | WebView2 ориентирован на Windows; кроссплатформенный MFD уже ссылается на [0093](../adr/0093-mfd-embedded-browser-for-launch-url.md) для **вторичных** поверхностей, без обязанности для **кодового** редактора |
+| **Политика** | [ADR 0103](../adr/0103-editor-hud-substrate-semantic-projection-and-surface-adapter.md): **не** baseline Forward; только опциональная исследовательская линия. WebView2 как инструмент **MFD** — [0035](../adr/0035-mfd-embedded-webview-external-llm-and-mcp-boundary.md). |
 
 ---
 
-## 3. Other native or hybrid options (strawman)
+## 3. Другие нативные или гибридные варианты (strawman)
 
-| Option | When to consider |
-|--------|------------------|
-| **Heavier custom Avalonia** (more adorners, Skia, custom text layout) | Stay native; invest if AvaloniaEdit limits are **measurable** in target scenarios (large files, specific hint density). |
-| **Separate process editor host** (IPC) | Out of scope for v1; increases ops and sync with [0084](../adr/0084-agent-edits-editor-source-of-truth-presence-channel.md) buffer truth. |
-| **Roslyn/VS platform**-style | Long-term; not implied by 0103 spike. |
-
----
-
-## 4. How this feeds `IEditorSurfaceAdapter`
-
-The adapter contract should be **host-agnostic** so that the **same** `SemanticProjectionPipeline` / `EditorHudEngine` can drive AvaloniaEdit first; a web host would re-implement the **same** coordinate, caret, and **semantic display** port surface without duplicating DAL or CCU.
-
-**Minimum port surface (conceptual):**
-
-- `DocumentId` + text snapshot or change ranges for LSP
-- Caret/selection in document offsets; optional visual line/column
-- API to request **stabilized** hover/diagnostic presentation from **engine** (not raw LSP in view)
+| Вариант | Когда смотреть |
+|---------|----------------|
+| **Более тяжёлая кастомизация Avalonia** (больше adorners, Skia, своя вёрстка текста) | Оставаться нативным; вкладываться, если пределы AvaloniaEdit **измеримы** в целевых сценариях (большие файлы, плотность hint’ов) |
+| **Редактор в отдельном процессе** (IPC) | Вне v1; растёт операционка и синхронизация с «истиной буфера» [0084](../adr/0084-agent-edits-editor-source-of-truth-presence-channel.md) |
+| **Стиль Roslyn/VS platform** | Долгий горизонт; не вытекает из спайка 0103 |
 
 ---
 
-## 5. Decision summary
+## 4. Как это питает `IEditorSurfaceAdapter`
 
-| Use case | Direction |
-|----------|-----------|
-| **Default Forward code editor** | **AvaloniaEdit** + [0103](../adr/0103-editor-hud-substrate-semantic-projection-and-surface-adapter.md) layers |
-| **MFD / launch URL / external LLM** | WebView2 per **0035 / 0093** — not a stand-in for core editor without ADR |
-| **“Replacement-first” research** | Optional spike **after** first AvaloniaEdit vertical slice; explicit risk sign-off |
+Контракт адаптера — **независимый от хоста**: тот же `SemanticProjectionPipeline` / `EditorHudEngine` сначала крутит AvaloniaEdit; веб-хост реализует **тот же** порт координат, каретки и **семантического отображения**, без дублирования DAL или CCU.
+
+**Минимальная поверхность порта (концептуально):**
+
+- `DocumentId` + снимок текста или диапазоны изменений для LSP
+- Каретка/selection в смещениях документа; опционально визуальная строка/колонка
+- API запроса **стабилизированной** презентации hover/диагностик от **движка** (а не сырой LSP во view)
+
+---
+
+## 5. Сводка решения
+
+| Сценарий | Направление |
+|----------|-------------|
+| **Редактор кода Forward по умолчанию** | **AvaloniaEdit** + слои [0103](../adr/0103-editor-hud-substrate-semantic-projection-and-surface-adapter.md) |
+| **MFD / URL запуска / внешний LLM** | WebView2 по **0035 / 0093** — не замена ядра редактора без отдельного ADR |
+| **Исследование «replacement-first»** | Опциональный спайк **после** первого вертикального среза AvaloniaEdit; явный sign-off рисков |

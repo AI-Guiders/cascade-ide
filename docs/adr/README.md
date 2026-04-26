@@ -112,7 +112,7 @@
 | [0100](0100-project-constitution.md) | **Конституция проекта:** долговременные принципы, архитектурные инварианты, governance и порядок изменений основания проекта | Proposed |
 | [0101](0101-licensing-and-commercialization-strategy.md) | Лицензирование и коммерциализация: матрица лицензий, правила зависимостей, guardrails для copyleft и план внедрения | Proposed |
 | [0102](0102-data-acquisition-layer-boundary-and-contract.md) | **Data Acquisition Layer (DAL):** явная граница добычи внешних данных и контракт DAL ↔ CCU ↔ UI | Proposed |
-| [0103](0103-editor-hud-substrate-semantic-projection-and-surface-adapter.md) | **Editor HUD substrate:** `SemanticProjectionPipeline` / `EditorHudEngine` / `IEditorSurfaceAdapter`; DAL / CCU / DataBus; отдельный hi-freq bounded-контур; baseline AvaloniaEdit; appendix в `design/`, roadmap в `ux/` | Proposed |
+| [0103](0103-editor-hud-substrate-semantic-projection-and-surface-adapter.md) | **Субстрат Editor HUD:** `SemanticProjectionPipeline` / `EditorHudEngine` / `IEditorSurfaceAdapter`; DAL / CCU / DataBus; отдельный hi-freq bounded-контур; baseline AvaloniaEdit; сравнение хостов в `design/`, roadmap UI в `ux/` | Proposed |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 
