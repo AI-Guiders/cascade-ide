@@ -1,5 +1,6 @@
 using Avalonia.Threading;
 using CascadeIDE.Features.Editor.Application;
+using CascadeIDE.Features.Editor.Application.Presentation;
 using CascadeIDE.Features.WorkspaceNavigation.Application;
 
 namespace CascadeIDE.ViewModels;
@@ -12,12 +13,10 @@ namespace CascadeIDE.ViewModels;
 public partial class MainWindowViewModel
 {
     /// <summary>
-    /// После стабилизированного ввода (ADR 0103): снимок счётчиков диагностик по файлу, пока нет
-    /// нового события <see cref="Services.WorkspaceDiagnosticsCoordinator.DiagnosticsChanged"/>.
+    /// После стабилизированного ввода (ADR 0103); инвалидируется при <see cref="Services.WorkspaceDiagnosticsCoordinator.DiagnosticsChanged"/>.
     /// </summary>
-    private string? _hudStabilizedDiagPath;
+    private EditorHudStabilizedContext? _hudStabilizedContext;
 
-    private EditorSemanticSnapshot? _hudStabilizedDiagSnapshot;
     private string? _editorHudBannerText;
 
     /// <summary>Текст баннера; пусто — полоса скрыта (Dark Cockpit).</summary>
@@ -66,25 +65,11 @@ public partial class MainWindowViewModel
     }
 
     /// <summary>Инвалидация: при смене диагностик снимок из hi-freq контура устарел.</summary>
-    private void InvalidateStabilizedHudDiagnosticSnapshot()
-    {
-        _hudStabilizedDiagPath = null;
-        _hudStabilizedDiagSnapshot = null;
-    }
+    private void InvalidateStabilizedHudDiagnosticSnapshot() => _hudStabilizedContext = null;
 
-    /// <summary>Вызывается из активной <c>DockDocumentView</c> после <see cref="EditorHudEngine.OnStabilizedInput"/> (ADR 0103).</summary>
-    internal void SetStabilizedEditorSemanticSnapshotForHud(string? filePath, EditorSemanticSnapshot? snapshot)
-    {
-        if (string.IsNullOrEmpty(filePath) || snapshot is null)
-        {
-            _hudStabilizedDiagPath = null;
-            _hudStabilizedDiagSnapshot = null;
-            return;
-        }
-
-        _hudStabilizedDiagPath = filePath;
-        _hudStabilizedDiagSnapshot = snapshot;
-    }
+    /// <summary>Вызывается из активной <c>DockDocumentView</c> через <see cref="EditorDocumentHudLayer.BuildStabilizedContext"/> (ADR 0103).</summary>
+    internal void SetStabilizedEditorHudContext(EditorHudStabilizedContext? context) =>
+        _hudStabilizedContext = context;
 
     /// <summary>
     /// Сводка для активного <c>.cs</c>: диагностики из <see cref="WorkspaceDiagnostics"/>
@@ -105,12 +90,11 @@ public partial class MainWindowViewModel
 
         int errors;
         int warns;
-        if (!string.IsNullOrEmpty(_hudStabilizedDiagPath)
-            && string.Equals(_hudStabilizedDiagPath, path, StringComparison.OrdinalIgnoreCase)
-            && _hudStabilizedDiagSnapshot is { } held)
+        if (_hudStabilizedContext is { } st
+            && string.Equals(st.FilePath, path, StringComparison.OrdinalIgnoreCase))
         {
-            errors = held.ErrorCount;
-            warns = held.WarningCount;
+            errors = st.Snapshot.ErrorCount;
+            warns = st.Snapshot.WarningCount;
         }
         else
         {
@@ -120,13 +104,7 @@ public partial class MainWindowViewModel
             warns = snap.WarningCount;
         }
 
-        string? diagPart = null;
-        if (errors > 0 && warns > 0)
-            diagPart = $"{errors} ошибок, {warns} предупреждений";
-        else if (errors > 0)
-            diagPart = errors == 1 ? "1 ошибка" : $"{errors} ошибок";
-        else if (warns > 0)
-            diagPart = warns == 1 ? "1 предупреждение" : $"{warns} предупреждений";
+        var diagPart = EditorHudBannerTextComposer.FormatDiagnosticSummary(errors, warns);
 
         string? refPart = null;
         var text = EditorText;
@@ -137,11 +115,7 @@ public partial class MainWindowViewModel
             {
                 var spans = _csharpLanguageService.GetHighlightSpans(path, text, line, column);
                 if (spans.Count > 0)
-                {
-                    refPart = spans.Count == 1
-                        ? "1 вхождение в файле"
-                        : $"{spans.Count} вхождений в файле";
-                }
+                    refPart = EditorHudBannerTextComposer.FormatReferenceOccurrenceSummary(spans.Count);
             }
             catch
             {
@@ -149,15 +123,13 @@ public partial class MainWindowViewModel
             }
         }
 
-        if (diagPart is null && refPart is null)
+        var combined = EditorHudBannerTextComposer.Combine(diagPart, refPart);
+        if (string.IsNullOrEmpty(combined))
         {
             EditorHudBannerText = null;
             return;
         }
 
-        if (diagPart is not null && refPart is not null)
-            EditorHudBannerText = $"{diagPart} · {refPart}";
-        else
-            EditorHudBannerText = diagPart ?? refPart;
+        EditorHudBannerText = combined;
     }
 }

@@ -1,8 +1,8 @@
 namespace CascadeIDE.Features.Editor.Application;
 
 /// <summary>
-/// Политика и композиция Editor HUD (inline vs banner vs PFD/MFD) — ADR 0103.
-/// Стабилизированный ввод: семантический снимок из DAL; баннер остаётся в <c>MainWindowViewModel</c> (дебаунс).
+/// Семантическая проекция для слоя: полосы диагностик → <see cref="EditorSemanticSnapshot"/> (ADR 0103).
+/// Сборка per-док: <see cref="EditorDocumentHudLayer"/>; баннер (текст) — <see cref="Presentation.EditorHudBannerTextComposer"/> + VM.
 /// </summary>
 public sealed class EditorHudEngine
 {

@@ -38,7 +38,7 @@ public partial class DockDocumentView : UserControl
 
     // ADR 0103: hi-freq → bounded + throttle на уровне MainWindowViewModel, не DataBus
     private IEditorSurfaceAdapter? _editorSurface;
-    private readonly EditorHudEngine _hudEngine = new();
+    private readonly EditorDocumentHudLayer _documentHudLayer = new();
     private Action<EditorInputDelta>? _stabilizedHudAction;
 
     public DockDocumentView()
@@ -165,7 +165,7 @@ public partial class DockDocumentView : UserControl
         UpdateMcpProvidersIfActive();
 
         _editorSurface = new AvaloniaEditSurfaceAdapter(_editor, _docVm.Doc.FilePath);
-        _hudEngine.ConfigureDiagnostics(p => _vm!.WorkspaceDiagnostics.GetStripsForFile(p));
+        _documentHudLayer.ConfigureDiagnostics(p => _vm!.WorkspaceDiagnostics.GetStripsForFile(p));
         UpdateStabilizedHudRegistration();
         if (_vm is not null)
             _vm.UpdateCodeNavigationMapCaretOffset(_editorSurface.CaretOffset);
@@ -174,11 +174,8 @@ public partial class DockDocumentView : UserControl
     private Action<EditorInputDelta> StabilizedHudAction =>
         _stabilizedHudAction ??= OnStabilizedHud;
 
-    private void OnStabilizedHud(EditorInputDelta d)
-    {
-        _hudEngine.OnStabilizedInput(d);
-        _vm?.SetStabilizedEditorSemanticSnapshotForHud(d.FilePath, _hudEngine.LastSnapshot);
-    }
+    private void OnStabilizedHud(EditorInputDelta d) =>
+        _vm?.SetStabilizedEditorHudContext(_documentHudLayer.BuildStabilizedContext(d));
 
     private void UpdateStabilizedHudRegistration()
     {
@@ -232,14 +229,14 @@ public partial class DockDocumentView : UserControl
         if (_vm is not null)
         {
             _vm.ClearActiveEditorStabilizedHudHandlerIfEquals(StabilizedHudAction);
-            _vm.SetStabilizedEditorSemanticSnapshotForHud(null, null);
+            _vm.SetStabilizedEditorHudContext(null);
             if (_vmHandler is not null)
                 _vm.PropertyChanged -= _vmHandler;
             if (_documentsHandler is not null)
                 _vm.Documents.PropertyChanged -= _documentsHandler;
         }
 
-        _hudEngine.ConfigureDiagnostics(null);
+        _documentHudLayer.ConfigureDiagnostics(null);
         _editorSurface = null;
 
         _diagRenderer = null;

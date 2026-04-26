@@ -131,6 +131,50 @@ public sealed class WorkspaceDiagnosticsCoordinator : IDisposable
         return null;
     }
 
+    /// <summary>
+    /// Как <see cref="HitTest"/>, плюс устойчивость к курсору <b>сразу после</b> диапазона (AvaloniaEdit часто
+    /// даёт offset на следующей позиции) и сопоставление по строке/колонке, если LSP-диапазон и
+    /// смещение в документе (GetOffset) редко расходятся.
+    /// </summary>
+    public static EditorDiagnosticStrip? HitTestForToolTip(
+        IReadOnlyList<EditorDiagnosticStrip> strips,
+        int offset,
+        int line1,
+        int col1,
+        string? documentText)
+    {
+        var exact = HitTest(strips, offset);
+        if (exact is not null)
+            return exact;
+
+        // Курсор сразу за последним UTF-16-кодпоинтом подчёркивания — тоже показать тот же тултип
+        foreach (var s in strips)
+        {
+            if (s.Length == 0)
+                continue;
+            if (offset == s.Start + s.Length)
+                return s;
+        }
+
+        // (line, col) 1-based: только для однострочного сегмента, иначе col+Length врёт
+        if (!string.IsNullOrEmpty(documentText))
+        {
+            foreach (var s in strips)
+            {
+                if (s.Line1 != line1)
+                    continue;
+                if (s.Length == 0 || s.Start < 0 || s.Start + s.Length > documentText.Length)
+                    continue;
+                if (documentText.AsSpan(s.Start, s.Length).IndexOf('\n') >= 0)
+                    continue;
+                if (col1 >= s.Column1 && col1 < s.Column1 + s.Length)
+                    return s;
+            }
+        }
+
+        return null;
+    }
+
     public void Dispose()
     {
         if (_disposed)
