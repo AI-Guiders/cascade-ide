@@ -15,6 +15,11 @@ public sealed record ProblemListItem(
     public string FileName => Path.GetFileName(FilePath);
 
     public string HeaderLine => $"{Severity} {FileName}({Line},{Column}) {Id}";
+
+    /// <summary>Для шаблона MFD/Problems: боковой акцент (ошибка / предупр.).</summary>
+    public bool IsError => string.Equals(Severity, "error", StringComparison.OrdinalIgnoreCase);
+
+    public bool IsWarning => !IsError;
 }
 
 /// <summary>Вкладка «Problems»: список диагностик по открытым .cs.</summary>

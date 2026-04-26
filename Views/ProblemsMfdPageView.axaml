@@ -6,20 +6,52 @@
              x:DataType="vm:MainWindowViewModel">
     <DockPanel DataContext="{Binding ProblemsPanel}">
         <views:PanelChromeHeader DockPanel.Dock="Top" Title="{Binding SummaryText}" UppercaseTitle="False"/>
-        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" MinHeight="96">
+        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Auto"
+                      MinHeight="96"
+                      VerticalAlignment="Stretch">
             <ListBox x:Name="ProblemsListBox"
                      ItemsSource="{Binding Items}"
                      Background="Transparent"
-                     DoubleTapped="ProblemsList_OnDoubleTapped">
+                     DoubleTapped="ProblemsList_OnDoubleTapped"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                <ListBox.Styles>
+                    <Style Selector="ListBoxItem">
+                        <Setter Property="Padding" Value="0,0,4,4"/>
+                        <Setter Property="Background" Value="Transparent"/>
+                    </Style>
+                </ListBox.Styles>
                 <ListBox.ItemTemplate>
                     <DataTemplate DataType="vm:ProblemListItem">
-                        <StackPanel Orientation="Vertical" Spacing="2" Margin="0,2">
-                            <TextBlock Text="{Binding HeaderLine}"
-                                       FontFamily="Consolas,monospace" FontSize="11"
-                                       Foreground="{DynamicResource CascadeTheme.TerminalForeground}"/>
-                            <TextBlock Text="{Binding Message}" TextWrapping="Wrap" FontSize="11"
-                                       Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-                        </StackPanel>
+                        <Border CornerRadius="5"
+                                Padding="10,7,10,8"
+                                BorderThickness="1"
+                                BorderBrush="#22FFFFFF"
+                                Background="#12000000">
+                            <Grid ColumnDefinitions="4,*" ColumnSpacing="10">
+                                <Panel Grid.Column="0" Width="4">
+                                    <Border Background="{DynamicResource CascadeTheme.ToolbarErrorForeground}"
+                                            CornerRadius="2"
+                                            IsVisible="{Binding IsError}"/>
+                                    <Border Background="#B8A85A"
+                                            CornerRadius="2"
+                                            IsVisible="{Binding IsWarning}"/>
+                                </Panel>
+                                <StackPanel Grid.Column="1" Orientation="Vertical" Spacing="4">
+                                    <TextBlock Text="{Binding HeaderLine}"
+                                               FontFamily="Consolas,monospace"
+                                               FontSize="11.5"
+                                               FontWeight="SemiBold"
+                                               TextWrapping="Wrap"
+                                               Foreground="{DynamicResource CascadeTheme.TerminalForeground}"/>
+                                    <TextBlock Text="{Binding Message}"
+                                               TextWrapping="Wrap"
+                                               FontSize="11"
+                                               LineHeight="15"
+                                               Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
