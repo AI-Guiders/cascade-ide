@@ -3,13 +3,15 @@
 **Статус:** чертеж / roadmap-компаньон к [ADR 0103](../adr/0103-editor-hud-substrate-semantic-projection-and-surface-adapter.md)  
 **Дата:** 2026-04-26
 
-**Связь:** [0021](../adr/0021-pfd-mfd-cockpit-attention-model.md) §9, [0085](../adr/0085-editor-hud-inline-layer-and-hud-banner.md), [0066](../adr/0066-cockpit-ui-vs-ide-presentation-layer.md), [architecture-migration.md](../architecture-migration.md), [editor-surface-candidates-comparison-v1](../design/editor-surface-candidates-comparison-v1.md)
+**Связь:** [0021](../adr/0021-pfd-mfd-cockpit-attention-model.md) §9, [0085](../adr/0085-editor-hud-inline-layer-and-hud-banner.md), [0066](../adr/0066-cockpit-ui-vs-ide-presentation-layer.md), [architecture-migration.md](../architecture-migration.md), [editor-surface-candidates-comparison-v1](../design/editor-surface-candidates-comparison-v1.md), [inline HUD inventory](../design/editor-hud-inline-migration-inventory-v1.md), [banner vs inline policy](../design/editor-hud-banner-inline-policy-v1.md)
 
 **Цель:** визуально **согласованная** зона Forward (хром документа, **HUD banner**, **inline** Editor HUD, всплывающие подсказки) и **согласованные** с ней поверхности MFD/Problems и т.п., не смешивая язык **deck** кокпита с **presentation**-оболочкой IDE [0066](../adr/0066-cockpit-ui-vs-ide-presentation-layer.md).
 
 ---
 
 ## Roadmap (в порядке strangler)
+
+**Чекпойнт (2026-04-26):** инвентаризация `DockDocumentView` + граница DAL/презентации — [editor-hud-inline-migration-inventory-v1](../design/editor-hud-inline-migration-inventory-v1.md); политика дублирования баннер/inline — [editor-hud-banner-inline-policy-v1](../design/editor-hud-banner-inline-policy-v1.md); hover tooltip вынесен в `EditorInlineHoverToolTipController` (`Features/Editor/.../Presentation`).
 
 1. **Согласовать с [architecture-migration.md](../architecture-migration.md):** при выносе editor HUD **не** раздувать DAL внутри view models. LSP/файлы/настройки → DAL; снимки для UI → CCU или `Features/*/Application` + тонкий оркестратор.
 
