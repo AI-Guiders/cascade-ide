@@ -8,6 +8,34 @@ namespace CascadeIDE.Features.IdeMcp.Application;
 /// </summary>
 public static class IdeMcpEditorOrchestrator
 {
+    /// <summary>
+    /// Maps 1-based line/column range to a selection span in <paramref name="editorText"/>.
+    /// Returns false if either offset is invalid (e.g. out of range).
+    /// </summary>
+    public static bool TryComputeSelectionSpan(
+        string? editorText,
+        int startLine,
+        int startColumn,
+        int endLine,
+        int endColumn,
+        out int selectionStart,
+        out int selectionLength)
+    {
+        var text = editorText ?? "";
+        var start = EditorTextCoordinateUtilities.LineColumnToOffset(text, startLine, startColumn);
+        var end = EditorTextCoordinateUtilities.LineColumnToOffset(text, endLine, endColumn);
+        if (start < 0 || end < 0)
+        {
+            selectionStart = 0;
+            selectionLength = 0;
+            return false;
+        }
+
+        selectionStart = start;
+        selectionLength = Math.Max(0, end - start);
+        return true;
+    }
+
     public static string SerializeEditorState(Services.EditorStateDto dto) =>
         JsonSerializer.Serialize(dto);
 

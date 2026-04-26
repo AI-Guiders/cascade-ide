@@ -49,11 +49,9 @@ public partial class MainWindowViewModel
                 finally { IsLoadingCurrentFile = false; }
             }
             var text = EditorText ?? "";
-            int start = EditorTextCoordinateUtilities.LineColumnToOffset(text, startLine, startColumn);
-            int end = EditorTextCoordinateUtilities.LineColumnToOffset(text, endLine, endColumn);
-            if (start < 0 || end < 0)
+            if (!IdeMcpEditorOrchestrator.TryComputeSelectionSpan(
+                    text, startLine, startColumn, endLine, endColumn, out var start, out var len))
                 return;
-            int len = Math.Max(0, end - start);
             EditorSelectionStart = start;
             EditorSelectionLength = len;
         });
