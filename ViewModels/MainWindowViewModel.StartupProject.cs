@@ -1,5 +1,4 @@
 using System.Collections.ObjectModel;
-using CascadeIDE.Cockpit.ComputingUnits.Launch;
 using CascadeIDE.Cockpit.DataBus;
 using CascadeIDE.Models;
 using CommunityToolkit.Mvvm.ComponentModel;

@@ -2,7 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 
-namespace CascadeIDE.Cockpit.ComputingUnits.Launch;
+namespace CascadeIDE.Features.Launch.DataAcquisition;
 
 /// <summary>
 /// Чтение SDK <c>Properties/launchSettings.json</c> и сопоставление с <see cref="LaunchProfileModel"/> (только <c>commandName: Project</c>, Kestrel).

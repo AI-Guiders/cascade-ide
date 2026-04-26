@@ -24,7 +24,7 @@ public sealed class LaunchProfileProjectResolveUnit : ICockpitComputeUnit
 
         string? csprojFullPath = null;
         if (!string.IsNullOrWhiteSpace(profile.ProjectRelativeToSolution))
-            _ = DebugLaunchFromProfile.TryGetExistingCsprojFullPath(solutionDirectory, profile.ProjectRelativeToSolution, out csprojFullPath);
+            _ = LaunchProjectPathResolver.TryGetExistingCsprojFullPath(solutionDirectory, profile.ProjectRelativeToSolution, out csprojFullPath);
 
         return new LaunchProfileProjectResolveSnapshot(profile, csprojFullPath);
     }

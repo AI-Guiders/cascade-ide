@@ -1,5 +1,6 @@
 using CascadeIDE.Cockpit.ComputingUnits;
 using CascadeIDE.Cockpit.ComputingUnits.Launch;
+using CascadeIDE.Features.Launch.DataAcquisition;
 using CascadeIDE.Services;
 using Xunit;
 

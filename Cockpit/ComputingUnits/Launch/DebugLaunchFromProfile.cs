@@ -1,6 +1,4 @@
 #nullable enable
-using System.Diagnostics.CodeAnalysis;
-
 namespace CascadeIDE.Cockpit.ComputingUnits.Launch;
 
 /// <summary>Общие шаги: путь к .csproj, карта <see cref="LaunchProfileData"/> в <see cref="DebugLaunchResolution"/> (ADR 0090).</summary>
@@ -12,21 +10,6 @@ public static class DebugLaunchFromProfile
     /// </summary>
     public static IReadOnlyDictionary<string, string>? NonEmptyEnvironmentOrNull(LaunchProfileData prof) =>
         prof.Environment is { Count: > 0 } d ? d : null;
-
-    public static bool TryGetExistingCsprojFullPath(
-        string solutionDirectory,
-        string projectRelativeToSolution,
-        [NotNullWhen(true)] out string? csprojFullPath)
-    {
-        csprojFullPath = null;
-        if (string.IsNullOrWhiteSpace(projectRelativeToSolution))
-            return false;
-        var full = Path.GetFullPath(Path.Combine(solutionDirectory, projectRelativeToSolution));
-        if (!File.Exists(full))
-            return false;
-        csprojFullPath = full;
-        return true;
-    }
 
     public static DebugLaunchResolution ToResolution(LaunchProfileData profile, string targetDllPath) =>
         new(

@@ -1,4 +1,5 @@
 using CascadeIDE.Cockpit.ComputingUnits.Launch;
+using CascadeIDE.Features.Launch.DataAcquisition;
 using Xunit;
 
 namespace CascadeIDE.Tests;
@@ -18,7 +19,7 @@ public sealed class DebugLaunchFromProfileTests
             File.WriteAllText(Path.Combine(sub, "A.csproj"), "<Project />");
 
             Assert.True(
-                DebugLaunchFromProfile.TryGetExistingCsprojFullPath(root, fsPath, out var full) &&
+                LaunchProjectPathResolver.TryGetExistingCsprojFullPath(root, fsPath, out var full) &&
                 full is { Length: > 0 } &&
                 File.Exists(full!));
         }
