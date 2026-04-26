@@ -22,7 +22,10 @@ public class CSharpLanguageServiceInlayTests
         var parts = svc.GetVarInlayHintsForFile(path, src);
         var h = Assert.Single(parts);
         Assert.Contains("int", h.Label, StringComparison.Ordinal);
-        Assert.True(h.Line1 > 0);
+        var i = src.IndexOf("var", StringComparison.Ordinal);
+        Assert.True(i >= 0);
+        Assert.Equal(i + 3, h.AnchorOffset);
+        Assert.Equal(' ', src[h.AnchorOffset]);
     }
 
     [Fact]
@@ -34,6 +37,8 @@ public class CSharpLanguageServiceInlayTests
         var parts = svc.GetVarInlayHintsForFile(path, src);
         var h = Assert.Single(parts);
         Assert.Contains("int", h.Label, StringComparison.Ordinal);
+        var j = src.IndexOf("var", StringComparison.Ordinal);
+        Assert.Equal(j + 3, h.AnchorOffset);
     }
 
     [Fact]

@@ -306,7 +306,7 @@ public sealed class CSharpLanguageService
     }
 
     /// <summary>
-    /// Подсказки «var → тип» в конец строки (EOL inlay, ADR 0085/0103; AvaloniaEdit без true intra-line inlay — roadmap).
+    /// Подсказки «var → тип» (intra-line, якорь по смещению после <c>var</c> — ADR 0085/0103).
     /// Кэш по (path, text); вызывать с актуальным <paramref name="sourceText"/>.
     /// </summary>
     public IReadOnlyList<EditorTrailingInlayPart> GetVarInlayHintsForFile(string filePath, string sourceText, CancellationToken ct = default)
@@ -335,8 +335,8 @@ public sealed class CSharpLanguageService
                         if (model.GetDeclaredSymbol(v0, ct) is not ILocalSymbol local)
                             break;
                         var label = "  " + local.Type.ToDisplayString(InlayTypeDisplayFormat);
-                        var line1 = lds.SyntaxTree.GetLineSpan(lds.Span, ct).EndLinePosition.Line + 1;
-                        list.Add(new EditorTrailingInlayPart(line1, label));
+                        var anchor = lds.Declaration.Type.Span.End;
+                        list.Add(new EditorTrailingInlayPart(anchor, label));
                         break;
                     }
                     case ForEachStatementSyntax fes
@@ -345,8 +345,8 @@ public sealed class CSharpLanguageService
                         if (model.GetDeclaredSymbol(fes, ct) is not ILocalSymbol le)
                             break;
                         var label2 = "  " + le.Type.ToDisplayString(InlayTypeDisplayFormat);
-                        var line2 = fes.SyntaxTree.GetLineSpan(fes.Span, ct).EndLinePosition.Line + 1;
-                        list.Add(new EditorTrailingInlayPart(line2, label2));
+                        var anchor2 = fes.Type.Span.End;
+                        list.Add(new EditorTrailingInlayPart(anchor2, label2));
                         break;
                     }
                 }

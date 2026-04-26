@@ -7,19 +7,24 @@ using CascadeIDE.Services;
 namespace CascadeIDE.Features.Editor.Application.Presentation;
 
 /// <summary>
-/// Регистрирует <see cref="IBackgroundRenderer"/> для документа (брейкпоинты, отладка, squiggles, EOL inlay).
-/// <see cref="Dispose"/> снимает те же инстансы с <see cref="AvaloniaEdit.TextEditor.TextArea.TextView.BackgroundRenderers"/>.
+/// Регистрирует <see cref="IBackgroundRenderer"/> и (для C#) <see cref="VarInlayHintElementGenerator" />.
+/// <see cref="Dispose"/> снимает те же инстансы с <see cref="AvaloniaEdit.TextEditor.TextArea.TextView" />.
 /// </summary>
 public sealed class EditorDocumentBackgroundVisualsHandle : IDisposable
 {
     private readonly TextEditor _editor;
     private readonly IBackgroundRenderer[] _renderers;
+    private readonly VarInlayHintElementGenerator _inlayGen;
     private bool _disposed;
 
-    private EditorDocumentBackgroundVisualsHandle(TextEditor editor, IBackgroundRenderer[] renderers)
+    private EditorDocumentBackgroundVisualsHandle(
+        TextEditor editor,
+        IBackgroundRenderer[] renderers,
+        VarInlayHintElementGenerator inlayGen)
     {
         _editor = editor;
         _renderers = renderers;
+        _inlayGen = inlayGen;
     }
 
     public static EditorDocumentBackgroundVisualsHandle Install(
@@ -30,18 +35,20 @@ public sealed class EditorDocumentBackgroundVisualsHandle : IDisposable
         Func<IReadOnlyList<EditorTrailingInlayPart>>? getTrailingInlays = null)
     {
         getTrailingInlays ??= static () => [];
+        var inlayGen = new VarInlayHintElementGenerator(getTrailingInlays);
+        // Первый в списке: тот же document offset, что и «показать пробел» (SingleCharacter), — иначе inlay не получит Construct.
+        editor.TextArea.TextView.ElementGenerators.Insert(0, inlayGen);
         var list = new IBackgroundRenderer[]
         {
             new BreakpointLineBackgroundRenderer(getBreakpointLines),
             new DebugCurrentLineBackgroundRenderer(getDebugCurrentLine),
             new DebugInstructionArrowBackgroundRenderer(getDebugCurrentLine),
             new EditorDiagnosticBackgroundRenderer(getDiagnosticStrips),
-            new EditorInlayHintBackgroundRenderer(getTrailingInlays)
         };
         var br = editor.TextArea.TextView.BackgroundRenderers;
         foreach (var r in list)
             br.Add(r);
-        return new EditorDocumentBackgroundVisualsHandle(editor, list);
+        return new EditorDocumentBackgroundVisualsHandle(editor, list, inlayGen);
     }
 
     public void Dispose()
@@ -49,14 +56,17 @@ public sealed class EditorDocumentBackgroundVisualsHandle : IDisposable
         if (_disposed)
             return;
         _disposed = true;
-        var br = _editor.TextArea?.TextView.BackgroundRenderers;
-        if (br is null)
-            return;
-        foreach (var r in _renderers)
+        var tv = _editor.TextArea?.TextView;
+        if (tv is not null)
         {
-            var i = br.IndexOf(r);
-            if (i >= 0)
-                br.RemoveAt(i);
+            tv.ElementGenerators.Remove(_inlayGen);
+            var br = tv.BackgroundRenderers;
+            foreach (var r in _renderers)
+            {
+                var i = br.IndexOf(r);
+                if (i >= 0)
+                    br.RemoveAt(i);
+            }
         }
     }
 }
