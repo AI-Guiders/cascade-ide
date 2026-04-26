@@ -11,6 +11,7 @@ using Avalonia.VisualTree;
 using AvaloniaEdit;
 using AvaloniaEdit.Rendering;
 using CascadeIDE.Features.Documents;
+using CascadeIDE.Features.Editor.Application;
 using CascadeIDE.Services;
 using CascadeIDE.ViewModels;
 
@@ -34,6 +35,12 @@ public partial class DockDocumentView : UserControl
     private string? _lastTipText;
     private int _tooltipSeq;
     private bool _editorThemeSubscribed;
+
+    // ADR 0103: hi-freq → bounded + throttle, не DataBus
+    private IEditorSurfaceAdapter? _editorSurface;
+    private EditorStabilizedInputThrottler? _stabilizedInput;
+    private readonly EditorHudEngine _hudEngine = new();
+    private CancellationTokenSource? _stabilizedInputCts;
 
     public DockDocumentView()
     {
@@ -153,7 +160,19 @@ public partial class DockDocumentView : UserControl
         SyncFromVmIfActive();
         InstallVisualAdornersOnce();
         UpdateMcpProvidersIfActive();
-        SyncCaretContextToVmIfActive();
+
+        _stabilizedInputCts = new CancellationTokenSource();
+        _editorSurface = new AvaloniaEditSurfaceAdapter(_editor, _docVm.Doc.FilePath);
+        _stabilizedInput = new EditorStabilizedInputThrottler(UiScheduler.Default, TimeSpan.FromMilliseconds(24));
+        _stabilizedInput.Start(
+            d =>
+            {
+                _hudEngine.OnStabilizedInput(d);
+                _vm?.UpdateCodeNavigationMapCaretOffset(d.CaretOffset);
+            },
+            _stabilizedInputCts.Token);
+        if (_vm is not null)
+            _vm.UpdateCodeNavigationMapCaretOffset(_editorSurface.CaretOffset);
     }
 
     private void Teardown()
@@ -202,6 +221,23 @@ public partial class DockDocumentView : UserControl
             if (_documentsHandler is not null)
                 _vm.Documents.PropertyChanged -= _documentsHandler;
         }
+
+        if (_stabilizedInput is not null)
+        {
+            _stabilizedInputCts?.Cancel();
+            try
+            {
+                _stabilizedInput.DisposeAsync().AsTask().GetAwaiter().GetResult();
+            }
+            catch
+            {
+                // ignore
+            }
+        }
+        _stabilizedInputCts?.Dispose();
+        _stabilizedInput = null;
+        _stabilizedInputCts = null;
+        _editorSurface = null;
 
         _diagRenderer = null;
         _editor = null;
@@ -316,7 +352,13 @@ public partial class DockDocumentView : UserControl
         }
 
         var strips = _vm.WorkspaceDiagnostics.GetStripsForFile(_docVm.Doc.FilePath);
-        var hit = WorkspaceDiagnosticsCoordinator.HitTest(strips, offset);
+        var text = _editor.Document.Text ?? "";
+        var hit = WorkspaceDiagnosticsCoordinator.HitTestForToolTip(
+            strips,
+            offset,
+            pos.Value.Line,
+            pos.Value.Column,
+            text);
         if (hit is not null)
         {
             var tip = $"{hit.Id}: {hit.Message}";
@@ -330,7 +372,6 @@ public partial class DockDocumentView : UserControl
         }
 
         var path = _docVm.Doc.FilePath;
-        var text = _editor.Document.Text ?? "";
         var line = pos.Value.Line;
         var col = pos.Value.Column;
         _ = Task.Run(async () =>
@@ -398,20 +439,19 @@ public partial class DockDocumentView : UserControl
         var newText = _editor.Document.Text ?? "";
         if (!string.Equals(_vm.EditorText, newText, StringComparison.Ordinal))
             _vm.EditorText = newText;
+        PostStabilizedEditorInputIfActive(EditorInputDeltaKind.DocumentText);
     }
 
-    private void OnEditorCaretOrSelectionChanged(object? sender, EventArgs e) => SyncCaretContextToVmIfActive();
+    private void OnEditorCaretOrSelectionChanged(object? sender, EventArgs e) =>
+        PostStabilizedEditorInputIfActive(EditorInputDeltaKind.CaretOrSelection);
 
-    private void SyncCaretContextToVmIfActive()
+    private void PostStabilizedEditorInputIfActive(EditorInputDeltaKind kind)
     {
-        if (!IsActive() || _vm is null || _editor is null)
+        if (!IsActive() || _vm is null || _editorSurface is null || _stabilizedInput is null)
             return;
-
-        var doc = _editor.Document;
-        var offset = _editor.TextArea.Caret.Offset;
-        if (offset < 0 || offset > doc.TextLength)
-            offset = 0;
-        _vm.UpdateCodeNavigationMapCaretOffset(offset);
+        _editorSurface.GetSelection(out var selStart, out var selLen);
+        var d = new EditorInputDelta(_docVm?.Doc.FilePath, _editorSurface.CaretOffset, selStart, selLen, kind);
+        _stabilizedInput.TryPost(d);
     }
 
     private void UpdateMcpProvidersIfActive()

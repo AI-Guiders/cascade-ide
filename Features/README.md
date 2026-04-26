@@ -22,3 +22,5 @@
 | CDS (п.2) | `Cockpit/Cds/` (`CascadeIDE.Cockpit.Cds`) | `CockpitSurfaceState`, `CockpitSurfaceSnapshotBuilder`, `AttentionLayoutSurfaceKind` |
 | Композитор (п.3) | `Cockpit/Composition/**` | `WorkspaceHealthSurfaceCompositor`, `EicasMessageSorter` |
 | Поверхность (п.4) | `Views/*`, `Cockpit/Surface/UiLayoutSnapshot` | дерево контролов, MCP `ide_get_ui_layout` |
+
+**Editor** (`Features/Editor/`) — субстрат ADR 0103: `IEditorSurfaceAdapter`, `EditorStabilizedInputThrottler`; см. [Editor/README](Editor/README.md).
