@@ -21,25 +21,22 @@ public static class SettingsService
 
     public static CascadeIdeSettings Load()
     {
-        var tomlPath = GetSettingsPath();
+        UserSettingsTomlFileAccess.TryRead(out var toml, out var mtime);
+        if (toml is null)
+        {
+            _settingsFileMtimeUtcAtLastLoad = mtime;
+            return ValidateAndReturn(new CascadeIdeSettings());
+        }
+
         try
         {
-            if (!File.Exists(tomlPath))
-            {
-                _settingsFileMtimeUtcAtLastLoad = DateTime.MinValue;
-                return ValidateAndReturn(new CascadeIdeSettings());
-            }
-
-            var toml = File.ReadAllText(tomlPath);
             var settings = CascadeTomlSerializer.Deserialize<CascadeIdeSettings>(toml) ?? new CascadeIdeSettings();
-            _settingsFileMtimeUtcAtLastLoad = File.GetLastWriteTimeUtc(tomlPath);
+            _settingsFileMtimeUtcAtLastLoad = mtime;
             return ValidateAndReturn(settings);
         }
         catch
         {
-            _settingsFileMtimeUtcAtLastLoad = File.Exists(tomlPath)
-                ? File.GetLastWriteTimeUtc(tomlPath)
-                : DateTime.MinValue;
+            _settingsFileMtimeUtcAtLastLoad = mtime;
             return ValidateAndReturn(new CascadeIdeSettings());
         }
     }
@@ -48,29 +45,28 @@ public static class SettingsService
     {
         try
         {
-            var path = GetSettingsPath();
-            if (File.Exists(path))
+            var path = UserSettingsTomlFileAccess.GetFilePath();
+            if (UserSettingsTomlFileAccess.TryGetLastWriteTimeUtc(out var mtimeNow) && mtimeNow > _settingsFileMtimeUtcAtLastLoad)
             {
-                var mtimeNow = File.GetLastWriteTimeUtc(path);
-                if (mtimeNow > _settingsFileMtimeUtcAtLastLoad)
+                try
                 {
-                    try
+                    var diskToml = TextFileReadWrite.TryReadAllTextIfExists(path);
+                    if (diskToml is not null)
                     {
-                        var diskToml = File.ReadAllText(path);
                         var disk = CascadeTomlSerializer.Deserialize<CascadeIdeSettings>(diskToml);
                         if (disk is not null)
                             ApplyPresentationFromDisk(settings, disk);
                     }
-                    catch
-                    {
-                        // merge не обязателен для сохранения остальных полей
-                    }
+                }
+                catch
+                {
+                    // merge не обязателен для сохранения остальных полей
                 }
             }
 
             var toml = CascadeTomlSerializer.Serialize(settings);
-            File.WriteAllText(path, toml);
-            _settingsFileMtimeUtcAtLastLoad = File.GetLastWriteTimeUtc(path);
+            UserSettingsTomlFileAccess.WriteAllText(toml, out var writtenMtime);
+            _settingsFileMtimeUtcAtLastLoad = writtenMtime;
         }
         catch
         {
