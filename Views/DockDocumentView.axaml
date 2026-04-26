@@ -15,6 +15,7 @@
 
         <Grid Grid.Row="1"
               x:Name="EditorContentGrid">
+            <!-- Inline hover / ToolTip: EditorInlineHoverChrome.ApplyToolTipServiceTo в code-behind (один источник). -->
             <ae:TextEditor
                            x:Name="Editor"
                            Classes="EditorBox"
@@ -22,11 +23,7 @@
                            ShowLineNumbers="True"
                            FontFamily="Consolas,Cascadia Code,monospace"
                            FontSize="13"
-                           Padding="8"
-                           ToolTip.Placement="Pointer"
-                           ToolTip.ShowDelay="280"
-                           ToolTip.VerticalOffset="10"
-                           ToolTip.HorizontalOffset="10"/>
+                           Padding="8"/>
         </Grid>
     </Grid>
 </UserControl>

@@ -92,11 +92,7 @@ public partial class DockDocumentView : UserControl
 
         EditorSelectionChrome.Apply(_editor);
 
-        // Иначе тултип якорится к огромному TextEditor и «прыгает» в углу; Pointer — у курсора (как в IDE).
-        ToolTip.SetPlacement(_editor, PlacementMode.Pointer);
-        ToolTip.SetShowDelay(_editor, 280);
-        ToolTip.SetVerticalOffset(_editor, 10);
-        ToolTip.SetHorizontalOffset(_editor, 10);
+        EditorInlineHoverChrome.ApplyToolTipServiceTo(_editor);
 
         _suppress = true;
         try
@@ -265,7 +261,7 @@ public partial class DockDocumentView : UserControl
 
         _inlineHoverToolTip = new EditorInlineHoverToolTipController(
             _editor,
-            TimeSpan.FromMilliseconds(120),
+            EditorInlineHoverChrome.PointerPositionDebounce,
             () => _docVm.Doc.FilePath,
             () => _vm.WorkspaceDiagnostics.GetStripsForFile(_docVm.Doc.FilePath),
             (path, text, line, col, ct) => _vm.GetEditorQuickInfoAsync(path, text, line, col, ct),
