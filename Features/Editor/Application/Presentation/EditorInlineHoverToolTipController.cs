@@ -61,6 +61,15 @@ public sealed class EditorInlineHoverToolTipController : IDisposable
 
     public void StopDebounce() => _debounce.Stop();
 
+    /// <summary>Закрыть тултип (Escape, смена фокуса) без dispose контроллера.</summary>
+    public void DismissToolTip()
+    {
+        ToolTip.SetTip(_editor, null);
+        _lastTipText = null;
+        _tooltipSeq++;
+        _debounce.Stop();
+    }
+
     public void Dispose()
     {
         if (_disposed)

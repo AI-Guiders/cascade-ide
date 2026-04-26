@@ -28,6 +28,7 @@ public partial class DockDocumentView : UserControl
     private EditorDocumentBackgroundVisualsHandle? _backgroundVisuals;
     private Action? _diagHubHandler;
     private bool _diagPointerHooked;
+    private bool _inlineKeyHooked;
     private EditorInlineHoverToolTipController? _inlineHoverToolTip;
     private bool _editorThemeSubscribed;
 
@@ -188,6 +189,12 @@ public partial class DockDocumentView : UserControl
 
         if (_editor is not null)
         {
+            if (_inlineKeyHooked)
+            {
+                _editor.TextArea.KeyDown -= OnTextAreaKeyDown;
+                _inlineKeyHooked = false;
+            }
+
             if (_diagPointerHooked && _inlineHoverToolTip is not null)
             {
                 _inlineHoverToolTip.StopDebounce();
@@ -250,7 +257,8 @@ public partial class DockDocumentView : UserControl
             _editor,
             () => _vm.GetAllBreakpointLinesForFile(_docVm.Doc.FilePath),
             () => _vm.GetDebugCurrentLineForFile(_docVm.Doc.FilePath),
-            () => _vm.WorkspaceDiagnostics.GetStripsForFile(_docVm.Doc.FilePath));
+            () => _vm.WorkspaceDiagnostics.GetStripsForFile(_docVm.Doc.FilePath),
+            () => _vm.CSharpLanguage.GetVarInlayHintsForFile(_docVm.Doc.FilePath, _editor.Document.Text ?? ""));
 
         _diagHubHandler = () =>
         {
@@ -275,7 +283,20 @@ public partial class DockDocumentView : UserControl
             _diagPointerHooked = true;
         }
 
+        if (!_inlineKeyHooked)
+        {
+            _editor.TextArea.KeyDown += OnTextAreaKeyDown;
+            _inlineKeyHooked = true;
+        }
+
         _renderersInstalled = true;
+    }
+
+    private void OnTextAreaKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Escape)
+            return;
+        _inlineHoverToolTip?.DismissToolTip();
     }
 
     private void SyncFromVmIfActive()

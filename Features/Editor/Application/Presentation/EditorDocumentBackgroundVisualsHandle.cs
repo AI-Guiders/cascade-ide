@@ -7,7 +7,7 @@ using CascadeIDE.Services;
 namespace CascadeIDE.Features.Editor.Application.Presentation;
 
 /// <summary>
-/// Регистрирует <see cref="IBackgroundRenderer"/> для документа (брейкпоинты, отладка, squiggles).
+/// Регистрирует <see cref="IBackgroundRenderer"/> для документа (брейкпоинты, отладка, squiggles, EOL inlay).
 /// <see cref="Dispose"/> снимает те же инстансы с <see cref="AvaloniaEdit.TextEditor.TextArea.TextView.BackgroundRenderers"/>.
 /// </summary>
 public sealed class EditorDocumentBackgroundVisualsHandle : IDisposable
@@ -26,14 +26,17 @@ public sealed class EditorDocumentBackgroundVisualsHandle : IDisposable
         TextEditor editor,
         Func<IReadOnlyList<int>> getBreakpointLines,
         Func<int> getDebugCurrentLine,
-        Func<IReadOnlyList<EditorDiagnosticStrip>> getDiagnosticStrips)
+        Func<IReadOnlyList<EditorDiagnosticStrip>> getDiagnosticStrips,
+        Func<IReadOnlyList<EditorTrailingInlayPart>>? getTrailingInlays = null)
     {
+        getTrailingInlays ??= static () => [];
         var list = new IBackgroundRenderer[]
         {
             new BreakpointLineBackgroundRenderer(getBreakpointLines),
             new DebugCurrentLineBackgroundRenderer(getDebugCurrentLine),
             new DebugInstructionArrowBackgroundRenderer(getDebugCurrentLine),
-            new EditorDiagnosticBackgroundRenderer(getDiagnosticStrips)
+            new EditorDiagnosticBackgroundRenderer(getDiagnosticStrips),
+            new EditorInlayHintBackgroundRenderer(getTrailingInlays)
         };
         var br = editor.TextArea.TextView.BackgroundRenderers;
         foreach (var r in list)

@@ -18,6 +18,7 @@ public sealed class CSharpLanguageService
     private readonly ConcurrentDictionary<(string path, int textHash, int line, int col), string?> _signatureCache = new();
     private readonly ConcurrentDictionary<(string path, int textHash, int line, int col), IReadOnlyList<TextSpan>> _highlightCache = new();
     private readonly ConcurrentDictionary<(string path, int textHash, int line, int col), string?> _quickInfoCache = new();
+    private readonly ConcurrentDictionary<(string path, int textHash), IReadOnlyList<EditorTrailingInlayPart>> _varInlayCache = new();
     private readonly LinkedList<(string path, int textHash)> _modelCacheOrder = new();
     private readonly object _modelCacheLock = new();
 
@@ -218,6 +219,12 @@ public sealed class CSharpLanguageService
         }
     }
 
+    private static readonly SymbolDisplayFormat InlayTypeDisplayFormat = new(
+        globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.OmittedAsContaining,
+        typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypes,
+        genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
+        miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
+
     private static readonly SymbolDisplayFormat QuickInfoDisplayFormat = new(
         globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.OmittedAsContaining,
         typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypes,
@@ -296,6 +303,71 @@ public sealed class CSharpLanguageService
         {
             return null;
         }
+    }
+
+    /// <summary>
+    /// Подсказки «var → тип» в конец строки (EOL inlay, ADR 0085/0103; AvaloniaEdit без true intra-line inlay — roadmap).
+    /// Кэш по (path, text); вызывать с актуальным <paramref name="sourceText"/>.
+    /// </summary>
+    public IReadOnlyList<EditorTrailingInlayPart> GetVarInlayHintsForFile(string filePath, string sourceText, CancellationToken ct = default)
+    {
+        if (string.IsNullOrEmpty(filePath) || !filePath.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
+            return [];
+        var text = SourceText.From(sourceText);
+        var textHash = GetStableHash(text);
+        var fileKey = (filePath, textHash);
+        if (_varInlayCache.TryGetValue(fileKey, out var cached))
+            return cached;
+        try
+        {
+            var model = GetOrCreateModel(filePath, text, ct);
+            var root = model.SyntaxTree.GetRoot(ct);
+            var list = new List<EditorTrailingInlayPart>(16);
+            foreach (var node in root.DescendantNodes())
+            {
+                ct.ThrowIfCancellationRequested();
+                switch (node)
+                {
+                    case LocalDeclarationStatementSyntax lds
+                        when lds.Declaration is { Type: IdentifierNameSyntax { Identifier.Text: "var" } } && lds.Declaration.Variables.Count > 0:
+                    {
+                        var v0 = lds.Declaration.Variables[0];
+                        if (model.GetDeclaredSymbol(v0, ct) is not ILocalSymbol local)
+                            break;
+                        var label = "  " + local.Type.ToDisplayString(InlayTypeDisplayFormat);
+                        var line1 = lds.SyntaxTree.GetLineSpan(lds.Span, ct).EndLinePosition.Line + 1;
+                        list.Add(new EditorTrailingInlayPart(line1, label));
+                        break;
+                    }
+                    case ForEachStatementSyntax fes
+                        when fes.Type is IdentifierNameSyntax { Identifier.Text: "var" }:
+                    {
+                        if (model.GetDeclaredSymbol(fes, ct) is not ILocalSymbol le)
+                            break;
+                        var label2 = "  " + le.Type.ToDisplayString(InlayTypeDisplayFormat);
+                        var line2 = fes.SyntaxTree.GetLineSpan(fes.Span, ct).EndLinePosition.Line + 1;
+                        list.Add(new EditorTrailingInlayPart(line2, label2));
+                        break;
+                    }
+                }
+            }
+            IReadOnlyList<EditorTrailingInlayPart> result = list;
+            TrimInlayCache();
+            _varInlayCache[fileKey] = result;
+            return result;
+        }
+        catch
+        {
+            return [];
+        }
+    }
+
+    private void TrimInlayCache()
+    {
+        if (_varInlayCache.Count <= 128) return;
+        var keys = _varInlayCache.Keys.ToList();
+        foreach (var k in keys.Take(keys.Count - 64))
+            _varInlayCache.TryRemove(k, out _);
     }
 
     /// <summary>Диапазоны подсветки вхождений символа в том же файле (offset, length). Выполнять в фоне.</summary>
@@ -425,6 +497,7 @@ public sealed class CSharpLanguageService
         _signatureCache.Clear();
         _highlightCache.Clear();
         _quickInfoCache.Clear();
+        _varInlayCache.Clear();
         lock (_modelCacheLock)
         {
             _modelCacheOrder.Clear();
