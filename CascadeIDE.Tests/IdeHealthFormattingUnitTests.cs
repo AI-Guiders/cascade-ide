@@ -80,7 +80,7 @@ public sealed class IdeHealthFormattingUnitTests
     public void Compose_fills_all_four_segments()
     {
         var snap = IdeHealthFormattingUnit.Default.Compose(
-            isBuilding: false,
+            buildState: BuildStateSnapshot.Empty,
             lastTestSummary: "",
             impactedTestsBadge: 1,
             hasDebugSession: false,
@@ -90,19 +90,22 @@ public sealed class IdeHealthFormattingUnitTests
             gitLine: "Git: 0 staged",
             gitCockpitShort: "main · Δ0");
 
-        Assert.Equal("Build: idle", snap.Build.LineText);
-        Assert.Equal("Tests: impacted 1", snap.Tests.LineText);
-        Assert.Equal("Debug: idle", snap.Debug.LineText);
-        Assert.Equal("Git: 0 staged", snap.Git.LineText);
-        Assert.Equal("main · Δ0", snap.Git.CockpitShort);
-        Assert.Equal(IdeHealthStratum.Solution, snap.Build.Stratum);
-        Assert.Equal(IdeHealthStratum.Solution, snap.Tests.Stratum);
-        Assert.Equal(IdeHealthStratum.Solution, snap.Debug.Stratum);
-        Assert.Equal(IdeHealthStratum.Workspace, snap.Git.Stratum);
-        Assert.Equal(IdeHealthScope.Solution, snap.Build.Scope);
-        Assert.Equal(IdeHealthScope.Solution, snap.Tests.Scope);
-        Assert.Equal(IdeHealthScope.Solution, snap.Debug.Scope);
-        Assert.Equal(IdeHealthScope.Solution, snap.Git.Scope);
+        Assert.Equal("Build: idle", snap.Solution.Build.LineText);
+        Assert.Equal("Tests: impacted 1", snap.Solution.Tests.LineText);
+        Assert.Equal("Debug: idle", snap.Solution.Debug.LineText);
+        Assert.Equal("Git: 0 staged", snap.Workspace.Git.LineText);
+        Assert.Equal("main · Δ0", snap.Workspace.Git.CockpitShort);
+        Assert.Equal(IdeHealthStratum.Solution, snap.Solution.Build.Stratum);
+        Assert.Equal(IdeHealthStratum.Solution, snap.Solution.Tests.Stratum);
+        Assert.Equal(IdeHealthStratum.Solution, snap.Solution.Debug.Stratum);
+        Assert.Equal(IdeHealthStratum.Workspace, snap.Workspace.Git.Stratum);
+        Assert.Equal(IdeHealthScope.Solution, snap.Solution.Build.Scope);
+        Assert.Equal(IdeHealthScope.Solution, snap.Solution.Tests.Scope);
+        Assert.Equal(IdeHealthScope.Solution, snap.Solution.Debug.Scope);
+        Assert.Equal(IdeHealthScope.Solution, snap.Workspace.Git.Scope);
+        Assert.Equal(default(IdeHealthIdeHostInput), snap.IdeHost);
+        Assert.Null(snap.IdeHost.LspStatusHint);
+        Assert.Equal(snap, IdeHealthStrataComposer.Compose(snap.Workspace, snap.Solution, snap.IdeHost));
     }
 
     [Fact]
@@ -116,7 +119,7 @@ public sealed class IdeHealthFormattingUnitTests
     public void Composed_snapshot_implements_ICockpitComputeUnitPayload()
     {
         var snap = IdeHealthFormattingUnit.Default.Compose(
-            isBuilding: false,
+            buildState: BuildStateSnapshot.Empty,
             lastTestSummary: null,
             impactedTestsBadge: 0,
             hasDebugSession: false,

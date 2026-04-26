@@ -8,7 +8,7 @@
         <views:EicasAlertsBarView Grid.Row="0"
                                   IsVisible="{Binding ShowEicasAlertsBar}"/>
         <!-- Полоса Workspace Health: раньше выравнивалась по MainGrid; теперь зона — MFD, на всю ширину контейнера. -->
-        <Grid Grid.Row="1" IsVisible="{Binding ShowWorkspaceHealthStrip}">
+        <Grid Grid.Row="1" IsVisible="{Binding ShowIdeHealthStrip}">
             <views:WorkspaceHealthStripView/>
         </Grid>
     </Grid>

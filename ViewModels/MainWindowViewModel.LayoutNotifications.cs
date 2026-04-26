@@ -8,12 +8,12 @@ public partial class MainWindowViewModel
     protected override void OnPropertyChanged(PropertyChangedEventArgs e)
     {
         base.OnPropertyChanged(e);
-        if (e.PropertyName is nameof(WorkspaceHealthBuildText)
-            or nameof(WorkspaceHealthTestsText)
-            or nameof(WorkspaceHealthDebugText)
-            or nameof(WorkspaceHealthBuildCockpitShort)
-            or nameof(WorkspaceHealthTestsCockpitShort)
-            or nameof(WorkspaceHealthDebugCockpitShort))
+        if (e.PropertyName is nameof(IdeHealthBuildText)
+            or nameof(IdeHealthTestsText)
+            or nameof(IdeHealthDebugText)
+            or nameof(IdeHealthBuildCockpitShort)
+            or nameof(IdeHealthTestsCockpitShort)
+            or nameof(IdeHealthDebugCockpitShort))
             RebuildIdeHealth();
     }
 }

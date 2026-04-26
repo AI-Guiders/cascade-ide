@@ -1,11 +1,12 @@
 using System.Diagnostics;
+using CascadeIDE.Cockpit.DataBus;
 using CascadeIDE.Models;
 using CascadeIDE.Services.Lsp;
 
 namespace CascadeIDE.Services;
 
 /// <summary>
-/// Сборка снимка «готовность окружения» из настроек и уже поднятых LSP-хостов (без дампа environ).
+/// Сборка снимка «готовность окружения» из настроек и проекции <see cref="IdeHostStateChanged"/> (тот же снимок, что на DataBus; без дампа environ).
 /// </summary>
 public static class EnvironmentReadinessSnapshotBuilder
 {
@@ -293,16 +294,15 @@ public static class EnvironmentReadinessSnapshotBuilder
             LampShortLabel: "Dbg");
     }
 
-    /// <summary>Статическая часть: C# LSP, Markdown LSP (без сетевого вызова).</summary>
+    /// <summary>Статическая часть: C# LSP, Markdown LSP (без сетевого вызова). Состояние — <see cref="IdeHostStateChanged"/> (тот же снимок, что на DataBus для IDE Health).</summary>
     public static IReadOnlyList<AnnunciatorLampItem> BuildLspRows(
         CascadeIdeSettings settings,
         string? solutionPath,
-        CSharpLspDiagnosticsHost? csharpHost,
-        MarkdownLspDiagnosticsHost? markdownHost)
+        in IdeHostStateChanged lsp)
     {
         var list = new List<AnnunciatorLampItem>(4);
-        list.Add(BuildCSharpRow(settings, solutionPath, csharpHost));
-        list.Add(BuildMarkdownRow(settings, solutionPath, markdownHost));
+        list.Add(BuildCSharpRow(settings, solutionPath, lsp.CSharpLspHostPresent, lsp.CSharpLspProcessActive));
+        list.Add(BuildMarkdownRow(settings, solutionPath, lsp.MarkdownLspHostPresent, lsp.MarkdownLspProcessActive));
         return list;
     }
 
@@ -369,7 +369,8 @@ public static class EnvironmentReadinessSnapshotBuilder
     private static AnnunciatorLampItem BuildCSharpRow(
         CascadeIdeSettings settings,
         string? solutionPath,
-        CSharpLspDiagnosticsHost? host)
+        bool hostPresent,
+        bool processActive)
     {
         var csharpLsp = settings.Languages.CSharp.ResolveForRuntime();
         var provider = csharpLsp.Mode;
@@ -403,7 +404,7 @@ public static class EnvironmentReadinessSnapshotBuilder
 
         var exeHint = string.IsNullOrWhiteSpace(exe) ? provider : $"{provider}: {exe}";
 
-        if (host is null)
+        if (!hostPresent)
         {
             return new AnnunciatorLampItem(
                 EnvironmentReadinessCellIds.CSharpLsp,
@@ -413,7 +414,7 @@ public static class EnvironmentReadinessSnapshotBuilder
                 LampShortLabel: "C#");
         }
 
-        if (host.IsActive)
+        if (processActive)
         {
             return new AnnunciatorLampItem(
                 EnvironmentReadinessCellIds.CSharpLsp,
@@ -434,7 +435,8 @@ public static class EnvironmentReadinessSnapshotBuilder
     private static AnnunciatorLampItem BuildMarkdownRow(
         CascadeIdeSettings settings,
         string? solutionPath,
-        MarkdownLspDiagnosticsHost? host)
+        bool hostPresent,
+        bool processActive)
     {
         var markdownLsp = settings.Languages.Markdown.ResolveForRuntime();
         var provider = markdownLsp.Mode;
@@ -468,7 +470,7 @@ public static class EnvironmentReadinessSnapshotBuilder
         var argHint = string.IsNullOrWhiteSpace(args) ? "" : $" {args}";
         var exeHint = string.IsNullOrWhiteSpace(exe) ? $"{provider}" : $"{provider}: {exe}{argHint}";
 
-        if (host is null)
+        if (!hostPresent)
         {
             return new AnnunciatorLampItem(
                 EnvironmentReadinessCellIds.MarkdownLsp,
@@ -478,7 +480,7 @@ public static class EnvironmentReadinessSnapshotBuilder
                 LampShortLabel: "MD");
         }
 
-        if (host.IsActive)
+        if (processActive)
         {
             return new AnnunciatorLampItem(
                 EnvironmentReadinessCellIds.MarkdownLsp,
@@ -503,19 +505,18 @@ public static class EnvironmentReadinessSnapshotBuilder
     public static async Task<IReadOnlyList<AnnunciatorLampItem>> BuildAllRowsAsync(
         CascadeIdeSettings settings,
         string? solutionPath,
-        CSharpLspDiagnosticsHost? csharpHost,
-        MarkdownLspDiagnosticsHost? markdownHost,
+        IdeHostStateChanged lsp,
         bool isMcpStdioHost = false,
         string? activeAiProvider = null,
         CancellationToken cancellationToken = default)
     {
         var agent = BuildAgentRow(isMcpStdioHost, activeAiProvider);
         var envRows = BuildEnvProbeRows(EnvironmentReadinessEnvSnapshot.FromCurrentProcess());
-        var lsp = BuildLspRows(settings, solutionPath, csharpHost, markdownHost);
+        var lspRows = BuildLspRows(settings, solutionPath, lsp);
         var dotnet = await ProbeDotnetAsync(cancellationToken).ConfigureAwait(false);
 
-        var devToolDetails = new List<AnnunciatorLampItem>(1 + lsp.Count + 1) { agent };
-        devToolDetails.AddRange(lsp);
+        var devToolDetails = new List<AnnunciatorLampItem>(1 + lspRows.Count + 1) { agent };
+        devToolDetails.AddRange(lspRows);
         devToolDetails.Add(dotnet);
 
         var devToolsSection = BuildDevToolsSectionRow(devToolDetails);

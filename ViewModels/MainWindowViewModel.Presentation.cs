@@ -106,13 +106,13 @@ public partial class MainWindowViewModel
     public string PfdInstrumentMountStyle => ResolveInstrumentMountStyle(
         MountPolicyRuntimeSurfaceId,
         "pfd",
-        "workspace_health_status_v1");
+        CockpitStandardInstrumentIds.IdeHealthStatusV1);
 
     /// <summary>Резолв style для mount в слоте MFD с учётом registry-правил.</summary>
     public string MfdInstrumentMountStyle => ResolveInstrumentMountStyle(
         MountPolicyRuntimeSurfaceId,
         "mfd",
-        "workspace_health_status_v1");
+        CockpitStandardInstrumentIds.IdeHealthStatusV1);
 
     /// <summary>Нормализованный runtime-контекст топологии для резолва mount-style из реестра.</summary>
     private string MountPolicyRuntimeSurfaceId => ActiveAttentionLayoutSurface switch
@@ -148,25 +148,25 @@ public partial class MainWindowViewModel
         new UiModeGateContext(UiModeFamily, AutonomousAgentTelemetry, IsTerminalVisible, HasDebugSession));
 
     /// <summary>
-    /// Дублирующая карточка Workspace Health на вкладке «Терминал» в Power. Пока видна полоса <see cref="WorkspaceHealthStripView"/> под редактором —
+    /// Дублирующая карточка IDE Health на вкладке «Терминал» в Power. Пока видна полоса <see cref="WorkspaceHealthStripView"/> под редактором —
     /// false, чтобы DockPanel не отдавал высоту дублю и не схлопывал область вывода консоли.
     /// </summary>
-    public bool WorkspaceHealthOnTerminalTab =>
-        Capabilities.WorkspaceHealthOnTerminalTab && !ShowWorkspaceHealthStrip;
+    public bool IdeHealthOnTerminalTab =>
+        Capabilities.IdeHealthOnTerminalTab && !ShowIdeHealthStrip;
 
-    /// <summary>Куда вести Workspace Health: нижняя полоса или страница зоны — из capabilities (<c>workspace_health_surface</c>).</summary>
-    public IdeHealthUiSurface WorkspaceHealthUiSurface => Capabilities.WorkspaceHealthSurface;
+    /// <summary>Куда вести полосу IDE Health: нижняя полоса или страница зоны — из capabilities (<c>ide_health_surface</c>).</summary>
+    public IdeHealthUiSurface IdeHealthStripSurface => Capabilities.IdeHealthSurface;
 
-    /// <summary>Форма представления канала Workspace Health на оси <see cref="ContentRepresentation"/> (ADR 0063).</summary>
-    public ContentRepresentation WorkspaceHealthContentRepresentation => Capabilities.WorkspaceHealthContentRepresentation;
+    /// <summary>Форма представления канала IDE Health на оси <see cref="ContentRepresentation"/> (ADR 0063).</summary>
+    public ContentRepresentation IdeHealthContentRepresentation => Capabilities.IdeHealthContentRepresentation;
 
-    /// <summary>Полоска build/tests/debug/git — при <c>workspace_health_strip</c> и <c>bottom_strip</c>; рисуется в <see cref="Views.WorkspaceChromeBandView"/> внутри MFD.</summary>
-    public bool ShowWorkspaceHealthStrip =>
-        Capabilities.WorkspaceHealthStripVisible && Capabilities.WorkspaceHealthSurface == IdeHealthUiSurface.BottomStrip;
+    /// <summary>Полоска build/tests/debug/git — при <c>ide_health_strip</c> и <c>bottom_strip</c>; рисуется в <see cref="Views.WorkspaceChromeBandView"/> внутри MFD.</summary>
+    public bool ShowIdeHealthStrip =>
+        Capabilities.IdeHealthStripVisible && Capabilities.IdeHealthSurface == IdeHealthUiSurface.BottomStrip;
 
-    /// <summary>Workspace Health на странице оболочки Mfd (вместо нижней полосы) — при <c>workspace_health_strip</c> и <c>workspace_health_surface = dedicated_page</c> (v1 — колонка зоны Mfd).</summary>
-    public bool ShowWorkspaceHealthMfdPage =>
-        Capabilities.WorkspaceHealthStripVisible && Capabilities.WorkspaceHealthSurface == IdeHealthUiSurface.DedicatedPage;
+    /// <summary>IDE Health на странице оболочки Mfd (вместо нижней полосы) — при <c>ide_health_strip</c> и <c>ide_health_surface = dedicated_page</c> (v1 — колонка зоны Mfd).</summary>
+    public bool ShowIdeHealthMfdPage =>
+        Capabilities.IdeHealthStripVisible && Capabilities.IdeHealthSurface == IdeHealthUiSurface.DedicatedPage;
 
     /// <summary>
     /// Полоса оповещений EICAS v1 (над полосой Workspace Health). Видно при <c>eicas_alerts_bar</c> и непустом списке (Dark Cockpit).
@@ -176,11 +176,11 @@ public partial class MainWindowViewModel
         Capabilities.EicasAlertsBarEnabled && EicasMessages.Count > 0;
 
     /// <summary>Область разметки над нижним доком: Workspace Health и/или полоса EICAS (<see cref="Views.WorkspaceChromeBandView"/>).</summary>
-    public bool ShowWorkspaceChromeBand => ShowWorkspaceHealthStrip || ShowEicasAlertsBar;
+    public bool ShowWorkspaceChromeBand => ShowIdeHealthStrip || ShowEicasAlertsBar;
 
-    /// <summary>Зона под чатом в MFD: полоса EICAS / Workspace Health и/или док (терминал, сборка, Problems, Git, инструменты).</summary>
+    /// <summary>Зона под чатом в MFD: полоса EICAS / IDE Health и/или док (терминал, сборка, Problems, Git, инструменты).</summary>
     public bool ShowWorkspaceBottomChrome =>
-        ShowWorkspaceHealthStrip || ShowEicasAlertsBar || IsBottomPanelVisible;
+        ShowIdeHealthStrip || ShowEicasAlertsBar || IsBottomPanelVisible;
 
     /// <summary>Чат в одной строке с PFD/Forward; MFD не пересекает нижнюю строку MainGrid.</summary>
     public int ChatPanelMainGridRowSpan => 1;
@@ -243,16 +243,16 @@ public partial class MainWindowViewModel
     public bool IsImpactedTestsBadgeVisible => ImpactedTestsBadge > 0;
     public bool IsActiveTaskProgressVisible => ActiveTaskProgress > 0;
 
-    /// <summary>Строки из канала IDE Health (свёртка <see cref="IdeHealthFormattingUnit"/> / <see cref="ICockpitComputeUnit"/>).</summary>
-    public string WorkspaceHealthBuildText => _workspaceHealth.Build(IdeHealthChannelContext.Default).Build.LineText;
+    /// <summary>Строки из канала IDE Health (один снимок на <see cref="MainWindowViewModel.RebuildIdeHealth"/>, без повторного <c>Build()</c> в геттерах).</summary>
+    public string IdeHealthBuildText => _lastIdeHealthInputSnapshot is { } s ? s.Solution.Build.LineText : "";
 
     /// <summary>Короткий статус для «кольца» сборки в Power cockpit.</summary>
-    public string WorkspaceHealthBuildCockpitShort => _workspaceHealth.Build(IdeHealthChannelContext.Default).Build.CockpitShort;
+    public string IdeHealthBuildCockpitShort => _lastIdeHealthInputSnapshot is { } s ? s.Solution.Build.CockpitShort : "";
 
-    public string WorkspaceHealthTestsText => _workspaceHealth.Build(IdeHealthChannelContext.Default).Tests.LineText;
+    public string IdeHealthTestsText => _lastIdeHealthInputSnapshot is { } s ? s.Solution.Tests.LineText : "";
 
     /// <summary>Компактная строка тестов для полосы Power.</summary>
-    public string WorkspaceHealthTestsCockpitShort => _workspaceHealth.Build(IdeHealthChannelContext.Default).Tests.CockpitShort;
+    public string IdeHealthTestsCockpitShort => _lastIdeHealthInputSnapshot is { } s ? s.Solution.Tests.CockpitShort : "";
 
     /// <summary>Есть активная DAP-сессия (режим отладки, как в VS).</summary>
     public bool HasDebugSession => _dapDebug.HasActiveSession;
@@ -263,10 +263,10 @@ public partial class MainWindowViewModel
     /// <summary>Процесс запущен под отладчиком, выполнение идёт.</summary>
     public bool IsDebugExecutionRunning => _dapDebug.HasActiveSession && !_dapDebug.IsExecutionStopped;
 
-    public string WorkspaceHealthDebugText => _workspaceHealth.Build(IdeHealthChannelContext.Default).Debug.LineText;
+    public string IdeHealthDebugText => _lastIdeHealthInputSnapshot is { } s ? s.Solution.Debug.LineText : "";
 
     /// <summary>Короткий статус отладки для Power.</summary>
-    public string WorkspaceHealthDebugCockpitShort => _workspaceHealth.Build(IdeHealthChannelContext.Default).Debug.CockpitShort;
+    public string IdeHealthDebugCockpitShort => _lastIdeHealthInputSnapshot is { } s ? s.Solution.Debug.CockpitShort : "";
 
     public string ChatPanelToggleButtonText => IsMfdRegionExpanded ? "◀" : "▶";
 
@@ -290,25 +290,23 @@ public partial class MainWindowViewModel
 
     public string MfdRegionToggleButtonText => ChatPanelToggleButtonText;
 
-    public IdeHealthStatusMountPayload WorkspaceHealthMountPayload => new(
-        WorkspaceHealthBuildCockpitShort,
-        WorkspaceHealthTestsCockpitShort,
-        WorkspaceHealthDebugCockpitShort,
-        SafetyLevel);
+    /// <summary>Снимок для Skia mount — тот же тик, что <see cref="IdeHealthBuildCockpitShort"/>; обновляется в <see cref="MainWindowViewModel.RebuildIdeHealth"/>.</summary>
+    public IdeHealthStatusMountPayload IdeHealthMountPayload =>
+        _lastIdeHealthMountPayload ?? new IdeHealthStatusMountPayload("", "", "", SafetyLevel);
 
-    public bool IsPfdWorkspaceHealthMountVisible =>
+    public bool IsPfdIdeHealthMountVisible =>
         UseSkiaInstrumentMount && IsPfdColumnVisible;
 
-    public bool IsMfdWorkspaceHealthMountVisible =>
+    public bool IsMfdIdeHealthMountVisible =>
         UseSkiaInstrumentMount && IsMfdColumnVisible;
 
-    public bool IsMfdHostWindowWorkspaceHealthMountVisible =>
+    public bool IsMfdHostWindowIdeHealthMountVisible =>
         UseSkiaInstrumentMount && IsMfdHostWindowShellOpen;
 
-    public bool IsPfdHostWindowWorkspaceHealthMountVisible =>
+    public bool IsPfdHostWindowIdeHealthMountVisible =>
         UseSkiaInstrumentMount && IsPfdHostWindowShellOpen;
 
-    public IdeHealthStatusMountContext? PfdWorkspaceHealthMountContext
+    public IdeHealthStatusMountContext? PfdIdeHealthMountContext
     {
         get
         {
@@ -320,19 +318,19 @@ public partial class MainWindowViewModel
                     _settings.Display,
                     "main_window_plus_pfd_host_top_level",
                     CockpitSlotIds.Pfd,
-                    WorkspaceHealthMountPayload);
+                    IdeHealthMountPayload);
             if (IsPfdColumnVisible)
                 return IdeHealthMountContextFactory.Create(
                     _instrumentMountPolicyResolver,
                     _settings.Display,
                     MountPolicyRuntimeSurfaceId,
                     CockpitSlotIds.Pfd,
-                    WorkspaceHealthMountPayload);
+                    IdeHealthMountPayload);
             return null;
         }
     }
 
-    public IdeHealthStatusMountContext? MfdWorkspaceHealthMountContext
+    public IdeHealthStatusMountContext? MfdIdeHealthMountContext
     {
         get
         {
@@ -344,14 +342,14 @@ public partial class MainWindowViewModel
                     _settings.Display,
                     "main_window_plus_mfd_host_top_level",
                     CockpitSlotIds.Mfd,
-                    WorkspaceHealthMountPayload);
+                    IdeHealthMountPayload);
             if (IsMfdColumnVisible)
                 return IdeHealthMountContextFactory.Create(
                     _instrumentMountPolicyResolver,
                     _settings.Display,
                     MountPolicyRuntimeSurfaceId,
                     CockpitSlotIds.Mfd,
-                    WorkspaceHealthMountPayload);
+                    IdeHealthMountPayload);
             return null;
         }
     }

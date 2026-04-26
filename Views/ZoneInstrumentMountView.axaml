@@ -17,11 +17,11 @@
                        FontSize="11"
                        FontWeight="SemiBold"/>
             <TextBlock Grid.Row="1" Grid.Column="0" Text="Build:" Foreground="{Binding LabelBrush, RelativeSource={RelativeSource AncestorType=views:ZoneInstrumentMountView}}" FontSize="11"/>
-            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding WorkspaceHealthBuildCockpitShort}" Foreground="{Binding ValueBrush, RelativeSource={RelativeSource AncestorType=views:ZoneInstrumentMountView}}" FontSize="11"/>
+            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding IdeHealthBuildCockpitShort}" Foreground="{Binding ValueBrush, RelativeSource={RelativeSource AncestorType=views:ZoneInstrumentMountView}}" FontSize="11"/>
             <TextBlock Grid.Row="2" Grid.Column="0" Text="Tests:" Foreground="{Binding LabelBrush, RelativeSource={RelativeSource AncestorType=views:ZoneInstrumentMountView}}" FontSize="11"/>
-            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding WorkspaceHealthTestsCockpitShort}" Foreground="{Binding ValueBrush, RelativeSource={RelativeSource AncestorType=views:ZoneInstrumentMountView}}" FontSize="11"/>
+            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding IdeHealthTestsCockpitShort}" Foreground="{Binding ValueBrush, RelativeSource={RelativeSource AncestorType=views:ZoneInstrumentMountView}}" FontSize="11"/>
             <TextBlock Grid.Row="3" Grid.Column="0" Text="Debug:" Foreground="{Binding LabelBrush, RelativeSource={RelativeSource AncestorType=views:ZoneInstrumentMountView}}" FontSize="11"/>
-            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding WorkspaceHealthDebugCockpitShort}" Foreground="{Binding ValueBrush, RelativeSource={RelativeSource AncestorType=views:ZoneInstrumentMountView}}" FontSize="11"/>
+            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding IdeHealthDebugCockpitShort}" Foreground="{Binding ValueBrush, RelativeSource={RelativeSource AncestorType=views:ZoneInstrumentMountView}}" FontSize="11"/>
             <TextBlock Grid.Row="4" Grid.Column="0" Text="Safety:" Foreground="{Binding LabelBrush, RelativeSource={RelativeSource AncestorType=views:ZoneInstrumentMountView}}" FontSize="11"/>
             <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SafetyLevel}" Foreground="{Binding SafetyBrush, RelativeSource={RelativeSource AncestorType=views:ZoneInstrumentMountView}}" FontSize="11" FontWeight="Bold"/>
         </Grid>

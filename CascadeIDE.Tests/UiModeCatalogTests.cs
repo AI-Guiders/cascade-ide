@@ -176,7 +176,7 @@ public sealed class UiModeCatalogTests : IDisposable
         var power = UiModeCatalog.GetCapabilities("Power");
         Assert.True(power.AgentTrace);
         Assert.True(power.AutonomousAgentTelemetry);
-        Assert.Equal(3, power.WorkspaceHealthMainColumnSpan);
+        Assert.Equal(3, power.IdeHealthMainColumnSpan);
 
         Assert.False(UiModeCatalog.GetCapabilities("Focus").RiskSummaryCard);
         Assert.False(UiModeCatalog.GetCapabilities("AgentChat").ResultSummaryCard);
@@ -228,7 +228,7 @@ public sealed class UiModeCatalogTests : IDisposable
             """
             [capabilities]
             hypotheses_tab = false
-            workspace_health_main_column_span = 4
+            ide_health_main_column_span = 4
 
             [meta]
             main_window_title = "IDE — Debug (custom)"
@@ -238,7 +238,7 @@ public sealed class UiModeCatalogTests : IDisposable
 
         var caps = UiModeCatalog.GetCapabilities("Debug");
         Assert.False(caps.HypothesesTab);
-        Assert.Equal(4, caps.WorkspaceHealthMainColumnSpan);
+        Assert.Equal(4, caps.IdeHealthMainColumnSpan);
 
         Assert.Equal("IDE — Debug (custom)", UiModeCatalog.GetWindowTitleOverride("Debug"));
     }
@@ -271,14 +271,14 @@ public sealed class UiModeCatalogTests : IDisposable
             agent_operations_panel = false
             agent_trace = false
             autonomous_agent_telemetry = false
-            workspace_health_on_terminal_tab = false
-            workspace_health_main_column_span = 5
+            ide_health_on_terminal_tab = false
+            ide_health_main_column_span = 5
             instrumentation_tabs = false
             hypotheses_tab = false
             risk_summary_card = false
             result_summary_card = false
-            workspace_health_strip = false
-            workspace_health_surface = "bottom_strip"
+            ide_health_strip = false
+            ide_health_surface = "bottom_strip"
             problems_panel = false
             eicas_alerts_bar = false
             """);
@@ -294,7 +294,7 @@ public sealed class UiModeCatalogTests : IDisposable
         Assert.False(spec.InstrumentationDockVisible);
 
         var caps = UiModeCatalog.GetCapabilities("Editor");
-        Assert.False(caps.WorkspaceHealthStripVisible);
+        Assert.False(caps.IdeHealthStripVisible);
         Assert.False(caps.ProblemsPanelVisible);
     }
 
@@ -314,14 +314,14 @@ public sealed class UiModeCatalogTests : IDisposable
             Path.Combine(dir, "Balanced.toml"),
             """
             [capabilities]
-            workspace_health_surface = "dedicated_page"
+            ide_health_surface = "dedicated_page"
             """);
 
         UiModeCatalog.Initialize(dir);
 
         var caps = UiModeCatalog.GetCapabilities("Balanced");
-        Assert.Equal(IdeHealthUiSurface.DedicatedPage, caps.WorkspaceHealthSurface);
-        Assert.Equal(ContentRepresentation.Page, caps.WorkspaceHealthContentRepresentation);
+        Assert.Equal(IdeHealthUiSurface.DedicatedPage, caps.IdeHealthSurface);
+        Assert.Equal(ContentRepresentation.Page, caps.IdeHealthContentRepresentation);
     }
 
     [Fact]

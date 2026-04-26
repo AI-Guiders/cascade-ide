@@ -54,7 +54,7 @@ public partial class MainWindowViewModel
 
     private bool IsMfdShellPageAllowed(MfdShellPage page) => page switch
     {
-        MfdShellPage.WorkspaceHealth => ShowWorkspaceHealthMfdPage,
+        MfdShellPage.WorkspaceHealth => ShowIdeHealthMfdPage,
         MfdShellPage.SolutionExplorer => IsDockedMfdSolutionExplorerTree,
         MfdShellPage.RelatedFiles => true,
         MfdShellPage.MarkdownPreview => true,

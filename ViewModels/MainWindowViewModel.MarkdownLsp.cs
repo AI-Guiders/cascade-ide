@@ -65,44 +65,51 @@ public partial class MainWindowViewModel
 
     private async Task RestartMarkdownLanguageServerAsync()
     {
-        var snap = await UiScheduler.Default.InvokeAsync(() =>
+        try
         {
-            _workspaceDiagnostics.SetMarkdownLspDiagnosticsHost(null);
-            _markdownLspHost?.Dispose();
-            _markdownLspHost = null;
-            var markdownLsp = _settings.Languages.Markdown.ResolveForRuntime();
-            return (
-                Workspace.SolutionPath ?? "",
-                markdownLsp.Mode,
-                markdownLsp.Executable,
-                markdownLsp.Arguments);
-        });
-
-        if (string.Equals(snap.Item2, MarkdownLspProviderIds.Off, StringComparison.OrdinalIgnoreCase))
-            return;
-        if (string.IsNullOrWhiteSpace(snap.Item1) || !File.Exists(snap.Item1))
-            return;
-
-        var host = new MarkdownLspDiagnosticsHost();
-        var ok = await host.TryStartAsync(snap.Item2, snap.Item1, snap.Item3, snap.Item4, CancellationToken.None)
-            .ConfigureAwait(false);
-
-        await UiScheduler.Default.InvokeAsync(() =>
-        {
-            if (!ok)
+            var snap = await UiScheduler.Default.InvokeAsync(() =>
             {
-                host.Dispose();
+                _workspaceDiagnostics.SetMarkdownLspDiagnosticsHost(null);
+                _markdownLspHost?.Dispose();
+                _markdownLspHost = null;
+                var markdownLsp = _settings.Languages.Markdown.ResolveForRuntime();
+                return (
+                    Workspace.SolutionPath ?? "",
+                    markdownLsp.Mode,
+                    markdownLsp.Executable,
+                    markdownLsp.Arguments);
+            });
+
+            if (string.Equals(snap.Item2, MarkdownLspProviderIds.Off, StringComparison.OrdinalIgnoreCase))
                 return;
-            }
+            if (string.IsNullOrWhiteSpace(snap.Item1) || !File.Exists(snap.Item1))
+                return;
 
-            _markdownLspHost = host;
-            _workspaceDiagnostics.SetMarkdownLspDiagnosticsHost(host);
-            foreach (var d in Documents.OpenDocuments)
+            var host = new MarkdownLspDiagnosticsHost();
+            var ok = await host.TryStartAsync(snap.Item2, snap.Item1, snap.Item3, snap.Item4, CancellationToken.None)
+                .ConfigureAwait(false);
+
+            await UiScheduler.Default.InvokeAsync(() =>
             {
-                if (d.FilePath.EndsWith(".md", StringComparison.OrdinalIgnoreCase)
-                    || d.FilePath.EndsWith(".markdown", StringComparison.OrdinalIgnoreCase))
-                    host.EnsureOpened(d.FilePath, d.Content ?? "");
-            }
-        });
+                if (!ok)
+                {
+                    host.Dispose();
+                    return;
+                }
+
+                _markdownLspHost = host;
+                _workspaceDiagnostics.SetMarkdownLspDiagnosticsHost(host);
+                foreach (var d in Documents.OpenDocuments)
+                {
+                    if (d.FilePath.EndsWith(".md", StringComparison.OrdinalIgnoreCase)
+                        || d.FilePath.EndsWith(".markdown", StringComparison.OrdinalIgnoreCase))
+                        host.EnsureOpened(d.FilePath, d.Content ?? "");
+                }
+            });
+        }
+        finally
+        {
+            await UiScheduler.Default.InvokeAsync(PublishIdeHostLspToDataBusAndRebuild);
+        }
     }
 }

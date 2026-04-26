@@ -60,8 +60,7 @@ public partial class MainWindowViewModel
         var rows = await _environmentReadinessChannel.Build(new EnvironmentReadinessChannelContext(
                 _settings,
                 Workspace.SolutionPath,
-                _csharpLspHost,
-                _markdownLspHost,
+                Lsp: CaptureIdeHostLspState(),
                 IsMcpStdioHost: IsMcpServerMode,
                 ActiveAiProvider: ActiveAiProvider))
             .ConfigureAwait(false);

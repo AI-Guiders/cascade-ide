@@ -1,6 +1,6 @@
 #nullable enable
 using CascadeIDE.Models;
-using CascadeIDE.Services;
+using CascadeIDE.Cockpit.ComputingUnits.EnvironmentReadiness;
 
 namespace CascadeIDE.Cockpit.Channels.EnvironmentReadiness;
 
@@ -9,13 +9,8 @@ namespace CascadeIDE.Cockpit.Channels.EnvironmentReadiness;
 /// </summary>
 public sealed class EnvironmentReadinessChannel : IEnvironmentReadinessChannel
 {
+    private readonly EnvironmentReadinessSnapshotUnit _snapshotUnit = EnvironmentReadinessSnapshotUnit.Default;
+
     public ValueTask<IReadOnlyList<AnnunciatorLampItem>> Build(in EnvironmentReadinessChannelContext context) =>
-        new(EnvironmentReadinessSnapshotBuilder.BuildAllRowsAsync(
-            context.Settings,
-            context.SolutionPath,
-            context.CSharpHost,
-            context.MarkdownHost,
-            context.IsMcpStdioHost,
-            context.ActiveAiProvider,
-            context.CancellationToken));
+        new(_snapshotUnit.BuildAsync(context));
 }

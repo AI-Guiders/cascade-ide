@@ -18,11 +18,11 @@ public partial class MainWindowViewModel
         OnPropertyChanged(nameof(HasDebugSession));
         OnPropertyChanged(nameof(IsDebugExecutionPaused));
         OnPropertyChanged(nameof(IsDebugExecutionRunning));
-        OnPropertyChanged(nameof(WorkspaceHealthDebugText));
-        OnPropertyChanged(nameof(WorkspaceHealthDebugCockpitShort));
-        OnPropertyChanged(nameof(WorkspaceHealthMountPayload));
-        OnPropertyChanged(nameof(PfdWorkspaceHealthMountContext));
-        OnPropertyChanged(nameof(MfdWorkspaceHealthMountContext));
+        OnPropertyChanged(nameof(IdeHealthDebugText));
+        OnPropertyChanged(nameof(IdeHealthDebugCockpitShort));
+        OnPropertyChanged(nameof(IdeHealthMountPayload));
+        OnPropertyChanged(nameof(PfdIdeHealthMountContext));
+        OnPropertyChanged(nameof(MfdIdeHealthMountContext));
     }
 
     private Task ShowDebugInfoAsync(string title, string message) =>

@@ -91,14 +91,14 @@ public sealed class UiModeCapabilitiesToml
     public bool? AgentOperationsPanel { get; set; }
     public bool? AgentTrace { get; set; }
     public bool? AutonomousAgentTelemetry { get; set; }
-    public bool? WorkspaceHealthOnTerminalTab { get; set; }
-    public int? WorkspaceHealthMainColumnSpan { get; set; }
+    public bool? IdeHealthOnTerminalTab { get; set; }
+    public int? IdeHealthMainColumnSpan { get; set; }
     public bool? InstrumentationTabs { get; set; }
     public bool? HypothesesTab { get; set; }
     public bool? RiskSummaryCard { get; set; }
     public bool? ResultSummaryCard { get; set; }
-    public bool? WorkspaceHealthStrip { get; set; }
-    public string? WorkspaceHealthSurface { get; set; }
+    public bool? IdeHealthStrip { get; set; }
+    public string? IdeHealthSurface { get; set; }
     public bool? ProblemsPanel { get; set; }
     public bool? EicasAlertsBar { get; set; }
 }

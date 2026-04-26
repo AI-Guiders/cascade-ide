@@ -2,8 +2,8 @@
 
 **Статус:** Accepted · Implemented (загрузчик TOML, `UiModeCatalog`, capabilities, bundle `UiModes/`; override и `docs/ux` — по мере нужды)  
 **Дата:** 2026-04-02  
-**Обновлено:** 2026-04-11 — якоря `adr0010-p1`…`p8` в разделе «Решение» и ссылки на [п. 3](#adr0010-p3), [п. 7](#adr0010-p7); соглашение — [README ADR](README.md#adr-anchors-policy). 2026-04-11 — **`presentation`** / **`zone_screen_layout`:** прежде всего **`settings.toml`**, не командный репо — [0017](0017-multi-window-workspace-and-agent-surfaces.md#adr0017-presentation-grammar), [п. 4](0017-multi-window-workspace-and-agent-surfaces.md#adr0017-p4); токены грамматики — секция **`[presentation_grammar]`** (без отдельных **`pfd_zone_alias`** — короткие имена через **`pfd_zone_identifier`** и т.д.); **`screen_markers`** / **`screen_separator`** / **`zone_separator`**, **EBNF** — [0017](0017-multi-window-workspace-and-agent-surfaces.md#adr0017-presentation-ebnf). 2026-04-08 — намерение задать **топологию презентации** зон в TOML после появления альтернатив одному `MainGrid` ([0017](0017-multi-window-workspace-and-agent-surfaces.md)); см. подраздел ниже.  
-**Связь:** [0003-debug-ui-mode-separate-from-power.md](0003-debug-ui-mode-separate-from-power.md), [0006-presentation-layers-and-feature-slices.md](0006-presentation-layers-and-feature-slices.md), [0017](0017-multi-window-workspace-and-agent-surfaces.md) (мультиоконность и топология), [`attention-zone-panel-playbook-v1.md`](../design/attention-zone-panel-playbook-v1.md) (зона ↔ панель ↔ топология), `Features/UiChrome/UiModeLayoutRegistry`, `Services/SettingsService` + Tomlyn, `Features/UiChrome/UiWorkspaceLayoutDimensions` / `Services/UiWorkspaceLayout`. [0022](0022-workspace-health-lexicon.md) — канон имён и эволюция для **IDE Health** (пересечение с таблицей `workspace_health_*` ниже).
+**Обновлено:** 2026-04-25 — в **`[capabilities]`** ключи контура **IDE Health** в TOML: **`ide_health_*`** (свойства `UiModeCapabilities` — `IdeHealth*`). Ранее: 2026-04-11 — якоря `adr0010-p1`…`p8` в разделе «Решение» и ссылки на [п. 3](#adr0010-p3), [п. 7](#adr0010-p7); соглашение — [README ADR](README.md#adr-anchors-policy). 2026-04-11 — **`presentation`** / **`zone_screen_layout`:** прежде всего **`settings.toml`**, не командный репо — [0017](0017-multi-window-workspace-and-agent-surfaces.md#adr0017-presentation-grammar), [п. 4](0017-multi-window-workspace-and-agent-surfaces.md#adr0017-p4); токены грамматики — секция **`[presentation_grammar]`** (без отдельных **`pfd_zone_alias`** — короткие имена через **`pfd_zone_identifier`** и т.д.); **`screen_markers`** / **`screen_separator`** / **`zone_separator`**, **EBNF** — [0017](0017-multi-window-workspace-and-agent-surfaces.md#adr0017-presentation-ebnf). 2026-04-08 — намерение задать **топологию презентации** зон в TOML после появления альтернатив одному `MainGrid` ([0017](0017-multi-window-workspace-and-agent-surfaces.md)); см. подраздел ниже.  
+**Связь:** [0003-debug-ui-mode-separate-from-power.md](0003-debug-ui-mode-separate-from-power.md), [0006-presentation-layers-and-feature-slices.md](0006-presentation-layers-and-feature-slices.md), [0017](0017-multi-window-workspace-and-agent-surfaces.md) (мультиоконность и топология), [`attention-zone-panel-playbook-v1.md`](../design/attention-zone-panel-playbook-v1.md) (зона ↔ панель ↔ топология), `Features/UiChrome/UiModeLayoutRegistry`, `Services/SettingsService` + Tomlyn, `Features/UiChrome/UiWorkspaceLayoutDimensions` / `Services/UiWorkspaceLayout`. [0022](0022-workspace-health-lexicon.md) — канон имён и эволюция для **IDE Health** (пересечение с таблицей `ide_health_*` ниже).
 
 ## Контекст
 
@@ -40,10 +40,10 @@
    | `agent_operations_panel` | Блок операций агента в чате (Balanced) |
    | `agent_trace` | Панель trace агента (Power) |
    | `autonomous_agent_telemetry` | Кокпит Power: явный доступ к выводу (терминал и подсказки); **не** канал IDE Health |
-   | `workspace_health_on_terminal_tab` | Дубль IDE Health на вкладке «Терминал» (Power) |
-   | `workspace_health_main_column_span` | Column span области IDE Health в основной сетке (Power) |
-   | `workspace_health_strip` | Показывать полосу IDE Health под редактором |
-   | `workspace_health_surface` | `bottom_strip` или `dedicated_page` — слой представления IDE Health |
+   | `ide_health_on_terminal_tab` | Дубль IDE Health на вкладке «Терминал» (Power) |
+   | `ide_health_main_column_span` | Column span области IDE Health в основной сетке (Power) |
+   | `ide_health_strip` | Показывать полосу IDE Health под редактором |
+   | `ide_health_surface` | `bottom_strip` или `dedicated_page` — слой представления IDE Health |
    | `instrumentation_tabs` | Вкладки событий/тестов/отладки в нижнем доке |
    | `hypotheses_tab` | Вкладка «Гипотезы» |
    | `risk_summary_card` / `result_summary_card` | Карточки риска и результата в чате |

@@ -63,8 +63,8 @@ public partial class MainWindowViewModel
         }
         OnPropertyChanged(nameof(BreakpointLinesInCurrentFile));
         OnPropertyChanged(nameof(AllBreakpointLinesInCurrentFile));
-        OnPropertyChanged(nameof(WorkspaceHealthDebugText));
-        OnPropertyChanged(nameof(WorkspaceHealthDebugCockpitShort));
+        OnPropertyChanged(nameof(IdeHealthDebugText));
+        OnPropertyChanged(nameof(IdeHealthDebugCockpitShort));
     }
 
     async Task<string> Services.IIdeMcpActions.GetDebugSnapshotAsync(CancellationToken cancellationToken) =>

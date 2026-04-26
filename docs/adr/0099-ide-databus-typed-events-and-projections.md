@@ -40,6 +40,7 @@
 6. **Git в IDE Health:** один продуктовый путь — после обновления git-строк в `UiChromeViewModel` вызывается `AfterGitWorkspaceHealthSummaryApplied` (в конце `RefreshGitSummaryAsync` на UI-потоке), что в `MainWindowViewModel` привязано к `PublishGitToIdeDataBusAndRebuildIdeHealth` (публикация `GitStateChanged` + `RebuildIdeHealth`). Сид начального состояния: `SeedIdeHealthDataBus()` в конструкторе (startup + первый `GitStateChanged`), без `PropertyChanged` на отдельные поля git.
 7. **Снимок канала и UI:** `IdeHealthSnapshotUnit.Build` вызывается только из `MainWindowViewModel.IdeHealth` (`RebuildIdeHealth`); результат кэшируется в `_lastIdeHealthInputSnapshot`, геттеры строк в `MainWindowViewModel.Presentation` читают кэш. Roslyn **CASCOPE019** фиксирует эту границу.
 8. **Жизненный цикл:** `IdeHealthSnapshotUnit` реализует `IDisposable` (отписка от шины); при закрытии главного окна — `ReleaseWorkspaceHealthChannel()`.
+9. **Порядок для IDE Health (внедрено):** прикладной `InMemoryDataBus` главного окна — **синхронная** диспетчеризация (`asynchronousDispatch: false`), чтобы подписчики `IdeHealthSnapshotUnit` отработали до возврата из `Publish`, а `RebuildIdeHealth()` читал согласованный снимок. Сборка из UI: сначала `BuildStateChanged` (старт/финиш), затем `IsBuilding` — чтобы `NotifyPropertyChangedFor`→`RebuildIdeHealth` не обходил обновление `_buildSnapshot`. Публикации с фона MCP — через `UiScheduler.InvokeAsync` в `PublishToIdeDataBusAndRebuild` (тот же UI-поток, что и свёртка).
 
 ---
 

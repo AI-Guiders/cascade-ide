@@ -25,7 +25,7 @@
 |-----------------|-------------------------------|
 | `solution_explorer` | `solution_explorer_tree` |
 | `workspace_map` | `workspace_navigation_map` |
-| `workspace_health` | `workspace_health_status_v1` |
+| `ide_health` | `ide_health_status_v1` |
 
 Допустимо также указать **уже канонический** `instrument_id` (как в CDS), если нужен копипаст из диагностик.
 

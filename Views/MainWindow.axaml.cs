@@ -27,6 +27,7 @@ public partial class MainWindow : PointerTrackingWindow
     public MainWindow()
     {
         InitializeComponent();
+        Closing += OnMainWindowClosing;
         // Глобальные хоткеи: tunnel + KeyGestureChordMatching + KeyBindings (см. MainWindowHotkeyService).
         AddHandler(InputElement.KeyDownEvent, OnDebugShortcutKeyDown, RoutingStrategies.Tunnel, handledEventsToo: true);
         DataContextChanged += OnDataContextChanged;
@@ -41,6 +42,12 @@ public partial class MainWindow : PointerTrackingWindow
         TryOpenPfdHostWindowOnStartup();
         TryOpenMfdHostWindowOnStartup();
         TryOpenPmSplitHostWindowOnStartup();
+    }
+
+    private void OnMainWindowClosing(object? sender, WindowClosingEventArgs e)
+    {
+        if (DataContext is ViewModels.MainWindowViewModel vm)
+            vm.ReleaseWorkspaceHealthChannel();
     }
 
     private void OnMainWindowLoaded(object? sender, RoutedEventArgs e)

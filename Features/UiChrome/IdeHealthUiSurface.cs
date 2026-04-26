@@ -3,20 +3,20 @@ using CascadeIDE.Cockpit;
 namespace CascadeIDE.Features.UiChrome;
 
 /// <summary>
-/// Слой представления для контура Workspace Health (build/tests/debug/git): нижняя полоса или отдельная страница зоны.
-/// Канал-специфичные имена TOML <c>workspace_health_surface</c>; абстрактная ось формы — <see cref="ContentRepresentation"/> (ADR 0063).
-/// Не шина событий и не маршрутизация сообщений — только выбор разметки; данные (<see cref="WorkspaceHealthInputSnapshot"/>) от выбора не зависят.
+/// Слой представления для контура IDE Health (build/tests/debug/git): нижняя полоса или отдельная страница зоны.
+/// Канал-специфичные имена TOML <c>ide_health_surface</c>; абстрактная ось формы — <see cref="ContentRepresentation"/> (ADR 0063).
+/// Не шина событий и не маршрутизация сообщений — только выбор разметки; данные (<see cref="IdeHealthInputSnapshot"/>) от выбора не зависят.
 /// </summary>
 public enum IdeHealthUiSurface
 {
-    /// <summary>Полоса под workspace (<c>WorkspaceHealthStripView</c>); <see cref="ContentRepresentation.Strip"/>.</summary>
+    /// <summary>Полоса под workspace (<c>WorkspaceHealthStripView</c>, CLR); <see cref="ContentRepresentation.Strip"/>.</summary>
     BottomStrip = 0,
 
     /// <summary>Отдельная страница в MFD/PFD — полноразметка позже; нижняя полоса скрыта; <see cref="ContentRepresentation.Page"/>.</summary>
     DedicatedPage = 1,
 }
 
-/// <summary>ADR 0063: соответствие поверхности WH общей оси <see cref="ContentRepresentation"/>.</summary>
+/// <summary>ADR 0063: соответствие поверхности IDE Health общей оси <see cref="ContentRepresentation"/>.</summary>
 public static class IdeHealthUiSurfaceExtensions
 {
     /// <summary>BottomStrip → Strip, DedicatedPage → Page.</summary>

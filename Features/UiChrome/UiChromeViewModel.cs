@@ -14,6 +14,9 @@ public sealed partial class UiChromeViewModel : ObservableObject
 
     public static string NormalizeUiMode(string? mode) => UiModeCatalog.NormalizeUiMode(mode);
 
+    /// <summary>Один вызов после обновления git-скаляров в UI (IDE Health / DataBus), без дублирования по <see cref="WorkspaceHealthGitText"/>.</summary>
+    public Action? AfterGitWorkspaceHealthSummaryApplied { get; set; }
+
     public async Task RefreshGitSummaryAsync(
         Func<IReadOnlyList<string>, Task<(bool Success, int ExitCode, string Output)>> runGit)
     {
@@ -27,6 +30,7 @@ public sealed partial class UiChromeViewModel : ObservableObject
                 GitUnstagedCount = 0;
                 GitUntrackedCount = 0;
                 FilesChangedBadge = 0;
+                AfterGitWorkspaceHealthSummaryApplied?.Invoke();
                 return;
             }
 
@@ -36,6 +40,7 @@ public sealed partial class UiChromeViewModel : ObservableObject
             GitUnstagedCount = parsed.Unstaged;
             GitUntrackedCount = parsed.Untracked;
             FilesChangedBadge = parsed.ChangedPaths;
+            AfterGitWorkspaceHealthSummaryApplied?.Invoke();
         });
     }
 

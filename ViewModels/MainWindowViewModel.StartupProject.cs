@@ -1,4 +1,6 @@
 using System.Collections.ObjectModel;
+using CascadeIDE.Cockpit.ComputingUnits.Launch;
+using CascadeIDE.Cockpit.DataBus;
 using CascadeIDE.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -26,6 +28,7 @@ public partial class MainWindowViewModel
 
     partial void OnStartupProjectCsprojFullPathChanged(string? value)
     {
+        PublishToIdeDataBusAndRebuild(new StartupProjectPathChanged(value));
         OnPropertyChanged(nameof(HasStartupProject));
         OnPropertyChanged(nameof(StartupProjectBanner));
         SetStartupProjectFromSelectionCommand.NotifyCanExecuteChanged();
@@ -245,40 +248,60 @@ public partial class MainWindowViewModel
     {
         TryApplyInferredStartupProjectForDebug();
         var sln = Workspace.SolutionPath;
-        if (string.IsNullOrEmpty(sln))
-            return null;
-
+        var hasSolution = !string.IsNullOrEmpty(sln);
         var solutionDir = Services.BreakpointsFileService.GetWorkspaceRoot(sln);
-        if (string.IsNullOrEmpty(solutionDir))
+        var hasWorkspaceRoot = !string.IsNullOrEmpty(solutionDir);
+
+        var csproj = StartupProjectCsprojFullPath;
+        var startupCsprojFull = !string.IsNullOrEmpty(csproj) && File.Exists(csproj) ? csproj : null;
+        var preResolve = hasSolution && hasWorkspaceRoot
+            ? LaunchPreResolvePipelineUnit.Default.Compose(
+                sln!,
+                explicitProfileName: null,
+                solutionDirectory: solutionDir!,
+                startupProjectFullPath: startupCsprojFull)
+            : new LaunchPreResolvePipelineSnapshot(
+                Profile: null,
+                ProfileProjectCsprojFullPath: null,
+                Readiness: LaunchReadinessUnit.Default.Compose(
+                    hasSolutionPath: hasSolution,
+                    hasWorkspaceRoot: hasWorkspaceRoot,
+                    profileId: null,
+                    profileProjectRelative: null,
+                    profileProjectFullPath: null,
+                    startupProjectFullPath: startupCsprojFull),
+                McpResolveError: null);
+
+        var resolvedProfile = preResolve.Profile;
+        var readiness = preResolve.Readiness;
+        if (!readiness.CanAttemptResolve)
             return null;
 
-        if (LaunchProfilesStore.TryResolveProfileForLaunch(sln, profileName: null, out var prof, out _) &&
-            !string.IsNullOrWhiteSpace(prof.ProjectRelativeToSolution) &&
-            DebugLaunchFromProfile.TryGetExistingCsprojFullPath(solutionDir, prof.ProjectRelativeToSolution, out var csprojFull))
+        if (readiness.Source == LaunchReadinessSource.Profile && resolvedProfile is { } launchProfile && !string.IsNullOrEmpty(readiness.SelectedProjectFullPath))
         {
             var (target, err) = await MsBuildDebugTargetResolver
-                .TryResolveAsync(csprojFull, _dotnetRunner, prof.Configuration)
+                .TryResolveAsync(readiness.SelectedProjectFullPath, _dotnetRunner, launchProfile.Configuration)
                 .ConfigureAwait(false);
             if (!string.IsNullOrEmpty(target))
-                return DebugLaunchFromProfile.ToResolution(prof, target);
+                return DebugLaunchFromProfile.ToResolution(launchProfile, target);
 
             if (!string.IsNullOrEmpty(err))
                 await ShowDebugInfoAsync("Стартовый проект", err).ConfigureAwait(false);
             return null;
         }
 
-        var csproj = StartupProjectCsprojFullPath;
-        if (string.IsNullOrEmpty(csproj) || !File.Exists(csproj))
-            return null;
+        if (!string.IsNullOrEmpty(readiness.SelectedProjectFullPath))
+        {
+            var (target, err) = await MsBuildDebugTargetResolver
+                .TryResolveAsync(readiness.SelectedProjectFullPath, _dotnetRunner, LaunchProfilesStore.DefaultConfiguration)
+                .ConfigureAwait(false);
+            if (!string.IsNullOrEmpty(target))
+                return new DebugLaunchResolution(target, null, null, null, OpenLaunchBrowser: false, LaunchUrl: null);
 
-        var (t2, e2) = await MsBuildDebugTargetResolver
-            .TryResolveAsync(csproj, _dotnetRunner, LaunchProfilesStore.DefaultConfiguration)
-            .ConfigureAwait(false);
-        if (!string.IsNullOrEmpty(t2))
-            return new DebugLaunchResolution(t2, null, null, null, OpenLaunchBrowser: false, LaunchUrl: null);
+            if (!string.IsNullOrEmpty(err))
+                await ShowDebugInfoAsync("Стартовый проект", err).ConfigureAwait(false);
+        }
 
-        if (!string.IsNullOrEmpty(e2))
-            await ShowDebugInfoAsync("Стартовый проект", e2).ConfigureAwait(false);
         return null;
     }
 
@@ -309,39 +332,49 @@ public partial class MainWindowViewModel
         if (string.IsNullOrEmpty(sln))
             return "# Error: no_solution_in_workspace: укажи каталог с .sln или путь к .sln, либо target_path к .dll.";
 
-        if (!LaunchProfilesStore.TryResolveProfileForLaunch(sln, profileName, out var prof, out var perr))
-            return "# Error: " + perr;
-
         var solutionDir = Services.BreakpointsFileService.GetWorkspaceRoot(sln);
         if (string.IsNullOrEmpty(solutionDir))
             return "# Error: workspace_root_unresolved.";
 
-        if (!DebugLaunchFromProfile.TryGetExistingCsprojFullPath(solutionDir, prof.ProjectRelativeToSolution, out var csprojFull))
+        var preResolve = LaunchPreResolvePipelineUnit.Default.Compose(
+            sln,
+            explicitProfileName: profileName,
+            solutionDirectory: solutionDir,
+            startupProjectFullPath: null);
+
+        var resolvedProfile = preResolve.Profile;
+        var readiness = preResolve.Readiness;
+
+        if (!readiness.CanAttemptResolve || readiness.Source != LaunchReadinessSource.Profile || resolvedProfile is not { } launchProfile)
         {
-            var candidate = Path.GetFullPath(Path.Combine(solutionDir, prof.ProjectRelativeToSolution));
-            return "# Error: project_not_found: " + candidate;
+            return preResolve.McpResolveError
+                ?? LaunchMcpErrorFormatUnit.Default.FormatResolveFailure(
+                    readiness,
+                    explicitProfileName: profileName,
+                    solutionDirectory: solutionDir);
         }
 
         var (target, err) = await MsBuildDebugTargetResolver
-            .TryResolveAsync(csprojFull, _dotnetRunner, prof.Configuration, cancellationToken)
+            .TryResolveAsync(readiness.SelectedProjectFullPath!, _dotnetRunner, launchProfile.Configuration, cancellationToken)
             .ConfigureAwait(false);
         if (string.IsNullOrEmpty(target))
             return "# Error: " + (err ?? "msbuild_unresolved");
 
-        var prg = mcpProgramArgs is { Count: > 0 } ? mcpProgramArgs : prof.ProgramArgs;
-        IReadOnlyDictionary<string, string>? env = DebugLaunchFromProfile.NonEmptyEnvironmentOrNull(prof);
+        var prg = mcpProgramArgs is { Count: > 0 } ? mcpProgramArgs : launchProfile.ProgramArgs;
+        IReadOnlyDictionary<string, string>? env = DebugLaunchFromProfile.NonEmptyEnvironmentOrNull(launchProfile);
         var launchResult = await DapDebug.LaunchAsync(
             workspacePath,
             target,
             netcoredbgPath,
             prg,
             env,
-            prof.WorkingDirectoryRelative,
+            launchProfile.WorkingDirectoryRelative,
             cancellationToken).ConfigureAwait(false);
-        if (prof.OpenLaunchBrowser)
+        if (launchProfile.OpenLaunchBrowser)
             KestrelLaunchBrowser.TryOpenAfterLaunch(
-                DebugLaunchFromProfile.NonEmptyEnvironmentOrNull(prof),
-                prof.LaunchUrl);
+                DebugLaunchFromProfile.NonEmptyEnvironmentOrNull(launchProfile),
+                launchProfile.LaunchUrl);
         return launchResult;
     }
+
 }

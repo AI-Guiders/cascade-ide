@@ -8,7 +8,7 @@ public sealed class InstrumentRoutingAliasResolverTests
     [Theory]
     [InlineData("solution_explorer", "solution_explorer_tree")]
     [InlineData("workspace_map", "workspace_navigation_map")]
-    [InlineData("workspace_health", "workspace_health_status_v1")]
+    [InlineData("ide_health", "ide_health_status_v1")]
     [InlineData("SOLUTION_EXPLORER", "solution_explorer_tree")]
     public void TryResolve_accepts_public_aliases(string alias, string expectedCanonical)
     {

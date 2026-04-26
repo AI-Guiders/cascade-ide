@@ -110,7 +110,36 @@
 
 ---
 
-## 6. Не цели
+## 6. Кандидаты на следующий CCU (практический shortlist)
+
+Ниже — инженерный приоритет для следующих шагов после IDE Health. Это **не** обязательство сделать всё сразу, а порядок, где CCU обычно даёт максимальный эффект.
+
+### P1 (сразу после текущего цикла)
+
+- **Build/Test сводка:** сырой поток билд/тест событий → `BuildStateSnapshot` (phase, progress, errors/warnings, duration, last-failure).
+- **Debug session сводка:** DAP события → `DebugSessionSnapshot` (attached/running/stopped, stop reason, current frame, breakpoint health).
+- **Launch readiness:** `launchSettings` + startup project + env/fs-проверки → `LaunchReadinessSnapshot` (ready/not-ready + причины).
+
+### P2 (когда закрепим P1 контрактами)
+
+- **Git workspace health:** status/branch/ahead-behind/submodule state → `RepoHealthSnapshot`.
+- **LSP health:** состояние C#/Markdown language services → `LanguageServiceHealthSnapshot` (connected/degraded, diagnostics delta).
+- **MCP health:** доступность и деградации по инструментам → `McpHealthSnapshot` (availability, last error, latency buckets).
+
+### P3 (после стабилизации graph-backed контура)
+
+- **Semantic map input snapshot:** индекс/источники/инвалидации → `SemanticMapInputSnapshot` как вход в graph-backed surfaces.
+- **Terminal attention snapshot:** поток терминалов → `TerminalAttentionSnapshot` (active command, failure streak, long-running suspicion).
+
+### Граница для semantic map (что в CCU, а что нет)
+
+- В **CCU**: нормализация источников, дедупликация/приоритизация сигналов, вычисление derived-полей, версия/свежесть snapshot.
+- Вне **CCU**: графовые интеракции, layout, selection, навигационный UX и логика конкретной поверхности ([0067](0067-graph-backed-surfaces-contract.md)).
+- Правило по умолчанию: если модуль отвечает на вопрос «**какой смысловой снимок сейчас каноничен**», это кандидат в CCU; если «**как пользователь работает с этим снимком на экране**», это не CCU.
+
+---
+
+## 7. Не цели
 
 - Сертификация, DO-178, физические LRU.
 - Обязательное введение нового namespace или суффикса во всех типах `Cockpit/`.
@@ -118,7 +147,7 @@
 
 ---
 
-## 7. Отклонённые альтернативы
+## 8. Отклонённые альтернативы
 
 - **Называть любой сервис «юнитом»** — отклонено: без контракта снимка/DTO термин бессмыслен.
 - **Расширять 0094, чтобы он же строил сводки Health** — отклонено: смешивает транспорт и вычисление смысла.

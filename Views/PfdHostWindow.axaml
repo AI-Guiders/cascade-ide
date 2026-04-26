@@ -25,7 +25,7 @@
                                                VerticalAlignment="Top"
                                                Margin="8"
                                                Width="250"
-                                               InstrumentId="workspace_health_status_v1"
+                                               InstrumentId="ide_health_status_v1"
                                                SlotId="pfd"
                                                MountStyle="{Binding PfdInstrumentMountStyle}"
                                                ZIndex="415"/>

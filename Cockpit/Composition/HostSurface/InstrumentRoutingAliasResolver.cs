@@ -35,9 +35,9 @@ public static class InstrumentRoutingAliasResolver
             return true;
         }
 
-        if (t.Equals("workspace_health", StringComparison.OrdinalIgnoreCase))
+        if (t.Equals("ide_health", StringComparison.OrdinalIgnoreCase))
         {
-            canonicalInstrumentId = CockpitStandardInstrumentIds.WorkspaceHealthStatusV1;
+            canonicalInstrumentId = CockpitStandardInstrumentIds.IdeHealthStatusV1;
             return true;
         }
 
@@ -47,7 +47,7 @@ public static class InstrumentRoutingAliasResolver
     private static bool IsKnownCanonical(string t) =>
         t.Equals(CockpitStandardInstrumentIds.SolutionExplorerTree, StringComparison.OrdinalIgnoreCase)
         || t.Equals(CockpitStandardInstrumentIds.WorkspaceNavigationMap, StringComparison.OrdinalIgnoreCase)
-        || t.Equals(CockpitStandardInstrumentIds.WorkspaceHealthStatusV1, StringComparison.OrdinalIgnoreCase);
+        || t.Equals(CockpitStandardInstrumentIds.IdeHealthStatusV1, StringComparison.OrdinalIgnoreCase);
 
     private static string NormalizeCanonical(string t)
     {
@@ -55,6 +55,6 @@ public static class InstrumentRoutingAliasResolver
             return CockpitStandardInstrumentIds.SolutionExplorerTree;
         if (t.Equals(CockpitStandardInstrumentIds.WorkspaceNavigationMap, StringComparison.OrdinalIgnoreCase))
             return CockpitStandardInstrumentIds.WorkspaceNavigationMap;
-        return CockpitStandardInstrumentIds.WorkspaceHealthStatusV1;
+        return CockpitStandardInstrumentIds.IdeHealthStatusV1;
     }
 }

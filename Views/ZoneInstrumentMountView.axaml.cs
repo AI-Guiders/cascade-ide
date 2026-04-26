@@ -8,7 +8,7 @@ namespace CascadeIDE.Views;
 public partial class ZoneInstrumentMountView : UserControl
 {
     public static readonly StyledProperty<string> InstrumentIdProperty =
-        AvaloniaProperty.Register<ZoneInstrumentMountView, string>(nameof(InstrumentId), "workspace_health_status_v1");
+        AvaloniaProperty.Register<ZoneInstrumentMountView, string>(nameof(InstrumentId), "ide_health_status_v1");
 
     public static readonly StyledProperty<string> SlotIdProperty =
         AvaloniaProperty.Register<ZoneInstrumentMountView, string>(nameof(SlotId), "pfd");
@@ -159,7 +159,7 @@ internal static class ZoneInstrumentMountPolicy
             _ => "PFD STATUS"
         };
 
-        if (instrumentId == "workspace_health_status_v1")
+        if (instrumentId == "ide_health_status_v1")
             return BuildSkin(fallbackHeader, "#5A6E8C", "#A9D9FF", "#9FB4C9", "#DCE8F2", "#C9F0FF");
 
         return BuildSkin($"{instrumentId.ToUpperInvariant()} [{slotId.ToUpperInvariant()}]", "#5A6E8C", "#A9D9FF", "#9FB4C9", "#DCE8F2", "#C9F0FF");

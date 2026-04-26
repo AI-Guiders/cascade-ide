@@ -17,11 +17,11 @@ public sealed class WorkspaceHealthSurfaceCompositorTests
         var col = new ObservableCollection<IdeHealthSegment>();
         SurfaceCompositor.Compose(
             col,
-            payload: new IdeHealthInputSnapshot(
-                Build: new IdeHealthSegmentInput("Build: idle", "READY", IsBuildRunning: false, Stratum: IdeHealthStratum.Solution),
-                Tests: new IdeHealthSegmentInput("Tests: x", "imp 0", Stratum: IdeHealthStratum.Solution),
-                Debug: new IdeHealthSegmentInput("Debug: idle", "DBG · —", Stratum: IdeHealthStratum.Solution),
-                Git: new IdeHealthSegmentInput("Git: 0 staged", "main · Δ0", Stratum: IdeHealthStratum.Workspace)),
+            payload: IdeHealthInputSnapshot.FromFlat(
+                new IdeHealthSegmentInput("Build: idle", "READY", IsBuildRunning: false, Stratum: IdeHealthStratum.Solution),
+                new IdeHealthSegmentInput("Tests: x", "imp 0", Stratum: IdeHealthStratum.Solution),
+                new IdeHealthSegmentInput("Debug: idle", "DBG · —", Stratum: IdeHealthStratum.Solution),
+                new IdeHealthSegmentInput("Git: 0 staged", "main · Δ0", Stratum: IdeHealthStratum.Workspace)),
             decision: new IdeHealthSurfaceDecision(Enabled: true));
 
         Assert.Equal(4, col.Count);
@@ -64,11 +64,11 @@ public sealed class WorkspaceHealthSurfaceCompositorTests
         var col = new ObservableCollection<IdeHealthSegment>();
         SurfaceCompositor.Compose(
             col,
-            payload: new IdeHealthInputSnapshot(
-                Build: new IdeHealthSegmentInput("Build: running…", "BUILD…", IsBuildRunning: true, Stratum: IdeHealthStratum.Solution),
-                Tests: new IdeHealthSegmentInput("Tests: a", "a"),
-                Debug: new IdeHealthSegmentInput("Debug: idle", "—", Stratum: IdeHealthStratum.Solution),
-                Git: new IdeHealthSegmentInput("Git: a", "a", Stratum: IdeHealthStratum.Workspace)),
+            payload: IdeHealthInputSnapshot.FromFlat(
+                new IdeHealthSegmentInput("Build: running…", "BUILD…", IsBuildRunning: true, Stratum: IdeHealthStratum.Solution),
+                new IdeHealthSegmentInput("Tests: a", "a"),
+                new IdeHealthSegmentInput("Debug: idle", "—", Stratum: IdeHealthStratum.Solution),
+                new IdeHealthSegmentInput("Git: a", "a", Stratum: IdeHealthStratum.Workspace)),
             decision: new IdeHealthSurfaceDecision(Enabled: true));
 
         Assert.True(col[0].IsBuildRunning);
@@ -82,11 +82,11 @@ public sealed class WorkspaceHealthSurfaceCompositorTests
         var col = new ObservableCollection<IdeHealthSegment>();
         SurfaceCompositor.Compose(
             col,
-            payload: new IdeHealthInputSnapshot(
-                Build: new IdeHealthSegmentInput("Build: idle", "READY", IsBuildRunning: false, Stratum: IdeHealthStratum.Solution),
-                Tests: new IdeHealthSegmentInput("Tests: x", "t", IsBuildRunning: true),
-                Debug: new IdeHealthSegmentInput("Debug: idle", "d", Stratum: IdeHealthStratum.Solution),
-                Git: new IdeHealthSegmentInput("Git: a", "g", Stratum: IdeHealthStratum.Workspace)),
+            payload: IdeHealthInputSnapshot.FromFlat(
+                new IdeHealthSegmentInput("Build: idle", "READY", IsBuildRunning: false, Stratum: IdeHealthStratum.Solution),
+                new IdeHealthSegmentInput("Tests: x", "t", IsBuildRunning: true),
+                new IdeHealthSegmentInput("Debug: idle", "d", Stratum: IdeHealthStratum.Solution),
+                new IdeHealthSegmentInput("Git: a", "g", Stratum: IdeHealthStratum.Workspace)),
             decision: new IdeHealthSurfaceDecision(Enabled: true));
 
         Assert.False(col[1].IsBuildRunning);
@@ -100,11 +100,11 @@ public sealed class WorkspaceHealthSurfaceCompositorTests
         var col = new ObservableCollection<IdeHealthSegment>();
         SurfaceCompositor.Compose(
             col,
-            payload: new IdeHealthInputSnapshot(
-                Build: IdeHealthFormattingUnit.Default.ProjectBuildSegment("src/App/App.csproj", isBuilding: false),
-                Tests: new IdeHealthSegmentInput("Tests: x", "t"),
-                Debug: new IdeHealthSegmentInput("Debug: idle", "d"),
-                Git: new IdeHealthSegmentInput("Git: a", "g", Stratum: IdeHealthStratum.Workspace)),
+            payload: IdeHealthInputSnapshot.FromFlat(
+                IdeHealthFormattingUnit.Default.ProjectBuildSegment("src/App/App.csproj", isBuilding: false),
+                new IdeHealthSegmentInput("Tests: x", "t"),
+                new IdeHealthSegmentInput("Debug: idle", "d"),
+                new IdeHealthSegmentInput("Git: a", "g", Stratum: IdeHealthStratum.Workspace)),
             decision: new IdeHealthSurfaceDecision(Enabled: true));
 
         Assert.Equal(IdeHealthScope.Project, col[0].Scope);

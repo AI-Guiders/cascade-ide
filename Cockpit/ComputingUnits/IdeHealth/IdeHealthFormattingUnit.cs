@@ -14,12 +14,35 @@ public sealed class IdeHealthFormattingUnit : ICockpitComputeUnit
     }
 
     public IdeHealthSegmentInput BuildSegment(bool isBuilding) =>
-        new(
-            isBuilding ? "Build: running…" : "Build: idle",
-            isBuilding ? "BUILD…" : "READY",
-            IsBuildRunning: isBuilding,
+        BuildSegment(new BuildStateSnapshot(isBuilding));
+
+    public IdeHealthSegmentInput BuildSegment(BuildStateSnapshot s)
+    {
+        if (s.IsBuilding)
+        {
+            return new IdeHealthSegmentInput(
+                "Build: running…",
+                "BUILD…",
+                IsBuildRunning: true,
+                Stratum: IdeHealthStratum.Solution,
+                Scope: IdeHealthScope.Solution);
+        }
+
+        var line = s.LastBuildSucceeded switch
+        {
+            true when s.LastExitCode is int ok => $"Build: idle · last OK (exit {ok})",
+            true => "Build: idle · last OK",
+            false when s.LastExitCode is int fail => $"Build: idle · last failed (exit {fail})",
+            false => "Build: idle · last failed",
+            _ => "Build: idle"
+        };
+        return new IdeHealthSegmentInput(
+            line,
+            "READY",
+            IsBuildRunning: false,
             Stratum: IdeHealthStratum.Solution,
             Scope: IdeHealthScope.Solution);
+    }
 
     public IdeHealthSegmentInput TestsSegment(string? lastTestSummary, int impactedTestsBadge)
     {
@@ -55,13 +78,37 @@ public sealed class IdeHealthFormattingUnit : ICockpitComputeUnit
         new(gitLine, gitCockpitShort, Stratum: IdeHealthStratum.Workspace);
 
     public IdeHealthSegmentInput ProjectBuildSegment(string projectPath, bool isBuilding) =>
-        new(
-            isBuilding ? $"Build[{projectPath}]: running…" : $"Build[{projectPath}]: idle",
-            isBuilding ? "BUILD…" : "READY",
-            IsBuildRunning: isBuilding,
+        ProjectBuildSegment(projectPath, new BuildStateSnapshot(isBuilding));
+
+    public IdeHealthSegmentInput ProjectBuildSegment(string projectPath, BuildStateSnapshot s)
+    {
+        if (s.IsBuilding)
+        {
+            return new IdeHealthSegmentInput(
+                $"Build[{projectPath}]: running…",
+                "BUILD…",
+                IsBuildRunning: true,
+                Stratum: IdeHealthStratum.Solution,
+                Scope: IdeHealthScope.Project,
+                ProjectPath: projectPath);
+        }
+
+        var tail = s.LastBuildSucceeded switch
+        {
+            true when s.LastExitCode is int ok => $"idle · last OK (exit {ok})",
+            true => "idle · last OK",
+            false when s.LastExitCode is int fail => $"idle · last failed (exit {fail})",
+            false => "idle · last failed",
+            _ => "idle"
+        };
+        return new IdeHealthSegmentInput(
+            $"Build[{projectPath}]: {tail}",
+            "READY",
+            IsBuildRunning: false,
             Stratum: IdeHealthStratum.Solution,
             Scope: IdeHealthScope.Project,
             ProjectPath: projectPath);
+    }
 
     public IdeHealthSegmentInput ProjectTestsSegment(string projectPath, string? summary, int impactedTestsBadge)
     {
@@ -86,7 +133,7 @@ public sealed class IdeHealthFormattingUnit : ICockpitComputeUnit
 
     /// <summary>Собирает снимок из уже вычисленных скаляров (удобно для тестов и провайдера).</summary>
     public IdeHealthInputSnapshot Compose(
-        bool isBuilding,
+        BuildStateSnapshot buildState,
         string? lastTestSummary,
         int impactedTestsBadge,
         bool hasDebugSession,
@@ -95,9 +142,10 @@ public sealed class IdeHealthFormattingUnit : ICockpitComputeUnit
         int debugVariableCount,
         string gitLine,
         string gitCockpitShort) =>
-        new(
-            Build: BuildSegment(isBuilding),
-            Tests: TestsSegment(lastTestSummary, impactedTestsBadge),
-            Debug: DebugSegment(hasDebugSession, debugExecutionStopped, debugStackFrameCount, debugVariableCount),
-            Git: GitSegment(gitLine, gitCockpitShort));
+        IdeHealthStrataComposer.Compose(
+            new IdeHealthWorkspaceInput(GitSegment(gitLine, gitCockpitShort)),
+            new IdeHealthSolutionInput(
+                BuildSegment(buildState),
+                TestsSegment(lastTestSummary, impactedTestsBadge),
+                DebugSegment(hasDebugSession, debugExecutionStopped, debugStackFrameCount, debugVariableCount)));
 }

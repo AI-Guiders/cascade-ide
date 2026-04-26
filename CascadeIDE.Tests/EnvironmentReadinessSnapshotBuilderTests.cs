@@ -1,4 +1,5 @@
 using CascadeIDE.Cockpit.Composition.EnvironmentReadiness;
+using CascadeIDE.Cockpit.DataBus;
 using CascadeIDE.Models;
 using CascadeIDE.Services;
 using CascadeIDE.Services.Lsp;
@@ -21,8 +22,7 @@ public sealed class EnvironmentReadinessSnapshotBuilderTests
         var rows = EnvironmentReadinessSnapshotBuilder.BuildLspRows(
             settings,
             solutionPath: null,
-            csharpHost: null,
-            markdownHost: null);
+            lsp: default);
 
         Assert.Contains(rows, r => r.Title == "C# LSP" && r.Level == AnnunciatorLampLevel.Advisory);
     }
@@ -38,7 +38,7 @@ public sealed class EnvironmentReadinessSnapshotBuilderTests
                 Markdown = new MarkdownLanguageServerSettings { Mode = MarkdownLspProviderIds.Off }
             }
         };
-        var rows = EnvironmentReadinessSnapshotBuilder.BuildLspRows(settings, null, null, null);
+        var rows = EnvironmentReadinessSnapshotBuilder.BuildLspRows(settings, null, default);
 
         Assert.Contains(rows, r => r.Title == "Markdown LSP" && r.Level == AnnunciatorLampLevel.Advisory);
     }
@@ -53,7 +53,7 @@ public sealed class EnvironmentReadinessSnapshotBuilderTests
                 CSharp = new CSharpLanguageServerSettings { Mode = CSharpLspProviderIds.CSharpLs }
             }
         };
-        var rows = EnvironmentReadinessSnapshotBuilder.BuildLspRows(settings, null, null, null);
+        var rows = EnvironmentReadinessSnapshotBuilder.BuildLspRows(settings, null, default);
 
         var row = Assert.Single(rows, r => r.Title == "C# LSP");
         Assert.Equal(AnnunciatorLampLevel.Caution, row.Level);
@@ -71,7 +71,7 @@ public sealed class EnvironmentReadinessSnapshotBuilderTests
             }
         };
 
-        var rows = await EnvironmentReadinessSnapshotBuilder.BuildAllRowsAsync(settings, null, null, null);
+        var rows = await EnvironmentReadinessSnapshotBuilder.BuildAllRowsAsync(settings, null, default);
 
         Assert.Equal(EnvironmentReadinessInstrumentDeck.OrderedCellIds.Count, rows.Count);
         for (var i = 0; i < rows.Count; i++)
@@ -176,7 +176,7 @@ public sealed class EnvironmentReadinessSnapshotBuilderTests
         };
 
         var rows = await EnvironmentReadinessSnapshotBuilder.BuildAllRowsAsync(
-            settings, null, null, null,
+            settings, null, default,
             isMcpStdioHost: true, activeAiProvider: "Ollama");
 
         Assert.Equal("DEV", rows[0].LampShortLabel);
@@ -198,7 +198,7 @@ public sealed class EnvironmentReadinessSnapshotBuilderTests
         };
 
         var rows = await EnvironmentReadinessSnapshotBuilder.BuildAllRowsAsync(
-            settings, null, null, null,
+            settings, null, default,
             isMcpStdioHost: false, activeAiProvider: "CursorACP");
 
         Assert.Equal("DEV", rows[0].LampShortLabel);

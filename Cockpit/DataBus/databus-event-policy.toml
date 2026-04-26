@@ -1,0 +1,13 @@
+# IDE DataBus: политика async-маршрутов (InMemoryDataBus при asynchronous_dispatch = true).
+# Только embedded-ресурс в сборке; правки через репозиторий. ADR 0099.
+#
+# burst — latest-wins: BoundedChannel(1), DropOldest (всплески состояния)
+# reliable — unbounded: полная очередь событий
+
+[events]
+DebugStateChanged = "burst"
+GitStateChanged = "burst"
+IdeHostStateChanged = "burst"
+BuildStateChanged = "reliable"
+TestsStateChanged = "reliable"
+StartupProjectPathChanged = "reliable"

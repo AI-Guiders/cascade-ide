@@ -20,12 +20,11 @@ quick_actions = true
 agent_operations_panel = true
 agent_trace = false
 autonomous_agent_telemetry = false
-workspace_health_on_terminal_tab = false
-workspace_health_main_column_span = 5
+ide_health_on_terminal_tab = false
+ide_health_main_column_span = 5
 instrumentation_tabs = true
 hypotheses_tab = true
 risk_summary_card = true
 result_summary_card = true
-
-# Удобно отлаживать раскладку: Workspace Health отдельной страницей в MFD.
-workspace_health_surface = "dedicated_page"
+# Удобно отлаживать раскладку: IDE Health отдельной страницей в MFD.
+ide_health_surface = "dedicated_page"

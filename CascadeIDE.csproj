@@ -58,6 +58,7 @@
     <Content Include="CodeNavigation\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <!-- Шипнутые дефолты: копия на диске (override) + встроенный ресурс, если файла нет. -->
     <EmbeddedResource Include="CodeNavigation\presets.toml" />
+    <EmbeddedResource Include="Cockpit\DataBus\databus-event-policy.toml" />
     <EmbeddedResource Include="Themes\*.json" />
     <!-- Обязательно для деплоя без шипнутой папки: BundledAppContent / TryReadUiModesFile fallback. -->
     <EmbeddedResource Include="UiModes\*.toml" />

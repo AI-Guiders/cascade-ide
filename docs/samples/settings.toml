@@ -38,7 +38,7 @@ require_scores = false
 [[display.mount.rules]]
 surface = "main_window_docked_grid"
 slot = "pfd"
-instrument = "workspace_health_status_v1"
+instrument = "ide_health_status_v1"
 style = "instrument_mount_v1"
 sa_score = 0.8
 performance_score = 0.8
@@ -47,7 +47,7 @@ workload_score = 0.2
 [[display.mount.rules]]
 surface = "main_window_plus_mfd_host_top_level"
 slot = "mfd"
-instrument = "workspace_health_status_v1"
+instrument = "ide_health_status_v1"
 style = "instrument_mount_v1"
 sa_score = 0.75
 performance_score = 0.72

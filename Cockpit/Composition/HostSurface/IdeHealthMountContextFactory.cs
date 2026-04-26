@@ -14,7 +14,7 @@ public static class IdeHealthMountContextFactory
         string slotId,
         IdeHealthStatusMountPayload payload)
     {
-        var instrumentId = CockpitStandardInstrumentIds.WorkspaceHealthStatusV1;
+        var instrumentId = CockpitStandardInstrumentIds.IdeHealthStatusV1;
         var style = resolver.Resolve(displaySettings, surfaceId, slotId, instrumentId);
         return new IdeHealthStatusMountContext(instrumentId, slotId, style, payload);
     }

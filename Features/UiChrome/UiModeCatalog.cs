@@ -515,7 +515,7 @@ public static class UiModeCatalog
         return DefaultShowTaskBarForFamily(family);
     }
 
-    private static IdeHealthUiSurface ResolveWorkspaceHealthSurface(string? fromFile, IdeHealthUiSurface inherited)
+    private static IdeHealthUiSurface ResolveIdeHealthSurface(string? fromFile, IdeHealthUiSurface inherited)
     {
         if (string.IsNullOrWhiteSpace(fromFile))
             return inherited;
@@ -543,26 +543,26 @@ public static class UiModeCatalog
         var modeFile = file!;
 
         var cap = modeFile.Capabilities;
-        var span = baseCaps.WorkspaceHealthMainColumnSpan;
-        if (cap?.WorkspaceHealthMainColumnSpan is { } s && s >= 1 && s <= 12)
+        var span = baseCaps.IdeHealthMainColumnSpan;
+        if (cap?.IdeHealthMainColumnSpan is { } s && s >= 1 && s <= 12)
             span = s;
 
-        var surface = ResolveWorkspaceHealthSurface(cap?.WorkspaceHealthSurface, baseCaps.WorkspaceHealthSurface);
+        var surface = ResolveIdeHealthSurface(cap?.IdeHealthSurface, baseCaps.IdeHealthSurface);
 
         return new UiModeCapabilities(
             QuickActions: cap?.QuickActions ?? baseCaps.QuickActions,
             AgentOperationsPanel: cap?.AgentOperationsPanel ?? baseCaps.AgentOperationsPanel,
             AgentTrace: cap?.AgentTrace ?? baseCaps.AgentTrace,
             AutonomousAgentTelemetry: cap?.AutonomousAgentTelemetry ?? baseCaps.AutonomousAgentTelemetry,
-            WorkspaceHealthOnTerminalTab: cap?.WorkspaceHealthOnTerminalTab
-                ?? baseCaps.WorkspaceHealthOnTerminalTab,
-            WorkspaceHealthMainColumnSpan: span,
+            IdeHealthOnTerminalTab: cap?.IdeHealthOnTerminalTab
+                ?? baseCaps.IdeHealthOnTerminalTab,
+            IdeHealthMainColumnSpan: span,
             InstrumentationTabs: cap?.InstrumentationTabs ?? baseCaps.InstrumentationTabs,
             HypothesesTab: cap?.HypothesesTab ?? baseCaps.HypothesesTab,
             RiskSummaryCard: cap?.RiskSummaryCard ?? baseCaps.RiskSummaryCard,
             ResultSummaryCard: cap?.ResultSummaryCard ?? baseCaps.ResultSummaryCard,
-            WorkspaceHealthStripVisible: cap?.WorkspaceHealthStrip ?? baseCaps.WorkspaceHealthStripVisible,
-            WorkspaceHealthSurface: surface,
+            IdeHealthStripVisible: cap?.IdeHealthStrip ?? baseCaps.IdeHealthStripVisible,
+            IdeHealthSurface: surface,
             ProblemsPanelVisible: cap?.ProblemsPanel ?? baseCaps.ProblemsPanelVisible,
             EicasAlertsBarEnabled: cap?.EicasAlertsBar ?? baseCaps.EicasAlertsBarEnabled);
     }

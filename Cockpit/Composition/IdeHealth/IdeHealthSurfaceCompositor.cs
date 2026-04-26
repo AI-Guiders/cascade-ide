@@ -21,10 +21,10 @@ public sealed class IdeHealthSurfaceCompositor : IIdeHealthSurfaceCompositor
             return scene;
 
         scene.Clear();
-        Append(scene, IdeHealthSource.Build, payload.Build);
-        Append(scene, IdeHealthSource.Tests, payload.Tests);
-        Append(scene, IdeHealthSource.Debug, payload.Debug);
-        Append(scene, IdeHealthSource.Git, payload.Git);
+        Append(scene, IdeHealthSource.Build, payload.Solution.Build);
+        Append(scene, IdeHealthSource.Tests, payload.Solution.Tests);
+        Append(scene, IdeHealthSource.Debug, payload.Solution.Debug);
+        Append(scene, IdeHealthSource.Git, payload.Workspace.Git);
         return scene;
     }
 

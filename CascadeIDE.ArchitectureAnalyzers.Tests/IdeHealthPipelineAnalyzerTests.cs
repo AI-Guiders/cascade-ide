@@ -74,10 +74,10 @@ public sealed class WorkspaceHealthPipelineAnalyzerTests
     }
 
     [Fact]
-    public async Task Build_InMainWindowViewModel_DoesNotReport()
+    public async Task Build_InMainWindowViewModel_IdeHealth_partial_DoesNotReport_CASCOPE019()
     {
         var diags = await RunAnalyzerAsync((
-            @"D:\repo\ViewModels\MainWindowViewModel.WorkspaceHealth.cs",
+            @"D:\repo\ViewModels\MainWindowViewModel.IdeHealth.cs",
             """
             namespace CascadeIDE.ViewModels;
 
@@ -94,6 +94,30 @@ public sealed class WorkspaceHealthPipelineAnalyzerTests
             """));
 
         Assert.Empty(diags);
+    }
+
+    [Fact]
+    public async Task CASCOPE019_workspaceHealth_Build_in_other_Mwm_partial_Reports()
+    {
+        var diags = await RunAnalyzerAsync((
+            @"D:\repo\ViewModels\MainWindowViewModel.Presentation.cs",
+            """
+            namespace CascadeIDE.ViewModels;
+
+            public sealed class MainWindowViewModel
+            {
+                private readonly HealthChannel _workspaceHealth = new();
+                private void Bad() => _workspaceHealth.Build(0);
+            }
+
+            public sealed class HealthChannel
+            {
+                public int Build(int context) => context;
+            }
+            """));
+
+        var d = Assert.Single(diags);
+        Assert.Equal(WorkspaceHealthPipelineAnalyzer.DirectIdeHealthBuildOutsidePipelineFileId, d.Id);
     }
 
     [Fact]

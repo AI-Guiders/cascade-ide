@@ -65,44 +65,51 @@ public partial class MainWindowViewModel
 
     private async Task RestartCSharpLanguageServerAsync()
     {
-        var snap = await UiScheduler.Default.InvokeAsync(() =>
+        try
         {
-            _workspaceDiagnostics.SetLspDiagnosticsHost(null);
-            _csharpLspHost?.Dispose();
-            _csharpLspHost = null;
-            var csharpLsp = _settings.Languages.CSharp.ResolveForRuntime();
-            return (
-                Workspace.SolutionPath ?? "",
-                csharpLsp.Mode,
-                csharpLsp.Executable,
-                csharpLsp.Arguments);
-        });
-
-        if (string.Equals(snap.Item2, CSharpLspProviderIds.ParseOnly, StringComparison.OrdinalIgnoreCase))
-            return;
-        if (string.IsNullOrWhiteSpace(snap.Item1) || !File.Exists(snap.Item1))
-            return;
-
-        var host = new CSharpLspDiagnosticsHost();
-        var ok = await host.TryStartAsync(snap.Item2, snap.Item1, snap.Item3, snap.Item4, CancellationToken.None)
-            .ConfigureAwait(false);
-
-        await UiScheduler.Default.InvokeAsync(() =>
-        {
-            if (!ok)
+            var snap = await UiScheduler.Default.InvokeAsync(() =>
             {
-                host.Dispose();
+                _workspaceDiagnostics.SetLspDiagnosticsHost(null);
+                _csharpLspHost?.Dispose();
+                _csharpLspHost = null;
+                var csharpLsp = _settings.Languages.CSharp.ResolveForRuntime();
+                return (
+                    Workspace.SolutionPath ?? "",
+                    csharpLsp.Mode,
+                    csharpLsp.Executable,
+                    csharpLsp.Arguments);
+            });
+
+            if (string.Equals(snap.Item2, CSharpLspProviderIds.ParseOnly, StringComparison.OrdinalIgnoreCase))
                 return;
-            }
+            if (string.IsNullOrWhiteSpace(snap.Item1) || !File.Exists(snap.Item1))
+                return;
 
-            _csharpLspHost = host;
-            _workspaceDiagnostics.SetLspDiagnosticsHost(host);
-            foreach (var d in Documents.OpenDocuments)
+            var host = new CSharpLspDiagnosticsHost();
+            var ok = await host.TryStartAsync(snap.Item2, snap.Item1, snap.Item3, snap.Item4, CancellationToken.None)
+                .ConfigureAwait(false);
+
+            await UiScheduler.Default.InvokeAsync(() =>
             {
-                if (d.FilePath.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
-                    host.EnsureOpened(d.FilePath, d.Content ?? "");
-            }
-        });
+                if (!ok)
+                {
+                    host.Dispose();
+                    return;
+                }
+
+                _csharpLspHost = host;
+                _workspaceDiagnostics.SetLspDiagnosticsHost(host);
+                foreach (var d in Documents.OpenDocuments)
+                {
+                    if (d.FilePath.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
+                        host.EnsureOpened(d.FilePath, d.Content ?? "");
+                }
+            });
+        }
+        finally
+        {
+            await UiScheduler.Default.InvokeAsync(PublishIdeHostLspToDataBusAndRebuild);
+        }
     }
 
     /// <summary>Текст Quick Info для тултипа: при активном C# LSP — <c>textDocument/hover</c>, иначе in-process Roslyn.</summary>

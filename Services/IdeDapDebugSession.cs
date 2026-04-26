@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using CascadeIDE.Cockpit.DataBus;
 using DotnetDebug.Core;
 
 namespace CascadeIDE.Services;
@@ -8,6 +9,7 @@ namespace CascadeIDE.Services;
 public sealed class IdeDapDebugSession
 {
     private readonly Action? _onSnapshotChanged;
+    private readonly IDataBus? _dataBus;
 
     private DapClient? _client;
     private int _lastStoppedThreadId;
@@ -21,9 +23,10 @@ public sealed class IdeDapDebugSession
     /// <summary>Кадр стека, для которого в снимке загружены <see cref="DebugSessionSnapshot.VariableRootScopes"/> (UI / MCP).</summary>
     private int _variablesFrameIndex;
 
-    public IdeDapDebugSession(Action? onSnapshotChanged)
+    public IdeDapDebugSession(Action? onSnapshotChanged, IDataBus? dataBus = null)
     {
         _onSnapshotChanged = onSnapshotChanged;
+        _dataBus = dataBus;
     }
 
     /// <summary>Есть активный DAP-клиент (launch или attach).</summary>
@@ -46,6 +49,7 @@ public sealed class IdeDapDebugSession
     {
         lock (_snapshotLock)
             _snapshot = snapshot;
+        _dataBus?.Publish(new DebugStateChanged(snapshot));
         _onSnapshotChanged?.Invoke();
     }
 

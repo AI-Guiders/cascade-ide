@@ -1,4 +1,5 @@
 using System.Text.Json;
+using CascadeIDE.Cockpit.DataBus;
 using CascadeIDE.Models;
 using CascadeIDE.Services;
 
@@ -38,6 +39,8 @@ public partial class MainWindowViewModel
             UiScheduler.Default.Post(() => { BuildOutputPanel.Set(msg + "\r\n"); IsBuildOutputVisible = true; });
             return msg;
         }
+        int? lastExitCode = null;
+        bool? lastSucceeded = null;
         try
         {
             var pathCopy = path;
@@ -46,11 +49,15 @@ public partial class MainWindowViewModel
                 BuildOutputPanel.Set($"Сборка: {pathCopy}\r\n");
                 IsBuildOutputVisible = true;
             }).ConfigureAwait(false);
+            await UiScheduler.Default.InvokeAsync(() => PublishToIdeDataBusAndRebuild(new BuildStateChanged(true)))
+                .ConfigureAwait(false);
 
             void AppendBuildChunk(string chunk) => BuildOutputPanel.Append(chunk);
-            var (outStr, _, _, binlogPath) = await _mcpBuildTest
+            var (outStr, success, exitCode, binlogPath) = await _mcpBuildTest
                 .BuildWithBinlogAsync(path, AppendBuildChunk, cancellationToken: default)
                 .ConfigureAwait(false);
+            lastExitCode = exitCode;
+            lastSucceeded = success;
 
             await UiScheduler.Default.InvokeAsync(() =>
             {
@@ -63,7 +70,16 @@ public partial class MainWindowViewModel
         {
             var msg = "Error: " + ex.Message;
             UiScheduler.Default.Post(() => { BuildOutputPanel.Set(msg + "\r\n"); IsBuildOutputVisible = true; });
+            lastSucceeded = false;
             return msg;
+        }
+        finally
+        {
+            var exit = lastExitCode;
+            var ok = lastSucceeded;
+            await UiScheduler.Default
+                .InvokeAsync(() => PublishToIdeDataBusAndRebuild(new BuildStateChanged(false, exit, ok)))
+                .ConfigureAwait(false);
         }
     }
 
@@ -104,6 +120,7 @@ public partial class MainWindowViewModel
             {
                 LastTestSummary = $"{parsed.Passed}/{parsed.Total} passed, {parsed.Failed} failed";
                 ImpactedTestsBadge = parsed.Failed;
+                PublishToIdeDataBusAndRebuild(new TestsStateChanged(LastTestSummary, ImpactedTestsBadge));
                 const int maxLogChars = 120_000;
                 var stamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
                 var block = $"=== {stamp} ===\n{LastTestSummary}\n\n{outStr}\n\n";
@@ -120,6 +137,7 @@ public partial class MainWindowViewModel
         {
             UiScheduler.Default.Post(() =>
             {
+                PublishToIdeDataBusAndRebuild(new TestsStateChanged("", 0));
                 const int maxLogChars = 120_000;
                 var stamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
                 var block = $"=== {stamp} (ошибка) ===\n{ex.Message}\n\n";

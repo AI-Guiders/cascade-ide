@@ -11,27 +11,27 @@ public sealed record UiModeCapabilities(
     bool AgentOperationsPanel,
     bool AgentTrace,
     bool AutonomousAgentTelemetry,
-    /// <summary>Дубль Workspace Health на вкладке «Терминал» в Power, когда полоска под редактором скрыта.</summary>
-    bool WorkspaceHealthOnTerminalTab,
-    /// <summary>Column span нижней зоны Workspace Health в MainGrid при Power и видимой полоске под редактором.</summary>
-    int WorkspaceHealthMainColumnSpan,
+    /// <summary>Дубль IDE Health на вкладке «Терминал» в Power, когда полоска под редактором скрыта. TOML: <c>ide_health_on_terminal_tab</c>.</summary>
+    bool IdeHealthOnTerminalTab,
+    /// <summary>Column span нижней зоны IDE Health в MainGrid при Power и видимой полоске под редактором. TOML: <c>ide_health_main_column_span</c>.</summary>
+    int IdeHealthMainColumnSpan,
     /// <summary>Вкладки инструментирования (события/тесты/…), когда док включён.</summary>
     bool InstrumentationTabs,
     /// <summary>Вкладка «Гипотезы» в доке / страница MFD (не привязана к отдельному UI-режиму).</summary>
     bool HypothesesTab,
     bool RiskSummaryCard,
     bool ResultSummaryCard,
-    /// <summary>Полоса build/tests/debug/git под редактором.</summary>
-    bool WorkspaceHealthStripVisible,
-    /// <summary>Нижняя полоса vs страница зоны; TOML: <c>workspace_health_surface</c>.</summary>
-    IdeHealthUiSurface WorkspaceHealthSurface,
+    /// <summary>Полоса build/tests/debug/git под редактором. TOML: <c>ide_health_strip</c>.</summary>
+    bool IdeHealthStripVisible,
+    /// <summary>Нижняя полоса vs страница зоны. TOML: <c>ide_health_surface</c>.</summary>
+    IdeHealthUiSurface IdeHealthSurface,
     /// <summary>Вкладка Problems и учёт в <see cref="MainWindowViewModel.IsBottomPanelVisible"/>.</summary>
     bool ProblemsPanelVisible,
     /// <summary>Разрешить полосу оповещений EICAS при наличии сообщений; TOML: <c>eicas_alerts_bar</c>. См. ADR 0021 §5, §1.1.</summary>
     bool EicasAlertsBarEnabled)
 {
-    /// <summary>Ось формы представления для канала Workspace Health (ADR 0063); дублирует <see cref="WorkspaceHealthSurface"/> через <see cref="IdeHealthUiSurfaceExtensions.ToContentRepresentation"/>.</summary>
-    public ContentRepresentation WorkspaceHealthContentRepresentation => WorkspaceHealthSurface.ToContentRepresentation();
+    /// <summary>Ось формы представления для канала IDE Health (ADR 0063); дублирует <see cref="IdeHealthSurface"/> через <see cref="IdeHealthUiSurfaceExtensions.ToContentRepresentation"/>.</summary>
+    public ContentRepresentation IdeHealthContentRepresentation => IdeHealthSurface.ToContentRepresentation();
 
     /// <summary>Дефолты по семье, если в TOML нет переопределений и нет наследуемого родителя.</summary>
     public static UiModeCapabilities DefaultsForFamily(UiModeFamily family)
@@ -57,14 +57,14 @@ public sealed record UiModeCapabilities(
             AgentOperationsPanel: balancedOrFlight,
             AgentTrace: power,
             AutonomousAgentTelemetry: power,
-            WorkspaceHealthOnTerminalTab: false,
-            WorkspaceHealthMainColumnSpan: power ? 3 : 5,
+            IdeHealthOnTerminalTab: false,
+            IdeHealthMainColumnSpan: power ? 3 : 5,
             InstrumentationTabs: focus || balanced || flight || power || agentChat || debug,
             HypothesesTab: flight,
             RiskSummaryCard: !focus && !agentChat,
             ResultSummaryCard: !focus && !agentChat,
-            WorkspaceHealthStripVisible: true,
-            WorkspaceHealthSurface: IdeHealthUiSurface.BottomStrip,
+            IdeHealthStripVisible: true,
+            IdeHealthSurface: IdeHealthUiSurface.BottomStrip,
             ProblemsPanelVisible: true,
             EicasAlertsBarEnabled: true);
     }

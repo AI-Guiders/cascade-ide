@@ -18,7 +18,7 @@
 1. **Форма представления** — *как* показать контент в разметке: полоса (**Strip**), блок «страницы» региона (**Page**), компактный индикатор и т.д.  
 2. **Композиционная единица** — *что* и в *каком порядке*: набор инструментов / сегментов канала / индикаторов (вкладки, стек, split, порядок в композиторе).
 
-В текущем продукте **`DedicatedPage`** / **`bottom_strip`** в пресете канала IDE Health (`workspace_health_surface` → `IdeHealthUiSurface.DedicatedPage` / `BottomStrip`) относятся к **оси 1** (форма представления того же логического канала IDE Health), а не к «именованной колоде инструментов целикого якоря». Имя **`DedicatedPage`** канал-специфично; абстрактно это режим **`ContentRepresentation.Page`** для IDE Health ([§ «Две оси»](#adr0063-two-axes) ниже).
+В текущем продукте **`DedicatedPage`** / **`bottom_strip`** в пресете канала IDE Health (`ide_health_surface` → `IdeHealthUiSurface.DedicatedPage` / `BottomStrip`) относятся к **оси 1** (форма представления того же логического канала IDE Health), а не к «именованной колоде инструментов целикого якоря». Имя **`DedicatedPage`** канал-специфично; абстрактно это режим **`ContentRepresentation.Page`** для IDE Health ([§ «Две оси»](#adr0063-two-axes) ниже).
 
 Отдельно: в разговоре о кокпите часто хочется сказать **«страница»** в смысле оси **2** — *упорядоченный набор инструментов и раскладка в одном месте*. Это пересекается с словом **Page** на оси **1** → нужны **разные имена** ([0021](0021-pfd-mfd-cockpit-attention-model.md#anchor-pfd-mfd-content-vs-telemetry-page)).
 
@@ -38,7 +38,7 @@
 |---|-------------------------------|-------------------------|
 | **Вопрос** | *Каким шаблоном/контейнером* показать контент в регионе (полоса vs блок «страницы» региона …) | *Что* на этом контейнере и *в какой раскладке*: несколько инструментов на одном экране, сегменты канала, вкладки/стек, сетка … |
 | **Каноническое имя (этот ADR)** | Перечисление **`ContentRepresentation`**: минимум **`Strip`**, **`Page`**. Дополнительные значения (например **`Indicator`**) — по мере продуктовой необходимости, не фиксируем полный список в Proposed. | Для инструментов в якоре — **`instrument deck`** (ниже). Для канала IDE Health — порядок сегментов в `IdeHealthSurfaceCompositor`, **независимо** от Strip/Page ([чертёж](../design/workspace-health-implementation-map-v1.md)). |
-| **IDE Health сегодня** | TOML `workspace_health_surface`: `bottom_strip` ↔ **`Strip`**, `dedicated_page` ↔ **`Page`**. В коде — `IdeHealthUiSurface.BottomStrip` / `DedicatedPage` (**не** синоним «любой страницы MFD**). | `IdeHealthSurfaceCompositor`: Build → Tests → Debug → Git. |
+| **IDE Health сегодня** | TOML `ide_health_surface`: `bottom_strip` ↔ **`Strip`**, `dedicated_page` ↔ **`Page`**. В коде — `IdeHealthUiSurface.BottomStrip` / `DedicatedPage` (**не** синоним «любой страницы MFD**). | `IdeHealthSurfaceCompositor`: Build → Tests → Debug → Git. |
 
 **Инвариант:** смена **`ContentRepresentation`** для IDE Health **не** меняет снимок `IdeHealthInputSnapshot` и логику композитора сегментов — только выбор **какой View** (полоса vs вторичная страница) привязать к тем же `IdeHealthSegments` ([0021](0021-pfd-mfd-cockpit-attention-model.md#glossary-presentation-vs-channel), [чертёж](../design/workspace-health-implementation-map-v1.md)).
 
@@ -52,7 +52,7 @@
 
 <a id="adr0063-content-representation-code"></a>
 
-**ContentRepresentation и код (направление; вопрос закрыт):** канон **имени** оси **формы представления** контента в регионе — **`ContentRepresentation`** (`Strip`, `Page`, …). У канала IDE Health это сегодня выражено **`IdeHealthUiSurface`** и TOML `workspace_health_surface` — **не отдельная «ось канала»**, а выбор **шаблона размещения** (полоса vs блок страницы) для **данных IDE Health**; соответствие **`Strip`/`Page`** — в таблице выше.
+**ContentRepresentation и код (направление; вопрос закрыт):** канон **имени** оси **формы представления** контента в регионе — **`ContentRepresentation`** (`Strip`, `Page`, …). У канала IDE Health это сегодня выражено **`IdeHealthUiSurface`** и TOML `ide_health_surface` — **не отдельная «ось канала»**, а выбор **шаблона размещения** (полоса vs блок страницы) для **данных IDE Health**; соответствие **`Strip`/`Page`** — в таблице выше.
 
 Когда для **другого потока данных** (другой канал в смысле [0021](0021-pfd-mfd-cockpit-attention-model.md)) понадобится **тот же** выбор «полоса или страница региона», переиспользуется **та же** ось **`ContentRepresentation`**. Каналы задают **что** показать; **форма** (Strip/Page) — **общая** ось представления, её не смешивают с «осями канала».
 

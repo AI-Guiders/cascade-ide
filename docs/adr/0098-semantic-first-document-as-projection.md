@@ -28,6 +28,7 @@
 
 - **CDS-канал** ([0036](0036-cds-channel-compositor-surface-pipeline.md)), **CCU** ([0097](0097-cockpit-compute-units-transport-to-channel-dto.md)), **IDS** ([0079](0079-ide-display-system-ids-overlay-pipeline.md)), приборы и deck опираются на **согласованный смысл** (DTO, снимки, `stratum` и т.д.), а не на «как догадался парсер из одного файла» как единственный источник.
 - **Forward** (редактор кода) остаётся **мощным каналом ввода** в эту карту, но **не** абсолютом всей правды о системе в долгую.
+- Для **semantic map** CCU трактуется как слой **входного снимка** (нормализация источников, версия/свежесть, derived-поля), а не как место для графового UX. Traversal, layout, selection и интеракции остаются в graph-backed surface-контуре ([0067](0067-graph-backed-surfaces-contract.md), [0097](0097-cockpit-compute-units-transport-to-channel-dto.md) §6).
 
 ### 2.3 Coexistence: две истины там, где нужен strangler
 

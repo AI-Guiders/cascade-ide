@@ -6,10 +6,10 @@
              x:Class="CascadeIDE.Views.TerminalMfdPageView"
              x:DataType="vm:MainWindowViewModel">
     <DockPanel>
-        <Border DockPanel.Dock="Top" IsVisible="{Binding WorkspaceHealthOnTerminalTab}" Classes="modeCard" Margin="0,0,0,4">
+        <Border DockPanel.Dock="Top" IsVisible="{Binding IdeHealthOnTerminalTab}" Classes="modeCard" Margin="0,0,0,4">
             <StackPanel Spacing="4">
                 <WrapPanel Orientation="Horizontal">
-                    <TextBlock Text="{Binding WorkspaceHealthBuildText}" Foreground="{DynamicResource CascadeTheme.TerminalForeground}" Margin="0,0,12,0"/>
+                    <TextBlock Text="{Binding IdeHealthBuildText}" Foreground="{DynamicResource CascadeTheme.TerminalForeground}" Margin="0,0,12,0"/>
                     <TextBlock Text="{Binding ResultSummary}"
                                IsVisible="{Binding IsResultSummaryVisible}"
                                Foreground="{DynamicResource CascadeTheme.TerminalForeground}" Margin="0,0,12,0" MaxWidth="320" TextTrimming="CharacterEllipsis"/>

@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using CascadeIDE.Services;
+using CascadeIDE.Cockpit.DataBus;
 using Avalonia.Threading;
 using CascadeIDE.Models;
 using CommunityToolkit.Mvvm.Input;
@@ -26,6 +27,7 @@ public partial class MainWindowViewModel
         if (string.IsNullOrWhiteSpace(solutionPath) || !File.Exists(solutionPath))
             return;
 
+        _ideDataBus.Publish(new BuildStateChanged(true));
         IsBuilding = true;
         if (!IsTerminalVisible)
             IsTerminalVisible = true;
@@ -40,6 +42,8 @@ public partial class MainWindowViewModel
 
         void AppendBuildChunk(string chunk) => BuildOutputPanel.Append(chunk);
 
+        int? lastExitCode = null;
+        bool? lastBuildSucceeded = null;
         try
         {
             var workDir = Path.GetDirectoryName(solutionPath) ?? "";
@@ -60,6 +64,8 @@ public partial class MainWindowViewModel
             // Без ConfigureAwait(false) на границе с UI: finally с IsBuilding остаётся согласованным с диспетчером.
             await Task.WhenAll(drainTask, runTask);
             var (success, exitCode) = await runTask;
+            lastExitCode = exitCode;
+            lastBuildSucceeded = success;
 
             AppendBuildChunk("\r\n");
             if (!success && exitCode != 0)
@@ -68,10 +74,12 @@ public partial class MainWindowViewModel
         catch (Exception ex)
         {
             AppendBuildChunk("Ошибка: " + ex.Message + "\r\n");
+            lastBuildSucceeded = false;
         }
         finally
         {
             BuildOutputPanel.FlushPending();
+            _ideDataBus.Publish(new BuildStateChanged(false, lastExitCode, lastBuildSucceeded));
             IsBuilding = false;
         }
     }
