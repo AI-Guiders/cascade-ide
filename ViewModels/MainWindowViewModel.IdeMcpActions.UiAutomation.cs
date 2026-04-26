@@ -45,8 +45,8 @@ public partial class MainWindowViewModel
 
     void Services.IIdeMcpActions.ShowPreview(string title, string content)
     {
-        var t = title ?? "Превью";
-        var c = content ?? "";
+        var t = IdeMcpUiAutomationOrchestrator.ResolveMarkdownPreviewTitle(title);
+        var c = IdeMcpUiAutomationOrchestrator.NormalizeTextInput(content);
         UiScheduler.Default.Post(() => RequestShowMarkdownPreviewWindow?.Invoke(t, c));
     }
 
@@ -114,7 +114,7 @@ public partial class MainWindowViewModel
     {
         var provider = SetControlLayoutProvider;
         if (provider is null)
-            return "No layout provider.";
+            return IdeMcpUiAutomationOrchestrator.NoLayoutProviderMessage();
         return await UiScheduler.Default.InvokeAsync(() =>
             provider(controlName, IdeMcpUiAutomationOrchestrator.NormalizeJsonInput(layoutJson)));
     }
@@ -123,7 +123,7 @@ public partial class MainWindowViewModel
     {
         var provider = AddControlProvider;
         if (provider is null)
-            return "AddControl disabled.";
+            return IdeMcpUiAutomationOrchestrator.AddControlDisabledMessage();
         return await UiScheduler.Default.InvokeAsync(() => provider(parentName, controlType ?? "", content, name));
     }
 
