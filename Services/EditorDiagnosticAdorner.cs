@@ -23,10 +23,9 @@ public sealed class EditorDiagnosticBackgroundRenderer(Func<IReadOnlyList<Editor
         if (textView.Document is null)
             return;
 
-        // Спокойнее дефолтного «кровавого» красного: приглушённая роза / пыльный янтарь (читаемо, без крика).
-        var errPen = new Pen(new SolidColorBrush(Color.FromRgb(178, 92, 98)), 1.05);
-        var warnPen = new Pen(new SolidColorBrush(Color.FromRgb(168, 138, 72)), 1.0);
-        var infoPen = new Pen(new SolidColorBrush(Color.FromRgb(96, 130, 150)), 0.95);
+        var errPen = new Pen(new SolidColorBrush(EditorHudDiagnosticsChroma.Error), 1.05);
+        var warnPen = new Pen(new SolidColorBrush(EditorHudDiagnosticsChroma.Warning), 1.0);
+        var infoPen = new Pen(new SolidColorBrush(EditorHudDiagnosticsChroma.Info), 0.95);
         foreach (var strip in getStrips())
         {
             var pen = strip.Severity switch

@@ -28,6 +28,10 @@
             <SolidColorBrush x:Key="CascadeTheme.EditorSelectionBrush" Color="#55225679"/>
             <SolidColorBrush x:Key="CascadeTheme.EditorSelectionForeground">#1A1A1A</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.EditorColumnBorderBrush">#CCC</SolidColorBrush>
+            <!-- Editor HUD: squiggles = те же sRGB, что MFD/Problems (EditorHudDiagnosticsChroma) -->
+            <SolidColorBrush x:Key="EditorHud.SeverityError">#B25C62</SolidColorBrush>
+            <SolidColorBrush x:Key="EditorHud.SeverityWarning">#A88A48</SolidColorBrush>
+            <SolidColorBrush x:Key="EditorHud.SeverityInfo">#608296</SolidColorBrush>
             <!-- Рамки колонок (решение / редактор / чат), вертикальные сплиттеры, шов с нижней панелью -->
             <SolidColorBrush x:Key="CascadeTheme.WorkspacePanelBorderBrush">#CCC</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.EditorColumnBackground">#FFF</SolidColorBrush>

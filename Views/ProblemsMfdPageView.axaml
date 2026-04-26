@@ -30,10 +30,10 @@
                                 Background="#12000000">
                             <Grid ColumnDefinitions="4,*" ColumnSpacing="10">
                                 <Panel Grid.Column="0" Width="4">
-                                    <Border Background="{DynamicResource CascadeTheme.ToolbarErrorForeground}"
+                                    <Border Background="{DynamicResource EditorHud.SeverityError}"
                                             CornerRadius="2"
                                             IsVisible="{Binding IsError}"/>
-                                    <Border Background="#B8A85A"
+                                    <Border Background="{DynamicResource EditorHud.SeverityWarning}"
                                             CornerRadius="2"
                                             IsVisible="{Binding IsWarning}"/>
                                 </Panel>
