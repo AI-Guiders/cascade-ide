@@ -38,9 +38,11 @@ public sealed class EditorDocumentBackgroundVisualsHandle : IDisposable
         Func<IReadOnlyList<int>> getBreakpointLines,
         Func<int> getDebugCurrentLine,
         Func<IReadOnlyList<EditorDiagnosticStrip>> getDiagnosticStrips,
-        Func<IReadOnlyList<EditorTrailingInlayPart>>? getTrailingInlays = null)
+        Func<IReadOnlyList<EditorTrailingInlayPart>>? getTrailingInlays = null,
+        Func<IReadOnlyList<EditorDebugHintStrip>>? getDebugHints = null)
     {
         getTrailingInlays ??= static () => [];
+        getDebugHints ??= static () => [];
         var tv = editor.TextArea.TextView;
         var gens = tv.ElementGenerators;
         for (int i = gens.Count - 1; i >= 0; i--)
@@ -72,6 +74,7 @@ public sealed class EditorDocumentBackgroundVisualsHandle : IDisposable
             new EditorDiagnosticBackgroundRenderer(getDiagnosticStrips),
             // Inline diagnostic text after EOL: KnownLayer.Text, поверх глифов.
             new EditorEndOfLineDiagnosticTextRenderer(getDiagnosticStrips),
+            new EditorEndOfLineDebugHintRenderer(getDebugHints),
         };
         var br = editor.TextArea.TextView.BackgroundRenderers;
         foreach (var r in list)

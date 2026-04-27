@@ -7,11 +7,16 @@ using Avalonia.Input;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using AvaloniaEdit;
+using AvaloniaEdit.Document;
+using AvaloniaEdit.Rendering;
 using CascadeIDE.Features.Documents;
 using CascadeIDE.Features.Editor.Application;
 using CascadeIDE.Features.Editor.Application.Presentation;
 using CascadeIDE.Services;
 using CascadeIDE.ViewModels;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace CascadeIDE.Views;
 
@@ -31,6 +36,8 @@ public partial class DockDocumentView : UserControl
     private bool _inlineKeyHooked;
     private EditorInlineHoverToolTipController? _inlineHoverToolTip;
     private bool _editorThemeSubscribed;
+    private Border? _stickyScrollHost;
+    private TextBlock? _stickyScrollText;
 
     // ADR 0103: hi-freq → bounded + throttle на уровне MainWindowViewModel, не DataBus
     private IEditorSurfaceAdapter? _editorSurface;
@@ -84,6 +91,8 @@ public partial class DockDocumentView : UserControl
         _editor = this.FindControl<TextEditor>("Editor");
         if (_editor is null)
             return;
+        _stickyScrollHost = this.FindControl<Border>("StickyScrollHost");
+        _stickyScrollText = this.FindControl<TextBlock>("StickyScrollText");
 
         if (!_editorThemeSubscribed)
         {
@@ -110,6 +119,7 @@ public partial class DockDocumentView : UserControl
         _editor.Document.Changed += OnEditorDocumentChanged;
         _editor.TextArea.Caret.PositionChanged += OnEditorCaretOrSelectionChanged;
         _editor.TextArea.SelectionChanged += OnEditorCaretOrSelectionChanged;
+        _editor.TextArea.TextView.VisualLinesChanged += OnEditorViewportChanged;
 
         _vmHandler = (_, args) =>
         {
@@ -155,6 +165,7 @@ public partial class DockDocumentView : UserControl
         SyncFromVmIfActive();
         InstallVisualAdornersOnce();
         UpdateMcpProvidersIfActive();
+        UpdateStickyScroll();
 
         _editorSurface = new AvaloniaEditSurfaceAdapter(_editor, _docVm.Doc.FilePath);
         _documentHudLayer.ConfigureDiagnostics(p => _vm!.WorkspaceDiagnostics.GetStripsForFile(p));
@@ -212,6 +223,7 @@ public partial class DockDocumentView : UserControl
             _editor.Document.Changed -= OnEditorDocumentChanged;
             _editor.TextArea.Caret.PositionChanged -= OnEditorCaretOrSelectionChanged;
             _editor.TextArea.SelectionChanged -= OnEditorCaretOrSelectionChanged;
+            _editor.TextArea.TextView.VisualLinesChanged -= OnEditorViewportChanged;
 
             if (_vm?.WorkspaceDiagnostics is not null && _diagHubHandler is not null)
                 _vm.WorkspaceDiagnostics.DiagnosticsChanged -= _diagHubHandler;
@@ -237,6 +249,8 @@ public partial class DockDocumentView : UserControl
         _vmHandler = null;
         _documentsHandler = null;
         _renderersInstalled = false;
+        _stickyScrollHost = null;
+        _stickyScrollText = null;
     }
 
     private bool IsActive()
@@ -258,7 +272,8 @@ public partial class DockDocumentView : UserControl
             () => _vm.GetAllBreakpointLinesForFile(_docVm.Doc.FilePath),
             () => _vm.GetDebugCurrentLineForFile(_docVm.Doc.FilePath),
             () => _vm.WorkspaceDiagnostics.GetStripsForFile(_docVm.Doc.FilePath),
-            () => _vm.GetEditorInlineHintsForFile(_docVm.Doc.FilePath, _editor.Document.Text ?? ""));
+            () => _vm.GetEditorInlineHintsForFile(_docVm.Doc.FilePath, _editor.Document.Text ?? ""),
+            () => _vm.GetEditorDebugHintsForFile(_docVm.Doc.FilePath, _editor.Document.Text ?? ""));
 
         _diagHubHandler = () =>
         {
@@ -329,11 +344,116 @@ public partial class DockDocumentView : UserControl
         var newText = _editor.Document.Text ?? "";
         if (!string.Equals(_vm.EditorText, newText, StringComparison.Ordinal))
             _vm.EditorText = newText;
+        UpdateStickyScroll();
         PostStabilizedEditorInputIfActive(EditorInputDeltaKind.DocumentText);
     }
 
-    private void OnEditorCaretOrSelectionChanged(object? sender, EventArgs e) =>
+    private void OnEditorCaretOrSelectionChanged(object? sender, EventArgs e)
+    {
+        UpdateStickyScroll();
         PostStabilizedEditorInputIfActive(EditorInputDeltaKind.CaretOrSelection);
+    }
+
+    private void OnEditorViewportChanged(object? sender, EventArgs e) => UpdateStickyScroll();
+
+    private void UpdateStickyScroll()
+    {
+        if (_stickyScrollHost is null || _stickyScrollText is null || _editor is null || _docVm is null)
+            return;
+        if (!IsActive())
+        {
+            _stickyScrollHost.IsVisible = false;
+            return;
+        }
+
+        var filePath = _docVm.Doc.FilePath ?? "";
+        if (!filePath.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
+        {
+            _stickyScrollHost.IsVisible = false;
+            return;
+        }
+
+        var topLine = GetTopVisibleLineNumber(_editor);
+        var text = _editor.Document.Text ?? "";
+        var sticky = BuildStickyScrollLabel(text, topLine);
+        if (string.IsNullOrWhiteSpace(sticky))
+        {
+            _stickyScrollHost.IsVisible = false;
+            return;
+        }
+
+        _stickyScrollText.Text = sticky;
+        _stickyScrollHost.IsVisible = true;
+    }
+
+    private static int GetTopVisibleLineNumber(TextEditor editor)
+    {
+        var textView = editor.TextArea.TextView;
+        if (textView.VisualLinesValid)
+        {
+            var first = textView.VisualLines.FirstOrDefault();
+            if (first?.FirstDocumentLine is not null)
+                return first.FirstDocumentLine.LineNumber;
+        }
+
+        return editor.TextArea.Caret.Line;
+    }
+
+    private static string? BuildStickyScrollLabel(string sourceText, int topLineOneBased)
+    {
+        if (topLineOneBased <= 1 || string.IsNullOrWhiteSpace(sourceText))
+            return null;
+
+        try
+        {
+            var tree = CSharpSyntaxTree.ParseText(sourceText);
+            var root = tree.GetRoot();
+            var line = tree.GetText().Lines[Math.Max(0, Math.Min(topLineOneBased - 1, tree.GetText().Lines.Count - 1))];
+            var token = root.FindToken(line.Start);
+            if (token.RawKind == 0)
+                return null;
+
+            var parts = token.Parent?
+                .AncestorsAndSelf()
+                .Reverse()
+                .Select(n => ToStickyPart(n, tree, topLineOneBased))
+                .Where(static s => !string.IsNullOrWhiteSpace(s))
+                .Distinct(StringComparer.Ordinal)
+                .ToList();
+
+            if (parts is null || parts.Count == 0)
+                return null;
+
+            return string.Join(" > ", parts);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static string? ToStickyPart(SyntaxNode node, SyntaxTree tree, int topLineOneBased)
+    {
+        var startLine = tree.GetLineSpan(node.Span).StartLinePosition.Line + 1;
+        if (startLine >= topLineOneBased)
+            return null;
+
+        return node switch
+        {
+            BaseNamespaceDeclarationSyntax n => $"namespace {n.Name}",
+            ClassDeclarationSyntax c => $"class {c.Identifier.Text}",
+            StructDeclarationSyntax s => $"struct {s.Identifier.Text}",
+            InterfaceDeclarationSyntax i => $"interface {i.Identifier.Text}",
+            RecordDeclarationSyntax r => $"record {r.Identifier.Text}",
+            MethodDeclarationSyntax m => $"{m.Identifier.Text}()",
+            ConstructorDeclarationSyntax c => $"{c.Identifier.Text}()",
+            PropertyDeclarationSyntax p => p.Identifier.Text,
+            IndexerDeclarationSyntax => "this[]",
+            LocalFunctionStatementSyntax f => $"{f.Identifier.Text}()",
+            _ => null
+        };
+    }
+
 
     private void PostStabilizedEditorInputIfActive(EditorInputDeltaKind kind)
     {

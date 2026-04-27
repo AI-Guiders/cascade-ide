@@ -16,7 +16,8 @@ public static class EditorInlineHudLayer
         Func<IReadOnlyList<int>> getBreakpointLines,
         Func<int> getDebugCurrentLine,
         Func<IReadOnlyList<EditorDiagnosticStrip>> getDiagnosticStrips,
-        Func<IReadOnlyList<EditorTrailingInlayPart>>? getTrailingInlays = null) =>
+        Func<IReadOnlyList<EditorTrailingInlayPart>>? getTrailingInlays = null,
+        Func<IReadOnlyList<EditorDebugHintStrip>>? getDebugHints = null) =>
         EditorDocumentBackgroundVisualsHandle.Install(
-            editor, getBreakpointLines, getDebugCurrentLine, getDiagnosticStrips, getTrailingInlays);
+            editor, getBreakpointLines, getDebugCurrentLine, getDiagnosticStrips, getTrailingInlays, getDebugHints);
 }

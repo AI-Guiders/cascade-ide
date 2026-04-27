@@ -108,3 +108,8 @@ require_scores = false
 enabled = true
 parameter_names = true
 variable_types = true
+
+[editor.debug_hints]
+enabled = true
+show_assignments = true
+show_conditions = true

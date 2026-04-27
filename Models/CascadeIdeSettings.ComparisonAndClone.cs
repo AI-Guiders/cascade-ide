@@ -214,6 +214,12 @@ public sealed partial class CascadeIdeSettings
                     ParameterNames = Editor.InlineHints.ParameterNames,
                     VariableTypes = Editor.InlineHints.VariableTypes,
                 },
+                DebugHints = new EditorDebugHintsSettings
+                {
+                    Enabled = Editor.DebugHints.Enabled,
+                    ShowAssignments = Editor.DebugHints.ShowAssignments,
+                    ShowConditions = Editor.DebugHints.ShowConditions,
+                },
             },
             CodeNavigation = new CodeNavigationSettings
             {
@@ -448,7 +454,8 @@ public sealed partial class CascadeIdeSettings
     {
         if (a is null || b is null)
             return a == b;
-        return InlineHintsEquals(a.InlineHints, b.InlineHints);
+        return InlineHintsEquals(a.InlineHints, b.InlineHints)
+            && DebugHintsEquals(a.DebugHints, b.DebugHints);
     }
 
     private static bool InlineHintsEquals(EditorInlineHintsSettings? a, EditorInlineHintsSettings? b)
@@ -458,6 +465,15 @@ public sealed partial class CascadeIdeSettings
         return a.Enabled == b.Enabled
             && a.ParameterNames == b.ParameterNames
             && a.VariableTypes == b.VariableTypes;
+    }
+
+    private static bool DebugHintsEquals(EditorDebugHintsSettings? a, EditorDebugHintsSettings? b)
+    {
+        if (a is null || b is null)
+            return a == b;
+        return a.Enabled == b.Enabled
+            && a.ShowAssignments == b.ShowAssignments
+            && a.ShowConditions == b.ShowConditions;
     }
 
     private static bool CodeNavigationPresetListsEqual(
