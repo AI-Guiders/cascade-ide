@@ -16,6 +16,7 @@ public sealed partial class CascadeIdeSettings
             && LanguagesEquals(Languages, o.Languages)
             && MarkdownEquals(Markdown, o.Markdown)
             && DisplayEquals(Display, o.Display)
+            && EditorEquals(Editor, o.Editor)
             && CodeNavigationEquals(CodeNavigation, o.CodeNavigation);
     }
 
@@ -203,6 +204,15 @@ public sealed partial class CascadeIdeSettings
                         Forward = Display.Screens.Grammar.Forward,
                         Mfd = Display.Screens.Grammar.Mfd,
                     },
+                },
+            },
+            Editor = new EditorSettings
+            {
+                InlineHints = new EditorInlineHintsSettings
+                {
+                    Enabled = Editor.InlineHints.Enabled,
+                    ParameterNames = Editor.InlineHints.ParameterNames,
+                    VariableTypes = Editor.InlineHints.VariableTypes,
                 },
             },
             CodeNavigation = new CodeNavigationSettings
@@ -432,6 +442,22 @@ public sealed partial class CascadeIdeSettings
         if (a is null || b is null)
             return a == b;
         return CodeNavigationPresetListsEqual(a.Presets, b.Presets);
+    }
+
+    private static bool EditorEquals(EditorSettings? a, EditorSettings? b)
+    {
+        if (a is null || b is null)
+            return a == b;
+        return InlineHintsEquals(a.InlineHints, b.InlineHints);
+    }
+
+    private static bool InlineHintsEquals(EditorInlineHintsSettings? a, EditorInlineHintsSettings? b)
+    {
+        if (a is null || b is null)
+            return a == b;
+        return a.Enabled == b.Enabled
+            && a.ParameterNames == b.ParameterNames
+            && a.VariableTypes == b.VariableTypes;
     }
 
     private static bool CodeNavigationPresetListsEqual(

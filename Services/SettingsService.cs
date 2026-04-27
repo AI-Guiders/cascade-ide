@@ -30,7 +30,8 @@ public static class SettingsService
 
         try
         {
-            var settings = CascadeTomlSerializer.Deserialize<CascadeIdeSettings>(toml) ?? new CascadeIdeSettings();
+            var normalized = NormalizeFriendlySectionAliases(toml);
+            var settings = CascadeTomlSerializer.Deserialize<CascadeIdeSettings>(normalized) ?? new CascadeIdeSettings();
             _settingsFileMtimeUtcAtLastLoad = mtime;
             return ValidateAndReturn(settings);
         }
@@ -53,7 +54,8 @@ public static class SettingsService
                     var diskToml = TextFileReadWrite.TryReadAllTextIfExists(path);
                     if (diskToml is not null)
                     {
-                        var disk = CascadeTomlSerializer.Deserialize<CascadeIdeSettings>(diskToml);
+                        var normalizedDisk = NormalizeFriendlySectionAliases(diskToml);
+                        var disk = CascadeTomlSerializer.Deserialize<CascadeIdeSettings>(normalizedDisk);
                         if (disk is not null)
                             ApplyPresentationFromDisk(settings, disk);
                     }
@@ -95,5 +97,16 @@ public static class SettingsService
         foreach (var validationError in ValidationSpecifications.SelectMany(spec => spec.Validate(settings)))
             global::System.Diagnostics.Debug.WriteLine($"Settings validation: {validationError}");
         return settings;
+    }
+
+    private static string NormalizeFriendlySectionAliases(string toml)
+    {
+        if (string.IsNullOrWhiteSpace(toml))
+            return toml;
+
+        return toml
+            .Replace("[Editor.InlineHints]", "[editor.inline_hints]", StringComparison.Ordinal)
+            .Replace("[editor.InlineHints]", "[editor.inline_hints]", StringComparison.Ordinal)
+            .Replace("[Editor.inline_hints]", "[editor.inline_hints]", StringComparison.Ordinal);
     }
 }

@@ -133,8 +133,8 @@ kroki_url = "https://kroki.io"
 # id = "my_preset"
 # exclude_kinds = ["same_namespace"]
 
-[inline_hints]
-# SDK implicit usings emulation and inlay rendering toggles.
+[Editor.InlineHints]
+# Editor inlay-hints toggles (friendly alias; normalized to [editor.inline_hints]).
 enabled = true
 parameter_names = true
 variable_types = true

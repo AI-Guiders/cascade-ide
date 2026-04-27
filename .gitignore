@@ -18,6 +18,9 @@ project.lock.json
 # Заметки агента (хранятся в каталоге решения, не коммитить)
 .cascade-ide/
 
+# Локальные inlay-логи (CASCADE_INLAY_DEBUG / TRACE; рядом с .sln, см. InlayLogPaths)
+.inlay-logs/
+
 # Локальные артефакты разработки/публикации
 publish/
 publish-debug/

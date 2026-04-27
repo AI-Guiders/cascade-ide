@@ -243,7 +243,7 @@ internal static class IdeCommandsContractGenerated
         ["open_chat_clarification_batch"] = "{\"batch_json\":\"{\\\"id\\\":\\\"...\\\",\\\"title\\\":\\\"Нужно уточнить\\\",\\\"items\\\":[]}\"}",
         ["open_file"] = "{\"path\":\"C:\\\\tmp\\\\a.txt\"}",
         ["read_hot_context"] = "{\"active_scope\":\"door-to-singularity\"}",
-        ["read_knowledge_file"] = "{\"file_path\":\"META/integrity-core.md\"}",
+        ["read_knowledge_file"] = "{\"file_path\":\"META/integrity-core.md\",\"offset\":2,\"limit\":20}",
         ["remove_breakpoint"] = "{\"file_path\":\"C:\\\\tmp\\\\a.cs\",\"line\":42}",
         ["request_confirmation"] = "{\"message\":\"Продолжить?\"}",
         ["rollback_agent_notes"] = "{\"revision_file\":\"20260402-120000-write-acde123.md\"}",

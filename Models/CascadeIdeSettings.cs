@@ -20,6 +20,8 @@ public sealed partial class CascadeIdeSettings : ModelBase
 
     public DisplaySettings Display { get; set; } = new();
 
+    public EditorSettings Editor { get; set; } = new();
+
     /// <summary>Пресеты навигации по коду / решению (ADR 0039, Code Navigation Context). TOML: <c>[code_navigation]</c>.</summary>
     public CodeNavigationSettings CodeNavigation { get; set; } = new();
 

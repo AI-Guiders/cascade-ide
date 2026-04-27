@@ -103,3 +103,8 @@ max_workload = 0.5
 require_scores = false
 
 [code_navigation]
+
+[Editor.InlineHints]
+enabled = true
+parameter_names = true
+variable_types = true

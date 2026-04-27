@@ -1,5 +1,4 @@
-using System;
-using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using AvaloniaEdit;
 using AvaloniaEdit.Rendering;
 using CascadeIDE.Services;
@@ -12,6 +11,13 @@ namespace CascadeIDE.Features.Editor.Application.Presentation;
 /// </summary>
 public sealed class EditorDocumentBackgroundVisualsHandle : IDisposable
 {
+    /// <summary>
+    /// Один <see cref="VarInlayHintElementGenerator" /> на <see cref="TextView" />: иначе AvaloniaEdit
+    /// для <c>DocumentLength == 0</c> не делает break и N экземпляров в <see cref="TextView.ElementGenerators" />
+    /// дают N одинаковых inlay на одном offset.
+    /// </summary>
+    private static readonly ConditionalWeakTable<TextView, VarInlayHintElementGenerator> InlayGeneratorsByTextView = new();
+
     private readonly TextEditor _editor;
     private readonly IBackgroundRenderer[] _renderers;
     private readonly VarInlayHintElementGenerator _inlayGen;
@@ -35,15 +41,37 @@ public sealed class EditorDocumentBackgroundVisualsHandle : IDisposable
         Func<IReadOnlyList<EditorTrailingInlayPart>>? getTrailingInlays = null)
     {
         getTrailingInlays ??= static () => [];
-        var inlayGen = new VarInlayHintElementGenerator(getTrailingInlays);
-        // Первый в списке: тот же document offset, что и «показать пробел» (SingleCharacter), — иначе inlay не получит Construct.
-        editor.TextArea.TextView.ElementGenerators.Insert(0, inlayGen);
+        var tv = editor.TextArea.TextView;
+        var gens = tv.ElementGenerators;
+        for (int i = gens.Count - 1; i >= 0; i--)
+        {
+            if (gens[i] is VarInlayHintElementGenerator)
+                gens.RemoveAt(i);
+        }
+        if (!InlayGeneratorsByTextView.TryGetValue(tv, out var inlayGen))
+        {
+            inlayGen = new VarInlayHintElementGenerator(getTrailingInlays);
+            InlayGeneratorsByTextView.Add(tv, inlayGen);
+        }
+        else
+            inlayGen.SetInlayProvider(getTrailingInlays);
+        // Та же ссылка в списке N раз = N inlay (AvaloniaEdit обходит все записи; Remove по типу не снимает дубль ссылок)
+        while (gens.Remove(inlayGen)) { }
+        gens.Insert(0, inlayGen);
+        if (InlayHintTrace.IsDebug)
+        {
+            for (int i = 0; i < gens.Count; i++)
+                InlayHintTrace.LogDebug($"ElementGenerators[{i}]={gens[i].GetType().Name} hash={gens[i].GetHashCode():X8}");
+        }
+
         var list = new IBackgroundRenderer[]
         {
             new BreakpointLineBackgroundRenderer(getBreakpointLines),
             new DebugCurrentLineBackgroundRenderer(getDebugCurrentLine),
             new DebugInstructionArrowBackgroundRenderer(getDebugCurrentLine),
             new EditorDiagnosticBackgroundRenderer(getDiagnosticStrips),
+            // Inline diagnostic text after EOL: KnownLayer.Text, поверх глифов.
+            new EditorEndOfLineDiagnosticTextRenderer(getDiagnosticStrips),
         };
         var br = editor.TextArea.TextView.BackgroundRenderers;
         foreach (var r in list)
@@ -59,7 +87,8 @@ public sealed class EditorDocumentBackgroundVisualsHandle : IDisposable
         var tv = _editor.TextArea?.TextView;
         if (tv is not null)
         {
-            tv.ElementGenerators.Remove(_inlayGen);
+            _inlayGen.SetInlayProvider(static () => []);
+            while (tv.ElementGenerators.Remove(_inlayGen)) { }
             var br = tv.BackgroundRenderers;
             foreach (var r in _renderers)
             {

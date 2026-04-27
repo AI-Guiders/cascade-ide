@@ -1,4 +1,5 @@
 using Avalonia;
+using CascadeIDE.Services;
 using CascadeIDE.Services.AgentContract;
 
 namespace CascadeIDE;
@@ -11,6 +12,7 @@ sealed class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        InlayLogPaths.EnsureInlayLogEnvironment();
         if (args.Length > 0 && string.Equals(args[0], "--agent-contract", StringComparison.OrdinalIgnoreCase))
         {
             var tail = args.AsSpan(1);

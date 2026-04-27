@@ -58,6 +58,7 @@
 
 - **OmniSharp-Roslyn:** https://github.com/OmniSharp/omnisharp-roslyn (C# language server, LSP по stdio).
 - **OmniSharp csharp-language-server-protocol:** https://github.com/OmniSharp/csharp-language-server-protocol (LSP на C#; для этапов 2–4).
+- **RoslynPad** (внешний ориентир, **не** NuGet-зависимость): https://github.com/roslynpad/roslynpad — продукт на Roslyn + редактор (AvalonEdit / Avalonia), где **уже** есть **autocomplete, code fixes** и сопутствующий набор; у нас аналогичные возможности **только наращиваются**. Смотреть на готовую реализацию того, что у нас **ещё** предстоит довести; не форк и не drop-in для AvaloniaEdit в CascadeIDE.
 - **netcoredbg** (внешний процесс): путь через `NETCOREDBG_PATH` или `PATH`; см. также `Financial/software/open/dotnet-debug-mcp`.
 
 ## Документ

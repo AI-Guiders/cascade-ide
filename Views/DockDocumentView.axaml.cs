@@ -258,7 +258,7 @@ public partial class DockDocumentView : UserControl
             () => _vm.GetAllBreakpointLinesForFile(_docVm.Doc.FilePath),
             () => _vm.GetDebugCurrentLineForFile(_docVm.Doc.FilePath),
             () => _vm.WorkspaceDiagnostics.GetStripsForFile(_docVm.Doc.FilePath),
-            () => _vm.CSharpLanguage.GetVarInlayHintsForFile(_docVm.Doc.FilePath, _editor.Document.Text ?? ""));
+            () => _vm.GetEditorInlineHintsForFile(_docVm.Doc.FilePath, _editor.Document.Text ?? ""));
 
         _diagHubHandler = () =>
         {

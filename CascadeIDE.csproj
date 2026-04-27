@@ -39,6 +39,7 @@
     <Compile Remove="CascadeIDE.Contracts\**\*.cs" />
     <!-- Внешний субмодуль/вендор: не компилировать в IDE (иначе sandbox с top-level Main перехватывает входную точку). -->
     <Compile Remove="externals\**\*.cs" />
+    <AvaloniaXaml Remove="externals\**\*.axaml" />
     <Compile Remove="CascadeIDE.Tests\**\*.cs" />
     <Compile Remove="CascadeIDE.ArchitectureAnalyzers.Tests\**\*.cs" />
     <Compile Remove="samples\**\*.cs" />
@@ -85,8 +86,7 @@
     <PackageReference Include="Avalonia.Themes.Fluent" Version="12.0.1" />
     <PackageReference Include="Avalonia.Fonts.Inter" Version="12.0.1" />
     <!-- Avalonia.Diagnostics: на NuGet нет линии 12.x (последняя 11.3.x); DevTools в проекте не подключали. При необходимости — отдельный пакет/версия под v12. -->
-    <!-- Версии Avalonia.AvaloniaEdit и AvaloniaEdit.TextMate держать синхронно (см. TypeLoadException TextEditorModel). -->
-    <PackageReference Include="Avalonia.AvaloniaEdit" Version="12.0.0" />
+    <!-- Локальная отладка AvaloniaEdit из исходников (externals/avaloniaedit, tag 12.0.0). -->
     <PackageReference Include="AvaloniaEdit.TextMate" Version="12.0.0" />
     <PackageReference Include="Dock.Avalonia" Version="12.0.0.1" />
     <PackageReference Include="Dock.Model.Avalonia" Version="12.0.0.1" />
@@ -120,6 +120,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="externals\acp-csharp\src\AgentClientProtocol\AgentClientProtocol.csproj" />
+    <ProjectReference Include="externals\avaloniaedit\src\AvaloniaEdit\AvaloniaEdit.csproj" />
   </ItemGroup>
   <!-- При RID вывод в net10.0/win-x64/; в корне net10.0/ часто остаётся старый apphost от прошлой сборки — Cursor/проводник открывают его и кажется «древняя» сборка. Удаляем только наши артефакты в корне TFM. -->
   <Target Name="RemoveStaleTfmRootHost" AfterTargets="Build" Condition="'$(RuntimeIdentifier)' != ''">
