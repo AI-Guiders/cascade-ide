@@ -132,3 +132,9 @@ kroki_url = "https://kroki.io"
 # [[code_navigation.presets]]
 # id = "my_preset"
 # exclude_kinds = ["same_namespace"]
+
+[inline_hints]
+# SDK implicit usings emulation and inlay rendering toggles.
+enabled = true
+parameter_names = true
+variable_types = true
