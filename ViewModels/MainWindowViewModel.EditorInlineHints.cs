@@ -1,5 +1,6 @@
 namespace CascadeIDE.ViewModels;
 
+/// <summary>Inline hints редактора: фильтрация и выдача по настройкам <c>editor.inline_hints</c>.</summary>
 public partial class MainWindowViewModel
 {
     /// <summary>Собрать inlay hints для документа с учётом пользовательских настроек editor.inline_hints.</summary>
