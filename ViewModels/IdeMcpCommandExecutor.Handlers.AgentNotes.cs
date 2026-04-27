@@ -39,7 +39,11 @@ internal sealed partial class IdeMcpCommandExecutor
         add(Services.IdeCommands.SearchAgentNotes, async (args, ct) =>
             await ((IIdeMcpActions)_vm).SearchAgentNotesAsync(McpCommandJsonArgs.String(args, "query") ?? "", args is not null && args.TryGetValue("head_limit", out var hl) && hl.TryGetInt32(out var v) ? v : null, ct));
         add(Services.IdeCommands.ReadKnowledgeFile, async (args, ct) =>
-            await ((IIdeMcpActions)_vm).ReadKnowledgeFileAsync(McpCommandJsonArgs.String(args, "file_path") ?? "", ct));
+            await ((IIdeMcpActions)_vm).ReadKnowledgeFileAsync(
+                McpCommandJsonArgs.String(args, "file_path") ?? "",
+                McpCommandJsonArgs.OptionalInt32(args, "offset"),
+                McpCommandJsonArgs.OptionalInt32(args, "limit"),
+                ct));
         add(Services.IdeCommands.ListKnowledgeFiles, async (args, ct) =>
             await ((IIdeMcpActions)_vm).ListKnowledgeFilesAsync(McpCommandJsonArgs.String(args, "subdir"), ct));
         add(Services.IdeCommands.WriteKnowledgeFile, async (args, ct) =>

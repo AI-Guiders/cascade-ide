@@ -122,7 +122,7 @@ internal static class IdeCommandsDoc
         ["prepare_commit"] = "Quick action: подготовить коммит (сводка/план/проверки). returns: text.",
         ["read_agent_notes"] = "Прочитать заметки агента из каталога решения. returns: text.",
         ["read_hot_context"] = "Прочитать только hot-context (L0/L1) без архивного хвоста. args: active_scope?:string; returns: json; example: {\"active_scope\":\"door-to-singularity\"}.",
-        ["read_knowledge_file"] = "Прочитать knowledge-файл из каталога решения. args: file_path:string; returns: text; example: {\"file_path\":\"META/integrity-core.md\"}.",
+        ["read_knowledge_file"] = "Прочитать knowledge-файл из каталога решения. args: file_path:string, offset?:integer, limit?:integer; returns: text; example: {\"file_path\":\"META/integrity-core.md\",\"offset\":2,\"limit\":20}.",
         ["refresh_workspace_snapshot"] = "Обновить снимок рабочего состояния (Power cockpit). returns: text.",
         ["remove_breakpoint"] = "Снять брейкпоинт. args: file_path:string, line:integer; returns: text; example: {\"file_path\":\"C:\\\\tmp\\\\a.cs\",\"line\":42}.",
         ["reopen_closed_document"] = "Переоткрыть недавно закрытый документ. returns: text.",

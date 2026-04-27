@@ -252,7 +252,7 @@
 | `git_submodule` | Git submodule в каталоге решения/workspace. args: action?:string, path?:string, recursive?:boolean; returns: json; example: {"action":"status"}. |
 | `highlight_control` | Подсветить контрол рамкой в том окне, где он находится (главное, окно-хост Mfd и т.д.). args: name?:string; returns: text; example: {"name":"BuildButton"}. |
 | `list_knowledge_files` | Список knowledge-файлов в каталоге решения (опционально subdir). args: subdir?:string; returns: json; example: {"subdir":"work"}. |
-| `read_knowledge_file` | Прочитать knowledge-файл из каталога решения. args: file_path:string; returns: text; example: {"file_path":"META/integrity-core.md"}. |
+| `read_knowledge_file` | Прочитать knowledge-файл из каталога решения. args: file_path:string, offset?:integer, limit?:integer; returns: text; example: {"file_path":"META/integrity-core.md","offset":2,"limit":20}. |
 | `send_keys` | Отправить хоткей в контрол. args: keys:string, name?:string; returns: text; example: {"keys":"Ctrl+S"}. |
 | `set_control_layout` | Изменить раскладку/позицию контрола. args: name:string, layout:string; returns: text; example: {"name":"BuildButton","layout":"{}"}. |
 | `set_control_text` | Установить текст в контроле ввода. args: name:string, text:string; returns: text; example: {"name":"ChatInput","text":"hi"}. |

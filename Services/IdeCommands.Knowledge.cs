@@ -3,7 +3,7 @@ namespace CascadeIDE.Services;
 /// <summary>Knowledge API (partial IdeCommands).</summary>
 public static partial class IdeCommands
 {
-    /// <summary>Прочитать knowledge-файл из каталога решения. args: file_path:string; returns: text; example: {"file_path":"META/integrity-core.md"}.</summary>
+    /// <summary>Прочитать knowledge-файл из каталога решения. args: file_path:string, offset?:integer, limit?:integer; returns: text; example: {"file_path":"META/integrity-core.md","offset":2,"limit":20}.</summary>
     public const string ReadKnowledgeFile = "read_knowledge_file";
     /// <summary>Список knowledge-файлов в каталоге решения (опционально subdir). args: subdir?:string; returns: json; example: {"subdir":"work"}.</summary>
     public const string ListKnowledgeFiles = "list_knowledge_files";

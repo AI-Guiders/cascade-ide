@@ -57,7 +57,7 @@ internal static class IdeCommandsArgsGenerated
         ["open_chat_clarification_batch"] = new IdeCommandsArgs.Arg[] { new("batch_json", "string", true, false, null) },
         ["open_file"] = new IdeCommandsArgs.Arg[] { new("path", "string", true, false, null) },
         ["read_hot_context"] = new IdeCommandsArgs.Arg[] { new("active_scope", "string", false, false, null) },
-        ["read_knowledge_file"] = new IdeCommandsArgs.Arg[] { new("file_path", "string", true, false, null) },
+        ["read_knowledge_file"] = new IdeCommandsArgs.Arg[] { new("file_path", "string", true, false, null), new("offset", "integer", false, false, null), new("limit", "integer", false, false, null) },
         ["remove_breakpoint"] = new IdeCommandsArgs.Arg[] { new("file_path", "string", true, false, null), new("line", "integer", true, false, null) },
         ["request_confirmation"] = new IdeCommandsArgs.Arg[] { new("message", "string", true, false, null) },
         ["rollback_agent_notes"] = new IdeCommandsArgs.Arg[] { new("revision_file", "string", false, false, null) },

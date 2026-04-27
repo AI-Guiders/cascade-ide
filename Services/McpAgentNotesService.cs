@@ -216,13 +216,13 @@ public sealed class McpAgentNotesService(NotesStorage? storage = null)
         }
     }
 
-    public string ReadKnowledgeFile(string filePath)
+    public string ReadKnowledgeFile(string filePath, int? offset = null, int? limit = null)
     {
         if (string.IsNullOrWhiteSpace(filePath))
             return "";
         try
         {
-            return _storage.ReadKnowledgeFile(canonPath: null, filePath);
+            return _storage.ReadKnowledgeFile(canonPath: null, filePath, offset, limit);
         }
         catch (Exception ex)
         {

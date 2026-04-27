@@ -151,8 +151,8 @@ public interface IIdeMcpActions
     Task<string> UpsertAgentNotesSectionAsync(string sectionId, string content, CancellationToken cancellationToken = default);
     /// <summary>Поиск по заметкам агента (case-insensitive). Возвращает JSON: matches [{ line, text }].</summary>
     Task<string> SearchAgentNotesAsync(string query, int? headLimit = null, CancellationToken cancellationToken = default);
-    /// <summary>Прочитать knowledge-файл из каталога решения (knowledge/&lt;file_path&gt;). Возвращает текст или "".</summary>
-    Task<string> ReadKnowledgeFileAsync(string filePath, CancellationToken cancellationToken = default);
+    /// <summary>Прочитать knowledge-файл из каталога решения (knowledge/&lt;file_path&gt;). Опционально offset (1-based) и limit (число строк). Возвращает текст или "".</summary>
+    Task<string> ReadKnowledgeFileAsync(string filePath, int? offset = null, int? limit = null, CancellationToken cancellationToken = default);
     /// <summary>Список knowledge-файлов в каталоге решения (knowledge/). subdir — относительный подкаталог (например "work"). Возвращает JSON: files [{ path, size_bytes, modified_utc }].</summary>
     Task<string> ListKnowledgeFilesAsync(string? subdir = null, CancellationToken cancellationToken = default);
     /// <summary>Записать knowledge-файл (полная замена). canon_path — корень канона или AGENT_NOTES_CANON_PATH.</summary>

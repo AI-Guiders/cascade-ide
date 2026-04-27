@@ -42,8 +42,8 @@ public partial class MainWindowViewModel
     Task<string> Services.IIdeMcpActions.SearchAgentNotesAsync(string query, int? headLimit, CancellationToken cancellationToken) =>
         Task.FromResult(_mcpAgentNotes.SearchAgentNotes(TryGetNotesWorkspacePath(), query, headLimit));
 
-    Task<string> Services.IIdeMcpActions.ReadKnowledgeFileAsync(string filePath, CancellationToken cancellationToken) =>
-        Task.FromResult(_mcpAgentNotes.ReadKnowledgeFile(filePath));
+    Task<string> Services.IIdeMcpActions.ReadKnowledgeFileAsync(string filePath, int? offset, int? limit, CancellationToken cancellationToken) =>
+        Task.FromResult(_mcpAgentNotes.ReadKnowledgeFile(filePath, offset, limit));
 
     Task<string> Services.IIdeMcpActions.ListKnowledgeFilesAsync(string? subdir, CancellationToken cancellationToken) =>
         Task.FromResult(_mcpAgentNotes.ListKnowledgeFiles(subdir));
