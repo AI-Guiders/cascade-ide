@@ -7,7 +7,7 @@
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:BEGIN -->
 
-`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~7.1k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~6k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.1k**); счётчики — ориентир по состоянию репозитория (авто: 2026-04). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
+`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~7.2k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~6.1k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.1k**); счётчики — ориентир по состоянию репозитория (авто: 2026-04). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:END -->
 
@@ -31,6 +31,7 @@
 | `MainWindowViewModel.DockInstrumentSlots.cs` | 28 | Какой инструмент показан в слотах PFD/MFD главного окна — по `InstrumentPlacementRuntime` и `DisplaySettings` (в т.ч. `[display.instrument_routing]` и merge `workspace.toml`). Логика — `MainWindowDockedGridInstrumentSlots`. |
 | `MainWindowViewModel.DocumentsDock.cs` | 43 | Документы / dock. |
 | `MainWindowViewModel.EditorHud.cs` | 117 | Полоса HUD над редактором (ADR 0021 §9): баннеры без отдельного якоря-колонки. Основной сценарий продукта — внешний агент (например Cursor) + Cascade; текст сюда задаётся явно (MCP, диагностика, позже — встроенная автономия), а не «по умолчанию» от автономного цикла Power. |
+| `MainWindowViewModel.EditorInlineHints.cs` | 21 | Inline hints редактора: фильтрация и выдача по настройкам `editor.inline_hints`. |
 | `MainWindowViewModel.EditorOllama.cs` | 43 | Состояние редактора, Markdown и выбора модели Ollama. |
 | `MainWindowViewModel.EditorStabilizedInput.cs` | 64 | Один hi-freq throttler на главное окно (ADR 0103): не N фоновых consumer на N вкладок. Стабилизированный выход обрабатывается только если `FilePath` совпадает с `CurrentFilePath` (устаревшие дельты после смены вкладки отбрасываются). |
 | `MainWindowViewModel.Eicas.cs` | 17 | Канал EICAS / CAS — отдельно от полосы телеметрии контура работы (ADR 0021, вариант A). |
@@ -74,7 +75,7 @@
 | Файл | Строк (≈) | Содержание |
 |------|------------|------------|
 | `IdeMcpCommandExecutor.cs` | 51 | Диспетчер MCP-команд IDE: разбор args и вызов `IIdeMcpActions` / UI-команд главного окна. |
-| `IdeMcpCommandExecutor.Handlers.AgentNotes.cs` | 70 | Хендлеры agent-notes. |
+| `IdeMcpCommandExecutor.Handlers.AgentNotes.cs` | 74 | Хендлеры agent-notes. |
 | `IdeMcpCommandExecutor.Handlers.Chrome.cs` | 359 | Хендлеры хрома / видимости. |
 | `IdeMcpCommandExecutor.Handlers.DapDebug.cs` | 112 | DAP / отладка. |
 | `IdeMcpCommandExecutor.Handlers.DebuggerUi.cs` | 57 | Поверхность отладки. |
