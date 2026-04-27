@@ -133,8 +133,8 @@ kroki_url = "https://kroki.io"
 # id = "my_preset"
 # exclude_kinds = ["same_namespace"]
 
-[Editor.InlineHints]
-# Editor inlay-hints toggles (friendly alias; normalized to [editor.inline_hints]).
+[editor.inline_hints]
+# Editor inlay-hints toggles.
 enabled = true
 parameter_names = true
 variable_types = true

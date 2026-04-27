@@ -104,7 +104,7 @@ require_scores = false
 
 [code_navigation]
 
-[Editor.InlineHints]
+[editor.inline_hints]
 enabled = true
 parameter_names = true
 variable_types = true
