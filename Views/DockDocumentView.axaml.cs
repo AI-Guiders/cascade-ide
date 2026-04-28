@@ -92,6 +92,7 @@ public partial class DockDocumentView : UserControl
         }
 
         EditorSelectionChrome.Apply(_editor);
+        EditorTextChrome.Apply(_editor);
 
         EditorInlineHoverChrome.ApplyToolTipServiceTo(_editor);
 
@@ -359,7 +360,10 @@ public partial class DockDocumentView : UserControl
     private void OnThemeAppliedRefreshEditorSelection(object? sender, EventArgs e)
     {
         if (_editor is not null)
+        {
             EditorSelectionChrome.Apply(_editor);
+            EditorTextChrome.Apply(_editor);
+        }
     }
 }
 
