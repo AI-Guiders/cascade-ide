@@ -138,3 +138,8 @@ kroki_url = "https://kroki.io"
 enabled = true
 parameter_names = true
 variable_types = true
+
+[editor.debug_hints]
+enabled = true
+show_assignments = true
+show_conditions = true
