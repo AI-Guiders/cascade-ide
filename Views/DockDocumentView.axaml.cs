@@ -121,6 +121,7 @@ public partial class DockDocumentView : UserControl
         _editor.TextArea.Caret.PositionChanged += OnEditorCaretOrSelectionChanged;
         _editor.TextArea.SelectionChanged += OnEditorCaretOrSelectionChanged;
         _editor.TextArea.TextView.VisualLinesChanged += OnEditorViewportChanged;
+        _editor.TextArea.TextView.ScrollOffsetChanged += OnEditorViewportChanged;
 
         _vmHandler = (_, args) =>
         {
@@ -225,6 +226,7 @@ public partial class DockDocumentView : UserControl
             _editor.TextArea.Caret.PositionChanged -= OnEditorCaretOrSelectionChanged;
             _editor.TextArea.SelectionChanged -= OnEditorCaretOrSelectionChanged;
             _editor.TextArea.TextView.VisualLinesChanged -= OnEditorViewportChanged;
+            _editor.TextArea.TextView.ScrollOffsetChanged -= OnEditorViewportChanged;
 
             if (_vm?.WorkspaceDiagnostics is not null && _diagHubHandler is not null)
                 _vm.WorkspaceDiagnostics.DiagnosticsChanged -= _diagHubHandler;
@@ -363,6 +365,7 @@ public partial class DockDocumentView : UserControl
             return;
         if (!IsActive())
         {
+            ToolTip.SetTip(_stickyScrollHost, null);
             _stickyScrollHost.IsVisible = false;
             return;
         }
@@ -370,6 +373,7 @@ public partial class DockDocumentView : UserControl
         var filePath = _docVm.Doc.FilePath ?? "";
         if (!filePath.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
         {
+            ToolTip.SetTip(_stickyScrollHost, null);
             _stickyScrollHost.IsVisible = false;
             return;
         }
@@ -379,25 +383,40 @@ public partial class DockDocumentView : UserControl
         var sticky = BuildStickyScrollLabel(text, topLine);
         if (string.IsNullOrWhiteSpace(sticky))
         {
+            ToolTip.SetTip(_stickyScrollHost, null);
             _stickyScrollHost.IsVisible = false;
             return;
         }
 
         _stickyScrollText.Text = sticky;
+        ToolTip.SetTip(_stickyScrollHost, sticky);
         _stickyScrollHost.IsVisible = true;
     }
 
+    /// <summary>Первая видимая сверху строка документа по прокрутке (не по каретке): иначе при скролле без двига каретки
+    /// мы оставались бы на строке каретки и sticky скрывался из-за BuildStickyScrollLabel(topLine &lt;= 1).</summary>
     private static int GetTopVisibleLineNumber(TextEditor editor)
     {
         var textView = editor.TextArea.TextView;
-        if (textView.VisualLinesValid)
-        {
-            var first = textView.VisualLines.FirstOrDefault();
-            if (first?.FirstDocumentLine is not null)
-                return first.FirstDocumentLine.LineNumber;
-        }
+        if (textView.Document is null)
+            return Math.Max(1, editor.TextArea.Caret.Line);
 
-        return editor.TextArea.Caret.Line;
+        try
+        {
+            var line = textView.GetDocumentLineByVisualTop(textView.ScrollOffset.Y);
+            return line.LineNumber;
+        }
+        catch
+        {
+            if (textView.VisualLinesValid)
+            {
+                var first = textView.VisualLines.FirstOrDefault();
+                if (first?.FirstDocumentLine is not null)
+                    return first.FirstDocumentLine.LineNumber;
+            }
+
+            return Math.Max(1, editor.TextArea.Caret.Line);
+        }
     }
 
     private static string? BuildStickyScrollLabel(string sourceText, int topLineOneBased)
@@ -446,6 +465,8 @@ public partial class DockDocumentView : UserControl
             StructDeclarationSyntax s => $"struct {s.Identifier.Text}",
             InterfaceDeclarationSyntax i => $"interface {i.Identifier.Text}",
             RecordDeclarationSyntax r => $"record {r.Identifier.Text}",
+            EnumDeclarationSyntax e => $"enum {e.Identifier.Text}",
+            DelegateDeclarationSyntax d => $"delegate {d.Identifier.Text}",
             MethodDeclarationSyntax m => $"{m.Identifier.Text}()",
             ConstructorDeclarationSyntax c => $"{c.Identifier.Text}()",
             PropertyDeclarationSyntax p => p.Identifier.Text,

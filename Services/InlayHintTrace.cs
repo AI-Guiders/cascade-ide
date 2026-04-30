@@ -22,14 +22,7 @@ internal static class InlayHintTrace
     {
         if (!IsEnabled) return;
         var line = $"{DateTimeOffset.Now:O} {message}";
-        try
-        {
-            Console.WriteLine("[inlay] " + line);
-        }
-        catch
-        {
-            // WinExe без консоли
-        }
+        // В stdio MCP stdout зарезервирован под JSON-RPC; диагностический текст туда не пишем.
 
         try
         {
@@ -51,14 +44,7 @@ internal static class InlayHintTrace
     {
         if (!IsDebug) return;
         var line = $"{DateTimeOffset.Now:O} {message}";
-        try
-        {
-            Console.WriteLine("[inlay-debug] " + line);
-        }
-        catch
-        {
-            // WinExe без консоли
-        }
+        // В stdio MCP stdout зарезервирован под JSON-RPC; диагностический текст туда не пишем.
 
         try
         {
