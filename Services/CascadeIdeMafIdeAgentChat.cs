@@ -15,12 +15,7 @@ namespace CascadeIDE.Services;
 /// </summary>
 internal static class CascadeIdeMafIdeAgentChat
 {
-    private const string SystemInstructionsRu =
-        "Ты ассистент внутри Cascade IDE. Частые действия (открыть файл, состояние IDE, сборка, тесты, поиск по репозиторию, брейкпоинты) "
-        + "вызывай именованными инструментами с теми же именами, что у MCP: ide_open_file, ide_load_solution, ide_get_ide_state, ide_build, ide_run_tests, "
-        + "ide_search_workspace_text, ide_set_breakpoint и др. Передавай аргументы как JSON-поля тула по схеме MCP."
-        + " Для любой другой команды IDE используй execute_ide_command: command_id как в docs/MCP-PROTOCOL.md "
-        + "без префикса ide_ (например open_file, build_structured); args_json — JSON-объект аргументов или пустая строка.";
+    private const int SalvageOutcomeMaxCharsForSummary = 18_000;
 
     /// <inheritdoc cref="RunAsync(IChatClient, IReadOnlyList{ChatMessage}, string?, Func{string, IReadOnlyDictionary{string, JsonElement}?, CancellationToken, Task{string}}, CancellationToken)" />
     internal static Task<(string AssistantText, IReadOnlyList<string> ToolTraces)> RunAsync(
@@ -59,8 +54,10 @@ internal static class CascadeIdeMafIdeAgentChat
             false;
 #endif
 
+        var prompts = MafIdeAgentPrompts.Current;
+
         AIAgent agent = chatClient.AsAIAgent(
-            instructions: SystemInstructionsRu,
+            instructions: prompts.AgentSystem,
             tools: BuildMafToolList(executeIdeCommandAsync, toolTraces, includeCatalogDebugExtras));
 
         var messages = BuildMeAiMessages(cascadeConversation, minimizedContextBlock);
@@ -69,6 +66,31 @@ internal static class CascadeIdeMafIdeAgentChat
 
         var response = await agent.RunAsync(messages, cancellationToken: cancellationToken).ConfigureAwait(false);
         var assistantText = ExtractAssistantText(response);
+
+        // Локальные модели часто печатают «вызов тула» как JSON в тексте вместо нативных tool_calls —
+        // FunctionInvokingChatClient тогда не исполняет ничего; вытаскиваем известные intent и прокидываем в тот же exec.
+        if (toolTraces.Count == 0)
+        {
+            var salvaged = await TrySalvageAssistantTextAsToolCallAsync(
+                    assistantText,
+                    executeIdeCommandAsync,
+                    toolTraces,
+                    includeCatalogDebugExtras,
+                    cancellationToken)
+                .ConfigureAwait(false);
+            if (!string.IsNullOrEmpty(salvaged))
+            {
+                assistantText = await SummarizeSalvagedToolOutcomeAsync(
+                        chatClient,
+                        salvaged,
+                        prompts,
+                        cascadeConversation,
+                        toolTraces,
+                        cancellationToken)
+                    .ConfigureAwait(false);
+            }
+        }
+
         return (assistantText, toolTraces);
     }
 
@@ -233,6 +255,235 @@ internal static class CascadeIdeMafIdeAgentChat
 
         r = MeAiRole.User;
         return false;
+    }
+
+    private static string? GetLastCascadeUserMessagePlain(IReadOnlyList<ChatMessage> cascadeConversation)
+    {
+        for (var i = cascadeConversation.Count - 1; i >= 0; i--)
+        {
+            var m = cascadeConversation[i];
+            if (!string.Equals(m.Role, "user", StringComparison.OrdinalIgnoreCase))
+                continue;
+            var t = (m.Content ?? "").Trim();
+            if (t.Length > 0)
+                return t;
+        }
+
+        return null;
+    }
+
+    /// <summary>Один вызов базового клиента без тулов и без Agent Framework — иначе Ollama снова может выдать JSON вместо пересказа.</summary>
+    private static async Task<string> SummarizeSalvagedToolOutcomeAsync(
+        IChatClient chatClient,
+        string toolOutcome,
+        MafIdeAgentPrompts.PromptPack prompts,
+        IReadOnlyList<ChatMessage> cascadeConversation,
+        List<string> toolTraces,
+        CancellationToken ct)
+    {
+        if (toolOutcome.Length == 0)
+            return toolOutcome;
+
+        string payload = toolOutcome.Length <= SalvageOutcomeMaxCharsForSummary
+            ? toolOutcome
+            : toolOutcome[..SalvageOutcomeMaxCharsForSummary] +
+              $"\n… (обрезано до {SalvageOutcomeMaxCharsForSummary} симв.; всего {toolOutcome.Length}.)\n";
+
+        string userQuery =
+            GetLastCascadeUserMessagePlain(cascadeConversation) ?? "(нет текста последнего сообщения пользователя)";
+
+        var userBlock = prompts.BuildSalvageUserMessage(userQuery, payload);
+
+        var briefChat = new List<MeAiChat>
+        {
+            new(MeAiRole.System, prompts.SalvageRecapSystem),
+            new(MeAiRole.User, userBlock),
+        };
+
+        toolTraces.Add("[salvage:пересказ] запрос модели без тулов…");
+        try
+        {
+            ChatResponse recap = await chatClient.GetResponseAsync(briefChat, cancellationToken: ct).ConfigureAwait(false);
+            var recapText = (recap.Text ?? "").Trim();
+            if (recapText.Length == 0)
+            {
+                toolTraces[^1] = "[salvage:пересказ] пустой ответ — оставлен сырой результат тула.";
+                return toolOutcome;
+            }
+
+            toolTraces[^1] = "[salvage:пересказ] ок";
+            return recapText;
+        }
+        catch (OperationCanceledException)
+        {
+            toolTraces[^1] = "[salvage:пересказ] отмена.";
+            throw;
+        }
+        catch (Exception ex)
+        {
+            toolTraces[^1] = $"[salvage:пересказ] ошибка: {ex.Message} — оставлен сырой результат.";
+            return toolOutcome;
+        }
+    }
+
+    private static async Task<string?> TrySalvageAssistantTextAsToolCallAsync(
+        string assistantText,
+        Func<string, IReadOnlyDictionary<string, JsonElement>?, CancellationToken, Task<string>> executeIdeCommandAsync,
+        List<string> toolTraces,
+        bool includeCatalogDebugExtras,
+        CancellationToken cancellationToken)
+    {
+        var unwrap = UnwrapMarkdownJsonFence(assistantText);
+        JsonDocument doc;
+        try
+        {
+            doc = JsonDocument.Parse(unwrap);
+        }
+        catch (JsonException)
+        {
+            return null;
+        }
+
+        using (doc)
+        {
+            var root = doc.RootElement;
+            if (root.ValueKind != JsonValueKind.Object)
+                return null;
+            if (!root.TryGetProperty("name", out var nameProp) || nameProp.ValueKind != JsonValueKind.String)
+                return null;
+
+            string toolName = nameProp.GetString() ?? "";
+            if (toolName.Length == 0)
+                return null;
+
+            string argumentsJson = root.TryGetProperty("arguments", out var argsProp)
+                ? argsProp.GetRawText()
+                : "{}";
+
+            var promoted = CascadeIdeMafPromotedTools.BuildLookup(includeCatalogDebugExtras);
+
+            if (string.Equals(toolName, "execute_ide_command", StringComparison.Ordinal))
+            {
+                return await InvokeSalvagedExecuteIdeCommandAsync(
+                        argumentsJson,
+                        executeIdeCommandAsync,
+                        toolTraces,
+                        cancellationToken)
+                    .ConfigureAwait(false);
+            }
+
+            if (!promoted.Contains(toolName))
+                return null;
+
+            return await InvokeSalvagedPromotedToolAsync(
+                    toolName,
+                    argumentsJson,
+                    executeIdeCommandAsync,
+                    toolTraces,
+                    cancellationToken)
+                .ConfigureAwait(false);
+        }
+    }
+
+    private static string UnwrapMarkdownJsonFence(string text)
+    {
+        var t = text.Trim();
+        if (t.Length == 0 || !t.StartsWith("```", StringComparison.Ordinal))
+            return t;
+
+        var firstNl = t.IndexOf('\n');
+        if (firstNl < 0)
+            return t;
+
+        var close = t.LastIndexOf("```", StringComparison.Ordinal);
+        if (close <= firstNl)
+            return t;
+
+        return t.AsSpan(firstNl + 1, close - firstNl - 1).Trim().ToString();
+    }
+
+    private static async Task<string?> InvokeSalvagedPromotedToolAsync(
+        string toolName,
+        string argumentsJson,
+        Func<string, IReadOnlyDictionary<string, JsonElement>?, CancellationToken, Task<string>> exec,
+        List<string> toolTraces,
+        CancellationToken ct)
+    {
+        if (!CascadeIdeMafPromotedTools.TryMcpProxyToolToCommandId(toolName, out var commandId))
+            return null;
+
+        using JsonDocument argsDoc = JsonDocument.Parse(argumentsJson);
+        JsonElement arguments = argsDoc.RootElement;
+
+        string traceHeader = $"[{toolName}]";
+        toolTraces.Add($"{traceHeader} salvage:text-json вызов…");
+        try
+        {
+            var argsDict = CascadeIdeMafPromotedTools.JsonArgsToDict(arguments);
+            var outcome = await exec(commandId, argsDict, ct).ConfigureAwait(false);
+            toolTraces[^1] = $"{traceHeader} salvage → {SummarizeOutcome(outcome)}";
+            return outcome;
+        }
+        catch (OperationCanceledException)
+        {
+            toolTraces[^1] = $"{traceHeader} salvage → отмена";
+            throw;
+        }
+        catch (Exception ex)
+        {
+            toolTraces[^1] = $"{traceHeader} salvage → ошибка: {ex.Message}";
+            return $"[{toolName}] ошибка (salvage): {ex.Message}";
+        }
+    }
+
+    private static async Task<string?> InvokeSalvagedExecuteIdeCommandAsync(
+        string argumentsJson,
+        Func<string, IReadOnlyDictionary<string, JsonElement>?, CancellationToken, Task<string>> exec,
+        List<string> toolTraces,
+        CancellationToken ct)
+    {
+        using JsonDocument argsDoc = JsonDocument.Parse(argumentsJson);
+        JsonElement arguments = argsDoc.RootElement;
+        if (arguments.ValueKind != JsonValueKind.Object)
+            return null;
+        if (!arguments.TryGetProperty("command_id", out var cid) || cid.ValueKind != JsonValueKind.String)
+            return null;
+
+        string commandId = (cid.GetString() ?? "").Trim();
+        if (commandId.Length == 0)
+            return null;
+
+        string? argsJson = null;
+        if (arguments.TryGetProperty("args_json", out var aj))
+        {
+            argsJson = aj.ValueKind switch
+            {
+                JsonValueKind.String => aj.GetString(),
+                JsonValueKind.Null => null,
+                JsonValueKind.Undefined => null,
+                _ => aj.GetRawText(),
+            };
+        }
+
+        string traceHeader = $"[{commandId}]";
+        toolTraces.Add($"{traceHeader} salvage:text-json вызов…");
+        try
+        {
+            var args = IdeCommandRegistry.ParseArgs(string.IsNullOrWhiteSpace(argsJson) ? null : argsJson.Trim());
+            var outcome = await exec(commandId, args, ct).ConfigureAwait(false);
+            toolTraces[^1] = $"{traceHeader} salvage → {SummarizeOutcome(outcome)}";
+            return outcome;
+        }
+        catch (OperationCanceledException)
+        {
+            toolTraces[^1] = $"{traceHeader} salvage → отмена";
+            throw;
+        }
+        catch (Exception ex)
+        {
+            toolTraces[^1] = $"{traceHeader} salvage → ошибка: {ex.Message}";
+            return $"[execute_ide_command] ошибка (salvage): {ex.Message}";
+        }
     }
 
     private static string ExtractAssistantText(AgentResponse response)

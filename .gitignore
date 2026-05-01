@@ -24,6 +24,7 @@ project.lock.json
 # Локальные артефакты разработки/публикации
 publish/
 publish-debug/
+publish-debug-staging/
 publish-hotkeyfix/
 Data/
 .cursor/

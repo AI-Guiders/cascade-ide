@@ -2,7 +2,10 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
+using Microsoft.Extensions.AI;
+using CascadeConversationMessage = CascadeIDE.Services.ChatMessage;
 using AgentClientProtocol;
 using CascadeIDE.Models;
 using CascadeIDE.Models.AgentChat;
@@ -37,6 +40,11 @@ public partial class ChatPanelViewModel : ViewModelBase
     private readonly Action<string?>? _onUserSelectedCursorAcpModelId;
     private readonly Action<string>? _appendAcpTerminal;
     private readonly Action? _showAcpTerminal;
+    private readonly Func<string, IReadOnlyDictionary<string, JsonElement>?, CancellationToken, Task<string>>? _executeIdeCommandForMafAgent;
+    private readonly Func<Uri>? _getLocalOllamaEndpoint;
+    private readonly Func<string>? _getEffectiveOllamaModelId;
+    private readonly Func<IChatClient?>? _tryCreateCloudMafIChatClient;
+    private readonly Func<string?>? _getChatMinimizedContextBlock;
     private readonly ChatSessionStore _sessionStore;
     private readonly ChatSurfaceCompositor _chatSurfaceCompositor = new();
     private readonly Dictionary<Guid, string> _collapsedThinkingByMessageId = new();
@@ -68,7 +76,12 @@ public partial class ChatPanelViewModel : ViewModelBase
         Func<string?> getCursorAcpPreferredModelId,
         Action<string?>? onUserSelectedCursorAcpModelId = null,
         Action<string>? appendAcpTerminal = null,
-        Action? showAcpTerminal = null)
+        Action? showAcpTerminal = null,
+        Func<string, IReadOnlyDictionary<string, JsonElement>?, CancellationToken, Task<string>>? executeIdeCommandForMafAgent = null,
+        Func<Uri>? getLocalOllamaEndpoint = null,
+        Func<string>? getEffectiveOllamaModelId = null,
+        Func<IChatClient?>? tryCreateCloudMafIChatClient = null,
+        Func<string?>? getChatMinimizedContextBlock = null)
     {
         _aiProviderManager = aiProviderManager;
         _getActiveAiProvider = getActiveAiProvider;
@@ -86,6 +99,11 @@ public partial class ChatPanelViewModel : ViewModelBase
         _onUserSelectedCursorAcpModelId = onUserSelectedCursorAcpModelId;
         _appendAcpTerminal = appendAcpTerminal;
         _showAcpTerminal = showAcpTerminal;
+        _executeIdeCommandForMafAgent = executeIdeCommandForMafAgent;
+        _getLocalOllamaEndpoint = getLocalOllamaEndpoint;
+        _getEffectiveOllamaModelId = getEffectiveOllamaModelId;
+        _tryCreateCloudMafIChatClient = tryCreateCloudMafIChatClient;
+        _getChatMinimizedContextBlock = getChatMinimizedContextBlock;
         _sessionStore = new ChatSessionStore(_getWorkspaceRoot());
         _sessionId = _sessionStore.EnsureSessionId();
         ChatMessages.CollectionChanged += OnChatMessagesCollectionChanged;
@@ -406,6 +424,20 @@ public partial class ChatPanelViewModel : ViewModelBase
 
     private async Task SendChatWithStreamingProviderAsync(string input)
     {
+        if (TryResolveMafIdeChat(out var exec, out var chatClient))
+        {
+            try
+            {
+                await SendChatWithMafIdeAgentAsync(input, exec!, chatClient!).ConfigureAwait(false);
+            }
+            finally
+            {
+                chatClient?.Dispose();
+            }
+
+            return;
+        }
+
         var messages = ChatMessages.Take(ChatMessages.Count - 1)
             .Select(m => new Services.ChatMessage(m.Role, m.Content))
             .Append(new Services.ChatMessage("user", input))
@@ -426,6 +458,106 @@ public partial class ChatPanelViewModel : ViewModelBase
         }
         _ = PersistEventAsync(ChatHistoryEventKind.MessageCompleted, MessageSnapshot(assistantMsg));
     }
+
+    private bool TryResolveMafIdeChat(
+        [NotNullWhen(true)] out Func<string, IReadOnlyDictionary<string, JsonElement>?, CancellationToken, Task<string>>? exec,
+        [NotNullWhen(true)] out IChatClient? chatClient)
+    {
+        exec = null;
+        chatClient = null;
+
+        var handler = _executeIdeCommandForMafAgent;
+        if (handler is null)
+            return false;
+
+        var key = _getActiveAiProvider();
+        if (string.Equals(key, "Ollama", StringComparison.OrdinalIgnoreCase))
+        {
+            var endpoint = _getLocalOllamaEndpoint?.Invoke();
+            var modelId = _getEffectiveOllamaModelId?.Invoke()?.Trim();
+            if (endpoint is null || string.IsNullOrWhiteSpace(modelId))
+                return false;
+
+            exec = handler;
+            chatClient = new OllamaChatClient(endpoint, modelId);
+            return true;
+        }
+
+        if (string.Equals(key, "Anthropic", StringComparison.Ordinal)
+            || string.Equals(key, "OpenAI", StringComparison.Ordinal)
+            || string.Equals(key, "DeepSeek", StringComparison.Ordinal))
+        {
+            var cloud = _tryCreateCloudMafIChatClient?.Invoke();
+            if (cloud is null)
+                return false;
+
+            exec = handler;
+            chatClient = cloud;
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>Microsoft Agent Framework + <see cref="IChatClient"/> (Ollama / облако) и вызовы IDE через <c>ExecuteCommandAsync</c> (как MCP).</summary>
+    private async Task SendChatWithMafIdeAgentAsync(
+        string input,
+        Func<string, IReadOnlyDictionary<string, JsonElement>?, CancellationToken, Task<string>> executeIdeCommandAsync,
+        IChatClient chatClient)
+    {
+        var dialogMessages = ChatMessages.Take(ChatMessages.Count - 1)
+            .Where(m => IsUserOrAssistantRole(m.Role))
+            .Select(m => new CascadeConversationMessage(m.Role, m.Content))
+            .Append(new CascadeConversationMessage("user", input))
+            .ToList();
+
+        var minimized = _getChatMinimizedContextBlock?.Invoke();
+        minimized = string.IsNullOrWhiteSpace(minimized) ? null : minimized.Trim();
+
+        ChatMessageViewModel? assistantMsg = null;
+
+        try
+        {
+            var (text, traces) = await CascadeIdeMafIdeAgentChat.RunAsync(
+                chatClient,
+                dialogMessages,
+                minimized,
+                executeIdeCommandAsync,
+                CancellationToken.None).ConfigureAwait(false);
+
+            await UiScheduler.Default.InvokeAsync(() =>
+            {
+                if (traces.Count > 0)
+                {
+                    ChatMessages.Add(new ChatMessageViewModel(
+                        "tool",
+                        string.Join("\n\n", traces),
+                        threadId: _activeThreadId));
+                }
+
+                assistantMsg = new ChatMessageViewModel("assistant", text, threadId: _activeThreadId);
+                ChatMessages.Add(assistantMsg);
+            }).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            await UiScheduler.Default.InvokeAsync(() =>
+            {
+                assistantMsg = new ChatMessageViewModel(
+                    "assistant",
+                    $"Ошибка агента (MAF): {ex.Message}",
+                    threadId: _activeThreadId);
+                ChatMessages.Add(assistantMsg);
+            }).ConfigureAwait(false);
+        }
+
+        if (assistantMsg is not null)
+            _ = PersistEventAsync(ChatHistoryEventKind.MessageCompleted, MessageSnapshot(assistantMsg));
+    }
+
+    private static bool IsUserOrAssistantRole(string role)
+        => string.Equals(role, "user", StringComparison.OrdinalIgnoreCase)
+           || string.Equals(role, "assistant", StringComparison.OrdinalIgnoreCase);
 
     private ChatMessageViewModel CreateThoughtMessage()
     {

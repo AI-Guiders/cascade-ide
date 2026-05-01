@@ -6,12 +6,15 @@ namespace CascadeIDE.Services;
 
 public sealed class OllamaService : IOllamaService
 {
+    /// <summary>Стандартный HTTP-базис нативного API Ollama (как в документации); совпадает с MAF/OllamaChatClient без кастомного хоста в настройках.</summary>
+    public const string DefaultBaseUriString = "http://localhost:11434";
+
     private readonly Uri _baseUrl;
     private readonly HttpClient _httpClient;
 
     public OllamaService(Uri? baseUrl = null)
     {
-        _baseUrl = baseUrl ?? new Uri("http://localhost:11434");
+        _baseUrl = baseUrl ?? new Uri(DefaultBaseUriString);
         _httpClient = new HttpClient { BaseAddress = _baseUrl };
     }
 
