@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CascadeIDE.ArchitectureAnal
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CascadeIDE.ArchitectureAnalyzers.Tests", "CascadeIDE.ArchitectureAnalyzers.Tests\CascadeIDE.ArchitectureAnalyzers.Tests.csproj", "{FFD883D2-7414-44D7-B6CE-811CA64E3F61}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MafSmoke", "samples\MafSmoke\MafSmoke.csproj", "{A16E9A97-A995-43D7-8C9F-181BAC723A34}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -99,6 +101,18 @@ Global
 		{FFD883D2-7414-44D7-B6CE-811CA64E3F61}.Release|x64.Build.0 = Release|Any CPU
 		{FFD883D2-7414-44D7-B6CE-811CA64E3F61}.Release|x86.ActiveCfg = Release|Any CPU
 		{FFD883D2-7414-44D7-B6CE-811CA64E3F61}.Release|x86.Build.0 = Release|Any CPU
+		{A16E9A97-A995-43D7-8C9F-181BAC723A34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A16E9A97-A995-43D7-8C9F-181BAC723A34}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A16E9A97-A995-43D7-8C9F-181BAC723A34}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A16E9A97-A995-43D7-8C9F-181BAC723A34}.Debug|x64.Build.0 = Debug|Any CPU
+		{A16E9A97-A995-43D7-8C9F-181BAC723A34}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A16E9A97-A995-43D7-8C9F-181BAC723A34}.Debug|x86.Build.0 = Debug|Any CPU
+		{A16E9A97-A995-43D7-8C9F-181BAC723A34}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A16E9A97-A995-43D7-8C9F-181BAC723A34}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A16E9A97-A995-43D7-8C9F-181BAC723A34}.Release|x64.ActiveCfg = Release|Any CPU
+		{A16E9A97-A995-43D7-8C9F-181BAC723A34}.Release|x64.Build.0 = Release|Any CPU
+		{A16E9A97-A995-43D7-8C9F-181BAC723A34}.Release|x86.ActiveCfg = Release|Any CPU
+		{A16E9A97-A995-43D7-8C9F-181BAC723A34}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -106,5 +120,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{82BFF04E-61FC-4B08-AC3B-5ECD6866BCF0} = {5D20AA90-6969-D8BD-9DCD-8634F4692FDA}
 		{456CC280-6F87-496A-8C52-4498DDE488B6} = {5D20AA90-6969-D8BD-9DCD-8634F4692FDA}
+		{A16E9A97-A995-43D7-8C9F-181BAC723A34} = {5D20AA90-6969-D8BD-9DCD-8634F4692FDA}
 	EndGlobalSection
 EndGlobal
