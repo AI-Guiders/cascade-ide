@@ -88,8 +88,6 @@
     <PackageReference Include="Avalonia.Themes.Fluent" Version="12.0.1" />
     <PackageReference Include="Avalonia.Fonts.Inter" Version="12.0.1" />
     <!-- Avalonia.Diagnostics: на NuGet нет линии 12.x (последняя 11.3.x); DevTools в проекте не подключали. При необходимости — отдельный пакет/версия под v12. -->
-    <!-- Локальная отладка AvaloniaEdit из исходников (externals/avaloniaedit, tag 12.0.0). -->
-    <PackageReference Include="AvaloniaEdit.TextMate" Version="12.0.0" />
     <PackageReference Include="Dock.Avalonia" Version="12.0.0.1" />
     <PackageReference Include="Dock.Model.Avalonia" Version="12.0.0.1" />
     <PackageReference Include="Dock.Model.Mvvm" Version="12.0.0.1" />
@@ -125,9 +123,11 @@
     <!-- Транзитивно тянулось ~0.21.2 (NU1903 GHSA-xrw6-gwf8-vvr9); явная версия поднимает граф до патча. -->
     <PackageReference Include="Tmds.DBus.Protocol" Version="0.92.0" />
   </ItemGroup>
+  <!-- AvaloniaEdit + AvaloniaEdit.TextMate только из vendored форка externals/avaloniaedit (не пакеты nuget.org). -->
   <ItemGroup>
     <ProjectReference Include="externals\acp-csharp\src\AgentClientProtocol\AgentClientProtocol.csproj" />
     <ProjectReference Include="externals\avaloniaedit\src\AvaloniaEdit\AvaloniaEdit.csproj" />
+    <ProjectReference Include="externals\avaloniaedit\src\AvaloniaEdit.TextMate\AvaloniaEdit.TextMate.csproj" />
   </ItemGroup>
   <!-- При RID вывод в net10.0/win-x64/; в корне net10.0/ часто остаётся старый apphost от прошлой сборки — Cursor/проводник открывают его и кажется «древняя» сборка. Удаляем только наши артефакты в корне TFM. -->
   <Target Name="RemoveStaleTfmRootHost" AfterTargets="Build" Condition="'$(RuntimeIdentifier)' != ''">
