@@ -514,6 +514,8 @@ public partial class ChatPanelViewModel : ViewModelBase
         var minimized = _getChatMinimizedContextBlock?.Invoke();
         minimized = string.IsNullOrWhiteSpace(minimized) ? null : minimized.Trim();
 
+        var projectRules = CascadeIdeMafProjectAgentRules.TryLoadMerged(_getWorkspaceRoot());
+
         ChatMessageViewModel? assistantMsg = null;
 
         try
@@ -522,6 +524,7 @@ public partial class ChatPanelViewModel : ViewModelBase
                 chatClient,
                 dialogMessages,
                 minimized,
+                projectRules,
                 executeIdeCommandAsync,
                 CancellationToken.None).ConfigureAwait(false);
 

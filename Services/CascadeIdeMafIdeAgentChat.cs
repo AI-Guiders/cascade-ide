@@ -17,12 +17,13 @@ internal static class CascadeIdeMafIdeAgentChat
 {
     private const int SalvageOutcomeMaxCharsForSummary = 18_000;
 
-    /// <inheritdoc cref="RunAsync(IChatClient, IReadOnlyList{ChatMessage}, string?, Func{string, IReadOnlyDictionary{string, JsonElement}?, CancellationToken, Task{string}}, CancellationToken)" />
+    /// <inheritdoc cref="RunAsync(IChatClient, IReadOnlyList{ChatMessage}, string?, string?, Func{string, IReadOnlyDictionary{string, JsonElement}?, CancellationToken, Task{string}}, CancellationToken)" />
     internal static Task<(string AssistantText, IReadOnlyList<string> ToolTraces)> RunAsync(
         Uri ollamaBaseUri,
         string modelId,
         IReadOnlyList<ChatMessage> cascadeConversation,
         string? minimizedContextBlock,
+        string? projectAgentRulesMarkdown,
         Func<string, IReadOnlyDictionary<string, JsonElement>?, CancellationToken, Task<string>> executeIdeCommandAsync,
         CancellationToken cancellationToken)
     {
@@ -31,13 +32,14 @@ internal static class CascadeIdeMafIdeAgentChat
             throw new ArgumentException("Model id is required.", nameof(modelId));
 
         Microsoft.Extensions.AI.IChatClient client = new OllamaChatClient(ollamaBaseUri, modelId.Trim());
-        return RunAsync(client, cascadeConversation, minimizedContextBlock, executeIdeCommandAsync, cancellationToken);
+        return RunAsync(client, cascadeConversation, minimizedContextBlock, projectAgentRulesMarkdown, executeIdeCommandAsync, cancellationToken);
     }
 
     public static async Task<(string AssistantText, IReadOnlyList<string> ToolTraces)> RunAsync(
         Microsoft.Extensions.AI.IChatClient chatClient,
         IReadOnlyList<ChatMessage> cascadeConversation,
         string? minimizedContextBlock,
+        string? projectAgentRulesMarkdown,
         Func<string, IReadOnlyDictionary<string, JsonElement>?, CancellationToken, Task<string>> executeIdeCommandAsync,
         CancellationToken cancellationToken)
     {
@@ -57,7 +59,7 @@ internal static class CascadeIdeMafIdeAgentChat
         var prompts = MafIdeAgentPrompts.Current;
 
         AIAgent agent = chatClient.AsAIAgent(
-            instructions: prompts.AgentSystem,
+            instructions: BuildInstructions(prompts.AgentSystem, projectAgentRulesMarkdown),
             tools: BuildMafToolList(executeIdeCommandAsync, toolTraces, includeCatalogDebugExtras));
 
         var messages = BuildMeAiMessages(cascadeConversation, minimizedContextBlock);
@@ -92,6 +94,16 @@ internal static class CascadeIdeMafIdeAgentChat
         }
 
         return (assistantText, toolTraces);
+    }
+
+    internal static string BuildInstructions(string bundledAgentSystemMarkdown, string? projectAgentRulesMarkdown)
+    {
+        var core = bundledAgentSystemMarkdown.Trim();
+        var extra = projectAgentRulesMarkdown?.Trim();
+        if (string.IsNullOrEmpty(extra))
+            return core;
+
+        return core + "\n\n---\n\n## Проектные правила (workspace)\n\n" + extra;
     }
 
     private static List<AITool> BuildMafToolList(
