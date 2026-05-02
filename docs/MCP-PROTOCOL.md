@@ -232,6 +232,7 @@
 | `debug_variables` | Переменные кадра. args: frame_index?:integer; returns: text; example: {"frame_index":0}. |
 | `delete_knowledge_file` | Удалить knowledge-файл. args: file_path:string, canon_path?:string; returns: text; example: {"file_path":"tmp.md"}. |
 | `delete_knowledge_section` | Удалить секцию из knowledge-файла. args: file_path:string, section_id:string, canon_path?:string; returns: text; example: {"file_path":"index.md","section_id":"foo"}. |
+| `fetch_web_public_url` | Загрузить публичный HTTPS-документ по URL и вернуть тело как читаемый текст (HTML упрощается до текста, поле extraction в JSON). Запрос из машины оператора; только https; локальные/частные хосты блокируются базово (не полная SSRF-защита). args: url:string, max_chars?:integer; returns: json; example: {\"url\":\"https://learn.microsoft.com/en-us/dotnet/\"}. |
 | `get_colors_under_cursor` | Цвета под курсором (прямые и effective). returns: json. |
 | `get_control_appearance` | Снимок внешнего вида контрола (под курсором или по имени). args: name?:string; returns: json; example: {"name":"BuildButton"}. |
 | `get_debug_snapshot` | JSON: канонический снимок встроенной DAP-сессии (ADR 0002). returns: json. |
@@ -253,6 +254,7 @@
 | `highlight_control` | Подсветить контрол рамкой в том окне, где он находится (главное, окно-хост Mfd и т.д.). args: name?:string; returns: text; example: {"name":"BuildButton"}. |
 | `list_knowledge_files` | Список knowledge-файлов в каталоге решения (опционально subdir). args: subdir?:string; returns: json; example: {"subdir":"work"}. |
 | `read_knowledge_file` | Прочитать knowledge-файл из каталога решения. args: file_path:string, offset?:integer, limit?:integer; returns: text; example: {"file_path":"META/integrity-core.md","offset":2,"limit":20}. |
+| `search_web_public_query` | Краткая веб-справка через открытый Instant Answer DuckDuckGo (запрос уходит во внешнюю сеть; не замена полнотекстового поиска). args: query:string; returns: json; example: {\"query\":\"C# file scoped types\"}. |
 | `send_keys` | Отправить хоткей в контрол. args: keys:string, name?:string; returns: text; example: {"keys":"Ctrl+S"}. |
 | `set_control_layout` | Изменить раскладку/позицию контрола. args: name:string, layout:string; returns: text; example: {"name":"BuildButton","layout":"{}"}. |
 | `set_control_text` | Установить текст в контроле ввода. args: name:string, text:string; returns: text; example: {"name":"ChatInput","text":"hi"}. |

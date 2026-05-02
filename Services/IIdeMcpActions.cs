@@ -31,6 +31,10 @@ public interface IIdeMcpActions
     Task<string> GetSolutionFilesAsync();
     /// <summary>Поиск текста по корню workspace через внешний <c>rg</c> (ripgrep). JSON: matches [{ path, line_number, line_text }], truncated, error?.</summary>
     Task<string> SearchWorkspaceTextAsync(string pattern, string? subPath, bool fixedString, string? glob, int maxMatches, string? rgPath);
+    /// <summary>Краткая справка из интернета (HTTPS, DuckDuckGo Instant Answer: abstract, связанные темы; без API-ключа). Запрос уходит на duckduckgo.com. JSON: query, heading, abstract_text, abstract_url, answer?, related_topics[], backend, note? | offline_or_error.</summary>
+    Task<string> SearchWebPublicQueryAsync(string query, CancellationToken cancellationToken = default);
+    /// <summary>Загрузить публичный HTTPS-документ по URL, вернуть тело как читаемый текст (HTML упрощён). JSON: url, resolved_url, text, extraction, лимиты. Только https; блок частных хостов — базовый SSRF-фильтр.</summary>
+    Task<string> FetchWebPublicUrlAsync(string url, int? maxChars, CancellationToken cancellationToken = default);
     /// <summary>Диагностики текущего открытого .cs файла (ошибки/предупреждения Roslyn). JSON: массив { id, message, severity, line, column }. Не-C# — [].</summary>
     Task<string> GetCurrentFileDiagnosticsAsync();
     /// <summary>Семантическая навигация (ADR 0039, CNC): режим <c>related</c> — список связанных файлов; <c>subgraph</c> — узлы и рёбра с капами. В JSON subgraph опционально <c>graph_kind</c> (<c>code_intent_code_navigation_map</c> | <c>related_files</c> | <c>repository_module_tree</c>, ADR 0065; устар. <c>code_intent_semantic_map</c> — принимается). Без <c>file_path</c> — якорь = текущий файл. Опционально <c>preset</c> (имя из <c>settings.toml</c> секции <c>[code_navigation]</c>), <c>include_kinds</c> / <c>exclude_kinds</c>; <c>level</c> (file/controlFlow) — override уровня карты на один вызов. JSON.</summary>
