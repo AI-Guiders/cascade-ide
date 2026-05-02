@@ -45,6 +45,7 @@
 | `MainWindowViewModel.IdeMcpActions.Git.cs` | 144 | MCP: git. |
 | `MainWindowViewModel.IdeMcpActions.Navigation.cs` | 68 | MCP: семантическая навигация (ADR 0039). |
 | `MainWindowViewModel.IdeMcpActions.UiAutomation.cs` | 170 | MCP: UI automation. |
+| `MainWindowViewModel.IdeMcpActions.Web.cs` | 10 | Реализация `IIdeMcpActions`: публичный веб-запрос (DuckDuckGo Instant Answer) и загрузка публичного URL. |
 | `MainWindowViewModel.IdeMcpActions.Workspace.cs` | 92 | MCP: workspace. |
 | `MainWindowViewModel.IdeMcpHostLifecycle.cs` | 27 | Жизненный цикл IDE MCP-хоста: `ide_ping`, перезапуск внешних MCP и stdio-сессии Cursor ACP. |
 | `MainWindowViewModel.LaunchProfiles.cs` | 116 | Селектор launch profile, импорт `launchSettings.json` (ADR 0090). |
@@ -82,7 +83,7 @@
 | `IdeMcpCommandExecutor.Handlers.DebuggerUi.cs` | 57 | Поверхность отладки. |
 | `IdeMcpCommandExecutor.Handlers.Editor.cs` | 108 | Редактор. |
 | `IdeMcpCommandExecutor.Handlers.PowerDocuments.cs` | 266 | Power / документы. |
-| `Generated/IdeMcpCommandExecutor.Generated.g.cs` | 67 | Сгенерированные хендлеры MCP → `IIdeMcpActions` (`CascadeIDE.ProtocolDocGen`). |
+| `Generated/IdeMcpCommandExecutor.Generated.g.cs` | 69 | Сгенерированные хендлеры MCP → `IIdeMcpActions` (`CascadeIDE.ProtocolDocGen`). |
 
 <!-- AUTO:MAIN-WINDOW-SLICE:EXEC-TABLE:END -->
 

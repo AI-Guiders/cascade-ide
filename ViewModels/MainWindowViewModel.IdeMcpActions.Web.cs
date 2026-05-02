@@ -2,8 +2,8 @@
 
 namespace CascadeIDE.ViewModels;
 
-/// <summary>Реализация <see cref="Services.IIdeMcpActions"/>: публичный веб-запрос (DuckDuckGo Instant Answer).</summary>
-partial class MainWindowViewModel
+/// <summary>Реализация <see cref="Services.IIdeMcpActions"/>: публичный веб-запрос (DuckDuckGo Instant Answer) и загрузка публичного URL.</summary>
+public partial class MainWindowViewModel
 {
     Task<string> Services.IIdeMcpActions.SearchWebPublicQueryAsync(string query, CancellationToken cancellationToken) =>
         Services.WebPublicSearchClient.FetchDdgInstantAnswerJsonAsync(query, cancellationToken);
