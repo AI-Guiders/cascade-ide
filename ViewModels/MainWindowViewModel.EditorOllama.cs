@@ -25,6 +25,12 @@ public partial class MainWindowViewModel
     [ObservableProperty]
     private string? _selectedOllamaModel;
 
+    /// <summary>Идентификатор модели Ollama как для чата: выбор в UI, иначе <c>[ai.local.ollama].model</c>.</summary>
+    public string EffectiveOllamaModelId =>
+        !string.IsNullOrWhiteSpace(SelectedOllamaModel) && SelectedOllamaModel != InstallNewSentinel
+            ? SelectedOllamaModel
+            : (_settings.Ai.Local.Ollama.Model ?? "qwen2.5-coder:7b");
+
     /// <summary>Краткое описание выбранной модели (размер, контекст, возможности) из Ollama API.</summary>
     [ObservableProperty]
     private string _selectedModelDetails = "";

@@ -31,6 +31,8 @@ internal static class IdeMcpToolCatalogFull
     private static readonly string[] s_reqKeys = ["keys"];
     private static readonly string[] s_reqPanel = ["panel"];
     private static readonly string[] s_reqContent = ["content"];
+    private static readonly string[] s_reqQuery = ["query"];
+    private static readonly string[] s_reqUrl = ["url"];
     private static readonly string[] s_reqCommandId = ["command_id"];
     private static readonly string[] s_reqParentNameControlType = ["parent_name", "control_type"];
 
@@ -253,6 +255,34 @@ internal static class IdeMcpToolCatalogFull
                 Name = "ide_get_solution_files",
                 Description = "Файлы и дерево решения. file_entries — массив { path, title, relative_path } (relative_path от каталога решения). solution_tree — иерархия (solution → projects → folders → files) с теми же полями. Для поиска .md или узла по пути и открытия через ide_open_file.",
                 InputSchema = s_emptyObjectInputSchema
+            },
+            new()
+            {
+                Name = "ide_search_web_public_query",
+                Description =
+                    "Краткая справка из интернета (HTTPS, DuckDuckGo Instant Answer: краткий abstract и связанные темы). Не полнотекстовый поисковик и не истина по умолчанию: дополнять фактами только после чтения JSON. Запрос уходит на duckduckgo.com — учитывай приватность. Без сети вернётся offline_or_error. Для содержимого репозитория — ide_search_workspace_text.",
+                InputSchema = Schema(new
+                {
+                    type = "object",
+                    properties = new { query = new { type = "string", description = "Поисковая строка или вопрос (по-русски или по-английски)." } },
+                    required = s_reqQuery
+                })
+            },
+            new()
+            {
+                Name = "ide_fetch_web_public_url",
+                Description =
+                    "Загрузить документ по публичному HTTPS URL и вернуть читаемый текст (аналог Cursor Fetch). HTML упрощается до текста; JSON/XML/обычный текст — как UTF-8. Запрос уходит из машины оператора (приватность, корпоративные ограничения). Только https; локальные и частные IP/localhost блокируются поверхностно (не замена корпоративного egress-фильтра). Ответ ограничен по размеру скачанного тела и по max_chars. Для общих формулировок без конкретного URL — ide_search_web_public_query.",
+                InputSchema = Schema(new
+                {
+                    type = "object",
+                    properties = new
+                    {
+                        url = new { type = "string", description = "Абсолютный https URL страницы или сырья (docs, спецификация)." },
+                        max_chars = new { type = "integer", description = "Максимум символов в поле text после извлечения (по умолчанию 200000, максимум 1000000)." }
+                    },
+                    required = s_reqUrl
+                })
             },
             new()
             {

@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Text.Json;
 using System.Threading;
+using Microsoft.Extensions.AI;
 using Avalonia.Threading;
 using CascadeIDE.Features.AutonomousAgent;
 using CascadeIDE.Features.Build;
@@ -120,6 +121,8 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _codeNavigationMapLevel = CodeNavigationMapLevelKind.Normalize(_settings.CodeNavigationMap.Depth);
         _workspaceSplittersLocked = _settings.Workspace.SplittersLocked;
 
+        _ideMcpExecutor = new IdeMcpCommandExecutor(this);
+
         BuildOutputPanel = new BuildOutputPanelViewModel();
         TerminalPanel = new TerminalPanelViewModel(() => Workspace.SolutionPath);
         GitPanel = new GitPanelViewModel(_gitRunner, GetWorkspacePath, this, LoadSolution, RefreshGitSummaryAsync);
@@ -143,7 +146,12 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             {
                 if (ShowTerminalPanelCommand.CanExecute(null))
                     ShowTerminalPanelCommand.Execute(null);
-            }));
+            }),
+            executeIdeCommandForMafAgent: (commandId, args, ct) => ((Services.IIdeMcpActions)this).ExecuteCommandAsync(commandId, args, ct),
+            getLocalOllamaEndpoint: () => new Uri(Services.OllamaService.DefaultBaseUriString),
+            getEffectiveOllamaModelId: () => EffectiveOllamaModelId,
+            tryCreateCloudMafIChatClient: TryCreateCloudMafIChatClientForChatPanel,
+            getChatMinimizedContextBlock: BuildChatMinimizedContextBlockCore);
         InstrumentationPanel = new InstrumentationPanelViewModel();
         InstrumentationPanel.PropertyChanged += OnInstrumentationPanelPropertyChanged;
         HypothesesPanel = new HypothesesPanelViewModel(GetWorkspacePath);
@@ -177,7 +185,6 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             UiScheduler.Default.Post(ApplyDapDebugSnapshotToUi);
         }, _ideDataBus);
         _dapDebug.StateChanged += (_, _) => NotifyDebugRelayCommandsChanged();
-        _ideMcpExecutor = new IdeMcpCommandExecutor(this);
         _mcpBuildTest = new Services.McpDotnetBuildTestService(_dotnetRunner);
         _mcpAgentNotes = new Services.McpAgentNotesService();
 
@@ -348,6 +355,25 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         }
     }
 
+    private Microsoft.Extensions.AI.IChatClient? TryCreateCloudMafIChatClientForChatPanel()
+    {
+        return ActiveAiProvider switch
+        {
+            "Anthropic" => Services.CascadeIdeMafChatClientFactories.CreateAnthropicChatClientOrNull(
+                AnthropicApiKey,
+                _settings.Ai.Cloud.Anthropic.Model),
+            "OpenAI" => Services.CascadeIdeMafChatClientFactories.CreateOpenAiCompatibleChatClientOrNull(
+                OpenAiApiKey,
+                _settings.Ai.Cloud.OpenAi.BaseUrl,
+                _settings.Ai.Cloud.OpenAi.Model),
+            "DeepSeek" => Services.CascadeIdeMafChatClientFactories.CreateOpenAiCompatibleChatClientOrNull(
+                DeepSeekApiKey,
+                _settings.Ai.Cloud.DeepSeek.BaseUrl,
+                _settings.Ai.Cloud.DeepSeek.Model),
+            _ => null,
+        };
+    }
+
     private (Services.IAiChatProvider? Provider, string Model) ResolveProvider(string providerKey)
     {
         var key = providerKey ?? _settings.Ai.ResolveEffectiveProviderUiKey();
@@ -414,6 +440,16 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _ = RestartCSharpLanguageServerAsync();
         _ = RestartMarkdownLanguageServerAsync();
         HypothesesPanel.LoadFromWorkspace();
+    }
+
+    private string? BuildChatMinimizedContextBlockCore()
+    {
+        if (!UseMinimizedContext)
+            return null;
+        if (string.IsNullOrEmpty(CurrentFilePath) || string.IsNullOrEmpty(EditorText))
+            return null;
+        var minimized = _contextMinimizer.Minimize(CurrentFilePath, EditorText, CancellationToken.None);
+        return string.IsNullOrWhiteSpace(minimized) ? null : minimized;
     }
 
     /// <summary>MCP и агент вызывают с фона; весь разбор команд и доступ к VM — на UI-потоке. Тяжёлые операции внутри хендлеров сами уходят с UI (<c>ConfigureAwait(false)</c>, <c>Task.Run</c>, <c>Post</c> обратно).</summary>

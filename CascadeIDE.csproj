@@ -57,6 +57,7 @@
     <Content Include="Hotkeys\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="IntentMelody\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="CodeNavigation\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="AiPrompts\maf-ide-agent.prompts.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <!-- Шипнутые дефолты: копия на диске (override) + встроенный ресурс, если файла нет. -->
     <EmbeddedResource Include="CodeNavigation\presets.toml" />
     <EmbeddedResource Include="Cockpit\DataBus\databus-event-policy.toml" />
@@ -65,6 +66,7 @@
     <EmbeddedResource Include="UiModes\*.toml" />
     <EmbeddedResource Include="Hotkeys\hotkeys.toml" />
     <EmbeddedResource Include="IntentMelody\intent-melody-aliases.toml" />
+    <EmbeddedResource Include="AiPrompts\maf-ide-agent.prompts.md" />
     <EmbeddedResource Include="TextMateGrammars\toml\package.json" />
     <EmbeddedResource Include="TextMateGrammars\toml\syntaxes\toml.tmLanguage.json" />
     <Content Include="TextMateGrammars\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
@@ -86,8 +88,6 @@
     <PackageReference Include="Avalonia.Themes.Fluent" Version="12.0.1" />
     <PackageReference Include="Avalonia.Fonts.Inter" Version="12.0.1" />
     <!-- Avalonia.Diagnostics: на NuGet нет линии 12.x (последняя 11.3.x); DevTools в проекте не подключали. При необходимости — отдельный пакет/версия под v12. -->
-    <!-- Локальная отладка AvaloniaEdit из исходников (externals/avaloniaedit, tag 12.0.0). -->
-    <PackageReference Include="AvaloniaEdit.TextMate" Version="12.0.0" />
     <PackageReference Include="Dock.Avalonia" Version="12.0.0.1" />
     <PackageReference Include="Dock.Model.Avalonia" Version="12.0.0.1" />
     <PackageReference Include="Dock.Model.Mvvm" Version="12.0.0.1" />
@@ -96,6 +96,8 @@
     <PackageReference Include="Eto.Parse" Version="1.6.0" />
     <PackageReference Include="Markdig" Version="1.1.2" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="Anthropic" Version="12.13.0" />
+    <PackageReference Include="Microsoft.Agents.AI.OpenAI" Version="1.3.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="5.3.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="5.3.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.6">
@@ -103,8 +105,11 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.6" />
+    <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.5.0" />
     <PackageReference Include="Microsoft.VisualStudio.SolutionPersistence" Version="1.0.52" />
-    <PackageReference Include="Microsoft.Extensions.AI" Version="10.4.1" />
+    <PackageReference Include="Microsoft.Agents.AI" Version="1.3.0" />
+    <PackageReference Include="Microsoft.Extensions.AI" Version="10.5.0" />
+    <PackageReference Include="Microsoft.Extensions.AI.Ollama" Version="9.7.0-preview.1.25356.2" />
     <PackageReference Include="ModelContextProtocol" Version="1.2.0" />
     <PackageReference Include="OllamaSharp" Version="5.4.25" />
     <PackageReference Include="OutWit.Common" Version="1.3.2" />
@@ -118,9 +123,11 @@
     <!-- Транзитивно тянулось ~0.21.2 (NU1903 GHSA-xrw6-gwf8-vvr9); явная версия поднимает граф до патча. -->
     <PackageReference Include="Tmds.DBus.Protocol" Version="0.92.0" />
   </ItemGroup>
+  <!-- AvaloniaEdit + AvaloniaEdit.TextMate только из vendored форка externals/avaloniaedit (не пакеты nuget.org). -->
   <ItemGroup>
     <ProjectReference Include="externals\acp-csharp\src\AgentClientProtocol\AgentClientProtocol.csproj" />
     <ProjectReference Include="externals\avaloniaedit\src\AvaloniaEdit\AvaloniaEdit.csproj" />
+    <ProjectReference Include="externals\avaloniaedit\src\AvaloniaEdit.TextMate\AvaloniaEdit.TextMate.csproj" />
   </ItemGroup>
   <!-- При RID вывод в net10.0/win-x64/; в корне net10.0/ часто остаётся старый apphost от прошлой сборки — Cursor/проводник открывают его и кажется «древняя» сборка. Удаляем только наши артефакты в корне TFM. -->
   <Target Name="RemoveStaleTfmRootHost" AfterTargets="Build" Condition="'$(RuntimeIdentifier)' != ''">

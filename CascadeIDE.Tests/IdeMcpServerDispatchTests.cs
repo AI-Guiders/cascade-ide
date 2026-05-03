@@ -113,6 +113,8 @@ public sealed class IdeMcpServerDispatchTests
         public string GetSolutionInfo() => throw new NotImplementedException();
         public Task<string> GetSolutionFilesAsync() => throw new NotImplementedException();
         public Task<string> SearchWorkspaceTextAsync(string pattern, string? subPath, bool fixedString, string? glob, int maxMatches, string? rgPath) => throw new NotImplementedException();
+        public Task<string> SearchWebPublicQueryAsync(string query, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<string> FetchWebPublicUrlAsync(string url, int? maxChars, CancellationToken cancellationToken = default) => throw new NotImplementedException();
         public Task<string> GetCurrentFileDiagnosticsAsync() => throw new NotImplementedException();
         public Task<string> GetCodeNavigationContextAsync(string mode, string? filePath, int? line, int? column, int? maxRelated, int? maxNodes, int? maxEdges, string? preset, IReadOnlyList<string>? includeKinds, IReadOnlyList<string>? excludeKinds, string? level) => throw new NotImplementedException();
         public Task<string> BuildAsync() => throw new NotImplementedException();
