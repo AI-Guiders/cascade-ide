@@ -37,5 +37,4 @@ docs/adr/_patch_*.py
 .tools/cursor-agent-package/
 .tools/acp-registry-snapshot.json
 
-# Внешний репозиторий AvaloniaEdit используется локально для экспериментов.
-externals/avaloniaedit/
+# AvaloniaEdit: git submodule → externals/avaloniaedit (см. .gitmodules).

@@ -1,0 +1,4 @@
+[submodule "externals/avaloniaedit"]
+	path = externals/avaloniaedit
+	url = https://github.com/KarataevDmitry/AvaloniaEdit.git
+	branch = fix/cross-assembly-mergeresource-include-avares
