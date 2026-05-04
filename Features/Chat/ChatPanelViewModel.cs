@@ -520,7 +520,7 @@ public partial class ChatPanelViewModel : ViewModelBase
 
         try
         {
-            var (text, traces) = await CascadeIdeMafIdeAgentChat.RunAsync(
+            var (text, toolUiBubbles) = await CascadeIdeMafIdeAgentChat.RunAsync(
                 chatClient,
                 dialogMessages,
                 minimized,
@@ -530,11 +530,11 @@ public partial class ChatPanelViewModel : ViewModelBase
 
             await UiScheduler.Default.InvokeAsync(() =>
             {
-                if (traces.Count > 0)
+                foreach (var bubble in toolUiBubbles)
                 {
                     ChatMessages.Add(new ChatMessageViewModel(
                         "tool",
-                        string.Join("\n\n", traces),
+                        bubble,
                         threadId: _activeThreadId));
                 }
 
