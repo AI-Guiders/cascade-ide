@@ -506,7 +506,7 @@ public partial class ChatPanelViewModel : ViewModelBase
         IChatClient chatClient)
     {
         var dialogMessages = ChatMessages.Take(ChatMessages.Count - 1)
-            .Where(m => IsUserOrAssistantRole(m.Role))
+            .Where(m => IsUserOrAssistantOrToolForMafHistory(m.Role))
             .Select(m => new CascadeConversationMessage(m.Role, m.Content))
             .Append(new CascadeConversationMessage("user", input))
             .ToList();
@@ -561,6 +561,11 @@ public partial class ChatPanelViewModel : ViewModelBase
     private static bool IsUserOrAssistantRole(string role)
         => string.Equals(role, "user", StringComparison.OrdinalIgnoreCase)
            || string.Equals(role, "assistant", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>Роли, которые уходят в <see cref="CascadeIdeMafIdeAgentChat.RunAsync"/> как история (в т.ч. <c>tool</c> → <see cref="Microsoft.Extensions.AI.ChatRole.Tool"/> с усечением в сборщике сообщений).</summary>
+    private static bool IsUserOrAssistantOrToolForMafHistory(string role)
+        => IsUserOrAssistantRole(role)
+           || string.Equals(role, "tool", StringComparison.OrdinalIgnoreCase);
 
     private ChatMessageViewModel CreateThoughtMessage()
     {

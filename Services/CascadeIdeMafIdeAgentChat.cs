@@ -19,6 +19,11 @@ internal static class CascadeIdeMafIdeAgentChat
 {
     internal const int SalvageOutcomeMaxCharsForSummary = 18_000;
 
+    /// <summary>
+    /// Макс. длина одного сообщения с ролью <c>tool</c> при сборке истории для MAF/Ollama (малый контекст — не забиваем окно длинными трассами UI).
+    /// </summary>
+    internal const int MafHistoryToolBubbleMaxChars = 960;
+
     /// <inheritdoc cref="RunAsync(IChatClient, IReadOnlyList{ChatMessage}, string?, string?, Func{string, IReadOnlyDictionary{string, JsonElement}?, CancellationToken, Task{string}}, CancellationToken)" />
     internal static Task<(string AssistantText, IReadOnlyList<string> ToolUiBubbles)> RunAsync(
         Uri ollamaBaseUri,
@@ -243,12 +248,30 @@ internal static class CascadeIdeMafIdeAgentChat
 
         foreach (var m in cascadeConversation)
         {
+            if (string.Equals(m.Role, "tool", StringComparison.OrdinalIgnoreCase))
+            {
+                var toolText = ClampForMafHistory(m.Content ?? "", MafHistoryToolBubbleMaxChars);
+                if (toolText.Length > 0)
+                    list.Add(new MeAiChat(MeAiRole.Tool, toolText));
+                continue;
+            }
+
             if (!TryMapRole(m.Role, out var r))
                 continue;
             list.Add(new MeAiChat(r, m.Content ?? ""));
         }
 
         return list;
+    }
+
+    private static string ClampForMafHistory(string text, int maxChars)
+    {
+        text = text.Trim();
+        if (text.Length == 0)
+            return "";
+        if (text.Length <= maxChars)
+            return text;
+        return text[..maxChars].TrimEnd() + "\n… [усечено для контекста]";
     }
 
     private static bool TryMapRole(string role, out MeAiRole r)
