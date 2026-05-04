@@ -12,7 +12,7 @@
                  MaxWidth="400"
                  FontFamily="Consolas,Cascadia Mono,Courier New,monospace"
                  FontSize="13"
-                 Watermark="{Binding CascadeChordHudWatermark}"
+                 PlaceholderText="{Binding CascadeChordHudWatermark}"
                  Text="{Binding CascadeChordHudMelodyText, Mode=TwoWay}"
                  IsEnabled="{Binding IsCascadeChordOverlayVisible}"
                  ToolTip.Tip="{Binding CascadeChordOverlayCompactFooter}"/>
