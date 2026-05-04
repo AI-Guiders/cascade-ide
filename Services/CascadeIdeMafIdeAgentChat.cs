@@ -1,5 +1,7 @@
 #nullable enable
+using System.Collections;
 using System.ComponentModel;
+using System.Text;
 using System.Text.Json;
 using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
@@ -15,10 +17,10 @@ namespace CascadeIDE.Services;
 /// </summary>
 internal static class CascadeIdeMafIdeAgentChat
 {
-    private const int SalvageOutcomeMaxCharsForSummary = 18_000;
+    internal const int SalvageOutcomeMaxCharsForSummary = 18_000;
 
     /// <inheritdoc cref="RunAsync(IChatClient, IReadOnlyList{ChatMessage}, string?, string?, Func{string, IReadOnlyDictionary{string, JsonElement}?, CancellationToken, Task{string}}, CancellationToken)" />
-    internal static Task<(string AssistantText, IReadOnlyList<string> ToolTraces)> RunAsync(
+    internal static Task<(string AssistantText, IReadOnlyList<string> ToolUiBubbles)> RunAsync(
         Uri ollamaBaseUri,
         string modelId,
         IReadOnlyList<ChatMessage> cascadeConversation,
@@ -35,7 +37,11 @@ internal static class CascadeIdeMafIdeAgentChat
         return RunAsync(client, cascadeConversation, minimizedContextBlock, projectAgentRulesMarkdown, executeIdeCommandAsync, cancellationToken);
     }
 
-    public static async Task<(string AssistantText, IReadOnlyList<string> ToolTraces)> RunAsync(
+    /// <summary>
+    /// Запуск агента MAF. <paramref name="ToolUiBubbles"/> — по одному элементу на шаг инструмента для панели чата
+    /// (отдельные пузыри «Инструмент»); при совпадении числа с <see cref="FunctionCallContent"/> в ответе сверху добавляется блок параметров.
+    /// </summary>
+    public static async Task<(string AssistantText, IReadOnlyList<string> ToolUiBubbles)> RunAsync(
         Microsoft.Extensions.AI.IChatClient chatClient,
         IReadOnlyList<ChatMessage> cascadeConversation,
         string? minimizedContextBlock,
@@ -64,7 +70,7 @@ internal static class CascadeIdeMafIdeAgentChat
 
         var messages = BuildMeAiMessages(cascadeConversation, minimizedContextBlock);
         if (messages.Count == 0)
-            return ("Нет сообщений для модели.", toolTraces);
+            return ("Нет сообщений для модели.", []);
 
         var response = await agent.RunAsync(messages, cancellationToken: cancellationToken).ConfigureAwait(false);
         var assistantText = ExtractAssistantText(response);
@@ -93,7 +99,8 @@ internal static class CascadeIdeMafIdeAgentChat
             }
         }
 
-        return (assistantText, toolTraces);
+        var uiBubbles = BuildToolUiBubbles(response, toolTraces);
+        return (assistantText, uiBubbles);
     }
 
     internal static string BuildInstructions(string bundledAgentSystemMarkdown, string? projectAgentRulesMarkdown)
@@ -156,8 +163,8 @@ internal static class CascadeIdeMafIdeAgentChat
                 {
                     var argsDict = CascadeIdeMafPromotedTools.JsonArgsToDict(arguments);
                     var outcome = await exec(commandId, argsDict, cancellationToken).ConfigureAwait(false);
-                    toolTraces[^1] = $"{traceHeader} → {SummarizeOutcome(outcome)}";
-                    return outcome;
+                    toolTraces[^1] = IdeMcpToolResultPlainFormatter.ForUiTrace(tool.Name, outcome);
+                    return IdeMcpToolResultPlainFormatter.ForModel(tool.Name, outcome);
                 }
                 catch (OperationCanceledException)
                 {
@@ -208,8 +215,8 @@ internal static class CascadeIdeMafIdeAgentChat
                 {
                     var args = IdeCommandRegistry.ParseArgs(string.IsNullOrWhiteSpace(args_json) ? null : args_json.Trim());
                     var outcome = await exec(command_id, args, cancellationToken).ConfigureAwait(false);
-                    toolTraces[^1] = $"{traceHeader} → {SummarizeOutcome(outcome)}";
-                    return outcome;
+                    toolTraces[^1] = IdeMcpToolResultPlainFormatter.ForUiTrace(command_id, outcome);
+                    return IdeMcpToolResultPlainFormatter.ForModel(command_id, outcome);
                 }
                 catch (OperationCanceledException)
                 {
@@ -225,13 +232,6 @@ internal static class CascadeIdeMafIdeAgentChat
             name: "execute_ide_command",
             description:
             "То же что MCP ide_execute_command: command_id + опционально args_json объектом параметров или пусто.");
-    }
-
-    private static string SummarizeOutcome(string outcome)
-    {
-        if (outcome.Length <= 420)
-            return outcome;
-        return outcome[..380] + "… (" + outcome.Length + " симв.)";
     }
 
     private static List<MeAiChat> BuildMeAiMessages(IReadOnlyList<ChatMessage> cascadeConversation, string? minimizedContextBlock)
@@ -296,10 +296,7 @@ internal static class CascadeIdeMafIdeAgentChat
         if (toolOutcome.Length == 0)
             return toolOutcome;
 
-        string payload = toolOutcome.Length <= SalvageOutcomeMaxCharsForSummary
-            ? toolOutcome
-            : toolOutcome[..SalvageOutcomeMaxCharsForSummary] +
-              $"\n… (обрезано до {SalvageOutcomeMaxCharsForSummary} симв.; всего {toolOutcome.Length}.)\n";
+        string payload = IdeMcpToolResultPlainFormatter.ForSalvagePayload(toolOutcome, SalvageOutcomeMaxCharsForSummary);
 
         string userQuery =
             GetLastCascadeUserMessagePlain(cascadeConversation) ?? "(нет текста последнего сообщения пользователя)";
@@ -433,7 +430,7 @@ internal static class CascadeIdeMafIdeAgentChat
         {
             var argsDict = CascadeIdeMafPromotedTools.JsonArgsToDict(arguments);
             var outcome = await exec(commandId, argsDict, ct).ConfigureAwait(false);
-            toolTraces[^1] = $"{traceHeader} salvage → {SummarizeOutcome(outcome)}";
+            toolTraces[^1] = IdeMcpToolResultPlainFormatter.ForUiTrace(toolName + " (salvage)", outcome);
             return outcome;
         }
         catch (OperationCanceledException)
@@ -483,7 +480,7 @@ internal static class CascadeIdeMafIdeAgentChat
         {
             var args = IdeCommandRegistry.ParseArgs(string.IsNullOrWhiteSpace(argsJson) ? null : argsJson.Trim());
             var outcome = await exec(commandId, args, ct).ConfigureAwait(false);
-            toolTraces[^1] = $"{traceHeader} salvage → {SummarizeOutcome(outcome)}";
+            toolTraces[^1] = IdeMcpToolResultPlainFormatter.ForUiTrace(commandId + " (salvage)", outcome);
             return outcome;
         }
         catch (OperationCanceledException)
@@ -495,6 +492,166 @@ internal static class CascadeIdeMafIdeAgentChat
         {
             toolTraces[^1] = $"{traceHeader} salvage → ошибка: {ex.Message}";
             return $"[execute_ide_command] ошибка (salvage): {ex.Message}";
+        }
+    }
+
+    /// <summary>Один элемент — один пузырь «Инструмент» в UI; при возможности дополняет трассу параметрами из <see cref="FunctionCallContent"/>.</summary>
+    private static IReadOnlyList<string> BuildToolUiBubbles(AgentResponse response, List<string> toolTraces)
+    {
+        if (toolTraces.Count == 0)
+            return [];
+
+        var calls = ExtractOrderedFunctionCalls(response);
+        var hasSalvageOrRecap = toolTraces.Exists(static t =>
+            t.Contains("salvage", StringComparison.OrdinalIgnoreCase));
+
+        if (!hasSalvageOrRecap && calls.Count == toolTraces.Count)
+        {
+            var merged = new List<string>(toolTraces.Count);
+            for (var i = 0; i < toolTraces.Count; i++)
+            {
+                var argsBlock = FormatArgsBlockForUi(calls[i].Name, calls[i].ArgsJson);
+                merged.Add(string.IsNullOrEmpty(argsBlock) ? toolTraces[i] : $"{argsBlock}\n\n{toolTraces[i]}");
+            }
+
+            return merged;
+        }
+
+        return [.. toolTraces];
+    }
+
+    private static string FormatArgsBlockForUi(string toolName, string argsJson)
+    {
+        var trimmed = argsJson.Trim();
+        if (trimmed is "" or "{}")
+            return "";
+
+        const int max = 1200;
+        if (trimmed.Length > max)
+            trimmed = trimmed[..max] + "\n…";
+
+        return $"Параметры `{toolName}`:\n{trimmed}";
+    }
+
+    private static List<(string Name, string ArgsJson)> ExtractOrderedFunctionCalls(AgentResponse response)
+    {
+        var list = new List<(string Name, string ArgsJson)>();
+        if (response.Messages is not { Count: > 0 })
+            return list;
+
+        foreach (var m in response.Messages)
+        {
+            foreach (var c in m.Contents)
+            {
+                if (c is FunctionCallContent { InformationalOnly: false } fcc)
+                {
+                    var argsJson = SerializeArgumentsForUi((object?)fcc.Arguments);
+                    list.Add((fcc.Name, argsJson));
+                }
+            }
+        }
+
+        return list;
+    }
+
+    private static string SerializeArgumentsForUi(object? arguments)
+    {
+        if (arguments is null)
+            return "{}";
+
+        try
+        {
+            using var stream = new MemoryStream();
+            using (var writer = new Utf8JsonWriter(stream, new JsonWriterOptions { Indented = true }))
+            {
+                writer.WriteStartObject();
+                switch (arguments)
+                {
+                    case IDictionary<string, object?> d:
+                        foreach (var kv in d)
+                        {
+                            writer.WritePropertyName(kv.Key);
+                            WriteJsonValue(writer, kv.Value);
+                        }
+
+                        break;
+                    case IDictionary legacy:
+                        foreach (DictionaryEntry e in legacy)
+                        {
+                            writer.WritePropertyName(e.Key?.ToString() ?? "");
+                            WriteJsonValue(writer, e.Value);
+                        }
+
+                        break;
+                    default:
+                        writer.WritePropertyName("_");
+                        WriteJsonValue(writer, arguments);
+                        break;
+                }
+
+                writer.WriteEndObject();
+            }
+
+            return Encoding.UTF8.GetString(stream.ToArray());
+        }
+        catch
+        {
+            return "{}";
+        }
+    }
+
+    private static void WriteJsonValue(Utf8JsonWriter writer, object? value)
+    {
+        switch (value)
+        {
+            case null:
+                writer.WriteNullValue();
+                break;
+            case string s:
+                writer.WriteStringValue(s);
+                break;
+            case bool b:
+                writer.WriteBooleanValue(b);
+                break;
+            case byte n:
+                writer.WriteNumberValue(n);
+                break;
+            case sbyte n:
+                writer.WriteNumberValue(n);
+                break;
+            case short n:
+                writer.WriteNumberValue(n);
+                break;
+            case ushort n:
+                writer.WriteNumberValue(n);
+                break;
+            case int n:
+                writer.WriteNumberValue(n);
+                break;
+            case uint n:
+                writer.WriteNumberValue(n);
+                break;
+            case long n:
+                writer.WriteNumberValue(n);
+                break;
+            case ulong n:
+                writer.WriteNumberValue(n);
+                break;
+            case float n:
+                writer.WriteNumberValue(n);
+                break;
+            case double n:
+                writer.WriteNumberValue(n);
+                break;
+            case decimal n:
+                writer.WriteNumberValue(n);
+                break;
+            case JsonElement je:
+                je.WriteTo(writer);
+                break;
+            default:
+                writer.WriteStringValue(value.ToString());
+                break;
         }
     }
 
