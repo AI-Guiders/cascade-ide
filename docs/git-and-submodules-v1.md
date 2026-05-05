@@ -44,3 +44,8 @@
 ## Версионирование документа
 
 - **v1** — зафиксированы принципы и критерии; по мере появления UI детали можно уточнять (имена панелей, MCP-тулов для submodule — отдельными дополнениями).
+
+## Operational runbook
+
+- For recurring `AVLN2000` regressions caused by remote/submodule drift, use:
+  - `docs/setup/avln2000-submodule-sync-checklist.md`
