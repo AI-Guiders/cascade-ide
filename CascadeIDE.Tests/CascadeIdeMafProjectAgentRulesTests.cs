@@ -37,9 +37,51 @@ public sealed class CascadeIdeMafProjectAgentRulesTests
     [Fact]
     public void BuildInstructions_AppendsProjectBlockWhenProvided()
     {
-        var merged = CascadeIdeMafIdeAgentChat.BuildInstructions("CORE", "## rule\nhello");
+        var prompts = new MafIdeAgentPrompts.PromptPack(
+            AgentSystem: "CORE",
+            SalvageRecapSystem: "S",
+            SalvageUserMessageTemplate: "{{USER_QUERY}}\n{{TOOL_PAYLOAD}}",
+            OptionalSections: new Dictionary<string, string>
+            {
+                ["pack_mode_debug"] = "DEBUG PACK",
+                ["pack_domain_csharp_roslyn"] = "ROSLYN PACK",
+            });
+        var merged = CascadeIdeMafIdeAgentChat.BuildInstructions(
+            prompts,
+            cascadeConversation:
+            [
+                new ChatMessage("user", "Приложение падает в .cs файле, помоги с debug"),
+            ],
+            minimizedContextBlock: "Program.cs: exception",
+            projectAgentRulesMarkdown: "## rule\nhello");
         Assert.Contains("CORE", merged, StringComparison.Ordinal);
         Assert.Contains("Проектные правила", merged, StringComparison.Ordinal);
         Assert.Contains("hello", merged, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void PromptPackRouter_SelectsPacks_ForClearDebugAndCSharpSignal()
+    {
+        var prompts = new MafIdeAgentPrompts.PromptPack(
+            AgentSystem: "CORE",
+            SalvageRecapSystem: "S",
+            SalvageUserMessageTemplate: "{{USER_QUERY}}\n{{TOOL_PAYLOAD}}",
+            OptionalSections: new Dictionary<string, string>
+            {
+                ["pack_mode_debug"] = "DEBUG PACK",
+                ["pack_domain_csharp_roslyn"] = "ROSLYN PACK",
+            });
+
+        var route = MafPromptPackRouter.Route(
+            prompts,
+            [
+                new ChatMessage("tool", "error: null reference"),
+                new ChatMessage("user", "Fix debug bug in .cs class, stack error in service"),
+            ],
+            minimizedContextBlock: "using System;\nclass Service {}",
+            budgetChars: 1_200);
+
+        Assert.True(route.Selections.Count > 0);
+        Assert.Contains(route.Selections, s => string.Equals(s.Key, "pack_mode_debug", StringComparison.Ordinal));
     }
 }

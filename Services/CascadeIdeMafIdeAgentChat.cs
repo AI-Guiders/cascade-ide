@@ -18,6 +18,7 @@ namespace CascadeIDE.Services;
 internal static class CascadeIdeMafIdeAgentChat
 {
     internal const int SalvageOutcomeMaxCharsForSummary = 18_000;
+    internal const int MafDynamicPromptPacksMaxChars = 2_200;
 
     /// <summary>
     /// Макс. длина одного сообщения с ролью <c>tool</c> при сборке истории для MAF/Ollama (малый контекст — не забиваем окно длинными трассами UI).
@@ -70,7 +71,7 @@ internal static class CascadeIdeMafIdeAgentChat
         var prompts = MafIdeAgentPrompts.Current;
 
         AIAgent agent = chatClient.AsAIAgent(
-            instructions: BuildInstructions(prompts.AgentSystem, projectAgentRulesMarkdown),
+            instructions: BuildInstructions(prompts, cascadeConversation, minimizedContextBlock, projectAgentRulesMarkdown),
             tools: BuildMafToolList(executeIdeCommandAsync, toolTraces, includeCatalogDebugExtras));
 
         var messages = BuildMeAiMessages(cascadeConversation, minimizedContextBlock);
@@ -108,14 +109,36 @@ internal static class CascadeIdeMafIdeAgentChat
         return (assistantText, uiBubbles);
     }
 
-    internal static string BuildInstructions(string bundledAgentSystemMarkdown, string? projectAgentRulesMarkdown)
+    internal static string BuildInstructions(
+        MafIdeAgentPrompts.PromptPack prompts,
+        IReadOnlyList<ChatMessage> cascadeConversation,
+        string? minimizedContextBlock,
+        string? projectAgentRulesMarkdown)
     {
-        var core = bundledAgentSystemMarkdown.Trim();
-        var extra = projectAgentRulesMarkdown?.Trim();
-        if (string.IsNullOrEmpty(extra))
-            return core;
+        var core = prompts.AgentSystem.Trim();
+        var sb = new StringBuilder(core);
 
-        return core + "\n\n---\n\n## Проектные правила (workspace)\n\n" + extra;
+        var route = MafPromptPackRouter.Route(prompts, cascadeConversation, minimizedContextBlock, MafDynamicPromptPacksMaxChars);
+        if (route.Selections.Count > 0)
+        {
+            sb.Append("\n\n---\n\n## Routing Abstraction State\n\n");
+            sb.Append(MafPromptPackRouter.FormatRoutingStateForPrompt(route.State));
+            sb.Append("\n\n---\n\n## Dynamic Prompt Packs\n\n");
+            foreach (var selection in route.Selections)
+            {
+                sb.Append("### ").Append(selection.Key).Append('\n');
+                sb.Append("_score=").Append(selection.Score).Append("; reasons=");
+                sb.Append(selection.Reasons.Count > 0 ? string.Join(", ", selection.Reasons) : "n/a");
+                sb.Append("_\n\n");
+                sb.Append(selection.Text).Append('\n').Append('\n');
+            }
+        }
+
+        var extra = projectAgentRulesMarkdown?.Trim();
+        if (!string.IsNullOrEmpty(extra))
+            sb.Append("\n\n---\n\n## Проектные правила (workspace)\n\n").Append(extra);
+
+        return sb.ToString().TrimEnd();
     }
 
     private static List<AITool> BuildMafToolList(

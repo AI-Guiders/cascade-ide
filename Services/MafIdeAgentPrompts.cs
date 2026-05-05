@@ -19,12 +19,28 @@ internal static class MafIdeAgentPrompts
 
     private static readonly Lazy<PromptPack> Loaded = new(ParsePromptFile, LazyThreadSafetyMode.ExecutionAndPublication);
 
-    internal sealed record PromptPack(string AgentSystem, string SalvageRecapSystem, string SalvageUserMessageTemplate)
+    internal sealed record PromptPack(
+        string AgentSystem,
+        string SalvageRecapSystem,
+        string SalvageUserMessageTemplate,
+        IReadOnlyDictionary<string, string> OptionalSections)
     {
         internal string BuildSalvageUserMessage(string userQuery, string toolPayload) =>
             SalvageUserMessageTemplate
                 .Replace("{{USER_QUERY}}", userQuery ?? "", StringComparison.Ordinal)
                 .Replace("{{TOOL_PAYLOAD}}", toolPayload ?? "", StringComparison.Ordinal);
+
+        internal bool TryGetOptionalSection(string key, out string text)
+        {
+            if (OptionalSections.TryGetValue(key, out var value) && !string.IsNullOrWhiteSpace(value))
+            {
+                text = value;
+                return true;
+            }
+
+            text = "";
+            return false;
+        }
     }
 
     internal static PromptPack Current => Loaded.Value;
@@ -50,7 +66,28 @@ internal static class MafIdeAgentPrompts
         return new PromptPack(
             agent.Trim(),
             salvageSys.Trim(),
-            salvageUser.Trim());
+            salvageUser.Trim(),
+            BuildOptionalSections(sections));
+    }
+
+    private static IReadOnlyDictionary<string, string> BuildOptionalSections(IReadOnlyDictionary<string, string> sections)
+    {
+        var optional = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var pair in sections)
+        {
+            if (string.Equals(pair.Key, AgentSystemSection, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(pair.Key, SalvageSystemSection, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(pair.Key, SalvageUserSection, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            var text = pair.Value?.Trim();
+            if (!string.IsNullOrWhiteSpace(text))
+                optional[pair.Key] = text;
+        }
+
+        return optional;
     }
 
     private static Dictionary<string, string> SplitSections(string raw)
