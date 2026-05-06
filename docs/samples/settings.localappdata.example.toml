@@ -38,6 +38,10 @@ show_thinking_in_history = true
 external_servers_json = "[]"
 acp_auto_inject_ide_mcp = true
 
+[agent_notes]
+# Необязательно: каталог канона с подпапкой knowledge/ поверх встроенного KB-Base IDE.
+kb_base_overlay_path = ""
+
 [workspace]
 pfd_expanded = true
 show_terminal = true

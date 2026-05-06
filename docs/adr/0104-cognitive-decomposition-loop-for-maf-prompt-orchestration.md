@@ -172,7 +172,7 @@ Rule/scorer слой:
 3. **Критерий недублирования:** смысл нельзя уместить в более короткий инвариант.
 4. **Бюджет:** изменение не должно неконтролируемо увеличивать размер KB-Base bundle.
 5. **Связность:** в include не добавляются "висячие" ссылки без базового контекста.
-6. **Проверка сборки:** после изменения обязателен прогон `scripts/build-kb-base-cide.ps1`.
+6. **Проверка сборки:** после изменения обязателен прогон `pwsh ./scripts/build-kb-base-cide.ps1` в **репозитории канона заметок** (корень задаётся через `AGENT_NOTES_CANON_PATH`, иначе у тебя в хуках дефолт `D:\Experiments\agent-notes` — см. `scripts/git-hooks/pre-commit.ps1` в корне PersonalCursorFolder; не путать с каталогом `open/agent-notes` внутри `financial-open`). Скрипт собирает `dist/kb-base-cide.zip` и копирует в CIDE: переменная **`CASCADE_IDE_ROOT`**, параметр **`-CascadeIdeRoot`**, или соседний `../cascade-ide` от корня канона. **`-SkipPublishToCascadeIde`** — только zip. Резерв копирования: `cascade-ide/tools/publish-kb-base-embed.ps1`.
 7. **Проверка режима:** при возможности проверить normal и degraded сценарии загрузки.
 
 ---
