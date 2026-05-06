@@ -197,4 +197,17 @@ public sealed class CascadeIdeSettingsTomlDeserializeTests
         Assert.Equal("--stdio", runtime.Arguments);
     }
 
+    [Fact]
+    public void Deserialize_AgentNotes_KbBaseOverlayPath_ParsesExpected()
+    {
+        const string text =
+            """
+            [agent_notes]
+            kb_base_overlay_path = "D:\\vault\\agent-notes"
+            """;
+
+        var s = Deserialize(text);
+        Assert.Equal("D:\\vault\\agent-notes", s.AgentNotes.KbBaseOverlayPath);
+    }
+
 }

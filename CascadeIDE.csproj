@@ -67,6 +67,7 @@
     <EmbeddedResource Include="Hotkeys\hotkeys.toml" />
     <EmbeddedResource Include="IntentMelody\intent-melody-aliases.toml" />
     <EmbeddedResource Include="AiPrompts\maf-ide-agent.prompts.md" />
+    <EmbeddedResource Include="KbBase\kb-base-cide.zip" />
     <EmbeddedResource Include="TextMateGrammars\toml\package.json" />
     <EmbeddedResource Include="TextMateGrammars\toml\syntaxes\toml.tmLanguage.json" />
     <Content Include="TextMateGrammars\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />

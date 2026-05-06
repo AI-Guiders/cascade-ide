@@ -11,6 +11,7 @@ public sealed partial class CascadeIdeSettings
             return false;
         return AiEquals(Ai, o.Ai)
             && McpEquals(Mcp, o.Mcp)
+            && AgentNotesEquals(AgentNotes, o.AgentNotes)
             && WorkspaceEquals(Workspace, o.Workspace)
             && CodeNavigationMapEquals(CodeNavigationMap, o.CodeNavigationMap)
             && LanguagesEquals(Languages, o.Languages)
@@ -65,6 +66,7 @@ public sealed partial class CascadeIdeSettings
                 AcpAutoInjectIdeMcp = Mcp.AcpAutoInjectIdeMcp,
                 ExternalServersJsonPath = Mcp.ExternalServersJsonPath,
             },
+            AgentNotes = new AgentNotesSettings { KbBaseOverlayPath = AgentNotes.KbBaseOverlayPath },
             Workspace = new WorkspaceSettings
             {
                 PfdExpanded = Workspace.PfdExpanded,
@@ -261,6 +263,13 @@ public sealed partial class CascadeIdeSettings
         return a.ExternalServersJson.Is(b.ExternalServersJson)
             && a.AcpAutoInjectIdeMcp == b.AcpAutoInjectIdeMcp
             && a.ExternalServersJsonPath.Is(b.ExternalServersJsonPath);
+    }
+
+    private static bool AgentNotesEquals(AgentNotesSettings? a, AgentNotesSettings? b)
+    {
+        if (a is null || b is null)
+            return a == b;
+        return a.KbBaseOverlayPath.Is(b.KbBaseOverlayPath);
     }
 
     private static bool WorkspaceEquals(WorkspaceSettings? a, WorkspaceSettings? b)

@@ -1,5 +1,7 @@
 #nullable enable
+using System.Text.Json;
 using AgentNotes.Core;
+using CascadeIDE.Models;
 
 namespace CascadeIDE.Services;
 
@@ -7,9 +9,27 @@ namespace CascadeIDE.Services;
 /// Обёртка над <see cref="NotesStorage"/> для MCP-команд заметок и knowledge: разрешение workspace,
 /// те же ответы/ошибки, что раньше собирались во ViewModel.
 /// </summary>
-public sealed class McpAgentNotesService(NotesStorage? storage = null)
+public sealed class McpAgentNotesService
 {
-    private readonly NotesStorage _storage = storage ?? new();
+    private static readonly JsonDocumentOptions JsonDocOptions = new() { CommentHandling = JsonCommentHandling.Skip };
+
+    private readonly Func<CascadeIdeSettings> _settingsProvider;
+    private readonly NotesStorage _storage;
+
+    /// <inheritdoc cref="McpAgentNotesService" />
+    public McpAgentNotesService(Func<CascadeIdeSettings>? settingsProvider = null, NotesStorage? storage = null)
+    {
+        _settingsProvider = settingsProvider ?? (() => new CascadeIdeSettings());
+        _storage = storage ?? new();
+    }
+
+    private const string EmptyKnowledgeListPayload = """{"path":"","files":[],"total":0}""";
+
+    /// <remarks>
+    /// Чтение <c>knowledge/</c> без канона окружения: встроенный KB-Base (embedded zip в сборке),
+    /// с опциональным оверлеем из <see cref="AgentNotesSettings.KbBaseOverlayPath"/> (файлы оверлея имеют приоритет).
+    /// Если задан <c>AGENT_NOTES_CANON_PATH</c>, используется только он (поведение agent-notes-core).
+    /// </remarks>
 
     public const string WorkspaceRequiredMessage =
         "Error: no notes workspace. Open a solution, or set AGENT_NOTES_FILE to a global agent-notes path.";
@@ -222,7 +242,26 @@ public sealed class McpAgentNotesService(NotesStorage? storage = null)
             return "";
         try
         {
-            return _storage.ReadKnowledgeFile(canonPath: null, filePath, offset, limit);
+            if (!string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(AgentNotesCanonEnvVar)))
+                return _storage.ReadKnowledgeFile(canonPath: null, filePath, offset, limit);
+
+            var overlayCanon = KbBaseOverlayPathResolver.TryResolveCanonRoot(_settingsProvider());
+            if (overlayCanon is not null)
+            {
+                var overlayFullPath = _storage.GetKnowledgeFilePath(overlayCanon, filePath);
+                if (File.Exists(overlayFullPath))
+                    return _storage.ReadKnowledgeFile(overlayCanon, filePath, offset, limit);
+            }
+
+            var embeddedCanon = KbBaseEmbeddedBundleProvisioner.TryGetEmbeddedCanonRoot();
+            if (embeddedCanon is not null)
+            {
+                var embeddedFullPath = _storage.GetKnowledgeFilePath(embeddedCanon, filePath);
+                if (File.Exists(embeddedFullPath))
+                    return _storage.ReadKnowledgeFile(embeddedCanon, filePath, offset, limit);
+            }
+
+            return "";
         }
         catch (Exception ex)
         {
@@ -234,11 +273,49 @@ public sealed class McpAgentNotesService(NotesStorage? storage = null)
     {
         try
         {
-            return _storage.ListKnowledgeFiles(canonPath: null, subdir);
+            if (!string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(AgentNotesCanonEnvVar)))
+                return _storage.ListKnowledgeFiles(canonPath: null, subdir);
+
+            var overlayCanon = KbBaseOverlayPathResolver.TryResolveCanonRoot(_settingsProvider());
+            var overlayJson =
+                overlayCanon is null ? EmptyKnowledgeListPayload : _storage.ListKnowledgeFiles(overlayCanon, subdir);
+
+            var embeddedCanon = KbBaseEmbeddedBundleProvisioner.TryGetEmbeddedCanonRoot();
+            var embeddedJson =
+                embeddedCanon is null ? EmptyKnowledgeListPayload : _storage.ListKnowledgeFiles(embeddedCanon, subdir);
+
+            var hint =
+                TryReadKnowledgeListSearchPathFirstNonEmpty(overlayJson)
+                ?? TryReadKnowledgeListSearchPathFirstNonEmpty(embeddedJson)
+                ?? "";
+            var mergedHint = hint.Length > 0 ? $"{hint} (overlay + embedded merge)" : "knowledge (overlay + embedded merge)";
+
+            return KbBaseKnowledgeListMerger.Merge(overlayJson, embeddedJson, mergedHint);
         }
         catch (Exception ex)
         {
             return "{\"error\":\"" + ex.Message.Replace("\"", "\\\"", StringComparison.Ordinal) + "\"}";
+        }
+    }
+
+    /// <remarks>Must match agent-notes-core <see cref="NotesStorage.ResolveCanonPath"/> env name.</remarks>
+    private const string AgentNotesCanonEnvVar = "AGENT_NOTES_CANON_PATH";
+
+    private static string? TryReadKnowledgeListSearchPathFirstNonEmpty(string jsonPayload)
+    {
+        if (string.IsNullOrWhiteSpace(jsonPayload))
+            return null;
+        try
+        {
+            using var doc = JsonDocument.Parse(jsonPayload, JsonDocOptions);
+            if (!doc.RootElement.TryGetProperty("path", out var inner) || inner.ValueKind != JsonValueKind.String)
+                return null;
+            var trimmed = (inner.GetString() ?? "").Trim();
+            return trimmed.Length > 0 ? trimmed : null;
+        }
+        catch
+        {
+            return null;
         }
     }
 

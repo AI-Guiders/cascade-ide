@@ -186,7 +186,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         }, _ideDataBus);
         _dapDebug.StateChanged += (_, _) => NotifyDebugRelayCommandsChanged();
         _mcpBuildTest = new Services.McpDotnetBuildTestService(_dotnetRunner);
-        _mcpAgentNotes = new Services.McpAgentNotesService();
+        _mcpAgentNotes = new Services.McpAgentNotesService(() => _settings);
 
         _workspaceHealth = new IdeHealthSnapshotUnit(_ideDataBus);
         SeedIdeHealthDataBus();
