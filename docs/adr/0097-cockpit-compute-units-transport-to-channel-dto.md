@@ -8,13 +8,19 @@
 
 ---
 
+<a id="adr0097-analysis"></a>
+
 ## 1. Анализ: что уже есть и где «дыра»
+
+<a id="adr0097-analysis-aviation"></a>
 
 ### 1.1 Авиационная опора (без претензии на сертификацию)
 
 В авионике рядом с **шиной** (ограниченный транспорт) и **индикацией** (CDS/дисплей) стоят **вычислительные LRU** (*Line **Replaceable Unit***): блоки, которые из сырых или частично нормализованных данных строят **согласованное состояние** и **законы отображения** для экипажа (интеграция навигации, фильтрация, лимиты, приоритеты). Последняя буква в аббревиатуре — **Unit**; в инженерном языке Cascade для этого слоя каноничнее говорить **compute unit** (юнит/блок свёртки), а не «node», чтобы не расходиться с привычным LRU и не путать с узлом графа, сети или AST.
 
 Они **не** заменяют шину и **не** рисуют пиксели — они **вычисляют**, что именно имеет смысл показать.
+
+<a id="adr0097-analysis-covered"></a>
 
 ### 1.2 Что в Cascade уже покрыто другими ADR
 
@@ -28,6 +34,8 @@
 
 Между **сырьём** (лог сборки, события DAP, git, LSP) и **DTO канала / снимком для CDS** часто нужен ещё один смысл: **агрегация, нормализация, разрешение конфликтов, дебаунс смысла** — это не всё автоматически делает ни шина 0094, ни таблица уровней 0095.
 
+<a id="adr0097-analysis-ide-health"></a>
+
 ### 1.3 Факт в коде: IDE Health уже близок к эталону
 
 По [`workspace-health-implementation-map-v1.md`](../design/workspace-health-implementation-map-v1.md) цепочка уже разведена:
@@ -39,17 +47,23 @@
 
 То есть **юниты свёртки уже есть**, но **именованный архитектурный слой** в глоссарии ADR не был выделен; новые фичи рискуют снова свалить свёртку в `MainWindowViewModel` или в транспорт 0094 «по пути».
 
+<a id="adr0097-analysis-gap"></a>
+
 ### 1.4 Дыра в формулировке
 
 - Нет **единого термина** для «LRU-подобного» модуля между ingestion и каналом.
 - Нет явного **инварианта**: «транспорт не считает смысл», «CDS не строит законы из сырого MSBuild», «VM в идеале оркестрирует, а не содержит всю математику сводки».
-- Для **CCU** как общего слоя полный набор **CASCOPE*** ещё впереди; для **IDE Health** уже действует **CASCOPE019** (единая точка `IIdeHealthChannel.Build(...)` в `MainWindowViewModel.IdeHealth`, см. [0099](0099-ide-databus-typed-events-and-projections.md)). Для остальных каналов риск частично остаётся **документарным**, пока анти-паттерны не оформлены в анализаторах ([§3](0097-cockpit-compute-units-transport-to-channel-dto.md#3-направление-на-реализацию-strangler)).
+- Для **CCU** как общего слоя полный набор **CASCOPE*** ещё впереди; для **IDE Health** уже действует **CASCOPE019** (единая точка `IIdeHealthChannel.Build(...)` в `MainWindowViewModel.IdeHealth`, см. [0099](0099-ide-databus-typed-events-and-projections.md)). Для остальных каналов риск частично остаётся **документарным**, пока анти-паттерны не оформлены в анализаторах ([§3 — направление на реализацию](#adr0097-implementation-strangler)).
 
 Этот ADR закрывает формулировку и связку с 0036 / 0094 / 0095 **без** обязательного массового переименования типов.
 
 ---
 
+<a id="adr0097-decision"></a>
+
 ## 2. Решение
+
+<a id="adr0097-term"></a>
 
 ### 2.1 Термин
 
@@ -59,6 +73,8 @@
 
 **Специализация по стратам:** один CCU на весь мир **не** обязателен и часто вреден; типичная декомпозиция — **несколько юнитов** (например по уровням A/B/C из [0095](0095-workspace-solution-ide-health-stratification.md#adr0095-stratum-ccu-examples): рабочие имена **WSCU / SSCU / ISCU**) плюс **отдельная** композиция в единый снимок канала. Подробнее и оговорка про **ISCU vs IDS** — в том же § примера в 0095.
 
+<a id="adr0097-invariants"></a>
+
 ### 2.2 Инварианты
 
 1. **Юнит не подменяет шину доставки:** не смешивать unbounded очередь и «законы сводки» в одном типе ([0094](0094-ingestion-bus-afdx-analogy-and-threading-channels.md) остаётся транспортом).
@@ -67,15 +83,21 @@
 4. **Выход, если относится к Health-подобным данным,** при расширении контрактов должен быть совместим с дисциплиной [0095](0095-workspace-solution-ide-health-stratification.md) (не сваливать A/B/C в одно непомеченное поле без осознанного исключения).
 5. **Тестируемость:** предпочтительно тестировать юнит **без** загрузки `MainWindow` и без полного дерева UI (как `IdeHealthFormattingUnit` и композитор в тестах из чертежа IDE Health).
 
+<a id="adr0097-vm-orchestration"></a>
+
 ### 2.3 Роль `MainWindowViewModel` и оркестраторов
 
 Подписка на `PropertyChanged`, вызов `RebuildIdeHealth()` и связывание делегатов с `IdeHealthSnapshotUnit` — это **оркестрация** (клей между миром IDE и каналом). По мере роста правил **свёртки** их следует **опускать вниз** в `Cockpit/*` (или выделенные сервисы снимков), оставляя VM тоньше — в духе уже принятого разделения в чертеже IDE Health.
+
+<a id="adr0097-other-contours"></a>
 
 ### 2.4 Другие контуры
 
 Конвейеры вроде [0055](0055-skia-instrument-composition-pipeline.md) (Intent → … → Render) — **отдельное семейство** compute для графики; этот ADR **не** унифицирует их API с `IdeHealth*`, но признаёт **ту же архитектурную идею**: снимок/модель на входе, структурированный результат на выходе, тесты без лишнего UI.
 
 ---
+
+<a id="adr0097-implementation-strangler"></a>
 
 ## 3. Направление на реализацию (strangler)
 
@@ -86,6 +108,8 @@
 
 ---
 
+<a id="adr0097-consequences"></a>
+
 ## 4. Последствия
 
 - Появляется **короткое слово** для ревью: «это должно быть в **CCU** (юните), не в транспорте» / «не в CDS».
@@ -94,6 +118,8 @@
 - Дополнительная дисциплина документации: новые ADR про наблюдаемость могут ссылаться на **0095 + 0097** вместе.
 
 ---
+
+<a id="adr0097-implementation-status"></a>
 
 ## 5. Состояние реализации (эталон в коде)
 
@@ -106,13 +132,17 @@
 | Сбор снимка из делегатов / DAP | `IdeHealthSnapshotUnit` → `IIdeHealthChannel` (`ICockpitComputeUnit`) |
 | Композиция сегментов для канала | `IIdeHealthSurfaceCompositor` / `IdeHealthSurfaceCompositor` (`ICockpitComputeUnit`, `Cockpit/Composition/IdeHealth/`) |
 
-Новые каналы наблюдаемости — по той же дисциплине: отдельный снимок, чистая свёртка, композиция, **без** смешения с [0094](0094-ingestion-bus-afdx-analogy-and-threading-channels.md). Для IDE Health **CASCOPE019** уже закрепляет одну из инвариантных границ; **прочие** **CASCOPE** под CCU — [§3](0097-cockpit-compute-units-transport-to-channel-dto.md#3-направление-на-реализацию-strangler) (по мере устойчивых анти-паттернов).
+Новые каналы наблюдаемости — по той же дисциплине: отдельный снимок, чистая свёртка, композиция, **без** смешения с [0094](0094-ingestion-bus-afdx-analogy-and-threading-channels.md). Для IDE Health **CASCOPE019** уже закрепляет одну из инвариантных границ; **прочие** **CASCOPE** под CCU — [§3 — направление на реализацию](#adr0097-implementation-strangler) (по мере устойчивых анти-паттернов).
 
 ---
+
+<a id="adr0097-candidates-next"></a>
 
 ## 6. Кандидаты на следующий CCU (практический shortlist)
 
 Ниже — инженерный приоритет для следующих шагов после IDE Health. Это **не** обязательство сделать всё сразу, а порядок, где CCU обычно даёт максимальный эффект.
+
+<a id="adr0097-candidates-p1"></a>
 
 ### P1 (сразу после текущего цикла)
 
@@ -120,16 +150,22 @@
 - **Debug session сводка:** DAP события → `DebugSessionSnapshot` (attached/running/stopped, stop reason, current frame, breakpoint health).
 - **Launch readiness:** `launchSettings` + startup project + env/fs-проверки → `LaunchReadinessSnapshot` (ready/not-ready + причины).
 
+<a id="adr0097-candidates-p2"></a>
+
 ### P2 (когда закрепим P1 контрактами)
 
 - **Git workspace health:** status/branch/ahead-behind/submodule state → `RepoHealthSnapshot`.
 - **LSP health:** состояние C#/Markdown language services → `LanguageServiceHealthSnapshot` (connected/degraded, diagnostics delta).
 - **MCP health:** доступность и деградации по инструментам → `McpHealthSnapshot` (availability, last error, latency buckets).
 
+<a id="adr0097-candidates-p3"></a>
+
 ### P3 (после стабилизации graph-backed контура)
 
 - **Semantic map input snapshot:** индекс/источники/инвалидации → `SemanticMapInputSnapshot` как вход в graph-backed surfaces.
 - **Terminal attention snapshot:** поток терминалов → `TerminalAttentionSnapshot` (active command, failure streak, long-running suspicion).
+
+<a id="adr0097-semantic-map-boundary"></a>
 
 ### Граница для semantic map (что в CCU, а что нет)
 
@@ -139,6 +175,8 @@
 
 ---
 
+<a id="adr0097-non-goals"></a>
+
 ## 7. Не цели
 
 - Сертификация, DO-178, физические LRU.
@@ -146,6 +184,8 @@
 - Слияние юнита с **EICAS** ([0021](0021-pfd-mfd-cockpit-attention-model.md)): оповещения W/C/A остаются отдельным контуром данных, как в чертеже IDE Health §7.
 
 ---
+
+<a id="adr0097-rejected-alternatives"></a>
 
 ## 8. Отклонённые альтернативы
 

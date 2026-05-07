@@ -3,9 +3,11 @@
 **Статус:** Proposed  
 **Дата:** 2026-04-24  
 
-**Связь:** [0039](0039-workspace-navigation-affordances.md) (навигация, **semantic map**, MCP subgraph), [0065](0065-instrument-categories-domain-taxonomy.md) / [0053](0053-semantic-map-control-flow-pfd.md) / [0056](0056-semantic-map-pipeline-adoption.md) (карта намерений как продуктовый граф), [0067](0067-graph-backed-surfaces-contract.md) (graph-backed surfaces), [0036](0036-cds-channel-compositor-surface-pipeline.md) (CDS, канал кабины), [0094](0094-ingestion-bus-afdx-analogy-and-threading-channels.md) (шина доставки), [0097](0097-cockpit-compute-units-transport-to-channel-dto.md) (CCU — свёртка в DTO канала), [0068](0068-deck-row-payload-and-presentation-projection.md) (полезная нагрузка vs проекция), [0079](0079-ide-display-system-ids-overlay-pipeline.md) (IDS), [0084](0084-agent-edits-editor-source-of-truth-presence-channel.md) (текст в редакторе — источник правды **для сессии правок**; см. §2.4), [0095](0095-workspace-solution-ide-health-stratification.md) (три уровня Health, `stratum`), [0045](0045-agent-chat-persistence-event-log-and-projections.md) (события + проекции), [0009](0009-strangler-migration-and-exceptions.md) (strangler).
+**Связь:** [0039](0039-workspace-navigation-affordances.md) (навигация, **semantic map**, MCP subgraph), [0065](0065-instrument-categories-domain-taxonomy.md) / [0053](0053-semantic-map-control-flow-pfd.md) / [0056](0056-semantic-map-pipeline-adoption.md) (карта намерений как продуктовый граф), [0067](0067-graph-backed-surfaces-contract.md) (graph-backed surfaces), [0036](0036-cds-channel-compositor-surface-pipeline.md) (CDS, канал кабины), [0094](0094-ingestion-bus-afdx-analogy-and-threading-channels.md) (шина доставки), [0097](0097-cockpit-compute-units-transport-to-channel-dto.md) (CCU — свёртка в DTO канала), [0068](0068-deck-row-payload-and-presentation-projection.md) (полезная нагрузка vs проекция), [0079](0079-ide-display-system-ids-overlay-pipeline.md) (IDS), [0084](0084-agent-edits-editor-source-of-truth-presence-channel.md) (текст в редакторе — источник правды **для сессии правок**; см. [§2.4](#adr0098-alignment-0084)), [0095](0095-workspace-solution-ide-health-stratification.md) (три уровня Health, `stratum`), [0045](0045-agent-chat-persistence-event-log-and-projections.md) (события + проекции), [0009](0009-strangler-migration-and-exceptions.md) (strangler).
 
 ---
+
+<a id="adr0098-context"></a>
 
 ## 1. Контекст
 
@@ -17,22 +19,32 @@
 
 ---
 
+<a id="adr0098-decision"></a>
+
 ## 2. Решение (инварианты)
+
+<a id="adr0098-semantic-map"></a>
 
 ### 2.1 Первична семантическая карта (Semantic Map)
 
 - **Смысловая модель** (намерения, границы, связи, состояния, пригодные для маршрутизации внимания и инструментов) рассматривается как **первичный** слой проектирования системы.
 - **Исходный код**, **текстовые документы** (в т.ч. ADR, TOML, Markdown) и **git-артефакты** — **проекции и упаковка**: детерминированные или полудетерминированные **представления**, которые можно версионировать, диффить, отдавать в LSP, CI и агенту.
 
+<a id="adr0098-cds-ids-instruments"></a>
+
 ### 2.2 Канал кабины, IDS, векторные/графовые инструменты
 
 - **CDS-канал** ([0036](0036-cds-channel-compositor-surface-pipeline.md)), **CCU** ([0097](0097-cockpit-compute-units-transport-to-channel-dto.md)), **IDS** ([0079](0079-ide-display-system-ids-overlay-pipeline.md)), приборы и deck опираются на **согласованный смысл** (DTO, снимки, `stratum` и т.д.), а не на «как догадался парсер из одного файла» как единственный источник.
 - **Forward** (редактор кода) остаётся **мощным каналом ввода** в эту карту, но **не** абсолютом всей правды о системе в долгую.
-- Для **semantic map** CCU трактуется как слой **входного снимка** (нормализация источников, версия/свежесть, derived-поля), а не как место для графового UX. Traversal, layout, selection и интеракции остаются в graph-backed surface-контуре ([0067](0067-graph-backed-surfaces-contract.md), [0097](0097-cockpit-compute-units-transport-to-channel-dto.md) §6).
+- Для **semantic map** CCU трактуется как слой **входного снимка** (нормализация источников, версия/свежесть, derived-поля), а не как место для графового UX. Traversal, layout, selection и интеракции остаются в graph-backed surface-контуре ([0067](0067-graph-backed-surfaces-contract.md), [0097 §6 — кандидаты CCU](0097-cockpit-compute-units-transport-to-channel-dto.md#adr0097-candidates-next)).
+
+<a id="adr0098-coexistence"></a>
 
 ### 2.3 Coexistence: две истины там, где нужен strangler
 
 - В переходных фазах допустимы **двухслойные** сценарии: «истина в git для релиза» + «истина в карте для кабины/агента», с явной политикой **синхронизации** и приоритета на конфликтах. Цель — **свести** к одной приоритетной семантике, а не вечно плодить разрыв.
+
+<a id="adr0098-alignment-0084"></a>
 
 ### 2.4 Согласование с [0084](0084-agent-edits-editor-source-of-truth-presence-channel.md)
 
@@ -40,6 +52,8 @@
 - **0098** не отменяет 0084: в момент правки **текстовая проекция** остаётся **каноном ввода** в этой сессии. Долгосрочно **семантическая карта** — канон **архитектуры смысла**; 0084 описывает **как** безопасно писать в проекцию, пока round-trip **в/из** карты не стал единым автоматом.
 
 ---
+
+<a id="adr0098-non-goals"></a>
 
 ## 3. Не-цели (явно)
 
@@ -51,6 +65,8 @@
 
 ---
 
+<a id="adr0098-consequences"></a>
+
 ## 4. Последствия и риски
 
 - **Плюс:** единая ось для CCU, каналов, агента и кабины — **одна и та же** адресуемая семантика, меньше «тихого рассхождения» файла и пикселя.
@@ -59,11 +75,15 @@
 
 ---
 
+<a id="adr0098-link-0100"></a>
+
 ## 5. Связь с будущим ADR 0100 (намёк)
 
 - Следующий круговой **«центр»** (субъектность агента, интегрированная среда смыслов, роль оператора) логично опирать на **0098** как на **северо-звезду по первичности смысла**; 0100 не обязан повторять этот ADR — он может сместить фокус на **субъект/экосистему**.
 
 ---
+
+<a id="adr0098-rejected"></a>
 
 ## 6. Отклонённая альтернатива (кратко)
 
@@ -71,13 +91,17 @@
 
 ---
 
+<a id="adr0098-adoption-status"></a>
+
 ## 7. Статус внедрения
 
 - **Proposed** — норматив **намерения** и границы; конкретные модули, хранилище карты и сроки — по follow-up ADR и дорожной карте.
 
 ---
 
+<a id="adr0098-faq"></a>
+
 ## 8. FAQ
 
 **Нужно ли при semantic-first заранее простроить полное семантическое дерево solution?**  
-**Нет** (см. §3 последние два пункта). Инвариант ADR — **роль** смыслового слоя и согласованных снимков, а не обязательная **априорная полнота** графа. Практическая семантика может накапливаться **инкрементально** и **по области** (файл, проект, запрос к Language Service), вперемешку с файловой проекцией, пока действует strangler.
+**Нет** ([см. §3 — два последних пункта](#adr0098-non-goals)). Инвариант ADR — **роль** смыслового слоя и согласованных снимков, а не обязательная **априорная полнота** графа. Практическая семантика может накапливаться **инкрементально** и **по области** (файл, проект, запрос к Language Service), вперемешку с файловой проекцией, пока действует strangler.

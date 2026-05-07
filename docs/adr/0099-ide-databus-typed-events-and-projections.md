@@ -7,6 +7,8 @@
 
 ---
 
+<a id="adr0099-context"></a>
+
 ## Контекст
 
 В коде уже есть рабочие элементы шины и свёртки:
@@ -19,30 +21,60 @@
 
 ---
 
+<a id="adr0099-decision"></a>
+
 ## Решение
 
 Ввести в архитектуру слой **IDE DataBus** как in-process typed event bus.
 
+<a id="adr0099-p1"></a>
+
 1. **Контракт:** `IDataBus` с минимальным API:
    - `Publish<TEvent>(TEvent evt)`
    - `Subscribe<TEvent>(Action<TEvent> handler)` (с disposable-отпиской)
+
+<a id="adr0099-p2"></a>
+
 2. **События типизированные** (не `object`/string):
    - `BuildStateChanged`
    - `TestsStateChanged`
    - `DebugStateChanged`
    - `GitStateChanged`
    - (по мере надобности) `ScopeDecisionChanged` и т.д.
+
+<a id="adr0099-p3"></a>
+
 3. **DataBus не подменяет 0094:**  
    `Channel<T>`/ingestion остаётся транспортом потока; DataBus — слой распространения **нормализованных событий домена**.
+
+<a id="adr0099-p4"></a>
+
 4. **DataBus не подменяет 0097/0036:**  
    CCU и compositor по-прежнему отвечают за свёртку/проекцию. DataBus доставляет входные события к местам, где строятся снимки/DTO.
+
+<a id="adr0099-p5"></a>
+
 5. **Базовая реализация v1:** синхронный in-memory bus в одном процессе IDE, без внешнего брокера/IPC.
+
+<a id="adr0099-p6"></a>
+
 6. **Git в IDE Health:** один продуктовый путь — после обновления git-строк в `UiChromeViewModel` вызывается `AfterGitWorkspaceHealthSummaryApplied` (в конце `RefreshGitSummaryAsync` на UI-потоке), что в `MainWindowViewModel` привязано к `PublishGitToIdeDataBusAndRebuildIdeHealth` (публикация `GitStateChanged` + `RebuildIdeHealth`). Сид начального состояния: `SeedIdeHealthDataBus()` в конструкторе (startup + первый `GitStateChanged`), без `PropertyChanged` на отдельные поля git.
+
+<a id="adr0099-p7"></a>
+
 7. **Снимок канала и UI:** `IdeHealthSnapshotUnit.Build` вызывается только из `MainWindowViewModel.IdeHealth` (`RebuildIdeHealth`); результат кэшируется в `_lastIdeHealthInputSnapshot`, геттеры строк в `MainWindowViewModel.Presentation` читают кэш. Roslyn **CASCOPE019** фиксирует эту границу.
+
+<a id="adr0099-p8"></a>
+
 8. **Жизненный цикл:** `IdeHealthSnapshotUnit` реализует `IDisposable` (отписка от шины); при закрытии главного окна — `ReleaseWorkspaceHealthChannel()`.
+
+<a id="adr0099-p9"></a>
+
 9. **Порядок для IDE Health (внедрено):** прикладной `InMemoryDataBus` главного окна — **синхронная** диспетчеризация (`asynchronousDispatch: false`), чтобы подписчики `IdeHealthSnapshotUnit` отработали до возврата из `Publish`, а `RebuildIdeHealth()` читал согласованный снимок. Сборка из UI: сначала `BuildStateChanged` (старт/финиш), затем `IsBuilding` — чтобы `NotifyPropertyChangedFor`→`RebuildIdeHealth` не обходил обновление `_buildSnapshot`. Публикации с фона MCP — через `UiScheduler.InvokeAsync` в `PublishToIdeDataBusAndRebuild` (тот же UI-поток, что и свёртка).
 
 ---
+
+<a id="adr0099-exchange-principles"></a>
 
 ## Принципы обмена
 
@@ -64,6 +96,8 @@
 
 ---
 
+<a id="adr0099-boundaries"></a>
+
 ## Границы
 
 - **Можно:** использовать DataBus для развязки источников и проекций (UI/MCP/cockpit snapshot).
@@ -71,6 +105,8 @@
 - **Нельзя:** переносить рендер/UI-логику в обработчики событий шины.
 
 ---
+
+<a id="adr0099-strangler-plan"></a>
 
 ## Strangler-план
 
@@ -81,6 +117,8 @@
 
 ---
 
+<a id="adr0099-consequences"></a>
+
 ## Последствия
 
 - Меньше связности в `MainWindowViewModel`.
@@ -89,6 +127,8 @@
 - Появляется риск «event spaghetti» при слабой дисциплине именования/границ — гасится typed-событиями и ADR-гайдлайнами.
 
 ---
+
+<a id="adr0099-non-goals"></a>
 
 ## Не цели
 
