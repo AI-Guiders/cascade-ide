@@ -9,6 +9,8 @@
 
 ---
 
+<a id="adr0103-context"></a>
+
 ## 1. Контекст
 
 `DockDocumentView` и связанные view models уже реализуют фрагменты **Editor HUD** (adorners, LSP, всплывающие подсказки) и **HUD banner** в духе [0085](0085-editor-hud-inline-layer-and-hud-banner.md), но **inline**-опыт **не** оформлен как единый именованный субстрат: контракты Quick Info, inlays, ghost text, gutter разбросаны. Параллельно в стеке закреплены явные слои — **CCU** [0097](0097-cockpit-compute-units-transport-to-channel-dto.md), **DAL** [0102](0102-data-acquisition-layer-boundary-and-contract.md), **IDE DataBus** [0099](0099-ide-databus-typed-events-and-projections.md), **ingestion** [0094](0094-ingestion-bus-afdx-analogy-and-threading-channels.md) — и направление **semantic-first** [0098](0098-semantic-first-document-as-projection.md).
@@ -21,7 +23,11 @@
 
 ---
 
+<a id="adr0103-decision"></a>
+
 ## 2. Решение
+
+<a id="adr0103-three-contours"></a>
 
 ### 2.1 Имя субстрата: три согласованных контура
 
@@ -33,6 +39,8 @@
 
 Термины [0085](0085-editor-hud-inline-layer-and-hud-banner.md) не меняются: **Editor HUD** = inline + привязка к документу; **HUD banner** = полоса уровня файла; **IDS** = глобальные оверлеи IDE, не Editor HUD [0066](0066-cockpit-ui-vs-ide-presentation-layer.md).
 
+<a id="adr0103-layering-table"></a>
+
 ### 2.2 Раскладка: DAL, CCU, DataBus, high-frequency
 
 | Вопрос | Слой | Примечание |
@@ -43,11 +51,15 @@
 | **Каретка, указатель, скролл** в масштабе кадра/клавиш | **Отдельный** in-process путь: например `System.Threading.Channels` **ёмкость 1** + `BoundedChannelFullMode.DropOldest` (или SPSC *latest slot*) | **Не** второй глобальный «продуктовый bus»; **не** подмена [0094](0094-ingestion-bus-afdx-analogy-and-threading-channels.md) как сквозного транспорта. Один consumer прореживает и при необходимости публикует **реже** в DataBus / входы CCU. |
 | Ingestion / потоки «как лог» в UI | [0094](0094-ingestion-bus-afdx-analogy-and-threading-channels.md) | Ортогонально DataBus [0099](0099-ide-databus-typed-events-and-projections.md) |
 
+<a id="adr0103-web-vs-native-forward"></a>
+
 ### 2.3 Веб-стек и нативный редактор Forward
 
 - **WebView2** в хосте Avalonia/Win32 **не** равен «втаскиваем **Electron**» (нет оболочки Chromium+Node как приложения). **Иная** ведомость: встроенный рендерер, interop, доверие.
 - **Продуктовый baseline** для **редактора кода** во Forward остаётся **нативный** (AvaloniaEdit). **Monaco в WebView2** (и аналоги) **не** молчаливый default: **сравнение** / **отклонён** для Forward по политике продукта; см. [editor-surface-candidates-comparison-v1](../design/editor-surface-candidates-comparison-v1.md).
 - Опциональные веб-поверхности **MFD** — по [0035](0035-mfd-embedded-webview-external-llm-and-mcp-boundary.md) / [0093](0093-mfd-embedded-browser-for-launch-url.md); **вторичные** инструменты, не тезис «редактор = браузер».
+
+<a id="adr0103-invariants"></a>
 
 ### 2.4 Инварианты (не ломать)
 
@@ -56,20 +68,26 @@
 - [0098](0098-semantic-first-document-as-projection.md): ведущими остаются семантические пути PFD/MFD; подсказки редактора **не** забирают на себя всю навигацию.
 - [0097](0097-cockpit-compute-units-transport-to-channel-dto.md) / [0102](0102-data-acquisition-layer-boundary-and-contract.md): **CASCOPE020/021** и rollout [analyzer-rollout-dal-ccu-v1](../design/analyzer-rollout-dal-ccu-v1.md) как «шлагбаум» границы.
 
+<a id="adr0103-editor-core-criteria"></a>
+
 ### 2.5 Критерии выбора ядра редактора (для чертежа-аппендикса / будущего спайка)
 
 - Inline hints, ghost text, inlays, gutter; rich hover / Quick Info; производительность на больших буферах; **согласованность темы**; API указателя/каретки/документа; интеграция с **semantic-first** кокпитом [0039](0039-workspace-navigation-affordances.md).
 
 ---
 
+<a id="adr0103-strangler"></a>
+
 ## 3. Strangler / миграция
 
 1. **Отвязать** презентацию HUD от ad-hoc деталей `DockDocumentView`: ввести три контура выше **без** big-bang замены `AvaloniaEdit`.
-2. **Спайк (по умолчанию):** `AvaloniaEditSurfaceAdapter` + **bounded** high-frequency путь + один **срез** `SemanticProjectionPipeline` / `EditorHudEngine` (например диагностики + одна ветка hover). Подробнее — §5.
+2. **Спайк (по умолчанию):** `AvaloniaEditSurfaceAdapter` + **bounded** high-frequency путь + один **срез** `SemanticProjectionPipeline` / `EditorHudEngine` (например диагностики + одна ветка hover). Подробнее — [§5 — объём spike](#adr0103-spike-scope).
 3. **Второй** адаптер хоста (например веб) — только при **явном** принятии риска веб-стека во Forward; для первого спайка не обязателен.
 4. После стабилизации — при необходимости **graph-backed** surfaces [0067](0067-graph-backed-surfaces-contract.md) для *навигации*, которой не место в текстовом хосте.
 
 ---
+
+<a id="adr0103-non-goals"></a>
 
 ## 4. Не цели (v1 этого ADR)
 
@@ -78,6 +96,8 @@
 - Внешние message broker’ы или сведение всех потоков в один envelope.
 
 ---
+
+<a id="adr0103-spike-scope"></a>
 
 ## 5. Объём technical spike (по умолчанию)
 
@@ -92,12 +112,16 @@
 
 ---
 
+<a id="adr0103-related-docs"></a>
+
 ## 6. Сопутствующие документы
 
 - **Сравнение хостов (аппендикс):** [editor-surface-candidates-comparison-v1](../design/editor-surface-candidates-comparison-v1.md)
 - **Roadmap полировки UI (Forward, баннер, всплывающие подсказки, MFD):** [editor-forward-ui-cleanup-roadmap-v1](../ux/editor-forward-ui-cleanup-roadmap-v1.md)
 
 ---
+
+<a id="adr0103-consequences"></a>
 
 ## 7. Последствия
 
@@ -106,6 +130,8 @@
 - **Риск при игнорировании:** возврат к **god-**`MainWindowViewModel`, **event spaghetti** на DataBus, нарушения CASCOPE между DAL и CCU.
 
 ---
+
+<a id="adr0103-rejected-alternatives"></a>
 
 ## 8. Отклонённые альтернативы (кратко)
 
