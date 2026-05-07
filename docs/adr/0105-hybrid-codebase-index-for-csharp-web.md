@@ -1,6 +1,6 @@
 # ADR 0105: Hybrid Codebase Index for C# (Web + Avalonia AXAML + общий контур) with Roslyn Truth
 
-**Статус:** Proposed  
+**Статус:** Accepted  
 **Дата:** 2026-05-06  
 
 **Связь:** [0039](0039-workspace-navigation-affordances.md), [0040](0040-lsp-launch-line-settings-toml-presets-and-environment.md), [0052](0052-agent-contract-cli-and-snapshot-tests.md), [0053](0053-semantic-map-control-flow-pfd.md), [0056](0056-semantic-map-pipeline-adoption.md), [0067](0067-graph-backed-surfaces-contract.md), [0069](0069-markdown-preview-tool-surface-and-renderer-decoupling.md), [0079](0079-ide-display-system-ids-overlay-pipeline.md) (IDS vs CDS; AXAML индекс — не IDS), [0095](0095-workspace-solution-ide-health-stratification.md), [0097](0097-cockpit-compute-units-transport-to-channel-dto.md), [0098](0098-semantic-first-document-as-projection.md), [0099](0099-ide-databus-typed-events-and-projections.md), [0100](0100-project-constitution.md), [0101](0101-licensing-and-commercialization-strategy.md), [0102](0102-data-acquisition-layer-boundary-and-contract.md).
