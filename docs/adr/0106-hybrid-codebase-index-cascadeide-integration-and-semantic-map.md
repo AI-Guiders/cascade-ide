@@ -3,7 +3,7 @@
 **Статус:** Proposed  
 **Дата:** 2026-05-07  
 
-**Связь:** базовое решение по ядру и MCP — **[ADR 0105](0105-hybrid-codebase-index-for-csharp-web.md)** (**Accepted · Implemented** в контуре `hybrid-codebase-index`). Здесь — **контур CascadeIDE**: DAL/CCU/DataBus, UX свежести индекса и подача снимков на graph-backed поверхности.
+**Связь:** базовое решение по ядру и MCP — **[ADR 0105](https://github.com/KarataevDmitry/hybrid-codebase-index/blob/main/docs/ADR-0105-hybrid-codebase-index-core-and-mcp.md)** (**Accepted · Implemented** в репозитории `hybrid-codebase-index`). Здесь — **контур CascadeIDE**: DAL/CCU/DataBus, UX свежести индекса и подача снимков на graph-backed поверхности.
 
 **Контекст кабины:** [0102](0102-data-acquisition-layer-boundary-and-contract.md), [0097](0097-cockpit-compute-units-transport-to-channel-dto.md), [0099](0099-ide-databus-typed-events-and-projections.md), [0098](0098-semantic-first-document-as-projection.md); навигация и semantic map — [0039](0039-workspace-navigation-affordances.md), [0053](0053-semantic-map-control-flow-pfd.md), [0056](0056-semantic-map-pipeline-adoption.md), [0067](0067-graph-backed-surfaces-contract.md), [0079](0079-ide-display-system-ids-overlay-pipeline.md).
 
@@ -26,17 +26,17 @@
 
 При частых сохранениях индекс по `.cs` / `.axaml` и смежным типам файлов должен обновляться **дёшевым инкрементом** (хеш, пересборка затронутых чанков), без UX-лагова «полный reindex на каждый keypress». Семантика: либо сценарный вызов с debounce из оркестратора, либо единый watcher-поток, согласованный с MCP-контрактом там, где агент смотрит тот же `databasePath`.
 
-Подробнее о мотивации см. в [ADR 0105 § watchouts freshness](0105-hybrid-codebase-index-for-csharp-web.md#adr0105-impl-watchouts-freshness) — здесь задаётся **реализация в CIDE**.
+Подробнее о мотивации см. в [ADR 0105 § watchouts freshness](https://github.com/KarataevDmitry/hybrid-codebase-index/blob/main/docs/ADR-0105-hybrid-codebase-index-core-and-mcp.md#adr0105-impl-watchouts-freshness) — здесь задаётся **реализация в CIDE**.
 
 ### Semantic Map и слой B (граница)
 
-**Semantic Map** — graph-backed поверхность (намерения, control flow, Skia pipeline). Гибридный индекс (**слой B** в терминологии ADR 0105) **не является** каноническим графом Semantic Map и **не заменяет** CFG / Roslyn-символьную истину по C#. Он даёт **ориентацию**: топ попаданий, пути, диапазоны в файлах, версия индекса и при желании вход для declutter карты — с явным `hit_kind` в DTO ([0105 § hit_kind](0105-hybrid-codebase-index-for-csharp-web.md#adr0105-impl-watchouts-hit-kind)).
+**Semantic Map** — graph-backed поверхность (намерения, control flow, Skia pipeline). Гибридный индекс (**слой B** в терминологии ADR 0105) **не является** каноническим графом Semantic Map и **не заменяет** CFG / Roslyn-символьную истину по C#. Он даёт **ориентацию**: топ попаданий, пути, диапазоны в файлах, версия индекса и при желании вход для declutter карты — с явным `hit_kind` в DTO ([0105 § hit_kind](https://github.com/KarataevDmitry/hybrid-codebase-index/blob/main/docs/ADR-0105-hybrid-codebase-index-core-and-mcp.md#adr0105-impl-watchouts-hit-kind)).
 
 В [0097 § P3](0097-cockpit-compute-units-transport-to-channel-dto.md#adr0097-candidates-p3) зафиксирован кандидат **`SemanticMapInputSnapshot`** — слой B после нормализации через **CCU** ([0097 § граница semantic map](0097-cockpit-compute-units-transport-to-channel-dto.md#adr0097-semantic-map-boundary)) задаёт содержание такого входа для graph-backed поверхностей.
 
 ### Composition workflow в продукте
 
-Интеграция сценария **«Hybrid search → Roslyn точность»** (п. 5 дорожной карты [ADR 0105](0105-hybrid-codebase-index-for-csharp-web.md)) в UI/оркестрации IDE: подсказки к следующему шагу (`go-to-def`, usages, diagnostics), без смешения `hit_kind` с символьной истиной.
+Интеграция сценария **«Hybrid search → Roslyn точность»** (п. 5 дорожной карты [ADR 0105](https://github.com/KarataevDmitry/hybrid-codebase-index/blob/main/docs/ADR-0105-hybrid-codebase-index-core-and-mcp.md#adr0105-rollout-plan)) в UI/оркестрации IDE: подсказки к следующему шагу (`go-to-def`, usages, diagnostics), без смешения `hit_kind` с символьной истиной.
 
 ---
 
