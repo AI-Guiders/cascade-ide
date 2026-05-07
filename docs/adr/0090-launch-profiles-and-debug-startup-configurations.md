@@ -4,6 +4,8 @@
 **Дата:** 2026-04-23  
 **Связь:** [0002](0002-debug-human-agent-parity.md) (единый слой отладки для человека и агента), [MCP-PROTOCOL.md](../MCP-PROTOCOL.md) (`debug_launch` и родственные тулы), текущее хранилище `StartupProjectStore` / `startup-project.json`, резолвер [MsBuildDebugTargetResolver.cs](../../Services/MsBuildDebugTargetResolver.cs), политика конфигурации TOML-first в [0028](0028-user-settings-toml-localappdata-and-secrets.md) / [0029](0029-configuration-toml-canonical-ui-facade.md). **Расширение (опц. встроенный просмотр URL на MFD):** [0093](0093-mfd-embedded-browser-for-launch-url.md).
 
+<a id="adr0090-context"></a>
+
 ## Контекст
 
 Сейчас на **одно решение** приходится **не больше одного** явного стартового проекта: путь к `.csproj` хранится в `.cascade-ide/startup-project.json` как одно поле `StartupProjectRelativePath`. F5 и интерактивный `debug_launch` резолвят **одну** цель; конфигурация MSBuild для отладки фактически зашита как **Debug** в резолвере.
@@ -14,9 +16,13 @@
 
 **Веб (ASP.NET Core)** — не «потом»: типичные портальные/SPA-host решения (в т.ч. продуктовый контур **EDW.Portal**, scope `portal` в оперативной памяти) по сути **зависят** от `Properties/launchSettings.json`: Kestrel **URL** (`http://localhost:…` / `https://…`, несколько endpoints), `ASPNETCORE_ENVIRONMENT`, иногда `launchBrowser`, разные профили (`http` / `https` / IIS). Без маппинга этих полей в DAP-launch (переменные окружения процесса + при необходимости аргументы хоста) F5 в CIDE **не** совпадёт с привычным `dotnet run` / VS. Консольные exe — подмножество; **веб — обязательный** горизонт v1 согласно этому ADR (детализация полей — ниже).
 
+<a id="adr0090-decision"></a>
+
 ## Решение (направление)
 
 Ввести **каталог профилей запуска** (launch profiles) в зоне workspace, с **текущим выбранным профилем**, и прогонять отладку (DAP launch) **через активный профиль**, а не через единственный `StartupProjectRelativePath`.
+
+<a id="adr0090-profile-model-v1"></a>
 
 ### Минимальная модель профиля (v1)
 
@@ -30,6 +36,8 @@
 
 - **Переменные окружения** процесса — для веба как минимум передавать/мерджить с тем, что приходит из профиля (часто `ASPNETCORE_ENVIRONMENT=Development` и кастомные ключи). Реализация: env в DAP `launch` (расширение [IdeDapDebugSession](../../Services/IdeDapDebugSession.cs), если сейчас нет), без «тихого» отбрасывания.
 
+<a id="adr0090-aspnet-v1"></a>
+
 ### ASP.NET Core / веб (v1, не откладывать)
 
 Профиль должен уметь выражать то, что **уже** в `launchSettings.json` для `commandName: Project` (Kestrel):
@@ -42,6 +50,8 @@
 
 **Импорт:** при чтении `Properties/launchSettings.json` веб-проекта схема TOML в `.cascade-ide` должна **сохранять семантику** URL и env, чтобы сценарии вроде портала не ломались относительно `dotnet run --launch-profile …`.
 
+<a id="adr0090-storage"></a>
+
 ### Хранение
 
 - **Каноничный формат: TOML**, не JSON — например `.cascade-ide/launch-profiles.toml` (плюс ключ/секция версии схемы, напр. `version = 1`). Такая же философия, что и пользовательский/канонический конфиг в IDE ([0028](0028-user-settings-toml-localappdata-and-secrets.md), [0029](0029-configuration-toml-canonical-ui-facade.md)): **читаемость, комментарии, один стиль** с `settings` / `workspace` рядом с репозиторием.
@@ -50,11 +60,15 @@
 
 **Миграция:** если существует только `startup-project.json`, при первом чтении построить **один** профиль по умолчанию (имя вроде `Default` / из имени проекта), выставить его активным, записать `launch-profiles.toml`, старый JSON оставить как совместимость до явного удаления (strangler).
 
+<a id="adr0090-ui"></a>
+
 ### UI
 
 - Видимый **селектор текущего профиля** (toolbar или полоса у обозревателя / баннер отладки) — **keyboard-first** согласованно с [0013](0013-command-surface-and-discoverability.md).
 - Команды: «управление профилями» (добавить/удалить/дублировать) — MFD или модалка по объёму ([0074](0074-settings-ui-mfd-compact-layout-overflow.md) как политика нехватки места).
 - F5 / «запустить отладку» используют **активный профиль**, без диалога выбора `.dll`, если резолв успешен (согласуется с паритетом [0002](0002-debug-human-agent-parity.md)).
+
+<a id="adr0090-mcp-parity"></a>
 
 ### Паритет агента (MCP / IdeCommands) — контракт v1
 
@@ -70,14 +84,20 @@
 
 Это позволяет человеку и агенту использовать один смысл F5/Launch: «запуск по активному профилю», а для точечных сценариев сохраняется прямой запуск по `target_path`.
 
+<a id="adr0090-dotnet-alignment"></a>
+
 ### Согласование с .NET
 
 - **Опциональный импорт** из `Properties/launchSettings.json` (после v1) — уменьшить трение для проектов, уже настроенных под `dotnet` / VS. Канон по-прежнему **TOML в `.cascade-ide`**; с **стандартным** `launchSettings` обеспечивается **семантическая совместимость** (маппинг полей), а не побитовая идентичность одного файла.
 - По желанию **экспорт** профиля обратно в форму, близкую к `launchSettings`, для совместимости с другими инструментами — без обязательности.
 
+<a id="adr0090-build-resolve"></a>
+
 ### Резолв сборки
 
 - [MsBuildDebugTargetResolver](../../Services/MsBuildDebugTargetResolver.cs): передавать **конфигурацию** из профиля (`-p:Configuration=...`), а не только константу `Debug`, когда источник истины — активный профиль.
+
+<a id="adr0090-consequences"></a>
 
 ## Последствия
 
@@ -85,14 +105,20 @@
 - Тесты: парсинг TOML, миграция с одного `startup-project.json`, импорт **веб-**`launchSettings` (см. пример в репо: [OpenVoiceTts.Service launchSettings.json](../../../voice-tts/OpenVoiceTts.Service/Properties/launchSettings.json) — `applicationUrl`, `environmentVariables`), сценарий F5: консоль + **Kestrel** с валидным URL.
 - Документация для пользователя (User Guide) — продуктовый слой, не обязательный объём самого ADR (см. [README](README.md) про User Guide).
 
+<a id="adr0090-rejected"></a>
+
 ## Отклонённые / отложенные альтернативы
 
 - **Только** читать `launchSettings.json` и не иметь собственного файла — отклонено как хуже для MVP паритета IDE (монорепы, пути относительно solution, и агенту нужен стабильный контракт в `.cascade-ide` рядом с брейкпоинтами).
 - **Несколько параллельных отладок** в одной IDE — вне scope этого ADR (остаётся одна DAP-сессия, как сейчас, если иное не зафиксировано отдельно).
 
+<a id="adr0090-implementation-status"></a>
+
 ## Статус внедрения
 
 - Канон хранения: `.cascade-ide/launch-profiles.toml`, миграция из `startup-project.json`, `MsBuildDebugTargetResolver` с конфигурацией из профиля, DAP `launch` с `env` и опциональным cwd, `debug_launch` с `profile_name` и явными ошибками контракта; тесты `LaunchProfilesStoreTests`, документация `IdeCommands` / `MCP-PROTOCOL.md`.
+
+<a id="adr0090-implementation-checklist"></a>
 
 ## Implementation checklist (из решения в код)
 
