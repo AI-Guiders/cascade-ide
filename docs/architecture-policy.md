@@ -33,6 +33,10 @@
 
 **Кастомная отрисовка** (например Skia) — **над** Avalonia как хостом: прямоугольники слотов и команды отрисовки выводятся из контракта CDS / композитора. Ядро Avalonia **не** форкается без необходимости; расширения продукта — в своём слое. Стабильность геометрии при явных весах в конфиге — [0017](adr/0017-multi-window-workspace-and-agent-surfaces.md) ([предохранитель](adr/0017-multi-window-workspace-and-agent-surfaces.md#adr0017-weight-fuse-policy)).
 
+### CDS vs IDS (коротко)
+
+Один процесс приложения — **два домена смысла**: **CDS** маршрутизирует данные в **зоны кабины** (PFD / MFD / слоты приборов); **IDS** — **оверлеи оболочки** (палитра, модалки, toast) поверх workspace, без семантики «прибор в слоте». Таблица, мнемоника и связь с [0066](adr/0066-cockpit-ui-vs-ide-presentation-layer.md): [ADR 0079 — раздел «Различение CDS и IDS»](adr/0079-ide-display-system-ids-overlay-pipeline.md#adr0079-cds-vs-ids).
+
 ---
 
 ## Где что зафиксировано (ADR)
@@ -290,4 +294,5 @@
 - **v2.35** — [0103](adr/0103-editor-hud-substrate-semantic-projection-and-surface-adapter.md): **субстрат Editor HUD** (пайплайн проекций, `EditorHudEngine`, `IEditorSurfaceAdapter`); границы DAL [0102](adr/0102-data-acquisition-layer-boundary-and-contract.md) / CCU [0097](adr/0097-cockpit-compute-units-transport-to-channel-dto.md) / DataBus [0099](adr/0099-ide-databus-typed-events-and-projections.md); отдельный **hi-freq** bounded-контур; baseline **AvaloniaEdit**; компаньоны [editor-surface-candidates-comparison-v1](design/editor-surface-candidates-comparison-v1.md), [editor-forward-ui-cleanup-roadmap-v1](ux/editor-forward-ui-cleanup-roadmap-v1.md); **Proposed**; индекс [README](adr/README.md), строка навигатора.
 - **v2.36** — [0103](adr/0103-editor-hud-substrate-semantic-projection-and-surface-adapter.md) и компаньоны `design/` / `ux/`: **каноничный текст на русском**; заголовок ADR, разделы и таблицы без англоязычного тела; индекс и строка навигатора уточнены («субстрат»).
 - **v2.37** — [0103](adr/0103-editor-hud-substrate-semantic-projection-and-surface-adapter.md): статус **Accepted (strangler)**; подраздел «Состояние реализации»; индекс [README](adr/README.md), строка навигатора.
+- **v2.38** — [0079](adr/0079-ide-display-system-ids-overlay-pipeline.md): подраздел **«Различение CDS и IDS (одно приложение, два домена)»** (таблица, мнемоника, CASCOPE016); в навигаторе — подраздел **CDS vs IDS** со ссылкой на якорь `adr0079-cds-vs-ids`.
 - Изменения направления — отдельным коммитом: обновление этого файла и при необходимости новый ADR в [docs/adr/README.md](adr/README.md).
