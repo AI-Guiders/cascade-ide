@@ -113,7 +113,8 @@
 | [0101](0101-licensing-and-commercialization-strategy.md) | Лицензирование и коммерциализация: матрица лицензий, правила зависимостей, guardrails для copyleft и план внедрения | Proposed |
 | [0102](0102-data-acquisition-layer-boundary-and-contract.md) | **Data Acquisition Layer (DAL):** явная граница добычи внешних данных и контракт DAL ↔ CCU ↔ UI | Proposed |
 | [0103](0103-editor-hud-substrate-semantic-projection-and-surface-adapter.md) | **Субстрат Editor HUD:** `SemanticProjectionPipeline` / `EditorHudEngine` / `IEditorSurfaceAdapter`; DAL / CCU / DataBus; отдельный hi-freq bounded-контур; baseline AvaloniaEdit; сравнение хостов в `design/`, roadmap UI в `ux/` | Accepted (strangler) |
-| [0105](0105-hybrid-codebase-index-for-csharp-web.md) | Hybrid codebase index для C# (Web + Avalonia AXAML + общий контур, опц. FTS по `.cs` как тексту) поверх Roslyn-истины | Proposed |
+| [0105](0105-hybrid-codebase-index-for-csharp-web.md) | Hybrid codebase index: переносимое ядро + MCP для C#/Razor/AXAML (Roslyn истина для C#); гибрид FTS+vec | Accepted · Implemented |
+| [0106](0106-hybrid-codebase-index-cascadeide-integration-and-semantic-map.md) | Встраивание hybrid index в CascadeIDE (DAL/CCU/DataBus/freshness) и граница Semantic Map | Proposed |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 
