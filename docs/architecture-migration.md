@@ -24,7 +24,7 @@
 | `MainWindowViewModel.Capabilities.cs` | 23 | Реестр capabilities. |
 | `MainWindowViewModel.CascadeChord.cs` | 426 | Аккордный слой ADR 0060: корень `cascade_chord` из hotkeys.toml (по умолчанию Ctrl+K), затем тот же хвост мелодии, что после `c:` в палитре (см. `IntentMelodyAliases`), без префикса `c:` и без Enter — если alias однозначен (например `so`). При конфликте префиксов (например `gs` vs `gsu`) точное совпадение после полного ввода или по клавише Enter. |
 | `MainWindowViewModel.CommandPalette.cs` | 550 | Палитра команд. |
-| `MainWindowViewModel.cs` | 400 | Главный композитор окна (partial-класс, несколько `MainWindowViewModel*.cs`). Карта файлов и ответственности — `docs/architecture-migration.md`, раздел «Срез MainWindowViewModel». |
+| `MainWindowViewModel.cs` | 407 | Главный композитор окна (partial-класс, несколько `MainWindowViewModel*.cs`). Карта файлов и ответственности — `docs/architecture-migration.md`, раздел «Срез MainWindowViewModel». |
 | `MainWindowViewModel.CSharpLsp.cs` | 120 | Запуск/перезапуск C# LSP. |
 | `MainWindowViewModel.CursorAcp.cs` | 36 | Путь Cursor ACP и предпочитаемая модель. |
 | `MainWindowViewModel.DebugStackUi.cs` | 35 | Выбор кадра в панели «Стек» Mfd: подгрузка Locals для выбранного кадра (DAP). |
