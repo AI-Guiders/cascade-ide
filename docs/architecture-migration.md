@@ -7,7 +7,7 @@
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:BEGIN -->
 
-`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~7.9k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~6.8k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.1k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
+`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~7.8k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~6.7k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.1k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:END -->
 
@@ -44,7 +44,7 @@
 | `MainWindowViewModel.IdeMcpActions.BuildTest.cs` | 166 | MCP: сборка, тесты. |
 | `MainWindowViewModel.IdeMcpActions.DebuggerPanel.cs` | 73 | Панель отладки и снимок DAP (ADR 0002): один `DebugSessionSnapshot`. |
 | `MainWindowViewModel.IdeMcpActions.Editor.cs` | 128 | MCP: редактор. |
-| `MainWindowViewModel.IdeMcpActions.Git.cs` | 144 | MCP: git. |
+| `MainWindowViewModel.IdeMcpActions.Git.cs` | 48 | MCP: git (`IdeMcpGitWorkspaceSession`). |
 | `MainWindowViewModel.IdeMcpActions.HybridCodebaseIndex.cs` | 103 | MCP / ide_execute_command: Hybrid Codebase Index (имена команд как у внешнего MCP). |
 | `MainWindowViewModel.IdeMcpActions.Navigation.cs` | 61 | MCP: семантическая навигация (ADR 0039). |
 | `MainWindowViewModel.IdeMcpActions.UiAutomation.cs` | 168 | MCP: UI automation. |
@@ -66,7 +66,7 @@
 | `MainWindowViewModel.ShellState.cs` | 274 | Раскладка панелей, нижняя зона, Workspace Health / автономный агент, ключи провайдеров и чата. |
 | `MainWindowViewModel.SolutionBuild.cs` | 195 | Сборка, `BuildOutputPanel`. |
 | `MainWindowViewModel.StartupProject.cs` | 326 | Стартовый проект. |
-| `MainWindowViewModel.UiGitWorkspace.cs` | 138 | Git + workspace UI. |
+| `MainWindowViewModel.UiGitWorkspace.cs` | 147 | Git + workspace UI. |
 | `MainWindowViewModel.ViewBridge.cs` | 62 | Колбэки и провайдеры, которые View подставляет в главный VM (диалоги, UI automation). |
 | `MainWindowViewModel.WorkspaceNavigationMap.cs` | 330 | Слот Pfd: отображение карты намерений / `CodeNavigationMapSubgraphDocument` (те же данные, что JSON MCP). Граф подграфа — не синоним `instrument_id`, см. ADR 0065. По доменам: карта намерений (в т.ч. control flow) — CodeNavigation; зависимости файлов — WorkspaceNavigation; submodules — дерево/GitMap (ADR 0062). |
 | `MainWindowViewModel.WorkspaceSplitters.cs` | 23 | Сплиттеры рабочей области (MainGrid, обозреватель решения, Git и т.д.): режим «взлёт» — блокировка перетаскивания. |
@@ -189,6 +189,7 @@
 - Второй срез: `HybridIndexScopeResolver` в `Features/HybridIndex/Application/` и `IdeMcpHybridIndexScope` для MCP `codebase_index_*` (`TryResolveForCodebaseIndexCommand` — без дубля логики в VM); MCP agent-notes через `IdeMcpAgentNotesOrchestrator`; `ResolveHybridIndexScope` в VM — делегирует ресолверу. Дальше — тяжёлые сборка/тесты в VM, при необходимости Git MCP preflight, остальной Editor/UI automation.
 - Третий срез: `Services.IdeMcpSolutionPathAvailability.IsRunnableSolutionFile` для MCP build/test/code-cleanup (I/O вне статического оркестратора, CASCOPE031); мутации UI тестов — `IdeMcpBuildTestOrchestrator.IdeMcpTestRunInstrumentationMutation`.
 - Четвёртый срез: единый контур **`BuildStateChanged` → DataBus → `RebuildIdeHealth`** (ADR 0099): локальная сборка решения и MCP code cleanup не шлют «сырой» `_ideDataBus.Publish` без пересборки полосы; MCP-пути после `ConfigureAwait(false)` используют `PublishIdeBuildStateOnUiAsync`.
+- Пятый срез: MCP git целиком на **`IdeMcpGitWorkspaceSession`** (`Features/IdeMcp/Application/`), VM — только workspace + `RefreshGitSummaryAsync`; список команд preflight-fix — приватная константа в сессии (CASCOPE030: не статическое поле в оркестраторе).
 
 ## Wave 1: UI clusters thinning
 
@@ -229,3 +230,4 @@
 - **v1.21** — MCP thinning второй заход: `HybridIndexScopeResolver`, `IdeMcpHybridIndexScope`, `IdeMcpAgentNotesOrchestrator`; тесты `HybridIndexScopeAndIdeMcpScopeTests`.
 - **v1.22** — `IdeMcpSolutionPathAvailability`, `IdeMcpTestRunInstrumentationMutation`; тесты `IdeMcpSolutionPathAvailabilityTests`.
 - **v1.23** — `PublishIdeBuildStateOnUiAsync`; MCP `RunCodeCleanupAsync` обрамлён `BuildStateChanged`; `BuildSolutionAsync` — `PublishToIdeDataBusAndRebuild` вместо «тихой» публикации в шину.
+- **v1.24** — `IdeMcpGitWorkspaceSession` (+ тесты `IdeMcpGitWorkspaceSessionTests`); `MainWindowViewModel.IdeMcpActions.Git` — делегирование в сессию.
