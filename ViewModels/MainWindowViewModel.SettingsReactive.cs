@@ -1,5 +1,5 @@
-using CascadeIDE.Models;
 using CascadeIDE.Features.Shell.Application;
+using CascadeIDE.Models;
 
 namespace CascadeIDE.ViewModels;
 
@@ -111,6 +111,7 @@ public partial class MainWindowViewModel
         SaveSettingsIfChanged();
         ChatPanel.DisposeCursorAcpSession();
         ChatPanel.RefreshSendChatCommandState();
+        ApplyHybridCodebaseIndexOrchestrationForCurrentSolution(pokeWhenAutoReindex: false);
     }
 
     partial void OnCloudActiveProviderChanged(string value)
@@ -199,5 +200,77 @@ public partial class MainWindowViewModel
         _settings.Workspace.SplittersLocked = value;
         if (_lastSavedSettings is not null)
             SaveSettingsIfChanged();
+    }
+
+    partial void OnHciIntegrationEnabledChanged(bool value)
+    {
+        _settings.HybridIndex.Enabled = value;
+        ApplyHybridCodebaseIndexOrchestrationForCurrentSolution(pokeWhenAutoReindex: false);
+        SaveSettingsIfChanged();
+    }
+
+    partial void OnHciIndexDirChanged(string value)
+    {
+        var normalized = ShellSettingsOrchestrator.NormalizeHybridIndexDir(value);
+        if (ShellSettingsOrchestrator.ShouldRewriteWithNormalizedValue(value, normalized))
+        {
+            HciIndexDir = normalized;
+            return;
+        }
+
+        _settings.HybridIndex.IndexDir = normalized;
+        _hybridIndex.SetIndexDirectoryRelative(ResolveHybridIndexDirRelative());
+        ApplyHybridCodebaseIndexOrchestrationForCurrentSolution(pokeWhenAutoReindex: false);
+        SaveSettingsIfChanged();
+        NotifyHybridIndexSnapshotChanged();
+    }
+
+    partial void OnHciDebounceMsChanged(int value)
+    {
+        var v = Math.Clamp(value, 0, 60_000);
+        if (v != value)
+        {
+            HciDebounceMs = v;
+            return;
+        }
+
+        _settings.HybridIndex.DebounceMs = v;
+        ApplyHybridCodebaseIndexOrchestrationForCurrentSolution(pokeWhenAutoReindex: false);
+        SaveSettingsIfChanged();
+    }
+
+    partial void OnHciAutoReindexOnSolutionOpenChanged(bool value)
+    {
+        _settings.HybridIndex.AutoReindexOnSolutionOpen = value;
+        SaveSettingsIfChanged();
+    }
+
+    partial void OnHciWatchFilesChanged(bool value)
+    {
+        _settings.HybridIndex.WatchFiles = value;
+        ApplyHybridCodebaseIndexOrchestrationForCurrentSolution(pokeWhenAutoReindex: false);
+        SaveSettingsIfChanged();
+    }
+
+    partial void OnHciScopeModeChanged(string value)
+    {
+        var n = ShellSettingsOrchestrator.NormalizeHybridIndexScopeMode(value);
+        if (ShellSettingsOrchestrator.ShouldRewriteWithNormalizedValue(value, n))
+        {
+            HciScopeMode = n;
+            return;
+        }
+
+        _settings.HybridIndex.ScopeMode = n;
+        ApplyHybridCodebaseIndexOrchestrationForCurrentSolution(pokeWhenAutoReindex: false);
+        SaveSettingsIfChanged();
+        NotifyHybridIndexSnapshotChanged();
+    }
+
+    partial void OnHciPauseWhenMcpStdioHostChanged(bool value)
+    {
+        _settings.HybridIndex.PauseWhenMcpStdioHost = value;
+        ApplyHybridCodebaseIndexOrchestrationForCurrentSolution(pokeWhenAutoReindex: false);
+        SaveSettingsIfChanged();
     }
 }

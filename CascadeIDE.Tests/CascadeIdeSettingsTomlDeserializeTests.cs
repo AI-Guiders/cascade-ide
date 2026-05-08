@@ -1,4 +1,5 @@
 using System.Text.Json;
+using CascadeIDE.Features.Shell.Application;
 using CascadeIDE.Models;
 using CascadeIDE.Services.Presentation;
 using Tomlyn;
@@ -233,6 +234,51 @@ public sealed class CascadeIdeSettingsTomlDeserializeTests
         Assert.False(s.HybridIndex.WatchFiles);
         Assert.Equal("workspace", s.HybridIndex.ScopeMode);
         Assert.True(s.HybridIndex.PauseWhenMcpStdioHost);
+    }
+
+    [Fact]
+    public void CascadeIdeSettings_Clone_CopiesHybridIndex()
+    {
+        var s = new CascadeIdeSettings
+        {
+            HybridIndex = new HybridIndexSettings
+            {
+                Enabled = false,
+                IndexDir = ".hci2",
+                DebounceMs = 999,
+                AutoReindexOnSolutionOpen = false,
+                WatchFiles = false,
+                ScopeMode = "workspace",
+                PauseWhenMcpStdioHost = true,
+            },
+        };
+        var c = (CascadeIdeSettings)s.Clone();
+        Assert.False(c.HybridIndex.Enabled);
+        Assert.Equal(".hci2", c.HybridIndex.IndexDir);
+        Assert.Equal(999, c.HybridIndex.DebounceMs);
+        Assert.False(c.HybridIndex.AutoReindexOnSolutionOpen);
+        Assert.False(c.HybridIndex.WatchFiles);
+        Assert.Equal("workspace", c.HybridIndex.ScopeMode);
+        Assert.True(c.HybridIndex.PauseWhenMcpStdioHost);
+    }
+
+    [Fact]
+    public void CascadeIdeSettings_Is_ComparesHybridIndex()
+    {
+        var a = new CascadeIdeSettings();
+        var b = new CascadeIdeSettings();
+        Assert.True(a.Is(b));
+
+        b.HybridIndex.DebounceMs = 123;
+        Assert.False(a.Is(b));
+    }
+
+    [Fact]
+    public void NormalizeHybridIndexScopeMode_DefaultsExpected()
+    {
+        Assert.Equal("workspace", ShellSettingsOrchestrator.NormalizeHybridIndexScopeMode("workspace"));
+        Assert.Equal("workspace+solution", ShellSettingsOrchestrator.NormalizeHybridIndexScopeMode(""));
+        Assert.Equal("workspace+solution", ShellSettingsOrchestrator.NormalizeHybridIndexScopeMode("garbage"));
     }
 
 }

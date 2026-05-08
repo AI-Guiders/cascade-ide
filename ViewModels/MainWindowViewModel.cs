@@ -19,6 +19,7 @@ using CascadeIDE.Cockpit.Composition.WorkspaceHealth;
 using CascadeIDE.Cockpit.Composition.HostSurface;
 using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Features.HybridIndex.Application;
+using CascadeIDE.Features.Shell.Application;
 using CascadeIDE.Models;
 namespace CascadeIDE.ViewModels;
 
@@ -119,6 +120,14 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _codeNavigationMapPresentation = CodeNavigationMapPresentationKind.Normalize(_settings.CodeNavigationMap.View);
         _codeNavigationMapLevel = CodeNavigationMapLevelKind.Normalize(_settings.CodeNavigationMap.Depth);
         _workspaceSplittersLocked = _settings.Workspace.SplittersLocked;
+
+        _hciIntegrationEnabled = _settings.HybridIndex.Enabled;
+        _hciIndexDir = ShellSettingsOrchestrator.NormalizeHybridIndexDir(_settings.HybridIndex.IndexDir);
+        _hciDebounceMs = Math.Clamp(_settings.HybridIndex.DebounceMs, 0, 60_000);
+        _hciAutoReindexOnSolutionOpen = _settings.HybridIndex.AutoReindexOnSolutionOpen;
+        _hciWatchFiles = _settings.HybridIndex.WatchFiles;
+        _hciScopeMode = ShellSettingsOrchestrator.NormalizeHybridIndexScopeMode(_settings.HybridIndex.ScopeMode);
+        _hciPauseWhenMcpStdioHost = _settings.HybridIndex.PauseWhenMcpStdioHost;
 
         _ideMcpExecutor = new IdeMcpCommandExecutor(this);
 
@@ -433,15 +442,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         OnPropertyChanged(nameof(IsPfdColumnVisible));
 
         ChatPanel.DisposeCursorAcpSession();
-        // ADR 0106: Hybrid Codebase Index in-proc watcher for workspace freshness.
-        var (hciWs, hciSln) = ResolveHybridIndexScope(ws ?? "", value);
-        var enableWatcher = !string.IsNullOrWhiteSpace(hciWs)
-            && _settings.HybridIndex.Enabled
-            && _settings.HybridIndex.WatchFiles
-            && !(ChatMcpOnly && _settings.HybridIndex.PauseWhenMcpStdioHost);
-        _hybridIndex.SetEnabled(hciWs, hciSln, enabled: enableWatcher, debounceMs: ResolveHybridIndexDebounceMs());
-        if (_settings.HybridIndex.AutoReindexOnSolutionOpen)
-            _hybridIndex.Poke(hciWs, hciSln);
+        ApplyHybridCodebaseIndexOrchestrationForCurrentSolution(pokeWhenAutoReindex: true);
         AttachBreakpointsFileWatcher(value);
         _ = RefreshGitSummaryAsync();
         _ = GitPanel.RefreshRepositoryFlagAsync();
@@ -482,6 +483,23 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         if (string.Equals(mode, "workspace", StringComparison.OrdinalIgnoreCase))
             return (ws, null);
         return (ws, solutionPath);
+    }
+
+    /// <summary>
+    /// ADR 0106: синхронизация оркестратора HCI с <see cref="CascadeIdeSettings.HybridIndex"/> и текущим решением в <see cref="SolutionWorkspaceViewModel"/>.
+    /// </summary>
+    private void ApplyHybridCodebaseIndexOrchestrationForCurrentSolution(bool pokeWhenAutoReindex)
+    {
+        var value = Workspace.SolutionPath ?? "";
+        var ws = GetWorkspacePath(value);
+        var (hciWs, hciSln) = ResolveHybridIndexScope(ws ?? "", value);
+        var enableWatcher = !string.IsNullOrWhiteSpace(hciWs)
+            && _settings.HybridIndex.Enabled
+            && _settings.HybridIndex.WatchFiles
+            && !(ChatMcpOnly && _settings.HybridIndex.PauseWhenMcpStdioHost);
+        _hybridIndex.SetEnabled(hciWs, hciSln, enabled: enableWatcher, debounceMs: ResolveHybridIndexDebounceMs());
+        if (pokeWhenAutoReindex && _settings.HybridIndex.AutoReindexOnSolutionOpen)
+            _hybridIndex.Poke(hciWs, hciSln);
     }
 
     private string? BuildChatMinimizedContextBlockCore()

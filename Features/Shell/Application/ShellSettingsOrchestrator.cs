@@ -32,4 +32,17 @@ public static class ShellSettingsOrchestrator
 
     public static bool ShouldCoerceWhenInstrumentationHidden(MfdShellPage currentPage) =>
         currentPage is MfdShellPage.Events or MfdShellPage.Tests or MfdShellPage.Hypotheses or MfdShellPage.DebugStack;
+
+    /// <summary>Hybrid Codebase Index: <c>workspace</c> or <c>workspace+solution</c> (TOML <c>[hybrid_index].scope_mode</c>).</summary>
+    public static string NormalizeHybridIndexScopeMode(string? value)
+    {
+        var v = (value ?? "").Trim();
+        if (string.Equals(v, "workspace", StringComparison.OrdinalIgnoreCase))
+            return "workspace";
+        return "workspace+solution";
+    }
+
+    /// <summary>Whitespace-trim для каталога индекса под корнем workspace; пустая строка = дефолт в рантайме.</summary>
+    public static string NormalizeHybridIndexDir(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? "" : value.Trim();
 }

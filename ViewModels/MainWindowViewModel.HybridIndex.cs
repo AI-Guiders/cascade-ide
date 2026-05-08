@@ -190,10 +190,19 @@ public partial class MainWindowViewModel
         if (string.IsNullOrWhiteSpace(ws))
             return;
 
-        // Ensure watcher is enabled, then poke.
         var (hciWs, hciSln) = ResolveHybridIndexScope(ws, sln);
-        _hybridIndex.SetEnabled(hciWs, hciSln, enabled: true, debounceMs: ResolveHybridIndexDebounceMs());
-        _hybridIndex.Poke(hciWs, hciSln);
+        if (string.IsNullOrWhiteSpace(hciWs))
+            return;
+
+        var enableWatcher = _settings.HybridIndex.Enabled
+            && _settings.HybridIndex.WatchFiles
+            && !(ChatMcpOnly && _settings.HybridIndex.PauseWhenMcpStdioHost);
+        _hybridIndex.SetEnabled(hciWs, hciSln, enabled: enableWatcher, debounceMs: ResolveHybridIndexDebounceMs());
+        if (enableWatcher)
+            _hybridIndex.Poke(hciWs, hciSln);
+        else
+            _ = _hybridIndex.RunFullReindexAndPublishStatusAsync(hciWs, hciSln, CancellationToken.None);
+
         NotifyHybridIndexSnapshotChanged();
     }
 

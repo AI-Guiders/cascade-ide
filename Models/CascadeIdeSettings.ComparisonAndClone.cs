@@ -13,6 +13,7 @@ public sealed partial class CascadeIdeSettings
             && McpEquals(Mcp, o.Mcp)
             && AgentNotesEquals(AgentNotes, o.AgentNotes)
             && WorkspaceEquals(Workspace, o.Workspace)
+            && HybridIndexEquals(HybridIndex, o.HybridIndex)
             && CodeNavigationMapEquals(CodeNavigationMap, o.CodeNavigationMap)
             && LanguagesEquals(Languages, o.Languages)
             && MarkdownEquals(Markdown, o.Markdown)
@@ -65,6 +66,16 @@ public sealed partial class CascadeIdeSettings
                 ExternalServersJson = Mcp.ExternalServersJson,
                 AcpAutoInjectIdeMcp = Mcp.AcpAutoInjectIdeMcp,
                 ExternalServersJsonPath = Mcp.ExternalServersJsonPath,
+            },
+            HybridIndex = new HybridIndexSettings
+            {
+                Enabled = HybridIndex.Enabled,
+                IndexDir = HybridIndex.IndexDir,
+                DebounceMs = HybridIndex.DebounceMs,
+                AutoReindexOnSolutionOpen = HybridIndex.AutoReindexOnSolutionOpen,
+                WatchFiles = HybridIndex.WatchFiles,
+                ScopeMode = HybridIndex.ScopeMode,
+                PauseWhenMcpStdioHost = HybridIndex.PauseWhenMcpStdioHost,
             },
             AgentNotes = new AgentNotesSettings { KbBaseOverlayPath = AgentNotes.KbBaseOverlayPath },
             Workspace = new WorkspaceSettings
@@ -270,6 +281,19 @@ public sealed partial class CascadeIdeSettings
         if (a is null || b is null)
             return a == b;
         return a.KbBaseOverlayPath.Is(b.KbBaseOverlayPath);
+    }
+
+    private static bool HybridIndexEquals(HybridIndexSettings? a, HybridIndexSettings? b)
+    {
+        if (a is null || b is null)
+            return a == b;
+        return a.Enabled == b.Enabled
+            && a.DebounceMs == b.DebounceMs
+            && a.AutoReindexOnSolutionOpen == b.AutoReindexOnSolutionOpen
+            && a.WatchFiles == b.WatchFiles
+            && a.PauseWhenMcpStdioHost == b.PauseWhenMcpStdioHost
+            && a.IndexDir.Is(b.IndexDir)
+            && a.ScopeMode.Is(b.ScopeMode);
     }
 
     private static bool WorkspaceEquals(WorkspaceSettings? a, WorkspaceSettings? b)
