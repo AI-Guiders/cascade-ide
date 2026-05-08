@@ -7,7 +7,7 @@
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:BEGIN -->
 
-`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~7.7k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~6.6k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.1k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
+`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~7.9k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~6.8k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.1k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:END -->
 
@@ -37,14 +37,15 @@
 | `MainWindowViewModel.EditorStabilizedInput.cs` | 64 | Один hi-freq throttler на главное окно (ADR 0103): не N фоновых consumer на N вкладок. Стабилизированный выход обрабатывается только если `FilePath` совпадает с `CurrentFilePath` (устаревшие дельты после смены вкладки отбрасываются). |
 | `MainWindowViewModel.Eicas.cs` | 17 | Канал EICAS / CAS — отдельно от полосы телеметрии контура работы (ADR 0021, вариант A). |
 | `MainWindowViewModel.EnvironmentReadiness.cs` | 66 | Снимок «готовность окружения» (ADR 0023), отдельно от Workspace Health. |
-| `MainWindowViewModel.HybridIndex.cs` | 256 | Hybrid Codebase Index (HCI): status projection and UI commands for the HIS (MFD) page. |
-| `MainWindowViewModel.HybridIndexSettings.cs` | 16 | Привязки окна настроек к `HybridIndex` (ADR 0106). |
+| `MainWindowViewModel.HybridIndex.cs` | 286 | Hybrid Codebase Index (HCI): status projection and UI commands for the HIS (MFD) page. |
+| `MainWindowViewModel.HybridIndexSettings.cs` | 18 | Привязки окна настроек к `HybridIndex` (ADR 0106). |
 | `MainWindowViewModel.IdeHealth.cs` | 86 | Связка с Workspace Health. |
 | `MainWindowViewModel.IdeMcpActions.AgentNotes.cs` | 45 | Реализация `IIdeMcpActions`: agent-notes. |
 | `MainWindowViewModel.IdeMcpActions.BuildTest.cs` | 165 | MCP: сборка, тесты. |
 | `MainWindowViewModel.IdeMcpActions.DebuggerPanel.cs` | 73 | Панель отладки и снимок DAP (ADR 0002): один `DebugSessionSnapshot`. |
 | `MainWindowViewModel.IdeMcpActions.Editor.cs` | 138 | MCP: редактор. |
 | `MainWindowViewModel.IdeMcpActions.Git.cs` | 144 | MCP: git. |
+| `MainWindowViewModel.IdeMcpActions.HybridCodebaseIndex.cs` | 128 | MCP / ide_execute_command: Hybrid Codebase Index (имена команд как у внешнего MCP). |
 | `MainWindowViewModel.IdeMcpActions.Navigation.cs` | 68 | MCP: семантическая навигация (ADR 0039). |
 | `MainWindowViewModel.IdeMcpActions.UiAutomation.cs` | 170 | MCP: UI automation. |
 | `MainWindowViewModel.IdeMcpActions.Web.cs` | 10 | Реализация `IIdeMcpActions`: публичный веб-запрос (DuckDuckGo Instant Answer) и загрузка публичного URL. |
@@ -85,7 +86,7 @@
 | `IdeMcpCommandExecutor.Handlers.DebuggerUi.cs` | 57 | Поверхность отладки. |
 | `IdeMcpCommandExecutor.Handlers.Editor.cs` | 108 | Редактор. |
 | `IdeMcpCommandExecutor.Handlers.PowerDocuments.cs` | 266 | Power / документы. |
-| `Generated/IdeMcpCommandExecutor.Generated.g.cs` | 69 | Сгенерированные хендлеры MCP → `IIdeMcpActions` (`CascadeIDE.ProtocolDocGen`). |
+| `Generated/IdeMcpCommandExecutor.Generated.g.cs` | 108 | Сгенерированные хендлеры MCP → `IIdeMcpActions` (`CascadeIDE.ProtocolDocGen`). |
 
 <!-- AUTO:MAIN-WINDOW-SLICE:EXEC-TABLE:END -->
 
