@@ -1,7 +1,7 @@
 # ADR 0106: Hybrid Codebase Index — интеграция в CascadeIDE, свежесть и Semantic Map
 
-**Статус:** Proposed  
-**Дата:** 2026-05-07  
+**Статус:** Accepted · In progress (in-proc оркестратор, UI настроек, MFD HIS)  
+**Дата:** 2026-05-07 (обновлено 2026-05-08)  
 
 **Связь:** базовое решение по ядру и MCP — **[ADR 0105](0105-hybrid-codebase-index-for-csharp-web.md)** (**Accepted · Implemented**; код в репозитории [`hybrid-codebase-index`](https://github.com/KarataevDmitry/hybrid-codebase-index)). Здесь — **контур CascadeIDE**: DAL/CCU/DataBus, UX свежести индекса и подача снимков на graph-backed поверхности.
 
@@ -37,6 +37,18 @@
 ### Composition workflow в продукте
 
 Интеграция сценария **«Hybrid search → Roslyn точность»** (п. 5 дорожной карты [ADR 0105](0105-hybrid-codebase-index-for-csharp-web.md#adr0105-rollout-plan)) в UI/оркестрации IDE: подсказки к следующему шагу (`go-to-def`, usages, diagnostics), без смешения `hit_kind` с символьной истиной.
+
+### Persistence и синхронизация с оркестратором
+
+- Модель: `CascadeIdeSettings.HybridIndex` → TOML **`[hybrid_index]`** (общий файл пользовательских настроек CascadeIDE, см. `SettingsService`; образец — `docs/samples/settings.toml`).
+- **Clone / Is**: изменения секции HCI участвуют в детекторе «сохранить на диск» (`SaveSettingsIfChanged`).
+- После изменения параметров через UI главного окна вызывается **`ApplyHybridCodebaseIndexOrchestrationForCurrentSolution`**: включение watcher, debounce, `scope_mode`, учёт режима **`mcp_only`** при `pause_when_mcp_stdio_host`, смена **`index_dir`** через пересборку in-proc `CodebaseIndexService` и переустановку watcher’ов.
+- Сценарий **открытие/смена решения** дополнительно делает **`Poke`** при `auto_reindex_on_solution_open` (как и раньше на `SolutionPath`-изменении).
+- Обновление страницы **INDEX / HCI** в MFD: событие `HybridIndexStateChanged` в IDE DataBus; подписка при первом переходе на страницу (см. `MainWindowViewModel.EnvironmentReadiness`).
+
+### Операционные заметки для агента / разработки
+
+Краткий чеклист (поддерживается файлом `docs/agent-hci-cascadeide-notes-v1.md`): где лежит TOML, как не путать in-proc путь БД и внешний MCP к тому же `index_dir`, как подтверждать «живость» индекса через MFD или MCP `codebase_index_status`.
 
 ---
 

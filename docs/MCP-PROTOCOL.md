@@ -219,7 +219,6 @@
 | command_id | Описание |
 |-----------:|----------|
 | `add_control` | Добавить контрол в UI (Debug). args: parent_name:string, control_type:string, content?:string, name?:string; returns: text; example: {"parent_name":"Root","control_type":"TextBlock","content":"Hi"}. |
-| `append_knowledge_file` | Добавить блок в конец knowledge-файла. args: file_path:string, content:string, canon_path?:string, save_revision?:boolean; returns: text; example: {"file_path":"META/x.md","content":"more","save_revision":true}. |
 | `click_control` | Клик по кнопке (под курсором или по имени). args: name?:string; returns: text; example: {"name":"BuildButton"}. |
 | `debug_attach` | Подключиться к процессу по PID. args: workspace_path:string, process_id:integer, target_path?:string, netcoredbg_path?:string; returns: text; example: {"workspace_path":"D:\\\\proj","process_id":12345}. |
 | `debug_continue` | Продолжить выполнение (DAP continue). returns: text. |
@@ -231,8 +230,6 @@
 | `debug_step_over` | Шаг через строку (DAP next). returns: text. |
 | `debug_stop` | Завершить сессию отладки (dispose DAP). returns: text. |
 | `debug_variables` | Переменные кадра. args: frame_index?:integer; returns: text; example: {"frame_index":0}. |
-| `delete_knowledge_file` | Удалить knowledge-файл. args: file_path:string, canon_path?:string; returns: text; example: {"file_path":"tmp.md"}. |
-| `delete_knowledge_section` | Удалить секцию из knowledge-файла. args: file_path:string, section_id:string, canon_path?:string; returns: text; example: {"file_path":"index.md","section_id":"foo"}. |
 | `fetch_web_public_url` | Загрузить публичный HTTPS-документ по URL и вернуть тело как читаемый текст (HTML упрощается до текста, поле extraction в JSON). Запрос из машины оператора; только https; локальные/частные хосты блокируются базово (не полная SSRF-защита). args: url:string, max_chars?:integer; returns: json; example: {\"url\":\"https://learn.microsoft.com/en-us/dotnet/\"}. |
 | `get_colors_under_cursor` | Цвета под курсором (прямые и effective). returns: json. |
 | `get_control_appearance` | Снимок внешнего вида контрола (под курсором или по имени). args: name?:string; returns: json; example: {"name":"BuildButton"}. |
@@ -253,8 +250,6 @@
 | `git_status` | Git status в каталоге решения/workspace (git status --short --branch). returns: json. |
 | `git_submodule` | Git submodule в каталоге решения/workspace. args: action?:string, path?:string, recursive?:boolean; returns: json; example: {"action":"status"}. |
 | `highlight_control` | Подсветить контрол рамкой в том окне, где он находится (главное, окно-хост Mfd и т.д.). args: name?:string; returns: text; example: {"name":"BuildButton"}. |
-| `list_knowledge_files` | Список knowledge-файлов в каталоге решения (опционально subdir). args: subdir?:string; returns: json; example: {"subdir":"work"}. |
-| `read_knowledge_file` | Прочитать knowledge-файл из каталога решения. args: file_path:string, offset?:integer, limit?:integer; returns: text; example: {"file_path":"META/integrity-core.md","offset":2,"limit":20}. |
 | `search_web_public_query` | Краткая веб-справка через открытый Instant Answer DuckDuckGo (запрос уходит во внешнюю сеть; не замена полнотекстового поиска). args: query:string; returns: json; example: {\"query\":\"C# file scoped types\"}. |
 | `send_keys` | Отправить хоткей в контрол. args: keys:string, name?:string; returns: text; example: {"keys":"Ctrl+S"}. |
 | `set_control_layout` | Изменить раскладку/позицию контрола. args: name:string, layout:string; returns: text; example: {"name":"BuildButton","layout":"{}"}. |
@@ -262,6 +257,20 @@
 | `set_focus` | Передать фокус контролу (под курсором или по имени). args: name?:string; returns: text; example: {"name":"Editor"}. |
 | `set_panel_size` | Изменить размер панели. args: panel:string, width?:integer, height?:integer; returns: text; example: {"panel":"terminal","height":300}. |
 | `set_ui_theme` | Применить тему UI из JSON. args: theme:string; returns: text; example: {"theme":"{}"}. |
+
+### Hybrid Codebase Index (паритет tool name с внешним MCP)
+
+| command_id | Описание |
+|-----------:|----------|
+| `append_knowledge_file` | Добавить блок в конец knowledge-файла. args: file_path:string, content:string, canon_path?:string, save_revision?:boolean; returns: text; example: {"file_path":"META/x.md","content":"more","save_revision":true}. |
+| `codebase_index_explain` | Explain одного hit (как tool `codebase_index_explain`). hit_id обязателен. args: workspace_path?:string, solution_path?:string, hit_id:integer; returns: json; example: {"hit_id":1}. |
+| `codebase_index_reindex` | Переиндексация: по умолчанию инкремент (как tool `codebase_index_reindex`); full_rebuild=true — полная перестройка. args: workspace_path?:string, solution_path?:string, full_rebuild?:boolean; returns: json; example: {}. |
+| `codebase_index_search` | Гибридный поиск по индексу (как tool `codebase_index_search`). query обязателен; workspace/solution по умолчанию — текущее решение. args: workspace_path?:string, solution_path?:string, query:string, top_n?:integer, semantic?:boolean, alpha?:number, beta?:number, vec_top_k?:integer, path_prefix?:string, exclude_path_prefixes?:string[], extensions?:string[]; returns: json; example: {"query":"HybridIndexOrchestrator"}. |
+| `codebase_index_status` | Статус локального индекса (как tool `codebase_index_status`). workspace_path и solution_path опциональны — по умолчанию текущее открытое решение. args: workspace_path?:string, solution_path?:string; returns: json; example: {"workspace_path":"D:\\repo"}. |
+| `delete_knowledge_file` | Удалить knowledge-файл. args: file_path:string, canon_path?:string; returns: text; example: {"file_path":"tmp.md"}. |
+| `delete_knowledge_section` | Удалить секцию из knowledge-файла. args: file_path:string, section_id:string, canon_path?:string; returns: text; example: {"file_path":"index.md","section_id":"foo"}. |
+| `list_knowledge_files` | Список knowledge-файлов в каталоге решения (опционально subdir). args: subdir?:string; returns: json; example: {"subdir":"work"}. |
+| `read_knowledge_file` | Прочитать knowledge-файл из каталога решения. args: file_path:string, offset?:integer, limit?:integer; returns: text; example: {"file_path":"META/integrity-core.md","offset":2,"limit":20}. |
 | `upsert_knowledge_section` | Вставить/обновить секцию в knowledge-файле по section_id. args: file_path:string, section_id:string, content:string, canon_path?:string, save_revision?:boolean; returns: text; example: {"file_path":"index.md","section_id":"foo","content":"body"}. |
 | `write_knowledge_file` | Записать knowledge-файл в канон (полная замена). args: file_path:string, content:string, canon_path?:string, save_revision?:boolean; returns: text; example: {"file_path":"META/x.md","content":"# Hi","save_revision":true}. |
 

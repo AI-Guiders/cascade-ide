@@ -7,7 +7,7 @@
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:BEGIN -->
 
-`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~7.6k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~6.5k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.1k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
+`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~7.7k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~6.6k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.1k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:END -->
 
@@ -24,7 +24,7 @@
 | `MainWindowViewModel.Capabilities.cs` | 23 | Реестр capabilities. |
 | `MainWindowViewModel.CascadeChord.cs` | 426 | Аккордный слой ADR 0060: корень `cascade_chord` из hotkeys.toml (по умолчанию Ctrl+K), затем тот же хвост мелодии, что после `c:` в палитре (см. `IntentMelodyAliases`), без префикса `c:` и без Enter — если alias однозначен (например `so`). При конфликте префиксов (например `gs` vs `gsu`) точное совпадение после полного ввода или по клавише Enter. |
 | `MainWindowViewModel.CommandPalette.cs` | 550 | Палитра команд. |
-| `MainWindowViewModel.cs` | 438 | Главный композитор окна (partial-класс, несколько `MainWindowViewModel*.cs`). Карта файлов и ответственности — `docs/architecture-migration.md`, раздел «Срез MainWindowViewModel». |
+| `MainWindowViewModel.cs` | 454 | Главный композитор окна (partial-класс, несколько `MainWindowViewModel*.cs`). Карта файлов и ответственности — `docs/architecture-migration.md`, раздел «Срез MainWindowViewModel». |
 | `MainWindowViewModel.CSharpLsp.cs` | 120 | Запуск/перезапуск C# LSP. |
 | `MainWindowViewModel.CursorAcp.cs` | 36 | Путь Cursor ACP и предпочитаемая модель. |
 | `MainWindowViewModel.DebugStackUi.cs` | 35 | Выбор кадра в панели «Стек» Mfd: подгрузка Locals для выбранного кадра (DAP). |
@@ -38,6 +38,7 @@
 | `MainWindowViewModel.Eicas.cs` | 17 | Канал EICAS / CAS — отдельно от полосы телеметрии контура работы (ADR 0021, вариант A). |
 | `MainWindowViewModel.EnvironmentReadiness.cs` | 66 | Снимок «готовность окружения» (ADR 0023), отдельно от Workspace Health. |
 | `MainWindowViewModel.HybridIndex.cs` | 256 | Hybrid Codebase Index (HCI): status projection and UI commands for the HIS (MFD) page. |
+| `MainWindowViewModel.HybridIndexSettings.cs` | 16 | Привязки окна настроек к `HybridIndex` (ADR 0106). |
 | `MainWindowViewModel.IdeHealth.cs` | 86 | Связка с Workspace Health. |
 | `MainWindowViewModel.IdeMcpActions.AgentNotes.cs` | 45 | Реализация `IIdeMcpActions`: agent-notes. |
 | `MainWindowViewModel.IdeMcpActions.BuildTest.cs` | 165 | MCP: сборка, тесты. |
@@ -60,7 +61,7 @@
 | `MainWindowViewModel.PresentationLayoutAuthority.cs` | 14 | Запись intent видимости панелей (семантика «хочу»); фактическая поверхность — `MainWindowShellSurfaceCompositor`. |
 | `MainWindowViewModel.RelayCommands.cs` | 294 | Relay-команды. |
 | `MainWindowViewModel.RelayCommands.Debug.cs` | 139 | Relay: отладка. |
-| `MainWindowViewModel.SettingsReactive.cs` | 175 | Реакции на изменение полей настроек и ключей API: диск, автономный агент, панели. |
+| `MainWindowViewModel.SettingsReactive.cs` | 238 | Реакции на изменение полей настроек и ключей API: диск, автономный агент, панели. |
 | `MainWindowViewModel.ShellState.cs` | 274 | Раскладка панелей, нижняя зона, Workspace Health / автономный агент, ключи провайдеров и чата. |
 | `MainWindowViewModel.SolutionBuild.cs` | 195 | Сборка, `BuildOutputPanel`. |
 | `MainWindowViewModel.StartupProject.cs` | 326 | Стартовый проект. |
