@@ -16,7 +16,8 @@ public enum CommandPaletteHost
 
 /// <summary>
 /// Раскладка панелей, нижняя зона, Workspace Health / автономный агент, ключи провайдеров и чата.
-/// Режим ИИ и поля облачных ключей — partial <c>MainWindowViewModel.ShellState.AiProviders.cs</c>.
+/// Режим ИИ и поля облачных ключей — partial <c>MainWindowViewModel.ShellState.AiProviders.cs</c>;
+/// клавиша отправки чата и JSON внешних MCP / ACP — <c>MainWindowViewModel.ShellState.ChatAndSessionConfig.cs</c>.
 /// </summary>
 public partial class MainWindowViewModel
 {
@@ -226,28 +227,6 @@ public partial class MainWindowViewModel
     [ObservableProperty]
     private string _pullModelProgress = "";
 
-    [ObservableProperty]
-    private string _sendMessageKey = "Enter";
-
-    /// <summary>Показывать thinking/reasoning в истории после завершения ответа.</summary>
-    [ObservableProperty]
-    private bool _showThinkingInHistory = true;
-
-    /// <summary>Отправлять только диагностики и сигнатуры текущего файла (минимальный контекст).</summary>
-    [ObservableProperty]
-    private bool _useMinimizedContext = true;
-
-    /// <summary>
-    /// JSON-конфиг внешних MCP-серверов (stdio) для автономного режима.
-    /// Формат — как в <see cref="McpSettings.ExternalServersJson"/>.
-    /// </summary>
-    [ObservableProperty]
-    private string _externalMcpServersJson = "[]";
-
-    /// <summary>Подмешивать stdio MCP текущей IDE (<c>cascade-ide</c>) в <c>session/new</c> для Cursor ACP (ADR 0048 §7).</summary>
-    [ObservableProperty]
-    private bool _acpAutoInjectIdeMcp = true;
-
     /// <summary>Mermaid/PlantUML в превью Markdown через Kroki (текст диаграммы отправляется на сервер).</summary>
     [ObservableProperty]
     private bool _markdownKrokiEnabled = true;
@@ -259,8 +238,4 @@ public partial class MainWindowViewModel
     public string EditorTextGroup2 => Documents.SelectedDocumentGroup2?.Content ?? "";
 
     public string EditorTextGroup3 => Documents.SelectedDocumentGroup3?.Content ?? "";
-
-    public static readonly IReadOnlyList<string> SendMessageKeyOptions = ["Enter", "Ctrl+Enter", "Shift+Enter"];
-
-    public IReadOnlyList<string> SendMessageKeyOptionsList => SendMessageKeyOptions;
 }
