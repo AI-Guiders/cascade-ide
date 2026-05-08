@@ -42,7 +42,7 @@
 | `MainWindowViewModel.IdeHealth.cs` | 95 | Связка с Workspace Health. |
 | `MainWindowViewModel.IdeMcpActions.AgentNotes.cs` | 44 | Реализация `IIdeMcpActions`: agent-notes. |
 | `MainWindowViewModel.IdeMcpActions.BuildTest.cs` | 166 | MCP: сборка, тесты. |
-| `MainWindowViewModel.IdeMcpActions.DebuggerPanel.cs` | 73 | Панель отладки и снимок DAP (ADR 0002): один `DebugSessionSnapshot`. |
+| `MainWindowViewModel.IdeMcpActions.DebuggerPanel.cs` | 75 | Панель отладки и снимок DAP (ADR 0002): один `DebugSessionSnapshot`. |
 | `MainWindowViewModel.IdeMcpActions.Editor.cs` | 128 | MCP: редактор. |
 | `MainWindowViewModel.IdeMcpActions.Git.cs` | 48 | MCP: git (`IdeMcpGitWorkspaceSession`). |
 | `MainWindowViewModel.IdeMcpActions.HybridCodebaseIndex.cs` | 103 | MCP / ide_execute_command: Hybrid Codebase Index (имена команд как у внешнего MCP). |
@@ -191,6 +191,7 @@
 - Четвёртый срез: единый контур **`BuildStateChanged` → DataBus → `RebuildIdeHealth`** (ADR 0099): локальная сборка решения и MCP code cleanup не шлют «сырой» `_ideDataBus.Publish` без пересборки полосы; MCP-пути после `ConfigureAwait(false)` используют `PublishIdeBuildStateOnUiAsync`.
 - Пятый срез: MCP git целиком на **`IdeMcpGitWorkspaceSession`** (`Features/IdeMcp/Application/`), VM — только workspace + `RefreshGitSummaryAsync`; список команд preflight-fix — приватная константа в сессии (CASCOPE030: не статическое поле в оркестраторе).
 - Шестой срез: **`IdeMcpIdeStateUiCapture`** + `BuildIdeStatePayload(capture, diagnostics)`; `get_ide_state` — diagnostics вне UI, снимок UI одним `CaptureIdeMcpIdeStateUi` (включая CDS через `BuildCockpitSurfaceSnapshot`).
+- Седьмой срез: **`IdeMcpDapSnapshotUiPlan`** / `IdeMcpDebugOrchestrator.BuildDapSnapshotUiPlan` для `ApplyDapDebugSnapshotToUi` (без `File.Exists` в Application, CASCOPE031); **`get_debug_snapshot`** — сериализация без очереди на UI (`GetSnapshot` под lock).
 
 ## Wave 1: UI clusters thinning
 
@@ -233,3 +234,4 @@
 - **v1.23** — `PublishIdeBuildStateOnUiAsync`; MCP `RunCodeCleanupAsync` обрамлён `BuildStateChanged`; `BuildSolutionAsync` — `PublishToIdeDataBusAndRebuild` вместо «тихой» публикации в шину.
 - **v1.24** — `IdeMcpGitWorkspaceSession` (+ тесты `IdeMcpGitWorkspaceSessionTests`); `MainWindowViewModel.IdeMcpActions.Git` — делегирование в сессию.
 - **v1.25** — `IdeMcpIdeStateUiCapture`; `IdeMcpWorkspaceOrchestrator.BuildIdeStatePayload` по снимку; тест в `IdeMcpOrchestratorThinningTests`.
+- **v1.26** — DAP UI-план + MCP `GetDebugSnapshotAsync` без `UiScheduler.InvokeAsync`.
