@@ -20,6 +20,7 @@ using CascadeIDE.Cockpit.Composition.EnvironmentReadiness;
 using CascadeIDE.Cockpit.Composition.WorkspaceHealth;
 using CascadeIDE.Cockpit.Composition.HostSurface;
 using CascadeIDE.Features.UiChrome;
+using CascadeIDE.Features.HybridIndex.Application;
 using CascadeIDE.Models;
 using CascadeIDE.Services.Lsp;
 namespace CascadeIDE.ViewModels;
@@ -58,6 +59,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private readonly IdeMcpCommandExecutor _ideMcpExecutor;
     private readonly Services.IdeDapDebugSession _dapDebug;
     private readonly IDataBus _ideDataBus;
+    private readonly HybridIndexOrchestrator _hybridIndex;
     private readonly IIdeHealthChannel _workspaceHealth;
     private readonly IIdeHealthSurfaceCompositor _workspaceHealthSurfaceCompositor;
     private readonly IEicasFeed _eicasFeed;
@@ -180,6 +182,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _autonomousAgentService = CreateAutonomousAgentService(_mcpClientService);
         Autonomous = new AutonomousAgentSessionViewModel(_autonomousAgentService, this);
         _ideDataBus = new InMemoryDataBus(asynchronousDispatch: false);
+        _hybridIndex = new HybridIndexOrchestrator(_ideDataBus);
         _dapDebug = new Services.IdeDapDebugSession(() =>
         {
             UiScheduler.Default.Post(ApplyDapDebugSnapshotToUi);
@@ -423,7 +426,8 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             RefreshLaunchProfilePickerFromStore();
         }
 
-        UiModeCatalog.ApplyRepositoryWorkspaceOverlay(GetWorkspacePath(value));
+        var ws = GetWorkspacePath(value);
+        UiModeCatalog.ApplyRepositoryWorkspaceOverlay(ws);
         NotifyDockedInstrumentSlotBindings();
         OnPropertyChanged(nameof(ChatPanelColumnPixelWidth));
         OnPropertyChanged(nameof(IsChatPanelColumnVisible));
@@ -432,6 +436,9 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         OnPropertyChanged(nameof(IsPfdColumnVisible));
 
         ChatPanel.DisposeCursorAcpSession();
+        // ADR 0106: Hybrid Codebase Index in-proc watcher for workspace freshness.
+        _hybridIndex.SetEnabled(ws ?? "", value, enabled: !string.IsNullOrWhiteSpace(ws));
+        _hybridIndex.Poke(ws ?? "", value);
         AttachBreakpointsFileWatcher(value);
         _ = RefreshGitSummaryAsync();
         _ = GitPanel.RefreshRepositoryFlagAsync();

@@ -77,6 +77,7 @@
     <ProjectReference Include="..\agent-notes-core\AgentNotes.Core.csproj" />
     <ProjectReference Include="..\git-mcp-core\GitMcp.Core.csproj" />
     <ProjectReference Include="..\dotnet-debug-core\DotnetDebug.Core.csproj" />
+    <ProjectReference Include="..\hybrid-codebase-index\HybridCodebaseIndex.Core\HybridCodebaseIndex.Core.csproj" />
     <ProjectReference Include="CascadeIDE.Contracts\CascadeIDE.Contracts.csproj" />
     <!-- RoslynMcp передаёт RoslynMcpWorkspace=true: не ссылаться на локальный анализатор, иначе DLL в bin держит процесс MCP и ломает dotnet build. -->
     <ProjectReference Include="CascadeIDE.ArchitectureAnalyzers\CascadeIDE.ArchitectureAnalyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" Condition="'$(RoslynMcpWorkspace)'!='true'" />
