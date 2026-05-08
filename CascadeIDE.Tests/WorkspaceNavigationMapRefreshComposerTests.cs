@@ -1,3 +1,4 @@
+using CascadeIDE.Cockpit.Cds;
 using CascadeIDE.Cockpit.Channels.TraceFlow;
 using CascadeIDE.Cockpit.Composition.TraceFlow;
 using CascadeIDE.Features.WorkspaceNavigation.Application;
