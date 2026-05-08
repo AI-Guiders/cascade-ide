@@ -74,8 +74,9 @@
 | `MainWindowViewModel.RelayCommands.Debug.cs` | 144 | Relay: отладка. |
 | `MainWindowViewModel.SettingsReactive.cs` | 238 | Реакции на изменение полей настроек и ключей API: диск, автономный агент, панели. |
 | `MainWindowViewModel.ShellState.AiProviders.cs` | 58 | Часть `ShellState`: режим ИИ и облачные ключи привязаны к нижнему приложению/чату. |
+| `MainWindowViewModel.ShellState.AutonomousAgentStripe.cs` | 62 | Часть `ShellState`: полоса/карточки автономной задачи агента, безопасности, LOC и сводки тестов для IDE Health. |
 | `MainWindowViewModel.ShellState.ChatAndSessionConfig.cs` | 26 | Часть `ShellState`: ввод чата и конфиг MCP/ACP для автономной сессии. |
-| `MainWindowViewModel.ShellState.cs` | 207 | Раскладка панелей, нижняя зона, Workspace Health / автономный агент, ключи провайдеров и чата. Режим ИИ и поля облачных ключей — partial `MainWindowViewModel.ShellState.AiProviders.cs`; клавиша отправки чата и JSON внешних MCP / ACP — `MainWindowViewModel.ShellState.ChatAndSessionConfig.cs`. |
+| `MainWindowViewModel.ShellState.cs` | 152 | Раскладка панелей, нижняя зона, Workspace Health / автономный агент, ключи провайдеров и чата. Режим ИИ и поля облачных ключей — partial `MainWindowViewModel.ShellState.AiProviders.cs`; клавиша отправки чата и JSON внешних MCP / ACP — `MainWindowViewModel.ShellState.ChatAndSessionConfig.cs`; полоса автономной задачи / безопасность / тесты для Health — `MainWindowViewModel.ShellState.AutonomousAgentStripe.cs`. |
 | `MainWindowViewModel.SolutionBuild.cs` | 195 | Сборка, `BuildOutputPanel`. |
 | `MainWindowViewModel.StartupProject.cs` | 326 | Стартовый проект. |
 | `MainWindowViewModel.UiGitWorkspace.cs` | 147 | Git + workspace UI. |
@@ -217,6 +218,7 @@
   - состояния панелей и режимов — в отдельные state-модули по доменам, не в один monolith-файл.
   - четвёртый срез: **`MainWindowViewModel.ShellState.AiProviders.cs`** — режим ИИ (`AiMode`, облачный провайдер, вычисляемые флаги выбора) и поля API-ключей; базовый `ShellState.cs` остаётся раскладкой/панелями/Workspace Health.
   - пятый срез: **`MainWindowViewModel.ShellState.ChatAndSessionConfig.cs`** — клавиша отправки чата, thinking/минимальный контекст, JSON внешних MCP, `AcpAutoInjectIdeMcp`.
+  - шестой срез: **`MainWindowViewModel.ShellState.AutonomousAgentStripe.cs`** — активная задача агента, риск/результат/шаг, `SafetyLevel`, LOC-бейдж, сводка/бейдж тестов для полосы IDE Health.
 - Кластер `WorkspaceNavigationMap`:
   - graph/data трансформации — в сервисы/CCU;
   - в VM оставить binding-state и команды поверхности.
@@ -260,3 +262,4 @@
 - **v1.31** — Тот же срез: **CDS-снимок для trace-flow** на карте захватывается на UI до фонового парсинга/компоновки, контракт `Compose(.., CockpitSurfaceState?)` без `Func` с пула.
 - **v1.32** — Wave UI clusters: вынесен partial **`MainWindowViewModel.ShellState.AiProviders`** (режим ИИ и облачные ключи) из `ShellState.cs`.
 - **v1.33** — Wave UI clusters: **`MainWindowViewModel.ShellState.ChatAndSessionConfig`** (чат + MCP/ACP конфиг автономной сессии).
+- **v1.34** — Wave UI clusters: **`MainWindowViewModel.ShellState.AutonomousAgentStripe`** (полоса автономного агента + тесты/LOC для IDE Health).
