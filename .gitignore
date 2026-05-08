@@ -28,6 +28,7 @@ publish-debug-staging/
 publish-hotkeyfix/
 Data/
 .cursor/
+.hybrid-codebase-index/
 
 # Локальные скрипты правок ADR (не шипить)
 docs/adr/_patch_*.py

@@ -1,0 +1,115 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CascadeIDE.ViewModels"
+             xmlns:models="using:CascadeIDE.Models"
+             xmlns:views="using:CascadeIDE.Views"
+             xmlns:ui="using:CascadeIDE.Views.UiKit"
+             x:Class="CascadeIDE.Views.HybridIndexMfdPageView"
+             x:DataType="vm:MainWindowViewModel">
+    <DockPanel Margin="0,4,0,0">
+        <views:PanelChromeHeader DockPanel.Dock="Top"
+                                 Title="INDEX / HCI · docs, freshns, scope"
+                                 UppercaseTitle="True"/>
+
+        <!-- ECAM-like layout: top = indicators, bottom = MSG zone. -->
+        <Grid RowDefinitions="Auto,Auto"
+              RowSpacing="10"
+              Margin="0,8,0,0">
+
+            <Grid Grid.Row="0"
+                  ColumnDefinitions="1.1*,1.2*,1.2*"
+                  RowDefinitions="Auto,*"
+                  ColumnSpacing="10"
+                  RowSpacing="10">
+
+            <!-- Column 1: Digital indicators + ERS-like lamp -->
+            <ui:EcamMetricCard Grid.Column="0"
+                               Grid.RowSpan="2"
+                               Title="HCI">
+                <Grid ColumnDefinitions="Auto,*"
+                      RowDefinitions="Auto,Auto"
+                      ColumnSpacing="12"
+                      RowSpacing="10"
+                      Margin="0,4,0,0">
+                    <views:AnnunciatorLampCell Grid.Column="0"
+                                               Grid.RowSpan="2"
+                                               Item="{Binding HybridIndexLampItem}"
+                                               VerticalAlignment="Top"
+                                               HorizontalAlignment="Center"
+                                               Margin="0,2,0,0"/>
+
+                    <ui:EcamReadout Grid.Column="1"
+                                    Grid.Row="0"
+                                    Label="DOCS"
+                                    ValueText="{Binding HybridIndexDocumentCountText}"/>
+
+                    <ui:EcamReadout Grid.Column="1"
+                                    Grid.Row="1"
+                                    Label="FRESHNS"
+                                    ValueText="{Binding HybridIndexFreshnessEcamText}"
+                                    SubText=""/>
+                </Grid>
+            </ui:EcamMetricCard>
+
+            <!-- Column 2: (keep) indexed at glance -->
+            <ui:EcamMetricCard Grid.Column="1"
+                               Grid.Row="0"
+                               VerticalAlignment="Top"
+                               Title="INDEXED">
+                <ui:EcamReadout Label="UTC"
+                                ValueText="{Binding HybridIndexIndexedAtText}"
+                                SubText=""/>
+            </ui:EcamMetricCard>
+
+            <!-- Column 3: Actions only (softkeys) -->
+            <ui:EcamMetricCard Grid.Column="2"
+                               Grid.Row="0"
+                               VerticalAlignment="Top"
+                               Title="ACTIONS">
+                <ui:EcamSoftKeyBar Button1Text="REINDEX"
+                                   Button1Command="{Binding HybridIndexReindexNowCommand}"
+                                   Button2Text="OPEN DIR"
+                                   Button2Command="{Binding HybridIndexOpenIndexDirCommand}"
+                                   Button3Text="COPY ERROR"
+                                   Button3Click="OnCopyErrorClick"/>
+            </ui:EcamMetricCard>
+            </Grid>
+
+            <!-- MSG zone -->
+            <ui:EcamMetricCard Grid.Row="1" Title="ECAM MSG">
+                <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="6">
+                    <TextBlock Grid.Row="0"
+                               Text="{Binding HybridIndexMsgLine1}"
+                               FontSize="14"
+                               Foreground="#00FF6A"/>
+                    <TextBlock Grid.Row="1"
+                               Text="{Binding HybridIndexMsgLine2}"
+                               FontSize="14"
+                               Foreground="{DynamicResource CascadeTheme.TerminalForeground}"
+                               TextWrapping="Wrap"/>
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="{Binding HybridIndexWorkspaceShortText}"
+                                   ToolTip.Tip="{Binding HybridIndexWorkspaceRootText}"
+                                   TextTrimming="CharacterEllipsis"
+                                   MaxWidth="260"
+                                   Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                                   Opacity="0.85"/>
+                        <TextBlock Text="{Binding HybridIndexSolutionShortText}"
+                                   ToolTip.Tip="{Binding HybridIndexSolutionPathText}"
+                                   TextTrimming="CharacterEllipsis"
+                                   MaxWidth="260"
+                                   Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                                   Opacity="0.85"/>
+                        <TextBlock Text="{Binding HybridIndexDatabaseShortText}"
+                                   ToolTip.Tip="{Binding HybridIndexDatabasePathText}"
+                                   TextTrimming="CharacterEllipsis"
+                                   MaxWidth="260"
+                                   Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                                   Opacity="0.85"/>
+                    </StackPanel>
+                </Grid>
+            </ui:EcamMetricCard>
+        </Grid>
+    </DockPanel>
+</UserControl>
+

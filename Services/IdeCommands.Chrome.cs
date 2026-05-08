@@ -42,6 +42,9 @@ public static partial class IdeCommands
     /// <summary>Показать страницу «готовность окружения» во вторичном контуре (зона Mfd; ADR 0023). Разворачивает регион Mfd при необходимости. returns: text.</summary>
     public const string ShowEnvironmentReadinessPage = "show_environment_readiness_page";
 
+    /// <summary>Показать страницу Hybrid Codebase Index (HCI) во вторичном контуре/MFD. Разворачивает регион Mfd при необходимости. returns: text.</summary>
+    public const string ShowHybridIndexPage = "show_hybrid_index_page";
+
     /// <summary>Перейти с страницы «готовность окружения» на первую другую разрешённую страницу вторичного контура. returns: text.</summary>
     public const string CloseEnvironmentReadinessPage = "close_environment_readiness_page";
 

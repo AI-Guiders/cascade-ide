@@ -164,6 +164,12 @@ internal sealed partial class IdeMcpCommandExecutor
             _vm.TryNavigateToMfdShellPage(MfdShellPage.EnvironmentReadiness);
             return await Task.FromResult("OK");
         });
+        add(ShowHybridIndexPage, async (_, _) =>
+        {
+            _vm.ApplyMfdRegionExpanded(true);
+            _vm.TryNavigateToMfdShellPage(MfdShellPage.HybridIndex);
+            return await Task.FromResult("OK");
+        });
         add(CloseEnvironmentReadinessPage, async (_, _) =>
         {
             if (_vm.CloseEnvironmentReadinessPageCommand.CanExecute(null))

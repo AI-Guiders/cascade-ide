@@ -30,6 +30,12 @@ public partial class MainWindowViewModel
         if (value == MfdShellPage.EnvironmentReadiness)
             _ = RefreshEnvironmentReadinessAsync();
 
+        if (value == MfdShellPage.HybridIndex)
+        {
+            EnsureHybridIndexSubscription();
+            NotifyHybridIndexSnapshotChanged();
+        }
+
         if (value == MfdShellPage.RelatedFiles)
             ScheduleWorkspaceNavigationMapRefresh();
     }

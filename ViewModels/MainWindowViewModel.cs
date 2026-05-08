@@ -1,7 +1,5 @@
 using System.ComponentModel;
 using System.Text.Json;
-using System.Threading;
-using Microsoft.Extensions.AI;
 using Avalonia.Threading;
 using CascadeIDE.Features.AutonomousAgent;
 using CascadeIDE.Features.Build;
@@ -22,7 +20,6 @@ using CascadeIDE.Cockpit.Composition.HostSurface;
 using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Features.HybridIndex.Application;
 using CascadeIDE.Models;
-using CascadeIDE.Services.Lsp;
 namespace CascadeIDE.ViewModels;
 
 /// <summary>
@@ -182,7 +179,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _autonomousAgentService = CreateAutonomousAgentService(_mcpClientService);
         Autonomous = new AutonomousAgentSessionViewModel(_autonomousAgentService, this);
         _ideDataBus = new InMemoryDataBus(asynchronousDispatch: false);
-        _hybridIndex = new HybridIndexOrchestrator(_ideDataBus);
+        _hybridIndex = new HybridIndexOrchestrator(_ideDataBus, ResolveHybridIndexDirRelative());
         _dapDebug = new Services.IdeDapDebugSession(() =>
         {
             UiScheduler.Default.Post(ApplyDapDebugSnapshotToUi);
@@ -437,8 +434,14 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
 
         ChatPanel.DisposeCursorAcpSession();
         // ADR 0106: Hybrid Codebase Index in-proc watcher for workspace freshness.
-        _hybridIndex.SetEnabled(ws ?? "", value, enabled: !string.IsNullOrWhiteSpace(ws));
-        _hybridIndex.Poke(ws ?? "", value);
+        var (hciWs, hciSln) = ResolveHybridIndexScope(ws ?? "", value);
+        var enableWatcher = !string.IsNullOrWhiteSpace(hciWs)
+            && _settings.HybridIndex.Enabled
+            && _settings.HybridIndex.WatchFiles
+            && !(ChatMcpOnly && _settings.HybridIndex.PauseWhenMcpStdioHost);
+        _hybridIndex.SetEnabled(hciWs, hciSln, enabled: enableWatcher, debounceMs: ResolveHybridIndexDebounceMs());
+        if (_settings.HybridIndex.AutoReindexOnSolutionOpen)
+            _hybridIndex.Poke(hciWs, hciSln);
         AttachBreakpointsFileWatcher(value);
         _ = RefreshGitSummaryAsync();
         _ = GitPanel.RefreshRepositoryFlagAsync();
@@ -447,6 +450,38 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         _ = RestartCSharpLanguageServerAsync();
         _ = RestartMarkdownLanguageServerAsync();
         HypothesesPanel.LoadFromWorkspace();
+    }
+
+    private int ResolveHybridIndexDebounceMs()
+    {
+        var v = _settings.HybridIndex.DebounceMs;
+        if (v < 0) v = 0;
+        if (v > 60_000) v = 60_000;
+        return v;
+    }
+
+    private string ResolveHybridIndexDirRelative()
+    {
+        var dir = _settings.HybridIndex.IndexDir ?? "";
+        dir = dir.Trim();
+        if (string.IsNullOrWhiteSpace(dir))
+            return ".hybrid-codebase-index";
+        if (Path.IsPathRooted(dir))
+            return ".hybrid-codebase-index";
+        dir = dir.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        return string.IsNullOrWhiteSpace(dir) ? ".hybrid-codebase-index" : dir;
+    }
+
+    private (string WorkspaceRoot, string? SolutionPath) ResolveHybridIndexScope(string workspaceRoot, string? solutionPath)
+    {
+        var ws = (workspaceRoot ?? "").Trim();
+        if (string.IsNullOrWhiteSpace(ws))
+            return ("", null);
+
+        var mode = (_settings.HybridIndex.ScopeMode ?? "").Trim();
+        if (string.Equals(mode, "workspace", StringComparison.OrdinalIgnoreCase))
+            return (ws, null);
+        return (ws, solutionPath);
     }
 
     private string? BuildChatMinimizedContextBlockCore()

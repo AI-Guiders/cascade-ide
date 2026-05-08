@@ -43,5 +43,7 @@ ato = "chat_open_selected_thread"
 atb = "chat_show_thread_overview"
 # Environment readiness (домен e…)
 ers = "show_environment_readiness_page"
+# Hybrid Codebase Index (домен h…)
+his = "show_hybrid_index_page"
 # Terminal (домен t…)
 ts = "show_terminal_panel"

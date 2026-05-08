@@ -169,6 +169,7 @@ internal static class IdeCommandsContractGenerated
         ["show_chat_page"] = IdeReturnKind.Text,
         ["show_editor_preview"] = IdeReturnKind.Text,
         ["show_environment_readiness_page"] = IdeReturnKind.Text,
+        ["show_hybrid_index_page"] = IdeReturnKind.Text,
         ["show_markdown_preview_page"] = IdeReturnKind.Text,
         ["show_pfd_region_panel"] = IdeReturnKind.Text,
         ["show_preview"] = IdeReturnKind.Text,

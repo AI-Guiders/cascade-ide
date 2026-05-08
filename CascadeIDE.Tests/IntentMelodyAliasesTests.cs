@@ -65,6 +65,7 @@ public sealed class IntentMelodyAliasesTests
         Assert.Equal(IdeCommands.BuildSolutionUi, IntentMelodyAliases.TryResolveExactCommandId("br"));
         Assert.Equal(IdeCommands.BuildStructured, IntentMelodyAliases.TryResolveExactCommandId("bs"));
         Assert.Equal(IdeCommands.ShowEnvironmentReadinessPage, IntentMelodyAliases.TryResolveExactCommandId("ers"));
+        Assert.Equal(IdeCommands.ShowHybridIndexPage, IntentMelodyAliases.TryResolveExactCommandId("his"));
         Assert.Equal(IdeCommands.ShowTerminalPanel, IntentMelodyAliases.TryResolveExactCommandId("ts"));
         Assert.Equal(IdeCommands.Select, IntentMelodyAliases.TryResolveExactCommandId("els"));
         Assert.Equal(IdeCommands.ApplyEdit, IntentMelodyAliases.TryResolveExactCommandId("eld"));
@@ -80,6 +81,7 @@ public sealed class IntentMelodyAliasesTests
         Assert.True(BundledAppContent.TryReadDiskThenEmbedded(IntentMelodyAliases.BundledRelativePath, out var text));
         Assert.Contains("[aliases]", text, StringComparison.Ordinal);
         Assert.Contains("ers = \"show_environment_readiness_page\"", text, StringComparison.Ordinal);
+        Assert.Contains("his = \"show_hybrid_index_page\"", text, StringComparison.Ordinal);
         Assert.Contains("ts = \"show_terminal_panel\"", text, StringComparison.Ordinal);
         Assert.Contains("dl = \"debug_launch\"", text, StringComparison.Ordinal);
         Assert.Contains("dn = \"debug_step_over\"", text, StringComparison.Ordinal);

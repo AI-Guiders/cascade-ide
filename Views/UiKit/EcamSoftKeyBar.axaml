@@ -1,0 +1,43 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="CascadeIDE.Views.UiKit.EcamSoftKeyBar"
+             x:Name="Root"
+             x:CompileBindings="False">
+    <UserControl.Styles>
+        <!-- ECAM-ish softkey: flat, outlined, green text; subtle hover. -->
+        <Style Selector="Button.ecamSoftKey">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="#00FF6A"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="2"/>
+            <Setter Property="Foreground" Value="#00FF6A"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="MinWidth" Value="96"/>
+        </Style>
+        <Style Selector="Button.ecamSoftKey:pointerover">
+            <Setter Property="Background" Value="#112018"/>
+        </Style>
+        <Style Selector="Button.ecamSoftKey:pressed">
+            <Setter Property="Background" Value="#163020"/>
+        </Style>
+        <Style Selector="Button.ecamSoftKey:disabled">
+            <Setter Property="Opacity" Value="0.45"/>
+        </Style>
+    </UserControl.Styles>
+    <StackPanel Orientation="Horizontal"
+                Spacing="8"
+                HorizontalAlignment="Left">
+        <Button Content="{Binding Button1Text, ElementName=Root}"
+                Command="{Binding Button1Command, ElementName=Root}"
+                Classes="ecamSoftKey"/>
+        <Button Content="{Binding Button2Text, ElementName=Root}"
+                Command="{Binding Button2Command, ElementName=Root}"
+                Classes="ecamSoftKey"/>
+        <Button Content="{Binding Button3Text, ElementName=Root}"
+                Click="OnButton3Click"
+                Classes="ecamSoftKey"/>
+    </StackPanel>
+</UserControl>
+

@@ -22,6 +22,9 @@
             <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=MarkdownPreview}">
                 <views:MarkdownPreviewMfdPageView/>
             </Border>
+            <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=HybridIndex}">
+                <views:HybridIndexMfdPageView/>
+            </Border>
             <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=Chat}">
                 <views:ChatMfdPageView/>
             </Border>

@@ -96,6 +96,17 @@ acp_auto_inject_ide_mcp = true
 external_servers_json = "[]"
 external_servers_json_path = ""
 
+[hybrid_index]
+# In-proc integration settings for Hybrid Codebase Index (ADR 0106).
+# Core HCI settings live in workspace folder under `index_dir` (same as external MCP).
+enabled = true
+index_dir = ".hybrid-codebase-index"
+debounce_ms = 750
+auto_reindex_on_solution_open = true
+watch_files = true
+scope_mode = "workspace+solution" # or "workspace"
+pause_when_mcp_stdio_host = false
+
 [workspace]
 pfd_expanded = true
 show_terminal = true

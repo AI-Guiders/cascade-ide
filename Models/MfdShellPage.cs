@@ -29,4 +29,9 @@ public enum MfdShellPage
     MarkdownPreview = 13,
     /// <summary>Связанные файлы (related) по якорю — <b>WorkspaceNavigation</b> списком; не дублирует колонку PFD с картой намерений (граф/CF — <b>CodeNavigation</b>, ADR 0088).</summary>
     RelatedFiles = 14,
+
+    /// <summary>
+    /// Hybrid Codebase Index status / control surface (HCI): ECAM-like glance for docs count, freshness, scope, errors.
+    /// </summary>
+    HybridIndex = 15,
 }

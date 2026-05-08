@@ -171,10 +171,10 @@ public sealed class HybridIndexOrchestrator : IDisposable
     private readonly IDataBus _dataBus;
     private readonly ConcurrentDictionary<WatchKey, WatcherState> _watchers = new();
 
-    public HybridIndexOrchestrator(IDataBus dataBus)
+    public HybridIndexOrchestrator(IDataBus dataBus, string indexDirectoryRelative)
     {
         _dataBus = dataBus;
-        _service = new CodebaseIndexService(indexDirectoryRelative: ".hybrid-codebase-index");
+        _service = new CodebaseIndexService(indexDirectoryRelative: indexDirectoryRelative);
     }
 
     public void SetEnabled(string workspaceRoot, string? solutionPath, bool enabled, int debounceMs = 750)

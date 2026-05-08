@@ -210,4 +210,29 @@ public sealed class CascadeIdeSettingsTomlDeserializeTests
         Assert.Equal("D:\\vault\\agent-notes", s.AgentNotes.KbBaseOverlayPath);
     }
 
+    [Fact]
+    public void Deserialize_HybridIndexSection_ParsesExpected()
+    {
+        const string text =
+            """
+            [hybrid_index]
+            enabled = true
+            index_dir = ".hci"
+            debounce_ms = 1234
+            auto_reindex_on_solution_open = false
+            watch_files = false
+            scope_mode = "workspace"
+            pause_when_mcp_stdio_host = true
+            """;
+
+        var s = Deserialize(text);
+        Assert.True(s.HybridIndex.Enabled);
+        Assert.Equal(".hci", s.HybridIndex.IndexDir);
+        Assert.Equal(1234, s.HybridIndex.DebounceMs);
+        Assert.False(s.HybridIndex.AutoReindexOnSolutionOpen);
+        Assert.False(s.HybridIndex.WatchFiles);
+        Assert.Equal("workspace", s.HybridIndex.ScopeMode);
+        Assert.True(s.HybridIndex.PauseWhenMcpStdioHost);
+    }
+
 }

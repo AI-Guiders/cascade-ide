@@ -10,6 +10,9 @@ public sealed partial class CascadeIdeSettings : ModelBase
 
     public McpSettings Mcp { get; set; } = new();
 
+    /// <summary>Hybrid Codebase Index integration toggles (in-proc). TOML: <c>[hybrid_index]</c>.</summary>
+    public HybridIndexSettings HybridIndex { get; set; } = new();
+
     /// <summary>Agent-notes / knowledge (встроенный KB-Base и оверлей). TOML: <c>[agent_notes]</c>.</summary>
     public AgentNotesSettings AgentNotes { get; set; } = new();
 
