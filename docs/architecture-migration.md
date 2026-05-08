@@ -218,7 +218,7 @@
   - в VM оставить binding-state и команды поверхности.
 - Первый срез (карта PFD): **`CodeNavigationMapPresentationProjection`** + статические `CodeNavigationMapSettings.ViewWantsList` / `ViewWantsGraph`; биндинги list/graph/бейдж/has-related в `MainWindowViewModel.WorkspaceNavigationMap` делегируют в проекцию.
 - Второй срез: **`WorkspaceNavigationMapContextJsonBuilder`** (ветвление related / subgraph / control-flow JSON внутри фонового refresh) и **`CodeNavigationMapViewportPolicy`** (пороги ширины viewport мини-карты); тесты `WorkspaceNavigationMapContextAndViewportTests`.
-- Третий срез: **`WorkspaceNavigationMapRefreshComposer`** — разбор JSON refresh, композиция сцены + trace-flow, related-строки; снимок CDS передаётся с VM через `Func<CockpitSurfaceState>`; тесты `WorkspaceNavigationMapRefreshComposerTests`.
+- Третий срез: **`WorkspaceNavigationMapRefreshComposer`** — разбор JSON refresh, композиция сцены + trace-flow, related-строки; **снимок CDS для control-flow** собирается на **UI-потоке** вместе с контекстом refresh и передаётся в композитор как `CockpitSurfaceState` (без чтения VM с пула); тесты `WorkspaceNavigationMapRefreshComposerTests`.
 
 ## Версионирование
 
@@ -253,3 +253,4 @@
 - **v1.28** — Wave UI clusters: `WorkspaceNavigationMapContextJsonBuilder`, `CodeNavigationMapViewportPolicy`; тесты `WorkspaceNavigationMapContextAndViewportTests`.
 - **v1.29** — Явная **стратегия целевого каркаса** (CDS / CCU / DAL / IDS), приоритет упрощающего буфера вокруг `MainWindowViewModel` и правило 5 раздела «Правила на время миграции» — чтобы strangler совпадал с реальным приближением к устоявшейся линии слоёв, а не откладывался потоком фич.
 - **v1.30** — Wave UI clusters: `WorkspaceNavigationMapRefreshComposer` (пост-JSON конвейер карты PFD); тесты `WorkspaceNavigationMapRefreshComposerTests`.
+- **v1.31** — Тот же срез: **CDS-снимок для trace-flow** на карте захватывается на UI до фонового парсинга/компоновки, контракт `Compose(.., CockpitSurfaceState?)` без `Func` с пула.
