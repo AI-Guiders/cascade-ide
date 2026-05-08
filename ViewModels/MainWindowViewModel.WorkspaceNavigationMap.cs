@@ -175,6 +175,7 @@ public partial class MainWindowViewModel
         var wantList = false;
         var wantGraph = false;
         var level = CodeNavigationMapLevelKind.File;
+        CockpitSurfaceState? cockpitSurfaceCapturedOnUi = null;
         await UiScheduler.Default.InvokeAsync(() =>
         {
             rawPaths = McpSolutionTree.CollectFileEntries(Workspace.SolutionRoots).Select(e => e.FullPath).ToList();
@@ -189,6 +190,8 @@ public partial class MainWindowViewModel
             wantList = sm.WantsCodeNavigationMapList;
             wantGraph = sm.WantsCodeNavigationMapGraph;
             level = CodeNavigationMapLevelKind.Normalize(sm.Depth);
+            if (level == CodeNavigationMapLevelKind.ControlFlow)
+                cockpitSurfaceCapturedOnUi = CockpitSurfaceSnapshotBuilder.Build(this);
         });
 
         if (ct.IsCancellationRequested)
@@ -238,7 +241,7 @@ public partial class MainWindowViewModel
             CodeNavigationMapGraphHeight,
             _settings.CodeNavigationMap.NormalizedDetailLevel,
             new WorkspaceNavigationMapRefreshComposer.TraceSignals(ImpactedTestsBadge, LastTestSummary),
-            () => CockpitSurfaceSnapshotBuilder.Build(this));
+            cockpitSurfaceCapturedOnUi);
 
         await UiScheduler.Default.InvokeAsync(() =>
         {

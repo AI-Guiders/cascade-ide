@@ -32,6 +32,7 @@ public static class WorkspaceNavigationMapRefreshComposer
         IReadOnlyList<WorkspaceNavigationMapOrchestrator.RelatedRow> ListRows);
 
     /// <summary>Разбирает <paramref name="json"/> и собирает сцену или related-список; при сбое — статус ошибки без исключений наружу.</summary>
+    /// <param name="cockpitSurfaceCapturedOnUi">Снимок CDS с UI-потока; обязателен, если ветка control-flow с подграфом (см. вызывающий refresh).</param>
     public static DryResult Compose(
         Dependencies deps,
         string json,
@@ -44,7 +45,7 @@ public static class WorkspaceNavigationMapRefreshComposer
         double graphHeight,
         CodeNavigationMapDetailLevel mapDetailLevel,
         TraceSignals trace,
-        Func<CockpitSurfaceState> cockpitSurfaceSnapshot)
+        CockpitSurfaceState? cockpitSurfaceCapturedOnUi)
     {
         var rows = new List<WorkspaceNavigationMapOrchestrator.RelatedRow>();
         var status = string.Empty;
@@ -69,12 +70,13 @@ public static class WorkspaceNavigationMapRefreshComposer
                     viewport);
                 if (normalizedLevel == CodeNavigationMapLevelKind.ControlFlow)
                 {
+                    ArgumentNullException.ThrowIfNull(cockpitSurfaceCapturedOnUi);
                     var channelPayload = deps.TraceFlowCoordinator.Build(new TraceFlowChannelContext(
                         subgraph!,
                         trace.ImpactedTestsBadge,
                         trace.LastTestSummary ?? ""));
-                    var cds = cockpitSurfaceSnapshot();
-                    var cdsDecision = deps.TraceFlowCdsRouter.Route(new TraceFlowCdsRouteInput(cds, normalizedLevel));
+                    var cdsDecision = deps.TraceFlowCdsRouter.Route(
+                        new TraceFlowCdsRouteInput(cockpitSurfaceCapturedOnUi, normalizedLevel));
                     scene = deps.TraceFlowSurfaceCompositor.Compose(composed.Scene, channelPayload, cdsDecision);
                 }
                 else
@@ -103,6 +105,10 @@ public static class WorkspaceNavigationMapRefreshComposer
             }
 
             return new DryResult(status, anchorLabel, scene, graphPreferredHeight, accentCount, rows);
+        }
+        catch (ArgumentNullException)
+        {
+            throw;
         }
         catch
         {

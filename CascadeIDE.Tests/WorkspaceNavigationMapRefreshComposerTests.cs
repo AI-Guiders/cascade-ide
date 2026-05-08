@@ -1,4 +1,3 @@
-using CascadeIDE.Cockpit.Cds;
 using CascadeIDE.Cockpit.Channels.TraceFlow;
 using CascadeIDE.Cockpit.Composition.TraceFlow;
 using CascadeIDE.Features.WorkspaceNavigation.Application;
@@ -36,7 +35,7 @@ public sealed class WorkspaceNavigationMapRefreshComposerTests
             graphHeight: 100,
             CodeNavigationMapDetailLevel.Normal,
             new WorkspaceNavigationMapRefreshComposer.TraceSignals(0, null),
-            () => throw new InvalidOperationException("CDS factory must not run for parse failure"));
+            cockpitSurfaceCapturedOnUi: null);
 
         Assert.Contains("разобрать", r.Status);
         Assert.Null(r.Scene);
@@ -59,7 +58,7 @@ public sealed class WorkspaceNavigationMapRefreshComposerTests
             graphHeight: 100,
             CodeNavigationMapDetailLevel.Normal,
             new WorkspaceNavigationMapRefreshComposer.TraceSignals(0, null),
-            () => throw new InvalidOperationException("CDS factory must not run on error payload"));
+            cockpitSurfaceCapturedOnUi: null);
 
         Assert.Equal("short reason", r.Status);
         Assert.Null(r.Scene);
