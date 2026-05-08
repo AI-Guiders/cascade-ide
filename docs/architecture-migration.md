@@ -68,7 +68,7 @@
 | `MainWindowViewModel.StartupProject.cs` | 326 | Стартовый проект. |
 | `MainWindowViewModel.UiGitWorkspace.cs` | 147 | Git + workspace UI. |
 | `MainWindowViewModel.ViewBridge.cs` | 62 | Колбэки и провайдеры, которые View подставляет в главный VM (диалоги, UI automation). |
-| `MainWindowViewModel.WorkspaceNavigationMap.cs` | 330 | Слот Pfd: отображение карты намерений / `CodeNavigationMapSubgraphDocument` (те же данные, что JSON MCP). Граф подграфа — не синоним `instrument_id`, см. ADR 0065. По доменам: карта намерений (в т.ч. control flow) — CodeNavigation; зависимости файлов — WorkspaceNavigation; submodules — дерево/GitMap (ADR 0062). |
+| `MainWindowViewModel.WorkspaceNavigationMap.cs` | 326 | Слот Pfd: отображение карты намерений / `CodeNavigationMapSubgraphDocument` (те же данные, что JSON MCP). Граф подграфа — не синоним `instrument_id`, см. ADR 0065. По доменам: карта намерений (в т.ч. control flow) — CodeNavigation; зависимости файлов — WorkspaceNavigation; submodules — дерево/GitMap (ADR 0062). |
 | `MainWindowViewModel.WorkspaceSplitters.cs` | 23 | Сплиттеры рабочей области (MainGrid, обозреватель решения, Git и т.д.): режим «взлёт» — блокировка перетаскивания. |
 
 <!-- AUTO:MAIN-WINDOW-SLICE:MWVM-TABLE:END -->
@@ -205,6 +205,7 @@
 - Кластер `WorkspaceNavigationMap`:
   - graph/data трансформации — в сервисы/CCU;
   - в VM оставить binding-state и команды поверхности.
+- Первый срез (карта PFD): **`CodeNavigationMapPresentationProjection`** + статические `CodeNavigationMapSettings.ViewWantsList` / `ViewWantsGraph`; биндинги list/graph/бейдж/has-related в `MainWindowViewModel.WorkspaceNavigationMap` делегируют в проекцию.
 
 ## Версионирование
 
@@ -235,3 +236,4 @@
 - **v1.24** — `IdeMcpGitWorkspaceSession` (+ тесты `IdeMcpGitWorkspaceSessionTests`); `MainWindowViewModel.IdeMcpActions.Git` — делегирование в сессию.
 - **v1.25** — `IdeMcpIdeStateUiCapture`; `IdeMcpWorkspaceOrchestrator.BuildIdeStatePayload` по снимку; тест в `IdeMcpOrchestratorThinningTests`.
 - **v1.26** — DAP UI-план + MCP `GetDebugSnapshotAsync` без `UiScheduler.InvokeAsync`.
+- **v1.27** — Wave UI clusters: `CodeNavigationMapPresentationProjection`, `CodeNavigationMapSettings.ViewWants*`; тесты `CodeNavigationMapPresentationProjectionTests`.
