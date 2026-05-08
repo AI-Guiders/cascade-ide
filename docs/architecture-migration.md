@@ -7,7 +7,7 @@
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:BEGIN -->
 
-`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~7.9k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~6.7k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.1k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
+`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~7.9k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~6.8k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.1k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:END -->
 
@@ -39,9 +39,9 @@
 | `MainWindowViewModel.EnvironmentReadiness.cs` | 66 | Снимок «готовность окружения» (ADR 0023), отдельно от Workspace Health. |
 | `MainWindowViewModel.HybridIndex.cs` | 295 | Hybrid Codebase Index (HCI): status projection and UI commands for the HIS (MFD) page. |
 | `MainWindowViewModel.HybridIndexSettings.cs` | 18 | Привязки окна настроек к `HybridIndex` (ADR 0106). |
-| `MainWindowViewModel.IdeHealth.cs` | 92 | Связка с Workspace Health. |
+| `MainWindowViewModel.IdeHealth.cs` | 95 | Связка с Workspace Health. |
 | `MainWindowViewModel.IdeMcpActions.AgentNotes.cs` | 44 | Реализация `IIdeMcpActions`: agent-notes. |
-| `MainWindowViewModel.IdeMcpActions.BuildTest.cs` | 158 | MCP: сборка, тесты. |
+| `MainWindowViewModel.IdeMcpActions.BuildTest.cs` | 166 | MCP: сборка, тесты. |
 | `MainWindowViewModel.IdeMcpActions.DebuggerPanel.cs` | 73 | Панель отладки и снимок DAP (ADR 0002): один `DebugSessionSnapshot`. |
 | `MainWindowViewModel.IdeMcpActions.Editor.cs` | 128 | MCP: редактор. |
 | `MainWindowViewModel.IdeMcpActions.Git.cs` | 144 | MCP: git. |
@@ -188,6 +188,7 @@
 - Первый срез выполнен: JSON для `get_open_document_text` (поиск вкладки по пути через `IdeMcpEditorOrchestrator.BuildGetOpenDocumentTextResponse`), якорь control-flow для `get_code_navigation_context` (`IdeMcpNavigationOrchestrator.ResolveControlFlowLineColumn`), payload `get_solution_files` (`IdeMcpBuildTestOrchestrator.BuildSolutionFilesJson`).
 - Второй срез: `HybridIndexScopeResolver` в `Features/HybridIndex/Application/` и `IdeMcpHybridIndexScope` для MCP `codebase_index_*` (`TryResolveForCodebaseIndexCommand` — без дубля логики в VM); MCP agent-notes через `IdeMcpAgentNotesOrchestrator`; `ResolveHybridIndexScope` в VM — делегирует ресолверу. Дальше — тяжёлые сборка/тесты в VM, при необходимости Git MCP preflight, остальной Editor/UI automation.
 - Третий срез: `Services.IdeMcpSolutionPathAvailability.IsRunnableSolutionFile` для MCP build/test/code-cleanup (I/O вне статического оркестратора, CASCOPE031); мутации UI тестов — `IdeMcpBuildTestOrchestrator.IdeMcpTestRunInstrumentationMutation`.
+- Четвёртый срез: единый контур **`BuildStateChanged` → DataBus → `RebuildIdeHealth`** (ADR 0099): локальная сборка решения и MCP code cleanup не шлют «сырой» `_ideDataBus.Publish` без пересборки полосы; MCP-пути после `ConfigureAwait(false)` используют `PublishIdeBuildStateOnUiAsync`.
 
 ## Wave 1: UI clusters thinning
 
@@ -227,3 +228,4 @@
 - **v1.20** — Wave MCP thinning (первый срез): оркестраторы `IdeMcpEditorOrchestrator` / `IdeMcpNavigationOrchestrator` / `IdeMcpBuildTestOrchestrator` + тесты `IdeMcpOrchestratorThinningTests`.
 - **v1.21** — MCP thinning второй заход: `HybridIndexScopeResolver`, `IdeMcpHybridIndexScope`, `IdeMcpAgentNotesOrchestrator`; тесты `HybridIndexScopeAndIdeMcpScopeTests`.
 - **v1.22** — `IdeMcpSolutionPathAvailability`, `IdeMcpTestRunInstrumentationMutation`; тесты `IdeMcpSolutionPathAvailabilityTests`.
+- **v1.23** — `PublishIdeBuildStateOnUiAsync`; MCP `RunCodeCleanupAsync` обрамлён `BuildStateChanged`; `BuildSolutionAsync` — `PublishToIdeDataBusAndRebuild` вместо «тихой» публикации в шину.
