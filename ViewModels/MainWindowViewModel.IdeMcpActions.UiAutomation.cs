@@ -24,8 +24,7 @@ public partial class MainWindowViewModel
         var ws = GetWorkspacePath();
         if (!string.IsNullOrEmpty(ws))
             BreakpointsFileService.RemoveBreakpointForBundledSampleTarget(ws, path, line);
-        OnPropertyChanged(nameof(BreakpointLinesInCurrentFile));
-        OnPropertyChanged(nameof(AllBreakpointLinesInCurrentFile));
+        NotifyBreakpointGlyphBindings();
         ResyncDapBreakpointsFireAndForget();
     }
 
@@ -38,8 +37,7 @@ public partial class MainWindowViewModel
         if (string.IsNullOrEmpty(ws))
             return;
         BreakpointsFileService.ToggleBreakpoint(ws, CurrentFilePath, line);
-        OnPropertyChanged(nameof(BreakpointLinesInCurrentFile));
-        OnPropertyChanged(nameof(AllBreakpointLinesInCurrentFile));
+        NotifyBreakpointGlyphBindings();
         ResyncDapBreakpointsFireAndForget();
     }
 

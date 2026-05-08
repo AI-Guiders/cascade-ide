@@ -47,7 +47,7 @@
 | `MainWindowViewModel.IdeMcpActions.Git.cs` | 144 | MCP: git. |
 | `MainWindowViewModel.IdeMcpActions.HybridCodebaseIndex.cs` | 103 | MCP / ide_execute_command: Hybrid Codebase Index (имена команд как у внешнего MCP). |
 | `MainWindowViewModel.IdeMcpActions.Navigation.cs` | 61 | MCP: семантическая навигация (ADR 0039). |
-| `MainWindowViewModel.IdeMcpActions.UiAutomation.cs` | 170 | MCP: UI automation. |
+| `MainWindowViewModel.IdeMcpActions.UiAutomation.cs` | 168 | MCP: UI automation. |
 | `MainWindowViewModel.IdeMcpActions.Web.cs` | 10 | Реализация `IIdeMcpActions`: публичный веб-запрос (DuckDuckGo Instant Answer) и загрузка публичного URL. |
 | `MainWindowViewModel.IdeMcpActions.Workspace.cs` | 92 | MCP: workspace. |
 | `MainWindowViewModel.IdeMcpHostLifecycle.cs` | 27 | Жизненный цикл IDE MCP-хоста: `ide_ping`, перезапуск внешних MCP и stdio-сессии Cursor ACP. |
