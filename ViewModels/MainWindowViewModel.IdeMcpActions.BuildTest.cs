@@ -1,6 +1,7 @@
 using CascadeIDE.Cockpit.DataBus;
 using CascadeIDE.Features.IdeMcp.Application;
 using CascadeIDE.Models;
+using CascadeIDE.Services;
 
 namespace CascadeIDE.ViewModels;
 
@@ -22,7 +23,7 @@ public partial class MainWindowViewModel
     async Task<string> Services.IIdeMcpActions.BuildAsync()
     {
         var path = await UiScheduler.Default.InvokeAsync(() => Workspace.SolutionPath ?? "");
-        if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+        if (!IdeMcpSolutionPathAvailability.IsRunnableSolutionFile(path))
         {
             var msg = IdeMcpBuildTestOrchestrator.MissingSolutionMessage();
             UiScheduler.Default.Post(() =>
@@ -100,7 +101,7 @@ public partial class MainWindowViewModel
     private async Task<string> RunTestsInternalAsync(string? filterExpression, string mode, IReadOnlyList<string>? tokens = null)
     {
         var path = await UiScheduler.Default.InvokeAsync(() => Workspace.SolutionPath ?? "");
-        if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+        if (!IdeMcpSolutionPathAvailability.IsRunnableSolutionFile(path))
             return IdeMcpBuildTestOrchestrator.SerializeMissingSolutionError(mode);
 
         try
@@ -111,18 +112,18 @@ public partial class MainWindowViewModel
 
             UiScheduler.Default.Post(() =>
             {
-                var uiOutcome = IdeMcpBuildTestOrchestrator.BuildTestUiOutcome(
+                var mutation = IdeMcpBuildTestOrchestrator.IdeMcpTestRunInstrumentationMutation.FromSuccessfulParse(
                     parsed.Passed,
                     parsed.Total,
                     parsed.Failed,
                     InstrumentationPanel.TestResultsOutput,
                     outStr,
                     InstrumentationTabs);
-                LastTestSummary = uiOutcome.summary;
-                ImpactedTestsBadge = uiOutcome.impactedTestsBadge;
-                PublishToIdeDataBusAndRebuild(new TestsStateChanged(LastTestSummary, ImpactedTestsBadge));
-                InstrumentationPanel.TestResultsOutput = uiOutcome.updatedOutput;
-                if (uiOutcome.shouldOpenTestsPage)
+                LastTestSummary = mutation.Summary;
+                ImpactedTestsBadge = mutation.ImpactedTestsBadge;
+                PublishToIdeDataBusAndRebuild(new TestsStateChanged(mutation.Summary, mutation.ImpactedTestsBadge));
+                InstrumentationPanel.TestResultsOutput = mutation.UpdatedTestResultsOutput;
+                if (mutation.ShouldOpenTestsPage)
                     CurrentMfdShellPage = MfdShellPage.Tests;
             });
             return outcome.JsonPayload;
@@ -131,9 +132,11 @@ public partial class MainWindowViewModel
         {
             UiScheduler.Default.Post(() =>
             {
-                var uiOutcome = IdeMcpBuildTestOrchestrator.BuildTestErrorUiOutcome(InstrumentationPanel.TestResultsOutput, ex.Message);
-                PublishToIdeDataBusAndRebuild(new TestsStateChanged(uiOutcome.summary, uiOutcome.impactedTestsBadge));
-                InstrumentationPanel.TestResultsOutput = uiOutcome.updatedOutput;
+                var mutation = IdeMcpBuildTestOrchestrator.IdeMcpTestRunInstrumentationMutation.FromThrownException(
+                    InstrumentationPanel.TestResultsOutput,
+                    ex.Message);
+                PublishToIdeDataBusAndRebuild(new TestsStateChanged(mutation.Summary, mutation.ImpactedTestsBadge));
+                InstrumentationPanel.TestResultsOutput = mutation.UpdatedTestResultsOutput;
             });
             return Services.McpDotnetBuildTestService.SerializeTestRunFailure(ex.Message, mode, filterExpression);
         }
@@ -142,7 +145,7 @@ public partial class MainWindowViewModel
     async Task<string> Services.IIdeMcpActions.RunCodeCleanupAsync(string? includePath)
     {
         var path = await UiScheduler.Default.InvokeAsync(() => Workspace.SolutionPath ?? "");
-        if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+        if (!IdeMcpSolutionPathAvailability.IsRunnableSolutionFile(path))
             return IdeMcpBuildTestOrchestrator.SerializeCodeCleanupFailure(IdeMcpBuildTestOrchestrator.MissingSolutionMessage());
 
         try

@@ -115,4 +115,47 @@ public static class IdeMcpBuildTestOrchestrator
     public static (string summary, int impactedTestsBadge, string updatedOutput)
         BuildTestErrorUiOutcome(string existingOutput, string errorMessage) =>
         ("", 0, BuildUpdatedTestErrorOutput(existingOutput, errorMessage));
+
+    /// <summary>Дифф для UI «Инструментация · тесты» и DataBus после MCP-тестового прогона (без ссылок на VM).</summary>
+    public readonly record struct IdeMcpTestRunInstrumentationMutation(
+        string Summary,
+        int ImpactedTestsBadge,
+        string UpdatedTestResultsOutput,
+        bool ShouldOpenTestsPage)
+    {
+        public static IdeMcpTestRunInstrumentationMutation FromSuccessfulParse(
+            int passed,
+            int total,
+            int failed,
+            string existingInstrumentationOutput,
+            string consoleOutput,
+            bool instrumentationTabsEnabled)
+        {
+            var u = BuildTestUiOutcome(
+                passed,
+                total,
+                failed,
+                existingInstrumentationOutput,
+                consoleOutput,
+                instrumentationTabsEnabled);
+            return new IdeMcpTestRunInstrumentationMutation(
+                u.summary,
+                u.impactedTestsBadge,
+                u.updatedOutput,
+                u.shouldOpenTestsPage);
+        }
+
+        /// <remarks>Не обновляет «последний summary» успешного прогона — только журнал и сброс бейджа на шину (совместимо с прежней обработкой в VM).</remarks>
+        public static IdeMcpTestRunInstrumentationMutation FromThrownException(
+            string existingInstrumentationOutput,
+            string exceptionMessage)
+        {
+            var u = BuildTestErrorUiOutcome(existingInstrumentationOutput, exceptionMessage);
+            return new IdeMcpTestRunInstrumentationMutation(
+                u.summary,
+                u.impactedTestsBadge,
+                u.updatedOutput,
+                ShouldOpenTestsPage: false);
+        }
+    }
 }
