@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading.Channels;
+using CascadeIDE.Cockpit.ComputingUnits.HybridIndex;
 using CascadeIDE.Cockpit.DataBus;
 using HybridCodebaseIndex.Core;
 
@@ -149,14 +150,7 @@ public sealed class HybridIndexOrchestrator : IDisposable
             try
             {
                 var st = await _service.GetStatusAsync(_workspaceRoot, _solutionPath, ct).ConfigureAwait(false);
-                _dataBus.Publish(new HybridIndexStateChanged(
-                    WorkspaceRoot: st.WorkspaceRootNormalized ?? _workspaceRoot,
-                    SolutionPath: _solutionPath,
-                    DatabasePath: st.DatabasePath,
-                    DocumentCount: st.DocumentCount,
-                    IndexedAtIso: st.IndexedAtIso,
-                    LastError: st.LastReindexError,
-                    LastErrorAtIso: st.LastReindexErrorAtIso));
+                _dataBus.Publish(HybridIndexStateChangedUnit.FromCoreStatus(st, _workspaceRoot, _solutionPath));
             }
             catch
             {
@@ -316,14 +310,7 @@ public sealed class HybridIndexOrchestrator : IDisposable
         try
         {
             var st = await _service.GetStatusAsync(rootNormalized, solutionPathTrimmedOrNull, cancellationToken).ConfigureAwait(false);
-            _dataBus.Publish(new HybridIndexStateChanged(
-                WorkspaceRoot: st.WorkspaceRootNormalized ?? rootNormalized,
-                SolutionPath: solutionPathTrimmedOrNull,
-                DatabasePath: st.DatabasePath,
-                DocumentCount: st.DocumentCount,
-                IndexedAtIso: st.IndexedAtIso,
-                LastError: st.LastReindexError,
-                LastErrorAtIso: st.LastReindexErrorAtIso));
+            _dataBus.Publish(HybridIndexStateChangedUnit.FromCoreStatus(st, rootNormalized, solutionPathTrimmedOrNull));
         }
         catch
         {
