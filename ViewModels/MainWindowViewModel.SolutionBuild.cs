@@ -27,7 +27,7 @@ public partial class MainWindowViewModel
         if (string.IsNullOrWhiteSpace(solutionPath) || !File.Exists(solutionPath))
             return;
 
-        _ideDataBus.Publish(new BuildStateChanged(true));
+        PublishToIdeDataBusAndRebuild(new BuildStateChanged(true));
         IsBuilding = true;
         if (!IsTerminalVisible)
             IsTerminalVisible = true;
@@ -79,7 +79,7 @@ public partial class MainWindowViewModel
         finally
         {
             BuildOutputPanel.FlushPending();
-            _ideDataBus.Publish(new BuildStateChanged(false, lastExitCode, lastBuildSucceeded));
+            PublishToIdeDataBusAndRebuild(new BuildStateChanged(false, lastExitCode, lastBuildSucceeded));
             IsBuilding = false;
         }
     }

@@ -43,8 +43,7 @@ public partial class MainWindowViewModel
                 BuildOutputPanel.Set(IdeMcpBuildTestOrchestrator.BuildOperationHeader("Сборка", pathCopy));
                 IsBuildOutputVisible = true;
             }).ConfigureAwait(false);
-            await UiScheduler.Default.InvokeAsync(() => PublishToIdeDataBusAndRebuild(new BuildStateChanged(true)))
-                .ConfigureAwait(false);
+            await PublishIdeBuildStateOnUiAsync(new BuildStateChanged(true)).ConfigureAwait(false);
 
             void AppendBuildChunk(string chunk) => BuildOutputPanel.Append(chunk);
             var (outStr, success, exitCode, binlogPath) = await _mcpBuildTest
@@ -75,9 +74,7 @@ public partial class MainWindowViewModel
         {
             var exit = lastExitCode;
             var ok = lastSucceeded;
-            await UiScheduler.Default
-                .InvokeAsync(() => PublishToIdeDataBusAndRebuild(new BuildStateChanged(false, exit, ok)))
-                .ConfigureAwait(false);
+            await PublishIdeBuildStateOnUiAsync(new BuildStateChanged(false, exit, ok)).ConfigureAwait(false);
         }
     }
 
@@ -148,6 +145,8 @@ public partial class MainWindowViewModel
         if (!IdeMcpSolutionPathAvailability.IsRunnableSolutionFile(path))
             return IdeMcpBuildTestOrchestrator.SerializeCodeCleanupFailure(IdeMcpBuildTestOrchestrator.MissingSolutionMessage());
 
+        int? lastExitCode = null;
+        bool? lastSucceeded = null;
         try
         {
             var pathCopy = path;
@@ -157,10 +156,14 @@ public partial class MainWindowViewModel
                 IsBuildOutputVisible = true;
             }).ConfigureAwait(false);
 
+            await PublishIdeBuildStateOnUiAsync(new BuildStateChanged(true)).ConfigureAwait(false);
+
             void AppendBuildChunk(string chunk) => BuildOutputPanel.Append(chunk);
             var (success, exitCode, outStr) = await _mcpBuildTest
                 .RunCodeCleanupAsync(path, includePath, AppendBuildChunk, cancellationToken: default)
                 .ConfigureAwait(false);
+            lastExitCode = exitCode;
+            lastSucceeded = success;
             var rawTruncated = IdeMcpBuildTestOrchestrator.BuildTruncatedRawOutput(outStr, 4000);
 
             await UiScheduler.Default.InvokeAsync(() => BuildOutputPanel.FlushPending()).ConfigureAwait(false);
@@ -169,7 +172,13 @@ public partial class MainWindowViewModel
         }
         catch (Exception ex)
         {
+            lastSucceeded = false;
             return IdeMcpBuildTestOrchestrator.SerializeCodeCleanupFailure(ex.Message);
+        }
+        finally
+        {
+            await PublishIdeBuildStateOnUiAsync(new BuildStateChanged(false, lastExitCode, lastSucceeded))
+                .ConfigureAwait(false);
         }
     }
 }
