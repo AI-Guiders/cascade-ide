@@ -41,12 +41,12 @@
 | `MainWindowViewModel.HybridIndexSettings.cs` | 18 | Привязки окна настроек к `HybridIndex` (ADR 0106). |
 | `MainWindowViewModel.IdeHealth.cs` | 92 | Связка с Workspace Health. |
 | `MainWindowViewModel.IdeMcpActions.AgentNotes.cs` | 45 | Реализация `IIdeMcpActions`: agent-notes. |
-| `MainWindowViewModel.IdeMcpActions.BuildTest.cs` | 165 | MCP: сборка, тесты. |
+| `MainWindowViewModel.IdeMcpActions.BuildTest.cs` | 155 | MCP: сборка, тесты. |
 | `MainWindowViewModel.IdeMcpActions.DebuggerPanel.cs` | 73 | Панель отладки и снимок DAP (ADR 0002): один `DebugSessionSnapshot`. |
-| `MainWindowViewModel.IdeMcpActions.Editor.cs` | 138 | MCP: редактор. |
+| `MainWindowViewModel.IdeMcpActions.Editor.cs` | 128 | MCP: редактор. |
 | `MainWindowViewModel.IdeMcpActions.Git.cs` | 144 | MCP: git. |
 | `MainWindowViewModel.IdeMcpActions.HybridCodebaseIndex.cs` | 128 | MCP / ide_execute_command: Hybrid Codebase Index (имена команд как у внешнего MCP). |
-| `MainWindowViewModel.IdeMcpActions.Navigation.cs` | 68 | MCP: семантическая навигация (ADR 0039). |
+| `MainWindowViewModel.IdeMcpActions.Navigation.cs` | 61 | MCP: семантическая навигация (ADR 0039). |
 | `MainWindowViewModel.IdeMcpActions.UiAutomation.cs` | 170 | MCP: UI automation. |
 | `MainWindowViewModel.IdeMcpActions.Web.cs` | 10 | Реализация `IIdeMcpActions`: публичный веб-запрос (DuckDuckGo Instant Answer) и загрузка публичного URL. |
 | `MainWindowViewModel.IdeMcpActions.Workspace.cs` | 92 | MCP: workspace. |
@@ -185,6 +185,7 @@
   - вызов соответствующего application-сервиса;
   - публикацию DataBus/UI обновлений.
 - Порядок первой волны: `IdeMcpActions.Editor` -> `IdeMcpActions.Navigation` -> `IdeMcpActions.BuildTest`.
+- Первый срез выполнен: JSON для `get_open_document_text` (поиск вкладки по пути через `IdeMcpEditorOrchestrator.BuildGetOpenDocumentTextResponse`), якорь control-flow для `get_code_navigation_context` (`IdeMcpNavigationOrchestrator.ResolveControlFlowLineColumn`), payload `get_solution_files` (`IdeMcpBuildTestOrchestrator.BuildSolutionFilesJson`). Дальше — тяжёлые методы сборки/тестов и остальной Editor.
 
 ## Wave 1: UI clusters thinning
 
@@ -221,3 +222,4 @@
 - **v1.17** — DAL-завершение среза Environment Readiness (ADR 0102): `EnvironmentReadinessExecutablePathProbe`, `EnvironmentReadinessEnvSnapshot` / `WellKnownEnv`, `EnvironmentReadinessPathAcquisition`, `EnvironmentReadinessFileFacts` в `Features/EnvironmentReadiness/DataAcquisition/`; I/O и классификация путей вне `Application/`.
 - **v1.18** — Cursor ACP DAL: `CursorAcpAgentPath`, `CursorAcpWorkspaceFileAccess` в `Features/CursorAcp/DataAcquisition/`; `global using` для этого пространства имён; `CursorAcpChatConnection` без прямого I/O путей агента и workspace-файлов в обработчиках ACP.
 - **v1.19** — Settings DAL: `UserSettingsPaths`, `TextFileReadWrite`, `HotkeyTomlLoader` в `Features/Settings/DataAcquisition/`; `McpExternalServersJsonResolver` читает файл через DAL. Workspace: `SolutionParser`, `ProjectFileTreeBuilder`, `SolutionFileLocator`, `FolderWorkspaceTreeBuilder`, `DebugWorkspacePath` — `Features/Workspace/DataAcquisition/`; `McpSolutionTree` — `Features/Workspace/Application/`; `global using` для Settings и Workspace; `SolutionFileLocator` не зависит от `EditorTextCoordinateUtilities` (локальное сравнение путей).
+- **v1.20** — Wave MCP thinning (первый срез): оркестраторы `IdeMcpEditorOrchestrator` / `IdeMcpNavigationOrchestrator` / `IdeMcpBuildTestOrchestrator` + тесты `IdeMcpOrchestratorThinningTests`.
