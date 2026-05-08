@@ -7,7 +7,7 @@
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:BEGIN -->
 
-`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~7.9k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~6.8k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.1k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
+`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~7.9k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~6.7k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.1k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:END -->
 
@@ -24,7 +24,7 @@
 | `MainWindowViewModel.Capabilities.cs` | 23 | Реестр capabilities. |
 | `MainWindowViewModel.CascadeChord.cs` | 432 | Аккордный слой ADR 0060: корень `cascade_chord` из hotkeys.toml (по умолчанию Ctrl+K), затем тот же хвост мелодии, что после `c:` в палитре (см. `IntentMelodyAliases`), без префикса `c:` и без Enter — если alias однозначен (например `so`). При конфликте префиксов (например `gs` vs `gsu`) точное совпадение после полного ввода или по клавише Enter. |
 | `MainWindowViewModel.CommandPalette.cs` | 550 | Палитра команд. |
-| `MainWindowViewModel.cs` | 454 | Главный композитор окна (partial-класс, несколько `MainWindowViewModel*.cs`). Карта файлов и ответственности — `docs/architecture-migration.md`, раздел «Срез MainWindowViewModel». |
+| `MainWindowViewModel.cs` | 446 | Главный композитор окна (partial-класс, несколько `MainWindowViewModel*.cs`). Карта файлов и ответственности — `docs/architecture-migration.md`, раздел «Срез MainWindowViewModel». |
 | `MainWindowViewModel.CSharpLsp.cs` | 120 | Запуск/перезапуск C# LSP. |
 | `MainWindowViewModel.CursorAcp.cs` | 36 | Путь Cursor ACP и предпочитаемая модель. |
 | `MainWindowViewModel.DebugStackUi.cs` | 35 | Выбор кадра в панели «Стек» Mfd: подгрузка Locals для выбранного кадра (DAP). |
@@ -40,12 +40,12 @@
 | `MainWindowViewModel.HybridIndex.cs` | 295 | Hybrid Codebase Index (HCI): status projection and UI commands for the HIS (MFD) page. |
 | `MainWindowViewModel.HybridIndexSettings.cs` | 18 | Привязки окна настроек к `HybridIndex` (ADR 0106). |
 | `MainWindowViewModel.IdeHealth.cs` | 92 | Связка с Workspace Health. |
-| `MainWindowViewModel.IdeMcpActions.AgentNotes.cs` | 45 | Реализация `IIdeMcpActions`: agent-notes. |
+| `MainWindowViewModel.IdeMcpActions.AgentNotes.cs` | 44 | Реализация `IIdeMcpActions`: agent-notes. |
 | `MainWindowViewModel.IdeMcpActions.BuildTest.cs` | 155 | MCP: сборка, тесты. |
 | `MainWindowViewModel.IdeMcpActions.DebuggerPanel.cs` | 73 | Панель отладки и снимок DAP (ADR 0002): один `DebugSessionSnapshot`. |
 | `MainWindowViewModel.IdeMcpActions.Editor.cs` | 128 | MCP: редактор. |
 | `MainWindowViewModel.IdeMcpActions.Git.cs` | 144 | MCP: git. |
-| `MainWindowViewModel.IdeMcpActions.HybridCodebaseIndex.cs` | 128 | MCP / ide_execute_command: Hybrid Codebase Index (имена команд как у внешнего MCP). |
+| `MainWindowViewModel.IdeMcpActions.HybridCodebaseIndex.cs` | 103 | MCP / ide_execute_command: Hybrid Codebase Index (имена команд как у внешнего MCP). |
 | `MainWindowViewModel.IdeMcpActions.Navigation.cs` | 61 | MCP: семантическая навигация (ADR 0039). |
 | `MainWindowViewModel.IdeMcpActions.UiAutomation.cs` | 170 | MCP: UI automation. |
 | `MainWindowViewModel.IdeMcpActions.Web.cs` | 10 | Реализация `IIdeMcpActions`: публичный веб-запрос (DuckDuckGo Instant Answer) и загрузка публичного URL. |
@@ -185,7 +185,8 @@
   - вызов соответствующего application-сервиса;
   - публикацию DataBus/UI обновлений.
 - Порядок первой волны: `IdeMcpActions.Editor` -> `IdeMcpActions.Navigation` -> `IdeMcpActions.BuildTest`.
-- Первый срез выполнен: JSON для `get_open_document_text` (поиск вкладки по пути через `IdeMcpEditorOrchestrator.BuildGetOpenDocumentTextResponse`), якорь control-flow для `get_code_navigation_context` (`IdeMcpNavigationOrchestrator.ResolveControlFlowLineColumn`), payload `get_solution_files` (`IdeMcpBuildTestOrchestrator.BuildSolutionFilesJson`). Дальше — тяжёлые методы сборки/тестов и остальной Editor.
+- Первый срез выполнен: JSON для `get_open_document_text` (поиск вкладки по пути через `IdeMcpEditorOrchestrator.BuildGetOpenDocumentTextResponse`), якорь control-flow для `get_code_navigation_context` (`IdeMcpNavigationOrchestrator.ResolveControlFlowLineColumn`), payload `get_solution_files` (`IdeMcpBuildTestOrchestrator.BuildSolutionFilesJson`).
+- Второй срез: `HybridIndexScopeResolver` в `Features/HybridIndex/Application/` и `IdeMcpHybridIndexScope` для MCP `codebase_index_*` (`TryResolveForCodebaseIndexCommand` — без дубля логики в VM); MCP agent-notes через `IdeMcpAgentNotesOrchestrator`; `ResolveHybridIndexScope` в VM — делегирует ресолверу. Дальше — тяжёлые сборка/тесты в VM, при необходимости Git MCP preflight, остальной Editor/UI automation.
 
 ## Wave 1: UI clusters thinning
 
@@ -223,3 +224,4 @@
 - **v1.18** — Cursor ACP DAL: `CursorAcpAgentPath`, `CursorAcpWorkspaceFileAccess` в `Features/CursorAcp/DataAcquisition/`; `global using` для этого пространства имён; `CursorAcpChatConnection` без прямого I/O путей агента и workspace-файлов в обработчиках ACP.
 - **v1.19** — Settings DAL: `UserSettingsPaths`, `TextFileReadWrite`, `HotkeyTomlLoader` в `Features/Settings/DataAcquisition/`; `McpExternalServersJsonResolver` читает файл через DAL. Workspace: `SolutionParser`, `ProjectFileTreeBuilder`, `SolutionFileLocator`, `FolderWorkspaceTreeBuilder`, `DebugWorkspacePath` — `Features/Workspace/DataAcquisition/`; `McpSolutionTree` — `Features/Workspace/Application/`; `global using` для Settings и Workspace; `SolutionFileLocator` не зависит от `EditorTextCoordinateUtilities` (локальное сравнение путей).
 - **v1.20** — Wave MCP thinning (первый срез): оркестраторы `IdeMcpEditorOrchestrator` / `IdeMcpNavigationOrchestrator` / `IdeMcpBuildTestOrchestrator` + тесты `IdeMcpOrchestratorThinningTests`.
+- **v1.21** — MCP thinning второй заход: `HybridIndexScopeResolver`, `IdeMcpHybridIndexScope`, `IdeMcpAgentNotesOrchestrator`; тесты `HybridIndexScopeAndIdeMcpScopeTests`.
