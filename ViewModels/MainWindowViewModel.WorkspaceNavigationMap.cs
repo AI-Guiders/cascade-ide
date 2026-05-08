@@ -93,22 +93,21 @@ public partial class MainWindowViewModel
 
     /// <summary>Настройка <c>list</c>/<c>both</c>: список связанных ренерится на странице MFD <see cref="MfdShellPage.RelatedFiles"/>, не в колонке PFD.</summary>
     public bool ShowCodeNavigationMapList =>
-        CodeNavigationMapPresentation == CodeNavigationMapPresentationKind.List
-        || CodeNavigationMapPresentation == CodeNavigationMapPresentationKind.Both;
+        CodeNavigationMapPresentationProjection.ShowCodeNavigationMapList(CodeNavigationMapPresentation);
 
     /// <summary>Списка related на PFD нет (см. <see cref="MfdShellPage.RelatedFiles"/>).</summary>
-    public bool ShowCodeNavigationMapListOnPfd => false;
+    public bool ShowCodeNavigationMapListOnPfd =>
+        CodeNavigationMapPresentationProjection.ShowCodeNavigationMapListOnPfd;
 
     /// <summary>Показать мини-карту подграфа.</summary>
     public bool ShowCodeNavigationMapGraph =>
-        CodeNavigationMapPresentation == CodeNavigationMapPresentationKind.Graph
-        || CodeNavigationMapPresentation == CodeNavigationMapPresentationKind.Both;
+        CodeNavigationMapPresentationProjection.ShowCodeNavigationMapGraph(CodeNavigationMapPresentation);
 
     /// <summary>
     /// Высота нижней строки Grid под список на PFD: список перенесён в MFD — всегда 0.
     /// </summary>
     public GridLength CodeNavigationMapListAreaRowHeight =>
-        (ShowCodeNavigationMapList && ShowCodeNavigationMapListOnPfd)
+        CodeNavigationMapPresentationProjection.ListAreaRowUsesStar(ShowCodeNavigationMapList, ShowCodeNavigationMapListOnPfd)
             ? new GridLength(1, GridUnitType.Star)
             : new GridLength(0);
 
@@ -116,23 +115,20 @@ public partial class MainWindowViewModel
     /// Режим <c>file</c>: подсказка «открыть файл» (в control flow клик ведёт к строке, не к файлу).
     /// </summary>
     public bool ShowCodeNavigationMapGraphClickHint =>
-        ShowCodeNavigationMapGraph
-        && string.Equals(CodeNavigationMapLevelKind.Normalize(CodeNavigationMapLevel), CodeNavigationMapLevelKind.File, StringComparison.Ordinal)
-        && CodeNavigationMapPresentation != CodeNavigationMapPresentationKind.List;
+        CodeNavigationMapPresentationProjection.ShowCodeNavigationMapGraphClickHint(
+            ShowCodeNavigationMapGraph,
+            CodeNavigationMapLevel,
+            CodeNavigationMapPresentation);
 
     /// <summary>Короткая подпись к количеству связей для шапки SM.</summary>
     public string WorkspaceNavigationMapRelatedBadge =>
-        WorkspaceNavigationMapRelatedCount switch
-        {
-            0 => "",
-            1 => "1 связь",
-            _ => $"{WorkspaceNavigationMapRelatedCount} связей"
-        };
+        CodeNavigationMapPresentationProjection.WorkspaceNavigationMapRelatedBadge(WorkspaceNavigationMapRelatedCount);
 
     /// <summary>Есть ли контекст для accent (список или подграф с соседями).</summary>
     public bool WorkspaceNavigationMapHasRelated =>
-        WorkspaceNavigationMapRelatedCount > 0
-        || (CodeNavigationMapGraphScene?.Nodes.Count > 1);
+        CodeNavigationMapPresentationProjection.WorkspaceNavigationMapHasRelated(
+            WorkspaceNavigationMapRelatedCount,
+            CodeNavigationMapGraphScene?.Nodes.Count);
 
     /// <summary>Открыть связанный файл из карты намерений (список related / узел графа).</summary>
     [RelayCommand]

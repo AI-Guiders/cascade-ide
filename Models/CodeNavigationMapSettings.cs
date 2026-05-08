@@ -20,12 +20,14 @@ public sealed class CodeNavigationMapSettings
         string.Equals(NormalizeDepth(Depth), CodeNavigationMapLevelKind.ControlFlow, StringComparison.Ordinal);
 
     /// <summary>Соответствует <c>wantList</c> в <c>RunWorkspaceNavigationMapRefreshAsync</c> (после <see cref="NormalizeView"/>).</summary>
-    public bool WantsCodeNavigationMapList =>
-        NormalizeView(View) is "list" or "both";
+    public bool WantsCodeNavigationMapList => ViewWantsList(View);
 
     /// <summary>Соответствует <c>wantGraph</c> в <c>RunWorkspaceNavigationMapRefreshAsync</c>.</summary>
-    public bool WantsCodeNavigationMapGraph =>
-        NormalizeView(View) is "graph" or "both";
+    public bool WantsCodeNavigationMapGraph => ViewWantsGraph(View);
+
+    public static bool ViewWantsList(string? view) => NormalizeView(view) is "list" or "both";
+
+    public static bool ViewWantsGraph(string? view) => NormalizeView(view) is "graph" or "both";
 
     public static string NormalizeView(string? value)
     {
