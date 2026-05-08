@@ -473,17 +473,8 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         return string.IsNullOrWhiteSpace(dir) ? ".hybrid-codebase-index" : dir;
     }
 
-    private (string WorkspaceRoot, string? SolutionPath) ResolveHybridIndexScope(string workspaceRoot, string? solutionPath)
-    {
-        var ws = (workspaceRoot ?? "").Trim();
-        if (string.IsNullOrWhiteSpace(ws))
-            return ("", null);
-
-        var mode = (_settings.HybridIndex.ScopeMode ?? "").Trim();
-        if (string.Equals(mode, "workspace", StringComparison.OrdinalIgnoreCase))
-            return (ws, null);
-        return (ws, solutionPath);
-    }
+    private (string WorkspaceRoot, string? SolutionPath) ResolveHybridIndexScope(string workspaceRoot, string? solutionPath) =>
+        HybridIndexScopeResolver.ApplyScopeMode(_settings.HybridIndex.ScopeMode, workspaceRoot, solutionPath);
 
     /// <summary>
     /// ADR 0106: синхронизация оркестратора HCI с <see cref="CascadeIdeSettings.HybridIndex"/> и текущим решением в <see cref="SolutionWorkspaceViewModel"/>.

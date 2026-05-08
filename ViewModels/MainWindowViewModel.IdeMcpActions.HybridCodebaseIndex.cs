@@ -1,5 +1,6 @@
 using System.Text.Json;
 using CascadeIDE.Features.HybridIndex.McpParity;
+using CascadeIDE.Features.IdeMcp.Application;
 
 namespace CascadeIDE.ViewModels;
 
@@ -11,47 +12,16 @@ public partial class MainWindowViewModel
         string? argSolutionPath,
         out string hciWorkspaceRoot,
         out string? hciSolutionPath,
-        out string? errorJson)
-    {
-        hciWorkspaceRoot = "";
-        hciSolutionPath = null;
-        errorJson = null;
-
-        var reqWs = argWorkspacePath?.Trim();
-        if (string.IsNullOrWhiteSpace(reqWs))
-        {
-            var sln = Workspace.SolutionPath;
-            var wsDir = GetWorkspacePath(sln);
-            if (string.IsNullOrWhiteSpace(wsDir))
-            {
-                errorJson = """{"error":"no_workspace","detail":"Open a solution or pass workspace_path"}""";
-                return false;
-            }
-
-            (hciWorkspaceRoot, hciSolutionPath) = ResolveHybridIndexScope(wsDir, sln);
-            return !string.IsNullOrWhiteSpace(hciWorkspaceRoot);
-        }
-
-        try
-        {
-            hciWorkspaceRoot = Path.GetFullPath(reqWs!.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
-        }
-        catch
-        {
-            errorJson = """{"error":"invalid_workspace_path"}""";
-            return false;
-        }
-
-        var slnArg = string.IsNullOrWhiteSpace(argSolutionPath) ? null : argSolutionPath.Trim();
-        (hciWorkspaceRoot, hciSolutionPath) = ResolveHybridIndexScope(hciWorkspaceRoot, slnArg);
-        if (string.IsNullOrWhiteSpace(hciWorkspaceRoot))
-        {
-            errorJson = """{"error":"invalid_workspace_path"}""";
-            return false;
-        }
-
-        return true;
-    }
+        out string? errorJson) =>
+        IdeMcpHybridIndexScope.TryResolveForCodebaseIndexCommand(
+            argWorkspacePath,
+            argSolutionPath,
+            _settings.HybridIndex.ScopeMode,
+            Workspace.SolutionPath,
+            GetWorkspacePath,
+            out hciWorkspaceRoot,
+            out hciSolutionPath,
+            out errorJson);
 
     Task<string> Services.IIdeMcpActions.CodebaseIndexStatusAsync(string? workspacePath, string? solutionPath, CancellationToken cancellationToken)
     {
