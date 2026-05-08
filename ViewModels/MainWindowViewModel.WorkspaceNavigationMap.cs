@@ -6,7 +6,6 @@ using CascadeIDE.Cockpit.Channels.TraceFlow;
 using CascadeIDE.Cockpit.Composition.TraceFlow;
 using CascadeIDE.Features.WorkspaceNavigation.Application;
 using CascadeIDE.Models;
-using CascadeIDE.Services.CodeNavigation;
 using CascadeIDE.Services.Navigation;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -150,10 +149,7 @@ public partial class MainWindowViewModel
     /// <summary>Вызывается из <c>WorkspaceNavigationMapView</c> при изменении ширины мини-карты.</summary>
     internal void NotifyCodeNavigationMapGraphViewportWidthChanged(double width)
     {
-        if (double.IsNaN(width) || width < 40)
-            return;
-        var clamped = Math.Clamp(width, 80, 2400);
-        if (Math.Abs(clamped - CodeNavigationMapGraphWidth) < 3)
+        if (!CodeNavigationMapViewportPolicy.ShouldApplyMeasuredWidth(width, CodeNavigationMapGraphWidth, out var clamped))
             return;
         CodeNavigationMapGraphWidth = clamped;
         ScheduleWorkspaceNavigationMapRefresh();
@@ -205,54 +201,16 @@ public partial class MainWindowViewModel
         try
         {
             json = await Task.Run(
-                    () =>
-                    {
-                        if (level == CodeNavigationMapLevelKind.ControlFlow)
-                        {
-                            return CodeNavigationControlFlowSubgraphBuilder.BuildJson(
-                                currentPath,
-                                editorText,
-                                cursorLine,
-                                cursorColumn,
-                                CodeNavigationContextBuilder.DefaultMaxNodes,
-                                CodeNavigationContextBuilder.DefaultMaxEdges);
-                        }
-
-                        if (useSubgraphMode)
-                        {
-                            return CodeNavigationContextBuilder.BuildJson(
-                                "subgraph",
-                                null,
-                                currentPath,
-                                rawPaths,
-                                solutionPath,
-                                null,
-                                null,
-                                CodeNavigationContextBuilder.DefaultMaxRelated,
-                                CodeNavigationContextBuilder.DefaultMaxNodes,
-                                CodeNavigationContextBuilder.DefaultMaxEdges,
-                                null,
-                                null,
-                                null,
-                                navSettings ?? new CodeNavigationSettings());
-                        }
-
-                        return CodeNavigationContextBuilder.BuildJson(
-                            "related",
-                            null,
-                            currentPath,
-                            rawPaths,
-                            solutionPath,
-                            null,
-                            null,
-                            CodeNavigationContextBuilder.DefaultMaxRelated,
-                            CodeNavigationContextBuilder.DefaultMaxNodes,
-                            CodeNavigationContextBuilder.DefaultMaxEdges,
-                            null,
-                            null,
-                            null,
-                            navSettings ?? new CodeNavigationSettings());
-                    },
+                    () => WorkspaceNavigationMapContextJsonBuilder.Build(
+                        level,
+                        wantGraph,
+                        currentPath,
+                        editorText,
+                        cursorLine,
+                        cursorColumn,
+                        rawPaths,
+                        solutionPath,
+                        navSettings),
                     ct)
                 .ConfigureAwait(false);
         }
