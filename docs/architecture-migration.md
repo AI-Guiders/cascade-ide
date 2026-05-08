@@ -73,7 +73,8 @@
 | `MainWindowViewModel.RelayCommands.cs` | 294 | Relay-команды. |
 | `MainWindowViewModel.RelayCommands.Debug.cs` | 144 | Relay: отладка. |
 | `MainWindowViewModel.SettingsReactive.cs` | 238 | Реакции на изменение полей настроек и ключей API: диск, автономный агент, панели. |
-| `MainWindowViewModel.ShellState.cs` | 274 | Раскладка панелей, нижняя зона, Workspace Health / автономный агент, ключи провайдеров и чата. |
+| `MainWindowViewModel.ShellState.AiProviders.cs` | 58 | Часть `ShellState`: режим ИИ и облачные ключи привязаны к нижнему приложению/чату. |
+| `MainWindowViewModel.ShellState.cs` | 225 | Раскладка панелей, нижняя зона, Workspace Health / автономный агент, ключи провайдеров и чата. Режим ИИ и поля облачных ключей — partial `MainWindowViewModel.ShellState.AiProviders.cs`. |
 | `MainWindowViewModel.SolutionBuild.cs` | 195 | Сборка, `BuildOutputPanel`. |
 | `MainWindowViewModel.StartupProject.cs` | 326 | Стартовый проект. |
 | `MainWindowViewModel.UiGitWorkspace.cs` | 147 | Git + workspace UI. |
@@ -213,6 +214,7 @@
   - на VM оставить свойства-проекции и orchestration вызовы.
 - Кластер `ShellState`:
   - состояния панелей и режимов — в отдельные state-модули по доменам, не в один monolith-файл.
+  - четвёртый срез: **`MainWindowViewModel.ShellState.AiProviders.cs`** — режим ИИ (`AiMode`, облачный провайдер, вычисляемые флаги выбора) и поля API-ключей; базовый `ShellState.cs` остаётся раскладкой/панелями/Workspace Health.
 - Кластер `WorkspaceNavigationMap`:
   - graph/data трансформации — в сервисы/CCU;
   - в VM оставить binding-state и команды поверхности.
@@ -254,3 +256,4 @@
 - **v1.29** — Явная **стратегия целевого каркаса** (CDS / CCU / DAL / IDS), приоритет упрощающего буфера вокруг `MainWindowViewModel` и правило 5 раздела «Правила на время миграции» — чтобы strangler совпадал с реальным приближением к устоявшейся линии слоёв, а не откладывался потоком фич.
 - **v1.30** — Wave UI clusters: `WorkspaceNavigationMapRefreshComposer` (пост-JSON конвейер карты PFD); тесты `WorkspaceNavigationMapRefreshComposerTests`.
 - **v1.31** — Тот же срез: **CDS-снимок для trace-flow** на карте захватывается на UI до фонового парсинга/компоновки, контракт `Compose(.., CockpitSurfaceState?)` без `Func` с пула.
+- **v1.32** — Wave UI clusters: вынесен partial **`MainWindowViewModel.ShellState.AiProviders`** (режим ИИ и облачные ключи) из `ShellState.cs`.
