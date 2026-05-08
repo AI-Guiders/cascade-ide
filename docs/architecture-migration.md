@@ -20,7 +20,7 @@
 | Файл | Строк (≈) | Содержание |
 |------|------------|------------|
 | `MainWindowViewModel.AutonomousAgent.cs` | 113 | Автономный агент (Power). |
-| `MainWindowViewModel.Breakpoints.cs` | 88 | Брейкпоинты: `BreakpointsFileService` / `BreakpointsStorage` — один источник (ADR 0002). |
+| `MainWindowViewModel.Breakpoints.cs` | 96 | Брейкпоинты: `BreakpointsFileService` / `BreakpointsStorage` — один источник (ADR 0002). |
 | `MainWindowViewModel.Capabilities.cs` | 23 | Реестр capabilities. |
 | `MainWindowViewModel.CascadeChord.cs` | 432 | Аккордный слой ADR 0060: корень `cascade_chord` из hotkeys.toml (по умолчанию Ctrl+K), затем тот же хвост мелодии, что после `c:` в палитре (см. `IntentMelodyAliases`), без префикса `c:` и без Enter — если alias однозначен (например `so`). При конфликте префиксов (например `gs` vs `gsu`) точное совпадение после полного ввода или по клавише Enter. |
 | `MainWindowViewModel.CommandPalette.cs` | 550 | Палитра команд. |
@@ -28,7 +28,7 @@
 | `MainWindowViewModel.CSharpLsp.cs` | 120 | Запуск/перезапуск C# LSP. |
 | `MainWindowViewModel.CursorAcp.cs` | 36 | Путь Cursor ACP и предпочитаемая модель. |
 | `MainWindowViewModel.DebugStackUi.cs` | 35 | Выбор кадра в панели «Стек» Mfd: подгрузка Locals для выбранного кадра (DAP). |
-| `MainWindowViewModel.DockInstrumentSlots.cs` | 28 | Какой инструмент показан в слотах PFD/MFD главного окна — по `InstrumentPlacementRuntime` и `DisplaySettings` (в т.ч. `[display.instrument_routing]` и merge `workspace.toml`). Логика — `MainWindowDockedGridInstrumentSlots`. |
+| `MainWindowViewModel.DockInstrumentSlots.cs` | 33 | Какой инструмент показан в слотах PFD/MFD главного окна — по `InstrumentPlacementRuntime` и `DisplaySettings` (в т.ч. `[display.instrument_routing]` и merge `workspace.toml`). Логика — `MainWindowDockedGridInstrumentSlots`. |
 | `MainWindowViewModel.DocumentsDock.cs` | 43 | Документы / dock. |
 | `MainWindowViewModel.EditorDebugHints.cs` | 97 | Debug-hints редактора: EOL-подсказки по текущей остановке DAP и top-level переменным. |
 | `MainWindowViewModel.EditorHud.cs` | 117 | Полоса HUD над редактором (ADR 0021 §9): баннеры без отдельного якоря-колонки. Основной сценарий продукта — внешний агент (например Cursor) + Cascade; текст сюда задаётся явно (MCP, диагностика, позже — встроенная автономия), а не «по умолчанию» от автономного цикла Power. |
@@ -39,7 +39,7 @@
 | `MainWindowViewModel.EnvironmentReadiness.cs` | 66 | Снимок «готовность окружения» (ADR 0023), отдельно от Workspace Health. |
 | `MainWindowViewModel.HybridIndex.cs` | 295 | Hybrid Codebase Index (HCI): status projection and UI commands for the HIS (MFD) page. |
 | `MainWindowViewModel.HybridIndexSettings.cs` | 18 | Привязки окна настроек к `HybridIndex` (ADR 0106). |
-| `MainWindowViewModel.IdeHealth.cs` | 86 | Связка с Workspace Health. |
+| `MainWindowViewModel.IdeHealth.cs` | 92 | Связка с Workspace Health. |
 | `MainWindowViewModel.IdeMcpActions.AgentNotes.cs` | 45 | Реализация `IIdeMcpActions`: agent-notes. |
 | `MainWindowViewModel.IdeMcpActions.BuildTest.cs` | 165 | MCP: сборка, тесты. |
 | `MainWindowViewModel.IdeMcpActions.DebuggerPanel.cs` | 73 | Панель отладки и снимок DAP (ADR 0002): один `DebugSessionSnapshot`. |
@@ -61,7 +61,7 @@
 | `MainWindowViewModel.PresentationLayout.cs` | 207 | ADR 0017: строка `presentation` и второй `TopLevel` — `MfdHostWindow` с полным вторичным контуром (п. 8). |
 | `MainWindowViewModel.PresentationLayoutAuthority.cs` | 14 | Запись intent видимости панелей (семантика «хочу»); фактическая поверхность — `MainWindowShellSurfaceCompositor`. |
 | `MainWindowViewModel.RelayCommands.cs` | 294 | Relay-команды. |
-| `MainWindowViewModel.RelayCommands.Debug.cs` | 139 | Relay: отладка. |
+| `MainWindowViewModel.RelayCommands.Debug.cs` | 144 | Relay: отладка. |
 | `MainWindowViewModel.SettingsReactive.cs` | 238 | Реакции на изменение полей настроек и ключей API: диск, автономный агент, панели. |
 | `MainWindowViewModel.ShellState.cs` | 274 | Раскладка панелей, нижняя зона, Workspace Health / автономный агент, ключи провайдеров и чата. |
 | `MainWindowViewModel.SolutionBuild.cs` | 195 | Сборка, `BuildOutputPanel`. |
@@ -90,7 +90,7 @@
 
 <!-- AUTO:MAIN-WINDOW-SLICE:EXEC-TABLE:END -->
 
-**Техдолг по главному VM (не блокирует развитие):** крупные куски MCP по-прежнему рядом с VM (`IdeMcpActions.*`); дальнейший вынос — по мере изменений. **План B по примитивам MCP для текущего объёма закрыт:** координаты/пути редактора (`EditorTextCoordinateUtilities`), разбор JSON панели отладки (`McpDebugPayloadParsing`), чтение полей args MCP (`McpCommandJsonArgs` в `Services/`) — вне `ViewModels/`. **Готовность окружения ([ADR 0023](adr/0023-environment-readiness-glance.md)):** полный список строк — `EnvironmentReadinessSnapshotBuilder.BuildAllRowsAsync` в `Features/EnvironmentReadiness/Application/` (DAL/канал CCU, ADR 0102); обновление страницы — `EnvironmentReadinessRefreshOrchestrator` (канал → compositor на UI), главный VM вызывает только оркестратор. **Cursor ACP (ADR 0102):** разрешение пути к `cursor-agent`, stdio-процесс и fs в пределах workspace — `Features/CursorAcp/DataAcquisition/`; сессия ACP и `IAcpClient` — `Services/CursorAcp/CursorAcpChatConnection`. **Настройки (ADR 0102):** пути к `%LocalAppData%\CascadeIDE\`, hotkeys и чтение внешнего JSON MCP — `Features/Settings/DataAcquisition/` (`UserSettingsPaths`, `TextFileReadWrite`, `HotkeyTomlLoader`); сериализация и merge display — `Services/SettingsService`. **Workspace (ADR 0102):** загрузка .sln/.csproj, дерево проекта, поиск .sln у файла, папка-workspace, разрешение `workspace_path` для отладки — `Features/Workspace/DataAcquisition/`; обход `SolutionItem` для MCP/JSON — `Features/Workspace/Application/McpSolutionTree`.
+**Техдолг по главному VM (не блокирует развитие):** крупные куски MCP по-прежнему рядом с VM (`IdeMcpActions.*`); дальнейший вынос — по мере изменений. **Странглер-фасад и уведомления UI:** связка списка `HybridIndexDependentPresentationNames` и `[NotifyPropertyChangedFor]` у `_hybridIndexLast` закреплена тестом `HybridIndexPresentationNotificationsConsistencyTests`; пачечные вызовы `OnPropertyChanged` для Workspace Health IDE, док-инструментов в слотах и глифов брейкпоинтов сведены к статическим массивам имён и циклу в partial-файлах главного VM. **План B по примитивам MCP для текущего объёма закрыт:** координаты/пути редактора (`EditorTextCoordinateUtilities`), разбор JSON панели отладки (`McpDebugPayloadParsing`), чтение полей args MCP (`McpCommandJsonArgs` в `Services/`) — вне `ViewModels/`. **Готовность окружения ([ADR 0023](adr/0023-environment-readiness-glance.md)):** полный список строк — `EnvironmentReadinessSnapshotBuilder.BuildAllRowsAsync` в `Features/EnvironmentReadiness/Application/` (DAL/канал CCU, ADR 0102); обновление страницы — `EnvironmentReadinessRefreshOrchestrator` (канал → compositor на UI), главный VM вызывает только оркестратор. **Cursor ACP (ADR 0102):** разрешение пути к `cursor-agent`, stdio-процесс и fs в пределах workspace — `Features/CursorAcp/DataAcquisition/`; сессия ACP и `IAcpClient` — `Services/CursorAcp/CursorAcpChatConnection`. **Настройки (ADR 0102):** пути к `%LocalAppData%\CascadeIDE\`, hotkeys и чтение внешнего JSON MCP — `Features/Settings/DataAcquisition/` (`UserSettingsPaths`, `TextFileReadWrite`, `HotkeyTomlLoader`); сериализация и merge display — `Services/SettingsService`. **Workspace (ADR 0102):** загрузка .sln/.csproj, дерево проекта, поиск .sln у файла, папка-workspace, разрешение `workspace_path` для отладки — `Features/Workspace/DataAcquisition/`; обход `SolutionItem` для MCP/JSON — `Features/Workspace/Application/McpSolutionTree`.
 
 ## Целевая карта срезов
 
