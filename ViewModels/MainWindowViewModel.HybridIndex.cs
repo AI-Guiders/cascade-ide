@@ -16,6 +16,34 @@ public partial class MainWindowViewModel
 {
     private IDisposable? _hybridIndexStateSubscription;
 
+    /// <summary>
+    /// Имена свойств HIS, которые завязаны на <see cref="HybridIndexLast"/> или должны пересчитываться без нового <c>HybridIndexStateChanged</c> (UTC/открытие вкладки).
+    /// При добавлении свойства расширяй массив и список в <c>[NotifyPropertyChangedFor(...)]</c> над полем снимка индекса.
+    /// </summary>
+    private static readonly string[] HybridIndexDependentPresentationNames =
+    [
+        nameof(HybridIndexLampText),
+        nameof(HybridIndexStateShort),
+        nameof(HybridIndexDocumentCountText),
+        nameof(HybridIndexDocsValue),
+        nameof(HybridIndexDocsGauge01),
+        nameof(HybridIndexIndexedAtText),
+        nameof(HybridIndexFreshnessText),
+        nameof(HybridIndexFreshnessMinutes),
+        nameof(HybridIndexFreshnessMinutesText),
+        nameof(HybridIndexFreshnessEcamText),
+        nameof(HybridIndexLastErrorText),
+        nameof(HybridIndexWorkspaceRootText),
+        nameof(HybridIndexSolutionPathText),
+        nameof(HybridIndexDatabasePathText),
+        nameof(HybridIndexWorkspaceShortText),
+        nameof(HybridIndexSolutionShortText),
+        nameof(HybridIndexDatabaseShortText),
+        nameof(HybridIndexLampItem),
+        nameof(HybridIndexMsgLine1),
+        nameof(HybridIndexMsgLine2),
+    ];
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(
         nameof(HybridIndexLampText),
@@ -271,26 +299,8 @@ public partial class MainWindowViewModel
     /// <summary>Перерисовать вычисляемые поля HIS без смены последнего события DataBus (свежесть от часов, открытие вкладки).</summary>
     private void RaiseHybridIndexPresentationProperties()
     {
-        OnPropertyChanged(nameof(HybridIndexLampText));
-        OnPropertyChanged(nameof(HybridIndexStateShort));
-        OnPropertyChanged(nameof(HybridIndexDocumentCountText));
-        OnPropertyChanged(nameof(HybridIndexDocsValue));
-        OnPropertyChanged(nameof(HybridIndexDocsGauge01));
-        OnPropertyChanged(nameof(HybridIndexIndexedAtText));
-        OnPropertyChanged(nameof(HybridIndexFreshnessText));
-        OnPropertyChanged(nameof(HybridIndexFreshnessMinutes));
-        OnPropertyChanged(nameof(HybridIndexFreshnessMinutesText));
-        OnPropertyChanged(nameof(HybridIndexFreshnessEcamText));
-        OnPropertyChanged(nameof(HybridIndexLastErrorText));
-        OnPropertyChanged(nameof(HybridIndexWorkspaceRootText));
-        OnPropertyChanged(nameof(HybridIndexSolutionPathText));
-        OnPropertyChanged(nameof(HybridIndexDatabasePathText));
-        OnPropertyChanged(nameof(HybridIndexWorkspaceShortText));
-        OnPropertyChanged(nameof(HybridIndexSolutionShortText));
-        OnPropertyChanged(nameof(HybridIndexDatabaseShortText));
-        OnPropertyChanged(nameof(HybridIndexLampItem));
-        OnPropertyChanged(nameof(HybridIndexMsgLine1));
-        OnPropertyChanged(nameof(HybridIndexMsgLine2));
+        foreach (var name in HybridIndexDependentPresentationNames)
+            OnPropertyChanged(name);
     }
 
     private static string ShortenPathLikeEcam(string text)
