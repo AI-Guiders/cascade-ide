@@ -1,4 +1,5 @@
 using System.Text.Json;
+using CascadeIDE.Services;
 
 namespace CascadeIDE.Features.IdeMcp.Application;
 
@@ -8,78 +9,58 @@ namespace CascadeIDE.Features.IdeMcp.Application;
 /// </summary>
 public static class IdeMcpWorkspaceOrchestrator
 {
-    public static object BuildIdeStatePayload(
-        string? solutionPath,
-        string? currentFilePath,
-        string? selectedSolutionPath,
-        int editorTextLength,
-        int? selectionStart,
-        int? selectionLength,
-        IReadOnlyCollection<int> currentFileBreakpoints,
-        Services.DebugSessionSnapshot debugSnapshot,
-        bool isBuildOutputVisible,
-        string buildOutputPreview,
-        string? binlogPath,
-        bool isTerminalVisible,
-        string? uiMode,
-        bool isPfdRegionExpanded,
-        bool isMfdRegionExpanded,
-        bool isGitPanelVisible,
-        bool isInstrumentationDockVisible,
-        string? safetyLevel,
-        int editorGroupCount,
-        int agentTraceStepCount,
-        bool isAutonomousRunning,
-        JsonElement diagnostics,
-        object cockpitSurface) =>
-        new
+    public static object BuildIdeStatePayload(IdeMcpIdeStateUiCapture ui, JsonElement diagnostics)
+    {
+        var d = ui.DebugSnapshot;
+        return new
         {
-            solution_path = solutionPath,
-            current_file_path = currentFilePath,
-            selected_solution_path = selectedSolutionPath,
+            solution_path = ui.SolutionPath,
+            current_file_path = ui.CurrentFilePath,
+            selected_solution_path = ui.SelectedSolutionPath,
             editor = new
             {
-                content_length = editorTextLength,
-                selection_start = selectionStart ?? 0,
-                selection_length = selectionLength ?? 0
+                content_length = ui.EditorTextLength,
+                selection_start = ui.SelectionStart ?? 0,
+                selection_length = ui.SelectionLength ?? 0
             },
             breakpoints = new
             {
-                current_file = currentFileBreakpoints,
-                total_count = debugSnapshot.Breakpoints.Count
+                current_file = ui.CurrentFileBreakpoints,
+                total_count = d.Breakpoints.Count
             },
             debug = new
             {
-                position_file = debugSnapshot.StoppedFile,
-                position_line = debugSnapshot.StoppedLine,
-                has_active_session = debugSnapshot.HasActiveSession,
-                is_stopped = debugSnapshot.IsExecutionStopped,
-                stack_count = debugSnapshot.StackFrames.Count,
-                variables_count = debugSnapshot.VariableRootScopes.Sum(g => g.Roots.Count)
+                position_file = d.StoppedFile,
+                position_line = d.StoppedLine,
+                has_active_session = d.HasActiveSession,
+                is_stopped = d.IsExecutionStopped,
+                stack_count = d.StackFrames.Count,
+                variables_count = d.VariableRootScopes.Sum(g => g.Roots.Count)
             },
             build = new
             {
-                is_visible = isBuildOutputVisible,
-                output_preview = buildOutputPreview,
-                binlog_path = binlogPath
+                is_visible = ui.IsBuildOutputVisible,
+                output_preview = ui.BuildOutputPreview,
+                binlog_path = ui.BinlogPath
             },
-            terminal = new { is_visible = isTerminalVisible },
-            ui_mode = uiMode,
+            terminal = new { is_visible = ui.IsTerminalVisible },
+            ui_mode = ui.UiMode,
             panels = new
             {
-                pfd_region_expanded = isPfdRegionExpanded,
-                build_output = isBuildOutputVisible,
-                mfd_region_expanded = isMfdRegionExpanded,
-                git = isGitPanelVisible,
-                instrumentation_dock = isInstrumentationDockVisible
+                pfd_region_expanded = ui.IsPfdRegionExpanded,
+                build_output = ui.IsBuildOutputVisible,
+                mfd_region_expanded = ui.IsMfdRegionExpanded,
+                git = ui.IsGitPanelVisible,
+                instrumentation_dock = ui.IsInstrumentationDockVisible
             },
-            safety_level = safetyLevel,
-            editor_group_count = editorGroupCount,
-            agent_trace_step_count = agentTraceStepCount,
-            is_autonomous_running = isAutonomousRunning,
+            safety_level = ui.SafetyLevel,
+            editor_group_count = ui.EditorGroupCount,
+            agent_trace_step_count = ui.AgentTraceStepCount,
+            is_autonomous_running = ui.IsAutonomousRunning,
             diagnostics,
-            cockpit_surface = cockpitSurface
+            cockpit_surface = ui.CockpitSurface
         };
+    }
 
     public static string SerializeIdeState(object state) =>
         JsonSerializer.Serialize(state);

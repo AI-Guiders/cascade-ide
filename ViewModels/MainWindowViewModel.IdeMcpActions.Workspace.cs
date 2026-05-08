@@ -56,37 +56,38 @@ public partial class MainWindowViewModel
     {
         var diagnosticsJson = await ((Services.IIdeMcpActions)this).GetCurrentFileDiagnosticsAsync().ConfigureAwait(false);
         var diagnostics = IdeMcpWorkspaceOrchestrator.ParseDiagnosticsOrEmpty(diagnosticsJson);
+        var ui = await UiScheduler.Default.InvokeAsync(CaptureIdeMcpIdeStateUi);
+        var state = IdeMcpWorkspaceOrchestrator.BuildIdeStatePayload(ui, diagnostics);
+        return IdeMcpWorkspaceOrchestrator.SerializeIdeState(state);
+    }
 
-        return await UiScheduler.Default.InvokeAsync(() =>
-        {
-            var buildText = IdeMcpWorkspaceOrchestrator.BuildTruncatedOutputPreview(BuildOutputPanel.BuildOutput, 2000);
-            var dbg = DapDebug.GetSnapshot();
-            var state = IdeMcpWorkspaceOrchestrator.BuildIdeStatePayload(
-                Workspace.SolutionPath,
-                CurrentFilePath,
-                Workspace.SelectedSolutionItem?.FullPath,
-                (EditorText ?? "").Length,
-                EditorSelectionStart,
-                EditorSelectionLength,
-                AllBreakpointLinesInCurrentFile,
-                dbg,
-                IsBuildOutputVisible,
-                buildText,
-                _lastBuildBinlogPath,
-                IsTerminalVisible,
-                UiMode,
-                IsPfdRegionExpanded,
-                IsMfdRegionExpanded,
-                IsGitPanelVisible,
-                IsInstrumentationDockVisible,
-                SafetyLevel,
-                EditorGroupCount,
-                InstrumentationPanel.AgentTraceSteps.Count,
-                Autonomous.IsAutonomousRunning,
-                diagnostics,
-                BuildCockpitSurfaceSnapshot());
-            return IdeMcpWorkspaceOrchestrator.SerializeIdeState(state);
-        });
+    /// <summary>Снимок полей UI для MCP <c>get_ide_state</c>; вызывать только с UI-потока (через <see cref="UiScheduler"/>).</summary>
+    private IdeMcpIdeStateUiCapture CaptureIdeMcpIdeStateUi()
+    {
+        var buildText = IdeMcpWorkspaceOrchestrator.BuildTruncatedOutputPreview(BuildOutputPanel.BuildOutput, 2000);
+        return new IdeMcpIdeStateUiCapture(
+            Workspace.SolutionPath,
+            CurrentFilePath,
+            Workspace.SelectedSolutionItem?.FullPath,
+            (EditorText ?? "").Length,
+            EditorSelectionStart,
+            EditorSelectionLength,
+            AllBreakpointLinesInCurrentFile,
+            DapDebug.GetSnapshot(),
+            IsBuildOutputVisible,
+            buildText,
+            _lastBuildBinlogPath,
+            IsTerminalVisible,
+            UiMode,
+            IsPfdRegionExpanded,
+            IsMfdRegionExpanded,
+            IsGitPanelVisible,
+            IsInstrumentationDockVisible,
+            SafetyLevel,
+            EditorGroupCount,
+            InstrumentationPanel.AgentTraceSteps.Count,
+            Autonomous.IsAutonomousRunning,
+            BuildCockpitSurfaceSnapshot());
     }
 
     Task<string> Services.IIdeMcpActions.GetCockpitSurfaceAsync() =>
