@@ -17,17 +17,7 @@ public partial class MainWindowViewModel
     /// <summary>Список файлов и дерево решения. file_entries — плоский список с path, title, relative_path. solution_tree — иерархия (solution → projects → folders → files). Выполняется в UI-потоке.</summary>
     Task<string> Services.IIdeMcpActions.GetSolutionFilesAsync() =>
         UiScheduler.Default.InvokeAsync(() =>
-        {
-            var solutionPath = Workspace.SolutionPath;
-            var entries = McpSolutionTree.CollectFileEntries(Workspace.SolutionRoots).Select(e => new
-            {
-                path = e.FullPath,
-                title = e.Title,
-                relative_path = McpSolutionTree.GetRelativePath(solutionPath, e.FullPath)
-            }).ToList();
-            var tree = Workspace.SolutionRoots.Select(r => McpSolutionTree.BuildSolutionTreeNode(r, solutionPath)).ToList();
-            return IdeMcpBuildTestOrchestrator.SerializeSolutionFilesPayload(entries, tree);
-        });
+            IdeMcpBuildTestOrchestrator.BuildSolutionFilesJson(Workspace.SolutionPath, Workspace.SolutionRoots));
 
     async Task<string> Services.IIdeMcpActions.BuildAsync()
     {

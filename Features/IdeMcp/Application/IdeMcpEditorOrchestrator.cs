@@ -8,6 +8,31 @@ namespace CascadeIDE.Features.IdeMcp.Application;
 /// </summary>
 public static class IdeMcpEditorOrchestrator
 {
+    /// <summary>Снимок открытой вкладки для <see cref="BuildGetOpenDocumentTextResponse"/> (без зависимости от ViewModels).</summary>
+    public readonly record struct OpenDocumentTabSnapshot(string FilePath, string Content, bool IsDirty);
+
+    /// <summary>
+    /// Разрешить путь, найти вкладку по тем же правилам, что и обозреватель, вернуть JSON для MCP <c>get_open_document_text</c>.
+    /// </summary>
+    public static string BuildGetOpenDocumentTextResponse(
+        string? filePathArgument,
+        string? currentFilePath,
+        IReadOnlyList<OpenDocumentTabSnapshot> openTabs,
+        int? maxChars)
+    {
+        var target = string.IsNullOrWhiteSpace(filePathArgument) ? currentFilePath : filePathArgument.Trim();
+        if (string.IsNullOrEmpty(target))
+            return SerializeOpenDocumentMissingPathError();
+
+        foreach (var tab in openTabs)
+        {
+            if (EditorTextCoordinateUtilities.PathsReferToSameFile(tab.FilePath, target))
+                return SerializeOpenDocumentText(tab.FilePath, tab.Content, tab.IsDirty, maxChars);
+        }
+
+        return SerializeOpenDocumentNotOpenError(target);
+    }
+
     /// <summary>
     /// Maps 1-based line/column range to a selection span in <paramref name="editorText"/>.
     /// Returns false if either offset is invalid (e.g. out of range).

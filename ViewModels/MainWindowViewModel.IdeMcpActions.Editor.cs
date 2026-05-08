@@ -101,20 +101,9 @@ public partial class MainWindowViewModel
         {
             try
             {
-                var target = string.IsNullOrWhiteSpace(filePath) ? CurrentFilePath : filePath.Trim();
-                if (string.IsNullOrEmpty(target))
-                {
-                    tcs.SetResult(IdeMcpEditorOrchestrator.SerializeOpenDocumentMissingPathError());
-                    return;
-                }
-
-                var doc = FindOpenDocumentModelByPath(target);
-                if (doc is null)
-                {
-                    tcs.SetResult(IdeMcpEditorOrchestrator.SerializeOpenDocumentNotOpenError(target));
-                    return;
-                }
-                tcs.SetResult(IdeMcpEditorOrchestrator.SerializeOpenDocumentText(doc.FilePath, doc.Content, doc.IsDirty, maxChars));
+                var tabs = CollectOpenDocumentTabSnapshots();
+                var json = IdeMcpEditorOrchestrator.BuildGetOpenDocumentTextResponse(filePath, CurrentFilePath, tabs, maxChars);
+                tcs.SetResult(json);
             }
             catch (Exception ex)
             {
@@ -124,18 +113,18 @@ public partial class MainWindowViewModel
         return await tcs.Task.ConfigureAwait(false);
     }
 
-    /// <summary>Модель открытого документа по пути (вкладка в <see cref="Documents.DockDocuments"/>).</summary>
-    private OpenDocumentViewModel? FindOpenDocumentModelByPath(string path)
+    private List<IdeMcpEditorOrchestrator.OpenDocumentTabSnapshot> CollectOpenDocumentTabSnapshots()
     {
+        var list = new List<IdeMcpEditorOrchestrator.OpenDocumentTabSnapshot>();
         foreach (var item in Documents.DockDocuments)
         {
             if (item is not DockDocumentViewModel dvm)
                 continue;
-            if (EditorTextCoordinateUtilities.PathsReferToSameFile(dvm.Doc.FilePath, path))
-                return dvm.Doc;
+            var doc = dvm.Doc;
+            list.Add(new IdeMcpEditorOrchestrator.OpenDocumentTabSnapshot(doc.FilePath, doc.Content, doc.IsDirty));
         }
 
-        return null;
+        return list;
     }
 
     void Services.IIdeMcpActions.ApplyEdit(string filePath, int startLine, int startColumn, int endLine, int endColumn, string newText)

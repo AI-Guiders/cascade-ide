@@ -1,3 +1,5 @@
+using CascadeIDE.Features.WorkspaceNavigation.Application;
+
 namespace CascadeIDE.Features.IdeMcp.Application;
 
 /// <summary>
@@ -26,6 +28,17 @@ public static class IdeMcpNavigationOrchestrator
             ? "subgraph"
             : requestedMode;
         return (effectiveLevel, effectiveMode);
+    }
+
+    /// <summary>Якорь для control-flow subgraph: производная позиция из текста редактора + fallback по запросу.</summary>
+    public static (int? line, int? column) ResolveControlFlowLineColumn(
+        int? requestedLine,
+        int? requestedColumn,
+        string? editorText,
+        int? caretOrSelectionOffset)
+    {
+        var (derivedLine, derivedColumn) = WorkspaceNavigationMapOrchestrator.ComputeLineColumn(editorText ?? "", caretOrSelectionOffset);
+        return ResolveLineColumnForControlFlow(requestedLine, requestedColumn, derivedLine, derivedColumn);
     }
 
     public static (int? line, int? column) ResolveLineColumnForControlFlow(

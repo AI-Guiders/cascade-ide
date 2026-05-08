@@ -1,5 +1,8 @@
-using System.Text.Json;
+using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Text.Json;
+using CascadeIDE.Models;
+using CascadeIDE.Features.Workspace.Application;
 
 namespace CascadeIDE.Features.IdeMcp.Application;
 
@@ -26,6 +29,19 @@ public static class IdeMcpBuildTestOrchestrator
 
     public static string SerializeSolutionFilesPayload<TEntry, TNode>(IReadOnlyList<TEntry> fileEntries, IReadOnlyList<TNode> solutionTree) =>
         JsonSerializer.Serialize(new { file_entries = fileEntries, solution_tree = solutionTree });
+
+    /// <summary>Плоские записи файлов и дерево решения для MCP <c>get_solution_files</c>; обход через <see cref="McpSolutionTree"/>.</summary>
+    public static string BuildSolutionFilesJson(string? solutionPath, ObservableCollection<SolutionItem> solutionRoots)
+    {
+        var entries = McpSolutionTree.CollectFileEntries(solutionRoots).Select(e => new
+        {
+            path = e.FullPath,
+            title = e.Title,
+            relative_path = McpSolutionTree.GetRelativePath(solutionPath, e.FullPath)
+        }).ToList();
+        var tree = solutionRoots.Select(r => McpSolutionTree.BuildSolutionTreeNode(r, solutionPath)).ToList();
+        return SerializeSolutionFilesPayload(entries, tree);
+    }
 
     public static (string? filterExpression, string mode, IReadOnlyList<string>? tokens) BuildAffectedTestsRequest(
         IReadOnlyList<string>? changedPaths)
