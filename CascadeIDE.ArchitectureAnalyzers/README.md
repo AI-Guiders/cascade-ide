@@ -21,6 +21,10 @@ Roslyn-анализаторы для границ [ADR 0036](../docs/adr/0036-cd
 | **CASCOPE020** | Warning | В `Cockpit/ComputingUnits/*` запрещён прямой доступ к внешним источникам (`File`, `Directory`, `Process`, `HttpClient`, `JsonDocument/Serializer` и др.): добыча данных — в DAL ([ADR 0102](../docs/adr/0102-data-acquisition-layer-boundary-and-contract.md)). |
 | **CASCOPE021** | Warning | В `Cockpit/ComputingUnits/*` запрещены UI-зависимости через `using` (`CascadeIDE.ViewModels`, `CascadeIDE.Views`, `CascadeIDE.Features.Ui*`, `Avalonia*`). |
 
+### Черновые направления (правила пока не вводим)
+
+- **HCI: JSON MCP против события DataBus.** Ответы `SerializeStatus(IndexStatus)` в `Features/HybridIndex/McpParity/` содержат полный снимок ядра; типизированное `HybridIndexStateChanged` после CCU узже (см. ADR 0106 и XML на `HybridIndexStateChangedUnit` / `CodebaseIndexIdeJsonResponses.SerializeStatus`). Возможное жёсткое CASCOPE-правило на подмножество полей — только после того, как стабилизируем контракт шины для UI и MCP parity.
+
 `MfdShellView.axaml` и `MfdShellPageStack.axaml` — в `<AdditionalFiles>` в `CascadeIDE.csproj` (**CASCOPE017**/**018**). Без записи проверка не сработает.
 
 Расширение правил: новые диагностики в этом проекте, версии `Microsoft.CodeAnalysis.CSharp` держать совместимыми с SDK.
