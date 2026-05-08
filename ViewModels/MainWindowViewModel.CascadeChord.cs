@@ -27,6 +27,25 @@ public partial class MainWindowViewModel
     private string _cascadeChordMelodyTail = "";
     private DateTimeOffset _cascadeChordDeadline = DateTimeOffset.MinValue;
     private DispatcherTimer? _cascadeChordTimer;
+
+    /// <summary>Связанные проекции оверлея/лампы Command при смене фазы или хвоста мелодии (ADR 0060).</summary>
+    private static readonly string[] CascadeChordOverlayPresentationNames =
+    [
+        nameof(IsCascadeChordOverlayVisible),
+        nameof(CascadeChordOverlayHintText),
+        nameof(CascadeChordOverlaySuggestions),
+        nameof(CascadeChordOverlayInputText),
+        nameof(CascadeChordOverlayFindBarLine),
+        nameof(CascadeChordOverlayFindBarOpacity),
+        nameof(CascadeChordOverlayNoMatches),
+        nameof(CascadeChordOverlayCompactFooter),
+        nameof(CascadeChordHudMelodyText),
+        nameof(IsCascadeChordDropdownOpen),
+        nameof(HasChordDropdownItems),
+        nameof(CascadeChordHudWatermark),
+        nameof(CommandArmedLampToolTip),
+    ];
+
     /// <summary>Фокус в полоске HUD над редактором: туннель не перехватывает буквы — ввод идёт в <see cref="CascadeChordHudMelodyText"/>.</summary>
     private bool _cascadeChordHudTextHasFocus;
 
@@ -208,19 +227,8 @@ public partial class MainWindowViewModel
 
     private void NotifyCascadeChordOverlayProperties()
     {
-        OnPropertyChanged(nameof(IsCascadeChordOverlayVisible));
-        OnPropertyChanged(nameof(CascadeChordOverlayHintText));
-        OnPropertyChanged(nameof(CascadeChordOverlaySuggestions));
-        OnPropertyChanged(nameof(CascadeChordOverlayInputText));
-        OnPropertyChanged(nameof(CascadeChordOverlayFindBarLine));
-        OnPropertyChanged(nameof(CascadeChordOverlayFindBarOpacity));
-        OnPropertyChanged(nameof(CascadeChordOverlayNoMatches));
-        OnPropertyChanged(nameof(CascadeChordOverlayCompactFooter));
-        OnPropertyChanged(nameof(CascadeChordHudMelodyText));
-        OnPropertyChanged(nameof(IsCascadeChordDropdownOpen));
-        OnPropertyChanged(nameof(HasChordDropdownItems));
-        OnPropertyChanged(nameof(CascadeChordHudWatermark));
-        OnPropertyChanged(nameof(CommandArmedLampToolTip));
+        foreach (var name in CascadeChordOverlayPresentationNames)
+            OnPropertyChanged(name);
     }
 
     /// <summary>Вызывается из полоски HUD: фокус ввода — туннель не должен съедать буквы до TextBox.</summary>
