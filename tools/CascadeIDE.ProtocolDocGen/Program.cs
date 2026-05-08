@@ -294,6 +294,47 @@ internal static class IdeMcpCommandExecutorEmitter
         sb.AppendLine("        add(Services.IdeCommands.RunCodeCleanup, async (args, _) => await ((IIdeMcpActions)_vm).RunCodeCleanupAsync(McpCommandJsonArgs.String(args, \"include_path\")));");
         sb.AppendLine("        add(Services.IdeCommands.GetCodeMetrics, async (args, _) => await ((IIdeMcpActions)_vm).GetCodeMetricsAsync(McpCommandJsonArgs.String(args, \"scope\"), McpCommandJsonArgs.String(args, \"path\")));");
 
+        // Hybrid Codebase Index (паритет MCP hybrid-codebase-index)
+        sb.AppendLine("        add(Services.IdeCommands.CodebaseIndexStatus, async (args, ct) => await ((IIdeMcpActions)_vm).CodebaseIndexStatusAsync(McpCommandJsonArgs.String(args, \"workspace_path\"), McpCommandJsonArgs.String(args, \"solution_path\"), ct));");
+        sb.AppendLine("        add(Services.IdeCommands.CodebaseIndexSearch, async (args, ct) =>");
+        sb.AppendLine("        {");
+        sb.AppendLine("            var top = McpCommandJsonArgs.OptionalInt32(args, \"top_n\") ?? 15;");
+        sb.AppendLine("            if (top < 1) top = 1;");
+        sb.AppendLine("            if (top > 128) top = 128;");
+        sb.AppendLine("            var semantic = McpCommandJsonArgs.OptionalBool(args, \"semantic\") ?? false;");
+        sb.AppendLine("            var alpha = McpCommandJsonArgs.OptionalDouble(args, \"alpha\") ?? 0.65;");
+        sb.AppendLine("            var beta = McpCommandJsonArgs.OptionalDouble(args, \"beta\") ?? 0.35;");
+        sb.AppendLine("            var vecTopK = McpCommandJsonArgs.OptionalInt32(args, \"vec_top_k\") ?? 30;");
+        sb.AppendLine("            return await ((IIdeMcpActions)_vm).CodebaseIndexSearchAsync(");
+        sb.AppendLine("                McpCommandJsonArgs.String(args, \"workspace_path\"),");
+        sb.AppendLine("                McpCommandJsonArgs.String(args, \"solution_path\"),");
+        sb.AppendLine("                McpCommandJsonArgs.String(args, \"query\") ?? \"\",");
+        sb.AppendLine("                top,");
+        sb.AppendLine("                McpCommandJsonArgs.String(args, \"path_prefix\"),");
+        sb.AppendLine("                McpCommandJsonArgs.StringList(args, \"exclude_path_prefixes\"),");
+        sb.AppendLine("                McpCommandJsonArgs.StringList(args, \"extensions\"),");
+        sb.AppendLine("                semantic,");
+        sb.AppendLine("                alpha,");
+        sb.AppendLine("                beta,");
+        sb.AppendLine("                vecTopK,");
+        sb.AppendLine("                ct);");
+        sb.AppendLine("        });");
+        sb.AppendLine("        add(Services.IdeCommands.CodebaseIndexExplain, async (args, ct) =>");
+        sb.AppendLine("        {");
+        sb.AppendLine("            var hitId = McpCommandJsonArgs.OptionalInt64(args, \"hit_id\");");
+        sb.AppendLine("            if (hitId is null) return \"{\\\"error\\\":\\\"missing_hit_id\\\"}\";");
+        sb.AppendLine("            return await ((IIdeMcpActions)_vm).CodebaseIndexExplainAsync(");
+        sb.AppendLine("                McpCommandJsonArgs.String(args, \"workspace_path\"),");
+        sb.AppendLine("                McpCommandJsonArgs.String(args, \"solution_path\"),");
+        sb.AppendLine("                hitId.Value,");
+        sb.AppendLine("                ct);");
+        sb.AppendLine("        });");
+        sb.AppendLine("        add(Services.IdeCommands.CodebaseIndexReindex, async (args, ct) => await ((IIdeMcpActions)_vm).CodebaseIndexReindexAsync(");
+        sb.AppendLine("            McpCommandJsonArgs.String(args, \"workspace_path\"),");
+        sb.AppendLine("            McpCommandJsonArgs.String(args, \"solution_path\"),");
+        sb.AppendLine("            McpCommandJsonArgs.Bool(args, \"full_rebuild\"),");
+        sb.AppendLine("            ct));");
+
         // Git (argv — GitMcp.Core, паритет с git-mcp)
         sb.AppendLine("        add(Services.IdeCommands.GitStatus, async (_, _) => await ((IIdeMcpActions)_vm).GitStatusAsync());");
         sb.AppendLine("        add(Services.IdeCommands.GitDiff, async (args, _) => await ((IIdeMcpActions)_vm).GitDiffAsync(McpCommandJsonArgs.String(args, \"path\"), McpCommandJsonArgs.Bool(args, \"staged\")));");

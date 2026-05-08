@@ -169,4 +169,13 @@ public interface IIdeMcpActions
     Task<string> DeleteKnowledgeFileAsync(string filePath, string? canonPath = null, CancellationToken cancellationToken = default);
     /// <summary>Удалить секцию из knowledge-файла.</summary>
     Task<string> DeleteKnowledgeSectionAsync(string filePath, string sectionId, string? canonPath = null, CancellationToken cancellationToken = default);
+
+    /// <summary>Статус гибридного индекса (паритет MCP <c>codebase_index_status</c>). JSON.</summary>
+    Task<string> CodebaseIndexStatusAsync(string? workspacePath, string? solutionPath, CancellationToken cancellationToken = default);
+    /// <summary>Гибридный поиск (паритет <c>codebase_index_search</c>). JSON.</summary>
+    Task<string> CodebaseIndexSearchAsync(string? workspacePath, string? solutionPath, string query, int topN, string? pathPrefix, IReadOnlyList<string>? excludePathPrefixes, IReadOnlyList<string>? extensions, bool semantic, double alpha, double beta, int vecTopK, CancellationToken cancellationToken = default);
+    /// <summary>Explain hit (паритет <c>codebase_index_explain</c>). JSON.</summary>
+    Task<string> CodebaseIndexExplainAsync(string? workspacePath, string? solutionPath, long hitId, CancellationToken cancellationToken = default);
+    /// <summary>Reindex (паритет <c>codebase_index_reindex</c>; после успеха публикуется снимок в DataBus для MFD). JSON.</summary>
+    Task<string> CodebaseIndexReindexAsync(string? workspacePath, string? solutionPath, bool fullRebuild, CancellationToken cancellationToken = default);
 }

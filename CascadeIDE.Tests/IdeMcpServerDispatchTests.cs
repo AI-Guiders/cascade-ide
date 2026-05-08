@@ -179,6 +179,10 @@ public sealed class IdeMcpServerDispatchTests
         public Task<string> UpsertKnowledgeSectionAsync(string filePath, string sectionId, string content, string? canonPath = null, bool saveRevision = true, CancellationToken cancellationToken = default) => throw new NotImplementedException();
         public Task<string> DeleteKnowledgeFileAsync(string filePath, string? canonPath = null, CancellationToken cancellationToken = default) => throw new NotImplementedException();
         public Task<string> DeleteKnowledgeSectionAsync(string filePath, string sectionId, string? canonPath = null, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<string> CodebaseIndexStatusAsync(string? workspacePath, string? solutionPath, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<string> CodebaseIndexSearchAsync(string? workspacePath, string? solutionPath, string query, int topN, string? pathPrefix, IReadOnlyList<string>? excludePathPrefixes, IReadOnlyList<string>? extensions, bool semantic, double alpha, double beta, int vecTopK, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<string> CodebaseIndexExplainAsync(string? workspacePath, string? solutionPath, long hitId, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<string> CodebaseIndexReindexAsync(string? workspacePath, string? solutionPath, bool fullRebuild, CancellationToken cancellationToken = default) => throw new NotImplementedException();
         public Task<string> SelectChatMessageAsync(int index) => throw new NotImplementedException();
         public Task<string> GetSelectedChatMessageAsync() => throw new NotImplementedException();
         public Task<string> EditChatAssistantMessageAsync(string messageId, string newContent, string? reason = null) => throw new NotImplementedException();

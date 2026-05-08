@@ -24,6 +24,45 @@ internal sealed partial class IdeMcpCommandExecutor
         add(Services.IdeCommands.RunAffectedTests, async (args, _) => await ((IIdeMcpActions)_vm).RunAffectedTestsAsync(McpCommandJsonArgs.StringList(args, "changed_paths")));
         add(Services.IdeCommands.RunCodeCleanup, async (args, _) => await ((IIdeMcpActions)_vm).RunCodeCleanupAsync(McpCommandJsonArgs.String(args, "include_path")));
         add(Services.IdeCommands.GetCodeMetrics, async (args, _) => await ((IIdeMcpActions)_vm).GetCodeMetricsAsync(McpCommandJsonArgs.String(args, "scope"), McpCommandJsonArgs.String(args, "path")));
+        add(Services.IdeCommands.CodebaseIndexStatus, async (args, ct) => await ((IIdeMcpActions)_vm).CodebaseIndexStatusAsync(McpCommandJsonArgs.String(args, "workspace_path"), McpCommandJsonArgs.String(args, "solution_path"), ct));
+        add(Services.IdeCommands.CodebaseIndexSearch, async (args, ct) =>
+        {
+            var top = McpCommandJsonArgs.OptionalInt32(args, "top_n") ?? 15;
+            if (top < 1) top = 1;
+            if (top > 128) top = 128;
+            var semantic = McpCommandJsonArgs.OptionalBool(args, "semantic") ?? false;
+            var alpha = McpCommandJsonArgs.OptionalDouble(args, "alpha") ?? 0.65;
+            var beta = McpCommandJsonArgs.OptionalDouble(args, "beta") ?? 0.35;
+            var vecTopK = McpCommandJsonArgs.OptionalInt32(args, "vec_top_k") ?? 30;
+            return await ((IIdeMcpActions)_vm).CodebaseIndexSearchAsync(
+                McpCommandJsonArgs.String(args, "workspace_path"),
+                McpCommandJsonArgs.String(args, "solution_path"),
+                McpCommandJsonArgs.String(args, "query") ?? "",
+                top,
+                McpCommandJsonArgs.String(args, "path_prefix"),
+                McpCommandJsonArgs.StringList(args, "exclude_path_prefixes"),
+                McpCommandJsonArgs.StringList(args, "extensions"),
+                semantic,
+                alpha,
+                beta,
+                vecTopK,
+                ct);
+        });
+        add(Services.IdeCommands.CodebaseIndexExplain, async (args, ct) =>
+        {
+            var hitId = McpCommandJsonArgs.OptionalInt64(args, "hit_id");
+            if (hitId is null) return "{\"error\":\"missing_hit_id\"}";
+            return await ((IIdeMcpActions)_vm).CodebaseIndexExplainAsync(
+                McpCommandJsonArgs.String(args, "workspace_path"),
+                McpCommandJsonArgs.String(args, "solution_path"),
+                hitId.Value,
+                ct);
+        });
+        add(Services.IdeCommands.CodebaseIndexReindex, async (args, ct) => await ((IIdeMcpActions)_vm).CodebaseIndexReindexAsync(
+            McpCommandJsonArgs.String(args, "workspace_path"),
+            McpCommandJsonArgs.String(args, "solution_path"),
+            McpCommandJsonArgs.Bool(args, "full_rebuild"),
+            ct));
         add(Services.IdeCommands.GitStatus, async (_, _) => await ((IIdeMcpActions)_vm).GitStatusAsync());
         add(Services.IdeCommands.GitDiff, async (args, _) => await ((IIdeMcpActions)_vm).GitDiffAsync(McpCommandJsonArgs.String(args, "path"), McpCommandJsonArgs.Bool(args, "staged")));
         add(Services.IdeCommands.GitLog, async (args, _) => await ((IIdeMcpActions)_vm).GitLogAsync(McpCommandJsonArgs.Int(args, "n", 20)));

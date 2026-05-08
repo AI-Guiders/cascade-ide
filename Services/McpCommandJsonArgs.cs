@@ -25,6 +25,36 @@ public static class McpCommandJsonArgs
             ? e.GetBoolean()
             : defaultValue;
 
+    public static bool? OptionalBool(IReadOnlyDictionary<string, JsonElement>? args, string key)
+    {
+        if (args is null || !args.TryGetValue(key, out var e))
+            return null;
+        return e.ValueKind switch
+        {
+            JsonValueKind.True => true,
+            JsonValueKind.False => false,
+            _ => null,
+        };
+    }
+
+    public static double? OptionalDouble(IReadOnlyDictionary<string, JsonElement>? args, string key)
+    {
+        if (args is null || !args.TryGetValue(key, out var e))
+            return null;
+        return e.ValueKind == JsonValueKind.Number && e.TryGetDouble(out var d)
+            ? d
+            : null;
+    }
+
+    public static long? OptionalInt64(IReadOnlyDictionary<string, JsonElement>? args, string key)
+    {
+        if (args is null || !args.TryGetValue(key, out var e))
+            return null;
+        return e.ValueKind == JsonValueKind.Number && e.TryGetInt64(out var v)
+            ? v
+            : null;
+    }
+
     public static List<string>? StringList(IReadOnlyDictionary<string, JsonElement>? args, string key)
     {
         if (args is null || !args.TryGetValue(key, out var e) || e.ValueKind != JsonValueKind.Array)

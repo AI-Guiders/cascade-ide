@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Threading.Channels;
 using CascadeIDE.Cockpit.DataBus;
 using HybridCodebaseIndex.Core;
@@ -21,19 +22,27 @@ public sealed class HybridIndexOrchestrator : IDisposable
         private readonly string _workspaceRoot;
         private readonly string? _solutionPath;
         private readonly int _debounceMs;
+        private readonly string _indexDirRelativeMarker;
 
         private readonly Channel<int> _poke;
         private readonly CancellationTokenSource _cts;
         private readonly Task _loop;
         private readonly FileSystemWatcher _fsw;
 
-        public WatcherState(CodebaseIndexService service, IDataBus dataBus, string workspaceRoot, string? solutionPath, int debounceMs)
+        public WatcherState(
+            CodebaseIndexService service,
+            IDataBus dataBus,
+            string workspaceRoot,
+            string? solutionPath,
+            int debounceMs,
+            string indexDirectoryRelativeForNoiseFilter)
         {
             _service = service;
             _dataBus = dataBus;
             _workspaceRoot = workspaceRoot;
             _solutionPath = solutionPath;
             _debounceMs = Math.Clamp(debounceMs, 50, 60_000);
+            _indexDirRelativeMarker = (indexDirectoryRelativeForNoiseFilter ?? "").Trim().TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
             _cts = new CancellationTokenSource();
             _poke = Channel.CreateUnbounded<int>(new UnboundedChannelOptions
@@ -66,11 +75,18 @@ public sealed class HybridIndexOrchestrator : IDisposable
 
         private void OnAny(object sender, FileSystemEventArgs e)
         {
-            // Best-effort: ignore self-induced churn from index directory.
+            // Best-effort: ignore self-induced churn from index directory (matches configured `index_dir`).
             // A false-positive poke is ok because reindex is incremental and debounced.
-            if (e.FullPath?.IndexOf(".hybrid-codebase-index", StringComparison.OrdinalIgnoreCase) >= 0)
+            if (IsIndexArtifactPath(e.FullPath, _indexDirRelativeMarker))
                 return;
             _poke.Writer.TryWrite(0);
+        }
+
+        private static bool IsIndexArtifactPath(string? fullPath, string indexDirRelativeMarker)
+        {
+            if (string.IsNullOrEmpty(fullPath) || string.IsNullOrEmpty(indexDirRelativeMarker))
+                return false;
+            return fullPath.Contains(indexDirRelativeMarker, StringComparison.OrdinalIgnoreCase);
         }
 
         private void OnError(object sender, ErrorEventArgs e)
@@ -167,14 +183,46 @@ public sealed class HybridIndexOrchestrator : IDisposable
         }
     }
 
-    private readonly CodebaseIndexService _service;
+    private CodebaseIndexService _service;
     private readonly IDataBus _dataBus;
+    private string _indexDirectoryRelative;
     private readonly ConcurrentDictionary<WatchKey, WatcherState> _watchers = new();
 
     public HybridIndexOrchestrator(IDataBus dataBus, string indexDirectoryRelative)
     {
         _dataBus = dataBus;
-        _service = new CodebaseIndexService(indexDirectoryRelative: indexDirectoryRelative);
+        _indexDirectoryRelative = NormalizeIndexDirectoryRelative(indexDirectoryRelative);
+        _service = new CodebaseIndexService(indexDirectoryRelative: _indexDirectoryRelative);
+    }
+
+    /// <summary>
+    /// Recreates the in-proc <see cref="CodebaseIndexService"/> and drops active watchers.
+    /// Callers should re-apply <see cref="SetEnabled"/> for the current workspace/solution.
+    /// </summary>
+    public void SetIndexDirectoryRelative(string indexDirectoryRelative)
+    {
+        var normalized = NormalizeIndexDirectoryRelative(indexDirectoryRelative);
+        if (string.Equals(_indexDirectoryRelative, normalized, StringComparison.Ordinal))
+            return;
+
+        foreach (var key in _watchers.Keys.ToArray())
+        {
+            if (_watchers.TryRemove(key, out var st))
+                st.Dispose();
+        }
+
+        _indexDirectoryRelative = normalized;
+        _service = new CodebaseIndexService(indexDirectoryRelative: normalized);
+    }
+
+    private static string NormalizeIndexDirectoryRelative(string indexDirectoryRelative)
+    {
+        var dir = (indexDirectoryRelative ?? "").Trim();
+        if (string.IsNullOrWhiteSpace(dir))
+            return ".hybrid-codebase-index";
+        if (Path.IsPathRooted(dir))
+            return ".hybrid-codebase-index";
+        return dir.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
     }
 
     public void SetEnabled(string workspaceRoot, string? solutionPath, bool enabled, int debounceMs = 750)
@@ -194,13 +242,25 @@ public sealed class HybridIndexOrchestrator : IDisposable
 
         _watchers.AddOrUpdate(
             key,
-            static (k, arg) => new WatcherState(arg.service, arg.bus, arg.root, arg.solutionPath, arg.debounceMs),
+            static (k, arg) => new WatcherState(
+                arg.service,
+                arg.bus,
+                arg.root,
+                arg.solutionPath,
+                arg.debounceMs,
+                arg.indexDir),
             static (k, existing, arg) =>
             {
                 existing.Dispose();
-                return new WatcherState(arg.service, arg.bus, arg.root, arg.solutionPath, arg.debounceMs);
+                return new WatcherState(
+                    arg.service,
+                    arg.bus,
+                    arg.root,
+                    arg.solutionPath,
+                    arg.debounceMs,
+                    arg.indexDir);
             },
-            (service: _service, bus: _dataBus, root, solutionPath: key.SolutionPath, debounceMs));
+            (service: _service, bus: _dataBus, root, solutionPath: key.SolutionPath, debounceMs, indexDir: _indexDirectoryRelative));
     }
 
     public void Poke(string workspaceRoot, string? solutionPath)
@@ -211,11 +271,101 @@ public sealed class HybridIndexOrchestrator : IDisposable
             st.Poke();
     }
 
+    public Task<IndexStatus> GetIndexStatusAsync(string workspaceRoot, string? solutionPath, CancellationToken cancellationToken = default) =>
+        _service.GetStatusAsync(workspaceRoot, solutionPath, cancellationToken);
+
+    public Task<(SearchResponse Response, string? Error)> SearchHybridAsync(
+        string workspaceRoot,
+        string? solutionPath,
+        string query,
+        int topN,
+        string? pathPrefix,
+        IReadOnlyList<string>? excludePathPrefixes,
+        IReadOnlyList<string>? extensions,
+        bool semantic,
+        double alpha,
+        double beta,
+        int vecTopK,
+        CancellationToken cancellationToken = default) =>
+        _service.SearchHybridAsync(workspaceRoot, solutionPath, query, topN, pathPrefix, excludePathPrefixes, extensions, semantic, alpha, beta, vecTopK, cancellationToken);
+
+    public Task<ExplainHitResponse> ExplainHitAsync(string workspaceRoot, string? solutionPath, long hitId, CancellationToken cancellationToken = default) =>
+        _service.ExplainHitAsync(workspaceRoot, solutionPath, hitId, cancellationToken);
+
+    /// <summary>Инкрементальный или полный reindex через Core; затем снимок в DataBus (страница HIS).</summary>
+    public async Task<ReindexSummary> RunReindexWithPublishAsync(
+        string workspaceRoot,
+        string? solutionPath,
+        bool fullRebuild,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(workspaceRoot))
+            throw new ArgumentException("workspace_root required", nameof(workspaceRoot));
+
+        var root = Path.GetFullPath(workspaceRoot.TrimEnd(Path.DirectorySeparatorChar));
+        var sln = string.IsNullOrWhiteSpace(solutionPath) ? null : solutionPath.Trim();
+        ReindexSummary summary = fullRebuild
+            ? await _service.FullRebuildAsync(root, sln, cancellationToken).ConfigureAwait(false)
+            : await _service.FullReindexAsync(root, sln, cancellationToken).ConfigureAwait(false);
+        await PublishHybridIndexSnapshotAsync(root, sln, cancellationToken).ConfigureAwait(false);
+        return summary;
+    }
+
+    private async Task PublishHybridIndexSnapshotAsync(string rootNormalized, string? solutionPathTrimmedOrNull, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var st = await _service.GetStatusAsync(rootNormalized, solutionPathTrimmedOrNull, cancellationToken).ConfigureAwait(false);
+            _dataBus.Publish(new HybridIndexStateChanged(
+                WorkspaceRoot: st.WorkspaceRootNormalized ?? rootNormalized,
+                SolutionPath: solutionPathTrimmedOrNull,
+                DatabasePath: st.DatabasePath,
+                DocumentCount: st.DocumentCount,
+                IndexedAtIso: st.IndexedAtIso,
+                LastError: st.LastReindexError,
+                LastErrorAtIso: st.LastReindexErrorAtIso));
+        }
+        catch
+        {
+            // ignore
+        }
+    }
+
+    /// <summary>
+    /// Full reindex outside the watcher loop (например watcher выключен или master switch HCI off).
+    /// Публикует <see cref="HybridIndexStateChanged"/> в DataBus по завершении.
+    /// </summary>
+    public async Task RunFullReindexAndPublishStatusAsync(
+        string workspaceRoot,
+        string? solutionPath,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(workspaceRoot))
+            return;
+
+        var root = Path.GetFullPath(workspaceRoot.TrimEnd(Path.DirectorySeparatorChar));
+        var sln = string.IsNullOrWhiteSpace(solutionPath) ? null : solutionPath.Trim();
+        try
+        {
+            await _service.FullReindexAsync(root, sln, cancellationToken).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            return;
+        }
+        catch
+        {
+            // surfaced via GetStatusAsync below
+        }
+
+        await PublishHybridIndexSnapshotAsync(root, sln, cancellationToken).ConfigureAwait(false);
+    }
+
     public void Dispose()
     {
-        foreach (var kv in _watchers)
+        foreach (var key in _watchers.Keys.ToArray())
         {
-            if (_watchers.TryRemove(kv.Key, out var st))
+            if (_watchers.TryRemove(key, out var st))
                 st.Dispose();
         }
     }
