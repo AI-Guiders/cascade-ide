@@ -11,7 +11,7 @@
 
 ## Решение
 
-Инструмент **`hybrid-codebase-index`** (библиотека + MCP) остаётся **переносимым** и может работать без Avalonia. **CascadeIDE** подключает тот же контракт tools / те же DTO (**или** in-proc ядро с тем же API), но размещает I/O и жизненный цикл по слоям кабины ниже — без «божественного» `MainWindowViewModel`.
+Инструмент **`hybrid-codebase-index`** оформлен как **общая библиотека** (`HybridCodebaseIndex.Core`) и тонкий **MCP-хост** (`HybridCodebaseIndex.Mcp`) поверх неё — тот же шаблон, что **agent-notes** (`AgentNotes.Core` + exe). **CascadeIDE** в первую очередь подключает **ядро in-proc** (`ProjectReference` на Core из репозитория [`hybrid-codebase-index`](https://github.com/KarataevDmitry/hybrid-codebase-index)): один процесс с редактором, дешёвый вызов `reindex`/`search`, общий `databasePath` с тем, что ожидает внешний MCP при работе из Cursor. Отдельно опубликованный **exe MCP** остаётся для внешних хостов и для сценария изоляции; размещение I/O и жизненного цикла — по слоям кабины ниже, без «божественного» `MainWindowViewModel`.
 
 ### Согласование в контуре CascadeIDE
 
@@ -42,15 +42,27 @@
 
 ## Rollout (эскиз, только CIDE)
 
-1. Тонкая оболочка: запуск уже опубликованного MCP или общая библиотека — тот же tool id / JSON-контракт.
-2. DAL-слой чтения workspace + проброс workspace root / опционально solution path так же, как в ADR 0105 (per-scope SQLite).
-3. Подписка на сохранения / debounced incremental reindex через оркестратор + события DataBus.
-4. CCU-снимок для канала IDE Health или отдельного «Index / Orientation» канала при необходимости.
-5. (Опционально) Связка **`SemanticMapInputSnapshot`** после стабилизации DTO.
+Порядок ориентировочный; первые шаги фиксируют **библиотеку в IDE**, дальше — жизненный цикл и каналы.
+
+1. **Подключить `HybridCodebaseIndex.Core` в решение CascadeIDE**  
+   `ProjectReference` на Core (сабмодуль или NuGet при публикации пакета — решение сборки). Один API индекса в процессе IDE; контракт полей ответа совпадает с тем, что описан для tools MCP ([0105 — слой B](0105-hybrid-codebase-index-for-csharp-web.md#adr0105-layer-b), `hit_kind`, версия формата).
+
+2. **Оркестратор + DAL**  
+   Проброс `workspace_root` и опционально пути решения — как в [0105 § эскиз области](0105-hybrid-codebase-index-for-csharp-web.md#adr0105-impl-sketch-scope); чтение файлов и вызовы ядра — за границей VM, в духе [0102](0102-data-acquisition-layer-boundary-and-contract.md). Один SQLite на пару *(workspace, solution scope)*, тот же каталог, что использует MCP при той же конфигурации.
+
+3. **Свежесть: сохранения → debounced incremental reindex**  
+   Подписка на сохранение документов (или единый watcher, согласованный с политикой IDE), debounce в оркестраторе `Application`, инкрементальный reindex через Core. События прогресса/«индекс обновлён» — в **IDE DataBus** ([0099](0099-ide-databus-typed-events-and-projections.md)).
+
+4. **CCU и каналы**  
+   Свёртка результата поиска / статуса индекса в стабильные DTO для **IDE Health** и при необходимости отдельного канала «Index / Orientation» — без дублирования логики индекса в VM ([0097](0097-cockpit-compute-units-transport-to-channel-dto.md)).
+
+5. **(Опционально, параллельно или позже)** Запуск опубликованного **`HybridCodebaseIndex.Mcp.exe`** как дочернего процесса — паритет с Cursor, изоляция перезапуска, или пока Core не вшит в sln. Не заменяет шаг 1 для основного UX редактора.
+
+6. **(Опционально)** Связка **`SemanticMapInputSnapshot`** после стабилизации DTO и границы CCU ([0097 § semantic map](0097-cockpit-compute-units-transport-to-channel-dto.md#adr0097-semantic-map-boundary)).
 
 ---
 
 ## Последствия
 
-- Дублирования логики индекса в VM нет — CCU только упаковывает.
-- Версионирование MCP и приложения может расходиться: нужны явные проверки `indexFormatVersion`/status при старте сессии.
+- Дублирования логики индекса в VM нет — CCU только упаковывает; **ядро одно** (Core), MCP — транспорт для внешних вызовов.
+- Версия формата индекса (`indexFormatVersion` / status) должна согласовываться между **сборкой Core**, встроенной в CIDE, и **опциональным** exe MCP, если агент использует оба контура к одному workspace — явная проверка при старте или несовместимости.
