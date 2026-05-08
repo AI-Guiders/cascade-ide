@@ -3,10 +3,12 @@
 # Run from repo root:  cd ...\cascade-ide  ;  .\scripts\deploy\publish-debug.ps1
 # Optional: -SkipDocGen  (faster when IdeCommands XML-doc / MCP markdown codegen not changed)
 # Optional: -Target "D:\cascade-ide-debug"
+# Optional: -KillRunning  (stop CascadeIDE from Target path if it locks publish output)
 [CmdletBinding()]
 param(
     [string] $Target = "D:\cascade-ide-debug",
-    [switch] $SkipDocGen
+    [switch] $SkipDocGen,
+    [switch] $KillRunning
 )
 
 $ErrorActionPreference = "Stop"
@@ -17,8 +19,8 @@ if (-not (Test-Path -LiteralPath $csproj)) {
     exit 1
 }
 
-$outDir = Join-Path $repoRoot "publish-debug"
 $debugTargetProj = Join-Path $repoRoot "samples\DebugTarget\DebugTarget.csproj"
+$generic = Join-Path $repoRoot "scripts\deploy\publish-to-fixed-target.ps1"
 
 Push-Location $repoRoot
 try {
@@ -29,43 +31,33 @@ try {
     & dotnet build $debugTargetProj -c Debug -v minimal
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-    $publishArgs = @(
-        "publish", $csproj,
-        "-c", "Debug",
-        "-r", "win-x64",
-        "--self-contained", "true",
-        "-o", $outDir,
-        "-v", "minimal"
-    )
-    if ($SkipDocGen) {
-        $publishArgs += "/p:GenerateIdeProtocolDocs=false"
-    }
-
-    & dotnet @publishArgs
-    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-    if (-not (Test-Path -LiteralPath $Target)) {
-        New-Item -ItemType Directory -Path $Target -Force | Out-Null
-    }
-
-    robocopy $outDir $Target /E /MIR /NFL /NDL /NJH /NJS | Out-Null
-    $robocode = $LASTEXITCODE
-    if ($robocode -ge 8) {
-        Write-Error "robocopy failed with exit code $robocode"
-        exit $robocode
-    }
-
-    $exe = Join-Path $Target "CascadeIDE.exe"
-    if (-not (Test-Path -LiteralPath $exe)) {
-        Write-Error "Expected exe not found: $exe"
+    if (-not (Test-Path -LiteralPath $generic)) {
+        Write-Error "Generic publish script not found: $generic"
         exit 1
     }
 
-    $ts = (Get-Item -LiteralPath $exe).LastWriteTimeUtc.ToString("o")
+    if ($SkipDocGen) {
+        & pwsh -NoProfile -ExecutionPolicy Bypass -File $generic `
+            -Project $csproj `
+            -Runtime "win-x64" `
+            -Configuration "Debug" `
+            -Target $Target `
+            -SelfContained `
+            -KillRunning:$KillRunning `
+            -MsbuildProps "/p:GenerateIdeProtocolDocs=false"
+    } else {
+        & pwsh -NoProfile -ExecutionPolicy Bypass -File $generic `
+            -Project $csproj `
+            -Runtime "win-x64" `
+            -Configuration "Debug" `
+            -Target $Target `
+            -SelfContained `
+            -KillRunning:$KillRunning
+    }
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+    $exe = Join-Path $Target "CascadeIDE.exe"
     $exeJson = $exe.Replace('\', '\\')
-    Write-Host ""
-    Write-Host "OK: $exe  (UTC $ts)"
-    Write-Host ""
     Write-Host "Cursor MCP (debug): paste into mcp.json ->"
     Write-Host @"
   "cascade-ide-debug": {
