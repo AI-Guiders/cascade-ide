@@ -25,7 +25,7 @@ public sealed record UiModeCapabilities(
     bool IdeHealthStripVisible,
     /// <summary>Нижняя полоса vs страница зоны. TOML: <c>ide_health_surface</c>.</summary>
     IdeHealthUiSurface IdeHealthSurface,
-    /// <summary>Вкладка Problems и учёт в <see cref="MainWindowViewModel.IsBottomPanelVisible"/>.</summary>
+    /// <summary>Вкладка Problems и учёт в <see cref="MainWindowViewModel.IsMfdContourContentVisible"/>.</summary>
     bool ProblemsPanelVisible,
     /// <summary>Разрешить полосу оповещений EICAS при наличии сообщений; TOML: <c>eicas_alerts_bar</c>. См. ADR 0021 §5, §1.1.</summary>
     bool EicasAlertsBarEnabled)

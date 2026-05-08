@@ -263,4 +263,5 @@
 - **v1.32** — Wave UI clusters: вынесен partial **`MainWindowViewModel.ShellState.AiProviders`** (режим ИИ и облачные ключи) из `ShellState.cs`.
 - **v1.33** — Wave UI clusters: **`MainWindowViewModel.ShellState.ChatAndSessionConfig`** (чат + MCP/ACP конфиг автономной сессии).
 - **v1.34** — Wave UI clusters: **`MainWindowViewModel.ShellState.AutonomousAgentStripe`** (полоса автономного агента + тесты/LOC для IDE Health).
-- **v1.35** — Терминология раскладки: **три зоны** (PFD · Forward · MFD); терминал/сборка/Git — **вторичный контур колонки MFD**, не отдельная «нижняя панель». Уточнены xmldoc `ShellState`, флаги страниц MFD и `<remarks>` для `IsBottomPanelVisible`.
+- **v1.35** — Терминология раскладки: **три зоны** (PFD · Forward · MFD); терминал/сборка/Git — **вторичный контур колонки MFD**, не отдельная «нижняя панель». Уточнены xmldoc `ShellState` и флаги страниц MFD.
+- **v1.36** — Переименование: `IsBottomPanelVisible` → **`IsMfdContourContentVisible`** (флаги контента стека вторичного контура MFD).

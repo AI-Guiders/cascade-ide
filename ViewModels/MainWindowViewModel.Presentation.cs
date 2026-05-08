@@ -180,7 +180,7 @@ public partial class MainWindowViewModel
 
     /// <summary>Зона под чатом в MFD: полоса EICAS / IDE Health и/или док (терминал, сборка, Problems, Git, инструменты).</summary>
     public bool ShowWorkspaceBottomChrome =>
-        ShowIdeHealthStrip || ShowEicasAlertsBar || IsBottomPanelVisible;
+        ShowIdeHealthStrip || ShowEicasAlertsBar || IsMfdContourContentVisible;
 
     /// <summary>Чат в одной строке с PFD/Forward; MFD не пересекает нижнюю строку MainGrid.</summary>
     public int ChatPanelMainGridRowSpan => 1;
@@ -280,8 +280,11 @@ public partial class MainWindowViewModel
     public bool IsTerminalPanelHidden => !IsTerminalVisible;
     public bool IsProblemsPanelVisible => Capabilities.ProblemsPanelVisible;
 
-    /// <remarks>Имя свойства историческое: речь о том, показан ли контент вторичного контура MFD хотя бы на одной из страниц (терминал, сборка, Git, проблемы, вкладки инструментации), а не об отдельной «нижней панели» на всю ширину главного окна (топология Flight — три зоны PFD · Forward · MFD).</remarks>
-    public bool IsBottomPanelVisible =>
+    /// <summary>
+    /// Хотя бы один элемент контента вторичного контура колонки MFD (стек <c>MfdShellPageStack</c>) включён через «Вид»:
+    /// терминал, вывод сборки, Git, вкладки инструментации или страница Problems (если разрешена возможностями режима).
+    /// </summary>
+    public bool IsMfdContourContentVisible =>
         IsProblemsPanelVisible || IsTerminalVisible || IsBuildOutputVisible || InstrumentationTabs || IsGitPanelVisible;
 
     /// <summary>Совместимость: старые имена региона MFD в main grid (см. <see cref="ChatPanelColumnPixelWidth"/> и т.д.).</summary>

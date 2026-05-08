@@ -52,7 +52,7 @@ public partial class MainWindowViewModel
     {
         _settings.Workspace.ShowTerminal = value;
         OnPropertyChanged(nameof(IsTerminalPanelHidden));
-        OnPropertyChanged(nameof(IsBottomPanelVisible));
+        OnPropertyChanged(nameof(IsMfdContourContentVisible));
         SaveSettingsIfChanged();
         if (value)
             TryNavigateToMfdShellPage(MfdShellPage.Terminal);
@@ -63,7 +63,7 @@ public partial class MainWindowViewModel
     partial void OnIsBuildOutputVisibleChanged(bool value)
     {
         OnPropertyChanged(nameof(IsBuildPanelHidden));
-        OnPropertyChanged(nameof(IsBottomPanelVisible));
+        OnPropertyChanged(nameof(IsMfdContourContentVisible));
         if (value)
             TryNavigateToMfdShellPage(MfdShellPage.Build);
         else if (ShellSettingsOrchestrator.ShouldCoerceCurrentPageWhenHidden(CurrentMfdShellPage, MfdShellPage.Build))
@@ -151,7 +151,7 @@ public partial class MainWindowViewModel
     partial void OnIsGitPanelVisibleChanged(bool value)
     {
         _settings.Workspace.ShowGit = value;
-        OnPropertyChanged(nameof(IsBottomPanelVisible));
+        OnPropertyChanged(nameof(IsMfdContourContentVisible));
         SaveSettingsIfChanged();
         if (value)
         {

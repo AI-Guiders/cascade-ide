@@ -57,13 +57,13 @@ public partial class MainWindowViewModel
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowTelemetryHiddenHint))]
     [NotifyPropertyChangedFor(nameof(TelemetryButtonText))]
-    [NotifyPropertyChangedFor(nameof(IsBottomPanelVisible))]
+    [NotifyPropertyChangedFor(nameof(IsMfdContourContentVisible))]
     [NotifyPropertyChangedFor(nameof(ShowWorkspaceBottomChrome))]
     private bool _isTerminalVisible;
 
     /// <summary>Страница «Git» в колонке MFD (меню Вид → Git).</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsBottomPanelVisible))]
+    [NotifyPropertyChangedFor(nameof(IsMfdContourContentVisible))]
     [NotifyPropertyChangedFor(nameof(ShowWorkspaceBottomChrome))]
     private bool _isGitPanelVisible;
 
@@ -105,7 +105,7 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(InstrumentationTabs))]
     [NotifyPropertyChangedFor(nameof(HypothesesTab))]
     [NotifyPropertyChangedFor(nameof(ShowInstrumentationLayoutMenu))]
-    [NotifyPropertyChangedFor(nameof(IsBottomPanelVisible))]
+    [NotifyPropertyChangedFor(nameof(IsMfdContourContentVisible))]
     [NotifyPropertyChangedFor(nameof(IsProblemsPanelVisible))]
     [NotifyPropertyChangedFor(nameof(WindowTitle))]
     private string _uiMode = "Balanced";
@@ -138,7 +138,7 @@ public partial class MainWindowViewModel
 
     /// <summary>Страница «Вывод сборки» в колонке MFD (меню Вид → вывод сборки).</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsBottomPanelVisible))]
+    [NotifyPropertyChangedFor(nameof(IsMfdContourContentVisible))]
     [NotifyPropertyChangedFor(nameof(ShowWorkspaceBottomChrome))]
     private bool _isBuildOutputVisible;
 
@@ -146,7 +146,7 @@ public partial class MainWindowViewModel
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(InstrumentationTabs))]
     [NotifyPropertyChangedFor(nameof(HypothesesTab))]
-    [NotifyPropertyChangedFor(nameof(IsBottomPanelVisible))]
+    [NotifyPropertyChangedFor(nameof(IsMfdContourContentVisible))]
     [NotifyPropertyChangedFor(nameof(ShowWorkspaceBottomChrome))]
     private bool _isInstrumentationDockVisible = true;
 
