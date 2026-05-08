@@ -49,7 +49,7 @@
 | `MainWindowViewModel.IdeMcpActions.Navigation.cs` | 61 | MCP: семантическая навигация (ADR 0039). |
 | `MainWindowViewModel.IdeMcpActions.UiAutomation.cs` | 168 | MCP: UI automation. |
 | `MainWindowViewModel.IdeMcpActions.Web.cs` | 10 | Реализация `IIdeMcpActions`: публичный веб-запрос (DuckDuckGo Instant Answer) и загрузка публичного URL. |
-| `MainWindowViewModel.IdeMcpActions.Workspace.cs` | 92 | MCP: workspace. |
+| `MainWindowViewModel.IdeMcpActions.Workspace.cs` | 93 | MCP: workspace. |
 | `MainWindowViewModel.IdeMcpHostLifecycle.cs` | 27 | Жизненный цикл IDE MCP-хоста: `ide_ping`, перезапуск внешних MCP и stdio-сессии Cursor ACP. |
 | `MainWindowViewModel.LaunchProfiles.cs` | 116 | Селектор launch profile, импорт `launchSettings.json` (ADR 0090). |
 | `MainWindowViewModel.LayoutNotifications.cs` | 17 | Инвалидация производных высот `MainGrid` без длинных цепочек `NotifyPropertyChangedFor` в ShellState. |
@@ -190,6 +190,7 @@
 - Третий срез: `Services.IdeMcpSolutionPathAvailability.IsRunnableSolutionFile` для MCP build/test/code-cleanup (I/O вне статического оркестратора, CASCOPE031); мутации UI тестов — `IdeMcpBuildTestOrchestrator.IdeMcpTestRunInstrumentationMutation`.
 - Четвёртый срез: единый контур **`BuildStateChanged` → DataBus → `RebuildIdeHealth`** (ADR 0099): локальная сборка решения и MCP code cleanup не шлют «сырой» `_ideDataBus.Publish` без пересборки полосы; MCP-пути после `ConfigureAwait(false)` используют `PublishIdeBuildStateOnUiAsync`.
 - Пятый срез: MCP git целиком на **`IdeMcpGitWorkspaceSession`** (`Features/IdeMcp/Application/`), VM — только workspace + `RefreshGitSummaryAsync`; список команд preflight-fix — приватная константа в сессии (CASCOPE030: не статическое поле в оркестраторе).
+- Шестой срез: **`IdeMcpIdeStateUiCapture`** + `BuildIdeStatePayload(capture, diagnostics)`; `get_ide_state` — diagnostics вне UI, снимок UI одним `CaptureIdeMcpIdeStateUi` (включая CDS через `BuildCockpitSurfaceSnapshot`).
 
 ## Wave 1: UI clusters thinning
 
@@ -231,3 +232,4 @@
 - **v1.22** — `IdeMcpSolutionPathAvailability`, `IdeMcpTestRunInstrumentationMutation`; тесты `IdeMcpSolutionPathAvailabilityTests`.
 - **v1.23** — `PublishIdeBuildStateOnUiAsync`; MCP `RunCodeCleanupAsync` обрамлён `BuildStateChanged`; `BuildSolutionAsync` — `PublishToIdeDataBusAndRebuild` вместо «тихой» публикации в шину.
 - **v1.24** — `IdeMcpGitWorkspaceSession` (+ тесты `IdeMcpGitWorkspaceSessionTests`); `MainWindowViewModel.IdeMcpActions.Git` — делегирование в сессию.
+- **v1.25** — `IdeMcpIdeStateUiCapture`; `IdeMcpWorkspaceOrchestrator.BuildIdeStatePayload` по снимку; тест в `IdeMcpOrchestratorThinningTests`.
