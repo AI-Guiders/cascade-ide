@@ -78,7 +78,7 @@
 | `MainWindowViewModel.StartupProject.cs` | 326 | Стартовый проект. |
 | `MainWindowViewModel.UiGitWorkspace.cs` | 147 | Git + workspace UI. |
 | `MainWindowViewModel.ViewBridge.cs` | 62 | Колбэки и провайдеры, которые View подставляет в главный VM (диалоги, UI automation). |
-| `MainWindowViewModel.WorkspaceNavigationMap.cs` | 232 | Слот Pfd: отображение карты намерений / `CodeNavigationMapSubgraphDocument` (те же данные, что JSON MCP). Граф подграфа — не синоним `instrument_id`, см. ADR 0065. По доменам: карта намерений (в т.ч. control flow) — CodeNavigation; зависимости файлов — WorkspaceNavigation; submodules — дерево/GitMap (ADR 0062). |
+| `MainWindowViewModel.WorkspaceNavigationMap.cs` | 235 | Слот Pfd: отображение карты намерений / `CodeNavigationMapSubgraphDocument` (те же данные, что JSON MCP). Граф подграфа — не синоним `instrument_id`, см. ADR 0065. По доменам: карта намерений (в т.ч. control flow) — CodeNavigation; зависимости файлов — WorkspaceNavigation; submodules — дерево/GitMap (ADR 0062). |
 | `MainWindowViewModel.WorkspaceSplitters.cs` | 23 | Сплиттеры рабочей области (MainGrid, обозреватель решения, Git и т.д.): режим «взлёт» — блокировка перетаскивания. |
 
 <!-- AUTO:MAIN-WINDOW-SLICE:MWVM-TABLE:END -->
