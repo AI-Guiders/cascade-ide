@@ -280,6 +280,7 @@ public partial class MainWindowViewModel
     public bool IsTerminalPanelHidden => !IsTerminalVisible;
     public bool IsProblemsPanelVisible => Capabilities.ProblemsPanelVisible;
 
+    /// <remarks>Имя свойства историческое: речь о том, показан ли контент вторичного контура MFD хотя бы на одной из страниц (терминал, сборка, Git, проблемы, вкладки инструментации), а не об отдельной «нижней панели» на всю ширину главного окна (топология Flight — три зоны PFD · Forward · MFD).</remarks>
     public bool IsBottomPanelVisible =>
         IsProblemsPanelVisible || IsTerminalVisible || IsBuildOutputVisible || InstrumentationTabs || IsGitPanelVisible;
 

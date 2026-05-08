@@ -15,10 +15,9 @@ public enum CommandPaletteHost
 }
 
 /// <summary>
-/// Раскладка панелей, нижняя зона, Workspace Health / автономный агент, ключи провайдеров и чата.
-/// Режим ИИ и поля облачных ключей — partial <c>MainWindowViewModel.ShellState.AiProviders.cs</c>;
-/// клавиша отправки чата и JSON внешних MCP / ACP — <c>MainWindowViewModel.ShellState.ChatAndSessionConfig.cs</c>;
-/// полоса автономной задачи / безопасность / тесты для Health — <c>MainWindowViewModel.ShellState.AutonomousAgentStripe.cs</c>.
+/// Состояние раскладки главного окна: три зоны внимания в <c>MainGrid</c> (PFD · Forward · MFD), см. ADR 0021 и <c>docs/ux/cascade-ide-ui-layout-v1.md</c>.
+/// Терминал, сборка, Git и пр. — во вторичном контуре колонки MFD (<c>MfdShellView</c> / <c>MfdShellPageStack</c>); отдельной строки «нижней панели» на всю ширину под сеткой нет.
+/// Режим ИИ и облачные ключи — <c>MainWindowViewModel.ShellState.AiProviders.cs</c>; чат и MCP/ACP — <c>MainWindowViewModel.ShellState.ChatAndSessionConfig.cs</c>; полоса агента / тесты для IDE Health — <c>MainWindowViewModel.ShellState.AutonomousAgentStripe.cs</c>.
 /// </summary>
 public partial class MainWindowViewModel
 {
@@ -54,6 +53,7 @@ public partial class MainWindowViewModel
     [NotifyCanExecuteChangedFor(nameof(TogglePfdRegionExpandedCommand))]
     private bool _isPfdRegionExpanded = true;
 
+    /// <summary>Страница «Терминал» в колонке MFD (меню Вид → Терминал); телеметрия полосы Power при необходимости.</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowTelemetryHiddenHint))]
     [NotifyPropertyChangedFor(nameof(TelemetryButtonText))]
@@ -61,7 +61,7 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(ShowWorkspaceBottomChrome))]
     private bool _isTerminalVisible;
 
-    /// <summary>Вкладка «Git» в нижней панели (Вид → Git).</summary>
+    /// <summary>Страница «Git» в колонке MFD (меню Вид → Git).</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsBottomPanelVisible))]
     [NotifyPropertyChangedFor(nameof(ShowWorkspaceBottomChrome))]
@@ -136,12 +136,13 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(MfdIdeHealthMountContext))]
     private bool _isBuilding;
 
+    /// <summary>Страница «Вывод сборки» в колонке MFD (меню Вид → вывод сборки).</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsBottomPanelVisible))]
     [NotifyPropertyChangedFor(nameof(ShowWorkspaceBottomChrome))]
     private bool _isBuildOutputVisible;
 
-    /// <summary>Вкладки «События / Тесты / …» (сохраняется в настройках).</summary>
+    /// <summary>Док инструментирования в колонке MFD: вкладки «События / Тесты / …» (сохраняется в настройках).</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(InstrumentationTabs))]
     [NotifyPropertyChangedFor(nameof(HypothesesTab))]
