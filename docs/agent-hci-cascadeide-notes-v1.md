@@ -42,7 +42,7 @@
 
 ## Проекция снимка на MFD (развитие и сопровождение)
 
-1. **Шина → поле снимка.** `HybridIndexStateChanged` приходит в `MainWindowViewModel` через `IdeDataBus`; в UI-поток присваивается `HybridIndexLast` (генерируемое `[ObservableProperty]` + `[NotifyPropertyChangedFor(...)]` для всех вычисляемых свойств страницы HIS).
+1. **Шина → поле снимка.** Ядро отдаёт `IndexStatus`; **CCU** `Cockpit/ComputingUnits/HybridIndex/HybridIndexStateChangedUnit` сворачивает его в `HybridIndexStateChanged` перед `IDataBus.Publish` (единая точка для watcher/reindex/MCP и задел под Semantic Map). В VM событие приходит через подписку; в UI-поток присваивается `HybridIndexLast` (генерируемое `[ObservableProperty]` + `[NotifyPropertyChangedFor(...)]`).
 2. **Без нового события с шины.** Свежесть и подписи вида «прошло N минут от `IndexedAtIso`» завязаны на UTC: при открытии вкладки INDEX, смене scope/каталога индекса в настройках и после `ApplyHybridCodebaseIndexOrchestrationForCurrentSolution` вызывается `RaiseHybridIndexPresentationProperties()`, который обходит **тот же список имён**, что и атрибут у поля снимка (массив `HybridIndexDependentPresentationNames` рядом с полем — расширять в двух местах сразу).
 
 Аналогичный приём пачечного обновления без «источника-снимка» для оверлея Cascade Chord: `CascadeChordOverlayPresentationNames` + `NotifyCascadeChordOverlayProperties()` в `MainWindowViewModel.CascadeChord.cs`.
