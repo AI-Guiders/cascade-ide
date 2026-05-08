@@ -7,7 +7,7 @@
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:BEGIN -->
 
-`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~7.8k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~6.7k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.1k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
+`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~7.8k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~6.6k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.1k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:END -->
 
@@ -68,7 +68,7 @@
 | `MainWindowViewModel.StartupProject.cs` | 326 | Стартовый проект. |
 | `MainWindowViewModel.UiGitWorkspace.cs` | 147 | Git + workspace UI. |
 | `MainWindowViewModel.ViewBridge.cs` | 62 | Колбэки и провайдеры, которые View подставляет в главный VM (диалоги, UI automation). |
-| `MainWindowViewModel.WorkspaceNavigationMap.cs` | 326 | Слот Pfd: отображение карты намерений / `CodeNavigationMapSubgraphDocument` (те же данные, что JSON MCP). Граф подграфа — не синоним `instrument_id`, см. ADR 0065. По доменам: карта намерений (в т.ч. control flow) — CodeNavigation; зависимости файлов — WorkspaceNavigation; submodules — дерево/GitMap (ADR 0062). |
+| `MainWindowViewModel.WorkspaceNavigationMap.cs` | 286 | Слот Pfd: отображение карты намерений / `CodeNavigationMapSubgraphDocument` (те же данные, что JSON MCP). Граф подграфа — не синоним `instrument_id`, см. ADR 0065. По доменам: карта намерений (в т.ч. control flow) — CodeNavigation; зависимости файлов — WorkspaceNavigation; submodules — дерево/GitMap (ADR 0062). |
 | `MainWindowViewModel.WorkspaceSplitters.cs` | 23 | Сплиттеры рабочей области (MainGrid, обозреватель решения, Git и т.д.): режим «взлёт» — блокировка перетаскивания. |
 
 <!-- AUTO:MAIN-WINDOW-SLICE:MWVM-TABLE:END -->
@@ -206,6 +206,7 @@
   - graph/data трансформации — в сервисы/CCU;
   - в VM оставить binding-state и команды поверхности.
 - Первый срез (карта PFD): **`CodeNavigationMapPresentationProjection`** + статические `CodeNavigationMapSettings.ViewWantsList` / `ViewWantsGraph`; биндинги list/graph/бейдж/has-related в `MainWindowViewModel.WorkspaceNavigationMap` делегируют в проекцию.
+- Второй срез: **`WorkspaceNavigationMapContextJsonBuilder`** (ветвление related / subgraph / control-flow JSON внутри фонового refresh) и **`CodeNavigationMapViewportPolicy`** (пороги ширины viewport мини-карты); тесты `WorkspaceNavigationMapContextAndViewportTests`.
 
 ## Версионирование
 
@@ -237,3 +238,4 @@
 - **v1.25** — `IdeMcpIdeStateUiCapture`; `IdeMcpWorkspaceOrchestrator.BuildIdeStatePayload` по снимку; тест в `IdeMcpOrchestratorThinningTests`.
 - **v1.26** — DAP UI-план + MCP `GetDebugSnapshotAsync` без `UiScheduler.InvokeAsync`.
 - **v1.27** — Wave UI clusters: `CodeNavigationMapPresentationProjection`, `CodeNavigationMapSettings.ViewWants*`; тесты `CodeNavigationMapPresentationProjectionTests`.
+- **v1.28** — Wave UI clusters: `WorkspaceNavigationMapContextJsonBuilder`, `CodeNavigationMapViewportPolicy`; тесты `WorkspaceNavigationMapContextAndViewportTests`.
