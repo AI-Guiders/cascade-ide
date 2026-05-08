@@ -68,6 +68,13 @@ internal static class CodebaseIndexIdeJsonResponses
         return JsonSerializer.Serialize(dto, JsonOut);
     }
 
+    /// <summary>
+    /// JSON для <c>codebase_index_status</c> и паритет с внешним MCP hybrid-codebase-index.
+    /// <para>
+    /// Это надмножество полезной нагрузки типизированного события <see cref="CascadeIDE.Cockpit.DataBus.HybridIndexStateChanged"/>.
+    /// Свертку ядра <c>IndexStatus</c> в узкий контракт шины выполняют CCU (<see cref="CascadeIDE.Cockpit.ComputingUnits.HybridIndex.HybridIndexStateChangedUnit"/>).
+    /// </para>
+    /// </summary>
     public static string SerializeStatus(IndexStatus st)
     {
         var dto = new StatusResultDto(

@@ -33,6 +33,8 @@
 - `codebase_index_explain` — explain по `hit_id`;
 - `codebase_index_reindex` — инкремент по умолчанию, `full_rebuild: true` — полная перестройка; после успешного прогона публикуется `HybridIndexStateChanged` для MFD.
 
+**JSON против события шины.** `codebase_index_status`/`SerializeStatus(IndexStatus)` — полный MCP-ответ (настройки, reindex-state и др. в DTO); в IDE DataBus идёт **свёрнутое** событие `HybridIndexStateChanged` из CCU (`HybridIndexStateChangedUnit`). Для автоматизации нужен MCP — см. кодовые summary на методе и юните; паритет по смыслу путей/БД, не побайтовое совпадение JSON ↔ payload шины.
+
 Если не переданы `workspace_path` / `solution_path`, область берётся из текущего открытого решения с тем же `ResolveHybridIndexScope`, что оркестратор HCI (`scope_mode` в настройках).
 
 ## Анти-паттерны
