@@ -3,6 +3,16 @@
 **Связь:** [architecture-policy.md](architecture-policy.md).  
 **Подход:** strangler — по фазам, без остановки разработки.
 
+## Стратегия: опора на целевой каркас (CDS · CCU · DAL · IDS)
+
+Геометрия **канал→композитор кабины (CDS)** ([ADR 0036](adr/0036-cds-channel-compositor-surface-pipeline.md)), **вычислительных блоков кабины (CCU)** ([ADR 0097](adr/0097-cockpit-compute-units-transport-to-channel-dto.md)), **DAL vs Application vs UI** ([ADR 0102](adr/0102-data-acquisition-layer-boundary-and-contract.md)) и **IDS** ([ADR 0079](adr/0079-ide-display-system-ids-overlay-pipeline.md)) уже **устоялась** как целевая линия: новые возможности смешиваем с нею, а не с параллельными локальными «мини-архитектурами» в главном окне.
+
+Иначе неизбежное **наполнение `MainWindowViewModel` новыми фичами** съест запас времени на приведение к этому каркасу. Поэтому:
+
+1. **Держим активный упрощающий буфер** вокруг MW: последовательное сужение крупных partial-кластеров (MCP, `Presentation*` / `ShellState`, карта workspace и др.) через оркестраторы и политики в `Features/<домен>/` — см. ниже Wave 1 (MCP / UI clusters).
+2. **Новая логика по умолчанию** живёт в `Features/` по слоям DAL → Application/CCU-потребители → биндинг на VM; главный VM — **тонкий композитор** там, где уместно уже зафиксировано таблицей «Целевая карта срезов» и [ADR 0006](adr/0006-presentation-layers-and-feature-slices.md).
+3. **[ADR 0009](adr/0009-strangler-migration-and-exceptions.md)** остаётся в силе: полное стирание исторического монолита по дедлайну не обязательно — но без пункта 1 можно соблюдать strangler формально и при этом **не приблизиться к каркасу**, если главный узел только разрастается новыми фичами без выносов.
+
 ## Текущее состояние
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:BEGIN -->
@@ -174,6 +184,7 @@
 2. Повторное использование **git** — только через `IGitCommandRunner` (или обёртки), не копировать `Process`.
 3. Изменения в `MainWindowViewModel` по старым фичам — по возможности сопровождать **микро-выносом** в сервис/панельный VM.
 4. Добыча внешних данных (fs/process/json/toml/wire) — в **Data Acquisition Layer** (`Features/<Feature>/DataAcquisition`), а не в `Cockpit/ComputingUnits/*` (см. ADR 0102).
+5. Крупную бизнес-логику в `MainWindowViewModel` не наращивать: сначала оркестратор/политика в `Features/<>` с узким контрактом; MV — только проверки контекста окна, вызов и обновление UI/шины (см. раздел «Стратегия: опора на целевой каркас» выше).
 
 ## Wave 1: MCP thinning (практический срез)
 
@@ -239,3 +250,4 @@
 - **v1.26** — DAP UI-план + MCP `GetDebugSnapshotAsync` без `UiScheduler.InvokeAsync`.
 - **v1.27** — Wave UI clusters: `CodeNavigationMapPresentationProjection`, `CodeNavigationMapSettings.ViewWants*`; тесты `CodeNavigationMapPresentationProjectionTests`.
 - **v1.28** — Wave UI clusters: `WorkspaceNavigationMapContextJsonBuilder`, `CodeNavigationMapViewportPolicy`; тесты `WorkspaceNavigationMapContextAndViewportTests`.
+- **v1.29** — Явная **стратегия целевого каркаса** (CDS / CCU / DAL / IDS), приоритет упрощающего буфера вокруг `MainWindowViewModel` и правило 5 раздела «Правила на время миграции» — чтобы strangler совпадал с реальным приближением к устоявшейся линии слоёв, а не откладывался потоком фич.
