@@ -1,4 +1,5 @@
 using Avalonia.Threading;
+using CascadeIDE.Features.IdeMcp.Application;
 using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Models;
 
@@ -18,6 +19,15 @@ public partial class MainWindowViewModel
     internal static string NormalizeUiMode(string? mode) => UiChromeViewModel.NormalizeUiMode(mode);
 
     private Task RefreshGitSummaryAsync() => Chrome.RefreshGitSummaryAsync(RunGitCommandAsync);
+
+    /// <summary>Git для полоски Workspace Health (<see cref="RefreshGitSummaryAsync"/>); MCP git — <see cref="IdeMcpGitWorkspaceSession"/>.</summary>
+    private async Task<(bool Success, int ExitCode, string Output)> RunGitCommandAsync(IReadOnlyList<string> args)
+    {
+        var workspace = GetWorkspacePath();
+        if (string.IsNullOrWhiteSpace(workspace) || !Directory.Exists(workspace))
+            return (false, -1, IdeMcpGitOrchestrator.WorkspaceUnavailableMessage());
+        return await _gitRunner.RunAsync(args, workspace).ConfigureAwait(false);
+    }
 
     private void InitializeAgentUiDefaults()
     {
