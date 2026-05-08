@@ -83,4 +83,50 @@ public sealed class IdeMcpOrchestratorThinningTests
         Assert.Equal(42, root.GetProperty("editor").GetProperty("content_length").GetInt32());
         Assert.False(string.IsNullOrEmpty(root.GetProperty("cockpit_surface").GetProperty("schema_version").GetString()));
     }
+
+    [Fact]
+    public void BuildDapSnapshotUiPlan_not_stopped_resets_mfd_prim()
+    {
+        var s = DebugSessionSnapshot.Empty with { HasActiveSession = true, IsExecutionStopped = false };
+        var p = IdeMcpDebugOrchestrator.BuildDapSnapshotUiPlan(s, mfdDebugPagePrimedForCurrentStop: true);
+        Assert.False(p.MfdPrimedForCurrentStopNext);
+        Assert.False(p.ActivateInstrumentationDockAndDebugStack);
+        Assert.Equal(-1, p.DebugStackSelectedIndex);
+    }
+
+    [Fact]
+    public void BuildDapSnapshotUiPlan_first_stop_activates_dock_and_prim()
+    {
+        var s = DebugSessionSnapshot.Empty with
+        {
+            HasActiveSession = true,
+            IsExecutionStopped = true,
+            StoppedFile = @"C:\proj\Stopped.cs",
+            StoppedLine = 9,
+            StackFrames = [("Main", @"C:\proj\Stopped.cs", 9)],
+            VariablesFrameIndex = 0,
+        };
+        var p = IdeMcpDebugOrchestrator.BuildDapSnapshotUiPlan(s, false);
+        Assert.True(p.MfdPrimedForCurrentStopNext);
+        Assert.True(p.ActivateInstrumentationDockAndDebugStack);
+        Assert.True(p.ShouldAttemptOpenStoppedSource);
+        Assert.Equal(@"C:\proj\Stopped.cs", p.StoppedSourcePathForOpenAttempt);
+        Assert.Equal(0, p.DebugStackSelectedIndex);
+    }
+
+    [Fact]
+    public void BuildDapSnapshotUiPlan_subsequent_stop_does_not_activate_dock()
+    {
+        var s = DebugSessionSnapshot.Empty with
+        {
+            HasActiveSession = true,
+            IsExecutionStopped = true,
+            StoppedFile = @"C:\a.cs",
+            StackFrames = [("F", @"C:\a.cs", 1)],
+            VariablesFrameIndex = 0,
+        };
+        var p = IdeMcpDebugOrchestrator.BuildDapSnapshotUiPlan(s, mfdDebugPagePrimedForCurrentStop: true);
+        Assert.True(p.MfdPrimedForCurrentStopNext);
+        Assert.False(p.ActivateInstrumentationDockAndDebugStack);
+    }
 }

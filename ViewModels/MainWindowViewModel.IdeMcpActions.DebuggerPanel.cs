@@ -12,19 +12,24 @@ public partial class MainWindowViewModel
     private void ApplyDapDebugSnapshotToUi()
     {
         var s = DapDebug.GetSnapshot();
-        if (!s.IsExecutionStopped)
-            _mfdDebugPagePrimedForCurrentStop = false;
-        else if (!_mfdDebugPagePrimedForCurrentStop)
+        var plan = IdeMcpDebugOrchestrator.BuildDapSnapshotUiPlan(s, _mfdDebugPagePrimedForCurrentStop);
+        _mfdDebugPagePrimedForCurrentStop = plan.MfdPrimedForCurrentStopNext;
+
+        if (plan.ActivateInstrumentationDockAndDebugStack)
         {
-            _mfdDebugPagePrimedForCurrentStop = true;
             IsInstrumentationDockVisible = true;
             TryNavigateToMfdShellPage(MfdShellPage.DebugStack);
         }
-        DebugPositionFile = s.StoppedFile is { } stoppedFile ? Path.GetFullPath(stoppedFile) : null;
-        DebugPositionLine = s.StoppedLine;
-        if (s.IsExecutionStopped && s.StoppedFile is { } sp && !string.IsNullOrEmpty(sp) && File.Exists(sp))
+
+        DebugPositionFile = plan.DebugPositionFile;
+        DebugPositionLine = plan.DebugPositionLine;
+
+        if (plan.ShouldAttemptOpenStoppedSource
+            && plan.StoppedSourcePathForOpenAttempt is { } stoppedPath
+            && !string.IsNullOrEmpty(stoppedPath)
+            && File.Exists(stoppedPath))
         {
-            var normalized = Path.GetFullPath(sp);
+            var normalized = Path.GetFullPath(stoppedPath);
             if (!string.Equals(CurrentFilePath, normalized, StringComparison.OrdinalIgnoreCase))
             {
                 IsLoadingCurrentFile = true;
@@ -38,6 +43,7 @@ public partial class MainWindowViewModel
                 }
             }
         }
+
         InstrumentationPanel.DebugStackFrames.Clear();
         var fi = 0;
         foreach (var frame in s.StackFrames)
@@ -50,7 +56,7 @@ public partial class MainWindowViewModel
         _suppressDebugStackSelectedIndex = true;
         try
         {
-            var idx = s is { IsExecutionStopped: true, StackFrames.Count: > 0 } ? s.VariablesFrameIndex : -1;
+            var idx = plan.DebugStackSelectedIndex;
             if (DebugStackSelectedIndex != idx)
             {
                 _debugStackSelectedIndex = idx;
@@ -67,11 +73,11 @@ public partial class MainWindowViewModel
         OnPropertyChanged(nameof(IdeHealthDebugCockpitShort));
     }
 
-    async Task<string> Services.IIdeMcpActions.GetDebugSnapshotAsync(CancellationToken cancellationToken) =>
-        await UiScheduler.Default.InvokeAsync(() =>
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            var s = DapDebug.GetSnapshot();
-            return IdeMcpDebugOrchestrator.SerializeDebugSnapshot(s);
-        });
+    Task<string> Services.IIdeMcpActions.GetDebugSnapshotAsync(CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var s = DapDebug.GetSnapshot();
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult(IdeMcpDebugOrchestrator.SerializeDebugSnapshot(s));
+    }
 }

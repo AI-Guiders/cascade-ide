@@ -1,4 +1,6 @@
+using System.IO;
 using System.Text.Json;
+using CascadeIDE.Services;
 
 namespace CascadeIDE.Features.IdeMcp.Application;
 
@@ -8,7 +10,48 @@ namespace CascadeIDE.Features.IdeMcp.Application;
 /// </summary>
 public static class IdeMcpDebugOrchestrator
 {
-    public static string SerializeDebugSnapshot(Services.DebugSessionSnapshot snapshot) =>
+    /// <summary>План для UI после DAP-снимка; без <c>File.Exists</c> на Application-слое (CASCOPE031).</summary>
+    public static IdeMcpDapSnapshotUiPlan BuildDapSnapshotUiPlan(DebugSessionSnapshot s, bool mfdDebugPagePrimedForCurrentStop)
+    {
+        bool mfdNext;
+        bool activateDock;
+        if (!s.IsExecutionStopped)
+        {
+            mfdNext = false;
+            activateDock = false;
+        }
+        else if (!mfdDebugPagePrimedForCurrentStop)
+        {
+            mfdNext = true;
+            activateDock = true;
+        }
+        else
+        {
+            mfdNext = true;
+            activateDock = false;
+        }
+
+        var positionFile = !string.IsNullOrEmpty(s.StoppedFile)
+            ? Path.GetFullPath(s.StoppedFile)
+            : null;
+
+        var attemptOpen = s.IsExecutionStopped && !string.IsNullOrEmpty(s.StoppedFile);
+
+        var stackIndex = s is { IsExecutionStopped: true, StackFrames.Count: > 0 }
+            ? s.VariablesFrameIndex
+            : -1;
+
+        return new IdeMcpDapSnapshotUiPlan(
+            mfdNext,
+            activateDock,
+            positionFile,
+            s.StoppedLine,
+            attemptOpen,
+            attemptOpen ? s.StoppedFile : null,
+            stackIndex);
+    }
+
+    public static string SerializeDebugSnapshot(DebugSessionSnapshot snapshot) =>
         JsonSerializer.Serialize(new
         {
             snapshot.HasActiveSession,
