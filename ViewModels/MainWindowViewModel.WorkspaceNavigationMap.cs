@@ -1,5 +1,4 @@
 using System.Collections.ObjectModel;
-using System.Text.Json;
 using Avalonia.Controls;
 using CascadeIDE.Cockpit.Cds;
 using CascadeIDE.Cockpit.Channels.TraceFlow;
@@ -222,102 +221,45 @@ public partial class MainWindowViewModel
         if (ct.IsCancellationRequested)
             return;
 
-        List<WorkspaceNavigationMapItemVm> rows = [];
-        string status = "";
-        string anchorLabel = "—";
-        CodeNavigationMapGraphSceneVm? scene = null;
-        var graphHeight = CodeNavigationMapCompositor.DefaultHeightFile;
-        var accentCount = 0;
-
-        try
-        {
-            using var doc = JsonDocument.Parse(json);
-            var root = doc.RootElement;
-            if (root.TryGetProperty("error", out _))
-            {
-                status = WorkspaceNavigationMapOrchestrator.ResolveErrorStatus(root, currentPath);
-            }
-            else if (useSubgraphMode && CodeNavigationMapSubgraphJson.TryParse(json, out var subgraph, out _))
-            {
-                var composed = _codeNavigationMapCompositor.Compose(
-                    new CodeNavigationMapCompositionIntent(
-                        subgraph!,
-                        level,
-                        _settings.CodeNavigationMap.NormalizedDetailLevel),
-                    new Services.SkiaInstruments.SkiaInstrumentViewport(CodeNavigationMapGraphWidth, CodeNavigationMapGraphHeight));
-                if (level == CodeNavigationMapLevelKind.ControlFlow)
-                {
-                    var channelPayload = _traceFlowChannelCoordinator.Build(new TraceFlowChannelContext(
-                        subgraph!,
-                        ImpactedTestsBadge,
-                        LastTestSummary));
-                    var cds = CockpitSurfaceSnapshotBuilder.Build(this);
-                    var cdsDecision = _traceFlowCdsRouter.Route(new TraceFlowCdsRouteInput(cds, level));
-                    scene = _traceFlowSurfaceCompositor.Compose(composed.Scene, channelPayload, cdsDecision);
-                }
-                else
-                {
-                    scene = composed.Scene;
-                }
-                graphHeight = composed.PreferredHeight;
-                var satCount = Math.Max(0, scene.Nodes.Count - 1);
-                accentCount = satCount;
-                anchorLabel = WorkspaceNavigationMapOrchestrator.ResolveAnchorLabelFromSubgraph(subgraph!);
-
-                if (wantList)
-                {
-                    var parsedRows = WorkspaceNavigationMapOrchestrator.BuildRowsFromSubgraph(subgraph!, solutionPath);
-                    foreach (var parsed in parsedRows)
-                    {
-                        rows.Add(new WorkspaceNavigationMapItemVm
-                        {
-                            FullPath = parsed.FullPath,
-                            RelativePath = parsed.RelativePath,
-                            Kind = parsed.Kind,
-                            Rationale = parsed.Rationale
-                        });
-                    }
-
-                    accentCount = Math.Max(accentCount, rows.Count);
-                    status = WorkspaceNavigationMapOrchestrator.ResolveEmptyStatus(parsedRows, status, wantList: true);
-                }
-            }
-            else if (wantList)
-            {
-                anchorLabel = WorkspaceNavigationMapOrchestrator.ResolveAnchorLabelFromRelatedRoot(root);
-                var parsedRows = WorkspaceNavigationMapOrchestrator.BuildRowsFromRelatedRoot(root);
-                foreach (var parsed in parsedRows)
-                {
-                    rows.Add(new WorkspaceNavigationMapItemVm
-                    {
-                        FullPath = parsed.FullPath,
-                        RelativePath = parsed.RelativePath,
-                        Kind = parsed.Kind,
-                        Rationale = parsed.Rationale
-                    });
-                }
-
-                accentCount = rows.Count;
-                status = WorkspaceNavigationMapOrchestrator.ResolveEmptyStatus(parsedRows, status, wantList: true);
-            }
-        }
-        catch
-        {
-            status = "Не удалось разобрать ответ навигации.";
-        }
+        var deps = new WorkspaceNavigationMapRefreshComposer.Dependencies(
+            _codeNavigationMapCompositor,
+            _traceFlowChannelCoordinator,
+            _traceFlowCdsRouter,
+            _traceFlowSurfaceCompositor);
+        var dry = WorkspaceNavigationMapRefreshComposer.Compose(
+            deps,
+            json,
+            useSubgraphMode,
+            wantList,
+            currentPath,
+            solutionPath,
+            level,
+            CodeNavigationMapGraphWidth,
+            CodeNavigationMapGraphHeight,
+            _settings.CodeNavigationMap.NormalizedDetailLevel,
+            new WorkspaceNavigationMapRefreshComposer.TraceSignals(ImpactedTestsBadge, LastTestSummary),
+            () => CockpitSurfaceSnapshotBuilder.Build(this));
 
         await UiScheduler.Default.InvokeAsync(() =>
         {
             if (ct.IsCancellationRequested)
                 return;
-            WorkspaceNavigationMapAnchorLabel = anchorLabel;
-            WorkspaceNavigationMapStatus = status;
-            WorkspaceNavigationMapRelatedCount = accentCount;
-            CodeNavigationMapGraphScene = scene;
-            CodeNavigationMapGraphHeight = graphHeight;
+            WorkspaceNavigationMapAnchorLabel = dry.AnchorLabel;
+            WorkspaceNavigationMapStatus = dry.Status;
+            WorkspaceNavigationMapRelatedCount = dry.AccentCount;
+            CodeNavigationMapGraphScene = dry.Scene;
+            CodeNavigationMapGraphHeight = dry.GraphHeight;
             WorkspaceNavigationMapItems.Clear();
-            foreach (var r in rows)
-                WorkspaceNavigationMapItems.Add(r);
+            foreach (var parsed in dry.ListRows)
+            {
+                WorkspaceNavigationMapItems.Add(new WorkspaceNavigationMapItemVm
+                {
+                    FullPath = parsed.FullPath,
+                    RelativePath = parsed.RelativePath,
+                    Kind = parsed.Kind,
+                    Rationale = parsed.Rationale
+                });
+            }
         });
     }
 
