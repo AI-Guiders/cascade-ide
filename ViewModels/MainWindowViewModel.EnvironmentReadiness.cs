@@ -33,7 +33,7 @@ public partial class MainWindowViewModel
         if (value == MfdShellPage.HybridIndex)
         {
             EnsureHybridIndexSubscription();
-            NotifyHybridIndexSnapshotChanged();
+            RaiseHybridIndexPresentationProperties();
         }
 
         if (value == MfdShellPage.RelatedFiles)

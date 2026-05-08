@@ -222,7 +222,7 @@ public partial class MainWindowViewModel
         _hybridIndex.SetIndexDirectoryRelative(ResolveHybridIndexDirRelative());
         ApplyHybridCodebaseIndexOrchestrationForCurrentSolution(pokeWhenAutoReindex: false);
         SaveSettingsIfChanged();
-        NotifyHybridIndexSnapshotChanged();
+        RaiseHybridIndexPresentationProperties();
     }
 
     partial void OnHciDebounceMsChanged(int value)
@@ -264,7 +264,7 @@ public partial class MainWindowViewModel
         _settings.HybridIndex.ScopeMode = n;
         ApplyHybridCodebaseIndexOrchestrationForCurrentSolution(pokeWhenAutoReindex: false);
         SaveSettingsIfChanged();
-        NotifyHybridIndexSnapshotChanged();
+        RaiseHybridIndexPresentationProperties();
     }
 
     partial void OnHciPauseWhenMcpStdioHostChanged(bool value)

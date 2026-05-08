@@ -4,6 +4,7 @@ using System.IO;
 using Avalonia.Threading;
 using CascadeIDE.Cockpit.DataBus;
 using CascadeIDE.Models;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 namespace CascadeIDE.ViewModels;
@@ -14,24 +15,47 @@ namespace CascadeIDE.ViewModels;
 public partial class MainWindowViewModel
 {
     private IDisposable? _hybridIndexStateSubscription;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(
+        nameof(HybridIndexLampText),
+        nameof(HybridIndexStateShort),
+        nameof(HybridIndexDocumentCountText),
+        nameof(HybridIndexDocsValue),
+        nameof(HybridIndexDocsGauge01),
+        nameof(HybridIndexIndexedAtText),
+        nameof(HybridIndexFreshnessText),
+        nameof(HybridIndexFreshnessMinutes),
+        nameof(HybridIndexFreshnessMinutesText),
+        nameof(HybridIndexFreshnessEcamText),
+        nameof(HybridIndexLastErrorText),
+        nameof(HybridIndexWorkspaceRootText),
+        nameof(HybridIndexSolutionPathText),
+        nameof(HybridIndexDatabasePathText),
+        nameof(HybridIndexWorkspaceShortText),
+        nameof(HybridIndexSolutionShortText),
+        nameof(HybridIndexDatabaseShortText),
+        nameof(HybridIndexLampItem),
+        nameof(HybridIndexMsgLine1),
+        nameof(HybridIndexMsgLine2))]
     private HybridIndexStateChanged? _hybridIndexLast;
 
-    public string HybridIndexLampText => _hybridIndexLast is null
+    public string HybridIndexLampText => HybridIndexLast is null
         ? "NO DATA"
-        : string.IsNullOrWhiteSpace(_hybridIndexLast.LastError)
+        : string.IsNullOrWhiteSpace(HybridIndexLast.LastError)
             ? "OK"
             : "CAUTION";
 
-    public string HybridIndexStateShort => _hybridIndexLast is null
+    public string HybridIndexStateShort => HybridIndexLast is null
         ? "—"
-        : string.IsNullOrWhiteSpace(_hybridIndexLast.LastError)
+        : string.IsNullOrWhiteSpace(HybridIndexLast.LastError)
             ? "IDLE"
             : "ERROR";
 
     public string HybridIndexDocumentCountText =>
-        _hybridIndexLast?.DocumentCount.ToString(CultureInfo.InvariantCulture) ?? "—";
+        HybridIndexLast?.DocumentCount.ToString(CultureInfo.InvariantCulture) ?? "—";
 
-    public double HybridIndexDocsValue => (double)(_hybridIndexLast?.DocumentCount ?? 0);
+    public double HybridIndexDocsValue => (double)(HybridIndexLast?.DocumentCount ?? 0);
 
     public double HybridIndexDocsGauge01
     {
@@ -39,7 +63,7 @@ public partial class MainWindowViewModel
         {
             // ECAM-like: simple 0..1 gauge. Scale is a UX choice; start with a stable max.
             const double max = 3000.0;
-            var v = (double)(_hybridIndexLast?.DocumentCount ?? 0);
+            var v = (double)(HybridIndexLast?.DocumentCount ?? 0);
             if (v <= 0)
                 return 0;
             return Math.Clamp(v / max, 0, 1);
@@ -50,7 +74,7 @@ public partial class MainWindowViewModel
     {
         get
         {
-            var iso = _hybridIndexLast?.IndexedAtIso;
+            var iso = HybridIndexLast?.IndexedAtIso;
             if (string.IsNullOrWhiteSpace(iso))
                 return 0;
             if (!DateTimeOffset.TryParse(iso, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var ts))
@@ -101,7 +125,7 @@ public partial class MainWindowViewModel
     {
         get
         {
-            var iso = _hybridIndexLast?.IndexedAtIso;
+            var iso = HybridIndexLast?.IndexedAtIso;
             if (string.IsNullOrWhiteSpace(iso))
                 return "—";
             return iso;
@@ -112,7 +136,7 @@ public partial class MainWindowViewModel
     {
         get
         {
-            var iso = _hybridIndexLast?.IndexedAtIso;
+            var iso = HybridIndexLast?.IndexedAtIso;
             if (string.IsNullOrWhiteSpace(iso))
                 return "freshness: —";
             if (!DateTimeOffset.TryParse(iso, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var ts))
@@ -129,11 +153,11 @@ public partial class MainWindowViewModel
     }
 
     public string HybridIndexLastErrorText =>
-        string.IsNullOrWhiteSpace(_hybridIndexLast?.LastError) ? "—" : _hybridIndexLast!.LastError!;
+        string.IsNullOrWhiteSpace(HybridIndexLast?.LastError) ? "—" : HybridIndexLast!.LastError!;
 
-    public string HybridIndexWorkspaceRootText => _hybridIndexLast?.WorkspaceRoot ?? "—";
-    public string HybridIndexSolutionPathText => _hybridIndexLast?.SolutionPath ?? "—";
-    public string HybridIndexDatabasePathText => _hybridIndexLast?.DatabasePath ?? "—";
+    public string HybridIndexWorkspaceRootText => HybridIndexLast?.WorkspaceRoot ?? "—";
+    public string HybridIndexSolutionPathText => HybridIndexLast?.SolutionPath ?? "—";
+    public string HybridIndexDatabasePathText => HybridIndexLast?.DatabasePath ?? "—";
 
     public string HybridIndexWorkspaceShortText => ShortenPathLikeEcam(HybridIndexWorkspaceRootText);
     public string HybridIndexSolutionShortText => ShortenPathLikeEcam(HybridIndexSolutionPathText);
@@ -143,7 +167,7 @@ public partial class MainWindowViewModel
     {
         get
         {
-            if (_hybridIndexLast is null)
+            if (HybridIndexLast is null)
                 return new AnnunciatorLampItem(
                     Id: "hci",
                     Title: "HCI",
@@ -151,13 +175,13 @@ public partial class MainWindowViewModel
                     Level: AnnunciatorLampLevel.Advisory,
                     LampShortLabel: "HCI");
 
-            var level = string.IsNullOrWhiteSpace(_hybridIndexLast.LastError)
+            var level = string.IsNullOrWhiteSpace(HybridIndexLast.LastError)
                 ? AnnunciatorLampLevel.Ok
                 : AnnunciatorLampLevel.Caution;
 
-            var detail = string.IsNullOrWhiteSpace(_hybridIndexLast.LastError)
+            var detail = string.IsNullOrWhiteSpace(HybridIndexLast.LastError)
                 ? "OK"
-                : _hybridIndexLast.LastError!;
+                : HybridIndexLast.LastError!;
 
             return new AnnunciatorLampItem(
                 Id: "hci",
@@ -203,7 +227,7 @@ public partial class MainWindowViewModel
         else
             _ = _hybridIndex.RunFullReindexAndPublishStatusAsync(hciWs, hciSln, CancellationToken.None);
 
-        NotifyHybridIndexSnapshotChanged();
+        RaiseHybridIndexPresentationProperties();
     }
 
     [RelayCommand]
@@ -239,13 +263,13 @@ public partial class MainWindowViewModel
             // DataBus is sync on UI thread in main VM, but keep this UI-safe anyway.
             UiScheduler.Default.Post(() =>
             {
-                _hybridIndexLast = evt;
-                NotifyHybridIndexSnapshotChanged();
+                HybridIndexLast = evt;
             }, DispatcherPriority.Background);
         });
     }
 
-    private void NotifyHybridIndexSnapshotChanged()
+    /// <summary>Перерисовать вычисляемые поля HIS без смены последнего события DataBus (свежесть от часов, открытие вкладки).</summary>
+    private void RaiseHybridIndexPresentationProperties()
     {
         OnPropertyChanged(nameof(HybridIndexLampText));
         OnPropertyChanged(nameof(HybridIndexStateShort));
