@@ -1,6 +1,7 @@
 using System.Threading.Channels;
 using CascadeIDE.Services;
 using Xunit;
+using TestContext = Xunit.TestContext;
 
 namespace CascadeIDE.Tests;
 
@@ -11,8 +12,9 @@ public sealed class BuildLogIngestionTests
     {
         var ch = Channel.CreateUnbounded<string>();
         var parts = new List<string>();
-        var drain = BuildLogIngestion.DrainToAppendAsync(ch.Reader, s => parts.Add(s), maxBatchChars: 10_000);
-        await ch.Writer.WriteAsync("hello");
+        var drain = BuildLogIngestion.DrainToAppendAsync(
+            ch.Reader, s => parts.Add(s), maxBatchChars: 10_000, cancellationToken: TestContext.Current.CancellationToken);
+        await ch.Writer.WriteAsync("hello", TestContext.Current.CancellationToken);
         ch.Writer.Complete();
         await drain;
         Assert.Equal(new[] { "hello" }, parts);
@@ -23,8 +25,9 @@ public sealed class BuildLogIngestionTests
     {
         var ch = Channel.CreateUnbounded<string>();
         var parts = new List<string>();
-        var drain = BuildLogIngestion.DrainToAppendAsync(ch.Reader, s => parts.Add(s), maxBatchChars: 10);
-        await ch.Writer.WriteAsync("1234567890");
+        var drain = BuildLogIngestion.DrainToAppendAsync(
+            ch.Reader, s => parts.Add(s), maxBatchChars: 10, cancellationToken: TestContext.Current.CancellationToken);
+        await ch.Writer.WriteAsync("1234567890", TestContext.Current.CancellationToken);
         ch.Writer.Complete();
         await drain;
         Assert.Equal(new[] { "1234567890" }, parts);
@@ -35,10 +38,11 @@ public sealed class BuildLogIngestionTests
     {
         var ch = Channel.CreateUnbounded<string>();
         var parts = new List<string>();
-        var drain = BuildLogIngestion.DrainToAppendAsync(ch.Reader, s => parts.Add(s), maxBatchChars: 5);
-        await ch.Writer.WriteAsync("12");
-        await ch.Writer.WriteAsync("345");
-        await ch.Writer.WriteAsync("6789");
+        var drain = BuildLogIngestion.DrainToAppendAsync(
+            ch.Reader, s => parts.Add(s), maxBatchChars: 5, cancellationToken: TestContext.Current.CancellationToken);
+        await ch.Writer.WriteAsync("12", TestContext.Current.CancellationToken);
+        await ch.Writer.WriteAsync("345", TestContext.Current.CancellationToken);
+        await ch.Writer.WriteAsync("6789", TestContext.Current.CancellationToken);
         ch.Writer.Complete();
         await drain;
         Assert.Equal(new[] { "12345", "6789" }, parts);
@@ -49,9 +53,10 @@ public sealed class BuildLogIngestionTests
     {
         var ch = Channel.CreateUnbounded<string>();
         var parts = new List<string>();
-        var drain = BuildLogIngestion.DrainToAppendAsync(ch.Reader, s => parts.Add(s), maxBatchChars: 100);
-        await ch.Writer.WriteAsync("");
-        await ch.Writer.WriteAsync("x");
+        var drain = BuildLogIngestion.DrainToAppendAsync(
+            ch.Reader, s => parts.Add(s), maxBatchChars: 100, cancellationToken: TestContext.Current.CancellationToken);
+        await ch.Writer.WriteAsync("", TestContext.Current.CancellationToken);
+        await ch.Writer.WriteAsync("x", TestContext.Current.CancellationToken);
         ch.Writer.Complete();
         await drain;
         Assert.Equal(new[] { "x" }, parts);
@@ -66,9 +71,10 @@ public sealed class BuildLogIngestionTests
             ch.Reader,
             static _ => { },
             maxBatchChars: 10_000,
-            onEachDequeuedChunk: c => cat.Append(c));
-        await ch.Writer.WriteAsync("a");
-        await ch.Writer.WriteAsync("b");
+            onEachDequeuedChunk: c => cat.Append(c),
+            cancellationToken: TestContext.Current.CancellationToken);
+        await ch.Writer.WriteAsync("a", TestContext.Current.CancellationToken);
+        await ch.Writer.WriteAsync("b", TestContext.Current.CancellationToken);
         ch.Writer.Complete();
         await drain;
         Assert.Equal("ab", cat.ToString());
@@ -78,9 +84,9 @@ public sealed class BuildLogIngestionTests
     public async Task CreateBuildLogChannel_Can_Pass_Through_Single_Chunk()
     {
         var c = BuildLogIngestion.CreateBuildLogChannel(1);
-        await c.Writer.WriteAsync("x");
+        await c.Writer.WriteAsync("x", TestContext.Current.CancellationToken);
         c.Writer.Complete();
-        var r = await c.Reader.ReadAsync();
+        var r = await c.Reader.ReadAsync(TestContext.Current.CancellationToken);
         Assert.Equal("x", r);
     }
 }

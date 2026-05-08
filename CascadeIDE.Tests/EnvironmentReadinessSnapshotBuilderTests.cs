@@ -4,6 +4,7 @@ using CascadeIDE.Models;
 using CascadeIDE.Services;
 using CascadeIDE.Services.Lsp;
 using Xunit;
+using TestContext = Xunit.TestContext;
 
 namespace CascadeIDE.Tests;
 
@@ -71,7 +72,8 @@ public sealed class EnvironmentReadinessSnapshotBuilderTests
             }
         };
 
-        var rows = await EnvironmentReadinessSnapshotBuilder.BuildAllRowsAsync(settings, null, default);
+        var rows = await EnvironmentReadinessSnapshotBuilder.BuildAllRowsAsync(
+            settings, null, default, cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(EnvironmentReadinessInstrumentDeck.OrderedCellIds.Count, rows.Count);
         for (var i = 0; i < rows.Count; i++)
@@ -177,7 +179,8 @@ public sealed class EnvironmentReadinessSnapshotBuilderTests
 
         var rows = await EnvironmentReadinessSnapshotBuilder.BuildAllRowsAsync(
             settings, null, default,
-            isMcpStdioHost: true, activeAiProvider: "Ollama");
+            isMcpStdioHost: true, activeAiProvider: "Ollama",
+            cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal("DEV", rows[0].LampShortLabel);
         Assert.Equal(AnnunciatorLampLevel.Ok, rows[0].Level);
@@ -199,7 +202,8 @@ public sealed class EnvironmentReadinessSnapshotBuilderTests
 
         var rows = await EnvironmentReadinessSnapshotBuilder.BuildAllRowsAsync(
             settings, null, default,
-            isMcpStdioHost: false, activeAiProvider: "CursorACP");
+            isMcpStdioHost: false, activeAiProvider: "CursorACP",
+            cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal("DEV", rows[0].LampShortLabel);
         Assert.Equal(AnnunciatorLampLevel.Ok, rows[0].Level);

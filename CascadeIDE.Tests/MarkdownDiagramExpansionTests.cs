@@ -1,6 +1,7 @@
 using CascadeIDE.Models;
 using CascadeIDE.Services;
 using Xunit;
+using TestContext = Xunit.TestContext;
 
 namespace CascadeIDE.Tests;
 
@@ -14,7 +15,7 @@ public class MarkdownDiagramExpansionTests
         {
             Markdown = new MarkdownSettings { Diagrams = new MarkdownDiagramSettings { Kroki = false } }
         };
-        var result = await MarkdownDiagramExpansion.ExpandAsync(md, settings);
+        var result = await MarkdownDiagramExpansion.ExpandAsync(md, settings, TestContext.Current.CancellationToken);
         Assert.Equal(md, result);
     }
 
@@ -29,7 +30,7 @@ public class MarkdownDiagramExpansionTests
                 Diagrams = new MarkdownDiagramSettings { Kroki = true, KrokiUrl = "https://kroki.io" }
             }
         };
-        var result = await MarkdownDiagramExpansion.ExpandAsync(md, settings);
+        var result = await MarkdownDiagramExpansion.ExpandAsync(md, settings, TestContext.Current.CancellationToken);
         Assert.Equal(md, result);
     }
 }

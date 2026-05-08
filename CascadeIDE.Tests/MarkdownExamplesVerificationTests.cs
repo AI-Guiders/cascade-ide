@@ -1,6 +1,7 @@
 using CascadeIDE.Models;
 using CascadeIDE.Services;
 using Xunit;
+using TestContext = Xunit.TestContext;
 
 namespace CascadeIDE.Tests;
 
@@ -44,7 +45,7 @@ public sealed class MarkdownExamplesVerificationTests
         {
             Markdown = new MarkdownSettings { Diagrams = new MarkdownDiagramSettings { Kroki = false } }
         };
-        var after = await MarkdownDiagramExpansion.ExpandAsync(expanded, settings);
+        var after = await MarkdownDiagramExpansion.ExpandAsync(expanded, settings, TestContext.Current.CancellationToken);
 
         Assert.Contains("```mermaid", after, StringComparison.Ordinal);
         Assert.Contains("```plantuml", after, StringComparison.Ordinal);

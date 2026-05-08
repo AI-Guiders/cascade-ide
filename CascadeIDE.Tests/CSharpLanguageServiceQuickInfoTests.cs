@@ -1,5 +1,6 @@
 using CascadeIDE.Services;
 using Xunit;
+using TestContext = Xunit.TestContext;
 
 namespace CascadeIDE.Tests;
 
@@ -22,7 +23,7 @@ public class CSharpLanguageServiceQuickInfoTests
         var svc = new CSharpLanguageService();
         var line = 6;
         var col = 17;
-        var info = svc.GetQuickInfo(path, src, line, col);
+        var info = svc.GetQuickInfo(path, src, line, col, TestContext.Current.CancellationToken);
 
         Assert.NotNull(info);
         Assert.Contains("Tell", info, StringComparison.Ordinal);
@@ -35,7 +36,7 @@ public class CSharpLanguageServiceQuickInfoTests
         const string path = @"D:\Fake\Empty.cs";
         var src = "class X { }";
         var svc = new CSharpLanguageService();
-        var info = svc.GetQuickInfo(path, src, line: 99, column: 1);
+        var info = svc.GetQuickInfo(path, src, line: 99, column: 1, TestContext.Current.CancellationToken);
         Assert.Null(info);
     }
 }

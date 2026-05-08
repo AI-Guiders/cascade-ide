@@ -1,6 +1,7 @@
 using System.Text.Json;
 using CascadeIDE.Services;
 using Xunit;
+using TestContext = Xunit.TestContext;
 
 namespace CascadeIDE.Tests;
 
@@ -86,7 +87,9 @@ public sealed class IdeMcpServerDispatchTests
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
         Assert.NotNull(mi);
 
-        var task = (Task<string>)mi!.Invoke(null, new object?[] { actions, toolName, args, CancellationToken.None })!;
+        var task = (Task<string>)mi!.Invoke(
+            null,
+            new object?[] { actions, toolName, args, TestContext.Current.CancellationToken })!;
         return await task.ConfigureAwait(false);
     }
 
