@@ -10,6 +10,20 @@ namespace CascadeIDE.ViewModels;
 /// <summary>Связка с Workspace Health.</summary>
 public partial class MainWindowViewModel
 {
+    /// <summary>Свойства, читающие кэш после <see cref="RebuildIdeHealth"/>; держать в одном месте с циклом notify.</summary>
+    private static readonly string[] IdeHealthRebuildPresentationNames =
+    [
+        nameof(IdeHealthMountPayload),
+        nameof(PfdIdeHealthMountContext),
+        nameof(MfdIdeHealthMountContext),
+        nameof(IdeHealthBuildText),
+        nameof(IdeHealthBuildCockpitShort),
+        nameof(IdeHealthTestsText),
+        nameof(IdeHealthTestsCockpitShort),
+        nameof(IdeHealthDebugText),
+        nameof(IdeHealthDebugCockpitShort),
+    ];
+
     private bool _inIdeHealthRebuild;
     private IdeHealthInputSnapshot? _lastIdeHealthInputSnapshot;
     private IdeHealthStatusMountPayload? _lastIdeHealthMountPayload;
@@ -78,15 +92,8 @@ public partial class MainWindowViewModel
                 IdeHealthSegments,
                 snapshot,
                 new IdeHealthSurfaceDecision(Enabled: true));
-            OnPropertyChanged(nameof(IdeHealthMountPayload));
-            OnPropertyChanged(nameof(PfdIdeHealthMountContext));
-            OnPropertyChanged(nameof(MfdIdeHealthMountContext));
-            OnPropertyChanged(nameof(IdeHealthBuildText));
-            OnPropertyChanged(nameof(IdeHealthBuildCockpitShort));
-            OnPropertyChanged(nameof(IdeHealthTestsText));
-            OnPropertyChanged(nameof(IdeHealthTestsCockpitShort));
-            OnPropertyChanged(nameof(IdeHealthDebugText));
-            OnPropertyChanged(nameof(IdeHealthDebugCockpitShort));
+            foreach (var name in IdeHealthRebuildPresentationNames)
+                OnPropertyChanged(name);
         }
         finally
         {

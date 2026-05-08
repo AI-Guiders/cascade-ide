@@ -8,6 +8,12 @@ namespace CascadeIDE.ViewModels;
 /// </summary>
 public partial class MainWindowViewModel
 {
+    private static readonly string[] BreakpointGlyphBindingNames =
+    [
+        nameof(BreakpointLinesInCurrentFile),
+        nameof(AllBreakpointLinesInCurrentFile),
+    ];
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsMarkdownFile))]
     [NotifyPropertyChangedFor(nameof(IsMarkdownPreviewVisible))]
@@ -60,6 +66,12 @@ public partial class MainWindowViewModel
     /// <summary>Номер строки текущей позиции отладки в открытом файле (0 если другой файл или сброшено).</summary>
     public int DebugCurrentLineInCurrentFile => GetDebugCurrentLineForFile(CurrentFilePath);
 
+    private void NotifyBreakpointGlyphBindings()
+    {
+        foreach (var name in BreakpointGlyphBindingNames)
+            OnPropertyChanged(name);
+    }
+
     private void RefreshBreakpointSnapshotFromWorkspace(string? solutionPath)
     {
         var ws = GetWorkspacePath(solutionPath);
@@ -84,14 +96,12 @@ public partial class MainWindowViewModel
             _breakpointsFileWatcher.Changed += (_, _) => UiScheduler.Default.Post(() =>
             {
                 RefreshBreakpointSnapshotFromWorkspace(solutionPath);
-                OnPropertyChanged(nameof(BreakpointLinesInCurrentFile));
-                OnPropertyChanged(nameof(AllBreakpointLinesInCurrentFile));
+                NotifyBreakpointGlyphBindings();
             });
             _breakpointsFileWatcher.Renamed += (_, _) => UiScheduler.Default.Post(() =>
             {
                 RefreshBreakpointSnapshotFromWorkspace(solutionPath);
-                OnPropertyChanged(nameof(BreakpointLinesInCurrentFile));
-                OnPropertyChanged(nameof(AllBreakpointLinesInCurrentFile));
+                NotifyBreakpointGlyphBindings();
             });
             _breakpointsFileWatcher.EnableRaisingEvents = true;
         }

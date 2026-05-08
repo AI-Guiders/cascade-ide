@@ -7,6 +7,18 @@ namespace CascadeIDE.ViewModels;
 /// <summary>Relay: отладка.</summary>
 public partial class MainWindowViewModel
 {
+    private static readonly string[] DebugRelayUiPresentationNames =
+    [
+        nameof(HasDebugSession),
+        nameof(IsDebugExecutionPaused),
+        nameof(IsDebugExecutionRunning),
+        nameof(IdeHealthDebugText),
+        nameof(IdeHealthDebugCockpitShort),
+        nameof(IdeHealthMountPayload),
+        nameof(PfdIdeHealthMountContext),
+        nameof(MfdIdeHealthMountContext),
+    ];
+
     private void NotifyDebugRelayCommandsChanged()
     {
         DebugStartOrContinueCommand.NotifyCanExecuteChanged();
@@ -15,14 +27,8 @@ public partial class MainWindowViewModel
         DebugStepOverCommand.NotifyCanExecuteChanged();
         DebugStepIntoCommand.NotifyCanExecuteChanged();
         DebugStepOutCommand.NotifyCanExecuteChanged();
-        OnPropertyChanged(nameof(HasDebugSession));
-        OnPropertyChanged(nameof(IsDebugExecutionPaused));
-        OnPropertyChanged(nameof(IsDebugExecutionRunning));
-        OnPropertyChanged(nameof(IdeHealthDebugText));
-        OnPropertyChanged(nameof(IdeHealthDebugCockpitShort));
-        OnPropertyChanged(nameof(IdeHealthMountPayload));
-        OnPropertyChanged(nameof(PfdIdeHealthMountContext));
-        OnPropertyChanged(nameof(MfdIdeHealthMountContext));
+        foreach (var name in DebugRelayUiPresentationNames)
+            OnPropertyChanged(name);
     }
 
     private Task ShowDebugInfoAsync(string title, string message) =>

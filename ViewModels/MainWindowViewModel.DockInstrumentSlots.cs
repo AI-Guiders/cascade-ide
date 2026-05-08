@@ -9,6 +9,14 @@ namespace CascadeIDE.ViewModels;
 /// </summary>
 public partial class MainWindowViewModel
 {
+    private static readonly string[] DockedInstrumentPlacementBindingNames =
+    [
+        nameof(IsDockedPfdSolutionExplorerTree),
+        nameof(IsDockedPfdWorkspaceNavigationMap),
+        nameof(IsDockedMfdSolutionExplorerTree),
+        nameof(IsMfdShellSolutionExplorerPageActive),
+    ];
+
     /// <summary>Дерево решения в колонке PFD — только если карта назначает его в слот Pfd.</summary>
     public bool IsDockedPfdSolutionExplorerTree =>
         MainWindowDockedGridInstrumentSlots.IsDockedPfdSolutionExplorerTree(_settings.Display);
@@ -24,10 +32,8 @@ public partial class MainWindowViewModel
     /// <summary>Вызывать после смены решения / merge <c>workspace.toml</c> / настроек Display, влияющих на placement.</summary>
     public void NotifyDockedInstrumentSlotBindings()
     {
-        OnPropertyChanged(nameof(IsDockedPfdSolutionExplorerTree));
-        OnPropertyChanged(nameof(IsDockedPfdWorkspaceNavigationMap));
-        OnPropertyChanged(nameof(IsDockedMfdSolutionExplorerTree));
-        OnPropertyChanged(nameof(IsMfdShellSolutionExplorerPageActive));
+        foreach (var name in DockedInstrumentPlacementBindingNames)
+            OnPropertyChanged(name);
         CoerceMfdShellPageToAllowed();
     }
 }
