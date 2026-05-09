@@ -17,7 +17,7 @@
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:BEGIN -->
 
-`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~7.7k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~6.6k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.1k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
+`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~7.7k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~6.5k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.1k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:END -->
 
@@ -53,7 +53,7 @@
 | `MainWindowViewModel.IdeMcpActions.AgentNotes.cs` | 44 | Реализация `IIdeMcpActions`: agent-notes. |
 | `MainWindowViewModel.IdeMcpActions.BuildTest.cs` | 166 | MCP: сборка, тесты. |
 | `MainWindowViewModel.IdeMcpActions.DebuggerPanel.cs` | 76 | Панель отладки и снимок DAP (ADR 0002): один `DebugSessionSnapshot`. |
-| `MainWindowViewModel.IdeMcpActions.Editor.cs` | 128 | MCP: редактор. |
+| `MainWindowViewModel.IdeMcpActions.Editor.cs` | 95 | MCP: редактор. |
 | `MainWindowViewModel.IdeMcpActions.Git.cs` | 48 | MCP: git (`IdeMcpGitWorkspaceSession`). |
 | `MainWindowViewModel.IdeMcpActions.HybridCodebaseIndex.cs` | 103 | MCP / ide_execute_command: Hybrid Codebase Index (имена команд как у внешнего MCP). |
 | `MainWindowViewModel.IdeMcpActions.Navigation.cs` | 61 | MCP: семантическая навигация (ADR 0039). |

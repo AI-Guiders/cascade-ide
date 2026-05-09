@@ -39,14 +39,18 @@ public partial class MainWindowViewModel
     {
         UiScheduler.Default.Post(() =>
         {
-            if (!string.IsNullOrEmpty(filePath) && filePath != CurrentFilePath && File.Exists(filePath))
+            if (!string.IsNullOrEmpty(filePath))
             {
-                IsLoadingCurrentFile = true;
-                try
+                var normalized = CanonicalFilePath.Normalize(filePath);
+                if (!CanonicalFilePath.Equals(CurrentFilePath, normalized) && File.Exists(normalized))
                 {
-                    Documents.OpenOrActivateDocument(filePath);
+                    IsLoadingCurrentFile = true;
+                    try
+                    {
+                        Documents.OpenOrActivateDocument(normalized);
+                    }
+                    finally { IsLoadingCurrentFile = false; }
                 }
-                finally { IsLoadingCurrentFile = false; }
             }
             var text = EditorText ?? "";
             if (!IdeMcpEditorOrchestrator.TryComputeSelectionSpan(
@@ -59,72 +63,33 @@ public partial class MainWindowViewModel
 
     async Task<string> Services.IIdeMcpActions.GetEditorStateAsync(int? maxPreviewChars)
     {
-        var tcs = new TaskCompletionSource<string>();
         var preview = maxPreviewChars ?? 2000;
-        UiScheduler.Default.Post(() =>
-        {
-            try
-            {
-                var dto = _editorStateProvider?.Invoke(preview) ?? new Services.EditorStateDto();
-                tcs.SetResult(IdeMcpEditorOrchestrator.SerializeEditorState(dto));
-            }
-            catch (Exception ex)
-            {
-                tcs.TrySetException(ex);
-            }
-        });
-        return await tcs.Task.ConfigureAwait(false);
+        return await UiScheduler.Default.InvokeAsync(() =>
+                IdeMcpEditorOrchestrator.SerializeEditorState(
+                    _editorStateProvider?.Invoke(preview) ?? new Services.EditorStateDto()))
+            .ConfigureAwait(false);
     }
 
     async Task<string> Services.IIdeMcpActions.GetEditorContentRangeAsync(int startLine, int endLine)
     {
-        var tcs = new TaskCompletionSource<string>();
-        UiScheduler.Default.Post(() =>
-        {
-            try
+        return await UiScheduler.Default.InvokeAsync(() =>
             {
                 var content = _editorContentRangeProvider?.Invoke(startLine, endLine);
-                tcs.SetResult(IdeMcpEditorOrchestrator.SerializeEditorContentRange(CurrentFilePath, startLine, endLine, content));
-            }
-            catch (Exception ex)
-            {
-                tcs.TrySetException(ex);
-            }
-        });
-        return await tcs.Task.ConfigureAwait(false);
+                return IdeMcpEditorOrchestrator.SerializeEditorContentRange(
+                    CurrentFilePath, startLine, endLine, content);
+            })
+            .ConfigureAwait(false);
     }
 
     async Task<string> Services.IIdeMcpActions.GetOpenDocumentTextAsync(string? filePath, int? maxChars)
     {
-        var tcs = new TaskCompletionSource<string>();
-        UiScheduler.Default.Post(() =>
-        {
-            try
+        return await UiScheduler.Default.InvokeAsync(() =>
             {
-                var tabs = CollectOpenDocumentTabSnapshots();
-                var json = IdeMcpEditorOrchestrator.BuildGetOpenDocumentTextResponse(filePath, CurrentFilePath, tabs, maxChars);
-                tcs.SetResult(json);
-            }
-            catch (Exception ex)
-            {
-                tcs.TrySetException(ex);
-            }
-        });
-        return await tcs.Task.ConfigureAwait(false);
-    }
-
-    private List<IdeMcpEditorOrchestrator.OpenDocumentTabSnapshot> CollectOpenDocumentTabSnapshots()
-    {
-        var list = new List<IdeMcpEditorOrchestrator.OpenDocumentTabSnapshot>();
-        foreach (var item in Documents.DockDocuments)
-        {
-            if (item is not DockDocumentViewModel dvm)
-                continue;
-            var doc = dvm.Doc;
-            list.Add(new IdeMcpEditorOrchestrator.OpenDocumentTabSnapshot(doc.FilePath, doc.Content, doc.IsDirty));
-        }
-
-        return list;
+                var tabs = Documents.CollectIdeMcpOpenDocumentTabSnapshots();
+                return IdeMcpEditorOrchestrator.BuildGetOpenDocumentTextResponse(
+                    filePath, CurrentFilePath, tabs, maxChars);
+            })
+            .ConfigureAwait(false);
     }
 
     void Services.IIdeMcpActions.ApplyEdit(string filePath, int startLine, int startColumn, int endLine, int endColumn, string newText)

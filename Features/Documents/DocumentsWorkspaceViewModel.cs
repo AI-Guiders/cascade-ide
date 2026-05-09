@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using Avalonia.Threading;
+using CascadeIDE.Features.IdeMcp.Application;
 using CascadeIDE.Models;
 using CascadeIDE.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -51,6 +52,21 @@ public sealed partial class DocumentsWorkspaceViewModel : ObservableObject
     public IDock DockLayout { get; private set; } = null!;
 
     public ObservableCollection<IDockable> DockDocuments { get; } = [];
+
+    /// <summary>Снимки открытых вкладок для MCP <c>get_open_document_text</c>; только с UI-потока.</summary>
+    public List<IdeMcpEditorOrchestrator.OpenDocumentTabSnapshot> CollectIdeMcpOpenDocumentTabSnapshots()
+    {
+        var list = new List<IdeMcpEditorOrchestrator.OpenDocumentTabSnapshot>();
+        foreach (var item in DockDocuments)
+        {
+            if (item is not DockDocumentViewModel dvm)
+                continue;
+            var doc = dvm.Doc;
+            list.Add(new IdeMcpEditorOrchestrator.OpenDocumentTabSnapshot(doc.FilePath, doc.Content, doc.IsDirty));
+        }
+
+        return list;
+    }
 
     [ObservableProperty]
     private IDockable? _dockActiveDocument;
