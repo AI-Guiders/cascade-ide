@@ -34,7 +34,7 @@
 | `MainWindowViewModel.Capabilities.cs` | 23 | Реестр capabilities. |
 | `MainWindowViewModel.CascadeChord.cs` | 432 | Аккордный слой ADR 0060: корень `cascade_chord` из hotkeys.toml (по умолчанию Ctrl+K), затем тот же хвост мелодии, что после `c:` в палитре (см. `IntentMelodyAliases`), без префикса `c:` и без Enter — если alias однозначен (например `so`). При конфликте префиксов (например `gs` vs `gsu`) точное совпадение после полного ввода или по клавише Enter. |
 | `MainWindowViewModel.CommandPalette.cs` | 550 | Палитра команд. |
-| `MainWindowViewModel.cs` | 446 | Главный композитор окна (partial-класс, несколько `MainWindowViewModel*.cs`). Карта файлов и ответственности — `docs/architecture-migration.md`, раздел «Срез MainWindowViewModel». |
+| `MainWindowViewModel.cs` | 434 | Главный композитор окна (partial-класс, несколько `MainWindowViewModel*.cs`). Карта файлов и ответственности — `docs/architecture-migration.md`, раздел «Срез MainWindowViewModel». |
 | `MainWindowViewModel.CSharpLsp.cs` | 120 | Запуск/перезапуск C# LSP. |
 | `MainWindowViewModel.CursorAcp.cs` | 36 | Путь Cursor ACP и предпочитаемая модель. |
 | `MainWindowViewModel.DebugStackUi.cs` | 35 | Выбор кадра в панели «Стек» Mfd: подгрузка Locals для выбранного кадра (DAP). |
@@ -47,7 +47,7 @@
 | `MainWindowViewModel.EditorStabilizedInput.cs` | 64 | Один hi-freq throttler на главное окно (ADR 0103): не N фоновых consumer на N вкладок. Стабилизированный выход обрабатывается только если `FilePath` совпадает с `CurrentFilePath` (устаревшие дельты после смены вкладки отбрасываются). |
 | `MainWindowViewModel.Eicas.cs` | 17 | Канал EICAS / CAS — отдельно от полосы телеметрии контура работы (ADR 0021, вариант A). |
 | `MainWindowViewModel.EnvironmentReadiness.cs` | 66 | Снимок «готовность окружения» (ADR 0023), отдельно от Workspace Health. |
-| `MainWindowViewModel.HybridIndex.cs` | 295 | Hybrid Codebase Index (HCI): status projection and UI commands for the HIS (MFD) page. |
+| `MainWindowViewModel.HybridIndex.cs` | 280 | Hybrid Codebase Index (HCI): status projection and UI commands for the HIS (MFD) page. |
 | `MainWindowViewModel.HybridIndexSettings.cs` | 18 | Привязки окна настроек к `HybridIndex` (ADR 0106). |
 | `MainWindowViewModel.IdeHealth.cs` | 95 | Связка с Workspace Health. |
 | `MainWindowViewModel.IdeMcpActions.AgentNotes.cs` | 44 | Реализация `IIdeMcpActions`: agent-notes. |
@@ -67,12 +67,12 @@
 | `MainWindowViewModel.MarkdownLsp.cs` | 103 | Запуск/перезапуск Markdown LSP. |
 | `MainWindowViewModel.McpBreakpointReveal.cs` | 61 | MCP: постановка брейкпоинта с загрузкой решения и показом строки в редакторе. |
 | `MainWindowViewModel.MfdShell.cs` | 88 | Оболочка Mfd: одна активная страница; навигация — команды и палитра. Якорь на экране задаётся presentation (зона Mfd в main и/или окно-хост). |
-| `MainWindowViewModel.Presentation.cs` | 287 | Вычисляемые свойства разметки, Workspace Health и видимости панелей (режимы UI). |
+| `MainWindowViewModel.Presentation.cs` | 290 | Вычисляемые свойства разметки, Workspace Health и видимости панелей (режимы UI). |
 | `MainWindowViewModel.PresentationLayout.cs` | 207 | ADR 0017: строка `presentation` и второй `TopLevel` — `MfdHostWindow` с полным вторичным контуром (п. 8). |
 | `MainWindowViewModel.PresentationLayoutAuthority.cs` | 14 | Запись intent видимости панелей (семантика «хочу»); фактическая поверхность — `MainWindowShellSurfaceCompositor`. |
 | `MainWindowViewModel.RelayCommands.cs` | 294 | Relay-команды. |
 | `MainWindowViewModel.RelayCommands.Debug.cs` | 144 | Relay: отладка. |
-| `MainWindowViewModel.SettingsReactive.cs` | 238 | Реакции на изменение полей настроек и ключей API: диск, автономный агент, панели. |
+| `MainWindowViewModel.SettingsReactive.cs` | 239 | Реакции на изменение полей настроек и ключей API: диск, автономный агент, панели. |
 | `MainWindowViewModel.ShellState.AiProviders.cs` | 58 | Часть `ShellState`: режим ИИ и облачные ключи привязаны к нижнему приложению/чату. |
 | `MainWindowViewModel.ShellState.AutonomousAgentStripe.cs` | 62 | Часть `ShellState`: полоса/карточки автономной задачи агента, безопасности, LOC и сводки тестов для IDE Health. |
 | `MainWindowViewModel.ShellState.ChatAndSessionConfig.cs` | 26 | Часть `ShellState`: ввод чата и конфиг MCP/ACP для автономной сессии. |
