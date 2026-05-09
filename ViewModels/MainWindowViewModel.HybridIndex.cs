@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.IO;
 using CascadeIDE.Cockpit.DataBus;
 using CascadeIDE.Features.HybridIndex.Application;
@@ -75,111 +74,43 @@ public partial class MainWindowViewModel
         HybridIndexHisPresentationProjection.StateShort(HybridIndexLast);
 
     public string HybridIndexDocumentCountText =>
-        HybridIndexLast?.DocumentCount.ToString(CultureInfo.InvariantCulture) ?? "—";
+        HybridIndexLast is null ? "—" : HybridIndexLast.DocumentCount.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
     public double HybridIndexDocsValue => (double)(HybridIndexLast?.DocumentCount ?? 0);
 
-    public double HybridIndexDocsGauge01
-    {
-        get
-        {
-            // ECAM-like: simple 0..1 gauge. Scale is a UX choice; start with a stable max.
-            const double max = 3000.0;
-            var v = (double)(HybridIndexLast?.DocumentCount ?? 0);
-            if (v <= 0)
-                return 0;
-            return Math.Clamp(v / max, 0, 1);
-        }
-    }
+    public double HybridIndexDocsGauge01 =>
+        HybridIndexHisPresentationProjection.DocsGauge01(HybridIndexLast?.DocumentCount ?? 0);
 
-    public double HybridIndexFreshnessMinutes
-    {
-        get
-        {
-            var iso = HybridIndexLast?.IndexedAtIso;
-            if (string.IsNullOrWhiteSpace(iso))
-                return 0;
-            if (!DateTimeOffset.TryParse(iso, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var ts))
-                return 0;
-            var age = DateTimeOffset.UtcNow - ts;
-            if (age < TimeSpan.Zero)
-                age = TimeSpan.Zero;
-            return age.TotalMinutes;
-        }
-    }
+    public double HybridIndexFreshnessMinutes =>
+        HybridIndexHisPresentationProjection.FreshnessTotalMinutes(
+            HybridIndexLast?.IndexedAtIso,
+            DateTimeOffset.UtcNow);
 
-    public string HybridIndexFreshnessMinutesText
-    {
-        get
-        {
-            var m = HybridIndexFreshnessMinutes;
-            if (m <= 0.5)
-                return "0";
-            if (m >= 10_000)
-                return "9999";
-            return Math.Floor(m).ToString(CultureInfo.InvariantCulture);
-        }
-    }
+    public string HybridIndexFreshnessMinutesText =>
+        HybridIndexHisPresentationProjection.FreshnessMinutesRoundedText(HybridIndexFreshnessMinutes);
 
-    public string HybridIndexFreshnessEcamText
-    {
-        get
-        {
-            var m = HybridIndexFreshnessMinutes;
-            if (m <= 0.5)
-                return "0m";
+    public string HybridIndexFreshnessEcamText =>
+        HybridIndexHisPresentationProjection.FreshnessEcamText(HybridIndexFreshnessMinutes);
 
-            if (m < 60)
-                return $"{Math.Floor(m).ToString(CultureInfo.InvariantCulture)}m";
+    public string HybridIndexIndexedAtText =>
+        HybridIndexHisPresentationProjection.IndexedAtOrDash(HybridIndexLast?.IndexedAtIso);
 
-            var h = m / 60.0;
-            if (h < 24)
-                return $"{Math.Floor(h).ToString(CultureInfo.InvariantCulture)}h";
-
-            var d = h / 24.0;
-            if (d >= 100)
-                return "99d";
-            return $"{Math.Floor(d).ToString(CultureInfo.InvariantCulture)}d";
-        }
-    }
-
-    public string HybridIndexIndexedAtText
-    {
-        get
-        {
-            var iso = HybridIndexLast?.IndexedAtIso;
-            if (string.IsNullOrWhiteSpace(iso))
-                return "—";
-            return iso;
-        }
-    }
-
-    public string HybridIndexFreshnessText
-    {
-        get
-        {
-            var iso = HybridIndexLast?.IndexedAtIso;
-            if (string.IsNullOrWhiteSpace(iso))
-                return "freshness: —";
-            if (!DateTimeOffset.TryParse(iso, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var ts))
-                return "freshness: ?";
-            var age = DateTimeOffset.UtcNow - ts;
-            if (age < TimeSpan.Zero)
-                age = TimeSpan.Zero;
-            if (age.TotalHours >= 24)
-                return $"freshness: {Math.Floor(age.TotalDays)}d";
-            if (age.TotalMinutes >= 60)
-                return $"freshness: {Math.Floor(age.TotalHours)}h";
-            return $"freshness: {Math.Floor(age.TotalMinutes)}m";
-        }
-    }
+    public string HybridIndexFreshnessText =>
+        HybridIndexHisPresentationProjection.FreshnessColonLine(
+            HybridIndexLast?.IndexedAtIso,
+            DateTimeOffset.UtcNow);
 
     public string HybridIndexLastErrorText =>
-        string.IsNullOrWhiteSpace(HybridIndexLast?.LastError) ? "—" : HybridIndexLast!.LastError!;
+        HybridIndexHisPresentationProjection.LastErrorOrDash(HybridIndexLast?.LastError);
 
-    public string HybridIndexWorkspaceRootText => HybridIndexLast?.WorkspaceRoot ?? "—";
-    public string HybridIndexSolutionPathText => HybridIndexLast?.SolutionPath ?? "—";
-    public string HybridIndexDatabasePathText => HybridIndexLast?.DatabasePath ?? "—";
+    public string HybridIndexWorkspaceRootText =>
+        HybridIndexHisPresentationProjection.OptionalFieldOrDash(HybridIndexLast?.WorkspaceRoot);
+
+    public string HybridIndexSolutionPathText =>
+        HybridIndexHisPresentationProjection.OptionalFieldOrDash(HybridIndexLast?.SolutionPath);
+
+    public string HybridIndexDatabasePathText =>
+        HybridIndexHisPresentationProjection.OptionalFieldOrDash(HybridIndexLast?.DatabasePath);
 
     public string HybridIndexWorkspaceShortText => HybridIndexHisPathDisplayShortener.ShortenLikeEcam(HybridIndexWorkspaceRootText);
     public string HybridIndexSolutionShortText => HybridIndexHisPathDisplayShortener.ShortenLikeEcam(HybridIndexSolutionPathText);
