@@ -1,6 +1,5 @@
 using System.Globalization;
 using System.IO;
-using Avalonia.Threading;
 using CascadeIDE.Cockpit.DataBus;
 using CascadeIDE.Features.HybridIndex.Application;
 using CascadeIDE.Features.Os.DataAcquisition;
@@ -270,14 +269,10 @@ public partial class MainWindowViewModel
     {
         if (_hybridIndexStateSubscription is not null)
             return;
-        _hybridIndexStateSubscription = _ideDataBus.Subscribe<HybridIndexStateChanged>(evt =>
-        {
-            // DataBus is sync on UI thread in main VM, but keep this UI-safe anyway.
-            UiScheduler.Default.Post(() =>
-            {
-                HybridIndexLast = evt;
-            }, DispatcherPriority.Background);
-        });
+        _hybridIndexStateSubscription = HybridIndexHisStateBusSubscription.Subscribe(
+            _ideDataBus,
+            UiScheduler.Default,
+            evt => HybridIndexLast = evt);
     }
 
     /// <summary>Перерисовать вычисляемые поля HIS без смены последнего события DataBus (свежесть от часов, открытие вкладки).</summary>
