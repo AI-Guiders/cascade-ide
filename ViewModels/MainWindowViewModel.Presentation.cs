@@ -70,11 +70,19 @@ public partial class MainWindowViewModel
     /// <summary>Включён debug-overlay контуров зон (ручная валидация геометрии W2).</summary>
     public bool ShowSkiaZoneGeometryOverlay => _settings.Display.Skia.ZoneGeometryOverlay;
 
-    public bool IsSkiaZoneGeometryOverlayPfdVisible => ShowSkiaZoneGeometryOverlay && IsPfdColumnVisible;
+    public bool IsSkiaZoneGeometryOverlayPfdVisible =>
+        MainWindowPresentationCapabilitiesProjection.IsSkiaZoneGeometryOverlayPfdVisible(
+            ShowSkiaZoneGeometryOverlay,
+            IsPfdColumnVisible);
 
-    public bool IsSkiaZoneGeometryOverlayForwardVisible => ShowSkiaZoneGeometryOverlay;
+    public bool IsSkiaZoneGeometryOverlayForwardVisible =>
+        MainWindowPresentationCapabilitiesProjection.IsSkiaZoneGeometryOverlayForwardVisible(
+            ShowSkiaZoneGeometryOverlay);
 
-    public bool IsSkiaZoneGeometryOverlayMfdVisible => ShowSkiaZoneGeometryOverlay && IsMfdColumnVisible;
+    public bool IsSkiaZoneGeometryOverlayMfdVisible =>
+        MainWindowPresentationCapabilitiesProjection.IsSkiaZoneGeometryOverlayMfdVisible(
+            ShowSkiaZoneGeometryOverlay,
+            IsMfdColumnVisible);
 
     /// <summary>Wave 3: включить отрисовку инструмента в Skia mount-слое зон P/F/M.</summary>
     public bool UseSkiaInstrumentMount => _settings.Display.Skia.InstrumentMount;
@@ -127,7 +135,7 @@ public partial class MainWindowViewModel
     /// false, чтобы DockPanel не отдавал высоту дублю и не схлопывал область вывода консоли.
     /// </summary>
     public bool IdeHealthOnTerminalTab =>
-        Capabilities.IdeHealthOnTerminalTab && !ShowIdeHealthStrip;
+        MainWindowPresentationCapabilitiesProjection.IdeHealthOnTerminalTab(Capabilities, ShowIdeHealthStrip);
 
     /// <summary>Куда вести полосу IDE Health: нижняя полоса или страница зоны — из capabilities (<c>ide_health_surface</c>).</summary>
     public IdeHealthUiSurface IdeHealthStripSurface => Capabilities.IdeHealthSurface;
@@ -137,25 +145,31 @@ public partial class MainWindowViewModel
 
     /// <summary>Полоска build/tests/debug/git — при <c>ide_health_strip</c> и <c>bottom_strip</c>; рисуется в <see cref="Views.WorkspaceChromeBandView"/> внутри MFD.</summary>
     public bool ShowIdeHealthStrip =>
-        Capabilities.IdeHealthStripVisible && Capabilities.IdeHealthSurface == IdeHealthUiSurface.BottomStrip;
+        MainWindowPresentationCapabilitiesProjection.ShowIdeHealthStrip(Capabilities);
 
     /// <summary>IDE Health на странице оболочки Mfd (вместо нижней полосы) — при <c>ide_health_strip</c> и <c>ide_health_surface = dedicated_page</c> (v1 — колонка зоны Mfd).</summary>
     public bool ShowIdeHealthMfdPage =>
-        Capabilities.IdeHealthStripVisible && Capabilities.IdeHealthSurface == IdeHealthUiSurface.DedicatedPage;
+        MainWindowPresentationCapabilitiesProjection.ShowIdeHealthMfdPage(Capabilities);
 
     /// <summary>
     /// Полоса оповещений EICAS v1 (над полосой Workspace Health). Видно при <c>eicas_alerts_bar</c> и непустом списке (Dark Cockpit).
     /// Отдельный контур от build/tests/debug/git (ADR 0021 §5; словарь §1.1).
     /// </summary>
     public bool ShowEicasAlertsBar =>
-        Capabilities.EicasAlertsBarEnabled && EicasMessages.Count > 0;
+        MainWindowPresentationCapabilitiesProjection.ShowEicasAlertsBar(Capabilities, EicasMessages.Count);
 
     /// <summary>Область разметки над нижним доком: Workspace Health и/или полоса EICAS (<see cref="Views.WorkspaceChromeBandView"/>).</summary>
-    public bool ShowWorkspaceChromeBand => ShowIdeHealthStrip || ShowEicasAlertsBar;
+    public bool ShowWorkspaceChromeBand =>
+        MainWindowPresentationCapabilitiesProjection.ShowWorkspaceChromeBand(
+            ShowIdeHealthStrip,
+            ShowEicasAlertsBar);
 
     /// <summary>Зона под чатом в MFD: полоса EICAS / IDE Health и/или док (терминал, сборка, Problems, Git, инструменты).</summary>
     public bool ShowWorkspaceBottomChrome =>
-        ShowIdeHealthStrip || ShowEicasAlertsBar || IsMfdContourContentVisible;
+        MainWindowPresentationCapabilitiesProjection.ShowWorkspaceBottomChrome(
+            ShowIdeHealthStrip,
+            ShowEicasAlertsBar,
+            IsMfdContourContentVisible);
 
     /// <summary>Чат в одной строке с PFD/Forward; MFD не пересекает нижнюю строку MainGrid.</summary>
     public int ChatPanelMainGridRowSpan => 1;
@@ -167,20 +181,21 @@ public partial class MainWindowViewModel
 
     /// <summary>Нижние вкладки «События / Тесты / Гипотезы / Отладка» при включённом доке.</summary>
     public bool InstrumentationTabs =>
-        IsInstrumentationDockVisible && Capabilities.InstrumentationTabs;
+        MainWindowPresentationCapabilitiesProjection.InstrumentationTabs(IsInstrumentationDockVisible, Capabilities);
 
     /// <summary>Вкладка «Гипотезы» — семья Debug и capabilities (ADR 0003, ADR 0010).</summary>
     public bool HypothesesTab =>
-        IsInstrumentationDockVisible
-        && Capabilities.InstrumentationTabs
-        && Capabilities.HypothesesTab;
+        MainWindowPresentationCapabilitiesProjection.HypothesesTab(IsInstrumentationDockVisible, Capabilities);
 
     /// <summary>Пункт меню для док-панели инструментирования (можно отключить и в Focus).</summary>
     public bool ShowInstrumentationLayoutMenu => true;
 
-    public bool IsSafetyL1 => string.Equals(SafetyLevel, "L1", StringComparison.OrdinalIgnoreCase);
-    public bool IsSafetyL2 => string.Equals(SafetyLevel, "L2", StringComparison.OrdinalIgnoreCase);
-    public bool IsSafetyL3 => string.Equals(SafetyLevel, "L3", StringComparison.OrdinalIgnoreCase);
+    public bool IsSafetyL1 =>
+        MainWindowPresentationCapabilitiesProjection.IsSafetyLevel(SafetyLevel, "L1");
+    public bool IsSafetyL2 =>
+        MainWindowPresentationCapabilitiesProjection.IsSafetyLevel(SafetyLevel, "L2");
+    public bool IsSafetyL3 =>
+        MainWindowPresentationCapabilitiesProjection.IsSafetyLevel(SafetyLevel, "L3");
 
     /// <summary>Подпись режима безопасности (как на мокапе Power).</summary>
     public string SafetyLevelDescription =>
@@ -206,15 +221,15 @@ public partial class MainWindowViewModel
             MainWindowPresentationSurfaceProjection.DefaultResultSummaryPlaceholder);
 
     public bool IsRiskCardVisible =>
-        Capabilities.RiskSummaryCard && IsRiskSummaryVisible;
+        MainWindowPresentationCapabilitiesProjection.IsRiskCardVisible(Capabilities, IsRiskSummaryVisible);
 
     public bool IsResultCardVisible =>
-        Capabilities.ResultSummaryCard && IsResultSummaryVisible;
+        MainWindowPresentationCapabilitiesProjection.IsResultCardVisible(Capabilities, IsResultSummaryVisible);
     public bool IsLocBadgeVisible => LocBadge > 0;
 
     /// <summary>Строка бейджа LOC: число непустых строк и ось Low/Medium/High (пороги из <c>[loc_limits]</c>).</summary>
     public string LocBadgeSummary =>
-        LocBadge <= 0 ? "" : $"LOC: {LocBadge} · {LocTierLabel}";
+        MainWindowPresentationCapabilitiesProjection.LocBadgeSummary(LocBadge, LocTierLabel);
     public bool IsImpactedTestsBadgeVisible => ImpactedTestsBadge > 0;
     public bool IsActiveTaskProgressVisible => ActiveTaskProgress > 0;
 
