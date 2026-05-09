@@ -219,15 +219,19 @@ public partial class MainWindowViewModel
     public bool IsActiveTaskProgressVisible => ActiveTaskProgress > 0;
 
     /// <summary>Строки из канала IDE Health (один снимок на <see cref="MainWindowViewModel.RebuildIdeHealth"/>, без повторного <c>Build()</c> в геттерах).</summary>
-    public string IdeHealthBuildText => _lastIdeHealthInputSnapshot is { } s ? s.Solution.Build.LineText : "";
+    public string IdeHealthBuildText =>
+        IdeHealthStripPresentationProjection.SolutionBuildLineText(_lastIdeHealthInputSnapshot);
 
     /// <summary>Короткий статус для «кольца» сборки в Power cockpit.</summary>
-    public string IdeHealthBuildCockpitShort => _lastIdeHealthInputSnapshot is { } s ? s.Solution.Build.CockpitShort : "";
+    public string IdeHealthBuildCockpitShort =>
+        IdeHealthStripPresentationProjection.SolutionBuildCockpitShort(_lastIdeHealthInputSnapshot);
 
-    public string IdeHealthTestsText => _lastIdeHealthInputSnapshot is { } s ? s.Solution.Tests.LineText : "";
+    public string IdeHealthTestsText =>
+        IdeHealthStripPresentationProjection.SolutionTestsLineText(_lastIdeHealthInputSnapshot);
 
     /// <summary>Компактная строка тестов для полосы Power.</summary>
-    public string IdeHealthTestsCockpitShort => _lastIdeHealthInputSnapshot is { } s ? s.Solution.Tests.CockpitShort : "";
+    public string IdeHealthTestsCockpitShort =>
+        IdeHealthStripPresentationProjection.SolutionTestsCockpitShort(_lastIdeHealthInputSnapshot);
 
     /// <summary>Есть активная DAP-сессия (режим отладки, как в VS).</summary>
     public bool HasDebugSession => _dapDebug.HasActiveSession;
@@ -238,10 +242,12 @@ public partial class MainWindowViewModel
     /// <summary>Процесс запущен под отладчиком, выполнение идёт.</summary>
     public bool IsDebugExecutionRunning => _dapDebug.HasActiveSession && !_dapDebug.IsExecutionStopped;
 
-    public string IdeHealthDebugText => _lastIdeHealthInputSnapshot is { } s ? s.Solution.Debug.LineText : "";
+    public string IdeHealthDebugText =>
+        IdeHealthStripPresentationProjection.SolutionDebugLineText(_lastIdeHealthInputSnapshot);
 
     /// <summary>Короткий статус отладки для Power.</summary>
-    public string IdeHealthDebugCockpitShort => _lastIdeHealthInputSnapshot is { } s ? s.Solution.Debug.CockpitShort : "";
+    public string IdeHealthDebugCockpitShort =>
+        IdeHealthStripPresentationProjection.SolutionDebugCockpitShort(_lastIdeHealthInputSnapshot);
 
     public string ChatPanelToggleButtonText =>
         MainWindowPresentationSurfaceProjection.MfdRegionToggleCaption(IsMfdRegionExpanded);

@@ -67,7 +67,7 @@
 | `MainWindowViewModel.MarkdownLsp.cs` | 103 | Запуск/перезапуск Markdown LSP. |
 | `MainWindowViewModel.McpBreakpointReveal.cs` | 62 | MCP: постановка брейкпоинта с загрузкой решения и показом строки в редакторе. |
 | `MainWindowViewModel.MfdShell.cs` | 88 | Оболочка Mfd: одна активная страница; навигация — команды и палитра. Якорь на экране задаётся presentation (зона Mfd в main и/или окно-хост). |
-| `MainWindowViewModel.Presentation.cs` | 243 | Вычисляемые свойства разметки, Workspace Health и видимости панелей (режимы UI). |
+| `MainWindowViewModel.Presentation.cs` | 249 | Вычисляемые свойства разметки, Workspace Health и видимости панелей (режимы UI). |
 | `MainWindowViewModel.PresentationLayout.cs` | 207 | ADR 0017: строка `presentation` и второй `TopLevel` — `MfdHostWindow` с полным вторичным контуром (п. 8). |
 | `MainWindowViewModel.PresentationLayoutAuthority.cs` | 14 | Запись intent видимости панелей (семантика «хочу»); фактическая поверхность — `MainWindowShellSurfaceCompositor`. |
 | `MainWindowViewModel.RelayCommands.cs` | 294 | Relay-команды. |
@@ -218,6 +218,7 @@
   - удерживать вычисления раскладки/видимости в compositor/policy-сервисах;
   - на VM оставить свойства-проекции и orchestration вызовы.
   - первый срез (**v1.40**): **`MainWindowPresentationSurfaceProjection`** (`Features/Shell/Application`) — заголовок окна, mount-style/топология, контур MFD, телеметрия-подписи, безопасность агента, mount-контекст IDE Health; плейсхолдеры риска/результата и дефолты в **ShellState.AutonomousAgentStripe** через константу проекции.
+  - второй срез (**v1.40b**): **`IdeHealthStripPresentationProjection`** — строки полосы IDE Health (build/tests/debug line + cockpit-short) из **`IdeHealthInputSnapshot?`**; геттеры **`MainWindowViewModel.Presentation`** только проксируют последний снимок.
 - Кластер `ShellState`:
   - состояния панелей и режимов — в отдельные state-модули по доменам, не в один monolith-файл.
   - четвёртый срез: **`MainWindowViewModel.ShellState.AiProviders.cs`** — режим ИИ (`AiMode`, облачный провайдер, вычисляемые флаги выбора) и поля API-ключей; геометрия регионов и видимость страниц MFD после v1.39 — **`ShellState.RegionAndContour`**.
@@ -274,3 +275,4 @@
 - **v1.38** — Wave MCP thinning (завершение волны в текущем объёме): **`IdeMcpBuildTestOrchestrator`** — поверхность панели при missing solution / ошибке сборки; **`IdeMcpHostOrchestrator`** — JSON `ping`/рестарт MCP; **`IdeMcpHybridCodebaseIndexOrchestrator`** — литералы ошибок и `SerializeReindexFailed`; дедуп **`PublishIdeMcpTestRunMutation`** в `IdeMcpActions.BuildTest`.
 - **v1.39** — Wave UI clusters: доменное разнесение **`MainWindowViewModel.ShellState`**: регион/контур MFD (**`ShellState.RegionAndContour.cs`**), режим UI и сборка (**`UiSessionChrome.cs`**), Kroki/modelfetch (**`ModelPullMarkdown.cs`**); enum палитры в **`Models/Shell/CommandPaletteHost.cs`** (хост-окна + тесты пользуются из `CascadeIDE.Models.Shell`).
 - **v1.40** — Wave UI clusters, кластер **Presentation**: статическая проекция **`MainWindowPresentationSurfaceProjection`** для вычисляемых свойств **`MainWindowViewModel.Presentation`**, тесты **`MainWindowPresentationSurfaceProjectionTests`**.
+- **v1.40b** — тот же кластер: **`IdeHealthStripPresentationProjection`** + тесты **`IdeHealthStripPresentationProjectionTests`**; VM не дублирует разбор вложенного снимка в шести геттерах.
