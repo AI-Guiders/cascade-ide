@@ -8,7 +8,6 @@ using CascadeIDE.Cockpit.Composition.HostSurface;
 using CascadeIDE.Cockpit.Composition.Shell;
 using CascadeIDE.Features.Shell.Application;
 using CascadeIDE.Features.UiChrome;
-using CascadeIDE.Lang;
 using CascadeIDE.Models;
 
 namespace CascadeIDE.ViewModels;
@@ -24,15 +23,7 @@ public partial class MainWindowViewModel
 
     /// <summary>Заголовок главного окна (в Power — подпись «Autonomous Agent Cockpit»); из TOML — <c>main_window_title</c>.</summary>
     public string WindowTitle =>
-        UiModeCatalog.GetWindowTitleOverride(NormalizeUiMode(UiMode))
-        ?? UiModeFamily switch
-        {
-            UiModeFamily.Power => "CascadeIDE — Power Mode [Autonomous Agent Cockpit]",
-            UiModeFamily.AgentChat => "CascadeIDE — Agent Chat",
-            UiModeFamily.Debug => "CascadeIDE — Debug",
-            UiModeFamily.Editor => "CascadeIDE — Editor",
-            _ => "CascadeIDE",
-        };
+        MainWindowPresentationSurfaceProjection.ResolveWindowTitle(NormalizeUiMode(UiMode));
 
     /// <summary>Композитор: intent + CDS style → кадр хоста (колонки + инструменты слотов; ADR 0036 п.3, 0047).</summary>
     private MainWindowHostSurfaceFrame HostSurfaceFrame =>
@@ -90,9 +81,7 @@ public partial class MainWindowViewModel
 
     /// <summary>Декларативный mount-style mount-инструмента (идёт из <c>[display.mount]</c>).</summary>
     public string InstrumentMountStyle =>
-        string.IsNullOrWhiteSpace(_settings.Display.Mount.DefaultStyle)
-            ? InstrumentMountPolicyIds.V1
-            : _settings.Display.Mount.DefaultStyle.Trim();
+        MainWindowPresentationSurfaceProjection.InstrumentMountDisplayStyle(_settings.Display);
 
     /// <summary>Резолв style для mount в слоте PFD с учётом registry-правил.</summary>
     public string PfdInstrumentMountStyle => ResolveInstrumentMountStyle(
@@ -107,14 +96,8 @@ public partial class MainWindowViewModel
         CockpitStandardInstrumentIds.IdeHealthStatusV1);
 
     /// <summary>Нормализованный runtime-контекст топологии для резолва mount-style из реестра.</summary>
-    private string MountPolicyRuntimeSurfaceId => ActiveAttentionLayoutSurface switch
-    {
-        AttentionLayoutSurfaceKind.MainWindowDockedGrid => "main_window_docked_grid",
-        AttentionLayoutSurfaceKind.MainWindowPlusMfdHostTopLevel => "main_window_plus_mfd_host_top_level",
-        AttentionLayoutSurfaceKind.MainWindowPlusPfdHostTopLevel => "main_window_plus_pfd_host_top_level",
-        AttentionLayoutSurfaceKind.MainWindowPlusPfdMfdHostTopLevel => "main_window_plus_pfd_mfd_host_top_level",
-        _ => "main_window_docked_grid"
-    };
+    private string MountPolicyRuntimeSurfaceId =>
+        MainWindowPresentationSurfaceProjection.MountPolicySurfaceId(ActiveAttentionLayoutSurface);
 
     private string ResolveInstrumentMountStyle(string surfaceId, string slotId, string instrumentId) =>
         _instrumentMountPolicyResolver.Resolve(
@@ -177,7 +160,8 @@ public partial class MainWindowViewModel
     /// <summary>Чат в одной строке с PFD/Forward; MFD не пересекает нижнюю строку MainGrid.</summary>
     public int ChatPanelMainGridRowSpan => 1;
 
-    public string TelemetryButtonText => IsTerminalVisible ? "Telemetry: on" : "Show telemetry";
+    public string TelemetryButtonText =>
+        MainWindowPresentationSurfaceProjection.TelemetryButtonCaption(IsTerminalVisible);
     public bool ShowEditorGroup2 => EditorGroupCount >= 2;
     public bool ShowEditorGroup3 => EditorGroupCount >= 3;
 
@@ -200,27 +184,26 @@ public partial class MainWindowViewModel
 
     /// <summary>Подпись режима безопасности (как на мокапе Power).</summary>
     public string SafetyLevelDescription =>
-        SafetyLevel switch
-        {
-            "L1" => Resources.Safety_Description_L1,
-            "L2" => Resources.Safety_Description_L2,
-            "L3" => Resources.Safety_Description_L3,
-            _ => ""
-        };
+        MainWindowPresentationSurfaceProjection.SafetyLevelDescription(SafetyLevel);
 
-    public double SafetyL1Opacity => IsSafetyL1 ? 1 : 0.38;
-    public double SafetyL2Opacity => IsSafetyL2 ? 1 : 0.38;
-    public double SafetyL3Opacity => IsSafetyL3 ? 1 : 0.38;
+    public double SafetyL1Opacity =>
+        MainWindowPresentationSurfaceProjection.SafetyBadgeOpacity(IsSafetyL1);
+    public double SafetyL2Opacity =>
+        MainWindowPresentationSurfaceProjection.SafetyBadgeOpacity(IsSafetyL2);
+    public double SafetyL3Opacity =>
+        MainWindowPresentationSurfaceProjection.SafetyBadgeOpacity(IsSafetyL3);
 
     public bool HasFocusPlanItems => FocusPlanItems.Count > 0;
 
     public bool IsRiskSummaryVisible =>
-        !string.IsNullOrWhiteSpace(RiskSummary)
-        && !string.Equals(RiskSummary, "Риски не зафиксированы.", StringComparison.Ordinal);
+        MainWindowPresentationSurfaceProjection.IsAgentSummaryVisibleComparedToPlaceholder(
+            RiskSummary,
+            MainWindowPresentationSurfaceProjection.DefaultRiskSummaryPlaceholder);
 
     public bool IsResultSummaryVisible =>
-        !string.IsNullOrWhiteSpace(ResultSummary)
-        && !string.Equals(ResultSummary, "Результатов пока нет.", StringComparison.Ordinal);
+        MainWindowPresentationSurfaceProjection.IsAgentSummaryVisibleComparedToPlaceholder(
+            ResultSummary,
+            MainWindowPresentationSurfaceProjection.DefaultResultSummaryPlaceholder);
 
     public bool IsRiskCardVisible =>
         Capabilities.RiskSummaryCard && IsRiskSummaryVisible;
@@ -260,7 +243,8 @@ public partial class MainWindowViewModel
     /// <summary>Короткий статус отладки для Power.</summary>
     public string IdeHealthDebugCockpitShort => _lastIdeHealthInputSnapshot is { } s ? s.Solution.Debug.CockpitShort : "";
 
-    public string ChatPanelToggleButtonText => IsMfdRegionExpanded ? "◀" : "▶";
+    public string ChatPanelToggleButtonText =>
+        MainWindowPresentationSurfaceProjection.MfdRegionToggleCaption(IsMfdRegionExpanded);
 
     public bool IsPfdRegionCollapsed => !IsPfdRegionExpanded;
 
@@ -277,7 +261,12 @@ public partial class MainWindowViewModel
     /// терминал, вывод сборки, Git, вкладки инструментации или страница Problems (если разрешена возможностями режима).
     /// </summary>
     public bool IsMfdContourContentVisible =>
-        IsProblemsPanelVisible || IsTerminalVisible || IsBuildOutputVisible || InstrumentationTabs || IsGitPanelVisible;
+        MainWindowPresentationSurfaceProjection.IsMfdContourContentVisible(
+            IsProblemsPanelVisible,
+            IsTerminalVisible,
+            IsBuildOutputVisible,
+            InstrumentationTabs,
+            IsGitPanelVisible);
 
     /// <summary>Совместимость: старые имена региона MFD в main grid (см. <see cref="ChatPanelColumnPixelWidth"/> и т.д.).</summary>
     public int MfdRegionPixelWidth => ChatPanelColumnPixelWidth;
@@ -302,51 +291,23 @@ public partial class MainWindowViewModel
     public bool IsPfdHostWindowIdeHealthMountVisible =>
         UseSkiaInstrumentMount && IsPfdHostWindowShellOpen;
 
-    public IdeHealthStatusMountContext? PfdIdeHealthMountContext
-    {
-        get
-        {
-            if (!UseSkiaInstrumentMount)
-                return null;
-            if (IsPfdHostWindowShellOpen)
-                return IdeHealthMountContextFactory.Create(
-                    _instrumentMountPolicyResolver,
-                    _settings.Display,
-                    "main_window_plus_pfd_host_top_level",
-                    CockpitSlotIds.Pfd,
-                    IdeHealthMountPayload);
-            if (IsPfdColumnVisible)
-                return IdeHealthMountContextFactory.Create(
-                    _instrumentMountPolicyResolver,
-                    _settings.Display,
-                    MountPolicyRuntimeSurfaceId,
-                    CockpitSlotIds.Pfd,
-                    IdeHealthMountPayload);
-            return null;
-        }
-    }
+    public IdeHealthStatusMountContext? PfdIdeHealthMountContext =>
+        MainWindowPresentationSurfaceProjection.ResolvePfdIdeHealthMountContext(
+            UseSkiaInstrumentMount,
+            IsPfdHostWindowShellOpen,
+            IsPfdColumnVisible,
+            _instrumentMountPolicyResolver,
+            _settings.Display,
+            MountPolicyRuntimeSurfaceId,
+            IdeHealthMountPayload);
 
-    public IdeHealthStatusMountContext? MfdIdeHealthMountContext
-    {
-        get
-        {
-            if (!UseSkiaInstrumentMount)
-                return null;
-            if (IsMfdHostWindowShellOpen)
-                return IdeHealthMountContextFactory.Create(
-                    _instrumentMountPolicyResolver,
-                    _settings.Display,
-                    "main_window_plus_mfd_host_top_level",
-                    CockpitSlotIds.Mfd,
-                    IdeHealthMountPayload);
-            if (IsMfdColumnVisible)
-                return IdeHealthMountContextFactory.Create(
-                    _instrumentMountPolicyResolver,
-                    _settings.Display,
-                    MountPolicyRuntimeSurfaceId,
-                    CockpitSlotIds.Mfd,
-                    IdeHealthMountPayload);
-            return null;
-        }
-    }
+    public IdeHealthStatusMountContext? MfdIdeHealthMountContext =>
+        MainWindowPresentationSurfaceProjection.ResolveMfdIdeHealthMountContext(
+            UseSkiaInstrumentMount,
+            IsMfdHostWindowShellOpen,
+            IsMfdColumnVisible,
+            _instrumentMountPolicyResolver,
+            _settings.Display,
+            MountPolicyRuntimeSurfaceId,
+            IdeHealthMountPayload);
 }

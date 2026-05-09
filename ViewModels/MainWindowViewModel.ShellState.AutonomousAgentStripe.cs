@@ -1,3 +1,4 @@
+using CascadeIDE.Features.Shell.Application;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace CascadeIDE.ViewModels;
@@ -21,12 +22,12 @@ public partial class MainWindowViewModel
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsRiskSummaryVisible))]
     [NotifyPropertyChangedFor(nameof(IsRiskCardVisible))]
-    private string _riskSummary = "Риски не зафиксированы.";
+    private string _riskSummary = MainWindowPresentationSurfaceProjection.DefaultRiskSummaryPlaceholder;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsResultSummaryVisible))]
     [NotifyPropertyChangedFor(nameof(IsResultCardVisible))]
-    private string _resultSummary = "Результатов пока нет.";
+    private string _resultSummary = MainWindowPresentationSurfaceProjection.DefaultResultSummaryPlaceholder;
 
     [ObservableProperty]
     private string _nextActionSummary = "Ожидание следующего шага.";
