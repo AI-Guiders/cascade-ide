@@ -17,7 +17,7 @@
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:BEGIN -->
 
-`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~7.6k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~6.5k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.1k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
+`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~7.7k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~6.5k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.1k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:END -->
 
@@ -68,7 +68,10 @@
 | `MainWindowViewModel.McpBreakpointReveal.cs` | 62 | MCP: постановка брейкпоинта с загрузкой решения и показом строки в редакторе. |
 | `MainWindowViewModel.MfdShell.cs` | 88 | Оболочка Mfd: одна активная страница; навигация — команды и палитра. Якорь на экране задаётся presentation (зона Mfd в main и/или окно-хост). |
 | `MainWindowViewModel.Presentation.cs` | 249 | Вычисляемые свойства разметки, Workspace Health и видимости панелей (режимы UI). |
-| `MainWindowViewModel.PresentationLayout.cs` | 207 | ADR 0017: строка `presentation` и второй `TopLevel` — `MfdHostWindow` с полным вторичным контуром (п. 8). |
+| `MainWindowViewModel.PresentationLayout.CockpitSurfaceSnapshot.cs` | 8 | Сборка `CockpitSurfaceState` главного окна (`Build`). |
+| `MainWindowViewModel.PresentationLayout.cs` | 91 | ADR 0017: строка `presentation` и второй `TopLevel` — `MfdHostWindow` с полным вторичным контуром (п. 8). |
+| `MainWindowViewModel.PresentationLayout.HostShell.cs` | 47 | События «окно-хост открыло полный контур» — скрытие колонок в main (`PresentationLayout`). |
+| `MainWindowViewModel.PresentationLayout.HostWindowBounds.cs` | 84 | Персистенция геометрии окон-хостов пресета `presentation` (ADR 0017). |
 | `MainWindowViewModel.PresentationLayoutAuthority.cs` | 14 | Запись intent видимости панелей (семантика «хочу»); фактическая поверхность — `MainWindowShellSurfaceCompositor`. |
 | `MainWindowViewModel.RelayCommands.cs` | 294 | Relay-команды. |
 | `MainWindowViewModel.RelayCommands.Debug.cs` | 144 | Relay: отладка. |
@@ -219,6 +222,7 @@
   - на VM оставить свойства-проекции и orchestration вызовы.
   - первый срез (**v1.40**): **`MainWindowPresentationSurfaceProjection`** (`Features/Shell/Application`) — заголовок окна, mount-style/топология, контур MFD, телеметрия-подписи, безопасность агента, mount-контекст IDE Health; плейсхолдеры риска/результата и дефолты в **ShellState.AutonomousAgentStripe** через константу проекции.
   - второй срез (**v1.40b**): **`IdeHealthStripPresentationProjection`** — строки полосы IDE Health (build/tests/debug line + cockpit-short) из **`IdeHealthInputSnapshot?`**; геттеры **`MainWindowViewModel.Presentation`** только проксируют последний снимок.
+  - третий срез (**v1.40c**): кластер **`PresentationLayout`** разнесён на partial: топология/MainGrid (**`PresentationLayout.cs`**), **`PresentationLayout.HostShell`**, **`PresentationLayout.HostWindowBounds`**, **`PresentationLayout.CockpitSurfaceSnapshot`** (CDS-сборка без изменения логики).
 - Кластер `ShellState`:
   - состояния панелей и режимов — в отдельные state-модули по доменам, не в один monolith-файл.
   - четвёртый срез: **`MainWindowViewModel.ShellState.AiProviders.cs`** — режим ИИ (`AiMode`, облачный провайдер, вычисляемые флаги выбора) и поля API-ключей; геометрия регионов и видимость страниц MFD после v1.39 — **`ShellState.RegionAndContour`**.
@@ -276,3 +280,4 @@
 - **v1.39** — Wave UI clusters: доменное разнесение **`MainWindowViewModel.ShellState`**: регион/контур MFD (**`ShellState.RegionAndContour.cs`**), режим UI и сборка (**`UiSessionChrome.cs`**), Kroki/modelfetch (**`ModelPullMarkdown.cs`**); enum палитры в **`Models/Shell/CommandPaletteHost.cs`** (хост-окна + тесты пользуются из `CascadeIDE.Models.Shell`).
 - **v1.40** — Wave UI clusters, кластер **Presentation**: статическая проекция **`MainWindowPresentationSurfaceProjection`** для вычисляемых свойств **`MainWindowViewModel.Presentation`**, тесты **`MainWindowPresentationSurfaceProjectionTests`**.
 - **v1.40b** — тот же кластер: **`IdeHealthStripPresentationProjection`** + тесты **`IdeHealthStripPresentationProjectionTests`**; VM не дублирует разбор вложенного снимка в шести геттерах.
+- **v1.40c** — **`MainWindowViewModel.PresentationLayout`**: несколько **`PresentationLayout.*`** partial-файлов (топология, host-shell инвалидация, сохранённые bounds окон-хостов, CDS snapshot).
