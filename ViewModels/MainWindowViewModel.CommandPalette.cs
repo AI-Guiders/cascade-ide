@@ -258,27 +258,25 @@ public partial class MainWindowViewModel
     [RelayCommand]
     private void CommandPaletteMoveSelection(int delta)
     {
-        if (FilteredCommandPaletteEntries.Count == 0)
-            return;
-        var next = CommandPaletteSelectedIndex + delta;
-        if (next < 0)
-            next = FilteredCommandPaletteEntries.Count - 1;
-        else if (next >= FilteredCommandPaletteEntries.Count)
-            next = 0;
-        CommandPaletteSelectedIndex = next;
+        if (CommandPaletteSelectionProjection.TryMoveCircular(
+                CommandPaletteSelectedIndex,
+                delta,
+                FilteredCommandPaletteEntries.Count,
+                out var next))
+            CommandPaletteSelectedIndex = next;
     }
 
     /// <summary>Прокрутка списка страницей (PgUp/PgDn).</summary>
     [RelayCommand]
     private void CommandPalettePageMove(int directionSign)
     {
-        if (FilteredCommandPaletteEntries.Count == 0)
-            return;
-        var step = CommandPalettePageStep * Math.Sign(directionSign);
-        if (step == 0)
-            return;
-        var next = CommandPaletteSelectedIndex + step;
-        CommandPaletteSelectedIndex = Math.Clamp(next, 0, FilteredCommandPaletteEntries.Count - 1);
+        if (CommandPaletteSelectionProjection.TryPageMove(
+                CommandPaletteSelectedIndex,
+                directionSign,
+                CommandPalettePageStep,
+                FilteredCommandPaletteEntries.Count,
+                out var next))
+            CommandPaletteSelectedIndex = next;
     }
 
     private void RefreshCommandPaletteFilter()
