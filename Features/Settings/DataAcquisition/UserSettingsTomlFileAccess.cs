@@ -1,6 +1,8 @@
+using CascadeIDE.Contracts;
 namespace CascadeIDE.Features.Settings.DataAcquisition;
 
 /// <summary>DAL: сырой I/O для <c>settings.toml</c> в каталоге пользователя.</summary>
+[IoBoundary]
 public static class UserSettingsTomlFileAccess
 {
     public static string GetFilePath() => UserSettingsPaths.GetSettingsFilePath();

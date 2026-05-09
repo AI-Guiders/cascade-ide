@@ -1,5 +1,6 @@
 #nullable enable
 
+using CascadeIDE.Contracts;
 namespace CascadeIDE.Features.EnvironmentReadiness.DataAcquisition;
 
 /// <summary>
@@ -19,6 +20,7 @@ public readonly record struct EnvironmentReadinessEnvSnapshot(
 }
 
 /// <summary>Имена переменных — в одном месте (совпадают с AgentNotes.Core и разрешением netcoredbg в отладке).</summary>
+[IoBoundary]
 public static class WellKnownEnv
 {
     public const string AgentNotesFile = "AGENT_NOTES_FILE";

@@ -1,7 +1,9 @@
 #nullable enable
+using CascadeIDE.Contracts;
 namespace CascadeIDE.Features.Workspace.DataAcquisition;
 
 /// <summary>Разрешение пути к <c>.sln</c> из аргумента MCP <c>workspace_path</c> (каталог, файл решения или произвольный файл в дереве).</summary>
+[IoBoundary]
 public static class DebugWorkspacePath
 {
     /// <summary>

@@ -1,6 +1,8 @@
+using CascadeIDE.Contracts;
 namespace CascadeIDE.Features.Settings.DataAcquisition;
 
 /// <summary>DAL: безопасное чтение/запись текста с диска для настроек и соседних JSON.</summary>
+[IoBoundary]
 public static class TextFileReadWrite
 {
     public static string? TryReadAllTextIfExists(string path)

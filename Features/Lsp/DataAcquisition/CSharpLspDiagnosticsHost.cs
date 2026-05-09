@@ -6,6 +6,7 @@ using System.Text.Json.Nodes;
 using Avalonia.Threading;
 using CascadeIDE.Services.Lsp;
 using Microsoft.CodeAnalysis;
+using CascadeIDE.Contracts;
 
 #nullable enable
 
@@ -17,6 +18,8 @@ namespace CascadeIDE.Features.Lsp.DataAcquisition;
 /// didOpen / didChange (full sync) для открытых .cs.
 /// Транспорт и JSON-RPC — <see cref="LspStdioSession"/>.
 /// </summary>
+[IoBoundary("lsp-csharp-stdio")]
+[UiThreadMarshal("diagnostics coalesce → UI Post")]
 public sealed class CSharpLspDiagnosticsHost : ILspDiagnosticSource
 {
     private readonly ConcurrentDictionary<string, List<EditorDiagnosticStrip>> _strips = new(StringComparer.OrdinalIgnoreCase);

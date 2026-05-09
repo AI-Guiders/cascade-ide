@@ -1,9 +1,11 @@
+using CascadeIDE.Contracts;
 namespace CascadeIDE.Features.Settings.DataAcquisition;
 
 /// <summary>
 /// DAL: merged-словарь из штатного <c>Hotkeys/hotkeys.toml</c> и
 /// <c>%LocalAppData%\CascadeIDE\hotkeys.toml</c> (оверлей поверх).
 /// </summary>
+[IoBoundary]
 public static class HotkeyTomlLoader
 {
     public static Dictionary<string, string> LoadMergedDictionary()

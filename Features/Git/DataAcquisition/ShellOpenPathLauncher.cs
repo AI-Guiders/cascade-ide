@@ -2,10 +2,12 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using CascadeIDE.Features.Os.DataAcquisition;
+using CascadeIDE.Contracts;
 
 namespace CascadeIDE.Features.Git.DataAcquisition;
 
 /// <summary>DAL: открытие пути в оболочке ОС (например папка в Explorer).</summary>
+[IoBoundary]
 public static class ShellOpenPathLauncher
 {
     [Obsolete("Use CascadeIDE.Features.Os.DataAcquisition.OsShellLauncher instead.")]

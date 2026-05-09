@@ -1,7 +1,9 @@
 #nullable enable
+using CascadeIDE.Contracts;
 namespace CascadeIDE.Features.Workspace.DataAcquisition;
 
 /// <summary>Поиск файла решения (.slnx / .sln / .slnf) относительно пути к исходнику.</summary>
+[IoBoundary]
 public static class SolutionFileLocator
 {
     /// <summary>

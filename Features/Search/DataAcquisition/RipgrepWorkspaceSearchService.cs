@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Text.Json;
+using CascadeIDE.Contracts;
 
 namespace CascadeIDE.Features.Search.DataAcquisition;
 
@@ -13,6 +14,7 @@ public readonly record struct RipgrepWorkspaceMatch(string Path, int LineNumber,
 /// По умолчанию запускается имя <c>rg</c> (разрешение через PATH ОС). Отдельный бинарь в составе IDE не поставляется —
 /// на любой платформе достаточно установить ripgrep и убедиться, что <c>rg</c> находится в PATH; иначе передай полный путь в <c>rg_path</c>.
 /// </remarks>
+[IoBoundary]
 public static class RipgrepWorkspaceSearchService
 {
     private const int DefaultMaxMatches = 200;

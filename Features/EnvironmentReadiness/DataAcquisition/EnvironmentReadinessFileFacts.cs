@@ -1,8 +1,10 @@
 #nullable enable
 
+using CascadeIDE.Contracts;
 namespace CascadeIDE.Features.EnvironmentReadiness.DataAcquisition;
 
 /// <summary>Минимальные fs-факты для readiness без I/O в Application (ADR 0102).</summary>
+[IoBoundary]
 public static class EnvironmentReadinessFileFacts
 {
     public static bool SolutionPathIsExistingFile(string? path) =>

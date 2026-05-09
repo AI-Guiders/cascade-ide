@@ -1,6 +1,8 @@
+using CascadeIDE.Contracts;
 namespace CascadeIDE.Features.Settings.DataAcquisition;
 
 /// <summary>DAL: каталог и пути к файлам настроек в %LocalAppData%\CascadeIDE\.</summary>
+[IoBoundary]
 public static class UserSettingsPaths
 {
     public static string GetSettingsDirectory()

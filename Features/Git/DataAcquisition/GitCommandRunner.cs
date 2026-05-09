@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using CascadeIDE.Contracts;
 
 namespace CascadeIDE.Features.Git.DataAcquisition;
 
@@ -6,6 +7,7 @@ namespace CascadeIDE.Features.Git.DataAcquisition;
 /// DAL: запуск внешнего <c>git</c> в рабочем каталоге (процесс, чтение stdout/stderr).
 /// </summary>
 /// <inheritdoc cref="IGitCommandRunner" />
+[IoBoundary]
 public sealed class GitCommandRunner : IGitCommandRunner
 {
     public const int MaxOutputChars = 250_000;

@@ -5,6 +5,7 @@ using System.Text.Json;
 using CascadeIDE.Models;
 using Microsoft.VisualStudio.SolutionPersistence.Model;
 using Microsoft.VisualStudio.SolutionPersistence.Serializer;
+using CascadeIDE.Contracts;
 
 namespace CascadeIDE.Features.Workspace.DataAcquisition;
 
@@ -12,6 +13,7 @@ namespace CascadeIDE.Features.Workspace.DataAcquisition;
 /// Загрузка .sln / .slnx / .slnf, либо одного .csproj/.fsproj (без solution-файла), и построение дерева <see cref="SolutionItem"/>.
 /// Файлы внутри .csproj — <see cref="ProjectFileTreeBuilder"/>.
 /// </summary>
+[IoBoundary]
 public static class SolutionParser
 {
     public static SolutionItem? Load(string solutionPath, out string? error)

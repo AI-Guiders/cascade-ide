@@ -1,9 +1,11 @@
 #nullable enable
 using System.Diagnostics;
 using System.IO;
+using CascadeIDE.Contracts;
 
 namespace CascadeIDE.Features.Os.DataAcquisition;
 
+[IoBoundary]
 public interface IOsShellLauncher
 {
     void TryOpen(string target, Action<string>? onError = null);
@@ -16,6 +18,7 @@ public interface IOsShellLauncher
 /// DAL: centralized OS-shell interactions (open path/url with default handler).
 /// Cross-feature dependency point for "ask OS to open something".
 /// </summary>
+[IoBoundary]
 public sealed class OsShellLauncher : IOsShellLauncher
 {
     public void TryOpen(string target, Action<string>? onError = null)
@@ -90,6 +93,7 @@ public sealed class OsShellLauncher : IOsShellLauncher
 }
 
 /// <summary>Access to the default OS shell launcher (until full DI is introduced).</summary>
+[IoBoundary]
 public static class OsShell
 {
     public static IOsShellLauncher Default { get; } = new OsShellLauncher();

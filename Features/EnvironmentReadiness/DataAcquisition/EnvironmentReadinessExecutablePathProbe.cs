@@ -1,10 +1,12 @@
 #nullable enable
 
+using CascadeIDE.Contracts;
 namespace CascadeIDE.Features.EnvironmentReadiness.DataAcquisition;
 
 /// <summary>
 /// Проверка существования исполняемого файла: явный путь или поиск по PATH (+ PATHEXT на Windows), как для NETCOREDBG_PATH (ADR 0023, DAL).
 /// </summary>
+[IoBoundary]
 public static class EnvironmentReadinessExecutablePathProbe
 {
     /// <summary>Возвращает полный путь к существующему файлу или null.</summary>

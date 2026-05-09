@@ -1,12 +1,14 @@
 #nullable enable
 using System.Diagnostics;
 using System.Text;
+using CascadeIDE.Contracts;
 
 namespace CascadeIDE.Features.CursorAcp.DataAcquisition;
 
 /// <summary>
 /// DAL: stdio-процесс <c>cursor-agent acp</c> для <see cref="CascadeIDE.Services.CursorAcp.CursorAcpChatConnection"/> (UTF-8, перенаправленные потоки).
 /// </summary>
+[IoBoundary]
 public static class CursorAcpChatAgentProcess
 {
     /// <summary>

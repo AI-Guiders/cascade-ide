@@ -1,10 +1,12 @@
 using CascadeIDE.Models;
+using CascadeIDE.Contracts;
 
 namespace CascadeIDE.Features.Workspace.DataAcquisition;
 
 /// <summary>
 /// Дерево обозревателя для режима «папка как workspace» (без .sln): каталоги и файлы с отсечением по глубине/числу узлов.
 /// </summary>
+[IoBoundary]
 public static class FolderWorkspaceTreeBuilder
 {
     private const int MaxDepth = 14;

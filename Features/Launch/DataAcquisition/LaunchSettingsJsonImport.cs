@@ -1,12 +1,14 @@
 #nullable enable
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
+using CascadeIDE.Contracts;
 
 namespace CascadeIDE.Features.Launch.DataAcquisition;
 
 /// <summary>
 /// Чтение SDK <c>Properties/launchSettings.json</c> и сопоставление с <see cref="LaunchProfileModel"/> (только <c>commandName: Project</c>, Kestrel).
 /// </summary>
+[IoBoundary]
 internal static class LaunchSettingsJsonImport
 {
     internal static bool TryReadProjectProfiles(

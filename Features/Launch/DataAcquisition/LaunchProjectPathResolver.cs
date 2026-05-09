@@ -1,11 +1,13 @@
 #nullable enable
 using System.Diagnostics.CodeAnalysis;
+using CascadeIDE.Contracts;
 
 namespace CascadeIDE.Features.Launch.DataAcquisition;
 
 /// <summary>
 /// DAL external adapter: резолв и проверка пути к .csproj в файловой системе.
 /// </summary>
+[IoBoundary]
 public static class LaunchProjectPathResolver
 {
     public static bool TryGetExistingCsprojFullPath(

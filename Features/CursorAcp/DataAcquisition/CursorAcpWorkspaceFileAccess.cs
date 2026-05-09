@@ -1,8 +1,10 @@
+using CascadeIDE.Contracts;
 namespace CascadeIDE.Features.CursorAcp.DataAcquisition;
 
 /// <summary>
 /// DAL: разрешение путей внутри workspace и чтение/запись текста (инструменты ACP, без обхода корня).
 /// </summary>
+[IoBoundary]
 public static class CursorAcpWorkspaceFileAccess
 {
     /// <summary>Абсолютный путь, если <paramref name="path"/> внутри <paramref name="workspaceRoot"/>; иначе <c>null</c>.</summary>

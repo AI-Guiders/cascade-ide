@@ -1,6 +1,7 @@
 using System.Xml.Linq;
 using CascadeIDE.Models;
 using CascadeIDE.Services;
+using CascadeIDE.Contracts;
 
 namespace CascadeIDE.Features.Workspace.DataAcquisition;
 
@@ -8,6 +9,7 @@ namespace CascadeIDE.Features.Workspace.DataAcquisition;
 /// Дерево файлов проекта для обозревателя: разбор .csproj (Compile/None/…), SDK-glob,
 /// <see cref="DependentUpon"/> и эвристика partial-классов. Не занимается загрузкой .sln.
 /// </summary>
+[IoBoundary]
 public static class ProjectFileTreeBuilder
 {
     /// <param name="solutionBaseDirectoryForIgnore">Каталог с <c>.sln</c> — для поиска корня репозитория и загрузки <c>.gitignore</c> / <c>.cascadeignore</c>.</param>

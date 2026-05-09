@@ -1,11 +1,13 @@
 #nullable enable
 using System.Diagnostics.CodeAnalysis;
+using CascadeIDE.Contracts;
 
 namespace CascadeIDE.Features.Launch.DataAcquisition;
 
 /// <summary>
 /// <c>.cascade-ide/launch-profiles.toml</c> — каталог launch profiles (ADR 0090), миграция с <c>startup-project.json</c>.
 /// </summary>
+[IoBoundary]
 public static class LaunchProfilesStore
 {
     public const string FileName = "launch-profiles.toml";
@@ -426,6 +428,7 @@ public readonly record struct LaunchProfileData(
     // launchUrl / launch_url: full URL or path; merged with first application URL if relative.
     string? LaunchUrl);
 
+[IoBoundary]
 internal sealed class LaunchProfilesTomlModel
 {
     public int Version { get; set; } = 1;
@@ -433,6 +436,7 @@ internal sealed class LaunchProfilesTomlModel
     public Dictionary<string, LaunchProfileModel>? Profiles { get; set; }
 }
 
+[IoBoundary]
 internal sealed class LaunchProfileModel
 {
     public string? Project { get; set; }

@@ -2,10 +2,12 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using CascadeIDE.Features.Os.DataAcquisition;
+using CascadeIDE.Contracts;
 
 namespace CascadeIDE.Features.Launch.DataAcquisition;
 
 /// <summary>Открытие URL после старта Kestrel: <c>launchUrl</c> (как в VS) или первый <c>http(s)</c> из <c>ASPNETCORE_URLS</c>.</summary>
+[IoBoundary]
 public static class KestrelLaunchBrowser
 {
     /// <summary>Устаревшее имя: то же, что <see cref="TryOpenAfterLaunch"/> без <paramref name="launchUrl"/>.</summary>

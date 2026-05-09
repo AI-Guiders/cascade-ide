@@ -1,12 +1,14 @@
 using System.Diagnostics;
 using System.Text;
 using AgentClientProtocol;
+using CascadeIDE.Contracts;
 
 namespace CascadeIDE.Features.CursorAcp.DataAcquisition;
 
 /// <summary>
 /// Процессы ACP <c>terminal/*</c>: вывод в буфер для опроса агентом и зеркалирование в UI нижней панели.
 /// </summary>
+[IoBoundary]
 internal sealed class AcpTerminalHost
 {
     private readonly object _mapLock = new();

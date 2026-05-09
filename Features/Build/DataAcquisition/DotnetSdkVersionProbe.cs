@@ -1,11 +1,13 @@
 #nullable enable
 using System.Diagnostics;
+using CascadeIDE.Contracts;
 
 namespace CascadeIDE.Features.Build.DataAcquisition;
 
 /// <summary>
 /// DAL: однократный запуск <c>dotnet --version</c> для индикаторов готовности окружения.
 /// </summary>
+[IoBoundary]
 public static class DotnetSdkVersionProbe
 {
     public static async Task<DotnetSdkVersionProbeResult> RunAsync(CancellationToken cancellationToken = default)

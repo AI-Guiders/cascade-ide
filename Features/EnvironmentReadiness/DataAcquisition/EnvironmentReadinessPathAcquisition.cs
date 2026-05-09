@@ -1,5 +1,7 @@
 #nullable enable
 
+using CascadeIDE.Contracts;
+
 namespace CascadeIDE.Features.EnvironmentReadiness.DataAcquisition;
 
 /// <summary>Классификация путей env для agent-notes (DAL, без UI-текстов).</summary>
@@ -31,6 +33,7 @@ public enum NetcoreDbgPathKind
 }
 
 /// <summary>Fs/PATH-логика для строк env-готовности; Application только маппит в AnnunciatorLampItem.</summary>
+[IoBoundary]
 public static class EnvironmentReadinessPathAcquisition
 {
     public static AgentNotesFilePathKind ClassifyAgentNotesFilePath(string? raw)

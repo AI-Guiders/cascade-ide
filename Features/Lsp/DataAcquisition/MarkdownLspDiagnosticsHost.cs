@@ -7,6 +7,7 @@ using Avalonia.Threading;
 using CascadeIDE.Services;
 using CascadeIDE.Services.Lsp;
 using Microsoft.CodeAnalysis;
+using CascadeIDE.Contracts;
 
 #nullable enable
 
@@ -16,6 +17,8 @@ namespace CascadeIDE.Features.Lsp.DataAcquisition;
 /// Один процесс Markdown LSP (stdio), по умолчанию Marksman: корень workspace = каталог решения,
 /// <see cref="textDocument/publishDiagnostics"/> для <c>*.md</c>. Транспорт — <see cref="LspStdioSession"/>.
 /// </summary>
+[IoBoundary("lsp-markdown-stdio")]
+[UiThreadMarshal("diagnostics coalesce → UI Post")]
 public sealed class MarkdownLspDiagnosticsHost : ILspDiagnosticSource
 {
     private readonly ConcurrentDictionary<string, List<EditorDiagnosticStrip>> _strips = new(StringComparer.OrdinalIgnoreCase);

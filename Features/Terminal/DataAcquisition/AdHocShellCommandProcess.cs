@@ -1,11 +1,13 @@
 #nullable enable
 using System.Diagnostics;
+using CascadeIDE.Contracts;
 
 namespace CascadeIDE.Features.Terminal.DataAcquisition;
 
 /// <summary>
 /// DAL: однократный запуск <c>cmd /c</c> или <c>sh -c</c> в каталоге для нижней панели «Terminal».
 /// </summary>
+[IoBoundary]
 public static class AdHocShellCommandProcess
 {
     public static Process? TryStart(string workingDirectory, string userCommand, out string? startError)

@@ -1,6 +1,8 @@
+using CascadeIDE.Contracts;
 namespace CascadeIDE.Features.CursorAcp.DataAcquisition;
 
 /// <summary>Сопоставление пути из настроек с <c>cursor-agent.cmd</c> из пакета Cursor ACP.</summary>
+[IoBoundary]
 public static class CursorAcpAgentPath
 {
     /// <summary>Возвращает полный путь к cmd и рабочий каталог для процесса.</summary>
