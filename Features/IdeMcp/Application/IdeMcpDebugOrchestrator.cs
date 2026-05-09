@@ -1,4 +1,3 @@
-using System.IO;
 using System.Text.Json;
 using CascadeIDE.Services;
 
@@ -32,7 +31,7 @@ public static class IdeMcpDebugOrchestrator
         }
 
         var positionFile = !string.IsNullOrEmpty(s.StoppedFile)
-            ? Path.GetFullPath(s.StoppedFile)
+            ? CanonicalFilePath.Normalize(s.StoppedFile)
             : null;
 
         var attemptOpen = s.IsExecutionStopped && !string.IsNullOrEmpty(s.StoppedFile);

@@ -1,5 +1,3 @@
-using CascadeIDE.Services;
-
 namespace CascadeIDE.Features.IdeMcp.Application;
 
 /// <summary>
@@ -34,7 +32,7 @@ public static class IdeMcpUiAutomationOrchestrator
         string.IsNullOrEmpty(filePath) || line < 1;
 
     public static string NormalizeBreakpointFilePath(string filePath) =>
-        Path.GetFullPath(filePath);
+        CanonicalFilePath.Normalize(filePath);
 
     public static async Task<string> InvokeJsonProviderOrDefaultAsync(
         IUiScheduler ui,

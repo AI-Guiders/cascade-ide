@@ -17,7 +17,7 @@
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:BEGIN -->
 
-`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~7.7k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~6.5k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.1k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
+`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~7.7k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~6.6k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.1k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:END -->
 
@@ -52,7 +52,7 @@
 | `MainWindowViewModel.IdeHealth.cs` | 95 | Связка с Workspace Health. |
 | `MainWindowViewModel.IdeMcpActions.AgentNotes.cs` | 44 | Реализация `IIdeMcpActions`: agent-notes. |
 | `MainWindowViewModel.IdeMcpActions.BuildTest.cs` | 166 | MCP: сборка, тесты. |
-| `MainWindowViewModel.IdeMcpActions.DebuggerPanel.cs` | 75 | Панель отладки и снимок DAP (ADR 0002): один `DebugSessionSnapshot`. |
+| `MainWindowViewModel.IdeMcpActions.DebuggerPanel.cs` | 76 | Панель отладки и снимок DAP (ADR 0002): один `DebugSessionSnapshot`. |
 | `MainWindowViewModel.IdeMcpActions.Editor.cs` | 128 | MCP: редактор. |
 | `MainWindowViewModel.IdeMcpActions.Git.cs` | 48 | MCP: git (`IdeMcpGitWorkspaceSession`). |
 | `MainWindowViewModel.IdeMcpActions.HybridCodebaseIndex.cs` | 103 | MCP / ide_execute_command: Hybrid Codebase Index (имена команд как у внешнего MCP). |
@@ -65,7 +65,7 @@
 | `MainWindowViewModel.LayoutNotifications.cs` | 17 | Инвалидация производных высот `MainGrid` без длинных цепочек `NotifyPropertyChangedFor` в ShellState. |
 | `MainWindowViewModel.MarkdownExport.cs` | 55 | Экспорт Markdown. |
 | `MainWindowViewModel.MarkdownLsp.cs` | 103 | Запуск/перезапуск Markdown LSP. |
-| `MainWindowViewModel.McpBreakpointReveal.cs` | 61 | MCP: постановка брейкпоинта с загрузкой решения и показом строки в редакторе. |
+| `MainWindowViewModel.McpBreakpointReveal.cs` | 62 | MCP: постановка брейкпоинта с загрузкой решения и показом строки в редакторе. |
 | `MainWindowViewModel.MfdShell.cs` | 88 | Оболочка Mfd: одна активная страница; навигация — команды и палитра. Якорь на экране задаётся presentation (зона Mfd в main и/или окно-хост). |
 | `MainWindowViewModel.Presentation.cs` | 282 | Вычисляемые свойства разметки, Workspace Health и видимости панелей (режимы UI). |
 | `MainWindowViewModel.PresentationLayout.cs` | 207 | ADR 0017: строка `presentation` и второй `TopLevel` — `MfdHostWindow` с полным вторичным контуром (п. 8). |

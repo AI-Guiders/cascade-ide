@@ -32,9 +32,9 @@ public partial class MainWindowViewModel
     {
         if (string.IsNullOrEmpty(filePath))
             return [];
-        var normalized = Path.GetFullPath(filePath);
+        var normalized = CanonicalFilePath.Normalize(filePath);
         return DapDebug.GetSnapshot().Breakpoints
-            .Where(b => string.Equals(Path.GetFullPath(b.File), normalized, StringComparison.OrdinalIgnoreCase))
+            .Where(b => CanonicalFilePath.EqualsNormalized(normalized, b.File))
             .Select(b => b.Line)
             .OrderBy(static line => line)
             .Distinct()
@@ -58,7 +58,7 @@ public partial class MainWindowViewModel
     {
         if (string.IsNullOrEmpty(DebugPositionFile) || string.IsNullOrEmpty(filePath))
             return 0;
-        if (!string.Equals(Path.GetFullPath(DebugPositionFile), Path.GetFullPath(filePath), StringComparison.OrdinalIgnoreCase))
+        if (!CanonicalFilePath.Equals(DebugPositionFile, filePath))
             return 0;
         return DebugPositionLine;
     }

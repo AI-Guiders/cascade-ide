@@ -61,9 +61,9 @@ public static class BreakpointsFileService
         if (string.IsNullOrEmpty(entryFile))
             return null;
         if (Path.IsPathRooted(entryFile))
-            return Path.GetFullPath(entryFile);
+            return CanonicalFilePath.Normalize(entryFile);
         var wsDir = Path.GetDirectoryName(GetFilePath(workspacePath));
-        return string.IsNullOrEmpty(wsDir) ? null : Path.GetFullPath(Path.Combine(wsDir, entryFile));
+        return string.IsNullOrEmpty(wsDir) ? null : CanonicalFilePath.Normalize(Path.Combine(wsDir, entryFile));
     }
 
     /// <summary>Номера строк с брейкпоинтами из файла для указанного файла (по всем targets).</summary>
@@ -71,7 +71,7 @@ public static class BreakpointsFileService
     {
         if (string.IsNullOrEmpty(filePath))
             return [];
-        var normalized = Path.GetFullPath(filePath);
+        var normalized = CanonicalFilePath.Normalize(filePath);
         var model = BreakpointsStorage.Load(workspacePath);
         var lines = new HashSet<int>();
         foreach (var list in model.Targets.Values)
@@ -79,7 +79,7 @@ public static class BreakpointsFileService
             foreach (var entry in list)
             {
                 var entryPath = NormalizeEntryPath(workspacePath, entry.File);
-                if (entryPath != null && string.Equals(entryPath, normalized, StringComparison.OrdinalIgnoreCase))
+                if (entryPath != null && CanonicalFilePath.Equals(entryPath, normalized))
                     lines.Add(entry.Line);
             }
         }
@@ -91,7 +91,7 @@ public static class BreakpointsFileService
     {
         var ws = GetWorkspaceRoot(workspacePath);
         var model = BreakpointsStorage.Load(workspacePath);
-        var preferred = Path.GetFullPath(GetBundledSampleDebugTargetDllPath(workspacePath));
+        var preferred = CanonicalFilePath.Normalize(GetBundledSampleDebugTargetDllPath(workspacePath));
         if (model.Targets.ContainsKey(preferred))
             return preferred;
         var key = model.Targets.Keys.FirstOrDefault(k => k.StartsWith(ws, StringComparison.OrdinalIgnoreCase));
@@ -103,13 +103,13 @@ public static class BreakpointsFileService
     {
         if (line < 1 || string.IsNullOrEmpty(filePath))
             return;
-        var path = Path.GetFullPath(filePath);
-        var target = Path.GetFullPath(GetBundledSampleDebugTargetDllPath(workspacePath));
+        var path = CanonicalFilePath.Normalize(filePath);
+        var target = CanonicalFilePath.Normalize(GetBundledSampleDebugTargetDllPath(workspacePath));
         var list = BreakpointsStorage.GetBreakpoints(workspacePath, target).ToList();
         list.RemoveAll(e =>
         {
             var ep = NormalizeEntryPath(workspacePath, e.File);
-            return ep != null && string.Equals(ep, path, StringComparison.OrdinalIgnoreCase) && e.Line == line;
+            return ep != null && CanonicalFilePath.Equals(ep, path) && e.Line == line;
         });
         list.Add(new BreakpointsStorage.BreakpointEntry(path, line, condition));
         BreakpointsStorage.SetBreakpoints(workspacePath, target, list);
@@ -120,13 +120,13 @@ public static class BreakpointsFileService
     {
         if (line < 1 || string.IsNullOrEmpty(filePath))
             return;
-        var path = Path.GetFullPath(filePath);
-        var target = Path.GetFullPath(GetBundledSampleDebugTargetDllPath(workspacePath));
+        var path = CanonicalFilePath.Normalize(filePath);
+        var target = CanonicalFilePath.Normalize(GetBundledSampleDebugTargetDllPath(workspacePath));
         var list = BreakpointsStorage.GetBreakpoints(workspacePath, target).ToList();
         list.RemoveAll(e =>
         {
             var ep = NormalizeEntryPath(workspacePath, e.File);
-            return ep != null && string.Equals(ep, path, StringComparison.OrdinalIgnoreCase) && e.Line == line;
+            return ep != null && CanonicalFilePath.Equals(ep, path) && e.Line == line;
         });
         BreakpointsStorage.SetBreakpoints(workspacePath, target, list);
     }
@@ -135,12 +135,12 @@ public static class BreakpointsFileService
     public static void ToggleBreakpoint(string workspacePath, string filePath, int line)
     {
         if (line < 1) return;
-        var path = Path.GetFullPath(filePath);
+        var path = CanonicalFilePath.Normalize(filePath);
         var model = BreakpointsStorage.Load(workspacePath);
         var targetKey = GetPreferredTargetKey(workspacePath);
         if (string.IsNullOrEmpty(targetKey))
         {
-            targetKey = Path.GetFullPath(GetBundledSampleDebugTargetDllPath(workspacePath));
+            targetKey = CanonicalFilePath.Normalize(GetBundledSampleDebugTargetDllPath(workspacePath));
             if (!model.Targets.ContainsKey(targetKey))
                 model.Targets[targetKey] = [];
         }
@@ -153,7 +153,7 @@ public static class BreakpointsFileService
         var removed = list.RemoveAll(e =>
         {
             var ep = NormalizeEntryPath(workspacePath, e.File);
-            return ep != null && string.Equals(ep, fileNorm, StringComparison.OrdinalIgnoreCase) && e.Line == line;
+            return ep != null && CanonicalFilePath.Equals(ep, fileNorm) && e.Line == line;
         });
         if (removed == 0)
             list.Add(new BreakpointsStorage.BreakpointEntry(path, line));

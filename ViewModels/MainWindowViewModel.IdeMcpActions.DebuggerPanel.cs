@@ -1,5 +1,6 @@
 using CascadeIDE.Features.IdeMcp.Application;
 using CascadeIDE.Models;
+using CascadeIDE.Services;
 
 namespace CascadeIDE.ViewModels;
 
@@ -29,8 +30,8 @@ public partial class MainWindowViewModel
             && !string.IsNullOrEmpty(stoppedPath)
             && File.Exists(stoppedPath))
         {
-            var normalized = Path.GetFullPath(stoppedPath);
-            if (!string.Equals(CurrentFilePath, normalized, StringComparison.OrdinalIgnoreCase))
+            var normalized = CanonicalFilePath.Normalize(stoppedPath);
+            if (!CanonicalFilePath.Equals(CurrentFilePath, normalized))
             {
                 IsLoadingCurrentFile = true;
                 try

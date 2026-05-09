@@ -1,5 +1,7 @@
 #nullable enable
 
+using CascadeIDE.Services;
+
 namespace CascadeIDE.ViewModels;
 
 /// <summary>MCP: постановка брейкпоинта с загрузкой решения и показом строки в редакторе.</summary>
@@ -10,7 +12,7 @@ public partial class MainWindowViewModel
     {
         if (string.IsNullOrEmpty(filePath) || line < 1)
             return;
-        var path = Path.GetFullPath(filePath);
+        var path = CanonicalFilePath.Normalize(filePath);
         var ws = GetWorkspacePath();
         if (!string.IsNullOrEmpty(ws))
             Services.BreakpointsFileService.SetBreakpointForBundledSampleTarget(ws, path, line, condition);
@@ -28,7 +30,7 @@ public partial class MainWindowViewModel
         string path;
         try
         {
-            path = Path.GetFullPath(filePath);
+            path = CanonicalFilePath.Normalize(filePath);
         }
         catch
         {

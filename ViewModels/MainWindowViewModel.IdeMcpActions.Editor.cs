@@ -14,7 +14,7 @@ public partial class MainWindowViewModel
         {
             if (!File.Exists(pathCopy))
                 return;
-            var normalizedPath = Path.GetFullPath(pathCopy);
+            var normalizedPath = CanonicalFilePath.Normalize(pathCopy);
             IsLoadingCurrentFile = true;
             try
             {
