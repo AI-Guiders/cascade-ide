@@ -17,7 +17,7 @@
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:BEGIN -->
 
-`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~7.7k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~6.5k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.1k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
+`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~7.7k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~6.6k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.1k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:END -->
 
@@ -67,7 +67,7 @@
 | `MainWindowViewModel.MarkdownLsp.cs` | 103 | Запуск/перезапуск Markdown LSP. |
 | `MainWindowViewModel.McpBreakpointReveal.cs` | 62 | MCP: постановка брейкпоинта с загрузкой решения и показом строки в редакторе. |
 | `MainWindowViewModel.MfdShell.cs` | 88 | Оболочка Mfd: одна активная страница; навигация — команды и палитра. Якорь на экране задаётся presentation (зона Mfd в main и/или окно-хост). |
-| `MainWindowViewModel.Presentation.cs` | 264 | Вычисляемые свойства разметки, Workspace Health и видимости панелей (режимы UI). |
+| `MainWindowViewModel.Presentation.cs` | 276 | Вычисляемые свойства разметки, Workspace Health и видимости панелей (режимы UI). |
 | `MainWindowViewModel.PresentationLayout.CockpitSurfaceSnapshot.cs` | 8 | Сборка `CockpitSurfaceState` главного окна (`Build`). |
 | `MainWindowViewModel.PresentationLayout.cs` | 91 | ADR 0017: строка `presentation` и второй `TopLevel` — `MfdHostWindow` с полным вторичным контуром (п. 8). |
 | `MainWindowViewModel.PresentationLayout.HostShell.cs` | 47 | События «окно-хост открыло полный контур» — скрытие колонок в main (`PresentationLayout`). |
@@ -238,6 +238,7 @@
 - Второй срез: **`WorkspaceNavigationMapContextJsonBuilder`** (ветвление related / subgraph / control-flow JSON внутри фонового refresh) и **`CodeNavigationMapViewportPolicy`** (пороги ширины viewport мини-карты); тесты `WorkspaceNavigationMapContextAndViewportTests`.
 - Третий срез: **`WorkspaceNavigationMapRefreshComposer`** — разбор JSON refresh, композиция сцены + trace-flow, related-строки; **снимок CDS для control-flow** собирается на **UI-потоке** вместе с контекстом refresh и передаётся в композитор как `CockpitSurfaceState` (без чтения VM с пула); тесты `WorkspaceNavigationMapRefreshComposerTests`.
 - Четвёртый срез (**v1.40e**): partial **`MainWindowViewModel.WorkspaceNavigationMap.Refresh`** — debounce、`RunWorkspaceNavigationMapRefreshAsync` и viewport width; файл привязок/команд карты (**`WorkspaceNavigationMap.cs`**) укорочен до состояния и проекций.
+  - пятый срез (**v1.40f**): **`MainWindowPresentationSurfaceProjection`** — видимость сплита main grid (`IsMainGridSplitColumnVisible`), флаги Skia-mount IDE Health (колонка / окно-хост), **`ResolveInstrumentMountStyleForSlot`**; отдельно **`MainWindowPresentationDapProjection`** для паузы/«running» DAP; геттеры **`MainWindowViewModel.Presentation`** только делегируют; тесты **`MainWindowPresentationDapProjectionTests`** и доп. кейсы в **`MainWindowPresentationSurfaceProjectionTests`**.
 
 ## Версионирование
 
@@ -286,3 +287,4 @@
 - **v1.40c** — **`MainWindowViewModel.PresentationLayout`**: несколько **`PresentationLayout.*`** partial-файлов (топология, host-shell инвалидация, сохранённые bounds окон-хостов, CDS snapshot).
 - **v1.40d** — **`MainWindowPresentationCapabilitiesProjection`** + тесты; геттеры **`Presentation`** делегируют цепочки capabilities/Skia/safety/LOC.
 - **v1.40e** — **`MainWindowViewModel.WorkspaceNavigationMap.Refresh`**: поток обновления карты отделён от partial с привязками PFD.
+- **v1.40f** — расширение **`MainWindowPresentationSurfaceProjection`** (split/Mount-style/IDE Health mount) + **`MainWindowPresentationDapProjection`**; VM без локальных помощников резолва mount-style.
