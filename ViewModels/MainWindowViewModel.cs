@@ -14,6 +14,7 @@ using CascadeIDE.Cockpit.Channels.EnvironmentReadiness;
 using CascadeIDE.Cockpit.Channels.WorkspaceHealth;
 using CascadeIDE.Cockpit.ComputingUnits.IdeHealth;
 using CascadeIDE.Cockpit.DataBus;
+using CascadeIDE.Contracts;
 using CascadeIDE.Cockpit.Composition.EnvironmentReadiness;
 using CascadeIDE.Cockpit.Composition.WorkspaceHealth;
 using CascadeIDE.Cockpit.Composition.HostSurface;
@@ -30,6 +31,7 @@ namespace CascadeIDE.ViewModels;
 /// Главный композитор окна (partial-класс, несколько <c>MainWindowViewModel*.cs</c>).
 /// Карта файлов и ответственности — <c>docs/architecture-migration.md</c>, раздел «Срез MainWindowViewModel».
 /// </summary>
+[DataBusPublisher("ide-health & related domain signals")]
 public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpActions, IAutonomousAgentSessionHost,
     IMainWindowHostSurfaceInput
 {

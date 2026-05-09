@@ -10,6 +10,7 @@ namespace CascadeIDE.Features.HybridIndex.Application;
 
 /// <summary>Оркестратор in-proc Hybrid Codebase Index (ADR 0106): watcher + debounce + публикация статуса в DataBus.</summary>
 [ApplicationOrchestrator("hybrid-index-in-proc")]
+[DataBusPublisher("hybrid-index-status")]
 public sealed class HybridIndexOrchestrator : IDisposable
 {
     private sealed record WatchKey(string WorkspaceRoot, string? SolutionPath)

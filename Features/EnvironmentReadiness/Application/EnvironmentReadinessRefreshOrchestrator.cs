@@ -12,6 +12,7 @@ namespace CascadeIDE.Features.EnvironmentReadiness.Application;
 /// Сценарий обновления страницы «готовность окружения» (ADR 0023/0102): канал → снимок, затем маршалинг <see cref="IEnvironmentReadinessSurfaceCompositor.Compose"/> на UI.
 /// </summary>
 [ApplicationOrchestrator]
+[UiThreadMarshal("UiScheduler.InvokeAsync compositor")]
 public static class EnvironmentReadinessRefreshOrchestrator
 {
     public static async Task RunAsync(

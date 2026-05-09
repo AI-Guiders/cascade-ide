@@ -9,6 +9,7 @@ using CascadeIDE.Services;
 /// Не тянет <c>UiChromeViewModel</c> / DAP / git напрямую. Продуктовое имя канала — IDE Health (ADR 0089).
 /// </summary>
 [ComputingUnit]
+[DataBusSubscriber("ide-health-ccu")]
 public sealed class IdeHealthSnapshotUnit : Channels.WorkspaceHealth.IIdeHealthChannel, IDisposable
 {
     private readonly IdeHealthScopeDecisionUnit _scopeDecision = IdeHealthScopeDecisionUnit.Default;

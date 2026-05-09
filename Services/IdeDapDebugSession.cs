@@ -1,11 +1,13 @@
 using System.Text;
 using System.Text.Json;
 using CascadeIDE.Cockpit.DataBus;
+using CascadeIDE.Contracts;
 using DotnetDebug.Core;
 
 namespace CascadeIDE.Services;
 
 /// <summary>Одна активная DAP-сессия (netcoredbg) для IDE: launch/attach, шаги, канонический <see cref="DebugSessionSnapshot"/>.</summary>
+[DataBusPublisher("debug-state")]
 public sealed class IdeDapDebugSession
 {
     private readonly Action? _onSnapshotChanged;
