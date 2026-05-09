@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using CascadeIDE.Cockpit.DataBus;
+using CascadeIDE.Features.Launch.Application;
 using CascadeIDE.Features.Workspace.Application;
 using CascadeIDE.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -20,11 +21,11 @@ public partial class MainWindowViewModel
     public bool HasStartupProject => !string.IsNullOrEmpty(StartupProjectCsprojFullPath);
 
     public string StartupProjectBanner =>
-        HasStartupProject
-            ? (ShowLaunchProfilePicker && !string.IsNullOrEmpty(SelectedLaunchProfileId)
-                ? $"Старт отладки (F5): {StartupProjectShortLabel} · {SelectedLaunchProfileId}"
-                : $"Старт отладки (F5): {StartupProjectShortLabel}")
-            : "";
+        StartupProjectBannerProjection.Format(
+            HasStartupProject,
+            ShowLaunchProfilePicker,
+            SelectedLaunchProfileId,
+            StartupProjectShortLabel);
 
     partial void OnStartupProjectCsprojFullPathChanged(string? value)
     {
@@ -89,11 +90,10 @@ public partial class MainWindowViewModel
         if (!projectPathSet.Contains(only))
             return;
 
+        if (!LaunchProjectRelativePath.TryGetRelativeToSolutionDirectory(solutionDir, only, out var rel, out _))
+            return;
         try
         {
-            var rel = Path.GetRelativePath(solutionDir, only);
-            if (rel.StartsWith("..", StringComparison.Ordinal))
-                return;
             StartupProjectStore.Save(sln, rel);
         }
         catch
@@ -197,11 +197,10 @@ public partial class MainWindowViewModel
         var full = CanonicalFilePath.Normalize(path);
         try
         {
-            var rel = Path.GetRelativePath(solutionDir, full);
-            if (rel.StartsWith("..", StringComparison.Ordinal))
+            if (!LaunchProjectRelativePath.TryGetRelativeToSolutionDirectory(solutionDir, full, out var rel, out var relErr))
             {
                 await ShowDebugInfoAsync("Стартовый проект",
-                        "Проект должен находиться внутри каталога решения.")
+                        string.IsNullOrEmpty(relErr) ? "Не удалось вычислить относительный путь к проекту." : relErr)
                     .ConfigureAwait(false);
                 return;
             }
