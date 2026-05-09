@@ -1,8 +1,10 @@
+using CascadeIDE.Contracts;
 using CascadeIDE.Services;
 
 namespace CascadeIDE.Features.IdeMcp.Application;
 
 /// <summary>Тонкий фасад MCP agent-notes: workspace к заметкам через <see cref="McpAgentNotesService.ResolveNotesWorkspacePath"/>.</summary>
+[ApplicationOrchestrator]
 public static class IdeMcpAgentNotesOrchestrator
 {
     public static string WriteAgentNotes(McpAgentNotesService svc, string? solutionPath, string content) =>

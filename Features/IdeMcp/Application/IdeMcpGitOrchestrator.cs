@@ -1,4 +1,5 @@
 using System.Text.Json;
+using CascadeIDE.Contracts;
 using GitMcp.Core;
 
 namespace CascadeIDE.Features.IdeMcp.Application;
@@ -7,6 +8,7 @@ namespace CascadeIDE.Features.IdeMcp.Application;
 /// Application-level helpers for IDE MCP git actions.
 /// Keeps common JSON/result shaping out of MainWindowViewModel.
 /// </summary>
+[ApplicationOrchestrator]
 public static class IdeMcpGitOrchestrator
 {
     public static string WorkspaceUnavailableMessage() =>

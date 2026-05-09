@@ -1,5 +1,6 @@
 #nullable enable
 using System.Text.Json;
+using CascadeIDE.Contracts;
 
 namespace CascadeIDE.Features.WorkspaceNavigation.Application;
 
@@ -7,6 +8,7 @@ namespace CascadeIDE.Features.WorkspaceNavigation.Application;
 /// Application-level helpers for workspace navigation map refresh.
 /// Keeps status/row shaping and caret position normalization out of MainWindowViewModel.
 /// </summary>
+[ApplicationOrchestrator]
 public static class WorkspaceNavigationMapOrchestrator
 {
     public sealed record RelatedRow(string FullPath, string RelativePath, string Kind, string Rationale);

@@ -1,8 +1,10 @@
 using System.Text.Json;
+using CascadeIDE.Contracts;
 
 namespace CascadeIDE.Features.IdeMcp.Application;
 
 /// <summary>Валидация и ошибки MCP <c>codebase_index_*</c> без I/O HCI.</summary>
+[ApplicationOrchestrator]
 public static class IdeMcpHybridCodebaseIndexOrchestrator
 {
     public static string MissingQueryJson() => """{"error":"missing_query"}""";

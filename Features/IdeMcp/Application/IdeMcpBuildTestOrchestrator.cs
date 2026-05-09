@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Text.Json;
+using CascadeIDE.Contracts;
 using CascadeIDE.Models;
 using CascadeIDE.Features.Workspace.Application;
 
@@ -10,6 +11,7 @@ namespace CascadeIDE.Features.IdeMcp.Application;
 /// Application-level orchestrator helpers for IDE MCP build/test actions.
 /// Keeps payload/filter/log shaping out of MainWindowViewModel.
 /// </summary>
+[ApplicationOrchestrator]
 public static class IdeMcpBuildTestOrchestrator
 {
     public static string MissingSolutionMessage() =>

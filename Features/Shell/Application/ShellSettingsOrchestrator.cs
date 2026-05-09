@@ -1,4 +1,5 @@
 #nullable enable
+using CascadeIDE.Contracts;
 using CascadeIDE.Models;
 
 namespace CascadeIDE.Features.Shell.Application;
@@ -7,6 +8,7 @@ namespace CascadeIDE.Features.Shell.Application;
 /// Pure helpers for shell/settings reactive handlers.
 /// Keeps small normalization and page-coercion decisions out of MainWindowViewModel.
 /// </summary>
+[ApplicationOrchestrator]
 public static class ShellSettingsOrchestrator
 {
     public static string NormalizeExternalMcpServersJson(string? value) =>

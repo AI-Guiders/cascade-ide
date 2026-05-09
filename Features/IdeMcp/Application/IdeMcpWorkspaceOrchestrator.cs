@@ -1,4 +1,5 @@
 using System.Text.Json;
+using CascadeIDE.Contracts;
 using CascadeIDE.Services;
 
 namespace CascadeIDE.Features.IdeMcp.Application;
@@ -7,6 +8,7 @@ namespace CascadeIDE.Features.IdeMcp.Application;
 /// Application-level orchestrator helpers for IDE MCP workspace actions.
 /// Keeps payload shaping and JSON guards out of MainWindowViewModel.
 /// </summary>
+[ApplicationOrchestrator]
 public static class IdeMcpWorkspaceOrchestrator
 {
     public static object BuildIdeStatePayload(IdeMcpIdeStateUiCapture ui, JsonElement diagnostics)

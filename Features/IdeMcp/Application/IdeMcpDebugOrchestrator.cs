@@ -1,4 +1,5 @@
 using System.Text.Json;
+using CascadeIDE.Contracts;
 using CascadeIDE.Services;
 
 namespace CascadeIDE.Features.IdeMcp.Application;
@@ -7,6 +8,7 @@ namespace CascadeIDE.Features.IdeMcp.Application;
 /// Application-level helpers for IDE MCP debug actions.
 /// Keeps snapshot payload shaping out of MainWindowViewModel.
 /// </summary>
+[ApplicationOrchestrator]
 public static class IdeMcpDebugOrchestrator
 {
     /// <summary>План для UI после DAP-снимка; без <c>File.Exists</c> на Application-слое (CASCOPE031).</summary>

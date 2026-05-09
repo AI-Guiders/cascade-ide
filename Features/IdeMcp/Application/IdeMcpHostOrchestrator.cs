@@ -1,8 +1,10 @@
 using System.Text.Json;
+using CascadeIDE.Contracts;
 
 namespace CascadeIDE.Features.IdeMcp.Application;
 
 /// <summary>JSON и полезная нагрузка для MCP-жизненного цикла IDE-хоста (ping, перезапуск клиентов).</summary>
+[ApplicationOrchestrator]
 public static class IdeMcpHostOrchestrator
 {
     public static string PingJson() =>

@@ -1,9 +1,12 @@
+using CascadeIDE.Contracts;
+
 namespace CascadeIDE.Features.IdeMcp.Application;
 
 /// <summary>
 /// Application-level helpers for IDE MCP UI automation actions.
 /// Centralizes common provider guards and normalized defaults.
 /// </summary>
+[ApplicationOrchestrator]
 public static class IdeMcpUiAutomationOrchestrator
 {
     public static string DefaultJsonObject() => "{}";

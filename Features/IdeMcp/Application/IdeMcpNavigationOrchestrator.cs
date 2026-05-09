@@ -1,3 +1,4 @@
+using CascadeIDE.Contracts;
 using CascadeIDE.Features.WorkspaceNavigation.Application;
 
 namespace CascadeIDE.Features.IdeMcp.Application;
@@ -6,6 +7,7 @@ namespace CascadeIDE.Features.IdeMcp.Application;
 /// Application-level orchestrator helpers for IDE MCP navigation actions.
 /// Keeps mode/level normalization and fallback rules out of MainWindowViewModel.
 /// </summary>
+[ApplicationOrchestrator]
 public static class IdeMcpNavigationOrchestrator
 {
     public static bool TryNormalizeRequestedMode(string mode, out string requestedMode)

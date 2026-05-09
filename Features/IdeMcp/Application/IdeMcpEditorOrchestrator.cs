@@ -1,4 +1,5 @@
 using System.Text.Json;
+using CascadeIDE.Contracts;
 
 namespace CascadeIDE.Features.IdeMcp.Application;
 
@@ -6,6 +7,7 @@ namespace CascadeIDE.Features.IdeMcp.Application;
 /// Application-level orchestrator helpers for IDE MCP editor actions.
 /// Keeps MCP payload shaping out of MainWindowViewModel.
 /// </summary>
+[ApplicationOrchestrator]
 public static class IdeMcpEditorOrchestrator
 {
     /// <summary>Снимок открытой вкладки для <see cref="BuildGetOpenDocumentTextResponse"/> (без зависимости от ViewModels).</summary>
