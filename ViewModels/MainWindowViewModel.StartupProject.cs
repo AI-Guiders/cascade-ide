@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using CascadeIDE.Cockpit.DataBus;
+using CascadeIDE.Features.Workspace.Application;
 using CascadeIDE.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -80,7 +81,7 @@ public partial class MainWindowViewModel
     /// <summary>Единственный <c>.csproj</c> в дереве — считаем его стартовым и сохраняем, чтобы F5 не открывал диалог выбора DLL.</summary>
     private void TryApplyDefaultSingleProjectStartup(string sln, string solutionDir, HashSet<string> projectPathSet)
     {
-        var csprojs = CollectDistinctProjectFilePaths(Workspace.SolutionRoots);
+        var csprojs = McpSolutionTree.CollectDistinctManagedProjectPaths(Workspace.SolutionRoots);
         if (csprojs.Count != 1)
             return;
 
@@ -103,16 +104,6 @@ public partial class MainWindowViewModel
         ApplyStartupProject(only);
     }
 
-    private static List<string> CollectDistinctProjectFilePaths(ObservableCollection<SolutionItem> roots)
-    {
-        return McpSolutionTree.CollectProjectPaths(roots)
-            .Where(static p => p.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase) ||
-                              p.EndsWith(".fsproj", StringComparison.OrdinalIgnoreCase))
-            .Select(static p => CanonicalFilePath.Normalize(p))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToList();
-    }
-
     /// <summary>
     /// Перед MSBuild: если стартовый не задан или битой ссылкой, выбрать единственный проект, проект по активному файлу
     /// или выбранный в обозревателе <c>.csproj</c> (как ожидается от F5 / «текущий код»).
@@ -125,7 +116,7 @@ public partial class MainWindowViewModel
         if (Workspace.SolutionRoots.Count == 0)
             return;
 
-        var csprojs = CollectDistinctProjectFilePaths(Workspace.SolutionRoots);
+        var csprojs = McpSolutionTree.CollectDistinctManagedProjectPaths(Workspace.SolutionRoots);
         var set = csprojs.ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         if (csprojs.Count == 1)

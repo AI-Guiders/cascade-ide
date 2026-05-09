@@ -1,5 +1,6 @@
-using System.Text;
 using Avalonia.Input;
+using CascadeIDE.Features.Shell.Application;
+using CascadeIDE.Models.Shell;
 using Avalonia.Threading;
 using CascadeIDE.Models;
 using CommunityToolkit.Mvvm.Input;
@@ -60,7 +61,10 @@ public partial class MainWindowViewModel
 
     /// <summary>Команды, подходящие под префикс (выпадающий список, до 25).</summary>
     public IReadOnlyList<CascadeChordOverlaySuggestion> CascadeChordOverlaySuggestions =>
-        BuildCascadeChordSuggestionRows(_cascadeChordPhase, _cascadeChordMelodyTail, MaxChordDropdownItems);
+        CascadeChordPresentationProjection.BuildSuggestionRows(
+            _cascadeChordPhase == CascadeChordPhase.AwaitMelodyTail,
+            _cascadeChordMelodyTail,
+            MaxChordDropdownItems);
 
     private const int MaxChordDropdownItems = 25;
 
@@ -69,7 +73,7 @@ public partial class MainWindowViewModel
         _cascadeChordPhase == CascadeChordPhase.AwaitMelodyTail
         && !_cascadeChordDropdownUserDismissed
         && !string.IsNullOrEmpty(_cascadeChordMelodyTail)
-        && (FilterCascadeChordEligibleMatches(_cascadeChordMelodyTail).Count > 0 || CascadeChordOverlayNoMatches);
+        && (CascadeChordPresentationProjection.FilterEligibleMatches(_cascadeChordMelodyTail).Count > 0 || CascadeChordOverlayNoMatches);
 
     /// <summary>Есть строки в выпадающем списке (для «нет совпадений» — отдельный текст).</summary>
     public bool HasChordDropdownItems =>
@@ -95,7 +99,7 @@ public partial class MainWindowViewModel
         {
             if (_cascadeChordPhase != CascadeChordPhase.AwaitMelodyTail)
                 return;
-            var n = NormalizeCascadeChordMelodyInput(value);
+            var n = CascadeChordPresentationProjection.NormalizeMelodyInput(value);
             if (string.Equals(n, _cascadeChordMelodyTail, StringComparison.Ordinal))
                 return;
             ApplyCascadeChordMelodyTail(n);
@@ -127,13 +131,13 @@ public partial class MainWindowViewModel
     public bool CascadeChordOverlayNoMatches =>
         _cascadeChordPhase == CascadeChordPhase.AwaitMelodyTail
         && !string.IsNullOrEmpty(_cascadeChordMelodyTail)
-        && FilterCascadeChordEligibleMatches(_cascadeChordMelodyTail).Count == 0;
+        && CascadeChordPresentationProjection.FilterEligibleMatches(_cascadeChordMelodyTail).Count == 0;
 
     /// <summary>Подсказка для лампы Command на тулбаре: в покое — кратко; при armed — полный контекст аккорда.</summary>
     public string CommandArmedLampToolTip =>
-        IsCascadeChordOverlayVisible
-            ? "Command (armed) — ввод по аккорду; транспорт CascadeChord (Ctrl+K).\n\n" + BuildCascadeChordOverlayHint()
-            : "Command: в покое. Ctrl+K — режим armed (CascadeChord).";
+        !IsCascadeChordOverlayVisible
+            ? "Command: в покое. Ctrl+K — режим armed (CascadeChord)."
+            : "Command (armed) — ввод по аккорду; транспорт CascadeChord (Ctrl+K).\n\n" + BuildCascadeChordOverlayHint();
 
     /// <summary>Сводка настроек карты намерений (без ComboBox; смена через палитру или MCP).</summary>
     public string CodeNavigationMapSettingsSummaryLine =>
@@ -141,59 +145,12 @@ public partial class MainWindowViewModel
 
     private string BuildCascadeChordOverlayHint()
     {
-        var timeout = (int)CascadeChordTimeoutSeconds;
-        var buf = _cascadeChordMelodyTail;
-        var bufLine = string.IsNullOrEmpty(buf)
-            ? "Набрано: (пусто) — тот же хвост, что после c: в палитре (например cps, cs, so)."
-            : $"Набрано: «{buf}»";
-
-        if (_cascadeChordPhase != CascadeChordPhase.AwaitMelodyTail)
-        {
-            return "CascadeChord\n" +
-                   "  Esc — отмена · таймаут " + timeout + " с";
-        }
-
-        var matches = FilterCascadeChordEligibleMatches(buf);
-        var matchLine = matches.Count == 0
-            ? "Нет alias с таким префиксом."
-            : "Совпадения: " + string.Join(", ", matches.Select(m => m.Alias));
-
-        return "CascadeChord · мелодия (как c:… без префикса и без Enter, если alias однозначен)\n" +
-               bufLine + "\n" +
-               matchLine + "\n" +
-               "  Enter — выполнить, если хвост — точный alias (нужно при gs vs gsu)\n" +
-               "  Backspace — стереть символ · Esc — отмена · таймаут " + timeout + " с\n" +
-               "Палитра Ctrl+Q, c: — тот же каталог.";
-    }
-
-    private static IReadOnlyList<CascadeChordOverlaySuggestion> BuildCascadeChordSuggestionRows(
-        CascadeChordPhase phase,
-        string tailNormalized,
-        int maxItems)
-    {
-        if (phase != CascadeChordPhase.AwaitMelodyTail)
-            return [];
-
-        var matches = FilterCascadeChordEligibleMatches(tailNormalized);
-        return matches
-            .Take(maxItems)
-            .Select(m => new CascadeChordOverlaySuggestion(
-                m.Alias,
-                TruncateChordTitle(IdeCommandDocDisplay.ShortTitleForCommandId(m.CommandId))))
-            .ToList();
-    }
-
-    private static IReadOnlyList<(string Alias, string CommandId)> FilterCascadeChordEligibleMatches(string tailNormalized) =>
-        IntentMelodyAliases.FilterByTailPrefix(tailNormalized)
-            .Where(m => ParametricIntentMelody.IsChordEligibleAlias(m.Alias))
-            .ToList();
-
-    private static string TruncateChordTitle(string s, int maxChars = 52)
-    {
-        if (string.IsNullOrEmpty(s))
-            return "";
-        s = s.Trim();
-        return s.Length <= maxChars ? s : s[..(maxChars - 1)] + "…";
+        var matches = CascadeChordPresentationProjection.FilterEligibleMatches(_cascadeChordMelodyTail);
+        return CascadeChordPresentationProjection.BuildOverlayHint(
+            _cascadeChordPhase == CascadeChordPhase.AwaitMelodyTail,
+            _cascadeChordMelodyTail,
+            (int)CascadeChordTimeoutSeconds,
+            matches);
     }
 
     private void EnsureCascadeChordTimer()
@@ -270,24 +227,11 @@ public partial class MainWindowViewModel
         EndCascadeChordIdle();
     }
 
-    private static string NormalizeCascadeChordMelodyInput(string? s)
-    {
-        if (string.IsNullOrEmpty(s))
-            return "";
-        var sb = new StringBuilder(s.Length);
-        foreach (var c in s.ToLowerInvariant())
-        {
-            if (c is >= 'a' and <= 'z' or >= '0' and <= '9')
-                sb.Append(c);
-        }
-        return sb.ToString();
-    }
-
     /// <summary>Общая логика хвоста: однозначное совпадение → выполнить; ноль префиксов при непустом → выход.</summary>
     private void ApplyCascadeChordMelodyTail(string newTail)
     {
         _cascadeChordDropdownUserDismissed = false;
-        var matches = FilterCascadeChordEligibleMatches(newTail);
+        var matches = CascadeChordPresentationProjection.FilterEligibleMatches(newTail);
         var exact = matches.FirstOrDefault(m => string.Equals(m.Alias, newTail, StringComparison.Ordinal));
         var hasLonger = matches.Any(m => m.Alias.Length > newTail.Length);
         if (exact.CommandId != null && !hasLonger && newTail.Length > 0)
@@ -393,7 +337,7 @@ public partial class MainWindowViewModel
             return true;
         }
 
-        if (!TryMapMelodyKeyToChar(e.Key, out var ch))
+        if (!CascadeChordMelodyKeyMap.TryMapToChar(e.Key, out var ch))
         {
             EndCascadeChordIdle();
             e.Handled = true;
@@ -414,30 +358,6 @@ public partial class MainWindowViewModel
         _cascadeChordDropdownUserDismissed = false;
         StopCascadeChordTimer();
         NotifyCascadeChordOverlayProperties();
-    }
-
-    private static bool TryMapMelodyKeyToChar(Key key, out char ch)
-    {
-        ch = default;
-        if (key >= Key.A && key <= Key.Z)
-        {
-            ch = (char)('a' + (key - Key.A));
-            return true;
-        }
-
-        if (key >= Key.D0 && key <= Key.D9)
-        {
-            ch = (char)('0' + (key - Key.D0));
-            return true;
-        }
-
-        if (key >= Key.NumPad0 && key <= Key.NumPad9)
-        {
-            ch = (char)('0' + (key - Key.NumPad0));
-            return true;
-        }
-
-        return false;
     }
 
     private async Task ExecuteCascadeChordCommandAsync(string commandId)

@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Threading.Tasks;
+using CascadeIDE.Features.Shell.Application;
 using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Lang;
 using CascadeIDE.Models;
@@ -289,24 +290,13 @@ public partial class MainWindowViewModel
     [RelayCommand]
     private void SetUiModeByIndex(object? parameter)
     {
-        var idx = ParseUiModeIndex(parameter);
+        var idx = UiModeSelectionParameter.ParseIndex(parameter);
         if (idx < 0)
             return;
         var ids = UiModeCatalog.OrderedModeIds;
         if (idx >= ids.Count)
             return;
         UiMode = ids[idx];
-    }
-
-    private static int ParseUiModeIndex(object? parameter)
-    {
-        return parameter switch
-        {
-            int i => i,
-            long l => l > int.MaxValue ? -1 : (int)l,
-            string s when int.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture, out var j) => j,
-            _ => -1,
-        };
     }
 
     [RelayCommand]

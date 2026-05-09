@@ -1,5 +1,6 @@
 using CascadeIDE.Features.HybridIndex.McpParity;
 using CascadeIDE.Features.IdeMcp.Application;
+using CascadeIDE.Features.Workspace.Application;
 
 namespace CascadeIDE.ViewModels;
 
@@ -17,7 +18,7 @@ public partial class MainWindowViewModel
             argSolutionPath,
             _settings.HybridIndex.ScopeMode,
             Workspace.SolutionPath,
-            GetWorkspacePath,
+            WorkspaceDirectoryFromSolutionPath.Resolve,
             out hciWorkspaceRoot,
             out hciSolutionPath,
             out errorJson);

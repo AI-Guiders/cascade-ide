@@ -1,5 +1,6 @@
 using Avalonia.Threading;
 using CascadeIDE.Features.IdeMcp.Application;
+using CascadeIDE.Features.Workspace.Application;
 using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Models;
 
@@ -8,14 +9,6 @@ namespace CascadeIDE.ViewModels;
 /// <summary>Git + workspace UI.</summary>
 public partial class MainWindowViewModel
 {
-    private static string GetWorkspacePath(string? solutionPath)
-    {
-        if (string.IsNullOrWhiteSpace(solutionPath))
-            return "";
-        var p = CanonicalFilePath.Normalize(solutionPath.Trim());
-        return File.Exists(p) ? Path.GetDirectoryName(p) ?? "" : p;
-    }
-
     internal static string NormalizeUiMode(string? mode) => UiChromeViewModel.NormalizeUiMode(mode);
 
     private Task RefreshGitSummaryAsync() => Chrome.RefreshGitSummaryAsync(RunGitCommandAsync);
@@ -73,7 +66,7 @@ public partial class MainWindowViewModel
         SaveSettingsIfChanged();
     }
 
-    private string GetWorkspacePath() => GetWorkspacePath(Workspace.SolutionPath);
+    private string GetWorkspacePath() => WorkspaceDirectoryFromSolutionPath.Resolve(Workspace.SolutionPath);
 
     partial void OnSelectedOllamaModelChanged(string? value)
     {

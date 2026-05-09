@@ -1,5 +1,6 @@
 #nullable enable
 using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using CascadeIDE.Models;
 
 namespace CascadeIDE.Features.Workspace.Application;
@@ -20,6 +21,15 @@ public static class McpSolutionTree
                 yield return child;
         }
     }
+
+    /// <summary>Нормализованные пути <c>.csproj</c>/<c>.fsproj</c> из дерева (без .sln).</summary>
+    public static List<string> CollectDistinctManagedProjectPaths(ObservableCollection<SolutionItem> roots) =>
+        CollectProjectPaths(roots)
+            .Where(static p => p.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase) ||
+                               p.EndsWith(".fsproj", StringComparison.OrdinalIgnoreCase))
+            .Select(static p => CanonicalFilePath.Normalize(p))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
 
     public static IEnumerable<(string Title, string FullPath)> CollectFileEntries(ObservableCollection<SolutionItem> roots)
     {

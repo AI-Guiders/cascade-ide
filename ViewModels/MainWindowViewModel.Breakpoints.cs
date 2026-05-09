@@ -1,6 +1,8 @@
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 
+using CascadeIDE.Features.Workspace.Application;
+
 namespace CascadeIDE.ViewModels;
 
 /// <summary>
@@ -74,7 +76,7 @@ public partial class MainWindowViewModel
 
     private void RefreshBreakpointSnapshotFromWorkspace(string? solutionPath)
     {
-        var ws = GetWorkspacePath(solutionPath);
+        var ws = WorkspaceDirectoryFromSolutionPath.Resolve(solutionPath);
         DapDebug.RefreshBreakpointSnapshotFromStorage(ws);
     }
 
@@ -82,7 +84,7 @@ public partial class MainWindowViewModel
     {
         _breakpointsFileWatcher?.Dispose();
         _breakpointsFileWatcher = null;
-        var ws = GetWorkspacePath(solutionPath);
+        var ws = WorkspaceDirectoryFromSolutionPath.Resolve(solutionPath);
         RefreshBreakpointSnapshotFromWorkspace(solutionPath);
         if (string.IsNullOrEmpty(ws) || !Directory.Exists(ws))
             return;

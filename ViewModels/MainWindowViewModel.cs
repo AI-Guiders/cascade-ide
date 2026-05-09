@@ -22,6 +22,8 @@ using CascadeIDE.Features.HybridIndex.Application;
 using CascadeIDE.Features.Shell.Application;
 using CascadeIDE.Models;
 using CascadeIDE.Features.Os.DataAcquisition;
+using CascadeIDE.Features.Workspace.Application;
+
 namespace CascadeIDE.ViewModels;
 
 /// <summary>
@@ -439,7 +441,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
             RefreshLaunchProfilePickerFromStore();
         }
 
-        var ws = GetWorkspacePath(value);
+        var ws = WorkspaceDirectoryFromSolutionPath.Resolve(value);
         UiModeCatalog.ApplyRepositoryWorkspaceOverlay(ws);
         NotifyDockedInstrumentSlotBindings();
         OnPropertyChanged(nameof(ChatPanelColumnPixelWidth));
@@ -469,7 +471,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private void ApplyHybridCodebaseIndexOrchestrationForCurrentSolution(bool pokeWhenAutoReindex)
     {
         var value = Workspace.SolutionPath ?? "";
-        var ws = GetWorkspacePath(value);
+        var ws = WorkspaceDirectoryFromSolutionPath.Resolve(value);
         if (string.IsNullOrWhiteSpace(ws))
             return;
 

@@ -1,6 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
-using System.Text.RegularExpressions;
+using CascadeIDE.Features.Shell.Application;
 using CascadeIDE.Features.UiChrome;
 using CascadeIDE.IdeDisplay;
 using CascadeIDE.IdeDisplay.CommandPalette;
@@ -33,12 +33,12 @@ public sealed class IdeCommandPaletteRowViewModel : ViewModelBase
         {
             // Режим c: — акцент на мелодии (первая строка), не на command_id.
             Title = $"c:{melodyAliasTail}";
-            Subtitle = BuildMelodyPaletteSecondaryLine(entry.Title, entry.CommandId, entry.Category);
+            Subtitle = CommandPaletteSubtitleProjection.MelodyPaletteSecondaryLine(entry.Title, entry.CommandId, entry.Category);
         }
         else
         {
             Title = entry.Title;
-            Subtitle = BuildCommandPaletteSubtitle(entry.CommandId, entry.Category);
+            Subtitle = CommandPaletteSubtitleProjection.CommandPaletteSubtitle(entry.CommandId, entry.Category);
         }
         IsMelodyAccentRow = !string.IsNullOrEmpty(melodyAliasTail);
         ArgsJson = argsJsonOverride ?? entry.ArgsJson;
@@ -137,20 +137,6 @@ public sealed class IdeCommandPaletteRowViewModel : ViewModelBase
     public int NavigateLine { get; }
     public int NavigateColumn { get; } = 1;
 
-    private static string BuildCommandPaletteSubtitle(string commandId, string category)
-    {
-        var tail = string.IsNullOrEmpty(category) ? "" : category.Trim();
-        return string.IsNullOrEmpty(tail) ? commandId : $"{commandId} · {tail}";
-    }
-
-    /// <summary>Вторая строка в режиме <c>c:</c> (мелодия уже в <see cref="Title"/>).</summary>
-    private static string BuildMelodyPaletteSecondaryLine(string entryTitle, string commandId, string category)
-    {
-        var tail = string.IsNullOrEmpty(category) ? "" : category.Trim();
-        if (string.IsNullOrEmpty(tail))
-            return $"{entryTitle} · {commandId}";
-        return $"{entryTitle} · {commandId} · {tail}";
-    }
 }
 
 /// <summary>Палитра команд.</summary>
@@ -194,12 +180,7 @@ public partial class MainWindowViewModel
         {
             var h = HotkeyGestureMap.GetDisplayHint("toggle_command_palette");
             var melody = IntentMelodyAliases.SampleAliasesForFooter(8);
-            var nav = string.IsNullOrEmpty(melody)
-                ? "f: файл · t: тип · m: член · x: текст · c: melody"
-                : $"f: файл · t: тип · m: член · x: текст · c: melody ({melody})";
-            return !string.IsNullOrEmpty(h)
-                ? $"↑↓ выбор · Enter выполнить · Esc закрыть · PgUp/PgDn страница · {h} выделить запрос · {nav}"
-                : $"↑↓ выбор · Enter выполнить · Esc закрыть · PgUp/PgDn страница · {nav}";
+            return CommandPaletteChromeProjection.FooterHint(h, melody);
         }
     }
 
@@ -210,9 +191,7 @@ public partial class MainWindowViewModel
         get
         {
             var melody = IntentMelodyAliases.SampleAliasesForFooter(6);
-            return string.IsNullOrEmpty(melody)
-                ? "Команда… · f: файл · t: тип · m: член · x: текст · c: melody"
-                : $"Команда… · f: файл · t: тип · m: член · x: текст · c: melody ({melody})";
+            return CommandPaletteChromeProjection.QueryPlaceholder(melody);
         }
     }
 
@@ -508,7 +487,7 @@ public partial class MainWindowViewModel
         try
         {
             await Task.Delay(GoToRipgrepDebounceMs, ct).ConfigureAwait(false);
-            var (pattern, fixedString, glob) = BuildRipgrepPatternForGoTo(query);
+            var (pattern, fixedString, glob) = GoToPaletteRipgrepPatternBuilder.Build(query);
             var (matches, err) = await RipgrepWorkspaceSearchService.SearchMatchesAsync(
                     workspaceRoot,
                     pattern,
@@ -568,30 +547,6 @@ public partial class MainWindowViewModel
         catch (OperationCanceledException)
         {
             // ignore
-        }
-    }
-
-    private static (string Pattern, bool FixedString, string? Glob) BuildRipgrepPatternForGoTo(GoToAllQuery q)
-    {
-        var term = q.Term.Trim();
-        switch (q.Prefix)
-        {
-            case 'x':
-                return (term, true, null);
-            case 't':
-            {
-                var esc = Regex.Escape(term);
-                var pattern = $@"(class|interface|enum|record|struct)\s+\S*{esc}\S*";
-                return (pattern, false, "*.cs");
-            }
-            case 'm':
-            {
-                var esc = Regex.Escape(term);
-                var pattern = $@"\b{esc}\b\s*\(";
-                return (pattern, false, "*.cs");
-            }
-            default:
-                return (term, true, null);
         }
     }
 

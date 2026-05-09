@@ -1,3 +1,4 @@
+using CascadeIDE.Features.Markdown.Application;
 using CascadeIDE.Services;
 using CommunityToolkit.Mvvm.Input;
 
@@ -20,7 +21,7 @@ public partial class MainWindowViewModel
             var expanded = MarkdownIncludeExpansion.ExpandMarkdown(raw, sourcePath);
             var outPath = RequestSaveMarkdownFile is not null
                 ? await RequestSaveMarkdownFile(sourcePath).ConfigureAwait(true)
-                : GetDefaultExpandedMarkdownPath(sourcePath);
+                : ExpandedMarkdownDefaultExportPath.Resolve(sourcePath);
 
             if (string.IsNullOrWhiteSpace(outPath))
                 return;
@@ -44,21 +45,5 @@ public partial class MainWindowViewModel
     private bool CanExportExpandedMarkdown() =>
         IsMarkdownFile && !string.IsNullOrWhiteSpace(CurrentFilePath);
 
-    private static string GetDefaultExpandedMarkdownPath(string sourcePath)
-    {
-        try
-        {
-            var full = CanonicalFilePath.Normalize(sourcePath);
-            var dir = Path.GetDirectoryName(full) ?? Directory.GetCurrentDirectory();
-            var name = Path.GetFileNameWithoutExtension(full);
-            if (string.IsNullOrWhiteSpace(name))
-                name = "export";
-            return Path.Combine(dir, $"{name}.expanded.md");
-        }
-        catch
-        {
-            return "export.expanded.md";
-        }
-    }
 }
 

@@ -3,6 +3,7 @@ using System.IO;
 using CascadeIDE.Cockpit.DataBus;
 using CascadeIDE.Features.HybridIndex.Application;
 using CascadeIDE.Features.Os.DataAcquisition;
+using CascadeIDE.Features.Workspace.Application;
 using CascadeIDE.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -187,9 +188,9 @@ public partial class MainWindowViewModel
     public string HybridIndexSolutionPathText => HybridIndexLast?.SolutionPath ?? "—";
     public string HybridIndexDatabasePathText => HybridIndexLast?.DatabasePath ?? "—";
 
-    public string HybridIndexWorkspaceShortText => ShortenPathLikeEcam(HybridIndexWorkspaceRootText);
-    public string HybridIndexSolutionShortText => ShortenPathLikeEcam(HybridIndexSolutionPathText);
-    public string HybridIndexDatabaseShortText => ShortenPathLikeEcam(HybridIndexDatabasePathText);
+    public string HybridIndexWorkspaceShortText => HybridIndexHisPathDisplayShortener.ShortenLikeEcam(HybridIndexWorkspaceRootText);
+    public string HybridIndexSolutionShortText => HybridIndexHisPathDisplayShortener.ShortenLikeEcam(HybridIndexSolutionPathText);
+    public string HybridIndexDatabaseShortText => HybridIndexHisPathDisplayShortener.ShortenLikeEcam(HybridIndexDatabasePathText);
 
     public AnnunciatorLampItem HybridIndexLampItem
     {
@@ -238,7 +239,7 @@ public partial class MainWindowViewModel
     private void HybridIndexReindexNow()
     {
         var sln = Workspace.SolutionPath;
-        var ws = GetWorkspacePath(sln);
+        var ws = WorkspaceDirectoryFromSolutionPath.Resolve(sln);
         if (string.IsNullOrWhiteSpace(ws))
             return;
 
@@ -257,7 +258,7 @@ public partial class MainWindowViewModel
     private void HybridIndexOpenIndexDir()
     {
         var sln = Workspace.SolutionPath;
-        var ws = GetWorkspacePath(sln);
+        var ws = WorkspaceDirectoryFromSolutionPath.Resolve(sln);
         if (string.IsNullOrWhiteSpace(ws))
             return;
         var dir = Path.Combine(ws, HybridIndexIndexDirectoryRelative.ResolveOrDefault(_settings.HybridIndex.IndexDir));
@@ -282,31 +283,5 @@ public partial class MainWindowViewModel
             OnPropertyChanged(name);
     }
 
-    private static string ShortenPathLikeEcam(string text)
-    {
-        if (string.IsNullOrWhiteSpace(text) || text == "—")
-            return "—";
-
-        var s = text.Trim();
-        try
-        {
-            if (s.IndexOf(Path.DirectorySeparatorChar) >= 0 || s.IndexOf(Path.AltDirectorySeparatorChar) >= 0)
-            {
-                var trimmed = s.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-                var name = Path.GetFileName(trimmed);
-                if (!string.IsNullOrWhiteSpace(name))
-                    return name;
-            }
-        }
-        catch
-        {
-            // ignore
-        }
-
-        const int max = 34;
-        if (s.Length <= max)
-            return s;
-        return s[..(max - 1)] + "…";
-    }
 }
 

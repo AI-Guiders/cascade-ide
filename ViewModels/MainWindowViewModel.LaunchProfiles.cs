@@ -1,6 +1,6 @@
 #nullable enable
+using CascadeIDE.Features.Launch.Application;
 using System.Collections.ObjectModel;
-using System.Diagnostics.CodeAnalysis;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -85,7 +85,7 @@ public partial class MainWindowViewModel
         if (string.IsNullOrEmpty(solutionDir))
             return;
 
-        if (!TryGetCsprojPathRelativeToSolution(solutionDir, path, out var rel, out var pathErr))
+        if (!LaunchProjectRelativePath.TryGetRelativeToSolutionDirectory(solutionDir, path, out var rel, out var pathErr))
         {
             await ShowDebugInfoAsync("launchSettings.json", pathErr).ConfigureAwait(false);
             return;
@@ -99,34 +99,6 @@ public partial class MainWindowViewModel
 
         RefreshLaunchProfilePickerFromStore();
         await ShowDebugInfoAsync("Импорт launch profiles", $"Скопировано профилей (Kestrel/Project) в {LaunchProfilesStore.FileName}: {n}.").ConfigureAwait(false);
-    }
-
-    /// <summary>Путь к <c>.csproj</c> относительно корня каталога решения; ошибка, если путь вне дерева.</summary>
-    private static bool TryGetCsprojPathRelativeToSolution(
-        string solutionRootDirectory,
-        string csprojFullPath,
-        [NotNullWhen(true)] out string? relativePath,
-        [NotNullWhen(false)] out string? error)
-    {
-        relativePath = null;
-        error = null;
-        try
-        {
-            var rel = Path.GetRelativePath(solutionRootDirectory, CanonicalFilePath.Normalize(csprojFullPath));
-            if (rel.StartsWith("..", StringComparison.Ordinal))
-            {
-                error = "Проект должен быть внутри каталога решения.";
-                return false;
-            }
-
-            relativePath = rel;
-            return true;
-        }
-        catch (Exception ex)
-        {
-            error = ex.Message;
-            return false;
-        }
     }
 
     private bool CanImportLaunchSettingsFromSelection() =>
