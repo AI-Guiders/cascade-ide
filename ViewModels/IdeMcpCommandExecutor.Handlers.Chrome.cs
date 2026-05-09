@@ -1,4 +1,5 @@
 using System.Text.Json;
+using CascadeIDE.Features.IdeMcp.Application;
 using CascadeIDE.Models;
 using static CascadeIDE.Services.IdeCommands;
 
@@ -9,7 +10,7 @@ internal sealed partial class IdeMcpCommandExecutor
 {
     private void RegisterOutputAndFocus(Action<string, Handler> add)
     {
-        add(IdePing, async (_, _) => await Task.FromResult(MainWindowViewModel.PingIdeMcpHostJson()));
+        add(IdePing, async (_, _) => await Task.FromResult(IdeMcpHostOrchestrator.PingJson()));
         add(IdeRestartMcpClients, async (_, ct) => await _vm.RestartMcpClientsForAgentAsync(ct));
 
         add(FocusEditor, async (_, _) =>

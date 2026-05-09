@@ -15,6 +15,24 @@ public static class IdeMcpBuildTestOrchestrator
     public static string MissingSolutionMessage() =>
         "No solution loaded or file not found.";
 
+    /// <summary>Текст MCP и содержимое панели при отсутствии решения (MCP-сборка с показом панели).</summary>
+    public readonly record struct IdeMcpBuildMissingSolutionPanel(string McpReplyText, string BuildOutputPanelFullText);
+
+    public static IdeMcpBuildMissingSolutionPanel BuildMissingSolutionPanelSurface()
+    {
+        var msg = MissingSolutionMessage();
+        return new IdeMcpBuildMissingSolutionPanel(msg, BuildPanelLine(msg));
+    }
+
+    /// <summary>Текст MCP и содержимое панели при исключении в цепочке MCP-сборки.</summary>
+    public readonly record struct IdeMcpBuildFailurePanel(string McpReplyText, string BuildOutputPanelFullText);
+
+    public static IdeMcpBuildFailurePanel FailedBuildPanelSurface(string exceptionMessage)
+    {
+        var msg = BuildErrorMessage(exceptionMessage);
+        return new IdeMcpBuildFailurePanel(msg, BuildPanelLine(msg));
+    }
+
     public static string BuildOperationHeader(string operation, string path) =>
         $"{operation}: {path}\r\n";
 

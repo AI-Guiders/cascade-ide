@@ -129,4 +129,40 @@ public sealed class IdeMcpOrchestratorThinningTests
         Assert.True(p.MfdPrimedForCurrentStopNext);
         Assert.False(p.ActivateInstrumentationDockAndDebugStack);
     }
+
+    [Fact]
+    public void BuildMissingSolutionPanelSurface_aligns_reply_with_panel_wrap()
+    {
+        var s = IdeMcpBuildTestOrchestrator.BuildMissingSolutionPanelSurface();
+        Assert.Equal(IdeMcpBuildTestOrchestrator.MissingSolutionMessage(), s.McpReplyText);
+        Assert.StartsWith(s.McpReplyText + "\r\n", s.BuildOutputPanelFullText, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void FailedBuildPanelSurface_echoes_error_prefix()
+    {
+        var s = IdeMcpBuildTestOrchestrator.FailedBuildPanelSurface("boom");
+        Assert.Equal("Error: boom", s.McpReplyText);
+        Assert.Contains("boom", s.BuildOutputPanelFullText, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void PingJson_contains_expected_kind_and_ok()
+    {
+        using var doc = JsonDocument.Parse(IdeMcpHostOrchestrator.PingJson());
+        Assert.True(doc.RootElement.GetProperty("ok").GetBoolean());
+        Assert.Equal("cascade_ide_mcp_host", doc.RootElement.GetProperty("kind").GetString());
+        Assert.True(doc.RootElement.GetProperty("pid").TryGetInt32(out var pid));
+        Assert.True(pid > 0);
+    }
+
+    [Fact]
+    public void HybridCodebaseIndexOrchestrator_errors_are_stable_literals()
+    {
+        Assert.Contains("missing_query", IdeMcpHybridCodebaseIndexOrchestrator.MissingQueryJson(), StringComparison.Ordinal);
+        Assert.Contains("invalid_hit_id", IdeMcpHybridCodebaseIndexOrchestrator.InvalidHitIdJson(), StringComparison.Ordinal);
+        var fail = IdeMcpHybridCodebaseIndexOrchestrator.SerializeReindexFailed("x");
+        Assert.Contains("reindex_failed", fail, StringComparison.Ordinal);
+        Assert.Contains("\"detail\":\"x\"", fail, StringComparison.Ordinal);
+    }
 }

@@ -1,19 +1,12 @@
-using System.Text.Json;
+using CascadeIDE.Features.IdeMcp.Application;
 
 namespace CascadeIDE.ViewModels;
 
 /// <summary>Жизненный цикл IDE MCP-хоста: <c>ide_ping</c>, перезапуск внешних MCP и stdio-сессии Cursor ACP.</summary>
 public partial class MainWindowViewModel
 {
-    /// <summary>JSON для MCP <c>ide_ping</c>: живость хоста и PID процесса IDE.</summary>
-    public static string PingIdeMcpHostJson() =>
-        JsonSerializer.Serialize(new
-        {
-            ok = true,
-            kind = "cascade_ide_mcp_host",
-            utc = DateTimeOffset.UtcNow,
-            pid = Environment.ProcessId,
-        });
+    /// <inheritdoc cref="IdeMcpHostOrchestrator.PingJson"/>
+    public static string PingIdeMcpHostJson() => IdeMcpHostOrchestrator.PingJson();
 
     /// <summary>Пересоздать клиентов внешних MCP и сбросить stdio-сессию Cursor ACP.</summary>
     public async Task<string> RestartMcpClientsForAgentAsync(CancellationToken cancellationToken = default)
@@ -25,6 +18,6 @@ public partial class MainWindowViewModel
         _autonomousAgentService = CreateAutonomousAgentService(_mcpClientService);
         Autonomous.ReplaceAgentService(_autonomousAgentService);
         ChatPanel.DisposeCursorAcpSession();
-        return JsonSerializer.Serialize(new { ok = true, restarted = true });
+        return IdeMcpHostOrchestrator.RestartClientsOkJson();
     }
 }

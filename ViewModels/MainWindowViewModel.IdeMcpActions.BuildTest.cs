@@ -25,13 +25,13 @@ public partial class MainWindowViewModel
         var path = await UiScheduler.Default.InvokeAsync(() => Workspace.SolutionPath ?? "");
         if (!IdeMcpSolutionPathAvailability.IsRunnableSolutionFile(path))
         {
-            var msg = IdeMcpBuildTestOrchestrator.MissingSolutionMessage();
+            var surf = IdeMcpBuildTestOrchestrator.BuildMissingSolutionPanelSurface();
             UiScheduler.Default.Post(() =>
             {
-                BuildOutputPanel.Set(IdeMcpBuildTestOrchestrator.BuildPanelLine(msg));
+                BuildOutputPanel.Set(surf.BuildOutputPanelFullText);
                 IsBuildOutputVisible = true;
             });
-            return msg;
+            return surf.McpReplyText;
         }
         int? lastExitCode = null;
         bool? lastSucceeded = null;
@@ -61,14 +61,14 @@ public partial class MainWindowViewModel
         }
         catch (Exception ex)
         {
-            var msg = IdeMcpBuildTestOrchestrator.BuildErrorMessage(ex.Message);
+            var surf = IdeMcpBuildTestOrchestrator.FailedBuildPanelSurface(ex.Message);
             UiScheduler.Default.Post(() =>
             {
-                BuildOutputPanel.Set(IdeMcpBuildTestOrchestrator.BuildPanelLine(msg));
+                BuildOutputPanel.Set(surf.BuildOutputPanelFullText);
                 IsBuildOutputVisible = true;
             });
             lastSucceeded = false;
-            return msg;
+            return surf.McpReplyText;
         }
         finally
         {
@@ -116,12 +116,7 @@ public partial class MainWindowViewModel
                     InstrumentationPanel.TestResultsOutput,
                     outStr,
                     InstrumentationTabs);
-                LastTestSummary = mutation.Summary;
-                ImpactedTestsBadge = mutation.ImpactedTestsBadge;
-                PublishToIdeDataBusAndRebuild(new TestsStateChanged(mutation.Summary, mutation.ImpactedTestsBadge));
-                InstrumentationPanel.TestResultsOutput = mutation.UpdatedTestResultsOutput;
-                if (mutation.ShouldOpenTestsPage)
-                    CurrentMfdShellPage = MfdShellPage.Tests;
+                PublishIdeMcpTestRunMutation(mutation, openTestsPageIfRequested: true);
             });
             return outcome.JsonPayload;
         }
@@ -132,8 +127,7 @@ public partial class MainWindowViewModel
                 var mutation = IdeMcpBuildTestOrchestrator.IdeMcpTestRunInstrumentationMutation.FromThrownException(
                     InstrumentationPanel.TestResultsOutput,
                     ex.Message);
-                PublishToIdeDataBusAndRebuild(new TestsStateChanged(mutation.Summary, mutation.ImpactedTestsBadge));
-                InstrumentationPanel.TestResultsOutput = mutation.UpdatedTestResultsOutput;
+                PublishIdeMcpTestRunMutation(mutation, openTestsPageIfRequested: false);
             });
             return Services.McpDotnetBuildTestService.SerializeTestRunFailure(ex.Message, mode, filterExpression);
         }
@@ -180,5 +174,18 @@ public partial class MainWindowViewModel
             await PublishIdeBuildStateOnUiAsync(new BuildStateChanged(false, lastExitCode, lastSucceeded))
                 .ConfigureAwait(false);
         }
+    }
+
+    /// <summary>Обновляет инструментацию, шину и навигацию MFD после MCP-тестов.</summary>
+    private void PublishIdeMcpTestRunMutation(
+        IdeMcpBuildTestOrchestrator.IdeMcpTestRunInstrumentationMutation mutation,
+        bool openTestsPageIfRequested)
+    {
+        LastTestSummary = mutation.Summary;
+        ImpactedTestsBadge = mutation.ImpactedTestsBadge;
+        PublishToIdeDataBusAndRebuild(new TestsStateChanged(mutation.Summary, mutation.ImpactedTestsBadge));
+        InstrumentationPanel.TestResultsOutput = mutation.UpdatedTestResultsOutput;
+        if (openTestsPageIfRequested && mutation.ShouldOpenTestsPage)
+            CurrentMfdShellPage = MfdShellPage.Tests;
     }
 }

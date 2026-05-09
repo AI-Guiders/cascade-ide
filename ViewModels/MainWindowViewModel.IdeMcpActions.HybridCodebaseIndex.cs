@@ -1,4 +1,3 @@
-using System.Text.Json;
 using CascadeIDE.Features.HybridIndex.McpParity;
 using CascadeIDE.Features.IdeMcp.Application;
 
@@ -50,7 +49,7 @@ public partial class MainWindowViewModel
         CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(query))
-            return Task.FromResult("""{"error":"missing_query"}""");
+            return Task.FromResult(IdeMcpHybridCodebaseIndexOrchestrator.MissingQueryJson());
 
         if (!TryResolveHybridIndexScopeForCodebaseIndexCalls(workspacePath, solutionPath, out var ws, out var sln, out var errJson))
             return Task.FromResult(errJson!);
@@ -78,7 +77,7 @@ public partial class MainWindowViewModel
     Task<string> Services.IIdeMcpActions.CodebaseIndexExplainAsync(string? workspacePath, string? solutionPath, long hitId, CancellationToken cancellationToken)
     {
         if (hitId <= 0)
-            return Task.FromResult("""{"error":"invalid_hit_id"}""");
+            return Task.FromResult(IdeMcpHybridCodebaseIndexOrchestrator.InvalidHitIdJson());
 
         if (!TryResolveHybridIndexScopeForCodebaseIndexCalls(workspacePath, solutionPath, out var ws, out var sln, out var errJson))
             return Task.FromResult(errJson!);
@@ -108,7 +107,7 @@ public partial class MainWindowViewModel
             }
             catch (Exception ex)
             {
-                return JsonSerializer.Serialize(new { error = "reindex_failed", detail = ex.Message });
+                return IdeMcpHybridCodebaseIndexOrchestrator.SerializeReindexFailed(ex.Message);
             }
         }, cancellationToken);
     }
