@@ -28,7 +28,8 @@ namespace CascadeIDE.ViewModels;
 /// Главный композитор окна (partial-класс, несколько <c>MainWindowViewModel*.cs</c>).
 /// Карта файлов и ответственности — <c>docs/architecture-migration.md</c>, раздел «Срез MainWindowViewModel».
 /// </summary>
-public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpActions, IAutonomousAgentSessionHost
+public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpActions, IAutonomousAgentSessionHost,
+    IMainWindowHostSurfaceInput
 {
     public const string InstallNewSentinel = "— Установить модель… —";
 
