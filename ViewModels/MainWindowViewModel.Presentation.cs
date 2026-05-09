@@ -6,6 +6,7 @@ using CascadeIDE.Cockpit.ComputingUnits.IdeHealth;
 using CascadeIDE.Cockpit.Composition;
 using CascadeIDE.Cockpit.Composition.HostSurface;
 using CascadeIDE.Cockpit.Composition.Shell;
+using CascadeIDE.Features.Shell.Application;
 using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Lang;
 using CascadeIDE.Models;
@@ -55,21 +56,12 @@ public partial class MainWindowViewModel
     /// Какая топология размещения зон сейчас активна. Свойства <see cref="IsPfdColumnVisible"/> / <see cref="IsMfdColumnVisible"/>
     /// имеют смысл только для <see cref="AttentionLayoutSurfaceKind.MainWindowDockedGrid"/>; иные варианты — ADR 0021 §13, 0017.
     /// </summary>
-    public AttentionLayoutSurfaceKind ActiveAttentionLayoutSurface
-    {
-        get
-        {
-            if (_suppressPfdColumnForPfdHostWindow
-                && _suppressMfdColumnForMfdHostWindow
-                && PresentationRequestsPfdHostWindow)
-                return AttentionLayoutSurfaceKind.MainWindowPlusPfdMfdHostTopLevel;
-            if (_suppressPfdColumnForPfdHostWindow && PresentationRequestsPfdHostWindow)
-                return AttentionLayoutSurfaceKind.MainWindowPlusPfdHostTopLevel;
-            if (_suppressMfdColumnForMfdHostWindow && _presentationMfdHostTopology)
-                return AttentionLayoutSurfaceKind.MainWindowPlusMfdHostTopLevel;
-            return AttentionLayoutSurfaceKind.MainWindowDockedGrid;
-        }
-    }
+    public AttentionLayoutSurfaceKind ActiveAttentionLayoutSurface =>
+        AttentionLayoutSurfaceResolver.Resolve(
+            _suppressPfdColumnForPfdHostWindow,
+            _suppressMfdColumnForMfdHostWindow,
+            PresentationRequestsPfdHostWindow,
+            _presentationMfdHostTopology);
 
     /// <summary>
     /// Видна ли колонка <c>MainGrid</c> под левый якорь при <see cref="ActiveAttentionLayoutSurface"/> (в этой разметке — зона PFD).
