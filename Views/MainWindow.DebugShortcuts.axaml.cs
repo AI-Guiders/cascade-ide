@@ -1,4 +1,5 @@
 using Avalonia.Input;
+using CascadeIDE.Models.Shell;
 
 namespace CascadeIDE.Views;
 
@@ -13,7 +14,7 @@ public partial class MainWindow
         var vm = _boundMainVm ?? DataContext as ViewModels.MainWindowViewModel;
         if (vm is null)
             return;
-        vm.CommandPaletteHost = ViewModels.CommandPaletteHost.MainWindow;
+        vm.CommandPaletteHost = CommandPaletteHost.MainWindow;
         Services.MainWindowHotkeyService.TryHandleTunnelKeyDownFromWindow(nameof(MainWindow), e, vm);
     }
 }

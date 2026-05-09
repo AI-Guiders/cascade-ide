@@ -1,6 +1,8 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using CascadeIDE.Models.Shell;
+
 namespace CascadeIDE.Views;
 
 /// <summary>TopLevel со сплитом PFD | MFD для пресета <c>(xP+yM)(F)</c> — ADR 0017.</summary>
@@ -29,13 +31,13 @@ public partial class PmSplitHostWindow : PointerTrackingWindow
     {
         if (DataContext is not ViewModels.MainWindowViewModel vm)
             return;
-        vm.CommandPaletteHost = ViewModels.CommandPaletteHost.PmSplitHost;
+        vm.CommandPaletteHost = CommandPaletteHost.PmSplitHost;
         MainWindowHotkeyService.TryHandleTunnelKeyDownFromWindow(nameof(PmSplitHostWindow), e, vm);
     }
 
     private void OnActivated(object? sender, EventArgs e)
     {
         if (DataContext is ViewModels.MainWindowViewModel vm)
-            vm.CommandPaletteHost = ViewModels.CommandPaletteHost.PmSplitHost;
+            vm.CommandPaletteHost = CommandPaletteHost.PmSplitHost;
     }
 }

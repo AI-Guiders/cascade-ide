@@ -2,6 +2,7 @@ using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
 using Avalonia.VisualTree;
+using CascadeIDE.Models.Shell;
 using CascadeIDE.Services;
 using CascadeIDE.ViewModels;
 using CascadeIDE.Views;

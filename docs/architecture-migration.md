@@ -76,7 +76,10 @@
 | `MainWindowViewModel.ShellState.AiProviders.cs` | 58 | Часть `ShellState`: режим ИИ и облачные ключи привязаны к нижнему приложению/чату. |
 | `MainWindowViewModel.ShellState.AutonomousAgentStripe.cs` | 62 | Часть `ShellState`: полоса/карточки автономной задачи агента, безопасности, LOC и сводки тестов для IDE Health. |
 | `MainWindowViewModel.ShellState.ChatAndSessionConfig.cs` | 26 | Часть `ShellState`: ввод чата и конфиг MCP/ACP для автономной сессии. |
-| `MainWindowViewModel.ShellState.cs` | 153 | Состояние раскладки главного окна: три зоны внимания в `MainGrid` (PFD · Forward · MFD), см. ADR 0021 и `docs/ux/cascade-ide-ui-layout-v1.md`. Терминал, сборка, Git и пр. — во вторичном контуре колонки MFD (`MfdShellView` / `MfdShellPageStack`); отдельной строки «нижней панели» на всю ширину под сеткой нет. Режим ИИ и облачные ключи — `MainWindowViewModel.ShellState.AiProviders.cs`; чат и MCP/ACP — `MainWindowViewModel.ShellState.ChatAndSessionConfig.cs`; полоса агента / тесты для IDE Health — `MainWindowViewModel.ShellState.AutonomousAgentStripe.cs`. |
+| `MainWindowViewModel.ShellState.cs` | 12 | Состояние раскладки главного окна: три зоны внимания в `MainGrid` (PFD · Forward · MFD), см. ADR 0021 и `docs/ux/cascade-ide-ui-layout-v1.md`. Терминал, сборка, Git и пр. — во вторичном контуре колонки MFD (`MfdShellView` / `MfdShellPageStack`); отдельной строки «нижней панели» на всю ширину под сеткой нет. Режим ИИ и облачные ключи — `MainWindowViewModel.ShellState.AiProviders.cs`; чат и MCP/ACP — `MainWindowViewModel.ShellState.ChatAndSessionConfig.cs`; полоса агента / тесты для IDE Health — `MainWindowViewModel.ShellState.AutonomousAgentStripe.cs`; регион MFD/PFD и страницы контура — `ShellState.RegionAndContour.cs`; режим/UI-сессия и полосы — `ShellState.UiSessionChrome.cs`; модель/Kroki — `ShellState.ModelPullMarkdown.cs`. |
+| `MainWindowViewModel.ShellState.ModelPullMarkdown.cs` | 20 | Часть `MainWindowViewModel`: pull модели и превью Markdown / Kroki. |
+| `MainWindowViewModel.ShellState.RegionAndContour.cs` | 63 | Часть `MainWindowViewModel`: регионы MainGrid и видимость страниц вторичного контура MFD. |
+| `MainWindowViewModel.ShellState.UiSessionChrome.cs` | 68 | Часть `MainWindowViewModel`: режим UI, прогресс сборки на полосе, палитра, снимок раскладки. |
 | `MainWindowViewModel.SolutionBuild.cs` | 195 | Сборка, `BuildOutputPanel`. |
 | `MainWindowViewModel.StartupProject.cs` | 326 | Стартовый проект. |
 | `MainWindowViewModel.UiGitWorkspace.cs` | 147 | Git + workspace UI. |
@@ -216,9 +219,10 @@
   - на VM оставить свойства-проекции и orchestration вызовы.
 - Кластер `ShellState`:
   - состояния панелей и режимов — в отдельные state-модули по доменам, не в один monolith-файл.
-  - четвёртый срез: **`MainWindowViewModel.ShellState.AiProviders.cs`** — режим ИИ (`AiMode`, облачный провайдер, вычисляемые флаги выбора) и поля API-ключей; базовый `ShellState.cs` остаётся раскладкой/панелями/Workspace Health.
+  - четвёртый срез: **`MainWindowViewModel.ShellState.AiProviders.cs`** — режим ИИ (`AiMode`, облачный провайдер, вычисляемые флаги выбора) и поля API-ключей; геометрия регионов и видимость страниц MFD после v1.39 — **`ShellState.RegionAndContour`**.
   - пятый срез: **`MainWindowViewModel.ShellState.ChatAndSessionConfig.cs`** — клавиша отправки чата, thinking/минимальный контекст, JSON внешних MCP, `AcpAutoInjectIdeMcp`.
   - шестой срез: **`MainWindowViewModel.ShellState.AutonomousAgentStripe.cs`** — активная задача агента, риск/результат/шаг, `SafetyLevel`, LOC-бейдж, сводка/бейдж тестов для полосы IDE Health.
+  - седьмой срез (**v1.39**): enum **`CascadeIDE.Models.Shell.CommandPaletteHost`** и partial **`ShellState.RegionAndContour`** / **`ShellState.UiSessionChrome`** / **`ShellState.ModelPullMarkdown`**; «базовый» **`ShellState.cs`** сведён к краткой сводке + привязкам текстов вторичных групп редакторов.
 - Кластер `WorkspaceNavigationMap`:
   - graph/data трансформации — в сервисы/CCU;
   - в VM оставить binding-state и команды поверхности.
@@ -267,3 +271,4 @@
 - **v1.36** — Переименование: `IsBottomPanelVisible` → **`IsMfdContourContentVisible`** (флаги контента стека вторичного контура MFD).
 - **v1.37** — Разметка и снимки: `Border#BottomPanelShell` → **`MfdContourStackHost`** (`MfdShellView.axaml`); ключ **`layout_regions`** в MCP/DeepSnapshot обновлён; доки без отсылки к вымышленной «нижней панели» главного окна во Flight.
 - **v1.38** — Wave MCP thinning (завершение волны в текущем объёме): **`IdeMcpBuildTestOrchestrator`** — поверхность панели при missing solution / ошибке сборки; **`IdeMcpHostOrchestrator`** — JSON `ping`/рестарт MCP; **`IdeMcpHybridCodebaseIndexOrchestrator`** — литералы ошибок и `SerializeReindexFailed`; дедуп **`PublishIdeMcpTestRunMutation`** в `IdeMcpActions.BuildTest`.
+- **v1.39** — Wave UI clusters: доменное разнесение **`MainWindowViewModel.ShellState`**: регион/контур MFD (**`ShellState.RegionAndContour.cs`**), режим UI и сборка (**`UiSessionChrome.cs`**), Kroki/modelfetch (**`ModelPullMarkdown.cs`**); enum палитры в **`Models/Shell/CommandPaletteHost.cs`** (хост-окна + тесты пользуются из `CascadeIDE.Models.Shell`).

@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using CascadeIDE.Models.Shell;
 using System.ComponentModel;
 
 namespace CascadeIDE.Views;
@@ -29,14 +30,14 @@ public partial class MfdHostWindow : PointerTrackingWindow
     {
         if (DataContext is not ViewModels.MainWindowViewModel vm)
             return;
-        vm.CommandPaletteHost = ViewModels.CommandPaletteHost.MfdHost;
+        vm.CommandPaletteHost = CommandPaletteHost.MfdHost;
         MainWindowHotkeyService.TryHandleTunnelKeyDownFromWindow(nameof(MfdHostWindow), e, vm);
     }
 
     private void OnActivated(object? sender, EventArgs e)
     {
         if (DataContext is ViewModels.MainWindowViewModel vm)
-            vm.CommandPaletteHost = ViewModels.CommandPaletteHost.MfdHost;
+            vm.CommandPaletteHost = CommandPaletteHost.MfdHost;
     }
 
     private void OnDataContextChanged(object? sender, EventArgs e)

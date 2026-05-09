@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
+using CascadeIDE.Models.Shell;
 using CascadeIDE.ViewModels;
 
 namespace CascadeIDE.Views;
