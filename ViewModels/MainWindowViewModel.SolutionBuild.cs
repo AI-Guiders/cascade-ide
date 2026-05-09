@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using CascadeIDE.Services;
 using CascadeIDE.Cockpit.DataBus;
 using Avalonia.Threading;
+using CascadeIDE.Features.Build.Application;
 using CascadeIDE.Models;
 using CommunityToolkit.Mvvm.Input;
 
@@ -42,46 +43,17 @@ public partial class MainWindowViewModel
 
         void AppendBuildChunk(string chunk) => BuildOutputPanel.Append(chunk);
 
-        int? lastExitCode = null;
-        bool? lastBuildSucceeded = null;
-        try
-        {
-            var workDir = Path.GetDirectoryName(solutionPath) ?? "";
-            var channel = BuildLogIngestion.CreateBuildLogChannel();
+        var (lastExitCode, lastBuildSucceeded) =
+            await DotnetSolutionChunkedBuildOrchestrator.RunSolutionBuildStreamingAsync(
+                    solutionPath,
+                    _dotnetRunner,
+                    AppendBuildChunk,
+                    CancellationToken.None)
+                .ConfigureAwait(true);
 
-            var drainTask = BuildLogIngestion.DrainToAppendAsync(
-                channel.Reader,
-                AppendBuildChunk,
-                maxBatchChars: 8192,
-                cancellationToken: CancellationToken.None);
-
-            var runTask = _dotnetRunner.RunWithChunkWriterAsync(
-                ["build", solutionPath],
-                workDir,
-                channel.Writer,
-                CancellationToken.None);
-
-            // Без ConfigureAwait(false) на границе с UI: finally с IsBuilding остаётся согласованным с диспетчером.
-            await Task.WhenAll(drainTask, runTask);
-            var (success, exitCode) = await runTask;
-            lastExitCode = exitCode;
-            lastBuildSucceeded = success;
-
-            AppendBuildChunk("\r\n");
-            if (!success && exitCode != 0)
-                AppendBuildChunk($"\r\nКод выхода: {exitCode}");
-        }
-        catch (Exception ex)
-        {
-            AppendBuildChunk("Ошибка: " + ex.Message + "\r\n");
-            lastBuildSucceeded = false;
-        }
-        finally
-        {
-            BuildOutputPanel.FlushPending();
-            PublishToIdeDataBusAndRebuild(new BuildStateChanged(false, lastExitCode, lastBuildSucceeded));
-            IsBuilding = false;
-        }
+        BuildOutputPanel.FlushPending();
+        PublishToIdeDataBusAndRebuild(new BuildStateChanged(false, lastExitCode, lastBuildSucceeded));
+        IsBuilding = false;
     }
 
     private bool CanBuildSolution() =>
