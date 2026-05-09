@@ -1,3 +1,4 @@
+using CascadeIDE.Features.Shell.Application;
 using CascadeIDE.Models;
 using CascadeIDE.Models.Shell;
 
@@ -12,26 +13,8 @@ public partial class MainWindowViewModel
     /// <summary>v1 — единый расклад; будущий декларативный пресет — смена id (ADR 0088).</summary>
     public IPfdLayout PfdLayout => PfdLayouts.Default;
 
-    /// <summary>Детерминированный порядок обхода при выборе первой доступной страницы.</summary>
     internal static readonly MfdShellPage[] MfdShellPageOrder =
-    [
-        MfdShellPage.WorkspaceHealth,
-        MfdShellPage.SolutionExplorer,
-        MfdShellPage.RelatedFiles,
-        MfdShellPage.MarkdownPreview,
-        MfdShellPage.HybridIndex,
-        MfdShellPage.Chat,
-        MfdShellPage.AiChatSettings,
-        MfdShellPage.EnvironmentReadiness,
-        MfdShellPage.Terminal,
-        MfdShellPage.Build,
-        MfdShellPage.Problems,
-        MfdShellPage.Git,
-        MfdShellPage.Events,
-        MfdShellPage.Tests,
-        MfdShellPage.Hypotheses,
-        MfdShellPage.DebugStack,
-    ];
+        MfdShellPageAllowanceProjection.PageOrder;
 
     /// <summary>MCP и палитра: перейти на страницу оболочки Mfd, если она разрешена пресетом.</summary>
     public void TryNavigateToMfdShellPage(MfdShellPage page)
@@ -53,35 +36,21 @@ public partial class MainWindowViewModel
             RequestToggleMfdHostWindow?.Invoke();
     }
 
-    private bool IsMfdShellPageAllowed(MfdShellPage page) => page switch
-    {
-        MfdShellPage.WorkspaceHealth => ShowIdeHealthMfdPage,
-        MfdShellPage.SolutionExplorer => IsDockedMfdSolutionExplorerTree,
-        MfdShellPage.RelatedFiles => true,
-        MfdShellPage.MarkdownPreview => true,
-        MfdShellPage.HybridIndex => true,
-        MfdShellPage.Chat => true,
-        MfdShellPage.AiChatSettings => true,
-        MfdShellPage.EnvironmentReadiness => true,
-        MfdShellPage.Terminal => IsTerminalVisible,
-        MfdShellPage.Build => IsBuildOutputVisible,
-        MfdShellPage.Problems => IsProblemsPanelVisible,
-        MfdShellPage.Git => IsGitPanelVisible,
-        MfdShellPage.Events or MfdShellPage.Tests or MfdShellPage.DebugStack => InstrumentationTabs,
-        MfdShellPage.Hypotheses => HypothesesTab,
-        _ => false,
-    };
+    private MfdShellPageAllowanceProjection.Snapshot MfdShellAllowanceSnapshot => new(
+        ShowIdeHealthMfdPage,
+        IsDockedMfdSolutionExplorerTree,
+        IsTerminalVisible,
+        IsBuildOutputVisible,
+        IsProblemsPanelVisible,
+        IsGitPanelVisible,
+        InstrumentationTabs,
+        HypothesesTab);
 
-    private MfdShellPage GetFirstAllowedMfdShellPage()
-    {
-        foreach (var p in MfdShellPageOrder)
-        {
-            if (IsMfdShellPageAllowed(p))
-                return p;
-        }
+    private bool IsMfdShellPageAllowed(MfdShellPage page) =>
+        MfdShellPageAllowanceProjection.IsAllowed(page, MfdShellAllowanceSnapshot);
 
-        return MfdShellPage.Chat;
-    }
+    private MfdShellPage GetFirstAllowedMfdShellPage() =>
+        MfdShellPageAllowanceProjection.FirstAllowedOrChat(MfdShellAllowanceSnapshot);
 
     private void CoerceMfdShellPageToAllowed()
     {
