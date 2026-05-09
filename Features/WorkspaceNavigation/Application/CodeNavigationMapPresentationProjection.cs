@@ -9,8 +9,53 @@ namespace CascadeIDE.Features.WorkspaceNavigation.Application;
 [ComputingUnit]
 public static class CodeNavigationMapPresentationProjection
 {
+    private static readonly string[] PresentationViewCycleOrder = ["list", "graph", "both"];
+
     /// <summary>Список related на странице MFD (вкладка RelatedFiles), не в колонке PFD.</summary>
     public const bool ShowCodeNavigationMapListOnPfd = false;
+
+    /// <summary>Строка сводки настроек карты для HUD (без ComboBox).</summary>
+    public static string SettingsSummaryLine(string presentationView, string mapLevel, string detailLevelRaw) =>
+        $"Вид: {presentationView} · уровень: {mapLevel} · детализация: {detailLevelRaw.Trim()} · палитра / MCP";
+
+    /// <summary>Следующий <see cref="CodeNavigationMapSettings.NormalizeView"/> после текущего: list → graph → both → list.</summary>
+    public static string NextPresentationViewAfter(string currentPresentationView)
+    {
+        var cur = CodeNavigationMapSettings.NormalizeView(currentPresentationView);
+        var i = Array.IndexOf(PresentationViewCycleOrder, cur);
+        if (i < 0)
+            i = 0;
+        return PresentationViewCycleOrder[(i + 1) % PresentationViewCycleOrder.Length];
+    }
+
+    /// <summary>Следующий нормализованный depth: file ↔ controlFlow.</summary>
+    public static string ToggledMapLevel(string currentDepth)
+    {
+        var n = CodeNavigationMapLevelKind.Normalize(currentDepth);
+        return string.Equals(n, CodeNavigationMapLevelKind.File, StringComparison.Ordinal)
+            ? CodeNavigationMapLevelKind.ControlFlow
+            : CodeNavigationMapLevelKind.File;
+    }
+
+    /// <summary>Цикл детализации glance → normal → inspect → glance для <c>[code_navigation_map]</c>.</summary>
+    public static (CodeNavigationMapDetailLevel Detail, string TomlDetailLevel) NextDetailCycle(CodeNavigationMapDetailLevel currentNormalized)
+    {
+        var next = currentNormalized switch
+        {
+            CodeNavigationMapDetailLevel.Glance => CodeNavigationMapDetailLevel.Normal,
+            CodeNavigationMapDetailLevel.Normal => CodeNavigationMapDetailLevel.Inspect,
+            CodeNavigationMapDetailLevel.Inspect => CodeNavigationMapDetailLevel.Glance,
+            _ => CodeNavigationMapDetailLevel.Normal
+        };
+        var toml = next switch
+        {
+            CodeNavigationMapDetailLevel.Glance => "glance",
+            CodeNavigationMapDetailLevel.Normal => "normal",
+            CodeNavigationMapDetailLevel.Inspect => "inspect",
+            _ => "normal"
+        };
+        return (next, toml);
+    }
 
     public static bool ShowCodeNavigationMapList(string presentationView) =>
         CodeNavigationMapSettings.ViewWantsList(presentationView);

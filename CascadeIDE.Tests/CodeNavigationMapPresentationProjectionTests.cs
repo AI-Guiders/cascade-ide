@@ -68,4 +68,40 @@ public sealed class CodeNavigationMapPresentationProjectionTests
             expect,
             CodeNavigationMapPresentationProjection.WorkspaceNavigationMapHasRelated(related, graphNodes));
     }
+
+    [Fact]
+    public void SettingsSummaryLine_includes_trimmed_detail()
+    {
+        var s = CodeNavigationMapPresentationProjection.SettingsSummaryLine("both", "file", "  normal  ");
+        Assert.Contains("детализация: normal", s, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("list", "graph")]
+    [InlineData("graph", "both")]
+    [InlineData("both", "list")]
+    [InlineData("junk", "graph")]
+    public void NextPresentationViewAfter_cycles(string current, string next) =>
+        Assert.Equal(next, CodeNavigationMapPresentationProjection.NextPresentationViewAfter(current));
+
+    [Theory]
+    [InlineData("file", CodeNavigationMapLevelKind.ControlFlow)]
+    [InlineData("FILE", CodeNavigationMapLevelKind.ControlFlow)]
+    [InlineData(CodeNavigationMapLevelKind.ControlFlow, CodeNavigationMapLevelKind.File)]
+    public void ToggledMapLevel_alternates(string current, string expected) =>
+        Assert.Equal(expected, CodeNavigationMapPresentationProjection.ToggledMapLevel(current));
+
+    [Theory]
+    [InlineData(CodeNavigationMapDetailLevel.Glance, CodeNavigationMapDetailLevel.Normal, "normal")]
+    [InlineData(CodeNavigationMapDetailLevel.Normal, CodeNavigationMapDetailLevel.Inspect, "inspect")]
+    [InlineData(CodeNavigationMapDetailLevel.Inspect, CodeNavigationMapDetailLevel.Glance, "glance")]
+    public void NextDetailCycle_rotates(
+        CodeNavigationMapDetailLevel current,
+        CodeNavigationMapDetailLevel expectDetail,
+        string expectToml)
+    {
+        var (d, t) = CodeNavigationMapPresentationProjection.NextDetailCycle(current);
+        Assert.Equal(expectDetail, d);
+        Assert.Equal(expectToml, t);
+    }
 }
