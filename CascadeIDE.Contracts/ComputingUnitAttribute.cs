@@ -11,7 +11,7 @@ namespace CascadeIDE.Contracts;
 /// типы-компьюторы кабины в <c>Cockpit/ComputingUnits</c> (типы с <c>: ICockpitComputeUnit</c> и статические CCU-хелперы в том дереве).
 /// Не маркировать только-DTO (<c>record struct</c> полезная нагрузка), перечисления и пустые контрактные интерфейсы.
 ///
-/// Поиск: <c>[ComputingUnit]</c>. При необходимости — параметр строки-подсказки в атрибуте.
+/// Поиск: <c>[ComputingUnit]</c>. Для координации сценариев — отдельно <c>[ApplicationOrchestrator]</c> (<see cref="ApplicationOrchestratorAttribute"/>).
 /// </remarks>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct,
     Inherited = false,
