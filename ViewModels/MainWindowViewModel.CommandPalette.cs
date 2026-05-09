@@ -222,7 +222,8 @@ public partial class MainWindowViewModel
             return;
         CommandPaletteQuery = "";
         RefreshCommandPaletteFilter();
-        CommandPaletteSelectedIndex = FilteredCommandPaletteEntries.Count > 0 ? 0 : -1;
+        CommandPaletteSelectedIndex = CommandPaletteSelectionProjection.InitialSelectedIndex(
+            FilteredCommandPaletteEntries.Count);
     }
 
     [RelayCommand]
@@ -308,7 +309,8 @@ public partial class MainWindowViewModel
         foreach (var e in ranked)
             FilteredCommandPaletteEntries.Add(new IdeCommandPaletteRowViewModel(e, hotkeys.GetDisplayHint(e.CommandId), family));
 
-        CommandPaletteSelectedIndex = FilteredCommandPaletteEntries.Count > 0 ? 0 : -1;
+        CommandPaletteSelectedIndex = CommandPaletteSelectionProjection.InitialSelectedIndex(
+            FilteredCommandPaletteEntries.Count);
         RefreshCommandPaletteSurfaceSnapshot();
     }
 
@@ -419,8 +421,9 @@ public partial class MainWindowViewModel
                 break;
         }
 
-        if (CommandPaletteSelectedIndex >= FilteredCommandPaletteEntries.Count)
-            CommandPaletteSelectedIndex = Math.Max(0, FilteredCommandPaletteEntries.Count - 1);
+        CommandPaletteSelectedIndex = CommandPaletteSelectionProjection.ClampUpperOrKeep(
+            CommandPaletteSelectedIndex,
+            FilteredCommandPaletteEntries.Count);
         RefreshCommandPaletteSurfaceSnapshot();
     }
 
@@ -538,7 +541,8 @@ public partial class MainWindowViewModel
                         cat));
                 }
 
-                CommandPaletteSelectedIndex = FilteredCommandPaletteEntries.Count > 0 ? 0 : -1;
+                CommandPaletteSelectedIndex = CommandPaletteSelectionProjection.InitialSelectedIndex(
+                    FilteredCommandPaletteEntries.Count);
                 RefreshCommandPaletteSurfaceSnapshot();
             });
         }

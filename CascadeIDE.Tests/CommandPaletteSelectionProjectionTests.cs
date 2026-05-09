@@ -31,6 +31,20 @@ public sealed class CommandPaletteSelectionProjectionTests
         Assert.Equal(9, n);
     }
 
+    [Theory]
+    [InlineData(0, -1)]
+    [InlineData(1, 0)]
+    [InlineData(3, 0)]
+    public void Initial_index_first_or_negative(int count, int expect) =>
+        Assert.Equal(expect, CommandPaletteSelectionProjection.InitialSelectedIndex(count));
+
+    [Theory]
+    [InlineData(10, 3, 2)]
+    [InlineData(10, 0, -1)]
+    [InlineData(2, 2, 1)]
+    public void Clamp_when_index_oob(int selected, int count, int expect) =>
+        Assert.Equal(expect, CommandPaletteSelectionProjection.ClampUpperOrKeep(selected, count));
+
     [Fact]
     public void Page_move_zero_step_fails()
     {

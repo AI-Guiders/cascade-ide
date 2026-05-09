@@ -6,6 +6,17 @@ namespace CascadeIDE.Features.Shell.Application;
 [ComputingUnit]
 public static class CommandPaletteSelectionProjection
 {
+    /// <summary>После полного пересчёта списка: первая строка или «нет выбора».</summary>
+    public static int InitialSelectedIndex(int entryCount) => entryCount > 0 ? 0 : -1;
+
+    /// <summary>Если индекс ушёл за хвост после добавления/удаления строк — зажать на последнюю валидную.</summary>
+    public static int ClampUpperOrKeep(int selectedIndex, int entryCount)
+    {
+        if (entryCount <= 0)
+            return -1;
+        return selectedIndex >= entryCount ? Math.Max(0, entryCount - 1) : selectedIndex;
+    }
+
     public static bool TryMoveCircular(int currentIndex, int delta, int entryCount, out int nextIndex)
     {
         nextIndex = currentIndex;
