@@ -243,11 +243,11 @@ public partial class GitPanelViewModel : ViewModelBase
             return "";
         try
         {
-            var wsFull = Path.GetFullPath(workspaceDir);
+            var wsFull = CanonicalFilePath.Normalize(workspaceDir);
             var topTrim = (toplevelRaw ?? "").Trim().Replace('/', Path.DirectorySeparatorChar);
             if (string.IsNullOrEmpty(topTrim))
                 return $"Каталог решения: {wsFull}";
-            var topFull = Path.GetFullPath(topTrim);
+            var topFull = CanonicalFilePath.Normalize(topTrim);
             var same = string.Equals(wsFull, topFull, StringComparison.OrdinalIgnoreCase);
             return same
                 ? $"Корень git: {topFull}"
@@ -394,7 +394,7 @@ public partial class GitPanelViewModel : ViewModelBase
         if (string.IsNullOrWhiteSpace(ws))
             return;
 
-        var full = Path.GetFullPath(Path.Combine(ws, rel.Replace('/', Path.DirectorySeparatorChar)));
+        var full = CanonicalFilePath.Normalize(Path.Combine(ws, rel.Replace('/', Path.DirectorySeparatorChar)));
         if (!Directory.Exists(full))
             return;
 
@@ -410,7 +410,7 @@ public partial class GitPanelViewModel : ViewModelBase
         if (string.IsNullOrWhiteSpace(ws))
             return false;
 
-        var full = Path.GetFullPath(Path.Combine(ws, rel.Replace('/', Path.DirectorySeparatorChar)));
+        var full = CanonicalFilePath.Normalize(Path.Combine(ws, rel.Replace('/', Path.DirectorySeparatorChar)));
         return Directory.Exists(full);
     }
 
@@ -424,7 +424,7 @@ public partial class GitPanelViewModel : ViewModelBase
         if (string.IsNullOrWhiteSpace(ws))
             return;
 
-        var dir = Path.GetFullPath(Path.Combine(ws, rel.Replace('/', Path.DirectorySeparatorChar)));
+        var dir = CanonicalFilePath.Normalize(Path.Combine(ws, rel.Replace('/', Path.DirectorySeparatorChar)));
         if (!Directory.Exists(dir))
             return;
 
@@ -448,7 +448,7 @@ public partial class GitPanelViewModel : ViewModelBase
         if (string.IsNullOrWhiteSpace(ws))
             return false;
 
-        var full = Path.GetFullPath(Path.Combine(ws, rel.Replace('/', Path.DirectorySeparatorChar)));
+        var full = CanonicalFilePath.Normalize(Path.Combine(ws, rel.Replace('/', Path.DirectorySeparatorChar)));
         return Directory.Exists(full) && FindSolutionFileInDirectory(full) is not null;
     }
 

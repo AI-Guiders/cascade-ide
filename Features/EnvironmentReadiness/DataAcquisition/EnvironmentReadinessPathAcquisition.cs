@@ -40,7 +40,7 @@ public static class EnvironmentReadinessPathAcquisition
 
         try
         {
-            var full = Path.GetFullPath(raw.Trim());
+            var full = CanonicalFilePath.Normalize(raw.Trim());
             var parent = Path.GetDirectoryName(full);
             if (!string.IsNullOrEmpty(parent) && Directory.Exists(parent))
                 return AgentNotesFilePathKind.ParentDirForGlobalFile;
@@ -63,7 +63,7 @@ public static class EnvironmentReadinessPathAcquisition
 
         try
         {
-            var full = Path.GetFullPath(raw.Trim());
+            var full = CanonicalFilePath.Normalize(raw.Trim());
             if (Directory.Exists(full))
                 return AgentNotesCanonPathKind.DirectoryExists;
 
@@ -95,7 +95,7 @@ public static class EnvironmentReadinessPathAcquisition
 
         try
         {
-            _ = Path.GetFullPath(trimmed);
+            _ = CanonicalFilePath.Normalize(trimmed);
         }
         catch
         {

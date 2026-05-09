@@ -37,7 +37,7 @@ public static class IdeMcpHybridIndexScope
 
         try
         {
-            hciWorkspaceRoot = Path.GetFullPath(
+            hciWorkspaceRoot = CanonicalFilePath.Normalize(
                 reqWs!.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
         }
         catch

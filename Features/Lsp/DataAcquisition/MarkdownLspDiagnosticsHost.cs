@@ -241,7 +241,7 @@ public sealed class MarkdownLspDiagnosticsHost : ILspDiagnosticSource
     {
         if (_session is null)
             return;
-        var uri = LspFileUri.PathToFileUri(Path.GetFullPath(filePath));
+        var uri = LspFileUri.PathToFileUri(CanonicalFilePath.Normalize(filePath));
         var ver = Interlocked.Increment(ref _versionCounter);
         var msg = new JsonObject
         {
@@ -265,7 +265,7 @@ public sealed class MarkdownLspDiagnosticsHost : ILspDiagnosticSource
     {
         if (_session is null)
             return;
-        var uri = LspFileUri.PathToFileUri(Path.GetFullPath(filePath));
+        var uri = LspFileUri.PathToFileUri(CanonicalFilePath.Normalize(filePath));
         var ver = Interlocked.Increment(ref _versionCounter);
         var msg = new JsonObject
         {

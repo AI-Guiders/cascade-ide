@@ -15,7 +15,7 @@ public static class SolutionFileLocator
         if (!File.Exists(sourceFilePath))
             return null;
 
-        var dir = Path.GetDirectoryName(Path.GetFullPath(sourceFilePath));
+        var dir = Path.GetDirectoryName(CanonicalFilePath.Normalize(sourceFilePath));
         while (!string.IsNullOrEmpty(dir))
         {
             var found = TryFindSolutionInDirectory(dir);
@@ -50,22 +50,17 @@ public static class SolutionFileLocator
     {
         if (string.IsNullOrWhiteSpace(foundSolutionPath) || !File.Exists(foundSolutionPath))
             return false;
-        var candidate = Path.GetFullPath(foundSolutionPath);
+        var candidate = CanonicalFilePath.Normalize(foundSolutionPath);
         if (string.IsNullOrWhiteSpace(currentWorkspaceSolutionPath))
             return true;
-        var current = Path.GetFullPath(currentWorkspaceSolutionPath.Trim());
+        var current = CanonicalFilePath.Normalize(currentWorkspaceSolutionPath.Trim());
         return !PathsReferToSameFile(candidate, current);
     }
 
     private static bool PathsReferToSameFile(string a, string b)
     {
-        try
-        {
-            return string.Equals(Path.GetFullPath(a), Path.GetFullPath(b), StringComparison.OrdinalIgnoreCase);
-        }
-        catch
-        {
-            return string.Equals(a, b, StringComparison.OrdinalIgnoreCase);
-        }
+        if (CanonicalFilePath.TryNormalize(a, out var na) && CanonicalFilePath.TryNormalize(b, out var nb))
+            return string.Equals(na, nb, StringComparison.OrdinalIgnoreCase);
+        return string.Equals(a, b, StringComparison.OrdinalIgnoreCase);
     }
 }

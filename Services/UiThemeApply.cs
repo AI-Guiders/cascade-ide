@@ -20,7 +20,7 @@ public static class UiThemeApply
     /// <summary>Загружает тему из файла рядом с приложением; при отсутствии — из встроенного ресурса (<see cref="BundledAppContent"/>). Перечитывает с диска только если изменились путь или дата модификации.</summary>
     public static string GetThemeJsonFromFile(string filePath)
     {
-        var path = Path.GetFullPath(filePath);
+        var path = CanonicalFilePath.Normalize(filePath);
         if (File.Exists(path))
         {
             var lastWrite = File.GetLastWriteTimeUtc(path);
@@ -42,8 +42,8 @@ public static class UiThemeApply
         relative = null;
         try
         {
-            var baseDir = Path.GetFullPath(AppContext.BaseDirectory);
-            var fp = Path.GetFullPath(fullPath);
+            var baseDir = CanonicalFilePath.Normalize(AppContext.BaseDirectory);
+            var fp = CanonicalFilePath.Normalize(fullPath);
             if (!fp.StartsWith(baseDir, StringComparison.OrdinalIgnoreCase))
                 return false;
             relative = Path.GetRelativePath(baseDir, fp).Replace('\\', '/');

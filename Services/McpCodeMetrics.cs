@@ -41,7 +41,7 @@ public static class McpCodeMetrics
 
         try
         {
-            var fullPath = Path.GetFullPath(path);
+            var fullPath = CanonicalFilePath.Normalize(path);
             if (File.Exists(fullPath))
                 return fullPath.EndsWith(".cs", StringComparison.OrdinalIgnoreCase) ? [fullPath] : [];
             if (!Directory.Exists(fullPath))

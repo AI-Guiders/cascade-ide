@@ -18,7 +18,7 @@ internal static class InlayLogPaths
         // Env выставляется в Main после возможных ранних вызовов — всегда перекрывает кэш.
         var fromEnv = Environment.GetEnvironmentVariable(EnvironmentVariableName);
         if (!string.IsNullOrWhiteSpace(fromEnv))
-            return Path.GetFullPath(fromEnv.Trim());
+            return CanonicalFilePath.Normalize(fromEnv.Trim());
 
         if (_cached is not null)
             return _cached;

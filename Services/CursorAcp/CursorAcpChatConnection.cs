@@ -55,7 +55,7 @@ public sealed class CursorAcpChatConnection : IDisposable
         if (string.IsNullOrWhiteSpace(workspaceRoot))
             workspaceRoot = workDir;
 
-        workspaceRoot = Path.GetFullPath(workspaceRoot);
+        workspaceRoot = CanonicalFilePath.Normalize(workspaceRoot);
         await EnsureSessionAsync(
             workspaceRoot,
             cmdPath,
@@ -272,7 +272,7 @@ internal sealed class CursorAcpIdeClient : IAcpClient
     private AcpTerminalHost? _terminalHost;
 
     public void ConfigureWorkspaceRoot(string workspaceRoot) =>
-        _workspaceRoot = Path.GetFullPath(workspaceRoot.Trim());
+        _workspaceRoot = CanonicalFilePath.Normalize(workspaceRoot.Trim());
 
     public void SetChunkHandlers(
         Action<string>? messageChunk,

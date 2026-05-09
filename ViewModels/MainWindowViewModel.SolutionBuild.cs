@@ -154,7 +154,7 @@ public partial class MainWindowViewModel
             {
                 try
                 {
-                    var full = Path.GetFullPath(solutionPath);
+                    var full = CanonicalFilePath.Normalize(solutionPath);
                     baseDir = File.Exists(full) ? (Path.GetDirectoryName(full) ?? "") : full;
                 }
                 catch

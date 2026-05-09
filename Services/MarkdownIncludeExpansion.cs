@@ -24,7 +24,7 @@ public static class MarkdownIncludeExpansion
 
         var opts = options ?? new Options();
         var errors = new List<string>();
-        var fullMd = Path.GetFullPath(markdownFilePath);
+        var fullMd = CanonicalFilePath.Normalize(markdownFilePath);
         var baseDir = Path.GetDirectoryName(fullMd) ?? Directory.GetCurrentDirectory();
         var stack = new Stack<string>();
 
@@ -130,7 +130,7 @@ public static class MarkdownIncludeExpansion
             return null;
         }
 
-        var full = Path.GetFullPath(Path.Combine(baseDir, relativePath));
+        var full = CanonicalFilePath.Normalize(Path.Combine(baseDir, relativePath));
         if (stack.Contains(full, StringComparer.OrdinalIgnoreCase))
         {
             errors.Add($"INCLUDE: cycle detected: '{full}'.");

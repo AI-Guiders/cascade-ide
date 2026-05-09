@@ -18,7 +18,7 @@ public static class MsBuildDebugTargetResolver
         if (string.IsNullOrWhiteSpace(csprojFullPath) || !File.Exists(csprojFullPath))
             return (null, "Файл проекта не найден.");
 
-        var projectDir = Path.GetDirectoryName(Path.GetFullPath(csprojFullPath));
+        var projectDir = Path.GetDirectoryName(CanonicalFilePath.Normalize(csprojFullPath));
         if (string.IsNullOrEmpty(projectDir))
             return (null, "Не удалось определить каталог проекта.");
 
@@ -53,7 +53,7 @@ public static class MsBuildDebugTargetResolver
 
     private static (string? TargetPath, string? Error) ValidateBuiltDllExists(string targetPathFromMsbuild)
     {
-        var full = Path.GetFullPath(targetPathFromMsbuild);
+        var full = CanonicalFilePath.Normalize(targetPathFromMsbuild);
         if (!File.Exists(full))
             return (null, $"Сборка ещё не найдена: {full}. Собери решение (Собрать) и повтори.");
         return (full, null);

@@ -17,7 +17,7 @@ internal static class VisualBaselinePaths
         {
             var baseDir = AppContext.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar);
             // .../CascadeIDE.Tests/bin/Debug/net10.0  →  .../CascadeIDE.Tests
-            var testsProject = Path.GetFullPath(Path.Combine(baseDir, "..", "..", ".."));
+            var testsProject = CanonicalFilePath.Normalize(Path.Combine(baseDir, "..", "..", ".."));
             return Path.Combine(testsProject, "TestData", "Visual");
         }
     }

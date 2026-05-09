@@ -19,8 +19,8 @@ public static class McpExternalServersJsonResolver
 
         var expanded = Environment.ExpandEnvironmentVariables(path);
         var fullPath = Path.IsPathRooted(expanded)
-            ? Path.GetFullPath(expanded)
-            : Path.GetFullPath(Path.Combine(UserSettingsPaths.GetSettingsDirectory(), expanded));
+            ? CanonicalFilePath.Normalize(expanded)
+            : CanonicalFilePath.Normalize(Path.Combine(UserSettingsPaths.GetSettingsDirectory(), expanded));
 
         var fromFile = TextFileReadWrite.TryReadAllTextIfExists(fullPath);
         if (fromFile is not null)

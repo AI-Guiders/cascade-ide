@@ -199,7 +199,7 @@ public sealed class IdeDapDebugSession
 
     private static string GetWorkspaceRootFromPath(string workspacePath)
     {
-        var workspaceRoot = Path.GetFullPath(workspacePath.Trim());
+        var workspaceRoot = CanonicalFilePath.Normalize(workspacePath.Trim());
         if (File.Exists(workspaceRoot))
             workspaceRoot = Path.GetDirectoryName(workspaceRoot) ?? workspaceRoot;
         return workspaceRoot;
@@ -283,8 +283,8 @@ public sealed class IdeDapDebugSession
         var netcoredbg = ResolveNetcoreDbgPath(netcoredbgPath);
         var workspaceRoot = GetWorkspaceRootFromPath(workspacePath);
         var programPath = Path.IsPathRooted(targetPath.Trim())
-            ? Path.GetFullPath(targetPath)
-            : Path.GetFullPath(Path.Combine(workspaceRoot, targetPath.Trim()));
+            ? CanonicalFilePath.Normalize(targetPath)
+            : CanonicalFilePath.Normalize(Path.Combine(workspaceRoot, targetPath.Trim()));
         if (!File.Exists(programPath))
             throw new ArgumentException($"Target not found: {programPath}");
 
@@ -305,8 +305,8 @@ public sealed class IdeDapDebugSession
             {
                 var w = workingDirectoryOverride.Trim();
                 launchCwd = Path.IsPathRooted(w)
-                    ? Path.GetFullPath(w)
-                    : Path.GetFullPath(Path.Combine(workspaceRoot, w));
+                    ? CanonicalFilePath.Normalize(w)
+                    : CanonicalFilePath.Normalize(Path.Combine(workspaceRoot, w));
             }
             else
                 launchCwd = ResolveLaunchWorkingDirectory(programPath, workspaceRoot, programArgs);

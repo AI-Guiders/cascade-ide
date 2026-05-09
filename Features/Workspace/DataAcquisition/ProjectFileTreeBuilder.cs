@@ -53,7 +53,7 @@ public static class ProjectFileTreeBuilder
                         continue;
 
                     var normalizedInclude = include.Replace('\\', Path.DirectorySeparatorChar);
-                    var fullPath = Path.GetFullPath(Path.Combine(projectDir, normalizedInclude));
+                    var fullPath = CanonicalFilePath.Normalize(Path.Combine(projectDir, normalizedInclude));
                     if (ignore.IsIgnored(fullPath))
                         continue;
                     if (item.Attribute("Include") is not null &&
@@ -84,7 +84,7 @@ public static class ProjectFileTreeBuilder
                     if (rel.StartsWith("obj", StringComparison.OrdinalIgnoreCase) ||
                         rel.StartsWith("bin", StringComparison.OrdinalIgnoreCase))
                         continue;
-                    var fp = Path.GetFullPath(f);
+                    var fp = CanonicalFilePath.Normalize(f);
                     if (ignore.IsIgnored(fp))
                         continue;
                     if (!included.Add(fp))
@@ -131,12 +131,12 @@ public static class ProjectFileTreeBuilder
             return null;
 
         if (dependentUpon.Contains(Path.DirectorySeparatorChar))
-            return Path.GetFullPath(Path.Combine(projectDir, dependentUpon));
+            return CanonicalFilePath.Normalize(Path.Combine(projectDir, dependentUpon));
 
         var childDir = Path.GetDirectoryName(childProjectRelativePath);
         if (string.IsNullOrEmpty(childDir))
-            return Path.GetFullPath(Path.Combine(projectDir, dependentUpon));
-        return Path.GetFullPath(Path.Combine(projectDir, childDir, dependentUpon));
+            return CanonicalFilePath.Normalize(Path.Combine(projectDir, dependentUpon));
+        return CanonicalFilePath.Normalize(Path.Combine(projectDir, childDir, dependentUpon));
     }
 
     /// <summary>
@@ -169,7 +169,7 @@ public static class ProjectFileTreeBuilder
                 var parentName = TryInferParentCsFileName(Path.GetFileName(full), names);
                 if (parentName is null)
                     continue;
-                var parentFull = Path.GetFullPath(Path.Combine(group.Key, parentName));
+                var parentFull = CanonicalFilePath.Normalize(Path.Combine(group.Key, parentName));
                 if (!File.Exists(parentFull) || comparer.Equals(full, parentFull))
                     continue;
                 pairs.Add((full, parentFull));

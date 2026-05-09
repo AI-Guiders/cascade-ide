@@ -1,7 +1,6 @@
 using CascadeIDE.Cockpit.ComputingUnits;
 using CascadeIDE.Cockpit.ComputingUnits.Launch;
 using CascadeIDE.Features.Launch.DataAcquisition;
-using CascadeIDE.Services;
 using Xunit;
 
 namespace CascadeIDE.Tests;
@@ -59,7 +58,7 @@ public sealed class LaunchProfileProjectResolveUnitTests
             Assert.True(snapshot.HasProfile);
             Assert.NotNull(snapshot.Profile);
             Assert.Equal("Default", snapshot.Profile!.Value.ProfileId);
-            Assert.Equal(Path.GetFullPath(csproj), snapshot.ProjectCsprojFullPath);
+            Assert.Equal(CanonicalFilePath.Normalize(csproj), snapshot.ProjectCsprojFullPath);
         }
         finally
         {

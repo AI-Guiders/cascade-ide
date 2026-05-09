@@ -26,8 +26,8 @@ public sealed class CursorAcpAgentPathTests
                 var ok = CursorAcpAgentPath.TryResolve("", out var cmdPath, out var workDir);
 
                 Assert.True(ok);
-                Assert.Equal(Path.GetFullPath(cmd), cmdPath, StringComparer.OrdinalIgnoreCase);
-                Assert.Equal(Path.GetFullPath(tmp.FullName), Path.GetFullPath(workDir));
+                Assert.Equal(CanonicalFilePath.Normalize(cmd), cmdPath, StringComparer.OrdinalIgnoreCase);
+                Assert.Equal(CanonicalFilePath.Normalize(tmp.FullName), CanonicalFilePath.Normalize(workDir));
             }
             finally
             {

@@ -14,8 +14,8 @@ internal static class KbBaseOverlayPathResolver
 
         var expanded = Environment.ExpandEnvironmentVariables(raw);
         var path = Path.IsPathRooted(expanded)
-            ? Path.GetFullPath(expanded)
-            : Path.GetFullPath(Path.Combine(UserSettingsPaths.GetSettingsDirectory(), expanded));
+            ? CanonicalFilePath.Normalize(expanded)
+            : CanonicalFilePath.Normalize(Path.Combine(UserSettingsPaths.GetSettingsDirectory(), expanded));
 
         var knowledge = Path.Combine(path, "knowledge");
         return Directory.Exists(knowledge) ? path : null;

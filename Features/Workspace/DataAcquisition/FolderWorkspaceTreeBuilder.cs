@@ -35,7 +35,7 @@ public static class FolderWorkspaceTreeBuilder
         string normalized;
         try
         {
-            normalized = Path.GetFullPath(folderPath);
+            normalized = CanonicalFilePath.Normalize(folderPath);
         }
         catch (Exception ex)
         {

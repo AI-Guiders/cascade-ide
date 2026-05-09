@@ -50,7 +50,7 @@ public sealed class OsShellLauncher : IOsShellLauncher
 
         try
         {
-            var full = Path.GetFullPath(filePath);
+            var full = CanonicalFilePath.Normalize(filePath);
             var dir = Path.GetDirectoryName(full);
             if (string.IsNullOrWhiteSpace(dir))
             {

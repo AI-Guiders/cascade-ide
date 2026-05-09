@@ -55,8 +55,8 @@ public static class IdeWindowScreenshot
     {
         if (string.IsNullOrWhiteSpace(workspaceRoot) || string.IsNullOrWhiteSpace(relativePath))
             return null;
-        var root = Path.GetFullPath(workspaceRoot.Trim());
-        var combined = Path.GetFullPath(Path.Combine(root, relativePath.Trim().Replace('/', Path.DirectorySeparatorChar)));
+        var root = CanonicalFilePath.Normalize(workspaceRoot.Trim());
+        var combined = CanonicalFilePath.Normalize(Path.Combine(root, relativePath.Trim().Replace('/', Path.DirectorySeparatorChar)));
         if (!IsStrictSubPath(root, combined))
             return null;
         var dir = Path.GetDirectoryName(combined);
@@ -68,9 +68,9 @@ public static class IdeWindowScreenshot
 
     private static bool IsStrictSubPath(string rootDir, string candidateFile)
     {
-        rootDir = Path.GetFullPath(rootDir.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar))
+        rootDir = CanonicalFilePath.Normalize(rootDir.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar))
                   + Path.DirectorySeparatorChar;
-        candidateFile = Path.GetFullPath(candidateFile);
+        candidateFile = CanonicalFilePath.Normalize(candidateFile);
         return candidateFile.StartsWith(rootDir, StringComparison.OrdinalIgnoreCase);
     }
 }

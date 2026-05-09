@@ -51,7 +51,7 @@ public sealed class WorkspaceIgnoreMatcher
 
         try
         {
-            var dir = new DirectoryInfo(Path.GetFullPath(fallbackStartDirectory));
+            var dir = new DirectoryInfo(CanonicalFilePath.Normalize(fallbackStartDirectory));
             while (dir is not null)
             {
                 if (Directory.Exists(Path.Combine(dir.FullName, ".git")))
@@ -61,12 +61,12 @@ public sealed class WorkspaceIgnoreMatcher
         }
         catch
         {
-            return Path.GetFullPath(fallbackStartDirectory);
+            return CanonicalFilePath.Normalize(fallbackStartDirectory);
         }
 
         try
         {
-            return Path.GetFullPath(fallbackStartDirectory);
+            return CanonicalFilePath.Normalize(fallbackStartDirectory);
         }
         catch
         {
@@ -77,7 +77,7 @@ public sealed class WorkspaceIgnoreMatcher
     /// <summary>Кэш по нормализованному корню репозитория.</summary>
     public static WorkspaceIgnoreMatcher GetOrCreate(string repositoryRoot)
     {
-        var key = Path.GetFullPath(repositoryRoot.Trim());
+        var key = CanonicalFilePath.Normalize(repositoryRoot.Trim());
         return Cache.GetOrAdd(key, static k => Load(k));
     }
 
@@ -109,7 +109,7 @@ public sealed class WorkspaceIgnoreMatcher
             return;
         try
         {
-            baseDir = Path.GetFullPath(baseDir);
+            baseDir = CanonicalFilePath.Normalize(baseDir);
         }
         catch
         {
@@ -156,7 +156,7 @@ public sealed class WorkspaceIgnoreMatcher
         string root;
         try
         {
-            root = Path.GetFullPath(repositoryRoot.Trim());
+            root = CanonicalFilePath.Normalize(repositoryRoot.Trim());
         }
         catch
         {
@@ -178,7 +178,7 @@ public sealed class WorkspaceIgnoreMatcher
         {
             var p = Path.Combine(directory, name);
             if (File.Exists(p))
-                list.Add(Path.GetFullPath(p));
+                list.Add(CanonicalFilePath.Normalize(p));
         }
 
         string[] subs;
@@ -230,7 +230,7 @@ public sealed class WorkspaceIgnoreMatcher
 
         try
         {
-            fullPath = Path.GetFullPath(fullPath);
+            fullPath = CanonicalFilePath.Normalize(fullPath);
         }
         catch
         {

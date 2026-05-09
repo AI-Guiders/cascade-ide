@@ -405,7 +405,7 @@ public sealed class WorkspaceDiagnosticsCoordinator : IDisposable
     }
 
     private static string NormalizePath(string path) =>
-        Path.GetFullPath(path);
+        CanonicalFilePath.Normalize(path);
 
     private static bool IsMarkdownPath(string filePath) =>
         filePath.EndsWith(".md", StringComparison.OrdinalIgnoreCase)

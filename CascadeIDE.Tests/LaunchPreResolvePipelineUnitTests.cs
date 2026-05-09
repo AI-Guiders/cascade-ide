@@ -1,7 +1,6 @@
 using CascadeIDE.Cockpit.ComputingUnits;
 using CascadeIDE.Cockpit.ComputingUnits.Launch;
 using CascadeIDE.Features.Launch.DataAcquisition;
-using CascadeIDE.Services;
 using Xunit;
 
 namespace CascadeIDE.Tests;
@@ -46,7 +45,7 @@ public sealed class LaunchPreResolvePipelineUnitTests
             Assert.Equal(LaunchReadinessSource.Profile, snap.Readiness.Source);
             Assert.True(snap.Readiness.CanAttemptResolve);
             Assert.Null(snap.McpResolveError);
-            Assert.Equal(Path.GetFullPath(csproj), snap.ProfileProjectCsprojFullPath);
+            Assert.Equal(CanonicalFilePath.Normalize(csproj), snap.ProfileProjectCsprojFullPath);
         }
         finally
         {

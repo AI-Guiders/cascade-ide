@@ -60,7 +60,7 @@ public sealed partial class SolutionWorkspaceViewModel : ViewModelBase
                 string normalizedProbe;
                 try
                 {
-                    normalizedProbe = Path.GetFullPath(trimmed);
+                    normalizedProbe = CanonicalFilePath.Normalize(trimmed);
                 }
                 catch
                 {
@@ -83,7 +83,7 @@ public sealed partial class SolutionWorkspaceViewModel : ViewModelBase
             var normalizedSolutionPath = root.FullPath;
             if (string.IsNullOrEmpty(normalizedSolutionPath))
             {
-                try { normalizedSolutionPath = Path.GetFullPath(path); }
+                try { normalizedSolutionPath = CanonicalFilePath.Normalize(path); }
                 catch { normalizedSolutionPath = path; }
             }
 

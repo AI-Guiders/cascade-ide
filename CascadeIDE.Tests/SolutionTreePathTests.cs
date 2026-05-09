@@ -5,7 +5,7 @@ using Xunit;
 namespace CascadeIDE.Tests;
 
 /// <summary>
-/// Регрессия: <see cref="Path.GetFullPath"/> на кривых строках в дереве решения не должен ронять синхронизацию выбора / открытие из карты намерений.
+/// Регрессия: нормализация путей в дереве решения не должна ронять синхронизацию выбора / открытие из карты намерений.
 /// </summary>
 public sealed class SolutionTreePathTests
 {
@@ -22,7 +22,7 @@ public sealed class SolutionTreePathTests
     {
         var tmp = Path.GetTempPath();
         Assert.True(SolutionTreePath.TryGetFullPath(tmp, out var full));
-        Assert.Equal(Path.GetFullPath(tmp), full);
+        Assert.Equal(CanonicalFilePath.Normalize(tmp), full);
     }
 
     [Fact]
@@ -32,7 +32,7 @@ public sealed class SolutionTreePathTests
         File.WriteAllText(goodPath, "//");
         try
         {
-            var goodNorm = Path.GetFullPath(goodPath);
+            var goodNorm = CanonicalFilePath.Normalize(goodPath);
             var root = SolutionItem.CreateSolution("s", @"C:\x.sln");
             root.Children.Add(SolutionItem.CreateFile("bad-null", "a\0broken.cs"));
             root.Children.Add(SolutionItem.CreateFile("good", goodPath));
@@ -40,7 +40,7 @@ public sealed class SolutionTreePathTests
             var found = SolutionTreePath.FindItemByFullPath(new[] { root }, goodNorm);
             Assert.NotNull(found);
             Assert.Equal("good", found.Title);
-            Assert.Equal(goodNorm, Path.GetFullPath(found.FullPath!));
+            Assert.Equal(goodNorm, CanonicalFilePath.Normalize(found.FullPath!));
         }
         finally
         {
@@ -61,7 +61,7 @@ public sealed class SolutionTreePathTests
         var root = SolutionItem.CreateSolution("s", @"C:\x.sln");
         root.Children.Add(SolutionItem.CreateFile("bad", "x\0y.cs"));
 
-        var found = SolutionTreePath.FindItemByFullPath(new[] { root }, Path.GetFullPath(Path.GetTempPath()));
+        var found = SolutionTreePath.FindItemByFullPath(new[] { root }, CanonicalFilePath.Normalize(Path.GetTempPath()));
         Assert.Null(found);
     }
 }

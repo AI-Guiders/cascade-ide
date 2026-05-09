@@ -112,7 +112,7 @@ public partial class MainWindowViewModel
         error = null;
         try
         {
-            var rel = Path.GetRelativePath(solutionRootDirectory, Path.GetFullPath(csprojFullPath));
+            var rel = Path.GetRelativePath(solutionRootDirectory, CanonicalFilePath.Normalize(csprojFullPath));
             if (rel.StartsWith("..", StringComparison.Ordinal))
             {
                 error = "Проект должен быть внутри каталога решения.";

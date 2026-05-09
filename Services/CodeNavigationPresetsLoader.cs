@@ -106,7 +106,7 @@ public static class CodeNavigationPresetsLoader
             return null;
         try
         {
-            var p = Path.GetFullPath(solutionPath.Trim());
+            var p = CanonicalFilePath.Normalize(solutionPath.Trim());
             if (File.Exists(p))
                 return Path.GetDirectoryName(p);
             return Directory.Exists(p) ? p : null;

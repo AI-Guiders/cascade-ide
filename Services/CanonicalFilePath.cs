@@ -10,6 +10,27 @@ public static class CanonicalFilePath
 {
     public static string Normalize(string path) => Path.GetFullPath(path);
 
+    /// <summary>
+    /// <see cref="Normalize"/> без исключений на невалидных строках (дерево решения, MCP, см. <c>SolutionTreePath</c>).
+    /// </summary>
+    public static bool TryNormalize(string path, out string fullPath)
+    {
+        fullPath = "";
+        try
+        {
+            fullPath = Normalize(path);
+            return true;
+        }
+        catch (ArgumentException)
+        {
+            return false;
+        }
+        catch (NotSupportedException)
+        {
+            return false;
+        }
+    }
+
     /// <summary>Оба пути не пустые; после нормализации сравниваются без учёта регистра.</summary>
     public static bool Equals(string? a, string? b)
     {

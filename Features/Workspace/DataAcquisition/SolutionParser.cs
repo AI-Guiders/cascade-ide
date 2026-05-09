@@ -30,7 +30,7 @@ public static class SolutionParser
         string normalized;
         try
         {
-            normalized = Path.GetFullPath(solutionPath);
+            normalized = CanonicalFilePath.Normalize(solutionPath);
         }
         catch (Exception ex)
         {
@@ -125,7 +125,7 @@ public static class SolutionParser
                 if (string.IsNullOrWhiteSpace(projectPath))
                     continue;
 
-                var fullPath = Path.GetFullPath(Path.Combine(baseDir, projectPath.Replace('/', Path.DirectorySeparatorChar)));
+                var fullPath = CanonicalFilePath.Normalize(Path.Combine(baseDir, projectPath.Replace('/', Path.DirectorySeparatorChar)));
                 var title = Path.GetFileName(projectPath);
                 var projectNode = SolutionItem.CreateProject(title, fullPath);
                 ProjectFileTreeBuilder.AddProjectFileChildren(projectNode, fullPath, baseDir);
@@ -215,7 +215,7 @@ public static class SolutionParser
                 if (string.IsNullOrWhiteSpace(path))
                     continue;
 
-                var fullPath = Path.GetFullPath(Path.Combine(baseDir, path.Replace('/', Path.DirectorySeparatorChar)));
+                var fullPath = CanonicalFilePath.Normalize(Path.Combine(baseDir, path.Replace('/', Path.DirectorySeparatorChar)));
                 var title = Path.GetFileName(path);
                 var projectNode = SolutionItem.CreateProject(title, fullPath);
                 ProjectFileTreeBuilder.AddProjectFileChildren(projectNode, fullPath, baseDir);
@@ -244,7 +244,7 @@ public static class SolutionParser
             if (string.IsNullOrEmpty(path) || path.Contains("*.vcxproj") || path.Contains(".vcxproj"))
                 continue;
 
-            var fullPath = Path.GetFullPath(Path.Combine(baseDir, path.Replace('\\', Path.DirectorySeparatorChar)));
+            var fullPath = CanonicalFilePath.Normalize(Path.Combine(baseDir, path.Replace('\\', Path.DirectorySeparatorChar)));
             var title = Path.GetFileName(path);
             var projectNode = SolutionItem.CreateProject(title, fullPath);
             ProjectFileTreeBuilder.AddProjectFileChildren(projectNode, fullPath, baseDir);
@@ -338,7 +338,7 @@ public static class SolutionParser
             return false;
         }
 
-        var resolvedBase = Path.GetFullPath(Path.Combine(slnfBaseDir, baseSolutionRel.Replace('/', Path.DirectorySeparatorChar)));
+        var resolvedBase = CanonicalFilePath.Normalize(Path.Combine(slnfBaseDir, baseSolutionRel.Replace('/', Path.DirectorySeparatorChar)));
         if (!File.Exists(resolvedBase))
         {
             error = "Базовый solution не найден: " + resolvedBase;
@@ -356,7 +356,7 @@ public static class SolutionParser
                 var rel = (p.GetString() ?? "").Trim();
                 if (rel.Length == 0)
                     continue;
-                var full = Path.GetFullPath(Path.Combine(baseSlnDir, rel.Replace('/', Path.DirectorySeparatorChar)));
+                var full = CanonicalFilePath.Normalize(Path.Combine(baseSlnDir, rel.Replace('/', Path.DirectorySeparatorChar)));
                 allowed.Add(full);
             }
         }
@@ -369,9 +369,11 @@ public static class SolutionParser
     private static bool PruneTreeToAllowedProjects(SolutionItem node, HashSet<string> allowedProjects)
     {
         // Returns whether this subtree contains any allowed project.
-        if (node.FullPath is { } fp && fp.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase))
+        if (node.FullPath is { } projPath && projPath.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase))
         {
-            try { fp = Path.GetFullPath(fp); } catch { /* ignore */ }
+            var fp = projPath;
+            if (CanonicalFilePath.TryNormalize(fp, out var norm))
+                fp = norm;
             return allowedProjects.Contains(fp);
         }
 

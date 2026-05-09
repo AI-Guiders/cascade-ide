@@ -1,4 +1,3 @@
-using CascadeIDE.Services;
 using Xunit;
 
 namespace CascadeIDE.Tests;
@@ -19,7 +18,7 @@ public sealed class SolutionFileLocatorTests
         {
             var found = SolutionFileLocator.TryFindSolutionForSourceFile(cs);
             Assert.NotNull(found);
-            Assert.Equal(Path.GetFullPath(sln), Path.GetFullPath(found));
+            Assert.Equal(CanonicalFilePath.Normalize(sln), CanonicalFilePath.Normalize(found));
         }
         finally
         {

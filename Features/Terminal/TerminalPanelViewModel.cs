@@ -38,7 +38,7 @@ public partial class TerminalPanelViewModel : ViewModelBase
             return Environment.CurrentDirectory;
         try
         {
-            var p = Path.GetFullPath(solutionPath.Trim());
+            var p = CanonicalFilePath.Normalize(solutionPath.Trim());
             if (File.Exists(p))
                 return Path.GetDirectoryName(p) ?? Environment.CurrentDirectory;
             if (Directory.Exists(p))

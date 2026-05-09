@@ -13,7 +13,7 @@ public static class DebugWorkspacePath
         if (string.IsNullOrWhiteSpace(workspacePath))
             return null;
 
-        var full = Path.GetFullPath(workspacePath.Trim());
+        var full = CanonicalFilePath.Normalize(workspacePath.Trim());
         if (File.Exists(full))
             return TryResolveWhenEntryIsFile(full);
 

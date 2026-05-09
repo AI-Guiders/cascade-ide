@@ -27,7 +27,7 @@ public sealed class LaunchMcpErrorFormatUnit : ICockpitComputeUnit
 
         if (!string.IsNullOrWhiteSpace(explicitProfileName) && !string.IsNullOrWhiteSpace(readiness.ProfileProjectRelative))
         {
-            var candidate = Path.GetFullPath(Path.Combine(solutionDirectory, readiness.ProfileProjectRelative));
+            var candidate = CanonicalFilePath.Normalize(Path.Combine(solutionDirectory, readiness.ProfileProjectRelative));
             return "# Error: project_not_found: " + candidate;
         }
 

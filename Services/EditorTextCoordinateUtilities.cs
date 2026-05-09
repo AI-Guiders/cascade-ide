@@ -29,17 +29,12 @@ public static class EditorTextCoordinateUtilities
     }
 
     /// <summary>
-    /// Сравнивает пути к одному и тому же файлу (нормализация через <see cref="Path.GetFullPath"/> при возможности).
+    /// Сравнивает пути к одному и тому же файлу (через <see cref="CanonicalFilePath"/> при возможности).
     /// </summary>
     public static bool PathsReferToSameFile(string a, string b)
     {
-        try
-        {
-            return string.Equals(Path.GetFullPath(a), Path.GetFullPath(b), StringComparison.OrdinalIgnoreCase);
-        }
-        catch
-        {
-            return string.Equals(a, b, StringComparison.OrdinalIgnoreCase);
-        }
+        if (CanonicalFilePath.TryNormalize(a, out var na) && CanonicalFilePath.TryNormalize(b, out var nb))
+            return string.Equals(na, nb, StringComparison.OrdinalIgnoreCase);
+        return string.Equals(a, b, StringComparison.OrdinalIgnoreCase);
     }
 }

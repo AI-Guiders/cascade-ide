@@ -11,9 +11,9 @@ public static class CursorAcpWorkspaceFileAccess
         if (string.IsNullOrWhiteSpace(path))
             return null;
         var full = Path.IsPathRooted(path)
-            ? Path.GetFullPath(path)
-            : Path.GetFullPath(Path.Combine(workspaceRoot, path));
-        var root = Path.GetFullPath(workspaceRoot.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+            ? CanonicalFilePath.Normalize(path)
+            : CanonicalFilePath.Normalize(Path.Combine(workspaceRoot, path));
+        var root = CanonicalFilePath.Normalize(workspaceRoot.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
             + Path.DirectorySeparatorChar);
         if (!full.StartsWith(root, StringComparison.OrdinalIgnoreCase))
             return null;

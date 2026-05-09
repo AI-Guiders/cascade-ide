@@ -23,7 +23,7 @@ public static class BreakpointsFileService
     /// <summary>Корень workspace (каталог с .sln/.slnx или переданный каталог).</summary>
     public static string GetWorkspaceRoot(string workspacePath)
     {
-        var dir = Path.GetFullPath(workspacePath.Trim());
+        var dir = CanonicalFilePath.Normalize(workspacePath.Trim());
         if (File.Exists(dir))
             dir = Path.GetDirectoryName(dir) ?? dir;
         return dir;
@@ -37,8 +37,8 @@ public static class BreakpointsFileService
     {
         var root = GetWorkspaceRoot(workspacePath);
         if (IsBundledDebugTargetSampleProjectRoot(root))
-            return Path.GetFullPath(Path.Combine(root, BundledSampleDebugTargetDllRelativeToProjectDir));
-        return Path.GetFullPath(Path.Combine(root, BundledSampleDebugTargetDllRelativeToRepoRoot));
+            return CanonicalFilePath.Normalize(Path.Combine(root, BundledSampleDebugTargetDllRelativeToProjectDir));
+        return CanonicalFilePath.Normalize(Path.Combine(root, BundledSampleDebugTargetDllRelativeToRepoRoot));
     }
 
     /// <summary>Корень workspace = каталог sample-проекта <c>DebugTarget</c> (не весь monorepo).</summary>

@@ -1,6 +1,5 @@
 using CascadeIDE.Features.Settings.DataAcquisition;
 using CascadeIDE.Models;
-using CascadeIDE.Services;
 using Xunit;
 
 namespace CascadeIDE.Tests;
@@ -34,7 +33,7 @@ public sealed class KbBaseOverlayPathResolverTests
                 AgentNotes = new AgentNotesSettings { KbBaseOverlayPath = unique },
             };
 
-            Assert.Equal(Path.GetFullPath(canon), Path.GetFullPath(KbBaseOverlayPathResolver.TryResolveCanonRoot(settings)!));
+            Assert.Equal(CanonicalFilePath.Normalize(canon), CanonicalFilePath.Normalize(KbBaseOverlayPathResolver.TryResolveCanonRoot(settings)!));
         }
         finally
         {

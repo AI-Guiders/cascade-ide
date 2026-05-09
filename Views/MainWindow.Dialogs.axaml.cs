@@ -140,7 +140,7 @@ public partial class MainWindow
             return null;
         try
         {
-            var p = Path.GetFullPath(workspacePath.Trim());
+            var p = CanonicalFilePath.Normalize(workspacePath.Trim());
             if (File.Exists(p))
                 return Path.GetDirectoryName(p);
             if (Directory.Exists(p))
@@ -190,7 +190,7 @@ public partial class MainWindow
         var path = files[0].TryGetLocalPath() ?? files[0].Path.LocalPath;
         if (string.IsNullOrEmpty(path) || !File.Exists(path))
             return;
-        var normalized = Path.GetFullPath(path);
+        var normalized = CanonicalFilePath.Normalize(path);
         vm.Documents.OpenOrActivateDocument(normalized);
     }
 
@@ -211,7 +211,7 @@ public partial class MainWindow
         {
             try
             {
-                var full = Path.GetFullPath(currentMarkdownPath);
+                var full = CanonicalFilePath.Normalize(currentMarkdownPath);
                 var dir = Path.GetDirectoryName(full);
                 var file = Path.GetFileNameWithoutExtension(full);
                 options.SuggestedFileName = string.IsNullOrWhiteSpace(file) ? "export.expanded.md" : $"{file}.expanded.md";

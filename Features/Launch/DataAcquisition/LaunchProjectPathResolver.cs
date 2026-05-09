@@ -16,7 +16,7 @@ public static class LaunchProjectPathResolver
         csprojFullPath = null;
         if (string.IsNullOrWhiteSpace(projectRelativeToSolution))
             return false;
-        var full = Path.GetFullPath(Path.Combine(solutionDirectory, projectRelativeToSolution));
+        var full = CanonicalFilePath.Normalize(Path.Combine(solutionDirectory, projectRelativeToSolution));
         if (!File.Exists(full))
             return false;
         csprojFullPath = full;

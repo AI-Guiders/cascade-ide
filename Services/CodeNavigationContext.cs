@@ -112,7 +112,7 @@ public static class CodeNavigationContextBuilder
             {
                 try
                 {
-                    return Path.GetFullPath(p);
+                    return CanonicalFilePath.Normalize(p);
                 }
                 catch
                 {
@@ -160,7 +160,7 @@ public static class CodeNavigationContextBuilder
 
         try
         {
-            anchor = Path.GetFullPath(anchor);
+            anchor = CanonicalFilePath.Normalize(anchor);
         }
         catch
         {
@@ -241,7 +241,7 @@ public static class CodeNavigationContextBuilder
         }
 
         var items = new List<object>();
-        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { Path.GetFullPath(anchor) };
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { CanonicalFilePath.Normalize(anchor) };
 
         void AddIfNew(string path, string kind, string rationale)
         {
@@ -252,7 +252,7 @@ public static class CodeNavigationContextBuilder
             string full;
             try
             {
-                full = Path.GetFullPath(path);
+                full = CanonicalFilePath.Normalize(path);
             }
             catch
             {
@@ -292,7 +292,7 @@ public static class CodeNavigationContextBuilder
         if (items.Count < maxRelated && !string.IsNullOrEmpty(anchorProj))
         {
             foreach (var f in allCs
-                         .Where(f => !string.Equals(Path.GetFullPath(f), Path.GetFullPath(anchor), StringComparison.OrdinalIgnoreCase))
+                         .Where(f => !CanonicalFilePath.Equals(f, anchor))
                          .OrderBy(f => f, StringComparer.OrdinalIgnoreCase))
             {
                 if (items.Count >= maxRelated)
@@ -329,7 +329,7 @@ public static class CodeNavigationContextBuilder
             if (anchorNs.Count > 0)
             {
                 foreach (var f in allCs
-                             .Where(f => !string.Equals(Path.GetFullPath(f), Path.GetFullPath(anchor), StringComparison.OrdinalIgnoreCase))
+                             .Where(f => !CanonicalFilePath.Equals(f, anchor))
                              .OrderBy(f => f, StringComparer.OrdinalIgnoreCase))
                 {
                     if (items.Count >= maxRelated)
@@ -391,7 +391,7 @@ public static class CodeNavigationContextBuilder
             new { id = "n0", path = anchor, kind = "anchor", label = Path.GetFileName(anchor), relative_path = McpSolutionTree.GetRelativePath(solutionPath, anchor) }
         };
         var edges = new List<object>();
-        var idByPath = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { [Path.GetFullPath(anchor)] = "n0" };
+        var idByPath = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { [CanonicalFilePath.Normalize(anchor)] = "n0" };
         var n = 1;
         foreach (var el in items)
         {
@@ -402,7 +402,7 @@ public static class CodeNavigationContextBuilder
             var p = pathEl.GetString();
             if (string.IsNullOrEmpty(p))
                 continue;
-            var full = Path.GetFullPath(p);
+            var full = CanonicalFilePath.Normalize(p);
             if (idByPath.ContainsKey(full))
                 continue;
             var id = $"n{n++}";
@@ -500,7 +500,7 @@ public static class CodeNavigationContextBuilder
             foreach (var f in allCs)
             {
                 if (string.Equals(Path.GetFileNameWithoutExtension(f), baseName, StringComparison.OrdinalIgnoreCase)
-                    && !string.Equals(Path.GetFullPath(f), Path.GetFullPath(anchor), StringComparison.OrdinalIgnoreCase))
+                    && !CanonicalFilePath.Equals(f, anchor))
                     yield return (f, "Исходный файл для тестового типа (*Tests)");
             }
 
@@ -515,7 +515,7 @@ public static class CodeNavigationContextBuilder
             foreach (var f in allCs)
             {
                 if (string.Equals(Path.GetFileNameWithoutExtension(f), baseName, StringComparison.OrdinalIgnoreCase)
-                    && !string.Equals(Path.GetFullPath(f), Path.GetFullPath(anchor), StringComparison.OrdinalIgnoreCase))
+                    && !CanonicalFilePath.Equals(f, anchor))
                     yield return (f, "Исходный файл для тестового типа (*Test)");
             }
 
@@ -529,7 +529,7 @@ public static class CodeNavigationContextBuilder
             {
                 if (!string.Equals(Path.GetFileName(f), wantFile, StringComparison.OrdinalIgnoreCase))
                     continue;
-                if (string.Equals(Path.GetFullPath(f), Path.GetFullPath(anchor), StringComparison.OrdinalIgnoreCase))
+                if (CanonicalFilePath.Equals(f, anchor))
                     continue;
                 yield return (f, suffix == "Tests" ? "Тесты (*Tests.cs) для этого типа" : "Тесты (*Test.cs) для этого типа");
             }
@@ -592,7 +592,7 @@ public static class CodeNavigationContextBuilder
         var list = new List<string>();
         foreach (var f in allCs)
         {
-            if (string.Equals(Path.GetFullPath(f), Path.GetFullPath(anchor), StringComparison.OrdinalIgnoreCase))
+            if (CanonicalFilePath.Equals(f, anchor))
                 continue;
             try
             {

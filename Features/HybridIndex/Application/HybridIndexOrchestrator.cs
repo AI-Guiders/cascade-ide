@@ -214,7 +214,7 @@ public sealed class HybridIndexOrchestrator : IDisposable
         if (string.IsNullOrWhiteSpace(workspaceRoot))
             return;
 
-        var root = Path.GetFullPath(workspaceRoot.TrimEnd(Path.DirectorySeparatorChar));
+        var root = CanonicalFilePath.Normalize(workspaceRoot.TrimEnd(Path.DirectorySeparatorChar));
         var key = new WatchKey(root, string.IsNullOrWhiteSpace(solutionPath) ? null : solutionPath.Trim());
 
         if (!enabled)
@@ -249,7 +249,7 @@ public sealed class HybridIndexOrchestrator : IDisposable
 
     public void Poke(string workspaceRoot, string? solutionPath)
     {
-        var root = Path.GetFullPath((workspaceRoot ?? "").TrimEnd(Path.DirectorySeparatorChar));
+        var root = CanonicalFilePath.Normalize((workspaceRoot ?? "").TrimEnd(Path.DirectorySeparatorChar));
         var key = new WatchKey(root, string.IsNullOrWhiteSpace(solutionPath) ? null : solutionPath.Trim());
         if (_watchers.TryGetValue(key, out var st))
             st.Poke();
@@ -286,7 +286,7 @@ public sealed class HybridIndexOrchestrator : IDisposable
         if (string.IsNullOrWhiteSpace(workspaceRoot))
             throw new ArgumentException("workspace_root required", nameof(workspaceRoot));
 
-        var root = Path.GetFullPath(workspaceRoot.TrimEnd(Path.DirectorySeparatorChar));
+        var root = CanonicalFilePath.Normalize(workspaceRoot.TrimEnd(Path.DirectorySeparatorChar));
         var sln = string.IsNullOrWhiteSpace(solutionPath) ? null : solutionPath.Trim();
         ReindexSummary summary = fullRebuild
             ? await _service.FullRebuildAsync(root, sln, cancellationToken).ConfigureAwait(false)
@@ -320,7 +320,7 @@ public sealed class HybridIndexOrchestrator : IDisposable
         if (string.IsNullOrWhiteSpace(workspaceRoot))
             return;
 
-        var root = Path.GetFullPath(workspaceRoot.TrimEnd(Path.DirectorySeparatorChar));
+        var root = CanonicalFilePath.Normalize(workspaceRoot.TrimEnd(Path.DirectorySeparatorChar));
         var sln = string.IsNullOrWhiteSpace(solutionPath) ? null : solutionPath.Trim();
         try
         {

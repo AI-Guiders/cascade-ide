@@ -18,7 +18,7 @@ internal sealed class AcpTerminalHost
 
     public AcpTerminalHost(string workspaceRoot, Action<string>? appendUi, Action? showTerminal)
     {
-        _workspaceRoot = Path.GetFullPath(workspaceRoot.Trim());
+        _workspaceRoot = CanonicalFilePath.Normalize(workspaceRoot.Trim());
         _appendUi = appendUi;
         _showTerminal = showTerminal;
     }
@@ -169,13 +169,13 @@ internal sealed class AcpTerminalHost
             return _workspaceRoot;
 
         var full = Path.IsPathRooted(cwd)
-            ? Path.GetFullPath(cwd)
-            : Path.GetFullPath(Path.Combine(_workspaceRoot, cwd));
-        var norm = Path.GetFullPath(full.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar))
+            ? CanonicalFilePath.Normalize(cwd)
+            : CanonicalFilePath.Normalize(Path.Combine(_workspaceRoot, cwd));
+        var norm = CanonicalFilePath.Normalize(full.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar))
                    + Path.DirectorySeparatorChar;
         if (!norm.StartsWith(root, StringComparison.OrdinalIgnoreCase))
             return null;
-        return Path.GetFullPath(full);
+        return CanonicalFilePath.Normalize(full);
     }
 
     private sealed class AcpTerminalSession : IDisposable

@@ -48,7 +48,7 @@ public partial class MainWindowViewModel
     {
         try
         {
-            var full = Path.GetFullPath(sourcePath);
+            var full = CanonicalFilePath.Normalize(sourcePath);
             var dir = Path.GetDirectoryName(full) ?? Directory.GetCurrentDirectory();
             var name = Path.GetFileNameWithoutExtension(full);
             if (string.IsNullOrWhiteSpace(name))

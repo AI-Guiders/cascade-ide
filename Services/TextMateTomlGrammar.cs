@@ -22,7 +22,7 @@ public static class TextMateTomlGrammar
     public static void TryLoadInto(RegistryOptions registry, string? baseDirectory = null)
     {
         baseDirectory ??= AppContext.BaseDirectory;
-        var packagePath = Path.GetFullPath(Path.Combine(baseDirectory, PackageJsonRelativePath));
+        var packagePath = CanonicalFilePath.Normalize(Path.Combine(baseDirectory, PackageJsonRelativePath));
         if (File.Exists(packagePath))
         {
             registry.LoadFromLocalFile("TOML", packagePath, overwrite: false);

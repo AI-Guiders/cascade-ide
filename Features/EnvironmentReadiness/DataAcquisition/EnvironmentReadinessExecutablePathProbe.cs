@@ -15,11 +15,11 @@ public static class EnvironmentReadinessExecutablePathProbe
             return null;
 
         if (File.Exists(t))
-            return Path.GetFullPath(t);
+            return CanonicalFilePath.Normalize(t);
 
         try
         {
-            var full = Path.GetFullPath(t);
+            var full = CanonicalFilePath.Normalize(t);
             if (File.Exists(full))
                 return full;
         }
@@ -70,7 +70,7 @@ public static class EnvironmentReadinessExecutablePathProbe
                 {
                     try
                     {
-                        return Path.GetFullPath(p);
+                        return CanonicalFilePath.Normalize(p);
                     }
                     catch
                     {

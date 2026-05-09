@@ -18,7 +18,7 @@ public static class CursorAcpAgentPath
             if (string.Equals(ext, ".cmd", StringComparison.OrdinalIgnoreCase)
                 || string.Equals(ext, ".bat", StringComparison.OrdinalIgnoreCase))
             {
-                cmdPath = Path.GetFullPath(trimmed);
+                cmdPath = CanonicalFilePath.Normalize(trimmed);
                 workingDirectory = Path.GetDirectoryName(cmdPath) ?? "";
                 return true;
             }
@@ -27,13 +27,13 @@ public static class CursorAcpAgentPath
         if (!Directory.Exists(trimmed))
             return false;
 
-        var dir = Path.GetFullPath(trimmed);
+        var dir = CanonicalFilePath.Normalize(trimmed);
         foreach (var rel in new[] { Path.Combine("dist-package", "cursor-agent.cmd"), "cursor-agent.cmd" })
         {
             var p = Path.Combine(dir, rel);
             if (File.Exists(p))
             {
-                cmdPath = Path.GetFullPath(p);
+                cmdPath = CanonicalFilePath.Normalize(p);
                 workingDirectory = Path.GetDirectoryName(cmdPath) ?? dir;
                 return true;
             }

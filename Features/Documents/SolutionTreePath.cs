@@ -7,24 +7,9 @@ namespace CascadeIDE.Features.Documents;
 /// </summary>
 internal static class SolutionTreePath
 {
-    /// <summary><see cref="Path.GetFullPath"/> без исключений на невалидных строках (дерево, MCP, карта намерений).</summary>
-    public static bool TryGetFullPath(string path, out string fullPath)
-    {
-        fullPath = "";
-        try
-        {
-            fullPath = Path.GetFullPath(path);
-            return true;
-        }
-        catch (ArgumentException)
-        {
-            return false;
-        }
-        catch (NotSupportedException)
-        {
-            return false;
-        }
-    }
+    /// <summary><see cref="CanonicalFilePath.TryNormalize"/> — без исключений на невалидных строках (дерево, MCP, карта намерений).</summary>
+    public static bool TryGetFullPath(string path, out string fullPath) =>
+        CanonicalFilePath.TryNormalize(path, out fullPath);
 
     /// <summary>Обход дерева: узлы с путями, которые нельзя нормализовать, пропускаются (не бросают).</summary>
     public static SolutionItem? FindItemByFullPath(IEnumerable<SolutionItem> items, string normalizedFullPath)

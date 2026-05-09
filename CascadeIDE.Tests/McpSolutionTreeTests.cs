@@ -31,9 +31,9 @@ public sealed class McpSolutionTreeTests
         Assert.True(File.Exists(testFile), testFile);
         Assert.True(File.Exists(contractsFile), contractsFile);
 
-        Assert.Equal(Path.GetFullPath(mainCsproj), Path.GetFullPath(McpSolutionTree.ResolveOwningProjectPath(mainFile)!));
-        Assert.Equal(Path.GetFullPath(testsCsproj), Path.GetFullPath(McpSolutionTree.ResolveOwningProjectPath(testFile)!));
-        Assert.Equal(Path.GetFullPath(contractsCsproj), Path.GetFullPath(McpSolutionTree.ResolveOwningProjectPath(contractsFile)!));
+        Assert.Equal(CanonicalFilePath.Normalize(mainCsproj), CanonicalFilePath.Normalize(McpSolutionTree.ResolveOwningProjectPath(mainFile)!));
+        Assert.Equal(CanonicalFilePath.Normalize(testsCsproj), CanonicalFilePath.Normalize(McpSolutionTree.ResolveOwningProjectPath(testFile)!));
+        Assert.Equal(CanonicalFilePath.Normalize(contractsCsproj), CanonicalFilePath.Normalize(McpSolutionTree.ResolveOwningProjectPath(contractsFile)!));
     }
 
     private static string FindCascadeIdeRoot()

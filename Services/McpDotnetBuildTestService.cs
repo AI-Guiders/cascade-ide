@@ -155,7 +155,7 @@ public sealed class McpDotnetBuildTestService(IDotnetCommandRunner dotnetRunner)
             string includeArg;
             try
             {
-                includeArg = Path.GetFullPath(includePath);
+                includeArg = CanonicalFilePath.Normalize(includePath);
             }
             catch
             {

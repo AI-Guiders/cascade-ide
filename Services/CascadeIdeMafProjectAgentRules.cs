@@ -26,18 +26,18 @@ internal static class CascadeIdeMafProjectAgentRules
             return null;
 
         var sb = new StringBuilder(4096);
-        var basePath = Path.GetFullPath(root.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+        var basePath = CanonicalFilePath.Normalize(root.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
 
-        var singlePath = Path.GetFullPath(Path.Combine(basePath, SingleFileRelativePath.Replace('/', Path.DirectorySeparatorChar)));
+        var singlePath = CanonicalFilePath.Normalize(Path.Combine(basePath, SingleFileRelativePath.Replace('/', Path.DirectorySeparatorChar)));
         TryAppendUnderRoot(sb, basePath, singlePath, sectionTitle: null);
 
-        var fragmentDir = Path.GetFullPath(Path.Combine(basePath, FragmentFolderRelativePath.Replace('/', Path.DirectorySeparatorChar)));
+        var fragmentDir = CanonicalFilePath.Normalize(Path.Combine(basePath, FragmentFolderRelativePath.Replace('/', Path.DirectorySeparatorChar)));
         if (Directory.Exists(fragmentDir))
         {
             foreach (var file in Directory.EnumerateFiles(fragmentDir, "*.md", SearchOption.TopDirectoryOnly)
                          .OrderBy(p => p, StringComparer.OrdinalIgnoreCase))
             {
-                var full = Path.GetFullPath(file);
+                var full = CanonicalFilePath.Normalize(file);
                 TryAppendUnderRoot(sb, basePath, full,
                     sectionTitle: "## " + Path.GetFileName(full));
             }
@@ -64,8 +64,8 @@ internal static class CascadeIdeMafProjectAgentRules
 
         try
         {
-            var canonicalWorkspace = Path.GetFullPath(workspaceRootAbsolute);
-            var canonicalFile = Path.GetFullPath(candidateAbsolutePath);
+            var canonicalWorkspace = CanonicalFilePath.Normalize(workspaceRootAbsolute);
+            var canonicalFile = CanonicalFilePath.Normalize(candidateAbsolutePath);
             if (!IsStrictChildOrSameDirectory(canonicalWorkspace, canonicalFile))
                 return;
 
@@ -96,8 +96,8 @@ internal static class CascadeIdeMafProjectAgentRules
 
     private static bool IsStrictChildOrSameDirectory(string workspaceDir, string filePath)
     {
-        workspaceDir = Path.TrimEndingDirectorySeparator(Path.GetFullPath(workspaceDir));
-        filePath = Path.GetFullPath(filePath);
+        workspaceDir = Path.TrimEndingDirectorySeparator(CanonicalFilePath.Normalize(workspaceDir));
+        filePath = CanonicalFilePath.Normalize(filePath);
 
         var wr = Path.GetPathRoot(workspaceDir);
         var fr = Path.GetPathRoot(filePath);

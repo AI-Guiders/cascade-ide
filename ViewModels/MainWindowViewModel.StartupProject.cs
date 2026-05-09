@@ -55,13 +55,13 @@ public partial class MainWindowViewModel
             return;
 
         var projects = McpSolutionTree.CollectProjectPaths(Workspace.SolutionRoots)
-            .Select(static p => Path.GetFullPath(p))
+            .Select(static p => CanonicalFilePath.Normalize(p))
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         var fromStore = false;
         if (StartupProjectStore.TryLoad(sln, out var rel) && !string.IsNullOrEmpty(rel))
         {
-            var full = Path.GetFullPath(Path.Combine(solutionDir, rel));
+            var full = CanonicalFilePath.Normalize(Path.Combine(solutionDir, rel));
             if (File.Exists(full) && projects.Contains(full))
             {
                 ApplyStartupProject(full);
@@ -108,7 +108,7 @@ public partial class MainWindowViewModel
         return McpSolutionTree.CollectProjectPaths(roots)
             .Where(static p => p.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase) ||
                               p.EndsWith(".fsproj", StringComparison.OrdinalIgnoreCase))
-            .Select(static p => Path.GetFullPath(p))
+            .Select(static p => CanonicalFilePath.Normalize(p))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
     }
@@ -139,7 +139,7 @@ public partial class MainWindowViewModel
         {
             try
             {
-                var full = Path.GetFullPath(fp);
+                var full = CanonicalFilePath.Normalize(fp);
                 if (File.Exists(full) && !McpSolutionTree.IsBuildArtifactPath(full))
                 {
                     if (McpSolutionTree.MapFileToProject(Workspace.SolutionRoots).TryGetValue(full, out var treeProj) &&
@@ -169,7 +169,7 @@ public partial class MainWindowViewModel
              sel.EndsWith(".fsproj", StringComparison.OrdinalIgnoreCase)) &&
             File.Exists(sel))
         {
-            var p = Path.GetFullPath(sel);
+            var p = CanonicalFilePath.Normalize(sel);
             if (set.Contains(p))
                 ApplyStartupProject(p);
         }
@@ -203,7 +203,7 @@ public partial class MainWindowViewModel
         if (string.IsNullOrEmpty(solutionDir))
             return;
 
-        var full = Path.GetFullPath(path);
+        var full = CanonicalFilePath.Normalize(path);
         try
         {
             var rel = Path.GetRelativePath(solutionDir, full);

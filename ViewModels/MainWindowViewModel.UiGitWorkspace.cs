@@ -12,7 +12,7 @@ public partial class MainWindowViewModel
     {
         if (string.IsNullOrWhiteSpace(solutionPath))
             return "";
-        var p = Path.GetFullPath(solutionPath.Trim());
+        var p = CanonicalFilePath.Normalize(solutionPath.Trim());
         return File.Exists(p) ? Path.GetDirectoryName(p) ?? "" : p;
     }
 

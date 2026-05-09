@@ -34,7 +34,7 @@ public static class RipgrepWorkspaceSearchService
         if (string.IsNullOrWhiteSpace(pattern))
             return JsonSerializer.Serialize(new { error = "Missing pattern." });
 
-        workspaceRoot = Path.GetFullPath(workspaceRoot.Trim());
+        workspaceRoot = CanonicalFilePath.Normalize(workspaceRoot.Trim());
         if (!Directory.Exists(workspaceRoot))
             return JsonSerializer.Serialize(new { error = "Workspace root is not a directory: " + workspaceRoot });
 
@@ -83,7 +83,7 @@ public static class RipgrepWorkspaceSearchService
         if (string.IsNullOrWhiteSpace(pattern))
             return (Array.Empty<RipgrepWorkspaceMatch>(), "Missing pattern.");
 
-        workspaceRoot = Path.GetFullPath(workspaceRoot.Trim());
+        workspaceRoot = CanonicalFilePath.Normalize(workspaceRoot.Trim());
         if (!Directory.Exists(workspaceRoot))
             return (Array.Empty<RipgrepWorkspaceMatch>(), "Workspace root is not a directory: " + workspaceRoot);
 
@@ -123,8 +123,8 @@ public static class RipgrepWorkspaceSearchService
         if (string.IsNullOrWhiteSpace(subPath))
             return ".";
 
-        var combined = Path.GetFullPath(Path.Combine(workspaceRoot, subPath.Trim()));
-        var root = Path.GetFullPath(workspaceRoot);
+        var combined = CanonicalFilePath.Normalize(Path.Combine(workspaceRoot, subPath.Trim()));
+        var root = CanonicalFilePath.Normalize(workspaceRoot);
         if (!combined.StartsWith(root, StringComparison.OrdinalIgnoreCase))
             return null;
         if (string.Equals(combined, root, StringComparison.OrdinalIgnoreCase))
@@ -261,7 +261,7 @@ public static class RipgrepWorkspaceSearchService
             if (string.IsNullOrEmpty(pathText))
                 return false;
 
-            var fullPath = Path.GetFullPath(Path.Combine(workspaceRoot, pathText.Replace('/', Path.DirectorySeparatorChar)));
+            var fullPath = CanonicalFilePath.Normalize(Path.Combine(workspaceRoot, pathText.Replace('/', Path.DirectorySeparatorChar)));
             match = (fullPath, lineNumber, lineText ?? "");
             return true;
         }

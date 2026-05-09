@@ -50,7 +50,7 @@ public static class McpSolutionTree
                     string proj;
                     try
                     {
-                        proj = Path.GetFullPath(p);
+                        proj = CanonicalFilePath.Normalize(p);
                     }
                     catch
                     {
@@ -69,7 +69,7 @@ public static class McpSolutionTree
                     {
                         // Первое вхождение пути в DFS определяет проект; не перезаписывать —
                         // иначе последний узел в дереве «перетягивает» общие/линкованные пути на чужой .csproj.
-                        map.TryAdd(Path.GetFullPath(p), projectPath);
+                        map.TryAdd(CanonicalFilePath.Normalize(p), projectPath);
                     }
                     catch
                     {
@@ -102,7 +102,7 @@ public static class McpSolutionTree
         string full;
         try
         {
-            full = Path.GetFullPath(fileFullPath.Trim());
+            full = CanonicalFilePath.Normalize(fileFullPath.Trim());
         }
         catch
         {
@@ -125,11 +125,11 @@ public static class McpSolutionTree
             if (csprojs.Length > 0)
             {
                 if (csprojs.Length == 1)
-                    return Path.GetFullPath(csprojs[0]);
+                    return CanonicalFilePath.Normalize(csprojs[0]);
                 var folderName = Path.GetFileName(dir);
                 var match = csprojs.FirstOrDefault(p =>
                     string.Equals(Path.GetFileNameWithoutExtension(p), folderName, StringComparison.OrdinalIgnoreCase));
-                return Path.GetFullPath(match ?? csprojs[0]);
+                return CanonicalFilePath.Normalize(match ?? csprojs[0]);
             }
 
             try

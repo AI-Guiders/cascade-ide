@@ -59,7 +59,7 @@ public sealed class CSharpLspDiagnosticsHost : ILspDiagnosticSource
         if (string.IsNullOrWhiteSpace(exe))
             return false;
 
-        var solutionDir = Path.GetDirectoryName(Path.GetFullPath(solutionPath));
+        var solutionDir = Path.GetDirectoryName(CanonicalFilePath.Normalize(solutionPath));
         if (string.IsNullOrEmpty(solutionDir))
             return false;
 
@@ -219,7 +219,7 @@ public sealed class CSharpLspDiagnosticsHost : ILspDiagnosticSource
 
         await SyncFullTextForRequestAsync(filePath, text, ct).ConfigureAwait(false);
 
-        var uri = LspFileUri.PathToFileUri(Path.GetFullPath(filePath));
+        var uri = LspFileUri.PathToFileUri(CanonicalFilePath.Normalize(filePath));
         var line0 = line1 - 1;
         var char0 = col1 - 1;
 
@@ -316,7 +316,7 @@ public sealed class CSharpLspDiagnosticsHost : ILspDiagnosticSource
     {
         if (_session is null)
             return;
-        var uri = LspFileUri.PathToFileUri(Path.GetFullPath(filePath));
+        var uri = LspFileUri.PathToFileUri(CanonicalFilePath.Normalize(filePath));
         var ver = Interlocked.Increment(ref _versionCounter);
         var msg = new JsonObject
         {
@@ -340,7 +340,7 @@ public sealed class CSharpLspDiagnosticsHost : ILspDiagnosticSource
     {
         if (_session is null)
             return;
-        var uri = LspFileUri.PathToFileUri(Path.GetFullPath(filePath));
+        var uri = LspFileUri.PathToFileUri(CanonicalFilePath.Normalize(filePath));
         var ver = Interlocked.Increment(ref _versionCounter);
         var msg = new JsonObject
         {

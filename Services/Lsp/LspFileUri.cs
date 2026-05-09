@@ -6,11 +6,11 @@ namespace CascadeIDE.Services.Lsp;
 public static class LspFileUri
 {
     public static string NormalizePath(string path) =>
-        Path.GetFullPath(path);
+        CanonicalFilePath.Normalize(path);
 
     public static string PathToFileUri(string fullPath)
     {
-        var full = Path.GetFullPath(fullPath);
+        var full = CanonicalFilePath.Normalize(fullPath);
         return new Uri(full).AbsoluteUri;
     }
 
