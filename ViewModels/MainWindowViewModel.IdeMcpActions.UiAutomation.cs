@@ -146,7 +146,7 @@ public partial class MainWindowViewModel
     async Task<string> Services.IIdeMcpActions.EditChatAssistantMessageAsync(string messageId, string newContent, string? reason) =>
         await UiScheduler.Default.InvokeAsync(() =>
         {
-            if (!Guid.TryParse(messageId, out var id))
+            if (!ChatMessageId.TryParse(messageId, out var id))
                 return IdeMcpUiAutomationOrchestrator.InvalidMessageIdJson();
             return ChatPanel.EditAssistantMessageById(id, IdeMcpUiAutomationOrchestrator.NormalizeTextInput(newContent), reason);
         });
