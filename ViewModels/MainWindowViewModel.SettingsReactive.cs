@@ -1,4 +1,5 @@
 using CascadeIDE.Features.Shell.Application;
+using CascadeIDE.Features.HybridIndex.Application;
 using CascadeIDE.Models;
 
 namespace CascadeIDE.ViewModels;
@@ -219,7 +220,7 @@ public partial class MainWindowViewModel
         }
 
         _settings.HybridIndex.IndexDir = normalized;
-        _hybridIndex.SetIndexDirectoryRelative(ResolveHybridIndexDirRelative());
+        _hybridIndex.SetIndexDirectoryRelative(HybridIndexIndexDirectoryRelative.ResolveOrDefault(_settings.HybridIndex.IndexDir));
         ApplyHybridCodebaseIndexOrchestrationForCurrentSolution(pokeWhenAutoReindex: false);
         SaveSettingsIfChanged();
         RaiseHybridIndexPresentationProperties();

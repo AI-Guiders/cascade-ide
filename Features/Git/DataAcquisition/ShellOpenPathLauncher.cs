@@ -1,20 +1,16 @@
 #nullable enable
-using System.Diagnostics;
+using System;
+using System.Diagnostics.CodeAnalysis;
+using CascadeIDE.Features.Os.DataAcquisition;
 
 namespace CascadeIDE.Features.Git.DataAcquisition;
 
 /// <summary>DAL: открытие пути в оболочке ОС (например папка в Explorer).</summary>
 public static class ShellOpenPathLauncher
 {
+    [Obsolete("Use CascadeIDE.Features.Os.DataAcquisition.OsShellLauncher instead.")]
     public static void TryOpenInDefaultShell(string fullPath, Action<string>? onError = null)
     {
-        try
-        {
-            Process.Start(new ProcessStartInfo { FileName = fullPath, UseShellExecute = true });
-        }
-        catch (Exception ex)
-        {
-            onError?.Invoke(ex.Message);
-        }
+        OsShell.Default.TryOpen(fullPath, onError);
     }
 }

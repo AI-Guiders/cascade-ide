@@ -185,7 +185,7 @@ public sealed class HybridIndexOrchestrator : IDisposable
     public HybridIndexOrchestrator(IDataBus dataBus, string indexDirectoryRelative)
     {
         _dataBus = dataBus;
-        _indexDirectoryRelative = NormalizeIndexDirectoryRelative(indexDirectoryRelative);
+        _indexDirectoryRelative = HybridIndexIndexDirectoryRelative.ResolveOrDefault(indexDirectoryRelative);
         _service = new CodebaseIndexService(indexDirectoryRelative: _indexDirectoryRelative);
     }
 
@@ -195,7 +195,7 @@ public sealed class HybridIndexOrchestrator : IDisposable
     /// </summary>
     public void SetIndexDirectoryRelative(string indexDirectoryRelative)
     {
-        var normalized = NormalizeIndexDirectoryRelative(indexDirectoryRelative);
+        var normalized = HybridIndexIndexDirectoryRelative.ResolveOrDefault(indexDirectoryRelative);
         if (string.Equals(_indexDirectoryRelative, normalized, StringComparison.Ordinal))
             return;
 
@@ -207,16 +207,6 @@ public sealed class HybridIndexOrchestrator : IDisposable
 
         _indexDirectoryRelative = normalized;
         _service = new CodebaseIndexService(indexDirectoryRelative: normalized);
-    }
-
-    private static string NormalizeIndexDirectoryRelative(string indexDirectoryRelative)
-    {
-        var dir = (indexDirectoryRelative ?? "").Trim();
-        if (string.IsNullOrWhiteSpace(dir))
-            return ".hybrid-codebase-index";
-        if (Path.IsPathRooted(dir))
-            return ".hybrid-codebase-index";
-        return dir.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
     }
 
     public void SetEnabled(string workspaceRoot, string? solutionPath, bool enabled, int debounceMs = 750)

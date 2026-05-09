@@ -1,8 +1,9 @@
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using Avalonia.Threading;
 using CascadeIDE.Cockpit.DataBus;
+using CascadeIDE.Features.HybridIndex.Application;
+using CascadeIDE.Features.Os.DataAcquisition;
 using CascadeIDE.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -242,18 +243,13 @@ public partial class MainWindowViewModel
         if (string.IsNullOrWhiteSpace(ws))
             return;
 
-        var (hciWs, hciSln) = ResolveHybridIndexScope(ws, sln);
-        if (string.IsNullOrWhiteSpace(hciWs))
-            return;
-
-        var enableWatcher = _settings.HybridIndex.Enabled
-            && _settings.HybridIndex.WatchFiles
-            && !(ChatMcpOnly && _settings.HybridIndex.PauseWhenMcpStdioHost);
-        _hybridIndex.SetEnabled(hciWs, hciSln, enabled: enableWatcher, debounceMs: ResolveHybridIndexDebounceMs());
-        if (enableWatcher)
-            _hybridIndex.Poke(hciWs, hciSln);
-        else
-            _ = _hybridIndex.RunFullReindexAndPublishStatusAsync(hciWs, hciSln, CancellationToken.None);
+        _ = HybridIndexOrchestrationPolicy.TriggerReindexNowAsync(
+            _hybridIndex,
+            _settings.HybridIndex,
+            ChatMcpOnly,
+            ws,
+            sln,
+            CancellationToken.None);
 
         RaiseHybridIndexPresentationProperties();
     }
@@ -265,20 +261,8 @@ public partial class MainWindowViewModel
         var ws = GetWorkspacePath(sln);
         if (string.IsNullOrWhiteSpace(ws))
             return;
-        var dir = Path.Combine(ws, ResolveHybridIndexDirRelative());
-        try
-        {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = "explorer.exe",
-                Arguments = $"\"{dir}\"",
-                UseShellExecute = true,
-            });
-        }
-        catch
-        {
-            // ignore
-        }
+        var dir = Path.Combine(ws, HybridIndexIndexDirectoryRelative.ResolveOrDefault(_settings.HybridIndex.IndexDir));
+        _osShell.TryOpenDirectory(dir);
     }
 
 

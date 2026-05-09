@@ -1,6 +1,7 @@
 #nullable enable
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using CascadeIDE.Features.Os.DataAcquisition;
 
 namespace CascadeIDE.Features.Launch.DataAcquisition;
 
@@ -17,7 +18,15 @@ public static class KestrelLaunchBrowser
         var u = ResolveUrlToOpen(environment, launchUrl);
         if (string.IsNullOrEmpty(u))
             return;
-        TryStartBrowser(u);
+        TryStartBrowser(u, shell: null);
+    }
+
+    public static void TryOpenAfterLaunch(IReadOnlyDictionary<string, string>? environment, string? launchUrl, IOsShellLauncher? shell)
+    {
+        var u = ResolveUrlToOpen(environment, launchUrl);
+        if (string.IsNullOrEmpty(u))
+            return;
+        TryStartBrowser(u, shell);
     }
 
     /// <summary>Разрешить URL для открытия (тесты и прозрачность).</summary>
@@ -41,16 +50,9 @@ public static class KestrelLaunchBrowser
         return CombineBaseWithPath(baseFromEnv, trimmedLaunchUrl);
     }
 
-    private static void TryStartBrowser(string url)
+    private static void TryStartBrowser(string url, IOsShellLauncher? shell)
     {
-        try
-        {
-            Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
-        }
-        catch (Exception ex)
-        {
-            Trace.WriteLine("[KestrelLaunchBrowser] Process.Start: " + ex);
-        }
+        (shell ?? OsShell.Default).TryOpenUrl(url, e => Trace.WriteLine("[KestrelLaunchBrowser] OpenUrl: " + e));
     }
 
     private static bool TryNormalizeAbsoluteHttpUrl(string value, [NotNullWhen(true)] out string? normalized)

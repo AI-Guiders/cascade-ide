@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Text;
 using Avalonia.Threading;
+using CascadeIDE.Features.Os.DataAcquisition;
 using CascadeIDE.Models;
 using CascadeIDE.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -18,19 +19,22 @@ public partial class GitPanelViewModel : ViewModelBase
     private readonly Services.IIdeMcpActions _ideActions;
     private readonly Action<string> _loadSolution;
     private readonly Func<Task> _refreshGitSummaryAsync;
+    private readonly IOsShellLauncher _osShell;
 
     public GitPanelViewModel(
         Services.IGitCommandRunner gitRunner,
         Func<string> getWorkspacePath,
         Services.IIdeMcpActions ideActions,
         Action<string> loadSolution,
-        Func<Task> refreshGitSummaryAsync)
+        Func<Task> refreshGitSummaryAsync,
+        IOsShellLauncher? osShell = null)
     {
         _gitRunner = gitRunner;
         _getWorkspacePath = getWorkspacePath;
         _ideActions = ideActions;
         _loadSolution = loadSolution;
         _refreshGitSummaryAsync = refreshGitSummaryAsync;
+        _osShell = osShell ?? OsShell.Default;
     }
 
     [ObservableProperty]
@@ -394,7 +398,7 @@ public partial class GitPanelViewModel : ViewModelBase
         if (!Directory.Exists(full))
             return;
 
-        ShellOpenPathLauncher.TryOpenInDefaultShell(full, e => GitPanelStatusText = e);
+        _osShell.TryOpenDirectory(full, e => GitPanelStatusText = e);
     }
 
     private bool CanOpenSubmoduleFolder()
