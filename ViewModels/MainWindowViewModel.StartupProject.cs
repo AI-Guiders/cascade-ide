@@ -110,60 +110,15 @@ public partial class MainWindowViewModel
     /// </summary>
     private void TryApplyInferredStartupProjectForDebug()
     {
-        if (!string.IsNullOrEmpty(StartupProjectCsprojFullPath) && File.Exists(StartupProjectCsprojFullPath))
+        if (StartupProjectDebugInferenceProjection.HasPersistedStartupPointingToExistingFile(StartupProjectCsprojFullPath))
             return;
 
-        if (Workspace.SolutionRoots.Count == 0)
-            return;
-
-        var csprojs = McpSolutionTree.CollectDistinctManagedProjectPaths(Workspace.SolutionRoots);
-        var set = csprojs.ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-        if (csprojs.Count == 1)
-        {
-            ApplyStartupProject(csprojs[0]);
-            return;
-        }
-
-        var fp = CurrentFilePath;
-        if (!string.IsNullOrEmpty(fp))
-        {
-            try
-            {
-                var full = CanonicalFilePath.Normalize(fp);
-                if (File.Exists(full) && !McpSolutionTree.IsBuildArtifactPath(full))
-                {
-                    if (McpSolutionTree.MapFileToProject(Workspace.SolutionRoots).TryGetValue(full, out var treeProj) &&
-                        !string.IsNullOrEmpty(treeProj) && set.Contains(treeProj))
-                    {
-                        ApplyStartupProject(treeProj);
-                        return;
-                    }
-
-                    var disk = McpSolutionTree.ResolveOwningProjectPath(full);
-                    if (!string.IsNullOrEmpty(disk) && set.Contains(disk))
-                    {
-                        ApplyStartupProject(disk);
-                        return;
-                    }
-                }
-            }
-            catch
-            {
-                // ignore
-            }
-        }
-
-        var sel = Workspace.SelectedSolutionItem?.FullPath;
-        if (!string.IsNullOrEmpty(sel) &&
-            (sel.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase) ||
-             sel.EndsWith(".fsproj", StringComparison.OrdinalIgnoreCase)) &&
-            File.Exists(sel))
-        {
-            var p = CanonicalFilePath.Normalize(sel);
-            if (set.Contains(p))
-                ApplyStartupProject(p);
-        }
+        var inferred = StartupProjectDebugInferenceProjection.TryInferCanonicalCsproj(
+            Workspace.SolutionRoots,
+            CurrentFilePath,
+            Workspace.SelectedSolutionItem?.FullPath);
+        if (!string.IsNullOrEmpty(inferred))
+            ApplyStartupProject(inferred);
     }
 
     private void ApplyStartupProject(string csprojFullPath)
