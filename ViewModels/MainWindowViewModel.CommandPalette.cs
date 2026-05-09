@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
+using CascadeIDE.Features.Search.Application;
 using CascadeIDE.Features.Shell.Application;
 using CascadeIDE.Features.UiChrome;
 using CascadeIDE.IdeDisplay;
@@ -143,9 +144,6 @@ public sealed class IdeCommandPaletteRowViewModel : ViewModelBase
 public partial class MainWindowViewModel
 {
     private const int CommandPalettePageStep = 8;
-    private const int GoToPaletteMaxFiles = 100;
-    private const int GoToPaletteMaxRipgrep = 80;
-    private const int GoToRipgrepDebounceMs = 220;
 
     private HotkeyGestureMap? _hotkeyGestureMap;
 
@@ -386,7 +384,7 @@ public partial class MainWindowViewModel
 
         FilteredCommandPaletteEntries.Clear();
 
-        var root = TryGetWorkspaceRootForPalette();
+        var root = CommandPaletteGoToWorkspacePresentation.TryResolveRoot(Workspace.SolutionPath);
         if (root is null)
         {
             FilteredCommandPaletteEntries.Add(new IdeCommandPaletteRowViewModel(
@@ -429,26 +427,23 @@ public partial class MainWindowViewModel
 
     private void FillGoToFileEntries(string term)
     {
-        var files = McpSolutionTree.CollectFileEntries(Workspace.SolutionRoots).ToList();
-        IEnumerable<(string Title, string FullPath)> query = files;
-        if (!string.IsNullOrWhiteSpace(term))
+        var workspaceRoot =
+            CommandPaletteGoToWorkspacePresentation.TryResolveRoot(Workspace.SolutionPath)
+            ?? "";
+        var files = McpSolutionTree.CollectFileEntries(Workspace.SolutionRoots);
+        foreach (var row in CommandPaletteGoToFileNavRowsProjection.EnumerateFiltered(
+                     files,
+                     term,
+                     workspaceRoot,
+                     CommandPaletteGoToLimits.MaxFiles))
         {
-            var t = term.Trim();
-            query = files.Where(e =>
-                e.Title.Contains(t, StringComparison.OrdinalIgnoreCase)
-                || e.FullPath.Contains(t, StringComparison.OrdinalIgnoreCase));
-        }
-
-        foreach (var (title, path) in query.OrderBy(e => e.Title, StringComparer.OrdinalIgnoreCase).Take(GoToPaletteMaxFiles))
-        {
-            var rel = TryRelativePath(path);
             FilteredCommandPaletteEntries.Add(new IdeCommandPaletteRowViewModel(
-                title,
-                rel ?? path,
-                path,
-                line: 0,
-                column: 1,
-                prefixHint: "f:"));
+                row.Title,
+                row.SubtitleCategory,
+                row.FullPath,
+                row.Line,
+                row.Column,
+                row.PrefixHint));
         }
 
         if (FilteredCommandPaletteEntries.Count == 0)
@@ -459,35 +454,11 @@ public partial class MainWindowViewModel
         }
     }
 
-    private string? TryRelativePath(string fullPath)
-    {
-        var root = TryGetWorkspaceRootForPalette();
-        if (root is null)
-            return null;
-        try
-        {
-            return Path.GetRelativePath(root, fullPath);
-        }
-        catch
-        {
-            return null;
-        }
-    }
-
-    private string? TryGetWorkspaceRootForPalette()
-    {
-        var sp = Workspace.SolutionPath ?? "";
-        if (string.IsNullOrWhiteSpace(sp))
-            return null;
-        var root = BreakpointsFileService.GetWorkspaceRoot(sp);
-        return string.IsNullOrEmpty(root) || !Directory.Exists(root) ? null : root;
-    }
-
     private async Task RunGoToRipgrepAsync(GoToAllQuery query, string workspaceRoot, long seq, CancellationToken ct)
     {
         try
         {
-            await Task.Delay(GoToRipgrepDebounceMs, ct).ConfigureAwait(false);
+            await Task.Delay(CommandPaletteGoToLimits.RipgrepDebounceMs, ct).ConfigureAwait(false);
             var (pattern, fixedString, glob) = GoToPaletteRipgrepPatternBuilder.Build(query);
             var (matches, err) = await RipgrepWorkspaceSearchService.SearchMatchesAsync(
                     workspaceRoot,
@@ -495,7 +466,7 @@ public partial class MainWindowViewModel
                     subPath: null,
                     fixedString,
                     glob,
-                    GoToPaletteMaxRipgrep,
+                    CommandPaletteGoToLimits.MaxRipgrepMatches,
                     rgExecutable: null,
                     ct)
                 .ConfigureAwait(false);
@@ -517,21 +488,16 @@ public partial class MainWindowViewModel
                     return;
                 }
 
-                var prefix = $"{query.Prefix}:";
                 var cat = query.Prefix == 't' ? "t: тип" : query.Prefix == 'm' ? "m: член" : "x: текст";
-                foreach (var m in matches)
+                foreach (var row in CommandPaletteGoToRipgrepNavRowsProjection.FromMatches(matches, workspaceRoot, query))
                 {
-                    var rel = TryRelativePath(m.Path);
-                    var preview = m.LineText.Trim();
-                    if (preview.Length > 160)
-                        preview = preview[..157] + "…";
                     FilteredCommandPaletteEntries.Add(new IdeCommandPaletteRowViewModel(
-                        preview,
-                        rel is not null ? $"{rel} · {m.LineNumber}" : $"{m.Path} · {m.LineNumber}",
-                        m.Path,
-                        m.LineNumber,
-                        1,
-                        prefix));
+                        row.Title,
+                        row.SubtitleCategory,
+                        row.FullPath,
+                        row.Line,
+                        row.Column,
+                        row.PrefixHint));
                 }
 
                 if (FilteredCommandPaletteEntries.Count == 0)
