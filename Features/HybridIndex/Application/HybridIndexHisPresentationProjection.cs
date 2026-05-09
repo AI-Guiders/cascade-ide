@@ -20,4 +20,10 @@ public static class HybridIndexHisPresentationProjection
             : string.IsNullOrWhiteSpace(last.LastError)
                 ? "IDLE"
                 : "ERROR";
+
+    /// <param name="lastErrorBannerText">Текст ошибки для баннера HIS или «—», если пусто.</param>
+    public static string SecondMessageLine(string lastErrorBannerText) =>
+        string.IsNullOrWhiteSpace(lastErrorBannerText) || lastErrorBannerText == "—"
+            ? "NO FAILURES"
+            : lastErrorBannerText;
 }

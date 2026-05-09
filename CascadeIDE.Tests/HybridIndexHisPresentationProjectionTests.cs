@@ -27,4 +27,11 @@ public sealed class HybridIndexHisPresentationProjectionTests
 
     private static HybridIndexStateChanged Make(string? lastError) =>
         new("/", null, ":memory:", 0, null, lastError, null);
+
+    [Theory]
+    [InlineData("", "NO FAILURES")]
+    [InlineData("—", "NO FAILURES")]
+    [InlineData("disk full", "disk full")]
+    public void Second_line_for_failures_row(string banner, string expect) =>
+        Assert.Equal(expect, HybridIndexHisPresentationProjection.SecondMessageLine(banner));
 }

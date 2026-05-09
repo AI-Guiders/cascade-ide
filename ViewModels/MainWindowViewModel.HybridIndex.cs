@@ -217,16 +217,8 @@ public partial class MainWindowViewModel
     public string HybridIndexMsgLine1 =>
         $"HCI {HybridIndexLampText}  DOCS {HybridIndexDocumentCountText}  FRESH {HybridIndexFreshnessEcamText}";
 
-    public string HybridIndexMsgLine2
-    {
-        get
-        {
-            var err = HybridIndexLastErrorText;
-            if (string.IsNullOrWhiteSpace(err) || err == "—")
-                return "NO FAILURES";
-            return err;
-        }
-    }
+    public string HybridIndexMsgLine2 =>
+        HybridIndexHisPresentationProjection.SecondMessageLine(HybridIndexLastErrorText);
 
     [RelayCommand]
     private void HybridIndexReindexNow()
