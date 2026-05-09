@@ -3,11 +3,13 @@ using System.Linq;
 using System.Threading.Channels;
 using CascadeIDE.Cockpit.ComputingUnits.HybridIndex;
 using CascadeIDE.Cockpit.DataBus;
+using CascadeIDE.Contracts;
 using HybridCodebaseIndex.Core;
 
 namespace CascadeIDE.Features.HybridIndex.Application;
 
 /// <summary>Оркестратор in-proc Hybrid Codebase Index (ADR 0106): watcher + debounce + публикация статуса в DataBus.</summary>
+[ApplicationOrchestrator("hybrid-index-in-proc")]
 public sealed class HybridIndexOrchestrator : IDisposable
 {
     private sealed record WatchKey(string WorkspaceRoot, string? SolutionPath)
