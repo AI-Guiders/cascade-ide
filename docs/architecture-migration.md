@@ -34,7 +34,7 @@
 | `MainWindowViewModel.Capabilities.cs` | 23 | Реестр capabilities. |
 | `MainWindowViewModel.CascadeChord.cs` | 432 | Аккордный слой ADR 0060: корень `cascade_chord` из hotkeys.toml (по умолчанию Ctrl+K), затем тот же хвост мелодии, что после `c:` в палитре (см. `IntentMelodyAliases`), без префикса `c:` и без Enter — если alias однозначен (например `so`). При конфликте префиксов (например `gs` vs `gsu`) точное совпадение после полного ввода или по клавише Enter. |
 | `MainWindowViewModel.CommandPalette.cs` | 550 | Палитра команд. |
-| `MainWindowViewModel.cs` | 434 | Главный композитор окна (partial-класс, несколько `MainWindowViewModel*.cs`). Карта файлов и ответственности — `docs/architecture-migration.md`, раздел «Срез MainWindowViewModel». |
+| `MainWindowViewModel.cs` | 435 | Главный композитор окна (partial-класс, несколько `MainWindowViewModel*.cs`). Карта файлов и ответственности — `docs/architecture-migration.md`, раздел «Срез MainWindowViewModel». |
 | `MainWindowViewModel.CSharpLsp.cs` | 120 | Запуск/перезапуск C# LSP. |
 | `MainWindowViewModel.CursorAcp.cs` | 36 | Путь Cursor ACP и предпочитаемая модель. |
 | `MainWindowViewModel.DebugStackUi.cs` | 35 | Выбор кадра в панели «Стек» Mfd: подгрузка Locals для выбранного кадра (DAP). |
@@ -239,6 +239,7 @@
 - Третий срез: **`WorkspaceNavigationMapRefreshComposer`** — разбор JSON refresh, композиция сцены + trace-flow, related-строки; **снимок CDS для control-flow** собирается на **UI-потоке** вместе с контекстом refresh и передаётся в композитор как `CockpitSurfaceState` (без чтения VM с пула); тесты `WorkspaceNavigationMapRefreshComposerTests`.
 - Четвёртый срез (**v1.40e**): partial **`MainWindowViewModel.WorkspaceNavigationMap.Refresh`** — debounce、`RunWorkspaceNavigationMapRefreshAsync` и viewport width; файл привязок/команд карты (**`WorkspaceNavigationMap.cs`**) укорочен до состояния и проекций.
   - пятый срез (**v1.40f**): **`MainWindowPresentationSurfaceProjection`** — видимость сплита main grid (`IsMainGridSplitColumnVisible`), флаги Skia-mount IDE Health (колонка / окно-хост), **`ResolveInstrumentMountStyleForSlot`**; отдельно **`MainWindowPresentationDapProjection`** для паузы/«running» DAP; геттеры **`MainWindowViewModel.Presentation`** только делегируют; тесты **`MainWindowPresentationDapProjectionTests`** и доп. кейсы в **`MainWindowPresentationSurfaceProjectionTests`**.
+  - шестой срез (**v1.40g**): **`IMainWindowHostSurfaceInput`** (`Cockpit/Composition/HostSurface`) — **`MainWindowHostSurfaceProjection`** принимает контракт вместо ссылки на **`MainWindowViewModel`**; реализация на VM через partial; тест **`MainWindowHostSurfaceProjectionTests`**.
 
 ## Версионирование
 
@@ -288,3 +289,4 @@
 - **v1.40d** — **`MainWindowPresentationCapabilitiesProjection`** + тесты; геттеры **`Presentation`** делегируют цепочки capabilities/Skia/safety/LOC.
 - **v1.40e** — **`MainWindowViewModel.WorkspaceNavigationMap.Refresh`**: поток обновления карты отделён от partial с привязками PFD.
 - **v1.40f** — расширение **`MainWindowPresentationSurfaceProjection`** (split/Mount-style/IDE Health mount) + **`MainWindowPresentationDapProjection`**; VM без локальных помощников резолва mount-style.
+- **v1.40g** — **`IMainWindowHostSurfaceInput`** + проекция host surface без типа VM; связность Cockpit → ViewModels ослаблена на границе shell/host кадра.
