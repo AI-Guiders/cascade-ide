@@ -45,6 +45,26 @@ public static class MainWindowPresentationSurfaceProjection
             _ => "main_window_docked_grid",
         };
 
+    /// <summary>Сплиттер и колонка main grid: ширина слота &gt; 0.</summary>
+    public static bool IsMainGridSplitColumnVisible(int columnWidthPixels) => columnWidthPixels > 0;
+
+    public static bool IsIdeHealthSkiaMountVisibleInDockedColumn(bool useSkiaInstrumentMount, bool columnVisible) =>
+        useSkiaInstrumentMount && columnVisible;
+
+    public static bool IsIdeHealthSkiaMountVisibleForHostWindow(bool useSkiaInstrumentMount, bool hostShellOpen) =>
+        useSkiaInstrumentMount && hostShellOpen;
+
+    public static string ResolveInstrumentMountStyleForSlot(
+        IInstrumentMountPolicyResolver resolver,
+        DisplaySettings displaySettings,
+        AttentionLayoutSurfaceKind attentionSurface,
+        string slotId,
+        string instrumentId)
+    {
+        var surfaceId = MountPolicySurfaceId(attentionSurface);
+        return resolver.Resolve(displaySettings, surfaceId, slotId, instrumentId);
+    }
+
     public static bool IsMfdContourContentVisible(
         bool problemsPanelVisible,
         bool isTerminalVisible,

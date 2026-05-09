@@ -41,7 +41,8 @@ public partial class MainWindowViewModel
     public int ChatPanelColumnPixelWidth => ShellSurfaceComposition.MfdColumnPixelWidthInMainGrid;
 
     /// <summary>Есть правая колонка MFD и сплиттер перед ней (ширина &gt; 0 в main).</summary>
-    public bool IsChatPanelColumnVisible => ChatPanelColumnPixelWidth > 0;
+    public bool IsChatPanelColumnVisible =>
+        MainWindowPresentationSurfaceProjection.IsMainGridSplitColumnVisible(ChatPanelColumnPixelWidth);
 
     /// <summary>
     /// Какая топология размещения зон сейчас активна. Свойства <see cref="IsPfdColumnVisible"/> / <see cref="IsMfdColumnVisible"/>
@@ -92,27 +93,22 @@ public partial class MainWindowViewModel
         MainWindowPresentationSurfaceProjection.InstrumentMountDisplayStyle(_settings.Display);
 
     /// <summary>Резолв style для mount в слоте PFD с учётом registry-правил.</summary>
-    public string PfdInstrumentMountStyle => ResolveInstrumentMountStyle(
-        MountPolicyRuntimeSurfaceId,
-        "pfd",
-        CockpitStandardInstrumentIds.IdeHealthStatusV1);
+    public string PfdInstrumentMountStyle =>
+        MainWindowPresentationSurfaceProjection.ResolveInstrumentMountStyleForSlot(
+            _instrumentMountPolicyResolver,
+            _settings.Display,
+            ActiveAttentionLayoutSurface,
+            "pfd",
+            CockpitStandardInstrumentIds.IdeHealthStatusV1);
 
     /// <summary>Резолв style для mount в слоте MFD с учётом registry-правил.</summary>
-    public string MfdInstrumentMountStyle => ResolveInstrumentMountStyle(
-        MountPolicyRuntimeSurfaceId,
-        "mfd",
-        CockpitStandardInstrumentIds.IdeHealthStatusV1);
-
-    /// <summary>Нормализованный runtime-контекст топологии для резолва mount-style из реестра.</summary>
-    private string MountPolicyRuntimeSurfaceId =>
-        MainWindowPresentationSurfaceProjection.MountPolicySurfaceId(ActiveAttentionLayoutSurface);
-
-    private string ResolveInstrumentMountStyle(string surfaceId, string slotId, string instrumentId) =>
-        _instrumentMountPolicyResolver.Resolve(
+    public string MfdInstrumentMountStyle =>
+        MainWindowPresentationSurfaceProjection.ResolveInstrumentMountStyleForSlot(
+            _instrumentMountPolicyResolver,
             _settings.Display,
-            surfaceId,
-            slotId,
-            instrumentId);
+            ActiveAttentionLayoutSurface,
+            "mfd",
+            CockpitStandardInstrumentIds.IdeHealthStatusV1);
     /// <summary>Полоса активной задачи / Task Cockpit — из <c>UiModes/&lt;id&gt;.toml</c> (<c>active_task_strip</c>); по умолчанию скрыто для семьи Debug.</summary>
     public bool ShowTaskBar => UiModeCatalog.GetShowTaskBar(NormalizeUiMode(UiMode));
 
@@ -252,10 +248,16 @@ public partial class MainWindowViewModel
     public bool HasDebugSession => _dapDebug.HasActiveSession;
 
     /// <summary>Выполнение остановлено — доступны шаги и просмотр стека.</summary>
-    public bool IsDebugExecutionPaused => _dapDebug.HasActiveSession && _dapDebug.IsExecutionStopped;
+    public bool IsDebugExecutionPaused =>
+        MainWindowPresentationDapProjection.IsDebugExecutionPaused(
+            _dapDebug.HasActiveSession,
+            _dapDebug.IsExecutionStopped);
 
     /// <summary>Процесс запущен под отладчиком, выполнение идёт.</summary>
-    public bool IsDebugExecutionRunning => _dapDebug.HasActiveSession && !_dapDebug.IsExecutionStopped;
+    public bool IsDebugExecutionRunning =>
+        MainWindowPresentationDapProjection.IsDebugExecutionRunning(
+            _dapDebug.HasActiveSession,
+            _dapDebug.IsExecutionStopped);
 
     public string IdeHealthDebugText =>
         IdeHealthStripPresentationProjection.SolutionDebugLineText(_lastIdeHealthInputSnapshot);
@@ -301,16 +303,24 @@ public partial class MainWindowViewModel
         _lastIdeHealthMountPayload ?? new IdeHealthStatusMountPayload("", "", "", SafetyLevel);
 
     public bool IsPfdIdeHealthMountVisible =>
-        UseSkiaInstrumentMount && IsPfdColumnVisible;
+        MainWindowPresentationSurfaceProjection.IsIdeHealthSkiaMountVisibleInDockedColumn(
+            UseSkiaInstrumentMount,
+            IsPfdColumnVisible);
 
     public bool IsMfdIdeHealthMountVisible =>
-        UseSkiaInstrumentMount && IsMfdColumnVisible;
+        MainWindowPresentationSurfaceProjection.IsIdeHealthSkiaMountVisibleInDockedColumn(
+            UseSkiaInstrumentMount,
+            IsMfdColumnVisible);
 
     public bool IsMfdHostWindowIdeHealthMountVisible =>
-        UseSkiaInstrumentMount && IsMfdHostWindowShellOpen;
+        MainWindowPresentationSurfaceProjection.IsIdeHealthSkiaMountVisibleForHostWindow(
+            UseSkiaInstrumentMount,
+            IsMfdHostWindowShellOpen);
 
     public bool IsPfdHostWindowIdeHealthMountVisible =>
-        UseSkiaInstrumentMount && IsPfdHostWindowShellOpen;
+        MainWindowPresentationSurfaceProjection.IsIdeHealthSkiaMountVisibleForHostWindow(
+            UseSkiaInstrumentMount,
+            IsPfdHostWindowShellOpen);
 
     public IdeHealthStatusMountContext? PfdIdeHealthMountContext =>
         MainWindowPresentationSurfaceProjection.ResolvePfdIdeHealthMountContext(
@@ -319,7 +329,7 @@ public partial class MainWindowViewModel
             IsPfdColumnVisible,
             _instrumentMountPolicyResolver,
             _settings.Display,
-            MountPolicyRuntimeSurfaceId,
+            MainWindowPresentationSurfaceProjection.MountPolicySurfaceId(ActiveAttentionLayoutSurface),
             IdeHealthMountPayload);
 
     public IdeHealthStatusMountContext? MfdIdeHealthMountContext =>
@@ -329,6 +339,6 @@ public partial class MainWindowViewModel
             IsMfdColumnVisible,
             _instrumentMountPolicyResolver,
             _settings.Display,
-            MountPolicyRuntimeSurfaceId,
+            MainWindowPresentationSurfaceProjection.MountPolicySurfaceId(ActiveAttentionLayoutSurface),
             IdeHealthMountPayload);
 }
