@@ -69,17 +69,10 @@ public partial class MainWindowViewModel
         nameof(HybridIndexMsgLine2))]
     private HybridIndexStateChanged? _hybridIndexLast;
 
-    public string HybridIndexLampText => HybridIndexLast is null
-        ? "NO DATA"
-        : string.IsNullOrWhiteSpace(HybridIndexLast.LastError)
-            ? "OK"
-            : "CAUTION";
+    public string HybridIndexLampText => HybridIndexHisPresentationProjection.LampText(HybridIndexLast);
 
-    public string HybridIndexStateShort => HybridIndexLast is null
-        ? "—"
-        : string.IsNullOrWhiteSpace(HybridIndexLast.LastError)
-            ? "IDLE"
-            : "ERROR";
+    public string HybridIndexStateShort =>
+        HybridIndexHisPresentationProjection.StateShort(HybridIndexLast);
 
     public string HybridIndexDocumentCountText =>
         HybridIndexLast?.DocumentCount.ToString(CultureInfo.InvariantCulture) ?? "—";
