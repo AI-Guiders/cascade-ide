@@ -1,9 +1,12 @@
+using CascadeIDE.Contracts;
+
 namespace CascadeIDE.Cockpit.ComputingUnits.IdeHealth;
 
 /// <summary>
 /// CCU «текст из скаляров» (реализует <see cref="ICockpitComputeUnit"/>, ADR 0097): чистое форматирование IDE Health без VM/DAP.
 /// Собирает <see cref="IdeHealthSegmentInput"/>; живые зависимости — в <see cref="IdeHealthSnapshotUnit"/>.
 /// </summary>
+[ComputingUnit]
 public sealed class IdeHealthFormattingUnit : ICockpitComputeUnit
 {
     /// <summary>Единственный экземпляр свёртки (без состояния).</summary>

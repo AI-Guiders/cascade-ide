@@ -1,4 +1,5 @@
 #nullable enable
+using CascadeIDE.Contracts;
 using CascadeIDE.Models;
 using CascadeIDE.Services;
 using CascadeIDE.Services.CodeNavigation;
@@ -8,6 +9,7 @@ namespace CascadeIDE.Features.WorkspaceNavigation.Application;
 /// <summary>
 /// Сборка JSON контекста карты намерений для PFD (тяжёлая работа — вызывать из фона, см. refresh в <c>MainWindowViewModel.WorkspaceNavigationMap</c>).
 /// </summary>
+[ComputingUnit]
 public static class WorkspaceNavigationMapContextJsonBuilder
 {
     /// <summary>

@@ -1,7 +1,9 @@
 using System.Globalization;
+using CascadeIDE.Contracts;
 
 namespace CascadeIDE.Features.Shell.Application;
 
+[ComputingUnit]
 public static class UiModeSelectionParameter
 {
     public static int ParseIndex(object? parameter) =>

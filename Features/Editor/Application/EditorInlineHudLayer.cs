@@ -1,4 +1,5 @@
 using AvaloniaEdit;
+using CascadeIDE.Contracts;
 using CascadeIDE.Features.Editor.Application.Presentation;
 
 namespace CascadeIDE.Features.Editor.Application;
@@ -9,6 +10,7 @@ namespace CascadeIDE.Features.Editor.Application;
 /// Реализации: <see cref="Presentation.EditorInlineHoverToolTipController"/>, <see cref="Presentation.EditorDocumentBackgroundVisualsHandle"/>;
 /// полная инвентаризация — <c>docs/design/editor-hud-inline-migration-inventory-v1.md</c>.
 /// </summary>
+[ComputingUnit]
 public static class EditorInlineHudLayer
 {
     public static EditorDocumentBackgroundVisualsHandle InstallDocumentBackgroundVisuals(

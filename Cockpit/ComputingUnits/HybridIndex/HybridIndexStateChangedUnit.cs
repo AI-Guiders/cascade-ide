@@ -1,4 +1,5 @@
 using CascadeIDE.Cockpit.DataBus;
+using CascadeIDE.Contracts;
 using HybridCodebaseIndex.Core;
 
 namespace CascadeIDE.Cockpit.ComputingUnits.HybridIndex;
@@ -12,6 +13,7 @@ namespace CascadeIDE.Cockpit.ComputingUnits.HybridIndex;
 /// там <see cref="IndexStatus"/> целиком (включая настройки, reindex state); здесь только поля, нужные проекции MFD/UI.
 /// </para>
 /// </summary>
+[ComputingUnit]
 public sealed class HybridIndexStateChangedUnit : ICockpitComputeUnit
 {
     /// <summary>

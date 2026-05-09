@@ -1,7 +1,10 @@
 #nullable enable
+using CascadeIDE.Contracts;
+
 namespace CascadeIDE.Cockpit.ComputingUnits.Launch;
 
 /// <summary>Общие шаги: путь к .csproj, карта <see cref="LaunchProfileData"/> в <see cref="DebugLaunchResolution"/> (ADR 0090).</summary>
+[ComputingUnit]
 public static class DebugLaunchFromProfile
 {
     /// <summary>

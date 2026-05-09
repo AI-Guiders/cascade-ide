@@ -1,6 +1,9 @@
+using CascadeIDE.Contracts;
+
 namespace CascadeIDE.Features.HybridIndex.Application;
 
 /// <summary>ADR 0106: пара workspace/solution под <c>[hybrid_index] scope_mode</c> без привязки к VM.</summary>
+[ComputingUnit]
 public static class HybridIndexScopeResolver
 {
     /// <summary>Применить режим области (например <c>workspace</c> без solution в ключе SQLite vs <c>workspace+solution</c>).</summary>

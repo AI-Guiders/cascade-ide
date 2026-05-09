@@ -1,6 +1,7 @@
 #nullable enable
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
+using CascadeIDE.Contracts;
 using CascadeIDE.Models;
 
 namespace CascadeIDE.Features.Workspace.Application;
@@ -9,6 +10,7 @@ namespace CascadeIDE.Features.Workspace.Application;
 /// Обход дерева <see cref="SolutionItem"/> для MCP: проекты, файлы, относительные пути, дерево для JSON.
 /// Без привязки к UI.
 /// </summary>
+[ComputingUnit]
 public static class McpSolutionTree
 {
     public static IEnumerable<string> CollectProjectPaths(ObservableCollection<SolutionItem> roots)

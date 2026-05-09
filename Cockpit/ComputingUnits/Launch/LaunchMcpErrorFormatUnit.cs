@@ -1,10 +1,13 @@
 #nullable enable
 
+using CascadeIDE.Contracts;
+
 namespace CascadeIDE.Cockpit.ComputingUnits.Launch;
 
 /// <summary>
 /// CCU formatter для ошибок MCP-запуска отладки: единый формат "# Error: ...".
 /// </summary>
+[ComputingUnit]
 public sealed class LaunchMcpErrorFormatUnit : ICockpitComputeUnit
 {
     public static LaunchMcpErrorFormatUnit Default { get; } = new();

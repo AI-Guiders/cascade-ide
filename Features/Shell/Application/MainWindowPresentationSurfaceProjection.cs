@@ -1,6 +1,7 @@
 using CascadeIDE.Cockpit;
 using CascadeIDE.Cockpit.Cds;
 using CascadeIDE.Cockpit.Composition.HostSurface;
+using CascadeIDE.Contracts;
 using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Lang;
 using CascadeIDE.Models;
@@ -10,6 +11,7 @@ namespace CascadeIDE.Features.Shell.Application;
 /// <summary>
 /// Статические проекции для вычисляемых свойств главного окна (видимость, подписи, mount-контекст без логики на VM).
 /// </summary>
+[ComputingUnit]
 public static class MainWindowPresentationSurfaceProjection
 {
     public const string DefaultRiskSummaryPlaceholder = "Риски не зафиксированы.";

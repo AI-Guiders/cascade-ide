@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using AvaloniaEdit;
+using CascadeIDE.Contracts;
 
 namespace CascadeIDE.Features.Editor.Application.Presentation;
 
@@ -8,6 +9,7 @@ namespace CascadeIDE.Features.Editor.Application.Presentation;
 /// Тайминги и смещения **inline** hover/Quick Info / диагностики по указателю (ADR 0085 Editor HUD, не file-level баннер).
 /// Не <b>IDS</b> (ADR 0079): тултип — привязка к <see cref="TextEditor"/>, не глобальный стек IDE-оверлеев; величины в одном месте (<see cref="ApplyToolTipServiceTo"/>, <see cref="PointerPositionDebounce"/>).
 /// </summary>
+[ComputingUnit]
 public static class EditorInlineHoverChrome
 {
     public const int PointerPositionDebounceMilliseconds = 120;

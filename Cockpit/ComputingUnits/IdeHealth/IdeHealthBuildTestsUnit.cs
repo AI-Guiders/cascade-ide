@@ -1,9 +1,12 @@
+using CascadeIDE.Contracts;
+
 namespace CascadeIDE.Cockpit.ComputingUnits.IdeHealth;
 
 /// <summary>
 /// CCU «build/tests сводка»: формирует пару сегментов из сигналов сборки/тестов и решения области (solution/project).
 /// Логика форматирования остаётся в <see cref="IdeHealthFormattingUnit"/>; этот юнит только выбирает нужную ветку.
 /// </summary>
+[ComputingUnit]
 public sealed class IdeHealthBuildTestsUnit : ICockpitComputeUnit
 {
     public static IdeHealthBuildTestsUnit Default { get; } = new();

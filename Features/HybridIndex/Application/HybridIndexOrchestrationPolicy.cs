@@ -1,4 +1,5 @@
 #nullable enable
+using CascadeIDE.Contracts;
 using CascadeIDE.Models;
 
 namespace CascadeIDE.Features.HybridIndex.Application;
@@ -7,6 +8,7 @@ namespace CascadeIDE.Features.HybridIndex.Application;
 /// Application-level policy for wiring Hybrid Codebase Index orchestration to current settings/runtime.
 /// Keeps watcher enablement and debounce decisions out of UI code.
 /// </summary>
+[ComputingUnit]
 public static class HybridIndexOrchestrationPolicy
 {
     public static int ResolveDebounceMs(HybridIndexSettings settings)

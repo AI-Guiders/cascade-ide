@@ -1,8 +1,10 @@
 using CascadeIDE.Cockpit.DataBus;
+using CascadeIDE.Contracts;
 
 namespace CascadeIDE.Cockpit.ComputingUnits.IdeHealth;
 
 /// <summary>CCU: чистая свёртка событий в <see cref="BuildStateSnapshot"/> (ADR 0097).</summary>
+[ComputingUnit]
 public static class BuildStateSnapshotUnit
 {
     public static BuildStateSnapshot Apply(BuildStateSnapshot prior, BuildStateChanged e)

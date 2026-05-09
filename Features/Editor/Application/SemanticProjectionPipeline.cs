@@ -1,3 +1,4 @@
+using CascadeIDE.Contracts;
 using Microsoft.CodeAnalysis;
 
 namespace CascadeIDE.Features.Editor.Application;
@@ -6,6 +7,7 @@ namespace CascadeIDE.Features.Editor.Application;
 /// Вертикальный срез DAL/диагностик → снимок для Editor HUD (ADR 0103).
 /// Источник полос — <see cref="WorkspaceDiagnosticsCoordinator"/>, не прямой CCU.
 /// </summary>
+[ComputingUnit]
 public static class SemanticProjectionPipeline
 {
     public static EditorSemanticSnapshot FromDiagnosticStrips(IReadOnlyList<EditorDiagnosticStrip> strips)

@@ -1,6 +1,9 @@
+using CascadeIDE.Contracts;
+
 namespace CascadeIDE.Features.Shell.Application;
 
 /// <summary>Проекции DAP-состояния для геттеров presentation (без логики на VM).</summary>
+[ComputingUnit]
 public static class MainWindowPresentationDapProjection
 {
     public static bool IsDebugExecutionPaused(bool hasActiveSession, bool executionStopped) =>

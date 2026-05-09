@@ -1,3 +1,4 @@
+using CascadeIDE.Contracts;
 using CascadeIDE.Models;
 
 namespace CascadeIDE.Features.WorkspaceNavigation.Application;
@@ -5,6 +6,7 @@ namespace CascadeIDE.Features.WorkspaceNavigation.Application;
 /// <summary>
 /// Проекция UI для панели карты намерений (PFD): видимость list/graph и вспомогательные строки без привязки к ViewModel.
 /// </summary>
+[ComputingUnit]
 public static class CodeNavigationMapPresentationProjection
 {
     /// <summary>Список related на странице MFD (вкладка RelatedFiles), не в колонке PFD.</summary>

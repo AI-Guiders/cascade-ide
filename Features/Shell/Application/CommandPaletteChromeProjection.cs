@@ -1,6 +1,9 @@
+using CascadeIDE.Contracts;
+
 namespace CascadeIDE.Features.Shell.Application;
 
 /// <summary>Тексты подсказки/плейсхолдера оверлея палитры (без привязки к VM).</summary>
+[ComputingUnit]
 public static class CommandPaletteChromeProjection
 {
     private const string ModeHintsNoSample = "f: файл · t: тип · m: член · x: текст · c: melody";

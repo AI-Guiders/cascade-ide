@@ -1,8 +1,11 @@
+using CascadeIDE.Contracts;
+
 namespace CascadeIDE.Cockpit.ComputingUnits.IdeHealth;
 
 /// <summary>
 /// CCU «сводка отладки» (ADR 0097): вычисляет человекочитаемую часть debug-сегмента для project scope.
 /// </summary>
+[ComputingUnit]
 public sealed class IdeHealthDebugSummaryUnit : ICockpitComputeUnit
 {
     /// <summary>Единственный экземпляр юнита (без состояния).</summary>

@@ -1,11 +1,14 @@
 #nullable enable
 
+using CascadeIDE.Contracts;
+
 namespace CascadeIDE.Cockpit.ComputingUnits.Launch;
 
 /// <summary>
 /// CCU «profile -> project path»: читает launch profile и пытается разрешить существующий .csproj.
 /// Никаких UI-эффектов; только снимок для дальнейшей orchestration-логики.
 /// </summary>
+[ComputingUnit]
 public sealed class LaunchProfileProjectResolveUnit : ICockpitComputeUnit
 {
     public static LaunchProfileProjectResolveUnit Default { get; } = new();

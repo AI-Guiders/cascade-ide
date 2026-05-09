@@ -1,11 +1,14 @@
 #nullable enable
 
+using CascadeIDE.Contracts;
+
 namespace CascadeIDE.Cockpit.ComputingUnits.Launch;
 
 /// <summary>
 /// CCU «готовность запуска» (pre-MSBuild): выбирает источник старта (профиль / startup project)
 /// и фиксирует причину, если попытка разрешения цели невозможна.
 /// </summary>
+[ComputingUnit]
 public sealed class LaunchReadinessUnit : ICockpitComputeUnit
 {
     public static LaunchReadinessUnit Default { get; } = new();

@@ -1,12 +1,14 @@
 namespace CascadeIDE.Cockpit.ComputingUnits.IdeHealth;
 
 using CascadeIDE.Cockpit.DataBus;
+using CascadeIDE.Contracts;
 using CascadeIDE.Services;
 
 /// <summary>
 /// <strong>CCU</strong> «сбор снимка канала» (ADR 0097): <see cref="IdeHealthInputSnapshot"/> только из <see cref="IDataBus"/> (события домена, ADR 0099).
 /// Не тянет <c>UiChromeViewModel</c> / DAP / git напрямую. Продуктовое имя канала — IDE Health (ADR 0089).
 /// </summary>
+[ComputingUnit]
 public sealed class IdeHealthSnapshotUnit : Channels.WorkspaceHealth.IIdeHealthChannel, IDisposable
 {
     private readonly IdeHealthScopeDecisionUnit _scopeDecision = IdeHealthScopeDecisionUnit.Default;

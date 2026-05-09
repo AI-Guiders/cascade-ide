@@ -1,8 +1,10 @@
+using CascadeIDE.Contracts;
 using CascadeIDE.Features.HybridIndex.Application;
 
 namespace CascadeIDE.Features.IdeMcp.Application;
 
 /// <summary>Разрешение области HCI для MCP <c>codebase_index_*</c> (паритет с оркестратором).</summary>
+[ComputingUnit]
 public static class IdeMcpHybridIndexScope
 {
     public static bool TryResolveForCodebaseIndexCommand(

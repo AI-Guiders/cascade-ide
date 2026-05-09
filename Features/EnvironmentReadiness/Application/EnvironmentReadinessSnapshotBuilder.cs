@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using CascadeIDE.Cockpit.DataBus;
+using CascadeIDE.Contracts;
 using CascadeIDE.Models;
 using CascadeIDE.Services.Lsp;
 
@@ -8,6 +9,7 @@ namespace CascadeIDE.Features.EnvironmentReadiness.Application;
 /// <summary>
 /// Сборка снимка «готовность окружения» из настроек и проекции <see cref="IdeHostStateChanged"/> (тот же снимок, что на DataBus; без дампа environ).
 /// </summary>
+[ComputingUnit]
 public static class EnvironmentReadinessSnapshotBuilder
 {
     /// <summary>Сводная строка блока Dev Tools: агент, LSP, dotnet — лампа «DEV» гаснет, если по всем деталям только Ok/Advisory.</summary>

@@ -1,6 +1,7 @@
 #nullable enable
 
 using CascadeIDE.Cockpit.Channels.EnvironmentReadiness;
+using CascadeIDE.Contracts;
 using CascadeIDE.Models;
 
 namespace CascadeIDE.Cockpit.ComputingUnits.EnvironmentReadiness;
@@ -9,6 +10,7 @@ namespace CascadeIDE.Cockpit.ComputingUnits.EnvironmentReadiness;
 /// CCU «Environment Readiness snapshot»: единая точка сборки строк готовности окружения (ADR 0023/0097).
 /// Оркеструет построение снимка по входному контексту канала без привязки к ViewModel.
 /// </summary>
+[ComputingUnit]
 public sealed class EnvironmentReadinessSnapshotUnit : ICockpitComputeUnit
 {
     public static EnvironmentReadinessSnapshotUnit Default { get; } = new();

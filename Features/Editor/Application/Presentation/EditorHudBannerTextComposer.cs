@@ -1,9 +1,12 @@
+using CascadeIDE.Contracts;
+
 namespace CascadeIDE.Features.Editor.Application.Presentation;
 
 /// <summary>
 /// Текст полосы **HUD banner** над редактором (ADR 0021 §9, 0085 — не путать с inline Editor HUD).
 /// Слой презентации: без DAL, без C#-сервисов; только форматирование сегментов.
 /// </summary>
+[ComputingUnit]
 public static class EditorHudBannerTextComposer
 {
     public static string? FormatDiagnosticSummary(int errorCount, int warningCount)

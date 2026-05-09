@@ -1,10 +1,12 @@
 using CascadeIDE.Cockpit.ComputingUnits.IdeHealth;
+using CascadeIDE.Contracts;
 
 namespace CascadeIDE.Features.Shell.Application;
 
 /// <summary>
 /// Тексты полосы IDE Health из последнего <see cref="IdeHealthInputSnapshot"/> (без геттеров коллекций на главном VM).
 /// </summary>
+[ComputingUnit]
 public static class IdeHealthStripPresentationProjection
 {
     public static string SolutionBuildLineText(IdeHealthInputSnapshot? snapshot) =>

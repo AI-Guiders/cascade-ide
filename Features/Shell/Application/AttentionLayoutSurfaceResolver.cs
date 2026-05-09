@@ -1,10 +1,12 @@
 using CascadeIDE.Cockpit.Cds;
+using CascadeIDE.Contracts;
 
 namespace CascadeIDE.Features.Shell.Application;
 
 /// <summary>
 /// Определяет активную топологию зон внимания по флагам презентации и хостов PFD/MFD (ADR 0017, 0021).
 /// </summary>
+[ComputingUnit]
 public static class AttentionLayoutSurfaceResolver
 {
     public static AttentionLayoutSurfaceKind Resolve(

@@ -1,8 +1,10 @@
 using Avalonia.Input;
+using CascadeIDE.Contracts;
 
 namespace CascadeIDE.Features.Shell.Application;
 
 /// <summary>Соответствие клавиш главного окна символам мелодии CascadeChord.</summary>
+[ComputingUnit]
 public static class CascadeChordMelodyKeyMap
 {
     public static bool TryMapToChar(Key key, out char ch)

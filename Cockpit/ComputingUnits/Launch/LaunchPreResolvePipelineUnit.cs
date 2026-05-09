@@ -1,10 +1,13 @@
 #nullable enable
 
+using CascadeIDE.Contracts;
+
 namespace CascadeIDE.Cockpit.ComputingUnits.Launch;
 
 /// <summary>
 /// Мини-пайплайн pre-resolve для запуска: profile->project resolve + readiness + (опционально) MCP error message.
 /// </summary>
+[ComputingUnit]
 public sealed class LaunchPreResolvePipelineUnit : ICockpitComputeUnit
 {
     private readonly LaunchProfileProjectResolveUnit _profileResolve = LaunchProfileProjectResolveUnit.Default;

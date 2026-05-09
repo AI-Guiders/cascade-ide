@@ -3,6 +3,7 @@ using System.Text.Json;
 using CascadeIDE.Cockpit.Cds;
 using CascadeIDE.Cockpit.Channels.TraceFlow;
 using CascadeIDE.Cockpit.Composition.TraceFlow;
+using CascadeIDE.Contracts;
 using CascadeIDE.Models;
 using CascadeIDE.Services.Navigation;
 using CascadeIDE.Services.SkiaInstruments;
@@ -13,6 +14,7 @@ namespace CascadeIDE.Features.WorkspaceNavigation.Application;
 /// <summary>
 /// Разбор JSON refresh карты намерений и сборка сцены/related-строк (до маршала на UI).
 /// </summary>
+[ComputingUnit]
 public static class WorkspaceNavigationMapRefreshComposer
 {
     public sealed record Dependencies(

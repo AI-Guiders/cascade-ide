@@ -1,11 +1,13 @@
 namespace CascadeIDE.Cockpit.ComputingUnits.IdeHealth;
 
+using CascadeIDE.Contracts;
 using CascadeIDE.Services;
 
 /// <summary>
 /// CCU «debug сегмент»: собирает сегмент Debug из снимка DAP и решения области (solution/project).
 /// Детализация строки для project scope делегируется <see cref="IdeHealthDebugSummaryUnit"/>.
 /// </summary>
+[ComputingUnit]
 public sealed class IdeHealthDebugSegmentUnit : ICockpitComputeUnit
 {
     private readonly IdeHealthDebugSummaryUnit _summary = IdeHealthDebugSummaryUnit.Default;

@@ -1,9 +1,12 @@
+using CascadeIDE.Contracts;
+
 namespace CascadeIDE.Cockpit.ComputingUnits.IdeHealth;
 
 /// <summary>
 /// CCU «решение о scope» (ADR 0097): определяет, когда IDE Health сегменты должны быть project-scoped
 /// вместо solution-scoped на основе startup project и активного build/tests сигнала.
 /// </summary>
+[ComputingUnit]
 public sealed class IdeHealthScopeDecisionUnit : ICockpitComputeUnit
 {
     /// <summary>Единственный экземпляр юнита (без состояния).</summary>
