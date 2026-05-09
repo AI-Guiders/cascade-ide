@@ -67,7 +67,7 @@
 | `MainWindowViewModel.MarkdownLsp.cs` | 103 | Запуск/перезапуск Markdown LSP. |
 | `MainWindowViewModel.McpBreakpointReveal.cs` | 62 | MCP: постановка брейкпоинта с загрузкой решения и показом строки в редакторе. |
 | `MainWindowViewModel.MfdShell.cs` | 88 | Оболочка Mfd: одна активная страница; навигация — команды и палитра. Якорь на экране задаётся presentation (зона Mfd в main и/или окно-хост). |
-| `MainWindowViewModel.Presentation.cs` | 249 | Вычисляемые свойства разметки, Workspace Health и видимости панелей (режимы UI). |
+| `MainWindowViewModel.Presentation.cs` | 264 | Вычисляемые свойства разметки, Workspace Health и видимости панелей (режимы UI). |
 | `MainWindowViewModel.PresentationLayout.CockpitSurfaceSnapshot.cs` | 8 | Сборка `CockpitSurfaceState` главного окна (`Build`). |
 | `MainWindowViewModel.PresentationLayout.cs` | 91 | ADR 0017: строка `presentation` и второй `TopLevel` — `MfdHostWindow` с полным вторичным контуром (п. 8). |
 | `MainWindowViewModel.PresentationLayout.HostShell.cs` | 47 | События «окно-хост открыло полный контур» — скрытие колонок в main (`PresentationLayout`). |
@@ -87,7 +87,8 @@
 | `MainWindowViewModel.StartupProject.cs` | 326 | Стартовый проект. |
 | `MainWindowViewModel.UiGitWorkspace.cs` | 147 | Git + workspace UI. |
 | `MainWindowViewModel.ViewBridge.cs` | 62 | Колбэки и провайдеры, которые View подставляет в главный VM (диалоги, UI automation). |
-| `MainWindowViewModel.WorkspaceNavigationMap.cs` | 235 | Слот Pfd: отображение карты намерений / `CodeNavigationMapSubgraphDocument` (те же данные, что JSON MCP). Граф подграфа — не синоним `instrument_id`, см. ADR 0065. По доменам: карта намерений (в т.ч. control flow) — CodeNavigation; зависимости файлов — WorkspaceNavigation; submodules — дерево/GitMap (ADR 0062). |
+| `MainWindowViewModel.WorkspaceNavigationMap.cs` | 116 | Слот Pfd: отображение карты намерений / `CodeNavigationMapSubgraphDocument` (те же данные, что JSON MCP). Граф подграфа — не синоним `instrument_id`, см. ADR 0065. По доменам: карта намерений (в т.ч. control flow) — CodeNavigation; зависимости файлов — WorkspaceNavigation; submodules — дерево/GitMap (ADR 0062). |
+| `MainWindowViewModel.WorkspaceNavigationMap.Refresh.cs` | 130 | Срез карты workspace: перезапрос refresh и сборка через `WorkspaceNavigationMapRefreshComposer`. |
 | `MainWindowViewModel.WorkspaceSplitters.cs` | 23 | Сплиттеры рабочей области (MainGrid, обозреватель решения, Git и т.д.): режим «взлёт» — блокировка перетаскивания. |
 
 <!-- AUTO:MAIN-WINDOW-SLICE:MWVM-TABLE:END -->
@@ -223,6 +224,7 @@
   - первый срез (**v1.40**): **`MainWindowPresentationSurfaceProjection`** (`Features/Shell/Application`) — заголовок окна, mount-style/топология, контур MFD, телеметрия-подписи, безопасность агента, mount-контекст IDE Health; плейсхолдеры риска/результата и дефолты в **ShellState.AutonomousAgentStripe** через константу проекции.
   - второй срез (**v1.40b**): **`IdeHealthStripPresentationProjection`** — строки полосы IDE Health (build/tests/debug line + cockpit-short) из **`IdeHealthInputSnapshot?`**; геттеры **`MainWindowViewModel.Presentation`** только проксируют последний снимок.
   - третий срез (**v1.40c**): кластер **`PresentationLayout`** разнесён на partial: топология/MainGrid (**`PresentationLayout.cs`**), **`PresentationLayout.HostShell`**, **`PresentationLayout.HostWindowBounds`**, **`PresentationLayout.CockpitSurfaceSnapshot`** (CDS-сборка без изменения логики).
+  - четвёртый срез (**v1.40d**): **`MainWindowPresentationCapabilitiesProjection`** — булевы цепочки и подписи из **`UiModeCapabilities`** (IDE Health strip / EICAS chrome / instrumentation / risk-result карточки / Skia overlay / safety ordinal / LOC-бейдж); тесты **`MainWindowPresentationCapabilitiesProjectionTests`**.
 - Кластер `ShellState`:
   - состояния панелей и режимов — в отдельные state-модули по доменам, не в один monolith-файл.
   - четвёртый срез: **`MainWindowViewModel.ShellState.AiProviders.cs`** — режим ИИ (`AiMode`, облачный провайдер, вычисляемые флаги выбора) и поля API-ключей; геометрия регионов и видимость страниц MFD после v1.39 — **`ShellState.RegionAndContour`**.
@@ -235,6 +237,7 @@
 - Первый срез (карта PFD): **`CodeNavigationMapPresentationProjection`** + статические `CodeNavigationMapSettings.ViewWantsList` / `ViewWantsGraph`; биндинги list/graph/бейдж/has-related в `MainWindowViewModel.WorkspaceNavigationMap` делегируют в проекцию.
 - Второй срез: **`WorkspaceNavigationMapContextJsonBuilder`** (ветвление related / subgraph / control-flow JSON внутри фонового refresh) и **`CodeNavigationMapViewportPolicy`** (пороги ширины viewport мини-карты); тесты `WorkspaceNavigationMapContextAndViewportTests`.
 - Третий срез: **`WorkspaceNavigationMapRefreshComposer`** — разбор JSON refresh, композиция сцены + trace-flow, related-строки; **снимок CDS для control-flow** собирается на **UI-потоке** вместе с контекстом refresh и передаётся в композитор как `CockpitSurfaceState` (без чтения VM с пула); тесты `WorkspaceNavigationMapRefreshComposerTests`.
+- Четвёртый срез (**v1.40e**): partial **`MainWindowViewModel.WorkspaceNavigationMap.Refresh`** — debounce、`RunWorkspaceNavigationMapRefreshAsync` и viewport width; файл привязок/команд карты (**`WorkspaceNavigationMap.cs`**) укорочен до состояния и проекций.
 
 ## Версионирование
 
@@ -281,3 +284,5 @@
 - **v1.40** — Wave UI clusters, кластер **Presentation**: статическая проекция **`MainWindowPresentationSurfaceProjection`** для вычисляемых свойств **`MainWindowViewModel.Presentation`**, тесты **`MainWindowPresentationSurfaceProjectionTests`**.
 - **v1.40b** — тот же кластер: **`IdeHealthStripPresentationProjection`** + тесты **`IdeHealthStripPresentationProjectionTests`**; VM не дублирует разбор вложенного снимка в шести геттерах.
 - **v1.40c** — **`MainWindowViewModel.PresentationLayout`**: несколько **`PresentationLayout.*`** partial-файлов (топология, host-shell инвалидация, сохранённые bounds окон-хостов, CDS snapshot).
+- **v1.40d** — **`MainWindowPresentationCapabilitiesProjection`** + тесты; геттеры **`Presentation`** делегируют цепочки capabilities/Skia/safety/LOC.
+- **v1.40e** — **`MainWindowViewModel.WorkspaceNavigationMap.Refresh`**: поток обновления карты отделён от partial с привязками PFD.
