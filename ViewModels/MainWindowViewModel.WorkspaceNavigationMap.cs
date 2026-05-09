@@ -137,5 +137,29 @@ public partial class MainWindowViewModel
         Documents.OpenOrActivateDocument(path);
     }
 
+    /// <summary>Сводка настроек карты намерений (без ComboBox; смена через палитру или MCP).</summary>
+    public string CodeNavigationMapSettingsSummaryLine =>
+        CodeNavigationMapPresentationProjection.SettingsSummaryLine(
+            CodeNavigationMapPresentation,
+            CodeNavigationMapLevel,
+            _settings.CodeNavigationMap.DetailLevel);
+
+    /// <summary>Команда палитры / MCP: list → graph → both.</summary>
+    public void CycleCodeNavigationMapPresentation() =>
+        CodeNavigationMapPresentation = CodeNavigationMapPresentationProjection.NextPresentationViewAfter(CodeNavigationMapPresentation);
+
+    /// <summary>Команда палитры / MCP: file ↔ controlFlow.</summary>
+    public void CycleCodeNavigationMapLevel() =>
+        CodeNavigationMapLevel = CodeNavigationMapPresentationProjection.ToggledMapLevel(CodeNavigationMapLevel);
+
+    /// <summary>Команда палитры / MCP: glance → normal → inspect.</summary>
+    public void CycleCodeNavigationMapDetailLevel()
+    {
+        var (_, toml) = CodeNavigationMapPresentationProjection.NextDetailCycle(_settings.CodeNavigationMap.NormalizedDetailLevel);
+        _settings.CodeNavigationMap.DetailLevel = toml;
+        SaveSettingsIfChanged();
+        ScheduleWorkspaceNavigationMapRefresh();
+        OnPropertyChanged(nameof(CodeNavigationMapSettingsSummaryLine));
+    }
 }
 

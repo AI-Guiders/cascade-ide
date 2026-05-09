@@ -139,10 +139,6 @@ public partial class MainWindowViewModel
             ? "Command: в покое. Ctrl+K — режим armed (CascadeChord)."
             : "Command (armed) — ввод по аккорду; транспорт CascadeChord (Ctrl+K).\n\n" + BuildCascadeChordOverlayHint();
 
-    /// <summary>Сводка настроек карты намерений (без ComboBox; смена через палитру или MCP).</summary>
-    public string CodeNavigationMapSettingsSummaryLine =>
-        $"Вид: {CodeNavigationMapPresentation} · уровень: {CodeNavigationMapLevel} · детализация: {_settings.CodeNavigationMap.DetailLevel.Trim()} · палитра / MCP";
-
     private string BuildCascadeChordOverlayHint()
     {
         var matches = CascadeChordPresentationProjection.FilterEligibleMatches(_cascadeChordMelodyTail);
@@ -372,50 +368,4 @@ public partial class MainWindowViewModel
         }
     }
 
-    /// <summary>Команда палитры / MCP: list → graph → both.</summary>
-    public void CycleCodeNavigationMapPresentation()
-    {
-        var order = new[]
-        {
-            CodeNavigationMapPresentationKind.List,
-            CodeNavigationMapPresentationKind.Graph,
-            CodeNavigationMapPresentationKind.Both
-        };
-        var cur = CodeNavigationMapPresentationKind.Normalize(CodeNavigationMapPresentation);
-        var i = Array.IndexOf(order, cur);
-        if (i < 0)
-            i = 0;
-        CodeNavigationMapPresentation = order[(i + 1) % order.Length];
-    }
-
-    /// <summary>Команда палитры / MCP: file ↔ controlFlow.</summary>
-    public void CycleCodeNavigationMapLevel()
-    {
-        CodeNavigationMapLevel = string.Equals(CodeNavigationMapLevel, CodeNavigationMapLevelKind.File, StringComparison.OrdinalIgnoreCase)
-            ? CodeNavigationMapLevelKind.ControlFlow
-            : CodeNavigationMapLevelKind.File;
-    }
-
-    /// <summary>Команда палитры / MCP: glance → normal → inspect.</summary>
-    public void CycleCodeNavigationMapDetailLevel()
-    {
-        var cur = _settings.CodeNavigationMap.NormalizedDetailLevel;
-        var next = cur switch
-        {
-            CodeNavigationMapDetailLevel.Glance => CodeNavigationMapDetailLevel.Normal,
-            CodeNavigationMapDetailLevel.Normal => CodeNavigationMapDetailLevel.Inspect,
-            CodeNavigationMapDetailLevel.Inspect => CodeNavigationMapDetailLevel.Glance,
-            _ => CodeNavigationMapDetailLevel.Normal
-        };
-        _settings.CodeNavigationMap.DetailLevel = next switch
-        {
-            CodeNavigationMapDetailLevel.Glance => "glance",
-            CodeNavigationMapDetailLevel.Normal => "normal",
-            CodeNavigationMapDetailLevel.Inspect => "inspect",
-            _ => "normal"
-        };
-        SaveSettingsIfChanged();
-        ScheduleWorkspaceNavigationMapRefresh();
-        OnPropertyChanged(nameof(CodeNavigationMapSettingsSummaryLine));
-    }
 }
