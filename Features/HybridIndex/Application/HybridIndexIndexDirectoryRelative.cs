@@ -1,5 +1,6 @@
 #nullable enable
 using System.IO;
+using CascadeIDE.Contracts;
 
 namespace CascadeIDE.Features.HybridIndex.Application;
 
@@ -7,6 +8,7 @@ namespace CascadeIDE.Features.HybridIndex.Application;
 /// Policy: normalize the configured relative index directory for HCI.
 /// Keeps "where index lives under workspace root" decisions out of UI and orchestration code.
 /// </summary>
+[ComputingUnit("policy-hybrid-index-path")]
 public static class HybridIndexIndexDirectoryRelative
 {
     public static string ResolveOrDefault(string? configuredRelativeDir)

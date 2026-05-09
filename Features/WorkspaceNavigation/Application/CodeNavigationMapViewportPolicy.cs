@@ -1,8 +1,10 @@
 #nullable enable
+using CascadeIDE.Contracts;
 
 namespace CascadeIDE.Features.WorkspaceNavigation.Application;
 
 /// <summary>Пороги ширины области мини-карты на PFD (колбэк ширины viewport).</summary>
+[ComputingUnit("policy-code-nav-viewport")]
 public static class CodeNavigationMapViewportPolicy
 {
     public const double IgnoreBelowWidth = 40;

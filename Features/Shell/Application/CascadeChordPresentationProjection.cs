@@ -1,10 +1,12 @@
 using System.Text;
+using CascadeIDE.Contracts;
 using CascadeIDE.Models.Shell;
 using CascadeIDE.Services;
 
 namespace CascadeIDE.Features.Shell.Application;
 
 /// <summary>Чистая логика текста и фильтрации CascadeChord (ADR 0060) без состояния VM.</summary>
+[ComputingUnit("presentation-cascade-chord")]
 public static class CascadeChordPresentationProjection
 {
     public static string NormalizeMelodyInput(string? s)

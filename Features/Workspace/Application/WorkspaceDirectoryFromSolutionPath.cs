@@ -1,8 +1,10 @@
+using CascadeIDE.Contracts;
 using CascadeIDE.Models;
 
 namespace CascadeIDE.Features.Workspace.Application;
 
 /// <summary>Каталог workspace по пути к файлу решения (как для git/индекса).</summary>
+[ComputingUnit("paths-workspace")]
 public static class WorkspaceDirectoryFromSolutionPath
 {
     public static string Resolve(string? solutionPath)

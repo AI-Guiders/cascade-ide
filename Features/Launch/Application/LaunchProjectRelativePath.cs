@@ -1,9 +1,11 @@
 using System.Diagnostics.CodeAnalysis;
+using CascadeIDE.Contracts;
 using CascadeIDE.Models;
 
 namespace CascadeIDE.Features.Launch.Application;
 
 /// <summary>Путь к .csproj относительно корня каталога решения.</summary>
+[ComputingUnit("paths-launch")]
 public static class LaunchProjectRelativePath
 {
     public static bool TryGetRelativeToSolutionDirectory(

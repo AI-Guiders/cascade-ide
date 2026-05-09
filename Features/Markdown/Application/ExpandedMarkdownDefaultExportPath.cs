@@ -1,7 +1,9 @@
+using CascadeIDE.Contracts;
 using CascadeIDE.Models;
 
 namespace CascadeIDE.Features.Markdown.Application;
 
+[ComputingUnit("paths-markdown")]
 public static class ExpandedMarkdownDefaultExportPath
 {
     public static string Resolve(string sourcePath)
