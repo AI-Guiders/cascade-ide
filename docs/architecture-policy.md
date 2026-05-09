@@ -9,6 +9,12 @@
 
 ---
 
+## Рекомендуемая точка входа (как устроено сейчас)
+
+- **Текущая архитектура (срез v1):** [`architecture/current-architecture-v1.md`](architecture/current-architecture-v1.md)
+- **Как читать ADR по темам:** [`architecture/adr-map-v1.md`](architecture/adr-map-v1.md)
+- **Эталон UI Flight (layout + имена регионов):** [`ux/cascade-ide-ui-layout-v1.md`](ux/cascade-ide-ui-layout-v1.md)
+
 ## Цель
 
 Сохранить скорость разработки одного десктопного приложения (Avalonia + MVVM) при явных границах между UI, сценариями и внешним миром; по отладке — единый слой для человека и агента (см. [debug-human-agent-parity-v1.md](debug-human-agent-parity-v1.md) и [ADR 0002](adr/0002-debug-human-agent-parity.md)).

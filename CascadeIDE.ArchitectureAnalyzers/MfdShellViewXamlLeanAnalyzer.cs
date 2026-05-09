@@ -17,7 +17,7 @@ public sealed class MfdShellViewXamlLeanAnalyzer : DiagnosticAnalyzer
     public const string ShellViewFileName = "MfdShellView.axaml";
     public const string PageStackFileName = "MfdShellPageStack.axaml";
 
-    /// <summary>Только EICAS + <c>BottomPanelShell</c> + <c>MfdShellPageStack</c>.</summary>
+    /// <summary>Только EICAS + <c>MfdContourStackHost</c> + <c>MfdShellPageStack</c>.</summary>
     public const int MaxLineCountMfdShellView = 48;
 
     /// <summary>Конвертер + набор <c>Border</c>+страница; растёт с числом Mfd-страниц.</summary>

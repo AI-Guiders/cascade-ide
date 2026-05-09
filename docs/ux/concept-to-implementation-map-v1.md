@@ -5,7 +5,7 @@ Scope: **CascadeIDE UI concepts** (Focus/Balanced/Power) mapped to current imple
 - `Views/MainWindow.axaml`
 - `Views/MainWindow.axaml.cs` (+ `MainWindow.PresentationHostWindows.axaml.cs` — вторичные `TopLevel` PFD/MFD)
 - `ViewModels/MainWindowViewModel.cs` (partial-классы)
-- `Views/TaskCockpitView.axaml`, `Views/ChatPanelView.axaml`, `Views/SolutionExplorerView.axaml`, `Views/IdeHealthStripView.axaml`, `Views/BottomPanelView.axaml`
+- `Views/TaskCockpitView.axaml`, `Views/ChatPanelView.axaml`, `Views/SolutionExplorerView.axaml`, `Views/IdeHealthStripView.axaml`, `Views/MfdShellView.axaml` (+ страницы `MfdShellPageStack`; **`BottomPanelView` в Flight нет** — старая топология)
 
 Отдельно [§6](#6-мультиоконность-adr-0017--второй-toplevel-mfd): **ADR 0017** — `presentation`, хосты `PfdHostWindow` / `MfdHostWindow`, топология мониторов.
 
@@ -39,7 +39,7 @@ This map is intended to drive incremental alignment work with clear acceptance c
 | Dominant editor | `Editor` (`AvaloniaEdit`) | `EditorText`, `CurrentFilePath` | ✅ | Inline markdown preview (`InlinePreviewBorder`). |
 | Agent panel (plan / next / confirmation) | `ChatPanelView` rows 0–1, 3 | `FocusPlanItems`, `NextActionSummary`, confirm commands | ✅ | Отдельные карточки в Focus; полный блок «Agent Operations» — в Balanced (`ShowAgentOperationsBlock`). |
 | Bottom status pills (Build/Test/Debug/Git) | `IdeHealthStripView` (`UiModeFamilyNe` + `Power`) | `IdeHealthBuildText`, `IdeHealthTestsText`, `IdeHealthDebugText`, `WorkspaceHealthGitText` (хром) | ✅ | Компактная полоса под редактором, когда семья **не** Power (Focus/Balanced/AgentChat/Debug и т.д.). |
-| Док инструментирования (События / Тесты / Отладка) | `BottomPanelView` tabs | `ShowInstrumentationTabs`, `IsInstrumentationDockVisible` | ✅ | В Focus доступны при включённом доке (меню «Док инструментирования»); детали — вкладки, сводка — полоса IDE Health. |
+| Док инструментирования (События / Тесты / Отладка) | страницы MFD в `MfdShellPageStack` (`EventsMfdPageView`, `TestsMfdPageView`, `DebugStackMfdPageView`, …) | `ShowInstrumentationTabs`, `IsInstrumentationDockVisible` | ✅ | В Focus доступны при включённом доке (меню «Док инструментирования»); сводка — полоса IDE Health. |
 | Карточка Safety L1–L3 | `ChatPanelView` row 5 (`modeCard` / Power: `safetyLevelIsland`) | `ShowSafetyControls`, `SetSafetyL*Command` | ✅ | Focus/Balanced — компактные кнопки; Power — отдельная панель-док, объёмные L1–L3 с тенью. |
 
 ---
@@ -68,9 +68,9 @@ This map is intended to drive incremental alignment work with clear acceptance c
 | Task queue list | `SolutionExplorerView` (Power) | `PowerTaskQueueItems` | 🟨 | Заполняется при появлении очереди от агента. |
 | Window title | `MainWindow` `Title` | `WindowTitle` | ✅ | |
 | **Panel headers** (полоса + разделитель + ⋯) | `Views/PanelChromeHeader.axaml`, стили в `App.axaml` | `panel_chrome` в JSON темы | 🟨 | Меню по ⋯: заглушка + «Копировать заголовок»; `UppercaseTitle` для коротких меток. Glow / декоративные дуги — вне scope. |
-| **Рамки рабочей области** (колонки, вертикальные сплиттеры, шов с нижней панелью, карточки `modeCard`) | `CascadeTheme.WorkspacePanelBorderBrush` в `App.axaml`; `MainWindow`, `SolutionExplorerView`, `DocumentsDockView`, `ChatPanelView`, `BottomPanelView` | `workspace_layout.border_brush` (если нет — `editor_column.border_brush`) | ✅ | Power: чуть ярче кайма колонок (`#00C8E8`) vs внутренние линии редактора. |
+| **Рамки рабочей области** (три колонки, сплиттеры, шов зон, карточки `modeCard`) | `CascadeTheme.WorkspacePanelBorderBrush` в `App.axaml`; `MainWindow`, `SolutionExplorerView`, `DocumentsDockView`, `ChatPanelView`, `MfdShellView` | `workspace_layout.border_brush` (если нет — `editor_column.border_brush`) | ✅ | Power: чуть ярче кайма колонок (`#00C8E8`) vs внутренние линии редактора. |
 | **Power: IDE Health в полосе хрома** | `WorkspaceChromeBandView`: `IdeHealthStripView` на всю ширину контейнера (раньше планировался `Grid.ColumnSpan` по колонкам main grid — свойство удалено). Чат — одна строка с редактором (`ChatPanelMainGridRowSpan` = 1). | `MainWindowViewModel`, `Capabilities.IdeHealthMainColumnSpan` в TOML режимов (`ide_health_main_column_span`) | ✅ | Ширина сегментов кокпита по-прежнему из capabilities; не через отдельное свойство VM для span главной сетки. |
-| **Power: острова, gutter, градиентные каймы** | `App.axaml`: `PowerEditorIslandFrameBrush`, `PowerChatIslandFrameBrush`, `PowerSolutionIslandFrameBrush`; `DocumentsDockView`, `SolutionExplorerView`, `ChatPanelView` — `Panel` + внутренний `Border` (`#…IslandInner`) с `Classes.power`, `Margin` 6–8 у `UserControl.power`; полоса хрома (IDE Health) — `CornerRadius` 14, усиленный `BoxShadow`; низ — `BottomPanelShell` скругление сверху в Power | — | ✅ | Focus/Balanced: без градиентных рамок, скругления ~10px у колонок. |
+| **Power: острова, gutter, градиентные каймы** | `App.axaml`: `PowerEditorIslandFrameBrush`, `PowerChatIslandFrameBrush`, `PowerSolutionIslandFrameBrush`; `DocumentsDockView`, `SolutionExplorerView`, `ChatPanelView` — `Panel` + внутренний `Border` (`#…IslandInner`) с `Classes.power`, `Margin` 6–8 у `UserControl.power`; полоса хрома (IDE Health) — `CornerRadius` 14, усиленный `BoxShadow`; низ — `MfdContourStackHost` скругление сверху в Power | — | ✅ | Focus/Balanced: без градиентных рамок, скругления ~10px у колонок. |
 
 ### 4.1) Визуальный хром Power: концепт (PNG) vs текущий XAML
 

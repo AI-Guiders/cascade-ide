@@ -128,13 +128,13 @@
 
 - Состояние и команды вкладки **Git** — в **`Features/Git/GitPanelViewModel`**. Зависимости: `IGitCommandRunner`, `GetWorkspacePath`, `IIdeMcpActions`, `LoadSolution`, `RefreshGitSummaryAsync`.
 - `MainWindowViewModel`: свойство **`GitPanel`**, видимость вкладки (`IsGitPanelVisible`) и настройки остаются на главном VM; при смене `SolutionPath` вызываются `GitPanel.RefreshRepositoryFlagAsync()` и при открытой вкладке — `RefreshGitPanelAsync()`.
-- **`BottomPanelView`:** вкладка Git — внутренний `Grid` с `DataContext="{Binding GitPanel}"`.
+- **Страница Git в MFD** (`MfdShellPageStack`): контент страницы с `DataContext="{Binding GitPanel}"` (нет отдельного `BottomPanelView` во Flight).
 
 ### Фаза 2 — Build output и Terminal (**сделано**)
 
 - **`Features/Build/BuildOutputPanelViewModel`** — текст вывода сборки и связанных операций (`BuildOutput`). Видимость вкладки и команды сборки остаются в `MainWindowViewModel`; он по-прежнему заполняет `BuildOutputPanel.BuildOutput` (как для Git — оркестрация снаружи).
 - **`Features/Terminal/TerminalPanelViewModel`** — `TerminalOutput`, `TerminalInput`, `RunTerminalCommandCommand` (рабочий каталог — из пути решения через замыкание).
-- **`BottomPanelView`:** вкладки Terminal и Build output с `DataContext="{Binding TerminalPanel}"` и `DataContext="{Binding BuildOutputPanel}"`; телеметрия Power на вкладке Terminal остаётся на `MainWindowViewModel`.
+- **Страницы Terminal и Build output в колонке MFD** (`MfdShellPageStack`): `DataContext="{Binding TerminalPanel}"` и `DataContext="{Binding BuildOutputPanel}"`; телеметрия Power на странице Terminal остаётся на `MainWindowViewModel`. *(В старой топологии использовались привязки в `BottomPanelView`.)*
 
 ### Фаза 3 — Chat (**сделано**)
 
@@ -230,7 +230,7 @@
 
 - **v1** — карта срезов и фазы 0–4.  
 - **v1.1** — фаза 1 (Git-панель) отмечена как выполненная.
-- **v1.2** — фаза 2 (Build output / Terminal как отдельные VM + привязки в `BottomPanelView`).
+- **v1.2** — фаза 2 (Build output / Terminal как отдельные VM + привязки во Flight — страницы `MfdShellPageStack`; исторически упоминался `BottomPanelView`).
 - **v1.3** — фаза 3 (`ChatPanelViewModel`, привязки в `ChatPanelView` + `MainWindow.axaml.cs`).
 - **v1.4** — фаза 4 (`InstrumentationPanelViewModel`, модели трассы/отладки в отдельных файлах, прокси на главном VM).
 - **v1.5** — инструментирование без прокси: разметка с `DataContext` на `InstrumentationPanel`, правила миграции уточнены.
@@ -265,3 +265,4 @@
 - **v1.34** — Wave UI clusters: **`MainWindowViewModel.ShellState.AutonomousAgentStripe`** (полоса автономного агента + тесты/LOC для IDE Health).
 - **v1.35** — Терминология раскладки: **три зоны** (PFD · Forward · MFD); терминал/сборка/Git — **вторичный контур колонки MFD**, не отдельная «нижняя панель». Уточнены xmldoc `ShellState` и флаги страниц MFD.
 - **v1.36** — Переименование: `IsBottomPanelVisible` → **`IsMfdContourContentVisible`** (флаги контента стека вторичного контура MFD).
+- **v1.37** — Разметка и снимки: `Border#BottomPanelShell` → **`MfdContourStackHost`** (`MfdShellView.axaml`); ключ **`layout_regions`** в MCP/DeepSnapshot обновлён; доки без отсылки к вымышленной «нижней панели» главного окна во Flight.

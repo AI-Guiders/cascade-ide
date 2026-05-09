@@ -43,7 +43,7 @@ internal static class UiThemeDeepSnapshot
         "CascadeTheme.PowerSolutionIslandFrameBrush"
     ];
 
-    /// <summary>Имена из разметки — острова, доки, чат, нижняя панель, бейдж режима.</summary>
+    /// <summary>Имена из разметки — острова, доки, чат, хост стека MFD, бейдж режима.</summary>
     private static readonly string[] LayoutRegionNames =
     [
         "RootWindow",
@@ -53,7 +53,7 @@ internal static class UiThemeDeepSnapshot
         "SolutionIslandInner",
         "ChatIslandInner",
         "ChatPanelRoot",
-        "BottomPanelShell",
+        "MfdContourStackHost",
         "ModeBadge",
         "UiModeBloomOverlay",
         "ChatInputBox",

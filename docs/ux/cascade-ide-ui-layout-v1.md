@@ -70,7 +70,7 @@
 Сверху вниз внутри колонки MFD:
 
 1. **`WorkspaceChromeBandView`** — полоса в духе EICAS / IDE Health (видимость и содержимое — по TOML и VM).
-2. **`BottomPanelShell`** — контейнер со **`MfdShellPageStack`**: одна **активная страница** (`CurrentMfdShellPage`), например:
+2. **`MfdContourStackHost`** — `Border`-хост со **`MfdShellPageStack`**: одна **активная страница** (`CurrentMfdShellPage`), например:
    - Workspace Health (выделенная страница), обозреватель в MFD, related files, превью Markdown, чат, настройки AI, **терминал**, **журнал сборки**, Problems, **Git**, события, тесты, гипотезы, стек отладки, …
 
 Переключение страниц — из VM/команд/меню (не отдельный `TabControl` нижней панели **главного** окна: его в текущем `MainWindow` **нет**).

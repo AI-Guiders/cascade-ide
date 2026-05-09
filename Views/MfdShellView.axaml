@@ -7,15 +7,15 @@
              Classes.power="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Power}"
              x:DataType="vm:MainWindowViewModel">
     <UserControl.Styles>
-        <Style Selector="Border#BottomPanelShell">
+        <Style Selector="Border#MfdContourStackHost">
             <Setter Property="CornerRadius" Value="0"/>
         </Style>
-        <Style Selector="views|MfdShellView.power Border#BottomPanelShell">
+        <Style Selector="views|MfdShellView.power Border#MfdContourStackHost">
             <Setter Property="CornerRadius" Value="12,12,0,0"/>
             <Setter Property="BoxShadow" Value="0 -8 32 0 #4000C8E8, 0 -2 20 0 #20000000"/>
         </Style>
     </UserControl.Styles>
-    <!-- Вторичный контур: полоса EICAS/Workspace Health + каркас нижней панели. Страницы — MfdShellPageStack. -->
+    <!-- Вторичный контур MFD: полоса EICAS/Workspace Health + хост стека страниц (MfdContourStackHost → MfdShellPageStack). -->
     <Grid MinHeight="0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -23,7 +23,7 @@
         </Grid.RowDefinitions>
         <views:WorkspaceChromeBandView Grid.Row="0"
                                        IsVisible="{Binding ShowWorkspaceChromeBand}"/>
-        <Border x:Name="BottomPanelShell"
+        <Border x:Name="MfdContourStackHost"
                 Grid.Row="1"
                 MinHeight="120"
                 BorderBrush="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"

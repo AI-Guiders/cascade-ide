@@ -327,7 +327,7 @@ public static class UiThemeSnapshot
             $"linear({sp.X:R},{sp.Y:R}->{ep.X:R},{ep.Y:R};{string.Join(",", stops)})");
     }
 
-    /// <summary>Цвета панели «Вывод сборки» (фон журнала и текст — как в <c>BottomPanelView</c>: <c>TerminalForeground</c>).</summary>
+    /// <summary>Цвета страницы «Вывод сборки» в MFD (фон журнала и текст в духе <c>TerminalForeground</c> хоста стека).</summary>
     public static (string background, string foreground) GetBuildOutputTheme()
     {
         const string defBg = "#F8F8F8";
