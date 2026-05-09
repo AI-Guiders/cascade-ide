@@ -88,4 +88,15 @@ public static class IdeMcpGitOrchestrator
 
     public static string NormalizeAction(string? action, string defaultAction) =>
         string.IsNullOrWhiteSpace(action) ? defaultAction : action.Trim().ToLowerInvariant();
+
+    /// <summary>Запуск MCP-git сессии или JSON-ошибки, если workspace недоступен.</summary>
+    public static Task<string> RunWithWorkspaceSession(
+        IGitCommandRunner runner,
+        string? workspacePath,
+        Func<IdeMcpGitWorkspaceSession, Task<string>> action)
+    {
+        if (!IdeMcpGitWorkspaceSession.TryCreate(runner, workspacePath, out var session, out var err))
+            return Task.FromResult(err);
+        return action(session);
+    }
 }
