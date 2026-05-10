@@ -75,7 +75,7 @@
 | `MainWindowViewModel.PresentationLayoutAuthority.cs` | 14 | Запись intent видимости панелей (семантика «хочу»); фактическая поверхность — `MainWindowShellSurfaceCompositor`. |
 | `MainWindowViewModel.RelayCommands.cs` | 285 | Relay-команды. |
 | `MainWindowViewModel.RelayCommands.Debug.cs` | 144 | Relay: отладка. |
-| `MainWindowViewModel.SettingsReactive.cs` | 239 | Реакции на изменение полей настроек и ключей API: диск, автономный агент, панели. |
+| `MainWindowViewModel.SettingsReactive.cs` | 248 | Реакции на изменение полей настроек и ключей API: диск, автономный агент, панели. |
 | `MainWindowViewModel.ShellState.AiProviders.cs` | 58 | Часть `ShellState`: режим ИИ и облачные ключи привязаны к нижнему приложению/чату. |
 | `MainWindowViewModel.ShellState.AutonomousAgentStripe.cs` | 63 | Часть `ShellState`: полоса/карточки автономной задачи агента, безопасности, LOC и сводки тестов для IDE Health. |
 | `MainWindowViewModel.ShellState.ChatAndSessionConfig.cs` | 26 | Часть `ShellState`: ввод чата и конфиг MCP/ACP для автономной сессии. |
@@ -299,3 +299,4 @@
 - **v1.41b** — Палитра команд: **`IdeCommandPaletteFilterOrchestrator`** / **`IdeCommandPaletteExecutionOrchestrator`** + **`CommandPaletteGoToAsyncHandle`** (`Features/Search/Application`) — фильтрация (каталог / melody / go-to + ripgrep) и исполнение выбора вне **`MainWindowViewModel.CommandPalette`**.
 - **v1.41c** — CascadeChord (ADR 0060): **`CascadeChordIntentSession`** (`Features/Shell/Application`) — фаза, хвост, таймер и разбор клавиш; **`MainWindowViewModel.CascadeChord`** — привязки и туннель к сессии.
 - **v1.41d** — Presentation: **`MainWindowPresentationSurfaceProjection.ComposeHostSurfaceFrame`** — сборка **`MainWindowHostSurfaceFrame`** по **`IMainWindowHostSurfaceInput`** и нормализованному UI-режиму вне **`MainWindowViewModel.Presentation`**.
+- **v1.41e** — Настройки: **`ShellSettingsReactiveSideEffects`** (`Features/Settings/Application`) — длинные цепочки **внешний MCP / autonomous**, **AI mode / cloud provider**, **HCI index dir + scope** вместо тел в **`MainWindowViewModel.SettingsReactive`**.
