@@ -237,6 +237,15 @@
     <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.cs">
       <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
     </Compile>
+    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.DialogsApp.cs">
+      <DependentUpon>IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.cs</DependentUpon>
+    </Compile>
+    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.PanelsLayout.cs">
+      <DependentUpon>IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.cs</DependentUpon>
+    </Compile>
+    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.ThemeLanguage.cs">
+      <DependentUpon>IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.Chrome.OutputFocus.cs">
@@ -252,6 +261,12 @@
     <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.DapDebug.cs">
       <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
     </Compile>
+    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.DapDebug.LaunchAttach.cs">
+      <DependentUpon>IdeMcpCommandExecutor.Handlers.DapDebug.cs</DependentUpon>
+    </Compile>
+    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.DapDebug.Stepping.cs">
+      <DependentUpon>IdeMcpCommandExecutor.Handlers.DapDebug.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.DebuggerUi.cs">
@@ -259,7 +274,16 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.Editor.cs">
+    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.Editor.EditNavigation.cs">
+      <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
+    </Compile>
+    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.Editor.FilesAndChat.cs">
+      <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
+    </Compile>
+    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.Editor.StateContent.cs">
+      <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
+    </Compile>
+    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.Editor.ToolCatalog.cs">
       <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
     </Compile>
   </ItemGroup>
