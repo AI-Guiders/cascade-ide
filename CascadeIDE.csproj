@@ -362,6 +362,11 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Update="ViewModels\MainWindowViewModel.ShellConstruction.cs">
+      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Update="ViewModels\MainWindowViewModel.ShellState.cs">
       <DependentUpon>MainWindowViewModel.cs</DependentUpon>
     </Compile>

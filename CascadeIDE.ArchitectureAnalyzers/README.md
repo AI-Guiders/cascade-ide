@@ -8,7 +8,7 @@ Roslyn-анализаторы для границ [ADR 0036](../docs/adr/0036-cd
 |----|---------|--------|
 | **CASCOPE001** | Error | В `Cockpit/Channels`, `Cockpit/Cds`, `Cockpit/Composition` запрещены ссылки на типы Avalonia UI (включая `using Avalonia…` и типы в сигнатурах). `Cockpit/Surface` и `Views` не затрагиваются. |
 | **CASCOPE002** | Error | В тех же трёх папках запрещён `using CascadeIDE.Features.UiChrome` (семантика зон для MCP — на границе Surface). |
-| **CASCOPE003** | Error | Прямые присваивания `IsPfdRegionExpanded` / `IsMfdRegionExpanded` (и полям `_is*`) у `MainWindowViewModel` только в белом списке файлов (`PresentationLayoutAuthority`, relay-команды, ctor, `ShellState`, `UiGitWorkspace`); иначе — дрейф от ADR 0046 (используй `Apply*` / relay). |
+| **CASCOPE003** | Error | Прямые присваивания `IsPfdRegionExpanded` / `IsMfdRegionExpanded` (и полям `_is*`) у `MainWindowViewModel` только в белом списке файлов (`PresentationLayoutAuthority`, relay-команды, ctor / `ShellConstruction`, `ShellState`, `UiGitWorkspace`); иначе — дрейф от ADR 0046 (используй `Apply*` / relay). |
 | **CASCOPE011** | Error | В `Features/UiChrome/` запрещён `using CascadeIDE.Cockpit.PrimitivesKit` (ADR 0066: хром IDE отдельно от отрисовки deck/кабины). |
 | **CASCOPE012** | Error | В `Cockpit/PrimitivesKit/` запрещён `using CascadeIDE.Features.UiChrome` (ADR 0066: примитивы кабины не тянут зоны/хром). |
 | **CASCOPE013** | Error | В `IdeDisplay/` запрещён `using CascadeIDE.Cockpit…` и типы из `CascadeIDE.Cockpit` в сигнатурах членов (ADR 0079: IDS ортогонален CDS/кабине). |

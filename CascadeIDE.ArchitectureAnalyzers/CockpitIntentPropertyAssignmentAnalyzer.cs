@@ -114,6 +114,7 @@ public sealed class CockpitIntentPropertyAssignmentAnalyzer : DiagnosticAnalyzer
         return EndsWithFile(p, "MainWindowViewModel.PresentationLayoutAuthority.cs")
             || EndsWithFile(p, "MainWindowViewModel.RelayCommands.cs")
             || EndsWithFile(p, "MainWindowViewModel.cs")
+            || EndsWithFile(p, "MainWindowViewModel.ShellConstruction.cs")
             || EndsWithFile(p, "MainWindowViewModel.ShellState.cs")
             || EndsWithFile(p, "MainWindowViewModel.UiGitWorkspace.cs");
     }
