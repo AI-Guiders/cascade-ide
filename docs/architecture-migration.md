@@ -17,7 +17,7 @@
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:BEGIN -->
 
-`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~7.1k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~5.9k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.1k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
+`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~7k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~5.9k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.1k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:END -->
 
@@ -83,7 +83,7 @@
 | `MainWindowViewModel.ShellState.ModelPullMarkdown.cs` | 20 | Часть `MainWindowViewModel`: pull модели и превью Markdown / Kroki. |
 | `MainWindowViewModel.ShellState.RegionAndContour.cs` | 63 | Часть `MainWindowViewModel`: регионы MainGrid и видимость страниц вторичного контура MFD. |
 | `MainWindowViewModel.ShellState.UiSessionChrome.cs` | 68 | Часть `MainWindowViewModel`: режим UI, прогресс сборки на полосе, палитра, снимок раскладки. |
-| `MainWindowViewModel.SolutionBuild.cs` | 170 | Сборка, `BuildOutputPanel`. |
+| `MainWindowViewModel.SolutionBuild.cs` | 132 | Сборка, `BuildOutputPanel`. |
 | `MainWindowViewModel.StartupProject.cs` | 229 | Стартовый проект. |
 | `MainWindowViewModel.UiGitWorkspace.cs` | 141 | Git + workspace UI. |
 | `MainWindowViewModel.ViewBridge.cs` | 62 | Колбэки и провайдеры, которые View подставляет в главный VM (диалоги, UI automation). |
@@ -294,3 +294,4 @@
 - **v1.40i** — MCP UI automation: **`IdeMcpUiAutomationOrchestrator`** — **`TryGetRemoveBreakpointNormalizedPath`**, **`ShouldSkipToggleBreakpointInEditor`**, **`InvokeStringResultOnUiAsync`**, **`EditChatAssistantMessageOnUiAsync`**; **`MainWindowViewModel.IdeMcpActions.UiAutomation`** короче.
 - **v1.40j** — палитра команд: типы строки списка **`IdeCommandPaletteRowKind`** / **`IdeCommandPaletteRowViewModel`** вынесены в **`ViewModels/IdeCommandPaletteRowViewModel.cs`**; **`MainWindowViewModel.CommandPalette.cs`** остаётся логикой фильтрации и исполнения.
 - **v1.40k** — Launch / MCP: **`DebugLaunchByProfileMcpOrchestrator`** (`Features/Launch/Application`) — сценарий **`debug_launch`** по `target_path` или профилю без длинного тела в **`MainWindowViewModel.StartupProject`**; HCI: **`HybridIndexHisPresentationProjection.LampItem`** + тесты, **`MainWindowViewModel.HybridIndex`** — однострочный геттер.
+- **v1.40l** — Workspace: **`SolutionLoadCrashLog`** (`Features/Workspace/Application`) — запись **`LoadSolution`** crash в **`.cascade-ide/crash-log.txt`** вне **`MainWindowViewModel.SolutionBuild`**; штамп UTC через **`InvariantCulture`**.
