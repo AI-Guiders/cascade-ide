@@ -1,3 +1,4 @@
+using CascadeIDE.Features.Settings.Application;
 using CascadeIDE.Features.Shell.Application;
 using CascadeIDE.Features.HybridIndex.Application;
 using CascadeIDE.Models;
@@ -19,19 +20,17 @@ public partial class MainWindowViewModel
         SaveSettingsIfChanged();
     }
 
-    partial void OnExternalMcpServersJsonChanged(string value)
-    {
-        _settings.Mcp.ExternalServersJson = ShellSettingsOrchestrator.NormalizeExternalMcpServersJson(value);
-
-        // External MCP connectivity affects autonomous tool list/calls.
-        Autonomous.CancelForHostReconfiguration();
-        _mcpClientService = new Services.McpClientService(Services.McpExternalServersJsonResolver.ResolveEffectiveJson(_settings));
-        _autonomousAgentService = CreateAutonomousAgentService(_mcpClientService);
-        Autonomous.ReplaceAgentService(_autonomousAgentService);
-        ChatPanel.DisposeCursorAcpSession();
-
-        SaveSettingsIfChanged();
-    }
+    partial void OnExternalMcpServersJsonChanged(string value) =>
+        ShellSettingsReactiveSideEffects.ApplyExternalMcpServersJson(
+            ShellSettingsOrchestrator.NormalizeExternalMcpServersJson(value),
+            _settings,
+            Autonomous.CancelForHostReconfiguration,
+            CreateAutonomousAgentService,
+            m => _mcpClientService = m,
+            a => _autonomousAgentService = a,
+            Autonomous.ReplaceAgentService,
+            ChatPanel.DisposeCursorAcpSession,
+            SaveSettingsIfChanged);
 
     partial void OnAcpAutoInjectIdeMcpChanged(bool value)
     {
@@ -107,12 +106,14 @@ public partial class MainWindowViewModel
             return;
         }
 
-        _settings.Ai.Mode = n;
-        OnPropertyChanged(nameof(ActiveAiProvider));
-        SaveSettingsIfChanged();
-        ChatPanel.DisposeCursorAcpSession();
-        ChatPanel.RefreshSendChatCommandState();
-        ApplyHybridCodebaseIndexOrchestrationForCurrentSolution(pokeWhenAutoReindex: false);
+        ShellSettingsReactiveSideEffects.ApplyAiModePersisted(
+            n,
+            _settings,
+            () => OnPropertyChanged(nameof(ActiveAiProvider)),
+            SaveSettingsIfChanged,
+            ChatPanel.DisposeCursorAcpSession,
+            ChatPanel.RefreshSendChatCommandState,
+            () => ApplyHybridCodebaseIndexOrchestrationForCurrentSolution(pokeWhenAutoReindex: false));
     }
 
     partial void OnCloudActiveProviderChanged(string value)
@@ -124,11 +125,13 @@ public partial class MainWindowViewModel
             return;
         }
 
-        _settings.Ai.Cloud.ActiveProvider = n;
-        OnPropertyChanged(nameof(ActiveAiProvider));
-        SaveSettingsIfChanged();
-        ChatPanel.DisposeCursorAcpSession();
-        ChatPanel.RefreshSendChatCommandState();
+        ShellSettingsReactiveSideEffects.ApplyCloudActiveProviderPersisted(
+            n,
+            _settings,
+            () => OnPropertyChanged(nameof(ActiveAiProvider)),
+            SaveSettingsIfChanged,
+            ChatPanel.DisposeCursorAcpSession,
+            ChatPanel.RefreshSendChatCommandState);
     }
 
     partial void OnAnthropicApiKeyChanged(string value)
@@ -219,11 +222,13 @@ public partial class MainWindowViewModel
             return;
         }
 
-        _settings.HybridIndex.IndexDir = normalized;
-        _hybridIndex.SetIndexDirectoryRelative(HybridIndexIndexDirectoryRelative.ResolveOrDefault(_settings.HybridIndex.IndexDir));
-        ApplyHybridCodebaseIndexOrchestrationForCurrentSolution(pokeWhenAutoReindex: false);
-        SaveSettingsIfChanged();
-        RaiseHybridIndexPresentationProperties();
+        ShellSettingsReactiveSideEffects.ApplyHybridIndexDirPersisted(
+            normalized,
+            _settings,
+            _hybridIndex,
+            () => ApplyHybridCodebaseIndexOrchestrationForCurrentSolution(pokeWhenAutoReindex: false),
+            SaveSettingsIfChanged,
+            RaiseHybridIndexPresentationProperties);
     }
 
     partial void OnHciDebounceMsChanged(int value)
@@ -262,10 +267,12 @@ public partial class MainWindowViewModel
             return;
         }
 
-        _settings.HybridIndex.ScopeMode = n;
-        ApplyHybridCodebaseIndexOrchestrationForCurrentSolution(pokeWhenAutoReindex: false);
-        SaveSettingsIfChanged();
-        RaiseHybridIndexPresentationProperties();
+        ShellSettingsReactiveSideEffects.ApplyHybridIndexScopeModePersisted(
+            n,
+            _settings,
+            () => ApplyHybridCodebaseIndexOrchestrationForCurrentSolution(pokeWhenAutoReindex: false),
+            SaveSettingsIfChanged,
+            RaiseHybridIndexPresentationProperties);
     }
 
     partial void OnHciPauseWhenMcpStdioHostChanged(bool value)
