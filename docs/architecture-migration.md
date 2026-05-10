@@ -47,7 +47,7 @@
 | `MainWindowViewModel.EditorStabilizedInput.cs` | 64 | Один hi-freq throttler на главное окно (ADR 0103): не N фоновых consumer на N вкладок. Стабилизированный выход обрабатывается только если `FilePath` совпадает с `CurrentFilePath` (устаревшие дельты после смены вкладки отбрасываются). |
 | `MainWindowViewModel.Eicas.cs` | 17 | Канал EICAS / CAS — отдельно от полосы телеметрии контура работы (ADR 0021, вариант A). |
 | `MainWindowViewModel.EnvironmentReadiness.cs` | 66 | Снимок «готовность окружения» (ADR 0023), отдельно от Workspace Health. |
-| `MainWindowViewModel.HybridIndex.cs` | 146 | Hybrid Codebase Index (HCI): status projection and UI commands for the HIS (MFD) page. |
+| `MainWindowViewModel.HybridIndex.cs` | 143 | Hybrid Codebase Index (HCI): status projection and UI commands for the HIS (MFD) page. |
 | `MainWindowViewModel.HybridIndexSettings.cs` | 18 | Привязки окна настроек к `HybridIndex` (ADR 0106). |
 | `MainWindowViewModel.IdeHealth.cs` | 95 | Связка с Workspace Health. |
 | `MainWindowViewModel.IdeMcpActions.AgentNotes.cs` | 44 | Реализация `IIdeMcpActions`: agent-notes. |
@@ -84,7 +84,7 @@
 | `MainWindowViewModel.ShellState.RegionAndContour.cs` | 63 | Часть `MainWindowViewModel`: регионы MainGrid и видимость страниц вторичного контура MFD. |
 | `MainWindowViewModel.ShellState.UiSessionChrome.cs` | 68 | Часть `MainWindowViewModel`: режим UI, прогресс сборки на полосе, палитра, снимок раскладки. |
 | `MainWindowViewModel.SolutionBuild.cs` | 170 | Сборка, `BuildOutputPanel`. |
-| `MainWindowViewModel.StartupProject.cs` | 232 | Стартовый проект. |
+| `MainWindowViewModel.StartupProject.cs` | 229 | Стартовый проект. |
 | `MainWindowViewModel.UiGitWorkspace.cs` | 141 | Git + workspace UI. |
 | `MainWindowViewModel.ViewBridge.cs` | 62 | Колбэки и провайдеры, которые View подставляет в главный VM (диалоги, UI automation). |
 | `MainWindowViewModel.WorkspaceNavigationMap.cs` | 137 | Слот Pfd: отображение карты намерений / `CodeNavigationMapSubgraphDocument` (те же данные, что JSON MCP). Граф подграфа — не синоним `instrument_id`, см. ADR 0065. По доменам: карта намерений (в т.ч. control flow) — CodeNavigation; зависимости файлов — WorkspaceNavigation; submodules — дерево/GitMap (ADR 0062). |
