@@ -105,6 +105,13 @@ function Get-FileLevelXmlSummary([string] $path, [string] $classBaseName) {
     while ($i -ge 0 -and [string]::IsNullOrWhiteSpace($lines[$i])) {
         $i--
     }
+    # Атрибуты между </summary> и объявлением класса — не XML; пропускаем однострочные [ ... ] над partial.
+    while ($i -ge 0 -and $lines[$i] -match '^\s*\[') {
+        $i--
+        while ($i -ge 0 -and [string]::IsNullOrWhiteSpace($lines[$i])) {
+            $i--
+        }
+    }
     $docLines = [System.Collections.Generic.List[string]]::new()
     while ($i -ge 0 -and $lines[$i] -match '^\s*///') {
         $docLines.Insert(0, $lines[$i])

@@ -17,7 +17,7 @@
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:BEGIN -->
 
-`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~7.5k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~6.4k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.1k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
+`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~7.3k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~6.1k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.1k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:END -->
 
@@ -32,9 +32,9 @@
 | `MainWindowViewModel.AutonomousAgent.cs` | 113 | Автономный агент (Power). |
 | `MainWindowViewModel.Breakpoints.cs` | 97 | Брейкпоинты: `BreakpointsFileService` / `BreakpointsStorage` — один источник (ADR 0002). |
 | `MainWindowViewModel.Capabilities.cs` | 23 | Реестр capabilities. |
-| `MainWindowViewModel.CascadeChord.cs` | 364 | Аккордный слой ADR 0060: корень `cascade_chord` из hotkeys.toml (по умолчанию Ctrl+K), затем тот же хвост мелодии, что после `c:` в палитре (см. `IntentMelodyAliases`), без префикса `c:` и без Enter — если alias однозначен (например `so`). При конфликте префиксов (например `gs` vs `gsu`) точное совпадение после полного ввода или по клавише Enter. |
-| `MainWindowViewModel.CommandPalette.cs` | 507 | Палитра команд. |
-| `MainWindowViewModel.cs` | 436 | Главный композитор окна (partial-класс, несколько `MainWindowViewModel*.cs`). Карта файлов и ответственности — `docs/architecture-migration.md`, раздел «Срез MainWindowViewModel». |
+| `MainWindowViewModel.CascadeChord.cs` | 317 | Аккордный слой ADR 0060: корень `cascade_chord` из hotkeys.toml (по умолчанию Ctrl+K), затем тот же хвост мелодии, что после `c:` в палитре (см. `IntentMelodyAliases`), без префикса `c:` и без Enter — если alias однозначен (например `so`). При конфликте префиксов (например `gs` vs `gsu`) точное совпадение после полного ввода или по клавише Enter. |
+| `MainWindowViewModel.CommandPalette.cs` | 478 | Палитра команд. |
+| `MainWindowViewModel.cs` | 438 | Главный композитор окна (partial-класс, несколько `MainWindowViewModel*.cs`). Карта файлов и ответственности — `docs/architecture-migration.md`, раздел «Срез MainWindowViewModel». |
 | `MainWindowViewModel.CSharpLsp.cs` | 120 | Запуск/перезапуск C# LSP. |
 | `MainWindowViewModel.CursorAcp.cs` | 36 | Путь Cursor ACP и предпочитаемая модель. |
 | `MainWindowViewModel.DebugStackUi.cs` | 35 | Выбор кадра в панели «Стек» Mfd: подгрузка Locals для выбранного кадра (DAP). |
@@ -47,26 +47,26 @@
 | `MainWindowViewModel.EditorStabilizedInput.cs` | 64 | Один hi-freq throttler на главное окно (ADR 0103): не N фоновых consumer на N вкладок. Стабилизированный выход обрабатывается только если `FilePath` совпадает с `CurrentFilePath` (устаревшие дельты после смены вкладки отбрасываются). |
 | `MainWindowViewModel.Eicas.cs` | 17 | Канал EICAS / CAS — отдельно от полосы телеметрии контура работы (ADR 0021, вариант A). |
 | `MainWindowViewModel.EnvironmentReadiness.cs` | 66 | Снимок «готовность окружения» (ADR 0023), отдельно от Workspace Health. |
-| `MainWindowViewModel.HybridIndex.cs` | 252 | Hybrid Codebase Index (HCI): status projection and UI commands for the HIS (MFD) page. |
+| `MainWindowViewModel.HybridIndex.cs` | 169 | Hybrid Codebase Index (HCI): status projection and UI commands for the HIS (MFD) page. |
 | `MainWindowViewModel.HybridIndexSettings.cs` | 18 | Привязки окна настроек к `HybridIndex` (ADR 0106). |
 | `MainWindowViewModel.IdeHealth.cs` | 95 | Связка с Workspace Health. |
 | `MainWindowViewModel.IdeMcpActions.AgentNotes.cs` | 44 | Реализация `IIdeMcpActions`: agent-notes. |
 | `MainWindowViewModel.IdeMcpActions.BuildTest.cs` | 172 | MCP: сборка, тесты. |
 | `MainWindowViewModel.IdeMcpActions.DebuggerPanel.cs` | 76 | Панель отладки и снимок DAP (ADR 0002): один `DebugSessionSnapshot`. |
 | `MainWindowViewModel.IdeMcpActions.Editor.cs` | 95 | MCP: редактор. |
-| `MainWindowViewModel.IdeMcpActions.Git.cs` | 48 | MCP: git (`IdeMcpGitWorkspaceSession`). |
+| `MainWindowViewModel.IdeMcpActions.Git.cs` | 42 | MCP: git (`IdeMcpGitWorkspaceSession`). |
 | `MainWindowViewModel.IdeMcpActions.HybridCodebaseIndex.cs` | 103 | MCP / ide_execute_command: Hybrid Codebase Index (имена команд как у внешнего MCP). |
 | `MainWindowViewModel.IdeMcpActions.Navigation.cs` | 61 | MCP: семантическая навигация (ADR 0039). |
 | `MainWindowViewModel.IdeMcpActions.UiAutomation.cs` | 153 | MCP: UI automation. |
-| `MainWindowViewModel.IdeMcpActions.Web.cs` | 10 | Реализация `IIdeMcpActions`: публичный веб-запрос (DuckDuckGo Instant Answer) и загрузка публичного URL. |
-| `MainWindowViewModel.IdeMcpActions.Workspace.cs` | 93 | MCP: workspace. |
+| `MainWindowViewModel.IdeMcpActions.Web.cs` | 11 | Реализация `IIdeMcpActions`: публичный веб-запрос (DuckDuckGo Instant Answer) и загрузка публичного URL. |
+| `MainWindowViewModel.IdeMcpActions.Workspace.cs` | 90 | MCP: workspace. |
 | `MainWindowViewModel.IdeMcpHostLifecycle.cs` | 20 | Жизненный цикл IDE MCP-хоста: `ide_ping`, перезапуск внешних MCP и stdio-сессии Cursor ACP. |
 | `MainWindowViewModel.LaunchProfiles.cs` | 90 | Селектор launch profile, импорт `launchSettings.json` (ADR 0090). |
 | `MainWindowViewModel.LayoutNotifications.cs` | 17 | Инвалидация производных высот `MainGrid` без длинных цепочек `NotifyPropertyChangedFor` в ShellState. |
-| `MainWindowViewModel.MarkdownExport.cs` | 40 | Экспорт Markdown. |
+| `MainWindowViewModel.MarkdownExport.cs` | 31 | Экспорт Markdown. |
 | `MainWindowViewModel.MarkdownLsp.cs` | 103 | Запуск/перезапуск Markdown LSP. |
 | `MainWindowViewModel.McpBreakpointReveal.cs` | 62 | MCP: постановка брейкпоинта с загрузкой решения и показом строки в редакторе. |
-| `MainWindowViewModel.MfdShell.cs` | 88 | Оболочка Mfd: одна активная страница; навигация — команды и палитра. Якорь на экране задаётся presentation (зона Mfd в main и/или окно-хост). |
+| `MainWindowViewModel.MfdShell.cs` | 57 | Оболочка Mfd: одна активная страница; навигация — команды и палитра. Якорь на экране задаётся presentation (зона Mfd в main и/или окно-хост). |
 | `MainWindowViewModel.Presentation.cs` | 276 | Вычисляемые свойства разметки, Workspace Health и видимости панелей (режимы UI). |
 | `MainWindowViewModel.PresentationLayout.CockpitSurfaceSnapshot.cs` | 8 | Сборка `CockpitSurfaceState` главного окна (`Build`). |
 | `MainWindowViewModel.PresentationLayout.cs` | 91 | ADR 0017: строка `presentation` и второй `TopLevel` — `MfdHostWindow` с полным вторичным контуром (п. 8). |
@@ -83,11 +83,11 @@
 | `MainWindowViewModel.ShellState.ModelPullMarkdown.cs` | 20 | Часть `MainWindowViewModel`: pull модели и превью Markdown / Kroki. |
 | `MainWindowViewModel.ShellState.RegionAndContour.cs` | 63 | Часть `MainWindowViewModel`: регионы MainGrid и видимость страниц вторичного контура MFD. |
 | `MainWindowViewModel.ShellState.UiSessionChrome.cs` | 68 | Часть `MainWindowViewModel`: режим UI, прогресс сборки на полосе, палитра, снимок раскладки. |
-| `MainWindowViewModel.SolutionBuild.cs` | 195 | Сборка, `BuildOutputPanel`. |
-| `MainWindowViewModel.StartupProject.cs` | 318 | Стартовый проект. |
+| `MainWindowViewModel.SolutionBuild.cs` | 170 | Сборка, `BuildOutputPanel`. |
+| `MainWindowViewModel.StartupProject.cs` | 277 | Стартовый проект. |
 | `MainWindowViewModel.UiGitWorkspace.cs` | 141 | Git + workspace UI. |
 | `MainWindowViewModel.ViewBridge.cs` | 62 | Колбэки и провайдеры, которые View подставляет в главный VM (диалоги, UI automation). |
-| `MainWindowViewModel.WorkspaceNavigationMap.cs` | 116 | Слот Pfd: отображение карты намерений / `CodeNavigationMapSubgraphDocument` (те же данные, что JSON MCP). Граф подграфа — не синоним `instrument_id`, см. ADR 0065. По доменам: карта намерений (в т.ч. control flow) — CodeNavigation; зависимости файлов — WorkspaceNavigation; submodules — дерево/GitMap (ADR 0062). |
+| `MainWindowViewModel.WorkspaceNavigationMap.cs` | 137 | Слот Pfd: отображение карты намерений / `CodeNavigationMapSubgraphDocument` (те же данные, что JSON MCP). Граф подграфа — не синоним `instrument_id`, см. ADR 0065. По доменам: карта намерений (в т.ч. control flow) — CodeNavigation; зависимости файлов — WorkspaceNavigation; submodules — дерево/GitMap (ADR 0062). |
 | `MainWindowViewModel.WorkspaceNavigationMap.Refresh.cs` | 130 | Срез карты workspace: перезапрос refresh и сборка через `WorkspaceNavigationMapRefreshComposer`. |
 | `MainWindowViewModel.WorkspaceSplitters.cs` | 23 | Сплиттеры рабочей области (MainGrid, обозреватель решения, Git и т.д.): режим «взлёт» — блокировка перетаскивания. |
 
