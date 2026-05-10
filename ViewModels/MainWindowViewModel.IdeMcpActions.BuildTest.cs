@@ -1,13 +1,37 @@
 using CascadeIDE.Cockpit.DataBus;
 using CascadeIDE.Features.IdeMcp.Application;
 using CascadeIDE.Models;
-using CascadeIDE.Services;
 
 namespace CascadeIDE.ViewModels;
 
 /// <summary>MCP: сборка, тесты.</summary>
 public partial class MainWindowViewModel
 {
+    /// <summary>Код выхода и успех для финального <see cref="BuildStateChanged"/> после MCP-операции на панели сборки.</summary>
+    private sealed class IdeMcpMutableBuildPhaseOutcome
+    {
+        public int? ExitCode;
+        public bool? Succeeded;
+    }
+
+    /// <summary>
+    /// Пара событий «сборка идёт» / «сборка завершилась» на IDE DataBus (ADR 0099); тело задаёт <see cref="IdeMcpMutableBuildPhaseOutcome"/> до return.
+    /// </summary>
+    private async Task<T> WithIdeMcpPublishedBuildStateAsync<T>(Func<IdeMcpMutableBuildPhaseOutcome, Task<T>> body)
+    {
+        await PublishIdeBuildStateOnUiAsync(new BuildStateChanged(true)).ConfigureAwait(false);
+        var outcome = new IdeMcpMutableBuildPhaseOutcome();
+        try
+        {
+            return await body(outcome).ConfigureAwait(false);
+        }
+        finally
+        {
+            await PublishIdeBuildStateOnUiAsync(new BuildStateChanged(false, outcome.ExitCode, outcome.Succeeded))
+                .ConfigureAwait(false);
+        }
+    }
+
     /// <summary>Диагностики открытого .cs файла (ошибки и предупреждения Roslyn). JSON: массив { id, message, severity, line, column }. Для не-C# или при отсутствии файла — [].</summary>
     async Task<string> Services.IIdeMcpActions.GetCurrentFileDiagnosticsAsync()
     {
@@ -33,49 +57,43 @@ public partial class MainWindowViewModel
             });
             return surf.McpReplyText;
         }
-        int? lastExitCode = null;
-        bool? lastSucceeded = null;
-        try
+        var pathCopy = path;
+        await UiScheduler.Default.InvokeAsync(() =>
         {
-            var pathCopy = path;
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                BuildOutputPanel.Set(IdeMcpBuildTestOrchestrator.BuildOperationHeader("Сборка", pathCopy));
-                IsBuildOutputVisible = true;
-            }).ConfigureAwait(false);
-            await PublishIdeBuildStateOnUiAsync(new BuildStateChanged(true)).ConfigureAwait(false);
+            BuildOutputPanel.Set(IdeMcpBuildTestOrchestrator.BuildOperationHeader("Сборка", pathCopy));
+            IsBuildOutputVisible = true;
+        }).ConfigureAwait(false);
 
-            void AppendBuildChunk(string chunk) => BuildOutputPanel.Append(chunk);
-            var (outStr, success, exitCode, binlogPath) = await _mcpBuildTest
-                .BuildWithBinlogAsync(path, AppendBuildChunk, cancellationToken: default)
-                .ConfigureAwait(false);
-            lastExitCode = exitCode;
-            lastSucceeded = success;
+        return await WithIdeMcpPublishedBuildStateAsync(async outcome =>
+        {
+            try
+            {
+                void AppendBuildChunk(string chunk) => BuildOutputPanel.Append(chunk);
+                var (outStr, success, exitCode, binlogPath) = await _mcpBuildTest
+                    .BuildWithBinlogAsync(path, AppendBuildChunk, cancellationToken: default)
+                    .ConfigureAwait(false);
+                outcome.ExitCode = exitCode;
+                outcome.Succeeded = success;
 
-            await UiScheduler.Default.InvokeAsync(() =>
+                await UiScheduler.Default.InvokeAsync(() =>
+                {
+                    BuildOutputPanel.FlushPending();
+                    _lastBuildBinlogPath = binlogPath;
+                }).ConfigureAwait(false);
+                return outStr;
+            }
+            catch (Exception ex)
             {
-                BuildOutputPanel.FlushPending();
-                _lastBuildBinlogPath = binlogPath;
-            }).ConfigureAwait(false);
-            return outStr;
-        }
-        catch (Exception ex)
-        {
-            var surf = IdeMcpBuildTestOrchestrator.FailedBuildPanelSurface(ex.Message);
-            UiScheduler.Default.Post(() =>
-            {
-                BuildOutputPanel.Set(surf.BuildOutputPanelFullText);
-                IsBuildOutputVisible = true;
-            });
-            lastSucceeded = false;
-            return surf.McpReplyText;
-        }
-        finally
-        {
-            var exit = lastExitCode;
-            var ok = lastSucceeded;
-            await PublishIdeBuildStateOnUiAsync(new BuildStateChanged(false, exit, ok)).ConfigureAwait(false);
-        }
+                outcome.Succeeded = false;
+                var surf = IdeMcpBuildTestOrchestrator.FailedBuildPanelSurface(ex.Message);
+                UiScheduler.Default.Post(() =>
+                {
+                    BuildOutputPanel.Set(surf.BuildOutputPanelFullText);
+                    IsBuildOutputVisible = true;
+                });
+                return surf.McpReplyText;
+            }
+        }).ConfigureAwait(false);
     }
 
     async Task<string> Services.IIdeMcpActions.BuildStructuredAsync()
@@ -139,41 +157,35 @@ public partial class MainWindowViewModel
         if (!IdeMcpSolutionPathAvailability.IsRunnableSolutionFile(path))
             return IdeMcpBuildTestOrchestrator.SerializeCodeCleanupFailure(IdeMcpBuildTestOrchestrator.MissingSolutionMessage());
 
-        int? lastExitCode = null;
-        bool? lastSucceeded = null;
-        try
+        var pathCopy = path;
+        await UiScheduler.Default.InvokeAsync(() =>
         {
-            var pathCopy = path;
-            await UiScheduler.Default.InvokeAsync(() =>
+            BuildOutputPanel.Set(IdeMcpBuildTestOrchestrator.BuildOperationHeader("Code cleanup", pathCopy));
+            IsBuildOutputVisible = true;
+        }).ConfigureAwait(false);
+
+        return await WithIdeMcpPublishedBuildStateAsync(async outcome =>
+        {
+            try
             {
-                BuildOutputPanel.Set(IdeMcpBuildTestOrchestrator.BuildOperationHeader("Code cleanup", pathCopy));
-                IsBuildOutputVisible = true;
-            }).ConfigureAwait(false);
+                void AppendBuildChunk(string chunk) => BuildOutputPanel.Append(chunk);
+                var (success, exitCode, outStr) = await _mcpBuildTest
+                    .RunCodeCleanupAsync(path, includePath, AppendBuildChunk, cancellationToken: default)
+                    .ConfigureAwait(false);
+                outcome.ExitCode = exitCode;
+                outcome.Succeeded = success;
+                var rawTruncated = IdeMcpBuildTestOrchestrator.BuildTruncatedRawOutput(outStr, 4000);
 
-            await PublishIdeBuildStateOnUiAsync(new BuildStateChanged(true)).ConfigureAwait(false);
+                await UiScheduler.Default.InvokeAsync(() => BuildOutputPanel.FlushPending()).ConfigureAwait(false);
 
-            void AppendBuildChunk(string chunk) => BuildOutputPanel.Append(chunk);
-            var (success, exitCode, outStr) = await _mcpBuildTest
-                .RunCodeCleanupAsync(path, includePath, AppendBuildChunk, cancellationToken: default)
-                .ConfigureAwait(false);
-            lastExitCode = exitCode;
-            lastSucceeded = success;
-            var rawTruncated = IdeMcpBuildTestOrchestrator.BuildTruncatedRawOutput(outStr, 4000);
-
-            await UiScheduler.Default.InvokeAsync(() => BuildOutputPanel.FlushPending()).ConfigureAwait(false);
-
-            return IdeMcpBuildTestOrchestrator.SerializeCodeCleanupResult(success, exitCode, rawTruncated);
-        }
-        catch (Exception ex)
-        {
-            lastSucceeded = false;
-            return IdeMcpBuildTestOrchestrator.SerializeCodeCleanupFailure(ex.Message);
-        }
-        finally
-        {
-            await PublishIdeBuildStateOnUiAsync(new BuildStateChanged(false, lastExitCode, lastSucceeded))
-                .ConfigureAwait(false);
-        }
+                return IdeMcpBuildTestOrchestrator.SerializeCodeCleanupResult(success, exitCode, rawTruncated);
+            }
+            catch (Exception ex)
+            {
+                outcome.Succeeded = false;
+                return IdeMcpBuildTestOrchestrator.SerializeCodeCleanupFailure(ex.Message);
+            }
+        }).ConfigureAwait(false);
     }
 
     /// <summary>Обновляет инструментацию, шину и навигацию MFD после MCP-тестов.</summary>

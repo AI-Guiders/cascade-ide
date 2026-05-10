@@ -51,7 +51,7 @@
 | `MainWindowViewModel.HybridIndexSettings.cs` | 18 | Привязки окна настроек к `HybridIndex` (ADR 0106). |
 | `MainWindowViewModel.IdeHealth.cs` | 95 | Связка с Workspace Health. |
 | `MainWindowViewModel.IdeMcpActions.AgentNotes.cs` | 44 | Реализация `IIdeMcpActions`: agent-notes. |
-| `MainWindowViewModel.IdeMcpActions.BuildTest.cs` | 172 | MCP: сборка, тесты. |
+| `MainWindowViewModel.IdeMcpActions.BuildTest.cs` | 183 | MCP: сборка, тесты. |
 | `MainWindowViewModel.IdeMcpActions.DebuggerPanel.cs` | 76 | Панель отладки и снимок DAP (ADR 0002): один `DebugSessionSnapshot`. |
 | `MainWindowViewModel.IdeMcpActions.Editor.cs` | 95 | MCP: редактор. |
 | `MainWindowViewModel.IdeMcpActions.Git.cs` | 42 | MCP: git (`IdeMcpGitWorkspaceSession`). |
@@ -290,3 +290,4 @@
 - **v1.40e** — **`MainWindowViewModel.WorkspaceNavigationMap.Refresh`**: поток обновления карты отделён от partial с привязками PFD.
 - **v1.40f** — расширение **`MainWindowPresentationSurfaceProjection`** (split/Mount-style/IDE Health mount) + **`MainWindowPresentationDapProjection`**; VM без локальных помощников резолва mount-style.
 - **v1.40g** — **`IMainWindowHostSurfaceInput`** + проекция host surface без типа VM; связность Cockpit → ViewModels ослаблена на границе shell/host кадра.
+- **v1.40h** — MCP **`BuildAsync`** / **`RunCodeCleanupAsync`**: общий каркас **`WithIdeMcpPublishedBuildStateAsync`** (пара **`BuildStateChanged`** на шину IDE Health, ADR 0099) вместо дублирующего try/finally в **`MainWindowViewModel.IdeMcpActions.BuildTest`**.
