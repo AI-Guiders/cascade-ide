@@ -34,12 +34,8 @@ public partial class MainWindowViewModel
         string? rgPath)
     {
         var solutionPath = await UiScheduler.Default.InvokeAsync(() => Workspace.SolutionPath ?? "");
-        if (string.IsNullOrWhiteSpace(solutionPath))
-            return IdeMcpWorkspaceOrchestrator.SerializeWorkspaceNotLoadedError();
-
-        var root = BreakpointsFileService.GetWorkspaceRoot(solutionPath);
-        if (string.IsNullOrEmpty(root) || !Directory.Exists(root))
-            return IdeMcpWorkspaceOrchestrator.SerializeInvalidWorkspaceRootError();
+        if (!IdeMcpWorkspaceOrchestrator.TryResolveWorkspaceRootForRipgrep(solutionPath, out var root, out var err))
+            return err;
 
         return await RipgrepWorkspaceSearchService.SearchAsync(
             root,

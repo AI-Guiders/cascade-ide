@@ -1,6 +1,7 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using CascadeIDE.Contracts;
-using CascadeIDE.Services;
+using CascadeIDE.Features.Workspace.Application;
 
 namespace CascadeIDE.Features.IdeMcp.Application;
 
@@ -99,6 +100,32 @@ public static class IdeMcpWorkspaceOrchestrator
 
     public static string SerializeInvalidWorkspaceRootError() =>
         JsonSerializer.Serialize(new { error = "Invalid workspace root." });
+
+    /// <summary>
+    /// Корень каталога для MCP <c>search_workspace_text</c> (как у палитры GoTo): из пути решения через <see cref="BreakpointsFileService.GetWorkspaceRoot"/>.
+    /// </summary>
+    public static bool TryResolveWorkspaceRootForRipgrep(
+        string? solutionPathTrimmedOrEmpty,
+        [NotNullWhen(true)] out string? root,
+        out string errorJson)
+    {
+        root = null;
+        if (string.IsNullOrWhiteSpace(solutionPathTrimmedOrEmpty))
+        {
+            errorJson = SerializeWorkspaceNotLoadedError();
+            return false;
+        }
+
+        if (!WorkspaceBreakpointsRootPresentation.TryResolveExistingDirectory(solutionPathTrimmedOrEmpty, out var candidate))
+        {
+            errorJson = SerializeInvalidWorkspaceRootError();
+            return false;
+        }
+
+        root = candidate;
+        errorJson = "";
+        return true;
+    }
 
     public static JsonElement ParseDiagnosticsOrEmpty(string diagnosticsJson)
     {
