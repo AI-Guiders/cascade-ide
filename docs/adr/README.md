@@ -116,6 +116,7 @@
 | [0105](0105-hybrid-codebase-index-for-csharp-web.md) | Hybrid codebase index: переносимое ядро + MCP для C#/Razor/AXAML (Roslyn истина для C#); гибрид FTS+vec | Accepted · Implemented |
 | [0106](0106-hybrid-codebase-index-cascadeide-integration-and-semantic-map.md) | Встраивание hybrid index в CascadeIDE (DAL/CCU/DataBus/freshness) и граница Semantic Map | Proposed |
 | [0107](0107-blank-solution-creation-via-dotnet-new-sln.md) | Пустое решение: `dotnet new sln`, меню/MCP, `BlankSolutionCreator` + `IDotnetCommandRunner` | Accepted · Implemented |
+| [0108](0108-web-ai-portal-host-object-tools-bridge.md) | Веб-портал для внешних веб-ИИ: WebView, Host Object → `IdeCommands`/MCP; allowlist, согласие; PoC (Atlas / Search AI) | Accepted · Implemented |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 
