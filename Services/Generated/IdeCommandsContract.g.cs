@@ -43,6 +43,7 @@ internal static class IdeCommandsContractGenerated
         ["codebase_index_status"] = IdeReturnKind.Json,
         ["compact_hot_context"] = IdeReturnKind.Json,
         ["confirm_focus_step"] = IdeReturnKind.Text,
+        ["create_new_solution_dialog"] = IdeReturnKind.Text,
         ["cycle_code_navigation_map_detail_level"] = IdeReturnKind.Text,
         ["cycle_code_navigation_map_level"] = IdeReturnKind.Text,
         ["cycle_code_navigation_map_presentation"] = IdeReturnKind.Text,

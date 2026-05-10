@@ -10,6 +10,8 @@ public static partial class IdeCommands
     public const string OpenFolderDialog = "open_folder_dialog";
     /// <summary>Открыть диалог выбора файла и показать его в редакторе (как меню Файл → Открыть файл...). returns: text.</summary>
     public const string OpenFileDialog = "open_file_dialog";
+    /// <summary>Создать новое пустое решение: диалог «Сохранить как» для <c>.sln</c>, затем <c>dotnet new sln</c> (шаблон SDK, не пакеты из NuGet). returns: text.</summary>
+    public const string CreateNewSolutionDialog = "create_new_solution_dialog";
     /// <summary>Закрыть приложение (как меню Файл → Выход). returns: none.</summary>
     public const string ExitApplication = "exit_application";
 

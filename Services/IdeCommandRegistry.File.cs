@@ -9,6 +9,7 @@ public static partial class IdeCommandRegistry
     {
         // ——— Меню «Файл» / приложение
         AddPalette(b, "open_solution_dialog", IdeCommands.OpenSolutionDialog, "Открыть решение…", "Файл");
+        AddPalette(b, "create_new_solution_dialog", IdeCommands.CreateNewSolutionDialog, "Создать новое решение…", "Файл");
         AddPalette(b, "open_folder_dialog", IdeCommands.OpenFolderDialog, "Открыть папку…", "Файл");
         AddPalette(b, "open_file_dialog", IdeCommands.OpenFileDialog, "Открыть файл…", "Файл");
         AddPalette(b, "export_expanded_markdown", IdeCommands.ExportExpandedMarkdown, "Export expanded Markdown…", "Файл");

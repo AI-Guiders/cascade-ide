@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using CascadeIDE.Cockpit.DataBus;
 using CascadeIDE.Features.Build.Application;
 using CascadeIDE.Features.Workspace.Application;
+using CascadeIDE.Services;
 using CascadeIDE.Models;
 using CommunityToolkit.Mvvm.Input;
 
@@ -113,6 +114,12 @@ public partial class MainWindowViewModel
             SolutionLoadCrashLog.TryAppend(path, ex);
         }
     }
+
+    /// <summary>Пустое решение через <c>dotnet new sln</c> по полному пути к будущему <c>.sln</c> (файл не должен существовать).</summary>
+    public Task<BlankSolutionCreateResult> TryCreateBlankSolutionAtPathAsync(
+        string solutionFilePath,
+        CancellationToken cancellationToken = default) =>
+        BlankSolutionCreator.TryCreateAsync(solutionFilePath, _dotnetRunner, cancellationToken);
 
     [RelayCommand(CanExecute = nameof(CanInstallModel))]
     private async Task InstallModelAsync()

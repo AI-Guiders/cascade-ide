@@ -135,6 +135,7 @@
 
 | command_id | Описание |
 |-----------:|----------|
+| `create_new_solution_dialog` | Создать новое пустое решение: диалог «Сохранить как» для `.sln`, затем `dotnet new sln` (шаблон SDK, не пакеты из NuGet). returns: text. |
 | `exit_application` | Закрыть приложение (как меню Файл → Выход). returns: none. |
 | `open_file_dialog` | Открыть диалог выбора файла и показать его в редакторе (как меню Файл → Открыть файл...). returns: text. |
 | `open_folder_dialog` | Открыть диалог выбора папки как workspace (как меню Файл → Открыть папку...). returns: text. |

@@ -19,6 +19,12 @@ public partial class MainWindowViewModel
     }
 
     [RelayCommand]
+    private void CreateNewSolution()
+    {
+        RequestCreateNewSolution?.Invoke();
+    }
+
+    [RelayCommand]
     private void OpenFolder()
     {
         RequestOpenFolder?.Invoke();

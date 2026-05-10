@@ -43,6 +43,7 @@ internal static class IdeCommandsDoc
         ["codebase_index_status"] = "Статус локального индекса (как tool `codebase_index_status`). workspace_path и solution_path опциональны — по умолчанию текущее открытое решение. args: workspace_path?:string, solution_path?:string; returns: json; example: {\"workspace_path\":\"D:\\\\repo\"}.",
         ["compact_hot_context"] = "Ужать hot-context (preview/apply). args: apply?:boolean; returns: json; example: {\"apply\":false}.",
         ["confirm_focus_step"] = "Подтвердить текущий шаг плана (Focus). returns: text.",
+        ["create_new_solution_dialog"] = "Создать новое пустое решение: диалог «Сохранить как» для `.sln`, затем `dotnet new sln` (шаблон SDK, не пакеты из NuGet). returns: text.",
         ["cycle_code_navigation_map_detail_level"] = "Карта намерений: цикл детализации glance → normal → inspect (Ctrl+K → S → D). returns: text.",
         ["cycle_code_navigation_map_level"] = "Карта намерений: переключить уровень file ↔ controlFlow (Ctrl+K → S → F). returns: text.",
         ["cycle_code_navigation_map_presentation"] = "Карта намерений: цикл вида list → graph → both (палитра; быстрый путь — Ctrl+K → S → P). returns: text.",

@@ -17,6 +17,8 @@ public partial class MainWindowViewModel
 
     /// <summary>Вызвать, чтобы показать диалог «Открыть решение» (View подставит реализацию).</summary>
     public Action? RequestOpenSolution { get; set; }
+    /// <summary>Вызвать, чтобы создать новое пустое решение (<c>dotnet new sln</c> после диалога «Сохранить как»).</summary>
+    public Action? RequestCreateNewSolution { get; set; }
     /// <summary>Вызвать, чтобы показать диалог «Открыть папку» (workspace без .sln).</summary>
     public Action? RequestOpenFolder { get; set; }
     /// <summary>Вызвать, чтобы показать диалог «Открыть файл» (View подставит реализацию).</summary>

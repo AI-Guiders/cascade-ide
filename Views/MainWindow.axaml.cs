@@ -83,6 +83,7 @@ public partial class MainWindow : PointerTrackingWindow
             vm.LoadSendMessageKeyFromStorage();
             vm.PropertyChanged += OnViewModelPropertyChanged;
             vm.RequestOpenSolution = () => _ = ShowOpenSolutionDialogAsync();
+            vm.RequestCreateNewSolution = () => _ = ShowCreateNewSolutionDialogAsync();
             vm.RequestOpenFolder = () => _ = ShowOpenFolderDialogAsync();
             vm.RequestOpenFile = () => _ = ShowOpenFileDialogAsync();
             vm.RequestClose = Close;

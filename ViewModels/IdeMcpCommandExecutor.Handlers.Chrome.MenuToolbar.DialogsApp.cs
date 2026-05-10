@@ -13,6 +13,12 @@ internal sealed partial class IdeMcpCommandExecutor
                 _vm.OpenSolutionCommand.Execute(null);
             return "OK";
         });
+        add(CreateNewSolutionDialog, async (_, _) =>
+        {
+            if (_vm.CreateNewSolutionCommand.CanExecute(null))
+                _vm.CreateNewSolutionCommand.Execute(null);
+            return "OK";
+        });
         add(OpenFolderDialog, async (_, _) =>
         {
             if (_vm.OpenFolderCommand.CanExecute(null))

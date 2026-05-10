@@ -6,6 +6,7 @@ using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using CascadeIDE.Services;
 using CommunityToolkit.Mvvm.Input;
+using System.Threading;
 
 namespace CascadeIDE.Views;
 
@@ -85,6 +86,56 @@ public partial class MainWindow
         };
 
         await dialog.ShowDialog(this);
+    }
+
+    private async Task ShowCreateNewSolutionDialogAsync()
+    {
+        if (DataContext is not ViewModels.MainWindowViewModel vm)
+            return;
+
+        var options = new FilePickerSaveOptions
+        {
+            Title = "Создать новое решение",
+            DefaultExtension = "sln",
+            FileTypeChoices =
+            [
+                new FilePickerFileType("Файл решения (.sln)") { Patterns = ["*.sln"] }
+            ],
+            SuggestedFileName = "MySolution.sln"
+        };
+
+        if (!string.IsNullOrEmpty(vm.Workspace.SolutionPath))
+        {
+            var start = DialogStartDirectoryFromWorkspacePath(vm.Workspace.SolutionPath);
+            if (!string.IsNullOrEmpty(start))
+            {
+                var folder = await StorageProvider.TryGetFolderFromPathAsync(start).ConfigureAwait(true);
+                if (folder is not null)
+                    options.SuggestedStartLocation = folder;
+            }
+        }
+
+        var fileOut = await StorageProvider.SaveFilePickerAsync(options).ConfigureAwait(true);
+        if (fileOut is null)
+            return;
+
+        var raw = fileOut.TryGetLocalPath() ?? fileOut.Path.LocalPath;
+        if (string.IsNullOrWhiteSpace(raw))
+            return;
+
+        var fullPath = CanonicalFilePath.Normalize(raw.Trim());
+        if (!fullPath.EndsWith(".sln", StringComparison.OrdinalIgnoreCase))
+            fullPath += ".sln";
+
+        var result = await vm.TryCreateBlankSolutionAtPathAsync(fullPath, CancellationToken.None).ConfigureAwait(true);
+        if (!result.Ok)
+        {
+            if (vm.RequestShowInfoAsync is not null)
+                await vm.RequestShowInfoAsync("Новое решение", result.ErrorMessage ?? "Не удалось создать решение.").ConfigureAwait(true);
+            return;
+        }
+
+        vm.LoadSolution(result.SolutionPath!);
     }
 
     private async Task ShowOpenSolutionDialogAsync()
