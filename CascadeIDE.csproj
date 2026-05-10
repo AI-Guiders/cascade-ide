@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <InternalsVisibleTo Include="CascadeIDE.Tests" />
   </ItemGroup>
@@ -234,7 +234,17 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.Chrome.cs">
+    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.cs">
+      <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.Chrome.OutputFocus.cs">
+      <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.Chrome.UiVisibility.cs">
       <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
     </Compile>
   </ItemGroup>
