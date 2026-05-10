@@ -48,11 +48,13 @@ jobs:
         with:
           repository: ${{ github.repository_owner }}/agent-notes-core
           path: agent-notes-core
+          token: ${{ secrets.PRIVATE_DEPS_PAT }}
 
       - uses: actions/checkout@v4
         with:
           repository: ${{ github.repository_owner }}/dotnet-debug-core
           path: dotnet-debug-core
+          token: ${{ secrets.PRIVATE_DEPS_PAT }}
 
       - uses: actions/setup-dotnet@v4
         with:
