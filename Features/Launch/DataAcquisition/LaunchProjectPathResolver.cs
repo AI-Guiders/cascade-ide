@@ -24,4 +24,13 @@ public static class LaunchProjectPathResolver
         csprojFullPath = full;
         return true;
     }
+
+    /// <summary>Возвращает нормализованный путь, если файл существует; иначе <see langword="null"/>.</summary>
+    public static string? NormalizeExistingProjectFileFullPath(string? projectFullPath)
+    {
+        if (string.IsNullOrWhiteSpace(projectFullPath))
+            return null;
+        var full = CanonicalFilePath.Normalize(projectFullPath);
+        return File.Exists(full) ? full : null;
+    }
 }

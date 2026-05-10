@@ -101,23 +101,6 @@ public partial class MainWindowViewModel
         ApplyStartupProject(only);
     }
 
-    /// <summary>
-    /// Перед MSBuild: если стартовый не задан или битой ссылкой, выбрать единственный проект, проект по активному файлу
-    /// или выбранный в обозревателе <c>.csproj</c> (как ожидается от F5 / «текущий код»).
-    /// </summary>
-    private void TryApplyInferredStartupProjectForDebug()
-    {
-        if (StartupProjectDebugInferenceProjection.HasPersistedStartupPointingToExistingFile(StartupProjectCsprojFullPath))
-            return;
-
-        var inferred = StartupProjectDebugInferenceProjection.TryInferCanonicalCsproj(
-            Workspace.SolutionRoots,
-            CurrentFilePath,
-            Workspace.SelectedSolutionItem?.FullPath);
-        if (!string.IsNullOrEmpty(inferred))
-            ApplyStartupProject(inferred);
-    }
-
     private void ApplyStartupProject(string csprojFullPath)
     {
         StartupProjectCsprojFullPath = csprojFullPath;
@@ -185,66 +168,17 @@ public partial class MainWindowViewModel
     private bool CanClearStartupProject() => HasStartupProject;
 
     /// <summary>MSBuild + launch profile (ADR 0090) или унаследованный стартовый <c>.csproj</c>.</summary>
-    private async Task<DebugLaunchResolution?> TryResolveDebugLaunchForF5Async()
-    {
-        TryApplyInferredStartupProjectForDebug();
-        var sln = Workspace.SolutionPath;
-        var hasSolution = !string.IsNullOrEmpty(sln);
-        var solutionDir = Services.BreakpointsFileService.GetWorkspaceRoot(sln);
-        var hasWorkspaceRoot = !string.IsNullOrEmpty(solutionDir);
-
-        var csproj = StartupProjectCsprojFullPath;
-        var startupCsprojFull = !string.IsNullOrEmpty(csproj) && File.Exists(csproj) ? csproj : null;
-        var preResolve = hasSolution && hasWorkspaceRoot
-            ? LaunchPreResolvePipelineUnit.Default.Compose(
-                sln!,
-                explicitProfileName: null,
-                solutionDirectory: solutionDir!,
-                startupProjectFullPath: startupCsprojFull)
-            : new LaunchPreResolvePipelineSnapshot(
-                Profile: null,
-                ProfileProjectCsprojFullPath: null,
-                Readiness: LaunchReadinessUnit.Default.Compose(
-                    hasSolutionPath: hasSolution,
-                    hasWorkspaceRoot: hasWorkspaceRoot,
-                    profileId: null,
-                    profileProjectRelative: null,
-                    profileProjectFullPath: null,
-                    startupProjectFullPath: startupCsprojFull),
-                McpResolveError: null);
-
-        var resolvedProfile = preResolve.Profile;
-        var readiness = preResolve.Readiness;
-        if (!readiness.CanAttemptResolve)
-            return null;
-
-        if (readiness.Source == LaunchReadinessSource.Profile && resolvedProfile is { } launchProfile && !string.IsNullOrEmpty(readiness.SelectedProjectFullPath))
-        {
-            var (target, err) = await MsBuildDebugTargetResolver
-                .TryResolveAsync(readiness.SelectedProjectFullPath, _dotnetRunner, launchProfile.Configuration)
-                .ConfigureAwait(false);
-            if (!string.IsNullOrEmpty(target))
-                return DebugLaunchFromProfile.ToResolution(launchProfile, target);
-
-            if (!string.IsNullOrEmpty(err))
-                await ShowDebugInfoAsync("Стартовый проект", err).ConfigureAwait(false);
-            return null;
-        }
-
-        if (!string.IsNullOrEmpty(readiness.SelectedProjectFullPath))
-        {
-            var (target, err) = await MsBuildDebugTargetResolver
-                .TryResolveAsync(readiness.SelectedProjectFullPath, _dotnetRunner, LaunchProfilesStore.DefaultConfiguration)
-                .ConfigureAwait(false);
-            if (!string.IsNullOrEmpty(target))
-                return new DebugLaunchResolution(target, null, null, null, OpenLaunchBrowser: false, LaunchUrl: null);
-
-            if (!string.IsNullOrEmpty(err))
-                await ShowDebugInfoAsync("Стартовый проект", err).ConfigureAwait(false);
-        }
-
-        return null;
-    }
+    private Task<DebugLaunchResolution?> TryResolveDebugLaunchForF5Async() =>
+        DebugLaunchForF5Orchestrator.TryResolveAsync(
+            Workspace.SolutionRoots,
+            CurrentFilePath,
+            Workspace.SelectedSolutionItem?.FullPath,
+            () => StartupProjectCsprojFullPath,
+            ApplyStartupProject,
+            Workspace.SolutionPath,
+            Services.BreakpointsFileService.GetWorkspaceRoot(Workspace.SolutionPath),
+            _dotnetRunner,
+            ShowDebugInfoAsync);
 
     /// <summary>
     /// Режим B <c>debug_launch</c> (MCP): <paramref name="profileName"/> или активный профиль; при явном <paramref name="mcpProgramArgs"/> — вместо аргументов из профиля.
