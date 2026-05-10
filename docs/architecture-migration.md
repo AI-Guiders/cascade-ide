@@ -107,12 +107,20 @@
 |------|------------|------------|
 | `IdeMcpCommandExecutor.cs` | 51 | Диспетчер MCP-команд IDE: разбор args и вызов `IIdeMcpActions` / UI-команд главного окна. |
 | `IdeMcpCommandExecutor.Handlers.AgentNotes.cs` | 74 | Хендлеры agent-notes. |
-| `IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.cs` | 183 | MCP-хендлеры меню и тулбара: открытие решения/папки/файла, темы, язык UI, группы редакторов, сборка. |
+| `IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.cs` | 11 | MCP-хендлеры меню и тулбара: делегирование по группам (диалоги, тема/язык, панели и сборка). |
+| `IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.DialogsApp.cs` | 71 | MCP-хендлеры диалогов открытия, выхода, настроек, превью и окон-хостов презентации. |
+| `IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.PanelsLayout.cs` | 75 | MCP-хендлеры показа панелей MFD, групп редакторов и сборки из UI. |
+| `IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.ThemeLanguage.cs` | 55 | MCP-хендлеры темы оформления и языка UI. |
 | `IdeMcpCommandExecutor.Handlers.Chrome.OutputFocus.cs` | 29 | MCP-хендлеры вывода и фокуса: ping, перезапуск MCP-клиентов, фокус редактора, снимок окна. |
 | `IdeMcpCommandExecutor.Handlers.Chrome.UiVisibility.cs` | 168 | MCP-хендлеры видимости панелей, режима UI, PFD/MFD, навигации по страницам MFD и палитре команд. |
-| `IdeMcpCommandExecutor.Handlers.DapDebug.cs` | 112 | DAP / отладка. |
+| `IdeMcpCommandExecutor.Handlers.DapDebug.cs` | 10 | DAP / отладка: делегирование регистрации хендлеров launch/attach и stepping. |
+| `IdeMcpCommandExecutor.Handlers.DapDebug.LaunchAttach.cs` | 69 | MCP DAP: ping, launch и attach. |
+| `IdeMcpCommandExecutor.Handlers.DapDebug.Stepping.cs` | 49 | MCP DAP: шагание, стоп, стек, снимок, переменные кадра. |
 | `IdeMcpCommandExecutor.Handlers.DebuggerUi.cs` | 57 | Поверхность отладки. |
-| `IdeMcpCommandExecutor.Handlers.Editor.cs` | 108 | Редактор. |
+| `IdeMcpCommandExecutor.Handlers.Editor.EditNavigation.cs` | 24 | MCP: правка текста и переход к позиции в файле. |
+| `IdeMcpCommandExecutor.Handlers.Editor.FilesAndChat.cs` | 55 | MCP: открытие файла, загрузка решения, выделение в редакторе, выбор/редактирование сообщений чата. |
+| `IdeMcpCommandExecutor.Handlers.Editor.StateContent.cs` | 27 | MCP: состояние редактора, диапазон текста и текст открытого документа. |
+| `IdeMcpCommandExecutor.Handlers.Editor.ToolCatalog.cs` | 18 | MCP: каталог инструментов `list_tools`. |
 | `IdeMcpCommandExecutor.Handlers.PowerDocuments.Documents.cs` | 68 | MCP-хендлеры вкладок документов: переоткрытие, активация, закрепление, перенос по группам редакторов. |
 | `IdeMcpCommandExecutor.Handlers.PowerDocuments.FocusPowerAgent.cs` | 203 | MCP-хендлеры Power / фокус-шагов, автономного агента, чата и установки модели Ollama. |
 | `Generated/IdeMcpCommandExecutor.Generated.g.cs` | 108 | Сгенерированные хендлеры MCP → `IIdeMcpActions` (`CascadeIDE.ProtocolDocGen`). |
@@ -315,3 +323,4 @@
 - **v1.41i** — MCP executor: **`IdeMcpCommandExecutor.Handlers.PowerDocuments`** разнесён на **`PowerDocuments.FocusPowerAgent`** (фокус, автономность, чат, Ollama) и **`PowerDocuments.Documents`** (вкладки документов).
 - **v1.41j** — MCP **`IIdeMcpActions`**: **`IdeMcpActions.BuildTest`** разнесён на **`BuildTest.Build`** (диагностики, дерево решения, сборка, structured, code cleanup) и **`BuildTest.Tests`** (тесты и **`PublishIdeMcpTestRunMutation`**).
 - **v1.41k** — MCP UI automation: **`IdeMcpActions.UiAutomation`** разнесён на **`UiAutomation.EditorPreview`** (редактор, брейкпоинты, превью) и **`UiAutomation.Providers`** (подтверждения, тема, провайдеры контролов и чата).
+- **v1.41l** — MCP executor: **`Handlers.DapDebug`** → **`DapDebug.LaunchAttach`** / **`DapDebug.Stepping`**; **`Handlers.Editor`** → **`Editor.ToolCatalog`** (статический **`RegisterCore`**), **`FilesAndChat`**, **`StateContent`**, **`EditNavigation`**; **`Chrome.MenuToolbar`** → **`MenuToolbar.DialogsApp`**, **`ThemeLanguage`**, **`PanelsLayout`**; **`CascadeIDE.csproj`** — **`DependentUpon`** для вложенных partial.
