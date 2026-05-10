@@ -17,7 +17,7 @@
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:BEGIN -->
 
-`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~6.6k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~5.4k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.1k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
+`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~6.6k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~5.5k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.1k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:END -->
 
@@ -73,8 +73,11 @@
 | `MainWindowViewModel.PresentationLayout.HostShell.cs` | 47 | События «окно-хост открыло полный контур» — скрытие колонок в main (`PresentationLayout`). |
 | `MainWindowViewModel.PresentationLayout.HostWindowBounds.cs` | 84 | Персистенция геометрии окон-хостов пресета `presentation` (ADR 0017). |
 | `MainWindowViewModel.PresentationLayoutAuthority.cs` | 14 | Запись intent видимости панелей (семантика «хочу»); фактическая поверхность — `MainWindowShellSurfaceCompositor`. |
-| `MainWindowViewModel.RelayCommands.cs` | 285 | Relay-команды. |
 | `MainWindowViewModel.RelayCommands.Debug.cs` | 144 | Relay: отладка. |
+| `MainWindowViewModel.RelayCommands.Documents.cs` | 65 | Relay: вкладки документов и группы. |
+| `MainWindowViewModel.RelayCommands.Layout.cs` | 64 | Relay: регионы, панели MFD, группы редакторов. |
+| `MainWindowViewModel.RelayCommands.Shell.cs` | 122 | Relay: приложение, диалоги открытия, тема, язык, окна-хосты. |
+| `MainWindowViewModel.RelayCommands.UiMode.cs` | 56 | Relay: режим UI и уровень безопасности. |
 | `MainWindowViewModel.SettingsReactive.cs` | 248 | Реакции на изменение полей настроек и ключей API: диск, автономный агент, панели. |
 | `MainWindowViewModel.ShellState.AiProviders.cs` | 58 | Часть `ShellState`: режим ИИ и облачные ключи привязаны к нижнему приложению/чату. |
 | `MainWindowViewModel.ShellState.AutonomousAgentStripe.cs` | 63 | Часть `ShellState`: полоса/карточки автономной задачи агента, безопасности, LOC и сводки тестов для IDE Health. |
@@ -300,3 +303,4 @@
 - **v1.41c** — CascadeChord (ADR 0060): **`CascadeChordIntentSession`** (`Features/Shell/Application`) — фаза, хвост, таймер и разбор клавиш; **`MainWindowViewModel.CascadeChord`** — привязки и туннель к сессии.
 - **v1.41d** — Presentation: **`MainWindowPresentationSurfaceProjection.ComposeHostSurfaceFrame`** — сборка **`MainWindowHostSurfaceFrame`** по **`IMainWindowHostSurfaceInput`** и нормализованному UI-режиму вне **`MainWindowViewModel.Presentation`**.
 - **v1.41e** — Настройки: **`ShellSettingsReactiveSideEffects`** (`Features/Settings/Application`) — длинные цепочки **внешний MCP / autonomous**, **AI mode / cloud provider**, **HCI index dir + scope** вместо тел в **`MainWindowViewModel.SettingsReactive`**.
+- **v1.41f** — Relay-команды: нарезка **`MainWindowViewModel.RelayCommands`** на **`RelayCommands.Shell`** / **`Layout`** / **`Documents`** / **`UiMode`** (+ **`RelayCommands.Debug`** без изменений логики); **`ApplyMfdRegionExpanded`** / **`ApplyPfdRegionExpanded`** вместо прямых присваиваний (CASCOPE003).
