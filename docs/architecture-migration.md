@@ -17,7 +17,7 @@
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:BEGIN -->
 
-`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~7.3k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~6.1k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.1k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
+`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~7.2k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~6k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.1k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:END -->
 
@@ -33,7 +33,7 @@
 | `MainWindowViewModel.Breakpoints.cs` | 97 | Брейкпоинты: `BreakpointsFileService` / `BreakpointsStorage` — один источник (ADR 0002). |
 | `MainWindowViewModel.Capabilities.cs` | 23 | Реестр capabilities. |
 | `MainWindowViewModel.CascadeChord.cs` | 317 | Аккордный слой ADR 0060: корень `cascade_chord` из hotkeys.toml (по умолчанию Ctrl+K), затем тот же хвост мелодии, что после `c:` в палитре (см. `IntentMelodyAliases`), без префикса `c:` и без Enter — если alias однозначен (например `so`). При конфликте префиксов (например `gs` vs `gsu`) точное совпадение после полного ввода или по клавише Enter. |
-| `MainWindowViewModel.CommandPalette.cs` | 478 | Палитра команд. |
+| `MainWindowViewModel.CommandPalette.cs` | 359 | Палитра команд. |
 | `MainWindowViewModel.cs` | 438 | Главный композитор окна (partial-класс, несколько `MainWindowViewModel*.cs`). Карта файлов и ответственности — `docs/architecture-migration.md`, раздел «Срез MainWindowViewModel». |
 | `MainWindowViewModel.CSharpLsp.cs` | 120 | Запуск/перезапуск C# LSP. |
 | `MainWindowViewModel.CursorAcp.cs` | 36 | Путь Cursor ACP и предпочитаемая модель. |
@@ -292,3 +292,4 @@
 - **v1.40g** — **`IMainWindowHostSurfaceInput`** + проекция host surface без типа VM; связность Cockpit → ViewModels ослаблена на границе shell/host кадра.
 - **v1.40h** — MCP **`BuildAsync`** / **`RunCodeCleanupAsync`**: общий каркас **`WithIdeMcpPublishedBuildStateAsync`** (пара **`BuildStateChanged`** на шину IDE Health, ADR 0099) вместо дублирующего try/finally в **`MainWindowViewModel.IdeMcpActions.BuildTest`**.
 - **v1.40i** — MCP UI automation: **`IdeMcpUiAutomationOrchestrator`** — **`TryGetRemoveBreakpointNormalizedPath`**, **`ShouldSkipToggleBreakpointInEditor`**, **`InvokeStringResultOnUiAsync`**, **`EditChatAssistantMessageOnUiAsync`**; **`MainWindowViewModel.IdeMcpActions.UiAutomation`** короче.
+- **v1.40j** — палитра команд: типы строки списка **`IdeCommandPaletteRowKind`** / **`IdeCommandPaletteRowViewModel`** вынесены в **`ViewModels/IdeCommandPaletteRowViewModel.cs`**; **`MainWindowViewModel.CommandPalette.cs`** остаётся логикой фильтрации и исполнения.
