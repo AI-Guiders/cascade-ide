@@ -1,8 +1,6 @@
 using Avalonia.Input;
 using CascadeIDE.Features.Shell.Application;
 using CascadeIDE.Models.Shell;
-using Avalonia.Threading;
-using CascadeIDE.Models;
 using CommunityToolkit.Mvvm.Input;
 
 namespace CascadeIDE.ViewModels;
@@ -13,21 +11,23 @@ namespace CascadeIDE.ViewModels;
 /// </summary>
 public partial class MainWindowViewModel
 {
-    /// <summary>Таймаут ожидания следующей клавиши без Ctrl/Alt (секунды; лампа и оверлей).</summary>
-    private const double CascadeChordTimeoutSeconds = 8;
+    private CascadeChordIntentSession? _cascadeChordSession;
 
-    private enum CascadeChordPhase
-    {
-        Idle,
-        /// <summary>После Ctrl+K — набор буквенно-цифрового хвоста как у <c>c:</c>.</summary>
-        AwaitMelodyTail
-    }
-
-    private CascadeChordPhase _cascadeChordPhase;
-    /// <summary>Нормализованный хвост мелодии (нижний регистр), как после <c>c:</c>.</summary>
-    private string _cascadeChordMelodyTail = "";
-    private DateTimeOffset _cascadeChordDeadline = DateTimeOffset.MinValue;
-    private DispatcherTimer? _cascadeChordTimer;
+    private CascadeChordIntentSession ChordSession =>
+        _cascadeChordSession ??= new CascadeChordIntentSession(
+            NotifyCascadeChordOverlayProperties,
+            async commandId =>
+            {
+                try
+                {
+                    await ((Services.IIdeMcpActions)this).ExecuteCommandAsync(commandId, null, CancellationToken.None)
+                        .ConfigureAwait(false);
+                }
+                catch
+                {
+                    // Исключения из хендлеров команд логируются внутри исполнителя; аккорд уже сброшен.
+                }
+            });
 
     /// <summary>Связанные проекции оверлея/лампы Command при смене фазы или хвоста мелодии (ADR 0060).</summary>
     private static readonly string[] CascadeChordOverlayPresentationNames =
@@ -47,136 +47,52 @@ public partial class MainWindowViewModel
         nameof(CommandArmedLampToolTip),
     ];
 
-    /// <summary>Фокус в полоске HUD над редактором: туннель не перехватывает буквы — ввод идёт в <see cref="CascadeChordHudMelodyText"/>.</summary>
-    private bool _cascadeChordHudTextHasFocus;
-
-    /// <summary>Пользователь закрыл выпадающий список (light dismiss) — не открывать снова, пока хвост не изменится или не вернётся фокус.</summary>
-    private bool _cascadeChordDropdownUserDismissed;
-
     /// <summary>Показать оверлей с подсказками (ADR 0060 §6) пока активна машина аккорда.</summary>
-    public bool IsCascadeChordOverlayVisible => _cascadeChordPhase != CascadeChordPhase.Idle;
+    public bool IsCascadeChordOverlayVisible => ChordSession.IsOverlayVisible;
 
     /// <summary>Текст подсказки для текущего шага машины аккорда.</summary>
-    public string CascadeChordOverlayHintText => BuildCascadeChordOverlayHint();
+    public string CascadeChordOverlayHintText => ChordSession.OverlayHintText;
 
     /// <summary>Команды, подходящие под префикс (выпадающий список, до 25).</summary>
     public IReadOnlyList<CascadeChordOverlaySuggestion> CascadeChordOverlaySuggestions =>
-        CascadeChordPresentationProjection.BuildSuggestionRows(
-            _cascadeChordPhase == CascadeChordPhase.AwaitMelodyTail,
-            _cascadeChordMelodyTail,
-            MaxChordDropdownItems);
-
-    private const int MaxChordDropdownItems = 25;
+        ChordSession.OverlaySuggestions;
 
     /// <summary>Выпадающий список под полем ввода: пока armed, есть префикс и совпадения или явное «нет совпадений».</summary>
-    public bool IsCascadeChordDropdownOpen =>
-        _cascadeChordPhase == CascadeChordPhase.AwaitMelodyTail
-        && !_cascadeChordDropdownUserDismissed
-        && !string.IsNullOrEmpty(_cascadeChordMelodyTail)
-        && (CascadeChordPresentationProjection.FilterEligibleMatches(_cascadeChordMelodyTail).Count > 0 || CascadeChordOverlayNoMatches);
+    public bool IsCascadeChordDropdownOpen => ChordSession.IsDropdownOpen;
 
     /// <summary>Есть строки в выпадающем списке (для «нет совпадений» — отдельный текст).</summary>
-    public bool HasChordDropdownItems =>
-        _cascadeChordPhase == CascadeChordPhase.AwaitMelodyTail && CascadeChordOverlaySuggestions.Count > 0;
+    public bool HasChordDropdownItems => ChordSession.HasDropdownItems;
 
     /// <summary>Подпись поля ввода рядом с CMD: в покое и при armed.</summary>
-    public string CascadeChordHudWatermark =>
-        IsCascadeChordOverlayVisible
-            ? "мелодия (как после c:)"
-            : "Ctrl+K — команда по мелодии";
+    public string CascadeChordHudWatermark => ChordSession.HudWatermark;
 
     /// <summary>Набранный хвост для визуального поля ввода в оверлее (find-bar style).</summary>
-    public string CascadeChordOverlayInputText =>
-        _cascadeChordPhase == CascadeChordPhase.AwaitMelodyTail
-            ? _cascadeChordMelodyTail
-            : "";
+    public string CascadeChordOverlayInputText => ChordSession.OverlayInputText;
 
     /// <summary>Двусторонняя привязка к полю ввода в полоске над редактором (только фаза armed).</summary>
     public string CascadeChordHudMelodyText
     {
-        get => _cascadeChordPhase == CascadeChordPhase.AwaitMelodyTail ? _cascadeChordMelodyTail : "";
-        set
-        {
-            if (_cascadeChordPhase != CascadeChordPhase.AwaitMelodyTail)
-                return;
-            var n = CascadeChordPresentationProjection.NormalizeMelodyInput(value);
-            if (string.Equals(n, _cascadeChordMelodyTail, StringComparison.Ordinal))
-                return;
-            ApplyCascadeChordMelodyTail(n);
-        }
+        get => ChordSession.HudMelodyTextGet();
+        set => ChordSession.HudMelodyTextSet(value);
     }
 
     /// <summary>После Ctrl+K — сфокусировать поле в полоске task cockpit (см. <see cref="Views.CascadeChordHudStripView"/>).</summary>
     public event Action? CascadeChordHudFocusRequested;
 
     /// <summary>Одна строка для полоски: плейсхолдер при пустом хвосте или набранный хвост (без двух <c>IsVisible</c>).</summary>
-    public string CascadeChordOverlayFindBarLine =>
-        _cascadeChordPhase != CascadeChordPhase.AwaitMelodyTail
-            ? ""
-            : string.IsNullOrEmpty(_cascadeChordMelodyTail)
-                ? "мелодия (как после c:) — полоска под тулбаром"
-                : _cascadeChordMelodyTail;
+    public string CascadeChordOverlayFindBarLine => ChordSession.OverlayFindBarLine;
 
     /// <summary>Плейсхолдер в полоске — чуть приглушить через прозрачность текста.</summary>
-    public double CascadeChordOverlayFindBarOpacity =>
-        _cascadeChordPhase == CascadeChordPhase.AwaitMelodyTail && string.IsNullOrEmpty(_cascadeChordMelodyTail)
-            ? 0.72
-            : 1.0;
+    public double CascadeChordOverlayFindBarOpacity => ChordSession.OverlayFindBarOpacity;
 
     /// <summary>Нижняя строка подсказки в полосе.</summary>
-    public string CascadeChordOverlayCompactFooter =>
-        "Esc — отмена · таймаут " + (int)CascadeChordTimeoutSeconds + " с · Ctrl+Q — палитра";
+    public string CascadeChordOverlayCompactFooter => ChordSession.OverlayCompactFooter;
 
     /// <summary>При вводе неверного префикса до сброса (редко видно — машина часто сразу выходит).</summary>
-    public bool CascadeChordOverlayNoMatches =>
-        _cascadeChordPhase == CascadeChordPhase.AwaitMelodyTail
-        && !string.IsNullOrEmpty(_cascadeChordMelodyTail)
-        && CascadeChordPresentationProjection.FilterEligibleMatches(_cascadeChordMelodyTail).Count == 0;
+    public bool CascadeChordOverlayNoMatches => ChordSession.OverlayNoMatches;
 
     /// <summary>Подсказка для лампы Command на тулбаре: в покое — кратко; при armed — полный контекст аккорда.</summary>
-    public string CommandArmedLampToolTip =>
-        !IsCascadeChordOverlayVisible
-            ? "Command: в покое. Ctrl+K — режим armed (CascadeChord)."
-            : "Command (armed) — ввод по аккорду; транспорт CascadeChord (Ctrl+K).\n\n" + BuildCascadeChordOverlayHint();
-
-    private string BuildCascadeChordOverlayHint()
-    {
-        var matches = CascadeChordPresentationProjection.FilterEligibleMatches(_cascadeChordMelodyTail);
-        return CascadeChordPresentationProjection.BuildOverlayHint(
-            _cascadeChordPhase == CascadeChordPhase.AwaitMelodyTail,
-            _cascadeChordMelodyTail,
-            (int)CascadeChordTimeoutSeconds,
-            matches);
-    }
-
-    private void EnsureCascadeChordTimer()
-    {
-        if (_cascadeChordTimer is not null)
-            return;
-        _cascadeChordTimer = new DispatcherTimer
-        {
-            Interval = TimeSpan.FromSeconds(CascadeChordTimeoutSeconds)
-        };
-        _cascadeChordTimer.Tick += (_, _) =>
-        {
-            _cascadeChordTimer.Stop();
-            if (_cascadeChordPhase == CascadeChordPhase.Idle)
-                return;
-            EndCascadeChordIdle();
-        };
-    }
-
-    private void RestartCascadeChordTimer()
-    {
-        EnsureCascadeChordTimer();
-        _cascadeChordTimer!.Stop();
-        _cascadeChordTimer.Start();
-    }
-
-    private void StopCascadeChordTimer()
-    {
-        _cascadeChordTimer?.Stop();
-    }
+    public string CommandArmedLampToolTip => ChordSession.CommandArmedLampToolTip;
 
     private void NotifyCascadeChordOverlayProperties()
     {
@@ -185,187 +101,29 @@ public partial class MainWindowViewModel
     }
 
     /// <summary>Вызывается из полоски HUD: фокус ввода — туннель не должен съедать буквы до TextBox.</summary>
-    public void SetCascadeChordHudTextHasFocus(bool hasFocus)
-    {
-        _cascadeChordHudTextHasFocus = hasFocus;
-        if (hasFocus)
-            _cascadeChordDropdownUserDismissed = false;
-        OnPropertyChanged(nameof(IsCascadeChordDropdownOpen));
-    }
+    public void SetCascadeChordHudTextHasFocus(bool hasFocus) => ChordSession.SetHudTextHasFocus(hasFocus);
 
     /// <summary>Popup закрыт кликом вне списка (Avalonia light dismiss).</summary>
-    public void NotifyCascadeChordDropdownDismissed()
-    {
-        _cascadeChordDropdownUserDismissed = true;
-        OnPropertyChanged(nameof(IsCascadeChordDropdownOpen));
-    }
+    public void NotifyCascadeChordDropdownDismissed() => ChordSession.NotifyDropdownDismissed();
 
     /// <summary>Выбор строки из выпадающего списка.</summary>
-    public void PickCascadeChordSuggestion(CascadeChordOverlaySuggestion? item)
-    {
-        if (item is null || _cascadeChordPhase != CascadeChordPhase.AwaitMelodyTail)
-            return;
-        ApplyCascadeChordMelodyTail(item.Alias);
-    }
-
+    public void PickCascadeChordSuggestion(CascadeChordOverlaySuggestion? item) => ChordSession.PickSuggestion(item);
 
     /// <summary>Esc из поля ввода или снаружи (после снятия фокуса с HUD).</summary>
-    public void CancelCascadeChord() => EndCascadeChordIdle();
+    public void CancelCascadeChord() => ChordSession.Cancel();
 
     /// <summary>Enter в поле HUD: как в туннеле — точный alias или сброс.</summary>
-    public void OnCascadeChordHudEnter()
-    {
-        if (_cascadeChordPhase != CascadeChordPhase.AwaitMelodyTail)
-            return;
-        var cmdEnter = IntentMelodyAliases.TryResolveExactCommandId(_cascadeChordMelodyTail);
-        if (cmdEnter != null)
-            _ = ExecuteCascadeChordCommandAsync(cmdEnter);
-        EndCascadeChordIdle();
-    }
-
-    /// <summary>Общая логика хвоста: однозначное совпадение → выполнить; ноль префиксов при непустом → выход.</summary>
-    private void ApplyCascadeChordMelodyTail(string newTail)
-    {
-        _cascadeChordDropdownUserDismissed = false;
-        var matches = CascadeChordPresentationProjection.FilterEligibleMatches(newTail);
-        var exact = matches.FirstOrDefault(m => string.Equals(m.Alias, newTail, StringComparison.Ordinal));
-        var hasLonger = matches.Any(m => m.Alias.Length > newTail.Length);
-        if (exact.CommandId != null && !hasLonger && newTail.Length > 0)
-        {
-            _cascadeChordMelodyTail = newTail;
-            _ = ExecuteCascadeChordCommandAsync(exact.CommandId);
-            EndCascadeChordIdle();
-            return;
-        }
-
-        if (matches.Count == 0 && newTail.Length > 0)
-        {
-            EndCascadeChordIdle();
-            return;
-        }
-
-        _cascadeChordMelodyTail = newTail;
-        _cascadeChordDeadline = DateTimeOffset.UtcNow.AddSeconds(CascadeChordTimeoutSeconds);
-        RestartCascadeChordTimer();
-        NotifyCascadeChordOverlayProperties();
-    }
-
-    private void BeginCascadeChordRoot()
-    {
-        _cascadeChordPhase = CascadeChordPhase.AwaitMelodyTail;
-        _cascadeChordMelodyTail = "";
-        _cascadeChordHudTextHasFocus = false;
-        _cascadeChordDropdownUserDismissed = false;
-        _cascadeChordDeadline = DateTimeOffset.UtcNow.AddSeconds(CascadeChordTimeoutSeconds);
-        RestartCascadeChordTimer();
-        NotifyCascadeChordOverlayProperties();
-        CascadeChordHudFocusRequested?.Invoke();
-    }
+    public void OnCascadeChordHudEnter() => ChordSession.OnHudEnterFromView();
 
     /// <summary>Корень аккорда (hotkeys.toml <c>cascade_chord</c>): обрабатывается tunnel KeyDown главного окна (как палитра Ctrl+Q).</summary>
     [RelayCommand]
-    private void CascadeChordRoot() => BeginCascadeChordRoot();
+    private void CascadeChordRoot() =>
+        ChordSession.BeginRoot(() => CascadeChordHudFocusRequested?.Invoke());
 
     /// <summary>
     /// Обрабатывает аккорд Cascade: возвращает <see langword="true"/>, если событие поглощено (в т.ч. корень Ctrl+K).
     /// Вызывать из tunnel <see cref="Views.MainWindow"/> до <see cref="MainWindowHotkeyService.TryHandleTunnelShortcuts"/>.
     /// </summary>
-    public bool TryConsumeCascadeChordKeyDown(KeyEventArgs e)
-    {
-        var map = MainWindowHotkeyService.GetMergedMap();
-        var rootGesture = CascadeChordHotkey.ResolveRootGesture(map);
-
-        if (CascadeChordHotkey.RootGestureMatches(rootGesture, e))
-        {
-            BeginCascadeChordRoot();
-            e.Handled = true;
-            return true;
-        }
-
-        if (_cascadeChordPhase == CascadeChordPhase.Idle)
-            return false;
-
-        if (DateTimeOffset.UtcNow > _cascadeChordDeadline)
-        {
-            EndCascadeChordIdle();
-            return false;
-        }
-
-        if (e.Key == Key.Escape)
-        {
-            EndCascadeChordIdle();
-            e.Handled = true;
-            return true;
-        }
-
-        if (_cascadeChordHudTextHasFocus)
-            return false;
-
-        var mods = e.KeyModifiers;
-        if (mods.HasFlag(KeyModifiers.Control) || mods.HasFlag(KeyModifiers.Alt) || mods.HasFlag(KeyModifiers.Meta))
-        {
-            EndCascadeChordIdle();
-            return false;
-        }
-
-        if (_cascadeChordPhase == CascadeChordPhase.AwaitMelodyTail)
-            return HandleCascadeChordMelodyKeyDown(e);
-
-        return false;
-    }
-
-    private bool HandleCascadeChordMelodyKeyDown(KeyEventArgs e)
-    {
-        if (e.Key == Key.Enter)
-        {
-            OnCascadeChordHudEnter();
-            e.Handled = true;
-            return true;
-        }
-
-        if (e.Key == Key.Back)
-        {
-            if (_cascadeChordMelodyTail.Length > 0)
-                ApplyCascadeChordMelodyTail(_cascadeChordMelodyTail[..^1]);
-            else
-                EndCascadeChordIdle();
-            e.Handled = true;
-            return true;
-        }
-
-        if (!CascadeChordMelodyKeyMap.TryMapToChar(e.Key, out var ch))
-        {
-            EndCascadeChordIdle();
-            e.Handled = true;
-            return true;
-        }
-
-        var newTail = _cascadeChordMelodyTail + ch;
-        ApplyCascadeChordMelodyTail(newTail);
-        e.Handled = true;
-        return true;
-    }
-
-    private void EndCascadeChordIdle()
-    {
-        _cascadeChordPhase = CascadeChordPhase.Idle;
-        _cascadeChordMelodyTail = "";
-        _cascadeChordHudTextHasFocus = false;
-        _cascadeChordDropdownUserDismissed = false;
-        StopCascadeChordTimer();
-        NotifyCascadeChordOverlayProperties();
-    }
-
-    private async Task ExecuteCascadeChordCommandAsync(string commandId)
-    {
-        try
-        {
-            await ((Services.IIdeMcpActions)this).ExecuteCommandAsync(commandId, null, CancellationToken.None).ConfigureAwait(false);
-        }
-        catch
-        {
-            // Исключения из хендлеров команд логируются внутри исполнителя; аккорд уже сброшен.
-        }
-    }
-
+    public bool TryConsumeCascadeChordKeyDown(KeyEventArgs e) =>
+        ChordSession.TryConsumeKeyDown(e, () => CascadeChordHudFocusRequested?.Invoke());
 }
