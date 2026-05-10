@@ -17,7 +17,7 @@
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:BEGIN -->
 
-`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~6.6k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~5.5k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.2k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
+`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~6.7k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~5.5k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.2k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:END -->
 
@@ -51,13 +51,15 @@
 | `MainWindowViewModel.HybridIndexSettings.cs` | 18 | Привязки окна настроек к `HybridIndex` (ADR 0106). |
 | `MainWindowViewModel.IdeHealth.cs` | 95 | Связка с Workspace Health. |
 | `MainWindowViewModel.IdeMcpActions.AgentNotes.cs` | 44 | Реализация `IIdeMcpActions`: agent-notes. |
-| `MainWindowViewModel.IdeMcpActions.BuildTest.cs` | 183 | MCP: сборка, тесты. |
+| `MainWindowViewModel.IdeMcpActions.BuildTest.Build.cs` | 127 | MCP: диагностики текущего файла, список файлов решения, сборка и code cleanup с публикацией фазы сборки на шину. |
+| `MainWindowViewModel.IdeMcpActions.BuildTest.Tests.cs` | 64 | MCP: запуск тестов (все / affected) и обновление панели инструментирования после прогона. |
 | `MainWindowViewModel.IdeMcpActions.DebuggerPanel.cs` | 76 | Панель отладки и снимок DAP (ADR 0002): один `DebugSessionSnapshot`. |
 | `MainWindowViewModel.IdeMcpActions.Editor.cs` | 95 | MCP: редактор. |
 | `MainWindowViewModel.IdeMcpActions.Git.cs` | 42 | MCP: git (`IdeMcpGitWorkspaceSession`). |
 | `MainWindowViewModel.IdeMcpActions.HybridCodebaseIndex.cs` | 103 | MCP / ide_execute_command: Hybrid Codebase Index (имена команд как у внешнего MCP). |
 | `MainWindowViewModel.IdeMcpActions.Navigation.cs` | 61 | MCP: семантическая навигация (ADR 0039). |
-| `MainWindowViewModel.IdeMcpActions.UiAutomation.cs` | 159 | MCP: UI automation. |
+| `MainWindowViewModel.IdeMcpActions.UiAutomation.EditorPreview.cs` | 64 | MCP: фокус редактора, брейкпоинты, превью Markdown и relay-команды страницы превью. |
+| `MainWindowViewModel.IdeMcpActions.UiAutomation.Providers.cs` | 103 | MCP: подтверждения, тема/лейаут, провайдеры UI automation и операции над чатом. |
 | `MainWindowViewModel.IdeMcpActions.Web.cs` | 11 | Реализация `IIdeMcpActions`: публичный веб-запрос (DuckDuckGo Instant Answer) и загрузка публичного URL. |
 | `MainWindowViewModel.IdeMcpActions.Workspace.cs` | 90 | MCP: workspace. |
 | `MainWindowViewModel.IdeMcpHostLifecycle.cs` | 20 | Жизненный цикл IDE MCP-хоста: `ide_ping`, перезапуск внешних MCP и stdio-сессии Cursor ACP. |
@@ -111,7 +113,8 @@
 | `IdeMcpCommandExecutor.Handlers.DapDebug.cs` | 112 | DAP / отладка. |
 | `IdeMcpCommandExecutor.Handlers.DebuggerUi.cs` | 57 | Поверхность отладки. |
 | `IdeMcpCommandExecutor.Handlers.Editor.cs` | 108 | Редактор. |
-| `IdeMcpCommandExecutor.Handlers.PowerDocuments.cs` | 266 | Power / документы. |
+| `IdeMcpCommandExecutor.Handlers.PowerDocuments.Documents.cs` | 68 | MCP-хендлеры вкладок документов: переоткрытие, активация, закрепление, перенос по группам редакторов. |
+| `IdeMcpCommandExecutor.Handlers.PowerDocuments.FocusPowerAgent.cs` | 203 | MCP-хендлеры Power / фокус-шагов, автономного агента, чата и установки модели Ollama. |
 | `Generated/IdeMcpCommandExecutor.Generated.g.cs` | 108 | Сгенерированные хендлеры MCP → `IIdeMcpActions` (`CascadeIDE.ProtocolDocGen`). |
 
 <!-- AUTO:MAIN-WINDOW-SLICE:EXEC-TABLE:END -->
@@ -309,3 +312,6 @@
 - **v1.41f** — Relay-команды: нарезка **`MainWindowViewModel.RelayCommands`** на **`RelayCommands.Shell`** / **`Layout`** / **`Documents`** / **`UiMode`** (+ **`RelayCommands.Debug`** без изменений логики); **`ApplyMfdRegionExpanded`** / **`ApplyPfdRegionExpanded`** вместо прямых присваиваний (CASCOPE003).
 - **v1.41g** — MCP executor: **`IdeMcpCommandExecutor.Handlers.Chrome`** разнесён на **`Chrome.OutputFocus`** / **`Chrome.UiVisibility`** / **`Chrome.MenuToolbar`** (регистрация хендлеров без изменения поведения).
 - **v1.41h** — Главное окно: тело конструктора вынесено в **`MainWindowViewModel.ShellConstruction`**; **CASCOPE003** — в белом списке **`ShellConstruction`** (наряду с `MainWindowViewModel.cs`).
+- **v1.41i** — MCP executor: **`IdeMcpCommandExecutor.Handlers.PowerDocuments`** разнесён на **`PowerDocuments.FocusPowerAgent`** (фокус, автономность, чат, Ollama) и **`PowerDocuments.Documents`** (вкладки документов).
+- **v1.41j** — MCP **`IIdeMcpActions`**: **`IdeMcpActions.BuildTest`** разнесён на **`BuildTest.Build`** (диагностики, дерево решения, сборка, structured, code cleanup) и **`BuildTest.Tests`** (тесты и **`PublishIdeMcpTestRunMutation`**).
+- **v1.41k** — MCP UI automation: **`IdeMcpActions.UiAutomation`** разнесён на **`UiAutomation.EditorPreview`** (редактор, брейкпоинты, превью) и **`UiAutomation.Providers`** (подтверждения, тема, провайдеры контролов и чата).
