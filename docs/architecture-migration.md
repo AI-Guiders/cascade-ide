@@ -17,7 +17,7 @@
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:BEGIN -->
 
-`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~7k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~5.9k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.1k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
+`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~7k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~5.8k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.1k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:END -->
 
@@ -84,7 +84,7 @@
 | `MainWindowViewModel.ShellState.RegionAndContour.cs` | 63 | Часть `MainWindowViewModel`: регионы MainGrid и видимость страниц вторичного контура MFD. |
 | `MainWindowViewModel.ShellState.UiSessionChrome.cs` | 68 | Часть `MainWindowViewModel`: режим UI, прогресс сборки на полосе, палитра, снимок раскладки. |
 | `MainWindowViewModel.SolutionBuild.cs` | 132 | Сборка, `BuildOutputPanel`. |
-| `MainWindowViewModel.StartupProject.cs` | 229 | Стартовый проект. |
+| `MainWindowViewModel.StartupProject.cs` | 172 | Стартовый проект. |
 | `MainWindowViewModel.UiGitWorkspace.cs` | 141 | Git + workspace UI. |
 | `MainWindowViewModel.ViewBridge.cs` | 62 | Колбэки и провайдеры, которые View подставляет в главный VM (диалоги, UI automation). |
 | `MainWindowViewModel.WorkspaceNavigationMap.cs` | 137 | Слот Pfd: отображение карты намерений / `CodeNavigationMapSubgraphDocument` (те же данные, что JSON MCP). Граф подграфа — не синоним `instrument_id`, см. ADR 0065. По доменам: карта намерений (в т.ч. control flow) — CodeNavigation; зависимости файлов — WorkspaceNavigation; submodules — дерево/GitMap (ADR 0062). |
@@ -295,3 +295,4 @@
 - **v1.40j** — палитра команд: типы строки списка **`IdeCommandPaletteRowKind`** / **`IdeCommandPaletteRowViewModel`** вынесены в **`ViewModels/IdeCommandPaletteRowViewModel.cs`**; **`MainWindowViewModel.CommandPalette.cs`** остаётся логикой фильтрации и исполнения.
 - **v1.40k** — Launch / MCP: **`DebugLaunchByProfileMcpOrchestrator`** (`Features/Launch/Application`) — сценарий **`debug_launch`** по `target_path` или профилю без длинного тела в **`MainWindowViewModel.StartupProject`**; HCI: **`HybridIndexHisPresentationProjection.LampItem`** + тесты, **`MainWindowViewModel.HybridIndex`** — однострочный геттер.
 - **v1.40l** — Workspace: **`SolutionLoadCrashLog`** (`Features/Workspace/Application`) — запись **`LoadSolution`** crash в **`.cascade-ide/crash-log.txt`** вне **`MainWindowViewModel.SolutionBuild`**; штамп UTC через **`InvariantCulture`**.
+- **v1.41a** — Launch / F5: **`DebugLaunchForF5Orchestrator`** (`Features/Launch/Application`) — pre-resolve + MSBuild для F5 вне **`MainWindowViewModel.StartupProject`**; **`LaunchProjectPathResolver.NormalizeExistingProjectFileFullPath`** (DAL) — проверка существования стартового `.csproj` без `File.Exists` в Application-оркестраторе (CASCOPE031).
