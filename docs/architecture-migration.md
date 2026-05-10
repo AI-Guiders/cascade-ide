@@ -67,7 +67,7 @@
 | `MainWindowViewModel.MarkdownLsp.cs` | 103 | Запуск/перезапуск Markdown LSP. |
 | `MainWindowViewModel.McpBreakpointReveal.cs` | 62 | MCP: постановка брейкпоинта с загрузкой решения и показом строки в редакторе. |
 | `MainWindowViewModel.MfdShell.cs` | 57 | Оболочка Mfd: одна активная страница; навигация — команды и палитра. Якорь на экране задаётся presentation (зона Mfd в main и/или окно-хост). |
-| `MainWindowViewModel.Presentation.cs` | 276 | Вычисляемые свойства разметки, Workspace Health и видимости панелей (режимы UI). |
+| `MainWindowViewModel.Presentation.cs` | 273 | Вычисляемые свойства разметки, Workspace Health и видимости панелей (режимы UI). |
 | `MainWindowViewModel.PresentationLayout.CockpitSurfaceSnapshot.cs` | 8 | Сборка `CockpitSurfaceState` главного окна (`Build`). |
 | `MainWindowViewModel.PresentationLayout.cs` | 91 | ADR 0017: строка `presentation` и второй `TopLevel` — `MfdHostWindow` с полным вторичным контуром (п. 8). |
 | `MainWindowViewModel.PresentationLayout.HostShell.cs` | 47 | События «окно-хост открыло полный контур» — скрытие колонок в main (`PresentationLayout`). |
@@ -298,3 +298,4 @@
 - **v1.41a** — Launch / F5: **`DebugLaunchForF5Orchestrator`** (`Features/Launch/Application`) — pre-resolve + MSBuild для F5 вне **`MainWindowViewModel.StartupProject`**; **`LaunchProjectPathResolver.NormalizeExistingProjectFileFullPath`** (DAL) — проверка существования стартового `.csproj` без `File.Exists` в Application-оркестраторе (CASCOPE031).
 - **v1.41b** — Палитра команд: **`IdeCommandPaletteFilterOrchestrator`** / **`IdeCommandPaletteExecutionOrchestrator`** + **`CommandPaletteGoToAsyncHandle`** (`Features/Search/Application`) — фильтрация (каталог / melody / go-to + ripgrep) и исполнение выбора вне **`MainWindowViewModel.CommandPalette`**.
 - **v1.41c** — CascadeChord (ADR 0060): **`CascadeChordIntentSession`** (`Features/Shell/Application`) — фаза, хвост, таймер и разбор клавиш; **`MainWindowViewModel.CascadeChord`** — привязки и туннель к сессии.
+- **v1.41d** — Presentation: **`MainWindowPresentationSurfaceProjection.ComposeHostSurfaceFrame`** — сборка **`MainWindowHostSurfaceFrame`** по **`IMainWindowHostSurfaceInput`** и нормализованному UI-режиму вне **`MainWindowViewModel.Presentation`**.
