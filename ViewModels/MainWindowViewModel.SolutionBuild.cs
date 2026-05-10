@@ -1,12 +1,9 @@
-using System.Collections.Generic;
 using System.IO;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using CascadeIDE.Services;
 using CascadeIDE.Cockpit.DataBus;
-using Avalonia.Threading;
 using CascadeIDE.Features.Build.Application;
+using CascadeIDE.Features.Workspace.Application;
 using CascadeIDE.Models;
 using CommunityToolkit.Mvvm.Input;
 
@@ -113,45 +110,7 @@ public partial class MainWindowViewModel
         {
             await UiScheduler.Default.InvokeAsync(() =>
                 Workspace.SolutionLoadError = "Ошибка загрузки решения: " + ex.Message);
-            TryLogLoadSolutionCrash(path, ex);
-        }
-    }
-
-    private void TryLogLoadSolutionCrash(string? solutionPath, Exception ex)
-    {
-        try
-        {
-            var baseDir = "";
-            if (!string.IsNullOrWhiteSpace(solutionPath))
-            {
-                try
-                {
-                    var full = CanonicalFilePath.Normalize(solutionPath);
-                    baseDir = File.Exists(full) ? (Path.GetDirectoryName(full) ?? "") : full;
-                }
-                catch
-                {
-                    baseDir = "";
-                }
-            }
-
-            if (string.IsNullOrWhiteSpace(baseDir))
-                baseDir = Environment.CurrentDirectory;
-
-            var logDir = Path.Combine(baseDir, ".cascade-ide");
-            Directory.CreateDirectory(logDir);
-            var logPath = Path.Combine(logDir, "crash-log.txt");
-            var stamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff 'UTC'");
-            var payload =
-                $"[{stamp}] LoadSolution crash{Environment.NewLine}" +
-                $"solution: {solutionPath}{Environment.NewLine}" +
-                $"{ex}{Environment.NewLine}" +
-                $"---{Environment.NewLine}";
-            File.AppendAllText(logPath, payload);
-        }
-        catch
-        {
-            // Do not throw from crash logger.
+            SolutionLoadCrashLog.TryAppend(path, ex);
         }
     }
 
