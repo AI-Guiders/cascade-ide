@@ -1,10 +1,12 @@
-# AVLN2000 Recovery Checklist (submodule/remote sync)
+# AVLN2000 Recovery Checklist (NuGet + родительские submodules)
 
 ## Purpose
 
-Run this checklist when `AVLN2000` reappears after a known fix was already made in `cascade-ide`, or when parent repos show unexpected submodule drift.
+Run this checklist when `AVLN2000` reappears after a known fix was already made in **`AIGuiders.AvaloniaEdit`** (или в исходниках форка), or when parent repos show unexpected submodule drift for **`cascade-ide` itself**.
 
-Root cause pattern: `cascade-ide` fix exists in one remote/history, but parent repos still reference an older gitlink, or `main` differs across remotes.
+**Важно:** в репозитории CascadeIDE **нет** субмодуля `externals/avaloniaedit` — редактор подключается **NuGet-пакетами** (`CascadeIDE.csproj`). Патчи в исходниках ведут в отдельном клоне форка (типичный путь машины: **`D:\Experiments\AvaloniaEdit`** → push → публикация на nuget.org → bump версии пакетов в `CascadeIDE.csproj`).
+
+Root cause pattern для **родителей** `open` / workspace: `cascade-ide` fix exists in one remote/history, but parent repos still reference an older gitlink, or `main` differs across remotes.
 
 ## Preconditions
 

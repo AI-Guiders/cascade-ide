@@ -26,7 +26,7 @@ dotnet run
 
 **Текущее состояние:**
 
-- **Редактор:** `AvaloniaEdit` + TextMate-подсветка (включая C#), выделение диапазонов, применение точечных правок из MCP.
+- **Редактор:** `AvaloniaEdit` + TextMate-подсветка (включая C#), выделение диапазонов, применение точечных правок из MCP. Пакеты с nuget.org — **`AIGuiders.AvaloniaEdit`** / **`AIGuiders.AvaloniaEdit.TextMate`** (форк с патчами под CascadeIDE); исходники и CI публикации — репозиторий [KarataevDmitry/AvaloniaEdit](https://github.com/KarataevDmitry/AvaloniaEdit). Для локальной разработки форка удобно отдельное дерево, например **`D:\Experiments\AvaloniaEdit`**.
 - **Чат с моделью:** правая панель — провайдеры Ollama/OpenAI/Anthropic/DeepSeek, выбор модели, история сообщений и стриминг ответа.
 - **Дерево решения:** левая панель — открытие `.slnx/.sln`, проекты/файлы в дереве; клик открывает файл в редакторе.
 - **Нативная поддержка slnx:** `SolutionParser` загружает `.slnx` (XML) и `.sln` (текстовый формат).

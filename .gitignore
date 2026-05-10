@@ -38,4 +38,4 @@ docs/adr/_patch_*.py
 .tools/cursor-agent-package/
 .tools/acp-registry-snapshot.json
 
-# AvaloniaEdit: git submodule → externals/avaloniaedit (см. .gitmodules).
+# Редактор AvaloniaEdit: NuGet AIGuiders.AvaloniaEdit*; исходники форка — отдельный клон (не в этом репо).
