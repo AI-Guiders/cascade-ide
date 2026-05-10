@@ -29,6 +29,7 @@ public sealed class MfdShellPageAllowanceProjectionTests
     {
         Assert.True(MfdShellPageAllowanceProjection.IsAllowed(MfdShellPage.RelatedFiles, AllDenied));
         Assert.True(MfdShellPageAllowanceProjection.IsAllowed(MfdShellPage.HybridIndex, AllDenied));
+        Assert.True(MfdShellPageAllowanceProjection.IsAllowed(MfdShellPage.WebAiPortal, AllDenied));
     }
 
     [Fact]
