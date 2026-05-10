@@ -1,6 +1,6 @@
 #nullable enable
-using CascadeIDE.Models;
 using CascadeIDE.Features.IdeMcp.Application;
+using CascadeIDE.Models;
 using CommunityToolkit.Mvvm.Input;
 
 namespace CascadeIDE.ViewModels;
@@ -18,9 +18,8 @@ public partial class MainWindowViewModel
 
     void Services.IIdeMcpActions.RemoveBreakpoint(string filePath, int line)
     {
-        if (IdeMcpUiAutomationOrchestrator.ShouldSkipRemoveBreakpoint(filePath, line))
+        if (!IdeMcpUiAutomationOrchestrator.TryGetRemoveBreakpointNormalizedPath(filePath, line, out var path))
             return;
-        var path = IdeMcpUiAutomationOrchestrator.NormalizeBreakpointFilePath(filePath!);
         var ws = GetWorkspacePath();
         if (!string.IsNullOrEmpty(ws))
             BreakpointsFileService.RemoveBreakpointForBundledSampleTarget(ws, path, line);
@@ -31,12 +30,13 @@ public partial class MainWindowViewModel
     /// <summary>Переключить брейкпоинт в .dotnet-debug-mcp-breakpoints.json для текущего файла и строки (клик по полю в редакторе).</summary>
     public void ToggleBreakpointInFile(int line)
     {
-        if (line < 1 || string.IsNullOrEmpty(CurrentFilePath))
+        if (IdeMcpUiAutomationOrchestrator.ShouldSkipToggleBreakpointInEditor(line, CurrentFilePath))
             return;
         var ws = GetWorkspacePath();
         if (string.IsNullOrEmpty(ws))
             return;
-        BreakpointsFileService.ToggleBreakpoint(ws, CurrentFilePath, line);
+        var filePath = CurrentFilePath!;
+        BreakpointsFileService.ToggleBreakpoint(ws, filePath, line);
         NotifyBreakpointGlyphBindings();
         ResyncDapBreakpointsFireAndForget();
     }
@@ -138,21 +138,27 @@ public partial class MainWindowViewModel
             IdeMcpUiAutomationOrchestrator.DefaultProviderMissingMessage());
 
     async Task<string> Services.IIdeMcpActions.SelectChatMessageAsync(int index) =>
-        await UiScheduler.Default.InvokeAsync(() => ChatPanel.SelectMessageByIndex(index));
+        await IdeMcpUiAutomationOrchestrator.InvokeStringResultOnUiAsync(
+            UiScheduler.Default,
+            () => ChatPanel.SelectMessageByIndex(index));
 
     async Task<string> Services.IIdeMcpActions.GetSelectedChatMessageAsync() =>
-        await UiScheduler.Default.InvokeAsync(ChatPanel.GetSelectedMessageJson);
+        await IdeMcpUiAutomationOrchestrator.InvokeStringResultOnUiAsync(
+            UiScheduler.Default,
+            ChatPanel.GetSelectedMessageJson);
 
     async Task<string> Services.IIdeMcpActions.EditChatAssistantMessageAsync(string messageId, string newContent, string? reason) =>
-        await UiScheduler.Default.InvokeAsync(() =>
-        {
-            if (!ChatMessageId.TryParse(messageId, out var id))
-                return IdeMcpUiAutomationOrchestrator.InvalidMessageIdJson();
-            return ChatPanel.EditAssistantMessageById(id, IdeMcpUiAutomationOrchestrator.NormalizeTextInput(newContent), reason);
-        });
+        await IdeMcpUiAutomationOrchestrator.EditChatAssistantMessageOnUiAsync(
+            UiScheduler.Default,
+            messageId,
+            newContent,
+            reason,
+            ChatPanel.EditAssistantMessageById);
 
     async Task<string> Services.IIdeMcpActions.ExportChatReadableAsync(bool writeFile, string? fileName) =>
-        await UiScheduler.Default.InvokeAsync(() => ChatPanel.ExportReadableMarkdown(writeFile, fileName));
+        await IdeMcpUiAutomationOrchestrator.InvokeStringResultOnUiAsync(
+            UiScheduler.Default,
+            () => ChatPanel.ExportReadableMarkdown(writeFile, fileName));
 
     async Task<string> Services.IIdeMcpActions.SetFocusAsync(string? controlName) =>
         await IdeMcpUiAutomationOrchestrator.InvokeProviderOrMessageAsync(

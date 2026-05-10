@@ -1,4 +1,6 @@
+using System.Diagnostics.CodeAnalysis;
 using CascadeIDE.Contracts;
+using CascadeIDE.Models;
 
 namespace CascadeIDE.Features.IdeMcp.Application;
 
@@ -34,8 +36,43 @@ public static class IdeMcpUiAutomationOrchestrator
     public static bool ShouldSkipRemoveBreakpoint(string? filePath, int line) =>
         string.IsNullOrEmpty(filePath) || line < 1;
 
+    /// <summary>После guard — нормализованный путь для <c>BreakpointsFileService</c> (MCP <c>remove_breakpoint</c>).</summary>
+    public static bool TryGetRemoveBreakpointNormalizedPath(
+        string? filePath,
+        int line,
+        [NotNullWhen(true)] out string? normalizedPath)
+    {
+        normalizedPath = null;
+        if (ShouldSkipRemoveBreakpoint(filePath, line))
+            return false;
+        normalizedPath = NormalizeBreakpointFilePath(filePath!);
+        return true;
+    }
+
+    /// <summary>Клик по gutter / toggle — нет строки или нет текущего файла.</summary>
+    public static bool ShouldSkipToggleBreakpointInEditor(int line, string? currentFilePath) =>
+        line < 1 || string.IsNullOrEmpty(currentFilePath);
+
     public static string NormalizeBreakpointFilePath(string filePath) =>
         CanonicalFilePath.Normalize(filePath);
+
+    /// <summary>MCP/чат: результат со строкой JSON, только на UI-потоке.</summary>
+    public static Task<string> InvokeStringResultOnUiAsync(IUiScheduler ui, Func<string> onUi) =>
+        ui.InvokeAsync(onUi);
+
+    /// <summary>MCP <c>edit_chat_assistant_message</c>: разбор id и нормализация текста на UI-потоке.</summary>
+    public static Task<string> EditChatAssistantMessageOnUiAsync(
+        IUiScheduler ui,
+        string messageId,
+        string newContent,
+        string? reason,
+        Func<Guid, string, string?, string> editOnUi) =>
+        ui.InvokeAsync(() =>
+        {
+            if (!ChatMessageId.TryParse(messageId, out var id))
+                return InvalidMessageIdJson();
+            return editOnUi(id, NormalizeTextInput(newContent), reason);
+        });
 
     public static async Task<string> InvokeJsonProviderOrDefaultAsync(
         IUiScheduler ui,

@@ -57,7 +57,7 @@
 | `MainWindowViewModel.IdeMcpActions.Git.cs` | 42 | MCP: git (`IdeMcpGitWorkspaceSession`). |
 | `MainWindowViewModel.IdeMcpActions.HybridCodebaseIndex.cs` | 103 | MCP / ide_execute_command: Hybrid Codebase Index (имена команд как у внешнего MCP). |
 | `MainWindowViewModel.IdeMcpActions.Navigation.cs` | 61 | MCP: семантическая навигация (ADR 0039). |
-| `MainWindowViewModel.IdeMcpActions.UiAutomation.cs` | 153 | MCP: UI automation. |
+| `MainWindowViewModel.IdeMcpActions.UiAutomation.cs` | 159 | MCP: UI automation. |
 | `MainWindowViewModel.IdeMcpActions.Web.cs` | 11 | Реализация `IIdeMcpActions`: публичный веб-запрос (DuckDuckGo Instant Answer) и загрузка публичного URL. |
 | `MainWindowViewModel.IdeMcpActions.Workspace.cs` | 90 | MCP: workspace. |
 | `MainWindowViewModel.IdeMcpHostLifecycle.cs` | 20 | Жизненный цикл IDE MCP-хоста: `ide_ping`, перезапуск внешних MCP и stdio-сессии Cursor ACP. |
@@ -291,3 +291,4 @@
 - **v1.40f** — расширение **`MainWindowPresentationSurfaceProjection`** (split/Mount-style/IDE Health mount) + **`MainWindowPresentationDapProjection`**; VM без локальных помощников резолва mount-style.
 - **v1.40g** — **`IMainWindowHostSurfaceInput`** + проекция host surface без типа VM; связность Cockpit → ViewModels ослаблена на границе shell/host кадра.
 - **v1.40h** — MCP **`BuildAsync`** / **`RunCodeCleanupAsync`**: общий каркас **`WithIdeMcpPublishedBuildStateAsync`** (пара **`BuildStateChanged`** на шину IDE Health, ADR 0099) вместо дублирующего try/finally в **`MainWindowViewModel.IdeMcpActions.BuildTest`**.
+- **v1.40i** — MCP UI automation: **`IdeMcpUiAutomationOrchestrator`** — **`TryGetRemoveBreakpointNormalizedPath`**, **`ShouldSkipToggleBreakpointInEditor`**, **`InvokeStringResultOnUiAsync`**, **`EditChatAssistantMessageOnUiAsync`**; **`MainWindowViewModel.IdeMcpActions.UiAutomation`** короче.
