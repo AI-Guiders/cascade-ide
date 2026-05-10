@@ -1,8 +1,5 @@
-using System.IO;
 using CascadeIDE.Cockpit.DataBus;
 using CascadeIDE.Features.HybridIndex.Application;
-using CascadeIDE.Features.Os.DataAcquisition;
-using CascadeIDE.Features.Workspace.Application;
 using CascadeIDE.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -116,34 +113,8 @@ public partial class MainWindowViewModel
     public string HybridIndexSolutionShortText => HybridIndexHisPathDisplayShortener.ShortenLikeEcam(HybridIndexSolutionPathText);
     public string HybridIndexDatabaseShortText => HybridIndexHisPathDisplayShortener.ShortenLikeEcam(HybridIndexDatabasePathText);
 
-    public AnnunciatorLampItem HybridIndexLampItem
-    {
-        get
-        {
-            if (HybridIndexLast is null)
-                return new AnnunciatorLampItem(
-                    Id: "hci",
-                    Title: "HCI",
-                    Detail: "No data yet.",
-                    Level: AnnunciatorLampLevel.Advisory,
-                    LampShortLabel: "HCI");
-
-            var level = string.IsNullOrWhiteSpace(HybridIndexLast.LastError)
-                ? AnnunciatorLampLevel.Ok
-                : AnnunciatorLampLevel.Caution;
-
-            var detail = string.IsNullOrWhiteSpace(HybridIndexLast.LastError)
-                ? "OK"
-                : HybridIndexLast.LastError!;
-
-            return new AnnunciatorLampItem(
-                Id: "hci",
-                Title: "HCI",
-                Detail: detail,
-                Level: level,
-                LampShortLabel: "HCI");
-        }
-    }
+    public AnnunciatorLampItem HybridIndexLampItem =>
+        HybridIndexHisPresentationProjection.LampItem(HybridIndexLast);
 
     public string HybridIndexMsgLine1 =>
         $"HCI {HybridIndexLampText}  DOCS {HybridIndexDocumentCountText}  FRESH {HybridIndexFreshnessEcamText}";

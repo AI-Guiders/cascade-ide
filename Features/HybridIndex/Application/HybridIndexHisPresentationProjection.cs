@@ -1,6 +1,7 @@
 using System.Globalization;
 using CascadeIDE.Cockpit.DataBus;
 using CascadeIDE.Contracts;
+using CascadeIDE.Models;
 
 namespace CascadeIDE.Features.HybridIndex.Application;
 
@@ -99,4 +100,32 @@ public static class HybridIndexHisPresentationProjection
 
     public static string LastErrorOrDash(string? lastError) =>
         string.IsNullOrWhiteSpace(lastError) ? "—" : lastError!;
+
+    public static AnnunciatorLampItem LampItem(HybridIndexStateChanged? last)
+    {
+        if (last is null)
+        {
+            return new AnnunciatorLampItem(
+                Id: "hci",
+                Title: "HCI",
+                Detail: "No data yet.",
+                Level: AnnunciatorLampLevel.Advisory,
+                LampShortLabel: "HCI");
+        }
+
+        var level = string.IsNullOrWhiteSpace(last.LastError)
+            ? AnnunciatorLampLevel.Ok
+            : AnnunciatorLampLevel.Caution;
+
+        var detail = string.IsNullOrWhiteSpace(last.LastError)
+            ? "OK"
+            : last.LastError!;
+
+        return new AnnunciatorLampItem(
+            Id: "hci",
+            Title: "HCI",
+            Detail: detail,
+            Level: level,
+            LampShortLabel: "HCI");
+    }
 }

@@ -1,8 +1,5 @@
-using System.Collections.ObjectModel;
 using CascadeIDE.Cockpit.DataBus;
 using CascadeIDE.Features.Launch.Application;
-using CascadeIDE.Features.Workspace.Application;
-using CascadeIDE.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -252,73 +249,21 @@ public partial class MainWindowViewModel
     /// <summary>
     /// Режим B <c>debug_launch</c> (MCP): <paramref name="profileName"/> или активный профиль; при явном <paramref name="mcpProgramArgs"/> — вместо аргументов из профиля.
     /// </summary>
-    internal async Task<string> DebugLaunchByProfileOrResolvedTargetAsync(
+    internal Task<string> DebugLaunchByProfileOrResolvedTargetAsync(
         string workspacePath,
         string? targetPath,
         string? profileName,
         string? netcoredbgPath,
         IReadOnlyList<string>? mcpProgramArgs,
-        CancellationToken cancellationToken = default)
-    {
-        if (!string.IsNullOrWhiteSpace(targetPath))
-        {
-            return await DapDebug.LaunchAsync(
-                workspacePath,
-                targetPath!,
-                netcoredbgPath,
-                mcpProgramArgs,
-                environment: null,
-                workingDirectoryOverride: null,
-                cancellationToken).ConfigureAwait(false);
-        }
-
-        var sln = DebugWorkspacePath.TryResolveWorkspaceToSolutionPath(workspacePath);
-        if (string.IsNullOrEmpty(sln))
-            return "# Error: no_solution_in_workspace: укажи каталог с .sln или путь к .sln, либо target_path к .dll.";
-
-        var solutionDir = Services.BreakpointsFileService.GetWorkspaceRoot(sln);
-        if (string.IsNullOrEmpty(solutionDir))
-            return "# Error: workspace_root_unresolved.";
-
-        var preResolve = LaunchPreResolvePipelineUnit.Default.Compose(
-            sln,
-            explicitProfileName: profileName,
-            solutionDirectory: solutionDir,
-            startupProjectFullPath: null);
-
-        var resolvedProfile = preResolve.Profile;
-        var readiness = preResolve.Readiness;
-
-        if (!readiness.CanAttemptResolve || readiness.Source != LaunchReadinessSource.Profile || resolvedProfile is not { } launchProfile)
-        {
-            return preResolve.McpResolveError
-                ?? LaunchMcpErrorFormatUnit.Default.FormatResolveFailure(
-                    readiness,
-                    explicitProfileName: profileName,
-                    solutionDirectory: solutionDir);
-        }
-
-        var (target, err) = await MsBuildDebugTargetResolver
-            .TryResolveAsync(readiness.SelectedProjectFullPath!, _dotnetRunner, launchProfile.Configuration, cancellationToken)
-            .ConfigureAwait(false);
-        if (string.IsNullOrEmpty(target))
-            return "# Error: " + (err ?? "msbuild_unresolved");
-
-        var prg = mcpProgramArgs is { Count: > 0 } ? mcpProgramArgs : launchProfile.ProgramArgs;
-        IReadOnlyDictionary<string, string>? env = DebugLaunchFromProfile.NonEmptyEnvironmentOrNull(launchProfile);
-        var launchResult = await DapDebug.LaunchAsync(
+        CancellationToken cancellationToken = default) =>
+        DebugLaunchByProfileMcpOrchestrator.RunAsync(
             workspacePath,
-            target,
+            targetPath,
+            profileName,
             netcoredbgPath,
-            prg,
-            env,
-            launchProfile.WorkingDirectoryRelative,
-            cancellationToken).ConfigureAwait(false);
-        if (launchProfile.OpenLaunchBrowser)
-            KestrelLaunchBrowser.TryOpenAfterLaunch(
-                DebugLaunchFromProfile.NonEmptyEnvironmentOrNull(launchProfile),
-                launchProfile.LaunchUrl);
-        return launchResult;
-    }
+            mcpProgramArgs,
+            _dotnetRunner,
+            DapDebug,
+            cancellationToken);
 
 }

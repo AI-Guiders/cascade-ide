@@ -1,6 +1,7 @@
 using System.Globalization;
 using CascadeIDE.Cockpit.DataBus;
 using CascadeIDE.Features.HybridIndex.Application;
+using CascadeIDE.Models;
 using Xunit;
 
 namespace CascadeIDE.Tests;
@@ -10,6 +11,26 @@ public sealed class HybridIndexHisPresentationProjectionTests
     [Fact]
     public void Lamp_empty_state_is_no_data() =>
         Assert.Equal("NO DATA", HybridIndexHisPresentationProjection.LampText(null));
+
+    [Fact]
+    public void Lamp_item_null_is_advisory_no_data_yet()
+    {
+        var item = HybridIndexHisPresentationProjection.LampItem(null);
+        Assert.Equal("hci", item.Id);
+        Assert.Equal(AnnunciatorLampLevel.Advisory, item.Level);
+        Assert.Contains("No data", item.Detail, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("", AnnunciatorLampLevel.Ok, "OK")]
+    [InlineData(" ", AnnunciatorLampLevel.Ok, "OK")]
+    [InlineData("fail", AnnunciatorLampLevel.Caution, "fail")]
+    public void Lamp_item_follows_last_error(string lastError, AnnunciatorLampLevel level, string detailContains)
+    {
+        var item = HybridIndexHisPresentationProjection.LampItem(Make(lastError));
+        Assert.Equal(level, item.Level);
+        Assert.Contains(detailContains, item.Detail, StringComparison.Ordinal);
+    }
 
     [Fact]
     public void State_empty_is_dash() =>
