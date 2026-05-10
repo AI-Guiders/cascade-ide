@@ -264,7 +264,12 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.PowerDocuments.cs">
+    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.PowerDocuments.Documents.cs">
+      <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.PowerDocuments.FocusPowerAgent.cs">
       <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
     </Compile>
   </ItemGroup>
@@ -307,7 +312,12 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="ViewModels\MainWindowViewModel.IdeMcpActions.BuildTest.cs">
+    <Compile Update="ViewModels\MainWindowViewModel.IdeMcpActions.BuildTest.Build.cs">
+      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="ViewModels\MainWindowViewModel.IdeMcpActions.BuildTest.Tests.cs">
       <DependentUpon>MainWindowViewModel.cs</DependentUpon>
     </Compile>
   </ItemGroup>
@@ -327,7 +337,12 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="ViewModels\MainWindowViewModel.IdeMcpActions.UiAutomation.cs">
+    <Compile Update="ViewModels\MainWindowViewModel.IdeMcpActions.UiAutomation.EditorPreview.cs">
+      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="ViewModels\MainWindowViewModel.IdeMcpActions.UiAutomation.Providers.cs">
       <DependentUpon>MainWindowViewModel.cs</DependentUpon>
     </Compile>
   </ItemGroup>
