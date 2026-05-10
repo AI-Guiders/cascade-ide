@@ -80,13 +80,13 @@
     <ProjectReference Include="..\dotnet-build-test-mcp-repo\DotNetBuildTestParsers\DotNetBuildTestParsers.csproj" />
     <ProjectReference Include="..\agent-notes-core\AgentNotes.Core.csproj" />
     <ProjectReference Include="..\git-mcp-core\GitMcp.Core.csproj" />
-    <ProjectReference Include="..\dotnet-debug-core\DotnetDebug.Core.csproj" />
     <ProjectReference Include="..\hybrid-codebase-index\HybridCodebaseIndex.Core\HybridCodebaseIndex.Core.csproj" />
     <ProjectReference Include="CascadeIDE.Contracts\CascadeIDE.Contracts.csproj" />
     <!-- RoslynMcp передаёт RoslynMcpWorkspace=true: не ссылаться на локальный анализатор, иначе DLL в bin держит процесс MCP и ломает dotnet build. -->
     <ProjectReference Include="CascadeIDE.ArchitectureAnalyzers\CascadeIDE.ArchitectureAnalyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" Condition="'$(RoslynMcpWorkspace)'!='true'" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="AIGuiders.DotnetDebugMCP.Core" Version="0.1.0" />
     <PackageReference Include="Avalonia" Version="12.0.1" />
     <PackageReference Include="Avalonia.Controls.WebView" Version="12.0.0" />
     <PackageReference Include="Avalonia.Desktop" Version="12.0.1" />
