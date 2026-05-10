@@ -33,6 +33,11 @@ public static class IdeMcpServer
                         bool isError;
                         if (name == "ide_execute_command")
                             isError = text.StartsWith("Missing", StringComparison.Ordinal) || text.StartsWith("Unknown command", StringComparison.Ordinal) || text.StartsWith("Error", StringComparison.Ordinal);
+                        else if (string.Equals(name, "ide_create_blank_solution", StringComparison.Ordinal))
+                        {
+                            // Успех: «OK:» + абсолютный путь к .sln; иначе — текст ошибки (в т.ч. на русском).
+                            isError = !text.StartsWith("OK:", StringComparison.Ordinal);
+                        }
                         else
                         {
                             var isActionTool = name is "ide_open_file" or "ide_load_solution" or "ide_select" or "ide_set_breakpoint" or "ide_remove_breakpoint"
@@ -97,30 +102,11 @@ public static class IdeMcpServer
 
     private static async Task<string> CallExecuteCommand(IIdeMcpActions actions, IReadOnlyDictionary<string, JsonElement>? args, CancellationToken cancellationToken)
     {
-        var merged = MergeExecuteCommandArgs(args);
+        var merged = IdeExecuteCommandArgs.MergeNestedArgs(args);
         var commandId = merged is not null && merged.TryGetValue("command_id", out var cid) ? cid.GetString() : null;
         if (string.IsNullOrEmpty(commandId))
             return "Missing command_id";
         return await actions.ExecuteCommandAsync(commandId, merged, cancellationToken);
-    }
-
-    /// <summary>
-    /// Клиенты MCP часто шлют <c>{ "command_id": "…", "args": { "workspace_path": "…" } }</c> — сливаем вложенный объект с верхним уровнем (верхний уровень при конфликте важнее).
-    /// </summary>
-    private static IReadOnlyDictionary<string, JsonElement>? MergeExecuteCommandArgs(IReadOnlyDictionary<string, JsonElement>? args)
-    {
-        if (args is null || !args.TryGetValue("args", out var nested) || nested.ValueKind != JsonValueKind.Object)
-            return args;
-        var merged = new Dictionary<string, JsonElement>(StringComparer.Ordinal);
-        foreach (var prop in nested.EnumerateObject())
-            merged[prop.Name] = prop.Value;
-        foreach (var kv in args)
-        {
-            if (string.Equals(kv.Key, "args", StringComparison.Ordinal))
-                continue;
-            merged[kv.Key] = kv.Value;
-        }
-        return merged;
     }
 
 }
