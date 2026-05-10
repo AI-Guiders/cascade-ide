@@ -17,7 +17,7 @@
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:BEGIN -->
 
-`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~6.6k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~5.5k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.1k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
+`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~6.6k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~5.5k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.2k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:END -->
 
@@ -104,7 +104,9 @@
 |------|------------|------------|
 | `IdeMcpCommandExecutor.cs` | 51 | Диспетчер MCP-команд IDE: разбор args и вызов `IIdeMcpActions` / UI-команд главного окна. |
 | `IdeMcpCommandExecutor.Handlers.AgentNotes.cs` | 74 | Хендлеры agent-notes. |
-| `IdeMcpCommandExecutor.Handlers.Chrome.cs` | 366 | Хендлеры хрома / видимости. |
+| `IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.cs` | 183 | MCP-хендлеры меню и тулбара: открытие решения/папки/файла, темы, язык UI, группы редакторов, сборка. |
+| `IdeMcpCommandExecutor.Handlers.Chrome.OutputFocus.cs` | 29 | MCP-хендлеры вывода и фокуса: ping, перезапуск MCP-клиентов, фокус редактора, снимок окна. |
+| `IdeMcpCommandExecutor.Handlers.Chrome.UiVisibility.cs` | 168 | MCP-хендлеры видимости панелей, режима UI, PFD/MFD, навигации по страницам MFD и палитре команд. |
 | `IdeMcpCommandExecutor.Handlers.DapDebug.cs` | 112 | DAP / отладка. |
 | `IdeMcpCommandExecutor.Handlers.DebuggerUi.cs` | 57 | Поверхность отладки. |
 | `IdeMcpCommandExecutor.Handlers.Editor.cs` | 108 | Редактор. |
@@ -304,3 +306,4 @@
 - **v1.41d** — Presentation: **`MainWindowPresentationSurfaceProjection.ComposeHostSurfaceFrame`** — сборка **`MainWindowHostSurfaceFrame`** по **`IMainWindowHostSurfaceInput`** и нормализованному UI-режиму вне **`MainWindowViewModel.Presentation`**.
 - **v1.41e** — Настройки: **`ShellSettingsReactiveSideEffects`** (`Features/Settings/Application`) — длинные цепочки **внешний MCP / autonomous**, **AI mode / cloud provider**, **HCI index dir + scope** вместо тел в **`MainWindowViewModel.SettingsReactive`**.
 - **v1.41f** — Relay-команды: нарезка **`MainWindowViewModel.RelayCommands`** на **`RelayCommands.Shell`** / **`Layout`** / **`Documents`** / **`UiMode`** (+ **`RelayCommands.Debug`** без изменений логики); **`ApplyMfdRegionExpanded`** / **`ApplyPfdRegionExpanded`** вместо прямых присваиваний (CASCOPE003).
+- **v1.41g** — MCP executor: **`IdeMcpCommandExecutor.Handlers.Chrome`** разнесён на **`Chrome.OutputFocus`** / **`Chrome.UiVisibility`** / **`Chrome.MenuToolbar`** (регистрация хендлеров без изменения поведения).
