@@ -40,7 +40,9 @@ public sealed class WebAiPortalCommandBridge : ObservableObject
         {
             IdeCommands.GetEditorContentRange,
             IdeCommands.GetEditorState,
+            IdeCommands.CodebaseIndexStatus,
             IdeCommands.CodebaseIndexSearch,
+            IdeCommands.CodebaseIndexExplain,
             IdeCommands.GetCurrentFileDiagnostics,
         },
         StringComparer.Ordinal);

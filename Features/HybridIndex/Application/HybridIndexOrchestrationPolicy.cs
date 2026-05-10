@@ -43,8 +43,8 @@ public static class HybridIndexOrchestrationPolicy
     }
 
     /// <summary>
-    /// Manual reindex request from UI. Re-applies enablement (watcher may be off) and triggers a catch-up.
-    /// If watcher is enabled: <see cref="HybridIndexOrchestrator.Poke"/>. Otherwise: full reindex once.
+    /// Manual reindex request from UI. Re-applies enablement (watcher may be off) и всегда один полный проход in-proc
+    /// со снимком в DataBus; фоновый watcher при необходимости остаётся активен для последующих debounce-прогонов.
     /// </summary>
     public static Task TriggerReindexNowAsync(
         HybridIndexOrchestrator orchestrator,
@@ -60,12 +60,6 @@ public static class HybridIndexOrchestrationPolicy
 
         var enableWatcher = ShouldEnableWatcher(settings, chatMcpOnly);
         orchestrator.SetEnabled(hciWs, hciSln, enabled: enableWatcher, debounceMs: ResolveDebounceMs(settings));
-
-        if (enableWatcher)
-        {
-            orchestrator.Poke(hciWs, hciSln);
-            return Task.CompletedTask;
-        }
 
         return orchestrator.RunFullReindexAndPublishStatusAsync(hciWs, hciSln, cancellationToken);
     }

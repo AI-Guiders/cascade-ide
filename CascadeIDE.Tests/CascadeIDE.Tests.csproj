@@ -35,6 +35,15 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>CodeNavigation\presets.toml</Link>
     </None>
+    <!-- AiPrompts: промпт ADR 0108 веб-портала — см. WebAiPortalAdr0108PromptVerificationTests -->
+    <None Include="..\AiPrompts\web-ai-portal-bridge-adr0108.prompts.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>AiPrompts\web-ai-portal-bridge-adr0108.prompts.md</Link>
+    </None>
+    <None Include="..\AiPrompts\web-ai-portal-bridge-adr0108.chat-paste.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>AiPrompts\web-ai-portal-bridge-adr0108.chat-paste.txt</Link>
+    </None>
     <!-- Как у exe: Hotkeys/hotkeys.toml для тестов MainWindowHotkeyService (toggle_command_palette и т.д.). -->
     <None Include="..\Hotkeys\hotkeys.toml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

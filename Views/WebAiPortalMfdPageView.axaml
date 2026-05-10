@@ -18,9 +18,9 @@
                     Padding="8"
                     Background="#22000000"
                     CornerRadius="4">
-                <Grid ColumnDefinitions="Auto,*,Auto,Auto"
+                    <Grid ColumnDefinitions="Auto,*,Auto,Auto"
                       ColumnSpacing="10"
-                      RowDefinitions="Auto,Auto,Auto"
+                      RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto"
                       RowSpacing="8">
                     <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Text="URL" Opacity="0.85"/>
                     <TextBox Grid.Row="0" Grid.Column="1"
@@ -42,9 +42,37 @@
                               Content="Все write на сессию"
                               IsChecked="{Binding WebAiPortalBridge.AllowWritesForSession, Mode=TwoWay}"/>
 
+                    <CheckBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
+                              Content="Ответ IDE → буфер"
+                              IsChecked="{Binding WebAiPortalCopyFullBridgeResultToClipboard, Mode=TwoWay}"
+                              ToolTip.Tip="После моста текст в системный буфер. Если включён «Под лимит чата» и ответ длинный — вместо сырого JSON кладётся компакт с HCI." />
+                    <CheckBox Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2"
+                              Content="Подмешать в композитор (фокус на странице)"
+                              IsChecked="{Binding WebAiPortalTryInjectResultIntoFocusedComposer, Mode=TwoWay}"
+                              ToolTip.Tip="Курсор в поле ввода чата на странице; после ответа моста текст добавляется как эвристика (может не сработать на каждой вёрстке)."/>
+
+                    <CheckBox Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="4"
+                              Content="Под лимит чата (~1200): компакт + HCI вместо сырого JSON"
+                              IsChecked="{Binding WebAiPortalPreferCompactComposerForChat, Mode=TwoWay}"
+                              ToolTip.Tip="Ответы типа get_editor_state с большим превью ломают веб-чат. В буфер/композитор — короткая сводка и готовые json-cascade (codebase_index_search, codebase_index_status, explain, узкий read)." />
+
+                    <CheckBox Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="4"
+                              Content="Авто: последняя json-cascade на странице → мост (poll, без кнопки)"
+                              IsChecked="{Binding WebAiPortalAutoDomBridgePolling, Mode=TwoWay}"
+                              ToolTip.Tip="Раз в ~1 с IDE находит последний блок ```json-cascade с command_id в DOM и выполняет его (буфер/копипаст не нужны). Повтор того же payload не запускает мост заново до смены страницы. Отправить результат в поле чата сайта пользователь делает там (или «Подмешать в композитор»)." />
+
                     <Button Grid.Row="1" Grid.Column="2"
                             Content="Отозвать мост"
                             Click="OnRevokeBridgeClick"/>
+
+                    <Button Grid.Row="6"
+                            Grid.Column="0"
+                            Grid.ColumnSpan="4"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Center"
+                            Content="Выполнить команду: буфер → последняя на странице"
+                            Click="OnExecuteJsonCascadeFromClipboardClick"
+                            ToolTip.Tip="Ручной вариант ADR 0108: 1) fenced json-cascade или голый JSON с command_id в буфере; 2) иначе последний такой блок в pre/code на открытой странице (снизу в DOM)." />
                 </Grid>
             </Border>
 

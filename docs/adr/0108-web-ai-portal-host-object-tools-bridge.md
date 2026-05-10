@@ -36,6 +36,20 @@
 
 3. **Транспорт JSON** обязателен: расширение полей без пересборки моста; новые команды добавляются через **`IdeCommands`** и allowlist, а не через новые COM-методы.
 
+#### Рекомендуемый вывод модели: fenced `json-cascade`
+
+Готовый текст инструкций для вложения во внешний веб-чат оператора: **`AiPrompts/web-ai-portal-bridge-adr0108.prompts.md`** (секции `## web_portal_bridge_*`). Если веб-слой портит Markdown при копировании из истории чата — плоский вариант без разметки и с **однострочным** JSON как у буфера моста: **`AiPrompts/web-ai-portal-bridge-adr0108.chat-paste.txt`**.
+
+Чтобы отделить команду к IDE от произвольного fenced `json` в том же ответе, веб-слой договаривается с моделью: **один объект** `{ "command_id", "args" }` (тот же контракт, что у `ide_execute_command`) помещается в fenced-блок с **info string** **`json-cascade`**:
+
+````markdown
+```json-cascade
+{ "command_id": "codebase_index_search", "args": { "query": "Foo", "top_n": 10 } }
+```
+````
+
+Парсер в IDE: `WebAiPortalJsonCascadeFence.TryExtractFirst` → строка JSON → `invokeCSharpAction` / мост. Внутри JSON не должно быть закрывающей последовательности fence (обычно не встречается).
+
 ### 2.2. PoC-allowlist (белый список `command_id`)
 
 <a id="adr0108-p2"></a>
@@ -47,7 +61,7 @@
    | Семантика (удобно в обсуждении) | Канонический `command_id` в CascadeIDE |
    |--------------------------------|----------------------------------------|
    | чтение / просмотр контекста редактора (аналог «read») | `get_editor_content_range` (при необходимости в связке с `get_editor_state` для метаданных активного файла) |
-   | поиск по локальному индексу кода | `codebase_index_search` |
+   | поиск по локальному индексу кода | `codebase_index_search` · для стабильного потока в веб чат добавлены read-only **`codebase_index_status`**, **`codebase_index_explain`** (whitelist моста) |
    | диагностики по текущему файлу | `get_current_file_diagnostics` |
 
    Псевдонимы вроде `read_file` / `search_index` / `get_diagnostics` в продукте **не** являются вторым источником правды: при необходимости — только тонкий **алиас** в JS-слое, который маппится в таблицу выше.
@@ -145,3 +159,7 @@
 - **MFD:** `MfdShellPage.WebAiPortal`, представление `Views/WebAiPortalMfdPageView.axaml`.
 - **Мост:** `Features/WebAiPortal/Application/WebAiPortalCommandBridge.cs` → `IIdeMcpActions.ExecuteCommandAsync` с whitelist §2.2; транспорт из страницы — канал Avalonia `WebMessageReceived` / `invokeCSharpAction` (тело — тот же JSON с `command_id` и `args`). **AddHostObjectToScript** при необходимости синхронного JS↔C# на Windows — через `TryGetPlatformHandle` / `ICoreWebView2` (см. док. Avalonia «Embedding web content»), не блокирует M1.
 - **Навигация:** IDE-команда `show_web_ai_portal_page` → регион MFD + страница `WebAiPortal`.
+- **Ручное исполнение (буфер/кнопка):** кнопка «Выполнить команду: буфер → последняя на странице» (`WebAiPortalMfdPageView`) — (1) clipboard: fenced `json-cascade` **или** голый JSON `{ "command_id", … }` (частый кейс «копировать» в UI чата без backtick); (2) иначе `NativeWebView.InvokeScript`: последний подходящий блок в `pre` / голый `code` в DOM (`WebAiPortalLastCommandDomProbe`). Далее тот же контур, что и `invokeCSharpAction`; результат в `WebAiPortalLastBridgeResult`.
+- **Hands-free без копипаста и без этой кнопки:** чекбокс «Авто: последняя json-cascade на странице → мост (poll…)» при **согласии** и **мост включён** (`WebAiPortalMfdPageView`): `DispatcherTimer` ~1,1 с выполняет тот же DOM-probe (`WebAiPortalLastCommandDomProbe`); успешное исполнение **дедуплицируется** по каноническому JSON (`WebAiPortalBridgePayloadDedup`); при навигации дедуп сбрасывается — повтор той же команды на новой странице снова возможен. Probe учитывает как fenced ```json-cascade, так и **голый** маркер `json-cascade` + перевод строки + JSON (типично для Gemini / ИИ-поиска Google, где нет triple-backtickов в тексте сообщения); поиск выполняется и по `document.body.innerText`, не только по `pre`/`code`.
+- **Не** автоматизируется нажатие «Send» в UI вендора: при необходимости остаётся «Подмешать в композитор» или ручная отправка в поле чата сайта (ограничение DOM/политики, не блокер моста).
+- **Подмешивание ответа IDE в веб-чат (после успешного моста):** по флажкам — (1) текст в системный буфер; (2) опционально `InvokeScript` / `WebAiPortalComposerInjectScript` в фокус страницы. Если ответ **очень длинный** (типичный `get_editor_state` с большим превью) и включён режим **«под лимит чата (~1200)»** (по умолчанию): в буфер/композитор идёт не сырой JSON, а **компакт** с готовыми `json-cascade` для **HCI** (`codebase_index_search`, `codebase_index_status`, `codebase_index_explain`) и узких read (`get_editor_state` с `max_preview_chars: 0`, `get_editor_content_range` около каретки). Whitelist моста включает **`codebase_index_status`** и **`codebase_index_explain`** (read-only).

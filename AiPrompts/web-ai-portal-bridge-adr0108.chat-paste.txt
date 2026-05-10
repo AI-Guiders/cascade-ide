@@ -1,0 +1,33 @@
+CascadeIDE веб-портал + мост к IDE (ADR 0108).
+Норматив в репозитории: docs/adr/0108-web-ai-portal-host-object-tools-bridge.md
+
+ДЛЯ ЧЕГО ЭТОТ ФАЙЛ
+Многие веб-ИИ плохо держат Markdown из чата после копирования. Здесь почти нет разметки.
+Команда в IDE: ОДНА СТРОКА — JSON-объект. Без оформления в markdown (ни тройные кавычки, ни отдельный fenced-блок — веб-чат после копирования часто их портит).
+Мост CascadeIDE читает буфер как голый JSON с полем command_id, если это один объект в одной строке.
+
+Разрешённые command_id (whitelist, только чтение):
+get_editor_state
+get_editor_content_range
+get_current_file_diagnostics
+codebase_index_status
+codebase_index_search
+codebase_index_explain
+
+Правила коротко
+- Для кода и символов по репозиторию сначала HCI: codebase_index_status → codebase_index_search → при необходимости codebase_index_explain с hit_id из ответа поиска.
+- Не проси огромный дамп файла в чат: get_editor_state с "max_preview_chars": 0 или мало (сотни символов).
+- Узкий фрагмент открытого файла: get_editor_content_range с start_line и end_line (нумерация с 1).
+
+Ниже каждая строка с JSON — законченная команда для копипаста оператором целиком одной строкой.
+
+ПРИМЕРЫ КОМАНД (одна строка = один вызов):
+
+{"command_id":"codebase_index_status","args":{}}
+{"command_id":"codebase_index_search","args":{"query":"WebAiPortalCommandBridge","top_n":12}}
+{"command_id":"codebase_index_explain","args":{"hit_id":1}}
+{"command_id":"get_editor_state","args":{"max_preview_chars":0}}
+{"command_id":"get_editor_content_range","args":{"start_line":1,"end_line":80}}
+{"command_id":"get_current_file_diagnostics","args":{}}
+
+КОНЕЦ

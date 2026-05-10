@@ -1,0 +1,81 @@
+# WinExe win-x64. Соседние репозитории того же owner (как в monorepo open/).
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Тег для GitHub Release. Пусто — ZIP …-manual-<run_id>-… без релиза.'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+env:
+  DOTNET_VERSION: '10.0.x'
+  RID: win-x64
+  ARTIFACT_PREFIX: CascadeIDE
+  ZIP_LABEL: ${{ github.ref_type == 'tag' && github.ref_name || ((github.event.inputs.tag || '') != '' && github.event.inputs.tag || format('manual-{0}', github.run_id)) }}
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: cascade-ide
+
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/dotnet-build-test-mcp
+          path: dotnet-build-test-mcp-repo
+
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/hybrid-codebase-index
+          path: hybrid-codebase-index
+
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/git-mcp-core
+          path: git-mcp-core
+
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/agent-notes-core
+          path: agent-notes-core
+
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/dotnet-debug-core
+          path: dotnet-debug-core
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Publish (self-contained win-x64)
+        working-directory: cascade-ide
+        run: |
+          set -euo pipefail
+          mkdir -p ../dist
+          out="../publish/${{ env.RID }}"
+          dotnet publish CascadeIDE.csproj -c Release -r ${{ env.RID }} --self-contained true -o "$out"
+          (cd "$out" && zip -r "../../dist/${ARTIFACT_PREFIX}-${ZIP_LABEL}-${{ env.RID }}.zip" .)
+          (cd "$GITHUB_WORKSPACE/dist" && sha256sum *.zip > SHA256SUMS)
+
+      - name: GitHub Release
+        if: ${{ github.ref_type == 'tag' || (github.event_name == 'workflow_dispatch' && (github.event.inputs.tag || '') != '') }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || github.event.inputs.tag }}
+          generate_release_notes: true
+          files: |
+            dist/*.zip
+            dist/SHA256SUMS
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -55,6 +55,8 @@ public static partial class IdeCommandRegistry
             window: new MainWindowHotkeyVmBinding(MainWindowHotkeyVmBindingKind.ToggleCommandPalette));
 
         AddPalette(b, "show_environment_readiness_page", IdeCommands.ShowEnvironmentReadinessPage, "Готовность окружения (LSP, dotnet…)", "Вид");
+        AddPalette(b, "show_hybrid_index_page", IdeCommands.ShowHybridIndexPage, "Hybrid Codebase Index (регион Mfd)", "Вид");
+        AddPalette(b, "show_web_ai_portal_page", IdeCommands.ShowWebAiPortalPage, "Веб-портал AI (регион Mfd)", "Вид");
         AddPalette(b, "close_environment_readiness_page", IdeCommands.CloseEnvironmentReadinessPage, "Закрыть страницу готовности окружения", "Вид");
     }
 }

@@ -45,5 +45,7 @@ atb = "chat_show_thread_overview"
 ers = "show_environment_readiness_page"
 # Hybrid Codebase Index (домен h…)
 his = "show_hybrid_index_page"
+# Web AI portal (ADR 0108 WebView + host bridge; домен w…)
+wai = "show_web_ai_portal_page"
 # Terminal (домен t…)
 ts = "show_terminal_panel"
