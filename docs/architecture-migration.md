@@ -78,7 +78,7 @@
 | `MainWindowViewModel.RelayCommands.Debug.cs` | 144 | Relay: отладка. |
 | `MainWindowViewModel.RelayCommands.Documents.cs` | 65 | Relay: вкладки документов и группы. |
 | `MainWindowViewModel.RelayCommands.Layout.cs` | 64 | Relay: регионы, панели MFD, группы редакторов. |
-| `MainWindowViewModel.RelayCommands.Shell.cs` | 122 | Relay: приложение, диалоги открытия, тема, язык, окна-хосты. |
+| `MainWindowViewModel.RelayCommands.Shell.cs` | 127 | Relay: приложение, диалоги открытия, тема, язык, окна-хосты. |
 | `MainWindowViewModel.RelayCommands.UiMode.cs` | 56 | Relay: режим UI и уровень безопасности. |
 | `MainWindowViewModel.SettingsReactive.cs` | 248 | Реакции на изменение полей настроек и ключей API: диск, автономный агент, панели. |
 | `MainWindowViewModel.ShellConstruction.cs` | 173 | Конструктор и композиция shell: дочерние VM, шина, DAP/HCI, топология presentation (ADR 0017). |
@@ -89,10 +89,10 @@
 | `MainWindowViewModel.ShellState.ModelPullMarkdown.cs` | 20 | Часть `MainWindowViewModel`: pull модели и превью Markdown / Kroki. |
 | `MainWindowViewModel.ShellState.RegionAndContour.cs` | 63 | Часть `MainWindowViewModel`: регионы MainGrid и видимость страниц вторичного контура MFD. |
 | `MainWindowViewModel.ShellState.UiSessionChrome.cs` | 68 | Часть `MainWindowViewModel`: режим UI, прогресс сборки на полосе, палитра, снимок раскладки. |
-| `MainWindowViewModel.SolutionBuild.cs` | 132 | Сборка, `BuildOutputPanel`. |
+| `MainWindowViewModel.SolutionBuild.cs` | 138 | Сборка, `BuildOutputPanel`. |
 | `MainWindowViewModel.StartupProject.cs` | 172 | Стартовый проект. |
 | `MainWindowViewModel.UiGitWorkspace.cs` | 141 | Git + workspace UI. |
-| `MainWindowViewModel.ViewBridge.cs` | 62 | Колбэки и провайдеры, которые View подставляет в главный VM (диалоги, UI automation). |
+| `MainWindowViewModel.ViewBridge.cs` | 64 | Колбэки и провайдеры, которые View подставляет в главный VM (диалоги, UI automation). |
 | `MainWindowViewModel.WorkspaceNavigationMap.cs` | 137 | Слот Pfd: отображение карты намерений / `CodeNavigationMapSubgraphDocument` (те же данные, что JSON MCP). Граф подграфа — не синоним `instrument_id`, см. ADR 0065. По доменам: карта намерений (в т.ч. control flow) — CodeNavigation; зависимости файлов — WorkspaceNavigation; submodules — дерево/GitMap (ADR 0062). |
 | `MainWindowViewModel.WorkspaceNavigationMap.Refresh.cs` | 130 | Срез карты workspace: перезапрос refresh и сборка через `WorkspaceNavigationMapRefreshComposer`. |
 | `MainWindowViewModel.WorkspaceSplitters.cs` | 23 | Сплиттеры рабочей области (MainGrid, обозреватель решения, Git и т.д.): режим «взлёт» — блокировка перетаскивания. |
@@ -108,7 +108,7 @@
 | `IdeMcpCommandExecutor.cs` | 51 | Диспетчер MCP-команд IDE: разбор args и вызов `IIdeMcpActions` / UI-команд главного окна. |
 | `IdeMcpCommandExecutor.Handlers.AgentNotes.cs` | 74 | Хендлеры agent-notes. |
 | `IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.cs` | 11 | MCP-хендлеры меню и тулбара: делегирование по группам (диалоги, тема/язык, панели и сборка). |
-| `IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.DialogsApp.cs` | 71 | MCP-хендлеры диалогов открытия, выхода, настроек, превью и окон-хостов презентации. |
+| `IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.DialogsApp.cs` | 77 | MCP-хендлеры диалогов открытия, выхода, настроек, превью и окон-хостов презентации. |
 | `IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.PanelsLayout.cs` | 75 | MCP-хендлеры показа панелей MFD, групп редакторов и сборки из UI. |
 | `IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.ThemeLanguage.cs` | 55 | MCP-хендлеры темы оформления и языка UI. |
 | `IdeMcpCommandExecutor.Handlers.Chrome.OutputFocus.cs` | 29 | MCP-хендлеры вывода и фокуса: ping, перезапуск MCP-клиентов, фокус редактора, снимок окна. |
@@ -324,3 +324,4 @@
 - **v1.41j** — MCP **`IIdeMcpActions`**: **`IdeMcpActions.BuildTest`** разнесён на **`BuildTest.Build`** (диагностики, дерево решения, сборка, structured, code cleanup) и **`BuildTest.Tests`** (тесты и **`PublishIdeMcpTestRunMutation`**).
 - **v1.41k** — MCP UI automation: **`IdeMcpActions.UiAutomation`** разнесён на **`UiAutomation.EditorPreview`** (редактор, брейкпоинты, превью) и **`UiAutomation.Providers`** (подтверждения, тема, провайдеры контролов и чата).
 - **v1.41l** — MCP executor: **`Handlers.DapDebug`** → **`DapDebug.LaunchAttach`** / **`DapDebug.Stepping`**; **`Handlers.Editor`** → **`Editor.ToolCatalog`** (статический **`RegisterCore`**), **`FilesAndChat`**, **`StateContent`**, **`EditNavigation`**; **`Chrome.MenuToolbar`** → **`MenuToolbar.DialogsApp`**, **`ThemeLanguage`**, **`PanelsLayout`**; **`CascadeIDE.csproj`** — **`DependentUpon`** для вложенных partial.
+- **v1.41m** — Workspace: **`BlankSolutionCreator`** (`Features/Workspace/Application`) — новое пустое **`.sln`** через **`dotnet new sln`**; меню **Файл → Создать новое решение…**, MCP **`create_new_solution_dialog`**, тесты **`BlankSolutionCreatorTests`**; **`MainWindowViewModel.TryCreateBlankSolutionAtPathAsync`**.
