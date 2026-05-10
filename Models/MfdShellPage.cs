@@ -34,4 +34,7 @@ public enum MfdShellPage
     /// Hybrid Codebase Index status / control surface (HCI): ECAM-like glance for docs count, freshness, scope, errors.
     /// </summary>
     HybridIndex = 15,
+
+    /// <summary>Веб-портал (NativeWebView) + мост <c>executeIdeCommand</c> / <c>invokeCSharpAction</c>, ADR 0108.</summary>
+    WebAiPortal = 16,
 }

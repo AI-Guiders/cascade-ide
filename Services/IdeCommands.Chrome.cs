@@ -47,6 +47,9 @@ public static partial class IdeCommands
     /// <summary>Показать страницу Hybrid Codebase Index (HCI) во вторичном контуре/MFD. Разворачивает регион Mfd при необходимости. returns: text.</summary>
     public const string ShowHybridIndexPage = "show_hybrid_index_page";
 
+    /// <summary>Показать страницу веб-портала (WebView + мост инструментов ADR 0108) во вторичном контуре/MFD. Разворачивает регион Mfd при необходимости. returns: text.</summary>
+    public const string ShowWebAiPortalPage = "show_web_ai_portal_page";
+
     /// <summary>Перейти с страницы «готовность окружения» на первую другую разрешённую страницу вторичного контура. returns: text.</summary>
     public const string CloseEnvironmentReadinessPage = "close_environment_readiness_page";
 

@@ -25,6 +25,9 @@
             <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=HybridIndex}">
                 <views:HybridIndexMfdPageView/>
             </Border>
+            <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=WebAiPortal}">
+                <views:WebAiPortalMfdPageView/>
+            </Border>
             <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=Chat}">
                 <views:ChatMfdPageView/>
             </Border>

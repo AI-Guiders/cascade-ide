@@ -181,6 +181,7 @@ internal static class IdeCommandsContractGenerated
         ["show_related_files_mfd_page"] = IdeReturnKind.Text,
         ["show_solution_explorer_page"] = IdeReturnKind.Text,
         ["show_terminal_panel"] = IdeReturnKind.Text,
+        ["show_web_ai_portal_page"] = IdeReturnKind.Text,
         ["start_autonomous"] = IdeReturnKind.Text,
         ["submit_chat_clarification_response"] = IdeReturnKind.Text,
         ["toggle_build_output"] = IdeReturnKind.Text,

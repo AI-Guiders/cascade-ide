@@ -16,6 +16,7 @@ using CascadeIDE.Features.HybridIndex.Application;
 using CascadeIDE.Features.Instrumentation;
 using CascadeIDE.Features.Markdown;
 using CascadeIDE.Features.Os.DataAcquisition;
+using CascadeIDE.Features.WebAiPortal.Application;
 using CascadeIDE.Features.Shell.Application;
 using CascadeIDE.Features.Terminal;
 using CascadeIDE.Features.UiChrome;
@@ -84,6 +85,7 @@ public partial class MainWindowViewModel
         _hciPauseWhenMcpStdioHost = _settings.HybridIndex.PauseWhenMcpStdioHost;
 
         _ideMcpExecutor = new IdeMcpCommandExecutor(this);
+        _webAiPortalBridge = new WebAiPortalCommandBridge(this);
 
         BuildOutputPanel = new BuildOutputPanelViewModel();
         TerminalPanel = new TerminalPanelViewModel(() => Workspace.SolutionPath);

@@ -181,6 +181,7 @@ internal static class IdeCommandsDoc
         ["show_related_files_mfd_page"] = "Развернуть регион Mfd и открыть страницу «Связанные файлы» (related; workspace). returns: text.",
         ["show_solution_explorer_page"] = "Развернуть регион Mfd и перейти на страницу обозревателя решения (toolbar). returns: text.",
         ["show_terminal_panel"] = "Явно показать терминал (toolbar). returns: text.",
+        ["show_web_ai_portal_page"] = "Показать страницу веб-портала (WebView + мост инструментов ADR 0108) во вторичном контуре/MFD. Разворачивает регион Mfd при необходимости. returns: text.",
         ["start_autonomous"] = "Запустить автономный режим (agent run). returns: text.",
         ["submit_chat_clarification_response"] = "Отправить structured clarification response для активного batch. args: response_json:string. returns: text; example: {\"response_json\":\"{\\\"batchId\\\":\\\"...\\\",\\\"answersByItemId\\\":{\\\"scope\\\":\\\"mfd\\\"}}\"}.",
         ["toggle_build_output"] = "Как меню «Вид → Вывод сборки». returns: text.",

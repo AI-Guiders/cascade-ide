@@ -164,6 +164,7 @@
 | `show_environment_readiness_page` | Показать страницу «готовность окружения» во вторичном контуре (зона Mfd; ADR 0023). Разворачивает регион Mfd при необходимости. returns: text. |
 | `show_hybrid_index_page` | Показать страницу Hybrid Codebase Index (HCI) во вторичном контуре/MFD. Разворачивает регион Mfd при необходимости. returns: text. |
 | `show_markdown_preview_page` | Показать Markdown preview как страницу во вторичном контуре/MFD. returns: text. |
+| `show_web_ai_portal_page` | Показать страницу веб-портала (WebView + мост инструментов ADR 0108) во вторичном контуре/MFD. Разворачивает регион Mfd при необходимости. returns: text. |
 | `toggle_command_palette` | Открыть или закрыть палитру команд (как Ctrl+Q / пункт меню «Вид»). returns: text. |
 
 ### Вид: тема
