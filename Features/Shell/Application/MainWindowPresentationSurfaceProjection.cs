@@ -1,6 +1,7 @@
 using CascadeIDE.Cockpit;
 using CascadeIDE.Cockpit.Cds;
 using CascadeIDE.Cockpit.Composition.HostSurface;
+using CascadeIDE.Cockpit.Composition.Shell;
 using CascadeIDE.Contracts;
 using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Lang;
@@ -14,6 +15,15 @@ namespace CascadeIDE.Features.Shell.Application;
 [ComputingUnit]
 public static class MainWindowPresentationSurfaceProjection
 {
+    /// <summary>Кадр хоста: intent + CDS style → shell + инструменты (ADR 0036 п.3, 0047).</summary>
+    public static MainWindowHostSurfaceFrame ComposeHostSurfaceFrame(
+        IMainWindowHostSurfaceInput host,
+        string normalizedUiMode) =>
+        MainWindowHostSurfaceProjection.ComposeFrame(
+            host,
+            UiModeCatalog.GetMfdRegionExpandedWidthPixels(normalizedUiMode),
+            UiWorkspaceLayoutRuntimeMetrics.MfdRegionCollapsedWidthPixels);
+
     public const string DefaultRiskSummaryPlaceholder = "Риски не зафиксированы.";
     public const string DefaultResultSummaryPlaceholder = "Результатов пока нет.";
 

@@ -27,10 +27,7 @@ public partial class MainWindowViewModel
 
     /// <summary>Композитор: intent + CDS style → кадр хоста (колонки + инструменты слотов; ADR 0036 п.3, 0047).</summary>
     private MainWindowHostSurfaceFrame HostSurfaceFrame =>
-        MainWindowHostSurfaceProjection.ComposeFrame(
-            this,
-            UiModeCatalog.GetMfdRegionExpandedWidthPixels(NormalizeUiMode(UiMode)),
-            UiWorkspaceLayoutRuntimeMetrics.MfdRegionCollapsedWidthPixels);
+        MainWindowPresentationSurfaceProjection.ComposeHostSurfaceFrame(this, NormalizeUiMode(UiMode));
 
     private MainWindowShellSurfaceComposition ShellSurfaceComposition => HostSurfaceFrame.Shell;
 
