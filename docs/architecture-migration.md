@@ -17,7 +17,7 @@
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:BEGIN -->
 
-`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~6.7k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~5.5k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.2k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
+`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~6.8k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~5.5k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.2k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:END -->
 
@@ -32,7 +32,7 @@
 | `MainWindowViewModel.AutonomousAgent.cs` | 113 | Автономный агент (Power). |
 | `MainWindowViewModel.Breakpoints.cs` | 97 | Брейкпоинты: `BreakpointsFileService` / `BreakpointsStorage` — один источник (ADR 0002). |
 | `MainWindowViewModel.Capabilities.cs` | 23 | Реестр capabilities. |
-| `MainWindowViewModel.CascadeChord.cs` | 103 | Аккордный слой ADR 0060: корень `cascade_chord` из hotkeys.toml (по умолчанию Ctrl+K), затем тот же хвост мелодии, что после `c:` в палитре (см. `IntentMelodyAliases`), без префикса `c:` и без Enter — если alias однозначен (например `so`). При конфликте префиксов (например `gs` vs `gsu`) точное совпадение после полного ввода или по клавише Enter. |
+| `MainWindowViewModel.CascadeChord.cs` | 107 | Аккордный слой ADR 0060: корень `cascade_chord` из hotkeys.toml (по умолчанию Ctrl+K), затем тот же хвост мелодии, что после `c:`. Однозначный обычный alias (например `so`) исполняется без Enter при отсутствии более длинного alias-префикса; параметрические (`wai:`, `els:`:…) — только по Enter или из палитры. При конфликте префиксов (`gs` vs `gsu`) — точный хвост или Enter. |
 | `MainWindowViewModel.CommandPalette.cs` | 158 | Палитра команд. |
 | `MainWindowViewModel.cs` | 293 | Главный композитор окна (partial-класс, несколько `MainWindowViewModel*.cs`). Карта файлов и ответственности — `docs/architecture-migration.md`, раздел «Срез MainWindowViewModel». |
 | `MainWindowViewModel.CSharpLsp.cs` | 120 | Запуск/перезапуск C# LSP. |
@@ -81,7 +81,7 @@
 | `MainWindowViewModel.RelayCommands.Shell.cs` | 127 | Relay: приложение, диалоги открытия, тема, язык, окна-хосты. |
 | `MainWindowViewModel.RelayCommands.UiMode.cs` | 56 | Relay: режим UI и уровень безопасности. |
 | `MainWindowViewModel.SettingsReactive.cs` | 248 | Реакции на изменение полей настроек и ключей API: диск, автономный агент, панели. |
-| `MainWindowViewModel.ShellConstruction.cs` | 173 | Конструктор и композиция shell: дочерние VM, шина, DAP/HCI, топология presentation (ADR 0017). |
+| `MainWindowViewModel.ShellConstruction.cs` | 175 | Конструктор и композиция shell: дочерние VM, шина, DAP/HCI, топология presentation (ADR 0017). |
 | `MainWindowViewModel.ShellState.AiProviders.cs` | 58 | Часть `ShellState`: режим ИИ и облачные ключи привязаны к нижнему приложению/чату. |
 | `MainWindowViewModel.ShellState.AutonomousAgentStripe.cs` | 63 | Часть `ShellState`: полоса/карточки автономной задачи агента, безопасности, LOC и сводки тестов для IDE Health. |
 | `MainWindowViewModel.ShellState.ChatAndSessionConfig.cs` | 26 | Часть `ShellState`: ввод чата и конфиг MCP/ACP для автономной сессии. |
@@ -93,6 +93,7 @@
 | `MainWindowViewModel.StartupProject.cs` | 172 | Стартовый проект. |
 | `MainWindowViewModel.UiGitWorkspace.cs` | 141 | Git + workspace UI. |
 | `MainWindowViewModel.ViewBridge.cs` | 64 | Колбэки и провайдеры, которые View подставляет в главный VM (диалоги, UI automation). |
+| `MainWindowViewModel.WebAiPortal.cs` | 29 | Страница MFD «веб-портал» (ADR 0108): URL, результат последнего вызова моста, `WebAiPortalCommandBridge`. |
 | `MainWindowViewModel.WorkspaceNavigationMap.cs` | 137 | Слот Pfd: отображение карты намерений / `CodeNavigationMapSubgraphDocument` (те же данные, что JSON MCP). Граф подграфа — не синоним `instrument_id`, см. ADR 0065. По доменам: карта намерений (в т.ч. control flow) — CodeNavigation; зависимости файлов — WorkspaceNavigation; submodules — дерево/GitMap (ADR 0062). |
 | `MainWindowViewModel.WorkspaceNavigationMap.Refresh.cs` | 130 | Срез карты workspace: перезапрос refresh и сборка через `WorkspaceNavigationMapRefreshComposer`. |
 | `MainWindowViewModel.WorkspaceSplitters.cs` | 23 | Сплиттеры рабочей области (MainGrid, обозреватель решения, Git и т.д.): режим «взлёт» — блокировка перетаскивания. |
@@ -112,7 +113,7 @@
 | `IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.PanelsLayout.cs` | 75 | MCP-хендлеры показа панелей MFD, групп редакторов и сборки из UI. |
 | `IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.ThemeLanguage.cs` | 55 | MCP-хендлеры темы оформления и языка UI. |
 | `IdeMcpCommandExecutor.Handlers.Chrome.OutputFocus.cs` | 29 | MCP-хендлеры вывода и фокуса: ping, перезапуск MCP-клиентов, фокус редактора, снимок окна. |
-| `IdeMcpCommandExecutor.Handlers.Chrome.UiVisibility.cs` | 168 | MCP-хендлеры видимости панелей, режима UI, PFD/MFD, навигации по страницам MFD и палитре команд. |
+| `IdeMcpCommandExecutor.Handlers.Chrome.UiVisibility.cs` | 177 | MCP-хендлеры видимости панелей, режима UI, PFD/MFD, навигации по страницам MFD и палитре команд. |
 | `IdeMcpCommandExecutor.Handlers.DapDebug.cs` | 10 | DAP / отладка: делегирование регистрации хендлеров launch/attach и stepping. |
 | `IdeMcpCommandExecutor.Handlers.DapDebug.LaunchAttach.cs` | 69 | MCP DAP: ping, launch и attach. |
 | `IdeMcpCommandExecutor.Handlers.DapDebug.Stepping.cs` | 49 | MCP DAP: шагание, стоп, стек, снимок, переменные кадра. |
