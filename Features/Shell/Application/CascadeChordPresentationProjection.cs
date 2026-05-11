@@ -35,6 +35,7 @@ public static class CascadeChordPresentationProjection
             .Where(m => ParametricIntentMelody.IsChordEligibleAlias(m.Alias))
             .ToList();
 
+
     public static IReadOnlyList<CascadeChordOverlaySuggestion> BuildSuggestionRows(
         bool isAwaitMelodyTail,
         string tailNormalized,
@@ -60,7 +61,7 @@ public static class CascadeChordPresentationProjection
     {
         var buf = melodyTail;
         var bufLine = string.IsNullOrEmpty(buf)
-            ? "Набрано: (пусто) — тот же хвост, что после c: в палитре (например cps, cs, so)."
+            ? "Набрано: (пусто) — тот же хвост, что после c: в палитре (примеры alias — из каталога IntentMelody)."
             : $"Набрано: «{buf}»";
 
         if (!isAwaitMelodyTail)
@@ -73,11 +74,11 @@ public static class CascadeChordPresentationProjection
             ? "Нет alias с таким префиксом."
             : "Совпадения: " + string.Join(", ", eligibleMatches.Select(m => m.Alias));
 
-        return "CascadeChord · мелодия (как c:… без префикса и без Enter, если alias однозначен)\n" +
+        return "CascadeChord · как c: после корня (латиница и цифры; в параметрике разделитель «;» без Shift или «:»)\n" +
                bufLine + "\n" +
                matchLine + "\n" +
-               "  Enter — выполнить, если хвост — точный alias (нужно при gs vs gsu)\n" +
-               "  Backspace — стереть символ · Esc — отмена · таймаут " + timeoutSeconds + " с\n" +
+               "  Без Enter: однозначный обычный alias. Параметрические корни каталога — по Enter.\n" +
+               "  Backspace · Esc — отмена · таймаут " + timeoutSeconds + " с\n" +
                "Палитра Ctrl+Q, c: — тот же каталог.";
     }
 }

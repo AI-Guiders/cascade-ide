@@ -80,17 +80,103 @@ public sealed class IntentMelodyAliasesTests
     public void Bundled_intent_melody_toml_is_readable_like_runtime()
     {
         Assert.True(BundledAppContent.TryReadDiskThenEmbedded(IntentMelodyAliases.BundledRelativePath, out var text));
-        Assert.Contains("[aliases]", text, StringComparison.Ordinal);
-        Assert.Contains("ers = \"show_environment_readiness_page\"", text, StringComparison.Ordinal);
-        Assert.Contains("his = \"show_hybrid_index_page\"", text, StringComparison.Ordinal);
-        Assert.Contains("wai = \"show_web_ai_portal_page\"", text, StringComparison.Ordinal);
-        Assert.Contains("ts = \"show_terminal_panel\"", text, StringComparison.Ordinal);
-        Assert.Contains("dl = \"debug_launch\"", text, StringComparison.Ordinal);
-        Assert.Contains("dn = \"debug_step_over\"", text, StringComparison.Ordinal);
-        Assert.Contains("df = \"debug_step_out\"", text, StringComparison.Ordinal);
-        Assert.Contains("els = \"select\"", text, StringComparison.Ordinal);
-        Assert.Contains("eld = \"apply_edit\"", text, StringComparison.Ordinal);
-        Assert.Contains("tol = \"toggle_workspace_splitters_lock\"", text, StringComparison.Ordinal);
+        Assert.Contains("melody_catalog_schema_version = 1", text, StringComparison.Ordinal);
+        Assert.Contains("[[tail_wire_class]]", text, StringComparison.Ordinal);
+        Assert.Contains("[[melody_root]]", text, StringComparison.Ordinal);
+        Assert.Contains("slug = \"ers\"", text, StringComparison.Ordinal);
+        Assert.Contains("command_id = \"show_environment_readiness_page\"", text, StringComparison.Ordinal);
+        Assert.Contains("slug = \"his\"", text, StringComparison.Ordinal);
+        Assert.Contains("command_id = \"show_hybrid_index_page\"", text, StringComparison.Ordinal);
+        Assert.Contains("slug = \"wai\"", text, StringComparison.Ordinal);
+        Assert.Contains("palette_hint_slug = \"wai-url\"", text, StringComparison.Ordinal);
+        Assert.Contains("command_id = \"show_web_ai_portal_page\"", text, StringComparison.Ordinal);
+        Assert.Contains("slug = \"ts\"", text, StringComparison.Ordinal);
+        Assert.Contains("command_id = \"show_terminal_panel\"", text, StringComparison.Ordinal);
+        Assert.Contains("slug = \"dl\"", text, StringComparison.Ordinal);
+        Assert.Contains("command_id = \"debug_launch\"", text, StringComparison.Ordinal);
+        Assert.Contains("slug = \"dn\"", text, StringComparison.Ordinal);
+        Assert.Contains("command_id = \"debug_step_over\"", text, StringComparison.Ordinal);
+        Assert.Contains("slug = \"df\"", text, StringComparison.Ordinal);
+        Assert.Contains("command_id = \"debug_step_out\"", text, StringComparison.Ordinal);
+        Assert.Contains("slug = \"els\"", text, StringComparison.Ordinal);
+        Assert.Contains("command_id = \"select\"", text, StringComparison.Ordinal);
+        Assert.Contains("slug = \"eld\"", text, StringComparison.Ordinal);
+        Assert.Contains("command_id = \"apply_edit\"", text, StringComparison.Ordinal);
+        Assert.Contains("slug = \"tol\"", text, StringComparison.Ordinal);
+        Assert.Contains("command_id = \"toggle_workspace_splitters_lock\"", text, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Tomlyn_deserializes_between_slots_two_single_char_literals()
+    {
+        const string minimal =
+            """
+            melody_catalog_schema_version = 1
+
+            [[tail_wire_class]]
+            id = "int_chain_colon_space"
+            kind = "delimited_slots"
+            between_slots_any_of = [":", " "]
+
+            [[melody_root]]
+            slug = "z"
+            command_id = "git_status"
+            shape = "simple"
+            """;
+
+        var parsed = CascadeTomlSerializer.Deserialize<IntentMelodyAliases.IntentMelodyTomlRoot>(minimal.Trim());
+        Assert.NotNull(parsed?.TailWireClass);
+        Assert.Single(parsed.TailWireClass);
+        var row = parsed.TailWireClass[0];
+        Assert.NotNull(row.BetweenSlotsAnyOf);
+        Assert.Equal(2, row.BetweenSlotsAnyOf!.Length);
+        Assert.Equal(":", row.BetweenSlotsAnyOf![0]);
+        Assert.Single(row.BetweenSlotsAnyOf![1]!);
+        Assert.Equal(' ', row.BetweenSlotsAnyOf![1]![0]);
+
+        IntentMelodyAliases.ParseBundleForTests(minimal.Trim());
+    }
+
+    [Fact]
+    public void ParseBundle_infers_show_usage_hint_for_two_int_parametric_without_explicit_flag()
+    {
+        const string toml =
+            """
+            melody_catalog_schema_version = 1
+
+            [[tail_wire_class]]
+            id = "int_chain_colon_space"
+            kind = "delimited_slots"
+            between_slots_any_of = [":", " "]
+
+            [[melody_root]]
+            slug = "zz"
+            command_id = "select"
+            shape = "parametric"
+            tail_signature = "<start:ln>:<end:ln>"
+            wire_class = "int_chain_colon_space"
+            chord_commit = "enter"
+            """;
+
+        var bundle = IntentMelodyAliases.ParseBundleForTests(toml.Trim());
+
+        Assert.True(bundle.Catalog.Roots.TryGetValue("zz", out var z));
+        Assert.True(z.ShowUsageHintIfBareSlug);
+    }
+
+    /// <summary>При локальном <c>dotnet test</c> полный проход <see cref="IntentMelodyAliases.Build"/> по embedded TOML (без дискового оверлея в <c>bin/</c>).</summary>
+    [Fact]
+    public void Embedded_intent_melody_ParseBundle_Build_succeeds()
+    {
+        Assert.True(BundledAppContent.TryReadEmbeddedText(IntentMelodyAliases.BundledRelativePath, out var text));
+        var bundle = IntentMelodyAliases.ParseBundleForTests(text.Trim());
+
+        Assert.NotEmpty(bundle.AliasToCommandId);
+        Assert.NotEmpty(bundle.Catalog.Roots);
+        Assert.NotEmpty(bundle.Catalog.TailWireClasses);
+        Assert.Contains(bundle.Catalog.Roots.Values, static e => e.Shape == IntentMelodyShape.Parametric);
+        Assert.True(bundle.Catalog.Roots["els"].ShowUsageHintIfBareSlug, "els — два int-слота, подсказка по умолчанию");
+        Assert.False(bundle.Catalog.Roots["wai"].ShowUsageHintIfBareSlug, "wai — явно false в TOML");
     }
 
     [Fact]

@@ -14,8 +14,8 @@ public static class MelodyPaletteLineCommandPaletteExtensions
                 MelodyPaletteHint hint => new IdeCommandPaletteRowViewModel(hint.Title, hint.Category),
                 MelodyPaletteCommand cmd when ParametricIntentMelody.IsPaletteOnlyAlias(cmd.Alias) && string.IsNullOrWhiteSpace(cmd.ArgsJson) =>
                     new IdeCommandPaletteRowViewModel(
-                        ParametricIntentMelody.BuildAliasUsageHint(cmd.Alias),
-                        ParametricIntentMelody.BuildAliasUsageCategory(cmd.Alias)),
+                        ParametricIntentMelody.BuildAliasUsageHintForPalette(cmd.Alias),
+                        ParametricIntentMelody.BuildAliasUsageCategoryForPalette(cmd.Alias)),
                 MelodyPaletteCommand cmd => IdeCommandPaletteCatalog.All.FirstOrDefault(e => e.CommandId == cmd.CommandId) is { } entry
                     ? new IdeCommandPaletteRowViewModel(entry, hotkeys.GetDisplayHint(entry.CommandId), family, cmd.Alias, cmd.ArgsJson)
                     : new IdeCommandPaletteRowViewModel(

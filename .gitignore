@@ -40,3 +40,6 @@ docs/adr/_patch_*.py
 .tools/acp-registry-snapshot.json
 
 # Редактор AvaloniaEdit: NuGet AIGuiders.AvaloniaEdit*; исходники форка — отдельный клон (не в этом репо).
+dist/
+externals/avaloniaedit/
+publish-gh-release/*.lib

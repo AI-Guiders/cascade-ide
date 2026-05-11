@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Avalonia.Input;
 using CascadeIDE.Features.Shell.Application;
 using CascadeIDE.Models.Shell;
@@ -6,8 +7,9 @@ using CommunityToolkit.Mvvm.Input;
 namespace CascadeIDE.ViewModels;
 
 /// <summary>
-/// Аккордный слой ADR 0060: корень <c>cascade_chord</c> из hotkeys.toml (по умолчанию Ctrl+K), затем <b>тот же хвост мелодии</b>, что после <c>c:</c> в палитре (см. <see cref="IntentMelodyAliases"/>), без префикса <c>c:</c> и без Enter — если alias однозначен (например <c>so</c>).
-/// При конфликте префиксов (например <c>gs</c> vs <c>gsu</c>) точное совпадение после полного ввода или по клавише Enter.
+/// Аккордный слой ADR 0060: корень <c>cascade_chord</c> из hotkeys.toml (по умолчанию Ctrl+K), затем тот же хвост мелодии, что после <c>c:</c>.
+/// Однозначный обычный alias (например <c>so</c>) исполняется без Enter при отсутствии более длинного alias-префикса; параметрические (<c>wai:</c>, <c>els:</c>:…) — только по Enter или из палитры.
+/// При конфликте префиксов (<c>gs</c> vs <c>gsu</c>) — точный хвост или Enter.
 /// </summary>
 public partial class MainWindowViewModel
 {
@@ -16,11 +18,14 @@ public partial class MainWindowViewModel
     private CascadeChordIntentSession ChordSession =>
         _cascadeChordSession ??= new CascadeChordIntentSession(
             NotifyCascadeChordOverlayProperties,
-            async commandId =>
+            () => CurrentFilePath,
+            () => EditorText,
+            async (commandId, argsJson) =>
             {
                 try
                 {
-                    await ((Services.IIdeMcpActions)this).ExecuteCommandAsync(commandId, null, CancellationToken.None)
+                    IReadOnlyDictionary<string, JsonElement>? args = IdeCommandRegistry.ParseArgs(argsJson);
+                    await ((IIdeMcpActions)this).ExecuteCommandAsync(commandId, args, CancellationToken.None)
                         .ConfigureAwait(false);
                 }
                 catch
@@ -41,6 +46,8 @@ public partial class MainWindowViewModel
         nameof(CascadeChordOverlayNoMatches),
         nameof(CascadeChordOverlayCompactFooter),
         nameof(CascadeChordHudMelodyText),
+        nameof(IsCascadeChordHudMirrorPlaceholderVisible),
+        nameof(IsCascadeChordHudMirrorMelodyVisible),
         nameof(IsCascadeChordDropdownOpen),
         nameof(HasChordDropdownItems),
         nameof(CascadeChordHudWatermark),
@@ -69,15 +76,16 @@ public partial class MainWindowViewModel
     /// <summary>Набранный хвост для визуального поля ввода в оверлее (find-bar style).</summary>
     public string CascadeChordOverlayInputText => ChordSession.OverlayInputText;
 
-    /// <summary>Двусторонняя привязка к полю ввода в полоске над редактором (только фаза armed).</summary>
-    public string CascadeChordHudMelodyText
-    {
-        get => ChordSession.HudMelodyTextGet();
-        set => ChordSession.HudMelodyTextSet(value);
-    }
+    /// <summary>Хвост мелодии в полоске HUD (зеркало; только чтение из сессии).</summary>
+    public string CascadeChordHudMelodyText => ChordSession.HudMelodyTextGet();
 
-    /// <summary>После Ctrl+K — сфокусировать поле в полоске task cockpit (см. <see cref="Views.CascadeChordHudStripView"/>).</summary>
-    public event Action? CascadeChordHudFocusRequested;
+    /// <summary>Плейсхолдер зеркала: покой (Ctrl+K…) или пустой armed до первой буквы.</summary>
+    public bool IsCascadeChordHudMirrorPlaceholderVisible =>
+        !IsCascadeChordOverlayVisible || string.IsNullOrEmpty(CascadeChordHudMelodyText);
+
+    /// <summary>Текущий набранный хвост поверх placeholder.</summary>
+    public bool IsCascadeChordHudMirrorMelodyVisible =>
+        IsCascadeChordOverlayVisible && !string.IsNullOrEmpty(CascadeChordHudMelodyText);
 
     /// <summary>Одна строка для полоски: плейсхолдер при пустом хвосте или набранный хвост (без двух <c>IsVisible</c>).</summary>
     public string CascadeChordOverlayFindBarLine => ChordSession.OverlayFindBarLine;
@@ -100,30 +108,26 @@ public partial class MainWindowViewModel
             OnPropertyChanged(name);
     }
 
-    /// <summary>Вызывается из полоски HUD: фокус ввода — туннель не должен съедать буквы до TextBox.</summary>
-    public void SetCascadeChordHudTextHasFocus(bool hasFocus) => ChordSession.SetHudTextHasFocus(hasFocus);
-
     /// <summary>Popup закрыт кликом вне списка (Avalonia light dismiss).</summary>
     public void NotifyCascadeChordDropdownDismissed() => ChordSession.NotifyDropdownDismissed();
 
     /// <summary>Выбор строки из выпадающего списка.</summary>
     public void PickCascadeChordSuggestion(CascadeChordOverlaySuggestion? item) => ChordSession.PickSuggestion(item);
 
-    /// <summary>Esc из поля ввода или снаружи (после снятия фокуса с HUD).</summary>
+    /// <summary>Esc или явная отмена: сброс сессии аккорда.</summary>
     public void CancelCascadeChord() => ChordSession.Cancel();
 
-    /// <summary>Enter в поле HUD: как в туннеле — точный alias или сброс.</summary>
+    /// <summary>Явный Enter (программно): как из туннеля — точный alias или выход из фазы.</summary>
     public void OnCascadeChordHudEnter() => ChordSession.OnHudEnterFromView();
 
     /// <summary>Корень аккорда (hotkeys.toml <c>cascade_chord</c>): обрабатывается tunnel KeyDown главного окна (как палитра Ctrl+Q).</summary>
     [RelayCommand]
-    private void CascadeChordRoot() =>
-        ChordSession.BeginRoot(() => CascadeChordHudFocusRequested?.Invoke());
+    private void CascadeChordRoot() => ChordSession.BeginRoot();
 
     /// <summary>
     /// Обрабатывает аккорд Cascade: возвращает <see langword="true"/>, если событие поглощено (в т.ч. корень Ctrl+K).
     /// Вызывать из tunnel <see cref="Views.MainWindow"/> до <see cref="MainWindowHotkeyService.TryHandleTunnelShortcuts"/>.
     /// </summary>
     public bool TryConsumeCascadeChordKeyDown(KeyEventArgs e) =>
-        ChordSession.TryConsumeKeyDown(e, () => CascadeChordHudFocusRequested?.Invoke());
+        ChordSession.TryConsumeKeyDown(e);
 }

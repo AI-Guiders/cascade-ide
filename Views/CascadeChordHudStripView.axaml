@@ -5,20 +5,40 @@
              x:Class="CascadeIDE.Views.CascadeChordHudStripView"
              x:DataType="vm:MainWindowViewModel"
              VerticalAlignment="Center">
-    <!-- Постоянный блок рядом с CMD: поле + выпадающий список по префиксу (ADR 0060). -->
+    <!-- Зеркало состояния мелодии без TextBox: фокус остаётся в редакторе, символы идут по Key → латиница даже при RU раскладке (ADR 0060). -->
     <Panel MinWidth="220" MaxWidth="400">
-        <TextBox x:Name="ChordQueryBox"
-                 Height="30"
-                 MinWidth="200"
-                 MaxWidth="400"
-                 FontFamily="Consolas,Cascadia Mono,Courier New,monospace"
-                 FontSize="13"
-                 PlaceholderText="{Binding CascadeChordHudWatermark}"
-                 Text="{Binding CascadeChordHudMelodyText, Mode=TwoWay}"
-                 IsEnabled="{Binding IsCascadeChordOverlayVisible}"
-                 ToolTip.Tip="{Binding CascadeChordOverlayCompactFooter}"/>
+        <Border x:Name="ChordMirrorHost"
+                MinHeight="30"
+                MinWidth="200"
+                MaxWidth="400"
+                Padding="10,6"
+                Focusable="False"
+                Cursor="Arrow"
+                CornerRadius="4"
+                BorderThickness="1"
+                BorderBrush="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"
+                Background="{DynamicResource CascadeTheme.CommandPaletteQueryBackground}"
+                ToolTip.Tip="{Binding CascadeChordOverlayCompactFooter}">
+            <Grid>
+                <TextBlock FontFamily="Consolas,Cascadia Mono,Courier New,monospace"
+                           FontSize="13"
+                           Opacity="0.58"
+                           Text="{Binding CascadeChordHudWatermark}"
+                           TextTrimming="CharacterEllipsis"
+                           VerticalAlignment="Center"
+                           IsVisible="{Binding IsCascadeChordHudMirrorPlaceholderVisible}"/>
+                <TextBlock FontFamily="Consolas,Cascadia Mono,Courier New,monospace"
+                           FontSize="13"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource CascadeTheme.CommandPaletteTitleForeground}"
+                           Text="{Binding CascadeChordHudMelodyText}"
+                           TextTrimming="CharacterEllipsis"
+                           VerticalAlignment="Center"
+                           IsVisible="{Binding IsCascadeChordHudMirrorMelodyVisible}"/>
+            </Grid>
+        </Border>
         <Popup x:Name="ChordSuggestionsPopup"
-               PlacementTarget="{Binding #ChordQueryBox}"
+               PlacementTarget="{Binding #ChordMirrorHost}"
                Placement="BottomEdgeAlignedLeft"
                IsOpen="{Binding IsCascadeChordDropdownOpen, Mode=OneWay}"
                IsLightDismissEnabled="True"

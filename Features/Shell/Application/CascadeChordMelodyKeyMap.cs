@@ -7,6 +7,73 @@ namespace CascadeIDE.Features.Shell.Application;
 [ComputingUnit]
 public static class CascadeChordMelodyKeyMap
 {
+    /// <summary>
+    /// Строчные латиница/цифры и символы для параметрических хвостов (<c>:</c>, <c>/</c>, <c>.</c>, <c>-</c>).
+    /// Буквы — по <see cref="Key"/> (как в ADR 0060 зеркало HUD); «:» и пробел дополняются
+    /// <see cref="PhysicalKey"/>, чтобы раскладка не ломала <c>:</c> (например RU: Shift+физ. 6).
+    /// </summary>
+    public static bool TryMapChordMelodyGlyph(Key key, KeyModifiers modifiers, PhysicalKey physicalKey, out char ch)
+    {
+        ch = default;
+        var shift = modifiers.HasFlag(KeyModifiers.Shift);
+        if (modifiers.HasFlag(KeyModifiers.Control) || modifiers.HasFlag(KeyModifiers.Alt) || modifiers.HasFlag(KeyModifiers.Meta))
+            return false;
+
+        if (key == Key.Space)
+        {
+            ch = ' ';
+            return true;
+        }
+
+        // Физ. клавиша «;» (US справа от L): без Shift — «;» в хвост (разделитель в int_chain, см. TOML); со Shift — «:».
+        // Так аккорд обходит глючный Shift у Avalonia для «:».
+        if (physicalKey == PhysicalKey.Semicolon)
+        {
+            ch = shift ? ':' : ';';
+            return true;
+        }
+
+        // «:» — RU и др.: часто Shift+физ. цифра 6 (на US той же клавише — ^; в хвосте мелодии нужен ':').
+        if (physicalKey == PhysicalKey.Digit6 && shift)
+        {
+            ch = ':';
+            return true;
+        }
+
+        if (TryMapToChar(key, out ch))
+            return true;
+
+        return key switch
+        {
+            // Windows US часто даёт VK_OEM_1 как Key.Oem1; «;» / «:» — те же позиции, что и PhysicalKey.Semicolon.
+
+            Key.OemSemicolon when shift =>
+                WithChar(':', out ch),
+            Key.OemSemicolon when !shift =>
+                WithChar(';', out ch),
+            Key.Oem1 when shift =>
+                WithChar(':', out ch),
+            Key.Oem1 when !shift =>
+                WithChar(';', out ch),
+            Key.OemPeriod when !shift =>
+                WithChar('.', out ch),
+
+            Key.Oem2 or Key.Divide =>
+                WithChar('/', out ch),
+            Key.OemMinus or Key.Subtract =>
+                shift ? WithChar('_', out ch) : WithChar('-', out ch),
+            Key.OemPlus or Key.Add =>
+                shift ? WithChar('+', out ch) : WithChar('=', out ch),
+            _ => false,
+        };
+
+        static bool WithChar(char c, out char o)
+        {
+            o = c;
+            return true;
+        }
+    }
+
     public static bool TryMapToChar(Key key, out char ch)
     {
         ch = default;

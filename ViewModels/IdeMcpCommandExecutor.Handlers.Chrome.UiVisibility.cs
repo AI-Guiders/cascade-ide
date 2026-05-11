@@ -147,8 +147,11 @@ internal sealed partial class IdeMcpCommandExecutor
             _vm.TryNavigateToMfdShellPage(MfdShellPage.HybridIndex);
             return await Task.FromResult("OK");
         });
-        add(ShowWebAiPortalPage, async (_, _) =>
+        add(ShowWebAiPortalPage, async (args, _) =>
         {
+            var hint = args is not null ? McpCommandJsonArgs.String(args, "url")?.Trim() : null;
+            if (!string.IsNullOrEmpty(hint))
+                _vm.WebAiPortalUrlText = hint;
             _vm.ApplyMfdRegionExpanded(true);
             _vm.TryNavigateToMfdShellPage(MfdShellPage.WebAiPortal);
             return await Task.FromResult("OK");

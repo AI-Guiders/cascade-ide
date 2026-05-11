@@ -112,6 +112,15 @@ internal static class IdeCommandPaletteFilterOrchestrator
         string? currentFilePath,
         string editorText)
     {
+        if (ParametricIntentMelody.TryResolveParametricExecution(
+                tailNormalized,
+                currentFilePath,
+                editorText,
+                out var resolvedCommandId,
+                out var resolvedArgsJson,
+                out var displayTail))
+            return new MelodyPalettePlan([new MelodyPaletteCommand(displayTail, resolvedCommandId, resolvedArgsJson)], 0);
+
         if (ParametricIntentMelody.TryParseLineRangeTail(tailNormalized, out var parsed) && parsed is not null)
         {
             if (ParametricIntentMelody.TryBuildExecutionArgs(
@@ -128,7 +137,7 @@ internal static class IdeCommandPaletteFilterOrchestrator
             }
 
             return new MelodyPalettePlan(
-                [new MelodyPaletteHint(error, ParametricIntentMelody.BuildAliasUsageHint(parsed.Alias))],
+                [new MelodyPaletteHint(error, ParametricIntentMelody.BuildAliasUsageHintForPalette(parsed.Alias))],
                 0);
         }
 
@@ -137,8 +146,8 @@ internal static class IdeCommandPaletteFilterOrchestrator
         {
             return new MelodyPalettePlan(
                 [new MelodyPaletteHint(
-                    ParametricIntentMelody.BuildAliasUsageHint(aliasBeforeColon),
-                    ParametricIntentMelody.BuildAliasUsageCategory(aliasBeforeColon))],
+                    ParametricIntentMelody.BuildAliasUsageHintForPalette(aliasBeforeColon),
+                    ParametricIntentMelody.BuildAliasUsageCategoryForPalette(aliasBeforeColon))],
                 0);
         }
 

@@ -2,7 +2,7 @@
 
 Документ фиксирует **язык ввода команд в палитре** с префиксом **`c:`** — тот же контракт, что в [ADR 0060 §11](adr/0060-keyboard-chord-stack-fms-tactical-strategic.md#adr0060-p11) (**Command Melody**). Здесь — **формальное описание**, мотивация и **открытые вопросы** для эволюции.
 
-**Связь:** [0060](adr/0060-keyboard-chord-stack-fms-tactical-strategic.md) (норматив продукта и паритет с аккордом), [0030](adr/0030-command-ids-hotkeys-and-ui-registry-layers.md) (`command_id`), [0072](adr/0072-chat-topic-cards-intent-melody-keyboard-contract.md) (chat-topic navigation как частный случай intent-first входов), [chord-notation-cascadeide.md](chord-notation-cascadeide.md) (физические клавиши и Vim-нотация — **другой** слой).
+**Связь:** [0060](adr/0060-keyboard-chord-stack-fms-tactical-strategic.md) (норматив продукта и паритет с аккордом), [0030](adr/0030-command-ids-hotkeys-and-ui-registry-layers.md) (`command_id`), [0072](adr/0072-chat-topic-cards-intent-melody-keyboard-contract.md) (chat-topic navigation как частный случай intent-first входов), [0109](adr/0109-declarative-parametric-melody-catalog-toml-and-code-binders.md) (каталог корней **`[[melody_root]]`** в TOML, параметрические сигнатуры хвоста), [chord-notation-cascadeide.md](chord-notation-cascadeide.md) (физические клавиши и Vim-нотация — **другой** слой).
 
 ---
 
@@ -143,6 +143,10 @@ ws_opt         ::= { " " | "\t" } ;
 ---
 
 ## 6. Реестр, конфликты, расширение
+
+Файл **IntentMelody/intent-melody-aliases.toml** — канонический **каталог корней**: **`melody_catalog_schema_version`**, при необходимости **`[[tail_wire_class]]`**, блоки **`[[melody_root]]`** с полями `slug`, `command_id`, опционально `shape`, `show_usage_hint_if_bare_slug` (голый slug в `c:` → строка подсказки вместо команды), `tail_signature`, `wire_class` (см. [ADR 0109](adr/0109-declarative-parametric-melody-catalog-toml-and-code-binders.md)). Простые alias — `shape = "simple"`; параметрические (диапазон строк, URL портала и т.п.) — `shape = "parametric"` и сигнатура хвоста в каталоге.
+
+В **`tail_signature`** для числовых слотов: **`:int`** — обобщённое целое; **`:ln`** или **`:linenumber`** — номер строки редактора (**1-based**, inclusive-диапазон как в продуктовой семантике диапазона строк). Загрузчик и разбор хвоста учитывают оба вида; для диапазонов строк в каталоге предпочтительно **`ln`**.
 
 Правила совпадают с [0060 §11](adr/0060-keyboard-chord-stack-fms-tactical-strategic.md#adr0060-p11):
 

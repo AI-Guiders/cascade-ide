@@ -117,6 +117,9 @@
 | [0106](0106-hybrid-codebase-index-cascadeide-integration-and-semantic-map.md) | Встраивание hybrid index в CascadeIDE (DAL/CCU/DataBus/freshness) и граница Semantic Map | Proposed |
 | [0107](0107-blank-solution-creation-via-dotnet-new-sln.md) | Пустое решение: `dotnet new sln`, меню/MCP, `BlankSolutionCreator` + `IDotnetCommandRunner` | Accepted · Implemented |
 | [0108](0108-web-ai-portal-host-object-tools-bridge.md) | Веб-портал для внешних веб-ИИ: WebView, Host Object → `IdeCommands`/MCP; allowlist, согласие; PoC (Atlas / Search AI) | Accepted · Implemented |
+| [0109](0109-declarative-parametric-melody-catalog-toml-and-code-binders.md) | Intent Melody: целевой каталог `[[melody_root]]` (`shape` + `tail_signature`); миграция с `[aliases]`+`[[parametric]]`; args в коде; плагины — обработка у плагина | Accepted |
+| [0110](0110-roslyn-refactor-intent-melody-bridge.md) | Рефакторинги Roslyn по диапазону: мост Intent Melody / IDE ↔ Roslyn MCP; без дублей Features в ядре; `rmx`/`rix` не в бандле до моста | Proposed |
+| [0111](0111-editor-linenumber-linerange-value-objects.md) | Редактор: `LineNumber` / `LineRange` (1-based, Start ≤ End); `ParsedLineRange`; граница к JSON — `int` в args команд | Accepted · Implemented |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 

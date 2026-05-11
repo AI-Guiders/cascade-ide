@@ -1,9 +1,7 @@
 #nullable enable
-using System.Linq;
 using Avalonia.Input;
 using Avalonia.Threading;
 using CascadeIDE.Models.Shell;
-using CascadeIDE.Services;
 
 namespace CascadeIDE.Features.Shell.Application;
 
@@ -18,12 +16,14 @@ public sealed class CascadeChordIntentSession
     private enum Phase
     {
         Idle,
-        /// <summary>После корня — набор буквенно-цифрового хвоста как у <c>c:</c>.</summary>
+        /// <summary>После корня — набор хвоста как у <c>c:</c> в палитре (включая параметрические <c>wai:</c>, <c>els:</c>…).</summary>
         AwaitMelodyTail
     }
 
     private readonly Action _notifyOverlayProperties;
-    private readonly Func<string, Task> _executeCommandByIdAsync;
+    private readonly Func<string?> _getCurrentFilePath;
+    private readonly Func<string?> _getEditorText;
+    private readonly Func<string, string?, Task> _executeChordCommandAsync;
 
     private Phase _phase;
     /// <summary>Нормализованный хвост мелодии (нижний регистр), как после <c>c:</c>.</summary>
@@ -31,18 +31,19 @@ public sealed class CascadeChordIntentSession
     private DateTimeOffset _deadline = DateTimeOffset.MinValue;
     private DispatcherTimer? _timer;
 
-    /// <summary>Фокус в полоске HUD над редактором: туннель не перехватывает буквы.</summary>
-    private bool _hudTextHasFocus;
-
     /// <summary>Пользователь закрыл выпадающий список (light dismiss).</summary>
     private bool _dropdownUserDismissed;
 
     public CascadeChordIntentSession(
         Action notifyOverlayProperties,
-        Func<string, Task> executeCommandByIdAsync)
+        Func<string?> getCurrentFilePath,
+        Func<string?> getEditorText,
+        Func<string, string?, Task> executeChordCommandAsync)
     {
         _notifyOverlayProperties = notifyOverlayProperties;
-        _executeCommandByIdAsync = executeCommandByIdAsync;
+        _getCurrentFilePath = getCurrentFilePath;
+        _getEditorText = getEditorText;
+        _executeChordCommandAsync = executeChordCommandAsync;
     }
 
     private const int MaxDropdownItems = 25;
@@ -61,7 +62,9 @@ public sealed class CascadeChordIntentSession
         _phase == Phase.AwaitMelodyTail
         && !_dropdownUserDismissed
         && !string.IsNullOrEmpty(_melodyTail)
-        && (CascadeChordPresentationProjection.FilterEligibleMatches(_melodyTail).Count > 0 || OverlayNoMatches);
+        && (CascadeChordPresentationProjection.FilterEligibleMatches(_melodyTail).Count > 0
+            || OverlayNoMatches
+            || ParametricIntentMelody.IsParametricChordTailPrefix(_melodyTail));
 
     public bool HasDropdownItems =>
         _phase == Phase.AwaitMelodyTail && OverlaySuggestions.Count > 0;
@@ -78,16 +81,6 @@ public sealed class CascadeChordIntentSession
 
     public string HudMelodyTextGet() =>
         _phase == Phase.AwaitMelodyTail ? _melodyTail : "";
-
-    public void HudMelodyTextSet(string value)
-    {
-        if (_phase != Phase.AwaitMelodyTail)
-            return;
-        var n = CascadeChordPresentationProjection.NormalizeMelodyInput(value);
-        if (string.Equals(n, _melodyTail, StringComparison.Ordinal))
-            return;
-        ApplyMelodyTail(n);
-    }
 
     public string OverlayFindBarLine =>
         _phase != Phase.AwaitMelodyTail
@@ -107,7 +100,8 @@ public sealed class CascadeChordIntentSession
     public bool OverlayNoMatches =>
         _phase == Phase.AwaitMelodyTail
         && !string.IsNullOrEmpty(_melodyTail)
-        && CascadeChordPresentationProjection.FilterEligibleMatches(_melodyTail).Count == 0;
+        && CascadeChordPresentationProjection.FilterEligibleMatches(_melodyTail).Count == 0
+        && !ParametricIntentMelody.IsParametricChordTailPrefix(_melodyTail);
 
     public string CommandArmedLampToolTip =>
         !IsOverlayVisible
@@ -150,14 +144,6 @@ public sealed class CascadeChordIntentSession
 
     private void StopTimer() => _timer?.Stop();
 
-    public void SetHudTextHasFocus(bool hasFocus)
-    {
-        _hudTextHasFocus = hasFocus;
-        if (hasFocus)
-            _dropdownUserDismissed = false;
-        _notifyOverlayProperties();
-    }
-
     public void NotifyDropdownDismissed()
     {
         _dropdownUserDismissed = true;
@@ -180,9 +166,21 @@ public sealed class CascadeChordIntentSession
     {
         if (_phase != Phase.AwaitMelodyTail)
             return;
-        var cmdEnter = IntentMelodyAliases.TryResolveExactCommandId(_melodyTail);
-        if (cmdEnter != null)
-            _ = ExecuteCommandFireAndForgetAsync(cmdEnter);
+
+        var melody = _melodyTail;
+
+        if (ParametricIntentMelody.TryResolveParametricExecution(
+                melody,
+                _getCurrentFilePath(),
+                _getEditorText() ?? "",
+                out var paramCmdId,
+                out var paramArgsJson,
+                out _))
+            _ = ExecuteCommandFireAndForgetAsync(paramCmdId, paramArgsJson);
+        else if (IntentMelodyAliases.TryResolveExactCommandId(melody) is { } plain &&
+                 !ParametricIntentMelody.IsParametricMelodyBaseAlias(melody))
+            _ = ExecuteCommandFireAndForgetAsync(plain, null);
+
         EndIdle();
     }
 
@@ -191,18 +189,30 @@ public sealed class CascadeChordIntentSession
         _dropdownUserDismissed = false;
         var matches = CascadeChordPresentationProjection.FilterEligibleMatches(newTail);
         var exact = matches.FirstOrDefault(m => string.Equals(m.Alias, newTail, StringComparison.Ordinal));
-        var hasLonger = matches.Any(m => m.Alias.Length > newTail.Length);
-        if (exact.CommandId != null && !hasLonger && newTail.Length > 0)
+        var hasLongerAlias = IntentMelodyAliases.HasStrictLongerAliasPrefix(newTail);
+        if (exact.CommandId != null &&
+            !hasLongerAlias &&
+            newTail.Length > 0 &&
+            !ParametricIntentMelody.ChordDefersInstantExecuteForExactAlias(exact.Alias))
         {
             _melodyTail = newTail;
-            _ = ExecuteCommandFireAndForgetAsync(exact.CommandId);
+            _ = ExecuteCommandFireAndForgetAsync(exact.CommandId, null);
             EndIdle();
             return;
         }
 
         if (matches.Count == 0 && newTail.Length > 0)
         {
-            EndIdle();
+            if (!ParametricIntentMelody.IsParametricChordTailPrefix(newTail))
+            {
+                EndIdle();
+                return;
+            }
+
+            _melodyTail = newTail;
+            _deadline = DateTimeOffset.UtcNow.AddSeconds(TimeoutSeconds);
+            RestartTimer();
+            _notifyOverlayProperties();
             return;
         }
 
@@ -212,29 +222,28 @@ public sealed class CascadeChordIntentSession
         _notifyOverlayProperties();
     }
 
-    public void BeginRoot(Action? requestHudFocus)
+    /// <summary>Корень аккорда: фаза ожидания мелодии; ввод — через tunnel окна (зеркало HUD не забирает фокус).</summary>
+    public void BeginRoot()
     {
         _phase = Phase.AwaitMelodyTail;
         _melodyTail = "";
-        _hudTextHasFocus = false;
         _dropdownUserDismissed = false;
         _deadline = DateTimeOffset.UtcNow.AddSeconds(TimeoutSeconds);
         RestartTimer();
         _notifyOverlayProperties();
-        requestHudFocus?.Invoke();
     }
 
     /// <summary>
     /// Обрабатывает аккорд Cascade: возвращает <see langword="true"/>, если событие поглощено (в т.ч. корень).
     /// </summary>
-    public bool TryConsumeKeyDown(KeyEventArgs e, Action? requestHudFocusOnChordRoot)
+    public bool TryConsumeKeyDown(KeyEventArgs e)
     {
         var map = MainWindowHotkeyService.GetMergedMap();
         var rootGesture = CascadeChordHotkey.ResolveRootGesture(map);
 
         if (CascadeChordHotkey.RootGestureMatches(rootGesture, e))
         {
-            BeginRoot(requestHudFocusOnChordRoot);
+            BeginRoot();
             e.Handled = true;
             return true;
         }
@@ -254,9 +263,6 @@ public sealed class CascadeChordIntentSession
             e.Handled = true;
             return true;
         }
-
-        if (_hudTextHasFocus)
-            return false;
 
         var mods = e.KeyModifiers;
         if (mods.HasFlag(KeyModifiers.Control) || mods.HasFlag(KeyModifiers.Alt) || mods.HasFlag(KeyModifiers.Meta))
@@ -290,14 +296,14 @@ public sealed class CascadeChordIntentSession
             return true;
         }
 
-        if (!CascadeChordMelodyKeyMap.TryMapToChar(e.Key, out var ch))
+        if (!CascadeChordMelodyKeyMap.TryMapChordMelodyGlyph(e.Key, e.KeyModifiers, e.PhysicalKey, out var ch))
         {
             EndIdle();
             e.Handled = true;
             return true;
         }
 
-        var newTail = _melodyTail + ch;
+        var newTail = _melodyTail + char.ToLowerInvariant(ch);
         ApplyMelodyTail(newTail);
         e.Handled = true;
         return true;
@@ -307,17 +313,16 @@ public sealed class CascadeChordIntentSession
     {
         _phase = Phase.Idle;
         _melodyTail = "";
-        _hudTextHasFocus = false;
         _dropdownUserDismissed = false;
         StopTimer();
         _notifyOverlayProperties();
     }
 
-    private async Task ExecuteCommandFireAndForgetAsync(string commandId)
+    private async Task ExecuteCommandFireAndForgetAsync(string commandId, string? argsJson)
     {
         try
         {
-            await _executeCommandByIdAsync(commandId).ConfigureAwait(false);
+            await _executeChordCommandAsync(commandId, argsJson).ConfigureAwait(false);
         }
         catch
         {

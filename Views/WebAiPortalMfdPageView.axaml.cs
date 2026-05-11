@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
@@ -38,7 +39,17 @@ public partial class WebAiPortalMfdPageView : UserControl
 
     private void OnUnloaded(object? sender, RoutedEventArgs e) => _autoDomBridgeTimer.Stop();
 
-    private void OnNavigateClick(object? sender, RoutedEventArgs e)
+    private void OnNavigateClick(object? sender, RoutedEventArgs e) => NavigateFromUrlBar();
+
+    private void OnWebAiPortalUrlKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Enter)
+            return;
+        e.Handled = true;
+        NavigateFromUrlBar();
+    }
+
+    private void NavigateFromUrlBar()
     {
         if (DataContext is not MainWindowViewModel vm)
             return;
@@ -47,17 +58,20 @@ public partial class WebAiPortalMfdPageView : UserControl
 
     private void TryNavigate(string? raw)
     {
-        var s = raw?.Trim();
-        if (string.IsNullOrEmpty(s))
-            s = "about:blank";
-        if (!Uri.TryCreate(s, UriKind.Absolute, out var uri))
+        if (!WebAiPortalUrlNormalize.TryBuildNavigationUri(raw, out var uri, out var normalized))
         {
             if (DataContext is MainWindowViewModel vm)
                 vm.WebAiPortalLastBridgeResult = "Некорректный URL.";
             return;
         }
 
-        WebView?.Navigate(uri);
+        if (DataContext is MainWindowViewModel vmNavigate)
+            vmNavigate.WebAiPortalUrlText = normalized;
+
+        if (WebView is null)
+            return;
+        ArgumentNullException.ThrowIfNull(uri);
+        WebView.Navigate(uri);
     }
 
     private async void OnExecuteJsonCascadeFromClipboardClick(object? sender, RoutedEventArgs e)
