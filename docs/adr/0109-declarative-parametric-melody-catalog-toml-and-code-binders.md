@@ -1,6 +1,6 @@
 # ADR 0109: Единый декларативный каталог параметрических Intent Melody (TOML + кодовое связывание args)
 
-**Статус:** Accepted  
+**Статус:** Accepted · Implemented (полный продуктовый контур §5, шаги 1–6: `[[melody_root]]` + `[[tail_wire_class]]`, загрузчик, рантайм-каталог, палитра/аккорд, бандл без legacy `[aliases]`/`[[parametric]]`, док `intent-melody-language-v1`; не в scope этого ADR: §3.5 внешняя грамматика `grammar_ref`, §3.6 плагины — до отдельной модели расширений)  
 **Дата:** 2026-05-11  
 
 **Связь:** [0081](0081-parametric-intent-melodies-editor-line-ranges.md) (параметрические хвосты для диапазонов строк редактора), [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md) (Command Melody, CascadeChord, паритет с `c:`), [0108](0108-web-ai-portal-host-object-tools-bridge.md) (веб-портал и параметрическая мелодия `wai:`…), [0030](0030-command-ids-hotkeys-and-ui-registry-layers.md) (`command_id`, слои реестра), [0008](0008-mcp-contracts-and-testable-infrastructure.md) (MCP / исполнение команд), [intent-melody-language-v1.md](../intent-melody-language-v1.md) (IML v1), [`IntentMelody/intent-melody-aliases.toml`](../../IntentMelody/intent-melody-aliases.toml) (реестр alias → `command_id`).
@@ -288,14 +288,28 @@ chord_commit = "enter"
 6. Обновить [intent-melody-language-v1.md](../intent-melody-language-v1.md): ссылка на этот ADR и на поля каталога (`[[melody_root]]` и миграционный вид).
 7. По необходимости (§3.5): поле **`grammar_ref`** на строку каталога (**`[[melody_root]]`** или **`[[parametric]]`**) или на сторонний реестр стратегий + парсер внешнего формата (XML/JSON + схема). Отдельно: когда появится модель плагинов — см. [§3.6](#adr0109-p-plugins).
 
-### Статус реализации (**Implemented**, ядро)
+### Статус реализации (**Implemented** — шаги 1–6 §5; §3.5–3.6 вне объёма)
+
+Соответствие **шагам внедрения** (раздел §5 ниже):
+
+| Шаг | Содержание ADR | Факт в коде/данных |
+|-----|------------------|---------------------|
+| 1 | DTO загрузки, нормализация миграционного TOML | `IntentMelodyAliases` → `IntentMelodyBundleState` / `IntentMelodyCatalogSnapshot` + merge оверлея |
+| 2 | Read-only каталог корней | `IntentMelodyCatalog` + снимок из бандла |
+| 3 | Целевой **`[[melody_root]]`** в бандле | `IntentMelody/intent-melody-aliases.toml`: `melody_catalog_schema_version`, только **`[[melody_root]]`** и **`[[tail_wire_class]]`** (без `[aliases]` / `[[parametric]]`) |
+| 4 | Палитра и аккорд через каталог | `IdeCommandPaletteFilterOrchestrator`, `CascadeChordIntentSession`, `MelodyPaletteLineCommandPaletteExtensions` + `ParametricIntentMelody` опираются на `IntentMelodyCatalog` |
+| 5 | Убрать `PaletteOnlyAliases` как источник правды | Список «только подсказка в палитре» задан в TOML (`show_usage_hint_if_bare_slug`); в коде остаётся лишь хелпер **`IsPaletteOnlyAlias`** (читает каталог), не статический перечень slug |
+| 6 | Обновить `intent-melody-language-v1.md` | Ссылки на ADR 0109 и поля **`[[melody_root]]`** / `[[tail_wire_class]]` — в [intent-melody-language-v1.md](../intent-melody-language-v1.md) |
+
+**Шаг 7** (поле **`grammar_ref`**, внешние стратегии разбора) и **§3.6** (плагины с собственным кодом binders) в ADR изначально **опциональны / следующая эпоха** — не часть «недоделанного ядра», а расширения после роста сложности.
+
+Детали поведения и тестов:
 
 - **Загрузка и валидация:** `IntentMelodyAliases.Build` разбирает **`[[tail_wire_class]]`** и **`[[melody_root]]`**, проверяет **`wire_class`**, **`chord_commit`**, согласованность **`kind`** с **`tail_signature`** (`IntentMelodyTailSemantics`).
 - **Каталог в рантайме:** read-only снимок `IntentMelodyCatalogSnapshot` + `IntentMelodyCatalog`; разбор параметрики использует классы проводов (**`SingleRemainder`** / **`DelimitedSlots`**) из `ParametricIntentMelody`.
-- **Поверхности:** палитра и аккорды резолвят slug и аргументы через каталог (`IdeCommandPaletteFilterOrchestrator`, `CascadeChordIntentSession`, `MelodyPaletteLineCommandPaletteExtensions`).
-- **`chord_commit`:** поведение мгновенного исполнения в аккорде — `ParametricIntentMelody.ChordDefersInstantExecuteFor*` ( **`enter`** и аналоги откладывают, **`immediate` / `instant`** — нет ).
-- **`palette_hint_slug`:** ключ подсказок палитры — `ParametricIntentMelody.ResolvePaletteHintKey`; в бандле зафиксировано для **`wai`** → **`wai-url`** (`intent-melody-aliases.toml`).
-- **Тесты:** `IntentMelodyCatalogWireTests`, `ParametricIntentMelodyTests`, `IntentMelodyAliasesTests` (в т.ч. строка `palette_hint_slug` в bundled TOML).
+- **`chord_commit`:** `ParametricIntentMelody.ChordDefersInstantExecuteFor*` (**`enter`** и аналоги откладывают, **`immediate` / `instant`** — нет).
+- **`palette_hint_slug`:** `ParametricIntentMelody.ResolvePaletteHintKey`; в бандле (напр. **`wai`** → **`wai-url`**).
+- **Тесты:** `IntentMelodyCatalogWireTests`, `ParametricIntentMelodyTests`, `IntentMelodyAliasesTests`.
 
 ---
 
