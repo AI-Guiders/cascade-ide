@@ -27,6 +27,7 @@ publish/
 publish-debug/
 publish-debug-staging/
 publish-hotkeyfix/
+publish-gh-release/
 Data/
 .cursor/
 .hybrid-codebase-index/
@@ -42,4 +43,3 @@ docs/adr/_patch_*.py
 # Редактор AvaloniaEdit: NuGet AIGuiders.AvaloniaEdit*; исходники форка — отдельный клон (не в этом репо).
 dist/
 externals/avaloniaedit/
-publish-gh-release/*.lib
