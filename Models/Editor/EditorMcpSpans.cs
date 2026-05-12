@@ -59,6 +59,12 @@ public readonly struct EditorTextSpan : IEquatable<EditorTextSpan>
             return false;
         }
 
+        if (sl.Equals(el) && ec.Value < sc.Value)
+        {
+            error = "На одной строке end_column не может быть меньше start_column.";
+            return false;
+        }
+
         span = new EditorTextSpan(filePath, sl, sc, el, ec);
         return true;
     }

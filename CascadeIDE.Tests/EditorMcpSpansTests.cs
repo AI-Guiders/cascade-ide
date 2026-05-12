@@ -42,6 +42,21 @@ public sealed class EditorMcpSpansTests
     }
 
     [Fact]
+    public void EditorTextSpan_TryParse_RejectsInvertedColumnsOnSameLine()
+    {
+        var fp = @"D:\a\b\c.txt";
+        var args = Args(
+            ("file_path", JsonSerializer.SerializeToElement(fp)),
+            ("start_line", JsonSerializer.SerializeToElement(2)),
+            ("start_column", JsonSerializer.SerializeToElement(8)),
+            ("end_line", JsonSerializer.SerializeToElement(2)),
+            ("end_column", JsonSerializer.SerializeToElement(3)));
+
+        Assert.False(EditorTextSpan.TryParse(args, out _, out var err));
+        Assert.Contains("end_column", err, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void EditorTextSpan_TryParse_RejectsEndLineBeforeStartLine()
     {
         var fp = @"D:\a\b\c.txt";
