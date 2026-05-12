@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using CascadeIDE.Features.Shell.Application;
 using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Models;
+using CascadeIDE.Services;
 using CascadeIDE.ViewModels;
 
 namespace CascadeIDE.Features.Search.Application;
@@ -22,43 +23,58 @@ internal static class IdeCommandPaletteFilterOrchestrator
         CommandPaletteGoToAsyncHandle goToHandle,
         Action<int> setSelectedIndex,
         Func<int> getSelectedIndex,
+        Action refreshCommandPaletteSurfaceSnapshot,
+        Func<ICommandPaletteGoToSearchBackend> getWorkspaceGoToSearchBackend)
+    {
+        switch (CommandPaletteParsedQueryParser.Parse(getCommandPaletteQuery()))
+        {
+            case CommandPaletteParsedQuery.Melody m:
+                goToHandle.Cancel();
+                RefreshMelodyPaletteFilter(
+                    m.TailNormalized,
+                    filteredEntries,
+                    hotkeyGestureMap,
+                    uiModeFamily,
+                    currentFilePath,
+                    editorText,
+                    setSelectedIndex,
+                    refreshCommandPaletteSurfaceSnapshot);
+                break;
+            case CommandPaletteParsedQuery.GoTo gt:
+                RefreshGoToPaletteFilter(
+                    gt.Query,
+                    filteredEntries,
+                    workspaceSolutionPath,
+                    solutionRoots,
+                    goToHandle,
+                    setSelectedIndex,
+                    getSelectedIndex,
+                    refreshCommandPaletteSurfaceSnapshot,
+                    getCommandPaletteQuery,
+                    getWorkspaceGoToSearchBackend);
+                break;
+            case CommandPaletteParsedQuery.Catalog c:
+                goToHandle.Cancel();
+                RefreshCommandCatalogPaletteFilter(
+                    c.TrimmedRaw,
+                    filteredEntries,
+                    hotkeyGestureMap,
+                    uiModeFamily,
+                    setSelectedIndex,
+                    refreshCommandPaletteSurfaceSnapshot);
+                break;
+        }
+    }
+
+    private static void RefreshCommandCatalogPaletteFilter(
+        string trimmedCatalogQuery,
+        ObservableCollection<IdeCommandPaletteRowViewModel> filteredEntries,
+        HotkeyGestureMap hotkeyGestureMap,
+        UiModeFamily uiModeFamily,
+        Action<int> setSelectedIndex,
         Action refreshCommandPaletteSurfaceSnapshot)
     {
-        var raw = getCommandPaletteQuery();
-        if (IntentMelodyAliases.TryGetTail(raw, out var melodyTail))
-        {
-            goToHandle.Cancel();
-            RefreshMelodyPaletteFilter(
-                melodyTail,
-                filteredEntries,
-                hotkeyGestureMap,
-                uiModeFamily,
-                currentFilePath,
-                editorText,
-                setSelectedIndex,
-                refreshCommandPaletteSurfaceSnapshot);
-            return;
-        }
-
-        if (GoToAllQueryParser.TryParse(raw) is { } goTo)
-        {
-            RefreshGoToPaletteFilter(
-                goTo,
-                filteredEntries,
-                workspaceSolutionPath,
-                solutionRoots,
-                goToHandle,
-                setSelectedIndex,
-                getSelectedIndex,
-                refreshCommandPaletteSurfaceSnapshot,
-                getCommandPaletteQuery);
-            return;
-        }
-
-        goToHandle.Cancel();
-
-        var q = raw.Trim();
-        var ranked = IdeCommandPaletteMatch.FilterAndRank(IdeCommandPaletteCatalog.All, q);
+        var ranked = IdeCommandPaletteMatch.FilterAndRank(IdeCommandPaletteCatalog.All, trimmedCatalogQuery);
 
         filteredEntries.Clear();
         var hotkeys = hotkeyGestureMap;
@@ -163,7 +179,8 @@ internal static class IdeCommandPaletteFilterOrchestrator
         Action<int> setSelectedIndex,
         Func<int> getSelectedIndex,
         Action refreshCommandPaletteSurfaceSnapshot,
-        Func<string> getCommandPaletteQuery)
+        Func<string> getCommandPaletteQuery,
+        Func<ICommandPaletteGoToSearchBackend> getWorkspaceGoToSearchBackend)
     {
         goToHandle.Cancel();
 
@@ -191,7 +208,7 @@ internal static class IdeCommandPaletteFilterOrchestrator
                 {
                     filteredEntries.Add(new IdeCommandPaletteRowViewModel(
                         "Введи запрос после префикса",
-                        q.Prefix == 't' ? "t: тип (по .cs)" : q.Prefix == 'm' ? "m: член (эвристика по .cs)" : "x: текст (ripgrep)"));
+                        q.Prefix == 't' ? "t: тип (по .cs)" : q.Prefix == 'm' ? "m: член (эвристика по .cs)" : "x: текст"));
                 }
                 else
                 {
@@ -199,12 +216,14 @@ internal static class IdeCommandPaletteFilterOrchestrator
                     goToHandle.Cts = new CancellationTokenSource();
                     var ct = goToHandle.Cts.Token;
                     var seq = ++goToHandle.Seq;
-                    _ = RunGoToRipgrepAsync(
+                    _ = RunGoToWorkspaceSearchAsync(
                         q,
                         root,
+                        workspaceSolutionPath,
                         seq,
                         () => goToHandle.Seq,
                         getCommandPaletteQuery,
+                        getWorkspaceGoToSearchBackend(),
                         filteredEntries,
                         setSelectedIndex,
                         refreshCommandPaletteSurfaceSnapshot,
@@ -253,12 +272,14 @@ internal static class IdeCommandPaletteFilterOrchestrator
         }
     }
 
-    public static async Task RunGoToRipgrepAsync(
+    internal static async Task RunGoToWorkspaceSearchAsync(
         GoToAllQuery query,
         string workspaceRoot,
+        string? workspaceSolutionPath,
         long seq,
         Func<long> getLiveGoToSeq,
         Func<string> getCommandPaletteQuery,
+        ICommandPaletteGoToSearchBackend workspaceBackend,
         ObservableCollection<IdeCommandPaletteRowViewModel> filteredEntries,
         Action<int> setSelectedIndex,
         Action refreshCommandPaletteSurfaceSnapshot,
@@ -267,13 +288,11 @@ internal static class IdeCommandPaletteFilterOrchestrator
         try
         {
             await Task.Delay(CommandPaletteGoToLimits.RipgrepDebounceMs, ct).ConfigureAwait(false);
-            var (pattern, fixedString, glob) = GoToPaletteRipgrepPatternBuilder.Build(query);
-            var (matches, err) = await RipgrepWorkspaceSearchService.SearchMatchesAsync(
+            var (matches, err) = await workspaceBackend
+                .SearchMatchesAsync(
+                    query,
                     workspaceRoot,
-                    pattern,
-                    subPath: null,
-                    fixedString,
-                    glob,
+                    workspaceSolutionPath,
                     CommandPaletteGoToLimits.MaxRipgrepMatches,
                     rgExecutable: null,
                     ct)

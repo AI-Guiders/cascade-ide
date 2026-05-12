@@ -6,12 +6,10 @@ namespace CascadeIDE.Features.Shell.Application;
 [ComputingUnit]
 public static class CommandPaletteChromeProjection
 {
-    private const string ModeHintsNoSample = "f: файл · t: тип · m: член · x: текст · c: melody";
-
     private static string ModeHints(string? melodyAliasesSample) =>
         string.IsNullOrEmpty(melodyAliasesSample)
-            ? ModeHintsNoSample
-            : $"{ModeHintsNoSample} ({melodyAliasesSample})";
+            ? CommandPaletteChromeModeHints.SeparatorLineJoin
+            : $"{CommandPaletteChromeModeHints.SeparatorLineJoin} ({melodyAliasesSample})";
 
     public static string FooterHint(string? toggleCommandPaletteHotkeyDisplay, string? melodyAliasesSampleForFooter)
     {
@@ -23,7 +21,7 @@ public static class CommandPaletteChromeProjection
 
     public static string QueryPlaceholder(string? melodyAliasesSample)
     {
-        var baseText = "Команда… · " + ModeHintsNoSample;
+        var baseText = "Команда… · " + CommandPaletteChromeModeHints.SeparatorLineJoin;
         return string.IsNullOrEmpty(melodyAliasesSample)
             ? baseText
             : $"{baseText} ({melodyAliasesSample})";

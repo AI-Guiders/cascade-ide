@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using CascadeIDE.Features.Search.Application;
 using CascadeIDE.Features.Shell.Application;
+using CascadeIDE.Models;
 using CascadeIDE.IdeDisplay;
 using CascadeIDE.IdeDisplay.CommandPalette;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -159,7 +160,12 @@ public partial class MainWindowViewModel
             _commandPaletteGoTo,
             i => CommandPaletteSelectedIndex = i,
             () => CommandPaletteSelectedIndex,
-            RefreshCommandPaletteSurfaceSnapshot);
+            RefreshCommandPaletteSurfaceSnapshot,
+            () => CommandPaletteGoToSearchBackendFactory.Resolve(
+                CommandPaletteGoToSearchBackendNormalizer.Parse(_settings.CommandPalette.GoToSearch.Backend),
+                _hybridIndex,
+                _settings.HybridIndex.ScopeMode,
+                _settings.HybridIndex.Enabled));
 
     /// <summary>Обновить подписи доступности при смене UI-режима с открытой палитрой.</summary>
     private void RefreshCommandPaletteIfOpen()
