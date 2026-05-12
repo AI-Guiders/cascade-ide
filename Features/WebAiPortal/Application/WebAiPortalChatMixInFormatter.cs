@@ -2,6 +2,8 @@ using System.Globalization;
 using System.Text;
 using System.Text.Json;
 
+using CascadeIDE.Models.Editor;
+
 namespace CascadeIDE.Features.WebAiPortal.Application;
 
 /// <summary>
@@ -58,11 +60,17 @@ public static class WebAiPortalChatMixInFormatter
         public List<string>? EffectiveExtensions { get; set; }
     }
 
-    private sealed class EditorRangeSnap
+    /// <summary>Снимок ответа <c>get_editor_content_range</c>: канонический диапазон строк + контент.</summary>
+    private sealed record EditorRangeSnap(string? FilePath, LineRange Lines, string Content);
+
+    private sealed class EditorRangeSerdeDto
     {
         public string? FilePath { get; set; }
+
         public int StartLine { get; set; }
+
         public int EndLine { get; set; }
+
         public string? Content { get; set; }
     }
 
@@ -165,21 +173,15 @@ public static class WebAiPortalChatMixInFormatter
     private static bool TryParseEditorRange(string json, out EditorRangeSnap? snap)
     {
         snap = null;
-        EditorRangeSnap? fromSerializer = null;
+        EditorRangeSerdeDto? dto = null;
         try
         {
-            fromSerializer = JsonSerializer.Deserialize<EditorRangeSnap>(json, JsonSnakeNaming);
-            if (!string.IsNullOrEmpty(fromSerializer?.Content))
-            {
-                snap = fromSerializer;
+            dto = JsonSerializer.Deserialize<EditorRangeSerdeDto>(json, JsonSnakeNaming);
+            if (dto is not null && trySnapFromDto(dto, out snap))
                 return true;
-            }
-            fromSerializer = JsonSerializer.Deserialize<EditorRangeSnap>(json, JsonRelaxed);
-            if (!string.IsNullOrEmpty(fromSerializer?.Content))
-            {
-                snap = fromSerializer;
+            dto = JsonSerializer.Deserialize<EditorRangeSerdeDto>(json, JsonRelaxed);
+            if (dto is not null && trySnapFromDto(dto, out snap))
                 return true;
-            }
         }
         catch
         {
@@ -196,12 +198,29 @@ public static class WebAiPortalChatMixInFormatter
                 || TryGetString(root, "FilePath", out fp);
             var sl = TryGetInt(root, "start_line", out var s0) ? s0 : (TryGetInt(root, "StartLine", out var s1) ? s1 : 1);
             var el = TryGetInt(root, "end_line", out var e0) ? e0 : (TryGetInt(root, "EndLine", out var e1) ? e1 : sl);
-            snap = new EditorRangeSnap { FilePath = fp, StartLine = sl, EndLine = el, Content = contentText };
-            return true;
+            return tryEditorRangeFromParts(fp, sl, el, contentText, out snap);
         }
         catch
         {
             return false;
+        }
+
+        static bool trySnapFromDto(EditorRangeSerdeDto d, out EditorRangeSnap? s) =>
+            tryEditorRangeFromParts(d.FilePath, d.StartLine, d.EndLine, d.Content ?? "", out s);
+
+        static bool tryEditorRangeFromParts(string? fp, int startRaw, int endRaw, string content, out EditorRangeSnap? s)
+        {
+            s = null;
+            if (string.IsNullOrEmpty(content))
+                return false;
+            var lo = Math.Min(startRaw, endRaw);
+            var hi = Math.Max(startRaw, endRaw);
+            if (!LineNumber.TryCreate(lo, out var lnLo) || !LineNumber.TryCreate(hi, out var lnHi)
+                || !LineRange.TryCreate(lnLo, lnHi, out var lines))
+                return false;
+
+            s = new EditorRangeSnap(fp, lines, content);
+            return true;
         }
     }
 
@@ -300,16 +319,18 @@ workspace {ws}; расширений FTS: {extN}{err}
             : content[..previewLimit];
         preview = NormalizeOneLinePreview(preview, preview.Length);
         var path = string.IsNullOrWhiteSpace(range.FilePath) ? "(файл)" : range.FilePath!;
-        var half = Math.Max(1, (range.EndLine - range.StartLine + 1) / 2);
-        var narrowEnd = Math.Min(range.EndLine, range.StartLine + half - 1);
-        narrowEnd = Math.Max(narrowEnd, range.StartLine);
+        var start = range.Lines.Start.Value;
+        var end = range.Lines.End.Value;
+        var half = Math.Max(1, (end - start + 1) / 2);
+        var narrowEnd = Math.Min(end, start + half - 1);
+        narrowEnd = Math.Max(narrowEnd, start);
 
         return $"""
-Диапазон ~{rawLength} симв.: {path}, L{range.StartLine}–{range.EndLine}
+Диапазон ~{rawLength} симв.: {path}, L{start}–{end}
 Превью (одна строка): {preview}{(content.Length > previewLimit ? $" …+{content.Length - previewLimit}" : "")}
 
 Уже меньше охват:
-{BridgeLine(IdeCommands.GetEditorContentRange, new Dictionary<string, object?> { ["start_line"] = range.StartLine, ["end_line"] = narrowEnd })}
+{BridgeLine(IdeCommands.GetEditorContentRange, new Dictionary<string, object?> { ["start_line"] = start, ["end_line"] = narrowEnd })}
 {BridgeFooter}
 """;
     }

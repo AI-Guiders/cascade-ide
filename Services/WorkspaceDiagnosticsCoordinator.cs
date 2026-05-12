@@ -320,15 +320,15 @@ public sealed class WorkspaceDiagnosticsCoordinator : IDisposable
                 spanLen = len - s.Start;
             if (spanLen <= 0)
                 continue;
-            var lp = d.Location.GetLineSpan().StartLinePosition;
+            var (line1, col1) = RoslynLinePositionMapper.ToEditorLineColumn(d.Location.GetLineSpan().StartLinePosition);
             strips.Add(new EditorDiagnosticStrip(
                 s.Start,
                 spanLen,
                 d.Severity,
                 d.Id,
                 d.GetMessage(),
-                lp.Line + 1,
-                lp.Character + 1));
+                line1.Value,
+                col1.Value));
         }
 
         UiScheduler.Default.Post(() =>

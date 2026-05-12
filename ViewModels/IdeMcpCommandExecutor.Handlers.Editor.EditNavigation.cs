@@ -1,3 +1,5 @@
+using CascadeIDE.Models.Editor;
+
 namespace CascadeIDE.ViewModels;
 
 /// <summary>MCP: правка текста и переход к позиции в файле.</summary>
@@ -8,17 +10,18 @@ internal sealed partial class IdeMcpCommandExecutor
         add(Services.IdeCommands.ApplyEdit, async (args, ct) =>
         {
             var a = (IIdeMcpActions)_vm;
-            if (args is null || string.IsNullOrEmpty(McpCommandJsonArgs.String(args, "file_path")) || !args.TryGetValue("new_text", out _)) return "Missing arguments";
-            a.ApplyEdit(McpCommandJsonArgs.String(args, "file_path")!, McpCommandJsonArgs.Int(args, "start_line"), McpCommandJsonArgs.Int(args, "start_column"), McpCommandJsonArgs.Int(args, "end_line"), McpCommandJsonArgs.Int(args, "end_column"), McpCommandJsonArgs.String(args, "new_text") ?? "");
+            if (args is null || !args.TryGetValue("new_text", out _)) return "Missing arguments";
+            if (!EditorTextSpan.TryParse(args, out var span, out var errSpan))
+                return errSpan;
+            a.ApplyEdit(span.File.Value, span.StartLine.Value, span.StartColumn.Value, span.EndLine.Value, span.EndColumn.Value, McpCommandJsonArgs.String(args, "new_text") ?? "");
             return await Task.FromResult("OK");
         });
         add(Services.IdeCommands.GoToPosition, async (args, ct) =>
         {
             var a = (IIdeMcpActions)_vm;
-            if (args is null || string.IsNullOrEmpty(McpCommandJsonArgs.String(args, "file_path")) || !args.TryGetValue("line", out _) || !args.TryGetValue("column", out _)) return "Missing file_path, line or column";
-            int? endLine = args.TryGetValue("end_line", out var el) && el.TryGetInt32(out var endL) ? endL : null;
-            int? endCol = args.TryGetValue("end_column", out var ec) && ec.TryGetInt32(out var endC) ? endC : null;
-            a.GoToPosition(McpCommandJsonArgs.String(args, "file_path"), McpCommandJsonArgs.Int(args, "line"), McpCommandJsonArgs.Int(args, "column"), endLine, endCol);
+            if (!EditorGoToPositionMcpArgs.TryParse(args, out var file, out var line, out var column, out var endLine, out var endColumn, out var err))
+                return err;
+            a.GoToPosition(file.Value, line.Value, column.Value, endLine?.Value, endColumn?.Value);
             return await Task.FromResult("OK");
         });
     }

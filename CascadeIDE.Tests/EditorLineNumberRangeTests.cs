@@ -30,4 +30,13 @@ public sealed class EditorLineNumberRangeTests
         Assert.Equal(5, r.Start.Value);
         Assert.Equal(5, r.End.Value);
     }
+
+    [Fact]
+    public void ColumnNumber_TryCreate_Rejects_ZeroAndNegative()
+    {
+        Assert.False(ColumnNumber.TryCreate(0, out _));
+        Assert.False(ColumnNumber.TryCreate(-3, out _));
+        Assert.True(ColumnNumber.TryCreate(1, out var c));
+        Assert.Equal(1, c.Value);
+    }
 }

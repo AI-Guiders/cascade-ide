@@ -4,7 +4,7 @@
 
 | Поле | Значение |
 |------|----------|
-| Статус | Accepted · Implemented (v1 — строки melody → JSON команд) |
+| Статус | Accepted · Implemented (v1 — строки melody → JSON; v2 — MCP/колонки/Roslyn/портал, см. ниже) |
 | Дата | 2026-05-11 |
 | Контекст | Параметрические intent melody (ADR 0081, каталог ADR 0109) передают в команды JSON с полями `start_line` / `end_line` как `int`. Метанотация `:ln` / `:linenumber` в `tail_signature` описывает слот каталога, но не даёт типобезопасности и единых инвариантов в C#. |
 
@@ -36,6 +36,20 @@
 
 Каталог по-прежнему описывает **два** числовых слота в `tail_signature` (`<start:ln>:<end:ln>`); сокращение «одно число» — **соглашение парсера приложения**, не отдельная строка каталога.
 
+## Реализация v2 (дорожная карта после v1 — закрыта в коде)
+
+| Артефакт | Назначение |
+|----------|------------|
+| `Models/Editor/ColumnNumber.cs` | CN — 1-based колонка (`TryCreate`, сравнение) |
+| `Models/Editor/EditorDocumentPath.cs` | Обёртка пути документа: `CanonicalFilePath.TryNormalize`, сравнение без регистра |
+| `Models/Editor/EditorMcpSpans.cs` | `EditorTextSpan.TryParse`, `EditorContentLineRangeMcpArgs.TryParse`, `EditorGoToPositionMcpArgs.TryParse` |
+| `Services/RoslynLinePositionMapper.cs` | `Microsoft.CodeAnalysis.Text.LinePosition` (0-based) → `(LineNumber, ColumnNumber)` для UI/MCP |
+| `Services/ContextMinimizer.cs`, `Services/WorkspaceDiagnosticsCoordinator.cs` | Используют маппер вместо дублирования `+1` |
+| `ViewModels/IdeMcpCommandExecutor.Handlers.Editor/*.cs` | `Select` / `ApplyEdit` / `GoToPosition` / `GetEditorContentRange` через общий разбор VO |
+| `Services/ParametricLineRangeArgsBuilder.cs` | Границы колонок через `ColumnNumber` + канонический `EditorDocumentPath` |
+| `Features/WebAiPortal/Application/WebAiPortalChatMixInFormatter.cs` | Снимок диапазона редактора: `LineRange` вместо «голых» int строк |
+| `CascadeIDE.Tests/EditorMcpSpansTests.cs`, расширение `EditorLineNumberRangeTests` | Отказы и границы парсера MCP |
+
 ## Связь с другими ADR
 
 - **0081** — семантика параметрики по строкам; ADR 0111 фиксирует представление LR/LN в доменной модели IDE поверх 0081.
@@ -56,34 +70,30 @@
 
 ---
 
-## Дорожная карта (после v1)
+## Дорожная карта (после v1) — выполнено (v2)
 
-Цель следующих итераций — **тот же паттерн**: инварианты в типах до границы JSON/MCP, без смены wire-контрактов `IdeCommands` без отдельного ADR.
+Цель итераций v2 — **тот же паттерн**: инварианты в типах до границы JSON/MCP, без смены wire-контрактов `IdeCommands`.
 
-### Приоритет 1 — граница MCP → редактор
+### Приоритет 1 — граница MCP → редактор — **сделано**
 
-Сейчас в обработчиках `IdeMcpCommandExecutor` (`Handlers/Editor/*.cs`) из JSON многократно читаются **`file_path` + четыре int** (`start_line`, `start_column`, `end_line`, `end_column`) и передаются в `IIdeMcpActions` «сырьём».
+- **`EditorTextSpan`** + **`ColumnNumber`**, **`TryParse`** из `IReadOnlyDictionary<string, JsonElement>` для `Select` / `ApplyEdit`; **`EditorGoToPositionMcpArgs`** для `go_to_position`; **`EditorContentLineRangeMcpArgs`** для `get_editor_content_range` (при отсутствии ключей — 1..1 как раньше; инвертированный явный диапазон — отказ с сообщением).
 
-- Ввести разбор в один тип (рабочее имя: **`EditorTextSpan`** или **`EditorLineColumnSpan`**: путь + LR по строкам + границы по колонкам), с **`TryParse`** из словаря/`JsonElement`.
-- Колонки — кандидат на отдельный VO **`ColumnNumber`** (1-based, ≥1), по аналогии с LN.
-- Выгода: одна валидация, меньше дублирования между `Select`, `ApplyEdit`, опциональными end в `go_to_position`.
+### Приоритет 2 — веб-портал — **сделано**
 
-### Приоритет 2 — веб-портал и компактные ответы
+- **`WebAiPortalChatMixInFormatter`**: `EditorRangeSnap` хранит **`LineRange`**; разбор JSON нормализует границы через `min/max` при «перевёрнутых» int в wire-ответе.
 
-- **`WebAiPortalChatMixInFormatter`** (`EditorRangeSnap`): заменить «голые» `StartLine`/`EndLine` на LR (и при необходимости общий тип пути), чтобы согласовать с MCP и melody.
+### Приоритет 3 — parametric args — **сделано**
 
-### Приоритет 3 — колонки в сборке parametric args
+- **`ParametricLineRangeArgsBuilder`**: колонки через **`ColumnNumber.TryCreate`**, путь через **`EditorDocumentPath`**.
 
-- **`ParametricLineRangeArgsBuilder`**: сейчас колонки зашиты как «начало строки / конец строки + 1» от текста; вынесение в CN/малый span-тип упростит сопоставление с полным `EditorTextSpan` из п.1.
+### Приоритет 4 — Roslyn — **сделано**
 
-### Приоритет 4 — Roslyn / диагностики
+- **`RoslynLinePositionMapper`**: `LinePosition` (0-based) → `(LineNumber, ColumnNumber)`; **`ContextMinimizer`**, **`WorkspaceDiagnosticsCoordinator`**.
 
-- В `ContextMinimizer`, координаторе диагностик и подобных местах: вместо повторяющихся `LinePosition.Line + 1` / `Character + 1` — **локальные расширения** или один маппер `RoslynLinePosition → (LN, CN)` с комментарием о 0-based vs 1-based.
+### Путь к файлу — **сделано**
 
-### Путь к файлу
+- **`EditorDocumentPath`** поверх **`CanonicalFilePath.TryNormalize`**.
 
-- Для нормализации путей в решении уже используется **`CanonicalFilePath`**; отдельный «документ IDE» может быть тонкой обёрткой над канонической строкой, если п.1–2 начнут пересекать дерево решения и редактор.
+### Критерий готовности
 
-### Критерий готовности очередного шага
-
-- Есть **два независимых call site** с одинаковым набором полей JSON → вынос в общий тип с тестами на отказ и на граничные значения.
+- Два call site с одним набором полей JSON (`Select` + `ApplyEdit`) → **`EditorTextSpan`**; тесты в **`EditorMcpSpansTests`**.

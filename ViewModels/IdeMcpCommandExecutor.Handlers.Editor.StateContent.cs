@@ -1,5 +1,7 @@
 using System.Text.Json;
 
+using CascadeIDE.Models.Editor;
+
 namespace CascadeIDE.ViewModels;
 
 /// <summary>MCP: состояние редактора, диапазон текста и текст открытого документа.</summary>
@@ -15,7 +17,9 @@ internal sealed partial class IdeMcpCommandExecutor
         add(Services.IdeCommands.GetEditorContentRange, async (args, _) =>
         {
             var a = (IIdeMcpActions)_vm;
-            return await a.GetEditorContentRangeAsync(McpCommandJsonArgs.Int(args, "start_line", 1), McpCommandJsonArgs.Int(args, "end_line", 1));
+            if (!EditorContentLineRangeMcpArgs.TryParse(args, out var lines, out var errLines))
+                return errLines;
+            return await a.GetEditorContentRangeAsync(lines.Start.Value, lines.End.Value);
         });
         add(Services.IdeCommands.GetOpenDocumentText, async (args, _) =>
         {

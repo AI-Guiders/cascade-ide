@@ -1,6 +1,8 @@
 #nullable enable
 using System.Text.Json;
 
+using CascadeIDE.Models.Editor;
+
 namespace CascadeIDE.Services;
 
 /// <summary>
@@ -21,11 +23,8 @@ internal static class ParametricLineRangeArgsBuilder
         argsJson = "";
         error = "";
 
-        if (string.IsNullOrWhiteSpace(currentFilePath))
-        {
-            error = "Нет активного документа для диапазона строк.";
+        if (!EditorDocumentPath.TryCreate(currentFilePath, out var documentPath, out error))
             return false;
-        }
 
         var text = editorText ?? "";
         var lines = text.Split('\n');
@@ -64,28 +63,48 @@ internal static class ParametricLineRangeArgsBuilder
         switch (catalogCmd)
         {
             case IdeCommands.Select:
+                if (!ColumnNumber.TryCreate(ColumnNumber.MinimumOneBasedInclusive, out var startCol)
+                    || !ColumnNumber.TryCreate(lines[endLine - 1].Length + 1, out var endCol))
+                {
+                    error = "Не удалось вычислить границы колонок для выделения.";
+                    return false;
+                }
+
                 commandId = catalogCmd;
                 argsJson = JsonSerializer.Serialize(new
                 {
-                    file_path = currentFilePath,
+                    file_path = documentPath.Value,
                     start_line = startLine,
-                    start_column = 1,
+                    start_column = startCol.Value,
                     end_line = endLine,
-                    end_column = lines[endLine - 1].Length + 1,
+                    end_column = endCol.Value,
                 });
                 return true;
 
             case IdeCommands.ApplyEdit:
                 var lastLine = endLine == lineCount;
+                if (!ColumnNumber.TryCreate(ColumnNumber.MinimumOneBasedInclusive, out var applyStartCol))
+                {
+                    error = "Не удалось вычислить начальную колонку для правки.";
+                    return false;
+                }
+
+                int endLineWire = lastLine ? endLine : endLine + 1;
+                int endColWire = lastLine ? lines[endLine - 1].Length + 1 : ColumnNumber.MinimumOneBasedInclusive;
+                if (!ColumnNumber.TryCreate(endColWire, out var applyEndCol))
+                {
+                    error = "Не удалось вычислить конечную колонку для правки.";
+                    return false;
+                }
 
                 commandId = catalogCmd;
                 argsJson = JsonSerializer.Serialize(new
                 {
-                    file_path = currentFilePath,
+                    file_path = documentPath.Value,
                     start_line = startLine,
-                    start_column = 1,
-                    end_line = lastLine ? endLine : endLine + 1,
-                    end_column = lastLine ? lines[endLine - 1].Length + 1 : 1,
+                    start_column = applyStartCol.Value,
+                    end_line = endLineWire,
+                    end_column = applyEndCol.Value,
                     new_text = "",
                 });
                 return true;

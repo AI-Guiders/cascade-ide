@@ -1,5 +1,7 @@
 using System.Text.Json;
 
+using CascadeIDE.Models.Editor;
+
 namespace CascadeIDE.ViewModels;
 
 /// <summary>MCP: открытие файла, загрузка решения, выделение в редакторе, выбор/редактирование сообщений чата.</summary>
@@ -24,8 +26,9 @@ internal sealed partial class IdeMcpCommandExecutor
         add(Services.IdeCommands.Select, async (args, _) =>
         {
             var a = (IIdeMcpActions)_vm;
-            if (args is null || string.IsNullOrEmpty(McpCommandJsonArgs.String(args, "file_path"))) return "Missing file_path";
-            a.SelectInEditor(McpCommandJsonArgs.String(args, "file_path"), McpCommandJsonArgs.Int(args, "start_line"), McpCommandJsonArgs.Int(args, "start_column"), McpCommandJsonArgs.Int(args, "end_line"), McpCommandJsonArgs.Int(args, "end_column"));
+            if (!EditorTextSpan.TryParse(args, out var span, out var err))
+                return err;
+            a.SelectInEditor(span.File.Value, span.StartLine.Value, span.StartColumn.Value, span.EndLine.Value, span.EndColumn.Value);
             return await Task.FromResult("OK");
         });
         add(Services.IdeCommands.ChatSelectMessage, async (args, _) =>

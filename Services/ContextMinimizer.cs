@@ -35,9 +35,8 @@ public sealed class ContextMinimizer
             var fileName = System.IO.Path.GetFileName(filePath);
             foreach (var d in diagnostics)
             {
-                var line = d.Location.GetLineSpan().StartLinePosition.Line + 1;
-                var col = d.Location.GetLineSpan().StartLinePosition.Character + 1;
-                sb.Append(fileName).Append('(').Append(line).Append(',').Append(col).Append("): ")
+                var (line, col) = RoslynLinePositionMapper.ToEditorLineColumn(d.Location.GetLineSpan().StartLinePosition);
+                sb.Append(fileName).Append('(').Append(line.Value).Append(',').Append(col.Value).Append("): ")
                     .Append(d.Severity == DiagnosticSeverity.Error ? "error" : "warning")
                     .Append(' ').Append(d.Id).Append(": ").Append(d.GetMessage()).Append('\n');
             }
@@ -59,8 +58,8 @@ public sealed class ContextMinimizer
         var diagnostics = _languageService.GetDiagnosticsForFile(filePath, sourceText, ct);
         var list = diagnostics.Select(d =>
         {
-            var span = d.Location.GetLineSpan().StartLinePosition;
-            return new { id = d.Id, message = d.GetMessage(), severity = d.Severity == DiagnosticSeverity.Error ? "error" : "warning", line = span.Line + 1, column = span.Character + 1 };
+            var (line, col) = RoslynLinePositionMapper.ToEditorLineColumn(d.Location.GetLineSpan().StartLinePosition);
+            return new { id = d.Id, message = d.GetMessage(), severity = d.Severity == DiagnosticSeverity.Error ? "error" : "warning", line = line.Value, column = col.Value };
         }).ToList();
         return JsonSerializer.Serialize(list);
     }
