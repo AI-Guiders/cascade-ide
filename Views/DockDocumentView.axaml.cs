@@ -454,7 +454,7 @@ public partial class DockDocumentView : UserControl
 
     private static string? ToStickyPart(SyntaxNode node, SyntaxTree tree, int topLineOneBased)
     {
-        var startLine = tree.GetLineSpan(node.Span).StartLinePosition.Line + 1;
+        var startLine = RoslynLinePositionMapper.ToEditorLineNumber(tree.GetLineSpan(node.Span).StartLinePosition).Value;
         if (startLine >= topLineOneBased)
             return null;
 
