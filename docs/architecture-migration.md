@@ -17,7 +17,7 @@
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:BEGIN -->
 
-`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~6.8k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~5.5k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.2k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
+`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~6.8k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~5.6k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.3k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:END -->
 
@@ -33,7 +33,7 @@
 | `MainWindowViewModel.Breakpoints.cs` | 97 | Брейкпоинты: `BreakpointsFileService` / `BreakpointsStorage` — один источник (ADR 0002). |
 | `MainWindowViewModel.Capabilities.cs` | 23 | Реестр capabilities. |
 | `MainWindowViewModel.CascadeChord.cs` | 107 | Аккордный слой ADR 0060: корень `cascade_chord` из hotkeys.toml (по умолчанию Ctrl+K), затем тот же хвост мелодии, что после `c:`. Однозначный обычный alias (например `so`) исполняется без Enter при отсутствии более длинного alias-префикса; параметрические (`wai:`, `els:`:…) — только по Enter или из палитры. При конфликте префиксов (`gs` vs `gsu`) — точный хвост или Enter. |
-| `MainWindowViewModel.CommandPalette.cs` | 158 | Палитра команд. |
+| `MainWindowViewModel.CommandPalette.cs` | 164 | Палитра команд. |
 | `MainWindowViewModel.cs` | 293 | Главный композитор окна (partial-класс, несколько `MainWindowViewModel*.cs`). Карта файлов и ответственности — `docs/architecture-migration.md`, раздел «Срез MainWindowViewModel». |
 | `MainWindowViewModel.CSharpLsp.cs` | 120 | Запуск/перезапуск C# LSP. |
 | `MainWindowViewModel.CursorAcp.cs` | 36 | Путь Cursor ACP и предпочитаемая модель. |
@@ -117,10 +117,10 @@
 | `IdeMcpCommandExecutor.Handlers.DapDebug.cs` | 10 | DAP / отладка: делегирование регистрации хендлеров launch/attach и stepping. |
 | `IdeMcpCommandExecutor.Handlers.DapDebug.LaunchAttach.cs` | 69 | MCP DAP: ping, launch и attach. |
 | `IdeMcpCommandExecutor.Handlers.DapDebug.Stepping.cs` | 49 | MCP DAP: шагание, стоп, стек, снимок, переменные кадра. |
-| `IdeMcpCommandExecutor.Handlers.DebuggerUi.cs` | 57 | Поверхность отладки. |
-| `IdeMcpCommandExecutor.Handlers.Editor.EditNavigation.cs` | 24 | MCP: правка текста и переход к позиции в файле. |
-| `IdeMcpCommandExecutor.Handlers.Editor.FilesAndChat.cs` | 55 | MCP: открытие файла, загрузка решения, выделение в редакторе, выбор/редактирование сообщений чата. |
-| `IdeMcpCommandExecutor.Handlers.Editor.StateContent.cs` | 27 | MCP: состояние редактора, диапазон текста и текст открытого документа. |
+| `IdeMcpCommandExecutor.Handlers.DebuggerUi.cs` | 77 | Поверхность отладки. |
+| `IdeMcpCommandExecutor.Handlers.Editor.EditNavigation.cs` | 26 | MCP: правка текста и переход к позиции в файле. |
+| `IdeMcpCommandExecutor.Handlers.Editor.FilesAndChat.cs` | 57 | MCP: открытие файла, загрузка решения, выделение в редакторе, выбор/редактирование сообщений чата. |
+| `IdeMcpCommandExecutor.Handlers.Editor.StateContent.cs` | 30 | MCP: состояние редактора, диапазон текста и текст открытого документа. |
 | `IdeMcpCommandExecutor.Handlers.Editor.ToolCatalog.cs` | 18 | MCP: каталог инструментов `list_tools`. |
 | `IdeMcpCommandExecutor.Handlers.PowerDocuments.Documents.cs` | 68 | MCP-хендлеры вкладок документов: переоткрытие, активация, закрепление, перенос по группам редакторов. |
 | `IdeMcpCommandExecutor.Handlers.PowerDocuments.FocusPowerAgent.cs` | 203 | MCP-хендлеры Power / фокус-шагов, автономного агента, чата и установки модели Ollama. |
