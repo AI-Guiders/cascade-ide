@@ -13,6 +13,9 @@ public sealed partial class CascadeIdeSettings : ModelBase
     /// <summary>Hybrid Codebase Index integration toggles (in-proc). TOML: <c>[hybrid_index]</c>.</summary>
     public HybridIndexSettings HybridIndex { get; set; } = new();
 
+    /// <summary>Палитра команд и go-to workspace. TOML: <c>[command_palette.go_to_search]</c> и др.; ADR 0112.</summary>
+    public CommandPaletteSettings CommandPalette { get; set; } = new();
+
     /// <summary>Agent-notes / knowledge (встроенный KB-Base и оверлей). TOML: <c>[agent_notes]</c>.</summary>
     public AgentNotesSettings AgentNotes { get; set; } = new();
 

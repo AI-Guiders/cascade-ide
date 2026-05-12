@@ -14,6 +14,7 @@ public sealed partial class CascadeIdeSettings
             && AgentNotesEquals(AgentNotes, o.AgentNotes)
             && WorkspaceEquals(Workspace, o.Workspace)
             && HybridIndexEquals(HybridIndex, o.HybridIndex)
+            && CommandPaletteEquals(CommandPalette, o.CommandPalette)
             && CodeNavigationMapEquals(CodeNavigationMap, o.CodeNavigationMap)
             && LanguagesEquals(Languages, o.Languages)
             && MarkdownEquals(Markdown, o.Markdown)
@@ -76,6 +77,10 @@ public sealed partial class CascadeIdeSettings
                 WatchFiles = HybridIndex.WatchFiles,
                 ScopeMode = HybridIndex.ScopeMode,
                 PauseWhenMcpStdioHost = HybridIndex.PauseWhenMcpStdioHost,
+            },
+            CommandPalette = new CommandPaletteSettings
+            {
+                GoToSearch = new CommandPaletteGoToSearchSettings { Backend = CommandPalette.GoToSearch.Backend },
             },
             AgentNotes = new AgentNotesSettings { KbBaseOverlayPath = AgentNotes.KbBaseOverlayPath },
             Workspace = new WorkspaceSettings
@@ -294,6 +299,13 @@ public sealed partial class CascadeIdeSettings
             && a.PauseWhenMcpStdioHost == b.PauseWhenMcpStdioHost
             && a.IndexDir.Is(b.IndexDir)
             && a.ScopeMode.Is(b.ScopeMode);
+    }
+
+    private static bool CommandPaletteEquals(CommandPaletteSettings? a, CommandPaletteSettings? b)
+    {
+        if (a is null || b is null)
+            return a == b;
+        return string.Equals(a.GoToSearch.Backend, b.GoToSearch.Backend, StringComparison.Ordinal);
     }
 
     private static bool WorkspaceEquals(WorkspaceSettings? a, WorkspaceSettings? b)

@@ -274,6 +274,20 @@ public sealed class CascadeIdeSettingsTomlDeserializeTests
     }
 
     [Fact]
+    public void Deserialize_CommandPaletteGoToSearch_ParsesBackend()
+    {
+        const string text =
+            """
+            [command_palette.go_to_search]
+            backend = "hci"
+            """;
+
+        var s = Deserialize(text);
+        Assert.Equal("hci", s.CommandPalette.GoToSearch.Backend);
+        Assert.Equal(CommandPaletteGoToSearchBackendKind.Hci, CommandPaletteGoToSearchBackendNormalizer.Parse(s.CommandPalette.GoToSearch.Backend));
+    }
+
+    [Fact]
     public void NormalizeHybridIndexScopeMode_DefaultsExpected()
     {
         Assert.Equal("workspace", ShellSettingsOrchestrator.NormalizeHybridIndexScopeMode("workspace"));

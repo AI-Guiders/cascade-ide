@@ -107,6 +107,10 @@ watch_files = true
 scope_mode = "workspace+solution" # or "workspace"
 pause_when_mcp_stdio_host = false
 
+# Palette go-to workspace search (ADR 0112): t:/m:/x:. hci/auto fall back to ripgrep until HCI path lands.
+[command_palette.go_to_search]
+backend = "rg"
+
 [workspace]
 pfd_expanded = true
 show_terminal = true
