@@ -4,6 +4,8 @@
 
 Операционная карточка проекта (Purpose, Vision, границы, ссылки) в каноне заметок: `knowledge/work/projects/door-to-singularity/cascade-ide/README.md` в репозитории **agent-notes** (слой **`work/`** — оперативный канон; в публичную KB не входит, см. **`knowledge/PUBLISHING.md`** и `scripts/build-public-kb.ps1` в agent-notes). В двух словах: редактор + дерево решения + сборка/запуск + отладка через debug-mcp, анализ через roslyn-mcp, чат/запросы к модели — через локальный Ollama. **Внешний ориентир (не зависимость):** [RoslynPad](https://github.com/roslynpad/roslynpad) — там уже типичный набор: **autocomplete, code fixes,** подсказки сигнатур и т.д.; у нас эта линия языкового сервиса только наращивается. Open-source, Roslyn + редактор (AvalonEdit, есть вариант на Avalonia). См. [LANGUAGE-SERVICES-PLAN.md](docs/LANGUAGE-SERVICES-PLAN.md). По продуктовому замыслу IDE **запланирована как keyboard-first** (клавиатура и палитра команд — опорные пути); см. [north-star](docs/design/north-star-cursor-mcp-cascade-workbench-v1.md) и [ADR 0013](docs/adr/0013-command-surface-and-discoverability.md).
 
+**Cursor:** примеры `.cursor/rules` для копипаста — **[docs/cursor-rules-examples.md](docs/cursor-rules-examples.md)**.
+
 ### До публичного релиза
 
 Пока основные потребители и разработчики — мы, **автоматические миграции схемы** `settings.toml` (и аналогичные слои совместимости в `SettingsService`) **не обязательны**: при смене полей правим `%LocalAppData%\CascadeIDE\settings.toml` вручную или дефолты в коде. Имеет смысл завести **явные** миграции/версию файла, когда появятся внешние установки и нужно не ломать чужие профили — см. [ADR 0028](docs/adr/0028-user-settings-toml-localappdata-and-secrets.md).
