@@ -120,6 +120,7 @@
 | [0109](0109-declarative-parametric-melody-catalog-toml-and-code-binders.md) | Intent Melody: целевой каталог `[[melody_root]]` (`shape` + `tail_signature`); миграция с `[aliases]`+`[[parametric]]`; args в коде; плагины — обработка у плагина | Accepted |
 | [0110](0110-roslyn-refactor-intent-melody-bridge.md) | Рефакторинги Roslyn по диапазону: мост Intent Melody / IDE ↔ Roslyn MCP; без дублей Features в ядре; `rmx`/`rix` не в бандле до моста | Proposed |
 | [0111](0111-editor-linenumber-linerange-value-objects.md) | Редактор: `LineNumber` / `LineRange` (1-based, Start ≤ End); `ParsedLineRange`; граница к JSON — `int` в args команд | Accepted · Implemented |
+| [0112](0112-command-palette-query-modes-strategy.md) | Палитра (Ctrl+Q): режимы строки, стратегии и контракт бэкенда workspace-поиска (`t:`/`m:`/`x:`) с переключением в settings | Accepted · Implemented |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 
