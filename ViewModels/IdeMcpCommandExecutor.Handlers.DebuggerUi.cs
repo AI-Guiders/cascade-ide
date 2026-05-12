@@ -1,5 +1,5 @@
 using System.Text.Json;
-using CascadeIDE.Services;
+using CascadeIDE.Models.Editor;
 
 namespace CascadeIDE.ViewModels;
 
@@ -10,19 +10,23 @@ internal sealed partial class IdeMcpCommandExecutor
     {
         add(Services.IdeCommands.SetBreakpoint, async (args, ct) =>
         {
-            if (args is null || string.IsNullOrEmpty(McpCommandJsonArgs.String(args, "file_path")) || !args.TryGetValue("line", out _))
+            if (args is null || string.IsNullOrEmpty(McpCommandJsonArgs.String(args, "file_path")))
                 return "Missing file_path or line";
+            if (!tryParseBreakpointLine(args, out var line, out var lineErr))
+                return lineErr;
             return await _vm.CompleteMcpSetBreakpointAsync(
                 McpCommandJsonArgs.String(args, "file_path")!,
-                McpCommandJsonArgs.Int(args, "line", 1),
+                line.Value,
                 McpCommandJsonArgs.String(args, "condition"),
                 ct).ConfigureAwait(false);
         });
         add(Services.IdeCommands.RemoveBreakpoint, async (args, ct) =>
         {
             var a = (IIdeMcpActions)_vm;
-            if (args is null || string.IsNullOrEmpty(McpCommandJsonArgs.String(args, "file_path")) || !args.TryGetValue("line", out _)) return "Missing file_path or line";
-            a.RemoveBreakpoint(McpCommandJsonArgs.String(args, "file_path")!, McpCommandJsonArgs.Int(args, "line", 1));
+            if (args is null || string.IsNullOrEmpty(McpCommandJsonArgs.String(args, "file_path"))) return "Missing file_path or line";
+            if (!tryParseBreakpointLine(args, out var line, out var lineErr))
+                return lineErr;
+            a.RemoveBreakpoint(McpCommandJsonArgs.String(args, "file_path")!, line.Value);
             return "OK";
         });
     }
@@ -57,5 +61,24 @@ internal sealed partial class IdeMcpCommandExecutor
             return await a.AddControlAsync(McpCommandJsonArgs.String(args, "parent_name") ?? "", McpCommandJsonArgs.String(args, "control_type") ?? "", McpCommandJsonArgs.String(args, "content"), McpCommandJsonArgs.String(args, "name"));
         });
 #endif
+    }
+
+    private static bool tryParseBreakpointLine(IReadOnlyDictionary<string, JsonElement> args, out LineNumber line, out string error)
+    {
+        line = default;
+        error = "";
+        if (!args.TryGetValue("line", out var el) || el.ValueKind != JsonValueKind.Number || !el.TryGetInt32(out var raw))
+        {
+            error = "Missing or invalid line (ожидается целое число).";
+            return false;
+        }
+
+        if (!LineNumber.TryCreate(raw, out line))
+        {
+            error = $"Invalid line: ожидается ≥ {LineNumber.MinimumOneBasedInclusive}, получено {raw}.";
+            return false;
+        }
+
+        return true;
     }
 }
