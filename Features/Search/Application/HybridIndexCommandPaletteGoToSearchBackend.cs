@@ -8,7 +8,7 @@ namespace CascadeIDE.Features.Search.Application;
 
 /// <summary>Workspace-поиск палитры через Hybrid Codebase Index (FTS; semantic выключен). ADR 0112 §7.</summary>
 internal sealed class HybridIndexCommandPaletteGoToSearchBackend(
-    HybridIndexOrchestrator orchestrator,
+    IHybridIndexOrchestratorSearch orchestrator,
     string hybridScopeMode) : ICommandPaletteGoToSearchBackend
 {
     public async Task<(IReadOnlyList<RipgrepWorkspaceMatch> Matches, string? Error)> SearchMatchesAsync(

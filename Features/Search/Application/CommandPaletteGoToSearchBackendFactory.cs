@@ -12,7 +12,7 @@ internal static class CommandPaletteGoToSearchBackendFactory
     /// <summary>При <see cref="HybridIndexSettings.Enabled"/> = false — любой режим, кроме <c>rg</c>, эквивалентен ripgrep.</summary>
     internal static ICommandPaletteGoToSearchBackend Resolve(
         CommandPaletteGoToSearchBackendKind kind,
-        HybridIndexOrchestrator hybridIndexOrchestrator,
+        IHybridIndexOrchestratorSearch hybridIndexOrchestrator,
         string hybridScopeMode,
         bool hybridIntegrationEnabled)
     {

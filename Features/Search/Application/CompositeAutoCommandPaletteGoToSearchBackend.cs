@@ -8,7 +8,7 @@ namespace CascadeIDE.Features.Search.Application;
 
 /// <summary><c>auto</c>: пробуем HCI при готовности индекса; при ошибке — ripgrep. ADR 0112 §7.</summary>
 internal sealed class CompositeAutoCommandPaletteGoToSearchBackend(
-    HybridIndexOrchestrator orchestrator,
+    IHybridIndexOrchestratorSearch orchestrator,
     string hybridScopeMode,
     ICommandPaletteGoToSearchBackend ripgrep,
     HybridIndexCommandPaletteGoToSearchBackend hciExclusive) : ICommandPaletteGoToSearchBackend
