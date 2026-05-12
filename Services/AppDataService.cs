@@ -8,7 +8,7 @@ namespace CascadeIDE.Services;
 /// <summary>Хранение данных приложения (недавние решения, кэш, настройки отправки и т.д.) в WitDatabase через EF Core.</summary>
 public sealed class AppDataService : IDisposable
 {
-    private readonly AppDbContext _context;
+    private AppDbContext _context;
 
     public AppDataService()
     {
@@ -18,6 +18,29 @@ public sealed class AppDataService : IDisposable
             .Options;
         _context = new AppDbContext(options);
         _context.Database.EnsureCreated();
+        // EnsureCreated при уже существующем файле не добавляет новые таблицы; старый app.witdb без AppData давал ошибку Wit «Table … not found».
+        EnsureAppDataTableReachable(path, options);
+    }
+
+    /// <summary>Если база уже была, но без таблицы AppData — пересоздаём файл (единоразово восстанавливает схему; локальное kv-хранилище).</summary>
+    private void EnsureAppDataTableReachable(string witPath, DbContextOptions<AppDbContext> options)
+    {
+        try
+        {
+            // Без Take(1)/Count: Wit SQL не переваривает LIMIT из такого запроса EF.
+            _ = _context.AppData.Find("__cascade_ide_schema_probe__");
+        }
+        catch (InvalidOperationException ex) when (
+            ex.Message.Contains("Table", StringComparison.Ordinal)
+            && ex.Message.Contains("not found", StringComparison.OrdinalIgnoreCase))
+        {
+            _context.Dispose();
+            if (File.Exists(witPath))
+                File.Delete(witPath);
+            _context = new AppDbContext(options);
+            _context.Database.EnsureCreated();
+            _ = _context.AppData.Find("__cascade_ide_schema_probe__");
+        }
     }
 
     public void Put(string key, string value)

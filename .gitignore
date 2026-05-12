@@ -28,7 +28,9 @@ publish-debug/
 publish-debug-staging/
 publish-hotkeyfix/
 publish-gh-release/
-Data/
+# Локальные файлы Wit внутри Data/ (исходники Data/*.cs в репо)
+Data/*.witdb
+Data/**/*.witdb
 .cursor/
 .hybrid-codebase-index/
 
