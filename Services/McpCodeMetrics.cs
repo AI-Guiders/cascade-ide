@@ -100,7 +100,7 @@ public static class McpCodeMetrics
                         DestructorDeclarationSyntax d => d.Identifier.Text,
                         _ => "method"
                     };
-                    var line = method.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
+                    var line = RoslynLinePositionMapper.ToEditorLineNumber(method.GetLocation().GetLineSpan().StartLinePosition).Value;
                     topMethods.Add((file, methodName, line, complexity));
                 }
             }
