@@ -83,7 +83,7 @@
   <ItemGroup>
     <ProjectReference Include="..\dotnet-build-test-mcp-repo\DotNetBuildTestParsers\DotNetBuildTestParsers.csproj" />
     <PackageReference Include="AIGuiders.AgentNotes.Core" Version="1.0.0" />
-    <ProjectReference Include="..\git-mcp-core\GitMcp.Core.csproj" />
+    <PackageReference Include="AIGuiders.GitMcp.Core" Version="1.0.1" />
     <ProjectReference Include="CascadeIDE.Contracts\CascadeIDE.Contracts.csproj" />
     <!-- RoslynMcp передаёт RoslynMcpWorkspace=true: не ссылаться на локальный анализатор, иначе DLL в bin держит процесс MCP и ломает dotnet build. -->
     <ProjectReference Include="CascadeIDE.ArchitectureAnalyzers\CascadeIDE.ArchitectureAnalyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" Condition="'$(RoslynMcpWorkspace)'!='true'" />
