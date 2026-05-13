@@ -75,10 +75,14 @@
     <EmbeddedResource Include="TextMateGrammars\toml\package.json" />
     <EmbeddedResource Include="TextMateGrammars\toml\syntaxes\toml.tmLanguage.json" />
     <Content Include="TextMateGrammars\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <!-- Лицензионные уведомления: см. ADR 0101, docs/license-policy.md -->
+    <Content Include="LICENSE" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="docs\COMMERCIAL-NOTICE.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="docs\THIRD-PARTY-NOTICES.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\dotnet-build-test-mcp-repo\DotNetBuildTestParsers\DotNetBuildTestParsers.csproj" />
-    <ProjectReference Include="..\agent-notes-core\AgentNotes.Core.csproj" />
+    <PackageReference Include="AIGuiders.AgentNotes.Core" Version="1.0.0" />
     <ProjectReference Include="..\git-mcp-core\GitMcp.Core.csproj" />
     <ProjectReference Include="CascadeIDE.Contracts\CascadeIDE.Contracts.csproj" />
     <!-- RoslynMcp передаёт RoslynMcpWorkspace=true: не ссылаться на локальный анализатор, иначе DLL в bin держит процесс MCP и ломает dotnet build. -->

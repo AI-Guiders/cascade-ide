@@ -39,13 +39,6 @@ jobs:
           repository: ${{ github.repository_owner }}/git-mcp-core
           path: git-mcp-core
 
-      - uses: actions/checkout@v4
-        with:
-          repository: ${{ github.repository_owner }}/agent-notes-core
-          path: agent-notes-core
-          # Пустой секрет ломает checkout ("token required"); публичный repo тянем через github.token; приватный — задай PRIVATE_DEPS_PAT.
-          token: ${{ secrets.PRIVATE_DEPS_PAT || github.token }}
-
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
