@@ -1,4 +1,4 @@
-# WinExe win-x64. Соседние репозитории того же owner (как в monorepo open/).
+# WinExe win-x64. Соседний репозиторий: dotnet-build-test-mcp; остальное — NuGet.
 name: Release
 
 on:
@@ -33,11 +33,6 @@ jobs:
         with:
           repository: ${{ github.repository_owner }}/dotnet-build-test-mcp
           path: dotnet-build-test-mcp-repo
-
-      - uses: actions/checkout@v4
-        with:
-          repository: ${{ github.repository_owner }}/git-mcp-core
-          path: git-mcp-core
 
       - uses: actions/setup-dotnet@v4
         with:

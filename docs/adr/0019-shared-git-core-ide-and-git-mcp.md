@@ -42,12 +42,11 @@
 
 ## Реализация (зафиксировано)
 
-- **Расположение:** субмодуль [`git-mcp-core/`](../../../git-mcp-core/) в корне meta-repo `open` (рядом с `git-mcp`). **Канонический remote:** GitLab `Krawler/git-mcp-core` (как у остальных MCP в `open`); зеркало на GitHub — дополнительный remote, не `origin` в рабочей политике.
-- **Сборка:** `GitMcp.Core.csproj`, `net10.0`, namespace `GitMcp.Core`. Зависимостей от `System.Text.Json` в Core нет — только примитивы и списки аргументов; `GitArgsResult` для ошибок валидации argv.
-- **git-mcp:** `ProjectReference` на `../git-mcp-core/GitMcp.Core.csproj`; вызов `git` через `ProcessStartInfo.ArgumentList`. Версия MCP-сервера **0.3.0**. `git_status` в MCP — последовательность из Core (`StatusMcpSequence`: `rev-parse` + `status`); в IDE панель по-прежнему `status --short --branch` (`StatusShortBranch`).
-- **Cascade IDE:** `ProjectReference` на тот же Core; расширены `ide_git_*` (log, fetch, pull, branch, show, submodule); для `ide_git_push` — `Push(..., defaultOriginWhenRemoteEmpty: false)` (без подстановки `origin` при пустом remote), в отличие от MCP `git_push`.
-- **Тесты:** `GitMcp.Tests` ссылается на Core; юнит-тесты `GitCommandBuilder`.
-
+- **Расположение исходников:** субмодуль [`git-mcp-core/`](../../../git-mcp-core/) в корне meta-repo `open` (рядом с `git-mcp`). **Канонический remote:** GitLab `Krawler/git-mcp-core`; публичное зеркало и репо для **Trusted Publishing** NuGet — **[KarataevDmitry/git-mcp-core](https://github.com/KarataevDmitry/git-mcp-core)**. **Потребители** подключают пакет **`AIGuiders.GitMcp.Core`** с nuget.org (`PackageReference`).
+- **Сборка библиотеки:** `GitMcp.Core.csproj`, `net10.0`, namespace `GitMcp.Core`, NuGet id **`AIGuiders.GitMcp.Core`**. Зависимостей от `System.Text.Json` в Core нет — только примитивы и списки аргументов; `GitArgsResult` для ошибок валидации argv.
+- **git-mcp:** `PackageReference` на **`AIGuiders.GitMcp.Core`**; вызов `git` через `ProcessStartInfo.ArgumentList`. Версия MCP-сервера **0.3.0**. `git_status` в MCP — последовательность из Core (`StatusMcpSequence`: `rev-parse` + `status`); в IDE панель по-прежнему `status --short --branch` (`StatusShortBranch`).
+- **Cascade IDE:** `PackageReference` на тот же пакет; расширены `ide_git_*` (log, fetch, pull, branch, show, submodule); для `ide_git_push` — `Push(..., defaultOriginWhenRemoteEmpty: false)` (без подстановки `origin` при пустом remote), в отличие от MCP `git_push`.
+- **Тесты:** `GitMcp.Tests` через ссылку на `GitMcp.csproj` (транзитивно Core); юнит-тесты `GitCommandBuilder`.
 ## Открытые вопросы (закрыты при принятии)
 
 - ~~Размещение~~ — каталог в `open`, не внутри субмодуля `git-mcp`.
