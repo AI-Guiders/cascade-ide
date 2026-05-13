@@ -72,7 +72,11 @@ dotnet run
 
 ## Продукт и лицензирование (видение)
 
+**Лицензия кода CascadeIDE:** [MIT](LICENSE) (`LICENSE` в корне). **Коммерческие услуги** (поддержка, внедрение и т.п.) — отдельное уведомление с контактами: **[docs/COMMERCIAL-NOTICE.md](docs/COMMERCIAL-NOTICE.md)** (сейчас там заглушки `TODO` для Telegram и почты — подставь свои).
+
 Допустимая в будущем модель **открытой** и **коммерческой** линейки, границы доверия и что этот текст **не** заменяет: **[docs/licensing-vision.md](docs/licensing-vision.md)**.
+
+Уведомления о стороннем коде (NuGet, вендор `externals/acp-csharp`, шрифт Inter): **[docs/THIRD-PARTY-NOTICES.md](docs/THIRD-PARTY-NOTICES.md)**. Краткая политика для разработчиков: **[docs/license-policy.md](docs/license-policy.md)**.
 
 ## Бэклог (идеи на потом)
 
