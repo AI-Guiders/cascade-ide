@@ -89,6 +89,8 @@
     <ProjectReference Include="CascadeIDE.ArchitectureAnalyzers\CascadeIDE.ArchitectureAnalyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" Condition="'$(RoslynMcpWorkspace)'!='true'" />
   </ItemGroup>
   <ItemGroup>
+    <!-- ACP C# SDK (nuskey8/acp-csharp); совпадает с пакетом AgentClientProtocol на nuget.org. -->
+    <PackageReference Include="AgentClientProtocol" Version="0.1.5" />
     <PackageReference Include="AIGuiders.DotnetDebugMCP.Core" Version="0.1.0" />
     <PackageReference Include="AIGuiders.HybridCodebaseIndex.Core" Version="0.1.0" />
     <PackageReference Include="Avalonia" Version="12.0.1" />
@@ -136,9 +138,6 @@
     <!-- Форк на nuget.org: KarataevDmitry/AvaloniaEdit CI; патчи AVLN2000 / ресурсы. -->
     <PackageReference Include="AIGuiders.AvaloniaEdit" Version="12.0.1-cascade.1" />
     <PackageReference Include="AIGuiders.AvaloniaEdit.TextMate" Version="12.0.1-cascade.1" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="externals\acp-csharp\src\AgentClientProtocol\AgentClientProtocol.csproj" />
   </ItemGroup>
   <!-- При RID вывод в net10.0/win-x64/; в корне net10.0/ часто остаётся старый apphost от прошлой сборки — Cursor/проводник открывают его и кажется «древняя» сборка. Удаляем только наши артефакты в корне TFM. -->
   <Target Name="RemoveStaleTfmRootHost" AfterTargets="Build" Condition="'$(RuntimeIdentifier)' != ''">
