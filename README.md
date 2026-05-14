@@ -94,8 +94,6 @@ git submodule update --init --recursive cascade-ide
 
 `knowledge/work/projects/door-to-singularity/cascade-ide/README.md`
 
-Краткий указатель для метарепо **financial-open** / **open**, где рядом лежит субмодуль **agent-notes**: от корня **open** — `agent-notes/knowledge/work/projects/door-to-singularity/cascade-ide/README.md` (если субмодуль подключён).
-
 Идеи вне текущего спринта: **[docs/backlog-ideas-from-doc-pipeline-v1.md](docs/backlog-ideas-from-doc-pipeline-v1.md)**.
 
 ---
