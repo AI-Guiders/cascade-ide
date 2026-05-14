@@ -60,6 +60,7 @@ dotnet run --project CascadeIDE.csproj -p:FastBuild=true
 | [docs/THIRD-PARTY-NOTICES.md](docs/THIRD-PARTY-NOTICES.md) | Сторонний код и вендоры |
 | [docs/COMMERCIAL-NOTICE.md](docs/COMMERCIAL-NOTICE.md) | Коммерческое предложение / контакты |
 | [docs/cursor-rules-examples.md](docs/cursor-rules-examples.md) | Примеры `.cursor/rules` для копипаста |
+| [docs/backlog-ideas-from-doc-pipeline-v1.md](docs/backlog-ideas-from-doc-pipeline-v1.md) | Идеи вне текущего спринта (документный пайплайн и др.) |
 
 **ACP (Agent Client Protocol):** клиентский SDK вендорится в **`externals/acp-csharp/`** и подключается **ProjectReference** (см. [ADR 0016](docs/adr/0016-agent-client-protocol-external-agent.md)); smoke на .NET — **`samples/AcpSmokeDotnet`**.
 
@@ -85,16 +86,6 @@ git submodule update --init --recursive cascade-ide
 ```
 
 Собирать из корня монорепы: `dotnet build cascade-ide/CascadeIDE.sln`.
-
----
-
-## Операционная карточка и бэклог вне репо
-
-Расширенная карточка (purpose, handoff, «следующая задача») ведётся в **каноне agent-notes** (путь задаётся **`AGENT_NOTES_CANON_PATH`**, не коммитится в этот репозиторий):
-
-`knowledge/work/projects/door-to-singularity/cascade-ide/README.md`
-
-Идеи вне текущего спринта: **[docs/backlog-ideas-from-doc-pipeline-v1.md](docs/backlog-ideas-from-doc-pipeline-v1.md)**.
 
 ---
 
