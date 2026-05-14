@@ -1,94 +1,113 @@
-# CascadeIDE
+# CascadeIDE (CIDE)
 
-Лёгкая IDE для .NET, которой управляет агент через MCP. Стек: .NET 10, Avalonia, интеграция с локальными моделями **Ollama** (в т.ч. Ollama 4.x).
+**CascadeIDE** — десктопная IDE на **Avalonia** / **.NET 10** для работы с решениями **.sln / .slnx**, с **встроенным MCP-сервером** (агент может дергать сборку, тесты, UI, Git и т.д. через стандартный MCP-транспорт) и панелями **чат / модели** (в т.ч. локальный **Ollama**).
 
-Операционная карточка проекта (Purpose, Vision, границы, ссылки) в каноне заметок: `knowledge/work/projects/door-to-singularity/cascade-ide/README.md` в репозитории **agent-notes** (слой **`work/`** — оперативный канон; в публичную KB не входит, см. **`knowledge/PUBLISHING.md`** и `scripts/build-public-kb.ps1` в agent-notes). В двух словах: редактор + дерево решения + сборка/запуск + отладка через debug-mcp, анализ через roslyn-mcp, чат/запросы к модели — через локальный Ollama. **Внешний ориентир (не зависимость):** [RoslynPad](https://github.com/roslynpad/roslynpad) — там уже типичный набор: **autocomplete, code fixes,** подсказки сигнатур и т.д.; у нас эта линия языкового сервиса только наращивается. Open-source, Roslyn + редактор (AvalonEdit, есть вариант на Avalonia). См. [LANGUAGE-SERVICES-PLAN.md](docs/LANGUAGE-SERVICES-PLAN.md). По продуктовому замыслу IDE **запланирована как keyboard-first** (клавиатура и палитра команд — опорные пути); см. [north-star](docs/design/north-star-cursor-mcp-cascade-workbench-v1.md) и [ADR 0013](docs/adr/0013-command-surface-and-discoverability.md).
+Репозиторий: [github.com/KarataevDmitry/cascade-ide](https://github.com/KarataevDmitry/cascade-ide). Лицензия кода: **[MIT](LICENSE)**.
 
-**Cursor:** примеры `.cursor/rules` для копипаста — **[docs/cursor-rules-examples.md](docs/cursor-rules-examples.md)**.
+---
 
-### До публичного релиза
+## Быстрый старт
 
-Пока основные потребители и разработчики — мы, **автоматические миграции схемы** `settings.toml` (и аналогичные слои совместимости в `SettingsService`) **не обязательны**: при смене полей правим `%LocalAppData%\CascadeIDE\settings.toml` вручную или дефолты в коде. Имеет смысл завести **явные** миграции/версию файла, когда появятся внешние установки и нужно не ломать чужие профили — см. [ADR 0028](docs/adr/0028-user-settings-toml-localappdata-and-secrets.md).
-
-## Требования
-
-- .NET 10 SDK
-- Windows / Linux / macOS (Avalonia)
-- Для чата с моделью: запущенный [Ollama](https://ollama.com) (localhost:11434)
-
-## Сборка и запуск
+**Нужно:** [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0), ОС с поддержкой Avalonia (Windows / Linux / macOS). Для чата с локальной моделью — запущенный [Ollama](https://ollama.com) (`http://localhost:11434`).
 
 ```bash
+git clone https://github.com/KarataevDmitry/cascade-ide.git
 cd cascade-ide
-dotnet build
-dotnet run
+dotnet restore
+dotnet build CascadeIDE.sln -c Release
+dotnet run --project CascadeIDE.csproj
 ```
 
-При запуске приложение проверяет доступность Ollama и выводит список локальных моделей (или подсказку установить Ollama).
+При старте приложение проверяет Ollama и подскажет, если API недоступен.
 
-**Текущее состояние:**
+**Быстрая итерация (без тяжёлых шагов генерации):**
 
-- **Редактор:** `AvaloniaEdit` + TextMate-подсветка (включая C#), выделение диапазонов, применение точечных правок из MCP. Пакеты с nuget.org — **`AIGuiders.AvaloniaEdit`** / **`AIGuiders.AvaloniaEdit.TextMate`** (форк с патчами под CascadeIDE); исходники и CI публикации — репозиторий [KarataevDmitry/AvaloniaEdit](https://github.com/KarataevDmitry/AvaloniaEdit). Для локальной разработки форка удобно отдельное дерево, например **`D:\Experiments\AvaloniaEdit`**.
-- **Чат с моделью:** правая панель — провайдеры Ollama/OpenAI/Anthropic/DeepSeek, выбор модели, история сообщений и стриминг ответа.
-- **Дерево решения:** левая панель — открытие `.slnx/.sln`, проекты/файлы в дереве; клик открывает файл в редакторе.
-- **Нативная поддержка slnx:** `SolutionParser` загружает `.slnx` (XML) и `.sln` (текстовый формат).
-- **MCP сервер IDE:** `IdeMcpServer` с инструментами для редактора, build/test, отладки-представления и UI-автоматизации (включая `ide_get_ui_layout`, `ide_build`, `ide_run_tests`, `ide_set_breakpoint`, `ide_request_confirmation`). Запуск с **`--mcp-stdio`** поднимает MCP на stdin/stdout; Cursor (или другой хост) подключается к процессу и вызывает тулы. См. [docs/MCP-PROTOCOL.md](docs/MCP-PROTOCOL.md).
-- **Подтверждения из MCP:** `ide_request_confirmation` показывает модальный `OK/Cancel` диалог в UI и возвращает `ok`/`cancel`.
-- **Отладочный контур:** поддержаны отображение брейкпоинтов/текущей строки/состояния отладки и синхронизация с `dotnet-debug-mcp`. Целевое видение — один слой отладки для человека и агента: [docs/debug-human-agent-parity-v1.md](docs/debug-human-agent-parity-v1.md).
-- **Git (нативно):** вкладка «Git» в нижней панели (меню **Вид → Git**) — корень репозитория vs каталог решения, статус, diff, `submodule status`, стейджинг, пометка `[sm]` из `.gitmodules`, **submodule update --init** / **sync**, **открыть .sln/.slnx в submodule** (переключение решения), папка submodule в проводнике, коммит (add -A или только staged), push. Подробнее: [docs/git-and-submodules-v1.md](docs/git-and-submodules-v1.md).
-- **Режимы UI:** `Focus / Balanced / Power` с переключением из меню/toolbar и хоткеями `Alt+1/Alt+2/Alt+3` (`Ctrl+Alt+M` — циклическое переключение).
-- **Настройки и данные:** выбранные модели и UI-параметры сохраняются в `%LocalAppData%\\CascadeIDE\\settings.toml`; данные приложения — в WitDatabase (`app.witdb` в том же каталоге).
+```bash
+dotnet build CascadeIDE.sln -c Debug -p:FastBuild=true
+dotnet run --project CascadeIDE.csproj -p:FastBuild=true
+```
 
-## MCP-сервер IDE: откуда список инструментов
+---
 
-Инструменты собираются в коде: [`Services/IdeMcpToolCatalog.cs`](Services/IdeMcpToolCatalog.cs) и [`Services/IdeMcpToolCatalogFull.cs`](Services/IdeMcpToolCatalogFull.cs); для полей `IdeCommands` дополнительно генерируются прокси-тулы. Человекочитаемая таблица команд — в [docs/MCP-PROTOCOL.md](docs/MCP-PROTOCOL.md); блок между маркерами `GENERATED:IdeCommands` обновляется утилитой [`tools/CascadeIDE.ProtocolDocGen`](tools/CascadeIDE.ProtocolDocGen/Program.cs) (см. комментарий в `CascadeIDE.csproj`). В отличие от отдельных консольных MCP в `Financial/software/open` (цикл `ToolCatalog` → `mcp-tools.manifest.json` и `docs/MCP-TOOLS.md` через `ExportMcpManifest`), у встроенного сервера Cascade IDE отдельного манифеста нет — источник правды в перечисленных сервисах и сгенерированных файлах.
+## Что уже есть (коротко)
 
-## Подключение как submodule (репо open)
+| Область | Суть |
+|--------|------|
+| Редактор | AvalonEdit + TextMate (в т.ч. C#), правки из MCP; пакеты **AIGuiders.AvaloniaEdit** с [форка](https://github.com/KarataevDmitry/AvaloniaEdit) |
+| Решение | Дерево `.sln` / `.slnx`, открытие файлов |
+| Чат | Ollama / OpenAI / Anthropic / DeepSeek, стриминг |
+| MCP IDE | `--mcp-stdio` — инструменты вроде `ide_build`, `ide_run_tests`, Git, UI; см. **[docs/MCP-PROTOCOL.md](docs/MCP-PROTOCOL.md)** |
+| Отладка | Связка с **dotnet-debug-mcp**, см. **[docs/debug-human-agent-parity-v1.md](docs/debug-human-agent-parity-v1.md)** |
+| Git | Вкладка Git: статус, diff, submodule, коммит/push — **[docs/git-and-submodules-v1.md](docs/git-and-submodules-v1.md)** |
+| UI-режимы | Focus / Balanced / Power (`Alt+1` … `Ctrl+Alt+M` — см. хоткеи в приложении) |
+| Настройки | `%LocalAppData%\CascadeIDE\settings.toml`, данные — WitDatabase рядом |
 
-Если этот проект вынесен в отдельный репозиторий на GitLab:
+Источник списка MCP-инструментов в коде: `Services/IdeMcpToolCatalog*.cs`; человекочитаемая таблица — в **MCP-PROTOCOL** (блок `GENERATED:IdeCommands` обновляется из `tools/CascadeIDE.ProtocolDocGen`).
 
-1. Создай пустой проект **cascade-ide** на своём GitLab (например `http://193.124.113.7/Krawler/cascade-ide`).
-2. В корне репо **open** выполни:
+---
 
-   ```bash
-   git submodule add http://193.124.113.7/Krawler/cascade-ide.git cascade-ide
-   git add .gitmodules cascade-ide
-   git commit -m "Add cascade-ide as submodule"
-   ```
+## Документация в репозитории
 
-3. Если проект пока только локальный (ещё не в отдельном репо): инициализируй git в `cascade-ide`, добавь remote и запушь первый коммит, затем выполни шаги 1–2.
+| Документ | Зачем |
+|----------|--------|
+| [docs/architecture-policy.md](docs/architecture-policy.md) | Слои, срезы, правила изменений |
+| [docs/architecture-migration.md](docs/architecture-migration.md) | Карта выноса фич из «кома» |
+| [Features/README.md](Features/README.md) | Оглавление каталога `Features/` |
+| [docs/MCP-PROTOCOL.md](docs/MCP-PROTOCOL.md) | Контракт MCP IDE |
+| [docs/ux/README.md](docs/ux/README.md) | UX: раскладка, имена зон для автоматизации |
+| [docs/design/north-star-cursor-mcp-cascade-workbench-v1.md](docs/design/north-star-cursor-mcp-cascade-workbench-v1.md) | Северная звезда продукта |
+| [SETUP.md](SETUP.md) | Чеклист окружения (SDK, шаблоны Avalonia, Ollama, GPU) |
+| [docs/THIRD-PARTY-NOTICES.md](docs/THIRD-PARTY-NOTICES.md) | Сторонний код и вендоры |
+| [docs/COMMERCIAL-NOTICE.md](docs/COMMERCIAL-NOTICE.md) | Коммерческое предложение / контакты |
+| [docs/cursor-rules-examples.md](docs/cursor-rules-examples.md) | Примеры `.cursor/rules` для копипаста |
 
-## Стек
+**ACP (Agent Client Protocol):** клиентский SDK вендорится в **`externals/acp-csharp/`** и подключается **ProjectReference** (см. [ADR 0016](docs/adr/0016-agent-client-protocol-external-agent.md)); smoke на .NET — **`samples/AcpSmokeDotnet`**.
 
-- **Avalonia** 11.3 — UI
-- **OllamaSharp** + **Microsoft.Extensions.AI** — клиент Ollama API
-- **CommunityToolkit.Mvvm** — MVVM
+---
 
-Установка стека на машину — см. [SETUP.md](SETUP.md).
+## Стек (ориентиры)
 
-## Архитектура
+- **.NET 10**, **Avalonia 12.x**, **CommunityToolkit.Mvvm**
+- **Roslyn** — анализ и подсказки вокруг C#
+- **Ollama** + расширения Microsoft для AI — чат
 
-Слои, вертикальные срезы фич, роль `MainWindowViewModel` и правила миграции: **[docs/architecture-policy.md](docs/architecture-policy.md)**. Карта срезов (Git, Build, Terminal, Chat…) и фазы выноса: **[docs/architecture-migration.md](docs/architecture-migration.md)**. Каталог **`Features/`** — см. [Features/README.md](Features/README.md).
+Детали установки тулчейна на машину — **[SETUP.md](SETUP.md)**.
 
-## Продукт и лицензирование (видение)
+---
 
-**Лицензия кода CascadeIDE:** [MIT](LICENSE) (`LICENSE` в корне). **Коммерческие услуги** (поддержка, внедрение и т.п.) — отдельное уведомление с контактами: **[docs/COMMERCIAL-NOTICE.md](docs/COMMERCIAL-NOTICE.md)** (сейчас там заглушки `TODO` для Telegram и почты — подставь свои).
+## Submodule в монорепе **financial-open**
 
-Допустимая в будущем модель **открытой** и **коммерческой** линейки, границы доверия и что этот текст **не** заменяет: **[docs/licensing-vision.md](docs/licensing-vision.md)**.
+CascadeIDE часто подключают как субмодуль из репо **open** / **financial-open**:
 
-Уведомления о стороннем коде (NuGet, вендор `externals/acp-csharp`, шрифт Inter): **[docs/THIRD-PARTY-NOTICES.md](docs/THIRD-PARTY-NOTICES.md)**. Краткая политика для разработчиков: **[docs/license-policy.md](docs/license-policy.md)**.
+```bash
+git submodule add https://github.com/KarataevDmitry/cascade-ide.git cascade-ide
+git submodule update --init --recursive cascade-ide
+```
 
-## Бэклог (идеи на потом)
+Собирать из корня монорепы: `dotnet build cascade-ide/CascadeIDE.sln`.
 
-- **Пайплайн Markdown-сборки (resume / книга):** манифесты, профили, `dotnet-script`, деградация бэкендов — что переносимо в оркестрацию IDE/агента. Указатель в операционной карточке в **agent-notes**: `knowledge/work/projects/door-to-singularity/cascade-ide/README.md` (раздел **«Отложено»**). Подробно: **[docs/backlog-ideas-from-doc-pipeline-v1.md](docs/backlog-ideas-from-doc-pipeline-v1.md)**.
+---
 
-## Git и submodules (roadmap)
+## Операционная карточка и бэклог вне репо
 
-Нативная работа с **Git** и **submodules** — целевое требование для использования IDE как основной среды (в т.ч. без боли, типичной для Visual Studio при submodules). Принципы и критерии приёмки: **[docs/git-and-submodules-v1.md](docs/git-and-submodules-v1.md)**.
+Расширенная карточка (purpose, handoff, «следующая задача») ведётся в **каноне agent-notes** (путь задаётся **`AGENT_NOTES_CANON_PATH`**, не коммитится в этот репозиторий):
 
-## Макеты и раскладка UI
+`knowledge/work/projects/door-to-singularity/cascade-ide/README.md`
 
-Описание макета главного окна (зоны, панели, режимы Focus/Balanced/Power, контролы для MCP) — в **[docs/ux/](docs/ux/)**:
-- [docs/ux/README.md](docs/ux/README.md) — оглавление UX-набора;
-- [docs/ux/cascade-ide-ui-layout-v1.md](docs/ux/cascade-ide-ui-layout-v1.md) — раскладка по строкам/колонкам и имена панелей для MCP.
-Визуальных макетов (Figma/PNG) в репо нет; эталон — `Views/MainWindow.axaml` и этот документ.
+Краткий указатель для метарепо **financial-open** / **open**, где рядом лежит субмодуль **agent-notes**: от корня **open** — `agent-notes/knowledge/work/projects/door-to-singularity/cascade-ide/README.md` (если субмодуль подключён).
+
+Идеи вне текущего спринта: **[docs/backlog-ideas-from-doc-pipeline-v1.md](docs/backlog-ideas-from-doc-pipeline-v1.md)**.
+
+---
+
+## Настройки до «массовых» пользователей
+
+Автоматические миграции `settings.toml` пока не обязательны: при смене полей правь `%LocalAppData%\CascadeIDE\settings.toml` или дефолты в коде. Явные миграции — когда появятся чужие установки; см. **[ADR 0028](docs/adr/0028-user-settings-toml-localappdata-and-secrets.md)**.
+
+---
+
+## Лицензирование и ориентиры
+
+- Видение open / commercial: **[docs/licensing-vision.md](docs/licensing-vision.md)**  
+- Политика лицензий в коде: **[docs/license-policy.md](docs/license-policy.md)**  
+- Внешний ориентир по языковому сервису (не зависимость): [RoslynPad](https://github.com/roslynpad/roslynpad); план — **[docs/LANGUAGE-SERVICES-PLAN.md](docs/LANGUAGE-SERVICES-PLAN.md)**  
