@@ -121,7 +121,8 @@
 | [0110](0110-roslyn-refactor-intent-melody-bridge.md) | Рефакторинги Roslyn по диапазону: мост Intent Melody / IDE ↔ Roslyn MCP; без дублей Features в ядре; `rmx`/`rix` не в бандле до моста | Proposed |
 | [0111](0111-editor-linenumber-linerange-value-objects.md) | Редактор: `LineNumber` / `LineRange` (1-based, Start ≤ End); `ParsedLineRange`; граница к JSON — `int` в args команд | Accepted · Implemented |
 | [0112](0112-command-palette-query-modes-strategy.md) | Палитра (Ctrl+Q): режимы строки, стратегии и контракт бэкенда workspace-поиска (`t:`/`m:`/`x:`) с переключением в settings | Accepted · Implemented |
-| [0113](0113-hci-semantic-map-orientation-layer.md) | HCI × Semantic Map: ориентация; оси **`graph_kind`** vs **provenance** связей; быстрый текстовый referenced-by → Roslyn; `SemanticMapInputSnapshot` / CCU | Proposed |
+| [0113](0113-hci-semantic-map-orientation-layer.md) | HCI × Semantic Map: ориентация; оси **`graph_kind`** / **provenance** / **`relation_kind`**; быстрый текстовый referenced-by → Roslyn; `SemanticMapInputSnapshot` / CCU | Proposed |
+| [0114](0114-graph-edge-relation-kind-taxonomy.md) | Тип отношения на ребре (`relation_kind`): «наследует», «ссылается на», partial peer, текстовое совпадение; ортогонально `graph_kind` и provenance; связь с `hit_kind` | Proposed |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 
