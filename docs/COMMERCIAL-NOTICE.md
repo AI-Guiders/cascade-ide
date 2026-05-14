@@ -6,11 +6,9 @@
 
 ## Контакты
 
-Замени строки ниже на реальные контакты одним коммитом.
-
 | Канал | Значение |
 |--------|----------|
-| **Telegram** | `TODO: @username или https://t.me/...` |
-| **Электронная почта** | `TODO: email@example.com` |
+| **Telegram** | @Krawler |
+| **Электронная почта** | dkarataev1990@gmail.com |
 
 Подробнее про сочетание открытой и коммерческой линейки (видение, не юридический текст): [licensing-vision.md](licensing-vision.md), [ADR 0101](adr/0101-licensing-and-commercialization-strategy.md).
