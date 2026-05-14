@@ -4,6 +4,9 @@
              xmlns:views="using:CascadeIDE.Views"
              x:Class="CascadeIDE.Views.WorkspaceNavigationMapView"
              x:DataType="vm:MainWindowViewModel">
+    <UserControl.Resources>
+        <views:StringNotEmptyToBoolConverter x:Key="HciOrientationLineVisible"/>
+    </UserControl.Resources>
     <!-- Карта намерений / CodeNavigationMap (ADR 0039 / 0047 / 0088): слот Pfd — граф подграфа; список related — страница MFD RelatedFiles. -->
     <Panel IsVisible="{Binding IsPfdRegionExpanded}">
         <Border BorderBrush="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"
@@ -43,6 +46,12 @@
                                Opacity="0.9"
                                Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
                                Text="{Binding CodeNavigationMapSettingsSummaryLine}"/>
+                    <TextBlock FontSize="10"
+                               TextWrapping="Wrap"
+                               Opacity="0.85"
+                               Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                               IsVisible="{Binding WorkspaceNavigationMapHciOrientationLine, Converter={StaticResource HciOrientationLineVisible}}"
+                               Text="{Binding WorkspaceNavigationMapHciOrientationLine}"/>
                     <StackPanel Orientation="Horizontal" Spacing="4">
                         <TextBlock FontSize="11"
                                    Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"

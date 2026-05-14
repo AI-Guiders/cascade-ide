@@ -4,6 +4,7 @@ using CascadeIDE.Cockpit.Composition.TraceFlow;
 using CascadeIDE.Features.WorkspaceNavigation.Application;
 using CascadeIDE.Models;
 using CascadeIDE.Services.Navigation;
+using CascadeIDE.Features.HybridIndex.Application;
 
 namespace CascadeIDE.ViewModels;
 
@@ -116,6 +117,33 @@ public partial class MainWindowViewModel
             new WorkspaceNavigationMapRefreshComposer.TraceSignals(ImpactedTestsBadge, LastTestSummary),
             cockpitSurfaceCapturedOnUi);
 
+        SemanticMapHciOrientationSnapshot? hciSnap = null;
+        if (!ct.IsCancellationRequested)
+        {
+            try
+            {
+                var wsRoot = GetWorkspacePath();
+                hciSnap = await SemanticMapHciOrientationAcquirer.TryAcquireAsync(
+                        _hybridIndex,
+                        _settings.HybridIndex,
+                        wsRoot,
+                        solutionPath,
+                        currentPath,
+                        ct)
+                    .ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                // refresh superseded
+            }
+            catch
+            {
+                hciSnap = new SemanticMapHciOrientationSnapshot([], "", "запрос HCI не выполнен");
+            }
+        }
+
+        var hciLine = SemanticMapHciOrientationFormatting.ToStatusLine(hciSnap);
+
         await UiScheduler.Default.InvokeAsync(() =>
         {
             if (ct.IsCancellationRequested)
@@ -125,6 +153,7 @@ public partial class MainWindowViewModel
             WorkspaceNavigationMapRelatedCount = dry.AccentCount;
             CodeNavigationMapGraphScene = dry.Scene;
             CodeNavigationMapGraphHeight = dry.GraphHeight;
+            WorkspaceNavigationMapHciOrientationLine = hciLine;
             WorkspaceNavigationMapItems.Clear();
             foreach (var parsed in dry.ListRows)
             {

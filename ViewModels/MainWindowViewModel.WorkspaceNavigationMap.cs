@@ -144,6 +144,10 @@ public partial class MainWindowViewModel
             CodeNavigationMapLevel,
             _settings.CodeNavigationMap.DetailLevel);
 
+    /// <summary>Краткая строка ориентации HCI (слой B) рядом с картой; не влияет на Roslyn-граф (ADR 0106).</summary>
+    [ObservableProperty]
+    private string _workspaceNavigationMapHciOrientationLine = "";
+
     /// <summary>Команда палитры / MCP: list → graph → both.</summary>
     public void CycleCodeNavigationMapPresentation() =>
         CodeNavigationMapPresentation = CodeNavigationMapPresentationProjection.NextPresentationViewAfter(CodeNavigationMapPresentation);
