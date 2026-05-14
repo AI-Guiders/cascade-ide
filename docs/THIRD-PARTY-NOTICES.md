@@ -79,7 +79,7 @@
 | `CascadeIDE.ArchitectureAnalyzers` | анализаторы, тот же продукт |
 | `AgentNotes.Core` | встроенная логика заметок без отдельных NuGet в ядре библиотеки |
 | `AIGuiders.GitMcp.Core` (NuGet) | Git argv / GitMcp.Core для IDE |
-| `DotNetBuildTestParsers` | парсеры вывода build/test |
+| `AIGuiders.DotNetBuildTestParsers` (NuGet) | парсеры вывода build/test |
 
 Отдельные **LICENSE** этих сборок при необходимости указываются в их репозиториях; в состав опубликованного CascadeIDE они входят как скомпилированные артефакты.
 
