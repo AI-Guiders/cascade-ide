@@ -1,8 +1,8 @@
 # ADR 0115: CDS — общий слой graph-backed приборов (реализация в кабине, не IDS)
 
-**Статус:** Proposed  
+**Статус:** Accepted  
 **Дата:** 2026-05-14  
-**Обновлено:** 2026-05-14 — абстракция источника графа (`IGraphDataSource` / эквивалент) в общем слое; адаптеры — доменно.
+**Обновлено:** 2026-05-14 — абстракция источника графа (`IGraphDataSource` / эквивалент) в общем слое; адаптеры — доменно. 2026-05-14 — в коде: `CascadeIDE.Cockpit.Graph.IGraphDataSource`, `CodeNavigationMapJsonRequest`, адаптер `WorkspaceNavigationMapContextJsonDataSource`; `MainWindowViewModel` берёт JSON через интерфейс.
 
 **Связь:** цепочка кабины **[0036](0036-cds-channel-compositor-surface-pipeline.md)** (канал → CDS → композитор → поверхность). Контракт семейства графов **[0067](0067-graph-backed-surfaces-contract.md)**. **Не** путать с **[0079](0079-ide-display-system-ids-overlay-pipeline.md)** (IDS — оверлеи оболочки). Skia-этапы **[0055](0055-skia-instrument-composition-pipeline.md)**. Слоты и дескрипторы **[0047](0047-cockpit-instrument-descriptor-and-slot-composition.md)**. Оси данных **[0065](0065-instrument-categories-domain-taxonomy.md)** (`graph_kind`), **[0114](0114-graph-edge-relation-kind-taxonomy.md)** (`relation_kind`), **[0113](0113-hci-semantic-map-orientation-layer.md)** (`edge_provenance` / HCI).
 
@@ -29,7 +29,7 @@
 **Общий слой** (имя в коде — решение реализации; рабочее пространство имён в духе `Cockpit.*` + суффикс `Graph` / `GraphSurface` / `GraphBacked`):
 
 - общие протоколы **документа графа** (узел/ребро, ключи сессии, опциональные поля **`graph_kind`**, **`edge_provenance`**, **`relation_kind`** — см. **0065**, **0113**, **0114**);
-- **абстракция источника данных** для поверхности: контракт в духе **`IGraphDataSource`** (имя в коде не фиксирует этот ADR) — *что* подать в документ графа (узлы/рёбра, версия, ошибки, отмена), **без** привязки generic-каркаса к Roslyn/Git/HCI; конкретные провайдеры — **адаптеры** снаружи общего viewer/pipeline;
+- **абстракция источника данных** для поверхности: **`IGraphDataSource`** в `CascadeIDE.Cockpit.Graph` — метод `BuildNavigationJson` принимает **`CodeNavigationMapJsonRequest`** (v0: wire JSON карты намерений / workspace navigation); конкретные провайдеры — **адаптеры** (сейчас `WorkspaceNavigationMapContextJsonDataSource` в `Features/WorkspaceNavigation/Application`) без привязки generic-каркаса к Roslyn в VM;
 - **повторяемые** куски **interaction** (пан/зум/hit-test policy, лимиты Dark Cockpit), где домен не уникален;
 - **точка подключения** к **[0055](0055-skia-instrument-composition-pipeline.md)** (Intent / Declutter / Layout / Render), не дублируя доменную загрузку графа;
 - соглашения по **command routing** и **observability** для агента, совместимые с таблицей измерений **0067**.
@@ -63,5 +63,5 @@
 ## Rollout (эскиз)
 
 1. Документ (этот ADR) как стабильная ссылка для дизайн-ревью.  
-2. Strangler: первый выделенный модуль общего слоя при появлении второго потребителя, уже отвечающего **0067**.  
+2. Strangler: **v0** — `IGraphDataSource` + адаптер на существующий `WorkspaceNavigationMapContextJsonBuilder`; refresh PFD через интерфейс. Далее — вынос общих частей композитора/политик по мере второго потребителя (**0067**).  
 3. По мере стабилизации — уточнить неймспейс и CASCOPE-правила в `CascadeIDE.ArchitectureAnalyzers` при необходимости (отдельный мини-ADR или правка существующих guardrails).

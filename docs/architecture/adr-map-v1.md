@@ -47,7 +47,7 @@
 - **DAL boundary**: [`0102`](../adr/0102-data-acquisition-layer-boundary-and-contract.md)
 - **CCU как слой свёртки**: [`0097`](../adr/0097-cockpit-compute-units-transport-to-channel-dto.md)
 - **CDS (канал → композитор → поверхность)**: [`0036`](../adr/0036-cds-channel-compositor-surface-pipeline.md)
-- **Graph-backed приборы — общий слой внутри CDS**: [`0115`](../adr/0115-cds-graph-backed-shared-layer.md) *(Proposed)*
+- **Graph-backed приборы — общий слой внутри CDS**: [`0115`](../adr/0115-cds-graph-backed-shared-layer.md) *(Accepted)*
 - **IDE DataBus**: [`0099`](../adr/0099-ide-databus-typed-events-and-projections.md)
 - **Health stratification**: [`0095`](../adr/0095-workspace-solution-ide-health-stratification.md) *(если интересует “что такое IDE/Solution/Workspace health”)*  
 
