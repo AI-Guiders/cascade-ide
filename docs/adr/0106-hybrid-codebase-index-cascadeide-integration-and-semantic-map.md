@@ -32,7 +32,7 @@
 
 **Semantic Map** — graph-backed поверхность (намерения, control flow, Skia pipeline). Гибридный индекс (**слой B** в терминологии ADR 0105) **не является** каноническим графом Semantic Map и **не заменяет** CFG / Roslyn-символьную истину по C#. Он даёт **ориентацию**: топ попаданий, пути, диапазоны в файлах, версия индекса и при желании вход для declutter карты — с явным `hit_kind` в DTO ([0105 § hit_kind](0105-hybrid-codebase-index-for-csharp-web.md#adr0105-impl-watchouts-hit-kind)).
 
-В [0097 § P3](0097-cockpit-compute-units-transport-to-channel-dto.md#adr0097-candidates-p3) зафиксирован кандидат **`SemanticMapInputSnapshot`** — слой B после нормализации через **CCU** ([0097 § граница semantic map](0097-cockpit-compute-units-transport-to-channel-dto.md#adr0097-semantic-map-boundary)) задаёт содержание такого входа для graph-backed поверхностей.
+В [0097 § P3](0097-cockpit-compute-units-transport-to-channel-dto.md#adr0097-candidates-p3) зафиксирован кандидат **`SemanticMapInputSnapshot`** — слой B после нормализации через **CCU** ([0097 § граница semantic map](0097-cockpit-compute-units-transport-to-channel-dto.md#adr0097-semantic-map-boundary)) задаёт содержание такого входа для graph-backed поверхностей. Подробнее, что HCI **даёт и не даёт** карте (ориентация vs граф, UI, non-goals) — **[ADR 0113](0113-hci-semantic-map-orientation-layer.md)**.
 
 ### Composition workflow в продукте
 

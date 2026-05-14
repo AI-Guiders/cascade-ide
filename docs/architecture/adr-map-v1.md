@@ -64,6 +64,7 @@
 - **Workspace navigation affordances**: [`0039`](../adr/0039-workspace-navigation-affordances.md)
 - **Hybrid codebase index core**: [`0105`](../adr/0105-hybrid-codebase-index-for-csharp-web.md) *(Accepted · Implemented)*
 - **Integration Hybrid index ↔ CascadeIDE**: [`0106`](../adr/0106-hybrid-codebase-index-cascadeide-integration-and-semantic-map.md)
+- **HCI и Semantic Map (ориентация, не граф)**: [`0113`](../adr/0113-hci-semantic-map-orientation-layer.md)
 - **Semantic map control flow (PFD)**: [`0053`](../adr/0053-semantic-map-control-flow-pfd.md) *(Accepted · Implemented)*
 
 ---
