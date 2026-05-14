@@ -88,8 +88,8 @@
     <ProjectReference Include="CascadeIDE.ArchitectureAnalyzers\CascadeIDE.ArchitectureAnalyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" Condition="'$(RoslynMcpWorkspace)'!='true'" />
   </ItemGroup>
   <ItemGroup>
-    <!-- ACP C# SDK (nuskey8/acp-csharp); совпадает с пакетом AgentClientProtocol на nuget.org. -->
-    <PackageReference Include="AgentClientProtocol" Version="0.1.5" />
+    <!-- ACP C# SDK: вендор externals/acp-csharp (IAcpClient с TerminalOutputResponse). NuGet AgentClientProtocol 0.1.5 расходится по сигнатуре TerminalOutputAsync — не использовать до фикса апстрима. -->
+    <ProjectReference Include="externals\acp-csharp\src\AgentClientProtocol\AgentClientProtocol.csproj" />
     <PackageReference Include="AIGuiders.DotNetBuildTestParsers" Version="0.1.1" />
     <PackageReference Include="AIGuiders.DotnetDebugMCP.Core" Version="0.1.0" />
     <PackageReference Include="AIGuiders.HybridCodebaseIndex.Core" Version="0.1.0" />

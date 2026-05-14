@@ -1,6 +1,6 @@
 # AcpSmokeDotnet — тот же ACP-smoke, что `samples/AcpSmoke`, на .NET
 
-Зачем: проверить цепочку **initialize → new_session → prompt** с тем же эталонным `echo_agent.py`, но клиентом на C# ([NuGet `AgentClientProtocol`](https://www.nuget.org/packages/AgentClientProtocol) — неофициальный SDK [nuskey8/acp-csharp](https://github.com/nuskey8/acp-csharp)).
+Зачем: проверить цепочку **initialize → new_session → prompt** с тем же эталонным `echo_agent.py`, но клиентом на C# (**тот же** вендор `AgentClientProtocol`, что и IDE: `ProjectReference` на [`externals/acp-csharp`](../../externals/acp-csharp) — неофициальный SDK [nuskey8/acp-csharp](https://github.com/nuskey8/acp-csharp); пакет на [nuget.org](https://www.nuget.org/packages/AgentClientProtocol) может отставать по сигнатурам).
 
 ## Требования
 
@@ -27,4 +27,4 @@ dotnet run
 
 ## Связь с Python-smoke
 
-Логика совпадает с `samples/AcpSmoke/smoke_client.py`: subprocess → stdio → `ClientSideConnection`. Официального ACP SDK для .NET от авторов протокола нет — используется community-пакет; версию см. в `AcpSmokeDotnet.csproj`.
+Логика совпадает с `samples/AcpSmoke/smoke_client.py`: subprocess → stdio → `ClientSideConnection`. Официального ACP SDK для .NET от авторов протокола нет — используется community-реализация из `externals/acp-csharp` (как в `CascadeIDE.csproj`).

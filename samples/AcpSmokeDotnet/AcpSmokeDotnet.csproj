@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AgentClientProtocol" Version="0.1.5" />
+    <ProjectReference Include="..\..\externals\acp-csharp\src\AgentClientProtocol\AgentClientProtocol.csproj" />
   </ItemGroup>
 
 </Project>
