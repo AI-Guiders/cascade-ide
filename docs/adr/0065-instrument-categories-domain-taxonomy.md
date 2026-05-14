@@ -2,9 +2,9 @@
 
 **Статус:** Accepted  
 **Дата:** 2026-04-18  
-**Обновлено:** 2026-04-22 — продукт в UI — **«Карта намерений»**: подграф **намерений и потока вокруг якоря** (фрагмент кода / метод), **не** карта всего решения в духе Code Map в VS; в узком смысле совпадает с **картой намерений кода**. Ранее (2026-04-18): введена ось **типов графов** (`graph_kind`).
+**Обновлено:** 2026-04-22 — продукт в UI — **«Карта намерений»**: подграф **намерений и потока вокруг якоря** (фрагмент кода / метод), **не** карта всего решения в духе Code Map в VS; в узком смысле совпадает с **картой намерений кода**. Ранее (2026-04-18): введена ось **типов графов** (`graph_kind`). 2026-05-14: ось **`graph_kind`** ортогональна оси **происхождения связей** (Roslyn / workspace / HCI) — **[0113 § оси](0113-hci-semantic-map-orientation-layer.md#adr0113-axes)**.
 
-**Связь:** [0047](0047-cockpit-instrument-descriptor-and-slot-composition.md) (`Instrument`, `CockpitInstrumentDescriptor`, слот vs композитор vs поверхность), [0063](0063-instrument-deck-named-composition-one-anchor.md) (две оси: форма представления vs композиция в якоре), [0039](0039-workspace-navigation-affordances.md) (навигация, MCP, subgraph), [0053](0053-semantic-map-control-flow-pfd.md) / [0056](0056-semantic-map-pipeline-adoption.md) (карта намерений, control flow), [0062](0062-git-submodules-semantic-map-subgraph.md) (GitMap / дерево submodules), [0055](0055-skia-instrument-composition-pipeline.md) (pipeline внутри Skia-инструмента), [0067](0067-graph-backed-surfaces-contract.md) (общий контракт **graph-backed surface**; `graph_kind` — ось данных внутри семейства).
+**Связь:** [0047](0047-cockpit-instrument-descriptor-and-slot-composition.md) (`Instrument`, `CockpitInstrumentDescriptor`, слот vs композитор vs поверхность), [0063](0063-instrument-deck-named-composition-one-anchor.md) (две оси: форма представления vs композиция в якоре), [0039](0039-workspace-navigation-affordances.md) (навигация, MCP, subgraph), [0053](0053-semantic-map-control-flow-pfd.md) / [0056](0056-semantic-map-pipeline-adoption.md) (карта намерений, control flow), [0062](0062-git-submodules-semantic-map-subgraph.md) (GitMap / дерево submodules), [0055](0055-skia-instrument-composition-pipeline.md) (pipeline внутри Skia-инструмента), [0067](0067-graph-backed-surfaces-contract.md) (общий контракт **graph-backed surface**; `graph_kind` — ось данных внутри семейства), [0113](0113-hci-semantic-map-orientation-layer.md) (ось **provenance** связей vs `graph_kind`).
 
 ---
 
@@ -69,6 +69,8 @@
    | `repository_module_tree` | **Дерево модулей / submodules** ([0062](0062-git-submodules-semantic-map-subgraph.md)). |
 
    Пока различение частично **косвенное** (уровень карты `file` vs `controlFlow`, поля `kind` на узлах). **Рекомендация:** при следующем изменении контракта subgraph добавить явное поле **`graph_kind`** (или эквивалент в MCP), чтобы агент и UI не выводили тип графа из эвристик.
+
+   Ось **`graph_kind`** отвечает на вопрос **какой доменный граф** (форма подграфа). Она **ортогональна** оси **происхождения связей** (Roslyn vs MSBuild workspace navigation vs HCI FTS/vec и композиты) — см. **[ADR 0113 § оси](0113-hci-semantic-map-orientation-layer.md#adr0113-axes)**.
 
 <a id="adr0065-p7"></a>
 

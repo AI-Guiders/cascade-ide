@@ -3,9 +3,9 @@
 **Статус:** Accepted  
 **Дата:** 2026-04-19  
 **Принято:** 2026-04-19  
-**Обновлено:** 2026-04-19 — ключевая мысль «операционная surface», ограничения, доп. требования, seed для агента (EN).
+**Обновлено:** 2026-04-19 — ключевая мысль «операционная surface», ограничения, доп. требования, seed для агента (EN). 2026-05-14 — измерение **Edge / node provenance** и ссылка на **[0113](0113-hci-semantic-map-orientation-layer.md#adr0113-axes)** (ось источника связей ортогонально `graph_kind`).
 
-**Связь:** [0065](0065-instrument-categories-domain-taxonomy.md) (ось `graph_kind`, категории инструментов, Semantic Map vs другие графы), [0062](0062-git-submodules-semantic-map-subgraph.md) (GitMap — отдельный домен данных, общий пайплайн отрисовки), [0053](0053-semantic-map-control-flow-pfd.md) / [0056](0056-semantic-map-pipeline-adoption.md) (Semantic Map, внедрение pipeline), [0055](0055-skia-instrument-composition-pipeline.md) (Intent → Declutter → Layout → Render), [0039](0039-workspace-navigation-affordances.md) (навигация, MCP, subgraph), [0047](0047-cockpit-instrument-descriptor-and-slot-composition.md) (инструмент, слот, поверхность), [0021](0021-pfd-mfd-cockpit-attention-model.md) (зоны внимания). [0066](0066-cockpit-ui-vs-ide-presentation-layer.md) — хром IDE vs кокпит: контракт ниже про **поверхность инструмента** в кабине, не про `ModalOverlay`.
+**Связь:** [0065](0065-instrument-categories-domain-taxonomy.md) (ось `graph_kind`, категории инструментов, Semantic Map vs другие графы), [0113](0113-hci-semantic-map-orientation-layer.md) (ось **происхождения связей** vs `graph_kind`, HCI и карта), [0062](0062-git-submodules-semantic-map-subgraph.md) (GitMap — отдельный домен данных, общий пайплайн отрисовки), [0053](0053-semantic-map-control-flow-pfd.md) / [0056](0056-semantic-map-pipeline-adoption.md) (Semantic Map, внедрение pipeline), [0055](0055-skia-instrument-composition-pipeline.md) (Intent → Declutter → Layout → Render), [0039](0039-workspace-navigation-affordances.md) (навигация, MCP, subgraph), [0047](0047-cockpit-instrument-descriptor-and-slot-composition.md) (инструмент, слот, поверхность), [0021](0021-pfd-mfd-cockpit-attention-model.md) (зоны внимания). [0066](0066-cockpit-ui-vs-ide-presentation-layer.md) — хром IDE vs кокпит: контракт ниже про **поверхность инструмента** в кабине, не про `ModalOverlay`.
 
 ---
 
@@ -74,6 +74,7 @@
 | Измерение | Вопрос, на который отвечает слой | Примечание |
 |-----------|-----------------------------------|------------|
 | **Data model** | Что такое узел и ребро в **этом** домене; стабильный **ключ** в пределах сессии; связь с `graph_kind` и категорией инструмента ([0065](0065-instrument-categories-domain-taxonomy.md)). | Домены ортогональны: код vs git-топология — разные графы, один класс поверхности. |
+| **Edge / node provenance** | На каком **источнике правды** держатся связи и узлы для этого экрана: символьная модель (Roslyn), эвристика workspace (MSBuild), полнотекст/vec по корпусу (HCI), композит (например HCI → Roslyn). | Ортогонально **`graph_kind`**: тот же вид карты может сочетать слои с разным provenance; таблица и имена — **[0113 § оси](0113-hci-semantic-map-orientation-layer.md#adr0113-axes)**. |
 | **Interaction model** | Пан, зум, «перетаскивание» вида, hit-test, ограничения FPS/Dark Cockpit ([0021](0021-pfd-mfd-cockpit-attention-model.md) §6). | Общие паттерны; детали могут отличаться по инструменту. |
 | **Navigation semantics** | Что значит «перейти», «открыть», «запросить subgraph», как это стыкуется с MCP и агентом ([0039](0039-workspace-navigation-affordances.md)). | Семантика **действий**, не только отрисовка. |
 | **Layout abstraction** | Где граница между данными графа и геометрией: этапы [0055](0055-skia-instrument-composition-pipeline.md); сменяемые **layout engines** под вид графа без дублирования Render. | GitMap и CFG не обязаны иметь один layout engine; обязаны иметь **одинаковую точку подключения** в pipeline. |

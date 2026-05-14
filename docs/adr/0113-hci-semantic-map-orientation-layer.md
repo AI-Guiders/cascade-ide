@@ -2,8 +2,9 @@
 
 **Статус:** Proposed  
 **Дата:** 2026-05-14  
+**Обновлено:** 2026-05-14 — оси **`graph_kind`** vs **происхождение связей** (provenance); линза «быстрый referenced-by по корпусу».
 
-**Связь:** расширяет и уточняет границу **Semantic Map и слой B** в **[0106](0106-hybrid-codebase-index-cascadeide-integration-and-semantic-map.md)** — без дублирования интеграционного контура IDE. Базовый индекс и MCP: **[0105](0105-hybrid-codebase-index-for-csharp-web.md)**. Карта как поверхность: **[0039](0039-workspace-navigation-affordances.md)**, **[0053](0053-semantic-map-control-flow-pfd.md)**, **[0067](0067-graph-backed-surfaces-contract.md)**. Снимок входа в CCU: **[0097](0097-cockpit-compute-units-transport-to-channel-dto.md)** (`SemanticMapInputSnapshot`).
+**Связь:** расширяет и уточняет границу **Semantic Map и слой B** в **[0106](0106-hybrid-codebase-index-cascadeide-integration-and-semantic-map.md)** — без дублирования интеграционного контура IDE. Базовый индекс и MCP: **[0105](0105-hybrid-codebase-index-for-csharp-web.md)**. Карта как поверхность: **[0039](0039-workspace-navigation-affordances.md)**, **[0053](0053-semantic-map-control-flow-pfd.md)**, **[0067](0067-graph-backed-surfaces-contract.md)**. Ось **`graph_kind`**: **[0065 §6](0065-instrument-categories-domain-taxonomy.md#adr0065-p6)**. Снимок входа в CCU: **[0097](0097-cockpit-compute-units-transport-to-channel-dto.md)** (`SemanticMapInputSnapshot`).
 
 ---
 
@@ -25,10 +26,23 @@
 
 HCI **не** является источником рёбер CFG, **не** заменяет **Roslyn** для go-to-definition / символьной связности и **не** смешивает `hit_kind` с фактами графа.
 
+<a id="adr0113-axes"></a>
+
+### 1a. Две ортогональные оси (тип графа vs происхождение связей)
+
+Чтобы не смешивать **какой граф рисуем** и **на чём основаны рёбра/узлы**, держим разводку явно:
+
+| Ось | Вопрос | Где зафиксировано | Примеры |
+|-----|--------|-------------------|---------|
+| **Тип / домен графа** (`graph_kind`) | Какой **смысловой** подграф в кабине: намерения кода, связанные файлы, дерево модулей Git, … | **[0065 §6](0065-instrument-categories-domain-taxonomy.md#adr0065-p6)** | `code_intent_code_navigation_map`, `related_files`, `repository_module_tree` |
+| **Происхождение связей** (рабочее имя `edge_provenance` / аналог в wire-модели позже) | **Откуда** взята доказуемость «узел A связан с B»: символьная модель, эвристика workspace, полнотекст / vec по корпусу, цепочка из нескольких источников | Этот ADR + измерение в **[0067](0067-graph-backed-surfaces-contract.md#adr0067-dimensions)** | `symbolic_roslyn`, `workspace_navigation_msbuild`, `hci_fulltext`, `hci_vector`, `composite_hci_then_roslyn` |
+
+**Зачем:** один и тот же `graph_kind` (например карта намерений) может **визуально** соседствовать с данными разного происхождения: CFG/Roslyn — канон для control flow; HCI — быстрый **корпусный** слой («где в репо всплывает имя типа / фрагмент» → черновой **referenced-by по тексту**), затем уточнение через Roslyn. Это **не** новый `graph_kind` сам по себе, пока явно не заведён отдельный инструмент «граф только из HCI» (тогда понадобится отдельное решение и согласование с [0067](0067-graph-backed-surfaces-contract.md)).
+
 ### 2. Продуктовый контур «карта + HCI»
 
 - **PFD / MFD:** краткая **строка ориентации** (или отдельный микро-канал), согласованная с тем же scope и `databasePath`, что оркестратор HCI ([0106](0106-hybrid-codebase-index-cascadeide-integration-and-semantic-map.md)).
-- **Следующий шаг для пользователя/агента:** из попадания HCI — осмысленные действия уровня **Roslyn** (definition, usages, diagnostics), как в эскизе **«Hybrid search → Roslyn точность»** в 0106 / дорожной карте 0105 — без объявления попадания HCI «истиной символа».
+- **Следующий шаг для пользователя/агента:** из попадания HCI — осмысленные действия уровня **Roslyn** (definition, usages, diagnostics), как в эскизе **«Hybrid search → Roslyn точность»** в 0106 / дорожной карте 0105 — без объявления попадания HCI «истиной символа». Продуктовая линза **«быстро referenced-by по корпусу»** укладывается в **`hci_fulltext` / `hci_vector`** на оси происхождения; символьный **referenced-by** остаётся **`symbolic_roslyn`**.
 
 ### 3. DTO и CCU (целевое состояние)
 
