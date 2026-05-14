@@ -123,6 +123,7 @@
 | [0112](0112-command-palette-query-modes-strategy.md) | Палитра (Ctrl+Q): режимы строки, стратегии и контракт бэкенда workspace-поиска (`t:`/`m:`/`x:`) с переключением в settings | Accepted · Implemented |
 | [0113](0113-hci-semantic-map-orientation-layer.md) | HCI × Semantic Map: ориентация; оси **`graph_kind`** / **provenance** / **`relation_kind`**; быстрый текстовый referenced-by → Roslyn; `SemanticMapInputSnapshot` / CCU | Proposed |
 | [0114](0114-graph-edge-relation-kind-taxonomy.md) | Тип отношения на ребре (`relation_kind`): «наследует», «ссылается на», partial peer, текстовое совпадение; ортогонально `graph_kind` и provenance; связь с `hit_kind` | Proposed |
+| [0115](0115-cds-graph-backed-shared-layer.md) | CDS: общий слой реализации graph-backed **приборов** в кабине (не IDS); стык с [0036](0036-cds-channel-compositor-surface-pipeline.md) и [0067](0067-graph-backed-surfaces-contract.md) | Proposed |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 

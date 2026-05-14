@@ -3,9 +3,9 @@
 **Статус:** Accepted  
 **Дата:** 2026-04-19  
 **Принято:** 2026-04-19  
-**Обновлено:** 2026-04-19 — ключевая мысль «операционная surface», ограничения, доп. требования, seed для агента (EN). 2026-05-14 — измерения **Edge / node provenance** ([0113 § оси](0113-hci-semantic-map-orientation-layer.md#adr0113-axes)) и **Relation kind** ([0114](0114-graph-edge-relation-kind-taxonomy.md)); обе ортогональны `graph_kind`.
+**Обновлено:** 2026-04-19 — ключевая мысль «операционная surface», ограничения, доп. требования, seed для агента (EN). 2026-05-14 — измерения **Edge / node provenance** ([0113 § оси](0113-hci-semantic-map-orientation-layer.md#adr0113-axes)) и **Relation kind** ([0114](0114-graph-edge-relation-kind-taxonomy.md)); обе ортогональны `graph_kind`. 2026-05-14 — ссылка на размещение общего слоя реализации в **CDS** ([0115](0115-cds-graph-backed-shared-layer.md)), не IDS.
 
-**Связь:** [0065](0065-instrument-categories-domain-taxonomy.md) (ось `graph_kind`, категории инструментов, Semantic Map vs другие графы), [0113](0113-hci-semantic-map-orientation-layer.md) (оси **provenance** и сводка **трёх** осей с `relation_kind`), [0114](0114-graph-edge-relation-kind-taxonomy.md) (каталог **`relation_kind`**: наследует, ссылается на, …), [0062](0062-git-submodules-semantic-map-subgraph.md) (GitMap — отдельный домен данных, общий пайплайн отрисовки), [0053](0053-semantic-map-control-flow-pfd.md) / [0056](0056-semantic-map-pipeline-adoption.md) (Semantic Map, внедрение pipeline), [0055](0055-skia-instrument-composition-pipeline.md) (Intent → Declutter → Layout → Render), [0039](0039-workspace-navigation-affordances.md) (навигация, MCP, subgraph), [0047](0047-cockpit-instrument-descriptor-and-slot-composition.md) (инструмент, слот, поверхность), [0021](0021-pfd-mfd-cockpit-attention-model.md) (зоны внимания). [0066](0066-cockpit-ui-vs-ide-presentation-layer.md) — хром IDE vs кокпит: контракт ниже про **поверхность инструмента** в кабине, не про `ModalOverlay`.
+**Связь:** [0065](0065-instrument-categories-domain-taxonomy.md) (ось `graph_kind`, категории инструментов, Semantic Map vs другие графы), [0113](0113-hci-semantic-map-orientation-layer.md) (оси **provenance** и сводка **трёх** осей с `relation_kind`), [0114](0114-graph-edge-relation-kind-taxonomy.md) (каталог **`relation_kind`**: наследует, ссылается на, …), [0115](0115-cds-graph-backed-shared-layer.md) (**где** в коде кабины живёт общий слой реализации graph-backed приборов — **CDS**, не IDS), [0062](0062-git-submodules-semantic-map-subgraph.md) (GitMap — отдельный домен данных, общий пайплайн отрисовки), [0053](0053-semantic-map-control-flow-pfd.md) / [0056](0056-semantic-map-pipeline-adoption.md) (Semantic Map, внедрение pipeline), [0055](0055-skia-instrument-composition-pipeline.md) (Intent → Declutter → Layout → Render), [0039](0039-workspace-navigation-affordances.md) (навигация, MCP, subgraph), [0047](0047-cockpit-instrument-descriptor-and-slot-composition.md) (инструмент, слот, поверхность), [0021](0021-pfd-mfd-cockpit-attention-model.md) (зоны внимания). [0066](0066-cockpit-ui-vs-ide-presentation-layer.md) — хром IDE vs кокпит: контракт ниже про **поверхность инструмента** в кабине, не про `ModalOverlay`.
 
 ---
 
@@ -38,7 +38,7 @@
 
 ## Решение
 
-Зафиксировать понятие **graph-backed surface** (рабочее имя): **инструмент или фрагмент UI**, в котором **первична** работа с **ориентированным (или помеченным) графом** как с объектом навигации и действий, согласованная с кокпитом и workspace по единым правилам; отрисовка — один из слоёв, не определение поверхности.
+Зафиксировать понятие **graph-backed surface** (рабочее имя): **инструмент или фрагмент UI**, в котором **первична** работа с **ориентированным (или помеченным) графом** как с объектом навигации и действий, согласованная с кокпитом и workspace по единым правилам; отрисовка — один из слоёв, не определение поверхности. **Размещение общей реализации** переиспользуемых частей этого класса в продукте — в контуре **CDS / Cockpit**, не в **IDS**; см. **[0115](0115-cds-graph-backed-shared-layer.md)**.
 
 <a id="adr0067-not"></a>
 
