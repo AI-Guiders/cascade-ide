@@ -18,6 +18,7 @@ high_min = 800
 
 # ADR 0021/0051 + ADR 0050: одна таблица [routing] — иначе Tomlyn при двух [routing.*] перезаписывает вложенный объект.
 # Канонические intent-id: forward, pfd, mfd, eicas, hud; слоты — alias без сырых instrument_id.
+# По умолчанию: карта намерений в PFD; дерево решения — в слоте MFD (иначе mfd_primary не резолвится из workspace-карты).
 [routing]
 attention = { solution_explorer = "pfd", chat = "mfd", git = "mfd", terminal = "mfd", editor = "forward" }
-instruments = { pfd_primary = "solution_explorer" }
+instruments = { pfd_primary = "workspace_map", mfd_primary = "solution_explorer" }
