@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using CascadeIDE.Cockpit.Cds;
 using CascadeIDE.Cockpit.Channels.TraceFlow;
 using CascadeIDE.Cockpit.Composition.TraceFlow;
+using CascadeIDE.Cockpit.Graph;
 using CascadeIDE.Features.WorkspaceNavigation.Application;
 using CascadeIDE.Models;
 using CascadeIDE.Services.Navigation;
@@ -17,6 +18,7 @@ namespace CascadeIDE.ViewModels;
 /// </summary>
 public partial class MainWindowViewModel
 {
+    private readonly IGraphDataSource _codeNavigationMapGraphDataSource = new WorkspaceNavigationMapContextJsonDataSource();
     private readonly CodeNavigationMapCompositor _codeNavigationMapCompositor = new();
     private readonly TraceFlowChannelCoordinator _traceFlowChannelCoordinator = new(
         [

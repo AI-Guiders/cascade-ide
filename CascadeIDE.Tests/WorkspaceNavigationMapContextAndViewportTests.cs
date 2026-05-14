@@ -1,4 +1,5 @@
 using System.Text.Json;
+using CascadeIDE.Cockpit.Graph;
 using CascadeIDE.Features.WorkspaceNavigation.Application;
 using CascadeIDE.Models;
 using Xunit;
@@ -47,5 +48,33 @@ public sealed class WorkspaceNavigationMapContextAndViewportTests
 
         using var doc = JsonDocument.Parse(json);
         Assert.Equal("no_file", doc.RootElement.GetProperty("error").GetString());
+    }
+
+    [Fact]
+    public void IGraphDataSource_matches_static_builder_for_control_flow_no_file()
+    {
+        IGraphDataSource source = new WorkspaceNavigationMapContextJsonDataSource();
+        var req = new CodeNavigationMapJsonRequest(
+            CodeNavigationMapLevelKind.ControlFlow,
+            WantGraph: false,
+            CurrentPath: null,
+            EditorText: null,
+            CursorLine: null,
+            CursorColumn: null,
+            RawFilePathsFromSolution: [],
+            SolutionPath: null,
+            NavSettings: null);
+        var fromInterface = source.BuildNavigationJson(req);
+        var fromStatic = WorkspaceNavigationMapContextJsonBuilder.Build(
+            CodeNavigationMapLevelKind.ControlFlow,
+            wantGraph: false,
+            currentPath: null,
+            editorText: null,
+            cursorLine: null,
+            cursorColumn: null,
+            [],
+            solutionPath: null,
+            navSettings: null);
+        Assert.Equal(fromStatic, fromInterface);
     }
 }

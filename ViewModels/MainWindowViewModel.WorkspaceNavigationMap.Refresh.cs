@@ -1,6 +1,7 @@
 using CascadeIDE.Cockpit.Cds;
 using CascadeIDE.Cockpit.Channels.TraceFlow;
 using CascadeIDE.Cockpit.Composition.TraceFlow;
+using CascadeIDE.Cockpit.Graph;
 using CascadeIDE.Features.WorkspaceNavigation.Application;
 using CascadeIDE.Models;
 using CascadeIDE.Services.Navigation;
@@ -77,16 +78,17 @@ public partial class MainWindowViewModel
         try
         {
             json = await Task.Run(
-                    () => WorkspaceNavigationMapContextJsonBuilder.Build(
-                        level,
-                        wantGraph,
-                        currentPath,
-                        editorText,
-                        cursorLine,
-                        cursorColumn,
-                        rawPaths,
-                        solutionPath,
-                        navSettings),
+                    () => _codeNavigationMapGraphDataSource.BuildNavigationJson(
+                        new CodeNavigationMapJsonRequest(
+                            level,
+                            wantGraph,
+                            currentPath,
+                            editorText,
+                            cursorLine,
+                            cursorColumn,
+                            rawPaths,
+                            solutionPath,
+                            navSettings)),
                     ct)
                 .ConfigureAwait(false);
         }
