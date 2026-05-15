@@ -58,6 +58,11 @@
 - **MCP contracts + testable infrastructure**: [`0008`](../adr/0008-mcp-contracts-and-testable-infrastructure.md)
 - **Agent contract CLI + snapshot tests**: [`0052`](../adr/0052-agent-contract-cli-and-snapshot-tests.md)
 - **Visibility of reasoning / provider limits**: [`0020`](../adr/0020-agent-reasoning-visibility-and-provider-limits.md)
+- **Intercom (канал, не «чат-бот»)**: [`0080`](../adr/0080-intercom-naming-and-multi-party-channel-model.md)
+- **Topic cards + spine (картотека тем)**: [`0072`](../adr/0072-chat-topic-cards-intent-melody-keyboard-contract.md), [`0096`](../adr/0096-intercom-topic-card-summary-and-product-spine.md)
+- **Дерево сессии, steer / follow-up**: [`0116`](../adr/0116-intercom-session-tree-and-agent-message-steering.md) *(Proposed)*
+- **Persistence чата (event log)**: [`0045`](../adr/0045-agent-chat-persistence-event-log-and-projections.md)
+- **Пакеты уточнений и треды**: [`0031`](../adr/0031-agent-chat-clarification-batches-and-threading.md)
 
 ---
 
