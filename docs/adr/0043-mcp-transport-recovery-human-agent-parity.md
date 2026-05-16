@@ -2,7 +2,20 @@
 
 **Статус:** Proposed  
 **Дата:** 2026-04-13  
-**Связь:** [north-star-cursor-mcp-cascade-workbench-v1.md](../design/north-star-cursor-mcp-cascade-workbench-v1.md) (Cursor + MCP + Cascade), [0008](0008-mcp-contracts-and-testable-infrastructure.md) (контракты MCP), [0016](0016-agent-client-protocol-external-agent.md) (ACP ортогонально MCP), [MCP-PROTOCOL.md](../MCP-PROTOCOL.md) (транспорт stdio, видимость MCP). **Ортогонально:** [0002](0002-debug-human-agent-parity.md) — там паритет **состояния отладки** в IDE, не жизненный цикл процессов MCP у хоста.
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0008](0008-mcp-contracts-and-testable-infrastructure.md) | контракты MCP |
+| [0016](0016-agent-client-protocol-external-agent.md) | ACP ортогонально MCP |
+| [0002](0002-debug-human-agent-parity.md) | Единый слой состояния отладки для человека и агента |
+
+### Вне ADR
+
+| Документ | Роль |
+|----------|------|
+| [north-star-cursor-mcp-cascade-workbench-v1.md](../design/north-star-cursor-mcp-cascade-workbench-v1.md) | Cursor + MCP + Cascade |
+| [MCP-PROTOCOL.md](../MCP-PROTOCOL.md) | транспорт stdio, видимость MCP |
 
 ## Контекст
 

@@ -2,8 +2,19 @@
 
 **Статус:** Accepted (границы решения и отбор сигналов; конкретный UI и типы в коде — по мере реализации)  
 **Дата:** 2026-04-11  
-**Связь:** [0021](0021-pfd-mfd-cockpit-attention-model.md) §1.2 (канал vs слот презентации; «статус окружения» в таблице каналов), [0022](0022-workspace-health-lexicon.md) (лексикон **IDE Health** — **другой** канал), [0089](0089-ide-omnibus-naming-and-ide-health-channel-rename.md) (переименование канала наблюдаемости), чертёж [`environment-readiness-glance-v1.md`](../design/environment-readiness-glance-v1.md).
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0021](0021-pfd-mfd-cockpit-attention-model.md) | PFD / MFD — модель внимания кокпита Cascade IDE |
+| [0022](0022-workspace-health-lexicon.md) | лексикон **IDE Health** — **другой** канал |
+| [0089](0089-ide-omnibus-naming-and-ide-health-channel-rename.md) | переименование канала наблюдаемости |
+
+### Вне ADR
+
+| Документ | Роль |
+|----------|------|
+| [`environment-readiness-glance-v1.md`](../design/environment-readiness-glance-v1.md) | `environment-readiness-glance-v1.md` |
 ---
 
 ## Контекст

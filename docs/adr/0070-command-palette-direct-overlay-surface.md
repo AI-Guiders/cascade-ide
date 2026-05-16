@@ -3,8 +3,15 @@
 **Статус:** Accepted  
 **Дата:** 2026-04-19  
 
-**Связь:** [0013](0013-command-surface-and-discoverability.md) (палитра и discoverability), [0017](0017-multi-window-workspace-and-agent-surfaces.md) (несколько `TopLevel` и фокус), [0021](0021-pfd-mfd-cockpit-attention-model.md) (модель внимания), [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md) (keyboard-first и overlay-подсказки), [0066](0066-cockpit-ui-vs-ide-presentation-layer.md) (shell chrome vs cockpit UI).
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0013](0013-command-surface-and-discoverability.md) | палитра и discoverability |
+| [0017](0017-multi-window-workspace-and-agent-surfaces.md) | несколько `TopLevel` и фокус |
+| [0021](0021-pfd-mfd-cockpit-attention-model.md) | модель внимания |
+| [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md) | keyboard-first и overlay-подсказки |
+| [0066](0066-cockpit-ui-vs-ide-presentation-layer.md) | shell chrome vs cockpit UI |
 ---
 
 ## Контекст

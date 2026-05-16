@@ -2,7 +2,14 @@
 
 **Статус:** Accepted  
 **Дата:** 2026-04-02  
-**Связь:** [Features/README.md](../Features/README.md), [architecture-migration.md](../architecture-migration.md).
+## Связанные ADR
+
+### Вне ADR
+
+| Документ | Роль |
+|----------|------|
+| [Features/README.md](../Features/README.md) | Features/README |
+| [architecture-migration.md](../architecture-migration.md) | architecture migration |
 
 ## Контекст
 

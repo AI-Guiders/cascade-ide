@@ -3,8 +3,26 @@
 **Статус:** Proposed  
 **Дата:** 2026-04-19
 
-**Связь:** [intent-melody-language-v1.md](../intent-melody-language-v1.md) (IML v1: грамматика `c:` и мотивация), [0031](0031-agent-chat-clarification-batches-and-threading.md) (пакеты уточнений, `ThreadNode`, обзор размаха), [0057](0057-chat-surface-pipeline-adoption.md) (chat surface → Skia pipeline), [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md) (Melody, CascadeChord, паритет с палитрой — **уточняется в chat-domain**, см. ниже), [0013](0013-command-surface-and-discoverability.md), [0030](0030-command-ids-hotkeys-and-ui-registry-layers.md), [0017](0017-multi-window-workspace-and-agent-surfaces.md) (мультиоконность, фокус), [0070](0070-command-palette-direct-overlay-surface.md), [0044](0044-avalonia-host-skia-agent-chat-surface.md), [0008](0008-mcp-contracts-and-testable-infrastructure.md), [0096](0096-intercom-topic-card-summary-and-product-spine.md) (**сводка на карточке**, spine продуктовой линии — продуктовая семантика поверх overview/detail; CIDE как пример; [§4](0096-intercom-topic-card-summary-and-product-spine.md#adr0096-p4) — контекст агента; перенос решений spine → тред, *carry-forward*).
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0031](0031-agent-chat-clarification-batches-and-threading.md) | пакеты уточнений, `ThreadNode`, обзор размаха |
+| [0057](0057-chat-surface-pipeline-adoption.md) | chat surface → Skia pipeline |
+| [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md) | Melody, CascadeChord, паритет с палитрой — **уточняется в chat-domain**, см. ниже |
+| [0013](0013-command-surface-and-discoverability.md) | Поверхность команд и discoverability (палитра, минимальный toolbar) |
+| [0030](0030-command-ids-hotkeys-and-ui-registry-layers.md) | Слои идентификаторов команд, хоткеев и UI (без одной таблицы «всё в одном» пока) |
+| [0017](0017-multi-window-workspace-and-agent-surfaces.md) | мультиоконность, фокус |
+| [0070](0070-command-palette-direct-overlay-surface.md) | Command Palette как прямой overlay surface, маршрутизируемый в активный TopLevel |
+| [0044](0044-avalonia-host-skia-agent-chat-surface.md) | Разделение ролей — Avalonia как хост («фюзеляж»), кастомная отрисовка для чата агента (Skia как гипотеза) |
+| [0008](0008-mcp-contracts-and-testable-infrastructure.md) | Стабильные контракты MCP и тестируемая инфраструктура |
+| [0096](0096-intercom-topic-card-summary-and-product-spine.md) | **сводка на карточке**, spine продуктовой линии — продуктовая семантика поверх overview/detail; CIDE как пример; [§4](0096-intercom-topic-card-summary-and-product-spine.md#adr0096-p4 |
+
+### Вне ADR
+
+| Документ | Роль |
+|----------|------|
+| [intent-melody-language-v1.md](../intent-melody-language-v1.md) | IML v1: грамматика `c:` и мотивация |
 **Отношение к [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md):** этот ADR **не заменяет** общую keyboard-first модель (палитра, `CascadeChord`, Command Melody `c:`). Он **нормативно уточняет**, как те же принципы **применяются к навигации по темам чата** (topic-level intents). См. [§ «Связь с ADR 0060»](#adr0072-relation-0060).
 
 ---

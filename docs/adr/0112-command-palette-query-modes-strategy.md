@@ -3,7 +3,25 @@
 **Статус:** Accepted · Implemented (этапы 1–4: режимная модель разбора, chrome, rg/hci/auto бэкенды, TOML; стратегии по режиму — см. код `CommandPaletteParsedQueryParser` и ветви оркестратора)  
 **Дата:** 2026-05-11 · обновлено 2026-05-12  
 
-**Связь:** [0013](0013-command-surface-and-discoverability.md) (палитра, keyboard-first), [0030](0030-command-ids-hotkeys-and-ui-registry-layers.md) (`IdeCommands`, каталог палитры), [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md) (Command Melody `c:` и CascadeChord — ортогонально префиксам **в строке** палитры), [0070](0070-command-palette-direct-overlay-surface.md) (палитра как overlay), [0079](0079-ide-display-system-ids-overlay-pipeline.md) (IDS, подсказки оверлея), [0081](0081-parametric-intent-melodies-editor-line-ranges.md) (параметрический хвост после alias в `c:`), [0109](0109-declarative-parametric-melody-catalog-toml-and-code-binders.md) (каталог melody), [0105](0105-hybrid-codebase-index-for-csharp-web.md) / [0106](0106-hybrid-codebase-index-cascadeide-integration-and-semantic-map.md) (Hybrid Codebase Index — HCI), грамматика IML — [intent-melody-language-v1.md](../intent-melody-language-v1.md).  
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0013](0013-command-surface-and-discoverability.md) | палитра, keyboard-first |
+| [0030](0030-command-ids-hotkeys-and-ui-registry-layers.md) | `IdeCommands`, каталог палитры |
+| [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md) | Command Melody `c:` и CascadeChord — ортогонально префиксам **в строке** палитры |
+| [0070](0070-command-palette-direct-overlay-surface.md) | палитра как overlay |
+| [0079](0079-ide-display-system-ids-overlay-pipeline.md) | IDS, подсказки оверлея |
+| [0081](0081-parametric-intent-melodies-editor-line-ranges.md) | параметрический хвост после alias в `c:` |
+| [0109](0109-declarative-parametric-melody-catalog-toml-and-code-binders.md) | каталог melody |
+| [0105](0105-hybrid-codebase-index-for-csharp-web.md) | Hybrid Codebase Index (ядро + MCP) for C# stacks with Roslyn Truth |
+| [0106](0106-hybrid-codebase-index-cascadeide-integration-and-semantic-map.md) | Hybrid Codebase Index — HCI |
+
+### Вне ADR
+
+| Документ | Роль |
+|----------|------|
+| [intent-melody-language-v1.md](../intent-melody-language-v1.md) | intent melody language v1 |
 **Точки кода (фактический baseline):** `IdeCommandPaletteFilterOrchestrator`, `IntentMelodyAliases.TryGetTail`, `GoToAllQueryParser`, `CommandPaletteChromeProjection`, `IdeCommandPaletteExecutionOrchestrator`.
 
 ---

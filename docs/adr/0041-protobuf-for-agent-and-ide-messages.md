@@ -2,8 +2,20 @@
 
 **Статус:** Proposed (фиксация направления обсуждения и критериев; **не** решение о немедленной миграции с JSON)  
 **Дата:** 2026-04-13  
-**Связь:** [0008](0008-mcp-contracts-and-testable-infrastructure.md) (контракты MCP и инфраструктура), [0018](0018-ide-commands-canonical-xml-documentation.md) (канон `IdeCommands`, ProtocolDocGen), [0038](0038-agent-facade-ai-provider-and-tool-orchestration.md) (фасад агента, инструменты), [MCP-PROTOCOL.md](../MCP-PROTOCOL.md) (текущий wire-формат команд IDE для агента). Операционный контраст: [0001](0001-debug-hypotheses-json-storage.md) (JSON как выбранное хранилище для отдельного домена — не смешивать с предметом этого ADR).
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0008](0008-mcp-contracts-and-testable-infrastructure.md) | контракты MCP и инфраструктура |
+| [0018](0018-ide-commands-canonical-xml-documentation.md) | канон `IdeCommands`, ProtocolDocGen |
+| [0038](0038-agent-facade-ai-provider-and-tool-orchestration.md) | фасад агента, инструменты |
+| [0001](0001-debug-hypotheses-json-storage.md) | JSON как выбранное хранилище для отдельного домена — не смешивать с предметом этого ADR |
+
+### Вне ADR
+
+| Документ | Роль |
+|----------|------|
+| [MCP-PROTOCOL.md](../MCP-PROTOCOL.md) | текущий wire-формат команд IDE для агента |
 ---
 
 ## Контекст

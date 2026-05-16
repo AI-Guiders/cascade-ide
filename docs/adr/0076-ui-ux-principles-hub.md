@@ -7,8 +7,20 @@
 
 **Канон текста** ниже — файлы в [`snippets/ui/`](snippets/ui/README.md); правки формулировок делаются там, этот ADR задаёт структуру и статус **Proposed/Accepted** для «центра» UX.
 
-**Связь:** [0021](0021-pfd-mfd-cockpit-attention-model.md) (кокпит, зоны), [0071](0071-ai-assistance-sovereignty-locality-invisibility.md), [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md), [0075](0075-ui-topic-index-and-mfd-page-conventions.md) (указатель `UI/`). Расширенная карта ссылок — [UI/principles.md](UI/principles.md).
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0021](0021-pfd-mfd-cockpit-attention-model.md) | кокпит, зоны |
+| [0071](0071-ai-assistance-sovereignty-locality-invisibility.md) | Принципы интеграции AI/ассистента в IDE — суверенитет, локальность, невидимость |
+| [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md) | Аккордный слой (FMS-style), S/T и overlay — расширение keyboard-first (ADR 0013) |
+| [0075](0075-ui-topic-index-and-mfd-page-conventions.md) | указатель `UI/` |
+
+### Вне ADR
+
+| Документ | Роль |
+|----------|------|
+| [UI/principles.md](UI/principles.md) | UI/principles |
 **Сборка:** в GitHub сырые `{{ INCLUDE }}` не раскрываются — для чтения «как книга»: `dotnet script build-adr.csx` (развёрнутый `0076` попадёт в общую книгу) или точечно собери HTML из корня `docs/adr` после включения 0076 в свой `adr-book.md`.
 
 ---

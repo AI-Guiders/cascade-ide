@@ -4,8 +4,16 @@
 **Дата:** 2026-05-10  
 **Зафиксированные параметры (2026-05-10):** формат **`executeIdeCommand(string json)`**, PoC-allowlist на чтение, режимы Read / Write-confirm, модель WebView2 ниже страницы (см. §2) — согласованы для первой интеграции в **CascadeIDE**. *Побочный шум:* персона **Atlas** иногда даёт «звучные» рабочие имена в обсуждении — это риторика, не отдельные сущности в архиве репозитория, если явно не заведены как продукт.
 
-**Связь:** [0035](0035-mfd-embedded-webview-external-llm-and-mcp-boundary.md) (базовая граница «веб ≠ автоматический MCP»; **этот ADR** задаёт *явный, согласованный* канал поверх неё), [0093](0093-mfd-embedded-browser-for-launch-url.md) (MFD / браузер / launch URL), [0008](0008-mcp-contracts-and-testable-infrastructure.md) (`IdeCommands`, MCP, исполняемый контур IDE), [0038](0038-agent-facade-ai-provider-and-tool-orchestration.md) (фасад провайдеров и оркестрация тулов), [0016](0016-agent-client-protocol-external-agent.md) (внешние агенты; ортогонально), [0048](0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) (поверхность тулов / паритет).
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0035](0035-mfd-embedded-webview-external-llm-and-mcp-boundary.md) | базовая граница «веб ≠ автоматический MCP»; **этот ADR** задаёт *явный, согласованный* канал поверх неё |
+| [0093](0093-mfd-embedded-browser-for-launch-url.md) | MFD / браузер / launch URL |
+| [0008](0008-mcp-contracts-and-testable-infrastructure.md) | `IdeCommands`, MCP, исполняемый контур IDE |
+| [0038](0038-agent-facade-ai-provider-and-tool-orchestration.md) | фасад провайдеров и оркестрация тулов |
+| [0016](0016-agent-client-protocol-external-agent.md) | внешние агенты; ортогонально |
+| [0048](0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) | поверхность тулов / паритет |
 ---
 
 ## 1. Контекст

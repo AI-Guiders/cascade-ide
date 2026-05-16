@@ -2,9 +2,15 @@
 
 **Статус:** Proposed  
 **Дата:** 2026-04-24  
-**Связь:** расширяет [0090](0090-launch-profiles-and-debug-startup-configurations.md) (семантика `launchBrowser` и URL из Kestrel / `ASPNETCORE_URLS`); [0002](0002-debug-human-agent-parity.md) (один смысл запуска — разные *поверхности* просмотра, без второго «типа» отладки); [0075](0075-ui-topic-index-and-mfd-page-conventions.md) (страницы MFD / слоты); [0021](0021-pfd-mfd-cockpit-attention-model.md) (кокпит: стек, лог, гипотезы + контент сессии рядом). Рядом по отладочной плотности: [0091](0091-pfd-debug-situational-deck-hypothesis.md) (PFD vs Mfd).
+## Связанные ADR
 
-<a id="adr0093-context"></a>
+| ADR | Роль |
+|-----|------|
+| [0090](0090-launch-profiles-and-debug-startup-configurations.md) | семантика `launchBrowser` и URL из Kestrel / `ASPNETCORE_URLS` |
+| [0002](0002-debug-human-agent-parity.md) | один смысл запуска — разные *поверхности* просмотра, без второго «типа» отладки |
+| [0075](0075-ui-topic-index-and-mfd-page-conventions.md) | страницы MFD / слоты |
+| [0021](0021-pfd-mfd-cockpit-attention-model.md) | кокпит: стек, лог, гипотезы + контент сессии рядом |
+| [0091](0091-pfd-debug-situational-deck-hypothesis.md) | PFD vs Mfd |
 
 ## Контекст
 

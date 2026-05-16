@@ -2,9 +2,21 @@
 
 **Статус:** Accepted · Implemented  
 **Дата:** 2026-04-23  
-**Связь:** [0002](0002-debug-human-agent-parity.md) (единый слой отладки для человека и агента), [MCP-PROTOCOL.md](../MCP-PROTOCOL.md) (`debug_launch` и родственные тулы), текущее хранилище `StartupProjectStore` / `startup-project.json`, резолвер [MsBuildDebugTargetResolver.cs](../../Services/MsBuildDebugTargetResolver.cs), политика конфигурации TOML-first в [0028](0028-user-settings-toml-localappdata-and-secrets.md) / [0029](0029-configuration-toml-canonical-ui-facade.md). **Расширение (опц. встроенный просмотр URL на MFD):** [0093](0093-mfd-embedded-browser-for-launch-url.md).
+## Связанные ADR
 
-<a id="adr0090-context"></a>
+| ADR | Роль |
+|-----|------|
+| [0002](0002-debug-human-agent-parity.md) | единый слой отладки для человека и агента |
+| [0028](0028-user-settings-toml-localappdata-and-secrets.md) | Пользовательские настройки — `settings.toml`, каталог `%LocalAppData%\CascadeIDE\`, секреты отдельно |
+| [0029](0029-configuration-toml-canonical-ui-facade.md) | Конфигурация — **TOML-first** (канон на диске); **целостный** UI настроек — **deferred**; точечный UI — **фасад канона**, не вторая правда |
+| [0093](0093-mfd-embedded-browser-for-launch-url.md) | Встроенный просмотр URL запуска на MFD (расширение к профилям и launchBrowser) |
+
+### Вне ADR
+
+| Документ | Роль |
+|----------|------|
+| [MCP-PROTOCOL.md](../MCP-PROTOCOL.md) | `debug_launch` и родственные тулы |
+| [MsBuildDebugTargetResolver.cs](../../Services/MsBuildDebugTargetResolver.cs) | MsBuildDebugTargetResolver.cs |
 
 ## Контекст
 

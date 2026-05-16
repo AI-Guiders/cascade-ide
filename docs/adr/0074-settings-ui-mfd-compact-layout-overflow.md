@@ -3,8 +3,22 @@
 **Статус:** Proposed  
 **Дата:** 2026-04-19  
 
-**Связь:** [0029](0029-configuration-toml-canonical-ui-facade.md) (канон TOML; целостный центр настроек **deferred**; точечный UI = фасад канона), [0028](0028-user-settings-toml-localappdata-and-secrets.md) (`settings.toml`), [0021](0021-pfd-mfd-cockpit-attention-model.md) (якоря PFD / Forward / MFD), [0046](0046-presentation-layout-authority-and-cockpit-invariants.md) (`presentation`, инварианты раскладки), [0017](0017-multi-window-workspace-and-agent-surfaces.md) (мультиоконность, `display.screens`), [0069](0069-markdown-preview-tool-surface-and-renderer-decoupling.md) (пример **MFD-first** tool surface). Реализация сегодня: `MfdShellPage` ([`Models/MfdShellPage.cs`](../../Models/MfdShellPage.cs)) — `AiChatSettings` в колонке Mfd (`MfdShellView`); отдельное окно настроек через `RequestOpenSettings` / `ShowSettingsWindow` в code-behind главного окна.
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0029](0029-configuration-toml-canonical-ui-facade.md) | канон TOML; целостный центр настроек **deferred**; точечный UI = фасад канона |
+| [0028](0028-user-settings-toml-localappdata-and-secrets.md) | `settings.toml` |
+| [0021](0021-pfd-mfd-cockpit-attention-model.md) | якоря PFD / Forward / MFD |
+| [0046](0046-presentation-layout-authority-and-cockpit-invariants.md) | `presentation`, инварианты раскладки |
+| [0017](0017-multi-window-workspace-and-agent-surfaces.md) | мультиоконность, `display.screens` |
+| [0069](0069-markdown-preview-tool-surface-and-renderer-decoupling.md) | пример **MFD-first** tool surface |
+
+### Вне ADR
+
+| Документ | Роль |
+|----------|------|
+| [`Models/MfdShellPage.cs`](../../Models/MfdShellPage.cs) | `Models/MfdShellPage.cs` |
 ---
 
 ## Контекст

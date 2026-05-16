@@ -3,8 +3,21 @@
 **Статус:** Proposed  
 **Дата:** 2026-04-20  
 
-**Связь:** [0048](0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) (чат Cursor ACP, `mcpServers`, авто-подмешивание IDE MCP), [0016](0016-agent-client-protocol-external-agent.md) (ACP, stdio, границы с MCP), [0008](0008-mcp-contracts-and-testable-infrastructure.md) (MCP IDE как контур), [0038](0038-agent-facade-ai-provider-and-tool-orchestration.md) (фасад агента), [0043](0043-mcp-transport-recovery-human-agent-parity.md) (транспорт MCP; ортогонально ACP, но полезно при сбоях). Код сегодня: `CascadeAcpMcpServerCatalog.TryCreateAutoIdeMcpStdioServer`, `CursorAcpChatConnection` → `NewSessionRequest.McpServers`. Схема ACP: `AgentClientProtocol` — `StdioMcpServer` / `HttpMcpServer` / `SseMcpServer` ([`externals/acp-csharp/.../McpServer.cs`](../../externals/acp-csharp/src/AgentClientProtocol/Schema/McpServer.cs)).
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0048](0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) | чат Cursor ACP, `mcpServers`, авто-подмешивание IDE MCP |
+| [0016](0016-agent-client-protocol-external-agent.md) | ACP, stdio, границы с MCP |
+| [0008](0008-mcp-contracts-and-testable-infrastructure.md) | MCP IDE как контур |
+| [0038](0038-agent-facade-ai-provider-and-tool-orchestration.md) | фасад агента |
+| [0043](0043-mcp-transport-recovery-human-agent-parity.md) | транспорт MCP; ортогонально ACP, но полезно при сбоях |
+
+### Вне ADR
+
+| Документ | Роль |
+|----------|------|
+| [`externals/acp-csharp/.../McpServer.cs`](../../externals/acp-csharp/src/AgentClientProtocol/Schema/McpServer.cs) | `externals/acp-csharp/.../McpServer.cs` |
 ---
 
 ## Контекст

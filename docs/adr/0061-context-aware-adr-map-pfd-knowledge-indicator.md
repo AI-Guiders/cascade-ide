@@ -3,8 +3,15 @@
 **Статус:** Proposed (реализация отложена)  
 **Дата:** 2026-04-17  
 
-**Связь:** [0021](0021-pfd-mfd-cockpit-attention-model.md) (PFD как зона внимания), [0039](0039-workspace-navigation-affordances.md) (навигация, semantic map), [0053](0053-semantic-map-control-flow-pfd.md) (карта и курсор в методе), [0028](0028-user-settings-toml-localappdata-and-secrets.md) / `workspace.toml` как канон workspace, [0050](0050-declarative-instrument-zone-placement-toml.md) (декларативные карты в TOML).
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0021](0021-pfd-mfd-cockpit-attention-model.md) | PFD как зона внимания |
+| [0039](0039-workspace-navigation-affordances.md) | навигация, semantic map |
+| [0053](0053-semantic-map-control-flow-pfd.md) | карта и курсор в методе |
+| [0028](0028-user-settings-toml-localappdata-and-secrets.md) | Пользовательские настройки — `settings.toml`, каталог `%LocalAppData%\CascadeIDE\`, секреты отдельно |
+| [0050](0050-declarative-instrument-zone-placement-toml.md) | декларативные карты в TOML |
 ---
 
 ## Контекст

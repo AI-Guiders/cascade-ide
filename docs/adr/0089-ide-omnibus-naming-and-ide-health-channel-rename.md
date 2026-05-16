@@ -3,8 +3,20 @@
 **Статус:** Accepted  
 **Дата:** 2026-04-23  
 
-**Связь:** [0002](0002-debug-human-agent-parity.md) (паритет отладки — **отдельное** решение; этот ADR **не** меняет семантику DAP/snapshot, только имена и границы терминов), [0036](0036-cds-channel-compositor-surface-pipeline.md) (канал → CDS → композитор → surface; **конвейер** тот же), [MCP-PROTOCOL.md](../MCP-PROTOCOL.md), [0008](0008-mcp-contracts-and-testable-infrastructure.md) (контракты, тесты), [0052](0052-agent-contract-cli-and-snapshot-tests.md) (снапшоты контракта агента).
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0002](0002-debug-human-agent-parity.md) | паритет отладки — **отдельное** решение; этот ADR **не** меняет семантику DAP/snapshot, только имена и границы терминов |
+| [0036](0036-cds-channel-compositor-surface-pipeline.md) | канал → CDS → композитор → surface; **конвейер** тот же |
+| [0008](0008-mcp-contracts-and-testable-infrastructure.md) | контракты, тесты |
+| [0052](0052-agent-contract-cli-and-snapshot-tests.md) | снапшоты контракта агента |
+
+### Вне ADR
+
+| Документ | Роль |
+|----------|------|
+| [MCP-PROTOCOL.md](../MCP-PROTOCOL.md) | MCP PROTOCOL |
 **Резюме:** снять путаницу между **workspace = каталог/репо** и **снимок состояния IDE** для агента; снять путаницу между **Workspace Health** (полоса наблюдаемости) и «workspace на диске». Решение: **переименовать** MCP-омнибус `get_workspace_state` → **`get_ide_state`**; **переименовать** продуктово и в коде канал **Workspace Health** → **IDE Health** (конкретные идентификаторы — по соглашению репо, напр. `IdeHealth*`).
 
 ---

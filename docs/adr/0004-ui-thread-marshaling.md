@@ -2,7 +2,18 @@
 
 **Статус:** Accepted (план внедрения — strangler)  
 **Дата:** 2026-04-02 (ретроспектива)  
-**Связь:** фаза 5 в [architecture-migration.md](../architecture-migration.md); слабая связность и батчинг — [ADR 0007](0007-signals-coupling-and-ui-backpressure.md); навигатор — [architecture-policy.md](../architecture-policy.md).
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0007](0007-signals-coupling-and-ui-backpressure.md) | Сигналы, слабая связность и снятие нагрузки с UI |
+
+### Вне ADR
+
+| Документ | Роль |
+|----------|------|
+| [architecture-migration.md](../architecture-migration.md) | architecture migration |
+| [architecture-policy.md](../architecture-policy.md) | architecture policy |
 
 ## Контекст
 

@@ -2,7 +2,15 @@
 
 **Статус:** Proposed (намерение и инварианты доверия; детали WebView и UX — по дорожной карте).  
 **Дата:** 2026-04-11  
-**Связь:** [0021](0021-pfd-mfd-cockpit-attention-model.md) (MFD как вторичный якорь; встроенный браузер в роли «навигационного» слоя), [0016](0016-agent-client-protocol-external-agent.md) (внешний агент / мосты к другим средам), [0008](0008-mcp-contracts-and-testable-infrastructure.md) (MCP в IDE — контракт и границы процесса), [0017](0017-multi-window-workspace-and-agent-surfaces.md) (мультиоконность, `MfdHostWindow` / вторичные поверхности), [0020](0020-agent-reasoning-visibility-and-provider-limits.md) (слои видимости рассуждения агента; честные ограничения провайдеров).
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0021](0021-pfd-mfd-cockpit-attention-model.md) | MFD как вторичный якорь; встроенный браузер в роли «навигационного» слоя |
+| [0016](0016-agent-client-protocol-external-agent.md) | внешний агент / мосты к другим средам |
+| [0008](0008-mcp-contracts-and-testable-infrastructure.md) | MCP в IDE — контракт и границы процесса |
+| [0017](0017-multi-window-workspace-and-agent-surfaces.md) | мультиоконность, `MfdHostWindow` / вторичные поверхности |
+| [0020](0020-agent-reasoning-visibility-and-provider-limits.md) | слои видимости рассуждения агента; честные ограничения провайдеров |
 
 ## Контекст
 

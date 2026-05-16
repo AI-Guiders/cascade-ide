@@ -3,8 +3,22 @@
 **Статус:** Proposed  
 **Дата:** 2026-04-19  
 
-**Связь:** [0013](0013-command-surface-and-discoverability.md) (палитра, discoverability), [0008](0008-mcp-contracts-and-testable-infrastructure.md) (MCP, паритет), [0020](0020-agent-reasoning-visibility-and-provider-limits.md) (видимость рассуждения агента), [0028](0028-user-settings-toml-localappdata-and-secrets.md) (настройки и секреты), [0038](0038-agent-facade-ai-provider-and-tool-orchestration.md) (фасад провайдеров), [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md) (аккорды; §10 — философия UX). **Развёрнутый нарратив (не ADR):** [cascadeide-philosophy-v1.md](../design/cascadeide-philosophy-v1.md).
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0013](0013-command-surface-and-discoverability.md) | палитра, discoverability |
+| [0008](0008-mcp-contracts-and-testable-infrastructure.md) | MCP, паритет |
+| [0020](0020-agent-reasoning-visibility-and-provider-limits.md) | видимость рассуждения агента |
+| [0028](0028-user-settings-toml-localappdata-and-secrets.md) | настройки и секреты |
+| [0038](0038-agent-facade-ai-provider-and-tool-orchestration.md) | фасад провайдеров |
+| [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md) | аккорды; §10 — философия UX |
+
+### Вне ADR
+
+| Документ | Роль |
+|----------|------|
+| [cascadeide-philosophy-v1.md](../design/cascadeide-philosophy-v1.md) | cascadeide philosophy v1 |
 ---
 
 ## Контекст

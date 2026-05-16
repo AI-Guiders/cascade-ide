@@ -3,8 +3,16 @@
 **Статус:** Accepted  
 **Дата:** 2026-04-20  
 
-**Связь:** [0036](0036-cds-channel-compositor-surface-pipeline.md) (CDS: кабина, канал → CDS → композитор → поверхность), [0066](0066-cockpit-ui-vs-ide-presentation-layer.md) (Cockpit UI vs presentation IDE: хром и оверлеи), [0070](0070-command-palette-direct-overlay-surface.md) (Command Palette как прямой overlay в активном `TopLevel`), [0057](0057-chat-surface-pipeline-adoption.md) (чат: композитор снимка поверхности; аналогия по слою «композиция»), [0013](0013-command-surface-and-discoverability.md) (палитра и discoverability). **Графовые приборы кабины** (Semantic Map и др.) — **[0115](0115-cds-graph-backed-shared-layer.md)** (CDS), не IDS.
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0036](0036-cds-channel-compositor-surface-pipeline.md) | CDS: кабина, канал → CDS → композитор → поверхность |
+| [0066](0066-cockpit-ui-vs-ide-presentation-layer.md) | Cockpit UI vs presentation IDE: хром и оверлеи |
+| [0070](0070-command-palette-direct-overlay-surface.md) | Command Palette как прямой overlay в активном `TopLevel` |
+| [0057](0057-chat-surface-pipeline-adoption.md) | чат: композитор снимка поверхности; аналогия по слою «композиция» |
+| [0013](0013-command-surface-and-discoverability.md) | палитра и discoverability |
+| [0115](0115-cds-graph-backed-shared-layer.md) | CDS — общий слой graph-backed приборов (реализация в кабине, не IDS) |
 ---
 
 ## Контекст

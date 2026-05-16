@@ -3,8 +3,23 @@
 **Статус:** Accepted  
 **Дата:** 2026-04-08  
 **Обновлено:** 2026-04-08 — Accepted; уточнён минимум discoverability (дока + примеры + ADR, ссылка на чертёж онбординга); добавлены **триггеры** вывода задач оси B из отложенного бэклога.  
-**Связь:** [0024](0024-ide-sdk-and-stable-contracts.md) (контракты и дисциплина границ без обещания SemVer «завтра»), [0005](0005-defer-dynamic-plugins-mef.md) (отложенный plugin-host), [0013](0013-command-surface-and-discoverability.md) (discoverability — отдельная ось от скорости ядра), [0010](0010-ui-modes-toml-configuration.md) (TOML как честный слой конфигурации), [0028](0028-user-settings-toml-localappdata-and-secrets.md) (канон пути и формата пользовательского `settings.toml` и секретов), [0029](0029-configuration-toml-canonical-ui-facade.md) (TOML-first; целостный центр настроек deferred; точечный UI — фасад канона), [README](README.md) (политика: крупные смены направления — отдельным коммитом + ADR), [onboarding-first-run-v1](../design/onboarding-first-run-v1.md) (живой чертёж first-run/онбординга — **не** обязательный объём для «открытия репо» по этому ADR; ориентир, когда осознанно углублять UI).
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0024](0024-ide-sdk-and-stable-contracts.md) | контракты и дисциплина границ без обещания SemVer «завтра» |
+| [0005](0005-defer-dynamic-plugins-mef.md) | отложенный plugin-host |
+| [0013](0013-command-surface-and-discoverability.md) | discoverability — отдельная ось от скорости ядра |
+| [0010](0010-ui-modes-toml-configuration.md) | TOML как честный слой конфигурации |
+| [0028](0028-user-settings-toml-localappdata-and-secrets.md) | канон пути и формата пользовательского `settings.toml` и секретов |
+| [0029](0029-configuration-toml-canonical-ui-facade.md) | TOML-first; целостный центр настроек deferred; точечный UI — фасад канона |
+
+### Вне ADR
+
+| Документ | Роль |
+|----------|------|
+| [README](README.md) | политика: крупные смены направления — отдельным коммитом + ADR |
+| [onboarding-first-run-v1](../design/onboarding-first-run-v1.md) | живой чертёж first-run/онбординга — **не** обязательный объём для «открытия репо» по этому ADR; ориентир, когда осознанно углублять UI |
 ---
 
 ## Контекст

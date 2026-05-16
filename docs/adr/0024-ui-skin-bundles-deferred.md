@@ -2,8 +2,12 @@
 
 **Статус:** Deferred (идея зафиксирована; контракт, загрузка и поддержка — при отдельной продуктовой инициативе)  
 **Дата:** 2026-04-11  
-**Связь:** [0021](0021-pfd-mfd-cockpit-attention-model.md) (модель внимания, Dark Cockpit, пресеты зон), [0010](0010-ui-modes-toml-configuration.md) (режимы UI и TOML), каталог тем в `Themes/`.
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0021](0021-pfd-mfd-cockpit-attention-model.md) | модель внимания, Dark Cockpit, пресеты зон |
+| [0010](0010-ui-modes-toml-configuration.md) | режимы UI и TOML |
 ---
 
 ## Контекст

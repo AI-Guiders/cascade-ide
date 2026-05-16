@@ -2,9 +2,23 @@
 
 **Статус:** Accepted (направление; состав команд и итерации UI — отдельно)  
 **Дата:** 2026-04-02  
-**Связь:** [0012-floating-workspace-chrome.md](0012-floating-workspace-chrome.md) (см. [раздел «Разделение с 0012»](#scope-split-0012) ниже), [0014-situational-checklists.md](0014-situational-checklists.md) (ситуационные чеклисты — отдельный ADR), [0010-ui-modes-toml-configuration.md](0010-ui-modes-toml-configuration.md) (режимы и видимость), [0008-mcp-contracts-and-testable-infrastructure.md](0008-mcp-contracts-and-testable-infrastructure.md) (команды и MCP), [0002-debug-human-agent-parity.md](0002-debug-human-agent-parity.md) (один слой для человека и агента, если команды общие), [0030-command-ids-hotkeys-and-ui-registry-layers.md](0030-command-ids-hotkeys-and-ui-registry-layers.md) — слои реестра команд и хоткеев (**Implemented** в коде: `IdeCommandRegistry*.cs`), [north-star — keyboard-first](../design/north-star-cursor-mcp-cascade-workbench-v1.md) (продуктовый принцип: палитра и хоткеи — опорные пути), [0060-keyboard-chord-stack-fms-tactical-strategic.md](0060-keyboard-chord-stack-fms-tactical-strategic.md) (аккордный слой FMS-style, S/T, overlay — **расширение** keyboard-first, не замена палитры).
+## Связанные ADR
 
-<a id="scope-split-0012"></a>
+| ADR | Роль |
+|-----|------|
+| [0012](0012-floating-workspace-chrome.md) | см. [раздел «Разделение с 0012»](#scope-split-0012 |
+| [0014](0014-situational-checklists.md) | ситуационные чеклисты — отдельный ADR |
+| [0010](0010-ui-modes-toml-configuration.md) | режимы и видимость |
+| [0008](0008-mcp-contracts-and-testable-infrastructure.md) | команды и MCP |
+| [0002](0002-debug-human-agent-parity.md) | один слой для человека и агента, если команды общие |
+| [0030](0030-command-ids-hotkeys-and-ui-registry-layers.md) | Слои идентификаторов команд, хоткеев и UI (без одной таблицы «всё в одном» пока) |
+| [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md) | аккордный слой FMS-style, S/T, overlay — **расширение** keyboard-first, не замена палитры |
+
+### Вне ADR
+
+| Документ | Роль |
+|----------|------|
+| [north-star — keyboard-first](../design/north-star-cursor-mcp-cascade-workbench-v1.md) | продуктовый принцип: палитра и хоткеи — опорные пути |
 
 ## Разделение с [0012](0012-floating-workspace-chrome.md)
 

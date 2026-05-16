@@ -3,8 +3,22 @@
 **Статус:** Accepted · Implemented (полный продуктовый контур §5, шаги 1–6: `[[melody_root]]` + `[[tail_wire_class]]`, загрузчик, рантайм-каталог, палитра/аккорд, бандл без legacy `[aliases]`/`[[parametric]]`, док `intent-melody-language-v1`; не в scope этого ADR: §3.5 внешняя грамматика `grammar_ref`, §3.6 плагины — до отдельной модели расширений)  
 **Дата:** 2026-05-11  
 
-**Связь:** [0081](0081-parametric-intent-melodies-editor-line-ranges.md) (параметрические хвосты для диапазонов строк редактора), [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md) (Command Melody, CascadeChord, паритет с `c:`), [0108](0108-web-ai-portal-host-object-tools-bridge.md) (веб-портал и параметрическая мелодия `wai:`…), [0030](0030-command-ids-hotkeys-and-ui-registry-layers.md) (`command_id`, слои реестра), [0008](0008-mcp-contracts-and-testable-infrastructure.md) (MCP / исполнение команд), [intent-melody-language-v1.md](../intent-melody-language-v1.md) (IML v1), [`IntentMelody/intent-melody-aliases.toml`](../../IntentMelody/intent-melody-aliases.toml) (реестр alias → `command_id`).
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0081](0081-parametric-intent-melodies-editor-line-ranges.md) | параметрические хвосты для диапазонов строк редактора |
+| [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md) | Command Melody, CascadeChord, паритет с `c:` |
+| [0108](0108-web-ai-portal-host-object-tools-bridge.md) | веб-портал и параметрическая мелодия `wai:`… |
+| [0030](0030-command-ids-hotkeys-and-ui-registry-layers.md) | `command_id`, слои реестра |
+| [0008](0008-mcp-contracts-and-testable-infrastructure.md) | MCP / исполнение команд |
+
+### Вне ADR
+
+| Документ | Роль |
+|----------|------|
+| [intent-melody-language-v1.md](../intent-melody-language-v1.md) | IML v1 |
+| [`IntentMelody/intent-melody-aliases.toml`](../../IntentMelody/intent-melody-aliases.toml) | реестр alias → `command_id` |
 **Про IML:** по сути этот ADR задаёт архитектурный путь к **IML «v2»** не как к отдельному языку с нуля, а как к **естественному надстрою v1**: тот же wire для пользователя (`wai:…`, `els:…`), но **единый декларативный каталог корней** (`[[melody_root]]`), явное **`shape`**, presentation (**`[[tail_wire_class]]`**) и детерминированная сборка args в коде. Нормативную запись вида «IML v2» при желании можно оформить отдельным документом после стабилизации полей; до тех пор источник правды здесь и в обновлениях к [intent-melody-language-v1.md](../intent-melody-language-v1.md).
 
 ---

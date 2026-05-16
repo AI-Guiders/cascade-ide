@@ -4,8 +4,25 @@
 **Дата:** 2026-04-24  
 **Актуализировано:** 2026-04-25 — второй тег: эталон CCU в канале IDE Health (§5), граница `Build` в **CASCOPE019** (см. [0099](0099-ide-databus-typed-events-and-projections.md) и `IdeHealthPipelineAnalyzer`).
 
-**Связь:** [0036](0036-cds-channel-compositor-surface-pipeline.md) (канал → CDS → композитор поверхности → поверхность), [0094](0094-ingestion-bus-afdx-analogy-and-threading-channels.md) (шина **доставки** в UI, аналогия AFDX), [0095](0095-workspace-solution-ide-health-stratification.md) (три **уровня** смысла A/B/C и поле `stratum`), [0102](0102-data-acquisition-layer-boundary-and-contract.md) (явная граница **DAL**: добыча внешних данных отдельно от CCU), [0068](0068-deck-row-payload-and-presentation-projection.md) (полезная нагрузка vs проекция), [0021](0021-pfd-mfd-cockpit-attention-model.md) (зоны внимания; EICAS отдельно от «работы»), [0089](0089-ide-omnibus-naming-and-ide-health-channel-rename.md) (IDE Health как продуктовый канал), чертёж [`workspace-health-implementation-map-v1.md`](../design/workspace-health-implementation-map-v1.md) (фактическая цепочка IDE Health), [0055](0055-skia-instrument-composition-pipeline.md) (другой контур **compute** для Skia-инструментов), [`CascadeIDE.ArchitectureAnalyzers/README.md`](../../CascadeIDE.ArchitectureAnalyzers/README.md) (Roslyn **CASCOPE*** — закрепление границ слоёв на сборке; CCU — см. §4).
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0036](0036-cds-channel-compositor-surface-pipeline.md) | канал → CDS → композитор поверхности → поверхность |
+| [0094](0094-ingestion-bus-afdx-analogy-and-threading-channels.md) | шина **доставки** в UI, аналогия AFDX |
+| [0095](0095-workspace-solution-ide-health-stratification.md) | три **уровня** смысла A/B/C и поле `stratum` |
+| [0102](0102-data-acquisition-layer-boundary-and-contract.md) | явная граница **DAL**: добыча внешних данных отдельно от CCU |
+| [0068](0068-deck-row-payload-and-presentation-projection.md) | полезная нагрузка vs проекция |
+| [0021](0021-pfd-mfd-cockpit-attention-model.md) | зоны внимания; EICAS отдельно от «работы» |
+| [0089](0089-ide-omnibus-naming-and-ide-health-channel-rename.md) | IDE Health как продуктовый канал |
+| [0055](0055-skia-instrument-composition-pipeline.md) | другой контур **compute** для Skia-инструментов |
+
+### Вне ADR
+
+| Документ | Роль |
+|----------|------|
+| [`workspace-health-implementation-map-v1.md`](../design/workspace-health-implementation-map-v1.md) | фактическая цепочка IDE Health |
+| [`CascadeIDE.ArchitectureAnalyzers/README.md`](../../CascadeIDE.ArchitectureAnalyzers/README.md) | Roslyn **CASCOPE*** — закрепление границ слоёв на сборке; CCU — см. §4 |
 ---
 
 <a id="adr0097-analysis"></a>

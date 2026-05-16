@@ -2,8 +2,14 @@
 
 **Статус:** Proposed  
 **Дата:** 2026-04-08  
-**Связь:** [0015](0015-editor-toml-syntax-highlighting.md) (TextMate подсветка как быстрый baseline), [0008](0008-mcp-contracts-and-testable-infrastructure.md) (внешние процессы и тестируемые абстракции), [0021](0021-pfd-mfd-cockpit-attention-model.md) (модель внимания кокпита), [0026](0026-markdown-preview-surfaces-and-placement.md) (**где** монтируется виджет превью Markdown — `workspace.toml`; канон по размещению превью).
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0015](0015-editor-toml-syntax-highlighting.md) | TextMate подсветка как быстрый baseline |
+| [0008](0008-mcp-contracts-and-testable-infrastructure.md) | внешние процессы и тестируемые абстракции |
+| [0021](0021-pfd-mfd-cockpit-attention-model.md) | модель внимания кокпита |
+| [0026](0026-markdown-preview-surfaces-and-placement.md) | **где** монтируется виджет превью Markdown — `workspace.toml`; канон по размещению превью |
 ---
 
 ## Контекст

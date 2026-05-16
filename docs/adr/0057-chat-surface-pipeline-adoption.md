@@ -3,8 +3,15 @@
 **Статус:** Accepted  
 **Дата:** 2026-04-17
 
-**Связь:** [0031](0031-agent-chat-clarification-batches-and-threading.md) (пакеты уточнений, threading), [0044](0044-avalonia-host-skia-agent-chat-surface.md) (ранняя гипотеза host/render split), [0055](0055-skia-instrument-composition-pipeline.md) (общий pipeline), [0056](0056-semantic-map-pipeline-adoption.md) (первый внедрённый consumer), [0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md) (overview/detail layout и keyboard-first intent для тем поверх pipeline).
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0031](0031-agent-chat-clarification-batches-and-threading.md) | пакеты уточнений, threading |
+| [0044](0044-avalonia-host-skia-agent-chat-surface.md) | ранняя гипотеза host/render split |
+| [0055](0055-skia-instrument-composition-pipeline.md) | общий pipeline |
+| [0056](0056-semantic-map-pipeline-adoption.md) | первый внедрённый consumer |
+| [0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md) | overview/detail layout и keyboard-first intent для тем поверх pipeline |
 ---
 
 ## Контекст

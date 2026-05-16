@@ -2,8 +2,15 @@
 
 **Статус:** Accepted (направление; состав сценариев и итерации — отдельно)  
 **Дата:** 2026-04-02  
-**Связь:** [0013-command-surface-and-discoverability.md](0013-command-surface-and-discoverability.md) (палитра и поверхность команд — родительское решение), [0010-ui-modes-toml-configuration.md](0010-ui-modes-toml-configuration.md) (режимы), [0011-debug-situational-awareness.md](0011-debug-situational-awareness.md) (полоска состояния vs чеклист шагов), [0002-debug-human-agent-parity.md](0002-debug-human-agent-parity.md), [0008-mcp-contracts-and-testable-infrastructure.md](0008-mcp-contracts-and-testable-infrastructure.md).
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0013](0013-command-surface-and-discoverability.md) | палитра и поверхность команд — родительское решение |
+| [0010](0010-ui-modes-toml-configuration.md) | режимы |
+| [0011](0011-debug-situational-awareness.md) | полоска состояния vs чеклист шагов |
+| [0002](0002-debug-human-agent-parity.md) | Единый слой состояния отладки для человека и агента |
+| [0008](0008-mcp-contracts-and-testable-infrastructure.md) | Стабильные контракты MCP и тестируемая инфраструктура |
 ## Разделение с [0013](0013-command-surface-and-discoverability.md)
 
 - **[0013](0013-command-surface-and-discoverability.md)** — поверхность команд: палитра, discoverability в целом, минимальный toolbar.

@@ -2,7 +2,17 @@
 
 **Статус:** Accepted (продуктовое направление); **реализация** — по плану релизов  
 **Дата:** 2026-04-02  
-**Связь:** [0001-debug-hypotheses-json-storage.md](0001-debug-hypotheses-json-storage.md), [ux/cascade-ide-ui-layout-v1.md](../ux/cascade-ide-ui-layout-v1.md) (текущие Focus / Balanced / Power).
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0001](0001-debug-hypotheses-json-storage.md) | Хранение гипотез отладки в одном JSON-файле |
+
+### Вне ADR
+
+| Документ | Роль |
+|----------|------|
+| [ux/cascade-ide-ui-layout-v1.md](../ux/cascade-ide-ui-layout-v1.md) | текущие Focus / Balanced / Power |
 
 ## Контекст
 

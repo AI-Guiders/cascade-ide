@@ -2,7 +2,13 @@
 
 **Статус:** Proposed  
 **Дата:** 2026-04-14  
-**Связь:** [0031](0031-agent-chat-clarification-batches-and-threading.md) (модель пакетов уточнений), [0044](0044-avalonia-host-skia-agent-chat-surface.md) (модель первична, UI вторичен), [0043](0043-mcp-transport-recovery-human-agent-parity.md) (транспорт не равен хранению истории).
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0031](0031-agent-chat-clarification-batches-and-threading.md) | модель пакетов уточнений |
+| [0044](0044-avalonia-host-skia-agent-chat-surface.md) | модель первична, UI вторичен |
+| [0043](0043-mcp-transport-recovery-human-agent-parity.md) | транспорт не равен хранению истории |
 
 ## Контекст
 

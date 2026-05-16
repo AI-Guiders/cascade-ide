@@ -2,7 +2,14 @@
 
 **Статус:** Accepted  
 **Дата:** 2026-04-02 (ретроспектива; содержание зафиксировано ранее в [debug-human-agent-parity-v1.md](../debug-human-agent-parity-v1.md))  
-**Связь:** [architecture-policy.md](../architecture-policy.md) (отладка), MCP-команды отладки в [MCP-PROTOCOL.md](../MCP-PROTOCOL.md).
+## Связанные ADR
+
+### Вне ADR
+
+| Документ | Роль |
+|----------|------|
+| [architecture-policy.md](../architecture-policy.md) | отладка |
+| [MCP-PROTOCOL.md](../MCP-PROTOCOL.md) | MCP PROTOCOL |
 
 ## Контекст
 

@@ -2,7 +2,14 @@
 
 **Статус:** Accepted  
 **Дата:** 2026-04-02  
-**Связь:** [architecture-migration.md](../architecture-migration.md), [architecture-policy.md](../architecture-policy.md) (навигатор).
+## Связанные ADR
+
+### Вне ADR
+
+| Документ | Роль |
+|----------|------|
+| [architecture-migration.md](../architecture-migration.md) | architecture migration |
+| [architecture-policy.md](../architecture-policy.md) | навигатор |
 
 ## Контекст
 

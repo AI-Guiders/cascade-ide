@@ -2,8 +2,19 @@
 
 **Статус:** Accepted · Implemented (реестр команд v1 в коде)  
 **Дата:** 2026-04-08  
-**Связь:** [0013](0013-command-surface-and-discoverability.md) (поверхность команд, палитра, `hotkeys.toml`), [0018](0018-ide-commands-canonical-xml-documentation.md) (канон XML для `IdeCommands`), [0028](0028-user-settings-toml-localappdata-and-secrets.md) (путь `%LocalAppData%\CascadeIDE\`, в т.ч. пользовательский `hotkeys.toml`), чертёж [ide-command-registry-v1.md](../design/ide-command-registry-v1.md).
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0013](0013-command-surface-and-discoverability.md) | поверхность команд, палитра, `hotkeys.toml` |
+| [0018](0018-ide-commands-canonical-xml-documentation.md) | канон XML для `IdeCommands` |
+| [0028](0028-user-settings-toml-localappdata-and-secrets.md) | путь `%LocalAppData%\CascadeIDE\`, в т.ч. пользовательский `hotkeys.toml` |
+
+### Вне ADR
+
+| Документ | Роль |
+|----------|------|
+| [ide-command-registry-v1.md](../design/ide-command-registry-v1.md) | ide command registry v1 |
 **Реализация (текущая):** partial **`IdeCommandRegistry*.cs`** (палитра + метаданные глобальных хоткеев окна), **`IdeCommandPaletteCatalog`** (проекция), **`HotkeyTomlLoader`**, **`MainWindowHotkeyService`**, **`Hotkeys/hotkeys.toml`**; тесты согласованности — **`CascadeIDE.Tests/IdeCommandRegistryTests.cs`**. Полный чертёж `IdeCommandUiMeta` из чертежа — по-прежнему отдельные итерации (§6 ниже).
 
 ---

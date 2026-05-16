@@ -3,8 +3,15 @@
 **Статус:** Superseded by [0069](0069-markdown-preview-tool-surface-and-renderer-decoupling.md)  
 **Дата:** 2026-04-08  
 **Обновлено:** 2026-04-11 — подраздел **«Внутренние отсылки»** (hover/peek по «см. п. N» и якорям); ортогонально [0023](0023-markdown-diagrams-language-tooling.md). 2026-04-08 — подраздел «Глубина превью»: целевая планка v1, non-goals, приоритет export из [0023](0023-markdown-diagrams-language-tooling.md).  
-**Связь:** [0010](0010-ui-modes-toml-configuration.md) (`workspace.toml`, merge бандла `UiModes/` и overlay репозитория `.cascade/workspace.toml`), [0021](0021-pfd-mfd-cockpit-attention-model.md) (превью как вторичная поверхность относительно лобового редактирования), [0017](0017-multi-window-workspace-and-agent-surfaces.md) (отдельное окно как второй `TopLevel`), [0022](0022-mfd-visual-design-surface-axaml-blazor.md) (перспектива вкладки/региона на MFD), [0023](0023-markdown-diagrams-language-tooling.md) (LSP, диаграммы, Kroki, export — **ортогонально** размещению виджета превью).
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0010](0010-ui-modes-toml-configuration.md) | `workspace.toml`, merge бандла `UiModes/` и overlay репозитория `.cascade/workspace.toml` |
+| [0021](0021-pfd-mfd-cockpit-attention-model.md) | превью как вторичная поверхность относительно лобового редактирования |
+| [0017](0017-multi-window-workspace-and-agent-surfaces.md) | отдельное окно как второй `TopLevel` |
+| [0022](0022-mfd-visual-design-surface-axaml-blazor.md) | перспектива вкладки/региона на MFD |
+| [0023](0023-markdown-diagrams-language-tooling.md) | LSP, диаграммы, Kroki, export — **ортогонально** размещению виджета превью |
 ---
 
 ## Замена прежних формулировок
@@ -60,8 +67,11 @@
 
 **Приоритет:** ниже **базового** качества превью и **контракта публикации** ([0023](0023-markdown-diagrams-language-tooling.md), export); может войти в **последующую** итерацию после стабильного рендера и размещения по этому ADR.
 
-**Связь:** ортогонально [0017](0017-multi-window-workspace-and-agent-surfaces.md) (отдельное окно превью — уже вторичный `TopLevel`); оверлей не меняет семантику зон, только снижает трение чтения длинных `.md`.
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0017](0017-multi-window-workspace-and-agent-surfaces.md) | отдельное окно превью — уже вторичный `TopLevel` |
 ---
 
 ## Реализация (ориентир по коду)

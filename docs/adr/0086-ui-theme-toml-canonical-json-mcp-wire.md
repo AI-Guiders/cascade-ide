@@ -2,7 +2,20 @@
 
 **Статус:** Proposed  
 **Дата:** 2026-04-21  
-**Связь:** [0028](0028-user-settings-toml-localappdata-and-secrets.md) (`settings.toml`, путь пользователя), [0029](0029-configuration-toml-canonical-ui-facade.md) (канон на диске, UI как фасад), [0008](0008-mcp-contracts-and-testable-infrastructure.md) (контракты MCP), [MCP-PROTOCOL.md](../MCP-PROTOCOL.md) (`ide_get_ui_theme`, `ide_set_ui_theme` — JSON), [0079](0079-ide-display-system-ids-overlay-pipeline.md) (оверлеи; ортогонально цветам кистей).
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0028](0028-user-settings-toml-localappdata-and-secrets.md) | `settings.toml`, путь пользователя |
+| [0029](0029-configuration-toml-canonical-ui-facade.md) | канон на диске, UI как фасад |
+| [0008](0008-mcp-contracts-and-testable-infrastructure.md) | контракты MCP |
+| [0079](0079-ide-display-system-ids-overlay-pipeline.md) | оверлеи; ортогонально цветам кистей |
+
+### Вне ADR
+
+| Документ | Роль |
+|----------|------|
+| [MCP-PROTOCOL.md](../MCP-PROTOCOL.md) | `ide_get_ui_theme`, `ide_set_ui_theme` — JSON |
 
 ## Контекст
 

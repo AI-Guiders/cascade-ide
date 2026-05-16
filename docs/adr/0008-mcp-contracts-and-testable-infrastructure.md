@@ -2,7 +2,13 @@
 
 **Статус:** Accepted · Implemented (`IIdeMcpActions`, исполнитель MCP, контракты в MCP-PROTOCOL)  
 **Дата:** 2026-04-02  
-**Связь:** [MCP-PROTOCOL.md](../MCP-PROTOCOL.md), `IIdeMcpActions`.
+## Связанные ADR
+
+### Вне ADR
+
+| Документ | Роль |
+|----------|------|
+| [MCP-PROTOCOL.md](../MCP-PROTOCOL.md) | MCP PROTOCOL |
 
 ## Контекст
 

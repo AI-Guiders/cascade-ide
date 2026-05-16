@@ -3,8 +3,15 @@
 **Статус:** Accepted · Implemented  
 **Дата:** 2026-04-20  
 
-**Связь:** [0028](0028-user-settings-toml-localappdata-and-secrets.md) (путь и секреты), [0038](0038-agent-facade-ai-provider-and-tool-orchestration.md) (фасад провайдеров и инструментов), [0048](0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) (ACP, MCP в сессии), [0016](0016-agent-client-protocol-external-agent.md) (ACP как внешний агент), [0081](0081-parametric-intent-melodies-editor-line-ranges.md) (параметрические Intent Melody `:start:end` для редактора — смежная тема, не часть `ai.mode`). Реализация: `Models/AiSettings.cs` (вложенные секции по этому ADR).
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0028](0028-user-settings-toml-localappdata-and-secrets.md) | путь и секреты |
+| [0038](0038-agent-facade-ai-provider-and-tool-orchestration.md) | фасад провайдеров и инструментов |
+| [0048](0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) | ACP, MCP в сессии |
+| [0016](0016-agent-client-protocol-external-agent.md) | ACP как внешний агент |
+| [0081](0081-parametric-intent-melodies-editor-line-ranges.md) | параметрические Intent Melody `:start:end` для редактора — смежная тема, не часть `ai.mode` |
 ---
 
 <a id="adr0083-context"></a>

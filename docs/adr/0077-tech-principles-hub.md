@@ -7,8 +7,19 @@
 
 **Канон текста** ниже — файлы в [`snippets/tech/`](snippets/tech/README.md); правки формулировок делаются там, этот ADR задаёт структуру и статус **Proposed/Accepted** для «центра» TECH.
 
-**Связь:** [0006](0006-presentation-layers-and-feature-slices.md) (слои и срезы), [0008](0008-mcp-contracts-and-testable-infrastructure.md), [TECH/README.md](TECH/README.md) (указатель `TECH/`). Расширенная карта ссылок — [TECH/principles.md](TECH/principles.md).
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0006](0006-presentation-layers-and-feature-slices.md) | слои и срезы |
+| [0008](0008-mcp-contracts-and-testable-infrastructure.md) | Стабильные контракты MCP и тестируемая инфраструктура |
+
+### Вне ADR
+
+| Документ | Роль |
+|----------|------|
+| [TECH/README.md](TECH/README.md) | указатель `TECH/` |
+| [TECH/principles.md](TECH/principles.md) | TECH/principles |
 **Сборка:** в GitHub сырые `{{ INCLUDE }}` не раскрываются — для чтения «как книга»: `dotnet script build-adr.csx` (развёрнутый `0077` попадёт в общую книгу) или точечно собери HTML из корня `docs/adr` после включения 0077 в свой `adr-book.md`.
 
 ---

@@ -4,8 +4,27 @@
 **Дата:** 2026-04-24  
 **Обновлено:** 2026-04-25 — ссылки на TOML: ключи **IDE Health** в `UiModes` — **`ide_health_*`** ([0010](0010-ui-modes-toml-configuration.md)); формулировки про миграцию `workspace_health_*` приведены в соответствие с репозиторием.
 
-**Связь:** [0089](0089-ide-omnibus-naming-and-ide-health-channel-rename.md) (продуктовое имя **IDE Health** и типы `IdeHealth*`; **не** снимает смешение сигналов по смыслу), [0097](0097-cockpit-compute-units-transport-to-channel-dto.md) (**CCU / вычислительный блок**: где живёт свёртка входов в DTO при сохранении `stratum`), [0102](0102-data-acquisition-layer-boundary-and-contract.md) (**DAL**: где добываются внешние данные до CCU), [0021](0021-pfd-mfd-cockpit-attention-model.md) (канал vs слот презентации; глоссарий), [0036](0036-cds-channel-compositor-surface-pipeline.md) (канал → CDS → композитор → поверхность), [0023](0023-environment-readiness-glance.md) и чертёж [`environment-readiness-glance-v1.md`](../design/environment-readiness-glance-v1.md) (канал **готовности окружения** — уже ближе к уровню IDE), [0022-workspace-health-lexicon.md](0022-workspace-health-lexicon.md) (лексикон и эволюция имён), [`workspace-health-implementation-map-v1.md`](../design/workspace-health-implementation-map-v1.md) (текущая карта полосы IDE Health), [0019](0019-shared-git-core-ide-and-git-mcp.md) (Git как сквозной контур), [0062](0062-git-submodules-semantic-map-subgraph.md) (GitMap — файловая/git-геометрия отдельно от кода решения), [0052](0052-agent-contract-cli-and-snapshot-tests.md) (снапшоты MCP — при сплите уровней потребуются явные секции или версия схемы).
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0089](0089-ide-omnibus-naming-and-ide-health-channel-rename.md) | продуктовое имя **IDE Health** и типы `IdeHealth*`; **не** снимает смешение сигналов по смыслу |
+| [0097](0097-cockpit-compute-units-transport-to-channel-dto.md) | **CCU / вычислительный блок**: где живёт свёртка входов в DTO при сохранении `stratum` |
+| [0102](0102-data-acquisition-layer-boundary-and-contract.md) | **DAL**: где добываются внешние данные до CCU |
+| [0021](0021-pfd-mfd-cockpit-attention-model.md) | канал vs слот презентации; глоссарий |
+| [0036](0036-cds-channel-compositor-surface-pipeline.md) | канал → CDS → композитор → поверхность |
+| [0023](0023-environment-readiness-glance.md) | Канал «готовность окружения» (glance) — отдельно от IDE Health |
+| [0022](0022-workspace-health-lexicon.md) | лексикон и эволюция имён |
+| [0019](0019-shared-git-core-ide-and-git-mcp.md) | Git как сквозной контур |
+| [0062](0062-git-submodules-semantic-map-subgraph.md) | GitMap — файловая/git-геометрия отдельно от кода решения |
+| [0052](0052-agent-contract-cli-and-snapshot-tests.md) | снапшоты MCP — при сплите уровней потребуются явные секции или версия схемы |
+
+### Вне ADR
+
+| Документ | Роль |
+|----------|------|
+| [`environment-readiness-glance-v1.md`](../design/environment-readiness-glance-v1.md) | канал **готовности окружения** — уже ближе к уровню IDE |
+| [`workspace-health-implementation-map-v1.md`](../design/workspace-health-implementation-map-v1.md) | текущая карта полосы IDE Health |
 ---
 
 ## Контекст

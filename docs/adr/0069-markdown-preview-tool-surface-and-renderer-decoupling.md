@@ -2,8 +2,17 @@
 
 **Статус:** Accepted  
 **Дата:** 2026-04-19  
-**Связь:** [0021](0021-pfd-mfd-cockpit-attention-model.md) (PFD vs MFD; длинные тексты и вторичные потоки — в MFD), [0023](0023-markdown-diagrams-language-tooling.md) (Markdown authoring, диаграммы, export expanded), [0026](0026-markdown-preview-surfaces-and-placement.md) (прежний канон размещения; этим ADR **superseded** по архитектуре surface/placement), [0035](0035-mfd-embedded-webview-external-llm-and-mcp-boundary.md) (WebView на MFD как отдельный доверенный/ограниченный слой, не базовый renderer), [0036](0036-cds-channel-compositor-surface-pipeline.md) (канал → surface), [0066](0066-cockpit-ui-vs-ide-presentation-layer.md) (инструмент vs хром IDE), [0068](0068-deck-row-payload-and-presentation-projection.md) (разделение payload / projection / slot).
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0021](0021-pfd-mfd-cockpit-attention-model.md) | PFD vs MFD; длинные тексты и вторичные потоки — в MFD |
+| [0023](0023-markdown-diagrams-language-tooling.md) | Markdown authoring, диаграммы, export expanded |
+| [0026](0026-markdown-preview-surfaces-and-placement.md) | прежний канон размещения; этим ADR **superseded** по архитектуре surface/placement |
+| [0035](0035-mfd-embedded-webview-external-llm-and-mcp-boundary.md) | WebView на MFD как отдельный доверенный/ограниченный слой, не базовый renderer |
+| [0036](0036-cds-channel-compositor-surface-pipeline.md) | канал → surface |
+| [0066](0066-cockpit-ui-vs-ide-presentation-layer.md) | инструмент vs хром IDE |
+| [0068](0068-deck-row-payload-and-presentation-projection.md) | разделение payload / projection / slot |
 ---
 
 ## Контекст

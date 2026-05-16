@@ -3,7 +3,20 @@
 **Статус:** Accepted · Implemented (загрузчик TOML, `UiModeCatalog`, capabilities, bundle `UiModes/`; override и `docs/ux` — по мере нужды)  
 **Дата:** 2026-04-02  
 **Обновлено:** 2026-04-25 — в **`[capabilities]`** ключи контура **IDE Health** в TOML: **`ide_health_*`** (свойства `UiModeCapabilities` — `IdeHealth*`). Ранее: 2026-04-11 — якоря `adr0010-p1`…`p8` в разделе «Решение» и ссылки на [п. 3](#adr0010-p3), [п. 7](#adr0010-p7); соглашение — [README ADR](README.md#adr-anchors-policy). 2026-04-11 — **`presentation`** / **`zone_screen_layout`:** прежде всего **`settings.toml`**, не командный репо — [0017](0017-multi-window-workspace-and-agent-surfaces.md#adr0017-presentation-grammar), [п. 4](0017-multi-window-workspace-and-agent-surfaces.md#adr0017-p4); токены грамматики — секция **`[presentation_grammar]`** (без отдельных **`pfd_zone_alias`** — короткие имена через **`pfd_zone_identifier`** и т.д.); **`screen_markers`** / **`screen_separator`** / **`zone_separator`**, **EBNF** — [0017](0017-multi-window-workspace-and-agent-surfaces.md#adr0017-presentation-ebnf). 2026-04-08 — намерение задать **топологию презентации** зон в TOML после появления альтернатив одному `MainGrid` ([0017](0017-multi-window-workspace-and-agent-surfaces.md)); см. подраздел ниже.  
-**Связь:** [0003-debug-ui-mode-separate-from-power.md](0003-debug-ui-mode-separate-from-power.md), [0006-presentation-layers-and-feature-slices.md](0006-presentation-layers-and-feature-slices.md), [0017](0017-multi-window-workspace-and-agent-surfaces.md) (мультиоконность и топология), [`attention-zone-panel-playbook-v1.md`](../design/attention-zone-panel-playbook-v1.md) (зона ↔ панель ↔ топология), `Features/UiChrome/UiModeLayoutRegistry`, `Services/SettingsService` + Tomlyn, `Features/UiChrome/UiWorkspaceLayoutDimensions` / `Services/UiWorkspaceLayout`. [0022](0022-workspace-health-lexicon.md) — канон имён и эволюция для **IDE Health** (пересечение с таблицей `ide_health_*` ниже).
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0003](0003-debug-ui-mode-separate-from-power.md) | Отдельный UI-режим Debug (не кокпит Power) |
+| [0006](0006-presentation-layers-and-feature-slices.md) | Слои, вертикальные срезы и роль MainWindowViewModel |
+| [0017](0017-multi-window-workspace-and-agent-surfaces.md) | мультиоконность и топология |
+| [0022](0022-workspace-health-lexicon.md) | канон имён и эволюция для **IDE Health** (пересечение с таблицей `ide_health_*` ниже). |
+
+### Вне ADR
+
+| Документ | Роль |
+|----------|------|
+| [`attention-zone-panel-playbook-v1.md`](../design/attention-zone-panel-playbook-v1.md) | зона ↔ панель ↔ топология |
 
 ## Контекст
 

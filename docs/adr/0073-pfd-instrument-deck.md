@@ -3,8 +3,26 @@
 **Статус:** Proposed  
 **Дата:** 2026-04-19  
 
-**Связь:** [0021](0021-pfd-mfd-cockpit-attention-model.md) (модель внимания PFD/MFD), [0037](0037-pfd-surface-invariants-and-roslyn-enforcement.md) (**строгая PFD-поверхность**, `[PfdStrict]` / `PfdStrictControl`; **не** синоним всей географии колонки PFD), [0063](0063-instrument-deck-named-composition-one-anchor.md) (**instrument deck** как именованная композиция в одном якоре; ось **ContentRepresentation**), [0064](0064-deck-primitives-visual-language-render-layer-and-palette.md) (примитивы / палитра отрисовки приборов), [0066](0066-cockpit-ui-vs-ide-presentation-layer.md) (Cockpit UI vs presentation IDE), [0050](0050-declarative-instrument-zone-placement-toml.md) (`[instrument_routing]`, слоты `pfd_primary` / …), [0047](0047-cockpit-instrument-descriptor-and-slot-composition.md) (`Instrument`, `CockpitInstrumentDescriptor`), [0008](0008-mcp-contracts-and-testable-infrastructure.md) (MCP / паритет с командами), [0011](0011-debug-situational-awareness.md) (SA в отладке — родственная ось «осведомлённость»), [0061](0061-context-aware-adr-map-pfd-knowledge-indicator.md) (ADR-карта и индикатор на PFD — **кандидат** в ту же колоду). **Метрики кода:** `get_code_metrics` / `McpCodeMetrics` — сегодня преимущественно MCP; вопрос размещения UI — в [§3](#adr0073-v3).
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0021](0021-pfd-mfd-cockpit-attention-model.md) | модель внимания PFD/MFD |
+| [0037](0037-pfd-surface-invariants-and-roslyn-enforcement.md) | **строгая PFD-поверхность**, `[PfdStrict]` / `PfdStrictControl`; **не** синоним всей географии колонки PFD |
+| [0063](0063-instrument-deck-named-composition-one-anchor.md) | **instrument deck** как именованная композиция в одном якоре; ось **ContentRepresentation** |
+| [0064](0064-deck-primitives-visual-language-render-layer-and-palette.md) | примитивы / палитра отрисовки приборов |
+| [0066](0066-cockpit-ui-vs-ide-presentation-layer.md) | Cockpit UI vs presentation IDE |
+| [0050](0050-declarative-instrument-zone-placement-toml.md) | `[instrument_routing]`, слоты `pfd_primary` / … |
+| [0047](0047-cockpit-instrument-descriptor-and-slot-composition.md) | `Instrument`, `CockpitInstrumentDescriptor` |
+| [0008](0008-mcp-contracts-and-testable-infrastructure.md) | MCP / паритет с командами |
+| [0011](0011-debug-situational-awareness.md) | SA в отладке — родственная ось «осведомлённость» |
+| [0061](0061-context-aware-adr-map-pfd-knowledge-indicator.md) | ADR-карта и индикатор на PFD — **кандидат** в ту же колоду |
+
+### Вне ADR
+
+| Документ | Роль |
+|----------|------|
+| [§3](#adr0073-v3) | §3 |
 **Назначение ADR:** зафиксировать **рабочее место** для перебора вариантов — **какие** инструменты и **в каком режиме** имеют смысл на **PFD** (первичный скан, тактика), не смешивая с **MFD**/палитрой без явного решения. Это **не** дублирует норматив [0063](0063-instrument-deck-named-composition-one-anchor.md) по терминам; здесь — **предметный** список кандидатов и **открытые** развилки.
 
 ---

@@ -2,7 +2,14 @@
 
 **Статус:** Proposed (направление зафиксировано; объём языков и миграция строк — по плану).  
 **Дата:** 2026-04-11  
-**Связь:** [0028](0028-user-settings-toml-localappdata-and-secrets.md) (пользовательский `settings.toml`), [0029](0029-configuration-toml-canonical-ui-facade.md) (канон конфигурации vs UI), [0032](0032-hud-banner-configuration-and-grammar.md) (HUD: шаблоны и ключи — не замена i18n), [0027](0027-small-team-focus-vs-public-maturity.md) (документация и discoverability). Официальные рекомендации Avalonia по локализации: *Localizing using ResX* в документации Avalonia (`Culture`, embedded `.resx`, `{x:Static}` к ресурсам).
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0028](0028-user-settings-toml-localappdata-and-secrets.md) | пользовательский `settings.toml` |
+| [0029](0029-configuration-toml-canonical-ui-facade.md) | канон конфигурации vs UI |
+| [0032](0032-hud-banner-configuration-and-grammar.md) | HUD: шаблоны и ключи — не замена i18n |
+| [0027](0027-small-team-focus-vs-public-maturity.md) | документация и discoverability |
 
 ## Контекст
 

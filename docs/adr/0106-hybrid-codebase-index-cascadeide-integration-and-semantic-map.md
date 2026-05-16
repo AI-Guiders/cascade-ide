@@ -3,9 +3,26 @@
 **Статус:** Accepted · In progress (in-proc оркестратор, UI настроек, MFD HIS)  
 **Дата:** 2026-05-07 (обновлено 2026-05-08)  
 
-**Связь:** базовое решение по ядру и MCP — **[ADR 0105](0105-hybrid-codebase-index-for-csharp-web.md)** (**Accepted · Implemented**; код в репозитории [`hybrid-codebase-index`](https://github.com/KarataevDmitry/hybrid-codebase-index)). Здесь — **контур CascadeIDE**: DAL/CCU/DataBus, UX свежести индекса и подача снимков на graph-backed поверхности.
+## Связанные ADR
 
-**Контекст кабины:** [0102](0102-data-acquisition-layer-boundary-and-contract.md), [0097](0097-cockpit-compute-units-transport-to-channel-dto.md), [0099](0099-ide-databus-typed-events-and-projections.md), [0098](0098-semantic-first-document-as-projection.md); навигация и semantic map — [0039](0039-workspace-navigation-affordances.md), [0053](0053-semantic-map-control-flow-pfd.md), [0056](0056-semantic-map-pipeline-adoption.md), [0067](0067-graph-backed-surfaces-contract.md), [0079](0079-ide-display-system-ids-overlay-pipeline.md).
+| ADR | Роль |
+|-----|------|
+| [0105](0105-hybrid-codebase-index-for-csharp-web.md) | Базовое ядро и MCP; этот ADR — контур CascadeIDE (DAL/CCU/DataBus, свежесть, Semantic Map) |
+| [0102](0102-data-acquisition-layer-boundary-and-contract.md) | Data Acquisition Layer — граница внешних интерфейсов и адаптеров |
+| [0097](0097-cockpit-compute-units-transport-to-channel-dto.md) | Вычислительные блоки кабины (CCU; аналог LRU *Unit*) — слой между транспортом, смыслом и каналом |
+| [0099](0099-ide-databus-typed-events-and-projections.md) | IDE DataBus — типизированные события и проекции состояния |
+| [0098](0098-semantic-first-document-as-projection.md) | Семантика первична; документ и репозиторий — проекции (Semantic-First) |
+| [0039](0039-workspace-navigation-affordances.md) | Навигация по workspace — несколько представлений и «текущий файл + связанные» |
+| [0053](0053-semantic-map-control-flow-pfd.md) | Карта намерений и поток управления на PFD (control flow) |
+| [0056](0056-semantic-map-pipeline-adoption.md) | Semantic Map adoption of Skia composition pipeline |
+| [0067](0067-graph-backed-surfaces-contract.md) | Graph-backed surfaces — общий контракт для семейства графовых экранов |
+| [0079](0079-ide-display-system-ids-overlay-pipeline.md) | IDS (Ide Display System) — пайплайн оверлеев IDE, ортогонально CDS |
+
+### Вне ADR
+
+| Документ | Роль |
+|----------|------|
+| [`hybrid-codebase-index`](https://github.com/KarataevDmitry/hybrid-codebase-index) | Репозиторий ядра и MCP-хоста |
 
 ---
 

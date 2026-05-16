@@ -3,8 +3,13 @@
 **Статус:** Proposed  
 **Дата:** 2026-04-20  
 
-**Связь:** [0019](0019-shared-git-core-ide-and-git-mcp.md) (общий Git Core), [0042](0042-pre-flight-planned-changes-and-review-before-apply.md) (pre-flight как обязательный шаг), [0077](0077-tech-principles-hub.md) (TECH-центр принципов).
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0019](0019-shared-git-core-ide-and-git-mcp.md) | общий Git Core |
+| [0042](0042-pre-flight-planned-changes-and-review-before-apply.md) | pre-flight как обязательный шаг |
+| [0077](0077-tech-principles-hub.md) | TECH-центр принципов |
 ---
 
 ## Контекст

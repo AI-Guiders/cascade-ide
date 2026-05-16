@@ -2,7 +2,11 @@
 
 **Статус:** Accepted  
 **Дата:** 2026-04-02  
-**Связь:** [0003-debug-ui-mode-separate-from-power.md](0003-debug-ui-mode-separate-from-power.md) — вкладка **«Гипотезы»** в нижней панели Debug (не колонка чата).
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0003](0003-debug-ui-mode-separate-from-power.md) | вкладка **«Гипотезы»** в нижней панели Debug (не колонка чата). |
 
 ## Контекст
 

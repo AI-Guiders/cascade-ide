@@ -3,8 +3,23 @@
 **Статус:** Accepted  
 **Дата:** 2026-04-24  
 
-**Связь:** [0036](0036-cds-channel-compositor-surface-pipeline.md) (продуктовый **канал** кабины → CDS → композитор → поверхность), [0097](0097-cockpit-compute-units-transport-to-channel-dto.md) (**CCU / вычислительный блок кабины**: свёртка в DTO/снимок канала — **не** эта шина), [0089](0089-ide-omnibus-naming-and-ide-health-channel-rename.md) (**IDE Health** вместо прежнего *Workspace Health* — термин и типы вроде `IdeHealth*`; **не** этот чат, а зафиксированное в репо решение), [0021](0021-pfd-mfd-cockpit-attention-model.md) (зоны внимания; **EICAS** как продуктовый контур — по дорожной карте), [0068](0068-deck-row-payload-and-presentation-projection.md) (полезная нагрузка строки канала vs проекция), [0007](0007-signals-coupling-and-ui-backpressure.md) (сигналы и нагрузка на UI), [0004](0004-ui-thread-marshaling.md) (маршалинг на UI-поток), [cds-contract-v0.md](../design/cds-contract-v0.md) §3 (слои CDS vs дерево UI).
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0036](0036-cds-channel-compositor-surface-pipeline.md) | продуктовый **канал** кабины → CDS → композитор → поверхность |
+| [0097](0097-cockpit-compute-units-transport-to-channel-dto.md) | **CCU / вычислительный блок кабины**: свёртка в DTO/снимок канала — **не** эта шина |
+| [0089](0089-ide-omnibus-naming-and-ide-health-channel-rename.md) | **IDE Health** вместо прежнего *Workspace Health* — термин и типы вроде `IdeHealth*`; **не** этот чат, а зафиксированное в репо решение |
+| [0021](0021-pfd-mfd-cockpit-attention-model.md) | зоны внимания; **EICAS** как продуктовый контур — по дорожной карте |
+| [0068](0068-deck-row-payload-and-presentation-projection.md) | полезная нагрузка строки канала vs проекция |
+| [0007](0007-signals-coupling-and-ui-backpressure.md) | сигналы и нагрузка на UI |
+| [0004](0004-ui-thread-marshaling.md) | маршалинг на UI-поток |
+
+### Вне ADR
+
+| Документ | Роль |
+|----------|------|
+| [cds-contract-v0.md](../design/cds-contract-v0.md) | cds contract v0 |
 ---
 
 <a id="adr0094-context"></a>

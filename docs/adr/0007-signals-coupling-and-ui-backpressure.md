@@ -2,7 +2,17 @@
 
 **Статус:** Accepted (внедрение — strangler)  
 **Дата:** 2026-04-02  
-**Связь:** [0004-ui-thread-marshaling.md](0004-ui-thread-marshaling.md), [architecture-migration.md](../architecture-migration.md) (фаза 5).
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0004](0004-ui-thread-marshaling.md) | Маршалинг обновлений UI через IUiScheduler |
+
+### Вне ADR
+
+| Документ | Роль |
+|----------|------|
+| [architecture-migration.md](../architecture-migration.md) | фаза 5 |
 
 ## Контекст
 

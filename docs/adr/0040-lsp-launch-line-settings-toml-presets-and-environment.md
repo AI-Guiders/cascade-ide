@@ -2,8 +2,14 @@
 
 **Статус:** Accepted · Implemented (как [§Решение](#решение) ниже)  
 **Дата:** 2026-04-13; обновлено 2026-04-25 — канон TOML: `[languages.csharp]` / `[languages.markdown]` + `mode` + вложенные профили  
-**Связь:** [0028](0028-user-settings-toml-localappdata-and-secrets.md) (где лежит `settings.toml`, snake_case, модель `CascadeIdeSettings`), [0029](0029-configuration-toml-canonical-ui-facade.md) (TOML как канон; UI — фасад), [0023 environment readiness](0023-environment-readiness-glance.md) (краткие подсказки по LSP без дампа `environ`), [0023 markdown tooling](0023-markdown-diagrams-language-tooling.md) (Markdown как first-class; LSP в долгой перспективе). Реализация: `CSharpLspProviderIds` / `MarkdownLspProviderIds` и `*ResolveForRuntime()` из `CSharpLanguageServerSettings` / `MarkdownLanguageServerSettings` (`Models/LanguagesSettings.cs`), хосты `*LspDiagnosticsHost`, строки readiness — `Features/EnvironmentReadiness/Application/EnvironmentReadinessSnapshotBuilder.cs` (DAL-пробы — `Features/EnvironmentReadiness/DataAcquisition/`).
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0028](0028-user-settings-toml-localappdata-and-secrets.md) | где лежит `settings.toml`, snake_case, модель `CascadeIdeSettings` |
+| [0029](0029-configuration-toml-canonical-ui-facade.md) | TOML как канон; UI — фасад |
+| [0023](0023-environment-readiness-glance.md) | краткие подсказки по LSP без дампа `environ` |
+| [0023](0023-markdown-diagrams-language-tooling.md) | Markdown как first-class; LSP в долгой перспективе |
 ---
 
 ## Контекст

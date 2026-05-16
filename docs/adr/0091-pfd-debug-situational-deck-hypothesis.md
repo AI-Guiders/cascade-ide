@@ -3,9 +3,16 @@
 **Статус:** Proposed  
 **Дата:** 2026-04-23
 
-**Связь:** [0002](0002-debug-human-agent-parity.md) (единый снимок отладки), [0011](0011-debug-situational-awareness.md) (ситуационная осведомлённость без «только нижняя панель»), [0021](0021-pfd-mfd-cockpit-attention-model.md) (PFD / MFD и внимание), [0063](0063-instrument-deck-named-composition-one-anchor.md) (Instrument deck, один якорь), [0073](0073-pfd-instrument-deck.md) (каталог вариантов PFD-deck), [0075](0075-ui-topic-index-and-mfd-page-conventions.md) (страницы Mfd), текущая страница отладки на Mfd — `DebugStack` / `MfdShellPage.DebugStack`.
+## Связанные ADR
 
-<a id="adr0091-context"></a>
+| ADR | Роль |
+|-----|------|
+| [0002](0002-debug-human-agent-parity.md) | единый снимок отладки |
+| [0011](0011-debug-situational-awareness.md) | ситуационная осведомлённость без «только нижняя панель» |
+| [0021](0021-pfd-mfd-cockpit-attention-model.md) | PFD / MFD и внимание |
+| [0063](0063-instrument-deck-named-composition-one-anchor.md) | Instrument deck, один якорь |
+| [0073](0073-pfd-instrument-deck.md) | каталог вариантов PFD-deck |
+| [0075](0075-ui-topic-index-and-mfd-page-conventions.md) | страницы Mfd |
 
 ## Контекст
 

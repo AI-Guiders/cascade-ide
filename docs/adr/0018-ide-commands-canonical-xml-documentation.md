@@ -2,7 +2,18 @@
 
 **Статус:** Proposed (направление; срок и объём миграции — по приоритетам)  
 **Дата:** 2026-04-05  
-**Связь:** [0013-command-surface-and-discoverability.md](0013-command-surface-and-discoverability.md) (единый реестр `command_id`), [0008-mcp-contracts-and-testable-infrastructure.md](0008-mcp-contracts-and-testable-infrastructure.md) (контракты MCP), [ide-commands-protocol-docgen-contract.md](../dev/ide-commands-protocol-docgen-contract.md) (текущий контракт парсера).
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0013](0013-command-surface-and-discoverability.md) | единый реестр `command_id` |
+| [0008](0008-mcp-contracts-and-testable-infrastructure.md) | контракты MCP |
+
+### Вне ADR
+
+| Документ | Роль |
+|----------|------|
+| [ide-commands-protocol-docgen-contract.md](../dev/ide-commands-protocol-docgen-contract.md) | текущий контракт парсера |
 
 ## Контекст
 

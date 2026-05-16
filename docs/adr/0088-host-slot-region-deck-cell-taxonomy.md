@@ -3,8 +3,17 @@
 **Статус:** Proposed  
 **Дата:** 2026-04-22  
 
-**Связь:** [0017](0017-multi-window-workspace-and-agent-surfaces.md) (зона **Mfd** vs **страницы** `MfdShellView`), [0021](0021-pfd-mfd-cockpit-attention-model.md) (якоря PFD/MFD, география vs телеметрия), [0047](0047-cockpit-instrument-descriptor-and-slot-composition.md) (`CockpitInstrumentDescriptor`, `slot_id`), [0050](0050-declarative-instrument-zone-placement-toml.md) (`[instrument_routing]`, `pfd_primary` / `mfd_primary`), [0063](0063-instrument-deck-named-composition-one-anchor.md) (**instrument deck**, `InstrumentDeckDescriptor`, `SemanticAnchorId`), [0068](0068-deck-row-payload-and-presentation-projection.md) (полезная нагрузка строки vs проекция vs слот), [0073](0073-pfd-instrument-deck.md) (каталог кандидатов на PFD), композиция кадра хоста: `Cockpit/Composition/HostSurface/MainWindowHostSurfaceCompositor.cs`.
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0017](0017-multi-window-workspace-and-agent-surfaces.md) | зона **Mfd** vs **страницы** `MfdShellView` |
+| [0021](0021-pfd-mfd-cockpit-attention-model.md) | якоря PFD/MFD, география vs телеметрия |
+| [0047](0047-cockpit-instrument-descriptor-and-slot-composition.md) | `CockpitInstrumentDescriptor`, `slot_id` |
+| [0050](0050-declarative-instrument-zone-placement-toml.md) | `[instrument_routing]`, `pfd_primary` / `mfd_primary` |
+| [0063](0063-instrument-deck-named-composition-one-anchor.md) | **instrument deck**, `InstrumentDeckDescriptor`, `SemanticAnchorId` |
+| [0068](0068-deck-row-payload-and-presentation-projection.md) | полезная нагрузка строки vs проекция vs слот |
+| [0073](0073-pfd-instrument-deck.md) | каталог кандидатов на PFD |
 **Резюме:** в обсуждениях **слот** называли и **всю колонку PFD**, и **малый прямоугольник** в сетке приборов. Этот ADR фиксирует **разведение уровней**: что такое **host slot** в wire хоста, что такое **регион/якорь внимания**, что такое **ячейка instrument deck** — и **что не смешивать**. Реализация **мульти-инструмента** на PFD (композитор deck на поверхности) **не** обязана менять смысл `CockpitSlotIds.Pfd` без отдельного согласования (см. §4).
 
 ---

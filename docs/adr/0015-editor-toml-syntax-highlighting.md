@@ -2,7 +2,11 @@
 
 **Статус:** Accepted · Implemented (`EditorLanguageSupport`, `TextMateTomlGrammar`, каталог `TextMateGrammars/toml`)  
 **Дата:** 2026-04-02  
-**Связь:** [0010-ui-modes-toml-configuration.md](0010-ui-modes-toml-configuration.md) (продуктовые данные в TOML), `Services/EditorLanguageSupport.cs`, `Services/TextMateTomlGrammar.cs`, `Views/MainWindow.Editor.axaml.cs` (после `new RegistryOptions` — загрузка грамматики), Tomlyn — парсинг конфигов, не подсветка.
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0010](0010-ui-modes-toml-configuration.md) | продуктовые данные в TOML |
 
 ## Контекст
 

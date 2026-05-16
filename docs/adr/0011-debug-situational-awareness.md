@@ -2,7 +2,19 @@
 
 **Статус:** Accepted (направление; конкретные экраны и хоткеи — по итерациям реализации)  
 **Дата:** 2026-04-02  
-**Связь:** [0002-debug-human-agent-parity.md](0002-debug-human-agent-parity.md) (единый слой состояния), [0003-debug-ui-mode-separate-from-power.md](0003-debug-ui-mode-separate-from-power.md) (режим Debug), [0012-floating-workspace-chrome.md](0012-floating-workspace-chrome.md) (плавающий хром — куда выносить полоски без конкуренции с высотой редактора), [MCP-PROTOCOL.md](../MCP-PROTOCOL.md) (команды отладки).
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0002](0002-debug-human-agent-parity.md) | единый слой состояния |
+| [0003](0003-debug-ui-mode-separate-from-power.md) | режим Debug |
+| [0012](0012-floating-workspace-chrome.md) | плавающий хром — куда выносить полоски без конкуренции с высотой редактора |
+
+### Вне ADR
+
+| Документ | Роль |
+|----------|------|
+| [MCP-PROTOCOL.md](../MCP-PROTOCOL.md) | команды отладки |
 
 ## Контекст
 

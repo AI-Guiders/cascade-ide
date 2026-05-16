@@ -2,7 +2,15 @@
 
 **Статус:** Proposed  
 **Дата:** 2026-04-20  
-**Связь:** [0021](0021-pfd-mfd-cockpit-attention-model.md) §9 (HUD-слой на лобовом), [0032](0032-hud-banner-configuration-and-grammar.md) (конфиг и грамматика **полосы** над редактором), [0066](0066-cockpit-ui-vs-ide-presentation-layer.md) (Cockpit UI vs presentation IDE), [0079](0079-ide-display-system-ids-overlay-pipeline.md) (IDS — оверлеи приложения, не путать с HUD редактора), [0084](0084-agent-edits-editor-source-of-truth-presence-channel.md) (присутствие агента, курсор, единый буфер).
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0021](0021-pfd-mfd-cockpit-attention-model.md) | PFD / MFD — модель внимания кокпита Cascade IDE |
+| [0032](0032-hud-banner-configuration-and-grammar.md) | конфиг и грамматика **полосы** над редактором |
+| [0066](0066-cockpit-ui-vs-ide-presentation-layer.md) | Cockpit UI vs presentation IDE |
+| [0079](0079-ide-display-system-ids-overlay-pipeline.md) | IDS — оверлеи приложения, не путать с HUD редактора |
+| [0084](0084-agent-edits-editor-source-of-truth-presence-channel.md) | присутствие агента, курсор, единый буфер |
 
 ## Контекст
 

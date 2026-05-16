@@ -3,8 +3,15 @@
 **Статус:** Accepted · **следующий шаг: PoC** (интеграция в `main` и обновление [0038](0038-agent-facade-ai-provider-and-tool-orchestration.md) — по итогам PoC)  
 **Дата:** 2026-04-22  
 
-**Связь:** [0038](0038-agent-facade-ai-provider-and-tool-orchestration.md) (фасад LLM, автономный JSON-цикл, `McpClientService`), [0083](0083-ai-mode-and-nested-settings-toml.md) (`ai.mode`, в т.ч. `mcp_only`), [0008](0008-mcp-contracts-and-testable-infrastructure.md) (контракты MCP), [0048](0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) (ACP, MCP-инструменты в сессии), [0082](0082-acp-ide-mcp-loopback-single-process.md) (MCP loopback в одном процессе).
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0038](0038-agent-facade-ai-provider-and-tool-orchestration.md) | фасад LLM, автономный JSON-цикл, `McpClientService` |
+| [0083](0083-ai-mode-and-nested-settings-toml.md) | `ai.mode`, в т.ч. `mcp_only` |
+| [0008](0008-mcp-contracts-and-testable-infrastructure.md) | контракты MCP |
+| [0048](0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) | ACP, MCP-инструменты в сессии |
+| [0082](0082-acp-ide-mcp-loopback-single-process.md) | MCP loopback в одном процессе |
 **Резюме:** ориентир **Agent-first** в продукте переносим на стек: **MAF** — целевой слой для будущей оркестрации встроенного агента; **следующий шаг** — **PoC** (отдельная ветка/проект), без обязательства немедленного мержа в основное приложение.
 
 ---

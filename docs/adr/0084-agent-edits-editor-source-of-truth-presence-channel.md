@@ -3,8 +3,19 @@
 **Статус:** Proposed  
 **Дата:** 2026-04-20  
 
-**Связь:** [0031](0031-agent-chat-clarification-batches-and-threading.md) (чат агента, поверхность, потоки), [0038](0038-agent-facade-ai-provider-and-tool-orchestration.md) (фасад агента, инструменты), [0048](0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) (ACP, MCP, паритет тулов), [0042](0042-pre-flight-planned-changes-and-review-before-apply.md) (preview / review before apply — ортогонально, может совпасть по политике «ghost»), [0080](0080-intercom-naming-and-multi-party-channel-model.md) (Intercom как канал; масштаб «командный продукт» — вне baseline), [0082](0082-acp-ide-mcp-loopback-single-process.md) (один процесс IDE ↔ MCP — хорошая база для одного буфера правды), [0021](0021-pfd-mfd-cockpit-attention-model.md) (образ «как collaborative editing» для баннера активности — см. таблицу file-level feedback), [0079](0079-ide-display-system-ids-overlay-pipeline.md) (оверлеи IDE — возможная поверхность для присутствия), [0063](0063-instrument-deck-named-composition-one-anchor.md) (Presence/Activity как продуктовый язык).
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0031](0031-agent-chat-clarification-batches-and-threading.md) | чат агента, поверхность, потоки |
+| [0038](0038-agent-facade-ai-provider-and-tool-orchestration.md) | фасад агента, инструменты |
+| [0048](0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) | ACP, MCP, паритет тулов |
+| [0042](0042-pre-flight-planned-changes-and-review-before-apply.md) | preview / review before apply — ортогонально, может совпасть по политике «ghost» |
+| [0080](0080-intercom-naming-and-multi-party-channel-model.md) | Intercom как канал; масштаб «командный продукт» — вне baseline |
+| [0082](0082-acp-ide-mcp-loopback-single-process.md) | один процесс IDE ↔ MCP — хорошая база для одного буфера правды |
+| [0021](0021-pfd-mfd-cockpit-attention-model.md) | образ «как collaborative editing» для баннера активности — см. таблицу file-level feedback |
+| [0079](0079-ide-display-system-ids-overlay-pipeline.md) | оверлеи IDE — возможная поверхность для присутствия |
+| [0063](0063-instrument-deck-named-composition-one-anchor.md) | Presence/Activity как продуктовый язык |
 ---
 
 <a id="adr0084-context"></a>

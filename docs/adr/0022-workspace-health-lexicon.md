@@ -3,8 +3,20 @@
 **Статус:** Accepted  
 **Дата:** 2026-04-11  
 **Обновлено:** 2026-04-25 — TOML-ключи контура **IDE Health** в режимах: канон **`ide_health_*`** (см. [0010](0010-ui-modes-toml-configuration.md)).  
-**Связь:** [0021](0021-pfd-mfd-cockpit-attention-model.md) (модель внимания, канал vs слот презентации), [0010](0010-ui-modes-toml-configuration.md) (ключи TOML и capabilities), [0012](0012-floating-workspace-chrome.md) (размещение полосы и нижней зоны), [0089](0089-ide-omnibus-naming-and-ide-health-channel-rename.md) (**переименование** продукта и типов: *Workspace Health* → **IDE Health**, `WorkspaceHealth*` → `IdeHealth*`), чертёж [`workspace-health-implementation-map-v1.md`](../design/workspace-health-implementation-map-v1.md) (код и поток данных).
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0021](0021-pfd-mfd-cockpit-attention-model.md) | модель внимания, канал vs слот презентации |
+| [0010](0010-ui-modes-toml-configuration.md) | ключи TOML и capabilities |
+| [0012](0012-floating-workspace-chrome.md) | размещение полосы и нижней зоны |
+| [0089](0089-ide-omnibus-naming-and-ide-health-channel-rename.md) | **переименование** продукта и типов: *Workspace Health* → **IDE Health**, `WorkspaceHealth*` → `IdeHealth*` |
+
+### Вне ADR
+
+| Документ | Роль |
+|----------|------|
+| [`workspace-health-implementation-map-v1.md`](../design/workspace-health-implementation-map-v1.md) | код и поток данных |
 ---
 
 ## Зачем этот ADR

@@ -3,8 +3,18 @@
 **Статус:** Proposed  
 **Дата:** 2026-04-24  
 
-**Связь:** [0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md) (topic cards, overview/detail, drill-in/back, **main thread** как одна из карточек; keyboard intents), [0080](0080-intercom-naming-and-multi-party-channel-model.md) (Intercom как канал, не «окно к боту»), [0116](0116-intercom-session-tree-and-agent-message-steering.md) (дерево сессии, steer/follow-up — ортогонально карточкам тем), [0057](0057-chat-surface-pipeline-adoption.md) (chat surface pipeline), [0045](0045-agent-chat-persistence-event-log-and-projections.md) (события и проекции — куда класть summary и метки линии), [0048](0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) (чат в IDE; **что** попадает в контекст агента — политика поверхности), [0021](0021-pfd-mfd-cockpit-attention-model.md) (зона Mfd / внимание), [0095](0095-workspace-solution-ide-health-stratification.md) (пример сквозной продуктовой линии в одной сессии работы).
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md) | topic cards, overview/detail, drill-in/back, **main thread** как одна из карточек; keyboard intents |
+| [0080](0080-intercom-naming-and-multi-party-channel-model.md) | Intercom как канал, не «окно к боту» |
+| [0116](0116-intercom-session-tree-and-agent-message-steering.md) | дерево сессии, steer/follow-up — ортогонально карточкам тем |
+| [0057](0057-chat-surface-pipeline-adoption.md) | chat surface pipeline |
+| [0045](0045-agent-chat-persistence-event-log-and-projections.md) | события и проекции — куда класть summary и метки линии |
+| [0048](0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) | чат в IDE; **что** попадает в контекст агента — политика поверхности |
+| [0021](0021-pfd-mfd-cockpit-attention-model.md) | зона Mfd / внимание |
+| [0095](0095-workspace-solution-ide-health-stratification.md) | пример сквозной продуктовой линии в одной сессии работы |
 **Отношение к [0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md):** 0072 остаётся каноном **навигации** (overview карточек тем ↔ detail треда, intent-команды, привязка к `ChatSurfaceLayout`). **0096** фиксирует **продуктовую семантику содержимого карточки** и **вторую ось** — **сквозную линию (spine)** работы над продуктом / проектом сессии поверх тем — **без** замены pipeline и без отмены drill-in/back. **Cascade IDE (CIDE)** в тексте ниже — **типичный пример** для основного репозитория; в другом workspace spine — та же абстракция для **его** продуктовой линии.
 
 ---

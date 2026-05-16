@@ -6,8 +6,26 @@
 **Дата:** 2026-05-06  
 **Расширяется / follow-up в IDE:** [0106](0106-hybrid-codebase-index-cascadeide-integration-and-semantic-map.md)
 
-**Связь:** [0039](0039-workspace-navigation-affordances.md), [0040](0040-lsp-launch-line-settings-toml-presets-and-environment.md), [0052](0052-agent-contract-cli-and-snapshot-tests.md), [0053](0053-semantic-map-control-flow-pfd.md), [0056](0056-semantic-map-pipeline-adoption.md), [0067](0067-graph-backed-surfaces-contract.md), [0069](0069-markdown-preview-tool-surface-and-renderer-decoupling.md), [0079](0079-ide-display-system-ids-overlay-pipeline.md) (IDS vs CDS; AXAML индекс — не IDS), [0095](0095-workspace-solution-ide-health-stratification.md), [0097](0097-cockpit-compute-units-transport-to-channel-dto.md), [0098](0098-semantic-first-document-as-projection.md), [0099](0099-ide-databus-typed-events-and-projections.md), [0100](0100-project-constitution.md), [0101](0101-licensing-and-commercialization-strategy.md), [0102](0102-data-acquisition-layer-boundary-and-contract.md), [0106](0106-hybrid-codebase-index-cascadeide-integration-and-semantic-map.md).
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0039](0039-workspace-navigation-affordances.md) | Навигация по workspace — несколько представлений и «текущий файл + связанные» |
+| [0040](0040-lsp-launch-line-settings-toml-presets-and-environment.md) | LSP (C# / Markdown) — командная строка в `settings.toml`: пресеты, опциональные ключи, переопределение через окружение |
+| [0052](0052-agent-contract-cli-and-snapshot-tests.md) | CLI для контракта агента (паритет с MCP) и снапшот-тесты |
+| [0053](0053-semantic-map-control-flow-pfd.md) | Карта намерений и поток управления на PFD (control flow) |
+| [0056](0056-semantic-map-pipeline-adoption.md) | Semantic Map adoption of Skia composition pipeline |
+| [0067](0067-graph-backed-surfaces-contract.md) | Graph-backed surfaces — общий контракт для семейства графовых экранов |
+| [0069](0069-markdown-preview-tool-surface-and-renderer-decoupling.md) | Markdown Preview — инструмент MFD, renderer-first decoupling и отказ от inline preview в документе |
+| [0079](0079-ide-display-system-ids-overlay-pipeline.md) | IDS vs CDS; AXAML индекс — не IDS |
+| [0095](0095-workspace-solution-ide-health-stratification.md) | Три уровня Health — Workspace, Solution, IDE (таксономия каналов) |
+| [0097](0097-cockpit-compute-units-transport-to-channel-dto.md) | Вычислительные блоки кабины (CCU; аналог LRU *Unit*) — слой между транспортом, смыслом и каналом |
+| [0098](0098-semantic-first-document-as-projection.md) | Семантика первична; документ и репозиторий — проекции (Semantic-First) |
+| [0099](0099-ide-databus-typed-events-and-projections.md) | IDE DataBus — типизированные события и проекции состояния |
+| [0100](0100-project-constitution.md) | Конституция проекта |
+| [0101](0101-licensing-and-commercialization-strategy.md) | Лицензирование и стратегия коммерциализации |
+| [0102](0102-data-acquisition-layer-boundary-and-contract.md) | Data Acquisition Layer — граница внешних интерфейсов и адаптеров |
+| [0106](0106-hybrid-codebase-index-cascadeide-integration-and-semantic-map.md) | Hybrid Codebase Index — интеграция в CascadeIDE, свежесть и Semantic Map |
 ---
 
 <a id="adr0105-glossary"></a>

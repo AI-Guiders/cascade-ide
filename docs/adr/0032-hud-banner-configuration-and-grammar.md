@@ -2,7 +2,16 @@
 
 **Статус:** Proposed (намерение зафиксировано; реализация — по плану).  
 **Дата:** 2026-04-11  
-**Связь:** [0021](0021-pfd-mfd-cockpit-attention-model.md) §9 (HUD-слой на лобовом), [0085](0085-editor-hud-inline-layer-and-hud-banner.md) (термины **Editor HUD** vs **HUD banner** — этот ADR про конфиг **баннера**), [0017](0017-multi-window-workspace-and-agent-surfaces.md) (строка `presentation`, секция `[presentation_grammar]`, EBNF в ADR), [0028](0028-user-settings-toml-localappdata-and-secrets.md) (`settings.toml`), [0029](0029-configuration-toml-canonical-ui-facade.md) (канон на диске, UI как фасад), [0030](0030-command-ids-hotkeys-and-ui-registry-layers.md) (ортогонально командам).
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0021](0021-pfd-mfd-cockpit-attention-model.md) | PFD / MFD — модель внимания кокпита Cascade IDE |
+| [0085](0085-editor-hud-inline-layer-and-hud-banner.md) | термины **Editor HUD** vs **HUD banner** — этот ADR про конфиг **баннера** |
+| [0017](0017-multi-window-workspace-and-agent-surfaces.md) | строка `presentation`, секция `[presentation_grammar]`, EBNF в ADR |
+| [0028](0028-user-settings-toml-localappdata-and-secrets.md) | `settings.toml` |
+| [0029](0029-configuration-toml-canonical-ui-facade.md) | канон на диске, UI как фасад |
+| [0030](0030-command-ids-hotkeys-and-ui-registry-layers.md) | ортогонально командам |
 
 ## Контекст
 

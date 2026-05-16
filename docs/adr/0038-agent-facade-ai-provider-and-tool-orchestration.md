@@ -2,7 +2,20 @@
 
 **Статус:** Accepted · Implemented (текущий код); раздел «Направление» — черновик идей, не обязательства  
 **Дата:** 2026-04-11  
-**Связь:** [0008](0008-mcp-contracts-and-testable-infrastructure.md) (контракты MCP и тестируемость), [0016](0016-agent-client-protocol-external-agent.md) (внешний агент по ACP), [0020](0020-agent-reasoning-visibility-and-provider-limits.md) (видимость рассуждения и ограничения провайдеров), [0031](0031-agent-chat-clarification-batches-and-threading.md) (эволюция UI чата), [MCP-PROTOCOL.md](../MCP-PROTOCOL.md) (канон `IdeCommands`).
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0008](0008-mcp-contracts-and-testable-infrastructure.md) | контракты MCP и тестируемость |
+| [0016](0016-agent-client-protocol-external-agent.md) | внешний агент по ACP |
+| [0020](0020-agent-reasoning-visibility-and-provider-limits.md) | видимость рассуждения и ограничения провайдеров |
+| [0031](0031-agent-chat-clarification-batches-and-threading.md) | эволюция UI чата |
+
+### Вне ADR
+
+| Документ | Роль |
+|----------|------|
+| [MCP-PROTOCOL.md](../MCP-PROTOCOL.md) | канон `IdeCommands` |
 
 ## Контекст
 

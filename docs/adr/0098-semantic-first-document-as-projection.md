@@ -3,8 +3,24 @@
 **Статус:** Proposed  
 **Дата:** 2026-04-24  
 
-**Связь:** [0039](0039-workspace-navigation-affordances.md) (навигация, **semantic map**, MCP subgraph), [0065](0065-instrument-categories-domain-taxonomy.md) / [0053](0053-semantic-map-control-flow-pfd.md) / [0056](0056-semantic-map-pipeline-adoption.md) (карта намерений как продуктовый граф), [0067](0067-graph-backed-surfaces-contract.md) (graph-backed surfaces), [0036](0036-cds-channel-compositor-surface-pipeline.md) (CDS, канал кабины), [0094](0094-ingestion-bus-afdx-analogy-and-threading-channels.md) (шина доставки), [0097](0097-cockpit-compute-units-transport-to-channel-dto.md) (CCU — свёртка в DTO канала), [0068](0068-deck-row-payload-and-presentation-projection.md) (полезная нагрузка vs проекция), [0079](0079-ide-display-system-ids-overlay-pipeline.md) (IDS), [0084](0084-agent-edits-editor-source-of-truth-presence-channel.md) (текст в редакторе — источник правды **для сессии правок**; см. [§2.4](#adr0098-alignment-0084)), [0095](0095-workspace-solution-ide-health-stratification.md) (три уровня Health, `stratum`), [0045](0045-agent-chat-persistence-event-log-and-projections.md) (события + проекции), [0009](0009-strangler-migration-and-exceptions.md) (strangler).
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0039](0039-workspace-navigation-affordances.md) | навигация, **semantic map**, MCP subgraph |
+| [0065](0065-instrument-categories-domain-taxonomy.md) | Категории инструментов и типы графов (ортогонально слоту и `instrument_id`) |
+| [0053](0053-semantic-map-control-flow-pfd.md) | Карта намерений и поток управления на PFD (control flow) |
+| [0056](0056-semantic-map-pipeline-adoption.md) | карта намерений как продуктовый граф |
+| [0067](0067-graph-backed-surfaces-contract.md) | graph-backed surfaces |
+| [0036](0036-cds-channel-compositor-surface-pipeline.md) | CDS, канал кабины |
+| [0094](0094-ingestion-bus-afdx-analogy-and-threading-channels.md) | шина доставки |
+| [0097](0097-cockpit-compute-units-transport-to-channel-dto.md) | CCU — свёртка в DTO канала |
+| [0068](0068-deck-row-payload-and-presentation-projection.md) | полезная нагрузка vs проекция |
+| [0079](0079-ide-display-system-ids-overlay-pipeline.md) | IDS |
+| [0084](0084-agent-edits-editor-source-of-truth-presence-channel.md) | текст в редакторе — источник правды **для сессии правок**; см. [§2.4](#adr0098-alignment-0084 |
+| [0095](0095-workspace-solution-ide-health-stratification.md) | три уровня Health, `stratum` |
+| [0045](0045-agent-chat-persistence-event-log-and-projections.md) | события + проекции |
+| [0009](0009-strangler-migration-and-exceptions.md) | strangler |
 ---
 
 <a id="adr0098-context"></a>

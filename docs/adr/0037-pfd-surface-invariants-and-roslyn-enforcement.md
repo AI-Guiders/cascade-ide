@@ -3,7 +3,20 @@
 **Статус:** Proposed  
 **Дата:** 2026-04-12  
 **Обновлено:** 2026-04-16 — [канон имён](#adr0037-naming) для строгой поверхности: `[PfdStrict]`, `PfdStrictControl`. Ранее: [глоссарий](#adr0037-glossary-pfd-dual); навигация и [0039](0039-workspace-navigation-affordances.md). Ранее: раздел «Зона внимания vs строгая поверхность» ([0021](0021-pfd-mfd-cockpit-attention-model.md)).  
-**Связь:** [0021](0021-pfd-mfd-cockpit-attention-model.md) (зона PFD в модели внимания), [0036](0036-cds-channel-compositor-surface-pipeline.md) (канал → CDS → композитор → поверхность), [0025](0025-sdk-attention-zones-and-capabilities.md) (capabilities и зоны), [0039](0039-workspace-navigation-affordances.md) (формы навигации в зоне внимания). Реализация анализаторов слоя Cockpit: [`CascadeIDE.ArchitectureAnalyzers/README.md`](../CascadeIDE.ArchitectureAnalyzers/README.md) (CASCOPE*; расширение — по этому ADR).
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0021](0021-pfd-mfd-cockpit-attention-model.md) | зона PFD в модели внимания |
+| [0036](0036-cds-channel-compositor-surface-pipeline.md) | канал → CDS → композитор → поверхность |
+| [0025](0025-sdk-attention-zones-and-capabilities.md) | capabilities и зоны |
+| [0039](0039-workspace-navigation-affordances.md) | формы навигации в зоне внимания |
+
+### Вне ADR
+
+| Документ | Роль |
+|----------|------|
+| [`CascadeIDE.ArchitectureAnalyzers/README.md`](../CascadeIDE.ArchitectureAnalyzers/README.md) | CASCOPE*; расширение — по этому ADR |
 
 ## Контекст
 

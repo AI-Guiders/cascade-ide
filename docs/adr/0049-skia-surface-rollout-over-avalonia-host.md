@@ -2,7 +2,16 @@
 
 **Статус:** Proposed  
 **Дата:** 2026-04-15  
-**Связь:** [0036](0036-cds-channel-compositor-surface-pipeline.md) (канал -> CDS -> композитор -> поверхность), [0044](0044-avalonia-host-skia-agent-chat-surface.md) (гипотеза Skia в чате), [0047](0047-cockpit-instrument-descriptor-and-slot-composition.md) (instrument/slot), [0046](0046-presentation-layout-authority-and-cockpit-invariants.md) (инварианты P/F/M), [0017](0017-multi-window-workspace-and-agent-surfaces.md) (топология окон и surfaces), [0037](0037-pfd-surface-invariants-and-roslyn-enforcement.md) (строгая PFD-поверхность).
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0036](0036-cds-channel-compositor-surface-pipeline.md) | канал -> CDS -> композитор -> поверхность |
+| [0044](0044-avalonia-host-skia-agent-chat-surface.md) | гипотеза Skia в чате |
+| [0047](0047-cockpit-instrument-descriptor-and-slot-composition.md) | instrument/slot |
+| [0046](0046-presentation-layout-authority-and-cockpit-invariants.md) | инварианты P/F/M |
+| [0017](0017-multi-window-workspace-and-agent-surfaces.md) | топология окон и surfaces |
+| [0037](0037-pfd-surface-invariants-and-roslyn-enforcement.md) | строгая PFD-поверхность |
 
 ## Контекст
 

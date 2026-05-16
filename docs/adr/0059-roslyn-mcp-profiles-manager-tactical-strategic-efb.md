@@ -3,8 +3,18 @@
 **Статус:** Proposed  
 **Дата:** 2026-04-18  
 
-**Связь:** [0058](0058-agent-roslyn-mcp-coupling-settings-toml.md) (секция `[agent.roslyn_mcp]`, оси лимитов/kinds/таймаутов/пресетов — **этот ADR не дублирует** ключи TOML, а описывает **поведение и сценарии** поверх них), [0010](0010-ui-modes-toml-configuration.md) (UI-режимы — отдельная ось), [0017](0017-multi-window-workspace-and-agent-surfaces.md) (окна, `presentation`, MFD), [0021](0021-pfd-mfd-cockpit-attention-model.md) (PFD / MFD), [0050](0050-declarative-instrument-zone-placement-toml.md) (инструмент → слот), [0051](0051-intent-based-attention-routing-toml.md) (intent routing), [0053](0053-semantic-map-control-flow-pfd.md) (Semantic Map, control flow), [0055](0055-skia-instrument-composition-pipeline.md) (declutter на PFD).
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0058](0058-agent-roslyn-mcp-coupling-settings-toml.md) | секция `[agent.roslyn_mcp]`, оси лимитов/kinds/таймаутов/пресетов — **этот ADR не дублирует** ключи TOML, а описывает **поведение и сценарии** поверх них |
+| [0010](0010-ui-modes-toml-configuration.md) | UI-режимы — отдельная ось |
+| [0017](0017-multi-window-workspace-and-agent-surfaces.md) | окна, `presentation`, MFD |
+| [0021](0021-pfd-mfd-cockpit-attention-model.md) | PFD / MFD |
+| [0050](0050-declarative-instrument-zone-placement-toml.md) | инструмент → слот |
+| [0051](0051-intent-based-attention-routing-toml.md) | intent routing |
+| [0053](0053-semantic-map-control-flow-pfd.md) | Semantic Map, control flow |
+| [0055](0055-skia-instrument-composition-pipeline.md) | declutter на PFD |
 ---
 
 ## Контекст

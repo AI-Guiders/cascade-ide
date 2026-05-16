@@ -2,7 +2,14 @@
 
 **Статус:** Proposed (намерение и границы зафиксированы; реализация — по отдельной дорожной карте).  
 **Дата:** 2026-04-12 · **Обновлено:** 2026-04-15  
-**Связь:** [0021](0021-pfd-mfd-cockpit-attention-model.md) (модель внимания, EICAS как слой сигналов; метафора **КВС** — [§1, глоссарий](0021-pfd-mfd-cockpit-attention-model.md#glossary-kvs)), [0025](0025-sdk-attention-zones-and-capabilities.md) (зоны и capabilities), [0032](0032-hud-banner-configuration-and-grammar.md) (HUD / «умное» снижение шума при ограничении внимания), [0008](0008-mcp-contracts-and-testable-infrastructure.md) (внешние MCP, stdio). Протоколы доверия и отказов для агента — в **KB** (`knowledge/META/integrity-*` и связанные документы), не дублируются здесь как техническая спецификация.
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0021](0021-pfd-mfd-cockpit-attention-model.md) | модель внимания, EICAS как слой сигналов; метафора **КВС** — [§1, глоссарий](0021-pfd-mfd-cockpit-attention-model.md#glossary-kvs |
+| [0025](0025-sdk-attention-zones-and-capabilities.md) | зоны и capabilities |
+| [0032](0032-hud-banner-configuration-and-grammar.md) | HUD / «умное» снижение шума при ограничении внимания |
+| [0008](0008-mcp-contracts-and-testable-infrastructure.md) | внешние MCP, stdio |
 
 ## Контекст
 

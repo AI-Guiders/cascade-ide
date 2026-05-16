@@ -6,8 +6,16 @@
 **Обновлено:** 2026-04-08 — ветка миграции `settings.json` → TOML **удалена** из кода: поддерживаемых legacy-профилей нет, канон только `settings.toml`.  
 **Обновлено:** 2026-04-08 — секреты API: **`ai-keys.toml`** вместо `ai-keys.json` (тот же Tomlyn/`CascadeTomlSerializer`, snake_case); миграции с JSON нет.  
 **Обновлено:** 2026-04-13 — ссылка на [0040](0040-lsp-launch-line-settings-toml-presets-and-environment.md) (командная строка LSP в `settings.toml`).  
-**Связь:** [0010](0010-ui-modes-toml-configuration.md) (TOML для **бандла режимов** и **репозиторного** `workspace.toml` — другой слой, не путать с пользовательским файлом), [0013](0013-command-surface-and-discoverability.md) (`hotkeys.toml` рядом с `settings.toml` — задумано, не обязательно реализовано), [0026](0026-markdown-preview-surfaces-and-placement.md) (часть пресетов в **merged** `workspace.toml`; пользовательский override размещения — не только `settings.toml`), [0027](0027-small-team-focus-vs-public-maturity.md) (предсказуемые пути конфигурации), [0029](0029-configuration-toml-canonical-ui-facade.md) (TOML как канон; UI — фасад над тем же файлом), [0040](0040-lsp-launch-line-settings-toml-presets-and-environment.md) (C#/Markdown LSP: пресеты, опциональные ключи `executable`/`arguments`, опционально окружение), реализация: `Services/SettingsService.cs`, `Services/AiKeysStorage.cs`, `Models/CascadeIdeSettings.cs`, `Services/CascadeTomlSerializer.cs`.
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0010](0010-ui-modes-toml-configuration.md) | TOML для **бандла режимов** и **репозиторного** `workspace.toml` — другой слой, не путать с пользовательским файлом |
+| [0013](0013-command-surface-and-discoverability.md) | `hotkeys.toml` рядом с `settings.toml` — задумано, не обязательно реализовано |
+| [0026](0026-markdown-preview-surfaces-and-placement.md) | часть пресетов в **merged** `workspace.toml`; пользовательский override размещения — не только `settings.toml` |
+| [0027](0027-small-team-focus-vs-public-maturity.md) | предсказуемые пути конфигурации |
+| [0029](0029-configuration-toml-canonical-ui-facade.md) | TOML как канон; UI — фасад над тем же файлом |
+| [0040](0040-lsp-launch-line-settings-toml-presets-and-environment.md) | C#/Markdown LSP: пресеты, опциональные ключи `executable`/`arguments`, опционально окружение |
 ---
 
 ## Контекст

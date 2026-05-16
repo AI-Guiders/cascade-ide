@@ -2,7 +2,13 @@
 
 **Статус:** Proposed  
 **Дата:** 2026-04-06  
-**Связь:** [0016-agent-client-protocol-external-agent.md](0016-agent-client-protocol-external-agent.md) (внешний агент, stdio), [0008-mcp-contracts-and-testable-infrastructure.md](0008-mcp-contracts-and-testable-infrastructure.md) (контракты и инфраструктура), [0002-debug-human-agent-parity.md](0002-debug-human-agent-parity.md) (паритет человек/агент по смыслу «что произошло»).
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0016](0016-agent-client-protocol-external-agent.md) | внешний агент, stdio |
+| [0008](0008-mcp-contracts-and-testable-infrastructure.md) | контракты и инфраструктура |
+| [0002](0002-debug-human-agent-parity.md) | паритет человек/агент по смыслу «что произошло» |
 
 ## Контекст
 

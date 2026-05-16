@@ -3,8 +3,28 @@
 **Статус:** Proposed  
 **Дата:** 2026-04-20  
 
-**Связь:** [intent-melody-language-v1.md](../intent-melody-language-v1.md) (IML v1: грамматика `c:` и реестр alias), [`IntentMelody/intent-melody-aliases.toml`](../../IntentMelody/intent-melody-aliases.toml) (оверлей alias → `command_id`), [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md) (Command Melody, CascadeChord, keyboard-first), [0030](0030-command-ids-hotkeys-and-ui-registry-layers.md) (`command_id` и слои UI), [0013](0013-command-surface-and-discoverability.md) (палитра и discoverability), [0070](0070-command-palette-direct-overlay-surface.md) (палитра как overlay), [0079](0079-ide-display-system-ids-overlay-pipeline.md) (IDS — композиция оверлея ввода), [0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md) (intent-first входы в домене чата), [0075](0075-ui-topic-index-and-mfd-page-conventions.md) (зоны внимания / MFD), [0039](0039-workspace-navigation-affordances.md) и [0080 § идеи развития](0080-intercom-naming-and-multi-party-channel-model.md#adr0080-future-modalities) (якоря на код — смежная тема, не дублирует этот ADR). Рефакторинги Roslyn по диапазону (`rmx` / `rix` и сопряжение с [Roslyn MCP](../../../roslyn-mcp/README.md)) — черновик направления в [0110](0110-roslyn-refactor-intent-melody-bridge.md).
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md) | Command Melody, CascadeChord, keyboard-first |
+| [0030](0030-command-ids-hotkeys-and-ui-registry-layers.md) | `command_id` и слои UI |
+| [0013](0013-command-surface-and-discoverability.md) | палитра и discoverability |
+| [0070](0070-command-palette-direct-overlay-surface.md) | палитра как overlay |
+| [0079](0079-ide-display-system-ids-overlay-pipeline.md) | IDS — композиция оверлея ввода |
+| [0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md) | intent-first входы в домене чата |
+| [0075](0075-ui-topic-index-and-mfd-page-conventions.md) | зоны внимания / MFD |
+| [0039](0039-workspace-navigation-affordances.md) | Навигация по workspace — несколько представлений и «текущий файл + связанные» |
+| [0080](0080-intercom-naming-and-multi-party-channel-model.md#adr0080-future-modalities) | якоря на код — смежная тема, не дублирует этот ADR |
+| [0110](0110-roslyn-refactor-intent-melody-bridge.md) | Рефакторинги Roslyn по диапазону — мост Intent Melody / IDE и Roslyn MCP |
+
+### Вне ADR
+
+| Документ | Роль |
+|----------|------|
+| [intent-melody-language-v1.md](../intent-melody-language-v1.md) | IML v1: грамматика `c:` и реестр alias |
+| [`IntentMelody/intent-melody-aliases.toml`](../../IntentMelody/intent-melody-aliases.toml) | оверлей alias → `command_id` |
+| [Roslyn MCP](../../../roslyn-mcp/README.md) | Roslyn MCP |
 ---
 
 ## Контекст

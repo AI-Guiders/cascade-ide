@@ -3,8 +3,15 @@
 **Статус:** Proposed  
 **Дата:** 2026-05-05  
 
-**Связь:** [0036](0036-cds-channel-compositor-surface-pipeline.md), [0052](0052-agent-contract-cli-and-snapshot-tests.md), [0053](0053-semantic-map-control-flow-pfd.md), [0099](0099-ide-databus-typed-events-and-projections.md), [0100](0100-project-constitution.md).
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0036](0036-cds-channel-compositor-surface-pipeline.md) | Канал → CDS → композитор поверхности → поверхность (Agent-first отображение) |
+| [0052](0052-agent-contract-cli-and-snapshot-tests.md) | CLI для контракта агента (паритет с MCP) и снапшот-тесты |
+| [0053](0053-semantic-map-control-flow-pfd.md) | Карта намерений и поток управления на PFD (control flow) |
+| [0099](0099-ide-databus-typed-events-and-projections.md) | IDE DataBus — типизированные события и проекции состояния |
+| [0100](0100-project-constitution.md) | Конституция проекта |
 ---
 
 <a id="adr0104-context"></a>

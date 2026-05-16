@@ -3,8 +3,16 @@
 **Статус:** Accepted · Implemented  
 **Дата:** 2026-04-25
 
-**Связь:** [0094](0094-ingestion-bus-afdx-analogy-and-threading-channels.md) (шина доставки и backpressure), [0097](0097-cockpit-compute-units-transport-to-channel-dto.md) (CCU: свёртка в DTO канала), [0036](0036-cds-channel-compositor-surface-pipeline.md) (канал → CDS → композиция поверхности), [0095](0095-workspace-solution-ide-health-stratification.md) (уровни Workspace/Solution/IDE), [0004](0004-ui-thread-marshaling.md) (UI marshaling), [0007](0007-signals-coupling-and-ui-backpressure.md) (сигналы и связность).
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0094](0094-ingestion-bus-afdx-analogy-and-threading-channels.md) | шина доставки и backpressure |
+| [0097](0097-cockpit-compute-units-transport-to-channel-dto.md) | CCU: свёртка в DTO канала |
+| [0036](0036-cds-channel-compositor-surface-pipeline.md) | канал → CDS → композиция поверхности |
+| [0095](0095-workspace-solution-ide-health-stratification.md) | уровни Workspace/Solution/IDE |
+| [0004](0004-ui-thread-marshaling.md) | UI marshaling |
+| [0007](0007-signals-coupling-and-ui-backpressure.md) | сигналы и связность |
 ---
 
 <a id="adr0099-context"></a>

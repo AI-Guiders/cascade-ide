@@ -3,8 +3,20 @@
 **Статус:** Proposed  
 **Дата:** 2026-05-11  
 
-**Связь:** [0081](0081-parametric-intent-melodies-editor-line-ranges.md) (параметрический хвост `:start:end`, §3 про рефакторинги), [0109](0109-declarative-parametric-melody-catalog-toml-and-code-binders.md) (каталог `[[melody_root]]`, сборка args в коде), [0058](0058-agent-roslyn-mcp-coupling-settings-toml.md) (сопряжение агента с Roslyn MCP), [0030](0030-command-ids-hotkeys-and-ui-registry-layers.md) (`command_id`), репозиторий [roslyn-mcp](../../../roslyn-mcp/README.md) (отдельный MCP-сервер).
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0081](0081-parametric-intent-melodies-editor-line-ranges.md) | параметрический хвост `:start:end`, §3 про рефакторинги |
+| [0109](0109-declarative-parametric-melody-catalog-toml-and-code-binders.md) | каталог `[[melody_root]]`, сборка args в коде |
+| [0058](0058-agent-roslyn-mcp-coupling-settings-toml.md) | сопряжение агента с Roslyn MCP |
+| [0030](0030-command-ids-hotkeys-and-ui-registry-layers.md) | `command_id` |
+
+### Вне ADR
+
+| Документ | Роль |
+|----------|------|
+| [roslyn-mcp](../../../roslyn-mcp/README.md) | отдельный MCP-сервер |
 ---
 
 ## Контекст

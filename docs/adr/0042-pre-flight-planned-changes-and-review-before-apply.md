@@ -2,7 +2,16 @@
 
 **Статус:** Proposed  
 **Дата:** 2026-04-13  
-**Связь:** [0039](0039-workspace-navigation-affordances.md) (семантическая карта и связанные файлы), [0021](0021-pfd-mfd-cockpit-attention-model.md) (PFD/MFD, situational awareness), [0038](0038-agent-facade-ai-provider-and-tool-orchestration.md) (агент, ACP, MCP), [0008](0008-mcp-contracts-and-testable-infrastructure.md) (контракты MCP), [0031](0031-agent-chat-clarification-batches-and-threading.md) (пакеты уточнений; ортогонально этому ADR), [0016](0016-agent-client-protocol-external-agent.md) (ACP как транспорт внешнего агента).
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0039](0039-workspace-navigation-affordances.md) | семантическая карта и связанные файлы |
+| [0021](0021-pfd-mfd-cockpit-attention-model.md) | PFD/MFD, situational awareness |
+| [0038](0038-agent-facade-ai-provider-and-tool-orchestration.md) | агент, ACP, MCP |
+| [0008](0008-mcp-contracts-and-testable-infrastructure.md) | контракты MCP |
+| [0031](0031-agent-chat-clarification-batches-and-threading.md) | пакеты уточнений; ортогонально этому ADR |
+| [0016](0016-agent-client-protocol-external-agent.md) | ACP как транспорт внешнего агента |
 
 ## Контекст
 

@@ -3,7 +3,21 @@
 **Статус:** Proposed  
 **Дата:** 2026-04-14  
 **Обновлено:** 2026-04-14 — разбор `mcp.json` ↔ CIDE; workspace «открыть папку» для сценариев по репо; **реализация «Открыть папку» в UI и MCP** (см. [§ workspace](#adr0048-folder-workspace)).
-**Связь:** [0016](0016-agent-client-protocol-external-agent.md) (ACP, stdio, границы с MCP), [0008](0008-mcp-contracts-and-testable-infrastructure.md) (MCP IDE как отдельный контур), [0038](0038-agent-facade-ai-provider-and-tool-orchestration.md) (фасад: чат / ACP / автономка / внешние MCP), [0045](0045-agent-chat-persistence-event-log-and-projections.md) (история чата в IDE), [0043](0043-mcp-transport-recovery-human-agent-parity.md) (транспорт MCP, не смешивать с ACP), [north-star-cursor-mcp-cascade-workbench-v1.md](../design/north-star-cursor-mcp-cascade-workbench-v1.md) (переход из Cursor).
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0016](0016-agent-client-protocol-external-agent.md) | ACP, stdio, границы с MCP |
+| [0008](0008-mcp-contracts-and-testable-infrastructure.md) | MCP IDE как отдельный контур |
+| [0038](0038-agent-facade-ai-provider-and-tool-orchestration.md) | фасад: чат / ACP / автономка / внешние MCP |
+| [0045](0045-agent-chat-persistence-event-log-and-projections.md) | история чата в IDE |
+| [0043](0043-mcp-transport-recovery-human-agent-parity.md) | транспорт MCP, не смешивать с ACP |
+
+### Вне ADR
+
+| Документ | Роль |
+|----------|------|
+| [north-star-cursor-mcp-cascade-workbench-v1.md](../design/north-star-cursor-mcp-cascade-workbench-v1.md) | переход из Cursor |
 
 ## Контекст
 

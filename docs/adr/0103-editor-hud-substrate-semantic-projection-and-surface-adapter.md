@@ -3,8 +3,35 @@
 **Статус:** Accepted (strangler)  
 **Дата:** 2026-04-26
 
-**Связь:** [0006](0006-presentation-layers-and-feature-slices.md), [0009](0009-strangler-migration-and-exceptions.md), [0021](0021-pfd-mfd-cockpit-attention-model.md) §9, [0032](0032-hud-banner-configuration-and-grammar.md), [0035](0035-mfd-embedded-webview-external-llm-and-mcp-boundary.md), [0036](0036-cds-channel-compositor-surface-pipeline.md), [0039](0039-workspace-navigation-affordances.md), [0066](0066-cockpit-ui-vs-ide-presentation-layer.md), [0067](0067-graph-backed-surfaces-contract.md), [0084](0084-agent-edits-editor-source-of-truth-presence-channel.md), [0085](0085-editor-hud-inline-layer-and-hud-banner.md), [0094](0094-ingestion-bus-afdx-analogy-and-threading-channels.md), [0097](0097-cockpit-compute-units-transport-to-channel-dto.md), [0098](0098-semantic-first-document-as-projection.md), [0099](0099-ide-databus-typed-events-and-projections.md), [0102](0102-data-acquisition-layer-boundary-and-contract.md), [чертеж: data-acquisition-layer-boundaries-v1](../design/data-acquisition-layer-boundaries-v1.md), [чертеж: сравнение кандидатов поверхности редактора](../design/editor-surface-candidates-comparison-v1.md), [чертеж: analyzer-rollout-dal-ccu-v1](../design/analyzer-rollout-dal-ccu-v1.md), [ux: roadmap полировки Forward](../ux/editor-forward-ui-cleanup-roadmap-v1.md)
+## Связанные ADR
 
+| ADR | Роль |
+|-----|------|
+| [0006](0006-presentation-layers-and-feature-slices.md) | Слои, вертикальные срезы и роль MainWindowViewModel |
+| [0009](0009-strangler-migration-and-exceptions.md) | Strangler-миграция и когда допускаются отклонения от политики |
+| [0021](0021-pfd-mfd-cockpit-attention-model.md) | PFD / MFD — модель внимания кокпита Cascade IDE |
+| [0032](0032-hud-banner-configuration-and-grammar.md) | HUD над редактором — настраиваемое содержимое и грамматика (как у `presentation`) |
+| [0035](0035-mfd-embedded-webview-external-llm-and-mcp-boundary.md) | Встроенный браузер в MFD, внешние веб-LLM и граница с MCP |
+| [0036](0036-cds-channel-compositor-surface-pipeline.md) | Канал → CDS → композитор поверхности → поверхность (Agent-first отображение) |
+| [0039](0039-workspace-navigation-affordances.md) | Навигация по workspace — несколько представлений и «текущий файл + связанные» |
+| [0066](0066-cockpit-ui-vs-ide-presentation-layer.md) | Cockpit UI и слой presentation IDE — раздельные опоры |
+| [0067](0067-graph-backed-surfaces-contract.md) | Graph-backed surfaces — общий контракт для семейства графовых экранов |
+| [0084](0084-agent-edits-editor-source-of-truth-presence-channel.md) | Правки агента в редакторе как единственный текстовый источник правды; чат — намерение и статус; слой присутствия (GDocs-like, без обязательного CRDT) |
+| [0085](0085-editor-hud-inline-layer-and-hud-banner.md) | Editor HUD — inline-слой в редакторе и отличие от HUD banner |
+| [0094](0094-ingestion-bus-afdx-analogy-and-threading-channels.md) | Шина доставки событий в UI (аналогия AFDX) и `System.Threading.Channel<T>` |
+| [0097](0097-cockpit-compute-units-transport-to-channel-dto.md) | Вычислительные блоки кабины (CCU; аналог LRU *Unit*) — слой между транспортом, смыслом и каналом |
+| [0098](0098-semantic-first-document-as-projection.md) | Семантика первична; документ и репозиторий — проекции (Semantic-First) |
+| [0099](0099-ide-databus-typed-events-and-projections.md) | IDE DataBus — типизированные события и проекции состояния |
+| [0102](0102-data-acquisition-layer-boundary-and-contract.md) | Data Acquisition Layer — граница внешних интерфейсов и адаптеров |
+
+### Вне ADR
+
+| Документ | Роль |
+|----------|------|
+| [чертеж: data-acquisition-layer-boundaries-v1](../design/data-acquisition-layer-boundaries-v1.md) | чертеж: data-acquisition-layer-boundaries-v1 |
+| [чертеж: сравнение кандидатов поверхности редактора](../design/editor-surface-candidates-comparison-v1.md) | чертеж: сравнение кандидатов поверхности редактора |
+| [чертеж: analyzer-rollout-dal-ccu-v1](../design/analyzer-rollout-dal-ccu-v1.md) | чертеж: analyzer-rollout-dal-ccu-v1 |
+| [ux: roadmap полировки Forward](../ux/editor-forward-ui-cleanup-roadmap-v1.md) | ux: roadmap полировки Forward |
 **Состояние реализации (v1 слоя «закрыт» в пределах strangler):** `Features/Editor` — `IEditorSurfaceAdapter` / `AvaloniaEditSurfaceAdapter`, hi-freq `EditorStabilizedInputThrottler` (один на окно) + `EditorInputDelta` → guard по `CurrentFilePath` → **`EditorDocumentHudLayer`** (per document: `EditorHudEngine` + `EditorHudStabilizedContext`) → `SemanticProjectionPipeline` / `EditorSemanticSnapshot` из DAL-полосок; **презентация** file-level **HUD banner** в `Application/Presentation/EditorHudBannerTextComposer` (0085: не путать с `EditorInlineHudLayer`-зарезервированным inline); VM только оркестрирует Roslyn-вхождения и присваивает `EditorHudBannerText`, при `DiagnosticsChanged` снимок инвалидируется. **Вне v1:** перенос inline-рендера (squiggles, tooltips) из `DockDocumentView` в тот же слой данных — [editor-hud-inline-migration-inventory-v1](../design/editor-hud-inline-migration-inventory-v1.md), политика баннер/inline — [editor-hud-banner-inline-policy-v1](../design/editor-hud-banner-inline-policy-v1.md), визуальная политика MFD/Forward — [editor-forward-ui-cleanup-roadmap-v1](../ux/editor-forward-ui-cleanup-roadmap-v1.md).
 
 ---
