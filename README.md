@@ -44,6 +44,12 @@ dotnet run --project CascadeIDE.csproj -p:FastBuild=true
 | UI | Режимы Focus / Balanced / Power — хоткеи в приложении |
 | Настройки | `%LocalAppData%\CascadeIDE\settings.toml`; данные рядом в WitDatabase |
 
+<a id="до-публичного-релиза"></a>
+
+## До публичного релиза
+
+Пока нет массовой установки **не** наращиваем в `SettingsService` автоматические миграции при переименовании или переносе ключей в `settings.toml` — пользователь правит файл вручную или переустанавливает. Канон путей и форматов — [docs/adr/0028-user-settings-toml-localappdata-and-secrets.md](docs/adr/0028-user-settings-toml-localappdata-and-secrets.md). После публичного релиза — отдельное решение (версия файла, одноразовый мигратор, changelog).
+
 ---
 
 ## Документация
