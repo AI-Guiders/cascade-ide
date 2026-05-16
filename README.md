@@ -2,7 +2,7 @@
 
 Десктопная IDE на **Avalonia** и **.NET 10**: решения **`.sln` / `.slnx`**, редактор, **встроенный MCP-сервер** (`--mcp-stdio` — сборка, тесты, Git, UI и т.д.), панели **чат / модели** (в т.ч. локальный **[Ollama](https://ollama.com)**).
 
-**Репозиторий:** [github.com/KarataevDmitry/cascade-ide](https://github.com/KarataevDmitry/cascade-ide) · **Лицензия кода:** [MIT](LICENSE)
+**Лицензия кода:** [MIT](LICENSE)
 
 Использование исходников и сборок **внутри условий MIT** (сохранение уведомлений, лицензии и т.д.) — как обычно для open-source. Если тебе нужно **коммерческое** применение (продукт на основе IDE, встраивание в закрытый контур, поддержка, кастомизация под бизнес) — **свяжись с нами**: контакты и рамки в **[docs/COMMERCIAL-NOTICE.md](docs/COMMERCIAL-NOTICE.md)**. Планируемая модель: **MIT + commercial** (открытый код + отдельная коммерческая линейка/услуги); подробнее о границах — **[docs/licensing-vision.md](docs/licensing-vision.md)**.
 
@@ -13,7 +13,7 @@
 Нужны [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) и ОС с поддержкой Avalonia (Windows / Linux / macOS). Для локального чата — запущенный Ollama (`http://localhost:11434`).
 
 ```bash
-git clone https://github.com/KarataevDmitry/cascade-ide.git
+git clone https://github.com/AI-Guiders/cascade-ide.git
 cd cascade-ide
 dotnet restore
 dotnet build CascadeIDE.sln -c Release
