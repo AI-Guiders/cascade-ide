@@ -1,7 +1,9 @@
 # ADR 0069: Markdown Preview — инструмент MFD, renderer-first decoupling и отказ от inline preview в документе
 
 **Статус:** Accepted  
-**Дата:** 2026-04-19
+**Дата:** 2026-04-19  
+
+**Заменяет по архитектуре surface/placement:** [0026](0026-markdown-preview-surfaces-and-placement.md) (исторический канон `markdown_preview_placement` / `forward_split`).
 
 ## Связанные ADR
 

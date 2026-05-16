@@ -23,6 +23,15 @@
 |----------|------|
 | [`workspace-health-implementation-map-v1.md`](../design/workspace-health-implementation-map-v1.md) | фактическая цепочка IDE Health |
 | [`CascadeIDE.ArchitectureAnalyzers/README.md`](../../CascadeIDE.ArchitectureAnalyzers/README.md) | Roslyn **CASCOPE*** — закрепление границ слоёв на сборке; CCU — см. §4 |
+
+## Резюме
+
+- **CCU** (*cockpit compute unit*) — слой **свёртки смысла** между сырыми событиями и DTO канала; аналог LRU *Unit*, не узел графа.
+- [0094](0094-ingestion-bus-afdx-analogy-and-threading-channels.md) доставляет; [0095](0095-workspace-solution-ide-health-stratification.md) классифицирует страту; **CCU считает**, что показать.
+- [0036](0036-cds-channel-compositor-surface-pipeline.md) маршрутизирует уже готовый снимок в кабину; CDS **не** строит законы из сырого MSBuild.
+- Эталон в коде — **IDE Health** (`IdeHealthInputSnapshot`, formatting unit, compositor; **CASCOPE019** на `Build`).
+- Массовое переименование типов **не обязательно**; новые каналы — по той же дисциплине (strangler).
+
 ---
 
 <a id="adr0097-analysis"></a>

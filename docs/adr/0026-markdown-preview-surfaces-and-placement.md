@@ -1,8 +1,10 @@
 # ADR 0026: Markdown — поверхности превью и размещение (`workspace.toml`)
 
-**Статус:** Superseded by [0069](0069-markdown-preview-tool-surface-and-renderer-decoupling.md)  
+**Статус:** Superseded  
 **Дата:** 2026-04-08  
 **Обновлено:** 2026-04-11 — подраздел «Внутренние отсылки»; ортогонально [0023](0023-markdown-diagrams-language-tooling.md). Подробности — [§ История](#adr0026-history).
+
+> **Superseded — актуальный канон:** [ADR 0069](0069-markdown-preview-tool-surface-and-renderer-decoupling.md) (MFD tool surface, renderer-first, без `forward_split`). Ниже — **история** размещения через `workspace.toml` и внутренние отсылки; для новых решений опираться только на **0069**.
 
 ## Связанные ADR
 

@@ -11,6 +11,59 @@
 
 **Статус в индексе:** только `Accepted` / `Proposed` / `Superseded`. Детали (`Implemented`, «направление», strangler) — в шапке ADR и [status-lifecycle.md](status-lifecycle.md).
 
+## Тематические кластеры
+
+Краткая навигация; **полный список** — [ниже](#adr-index-full). У крупных ADR в начале файла есть блок **## Резюме**.
+
+### Отладка и IDE Health
+
+| ID | ADR |
+|----|-----|
+| 0001–0004 | [гипотезы](0001-debug-hypotheses-json-storage.md) · [паритет агент/человек](0002-debug-human-agent-parity.md) · [режим Debug](0003-debug-ui-mode-separate-from-power.md) · [UI thread](0004-ui-thread-marshaling.md) |
+| 0011 | [ситуационная осведомлённость](0011-debug-situational-awareness.md) |
+| 0089, 0090–0091, 0095 | [IDE Health naming](0089-ide-omnibus-naming-and-ide-health-channel-rename.md) · [launch profiles](0090-launch-profiles-and-debug-startup-configurations.md) · [PFD debug deck](0091-pfd-debug-situational-deck-hypothesis.md) · [стратификация Health](0095-workspace-solution-ide-health-stratification.md) |
+
+### Конфигурация и TOML
+
+| ID | ADR |
+|----|-----|
+| 0010, 0028–0029 | [UI modes](0010-ui-modes-toml-configuration.md) · [settings.toml](0028-user-settings-toml-localappdata-and-secrets.md) · [TOML-first UI](0029-configuration-toml-canonical-ui-facade.md) |
+| 0030, 0040, 0050–0051, 0083, 0086 | [команды/хоткеи](0030-command-ids-hotkeys-and-ui-registry-layers.md) · [LSP presets](0040-lsp-launch-line-settings-toml-presets-and-environment.md) · [инструменты в TOML](0050-declarative-instrument-zone-placement-toml.md) · [intent routing](0051-intent-based-attention-routing-toml.md) · [`[ai]`](0083-ai-mode-and-nested-settings-toml.md) · [тема UI](0086-ui-theme-toml-canonical-json-mcp-wire.md) |
+
+### Кокпит, CDS и вычислительный контур
+
+| ID | ADR |
+|----|-----|
+| 0021 | [**PFD/MFD — модель внимания**](0021-pfd-mfd-cockpit-attention-model.md) |
+| 0036, 0046–0047, 0066 | [канал→CDS→surface](0036-cds-channel-compositor-surface-pipeline.md) · [layout authority](0046-presentation-layout-authority-and-cockpit-invariants.md) · [instrument descriptor](0047-cockpit-instrument-descriptor-and-slot-composition.md) · [cockpit vs presentation](0066-cockpit-ui-vs-ide-presentation-layer.md) |
+| 0063–0065, 0068, 0097 | [instrument deck](0063-instrument-deck-named-composition-one-anchor.md) · [примитивы deck](0064-deck-primitives-visual-language-render-layer-and-palette.md) · [таксономия](0065-instrument-categories-domain-taxonomy.md) · [payload vs projection](0068-deck-row-payload-and-presentation-projection.md) · [**CCU**](0097-cockpit-compute-units-transport-to-channel-dto.md) |
+| 0094, 0099 | [ingestion bus](0094-ingestion-bus-afdx-analogy-and-threading-channels.md) · [IDE DataBus](0099-ide-databus-typed-events-and-projections.md) |
+
+### Агент, MCP и индексация
+
+| ID | ADR |
+|----|-----|
+| 0008, 0016, 0038 | [контракты MCP](0008-mcp-contracts-and-testable-infrastructure.md) · [ACP](0016-agent-client-protocol-external-agent.md) · [фасад агента](0038-agent-facade-ai-provider-and-tool-orchestration.md) |
+| 0031, 0045, 0048, 0082, 0087 | [чат](0031-agent-chat-clarification-batches-and-threading.md) · [persistence](0045-agent-chat-persistence-event-log-and-projections.md) · [Cursor parity](0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) · [loopback MCP](0082-acp-ide-mcp-loopback-single-process.md) · [MAF](0087-microsoft-agent-framework-builtin-agent-orchestration.md) |
+| 0105–0106, 0118 | [hybrid index](0105-hybrid-codebase-index-for-csharp-web.md) · [интеграция в CIDE](0106-hybrid-codebase-index-cascadeide-integration-and-semantic-map.md) · [agent-notes 2.0](0118-agent-notes-core-2-toml-and-knowledge-path.md) |
+
+### Граф, semantic map и навигация
+
+| ID | ADR |
+|----|-----|
+| 0039, 0053, 0062 | [workspace navigation](0039-workspace-navigation-affordances.md) · [control flow PFD](0053-semantic-map-control-flow-pfd.md) · [GitMap](0062-git-submodules-semantic-map-subgraph.md) |
+| 0067, 0113–0115 | [graph-backed contract](0067-graph-backed-surfaces-contract.md) · [HCI orientation](0113-hci-semantic-map-orientation-layer.md) · [`relation_kind`](0114-graph-edge-relation-kind-taxonomy.md) · [CDS graph layer](0115-cds-graph-backed-shared-layer.md) |
+
+### Превью и документация (Markdown)
+
+| ID | ADR |
+|----|-----|
+| 0023, 0026→0069 | [язык/diagrams](0023-markdown-diagrams-language-tooling.md) · [**0026 Superseded →**](0026-markdown-preview-surfaces-and-placement.md) [**0069**](0069-markdown-preview-tool-surface-and-renderer-decoupling.md) |
+
+<a id="adr-index-full"></a>
+
+## Полный индекс
+
 | ID | Название | Статус |
 |----|----------|--------|
 | [0001](0001-debug-hypotheses-json-storage.md) | Хранение гипотез отладки в одном JSON-файле | Accepted |
@@ -99,7 +152,7 @@
 | [0084](0084-agent-edits-editor-source-of-truth-presence-channel.md) | **Правки агента:** единственный текст в редакторе; чат — намерение/статус; слой присутствия (курсор, «пишет»); дифф в чате не основной; без обязательного CRDT | Proposed |
 | [0085](0085-editor-hud-inline-layer-and-hud-banner.md) | **Editor HUD:** inline-слой в редакторе (каретка, текст, gutter) vs **HUD banner** (полоса над текстом); IDS оверлеи отдельно; конфиг баннера — [0032](0032-hud-banner-configuration-and-grammar.md) | Proposed |
 | [0086](0086-ui-theme-toml-canonical-json-mcp-wire.md) | **Тема UI:** канон кистей в `settings.toml`; JSON для `ide_get/set_ui_theme` как транспорт; strangler `Themes/*.json` | Proposed |
-| [0087](0087-microsoft-agent-framework-builtin-agent-orchestration.md) | **Microsoft Agent Framework (MAF):** ориентир на оркестрацию встроенного агентного контура; след. шаг — PoC | Accepted · **след. шаг: PoC** |
+| [0087](0087-microsoft-agent-framework-builtin-agent-orchestration.md) | **Microsoft Agent Framework (MAF):** ориентир на оркестрацию встроенного агентного контура; след. шаг — PoC | Accepted |
 | [0088](0088-host-slot-region-deck-cell-taxonomy.md) | **Host slot / регион / ячейка deck** — таксономия уровней; не смешивать | Proposed |
 | [0089](0089-ide-omnibus-naming-and-ide-health-channel-rename.md) | **`get_ide_state`** вместо `get_workspace_state`; канал **IDE Health** вместо Workspace Health; ортогонально ADR 0002 | Accepted |
 | [0090](0090-launch-profiles-and-debug-startup-configurations.md) | Профили запуска / несколько стартовых конфигураций отладки (как launch profiles в VS), хранение, MCP, миграция с `startup-project.json` | Accepted |

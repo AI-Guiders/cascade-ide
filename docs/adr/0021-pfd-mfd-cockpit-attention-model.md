@@ -27,6 +27,14 @@
 | [`command-palette-ux-concept-v1.md`](../ux/command-palette-ux-concept-v1.md) | UX Command Palette |
 | [`workspace-health-implementation-map-v1.md`](../design/workspace-health-implementation-map-v1.md) | Карта реализации IDE Health / EICAS |
 
+## Резюме
+
+- **PFD / Forward / MFD / EICAS / HUD** — якоря внимания и политика плотности UI, не обещание «встроить все приложения мира».
+- **Пресеты** (TOML, [0010](0010-ui-modes-toml-configuration.md)) задают *где* инструменты; **режимы** Focus/Balanced/Power — *как* управлять потоком внимания поверх якорей.
+- **EICAS** — единый сводный канал оповещений; подсистемы подают события, а не конкурируют toast’ами в лобовом редакторе.
+- Идеи **ARINC 661** — один композитор и границы зон; сертификация и полный профиль 661 **вне scope**.
+- Внешние агенты и чаты — **мосты** ([0016](0016-agent-client-protocol-external-agent.md)), без второго «кокпита» в зоне PFD.
+
 ---
 ## Контекст
 

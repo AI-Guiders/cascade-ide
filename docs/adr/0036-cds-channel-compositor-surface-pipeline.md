@@ -23,6 +23,14 @@
 | — | слои `Cockpit/Cds`, `Cockpit/Channels`, `Cockpit/Composition`, `Cockpit/Surface` |
 | — | чертёж полей — [`cds-contract-v0.md`](../design/cds-contract-v0.md) §6–7, [`Features/README.md`](../Features/README.md) |
 
+## Резюме
+
+- Цепочка: **канал** (смысл и payload) → **CDS** (куда данные *имеют право* попасть) → **композитор** (слот и разметка) → **поверхность** (Avalonia/Skia).
+- **Agent-first:** целевые команды агента — на уровне CDS/композитора, не прямой доступ к произвольному `Control` (исключения — явный strangler).
+- **`UiLayoutSnapshot`** остаётся для дерева контролов и отладки; **ортогонален** CDS ([0021](0021-pfd-mfd-cockpit-attention-model.md)).
+- Канал **не** импортирует `MainWindow.axaml`; CDS **не** дублирует полное дерево UI.
+- Реализация: `Cockpit/Cds`, `Channels`, `Composition`, `Surface` — см. [cds-contract-v0.md](../design/cds-contract-v0.md).
+
 ---
 ## Контекст
 

@@ -1,10 +1,9 @@
 # ADR 0017: Несколько окон приложения (мультиоконность), зоны экрана и поверхности агента
 
-**Статус:** Accepted · Implemented (парсер `presentation` / `zone_screen_layout`, **`[presentation_grammar]`**, тесты, **`MfdHostWindow`**, топология дисплеев, плейсмент, bounds в **`settings.toml`**, MCP `mfd_host` — см. [«Состояние реализации»](#adr0017-implementation-status)). **Дорожная карта:** продуктовая доводка второго экрана (EICAS/UX), полнота fallback при смене мониторов, явная политика закрытия главного при отдельных сценариях, детали подтверждений агента — [«Открытые вопросы»](#adr0017-open-questions), [п. 5](#adr0017-p5), [п. 6](#adr0017-p6). Семантика **полного** хоста Mfd — [п. 8](#adr0017-p8-mfd-host-wide).  
+**Статус:** Accepted · Implemented  
 **Дата:** 2026-04-05  
-**Обновлено:** 2026-04-16 — чертёж [skia-surfaces-vs-overlays-v1](../design/skia-surfaces-vs-overlays-v1.md). Подробности — [§ История](#adr0017-history).
-**Обновлено (доп.):** 2026-04-18 — [§ ёмкость нотации и направление имён TOML `display.screens` / `topology`](#adr0017-display-screens-topology-naming) (согласовано с [0063](0063-instrument-deck-named-composition-one-anchor.md); нормативно по ключам и глоссарию *screen* — этот ADR).  
-**Обновлено (доп.):** 2026-04-17 — **канон числа `TopLevel`:** `(P+F)(M)` ⇒ два окна (главное с P+F и `MfdHostWindow`); `(P)(F)(M)` ⇒ три окна (по зоне на `TopLevel`). **Пространственно:** слева направо = порядок групп `(…) (…) (…)` в строке (напр. `(M)(F)(P)` — слева M, центр F, справа P) — см. §«Три типовых раскладки» / пространственный канон. Факт v1 для тройной группы — в [§ состояние реализации](#adr0017-implementation-status). **Инвариант:** плейсмент хостов PFD/MFD — только `PresentationHostWindowPlacement` (+ lifecycle в `MainWindow.PresentationHostWindows.axaml.cs`), см. таблицу «Уже реализовано».  
+**Обновлено:** 2026-04-18 — канон числа `TopLevel` и `display.screens` / topology; подробности — [§ История](#adr0017-history).
+
 ## Связанные ADR
 
 | ADR | Роль |
@@ -25,9 +24,17 @@
 | Документ | Роль |
 |----------|------|
 | [`attention-zone-panel-playbook-v1.md`](../design/attention-zone-panel-playbook-v1.md) | зона ↔ панель ↔ топология; в коде — `AttentionLayoutSurfaceKind` |
-| [`concept-pfd-mfd-cascade-v1.md`](../ux/concept-pfd-mfd-cascade-v1.md) | `concept-pfd-mfd-cascade-v1.md` |
-| [`concept-to-implementation-map-v1.md`](../ux/concept-to-implementation-map-v1.md) | `concept-to-implementation-map-v1.md` |
-| [skia-surfaces-vs-overlays-v1.md](../design/skia-surfaces-vs-overlays-v1.md) | skia surfaces vs overlays v1 |
+| [`concept-pfd-mfd-cascade-v1.md`](../ux/concept-pfd-mfd-cascade-v1.md) | UX-концепт PFD/MFD (superseded текстом [0021](0021-pfd-mfd-cockpit-attention-model.md)) |
+| [`concept-to-implementation-map-v1.md`](../ux/concept-to-implementation-map-v1.md) | карта концепт → код |
+| [skia-surfaces-vs-overlays-v1.md](../design/skia-surfaces-vs-overlays-v1.md) | Skia-поверхности vs оверлеи |
+
+## Резюме
+
+- **Несколько `TopLevel`** — продуктовая модель разнесения зон по мониторам; семантика зон ([0021](0021-pfd-mfd-cockpit-attention-model.md)) **не равна** числу окон.
+- Источник истины раскладки — строка **`presentation`** / **`zone_screen_layout`** в **`settings.toml`** ([0028](0028-user-settings-toml-localappdata-and-secrets.md)), парсер + `[presentation_grammar]`.
+- **`(P+F)(M)`** → два окна; **`(P)(F)(M)`** → три; порядок групп в строке = слева направо на экранах.
+- **`MfdHostWindow` / `PfdHostWindow`** — полный shell зоны; плейсмент только через `PresentationHostWindowPlacement`.
+- MCP **`ide_get_ui_layout`** уже отдаёт все окна; roadmap — EICAS на втором экране, fallbacks, подтверждения агента ([«Открытые вопросы»](#adr0017-open-questions)).
 
 ## Состояние реализации (актуально по репозиторию)
 
@@ -343,3 +350,5 @@ screen       ::= O weighted_anchor { Z weighted_anchor } C
 | 2026-04-11 | **токены грамматики** в **`settings.toml`** — секция **`[presentation_grammar]`** (модель **`CascadeIdeSettings.PresentationGrammar`**). |
 | 2026-04-11 | статус **Accepted**; навигатор [architecture-policy.md](../architecture-policy.md). |
 | 2026-04-16 | [skia-surfaces-vs-overlays-v1.md](../design/skia-surfaces-vs-overlays-v1.md) (Skia-поверхности vs оверлеи, отказ от зашитых сплитов в пользу зон презентации); [п. 8](#adr0017-p8-mfd-host-wide) уточнён: обозреватель решения — страница вторичного контура, не отдельный сплит в колонке Mfd `MainWindow`. |
+| 2026-04-17 | **Канон числа `TopLevel`:** `(P+F)(M)` ⇒ два окна; `(P)(F)(M)` ⇒ три; слева направо = порядок групп в строке; плейсмент хостов — только `PresentationHostWindowPlacement`. |
+| 2026-04-18 | [§ `display.screens` / topology](#adr0017-display-screens-topology-naming); согласование с [0063](0063-instrument-deck-named-composition-one-anchor.md). |
