@@ -2,7 +2,15 @@
 
 **Статус:** Accepted · Implemented (инварианты P/F/M и coercion intent в VM; `CockpitPresentationLayoutPolicy` / CASCOPE003 — см. § «Решение»)  
 **Дата:** 2026-04-14  
-**Связь:** [0017](0017-multi-window-workspace-and-agent-surfaces.md) (presentation и мультиоконность), [0021](0021-pfd-mfd-cockpit-attention-model.md) (модель внимания), [0044](0044-avalonia-host-skia-agent-chat-surface.md) (UI не источник истины по смыслу).
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0017](0017-multi-window-workspace-and-agent-surfaces.md) | `presentation`, мультиоконность |
+| [0021](0021-pfd-mfd-cockpit-attention-model.md) | Модель внимания PFD/MFD |
+| [0044](0044-avalonia-host-skia-agent-chat-surface.md) | UI не источник истины по смыслу |
+| [0047](0047-cockpit-instrument-descriptor-and-slot-composition.md) | Instrument, слоты |
+| [0036](0036-cds-channel-compositor-surface-pipeline.md) | CDS → композитор → поверхность |
 
 ## Контекст
 

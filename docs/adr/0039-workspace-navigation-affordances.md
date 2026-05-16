@@ -4,7 +4,19 @@
 **Дата:** 2026-04-16  
 **Реализация (MCP-слой):** зафиксирована в коде (2026-04): пресеты в `settings.toml`, эхо фильтра, семантика subgraph; см. [§ Agent/MCP](#adr0039-mcp-workspace-navigation). Полноценная Semantic Map в UI и `ILayoutEngine` — вне этого статуса.  
 **Обновлено:** 2026-04-13 — расширен контракт MCP: [именованные пресеты](#adr0039-mcp-workspace-navigation), [`kind_filter`](#adr0039-mcp-workspace-navigation), [subgraph: `kind` / `related_kind`](#adr0039-mcp-workspace-navigation); cookbook: [workspace-navigation-mcp-cookbook.md](../design/workspace-navigation-mcp-cookbook.md). Ранее: [Agent/MCP: `get_code_navigation_context`](#adr0039-mcp-workspace-navigation). Ранее: 2026-04-11 — [Semantic Map: источник истины и слой конфигурации](#adr0039-semantic-map-data-layer) (зафиксировано). Ранее: блок [открытые vs закрытые вопросы](#adr0039-open-questions); [канон `(PFD)(Forward)(MFD)`](#adr0039-layout-canon) (scan pattern; уточнение: [строка `presentation` ≠ токен `window`](#adr0039-presentation-vs-toplevel)); [Semantic Map: `ILayoutEngine`](#adr0039-semantic-map-layout). Ещё ранее: 2026-04-16 — [область языков](#adr0039-language-scope); [«Продуктовая метафора»](#adr0039-product-metaphor).  
-**Связь:** [0021](0021-pfd-mfd-cockpit-attention-model.md) (зона PFD и якорь «где я»), [0037](0037-pfd-surface-invariants-and-roslyn-enforcement.md) (навигация ≠ строгая PFD-поверхность), [0010](0010-ui-modes-toml-configuration.md) (пресеты UI), [0030](0030-command-ids-hotkeys-and-ui-registry-layers.md) (команды и палитра), [0017](0017-multi-window-workspace-and-agent-surfaces.md) (мультиоконность, `presentation` / размещение поверхностей), [0058](0058-agent-roslyn-mcp-coupling-settings-toml.md) (сопряжение агент ↔ Roslyn MCP: ключи в `settings.toml`; ортогонально пресетам навигации здесь), [0059](0059-roslyn-mcp-profiles-manager-tactical-strategic-efb.md) (профили, Manager, тактика/стратегия, EFB).
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0021](0021-pfd-mfd-cockpit-attention-model.md) | PFD, якорь «где я» |
+| [0037](0037-pfd-surface-invariants-and-roslyn-enforcement.md) | Навигация ≠ строгая PFD-поверхность |
+| [0010](0010-ui-modes-toml-configuration.md) | Пресеты UI |
+| [0030](0030-command-ids-hotkeys-and-ui-registry-layers.md) | Команды, палитра |
+| [0017](0017-multi-window-workspace-and-agent-surfaces.md) | `presentation`, размещение поверхностей |
+| [0058](0058-agent-roslyn-mcp-coupling-settings-toml.md) | Агент ↔ Roslyn MCP в `settings.toml` |
+| [0059](0059-roslyn-mcp-profiles-manager-tactical-strategic-efb.md) | Профили Roslyn, Manager, EFB |
+| [0065](0065-instrument-categories-domain-taxonomy.md) | `graph_kind`, карта намерений |
+| [0067](0067-graph-backed-surfaces-contract.md) | Контракт graph-backed поверхностей |
 
 ## Контекст
 

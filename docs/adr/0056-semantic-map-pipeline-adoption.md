@@ -3,7 +3,13 @@
 **Статус:** Accepted · Implemented  
 **Дата:** 2026-04-17
 
-**Связь:** [0053](0053-semantic-map-control-flow-pfd.md) (controlFlow intent), [0055](0055-skia-instrument-composition-pipeline.md) (общий pipeline для Skia-инструментов).
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0053](0053-semantic-map-control-flow-pfd.md) | controlFlow intent, раскладка |
+| [0055](0055-skia-instrument-composition-pipeline.md) | Общий Skia pipeline |
+| [0067](0067-graph-backed-surfaces-contract.md) | Контракт graph-backed surface |
 
 ---
 

@@ -4,7 +4,19 @@
 **Дата:** 2026-04-19  
 **Принято:** 2026-04-19  
 
-**Связь:** [0021](0021-pfd-mfd-cockpit-attention-model.md) (модель внимания, зоны, EICAS), [0046](0046-presentation-layout-authority-and-cockpit-invariants.md) (политика представления), [0064](0064-deck-primitives-visual-language-render-layer-and-palette.md) (виды индикаторов deck, `PrimitivesKit`, семантическая палитра кабины), [0065](0065-instrument-categories-domain-taxonomy.md) (категории инструментов / `graph_kind`), [0013](0013-command-surface-and-discoverability.md) / [0030](0030-command-ids-hotkeys-and-ui-registry-layers.md) (палитра, команды). Реализация: `Cockpit/PrimitivesKit/`, `CockpitPrimitivesPalette`; общий хром — `Features/UiChrome/` (например `ModalOverlay`), темы `Themes/*.json`.
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0021](0021-pfd-mfd-cockpit-attention-model.md) | Модель внимания, EICAS |
+| [0046](0046-presentation-layout-authority-and-cockpit-invariants.md) | Политика `presentation` |
+| [0064](0064-deck-primitives-visual-language-render-layer-and-palette.md) | `PrimitivesKit`, палитра кабины |
+| [0065](0065-instrument-categories-domain-taxonomy.md) | Категории / `graph_kind` |
+| [0013](0013-command-surface-and-discoverability.md) | Палитра команд |
+| [0030](0030-command-ids-hotkeys-and-ui-registry-layers.md) | Реестр команд, hotkeys |
+| [0079](0079-ide-display-system-ids-overlay-pipeline.md) | IDS — оверлеи shell (**не** cockpit UI) |
+
+**Код:** `Cockpit/PrimitivesKit/`, `Features/UiChrome/`, `Themes/*.json`.
 
 ---
 

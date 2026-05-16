@@ -3,7 +3,17 @@
 **Статус:** Accepted · Implemented (merge bundle/repo/user, `[instrument_routing]` с alias, приоритет `prefer_repo_instruments_placement`, резолв в `InstrumentPlacementRuntime` + `MainWindowHostSurfaceCompositor`).  
 **Дата:** 2026-04-16  
 
-**Связь:** [0017](0017-multi-window-workspace-and-agent-surfaces.md) (строка **`presentation`** — **топология** физических дисплеев и якорей, не наполнение слотов), [0047](0047-cockpit-instrument-descriptor-and-slot-composition.md) ( **`CockpitInstrumentDescriptor`**: `instrument_id` + `slot_id`; композитор хоста без дерева контролов), [0028](0028-user-settings-toml-localappdata-and-secrets.md) (личный **`settings.toml`**), [0010](0010-ui-modes-toml-configuration.md) (режимы UI и бандлы `UiModes/`), [0036](0036-cds-channel-compositor-surface-pipeline.md) / [`cds-contract-v0.md`](../design/cds-contract-v0.md) (CDS и список инструментов на поверхности). Аналогия по **слоям данных:** пресеты [`[code_navigation]`](../samples/settings.toml) (бандл + репо + пользователь).
+## Связанные ADR
+
+| ADR / документ | Роль |
+|----------------|------|
+| [0017](0017-multi-window-workspace-and-agent-surfaces.md) | `presentation` — топология дисплеев, не слоты |
+| [0047](0047-cockpit-instrument-descriptor-and-slot-composition.md) | `instrument_id` + `slot_id` |
+| [0028](0028-user-settings-toml-localappdata-and-secrets.md) | Личный `settings.toml` |
+| [0010](0010-ui-modes-toml-configuration.md) | UiModes, бандлы |
+| [0036](0036-cds-channel-compositor-surface-pipeline.md) | CDS, инструменты на поверхности |
+| [`cds-contract-v0.md`](../design/cds-contract-v0.md) | Чертёж CDS |
+| [`[code_navigation]` в samples](../samples/settings.toml) | Аналогия слоёв: bundle + repo + user |
 
 ---
 

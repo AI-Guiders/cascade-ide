@@ -2,7 +2,18 @@
 
 **Статус:** Accepted · Implemented (слои `Cockpit/Cds`, `Cockpit/Channels`, `Cockpit/Composition`, `Cockpit/Surface`; чертёж полей — [`cds-contract-v0.md`](../design/cds-contract-v0.md) §6–7, [`Features/README.md`](../Features/README.md))  
 **Дата:** 2026-04-11  
-**Связь:** [0021](0021-pfd-mfd-cockpit-attention-model.md) (зоны внимания, глоссарий CDS vs `UiLayoutSnapshot`), [0097](0097-cockpit-compute-units-transport-to-channel-dto.md) (**CCU / вычислительный блок**: свёртка сырья в DTO канала **до** маршрутизации CDS и композиции слота), [0017](0017-multi-window-workspace-and-agent-surfaces.md) (`presentation`, топология окон), [0008](0008-mcp-contracts-and-testable-infrastructure.md) (контракты и тестируемые границы), [0035](0035-mfd-embedded-webview-external-llm-and-mcp-boundary.md) (веб-поверхность ≠ MCP). Чертёж полей и DTO: [`cds-contract-v0.md`](../design/cds-contract-v0.md). Graph-backed приборы — общий слой в кабине: **[0115](0115-cds-graph-backed-shared-layer.md)**; контракт измерений — **[0067](0067-graph-backed-surfaces-contract.md)**.
+## Связанные ADR
+
+| ADR / документ | Роль |
+|----------------|------|
+| [0021](0021-pfd-mfd-cockpit-attention-model.md) | Зоны внимания; CDS vs `UiLayoutSnapshot` |
+| [0097](0097-cockpit-compute-units-transport-to-channel-dto.md) | CCU: DTO канала **до** CDS |
+| [0017](0017-multi-window-workspace-and-agent-surfaces.md) | `presentation`, топология окон |
+| [0008](0008-mcp-contracts-and-testable-infrastructure.md) | Контракты, тестируемые границы |
+| [0035](0035-mfd-embedded-webview-external-llm-and-mcp-boundary.md) | Веб-поверхность ≠ MCP |
+| [0115](0115-cds-graph-backed-shared-layer.md) | Общий слой graph-backed в кабине |
+| [0067](0067-graph-backed-surfaces-contract.md) | Контракт измерений graph-backed |
+| [`cds-contract-v0.md`](../design/cds-contract-v0.md) | Чертёж полей и DTO |
 
 ## Контекст
 

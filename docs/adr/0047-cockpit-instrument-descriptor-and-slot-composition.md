@@ -2,7 +2,15 @@
 
 **Статус:** Accepted · Implemented (термин **Instrument**, `CockpitInstrumentDescriptor`, `MainWindowHostSurfaceFrame`, `MainWindowInstrumentMountRegistry`; см. [`cds-contract-v0.md`](../design/cds-contract-v0.md); расширение списка инструментов — по дорожной карте)  
 **Дата:** 2026-04-15  
-**Связь:** [0036](0036-cds-channel-compositor-surface-pipeline.md) (канал → CDS → композитор → поверхность), [0021](0021-pfd-mfd-cockpit-attention-model.md) (зоны внимания), [0039](0039-workspace-navigation-affordances.md) (Semantic Map), [0046](0046-presentation-layout-authority-and-cockpit-invariants.md) (инварианты `presentation`), чертёж [`cds-contract-v0.md`](../design/cds-contract-v0.md).
+## Связанные ADR
+
+| ADR / документ | Роль |
+|----------------|------|
+| [0036](0036-cds-channel-compositor-surface-pipeline.md) | Канал → CDS → композитор → поверхность |
+| [0021](0021-pfd-mfd-cockpit-attention-model.md) | Зоны внимания |
+| [0039](0039-workspace-navigation-affordances.md) | Semantic Map, навигация |
+| [0046](0046-presentation-layout-authority-and-cockpit-invariants.md) | Инварианты `presentation` |
+| [`cds-contract-v0.md`](../design/cds-contract-v0.md) | Чертёж дескрипторов и слотов |
 
 **Имя файла (история):** ранее черновик назывался `*widget*`; канонический термин продукта — **Instrument** (см. п.1).
 

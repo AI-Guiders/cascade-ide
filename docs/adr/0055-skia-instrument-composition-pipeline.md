@@ -3,7 +3,16 @@
 **Статус:** Accepted  
 **Дата:** 2026-04-17
 
-**Связь:** [0036](0036-cds-channel-compositor-surface-pipeline.md) (канал→CDS→surface), [0047](0047-cockpit-instrument-descriptor-and-slot-composition.md) (instrument/slot), [0049](0049-skia-surface-rollout-over-avalonia-host.md) (Skia rollout), [0053](0053-semantic-map-control-flow-pfd.md) (Semantic Map / control flow), [0056](0056-semantic-map-pipeline-adoption.md) (первое внедрение pipeline в Semantic Map).
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0036](0036-cds-channel-compositor-surface-pipeline.md) | Канал → CDS → surface |
+| [0047](0047-cockpit-instrument-descriptor-and-slot-composition.md) | Instrument / slot |
+| [0049](0049-skia-surface-rollout-over-avalonia-host.md) | Поэтапный Skia rollout |
+| [0053](0053-semantic-map-control-flow-pfd.md) | Semantic Map, control flow |
+| [0056](0056-semantic-map-pipeline-adoption.md) | Первый consumer — карта намерений |
+| [0064](0064-deck-primitives-visual-language-render-layer-and-palette.md) | Стадия Render, примитивы deck |
 
 ---
 

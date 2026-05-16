@@ -5,7 +5,22 @@
 **Принято:** 2026-04-19  
 **Обновлено:** 2026-04-19 — ключевая мысль «операционная surface», ограничения, доп. требования, seed для агента (EN). 2026-05-14 — измерения **Edge / node provenance** ([0113 § оси](0113-hci-semantic-map-orientation-layer.md#adr0113-axes)) и **Relation kind** ([0114](0114-graph-edge-relation-kind-taxonomy.md)); обе ортогональны `graph_kind`. 2026-05-14 — ссылка на размещение общего слоя реализации в **CDS** ([0115](0115-cds-graph-backed-shared-layer.md)), не IDS.
 
-**Связь:** [0065](0065-instrument-categories-domain-taxonomy.md) (ось `graph_kind`, категории инструментов, Semantic Map vs другие графы), [0113](0113-hci-semantic-map-orientation-layer.md) (оси **provenance** и сводка **трёх** осей с `relation_kind`), [0114](0114-graph-edge-relation-kind-taxonomy.md) (каталог **`relation_kind`**: наследует, ссылается на, …), [0115](0115-cds-graph-backed-shared-layer.md) (**где** в коде кабины живёт общий слой реализации graph-backed приборов — **CDS**, не IDS), [0062](0062-git-submodules-semantic-map-subgraph.md) (GitMap — отдельный домен данных, общий пайплайн отрисовки), [0053](0053-semantic-map-control-flow-pfd.md) / [0056](0056-semantic-map-pipeline-adoption.md) (Semantic Map, внедрение pipeline), [0055](0055-skia-instrument-composition-pipeline.md) (Intent → Declutter → Layout → Render), [0039](0039-workspace-navigation-affordances.md) (навигация, MCP, subgraph), [0047](0047-cockpit-instrument-descriptor-and-slot-composition.md) (инструмент, слот, поверхность), [0021](0021-pfd-mfd-cockpit-attention-model.md) (зоны внимания). [0066](0066-cockpit-ui-vs-ide-presentation-layer.md) — хром IDE vs кокпит: контракт ниже про **поверхность инструмента** в кабине, не про `ModalOverlay`.
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0065](0065-instrument-categories-domain-taxonomy.md) | Ось `graph_kind`, категории инструментов |
+| [0113](0113-hci-semantic-map-orientation-layer.md) | Оси **provenance**, сводка трёх осей |
+| [0114](0114-graph-edge-relation-kind-taxonomy.md) | Каталог `relation_kind` на рёбрах |
+| [0115](0115-cds-graph-backed-shared-layer.md) | Общий слой реализации в **CDS**, не IDS |
+| [0062](0062-git-submodules-semantic-map-subgraph.md) | GitMap — домен данных, общий pipeline |
+| [0053](0053-semantic-map-control-flow-pfd.md) | Semantic Map, control flow |
+| [0056](0056-semantic-map-pipeline-adoption.md) | Внедрение Skia pipeline в карту |
+| [0055](0055-skia-instrument-composition-pipeline.md) | Intent → Declutter → Layout → Render |
+| [0039](0039-workspace-navigation-affordances.md) | Навигация, MCP, subgraph |
+| [0047](0047-cockpit-instrument-descriptor-and-slot-composition.md) | Instrument, слот, поверхность |
+| [0021](0021-pfd-mfd-cockpit-attention-model.md) | Зоны внимания PFD/MFD |
+| [0066](0066-cockpit-ui-vs-ide-presentation-layer.md) | Поверхность прибора vs хром IDE (`ModalOverlay`) |
 
 ---
 

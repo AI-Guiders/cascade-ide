@@ -3,7 +3,17 @@
 **Статус:** Accepted · Implemented  
 **Дата:** 2026-04-17  
 
-**Связь:** [0021](0021-pfd-mfd-cockpit-attention-model.md) (зоны внимания, PFD как «приборы»), [0051](0051-intent-based-attention-routing-toml.md) (маршрутизация внимания), subgraph / `CodeNavigationMapSubgraph*` (`Services/CodeNavigationMapSubgraphModels.cs`), режим **Flight** как полигон раскладки.
+## Связанные ADR
+
+| ADR / артефакт | Роль |
+|----------------|------|
+| [0021](0021-pfd-mfd-cockpit-attention-model.md) | PFD как приборы, зоны внимания |
+| [0051](0051-intent-based-attention-routing-toml.md) | Маршрутизация внимания |
+| [0055](0055-skia-instrument-composition-pipeline.md) | Skia pipeline |
+| [0056](0056-semantic-map-pipeline-adoption.md) | Внедрение pipeline в карту |
+| [0039](0039-workspace-navigation-affordances.md) | MCP, subgraph |
+| [0065](0065-instrument-categories-domain-taxonomy.md) | Карта намерений кода |
+| `CodeNavigationMapSubgraph*` | Модели subgraph в коде |
 
 ---
 

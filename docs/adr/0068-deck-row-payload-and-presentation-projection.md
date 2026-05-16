@@ -4,9 +4,20 @@
 **Дата:** 2026-04-19  
 **Принято:** 2026-04-19  
 
-**Связь:** [0021](0021-pfd-mfd-cockpit-attention-model.md) (канал vs слот презентации; глоссарий presentation vs channel), [0023](0023-environment-readiness-glance.md) (канал готовности окружения; снимок отдельно от IDE Health), [0036](0036-cds-channel-compositor-surface-pipeline.md) (канал → композитор поверхности → UI), [0063](0063-instrument-deck-named-composition-one-anchor.md) (ось **ContentRepresentation** vs **instrument deck**; форма контейнера vs композиция), [0064](0064-deck-primitives-visual-language-render-layer-and-palette.md) (примитивы лампы и отрисовка), [0066](0066-cockpit-ui-vs-ide-presentation-layer.md) (Cockpit UI vs хром IDE для интерактива и «обычных» контролов). Чертёж: [`environment-readiness-glance-v1.md`](../design/environment-readiness-glance-v1.md).
+## Связанные ADR
 
-**Не путать с [0021 §1.1–1.2](0021-pfd-mfd-cockpit-attention-model.md#glossary-presentation-vs-channel):** там **слот презентации** / **слой представления** — уровень **региона и формы** (полоса vs страница MFD, оверлей) и **какой канал** заполняет слот. В этом ADR **проекция представления** — **ниже**: при уже выбранном канале и контейнере — как **одна строка снимка** становится лампой, глифом, колонками таблицы и т.д. Это **не** переопределение «слоя представления» из таблицы терминов 0021 и **не** замена [0063](0063-instrument-deck-named-composition-one-anchor.md) для **ContentRepresentation** (Strip/Page).
+| ADR / документ | Роль |
+|----------------|------|
+| [0021](0021-pfd-mfd-cockpit-attention-model.md) | Канал vs слот; глоссарий presentation |
+| [0021 § глоссарий](0021-pfd-mfd-cockpit-attention-model.md#glossary-presentation-vs-channel) | Слот презентации vs проекция строки (**не путать**) |
+| [0023](0023-environment-readiness-glance.md) | Канал readiness vs IDE Health |
+| [0036](0036-cds-channel-compositor-surface-pipeline.md) | Канал → композитор → UI |
+| [0063](0063-instrument-deck-named-composition-one-anchor.md) | ContentRepresentation vs instrument deck |
+| [0064](0064-deck-primitives-visual-language-render-layer-and-palette.md) | Примитивы лампы, отрисовка |
+| [0066](0066-cockpit-ui-vs-ide-presentation-layer.md) | Cockpit UI vs хром IDE |
+| [`environment-readiness-glance-v1.md`](../design/environment-readiness-glance-v1.md) | Чертёж readiness |
+
+**Не путать:** «проекция представления» здесь — как **строка снимка** становится лампой/глифом; это уровень **ниже**, чем слот региона в [0021](0021-pfd-mfd-cockpit-attention-model.md) и не замена **ContentRepresentation** в [0063](0063-instrument-deck-named-composition-one-anchor.md).
 
 ---
 

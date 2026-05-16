@@ -4,7 +4,17 @@
 **Дата:** 2026-04-19  
 **Принято:** 2026-04-19  
 
-**Связь:** [0063](0063-instrument-deck-named-composition-one-anchor.md) (§ [типы индикаторов](0063-instrument-deck-named-composition-one-anchor.md#adr0063-indicator-kinds), **`DeckPrimitiveKind`** в коде — перечисление **видов** индикатора; Presence/Dark Cockpit), [0055](0055-skia-instrument-composition-pipeline.md) (стадия **Render**), [0021](0021-pfd-mfd-cockpit-attention-model.md) (**Dark Cockpit**), [0046](0046-presentation-layout-authority-and-cockpit-invariants.md), [0066](0066-cockpit-ui-vs-ide-presentation-layer.md) (граница **Cockpit UI** vs хром IDE — этот ADR про палитру и отрисовку **кабины**, не про оверлеи shell). Черновик реализации: `Cockpit/PrimitivesKit/` (отрисовка annunciator / лампы, токены раскладки semantic map).
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0063 § типы](0063-instrument-deck-named-composition-one-anchor.md#adr0063-indicator-kinds) | `DeckPrimitiveKind`, Presence / Dark Cockpit |
+| [0055](0055-skia-instrument-composition-pipeline.md) | Стадия **Render** pipeline |
+| [0021](0021-pfd-mfd-cockpit-attention-model.md) | Dark Cockpit |
+| [0046](0046-presentation-layout-authority-and-cockpit-invariants.md) | Инварианты layout |
+| [0066](0066-cockpit-ui-vs-ide-presentation-layer.md) | Палитра кабины vs хром IDE |
+
+**Код:** `Cockpit/PrimitivesKit/` — annunciator, лампы, токены semantic map.
 
 ---
 

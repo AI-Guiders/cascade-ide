@@ -5,9 +5,19 @@
 **Принято:** 2026-04-19  
 **Обновлено:** 2026-04-24 — [§ deck страницы MFD](#adr0063-mfd-page-deck): композиция **внутри** одной страницы оболочки Mfd, ортогонально навигации между `MfdShellPage`. Ранее: 2026-04-18 — согласовано: **instrument deck** остаётся отдельной осью (композиция инструментов / порядок во вкладках и т.д.), ортогонально оси **`ContentRepresentation`** (Strip/Page). Ранее: то же по смыслу, что неформальное имя **CompositionPage** (см. [§ синоним](#adr0063-composition-page-synonym)). Ранее: [§ типы индикаторов](#adr0063-indicator-kinds) — направление **Lamp / Bar / Sign** для компактных deck-страниц. Ранее: [§ примитив vs инструмент](#adr0063-primitive-vs-instrument). Ранее: расширенная таксономия примитивов + [§ Presence и Dark Cockpit](#adr0063-presence-dark-cockpit). Ранее: статический Presence по геометрии — **Lamp**/Sign, не отдельный примитив. Ранее: [§ ContentRepresentation и код](#adr0063-content-representation-code) — вопрос про enum закрыт формулировкой ADR. Ранее: [§ deck в пресетах](#adr0063-deck-presets-evolution) — эволюционно, без обязательной сущности в TOML на старте. Ранее: [§ Page + deck](#adr0063-page-plus-deck-pfd) — один экран региона, несколько инструментов (образ PFD). Ранее: [§ CDS не presentation](#adr0063-cds-not-presentation). Ранее: ключи топологии дисплеев / `display.screens` — нормативно [0017 §](0017-multi-window-workspace-and-agent-surfaces.md#adr0017-display-screens-topology-naming).
 
-**Связь:** [0021](0021-pfd-mfd-cockpit-attention-model.md) (якоря PFD/MFD/лобовое; композиция **внутри** региона; не переносить инструменты между якорями без смены пресета), [0050](0050-declarative-instrument-zone-placement-toml.md) (`[instrument_routing]` — **какой** инструмент в **семантическом** слоте `pfd_primary` / `mfd_primary`), [0046](0046-presentation-layout-authority-and-cockpit-invariants.md) / [0047](0047-cockpit-instrument-descriptor-and-slot-composition.md) (политика layout, `Instrument`, слоты), [0010](0010-ui-modes-toml-configuration.md) (UiModes / пресеты). Чертёж IDE Health: [`workspace-health-implementation-map-v1.md`](../design/workspace-health-implementation-map-v1.md). **Различие терминов:** [0021 § «Архитектура зон»](0021-pfd-mfd-cockpit-attention-model.md#anchor-pfd-mfd-content-vs-telemetry-page).
+## Связанные ADR
 
-**См. также:** [0064](0064-deck-primitives-visual-language-render-layer-and-palette.md) — единое графическое воплощение **видов индикаторов**, библиотека отрисовки, семантическая палитра (vs токены метрик сцены).
+| ADR / документ | Роль |
+|----------------|------|
+| [0021](0021-pfd-mfd-cockpit-attention-model.md) | Якоря; композиция **внутри** региона |
+| [0021 § зоны](0021-pfd-mfd-cockpit-attention-model.md#anchor-pfd-mfd-content-vs-telemetry-page) | Различие терминов зон |
+| [0050](0050-declarative-instrument-zone-placement-toml.md) | `[instrument_routing]`, слоты |
+| [0046](0046-presentation-layout-authority-and-cockpit-invariants.md) | Политика layout P/F/M |
+| [0047](0047-cockpit-instrument-descriptor-and-slot-composition.md) | `Instrument`, слоты |
+| [0010](0010-ui-modes-toml-configuration.md) | UiModes, пресеты |
+| [0064](0064-deck-primitives-visual-language-render-layer-and-palette.md) | Виды индикаторов, `PrimitivesKit` |
+| [0068](0068-deck-row-payload-and-presentation-projection.md) | Payload строки vs проекция |
+| [`workspace-health-implementation-map-v1.md`](../design/workspace-health-implementation-map-v1.md) | Чертёж IDE Health deck |
 
 ---
 
