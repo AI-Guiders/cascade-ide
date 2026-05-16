@@ -25,6 +25,7 @@
 - **Инварианты раскладки и authority `presentation`**: [`0046`](../adr/0046-presentation-layout-authority-and-cockpit-invariants.md) *(Accepted · Implemented)*
 - **Мультиоконность и поверхности**: [`0017`](../adr/0017-multi-window-workspace-and-agent-surfaces.md) *(Accepted · Implemented)*
 - **Пульт оператора с другого устройства** (не mobile IDE): [`0117`](../adr/0117-remote-operator-surface-multidevice.md) *(Proposed)*
+- **Agent Notes Core 2.0** (TOML, `knowledge_path`, паритет с MCP): [`0118`](../adr/0118-agent-notes-core-2-toml-and-knowledge-path.md) *(Proposed)*
 
 ---
 
