@@ -25,6 +25,13 @@
 | — | загрузчик TOML, `UiModeCatalog`, capabilities, bundle `UiModes/` |
 | — | override и `docs/ux` — по мере нужды |
 
+## Резюме
+
+- Режимы UI (Focus/Balanced/…) — **данные в TOML** (`UiModes/`), не только константы в C#.
+- Bundle + merge с `.cascade/workspace.toml`; override без обратной записи динамики в шип.
+- **`[capabilities]`** и ключи **`ide_health_*`** — контур IDE Health в том же каталоге режимов.
+- Tomlyn, snake_case; JSON не дублируем как второй канон конфигов.
+
 ---
 ## Контекст
 

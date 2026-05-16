@@ -33,6 +33,12 @@
 
 Нужен **второй вход с клавиатуры**: **аккордный слой** (префикс → вторая клавиша), согласованный с `IdeCommands` ([0030](0030-command-ids-hotkeys-and-ui-registry-layers.md)) и не дублирующий палитру.
 
+## Резюме
+
+- Аккордный слой (**Ctrl+K**), FMS-style тактика/стратегия, overlay поверх [0013](0013-command-surface-and-discoverability.md).
+- Расширение discoverability без замены палитры и IdeCommands.
+- Связь с intent melody и chat-domain ([0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md)).
+
 ---
 
 ## Решение

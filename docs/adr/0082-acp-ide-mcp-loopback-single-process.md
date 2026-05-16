@@ -16,7 +16,7 @@
 
 | Документ | Роль |
 |----------|------|
-| [`externals/acp-csharp/.../McpServer.cs`](../../externals/acp-csharp/src/AgentClientProtocol/Schema/McpServer.cs) | `externals/acp-csharp/.../McpServer.cs` |
+| [`externals/acp-csharp/.../McpServer.cs`](../../externals/acp-csharp/src/AgentClientProtocol/Schema/McpServer.cs) | вендор ACP SDK (McpServer) |
 
 ---
 ## Контекст

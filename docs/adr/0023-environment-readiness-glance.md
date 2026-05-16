@@ -10,11 +10,16 @@
 | [0022](0022-workspace-health-lexicon.md) | лексикон **IDE Health** — **другой** канал |
 | [0089](0089-ide-omnibus-naming-and-ide-health-channel-rename.md) | переименование канала наблюдаемости |
 
+## Резюме
+
+- Markdown + **Mermaid/PlantUML** — first-class через LSP и workflow.
+- Kroki, export expanded, authoring — **ортогонально** preview ([0069](0069-markdown-preview-tool-surface-and-renderer-decoupling.md)).
+
 ### Вне ADR
 
 | Документ | Роль |
 |----------|------|
-| [`environment-readiness-glance-v1.md`](../design/environment-readiness-glance-v1.md) | `environment-readiness-glance-v1.md` |
+| [`environment-readiness-glance-v1.md`](../design/environment-readiness-glance-v1.md) | чертёж readiness glance |
 
 ---
 ## Контекст

@@ -1,6 +1,6 @@
 # ADR 0050: Декларативная карта «инструмент → зона/слот» в TOML
 
-**Статус:** Accepted · Implemented (merge bundle/repo/user, `[instrument_routing]` с alias, приоритет `prefer_repo_instruments_placement`, резолв в `InstrumentPlacementRuntime` + `MainWindowHostSurfaceCompositor`).  
+**Статус:** Accepted · Implemented  
 **Дата:** 2026-04-16
 
 ## Связанные ADR
@@ -14,6 +14,19 @@
 | [0036](0036-cds-channel-compositor-surface-pipeline.md) | CDS, инструменты на поверхности |
 | [`cds-contract-v0.md`](../design/cds-contract-v0.md) | Чертёж CDS |
 | [`[code_navigation]` в samples](../samples/settings.toml) | Аналогия слоёв: bundle + repo + user |
+
+## Резюме
+
+- Декларативная карта **инструмент → зона/слот** в TOML.
+- Merge bundle/repo/user; `InstrumentPlacementRuntime` + compositor.
+
+
+### Снимок реализации
+
+| Элемент | Значение |
+|---------|----------|
+| TOML | `[instrument_routing]`, merge bundle/repo/user |
+| Runtime | `InstrumentPlacementRuntime`, `MainWindowHostSurfaceCompositor` |
 
 ---
 ## Контекст

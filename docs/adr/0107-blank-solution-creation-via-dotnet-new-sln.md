@@ -1,9 +1,24 @@
 # ADR 0107: Создание пустого решения через `dotnet new sln` (самодостаточность workspace)
 
-**Status:** Accepted · Implemented  
-**Date:** 2026-05-10
+**Статус:** Accepted · Implemented  
+**Дата:** 2026-05-10
 
-**Related:** [0006](0006-presentation-layers-and-feature-slices.md), [0008](0008-mcp-contracts-and-testable-infrastructure.md), [0013](0013-command-surface-and-discoverability.md), [0102](0102-data-acquisition-layer-boundary-and-contract.md) (`IDotnetCommandRunner` / DAL), [architecture-migration.md](../architecture-migration.md) (v1.41m)
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0006](0006-presentation-layers-and-feature-slices.md) | связанный ADR |
+| [0008](0008-mcp-contracts-and-testable-infrastructure.md) | связанный ADR |
+| [0013](0013-command-surface-and-discoverability.md) | связанный ADR |
+| [0102](0102-data-acquisition-layer-boundary-and-contract.md) | связанный ADR |
+| [architecture-migration.md](../architecture-migration.md) | вне нумерованного ADR |
+
+
+## Резюме
+
+- Пустое решение: **`dotnet new sln`**, меню/MCP, `BlankSolutionCreator`.
+- `IDotnetCommandRunner` — общий раннер CLI.
+
 
 ---
 

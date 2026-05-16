@@ -13,6 +13,12 @@
 | [0046](0046-presentation-layout-authority-and-cockpit-invariants.md) | Инварианты layout |
 | [0066](0066-cockpit-ui-vs-ide-presentation-layer.md) | Палитра кабины vs хром IDE |
 
+## Резюме
+
+- **Виды индикаторов** deck: единая отрисовка + семантическая палитра.
+- `DeckPrimitiveKind` — каталог видов; без лишнего архитектурного слоя.
+
+
 **Код:** `Cockpit/PrimitivesKit/` — annunciator, лампы, токены semantic map.
 
 ---

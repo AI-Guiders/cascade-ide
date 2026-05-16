@@ -21,6 +21,12 @@
 | [0095](0095-workspace-solution-ide-health-stratification.md) | три уровня Health, `stratum` |
 | [0045](0045-agent-chat-persistence-event-log-and-projections.md) | события + проекции |
 | [0009](0009-strangler-migration-and-exceptions.md) | strangler |
+## Резюме
+
+- **Semantic-first:** карта смысла первична; код/доки/git — проекции.
+- Согласование с сессией правок ([0084](0084-agent-edits-editor-source-of-truth-presence-channel.md)).
+
+
 ---
 
 <a id="adr0098-context"></a>

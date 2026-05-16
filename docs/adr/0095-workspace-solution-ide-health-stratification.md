@@ -18,6 +18,11 @@
 | [0062](0062-git-submodules-semantic-map-subgraph.md) | GitMap — файловая/git-геометрия отдельно от кода решения |
 | [0052](0052-agent-contract-cli-and-snapshot-tests.md) | снапшоты MCP — при сплите уровней потребуются явные секции или версия схемы |
 
+## Резюме
+
+- Три уровня Health: **Workspace** · **Solution** · **IDE**; поле `stratum`.
+- Strangler от монолитного «workspace health»; TOML `ide_health_*` ([0010](0010-ui-modes-toml-configuration.md)).
+
 ### Вне ADR
 
 | Документ | Роль |

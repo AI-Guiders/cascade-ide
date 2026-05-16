@@ -44,6 +44,12 @@
 3. **Keyboard-first без intent-слоя:** если Melody/Chords будут **напрямую** дергать фокус Skia-элементов или хитбоксы, теряется кроссплатформенность и паритет с MCP ([0008](0008-mcp-contracts-and-testable-infrastructure.md)); дублируется логика с pointer.
 4. **Смешение с опасными подтверждениями:** навигация по темам не должна конкурировать по UX с **PFD-подтверждениями** и пакетами уточнений как с «да/нет» — границы остаются по [0017](0017-multi-window-workspace-and-agent-surfaces.md) и [0031](0031-agent-chat-clarification-batches-and-threading.md).
 
+## Резюме
+
+- **Topic cards** в чате: drill-in/back, adaptive default; intent-based Melody/Chords v1.
+- Уточняет аккорды [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md) в chat-domain.
+- Дополняет Intercom/spine ([0096](0096-intercom-topic-card-summary-and-product-spine.md)).
+
 ---
 
 ## Решение

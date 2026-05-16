@@ -1,6 +1,6 @@
 # ADR 0108: Встроенный веб-портал для внешних веб-ИИ и мост инструментов через Host Object (WebView → IDE)
 
-**Статус:** Accepted · **Implemented** (M1: страница MFD `WebAiPortal`, `NativeWebView` + мост `WebAiPortalCommandBridge` / `invokeCSharpAction` → `IIdeMcpActions`, см. `Views/WebAiPortalMfdPageView`, `Features/WebAiPortal/Application/WebAiPortalCommandBridge.cs`)  
+**Статус:** Accepted · Implemented  
 **Дата:** 2026-05-10  
 **Зафиксированные параметры (2026-05-10):** формат **`executeIdeCommand(string json)`**, PoC-allowlist на чтение, режимы Read / Write-confirm, модель WebView2 ниже страницы (см. §2) — согласованы для первой интеграции в **CascadeIDE**. *Побочный шум:* персона **Atlas** иногда даёт «звучные» рабочие имена в обсуждении — это риторика, не отдельные сущности в архиве репозитория, если явно не заведены как продукт.
 
@@ -14,6 +14,13 @@
 | [0038](0038-agent-facade-ai-provider-and-tool-orchestration.md) | фасад провайдеров и оркестрация тулов |
 | [0016](0016-agent-client-protocol-external-agent.md) | внешние агенты; ортогонально |
 | [0048](0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) | поверхность тулов / паритет |
+## Резюме
+
+- **Web AI portal** на MFD: WebView2, Host Object → `IdeCommands`/MCP.
+- Allowlist, согласие пользователя; PoC (Atlas / Search AI).
+- Граница доверия — [0035](0035-mfd-embedded-webview-external-llm-and-mcp-boundary.md).
+
+
 ---
 
 ## 1. Контекст

@@ -12,6 +12,11 @@
 | [0025](0025-sdk-attention-zones-and-capabilities.md) | capabilities и зоны |
 | [0039](0039-workspace-navigation-affordances.md) | формы навигации в зоне внимания |
 
+## Резюме
+
+- **PFD strict surface:** инварианты weight/input lock; Roslyn-анализаторы.
+- Канон **`[PfdStrict]`** / `PfdStrictControl` — география зоны vs строгая поверхность ([0021](0021-pfd-mfd-cockpit-attention-model.md#adr0037-zone-vs-surface)).
+
 ### Вне ADR
 
 | Документ | Роль |

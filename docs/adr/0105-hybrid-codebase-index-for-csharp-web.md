@@ -2,8 +2,6 @@
 
 **Статус:** Accepted · Implemented  
 **Дата:** 2026-05-06  
-**Реализация (ядро + MCP):** репозиторий [hybrid-codebase-index](https://github.com/KarataevDmitry/hybrid-codebase-index). Пояснение «зачем и почему так» без нумерации ADR см. **[design rationale](https://github.com/KarataevDmitry/hybrid-codebase-index/blob/main/docs/design-rationale.md)**.  
-**Расширяется / follow-up в IDE:** [0106](0106-hybrid-codebase-index-cascadeide-integration-and-semantic-map.md)
 
 ## Связанные ADR
 
@@ -25,6 +23,13 @@
 | [0101](0101-licensing-and-commercialization-strategy.md) | Лицензирование и стратегия коммерциализации |
 | [0102](0102-data-acquisition-layer-boundary-and-contract.md) | Data Acquisition Layer — граница внешних интерфейсов и адаптеров |
 | [0106](0106-hybrid-codebase-index-cascadeide-integration-and-semantic-map.md) | Hybrid Codebase Index — интеграция в CascadeIDE, свежесть и Semantic Map |
+## Резюме
+
+- **Hybrid codebase index:** переносимое ядро + MCP; **Roslyn — истина для C#**.
+- SQLite **FTS5** (keyword) + опциональный **vec** (semantic); fusion α/β.
+- Scope: C#, Razor, AXAML, web-стеки в одном workspace; ADR 0106 — интеграция в CIDE.
+
+
 ---
 
 <a id="adr0105-glossary"></a>

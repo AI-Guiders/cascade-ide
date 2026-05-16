@@ -14,6 +14,13 @@
 | [0056](0056-semantic-map-pipeline-adoption.md) | Первый consumer — карта намерений |
 | [0064](0064-deck-primitives-visual-language-render-layer-and-palette.md) | Стадия Render, примитивы deck |
 
+## Резюме
+
+- Общий pipeline Skia-инструментов: **Intent → Declutter → Layout → Render**.
+- Единые invariants для semantic map, deck и будущих приборов.
+- Потребители — [0056](0056-semantic-map-pipeline-adoption.md), [0057](0057-chat-surface-pipeline-adoption.md).
+
+
 ---
 ## Контекст
 

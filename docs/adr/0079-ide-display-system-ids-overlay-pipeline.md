@@ -14,6 +14,12 @@
 | [0013](0013-command-surface-and-discoverability.md) | палитра и discoverability |
 | [0115](0115-cds-graph-backed-shared-layer.md) | CDS — общий слой graph-backed приборов (реализация в кабине, не IDS) |
 
+## Резюме
+
+- **IDS** — пайплайн IDE-оверлеев (intent → композитор → снимок → поверхность).
+- Ортогонально CDS [0036](0036-cds-channel-compositor-surface-pipeline.md); Roslyn CASCOPE013–016.
+
+
 ---
 ## Контекст
 

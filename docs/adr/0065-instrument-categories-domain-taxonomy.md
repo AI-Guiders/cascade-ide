@@ -19,6 +19,11 @@
 | [0113](0113-hci-semantic-map-orientation-layer.md) | Ось **provenance** vs `graph_kind` |
 | [0114](0114-graph-edge-relation-kind-taxonomy.md) | Ось `relation_kind` на рёбрах |
 
+## Резюме
+
+- **Категории инструментов** и **`graph_kind`** — домен ортогонален слоту.
+- «Карта намерений» = подграф **намерений кода** вокруг якоря, не вся solution map.
+
 ---
 ## Контекст
 

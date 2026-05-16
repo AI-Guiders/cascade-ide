@@ -20,7 +20,7 @@
 
 | Документ | Роль |
 |----------|------|
-| [`TECH/README.md`](TECH/README.md) | `TECH/README.md` |
+| [`TECH/README.md`](TECH/README.md) | указатель TECH-принципов |
 
 ---
 ## Контекст

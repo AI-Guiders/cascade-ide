@@ -12,6 +12,14 @@
 | [0053](0053-semantic-map-control-flow-pfd.md) | Карта намерений и поток управления на PFD (control flow) |
 | [0099](0099-ide-databus-typed-events-and-projections.md) | IDE DataBus — типизированные события и проекции состояния |
 | [0100](0100-project-constitution.md) | Конституция проекта |
+## Резюме
+
+- **Reasoning Substrate** для MAF — отдельный слой мышления, не только if-then роутинг.
+- Цикл: top-down модель → bottom-up grounding → integration → execution.
+- Rule/scorer — нижний компилируемый слой ограничений и fallback.
+- Совместимость с KB-Base (integrity, scope, completion discipline).
+
+
 ---
 
 <a id="adr0104-context"></a>

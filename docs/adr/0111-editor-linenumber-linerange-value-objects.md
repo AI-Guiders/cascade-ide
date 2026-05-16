@@ -8,6 +8,12 @@
 | [0109](0109-declarative-parametric-melody-catalog-toml-and-code-binders.md) | Каталог, `tail_signature`; `:ln` — метаданные каталога |
 | [0110](0110-roslyn-refactor-intent-melody-bridge.md) | Roslyn по диапазону; будущий мост к аргументам MCP |
 
+## Резюме
+
+- Value objects **`LineNumber`** / **`LineRange`** (1-based, Start ≤ End).
+- Граница к JSON/командам — `int` в args; `ParsedLineRange` для парсинга.
+
+
 ## Отклонённые альтернативы
 
 - **Только алиасы `:ln` в TOML** — не заменяют проверки и самодокументацию API в C#.

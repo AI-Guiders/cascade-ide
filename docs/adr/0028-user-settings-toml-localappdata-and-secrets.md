@@ -25,6 +25,13 @@
 | Настройки | `settings.toml` (Tomlyn, snake_case) |
 | Секреты | `ai-keys.toml` (отдельно от настроек) |
 
+## Резюме
+
+- Пользовательский канон: **`%LocalAppData%\CascadeIDE\settings.toml`** (Tomlyn).
+- Секреты — **`ai-keys.toml`**, не в основном файле настроек.
+- Отдельно от бандла `UiModes/` и merge `.cascade/workspace.toml` ([0010](0010-ui-modes-toml-configuration.md)).
+- LSP-пресеты — [0040](0040-lsp-launch-line-settings-toml-presets-and-environment.md).
+
 ---
 ## Контекст
 

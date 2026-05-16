@@ -13,6 +13,12 @@
 | [0028](0028-user-settings-toml-localappdata-and-secrets.md) | Пользовательские настройки — `settings.toml`, каталог `%LocalAppData%\CascadeIDE\`, секреты отдельно |
 | [0050](0050-declarative-instrument-zone-placement-toml.md) | декларативные карты в TOML |
 
+## Резюме
+
+- Контекстная карта **ADR ↔ пути** в `workspace.toml`; индикатор на PFD.
+- Advisory для агента («GPWS для доков»); не заменяет чтение ADR.
+
+
 ---
 ## Контекст
 

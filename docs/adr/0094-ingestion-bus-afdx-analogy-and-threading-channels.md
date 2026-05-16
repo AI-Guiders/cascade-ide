@@ -14,6 +14,12 @@
 | [0007](0007-signals-coupling-and-ui-backpressure.md) | сигналы и нагрузка на UI |
 | [0004](0004-ui-thread-marshaling.md) | маршалинг на UI-поток |
 
+## Резюме
+
+- **Шина доставки в UI** (аналогия AFDX): `Channel<T>`, батчинг, backpressure.
+- Ортогонально CDS-«каналу» [0036](0036-cds-channel-compositor-surface-pipeline.md).
+
+
 ### Вне ADR
 
 | Документ | Роль |

@@ -17,7 +17,7 @@
 
 | Документ | Роль |
 |----------|------|
-| [`Models/MfdShellPage.cs`](../../Models/MfdShellPage.cs) | `Models/MfdShellPage.cs` |
+| [`Models/MfdShellPage.cs`](../../Models/MfdShellPage.cs) | enum страниц MFD |
 
 ---
 ## Контекст

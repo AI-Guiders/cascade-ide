@@ -1,9 +1,27 @@
 # ADR 0100: Конституция проекта
 
-**Status:** Accepted  
-**Date:** 2026-04-26
+**Статус:** Accepted  
+**Дата:** 2026-04-26
 
-**Related:** [0006](0006-presentation-layers-and-feature-slices.md), [0009](0009-strangler-migration-and-exceptions.md), [0027](0027-small-team-focus-vs-public-maturity.md), [0036](0036-cds-channel-compositor-surface-pipeline.md), [0079](0079-ide-display-system-ids-overlay-pipeline.md), [0097](0097-cockpit-compute-units-transport-to-channel-dto.md), [0099](0099-ide-databus-typed-events-and-projections.md), [architecture-policy.md](../architecture-policy.md)
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0006](0006-presentation-layers-and-feature-slices.md) | связанный ADR |
+| [0009](0009-strangler-migration-and-exceptions.md) | связанный ADR |
+| [0027](0027-small-team-focus-vs-public-maturity.md) | связанный ADR |
+| [0036](0036-cds-channel-compositor-surface-pipeline.md) | связанный ADR |
+| [0079](0079-ide-display-system-ids-overlay-pipeline.md) | связанный ADR |
+| [0097](0097-cockpit-compute-units-transport-to-channel-dto.md) | связанный ADR |
+| [0099](0099-ide-databus-typed-events-and-projections.md) | связанный ADR |
+| [architecture-policy.md](../architecture-policy.md) | вне нумерованного ADR |
+
+
+## Резюме
+
+- **Конституция проекта:** долговременные принципы, инварианты, governance.
+- Порядок изменений «основания»; hub с [0077](0077-tech-principles-hub.md).
+
 
 ---
 

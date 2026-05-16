@@ -17,6 +17,13 @@
 | [0066](0066-cockpit-ui-vs-ide-presentation-layer.md) | инструмент vs хром IDE |
 | [0068](0068-deck-row-payload-and-presentation-projection.md) | разделение payload / projection / slot |
 
+## Резюме
+
+- Markdown Preview — **инструмент MFD**, не обязательная часть вкладки документа.
+- **Renderer-first:** native Markdig по умолчанию; WebView — optional adaptor ([0035](0035-mfd-embedded-webview-external-llm-and-mcp-boundary.md)).
+- **`forward_split` снят** с канона; заменяет [0026](0026-markdown-preview-surfaces-and-placement.md).
+- Authoring ([0023](0023-markdown-diagrams-language-tooling.md)) ортогонален preview.
+
 ---
 ## Контекст
 

@@ -16,6 +16,12 @@
 | [0021](0021-pfd-mfd-cockpit-attention-model.md) | образ «как collaborative editing» для баннера активности — см. таблицу file-level feedback |
 | [0079](0079-ide-display-system-ids-overlay-pipeline.md) | оверлеи IDE — возможная поверхность для присутствия |
 | [0063](0063-instrument-deck-named-composition-one-anchor.md) | Presence/Activity как продуктовый язык |
+## Резюме
+
+- **Редактор** — единственный source of truth текста; чат — намерение/статус.
+- Слой присутствия (курсор, «пишет»); дифф в чате не основной.
+
+
 ---
 
 <a id="adr0084-context"></a>

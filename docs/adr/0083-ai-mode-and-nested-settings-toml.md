@@ -12,6 +12,12 @@
 | [0048](0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) | ACP, MCP в сессии |
 | [0016](0016-agent-client-protocol-external-agent.md) | ACP как внешний агент |
 | [0081](0081-parametric-intent-melodies-editor-line-ranges.md) | параметрические Intent Melody `:start:end` для редактора — смежная тема, не часть `ai.mode` |
+## Резюме
+
+- Секция **`[ai]`** в `settings.toml`: `mode` = local | acp | mcp_only | cloud.
+- Вложенные секции; **без** обратной совместимости со старым `provider`.
+
+
 ---
 
 <a id="adr0083-context"></a>

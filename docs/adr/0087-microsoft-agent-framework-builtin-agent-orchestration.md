@@ -24,6 +24,11 @@
 |---------|----------|
 | — | интеграция в `main` и обновление [0038](0038-agent-facade-ai-provider-and-tool-orchestration.md) — по итогам PoC |
 
+## Резюме
+
+- **Microsoft Agent Framework** — ориентир оркестрации встроенного агента.
+- Следующий шаг — PoC; связь с [0104](0104-cognitive-decomposition-loop-for-maf-prompt-orchestration.md).
+
 ---
 ## Контекст
 

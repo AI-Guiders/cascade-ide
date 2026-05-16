@@ -11,6 +11,12 @@
 | [0017](0017-multi-window-workspace-and-agent-surfaces.md) | топология `presentation` |
 | [0050](0050-declarative-instrument-zone-placement-toml.md) | декларативный placement `instrument_id` по `surface_id+slot_id` |
 
+## Резюме
+
+- **Intent-based attention routing** в TOML — маршрутизация внимания по намерению.
+- Связь с capabilities и зонами [0021](0021-pfd-mfd-cockpit-attention-model.md).
+
+
 ### Снимок реализации
 
 | Элемент | Значение |

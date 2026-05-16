@@ -30,6 +30,12 @@
 | — | этапы 1–4: режимная модель разбора, chrome, rg/hci/auto бэкенды, TOML |
 | — | стратегии по режиму — см. код `CommandPaletteParsedQueryParser` и ветви оркестратора |
 
+## Резюме
+
+- Палитра (**Ctrl+Q**): режимы строки запроса (`t:`/`m:`/`x:`), стратегии бэкенда.
+- Контракт workspace-поиска и переключение в `settings.toml`.
+- Direct overlay surface — [0070](0070-command-palette-direct-overlay-surface.md).
+
 ---
 ## Контекст
 

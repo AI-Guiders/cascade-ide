@@ -15,6 +15,12 @@
 | [0065](0065-instrument-categories-domain-taxonomy.md) | Карта намерений кода |
 | `CodeNavigationMapSubgraph*` | Модели subgraph в коде |
 
+## Резюме
+
+- **Карта намерений** на PFD: control flow, subgraph, KISS-навигация вокруг якоря кода.
+- Общий Skia pipeline и cursor semantics ([0056](0056-semantic-map-pipeline-adoption.md)).
+- Не путать с GitMap ([0062](0062-git-submodules-semantic-map-subgraph.md)) и с полным solution tree.
+
 ---
 ## Контекст
 

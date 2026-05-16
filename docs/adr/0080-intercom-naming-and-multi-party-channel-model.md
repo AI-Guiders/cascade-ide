@@ -16,6 +16,11 @@
 | [0066](0066-cockpit-ui-vs-ide-presentation-layer.md) | presentation IDE vs кабина |
 | [0033](0033-internationalization-resx-avalonia.md) | i18n |
 
+## Резюме
+
+- **Intercom** — продуктовое имя канала связи (агент + команда + система).
+- Внешний командный контур vs «своя гора»; strangler для legacy «чат».
+
 ### Вне ADR
 
 | Документ | Роль |

@@ -12,6 +12,11 @@
 | [0021](0021-pfd-mfd-cockpit-attention-model.md) | модель внимания кокпита |
 | [0026](0026-markdown-preview-surfaces-and-placement.md) | **где** монтируется виджет превью Markdown — `workspace.toml`; канон по размещению превью |
 
+## Резюме
+
+- Markdown + **Mermaid/PlantUML** — first-class через LSP и workflow.
+- Kroki, export expanded, authoring — **ортогонально** preview ([0069](0069-markdown-preview-tool-surface-and-renderer-decoupling.md)).
+
 ---
 ## Контекст
 

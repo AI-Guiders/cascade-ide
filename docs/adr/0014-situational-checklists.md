@@ -1,6 +1,6 @@
 # ADR 0014: Ситуационные чеклисты (модель, триггеры, UI)
 
-**Статус:** Accepted (направление; состав сценариев и итерации — отдельно)  
+**Статус:** Accepted  
 **Дата:** 2026-04-02
 
 ## Связанные ADR
@@ -12,6 +12,12 @@
 | [0011](0011-debug-situational-awareness.md) | полоска состояния vs чеклист шагов |
 | [0002](0002-debug-human-agent-parity.md) | Единый слой состояния отладки для человека и агента |
 | [0008](0008-mcp-contracts-and-testable-infrastructure.md) | Стабильные контракты MCP и тестируемая инфраструктура |
+## Резюме
+
+- Ситуационные **чеклисты**: модель, триггеры, UI; дочерний к [0013](0013-command-surface-and-discoverability.md).
+- Discoverability через палитру и контекст задачи, не отдельное приложение.
+
+
 ## Разделение с [0013](0013-command-surface-and-discoverability.md)
 
 - **[0013](0013-command-surface-and-discoverability.md)** — поверхность команд: палитра, discoverability в целом, минимальный toolbar.

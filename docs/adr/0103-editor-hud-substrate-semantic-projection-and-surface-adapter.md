@@ -24,6 +24,12 @@
 | [0099](0099-ide-databus-typed-events-and-projections.md) | IDE DataBus — типизированные события и проекции состояния |
 | [0102](0102-data-acquisition-layer-boundary-and-contract.md) | Data Acquisition Layer — граница внешних интерфейсов и адаптеров |
 
+## Резюме
+
+- **Субстрат Editor HUD:** `SemanticProjectionPipeline` / `EditorHudEngine` / `IEditorSurfaceAdapter`.
+- DAL / CCU / DataBus; hi-freq bounded-контур отдельно от CDS.
+- Baseline AvaloniaEdit; roadmap UI в `ux/`, сравнение хостов в `design/`.
+
 ### Вне ADR
 
 | Документ | Роль |

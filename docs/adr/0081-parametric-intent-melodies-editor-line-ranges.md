@@ -17,6 +17,12 @@
 | [0080](0080-intercom-naming-and-multi-party-channel-model.md#adr0080-future-modalities) | якоря на код — смежная тема, не дублирует этот ADR |
 | [0110](0110-roslyn-refactor-intent-melody-bridge.md) | Рефакторинги Roslyn по диапазону — мост Intent Melody / IDE и Roslyn MCP |
 
+## Резюме
+
+- Параметрические **Intent Melody:** суффикс `:startLine:endLine` для операций над текстом.
+- Валидация диапазона; мост к Roslyn — [0110](0110-roslyn-refactor-intent-melody-bridge.md).
+
+
 ### Вне ADR
 
 | Документ | Роль |

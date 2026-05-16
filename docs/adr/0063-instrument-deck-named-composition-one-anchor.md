@@ -18,6 +18,13 @@
 | [0068](0068-deck-row-payload-and-presentation-projection.md) | Payload строки vs проекция |
 | [`workspace-health-implementation-map-v1.md`](../design/workspace-health-implementation-map-v1.md) | Чертёж IDE Health deck |
 
+## Резюме
+
+- **Instrument deck** — именованная композиция вокруг **одного якоря** (фрагмент кода / метод).
+- **`ContentRepresentation`**, таксономия примитивов (Readout, Trend, Gauge, Presence…).
+- **Presence/Activity** vs **Dark Cockpit**; `DedicatedPage` — режим страницы MFD, не deck.
+- Deck **внутри** страницы Mfd — ортогонально навигации между страницами.
+
 ---
 ## Контекст
 

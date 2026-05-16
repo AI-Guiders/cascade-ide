@@ -1,6 +1,6 @@
 # ADR 0109: Единый декларативный каталог параметрических Intent Melody (TOML + кодовое связывание args)
 
-**Статус:** Accepted · Implemented (полный продуктовый контур §5, шаги 1–6: `[[melody_root]]` + `[[tail_wire_class]]`, загрузчик, рантайм-каталог, палитра/аккорд, бандл без legacy `[aliases]`/`[[parametric]]`, док `intent-melody-language-v1`; не в scope этого ADR: §3.5 внешняя грамматика `grammar_ref`, §3.6 плагины — до отдельной модели расширений)  
+**Статус:** Accepted · Implemented  
 **Дата:** 2026-05-11  
 
 ## Связанные ADR
@@ -12,6 +12,19 @@
 | [0108](0108-web-ai-portal-host-object-tools-bridge.md) | веб-портал и параметрическая мелодия `wai:`… |
 | [0030](0030-command-ids-hotkeys-and-ui-registry-layers.md) | `command_id`, слои реестра |
 | [0008](0008-mcp-contracts-and-testable-infrastructure.md) | MCP / исполнение команд |
+
+## Резюме
+
+- Каталог **Intent Melody:** `[[melody_root]]` + `[[tail_wire_class]]` в TOML.
+- Миграция с legacy `[aliases]` / `[[parametric]]`; binders в коде.
+- Implemented: загрузчик, рантайм-каталог, палитра/аккорд; плагины — отдельная модель.
+
+### Снимок реализации
+
+| Элемент | Значение |
+|---------|----------|
+| TOML | `[[melody_root]]`, `[[tail_wire_class]]` |
+| Docs | `intent-melody-language-v1`; без legacy `[aliases]` |
 
 ### Вне ADR
 

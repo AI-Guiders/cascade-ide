@@ -1,9 +1,24 @@
 # ADR 0101: Лицензирование и стратегия коммерциализации
 
-**Status:** Accepted  
-**Date:** 2026-04-26
+**Статус:** Accepted  
+**Дата:** 2026-04-26
 
-**Related:** [0009](0009-strangler-migration-and-exceptions.md), [0024](0024-ide-sdk-and-stable-contracts.md), [0027](0027-small-team-focus-vs-public-maturity.md), [architecture-policy.md](../architecture-policy.md)
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0009](0009-strangler-migration-and-exceptions.md) | связанный ADR |
+| [0024](0024-ide-sdk-and-stable-contracts.md) | связанный ADR |
+| [0027](0027-small-team-focus-vs-public-maturity.md) | связанный ADR |
+| [architecture-policy.md](../architecture-policy.md) | вне нумерованного ADR |
+
+
+## Резюме
+
+- Матрица **лицензий** и правила зависимостей (copyleft, коммерциализация).
+- Guardrails для выбора стека и публикации артефактов.
+- Governance — рядом с [0100](0100-project-constitution.md).
+
 
 ---
 

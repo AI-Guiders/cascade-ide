@@ -13,6 +13,12 @@
 | [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md) | keyboard-first и overlay-подсказки |
 | [0066](0066-cockpit-ui-vs-ide-presentation-layer.md) | shell chrome vs cockpit UI |
 
+## Резюме
+
+- Command Palette — **прямой overlay** в host, не `ModalOverlay` baseline.
+- Маршрутизация в активный `TopLevel`; связь с [0112](0112-command-palette-query-modes-strategy.md).
+
+
 ---
 ## Контекст
 

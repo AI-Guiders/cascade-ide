@@ -17,6 +17,11 @@
 | [0011](0011-debug-situational-awareness.md) | SA в отладке — родственная ось «осведомлённость» |
 | [0061](0061-context-aware-adr-map-pfd-knowledge-indicator.md) | ADR-карта и индикатор на PFD — **кандидат** в ту же колоду |
 
+## Резюме
+
+- Каталог вариантов **PFD instrument deck** (SA, metrics, semantic map, ADR indicator…).
+- Критерии «PFD vs по запросу»; живой черновик до выбора пресета.
+
 ### Вне ADR
 
 | Документ | Роль |

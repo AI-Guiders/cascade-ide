@@ -16,6 +16,12 @@
 | [0026](0026-markdown-preview-surfaces-and-placement.md) | геометрия превью Markdown в TOML |
 | [0025](0025-sdk-attention-zones-and-capabilities.md) | зоны внимания PFD/MFD/… в SDK и capabilities |
 
+## Резюме
+
+- **CascadeIDE SDK** — стабильные контракты для внутреннего расширения и будущих плагинов.
+- Версионирование публичных API; граница с «всё internal».
+- Связь с зонами внимания — [0025](0025-sdk-attention-zones-and-capabilities.md).
+
 ---
 ## Контекст
 

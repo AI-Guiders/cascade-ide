@@ -14,6 +14,12 @@
 | [0028](0028-user-settings-toml-localappdata-and-secrets.md) | канон пути и формата пользовательского `settings.toml` и секретов |
 | [0029](0029-configuration-toml-canonical-ui-facade.md) | TOML-first; целостный центр настроек deferred; точечный UI — фасад канона |
 
+## Резюме
+
+- Две оси: **границы** узкой команды (человек + ассистент) vs **очередь** публичной зрелости.
+- Discoverability через доки, примеры и ADR — без обязательства «IDE для всех» в v1.
+
+
 ### Вне ADR
 
 | Документ | Роль |

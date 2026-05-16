@@ -15,6 +15,12 @@
 | [0067](0067-graph-backed-surfaces-contract.md) | GitMap как graph-backed surface |
 | [`git-and-submodules-v1.md`](../git-and-submodules-v1.md) | Продуктовый контур |
 
+## Резюме
+
+- **GitMap:** submodules и git-границы **отдельно** от WSNC/карты намерений.
+- Общий Skia pipeline; собственный контракт/MCP.
+
+
 <a id="adr0062-not-wsnc"></a>
 
 ## Почему не смешивать с workspace navigation context (WSNC)

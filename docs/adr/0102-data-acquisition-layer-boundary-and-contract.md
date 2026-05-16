@@ -1,9 +1,26 @@
 # ADR 0102: Data Acquisition Layer — граница внешних интерфейсов и адаптеров
 
-**Status:** Accepted  
-**Date:** 2026-04-26
+**Статус:** Accepted  
+**Дата:** 2026-04-26
 
-**Related:** [0006](0006-presentation-layers-and-feature-slices.md), [0008](0008-mcp-contracts-and-testable-infrastructure.md), [0009](0009-strangler-migration-and-exceptions.md), [0094](0094-ingestion-bus-afdx-analogy-and-threading-channels.md), [0095](0095-workspace-solution-ide-health-stratification.md), [0097](0097-cockpit-compute-units-transport-to-channel-dto.md), [0099](0099-ide-databus-typed-events-and-projections.md)
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0006](0006-presentation-layers-and-feature-slices.md) | связанный ADR |
+| [0008](0008-mcp-contracts-and-testable-infrastructure.md) | связанный ADR |
+| [0009](0009-strangler-migration-and-exceptions.md) | связанный ADR |
+| [0094](0094-ingestion-bus-afdx-analogy-and-threading-channels.md) | связанный ADR |
+| [0095](0095-workspace-solution-ide-health-stratification.md) | связанный ADR |
+| [0097](0097-cockpit-compute-units-transport-to-channel-dto.md) | связанный ADR |
+| [0099](0099-ide-databus-typed-events-and-projections.md) | связанный ADR |
+
+
+## Резюме
+
+- **DAL** — явная граница добычи внешних данных.
+- Контракт DAL ↔ CCU ↔ UI; сырой I/O не в VM.
+
 
 ---
 

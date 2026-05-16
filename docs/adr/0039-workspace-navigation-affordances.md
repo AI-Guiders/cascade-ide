@@ -26,6 +26,13 @@
 | — | MCP `get_code_navigation_context`, пресеты и фильтры в `settings.toml` |
 | — | полноценный UI Semantic Map / `ILayoutEngine` — по плану, см. текст ADR |
 
+## Резюме
+
+- Навигация **C# / .NET first**: Roslyn и solution — north-star, не «IDE на все языки».
+- Несколько представлений workspace + режим **«вокруг активного документа»** вместо одного дерева.
+- MCP-слой (пресеты, subgraph, `get_code_navigation_context`) — **implemented**; полный UI Semantic Map — roadmap.
+- Ортогонально строгой PFD-поверхности ([0037](0037-pfd-surface-invariants-and-roslyn-enforcement.md)).
+
 ---
 ## Контекст
 

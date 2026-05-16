@@ -15,6 +15,12 @@
 | [0048](0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) | чат в IDE; **что** попадает в контекст агента — политика поверхности |
 | [0021](0021-pfd-mfd-cockpit-attention-model.md) | зона Mfd / внимание |
 | [0095](0095-workspace-solution-ide-health-stratification.md) | пример сквозной продуктовой линии в одной сессии работы |
+## Резюме
+
+- Intercom: карточка темы = заголовок + **сводка** (картотека).
+- Product spine ортогонален main thread; дополняет [0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md).
+
+
 **Отношение к [0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md):** 0072 остаётся каноном **навигации** (overview карточек тем ↔ detail треда, intent-команды, привязка к `ChatSurfaceLayout`). **0096** фиксирует **продуктовую семантику содержимого карточки** и **вторую ось** — **сквозную линию (spine)** работы над продуктом / проектом сессии поверх тем — **без** замены pipeline и без отмены drill-in/back. **Cascade IDE (CIDE)** в тексте ниже — **типичный пример** для основного репозитория; в другом workspace spine — та же абстракция для **его** продуктовой линии.
 
 ---

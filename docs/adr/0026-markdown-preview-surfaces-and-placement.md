@@ -16,6 +16,12 @@
 | [0022](0022-mfd-visual-design-surface-axaml-blazor.md) | перспектива вкладки/региона на MFD |
 | [0023](0023-markdown-diagrams-language-tooling.md) | LSP, диаграммы, Kroki, export — **ортогонально** размещению виджета превью |
 
+## Резюме
+
+- **Исторический** канон размещения Markdown preview (`workspace.toml`, `forward_split`).
+- **Не использовать для новых решений** — см. callout и [0069](0069-markdown-preview-tool-surface-and-renderer-decoupling.md).
+
+
 ## Замена прежних формулировок
 
 - **Этот ADR superseded** новым каноном в [0069](0069-markdown-preview-tool-surface-and-renderer-decoupling.md): preview больше рассматривается как отдельный tool surface с renderer/placement decoupling, а `forward_split` снят с канона.

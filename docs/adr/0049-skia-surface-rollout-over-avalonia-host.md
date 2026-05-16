@@ -14,6 +14,12 @@
 | [0017](0017-multi-window-workspace-and-agent-surfaces.md) | топология окон и surfaces |
 | [0037](0037-pfd-surface-invariants-and-roslyn-enforcement.md) | строгая PFD-поверхность |
 
+## Резюме
+
+- Поэтапный **rollout Skia-поверхностей** при Avalonia как хосте (dual-path, волны).
+- Не big-bang: миграция по инструментам/зонам с сохранением fallback на Avalonia-контролы.
+- Связка с pipeline Intent→Declutter→Layout→Render ([0055](0055-skia-instrument-composition-pipeline.md)).
+
 ---
 ## Контекст
 

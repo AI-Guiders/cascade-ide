@@ -13,6 +13,12 @@
 | [0039](0039-workspace-navigation-affordances.md) | Навигация workspace, related files |
 | [0105](0105-hybrid-codebase-index-for-csharp-web.md) | Hybrid index, `hit_kind` |
 
+## Резюме
+
+- Ось **`relation_kind`** на рёбрах графа («наследует», partial peer, …).
+- Ортогонально `graph_kind` и provenance ([0113](0113-hci-semantic-map-orientation-layer.md)).
+
+
 ## Проблема
 
 Для graph-backed поверхностей мы уже разводим:

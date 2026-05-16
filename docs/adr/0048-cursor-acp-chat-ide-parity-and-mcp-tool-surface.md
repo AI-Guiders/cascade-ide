@@ -19,6 +19,12 @@
 |----------|------|
 | [north-star-cursor-mcp-cascade-workbench-v1.md](../design/north-star-cursor-mcp-cascade-workbench-v1.md) | переход из Cursor |
 
+## Резюме
+
+- Паритет чата **Cursor ACP** внутри IDE: `mcpServers`, авто IDE MCP, разбор `mcp.json` ↔ CIDE.
+- Workspace «открыть папку» и пробелы тулов — зафиксированы как продуктовые задачи.
+- Внешний агент ([0016](0016-agent-client-protocol-external-agent.md)) ортогонален встроенному UI чата.
+
 ---
 ## Контекст
 

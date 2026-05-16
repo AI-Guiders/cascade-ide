@@ -18,6 +18,12 @@
 | [MCP-PROTOCOL.md](../MCP-PROTOCOL.md) | `debug_launch` и родственные тулы |
 | [MsBuildDebugTargetResolver.cs](../../Services/MsBuildDebugTargetResolver.cs) | MsBuildDebugTargetResolver.cs |
 
+## Резюме
+
+- **Launch profiles** и несколько стартовых конфигураций отладки (как в VS).
+- Хранение, MCP, миграция с `startup-project.json`.
+- Опциональный URL на MFD — [0093](0093-mfd-embedded-browser-for-launch-url.md).
+
 ---
 ## Контекст
 

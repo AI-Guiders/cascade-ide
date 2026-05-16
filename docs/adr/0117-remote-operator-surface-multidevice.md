@@ -19,6 +19,12 @@
 | [0099](0099-ide-databus-typed-events-and-projections.md) | События IDE → проекции |
 | [0045](0045-agent-chat-persistence-event-log-and-projections.md) | История чата / события |
 
+## Резюме
+
+- **Remote operator:** PWA-пульт с телефона/другого ПК, Operator Gateway.
+- Не mobile IDE; дополняет мультиоконность ([0017](0017-multi-window-workspace-and-agent-surfaces.md)).
+- Связь с web-portal bridge ([0108](0108-web-ai-portal-host-object-tools-bridge.md)).
+
 **Вне репо:** vision **agent-forge** (худший сценарий, API + браузер) — личный канон `agent-notes`.
 
 ---

@@ -21,6 +21,12 @@
 | [0021](0021-pfd-mfd-cockpit-attention-model.md) | Зоны внимания PFD/MFD |
 | [0066](0066-cockpit-ui-vs-ide-presentation-layer.md) | Поверхность прибора vs хром IDE (`ModalOverlay`) |
 
+## Резюме
+
+- Общий **контракт graph-backed поверхностей**: данные, взаимодействие, layout, sync.
+- Семейство: карта намерений, GitMap, будущие графы; реализация — [0115](0115-cds-graph-backed-shared-layer.md).
+- Оси **`graph_kind`**, provenance, **`relation_kind`** — в [0065](0065-instrument-categories-domain-taxonomy.md), [0114](0114-graph-edge-relation-kind-taxonomy.md).
+
 ---
 ## Контекст
 

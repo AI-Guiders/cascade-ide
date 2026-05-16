@@ -17,6 +17,12 @@
 | [0048](0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) | ACP/MCP, контекст |
 | [0008](0008-mcp-contracts-and-testable-infrastructure.md) | Снапшоты для тестов |
 
+## Резюме
+
+- Intercom: дерево сессии (ветвление, rewind, bookmark).
+- **Steer** / **follow-up** при работе агента; [0045](0045-agent-chat-persistence-event-log-and-projections.md).
+
+
 **Вне ADR:** [Pi](https://pi.dev/) — KB `kb-open-source-agents-patterns-landscape-v1.md`, секция `pi-dev-coding-agent`.
 
 ## Проблема

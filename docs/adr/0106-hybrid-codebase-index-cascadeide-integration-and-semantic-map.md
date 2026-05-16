@@ -29,6 +29,12 @@
 |---------|----------|
 | — | in-proc оркестратор, UI настроек, MFD HIS |
 
+## Резюме
+
+- In-proc **HybridCodebaseIndex.Core** в CascadeIDE; exe MCP — для внешних хостов.
+- Вписывание в **DAL → Application → CCU → DataBus** ([0102](0102-data-acquisition-layer-boundary-and-contract.md), [0097](0097-cockpit-compute-units-transport-to-channel-dto.md), [0099](0099-ide-databus-typed-events-and-projections.md)).
+- Свежесть индекса, UI настроек, граница с **Semantic Map** ([0053](0053-semantic-map-control-flow-pfd.md)).
+
 ---
 ## Решение
 
