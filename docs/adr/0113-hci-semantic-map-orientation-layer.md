@@ -2,7 +2,7 @@
 
 **Статус:** Proposed  
 **Дата:** 2026-05-14  
-**Обновлено:** 2026-05-14 — оси **`graph_kind`**, **provenance** и **`relation_kind`** ([0114](0114-graph-edge-relation-kind-taxonomy.md)); линза «быстрый referenced-by по корпусу».
+**Обновлено:** 2026-05-14 — оси **`graph_kind`**, **provenance** и **`relation_kind`** ([0114](0114-graph-edge-relation-kind-taxonomy.md)); линза «б… Подробности — [§ История](#adr0113-history).
 
 ## Связанные ADR
 
@@ -16,8 +16,6 @@
 | [0065 §6](0065-instrument-categories-domain-taxonomy.md#adr0065-p6) | Ось `graph_kind` |
 | [0114](0114-graph-edge-relation-kind-taxonomy.md) | Семантика `relation_kind` на ребре |
 | [0097](0097-cockpit-compute-units-transport-to-channel-dto.md) | `SemanticMapInputSnapshot` в CCU |
-
----
 
 ## Проблема
 
@@ -80,3 +78,13 @@ HCI **не** является источником рёбер CFG, **не** за
 
 1. Зафиксировать в коде/UX только **ориентацию** и ссылки на scope/HCI errors — без подмешивания в граф Roslyn.  
 2. По готовности DTO — один PR с `SemanticMapInputSnapshot` + тесты границы CCU; обновить этот ADR до **Accepted · Implemented** для соответствующих пунктов.
+
+---
+
+## История изменений
+
+<a id="adr0113-history"></a>
+
+| Дата | Изменение |
+|------|-----------|
+| 2026-05-14 | оси **`graph_kind`**, **provenance** и **`relation_kind`** ([0114](0114-graph-edge-relation-kind-taxonomy.md)); линза «быстрый referenced-by по корпусу». |

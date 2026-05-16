@@ -1,7 +1,7 @@
 # ADR 0114: Тип отношения на рёбрах графа (`relation_kind`) — семантика связи
 
 **Статус:** Proposed  
-**Дата:** 2026-05-14  
+**Дата:** 2026-05-14
 
 ## Связанные ADR
 
@@ -12,8 +12,6 @@
 | [0113 § оси](0113-hci-semantic-map-orientation-layer.md#adr0113-axes) | Сводка трёх осей и HCI |
 | [0039](0039-workspace-navigation-affordances.md) | Навигация workspace, related files |
 | [0105](0105-hybrid-codebase-index-for-csharp-web.md) | Hybrid index, `hit_kind` |
-
----
 
 ## Проблема
 

@@ -1,7 +1,7 @@
 # ADR 0058: Сопряжение агента и Roslyn MCP в `settings.toml` (лимиты, виды узлов, таймауты, пресеты)
 
 **Статус:** Proposed  
-**Дата:** 2026-04-18  
+**Дата:** 2026-04-18
 
 ## Связанные ADR
 
@@ -13,7 +13,6 @@
 | [0040](0040-lsp-launch-line-settings-toml-presets-and-environment.md) | паттерн TOML |
 | [0053](0053-semantic-map-control-flow-pfd.md) | карта намерений на PFD |
 | [0059](0059-roslyn-mcp-profiles-manager-tactical-strategic-efb.md) | профили, Manager, режимы Auto-Focus / Combat / Echelon, EFB на третьем мониторе — **отдельный ADR** |
----
 
 ## Контекст
 

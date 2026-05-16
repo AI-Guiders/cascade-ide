@@ -1,7 +1,7 @@
 # ADR 0083: `settings.toml` — дискриминант `ai.mode` и вложенные секции (local / acp / mcp_only / cloud)
 
 **Статус:** Accepted · Implemented  
-**Дата:** 2026-04-20  
+**Дата:** 2026-04-20
 
 ## Связанные ADR
 

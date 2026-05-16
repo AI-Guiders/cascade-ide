@@ -1,8 +1,7 @@
 # ADR 0066: Cockpit UI и слой presentation IDE — раздельные опоры
 
 **Статус:** Accepted  
-**Дата:** 2026-04-19  
-**Принято:** 2026-04-19  
+**Дата:** 2026-04-19
 
 ## Связанные ADR
 
@@ -17,8 +16,6 @@
 | [0079](0079-ide-display-system-ids-overlay-pipeline.md) | IDS — оверлеи shell (**не** cockpit UI) |
 
 **Код:** `Cockpit/PrimitivesKit/`, `Features/UiChrome/`, `Themes/*.json`.
-
----
 
 ## Контекст
 

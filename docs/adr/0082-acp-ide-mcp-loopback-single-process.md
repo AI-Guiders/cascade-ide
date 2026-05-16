@@ -2,7 +2,6 @@
 
 **Статус:** Proposed  
 **Дата:** 2026-04-20  
-
 ## Связанные ADR
 
 | ADR | Роль |
@@ -18,7 +17,6 @@
 | Документ | Роль |
 |----------|------|
 | [`externals/acp-csharp/.../McpServer.cs`](../../externals/acp-csharp/src/AgentClientProtocol/Schema/McpServer.cs) | `externals/acp-csharp/.../McpServer.cs` |
----
 
 ## Контекст
 

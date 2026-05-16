@@ -1,7 +1,8 @@
 # ADR 0023: Markdown + диаграммы (Mermaid/PlantUML) — first-class опыт через LSP и workflow
 
 **Статус:** Proposed  
-**Дата:** 2026-04-08  
+**Дата:** 2026-04-08
+
 ## Связанные ADR
 
 | ADR | Роль |
@@ -10,7 +11,6 @@
 | [0008](0008-mcp-contracts-and-testable-infrastructure.md) | внешние процессы и тестируемые абстракции |
 | [0021](0021-pfd-mfd-cockpit-attention-model.md) | модель внимания кокпита |
 | [0026](0026-markdown-preview-surfaces-and-placement.md) | **где** монтируется виджет превью Markdown — `workspace.toml`; канон по размещению превью |
----
 
 ## Контекст
 

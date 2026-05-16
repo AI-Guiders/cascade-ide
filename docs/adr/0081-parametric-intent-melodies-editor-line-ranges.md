@@ -2,7 +2,6 @@
 
 **Статус:** Proposed  
 **Дата:** 2026-04-20  
-
 ## Связанные ADR
 
 | ADR | Роль |
@@ -25,7 +24,6 @@
 | [intent-melody-language-v1.md](../intent-melody-language-v1.md) | IML v1: грамматика `c:` и реестр alias |
 | [`IntentMelody/intent-melody-aliases.toml`](../../IntentMelody/intent-melody-aliases.toml) | оверлей alias → `command_id` |
 | [Roslyn MCP](../../../roslyn-mcp/README.md) | Roslyn MCP |
----
 
 ## Контекст
 

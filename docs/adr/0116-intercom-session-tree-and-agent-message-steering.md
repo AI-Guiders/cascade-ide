@@ -1,7 +1,7 @@
 # ADR 0116: Intercom — дерево сессии (ветвление) и steer / follow-up при работе агента
 
 **Статус:** Proposed  
-**Дата:** 2026-05-15  
+**Дата:** 2026-05-15
 
 ## Связанные ADR
 
@@ -18,8 +18,6 @@
 | [0008](0008-mcp-contracts-and-testable-infrastructure.md) | Снапшоты для тестов |
 
 **Вне ADR:** [Pi](https://pi.dev/) — KB `kb-open-source-agents-patterns-landscape-v1.md`, секция `pi-dev-coding-agent`.
-
----
 
 ## Проблема
 

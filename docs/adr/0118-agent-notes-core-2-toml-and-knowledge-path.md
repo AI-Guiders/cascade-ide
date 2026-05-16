@@ -1,7 +1,7 @@
 # ADR 0118: Agent Notes Core 2.0 — TOML, `knowledge_path`, паритет с agent-notes-mcp
 
 **Статус:** Accepted (implemented 2026-05)  
-**Дата:** 2026-05-16  
+**Дата:** 2026-05-16
 
 ## Связанные ADR
 
@@ -14,8 +14,6 @@
 | [0008](0008-mcp-contracts-and-testable-infrastructure.md) | Контракты MCP |
 
 **Вне репо:** [agent-notes-mcp ADR 014](https://github.com/AI-Guiders/agent-notes-mcp/blob/main/docs/adr/014-agent-notes-local-settings-toml-v1.md) (релиз **2.0**, `--config`); NuGet **AIGuiders.AgentNotes.Core** 2.x.
-
----
 
 ## Контекст
 

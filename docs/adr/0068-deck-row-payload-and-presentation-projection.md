@@ -1,8 +1,7 @@
 # ADR 0068: Полезная нагрузка строки канала и проекция на поверхность (layout vs cell content)
 
 **Статус:** Accepted  
-**Дата:** 2026-04-19  
-**Принято:** 2026-04-19  
+**Дата:** 2026-04-19
 
 ## Связанные ADR
 
@@ -18,8 +17,6 @@
 | [`environment-readiness-glance-v1.md`](../design/environment-readiness-glance-v1.md) | Чертёж readiness |
 
 **Не путать:** «проекция представления» здесь — как **строка снимка** становится лампой/глифом; это уровень **ниже**, чем слот региона в [0021](0021-pfd-mfd-cockpit-attention-model.md) и не замена **ContentRepresentation** в [0063](0063-instrument-deck-named-composition-one-anchor.md).
-
----
 
 ## Контекст
 

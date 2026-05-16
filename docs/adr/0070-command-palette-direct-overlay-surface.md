@@ -1,7 +1,7 @@
 # ADR 0070: Command Palette как прямой overlay surface, маршрутизируемый в активный TopLevel
 
 **Статус:** Accepted  
-**Дата:** 2026-04-19  
+**Дата:** 2026-04-19
 
 ## Связанные ADR
 
@@ -12,7 +12,6 @@
 | [0021](0021-pfd-mfd-cockpit-attention-model.md) | модель внимания |
 | [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md) | keyboard-first и overlay-подсказки |
 | [0066](0066-cockpit-ui-vs-ide-presentation-layer.md) | shell chrome vs cockpit UI |
----
 
 ## Контекст
 

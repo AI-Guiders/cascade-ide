@@ -2,7 +2,8 @@
 
 **Статус:** Superseded by [0069](0069-markdown-preview-tool-surface-and-renderer-decoupling.md)  
 **Дата:** 2026-04-08  
-**Обновлено:** 2026-04-11 — подраздел **«Внутренние отсылки»** (hover/peek по «см. п. N» и якорям); ортогонально [0023](0023-markdown-diagrams-language-tooling.md). 2026-04-08 — подраздел «Глубина превью»: целевая планка v1, non-goals, приоритет export из [0023](0023-markdown-diagrams-language-tooling.md).  
+**Обновлено:** 2026-04-11 — подраздел **«Внутренние отсылки»** (hover/peek по «см. п. N» и якорям); ортогонально [0023](0023-markdown-diagrams-langu… Подробности — [§ История](#adr0026-history).
+
 ## Связанные ADR
 
 | ADR | Роль |
@@ -12,7 +13,6 @@
 | [0017](0017-multi-window-workspace-and-agent-surfaces.md) | отдельное окно как второй `TopLevel` |
 | [0022](0022-mfd-visual-design-surface-axaml-blazor.md) | перспектива вкладки/региона на MFD |
 | [0023](0023-markdown-diagrams-language-tooling.md) | LSP, диаграммы, Kroki, export — **ортогонально** размещению виджета превью |
----
 
 ## Замена прежних формулировок
 
@@ -94,3 +94,14 @@
 
 - **Держать размещение превью только в пользовательском `settings.toml`** — отклонено для пресета «как у проекта»: команда должна иметь возможность зафиксировать поведение в repo overlay рядом с остальным `workspace.toml`.
 - **Сливать с [0023](0023-markdown-diagrams-language-tooling.md) одним ADR** — отклонено: смешивает языковой опыт и геометрию UI, усложняет навигацию и эволюцию по независимым осям.
+
+---
+
+## История изменений
+
+<a id="adr0026-history"></a>
+
+| Дата | Изменение |
+|------|-----------|
+| 2026-04-08 | подраздел «Глубина превью»: целевая планка v1, non-goals, приоритет export из [0023](0023-markdown-diagrams-language-tooling.md). |
+| 2026-04-11 | подраздел **«Внутренние отсылки»** (hover/peek по «см. п. N» и якорям); ортогонально [0023](0023-markdown-diagrams-language-tooling.md). |

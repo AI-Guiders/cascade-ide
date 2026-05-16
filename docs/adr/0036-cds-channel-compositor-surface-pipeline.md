@@ -1,7 +1,8 @@
 # ADR 0036: Канал → CDS → композитор поверхности → поверхность (Agent-first отображение)
 
-**Статус:** Accepted · Implemented (слои `Cockpit/Cds`, `Cockpit/Channels`, `Cockpit/Composition`, `Cockpit/Surface`; чертёж полей — [`cds-contract-v0.md`](../design/cds-contract-v0.md) §6–7, [`Features/README.md`](../Features/README.md))  
-**Дата:** 2026-04-11  
+**Статус:** Accepted · Implemented  
+**Дата:** 2026-04-11
+
 ## Связанные ADR
 
 | ADR / документ | Роль |
@@ -14,6 +15,13 @@
 | [0115](0115-cds-graph-backed-shared-layer.md) | Общий слой graph-backed в кабине |
 | [0067](0067-graph-backed-surfaces-contract.md) | Контракт измерений graph-backed |
 | [`cds-contract-v0.md`](../design/cds-contract-v0.md) | Чертёж полей и DTO |
+
+### Снимок реализации
+
+| Элемент | Значение |
+|---------|----------|
+| — | слои `Cockpit/Cds`, `Cockpit/Channels`, `Cockpit/Composition`, `Cockpit/Surface` |
+| — | чертёж полей — [`cds-contract-v0.md`](../design/cds-contract-v0.md) §6–7, [`Features/README.md`](../Features/README.md) |
 
 ## Контекст
 

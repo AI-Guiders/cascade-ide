@@ -1,6 +1,6 @@
 # ADR 0019: Общий Git Core для Cascade IDE и git-mcp
 
-**Статус:** Accepted · Implemented (`GitMcp.Core` — общий слой для `ide_git_*` в IDE и git-mcp; паритет argv)  
+**Статус:** Accepted · Implemented  
 **Дата:** 2026-04-06  
 ## Связанные ADR
 
@@ -17,6 +17,12 @@
 | [MCP-PROTOCOL.md](../MCP-PROTOCOL.md) | Протокол IDE MCP |
 
 Внешний репозиторий: `git-mcp` (субмодуль `financial-open`).
+
+### Снимок реализации
+
+| Элемент | Значение |
+|---------|----------|
+| — | `GitMcp.Core` — общий слой для `ide_git_*` в IDE и git-mcp; паритет argv |
 
 ## Контекст
 

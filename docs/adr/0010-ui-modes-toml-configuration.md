@@ -1,8 +1,8 @@
 # ADR 0010: Данные UI-режимов (Focus / Balanced / …) в TOML
 
-**Статус:** Accepted · Implemented (загрузчик TOML, `UiModeCatalog`, capabilities, bundle `UiModes/`; override и `docs/ux` — по мере нужды)  
+**Статус:** Accepted · Implemented  
 **Дата:** 2026-04-02  
-**Обновлено:** 2026-04-25 — в **`[capabilities]`** ключи контура **IDE Health** в TOML: **`ide_health_*`** (свойства `UiModeCapabilities` — `IdeHealth*`). Ранее: 2026-04-11 — якоря `adr0010-p1`…`p8` в разделе «Решение» и ссылки на [п. 3](#adr0010-p3), [п. 7](#adr0010-p7); соглашение — [README ADR](README.md#adr-anchors-policy). 2026-04-11 — **`presentation`** / **`zone_screen_layout`:** прежде всего **`settings.toml`**, не командный репо — [0017](0017-multi-window-workspace-and-agent-surfaces.md#adr0017-presentation-grammar), [п. 4](0017-multi-window-workspace-and-agent-surfaces.md#adr0017-p4); токены грамматики — секция **`[presentation_grammar]`** (без отдельных **`pfd_zone_alias`** — короткие имена через **`pfd_zone_identifier`** и т.д.); **`screen_markers`** / **`screen_separator`** / **`zone_separator`**, **EBNF** — [0017](0017-multi-window-workspace-and-agent-surfaces.md#adr0017-presentation-ebnf). 2026-04-08 — намерение задать **топологию презентации** зон в TOML после появления альтернатив одному `MainGrid` ([0017](0017-multi-window-workspace-and-agent-surfaces.md)); см. подраздел ниже.  
+**Обновлено:** 2026-04-25 — в **`[capabilities]`** ключи контура **IDE Health** в TOML: **`ide_health_*`** (свойства `UiModeCapabilities` — `IdeHeal… Подробности — [§ История](#adr0010-history).  
 ## Связанные ADR
 
 | ADR | Роль |
@@ -17,6 +17,13 @@
 | Документ | Роль |
 |----------|------|
 | [`attention-zone-panel-playbook-v1.md`](../design/attention-zone-panel-playbook-v1.md) | зона ↔ панель ↔ топология |
+
+### Снимок реализации
+
+| Элемент | Значение |
+|---------|----------|
+| — | загрузчик TOML, `UiModeCatalog`, capabilities, bundle `UiModes/` |
+| — | override и `docs/ux` — по мере нужды |
 
 ## Контекст
 
@@ -242,3 +249,16 @@ family = "Balanced"
 ## Следующий шаг (опционально)
 
 Пользовательский override каталога `UiModes/` из `%LocalAppData%` при продуктовой необходимости; точечные правки **`docs/ux`** при изменении поведения режимов в коде.
+
+---
+
+## История изменений
+
+<a id="adr0010-history"></a>
+
+| Дата | Изменение |
+|------|-----------|
+| 2026-04-08 | намерение задать **топологию презентации** зон в TOML после появления альтернатив одному `MainGrid` ([0017](0017-multi-window-workspace-and-agent-surfaces.md)); см. подраздел ниже. |
+| 2026-04-11 | **`presentation`** / **`zone_screen_layout`:** прежде всего **`settings.toml`**, не командный репо — [0017](0017-multi-window-workspace-and-agent-surfaces.md#adr0017-presentation-grammar), [п. 4](0017-multi-window-workspace-and-agent-surfaces.md#adr0017-p4); токены грамматики — секция **`[presentation_grammar]`** (без отдельных **`pfd_zone_alias`** — короткие имена через **`pfd_zone_identifier`** и т.д.); **`screen_markers`** / **`screen_separator`** / **`zone_separator`**, **EBNF** — [0017](0017-multi-window-workspace-and-agent-surfaces.md#adr0017-presentation-ebnf). |
+| 2026-04-11 | якоря `adr0010-p1`…`p8` в разделе «Решение» и ссылки на [п. 3](#adr0010-p3), [п. 7](#adr0010-p7); соглашение — [README ADR](README.md#adr-anchors-policy). |
+| 2026-04-25 | в **`[capabilities]`** ключи контура **IDE Health** в TOML: **`ide_health_*`** (свойства `UiModeCapabilities` — `IdeHealth*`). |

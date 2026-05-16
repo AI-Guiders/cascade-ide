@@ -1,7 +1,7 @@
 # ADR 0053: Карта намерений и поток управления на PFD (control flow)
 
 **Статус:** Accepted · Implemented  
-**Дата:** 2026-04-17  
+**Дата:** 2026-04-17
 
 ## Связанные ADR
 
@@ -14,8 +14,6 @@
 | [0039](0039-workspace-navigation-affordances.md) | MCP, subgraph |
 | [0065](0065-instrument-categories-domain-taxonomy.md) | Карта намерений кода |
 | `CodeNavigationMapSubgraph*` | Модели subgraph в коде |
-
----
 
 ## Контекст
 

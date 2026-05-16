@@ -2,7 +2,7 @@
 
 **Статус:** Accepted  
 **Дата:** 2026-05-14  
-**Обновлено:** 2026-05-14 — абстракция источника графа (`IGraphDataSource` / эквивалент) в общем слое; адаптеры — доменно. 2026-05-14 — в коде: `CascadeIDE.Cockpit.Graph.IGraphDataSource`, `CodeNavigationMapJsonRequest`, адаптер `WorkspaceNavigationMapContextJsonDataSource`; `MainWindowViewModel` берёт JSON через интерфейс.
+**Обновлено:** 2026-05-14 — в коде: `CascadeIDE.Cockpit.Graph.IGraphDataSource`, `CodeNavigationMapJsonRequest`, адаптер `WorkspaceNavigationMapCont… Подробности — [§ История](#adr0115-history).
 
 ## Связанные ADR
 
@@ -18,8 +18,6 @@
 | [0113](0113-hci-semantic-map-orientation-layer.md) | HCI, `edge_provenance` |
 | [0097](0097-cockpit-compute-units-transport-to-channel-dto.md) | CCU → DTO канала (§4 в тексте) |
 | [0106](0106-hybrid-codebase-index-cascadeide-integration-and-semantic-map.md) | `SemanticMapInputSnapshot` и интеграция индекса |
-
----
 
 ## Проблема
 
@@ -78,3 +76,14 @@
 1. Документ (этот ADR) как стабильная ссылка для дизайн-ревью.  
 2. Strangler: **v0** — `IGraphDataSource` + адаптер на существующий `WorkspaceNavigationMapContextJsonBuilder`; refresh PFD через интерфейс. Далее — вынос общих частей композитора/политик по мере второго потребителя (**0067**).  
 3. По мере стабилизации — уточнить неймспейс и CASCOPE-правила в `CascadeIDE.ArchitectureAnalyzers` при необходимости (отдельный мини-ADR или правка существующих guardrails).
+
+---
+
+## История изменений
+
+<a id="adr0115-history"></a>
+
+| Дата | Изменение |
+|------|-----------|
+| 2026-05-14 | абстракция источника графа (`IGraphDataSource` / эквивалент) в общем слое; адаптеры — доменно. |
+| 2026-05-14 | в коде: `CascadeIDE.Cockpit.Graph.IGraphDataSource`, `CodeNavigationMapJsonRequest`, адаптер `WorkspaceNavigationMapContextJsonDataSource`; `MainWindowViewModel` берёт JSON через интерфейс. |

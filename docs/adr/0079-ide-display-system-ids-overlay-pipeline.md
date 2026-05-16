@@ -1,7 +1,7 @@
 # ADR 0079: IDS (Ide Display System) — пайплайн оверлеев IDE, ортогонально CDS
 
 **Статус:** Accepted  
-**Дата:** 2026-04-20  
+**Дата:** 2026-04-20
 
 ## Связанные ADR
 
@@ -13,7 +13,6 @@
 | [0057](0057-chat-surface-pipeline-adoption.md) | чат: композитор снимка поверхности; аналогия по слою «композиция» |
 | [0013](0013-command-surface-and-discoverability.md) | палитра и discoverability |
 | [0115](0115-cds-graph-backed-shared-layer.md) | CDS — общий слой graph-backed приборов (реализация в кабине, не IDS) |
----
 
 ## Контекст
 

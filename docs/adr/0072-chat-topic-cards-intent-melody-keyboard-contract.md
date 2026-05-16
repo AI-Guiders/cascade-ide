@@ -1,8 +1,7 @@
 # ADR 0072: Chat topic cards, drill-in/back и intent-based Melody/Chords для навигации по темам
 
 **Статус:** Proposed  
-**Дата:** 2026-04-19
-
+**Дата:** 2026-04-19  
 ## Связанные ADR
 
 | ADR | Роль |
@@ -24,8 +23,6 @@
 |----------|------|
 | [intent-melody-language-v1.md](../intent-melody-language-v1.md) | IML v1: грамматика `c:` и мотивация |
 **Отношение к [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md):** этот ADR **не заменяет** общую keyboard-first модель (палитра, `CascadeChord`, Command Melody `c:`). Он **нормативно уточняет**, как те же принципы **применяются к навигации по темам чата** (topic-level intents). См. [§ «Связь с ADR 0060»](#adr0072-relation-0060).
-
----
 
 ## Контекст
 

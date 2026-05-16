@@ -10,7 +10,6 @@
 | [0021](0021-pfd-mfd-cockpit-attention-model.md) | PFD / MFD — модель внимания кокпита Cascade IDE |
 | [0049](0049-skia-surface-rollout-over-avalonia-host.md) | Поэтапный rollout Skia-поверхностей при Avalonia-host (CIDE-wide) |
 | [0053](0053-semantic-map-control-flow-pfd.md) | Карта намерений и поток управления на PFD (control flow) |
----
 
 ## Контекст
 

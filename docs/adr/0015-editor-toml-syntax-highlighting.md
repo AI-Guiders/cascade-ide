@@ -1,12 +1,19 @@
 # ADR 0015: Подсветка TOML в текстовом редакторе
 
-**Статус:** Accepted · Implemented (`EditorLanguageSupport`, `TextMateTomlGrammar`, каталог `TextMateGrammars/toml`)  
-**Дата:** 2026-04-02  
+**Статус:** Accepted · Implemented  
+**Дата:** 2026-04-02
+
 ## Связанные ADR
 
 | ADR | Роль |
 |-----|------|
 | [0010](0010-ui-modes-toml-configuration.md) | продуктовые данные в TOML |
+
+### Снимок реализации
+
+| Элемент | Значение |
+|---------|----------|
+| — | `EditorLanguageSupport`, `TextMateTomlGrammar`, каталог `TextMateGrammars/toml` |
 
 ## Контекст
 

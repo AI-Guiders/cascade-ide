@@ -1,7 +1,7 @@
 # ADR 0104: Reasoning Substrate and Cognitive Decomposition Loop for MAF
 
 **Статус:** Proposed  
-**Дата:** 2026-05-05  
+**Дата:** 2026-05-05
 
 ## Связанные ADR
 

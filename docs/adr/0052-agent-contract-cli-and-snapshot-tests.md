@@ -1,11 +1,8 @@
 # ADR 0052: CLI для контракта агента (паритет с MCP) и снапшот-тесты
 
-**Статус:** Accepted · Implemented (`get_ui_modes_diagnostics`, `get_supported_editor_languages`, `get_solution_info`, `get_cockpit_surface`, `get_ide_state`, read-only `git_*` с `--workspace`; CI: `.gitlab-ci.yml` — `dotnet test` + smoke `--agent-contract`; **golden slice** CDS: `CascadeIDE.Tests/TestData/AgentContract/cockpit_surface_contract_slice.approved.json` + `AgentContractCockpitContractSlice`)  
+**Статус:** Accepted · Implemented  
 **Дата:** 2026-04-17  
-**Принят:** 2026-04-16  
-
-**Реализация:** [`Services/AgentContract/AgentContractRunner.cs`](../../Services/AgentContract/AgentContractRunner.cs), [`Services/AgentContract/AgentContractHeadlessRuntime.cs`](../../Services/AgentContract/AgentContractHeadlessRuntime.cs), вход `CascadeIDE.exe --agent-contract [--workspace <dir>] <command>` в [`Program.cs`](../../Program.cs); тесты [`CascadeIDE.Tests/AgentContractRunnerTests.cs`](../../CascadeIDE.Tests/AgentContractRunnerTests.cs), [`CascadeIDE.Tests/AgentContractRunnerHeadlessTests.cs`](../../CascadeIDE.Tests/AgentContractRunnerHeadlessTests.cs) (в т.ч. снапшот-срез `cockpit_surface`: [`CascadeIDE.Tests/AgentContractCockpitContractSlice.cs`](../../CascadeIDE.Tests/AgentContractCockpitContractSlice.cs), [`CascadeIDE.Tests/TestData/AgentContract/cockpit_surface_contract_slice.approved.json`](../../CascadeIDE.Tests/TestData/AgentContract/cockpit_surface_contract_slice.approved.json)). Паритет с MCP: `ide_get_ui_modes_diagnostics`, `ide_get_supported_editor_languages`, `ide_get_ide_state` (полная сводка — команда CLI `get_ide_state`), `ide_get_cockpit_surface` / только CDS — `get_cockpit_surface` (тот же JSON, что поле `cockpit_surface` в `get_ide_state`), `ide_git_*` (те же JSON-поля, что и в `MainWindowViewModel` / `GitCommandBuilder` + `GitCommandRunner`).
-
+**Реализация:** [`Services/AgentContract/AgentContractRunner.cs`](../../Services/AgentContract/AgentContractRunner.cs), [`Services/AgentContract/AgentContractHeadlessRuntime.cs`](../../Services/AgentContract/AgentContractHeadlessRuntime.cs), вход `CascadeIDE.exe --agent-contract [--workspace <dir>] <command>` в [`Program.cs`](../../Program.cs); тесты [`CascadeIDE.Tests/AgentContractRunnerTests.cs`](../../CascadeIDE.Tests/AgentContractRunnerTests.cs), [`CascadeIDE.Tests/AgentContractRunnerHeadlessTests.cs`](../../CascadeIDE.Tests/AgentContractRunnerHeadlessTests.cs) (в т.ч. снапшот-срез `cockpit_surface`: [`CascadeIDE.Tests/AgentContractCockpitContractSlice.cs`](../../CascadeIDE.Tests/AgentContractCockpitContractSlice.cs), [`CascadeIDE.Tests/TestData/AgentContract/cockpit_surface_contract_slice.approved.json`](../../CascadeIDE.Tests/TestData/AgentContract/cockpit_surface_contract_slice.approved.json)). Паритет с MCP: `ide_get_ui_modes_diagnostics`, `ide_get_supported_editor_languages`, `ide_get_ide_state` (полная сводка — команда CLI `get_ide_state`), `ide_get_cockpit_surface` / только CDS — `get_cockpit_surface` (тот же JSON, что поле `cockpit_surface` в `get_ide_state`), `ide_git_*` (те же JSON-поля, что и в `MainWindowViewModel` / `GitCommandBuilder` + `GitCommandRunner`).  
 ## Связанные ADR
 
 | ADR | Роль |
@@ -20,7 +17,14 @@
 | Документ | Роль |
 |----------|------|
 | [MCP-PROTOCOL.md](../MCP-PROTOCOL.md) | команды IDE / stdio MCP |
----
+
+### Снимок реализации
+
+| Элемент | Значение |
+|---------|----------|
+| — | `get_ui_modes_diagnostics`, `get_supported_editor_languages`, `get_solution_info`, `get_cockpit_surface`, `get_ide_state`, read-only `git_*` с `--workspace` |
+| — | CI: `.gitlab-ci.yml` — `dotnet test` + smoke `--agent-contract` |
+| — | **golden slice** CDS: `CascadeIDE.Tests/TestData/AgentContract/cockpit_surface_contract_slice.approved.json` + `AgentContractCockpitContractSlice` |
 
 ## Контекст
 

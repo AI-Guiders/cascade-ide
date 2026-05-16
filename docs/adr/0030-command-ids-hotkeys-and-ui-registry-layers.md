@@ -2,6 +2,9 @@
 
 **Статус:** Accepted · Implemented (реестр команд v1 в коде)  
 **Дата:** 2026-04-08  
+### Вне ADR  
+**Реализация (текущая):** partial **`IdeCommandRegistry*.cs`** (палитра + метаданные глобальных хоткеев окна), **`IdeCommandPaletteCatalog`** (проекция), **`HotkeyTomlLoader`**, **`MainWindowHotkeyService`**, **`Hotkeys/hotkeys.toml`**; тесты согласованности — **`CascadeIDE.Tests/IdeCommandRegistryTests.cs`**. Полный чертёж `IdeCommandUiMeta` из чертежа — по-прежнему отдельные итерации (§6 ниже).
+
 ## Связанные ADR
 
 | ADR | Роль |
@@ -16,8 +19,6 @@
 |----------|------|
 | [ide-command-registry-v1.md](../design/ide-command-registry-v1.md) | ide command registry v1 |
 **Реализация (текущая):** partial **`IdeCommandRegistry*.cs`** (палитра + метаданные глобальных хоткеев окна), **`IdeCommandPaletteCatalog`** (проекция), **`HotkeyTomlLoader`**, **`MainWindowHotkeyService`**, **`Hotkeys/hotkeys.toml`**; тесты согласованности — **`CascadeIDE.Tests/IdeCommandRegistryTests.cs`**. Полный чертёж `IdeCommandUiMeta` из чертежа — по-прежнему отдельные итерации (§6 ниже).
-
----
 
 ## Контекст
 

@@ -1,9 +1,8 @@
 # ADR 0105: Hybrid Codebase Index (ядро + MCP) for C# stacks with Roslyn Truth
 
-**Реализация (ядро + MCP):** репозиторий [hybrid-codebase-index](https://github.com/KarataevDmitry/hybrid-codebase-index). Пояснение «зачем и почему так» без нумерации ADR см. **[design rationale](https://github.com/KarataevDmitry/hybrid-codebase-index/blob/main/docs/design-rationale.md)**.
-
 **Статус:** Accepted · Implemented  
 **Дата:** 2026-05-06  
+**Реализация (ядро + MCP):** репозиторий [hybrid-codebase-index](https://github.com/KarataevDmitry/hybrid-codebase-index). Пояснение «зачем и почему так» без нумерации ADR см. **[design rationale](https://github.com/KarataevDmitry/hybrid-codebase-index/blob/main/docs/design-rationale.md)**.  
 **Расширяется / follow-up в IDE:** [0106](0106-hybrid-codebase-index-cascadeide-integration-and-semantic-map.md)
 
 ## Связанные ADR

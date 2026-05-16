@@ -1,7 +1,8 @@
 # ADR 0069: Markdown Preview — инструмент MFD, renderer-first decoupling и отказ от inline preview в документе
 
 **Статус:** Accepted  
-**Дата:** 2026-04-19  
+**Дата:** 2026-04-19
+
 ## Связанные ADR
 
 | ADR | Роль |
@@ -13,7 +14,6 @@
 | [0036](0036-cds-channel-compositor-surface-pipeline.md) | канал → surface |
 | [0066](0066-cockpit-ui-vs-ide-presentation-layer.md) | инструмент vs хром IDE |
 | [0068](0068-deck-row-payload-and-presentation-projection.md) | разделение payload / projection / slot |
----
 
 ## Контекст
 

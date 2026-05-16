@@ -1,7 +1,7 @@
 # ADR 0059: Профили Roslyn MCP, Manager, тактика/стратегия и EFB (MFD)
 
 **Статус:** Proposed  
-**Дата:** 2026-04-18  
+**Дата:** 2026-04-18
 
 ## Связанные ADR
 
@@ -15,7 +15,6 @@
 | [0051](0051-intent-based-attention-routing-toml.md) | intent routing |
 | [0053](0053-semantic-map-control-flow-pfd.md) | Semantic Map, control flow |
 | [0055](0055-skia-instrument-composition-pipeline.md) | declutter на PFD |
----
 
 ## Контекст
 

@@ -1,7 +1,7 @@
 # ADR 0061: Контекстная привязка ADR к путям кода (GPWS для документации) и индикатор на PFD
 
 **Статус:** Proposed (реализация отложена)  
-**Дата:** 2026-04-17  
+**Дата:** 2026-04-17
 
 ## Связанные ADR
 
@@ -12,7 +12,6 @@
 | [0053](0053-semantic-map-control-flow-pfd.md) | карта и курсор в методе |
 | [0028](0028-user-settings-toml-localappdata-and-secrets.md) | Пользовательские настройки — `settings.toml`, каталог `%LocalAppData%\CascadeIDE\`, секреты отдельно |
 | [0050](0050-declarative-instrument-zone-placement-toml.md) | декларативные карты в TOML |
----
 
 ## Контекст
 

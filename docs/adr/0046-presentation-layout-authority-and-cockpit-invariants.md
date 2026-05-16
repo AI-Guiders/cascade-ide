@@ -1,7 +1,8 @@
 # ADR 0046: Cockpit CDS — policy раскладки (`CockpitPresentationLayoutPolicy`) и инварианты P/F/M
 
-**Статус:** Accepted · Implemented (инварианты P/F/M и coercion intent в VM; `CockpitPresentationLayoutPolicy` / CASCOPE003 — см. § «Решение»)  
-**Дата:** 2026-04-14  
+**Статус:** Accepted · Implemented  
+**Дата:** 2026-04-14
+
 ## Связанные ADR
 
 | ADR | Роль |
@@ -11,6 +12,12 @@
 | [0044](0044-avalonia-host-skia-agent-chat-surface.md) | UI не источник истины по смыслу |
 | [0047](0047-cockpit-instrument-descriptor-and-slot-composition.md) | Instrument, слоты |
 | [0036](0036-cds-channel-compositor-surface-pipeline.md) | CDS → композитор → поверхность |
+
+### Снимок реализации
+
+| Элемент | Значение |
+|---------|----------|
+| — | инварианты P/F/M и coercion intent в VM; `CockpitPresentationLayoutPolicy` / CASCOPE003 — см. § «Решение» |
 
 ## Контекст
 

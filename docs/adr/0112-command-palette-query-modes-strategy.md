@@ -1,8 +1,7 @@
 # ADR 0112: Режимы строки палитры (`f:` / `t:` / `m:` / `x:` / `c:`) — модель режимов, стратегии и **бэкенды** workspace-поиска
 
-**Статус:** Accepted · Implemented (этапы 1–4: режимная модель разбора, chrome, rg/hci/auto бэкенды, TOML; стратегии по режиму — см. код `CommandPaletteParsedQueryParser` и ветви оркестратора)  
+**Статус:** Accepted · Implemented  
 **Дата:** 2026-05-11 · обновлено 2026-05-12  
-
 ## Связанные ADR
 
 | ADR | Роль |
@@ -24,7 +23,12 @@
 | [intent-melody-language-v1.md](../intent-melody-language-v1.md) | intent melody language v1 |
 **Точки кода (фактический baseline):** `IdeCommandPaletteFilterOrchestrator`, `IntentMelodyAliases.TryGetTail`, `GoToAllQueryParser`, `CommandPaletteChromeProjection`, `IdeCommandPaletteExecutionOrchestrator`.
 
----
+### Снимок реализации
+
+| Элемент | Значение |
+|---------|----------|
+| — | этапы 1–4: режимная модель разбора, chrome, rg/hci/auto бэкенды, TOML |
+| — | стратегии по режиму — см. код `CommandPaletteParsedQueryParser` и ветви оркестратора |
 
 ## Контекст
 

@@ -15,7 +15,6 @@
 | Документ | Роль |
 |----------|------|
 | [`environment-readiness-glance-v1.md`](../design/environment-readiness-glance-v1.md) | `environment-readiness-glance-v1.md` |
----
 
 ## Контекст
 

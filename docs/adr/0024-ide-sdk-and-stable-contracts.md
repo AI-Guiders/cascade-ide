@@ -1,7 +1,8 @@
 # ADR 0024: SDK для CascadeIDE — стабильные контракты для внутреннего расширения и будущих плагинов
 
 **Статус:** Proposed  
-**Дата:** 2026-04-08  
+**Дата:** 2026-04-08
+
 ## Связанные ADR
 
 | ADR | Роль |
@@ -14,7 +15,6 @@
 | [0023](0023-markdown-diagrams-language-tooling.md) | внешние инструменты/LSP как контракты |
 | [0026](0026-markdown-preview-surfaces-and-placement.md) | геометрия превью Markdown в TOML |
 | [0025](0025-sdk-attention-zones-and-capabilities.md) | зоны внимания PFD/MFD/… в SDK и capabilities |
----
 
 ## Контекст
 

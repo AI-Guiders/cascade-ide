@@ -2,9 +2,9 @@
 
 **Статус:** Proposed (черновик направления до переработки UI чата; детали протокола и экранов — по итерациям)  
 **Дата:** 2026-04-12  
-**Обновлено:** 2026-04-13 — v0 доменной модели пакетов уточнений и валидации в коде: `Models/AgentChat/` (`ClarificationBatch`, `ClarificationItem`, `ClarificationResponse`, `ClarificationBatchValidation`); UI чата пока не подключён.  
-**Обновлено:** 2026-04-19 — chat surface переведён на pipeline snapshot (`ChatSurfaceCompositor`: `Intent -> Declutter -> Layout -> Render`), Skia закреплён как единый продуктовый path; `ClarificationBatch` / `ClarificationResponse` подключены к реальному chat flow и MCP-командам `open_chat_clarification_batch` / `submit_chat_clarification_response`.  
-**Обновлено (ранее):** 2026-04-12 — «тема → подтемы», **обзор размаха на одном экране** vs глубокий скролл; смесь подзадач в одной сессии (ADR + ответвления) как норма.  
+**Обновлено:** 2026-04-19 — chat surface переведён на pipeline snapshot (`ChatSurfaceCompositor`: `Intent -> Declutter -> Layout -> Render`), Skia з… Подробности — [§ История](#adr0031-history).  
+**Обновлено (ранее):** 2026-04-12 — «тема → подтемы», **обзор размаха на одном экране** vs глубокий скролл; смесь подзадач в одной сессии (ADR + ответвления) как норма.
+
 ## Связанные ADR
 
 | ADR | Роль |
@@ -78,3 +78,14 @@
 ## Статус после принятия
 
 После согласования: статус **Accepted**, при необходимости ссылка из [concept-to-implementation-map-v1.md](../ux/concept-to-implementation-map-v1.md) и обновление навигатора в [architecture-policy.md](../architecture-policy.md).
+
+---
+
+## История изменений
+
+<a id="adr0031-history"></a>
+
+| Дата | Изменение |
+|------|-----------|
+| 2026-04-13 | v0 доменной модели пакетов уточнений и валидации в коде: `Models/AgentChat/` (`ClarificationBatch`, `ClarificationItem`, `ClarificationResponse`, `ClarificationBatchValidation`); UI чата пока не подключён. |
+| 2026-04-19 | chat surface переведён на pipeline snapshot (`ChatSurfaceCompositor`: `Intent -> Declutter -> Layout -> Render`), Skia закреплён как единый продуктовый path; `ClarificationBatch` / `ClarificationResponse` подключены к реальному chat flow и MCP-командам `open_chat_clarification_batch` / `submit_chat_clarification_response`. |

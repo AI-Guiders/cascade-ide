@@ -2,8 +2,7 @@
 
 **Статус:** Proposed  
 **Дата:** 2026-04-24  
-**Обновлено:** 2026-04-25 — ссылки на TOML: ключи **IDE Health** в `UiModes` — **`ide_health_*`** ([0010](0010-ui-modes-toml-configuration.md)); формулировки про миграцию `workspace_health_*` приведены в соответствие с репозиторием.
-
+**Обновлено:** 2026-04-25 — ссылки на TOML: ключи **IDE Health** в `UiModes` — **`ide_health_*`** ([0010](0010-ui-modes-toml-configuration.md)); фор… Подробности — [§ История](#adr0095-history).  
 ## Связанные ADR
 
 | ADR | Роль |
@@ -25,7 +24,6 @@
 |----------|------|
 | [`environment-readiness-glance-v1.md`](../design/environment-readiness-glance-v1.md) | канал **готовности окружения** — уже ближе к уровню IDE |
 | [`workspace-health-implementation-map-v1.md`](../design/workspace-health-implementation-map-v1.md) | текущая карта полосы IDE Health |
----
 
 ## Контекст
 
@@ -133,3 +131,13 @@
 
 - Новые фичи и ADR, затрагивающие наблюдаемость, **ссылаются** на этот ADR и явно указывают уровень A/B/C (или осознанное нарушение с обоснованием).
 - Рефакторинг `IdeHealth*` становится **планируемым** с трекингом по уровням, а не только косметическим переименованием.
+
+---
+
+## История изменений
+
+<a id="adr0095-history"></a>
+
+| Дата | Изменение |
+|------|-----------|
+| 2026-04-25 | ссылки на TOML: ключи **IDE Health** в `UiModes` — **`ide_health_*`** ([0010](0010-ui-modes-toml-configuration.md)); формулировки про миграцию `workspace_health_*` приведены в соответствие с репозиторием. |

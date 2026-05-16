@@ -1,7 +1,8 @@
 # ADR 0042: Pre-flight briefing — Planned Changes и Review Before Apply
 
 **Статус:** Proposed  
-**Дата:** 2026-04-13  
+**Дата:** 2026-04-13
+
 ## Связанные ADR
 
 | ADR | Роль |

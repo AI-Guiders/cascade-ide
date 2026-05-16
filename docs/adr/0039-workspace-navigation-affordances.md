@@ -1,9 +1,10 @@
 # ADR 0039: Навигация по workspace — несколько представлений и «текущий файл + связанные»
 
-**Статус:** Accepted · Implemented (MCP `get_code_navigation_context`, пресеты и фильтры в `settings.toml`; полноценный UI Semantic Map / `ILayoutEngine` — по плану, см. текст ADR)  
+**Статус:** Accepted · Implemented  
 **Дата:** 2026-04-16  
-**Реализация (MCP-слой):** зафиксирована в коде (2026-04): пресеты в `settings.toml`, эхо фильтра, семантика subgraph; см. [§ Agent/MCP](#adr0039-mcp-workspace-navigation). Полноценная Semantic Map в UI и `ILayoutEngine` — вне этого статуса.  
-**Обновлено:** 2026-04-13 — расширен контракт MCP: [именованные пресеты](#adr0039-mcp-workspace-navigation), [`kind_filter`](#adr0039-mcp-workspace-navigation), [subgraph: `kind` / `related_kind`](#adr0039-mcp-workspace-navigation); cookbook: [workspace-navigation-mcp-cookbook.md](../design/workspace-navigation-mcp-cookbook.md). Ранее: [Agent/MCP: `get_code_navigation_context`](#adr0039-mcp-workspace-navigation). Ранее: 2026-04-11 — [Semantic Map: источник истины и слой конфигурации](#adr0039-semantic-map-data-layer) (зафиксировано). Ранее: блок [открытые vs закрытые вопросы](#adr0039-open-questions); [канон `(PFD)(Forward)(MFD)`](#adr0039-layout-canon) (scan pattern; уточнение: [строка `presentation` ≠ токен `window`](#adr0039-presentation-vs-toplevel)); [Semantic Map: `ILayoutEngine`](#adr0039-semantic-map-layout). Ещё ранее: 2026-04-16 — [область языков](#adr0039-language-scope); [«Продуктовая метафора»](#adr0039-product-metaphor).  
+**Обновлено:** 2026-04-16 — [область языков](#adr0039-language-scope); [«Продуктовая метафора»](#adr0039-product-metaphor). Подробности — [§ История](#adr0039-history).  
+**Реализация (MCP-слой):** зафиксирована в коде (2026-04): пресеты в `settings.toml`, эхо фильтра, семантика subgraph; см. [§ Agent/MCP](#adr0039-mcp-workspace-navigation). Полноценная Semantic Map в UI и `ILayoutEngine` — вне этого статуса.
+
 ## Связанные ADR
 
 | ADR | Роль |
@@ -17,6 +18,13 @@
 | [0059](0059-roslyn-mcp-profiles-manager-tactical-strategic-efb.md) | Профили Roslyn, Manager, EFB |
 | [0065](0065-instrument-categories-domain-taxonomy.md) | `graph_kind`, карта намерений |
 | [0067](0067-graph-backed-surfaces-contract.md) | Контракт graph-backed поверхностей |
+
+### Снимок реализации
+
+| Элемент | Значение |
+|---------|----------|
+| — | MCP `get_code_navigation_context`, пресеты и фильтры в `settings.toml` |
+| — | полноценный UI Semantic Map / `ILayoutEngine` — по плану, см. текст ADR |
 
 ## Контекст
 
@@ -197,3 +205,17 @@ IDE-команда **`get_code_navigation_context`** (`ide_execute_command`) —
 2. Канон **«связанных»** для **C#** (Roslyn): полный контракт данных и UX в панелях IDE; для **MCP** зафиксированы **имена видов связей** и ответ с эхом фильтра — см. [§ Agent/MCP](#adr0039-mcp-workspace-navigation). Расширение на другие языки — **отдельная фаза**, вне north-star.
 
 3. **Semantic Map: численные значения по умолчанию** — конкретные пороги по числу **узлов** и **рёбер** в подграфе мини-карты, таймаут укладки, при необходимости глубина обхода; пороги **деградации** в список; **профилирование** на очень больших решениях. *(Принцип капов и эвристика 7±2 — [закрыты](#adr0039-closed-questions) п.3; `ILayoutEngine` — [§4](#adr0039-semantic-map-layout). Слой данных и пресеты — [закрыты](#adr0039-closed-questions) п.4.)*
+
+---
+
+## История изменений
+
+<a id="adr0039-history"></a>
+
+| Дата | Изменение |
+|------|-----------|
+| — | [Agent/MCP: `get_code_navigation_context`](#adr0039-mcp-workspace-navigation). |
+| — | блок [открытые vs закрытые вопросы](#adr0039-open-questions); [канон `(PFD)(Forward)(MFD)`](#adr0039-layout-canon) (scan pattern; уточнение: [строка `presentation` ≠ токен `window`](#adr0039-presentation-vs-toplevel)); [Semantic Map: `ILayoutEngine`](#adr0039-semantic-map-layout). Ещё |
+| 2026-04-11 | [Semantic Map: источник истины и слой конфигурации](#adr0039-semantic-map-data-layer) (зафиксировано). |
+| 2026-04-13 | расширен контракт MCP: [именованные пресеты](#adr0039-mcp-workspace-navigation), [`kind_filter`](#adr0039-mcp-workspace-navigation), [subgraph: `kind` / `related_kind`](#adr0039-mcp-workspace-navigation); cookbook: [workspace-navigation-mcp-cookbook.md](../design/workspace-navigation-mcp-cookbook.md). |
+| 2026-04-16 | [область языков](#adr0039-language-scope); [«Продуктовая метафора»](#adr0039-product-metaphor). |

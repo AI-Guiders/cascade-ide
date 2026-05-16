@@ -2,8 +2,7 @@
 
 **Статус:** Accepted  
 **Дата:** 2026-04-19  
-**Принято:** 2026-04-19  
-**Обновлено:** 2026-04-19 — ключевая мысль «операционная surface», ограничения, доп. требования, seed для агента (EN). 2026-05-14 — измерения **Edge / node provenance** ([0113 § оси](0113-hci-semantic-map-orientation-layer.md#adr0113-axes)) и **Relation kind** ([0114](0114-graph-edge-relation-kind-taxonomy.md)); обе ортогональны `graph_kind`. 2026-05-14 — ссылка на размещение общего слоя реализации в **CDS** ([0115](0115-cds-graph-backed-shared-layer.md)), не IDS.
+**Обновлено:** 2026-05-14 — ссылка на размещение общего слоя реализации в **CDS** ([0115](0115-cds-graph-backed-shared-layer.md)), не IDS. Подробности — [§ История](#adr0067-history).
 
 ## Связанные ADR
 
@@ -21,8 +20,6 @@
 | [0047](0047-cockpit-instrument-descriptor-and-slot-composition.md) | Instrument, слот, поверхность |
 | [0021](0021-pfd-mfd-cockpit-attention-model.md) | Зоны внимания PFD/MFD |
 | [0066](0066-cockpit-ui-vs-ide-presentation-layer.md) | Поверхность прибора vs хром IDE (`ModalOverlay`) |
-
----
 
 ## Контекст
 
@@ -151,3 +148,15 @@ Cross-check with ADR **0067** (graph-backed surfaces) and related ADRs on `graph
 | Отдельный viewer на каждый граф | Дублирование, расхождение навигации и синхронизации с workspace |
 | Один жёсткий `GraphView` control на все данные | Не гнётся под разные домены и layout; тормозит эволюцию |
 | Только гайд в Markdown без ADR | Нет стабильной ссылки для ревью и онбординга |
+
+---
+
+## История изменений
+
+<a id="adr0067-history"></a>
+
+| Дата | Изменение |
+|------|-----------|
+| 2026-04-19 | ключевая мысль «операционная surface», ограничения, доп. требования, seed для агента (EN). |
+| 2026-05-14 | измерения **Edge / node provenance** ([0113 § оси](0113-hci-semantic-map-orientation-layer.md#adr0113-axes)) и **Relation kind** ([0114](0114-graph-edge-relation-kind-taxonomy.md)); обе ортогональны `graph_kind`. |
+| 2026-05-14 | ссылка на размещение общего слоя реализации в **CDS** ([0115](0115-cds-graph-backed-shared-layer.md)), не IDS. |

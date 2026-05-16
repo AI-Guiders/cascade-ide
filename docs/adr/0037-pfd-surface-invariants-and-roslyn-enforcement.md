@@ -2,7 +2,7 @@
 
 **Статус:** Proposed  
 **Дата:** 2026-04-12  
-**Обновлено:** 2026-04-16 — [канон имён](#adr0037-naming) для строгой поверхности: `[PfdStrict]`, `PfdStrictControl`. Ранее: [глоссарий](#adr0037-glossary-pfd-dual); навигация и [0039](0039-workspace-navigation-affordances.md). Ранее: раздел «Зона внимания vs строгая поверхность» ([0021](0021-pfd-mfd-cockpit-attention-model.md)).  
+**Обновлено:** 2026-04-16 — [канон имён](#adr0037-naming) для строгой поверхности: `[PfdStrict]`, `PfdStrictControl`. Подробности — [§ История](#adr0037-history).  
 ## Связанные ADR
 
 | ADR | Роль |
@@ -126,3 +126,15 @@
 2. Нужен ли **отдельный** анализ `.axaml` или достаточно partial-класса и codegen.
 
 **Снято с повестки именования:** канон — [`[PfdStrict]` / `PfdStrictAttribute`](#adr0037-naming) и опционально [`PfdStrictControl`](#adr0037-naming); см. таблицу в том же разделе.
+
+---
+
+## История изменений
+
+<a id="adr0037-history"></a>
+
+| Дата | Изменение |
+|------|-----------|
+| — | [глоссарий](#adr0037-glossary-pfd-dual); навигация и [0039](0039-workspace-navigation-affordances.md). |
+| — | раздел «Зона внимания vs строгая поверхность» ([0021](0021-pfd-mfd-cockpit-attention-model.md)). |
+| 2026-04-16 | [канон имён](#adr0037-naming) для строгой поверхности: `[PfdStrict]`, `PfdStrictControl`. |

@@ -1,7 +1,7 @@
 # ADR 0078: Git preflight и шум-контроль изменений в CIDE
 
 **Статус:** Proposed  
-**Дата:** 2026-04-20  
+**Дата:** 2026-04-20
 
 ## Связанные ADR
 
@@ -10,7 +10,6 @@
 | [0019](0019-shared-git-core-ide-and-git-mcp.md) | общий Git Core |
 | [0042](0042-pre-flight-planned-changes-and-review-before-apply.md) | pre-flight как обязательный шаг |
 | [0077](0077-tech-principles-hub.md) | TECH-центр принципов |
----
 
 ## Контекст
 

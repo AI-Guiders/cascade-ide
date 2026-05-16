@@ -2,7 +2,6 @@
 
 **Статус:** Proposed  
 **Дата:** 2026-04-19  
-
 ## Связанные ADR
 
 | ADR | Роль |
@@ -19,7 +18,6 @@
 | Документ | Роль |
 |----------|------|
 | [cascadeide-philosophy-v1.md](../design/cascadeide-philosophy-v1.md) | cascadeide philosophy v1 |
----
 
 ## Контекст
 

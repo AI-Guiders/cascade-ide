@@ -1,8 +1,7 @@
 # ADR 0106: Hybrid Codebase Index — интеграция в CascadeIDE, свежесть и Semantic Map
 
-**Статус:** Accepted · In progress (in-proc оркестратор, UI настроек, MFD HIS)  
+**Статус:** Accepted · In progress  
 **Дата:** 2026-05-07 (обновлено 2026-05-08)  
-
 ## Связанные ADR
 
 | ADR | Роль |
@@ -24,7 +23,11 @@
 |----------|------|
 | [`hybrid-codebase-index`](https://github.com/KarataevDmitry/hybrid-codebase-index) | Репозиторий ядра и MCP-хоста |
 
----
+### Снимок реализации
+
+| Элемент | Значение |
+|---------|----------|
+| — | in-proc оркестратор, UI настроек, MFD HIS |
 
 ## Решение
 

@@ -1,7 +1,8 @@
 # ADR 0047: Инструмент кабины (`Instrument`) — дескриптор композиции слота, не `Control`
 
-**Статус:** Accepted · Implemented (термин **Instrument**, `CockpitInstrumentDescriptor`, `MainWindowHostSurfaceFrame`, `MainWindowInstrumentMountRegistry`; см. [`cds-contract-v0.md`](../design/cds-contract-v0.md); расширение списка инструментов — по дорожной карте)  
-**Дата:** 2026-04-15  
+**Статус:** Accepted · Implemented  
+**Дата:** 2026-04-15
+
 ## Связанные ADR
 
 | ADR / документ | Роль |
@@ -13,6 +14,14 @@
 | [`cds-contract-v0.md`](../design/cds-contract-v0.md) | Чертёж дескрипторов и слотов |
 
 **Имя файла (история):** ранее черновик назывался `*widget*`; канонический термин продукта — **Instrument** (см. п.1).
+
+### Снимок реализации
+
+| Элемент | Значение |
+|---------|----------|
+| — | термин **Instrument**, `CockpitInstrumentDescriptor`, `MainWindowHostSurfaceFrame`, `MainWindowInstrumentMountRegistry` |
+| — | см. [`cds-contract-v0.md`](../design/cds-contract-v0.md) |
+| — | расширение списка инструментов — по дорожной карте |
 
 ## Контекст
 

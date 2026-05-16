@@ -1,7 +1,8 @@
 # ADR 0025: SDK и зоны внимания (PFD / Forward / MFD / EICAS / HUD)
 
 **Статус:** Proposed  
-**Дата:** 2026-04-08  
+**Дата:** 2026-04-08
+
 ## Связанные ADR
 
 | ADR | Роль |
@@ -9,7 +10,6 @@
 | [0021](0021-pfd-mfd-cockpit-attention-model.md) | семантика зон и каналов внимания |
 | [0024](0024-ide-sdk-and-stable-contracts.md) | SDK, capability‑модель, `CascadeIDE.Contracts` |
 | [0010](0010-ui-modes-toml-configuration.md) | overlay презентации без подмены семантики |
----
 
 ## Контекст
 
