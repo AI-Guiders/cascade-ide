@@ -4,7 +4,20 @@
 **Дата:** 2026-05-14  
 **Обновлено:** 2026-05-14 — абстракция источника графа (`IGraphDataSource` / эквивалент) в общем слое; адаптеры — доменно. 2026-05-14 — в коде: `CascadeIDE.Cockpit.Graph.IGraphDataSource`, `CodeNavigationMapJsonRequest`, адаптер `WorkspaceNavigationMapContextJsonDataSource`; `MainWindowViewModel` берёт JSON через интерфейс.
 
-**Связь:** цепочка кабины **[0036](0036-cds-channel-compositor-surface-pipeline.md)** (канал → CDS → композитор → поверхность). Контракт семейства графов **[0067](0067-graph-backed-surfaces-contract.md)**. **Не** путать с **[0079](0079-ide-display-system-ids-overlay-pipeline.md)** (IDS — оверлеи оболочки). Skia-этапы **[0055](0055-skia-instrument-composition-pipeline.md)**. Слоты и дескрипторы **[0047](0047-cockpit-instrument-descriptor-and-slot-composition.md)**. Оси данных **[0065](0065-instrument-categories-domain-taxonomy.md)** (`graph_kind`), **[0114](0114-graph-edge-relation-kind-taxonomy.md)** (`relation_kind`), **[0113](0113-hci-semantic-map-orientation-layer.md)** (`edge_provenance` / HCI).
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0036](0036-cds-channel-compositor-surface-pipeline.md) | Канал → CDS → композитор → поверхность |
+| [0067](0067-graph-backed-surfaces-contract.md) | Контракт семейства graph-backed поверхностей |
+| [0079](0079-ide-display-system-ids-overlay-pipeline.md) | IDS — оверлеи оболочки (**не** путать с CDS) |
+| [0055](0055-skia-instrument-composition-pipeline.md) | Skia-этапы композиции |
+| [0047](0047-cockpit-instrument-descriptor-and-slot-composition.md) | Слоты и дескрипторы приборов |
+| [0065](0065-instrument-categories-domain-taxonomy.md) | Ось `graph_kind` |
+| [0114](0114-graph-edge-relation-kind-taxonomy.md) | Ось `relation_kind` |
+| [0113](0113-hci-semantic-map-orientation-layer.md) | HCI, `edge_provenance` |
+| [0097](0097-cockpit-compute-units-transport-to-channel-dto.md) | CCU → DTO канала (§4 в тексте) |
+| [0106](0106-hybrid-codebase-index-cascadeide-integration-and-semantic-map.md) | `SemanticMapInputSnapshot` и интеграция индекса |
 
 ---
 

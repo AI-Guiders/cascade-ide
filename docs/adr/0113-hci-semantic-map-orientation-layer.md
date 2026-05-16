@@ -4,7 +4,18 @@
 **Дата:** 2026-05-14  
 **Обновлено:** 2026-05-14 — оси **`graph_kind`**, **provenance** и **`relation_kind`** ([0114](0114-graph-edge-relation-kind-taxonomy.md)); линза «быстрый referenced-by по корпусу».
 
-**Связь:** расширяет и уточняет границу **Semantic Map и слой B** в **[0106](0106-hybrid-codebase-index-cascadeide-integration-and-semantic-map.md)** — без дублирования интеграционного контура IDE. Базовый индекс и MCP: **[0105](0105-hybrid-codebase-index-for-csharp-web.md)**. Карта как поверхность: **[0039](0039-workspace-navigation-affordances.md)**, **[0053](0053-semantic-map-control-flow-pfd.md)**, **[0067](0067-graph-backed-surfaces-contract.md)**. Ось **`graph_kind`**: **[0065 §6](0065-instrument-categories-domain-taxonomy.md#adr0065-p6)**. Семантика отношения на ребре: **[0114](0114-graph-edge-relation-kind-taxonomy.md)**. Снимок входа в CCU: **[0097](0097-cockpit-compute-units-transport-to-channel-dto.md)** (`SemanticMapInputSnapshot`).
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0106](0106-hybrid-codebase-index-cascadeide-integration-and-semantic-map.md) | Граница Semantic Map / слой B; интеграция IDE |
+| [0105](0105-hybrid-codebase-index-for-csharp-web.md) | Hybrid index, MCP |
+| [0039](0039-workspace-navigation-affordances.md) | Карта как поверхность навигации |
+| [0053](0053-semantic-map-control-flow-pfd.md) | Control flow на PFD |
+| [0067](0067-graph-backed-surfaces-contract.md) | Контракт graph-backed поверхностей |
+| [0065 §6](0065-instrument-categories-domain-taxonomy.md#adr0065-p6) | Ось `graph_kind` |
+| [0114](0114-graph-edge-relation-kind-taxonomy.md) | Семантика `relation_kind` на ребре |
+| [0097](0097-cockpit-compute-units-transport-to-channel-dto.md) | `SemanticMapInputSnapshot` в CCU |
 
 ---
 

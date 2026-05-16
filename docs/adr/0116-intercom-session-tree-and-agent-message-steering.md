@@ -3,7 +3,21 @@
 **Статус:** Proposed  
 **Дата:** 2026-05-15  
 
-**Связь:** [0080](0080-intercom-naming-and-multi-party-channel-model.md) (Intercom как канал), [0096](0096-intercom-topic-card-summary-and-product-spine.md) (картотека тем, spine), [0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md) (overview/detail, topic cards), [0045](0045-agent-chat-persistence-event-log-and-projections.md) (append-only события), [0031](0031-agent-chat-clarification-batches-and-threading.md) (треды, пакеты уточнений), [0038](0038-agent-facade-ai-provider-and-tool-orchestration.md) (цикл агента, tool-run), [0084](0084-agent-edits-editor-source-of-truth-presence-channel.md) (присутствие агента), [0048](0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) (контекст в ACP/MCP), [0008](0008-mcp-contracts-and-testable-infrastructure.md) (снапшоты для тестов). Внешний ориентир: [Pi](https://pi.dev/) — KB `kb-open-source-agents-patterns-landscape-v1.md`, секция `pi-dev-coding-agent`.
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0080](0080-intercom-naming-and-multi-party-channel-model.md) | Intercom как канал |
+| [0096](0096-intercom-topic-card-summary-and-product-spine.md) | Картотека тем, product spine |
+| [0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md) | Topic cards, overview/detail |
+| [0045](0045-agent-chat-persistence-event-log-and-projections.md) | Append-only события чата |
+| [0031](0031-agent-chat-clarification-batches-and-threading.md) | Треды, пакеты уточнений |
+| [0038](0038-agent-facade-ai-provider-and-tool-orchestration.md) | Цикл агента, tool-run |
+| [0084](0084-agent-edits-editor-source-of-truth-presence-channel.md) | Присутствие агента в редакторе |
+| [0048](0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) | ACP/MCP, контекст |
+| [0008](0008-mcp-contracts-and-testable-infrastructure.md) | Снапшоты для тестов |
+
+**Вне ADR:** [Pi](https://pi.dev/) — KB `kb-open-source-agents-patterns-landscape-v1.md`, секция `pi-dev-coding-agent`.
 
 ---
 

@@ -134,6 +134,7 @@
 
 ## Соглашения
 
+- **Связанные ADR:** не сплошной абзац в шапке — секция [## Связанные ADR](snippets/adr-related-links-convention.md) с таблицей `| ADR | Роль |` (шаблон и правила в snippets).
 - **Имя файла:** `NNNN-краткий-kebab-title.md`, четыре цифры с ведущими нулями.
 - **Статусы:** в шапке ADR и в колонке «Статус» — см. [status-lifecycle.md](status-lifecycle.md). Кратко: первый тег (**Proposed** / **Accepted** / **Superseded** / **Deprecated**); для **внедрённого в код** решения — **`Accepted · Implemented`** (второй тег через **` · `**). Без подпапок по статусу — один `docs/adr/`.
 - **Тематические подпапки** (не по статусу): опционально указатель по теме — [0075](0075-ui-topic-index-and-mfd-page-conventions.md) и [`UI/README.md`](UI/README.md); **TECH** — [`TECH/README.md`](TECH/README.md) и [0077](0077-tech-principles-hub.md).

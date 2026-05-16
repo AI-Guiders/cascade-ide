@@ -50,11 +50,13 @@
 | `Features/WebAiPortal/Application/WebAiPortalChatMixInFormatter.cs` | Снимок диапазона редактора: `LineRange` вместо «голых» int строк |
 | `CascadeIDE.Tests/EditorMcpSpansTests.cs`, расширение `EditorLineNumberRangeTests` | Отказы и границы парсера MCP |
 
-## Связь с другими ADR
+## Связанные ADR
 
-- **0081** — семантика параметрики по строкам; ADR 0111 фиксирует представление LR/LN в доменной модели IDE поверх 0081.
-- **0109** — каталог и `tail_signature`; `:ln` остаётся метаданными каталога, VO — слой приложения.
-- **0110** — Roslyn по диапазону; когда появится мост, LR может переиспользоваться или маппиться в аргументы Roslyn MCP (отдельный шаг).
+| ADR | Роль |
+|-----|------|
+| [0081](0081-parametric-intent-melodies-editor-line-ranges.md) | Семантика параметрики по строкам; 0111 — VO LR/LN в домене IDE |
+| [0109](0109-declarative-parametric-melody-catalog-toml-and-code-binders.md) | Каталог, `tail_signature`; `:ln` — метаданные каталога |
+| [0110](0110-roslyn-refactor-intent-melody-bridge.md) | Roslyn по диапазону; будущий мост к аргументам MCP |
 
 ## Отклонённые альтернативы
 

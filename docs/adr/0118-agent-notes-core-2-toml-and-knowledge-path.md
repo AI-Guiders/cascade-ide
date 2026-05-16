@@ -3,7 +3,17 @@
 **Статус:** Accepted (implemented 2026-05)  
 **Дата:** 2026-05-16  
 
-**Связь:** [0019](0019-shared-git-core-ide-and-git-mcp.md) (прецедент общего Core), [0028](0028-user-settings-toml-localappdata-and-secrets.md) / [0029](0029-configuration-toml-canonical-ui-facade.md) (TOML в IDE), [0048](0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) (поверхность `IdeCommands`), [0008](0008-mcp-contracts-and-testable-infrastructure.md). Вне репо: **agent-notes-mcp** [ADR 014](https://github.com/AI-Guiders/agent-notes-mcp/blob/main/docs/adr/014-agent-notes-local-settings-toml-v1.md) (релиз **2.0**, `--config`), **AIGuiders.AgentNotes.Core** 2.x (NuGet).
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0019](0019-shared-git-core-ide-and-git-mcp.md) | Прецедент общего Core (git-mcp) |
+| [0028](0028-user-settings-toml-localappdata-and-secrets.md) | TOML настроек, секреты |
+| [0029](0029-configuration-toml-canonical-ui-facade.md) | TOML-first конфигурация IDE |
+| [0048](0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) | Поверхность `IdeCommands` |
+| [0008](0008-mcp-contracts-and-testable-infrastructure.md) | Контракты MCP |
+
+**Вне репо:** [agent-notes-mcp ADR 014](https://github.com/AI-Guiders/agent-notes-mcp/blob/main/docs/adr/014-agent-notes-local-settings-toml-v1.md) (релиз **2.0**, `--config`); NuGet **AIGuiders.AgentNotes.Core** 2.x.
 
 ---
 

@@ -3,7 +3,15 @@
 **Статус:** Proposed  
 **Дата:** 2026-05-14  
 
-**Связь:** ортогонально **[0065 §6](0065-instrument-categories-domain-taxonomy.md#adr0065-p6)** (`graph_kind` — *какой* доменный граф), **[0067](0067-graph-backed-surfaces-contract.md#adr0067-dimensions)** (измерение **Edge / node provenance** — *кто/чем* вычислена связь), **[0113 § оси](0113-hci-semantic-map-orientation-layer.md#adr0113-axes)** (сводка трёх осей и HCI). Навигация и related: **[0039](0039-workspace-navigation-affordances.md)**. Индекс и `hit_kind`: **[0105](0105-hybrid-codebase-index-for-csharp-web.md)**.
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0065 §6](0065-instrument-categories-domain-taxonomy.md#adr0065-p6) | `graph_kind` — *какой* доменный граф (ортогонально) |
+| [0067](0067-graph-backed-surfaces-contract.md#adr0067-dimensions) | Измерение edge / node **provenance** |
+| [0113 § оси](0113-hci-semantic-map-orientation-layer.md#adr0113-axes) | Сводка трёх осей и HCI |
+| [0039](0039-workspace-navigation-affordances.md) | Навигация workspace, related files |
+| [0105](0105-hybrid-codebase-index-for-csharp-web.md) | Hybrid index, `hit_kind` |
 
 ---
 

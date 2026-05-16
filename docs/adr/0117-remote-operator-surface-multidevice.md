@@ -4,7 +4,22 @@
 **Дата:** 2026-05-16  
 **Обновлено:** 2026-05-16 — клиент remote surface: **PWA** (каноничный выбор).
 
-**Связь:** [0017](0017-multi-window-workspace-and-agent-surfaces.md) (мульти**оконность** на одной машине / нескольких мониторах), [0108](0108-web-ai-portal-host-object-tools-bridge.md) (веб **внутри** MFD → `IdeCommands`; ортогонально), [0035](0035-mfd-embedded-webview-external-llm-and-mcp-boundary.md) (граница доверия веб ↔ MCP), [0016](0016-agent-client-protocol-external-agent.md) (внешний агент по ACP), [0031](0031-agent-chat-clarification-batches-and-threading.md) (уточнения в Intercom; не смешивать с PFD-подтверждениями), [0030](0030-command-ids-hotkeys-and-ui-registry-layers.md) (`command_id`, подтверждения), [0008](0008-mcp-contracts-and-testable-infrastructure.md) (`IdeCommands`, MCP), [0043](0043-mcp-transport-recovery-human-agent-parity.md) (восстановление транспорта), [0099](0099-ide-databus-typed-events-and-projections.md) (события IDE → проекции), [0045](0045-agent-chat-persistence-event-log-and-projections.md) (история чата). Вне репо: vision **agent-forge** (худший сценарий, API + браузер) — личный канон `agent-notes`.
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0017](0017-multi-window-workspace-and-agent-surfaces.md) | Мультиоконность на одной станции (**не** remote) |
+| [0108](0108-web-ai-portal-host-object-tools-bridge.md) | Веб в MFD → `IdeCommands` (ортогонально) |
+| [0035](0035-mfd-embedded-webview-external-llm-and-mcp-boundary.md) | Граница доверия веб ↔ MCP |
+| [0016](0016-agent-client-protocol-external-agent.md) | Внешний агент по ACP |
+| [0031](0031-agent-chat-clarification-batches-and-threading.md) | Уточнения Intercom vs PFD |
+| [0030](0030-command-ids-hotkeys-and-ui-registry-layers.md) | `command_id`, подтверждения |
+| [0008](0008-mcp-contracts-and-testable-infrastructure.md) | `IdeCommands`, MCP |
+| [0043](0043-mcp-transport-recovery-human-agent-parity.md) | Восстановление транспорта |
+| [0099](0099-ide-databus-typed-events-and-projections.md) | События IDE → проекции |
+| [0045](0045-agent-chat-persistence-event-log-and-projections.md) | История чата / события |
+
+**Вне репо:** vision **agent-forge** (худший сценарий, API + браузер) — личный канон `agent-notes`.
 
 ---
 
