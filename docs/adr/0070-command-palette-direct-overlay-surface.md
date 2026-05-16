@@ -13,6 +13,7 @@
 | [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md) | keyboard-first и overlay-подсказки |
 | [0066](0066-cockpit-ui-vs-ide-presentation-layer.md) | shell chrome vs cockpit UI |
 
+---
 ## Контекст
 
 Командная палитра уже была канонической surface в [0013](0013-command-surface-and-discoverability.md), но её конкретный render-host оставался незафиксированным. Практика показала, что композиция через общий `ModalOverlay` оказалась хрупкой для multi-window topology:

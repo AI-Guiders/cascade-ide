@@ -26,6 +26,7 @@
 | [chord-notation-cascadeide.md](../chord-notation-cascadeide.md) | chord notation cascadeide |
 **Частичное уточнение (chat-domain):** навигация по **темам чата** (topic cards, drill-in/back, минимальный набор intent-команд и паритет палитра / Melody / Chords) зафиксирована в [0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md). Этот ADR (**0060**) остаётся каноном для общей модели **Melody**, **CascadeChord** и **Command Melody (`c:`)**; **0072** **не** отменяет §1–§11 целиком и **не** переназначает S/T/M/E для кокпита вне chat-topic navigation.
 
+---
 ## Контекст
 
 [0013](0013-command-surface-and-discoverability.md) закрепляет **палитру команд** как опорную точку (поиск по строке, полный каталог) и **keyboard-first** как продуктовый ориентир. Для кокпита этого недостаточно: пилот в FMS сначала выбирает **раздел**, потом **параметр** — два осмысленных шага без набора текста. В CascadeIDE параллельно нужен **масштаб мышления** (тактика vs стратегия, см. [0059](0059-roslyn-mcp-profiles-manager-tactical-strategic-efb.md)), который **не сводится** к «открыть другое окно».

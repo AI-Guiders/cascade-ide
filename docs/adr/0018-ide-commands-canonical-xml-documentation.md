@@ -15,6 +15,7 @@
 |----------|------|
 | [ide-commands-protocol-docgen-contract.md](../dev/ide-commands-protocol-docgen-contract.md) | текущий контракт парсера |
 
+---
 ## Контекст
 
 Реестр команд **`IdeCommands`** (частичный класс, `Services/IdeCommands.cs` + `Services/IdeCommands.*.cs`) снабжается XML-комментариями; **`tools/CascadeIDE.ProtocolDocGen`** генерирует `IdeCommandsDoc`, `IdeCommandsArgs`, `IdeCommandsContract`, фрагмент **`MCP-PROTOCOL.md`** и прогоняет линт контракта.

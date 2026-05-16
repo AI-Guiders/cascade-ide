@@ -23,6 +23,7 @@
 
 <a id="adr0094-context"></a>
 
+---
 ## Контекст
 
 **Уточнение по размещению UI (чтобы не путать с VS-like «нижней панелью» главного окна):** в текущей разметке `MainWindow` **нет** отдельной строки grid на всю ширину под «терминал / сборка». Вторичный контур — **колонка MFD**: `MfdShellView` — сверху полоса `WorkspaceChromeBandView` (**IDE Health** по [0089](0089-ide-omnibus-naming-and-ide-health-channel-rename.md); задел под **EICAS**-семантику — см. комментарий в `MfdShellView.axaml` и [0021](0021-pfd-mfd-cockpit-attention-model.md)), ниже хост **`MfdContourStackHost`** со **`MfdShellPageStack`** (страницы WORKSPACE / чат / **журнал сборки** / терминал / …). Этот ADR про **транспорт потоков текста** в соответствующие VM (например `BuildOutputPanelViewModel`), а не про то, что журнал MSBuild уже является полосой EICAS.

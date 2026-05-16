@@ -19,6 +19,7 @@
 |---------|----------|
 | — | инварианты P/F/M и coercion intent в VM; `CockpitPresentationLayoutPolicy` / CASCOPE003 — см. § «Решение» |
 
+---
 ## Контекст
 
 `presentation` в `settings.toml` задает не только декоративную геометрию, а семантическую раскладку кабины: где находятся PFD, Forward и MFD.

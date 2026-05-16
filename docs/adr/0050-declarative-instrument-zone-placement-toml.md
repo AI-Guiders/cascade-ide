@@ -15,6 +15,7 @@
 | [`cds-contract-v0.md`](../design/cds-contract-v0.md) | Чертёж CDS |
 | [`[code_navigation]` в samples](../samples/settings.toml) | Аналогия слоёв: bundle + repo + user |
 
+---
 ## Контекст
 
 Сегодня **где какой инструмент кабины** (дерево решения vs Semantic Map vs mount preview и т.д.) в главном окне задаётся **логикой композиторов** (`MainWindowHostSurfaceCompositor`, `DefaultSurfaceSlotInstrumentBindingProvider`, placement rules) и привязками Avalonia. Строка **`presentation`** задаёт **сколько якорей и на каких экранах**, но **не** декларативный выбор «в слоте `pfd` показывать инструмент A или B» для конкретного репозитория или пользователя.

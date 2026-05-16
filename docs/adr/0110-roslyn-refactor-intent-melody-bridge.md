@@ -17,6 +17,7 @@
 |----------|------|
 | [roslyn-mcp](../../../roslyn-mcp/README.md) | отдельный MCP-сервер |
 
+---
 ## Контекст
 
 Полноценные рефакторинги C# (Extract Method, Extract Interface и т.д.) в экосистеме Cascade реализованы **в процессе Roslyn MCP**: `roslyn_get_code_actions` и `roslyn_apply_code_action` с опциональным **диапазоном** (`end_line`, `end_column`) — см. схемы тулов и `ServiceLayer/CodeActions.cs` в репозитории **roslyn-mcp**.

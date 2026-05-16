@@ -16,6 +16,7 @@
 | [0053](0053-semantic-map-control-flow-pfd.md) | Semantic Map, control flow |
 | [0055](0055-skia-instrument-composition-pipeline.md) | declutter на PFD |
 
+---
 ## Контекст
 
 [0058](0058-agent-roslyn-mcp-coupling-settings-toml.md) вводит **декларативные параметры** сопряжения агент ↔ Roslyn MCP в `settings.toml`. Отдельно нужно зафиксировать **продуктовое** поведение: несколько **именованных профилей**, **кто** переключает активный профиль, **режимы** (тактические сигналы среды) и использование **дополнительного монитора** как «стратегической» карты — без раздувания [0058](0058-agent-roslyn-mcp-coupling-settings-toml.md).

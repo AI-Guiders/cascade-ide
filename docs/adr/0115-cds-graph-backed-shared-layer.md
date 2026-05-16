@@ -2,7 +2,7 @@
 
 **Статус:** Accepted  
 **Дата:** 2026-05-14  
-**Обновлено:** 2026-05-14 — в коде: `CascadeIDE.Cockpit.Graph.IGraphDataSource`, `CodeNavigationMapJsonRequest`, адаптер `WorkspaceNavigationMapCont… Подробности — [§ История](#adr0115-history).
+**Обновлено:** 2026-05-14 — в коде: `IGraphDataSource`, адаптер workspace navigation map. Подробности — [§ История](#adr0115-history).
 
 ## Связанные ADR
 

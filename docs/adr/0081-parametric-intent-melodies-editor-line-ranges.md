@@ -25,6 +25,7 @@
 | [`IntentMelody/intent-melody-aliases.toml`](../../IntentMelody/intent-melody-aliases.toml) | оверлей alias → `command_id` |
 | [Roslyn MCP](../../../roslyn-mcp/README.md) | Roslyn MCP |
 
+---
 ## Контекст
 
 В IML v1 хвост после `c:` — это **мнемоника**, резолвящаяся в **`command_id`** через реестр ([`intent-melody-aliases.toml`](../../IntentMelody/intent-melody-aliases.toml), [ADR 0060 §11](0060-keyboard-chord-stack-fms-tactical-strategic.md#adr0060-p11)). Для команд уровня «Git status» или «открыть страницу Chat» этого достаточно: контекст задаётся фокусом и текущим решением.

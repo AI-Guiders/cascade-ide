@@ -21,6 +21,7 @@
 | [0021](0021-pfd-mfd-cockpit-attention-model.md) | Зоны внимания PFD/MFD |
 | [0066](0066-cockpit-ui-vs-ide-presentation-layer.md) | Поверхность прибора vs хром IDE (`ModalOverlay`) |
 
+---
 ## Контекст
 
 В IDE появляется **не один** графовый экран, а **семейство** поверхностей, где пользователь и агент работают с **графом** как с главным объектом: Semantic Map (намерения кода / control flow), GitMap / submodules ([0062](0062-git-submodules-semantic-map-subgraph.md)), возможные будущие графы (зависимости, топология сервисов и т.д.).

@@ -24,6 +24,7 @@
 | [intent-melody-language-v1.md](../intent-melody-language-v1.md) | IML v1: грамматика `c:` и мотивация |
 **Отношение к [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md):** этот ADR **не заменяет** общую keyboard-first модель (палитра, `CascadeChord`, Command Melody `c:`). Он **нормативно уточняет**, как те же принципы **применяются к навигации по темам чата** (topic-level intents). См. [§ «Связь с ADR 0060»](#adr0072-relation-0060).
 
+---
 ## Контекст
 
 [0031](0031-agent-chat-clarification-batches-and-threading.md) уже вводит **треды как устойчивые линии работы** (`ThreadNode` vs `MessageNode`), пакеты уточнений и вектор **«обзор размаха»** сессии вместо одной бесконечной ленты. [0057](0057-chat-surface-pipeline-adoption.md) переводит чат на общий pipeline **Intent → Declutter → Layout → Render** и выделяет доменные узлы (`ThreadNode`, `MessageNode`, …) как first-class на стадии Intent.

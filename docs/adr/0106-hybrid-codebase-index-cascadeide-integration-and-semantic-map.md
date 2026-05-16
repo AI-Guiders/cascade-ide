@@ -29,6 +29,7 @@
 |---------|----------|
 | — | in-proc оркестратор, UI настроек, MFD HIS |
 
+---
 ## Решение
 
 Инструмент **`hybrid-codebase-index`** оформлен как **общая библиотека** (`HybridCodebaseIndex.Core`) и тонкий **MCP-хост** (`HybridCodebaseIndex.Mcp`) поверх неё — тот же шаблон, что **agent-notes** (`AgentNotes.Core` + exe). **CascadeIDE** в первую очередь подключает **ядро in-proc** (`ProjectReference` на Core из репозитория [`hybrid-codebase-index`](https://github.com/KarataevDmitry/hybrid-codebase-index)): один процесс с редактором, дешёвый вызов `reindex`/`search`, общий `databasePath` с тем, что ожидает внешний MCP при работе из Cursor. Отдельно опубликованный **exe MCP** остаётся для внешних хостов и для сценария изоляции; размещение I/O и жизненного цикла — по слоям кабины ниже, без «божественного» `MainWindowViewModel`.

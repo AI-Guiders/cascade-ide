@@ -24,6 +24,7 @@
 |---------|----------|
 | — | `GitMcp.Core` — общий слой для `ide_git_*` в IDE и git-mcp; паритет argv |
 
+---
 ## Контекст
 
 1. **Два потребителя одной предметной области:** операции Git для агента реализованы и как **встроенные команды IDE** (`ide_git_*`, `IIdeMcpActions` в `MainWindowViewModel.IdeMcpActions.Git.cs`), и как отдельный процесс **git-mcp** (stdio MCP, каталог тулов, сборка аргументов и JSON-ответов в `Program.cs`).

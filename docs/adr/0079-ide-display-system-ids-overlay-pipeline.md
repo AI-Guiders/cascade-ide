@@ -14,6 +14,7 @@
 | [0013](0013-command-surface-and-discoverability.md) | палитра и discoverability |
 | [0115](0115-cds-graph-backed-shared-layer.md) | CDS — общий слой graph-backed приборов (реализация в кабине, не IDS) |
 
+---
 ## Контекст
 
 [0036](0036-cds-channel-compositor-surface-pipeline.md) задаёт цепочку для **семантики кабины** (PFD/MFD/инструменты, `CockpitSurfaceState`, слоты приборов). Она **не должна** разрастаться до «всех пикселей IDE», иначе CDS станет God-слоем и смешается с [0066](0066-cockpit-ui-vs-ide-presentation-layer.md).

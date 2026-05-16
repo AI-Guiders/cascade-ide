@@ -2,7 +2,8 @@
 
 **Статус:** Accepted  
 **Дата:** 2026-04-06  
-**Обновлено:** 2026-04-15 — после таблицы зон: отсылка к [0037](0037-pfd-surface-invariants-and-roslyn-enforcement.md#adr0037-zone-vs-surface) (геог… Подробности — [§ История](#adr0021-history).  
+**Обновлено:** 2026-04-15 — отсылка к [0037](0037-pfd-surface-invariants-and-roslyn-enforcement.md#adr0037-zone-vs-surface) (география PFD vs строгая поверхность). Подробности — [§ История](#adr0021-history).
+
 **Поглощает:** [`concept-pfd-mfd-cascade-v1.md`](../ux/concept-pfd-mfd-cascade-v1.md) (черновик концепта → формализован здесь).  
 ## Связанные ADR
 
@@ -26,6 +27,7 @@
 | [`command-palette-ux-concept-v1.md`](../ux/command-palette-ux-concept-v1.md) | UX Command Palette |
 | [`workspace-health-implementation-map-v1.md`](../design/workspace-health-implementation-map-v1.md) | Карта реализации IDE Health / EICAS |
 
+---
 ## Контекст
 
 Разработчик в IDE оперирует десятками сигналов: код, сборка, тесты, агент, git, безопасность. Без явной модели приоритетов внимания интерфейс скатывается к двум крайностям: «всё спрятано» (Focus без обратной связи) или «всё видно» (Power с баннерной слепотой).

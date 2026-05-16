@@ -15,6 +15,7 @@
 
 **Вне репо:** [agent-notes-mcp ADR 014](https://github.com/AI-Guiders/agent-notes-mcp/blob/main/docs/adr/014-agent-notes-local-settings-toml-v1.md) (релиз **2.0**, `--config`); NuGet **AIGuiders.AgentNotes.Core** 2.x.
 
+---
 ## Контекст
 
 **agent-notes-mcp 2.0**:

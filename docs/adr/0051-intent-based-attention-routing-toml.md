@@ -17,6 +17,7 @@
 |---------|----------|
 | — | секция `[attention_routing]` в bundle `UiModes/workspace.toml` и оверлее `.cascade/workspace.toml`; intent-id — `AttentionRoutingIntentIds` |
 
+---
 ## Контекст
 
 В `UiModes/workspace.toml` и `.cascade/workspace.toml` сегодня существует карта размещения UI-панелей по зонам внимания: секция `[attention_zone_panels]` задаёт `panel_id -> attention_zone`.

@@ -17,6 +17,7 @@
 
 **Код:** `Cockpit/PrimitivesKit/`, `Features/UiChrome/`, `Themes/*.json`.
 
+---
 ## Контекст
 
 В продукте одновременно существуют:

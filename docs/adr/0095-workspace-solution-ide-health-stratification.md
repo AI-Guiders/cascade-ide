@@ -2,7 +2,7 @@
 
 **Статус:** Proposed  
 **Дата:** 2026-04-24  
-**Обновлено:** 2026-04-25 — ссылки на TOML: ключи **IDE Health** в `UiModes` — **`ide_health_*`** ([0010](0010-ui-modes-toml-configuration.md)); фор… Подробности — [§ История](#adr0095-history).  
+**Обновлено:** 2026-04-25 — TOML-ключи IDE Health: `ide_health_*`. Подробности — [§ История](#adr0095-history).
 ## Связанные ADR
 
 | ADR | Роль |
@@ -25,6 +25,7 @@
 | [`environment-readiness-glance-v1.md`](../design/environment-readiness-glance-v1.md) | канал **готовности окружения** — уже ближе к уровню IDE |
 | [`workspace-health-implementation-map-v1.md`](../design/workspace-health-implementation-map-v1.md) | текущая карта полосы IDE Health |
 
+---
 ## Контекст
 
 После [0089](0089-ide-omnibus-naming-and-ide-health-channel-rename.md) канал в продукте называется **IDE Health**, но **по смыслу** в один пользовательский образ (полоса, кокпит, снапшот для агента) по-прежнему попадают сигналы **разной природы**:

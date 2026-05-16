@@ -23,6 +23,7 @@
 | — | слои `Cockpit/Cds`, `Cockpit/Channels`, `Cockpit/Composition`, `Cockpit/Surface` |
 | — | чертёж полей — [`cds-contract-v0.md`](../design/cds-contract-v0.md) §6–7, [`Features/README.md`](../Features/README.md) |
 
+---
 ## Контекст
 
 В авионике **CDS** (Cockpit Display System в смысле ARINC) — идея **единого контура отображения**: прикладные системы подают данные и команды, а **композиция** экрана (слои, приоритеты, допустимые регионы) — у согласованного рантайма. Cascade **не** копирует профиль 661 и не требует сертификации ([0021 § ARINC 661](0021-pfd-mfd-cockpit-attention-model.md#arinc-661-borrow)); переносим **принцип разделения**: агент и каналы не должны напрямую «рисовать» произвольный UI, если цель — **предсказуемая кабина** и Agent-first дисциплина.

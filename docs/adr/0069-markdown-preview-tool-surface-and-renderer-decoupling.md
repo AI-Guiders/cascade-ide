@@ -15,6 +15,7 @@
 | [0066](0066-cockpit-ui-vs-ide-presentation-layer.md) | инструмент vs хром IDE |
 | [0068](0068-deck-row-payload-and-presentation-projection.md) | разделение payload / projection / slot |
 
+---
 ## Контекст
 
 Текущая реализация preview Markdown выросла как **виджет внутри документа** (`DockDocumentView`, `forward_split`) с дополнительным окном и незавершённым `mfd`-маршрутом из [0026](0026-markdown-preview-surfaces-and-placement.md). На практике это привело к неверной связности:

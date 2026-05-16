@@ -2,7 +2,7 @@
 
 **Статус:** Superseded by [0069](0069-markdown-preview-tool-surface-and-renderer-decoupling.md)  
 **Дата:** 2026-04-08  
-**Обновлено:** 2026-04-11 — подраздел **«Внутренние отсылки»** (hover/peek по «см. п. N» и якорям); ортогонально [0023](0023-markdown-diagrams-langu… Подробности — [§ История](#adr0026-history).
+**Обновлено:** 2026-04-11 — подраздел «Внутренние отсылки»; ортогонально [0023](0023-markdown-diagrams-language-tooling.md). Подробности — [§ История](#adr0026-history).
 
 ## Связанные ADR
 

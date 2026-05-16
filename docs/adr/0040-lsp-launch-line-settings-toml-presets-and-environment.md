@@ -12,6 +12,7 @@
 | [0023](0023-environment-readiness-glance.md) | краткие подсказки по LSP без дампа `environ` |
 | [0023](0023-markdown-diagrams-language-tooling.md) | Markdown как first-class; LSP в долгой перспективе |
 
+---
 ## Контекст
 
 1. В `%LocalAppData%\CascadeIDE\settings.toml` языковые LSP настраиваются в **`[languages.csharp]`** и **`[languages.markdown]`**: дискриминатор **`mode`** (например `ParseOnly` / `OmniSharp` / `Marksman`) и **вложенные таблицы** профилей с **`executable`** / **`arguments`** для stdio.

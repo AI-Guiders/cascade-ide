@@ -18,6 +18,7 @@
 | [MCP-PROTOCOL.md](../MCP-PROTOCOL.md) | `debug_launch` и родственные тулы |
 | [MsBuildDebugTargetResolver.cs](../../Services/MsBuildDebugTargetResolver.cs) | MsBuildDebugTargetResolver.cs |
 
+---
 ## Контекст
 
 Сейчас на **одно решение** приходится **не больше одного** явного стартового проекта: путь к `.csproj` хранится в `.cascade-ide/startup-project.json` как одно поле `StartupProjectRelativePath`. F5 и интерактивный `debug_launch` резолвят **одну** цель; конфигурация MSBuild для отладки фактически зашита как **Debug** в резолвере.

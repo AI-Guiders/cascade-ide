@@ -18,6 +18,7 @@
 |----------|------|
 | [`CascadeIDE.ArchitectureAnalyzers/README.md`](../CascadeIDE.ArchitectureAnalyzers/README.md) | CASCOPE*; расширение — по этому ADR |
 
+---
 ## Контекст
 
 В авиационной метафоре **PFD** — первичный «прибор»: плотная, авторитетная картина контекста без охоты по вкладкам ([0021](0021-pfd-mfd-cockpit-attention-model.md)). На уровне **чистого кода** Roslyn **не знает**, «лёгкий» ли виджет: тяжесть — это политика продукта, а не свойство IL.

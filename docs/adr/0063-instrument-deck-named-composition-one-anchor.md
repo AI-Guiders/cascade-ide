@@ -2,7 +2,7 @@
 
 **Статус:** Accepted  
 **Дата:** 2026-04-17  
-**Обновлено:** 2026-04-24 — [§ deck страницы MFD](#adr0063-mfd-page-deck): композиция **внутри** одной страницы оболочки Mfd, ортогонально навигации… Подробности — [§ История](#adr0063-history).
+**Обновлено:** 2026-04-24 — § deck страницы MFD (композиция внутри страницы Mfd). Подробности — [§ История](#adr0063-history).
 
 ## Связанные ADR
 
@@ -18,6 +18,7 @@
 | [0068](0068-deck-row-payload-and-presentation-projection.md) | Payload строки vs проекция |
 | [`workspace-health-implementation-map-v1.md`](../design/workspace-health-implementation-map-v1.md) | Чертёж IDE Health deck |
 
+---
 ## Контекст
 
 В разговоре о кокпите раньше **смешивались две оси**:

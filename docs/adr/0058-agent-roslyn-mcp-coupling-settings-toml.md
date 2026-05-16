@@ -14,6 +14,7 @@
 | [0053](0053-semantic-map-control-flow-pfd.md) | карта намерений на PFD |
 | [0059](0059-roslyn-mcp-profiles-manager-tactical-strategic-efb.md) | профили, Manager, режимы Auto-Focus / Combat / Echelon, EFB на третьем мониторе — **отдельный ADR** |
 
+---
 ## Контекст
 
 Агентский слой и **Roslyn** связаны через **MCP-инструменты**. Без явных правил «сколько и чего отдавать» агент перегружает контекст или недополучает структуру. Менять это нужно **в конфиге** ([0028](0028-user-settings-toml-localappdata-and-secrets.md)), без обязательной правки C#.

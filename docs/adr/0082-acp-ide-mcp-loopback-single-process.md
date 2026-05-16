@@ -18,6 +18,7 @@
 |----------|------|
 | [`externals/acp-csharp/.../McpServer.cs`](../../externals/acp-csharp/src/AgentClientProtocol/Schema/McpServer.cs) | `externals/acp-csharp/.../McpServer.cs` |
 
+---
 ## Контекст
 
 При включённом **`acp_auto_inject_ide_mcp`** в `session/new` подмешивается **`StdioMcpServer`** с тем же бинарём, что и GUI, и аргументами **`--mcp-stdio`**. Процесс **`cursor-agent`** поднимает **отдельный** экземпляр Cascade IDE как MCP-сервер по stdio.

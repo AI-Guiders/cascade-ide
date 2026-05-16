@@ -11,6 +11,7 @@
 | [0024](0024-ide-sdk-and-stable-contracts.md) | SDK, capability‑модель, `CascadeIDE.Contracts` |
 | [0010](0010-ui-modes-toml-configuration.md) | overlay презентации без подмены семантики |
 
+---
 ## Контекст
 
 [0024](0024-ide-sdk-and-stable-contracts.md) вводит SDK как способ держать **единую ментальную модель продукта** (модули, capabilities, introspection). Отдельно [0021](0021-pfd-mfd-cockpit-attention-model.md) задаёт **модель внимания** кокпита: три пространственных якоря (`Forward`, `Pfd`, `Mfd`), канал оповещений `Eicas`, слой `Hud` на лобовом.

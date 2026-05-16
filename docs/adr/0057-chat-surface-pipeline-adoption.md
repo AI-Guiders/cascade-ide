@@ -13,6 +13,7 @@
 | [0056](0056-semantic-map-pipeline-adoption.md) | первый внедрённый consumer |
 | [0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md) | overview/detail layout и keyboard-first intent для тем поверх pipeline |
 
+---
 ## Контекст
 
 После внедрения pipeline в Semantic Map ([0056](0056-semantic-map-pipeline-adoption.md)) следующий запланированный consumer — chat surface:

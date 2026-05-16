@@ -20,6 +20,7 @@
 | [ide-command-registry-v1.md](../design/ide-command-registry-v1.md) | ide command registry v1 |
 **Реализация (текущая):** partial **`IdeCommandRegistry*.cs`** (палитра + метаданные глобальных хоткеев окна), **`IdeCommandPaletteCatalog`** (проекция), **`HotkeyTomlLoader`**, **`MainWindowHotkeyService`**, **`Hotkeys/hotkeys.toml`**; тесты согласованности — **`CascadeIDE.Tests/IdeCommandRegistryTests.cs`**. Полный чертёж `IdeCommandUiMeta` из чертежа — по-прежнему отдельные итерации (§6 ниже).
 
+---
 ## Контекст
 
 [0013](0013-command-surface-and-discoverability.md) уже зафиксировал намерение: **палитра + паритет с MCP**, **жесты в data-файлах** (`Hotkeys/hotkeys.toml` + пользовательский оверлей), а в последствиях — **«единый реестр команд»** с отсылкой на чертёж [ide-command-registry-v1.md](../design/ide-command-registry-v1.md).

@@ -14,6 +14,7 @@
 | [0056](0056-semantic-map-pipeline-adoption.md) | Первый consumer — карта намерений |
 | [0064](0064-deck-primitives-visual-language-render-layer-and-palette.md) | Стадия Render, примитивы deck |
 
+---
 ## Контекст
 
 Skia-инструменты в CIDE (`workspace_navigation_map`, будущие приборы и overlays) размещаются через host surface compositor, но внутренняя композиция каждого инструмента (данные, declutter, геометрия, рендер-правила) исторически смешивалась в конкретной фиче.

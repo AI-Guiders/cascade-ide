@@ -15,6 +15,7 @@
 |---------|----------|
 | — | `EditorLanguageSupport`, `TextMateTomlGrammar`, каталог `TextMateGrammars/toml` |
 
+---
 ## Контекст
 
 В продукте TOML уже **первый класс**: режимы интерфейса (`UiModes/`), пользовательские настройки (`settings.toml`), загрузка через Tomlyn ([0010](0010-ui-modes-toml-configuration.md)). Пользователи и разработчики открывают эти файлы во **встроенном редакторе** Cascade IDE.

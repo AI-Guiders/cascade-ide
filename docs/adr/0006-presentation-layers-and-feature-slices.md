@@ -11,6 +11,7 @@
 | [Features/README.md](../Features/README.md) | Features/README |
 | [architecture-migration.md](../architecture-migration.md) | architecture migration |
 
+---
 ## Контекст
 
 Нужна предсказуемая структура одного десктопного приложения (Avalonia + MVVM) без обязательного DDD или hexagonal на весь код, но с явными границами, чтобы не получить неподдерживаемый God ViewModel и не смешивать UI, сценарии и доступ к диску и процессам.

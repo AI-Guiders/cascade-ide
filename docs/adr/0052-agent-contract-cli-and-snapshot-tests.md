@@ -26,6 +26,7 @@
 | — | CI: `.gitlab-ci.yml` — `dotnet test` + smoke `--agent-contract` |
 | — | **golden slice** CDS: `CascadeIDE.Tests/TestData/AgentContract/cockpit_surface_contract_slice.approved.json` + `AgentContractCockpitContractSlice` |
 
+---
 ## Контекст
 
 Сегодня Cascade IDE отдаёт агенту **обогащённый JSON** (layout, состояние workspace, диагностики, проекция кабины/инструментов и т.д.) через **MCP-инструменты** (`ide_*`, см. контракт в [MCP-PROTOCOL.md](../MCP-PROTOCOL.md)). Часть полей — **тот же семантический слой**, на который опирается UI (размещение, видимость слотов, раскладка в смысле CDS/host surface), а не «параллельная выдумка для агента». Это удобно в интерактиве, но:

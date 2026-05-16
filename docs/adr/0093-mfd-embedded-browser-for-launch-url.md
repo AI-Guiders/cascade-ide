@@ -13,6 +13,7 @@
 | [0021](0021-pfd-mfd-cockpit-attention-model.md) | кокпит: стек, лог, гипотезы + контент сессии рядом |
 | [0091](0091-pfd-debug-situational-deck-hypothesis.md) | PFD vs Mfd |
 
+---
 ## Контекст
 
 В [0090](0090-launch-profiles-and-debug-startup-configurations.md) зафиксированы Kestrel-профили, импорт из `Properties/launchSettings.json` и смысловой флаг **открыть браузер** после старта процесса. В реализации baseline это **внешнее** открытие URL (системный браузер), что совпадает с привычным поведением Visual Studio и не требует встраивать движок рендеринга.

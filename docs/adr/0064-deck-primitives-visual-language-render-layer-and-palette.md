@@ -15,6 +15,7 @@
 
 **Код:** `Cockpit/PrimitivesKit/` — annunciator, лампы, токены semantic map.
 
+---
 ## Контекст
 
 В [0063 § типы индикаторов](0063-instrument-deck-named-composition-one-anchor.md#adr0063-indicator-kinds) зафиксирована **продуктовая** таксономия **видов индикаторов**: *Lamp*, *Bar*, *Sign*, *Readout* и т.д. — **форма сигнала** в ячейке deck или фрагменте Skia-инструмента.

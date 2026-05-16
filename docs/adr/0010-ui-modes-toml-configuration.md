@@ -2,7 +2,7 @@
 
 **Статус:** Accepted · Implemented  
 **Дата:** 2026-04-02  
-**Обновлено:** 2026-04-25 — в **`[capabilities]`** ключи контура **IDE Health** в TOML: **`ide_health_*`** (свойства `UiModeCapabilities` — `IdeHeal… Подробности — [§ История](#adr0010-history).  
+**Обновлено:** 2026-04-25 — в `[capabilities]` ключи **IDE Health**: `ide_health_*`. Подробности — [§ История](#adr0010-history).
 ## Связанные ADR
 
 | ADR | Роль |
@@ -25,6 +25,7 @@
 | — | загрузчик TOML, `UiModeCatalog`, capabilities, bundle `UiModes/` |
 | — | override и `docs/ux` — по мере нужды |
 
+---
 ## Контекст
 
 Сейчас **спеки режимов** (видимость панелей, группы редактора, слот темы, ширина развёрнутого чата и т.д.) зашиты в **C#** (`UiModeLayoutRegistry`, связанные константы). Глобальные размеры хрома (сплиттеры, минимумы строк и пр.) собраны в **`UiWorkspaceLayoutDimensions`** и применяются через **`UiWorkspaceLayout`**.

@@ -11,6 +11,7 @@
 | [architecture-migration.md](../architecture-migration.md) | architecture migration |
 | [architecture-policy.md](../architecture-policy.md) | навигатор |
 
+---
 ## Контекст
 
 Кодовая база развивается долго; полная перелопатка под новые правила недопустима по стоимости. Вместе с тем нужны ясные правила для прототипов и merge в основную ветку.

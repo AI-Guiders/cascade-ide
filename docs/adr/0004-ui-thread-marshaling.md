@@ -15,6 +15,7 @@
 | [architecture-migration.md](../architecture-migration.md) | architecture migration |
 | [architecture-policy.md](../architecture-policy.md) | architecture policy |
 
+---
 ## Контекст
 
 В IDE много асинхронных источников (сборка, MCP, LSP и т.д.). Размазанный `Post`/`Invoke` по коду усложняет сопровождение и повышает риск обращения к UI не с UI-потока.

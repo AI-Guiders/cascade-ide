@@ -11,6 +11,7 @@
 | [0042](0042-pre-flight-planned-changes-and-review-before-apply.md) | pre-flight как обязательный шаг |
 | [0077](0077-tech-principles-hub.md) | TECH-центр принципов |
 
+---
 ## Контекст
 
 В ежедневной работе есть повторяющийся операционный шум перед коммитом:

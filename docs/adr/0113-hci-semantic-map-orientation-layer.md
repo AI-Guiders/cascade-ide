@@ -2,7 +2,7 @@
 
 **Статус:** Proposed  
 **Дата:** 2026-05-14  
-**Обновлено:** 2026-05-14 — оси **`graph_kind`**, **provenance** и **`relation_kind`** ([0114](0114-graph-edge-relation-kind-taxonomy.md)); линза «б… Подробности — [§ История](#adr0113-history).
+**Обновлено:** 2026-05-14 — оси `graph_kind`, provenance, `relation_kind` ([0114](0114-graph-edge-relation-kind-taxonomy.md)). Подробности — [§ История](#adr0113-history).
 
 ## Связанные ADR
 

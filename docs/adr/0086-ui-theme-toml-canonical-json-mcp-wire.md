@@ -17,6 +17,7 @@
 |----------|------|
 | [MCP-PROTOCOL.md](../MCP-PROTOCOL.md) | `ide_get_ui_theme`, `ide_set_ui_theme` — JSON |
 
+---
 ## Контекст
 
 Сейчас **применение палитры** к `Application.Resources` идёт из **JSON**: `UiThemeApply.Apply(themeJson)` — тот же формат, что возвращает и принимает MCP (`ide_get_ui_theme` / `ide_set_ui_theme`). Пресеты «светлая / тёмная / …» читают файлы `Themes/*.json` рядом с exe или встроенный текст ([`UiThemeApply`](../../Services/UiThemeApply.cs)). Дефолты кистей также живут в **`App.axaml`** (`CascadeTheme.*`).

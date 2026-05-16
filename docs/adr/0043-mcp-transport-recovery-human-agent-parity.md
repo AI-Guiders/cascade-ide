@@ -17,6 +17,7 @@
 | [north-star-cursor-mcp-cascade-workbench-v1.md](../design/north-star-cursor-mcp-cascade-workbench-v1.md) | Cursor + MCP + Cascade |
 | [MCP-PROTOCOL.md](../MCP-PROTOCOL.md) | транспорт stdio, видимость MCP |
 
+---
 ## Контекст
 
 Северная звезда продукта предполагает рабочий контур **Cursor (или аналог) + MCP + CascadeIDE**: агент вызывает инструменты IDE и видит согласованное состояние с человеком ([north-star § критерии](../design/north-star-cursor-mcp-cascade-workbench-v1.md#критерии-мы-в-зоне-цели-проверяемые)).

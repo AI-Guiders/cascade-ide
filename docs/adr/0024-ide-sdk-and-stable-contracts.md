@@ -16,6 +16,7 @@
 | [0026](0026-markdown-preview-surfaces-and-placement.md) | геометрия превью Markdown в TOML |
 | [0025](0025-sdk-attention-zones-and-capabilities.md) | зоны внимания PFD/MFD/… в SDK и capabilities |
 
+---
 ## Контекст
 
 CascadeIDE активно развивается “изнутри”: добавляются новые панели, инструменты, каналы диагностики, режимы UI и интеграции с внешними процессами (LSP/DAP/MCP). При этом:

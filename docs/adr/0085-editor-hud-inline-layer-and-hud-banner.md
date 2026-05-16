@@ -13,6 +13,7 @@
 | [0079](0079-ide-display-system-ids-overlay-pipeline.md) | IDS — оверлеи приложения, не путать с HUD редактора |
 | [0084](0084-agent-edits-editor-source-of-truth-presence-channel.md) | присутствие агента, курсор, единый буфер |
 
+---
 ## Контекст
 
 В [0021](0021-pfd-mfd-cockpit-attention-model.md) **HUD** описан как слой **внутри лобового** (редактора): inline-диагностика, ghost text, gutter, при необходимости — **file-level banner** над текстом. Тот же тезис («не четвёртый якорь», слой внутри редактора) уже был в контексте [0032](0032-hud-banner-configuration-and-grammar.md); этот ADR не переписывает [0021](0021-pfd-mfd-cockpit-attention-model.md), а только расщепляет словарь. В разговоре и в коде смешиваются три разных понятия:
