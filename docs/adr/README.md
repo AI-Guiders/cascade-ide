@@ -125,6 +125,7 @@
 | [0114](0114-graph-edge-relation-kind-taxonomy.md) | Тип отношения на ребре (`relation_kind`): «наследует», «ссылается на», partial peer, текстовое совпадение; ортогонально `graph_kind` и provenance; связь с `hit_kind` | Proposed |
 | [0115](0115-cds-graph-backed-shared-layer.md) | CDS: общий слой реализации graph-backed **приборов** в кабине (не IDS); `IGraphDataSource` (v0); стык с [0036](0036-cds-channel-compositor-surface-pipeline.md) и [0067](0067-graph-backed-surfaces-contract.md) | Accepted |
 | [0116](0116-intercom-session-tree-and-agent-message-steering.md) | Intercom: дерево сессии (ветвление, rewind, bookmark) и **steer** / **follow-up** при работе агента; [0045](0045-agent-chat-persistence-event-log-and-projections.md), [0080](0080-intercom-naming-and-multi-party-channel-model.md), [0096](0096-intercom-topic-card-summary-and-product-spine.md) | Proposed |
+| [0117](0117-remote-operator-surface-multidevice.md) | Remote operator surface: **PWA**-пульт с телефона/другого ПК, Operator Gateway; не mobile IDE; [0017](0017-multi-window-workspace-and-agent-surfaces.md), [0108](0108-web-ai-portal-host-object-tools-bridge.md) | Proposed |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 

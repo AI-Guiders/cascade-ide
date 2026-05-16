@@ -24,6 +24,7 @@
 - **Модель внимания и терминология PFD/MFD**: [`0021`](../adr/0021-pfd-mfd-cockpit-attention-model.md) *(Proposed, но задаёт язык)*  
 - **Инварианты раскладки и authority `presentation`**: [`0046`](../adr/0046-presentation-layout-authority-and-cockpit-invariants.md) *(Accepted · Implemented)*
 - **Мультиоконность и поверхности**: [`0017`](../adr/0017-multi-window-workspace-and-agent-surfaces.md) *(Accepted · Implemented)*
+- **Пульт оператора с другого устройства** (не mobile IDE): [`0117`](../adr/0117-remote-operator-surface-multidevice.md) *(Proposed)*
 
 ---
 
