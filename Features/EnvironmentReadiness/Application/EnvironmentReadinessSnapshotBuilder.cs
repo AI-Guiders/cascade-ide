@@ -1,7 +1,9 @@
 using System.Diagnostics;
+using AgentNotes.Core;
 using CascadeIDE.Cockpit.DataBus;
 using CascadeIDE.Contracts;
 using CascadeIDE.Models;
+using CascadeIDE.Services;
 using CascadeIDE.Services.Lsp;
 
 namespace CascadeIDE.Features.EnvironmentReadiness.Application;
@@ -73,10 +75,11 @@ public static class EnvironmentReadinessSnapshotBuilder
     /// </param>
     public static IReadOnlyList<AnnunciatorLampItem> BuildEnvProbeRows(
         EnvironmentReadinessEnvSnapshot env,
+        CascadeIdeSettings settings,
         Func<string?>? tryResolveNetcoreDbgWhenUnset = null) =>
     [
         BuildAgentNotesFileRow(env.AgentNotesFile),
-        BuildAgentNotesCanonRow(env.AgentNotesCanonPath),
+        BuildAgentNotesConfigRow(env.AgentNotesConfigPath, settings),
         BuildNetcoreDbgRow(env.NetcoreDbgPath, tryResolveNetcoreDbgWhenUnset),
     ];
 
@@ -166,37 +169,65 @@ public static class EnvironmentReadinessSnapshotBuilder
         };
     }
 
-    private static AnnunciatorLampItem BuildAgentNotesCanonRow(string? raw)
+    private static AnnunciatorLampItem BuildAgentNotesConfigRow(string? configPath, CascadeIdeSettings settings)
     {
-        const string title = WellKnownEnv.AgentNotesCanonPath;
-        return EnvironmentReadinessPathAcquisition.ClassifyAgentNotesCanonPath(raw) switch
+        const string title = "agent-notes config (TOML)";
+        return EnvironmentReadinessPathAcquisition.ClassifyAgentNotesConfigPath(configPath) switch
         {
-            AgentNotesCanonPathKind.Unset => new AnnunciatorLampItem(
+            AgentNotesConfigPathKind.Unset => new AnnunciatorLampItem(
                 EnvironmentReadinessCellIds.AgentNotesCanonPath,
                 title,
-                "Не задана: для knowledge передавай canon_path в MCP или задай корень репозитория agent-notes здесь.",
+                "Не задан: укажи [agent_notes].config_path в settings.toml — тот же файл, что --config в mcp.json для agent-notes-mcp.",
                 AnnunciatorLampLevel.Advisory,
                 LampShortLabel: "KB"),
-            AgentNotesCanonPathKind.DirectoryExists => new AnnunciatorLampItem(
+            AgentNotesConfigPathKind.FileMissing => new AnnunciatorLampItem(
                 EnvironmentReadinessCellIds.AgentNotesCanonPath,
                 title,
-                "Каталог канона knowledge существует.",
-                AnnunciatorLampLevel.Ok,
-                LampShortLabel: "KB"),
-            AgentNotesCanonPathKind.DirectoryMissing => new AnnunciatorLampItem(
-                EnvironmentReadinessCellIds.AgentNotesCanonPath,
-                title,
-                "Каталог не найден — проверь AGENT_NOTES_CANON_PATH.",
+                "Файл TOML не найден — проверь config_path.",
                 AnnunciatorLampLevel.Caution,
                 LampShortLabel: "KB"),
-            AgentNotesCanonPathKind.InvalidPath => new AnnunciatorLampItem(
+            AgentNotesConfigPathKind.InvalidPath => new AnnunciatorLampItem(
                 EnvironmentReadinessCellIds.AgentNotesCanonPath,
                 title,
-                "Некорректный путь в AGENT_NOTES_CANON_PATH.",
+                "Некорректный путь в config_path.",
                 AnnunciatorLampLevel.Critical,
                 LampShortLabel: "KB"),
+            AgentNotesConfigPathKind.FileExists => BuildAgentNotesConfigLoadedRow(configPath!, settings),
             _ => throw new UnreachableException()
         };
+    }
+
+    private static AnnunciatorLampItem BuildAgentNotesConfigLoadedRow(string configPath, CascadeIdeSettings settings)
+    {
+        const string title = "agent-notes config (TOML)";
+        if (!AgentNotesRuntimeLoader.EnsureInitialized(settings))
+        {
+            var err = AgentNotesRuntimeLoader.LastLoadError ?? "unknown";
+            return new AnnunciatorLampItem(
+                EnvironmentReadinessCellIds.AgentNotesCanonPath,
+                title,
+                $"TOML найден, но не загружен: {err}",
+                AnnunciatorLampLevel.Caution,
+                LampShortLabel: "KB");
+        }
+
+        if (!AgentNotesRuntime.TryGetPrimaryKnowledgeRoot(out var root) || !Directory.Exists(root))
+        {
+            return new AnnunciatorLampItem(
+                EnvironmentReadinessCellIds.AgentNotesCanonPath,
+                title,
+                "TOML загружен, но primary knowledge root из [knowledge] не существует на диске.",
+                AnnunciatorLampLevel.Caution,
+                LampShortLabel: "KB");
+        }
+
+        _ = configPath;
+        return new AnnunciatorLampItem(
+            EnvironmentReadinessCellIds.AgentNotesCanonPath,
+            title,
+            "TOML загружен; primary knowledge root доступен (паритет с agent-notes-mcp 2.0).",
+            AnnunciatorLampLevel.Ok,
+            LampShortLabel: "KB");
     }
 
     private static AnnunciatorLampItem BuildNetcoreDbgRow(string? raw, Func<string?>? tryResolveNetcoreDbgWhenUnset = null)
@@ -443,7 +474,7 @@ public static class EnvironmentReadinessSnapshotBuilder
         CancellationToken cancellationToken = default)
     {
         var agent = BuildAgentRow(isMcpStdioHost, activeAiProvider);
-        var envRows = BuildEnvProbeRows(EnvironmentReadinessEnvSnapshot.FromCurrentProcess());
+        var envRows = BuildEnvProbeRows(EnvironmentReadinessEnvSnapshot.FromSettings(settings), settings);
         var lspRows = BuildLspRows(settings, solutionPath, lsp);
         var dotnet = await ProbeDotnetAsync(cancellationToken).ConfigureAwait(false);
 

@@ -50,14 +50,14 @@ internal sealed partial class IdeMcpCommandExecutor
             await ((IIdeMcpActions)_vm).WriteKnowledgeFileAsync(
                 McpCommandJsonArgs.String(args, "file_path") ?? "",
                 McpCommandJsonArgs.String(args, "content") ?? "",
-                McpCommandJsonArgs.String(args, "canon_path"),
+                McpCommandJsonArgs.KnowledgePath(args),
                 McpCommandJsonArgs.Bool(args, "save_revision", true),
                 ct));
         add(Services.IdeCommands.AppendKnowledgeFile, async (args, ct) =>
             await ((IIdeMcpActions)_vm).AppendKnowledgeFileAsync(
                 McpCommandJsonArgs.String(args, "file_path") ?? "",
                 McpCommandJsonArgs.String(args, "content") ?? "",
-                McpCommandJsonArgs.String(args, "canon_path"),
+                McpCommandJsonArgs.KnowledgePath(args),
                 McpCommandJsonArgs.Bool(args, "save_revision", true),
                 ct));
         add(Services.IdeCommands.UpsertKnowledgeSection, async (args, ct) =>
@@ -65,12 +65,12 @@ internal sealed partial class IdeMcpCommandExecutor
                 McpCommandJsonArgs.String(args, "file_path") ?? "",
                 McpCommandJsonArgs.String(args, "section_id") ?? "",
                 McpCommandJsonArgs.String(args, "content") ?? "",
-                McpCommandJsonArgs.String(args, "canon_path"),
+                McpCommandJsonArgs.KnowledgePath(args),
                 McpCommandJsonArgs.Bool(args, "save_revision", true),
                 ct));
         add(Services.IdeCommands.DeleteKnowledgeFile, async (args, ct) =>
-            await ((IIdeMcpActions)_vm).DeleteKnowledgeFileAsync(McpCommandJsonArgs.String(args, "file_path") ?? "", McpCommandJsonArgs.String(args, "canon_path"), ct));
+            await ((IIdeMcpActions)_vm).DeleteKnowledgeFileAsync(McpCommandJsonArgs.String(args, "file_path") ?? "", McpCommandJsonArgs.KnowledgePath(args), ct));
         add(Services.IdeCommands.DeleteKnowledgeSection, async (args, ct) =>
-            await ((IIdeMcpActions)_vm).DeleteKnowledgeSectionAsync(McpCommandJsonArgs.String(args, "file_path") ?? "", McpCommandJsonArgs.String(args, "section_id") ?? "", McpCommandJsonArgs.String(args, "canon_path"), ct));
+            await ((IIdeMcpActions)_vm).DeleteKnowledgeSectionAsync(McpCommandJsonArgs.String(args, "file_path") ?? "", McpCommandJsonArgs.String(args, "section_id") ?? "", McpCommandJsonArgs.KnowledgePath(args), ct));
     }
 }

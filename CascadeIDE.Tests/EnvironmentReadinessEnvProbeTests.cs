@@ -1,5 +1,7 @@
-using CascadeIDE.Cockpit.Composition.EnvironmentReadiness;
+using CascadeIDE.Features.EnvironmentReadiness.Application;
+using CascadeIDE.Features.EnvironmentReadiness.DataAcquisition;
 using CascadeIDE.Models;
+using CascadeIDE.Services;
 using Xunit;
 
 namespace CascadeIDE.Tests;
@@ -7,10 +9,11 @@ namespace CascadeIDE.Tests;
 public sealed class EnvironmentReadinessEnvProbeTests
 {
     [Fact]
-    public void BuildEnvProbeRows_unset_notes_ok_canon_and_dbg_advisory()
+    public void BuildEnvProbeRows_unset_notes_ok_config_and_dbg_advisory()
     {
         var rows = EnvironmentReadinessSnapshotBuilder.BuildEnvProbeRows(
             new EnvironmentReadinessEnvSnapshot(null, null, null),
+            new CascadeIdeSettings(),
             tryResolveNetcoreDbgWhenUnset: static () => null);
 
         Assert.Equal(3, rows.Count);
@@ -30,6 +33,7 @@ public sealed class EnvironmentReadinessEnvProbeTests
     {
         var rows = EnvironmentReadinessSnapshotBuilder.BuildEnvProbeRows(
             new EnvironmentReadinessEnvSnapshot(null, null, null),
+            new CascadeIdeSettings(),
             tryResolveNetcoreDbgWhenUnset: static () => @"C:\fake\netcoredbg.exe");
 
         var dbg = Assert.Single(rows, r => r.Id == EnvironmentReadinessCellIds.NetcoreDbgPath);
@@ -38,27 +42,47 @@ public sealed class EnvironmentReadinessEnvProbeTests
     }
 
     [Fact]
-    public void BuildEnvProbeRows_canon_existing_directory_ok()
+    public void BuildEnvProbeRows_valid_config_toml_ok()
     {
-        var dir = Path.Combine(Path.GetTempPath(), "cascade-ers-canon-" + Guid.NewGuid().ToString("n"));
-        Directory.CreateDirectory(dir);
+        var root = Path.Combine(Path.GetTempPath(), "cascade-ers-kb-" + Guid.NewGuid().ToString("n"));
+        Directory.CreateDirectory(Path.Combine(root, "knowledge", "work", "local"));
+        var tomlPath = Path.Combine(root, "agent-notes.toml");
+        File.WriteAllText(
+            tomlPath,
+            $"""
+            version = 1
+            [knowledge]
+            primary = "test"
+            [knowledge.roots]
+            test = "{root.Replace('\\', '/')}"
+            [workspace]
+            default_scope = "door-to-singularity"
+            scope_map = "work/local/workspace-scope-map-v1.md"
+            scope_aliases = "work/local/scope-alias-map-v1.md"
+            """);
+        File.WriteAllText(Path.Combine(root, "knowledge", "work", "local", "workspace-scope-map-v1.md"), "# map\n");
+        File.WriteAllText(Path.Combine(root, "agent-notes.md"), "<!-- section:active-scope -->\n<!-- /section:active-scope -->\n");
+
         try
         {
+            var settings = new CascadeIdeSettings { AgentNotes = new AgentNotesSettings { ConfigPath = tomlPath } };
             var rows = EnvironmentReadinessSnapshotBuilder.BuildEnvProbeRows(
-                new EnvironmentReadinessEnvSnapshot(null, dir, null));
+                EnvironmentReadinessEnvSnapshot.FromSettings(settings),
+                settings);
 
-            var canon = Assert.Single(rows, r => r.Id == EnvironmentReadinessCellIds.AgentNotesCanonPath);
-            Assert.Equal(AnnunciatorLampLevel.Ok, canon.Level);
+            var kb = Assert.Single(rows, r => r.Id == EnvironmentReadinessCellIds.AgentNotesCanonPath);
+            Assert.Equal(AnnunciatorLampLevel.Ok, kb.Level);
         }
         finally
         {
+            AgentNotesRuntimeLoader.Reset();
             try
             {
-                Directory.Delete(dir, recursive: true);
+                Directory.Delete(root, recursive: true);
             }
             catch
             {
-                // temp cleanup best-effort
+                // best-effort
             }
         }
     }
@@ -67,7 +91,8 @@ public sealed class EnvironmentReadinessEnvProbeTests
     public void BuildEnvProbeRows_netcoredbg_bare_name_not_on_path_is_caution()
     {
         var rows = EnvironmentReadinessSnapshotBuilder.BuildEnvProbeRows(
-            new EnvironmentReadinessEnvSnapshot(null, null, "zzz_cascade_ers_missing_exe_9f2a"));
+            new EnvironmentReadinessEnvSnapshot(null, null, "zzz_cascade_ers_missing_exe_9f2a"),
+            new CascadeIdeSettings());
 
         var dbg = Assert.Single(rows, r => r.Id == EnvironmentReadinessCellIds.NetcoreDbgPath);
         Assert.Equal(AnnunciatorLampLevel.Caution, dbg.Level);
@@ -81,7 +106,8 @@ public sealed class EnvironmentReadinessEnvProbeTests
         try
         {
             var rows = EnvironmentReadinessSnapshotBuilder.BuildEnvProbeRows(
-                new EnvironmentReadinessEnvSnapshot(null, null, temp));
+                new EnvironmentReadinessEnvSnapshot(null, null, temp),
+                new CascadeIdeSettings());
 
             var dbg = Assert.Single(rows, r => r.Id == EnvironmentReadinessCellIds.NetcoreDbgPath);
             Assert.Equal(AnnunciatorLampLevel.Ok, dbg.Level);

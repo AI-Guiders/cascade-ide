@@ -22,6 +22,14 @@ public enum AgentNotesCanonPathKind
     InvalidPath
 }
 
+public enum AgentNotesConfigPathKind
+{
+    Unset,
+    FileExists,
+    FileMissing,
+    InvalidPath
+}
+
 public enum NetcoreDbgPathKind
 {
     UnsetFoundOnPath,
@@ -56,6 +64,22 @@ public static class EnvironmentReadinessPathAcquisition
         catch
         {
             return AgentNotesFilePathKind.InvalidPath;
+        }
+    }
+
+    public static AgentNotesConfigPathKind ClassifyAgentNotesConfigPath(string? raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw))
+            return AgentNotesConfigPathKind.Unset;
+
+        try
+        {
+            var full = CanonicalFilePath.Normalize(raw.Trim());
+            return File.Exists(full) ? AgentNotesConfigPathKind.FileExists : AgentNotesConfigPathKind.FileMissing;
+        }
+        catch
+        {
+            return AgentNotesConfigPathKind.InvalidPath;
         }
     }
 

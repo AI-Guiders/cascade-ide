@@ -1,6 +1,9 @@
 #nullable enable
 
 using CascadeIDE.Contracts;
+using CascadeIDE.Models;
+using CascadeIDE.Services;
+
 namespace CascadeIDE.Features.EnvironmentReadiness.DataAcquisition;
 
 /// <summary>
@@ -9,13 +12,19 @@ namespace CascadeIDE.Features.EnvironmentReadiness.DataAcquisition;
 /// </summary>
 public readonly record struct EnvironmentReadinessEnvSnapshot(
     string? AgentNotesFile,
-    string? AgentNotesCanonPath,
+    string? AgentNotesConfigPath,
     string? NetcoreDbgPath)
 {
     public static EnvironmentReadinessEnvSnapshot FromCurrentProcess() =>
         new(
             Environment.GetEnvironmentVariable(WellKnownEnv.AgentNotesFile),
-            Environment.GetEnvironmentVariable(WellKnownEnv.AgentNotesCanonPath),
+            null,
+            Environment.GetEnvironmentVariable(WellKnownEnv.NetcoreDbgPath));
+
+    public static EnvironmentReadinessEnvSnapshot FromSettings(CascadeIdeSettings settings) =>
+        new(
+            Environment.GetEnvironmentVariable(WellKnownEnv.AgentNotesFile),
+            AgentNotesRuntimeLoader.ResolveConfigPath(settings),
             Environment.GetEnvironmentVariable(WellKnownEnv.NetcoreDbgPath));
 }
 
@@ -24,6 +33,7 @@ public readonly record struct EnvironmentReadinessEnvSnapshot(
 public static class WellKnownEnv
 {
     public const string AgentNotesFile = "AGENT_NOTES_FILE";
+    [Obsolete("Use [agent_notes].config_path in settings.toml (SSOT with MCP --config).")]
     public const string AgentNotesCanonPath = "AGENT_NOTES_CANON_PATH";
     public const string NetcoreDbgPath = "NETCOREDBG_PATH";
 }

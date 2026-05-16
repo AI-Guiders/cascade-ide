@@ -82,7 +82,11 @@ public sealed partial class CascadeIdeSettings
             {
                 GoToSearch = new CommandPaletteGoToSearchSettings { Backend = CommandPalette.GoToSearch.Backend },
             },
-            AgentNotes = new AgentNotesSettings { KbBaseOverlayPath = AgentNotes.KbBaseOverlayPath },
+            AgentNotes = new AgentNotesSettings
+            {
+                ConfigPath = AgentNotes.ConfigPath,
+                KbBaseOverlayPath = AgentNotes.KbBaseOverlayPath
+            },
             Workspace = new WorkspaceSettings
             {
                 PfdExpanded = Workspace.PfdExpanded,
@@ -285,7 +289,7 @@ public sealed partial class CascadeIdeSettings
     {
         if (a is null || b is null)
             return a == b;
-        return a.KbBaseOverlayPath.Is(b.KbBaseOverlayPath);
+        return a.ConfigPath.Is(b.ConfigPath) && a.KbBaseOverlayPath.Is(b.KbBaseOverlayPath);
     }
 
     private static bool HybridIndexEquals(HybridIndexSettings? a, HybridIndexSettings? b)

@@ -39,6 +39,8 @@ external_servers_json = "[]"
 acp_auto_inject_ide_mcp = true
 
 [agent_notes]
+# SSOT с Cursor MCP: тот же TOML, что в mcp.json → --config для agent-notes-mcp.
+config_path = "D:/agent-notes-mcp/agent-notes-mcp.toml"
 # Необязательно: каталог канона с подпапкой knowledge/ поверх встроенного KB-Base IDE.
 kb_base_overlay_path = ""
 

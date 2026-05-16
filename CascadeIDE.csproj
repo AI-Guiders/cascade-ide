@@ -81,7 +81,9 @@
     <Content Include="docs\THIRD-PARTY-NOTICES.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AIGuiders.AgentNotes.Core" Version="1.0.0" />
+    <!-- 2.0: локальный Core в open/; после публикации NuGet — PackageReference AIGuiders.AgentNotes.Core 2.0.0 -->
+    <ProjectReference Include="..\agent-notes-core\AgentNotes.Core.csproj" Condition="Exists('..\agent-notes-core\AgentNotes.Core.csproj')" />
+    <PackageReference Include="AIGuiders.AgentNotes.Core" Version="2.0.0" Condition="!Exists('..\agent-notes-core\AgentNotes.Core.csproj')" />
     <PackageReference Include="AIGuiders.GitMcp.Core" Version="1.0.1" />
     <ProjectReference Include="CascadeIDE.Contracts\CascadeIDE.Contracts.csproj" />
     <!-- RoslynMcp передаёт RoslynMcpWorkspace=true: не ссылаться на локальный анализатор, иначе DLL в bin держит процесс MCP и ломает dotnet build. -->

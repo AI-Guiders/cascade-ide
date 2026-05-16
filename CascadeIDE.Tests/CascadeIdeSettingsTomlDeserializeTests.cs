@@ -199,6 +199,17 @@ public sealed class CascadeIdeSettingsTomlDeserializeTests
     }
 
     [Fact]
+    public void Deserialize_AgentNotes_ConfigPath_ParsesExpected()
+    {
+        const string toml = """
+            [agent_notes]
+            config_path = "D:/agent-notes-mcp/agent-notes-mcp.toml"
+            """;
+        var s = CascadeTomlSerializer.Deserialize<CascadeIdeSettings>(toml)!;
+        Assert.Equal("D:/agent-notes-mcp/agent-notes-mcp.toml", s.AgentNotes.ConfigPath);
+    }
+
+    [Fact]
     public void Deserialize_AgentNotes_KbBaseOverlayPath_ParsesExpected()
     {
         const string text =

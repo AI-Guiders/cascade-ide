@@ -8,6 +8,10 @@ public static class McpCommandJsonArgs
     public static string? String(IReadOnlyDictionary<string, JsonElement>? args, string key) =>
         args is not null && args.TryGetValue(key, out var e) ? e.GetString() : null;
 
+    /// <summary>Primary knowledge root override (MCP 2.0 / IDE parity). Accepts legacy <c>canon_path</c> alias.</summary>
+    public static string? KnowledgePath(IReadOnlyDictionary<string, JsonElement>? args) =>
+        String(args, "knowledge_path") ?? String(args, "canon_path");
+
     public static int Int(IReadOnlyDictionary<string, JsonElement>? args, string key, int defaultValue = 0)
     {
         if (args is null || !args.TryGetValue(key, out var e) || e.ValueKind != JsonValueKind.Number)

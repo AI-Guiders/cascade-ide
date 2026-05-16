@@ -26,13 +26,16 @@ public sealed class McpAgentNotesService
     private const string EmptyKnowledgeListPayload = """{"path":"","files":[],"total":0}""";
 
     /// <remarks>
-    /// Чтение <c>knowledge/</c> без канона окружения: встроенный KB-Base (embedded zip в сборке),
-    /// с опциональным оверлеем из <see cref="AgentNotesSettings.KbBaseOverlayPath"/> (файлы оверлея имеют приоритет).
-    /// Если задан <c>AGENT_NOTES_CANON_PATH</c>, используется только он (поведение agent-notes-core).
+    /// Чтение <c>knowledge/</c> без явного <c>knowledge_path</c>: primary root из TOML (<see cref="AgentNotesRuntimeLoader"/>),
+    /// иначе встроенный KB-Base + оверлей <see cref="AgentNotesSettings.KbBaseOverlayPath"/>.
     /// </remarks>
 
     public const string WorkspaceRequiredMessage =
         "Error: no notes workspace. Open a solution, or set AGENT_NOTES_FILE to a global agent-notes path.";
+
+    private CascadeIdeSettings Settings => _settingsProvider();
+
+    private bool TryEnsureRuntime() => AgentNotesRuntimeLoader.EnsureInitialized(Settings);
 
     /// <summary>
     /// Каталог workspace для <see cref="NotesStorage"/> (read/write/list).
@@ -53,6 +56,7 @@ public sealed class McpAgentNotesService
 
     public string WriteAgentNotes(string? workspace, string content)
     {
+        TryEnsureRuntime();
         if (string.IsNullOrEmpty(workspace))
             return WorkspaceRequiredMessage;
         try
@@ -68,6 +72,7 @@ public sealed class McpAgentNotesService
 
     public string ReadAgentNotes(string? workspace)
     {
+        TryEnsureRuntime();
         if (string.IsNullOrEmpty(workspace))
             return "";
         try
@@ -82,6 +87,7 @@ public sealed class McpAgentNotesService
 
     public string AppendAgentNotes(string? workspace, string content)
     {
+        TryEnsureRuntime();
         if (string.IsNullOrEmpty(workspace))
             return WorkspaceRequiredMessage;
         try
@@ -97,6 +103,7 @@ public sealed class McpAgentNotesService
 
     public string ListAgentNotesRevisions(string? workspace, int? limit)
     {
+        TryEnsureRuntime();
         if (string.IsNullOrEmpty(workspace))
             return "[]";
         try
@@ -112,6 +119,7 @@ public sealed class McpAgentNotesService
 
     public string RollbackAgentNotes(string? workspace, string? revisionFile)
     {
+        TryEnsureRuntime();
         if (string.IsNullOrEmpty(workspace))
             return WorkspaceRequiredMessage;
         try
@@ -126,6 +134,7 @@ public sealed class McpAgentNotesService
 
     public string ReadHotContext(string? workspace, string? activeScope)
     {
+        TryEnsureRuntime();
         if (string.IsNullOrEmpty(workspace))
             return "{\"content\":\"\"}";
         try
@@ -140,6 +149,7 @@ public sealed class McpAgentNotesService
 
     public string RouteContext(string? workspace, string query, string? activeScope, int? maxSections, int? maxChars)
     {
+        TryEnsureRuntime();
         if (string.IsNullOrEmpty(workspace))
             return "{\"assembled_context\":\"\"}";
         if (string.IsNullOrWhiteSpace(query))
@@ -158,6 +168,7 @@ public sealed class McpAgentNotesService
 
     public string MemoryHealth(string? workspace, string? activeScope)
     {
+        TryEnsureRuntime();
         if (string.IsNullOrEmpty(workspace))
             return "{\"health\":\"unknown\"}";
         try
@@ -172,6 +183,7 @@ public sealed class McpAgentNotesService
 
     public string CompactHotContext(string? workspace, bool apply)
     {
+        TryEnsureRuntime();
         if (string.IsNullOrEmpty(workspace))
             return "{\"changed\":false}";
         try
@@ -186,6 +198,7 @@ public sealed class McpAgentNotesService
 
     public string ExtractFromArchive(string? workspace, string query, string? revisionFile, int? headLimit, int? contextLines)
     {
+        TryEnsureRuntime();
         if (string.IsNullOrEmpty(workspace))
             return "{\"matches\":[]}";
         if (string.IsNullOrWhiteSpace(query))
@@ -204,6 +217,7 @@ public sealed class McpAgentNotesService
 
     public string UpsertAgentNotesSection(string? workspace, string sectionId, string content)
     {
+        TryEnsureRuntime();
         if (string.IsNullOrWhiteSpace(sectionId))
             return "Error: missing section_id.";
         if (string.IsNullOrEmpty(workspace))
@@ -221,6 +235,7 @@ public sealed class McpAgentNotesService
 
     public string SearchAgentNotes(string? workspace, string query, int? headLimit)
     {
+        TryEnsureRuntime();
         if (string.IsNullOrWhiteSpace(query))
             return "{\"matches\":[]}";
         if (string.IsNullOrEmpty(workspace))
@@ -238,14 +253,15 @@ public sealed class McpAgentNotesService
 
     public string ReadKnowledgeFile(string filePath, int? offset = null, int? limit = null)
     {
+        TryEnsureRuntime();
         if (string.IsNullOrWhiteSpace(filePath))
             return "";
         try
         {
-            if (!string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(AgentNotesCanonEnvVar)))
-                return _storage.ReadKnowledgeFile(canonPath: null, filePath, offset, limit);
+            if (AgentNotesRuntime.IsConfigured)
+                return _storage.ReadKnowledgeFile(knowledgePath: null, filePath, offset, limit);
 
-            var overlayCanon = KbBaseOverlayPathResolver.TryResolveCanonRoot(_settingsProvider());
+            var overlayCanon = KbBaseOverlayPathResolver.TryResolveCanonRoot(Settings);
             if (overlayCanon is not null)
             {
                 var overlayFullPath = _storage.GetKnowledgeFilePath(overlayCanon, filePath);
@@ -271,12 +287,13 @@ public sealed class McpAgentNotesService
 
     public string ListKnowledgeFiles(string? subdir)
     {
+        TryEnsureRuntime();
         try
         {
-            if (!string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(AgentNotesCanonEnvVar)))
-                return _storage.ListKnowledgeFiles(canonPath: null, subdir);
+            if (AgentNotesRuntime.IsConfigured)
+                return _storage.ListKnowledgeFiles(knowledgePath: null, subdir);
 
-            var overlayCanon = KbBaseOverlayPathResolver.TryResolveCanonRoot(_settingsProvider());
+            var overlayCanon = KbBaseOverlayPathResolver.TryResolveCanonRoot(Settings);
             var overlayJson =
                 overlayCanon is null ? EmptyKnowledgeListPayload : _storage.ListKnowledgeFiles(overlayCanon, subdir);
 
@@ -298,9 +315,6 @@ public sealed class McpAgentNotesService
         }
     }
 
-    /// <remarks>Must match agent-notes-core <see cref="NotesStorage.ResolveCanonPath"/> env name.</remarks>
-    private const string AgentNotesCanonEnvVar = "AGENT_NOTES_CANON_PATH";
-
     private static string? TryReadKnowledgeListSearchPathFirstNonEmpty(string jsonPayload)
     {
         if (string.IsNullOrWhiteSpace(jsonPayload))
@@ -319,11 +333,12 @@ public sealed class McpAgentNotesService
         }
     }
 
-    public string WriteKnowledgeFile(string filePath, string content, string? canonPath, bool saveRevision)
+    public string WriteKnowledgeFile(string filePath, string content, string? knowledgePath, bool saveRevision)
     {
+        TryEnsureRuntime();
         try
         {
-            return _storage.WriteKnowledgeFile(canonPath, filePath, content, saveRevision);
+            return _storage.WriteKnowledgeFile(knowledgePath, filePath, content, saveRevision);
         }
         catch (Exception ex)
         {
@@ -331,11 +346,12 @@ public sealed class McpAgentNotesService
         }
     }
 
-    public string AppendKnowledgeFile(string filePath, string content, string? canonPath, bool saveRevision)
+    public string AppendKnowledgeFile(string filePath, string content, string? knowledgePath, bool saveRevision)
     {
+        TryEnsureRuntime();
         try
         {
-            return _storage.AppendKnowledgeFile(canonPath, filePath, content, saveRevision);
+            return _storage.AppendKnowledgeFile(knowledgePath, filePath, content, saveRevision);
         }
         catch (Exception ex)
         {
@@ -343,11 +359,12 @@ public sealed class McpAgentNotesService
         }
     }
 
-    public string UpsertKnowledgeSection(string filePath, string sectionId, string content, string? canonPath, bool saveRevision)
+    public string UpsertKnowledgeSection(string filePath, string sectionId, string content, string? knowledgePath, bool saveRevision)
     {
+        TryEnsureRuntime();
         try
         {
-            return _storage.UpsertKnowledgeSection(canonPath, filePath, sectionId, content, saveRevision);
+            return _storage.UpsertKnowledgeSection(knowledgePath, filePath, sectionId, content, saveRevision);
         }
         catch (Exception ex)
         {
@@ -355,11 +372,12 @@ public sealed class McpAgentNotesService
         }
     }
 
-    public string DeleteKnowledgeFile(string filePath, string? canonPath)
+    public string DeleteKnowledgeFile(string filePath, string? knowledgePath)
     {
+        TryEnsureRuntime();
         try
         {
-            return _storage.DeleteKnowledgeFile(canonPath, filePath);
+            return _storage.DeleteKnowledgeFile(knowledgePath, filePath);
         }
         catch (Exception ex)
         {
@@ -367,11 +385,12 @@ public sealed class McpAgentNotesService
         }
     }
 
-    public string DeleteKnowledgeSection(string filePath, string sectionId, string? canonPath)
+    public string DeleteKnowledgeSection(string filePath, string sectionId, string? knowledgePath)
     {
+        TryEnsureRuntime();
         try
         {
-            return _storage.DeleteKnowledgeSection(canonPath, filePath, sectionId);
+            return _storage.DeleteKnowledgeSection(knowledgePath, filePath, sectionId);
         }
         catch (Exception ex)
         {

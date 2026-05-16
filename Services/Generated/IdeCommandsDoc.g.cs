@@ -11,7 +11,7 @@ internal static class IdeCommandsDoc
         ["activate_document"] = "Активировать документ (переключить вкладку). args: file_path:string; returns: text; example: {\"file_path\":\"C:\\\\\\\\tmp\\\\\\\\a.cs\"}.",
         ["add_control"] = "Добавить контрол в UI (Debug). args: parent_name:string, control_type:string, content?:string, name?:string; returns: text; example: {\"parent_name\":\"Root\",\"control_type\":\"TextBlock\",\"content\":\"Hi\"}.",
         ["append_agent_notes"] = "Добавить блок в конец заметок агента. args: content:string; returns: text; example: {\"content\":\"\\\\n# Update\\\\n...\"}.",
-        ["append_knowledge_file"] = "Добавить блок в конец knowledge-файла. args: file_path:string, content:string, canon_path?:string, save_revision?:boolean; returns: text; example: {\"file_path\":\"META/x.md\",\"content\":\"more\",\"save_revision\":true}.",
+        ["append_knowledge_file"] = "Добавить блок в конец knowledge-файла. args: file_path:string, content:string, knowledge_path?:string, save_revision?:boolean; returns: text; example: {\"file_path\":\"META/x.md\",\"content\":\"more\",\"save_revision\":true}.",
         ["apply_cursor_like_theme"] = "Применить тему «как Cursor». returns: text.",
         ["apply_dark_theme"] = "Применить тёмную тему. returns: text.",
         ["apply_edit"] = "Применить текстовую правку в открытом документе. args: file_path:string, start_line:integer, start_column:integer, end_line:integer, end_column:integer, new_text:string; returns: text; example: {\"file_path\":\"C:\\\\tmp\\\\a.cs\",\"start_line\":1,\"start_column\":1,\"end_line\":1,\"end_column\":1,\"new_text\":\"// hi\\n\"}.",
@@ -58,8 +58,8 @@ internal static class IdeCommandsDoc
         ["debug_step_over"] = "Шаг через строку (DAP next). returns: text.",
         ["debug_stop"] = "Завершить сессию отладки (dispose DAP). returns: text.",
         ["debug_variables"] = "Переменные кадра. args: frame_index?:integer; returns: text; example: {\"frame_index\":0}.",
-        ["delete_knowledge_file"] = "Удалить knowledge-файл. args: file_path:string, canon_path?:string; returns: text; example: {\"file_path\":\"tmp.md\"}.",
-        ["delete_knowledge_section"] = "Удалить секцию из knowledge-файла. args: file_path:string, section_id:string, canon_path?:string; returns: text; example: {\"file_path\":\"index.md\",\"section_id\":\"foo\"}.",
+        ["delete_knowledge_file"] = "Удалить knowledge-файл. args: file_path:string, knowledge_path?:string; returns: text; example: {\"file_path\":\"tmp.md\"}.",
+        ["delete_knowledge_section"] = "Удалить секцию из knowledge-файла. args: file_path:string, section_id:string, knowledge_path?:string; returns: text; example: {\"file_path\":\"index.md\",\"section_id\":\"foo\"}.",
         ["emergency_stop"] = "Экстренно остановить автономные действия/выполнение (Emergency stop). returns: text.",
         ["exit_application"] = "Закрыть приложение (как меню Файл → Выход). returns: none.",
         ["explain_current_step"] = "Пояснить текущий шаг (Focus/Power). returns: text.",
@@ -196,9 +196,9 @@ internal static class IdeCommandsDoc
         ["toggle_terminal"] = "Как меню «Вид → Терминал» (переключатель). returns: text.",
         ["toggle_workspace_splitters_lock"] = "Сплиттеры рабочей области: переключить ON GND / IN AIR (мелодия tol, лампа TOL в task cockpit). returns: text.",
         ["upsert_agent_notes_section"] = "Вставить/обновить секцию заметок агента по section_id (маркерный блок). args: section_id:string, content:string; returns: text; example: {\"section_id\":\"active\",\"content\":\"ActiveProjectId: cascade-ide\"}.",
-        ["upsert_knowledge_section"] = "Вставить/обновить секцию в knowledge-файле по section_id. args: file_path:string, section_id:string, content:string, canon_path?:string, save_revision?:boolean; returns: text; example: {\"file_path\":\"index.md\",\"section_id\":\"foo\",\"content\":\"body\"}.",
+        ["upsert_knowledge_section"] = "Вставить/обновить секцию в knowledge-файле по section_id. args: file_path:string, section_id:string, content:string, knowledge_path?:string, save_revision?:boolean; returns: text; example: {\"file_path\":\"index.md\",\"section_id\":\"foo\",\"content\":\"body\"}.",
         ["write_agent_notes"] = "Записать заметки агента в каталог решения. args: content:string; returns: text; example: {\"content\":\"notes\"}.",
-        ["write_knowledge_file"] = "Записать knowledge-файл в канон (полная замена). args: file_path:string, content:string, canon_path?:string, save_revision?:boolean; returns: text; example: {\"file_path\":\"META/x.md\",\"content\":\"# Hi\",\"save_revision\":true}.",
+        ["write_knowledge_file"] = "Записать knowledge-файл (полная замена). args: file_path:string, content:string, knowledge_path?:string, save_revision?:boolean; returns: text; example: {\"file_path\":\"META/x.md\",\"content\":\"# Hi\",\"save_revision\":true}.",
     };
 
     public static bool TryGetSummary(string commandId, out string summary) =>

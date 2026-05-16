@@ -264,17 +264,17 @@
 
 | command_id | Описание |
 |-----------:|----------|
-| `append_knowledge_file` | Добавить блок в конец knowledge-файла. args: file_path:string, content:string, canon_path?:string, save_revision?:boolean; returns: text; example: {"file_path":"META/x.md","content":"more","save_revision":true}. |
+| `append_knowledge_file` | Добавить блок в конец knowledge-файла. args: file_path:string, content:string, knowledge_path?:string, save_revision?:boolean; returns: text; example: {"file_path":"META/x.md","content":"more","save_revision":true}. |
 | `codebase_index_explain` | Explain одного hit (как tool `codebase_index_explain`). hit_id обязателен. args: workspace_path?:string, solution_path?:string, hit_id:integer; returns: json; example: {"hit_id":1}. |
 | `codebase_index_reindex` | Переиндексация: по умолчанию инкремент (как tool `codebase_index_reindex`); full_rebuild=true — полная перестройка. args: workspace_path?:string, solution_path?:string, full_rebuild?:boolean; returns: json; example: {}. |
 | `codebase_index_search` | Гибридный поиск по индексу (как tool `codebase_index_search`). query обязателен; workspace/solution по умолчанию — текущее решение. args: workspace_path?:string, solution_path?:string, query:string, top_n?:integer, semantic?:boolean, alpha?:number, beta?:number, vec_top_k?:integer, path_prefix?:string, exclude_path_prefixes?:string[], extensions?:string[]; returns: json; example: {"query":"HybridIndexOrchestrator"}. |
 | `codebase_index_status` | Статус локального индекса (как tool `codebase_index_status`). workspace_path и solution_path опциональны — по умолчанию текущее открытое решение. args: workspace_path?:string, solution_path?:string; returns: json; example: {"workspace_path":"D:\\repo"}. |
-| `delete_knowledge_file` | Удалить knowledge-файл. args: file_path:string, canon_path?:string; returns: text; example: {"file_path":"tmp.md"}. |
-| `delete_knowledge_section` | Удалить секцию из knowledge-файла. args: file_path:string, section_id:string, canon_path?:string; returns: text; example: {"file_path":"index.md","section_id":"foo"}. |
+| `delete_knowledge_file` | Удалить knowledge-файл. args: file_path:string, knowledge_path?:string; returns: text; example: {"file_path":"tmp.md"}. |
+| `delete_knowledge_section` | Удалить секцию из knowledge-файла. args: file_path:string, section_id:string, knowledge_path?:string; returns: text; example: {"file_path":"index.md","section_id":"foo"}. |
 | `list_knowledge_files` | Список knowledge-файлов в каталоге решения (опционально subdir). args: subdir?:string; returns: json; example: {"subdir":"work"}. |
 | `read_knowledge_file` | Прочитать knowledge-файл из каталога решения. args: file_path:string, offset?:integer, limit?:integer; returns: text; example: {"file_path":"META/integrity-core.md","offset":2,"limit":20}. |
-| `upsert_knowledge_section` | Вставить/обновить секцию в knowledge-файле по section_id. args: file_path:string, section_id:string, content:string, canon_path?:string, save_revision?:boolean; returns: text; example: {"file_path":"index.md","section_id":"foo","content":"body"}. |
-| `write_knowledge_file` | Записать knowledge-файл в канон (полная замена). args: file_path:string, content:string, canon_path?:string, save_revision?:boolean; returns: text; example: {"file_path":"META/x.md","content":"# Hi","save_revision":true}. |
+| `upsert_knowledge_section` | Вставить/обновить секцию в knowledge-файле по section_id. args: file_path:string, section_id:string, content:string, knowledge_path?:string, save_revision?:boolean; returns: text; example: {"file_path":"index.md","section_id":"foo","content":"body"}. |
+| `write_knowledge_file` | Записать knowledge-файл (полная замена). args: file_path:string, content:string, knowledge_path?:string, save_revision?:boolean; returns: text; example: {"file_path":"META/x.md","content":"# Hi","save_revision":true}. |
 
 ### MCP / редактор
 

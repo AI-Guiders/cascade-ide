@@ -47,18 +47,18 @@ public partial class MainWindowViewModel
     Task<string> Services.IIdeMcpActions.ListKnowledgeFilesAsync(string? subdir, CancellationToken cancellationToken) =>
         Task.FromResult(_mcpAgentNotes.ListKnowledgeFiles(subdir));
 
-    Task<string> Services.IIdeMcpActions.WriteKnowledgeFileAsync(string filePath, string content, string? canonPath, bool saveRevision, CancellationToken cancellationToken) =>
-        Task.FromResult(_mcpAgentNotes.WriteKnowledgeFile(filePath, content, canonPath, saveRevision));
+    Task<string> Services.IIdeMcpActions.WriteKnowledgeFileAsync(string filePath, string content, string? knowledgePath, bool saveRevision, CancellationToken cancellationToken) =>
+        Task.FromResult(_mcpAgentNotes.WriteKnowledgeFile(filePath, content, knowledgePath, saveRevision));
 
-    Task<string> Services.IIdeMcpActions.AppendKnowledgeFileAsync(string filePath, string content, string? canonPath, bool saveRevision, CancellationToken cancellationToken) =>
-        Task.FromResult(_mcpAgentNotes.AppendKnowledgeFile(filePath, content, canonPath, saveRevision));
+    Task<string> Services.IIdeMcpActions.AppendKnowledgeFileAsync(string filePath, string content, string? knowledgePath, bool saveRevision, CancellationToken cancellationToken) =>
+        Task.FromResult(_mcpAgentNotes.AppendKnowledgeFile(filePath, content, knowledgePath, saveRevision));
 
-    Task<string> Services.IIdeMcpActions.UpsertKnowledgeSectionAsync(string filePath, string sectionId, string content, string? canonPath, bool saveRevision, CancellationToken cancellationToken) =>
-        Task.FromResult(_mcpAgentNotes.UpsertKnowledgeSection(filePath, sectionId, content, canonPath, saveRevision));
+    Task<string> Services.IIdeMcpActions.UpsertKnowledgeSectionAsync(string filePath, string sectionId, string content, string? knowledgePath, bool saveRevision, CancellationToken cancellationToken) =>
+        Task.FromResult(_mcpAgentNotes.UpsertKnowledgeSection(filePath, sectionId, content, knowledgePath, saveRevision));
 
-    Task<string> Services.IIdeMcpActions.DeleteKnowledgeFileAsync(string filePath, string? canonPath, CancellationToken cancellationToken) =>
-        Task.FromResult(_mcpAgentNotes.DeleteKnowledgeFile(filePath, canonPath));
+    Task<string> Services.IIdeMcpActions.DeleteKnowledgeFileAsync(string filePath, string? knowledgePath, CancellationToken cancellationToken) =>
+        Task.FromResult(_mcpAgentNotes.DeleteKnowledgeFile(filePath, knowledgePath));
 
-    Task<string> Services.IIdeMcpActions.DeleteKnowledgeSectionAsync(string filePath, string sectionId, string? canonPath, CancellationToken cancellationToken) =>
-        Task.FromResult(_mcpAgentNotes.DeleteKnowledgeSection(filePath, sectionId, canonPath));
+    Task<string> Services.IIdeMcpActions.DeleteKnowledgeSectionAsync(string filePath, string sectionId, string? knowledgePath, CancellationToken cancellationToken) =>
+        Task.FromResult(_mcpAgentNotes.DeleteKnowledgeSection(filePath, sectionId, knowledgePath));
 }

@@ -11,7 +11,7 @@ internal static class IdeCommandsArgsGenerated
         ["activate_document"] = new IdeCommandsArgs.Arg[] { new("file_path", "string", true, false, null) },
         ["add_control"] = new IdeCommandsArgs.Arg[] { new("parent_name", "string", true, false, null), new("control_type", "string", true, false, null), new("content", "string", false, false, null), new("name", "string", false, false, null) },
         ["append_agent_notes"] = new IdeCommandsArgs.Arg[] { new("content", "string", true, false, null) },
-        ["append_knowledge_file"] = new IdeCommandsArgs.Arg[] { new("file_path", "string", true, false, null), new("content", "string", true, false, null), new("canon_path", "string", false, false, null), new("save_revision", "boolean", false, false, null) },
+        ["append_knowledge_file"] = new IdeCommandsArgs.Arg[] { new("file_path", "string", true, false, null), new("content", "string", true, false, null), new("knowledge_path", "string", false, false, null), new("save_revision", "boolean", false, false, null) },
         ["apply_edit"] = new IdeCommandsArgs.Arg[] { new("file_path", "string", true, false, null), new("start_line", "integer", true, false, null), new("start_column", "integer", true, false, null), new("end_line", "integer", true, false, null), new("end_column", "integer", true, false, null), new("new_text", "string", true, false, null) },
         ["capture_window"] = new IdeCommandsArgs.Arg[] { new("scope", "string", false, false, null), new("workspace_path", "string", false, false, null), new("output_path", "string", false, false, null) },
         ["chat_edit_message"] = new IdeCommandsArgs.Arg[] { new("message_id", "string", true, false, null), new("new_content", "string", true, false, null), new("reason", "string", false, false, null) },
@@ -27,8 +27,8 @@ internal static class IdeCommandsArgsGenerated
         ["debug_attach"] = new IdeCommandsArgs.Arg[] { new("workspace_path", "string", true, false, null), new("process_id", "integer", true, false, null), new("target_path", "string", false, false, null), new("netcoredbg_path", "string", false, false, null) },
         ["debug_launch"] = new IdeCommandsArgs.Arg[] { new("workspace_path", "string", false, false, null), new("target_path", "string", false, false, null), new("profile_name", "string", false, false, null), new("netcoredbg_path", "string", false, false, null), new("program_args", "string", false, true, "string") },
         ["debug_variables"] = new IdeCommandsArgs.Arg[] { new("frame_index", "integer", false, false, null) },
-        ["delete_knowledge_file"] = new IdeCommandsArgs.Arg[] { new("file_path", "string", true, false, null), new("canon_path", "string", false, false, null) },
-        ["delete_knowledge_section"] = new IdeCommandsArgs.Arg[] { new("file_path", "string", true, false, null), new("section_id", "string", true, false, null), new("canon_path", "string", false, false, null) },
+        ["delete_knowledge_file"] = new IdeCommandsArgs.Arg[] { new("file_path", "string", true, false, null), new("knowledge_path", "string", false, false, null) },
+        ["delete_knowledge_section"] = new IdeCommandsArgs.Arg[] { new("file_path", "string", true, false, null), new("section_id", "string", true, false, null), new("knowledge_path", "string", false, false, null) },
         ["explain_trace_step"] = new IdeCommandsArgs.Arg[] { new("step_index", "integer", true, false, null) },
         ["extract_from_archive"] = new IdeCommandsArgs.Arg[] { new("query", "string", true, false, null), new("revision_file", "string", false, false, null), new("head_limit", "integer", false, false, null), new("context_lines", "integer", false, false, null) },
         ["fetch_web_public_url"] = new IdeCommandsArgs.Arg[] { new("url", "string", true, false, null), new("max_chars", "integer", false, false, null) },
@@ -96,9 +96,9 @@ internal static class IdeCommandsArgsGenerated
         ["submit_chat_clarification_response"] = new IdeCommandsArgs.Arg[] { new("response_json", "string", true, false, null) },
         ["toggle_pin_document"] = new IdeCommandsArgs.Arg[] { new("file_path", "string", true, false, null) },
         ["upsert_agent_notes_section"] = new IdeCommandsArgs.Arg[] { new("section_id", "string", true, false, null), new("content", "string", true, false, null) },
-        ["upsert_knowledge_section"] = new IdeCommandsArgs.Arg[] { new("file_path", "string", true, false, null), new("section_id", "string", true, false, null), new("content", "string", true, false, null), new("canon_path", "string", false, false, null), new("save_revision", "boolean", false, false, null) },
+        ["upsert_knowledge_section"] = new IdeCommandsArgs.Arg[] { new("file_path", "string", true, false, null), new("section_id", "string", true, false, null), new("content", "string", true, false, null), new("knowledge_path", "string", false, false, null), new("save_revision", "boolean", false, false, null) },
         ["write_agent_notes"] = new IdeCommandsArgs.Arg[] { new("content", "string", true, false, null) },
-        ["write_knowledge_file"] = new IdeCommandsArgs.Arg[] { new("file_path", "string", true, false, null), new("content", "string", true, false, null), new("canon_path", "string", false, false, null), new("save_revision", "boolean", false, false, null) },
+        ["write_knowledge_file"] = new IdeCommandsArgs.Arg[] { new("file_path", "string", true, false, null), new("content", "string", true, false, null), new("knowledge_path", "string", false, false, null), new("save_revision", "boolean", false, false, null) },
     };
 
     public static bool TryGetArgs(string commandId, out IdeCommandsArgs.Arg[] args) =>
