@@ -1,6 +1,6 @@
 # IOP — Intent-Oriented Programming
 
-**Intent-Oriented Programming** shifts focus from hand-written syntax to **intent** and **target state**. **Cascade IDE** is an open *reference implementation* of this model for **.NET** and **agent-first** workflows.
+**Intent-Oriented Programming** shifts focus from hand-written syntax to **intent** and **target state**. **Cascade IDE** is an open **working implementation** of IOP: a stack where the paradigm is explored in a shipping **.NET** **agent-first** IDE.
 
 !!! info "Normative detail"
     Non-goals and ADR links — [ADR 0121](adr/0121-intent-oriented-programming-paradigm.md) (Proposed).  

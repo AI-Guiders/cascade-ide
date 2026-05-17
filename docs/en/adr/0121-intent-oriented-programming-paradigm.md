@@ -30,7 +30,7 @@
 
 ## Summary
 
-- Adopt **Intent-Oriented Programming (IOP)** as the **named product paradigm** of Cascade IDE (reference implementation), not as a replacement for OOP/FP in the user’s codebase.
+- Adopt **Intent-Oriented Programming (IOP)** as the **named product paradigm** of Cascade IDE (**working implementation of a proposed paradigm in the product**), not as a replacement for OOP/FP in the user’s codebase.
 - Three IOP pillars in CIDE: **intent over manual syntax** (intent layer), **two-loop verification** (agent synthesizes — human approves diff), **epistemic context** (KB/domains as normative layer for the agent).
 - Public wording for the team and site — [iop-manifest-v1.md](../iop-manifest-v1.md); this ADR is the normative link to existing decisions and non-goals.
 
@@ -42,7 +42,7 @@ The agent-first IDE stack already has “intent-first” in individual ADRs ([00
 
 1. explains to newcomers (including on probation) *why* the product is shaped this way, not as “VS + chat”;
 2. connects scattered ADRs into one mental model;
-3. honestly separates **hypothesis + reference implementation** from “the only industry standard”.
+3. honestly separates **hypothesis + working in-product implementation** from “the only industry standard” or “the spec reference implementation”.
 
 Team discussion (including with Atlas) proposed **IOP** alongside OOP and FP, shifting focus from implementation to **intent** and **target state**.
 
@@ -85,11 +85,11 @@ The manifest metaphor of an “intent compiler” is **not one binary** but the 
 
 <a id="adr0121-p3"></a>
 
-### 3. Reference implementation
+### 3. Working implementation in the product
 
-Cascade IDE is positioned as the **IOP reference implementation**: open stack (IDE, Roslyn MCP, agent-notes, kb-public), documented at the [project site](https://ai-guiders.github.io/cascade-ide/).
+Cascade IDE is an **open working implementation** of the proposed IOP paradigm (**an in-product instance**, not an external-spec reference): IDE, Roslyn MCP, agent-notes, kb-public, documented at the [project site](https://ai-guiders.github.io/cascade-ide/).
 
-Wording such as “the whole world will switch to IOP” / “the world’s only compiler” is **not** part of this ADR — only a **working paradigm hypothesis** for the product and the AI-Guiders community.
+Wording such as “the whole world will switch to IOP”, “the world’s only compiler”, or **reference implementation** in the ISO/W3C sense is **not** part of this ADR — only a **working paradigm hypothesis** for the product and the AI-Guiders community.
 
 <a id="adr0121-p4"></a>
 
@@ -138,4 +138,5 @@ Wording such as “the whole world will switch to IOP” / “the world’s only
 
 | Date | Change |
 |------|--------|
-| 2026-05-17 | Proposed: IOP paradigm, three pillars, manifest, CIDE reference implementation. |
+| 2026-05-17 | Proposed: IOP paradigm, three pillars, manifest, CIDE working implementation. |
+| 2026-05-17 | Softened positioning: “reference implementation” → “working implementation in the product”. |
