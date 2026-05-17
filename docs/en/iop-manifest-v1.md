@@ -82,6 +82,8 @@ IOP and Cascade in perspective are a **team work environment**, not only an IDE 
 
 The personal cockpit stays for **your** cycle; the shared display is the **team PFD for the room** (read-mostly projection of the agreed model). Details — [ADR 0122](adr/0122-collaborative-iop-environment-and-shared-situational-display.md) (Proposed).
 
+**Environment-first and voice:** in one room people **speak** more than they type in chat — agents cannot honestly promise “we heard everything”. IOP does not bet on **full table transcription** (wheat/chaff); the wall and Intercom capture the **outcome of agreement** (card, pin, short structured note), not every remark at the desk.
+
 ---
 
 ## Session shape

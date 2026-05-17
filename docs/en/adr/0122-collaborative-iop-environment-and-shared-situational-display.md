@@ -116,6 +116,23 @@ CIDE on a station remains **executor and verifier**; the shared screen is a **re
 
 Cascade IDE is the **working implementation** of IOP at the station; **room projection** extends the same paradigm, not a separate “wall chat”.
 
+<a id="adr0122-p5"></a>
+
+### 5. Environment-first and voice in the room (honest)
+
+The **environment-first** model ([0121](0121-intent-oriented-programming-paradigm.md)) fits the room well: environment = stations + **shared picture**, not “another messenger”. But in one physical room people **usually do not chat in text** — they **talk**. Agents **cannot** reliably capture the spoken stream; if **everything** is written down and transcribed, you spend a long time **separating wheat from chaff** — the same problem as an endless feed, only in audio.
+
+**IOP direction (not a v1 commit):**
+
+| What | Meaning |
+|------|---------|
+| **Shared display** | Shows the **agreed model** (lines, KB gaps, phase) — what the team **already decided**, not a raw conversation log |
+| **Voice in the room** | Stays **human bandwidth**; the system is not required to be “microphone on the whole room” |
+| **Capture after talk** | Short **artifact of agreement**: topic card update / room pin / structured note (“intent minutes”), optionally a **voice packet** in a thread on explicit action ([0080](0080-intercom-naming-and-multi-party-channel-model.md) § async voice packets, not always-on) |
+| **Agent work** | Grounded in **delta and artifacts** (git, MCP, card, ADR), not reconstructing every remark at the desk |
+
+**Invariant:** environment-first does **not** mean “record and transcribe everything said at the whiteboard”. It means: **after** verbal agreement — **explicitly** enter what became team truth (intent, knowledge gap, next step) into the contour. Coffee-machine talk **need not** land in Intercom; the **outcome** does.
+
 ---
 
 ## Non-goals
@@ -124,6 +141,7 @@ Cascade IDE is the **working implementation** of IOP at the station; **room proj
 - Replacing a **corporate messenger** or building the full team contour inside CIDE ([0080](0080-intercom-naming-and-multi-party-channel-model.md) §5).
 - Mandatory **fourth monitor** per person — the shared display is **for the room**, not personal.
 - Choosing sync transport (WebSocket, Mattermost widget, local HTTP) — follow-up ADR/sketch.
+- **Continuous room transcription** as the sole source of truth for agents — against IOP (wheat/chaff, privacy, noise).
 
 ---
 
@@ -172,6 +190,7 @@ flowchart TB
 | 2 | Who **publishes** to the wall: all active cards auto vs explicit “pin for room” | v1 — explicit pin + auto aggregate “in progress” |
 | 3 | One workspace per room vs several | One shared workspace/session id per room for v1 hypothesis |
 | 4 | Projection transport | Local service / MCP relay / read-only web page on the big screen |
+| 5 | Room voice vs intent capture | v1 — **manual/semi-automatic** artifact after talk; always-on room STT — not default |
 
 ---
 
@@ -182,3 +201,4 @@ flowchart TB
 | Date | Change |
 |------|--------|
 | 2026-05-17 | Proposed: collaborative IOP environment, `(P)(F)(M)` stations, shared situational display. |
+| 2026-05-17 | §5: environment-first; room voice — no full transcription default; agreement artifacts. |
