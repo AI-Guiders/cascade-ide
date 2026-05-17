@@ -39,22 +39,22 @@ Beyond types-in-code alone: **knowledge domains** — [kb-public](https://github
 
 ```mermaid
 flowchart LR
-  subgraph intent [Intent surface]
-    I[Intercom / Melody / Palette / MCP]
+  subgraph intent ["Intent surface"]
+    I["Intercom / Melody / Palette / MCP"]
   end
-  subgraph synth [Synthesis]
-    A[Agent + tools]
+  subgraph synth ["Synthesis"]
+    A["Agent + tools"]
   end
-  subgraph verify [Verification]
-    H[Human: diff + diagnostics + tests]
+  subgraph verify ["Verification"]
+    H["Human: diff + diagnostics + tests"]
   end
-  subgraph knowledge [Epistemic layer]
-    K[KB / domains / agent-notes]
+  subgraph knowledge ["Epistemic layer"]
+    K["KB / domains / agent-notes"]
   end
   I --> A
   K -.-> A
   A --> H
-  H -->|accept / revise| I
+  H -->|"accept / revise"| I
 ```
 
 ---
