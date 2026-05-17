@@ -62,7 +62,7 @@ dotnet run --project CascadeIDE.csproj -p:FastBuild=true
 | [docs/architecture-policy.md](docs/architecture-policy.md) | Слои и правила изменений в коде |
 | [docs/architecture-migration.md](docs/architecture-migration.md) | Вынос фич из «кома» |
 | [Features/README.md](Features/README.md) | Оглавление `Features/` |
-| [docs/ux/README.md](docs/ux/README.md) | Раскладка окна, зоны для автоматизации |
+| [docs/ui-ux/README.md](docs/ui-ux/README.md) | Раскладка окна, зоны для автоматизации |
 | [docs/design/north-star-cursor-mcp-cascade-workbench-v1.md](docs/design/north-star-cursor-mcp-cascade-workbench-v1.md) | Продуктовая северная звезда |
 | [docs/adr/0016-agent-client-protocol-external-agent.md](docs/adr/0016-agent-client-protocol-external-agent.md) | ACP: вендор `externals/acp-csharp`, sample [samples/AcpSmokeDotnet](samples/AcpSmokeDotnet) |
 | [docs/adr/0028-user-settings-toml-localappdata-and-secrets.md](docs/adr/0028-user-settings-toml-localappdata-and-secrets.md) | Настройки, секреты, миграции `settings.toml` |

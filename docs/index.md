@@ -11,6 +11,8 @@
 | [Жизненный цикл статусов ADR](adr/status-lifecycle.md) | Как читать `Proposed` / `Accepted · Implemented` |
 | [Текущая архитектура](architecture/current-architecture-v1.md) | Снимок реализации |
 | [MCP-протокол IDE](MCP-PROTOCOL.md) | Команды для агента и человека |
+| [Раскладка UI (Flight)](ui-ux/cascade-ide-ui-layout-v1.md) | PFD · Forward · MFD, имена контролов для MCP |
+| [Карта концепт → код](ui-ux/concept-to-implementation-map-v1.md) | Что в коде vs архивные концепты |
 
 ## Репозиторий
 

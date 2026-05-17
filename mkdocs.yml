@@ -38,6 +38,12 @@ theme:
     - content.tabs.link
 
 plugins:
+  - redirects:
+      redirect_maps:
+        # docs/ux/ matched ISO 639-1 locale "ux" in mkdocs-static-i18n — use ui-ux/
+        ux/cascade-ide-ui-layout-v1.md: ui-ux/cascade-ide-ui-layout-v1.md
+        ux/concept-to-implementation-map-v1.md: ui-ux/concept-to-implementation-map-v1.md
+        ux/README.md: ui-ux/README.md
   - search:
       lang:
         - ru
@@ -70,8 +76,8 @@ plugins:
                 - Текущая архитектура: architecture/current-architecture-v1.md
                 - MCP: MCP-PROTOCOL.md
             - UX:
-                - Раскладка UI: ux/cascade-ide-ui-layout-v1.md
-                - Карта концептов: ux/concept-to-implementation-map-v1.md
+                - Раскладка UI: ui-ux/cascade-ide-ui-layout-v1.md
+                - Карта концептов: ui-ux/concept-to-implementation-map-v1.md
         - locale: en
           name: English
           build: true
@@ -94,8 +100,8 @@ plugins:
                 - Current architecture: architecture/current-architecture-v1.md
                 - MCP: MCP-PROTOCOL.md
             - UX:
-                - UI layout: ux/cascade-ide-ui-layout-v1.md
-                - Concept map: ux/concept-to-implementation-map-v1.md
+                - UI layout: ui-ux/cascade-ide-ui-layout-v1.md
+                - Concept map: ui-ux/concept-to-implementation-map-v1.md
 
 markdown_extensions:
   - admonition

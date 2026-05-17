@@ -2,6 +2,8 @@
 
 Публичный сайт: **https://ai-guiders.github.io/cascade-ide/**
 
+**UX-доки** лежат в `docs/ui-ux/` (не `docs/ux/`): папка `ux` совпадала с двухбуквенным кодом языка в mkdocs-static-i18n и не попадала в сборку. На сайте: [Раскладка UI](https://ai-guiders.github.io/cascade-ide/ui-ux/cascade-ide-ui-layout-v1/) (HTML, не `.md`). Старые URL `/ux/...` редиректятся через плагин `redirects`.
+
 ## Сборка локально
 
 ```bash
