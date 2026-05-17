@@ -1,6 +1,6 @@
 # ADR 0121: Парадигма Intent-Oriented Programming (IOP) — концептуальный фундамент Cascade IDE
 
-**Статус:** Proposed  
+**Статус:** Accepted  
 **Дата:** 2026-05-17
 
 ## Связанные ADR

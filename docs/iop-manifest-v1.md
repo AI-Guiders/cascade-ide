@@ -7,7 +7,7 @@
 **Cascade IDE** — открытая **рабочая реализация** IOP: стек, где этот поток сделан явным в agent-first IDE для .NET.
 
 !!! info "Нормативная привязка"
-    Детали, non-goals и связи с ADR — [ADR 0121](adr/0121-intent-oriented-programming-paradigm.md) (Proposed).  
+    Детали, non-goals и связи с ADR — [ADR 0121](adr/0121-intent-oriented-programming-paradigm.md) (Accepted).  
     English: [IOP manifest (EN)](en/iop-manifest-v1.md).
 
 ---
