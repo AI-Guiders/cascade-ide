@@ -39,7 +39,7 @@
 | Secondary **Pfd** window | `PfdHostWindow` | ✅ |
 | Hide duplicate column when host open | layout VM | ✅ |
 
-Details: [ADR 0017](../../adr/0017-multi-window-workspace-and-agent-surfaces.md#summary-en) (Russian body).
+Details: [ADR 0017](../adr/0017-multi-window-workspace-and-agent-surfaces.md).
 
 ---
 

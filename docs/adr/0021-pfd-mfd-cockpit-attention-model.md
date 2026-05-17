@@ -6,12 +6,6 @@
 
 **Поглощает:** [`concept-pfd-mfd-cascade-v1.md`](../ui-ux/concept-pfd-mfd-cascade-v1.md) (черновик концепта → формализован здесь).
 
-<a id="summary-en"></a>
-
-## Summary (EN)
-
-Cascade IDE organizes the main window as a **cockpit**, not “editor + side panels”. Three **attention anchors** — **PFD** (navigation), **Forward** (primary work: editor or Intercom), **MFD** (secondary instruments as **pages**: terminal, build, Git, chat page, IDE Health) — stay stable while presets change visibility and density. **EICAS** is the single summary channel for workspace health; subsystems feed it instead of spamming the editor. Legacy Focus/Balanced/Power names describe *attention flow* on top of these anchors; shipping layout is **Flight** (see [UI layout EN](../en/ui-ux/cascade-ide-ui-layout-v1.md)).
-
 ## Связанные ADR
 
 | ADR | Роль |

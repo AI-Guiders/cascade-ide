@@ -2,7 +2,7 @@
 
 Layout reference for MCP, onboarding, and agents. **Source of truth:** `Views/MainWindow.axaml` and related views (`DocumentsDockView`, `MfdShellView`).
 
-**UI mode:** the product ships one mode id in **`UiModes/index.toml`** — **Flight** (PFD · Forward · MFD polygon). There is **no** menu switch for legacy **Focus / Balanced / Power** presets. Family **`UiModeFamily.Flight`** and capabilities come from mode TOML; see [ADR 0010](../../adr/0010-ui-modes-toml-configuration.md#summary-en), [ui-modes-overview-v1.md](ui-modes-overview-v1.md), [ADR 0021](../../adr/0021-pfd-mfd-cockpit-attention-model.md#summary-en).
+**UI mode:** the product ships one mode id in **`UiModes/index.toml`** — **Flight** (PFD · Forward · MFD polygon). There is **no** menu switch for legacy **Focus / Balanced / Power** presets. Family **`UiModeFamily.Flight`** and capabilities come from mode TOML; see [ADR 0010](../adr/0010-ui-modes-toml-configuration.md), [ui-modes-overview-v1.md](ui-modes-overview-v1.md), [ADR 0021](../adr/0021-pfd-mfd-cockpit-attention-model.md).
 
 ---
 

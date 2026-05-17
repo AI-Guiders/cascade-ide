@@ -3,12 +3,6 @@
 **Статус:** Accepted (strangler: Intercom в UI и docs v1; multi-party и внешний контур — по дорожной карте)  
 **Дата:** 2026-04-20
 
-<a id="summary-en"></a>
-
-## Summary (EN)
-
-**Intercom** is the product name for the IDE’s **session communication channel** — not “chat with the bot”. It covers agent dialogue, topic cards, system/CI messages, and (roadmap) multi-party participation. Avoiding the word “chat” in product language reduces the assumption of a single LLM sidebar. UI and docs use **Intercom**; legacy “chat” strings are migrated gradually.
-
 ## Связанные ADR
 
 | ADR | Роль |

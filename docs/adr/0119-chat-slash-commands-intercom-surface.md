@@ -4,12 +4,6 @@
 **Дата:** 2026-05-17  
 **Обновлено:** 2026-05-17 — расширение до IDE-глаголов (`/build run`, `/test run`, `/debug launch`); autocomplete обязателен. [§ История](#adr0119-history)
 
-<a id="summary-en"></a>
-
-## Summary (EN)
-
-**Proposed:** treat **Intercom input** as a second command line for the IDE. Lines starting with `/` map to canonical **`command_id`** values (same registry as the command palette and MCP `ide_execute_command`) — e.g. `/build run`, `/test run`, `/card …`. Autocomplete is required. This complements (does not replace) the palette and keyboard chords. Stronger when Forward is Intercom-centric ([ADR 0120](0120-primary-work-surface-intercom-or-editor.md#summary-en)).
-
 ## Связанные ADR
 
 | ADR | Роль |

@@ -1,6 +1,6 @@
 # Cascade IDE — concept overview (English)
 
-**Read this first** if you do not read Russian. Detailed ADR bodies remain Russian-first; this page and the [UX docs](ui-ux/cascade-ide-ui-layout-v1.md) are written for an international audience.
+**Read this first** if you do not read Russian. Full ADRs in English live under [adr/](adr/README.md); this page and [UX docs](ui-ux/cascade-ide-ui-layout-v1.md) are the short onboarding path.
 
 ## What is Cascade IDE?
 
@@ -8,7 +8,7 @@
 
 - **In-process MCP** — tools and IDE commands are available to agents without ad-hoc glue.
 - **Cockpit attention model** — the window is organized like a flight deck, not “editor + side panels”.
-- **Intercom** — the name of the primary human↔agent communication surface (see [ADR 0080](../adr/0080-intercom-naming-and-multi-party-channel-model.md#summary-en)).
+- **Intercom** — the name of the primary human↔agent communication surface (see [ADR 0080](adr/0080-intercom-naming-and-multi-party-channel-model.md)).
 
 ## The three attention zones (Flight layout)
 
@@ -17,12 +17,12 @@ The shipping UI uses one product mode: **Flight**. The main window is a single g
 | Zone | Name | Role |
 |------|------|------|
 | **PFD** | Primary Flight Display | Navigation: solution explorer, workspace map, optional tool mount — “where am I in the project?” |
-| **Forward** | Forward field of view | **Primary work surface**: document editor (AvaloniaEdit dock) *or* full Intercom (proposed toggle, [ADR 0120](../adr/0120-primary-work-surface-intercom-or-editor.md#summary-en)) |
+| **Forward** | Forward field of view | **Primary work surface**: document editor (AvaloniaEdit dock) *or* full Intercom (proposed toggle, [ADR 0120](adr/0120-primary-work-surface-intercom-or-editor.md)) |
 | **MFD** | Multi-Function Display | Secondary shell: **pages** (terminal, build output, Git, chat page, IDE Health strip, settings, …) — “instruments”, not the main horizon |
 
 Long-running streams (build log, terminal) live on **MFD pages**, not in a legacy bottom panel across the whole window.
 
-**Canonical layout doc:** [UI layout v1](ui-ux/cascade-ide-ui-layout-v1.md) · **Normative ADR:** [0021 PFD/MFD cockpit](../adr/0021-pfd-mfd-cockpit-attention-model.md#summary-en)
+**Canonical layout doc:** [UI layout v1](ui-ux/cascade-ide-ui-layout-v1.md) · **Normative ADR:** [0021 PFD/MFD cockpit](adr/0021-pfd-mfd-cockpit-attention-model.md)
 
 ```
 ┌──────────┬─────────────────────────────┬──────────────┐
@@ -34,14 +34,14 @@ Long-running streams (build log, terminal) live on **MFD pages**, not in a legac
 
 ## Intercom (not “just chat”)
 
-**Intercom** is the IDE’s session channel: topics, topic cards, agent steering, and (planned) slash commands such as `/build run` in the same input line ([ADR 0119](../adr/0119-chat-slash-commands-intercom-surface.md#summary-en)). Chat UI may be rendered with a Skia surface ([ADR 0044](../adr/0044-avalonia-host-skia-agent-chat-surface.md)); the product idea is **parity** between what you type and what an agent can invoke via MCP.
+**Intercom** is the IDE’s session channel: topics, topic cards, agent steering, and (planned) slash commands such as `/build run` in the same input line ([ADR 0119](adr/0119-chat-slash-commands-intercom-surface.md)). Chat UI may be rendered with a Skia surface ([ADR 0044](adr/0044-avalonia-host-skia-agent-chat-surface.md)); the product idea is **parity** between what you type and what an agent can invoke via MCP.
 
 ## What we are building next (Proposed)
 
 | ADR | Idea |
 |-----|------|
-| [0119](../adr/0119-chat-slash-commands-intercom-surface.md) | Slash commands in Intercom input → same `command_id` as palette/MCP |
-| [0120](../adr/0120-primary-work-surface-intercom-or-editor.md) | Choose whether **Forward** is Intercom-centric (Cursor-like) or editor-centric |
+| [0119](adr/0119-chat-slash-commands-intercom-surface.md) | Slash commands in Intercom input → same `command_id` as palette/MCP |
+| [0120](adr/0120-primary-work-surface-intercom-or-editor.md) | Choose whether **Forward** is Intercom-centric (Cursor-like) or editor-centric |
 
 ## Where to go next
 
@@ -52,13 +52,13 @@ Long-running streams (build log, terminal) live on **MFD pages**, not in a legac
 | All decisions by lifecycle status | [ADR navigator](site/adr-nav/index.md) |
 | Architecture snapshot | [Current architecture](../architecture/current-architecture-v1.md) |
 | Agent/MCP commands | [MCP protocol](../MCP-PROTOCOL.md) |
-| Project principles | [ADR 0100 constitution](../adr/0100-project-constitution.md#summary-en) |
+| Project principles | [ADR 0100 constitution](adr/0100-project-constitution.md) |
 
 ## Language on this site
 
-- **Russian** is the canonical language for most ADR text and team docs.
-- **English** on this site: this overview, UX layout pages under `/en/ui-ux/`, ADR navigator labels, and **`## Summary (EN)`** blocks at the top of selected ADRs.
-- Use the **RU / EN** switch in the header; with **EN** selected, open links under `/en/` for English UX pages.
+- **Russian** (`/cascade-ide/…`) — canonical for the team: `docs/adr/` in the repository.
+- **English** (`/cascade-ide/en/…`) — this overview, `en/ui-ux/`, and full **`en/adr/`** translations.
+- Use the **RU / EN** switch in the header.
 
 ---
 
