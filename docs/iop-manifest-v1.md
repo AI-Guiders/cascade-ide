@@ -31,7 +31,7 @@
 
 ### 3. Эпистемический контекст
 
-Вместо «типов только в коде» — **домены знаний**: [kb-public](https://github.com/AI-Guiders/kb-public), agent-notes, `knowledge/domains/`. Агент маршрутизирует контекст по **light-онтологии** команды; KB — справочник правил высшего порядка.
+Вместо опоры только на типы в C# — **канон и маршрутизация контекста**: [kb-public](https://github.com/AI-Guiders/kb-public), agent-notes, дерево `knowledge/` (подпапки вроде `domains/agent-operations/` — **путь в репозитории KB**, не «домен» в смысле DDD, KE или таксономии приборов). Агент подбирает playbook'и через router / **light-онтологию** команды; KB — нормативный слой правил высшего порядка.
 
 ---
 
@@ -49,7 +49,7 @@ flowchart LR
     H["Human: diff + diagnostics + tests"]
   end
   subgraph knowledge ["Epistemic layer"]
-    K["KB / domains / agent-notes"]
+    K["KB canon / agent-notes"]
   end
   I --> A
   K -.-> A

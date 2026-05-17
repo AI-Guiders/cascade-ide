@@ -31,7 +31,7 @@ Infrastructure (HCI, Roslyn MCP, build/test, git) keeps intents inside project �
 
 ### 3. Epistemic context
 
-Beyond types-in-code alone: **knowledge domains** — [kb-public](https://github.com/AI-Guiders/kb-public), agent-notes, `knowledge/domains/`. The agent routes context through team **light ontology**; the KB is a higher-order rulebook.
+Beyond relying on C# types alone — **knowledge canon and context routing**: [kb-public](https://github.com/AI-Guiders/kb-public), agent-notes, the `knowledge/` tree (folders such as `domains/agent-operations/` are **paths in the KB repo**, not a product/DDD/KE “domain”). The agent attaches playbooks via router / team **light ontology**; the KB is a higher-order normative layer.
 
 ---
 
@@ -49,7 +49,7 @@ flowchart LR
     H["Human: diff + diagnostics + tests"]
   end
   subgraph knowledge ["Epistemic layer"]
-    K["KB / domains / agent-notes"]
+    K["KB canon / agent-notes"]
   end
   I --> A
   K -.-> A

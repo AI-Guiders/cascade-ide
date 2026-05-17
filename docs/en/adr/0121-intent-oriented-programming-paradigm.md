@@ -31,7 +31,7 @@
 ## Summary
 
 - Adopt **Intent-Oriented Programming (IOP)** as the **named product paradigm** of Cascade IDE (**working implementation of a proposed paradigm in the product**), not as a replacement for OOP/FP in the user’s codebase.
-- Three IOP pillars in CIDE: **intent over manual syntax** (intent layer), **two-loop verification** (agent synthesizes — human approves diff), **epistemic context** (KB/domains as normative layer for the agent).
+- Three IOP pillars in CIDE: **intent over manual syntax** (intent layer), **two-loop verification** (agent synthesizes — human approves diff), **epistemic context** (KB canon and context routing as normative layer for the agent).
 - Public wording for the team and site — [iop-manifest-v1.md](../iop-manifest-v1.md); this ADR is the normative link to existing decisions and non-goals.
 
 ---
@@ -52,7 +52,7 @@ Team discussion (including with Atlas) proposed **IOP** alongside OOP and FP, sh
 
 1. **Cognitive ceiling:** a human cannot hold 100k+ lines of a monolith as “one text in the head”; the human role is architecture and verification, not a manual syntax compiler.
 2. **Split contours:** without a shared paradigm it is easy to duplicate command parsing (chat slash vs Melody vs MCP) — see motivation in [0119](0119-chat-slash-commands-intercom-surface.md).
-3. **Weak agent context:** without KB/domains intents “drift”; we need an explicit **epistemic constraint** model, not prompt alone.
+3. **Weak agent context:** without KB canon and routing (`route_context`, playbooks) intents “drift”; we need an explicit **epistemic constraint** model, not prompt alone.
 4. **Marketing vs engineering:** without an ADR the term IOP risks sounding like a “revolution” declaration without ties to code and ADR statuses.
 
 ---
@@ -79,7 +79,7 @@ IOP in CIDE is an **orchestration overlay** in an agent-first IDE. **C#, project
 |--------|---------|-------------------------------|
 | **1. Intent over syntax** | User states *what should be*, not a step-by-step algorithm | Intent Melody (`c:`), `command_id`, palette, [0119](0119-chat-slash-commands-intercom-surface.md) slashes → same contour as MCP; catalog [0109](0109-declarative-parametric-melody-catalog-toml-and-code-binders.md) |
 | **2. Two-loop verification** | Agent synthesizes; human is architect and diff arbiter | Forward (editor) / Intercom ([0120](0120-primary-work-surface-intercom-or-editor.md)); Roslyn MCP, build/test MCP, git MCP; human-in-the-loop on merge |
-| **3. Epistemic context** | Higher-order “types” are knowledge domains and policies | kb-public, agent-notes, `knowledge/domains/`; agent context routing; [architecture-policy](../architecture-policy.md), [0100](0100-project-constitution.md) |
+| **3. Epistemic context** | Normative layer over code — KB canon, router, policies | kb-public, agent-notes, `knowledge/` tree (`domains/` is a **repo path**, not a “domain” term); [architecture-policy](../architecture-policy.md), [0100](0100-project-constitution.md) |
 
 The manifest metaphor of an “intent compiler” is **not one binary** but the bundle: **Intercom + command surface + MCP + agent + IDE verification**.
 
@@ -101,7 +101,7 @@ Wording such as “the whole world will switch to IOP”, “the world’s only 
 | **Intent Melody** | Declarative/parametric language binding intents to UI and hotkeys |
 | **Intercom** | Session channel: dialogue, topic cards, slashes — forward surface for intents ([0080](0080-intercom-naming-and-multi-party-channel-model.md)) |
 | **Verification loop** | Synthesis → diff/diagnostics/tests → human accept or rollback |
-| **Epistemic context** | KB, domains, agent-notes, policies — meaning constraints for the agent |
+| **Epistemic context** | KB, agent-notes, router/playbooks, policies — meaning constraints for the agent |
 
 ---
 
@@ -140,3 +140,4 @@ Wording such as “the whole world will switch to IOP”, “the world’s only 
 |------|--------|
 | 2026-05-17 | Proposed: IOP paradigm, three pillars, manifest, CIDE working implementation. |
 | 2026-05-17 | Softened positioning: “reference implementation” → “working implementation in the product”. |
+| 2026-05-17 | IOP: avoid “knowledge domains”; `knowledge/domains/` — repo path only. |
