@@ -42,6 +42,7 @@ public partial class ChatPanelViewModel : ViewModelBase
     private readonly Action<string>? _appendAcpTerminal;
     private readonly Action? _showAcpTerminal;
     private readonly Func<string, IReadOnlyDictionary<string, JsonElement>?, CancellationToken, Task<string>>? _executeIdeCommandForMafAgent;
+    private readonly ChatSlashCommandRunner _slashCommandRunner;
     private readonly Func<Uri>? _getLocalOllamaEndpoint;
     private readonly Func<string>? _getEffectiveOllamaModelId;
     private readonly Func<IChatClient?>? _tryCreateCloudMafIChatClient;
@@ -100,6 +101,7 @@ public partial class ChatPanelViewModel : ViewModelBase
         _appendAcpTerminal = appendAcpTerminal;
         _showAcpTerminal = showAcpTerminal;
         _executeIdeCommandForMafAgent = executeIdeCommandForMafAgent;
+        _slashCommandRunner = new ChatSlashCommandRunner(executeIdeCommandForMafAgent);
         _getLocalOllamaEndpoint = getLocalOllamaEndpoint;
         _getEffectiveOllamaModelId = getEffectiveOllamaModelId;
         _tryCreateCloudMafIChatClient = tryCreateCloudMafIChatClient;
@@ -305,7 +307,30 @@ public partial class ChatPanelViewModel : ViewModelBase
     [RelayCommand(CanExecute = nameof(CanSendChat))]
     private async Task SendChatAsync()
     {
-        var input = ApplyProductSpineToOutboundMessage(ChatInput.Trim());
+        var rawInput = ChatInput.Trim();
+        if (string.IsNullOrEmpty(rawInput))
+            return;
+
+        var slash = await _slashCommandRunner.TryRunAsync(rawInput).ConfigureAwait(false);
+        if (slash.Handled)
+        {
+            await UiScheduler.Default.InvokeAsync(() =>
+            {
+                ChatInput = "";
+                var role = slash.Success ? "system" : "assistant";
+                var text = slash.UserFacingText;
+                if (!string.IsNullOrWhiteSpace(text))
+                {
+                    var msg = new ChatMessageViewModel(role, text, threadId: _activeThreadId);
+                    ChatMessages.Add(msg);
+                    _ = PersistEventAsync(ChatHistoryEventKind.MessageAdded, MessageSnapshot(msg));
+                    RefreshChatSurfaceSnapshot();
+                }
+            });
+            return;
+        }
+
+        var input = ApplyProductSpineToOutboundMessage(rawInput);
         if (string.IsNullOrEmpty(input))
             return;
 
