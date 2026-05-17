@@ -1,0 +1,11 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="CascadeIDE.Views.UiKit.CascadeStatusChip"
+             x:Name="Root"
+             x:CompileBindings="False">
+    <Border Classes="cascadeStatusChip">
+        <TextBlock Text="{Binding Text, ElementName=Root}"
+                   FontSize="11"
+                   Foreground="{DynamicResource CascadeTheme.StatusChipForeground}"/>
+    </Border>
+</UserControl>

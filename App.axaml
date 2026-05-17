@@ -51,6 +51,12 @@
             <SolidColorBrush x:Key="CascadeTheme.ChatLabelForeground">#333</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.ChatMessageBubbleBackground">#F0F0F0</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.ChatMessageContentForeground">#1A1A1A</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.PanelBackgroundBrush">#F0F0F0</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.InsetSurfaceBackground">#FAFAFA</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.InsetSurfaceBorderBrush">#CCC</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.StatusChipBackground">#E3EAF5</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.StatusChipBorderBrush">#B8C4D8</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.StatusChipForeground">#1E3A5F</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.SendButtonBackground">#4CAF50</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.SendButtonForeground">White</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.TerminalBackground">#1E1E1E</SolidColorBrush>
@@ -242,6 +248,52 @@
         </Style>
         <Style Selector="views|PanelChromeHeader.compact Button.panelChromeOverflowBtn:pointerover">
             <Setter Property="Background" Value="#18000000"/>
+        </Style>
+        <!-- IDE chrome (UiKit): секции, inset, status chip — design/ide-chrome-tokens-v1.md -->
+        <Style Selector="Border.cascadeSection">
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="10"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.EditorColumnBorderBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource CascadeTheme.ChatMessageBubbleBackground}"/>
+        </Style>
+        <Style Selector="Border.cascadeSection TextBox">
+            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
+            <Setter Property="Background" Value="{DynamicResource CascadeTheme.ChatPanelBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.EditorColumnBorderBrush}"/>
+            <Setter Property="CaretBrush" Value="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
+            <Setter Property="SelectionBrush" Value="{DynamicResource CascadeTheme.EditorSelectionBrush}"/>
+            <Setter Property="SelectionForegroundBrush" Value="{DynamicResource CascadeTheme.EditorSelectionForeground}"/>
+        </Style>
+        <Style Selector="Border.cascadeSection TextBox /template/ TextBlock#PART_Watermark">
+            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+        </Style>
+        <Style Selector="Border.cascadeSection CheckBox">
+            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
+        </Style>
+        <Style Selector="Border.cascadeSection Expander">
+            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
+        </Style>
+        <Style Selector="Border.cascadeInset">
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="8"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.InsetSurfaceBorderBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource CascadeTheme.InsetSurfaceBackground}"/>
+        </Style>
+        <Style Selector="Border.cascadeAutocomplete">
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="4"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.EditorColumnBorderBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource CascadeTheme.ChatPanelBackground}"/>
+        </Style>
+        <Style Selector="Border.cascadeStatusChip">
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="8,3"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.StatusChipBorderBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource CascadeTheme.StatusChipBackground}"/>
         </Style>
         <!-- Глобально: тултипы ближе к VS/Cursor, чем к дефолтному Fluent-желту -->
         <Style Selector="ToolTip">

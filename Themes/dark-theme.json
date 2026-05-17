@@ -45,6 +45,14 @@
     "send_button_background": "#0E639C",
     "send_button_foreground": "#FFF"
   },
+  "ide_chrome": {
+    "panel_background": "#2D2D2D",
+    "inset_surface_background": "#1A1A1A",
+    "inset_surface_border_brush": "#3F3F46",
+    "status_chip_background": "#2E3A52",
+    "status_chip_border_brush": "#50658C",
+    "status_chip_foreground": "#D8E4FF"
+  },
   "terminal": {
     "background": "#1E1E1E",
     "foreground": "#CCCCCC",

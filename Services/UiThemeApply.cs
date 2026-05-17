@@ -113,6 +113,12 @@ public static class UiThemeApply
         public const string ChatLabelForeground = "CascadeTheme.ChatLabelForeground";
         public const string ChatMessageBubbleBackground = "CascadeTheme.ChatMessageBubbleBackground";
         public const string ChatMessageContentForeground = "CascadeTheme.ChatMessageContentForeground";
+        public const string PanelBackgroundBrush = "CascadeTheme.PanelBackgroundBrush";
+        public const string InsetSurfaceBackground = "CascadeTheme.InsetSurfaceBackground";
+        public const string InsetSurfaceBorderBrush = "CascadeTheme.InsetSurfaceBorderBrush";
+        public const string StatusChipBackground = "CascadeTheme.StatusChipBackground";
+        public const string StatusChipBorderBrush = "CascadeTheme.StatusChipBorderBrush";
+        public const string StatusChipForeground = "CascadeTheme.StatusChipForeground";
         public const string SendButtonBackground = "CascadeTheme.SendButtonBackground";
         public const string SendButtonForeground = "CascadeTheme.SendButtonForeground";
         public const string TerminalBackground = "CascadeTheme.TerminalBackground";
@@ -191,6 +197,13 @@ public static class UiThemeApply
             Set(res, Keys.ChatLabelForeground, GetColor(root, "chat_panel", "label_foreground"));
             Set(res, Keys.ChatMessageBubbleBackground, GetColor(root, "chat_panel", "message_bubble_background"));
             Set(res, Keys.ChatMessageContentForeground, GetColor(root, "chat_panel", "message_content_foreground"));
+            Set(res, Keys.PanelBackgroundBrush, GetIdeChromeColor(root, "panel_background")
+                ?? GetColor(root, "chat_panel", "message_bubble_background"));
+            Set(res, Keys.InsetSurfaceBackground, GetIdeChromeColor(root, "inset_surface_background"));
+            Set(res, Keys.InsetSurfaceBorderBrush, GetIdeChromeColor(root, "inset_surface_border_brush"));
+            Set(res, Keys.StatusChipBackground, GetIdeChromeColor(root, "status_chip_background"));
+            Set(res, Keys.StatusChipBorderBrush, GetIdeChromeColor(root, "status_chip_border_brush"));
+            Set(res, Keys.StatusChipForeground, GetIdeChromeColor(root, "status_chip_foreground"));
             Set(res, Keys.SendButtonBackground, GetColor(root, "chat_panel", "send_button_background"));
             Set(res, Keys.SendButtonForeground, GetColor(root, "chat_panel", "send_button_foreground"));
             Set(res, Keys.TerminalBackground, GetColor(root, "terminal", "background"));
@@ -247,6 +260,9 @@ public static class UiThemeApply
             return p.GetString();
         return null;
     }
+
+    private static string? GetIdeChromeColor(JsonElement root, string prop) =>
+        GetColor(root, "ide_chrome", prop);
 
     private static void Set(Avalonia.Controls.IResourceDictionary res, string key, string? hex)
     {
