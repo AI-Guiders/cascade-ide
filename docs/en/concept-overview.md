@@ -50,14 +50,14 @@ Long-running streams (build log, terminal) live on **MFD pages**, not in a legac
 | Window layout & control names for automation | [UI layout v1](ui-ux/cascade-ide-ui-layout-v1.md) |
 | Concept vs code (legacy Focus/Balanced/Power vs Flight) | [Concept → implementation map](ui-ux/concept-to-implementation-map-v1.md) |
 | All decisions by lifecycle status | [ADR navigator](site/adr-nav/index.md) |
-| Architecture snapshot | [Current architecture](../architecture/current-architecture-v1.md) |
+| Architecture policy & snapshot | [Policy](architecture-policy.md) · [Current architecture](architecture/current-architecture-v1.md) |
 | Agent/MCP commands | [MCP protocol](../MCP-PROTOCOL.md) |
 | Project principles | [ADR 0100 constitution](adr/0100-project-constitution.md) |
 
 ## Language on this site
 
 - **Russian** (`/cascade-ide/…`) — canonical for the team: `docs/adr/` in the repository.
-- **English** (`/cascade-ide/en/…`) — this overview, `en/ui-ux/`, and full **`en/adr/`** translations.
+- **English** (`/cascade-ide/en/…`) — this overview, `en/ui-ux/`, **`en/adr/`**, and **`en/architecture-policy.md`** (+ architecture slice docs).
 - Use the **RU / EN** switch in the header.
 
 ---

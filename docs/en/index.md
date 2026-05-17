@@ -16,7 +16,9 @@
 | [Full ADR index](adr/README.md) | All ADRs (English) |
 | [ADR status lifecycle](adr/status-lifecycle.md) | How to read statuses |
 | [Russian ADR originals](../adr/README.md) | Canonical Russian copies |
-| [Current architecture](../architecture/current-architecture-v1.md) | Implementation snapshot |
+| [Architecture policy](architecture-policy.md) | Navigator and ADR topic table |
+| [Current architecture](architecture/current-architecture-v1.md) | Implementation snapshot |
+| [ADR map by topic](architecture/adr-map-v1.md) | How to read ADRs by theme |
 | [IDE MCP protocol](../MCP-PROTOCOL.md) | Commands for agents and humans |
 
 ## Repository
