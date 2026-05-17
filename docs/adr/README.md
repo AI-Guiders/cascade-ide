@@ -183,6 +183,8 @@
 | [0116](0116-intercom-session-tree-and-agent-message-steering.md) | Intercom: дерево сессии (ветвление, rewind, bookmark) и **steer** / **follow-up** при работе агента; [0045](0045-agent-chat-persistence-event-log-and-projections.md), [0080](0080-intercom-naming-and-multi-party-channel-model.md), [0096](0096-intercom-topic-card-summary-and-product-spine.md) | Proposed |
 | [0117](0117-remote-operator-surface-multidevice.md) | Remote operator surface: **PWA**-пульт с телефона/другого ПК, Operator Gateway; не mobile IDE; [0017](0017-multi-window-workspace-and-agent-surfaces.md), [0108](0108-web-ai-portal-host-object-tools-bridge.md) | Proposed |
 | [0118](0118-agent-notes-core-2-toml-and-knowledge-path.md) | Agent Notes Core **2.0**: TOML in-proc, `config_path` SSOT с MCP, `knowledge_path` в `IdeCommands` | Accepted |
+| [0119](0119-chat-slash-commands-intercom-surface.md) | Чат как command line: Intercom (`/card`) + IDE (`/build run`, `/test run`, `/debug launch`); autocomplete, `command_id` | Proposed |
+| [0120](0120-primary-work-surface-intercom-or-editor.md) | `primary_work_surface`: Intercom или Editor в якоре Forward (аналог Agent/Editor в Cursor) | Proposed |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 

@@ -1,0 +1,301 @@
+# ADR 0119: Слэш-команды в чате — unified command line (Intercom + IDE)
+
+**Статус:** Proposed  
+**Дата:** 2026-05-17  
+**Обновлено:** 2026-05-17 — расширение до IDE-глаголов (`/build run`, `/test run`, `/debug launch`); autocomplete обязателен. [§ История](#adr0119-history)
+
+## Связанные ADR
+
+| ADR | Роль |
+|-----|------|
+| [0080](0080-intercom-naming-and-multi-party-channel-model.md) | Чат как **Intercom** — центральный канал, не «окно к боту» |
+| [0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md) | Topic cards, overview/detail, **intent-first** навигация (Melody/Chords) |
+| [0096](0096-intercom-topic-card-summary-and-product-spine.md) | Содержимое карточек, spine, carry-forward в тред |
+| [0013](0013-command-surface-and-discoverability.md) | Палитра и discoverability — слэши **дополняют**, не заменяют |
+| [0030](0030-command-ids-hotkeys-and-ui-registry-layers.md) | Канон `command_id`, реестр, паритет MCP |
+| [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md) | CascadeChord, Command Melody `c:` — **ортогональный** вход |
+| [0008](0008-mcp-contracts-and-testable-infrastructure.md) | Паритет агента: те же эффекты через `ide_execute_command` |
+| [0048](0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) | Что уходит агенту vs локальное действие IDE |
+| [0057](0057-chat-surface-pipeline-adoption.md) | Snapshot/layout после смены состояния VM |
+| [0116](0116-intercom-session-tree-and-agent-message-steering.md) | Дерево сессии, steer — не смешивать со слэш-парсером |
+| [0002](0002-debug-human-agent-parity.md) | `/build`, `/test`, `/debug` — те же `command_id`, что агент через MCP |
+| [0018](0018-ide-commands-canonical-xml-documentation.md) | Канон имён `IdeCommands` для проекции каталога |
+| [0120](0120-primary-work-surface-intercom-or-editor.md) | Intercom в Forward — слэши как основной CLI сессии |
+
+### Вне ADR
+
+| Документ | Роль |
+|----------|------|
+| [MCP-PROTOCOL.md](../MCP-PROTOCOL.md) | `ide_execute_command`, `send_chat`, chat_* MCP |
+| [intent-melody-language-v1.md](../intent-melody-language-v1.md) | Грамматика `c:` — **не** грамматика `/` в чате |
+
+## Резюме
+
+- **`ChatInput`** — **альтернативная command line** IDE: можно **не уходить из чата** для Intercom *и* для частых действий (`/build run`, `/test run`, `/debug launch`, `/card …`).
+- Слэш → **`command_id`** ([0030](0030-command-ids-hotkeys-and-ui-registry-layers.md)); каталог — **проекция** реестра + curated aliases, не второй исполнитель в VM.
+- **Autocomplete обязателен** (иерархия namespace → action, подсказки, `/help`) — без него расширенный каталог не принимается.
+- Палитра, Melody `c:` и аккорды остаются; слэш — **равноправный вход** для тех, кто уже в поле сообщения ([0013](0013-command-surface-and-discoverability.md)).
+- Внедрение **по фазам**: Intercom-глаголы → IDE namespaces → расширение из палитры.
+
+---
+
+## Контекст
+
+Intercom в CIDE ([0080](0080-intercom-naming-and-multi-party-channel-model.md)) всё чаще — **центральная поверхность**: диалог с агентом, картотека тем ([0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md)), product spine ([0096](0096-intercom-topic-card-summary-and-product-spine.md)), уточнения ([0031](0031-agent-chat-clarification-batches-and-threading.md)).
+
+Для power-user уже есть:
+
+- **палитра** и fuzzy-поиск ([0013](0013-command-surface-and-discoverability.md));
+- **глобальные хоткеи** и **CascadeChord** ([0060](0060-keyboard-chord-stack-fms-tactical-strategic.md));
+- **Command Melody** `c:` в палитре ([0112](0112-command-palette-query-modes-strategy.md));
+- **chat navigation intents** с паритетом в MCP (`chat_show_thread_overview`, `chat_open_selected_thread`, … — [0072 §4](0072-chat-topic-cards-intent-melody-keyboard-contract.md)).
+
+Этого **недостаточно**, когда оператор **уже печатает в поле сообщения** и ожидает модель «как в Slack/Discord» или **CLI внутри чата**:
+
+- Intercom: `/card Новая тема`, `/overview`, `/spine focus=…`;
+- IDE: `/build run`, `/test run`, `/debug launch` — **без** переключения на палитру, тулбар и без обязательных аккордов.
+
+Продуктовая гипотеза: если Intercom — **центральная поверхность**, чат становится **единой точкой управления сессией**, а не только каналом к агенту.
+
+---
+
+## Проблема
+
+1. **Разрыв discoverability:** команды чата есть в реестре и MCP, но **не видны** в контексте ввода, где живёт основной поток мысли.
+2. **Риск дублирования:** ad-hoc парсинг `/card` в `SendChatAsync` обходит intent-слой [0072 §5](0072-chat-topic-cards-intent-melody-keyboard-contract.md) и плодит расхождение с pointer/MCP.
+3. **Смешение с агентом:** без правила «слэш = локально» строка `/export` может уехать в LLM как обычный текст.
+4. **Конфликт префиксов:** `c:` зарезервирован за палитрой/Melody ([0112](0112-command-palette-query-modes-strategy.md)); **`/`** — отдельное пространство **только в ChatInput**.
+
+---
+
+## Решение
+
+<a id="adr0119-p1"></a>
+
+### 1. ChatInput как **unified command line** (слэш-префикс)
+
+- Строка, начинающаяся с **`/`** (после trim), трактуется как **слэш-команда** (одно- или двухуровневая, см. [§4](#adr0119-p4)).
+- Разбор **при отправке** (Enter) и **инкрементально** для autocomplete ([§6](#adr0119-p6)) — autocomplete **не опционален** для принятого объёма каталога.
+- **Не** перехватывать `/` в середине обычного сообщения; обычный диалог с агентом — **без** слэша.
+
+<a id="adr0119-p2"></a>
+
+### 2. Intent-first: слэш → `command_id` → VM → snapshot
+
+**Инвариант** (расширение [0072 §5](0072-chat-topic-cards-intent-melody-keyboard-contract.md)):
+
+```text
+ChatInput (/verb args…) → ChatSlashCommandParser → command_id (+ args)
+  → IdeMcpCommandExecutor / ChatPanel handlers (как palette/MCP)
+  → ChatPanelViewModel state → ChatSurfaceCompositor → Skia render
+```
+
+- Слэш-команда **не** меняет Skia напрямую и **не** читает hit-target геометрию.
+- Pointer, Melody, Chords, палитра, MCP и слэш **сходятся** в одном `command_id`, где это возможно.
+
+<a id="adr0119-p3"></a>
+
+### 3. Режимы исполнения
+
+| Режим | Поведение | Пример |
+|-------|-----------|--------|
+| **Local** | Сообщение **не** уходит агенту; выполняется `command_id`; поле ввода очищается (или остаётся статус одной строкой). | `/overview`, `/export` |
+| **Local + echo** | Локально + короткая системная запись в ленте (опционально, v1+). | `/card` с подтверждением «создана тема …» |
+| **Reject** | Неизвестный verb — ошибка в UI, **без** отправки агенту. | `/foo` |
+| **Pass-through** *(запрещено по умолчанию)* | Отправить текст агенту как есть. | **Не** использовать для нераспознанных `/` |
+
+**Правило v1:** нераспознанная строка с ведущим `/` → **Reject** с подсказкой «неизвестная команда, Tab — список».
+
+<a id="adr0119-p4"></a>
+
+### 4. Грамматика v1
+
+**Два уровня** (как «namespace / action»):
+
+```ebnf
+slash_line   = "/" head (WS tail)? WS? ;
+head         = flat_verb | namespace ;
+flat_verb    = letter { letter | digit | "-" } ;     (* overview, card, help, export *)
+namespace    = letter { letter | digit } ;           (* build, test, debug, git, chat *)
+tail         = action (WS arg_token)* | arg_tail ;   (* run | launch | …  OR  rest for flat *)
+action       = letter { letter | digit | "-" } ;
+arg_tail     = { arg_token } ;                       (* /card Имя темы — всё после head *)
+arg_token    = quoted_string | bare_token ;
+```
+
+**Примеры:**
+
+| Ввод | Разбор |
+|------|--------|
+| `/overview` | flat: `overview` |
+| `/card ADR 0119` | flat: `card`, args: `ADR 0119` |
+| `/build run` | namespace: `build`, action: `run` |
+| `/test run` | namespace: `test`, action: `run` |
+| `/debug launch` | namespace: `debug`, action: `launch` |
+
+- **Регистр:** case-insensitive.
+- **Именованные аргументы** (`configuration=Release`) — v2; v1 — позиционный хвост где нужен.
+
+<a id="adr0119-p5"></a>
+
+### 5. Каталог: проекция на `command_id`, не второй реестр
+
+<a id="adr0119-p5a"></a>
+
+#### 5a. Источник правды
+
+- **Исполнение** — только через существующий контур `ide_execute_command` / `IdeMcpCommandExecutor` ([0030](0030-command-ids-hotkeys-and-ui-registry-layers.md), [0008](0008-mcp-contracts-and-testable-infrastructure.md)).
+- **Каталог слэшей** (`ChatSlashCommandCatalog`) — **отображение** (alias → `command_id` + шаблон args), собираемое из:
+  1. **Curated** таблицы в коде (v1);
+  2. v2+ — **проекция** подмножества `IdeCommandPaletteCatalog` / метаданных `IdeCommands` (заголовок палитры → не обязан совпадать со слэшем, alias задаётся явно).
+- **Запрещено:** дублировать логику `dotnet build` / тестов / отладки в `ChatPanelViewModel`.
+
+<a id="adr0119-p5b"></a>
+
+#### 5b. Intercom (flat verbs) — фаза A
+
+| Слэш | `command_id` | Примечание |
+|------|----------------|------------|
+| `/overview` | `chat_show_thread_overview` | |
+| `/open` | `chat_open_selected_thread` | |
+| `/card <title>` | *новый* или `fork_chat_thread` + title | продуктово |
+| `/spine …` | `chat_set_product_spine` | хвост → focus / milestones |
+| `/spine-toggle` | `chat_toggle_product_spine_in_agent_context` | |
+| `/export` | `chat_export_readable` | |
+| `/help` | локальный каталог | без MCP |
+
+<a id="adr0119-p5c"></a>
+
+#### 5c. IDE namespaces — фаза B (не уходя из чата)
+
+| Слэш | `command_id` | Примечание |
+|------|----------------|------------|
+| `/build run` | `build` или `build_structured` | structured JSON в ленту/панель — политика UI |
+| `/build ui` | `build_solution_ui` | тулбарный путь, текст в output |
+| `/test run` | `run_tests` | |
+| `/test affected` | `run_affected_tests` | опционально `changed_paths` из git |
+| `/debug launch` | `debug_launch` | target из launch profile / текущий |
+| `/debug continue` | *debug_start_or_continue* (UI id) | если нет в `IdeCommands` — добавить константу |
+| `/git status` | `git_status` | фаза C, когда есть в реестре |
+
+Дальнейшие namespace (`nav`, `index`, `palette`) — **по мере discoverability**, не «весь IdeCommands одним махом».
+
+**Паритет:** агент вызывает тот же `build` / `run_tests` / `debug_launch` через MCP; оператор — `/build run` в чате.
+
+<a id="adr0119-p6"></a>
+
+### 6. Discoverability: autocomplete и help (обязательно)
+
+Без autocomplete расширение до `/build`, `/test`, … **не принимается** — оператор не обязан помнить namespace и action.
+
+**Поведение UI (v1 минимум):**
+
+| Шаг ввода | Popup показывает |
+|-----------|------------------|
+| `/` | top-level: flat verbs + namespaces (`build`, `test`, `debug`, `card`, …) |
+| `/build ` | actions: `run`, `ui`, … + однострочное описание |
+| `/build r` | фильтр по префиксу (`run`) |
+| неизвестный префикс | «нет совпадений» + ссылка на `/help` |
+
+- **`Tab`** — дополнить токен / выбрать highlighted; **↑↓** — навигация; **Esc** — закрыть popup, не очищая строку.
+- Под каждым пунктом — **краткий help** (из `IdeCommands` doc / curated catalog) и опционально **hotkey** из TOML, если есть ([0030](0030-command-ids-hotkeys-and-ui-registry-layers.md)).
+- **`/help`** и **`/help build`** — текстовый/интерактивный список в ленте или overlay (local).
+- Источник v1: `ChatSlashCommandCatalog` в коде; v2 — TOML `chat-slash-aliases.toml` по аналогии [0109](0109-declarative-parametric-melody-catalog-toml-and-code-binders.md).
+
+<a id="adr0119-p7"></a>
+
+### 7. Связь с агентом и spine ([0096](0096-intercom-topic-card-summary-and-product-spine.md))
+
+- Слэш-команды **по умолчанию local** — **не** расширяют промпт агента.
+- `/spine-toggle` и `/spine` меняют метаданные сессии; включение spine в контекст агента — **явное** ([0096 §4](0096-intercom-topic-card-summary-and-product-spine.md#adr0096-p4)), не побочный эффект любой слэш-команды.
+- **Carry-forward** в тред по-прежнему **обычным сообщением** или отдельным intent; слэш **не обязан** генерировать текст для агента.
+
+<a id="adr0119-p8"></a>
+
+### 8. Non-goals и границы
+
+**Non-goals:**
+
+- **Полная замена** Command Palette: fuzzy-поиск по *всем* командам без структуры namespace остаётся в палитре.
+- Автоматическое **1:1** «каждая строка палитры = слэш» без curated aliases и UX-фильтра (слишком шумно).
+- Слэш-команды в **других** полях (терминал, редактор, палитра) — только `ChatInput`.
+- Плагины с произвольными verb **без** записи в каталог / `command_id`.
+- Pass-through нераспознанного `/…` агенту.
+
+**В scope (осознанно):**
+
+- **Альтернативный вход** в те же IDE-действия, что палитра/аккорды/MCP — в т.ч. `/build run`, `/test run`, `/debug launch`.
+- Оператор **может не уходить из чата** для частого цикла «спросил агента → собрал → прогнал тесты → отладил».
+
+---
+
+## Ортогональность входов (сводка)
+
+| Вход | Где | Префикс / форма |
+|------|-----|-----------------|
+| Палитра | overlay | fuzzy, `c:` Melody |
+| Hotkeys / Chord | глобально | TOML → `command_id` |
+| Chat Melody aliases | палитра / intents | `ato`, `atb`, … ([0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md)) |
+| **Chat slash** | `ChatInput` | `/verb` или `/namespace action` (**этот ADR**) |
+| MCP | агент | `ide_execute_command` |
+
+---
+
+## Диаграмма
+
+```mermaid
+flowchart TD
+    input[ChatInput]
+    input -->|starts with /| parser[ChatSlashCommandParser]
+    input -->|normal text| agent[SendToAgent]
+    parser -->|known verb| cmd[command_id handler]
+    parser -->|unknown| err[Inline error + help]
+    cmd --> vm[ChatPanelViewModel]
+    vm --> snap[ChatSurfaceSnapshot]
+    snap --> skia[SkiaChatSurfaceControl]
+    palette[Palette Melody Chords MCP] --> cmd
+```
+
+---
+
+## Якоря реализации (план)
+
+| Компонент | Роль |
+|-----------|------|
+| `Features/Chat/ChatSlashCommandCatalog.cs` *(новый)* | verb → descriptor (`command_id`, help, arg hint) |
+| `Features/Chat/ChatSlashCommandParser.cs` *(новый)* | разбор строки, валидация |
+| [`ChatPanelViewModel`](../../Features/Chat/ChatPanelViewModel.cs) | вызов парсера в `SendChatAsync` **до** `ApplyProductSpineToOutboundMessage` / ACP |
+| [`IdeMcpCommandExecutor`](../../ViewModels/IdeMcpCommandExecutor.cs) | исполнение тех же `command_id`, что MCP |
+| [`ChatPanelView.axaml`](../../Views/ChatPanelView.axaml) | popup autocomplete (**обязателен** до фазы B) |
+| `ChatSlashAutocompleteControl` *(новый)* | иерархический popup, привязка к `ChatInput` |
+| [`IdeCommands`](../../Services/IdeCommands.SolutionWorkspace.cs) | новые `command_id` только если нет покрытия (`chat_create_or_rename_topic`) |
+
+**Порядок внедрения:**
+
+| Фаза | Содержание | Критерий готовности |
+|------|------------|---------------------|
+| **A** | Parser (flat + namespace/action), catalog Intercom, local execution | `/overview`, `/export` не уходят агенту |
+| **A′** | **Autocomplete** для flat + namespace list | после `/` и `/build ` есть подсказки |
+| **B** | IDE: `/build run`, `/test run`, `/debug launch` → `command_id` | паритет с MCP `build` / `run_tests` / `debug_launch` |
+| **C** | Расширение aliases (`/git`, `/nav`, проекция из палитры) | по discoverability, не big-bang |
+
+Тесты: parser unit-tests; интеграция «слэш local»; снапшоты каталога help.
+
+---
+
+## Отклонённые альтернативы
+
+1. **Парсить слэши в палитре** (`/card` в Command Palette) — смешивает overlay и Intercom; отвергнуто.
+2. **Отдельные MCP-only команды без `command_id`** — ломает [0030](0030-command-ids-hotkeys-and-ui-registry-layers.md); отвергнуто.
+3. **Отправлять нераспознанный `/` агенту** — шум и утечки; отвергнуто.
+
+---
+
+## История изменений
+
+<a id="adr0119-history"></a>
+
+| Дата | Изменение |
+|------|-----------|
+| 2026-05-17 | Proposed: слэш-команды в ChatInput, каталог v1, intent-first, non-goals. |
+| 2026-05-17 | Расширение: unified command line — IDE namespaces (`/build run`, `/test run`, `/debug launch`); autocomplete обязателен; фазы A–C. |

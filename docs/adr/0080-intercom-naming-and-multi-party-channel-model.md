@@ -15,6 +15,7 @@
 | [0038](0038-agent-facade-ai-provider-and-tool-orchestration.md) | фасад AI, оркестрация |
 | [0066](0066-cockpit-ui-vs-ide-presentation-layer.md) | presentation IDE vs кабина |
 | [0033](0033-internationalization-resx-avalonia.md) | i18n |
+| [0120](0120-primary-work-surface-intercom-or-editor.md) | Intercom в якоре Forward — agent-central layout |
 
 ## Резюме
 

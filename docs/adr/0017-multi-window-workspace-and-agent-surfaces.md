@@ -18,6 +18,7 @@
 | [0002](0002-debug-human-agent-parity.md) | паритет MCP |
 | [0008](0008-mcp-contracts-and-testable-infrastructure.md) | контракты MCP |
 | [0063](0063-instrument-deck-named-composition-one-anchor.md) | ось **instrument deck** и слово *presentation* vs CDS — см. § там; **ключи топологии** — ниже в этом ADR |
+| [0120](0120-primary-work-surface-intercom-or-editor.md) | `primary_work_surface` — Intercom или Editor в Forward (ортогонально `presentation`) |
 
 ### Вне ADR
 
