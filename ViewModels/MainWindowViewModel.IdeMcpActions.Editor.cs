@@ -5,35 +5,25 @@ namespace CascadeIDE.ViewModels;
 /// <summary>MCP: редактор.</summary>
 public partial class MainWindowViewModel
 {
-    void Services.IIdeMcpActions.OpenFile(string path)
-    {
-        if (string.IsNullOrEmpty(path))
-            return;
-        var pathCopy = path;
-        UiScheduler.Default.Post(() =>
-        {
-            if (!File.Exists(pathCopy))
-                return;
-            var normalizedPath = CanonicalFilePath.Normalize(pathCopy);
-            IsLoadingCurrentFile = true;
-            try
+    void Services.IIdeMcpActions.OpenFile(string path) =>
+        IdeMcpEditorDocumentActions.ScheduleOpenFile(
+            UiScheduler.Default,
+            path,
+            normalizedPath =>
             {
-                Documents.OpenOrActivateDocument(normalizedPath);
-            }
-            finally
-            {
-                IsLoadingCurrentFile = false;
-            }
-        });
-    }
+                IsLoadingCurrentFile = true;
+                try
+                {
+                    Documents.OpenOrActivateDocument(normalizedPath);
+                }
+                finally
+                {
+                    IsLoadingCurrentFile = false;
+                }
+            });
 
-    void Services.IIdeMcpActions.LoadSolution(string path)
-    {
-        if (string.IsNullOrEmpty(path))
-            return;
-        var pathCopy = path;
-        UiScheduler.Default.Post(() => LoadSolution(pathCopy));
-    }
+    void Services.IIdeMcpActions.LoadSolution(string path) =>
+        IdeMcpEditorDocumentActions.ScheduleLoadSolution(UiScheduler.Default, path, LoadSolution);
 
     void Services.IIdeMcpActions.SelectInEditor(string? filePath, int startLine, int startColumn, int endLine, int endColumn)
     {
