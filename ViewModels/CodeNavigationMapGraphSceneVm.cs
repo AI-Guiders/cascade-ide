@@ -62,31 +62,6 @@ public sealed class CodeNavigationMapGraphSceneVm
     public double? SideLabelFontSizePx { get; init; }
 
     public bool IsEmpty => Nodes.Count == 0;
-
-    /// <summary>Подмена только <see cref="Presentation"/> (после укладки графа из wire <c>graph_kind</c>).</summary>
-    public static CodeNavigationMapGraphSceneVm WithPresentationKind(CodeNavigationMapGraphSceneVm scene, CodeNavigationMapGraphPresentationKind presentation)
-    {
-        if (scene.Presentation == presentation)
-            return scene;
-        return new CodeNavigationMapGraphSceneVm
-        {
-            Nodes = scene.Nodes,
-            Edges = scene.Edges,
-            Presentation = presentation,
-            Legend = scene.Legend,
-            UseLegendColumn = scene.UseLegendColumn,
-            ShowLegendConditionKey = scene.ShowLegendConditionKey,
-            ShowLegendReturnKey = scene.ShowLegendReturnKey,
-            ShowLegendExceptionFlowKey = scene.ShowLegendExceptionFlowKey,
-            ShowLegendEdgeStyleKey = scene.ShowLegendEdgeStyleKey,
-            LegendColumnLeft = scene.LegendColumnLeft,
-            LegendPlacement = scene.LegendPlacement,
-            LegendBlockTopY = scene.LegendBlockTopY,
-            HighlightedNodeIds = scene.HighlightedNodeIds,
-            HighlightedEdgeKeys = scene.HighlightedEdgeKeys,
-            SideLabelFontSizePx = scene.SideLabelFontSizePx
-        };
-    }
 }
 
 /// <summary>Строка легенды control flow: номер ↔ одна строка кода/предиката.</summary>

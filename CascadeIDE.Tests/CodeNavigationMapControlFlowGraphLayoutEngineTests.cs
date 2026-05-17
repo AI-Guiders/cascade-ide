@@ -1,6 +1,5 @@
 using CascadeIDE.Cockpit.Graph;
 using CascadeIDE.Cockpit.Graph.Layout;
-using CascadeIDE.Cockpit.PrimitivesKit;
 using CascadeIDE.Services;
 using CascadeIDE.Features.WorkspaceNavigation.Application;
 using CascadeIDE.ViewModels;
@@ -178,8 +177,8 @@ public sealed class ControlFlowGraphLayoutEngineTests
     [Fact]
     public void Layout_WideSlot_AllowsLongerLabelsThanNarrow()
     {
-        var narrow = CodeNavigationMapGraphPrimitives.ResolveControlFlowLabelCharBudget(118);
-        var wide = CodeNavigationMapGraphPrimitives.ResolveControlFlowLabelCharBudget(360);
+        var narrow = GraphControlFlowLayoutMetrics.ResolveLabelCharBudget(118);
+        var wide = GraphControlFlowLayoutMetrics.ResolveLabelCharBudget(360);
         Assert.True(wide > narrow);
     }
 
@@ -208,10 +207,10 @@ public sealed class ControlFlowGraphLayoutEngineTests
         const double viewportW = 400;
         var scene = engine.Layout(doc, viewportW, 200);
         Assert.True(scene.UseLegendColumn);
-        var inkSl = CodeNavigationMapGraphPrimitives.ControlFlowBesideLegendInkSlack;
+        var inkSl = GraphControlFlowLayoutMetrics.BesideLegendInkSlack;
         var minCl = Math.Max(
-            CodeNavigationMapGraphPrimitives.ControlFlowLegendGap,
-            CodeNavigationMapGraphPrimitives.ControlFlowLegendBesideMinClearance);
+            GraphControlFlowLayoutMetrics.LegendGap,
+            GraphControlFlowLayoutMetrics.LegendBesideMinClearance);
         var inkR = 0.0;
         foreach (var n in scene.Nodes)
             inkR = Math.Max(inkR, n.Center.X + n.Radius + inkSl);
@@ -246,6 +245,6 @@ public sealed class ControlFlowGraphLayoutEngineTests
         Assert.True(scene.UseLegendColumn);
         Assert.Equal(GraphLegendBlockPlacement.BelowGraph, scene.LegendPlacement);
         Assert.True(scene.LegendBlockTopY > 0);
-        Assert.Equal(CodeNavigationMapGraphPrimitives.ControlFlowSidePadding, scene.LegendColumnLeft, 0.01);
+        Assert.Equal(GraphControlFlowLayoutMetrics.SidePadding, scene.LegendColumnLeft, 0.01);
     }
 }
