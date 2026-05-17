@@ -44,16 +44,17 @@ The agent-first IDE stack already has “intent-first” in individual ADRs ([00
 2. connects scattered ADRs into one mental model;
 3. honestly separates **hypothesis + working in-product implementation** from “the only industry standard” or “the spec reference implementation”.
 
-Team discussion (including with Atlas) proposed **IOP** alongside OOP and FP, shifting focus from implementation to **intent** and **target state**.
+Team discussion (including with Atlas) proposed **IOP** alongside OOP and FP. The meaning runs deeper than UI commands: IT is about **information flow** (goals, intentions, processes, communication, transparency); software development is part of the flow, not the whole subject. Agents reinforced an old truth: without explicit intent and a shared picture, code and the team diverge into chaos.
 
 ---
 
 ## Problem
 
-1. **Cognitive ceiling:** a human cannot hold 100k+ lines of a monolith as “one text in the head”; the human role is architecture and verification, not a manual syntax compiler.
-2. **Split contours:** without a shared paradigm it is easy to duplicate command parsing (chat slash vs Melody vs MCP) — see motivation in [0119](0119-chat-slash-commands-intercom-surface.md).
-3. **Weak agent context:** without KB canon and routing (`route_context`, playbooks) intents “drift”; we need an explicit **epistemic constraint** model, not prompt alone.
-4. **Marketing vs engineering:** without an ADR the term IOP risks sounding like a “revolution” declaration without ties to code and ADR statuses.
+1. **Shallow reading of IOP:** “the basic unit is intent” sounds like “more slashes,” although the point is **agreement on goals** in the team’s information contour.
+2. **Cognitive ceiling:** a human cannot hold 100k+ lines of a monolith as “one text in the head”; the human role is architecture and verification, not a manual syntax compiler.
+3. **Split contours:** without a shared paradigm it is easy to duplicate command parsing (chat slash vs Melody vs MCP) — see motivation in [0119](0119-chat-slash-commands-intercom-surface.md).
+4. **Weak agent context:** without KB canon and routing (`route_context`, playbooks) intents “drift”; we need an explicit **epistemic constraint** model, not prompt alone.
+5. **Marketing vs engineering:** without an ADR the term IOP risks sounding like a “revolution” declaration without ties to code and ADR statuses.
 
 ---
 
@@ -65,11 +66,12 @@ Team discussion (including with Atlas) proposed **IOP** alongside OOP and FP, sh
 
 **Intent-Oriented Programming (IOP)** is a way of organizing work in the IDE where:
 
-- the **basic unit of interaction** is an *intent* (intention, target state, command with semantics), not a syntax fragment;
-- **execution** is delegated to the agent and infrastructure (MCP, build, Roslyn, git) under **human observability**;
+- the **subject** is an aligned **information flow** (goals, processes, communication, transparency), not program text alone;
+- an **intent** is a *named agreement* on intention or target state in that flow (not syntax and not “yet another slash”);
+- **execution** (including code generation) is delegated to the agent and infrastructure (MCP, build, Roslyn, git) under **human observability**;
 - **correctness** is checked via **delta** (diff, diagnostics, tests) and **normative knowledge** (KB), not only “something was generated”.
 
-IOP in CIDE is an **orchestration overlay** in an agent-first IDE. **C#, projects, and the editor remain the source of truth** for program text ([0084](0084-agent-edits-editor-source-of-truth-presence-channel.md), [0098](0098-semantic-first-document-as-projection.md)).
+IOP in CIDE is **information-flow discipline** in an agent-first IDE. **C#, projects, and the editor remain the source of truth** for program text ([0084](0084-agent-edits-editor-source-of-truth-presence-channel.md), [0098](0098-semantic-first-document-as-projection.md)).
 
 <a id="adr0121-p2"></a>
 
@@ -77,7 +79,7 @@ IOP in CIDE is an **orchestration overlay** in an agent-first IDE. **C#, project
 
 | Pillar | Meaning | In CIDE (existing / in flight) |
 |--------|---------|-------------------------------|
-| **1. Intent over syntax** | User states *what should be*, not a step-by-step algorithm | Intent Melody (`c:`), `command_id`, palette, [0119](0119-chat-slash-commands-intercom-surface.md) slashes → same contour as MCP; catalog [0109](0109-declarative-parametric-melody-catalog-toml-and-code-binders.md) |
+| **1. Flow and explicit intent** | Aligned information flow; intent = agreement on goal/state | Intercom, topic cards, KB/ADR; Intent Melody, `command_id`, palette, [0119](0119-chat-slash-commands-intercom-surface.md) slashes → same contour as MCP; [0109](0109-declarative-parametric-melody-catalog-toml-and-code-binders.md) |
 | **2. Two-loop verification** | Agent synthesizes; human is architect and diff arbiter | Forward (editor) / Intercom ([0120](0120-primary-work-surface-intercom-or-editor.md)); Roslyn MCP, build/test MCP, git MCP; human-in-the-loop on merge |
 | **3. Epistemic context** | Normative layer over code — KB canon, router, policies | kb-public, agent-notes, `knowledge/` tree (`domains/` is a **repo path**, not a “domain” term); [architecture-policy](../architecture-policy.md), [0100](0100-project-constitution.md) |
 
@@ -97,7 +99,7 @@ Wording such as “the whole world will switch to IOP”, “the world’s only 
 
 | Term | Meaning in IOP/CIDE |
 |------|---------------------|
-| **Intent** | Named intention with an execution contract (`command_id`, Melody, slash token) |
+| **Intent** | Named agreement on goal/target state in the information flow; in CIDE carriers include Intercom, KB, `command_id`, Melody, slash (not “atom = slash”) |
 | **Intent Melody** | Declarative/parametric language binding intents to UI and hotkeys |
 | **Intercom** | Session channel: dialogue, topic cards, slashes — forward surface for intents ([0080](0080-intercom-naming-and-multi-party-channel-model.md)) |
 | **Verification loop** | Synthesis → diff/diagnostics/tests → human accept or rollback |
@@ -107,6 +109,7 @@ Wording such as “the whole world will switch to IOP”, “the world’s only 
 
 ## Non-goals
 
+- **Do not** reduce IOP to slash commands, palette, or Melody — surfaces, not the paradigm.
 - **Do not** replace OOP, FP, or C# in the user repo with “intents instead of code”.
 - **Do not** autonomous merge to main without human-in-the-loop (see [0100](0100-project-constitution.md), git policies).
 - **Do not** IOP without verification infrastructure (Roslyn/build/test/git) — otherwise it is chat only.
@@ -141,3 +144,4 @@ Wording such as “the whole world will switch to IOP”, “the world’s only 
 | 2026-05-17 | Proposed: IOP paradigm, three pillars, manifest, CIDE working implementation. |
 | 2026-05-17 | Softened positioning: “reference implementation” → “working implementation in the product”. |
 | 2026-05-17 | IOP: avoid “knowledge domains”; `knowledge/domains/` — repo path only. |
+| 2026-05-17 | IOP depth: information flow, communication/transparency; intent ≠ slash. |

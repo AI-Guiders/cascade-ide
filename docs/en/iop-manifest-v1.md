@@ -1,6 +1,8 @@
 # IOP — Intent-Oriented Programming
 
-**Intent-Oriented Programming** shifts focus from hand-written syntax to **intent** and **target state**. **Cascade IDE** is an open **working implementation** of IOP: a stack where the paradigm is explored in a shipping **.NET** **agent-first** IDE.
+**Intent-Oriented Programming (IOP)** is not “slash commands reinvented.” It recognizes that **information technology** is about **designing information flow** in a system: goals, intentions, processes, **communication**, and **transparency**. Building software is only part of that flow; without aligned intent and a shared picture, code becomes chaos — agents made that painfully visible.
+
+**Cascade IDE** is an open **working implementation** of IOP: a stack that makes this flow explicit in a **.NET** **agent-first** IDE.
 
 !!! info "Normative detail"
     Non-goals and ADR links — [ADR 0121](adr/0121-intent-oriented-programming-paradigm.md) (Proposed).  
@@ -10,15 +12,24 @@
 
 ## Why IOP
 
-Human brains are strong **meaning generators** and weak **syntax compilers** for hundred-thousand-line monoliths. IOP puts you back in the **architect / strategist** seat: state an intent → observe synthesis → **verify the delta** in the editor. C# and the repo remain the source of truth; IOP is an **orchestration layer**, not a replacement for code.
+IT is **information** technology: the work is a **coherent flow of meaning** — who talks to whom, about what, toward which goals, with which processes, and what observers can see. Without communication and transparency, shipping code is pointless: local order in files, global chaos in the team.
+
+IOP in the IDE centers **explicit intent** (goal, target state, agreed process) and an **observable execution delta**. C# and the repo stay the source of truth for program text; IOP is **information-flow discipline** around code, not a replacement for it.
+
+---
+
+## What IOP is not
+
+- **Not** “zoomers invented `/build`” — slashes, palette, and Melody are **surfaces** for one meaning.
+- **Not** a replacement for OOP/FP: classes and functions remain; what changes is how the team **agrees on work** before and after edits.
 
 ---
 
 ## Three pillars in Cascade IDE
 
-### 1. Intent instead of syntax
+### 1. Information flow and explicit intent
 
-The atom is an **intent**: `command_id`, Intent Melody (`c:`), **Intercom** slash commands ([ADR 0119](adr/0119-chat-slash-commands-intercom-surface.md)), palette, and the **same commands via MCP**. One meaning — many surfaces; no ad-hoc parsers that bypass the intent layer.
+At the center is a **aligned information flow** (people, agent, artifacts, status). An **intent** is not a button — it is a **named agreement** on a goal or target state in that flow. In CIDE it is carried by Intercom, topic cards, ADR/KB, `command_id`, Intent Melody (`c:`), slashes ([ADR 0119](adr/0119-chat-slash-commands-intercom-surface.md)), palette, and the **same commands via MCP** — one meaning, many channels, no scattered parsers.
 
 ### 2. Two-loop verification
 
