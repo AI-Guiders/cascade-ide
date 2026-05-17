@@ -28,12 +28,12 @@ public sealed class SkiaPipelineArchitectureAnalyzer : DiagnosticAnalyzer
 
     private static readonly DiagnosticDescriptor CodeNavigationMapCompositorStageFlowRule = new(
         CodeNavigationMapCompositorStageFlowId,
-        "CodeNavigationMapCompositor must execute Intent -> Declutter -> Layout",
-        "CodeNavigationMapCompositor.Compose(...) must call _intentStage.Resolve, _declutterStage.Apply and _layoutStage.Layout",
+        "Skia surface compositor must execute Intent -> Declutter -> Layout",
+        "{0}.Compose(...) must call _intentStage.Resolve, _declutterStage.Apply and _layoutStage.Layout",
         "Architecture",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true,
-        description: "ADR 0055 canonical stage chain must be explicit in CodeNavigationMapCompositor.");
+        description: "ADR 0055/0057 canonical stage chain must be explicit in graph/chat compositors.");
 
     private static readonly DiagnosticDescriptor LayoutBypassRule = new(
         LayoutBypassId,
@@ -112,7 +112,12 @@ public sealed class SkiaPipelineArchitectureAnalyzer : DiagnosticAnalyzer
             return;
 
         var type = method.Parent as TypeDeclarationSyntax;
-        if (type is null || !string.Equals(type.Identifier.ValueText, "CodeNavigationMapCompositor", StringComparison.Ordinal))
+        if (type is null)
+            return;
+
+        var compositorName = type.Identifier.ValueText;
+        if (!string.Equals(compositorName, "CodeNavigationMapCompositor", StringComparison.Ordinal)
+            && !string.Equals(compositorName, "ChatSurfaceCompositor", StringComparison.Ordinal))
             return;
 
         var hasIntent = method.DescendantNodes().OfType<MemberAccessExpressionSyntax>()
@@ -129,7 +134,7 @@ public sealed class SkiaPipelineArchitectureAnalyzer : DiagnosticAnalyzer
                       && m.Name.Identifier.ValueText == "Layout");
 
         if (!hasIntent || !hasDeclutter || !hasLayout)
-            context.ReportDiagnostic(Diagnostic.Create(CodeNavigationMapCompositorStageFlowRule, method.Identifier.GetLocation()));
+            context.ReportDiagnostic(Diagnostic.Create(CodeNavigationMapCompositorStageFlowRule, method.Identifier.GetLocation(), compositorName));
     }
 
     private static void AnalyzeObjectCreation(SyntaxNodeAnalysisContext context)
