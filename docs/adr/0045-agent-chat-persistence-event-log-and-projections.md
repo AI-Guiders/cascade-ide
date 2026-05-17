@@ -1,6 +1,6 @@
 # ADR 0045: Persistence истории чата — append-only события + проекции
 
-**Статус:** Proposed  
+**Статус:** Accepted · Implemented  
 **Дата:** 2026-04-14
 
 ## Связанные ADR

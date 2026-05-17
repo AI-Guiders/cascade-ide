@@ -1,6 +1,6 @@
 # ADR 0081: Параметрические Intent Melody — диапазоны строк редактора (`:start:end`)
 
-**Статус:** Proposed  
+**Статус:** Accepted · Implemented  
 **Дата:** 2026-04-20  
 ## Связанные ADR
 

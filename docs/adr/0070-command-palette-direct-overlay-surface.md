@@ -1,6 +1,6 @@
 # ADR 0070: Command Palette как прямой overlay surface, маршрутизируемый в активный TopLevel
 
-**Статус:** Accepted  
+**Статус:** Accepted · Implemented  
 **Дата:** 2026-04-19
 
 ## Связанные ADR

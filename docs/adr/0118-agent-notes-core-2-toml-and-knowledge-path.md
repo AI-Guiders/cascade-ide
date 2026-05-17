@@ -1,6 +1,6 @@
 # ADR 0118: Agent Notes Core 2.0 — TOML, `knowledge_path`, паритет с agent-notes-mcp
 
-**Статус:** Accepted (implemented 2026-05)  
+**Статус:** Accepted · Implemented  
 **Дата:** 2026-05-16
 
 ## Связанные ADR

@@ -1,6 +1,6 @@
 # ADR 0018: Каноничные XML-доки для `IdeCommands` и ProtocolDocGen
 
-**Статус:** Proposed (направление; срок и объём миграции — по приоритетам)  
+**Статус:** Accepted (частично: ProtocolDocGen + generated summaries; полный XML на IdeCommands — по миграции)  
 **Дата:** 2026-04-05  
 ## Связанные ADR
 

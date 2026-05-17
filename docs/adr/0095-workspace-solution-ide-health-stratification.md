@@ -1,6 +1,6 @@
 # ADR 0095: Три уровня Health — Workspace, Solution, IDE (таксономия каналов)
 
-**Статус:** Proposed  
+**Статус:** Accepted (частично: WorkspaceHealth MFD + каналы; полная трёхуровневая таксономия — по ADR)  
 **Дата:** 2026-04-24  
 **Обновлено:** 2026-04-25 — TOML-ключи IDE Health: `ide_health_*`. Подробности — [§ История](#adr0095-history).
 ## Связанные ADR

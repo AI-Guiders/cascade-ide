@@ -1,6 +1,6 @@
 # ADR 0060: Аккордный слой (FMS-style), S/T и overlay — расширение keyboard-first (ADR 0013)
 
-**Статус:** Proposed  
+**Статус:** Accepted (частично: Intent Melody каталог + chord/palette v1; полный FMS T/S overlay — по ADR)  
 **Дата:** 2026-04-19  
 ## Связанные ADR
 

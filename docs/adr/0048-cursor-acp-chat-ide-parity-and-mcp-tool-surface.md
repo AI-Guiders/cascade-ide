@@ -1,6 +1,6 @@
 # ADR 0048: Чат через Cursor ACP в IDE — цель паритета с хостом Cursor, поверхность инструментов и MCP
 
-**Статус:** Proposed  
+**Статус:** Accepted (частично: Cursor ACP в IDE, auto-inject MCP; полный parity — по ADR)  
 **Дата:** 2026-04-14  
 **Обновлено:** 2026-04-14 — `mcp.json` ↔ CIDE; «Открыть папку» в UI и MCP. Подробности — [§ История](#adr0048-history).
 ## Связанные ADR

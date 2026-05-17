@@ -83,7 +83,7 @@
 | [0015](0015-editor-toml-syntax-highlighting.md) | Подсветка TOML в редакторе (шипнутый TextMate-пакет taplo; не LSP в v1) | Accepted |
 | [0016](0016-agent-client-protocol-external-agent.md) | Внешний агент по ACP (stdio, Cursor CLI); вендор SDK; UTF-8; ортогонально MCP | Accepted |
 | [0017](0017-multi-window-workspace-and-agent-surfaces.md) | Несколько окон приложения, зоны экрана, поверхности агента; MCP multi-root в scope | Accepted |
-| [0018](0018-ide-commands-canonical-xml-documentation.md) | Каноничные XML-доки для `IdeCommands` и ProtocolDocGen (вместо мини-языка только в summary) | Proposed |
+| [0018](0018-ide-commands-canonical-xml-documentation.md) | Каноничные XML-доки для `IdeCommands` и ProtocolDocGen (вместо мини-языка только в summary) | Accepted |
 | [0019](0019-shared-git-core-ide-and-git-mcp.md) | Общий Git Core для Cascade IDE и git-mcp (паритет логики, прецедент agent-notes-core) | Accepted |
 | [0020](0020-agent-reasoning-visibility-and-provider-limits.md) | Видимость рассуждения агента: слои (ответ, трасс, опциональный лог), честные ограничения провайдеров LLM | Proposed |
 | [0021](0021-pfd-mfd-cockpit-attention-model.md) | PFD / MFD — модель внимания кокпита Cascade IDE | Accepted |
@@ -110,10 +110,10 @@
 | [0042](0042-pre-flight-planned-changes-and-review-before-apply.md) | Pre-flight briefing: Planned Changes (намерение + SA) и Review Before Apply (превью, семантический слой, отказ без мусора); машина состояний; ортогонально «построчному доверию» | Proposed |
 | [0043](0043-mcp-transport-recovery-human-agent-parity.md) | Паритет восстановления MCP-транспорта (человек ↔ агент), граница хоста (Cursor) vs IDE; ортогонально ADR 0002 | Proposed |
 | [0044](0044-avalonia-host-skia-agent-chat-surface.md) | Avalonia как хост (фюзеляж), кастомная отрисовка чата (Skia — гипотеза); **модель первична**, спайк следом; см. ADR 0031 | Accepted |
-| [0045](0045-agent-chat-persistence-event-log-and-projections.md) | Persistence истории чата: append-only NDJSON события + метаданные и проекции; UI/рендер не источник правды | Proposed |
+| [0045](0045-agent-chat-persistence-event-log-and-projections.md) | Persistence истории чата: append-only NDJSON события + метаданные и проекции; UI/рендер не источник правды | Accepted |
 | [0046](0046-presentation-layout-authority-and-cockpit-invariants.md) | CDS: `CockpitPresentationLayoutPolicy` и инварианты P/F/M; `presentation` как источник истины для меню/MCP/режимов/реактивного слоя | Accepted |
 | [0047](0047-cockpit-instrument-descriptor-and-slot-composition.md) | Инструмент кабины (`Instrument`): дескриптор слота (`CockpitInstrumentDescriptor`), не `Control`; SE vs карта намерений как примеры | Accepted |
-| [0048](0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) | Чат через Cursor ACP в IDE: `mcpServers`, авто IDE MCP; приложения — пробелы тулов, разбор `mcp.json` ↔ CIDE | Proposed |
+| [0048](0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) | Чат через Cursor ACP в IDE: `mcpServers`, авто IDE MCP; приложения — пробелы тулов, разбор `mcp.json` ↔ CIDE | Accepted |
 | [0049](0049-skia-surface-rollout-over-avalonia-host.md) | Поэтапный rollout Skia-поверхностей по CIDE при Avalonia-host; миграция волнами и dual-path | Accepted |
 | [0050](0050-declarative-instrument-zone-placement-toml.md) | Декларативная карта «инструмент → зона/слот» в TOML | Accepted |
 | [0051](0051-intent-based-attention-routing-toml.md) | Intent-based attention routing (TOML) | Accepted |
@@ -125,7 +125,7 @@
 | [0057](0057-chat-surface-pipeline-adoption.md) | Chat surface: adoption общего Skia pipeline (threads, confirmations, dual-path rollout) | Accepted |
 | [0058](0058-agent-roslyn-mcp-coupling-settings-toml.md) | Сопряжение агента и Roslyn MCP в `settings.toml` (лимиты, виды узлов, таймауты, пресеты) | Proposed |
 | [0059](0059-roslyn-mcp-profiles-manager-tactical-strategic-efb.md) | Профили Roslyn MCP, Manager, тактика (PFD) / EFB на MFD, Auto-Focus / Combat / Echelon | Proposed |
-| [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md) | Аккордный слой (Ctrl+K), FMS-style, S/T, overlay; расширение ADR 0013 | Proposed |
+| [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md) | Аккордный слой (Ctrl+K), FMS-style, S/T, overlay; расширение ADR 0013 | Accepted |
 | [0061](0061-context-aware-adr-map-pfd-knowledge-indicator.md) | Контекстная карта ADR ↔ пути в `workspace.toml`, индикатор на PFD, intent/tooltip, advisory для агента (GPWS для доков) | Proposed |
 | [0062](0062-git-submodules-semantic-map-subgraph.md) | **GitMap:** submodules и git-границы **отдельно** от WSNC/карты намерений; общий Skia pipeline; собственный контракт/MCP; [git-and-submodules-v1](../git-and-submodules-v1.md) | Proposed |
 | [0063](0063-instrument-deck-named-composition-one-anchor.md) | **Instrument deck** + **`ContentRepresentation`**; таксономия примитивов (в т.ч. Readout, Trend, Gauge, Presence); **Presence/Activity vs Dark Cockpit**; `DedicatedPage` — режим Page для WH, не deck | Accepted |
@@ -146,7 +146,7 @@
 | [0078](0078-git-preflight-and-noise-control-for-cide.md) | **Git preflight:** шум-контроль (EOL/BOM/whitespace), safe fixes, подсказки логических коммитов и post-push отчёт | Accepted |
 | [0079](0079-ide-display-system-ids-overlay-pipeline.md) | **IDS (Ide Display System):** пайплайн IDE-оверлеев (intent → композитор → снимок → поверхность), ортогонально CDS; единый input host и слоты — по плану; Roslyn **CASCOPE013–016** | Accepted |
 | [0080](0080-intercom-naming-and-multi-party-channel-model.md) | **Intercom:** продуктовое имя канала связи вместо узкого «чат»; агент + команда + системные реплики; **внешний** командный контур vs своя «гора»; discoverability/i18n; strangler для кода | Accepted |
-| [0081](0081-parametric-intent-melodies-editor-line-ranges.md) | **Параметрические Intent Melody:** суффикс `:startLine:endLine` для операций над текстом редактора; валидация; рефакторинги по диапазону; UX (индикатор, chord vs палитра) | Proposed |
+| [0081](0081-parametric-intent-melodies-editor-line-ranges.md) | **Параметрические Intent Melody:** суффикс `:startLine:endLine` для операций над текстом редактора; валидация; рефакторинги по диапазону; UX (индикатор, chord vs палитра) | Accepted |
 | [0082](0082-acp-ide-mcp-loopback-single-process.md) | **ACP + IDE MCP:** одна копия процесса — loopback HTTP/SSE вместо второго `CascadeIDE --mcp-stdio`; безопасность localhost; stdio для внешнего хоста сохранить | Proposed |
 | [0083](0083-ai-mode-and-nested-settings-toml.md) | **`[ai]` в settings.toml:** `mode` = local \| acp \| mcp_only \| cloud; вложенные секции; без обратной совместимости со старым `provider` | Accepted |
 | [0084](0084-agent-edits-editor-source-of-truth-presence-channel.md) | **Правки агента:** единственный текст в редакторе; чат — намерение/статус; слой присутствия (курсор, «пишет»); дифф в чате не основной; без обязательного CRDT | Proposed |
@@ -158,9 +158,9 @@
 | [0090](0090-launch-profiles-and-debug-startup-configurations.md) | Профили запуска / несколько стартовых конфигураций отладки (как launch profiles в VS), хранение, MCP, миграция с `startup-project.json` | Accepted |
 | [0091](0091-pfd-debug-situational-deck-hypothesis.md) | Гипотеза: PFD **instrument deck** в режиме отладки — одной страницы Mfd (DebugStack) может не хватить; PFD = краткая сводка, Mfd = детали | Proposed |
 | [0092](0092-visual-ui-designer-major-track.md) | Трек **Visual UI** (дизайнер разметки): отдельная крупная программная линия; норматив по UX — [0022](0022-mfd-visual-design-surface-axaml-blazor.md); приоритет Avalonia → Blazor → (опц.) Razor | Accepted |
-| [0093](0093-mfd-embedded-browser-for-launch-url.md) | Расширение [0090](0090-launch-profiles-and-debug-startup-configurations.md): **опциональный** встроенный просмотр URL Kestrel на MFD рядом с отладкой; внешний браузер остаётся default; WebView2 / кроссплатформа — в roadmap | Proposed |
+| [0093](0093-mfd-embedded-browser-for-launch-url.md) | Расширение [0090](0090-launch-profiles-and-debug-startup-configurations.md): **опциональный** встроенный просмотр URL Kestrel на MFD рядом с отладкой; внешний браузер остаётся default; WebView2 / кроссплатформа — в roadmap | Accepted |
 | [0094](0094-ingestion-bus-afdx-analogy-and-threading-channels.md) | **Шина доставки в UI** (аналогия **AFDX**): `Channel<T>`, батчинг, backpressure; ортогонально CDS-«каналу»; strangler с журнала сборки | Proposed |
-| [0095](0095-workspace-solution-ide-health-stratification.md) | Три уровня Health: **Workspace** (папки, Git) · **Solution** (сборка, тесты) · **IDE** (LSP, MCP, окружение); таксономия для каналов/CDS/MCP; strangler от текущего IDE Health | Proposed |
+| [0095](0095-workspace-solution-ide-health-stratification.md) | Три уровня Health: **Workspace** (папки, Git) · **Solution** (сборка, тесты) · **IDE** (LSP, MCP, окружение); таксономия для каналов/CDS/MCP; strangler от текущего IDE Health | Accepted |
 | [0096](0096-intercom-topic-card-summary-and-product-spine.md) | **Intercom:** карточка темы = заголовок + **сводка** (картотека); **spine** продуктовой линии ортогональна main thread (CIDE — пример); дополняет [0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md) | Accepted |
 | [0097](0097-cockpit-compute-units-transport-to-channel-dto.md) | **Вычислительные блоки кабины (CCU)**, аналог LRU *Unit*: свёртка сырья → DTO/снимок канала; ортогонально [0094](0094-ingestion-bus-afdx-analogy-and-threading-channels.md) (транспорт) и CDS; IDE Health в коде — эталон цепочки | Accepted |
 | [0098](0098-semantic-first-document-as-projection.md) | **Semantic-first:** первична семантическая карта; код/доки/git — проекции; согласование с [0084](0084-agent-edits-editor-source-of-truth-presence-channel.md) по сессии правок; strangler | Proposed |
