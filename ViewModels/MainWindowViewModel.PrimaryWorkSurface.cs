@@ -20,6 +20,7 @@ public partial class MainWindowViewModel
             OnPropertyChanged();
             OnPropertyChanged(nameof(IsForwardEditorHostVisible));
             OnPropertyChanged(nameof(IsForwardIntercomHostVisible));
+            SyncMfdShellPageForPrimaryWorkSurface();
             try
             {
                 SettingsService.Save(_settings);
@@ -28,6 +29,21 @@ public partial class MainWindowViewModel
             {
                 // ignore persistence errors during toggle
             }
+        }
+    }
+
+    private void SyncMfdShellPageForPrimaryWorkSurface()
+    {
+        if (PrimaryWorkSurface == PrimaryWorkSurfaceKind.Intercom)
+        {
+            if (IsMfdShellPageAllowed(MfdShellPage.Editor))
+                TryNavigateToMfdShellPage(MfdShellPage.Editor);
+            else
+                CoerceMfdShellPageToAllowed();
+        }
+        else if (CurrentMfdShellPage == MfdShellPage.Editor)
+        {
+            CoerceMfdShellPageToAllowed();
         }
     }
 

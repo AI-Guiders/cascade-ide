@@ -1,0 +1,8 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CascadeIDE.ViewModels"
+             xmlns:views="using:CascadeIDE.Views"
+             x:Class="CascadeIDE.Views.EditorMfdPageView"
+             x:DataType="vm:MainWindowViewModel">
+    <views:DocumentsDockView MinHeight="120"/>
+</UserControl>

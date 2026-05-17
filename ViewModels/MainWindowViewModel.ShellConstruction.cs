@@ -187,6 +187,7 @@ public partial class MainWindowViewModel
         _presentationPmHostTopology = _presentationPmForwardTwoScreen;
         _instrumentMountPolicyResolver = new SettingsBackedInstrumentMountPolicyResolver();
 
+        SyncMfdShellPageForPrimaryWorkSurface();
         NotifyDockedInstrumentSlotBindings();
     }
 }

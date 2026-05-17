@@ -14,7 +14,8 @@ public sealed class MfdShellPageAllowanceProjectionTests
         IsProblemsPanelVisible: false,
         IsGitPanelVisible: false,
         InstrumentationTabs: false,
-        HypothesesTab: false);
+        HypothesesTab: false,
+        IsIntercomPrimaryWorkSurface: false);
 
     [Fact]
     public void Core_pages_still_blocked_when_snapshot_denies()
@@ -44,5 +45,13 @@ public sealed class MfdShellPageAllowanceProjectionTests
     {
         var on = AllDenied with { IsTerminalVisible = true };
         Assert.True(MfdShellPageAllowanceProjection.IsAllowed(MfdShellPage.Terminal, on));
+    }
+
+    [Fact]
+    public void Intercom_primary_swaps_editor_and_chat_mfd_pages()
+    {
+        var intercom = AllDenied with { IsIntercomPrimaryWorkSurface = true };
+        Assert.True(MfdShellPageAllowanceProjection.IsAllowed(MfdShellPage.Editor, intercom));
+        Assert.False(MfdShellPageAllowanceProjection.IsAllowed(MfdShellPage.Chat, intercom));
     }
 }

@@ -37,4 +37,7 @@ public enum MfdShellPage
 
     /// <summary>Веб-портал (NativeWebView) + мост <c>executeIdeCommand</c> / <c>invokeCSharpAction</c>, ADR 0108.</summary>
     WebAiPortal = 16,
+
+    /// <summary>Редактор документов в Mfd при <c>primary_work_surface = intercom</c> (ADR 0120).</summary>
+    Editor = 17,
 }

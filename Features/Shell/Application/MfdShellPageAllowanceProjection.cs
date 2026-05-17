@@ -16,6 +16,7 @@ public static class MfdShellPageAllowanceProjection
         MfdShellPage.MarkdownPreview,
         MfdShellPage.HybridIndex,
         MfdShellPage.WebAiPortal,
+        MfdShellPage.Editor,
         MfdShellPage.Chat,
         MfdShellPage.AiChatSettings,
         MfdShellPage.EnvironmentReadiness,
@@ -37,7 +38,8 @@ public static class MfdShellPageAllowanceProjection
         bool IsProblemsPanelVisible,
         bool IsGitPanelVisible,
         bool InstrumentationTabs,
-        bool HypothesesTab);
+        bool HypothesesTab,
+        bool IsIntercomPrimaryWorkSurface);
 
     public static bool IsAllowed(MfdShellPage page, Snapshot s) => page switch
     {
@@ -47,7 +49,8 @@ public static class MfdShellPageAllowanceProjection
         MfdShellPage.MarkdownPreview => true,
         MfdShellPage.HybridIndex => true,
         MfdShellPage.WebAiPortal => true,
-        MfdShellPage.Chat => true,
+        MfdShellPage.Editor => s.IsIntercomPrimaryWorkSurface,
+        MfdShellPage.Chat => !s.IsIntercomPrimaryWorkSurface,
         MfdShellPage.AiChatSettings => true,
         MfdShellPage.EnvironmentReadiness => true,
         MfdShellPage.Terminal => s.IsTerminalVisible,

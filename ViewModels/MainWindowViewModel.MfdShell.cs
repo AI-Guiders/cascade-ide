@@ -44,7 +44,8 @@ public partial class MainWindowViewModel
         IsProblemsPanelVisible,
         IsGitPanelVisible,
         InstrumentationTabs,
-        HypothesesTab);
+        HypothesesTab,
+        PrimaryWorkSurface == PrimaryWorkSurfaceKind.Intercom);
 
     private bool IsMfdShellPageAllowed(MfdShellPage page) =>
         MfdShellPageAllowanceProjection.IsAllowed(page, MfdShellAllowanceSnapshot);
