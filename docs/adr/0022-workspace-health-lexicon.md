@@ -66,7 +66,7 @@
 ## Последствия
 
 - Новые фичи для этого канала — имена типов **`IdeHealth*`**, ключи TOML в **`[capabilities]`** — префикс **`ide_health_*`** ([0010](0010-ui-modes-toml-configuration.md)).
-- Обзорные UX-доки: [`cascade-ide-ui-layout-v1.md`](../ux/cascade-ide-ui-layout-v1.md), [`concept-to-implementation-map-v1.md`](../ux/concept-to-implementation-map-v1.md), [`ui-modes-overview-v1.md`](../ux/ui-modes-overview-v1.md) — выровнены по термину **IDE Health**; при расхождении **приоритет у 0089, этого ADR и 0021**.
+- Обзорные UX-доки: [`cascade-ide-ui-layout-v1.md`](../ui-ux/cascade-ide-ui-layout-v1.md), [`concept-to-implementation-map-v1.md`](../ui-ux/concept-to-implementation-map-v1.md), [`ui-modes-overview-v1.md`](../ui-ux/ui-modes-overview-v1.md) — выровнены по термину **IDE Health**; при расхождении **приоритет у 0089, этого ADR и 0021**.
 
 ---
 

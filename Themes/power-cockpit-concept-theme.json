@@ -1,5 +1,5 @@
 {
-  "_comment": "Палитра ближе к docs/ux/concept-generated/cascadeide-ui-concept-power.png: L1 бирюза, L2 янтарь, L3 фиолет, неон фуксия/циан. Сплошные кисти CascadeTheme.* (градиенты островов по-прежнему из App.axaml).",
+  "_comment": "Палитра ближе к docs/ui-ux/concept-generated/cascadeide-ui-concept-power.png: L1 бирюза, L2 янтарь, L3 фиолет, неон фуксия/циан. Сплошные кисти CascadeTheme.* (градиенты островов по-прежнему из App.axaml).",
   "main_window": { "background": "#07051A" },
   "menu": { "background": "#10082A", "foreground": "#EDE9FE" },
   "button": {

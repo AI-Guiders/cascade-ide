@@ -25,8 +25,8 @@
 | Документ | Роль |
 |----------|------|
 | [`attention-zone-panel-playbook-v1.md`](../design/attention-zone-panel-playbook-v1.md) | зона ↔ панель ↔ топология; в коде — `AttentionLayoutSurfaceKind` |
-| [`concept-pfd-mfd-cascade-v1.md`](../ux/concept-pfd-mfd-cascade-v1.md) | UX-концепт PFD/MFD (superseded текстом [0021](0021-pfd-mfd-cockpit-attention-model.md)) |
-| [`concept-to-implementation-map-v1.md`](../ux/concept-to-implementation-map-v1.md) | карта концепт → код |
+| [`concept-pfd-mfd-cascade-v1.md`](../ui-ux/concept-pfd-mfd-cascade-v1.md) | UX-концепт PFD/MFD (superseded текстом [0021](0021-pfd-mfd-cockpit-attention-model.md)) |
+| [`concept-to-implementation-map-v1.md`](../ui-ux/concept-to-implementation-map-v1.md) | карта концепт → код |
 | [skia-surfaces-vs-overlays-v1.md](../design/skia-surfaces-vs-overlays-v1.md) | Skia-поверхности vs оверлеи |
 
 ## Резюме
@@ -323,7 +323,7 @@ screen       ::= O weighted_anchor { Z weighted_anchor } C
 
 ## Принятие
 
-**2026-04-11** — статус **Accepted**; ссылка из [architecture-policy.md](../architecture-policy.md). [concept-to-implementation-map-v1.md](../ux/concept-to-implementation-map-v1.md) §6 — мультиоконность и `MfdHostWindow` (актуальная привязка к файлам). **2026-04-11** — раздел [«Состояние реализации»](#adr0017-implementation-status): синхронизация ADR с кодом (топология, плейсмент, персистентность bounds).
+**2026-04-11** — статус **Accepted**; ссылка из [architecture-policy.md](../architecture-policy.md). [concept-to-implementation-map-v1.md](../ui-ux/concept-to-implementation-map-v1.md) §6 — мультиоконность и `MfdHostWindow` (актуальная привязка к файлам). **2026-04-11** — раздел [«Состояние реализации»](#adr0017-implementation-status): синхронизация ADR с кодом (топология, плейсмент, персистентность bounds).
 
 ---
 

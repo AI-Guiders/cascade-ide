@@ -2,7 +2,7 @@
 
 **Статус:** продуктово-инженерный норматив (v1)  
 **Дата:** 2026-04-26  
-**Связь:** [0085](../adr/0085-editor-hud-inline-layer-and-hud-banner.md), [0032](../adr/0032-hud-banner-configuration-and-grammar.md), [ux roadmap editor-forward](../ux/editor-forward-ui-cleanup-roadmap-v1.md), [0021](../adr/0021-pfd-mfd-cockpit-attention-model.md) §9
+**Связь:** [0085](../adr/0085-editor-hud-inline-layer-and-hud-banner.md), [0032](../adr/0032-hud-banner-configuration-and-grammar.md), [ux roadmap editor-forward](../ui-ux/editor-forward-ui-cleanup-roadmap-v1.md), [0021](../adr/0021-pfd-mfd-cockpit-attention-model.md) §9
 
 **Цель:** не иметь **двух громких каналов** с **одной и той же** полноформенной прозой; при этом **не** отменять [0085](../adr/0085-editor-hud-inline-layer-and-hud-banner.md) (баннер — отдельное имя; inline — **Editor HUD** в узком смысле).
 

@@ -78,7 +78,7 @@
 
 ## Статус после принятия
 
-После согласования: статус **Accepted**, при необходимости ссылка из [concept-to-implementation-map-v1.md](../ux/concept-to-implementation-map-v1.md) и обновление навигатора в [architecture-policy.md](../architecture-policy.md).
+После согласования: статус **Accepted**, при необходимости ссылка из [concept-to-implementation-map-v1.md](../ui-ux/concept-to-implementation-map-v1.md) и обновление навигатора в [architecture-policy.md](../architecture-policy.md).
 
 ---
 

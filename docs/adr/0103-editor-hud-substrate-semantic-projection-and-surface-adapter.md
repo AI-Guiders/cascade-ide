@@ -28,7 +28,7 @@
 
 - **Субстрат Editor HUD:** `SemanticProjectionPipeline` / `EditorHudEngine` / `IEditorSurfaceAdapter`.
 - DAL / CCU / DataBus; hi-freq bounded-контур отдельно от CDS.
-- Baseline AvaloniaEdit; roadmap UI в `ux/`, сравнение хостов в `design/`.
+- Baseline AvaloniaEdit; roadmap UI в `ui-ux/`, сравнение хостов в `design/`.
 
 ### Вне ADR
 
@@ -37,8 +37,8 @@
 | [чертеж: data-acquisition-layer-boundaries-v1](../design/data-acquisition-layer-boundaries-v1.md) | чертеж: data-acquisition-layer-boundaries-v1 |
 | [чертеж: сравнение кандидатов поверхности редактора](../design/editor-surface-candidates-comparison-v1.md) | чертеж: сравнение кандидатов поверхности редактора |
 | [чертеж: analyzer-rollout-dal-ccu-v1](../design/analyzer-rollout-dal-ccu-v1.md) | чертеж: analyzer-rollout-dal-ccu-v1 |
-| [ux: roadmap полировки Forward](../ux/editor-forward-ui-cleanup-roadmap-v1.md) | ux: roadmap полировки Forward |
-**Состояние реализации (v1 слоя «закрыт» в пределах strangler):** `Features/Editor` — `IEditorSurfaceAdapter` / `AvaloniaEditSurfaceAdapter`, hi-freq `EditorStabilizedInputThrottler` (один на окно) + `EditorInputDelta` → guard по `CurrentFilePath` → **`EditorDocumentHudLayer`** (per document: `EditorHudEngine` + `EditorHudStabilizedContext`) → `SemanticProjectionPipeline` / `EditorSemanticSnapshot` из DAL-полосок; **презентация** file-level **HUD banner** в `Application/Presentation/EditorHudBannerTextComposer` (0085: не путать с `EditorInlineHudLayer`-зарезервированным inline); VM только оркестрирует Roslyn-вхождения и присваивает `EditorHudBannerText`, при `DiagnosticsChanged` снимок инвалидируется. **Вне v1:** перенос inline-рендера (squiggles, tooltips) из `DockDocumentView` в тот же слой данных — [editor-hud-inline-migration-inventory-v1](../design/editor-hud-inline-migration-inventory-v1.md), политика баннер/inline — [editor-hud-banner-inline-policy-v1](../design/editor-hud-banner-inline-policy-v1.md), визуальная политика MFD/Forward — [editor-forward-ui-cleanup-roadmap-v1](../ux/editor-forward-ui-cleanup-roadmap-v1.md).
+| [ux: roadmap полировки Forward](../ui-ux/editor-forward-ui-cleanup-roadmap-v1.md) | ux: roadmap полировки Forward |
+**Состояние реализации (v1 слоя «закрыт» в пределах strangler):** `Features/Editor` — `IEditorSurfaceAdapter` / `AvaloniaEditSurfaceAdapter`, hi-freq `EditorStabilizedInputThrottler` (один на окно) + `EditorInputDelta` → guard по `CurrentFilePath` → **`EditorDocumentHudLayer`** (per document: `EditorHudEngine` + `EditorHudStabilizedContext`) → `SemanticProjectionPipeline` / `EditorSemanticSnapshot` из DAL-полосок; **презентация** file-level **HUD banner** в `Application/Presentation/EditorHudBannerTextComposer` (0085: не путать с `EditorInlineHudLayer`-зарезервированным inline); VM только оркестрирует Roslyn-вхождения и присваивает `EditorHudBannerText`, при `DiagnosticsChanged` снимок инвалидируется. **Вне v1:** перенос inline-рендера (squiggles, tooltips) из `DockDocumentView` в тот же слой данных — [editor-hud-inline-migration-inventory-v1](../design/editor-hud-inline-migration-inventory-v1.md), политика баннер/inline — [editor-hud-banner-inline-policy-v1](../design/editor-hud-banner-inline-policy-v1.md), визуальная политика MFD/Forward — [editor-forward-ui-cleanup-roadmap-v1](../ui-ux/editor-forward-ui-cleanup-roadmap-v1.md).
 
 ---
 
@@ -68,7 +68,7 @@
 
 2. **`EditorHudEngine`** — **политика и композиция**: *что* показывать **inline**, что в **HUD banner**, что отдать PFD/MFD [0036](0036-cds-channel-compositor-surface-pipeline.md) / [0039](0039-workspace-navigation-affordances.md). Потребляет **стабилизованные** или **прореженные (throttle)** входы, а не неограниченный «шум на символ».
 
-3. **`IEditorSurfaceAdapter`** (или эквивалентное имя) — **граница реализации** фактического текстового контрола: **основной baseline** в этом репозитории остаётся **AvaloniaEdit** (см. [concept-to-implementation-map-v1](../ux/concept-to-implementation-map-v1.md), [LANGUAGE-SERVICES-PLAN.md](../LANGUAGE-SERVICES-PLAN.md)). Адаптер отдаёт **координаты документа, каретку, selection** и **affordances** хоста, нужные движку HUD, без размазывания типов редактора по приложению.
+3. **`IEditorSurfaceAdapter`** (или эквивалентное имя) — **граница реализации** фактического текстового контрола: **основной baseline** в этом репозитории остаётся **AvaloniaEdit** (см. [concept-to-implementation-map-v1](../ui-ux/concept-to-implementation-map-v1.md), [LANGUAGE-SERVICES-PLAN.md](../LANGUAGE-SERVICES-PLAN.md)). Адаптер отдаёт **координаты документа, каретку, selection** и **affordances** хоста, нужные движку HUD, без размазывания типов редактора по приложению.
 
 Термины [0085](0085-editor-hud-inline-layer-and-hud-banner.md) не меняются: **Editor HUD** = inline + привязка к документу; **HUD banner** = полоса уровня файла; **IDS** = глобальные оверлеи IDE, не Editor HUD [0066](0066-cockpit-ui-vs-ide-presentation-layer.md).
 
@@ -150,7 +150,7 @@
 ## 6. Сопутствующие документы
 
 - **Сравнение хостов (аппендикс):** [editor-surface-candidates-comparison-v1](../design/editor-surface-candidates-comparison-v1.md)
-- **Roadmap полировки UI (Forward, баннер, всплывающие подсказки, MFD):** [editor-forward-ui-cleanup-roadmap-v1](../ux/editor-forward-ui-cleanup-roadmap-v1.md)
+- **Roadmap полировки UI (Forward, баннер, всплывающие подсказки, MFD):** [editor-forward-ui-cleanup-roadmap-v1](../ui-ux/editor-forward-ui-cleanup-roadmap-v1.md)
 
 ---
 

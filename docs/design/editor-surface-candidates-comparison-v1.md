@@ -3,7 +3,7 @@
 **Статус:** чертеж-компаньон к [ADR 0103](../adr/0103-editor-hud-substrate-semantic-projection-and-surface-adapter.md)  
 **Дата:** 2026-04-26
 
-**Связь:** [0085](../adr/0085-editor-hud-inline-layer-and-hud-banner.md), [0098](../adr/0098-semantic-first-document-as-projection.md), [0035](../adr/0035-mfd-embedded-webview-external-llm-and-mcp-boundary.md), [concept-to-implementation-map-v1](../ux/concept-to-implementation-map-v1.md), [LANGUAGE-SERVICES-PLAN.md](../LANGUAGE-SERVICES-PLAN.md)
+**Связь:** [0085](../adr/0085-editor-hud-inline-layer-and-hud-banner.md), [0098](../adr/0098-semantic-first-document-as-projection.md), [0035](../adr/0035-mfd-embedded-webview-external-llm-and-mcp-boundary.md), [concept-to-implementation-map-v1](../ui-ux/concept-to-implementation-map-v1.md), [LANGUAGE-SERVICES-PLAN.md](../LANGUAGE-SERVICES-PLAN.md)
 
 Документ — **сравнительный аппендикс** к хосту документного редактора в зоне **Forward**. Он **не** меняет продуктовый baseline: **AvaloniaEdit** остаётся стеком по умолчанию в репозитории.
 

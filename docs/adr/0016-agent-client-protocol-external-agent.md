@@ -12,8 +12,8 @@
 
 | Документ | Роль |
 |----------|------|
-| [note-acp-cascade-cursor-v1.md](../ux/note-acp-cascade-cursor-v1.md) | терминология и ссылки на спецификацию |
-| [concept-pfd-mfd-cascade-v1.md](../ux/concept-pfd-mfd-cascade-v1.md) | concept pfd mfd cascade v1 |
+| [note-acp-cascade-cursor-v1.md](../ui-ux/note-acp-cascade-cursor-v1.md) | терминология и ссылки на спецификацию |
+| [concept-pfd-mfd-cascade-v1.md](../ui-ux/concept-pfd-mfd-cascade-v1.md) | concept pfd mfd cascade v1 |
 
 ### Снимок реализации
 

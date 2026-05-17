@@ -32,7 +32,7 @@
 | **`PaletteVisibility`** | `Normal` \| `Hidden` — скрыть низкоуровневые команды (`click_control`, `set_control_layout`, …) из палитры; в MCP они остаются. |
 | **`ModeRule`** | Правило доступности в текущем UI-режиме (см. §4). |
 
-Не дублируем здесь: **args** (уже в `IdeCommandsArgs`), **описание для MCP** (уже в XML-summary), **хоткей** (берётся из мерджа `Hotkeys/*.toml`, ключ = `command_id` в snake_case как в [UX §9](../ux/command-palette-ux-concept-v1.md)).
+Не дублируем здесь: **args** (уже в `IdeCommandsArgs`), **описание для MCP** (уже в XML-summary), **хоткей** (берётся из мерджа `Hotkeys/*.toml`, ключ = `command_id` в snake_case как в [UX §9](../ui-ux/command-palette-ux-concept-v1.md)).
 
 ---
 
@@ -51,7 +51,7 @@
 2. **`AllowedFamilies(UiModeFamily[])`** — например только `Focus` для `focus_checkpoint`, только `Power` для части автономки; соответствие с продуктовыми семьями из [0010](../adr/0010-ui-modes-toml-configuration.md).
 3. **`AllowedModeIds(string[])`** — если удобнее оперировать id из `UiModes/index.toml`, а не семьёй.
 
-Палитра при смене режима: фильтрует или помечает пункт **серым** + «недоступно в режиме …» ([UX](../ux/command-palette-ux-concept-v1.md)).
+Палитра при смене режима: фильтрует или помечает пункт **серым** + «недоступно в режиме …» ([UX](../ui-ux/command-palette-ux-concept-v1.md)).
 
 Тонкая связка с **`UiModeCapabilities`** (показывать quick action только если capability включена) — **опционально v2**: отдельное поле или подмножество команд с `WhenCapability(...)`.
 

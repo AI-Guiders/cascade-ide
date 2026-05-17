@@ -71,11 +71,11 @@
 
 ## Решения по реализации (уточнение после обсуждения)
 
-- **Базовые хоткеи (шип):** **`Hotkeys/hotkeys.toml`** под `AppContext.BaseDirectory` — единый источник **строк жестов** для продуктовых дефолтов; репозиторий содержит тот же файл, что попадает в поставку. Формат — пары `command_id` → строка жеста; детали — [`command-palette-ux-concept-v1.md`](../ux/command-palette-ux-concept-v1.md) §9.
+- **Базовые хоткеи (шип):** **`Hotkeys/hotkeys.toml`** под `AppContext.BaseDirectory` — единый источник **строк жестов** для продуктовых дефолтов; репозиторий содержит тот же файл, что попадает в поставку. Формат — пары `command_id` → строка жеста; детали — [`command-palette-ux-concept-v1.md`](../ui-ux/command-palette-ux-concept-v1.md) §9.
 - **Пользовательский слой:** **`hotkeys.toml`** в `%LocalAppData%\CascadeIDE\` (рядом с `settings.toml`) — только **переопределения** поверх шипнутой карты; отсутствующие ключи не ошибка: берётся значение из шипнутого файла. Несколько пресетов — **не часть минимального v1**; при появлении — поле вроде `hotkeys_preset` в `settings.toml` или соглашение об именах, см. §9 UX-документа.
 - **Будущее (после нескольких пресетов):** опциональное **`inherits`** в файле пресета хоткеев — как **`inherits` в `UiModes/<id>.toml`** ([0010](0010-ui-modes-toml-configuration.md)): один родитель (id или имя базового файла), разрешение цепочки, затем **мердж пар** `command_id` → жест — явные в дочернем перекрывают родителя; циклы — ошибка загрузки с понятным сообщением (паттерн как в `UiModeCatalog`).
-- **Хоткей палитры по умолчанию (в шипнутом файле):** **Ctrl+Q** (как Quick Launch в Visual Studio). Переопределение — в пользовательском `hotkeys.toml`; конфликт с ОС — см. [`command-palette-ux-concept-v1.md`](../ux/command-palette-ux-concept-v1.md) §8.
-- **Фокус:** при открытии — поле поиска; при закрытии — восстановление фокуса на элемент до открытия (одно главное окно). Детали UX — в [`command-palette-ux-concept-v1.md`](../ux/command-palette-ux-concept-v1.md) §6; мультиоконность — с [0017](0017-multi-window-workspace-and-agent-surfaces.md).
+- **Хоткей палитры по умолчанию (в шипнутом файле):** **Ctrl+Q** (как Quick Launch в Visual Studio). Переопределение — в пользовательском `hotkeys.toml`; конфликт с ОС — см. [`command-palette-ux-concept-v1.md`](../ui-ux/command-palette-ux-concept-v1.md) §8.
+- **Фокус:** при открытии — поле поиска; при закрытии — восстановление фокуса на элемент до открытия (одно главное окно). Детали UX — в [`command-palette-ux-concept-v1.md`](../ui-ux/command-palette-ux-concept-v1.md) §6; мультиоконность — с [0017](0017-multi-window-workspace-and-agent-surfaces.md).
 
 ## Обсуждение (открытые вопросы для следующих итераций)
 

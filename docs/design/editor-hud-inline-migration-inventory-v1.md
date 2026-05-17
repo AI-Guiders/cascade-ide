@@ -2,7 +2,7 @@
 
 **Статус:** рабочий чек-лист  
 **Дата:** 2026-04-26  
-**Связь:** [ADR 0103](../adr/0103-editor-hud-substrate-semantic-projection-and-surface-adapter.md), [0085](../adr/0085-editor-hud-inline-layer-and-hud-banner.md), [ux roadmap editor-forward](../ux/editor-forward-ui-cleanup-roadmap-v1.md), [banner vs inline policy](editor-hud-banner-inline-policy-v1.md)
+**Связь:** [ADR 0103](../adr/0103-editor-hud-substrate-semantic-projection-and-surface-adapter.md), [0085](../adr/0085-editor-hud-inline-layer-and-hud-banner.md), [ux roadmap editor-forward](../ui-ux/editor-forward-ui-cleanup-roadmap-v1.md), [banner vs inline policy](editor-hud-banner-inline-policy-v1.md)
 
 **Цель:** зафиксировать, **что сейчас** живёт в `Views/DockDocumentView` и **куда** по намерению ADR 0103 / 0085 должны переезжать **модель презентации** (не DAL) и **тонкий рендер** — без дублирования LSP-ввода-вывода в VM.
 
@@ -46,7 +46,7 @@
 
 1. ~~Вынести тултип-контроллер из code-behind~~ — `EditorInlineHoverToolTipController`.
 2. ~~Тонкий фасад для `IBackgroundRenderer` (диагностики + брейкпоинты + отладка)~~ — `EditorDocumentBackgroundVisualsHandle` + `EditorInlineHudLayer.InstallDocumentBackgroundVisuals` (`Services/EditorDocumentDebugLineBackgroundRenderers.cs` переносит бывший `MainWindow.LineRenderers`).
-3. **Политика 0085** + токены MFD/Forward — [editor-hud-banner-inline-policy-v1](editor-hud-banner-inline-policy-v1.md) и [roadmap](../ux/editor-forward-ui-cleanup-roadmap-v1.md) §4–6.
+3. **Политика 0085** + токены MFD/Forward — [editor-hud-banner-inline-policy-v1](editor-hud-banner-inline-policy-v1.md) и [roadmap](../ui-ux/editor-forward-ui-cleanup-roadmap-v1.md) §4–6.
 
 ---
 

@@ -22,7 +22,7 @@
 
 | Документ | Роль |
 |----------|------|
-| [ux/README.md](../ux/README.md) | Актуальная линия Flight; legacy Focus/Balanced/Power — архив |
+| [ux/README.md](../ui-ux/README.md) | Актуальная линия Flight; legacy Focus/Balanced/Power — архив |
 
 ## Резюме
 

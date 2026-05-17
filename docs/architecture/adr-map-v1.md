@@ -15,7 +15,7 @@
 - **Навигация по коду / MCP навигации**: [`0039`](../adr/0039-workspace-navigation-affordances.md)
 
 Если ты читаешь это ради “как сейчас устроен UI Flight”, начни не с ADR, а с layout doc:
-- [`docs/ux/cascade-ide-ui-layout-v1.md`](../ux/cascade-ide-ui-layout-v1.md)
+- [`docs/ui-ux/cascade-ide-ui-layout-v1.md`](../ui-ux/cascade-ide-ui-layout-v1.md)
 
 ---
 
@@ -93,7 +93,7 @@
 
 ADR фиксируют решения и мотивацию. Для “как сейчас” держим:
 - `docs/architecture/current-architecture-v1.md` (эталонная точка входа)
-- `docs/ux/cascade-ide-ui-layout-v1.md` (эталон layout/имена регионов)
+- `docs/ui-ux/cascade-ide-ui-layout-v1.md` (эталон layout/имена регионов)
 - `docs/MCP-PROTOCOL.md` (эталон контракта MCP)
 
 Версия: **v1**.

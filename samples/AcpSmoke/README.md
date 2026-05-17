@@ -31,7 +31,7 @@ python smoke_client.py
 
 ## Cursor и Cascade
 
-Подключение **Cursor как ACP-агента** к JetBrains описано у Cursor ([блог](https://cursor.com/blog/jetbrains-acp)); для Cascade см. заметку [`docs/ux/note-acp-cascade-cursor-v1.md`](../../docs/ux/note-acp-cascade-cursor-v1.md). Этот smoke **не** подставляет бинарник Cursor — только проверяет протокол на референс-агенте.
+Подключение **Cursor как ACP-агента** к JetBrains описано у Cursor ([блог](https://cursor.com/blog/jetbrains-acp)); для Cascade см. заметку [`docs/ui-ux/note-acp-cascade-cursor-v1.md`](../../docs/ui-ux/note-acp-cascade-cursor-v1.md). Этот smoke **не** подставляет бинарник Cursor — только проверяет протокол на референс-агенте.
 
 ## Лицензия `echo_agent.py`
 
