@@ -15,6 +15,7 @@
 | [0048](0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) | чат в IDE; **что** попадает в контекст агента — политика поверхности |
 | [0021](0021-pfd-mfd-cockpit-attention-model.md) | зона Mfd / внимание |
 | [0095](0095-workspace-solution-ide-health-stratification.md) | пример сквозной продуктовой линии в одной сессии работы |
+| [0119](0119-chat-slash-commands-intercom-surface.md) | Слэш-команды в чате (`/card`, `/spine`) — локальные действия Intercom |
 ## Резюме
 
 - Intercom: карточка темы = заголовок + **сводка** (картотека).

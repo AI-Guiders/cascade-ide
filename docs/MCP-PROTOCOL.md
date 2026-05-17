@@ -333,6 +333,7 @@
 | `capture_window` | Снимок окон IDE в PNG (по умолчанию главное окно; при scope=all — все top-level, в т.ч. окно-хост Mfd и прочие). args: scope?:string, workspace_path?:string, output_path?:string; returns: json. example: {"scope":"all","workspace_path":"D:\\\\tmp\\\\ws","output_path":".cascade-ide/window-{n}.png"}. |
 | `chat_edit_message` | Заменить текст ответа ассистента по стабильному message_id; в лог пишется message_edited. args: message_id:string, new_content:string, reason?:string; returns: json; example: {"message_id":"a1b2c3d4e5f6789012345678901234ab","new_content":"fixed text"}. |
 | `chat_export_readable` | Экспорт текущего чата в читаемый Markdown (роли, индексы, message_id). Поддерживаемый сценарий — явно подвести итоги длинной сессии: экспорт, затем краткое смысловое резюме и согласование с пользователем (см. MCP-PROTOCOL.md, раздел «Подведение итогов сессии чата»). args: write_file?:boolean, file_name?:string; returns: json; example: {"write_file":true}. |
+| `chat_get_product_spine` | Прочитать сквозную линию продукта (spine) сессии. returns: json. |
 | `chat_get_selected_message` | Получить выбранное сообщение чата (индекс, роль, контент) в JSON. returns: json. |
 | `chat_open_selected_thread` | Открыть detail выбранной темы. returns: text. |
 | `chat_select_message` | Выбрать сообщение в чате по индексу (0-based), в т.ч. для Skia-поверхности. args: index:integer; returns: text; example: {"index":0}. |
@@ -340,7 +341,9 @@
 | `chat_select_next_thread` | Выбрать следующую тему в overview (циклически). returns: text. |
 | `chat_select_prev_message` | Сместить выбор на предыдущее сообщение чата (keyboard-first). returns: text. |
 | `chat_select_prev_thread` | Выбрать предыдущую тему в overview (циклически). returns: text. |
+| `chat_set_product_spine` | Обновить spine (частично): переданные поля перезаписываются; milestones — многострочный текст (веха на строку). args: line_title?:string, current_focus?:string, milestones?:string, include_in_agent_context?:boolean; returns: text; example: {"current_focus":"Topic cards + spine MCP","milestones":"ADR 0096\\nMCP get/set"}. |
 | `chat_show_thread_overview` | Вернуться в overview тем (карточки). returns: text. |
+| `chat_toggle_product_spine_in_agent_context` | Включить/выключить сжатый spine в исходящих сообщениях агенту. returns: text. |
 | `chat_toggle_selected_thinking` | Переключить у выбранного thinking-сообщения свёрнутый/полный вид. returns: text. |
 | `chat_toggle_show_thinking_in_history` | Переключить настройку show_thinking_in_history (keyboard-first toggle). returns: text. |
 | `close_document` | Закрыть документ. args: file_path:string; returns: text; example: {"file_path":"C:\\\\tmp\\\\a.cs"}. |

@@ -13,6 +13,9 @@ public static partial class IdeCommandRegistry
         AddPalette(b, "chat_select_next_thread", IdeCommands.ChatSelectNextThread, "Чат: выбрать следующую тему", "Чат");
         AddPalette(b, "chat_open_selected_thread", IdeCommands.ChatOpenSelectedThread, "Чат: открыть detail выбранной темы", "Чат");
         AddPalette(b, "chat_show_thread_overview", IdeCommands.ChatShowThreadOverview, "Чат: вернуться к overview тем", "Чат");
+        AddPalette(b, "chat_toggle_product_spine_in_agent_context", IdeCommands.ChatToggleProductSpineInAgentContext, "Чат: spine в контекст агента (вкл/выкл)", "Чат");
+        AddPalette(b, "chat_get_product_spine", IdeCommands.ChatGetProductSpine, "Чат: прочитать product spine", "Чат");
+        AddPalette(b, "chat_set_product_spine", IdeCommands.ChatSetProductSpine, "Чат: обновить product spine", "Чат");
         AddPalette(b, "chat_toggle_selected_thinking", IdeCommands.ChatToggleSelectedThinking, "Чат: свернуть/развернуть selected thinking", "Чат");
         AddPalette(
             b,

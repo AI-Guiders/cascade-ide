@@ -17,6 +17,7 @@ internal static class IdeCommandsArgsGenerated
         ["chat_edit_message"] = new IdeCommandsArgs.Arg[] { new("message_id", "string", true, false, null), new("new_content", "string", true, false, null), new("reason", "string", false, false, null) },
         ["chat_export_readable"] = new IdeCommandsArgs.Arg[] { new("write_file", "boolean", false, false, null), new("file_name", "string", false, false, null) },
         ["chat_select_message"] = new IdeCommandsArgs.Arg[] { new("index", "integer", true, false, null) },
+        ["chat_set_product_spine"] = new IdeCommandsArgs.Arg[] { new("line_title", "string", false, false, null), new("current_focus", "string", false, false, null), new("milestones", "string", false, false, null), new("include_in_agent_context", "boolean", false, false, null) },
         ["click_control"] = new IdeCommandsArgs.Arg[] { new("name", "string", false, false, null) },
         ["close_document"] = new IdeCommandsArgs.Arg[] { new("file_path", "string", true, false, null) },
         ["codebase_index_explain"] = new IdeCommandsArgs.Arg[] { new("workspace_path", "string", false, false, null), new("solution_path", "string", false, false, null), new("hit_id", "integer", true, false, null) },

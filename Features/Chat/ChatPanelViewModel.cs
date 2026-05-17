@@ -9,6 +9,7 @@ using CascadeConversationMessage = CascadeIDE.Services.ChatMessage;
 using AgentClientProtocol;
 using CascadeIDE.Models;
 using CascadeIDE.Models.AgentChat;
+using CascadeIDE.Services;
 using CascadeIDE.Services.CursorAcp;
 using CascadeIDE.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -46,7 +47,6 @@ public partial class ChatPanelViewModel : ViewModelBase
     private readonly Func<IChatClient?>? _tryCreateCloudMafIChatClient;
     private readonly Func<string?>? _getChatMinimizedContextBlock;
     private readonly ChatSessionStore _sessionStore;
-    private readonly ChatSurfaceCompositor _chatSurfaceCompositor = new();
     private readonly Dictionary<Guid, string> _collapsedThinkingByMessageId = new();
 
     private CursorAcpChatConnection? _cursorAcp;
@@ -305,7 +305,7 @@ public partial class ChatPanelViewModel : ViewModelBase
     [RelayCommand(CanExecute = nameof(CanSendChat))]
     private async Task SendChatAsync()
     {
-        var input = ChatInput.Trim();
+        var input = ApplyProductSpineToOutboundMessage(ChatInput.Trim());
         if (string.IsNullOrEmpty(input))
             return;
 
@@ -1018,13 +1018,13 @@ public partial class ChatPanelViewModel : ViewModelBase
 
             var events = await _sessionStore.ReadEventsAsync(_sessionId, CancellationToken.None).ConfigureAwait(false);
             var rows = ChatHistoryMessageProjector.Project(events, _mainThreadId);
-            if (rows.Count == 0)
-                return;
             UiScheduler.Default.Post(() =>
             {
+                ApplyProductSpineFromMetadata(meta);
                 foreach (var row in rows)
                     ChatMessages.Add(new ChatMessageViewModel(row.Role, row.Content, row.MessageId, row.ThreadId, row.ParentMessageId));
-                ClarificationStatusText = $"Восстановлено сообщений: {rows.Count}";
+                if (rows.Count > 0)
+                    ClarificationStatusText = $"Восстановлено сообщений: {rows.Count}";
                 RefreshChatSurfaceSnapshot();
             });
         }
@@ -1084,48 +1084,6 @@ public partial class ChatPanelViewModel : ViewModelBase
         DismissClarificationBatchCommand.NotifyCanExecuteChanged();
         RefreshChatSurfaceSnapshot();
     }
-
-    private void RefreshChatSurfaceSnapshot()
-    {
-        ChatSurfaceSnapshot = _chatSurfaceCompositor.Compose(new ChatSurfaceIntent(
-            BuildConversationMessages(),
-            _activeClarificationBatch,
-            SelectedMessageIndex,
-            _mainThreadId,
-            _activeThreadId,
-            ThreadBranchHint));
-
-        var overview = ChatSurfaceSnapshot.Layout.Overview;
-        if (overview.Count == 0)
-        {
-            SelectedChatThreadId = Guid.Empty;
-            return;
-        }
-
-        if (SelectedChatThreadId == Guid.Empty || !overview.Any(x => x.ThreadId == SelectedChatThreadId))
-        {
-            var preferred = Guid.Empty;
-            foreach (var thread in overview)
-            {
-                if (thread.ThreadId != _activeThreadId)
-                    continue;
-                preferred = thread.ThreadId;
-                break;
-            }
-            SelectedChatThreadId = preferred != Guid.Empty ? preferred : overview[0].ThreadId;
-        }
-    }
-
-    private IReadOnlyList<ChatConversationMessage> BuildConversationMessages() =>
-        ChatMessages
-            .Select((message, index) => new ChatConversationMessage(
-                message.MessageId,
-                message.Role,
-                message.Content,
-                message.ThreadId,
-                message.ParentMessageId,
-                index))
-            .ToList();
 
     private static string BuildClarificationTranscriptMessage(
         ClarificationBatch? batch,

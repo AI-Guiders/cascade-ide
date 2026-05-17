@@ -15,7 +15,8 @@
 | [0070](0070-command-palette-direct-overlay-surface.md) | Command Palette как прямой overlay surface, маршрутизируемый в активный TopLevel |
 | [0044](0044-avalonia-host-skia-agent-chat-surface.md) | Разделение ролей — Avalonia как хост («фюзеляж»), кастомная отрисовка для чата агента (Skia как гипотеза) |
 | [0008](0008-mcp-contracts-and-testable-infrastructure.md) | Стабильные контракты MCP и тестируемая инфраструктура |
-| [0096](0096-intercom-topic-card-summary-and-product-spine.md) | **сводка на карточке**, spine продуктовой линии — продуктовая семантика поверх overview/detail; CIDE как пример; [§4](0096-intercom-topic-card-summary-and-product-spine.md#adr0096-p4 |
+| [0096](0096-intercom-topic-card-summary-and-product-spine.md) | **сводка на карточке**, spine продуктовой линии — продуктовая семантика поверх overview/detail; CIDE как пример; [§4](0096-intercom-topic-card-summary-and-product-spine.md#adr0096-p4) |
+| [0119](0119-chat-slash-commands-intercom-surface.md) | Слэш-команды в `ChatInput` — тот же `command_id`, что Melody/Chords/palette |
 
 ### Вне ADR
 

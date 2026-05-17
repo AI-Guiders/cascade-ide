@@ -197,6 +197,18 @@ internal sealed partial class IdeMcpCommandExecutor
         {
             return _vm.ChatPanel.ShowThreadOverview();
         });
+        add(Services.IdeCommands.ChatToggleProductSpineInAgentContext, async (_, _) =>
+        {
+            return _vm.ChatPanel.ToggleProductSpineInAgentContext();
+        });
+        add(Services.IdeCommands.ChatGetProductSpine, async (_, _) =>
+        {
+            return _vm.ChatPanel.GetProductSpineJson();
+        });
+        add(Services.IdeCommands.ChatSetProductSpine, async (args, _) =>
+        {
+            return _vm.ChatPanel.SetProductSpineFromMcp(args);
+        });
 
         add(Services.IdeCommands.InstallOllamaModel, async (args, _) =>
         {

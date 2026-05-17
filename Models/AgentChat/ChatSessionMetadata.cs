@@ -8,4 +8,9 @@ public sealed record ChatSessionMetadata(
     string? Title = null,
     int SchemaVersion = 1,
     /// <summary>Корневая ветка по умолчанию; новые сообщения привязываются к активной ветке (см. события <c>thread_forked</c>).</summary>
-    Guid MainThreadId = default);
+    Guid MainThreadId = default,
+    string? ProductSpineLineTitle = null,
+    string? ProductSpineCurrentFocus = null,
+    /// <summary>Вехи spine, по одной на строку.</summary>
+    string? ProductSpineMilestones = null,
+    bool ProductSpineIncludeInAgentContext = false);

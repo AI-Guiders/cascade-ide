@@ -12,6 +12,49 @@
             <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.EditorColumnBorderBrush}"/>
             <Setter Property="Background" Value="{DynamicResource CascadeTheme.ChatMessageBubbleBackground}"/>
         </Style>
+        <Style Selector="Border.section TextBox">
+            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
+            <Setter Property="Background" Value="{DynamicResource CascadeTheme.ChatPanelBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.EditorColumnBorderBrush}"/>
+            <Setter Property="CaretBrush" Value="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
+            <Setter Property="SelectionBrush" Value="{DynamicResource CascadeTheme.EditorSelectionBrush}"/>
+            <Setter Property="SelectionForegroundBrush" Value="{DynamicResource CascadeTheme.EditorSelectionForeground}"/>
+        </Style>
+        <Style Selector="Border.section TextBox /template/ TextBlock#PART_Watermark">
+            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+        </Style>
+        <Style Selector="Border.section CheckBox">
+            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
+        </Style>
+        <Style Selector="Border.section Expander">
+            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
+        </Style>
+        <Style Selector="Expander">
+            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
+        </Style>
+        <Style Selector="Expander /template/ ToggleButton#PART_toggle">
+            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
+        </Style>
+        <Style Selector="Expander TextBox">
+            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
+            <Setter Property="Background" Value="{DynamicResource CascadeTheme.ChatPanelBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.ButtonBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="MinHeight" Value="32"/>
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="CaretBrush" Value="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
+        </Style>
+        <Style Selector="Expander TextBox:focus">
+            <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.PanelTitleAccentBrush}"/>
+            <Setter Property="BorderThickness" Value="2"/>
+        </Style>
+        <Style Selector="Expander TextBox /template/ TextBlock#PART_Watermark">
+            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+        </Style>
+        <Style Selector="Expander CheckBox">
+            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
+        </Style>
     </UserControl.Styles>
 
     <Grid RowDefinitions="Auto,Auto,*,Auto" RowSpacing="8">
@@ -83,6 +126,33 @@
 
         <Border Grid.Row="2" Classes="section">
             <DockPanel>
+                <Expander DockPanel.Dock="Top"
+                          Header="Продуктовая линия (spine)"
+                          IsExpanded="{Binding IsChatOverviewMode}"
+                          Margin="0,0,0,6">
+                    <Border Margin="0,4,0,0" Padding="8" CornerRadius="6"
+                            Background="{DynamicResource CascadeTheme.ChatPanelBackground}"
+                            BorderBrush="{DynamicResource CascadeTheme.EditorColumnBorderBrush}"
+                            BorderThickness="1">
+                    <StackPanel Spacing="8">
+                        <TextBox Text="{Binding ProductSpineLineTitle, Mode=TwoWay}"
+                                 PlaceholderText="Линия (например Cascade IDE)"/>
+                        <TextBox Text="{Binding ProductSpineCurrentFocus, Mode=TwoWay}"
+                                 PlaceholderText="Текущий фокус линии"
+                                 AcceptsReturn="True"
+                                 MinHeight="36"
+                                 TextWrapping="Wrap"/>
+                        <TextBox Text="{Binding ProductSpineMilestonesText, Mode=TwoWay}"
+                                 PlaceholderText="Вехи — по одной на строку"
+                                 AcceptsReturn="True"
+                                 MinHeight="56"
+                                 TextWrapping="Wrap"/>
+                        <CheckBox Content="Добавлять сжатый spine в сообщения агенту"
+                                  IsChecked="{Binding IncludeProductSpineInAgentContext, Mode=TwoWay}"/>
+                    </StackPanel>
+                    </Border>
+                </Expander>
+
                 <TextBlock DockPanel.Dock="Top"
                            Text="Диалог"
                            Margin="0,0,0,6"

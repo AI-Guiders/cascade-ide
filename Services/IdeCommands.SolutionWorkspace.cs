@@ -37,6 +37,12 @@ public static partial class IdeCommands
     public const string ChatOpenSelectedThread = "chat_open_selected_thread";
     /// <summary>Вернуться в overview тем (карточки). returns: text.</summary>
     public const string ChatShowThreadOverview = "chat_show_thread_overview";
+    /// <summary>Включить/выключить сжатый spine в исходящих сообщениях агенту. returns: text.</summary>
+    public const string ChatToggleProductSpineInAgentContext = "chat_toggle_product_spine_in_agent_context";
+    /// <summary>Прочитать сквозную линию продукта (spine) сессии. returns: json.</summary>
+    public const string ChatGetProductSpine = "chat_get_product_spine";
+    /// <summary>Обновить spine (частично): переданные поля перезаписываются; milestones — многострочный текст (веха на строку). args: line_title?:string, current_focus?:string, milestones?:string, include_in_agent_context?:boolean; returns: text; example: {"current_focus":"Topic cards + spine MCP","milestones":"ADR 0096\\nMCP get/set"}.</summary>
+    public const string ChatSetProductSpine = "chat_set_product_spine";
     /// <summary>Получить выбранное сообщение чата (индекс, роль, контент) в JSON. returns: json.</summary>
     public const string ChatGetSelectedMessage = "chat_get_selected_message";
     /// <summary>Заменить текст ответа ассистента по стабильному message_id; в лог пишется message_edited. args: message_id:string, new_content:string, reason?:string; returns: json; example: {"message_id":"a1b2c3d4e5f6789012345678901234ab","new_content":"fixed text"}.</summary>
