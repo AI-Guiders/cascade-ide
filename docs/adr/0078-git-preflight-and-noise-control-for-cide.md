@@ -1,6 +1,6 @@
 # ADR 0078: Git preflight и шум-контроль изменений в CIDE
 
-**Статус:** Proposed  
+**Статус:** Accepted · Implemented  
 **Дата:** 2026-04-20
 
 ## Связанные ADR

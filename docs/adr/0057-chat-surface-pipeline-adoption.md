@@ -1,6 +1,6 @@
 # ADR 0057: Chat surface adoption of Skia composition pipeline
 
-**Статус:** Accepted  
+**Статус:** Accepted · Implemented  
 **Дата:** 2026-04-17
 
 ## Связанные ADR

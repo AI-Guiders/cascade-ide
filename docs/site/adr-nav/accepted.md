@@ -27,8 +27,8 @@ hide:
 | [0022](../../adr/0022-workspace-health-lexicon.md) | Лексикон и канон имён — IDE Health (эволюция названий; файл ADR сохранён как 0022) | Accepted |
 | [0023](../../adr/0023-environment-readiness-glance.md) | Канал «готовность окружения» (glance) — отдельно от IDE Health | Accepted (границы решения и отбор сигналов; конкретный UI и типы в коде — по мере реализации) |
 | [0027](../../adr/0027-small-team-focus-vs-public-maturity.md) | Узкая команда (человек + ассистент) и зрелость «для открытия» — две оси, не одна очередь | Accepted |
+| [0049](../../adr/0049-skia-surface-rollout-over-avalonia-host.md) | Поэтапный rollout Skia-поверхностей при Avalonia-host (CIDE-wide) | Accepted (частично: chat surface, SkiaKit; остальные поверхности — по волнам) |
 | [0055](../../adr/0055-skia-instrument-composition-pipeline.md) | Skia instrument composition pipeline (Intent -> Declutter -> Layout -> Render) | Accepted |
-| [0057](../../adr/0057-chat-surface-pipeline-adoption.md) | Chat surface adoption of Skia composition pipeline | Accepted |
 | [0063](../../adr/0063-instrument-deck-named-composition-one-anchor.md) | Instrument deck — именованная композиция инструментов в одном якоре внимания | Accepted |
 | [0064](../../adr/0064-deck-primitives-visual-language-render-layer-and-palette.md) | Виды индикаторов deck — визуальный язык, отрисовка и семантическая палитра | Accepted |
 | [0065](../../adr/0065-instrument-categories-domain-taxonomy.md) | Категории инструментов и типы графов (ортогонально слоту и `instrument_id`) | Accepted |
@@ -38,6 +38,7 @@ hide:
 | [0069](../../adr/0069-markdown-preview-tool-surface-and-renderer-decoupling.md) | Markdown Preview — инструмент MFD, renderer-first decoupling и отказ от inline preview в документе | Accepted |
 | [0070](../../adr/0070-command-palette-direct-overlay-surface.md) | Command Palette как прямой overlay surface, маршрутизируемый в активный TopLevel | Accepted |
 | [0079](../../adr/0079-ide-display-system-ids-overlay-pipeline.md) | IDS (Ide Display System) — пайплайн оверлеев IDE, ортогонально CDS | Accepted |
+| [0080](../../adr/0080-intercom-naming-and-multi-party-channel-model.md) | Intercom — имя и модель канала связи (не только «чат с агентом») | Accepted (strangler: Intercom в UI и docs v1; multi-party и внешний контур — по дорожной карте) |
 | [0087](../../adr/0087-microsoft-agent-framework-builtin-agent-orchestration.md) | Microsoft Agent Framework (MAF) — ориентир на слой оркестрации **встроенного** агентного контура | Accepted · **следующий шаг: PoC** |
 | [0089](../../adr/0089-ide-omnibus-naming-and-ide-health-channel-rename.md) | Именование омнибуса агента (`get_ide_state`) и канал **IDE Health** (вместо Workspace Health) | Accepted |
 | [0092](../../adr/0092-visual-ui-designer-major-track.md) | Трек **Visual UI** (дизайнер разметки) — отдельная крупная программная линия CIDE | Accepted (направление) |
@@ -47,7 +48,6 @@ hide:
 | [0102](../../adr/0102-data-acquisition-layer-boundary-and-contract.md) | Data Acquisition Layer — граница внешних интерфейсов и адаптеров | Accepted |
 | [0103](../../adr/0103-editor-hud-substrate-semantic-projection-and-surface-adapter.md) | субстрат Editor HUD — семантическая проекция, адаптер поверхности, границы DAL / CCU / DataBus | Accepted (strangler) |
 | [0115](../../adr/0115-cds-graph-backed-shared-layer.md) | CDS — общий слой graph-backed приборов (реализация в кабине, не IDS) | Accepted |
-| [0117](../../adr/0117-ide-skia-kit.md) | SkiaKit — переиспользуемые Skia-примитивы IDE | Accepted |
 
 
 ---

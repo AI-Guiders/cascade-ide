@@ -26,10 +26,8 @@ hide:
 | [0041](../../adr/0041-protobuf-for-agent-and-ide-messages.md) | Protocol Buffers — рассмотрение для сообщений агента и IDE (точка входа) | Proposed (фиксация направления обсуждения и критериев; **не** решение о немедленной миграции с JSON) |
 | [0042](../../adr/0042-pre-flight-planned-changes-and-review-before-apply.md) | Pre-flight briefing — Planned Changes и Review Before Apply | Proposed |
 | [0043](../../adr/0043-mcp-transport-recovery-human-agent-parity.md) | Паритет восстановления MCP-транспорта (человек ↔ агент) и границы хоста | Proposed |
-| [0044](../../adr/0044-avalonia-host-skia-agent-chat-surface.md) | Разделение ролей — Avalonia как хост («фюзеляж»), кастомная отрисовка для чата агента (Skia как гипотеза) | Proposed |
 | [0045](../../adr/0045-agent-chat-persistence-event-log-and-projections.md) | Persistence истории чата — append-only события + проекции | Proposed |
 | [0048](../../adr/0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) | Чат через Cursor ACP в IDE — цель паритета с хостом Cursor, поверхность инструментов и MCP | Proposed |
-| [0049](../../adr/0049-skia-surface-rollout-over-avalonia-host.md) | Поэтапный rollout Skia-поверхностей при Avalonia-host (CIDE-wide) | Proposed |
 | [0054](../../adr/0054-benchmarking-methodology-and-baselines.md) | Бенчмарки производительности и baseline-метрики | Proposed |
 | [0058](../../adr/0058-agent-roslyn-mcp-coupling-settings-toml.md) | Сопряжение агента и Roslyn MCP в `settings.toml` (лимиты, виды узлов, таймауты, пресеты) | Proposed |
 | [0059](../../adr/0059-roslyn-mcp-profiles-manager-tactical-strategic-efb.md) | Профили Roslyn MCP, Manager, тактика/стратегия и EFB (MFD) | Proposed |
@@ -37,14 +35,11 @@ hide:
 | [0061](../../adr/0061-context-aware-adr-map-pfd-knowledge-indicator.md) | Контекстная привязка ADR к путям кода (GPWS для документации) и индикатор на PFD | Proposed (реализация отложена) |
 | [0062](../../adr/0062-git-submodules-semantic-map-subgraph.md) | GitMap — карта git-границ (submodules) отдельно от workspace navigation context | Proposed — черновик для обсуждения; реализация не зафиксирована. |
 | [0071](../../adr/0071-ai-assistance-sovereignty-locality-invisibility.md) | Принципы интеграции AI/ассистента в IDE — суверенитет, локальность, невидимость | Proposed |
-| [0072](../../adr/0072-chat-topic-cards-intent-melody-keyboard-contract.md) | Chat topic cards, drill-in/back и intent-based Melody/Chords для навигации по темам | Proposed |
 | [0073](../../adr/0073-pfd-instrument-deck.md) | PFD instrument deck — каталог вариантов состава и поверхностей (SA) | Proposed |
 | [0074](../../adr/0074-settings-ui-mfd-compact-layout-overflow.md) | UI настроек — компактнее, якорь на MFD; нехватка места в раскладке P+F+M | Proposed |
 | [0075](../../adr/0075-ui-topic-index-and-mfd-page-conventions.md) | Тематический указатель UI (`docs/adr/UI/`) и соглашения по страницам MFD | Proposed |
 | [0076](../../adr/0076-ui-ux-principles-hub.md) | UI/UX — центр принципов (связный текст из канона) | Proposed |
 | [0077](../../adr/0077-tech-principles-hub.md) | TECH — центр принципов (связный текст из канона) | Proposed |
-| [0078](../../adr/0078-git-preflight-and-noise-control-for-cide.md) | Git preflight и шум-контроль изменений в CIDE | Proposed |
-| [0080](../../adr/0080-intercom-naming-and-multi-party-channel-model.md) | Intercom — имя и модель канала связи (не только «чат с агентом») | Proposed |
 | [0081](../../adr/0081-parametric-intent-melodies-editor-line-ranges.md) | Параметрические Intent Melody — диапазоны строк редактора (`:start:end`) | Proposed |
 | [0082](../../adr/0082-acp-ide-mcp-loopback-single-process.md) | ACP и MCP IDE — одна копия процесса (loopback HTTP/SSE вместо второго `CascadeIDE --mcp-stdio`) | Proposed |
 | [0084](../../adr/0084-agent-edits-editor-source-of-truth-presence-channel.md) | Правки агента в редакторе как единственный текстовый источник правды; чат — намерение и статус; слой присутствия (GDocs-like, без обязательного CRDT) | Proposed |
@@ -54,7 +49,6 @@ hide:
 | [0091](../../adr/0091-pfd-debug-situational-deck-hypothesis.md) | Гипотеза — PFD instrument deck в режиме отладки (MFD DebugStack не исчерпывает) | Proposed |
 | [0093](../../adr/0093-mfd-embedded-browser-for-launch-url.md) | Встроенный просмотр URL запуска на MFD (расширение к профилям и launchBrowser) | Proposed |
 | [0095](../../adr/0095-workspace-solution-ide-health-stratification.md) | Три уровня Health — Workspace, Solution, IDE (таксономия каналов) | Proposed |
-| [0096](../../adr/0096-intercom-topic-card-summary-and-product-spine.md) | Intercom — сводка на карточке темы (картотека) и сквозная линия продукта (spine) | Proposed |
 | [0098](../../adr/0098-semantic-first-document-as-projection.md) | Семантика первична; документ и репозиторий — проекции (Semantic-First) | Proposed |
 | [0104](../../adr/0104-cognitive-decomposition-loop-for-maf-prompt-orchestration.md) | Reasoning Substrate and Cognitive Decomposition Loop for MAF | Proposed |
 | [0110](../../adr/0110-roslyn-refactor-intent-melody-bridge.md) | Рефакторинги Roslyn по диапазону — мост Intent Melody / IDE и Roslyn MCP | Proposed |

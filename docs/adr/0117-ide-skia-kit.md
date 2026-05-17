@@ -1,6 +1,6 @@
 # ADR 0117: SkiaKit — переиспользуемые Skia-примитивы IDE
 
-**Статус:** Accepted  
+**Статус:** Accepted · Implemented  
 **Дата:** 2026-05-17
 
 ## Связанные ADR

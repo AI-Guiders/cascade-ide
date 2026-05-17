@@ -1,6 +1,6 @@
 # ADR 0072: Chat topic cards, drill-in/back и intent-based Melody/Chords для навигации по темам
 
-**Статус:** Proposed  
+**Статус:** Accepted · Implemented  
 **Дата:** 2026-04-19  
 ## Связанные ADR
 

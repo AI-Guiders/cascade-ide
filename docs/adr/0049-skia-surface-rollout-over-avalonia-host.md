@@ -1,6 +1,6 @@
 # ADR 0049: Поэтапный rollout Skia-поверхностей при Avalonia-host (CIDE-wide)
 
-**Статус:** Proposed  
+**Статус:** Accepted (частично: chat surface, SkiaKit; остальные поверхности — по волнам)  
 **Дата:** 2026-04-15
 
 ## Связанные ADR

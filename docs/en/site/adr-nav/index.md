@@ -4,10 +4,10 @@ Architecture decisions grouped by [lifecycle status](../../../adr/status-lifecyc
 
 [Status lifecycle](../../../adr/status-lifecycle.md) · [Full ADR index](../../../adr/README.md)
 
-- [Proposed](proposed.md) — **53**
+- [Proposed](proposed.md) — **47**
 - [Accepted](accepted.md) — **37**
 - [Accepted · In progress](accepted-in-progress.md) — **1**
-- [Accepted · Implemented](accepted-implemented.md) — **30**
+- [Accepted · Implemented](accepted-implemented.md) — **36**
 - [Superseded](superseded.md) — **1**
 - [Deferred / Deprecated / other](other.md) — **3**
 
