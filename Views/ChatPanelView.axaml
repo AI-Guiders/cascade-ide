@@ -1,34 +1,11 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:chat="using:CascadeIDE.Features.Chat"
+             xmlns:uikit="using:CascadeIDE.Views.UiKit"
              xmlns:views="using:CascadeIDE.Views"
              x:Class="CascadeIDE.Views.ChatPanelView"
              x:DataType="chat:ChatPanelViewModel">
     <UserControl.Styles>
-        <Style Selector="Border.section">
-            <Setter Property="CornerRadius" Value="8"/>
-            <Setter Property="Padding" Value="10"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.EditorColumnBorderBrush}"/>
-            <Setter Property="Background" Value="{DynamicResource CascadeTheme.ChatMessageBubbleBackground}"/>
-        </Style>
-        <Style Selector="Border.section TextBox">
-            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
-            <Setter Property="Background" Value="{DynamicResource CascadeTheme.ChatPanelBackground}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.EditorColumnBorderBrush}"/>
-            <Setter Property="CaretBrush" Value="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
-            <Setter Property="SelectionBrush" Value="{DynamicResource CascadeTheme.EditorSelectionBrush}"/>
-            <Setter Property="SelectionForegroundBrush" Value="{DynamicResource CascadeTheme.EditorSelectionForeground}"/>
-        </Style>
-        <Style Selector="Border.section TextBox /template/ TextBlock#PART_Watermark">
-            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-        </Style>
-        <Style Selector="Border.section CheckBox">
-            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
-        </Style>
-        <Style Selector="Border.section Expander">
-            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
-        </Style>
         <Style Selector="Expander">
             <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
         </Style>
@@ -58,7 +35,7 @@
     </UserControl.Styles>
 
     <Grid RowDefinitions="Auto,Auto,*,Auto" RowSpacing="8">
-        <Border Grid.Row="0" Classes="section">
+        <uikit:CascadeSection Grid.Row="0">
             <DockPanel LastChildFill="False">
                 <StackPanel DockPanel.Dock="Left" Spacing="2">
                     <TextBlock Text="Agent Chat" FontSize="16" FontWeight="SemiBold"
@@ -67,15 +44,13 @@
                                FontSize="11"
                                Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
                 </StackPanel>
-                <Border DockPanel.Dock="Right" CornerRadius="10" Padding="8,3"
-                        Background="#2E3A52" BorderBrush="#50658C" BorderThickness="1"
-                        IsVisible="{Binding IsChatLoading}">
-                    <TextBlock Text="{Binding ChatLoadingStatusText}" FontSize="11" Foreground="#D8E4FF"/>
-                </Border>
+                <uikit:CascadeStatusChip DockPanel.Dock="Right"
+                                         Text="{Binding ChatLoadingStatusText}"
+                                         IsVisible="{Binding IsChatLoading}"/>
             </DockPanel>
-        </Border>
+        </uikit:CascadeSection>
 
-        <Border Grid.Row="1" Classes="section" IsVisible="{Binding HasActiveClarificationBatch}">
+        <uikit:CascadeSection Grid.Row="1" IsVisible="{Binding HasActiveClarificationBatch}">
             <StackPanel Spacing="8">
                 <DockPanel LastChildFill="False">
                     <TextBlock DockPanel.Dock="Left" Text="{Binding ActiveClarificationTitle}"
@@ -90,8 +65,7 @@
                 <ItemsControl ItemsSource="{Binding ClarificationDraftItems}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="chat:ClarificationDraftItemViewModel">
-                            <Border CornerRadius="6" Padding="8" Margin="0,0,0,6"
-                                    Background="#1A1A1A" BorderBrush="#3F3F3F" BorderThickness="1">
+                            <Border Classes="cascadeInset" Margin="0,0,0,6">
                                 <StackPanel Spacing="6">
                                     <TextBlock Text="{Binding Prompt}" TextWrapping="Wrap"
                                                Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
@@ -122,9 +96,9 @@
                                Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
                 </StackPanel>
             </StackPanel>
-        </Border>
+        </uikit:CascadeSection>
 
-        <Border Grid.Row="2" Classes="section">
+        <uikit:CascadeSection Grid.Row="2">
             <DockPanel>
                 <Expander DockPanel.Dock="Top"
                           Header="Продуктовая линия (spine)"
@@ -168,21 +142,19 @@
                                                   OverviewMode="{Binding IsChatOverviewMode, Mode=TwoWay}"/>
                 </Grid>
             </DockPanel>
-        </Border>
+        </uikit:CascadeSection>
 
-        <Border Grid.Row="3" Classes="section">
+        <uikit:CascadeSection Grid.Row="3">
             <StackPanel Spacing="4">
-                <Border IsVisible="{Binding IsChatSlashAutocompleteVisible}"
-                        MaxHeight="168"
-                        CornerRadius="6"
-                        Padding="4"
-                        BorderThickness="1"
-                        BorderBrush="{DynamicResource CascadeTheme.EditorColumnBorderBrush}"
-                        Background="{DynamicResource CascadeTheme.ChatPanelBackground}">
+                <Border Classes="cascadeAutocomplete"
+                        IsVisible="{Binding IsChatSlashAutocompleteVisible}"
+                        MaxHeight="168">
                     <ListBox x:Name="ChatSlashSuggestionList"
                              ItemsSource="{Binding ChatSlashSuggestions}"
                              SelectedIndex="{Binding SelectedChatSlashSuggestionIndex, Mode=TwoWay}"
-                             MaxHeight="160">
+                             MaxHeight="160"
+                             Background="Transparent"
+                             BorderThickness="0">
                         <ListBox.ItemTemplate>
                             <DataTemplate DataType="chat:ChatSlashSuggestionItem">
                                 <StackPanel Spacing="2" Margin="4,2">
@@ -214,6 +186,6 @@
                             Padding="14,8"/>
                 </Grid>
             </StackPanel>
-        </Border>
+        </uikit:CascadeSection>
     </Grid>
 </UserControl>
