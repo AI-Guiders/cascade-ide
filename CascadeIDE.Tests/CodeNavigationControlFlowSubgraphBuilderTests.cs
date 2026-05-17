@@ -1,6 +1,6 @@
 using System.Text.Json;
 using CascadeIDE.Services.CodeNavigation;
-using CascadeIDE.Services.Navigation;
+using CascadeIDE.Features.WorkspaceNavigation.Application;
 using Xunit;
 
 namespace CascadeIDE.Tests;

@@ -1,37 +1,39 @@
+using CascadeIDE.Cockpit.Graph;
+using CascadeIDE.Cockpit.Graph.Layout;
 using CascadeIDE.Cockpit.PrimitivesKit;
 using CascadeIDE.Services;
-using CascadeIDE.Services.Navigation;
+using CascadeIDE.Features.WorkspaceNavigation.Application;
 using CascadeIDE.ViewModels;
 using Xunit;
 
 namespace CascadeIDE.Tests;
 
-public sealed class CodeNavigationMapControlFlowGraphLayoutEngineTests
+public sealed class ControlFlowGraphLayoutEngineTests
 {
     [Fact]
     public void Layout_PlacesFlowTopToBottom_ByDepth()
     {
-        var engine = new CodeNavigationMapControlFlowGraphLayoutEngine();
-        var doc = new CodeNavigationMapSubgraphDocument
+        var engine = new ControlFlowGraphLayoutEngine();
+        var doc = new GraphDocument
         {
             AnchorPath = @"D:\w\A.cs",
             Nodes =
             [
-                new CodeNavigationMapSubgraphNode
+                new GraphNode
                 {
                     Id = "n0",
                     Path = @"D:\w\A.cs",
                     Kind = "anchor",
                     Label = "A.cs"
                 },
-                new CodeNavigationMapSubgraphNode
+                new GraphNode
                 {
                     Id = "n1",
                     Path = @"D:\w\A.cs",
                     Kind = "call_step",
                     Label = "B"
                 },
-                new CodeNavigationMapSubgraphNode
+                new GraphNode
                 {
                     Id = "n2",
                     Path = @"D:\w\A.cs",
@@ -41,8 +43,8 @@ public sealed class CodeNavigationMapControlFlowGraphLayoutEngineTests
             ],
             Edges =
             [
-                new CodeNavigationMapSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "Call" },
-                new CodeNavigationMapSubgraphEdge { FromId = "n1", ToId = "n2", Kind = "Call" }
+                new GraphEdge { FromId = "n0", ToId = "n1", Kind = "Call" },
+                new GraphEdge { FromId = "n1", ToId = "n2", Kind = "Call" }
             ]
         };
 
@@ -62,20 +64,20 @@ public sealed class CodeNavigationMapControlFlowGraphLayoutEngineTests
     [Fact]
     public void Layout_ShowsEdgeStyleLegend_WhenGraphHasNonSolidEdges()
     {
-        var engine = new CodeNavigationMapControlFlowGraphLayoutEngine();
-        var doc = new CodeNavigationMapSubgraphDocument
+        var engine = new ControlFlowGraphLayoutEngine();
+        var doc = new GraphDocument
         {
             AnchorPath = @"D:\w\A.cs",
             Nodes =
             [
-                new CodeNavigationMapSubgraphNode
+                new GraphNode
                 {
                     Id = "n0",
                     Path = @"D:\w\A.cs",
                     Kind = "anchor",
                     Label = "A.cs"
                 },
-                new CodeNavigationMapSubgraphNode
+                new GraphNode
                 {
                     Id = "n1",
                     Path = @"D:\w\A.cs",
@@ -85,7 +87,7 @@ public sealed class CodeNavigationMapControlFlowGraphLayoutEngineTests
             ],
             Edges =
             [
-                new CodeNavigationMapSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "ConditionalCall" }
+                new GraphEdge { FromId = "n0", ToId = "n1", Kind = "ConditionalCall" }
             ]
         };
 
@@ -96,27 +98,27 @@ public sealed class CodeNavigationMapControlFlowGraphLayoutEngineTests
     [Fact]
     public void Layout_PlacesSameDepthBranchesSideBySide()
     {
-        var engine = new CodeNavigationMapControlFlowGraphLayoutEngine();
-        var doc = new CodeNavigationMapSubgraphDocument
+        var engine = new ControlFlowGraphLayoutEngine();
+        var doc = new GraphDocument
         {
             AnchorPath = @"D:\w\A.cs",
             Nodes =
             [
-                new CodeNavigationMapSubgraphNode
+                new GraphNode
                 {
                     Id = "n0",
                     Path = @"D:\w\A.cs",
                     Kind = "anchor",
                     Label = "A.cs"
                 },
-                new CodeNavigationMapSubgraphNode
+                new GraphNode
                 {
                     Id = "n1",
                     Path = @"D:\w\A.cs",
                     Kind = "call_step",
                     Label = "LeftBranch"
                 },
-                new CodeNavigationMapSubgraphNode
+                new GraphNode
                 {
                     Id = "n2",
                     Path = @"D:\w\A.cs",
@@ -126,8 +128,8 @@ public sealed class CodeNavigationMapControlFlowGraphLayoutEngineTests
             ],
             Edges =
             [
-                new CodeNavigationMapSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "ConditionalCall" },
-                new CodeNavigationMapSubgraphEdge { FromId = "n0", ToId = "n2", Kind = "ConditionalCall" }
+                new GraphEdge { FromId = "n0", ToId = "n1", Kind = "ConditionalCall" },
+                new GraphEdge { FromId = "n0", ToId = "n2", Kind = "ConditionalCall" }
             ]
         };
 
@@ -141,20 +143,20 @@ public sealed class CodeNavigationMapControlFlowGraphLayoutEngineTests
     [Fact]
     public void Layout_NarrowSlot_ShortensLabelsAndSetsAdaptiveSideFont()
     {
-        var engine = new CodeNavigationMapControlFlowGraphLayoutEngine();
-        var doc = new CodeNavigationMapSubgraphDocument
+        var engine = new ControlFlowGraphLayoutEngine();
+        var doc = new GraphDocument
         {
             AnchorPath = @"D:\w\A.cs",
             Nodes =
             [
-                new CodeNavigationMapSubgraphNode
+                new GraphNode
                 {
                     Id = "n0",
                     Path = @"D:\w\A.cs",
                     Kind = "anchor",
                     Label = "A.cs"
                 },
-                new CodeNavigationMapSubgraphNode
+                new GraphNode
                 {
                     Id = "n1",
                     Path = @"D:\w\A.cs",
@@ -162,12 +164,12 @@ public sealed class CodeNavigationMapControlFlowGraphLayoutEngineTests
                     Label = new string('M', 40)
                 }
             ],
-            Edges = [new CodeNavigationMapSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "Call" }]
+            Edges = [new GraphEdge { FromId = "n0", ToId = "n1", Kind = "Call" }]
         };
 
         var scene = engine.Layout(doc, 118, 200);
         Assert.NotNull(scene.SideLabelFontSizePx);
-        Assert.InRange(scene.SideLabelFontSizePx!.Value, CodeNavigationMapRenderInvariants.CompactSideLabelFontSizeFloor, CodeNavigationMapRenderInvariants.MaxSideLabelFontSize);
+        Assert.InRange(scene.SideLabelFontSizePx!.Value, GraphRenderInvariants.CompactSideLabelFontSizeFloor, GraphRenderInvariants.MaxSideLabelFontSize);
         var n1 = scene.Nodes.Single(n => n.Id == "n1");
         Assert.True(n1.Label.Length < 40);
         Assert.EndsWith("…", n1.Label);
@@ -184,14 +186,14 @@ public sealed class CodeNavigationMapControlFlowGraphLayoutEngineTests
     [Fact]
     public void Layout_LegendColumnLeft_StartsAtMaxInkRightPlusGap_NotReadableBandRight()
     {
-        var engine = new CodeNavigationMapControlFlowGraphLayoutEngine();
-        var doc = new CodeNavigationMapSubgraphDocument
+        var engine = new ControlFlowGraphLayoutEngine();
+        var doc = new GraphDocument
         {
             AnchorPath = @"D:\w\A.cs",
             Nodes =
             [
-                new CodeNavigationMapSubgraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A" },
-                new CodeNavigationMapSubgraphNode
+                new GraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A" },
+                new GraphNode
                 {
                     Id = "n1",
                     Path = @"D:\w\A.cs",
@@ -201,7 +203,7 @@ public sealed class CodeNavigationMapControlFlowGraphLayoutEngineTests
                     LegendText = "x > 0"
                 }
             ],
-            Edges = [new CodeNavigationMapSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "Call" }]
+            Edges = [new GraphEdge { FromId = "n0", ToId = "n1", Kind = "Call" }]
         };
         const double viewportW = 400;
         var scene = engine.Layout(doc, viewportW, 200);
@@ -220,14 +222,14 @@ public sealed class CodeNavigationMapControlFlowGraphLayoutEngineTests
     [Fact]
     public void Layout_NarrowWidth_PlacesLegendBlockBelowGraph_FullWidthText()
     {
-        var engine = new CodeNavigationMapControlFlowGraphLayoutEngine();
-        var doc = new CodeNavigationMapSubgraphDocument
+        var engine = new ControlFlowGraphLayoutEngine();
+        var doc = new GraphDocument
         {
             AnchorPath = @"D:\w\A.cs",
             Nodes =
             [
-                new CodeNavigationMapSubgraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A" },
-                new CodeNavigationMapSubgraphNode
+                new GraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A" },
+                new GraphNode
                 {
                     Id = "n1",
                     Path = @"D:\w\A.cs",
@@ -237,12 +239,12 @@ public sealed class CodeNavigationMapControlFlowGraphLayoutEngineTests
                     LegendText = "pred"
                 }
             ],
-            Edges = [new CodeNavigationMapSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "Call" }]
+            Edges = [new GraphEdge { FromId = "n0", ToId = "n1", Kind = "Call" }]
         };
         // Мало места справа от «чернила» — блок легенды уходит вниз на полную ширину.
         var scene = engine.Layout(doc, 130, 200);
         Assert.True(scene.UseLegendColumn);
-        Assert.Equal(CodeNavigationMapLegendBlockPlacement.BelowGraph, scene.LegendPlacement);
+        Assert.Equal(GraphLegendBlockPlacement.BelowGraph, scene.LegendPlacement);
         Assert.True(scene.LegendBlockTopY > 0);
         Assert.Equal(CodeNavigationMapGraphPrimitives.ControlFlowSidePadding, scene.LegendColumnLeft, 0.01);
     }

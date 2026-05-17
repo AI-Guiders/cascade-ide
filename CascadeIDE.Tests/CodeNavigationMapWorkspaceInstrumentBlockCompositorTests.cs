@@ -1,8 +1,9 @@
 using Avalonia;
 using CascadeIDE.Models;
-using CascadeIDE.Services;
+using CascadeIDE.Cockpit.Graph;
 using CascadeIDE.Services.CodeNavigation;
 using CascadeIDE.Services.Navigation;
+using CascadeIDE.Features.WorkspaceNavigation.Application;
 using CascadeIDE.ViewModels;
 using Xunit;
 
@@ -85,19 +86,19 @@ public sealed class CodeNavigationMapWorkspaceInstrumentBlockCompositorTests
     public void Compositor_Integration_ControlFlow_Produces_Two_Blocks()
     {
         var c = new CodeNavigationMapCompositor();
-        var doc = new CodeNavigationMapSubgraphDocument
+        var doc = new GraphDocument
         {
             AnchorPath = "A.cs",
             Nodes =
             [
-                new CodeNavigationMapSubgraphNode
+                new GraphNode
                 {
                     Id = "n0",
                     Path = "A.cs",
                     Kind = "anchor",
                     Label = "A"
                 },
-                new CodeNavigationMapSubgraphNode
+                new GraphNode
                 {
                     Id = "n1",
                     Path = "A.cs",
@@ -107,7 +108,7 @@ public sealed class CodeNavigationMapWorkspaceInstrumentBlockCompositorTests
                     LegendText = "first line"
                 }
             ],
-            Edges = [new CodeNavigationMapSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "Call" }]
+            Edges = [new GraphEdge { FromId = "n0", ToId = "n1", Kind = "Call" }]
         };
         var r = c.Compose(doc, CodeNavigationMapLevelKind.ControlFlow, 500, 400);
         Assert.NotEmpty(r.CodeNavigationMapInstrumentBlocks);

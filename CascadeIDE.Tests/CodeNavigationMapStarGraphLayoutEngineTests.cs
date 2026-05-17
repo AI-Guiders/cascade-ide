@@ -1,36 +1,36 @@
 using Avalonia;
-using CascadeIDE.Services;
-using CascadeIDE.Services.Navigation;
+using CascadeIDE.Cockpit.Graph;
+using CascadeIDE.Cockpit.Graph.Layout;
 using Xunit;
 
 namespace CascadeIDE.Tests;
 
-public sealed class CodeNavigationMapStarGraphLayoutEngineTests
+public sealed class StarGraphLayoutEngineTests
 {
     [Fact]
     public void Layout_PlacesAnchorCenterAndSatellitesOnOrbit()
     {
-        var engine = new CodeNavigationMapStarGraphLayoutEngine();
-        var doc = new CodeNavigationMapSubgraphDocument
+        var engine = new StarGraphLayoutEngine();
+        var doc = new GraphDocument
         {
             AnchorPath = @"D:\w\A.cs",
             Nodes =
             [
-                new CodeNavigationMapSubgraphNode
+                new GraphNode
                 {
                     Id = "n0",
                     Path = @"D:\w\A.cs",
                     Kind = "anchor",
                     Label = "A.cs"
                 },
-                new CodeNavigationMapSubgraphNode
+                new GraphNode
                 {
                     Id = "n1",
                     Path = @"D:\w\B.cs",
                     Kind = "project_peer",
                     Label = "B.cs"
                 },
-                new CodeNavigationMapSubgraphNode
+                new GraphNode
                 {
                     Id = "n2",
                     Path = @"D:\w\C.cs",
@@ -40,8 +40,8 @@ public sealed class CodeNavigationMapStarGraphLayoutEngineTests
             ],
             Edges =
             [
-                new CodeNavigationMapSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "related_to" },
-                new CodeNavigationMapSubgraphEdge { FromId = "n0", ToId = "n2", Kind = "related_to" }
+                new GraphEdge { FromId = "n0", ToId = "n1", Kind = "related_to" },
+                new GraphEdge { FromId = "n0", ToId = "n2", Kind = "related_to" }
             ]
         };
 

@@ -54,7 +54,7 @@ public sealed class WorkspaceNavigationMapContextAndViewportTests
     public void IGraphDataSource_matches_static_builder_for_control_flow_no_file()
     {
         IGraphDataSource source = new WorkspaceNavigationMapContextJsonDataSource();
-        var req = new CodeNavigationMapJsonRequest(
+        var req = new GraphNavigationJsonRequest(
             CodeNavigationMapLevelKind.ControlFlow,
             WantGraph: false,
             CurrentPath: null,

@@ -1,4 +1,5 @@
 using CascadeIDE.Cockpit.Channels.TraceFlow;
+using CascadeIDE.Cockpit.Graph;
 using CascadeIDE.Services;
 using Xunit;
 
@@ -9,7 +10,7 @@ public sealed class TraceFlowChannelCoordinatorTests
     [Fact]
     public void Build_MergesSnapshotsFromMultipleChannels()
     {
-        var doc = new CodeNavigationMapSubgraphDocument
+        var doc = new GraphDocument
         {
             AnchorPath = @"D:\w\A.cs",
             Nodes =
@@ -39,7 +40,7 @@ public sealed class TraceFlowChannelCoordinatorTests
         Assert.Contains("n2", snapshot.HighlightedNodeIds);      // exit emphasis
     }
 
-    private static CodeNavigationMapSubgraphNode Node(string id, string kind) => new()
+    private static GraphNode Node(string id, string kind) => new()
     {
         Id = id,
         Path = @"D:\w\A.cs",
@@ -47,11 +48,11 @@ public sealed class TraceFlowChannelCoordinatorTests
         Label = id
     };
 
-    private static CodeNavigationMapSubgraphEdge Edge(string from, string to, string kind) => new()
+    private static GraphEdge Edge(string from, string to, string kind) => new()
     {
         FromId = from,
         ToId = to,
         Kind = kind,
-        RelatedKind = kind
+        RelationKind = kind
     };
 }

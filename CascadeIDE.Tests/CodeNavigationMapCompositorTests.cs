@@ -1,6 +1,8 @@
+using CascadeIDE.Cockpit.Graph;
+using CascadeIDE.Cockpit.Graph.Layout;
 using CascadeIDE.Models;
 using CascadeIDE.Services;
-using CascadeIDE.Services.Navigation;
+using CascadeIDE.Features.WorkspaceNavigation.Application;
 using CascadeIDE.Services.SkiaInstruments;
 using CascadeIDE.ViewModels;
 using Xunit;
@@ -13,25 +15,25 @@ public sealed class CodeNavigationMapCompositorTests
     public void Compose_ControlFlow_ExpandsPreferredHeightForLongFlow()
     {
         var compositor = new CodeNavigationMapCompositor();
-        var doc = new CodeNavigationMapSubgraphDocument
+        var doc = new GraphDocument
         {
             AnchorPath = @"D:\w\A.cs",
             Nodes =
             [
-                new CodeNavigationMapSubgraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" },
-                new CodeNavigationMapSubgraphNode { Id = "n1", Path = @"D:\w\A.cs", Kind = "call_step", Label = "S1" },
-                new CodeNavigationMapSubgraphNode { Id = "n2", Path = @"D:\w\A.cs", Kind = "call_step", Label = "S2" },
-                new CodeNavigationMapSubgraphNode { Id = "n3", Path = @"D:\w\A.cs", Kind = "call_step", Label = "S3" },
-                new CodeNavigationMapSubgraphNode { Id = "n4", Path = @"D:\w\A.cs", Kind = "call_step", Label = "S4" },
-                new CodeNavigationMapSubgraphNode { Id = "n5", Path = @"D:\w\A.cs", Kind = "call_step", Label = "S5" }
+                new GraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" },
+                new GraphNode { Id = "n1", Path = @"D:\w\A.cs", Kind = "call_step", Label = "S1" },
+                new GraphNode { Id = "n2", Path = @"D:\w\A.cs", Kind = "call_step", Label = "S2" },
+                new GraphNode { Id = "n3", Path = @"D:\w\A.cs", Kind = "call_step", Label = "S3" },
+                new GraphNode { Id = "n4", Path = @"D:\w\A.cs", Kind = "call_step", Label = "S4" },
+                new GraphNode { Id = "n5", Path = @"D:\w\A.cs", Kind = "call_step", Label = "S5" }
             ],
             Edges =
             [
-                new CodeNavigationMapSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "Call" },
-                new CodeNavigationMapSubgraphEdge { FromId = "n1", ToId = "n2", Kind = "Call" },
-                new CodeNavigationMapSubgraphEdge { FromId = "n2", ToId = "n3", Kind = "Call" },
-                new CodeNavigationMapSubgraphEdge { FromId = "n3", ToId = "n4", Kind = "Call" },
-                new CodeNavigationMapSubgraphEdge { FromId = "n4", ToId = "n5", Kind = "Call" }
+                new GraphEdge { FromId = "n0", ToId = "n1", Kind = "Call" },
+                new GraphEdge { FromId = "n1", ToId = "n2", Kind = "Call" },
+                new GraphEdge { FromId = "n2", ToId = "n3", Kind = "Call" },
+                new GraphEdge { FromId = "n3", ToId = "n4", Kind = "Call" },
+                new GraphEdge { FromId = "n4", ToId = "n5", Kind = "Call" }
             ]
         };
 
@@ -46,24 +48,24 @@ public sealed class CodeNavigationMapCompositorTests
     public void Compose_ControlFlow_LongFlow_CapsPreferredHeight()
     {
         var compositor = new CodeNavigationMapCompositor();
-        var nodes = new List<CodeNavigationMapSubgraphNode>
+        var nodes = new List<GraphNode>
         {
             new() { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" }
         };
-        var edges = new List<CodeNavigationMapSubgraphEdge>();
+        var edges = new List<GraphEdge>();
         for (var i = 1; i <= 25; i++)
         {
-            nodes.Add(new CodeNavigationMapSubgraphNode
+            nodes.Add(new GraphNode
             {
                 Id = $"n{i}",
                 Path = @"D:\w\A.cs",
                 Kind = "call_step",
                 Label = $"S{i}"
             });
-            edges.Add(new CodeNavigationMapSubgraphEdge { FromId = $"n{i - 1}", ToId = $"n{i}", Kind = "Call" });
+            edges.Add(new GraphEdge { FromId = $"n{i - 1}", ToId = $"n{i}", Kind = "Call" });
         }
 
-        var doc = new CodeNavigationMapSubgraphDocument
+        var doc = new GraphDocument
         {
             AnchorPath = @"D:\w\A.cs",
             Nodes = nodes,
@@ -78,15 +80,15 @@ public sealed class CodeNavigationMapCompositorTests
     public void Compose_ControlFlow_TallViewport_KeepsIntrinsicPreferredHeightAndReadableStep()
     {
         var compositor = new CodeNavigationMapCompositor();
-        var doc = new CodeNavigationMapSubgraphDocument
+        var doc = new GraphDocument
         {
             AnchorPath = @"D:\w\A.cs",
             Nodes =
             [
-                new CodeNavigationMapSubgraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" },
-                new CodeNavigationMapSubgraphNode { Id = "n1", Path = @"D:\w\A.cs", Kind = "call_step", Label = "S1" }
+                new GraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" },
+                new GraphNode { Id = "n1", Path = @"D:\w\A.cs", Kind = "call_step", Label = "S1" }
             ],
-            Edges = [new CodeNavigationMapSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "Call" }]
+            Edges = [new GraphEdge { FromId = "n0", ToId = "n1", Kind = "Call" }]
         };
 
         var result = compositor.Compose(doc, CodeNavigationMapLevelKind.ControlFlow, 280, 420);
@@ -101,20 +103,20 @@ public sealed class CodeNavigationMapCompositorTests
     [Fact]
     public void ControlFlowLayout_WideGraphArea_CentersReadableBand()
     {
-        var engine = new CodeNavigationMapControlFlowGraphLayoutEngine();
-        var doc = new CodeNavigationMapSubgraphDocument
+        var engine = new ControlFlowGraphLayoutEngine();
+        var doc = new GraphDocument
         {
             AnchorPath = @"D:\w\A.cs",
             Nodes =
             [
-                new CodeNavigationMapSubgraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" },
-                new CodeNavigationMapSubgraphNode { Id = "n1", Path = @"D:\w\A.cs", Kind = "condition_step", Label = "L", LegendIndex = 1, LegendText = "a" },
-                new CodeNavigationMapSubgraphNode { Id = "n2", Path = @"D:\w\A.cs", Kind = "condition_step", Label = "R", LegendIndex = 2, LegendText = "b" }
+                new GraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" },
+                new GraphNode { Id = "n1", Path = @"D:\w\A.cs", Kind = "condition_step", Label = "L", LegendIndex = 1, LegendText = "a" },
+                new GraphNode { Id = "n2", Path = @"D:\w\A.cs", Kind = "condition_step", Label = "R", LegendIndex = 2, LegendText = "b" }
             ],
             Edges =
             [
-                new CodeNavigationMapSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "Call" },
-                new CodeNavigationMapSubgraphEdge { FromId = "n0", ToId = "n2", Kind = "Call" }
+                new GraphEdge { FromId = "n0", ToId = "n1", Kind = "Call" },
+                new GraphEdge { FromId = "n0", ToId = "n2", Kind = "Call" }
             ]
         };
 
@@ -128,15 +130,15 @@ public sealed class CodeNavigationMapCompositorTests
     public void Compose_File_KeepsCompactHeight()
     {
         var compositor = new CodeNavigationMapCompositor();
-        var doc = new CodeNavigationMapSubgraphDocument
+        var doc = new GraphDocument
         {
             AnchorPath = @"D:\w\A.cs",
             Nodes =
             [
-                new CodeNavigationMapSubgraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" },
-                new CodeNavigationMapSubgraphNode { Id = "n1", Path = @"D:\w\B.cs", Kind = "project_peer", Label = "B.cs" }
+                new GraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" },
+                new GraphNode { Id = "n1", Path = @"D:\w\B.cs", Kind = "project_peer", Label = "B.cs" }
             ],
-            Edges = [new CodeNavigationMapSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "related_to" }]
+            Edges = [new GraphEdge { FromId = "n0", ToId = "n1", Kind = "related_to" }]
         };
 
         var result = compositor.Compose(doc, CodeNavigationMapLevelKind.File, 280, 120);
@@ -149,10 +151,10 @@ public sealed class CodeNavigationMapCompositorTests
     public void Compose_GenericPipelineEntryPoint_ProducesScene()
     {
         var compositor = new CodeNavigationMapCompositor();
-        var doc = new CodeNavigationMapSubgraphDocument
+        var doc = new GraphDocument
         {
             AnchorPath = @"D:\w\A.cs",
-            Nodes = [new CodeNavigationMapSubgraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" }],
+            Nodes = [new GraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" }],
             Edges = []
         };
 
@@ -166,15 +168,15 @@ public sealed class CodeNavigationMapCompositorTests
     public void IntentStage_DetectsLoopEdgeMetrics()
     {
         var stage = new CodeNavigationMapIntentStage();
-        var doc = new CodeNavigationMapSubgraphDocument
+        var doc = new GraphDocument
         {
             AnchorPath = @"D:\w\A.cs",
             Nodes =
             [
-                new CodeNavigationMapSubgraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" },
-                new CodeNavigationMapSubgraphNode { Id = "n1", Path = @"D:\w\A.cs", Kind = "call_step", Label = "B" }
+                new GraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" },
+                new GraphNode { Id = "n1", Path = @"D:\w\A.cs", Kind = "call_step", Label = "B" }
             ],
-            Edges = [new CodeNavigationMapSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "LoopCall" }]
+            Edges = [new GraphEdge { FromId = "n0", ToId = "n1", Kind = "LoopCall" }]
         };
 
         var state = stage.Resolve(new CodeNavigationMapPipelineContext(
@@ -190,19 +192,19 @@ public sealed class CodeNavigationMapCompositorTests
     public void Compose_ControlFlow_Glance_FiltersMultibranchOnlyBranch()
     {
         var compositor = new CodeNavigationMapCompositor();
-        var doc = new CodeNavigationMapSubgraphDocument
+        var doc = new GraphDocument
         {
             AnchorPath = @"D:\w\A.cs",
             Nodes =
             [
-                new CodeNavigationMapSubgraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A" },
-                new CodeNavigationMapSubgraphNode { Id = "n1", Path = @"D:\w\A.cs", Kind = "call_step", Label = "S1" },
-                new CodeNavigationMapSubgraphNode { Id = "n2", Path = @"D:\w\A.cs", Kind = "call_step", Label = "S2" }
+                new GraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A" },
+                new GraphNode { Id = "n1", Path = @"D:\w\A.cs", Kind = "call_step", Label = "S1" },
+                new GraphNode { Id = "n2", Path = @"D:\w\A.cs", Kind = "call_step", Label = "S2" }
             ],
             Edges =
             [
-                new CodeNavigationMapSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "Call" },
-                new CodeNavigationMapSubgraphEdge { FromId = "n0", ToId = "n2", Kind = "multibranch" }
+                new GraphEdge { FromId = "n0", ToId = "n1", Kind = "Call" },
+                new GraphEdge { FromId = "n0", ToId = "n2", Kind = "multibranch" }
             ]
         };
 
@@ -216,24 +218,24 @@ public sealed class CodeNavigationMapCompositorTests
     public void Compose_ControlFlow_GlanceVsInspect_PreferredHeightInspectIsTallerWhenIntrinsicExceedsMinClamp()
     {
         var compositor = new CodeNavigationMapCompositor();
-        var nodes = new List<CodeNavigationMapSubgraphNode>
+        var nodes = new List<GraphNode>
         {
             new() { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" }
         };
-        var edges = new List<CodeNavigationMapSubgraphEdge>();
+        var edges = new List<GraphEdge>();
         for (var i = 1; i <= 17; i++)
         {
-            nodes.Add(new CodeNavigationMapSubgraphNode
+            nodes.Add(new GraphNode
             {
                 Id = $"n{i}",
                 Path = @"D:\w\A.cs",
                 Kind = "call_step",
                 Label = $"S{i}"
             });
-            edges.Add(new CodeNavigationMapSubgraphEdge { FromId = $"n{i - 1}", ToId = $"n{i}", Kind = "Call" });
+            edges.Add(new GraphEdge { FromId = $"n{i - 1}", ToId = $"n{i}", Kind = "Call" });
         }
 
-        var doc = new CodeNavigationMapSubgraphDocument
+        var doc = new GraphDocument
         {
             AnchorPath = @"D:\w\A.cs",
             Nodes = nodes,
@@ -248,14 +250,14 @@ public sealed class CodeNavigationMapCompositorTests
     [Fact]
     public void ControlFlowLayout_WithLegend_ReservesColumnAndConditionBranch()
     {
-        var engine = new CodeNavigationMapControlFlowGraphLayoutEngine();
-        var doc = new CodeNavigationMapSubgraphDocument
+        var engine = new ControlFlowGraphLayoutEngine();
+        var doc = new GraphDocument
         {
             AnchorPath = @"D:\w\A.cs",
             Nodes =
             [
-                new CodeNavigationMapSubgraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" },
-                new CodeNavigationMapSubgraphNode
+                new GraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" },
+                new GraphNode
                 {
                     Id = "n1",
                     Path = @"D:\w\A.cs",
@@ -265,7 +267,7 @@ public sealed class CodeNavigationMapCompositorTests
                     LegendText = "x > 0"
                 }
             ],
-            Edges = [new CodeNavigationMapSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "Call" }]
+            Edges = [new GraphEdge { FromId = "n0", ToId = "n1", Kind = "Call" }]
         };
 
         var scene = engine.Layout(doc, 400, 200);
@@ -277,20 +279,20 @@ public sealed class CodeNavigationMapCompositorTests
         Assert.False(scene.ShowLegendReturnKey);
         Assert.True(scene.LegendColumnLeft < 400);
         var cond = scene.Nodes.First(n => n.Id == "n1");
-        Assert.Equal(CodeNavigationMapNodeShape.Condition, cond.Shape);
+        Assert.Equal(GraphNodeShape.Condition, cond.Shape);
     }
 
     [Fact]
     public void ControlFlowLayout_SkipsReturnInLegendRows_ShowsReturnShapeKey()
     {
-        var engine = new CodeNavigationMapControlFlowGraphLayoutEngine();
-        var doc = new CodeNavigationMapSubgraphDocument
+        var engine = new ControlFlowGraphLayoutEngine();
+        var doc = new GraphDocument
         {
             AnchorPath = @"D:\w\A.cs",
             Nodes =
             [
-                new CodeNavigationMapSubgraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" },
-                new CodeNavigationMapSubgraphNode
+                new GraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" },
+                new GraphNode
                 {
                     Id = "n1",
                     Path = @"D:\w\A.cs",
@@ -300,7 +302,7 @@ public sealed class CodeNavigationMapCompositorTests
                     LegendText = "return"
                 }
             ],
-            Edges = [new CodeNavigationMapSubgraphEdge { FromId = "n0", ToId = "n1", Kind = "Exit" }]
+            Edges = [new GraphEdge { FromId = "n0", ToId = "n1", Kind = "Exit" }]
         };
 
         var scene = engine.Layout(doc, 400, 200);
@@ -316,9 +318,9 @@ public sealed class CodeNavigationMapCompositorTests
     {
         const string json =
             """{"mode":"subgraph","graph_kind":"code_intent_code_navigation_map","anchor_path":"D:\\a.cs","nodes":[{"id":"n0","path":"D:\\a.cs","kind":"anchor","label":"a.cs","relative_path":"","rationale":""},{"id":"n1","path":"D:\\a.cs","kind":"condition_step","label":"IF","relative_path":"","rationale":"","legend_index":1,"legend_text":"x > 0"}],"edges":[]}""";
-        Assert.True(CodeNavigationMapSubgraphJson.TryParse(json, out var doc, out _));
+        Assert.True(GraphDocumentJson.TryParse(json, out var doc, out _));
         Assert.NotNull(doc);
-        Assert.Equal(CodeNavigationMapGraphKind.CodeIntent, doc!.GraphKind);
+        Assert.Equal(GraphKind.CodeIntent, doc!.Kind);
         var n1 = doc.Nodes.First(n => n.Id == "n1");
         Assert.Equal(1, n1.LegendIndex);
         Assert.Equal("x > 0", n1.LegendText);
