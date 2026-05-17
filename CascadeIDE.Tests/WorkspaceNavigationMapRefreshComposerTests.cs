@@ -3,7 +3,6 @@ using CascadeIDE.Cockpit.Channels.TraceFlow;
 using CascadeIDE.Cockpit.Composition.TraceFlow;
 using CascadeIDE.Features.WorkspaceNavigation.Application;
 using CascadeIDE.Models;
-using CascadeIDE.Features.WorkspaceNavigation.Application;
 using Xunit;
 
 namespace CascadeIDE.Tests;
