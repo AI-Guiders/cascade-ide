@@ -258,9 +258,14 @@
         </chrome:AttentionZoneContainer>
         <GridSplitter Grid.Row="2" Grid.Column="1" Width="4" ResizeDirection="Columns" Background="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}" IsVisible="{Binding IsPfdColumnVisible}" IsEnabled="{Binding WorkspaceSplittersUnlocked}"/>
 
-        <!-- Лобовое: редактор (forward) -->
+        <!-- Лобовое: редактор или Intercom (ADR 0120 primary_work_surface) -->
         <chrome:AttentionZoneContainer Zone="Forward" Grid.Row="2" Grid.Column="2">
-            <views:DocumentsDockView />
+            <Panel>
+                <views:DocumentsDockView IsVisible="{Binding IsForwardEditorHostVisible}" />
+                <Border IsVisible="{Binding IsForwardIntercomHostVisible}">
+                    <views:ChatPanelView DataContext="{Binding ChatPanel}" />
+                </Border>
+            </Panel>
         </chrome:AttentionZoneContainer>
         <GridSplitter Grid.Row="2" Grid.Column="3"
                       Grid.RowSpan="{Binding ChatPanelMainGridRowSpan}"

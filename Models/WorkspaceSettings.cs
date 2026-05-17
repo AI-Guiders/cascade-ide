@@ -16,4 +16,7 @@ public sealed class WorkspaceSettings
     public string Culture { get; set; } = "";
 
     public bool SplittersLocked { get; set; }
+
+    /// <summary>Лобовой якорь: <c>editor</c> | <c>intercom</c> (ADR 0120).</summary>
+    public string PrimaryWorkSurface { get; set; } = PrimaryWorkSurfaceKindExtensions.EditorValue;
 }
