@@ -116,14 +116,8 @@ markdown_extensions:
   - toc:
       permalink: true
 
-extra:
-  alternate:
-    - name: Русский
-      link: /
-      lang: ru
-    - name: English
-      link: /en/
-      lang: en
+# Language switcher: mkdocs-static-i18n `reconfigure_material: true` sets contextual
+# alternates per page (do not add manual extra.alternate — breaks GitHub Pages subpath).
 
 exclude_docs: |
   architecture-migration.md
