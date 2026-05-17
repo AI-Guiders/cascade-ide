@@ -15,6 +15,7 @@
 | [0109](0109-declarative-parametric-melody-catalog-toml-and-code-binders.md) | Intent Melody catalog (declarative intent layer) |
 | [0119](0119-chat-slash-commands-intercom-surface.md) | Intercom slash → same `command_id` as palette/MCP |
 | [0120](0120-primary-work-surface-intercom-or-editor.md) | Forward anchor: Intercom or editor — where the IOP loop lives |
+| [0122](0122-collaborative-iop-environment-and-shared-situational-display.md) | Environment: N `(P)(F)(M)` stations + shared room situational display |
 | [0019](0019-shared-git-core-ide-and-git-mcp.md) | Git parity: human and agent in one loop |
 | [0084](0084-agent-edits-editor-source-of-truth-presence-channel.md) | Editor — text source of truth; chat — intent/status |
 
@@ -132,6 +133,7 @@ Wording such as “the whole world will switch to IOP”, “the world’s only 
 ## Consequences
 
 - **Intercom** in perspective — **communication hub around a goal** (people + agents → intent → implementation), see [0120](0120-primary-work-surface-intercom-or-editor.md), [0080](0080-intercom-naming-and-multi-party-channel-model.md).
+- **Team environment** — multiple cockpits + **shared situational display** (not a chat feed), see [0122](0122-collaborative-iop-environment-and-shared-situational-display.md).
 - New command/chat/MCP features are described as **intent surface extension** + **parity** + **verification**, referencing IOP pillars.
 - Documentation site: block on [home](../index.md), [IOP manifest](../iop-manifest-v1.md), Russian copy at `docs/iop-manifest-v1.md`.
 - On **Accepted** — one line in [architecture-policy.md](../architecture-policy.md) (goal/positioning) and glossary in [MCP-PROTOCOL.md](../../MCP-PROTOCOL.md) if needed.
@@ -159,3 +161,4 @@ Wording such as “the whole world will switch to IOP”, “the world’s only 
 | 2026-05-17 | IOP depth: information flow, communication/transparency; intent ≠ slash. |
 | 2026-05-17 | Anchor wording: IOP = **discipline of communication** (“communication is the whole key”). |
 | 2026-05-17 | Intercom as goal-centric communication hub; honest risks on message volume. |
+| 2026-05-17 | Link to [0122](0122-collaborative-iop-environment-and-shared-situational-display.md) — environment vs application. |

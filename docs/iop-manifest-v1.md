@@ -69,6 +69,21 @@ IOP **не обещает**, что «вывезем любой входящий
 
 ---
 
+## Среда, не только приложение (перспектива)
+
+IOP и Cascade в перспективе — **среда командной работы**, а не только окно IDE на одном столе.
+
+**Картина:** 2–3 человека за отдельными рабочими местами — у каждого **каноническая раскладка** «три монитора» PFD / Forward / MFD ([ADR 0017](adr/0017-multi-window-workspace-and-agent-surfaces.md)); в общем поле зрения комнаты — **большой экран** с **командной ситуацией**, а не зеркалом чата:
+
+- что **в работе** (линии / topic cards);
+- где агентам и людям **достаточно** контекста (KB, playbook, scope);
+- где **нужно дополнить** знания или уточнить намерение;
+- при необходимости — блокеры и фаза (синтез / уточнение / верификация).
+
+Личный кокпит остаётся для **своего** цикла; общий дисплей — **коллективный PFD комнаты** (read-mostly проекция согласованной модели). Подробнее — [ADR 0122](adr/0122-collaborative-iop-environment-and-shared-situational-display.md) (Proposed).
+
+---
+
 ## Как это выглядит в сессии
 
 ```mermaid
@@ -99,6 +114,7 @@ flowchart LR
 |-------------|----------|
 | Кокпит PFD / Forward / MFD | [Раскладка UI](ui-ux/cascade-ide-ui-layout-v1.md) |
 | Intercom и слэши | [ADR 0119](adr/0119-chat-slash-commands-intercom-surface.md) |
+| Командная среда и общий экран | [ADR 0122](adr/0122-collaborative-iop-environment-and-shared-situational-display.md) |
 | Intent Melody | [intent-melody-language-v1.md](intent-melody-language-v1.md), [ADR 0109](adr/0109-declarative-parametric-melody-catalog-toml-and-code-binders.md) |
 | Все решения | [Навигатор ADR](site/adr-nav/index.md) |
 | Agent-first политика | [architecture-policy.md](architecture-policy.md) |

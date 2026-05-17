@@ -69,6 +69,21 @@ If communication is not structured, neither agents nor the IDE will save the day
 
 ---
 
+## Environment, not application only (perspective)
+
+IOP and Cascade in perspective are a **team work environment**, not only an IDE window on one desk.
+
+**Picture:** 2–3 people at separate workstations — each with the **canonical** three-monitor PFD / Forward / MFD layout ([ADR 0017](adr/0017-multi-window-workspace-and-agent-surfaces.md)); in the room’s shared field of view — a **large screen** with the **team situation**, not a chat mirror:
+
+- what is **in progress** (lines / topic cards);
+- where **context is sufficient** for agents and people (KB, playbooks, scope);
+- where knowledge or intent **needs supplement**;
+- when needed — blockers and phase (synthesis / clarification / verification).
+
+The personal cockpit stays for **your** cycle; the shared display is the **team PFD for the room** (read-mostly projection of the agreed model). Details — [ADR 0122](adr/0122-collaborative-iop-environment-and-shared-situational-display.md) (Proposed).
+
+---
+
 ## Session shape
 
 ```mermaid
@@ -99,6 +114,7 @@ flowchart LR
 |--------------|----------|
 | Cockpit PFD / Forward / MFD | [UI layout](ui-ux/cascade-ide-ui-layout-v1.md) |
 | Intercom and slashes | [ADR 0119](adr/0119-chat-slash-commands-intercom-surface.md) |
+| Team environment and shared display | [ADR 0122](adr/0122-collaborative-iop-environment-and-shared-situational-display.md) |
 | Intent Melody | [intent-melody-language-v1.md](../intent-melody-language-v1.md), [ADR 0109](adr/0109-declarative-parametric-melody-catalog-toml-and-code-binders.md) |
 | All decisions | [ADR navigator](site/adr-nav/index.md) |
 | Agent-first policy | [architecture-policy.md](architecture-policy.md) |
