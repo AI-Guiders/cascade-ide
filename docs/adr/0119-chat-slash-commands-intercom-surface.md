@@ -28,12 +28,14 @@
 |----------|------|
 | [MCP-PROTOCOL.md](../MCP-PROTOCOL.md) | `ide_execute_command`, `send_chat`, chat_* MCP |
 | [intent-melody-language-v1.md](../intent-melody-language-v1.md) | Грамматика `c:` — **не** грамматика `/` в чате |
+| [intercom-ux-reference-slack-mattermost-v1.md](../design/intercom-ux-reference-slack-mattermost-v1.md) | Slack/MM как вдохновение для composer и слэшей; границы vs внешний чат [0080 §5](0080-intercom-naming-and-multi-party-channel-model.md#adr0080-p5) |
 
 ## Резюме
 
 - **`ChatInput`** — **альтернативная command line** IDE: можно **не уходить из чата** для Intercom *и* для частых действий (`/build run`, `/test run`, `/debug launch`, `/card …`).
-- Слэш → **`command_id`** ([0030](0030-command-ids-hotkeys-and-ui-registry-layers.md)); каталог — **проекция** реестра + curated aliases, не второй исполнитель в VM.
-- **Autocomplete обязателен** (иерархия namespace → action, подсказки, `/help`) — без него расширенный каталог не принимается.
+- Слэш → **`command_id`** ([0030](0030-command-ids-hotkeys-and-ui-registry-layers.md)); каталог — **проекция** реестра на **читаемые** slash-пути (`/build run`, `/overview`), не второй исполнитель в VM.
+- **Discoverability — через autocomplete** (иерархия namespace → action, подсказки, `/help`), **не** через короткие мнемоники вроде `/br` (сжатые формы — слой **`c:`** Melody и аккорды, [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md)).
+- **Autocomplete обязателен** — без него расширенный каталог не принимается.
 - Палитра, Melody `c:` и аккорды остаются; слэш — **равноправный вход** для тех, кто уже в поле сообщения ([0013](0013-command-surface-and-discoverability.md)).
 - Внедрение **по фазам**: Intercom-глаголы → IDE namespaces → расширение из палитры.
 
@@ -145,9 +147,10 @@ arg_token    = quoted_string | bare_token ;
 #### 5a. Источник правды
 
 - **Исполнение** — только через существующий контур `ide_execute_command` / `IdeMcpCommandExecutor` ([0030](0030-command-ids-hotkeys-and-ui-registry-layers.md), [0008](0008-mcp-contracts-and-testable-infrastructure.md)).
-- **Каталог слэшей** (`ChatSlashCommandCatalog`) — **отображение** (alias → `command_id` + шаблон args), собираемое из:
+- **Каталог слэшей** (`ChatSlashCommandCatalog`) — **отображение** (slash-путь → `command_id` + шаблон args), собираемое из:
   1. **Curated** таблицы в коде (v1);
-  2. v2+ — **проекция** подмножества `IdeCommandPaletteCatalog` / метаданных `IdeCommands` (заголовок палитры → не обязан совпадать со слэшем, alias задаётся явно).
+  2. v2+ — **проекция** подмножества `IdeCommandPaletteCatalog` / метаданных `IdeCommands` (заголовок палитры → не обязан совпадать со слэшем; slash-путь задаётся явно).
+- **Не путать** с Melody: в каталоге **нет** отдельных записей «2–3 буквы» (`/br`, `/tr`) как сокращений к `namespace action` — оператор выбирает **`/build` → `run`** из autocomplete или вводит полную форму.
 - **Запрещено:** дублировать логику `dotnet build` / тестов / отладки в `ChatPanelViewModel`.
 
 <a id="adr0119-p5b"></a>
@@ -186,7 +189,7 @@ arg_token    = quoted_string | bare_token ;
 
 ### 6. Discoverability: autocomplete и help (обязательно)
 
-Без autocomplete расширение до `/build`, `/test`, … **не принимается** — оператор не обязан помнить namespace и action.
+Без autocomplete расширение до `/build`, `/test`, … **не принимается** — оператор **не обязан** помнить namespace и action и **не должен** полагаться на сжатые слэш-мнемоники (в отличие от `c:` в палитре).
 
 **Поведение UI (v1 минимум):**
 
@@ -221,6 +224,7 @@ arg_token    = quoted_string | bare_token ;
 - Слэш-команды в **других** полях (терминал, редактор, палитра) — только `ChatInput`.
 - Плагины с произвольными verb **без** записи в каталог / `command_id`.
 - Pass-through нераспознанного `/…` агенту.
+- **Короткие слэш-алиасы** (2–3 символа, «мелодия после `/»): `/br` вместо `/build run`, автогенерация из [0109](0109-declarative-parametric-melody-catalog-toml-and-code-binders.md) без отдельного slash-пути — discoverability только **иерархический autocomplete** и читаемые `namespace` / `action` / flat verbs.
 
 **В scope (осознанно):**
 
@@ -277,7 +281,7 @@ flowchart TD
 | **A** | Parser (flat + namespace/action), catalog Intercom, local execution | `/overview`, `/export` не уходят агенту |
 | **A′** | **Autocomplete** для flat + namespace list | после `/` и `/build ` есть подсказки |
 | **B** | IDE: `/build run`, `/test run`, `/debug launch` → `command_id` | паритет с MCP `build` / `run_tests` / `debug_launch` |
-| **C** | Расширение aliases (`/git`, `/nav`, проекция из палитры) | по discoverability, не big-bang |
+| **C** | Расширение каталога (`/git status`, `/nav`, проекция из палитры) | по discoverability + autocomplete, не big-bang |
 
 Тесты: parser unit-tests; интеграция «слэш local»; снапшоты каталога help.
 
@@ -288,6 +292,7 @@ flowchart TD
 1. **Парсить слэши в палитре** (`/card` в Command Palette) — смешивает overlay и Intercom; отвергнуто.
 2. **Отдельные MCP-only команды без `command_id`** — ломает [0030](0030-command-ids-hotkeys-and-ui-registry-layers.md); отвергнуто.
 3. **Отправлять нераспознанный `/` агенту** — шум и утечки; отвергнуто.
+4. **Короткие слэши как у Melody** (`/br` = build run) — дублирует `c:` / аккорды, коллизии и второй парсер; discoverability в Intercom — **autocomplete**, не мнемоники; отвергнуто.
 
 ---
 
@@ -299,3 +304,4 @@ flowchart TD
 |------|-----------|
 | 2026-05-17 | Proposed: слэш-команды в ChatInput, каталог v1, intent-first, non-goals. |
 | 2026-05-17 | Расширение: unified command line — IDE namespaces (`/build run`, `/test run`, `/debug launch`); autocomplete обязателен; фазы A–C. |
+| 2026-05-17 | Уточнение: discoverability слэша — **autocomplete**; короткие алиасы (`/br`) и «мелодия после `/`» — **non-goal** (сжатие — `c:` Melody). |

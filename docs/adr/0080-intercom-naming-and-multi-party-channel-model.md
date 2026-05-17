@@ -28,6 +28,7 @@
 | Документ | Роль |
 |----------|------|
 | [cascadeide-philosophy-v1](../design/cascadeide-philosophy-v1.md) | продуктовый нарратив |
+| [intercom-ux-reference-slack-mattermost-v1.md](../design/intercom-ux-reference-slack-mattermost-v1.md) | UX-ориентиры Slack/Mattermost; in/out of scope для Intercom в IDE vs внешний контур |
 
 ---
 ## Контекст
