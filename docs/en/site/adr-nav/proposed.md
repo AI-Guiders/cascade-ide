@@ -51,6 +51,7 @@ Draft for discussion — not yet accepted.
 | [0117](../../adr/0117-remote-operator-surface-multidevice.md) | Remote operator surface - multi-device operator (remote control, not mobile IDE) | Proposed |
 | [0119](../../adr/0119-chat-slash-commands-intercom-surface.md) | Slash commands in chat — unified command line (Intercom + IDE) | Proposed |
 | [0120](../../adr/0120-primary-work-surface-intercom-or-editor.md) | Primary work surface — Intercom or Editor (Agent / Editor analogue) | Proposed |
+| [0121](../../adr/0121-intent-oriented-programming-paradigm.md) | Intent-Oriented Programming (IOP) — conceptual foundation of Cascade IDE | Proposed |
 
 
 ---

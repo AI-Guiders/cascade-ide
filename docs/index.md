@@ -2,10 +2,15 @@
 
 **Cascade IDE (CIDE)** — agent-first IDE на **.NET** и **Avalonia**: in-proc MCP, модель внимания кокпита (PFD / Forward / MFD), канал **Intercom**.
 
+!!! tip "IOP — Intent-Oriented Programming"
+    CIDE — открытая **reference implementation** [интенционально-ориентированного программирования (IOP)](iop-manifest-v1.md): намерение → синтез агентом → верификация diff человеком.  
+    Краткий манифест: **[IOP (манифест)](iop-manifest-v1.md)** · нормативно: [ADR 0121](adr/0121-intent-oriented-programming-paradigm.md) (Proposed).
+
 ## С чего начать
 
 | Раздел | Описание |
 |--------|----------|
+| [IOP — манифест](iop-manifest-v1.md) | Три столпа: намерение, верификация, эпистемический контекст |
 | [Навигатор ADR по статусам](site/adr-nav/index.md) | Proposed, Accepted, Implemented, Superseded — автообновление из шапок ADR |
 | [Полный индекс ADR](adr/README.md) | Таблица всех решений и тематические кластеры |
 | [Жизненный цикл статусов ADR](adr/status-lifecycle.md) | Как читать `Proposed` / `Accepted · Implemented` |

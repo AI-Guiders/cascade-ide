@@ -186,6 +186,7 @@
 | [0118](0118-agent-notes-core-2-toml-and-knowledge-path.md) | Agent Notes Core **2.0**: TOML in-proc, `config_path` SSOT с MCP, `knowledge_path` в `IdeCommands` | Accepted |
 | [0119](0119-chat-slash-commands-intercom-surface.md) | Чат как command line: Intercom (`/card`) + IDE (`/build run`, `/test run`, `/debug launch`); autocomplete, `command_id` | Proposed |
 | [0120](0120-primary-work-surface-intercom-or-editor.md) | `primary_work_surface`: Intercom или Editor в якоре Forward (аналог Agent/Editor в Cursor) | Proposed |
+| [0121](0121-intent-oriented-programming-paradigm.md) | Парадигма IOP (Intent-Oriented Programming) — концептуальный фундамент; [манифест](../iop-manifest-v1.md) | Proposed |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 

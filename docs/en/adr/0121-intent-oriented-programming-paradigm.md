@@ -1,0 +1,141 @@
+# ADR 0121: Intent-Oriented Programming (IOP) — conceptual foundation of Cascade IDE
+
+**Status:** Proposed  
+**Date:** 2026-05-17
+
+## Related ADRs
+
+| ADR | Role |
+|-----|------|
+| [0100](0100-project-constitution.md) | Constitution: agent-first, cockpit, shared operational model |
+| [0013](0013-command-surface-and-discoverability.md) | Palette, keyboard-first, command discoverability |
+| [0051](0051-intent-based-attention-routing-toml.md) | Intent-based attention routing (TOML) |
+| [0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md) | Intent-first: topic cards, Melody/Chords, `command_id` |
+| [0080](0080-intercom-naming-and-multi-party-channel-model.md) | Intercom — session and intent channel |
+| [0109](0109-declarative-parametric-melody-catalog-toml-and-code-binders.md) | Intent Melody catalog (declarative intent layer) |
+| [0119](0119-chat-slash-commands-intercom-surface.md) | Intercom slash → same `command_id` as palette/MCP |
+| [0120](0120-primary-work-surface-intercom-or-editor.md) | Forward anchor: Intercom or editor — where the IOP loop lives |
+| [0019](0019-shared-git-core-ide-and-git-mcp.md) | Git parity: human and agent in one loop |
+| [0084](0084-agent-edits-editor-source-of-truth-presence-channel.md) | Editor — text source of truth; chat — intent/status |
+
+### Outside ADR
+
+| Document | Role |
+|----------|------|
+| [iop-manifest-v1.md](../iop-manifest-v1.md) | Short IOP manifest for the site and onboarding |
+| [architecture-policy.md](../architecture-policy.md) | Architecture policy, north-star, KB |
+| [MCP-PROTOCOL.md](../../MCP-PROTOCOL.md) | IDE/MCP commands — intent execution |
+| [intent-melody-language-v1.md](../../intent-melody-language-v1.md) | `c:` grammar (Melody), not chat slashes |
+| [north-star-cursor-mcp-cascade-workbench-v1.md](../../design/north-star-cursor-mcp-cascade-workbench-v1.md) | “Cursor + MCP + Cascade” boundaries |
+
+## Summary
+
+- Adopt **Intent-Oriented Programming (IOP)** as the **named product paradigm** of Cascade IDE (reference implementation), not as a replacement for OOP/FP in the user’s codebase.
+- Three IOP pillars in CIDE: **intent over manual syntax** (intent layer), **two-loop verification** (agent synthesizes — human approves diff), **epistemic context** (KB/domains as normative layer for the agent).
+- Public wording for the team and site — [iop-manifest-v1.md](../iop-manifest-v1.md); this ADR is the normative link to existing decisions and non-goals.
+
+---
+
+## Context
+
+The agent-first IDE stack already has “intent-first” in individual ADRs ([0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md), [0055](0055-skia-instrument-composition-pipeline.md) Intent→…→Render), an **Intent Melody** catalog, **Intercom**, **MCP** and **Roslyn** parity. What is missing is a **single paradigm name** that:
+
+1. explains to newcomers (including on probation) *why* the product is shaped this way, not as “VS + chat”;
+2. connects scattered ADRs into one mental model;
+3. honestly separates **hypothesis + reference implementation** from “the only industry standard”.
+
+Team discussion (including with Atlas) proposed **IOP** alongside OOP and FP, shifting focus from implementation to **intent** and **target state**.
+
+---
+
+## Problem
+
+1. **Cognitive ceiling:** a human cannot hold 100k+ lines of a monolith as “one text in the head”; the human role is architecture and verification, not a manual syntax compiler.
+2. **Split contours:** without a shared paradigm it is easy to duplicate command parsing (chat slash vs Melody vs MCP) — see motivation in [0119](0119-chat-slash-commands-intercom-surface.md).
+3. **Weak agent context:** without KB/domains intents “drift”; we need an explicit **epistemic constraint** model, not prompt alone.
+4. **Marketing vs engineering:** without an ADR the term IOP risks sounding like a “revolution” declaration without ties to code and ADR statuses.
+
+---
+
+## Decision
+
+<a id="adr0121-p1"></a>
+
+### 1. Definition of IOP (Cascade IDE scope)
+
+**Intent-Oriented Programming (IOP)** is a way of organizing work in the IDE where:
+
+- the **basic unit of interaction** is an *intent* (intention, target state, command with semantics), not a syntax fragment;
+- **execution** is delegated to the agent and infrastructure (MCP, build, Roslyn, git) under **human observability**;
+- **correctness** is checked via **delta** (diff, diagnostics, tests) and **normative knowledge** (KB), not only “something was generated”.
+
+IOP in CIDE is an **orchestration overlay** in an agent-first IDE. **C#, projects, and the editor remain the source of truth** for program text ([0084](0084-agent-edits-editor-source-of-truth-presence-channel.md), [0098](0098-semantic-first-document-as-projection.md)).
+
+<a id="adr0121-p2"></a>
+
+### 2. Three IOP pillars in Cascade IDE
+
+| Pillar | Meaning | In CIDE (existing / in flight) |
+|--------|---------|-------------------------------|
+| **1. Intent over syntax** | User states *what should be*, not a step-by-step algorithm | Intent Melody (`c:`), `command_id`, palette, [0119](0119-chat-slash-commands-intercom-surface.md) slashes → same contour as MCP; catalog [0109](0109-declarative-parametric-melody-catalog-toml-and-code-binders.md) |
+| **2. Two-loop verification** | Agent synthesizes; human is architect and diff arbiter | Forward (editor) / Intercom ([0120](0120-primary-work-surface-intercom-or-editor.md)); Roslyn MCP, build/test MCP, git MCP; human-in-the-loop on merge |
+| **3. Epistemic context** | Higher-order “types” are knowledge domains and policies | kb-public, agent-notes, `knowledge/domains/`; agent context routing; [architecture-policy](../architecture-policy.md), [0100](0100-project-constitution.md) |
+
+The manifest metaphor of an “intent compiler” is **not one binary** but the bundle: **Intercom + command surface + MCP + agent + IDE verification**.
+
+<a id="adr0121-p3"></a>
+
+### 3. Reference implementation
+
+Cascade IDE is positioned as the **IOP reference implementation**: open stack (IDE, Roslyn MCP, agent-notes, kb-public), documented at the [project site](https://ai-guiders.github.io/cascade-ide/).
+
+Wording such as “the whole world will switch to IOP” / “the world’s only compiler” is **not** part of this ADR — only a **working paradigm hypothesis** for the product and the AI-Guiders community.
+
+<a id="adr0121-p4"></a>
+
+### 4. Terminology (glossary v0)
+
+| Term | Meaning in IOP/CIDE |
+|------|---------------------|
+| **Intent** | Named intention with an execution contract (`command_id`, Melody, slash token) |
+| **Intent Melody** | Declarative/parametric language binding intents to UI and hotkeys |
+| **Intercom** | Session channel: dialogue, topic cards, slashes — forward surface for intents ([0080](0080-intercom-naming-and-multi-party-channel-model.md)) |
+| **Verification loop** | Synthesis → diff/diagnostics/tests → human accept or rollback |
+| **Epistemic context** | KB, domains, agent-notes, policies — meaning constraints for the agent |
+
+---
+
+## Non-goals
+
+- **Do not** replace OOP, FP, or C# in the user repo with “intents instead of code”.
+- **Do not** autonomous merge to main without human-in-the-loop (see [0100](0100-project-constitution.md), git policies).
+- **Do not** IOP without verification infrastructure (Roslyn/build/test/git) — otherwise it is chat only.
+- **Do not** claim an ISO/ECMA standard; IOP here is a **product and architecture** frame for CIDE.
+- **Do not** duplicate the body of [0119](0119-chat-slash-commands-intercom-surface.md) / [0109](0109-declarative-parametric-melody-catalog-toml-and-code-binders.md) — linking layer only.
+
+---
+
+## Consequences
+
+- New command/chat/MCP features are described as **intent surface extension** + **parity** + **verification**, referencing IOP pillars.
+- Documentation site: block on [home](../index.md), [IOP manifest](../iop-manifest-v1.md), Russian copy at `docs/iop-manifest-v1.md`.
+- On **Accepted** — one line in [architecture-policy.md](../architecture-policy.md) (goal/positioning) and glossary in [MCP-PROTOCOL.md](../../MCP-PROTOCOL.md) if needed.
+- Onboarding (probation, contributors): manifest + [concept overview](../concept-overview.md) first, then ADRs by topic.
+
+---
+
+## Implementation maturity (at Proposed)
+
+| Pillar | Maturity | Notes |
+|--------|----------|-------|
+| Intent | Partially Implemented | Melody, palette, part of MCP; [0119](0119-chat-slash-commands-intercom-surface.md) — Proposed |
+| Verification | Implemented (contour) | Editor, Roslyn/build/git MCP; UX completeness — roadmap |
+| Epistemic context | Implemented (external stack) | kb-public, agent-notes-mcp; CIDE integration — [0118](0118-agent-notes-core-2-toml-and-knowledge-path.md) |
+
+---
+
+## History
+
+| Date | Change |
+|------|--------|
+| 2026-05-17 | Proposed: IOP paradigm, three pillars, manifest, CIDE reference implementation. |

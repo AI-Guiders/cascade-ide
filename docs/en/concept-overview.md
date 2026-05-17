@@ -6,6 +6,8 @@
 
 **Cascade IDE (CIDE)** is an **agent-first** desktop IDE for **.NET**, built with **Avalonia**. It is designed so that **you and an AI agent share the same cockpit**: the same commands, the same layout, and the same **Intercom** channel (session dialogue), not a separate “chat widget” bolted onto a classic IDE.
 
+CIDE is a **reference implementation** of **[Intent-Oriented Programming (IOP)](iop-manifest-v1.md)** — you state *intent*, the agent synthesizes changes, you **verify the diff** in the editor. See [ADR 0121](adr/0121-intent-oriented-programming-paradigm.md) (Proposed) for the full framing.
+
 - **In-process MCP** — tools and IDE commands are available to agents without ad-hoc glue.
 - **Cockpit attention model** — the window is organized like a flight deck, not “editor + side panels”.
 - **Intercom** — the name of the primary human↔agent communication surface (see [ADR 0080](adr/0080-intercom-naming-and-multi-party-channel-model.md)).
@@ -47,6 +49,7 @@ Long-running streams (build log, terminal) live on **MFD pages**, not in a legac
 
 | If you want… | Start here |
 |--------------|------------|
+| IOP paradigm (intent → verify) | [IOP manifest](iop-manifest-v1.md) |
 | Window layout & control names for automation | [UI layout v1](ui-ux/cascade-ide-ui-layout-v1.md) |
 | Concept vs code (legacy Focus/Balanced/Power vs Flight) | [Concept → implementation map](ui-ux/concept-to-implementation-map-v1.md) |
 | All decisions by lifecycle status | [ADR navigator](site/adr-nav/index.md) |

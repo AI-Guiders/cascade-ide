@@ -11,6 +11,9 @@ edit_uri: edit/develop/docs/
 docs_dir: docs
 site_dir: site
 
+hooks:
+  - hooks/i18n_alternate_absolute.py
+
 theme:
   name: material
   language: ru
@@ -60,6 +63,7 @@ plugins:
           site_name: Cascade IDE
           nav:
             - Главная: index.md
+            - IOP (манифест): iop-manifest-v1.md
             - ADR:
                 - site/adr-nav/index.md
                 - По статусам:
@@ -84,6 +88,7 @@ plugins:
           site_name: Cascade IDE
           nav:
             - Home: index.md
+            - IOP manifest: iop-manifest-v1.md
             - Concept overview: concept-overview.md
             - ADR:
                 - site/adr-nav/index.md
@@ -96,7 +101,7 @@ plugins:
                     - Other: site/adr-nav/other.md
                 - Lifecycle: adr/status-lifecycle.md
                 - Full index: adr/README.md
-                - Russian originals: ../adr/README.md
+                - Russian ADR (canonical): https://ai-guiders.github.io/cascade-ide/adr/
             - Architecture:
                 - Policy: architecture-policy.md
                 - Current architecture: architecture/current-architecture-v1.md

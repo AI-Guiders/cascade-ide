@@ -51,6 +51,7 @@ hide:
 | [0117](../../adr/0117-remote-operator-surface-multidevice.md) | Remote operator surface — мультидевайсность оператора (пульт, не mobile IDE) | Proposed |
 | [0119](../../adr/0119-chat-slash-commands-intercom-surface.md) | Слэш-команды в чате — unified command line (Intercom + IDE) | Proposed |
 | [0120](../../adr/0120-primary-work-surface-intercom-or-editor.md) | Primary work surface — Intercom или Editor (аналог Agent / Editor) | Proposed |
+| [0121](../../adr/0121-intent-oriented-programming-paradigm.md) | Парадигма Intent-Oriented Programming (IOP) — концептуальный фундамент Cascade IDE | Proposed |
 
 
 ---

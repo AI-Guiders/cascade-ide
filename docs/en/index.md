@@ -2,6 +2,10 @@
 
 **Cascade IDE (CIDE)** is an agent-first IDE on **.NET** and **Avalonia**: in-process MCP, cockpit attention model (PFD / Forward / MFD), and the **Intercom** session channel.
 
+!!! tip "IOP — Intent-Oriented Programming"
+    CIDE is an open **reference implementation** of [Intent-Oriented Programming (IOP)](iop-manifest-v1.md): intent → agent synthesis → human diff verification.  
+    **[IOP manifest](iop-manifest-v1.md)** · normative: [ADR 0121](adr/0121-intent-oriented-programming-paradigm.md) (Proposed).
+
 !!! tip "New here?"
     Start with **[Concept overview](concept-overview.md)** — five minutes, no Russian required.
 
@@ -9,6 +13,7 @@
 
 | Section | Description |
 |---------|-------------|
+| **[IOP manifest](iop-manifest-v1.md)** | Three pillars: intent, verification loop, epistemic context |
 | **[Concept overview](concept-overview.md)** | What the product is and how the cockpit layout works |
 | [UI layout (Flight)](ui-ux/cascade-ide-ui-layout-v1.md) | PFD · Forward · MFD, menus, MCP control names |
 | [Concept → code map](ui-ux/concept-to-implementation-map-v1.md) | Flight vs legacy Focus/Balanced/Power |
