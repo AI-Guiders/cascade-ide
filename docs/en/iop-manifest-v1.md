@@ -52,7 +52,7 @@ Beyond relying on C# types alone — **knowledge canon and context routing**: [k
 
 **Intercom** ([ADR 0080](adr/0080-intercom-naming-and-multi-party-channel-model.md)) in the IOP perspective is not a “chat widget” but the **hub of communication around a goal**: people and agents **agree**, **surface intent**, clarify context, and **drive implementation** in the same contour (editor, MCP, verification). Topic cards, spine, slashes ([0119](adr/0119-chat-slash-commands-intercom-surface.md)) are **lines of work**, not a feed for its own sake.
 
-Cockpit placement — [ADR 0120](adr/0120-primary-work-surface-intercom-or-editor.md) (Proposed): **`primary_work_surface = intercom`** when the forward anchor is connection and intent, not code alone.
+Cockpit placement — [ADR 0120](adr/0120-primary-work-surface-intercom-or-editor.md) (Accepted · Implemented): **`primary_work_surface = intercom`** when the forward anchor is connection and intent, not code alone.
 
 ---
 

@@ -1,6 +1,6 @@
 # ADR 0120: Primary work surface — Intercom или Editor (аналог Agent / Editor)
 
-**Статус:** Proposed  
+**Статус:** Accepted · Implemented  
 **Дата:** 2026-05-17
 
 ## Связанные ADR

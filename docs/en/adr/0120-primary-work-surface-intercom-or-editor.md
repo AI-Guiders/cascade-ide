@@ -1,6 +1,6 @@
 # ADR 0120: Primary work surface — Intercom or Editor (Agent / Editor analogue)
 
-**Status:** Proposed  
+**Status:** Accepted · Implemented  
 **Date:** 2026-05-17
 
 ## Related ADRs
