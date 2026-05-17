@@ -76,9 +76,14 @@ public static class ChatSlashCommandCatalog
         return false;
     }
 
+    public static IReadOnlyList<ChatSlashSuggestion> AllSuggestions() =>
+        Entries
+            .Select(e => new ChatSlashSuggestion(e.SlashPath, e.SlashPath, e.Help))
+            .ToList();
+
     public static IReadOnlyList<string> ListHelpLines()
     {
-        var lines = new List<string> { "Слэш-команды Intercom / IDE (Tab — autocomplete, позже):" };
+        var lines = new List<string> { "Слэш-команды Intercom / IDE (Tab — autocomplete):" };
         foreach (var entry in Entries)
         {
             if (entry.ExecutionKind == ChatSlashCommandExecutionKind.LocalHelp)
