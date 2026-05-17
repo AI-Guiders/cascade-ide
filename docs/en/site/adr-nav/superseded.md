@@ -11,7 +11,7 @@ Replaced by another ADR — see link in the document.
 
 | ID | Title | Status (raw) |
 |----|-------|----------------|
-| [0026](../../../adr/0026-markdown-preview-surfaces-and-placement.md) | Markdown — поверхности превью и размещение (`workspace.toml`) | Superseded |
+| [0026](../../adr/0026-markdown-preview-surfaces-and-placement.md) | Markdown — Preview Surfaces and Placement (`workspace.toml`) | Superseded |
 
 
 ---

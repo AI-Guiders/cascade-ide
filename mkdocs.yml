@@ -96,6 +96,7 @@ plugins:
                     - Other: site/adr-nav/other.md
                 - Lifecycle: adr/status-lifecycle.md
                 - Full index: adr/README.md
+                - Russian originals: ../adr/README.md
             - Architecture:
                 - Policy: architecture-policy.md
                 - Current architecture: architecture/current-architecture-v1.md

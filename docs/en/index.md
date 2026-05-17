@@ -13,8 +13,9 @@
 | [UI layout (Flight)](ui-ux/cascade-ide-ui-layout-v1.md) | PFD · Forward · MFD, menus, MCP control names |
 | [Concept → code map](ui-ux/concept-to-implementation-map-v1.md) | Flight vs legacy Focus/Balanced/Power |
 | [ADR navigator by status](site/adr-nav/index.md) | Proposed, Accepted, Implemented — from ADR headers |
-| [Full ADR index](../adr/README.md) | All decisions (Russian body; **Summary (EN)** on key ADRs) |
-| [ADR status lifecycle](../adr/status-lifecycle.md) | How to read statuses |
+| [Full ADR index](adr/README.md) | All ADRs (English) |
+| [ADR status lifecycle](adr/status-lifecycle.md) | How to read statuses |
+| [Russian ADR originals](../adr/README.md) | Canonical Russian copies |
 | [Current architecture](../architecture/current-architecture-v1.md) | Implementation snapshot |
 | [IDE MCP protocol](../MCP-PROTOCOL.md) | Commands for agents and humans |
 
@@ -25,6 +26,5 @@
 - License: MIT · commercial use — [COMMERCIAL-NOTICE.md](../COMMERCIAL-NOTICE.md)
 
 !!! note "Languages"
-    **English:** this home page, [concept overview](concept-overview.md), and pages under `ui-ux/` here.  
-    **Russian:** canonical text for most ADRs and deep architecture notes — use **RU** in the header or read the same paths without `/en/`.  
-    Selected ADRs include a **`## Summary (EN)`** section at the top (e.g. [0021](../adr/0021-pfd-mfd-cockpit-attention-model.md#summary-en), [0080 Intercom](../adr/0080-intercom-naming-and-multi-party-channel-model.md#summary-en)).
+    **English:** this home page, [concept overview](concept-overview.md), `ui-ux/`, and [full ADR set](adr/README.md).  
+    **Russian:** canonical copies in the repo at `docs/adr/` — switch **RU** in the header or open paths without `/en/`.

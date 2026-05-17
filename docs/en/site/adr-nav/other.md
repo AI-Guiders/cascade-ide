@@ -11,9 +11,9 @@ Deferred, deprecated, or non-standard status wording.
 
 | ID | Title | Status (raw) |
 |----|-------|----------------|
-| [0024](../../../adr/0024-ui-skin-bundles-deferred.md) | Скины оформления (skin bundles) — отложено | Deferred |
-| [0096](../../../adr/0096-intercom-topic-card-summary-and-cide-spine.md) | ADR 0096 — переименование файла | (no status line) |
-| [0111](../../../adr/0111-editor-linenumber-linerange-value-objects.md) | `LineNumber` и `LineRange` как доменные типы редактора | (no status line) |
+| [0024](../../adr/0024-ui-skin-bundles-deferred.md) | Skin bundles - postponed | Deferred |
+| [0096](../../adr/0096-intercom-topic-card-summary-and-cide-spine.md) | ADR 0096 - file rename | (no status line) |
+| [0111](../../adr/0111-editor-linenumber-linerange-value-objects.md) | `LineNumber` and `LineRange` as editor domain types | (no status line) |
 
 
 ---

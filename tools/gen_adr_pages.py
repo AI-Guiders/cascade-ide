@@ -14,12 +14,16 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 ADR_DIR = ROOT / "docs" / "adr"
+ADR_EN_DIR = ROOT / "docs" / "en" / "adr"
 OUT_RU = ROOT / "docs" / "site" / "adr-nav"
 OUT_EN = ROOT / "docs" / "en" / "site" / "adr-nav"
 
 SKIP_NAMES = {"README.md", "status-lifecycle.md"}
 
-STATUS_RE = re.compile(r"^\*\*Статус:\*\*\s*(.+?)\s*$", re.IGNORECASE)
+STATUS_RE = re.compile(
+    r"^\*\*(?:Статус|Status):\*\*\s*(.+?)\s*$",
+    re.IGNORECASE,
+)
 TITLE_RE = re.compile(r"^#\s+ADR\s+(\d+):\s*(.+)$", re.IGNORECASE)
 TITLE_ALT_RE = re.compile(r"^#\s+(.+)$")
 
@@ -111,7 +115,8 @@ def classify(status_raw: str) -> str:
     return "other"
 
 
-def load_records() -> list[AdrRecord]:
+def load_records(*, lang: str = "ru") -> list[AdrRecord]:
+    base = ADR_EN_DIR if lang == "en" else ADR_DIR
     records: list[AdrRecord] = []
     for path in sorted(ADR_DIR.glob("*.md")):
         if path.name in SKIP_NAMES:
@@ -119,9 +124,10 @@ def load_records() -> list[AdrRecord]:
         m = re.match(r"^(\d+)-(.+)\.md$", path.name)
         if not m:
             continue
+        read_path = base / path.name if lang == "en" and (base / path.name).is_file() else path
         num = int(m.group(1))
         slug = path.name[:-3]
-        text = path.read_text(encoding="utf-8")
+        text = read_path.read_text(encoding="utf-8")
         lines = text.splitlines()
         status_raw = ""
         for line in lines[:12]:
@@ -170,7 +176,7 @@ def write_bucket(
     *,
     lang: str,
 ) -> None:
-    adr_prefix = "../../adr/" if lang == "ru" else "../../../adr/"
+    adr_prefix = "../../adr/" if lang == "ru" else "../../adr/"
     nav_prefix = "./" if lang == "ru" else "./"
     if lang == "ru":
         title = title_ru
@@ -221,12 +227,11 @@ def write_index(out_dir: Path, records: list[AdrRecord], *, lang: str) -> None:
     else:
         h1 = "ADR navigator by status"
         intro = (
-            "Architecture decisions grouped by [lifecycle status](../../../adr/status-lifecycle.md). "
-            "Full index and topic clusters: [ADR README](../../../adr/README.md). "
-            "ADR bodies are **Russian-first**; this navigator is bilingual."
+            "Architecture decisions grouped by [lifecycle status](../../adr/status-lifecycle.md). "
+            "Full index and topic clusters: [ADR README](../../adr/README.md)."
         )
-        full = "[Full ADR index](../../../adr/README.md)"
-        life = "[Status lifecycle](../../../adr/status-lifecycle.md)"
+        full = "[Full ADR index](../../adr/README.md)"
+        life = "[Status lifecycle](../../adr/status-lifecycle.md)"
 
     lines = [f"# {h1}", "", intro, "", life + " · " + full, ""]
     for bid, title_en, title_ru, _be, _br in BUCKETS:
@@ -240,12 +245,19 @@ def write_index(out_dir: Path, records: list[AdrRecord], *, lang: str) -> None:
 
 
 def main() -> None:
-    records = load_records()
-    by_bucket: dict[str, list[AdrRecord]] = {b[0]: [] for b in BUCKETS}
-    for r in records:
-        by_bucket.setdefault(r.bucket, []).append(r)
+    records_ru = load_records(lang="ru")
+    records_en = load_records(lang="en")
+    by_bucket_ru: dict[str, list[AdrRecord]] = {b[0]: [] for b in BUCKETS}
+    by_bucket_en: dict[str, list[AdrRecord]] = {b[0]: [] for b in BUCKETS}
+    for r in records_ru:
+        by_bucket_ru.setdefault(r.bucket, []).append(r)
+    for r in records_en:
+        by_bucket_en.setdefault(r.bucket, []).append(r)
 
-    for lang, out_dir in (("ru", OUT_RU), ("en", OUT_EN)):
+    for lang, out_dir, records, by_bucket in (
+        ("ru", OUT_RU, records_ru, by_bucket_ru),
+        ("en", OUT_EN, records_en, by_bucket_en),
+    ):
         write_index(out_dir, records, lang=lang)
         for bid, title_en, title_ru, blurb_en, blurb_ru in BUCKETS:
             write_bucket(
@@ -259,10 +271,12 @@ def main() -> None:
                 lang=lang,
             )
 
-    total = len(records)
-    print(f"OK: {total} ADRs -> {OUT_RU.relative_to(ROOT)} + {OUT_EN.relative_to(ROOT)}")
+    print(
+        f"OK: {len(records_ru)} RU / {len(records_en)} EN ADRs -> "
+        f"{OUT_RU.relative_to(ROOT)} + {OUT_EN.relative_to(ROOT)}"
+    )
     for bid, *_ in BUCKETS:
-        print(f"  {bid}: {len(by_bucket.get(bid, []))}")
+        print(f"  {bid}: ru={len(by_bucket_ru.get(bid, []))} en={len(by_bucket_en.get(bid, []))}")
 
 
 if __name__ == "__main__":

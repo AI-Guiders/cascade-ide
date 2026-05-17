@@ -11,7 +11,7 @@ Accepted; implementation in progress.
 
 | ID | Title | Status (raw) |
 |----|-------|----------------|
-| [0106](../../../adr/0106-hybrid-codebase-index-cascadeide-integration-and-semantic-map.md) | Hybrid Codebase Index — интеграция в CascadeIDE, свежесть и Semantic Map | Accepted · In progress |
+| [0106](../../adr/0106-hybrid-codebase-index-cascadeide-integration-and-semantic-map.md) | Hybrid Codebase Index - integration into CascadeIDE, freshness and Semantic Map | Accepted · In progress |
 
 
 ---

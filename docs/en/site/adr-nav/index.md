@@ -1,13 +1,13 @@
 # ADR navigator by status
 
-Architecture decisions grouped by [lifecycle status](../../../adr/status-lifecycle.md). Full index and topic clusters: [ADR README](../../../adr/README.md). ADR bodies are **Russian-first**; this navigator is bilingual.
+Architecture decisions grouped by [lifecycle status](../../adr/status-lifecycle.md). Full index and topic clusters: [ADR README](../../adr/README.md).
 
-[Status lifecycle](../../../adr/status-lifecycle.md) · [Full ADR index](../../../adr/README.md)
+[Status lifecycle](../../adr/status-lifecycle.md) · [Full ADR index](../../adr/README.md)
 
 - [Proposed](proposed.md) — **40**
-- [Accepted](accepted.md) — **39**
+- [Accepted](accepted.md) — **38**
 - [Accepted · In progress](accepted-in-progress.md) — **1**
-- [Accepted · Implemented](accepted-implemented.md) — **41**
+- [Accepted · Implemented](accepted-implemented.md) — **42**
 - [Superseded](superseded.md) — **1**
 - [Deferred / Deprecated / other](other.md) — **3**
 
