@@ -120,7 +120,7 @@ Cascade IDE is the **working implementation** of IOP at the station; **room proj
 
 ### 5. Environment-first and voice in the room (honest)
 
-The **environment-first** model ([0121](0121-intent-oriented-programming-paradigm.md)) fits the room well: environment = stations + **shared picture**, not “another messenger”. But in one physical room people **usually do not chat in text** — they **talk**. Agents **cannot** reliably capture the spoken stream; if **everything** is written down and transcribed, you spend a long time **separating wheat from chaff** — the same problem as an endless feed, only in audio.
+The **environment-first** model ([0121](0121-intent-oriented-programming-paradigm.md)) fits the room well: environment = stations + **shared picture**, not “another messenger”. But in one physical room people **usually do not chat in text** — they **talk**. Agents **cannot** reliably capture the whole spoken stream; if **everything** is recorded and transcribed, you spend a long time separating **decisions and agreements** from **noise** (half-phrases, tangents, changes of mind) — the same trap as an endless message feed, only in audio.
 
 **IOP direction (not a v1 commit):**
 
