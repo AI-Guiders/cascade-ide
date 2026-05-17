@@ -31,6 +31,28 @@ public sealed class ChatSurfaceCompositorTests
         Assert.Contains(branchLane.Entries, entry => entry.StartsBranch);
         Assert.Contains(snapshot.State.Edges, edge => edge.Kind == "fork");
         Assert.Contains(snapshot.Layout.Overview, item => item.ThreadId == branchThread && item.IsActive);
+
+        var branchOverview = Assert.Single(snapshot.Layout.Overview, item => item.ThreadId == branchThread);
+        Assert.Contains("Skia", branchOverview.Summary, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Compose_SingleThreadOverview_UsesLastAssistantMessageAsSummary()
+    {
+        var threadId = Guid.NewGuid();
+        var snapshot = new ChatSurfaceCompositor().Compose(new ChatSurfaceIntent(
+            [
+                new ChatConversationMessage(Guid.NewGuid(), "user", "Как сделать topic cards?", threadId, null, 0),
+                new ChatConversationMessage(Guid.NewGuid(), "assistant", "Картотека: заголовок и короткая сводка.", threadId, null, 1)
+            ],
+            ActiveClarificationBatch: null,
+            SelectedMessageIndex: -1,
+            MainThreadId: threadId,
+            ActiveThreadId: threadId,
+            ThreadBranchHint: null));
+
+        var overview = Assert.Single(snapshot.Layout.Overview);
+        Assert.Contains("картотека", overview.Summary, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

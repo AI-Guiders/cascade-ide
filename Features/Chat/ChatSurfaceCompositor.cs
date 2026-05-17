@@ -256,7 +256,10 @@ public sealed class ChatSurfaceLayoutStage : IChatSurfaceLayoutStage
             .ToDictionary(group => group.Key, group => group.OrderBy(message => message.MessageIndex).ToList());
 
         var lanes = new List<ChatSurfaceLane>();
-        foreach (var thread in state.Threads.OrderBy(thread => thread.Order))
+        foreach (var thread in state.Threads
+                     .OrderByDescending(thread => thread.IsActive)
+                     .ThenBy(thread => thread.Depth)
+                     .ThenBy(thread => thread.Order))
         {
             var entries = new List<ChatSurfaceEntry>();
             if (messagesByThread.TryGetValue(thread.ThreadId, out var messages))
@@ -268,7 +271,7 @@ public sealed class ChatSurfaceLayoutStage : IChatSurfaceLayoutStage
                         message.NodeId,
                         BuildMessageTitle(message, thread),
                         message.Content,
-                        message.Role,
+                        ChatMessageVisualRoleMapping.FromMessageRole(message.Role),
                         message.MessageIndex,
                         MessageIndex: message.MessageIndex,
                         IsSelected: message.IsSelected,
@@ -286,7 +289,9 @@ public sealed class ChatSurfaceLayoutStage : IChatSurfaceLayoutStage
                         confirmation.NodeId,
                         confirmation.Title,
                         confirmation.Body,
-                        confirmation.IsResolved ? "resolved" : "clarification",
+                        confirmation.IsResolved
+                            ? ChatMessageVisualRole.ClarificationResolved
+                            : ChatMessageVisualRole.ClarificationPending,
                         orderBase++,
                         IsPending: confirmation.IsActive && !confirmation.IsResolved));
                 }
@@ -299,6 +304,7 @@ public sealed class ChatSurfaceLayoutStage : IChatSurfaceLayoutStage
             .Select(lane => new ChatThreadOverviewItem(
                 lane.Thread.ThreadId,
                 lane.Thread.Title,
+                BuildThreadSummary(lane),
                 lane.Thread.IsActive,
                 lane.Thread.IsMainThread,
                 lane.Thread.Depth,
@@ -306,6 +312,42 @@ public sealed class ChatSurfaceLayoutStage : IChatSurfaceLayoutStage
             .ToList();
 
         return new ChatSurfaceLayout(overview, lanes);
+    }
+
+    private static string BuildThreadSummary(ChatSurfaceLane lane)
+    {
+        var lastMeaningful = lane.Entries
+            .Where(entry => entry.Kind == ChatSurfaceEntryKind.Message)
+            .Where(entry => entry.VisualRole is ChatMessageVisualRole.User or ChatMessageVisualRole.Assistant)
+            .OrderByDescending(entry => entry.Order)
+            .FirstOrDefault();
+
+        if (lastMeaningful is null)
+        {
+            var pending = lane.Entries.FirstOrDefault(entry => entry.Kind == ChatSurfaceEntryKind.Confirmation && entry.IsPending);
+            if (pending is not null)
+                return TruncateSummary(pending.Body);
+
+            var any = lane.Entries
+                .Where(entry => entry.Kind == ChatSurfaceEntryKind.Message)
+                .OrderByDescending(entry => entry.Order)
+                .FirstOrDefault();
+            if (any is null)
+                return "Пока без сообщений";
+
+            return TruncateSummary(any.Body);
+        }
+
+        return TruncateSummary(lastMeaningful.Body);
+    }
+
+    private static string TruncateSummary(string text)
+    {
+        var normalized = string.Join(' ', (text ?? "").Replace('\r', ' ').Replace('\n', ' ').Split(' ', StringSplitOptions.RemoveEmptyEntries));
+        if (normalized.Length == 0)
+            return "Пока без текста";
+        const int maxLen = 160;
+        return normalized.Length <= maxLen ? normalized : normalized[..maxLen] + "…";
     }
 
     private static string BuildMessageTitle(ChatMessageNode message, ChatThreadNode thread)
@@ -340,6 +382,7 @@ public sealed class ChatSurfaceCompositor(
         var resolved = _intentStage.Resolve(intent);
         var decluttered = _declutterStage.Apply(resolved);
         var layout = _layoutStage.Layout(decluttered);
-        return new ChatSurfaceSnapshot(decluttered, layout);
+        var spine = intent.ProductSpine ?? ChatProductSpine.Empty;
+        return new ChatSurfaceSnapshot(decluttered, layout, spine);
     }
 }

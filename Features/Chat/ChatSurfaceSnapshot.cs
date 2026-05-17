@@ -10,7 +10,8 @@ public sealed record ChatSurfaceIntent(
     int SelectedMessageIndex,
     Guid MainThreadId,
     Guid ActiveThreadId,
-    string? ThreadBranchHint);
+    string? ThreadBranchHint,
+    ChatProductSpine? ProductSpine = null);
 
 /// <summary>Плоское представление сообщения, отвязанное от UI-observable состояния.</summary>
 public sealed record ChatConversationMessage(
@@ -69,7 +70,7 @@ public sealed record ChatSurfaceEntry(
     string NodeId,
     string Title,
     string Body,
-    string Accent,
+    ChatMessageVisualRole VisualRole,
     int Order,
     int? MessageIndex = null,
     bool IsSelected = false,
@@ -79,6 +80,7 @@ public sealed record ChatSurfaceEntry(
 public sealed record ChatThreadOverviewItem(
     Guid ThreadId,
     string Title,
+    string Summary,
     bool IsActive,
     bool IsMainThread,
     int Depth,
@@ -102,9 +104,11 @@ public sealed record ChatSurfaceState(
 
 public sealed record ChatSurfaceSnapshot(
     ChatSurfaceState State,
-    ChatSurfaceLayout Layout)
+    ChatSurfaceLayout Layout,
+    ChatProductSpine ProductSpine)
 {
     public static ChatSurfaceSnapshot Empty { get; } = new(
         new ChatSurfaceState([], [], [], [], Guid.Empty, "Chat"),
-        new ChatSurfaceLayout([], []));
+        new ChatSurfaceLayout([], []),
+        ChatProductSpine.Empty);
 }
