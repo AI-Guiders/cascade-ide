@@ -1,6 +1,6 @@
 # ADR 0119: Слэш-команды в чате — unified command line (Intercom + IDE)
 
-**Статус:** Proposed  
+**Статус:** Accepted · Implemented  
 **Дата:** 2026-05-17  
 **Обновлено:** 2026-05-17 — расширение до IDE-глаголов (`/build run`, `/test run`, `/debug launch`); autocomplete обязателен. [§ История](#adr0119-history)
 
@@ -305,3 +305,4 @@ flowchart TD
 | 2026-05-17 | Proposed: слэш-команды в ChatInput, каталог v1, intent-first, non-goals. |
 | 2026-05-17 | Расширение: unified command line — IDE namespaces (`/build run`, `/test run`, `/debug launch`); autocomplete обязателен; фазы A–C. |
 | 2026-05-17 | Уточнение: discoverability слэша — **autocomplete**; короткие алиасы (`/br`) и «мелодия после `/`» — **non-goal** (сжатие — `c:` Melody). |
+| 2026-05-17 | Accepted · Implemented: фазы **A**, **A′**, **B** (`ChatSlashCommand*`, autocomplete, IDE namespaces); фаза **C** — backlog. |

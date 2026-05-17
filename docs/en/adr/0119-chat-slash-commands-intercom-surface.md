@@ -1,6 +1,6 @@
 # ADR 0119: Slash commands in chat — unified command line (Intercom + IDE)
 
-**Status:** Proposed  
+**Status:** Accepted · Implemented  
 **Date:** 2026-05-17  
 **Updated:** 2026-05-17 — extended to IDE verbs (`/build run`, `/test run`, `/debug launch`); autocomplete required. [§ History](#adr0119-history)
 
@@ -304,3 +304,4 @@ Tests: parser unit tests; “slash local” integration; catalog help snapshots.
 | 2026-05-17 | Proposed: slash commands in ChatInput, v1 catalog, intent-first, non-goals. |
 | 2026-05-17 | Extended: unified command line — IDE namespaces (`/build run`, `/test run`, `/debug launch`); autocomplete required; phases A–C. |
 | 2026-05-17 | Clarified: slash discoverability is **autocomplete**; short aliases (`/br`) and “melody after `/`” are **non-goals** (compression — `c:` Melody). |
+| 2026-05-17 | Accepted · Implemented: phases **A**, **A′**, **B** (`ChatSlashCommand*`, autocomplete, IDE namespaces); phase **C** — backlog. |

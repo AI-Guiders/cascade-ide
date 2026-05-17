@@ -333,3 +333,4 @@
 - **v1.41m** — Workspace: **`BlankSolutionCreator`** (`Features/Workspace/Application`) — новое пустое **`.sln`** через **`dotnet new sln`**; меню **Файл → Создать новое решение…**, MCP **`create_new_solution_dialog`**, тесты **`BlankSolutionCreatorTests`**; **`MainWindowViewModel.TryCreateBlankSolutionAtPathAsync`**.
 - **v1.42** — [design/feature-archetype-v1.md](design/feature-archetype-v1.md) + [design/ide-chrome-tokens-v1.md](design/ide-chrome-tokens-v1.md); глобальные стили `cascadeSection` / UiKit **`CascadeSection`**, **`CascadeStatusChip`**; ADR **0076**, **0121** → Accepted.
 - **v1.43** — ADR **0120** (primary work surface Intercom/Editor) → Accepted · Implemented; IOP manifest синхронизирован.
+- **v1.44** — ADR **0119** (chat slash commands) → Accepted · Implemented (фазы A, A′, B); **0121** таблица зрелости обновлена.
