@@ -30,7 +30,7 @@
 
 ## Summary
 
-- Adopt **Intent-Oriented Programming (IOP)** as the **named product paradigm** of Cascade IDE (**working implementation of a proposed paradigm in the product**), not as a replacement for OOP/FP in the user’s codebase.
+- Adopt **Intent-Oriented Programming (IOP)** as the **named product paradigm** of Cascade IDE: first of all a **discipline of communication** in the development contour (**working implementation of a proposed paradigm in the product**), not a replacement for OOP/FP.
 - Three IOP pillars in CIDE: **intent over manual syntax** (intent layer), **two-loop verification** (agent synthesizes — human approves diff), **epistemic context** (KB canon and context routing as normative layer for the agent).
 - Public wording for the team and site — [iop-manifest-v1.md](../iop-manifest-v1.md); this ADR is the normative link to existing decisions and non-goals.
 
@@ -71,7 +71,7 @@ Team discussion (including with Atlas) proposed **IOP** alongside OOP and FP. Th
 - **execution** (including code generation) is delegated to the agent and infrastructure (MCP, build, Roslyn, git) under **human observability**;
 - **correctness** is checked via **delta** (diff, diagnostics, tests) and **normative knowledge** (KB), not only “something was generated”.
 
-IOP in CIDE is **information-flow discipline** in an agent-first IDE. **C#, projects, and the editor remain the source of truth** for program text ([0084](0084-agent-edits-editor-source-of-truth-presence-channel.md), [0098](0098-semantic-first-document-as-projection.md)).
+IOP in CIDE is a **discipline of communication** in an agent-first IDE (information flow made explicit and verifiable). **C#, projects, and the editor remain the source of truth** for program text ([0084](0084-agent-edits-editor-source-of-truth-presence-channel.md), [0098](0098-semantic-first-document-as-projection.md)).
 
 <a id="adr0121-p2"></a>
 
@@ -145,3 +145,4 @@ Wording such as “the whole world will switch to IOP”, “the world’s only 
 | 2026-05-17 | Softened positioning: “reference implementation” → “working implementation in the product”. |
 | 2026-05-17 | IOP: avoid “knowledge domains”; `knowledge/domains/` — repo path only. |
 | 2026-05-17 | IOP depth: information flow, communication/transparency; intent ≠ slash. |
+| 2026-05-17 | Anchor wording: IOP = **discipline of communication** (“communication is the whole key”). |

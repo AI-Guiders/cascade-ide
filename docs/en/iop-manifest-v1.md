@@ -1,6 +1,8 @@
 # IOP — Intent-Oriented Programming
 
-**Intent-Oriented Programming (IOP)** is not “slash commands reinvented.” It recognizes that **information technology** is about **designing information flow** in a system: goals, intentions, processes, **communication**, and **transparency**. Building software is only part of that flow; without aligned intent and a shared picture, code becomes chaos — agents made that painfully visible.
+**Intent-Oriented Programming (IOP)** is first of all a **discipline of communication** around development: not “slash commands reinvented,” but a way to agree on goals, processes, and changes so they stay **visible** to everyone in the contour (people, agent, artifacts).
+
+**Communication is the whole key.** With communication come aligned intent, transparency, and meaningful code; without it — local order in files and global chaos, which agents made painfully visible. IT is about **information flow**; writing software is only part of that flow.
 
 **Cascade IDE** is an open **working implementation** of IOP: a stack that makes this flow explicit in a **.NET** **agent-first** IDE.
 
@@ -14,7 +16,7 @@
 
 IT is **information** technology: the work is a **coherent flow of meaning** — who talks to whom, about what, toward which goals, with which processes, and what observers can see. Without communication and transparency, shipping code is pointless: local order in files, global chaos in the team.
 
-IOP in the IDE centers **explicit intent** (goal, target state, agreed process) and an **observable execution delta**. C# and the repo stay the source of truth for program text; IOP is **information-flow discipline** around code, not a replacement for it.
+IOP in the IDE centers **explicit intent** (goal, target state, agreed process) and an **observable execution delta**. C# and the repo stay the source of truth for program text; IOP is a **discipline of communication** in which code is the verifiable outcome of agreement, not a replacement for talking.
 
 ---
 
