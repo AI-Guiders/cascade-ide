@@ -141,11 +141,11 @@ Wording such as “the whole world will switch to IOP”, “the world’s only 
 
 ---
 
-## Implementation maturity (at Proposed)
+## Implementation maturity (at Accepted)
 
 | Pillar | Maturity | Notes |
 |--------|----------|-------|
-| Intent | Partially Implemented | Melody, palette, part of MCP; [0119](0119-chat-slash-commands-intercom-surface.md) — Proposed |
+| Intent | Implemented (v1) | Melody, palette, MCP; [0119](0119-chat-slash-commands-intercom-surface.md) phases A–B; [0120](0120-primary-work-surface-intercom-or-editor.md) |
 | Verification | Implemented (contour) | Editor, Roslyn/build/git MCP; UX completeness — roadmap |
 | Epistemic context | Implemented (external stack) | kb-public, agent-notes-mcp; CIDE integration — [0118](0118-agent-notes-core-2-toml-and-knowledge-path.md) |
 
