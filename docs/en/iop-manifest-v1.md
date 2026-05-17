@@ -48,6 +48,27 @@ Beyond relying on C# types alone — **knowledge canon and context routing**: [k
 
 ---
 
+## Intercom — communication hub around a goal (perspective)
+
+**Intercom** ([ADR 0080](adr/0080-intercom-naming-and-multi-party-channel-model.md)) in the IOP perspective is not a “chat widget” but the **hub of communication around a goal**: people and agents **agree**, **surface intent**, clarify context, and **drive implementation** in the same contour (editor, MCP, verification). Topic cards, spine, slashes ([0119](adr/0119-chat-slash-commands-intercom-surface.md)) are **lines of work**, not a feed for its own sake.
+
+Cockpit placement — [ADR 0120](adr/0120-primary-work-surface-intercom-or-editor.md) (Proposed): **`primary_work_surface = intercom`** when the forward anchor is connection and intent, not code alone.
+
+---
+
+## Honestly about human message volume
+
+IOP does **not** promise “we will handle any inbound stream” — **people do not handle that either** when everything lands in one endless feed. The product bet is to **structure** communication, not amplify noise:
+
+- **lines of work** (topic cards, overview/detail) instead of one chaotic chat;
+- **clarification batches** and threads ([0031](adr/0031-agent-chat-clarification-batches-and-threading.md)), not every message = an immediate autonomous sprint;
+- **intent-first** and MCP parity — less “wrote in chat / did in palette / agent missed it”;
+- **verification** — the human is not required to digest everything; they arbitrate **delta**, not every token.
+
+If communication is not structured, neither agents nor the IDE will save the day. IOP is about structuring it **first**.
+
+---
+
 ## Session shape
 
 ```mermaid

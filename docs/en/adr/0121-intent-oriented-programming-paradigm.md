@@ -115,11 +115,23 @@ Wording such as “the whole world will switch to IOP”, “the world’s only 
 - **Do not** IOP without verification infrastructure (Roslyn/build/test/git) — otherwise it is chat only.
 - **Do not** claim an ISO/ECMA standard; IOP here is a **product and architecture** frame for CIDE.
 - **Do not** duplicate the body of [0119](0119-chat-slash-commands-intercom-surface.md) / [0109](0109-declarative-parametric-melody-catalog-toml-and-code-binders.md) — linking layer only.
+- **Do not** promise “we will digest any inbound user stream” — IOP reduces communication chaos; it does not remove human attention limits.
+
+---
+
+## Risks and boundaries (honest)
+
+| Risk | IOP/CIDE response |
+|------|---------------------|
+| **Intercom = endless feed** | Intercom is a **communication hub around a goal** ([0080](0080-intercom-naming-and-multi-party-channel-model.md), [0120](0120-primary-work-surface-intercom-or-editor.md)), not a generic messenger; topic cards, spine, threads ([0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md), [0031](0031-agent-chat-clarification-batches-and-threading.md)) |
+| **“We cannot handle the user stream”** | People cannot either without structure; the product **does not amplify** inbound noise — it **names intent** and separates synthesis from verification |
+| **Agent does everything at once** | Human-in-the-loop, diff, non-goals on autonomous merge; slash/MCP are contracts, not message chaos |
 
 ---
 
 ## Consequences
 
+- **Intercom** in perspective — **communication hub around a goal** (people + agents → intent → implementation), see [0120](0120-primary-work-surface-intercom-or-editor.md), [0080](0080-intercom-naming-and-multi-party-channel-model.md).
 - New command/chat/MCP features are described as **intent surface extension** + **parity** + **verification**, referencing IOP pillars.
 - Documentation site: block on [home](../index.md), [IOP manifest](../iop-manifest-v1.md), Russian copy at `docs/iop-manifest-v1.md`.
 - On **Accepted** — one line in [architecture-policy.md](../architecture-policy.md) (goal/positioning) and glossary in [MCP-PROTOCOL.md](../../MCP-PROTOCOL.md) if needed.
@@ -146,3 +158,4 @@ Wording such as “the whole world will switch to IOP”, “the world’s only 
 | 2026-05-17 | IOP: avoid “knowledge domains”; `knowledge/domains/` — repo path only. |
 | 2026-05-17 | IOP depth: information flow, communication/transparency; intent ≠ slash. |
 | 2026-05-17 | Anchor wording: IOP = **discipline of communication** (“communication is the whole key”). |
+| 2026-05-17 | Intercom as goal-centric communication hub; honest risks on message volume. |
