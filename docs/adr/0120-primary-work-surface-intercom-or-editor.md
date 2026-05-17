@@ -16,6 +16,7 @@
 | [0044](0044-avalonia-host-skia-agent-chat-surface.md) | Skia host для agent chat surface |
 | [0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md) | Topic cards в overview/detail |
 | [0119](0119-chat-slash-commands-intercom-surface.md) | Слэш-команды в `ChatInput` — усиливаются при Intercom в центре |
+| [0121](0121-intent-oriented-programming-paradigm.md) | IOP: дисциплина коммуникации; Intercom как центр вокруг цели; честные границы потока |
 | [0074](0074-settings-ui-mfd-compact-layout-overflow.md) | Плотность MFD при узкой колонке |
 
 ### Вне ADR
@@ -23,6 +24,7 @@
 | Документ | Роль |
 |----------|------|
 | [ux/README.md](../ui-ux/README.md) | Актуальная линия Flight; legacy Focus/Balanced/Power — архив |
+| [iop-manifest-v1.md](../iop-manifest-v1.md) | IOP: Intercom — центр коммуникации; не обещать «переварить любой поток» |
 
 ## Резюме
 
@@ -31,6 +33,7 @@
 - Вторичный контур (MFD) показывает **другую** поверхность (редактор или страницы shell), без потери функций.
 - **Не** путать с primary-монитором ОС ([0017 § primary vs Forward](0017-multi-window-workspace-and-agent-surfaces.md#adr0017-p5-primary-vs-forward)).
 - Дефолт продукта: **`editor`**; пресет «как Cursor» — **`intercom`**. Связь с [0119](0119-chat-slash-commands-intercom-surface.md).
+- При **`intercom`** лобовой якорь — не «лента сообщений», а **центр коммуникации вокруг цели** (люди + агенты → намерение → реализация), см. [0121](0121-intent-oriented-programming-paradigm.md), [iop-manifest-v1.md](../iop-manifest-v1.md).
 
 ---
 
@@ -122,6 +125,21 @@ primary_work_surface = "intercom"
 
 При **`editor`** — поведение как сейчас; 0119 остаётся полезным, но чат не обязан быть в центре внимания.
 
+<a id="adr0120-p5b"></a>
+
+#### 5.1. Intercom в центре ≠ бесконечный поток
+
+`primary_work_surface = intercom` **не** означает «всё входящее в одну ленту» и **не** обещает, что продукт или агенты **вывезут любой объём** переписки от людей — без структуры его не вывозят и сами люди ([0121](0121-intent-oriented-programming-paradigm.md) § «Риски и границы», [iop-manifest-v1.md](../iop-manifest-v1.md) § «Честно о потоке»).
+
+Смысл центрального Intercom:
+
+- **линии работы** (topic cards, spine) вместо хаотичного чата;
+- **батчи уточнений** и треды ([0031](0031-agent-chat-clarification-batches-and-threading.md));
+- **intent-first** и слэши/MCP как один контракт ([0119](0119-chat-slash-commands-intercom-surface.md));
+- человек в Forward — **арбитр намерения и дельты**, а не диспетчер каждого сообщения.
+
+0120 меняет **якорь внимания**; IOP и картотека тем — **как** этот якорь не превращается в шум.
+
 <a id="adr0120-p6"></a>
 
 ### 6. Редактор при Intercom-central
@@ -138,6 +156,7 @@ primary_work_surface = "intercom"
 - Тождество `primary_work_surface` и **primary monitor** ОС.
 - Обязательная смена строки `presentation` при каждом переключении Agent/Editor.
 - Удаление режима **Editor** или отказ от AvaloniaEdit во Forward **навсегда**.
+- **Бесконечная лента** как целевой UX Intercom-central — против [0080](0080-intercom-naming-and-multi-party-channel-model.md), [0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md), [0121](0121-intent-oriented-programming-paradigm.md).
 
 ---
 
@@ -205,3 +224,4 @@ flowchart LR
 | Дата | Изменение |
 |------|-----------|
 | 2026-05-17 | Proposed: `primary_work_surface` (intercom \| editor), swap Forward/MFD, связь с 0119. |
+| 2026-05-17 | §5.1: Intercom-central = центр коммуникации вокруг цели; границы потока (0121, IOP manifest). |

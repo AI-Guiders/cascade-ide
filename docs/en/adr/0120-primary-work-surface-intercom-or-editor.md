@@ -16,6 +16,7 @@
 | [0044](0044-avalonia-host-skia-agent-chat-surface.md) | Skia host for agent chat surface |
 | [0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md) | Topic cards in overview/detail |
 | [0119](0119-chat-slash-commands-intercom-surface.md) | Slash commands in `ChatInput` — stronger when Intercom is central |
+| [0121](0121-intent-oriented-programming-paradigm.md) | IOP: discipline of communication; Intercom as goal-centric hub; honest stream limits |
 | [0074](0074-settings-ui-mfd-compact-layout-overflow.md) | MFD density in a narrow column |
 
 ### Outside ADR
@@ -23,6 +24,7 @@
 | Document | Role |
 |----------|------|
 | [ui-ux/README.md](../ui-ux/README.md) | Current Flight line; legacy Focus/Balanced/Power — archive |
+| [iop-manifest-v1.md](../iop-manifest-v1.md) | IOP: Intercom communication hub; no promise to digest any inbound stream |
 
 ## Summary
 
@@ -31,6 +33,7 @@
 - Secondary contour (MFD) shows the **other** surface (editor or shell pages) without losing features.
 - **Do not** confuse with OS **primary monitor** ([0017 § primary vs Forward](0017-multi-window-workspace-and-agent-surfaces.md#adr0017-p5-primary-vs-forward)).
 - Product default: **`editor`**; “like Cursor” preset — **`intercom`**. Ties to [0119](0119-chat-slash-commands-intercom-surface.md).
+- With **`intercom`**, the forward anchor is not a “message feed” but the **communication hub around a goal** (people + agents → intent → implementation), see [0121](0121-intent-oriented-programming-paradigm.md), [iop-manifest-v1.md](../iop-manifest-v1.md).
 
 ---
 
@@ -122,6 +125,21 @@ When **`primary_work_surface = intercom`**:
 
 When **`editor`** — behavior as today; 0119 remains useful but chat need not be central.
 
+<a id="adr0120-p5b"></a>
+
+#### 5.1. Intercom-central ≠ endless stream
+
+`primary_work_surface = intercom` does **not** mean “everything inbound in one feed” and does **not** promise that the product or agents will **handle any volume** of human messages — without structure, **people cannot either** ([0121](0121-intent-oriented-programming-paradigm.md) § “Risks and boundaries”, [iop-manifest-v1.md](../iop-manifest-v1.md) § “Honestly about human message volume”).
+
+What central Intercom is for:
+
+- **lines of work** (topic cards, spine) instead of chaotic chat;
+- **clarification batches** and threads ([0031](0031-agent-chat-clarification-batches-and-threading.md));
+- **intent-first** and slash/MCP as one contract ([0119](0119-chat-slash-commands-intercom-surface.md));
+- the human in Forward is **arbiter of intent and delta**, not dispatcher of every message.
+
+0120 changes the **attention anchor**; IOP and the topic catalog define **how** that anchor does not become noise.
+
 <a id="adr0120-p6"></a>
 
 ### 6. Editor when Intercom-central
@@ -138,6 +156,7 @@ When **`editor`** — behavior as today; 0119 remains useful but chat need not b
 - Identifying `primary_work_surface` with OS **primary monitor**.
 - Mandatory `presentation` string change on every Agent/Editor toggle.
 - Removing **Editor** mode or abandoning AvaloniaEdit in Forward **forever**.
+- **Endless feed** as the target UX for Intercom-central — contradicts [0080](0080-intercom-naming-and-multi-party-channel-model.md), [0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md), [0121](0121-intent-oriented-programming-paradigm.md).
 
 ---
 
@@ -205,3 +224,4 @@ flowchart LR
 | Date | Change |
 |------|--------|
 | 2026-05-17 | Proposed: `primary_work_surface` (intercom \| editor), Forward/MFD swap, link to 0119. |
+| 2026-05-17 | §5.1: Intercom-central = goal-centric communication hub; stream boundaries (0121, IOP manifest). |
