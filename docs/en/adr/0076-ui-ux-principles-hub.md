@@ -2,7 +2,7 @@
 
 # ADR 0076: UI/UX - the center of principles (coherent text from the canon)
 
-**Status:** Proposed  
+**Status:** Accepted  
 **Date:** 2026-04-20  
 
 **Purpose:** one **input** ADR for the reader: **how we think about the interface and experience**, without going through dozens of records. Details, tables of terms and exceptions are in the original ADR and in [cascadeide-philosophy-v1.md](../../design/cascadeide-philosophy-v1.md).

@@ -1,6 +1,6 @@
 # ADR 0121: Intent-Oriented Programming (IOP) — conceptual foundation of Cascade IDE
 
-**Status:** Proposed  
+**Status:** Accepted  
 **Date:** 2026-05-17
 
 ## Related ADRs
