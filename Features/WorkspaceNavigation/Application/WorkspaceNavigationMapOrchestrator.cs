@@ -1,5 +1,6 @@
 #nullable enable
 using System.Text.Json;
+using CascadeIDE.Cockpit.Graph;
 using CascadeIDE.Contracts;
 
 namespace CascadeIDE.Features.WorkspaceNavigation.Application;
@@ -47,7 +48,7 @@ public static class WorkspaceNavigationMapOrchestrator
         return string.IsNullOrEmpty(msg) ? code : msg;
     }
 
-    public static List<RelatedRow> BuildRowsFromSubgraph(CodeNavigationMapSubgraphDocument subgraph, string? solutionPath)
+    public static List<RelatedRow> BuildRowsFromSubgraph(GraphDocument subgraph, string? solutionPath)
     {
         var rows = new List<RelatedRow>();
         foreach (var n in subgraph.Nodes)
@@ -69,7 +70,7 @@ public static class WorkspaceNavigationMapOrchestrator
         return rows;
     }
 
-    public static string ResolveAnchorLabelFromSubgraph(CodeNavigationMapSubgraphDocument subgraph) =>
+    public static string ResolveAnchorLabelFromSubgraph(GraphDocument subgraph) =>
         string.IsNullOrEmpty(subgraph.AnchorPath)
             ? "—"
             : Path.GetFileName(subgraph.AnchorPath);

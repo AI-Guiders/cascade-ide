@@ -1,22 +1,15 @@
 #nullable enable
 using Avalonia;
-using CascadeIDE.ViewModels;
 
-namespace CascadeIDE.Services.Navigation;
+namespace CascadeIDE.Cockpit.Graph.Layout;
 
-/// <summary>Звезда: якорь в центре, спутники по окружности (тот же подграф, что отдаёт MCP в режиме <c>subgraph</c>).</summary>
-public sealed class CodeNavigationMapStarGraphLayoutEngine : ICodeNavigationMapSubgraphLayoutEngine
+/// <summary>Звезда: якорь в центре, спутники по окружности.</summary>
+public sealed class StarGraphLayoutEngine : IGraphLayoutEngine
 {
-    public CodeNavigationMapGraphSceneVm Layout(CodeNavigationMapSubgraphDocument doc, double width, double height)
+    public GraphLayoutScene Layout(GraphDocument doc, double width, double height)
     {
         if (width <= 0 || height <= 0)
-            return new CodeNavigationMapGraphSceneVm
-            {
-                Nodes = [],
-                Edges = [],
-                Legend = [],
-                LegendColumnLeft = width
-            };
+            return EmptyScene(width);
 
         var anchor = doc.Nodes.FirstOrDefault(n => string.Equals(n.Kind, "anchor", StringComparison.OrdinalIgnoreCase))
                      ?? doc.Nodes.FirstOrDefault(n => n.Id.Equals("n0", StringComparison.OrdinalIgnoreCase));
@@ -30,10 +23,9 @@ public sealed class CodeNavigationMapStarGraphLayoutEngine : ICodeNavigationMapS
         var scale = Math.Clamp(minDim / 220.0, 0.58, 1.22);
         var anchorR = 16 * scale;
         var satR = 13 * scale;
-        // Одно кольцо — чуть компактнее, чтобы граф не «разъезжался» на всю зону; при плотности — два кольца (не одна орбита).
         const int singleRingMaxSatellites = 8;
 
-        var layouts = new List<CodeNavigationMapGraphNodeLayout>();
+        var layouts = new List<GraphLayoutNode>();
         Point? anchorCenter = null;
         var idToCenter = new Dictionary<string, Point>(StringComparer.OrdinalIgnoreCase);
         var idToRadius = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
@@ -44,7 +36,7 @@ public sealed class CodeNavigationMapStarGraphLayoutEngine : ICodeNavigationMapS
             anchorCenter = ac;
             idToCenter[anchor.Id] = ac;
             idToRadius[anchor.Id] = anchorR;
-            layouts.Add(new CodeNavigationMapGraphNodeLayout
+            layouts.Add(new GraphLayoutNode
             {
                 Id = anchor.Id,
                 Kind = anchor.Kind,
@@ -53,7 +45,7 @@ public sealed class CodeNavigationMapStarGraphLayoutEngine : ICodeNavigationMapS
                 Center = ac,
                 Radius = anchorR,
                 IsAnchor = true,
-                Shape = CodeNavigationMapNodeShape.Circle
+                Shape = GraphNodeShape.Circle
             });
         }
 
@@ -94,7 +86,7 @@ public sealed class CodeNavigationMapStarGraphLayoutEngine : ICodeNavigationMapS
             var p = new Point(px, py);
             idToCenter[sat.Id] = p;
             idToRadius[sat.Id] = satR;
-            layouts.Add(new CodeNavigationMapGraphNodeLayout
+            layouts.Add(new GraphLayoutNode
             {
                 Id = sat.Id,
                 Kind = sat.Kind,
@@ -103,18 +95,18 @@ public sealed class CodeNavigationMapStarGraphLayoutEngine : ICodeNavigationMapS
                 Center = p,
                 Radius = satR,
                 IsAnchor = false,
-                Shape = CodeNavigationMapNodeShape.Circle
+                Shape = GraphNodeShape.Circle
             });
         }
 
-        var edgeLayouts = new List<CodeNavigationMapGraphEdgeLayout>();
+        var edgeLayouts = new List<GraphLayoutEdge>();
         foreach (var e in doc.Edges)
         {
             if (!idToCenter.TryGetValue(e.FromId, out var a))
                 continue;
             if (!idToCenter.TryGetValue(e.ToId, out var b))
                 continue;
-            edgeLayouts.Add(new CodeNavigationMapGraphEdgeLayout
+            edgeLayouts.Add(new GraphLayoutEdge
             {
                 FromNodeId = e.FromId,
                 ToNodeId = e.ToId,
@@ -122,15 +114,14 @@ public sealed class CodeNavigationMapStarGraphLayoutEngine : ICodeNavigationMapS
                 To = b,
                 ToRadius = idToRadius.TryGetValue(e.ToId, out var toR) ? toR : satR,
                 Kind = e.Kind,
-                RelatedKind = e.RelatedKind
+                RelationKind = e.RelationKind
             });
         }
 
-        // Если рёбер нет, но есть якорь и спутники — линии от центра.
         if (edgeLayouts.Count == 0 && anchorCenter is { } ac0)
         {
             foreach (var s in layouts.Where(x => !x.IsAnchor))
-                edgeLayouts.Add(new CodeNavigationMapGraphEdgeLayout
+                edgeLayouts.Add(new GraphLayoutEdge
                 {
                     FromNodeId = anchor?.Id ?? "n0",
                     ToNodeId = s.Id,
@@ -138,11 +129,11 @@ public sealed class CodeNavigationMapStarGraphLayoutEngine : ICodeNavigationMapS
                     To = s.Center,
                     ToRadius = s.Radius,
                     Kind = null,
-                    RelatedKind = null
+                    RelationKind = null
                 });
         }
 
-        return new CodeNavigationMapGraphSceneVm
+        return new GraphLayoutScene
         {
             Nodes = layouts,
             Edges = edgeLayouts,
@@ -152,10 +143,19 @@ public sealed class CodeNavigationMapStarGraphLayoutEngine : ICodeNavigationMapS
         };
     }
 
+    private static GraphLayoutScene EmptyScene(double width) =>
+        new()
+        {
+            Nodes = [],
+            Edges = [],
+            Legend = [],
+            LegendColumnLeft = width
+        };
+
     private static string TruncateLabel(string label)
     {
-        if (label.Length <= 22)
+        if (label.Length <= GraphControlFlowLayoutMetrics.LabelMaxLength)
             return label;
-        return label[..19] + "…";
+        return label[..GraphControlFlowLayoutMetrics.LabelTruncateLength] + "…";
     }
 }

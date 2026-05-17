@@ -29,7 +29,7 @@ public sealed class CodeNavigationMapGraphSceneVm
     public required IReadOnlyList<CodeNavigationMapGraphNodeLayout> Nodes { get; init; }
     public required IReadOnlyList<CodeNavigationMapGraphEdgeLayout> Edges { get; init; }
 
-    /// <summary>Визуальный язык сцены; <see cref="CascadeIDE.Cockpit.PrimitivesKit.CodeNavigationMapVisualTheme.ForPresentation"/>.</summary>
+    /// <summary>Визуальный язык сцены; Render — <see cref="CascadeIDE.Views.SkiaKit.Graph.SkiaGraphVisualTheme.ForPresentation"/>.</summary>
     public CodeNavigationMapGraphPresentationKind Presentation { get; init; } = CodeNavigationMapGraphPresentationKind.CodeControlFlow;
     public IReadOnlyList<CodeNavigationMapLegendEntry> Legend { get; init; } = [];
     /// <summary>Резервировать колонку под легенду (номера шагов и/или обозначения фигур).</summary>
@@ -57,7 +57,7 @@ public sealed class CodeNavigationMapGraphSceneVm
     public IReadOnlySet<string> HighlightedEdgeKeys { get; init; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
-    /// Размер шрифта боковых подписей узлов (call_step), согласованный с укладкой; null — взять <see cref="CascadeIDE.Cockpit.PrimitivesKit.CodeNavigationMapRenderInvariants.MinSideLabelFontSize"/> при отрисовке.
+    /// Размер шрифта боковых подписей узлов (call_step), согласованный с укладкой; null — <see cref="CascadeIDE.Cockpit.Graph.Layout.GraphRenderInvariants.MinSideLabelFontSize"/> при отрисовке.
     /// </summary>
     public double? SideLabelFontSizePx { get; init; }
 

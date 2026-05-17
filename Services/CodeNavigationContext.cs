@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using CascadeIDE.Cockpit.Graph;
 using CascadeIDE.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -425,7 +426,7 @@ public static class CodeNavigationContextBuilder
         return JsonSerializer.Serialize(new
         {
             mode = "subgraph",
-            graph_kind = CodeNavigationMapGraphKindWire.RelatedFiles,
+            graph_kind = GraphKindWire.RelatedFiles,
             anchor_path = anchor,
             line,
             column,

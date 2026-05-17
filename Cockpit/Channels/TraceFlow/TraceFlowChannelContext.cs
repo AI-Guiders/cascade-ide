@@ -1,5 +1,5 @@
 #nullable enable
-using CascadeIDE.Services;
+using CascadeIDE.Cockpit.Graph;
 
 namespace CascadeIDE.Cockpit.Channels.TraceFlow;
 
@@ -7,6 +7,6 @@ namespace CascadeIDE.Cockpit.Channels.TraceFlow;
 /// Shared channel context for trace-flow family.
 /// </summary>
 public readonly record struct TraceFlowChannelContext(
-    CodeNavigationMapSubgraphDocument Subgraph,
+    GraphDocument Subgraph,
     int ImpactedTestsBadge,
     string LastTestSummary);

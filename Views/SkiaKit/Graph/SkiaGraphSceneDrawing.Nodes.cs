@@ -1,19 +1,19 @@
 using System.Globalization;
 using Avalonia;
 using Avalonia.Media;
-using CascadeIDE.ViewModels;
+using CascadeIDE.Cockpit.Graph.Layout;
 
-namespace CascadeIDE.Cockpit.PrimitivesKit;
+namespace CascadeIDE.Views.SkiaKit.Graph;
 
-public static partial class CodeNavigationMapSceneDrawing
+public static partial class SkiaGraphSceneDrawing
 {
-    private static void DrawNodes(DrawingContext context, CodeNavigationMapGraphSceneVm scene, CodeNavigationMapVisualTheme theme)
+    private static void DrawNodes(DrawingContext context, GraphLayoutScene scene, SkiaGraphVisualTheme theme)
     {
         var useLegend = scene.UseLegendColumn;
         foreach (var n in scene.Nodes)
         {
             var highlighted = scene.HighlightedNodeIds.Contains(n.Id);
-            if (n.Shape == CodeNavigationMapNodeShape.Condition)
+            if (n.Shape == GraphNodeShape.Condition)
                 DrawConditionBranch(context, theme, n, highlighted);
             else
             {
@@ -30,10 +30,10 @@ public static partial class CodeNavigationMapSceneDrawing
             }
             else if (!string.IsNullOrEmpty(glyph))
             {
-                var maxGlyph = Math.Max(CodeNavigationMapRenderInvariants.MinGlyphFontSize, n.Radius * 0.92);
+                var maxGlyph = Math.Max(SkiaGraphRenderInvariants.MinGlyphFontSize, n.Radius * 0.92);
                 var fontSize = n.LegendIndex is > 99
-                    ? CodeNavigationMapRenderInvariants.MinGlyphFontSize
-                    : Math.Clamp(maxGlyph, CodeNavigationMapRenderInvariants.MinGlyphFontSize, 11);
+                    ? SkiaGraphRenderInvariants.MinGlyphFontSize
+                    : Math.Clamp(maxGlyph, SkiaGraphRenderInvariants.MinGlyphFontSize, 11);
                 var glyphText = new FormattedText(
                     glyph,
                     CultureInfo.InvariantCulture,
@@ -50,7 +50,7 @@ public static partial class CodeNavigationMapSceneDrawing
             var fullLabel = BuildNodeFullLabel(n, useLegend);
             if (!string.IsNullOrWhiteSpace(fullLabel))
             {
-                var sideFont = scene.SideLabelFontSizePx ?? CodeNavigationMapRenderInvariants.MinSideLabelFontSize;
+                var sideFont = scene.SideLabelFontSizePx ?? SkiaGraphRenderInvariants.MinSideLabelFontSize;
                 var labelText = new FormattedText(
                     fullLabel,
                     CultureInfo.InvariantCulture,
@@ -67,7 +67,7 @@ public static partial class CodeNavigationMapSceneDrawing
     }
 
     /// <summary>Узел условия в control-flow: заливка и обводка ромба (классический знак ветвления).</summary>
-    private static void DrawConditionBranch(DrawingContext context, CodeNavigationMapVisualTheme theme, CodeNavigationMapGraphNodeLayout n, bool highlighted)
+    private static void DrawConditionBranch(DrawingContext context, SkiaGraphVisualTheme theme, GraphLayoutNode n, bool highlighted)
     {
         var geo = new StreamGeometry();
         var c = n.Center;
@@ -99,7 +99,7 @@ public static partial class CodeNavigationMapSceneDrawing
         }
     }
 
-    private static IBrush ResolveNodeFill(CodeNavigationMapVisualTheme theme, CodeNavigationMapGraphNodeLayout node)
+    private static IBrush ResolveNodeFill(SkiaGraphVisualTheme theme, GraphLayoutNode node)
     {
         if (node.IsAnchor)
             return theme.AnchorFill;
@@ -112,7 +112,7 @@ public static partial class CodeNavigationMapSceneDrawing
         return theme.CallFill;
     }
 
-    private static string BuildNodeGlyph(CodeNavigationMapGraphNodeLayout node, bool useLegendColumn)
+    private static string BuildNodeGlyph(GraphLayoutNode node, bool useLegendColumn)
     {
         if (node.IsAnchor)
             return "A";
@@ -129,7 +129,7 @@ public static partial class CodeNavigationMapSceneDrawing
         return "•";
     }
 
-    private static string? BuildNodeFullLabel(CodeNavigationMapGraphNodeLayout node, bool useLegendColumn)
+    private static string? BuildNodeFullLabel(GraphLayoutNode node, bool useLegendColumn)
     {
         if (useLegendColumn)
             return null;
@@ -141,12 +141,12 @@ public static partial class CodeNavigationMapSceneDrawing
         return label;
     }
 
-    private static bool IsExitNode(CodeNavigationMapGraphNodeLayout node) =>
+    private static bool IsExitNode(GraphLayoutNode node) =>
         string.Equals(node.Kind, ExitStepKind, StringComparison.OrdinalIgnoreCase);
 
-    private static bool IsConditionNode(CodeNavigationMapGraphNodeLayout node) =>
+    private static bool IsConditionNode(GraphLayoutNode node) =>
         string.Equals(node.Kind, ConditionStepKind, StringComparison.OrdinalIgnoreCase);
 
-    private static bool IsHandlerNode(CodeNavigationMapGraphNodeLayout node) =>
+    private static bool IsHandlerNode(GraphLayoutNode node) =>
         string.Equals(node.Kind, "handler_step", StringComparison.OrdinalIgnoreCase);
 }

@@ -1,4 +1,6 @@
 #nullable enable
+using CascadeIDE.Cockpit.Graph;
+
 namespace CascadeIDE.Cockpit.Channels.TraceFlow;
 
 /// <summary>
@@ -49,7 +51,7 @@ public sealed class CodeFlowTraceChannel : ITraceFlowChannel
     private static bool IsExit(string? kind) =>
         string.Equals(kind, "Exit", StringComparison.OrdinalIgnoreCase);
 
-    private static CodeNavigationMapSubgraphEdge PickDominantEdge(IReadOnlyList<CodeNavigationMapSubgraphEdge> edges)
+    private static GraphEdge PickDominantEdge(IReadOnlyList<GraphEdge> edges)
     {
         if (edges.Count == 1)
             return edges[0];

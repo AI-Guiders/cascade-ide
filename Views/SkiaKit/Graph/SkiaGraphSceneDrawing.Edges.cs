@@ -1,12 +1,12 @@
 using Avalonia;
 using Avalonia.Media;
-using CascadeIDE.ViewModels;
+using CascadeIDE.Cockpit.Graph.Layout;
 
-namespace CascadeIDE.Cockpit.PrimitivesKit;
+namespace CascadeIDE.Views.SkiaKit.Graph;
 
-public static partial class CodeNavigationMapSceneDrawing
+public static partial class SkiaGraphSceneDrawing
 {
-    private static void DrawEdges(DrawingContext context, CodeNavigationMapGraphSceneVm scene, CodeNavigationMapVisualTheme theme)
+    private static void DrawEdges(DrawingContext context, GraphLayoutScene scene, SkiaGraphVisualTheme theme)
     {
         var previousWasLoop = false;
         foreach (var edge in scene.Edges)
@@ -29,7 +29,7 @@ public static partial class CodeNavigationMapSceneDrawing
         }
     }
 
-    private static Pen ResolveEdgePen(CodeNavigationMapVisualTheme theme, string? kind, bool highlighted)
+    private static Pen ResolveEdgePen(SkiaGraphVisualTheme theme, string? kind, bool highlighted)
     {
         if (highlighted)
             return theme.HighlightedEdgePen;
@@ -60,9 +60,9 @@ public static partial class CodeNavigationMapSceneDrawing
 
     private static void DrawLoopEdge(
         DrawingContext context,
-        CodeNavigationMapGraphSceneVm scene,
-        CodeNavigationMapVisualTheme theme,
-        CodeNavigationMapGraphEdgeLayout edge,
+        GraphLayoutScene scene,
+        SkiaGraphVisualTheme theme,
+        GraphLayoutEdge edge,
         Pen linePen,
         Pen loopPen)
     {
@@ -87,7 +87,7 @@ public static partial class CodeNavigationMapSceneDrawing
         context.DrawEllipse(null, loopPen, edge.To, loopRadius, loopRadius);
     }
 
-    private static double GetNodeRadius(CodeNavigationMapGraphSceneVm scene, string nodeId, double fallback)
+    private static double GetNodeRadius(GraphLayoutScene scene, string nodeId, double fallback)
     {
         foreach (var n in scene.Nodes)
         {

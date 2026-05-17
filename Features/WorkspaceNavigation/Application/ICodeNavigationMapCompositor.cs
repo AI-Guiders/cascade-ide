@@ -1,20 +1,18 @@
 #nullable enable
+using CascadeIDE.Cockpit.Graph;
+using CascadeIDE.Cockpit.Graph.Layout;
 using CascadeIDE.Models;
 using CascadeIDE.Services.CodeNavigation;
-using CascadeIDE.ViewModels;
 using CascadeIDE.Services.SkiaInstruments;
+using CascadeIDE.ViewModels;
 
-namespace CascadeIDE.Services.Navigation;
+namespace CascadeIDE.Features.WorkspaceNavigation.Application;
 
-/// <summary>
-/// Композитор карты намерений: выбирает layout по уровню карты и возвращает сцену
-/// вместе с рекомендуемой высотой viewport для читаемой отрисовки.
-/// </summary>
 public interface ICodeNavigationMapCompositor
     : ISkiaInstrumentCompositor<CodeNavigationMapCompositionIntent, CodeNavigationMapCompositionResult>
 {
     CodeNavigationMapCompositionResult Compose(
-        CodeNavigationMapSubgraphDocument doc,
+        GraphDocument doc,
         string mapLevel,
         double availableWidth,
         double availableHeight,
@@ -22,12 +20,15 @@ public interface ICodeNavigationMapCompositor
 }
 
 public sealed record CodeNavigationMapCompositionResult(
-    CodeNavigationMapGraphSceneVm Scene,
+    GraphLayoutScene LayoutScene,
     double PreferredHeight,
-    IReadOnlyList<CodeNavigationMapInstrumentBlockDescriptor> CodeNavigationMapInstrumentBlocks);
+    IReadOnlyList<CodeNavigationMapInstrumentBlockDescriptor> CodeNavigationMapInstrumentBlocks)
+{
+    public CodeNavigationMapGraphSceneVm Scene =>
+        CodeNavigationMapGraphSceneProjection.ToViewModel(LayoutScene);
+}
 
-/// <param name="DetailLevel">Политика Declutter + метрики Layout (ADR 0055); источник — <c>[code_navigation_map].detail_level</c>.</param>
 public sealed record CodeNavigationMapCompositionIntent(
-    CodeNavigationMapSubgraphDocument Subgraph,
+    GraphDocument Subgraph,
     string MapLevel,
     CodeNavigationMapDetailLevel DetailLevel = CodeNavigationMapDetailLevel.Normal);

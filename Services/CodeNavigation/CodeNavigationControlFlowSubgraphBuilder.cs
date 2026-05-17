@@ -1,5 +1,6 @@
 #nullable enable
 using System.Text.Json;
+using CascadeIDE.Cockpit.Graph;
 using CascadeIDE.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -9,7 +10,7 @@ namespace CascadeIDE.Services.CodeNavigation;
 
 /// <summary>
 /// Строит subgraph control flow из синтаксиса метода (Roslyn). Домен — <b>навигация по коду</b>, не структура workspace/git;
-/// wire-документ — <see cref="CodeNavigationMapSubgraphDocument"/> (та же семантическая карта, что отображается в кокпите; см. ADR 0039, 0053).
+/// wire-документ — <see cref="GraphDocument"/> (та же семантическая карта, что отображается в кокпите; см. ADR 0039, 0053).
 /// </summary>
 public static class CodeNavigationControlFlowSubgraphBuilder
 {
@@ -56,7 +57,7 @@ public static class CodeNavigationControlFlowSubgraphBuilder
         var payload = new
         {
             mode = "subgraph",
-            graph_kind = CodeNavigationMapGraphKindWire.CodeIntent,
+            graph_kind = GraphKindWire.CodeIntent,
             anchor_path = filePath,
             nodes = graph.Nodes.Select(n => new
             {
@@ -74,7 +75,7 @@ public static class CodeNavigationControlFlowSubgraphBuilder
                 from_id = e.FromId,
                 to_id = e.ToId,
                 kind = e.Kind,
-                related_kind = e.RelatedKind
+                related_kind = e.RelationKind
             }).ToList()
         };
         return JsonSerializer.Serialize(payload);
@@ -85,7 +86,7 @@ public static class CodeNavigationControlFlowSubgraphBuilder
         var payload = new
         {
             mode = "subgraph",
-            graph_kind = CodeNavigationMapGraphKindWire.CodeIntent,
+            graph_kind = GraphKindWire.CodeIntent,
             anchor_path = filePath,
             nodes = new[]
             {
@@ -123,22 +124,22 @@ public static class CodeNavigationControlFlowSubgraphBuilder
     private sealed class ControlFlowGraphBuilder
     {
         private readonly string _filePath;
-        private readonly CodeNavigationMapSubgraphBlueprint _graph;
+        private readonly GraphDocumentBlueprint _graph;
 
-        public List<SubgraphBuildNode> Nodes => _graph.Nodes;
+        public List<GraphBuildNode> Nodes => _graph.Nodes;
 
-        public List<SubgraphBuildEdge> Edges => _graph.Edges;
+        public List<GraphBuildEdge> Edges => _graph.Edges;
 
         public ControlFlowGraphBuilder(string filePath, string methodName, int nodeCap, int edgeCap)
         {
             _filePath = filePath;
-            _graph = new CodeNavigationMapSubgraphBlueprint(
+            _graph = new GraphDocumentBlueprint(
                 filePath,
                 nodeCap,
                 edgeCap,
                 Path.GetFileName(filePath),
                 $"method {methodName}",
-                CodeNavigationMapGraphKind.CodeIntent);
+                GraphKind.CodeIntent);
         }
 
         public void Build(MethodDeclarationSyntax method)
@@ -220,9 +221,9 @@ public static class CodeNavigationControlFlowSubgraphBuilder
         private static string CatchLegend(CatchClauseSyntax catchClause)
         {
             if (catchClause.Declaration is { } d)
-                return CodeNavigationMapSubgraphBlueprint.SanitizeLegendLine($"catch ({d})", 200);
+                return GraphDocumentBlueprint.SanitizeLegendLine($"catch ({d})", 200);
             if (catchClause.Filter is { } f)
-                return CodeNavigationMapSubgraphBlueprint.SanitizeLegendLine($"catch when ({f.FilterExpression})", 200);
+                return GraphDocumentBlueprint.SanitizeLegendLine($"catch when ({f.FilterExpression})", 200);
             return "catch";
         }
 
@@ -250,7 +251,7 @@ public static class CodeNavigationControlFlowSubgraphBuilder
         /// <summary>Высокоуровневый шаг: узел условия (ромб) и рёбра от входящих потоков.</summary>
         private string? AddConditionStep(string conditionExpressionText, List<string> incoming)
         {
-            var condLine = CodeNavigationMapSubgraphBlueprint.SanitizeLegendLine(conditionExpressionText, 200);
+            var condLine = GraphDocumentBlueprint.SanitizeLegendLine(conditionExpressionText, 200);
             var conditionId = AddNode("condition_step", "IF", "if condition", condLine);
             if (conditionId is null)
                 return null;
@@ -285,7 +286,7 @@ public static class CodeNavigationControlFlowSubgraphBuilder
             foreach (var invocation in invocations)
             {
                 var label = ExtractInvocationLabel(invocation);
-                var legend = CodeNavigationMapSubgraphBlueprint.SanitizeLegendLine(invocation.ToString(), 200);
+                var legend = GraphDocumentBlueprint.SanitizeLegendLine(invocation.ToString(), 200);
                 var nodeId = AddNode("call_step", label, $"call {label}", legend);
                 if (nodeId is null)
                     return continuation;

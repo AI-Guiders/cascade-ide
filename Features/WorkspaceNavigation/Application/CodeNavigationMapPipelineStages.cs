@@ -1,22 +1,20 @@
 #nullable enable
-using CascadeIDE.Cockpit.PrimitivesKit;
+using CascadeIDE.Cockpit.Graph;
+using CascadeIDE.Cockpit.Graph.Layout;
 using CascadeIDE.Models;
 using CascadeIDE.Services.CodeNavigation;
 using CascadeIDE.Services.SkiaInstruments;
-using CascadeIDE.ViewModels;
 
-namespace CascadeIDE.Services.Navigation;
+namespace CascadeIDE.Features.WorkspaceNavigation.Application;
 
-/// <summary>Контекст запроса на композицию карты намерений.</summary>
 public readonly record struct CodeNavigationMapPipelineContext(
-    CodeNavigationMapSubgraphDocument Subgraph,
+    GraphDocument Subgraph,
     string MapLevel,
     SkiaInstrumentViewport Viewport,
     CodeNavigationMapDetailLevel DetailLevel = CodeNavigationMapDetailLevel.Normal);
 
-/// <summary>Промежуточное состояние pipeline карты намерений.</summary>
 public readonly record struct CodeNavigationMapPipelineState(
-    CodeNavigationMapSubgraphDocument Subgraph,
+    GraphDocument Subgraph,
     string MapLevel,
     SkiaInstrumentViewport Viewport,
     CodeNavigationMapDetailLevel DetailLevel,
@@ -40,14 +38,11 @@ public interface ICodeNavigationMapLayoutStage
     CodeNavigationMapCompositionResult Layout(in CodeNavigationMapPipelineState state);
 }
 
-/// <summary>
-/// Intent stage v1: нормализация уровня и сбор базовых метрик графа для последующих стадий.
-/// </summary>
 public sealed class CodeNavigationMapIntentStage : ICodeNavigationMapIntentStage
 {
     public CodeNavigationMapPipelineState Resolve(in CodeNavigationMapPipelineContext context)
     {
-        var level = Models.CodeNavigationMapLevelKind.Normalize(context.MapLevel);
+        var level = CodeNavigationMapLevelKind.Normalize(context.MapLevel);
         var doc = context.Subgraph;
         var loopEdgeCount = 0;
         var multiBranchEdgeCount = 0;
@@ -72,7 +67,7 @@ public sealed class CodeNavigationMapIntentStage : ICodeNavigationMapIntentStage
             isDense);
     }
 
-    private static int EstimateLevelCount(CodeNavigationMapSubgraphDocument doc)
+    private static int EstimateLevelCount(GraphDocument doc)
     {
         if (doc.Nodes.Count <= 1)
             return 1;
@@ -116,9 +111,6 @@ public sealed class CodeNavigationMapIntentStage : ICodeNavigationMapIntentStage
     }
 }
 
-/// <summary>
-/// Declutter: политика «что показывать» до геометрии (ADR 0055). Glance + control flow: убираем второстепенные multibranch-связи.
-/// </summary>
 public sealed class CodeNavigationMapDeclutterStage(ICodeNavigationMapIntentStage intentStage) : ICodeNavigationMapDeclutterStage
 {
     private readonly ICodeNavigationMapIntentStage _intentStage = intentStage;
@@ -137,8 +129,7 @@ public sealed class CodeNavigationMapDeclutterStage(ICodeNavigationMapIntentStag
         return _intentStage.Resolve(ctx);
     }
 
-    /// <summary>Glance: исключаем рёбра multibranch и недостижимые от anchor узлы; метрики пересчитываются через Intent.</summary>
-    private static CodeNavigationMapSubgraphDocument? TryGlanceFilterControlFlow(in CodeNavigationMapPipelineState state)
+    private static GraphDocument? TryGlanceFilterControlFlow(in CodeNavigationMapPipelineState state)
     {
         if (state.DetailLevel != CodeNavigationMapDetailLevel.Glance)
             return null;
@@ -156,20 +147,20 @@ public sealed class CodeNavigationMapDeclutterStage(ICodeNavigationMapIntentStag
         var kept = new HashSet<string>(reachable, StringComparer.OrdinalIgnoreCase);
         var finalEdges = edgesWithoutMulti.Where(e => kept.Contains(e.FromId) && kept.Contains(e.ToId)).ToList();
 
-        return new CodeNavigationMapSubgraphDocument
+        return new GraphDocument
         {
             AnchorPath = doc.AnchorPath,
-            GraphKind = doc.GraphKind,
+            Kind = doc.Kind,
             Nodes = nodes,
             Edges = finalEdges
         };
     }
 
-    private static bool IsMultibranchEdge(CodeNavigationMapSubgraphEdge e) =>
+    private static bool IsMultibranchEdge(GraphEdge e) =>
         !string.IsNullOrWhiteSpace(e.Kind)
         && e.Kind.Contains("multibranch", StringComparison.OrdinalIgnoreCase);
 
-    private static string FindAnchorNodeId(CodeNavigationMapSubgraphDocument doc)
+    private static string FindAnchorNodeId(GraphDocument doc)
     {
         var anchor = doc.Nodes.FirstOrDefault(n => string.Equals(n.Kind, "anchor", StringComparison.OrdinalIgnoreCase));
         if (anchor is not null)
@@ -180,7 +171,7 @@ public sealed class CodeNavigationMapDeclutterStage(ICodeNavigationMapIntentStag
         return doc.Nodes[0].Id;
     }
 
-    private static HashSet<string> ReachableForward(string anchorId, IReadOnlyList<CodeNavigationMapSubgraphEdge> edges)
+    private static HashSet<string> ReachableForward(string anchorId, IReadOnlyList<GraphEdge> edges)
     {
         var outgoing = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
         foreach (var e in edges)
@@ -214,48 +205,43 @@ public sealed class CodeNavigationMapDeclutterStage(ICodeNavigationMapIntentStag
     }
 }
 
-/// <summary>Layout stage v1: выбирает движок и рассчитывает рекомендуемую высоту viewport.</summary>
 public sealed class CodeNavigationMapLayoutStage(
-    ICodeNavigationMapSubgraphLayoutEngine? fileLayout = null,
-    ICodeNavigationMapSubgraphLayoutEngine? controlFlowLayout = null) : ICodeNavigationMapLayoutStage
+    IGraphLayoutEngine? fileLayout = null,
+    IGraphLayoutEngine? controlFlowLayout = null) : ICodeNavigationMapLayoutStage
 {
-    private readonly ICodeNavigationMapSubgraphLayoutEngine _fileLayout = fileLayout ?? new CodeNavigationMapStarGraphLayoutEngine();
-    private readonly ICodeNavigationMapSubgraphLayoutEngine _controlFlowLayout = controlFlowLayout ?? new CodeNavigationMapControlFlowGraphLayoutEngine();
+    private readonly IGraphLayoutEngine _fileLayout = fileLayout ?? new StarGraphLayoutEngine();
+    private readonly IGraphLayoutEngine _controlFlowLayout = controlFlowLayout ?? new ControlFlowGraphLayoutEngine();
 
     public CodeNavigationMapCompositionResult Layout(in CodeNavigationMapPipelineState state)
     {
         var viewport = state.Viewport;
         var width = viewport.Width > 0 ? viewport.Width : CodeNavigationMapCompositor.DefaultWidth;
-        var isControlFlow = string.Equals(state.MapLevel, Models.CodeNavigationMapLevelKind.ControlFlow, StringComparison.Ordinal);
+        var presentation = GraphLayoutPresentationResolver.Resolve(state.Subgraph, state.MapLevel);
+        var isControlFlow = string.Equals(state.MapLevel, CodeNavigationMapLevelKind.ControlFlow, StringComparison.Ordinal);
 
         if (!isControlFlow)
         {
             var preferredHeight = viewport.Height > 0 ? viewport.Height : CodeNavigationMapCompositor.DefaultHeightFile;
-            var scene = _fileLayout.Layout(state.Subgraph, width, preferredHeight);
-            scene = CodeNavigationMapGraphSceneVm.WithPresentationKind(
-                scene,
-                CodeNavigationMapPresentationResolver.Resolve(state.Subgraph, state.MapLevel));
+            var layoutScene = _fileLayout.Layout(state.Subgraph, width, preferredHeight)
+                .WithPresentation(presentation);
             return new CodeNavigationMapCompositionResult(
-                scene,
+                layoutScene,
                 preferredHeight,
                 Array.Empty<CodeNavigationMapInstrumentBlockDescriptor>());
         }
 
-        var computedHeight = CodeNavigationMapGraphPrimitives.EstimateControlFlowPreferredHeight(
+        var computedHeight = GraphControlFlowLayoutMetrics.EstimatePreferredHeight(
             state.EstimatedLevelCount,
             state.DetailLevel);
-        // Высота панели от «читаемого» интринсика, не от растягивания под весь слот — иначе рёбра и шаг становятся нечитаемыми.
         var preferredCfHeight = Math.Clamp(
             computedHeight,
-            CodeNavigationMapGraphPrimitives.DefaultViewportHeightControlFlow,
-            CodeNavigationMapGraphPrimitives.MaxViewportHeightControlFlow);
+            GraphViewportMetrics.DefaultHeightControlFlow,
+            GraphViewportMetrics.MaxHeightControlFlow);
 
-        var cfScene = _controlFlowLayout.Layout(state.Subgraph, width, preferredCfHeight);
-        var presented = CodeNavigationMapGraphSceneVm.WithPresentationKind(
-            cfScene,
-            CodeNavigationMapPresentationResolver.Resolve(state.Subgraph, state.MapLevel));
+        var cfScene = _controlFlowLayout.Layout(state.Subgraph, width, preferredCfHeight)
+            .WithPresentation(presentation);
         return new CodeNavigationMapCompositionResult(
-            presented,
+            cfScene,
             preferredCfHeight,
             Array.Empty<CodeNavigationMapInstrumentBlockDescriptor>());
     }

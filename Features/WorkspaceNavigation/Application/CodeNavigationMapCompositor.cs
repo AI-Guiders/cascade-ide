@@ -1,31 +1,28 @@
 #nullable enable
-using CascadeIDE.Cockpit.PrimitivesKit;
+using CascadeIDE.Cockpit.Graph;
+using CascadeIDE.Cockpit.Graph.Layout;
 using CascadeIDE.Models;
 using CascadeIDE.Services.CodeNavigation;
 using CascadeIDE.Services.SkiaInstruments;
+using CascadeIDE.ViewModels;
 
-namespace CascadeIDE.Services.Navigation;
+namespace CascadeIDE.Features.WorkspaceNavigation.Application;
 
-/// <summary>
-/// Оркестратор компоновки <b>семантической карты</b> (граф → сцена для отрисовки): уровень карты → движок раскладки + политика высоты.
-/// «Карта намерений» (control flow) — <b>CodeNavigation</b>; режим файлов/связей — <b>WorkspaceNavigation</b> (см. <see cref="Models.CodeNavigationMapLevelKind"/>).
-/// Поверхность Skia compositor занимается размещением в слотах кокпита, а не смыслом узлов.
-/// </summary>
+/// <summary>Композитор graph-backed карты намерений (Intent → Declutter → Layout), ADR 0055 / 0115.</summary>
 public sealed class CodeNavigationMapCompositor : ICodeNavigationMapCompositor
 {
-    public const double DefaultWidth = CodeNavigationMapGraphPrimitives.DefaultViewportWidth;
-    public const double DefaultHeightFile = CodeNavigationMapGraphPrimitives.DefaultViewportHeightFile;
-    public const double DefaultHeightControlFlow = CodeNavigationMapGraphPrimitives.DefaultViewportHeightControlFlow;
-    /// <summary>Верхний предел «интринсик»-высоты и слияния с viewport; сцена карты заполняет высоту области, если она передана в SkiaInstrumentViewport.</summary>
-    public const double MaxHeightControlFlow = CodeNavigationMapGraphPrimitives.MaxViewportHeightControlFlow;
+    public const double DefaultWidth = GraphViewportMetrics.DefaultWidth;
+    public const double DefaultHeightFile = GraphViewportMetrics.DefaultHeightFile;
+    public const double DefaultHeightControlFlow = GraphViewportMetrics.DefaultHeightControlFlow;
+    public const double MaxHeightControlFlow = GraphViewportMetrics.MaxHeightControlFlow;
 
     private readonly ICodeNavigationMapIntentStage _intentStage;
     private readonly ICodeNavigationMapDeclutterStage _declutterStage;
     private readonly ICodeNavigationMapLayoutStage _layoutStage;
 
     public CodeNavigationMapCompositor(
-        ICodeNavigationMapSubgraphLayoutEngine? fileLayout = null,
-        ICodeNavigationMapSubgraphLayoutEngine? controlFlowLayout = null,
+        IGraphLayoutEngine? fileLayout = null,
+        IGraphLayoutEngine? controlFlowLayout = null,
         ICodeNavigationMapIntentStage? intentStage = null,
         ICodeNavigationMapDeclutterStage? declutterStage = null,
         ICodeNavigationMapLayoutStage? layoutStage = null)
@@ -41,14 +38,14 @@ public sealed class CodeNavigationMapCompositor : ICodeNavigationMapCompositor
             intent.Subgraph,
             intent.MapLevel,
             viewport,
-            CodeNavigationMapDetailLevel.Normal);
+            intent.DetailLevel);
         var resolved = _intentStage.Resolve(context);
         var decluttered = _declutterStage.Apply(resolved);
         return WithCodeNavigationInstrumentBlocks(_layoutStage.Layout(decluttered), decluttered);
     }
 
     public CodeNavigationMapCompositionResult Compose(
-        CodeNavigationMapSubgraphDocument doc,
+        GraphDocument doc,
         string mapLevel,
         double availableWidth,
         double availableHeight,

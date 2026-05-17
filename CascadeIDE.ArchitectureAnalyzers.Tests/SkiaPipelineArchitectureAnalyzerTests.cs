@@ -76,9 +76,9 @@ public sealed class SkiaPipelineArchitectureAnalyzerTests
             namespace CascadeIDE.Services.Navigation;
             public sealed class AnyCompositor
             {
-                public object X() => new CodeNavigationMapStarGraphLayoutEngine();
+                public object X() => new StarGraphLayoutEngine();
             }
-            public sealed class CodeNavigationMapStarGraphLayoutEngine { }
+            public sealed class StarGraphLayoutEngine { }
             """));
 
         var d = Assert.Single(diags);
@@ -91,7 +91,7 @@ public sealed class SkiaPipelineArchitectureAnalyzerTests
         var diags = await RunAnalyzerAsync((
             @"D:\repo\Views\SkiaHostRendererPipeline.cs",
             """
-            using CascadeIDE.Services.Navigation;
+            using CascadeIDE.Features.WorkspaceNavigation.Application;
             namespace CascadeIDE.Views;
             public sealed class SkiaHostRendererPipeline
             {

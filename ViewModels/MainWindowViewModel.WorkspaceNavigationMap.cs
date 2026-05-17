@@ -6,20 +6,18 @@ using CascadeIDE.Cockpit.Composition.TraceFlow;
 using CascadeIDE.Cockpit.Graph;
 using CascadeIDE.Features.WorkspaceNavigation.Application;
 using CascadeIDE.Models;
-using CascadeIDE.Services.Navigation;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 namespace CascadeIDE.ViewModels;
 
 /// <summary>
-/// Слот Pfd: <b>отображение</b> карты намерений / <see cref="CodeNavigationMapSubgraphDocument"/> (те же данные, что JSON MCP). Граф подграфа — не синоним <c>instrument_id</c>, см. ADR 0065.
+/// Слот Pfd: <b>отображение</b> карты намерений / <see cref="CascadeIDE.Cockpit.Graph.GraphDocument"/> (те же данные, что JSON MCP). Граф подграфа — не синоним <c>instrument_id</c>, см. ADR 0065.
 /// По доменам: <b>карта намерений</b> (в т.ч. control flow) — CodeNavigation; <b>зависимости файлов</b> — WorkspaceNavigation; <b>submodules</b> — дерево/GitMap (ADR 0062).
 /// </summary>
 public partial class MainWindowViewModel
 {
     private readonly IGraphDataSource _codeNavigationMapGraphDataSource = new WorkspaceNavigationMapContextJsonDataSource();
-    private readonly CodeNavigationMapCompositor _codeNavigationMapCompositor = new();
     private readonly TraceFlowChannelCoordinator _traceFlowChannelCoordinator = new(
         [
             new CodeFlowTraceChannel(),

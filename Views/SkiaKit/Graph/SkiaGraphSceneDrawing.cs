@@ -1,13 +1,11 @@
 using Avalonia;
 using Avalonia.Media;
-using CascadeIDE.ViewModels;
+using CascadeIDE.Cockpit.Graph.Layout;
 
-namespace CascadeIDE.Cockpit.PrimitivesKit;
+namespace CascadeIDE.Views.SkiaKit.Graph;
 
-/// <summary>
-/// Точка входа: отрисовка сцены мини-карты навигации по коду (в UI — «Карта намерений»). Геометрия — partial (рёбра / узлы / легенда).
-/// </summary>
-public static partial class CodeNavigationMapSceneDrawing
+/// <summary>Render graph-backed surface: edges → nodes → legend (ADR 0055, SkiaKit 0117).</summary>
+public static partial class SkiaGraphSceneDrawing
 {
     private const string ConditionStepKind = "condition_step";
     private const string ExitStepKind = "exit_step";
@@ -52,8 +50,8 @@ public static partial class CodeNavigationMapSceneDrawing
 
     public static void DrawScene(
         DrawingContext context,
-        CodeNavigationMapGraphSceneVm scene,
-        CodeNavigationMapVisualTheme theme,
+        GraphLayoutScene scene,
+        SkiaGraphVisualTheme theme,
         double width,
         double height)
     {
@@ -66,9 +64,9 @@ public static partial class CodeNavigationMapSceneDrawing
     }
 
     /// <summary>Hit-test узла для pointer routing (узел условия — ромб, манхэттенское расстояние до ромба).</summary>
-    public static bool HitTestNode(CodeNavigationMapGraphNodeLayout n, Point p, double tolerance = 6)
+    public static bool HitTestNode(GraphLayoutNode n, Point p, double tolerance = 6)
     {
-        if (n.Shape == CodeNavigationMapNodeShape.Condition)
+        if (n.Shape == GraphNodeShape.Condition)
             return HitConditionBranchOutline(n.Center, n.Radius, p, tolerance);
         var dx = p.X - n.Center.X;
         var dy = p.Y - n.Center.Y;

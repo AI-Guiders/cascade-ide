@@ -4,7 +4,6 @@ using CascadeIDE.Cockpit.Composition.TraceFlow;
 using CascadeIDE.Cockpit.Graph;
 using CascadeIDE.Features.WorkspaceNavigation.Application;
 using CascadeIDE.Models;
-using CascadeIDE.Services.Navigation;
 using CascadeIDE.Features.HybridIndex.Application;
 
 namespace CascadeIDE.ViewModels;
@@ -79,7 +78,7 @@ public partial class MainWindowViewModel
         {
             json = await Task.Run(
                     () => _codeNavigationMapGraphDataSource.BuildNavigationJson(
-                        new CodeNavigationMapJsonRequest(
+                        new GraphNavigationJsonRequest(
                             level,
                             wantGraph,
                             currentPath,
@@ -100,8 +99,7 @@ public partial class MainWindowViewModel
         if (ct.IsCancellationRequested)
             return;
 
-        var deps = new WorkspaceNavigationMapRefreshComposer.Dependencies(
-            _codeNavigationMapCompositor,
+        var deps = WorkspaceNavigationMapGraphComposition.CreateRefreshDependencies(
             _traceFlowChannelCoordinator,
             _traceFlowCdsRouter,
             _traceFlowSurfaceCompositor);

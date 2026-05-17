@@ -22,5 +22,9 @@
 - `SkiaTileGridLayout` — сетка плиток по ширине viewport.
 - `SkiaTextLayout.Wrap` — перенос строк.
 - `SkiaKitColor` / `SkiaKitThemeBridge` — мост CascadeTheme → SKColor.
+- **`Graph/`** — graph-backed surfaces ([0067](../../docs/adr/0067-graph-backed-surfaces-contract.md)):
+  - вход: `Cockpit.Graph.Layout.GraphLayoutScene` (геометрия после Layout stage);
+  - `SkiaGraphSceneDrawing` — Render (рёбра → узлы → легенда), hit-test;
+  - `SkiaGraphVisualTheme`, `GraphLayoutSceneMapper` (мост с ViewModels для binding).
 
 Фичи (`Views/Chat/Skia/`, semantic map render, …) собирают **сцену** из kit + свой layout/compositor.

@@ -1,13 +1,12 @@
 #nullable enable
-using System.IO;
 using System.Text.Json;
 
-namespace CascadeIDE.Services;
+namespace CascadeIDE.Cockpit.Graph;
 
-/// <summary>Парсинг JSON режима <c>subgraph</c> без дублирования логики построения графа.</summary>
-public static class CodeNavigationMapSubgraphJson
+/// <summary>Парсинг wire JSON режима <c>subgraph</c> в <see cref="GraphDocument"/> (ADR 0067).</summary>
+public static class GraphDocumentJson
 {
-    public static bool TryParse(string json, out CodeNavigationMapSubgraphDocument? doc, out string? error)
+    public static bool TryParse(string json, out GraphDocument? doc, out string? error)
     {
         doc = null;
         error = null;
@@ -38,7 +37,7 @@ public static class CodeNavigationMapSubgraphJson
 
             var graphKind = TryParseGraphKind(root);
 
-            var nodes = new List<CodeNavigationMapSubgraphNode>();
+            var nodes = new List<GraphNode>();
             if (root.TryGetProperty("nodes", out var nodesEl) && nodesEl.ValueKind == JsonValueKind.Array)
             {
                 foreach (var el in nodesEl.EnumerateArray())
@@ -56,7 +55,7 @@ public static class CodeNavigationMapSubgraphJson
                         && liEl.TryGetInt32(out var li))
                         legendIndex = li;
                     var legendText = el.TryGetProperty("legend_text", out var ltEl) ? ltEl.GetString() : null;
-                    nodes.Add(new CodeNavigationMapSubgraphNode
+                    nodes.Add(new GraphNode
                     {
                         Id = id,
                         Path = path,
@@ -70,7 +69,7 @@ public static class CodeNavigationMapSubgraphJson
                 }
             }
 
-            var edges = new List<CodeNavigationMapSubgraphEdge>();
+            var edges = new List<GraphEdge>();
             if (root.TryGetProperty("edges", out var edgesEl) && edgesEl.ValueKind == JsonValueKind.Array)
             {
                 foreach (var el in edgesEl.EnumerateArray())
@@ -80,15 +79,27 @@ public static class CodeNavigationMapSubgraphJson
                     if (string.IsNullOrEmpty(from) || string.IsNullOrEmpty(to))
                         continue;
                     var k = el.TryGetProperty("kind", out var ke) ? ke.GetString() : null;
-                    var rk = el.TryGetProperty("related_kind", out var rke) ? rke.GetString() : null;
-                    edges.Add(new CodeNavigationMapSubgraphEdge { FromId = from, ToId = to, Kind = k, RelatedKind = rk });
+                    var relationKind = el.TryGetProperty("relation_kind", out var rkeNew) && rkeNew.ValueKind == JsonValueKind.String
+                        ? rkeNew.GetString()
+                        : el.TryGetProperty("related_kind", out var rke) ? rke.GetString() : null;
+                    var provenance = el.TryGetProperty("edge_provenance", out var pe) && pe.ValueKind == JsonValueKind.String
+                        ? pe.GetString()
+                        : null;
+                    edges.Add(new GraphEdge
+                    {
+                        FromId = from,
+                        ToId = to,
+                        Kind = k,
+                        RelationKind = relationKind,
+                        EdgeProvenance = provenance
+                    });
                 }
             }
 
-            doc = new CodeNavigationMapSubgraphDocument
+            doc = new GraphDocument
             {
                 AnchorPath = anchor,
-                GraphKind = graphKind,
+                Kind = graphKind,
                 Nodes = nodes,
                 Edges = edges
             };
@@ -101,20 +112,20 @@ public static class CodeNavigationMapSubgraphJson
         }
     }
 
-    private static CodeNavigationMapGraphKind TryParseGraphKind(JsonElement root)
+    public static GraphKind TryParseGraphKind(JsonElement root)
     {
         if (!root.TryGetProperty("graph_kind", out var g) || g.ValueKind != JsonValueKind.String)
-            return CodeNavigationMapGraphKind.Unspecified;
+            return GraphKind.Unspecified;
         var s = g.GetString();
         if (string.IsNullOrEmpty(s))
-            return CodeNavigationMapGraphKind.Unspecified;
-        if (string.Equals(s, CodeNavigationMapGraphKindWire.CodeIntent, StringComparison.Ordinal)
-            || string.Equals(s, CodeNavigationMapGraphKindWire.CodeIntentLegacy, StringComparison.Ordinal))
-            return CodeNavigationMapGraphKind.CodeIntent;
-        if (string.Equals(s, CodeNavigationMapGraphKindWire.RelatedFiles, StringComparison.Ordinal))
-            return CodeNavigationMapGraphKind.RelatedFiles;
-        if (string.Equals(s, CodeNavigationMapGraphKindWire.RepositoryModuleTree, StringComparison.Ordinal))
-            return CodeNavigationMapGraphKind.RepositoryModuleTree;
-        return CodeNavigationMapGraphKind.Unspecified;
+            return GraphKind.Unspecified;
+        if (string.Equals(s, GraphKindWire.CodeIntent, StringComparison.Ordinal)
+            || string.Equals(s, GraphKindWire.CodeIntentLegacy, StringComparison.Ordinal))
+            return GraphKind.CodeIntent;
+        if (string.Equals(s, GraphKindWire.RelatedFiles, StringComparison.Ordinal))
+            return GraphKind.RelatedFiles;
+        if (string.Equals(s, GraphKindWire.RepositoryModuleTree, StringComparison.Ordinal))
+            return GraphKind.RepositoryModuleTree;
+        return GraphKind.Unspecified;
     }
 }

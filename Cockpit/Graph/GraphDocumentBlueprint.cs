@@ -1,29 +1,29 @@
 #nullable enable
 
-namespace CascadeIDE.Services;
+namespace CascadeIDE.Cockpit.Graph;
 
 /// <summary>
-/// Общий изменяемый чертёж subgraph (узлы/рёбра в том же смысле, что <see cref="CodeNavigationMapSubgraphDocument"/> и JSON MCP).
-/// Один механический API для разных <b>источников</b>: control flow и связи кода (CodeNavigation), связанные файлы (WorkspaceNavigation), submodule-дерево (GitMap, ADR 0062) — без дублирования капов и Merge-логики рёбер.
+/// Изменяемый чертёж <see cref="GraphDocument"/> для разных источников (control flow, related files, GitMap).
+/// Общий механический API graph-backed layer (ADR 0115).
 /// </summary>
-public sealed class CodeNavigationMapSubgraphBlueprint
+public class GraphDocumentBlueprint
 {
     private int _nextId = 1;
     private int _legendSerial;
 
-    public CodeNavigationMapSubgraphBlueprint(
+    public GraphDocumentBlueprint(
         string anchorPath,
         int maxNodes,
         int maxEdges,
         string anchorLabel,
         string anchorRationale,
-        CodeNavigationMapGraphKind graphKind = CodeNavigationMapGraphKind.Unspecified)
+        GraphKind graphKind = GraphKind.Unspecified)
     {
         AnchorPath = anchorPath;
-        GraphKind = graphKind;
+        Kind = graphKind;
         MaxNodes = maxNodes;
         MaxEdges = maxEdges;
-        Nodes.Add(new SubgraphBuildNode(
+        Nodes.Add(new GraphBuildNode(
             AnchorNodeId,
             anchorPath,
             "anchor",
@@ -34,23 +34,20 @@ public sealed class CodeNavigationMapSubgraphBlueprint
             null));
     }
 
-    /// <summary>Якорь subgraph (как правило файл control flow или корень worktree GitMap).</summary>
     public string AnchorPath { get; }
 
     public string AnchorNodeId { get; } = "n0";
 
-    /// <summary>Тип графа для <see cref="ToDocument"/> и JSON MCP (<c>graph_kind</c>).</summary>
-    public CodeNavigationMapGraphKind GraphKind { get; }
+    public GraphKind Kind { get; }
 
     public int MaxNodes { get; }
 
     public int MaxEdges { get; }
 
-    public List<SubgraphBuildNode> Nodes { get; } = [];
+    public List<GraphBuildNode> Nodes { get; } = [];
 
-    public List<SubgraphBuildEdge> Edges { get; } = [];
+    public List<GraphBuildEdge> Edges { get; } = [];
 
-    /// <summary>Санитизация строки для легенды / подписи (общая для control flow и прочих сценариев).</summary>
     public static string SanitizeLegendLine(string? text, int maxLen)
     {
         if (string.IsNullOrWhiteSpace(text))
@@ -64,10 +61,6 @@ public sealed class CodeNavigationMapSubgraphBlueprint
         return s[..(maxLen - 1)] + "…";
     }
 
-    /// <summary>
-    /// Узел с опциональной нумерацией легенды (control flow: <paramref name="assignControlFlowLegendIndex"/> = true).
-    /// GitMap / прочие графы обычно передают false.
-    /// </summary>
     public string? TryAddNode(
         string kind,
         string nodePath,
@@ -93,23 +86,19 @@ public sealed class CodeNavigationMapSubgraphBlueprint
             legendText = string.IsNullOrEmpty(leg) ? null : leg;
         }
 
-        Nodes.Add(new SubgraphBuildNode(id, nodePath, kind, label, relativePath, rationale, legendIndex, legendText));
+        Nodes.Add(new GraphBuildNode(id, nodePath, kind, label, relativePath, rationale, legendIndex, legendText));
         return id;
     }
 
-    /// <summary>Ребро parent → child с одинаковым kind/related_kind (GitMap: «содержит»).</summary>
-    public bool TryAddEdge(string fromId, string toId, string kind, string relatedKind)
+    public bool TryAddEdge(string fromId, string toId, string kind, string relationKind, string? edgeProvenance = null)
     {
         if (Edges.Count >= MaxEdges)
             return false;
-        Edges.Add(new SubgraphBuildEdge(fromId, toId, kind, relatedKind));
+        Edges.Add(new GraphBuildEdge(fromId, toId, kind, relationKind, edgeProvenance));
         return true;
     }
 
-    /// <summary>
-    /// Несколько источников → один приёмник; при нескольких источниках kind рёбра становится <c>Merge</c> (как в control flow).
-    /// </summary>
-    public void AddEdges(IReadOnlyList<string> fromIds, string toId, string kind, string relatedKind)
+    public void AddEdges(IReadOnlyList<string> fromIds, string toId, string kind, string relationKind, string? edgeProvenance = null)
     {
         if (fromIds.Count == 0)
             return;
@@ -119,13 +108,10 @@ public sealed class CodeNavigationMapSubgraphBlueprint
         {
             if (Edges.Count >= MaxEdges)
                 break;
-            Edges.Add(new SubgraphBuildEdge(fromId, toId, edgeKind, relatedKind));
+            Edges.Add(new GraphBuildEdge(fromId, toId, edgeKind, relationKind, edgeProvenance));
         }
     }
 
-    #region Высокоуровневые операции (GitMap, ADR 0062)
-
-    /// <summary>Узел корня submodule (путь каталога checkout).</summary>
     public string? TryAddSubmoduleRepository(string absolutePath, string shortLabel, string? rationale = null) =>
         TryAddNode(
             "submodule",
@@ -136,19 +122,15 @@ public sealed class CodeNavigationMapSubgraphBlueprint
             null,
             assignControlFlowLegendIndex: false);
 
-    /// <summary>Ребро «родительский репозиторий содержит вложенный модуль».</summary>
     public bool TryLinkParentContainsSubmodule(string parentId, string childId, string edgeKind = "contains") =>
         TryAddEdge(parentId, childId, edgeKind, edgeKind);
 
-    #endregion
-
-    /// <summary>Снимок для композитора карты намерений и разбора subgraph без повторного копирования полей.</summary>
-    public CodeNavigationMapSubgraphDocument ToDocument() =>
+    public GraphDocument ToDocument() =>
         new()
         {
             AnchorPath = AnchorPath,
-            GraphKind = GraphKind,
-            Nodes = Nodes.Select(n => new CodeNavigationMapSubgraphNode
+            Kind = Kind,
+            Nodes = Nodes.Select(n => new GraphNode
             {
                 Id = n.Id,
                 Path = n.Path,
@@ -159,17 +141,18 @@ public sealed class CodeNavigationMapSubgraphBlueprint
                 LegendIndex = n.LegendIndex,
                 LegendText = n.LegendText
             }).ToList(),
-            Edges = Edges.Select(e => new CodeNavigationMapSubgraphEdge
+            Edges = Edges.Select(e => new GraphEdge
             {
                 FromId = e.FromId,
                 ToId = e.ToId,
                 Kind = e.Kind,
-                RelatedKind = e.RelatedKind
+                RelationKind = e.RelationKind,
+                EdgeProvenance = e.EdgeProvenance
             }).ToList()
         };
 }
 
-public readonly record struct SubgraphBuildNode(
+public readonly record struct GraphBuildNode(
     string Id,
     string Path,
     string Kind,
@@ -179,8 +162,9 @@ public readonly record struct SubgraphBuildNode(
     int? LegendIndex,
     string? LegendText);
 
-public readonly record struct SubgraphBuildEdge(
+public readonly record struct GraphBuildEdge(
     string FromId,
     string ToId,
     string Kind,
-    string RelatedKind);
+    string RelationKind,
+    string? EdgeProvenance);

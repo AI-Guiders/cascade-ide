@@ -2,18 +2,18 @@ using System.Collections.Generic;
 using System.Globalization;
 using Avalonia;
 using Avalonia.Media;
-using CascadeIDE.ViewModels;
+using CascadeIDE.Cockpit.Graph.Layout;
 
-namespace CascadeIDE.Cockpit.PrimitivesKit;
+namespace CascadeIDE.Views.SkiaKit.Graph;
 
-public static partial class CodeNavigationMapSceneDrawing
+public static partial class SkiaGraphSceneDrawing
 {
-    private static void DrawLegend(DrawingContext context, CodeNavigationMapGraphSceneVm scene, CodeNavigationMapVisualTheme theme, double w, double h)
+    private static void DrawLegend(DrawingContext context, GraphLayoutScene scene, SkiaGraphVisualTheme theme, double w, double h)
     {
         if (!scene.UseLegendColumn || h < 40)
             return;
 
-        var isBelow = scene.LegendPlacement == CodeNavigationMapLegendBlockPlacement.BelowGraph;
+        var isBelow = scene.LegendPlacement == GraphLegendBlockPlacement.BelowGraph;
         if (isBelow)
         {
             if (scene.LegendBlockTopY <= 0 || scene.LegendBlockTopY >= h - 12)
@@ -31,7 +31,7 @@ public static partial class CodeNavigationMapSceneDrawing
             return;
 
         var captionSize = scene.SideLabelFontSizePx is { } s
-            ? Math.Clamp(s, CodeNavigationMapRenderInvariants.MinLegendCaptionFontSize, CodeNavigationMapRenderInvariants.MaxSideLabelFontSize)
+            ? Math.Clamp(s, SkiaGraphRenderInvariants.MinLegendCaptionFontSize, SkiaGraphRenderInvariants.MaxSideLabelFontSize)
             : 12;
 
         var idxColW = MeasureIndexColumnWidth(theme, scene.Legend, captionSize);
@@ -125,7 +125,7 @@ public static partial class CodeNavigationMapSceneDrawing
         }
     }
 
-    private static double MeasureIndexColumnWidth(CodeNavigationMapVisualTheme theme, IReadOnlyList<CodeNavigationMapLegendEntry> rows, double captionSize)
+    private static double MeasureIndexColumnWidth(SkiaGraphVisualTheme theme, IReadOnlyList<GraphLegendEntry> rows, double captionSize)
     {
         var idxColW = 0d;
         foreach (var row in rows)
@@ -145,8 +145,8 @@ public static partial class CodeNavigationMapSceneDrawing
     }
 
     private static double FitLegendCaptionSize(
-        CodeNavigationMapVisualTheme theme,
-        IReadOnlyList<CodeNavigationMapLegendEntry> rows,
+        SkiaGraphVisualTheme theme,
+        IReadOnlyList<GraphLegendEntry> rows,
         double textMaxW,
         double captionSize,
         double viewportH)
@@ -194,7 +194,7 @@ public static partial class CodeNavigationMapSceneDrawing
         return floor;
     }
 
-    private static void DrawLegendReturnKeyRow(DrawingContext context, CodeNavigationMapVisualTheme theme, double x0, double y, double rowH, double captionSize)
+    private static void DrawLegendReturnKeyRow(DrawingContext context, SkiaGraphVisualTheme theme, double x0, double y, double rowH, double captionSize)
     {
         const double iconR = 5.5;
         var cy = y + rowH / 2;
@@ -213,7 +213,7 @@ public static partial class CodeNavigationMapSceneDrawing
         context.DrawText(cap, new Point(x0 + iconR * 2 + 10, y + (rowH - cap.Height) / 2));
     }
 
-    private static void DrawLegendConditionKeyRow(DrawingContext context, CodeNavigationMapVisualTheme theme, double x0, double y, double rowH, double captionSize)
+    private static void DrawLegendConditionKeyRow(DrawingContext context, SkiaGraphVisualTheme theme, double x0, double y, double rowH, double captionSize)
     {
         const double r = 5.5;
         var cy = y + rowH / 2;
@@ -240,7 +240,7 @@ public static partial class CodeNavigationMapSceneDrawing
         context.DrawText(cap, new Point(x0 + r * 2 + 10, y + (rowH - cap.Height) / 2));
     }
 
-    private static void DrawLegendExceptionFlowKeyRow(DrawingContext context, CodeNavigationMapVisualTheme theme, double x0, double y, double rowH, double captionSize)
+    private static void DrawLegendExceptionFlowKeyRow(DrawingContext context, SkiaGraphVisualTheme theme, double x0, double y, double rowH, double captionSize)
     {
         const double iconR = 5.5;
         var cy = y + rowH / 2;
@@ -267,13 +267,13 @@ public static partial class CodeNavigationMapSceneDrawing
 
     private static double DrawLegendEdgeStyleKeyBlock(
         DrawingContext context,
-        CodeNavigationMapVisualTheme theme,
+        SkiaGraphVisualTheme theme,
         double x0,
         double y,
         double keyRowH,
         double captionSize,
         double viewportBottom,
-        IReadOnlyList<CodeNavigationMapGraphEdgeLayout> edges)
+        IReadOnlyList<GraphLayoutEdge> edges)
     {
         static bool KindContains(string? kind, string needle) =>
             !string.IsNullOrEmpty(kind) && kind.Contains(needle, StringComparison.OrdinalIgnoreCase);
@@ -310,7 +310,7 @@ public static partial class CodeNavigationMapSceneDrawing
             yRow += keyRowH + 2;
         }
 
-        // Совпадает с <see cref="CodeNavigationMapSceneDrawing.Edges"/>: solid — основной поток.
+        // Совпадает с <see cref="SkiaGraphSceneDrawing.Edges"/>: solid — основной поток.
         OneRow(theme.BaseEdgePen, "основной поток (вызовы, return, последовательно)", ref y);
         if (edges.Any(e => KindContains(e.Kind, "conditional") || KindContains(e.Kind, "exception")))
             OneRow(theme.ConditionalEdgePen, "длинные штрихи — ветвления, catch, исключения", ref y);

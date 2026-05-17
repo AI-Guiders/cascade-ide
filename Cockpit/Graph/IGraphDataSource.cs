@@ -3,9 +3,17 @@
 namespace CascadeIDE.Cockpit.Graph;
 
 /// <summary>
-/// Источник JSON полезной нагрузки для graph-backed прибора карты навигации (CDS, не IDS). ADR 0115.
+/// Источник wire JSON для graph-backed прибора (CDS, не IDS). ADR 0115; доменный снимок — <see cref="GraphDocument"/> (ADR 0067).
 /// </summary>
 public interface IGraphDataSource
 {
-    string BuildNavigationJson(CodeNavigationMapJsonRequest request);
+    string BuildNavigationJson(GraphNavigationJsonRequest request);
+}
+
+/// <summary>
+/// Источник, возвращающий <see cref="GraphDocument"/> напрямую (предпочтительно для нового кода).
+/// </summary>
+public interface IGraphDocumentSource
+{
+    bool TryBuildDocument(GraphNavigationJsonRequest request, out GraphDocument? document, out string? wireJson);
 }

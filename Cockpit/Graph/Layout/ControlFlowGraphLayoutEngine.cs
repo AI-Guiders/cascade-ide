@@ -1,26 +1,25 @@
 #nullable enable
 using Avalonia;
-using CascadeIDE.Cockpit.PrimitivesKit;
-using CascadeIDE.ViewModels;
+using CascadeIDE.Cockpit.Graph;
 
-namespace CascadeIDE.Services.Navigation;
+namespace CascadeIDE.Cockpit.Graph.Layout;
 
 /// <summary>
 /// Укладка control-flow в формате "полётного плана": основной поток сверху вниз,
 /// а узлы одного шага по глубине — в сторону от центральной оси.
 /// </summary>
-public sealed class CodeNavigationMapControlFlowGraphLayoutEngine : ICodeNavigationMapSubgraphLayoutEngine
+public sealed class ControlFlowGraphLayoutEngine : IGraphLayoutEngine
 {
-    public CodeNavigationMapGraphSceneVm Layout(CodeNavigationMapSubgraphDocument doc, double width, double height)
+    public GraphLayoutScene Layout(GraphDocument doc, double width, double height)
     {
         if (width <= 0 || height <= 0)
-            return new CodeNavigationMapGraphSceneVm
+            return new GraphLayoutScene
             {
                 Nodes = [],
                 Edges = [],
                 Legend = [],
                 LegendColumnLeft = width,
-                LegendPlacement = CodeNavigationMapLegendBlockPlacement.BesideGraph,
+                LegendPlacement = GraphLegendBlockPlacement.BesideGraph,
                 LegendBlockTopY = 0
             };
 
@@ -28,13 +27,13 @@ public sealed class CodeNavigationMapControlFlowGraphLayoutEngine : ICodeNavigat
                      ?? doc.Nodes.FirstOrDefault(n => n.Id.Equals("n0", StringComparison.OrdinalIgnoreCase))
                      ?? (doc.Nodes.Count > 0 ? doc.Nodes[0] : null);
         if (anchor is null)
-            return new CodeNavigationMapGraphSceneVm
+            return new GraphLayoutScene
             {
                 Nodes = [],
                 Edges = [],
                 Legend = [],
                 LegendColumnLeft = width,
-                LegendPlacement = CodeNavigationMapLegendBlockPlacement.BesideGraph,
+                LegendPlacement = GraphLegendBlockPlacement.BesideGraph,
                 LegendBlockTopY = 0
             };
 
@@ -57,15 +56,15 @@ public sealed class CodeNavigationMapControlFlowGraphLayoutEngine : ICodeNavigat
             .OrderBy(g => g.Key)
             .ToDictionary(g => g.Key, g => g.Select(kv => kv.Key).ToList());
 
-        var topPadding = CodeNavigationMapGraphPrimitives.ControlFlowTopPadding;
-        var bottomPadding = CodeNavigationMapGraphPrimitives.ControlFlowBottomPadding;
-        var sidePadding = CodeNavigationMapGraphPrimitives.ControlFlowSidePadding;
-        var legendGap = CodeNavigationMapGraphPrimitives.ControlFlowLegendGap;
+        var topPadding = GraphControlFlowLayoutMetrics.TopPadding;
+        var bottomPadding = GraphControlFlowLayoutMetrics.BottomPadding;
+        var sidePadding = GraphControlFlowLayoutMetrics.SidePadding;
+        var legendGap = GraphControlFlowLayoutMetrics.LegendGap;
 
-        static bool IsExitStep(CodeNavigationMapSubgraphNode n) =>
+        static bool IsExitStep(GraphNode n) =>
             string.Equals(n.Kind, "exit_step", StringComparison.OrdinalIgnoreCase);
 
-        static bool IsConditionStep(CodeNavigationMapSubgraphNode n) =>
+        static bool IsConditionStep(GraphNode n) =>
             string.Equals(n.Kind, "condition_step", StringComparison.OrdinalIgnoreCase);
 
         var hasLegendRows = doc.Nodes.Any(static n =>
@@ -89,9 +88,9 @@ public sealed class CodeNavigationMapControlFlowGraphLayoutEngine : ICodeNavigat
                     && n.LegendIndex is > 0
                     && !string.IsNullOrWhiteSpace(n.LegendText))
                 .OrderBy(n => n.LegendIndex.GetValueOrDefault())
-                .Select(n => new CodeNavigationMapLegendEntry { Index = n.LegendIndex!.Value, Text = n.LegendText!.Trim() })
+                .Select(n => new GraphLegendEntry { Index = n.LegendIndex!.Value, Text = n.LegendText!.Trim() })
                 .ToList()
-            : new List<CodeNavigationMapLegendEntry>();
+            : new List<GraphLegendEntry>();
 
         var contentLegendNeed = EstimateLegendColumnContentWidth(
             legendRowsPreview,
@@ -99,56 +98,56 @@ public sealed class CodeNavigationMapControlFlowGraphLayoutEngine : ICodeNavigat
             showLegendConditionKey,
             showLegendExceptionFlowKey,
             showLegendEdgeStyleKey);
-        var fallbackFraction = width * CodeNavigationMapGraphPrimitives.ControlFlowLegendReserveWidthFraction;
-        var legendReserveCap = CodeNavigationMapGraphPrimitives.ResolveControlFlowLegendReserveCap(width);
-        var legendReserveLo = Math.Min(CodeNavigationMapGraphPrimitives.ControlFlowLegendReserveMin, legendReserveCap);
+        var fallbackFraction = width * GraphControlFlowLayoutMetrics.LegendReserveWidthFraction;
+        var legendReserveCap = GraphControlFlowLayoutMetrics.ResolveLegendReserveCap(width);
+        var legendReserveLo = Math.Min(GraphControlFlowLayoutMetrics.LegendReserveMin, legendReserveCap);
         var firstLegendReserve = useLegendColumn
             ? Math.Clamp(
                 Math.Max(fallbackFraction, contentLegendNeed),
                 legendReserveLo,
                 legendReserveCap)
             : 0;
-        IReadOnlyList<CodeNavigationMapLegendEntry> legendRows = legendRowsPreview;
+        IReadOnlyList<GraphLegendEntry> legendRows = legendRowsPreview;
 
-        CodeNavigationMapGraphSceneVm BuildFor(double heightForY, double legendResForWidth)
+        GraphLayoutScene BuildFor(double heightForY, double legendResForWidth)
         {
         var graphWidth = Math.Max(
-            CodeNavigationMapGraphPrimitives.ControlFlowMinGraphWidth,
+            GraphControlFlowLayoutMetrics.MinGraphWidth,
             width - legendResForWidth - (useLegendColumn ? legendGap : 0));
 
         // Узлы на одном уровне не разъезжаются на всю ширину слота — ограниченная «полоса чтения», по центру области графа.
-        var bandW = CodeNavigationMapGraphPrimitives.ResolveControlFlowReadableBandWidth(graphWidth);
+        var bandW = GraphControlFlowLayoutMetrics.ResolveReadableBandWidth(graphWidth);
         var bandLeft = (graphWidth - bandW) * 0.5;
         var centerX = bandLeft + bandW * 0.5;
-        var labelCharBudget = CodeNavigationMapGraphPrimitives.ResolveControlFlowLabelCharBudget(bandW);
+        var labelCharBudget = GraphControlFlowLayoutMetrics.ResolveLabelCharBudget(bandW);
 
         var levelCount = Math.Max(1, levels.Count);
         var innerH = heightForY - topPadding - bottomPadding;
         var slotCount = Math.Max(1, levelCount - 1);
         var rawYStep = innerH / slotCount;
-        var minYStep = CodeNavigationMapGraphPrimitives.MinVerticalStepForLevelCount(levelCount);
+        var minYStep = GraphControlFlowLayoutMetrics.MinVerticalStepForLevelCount(levelCount);
         var maxYStep = Math.Min(
-            CodeNavigationMapGraphPrimitives.ControlFlowMaxReadableVerticalStepCap,
-            Math.Max(CodeNavigationMapGraphPrimitives.ControlFlowMaxReadableVerticalStep, rawYStep));
+            GraphControlFlowLayoutMetrics.MaxReadableVerticalStepCap,
+            Math.Max(GraphControlFlowLayoutMetrics.MaxReadableVerticalStep, rawYStep));
         var yStep = Math.Clamp(rawYStep, minYStep, maxYStep);
         var verticalSpan = Math.Max(0, levelCount - 1) * yStep;
         var yStart = topPadding + (innerH - verticalSpan) * 0.5;
         var radiusMul = Math.Clamp(
-            yStep / CodeNavigationMapGraphPrimitives.ControlFlowRefVerticalStep,
-            CodeNavigationMapGraphPrimitives.ControlFlowRadiusScaleMin,
-            CodeNavigationMapGraphPrimitives.ControlFlowRadiusScaleMax);
+            yStep / GraphControlFlowLayoutMetrics.RefVerticalStep,
+            GraphControlFlowLayoutMetrics.RadiusScaleMin,
+            GraphControlFlowLayoutMetrics.RadiusScaleMax);
         var horizontalRadiusScale = Math.Clamp(
-            bandW / CodeNavigationMapGraphPrimitives.ControlFlowMaxReadableBandWidth,
-            CodeNavigationMapGraphPrimitives.ControlFlowHorizontalRadiusScaleMin,
+            bandW / GraphControlFlowLayoutMetrics.MaxReadableBandWidth,
+            GraphControlFlowLayoutMetrics.HorizontalRadiusScaleMin,
             1.0);
         radiusMul *= horizontalRadiusScale;
-        var sideLabelFontPx = CodeNavigationMapGraphPrimitives.ResolveControlFlowSideLabelFontSize(bandW, yStep);
-        var anchorR = CodeNavigationMapGraphPrimitives.ControlFlowAnchorRadiusBase * radiusMul;
-        var nodeR = CodeNavigationMapGraphPrimitives.ControlFlowNodeRadiusBase * radiusMul;
+        var sideLabelFontPx = GraphControlFlowLayoutMetrics.ResolveSideLabelFontSize(bandW, yStep);
+        var anchorR = GraphControlFlowLayoutMetrics.AnchorRadiusBase * radiusMul;
+        var nodeR = GraphControlFlowLayoutMetrics.NodeRadiusBase * radiusMul;
 
         var idToCenter = new Dictionary<string, Point>(StringComparer.OrdinalIgnoreCase);
         var idToRadius = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
-        var nodeLayouts = new List<CodeNavigationMapGraphNodeLayout>(doc.Nodes.Count);
+        var nodeLayouts = new List<GraphLayoutNode>(doc.Nodes.Count);
 
         foreach (var (depth, ids) in levels)
         {
@@ -176,9 +175,9 @@ public sealed class CodeNavigationMapControlFlowGraphLayoutEngine : ICodeNavigat
                 idToRadius[id] = radius;
                 var isAnchor = string.Equals(n.Id, anchor.Id, StringComparison.OrdinalIgnoreCase);
                 var shape = !isAnchor && string.Equals(n.Kind, "condition_step", StringComparison.OrdinalIgnoreCase)
-                    ? CodeNavigationMapNodeShape.Condition
-                    : CodeNavigationMapNodeShape.Circle;
-                nodeLayouts.Add(new CodeNavigationMapGraphNodeLayout
+                    ? GraphNodeShape.Condition
+                    : GraphNodeShape.Circle;
+                nodeLayouts.Add(new GraphLayoutNode
                 {
                     Id = n.Id,
                     Kind = n.Kind,
@@ -194,7 +193,7 @@ public sealed class CodeNavigationMapControlFlowGraphLayoutEngine : ICodeNavigat
             }
         }
 
-        var edgeLayouts = new List<CodeNavigationMapGraphEdgeLayout>(doc.Edges.Count);
+        var edgeLayouts = new List<GraphLayoutEdge>(doc.Edges.Count);
         foreach (var e in doc.Edges)
         {
             if (!idToCenter.TryGetValue(e.FromId, out var from))
@@ -202,7 +201,7 @@ public sealed class CodeNavigationMapControlFlowGraphLayoutEngine : ICodeNavigat
             if (!idToCenter.TryGetValue(e.ToId, out var to))
                 continue;
 
-            edgeLayouts.Add(new CodeNavigationMapGraphEdgeLayout
+            edgeLayouts.Add(new GraphLayoutEdge
             {
                 FromNodeId = e.FromId,
                 ToNodeId = e.ToId,
@@ -210,7 +209,7 @@ public sealed class CodeNavigationMapControlFlowGraphLayoutEngine : ICodeNavigat
                 To = to,
                 ToRadius = idToRadius.TryGetValue(e.ToId, out var toR) ? toR : nodeR,
                 Kind = e.Kind,
-                RelatedKind = e.RelatedKind
+                RelationKind = e.RelationKind
             });
         }
 
@@ -221,8 +220,8 @@ public sealed class CodeNavigationMapControlFlowGraphLayoutEngine : ICodeNavigat
         {
             if (nodeLayouts.Count > 0)
             {
-                var inkSlack = CodeNavigationMapGraphPrimitives.ControlFlowBesideLegendInkSlack;
-                var minClear = Math.Max(legendGap, CodeNavigationMapGraphPrimitives.ControlFlowLegendBesideMinClearance);
+                var inkSlack = GraphControlFlowLayoutMetrics.BesideLegendInkSlack;
+                var minClear = Math.Max(legendGap, GraphControlFlowLayoutMetrics.LegendBesideMinClearance);
                 var maxInkRight = 0.0;
                 foreach (var n in nodeLayouts)
                     maxInkRight = Math.Max(maxInkRight, n.Center.X + n.Radius + inkSlack);
@@ -230,12 +229,12 @@ public sealed class CodeNavigationMapControlFlowGraphLayoutEngine : ICodeNavigat
             }
             else
             {
-                var minClear = Math.Max(legendGap, CodeNavigationMapGraphPrimitives.ControlFlowLegendBesideMinClearance);
+                var minClear = Math.Max(legendGap, GraphControlFlowLayoutMetrics.LegendBesideMinClearance);
                 legendColumnLeft = bandLeft + bandW + minClear;
             }
         }
 
-        return new CodeNavigationMapGraphSceneVm
+        return new GraphLayoutScene
         {
             Nodes = nodeLayouts,
             Edges = edgeLayouts,
@@ -246,7 +245,7 @@ public sealed class CodeNavigationMapControlFlowGraphLayoutEngine : ICodeNavigat
             ShowLegendExceptionFlowKey = showLegendExceptionFlowKey,
             ShowLegendEdgeStyleKey = showLegendEdgeStyleKey,
             LegendColumnLeft = legendColumnLeft,
-            LegendPlacement = CodeNavigationMapLegendBlockPlacement.BesideGraph,
+            LegendPlacement = GraphLegendBlockPlacement.BesideGraph,
             LegendBlockTopY = 0,
             SideLabelFontSizePx = sideLabelFontPx
         };
@@ -260,21 +259,21 @@ public sealed class CodeNavigationMapControlFlowGraphLayoutEngine : ICodeNavigat
         // Колонка у правого края вьюпорта — соседняя невозможна без наложения на граф/обрезки.
         var besideUnusable = sceneBeside.LegendColumnLeft + 8 >= width;
         var needBelow = besideUnusable
-            || textRoomBeside < CodeNavigationMapGraphPrimitives.ControlFlowLegendSideColumnMinTextWidth
+            || textRoomBeside < GraphControlFlowLayoutMetrics.LegendSideColumnMinTextWidth
             || contentLegendNeed > textRoomBeside + 0.5;
         if (!needBelow)
             return sceneBeside;
 
         var hasShapeKeyRows = showLegendReturnKey || showLegendConditionKey || showLegendExceptionFlowKey;
         var capEst = sceneBeside.SideLabelFontSizePx ?? 11.0;
-        var estimatedLegendH = CodeNavigationMapGraphPrimitives.EstimateControlFlowLegendBlockHeight(
+        var estimatedLegendH = GraphControlFlowLayoutMetrics.EstimateLegendBlockHeight(
             legendRows.Count,
             hasShapeKeyRows,
             edgeStyleLegendRowCount,
             capEst);
-        var belowGap = CodeNavigationMapGraphPrimitives.ControlFlowLegendBelowBlockGap;
+        var belowGap = GraphControlFlowLayoutMetrics.LegendBelowBlockGap;
         var graphH = height - estimatedLegendH - belowGap;
-        if (graphH < CodeNavigationMapGraphPrimitives.ControlFlowMinGraphHeightForBelowLegend)
+        if (graphH < GraphControlFlowLayoutMetrics.MinGraphHeightForBelowLegend)
             return sceneBeside;
 
         var sceneBelow = BuildFor(graphH, 0);
@@ -288,7 +287,7 @@ public sealed class CodeNavigationMapControlFlowGraphLayoutEngine : ICodeNavigat
         if (legendTopY + estimatedLegendH > height + 1.0)
             return sceneBeside;
 
-        return new CodeNavigationMapGraphSceneVm
+        return new GraphLayoutScene
         {
             Nodes = sceneBelow.Nodes,
             Edges = sceneBelow.Edges,
@@ -299,7 +298,7 @@ public sealed class CodeNavigationMapControlFlowGraphLayoutEngine : ICodeNavigat
             ShowLegendExceptionFlowKey = showLegendExceptionFlowKey,
             ShowLegendEdgeStyleKey = showLegendEdgeStyleKey,
             LegendColumnLeft = sidePadding,
-            LegendPlacement = CodeNavigationMapLegendBlockPlacement.BelowGraph,
+            LegendPlacement = GraphLegendBlockPlacement.BelowGraph,
             LegendBlockTopY = legendTopY,
             SideLabelFontSizePx = sceneBelow.SideLabelFontSizePx
         };
@@ -307,7 +306,7 @@ public sealed class CodeNavigationMapControlFlowGraphLayoutEngine : ICodeNavigat
 
     /// <summary>Оценка минимальной ширины колонки легенды (индекс + текст + блок ключей фигур).</summary>
     private static double EstimateLegendColumnContentWidth(
-        IReadOnlyList<CodeNavigationMapLegendEntry> rows,
+        IReadOnlyList<GraphLegendEntry> rows,
         bool showReturnKey,
         bool showConditionKey,
         bool showExceptionKey,
@@ -332,7 +331,7 @@ public sealed class CodeNavigationMapControlFlowGraphLayoutEngine : ICodeNavigat
 
     /// <summary>Блок «стили рёбер» в легенде: только если в графе есть нестандартные рёбра (пунктир, цикл).</summary>
     private static void ComputeEdgeStyleLegend(
-        IReadOnlyList<CodeNavigationMapSubgraphEdge> edges,
+        IReadOnlyList<GraphEdge> edges,
         out bool show,
         out int rowCount)
     {
@@ -361,7 +360,7 @@ public sealed class CodeNavigationMapControlFlowGraphLayoutEngine : ICodeNavigat
             rowCount++;
     }
 
-    private static Dictionary<string, List<string>> BuildOutgoing(IReadOnlyList<CodeNavigationMapSubgraphEdge> edges)
+    private static Dictionary<string, List<string>> BuildOutgoing(IReadOnlyList<GraphEdge> edges)
     {
         var outgoing = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
         foreach (var e in edges)

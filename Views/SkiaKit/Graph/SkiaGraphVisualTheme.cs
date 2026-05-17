@@ -1,14 +1,14 @@
+#nullable enable
 using Avalonia.Media;
-using CascadeIDE.ViewModels;
+using CascadeIDE.Cockpit.Graph.Layout;
+using CascadeIDE.Cockpit.PrimitivesKit;
 
-namespace CascadeIDE.Cockpit.PrimitivesKit;
+namespace CascadeIDE.Views.SkiaKit.Graph;
 
-/// <summary>
-/// Цвета и перья сцены мини-карты (control flow / звезда; в UI — «Карта намерений»). Единый источник для <see cref="CodeNavigationMapSceneDrawing"/> (ADR 0064, 0055, 0067).
-/// </summary>
-public sealed class CodeNavigationMapVisualTheme
+/// <summary>Цвета и перья graph-backed surface (SkiaKit / Avalonia DrawingContext). ADR 0117, 0067.</summary>
+public sealed class SkiaGraphVisualTheme
 {
-    private CodeNavigationMapVisualTheme(
+    private SkiaGraphVisualTheme(
         Color anchorFill,
         Color conditionFill,
         Color exitFill,
@@ -46,8 +46,7 @@ public sealed class CodeNavigationMapVisualTheme
         NodeStrokePen = new(new SolidColorBrush(nodeStroke), 1);
     }
 
-    /// <summary>Тема по умолчанию: CFG / control flow.</summary>
-    public static CodeNavigationMapVisualTheme Default { get; } = new(
+    public static SkiaGraphVisualTheme Default { get; } = new(
         CockpitPrimitivesPalette.CodeNavigationMap.AnchorFill,
         CockpitPrimitivesPalette.CodeNavigationMap.ConditionFill,
         CockpitPrimitivesPalette.CodeNavigationMap.ExitFill,
@@ -63,7 +62,7 @@ public sealed class CodeNavigationMapVisualTheme
         CockpitPrimitivesPalette.CodeNavigationMap.HighlightedNode,
         CockpitPrimitivesPalette.CodeNavigationMap.NodeStroke);
 
-    private static readonly CodeNavigationMapVisualTheme WorkspaceRelated = new(
+    private static readonly SkiaGraphVisualTheme WorkspaceRelated = new(
         CockpitPrimitivesPalette.CodeNavigationMapWorkspace.AnchorFill,
         CockpitPrimitivesPalette.CodeNavigationMapWorkspace.ConditionFill,
         CockpitPrimitivesPalette.CodeNavigationMapWorkspace.ExitFill,
@@ -79,8 +78,8 @@ public sealed class CodeNavigationMapVisualTheme
         CockpitPrimitivesPalette.CodeNavigationMapWorkspace.HighlightedNode,
         CockpitPrimitivesPalette.CodeNavigationMapWorkspace.NodeStroke);
 
-    public static CodeNavigationMapVisualTheme ForPresentation(CodeNavigationMapGraphPresentationKind presentation) =>
-        presentation == CodeNavigationMapGraphPresentationKind.WorkspaceRelatedFiles
+    public static SkiaGraphVisualTheme ForPresentation(GraphLayoutPresentation presentation) =>
+        presentation == GraphLayoutPresentation.WorkspaceRelatedFiles
             ? WorkspaceRelated
             : Default;
 

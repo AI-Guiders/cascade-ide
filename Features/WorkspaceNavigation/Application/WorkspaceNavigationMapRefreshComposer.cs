@@ -2,10 +2,10 @@
 using System.Text.Json;
 using CascadeIDE.Cockpit.Cds;
 using CascadeIDE.Cockpit.Channels.TraceFlow;
+using CascadeIDE.Cockpit.Graph;
 using CascadeIDE.Cockpit.Composition.TraceFlow;
 using CascadeIDE.Contracts;
 using CascadeIDE.Models;
-using CascadeIDE.Services.Navigation;
 using CascadeIDE.Services.SkiaInstruments;
 using CascadeIDE.ViewModels;
 
@@ -64,7 +64,7 @@ public static class WorkspaceNavigationMapRefreshComposer
             {
                 status = WorkspaceNavigationMapOrchestrator.ResolveErrorStatus(root, currentPath);
             }
-            else if (useSubgraphMode && CodeNavigationMapSubgraphJson.TryParse(json, out var subgraph, out _))
+            else if (useSubgraphMode && GraphDocumentJson.TryParse(json, out var subgraph, out _))
             {
                 var viewport = new SkiaInstrumentViewport(graphWidth, graphHeight);
                 var composed = deps.MapCompositor.Compose(
