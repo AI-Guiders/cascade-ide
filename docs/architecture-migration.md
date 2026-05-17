@@ -54,7 +54,7 @@
 | `MainWindowViewModel.IdeMcpActions.BuildTest.Build.cs` | 127 | MCP: диагностики текущего файла, список файлов решения, сборка и code cleanup с публикацией фазы сборки на шину. |
 | `MainWindowViewModel.IdeMcpActions.BuildTest.Tests.cs` | 64 | MCP: запуск тестов (все / affected) и обновление панели инструментирования после прогона. |
 | `MainWindowViewModel.IdeMcpActions.DebuggerPanel.cs` | 76 | Панель отладки и снимок DAP (ADR 0002): один `DebugSessionSnapshot`. |
-| `MainWindowViewModel.IdeMcpActions.Editor.cs` | 95 | MCP: редактор. |
+| `MainWindowViewModel.IdeMcpActions.Editor.cs` | 85 | MCP: редактор. |
 | `MainWindowViewModel.IdeMcpActions.Git.cs` | 42 | MCP: git (`IdeMcpGitWorkspaceSession`). |
 | `MainWindowViewModel.IdeMcpActions.HybridCodebaseIndex.cs` | 103 | MCP / ide_execute_command: Hybrid Codebase Index (имена команд как у внешнего MCP). |
 | `MainWindowViewModel.IdeMcpActions.Navigation.cs` | 61 | MCP: семантическая навигация (ADR 0039). |
@@ -75,6 +75,7 @@
 | `MainWindowViewModel.PresentationLayout.HostShell.cs` | 47 | События «окно-хост открыло полный контур» — скрытие колонок в main (`PresentationLayout`). |
 | `MainWindowViewModel.PresentationLayout.HostWindowBounds.cs` | 84 | Персистенция геометрии окон-хостов пресета `presentation` (ADR 0017). |
 | `MainWindowViewModel.PresentationLayoutAuthority.cs` | 14 | Запись intent видимости панелей (семантика «хочу»); фактическая поверхность — `MainWindowShellSurfaceCompositor`. |
+| `MainWindowViewModel.PrimaryWorkSurface.cs` | 38 | Переключатель лобового якоря Intercom / Editor (ADR 0120). |
 | `MainWindowViewModel.RelayCommands.Debug.cs` | 144 | Relay: отладка. |
 | `MainWindowViewModel.RelayCommands.Documents.cs` | 65 | Relay: вкладки документов и группы. |
 | `MainWindowViewModel.RelayCommands.Layout.cs` | 64 | Relay: регионы, панели MFD, группы редакторов. |
@@ -94,8 +95,8 @@
 | `MainWindowViewModel.UiGitWorkspace.cs` | 141 | Git + workspace UI. |
 | `MainWindowViewModel.ViewBridge.cs` | 64 | Колбэки и провайдеры, которые View подставляет в главный VM (диалоги, UI automation). |
 | `MainWindowViewModel.WebAiPortal.cs` | 29 | Страница MFD «веб-портал» (ADR 0108): URL, результат последнего вызова моста, `WebAiPortalCommandBridge`. |
-| `MainWindowViewModel.WorkspaceNavigationMap.cs` | 142 | Слот Pfd: отображение карты намерений / `CodeNavigationMapSubgraphDocument` (те же данные, что JSON MCP). Граф подграфа — не синоним `instrument_id`, см. ADR 0065. По доменам: карта намерений (в т.ч. control flow) — CodeNavigation; зависимости файлов — WorkspaceNavigation; submodules — дерево/GitMap (ADR 0062). |
-| `MainWindowViewModel.WorkspaceNavigationMap.Refresh.cs` | 159 | Срез карты workspace: перезапрос refresh и сборка через `WorkspaceNavigationMapRefreshComposer`. |
+| `MainWindowViewModel.WorkspaceNavigationMap.cs` | 140 | Слот Pfd: отображение карты намерений / `GraphDocument` (те же данные, что JSON MCP). Граф подграфа — не синоним `instrument_id`, см. ADR 0065. По доменам: карта намерений (в т.ч. control flow) — CodeNavigation; зависимости файлов — WorkspaceNavigation; submodules — дерево/GitMap (ADR 0062). |
+| `MainWindowViewModel.WorkspaceNavigationMap.Refresh.cs` | 157 | Срез карты workspace: перезапрос refresh и сборка через `WorkspaceNavigationMapRefreshComposer`. |
 | `MainWindowViewModel.WorkspaceSplitters.cs` | 23 | Сплиттеры рабочей области (MainGrid, обозреватель решения, Git и т.д.): режим «взлёт» — блокировка перетаскивания. |
 
 <!-- AUTO:MAIN-WINDOW-SLICE:MWVM-TABLE:END -->

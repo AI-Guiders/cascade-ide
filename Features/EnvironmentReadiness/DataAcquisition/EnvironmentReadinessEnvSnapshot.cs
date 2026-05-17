@@ -33,7 +33,5 @@ public readonly record struct EnvironmentReadinessEnvSnapshot(
 public static class WellKnownEnv
 {
     public const string AgentNotesFile = "AGENT_NOTES_FILE";
-    [Obsolete("Use [agent_notes].config_path in settings.toml (SSOT with MCP --config).")]
-    public const string AgentNotesCanonPath = "AGENT_NOTES_CANON_PATH";
     public const string NetcoreDbgPath = "NETCOREDBG_PATH";
 }

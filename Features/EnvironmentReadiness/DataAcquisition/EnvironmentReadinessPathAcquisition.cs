@@ -14,14 +14,6 @@ public enum AgentNotesFilePathKind
     InvalidPath
 }
 
-public enum AgentNotesCanonPathKind
-{
-    Unset,
-    DirectoryExists,
-    DirectoryMissing,
-    InvalidPath
-}
-
 public enum AgentNotesConfigPathKind
 {
     Unset,
@@ -80,25 +72,6 @@ public static class EnvironmentReadinessPathAcquisition
         catch
         {
             return AgentNotesConfigPathKind.InvalidPath;
-        }
-    }
-
-    public static AgentNotesCanonPathKind ClassifyAgentNotesCanonPath(string? raw)
-    {
-        if (string.IsNullOrWhiteSpace(raw))
-            return AgentNotesCanonPathKind.Unset;
-
-        try
-        {
-            var full = CanonicalFilePath.Normalize(raw.Trim());
-            if (Directory.Exists(full))
-                return AgentNotesCanonPathKind.DirectoryExists;
-
-            return AgentNotesCanonPathKind.DirectoryMissing;
-        }
-        catch
-        {
-            return AgentNotesCanonPathKind.InvalidPath;
         }
     }
 

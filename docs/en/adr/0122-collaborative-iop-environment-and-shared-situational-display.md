@@ -141,7 +141,7 @@ The **environment-first** model ([0121](0121-intent-oriented-programming-paradig
 - Replacing a **corporate messenger** or building the full team contour inside CIDE ([0080](0080-intercom-naming-and-multi-party-channel-model.md) §5).
 - Mandatory **fourth monitor** per person — the shared display is **for the room**, not personal.
 - Choosing sync transport (WebSocket, Mattermost widget, local HTTP) — follow-up ADR/sketch.
-- **Continuous room transcription** as the sole source of truth for agents — against IOP (wheat/chaff, privacy, noise).
+- **Continuous transcription** of the whole room conversation as the sole source of truth for agents — against IOP (noise, privacy, long manual cleanup).
 
 ---
 
