@@ -84,6 +84,7 @@ plugins:
           site_name: Cascade IDE
           nav:
             - Home: index.md
+            - Concept overview: concept-overview.md
             - ADR:
                 - site/adr-nav/index.md
                 - By status:
@@ -102,6 +103,7 @@ plugins:
             - UX:
                 - UI layout: ui-ux/cascade-ide-ui-layout-v1.md
                 - Concept map: ui-ux/concept-to-implementation-map-v1.md
+                - UX index: ui-ux/README.md
 
 markdown_extensions:
   - admonition

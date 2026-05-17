@@ -3,6 +3,12 @@
 **Статус:** Accepted  
 **Дата:** 2026-04-26
 
+<a id="summary-en"></a>
+
+## Summary (EN)
+
+Meta-level **constitution** for Cascade IDE: long-lived principles, invariants, and how architectural decisions are made. Feature ADRs must stay consistent with this document. Mission: agent-first IDE where humans and agents share commands, layout, and the **Intercom** session channel. Read the [English concept overview](../en/concept-overview.md) for a short onboarding path.
+
 ## Связанные ADR
 
 | ADR | Роль |

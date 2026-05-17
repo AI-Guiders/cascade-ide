@@ -29,7 +29,7 @@ dotnet build CascadeIDE.sln -c Debug -p:FastBuild=true
 dotnet run --project CascadeIDE.csproj -p:FastBuild=true
 ```
 
-**Документация (сайт):** [ai-guiders.github.io/cascade-ide](https://ai-guiders.github.io/cascade-ide/) — MkDocs, RU/EN навигация, [навигатор ADR по статусам](https://ai-guiders.github.io/cascade-ide/site/adr-nav/). Локально: `pip install -r requirements-docs.txt`, `python tools/gen_adr_pages.py`, `mkdocs serve`.
+**Документация (сайт):** [ai-guiders.github.io/cascade-ide](https://ai-guiders.github.io/cascade-ide/) — MkDocs, RU/EN. **English onboarding:** [concept overview](https://ai-guiders.github.io/cascade-ide/en/concept-overview/). [Навигатор ADR](https://ai-guiders.github.io/cascade-ide/site/adr-nav/). Локально: `pip install -r requirements-docs.txt`, `python tools/gen_adr_pages.py`, `mkdocs serve`.
 
 ---
 

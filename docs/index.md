@@ -21,4 +21,4 @@
 - Лицензия кода: MIT · коммерческие вопросы — [COMMERCIAL-NOTICE.md](COMMERCIAL-NOTICE.md)
 
 !!! note "Язык"
-    Тела ADR и большинство UX-доков — **на русском**. Переключатель **EN** в шапке — оболочка навигации и навигатор ADR; содержимое ADR постепенно дополняется английскими summary.
+    Тела ADR — **на русском**. Для англоязычных читателей: переключатель **EN** → [Concept overview](en/concept-overview.md), [раскладка UI (EN)](en/ui-ux/cascade-ide-ui-layout-v1.md); в ключевых ADR — блок **`Summary (EN)`** в начале.

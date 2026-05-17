@@ -3,6 +3,13 @@
 **Статус:** Accepted · Implemented  
 **Дата:** 2026-04-02  
 **Обновлено:** 2026-04-25 — в `[capabilities]` ключи **IDE Health**: `ide_health_*`. Подробности — [§ История](#adr0010-history).
+
+<a id="summary-en"></a>
+
+## Summary (EN)
+
+UI behavior is driven by **TOML mode definitions** (`UiModes/`) — capabilities, layout metrics, and family (`UiModeFamily`) — not hard-coded booleans in the ViewModel. The shipping product uses **Flight** as the primary mode id. Older Focus/Balanced/Power names in docs refer to historical presets; the catalog and loader remain the extension point for future presets.
+
 ## Связанные ADR
 
 | ADR | Роль |

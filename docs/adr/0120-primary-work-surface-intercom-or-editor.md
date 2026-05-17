@@ -3,6 +3,12 @@
 **Статус:** Proposed  
 **Дата:** 2026-05-17
 
+<a id="summary-en"></a>
+
+## Summary (EN)
+
+**Proposed:** setting **`primary_work_surface`**: **`intercom`** | **`editor`** (similar to Cursor’s Agent vs Editor). Controls what occupies the **Forward** anchor: full **Intercom** (topic cards + session spine) or the **code editor**. The other surface moves to the **MFD** page stack without losing features. Default remains **`editor`**; **`intercom`** is the “agent-central” preset. Works with slash commands in [ADR 0119](0119-chat-slash-commands-intercom-surface.md#summary-en).
+
 ## Связанные ADR
 
 | ADR | Роль |
