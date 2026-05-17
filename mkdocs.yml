@@ -1,0 +1,127 @@
+# Cascade IDE documentation site (GitHub Pages: /cascade-ide/)
+# Build: pip install -r requirements-docs.txt && python tools/gen_adr_pages.py && mkdocs build
+
+site_name: Cascade IDE
+site_description: Agent-first IDE for .NET — documentation, ADR, architecture
+site_url: https://ai-guiders.github.io/cascade-ide/
+repo_url: https://github.com/AI-Guiders/cascade-ide
+repo_name: AI-Guiders/cascade-ide
+edit_uri: edit/develop/docs/
+
+docs_dir: docs
+site_dir: site
+
+theme:
+  name: material
+  language: ru
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Тёмная тема
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Светлая тема
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.indexes
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.tabs.link
+
+plugins:
+  - search:
+      lang:
+        - ru
+        - en
+  - i18n:
+      docs_structure: folder
+      fallback_to_default: true
+      reconfigure_material: true
+      languages:
+        - locale: ru
+          name: Русский
+          default: true
+          build: true
+          site_name: Cascade IDE
+          nav:
+            - Главная: index.md
+            - ADR:
+                - site/adr-nav/index.md
+                - По статусам:
+                    - Proposed: site/adr-nav/proposed.md
+                    - Accepted: site/adr-nav/accepted.md
+                    - In progress: site/adr-nav/accepted-in-progress.md
+                    - Implemented: site/adr-nav/accepted-implemented.md
+                    - Superseded: site/adr-nav/superseded.md
+                    - Прочее: site/adr-nav/other.md
+                - Жизненный цикл: adr/status-lifecycle.md
+                - Полный индекс: adr/README.md
+            - Архитектура:
+                - Политика: architecture-policy.md
+                - Текущая архитектура: architecture/current-architecture-v1.md
+                - MCP: MCP-PROTOCOL.md
+            - UX:
+                - Раскладка UI: ux/cascade-ide-ui-layout-v1.md
+                - Карта концептов: ux/concept-to-implementation-map-v1.md
+        - locale: en
+          name: English
+          build: true
+          site_name: Cascade IDE
+          nav:
+            - Home: index.md
+            - ADR:
+                - site/adr-nav/index.md
+                - By status:
+                    - Proposed: site/adr-nav/proposed.md
+                    - Accepted: site/adr-nav/accepted.md
+                    - In progress: site/adr-nav/accepted-in-progress.md
+                    - Implemented: site/adr-nav/accepted-implemented.md
+                    - Superseded: site/adr-nav/superseded.md
+                    - Other: site/adr-nav/other.md
+                - Lifecycle: adr/status-lifecycle.md
+                - Full index: adr/README.md
+            - Architecture:
+                - Policy: architecture-policy.md
+                - Current architecture: architecture/current-architecture-v1.md
+                - MCP: MCP-PROTOCOL.md
+            - UX:
+                - UI layout: ux/cascade-ide-ui-layout-v1.md
+                - Concept map: ux/concept-to-implementation-map-v1.md
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - toc:
+      permalink: true
+
+extra:
+  alternate:
+    - name: Русский
+      link: /
+      lang: ru
+    - name: English
+      link: /en/
+      lang: en
+
+exclude_docs: |
+  architecture-migration.md
+  design/*
+  adr/snippets/*
+
+validation:
+  absolute_links: ignore
+  unrecognized_links: ignore
+  anchors: ignore

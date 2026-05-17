@@ -2,6 +2,8 @@
 
 **Назначение:** единая договорённость, **как читать и как обновлять** поле «Статус» в ADR — без перечисления конкретных номеров записей (полный индекс — в [README.md](README.md)).
 
+**На сайте документации:** сгруппированный навигатор по статусам (автогенерация из шапок ADR) — [../site/adr-nav/index.md](../site/adr-nav/index.md) · публично: [ai-guiders.github.io/cascade-ide/site/adr-nav/](https://ai-guiders.github.io/cascade-ide/site/adr-nav/).
+
 ---
 
 ## Зачем два уровня

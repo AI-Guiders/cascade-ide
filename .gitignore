@@ -1,3 +1,6 @@
+# MkDocs output (see mkdocs.yml site_dir)
+/site/
+
 # Build
 bin/
 obj/
