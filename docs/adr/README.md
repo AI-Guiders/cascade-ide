@@ -187,6 +187,7 @@
 | [0119](0119-chat-slash-commands-intercom-surface.md) | Чат как command line: Intercom (`/card`) + IDE (`/build run`, `/test run`, `/debug launch`); autocomplete, `command_id` | Proposed |
 | [0120](0120-primary-work-surface-intercom-or-editor.md) | `primary_work_surface`: Intercom или Editor в якоре Forward (аналог Agent/Editor в Cursor) | Proposed |
 | [0121](0121-intent-oriented-programming-paradigm.md) | Парадигма IOP (Intent-Oriented Programming) — концептуальный фундамент; [манифест](../iop-manifest-v1.md) | Accepted |
+| [0123](0123-intercom-full-skia-surface-evolution.md) | Intercom → full-Skia surface (Slack/MM-like); strangler фазы 0–4; Avalonia = фюзеляж | Accepted |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 

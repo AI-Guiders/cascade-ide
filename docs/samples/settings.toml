@@ -119,6 +119,8 @@ show_instrumentation = true
 mode = "Flight"
 culture = ""
 splitters_locked = false
+# ADR 0120: "editor" (дефолт) | "intercom" — Intercom в Forward, редактор на MFD
+primary_work_surface = "editor"
 
 [code_navigation_map]
 view = "list"
