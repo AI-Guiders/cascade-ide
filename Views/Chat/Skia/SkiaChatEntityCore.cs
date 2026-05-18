@@ -14,7 +14,8 @@ internal readonly record struct SkiaChatMeasureContext(int MaxChars, float Conte
 internal readonly record struct SkiaChatHit(
     int? MessageIndex,
     Guid? SelectThreadId,
-    bool ResetDetailMode);
+    bool ResetDetailMode,
+    bool ToggleThinking = false);
 
 internal readonly record struct SkiaChatMeasuredLayout(
     float Height,

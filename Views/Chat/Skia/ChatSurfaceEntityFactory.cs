@@ -177,11 +177,26 @@ internal static class ChatSurfaceEntityFactory
                     () => new SkiaChatHit(null, lane.Thread.ThreadId, ResetDetailMode: false)));
             }
 
+            ChatMessageVisualRole? previousMessageRole = null;
             foreach (var entry in lane.Entries)
             {
-                entities.Add(entry.Kind == ChatSurfaceEntryKind.Message
-                    ? MessageEntity(entry, compactLayout)
-                    : ConfirmationEntity(entry, compactLayout));
+                if (entry.Kind == ChatSurfaceEntryKind.Message)
+                {
+                    var suppressTitle = previousMessageRole == entry.VisualRole
+                                        && !entry.StartsBranch
+                                        && entry.VisualRole is ChatMessageVisualRole.User
+                                            or ChatMessageVisualRole.Assistant
+                                            or ChatMessageVisualRole.Thinking;
+                    var gapAfter = suppressTitle
+                        ? compactLayout ? 2f : 3f
+                        : compactLayout ? 5f : 8f;
+                    entities.Add(MessageEntity(entry, compactLayout, suppressTitle, gapAfter));
+                    previousMessageRole = entry.VisualRole;
+                    continue;
+                }
+
+                entities.Add(ConfirmationEntity(entry, compactLayout));
+                previousMessageRole = null;
             }
         }
     }
@@ -189,7 +204,11 @@ internal static class ChatSurfaceEntityFactory
     private static SkiaChatBubbleSpec D(in SkiaChatBubbleSpec spec, bool compact) =>
         SkiaChatDensity.Apply(spec, compact);
 
-    private static ISkiaChatEntity MessageEntity(ChatSurfaceEntry entry, bool compactLayout)
+    private static ISkiaChatEntity MessageEntity(
+        ChatSurfaceEntry entry,
+        bool compactLayout,
+        bool suppressTitle,
+        float gapAfter)
     {
         if (entry.VisualRole == ChatMessageVisualRole.SlashCommand
             && entry.SlashCommandStatus is { } slashStatus
@@ -203,26 +222,7 @@ internal static class ChatSurfaceEntityFactory
                 entry.MessageIndex);
         }
 
-        var fillRole = SkiaBubbleFillRoleMapping.FromMessageRole(entry.VisualRole);
-        return new SkiaChatBubbleEntity(
-            D(
-                new SkiaChatBubbleSpec(
-                    entry.Title,
-                    entry.Body,
-                    Footer: null,
-                    SkiaChatBubbleKind.Standard,
-                    fillRole,
-                    SkiaChatBodyTone.Normal,
-                    IsPending: false,
-                    entry.IsSelected,
-                    entry.StartsBranch,
-                    entry.MessageIndex,
-                    GapAfter: 5,
-                    Padding: 8,
-                    TitleHeight: 14,
-                    LineHeight: 14),
-                compactLayout),
-            () => new SkiaChatHit(entry.MessageIndex, null, ResetDetailMode: false));
+        return new SkiaChatMessageFeedEntity(entry, compactLayout, suppressTitle, gapAfter);
     }
 
     private static SkiaChatBubbleEntity ConfirmationEntity(ChatSurfaceEntry entry, bool compactLayout)

@@ -23,7 +23,7 @@ namespace CascadeIDE.Features.Chat;
 public partial class ChatPanelViewModel : ViewModelBase
 {
     private static readonly JsonSerializerOptions ChatPanelJson = new(JsonSerializerDefaults.Web);
-    private const string CollapsedThinkingPrefix = "[thinking свернут] ";
+    private const string CollapsedThinkingPrefix = ChatMessageBodyPresentation.CollapsedThinkingPrefix;
 
     private readonly Services.AiProviderManager _aiProviderManager;
     private readonly Func<string> _getActiveAiProvider;
