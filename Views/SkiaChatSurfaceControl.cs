@@ -16,7 +16,7 @@ namespace CascadeIDE.Views;
 /// <summary>
 /// Skia-центричный chat surface: overview веток, секции тредов и карточки сообщений/уточнений.
 /// </summary>
-public sealed class SkiaChatSurfaceControl : Control
+public partial class SkiaChatSurfaceControl : Control
 {
     private const double WheelPixelsPerDelta = 48;
 
@@ -110,7 +110,14 @@ public sealed class SkiaChatSurfaceControl : Control
             CompactLayoutProperty,
             ChromeTitleProperty,
             LoadingStatusTextProperty,
-            IsChatLoadingProperty);
+            IsChatLoadingProperty,
+            ShowIntercomComposerProperty,
+            ComposerTextProperty,
+            ComposerPreeditTextProperty,
+            IsComposerEnabledProperty,
+            IsSlashAutocompleteVisibleProperty,
+            SelectedSlashSuggestionIndexProperty,
+            SlashSuggestionsProperty);
     }
 
     public SkiaChatSurfaceControl()
@@ -119,6 +126,7 @@ public sealed class SkiaChatSurfaceControl : Control
         AddHandler(PointerPressedEvent, OnPointerPressed, RoutingStrategies.Bubble);
         AddHandler(PointerExitedEvent, OnPointerExited, RoutingStrategies.Bubble);
         AddHandler(PointerWheelChangedEvent, OnPointerWheelChanged, RoutingStrategies.Bubble);
+        InitializeIntercomComposer();
     }
 
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
@@ -178,7 +186,8 @@ public sealed class SkiaChatSurfaceControl : Control
         var statusSubtitle = CompactLayout
             ? ChatIntercomChromeStatusPresentation.FormatSubtitle(snapshot, OverviewMode, DetailThreadId)
             : null;
-        ClampScrollToContent(showOverviewCatalog, statusSubtitle);
+        var bottomChrome = (float)ResolveBottomChromeHeight((float)Math.Max(160, Bounds.Width));
+        ClampScrollToContent(showOverviewCatalog, statusSubtitle, bottomChrome);
 
         context.Custom(new DrawOperation(
             new Rect(Bounds.Size),
@@ -196,6 +205,8 @@ public sealed class SkiaChatSurfaceControl : Control
             IsChatLoading,
             LoadingStatusText,
             statusSubtitle,
+            bottomChrome,
+            this,
             bounds => _overviewButtonBounds = bounds));
         base.Render(context);
     }
@@ -210,6 +221,10 @@ public sealed class SkiaChatSurfaceControl : Control
 
     private void OnPointerWheelChanged(object? sender, PointerWheelEventArgs e)
     {
+        var p = e.GetPosition(this);
+        if (_composerBounds.Width > 0 && _composerBounds.Contains((float)p.X, (float)p.Y))
+            return;
+
         _scrollOffset -= e.Delta.Y * WheelPixelsPerDelta;
         ClampScrollToContent();
         e.Handled = true;
@@ -228,6 +243,13 @@ public sealed class SkiaChatSurfaceControl : Control
 
     private void OnPointerPressed(object? sender, PointerPressedEventArgs e)
     {
+        if (TryHandleIntercomPointer(e.GetPosition(this)))
+        {
+            e.Handled = true;
+            InvalidateVisual();
+            return;
+        }
+
         if (CompactLayout && _overviewButtonBounds.Width > 0)
         {
             var p = e.GetPosition(this);
@@ -252,7 +274,11 @@ public sealed class SkiaChatSurfaceControl : Control
             OverviewMode = false;
         }
         else if (hit.MessageIndex is { } messageIndex)
+        {
             SelectedMessageIndex = messageIndex;
+            if (hit.ToggleThinking && e.ClickCount >= 2)
+                ThinkingToggleRequested?.Invoke(this, messageIndex);
+        }
 
         e.Handled = true;
         InvalidateVisual();
@@ -278,17 +304,18 @@ public sealed class SkiaChatSurfaceControl : Control
         return -1;
     }
 
-    private void ClampScrollToContent(bool? showOverviewCatalog = null, string? statusSubtitle = null)
+    private void ClampScrollToContent(bool? showOverviewCatalog = null, string? statusSubtitle = null, float? bottomChrome = null)
     {
         var catalog = showOverviewCatalog ?? (OverviewMode && (Snapshot?.Layout.Overview.Count ?? 0) > 0);
         var subtitle = statusSubtitle;
         if (subtitle is null && CompactLayout && Snapshot is { } snap)
             subtitle = ChatIntercomChromeStatusPresentation.FormatSubtitle(snap, OverviewMode, DetailThreadId);
-        var chrome = SkiaChatChromeRenderer.ResolveTopChromeHeight(
+        var chromeTop = SkiaChatChromeRenderer.ResolveTopChromeHeight(
             CompactLayout,
             catalog,
             !string.IsNullOrWhiteSpace(subtitle));
-        var viewport = Math.Max(1, Bounds.Height - chrome);
+        var chromeBottom = bottomChrome ?? (float)ResolveBottomChromeHeight((float)Math.Max(160, Bounds.Width));
+        var viewport = Math.Max(1, Bounds.Height - chromeTop - chromeBottom);
         var max = Math.Max(0, _cachedContentHeight - viewport);
         if (_scrollOffset > max)
             _scrollOffset = max;
@@ -312,6 +339,8 @@ public sealed class SkiaChatSurfaceControl : Control
         private readonly bool _isChatLoading;
         private readonly string? _loadingStatusText;
         private readonly string? _statusSubtitle;
+        private readonly float _bottomChrome;
+        private readonly SkiaChatSurfaceControl? _host;
         private readonly Action<SKRect> _onOverviewButtonBounds;
 
         public DrawOperation(
@@ -330,6 +359,8 @@ public sealed class SkiaChatSurfaceControl : Control
             bool isChatLoading,
             string? loadingStatusText,
             string? statusSubtitle,
+            float bottomChrome,
+            SkiaChatSurfaceControl? host,
             Action<SKRect> onOverviewButtonBounds)
         {
             Bounds = bounds;
@@ -347,6 +378,8 @@ public sealed class SkiaChatSurfaceControl : Control
             _isChatLoading = isChatLoading;
             _loadingStatusText = loadingStatusText;
             _statusSubtitle = statusSubtitle;
+            _bottomChrome = bottomChrome;
+            _host = host;
             _onOverviewButtonBounds = onOverviewButtonBounds;
         }
 
@@ -396,7 +429,8 @@ public sealed class SkiaChatSurfaceControl : Control
 
             const float contentLeft = 12f;
             var contentWidth = width - 24f;
-            canvas.ClipRect(new SKRect(0, chromeTop, width, height), antialias: false);
+            var contentBottom = Math.Max(chromeTop + 1f, height - _bottomChrome);
+            canvas.ClipRect(new SKRect(0, chromeTop, width, contentBottom), antialias: false);
             canvas.Translate(0, chromeTop - _scrollOffset);
 
             _hitTargets.Clear();
@@ -407,6 +441,7 @@ public sealed class SkiaChatSurfaceControl : Control
                 using var emptyPaint = new SKPaint { IsAntialias = true, Color = _theme.EmptyHint };
                 canvas.DrawText("Пока пусто. Задай вопрос или команду.", contentLeft, 28, SKTextAlign.Left, emptyFont, emptyPaint);
                 canvas.Restore();
+                _host?.DrawIntercomBottomChrome(canvas, width, height, _theme);
                 return;
             }
 
@@ -438,6 +473,8 @@ public sealed class SkiaChatSurfaceControl : Control
             }
 
             canvas.Restore();
+
+            _host?.DrawIntercomBottomChrome(canvas, width, height, _theme);
         }
 
         public bool HitTest(Point p) => Bounds.Contains(p);

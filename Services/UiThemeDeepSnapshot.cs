@@ -56,8 +56,8 @@ internal static class UiThemeDeepSnapshot
         "MfdContourStackHost",
         "ModeBadge",
         "UiModeBloomOverlay",
-        "ForwardChatInputBox",
-        "ClassicChatInputBox",
+        "ForwardIntercomSurface",
+        "ClassicIntercomSurface",
         "TerminalInputBox"
     ];
 

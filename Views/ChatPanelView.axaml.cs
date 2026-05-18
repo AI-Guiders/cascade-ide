@@ -11,100 +11,77 @@ public partial class ChatPanelView : UserControl
     public ChatPanelView()
     {
         InitializeComponent();
-        WireChatInput(ForwardChatInputBox);
-        WireChatInput(ClassicChatInputBox);
-        WireSlashSuggestionList(ForwardSlashSuggestionList);
-        WireSlashSuggestionList(ClassicSlashSuggestionList);
+        WireIntercomSurface(ForwardIntercomSurface);
+        WireIntercomSurface(ClassicIntercomSurface);
     }
 
-    private void WireChatInput(TextBox box)
+    private void WireIntercomSurface(SkiaChatSurfaceControl surface)
     {
-        box.AddHandler(InputElement.KeyDownEvent, OnChatInputKeyDown, RoutingStrategies.Tunnel);
-        box.TextChanged += OnChatInputTextChanged;
-    }
-
-    private void WireSlashSuggestionList(ListBox list) =>
-        list.PointerReleased += OnSlashSuggestionPointerReleased;
-
-    private TextBox? SenderAsTextBox(object? sender) => sender as TextBox;
-
-    private void OnChatInputTextChanged(object? sender, TextChangedEventArgs e)
-    {
-        if (DataContext is not ChatPanelViewModel vm)
-            return;
-        var text = SenderAsTextBox(sender)?.Text;
-        vm.RefreshChatSlashAutocomplete(text);
-    }
-
-    private void OnChatInputKeyDown(object? sender, KeyEventArgs e)
-    {
-        if (DataContext is not ChatPanelViewModel vm)
-            return;
-
-        var input = SenderAsTextBox(sender);
-        if (input is null)
-            return;
-
-        if (vm.IsChatSlashAutocompleteVisible)
+        surface.SendRequested += (_, _) =>
         {
-            switch (e.Key)
+            if (DataContext is ChatPanelViewModel vm)
+                TryExecuteSendChat(vm);
+        };
+
+        surface.ThinkingToggleRequested += (_, messageIndex) =>
+        {
+            if (DataContext is not ChatPanelViewModel vm)
+                return;
+            vm.SelectedMessageIndex = messageIndex;
+            _ = vm.ToggleSelectedThinkingDetails();
+        };
+
+        surface.ComposerKeyDown += (_, e) =>
+        {
+            if (DataContext is not ChatPanelViewModel vm)
+                return;
+
+            switch (e.Kind)
             {
-                case Key.Tab:
-                    if (vm.TryCommitSelectedChatSlashSuggestion(out _))
-                    {
-                        e.Handled = true;
-                        input.CaretIndex = vm.ChatInput.Length;
-                    }
-                    return;
-                case Key.Up:
+                case IntercomComposerKeyKind.Tab:
+                    if (vm.TryCommitSelectedChatSlashSuggestion(out bool _))
+                        surface.ComposerCaretIndex = vm.ChatInput.Length;
+                    break;
+                case IntercomComposerKeyKind.SlashUp:
                     vm.MoveChatSlashSuggestionSelection(-1);
-                    e.Handled = true;
-                    return;
-                case Key.Down:
+                    break;
+                case IntercomComposerKeyKind.SlashDown:
                     vm.MoveChatSlashSuggestionSelection(1);
-                    e.Handled = true;
-                    return;
-                case Key.Escape:
+                    break;
+                case IntercomComposerKeyKind.Escape:
                     vm.DismissChatSlashAutocomplete();
-                    e.Handled = true;
-                    return;
-                case Key.Enter when !e.KeyModifiers.HasFlag(KeyModifiers.Control)
-                                    && !e.KeyModifiers.HasFlag(KeyModifiers.Shift):
-                    if (vm.TryCommitSelectedChatSlashSuggestion(out var autoExecute))
+                    break;
+                case IntercomComposerKeyKind.Enter:
+                    if (vm.IsChatSlashAutocompleteVisible)
                     {
-                        e.Handled = true;
-                        if (autoExecute)
+                        if (vm.TryCommitSelectedChatSlashSuggestion(out var autoExecute))
+                        {
+                            surface.ComposerCaretIndex = vm.ChatInput.Length;
+                            if (autoExecute)
+                                TryExecuteSendChat(vm);
+                        }
+                    }
+                    else if (e.KeyEvent is { } enterKey && ChatSendKeyMatcher.Matches(enterKey, vm.GetSendMessageKey()))
+                    {
+                        TryExecuteSendChat(vm);
+                    }
+                    else
+                    {
+                        var caret = surface.ComposerCaretIndex;
+                        vm.ChatInput = vm.ChatInput.Insert(Math.Clamp(caret, 0, vm.ChatInput.Length), "\n");
+                        surface.ComposerCaretIndex = caret + 1;
+                    }
+                    break;
+                case IntercomComposerKeyKind.CommitSlashSuggestion:
+                    if (vm.TryCommitSelectedChatSlashSuggestion(out var execute))
+                    {
+                        surface.ComposerCaretIndex = vm.ChatInput.Length;
+                        if (execute)
                             TryExecuteSendChat(vm);
-                        else
-                            input.CaretIndex = vm.ChatInput.Length;
-                        return;
                     }
                     break;
             }
-        }
-
-        if (!ChatSendKeyMatcher.Matches(e, vm.GetSendMessageKey()))
-            return;
-
-        TryExecuteSendChat(vm);
-        e.Handled = true;
-    }
-
-    private void OnSlashSuggestionPointerReleased(object? sender, PointerReleasedEventArgs e)
-    {
-        if (e.InitialPressMouseButton != MouseButton.Left)
-            return;
-        if (DataContext is not ChatPanelViewModel vm || !vm.IsChatSlashAutocompleteVisible)
-            return;
-        if (sender is not ListBox { SelectedIndex: >= 0 })
-            return;
-
-        if (!vm.TryCommitSelectedChatSlashSuggestion(out var autoExecute))
-            return;
-
-        e.Handled = true;
-        if (autoExecute)
-            TryExecuteSendChat(vm);
+        };
     }
 
     private static void TryExecuteSendChat(ChatPanelViewModel vm)

@@ -32,84 +32,28 @@
         <Style Selector="Expander CheckBox">
             <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
         </Style>
-        <Style Selector="Border.intercomComposer">
-            <Setter Property="Background" Value="{DynamicResource CascadeTheme.ChatPanelBackground}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.EditorColumnBorderBrush}"/>
-            <Setter Property="BorderThickness" Value="1,1,0,0"/>
-            <Setter Property="Padding" Value="8,6"/>
-        </Style>
     </UserControl.Styles>
 
     <Panel>
         <!-- Forward Intercom (ADR 0123): Skia-колонна + компактный composer; toolbar в Skia -->
         <Panel IsVisible="{Binding IsForwardIntercomLayout}">
-            <Grid RowDefinitions="*,Auto">
-                <views:SkiaChatSurfaceControl Grid.Row="0"
-                                              HorizontalAlignment="Stretch"
-                                              VerticalAlignment="Stretch"
-                                              Snapshot="{Binding ChatSurfaceSnapshot}"
-                                              SelectedMessageIndex="{Binding SelectedMessageIndex, Mode=TwoWay}"
-                                              DetailThreadId="{Binding SelectedChatThreadId, Mode=TwoWay}"
-                                              OverviewMode="{Binding IsChatOverviewMode, Mode=TwoWay}"
-                                              CompactLayout="True"
-                                              ChromeTitle="Intercom"
-                                              IsChatLoading="{Binding IsChatLoading}"
-                                              LoadingStatusText="{Binding ChatLoadingStatusText}"/>
-                <Border Grid.Row="1" Classes="intercomComposer">
-                    <StackPanel Spacing="4">
-                        <Border Classes="cascadeAutocomplete"
-                                ZIndex="20"
-                                IsVisible="{Binding IsChatSlashAutocompleteVisible}"
-                                MaxHeight="280">
-                            <ListBox x:Name="ForwardSlashSuggestionList"
-                                     ItemsSource="{Binding ChatSlashSuggestions}"
-                                     SelectedIndex="{Binding SelectedChatSlashSuggestionIndex, Mode=TwoWay}"
-                                     MinHeight="64"
-                                     MaxHeight="160"
-                                     Background="Transparent"
-                                     BorderThickness="0">
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate DataType="chat:ChatSlashSuggestionItem">
-                                        <StackPanel Spacing="2" Margin="4,2">
-                                            <TextBlock Text="{Binding Group}"
-                                                       FontSize="10"
-                                                       Opacity="0.75"
-                                                       Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-                                            <TextBlock Text="{Binding SlashPath}"
-                                                       FontWeight="SemiBold"
-                                                       Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
-                                            <TextBlock Text="{Binding Help}"
-                                                       FontSize="11"
-                                                       TextWrapping="Wrap"
-                                                       Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
-                        </Border>
-                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                            <TextBox x:Name="ForwardChatInputBox"
-                                     Grid.Column="0"
-                                     Text="{Binding ChatInput, Mode=TwoWay}"
-                                     PlaceholderText="Сообщение или /команда…"
-                                     AcceptsReturn="True"
-                                     MinHeight="40"
-                                     Padding="10,8"
-                                     TextWrapping="Wrap"
-                                     Background="Transparent"
-                                     BorderThickness="0"
-                                     IsEnabled="{Binding !IsChatLoading}"/>
-                            <Button Grid.Column="1"
-                                    Content="↑"
-                                    ToolTip.Tip="Отправить"
-                                    Command="{Binding SendChatCommand}"
-                                    IsEnabled="{Binding !IsChatLoading}"
-                                    Padding="12,8"
-                                    MinWidth="44"/>
-                        </Grid>
-                    </StackPanel>
-                </Border>
-            </Grid>
+            <views:IntercomSkiaSurface x:Name="ForwardIntercomSurface"
+                                          HorizontalAlignment="Stretch"
+                                          VerticalAlignment="Stretch"
+                                          Snapshot="{Binding ChatSurfaceSnapshot}"
+                                          SelectedMessageIndex="{Binding SelectedMessageIndex, Mode=TwoWay}"
+                                          DetailThreadId="{Binding SelectedChatThreadId, Mode=TwoWay}"
+                                          OverviewMode="{Binding IsChatOverviewMode, Mode=TwoWay}"
+                                          CompactLayout="True"
+                                          ChromeTitle="Intercom"
+                                          IsChatLoading="{Binding IsChatLoading}"
+                                          LoadingStatusText="{Binding ChatLoadingStatusText}"
+                                          ShowIntercomComposer="True"
+                                          ComposerText="{Binding ChatInput, Mode=TwoWay}"
+                                          IsComposerEnabled="{Binding !IsChatLoading}"
+                                          IsSlashAutocompleteVisible="{Binding IsChatSlashAutocompleteVisible}"
+                                          SelectedSlashSuggestionIndex="{Binding SelectedChatSlashSuggestionIndex, Mode=TwoWay}"
+                                          SlashSuggestions="{Binding ChatSlashSuggestions}"/>
 
             <Border IsVisible="{Binding HasActiveClarificationBatch}"
                     ZIndex="40"
@@ -166,7 +110,7 @@
 
         <!-- MFD / comfortable: UiKit shell (до слияния в один Skia-surface) -->
         <Grid IsVisible="{Binding !IsForwardIntercomLayout}"
-              RowDefinitions="Auto,Auto,*,Auto"
+              RowDefinitions="Auto,Auto,*"
               RowSpacing="8">
             <uikit:CascadeSection Grid.Row="0">
                 <DockPanel LastChildFill="False">
@@ -260,66 +204,22 @@
                                Margin="0,0,0,6"
                                FontSize="12"
                                Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-                    <Grid MinHeight="220">
-                        <views:SkiaChatSurfaceControl HorizontalAlignment="Stretch"
-                                                      VerticalAlignment="Stretch"
-                                                      Snapshot="{Binding ChatSurfaceSnapshot}"
-                                                      SelectedMessageIndex="{Binding SelectedMessageIndex, Mode=TwoWay}"
-                                                      DetailThreadId="{Binding SelectedChatThreadId, Mode=TwoWay}"
-                                                      OverviewMode="{Binding IsChatOverviewMode, Mode=TwoWay}"
-                                                      CompactLayout="False"/>
-                    </Grid>
+                    <views:IntercomSkiaSurface x:Name="ClassicIntercomSurface"
+                                               MinHeight="220"
+                                               HorizontalAlignment="Stretch"
+                                               VerticalAlignment="Stretch"
+                                               Snapshot="{Binding ChatSurfaceSnapshot}"
+                                               SelectedMessageIndex="{Binding SelectedMessageIndex, Mode=TwoWay}"
+                                               DetailThreadId="{Binding SelectedChatThreadId, Mode=TwoWay}"
+                                               OverviewMode="{Binding IsChatOverviewMode, Mode=TwoWay}"
+                                               CompactLayout="False"
+                                               ShowIntercomComposer="True"
+                                               ComposerText="{Binding ChatInput, Mode=TwoWay}"
+                                               IsComposerEnabled="{Binding !IsChatLoading}"
+                                               IsSlashAutocompleteVisible="{Binding IsChatSlashAutocompleteVisible}"
+                                               SelectedSlashSuggestionIndex="{Binding SelectedChatSlashSuggestionIndex, Mode=TwoWay}"
+                                               SlashSuggestions="{Binding ChatSlashSuggestions}"/>
                 </DockPanel>
-            </uikit:CascadeSection>
-
-            <uikit:CascadeSection Grid.Row="3">
-                <StackPanel Spacing="4">
-                    <Border Classes="cascadeAutocomplete"
-                            ZIndex="20"
-                            IsVisible="{Binding IsChatSlashAutocompleteVisible}"
-                            MaxHeight="280">
-                        <ListBox x:Name="ClassicSlashSuggestionList"
-                                 ItemsSource="{Binding ChatSlashSuggestions}"
-                                 SelectedIndex="{Binding SelectedChatSlashSuggestionIndex, Mode=TwoWay}"
-                                 MinHeight="80"
-                                 MaxHeight="160"
-                                 Background="Transparent"
-                                 BorderThickness="0">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate DataType="chat:ChatSlashSuggestionItem">
-                                    <StackPanel Spacing="2" Margin="4,2">
-                                        <TextBlock Text="{Binding Group}"
-                                                   FontSize="10"
-                                                   Opacity="0.75"
-                                                   Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-                                        <TextBlock Text="{Binding SlashPath}"
-                                                   FontWeight="SemiBold"
-                                                   Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
-                                        <TextBlock Text="{Binding Help}"
-                                                   FontSize="11"
-                                                   TextWrapping="Wrap"
-                                                   Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
-                    </Border>
-                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                        <TextBox x:Name="ClassicChatInputBox"
-                                 Grid.Column="0"
-                                 Text="{Binding ChatInput, Mode=TwoWay}"
-                                 PlaceholderText="Сообщение или /команда…"
-                                 AcceptsReturn="True"
-                                 MinHeight="52"
-                                 TextWrapping="Wrap"
-                                 IsEnabled="{Binding !IsChatLoading}"/>
-                        <Button Grid.Column="1"
-                                Content="Отправить"
-                                Command="{Binding SendChatCommand}"
-                                IsEnabled="{Binding !IsChatLoading}"
-                                Padding="14,8"/>
-                    </Grid>
-                </StackPanel>
             </uikit:CascadeSection>
         </Grid>
     </Panel>
