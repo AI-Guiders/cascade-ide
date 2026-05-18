@@ -124,7 +124,7 @@
 | `IdeMcpCommandExecutor.Handlers.Editor.StateContent.cs` | 30 | MCP: состояние редактора, диапазон текста и текст открытого документа. |
 | `IdeMcpCommandExecutor.Handlers.Editor.ToolCatalog.cs` | 18 | MCP: каталог инструментов `list_tools`. |
 | `IdeMcpCommandExecutor.Handlers.PowerDocuments.Documents.cs` | 68 | MCP-хендлеры вкладок документов: переоткрытие, активация, закрепление, перенос по группам редакторов. |
-| `IdeMcpCommandExecutor.Handlers.PowerDocuments.FocusPowerAgent.cs` | 228 | MCP-хендлеры Power / фокус-шагов, автономного агента, чата и установки модели Ollama. |
+| `IdeMcpCommandExecutor.Handlers.PowerDocuments.FocusPowerAgent.cs` | 233 | MCP-хендлеры Power / фокус-шагов, автономного агента, чата и установки модели Ollama. |
 | `Generated/IdeMcpCommandExecutor.Generated.g.cs` | 108 | Сгенерированные хендлеры MCP → `IIdeMcpActions` (`CascadeIDE.ProtocolDocGen`). |
 
 <!-- AUTO:MAIN-WINDOW-SLICE:EXEC-TABLE:END -->
