@@ -115,7 +115,8 @@ public partial class MainWindowViewModel
             getLocalOllamaEndpoint: () => new Uri(Services.OllamaService.DefaultBaseUriString),
             getEffectiveOllamaModelId: () => EffectiveOllamaModelId,
             tryCreateCloudMafIChatClient: TryCreateCloudMafIChatClientForChatPanel,
-            getChatMinimizedContextBlock: BuildChatMinimizedContextBlockCore);
+            getChatMinimizedContextBlock: BuildChatMinimizedContextBlockCore,
+            getSendMessageKey: () => SendMessageKey);
         InstrumentationPanel = new InstrumentationPanelViewModel();
         InstrumentationPanel.PropertyChanged += OnInstrumentationPanelPropertyChanged;
         HypothesesPanel = new HypothesesPanelViewModel(GetWorkspacePath);

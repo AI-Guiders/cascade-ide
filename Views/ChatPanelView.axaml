@@ -147,11 +147,13 @@
         <uikit:CascadeSection Grid.Row="3">
             <StackPanel Spacing="4">
                 <Border Classes="cascadeAutocomplete"
+                        ZIndex="20"
                         IsVisible="{Binding IsChatSlashAutocompleteVisible}"
                         MaxHeight="168">
                     <ListBox x:Name="ChatSlashSuggestionList"
                              ItemsSource="{Binding ChatSlashSuggestions}"
                              SelectedIndex="{Binding SelectedChatSlashSuggestionIndex, Mode=TwoWay}"
+                             MinHeight="80"
                              MaxHeight="160"
                              Background="Transparent"
                              BorderThickness="0">

@@ -47,6 +47,7 @@ public partial class ChatPanelViewModel : ViewModelBase
     private readonly Func<string>? _getEffectiveOllamaModelId;
     private readonly Func<IChatClient?>? _tryCreateCloudMafIChatClient;
     private readonly Func<string?>? _getChatMinimizedContextBlock;
+    private readonly Func<string> _getSendMessageKey;
     private readonly ChatSessionStore _sessionStore;
     private readonly Dictionary<Guid, string> _collapsedThinkingByMessageId = new();
 
@@ -82,7 +83,8 @@ public partial class ChatPanelViewModel : ViewModelBase
         Func<Uri>? getLocalOllamaEndpoint = null,
         Func<string>? getEffectiveOllamaModelId = null,
         Func<IChatClient?>? tryCreateCloudMafIChatClient = null,
-        Func<string?>? getChatMinimizedContextBlock = null)
+        Func<string?>? getChatMinimizedContextBlock = null,
+        Func<string>? getSendMessageKey = null)
     {
         _aiProviderManager = aiProviderManager;
         _getActiveAiProvider = getActiveAiProvider;
@@ -106,6 +108,7 @@ public partial class ChatPanelViewModel : ViewModelBase
         _getEffectiveOllamaModelId = getEffectiveOllamaModelId;
         _tryCreateCloudMafIChatClient = tryCreateCloudMafIChatClient;
         _getChatMinimizedContextBlock = getChatMinimizedContextBlock;
+        _getSendMessageKey = getSendMessageKey ?? (() => "Enter");
         _sessionStore = new ChatSessionStore(_getWorkspaceRoot());
         _sessionId = _sessionStore.EnsureSessionId();
         ChatMessages.CollectionChanged += OnChatMessagesCollectionChanged;
@@ -140,6 +143,9 @@ public partial class ChatPanelViewModel : ViewModelBase
 
     /// <summary>Вызвать из главного окна при смене провайдера/модели, влияющих на <see cref="CanSendChat"/>.</summary>
     public void RefreshSendChatCommandState() => SendChatCommand.NotifyCanExecuteChanged();
+
+    /// <summary>Клавиша отправки из настроек (Enter / Ctrl+Enter / Shift+Enter).</summary>
+    public string GetSendMessageKey() => _getSendMessageKey();
 
     public ObservableCollection<ChatMessageViewModel> ChatMessages { get; } = [];
     public ObservableCollection<ClarificationDraftItemViewModel> ClarificationDraftItems { get; } = [];

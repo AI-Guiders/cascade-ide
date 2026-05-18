@@ -16,15 +16,21 @@ public partial class ChatPanelViewModel
 
     partial void OnChatInputChanged(string value) => RefreshChatSlashAutocomplete();
 
-    public void RefreshChatSlashAutocomplete()
+    /// <param name="inputOverride">Текст из TextBox при <c>TextChanged</c> (биндинг может отставать на один тик).</param>
+    public void RefreshChatSlashAutocomplete(string? inputOverride = null)
     {
-        var suggestions = ChatSlashAutocomplete.GetSuggestions(ChatInput);
+        var suggestions = ChatSlashAutocomplete.GetSuggestions(inputOverride ?? ChatInput);
         ChatSlashSuggestions.Clear();
         foreach (var s in suggestions)
             ChatSlashSuggestions.Add(new ChatSlashSuggestionItem(s));
 
-        IsChatSlashAutocompleteVisible = ChatSlashSuggestions.Count > 0;
-        SelectedChatSlashSuggestionIndex = ChatSlashSuggestions.Count > 0 ? 0 : -1;
+        var visible = ChatSlashSuggestions.Count > 0;
+        if (IsChatSlashAutocompleteVisible != visible)
+            IsChatSlashAutocompleteVisible = visible;
+        else
+            OnPropertyChanged(nameof(IsChatSlashAutocompleteVisible));
+
+        SelectedChatSlashSuggestionIndex = visible ? 0 : -1;
     }
 
     public void MoveChatSlashSuggestionSelection(int delta)
