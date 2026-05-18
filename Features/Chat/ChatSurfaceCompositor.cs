@@ -19,7 +19,7 @@ public interface IChatSurfaceLayoutStage
 }
 
 /// <summary>Intent stage: строит first-class thread/message/confirmation graph из канонического chat intent.</summary>
-public sealed class ChatSurfaceIntentStage : IChatSurfaceIntentStage
+public sealed partial class ChatSurfaceIntentStage : IChatSurfaceIntentStage
 {
     public ChatSurfaceState Resolve(in ChatSurfaceIntent intent)
     {
@@ -42,7 +42,7 @@ public sealed class ChatSurfaceIntentStage : IChatSurfaceIntentStage
             .ToList();
 
         if (messages.Count == 0)
-            return BuildEmptyState(currentIntent);
+            return BuildStateWithoutMessages(currentIntent);
 
         var messageById = messages.ToDictionary(message => message.MessageId, message => message);
         var parentThreadByThread = new Dictionary<Guid, Guid?>();
@@ -59,6 +59,8 @@ public sealed class ChatSurfaceIntentStage : IChatSurfaceIntentStage
             parentMessageByThread[message.ThreadId] = parent.MessageId;
         }
 
+        ApplyForkHints(currentIntent, parentThreadByThread);
+
         var firstMessageByThread = messages
             .GroupBy(message => message.ThreadId)
             .ToDictionary(group => group.Key, group => group.OrderBy(message => message.MessageIndex).First());
@@ -73,7 +75,12 @@ public sealed class ChatSurfaceIntentStage : IChatSurfaceIntentStage
                 return new ChatThreadNode(
                     threadId,
                     NodeIdForThread(threadId),
-                    BuildThreadTitle(threadId, pair.Value, currentIntent.MainThreadId, currentIntent.ThreadBranchHint),
+                    BuildThreadTitle(
+                        threadId,
+                        pair.Value,
+                        currentIntent.MainThreadId,
+                        currentIntent.ThreadBranchHint,
+                        currentIntent.ThreadDisplayTitles),
                     IsMainThread: threadId == currentIntent.MainThreadId,
                     IsActive: threadId == currentIntent.ActiveThreadId,
                     ParentThreadId: parentThreadId,
@@ -82,6 +89,9 @@ public sealed class ChatSurfaceIntentStage : IChatSurfaceIntentStage
                     Order: pair.Value.MessageIndex);
             })
             .ToDictionary(thread => thread.ThreadId);
+
+        var orderBase = messages.Count > 0 ? messages.Max(m => m.MessageIndex) + 1 : 0;
+        MergeSyntheticThreads(threads, currentIntent, parentThreadByThread, orderBase);
 
         foreach (var threadId in threads.Keys.ToList())
         {
@@ -155,26 +165,6 @@ public sealed class ChatSurfaceIntentStage : IChatSurfaceIntentStage
             activeThreadLabel);
     }
 
-    private static ChatSurfaceState BuildEmptyState(in ChatSurfaceIntent intent)
-    {
-        var confirmations = new List<ChatConfirmationNode>();
-        if (intent.ActiveClarificationBatch is { } clarification)
-        {
-            var threadId = intent.ActiveThreadId != Guid.Empty ? intent.ActiveThreadId : intent.MainThreadId;
-            confirmations.Add(new ChatConfirmationNode(
-                NodeIdForClarification(clarification.Id),
-                threadId,
-                clarification.Id,
-                string.IsNullOrWhiteSpace(clarification.Title) ? "Уточнения к текущему шагу" : clarification.Title.Trim(),
-                BuildClarificationBody(clarification),
-                clarification.Items.Count,
-                IsActive: true,
-                IsResolved: false));
-        }
-
-        return new ChatSurfaceState([], [], confirmations, [], intent.ActiveThreadId, "Chat");
-    }
-
     private static int ComputeDepth(Guid threadId, IReadOnlyDictionary<Guid, ChatThreadNode> threads)
     {
         var seen = new HashSet<Guid>();
@@ -191,8 +181,20 @@ public sealed class ChatSurfaceIntentStage : IChatSurfaceIntentStage
         return depth;
     }
 
-    private static string BuildThreadTitle(Guid threadId, ChatMessageNode firstMessage, Guid mainThreadId, string? branchHint)
+    private static string BuildThreadTitle(
+        Guid threadId,
+        ChatMessageNode firstMessage,
+        Guid mainThreadId,
+        string? branchHint,
+        IReadOnlyDictionary<Guid, string>? displayTitles)
     {
+        if (displayTitles is not null
+            && displayTitles.TryGetValue(threadId, out var custom)
+            && !string.IsNullOrWhiteSpace(custom))
+        {
+            return TrimForTitle(custom);
+        }
+
         if (threadId == mainThreadId)
             return "Основная тема";
 
@@ -392,6 +394,6 @@ public sealed class ChatSurfaceCompositor(
         var decluttered = _declutterStage.Apply(resolved);
         var layout = _layoutStage.Layout(decluttered);
         var spine = intent.ProductSpine ?? ChatProductSpine.Empty;
-        return new ChatSurfaceSnapshot(decluttered, layout, spine);
+        return new ChatSurfaceSnapshot(decluttered, layout, spine, intent.TopicPicker);
     }
 }

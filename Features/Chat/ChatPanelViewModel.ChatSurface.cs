@@ -15,7 +15,10 @@ public partial class ChatPanelViewModel
             _mainThreadId,
             _activeThreadId,
             ThreadBranchHint,
-            BuildProductSpine()));
+            BuildProductSpine(),
+            BuildThreadDisplayTitles(),
+            _threadForks,
+            _topicPickerPresentation));
 
         var overview = ChatSurfaceSnapshot.Layout.Overview;
         if (overview.Count == 0)
