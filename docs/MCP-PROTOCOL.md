@@ -309,7 +309,7 @@
 | `fix_failing_tests` | Quick action: починить упавшие тесты. returns: text. |
 | `focus_checkpoint` | Создать контрольную точку (Focus). returns: text. |
 | `focus_rollback` | Откатить к последней контрольной точке (Focus). returns: text. |
-| `fork_chat_thread` | Новая ветка чата: args: parent_message_id?:string. Пишет thread_forked; следующее user-сообщение может ссылаться на родителя. returns: text; example: {} |
+| `fork_chat_thread` | Новая ветка чата: args: parent_message_id?:string, display_title?:string, title?:string. Пишет thread_forked; переключает активную ветку. returns: text; example: {"display_title":"ADR review"} |
 | `install_ollama_model` | Скачать модель Ollama (как в настройках). args: model:string; returns: text; example: {"model":"qwen2.5-coder:7b"}. |
 | `investigate_nullref` | Quick action: расследовать NullReferenceException. returns: text. |
 | `open_chat_clarification_batch` | Открыть structured clarification batch в чате. args: batch_json:string. returns: text; example: {"batch_json":"{\"id\":\"...\",\"title\":\"Нужно уточнить\",\"items\":[]}"}. |

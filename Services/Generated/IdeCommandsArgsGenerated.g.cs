@@ -34,7 +34,7 @@ internal static class IdeCommandsArgsGenerated
         ["explain_trace_step"] = new IdeCommandsArgs.Arg[] { new("step_index", "integer", true, false, null) },
         ["extract_from_archive"] = new IdeCommandsArgs.Arg[] { new("query", "string", true, false, null), new("revision_file", "string", false, false, null), new("head_limit", "integer", false, false, null), new("context_lines", "integer", false, false, null) },
         ["fetch_web_public_url"] = new IdeCommandsArgs.Arg[] { new("url", "string", true, false, null), new("max_chars", "integer", false, false, null) },
-        ["fork_chat_thread"] = new IdeCommandsArgs.Arg[] { new("parent_message_id", "string", false, false, null) },
+        ["fork_chat_thread"] = new IdeCommandsArgs.Arg[] { new("parent_message_id", "string", false, false, null), new("display_title", "string", false, false, null), new("title", "string", false, false, null) },
         ["get_code_metrics"] = new IdeCommandsArgs.Arg[] { new("scope", "string", false, false, null), new("path", "string", false, false, null) },
         ["get_code_navigation_context"] = new IdeCommandsArgs.Arg[] { new("mode", "string", true, false, null), new("file_path", "string", false, false, null), new("line", "integer", false, false, null), new("column", "integer", false, false, null), new("max_related", "integer", false, false, null), new("max_nodes", "integer", false, false, null), new("max_edges", "integer", false, false, null), new("preset", "string", false, false, null), new("include_kinds", "string", false, true, "string"), new("exclude_kinds", "string", false, true, "string"), new("level", "string", false, false, null) },
         ["get_control_appearance"] = new IdeCommandsArgs.Arg[] { new("name", "string", false, false, null) },

@@ -234,7 +234,7 @@ internal static class IdeCommandsContractGenerated
         ["delete_knowledge_section"] = "{\"file_path\":\"index.md\",\"section_id\":\"foo\"}",
         ["explain_trace_step"] = "{\"step_index\":0}",
         ["extract_from_archive"] = "{\"query\":\"ActiveProjectId\",\"head_limit\":10,\"context_lines\":2}",
-        ["fork_chat_thread"] = "{}",
+        ["fork_chat_thread"] = "{\"display_title\":\"ADR review\"}",
         ["get_code_metrics"] = "{\"scope\":\"solution\",\"path\":\".\"}",
         ["get_code_navigation_context"] = "{\"mode\":\"related\",\"file_path\":\"src/Foo.cs\",\"preset\":\"no_namespace_noise\",\"level\":\"controlFlow\"}",
         ["get_control_appearance"] = "{\"name\":\"BuildButton\"}",

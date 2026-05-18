@@ -42,7 +42,7 @@ public static partial class IdeCommands
     public const string PrepareCommit = "prepare_commit";
     /// <summary>Чат: args: message?:string, role?:string. role assistant — только строка ассистента из MCP; иначе user и отправка; при ai.mode = mcp_only встроенный LLM не вызывается. returns: text; example: {"message":"hello"}.</summary>
     public const string SendChat = "send_chat";
-    /// <summary>Новая ветка чата: args: parent_message_id?:string. Пишет thread_forked; следующее user-сообщение может ссылаться на родителя. returns: text; example: {}</summary>
+    /// <summary>Новая ветка чата: args: parent_message_id?:string, display_title?:string, title?:string. Пишет thread_forked; переключает активную ветку. returns: text; example: {"display_title":"ADR review"}</summary>
     public const string ForkChatThread = "fork_chat_thread";
     /// <summary>Открыть structured clarification batch в чате. args: batch_json:string. returns: text; example: {"batch_json":"{\"id\":\"...\",\"title\":\"Нужно уточнить\",\"items\":[]}"}.</summary>
     public const string OpenChatClarificationBatch = "open_chat_clarification_batch";

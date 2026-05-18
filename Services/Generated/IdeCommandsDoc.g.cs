@@ -75,7 +75,7 @@ internal static class IdeCommandsDoc
         ["focus_checkpoint"] = "Создать контрольную точку (Focus). returns: text.",
         ["focus_editor"] = "Передать фокус в редактор (чтобы клавиши/ввод шли в него). returns: text.",
         ["focus_rollback"] = "Откатить к последней контрольной точке (Focus). returns: text.",
-        ["fork_chat_thread"] = "Новая ветка чата: args: parent_message_id?:string. Пишет thread_forked; следующее user-сообщение может ссылаться на родителя. returns: text; example: {}",
+        ["fork_chat_thread"] = "Новая ветка чата: args: parent_message_id?:string, display_title?:string, title?:string. Пишет thread_forked; переключает активную ветку. returns: text; example: {\"display_title\":\"ADR review\"}",
         ["get_build_output"] = "Текст панели «Вывод сборки» + цвета оформления. returns: json.",
         ["get_cockpit_surface"] = "Только CDS (`CockpitSurfaceState`): тот же payload, что поле `cockpit_surface` в `get_ide_state`. returns: json. Для `--agent-contract` без полной сводки.",
         ["get_code_metrics"] = "Метрики кода (LOC/классы/методы/цикломатика). args: scope?:string, path?:string; returns: json; example: {\"scope\":\"solution\",\"path\":\".\"}.",
