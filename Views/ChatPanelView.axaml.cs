@@ -11,19 +11,33 @@ public partial class ChatPanelView : UserControl
     public ChatPanelView()
     {
         InitializeComponent();
-        ChatInputBox.AddHandler(InputElement.KeyDownEvent, OnChatInputKeyDown, RoutingStrategies.Tunnel);
-        ChatInputBox.TextChanged += OnChatInputTextChanged;
+        WireChatInput(ForwardChatInputBox);
+        WireChatInput(ClassicChatInputBox);
     }
+
+    private void WireChatInput(TextBox box)
+    {
+        box.AddHandler(InputElement.KeyDownEvent, OnChatInputKeyDown, RoutingStrategies.Tunnel);
+        box.TextChanged += OnChatInputTextChanged;
+    }
+
+    private TextBox? SenderAsTextBox(object? sender) => sender as TextBox;
 
     private void OnChatInputTextChanged(object? sender, TextChangedEventArgs e)
     {
-        if (DataContext is ChatPanelViewModel vm)
-            vm.RefreshChatSlashAutocomplete(ChatInputBox.Text);
+        if (DataContext is not ChatPanelViewModel vm)
+            return;
+        var text = SenderAsTextBox(sender)?.Text;
+        vm.RefreshChatSlashAutocomplete(text);
     }
 
     private void OnChatInputKeyDown(object? sender, KeyEventArgs e)
     {
         if (DataContext is not ChatPanelViewModel vm)
+            return;
+
+        var input = SenderAsTextBox(sender);
+        if (input is null)
             return;
 
         if (vm.IsChatSlashAutocompleteVisible)
@@ -34,7 +48,7 @@ public partial class ChatPanelView : UserControl
                     if (vm.TryApplySelectedChatSlashSuggestion())
                     {
                         e.Handled = true;
-                        ChatInputBox.CaretIndex = vm.ChatInput.Length;
+                        input.CaretIndex = vm.ChatInput.Length;
                     }
                     return;
                 case Key.Up:
@@ -54,7 +68,7 @@ public partial class ChatPanelView : UserControl
                     if (vm.TryApplySelectedChatSlashSuggestion())
                     {
                         e.Handled = true;
-                        ChatInputBox.CaretIndex = vm.ChatInput.Length;
+                        input.CaretIndex = vm.ChatInput.Length;
                         return;
                     }
                     break;

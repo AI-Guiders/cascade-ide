@@ -38,6 +38,20 @@ public sealed class SkiaChatSurfaceControl : Control
     public static readonly StyledProperty<bool> OverviewModeProperty =
         AvaloniaProperty.Register<SkiaChatSurfaceControl, bool>(nameof(OverviewMode), false);
 
+    public static readonly StyledProperty<bool> CompactLayoutProperty =
+        AvaloniaProperty.Register<SkiaChatSurfaceControl, bool>(nameof(CompactLayout), false);
+
+    public static readonly StyledProperty<string> ChromeTitleProperty =
+        AvaloniaProperty.Register<SkiaChatSurfaceControl, string>(nameof(ChromeTitle), "Intercom");
+
+    public static readonly StyledProperty<string> LoadingStatusTextProperty =
+        AvaloniaProperty.Register<SkiaChatSurfaceControl, string>(nameof(LoadingStatusText), "");
+
+    public static readonly StyledProperty<bool> IsChatLoadingProperty =
+        AvaloniaProperty.Register<SkiaChatSurfaceControl, bool>(nameof(IsChatLoading), false);
+
+    private SKRect _overviewButtonBounds;
+
     public ChatSurfaceSnapshot Snapshot
     {
         get => GetValue(SnapshotProperty);
@@ -62,9 +76,41 @@ public sealed class SkiaChatSurfaceControl : Control
         set => SetValue(OverviewModeProperty, value);
     }
 
+    public bool CompactLayout
+    {
+        get => GetValue(CompactLayoutProperty);
+        set => SetValue(CompactLayoutProperty, value);
+    }
+
+    public string ChromeTitle
+    {
+        get => GetValue(ChromeTitleProperty);
+        set => SetValue(ChromeTitleProperty, value);
+    }
+
+    public string LoadingStatusText
+    {
+        get => GetValue(LoadingStatusTextProperty);
+        set => SetValue(LoadingStatusTextProperty, value);
+    }
+
+    public bool IsChatLoading
+    {
+        get => GetValue(IsChatLoadingProperty);
+        set => SetValue(IsChatLoadingProperty, value);
+    }
+
     static SkiaChatSurfaceControl()
     {
-        AffectsRender<SkiaChatSurfaceControl>(SnapshotProperty, SelectedMessageIndexProperty, DetailThreadIdProperty, OverviewModeProperty);
+        AffectsRender<SkiaChatSurfaceControl>(
+            SnapshotProperty,
+            SelectedMessageIndexProperty,
+            DetailThreadIdProperty,
+            OverviewModeProperty,
+            CompactLayoutProperty,
+            ChromeTitleProperty,
+            LoadingStatusTextProperty,
+            IsChatLoadingProperty);
     }
 
     public SkiaChatSurfaceControl()
@@ -120,7 +166,7 @@ public sealed class SkiaChatSurfaceControl : Control
         RefreshTheme();
 
         var snapshot = Snapshot ?? ChatSurfaceSnapshot.Empty;
-        var entities = SkiaChatSceneBuilder.Build(snapshot, OverviewMode, DetailThreadId);
+        var entities = SkiaChatSceneBuilder.Build(snapshot, OverviewMode, DetailThreadId, CompactLayout);
         var width = Math.Max(160, Bounds.Width);
         var contentWidth = (float)(width - 24);
         var maxChars = Math.Max(18, (int)(contentWidth / 7.1f));
@@ -137,7 +183,13 @@ public sealed class SkiaChatSurfaceControl : Control
             _theme,
             SelectedMessageIndex,
             _hoveredItem,
-            _hitTargets));
+            _hitTargets,
+            CompactLayout,
+            ChromeTitle,
+            OverviewMode,
+            IsChatLoading,
+            LoadingStatusText,
+            bounds => _overviewButtonBounds = bounds));
         base.Render(context);
     }
 
@@ -169,6 +221,18 @@ public sealed class SkiaChatSurfaceControl : Control
 
     private void OnPointerPressed(object? sender, PointerPressedEventArgs e)
     {
+        if (CompactLayout && _overviewButtonBounds.Width > 0)
+        {
+            var p = e.GetPosition(this);
+            if (_overviewButtonBounds.Contains((float)p.X, (float)p.Y))
+            {
+                OverviewMode = !OverviewMode;
+                e.Handled = true;
+                InvalidateVisual();
+                return;
+            }
+        }
+
         var index = FindHit(e.GetPosition(this));
         if (index < 0)
             return;
@@ -209,7 +273,8 @@ public sealed class SkiaChatSurfaceControl : Control
 
     private void ClampScrollToContent()
     {
-        var viewport = Math.Max(1, Bounds.Height);
+        var chrome = CompactLayout ? SkiaChatChromeRenderer.ToolbarHeight : 0;
+        var viewport = Math.Max(1, Bounds.Height - chrome);
         var max = Math.Max(0, _cachedContentHeight - viewport);
         if (_scrollOffset > max)
             _scrollOffset = max;
@@ -225,6 +290,12 @@ public sealed class SkiaChatSurfaceControl : Control
         private readonly int _selectedMessageIndex;
         private readonly int _hoveredItem;
         private readonly List<(Rect Bounds, SkiaChatHit Hit)> _hitTargets;
+        private readonly bool _compactLayout;
+        private readonly string _chromeTitle;
+        private readonly bool _overviewMode;
+        private readonly bool _isChatLoading;
+        private readonly string? _loadingStatusText;
+        private readonly Action<SKRect> _onOverviewButtonBounds;
 
         public DrawOperation(
             Rect bounds,
@@ -233,7 +304,13 @@ public sealed class SkiaChatSurfaceControl : Control
             SkiaChatTheme theme,
             int selectedMessageIndex,
             int hoveredItem,
-            List<(Rect Bounds, SkiaChatHit Hit)> hitTargets)
+            List<(Rect Bounds, SkiaChatHit Hit)> hitTargets,
+            bool compactLayout,
+            string chromeTitle,
+            bool overviewMode,
+            bool isChatLoading,
+            string? loadingStatusText,
+            Action<SKRect> onOverviewButtonBounds)
         {
             Bounds = bounds;
             _placed = placed;
@@ -242,6 +319,12 @@ public sealed class SkiaChatSurfaceControl : Control
             _selectedMessageIndex = selectedMessageIndex;
             _hoveredItem = hoveredItem;
             _hitTargets = hitTargets;
+            _compactLayout = compactLayout;
+            _chromeTitle = chromeTitle;
+            _overviewMode = overviewMode;
+            _isChatLoading = isChatLoading;
+            _loadingStatusText = loadingStatusText;
+            _onOverviewButtonBounds = onOverviewButtonBounds;
         }
 
         public Rect Bounds { get; }
@@ -259,10 +342,27 @@ public sealed class SkiaChatSurfaceControl : Control
 
             var width = Math.Max(160f, (float)Bounds.Width);
             var height = Math.Max(1f, (float)Bounds.Height);
+            var chromeTop = _compactLayout ? SkiaChatChromeRenderer.ToolbarHeight : 0f;
+            if (_compactLayout)
+            {
+                SkiaChatChromeRenderer.Draw(
+                    canvas,
+                    width,
+                    _theme,
+                    _chromeTitle,
+                    _overviewMode,
+                    _isChatLoading,
+                    _loadingStatusText,
+                    out var overviewBounds);
+                _onOverviewButtonBounds(overviewBounds);
+            }
+            else
+                _onOverviewButtonBounds(default);
+
             const float contentLeft = 12f;
             var contentWidth = width - 24f;
-            canvas.ClipRect(new SKRect(0, 0, width, height), antialias: false);
-            canvas.Translate(0, -_scrollOffset);
+            canvas.ClipRect(new SKRect(0, chromeTop, width, height), antialias: false);
+            canvas.Translate(0, chromeTop - _scrollOffset);
 
             _hitTargets.Clear();
 
@@ -286,7 +386,7 @@ public sealed class SkiaChatSurfaceControl : Control
                     Theme = _theme,
                     ContentLeft = itemLeft,
                     ContentWidth = itemWidth,
-                    ScrollOffset = _scrollOffset,
+                    ScrollOffset = _scrollOffset - chromeTop,
                     ItemIndex = i,
                     HoveredItemIndex = _hoveredItem,
                     SelectedMessageIndex = _selectedMessageIndex,

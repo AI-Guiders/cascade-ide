@@ -9,6 +9,7 @@ internal static class SkiaChatSceneBuilder
     public static IReadOnlyList<ISkiaChatEntity> Build(
         ChatSurfaceSnapshot snapshot,
         bool overviewMode,
-        Guid detailThreadId) =>
-        ChatSurfaceEntityFactory.Build(snapshot, overviewMode, detailThreadId);
+        Guid detailThreadId,
+        bool compactLayout = false) =>
+        ChatSurfaceEntityFactory.Build(snapshot, overviewMode, detailThreadId, compactLayout);
 }

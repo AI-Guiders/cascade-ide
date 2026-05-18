@@ -53,8 +53,8 @@
             <Setter Property="Background" Value="{DynamicResource CascadeTheme.EditorBackground}"/>
             <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.EditorForeground}"/>
         </Style>
-        <!-- Поле ввода чата — в тон пузырям сообщений -->
-        <Style Selector="TextBox#ChatInputBox">
+        <!-- Поле ввода чата — в тон пузырям сообщений (Forward + MFD) -->
+        <Style Selector="TextBox#ForwardChatInputBox, TextBox#ClassicChatInputBox">
             <Setter Property="Background" Value="{DynamicResource CascadeTheme.ChatMessageBubbleBackground}"/>
             <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.EditorColumnBorderBrush}"/>

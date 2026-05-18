@@ -57,6 +57,8 @@ internal static class UiThemeDeepSnapshot
         "ModeBadge",
         "UiModeBloomOverlay",
         "ChatInputBox",
+        "ForwardChatInputBox",
+        "ClassicChatInputBox",
         "TerminalInputBox"
     ];
 

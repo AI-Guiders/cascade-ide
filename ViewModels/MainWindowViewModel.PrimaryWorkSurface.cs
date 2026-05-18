@@ -20,6 +20,7 @@ public partial class MainWindowViewModel
             OnPropertyChanged();
             OnPropertyChanged(nameof(IsForwardEditorHostVisible));
             OnPropertyChanged(nameof(IsForwardIntercomHostVisible));
+            ChatPanel.IsForwardIntercomLayout = value == PrimaryWorkSurfaceKind.Intercom;
             SyncMfdShellPageForPrimaryWorkSurface();
             try
             {
