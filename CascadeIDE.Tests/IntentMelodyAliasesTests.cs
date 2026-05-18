@@ -80,30 +80,56 @@ public sealed class IntentMelodyAliasesTests
     public void Bundled_intent_melody_toml_is_readable_like_runtime()
     {
         Assert.True(BundledAppContent.TryReadDiskThenEmbedded(IntentMelodyAliases.BundledRelativePath, out var text));
-        Assert.Contains("melody_catalog_schema_version = 1", text, StringComparison.Ordinal);
+        Assert.Contains("intent_catalog_schema_version = 1", text, StringComparison.Ordinal);
         Assert.Contains("[[tail_wire_class]]", text, StringComparison.Ordinal);
-        Assert.Contains("[[melody_root]]", text, StringComparison.Ordinal);
-        Assert.Contains("slug = \"ers\"", text, StringComparison.Ordinal);
+        Assert.Contains("[[command]]", text, StringComparison.Ordinal);
+        Assert.Contains("[[command.form.slash]]", text, StringComparison.Ordinal);
+        Assert.Contains("path = \"/terminal show\"", text, StringComparison.Ordinal);
+        Assert.Contains("melody_slug = \"ers\"", text, StringComparison.Ordinal);
         Assert.Contains("command_id = \"show_environment_readiness_page\"", text, StringComparison.Ordinal);
-        Assert.Contains("slug = \"his\"", text, StringComparison.Ordinal);
+        Assert.Contains("melody_slug = \"his\"", text, StringComparison.Ordinal);
         Assert.Contains("command_id = \"show_hybrid_index_page\"", text, StringComparison.Ordinal);
-        Assert.Contains("slug = \"wai\"", text, StringComparison.Ordinal);
-        Assert.Contains("palette_hint_slug = \"wai-url\"", text, StringComparison.Ordinal);
+        Assert.Contains("melody_slug = \"wai\"", text, StringComparison.Ordinal);
+        Assert.Contains("melody_palette_hint_slug = \"wai-url\"", text, StringComparison.Ordinal);
         Assert.Contains("command_id = \"show_web_ai_portal_page\"", text, StringComparison.Ordinal);
-        Assert.Contains("slug = \"ts\"", text, StringComparison.Ordinal);
+        Assert.Contains("melody_slug = \"ts\"", text, StringComparison.Ordinal);
         Assert.Contains("command_id = \"show_terminal_panel\"", text, StringComparison.Ordinal);
-        Assert.Contains("slug = \"dl\"", text, StringComparison.Ordinal);
+        Assert.Contains("melody_slug = \"dl\"", text, StringComparison.Ordinal);
         Assert.Contains("command_id = \"debug_launch\"", text, StringComparison.Ordinal);
-        Assert.Contains("slug = \"dn\"", text, StringComparison.Ordinal);
+        Assert.Contains("melody_slug = \"dn\"", text, StringComparison.Ordinal);
         Assert.Contains("command_id = \"debug_step_over\"", text, StringComparison.Ordinal);
-        Assert.Contains("slug = \"df\"", text, StringComparison.Ordinal);
+        Assert.Contains("melody_slug = \"df\"", text, StringComparison.Ordinal);
         Assert.Contains("command_id = \"debug_step_out\"", text, StringComparison.Ordinal);
-        Assert.Contains("slug = \"els\"", text, StringComparison.Ordinal);
+        Assert.Contains("melody_slug = \"els\"", text, StringComparison.Ordinal);
         Assert.Contains("command_id = \"select\"", text, StringComparison.Ordinal);
-        Assert.Contains("slug = \"eld\"", text, StringComparison.Ordinal);
+        Assert.Contains("melody_slug = \"eld\"", text, StringComparison.Ordinal);
         Assert.Contains("command_id = \"apply_edit\"", text, StringComparison.Ordinal);
-        Assert.Contains("slug = \"tol\"", text, StringComparison.Ordinal);
+        Assert.Contains("melody_slug = \"tol\"", text, StringComparison.Ordinal);
         Assert.Contains("command_id = \"toggle_workspace_splitters_lock\"", text, StringComparison.Ordinal);
+        Assert.Contains("slash_group = \"Панели\"", text, StringComparison.Ordinal);
+        Assert.Contains("[command.form.slash.args]", text, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ParseBundle_command_model_flat_melody_and_form_slash()
+    {
+        const string toml =
+            """
+            intent_catalog_schema_version = 1
+            [[command]]
+            command_id = "git_status"
+            melody_slug = "gs"
+            melody_shape = "simple"
+            [[command.form.slash]]
+            path = "/git status"
+            help = "git status"
+            """;
+
+        var bundle = IntentMelodyAliases.ParseBundleForTests(toml.Trim());
+
+        Assert.Equal(IdeCommands.GitStatus, IntentMelodyAliases.TryResolveExactCommandId("gs"));
+        Assert.True(bundle.Catalog.SlashRoutes.TryGetValue("/git status", out var slash));
+        Assert.Equal(IdeCommands.GitStatus, slash.CommandId);
     }
 
     [Fact]
@@ -111,16 +137,17 @@ public sealed class IntentMelodyAliasesTests
     {
         const string minimal =
             """
-            melody_catalog_schema_version = 1
+            intent_catalog_schema_version = 1
 
             [[tail_wire_class]]
             id = "int_chain_colon_space"
             kind = "delimited_slots"
             between_slots_any_of = [":", " "]
 
-            [[melody_root]]
-            slug = "z"
+            [[command]]
             command_id = "git_status"
+            [command.melody]
+            slug = "z"
             shape = "simple"
             """;
 
@@ -138,20 +165,44 @@ public sealed class IntentMelodyAliasesTests
     }
 
     [Fact]
+    public void ParseBundle_command_model_melody_and_slash_forms()
+    {
+        const string toml =
+            """
+            intent_catalog_schema_version = 1
+            [[command]]
+            command_id = "git_status"
+            [command.melody]
+            slug = "gs"
+            shape = "simple"
+            [[command.slash]]
+            path = "/git status"
+            help = "git status"
+            """;
+
+        var bundle = IntentMelodyAliases.ParseBundleForTests(toml.Trim());
+
+        Assert.Equal(IdeCommands.GitStatus, IntentMelodyAliases.TryResolveExactCommandId("gs"));
+        Assert.True(bundle.Catalog.SlashRoutes.TryGetValue("/git status", out var slash));
+        Assert.Equal(IdeCommands.GitStatus, slash.CommandId);
+    }
+
+    [Fact]
     public void ParseBundle_infers_show_usage_hint_for_two_int_parametric_without_explicit_flag()
     {
         const string toml =
             """
-            melody_catalog_schema_version = 1
+            intent_catalog_schema_version = 1
 
             [[tail_wire_class]]
             id = "int_chain_colon_space"
             kind = "delimited_slots"
             between_slots_any_of = [":", " "]
 
-            [[melody_root]]
-            slug = "zz"
+            [[command]]
             command_id = "select"
+            [command.melody]
+            slug = "zz"
             shape = "parametric"
             tail_signature = "<start:ln>:<end:ln>"
             wire_class = "int_chain_colon_space"
@@ -174,6 +225,10 @@ public sealed class IntentMelodyAliasesTests
         Assert.NotEmpty(bundle.AliasToCommandId);
         Assert.NotEmpty(bundle.Catalog.Roots);
         Assert.NotEmpty(bundle.Catalog.TailWireClasses);
+        Assert.NotEmpty(bundle.Catalog.SlashRoutes);
+        Assert.True(bundle.Catalog.SlashRoutes.TryGetValue("/terminal show", out var term));
+        Assert.Equal(IdeCommands.SetMfdShellPage, term.CommandId);
+        Assert.Equal("Terminal", term.MfdPage);
         Assert.Contains(bundle.Catalog.Roots.Values, static e => e.Shape == IntentMelodyShape.Parametric);
         Assert.True(bundle.Catalog.Roots["els"].ShowUsageHintIfBareSlug, "els — два int-слота, подсказка по умолчанию");
         Assert.False(bundle.Catalog.Roots["wai"].ShowUsageHintIfBareSlug, "wai — явно false в TOML");

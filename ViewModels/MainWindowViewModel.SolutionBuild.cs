@@ -121,6 +121,31 @@ public partial class MainWindowViewModel
         CancellationToken cancellationToken = default) =>
         BlankSolutionCreator.TryCreateAsync(solutionFilePath, _dotnetRunner, cancellationToken);
 
+    /// <summary><c>dotnet new</c> + <c>dotnet sln add</c> в текущее решение (ADR 0125).</summary>
+    public async Task<string> TryCreateProjectInSolutionAsync(
+        string template,
+        string projectName,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await ProjectInSolutionCreator.TryCreateAsync(
+                Workspace.SolutionPath,
+                template,
+                projectName,
+                _dotnetRunner,
+                cancellationToken)
+            .ConfigureAwait(false);
+
+        if (!result.Ok)
+            return result.ErrorMessage ?? "Не удалось создать проект.";
+
+        if (!string.IsNullOrWhiteSpace(Workspace.SolutionPath))
+            await LoadSolutionAsync(Workspace.SolutionPath).ConfigureAwait(false);
+
+        return System.Text.Json.JsonSerializer.Serialize(
+            new { ok = true, project_path = result.ProjectPath },
+            new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
+    }
+
     [RelayCommand(CanExecute = nameof(CanInstallModel))]
     private async Task InstallModelAsync()
     {

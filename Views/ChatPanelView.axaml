@@ -60,7 +60,7 @@
                         <Border Classes="cascadeAutocomplete"
                                 ZIndex="20"
                                 IsVisible="{Binding IsChatSlashAutocompleteVisible}"
-                                MaxHeight="168">
+                                MaxHeight="280">
                             <ListBox x:Name="ForwardSlashSuggestionList"
                                      ItemsSource="{Binding ChatSlashSuggestions}"
                                      SelectedIndex="{Binding SelectedChatSlashSuggestionIndex, Mode=TwoWay}"
@@ -71,6 +71,10 @@
                                 <ListBox.ItemTemplate>
                                     <DataTemplate DataType="chat:ChatSlashSuggestionItem">
                                         <StackPanel Spacing="2" Margin="4,2">
+                                            <TextBlock Text="{Binding Group}"
+                                                       FontSize="10"
+                                                       Opacity="0.75"
+                                                       Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
                                             <TextBlock Text="{Binding SlashPath}"
                                                        FontWeight="SemiBold"
                                                        Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
@@ -273,7 +277,7 @@
                     <Border Classes="cascadeAutocomplete"
                             ZIndex="20"
                             IsVisible="{Binding IsChatSlashAutocompleteVisible}"
-                            MaxHeight="168">
+                            MaxHeight="280">
                         <ListBox x:Name="ClassicSlashSuggestionList"
                                  ItemsSource="{Binding ChatSlashSuggestions}"
                                  SelectedIndex="{Binding SelectedChatSlashSuggestionIndex, Mode=TwoWay}"
@@ -284,6 +288,10 @@
                             <ListBox.ItemTemplate>
                                 <DataTemplate DataType="chat:ChatSlashSuggestionItem">
                                     <StackPanel Spacing="2" Margin="4,2">
+                                        <TextBlock Text="{Binding Group}"
+                                                   FontSize="10"
+                                                   Opacity="0.75"
+                                                   Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
                                         <TextBlock Text="{Binding SlashPath}"
                                                    FontWeight="SemiBold"
                                                    Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>

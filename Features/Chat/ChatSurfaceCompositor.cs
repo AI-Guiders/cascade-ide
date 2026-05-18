@@ -34,7 +34,10 @@ public sealed class ChatSurfaceIntentStage : IChatSurfaceIntentStage
                 NormalizeRole(message.Role),
                 message.Content ?? "",
                 message.MessageIndex == currentIntent.SelectedMessageIndex,
-                StartsBranch: false))
+                StartsBranch: false,
+                message.SlashCommandPath,
+                message.SlashCommandArgs,
+                message.SlashCommandStatus))
             .OrderBy(message => message.MessageIndex)
             .ToList();
 
@@ -271,11 +274,16 @@ public sealed class ChatSurfaceLayoutStage : IChatSurfaceLayoutStage
                         message.NodeId,
                         BuildMessageTitle(message, thread),
                         message.Content,
-                        ChatMessageVisualRoleMapping.FromMessageRole(message.Role),
+                        message.SlashCommandStatus is not null
+                            ? ChatMessageVisualRole.SlashCommand
+                            : ChatMessageVisualRoleMapping.FromMessageRole(message.Role),
                         message.MessageIndex,
                         MessageIndex: message.MessageIndex,
                         IsSelected: message.IsSelected,
-                        StartsBranch: message.StartsBranch));
+                        StartsBranch: message.StartsBranch,
+                        SlashCommandPath: message.SlashCommandPath,
+                        SlashCommandArgs: message.SlashCommandArgs,
+                        SlashCommandStatus: message.SlashCommandStatus));
                 }
             }
 
@@ -363,6 +371,7 @@ public sealed class ChatSurfaceLayoutStage : IChatSurfaceLayoutStage
             "assistant" => "Агент",
             "thinking" => "Размышление",
             "tool" => "Инструмент",
+            "slash_command" => "Команда",
             _ => message.Role
         };
     }

@@ -1,6 +1,6 @@
 namespace CascadeIDE.Services;
 
-/// <summary>Параметрика и метаданные корней melody (<c>c:</c>) по <see cref="IntentMelodyAliases.BundledRelativePath"/>, см. ADR 0109.</summary>
+/// <summary>Формы melody (<c>c:</c>) из command-first каталога <see cref="IntentMelodyAliases.BundledRelativePath"/> (ADR 0109).</summary>
 public static class IntentMelodyCatalog
 {
     /// <inheritdoc cref="IntentMelodyAliases.GetCatalogSnapshot"/>
@@ -9,6 +9,27 @@ public static class IntentMelodyCatalog
         var roots = IntentMelodyAliases.GetCatalogSnapshot().Roots;
         var key = slug.Trim().ToLowerInvariant();
         return roots.TryGetValue(key, out entry);
+    }
+
+    /// <summary>Параметрический melody-корень по <c>command_id</c> (0..1 на команду в каталоге).</summary>
+    public static bool TryGetParametricRootByCommandId(string commandId, out MelodyRootEntry entry)
+    {
+        entry = default;
+        if (string.IsNullOrWhiteSpace(commandId))
+            return false;
+
+        foreach (var root in IntentMelodyAliases.GetCatalogSnapshot().Roots.Values)
+        {
+            if (root.Shape != IntentMelodyShape.Parametric)
+                continue;
+            if (!string.Equals(root.CommandId, commandId.Trim(), StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            entry = root;
+            return true;
+        }
+
+        return false;
     }
 
     /// <summary>Реестр <c>[[tail_wire_class]]</c> по id (lower).</summary>
@@ -51,4 +72,33 @@ public readonly record struct TailWireClassEntry(string Id, TailWireKind Kind, s
 
 public sealed record IntentMelodyCatalogSnapshot(
     IReadOnlyDictionary<string, MelodyRootEntry> Roots,
-    IReadOnlyDictionary<string, TailWireClassEntry> TailWireClasses);
+    IReadOnlyDictionary<string, TailWireClassEntry> TailWireClasses,
+    IReadOnlyDictionary<string, SlashRouteEntry> SlashRoutes);
+
+public static class IntentSlashCatalog
+{
+    /// <inheritdoc cref="IntentMelodyAliases.GetCatalogSnapshot"/>
+    public static IReadOnlyDictionary<string, SlashRouteEntry> SlashRoutes =>
+        IntentMelodyAliases.GetCatalogSnapshot().SlashRoutes;
+
+    public static bool TryGetRoute(string slashPath, out SlashRouteEntry entry)
+    {
+        var key = NormalizeSlashPath(slashPath);
+        return SlashRoutes.TryGetValue(key, out entry);
+    }
+
+    internal static string NormalizeSlashPath(string? slashPath)
+    {
+        if (string.IsNullOrWhiteSpace(slashPath))
+            return "";
+
+        var t = slashPath.Trim();
+        if (t.Length == 0)
+            return "";
+
+        if (t[0] != '/')
+            t = "/" + t;
+
+        return t;
+    }
+}

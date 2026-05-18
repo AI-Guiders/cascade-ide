@@ -23,6 +23,16 @@ internal sealed partial class IdeMcpCommandExecutor
             a.LoadSolution(McpCommandJsonArgs.String(args, "path")!);
             return await Task.FromResult("OK");
         });
+        add(Services.IdeCommands.CreateProjectInSolution, async (args, ct) =>
+        {
+            var template = McpCommandJsonArgs.String(args, "template");
+            var projectName = McpCommandJsonArgs.String(args, "project_name");
+            if (string.IsNullOrWhiteSpace(template))
+                return "Missing template";
+            if (string.IsNullOrWhiteSpace(projectName))
+                return "Missing project_name";
+            return await _vm.TryCreateProjectInSolutionAsync(template!, projectName!, ct).ConfigureAwait(false);
+        });
         add(Services.IdeCommands.Select, async (args, _) =>
         {
             var a = (IIdeMcpActions)_vm;

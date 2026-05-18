@@ -52,7 +52,7 @@ public partial class MainWindowViewModel
         }
     }
 
-    /// <summary>Плейсхолдер поля поиска; примеры melody из <c>IntentMelody/intent-melody-aliases.toml</c>.</summary>
+    /// <summary>Плейсхолдер поля поиска; примеры melody из <c>IntentMelody/intent-catalog.toml</c>.</summary>
     [SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "Привязка Avalonia к экземпляру MainWindowViewModel (DataContext).")]
     public string CommandPalettePlaceholderText
     {

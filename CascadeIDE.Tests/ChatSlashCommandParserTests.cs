@@ -67,4 +67,12 @@ public sealed class ChatSlashCommandParserTests
         Assert.True(ChatSlashCommandCatalog.TryResolve(parse, out var d));
         Assert.Equal(ChatSlashCommandExecutionKind.LocalHelp, d.ExecutionKind);
     }
+
+    [Theory]
+    [InlineData("/file open src/Foo.cs", true)]
+    [InlineData("/solution load My.sln", true)]
+    [InlineData("/file open", false)]
+    [InlineData("/build run", false)]
+    public void ShouldAutoExecuteAfterAutocompleteCommit(string line, bool expected) =>
+        Assert.Equal(expected, ChatSlashCommandParser.ShouldAutoExecuteAfterAutocompleteCommit(line));
 }

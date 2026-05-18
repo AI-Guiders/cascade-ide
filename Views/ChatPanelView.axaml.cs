@@ -13,6 +13,8 @@ public partial class ChatPanelView : UserControl
         InitializeComponent();
         WireChatInput(ForwardChatInputBox);
         WireChatInput(ClassicChatInputBox);
+        WireSlashSuggestionList(ForwardSlashSuggestionList);
+        WireSlashSuggestionList(ClassicSlashSuggestionList);
     }
 
     private void WireChatInput(TextBox box)
@@ -20,6 +22,9 @@ public partial class ChatPanelView : UserControl
         box.AddHandler(InputElement.KeyDownEvent, OnChatInputKeyDown, RoutingStrategies.Tunnel);
         box.TextChanged += OnChatInputTextChanged;
     }
+
+    private void WireSlashSuggestionList(ListBox list) =>
+        list.PointerReleased += OnSlashSuggestionPointerReleased;
 
     private TextBox? SenderAsTextBox(object? sender) => sender as TextBox;
 
@@ -45,7 +50,7 @@ public partial class ChatPanelView : UserControl
             switch (e.Key)
             {
                 case Key.Tab:
-                    if (vm.TryApplySelectedChatSlashSuggestion())
+                    if (vm.TryCommitSelectedChatSlashSuggestion(out _))
                     {
                         e.Handled = true;
                         input.CaretIndex = vm.ChatInput.Length;
@@ -65,10 +70,13 @@ public partial class ChatPanelView : UserControl
                     return;
                 case Key.Enter when !e.KeyModifiers.HasFlag(KeyModifiers.Control)
                                     && !e.KeyModifiers.HasFlag(KeyModifiers.Shift):
-                    if (vm.TryApplySelectedChatSlashSuggestion())
+                    if (vm.TryCommitSelectedChatSlashSuggestion(out var autoExecute))
                     {
                         e.Handled = true;
-                        input.CaretIndex = vm.ChatInput.Length;
+                        if (autoExecute)
+                            TryExecuteSendChat(vm);
+                        else
+                            input.CaretIndex = vm.ChatInput.Length;
                         return;
                     }
                     break;
@@ -78,10 +86,32 @@ public partial class ChatPanelView : UserControl
         if (!ChatSendKeyMatcher.Matches(e, vm.GetSendMessageKey()))
             return;
 
-        if (vm.SendChatCommand is IRelayCommand relay && relay.CanExecute(null))
-        {
-            _ = vm.SendChatCommand.ExecuteAsync(null);
-            e.Handled = true;
-        }
+        TryExecuteSendChat(vm);
+        e.Handled = true;
+    }
+
+    private void OnSlashSuggestionPointerReleased(object? sender, PointerReleasedEventArgs e)
+    {
+        if (e.InitialPressMouseButton != MouseButton.Left)
+            return;
+        if (DataContext is not ChatPanelViewModel vm || !vm.IsChatSlashAutocompleteVisible)
+            return;
+        if (sender is not ListBox { SelectedIndex: >= 0 })
+            return;
+
+        if (!vm.TryCommitSelectedChatSlashSuggestion(out var autoExecute))
+            return;
+
+        e.Handled = true;
+        if (autoExecute)
+            TryExecuteSendChat(vm);
+    }
+
+    private static void TryExecuteSendChat(ChatPanelViewModel vm)
+    {
+        if (vm.SendChatCommand is IAsyncRelayCommand async && async.CanExecute(null))
+            _ = async.ExecuteAsync(null);
+        else if (vm.SendChatCommand is IRelayCommand relay && relay.CanExecute(null))
+            relay.Execute(null);
     }
 }

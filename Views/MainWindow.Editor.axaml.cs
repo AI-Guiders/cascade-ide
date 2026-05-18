@@ -69,6 +69,13 @@ public partial class MainWindow
         _textMateByEditor.Add(editor, inst);
     }
 
+    /// <summary>TextMate + грамматика для конкретного dock-редактора (в т.ч. MfdHostWindow).</summary>
+    internal void EnsureDockEditorTextMate(TextEditor editor, string? filePath)
+    {
+        EnsureTextMateOnEditor(editor);
+        ApplyGrammarByFilePath(editor, filePath);
+    }
+
     private void TryAttachTextMateAndRenderers()
     {
         if (DataContext is not ViewModels.MainWindowViewModel vmSetup)
@@ -130,32 +137,7 @@ public partial class MainWindow
         if (DataContext is not ViewModels.MainWindowViewModel vm)
             return null;
 
-        var targetPath = vm.CurrentFilePath;
-        if (string.IsNullOrWhiteSpace(targetPath))
-            return null;
-
-        foreach (var v in EnumerateVisualDescendants(this))
-        {
-            if (v is not DockDocumentView dockView)
-                continue;
-
-            if (dockView.DataContext is not ViewModels.DockDocumentViewModel dv)
-                continue;
-
-            if (!string.Equals(dv.Doc.FilePath, targetPath, StringComparison.OrdinalIgnoreCase))
-                continue;
-
-            return dockView.FindControl<TextEditor>("Editor");
-        }
-
-        // Fallback: if we can't match by path, try any dock editor named "Editor".
-        foreach (var v in EnumerateVisualDescendants(this))
-        {
-            if (v is DockDocumentView dockView && dockView.FindControl<TextEditor>("Editor") is { } ed)
-                return ed;
-        }
-
-        return null;
+        return Services.EditorActiveDockResolver.TryGetEditor(vm, vm.CurrentFilePath);
     }
 
     /// <summary>Активная вкладка документа (для <c>EditorContentGrid</c> / inline-превью Markdown).</summary>
@@ -164,41 +146,7 @@ public partial class MainWindow
         if (DataContext is not ViewModels.MainWindowViewModel vm)
             return null;
 
-        var targetPath = vm.CurrentFilePath;
-        if (string.IsNullOrWhiteSpace(targetPath))
-            return null;
-
-        foreach (var v in EnumerateVisualDescendants(this))
-        {
-            if (v is not DockDocumentView dockView)
-                continue;
-
-            if (dockView.DataContext is not ViewModels.DockDocumentViewModel dv)
-                continue;
-
-            if (!string.Equals(dv.Doc.FilePath, targetPath, StringComparison.OrdinalIgnoreCase))
-                continue;
-
-            return dockView;
-        }
-
-        foreach (var v in EnumerateVisualDescendants(this))
-        {
-            if (v is DockDocumentView dockView)
-                return dockView;
-        }
-
-        return null;
-    }
-
-    private static IEnumerable<Visual> EnumerateVisualDescendants(Visual root)
-    {
-        foreach (var child in root.GetVisualChildren())
-        {
-            yield return child;
-            foreach (var grandChild in EnumerateVisualDescendants(child))
-                yield return grandChild;
-        }
+        return Services.EditorActiveDockResolver.TryGetDockDocumentView(vm, vm.CurrentFilePath);
     }
 
     private void ApplyEditInActiveDockEditor(
@@ -390,5 +338,7 @@ public partial class MainWindow
         start = Math.Clamp(start, 0, docLen);
         length = Math.Clamp(length, 0, docLen - start);
         editor.Select(start, length);
+        editor.Focus();
+        editor.TextArea.Caret.BringCaretToView();
     }
 }

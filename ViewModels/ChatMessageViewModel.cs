@@ -1,3 +1,4 @@
+using CascadeIDE.Features.Chat;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace CascadeIDE.ViewModels;
@@ -18,17 +19,57 @@ public sealed partial class ChatMessageViewModel : ObservableObject
     [ObservableProperty]
     private string _content;
 
+    public string? SlashCommandPath { get; private set; }
+
+    public string? SlashCommandArgs { get; private set; }
+
+    [ObservableProperty]
+    private ChatSlashCommandStatus? _slashCommandStatus;
+
+    public bool IsSlashCommand => SlashCommandStatus is not null;
+
     public ChatMessageViewModel(
         string role,
         string content,
         Guid? messageId = null,
         Guid? threadId = null,
-        Guid? parentMessageId = null)
+        Guid? parentMessageId = null,
+        string? slashCommandPath = null,
+        string? slashCommandArgs = null,
+        ChatSlashCommandStatus? slashCommandStatus = null)
     {
         MessageId = messageId ?? Guid.NewGuid();
         Role = role;
         ThreadId = threadId ?? Guid.Empty;
         ParentMessageId = parentMessageId;
         _content = content;
+        SlashCommandPath = slashCommandPath;
+        SlashCommandArgs = slashCommandArgs;
+        _slashCommandStatus = slashCommandStatus;
+    }
+
+    public static ChatMessageViewModel CreateSlashCommand(
+        string slashPath,
+        string? args,
+        Guid? threadId = null) =>
+        new(
+            "slash_command",
+            "",
+            threadId: threadId,
+            slashCommandPath: slashPath,
+            slashCommandArgs: args,
+            slashCommandStatus: ChatSlashCommandStatus.Running);
+
+    public void ApplySlashCommandResult(in ChatSlashCommandRunResult result)
+    {
+        SlashCommandPath = result.SlashPath;
+        SlashCommandArgs = ChatSlashCommandPresentation.NormalizeArgsTail(result.ArgsTail);
+        SlashCommandStatus = result.Success
+            ? ChatSlashCommandStatus.Succeeded
+            : ChatSlashCommandStatus.Failed;
+        Content = result.DetailText ?? "";
+        OnPropertyChanged(nameof(SlashCommandPath));
+        OnPropertyChanged(nameof(SlashCommandArgs));
+        OnPropertyChanged(nameof(IsSlashCommand));
     }
 }

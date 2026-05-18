@@ -178,6 +178,7 @@ public sealed partial class DocumentsWorkspaceViewModel : ObservableObject
 
         ActivateDocumentInternal(existing);
         RebuildAndReinitDockLayout();
+        _host.RevealEditorForOpenedDocument();
     }
 
     public void ActivateDocumentInternal(OpenDocumentViewModel doc)

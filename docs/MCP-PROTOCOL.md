@@ -347,6 +347,7 @@
 | `chat_toggle_selected_thinking` | Переключить у выбранного thinking-сообщения свёрнутый/полный вид. returns: text. |
 | `chat_toggle_show_thinking_in_history` | Переключить настройку show_thinking_in_history (keyboard-first toggle). returns: text. |
 | `close_document` | Закрыть документ. args: file_path:string; returns: text; example: {"file_path":"C:\\\\tmp\\\\a.cs"}. |
+| `create_project_in_solution` | Добавить проект в открытое решение: `dotnet new` (console\|classlib\|webapi) + `dotnet sln add`. args: template:string, project_name:string; returns: json; example: {"template":"console","project_name":"MyApp"}. |
 | `cycle_code_navigation_map_detail_level` | Карта намерений: цикл детализации glance → normal → inspect (Ctrl+K → S → D). returns: text. |
 | `cycle_code_navigation_map_level` | Карта намерений: переключить уровень file ↔ controlFlow (Ctrl+K → S → F). returns: text. |
 | `cycle_code_navigation_map_presentation` | Карта намерений: цикл вида list → graph → both (палитра; быстрый путь — Ctrl+K → S → P). returns: text. |
@@ -364,11 +365,13 @@
 | `reopen_closed_document` | Переоткрыть недавно закрытый документ. returns: text. |
 | `search_workspace_text` | Поиск текста по workspace через ripgrep: вызывается команда `rg` из PATH (Windows/Linux/macOS — поставь пакетом или с релиза). Явный путь: только `rg_path`. args: pattern:string, subpath?:string, fixed_string?:boolean, glob?:string, max_matches?:integer, rg_path?:string; returns: json; example: {\"pattern\":\"LoadSolution\",\"glob\":\"*.cs\",\"max_matches\":50}. |
 | `set_build_output_visible` | Явно показать/скрыть журнал сборки. args: visible:boolean; returns: text; example: {"visible":true}. |
+| `set_primary_work_surface` | Установить якорь Forward: `intercom` \| `editor`. args: surface:string; returns: text; example: {"surface":"intercom"}. |
 | `set_terminal_visible` | Явно показать/скрыть терминал (без переключения). args: visible:boolean; returns: text; example: {"visible":true}. |
 | `set_ui_mode` | Режим UI (как меню «Вид → Режим интерфейса»). args: mode:string; returns: text; example: {"mode":"Flight"}. |
 | `toggle_build_output` | Как меню «Вид → Вывод сборки». returns: text. |
 | `toggle_pfd_region_expanded` | Переключить развёрнут/свёрнут регион Pfd (как меню «Вид → Карта намерений (PFD)»). returns: text. |
 | `toggle_pin_document` | Закрепить/открепить документ (pin). args: file_path:string; returns: text; example: {"file_path":"C:\\\\tmp\\\\a.cs"}. |
+| `toggle_primary_work_surface` | Переключить `primary_work_surface` intercom ↔ editor (ADR 0120). returns: text. |
 | `toggle_terminal` | Как меню «Вид → Терминал» (переключатель). returns: text. |
 | `toggle_workspace_splitters_lock` | Сплиттеры рабочей области: переключить ON GND / IN AIR (мелодия tol, лампа TOL в task cockpit). returns: text. |
 <!-- GENERATED:IdeCommands END -->

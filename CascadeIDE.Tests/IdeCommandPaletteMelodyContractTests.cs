@@ -5,7 +5,7 @@ namespace CascadeIDE.Tests;
 /// <summary>
 /// Контракт discoverability: навигация на фиксированные страницы вторичного контура
 /// должна быть и в палитре, и в Command Melody (<c>c:</c>). Новую такую команду —
-/// сюда + <see cref="IdeCommandRegistry"/> + <c>intent-melody-aliases.toml</c>.
+/// сюда + <see cref="IdeCommandRegistry"/> + <c>intent-catalog.toml</c>.
 /// </summary>
 public sealed class IdeCommandPaletteMelodyContractTests
 {
@@ -35,7 +35,7 @@ public sealed class IdeCommandPaletteMelodyContractTests
         {
             Assert.True(
                 counts.TryGetValue(id, out var n) && n >= 1,
-                $"Ожидался хотя бы один alias в IntentMelody для «{id}» (файл intent-melody-aliases.toml).");
+                $"Ожидался хотя бы один alias в IntentMelody для «{id}» (файл intent-catalog.toml).");
         }
     }
 }

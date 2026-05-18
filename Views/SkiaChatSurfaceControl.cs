@@ -174,7 +174,11 @@ public sealed class SkiaChatSurfaceControl : Control
         var placed = SkiaChatLayoutEngine.Layout(entities, measureContext);
         _cachedContentHeight = SkiaChatLayoutEngine.TotalHeight(placed);
 
-        ClampScrollToContent();
+        var showOverviewCatalog = OverviewMode && snapshot.Layout.Overview.Count > 0;
+        var statusSubtitle = CompactLayout
+            ? ChatIntercomChromeStatusPresentation.FormatSubtitle(snapshot, OverviewMode, DetailThreadId)
+            : null;
+        ClampScrollToContent(showOverviewCatalog, statusSubtitle);
 
         context.Custom(new DrawOperation(
             new Rect(Bounds.Size),
@@ -187,8 +191,11 @@ public sealed class SkiaChatSurfaceControl : Control
             CompactLayout,
             ChromeTitle,
             OverviewMode,
+            showOverviewCatalog,
+            snapshot.Layout.Overview.Count,
             IsChatLoading,
             LoadingStatusText,
+            statusSubtitle,
             bounds => _overviewButtonBounds = bounds));
         base.Render(context);
     }
@@ -271,9 +278,16 @@ public sealed class SkiaChatSurfaceControl : Control
         return -1;
     }
 
-    private void ClampScrollToContent()
+    private void ClampScrollToContent(bool? showOverviewCatalog = null, string? statusSubtitle = null)
     {
-        var chrome = CompactLayout ? SkiaChatChromeRenderer.ToolbarHeight : 0;
+        var catalog = showOverviewCatalog ?? (OverviewMode && (Snapshot?.Layout.Overview.Count ?? 0) > 0);
+        var subtitle = statusSubtitle;
+        if (subtitle is null && CompactLayout && Snapshot is { } snap)
+            subtitle = ChatIntercomChromeStatusPresentation.FormatSubtitle(snap, OverviewMode, DetailThreadId);
+        var chrome = SkiaChatChromeRenderer.ResolveTopChromeHeight(
+            CompactLayout,
+            catalog,
+            !string.IsNullOrWhiteSpace(subtitle));
         var viewport = Math.Max(1, Bounds.Height - chrome);
         var max = Math.Max(0, _cachedContentHeight - viewport);
         if (_scrollOffset > max)
@@ -293,8 +307,11 @@ public sealed class SkiaChatSurfaceControl : Control
         private readonly bool _compactLayout;
         private readonly string _chromeTitle;
         private readonly bool _overviewMode;
+        private readonly bool _showOverviewCatalog;
+        private readonly int _overviewTopicCount;
         private readonly bool _isChatLoading;
         private readonly string? _loadingStatusText;
+        private readonly string? _statusSubtitle;
         private readonly Action<SKRect> _onOverviewButtonBounds;
 
         public DrawOperation(
@@ -308,8 +325,11 @@ public sealed class SkiaChatSurfaceControl : Control
             bool compactLayout,
             string chromeTitle,
             bool overviewMode,
+            bool showOverviewCatalog,
+            int overviewTopicCount,
             bool isChatLoading,
             string? loadingStatusText,
+            string? statusSubtitle,
             Action<SKRect> onOverviewButtonBounds)
         {
             Bounds = bounds;
@@ -322,8 +342,11 @@ public sealed class SkiaChatSurfaceControl : Control
             _compactLayout = compactLayout;
             _chromeTitle = chromeTitle;
             _overviewMode = overviewMode;
+            _showOverviewCatalog = showOverviewCatalog;
+            _overviewTopicCount = overviewTopicCount;
             _isChatLoading = isChatLoading;
             _loadingStatusText = loadingStatusText;
+            _statusSubtitle = statusSubtitle;
             _onOverviewButtonBounds = onOverviewButtonBounds;
         }
 
@@ -342,7 +365,10 @@ public sealed class SkiaChatSurfaceControl : Control
 
             var width = Math.Max(160f, (float)Bounds.Width);
             var height = Math.Max(1f, (float)Bounds.Height);
-            var chromeTop = _compactLayout ? SkiaChatChromeRenderer.ToolbarHeight : 0f;
+            var chromeTop = SkiaChatChromeRenderer.ResolveTopChromeHeight(
+                _compactLayout,
+                _showOverviewCatalog,
+                !string.IsNullOrWhiteSpace(_statusSubtitle));
             if (_compactLayout)
             {
                 SkiaChatChromeRenderer.Draw(
@@ -353,11 +379,20 @@ public sealed class SkiaChatSurfaceControl : Control
                     _overviewMode,
                     _isChatLoading,
                     _loadingStatusText,
+                    _statusSubtitle,
                     out var overviewBounds);
                 _onOverviewButtonBounds(overviewBounds);
             }
             else
                 _onOverviewButtonBounds(default);
+
+            if (_showOverviewCatalog)
+            {
+                var bandTop = _compactLayout
+                    ? SkiaChatChromeRenderer.ResolveToolbarHeight(true, !string.IsNullOrWhiteSpace(_statusSubtitle))
+                    : 0f;
+                SkiaChatChromeRenderer.DrawOverviewCatalogBand(canvas, width, bandTop, _theme, _overviewTopicCount);
+            }
 
             const float contentLeft = 12f;
             var contentWidth = width - 24f;

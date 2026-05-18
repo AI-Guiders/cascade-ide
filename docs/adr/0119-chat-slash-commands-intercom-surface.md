@@ -21,6 +21,9 @@
 | [0002](0002-debug-human-agent-parity.md) | `/build`, `/test`, `/debug` — те же `command_id`, что агент через MCP |
 | [0018](0018-ide-commands-canonical-xml-documentation.md) | Канон имён `IdeCommands` для проекции каталога |
 | [0120](0120-primary-work-surface-intercom-or-editor.md) | Intercom в Forward — слэши как основной CLI сессии |
+| [0124](0124-slash-parametric-editor-line-commands.md) | Параметрический слэш: `/editor line select|delete` (паритет `c:els` / `c:eld`) |
+| [0125](0125-slash-workspace-file-commands-and-dynamic-completion.md) | Workspace/file: `/file open`, `/solution new`, динамические подсказки по файлам solution |
+| [0126](0126-intercom-inspect-slash-and-compact-chrome-status.md) | `kind=report`: `/topic`/`/spine` list\|tree; compact chrome status |
 
 ### Вне ADR
 
@@ -134,8 +137,10 @@ arg_token    = quoted_string | bare_token ;
 | `/build run` | namespace: `build`, action: `run` |
 | `/test run` | namespace: `test`, action: `run` |
 | `/debug launch` | namespace: `debug`, action: `launch` |
+| `/editor line select 5 10` | namespace: `editor`, action: `line`, subAction: `select`, args: `5 10` — [0124](0124-slash-parametric-editor-line-commands.md) |
 
 - **Регистр:** case-insensitive.
+- **Три уровня** (`/editor line select`) — исключение для параметрического редактора; не общий прецедент для всех namespace ([0124](0124-slash-parametric-editor-line-commands.md)).
 - **Именованные аргументы** (`configuration=Release`) — v2; v1 — позиционный хвост где нужен.
 
 <a id="adr0119-p5"></a>
@@ -165,7 +170,12 @@ arg_token    = quoted_string | bare_token ;
 | `/spine …` | `chat_set_product_spine` | хвост → focus / milestones |
 | `/spine-toggle` | `chat_toggle_product_spine_in_agent_context` | |
 | `/export` | `chat_export_readable` | |
-| `/help` | локальный каталог | без MCP |
+| `/help` | локальный каталог | `kind=help`, без MCP |
+| `/topic list` \| `/topic tree` | локальный отчёт | `kind=report`, [0126](0126-intercom-inspect-slash-and-compact-chrome-status.md) |
+| `/topic open` | открыть detail темы | `kind=intercom`, [0126](0126-intercom-inspect-slash-and-compact-chrome-status.md) |
+| `/spine list` \| `/spine tree` | локальный отчёт | `kind=report`, [0126](0126-intercom-inspect-slash-and-compact-chrome-status.md) |
+| `/topic cards` | картотека тем (overview) | `kind=intercom`, [0126](0126-intercom-inspect-slash-and-compact-chrome-status.md) |
+| `/spine open` | то же, что `/topic cards` | `kind=intercom`, [0126](0126-intercom-inspect-slash-and-compact-chrome-status.md) |
 
 <a id="adr0119-p5c"></a>
 
@@ -306,3 +316,4 @@ flowchart TD
 | 2026-05-17 | Расширение: unified command line — IDE namespaces (`/build run`, `/test run`, `/debug launch`); autocomplete обязателен; фазы A–C. |
 | 2026-05-17 | Уточнение: discoverability слэша — **autocomplete**; короткие алиасы (`/br`) и «мелодия после `/`» — **non-goal** (сжатие — `c:` Melody). |
 | 2026-05-17 | Accepted · Implemented: фазы **A**, **A′**, **B** (`ChatSlashCommand*`, autocomplete, IDE namespaces); фаза **C** — backlog. |
+| 2026-05-17 | См. [0124](0124-slash-parametric-editor-line-commands.md): полный slash-паритет каталога IML (`wire_class`, `/editor line …`, `/portal open`). |

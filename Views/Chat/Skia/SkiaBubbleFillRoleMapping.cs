@@ -13,6 +13,7 @@ internal static class SkiaBubbleFillRoleMapping
             ChatMessageVisualRole.Tool => SkiaBubbleFillRole.MessageTool,
             ChatMessageVisualRole.ClarificationPending => SkiaBubbleFillRole.ClarificationPending,
             ChatMessageVisualRole.ClarificationResolved => SkiaBubbleFillRole.ClarificationResolved,
+            ChatMessageVisualRole.SlashCommand => SkiaBubbleFillRole.MessageTool,
             _ => SkiaBubbleFillRole.MessageAssistant
         };
 }

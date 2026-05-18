@@ -188,6 +188,9 @@
 | [0120](0120-primary-work-surface-intercom-or-editor.md) | `primary_work_surface`: Intercom или Editor в якоре Forward (аналог Agent/Editor в Cursor) | Proposed |
 | [0121](0121-intent-oriented-programming-paradigm.md) | Парадигма IOP (Intent-Oriented Programming) — концептуальный фундамент; [манифест](../iop-manifest-v1.md) | Accepted |
 | [0123](0123-intercom-full-skia-surface-evolution.md) | Intercom → full-Skia surface (Slack/MM-like); strangler фазы 0–4; Avalonia = фюзеляж | Accepted |
+| [0124](0124-slash-parametric-editor-line-commands.md) | Фича: параметрический slash = полный паритет `melody_shape=parametric` в TOML (`wire_class`, binders, TOML, SubAction) | Accepted · Implemented |
+| [0125](0125-slash-workspace-file-commands-and-dynamic-completion.md) | Slash workspace/file: `/file open`, `/solution new`, динамические подсказки по файлам; `create_project_in_solution` (console/classlib/webapi) | Accepted · Implemented |
+| [0126](0126-intercom-inspect-slash-and-compact-chrome-status.md) | Intercom inspect: `/topic`/`/spine` list\|tree (`kind=report`); статус в compact toolbar; UX открытия файла из slash | Accepted · Implemented |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 

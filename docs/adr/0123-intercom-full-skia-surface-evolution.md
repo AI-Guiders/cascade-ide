@@ -13,6 +13,7 @@
 | [0119](0119-chat-slash-commands-intercom-surface.md) | Слэши и autocomplete в `ChatInput` |
 | [0120](0120-primary-work-surface-intercom-or-editor.md) | Intercom в Forward — якорь внимания; компактный chrome |
 | [0121](0121-intent-oriented-programming-paradigm.md) | Intercom — центр вокруг цели; структура важнее «ленты ради ленты» |
+| [0126](0126-intercom-inspect-slash-and-compact-chrome-status.md) | Compact: статус в toolbar; навигационный хвост убран из скролла |
 | [0031](0031-agent-chat-clarification-batches-and-threading.md) | Пакеты уточнений — структурированный UI |
 | [0066](0066-cockpit-ui-vs-ide-presentation-layer.md) | Cockpit UI vs IDE chrome; Intercom — **не** «ещё один Avalonia-экран» |
 | [0076](0076-ui-ux-principles-hub.md) | Плотность, токены; **UiKit** — shell/MFD-настройки, не лента Intercom |

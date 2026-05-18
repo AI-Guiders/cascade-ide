@@ -9,6 +9,7 @@ public static class ChatMessageVisualRoleMapping
             "assistant" => ChatMessageVisualRole.Assistant,
             "thinking" => ChatMessageVisualRole.Thinking,
             "tool" => ChatMessageVisualRole.Tool,
+            "slash_command" => ChatMessageVisualRole.SlashCommand,
             _ => ChatMessageVisualRole.Assistant
         };
 }

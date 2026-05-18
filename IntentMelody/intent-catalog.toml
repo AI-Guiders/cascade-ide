@@ -1,0 +1,818 @@
+# intent-catalog.toml — command-first каталог форм ввода (ADR 0109, 0119)
+# Оверлей: IntentMelody/intent-catalog.toml рядом с exe (legacy: intent-melody-aliases.toml).
+#
+# Cookbook:
+# - Якорь: command_id (канон IdeCommands / MCP).
+# - Melody: поля melody_* на [[command]] (0–1 slug на команду); в палитре c:<slug>.
+# - Slash: [[command.form.slash]] (0..N); intent-first пути /namespace action.
+# - slash_group на [[command]] — группа autocomplete по умолчанию для всех slash ниже.
+# - [command.form.slash.args] — статические args (page, surface); legacy mfd_page тоже читается.
+# - enabled = false — отключить команду или отдельный slash без удаления из файла.
+# - IML v2 (параметрические мелодии, tail_wire_class) — смысл языка, ADR 0109; не путать с intent_catalog_schema_version.
+# - Параметрический slash: любая команда с melody_shape=parametric — хвост по wire_class (ADR 0124).
+#   Редактор: /editor line select|delete <строки>. Портал: /portal open [url] (как c:wai).
+# - Норматив: docs/intent-melody-language-v1.md
+#
+intent_catalog_schema_version = 1
+
+# ------------------------------------------------------------------------------
+# [[tail_wire_class]] — провода хвоста parametric melody (c:)
+# ------------------------------------------------------------------------------
+
+[[tail_wire_class]]
+id = "url_remainder"
+kind = "single_remainder"
+
+[[tail_wire_class]]
+id = "int_chain_colon_space"
+kind = "delimited_slots"
+between_slots_any_of = [":", ";", " "]
+
+# ==============================================================================
+# Editor (parametric line)
+# ==============================================================================
+
+# apply_edit — Удалить строки в открытом файле (1-based): одна, «5 10» или … (/editor line delete)
+[[command]]
+command_id = "apply_edit"
+melody_slug = "eld"
+melody_shape = "parametric"
+melody_tail_signature = "<start:ln>:<end:ln>"
+melody_wire_class = "int_chain_colon_space"
+melody_chord_commit = "enter"
+melody_palette_usage_hint = "c:eld:<start>:<end> или одна строка c:eld:<line> (в аккорде c:eld;<start>;<end> / c:eld;<line> — «;» без Shift) — удалить строки"
+melody_palette_usage_category = "Editor -> Line -> Delete"
+
+[[command.form.slash]]
+path = "/editor line delete"
+help = "Удалить строки в открытом файле (1-based): одна, «5 10» или «5:10»."
+group = "Editor"
+
+# select — Выделить строки в открытом файле (1-based): одна, «5 10» или… (/editor line select)
+[[command]]
+command_id = "select"
+melody_slug = "els"
+melody_shape = "parametric"
+melody_tail_signature = "<start:ln>:<end:ln>"
+melody_wire_class = "int_chain_colon_space"
+melody_chord_commit = "enter"
+melody_palette_usage_hint = "c:els:<start>:<end> или одна строка c:els:<line> (в аккорде c:els;<start>;<end> / c:els;<line> — «;» без Shift) — выделить строки"
+melody_palette_usage_category = "Editor -> Line -> Select"
+
+[[command.form.slash]]
+path = "/editor line select"
+help = "Выделить строки в открытом файле (1-based): одна, «5 10» или «5:10»."
+group = "Editor"
+
+# ==============================================================================
+# Intercom
+# ==============================================================================
+
+# chat_export_readable — Экспорт чата в Markdown. (/export)
+[[command]]
+command_id = "chat_export_readable"
+melody_slug = "cex"
+melody_shape = "simple"
+
+[[command.form.slash]]
+path = "/export"
+help = "Экспорт чата в Markdown."
+group = "Intercom"
+
+# chat_get_product_spine — Показать текущий spine (JSON). (/spine show)
+[[command]]
+command_id = "chat_get_product_spine"
+
+[[command.form.slash]]
+path = "/spine show"
+help = "Показать текущий spine (JSON)."
+group = "Intercom"
+
+# chat_open_selected_thread — Открыть detail выбранной темы. (/open)
+[[command]]
+command_id = "chat_open_selected_thread"
+melody_slug = "ato"
+melody_shape = "simple"
+
+[[command.form.slash]]
+path = "/open"
+help = "Открыть detail выбранной темы."
+group = "Intercom"
+
+# chat_select_next_message — c:amn (c:amn)
+[[command]]
+command_id = "chat_select_next_message"
+melody_slug = "amn"
+melody_shape = "simple"
+
+# chat_select_next_thread — Следующая тема в overview. (/thread next)
+[[command]]
+command_id = "chat_select_next_thread"
+melody_slug = "atn"
+melody_shape = "simple"
+
+[[command.form.slash]]
+path = "/thread next"
+help = "Следующая тема в overview."
+group = "Intercom"
+
+# chat_select_prev_message — c:amp (c:amp)
+[[command]]
+command_id = "chat_select_prev_message"
+melody_slug = "amp"
+melody_shape = "simple"
+
+# chat_select_prev_thread — Предыдущая тема в overview. (/thread prev)
+[[command]]
+command_id = "chat_select_prev_thread"
+melody_slug = "atp"
+melody_shape = "simple"
+
+[[command.form.slash]]
+path = "/thread prev"
+help = "Предыдущая тема в overview."
+group = "Intercom"
+
+# chat_set_product_spine — Обновить product spine (хвост — focus). (/spine set)
+[[command]]
+command_id = "chat_set_product_spine"
+
+[[command.form.slash]]
+path = "/spine set"
+help = "Обновить product spine (хвост — focus)."
+group = "Intercom"
+
+# chat_show_thread_overview — Показать картотеку тем. (/overview)
+[[command]]
+command_id = "chat_show_thread_overview"
+melody_slug = "atb"
+melody_shape = "simple"
+
+[[command.form.slash]]
+path = "/overview"
+help = "Показать картотеку тем."
+group = "Intercom"
+
+# chat_toggle_product_spine_in_agent_context — Spine в контексте агента: вкл/выкл. (/spine toggle)
+[[command]]
+command_id = "chat_toggle_product_spine_in_agent_context"
+
+[[command.form.slash]]
+path = "/spine toggle"
+help = "Spine в контексте агента: вкл/выкл."
+group = "Intercom"
+
+# chat_toggle_selected_thinking — c:amt (c:amt)
+[[command]]
+command_id = "chat_toggle_selected_thinking"
+melody_slug = "amt"
+melody_shape = "simple"
+
+# chat_toggle_show_thinking_in_history — c:amh (c:amh)
+[[command]]
+command_id = "chat_toggle_show_thinking_in_history"
+melody_slug = "amh"
+melody_shape = "simple"
+
+# fork_chat_thread — Новая тема (ветка). Хвост — заголовок. (/card)
+[[command]]
+command_id = "fork_chat_thread"
+melody_slug = "ctf"
+melody_shape = "simple"
+
+[[command.form.slash]]
+path = "/card"
+help = "Новая тема (ветка). Хвост — заголовок."
+group = "Intercom"
+
+# send_chat — Отправить черновик из поля ввода (как c:cs). (c:cs · /chat send)
+[[command]]
+command_id = "send_chat"
+melody_slug = "cs"
+melody_shape = "simple"
+
+[[command.form.slash]]
+path = "/chat send"
+help = "Отправить черновик из поля ввода (как c:cs)."
+group = "Intercom"
+
+# show_chat_page — Страница Chat (регион Mfd). (c:cps · /chat show)
+[[command]]
+command_id = "show_chat_page"
+melody_slug = "cps"
+melody_shape = "simple"
+
+[[command.form.slash]]
+path = "/chat show"
+help = "Страница Chat (регион Mfd)."
+group = "Intercom"
+
+# ==============================================================================
+# Build & quality
+# ==============================================================================
+
+# build — Собрать решение (structured JSON). (/build run)
+[[command]]
+command_id = "build"
+
+[[command.form.slash]]
+path = "/build run"
+help = "Собрать решение (structured JSON)."
+group = "Сборка"
+
+# build_solution_ui — Собрать решение (вывод в панель). (/build ui)
+[[command]]
+command_id = "build_solution_ui"
+melody_slug = "br"
+melody_shape = "simple"
+
+[[command.form.slash]]
+path = "/build ui"
+help = "Собрать решение (вывод в панель)."
+group = "Сборка"
+
+# build_structured — Собрать решение (structured JSON, без UI-панели). (c:bs · /build structured)
+[[command]]
+command_id = "build_structured"
+melody_slug = "bs"
+melody_shape = "simple"
+
+[[command.form.slash]]
+path = "/build structured"
+help = "Собрать решение (structured JSON, без UI-панели)."
+group = "Сборка"
+
+# run_code_cleanup — dotnet format / code cleanup. (/format run)
+[[command]]
+command_id = "run_code_cleanup"
+
+[[command.form.slash]]
+path = "/format run"
+help = "dotnet format / code cleanup."
+group = "Сборка"
+
+# ==============================================================================
+# Tests
+# ==============================================================================
+
+# run_affected_tests — Затронутые тесты (git changed paths). (/test affected)
+[[command]]
+command_id = "run_affected_tests"
+
+[[command.form.slash]]
+path = "/test affected"
+help = "Затронутые тесты (git changed paths)."
+group = "Тесты"
+
+# run_tests — Запустить тесты. (/test run)
+[[command]]
+command_id = "run_tests"
+melody_slug = "bt"
+melody_shape = "simple"
+
+[[command.form.slash]]
+path = "/test run"
+help = "Запустить тесты."
+group = "Тесты"
+
+# ==============================================================================
+# Debug
+# ==============================================================================
+
+# debug_attach — Подключиться к процессу .NET. (c:da · /debug attach)
+[[command]]
+command_id = "debug_attach"
+melody_slug = "da"
+melody_shape = "simple"
+
+[[command.form.slash]]
+path = "/debug attach"
+help = "Подключиться к процессу .NET."
+group = "Отладка"
+
+# debug_continue — Продолжить (F5). (/debug continue)
+[[command]]
+command_id = "debug_continue"
+melody_slug = "dc"
+melody_shape = "simple"
+
+[[command.form.slash]]
+path = "/debug continue"
+help = "Продолжить (F5)."
+group = "Отладка"
+
+# debug_launch — Запуск под отладчиком. (/debug launch)
+[[command]]
+command_id = "debug_launch"
+melody_slug = "dl"
+melody_shape = "simple"
+
+[[command.form.slash]]
+path = "/debug launch"
+help = "Запуск под отладчиком."
+group = "Отладка"
+
+# debug_step_into — Шаг с заходом. (/debug step-into)
+[[command]]
+command_id = "debug_step_into"
+melody_slug = "di"
+melody_shape = "simple"
+
+[[command.form.slash]]
+path = "/debug step-into"
+help = "Шаг с заходом."
+group = "Отладка"
+
+# debug_step_out — Шаг с выходом. (/debug step-out)
+[[command]]
+command_id = "debug_step_out"
+melody_slug = "df"
+melody_shape = "simple"
+
+[[command.form.slash]]
+path = "/debug step-out"
+help = "Шаг с выходом."
+group = "Отладка"
+
+# debug_step_over — Шаг с обходом. (/debug step-over)
+[[command]]
+command_id = "debug_step_over"
+melody_slug = "dn"
+melody_shape = "simple"
+
+[[command.form.slash]]
+path = "/debug step-over"
+help = "Шаг с обходом."
+group = "Отладка"
+
+# debug_stop — Остановить сессию отладки. (/debug stop)
+[[command]]
+command_id = "debug_stop"
+melody_slug = "dx"
+melody_shape = "simple"
+
+[[command.form.slash]]
+path = "/debug stop"
+help = "Остановить сессию отладки."
+group = "Отладка"
+
+# ==============================================================================
+# Git
+# ==============================================================================
+
+# git_branch — git branch list/create. (/git branch)
+[[command]]
+command_id = "git_branch"
+
+[[command.form.slash]]
+path = "/git branch"
+help = "git branch list/create."
+group = "Git"
+
+# git_commit — Коммит: хвост — сообщение (можно в кавычках: \"feat: …\"). (/git commit)
+[[command]]
+command_id = "git_commit"
+melody_slug = "gc"
+melody_shape = "simple"
+
+[[command.form.slash]]
+path = "/git commit"
+help = "Коммит: хвост — сообщение (можно в кавычках: «feat: …»)."
+group = "Git"
+
+# git_diff — git diff (опционально path в хвосте). (/git diff)
+[[command]]
+command_id = "git_diff"
+
+[[command.form.slash]]
+path = "/git diff"
+help = "git diff (опционально path в хвосте)."
+group = "Git"
+
+# git_fetch — git fetch. (/git fetch)
+[[command]]
+command_id = "git_fetch"
+
+[[command.form.slash]]
+path = "/git fetch"
+help = "git fetch."
+group = "Git"
+
+# git_log — git log (хвост — n, напр. 20). (/git log)
+[[command]]
+command_id = "git_log"
+
+[[command.form.slash]]
+path = "/git log"
+help = "git log (хвост — n, напр. 20)."
+group = "Git"
+
+# git_preflight — Preflight перед коммитом. (/git preflight)
+[[command]]
+command_id = "git_preflight"
+
+[[command.form.slash]]
+path = "/git preflight"
+help = "Preflight перед коммитом."
+group = "Git"
+
+# git_preflight_fix_safe — Preflight + renormalize (safe). (/git preflight-fix)
+[[command]]
+command_id = "git_preflight_fix_safe"
+
+[[command.form.slash]]
+path = "/git preflight-fix"
+help = "Preflight + renormalize (safe)."
+group = "Git"
+
+# git_pull — git pull (--ff-only). (/git pull)
+[[command]]
+command_id = "git_pull"
+
+[[command.form.slash]]
+path = "/git pull"
+help = "git pull (--ff-only)."
+group = "Git"
+
+# git_push — git push. (/git push)
+[[command]]
+command_id = "git_push"
+melody_slug = "gp"
+melody_shape = "simple"
+
+[[command.form.slash]]
+path = "/git push"
+help = "git push."
+group = "Git"
+
+# git_status — git status (кратко). (/git status)
+[[command]]
+command_id = "git_status"
+melody_slug = "gs"
+melody_shape = "simple"
+
+[[command.form.slash]]
+path = "/git status"
+help = "git status (кратко)."
+group = "Git"
+
+# git_submodule — git submodule status/update. (/git submodule)
+[[command]]
+command_id = "git_submodule"
+melody_slug = "gsu"
+melody_shape = "simple"
+
+[[command.form.slash]]
+path = "/git submodule"
+help = "git submodule status/update."
+group = "Git"
+
+# ==============================================================================
+# Workspace & search
+# ==============================================================================
+
+# focus_editor — Фокус в редактор. (/editor focus)
+[[command]]
+command_id = "focus_editor"
+
+[[command.form.slash]]
+path = "/editor focus"
+help = "Фокус в редактор."
+group = "Редактор"
+
+# get_current_file_diagnostics — Диагностики открытого .cs. (/diagnostics show)
+[[command]]
+command_id = "get_current_file_diagnostics"
+
+[[command.form.slash]]
+path = "/diagnostics show"
+help = "Диагностики открытого .cs."
+group = "Workspace"
+
+# get_ide_state — Сводка состояния IDE (JSON). (/state show)
+[[command]]
+command_id = "get_ide_state"
+
+[[command.form.slash]]
+path = "/state show"
+help = "Сводка состояния IDE (JSON)."
+group = "Workspace"
+
+# open_solution_dialog — Открыть диалог выбора .sln / .slnx. (c:so · /solution open)
+[[command]]
+command_id = "open_solution_dialog"
+melody_slug = "so"
+melody_shape = "simple"
+
+[[command.form.slash]]
+path = "/solution open"
+help = "Открыть диалог выбора .sln / .slnx."
+group = "Workspace"
+
+# create_new_solution_dialog — Новое пустое решение (dotnet new sln). (/solution new)
+[[command]]
+command_id = "create_new_solution_dialog"
+
+[[command.form.slash]]
+path = "/solution new"
+help = "Новое пустое решение (диалог, dotnet new sln)."
+group = "Workspace"
+
+# create_project_in_solution — dotnet new + sln add (ADR 0125). (/solution new console|classlib|webapi)
+[[command]]
+command_id = "create_project_in_solution"
+
+[[command.form.slash]]
+path = "/solution new console"
+help = "Добавить консольный проект в открытое решение (хвост — имя)."
+group = "Workspace"
+
+[[command.form.slash]]
+path = "/solution new classlib"
+help = "Добавить class library в открытое решение (хвост — имя)."
+group = "Workspace"
+
+[[command.form.slash]]
+path = "/solution new webapi"
+help = "Добавить Web API в открытое решение (хвост — имя)."
+group = "Workspace"
+
+# open_folder_dialog — Открыть папку как workspace. (/folder open)
+[[command]]
+command_id = "open_folder_dialog"
+
+[[command.form.slash]]
+path = "/folder open"
+help = "Открыть папку как workspace (диалог)."
+group = "Workspace"
+
+# load_solution — Загрузить .sln / .csproj / каталог по пути. (/solution load)
+[[command]]
+command_id = "load_solution"
+
+[[command.form.slash]]
+path = "/solution load"
+help = "Загрузить решение или проект по пути (хвост — путь)."
+group = "Workspace"
+completion = "workspace_files"
+
+# open_file_dialog — Диалог выбора файла. (/file pick)
+[[command]]
+command_id = "open_file_dialog"
+
+[[command.form.slash]]
+path = "/file pick"
+help = "Диалог выбора файла для редактора."
+group = "Файл"
+
+# open_file — Открыть файл в редакторе. (/file open)
+[[command]]
+command_id = "open_file"
+
+[[command.form.slash]]
+path = "/file open"
+help = "Открыть файл в редакторе (хвост — путь)."
+group = "Файл"
+completion = "workspace_files"
+
+# search_workspace_text — Поиск по workspace (хвост — pattern). (/search)
+[[command]]
+command_id = "search_workspace_text"
+
+[[command.form.slash]]
+path = "/search"
+help = "Поиск по workspace (хвост — pattern)."
+group = "Workspace"
+
+# set_primary_work_surface — Якорь Forward: Intercom. (/intercom show, /editor show)
+[[command]]
+command_id = "set_primary_work_surface"
+
+[[command.form.slash]]
+path = "/intercom show"
+help = "Якорь Forward: Intercom."
+group = "Intercom"
+
+[command.form.slash.args]
+surface = "intercom"
+
+[[command.form.slash]]
+path = "/editor show"
+help = "Якорь Forward: редактор."
+group = "Редактор"
+
+[command.form.slash.args]
+surface = "editor"
+
+# toggle_workspace_splitters_lock — Сплиттеры рабочей области: переключить ON GND / IN AIR. (c:tol · /workspace splitters-lock)
+[[command]]
+command_id = "toggle_workspace_splitters_lock"
+melody_slug = "tol"
+melody_shape = "simple"
+
+[[command.form.slash]]
+path = "/workspace splitters-lock"
+help = "Сплиттеры рабочей области: переключить ON GND / IN AIR."
+group = "Workspace"
+
+# ==============================================================================
+# Panels (MFD)
+# ==============================================================================
+
+# set_mfd_shell_page — Показать панель вывода сборки. (/output show, /tests show, /debug show…)
+[[command]]
+command_id = "set_mfd_shell_page"
+slash_group = "Панели"
+
+[[command.form.slash]]
+path = "/output show"
+help = "Показать панель вывода сборки."
+group = "Сборка"
+
+[command.form.slash.args]
+page = "Build"
+
+[[command.form.slash]]
+path = "/tests show"
+help = "Показать панель тестов."
+group = "Тесты"
+
+[command.form.slash.args]
+page = "Tests"
+
+[[command.form.slash]]
+path = "/debug show"
+help = "Показать стек отладки."
+group = "Отладка"
+
+[command.form.slash.args]
+page = "DebugStack"
+
+[[command.form.slash]]
+path = "/repository show"
+help = "Показать панель Git (SCM)."
+group = "Панели"
+
+[command.form.slash.args]
+page = "Git"
+
+[[command.form.slash]]
+path = "/editor panel"
+help = "Страница редактора на MFD."
+group = "Редактор"
+
+[command.form.slash.args]
+page = "Editor"
+
+[[command.form.slash]]
+path = "/terminal show"
+help = "Показать терминал."
+group = "Панели"
+
+[command.form.slash.args]
+page = "Terminal"
+
+[[command.form.slash]]
+path = "/problems show"
+help = "Показать Problems."
+group = "Панели"
+
+[command.form.slash.args]
+page = "Problems"
+
+[[command.form.slash]]
+path = "/events show"
+help = "Показать события агента."
+group = "Панели"
+
+[command.form.slash.args]
+page = "Events"
+
+[[command.form.slash]]
+path = "/workspace show"
+help = "Здоровье workspace."
+group = "Панели"
+
+[command.form.slash.args]
+page = "WorkspaceHealth"
+
+[[command.form.slash]]
+path = "/settings show"
+help = "Параметры AI и чата."
+group = "Панели"
+
+[command.form.slash.args]
+page = "AiChatSettings"
+
+# show_environment_readiness_page — Страница готовности окружения (Environment Readiness). (c:ers · /readiness show)
+[[command]]
+command_id = "show_environment_readiness_page"
+melody_slug = "ers"
+melody_shape = "simple"
+
+[[command.form.slash]]
+path = "/readiness show"
+help = "Страница готовности окружения (Environment Readiness)."
+group = "Панели"
+
+# show_hybrid_index_page — Hybrid codebase index. (/index show)
+[[command]]
+command_id = "show_hybrid_index_page"
+melody_slug = "his"
+melody_shape = "simple"
+
+[[command.form.slash]]
+path = "/index show"
+help = "Hybrid codebase index."
+group = "Панели"
+
+# show_terminal_panel — c:ts (c:ts)
+[[command]]
+command_id = "show_terminal_panel"
+melody_slug = "ts"
+melody_shape = "simple"
+
+# show_web_ai_portal_page — Открыть Web AI Portal; опционально URL (как c:wai:…). Без UR… (/portal open)
+[[command]]
+command_id = "show_web_ai_portal_page"
+melody_slug = "wai"
+melody_shape = "parametric"
+melody_show_usage_hint_if_bare_slug = false
+melody_tail_signature = "<url:url>"
+melody_wire_class = "url_remainder"
+melody_chord_commit = "enter"
+melody_palette_hint_slug = "wai-url"
+melody_palette_usage_hint = "c:wai:<адрес> - веб-портал AI; адрес можно без схемы (или c:wai: для страницы по умолчанию)"
+melody_palette_usage_category = "Web AI Portal"
+
+[[command.form.slash]]
+path = "/portal open"
+help = "Открыть Web AI Portal; опционально URL (как c:wai:…). Без URL — страница по умолчанию."
+group = "Web AI Portal"
+
+# ==============================================================================
+# Intercom inspect (local report)
+# ==============================================================================
+
+[[command]]
+[[command.form.slash]]
+path = "/topic list"
+help = "Плоский список тем сессии (активная, main, число сообщений)."
+group = "Intercom"
+kind = "report"
+
+[[command]]
+[[command.form.slash]]
+path = "/topic tree"
+help = "Дерево веток тем (fork) с числом сообщений."
+group = "Intercom"
+kind = "report"
+
+[[command]]
+[[command.form.slash]]
+path = "/spine list"
+help = "Product spine: линия, фокус, вехи (список)."
+group = "Intercom"
+kind = "report"
+
+[[command]]
+[[command.form.slash]]
+path = "/spine tree"
+help = "Product spine: линия → фокус → вехи (дерево)."
+group = "Intercom"
+kind = "report"
+
+[[command]]
+[[command.form.slash]]
+path = "/topic cards"
+help = "Картотека тем (overview): карточки тем и spine; drill-in — /topic open."
+group = "Intercom"
+kind = "intercom"
+
+[[command]]
+[[command.form.slash]]
+path = "/topic open"
+help = "Открыть тему (detail): заголовок, короткий id или без аргумента — выбранная/активная."
+group = "Intercom"
+kind = "intercom"
+completion = "session_topics"
+
+[[command]]
+[[command.form.slash]]
+path = "/spine open"
+help = "Картотека (overview); то же, что /topic cards."
+group = "Intercom"
+kind = "intercom"
+
+# ==============================================================================
+# Help
+# ==============================================================================
+
+# local — Список слэш-команд. (/help)
+[[command]]
+
+[[command.form.slash]]
+path = "/help"
+help = "Список слэш-команд."
+group = "Справка"
+kind = "help"

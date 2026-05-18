@@ -20,7 +20,10 @@ public sealed record ChatConversationMessage(
     string Content,
     Guid ThreadId,
     Guid? ParentMessageId,
-    int MessageIndex);
+    int MessageIndex,
+    string? SlashCommandPath = null,
+    string? SlashCommandArgs = null,
+    ChatSlashCommandStatus? SlashCommandStatus = null);
 
 public sealed record ChatThreadNode(
     Guid ThreadId,
@@ -42,7 +45,10 @@ public sealed record ChatMessageNode(
     string Role,
     string Content,
     bool IsSelected,
-    bool StartsBranch);
+    bool StartsBranch,
+    string? SlashCommandPath = null,
+    string? SlashCommandArgs = null,
+    ChatSlashCommandStatus? SlashCommandStatus = null);
 
 public sealed record ChatConfirmationNode(
     string NodeId,
@@ -75,7 +81,10 @@ public sealed record ChatSurfaceEntry(
     int? MessageIndex = null,
     bool IsSelected = false,
     bool IsPending = false,
-    bool StartsBranch = false);
+    bool StartsBranch = false,
+    string? SlashCommandPath = null,
+    string? SlashCommandArgs = null,
+    ChatSlashCommandStatus? SlashCommandStatus = null);
 
 public sealed record ChatThreadOverviewItem(
     Guid ThreadId,

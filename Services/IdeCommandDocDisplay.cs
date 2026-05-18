@@ -2,7 +2,7 @@ namespace CascadeIDE.Services;
 
 /// <summary>
 /// Краткий заголовок команды для палитры, если записи в <see cref="IdeCommandPaletteCatalog"/> нет
-/// (например alias в <c>intent-melody-aliases.toml</c> указывает на MCP-команду без отдельной строки палитры).
+/// (например alias в <c>intent-catalog.toml</c> указывает на MCP-команду без отдельной строки палитры).
 /// </summary>
 public static class IdeCommandDocDisplay
 {

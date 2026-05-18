@@ -104,7 +104,7 @@
 | `ers` | Environment → Readiness → Show (`show_environment_readiness_page`) |
 | `ts` | Terminal → Show (`show_terminal_panel`) |
 
-Реестр alias в поставке — **`IntentMelody/intent-melody-aliases.toml`** (встроенный ресурс + опциональный файл рядом с exe, как `Hotkeys/hotkeys.toml`).
+Единый каталог intent в поставке — **`IntentMelody/intent-catalog.toml`** (встроенный ресурс + оверлей рядом с exe, как `Hotkeys/hotkeys.toml`; устаревшее имя файла: `intent-melody-aliases.toml`).
 
 **Сейчас:** короткие коды задаются **реестром и ревью** (качественный консенсус по Git / build / debug / test), без сбора частот из продукта.
 
@@ -144,7 +144,22 @@ ws_opt         ::= { " " | "\t" } ;
 
 ## 6. Реестр, конфликты, расширение
 
-Файл **IntentMelody/intent-melody-aliases.toml** — канонический **каталог корней**: **`melody_catalog_schema_version`**, при необходимости **`[[tail_wire_class]]`**, блоки **`[[melody_root]]`** с полями `slug`, `command_id`, опционально `shape`, `show_usage_hint_if_bare_slug` (голый slug в `c:` → строка подсказки вместо команды), `tail_signature`, `wire_class` (см. [ADR 0109](adr/0109-declarative-parametric-melody-catalog-toml-and-code-binders.md)). Простые alias — `shape = "simple"`; параметрические (диапазон строк, URL портала и т.п.) — `shape = "parametric"` и сигнатура хвоста в каталоге.
+Файл **IntentMelody/intent-catalog.toml** — канонический **command-first каталог** (`intent_catalog_schema_version = 1`; ключ версии **файла**, не «IML v2»).
+
+**IML v2** (смысл языка, [ADR 0109](adr/0109-declarative-parametric-melody-catalog-toml-and-code-binders.md)) — надстройка над IML v1: тот же wire `c:…`, но **`shape`**, **`tail_signature`**, **`[[tail_wire_class]]`**, детерминированная сборка args; параметрические корни (`eld`, `els`, `wai-url`, …) уже живут в этом каталоге. Отдельного `intent_catalog_schema_version = 2` для этого **нет** — это не версия языка.
+
+**Раскладка TOML** (читаемость, без смены номера схемы):
+
+- Якорь: **`command_id`** на `[[command]]`.
+- **Melody** (0–1): поля **`melody_*`** на `[[command]]` или legacy **`[command.melody]`**.
+- **Slash** (0..N): **`[[command.form.slash]]`** (или legacy **`[[command.slash]]`**); args — **`[command.form.slash.args]`** (`page`, `surface`).
+- **`slash_group`**, **`enabled`**, секции-комментарии, cookbook в шапке файла.
+
+При необходимости **`[[tail_wire_class]]`** (см. также [ADR 0119](adr/0119-chat-slash-commands-intercom-surface.md)).
+
+**Slash-паритет (параметрика каталога):** для каждой команды с `melody_shape = parametric` — curated slash-путь и хвост по `wire_class` (редактор: `/editor line select|delete …`; портал: `/portal open [url]`). Сборка args — те же binders, что у `c:` — [ADR 0124](adr/0124-slash-parametric-editor-line-commands.md).
+
+**Slash workspace/file:** `/file open`, `/solution new`, динамические подсказки по файлам solution — [ADR 0125](adr/0125-slash-workspace-file-commands-and-dynamic-completion.md) (ортогонально параметрике 0124).
 
 В **`tail_signature`** для числовых слотов: **`:int`** — обобщённое целое; **`:ln`** или **`:linenumber`** — номер строки редактора (**1-based**, inclusive-диапазон как в продуктовой семантике диапазона строк). Загрузчик и разбор хвоста учитывают оба вида; для диапазонов строк в каталоге предпочтительно **`ln`**.
 

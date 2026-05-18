@@ -13,16 +13,19 @@ internal static class ChatSurfaceEntityFactory
         bool compactLayout = false)
     {
         var entities = new List<ISkiaChatEntity>();
-        AppendSpine(entities, snapshot.ProductSpine, overviewMode, compactLayout);
+        var hideNavChromeInFeed = compactLayout;
+
+        if (!hideNavChromeInFeed)
+            AppendSpine(entities, snapshot.ProductSpine, overviewMode, compactLayout);
 
         if (snapshot.Layout.Overview.Count > 0)
         {
-            AppendOverview(entities, snapshot, overviewMode, detailThreadId, compactLayout);
+            AppendOverview(entities, snapshot, overviewMode, detailThreadId, compactLayout, hideNavChromeInFeed);
             if (overviewMode)
                 return entities;
         }
 
-        AppendDetailLanes(entities, snapshot, detailThreadId, compactLayout);
+        AppendDetailLanes(entities, snapshot, detailThreadId, compactLayout, hideNavChromeInFeed);
         return entities;
     }
 
@@ -70,37 +73,11 @@ internal static class ChatSurfaceEntityFactory
         ChatSurfaceSnapshot snapshot,
         bool overviewMode,
         Guid detailThreadId,
-        bool compactLayout)
+        bool compactLayout,
+        bool hideNavChromeInFeed)
     {
-        if (!overviewMode)
+        if (!overviewMode && !hideNavChromeInFeed)
             entities.Add(OverviewBackLink(compactLayout));
-
-        if (overviewMode)
-        {
-            var topicCount = snapshot.Layout.Overview.Count;
-            entities.Add(new SkiaChatBubbleEntity(
-                D(
-                    new SkiaChatBubbleSpec(
-                        "Картотека тем",
-                        ChatThreadOverviewPresentation.FormatCatalogHint(topicCount),
-                        ChatThreadOverviewPresentation.CatalogFooter,
-                        SkiaChatBubbleKind.OverviewHeader,
-                        SkiaBubbleFillRole.OverviewNav,
-                        SkiaChatBodyTone.Normal,
-                        IsPending: false,
-                        IsSelected: false,
-                        StartsBranch: false,
-                        MessageIndex: null,
-                        MinHeight: 56,
-                        MaxBodyLines: 1,
-                        GapAfter: 10,
-                        Padding: 12,
-                        TitleHeight: 20,
-                        FooterHeight: 14,
-                        LineHeight: 15),
-                    compactLayout),
-                static () => null));
-        }
 
         foreach (var item in snapshot.Layout.Overview)
         {
@@ -114,6 +91,9 @@ internal static class ChatSurfaceEntityFactory
                     item.ThreadId));
                 continue;
             }
+
+            if (hideNavChromeInFeed)
+                continue;
 
             var fillRole = detailThreadId == item.ThreadId
                 ? SkiaBubbleFillRole.ThreadRowActive
@@ -157,7 +137,8 @@ internal static class ChatSurfaceEntityFactory
         List<ISkiaChatEntity> entities,
         ChatSurfaceSnapshot snapshot,
         Guid detailThreadId,
-        bool compactLayout)
+        bool compactLayout,
+        bool hideNavChromeInFeed)
     {
         var lanes = snapshot.Layout.Lanes.OrderBy(lane => lane.Thread.Order);
         if (detailThreadId != Guid.Empty)
@@ -165,24 +146,27 @@ internal static class ChatSurfaceEntityFactory
 
         foreach (var lane in lanes)
         {
-            var headerRole = lane.Thread.IsActive
-                ? SkiaBubbleFillRole.ThreadHeaderActive
-                : SkiaBubbleFillRole.ThreadHeader;
-            entities.Add(new SkiaChatBubbleEntity(
-                D(
-                    new SkiaChatBubbleSpec(
-                        lane.Thread.Title,
-                        ChatThreadOverviewPresentation.FormatThreadHeaderMeta(lane.Thread),
-                        Footer: null,
-                        SkiaChatBubbleKind.Standard,
-                        headerRole,
-                        SkiaChatBodyTone.Normal,
-                        IsPending: false,
-                        IsSelected: false,
-                        StartsBranch: false,
-                        MessageIndex: null),
-                    compactLayout),
-                () => new SkiaChatHit(null, lane.Thread.ThreadId, ResetDetailMode: false)));
+            if (!hideNavChromeInFeed)
+            {
+                var headerRole = lane.Thread.IsActive
+                    ? SkiaBubbleFillRole.ThreadHeaderActive
+                    : SkiaBubbleFillRole.ThreadHeader;
+                entities.Add(new SkiaChatBubbleEntity(
+                    D(
+                        new SkiaChatBubbleSpec(
+                            lane.Thread.Title,
+                            ChatThreadOverviewPresentation.FormatThreadHeaderMeta(lane.Thread),
+                            Footer: null,
+                            SkiaChatBubbleKind.Standard,
+                            headerRole,
+                            SkiaChatBodyTone.Normal,
+                            IsPending: false,
+                            IsSelected: false,
+                            StartsBranch: false,
+                            MessageIndex: null),
+                        compactLayout),
+                    () => new SkiaChatHit(null, lane.Thread.ThreadId, ResetDetailMode: false)));
+            }
 
             foreach (var entry in lane.Entries)
             {
@@ -196,8 +180,20 @@ internal static class ChatSurfaceEntityFactory
     private static SkiaChatBubbleSpec D(in SkiaChatBubbleSpec spec, bool compact) =>
         SkiaChatDensity.Apply(spec, compact);
 
-    private static SkiaChatBubbleEntity MessageEntity(ChatSurfaceEntry entry, bool compactLayout)
+    private static ISkiaChatEntity MessageEntity(ChatSurfaceEntry entry, bool compactLayout)
     {
+        if (entry.VisualRole == ChatMessageVisualRole.SlashCommand
+            && entry.SlashCommandStatus is { } slashStatus
+            && !string.IsNullOrWhiteSpace(entry.SlashCommandPath))
+        {
+            return new SkiaChatSlashCommandEntity(
+                entry.SlashCommandPath,
+                entry.SlashCommandArgs,
+                string.IsNullOrWhiteSpace(entry.Body) ? null : entry.Body,
+                slashStatus,
+                entry.MessageIndex);
+        }
+
         var fillRole = SkiaBubbleFillRoleMapping.FromMessageRole(entry.VisualRole);
         return new SkiaChatBubbleEntity(
             D(

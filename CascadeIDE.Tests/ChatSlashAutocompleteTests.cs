@@ -25,6 +25,7 @@ public sealed class ChatSlashAutocompleteTests
         var suggestions = ChatSlashAutocomplete.GetSuggestions("/b");
         Assert.Contains(suggestions, s => s.SlashPath == "/build run");
         Assert.Contains(suggestions, s => s.SlashPath == "/build ui");
+        Assert.Contains(suggestions, s => s.SlashPath == "/build structured");
         Assert.DoesNotContain(suggestions, s => s.SlashPath == "/overview");
     }
 
@@ -32,9 +33,10 @@ public sealed class ChatSlashAutocompleteTests
     public void GetSuggestions_BuildNamespace_ListsActions()
     {
         var suggestions = ChatSlashAutocomplete.GetSuggestions("/build ");
-        Assert.Equal(2, suggestions.Count);
+        Assert.Equal(3, suggestions.Count);
         Assert.Contains(suggestions, s => s.SlashPath == "/build run");
         Assert.Contains(suggestions, s => s.SlashPath == "/build ui");
+        Assert.Contains(suggestions, s => s.SlashPath == "/build structured");
     }
 
     [Fact]

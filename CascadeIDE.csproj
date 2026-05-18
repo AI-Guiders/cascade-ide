@@ -67,7 +67,7 @@
     <!-- Обязательно для деплоя без шипнутой папки: BundledAppContent / TryReadUiModesFile fallback. -->
     <EmbeddedResource Include="UiModes\*.toml" />
     <EmbeddedResource Include="Hotkeys\hotkeys.toml" />
-    <EmbeddedResource Include="IntentMelody\intent-melody-aliases.toml" />
+    <EmbeddedResource Include="IntentMelody\intent-catalog.toml" />
     <EmbeddedResource Include="AiPrompts\maf-ide-agent.prompts.md" />
     <EmbeddedResource Include="AiPrompts\web-ai-portal-bridge-adr0108.prompts.md" />
     <EmbeddedResource Include="AiPrompts\web-ai-portal-bridge-adr0108.chat-paste.txt" />

@@ -57,6 +57,9 @@ public partial class ChatPanelViewModel
                 message.Content,
                 message.ThreadId,
                 message.ParentMessageId,
-                index))
+                index,
+                message.SlashCommandPath,
+                message.SlashCommandArgs,
+                message.SlashCommandStatus))
             .ToList();
 }

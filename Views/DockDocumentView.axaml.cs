@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
@@ -78,16 +79,6 @@ public partial class DockDocumentView : UserControl
         if (_vm is null)
             return;
 
-        MainWindow? mainWindow = null;
-        for (Visual? v = this; v is not null; v = v.GetVisualParent())
-        {
-            if (v is MainWindow mw)
-            {
-                mainWindow = mw;
-                break;
-            }
-        }
-
         _editor = this.FindControl<TextEditor>("Editor");
         if (_editor is null)
             return;
@@ -158,10 +149,11 @@ public partial class DockDocumentView : UserControl
         };
         _vm.Documents.PropertyChanged += _documentsHandler;
 
-        if (mainWindow is not null)
+        if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime { MainWindow: MainWindow mainWindow })
         {
-            mainWindow.EnsureTextMateOnEditor(_editor);
-            mainWindow.AttachTextMateWhenEditorReady();
+            mainWindow.EnsureDockEditorTextMate(_editor, _docVm.Doc.FilePath);
+            if (IsActive())
+                mainWindow.AttachTextMateWhenEditorReady();
         }
 
         SyncFromVmIfActive();

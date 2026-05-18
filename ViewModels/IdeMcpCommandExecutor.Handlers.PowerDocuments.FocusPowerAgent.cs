@@ -1,4 +1,5 @@
 using System.Text.Json;
+using CascadeIDE.Models;
 
 namespace CascadeIDE.ViewModels;
 
@@ -196,6 +197,18 @@ internal sealed partial class IdeMcpCommandExecutor
         add(Services.IdeCommands.ChatShowThreadOverview, async (_, _) =>
         {
             return _vm.ChatPanel.ShowThreadOverview();
+        });
+        add(Services.IdeCommands.TogglePrimaryWorkSurface, async (_, _) =>
+        {
+            if (_vm.TogglePrimaryWorkSurfaceCommand.CanExecute(null))
+                _vm.TogglePrimaryWorkSurfaceCommand.Execute(null);
+            return _vm.PrimaryWorkSurface.ToTomlValue();
+        });
+        add(Services.IdeCommands.SetPrimaryWorkSurface, async (args, _) =>
+        {
+            var surface = McpCommandJsonArgs.String(args, "surface") ?? "intercom";
+            _vm.PrimaryWorkSurface = PrimaryWorkSurfaceKindExtensions.ParseTomlValue(surface);
+            return _vm.PrimaryWorkSurface.ToTomlValue();
         });
         add(Services.IdeCommands.ChatToggleProductSpineInAgentContext, async (_, _) =>
         {

@@ -3,36 +3,17 @@ using CascadeIDE.Services;
 
 namespace CascadeIDE.Features.Chat;
 
-public enum ChatSlashCommandExecutionKind
+/// <summary>
+/// Слэш Intercom → <see cref="IdeCommands"/> (ADR 0119).
+/// Источник: <c>[[command]]</c> → <c>[[command.slash]]</c> в <see cref="IntentMelodyAliases.BundledRelativePath"/> (якорь <c>command_id</c>, ADR 0109/0119).
+/// Оверлей TOML рядом с exe — без пересборки для новых команд.
+/// </summary>
+public static partial class ChatSlashCommandCatalog
 {
-    IdeCommand,
-    LocalHelp,
-}
-
-public sealed record ChatSlashCommandDescriptor(
-    string SlashPath,
-    string CommandId,
-    string Help,
-    ChatSlashCommandExecutionKind ExecutionKind = ChatSlashCommandExecutionKind.IdeCommand);
-
-/// <summary>Curated slash → <see cref="IdeCommands"/> (ADR 0119 §5).</summary>
-public static class ChatSlashCommandCatalog
-{
-    private static readonly ChatSlashCommandDescriptor[] Entries =
-    [
-        new("/overview", IdeCommands.ChatShowThreadOverview, "Вернуться к overview тем."),
-        new("/open", IdeCommands.ChatOpenSelectedThread, "Открыть detail выбранной темы."),
-        new("/card", IdeCommands.ForkChatThread, "Новая тема (ветка). Хвост — заголовок/контекст."),
-        new("/spine", IdeCommands.ChatSetProductSpine, "Обновить product spine (хвост — текст)."),
-        new("/spine-toggle", IdeCommands.ChatToggleProductSpineInAgentContext, "Вкл/выкл spine в контексте агента."),
-        new("/export", IdeCommands.ChatExportReadable, "Экспорт чата в читаемый Markdown."),
-        new("/build run", IdeCommands.Build, "Собрать решение (structured MCP build)."),
-        new("/build ui", IdeCommands.BuildSolutionUi, "Собрать решение (вывод в панель)."),
-        new("/test run", IdeCommands.RunTests, "Запустить тесты."),
-        new("/test affected", IdeCommands.RunAffectedTests, "Запустить затронутые тесты."),
-        new("/debug launch", IdeCommands.DebugLaunch, "Запустить отладку (launch profile / target)."),
-        new("/help", "", "Список слэш-команд.", ChatSlashCommandExecutionKind.LocalHelp),
-    ];
+    private static IReadOnlyList<ChatSlashCommandDescriptor> Descriptors =>
+        IntentSlashCatalog.SlashRoutes.Values
+            .Select(ToDescriptor)
+            .ToList();
 
     public static bool TryResolve(ChatSlashCommandParseResult parse, out ChatSlashCommandDescriptor descriptor)
     {
@@ -43,7 +24,7 @@ public static class ChatSlashCommandCatalog
         if (parse.Shape == ChatSlashCommandShape.Flat)
         {
             var flat = "/" + parse.Head;
-            foreach (var entry in Entries)
+            foreach (var entry in Descriptors)
             {
                 if (entry.ExecutionKind == ChatSlashCommandExecutionKind.LocalHelp
                     && string.Equals(entry.SlashPath, flat, StringComparison.OrdinalIgnoreCase))
@@ -63,8 +44,10 @@ public static class ChatSlashCommandCatalog
             return false;
         }
 
-        var path = "/" + parse.Head + " " + parse.Action;
-        foreach (var entry in Entries)
+        var path = string.IsNullOrEmpty(parse.SubAction)
+            ? "/" + parse.Head + " " + parse.Action
+            : "/" + parse.Head + " " + parse.Action + " " + parse.SubAction;
+        foreach (var entry in Descriptors)
         {
             if (string.Equals(entry.SlashPath, path, StringComparison.OrdinalIgnoreCase))
             {
@@ -77,21 +60,87 @@ public static class ChatSlashCommandCatalog
     }
 
     public static IReadOnlyList<ChatSlashSuggestion> AllSuggestions() =>
-        Entries
-            .Select(e => new ChatSlashSuggestion(e.SlashPath, e.SlashPath, e.Help))
+        OrderDescriptors(Descriptors)
+            .Select(e => new ChatSlashSuggestion(
+                e.SlashPath,
+                e.SlashPath,
+                e.Help,
+                ResolveGroup(e)))
             .ToList();
 
-    public static IReadOnlyList<string> ListHelpLines()
+    public static IReadOnlyList<string> ListHelpLines(string? namespaceFilter = null)
     {
-        var lines = new List<string> { "Слэш-команды Intercom / IDE (Tab — autocomplete):" };
-        foreach (var entry in Entries)
+        var lines = new List<string>
         {
-            if (entry.ExecutionKind == ChatSlashCommandExecutionKind.LocalHelp)
-                lines.Add($"  {entry.SlashPath} — {entry.Help}");
-            else
-                lines.Add($"  {entry.SlashPath} — {entry.Help} ({entry.CommandId})");
+            string.IsNullOrWhiteSpace(namespaceFilter)
+                ? "Слэш-команды Intercom (Tab — autocomplete, Enter — выполнить):"
+                : $"Слэш-команды /{namespaceFilter.Trim()}:*",
+        };
+
+        foreach (var entry in OrderDescriptors(Descriptors))
+        {
+            if (!string.IsNullOrWhiteSpace(namespaceFilter)
+                && !entry.SlashPath.StartsWith("/" + namespaceFilter.Trim(), StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            lines.Add($"  {entry.SlashPath} — {entry.Help}");
         }
 
         return lines;
+    }
+
+    internal static string? GroupFor(string slashPath)
+    {
+        if (!IntentSlashCatalog.TryGetRoute(slashPath, out var route))
+            return ExtractNamespaceHead(slashPath);
+
+        return string.IsNullOrWhiteSpace(route.Group) ? ExtractNamespaceHead(slashPath) : route.Group;
+    }
+
+    internal static string SortKeyForSuggestion(ChatSlashCommandDescriptor descriptor) =>
+        SortKey(descriptor);
+
+    internal static string SortKeyForSuggestion(string slashPath) =>
+        IntentSlashCatalog.TryGetRoute(slashPath, out var route)
+            ? SortKey(ToDescriptor(route))
+            : slashPath;
+
+    internal static IEnumerable<ChatSlashCommandDescriptor> OrderDescriptors(
+        IEnumerable<ChatSlashCommandDescriptor> descriptors) =>
+        descriptors.OrderBy(SortKey, StringComparer.Ordinal);
+
+    private static string? ResolveGroup(ChatSlashCommandDescriptor descriptor) =>
+        string.IsNullOrWhiteSpace(descriptor.SlashGroup)
+            ? ExtractNamespaceHead(descriptor.SlashPath)
+            : descriptor.SlashGroup;
+
+    private static ChatSlashCommandDescriptor ToDescriptor(SlashRouteEntry route) =>
+        new(
+            route.SlashPath,
+            route.CommandId,
+            route.Help,
+            route.ExecutionKind,
+            route.MfdPage,
+            route.PrimarySurface,
+            route.Group,
+            route.Completion);
+
+    internal static bool TryGetRoute(string slashPath, out SlashRouteEntry route) =>
+        IntentSlashCatalog.TryGetRoute(slashPath, out route);
+
+    private static string SortKey(ChatSlashCommandDescriptor descriptor)
+    {
+        var group = ResolveGroup(descriptor) ?? "";
+        return $"{group}\u001f{descriptor.SlashPath}";
+    }
+
+    private static string? ExtractNamespaceHead(string slashPath)
+    {
+        if (slashPath.Length < 2 || slashPath[0] != '/')
+            return null;
+
+        var body = slashPath[1..];
+        var space = body.IndexOf(' ');
+        return space < 0 ? body : body[..space];
     }
 }

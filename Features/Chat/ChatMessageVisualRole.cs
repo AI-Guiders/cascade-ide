@@ -8,5 +8,6 @@ public enum ChatMessageVisualRole
     Thinking = 2,
     Tool = 3,
     ClarificationPending = 4,
-    ClarificationResolved = 5
+    ClarificationResolved = 5,
+    SlashCommand = 6,
 }

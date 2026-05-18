@@ -43,6 +43,8 @@ public partial class ChatPanelViewModel : ViewModelBase
     private readonly Action? _showAcpTerminal;
     private readonly Func<string, IReadOnlyDictionary<string, JsonElement>?, CancellationToken, Task<string>>? _executeIdeCommandForMafAgent;
     private readonly ChatSlashCommandRunner _slashCommandRunner;
+    private readonly IWorkspaceFileSlashCompletionProvider? _workspaceFileSlashCompletion;
+    private readonly ISessionTopicSlashCompletionProvider _sessionTopicSlashCompletion;
     private readonly Func<Uri>? _getLocalOllamaEndpoint;
     private readonly Func<string>? _getEffectiveOllamaModelId;
     private readonly Func<IChatClient?>? _tryCreateCloudMafIChatClient;
@@ -84,7 +86,9 @@ public partial class ChatPanelViewModel : ViewModelBase
         Func<string>? getEffectiveOllamaModelId = null,
         Func<IChatClient?>? tryCreateCloudMafIChatClient = null,
         Func<string?>? getChatMinimizedContextBlock = null,
-        Func<string>? getSendMessageKey = null)
+        Func<string>? getSendMessageKey = null,
+        Func<string?>? getSolutionPath = null,
+        Func<ObservableCollection<SolutionItem>>? getSolutionRoots = null)
     {
         _aiProviderManager = aiProviderManager;
         _getActiveAiProvider = getActiveAiProvider;
@@ -103,7 +107,18 @@ public partial class ChatPanelViewModel : ViewModelBase
         _appendAcpTerminal = appendAcpTerminal;
         _showAcpTerminal = showAcpTerminal;
         _executeIdeCommandForMafAgent = executeIdeCommandForMafAgent;
-        _slashCommandRunner = new ChatSlashCommandRunner(executeIdeCommandForMafAgent);
+        _workspaceFileSlashCompletion = getSolutionPath is not null && getSolutionRoots is not null
+            ? new WorkspaceFileSlashCompletionProvider(getSolutionPath, getSolutionRoots, getWorkspaceRoot)
+            : null;
+        _sessionTopicSlashCompletion = new SessionTopicSlashCompletionProvider(() => ChatSurfaceSnapshot);
+        _slashCommandRunner = new ChatSlashCommandRunner(
+            executeIdeCommandForMafAgent,
+            () => new ChatSlashEditorContext(_getCurrentFilePath?.Invoke(), _getEditorText?.Invoke()),
+            getWorkspaceRoot,
+            () => ChatSurfaceSnapshot,
+            () => SelectedChatThreadId,
+            id => SelectedChatThreadId = id,
+            v => IsChatOverviewMode = v);
         _getLocalOllamaEndpoint = getLocalOllamaEndpoint;
         _getEffectiveOllamaModelId = getEffectiveOllamaModelId;
         _tryCreateCloudMafIChatClient = tryCreateCloudMafIChatClient;
@@ -239,7 +254,8 @@ public partial class ChatPanelViewModel : ViewModelBase
 
     private void OnChatMessagePropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName is nameof(ChatMessageViewModel.Content))
+        if (e.PropertyName is nameof(ChatMessageViewModel.Content)
+            or nameof(ChatMessageViewModel.SlashCommandStatus))
             RefreshChatSurfaceSnapshot();
     }
 
@@ -317,21 +333,23 @@ public partial class ChatPanelViewModel : ViewModelBase
         if (string.IsNullOrEmpty(rawInput))
             return;
 
-        var slash = await _slashCommandRunner.TryRunAsync(rawInput).ConfigureAwait(false);
-        if (slash.Handled)
+        var parse = ChatSlashCommandParser.TryParse(rawInput);
+        if (parse.IsSlashLine)
         {
+            var slashPath = ChatSlashCommandPresentation.FormatDisplayPath(parse, rawInput);
+            var slashArgs = ChatSlashCommandPresentation.NormalizeArgsTail(parse.ArgsTail);
+            var cmdMsg = ChatMessageViewModel.CreateSlashCommand(slashPath, slashArgs, _activeThreadId);
+            ChatInput = "";
+            ChatMessages.Add(cmdMsg);
+            _ = PersistEventAsync(ChatHistoryEventKind.MessageAdded, MessageSnapshot(cmdMsg));
+            RefreshChatSurfaceSnapshot();
+
+            var slash = await _slashCommandRunner.TryRunAsync(rawInput).ConfigureAwait(false);
             await UiScheduler.Default.InvokeAsync(() =>
             {
-                ChatInput = "";
-                var role = slash.Success ? "system" : "assistant";
-                var text = slash.UserFacingText;
-                if (!string.IsNullOrWhiteSpace(text))
-                {
-                    var msg = new ChatMessageViewModel(role, text, threadId: _activeThreadId);
-                    ChatMessages.Add(msg);
-                    _ = PersistEventAsync(ChatHistoryEventKind.MessageAdded, MessageSnapshot(msg));
-                    RefreshChatSurfaceSnapshot();
-                }
+                cmdMsg.ApplySlashCommandResult(slash);
+                _ = PersistEventAsync(ChatHistoryEventKind.MessageCompleted, MessageSnapshot(cmdMsg));
+                RefreshChatSurfaceSnapshot();
             });
             return;
         }
@@ -1007,6 +1025,13 @@ public partial class ChatPanelViewModel : ViewModelBase
         };
         if (m.ParentMessageId is { } p)
             d["parent_message_id"] = p.ToString("N");
+        if (m.SlashCommandStatus is { } status)
+        {
+            d["slash_command_path"] = m.SlashCommandPath ?? "";
+            if (!string.IsNullOrWhiteSpace(m.SlashCommandArgs))
+                d["slash_command_args"] = m.SlashCommandArgs;
+            d["slash_command_status"] = status.ToString();
+        }
         return d;
     }
 

@@ -48,6 +48,20 @@ public partial class MainWindowViewModel
         }
     }
 
+    /// <summary>
+    /// После открытия файла: при Intercom в Forward — страница Editor на MFD; иначе фокус в лобовой редактор (ADR 0120).
+    /// </summary>
+    internal void RevealEditorForOpenedDocument()
+    {
+        if (PrimaryWorkSurface == PrimaryWorkSurfaceKind.Intercom)
+        {
+            if (IsMfdShellPageAllowed(MfdShellPage.Editor))
+                TryNavigateToMfdShellPage(MfdShellPage.Editor);
+        }
+
+        ((Services.IIdeMcpActions)this).FocusEditor();
+    }
+
     public bool IsForwardEditorHostVisible => PrimaryWorkSurface == PrimaryWorkSurfaceKind.Editor;
 
     public bool IsForwardIntercomHostVisible => PrimaryWorkSurface == PrimaryWorkSurfaceKind.Intercom;

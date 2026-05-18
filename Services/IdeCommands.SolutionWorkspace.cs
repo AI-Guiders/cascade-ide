@@ -49,4 +49,10 @@ public static partial class IdeCommands
     public const string ChatEditMessage = "chat_edit_message";
     /// <summary>Экспорт текущего чата в читаемый Markdown (роли, индексы, message_id). Поддерживаемый сценарий — явно подвести итоги длинной сессии: экспорт, затем краткое смысловое резюме и согласование с пользователем (см. MCP-PROTOCOL.md, раздел «Подведение итогов сессии чата»). args: write_file?:boolean, file_name?:string; returns: json; example: {"write_file":true}.</summary>
     public const string ChatExportReadable = "chat_export_readable";
+    /// <summary>Переключить <c>primary_work_surface</c> intercom ↔ editor (ADR 0120). returns: text.</summary>
+    public const string TogglePrimaryWorkSurface = "toggle_primary_work_surface";
+    /// <summary>Установить якорь Forward: <c>intercom</c> | <c>editor</c>. args: surface:string; returns: text; example: {"surface":"intercom"}.</summary>
+    public const string SetPrimaryWorkSurface = "set_primary_work_surface";
+    /// <summary>Добавить проект в открытое решение: <c>dotnet new</c> (console|classlib|webapi) + <c>dotnet sln add</c>. args: template:string, project_name:string; returns: json; example: {"template":"console","project_name":"MyApp"}.</summary>
+    public const string CreateProjectInSolution = "create_project_in_solution";
 }
