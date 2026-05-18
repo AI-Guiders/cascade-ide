@@ -24,6 +24,8 @@ public sealed class ChatSlashCommandRunner
     private readonly Func<Guid>? _getSelectedChatThreadId;
     private readonly Action<Guid>? _selectChatThread;
     private readonly Action<bool>? _setChatOverviewMode;
+    private readonly Action<TopicPickerPresentation>? _setTopicPicker;
+    private readonly Func<string, string>? _createTopicWithTitle;
 
     public ChatSlashCommandRunner(
         Func<string, IReadOnlyDictionary<string, JsonElement>?, CancellationToken, Task<string>>? executeIdeCommand,
@@ -32,7 +34,9 @@ public sealed class ChatSlashCommandRunner
         Func<ChatSurfaceSnapshot>? getChatSurfaceSnapshot = null,
         Func<Guid>? getSelectedChatThreadId = null,
         Action<Guid>? selectChatThread = null,
-        Action<bool>? setChatOverviewMode = null)
+        Action<bool>? setChatOverviewMode = null,
+        Action<TopicPickerPresentation>? setTopicPicker = null,
+        Func<string, string>? createTopicWithTitle = null)
     {
         _executeIdeCommand = executeIdeCommand;
         _getEditorContext = getEditorContext;
@@ -41,6 +45,8 @@ public sealed class ChatSlashCommandRunner
         _getSelectedChatThreadId = getSelectedChatThreadId;
         _selectChatThread = selectChatThread;
         _setChatOverviewMode = setChatOverviewMode;
+        _setTopicPicker = setTopicPicker;
+        _createTopicWithTitle = createTopicWithTitle;
     }
 
     public async Task<ChatSlashCommandRunResult> TryRunAsync(string rawInput, CancellationToken cancellationToken = default)
@@ -103,19 +109,31 @@ public sealed class ChatSlashCommandRunner
 
             var snapshot = _getChatSurfaceSnapshot?.Invoke() ?? ChatSurfaceSnapshot.Empty;
             var selectedId = _getSelectedChatThreadId?.Invoke() ?? Guid.Empty;
-            var detail = ChatSlashIntercomActions.TryExecute(
-                descriptor.SlashPath,
-                parse.ArgsTail,
-                selectedId,
-                _selectChatThread,
-                _setChatOverviewMode,
-                snapshot);
+            if (!ChatSlashIntercomActions.TryExecute(
+                    descriptor.SlashPath,
+                    argsTail,
+                    selectedId,
+                    _selectChatThread,
+                    _setChatOverviewMode,
+                    snapshot,
+                    out var intercom,
+                    _setTopicPicker,
+                    _createTopicWithTitle))
+            {
+                return new ChatSlashCommandRunResult(
+                    true,
+                    false,
+                    displayPath,
+                    argsTail,
+                    "Действие недоступно.");
+            }
+
             return new ChatSlashCommandRunResult(
                 true,
-                true,
+                intercom.Success,
                 displayPath,
                 argsTail,
-                detail ?? "Действие недоступно.");
+                intercom.Message);
         }
 
         var validationError = ValidateRequiredArgs(descriptor, parse);

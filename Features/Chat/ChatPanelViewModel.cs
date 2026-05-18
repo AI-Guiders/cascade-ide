@@ -118,7 +118,9 @@ public partial class ChatPanelViewModel : ViewModelBase
             () => ChatSurfaceSnapshot,
             () => SelectedChatThreadId,
             id => SelectedChatThreadId = id,
-            v => IsChatOverviewMode = v);
+            v => IsChatOverviewMode = v,
+            setTopicPicker: SetTopicPickerPresentation,
+            createTopicWithTitle: CreateTopicWithTitle);
         _getLocalOllamaEndpoint = getLocalOllamaEndpoint;
         _getEffectiveOllamaModelId = getEffectiveOllamaModelId;
         _tryCreateCloudMafIChatClient = tryCreateCloudMafIChatClient;
@@ -217,11 +219,6 @@ public partial class ChatPanelViewModel : ViewModelBase
         RefreshChatSurfaceSnapshot();
     }
 
-    partial void OnSelectedChatThreadIdChanged(Guid value)
-    {
-        RefreshChatSurfaceSnapshot();
-    }
-
     partial void OnIsChatOverviewModeChanged(bool value)
     {
         RefreshChatSurfaceSnapshot();
@@ -272,9 +269,7 @@ public partial class ChatPanelViewModel : ViewModelBase
         SubmitClarificationResponseCommand.NotifyCanExecuteChanged();
         DismissClarificationBatchCommand.NotifyCanExecuteChanged();
         RefreshChatSurfaceSnapshot();
-        _ = PersistEventAsync(
-            ChatHistoryEventKind.ClarificationBatchOpened,
-            new { batch.Id, batch.Title, Items = batch.Items.Select(x => new { x.Id, x.Prompt, x.AnswerStyle, x.ChoiceOptions }) });
+        _ = PersistEventAsync(ChatHistoryEventKind.ClarificationBatchOpened, batch);
     }
 
     public string OpenClarificationBatchFromJson(string batchJson)
@@ -338,17 +333,20 @@ public partial class ChatPanelViewModel : ViewModelBase
         {
             var slashPath = ChatSlashCommandPresentation.FormatDisplayPath(parse, rawInput);
             var slashArgs = ChatSlashCommandPresentation.NormalizeArgsTail(parse.ArgsTail);
-            var cmdMsg = ChatMessageViewModel.CreateSlashCommand(slashPath, slashArgs, _activeThreadId);
+            var threadAtSlash = _activeThreadId;
+            var cmdMsg = ChatMessageViewModel.CreateSlashCommand(slashPath, slashArgs, threadAtSlash);
             ChatInput = "";
             ChatMessages.Add(cmdMsg);
-            _ = PersistEventAsync(ChatHistoryEventKind.MessageAdded, MessageSnapshot(cmdMsg));
+            _ = PersistEventAsync(ChatHistoryEventKind.MessageAdded, ChatHistoryPayloadMapping.ToMessagePayload(cmdMsg));
             RefreshChatSurfaceSnapshot();
 
             var slash = await _slashCommandRunner.TryRunAsync(rawInput).ConfigureAwait(false);
             await UiScheduler.Default.InvokeAsync(() =>
             {
+                if (_activeThreadId != threadAtSlash && _activeThreadId != Guid.Empty)
+                    cmdMsg.AssignThread(_activeThreadId);
                 cmdMsg.ApplySlashCommandResult(slash);
-                _ = PersistEventAsync(ChatHistoryEventKind.MessageCompleted, MessageSnapshot(cmdMsg));
+                _ = PersistEventAsync(ChatHistoryEventKind.MessageCompleted, ChatHistoryPayloadMapping.ToMessagePayload(cmdMsg));
                 RefreshChatSurfaceSnapshot();
             });
             return;
@@ -363,7 +361,7 @@ public partial class ChatPanelViewModel : ViewModelBase
         _pendingParentForNextMessage = null;
         var userMsg = new ChatMessageViewModel("user", input, threadId: _activeThreadId, parentMessageId: parent);
         ChatMessages.Add(userMsg);
-        _ = PersistEventAsync(ChatHistoryEventKind.MessageAdded, MessageSnapshot(userMsg));
+        _ = PersistEventAsync(ChatHistoryEventKind.MessageAdded, ChatHistoryPayloadMapping.ToMessagePayload(userMsg));
         IsChatLoading = true;
         ChatLoadingStatusText = "Модель отвечает…";
 
@@ -456,7 +454,7 @@ public partial class ChatPanelViewModel : ViewModelBase
                 FinalizeThinkingMessage(thoughtMsg);
                 FinalizeToolMessage(toolMsg, isError: false);
             });
-            _ = PersistEventAsync(ChatHistoryEventKind.MessageCompleted, MessageSnapshot(assistantMsg));
+            _ = PersistEventAsync(ChatHistoryEventKind.MessageCompleted, ChatHistoryPayloadMapping.ToMessagePayload(assistantMsg));
         }
         catch (Exception ex)
         {
@@ -505,7 +503,7 @@ public partial class ChatPanelViewModel : ViewModelBase
             var t = token;
             UiScheduler.Default.Post(() => assistantMsg.Content += t);
         }
-        _ = PersistEventAsync(ChatHistoryEventKind.MessageCompleted, MessageSnapshot(assistantMsg));
+        _ = PersistEventAsync(ChatHistoryEventKind.MessageCompleted, ChatHistoryPayloadMapping.ToMessagePayload(assistantMsg));
     }
 
     private bool TryResolveMafIdeChat(
@@ -604,7 +602,7 @@ public partial class ChatPanelViewModel : ViewModelBase
         }
 
         if (assistantMsg is not null)
-            _ = PersistEventAsync(ChatHistoryEventKind.MessageCompleted, MessageSnapshot(assistantMsg));
+            _ = PersistEventAsync(ChatHistoryEventKind.MessageCompleted, ChatHistoryPayloadMapping.ToMessagePayload(assistantMsg));
     }
 
     private static bool IsUserOrAssistantRole(string role)
@@ -822,9 +820,9 @@ public partial class ChatPanelViewModel : ViewModelBase
             return "Empty content";
         var vm = new ChatMessageViewModel(r, trimmed, threadId: _activeThreadId);
         ChatMessages.Add(vm);
-        _ = PersistEventAsync(ChatHistoryEventKind.MessageAdded, MessageSnapshot(vm));
+        _ = PersistEventAsync(ChatHistoryEventKind.MessageAdded, ChatHistoryPayloadMapping.ToMessagePayload(vm));
         if (string.Equals(r, "assistant", StringComparison.Ordinal))
-            _ = PersistEventAsync(ChatHistoryEventKind.MessageCompleted, MessageSnapshot(vm));
+            _ = PersistEventAsync(ChatHistoryEventKind.MessageCompleted, ChatHistoryPayloadMapping.ToMessagePayload(vm));
         return "OK";
     }
 
@@ -973,12 +971,7 @@ public partial class ChatPanelViewModel : ViewModelBase
             m.Content = newContent;
             _ = PersistEventAsync(
                 ChatHistoryEventKind.MessageEdited,
-                new Dictionary<string, object?>
-                {
-                    ["message_id"] = messageId.ToString("N"),
-                    ["new_content"] = newContent,
-                    ["reason"] = string.IsNullOrWhiteSpace(reason) ? "correction" : reason.Trim()
-                });
+                ChatHistoryPayloadMapping.ToMessageEditedPayload(messageId, newContent, reason));
             return JsonSerializer.Serialize(new { ok = true, message_id = messageId.ToString("N") }, ChatPanelJson);
         }
 
@@ -1014,107 +1007,6 @@ public partial class ChatPanelViewModel : ViewModelBase
         }
     }
 
-    private static Dictionary<string, object?> MessageSnapshot(ChatMessageViewModel m)
-    {
-        var d = new Dictionary<string, object?>
-        {
-            ["message_id"] = m.MessageId.ToString("N"),
-            ["role"] = m.Role,
-            ["content"] = m.Content,
-            ["thread_id"] = m.ThreadId.ToString("N"),
-        };
-        if (m.ParentMessageId is { } p)
-            d["parent_message_id"] = p.ToString("N");
-        if (m.SlashCommandStatus is { } status)
-        {
-            d["slash_command_path"] = m.SlashCommandPath ?? "";
-            if (!string.IsNullOrWhiteSpace(m.SlashCommandArgs))
-                d["slash_command_args"] = m.SlashCommandArgs;
-            d["slash_command_status"] = status.ToString();
-        }
-        return d;
-    }
-
-    /// <summary>Новая ветка: следующее user-сообщение получит <see cref="ChatMessageViewModel.ParentMessageId"/>, если задано.</summary>
-    public string ForkThread(Guid? parentMessageId)
-    {
-        var previous = _activeThreadId;
-        if (previous == Guid.Empty)
-            previous = _mainThreadId;
-        _activeThreadId = Guid.NewGuid();
-        _pendingParentForNextMessage = parentMessageId;
-        ThreadBranchHint = $"Ветка {_activeThreadId:N}";
-        _ = PersistEventAsync(
-            ChatHistoryEventKind.ThreadForked,
-            new
-            {
-                new_thread_id = _activeThreadId.ToString("N"),
-                previous_thread_id = previous.ToString("N"),
-                parent_message_id = parentMessageId?.ToString("N"),
-            },
-            envelopeThreadId: _activeThreadId);
-        RefreshChatSurfaceSnapshot();
-        return "OK";
-    }
-
-    private async Task InitializeSessionAsync()
-    {
-        try
-        {
-            var meta = await _sessionStore.LoadOrCreateMetadataAsync(_sessionId, CancellationToken.None).ConfigureAwait(false);
-            if (meta.MainThreadId == Guid.Empty)
-            {
-                meta = meta with { MainThreadId = Guid.NewGuid() };
-                await _sessionStore.SaveMetadataAsync(meta, CancellationToken.None).ConfigureAwait(false);
-            }
-
-            _mainThreadId = meta.MainThreadId;
-            _activeThreadId = meta.MainThreadId;
-            ThreadBranchHint = $"Ветка {_activeThreadId:N}";
-
-            var events = await _sessionStore.ReadEventsAsync(_sessionId, CancellationToken.None).ConfigureAwait(false);
-            var rows = ChatHistoryMessageProjector.Project(events, _mainThreadId);
-            UiScheduler.Default.Post(() =>
-            {
-                ApplyProductSpineFromMetadata(meta);
-                foreach (var row in rows)
-                    ChatMessages.Add(new ChatMessageViewModel(row.Role, row.Content, row.MessageId, row.ThreadId, row.ParentMessageId));
-                if (rows.Count > 0)
-                    ClarificationStatusText = $"Восстановлено сообщений: {rows.Count}";
-                RefreshChatSurfaceSnapshot();
-            });
-        }
-        catch
-        {
-            // v1 persistence best-effort: не роняем чат при ошибке диска/JSON.
-        }
-    }
-
-    private async Task PersistEventAsync(string kind, object payload, Guid? envelopeThreadId = null)
-    {
-        try
-        {
-            var tid = envelopeThreadId ?? _activeThreadId;
-            if (tid == Guid.Empty)
-                tid = _mainThreadId;
-            var ev = new ChatHistoryEvent(
-                Guid.NewGuid(),
-                _sessionId,
-                DateTimeOffset.UtcNow,
-                kind,
-                JsonSerializer.Serialize(payload, ChatPanelJson),
-                ThreadId: tid == Guid.Empty ? null : tid.ToString("N"));
-            await _sessionStore.AppendEventAsync(ev, CancellationToken.None).ConfigureAwait(false);
-            var meta = await _sessionStore.LoadOrCreateMetadataAsync(_sessionId, CancellationToken.None).ConfigureAwait(false);
-            if (meta.UpdatedAtUtc < ev.AtUtc)
-                await _sessionStore.SaveMetadataAsync(meta with { UpdatedAtUtc = ev.AtUtc }, CancellationToken.None).ConfigureAwait(false);
-        }
-        catch
-        {
-            // intentionally ignored (best-effort persistence).
-        }
-    }
-
     private void ApplyClarificationResponse(ClarificationResponse response, IReadOnlyDictionary<string, string> answers)
     {
         var clarifyMsg = new ChatMessageViewModel(
@@ -1122,14 +1014,10 @@ public partial class ChatPanelViewModel : ViewModelBase
             BuildClarificationTranscriptMessage(_activeClarificationBatch, answers),
             threadId: _activeThreadId);
         ChatMessages.Add(clarifyMsg);
-        _ = PersistEventAsync(ChatHistoryEventKind.MessageAdded, MessageSnapshot(clarifyMsg));
+        _ = PersistEventAsync(ChatHistoryEventKind.MessageAdded, ChatHistoryPayloadMapping.ToMessagePayload(clarifyMsg));
         _ = PersistEventAsync(
             ChatHistoryEventKind.ClarificationAnswerSubmitted,
-            new
-            {
-                response.BatchId,
-                Answers = answers
-            });
+            ChatHistoryPayloadMapping.ToClarificationAnswerPayload(response, answers));
 
         _activeClarificationBatch = null;
         ClarificationDraftItems.Clear();

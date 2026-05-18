@@ -11,7 +11,7 @@ public sealed partial class ChatMessageViewModel : ObservableObject
     public string Role { get; }
 
     /// <summary>Ветка диалога; сообщения с разными thread_id — параллельные линии в одной сессии.</summary>
-    public Guid ThreadId { get; }
+    public Guid ThreadId { get; private set; }
 
     /// <summary>Родительское сообщение при ответной ветке; иначе null.</summary>
     public Guid? ParentMessageId { get; }
@@ -59,6 +59,16 @@ public sealed partial class ChatMessageViewModel : ObservableObject
             slashCommandPath: slashPath,
             slashCommandArgs: args,
             slashCommandStatus: ChatSlashCommandStatus.Running);
+
+    /// <summary>Привязать слэш-сообщение к ветке после fork (<c>/topic create</c>, MCP).</summary>
+    public void AssignThread(Guid threadId)
+    {
+        if (threadId == Guid.Empty || ThreadId == threadId)
+            return;
+
+        ThreadId = threadId;
+        OnPropertyChanged(nameof(ThreadId));
+    }
 
     public void ApplySlashCommandResult(in ChatSlashCommandRunResult result)
     {

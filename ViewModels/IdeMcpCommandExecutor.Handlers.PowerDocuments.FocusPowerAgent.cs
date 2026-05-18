@@ -153,7 +153,12 @@ internal sealed partial class IdeMcpCommandExecutor
             var raw = McpCommandJsonArgs.String(args, "parent_message_id")?.Trim();
             if (!string.IsNullOrEmpty(raw) && Guid.TryParse(raw, out var pid))
                 parent = pid;
-            return _vm.ChatPanel.ForkThread(parent);
+            var title = McpCommandJsonArgs.String(args, "display_title")?.Trim();
+            if (string.IsNullOrEmpty(title))
+                title = McpCommandJsonArgs.String(args, "title")?.Trim();
+            return string.IsNullOrEmpty(title)
+                ? _vm.ChatPanel.ForkThread(parent)
+                : _vm.ChatPanel.ForkThread(parent, title);
         });
         add(Services.IdeCommands.OpenChatClarificationBatch, async (args, _) =>
         {
