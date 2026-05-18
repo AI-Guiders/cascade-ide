@@ -215,3 +215,4 @@ Skia draw (Views/Chat/Skia, SkiaKit)
 | 2026-05-18 | Proposed: full-Skia evolution, фазы 0–4, открытые вопросы. |
 | 2026-05-18 | Уточнение: Avalonia только фюзеляж + тяжёлые контуры; отказ от steady-state Avalonia в Intercom; composer через `ITextInputMethodClient` (Avalonia 12), не Fluent TextBox. |
 | 2026-05-18 | **Accepted.** Фаза 1 в коде: Forward shell, Skia toolbar, `intercomComposer` strip (временный TextBox до фазы 2). |
+| 2026-05-17 | **Implemented (фазы 1–3 v1):** `IntercomSkiaSurface`, Skia composer + `SkiaPopupList` + IME client; MFD на том же surface; группировка ленты, `SkiaMonoCodeStrip`, double-click thinking toggle. Markdown subset и copy — открыто. |

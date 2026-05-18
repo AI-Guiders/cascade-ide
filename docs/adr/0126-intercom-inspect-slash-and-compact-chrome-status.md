@@ -192,3 +192,4 @@ Intercom                                    [Темы]
 | Дата | Изменение |
 |------|-----------|
 | 2026-05-18 | Accepted · Implemented: report slash, compact chrome status, cross-fix open file UX |
+| 2026-05-17 | Review fixes: synthetic threads, thread_fork replay, slash thread assign, intercom Success |
