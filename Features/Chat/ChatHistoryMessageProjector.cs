@@ -17,23 +17,18 @@ internal static class ChatHistoryMessageProjector
 
         foreach (var ev in events)
         {
-            if (string.Equals(ev.Kind, ChatHistoryEventKind.MessageAdded, StringComparison.Ordinal))
+            if (string.Equals(ev.Kind, ChatHistoryEventKind.MessageAdded, StringComparison.Ordinal)
+                || string.Equals(ev.Kind, ChatHistoryEventKind.MessageCompleted, StringComparison.Ordinal))
             {
-                if (!TryParseMessagePayload(ev.PayloadJson, defaultThreadId, out var id, out var role, out var content, out var tid, out var parent))
+                if (!TryParseMessagePayload(ev.PayloadJson, defaultThreadId, out var row))
                     continue;
-                Upsert(rows, indexById, id, role, content, tid, parent);
-            }
-            else if (string.Equals(ev.Kind, ChatHistoryEventKind.MessageCompleted, StringComparison.Ordinal))
-            {
-                if (!TryParseMessagePayload(ev.PayloadJson, defaultThreadId, out var id, out var role, out var content, out var tid, out var parent))
-                    continue;
-                Upsert(rows, indexById, id, role, content, tid, parent);
+                Upsert(rows, indexById, row);
             }
             else if (string.Equals(ev.Kind, ChatHistoryEventKind.MessageEdited, StringComparison.Ordinal))
             {
-                if (!TryParseMessageEdited(ev.PayloadJson, out var id, out var newContent))
+                if (!TryParseMessageEdited(ev.PayloadJson, out var messageId, out var newContent))
                     continue;
-                if (indexById.TryGetValue(id, out var idx))
+                if (indexById.TryGetValue(messageId, out var idx))
                     rows[idx] = rows[idx] with { Content = newContent };
             }
         }
@@ -44,83 +39,101 @@ internal static class ChatHistoryMessageProjector
     private static void Upsert(
         List<Row> rows,
         Dictionary<Guid, int> indexById,
-        Guid id,
-        string role,
-        string content,
-        Guid threadId,
-        Guid? parentMessageId)
+        Row row)
     {
-        if (indexById.TryGetValue(id, out var idx))
+        if (indexById.TryGetValue(row.MessageId, out var idx))
         {
-            rows[idx] = new Row(id, role, content, threadId, parentMessageId);
+            rows[idx] = row;
             return;
         }
 
-        indexById[id] = rows.Count;
-        rows.Add(new Row(id, role, content, threadId, parentMessageId));
+        indexById[row.MessageId] = rows.Count;
+        rows.Add(row);
     }
 
-    private static bool TryParseMessagePayload(
-        string payloadJson,
-        Guid defaultThreadId,
-        out Guid messageId,
-        out string role,
-        out string content,
-        out Guid threadId,
-        out Guid? parentMessageId)
+    private static bool TryParseMessagePayload(string payloadJson, Guid defaultThreadId, out Row row)
     {
-        messageId = Guid.NewGuid();
-        role = "assistant";
-        content = "";
-        threadId = defaultThreadId;
-        parentMessageId = null;
+        row = default!;
+        ChatHistoryMessagePayload? payload;
+        try
+        {
+            payload = JsonSerializer.Deserialize<ChatHistoryMessagePayload>(payloadJson, ChatHistoryJson.Options);
+        }
+        catch (JsonException)
+        {
+            return TryParseMessagePayloadLegacy(payloadJson, defaultThreadId, out row);
+        }
 
-        using var doc = JsonDocument.Parse(payloadJson);
-        var root = doc.RootElement;
+        if (payload is null)
+            return TryParseMessagePayloadLegacy(payloadJson, defaultThreadId, out row);
 
-        if (TryReadMessageId(root, out var parsed))
-            messageId = parsed;
+        if (!Guid.TryParse(payload.MessageId, out var messageId))
+            messageId = Guid.NewGuid();
 
-        if (root.TryGetProperty("Role", out var r))
-            role = r.GetString() ?? role;
-        else if (root.TryGetProperty("role", out var r2))
-            role = r2.GetString() ?? role;
+        var threadId = Guid.TryParse(payload.ThreadId, out var tid) && tid != Guid.Empty
+            ? tid
+            : defaultThreadId;
 
-        if (root.TryGetProperty("Content", out var c))
-            content = c.GetString() ?? "";
-        else if (root.TryGetProperty("content", out var c2))
-            content = c2.GetString() ?? "";
+        Guid? parentMessageId = null;
+        if (!string.IsNullOrWhiteSpace(payload.ParentMessageId)
+            && Guid.TryParse(payload.ParentMessageId, out var parent)
+            && parent != Guid.Empty)
+        {
+            parentMessageId = parent;
+        }
 
-        if (TryReadGuidProp(root, "thread_id", out var tid) && tid != Guid.Empty)
-            threadId = tid;
-        else if (TryReadGuidProp(root, "ThreadId", out var tid2) && tid2 != Guid.Empty)
-            threadId = tid2;
-
-        if (TryReadGuidProp(root, "parent_message_id", out var p1) && p1 != Guid.Empty)
-            parentMessageId = p1;
-        else if (TryReadGuidProp(root, "ParentMessageId", out var p2) && p2 != Guid.Empty)
-            parentMessageId = p2;
-
+        row = new Row(
+            messageId,
+            string.IsNullOrWhiteSpace(payload.Role) ? "assistant" : payload.Role,
+            payload.Content ?? "",
+            threadId,
+            parentMessageId);
         return true;
-    }
-
-    private static bool TryReadGuidProp(JsonElement root, string name, out Guid g)
-    {
-        g = Guid.Empty;
-        if (!root.TryGetProperty(name, out var p))
-            return false;
-        var s = p.GetString();
-        return !string.IsNullOrWhiteSpace(s) && Guid.TryParse(s, out g);
     }
 
     private static bool TryParseMessageEdited(string payloadJson, out Guid messageId, out string newContent)
     {
         messageId = Guid.Empty;
         newContent = "";
+
+        ChatHistoryMessageEditedPayload? payload;
+        try
+        {
+            payload = JsonSerializer.Deserialize<ChatHistoryMessageEditedPayload>(payloadJson, ChatHistoryJson.Options);
+        }
+        catch (JsonException)
+        {
+            return TryParseMessageEditedLegacy(payloadJson, out messageId, out newContent);
+        }
+
+        if (payload is null)
+            return TryParseMessageEditedLegacy(payloadJson, out messageId, out newContent);
+
+        if (!Guid.TryParse(payload.MessageId, out messageId) || messageId == Guid.Empty)
+            return false;
+
+        newContent = payload.NewContent ?? "";
+        return true;
+    }
+
+    /// <summary>Чтение старых NDJSON до typed payload (ручной разбор).</summary>
+    private static bool TryParseMessageEditedLegacy(string payloadJson, out Guid messageId, out string newContent)
+    {
+        messageId = Guid.Empty;
+        newContent = "";
         using var doc = JsonDocument.Parse(payloadJson);
         var root = doc.RootElement;
-        if (!TryReadMessageId(root, out messageId))
+
+        if (root.TryGetProperty("message_id", out var p) || root.TryGetProperty("MessageId", out p))
+        {
+            var s = p.GetString();
+            if (string.IsNullOrWhiteSpace(s) || !Guid.TryParse(s, out messageId))
+                return false;
+        }
+        else
+        {
             return false;
+        }
 
         if (root.TryGetProperty("new_content", out var nc))
             newContent = nc.GetString() ?? "";
@@ -130,16 +143,56 @@ internal static class ChatHistoryMessageProjector
         return messageId != Guid.Empty;
     }
 
-    private static bool TryReadMessageId(JsonElement root, out Guid id)
+    /// <summary>NDJSON до typed payload (<c>Dictionary</c>-эра и PascalCase).</summary>
+    private static bool TryParseMessagePayloadLegacy(string payloadJson, Guid defaultThreadId, out Row row)
     {
-        id = Guid.Empty;
-        if (root.TryGetProperty("message_id", out var p) || root.TryGetProperty("MessageId", out p))
+        row = default!;
+        try
         {
-            var s = p.GetString();
-            if (!string.IsNullOrWhiteSpace(s) && Guid.TryParse(s, out id))
-                return true;
-        }
+            using var doc = JsonDocument.Parse(payloadJson);
+            var root = doc.RootElement;
 
-        return false;
+            if (!TryGetGuidProperty(root, "message_id", "MessageId", out var messageId))
+                messageId = Guid.NewGuid();
+
+            var role = TryGetStringProperty(root, "role", "Role") ?? "assistant";
+            var content = TryGetStringProperty(root, "content", "Content") ?? "";
+
+            var threadId = defaultThreadId;
+            if (TryGetGuidProperty(root, "thread_id", "ThreadId", out var tid) && tid != Guid.Empty)
+                threadId = tid;
+
+            Guid? parentMessageId = null;
+            if (TryGetGuidProperty(root, "parent_message_id", "ParentMessageId", out var parent) && parent != Guid.Empty)
+                parentMessageId = parent;
+
+            row = new Row(messageId, role, content, threadId, parentMessageId);
+            return true;
+        }
+        catch (JsonException)
+        {
+            return false;
+        }
+    }
+
+    private static bool TryGetGuidProperty(
+        JsonElement root,
+        string snakeName,
+        string pascalName,
+        out Guid value)
+    {
+        value = Guid.Empty;
+        if (!root.TryGetProperty(snakeName, out var el) && !root.TryGetProperty(pascalName, out el))
+            return false;
+
+        var s = el.GetString();
+        return !string.IsNullOrWhiteSpace(s) && Guid.TryParse(s, out value);
+    }
+
+    private static string? TryGetStringProperty(JsonElement root, string snakeName, string pascalName)
+    {
+        if (root.TryGetProperty(snakeName, out var el) || root.TryGetProperty(pascalName, out el))
+            return el.GetString();
+        return null;
     }
 }
