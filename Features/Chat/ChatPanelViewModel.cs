@@ -337,7 +337,6 @@ public partial class ChatPanelViewModel : ViewModelBase
             var cmdMsg = ChatMessageViewModel.CreateSlashCommand(slashPath, slashArgs, threadAtSlash);
             ChatInput = "";
             ChatMessages.Add(cmdMsg);
-            _ = PersistEventAsync(ChatHistoryEventKind.MessageAdded, ChatHistoryPayloadMapping.ToMessagePayload(cmdMsg));
             RefreshChatSurfaceSnapshot();
 
             var slash = await _slashCommandRunner.TryRunAsync(rawInput).ConfigureAwait(false);
@@ -346,7 +345,9 @@ public partial class ChatPanelViewModel : ViewModelBase
                 if (_activeThreadId != threadAtSlash && _activeThreadId != Guid.Empty)
                     cmdMsg.AssignThread(_activeThreadId);
                 cmdMsg.ApplySlashCommandResult(slash);
-                _ = PersistEventAsync(ChatHistoryEventKind.MessageCompleted, ChatHistoryPayloadMapping.ToMessagePayload(cmdMsg));
+                var payload = ChatHistoryPayloadMapping.ToMessagePayload(cmdMsg);
+                _ = PersistEventAsync(ChatHistoryEventKind.MessageAdded, payload);
+                _ = PersistEventAsync(ChatHistoryEventKind.MessageCompleted, payload);
                 RefreshChatSurfaceSnapshot();
             });
             return;
