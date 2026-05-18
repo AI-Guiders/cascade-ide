@@ -15,7 +15,7 @@
         Background="{DynamicResource CascadeTheme.MainWindowBackground}">
 
     <!-- ADR 0017: контент колонки PFD главного окна (дерево / semantic map), тот же DataContext. -->
-    <Grid>
+    <Grid Background="{DynamicResource CascadeTheme.MainWindowBackground}">
         <chrome:AttentionZoneContainer Zone="Pfd">
             <Grid>
                 <views:SolutionExplorerView IsVisible="{Binding IsDockedPfdSolutionExplorerTree}"/>

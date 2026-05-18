@@ -151,7 +151,7 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <Grid>
+    <Grid Background="{DynamicResource CascadeTheme.MainWindowBackground}">
     <DockPanel>
         <!-- Главное меню -->
         <Menu DockPanel.Dock="Top" Background="{DynamicResource CascadeTheme.MenuBackground}">
@@ -253,7 +253,8 @@
         <chrome:AttentionZoneContainer Zone="Forward" Grid.Row="2" Grid.Column="2">
             <Panel>
                 <views:DocumentsDockView IsVisible="{Binding IsForwardEditorHostVisible}" />
-                <Border IsVisible="{Binding IsForwardIntercomHostVisible}">
+                <Border IsVisible="{Binding IsForwardIntercomHostVisible}"
+                        Background="{DynamicResource CascadeTheme.ChatPanelBackground}">
                     <views:ChatPanelView DataContext="{Binding ChatPanel}" />
                 </Border>
             </Panel>

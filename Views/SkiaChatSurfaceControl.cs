@@ -4,8 +4,8 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Interactivity;
-using Avalonia.Rendering.SceneGraph;
-using Avalonia.Skia;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using CascadeIDE.Features.Chat;
 using CascadeIDE.Views.Chat;
 using CascadeIDE.Views.Chat.Skia;
@@ -25,6 +25,9 @@ public partial class SkiaChatSurfaceControl : Control
     private double _cachedContentHeight;
     private int _hoveredItem = -1;
     private SkiaChatTheme _theme = SkiaChatTheme.DarkFallback;
+    private WriteableBitmap? _skiaFrame;
+    private int _skiaFrameWidth;
+    private int _skiaFrameHeight;
 
     public static readonly StyledProperty<ChatSurfaceSnapshot> SnapshotProperty =
         AvaloniaProperty.Register<SkiaChatSurfaceControl, ChatSurfaceSnapshot>(nameof(Snapshot), ChatSurfaceSnapshot.Empty);
@@ -122,6 +125,9 @@ public partial class SkiaChatSurfaceControl : Control
 
     public SkiaChatSurfaceControl()
     {
+        ClipToBounds = true;
+        MinWidth = 160;
+        MinHeight = 120;
         AddHandler(PointerMovedEvent, OnPointerMoved, RoutingStrategies.Bubble);
         AddHandler(PointerPressedEvent, OnPointerPressed, RoutingStrategies.Bubble);
         AddHandler(PointerExitedEvent, OnPointerExited, RoutingStrategies.Bubble);
@@ -139,6 +145,10 @@ public partial class SkiaChatSurfaceControl : Control
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
         ActualThemeVariantChanged -= OnActualThemeVariantChanged;
+        _skiaFrame?.Dispose();
+        _skiaFrame = null;
+        _skiaFrameWidth = 0;
+        _skiaFrameHeight = 0;
         base.OnDetachedFromVisualTree(e);
     }
 
@@ -169,6 +179,15 @@ public partial class SkiaChatSurfaceControl : Control
         InvalidateVisual();
     }
 
+    protected override Size MeasureOverride(Size availableSize)
+    {
+        var w = double.IsInfinity(availableSize.Width) ? MinWidth : availableSize.Width;
+        var h = double.IsInfinity(availableSize.Height) ? MinHeight : availableSize.Height;
+        return new Size(Math.Max(MinWidth, w), Math.Max(MinHeight, h));
+    }
+
+    protected override Size ArrangeOverride(Size finalSize) => base.ArrangeOverride(finalSize);
+
     public override void Render(DrawingContext context)
     {
         RefreshTheme();
@@ -189,26 +208,156 @@ public partial class SkiaChatSurfaceControl : Control
         var bottomChrome = (float)ResolveBottomChromeHeight((float)Math.Max(160, Bounds.Width));
         ClampScrollToContent(showOverviewCatalog, statusSubtitle, bottomChrome);
 
-        context.Custom(new DrawOperation(
-            new Rect(Bounds.Size),
-            placed,
-            (float)_scrollOffset,
-            _theme,
-            SelectedMessageIndex,
-            _hoveredItem,
-            _hitTargets,
+        var pixelWidth = Math.Max(1, (int)Math.Ceiling(width));
+        var pixelHeight = Math.Max(1, (int)Math.Ceiling(Bounds.Height));
+        var surfaceColor = _theme.Surface;
+        var fallbackBrush = new SolidColorBrush(
+            Color.FromArgb(byte.MaxValue, surfaceColor.Red, surfaceColor.Green, surfaceColor.Blue));
+        var destRect = new Rect(Bounds.Size);
+        context.FillRectangle(fallbackBrush, destRect);
+
+        if (!IsIntercomSkiaRenderingEnabled())
+            return;
+
+        var bitmap = EnsureSkiaFrameBitmap(pixelWidth, pixelHeight);
+        using (var framebuffer = bitmap.Lock())
+        {
+            var info = new SKImageInfo(pixelWidth, pixelHeight, SKColorType.Bgra8888, SKAlphaType.Premul);
+            using var skSurface = SKSurface.Create(info, framebuffer.Address, framebuffer.RowBytes);
+            if (skSurface is null)
+                return;
+
+            DrawSkiaScene(
+                skSurface.Canvas,
+                (float)pixelWidth,
+                (float)pixelHeight,
+                placed,
+                (float)_scrollOffset,
+                showOverviewCatalog,
+                snapshot.Layout.Overview.Count,
+                statusSubtitle,
+                bottomChrome);
+        }
+
+        var srcRect = new Rect(0, 0, bitmap.PixelSize.Width, bitmap.PixelSize.Height);
+        context.DrawImage(bitmap, srcRect, destRect);
+    }
+
+    private static bool IsIntercomSkiaRenderingEnabled() =>
+        !string.Equals(
+            Environment.GetEnvironmentVariable("CASCADE_INTERCOM_SKIA"),
+            "0",
+            StringComparison.Ordinal);
+
+    private WriteableBitmap EnsureSkiaFrameBitmap(int width, int height)
+    {
+        if (_skiaFrame is not null && _skiaFrameWidth == width && _skiaFrameHeight == height)
+            return _skiaFrame;
+
+        _skiaFrame?.Dispose();
+        _skiaFrameWidth = width;
+        _skiaFrameHeight = height;
+        _skiaFrame = new WriteableBitmap(
+            new PixelSize(width, height),
+            new Vector(96, 96),
+            PixelFormat.Bgra8888,
+            AlphaFormat.Premul);
+        return _skiaFrame;
+    }
+
+    /// <summary>
+    /// Рисует сцену в локальный SKSurface (не lease canvas TopLevel — иначе затирается всё окно, Avalonia #5932).
+    /// </summary>
+    private void DrawSkiaScene(
+        SKCanvas canvas,
+        float width,
+        float height,
+        IReadOnlyList<SkiaChatPlacedEntity> placed,
+        float scrollOffset,
+        bool showOverviewCatalog,
+        int overviewTopicCount,
+        string? statusSubtitle,
+        float bottomChrome)
+    {
+        canvas.Clear(_theme.Surface);
+
+        var chromeTop = SkiaChatChromeRenderer.ResolveTopChromeHeight(
             CompactLayout,
-            ChromeTitle,
-            OverviewMode,
             showOverviewCatalog,
-            snapshot.Layout.Overview.Count,
-            IsChatLoading,
-            LoadingStatusText,
-            statusSubtitle,
-            bottomChrome,
-            this,
-            bounds => _overviewButtonBounds = bounds));
-        base.Render(context);
+            !string.IsNullOrWhiteSpace(statusSubtitle));
+        if (CompactLayout)
+        {
+            SkiaChatChromeRenderer.Draw(
+                canvas,
+                width,
+                _theme,
+                ChromeTitle,
+                OverviewMode,
+                IsChatLoading,
+                LoadingStatusText,
+                statusSubtitle,
+                out var overviewBounds);
+            _overviewButtonBounds = overviewBounds;
+        }
+        else
+            _overviewButtonBounds = default;
+
+        if (showOverviewCatalog)
+        {
+            var bandTop = CompactLayout
+                ? SkiaChatChromeRenderer.ResolveToolbarHeight(true, !string.IsNullOrWhiteSpace(statusSubtitle))
+                : 0f;
+            SkiaChatChromeRenderer.DrawOverviewCatalogBand(canvas, width, bandTop, _theme, overviewTopicCount);
+        }
+
+        const float contentLeft = 12f;
+        var contentWidth = width - 24f;
+        var contentBottom = Math.Max(chromeTop + 1f, height - bottomChrome);
+
+        canvas.Save();
+        canvas.ClipRect(new SKRect(0, chromeTop, width, contentBottom), antialias: false);
+        canvas.Translate(0, chromeTop - scrollOffset);
+
+        _hitTargets.Clear();
+
+        if (placed.Count == 0)
+        {
+            using var emptyFont = new SKFont(SKTypeface.FromFamilyName("Segoe UI"), 11);
+            using var emptyPaint = new SKPaint { IsAntialias = true, Color = _theme.EmptyHint };
+            canvas.DrawText("Пока пусто. Задай вопрос или команду.", contentLeft, 28, SKTextAlign.Left, emptyFont, emptyPaint);
+        }
+        else
+        {
+            for (var i = 0; i < placed.Count; i++)
+            {
+                var item = placed[i];
+                var itemLeft = float.IsNaN(item.Left) ? contentLeft : item.Left;
+                var itemWidth = float.IsNaN(item.Width) ? contentWidth : item.Width;
+                var drawContext = new SkiaChatDrawContext
+                {
+                    Canvas = canvas,
+                    Theme = _theme,
+                    ContentLeft = itemLeft,
+                    ContentWidth = itemWidth,
+                    ScrollOffset = scrollOffset - chromeTop,
+                    ItemIndex = i,
+                    HoveredItemIndex = _hoveredItem,
+                    SelectedMessageIndex = SelectedMessageIndex,
+                    HitTargets = _hitTargets
+                };
+                item.Entity.Draw(drawContext, item.Top, item.Layout);
+
+                var hit = item.Entity.CreateHit(item.Layout);
+                if (hit is { } h)
+                {
+                    var rect = new SKRect(itemLeft, item.Top, itemLeft + itemWidth, item.Top + item.Layout.Height);
+                    drawContext.RegisterHit(rect, h);
+                }
+            }
+        }
+
+        canvas.Restore();
+        DrawIntercomBottomChrome(canvas, width, height, _theme);
     }
 
     private void OnActualThemeVariantChanged(object? sender, EventArgs e)
@@ -217,7 +366,13 @@ public partial class SkiaChatSurfaceControl : Control
         InvalidateVisual();
     }
 
-    private void RefreshTheme() => _theme = SkiaChatTheme.Resolve(this);
+    private void RefreshTheme()
+    {
+        _theme = SkiaChatTheme.Resolve(this);
+        var surface = _theme.Surface;
+        if (surface.Alpha < byte.MaxValue)
+            _theme = _theme with { Surface = surface.WithAlpha(byte.MaxValue) };
+    }
 
     private void OnPointerWheelChanged(object? sender, PointerWheelEventArgs e)
     {
@@ -323,166 +478,4 @@ public partial class SkiaChatSurfaceControl : Control
             _scrollOffset = 0;
     }
 
-    private sealed class DrawOperation : ICustomDrawOperation
-    {
-        private readonly IReadOnlyList<SkiaChatPlacedEntity> _placed;
-        private readonly float _scrollOffset;
-        private readonly SkiaChatTheme _theme;
-        private readonly int _selectedMessageIndex;
-        private readonly int _hoveredItem;
-        private readonly List<(Rect Bounds, SkiaChatHit Hit)> _hitTargets;
-        private readonly bool _compactLayout;
-        private readonly string _chromeTitle;
-        private readonly bool _overviewMode;
-        private readonly bool _showOverviewCatalog;
-        private readonly int _overviewTopicCount;
-        private readonly bool _isChatLoading;
-        private readonly string? _loadingStatusText;
-        private readonly string? _statusSubtitle;
-        private readonly float _bottomChrome;
-        private readonly SkiaChatSurfaceControl? _host;
-        private readonly Action<SKRect> _onOverviewButtonBounds;
-
-        public DrawOperation(
-            Rect bounds,
-            IReadOnlyList<SkiaChatPlacedEntity> placed,
-            float scrollOffset,
-            SkiaChatTheme theme,
-            int selectedMessageIndex,
-            int hoveredItem,
-            List<(Rect Bounds, SkiaChatHit Hit)> hitTargets,
-            bool compactLayout,
-            string chromeTitle,
-            bool overviewMode,
-            bool showOverviewCatalog,
-            int overviewTopicCount,
-            bool isChatLoading,
-            string? loadingStatusText,
-            string? statusSubtitle,
-            float bottomChrome,
-            SkiaChatSurfaceControl? host,
-            Action<SKRect> onOverviewButtonBounds)
-        {
-            Bounds = bounds;
-            _placed = placed;
-            _scrollOffset = scrollOffset;
-            _theme = theme;
-            _selectedMessageIndex = selectedMessageIndex;
-            _hoveredItem = hoveredItem;
-            _hitTargets = hitTargets;
-            _compactLayout = compactLayout;
-            _chromeTitle = chromeTitle;
-            _overviewMode = overviewMode;
-            _showOverviewCatalog = showOverviewCatalog;
-            _overviewTopicCount = overviewTopicCount;
-            _isChatLoading = isChatLoading;
-            _loadingStatusText = loadingStatusText;
-            _statusSubtitle = statusSubtitle;
-            _bottomChrome = bottomChrome;
-            _host = host;
-            _onOverviewButtonBounds = onOverviewButtonBounds;
-        }
-
-        public Rect Bounds { get; }
-
-        public void Render(ImmediateDrawingContext context)
-        {
-            var feature = context.TryGetFeature(typeof(ISkiaSharpApiLeaseFeature)) as ISkiaSharpApiLeaseFeature;
-            if (feature is null)
-                return;
-
-            using var lease = feature.Lease();
-            var canvas = lease.SkCanvas;
-            canvas.Save();
-            canvas.Clear(_theme.Surface);
-
-            var width = Math.Max(160f, (float)Bounds.Width);
-            var height = Math.Max(1f, (float)Bounds.Height);
-            var chromeTop = SkiaChatChromeRenderer.ResolveTopChromeHeight(
-                _compactLayout,
-                _showOverviewCatalog,
-                !string.IsNullOrWhiteSpace(_statusSubtitle));
-            if (_compactLayout)
-            {
-                SkiaChatChromeRenderer.Draw(
-                    canvas,
-                    width,
-                    _theme,
-                    _chromeTitle,
-                    _overviewMode,
-                    _isChatLoading,
-                    _loadingStatusText,
-                    _statusSubtitle,
-                    out var overviewBounds);
-                _onOverviewButtonBounds(overviewBounds);
-            }
-            else
-                _onOverviewButtonBounds(default);
-
-            if (_showOverviewCatalog)
-            {
-                var bandTop = _compactLayout
-                    ? SkiaChatChromeRenderer.ResolveToolbarHeight(true, !string.IsNullOrWhiteSpace(_statusSubtitle))
-                    : 0f;
-                SkiaChatChromeRenderer.DrawOverviewCatalogBand(canvas, width, bandTop, _theme, _overviewTopicCount);
-            }
-
-            const float contentLeft = 12f;
-            var contentWidth = width - 24f;
-            var contentBottom = Math.Max(chromeTop + 1f, height - _bottomChrome);
-            canvas.ClipRect(new SKRect(0, chromeTop, width, contentBottom), antialias: false);
-            canvas.Translate(0, chromeTop - _scrollOffset);
-
-            _hitTargets.Clear();
-
-            if (_placed.Count == 0)
-            {
-                using var emptyFont = new SKFont(SKTypeface.FromFamilyName("Segoe UI"), 11);
-                using var emptyPaint = new SKPaint { IsAntialias = true, Color = _theme.EmptyHint };
-                canvas.DrawText("Пока пусто. Задай вопрос или команду.", contentLeft, 28, SKTextAlign.Left, emptyFont, emptyPaint);
-                canvas.Restore();
-                _host?.DrawIntercomBottomChrome(canvas, width, height, _theme);
-                return;
-            }
-
-            for (var i = 0; i < _placed.Count; i++)
-            {
-                var placed = _placed[i];
-                var itemLeft = float.IsNaN(placed.Left) ? contentLeft : placed.Left;
-                var itemWidth = float.IsNaN(placed.Width) ? contentWidth : placed.Width;
-                var drawContext = new SkiaChatDrawContext
-                {
-                    Canvas = canvas,
-                    Theme = _theme,
-                    ContentLeft = itemLeft,
-                    ContentWidth = itemWidth,
-                    ScrollOffset = _scrollOffset - chromeTop,
-                    ItemIndex = i,
-                    HoveredItemIndex = _hoveredItem,
-                    SelectedMessageIndex = _selectedMessageIndex,
-                    HitTargets = _hitTargets
-                };
-                placed.Entity.Draw(drawContext, placed.Top, placed.Layout);
-
-                var hit = placed.Entity.CreateHit(placed.Layout);
-                if (hit is { } h)
-                {
-                    var rect = new SKRect(itemLeft, placed.Top, itemLeft + itemWidth, placed.Top + placed.Layout.Height);
-                    drawContext.RegisterHit(rect, h);
-                }
-            }
-
-            canvas.Restore();
-
-            _host?.DrawIntercomBottomChrome(canvas, width, height, _theme);
-        }
-
-        public bool HitTest(Point p) => Bounds.Contains(p);
-
-        public bool Equals(ICustomDrawOperation? other) => false;
-
-        public void Dispose()
-        {
-        }
-    }
 }

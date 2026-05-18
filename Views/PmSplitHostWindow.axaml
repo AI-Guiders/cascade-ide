@@ -15,7 +15,8 @@
         Background="{DynamicResource CascadeTheme.MainWindowBackground}">
 
     <!-- Две зоны на одном экране — как колонки PFD | MFD в MainWindow без Forward (ADR 0017). -->
-    <Grid x:Name="PmSplitRootGrid" ColumnDefinitions="220,4,340">
+    <Grid x:Name="PmSplitRootGrid" ColumnDefinitions="220,4,340"
+          Background="{DynamicResource CascadeTheme.MainWindowBackground}">
         <chrome:AttentionZoneContainer Zone="Pfd" Grid.Column="0">
             <Grid>
                 <views:SolutionExplorerView IsVisible="{Binding IsDockedPfdSolutionExplorerTree}"/>

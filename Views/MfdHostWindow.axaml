@@ -15,7 +15,7 @@
         Background="{DynamicResource CascadeTheme.MainWindowBackground}">
 
     <!-- ADR 0017 п. 8: полный MfdShellView (все страницы), как колонка Mfd в MainWindow. -->
-    <Grid>
+    <Grid Background="{DynamicResource CascadeTheme.MainWindowBackground}">
         <views:MfdShellView DataContext="{Binding}" MinHeight="0"/>
         <!-- W3: mount-layer host preview для MFD (паритет с PFD-host). -->
         <views:ZoneInstrumentMountView IsVisible="{Binding UseSkiaInstrumentMount}"

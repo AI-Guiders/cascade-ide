@@ -4,7 +4,8 @@
              xmlns:uikit="using:CascadeIDE.Views.UiKit"
              xmlns:views="using:CascadeIDE.Views"
              x:Class="CascadeIDE.Views.ChatPanelView"
-             x:DataType="chat:ChatPanelViewModel">
+             x:DataType="chat:ChatPanelViewModel"
+             Background="{DynamicResource CascadeTheme.ChatPanelBackground}">
     <UserControl.Styles>
         <Style Selector="Expander">
             <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
@@ -36,7 +37,9 @@
 
     <Panel>
         <!-- Forward Intercom (ADR 0123): Skia-колонна + компактный composer; toolbar в Skia -->
-        <Panel IsVisible="{Binding IsForwardIntercomLayout}">
+        <Panel IsVisible="{Binding IsForwardIntercomLayout}"
+               Background="{DynamicResource CascadeTheme.ChatPanelBackground}">
+            <Border Background="{DynamicResource CascadeTheme.ChatPanelBackground}">
             <views:IntercomSkiaSurface x:Name="ForwardIntercomSurface"
                                           HorizontalAlignment="Stretch"
                                           VerticalAlignment="Stretch"
@@ -54,6 +57,7 @@
                                           IsSlashAutocompleteVisible="{Binding IsChatSlashAutocompleteVisible}"
                                           SelectedSlashSuggestionIndex="{Binding SelectedChatSlashSuggestionIndex, Mode=TwoWay}"
                                           SlashSuggestions="{Binding ChatSlashSuggestions}"/>
+            </Border>
 
             <Border IsVisible="{Binding HasActiveClarificationBatch}"
                     ZIndex="40"
@@ -204,6 +208,7 @@
                                Margin="0,0,0,6"
                                FontSize="12"
                                Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+                    <Border Background="{DynamicResource CascadeTheme.ChatPanelBackground}">
                     <views:IntercomSkiaSurface x:Name="ClassicIntercomSurface"
                                                MinHeight="220"
                                                HorizontalAlignment="Stretch"
@@ -219,6 +224,7 @@
                                                IsSlashAutocompleteVisible="{Binding IsChatSlashAutocompleteVisible}"
                                                SelectedSlashSuggestionIndex="{Binding SelectedChatSlashSuggestionIndex, Mode=TwoWay}"
                                                SlashSuggestions="{Binding ChatSlashSuggestions}"/>
+                    </Border>
                 </DockPanel>
             </uikit:CascadeSection>
         </Grid>

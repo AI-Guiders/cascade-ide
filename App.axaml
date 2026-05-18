@@ -132,6 +132,16 @@
   
     <Application.Styles>
         <FluentTheme />
+        <!-- v12 Fluent: без непрозрачного PART_WindowBorder клиент окна на Windows может не заливаться (сквозь рамку виден рабочий стол). -->
+        <Style Selector="Window">
+            <Setter Property="Background" Value="{DynamicResource CascadeTheme.MainWindowBackground}"/>
+        </Style>
+        <Style Selector="Window /template/ Border#PART_WindowBorder">
+            <Setter Property="Background" Value="{DynamicResource CascadeTheme.MainWindowBackground}"/>
+        </Style>
+        <Style Selector="Window /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource CascadeTheme.MainWindowBackground}"/>
+        </Style>
         <!-- SukiUI: пакет 6.0.3 не совместим с Avalonia 12 (MissingMethodException в SukiTheme/TextBox.axaml). Вернуть после релиза Suki под v12. -->
         <StyleInclude Source="avares://Dock.Avalonia.Themes.Fluent/DockFluentTheme.axaml"/>
         <StyleInclude Source="avares://AvaloniaEdit/Themes/Fluent/AvaloniaEdit.xaml" />

@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Win32;
 using CascadeIDE.Services;
 using CascadeIDE.Services.AgentContract;
 
@@ -27,8 +28,21 @@ sealed class Program
 
     // Avalonia configuration, don't remove; also used by visual designer.
     public static AppBuilder BuildAvaloniaApp()
-        => AppBuilder.Configure<App>()
+    {
+        var builder = AppBuilder.Configure<App>()
             .UsePlatformDetect()
             .WithInterFont()
             .LogToTrace();
+
+        // Диагностика «прозрачных» окон на Windows: set CASCADE_RENDER_SOFTWARE=1
+        if (string.Equals(Environment.GetEnvironmentVariable("CASCADE_RENDER_SOFTWARE"), "1", StringComparison.Ordinal))
+        {
+            builder = builder.With(new Win32PlatformOptions
+            {
+                RenderingMode = [Win32RenderingMode.Software]
+            });
+        }
+
+        return builder;
+    }
 }
