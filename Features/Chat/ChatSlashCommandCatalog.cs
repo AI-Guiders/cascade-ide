@@ -10,10 +10,10 @@ namespace CascadeIDE.Features.Chat;
 /// </summary>
 public static partial class ChatSlashCommandCatalog
 {
-    private static IReadOnlyList<ChatSlashCommandDescriptor> Descriptors =>
-        IntentSlashCatalog.SlashRoutes.Values
-            .Select(ToDescriptor)
-            .ToList();
+    private static readonly Lazy<IReadOnlyList<ChatSlashCommandDescriptor>> DescriptorsLazy = new(
+        static () => IntentSlashCatalog.SlashRoutes.Values.Select(ToDescriptor).ToList());
+
+    private static IReadOnlyList<ChatSlashCommandDescriptor> Descriptors => DescriptorsLazy.Value;
 
     public static bool TryResolve(ChatSlashCommandParseResult parse, out ChatSlashCommandDescriptor descriptor)
     {

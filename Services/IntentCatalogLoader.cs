@@ -261,6 +261,8 @@ internal static class IntentCatalogLoader
         var group = NormOptional(row.Group) ?? defaultSlashGroup;
         ResolveSlashStaticArgs(row, out var mfdPage, out var primarySurface);
         var completion = ParseSlashCompletion(row.Completion, path, slashPath);
+        var reportHandler = ResolveReportHandler(row, kind, path, slashPath);
+        var intercomHandler = ResolveIntercomHandler(row, kind, path, slashPath);
 
         routes[slashPath] = new SlashRouteEntry(
             slashPath,
@@ -270,7 +272,75 @@ internal static class IntentCatalogLoader
             mfdPage,
             primarySurface,
             group,
-            completion);
+            completion,
+            reportHandler,
+            intercomHandler);
+    }
+
+    private static string? ResolveReportHandler(
+        SlashFormToml row,
+        ChatSlashCommandExecutionKind kind,
+        string path,
+        string slashPath)
+    {
+        var handler = NormOptional(row.ReportHandler);
+        if (kind == ChatSlashCommandExecutionKind.LocalReport)
+        {
+            if (handler is null)
+            {
+                throw new InvalidOperationException(
+                    $"{path}: slash '{slashPath}' kind=report requires report_handler.");
+            }
+
+            if (!ChatSlashReportHandlers.IsKnown(handler))
+            {
+                throw new InvalidOperationException(
+                    $"{path}: slash '{slashPath}' unknown report_handler '{handler}'.");
+            }
+
+            return handler;
+        }
+
+        if (handler is not null)
+        {
+            throw new InvalidOperationException(
+                $"{path}: slash '{slashPath}' report_handler is only allowed for kind=report.");
+        }
+
+        return null;
+    }
+
+    private static string? ResolveIntercomHandler(
+        SlashFormToml row,
+        ChatSlashCommandExecutionKind kind,
+        string path,
+        string slashPath)
+    {
+        var handler = NormOptional(row.IntercomHandler);
+        if (kind == ChatSlashCommandExecutionKind.LocalIntercom)
+        {
+            if (handler is null)
+            {
+                throw new InvalidOperationException(
+                    $"{path}: slash '{slashPath}' kind=intercom requires intercom_handler.");
+            }
+
+            if (!ChatSlashIntercomHandlers.IsKnown(handler))
+            {
+                throw new InvalidOperationException(
+                    $"{path}: slash '{slashPath}' unknown intercom_handler '{handler}'.");
+            }
+
+            return handler;
+        }
+
+        if (handler is not null)
+        {
+            throw new InvalidOperationException(
+                $"{path}: slash '{slashPath}' intercom_handler is only allowed for kind=intercom.");
+        }
+
+        return null;
     }
 
     private static SlashCompletionKind ParseSlashCompletion(string? raw, string path, string slashPath)

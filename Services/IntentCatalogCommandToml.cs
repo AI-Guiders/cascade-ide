@@ -62,6 +62,10 @@ internal sealed class SlashFormToml
     public string? PrimarySurface { get; set; }
     /// <summary><c>workspace_files</c> — динамические подсказки файлов после пробела (ADR 0125).</summary>
     public string? Completion { get; set; }
+    /// <summary>Обработчик локального отчёта при <c>kind=report</c> (см. <see cref="Chat.ChatSlashReportHandlers"/>).</summary>
+    public string? ReportHandler { get; set; }
+    /// <summary>Обработчик Intercom при <c>kind=intercom</c> (см. <see cref="Chat.ChatSlashIntercomHandlers"/>).</summary>
+    public string? IntercomHandler { get; set; }
 }
 
 /// <remarks><c>[command.form.slash.args]</c> → JSON args исполнителя.</remarks>

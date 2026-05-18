@@ -12,4 +12,6 @@ public readonly record struct SlashRouteEntry(
     string? MfdPage = null,
     string? PrimarySurface = null,
     string? Group = null,
-    SlashCompletionKind Completion = SlashCompletionKind.None);
+    SlashCompletionKind Completion = SlashCompletionKind.None,
+    string? ReportHandlerId = null,
+    string? IntercomHandlerId = null);

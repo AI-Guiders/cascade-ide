@@ -174,16 +174,19 @@ command_id = "chat_toggle_show_thinking_in_history"
 melody_slug = "amh"
 melody_shape = "simple"
 
-# fork_chat_thread — Новая тема (ветка). Хвост — заголовок. (/card)
+# fork_chat_thread — Новая ветка (MCP / melody ctf). Заголовок — /topic create или /card.
 [[command]]
 command_id = "fork_chat_thread"
 melody_slug = "ctf"
 melody_shape = "simple"
 
+[[command]]
 [[command.form.slash]]
 path = "/card"
-help = "Новая тема (ветка). Хвост — заголовок."
+help = "Новая тема с заголовком (алиас /topic create). Хвост — название."
 group = "Intercom"
+kind = "intercom"
+intercom_handler = "topic_create"
 
 # send_chat — Отправить черновик из поля ввода (как c:cs). (c:cs · /chat send)
 [[command]]
@@ -757,16 +760,42 @@ group = "Web AI Portal"
 [[command]]
 [[command.form.slash]]
 path = "/topic list"
-help = "Плоский список тем сессии (активная, main, число сообщений)."
+help = "Интерактивный список тем в ленте (клик — открыть). Текст для агента: /topic list text."
+group = "Intercom"
+kind = "intercom"
+intercom_handler = "topic_list"
+
+[[command]]
+[[command.form.slash]]
+path = "/topic list text"
+help = "Текстовый список тем (для агента): main, active, число сообщений."
 group = "Intercom"
 kind = "report"
+report_handler = "topic_list_text"
 
 [[command]]
 [[command.form.slash]]
 path = "/topic tree"
-help = "Дерево веток тем (fork) с числом сообщений."
+help = "Интерактивное дерево тем в ленте (клик — открыть). Текст: /topic tree text."
+group = "Intercom"
+kind = "intercom"
+intercom_handler = "topic_tree"
+
+[[command]]
+[[command.form.slash]]
+path = "/topic tree text"
+help = "Текстовое дерево веток (fork) с числом сообщений."
 group = "Intercom"
 kind = "report"
+report_handler = "topic_tree_text"
+
+[[command]]
+[[command.form.slash]]
+path = "/topic create"
+help = "Новая тема с заголовком: /topic create <название>."
+group = "Intercom"
+kind = "intercom"
+intercom_handler = "topic_create"
 
 [[command]]
 [[command.form.slash]]
@@ -774,6 +803,7 @@ path = "/spine list"
 help = "Product spine: линия, фокус, вехи (список)."
 group = "Intercom"
 kind = "report"
+report_handler = "spine_list"
 
 [[command]]
 [[command.form.slash]]
@@ -781,6 +811,7 @@ path = "/spine tree"
 help = "Product spine: линия → фокус → вехи (дерево)."
 group = "Intercom"
 kind = "report"
+report_handler = "spine_tree"
 
 [[command]]
 [[command.form.slash]]
@@ -788,13 +819,15 @@ path = "/topic cards"
 help = "Картотека тем (overview): карточки тем и spine; drill-in — /topic open."
 group = "Intercom"
 kind = "intercom"
+intercom_handler = "topic_cards"
 
 [[command]]
 [[command.form.slash]]
 path = "/topic open"
-help = "Открыть тему (detail): заголовок, короткий id или без аргумента — выбранная/активная."
+help = "Открыть тему (detail): подсказки «id · заголовок»; аргумент — короткий id, заголовок или пусто — выбранная/активная."
 group = "Intercom"
 kind = "intercom"
+intercom_handler = "topic_open"
 completion = "session_topics"
 
 [[command]]
@@ -803,6 +836,7 @@ path = "/spine open"
 help = "Картотека (overview); то же, что /topic cards."
 group = "Intercom"
 kind = "intercom"
+intercom_handler = "spine_open"
 
 # ==============================================================================
 # Help
