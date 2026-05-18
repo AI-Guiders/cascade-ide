@@ -1,4 +1,5 @@
 using CascadeIDE.Features.Chat;
+using CascadeIDE.Services;
 using Xunit;
 
 namespace CascadeIDE.Tests;
@@ -46,12 +47,67 @@ public sealed class ChatSlashSessionReportsTests
     }
 
     [Fact]
-    public void Catalog_ResolvesTopicList_AsLocalReport()
+    public void Catalog_ResolvesTopicList_AsLocalIntercom()
     {
         var parse = ChatSlashCommandParser.TryParse("/topic list");
         Assert.True(ChatSlashCommandCatalog.TryResolve(parse, out var d));
-        Assert.Equal(ChatSlashCommandExecutionKind.LocalReport, d.ExecutionKind);
+        Assert.Equal(ChatSlashCommandExecutionKind.LocalIntercom, d.ExecutionKind);
         Assert.Equal("/topic list", d.SlashPath);
+    }
+
+    [Fact]
+    public void Catalog_ResolvesTopicListText_AsLocalReport()
+    {
+        var parse = ChatSlashCommandParser.TryParse("/topic list text");
+        Assert.True(ChatSlashCommandCatalog.TryResolve(parse, out var d));
+        Assert.Equal(ChatSlashCommandExecutionKind.LocalReport, d.ExecutionKind);
+        Assert.Equal("/topic list text", d.SlashPath);
+    }
+
+    [Fact]
+    public void TryFormat_TopicListText_Route()
+    {
+        var snapshot = SampleSnapshot();
+        var text = ChatSlashSessionReports.TryFormat("/topic list text", snapshot);
+        Assert.NotNull(text);
+        Assert.Contains("Темы сессии", text);
+    }
+
+    [Fact]
+    public void Catalog_ReportRoutes_HaveReportHandler()
+    {
+        foreach (var route in IntentSlashCatalog.SlashRoutes.Values)
+        {
+            if (route.ExecutionKind != ChatSlashCommandExecutionKind.LocalReport)
+                continue;
+
+            Assert.False(string.IsNullOrWhiteSpace(route.ReportHandlerId), route.SlashPath);
+            Assert.True(ChatSlashReportHandlers.IsKnown(route.ReportHandlerId!), route.SlashPath);
+        }
+    }
+
+    [Fact]
+    public void Catalog_IntercomRoutes_HaveIntercomHandler()
+    {
+        foreach (var route in IntentSlashCatalog.SlashRoutes.Values)
+        {
+            if (route.ExecutionKind != ChatSlashCommandExecutionKind.LocalIntercom)
+                continue;
+
+            Assert.False(string.IsNullOrWhiteSpace(route.IntercomHandlerId), route.SlashPath);
+            Assert.True(ChatSlashIntercomHandlers.IsKnown(route.IntercomHandlerId!), route.SlashPath);
+        }
+    }
+
+    [Fact]
+    public void Catalog_ResolvesCard_AsLocalIntercomTopicCreate()
+    {
+        var parse = ChatSlashCommandParser.TryParse("/card My title");
+        Assert.True(ChatSlashCommandCatalog.TryResolve(parse, out var d));
+        Assert.Equal(ChatSlashCommandExecutionKind.LocalIntercom, d.ExecutionKind);
+        Assert.Equal("/card", d.SlashPath);
+        Assert.True(IntentSlashCatalog.TryGetRoute("/card", out var route));
+        Assert.Equal(ChatSlashIntercomHandlers.Ids.TopicCreate, route.IntercomHandlerId);
     }
 
     private static ChatSurfaceSnapshot SampleSnapshot()
