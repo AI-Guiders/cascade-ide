@@ -39,6 +39,8 @@ Data/**/*.witdb
 
 # Локальные скрипты правок ADR (не шипить)
 docs/adr/_patch_*.py
+__pycache__/
+*.py[cod]
 
 # Cursor agent CLI (качается с downloads.cursor.com / снимок реестра ACP)
 .tools/cursor-agent-win-x64.zip
