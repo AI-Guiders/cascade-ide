@@ -18,7 +18,20 @@ internal static class ChatThreadForkProjector
                 list.Add(record);
         }
 
-        return list;
+        return DedupeByNewThread(list);
+    }
+
+    public static List<ChatThreadForkRecord> DedupeByNewThread(IReadOnlyList<ChatThreadForkRecord> forks)
+    {
+        var byNew = new Dictionary<Guid, ChatThreadForkRecord>();
+        foreach (var fork in forks)
+        {
+            if (fork.NewThreadId == Guid.Empty)
+                continue;
+            byNew[fork.NewThreadId] = fork;
+        }
+
+        return byNew.Values.ToList();
     }
 
     private static bool TryParse(string payloadJson, out ChatThreadForkRecord record)
