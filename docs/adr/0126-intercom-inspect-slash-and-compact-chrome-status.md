@@ -162,7 +162,10 @@ Intercom                                    [Темы]
 - [x] Compact: нет spine/nav/заголовка ветки в скролле; подзаголовок toolbar с темой/линией/счётчиком.
 - [x] Тесты: `ChatSlashSessionReportsTests`, `ChatThreadPresentationTests`, `ChatIntercomChromeStatusPresentationTests`; каталог: `intercom_handler` / `report_handler` на всех маршрутах.
 - [x] Typed NDJSON payloads (`ChatHistoryPayloads`); legacy read в `ChatHistoryMessageProjector` для старых `message_*` / `message_edited`.
-- [x] MCP `fork_chat_thread`: опционально `display_title` / `title` → `ForkThread(parent, title)`.
+- [x] MCP `fork_chat_thread`: опционально `display_title` / `title` → `ForkThread(parent, title)`; `SelectedChatThreadId` синхронизируется с новой веткой.
+- [x] Пустые темы (только заголовок / fork без сообщений) видны в snapshot через `ThreadDisplayTitles` + `ThreadForks`.
+- [x] Слэш после fork (`/topic create`, `/card`, MCP fork) пишется в активную ветку (`AssignThread`).
+- [x] Intercom-ошибки (не найдена тема, пустой заголовок) — `SlashCommandStatus.Failed`, не Succeeded.
 - [x] Autocomplete включает новые пути (статический каталог).
 
 ---
