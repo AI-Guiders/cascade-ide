@@ -4,7 +4,7 @@
 
 !!! tip "IOP — Intent-Oriented Programming"
     CIDE is an open **working implementation** of [IOP](iop-manifest-v1.md): a **discipline of communication** in the dev contour → agent synthesis → human diff verification (not “more slashes”).  
-    **[IOP manifest](iop-manifest-v1.md)** · normative: [ADR 0121](adr/0121-intent-oriented-programming-paradigm.md) (Proposed).
+    **[IOP manifest](iop-manifest-v1.md)** · normative: [ADR 0121](adr/0121-intent-oriented-programming-paradigm.md) (Accepted).
 
 !!! tip "New here?"
     Start with **[Concept overview](concept-overview.md)** — five minutes, no Russian required.

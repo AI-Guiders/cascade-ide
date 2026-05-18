@@ -37,6 +37,7 @@ Accepted as norm; implementation not complete or intentionally phased.
 | [0066](../../adr/0066-cockpit-ui-vs-ide-presentation-layer.md) | Cockpit UI and presentation IDE layer - separate supports | Accepted |
 | [0067](../../adr/0067-graph-backed-surfaces-contract.md) | Graph-backed surfaces - a general contract for a family of graph screens | Accepted |
 | [0068](../../adr/0068-deck-row-payload-and-presentation-projection.md) | Deck Row Payload And Presentation Projection | Accepted |
+| [0076](../../adr/0076-ui-ux-principles-hub.md) | UI/UX - the center of principles (coherent text from the canon) | Accepted |
 | [0079](../../adr/0079-ide-display-system-ids-overlay-pipeline.md) | IDS (Ide Display System) - IDE overlay pipeline, orthogonal to CDS | Accepted |
 | [0080](../../adr/0080-intercom-naming-and-multi-party-channel-model.md) | Intercom — channel name and model (not only “chat with the agent”) | Accepted (strangler: Intercom in UI and docs v1; multi-party and external contour — on roadmap) |
 | [0087](../../adr/0087-microsoft-agent-framework-builtin-agent-orchestration.md) | Microsoft Agent Framework (MAF) - a guide to the **embedded** agent framework orchestration layer | Accepted · **Next step: PoC** |
@@ -49,6 +50,7 @@ Accepted as norm; implementation not complete or intentionally phased.
 | [0102](../../adr/0102-data-acquisition-layer-boundary-and-contract.md) | Data Acquisition Layer - boundary of external interfaces and adapters | Accepted |
 | [0103](../../adr/0103-editor-hud-substrate-semantic-projection-and-surface-adapter.md) | Editor Hud Substrate Semantic Projection And Surface Adapter | Accepted (strangler) |
 | [0115](../../adr/0115-cds-graph-backed-shared-layer.md) | CDS - common layer of graph-backed devices (implementation in the cockpit, not IDS) | Accepted |
+| [0121](../../adr/0121-intent-oriented-programming-paradigm.md) | Intent-Oriented Programming (IOP) — conceptual foundation of Cascade IDE | Accepted |
 
 
 ---

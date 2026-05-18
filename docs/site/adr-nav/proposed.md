@@ -34,7 +34,6 @@ hide:
 | [0073](../../adr/0073-pfd-instrument-deck.md) | PFD instrument deck — каталог вариантов состава и поверхностей (SA) | Proposed |
 | [0074](../../adr/0074-settings-ui-mfd-compact-layout-overflow.md) | UI настроек — компактнее, якорь на MFD; нехватка места в раскладке P+F+M | Proposed |
 | [0075](../../adr/0075-ui-topic-index-and-mfd-page-conventions.md) | Тематический указатель UI (`docs/adr/UI/`) и соглашения по страницам MFD | Proposed |
-| [0076](../../adr/0076-ui-ux-principles-hub.md) | UI/UX — центр принципов (связный текст из канона) | Proposed |
 | [0077](../../adr/0077-tech-principles-hub.md) | TECH — центр принципов (связный текст из канона) | Proposed |
 | [0082](../../adr/0082-acp-ide-mcp-loopback-single-process.md) | ACP и MCP IDE — одна копия процесса (loopback HTTP/SSE вместо второго `CascadeIDE --mcp-stdio`) | Proposed |
 | [0084](../../adr/0084-agent-edits-editor-source-of-truth-presence-channel.md) | Правки агента в редакторе как единственный текстовый источник правды; чат — намерение и статус; слой присутствия (GDocs-like, без обязательного CRDT) | Proposed |
@@ -49,9 +48,6 @@ hide:
 | [0114](../../adr/0114-graph-edge-relation-kind-taxonomy.md) | Тип отношения на рёбрах графа (`relation_kind`) — семантика связи | Proposed |
 | [0116](../../adr/0116-intercom-session-tree-and-agent-message-steering.md) | Intercom — дерево сессии (ветвление) и steer / follow-up при работе агента | Proposed |
 | [0117](../../adr/0117-remote-operator-surface-multidevice.md) | Remote operator surface — мультидевайсность оператора (пульт, не mobile IDE) | Proposed |
-| [0119](../../adr/0119-chat-slash-commands-intercom-surface.md) | Слэш-команды в чате — unified command line (Intercom + IDE) | Proposed |
-| [0120](../../adr/0120-primary-work-surface-intercom-or-editor.md) | Primary work surface — Intercom или Editor (аналог Agent / Editor) | Proposed |
-| [0121](../../adr/0121-intent-oriented-programming-paradigm.md) | Парадигма Intent-Oriented Programming (IOP) — концептуальный фундамент Cascade IDE | Proposed |
 | [0122](../../adr/0122-collaborative-iop-environment-and-shared-situational-display.md) | Командная среда IOP — рабочие места и общий ситуационный экран | Proposed |
 
 

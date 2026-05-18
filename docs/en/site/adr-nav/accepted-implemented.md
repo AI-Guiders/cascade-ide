@@ -53,6 +53,8 @@ Accepted and main delivery is in the codebase.
 | [0112](../../adr/0112-command-palette-query-modes-strategy.md) | Command palette query modes (`f:` / `t:` / `m:` / `x:` / `c:`) — mode model, strategies, and workspace search **backends** | Accepted · Implemented |
 | [0117](../../adr/0117-ide-skia-kit.md) | SkiaKit - reusable Skia IDE primitives | Accepted · Implemented |
 | [0118](../../adr/0118-agent-notes-core-2-toml-and-knowledge-path.md) | Agent Notes Core 2.0 - TOML, `knowledge_path`, parity with agent-notes-mcp | Accepted · Implemented |
+| [0119](../../adr/0119-chat-slash-commands-intercom-surface.md) | Slash commands in chat — unified command line (Intercom + IDE) | Accepted · Implemented |
+| [0120](../../adr/0120-primary-work-surface-intercom-or-editor.md) | Primary work surface — Intercom or Editor (Agent / Editor analogue) | Accepted · Implemented |
 
 
 ---

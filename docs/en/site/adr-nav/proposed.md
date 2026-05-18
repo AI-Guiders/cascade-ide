@@ -34,7 +34,6 @@ Draft for discussion — not yet accepted.
 | [0073](../../adr/0073-pfd-instrument-deck.md) | PFD instrument deck — catalog of composition variants and surfaces (SA) | Proposed |
 | [0074](../../adr/0074-settings-ui-mfd-compact-layout-overflow.md) | Settings UI - more compact, anchored on MFD; lack of space in the P+F+M layout | Proposed |
 | [0075](../../adr/0075-ui-topic-index-and-mfd-page-conventions.md) | UI Subject Index (`docs/adr/UI/`) and MFD Page Conventions | Proposed |
-| [0076](../../adr/0076-ui-ux-principles-hub.md) | UI/UX - the center of principles (coherent text from the canon) | Proposed |
 | [0077](../../adr/0077-tech-principles-hub.md) | TECH - the center of principles (connected text from the canon) | Proposed |
 | [0082](../../adr/0082-acp-ide-mcp-loopback-single-process.md) | ACP and MCP IDE - one copy of the process (loopback HTTP/SSE instead of the second `CascadeIDE --mcp-stdio`) | Proposed |
 | [0084](../../adr/0084-agent-edits-editor-source-of-truth-presence-channel.md) | Agent edits — editor as sole text source of truth; chat for intent/status; presence layer (GDocs-like, no mandatory CRDT) | Proposed |
@@ -49,9 +48,6 @@ Draft for discussion — not yet accepted.
 | [0114](../../adr/0114-graph-edge-relation-kind-taxonomy.md) | Relation type on graph edges (`relation_kind`) - connection semantics | Proposed |
 | [0116](../../adr/0116-intercom-session-tree-and-agent-message-steering.md) | Intercom - session tree (branching) and steer / follow-up during agent operation | Proposed |
 | [0117](../../adr/0117-remote-operator-surface-multidevice.md) | Remote operator surface - multi-device operator (remote control, not mobile IDE) | Proposed |
-| [0119](../../adr/0119-chat-slash-commands-intercom-surface.md) | Slash commands in chat — unified command line (Intercom + IDE) | Proposed |
-| [0120](../../adr/0120-primary-work-surface-intercom-or-editor.md) | Primary work surface — Intercom or Editor (Agent / Editor analogue) | Proposed |
-| [0121](../../adr/0121-intent-oriented-programming-paradigm.md) | Intent-Oriented Programming (IOP) — conceptual foundation of Cascade IDE | Proposed |
 | [0122](../../adr/0122-collaborative-iop-environment-and-shared-situational-display.md) | Collaborative IOP Environment — Workstations and Shared Situational Display | Proposed |
 
 

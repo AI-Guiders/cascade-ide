@@ -38,6 +38,7 @@ hide:
 | [0066](../../adr/0066-cockpit-ui-vs-ide-presentation-layer.md) | Cockpit UI и слой presentation IDE — раздельные опоры | Accepted |
 | [0067](../../adr/0067-graph-backed-surfaces-contract.md) | Graph-backed surfaces — общий контракт для семейства графовых экранов | Accepted |
 | [0068](../../adr/0068-deck-row-payload-and-presentation-projection.md) | Полезная нагрузка строки канала и проекция на поверхность (layout vs cell content) | Accepted |
+| [0076](../../adr/0076-ui-ux-principles-hub.md) | UI/UX — центр принципов (связный текст из канона) | Accepted |
 | [0079](../../adr/0079-ide-display-system-ids-overlay-pipeline.md) | IDS (Ide Display System) — пайплайн оверлеев IDE, ортогонально CDS | Accepted |
 | [0080](../../adr/0080-intercom-naming-and-multi-party-channel-model.md) | Intercom — имя и модель канала связи (не только «чат с агентом») | Accepted (strangler: Intercom в UI и docs v1; multi-party и внешний контур — по дорожной карте) |
 | [0087](../../adr/0087-microsoft-agent-framework-builtin-agent-orchestration.md) | Microsoft Agent Framework (MAF) — ориентир на слой оркестрации **встроенного** агентного контура | Accepted · **следующий шаг: PoC** |
@@ -50,6 +51,7 @@ hide:
 | [0102](../../adr/0102-data-acquisition-layer-boundary-and-contract.md) | Data Acquisition Layer — граница внешних интерфейсов и адаптеров | Accepted |
 | [0103](../../adr/0103-editor-hud-substrate-semantic-projection-and-surface-adapter.md) | субстрат Editor HUD — семантическая проекция, адаптер поверхности, границы DAL / CCU / DataBus | Accepted (strangler) |
 | [0115](../../adr/0115-cds-graph-backed-shared-layer.md) | CDS — общий слой graph-backed приборов (реализация в кабине, не IDS) | Accepted |
+| [0121](../../adr/0121-intent-oriented-programming-paradigm.md) | Парадигма Intent-Oriented Programming (IOP) — концептуальный фундамент Cascade IDE | Accepted |
 
 
 ---

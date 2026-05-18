@@ -7,7 +7,7 @@
 **Cascade IDE** is an open **working implementation** of IOP: a stack that makes this flow explicit in a **.NET** **agent-first** IDE.
 
 !!! info "Normative detail"
-    Non-goals and ADR links — [ADR 0121](adr/0121-intent-oriented-programming-paradigm.md) (Proposed).  
+    Non-goals and ADR links — [ADR 0121](adr/0121-intent-oriented-programming-paradigm.md) (Accepted).  
     Russian: [манифест IOP (RU)](../iop-manifest-v1.md).
 
 ---

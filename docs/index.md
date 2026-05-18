@@ -4,7 +4,7 @@
 
 !!! tip "IOP — Intent-Oriented Programming"
     CIDE — открытая **рабочая реализация** [IOP](iop-manifest-v1.md): **дисциплина коммуникации** в контуре разработки → синтез агентом → верификация diff человеком (не «ещё слэши»).  
-    Краткий манифест: **[IOP (манифест)](iop-manifest-v1.md)** · нормативно: [ADR 0121](adr/0121-intent-oriented-programming-paradigm.md) (Proposed).
+    Краткий манифест: **[IOP (манифест)](iop-manifest-v1.md)** · нормативно: [ADR 0121](adr/0121-intent-oriented-programming-paradigm.md) (Accepted).
 
 ## С чего начать
 
