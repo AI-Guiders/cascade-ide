@@ -22,7 +22,7 @@ public static class ChatSlashIntercomHandlers
         Action<bool> SetOverviewMode,
         ChatSurfaceSnapshot Snapshot,
         Action<TopicPickerPresentation>? SetTopicPicker,
-        Func<string, string>? CreateTopicWithTitle);
+        Func<string, TopicCreateResult>? CreateTopicWithTitle);
 
     private delegate ChatSlashIntercomResult Handler(Context context);
 

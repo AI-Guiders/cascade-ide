@@ -10,8 +10,6 @@ public partial class ChatPanelViewModel
 
     private TopicPickerPresentation _topicPickerPresentation;
 
-    private IReadOnlyList<ChatThreadForkRecord> BuildThreadForks() => _threadForks;
-
     public void SetTopicPickerPresentation(TopicPickerPresentation presentation)
     {
         _topicPickerPresentation = presentation;
@@ -66,7 +64,7 @@ public partial class ChatPanelViewModel
             previous = _mainThreadId;
         _activeThreadId = Guid.NewGuid();
         _pendingParentForNextMessage = parentMessageId;
-        _threadForks.Add(new ChatThreadForkRecord(_activeThreadId, previous, parentMessageId));
+        RecordThreadFork(_activeThreadId, previous, parentMessageId);
         ApplyDisplayTitleForThread(_activeThreadId, displayTitle);
         SelectedChatThreadId = _activeThreadId;
         _ = PersistEventAsync(
@@ -78,20 +76,29 @@ public partial class ChatPanelViewModel
     }
 
     /// <summary>Новая ветка с явным заголовком (slash <c>/topic create</c>, <c>/card</c>).</summary>
-    public string CreateTopicWithTitle(string? title)
+    public TopicCreateResult CreateTopicWithTitle(string? title)
     {
         if (string.IsNullOrWhiteSpace(title))
-            return "Укажи заголовок: /topic create <название>";
+            return TopicCreateResult.Fail("Укажи заголовок: /topic create <название>");
 
         var trimmed = title.Trim();
         var forkResult = ForkThread(parentMessageId: null, displayTitle: trimmed);
         if (!string.Equals(forkResult, "OK", StringComparison.Ordinal))
-            return forkResult;
+            return TopicCreateResult.Fail(forkResult);
 
         _topicPickerPresentation = TopicPickerPresentation.None;
         IsChatOverviewMode = false;
         RefreshChatSurfaceSnapshot();
-        return $"Создана тема: {trimmed}";
+        return TopicCreateResult.Ok($"Создана тема: {trimmed}");
+    }
+
+    private void RecordThreadFork(Guid newThreadId, Guid previousThreadId, Guid? parentMessageId)
+    {
+        if (newThreadId == Guid.Empty)
+            return;
+
+        _threadForks.RemoveAll(f => f.NewThreadId == newThreadId);
+        _threadForks.Add(new ChatThreadForkRecord(newThreadId, previousThreadId, parentMessageId));
     }
 
     private void ApplyDisplayTitleForThread(Guid threadId, string? displayTitle)

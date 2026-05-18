@@ -15,7 +15,7 @@ public static class ChatSlashIntercomActions
         ChatSurfaceSnapshot snapshot,
         out ChatSlashIntercomResult result,
         Action<TopicPickerPresentation>? setTopicPicker = null,
-        Func<string, string>? createTopicWithTitle = null)
+        Func<string, TopicCreateResult>? createTopicWithTitle = null)
     {
         result = ChatSlashIntercomResult.Fail("");
         if (!IntentSlashCatalog.TryGetRoute(slashPath, out var route)
@@ -44,15 +44,17 @@ public static class ChatSlashIntercomActions
         return true;
     }
 
-    internal static ChatSlashIntercomResult CreateTopic(string? title, Func<string, string>? createTopicWithTitle)
+    internal static ChatSlashIntercomResult CreateTopic(
+        string? title,
+        Func<string, TopicCreateResult>? createTopicWithTitle)
     {
         if (createTopicWithTitle is null)
             return ChatSlashIntercomResult.Fail("Создание тем недоступно.");
 
-        var text = createTopicWithTitle(title ?? "");
-        return IsCreateTopicFailure(text)
-            ? ChatSlashIntercomResult.Fail(text)
-            : ChatSlashIntercomResult.Ok(text);
+        var create = createTopicWithTitle(title ?? "");
+        return create.Success
+            ? ChatSlashIntercomResult.Ok(create.Message)
+            : ChatSlashIntercomResult.Fail(create.Message);
     }
 
     internal static ChatSlashIntercomResult ShowTopicPicker(
@@ -101,7 +103,4 @@ public static class ChatSlashIntercomActions
         return ChatSlashIntercomResult.Ok(
             $"Картотека тем: spine «{title}». /topic open <имя> — открыть тему.");
     }
-
-    private static bool IsCreateTopicFailure(string text) =>
-        text.StartsWith("Укажи заголовок", StringComparison.OrdinalIgnoreCase);
 }

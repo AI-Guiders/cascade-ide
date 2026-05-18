@@ -25,7 +25,7 @@ public sealed class ChatSlashCommandRunner
     private readonly Action<Guid>? _selectChatThread;
     private readonly Action<bool>? _setChatOverviewMode;
     private readonly Action<TopicPickerPresentation>? _setTopicPicker;
-    private readonly Func<string, string>? _createTopicWithTitle;
+    private readonly Func<string, TopicCreateResult>? _createTopicWithTitle;
 
     public ChatSlashCommandRunner(
         Func<string, IReadOnlyDictionary<string, JsonElement>?, CancellationToken, Task<string>>? executeIdeCommand,
@@ -36,7 +36,7 @@ public sealed class ChatSlashCommandRunner
         Action<Guid>? selectChatThread = null,
         Action<bool>? setChatOverviewMode = null,
         Action<TopicPickerPresentation>? setTopicPicker = null,
-        Func<string, string>? createTopicWithTitle = null)
+        Func<string, TopicCreateResult>? createTopicWithTitle = null)
     {
         _executeIdeCommand = executeIdeCommand;
         _getEditorContext = getEditorContext;

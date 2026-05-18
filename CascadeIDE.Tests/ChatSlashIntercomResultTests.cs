@@ -14,7 +14,9 @@ public sealed class ChatSlashIntercomResultTests
             selectChatThread: _ => { },
             setChatOverviewMode: _ => { },
             createTopicWithTitle: title =>
-                string.IsNullOrWhiteSpace(title) ? "Укажи заголовок: /topic create <название>" : "ok");
+                string.IsNullOrWhiteSpace(title)
+                    ? TopicCreateResult.Fail("Укажи заголовок: /topic create <название>")
+                    : TopicCreateResult.Ok("ok"));
 
         var result = await runner.TryRunAsync("/topic create");
 
