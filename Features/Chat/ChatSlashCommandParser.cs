@@ -117,6 +117,19 @@ public static class ChatSlashCommandParser
                 null);
         }
 
+        if (TryParseTopicInspectTextSubAction(head, action, args, out subAction, out var inspectArgs))
+        {
+            return new ChatSlashCommandParseResult(
+                true,
+                false,
+                ChatSlashCommandShape.NamespaceAction,
+                head,
+                action,
+                subAction,
+                inspectArgs,
+                null);
+        }
+
         return new ChatSlashCommandParseResult(
             true,
             false,
@@ -188,6 +201,38 @@ public static class ChatSlashCommandParser
         string.Equals(token, "console", StringComparison.OrdinalIgnoreCase)
         || string.Equals(token, "classlib", StringComparison.OrdinalIgnoreCase)
         || string.Equals(token, "webapi", StringComparison.OrdinalIgnoreCase);
+
+    private static bool TryParseTopicInspectTextSubAction(
+        string head,
+        string action,
+        string args,
+        out string subAction,
+        out string remainder)
+    {
+        subAction = "";
+        remainder = args;
+
+        if (!string.Equals(head, "topic", StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        if (!string.Equals(action, "list", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(action, "tree", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(args))
+            return false;
+
+        var subSplit = args.IndexOf(' ');
+        var first = subSplit < 0 ? args : args[..subSplit];
+        if (!string.Equals(first, "text", StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        subAction = "text";
+        remainder = subSplit < 0 ? "" : args[(subSplit + 1)..].Trim();
+        return true;
+    }
 
     private static bool TrySplitHead(string headToken, out string head, out string? inlineAction)
     {

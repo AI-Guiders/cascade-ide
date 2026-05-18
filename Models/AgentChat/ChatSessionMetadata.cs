@@ -13,4 +13,6 @@ public sealed record ChatSessionMetadata(
     string? ProductSpineCurrentFocus = null,
     /// <summary>Вехи spine, по одной на строку.</summary>
     string? ProductSpineMilestones = null,
-    bool ProductSpineIncludeInAgentContext = false);
+    bool ProductSpineIncludeInAgentContext = false,
+    /// <summary>Явные заголовки веток (ключ — <c>thread_id</c> N-формат). Schema ≥ 2.</summary>
+    Dictionary<string, string>? ThreadTitles = null);

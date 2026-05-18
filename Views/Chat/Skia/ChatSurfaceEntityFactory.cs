@@ -25,6 +25,15 @@ internal static class ChatSurfaceEntityFactory
                 return entities;
         }
 
+        if (!overviewMode && snapshot.TopicPicker != TopicPickerPresentation.None)
+        {
+            var counts = ChatThreadPresentation.MessageCountsByThread(snapshot);
+            entities.Add(new SkiaChatTopicPickerEntity(
+                snapshot.TopicPicker,
+                snapshot.State.Threads,
+                counts));
+        }
+
         AppendDetailLanes(entities, snapshot, detailThreadId, compactLayout, hideNavChromeInFeed);
         return entities;
     }

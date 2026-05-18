@@ -61,15 +61,16 @@
 | Поле TOML | Значение |
 |-----------|----------|
 | `kind` | `report` |
+| `report_handler` | id в реестре `ChatSlashReportHandlers` (`topic_list_text`, `topic_tree_text`, `spine_list`, `spine_tree`) |
 | `command_id` | **не задаётся** (как у `help`) |
-| Исполнение | `ChatSlashCommandRunner` → `ChatSlashSessionReports.TryFormat(path, ChatSurfaceSnapshot)` |
+| Исполнение | `ChatSlashCommandRunner` → `ChatSlashSessionReports.TryFormat(path, ChatSurfaceSnapshot)` → handler по `report_handler` |
 
 Маршруты (группа **Intercom**):
 
 | Слэш | Вывод |
 |------|--------|
-| `/topic list` | Плоский список тем: заголовок, `[main, active]`, число сообщений, короткий id |
-| `/topic tree` | Дерево по `ParentThreadId` (fork) |
+| `/topic list text` | Плоский список тем: заголовок, `[main, active]`, число сообщений, короткий id |
+| `/topic tree text` | Дерево по `ParentThreadId` (fork) |
 | `/spine list` | Линия, фокус, вехи, флаг контекста агента |
 | `/spine tree` | Линия → фокус → вехи |
 
@@ -79,13 +80,23 @@
 
 ### 1b. `kind = "intercom"` — навигация (не только просмотр)
 
+| Поле TOML | Значение |
+|-----------|----------|
+| `kind` | `intercom` |
+| `intercom_handler` | id в реестре `ChatSlashIntercomHandlers` (`topic_list`, `topic_tree`, `topic_create`, `topic_open`, `topic_cards`, `spine_open`) |
+| Исполнение | `ChatSlashCommandRunner` → `ChatSlashIntercomHandlers.TryExecute(intercom_handler, …)` |
+
 | Слэш | Действие |
 |------|----------|
+| `/topic list` | **Интерактивный** плоский picker в ленте (`SkiaChatTopicPickerEntity`); клик по строке → `SelectedChatThreadId`, picker сбрасывается. |
+| `/topic tree` | То же, дерево по `ParentThreadId`. |
+| `/topic create <название>` | Fork **без** `parent_message_id` + заголовок в `ChatSessionMetadata.ThreadTitles` (schema ≥ 2). |
+| `/card <название>` | Алиас `topic_create` (`intercom_handler = topic_create`). |
 | `/topic cards` | **Картотека** (overview): topic cards + spine; `IsChatOverviewMode = true`. Каноническое имя для [0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md). |
 | `/topic open` | Detail выбранной темы: `SelectedChatThreadId`, `IsChatOverviewMode = false`. Аргумент — заголовок, короткий id (8 hex) или **пусто** (выбранная/активная/main). Autocomplete: `completion = session_topics`. |
 | `/spine open` | То же, что `/topic cards` (алиас). |
 
-После клика по подсказке `/topic open …` — **автовыполнение** (как `/file open`). Из list/tree **переключиться нельзя** — только смотреть; для перехода — **`/topic open`**; для картотеки — **`/topic cards`** (или «Темы» в toolbar).
+После клика по подсказке `/topic open …` — **автовыполнение** (как `/file open`). Текстовый срез для агента — **`/topic list text`** / **`/topic tree text`** (`kind=report`); для UI-навигации — **`/topic list|tree`** или **`/topic open`** / **`/topic cards`** (или «Темы» в toolbar).
 
 <a id="adr0126-p2"></a>
 
@@ -137,18 +148,21 @@ Intercom                                    [Темы]
 
 - **+** Лента compact начинается с сообщений; inspect по запросу.
 - **+** Единый snapshot для Skia и отчётов.
-- **−** В compact нельзя кликнуть боковую строку темы в ленте — только **Темы** / `/overview` / `/topic list`.
+- **−** В compact нет боковых строк тем в ленте — **Темы** / `/topic cards` / интерактивный **`/topic list|tree`** (picker **перед** detail-лентой сообщений, не после).
 - **Расширение:** `kind=report` для `/session tree` ([0116](0116-intercom-session-tree-and-agent-message-steering.md)) — отдельно.
 
 ---
 
 ## Критерии приёмки
 
-- [x] `/topic list`, `/topic tree`, `/spine list`, `/spine tree` в `intent-catalog.toml`, `kind = report`.
-- [x] `/topic cards`, `/topic open`, `/spine open` (алиас cards) — `kind = intercom`; autocomplete тем для `/topic open`.
+- [x] `/topic list text`, `/topic tree text`, `/spine list`, `/spine tree` — `kind = report`.
+- [x] `/topic list`, `/topic tree`, `/topic create`, `/topic cards`, `/topic open`, `/spine open` — `kind = intercom`; autocomplete тем для `/topic open`.
+- [x] Явные заголовки веток (`ThreadTitles` в metadata); partial `ChatPanelViewModel.Threading.cs`.
 - [x] Ответ в ленте как сообщение слэш-команды (успех + текст).
 - [x] Compact: нет spine/nav/заголовка ветки в скролле; подзаголовок toolbar с темой/линией/счётчиком.
-- [x] Тесты: `ChatSlashSessionReportsTests`, `ChatIntercomChromeStatusPresentationTests`.
+- [x] Тесты: `ChatSlashSessionReportsTests`, `ChatThreadPresentationTests`, `ChatIntercomChromeStatusPresentationTests`; каталог: `intercom_handler` / `report_handler` на всех маршрутах.
+- [x] Typed NDJSON payloads (`ChatHistoryPayloads`); legacy read в `ChatHistoryMessageProjector` для старых `message_*` / `message_edited`.
+- [x] MCP `fork_chat_thread`: опционально `display_title` / `title` → `ForkThread(parent, title)`.
 - [x] Autocomplete включает новые пути (статический каталог).
 
 ---
@@ -157,14 +171,15 @@ Intercom                                    [Темы]
 
 | Компонент | Путь |
 |-----------|------|
-| Отчёты | `Features/Chat/ChatSlashSessionReports.cs` |
-| Статус toolbar | `Features/Chat/ChatIntercomChromeStatusPresentation.cs` |
-| Скрытие хвоста | `Views/Chat/Skia/ChatSurfaceEntityFactory.cs` (`hideNavChromeInFeed`) |
-| Toolbar | `Views/Chat/Skia/SkiaChatChromeRenderer.cs` |
-| Runner | `Features/Chat/ChatSlashCommandRunner.cs` (`LocalReport`, `LocalIntercom`) |
-| Навигация | `Features/Chat/ChatSlashIntercomActions.cs`, `ChatSlashTopicResolver.cs` |
-| Autocomplete тем | `SessionTopicSlashCompletionProvider.cs` |
-| Loader | `Services/IntentCatalogLoader.cs` (`report`, `intercom`, `session_topics`) |
+| Отчёты / презентация тем | `ChatSlashSessionReports.cs`, `ChatThreadPresentation.cs`, `ChatSlashReportHandlers.cs` |
+| Intercom handlers | `ChatSlashIntercomHandlers.cs`, `ChatSlashIntercomActions.cs`, `ChatSlashTopicResolver.cs` |
+| Статус toolbar | `ChatIntercomChromeStatusPresentation.cs` |
+| Picker + порядок в ленте | `SkiaChatTopicPickerEntity.cs`, `ChatSurfaceEntityFactory.cs` (picker до detail lanes) |
+| Сессия / ветки | `ChatPanelViewModel.Threading.cs`, `ChatPanelViewModel.Session.cs` |
+| История | `Models/AgentChat/ChatHistoryPayloads.cs`, `ChatHistoryMessageProjector.cs` |
+| Runner | `ChatSlashCommandRunner.cs` |
+| Loader | `IntentCatalogLoader.cs` (`report_handler`, `intercom_handler`, `session_topics`) |
+| Autocomplete тем | `SessionTopicSlashCompletionProvider.cs` (ранжирование по `State.Threads`) |
 | TOML | `IntentMelody/intent-catalog.toml` |
 
 ---

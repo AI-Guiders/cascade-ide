@@ -15,53 +15,26 @@ public sealed class SessionTopicSlashCompletionProvider : ISessionTopicSlashComp
             return [];
 
         var prefix = (titleOrIdPrefix ?? "").Trim();
-        var items = _getSnapshot().Layout.Overview;
-        if (items.Count == 0)
+        var threads = _getSnapshot().State.Threads;
+        if (threads.Count == 0)
             return [];
 
-        IEnumerable<ChatThreadOverviewItem> ranked = items;
-        if (prefix.Length > 0)
-        {
-            ranked = items
-                .Select(item => (item, Rank(prefix, item)))
-                .Where(x => x.Item2 < int.MaxValue)
-                .OrderBy(x => x.Item2)
-                .ThenBy(x => x.item.Title, StringComparer.OrdinalIgnoreCase)
-                .Select(x => x.item);
-        }
-        else
-        {
-            ranked = items.OrderBy(i => i.IsActive ? 0 : 1).ThenBy(i => i.Title, StringComparer.OrdinalIgnoreCase);
-        }
-
-        return ranked
+        var counts = ChatThreadPresentation.MessageCountsByThread(_getSnapshot());
+        return ChatThreadPresentation.RankThreadsForCompletion(threads, prefix)
             .Take(limit)
-            .Select(item =>
+            .Select(thread =>
             {
-                var shortId = item.ThreadId.ToString("N")[..8];
-                var flags = new List<string>();
-                if (item.IsMainThread)
-                    flags.Add("main");
-                if (item.IsActive)
-                    flags.Add("active");
-                var flagText = flags.Count == 0 ? "" : " · " + string.Join(", ", flags);
+                var shortId = thread.ThreadId.ToString("N")[..8];
+                counts.TryGetValue(thread.ThreadId, out var messageCount);
+                var flags = ChatThreadPresentation.FormatFlags(thread);
+                var help = string.IsNullOrEmpty(flags)
+                    ? $"{messageCount} сообщ."
+                    : $"{flags} · {messageCount} сообщ.";
                 return new SessionTopicSlashMatch(
-                    item.Title,
-                    $"{item.Title}{flagText} · {item.ItemCount} сообщ. · {shortId}");
+                    shortId,
+                    $"{shortId} · {thread.Title}",
+                    help);
             })
             .ToList();
-    }
-
-    private static int Rank(string prefix, ChatThreadOverviewItem item)
-    {
-        var p = prefix.AsSpan();
-        var id = item.ThreadId.ToString("N");
-        if (id.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-            return 0;
-        if (item.Title.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-            return 1;
-        if (item.Title.Contains(prefix, StringComparison.OrdinalIgnoreCase))
-            return 2;
-        return int.MaxValue;
     }
 }

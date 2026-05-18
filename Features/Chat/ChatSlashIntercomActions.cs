@@ -6,29 +6,76 @@ namespace CascadeIDE.Features.Chat;
 /// <summary>Локальные действия Intercom из slash (<c>kind=intercom</c>).</summary>
 public static class ChatSlashIntercomActions
 {
-    public static string? TryExecute(
+    public static bool TryExecute(
         string slashPath,
         string? argsTail,
         Guid selectedThreadId,
         Action<Guid> selectThread,
         Action<bool> setOverviewMode,
-        ChatSurfaceSnapshot snapshot)
+        ChatSurfaceSnapshot snapshot,
+        out ChatSlashIntercomResult result,
+        Action<TopicPickerPresentation>? setTopicPicker = null,
+        Func<string, string>? createTopicWithTitle = null)
     {
+        result = ChatSlashIntercomResult.Fail("");
         if (!IntentSlashCatalog.TryGetRoute(slashPath, out var route)
             || route.ExecutionKind != ChatSlashCommandExecutionKind.LocalIntercom)
         {
-            return null;
+            return false;
         }
 
-        return slashPath.ToLowerInvariant() switch
+        if (string.IsNullOrWhiteSpace(route.IntercomHandlerId)
+            || !ChatSlashIntercomHandlers.TryExecute(
+                route.IntercomHandlerId,
+                new ChatSlashIntercomHandlers.Context(
+                    argsTail,
+                    selectedThreadId,
+                    selectThread,
+                    setOverviewMode,
+                    snapshot,
+                    setTopicPicker,
+                    createTopicWithTitle),
+                out result))
         {
-            "/topic open" => OpenTopic(argsTail, selectedThreadId, selectThread, setOverviewMode, snapshot),
-            "/topic cards" or "/spine open" => OpenTopicCards(setOverviewMode, snapshot),
-            _ => $"Неизвестное действие: {slashPath}",
-        };
+            result = ChatSlashIntercomResult.Fail($"Неизвестное действие: {slashPath}");
+            return true;
+        }
+
+        return true;
     }
 
-    public static string OpenTopic(
+    internal static ChatSlashIntercomResult CreateTopic(string? title, Func<string, string>? createTopicWithTitle)
+    {
+        if (createTopicWithTitle is null)
+            return ChatSlashIntercomResult.Fail("Создание тем недоступно.");
+
+        var text = createTopicWithTitle(title ?? "");
+        return IsCreateTopicFailure(text)
+            ? ChatSlashIntercomResult.Fail(text)
+            : ChatSlashIntercomResult.Ok(text);
+    }
+
+    internal static ChatSlashIntercomResult ShowTopicPicker(
+        TopicPickerPresentation mode,
+        Action<TopicPickerPresentation>? setTopicPicker,
+        Action<bool> setOverviewMode,
+        ChatSurfaceSnapshot snapshot)
+    {
+        if (setTopicPicker is null)
+            return ChatSlashIntercomResult.Fail("Интерактивный список тем недоступен. Для агента: /topic list text.");
+
+        if (snapshot.State.Threads.Count == 0)
+            return ChatSlashIntercomResult.Fail(ChatThreadPresentation.EmptyTopicsHint);
+
+        setOverviewMode(false);
+        setTopicPicker(mode);
+        var text = mode == TopicPickerPresentation.Tree
+            ? "Дерево тем в ленте — клик по строке, чтобы открыть."
+            : "Список тем в ленте — клик по строке, чтобы открыть.";
+        return ChatSlashIntercomResult.Ok(text);
+    }
+
+    public static ChatSlashIntercomResult OpenTopic(
         string? query,
         Guid selectedThreadId,
         Action<Guid> selectThread,
@@ -36,20 +83,25 @@ public static class ChatSlashIntercomActions
         ChatSurfaceSnapshot snapshot)
     {
         if (!ChatSlashTopicResolver.TryResolve(query, snapshot, selectedThreadId, out var thread, out var error))
-            return error ?? "Не удалось открыть тему.";
+            return ChatSlashIntercomResult.Fail(error ?? "Не удалось открыть тему.");
 
         selectThread(thread.ThreadId);
         setOverviewMode(false);
-        return $"Открыта тема: {thread.Title}";
+        return ChatSlashIntercomResult.Ok($"Открыта тема: {thread.Title}");
     }
 
-    public static string OpenTopicCards(Action<bool> setOverviewMode, ChatSurfaceSnapshot snapshot)
+    public static ChatSlashIntercomResult OpenTopicCards(Action<bool> setOverviewMode, ChatSurfaceSnapshot snapshot)
     {
         setOverviewMode(true);
         if (!snapshot.ProductSpine.HasContent)
-            return "Картотека тем. Spine пуст — /spine set <текст>. Открыть тему: /topic open <имя>.";
+            return ChatSlashIntercomResult.Ok(
+                "Картотека тем. Spine пуст — /spine set <текст>. Открыть тему: /topic open <имя>.");
 
         var title = ChatProductSpinePresentation.ResolveLineTitle(snapshot.ProductSpine);
-        return $"Картотека тем: spine «{title}». /topic open <имя> — открыть тему.";
+        return ChatSlashIntercomResult.Ok(
+            $"Картотека тем: spine «{title}». /topic open <имя> — открыть тему.");
     }
+
+    private static bool IsCreateTopicFailure(string text) =>
+        text.StartsWith("Укажи заголовок", StringComparison.OrdinalIgnoreCase);
 }

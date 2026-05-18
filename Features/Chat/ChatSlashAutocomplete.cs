@@ -112,7 +112,7 @@ public static class ChatSlashAutocomplete
             suggestions = matches
                 .Select(m => new ChatSlashSuggestion(
                     $"{route.SlashPath} {m.InsertArg}",
-                    route.SlashPath,
+                    m.Label,
                     m.Help,
                     group))
                 .ToList();
