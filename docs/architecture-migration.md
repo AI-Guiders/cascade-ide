@@ -17,7 +17,7 @@
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:BEGIN -->
 
-`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~6.9k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~5.6k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.3k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
+`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~7k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~5.7k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.3k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:END -->
 
@@ -68,21 +68,21 @@
 | `MainWindowViewModel.MarkdownExport.cs` | 31 | Экспорт Markdown. |
 | `MainWindowViewModel.MarkdownLsp.cs` | 103 | Запуск/перезапуск Markdown LSP. |
 | `MainWindowViewModel.McpBreakpointReveal.cs` | 62 | MCP: постановка брейкпоинта с загрузкой решения и показом строки в редакторе. |
-| `MainWindowViewModel.MfdShell.cs` | 57 | Оболочка Mfd: одна активная страница; навигация — команды и палитра. Якорь на экране задаётся presentation (зона Mfd в main и/или окно-хост). |
+| `MainWindowViewModel.MfdShell.cs` | 58 | Оболочка Mfd: одна активная страница; навигация — команды и палитра. Якорь на экране задаётся presentation (зона Mfd в main и/или окно-хост). |
 | `MainWindowViewModel.Presentation.cs` | 273 | Вычисляемые свойства разметки, Workspace Health и видимости панелей (режимы UI). |
 | `MainWindowViewModel.PresentationLayout.CockpitSurfaceSnapshot.cs` | 8 | Сборка `CockpitSurfaceState` главного окна (`Build`). |
 | `MainWindowViewModel.PresentationLayout.cs` | 91 | ADR 0017: строка `presentation` и второй `TopLevel` — `MfdHostWindow` с полным вторичным контуром (п. 8). |
 | `MainWindowViewModel.PresentationLayout.HostShell.cs` | 47 | События «окно-хост открыло полный контур» — скрытие колонок в main (`PresentationLayout`). |
 | `MainWindowViewModel.PresentationLayout.HostWindowBounds.cs` | 84 | Персистенция геометрии окон-хостов пресета `presentation` (ADR 0017). |
 | `MainWindowViewModel.PresentationLayoutAuthority.cs` | 14 | Запись intent видимости панелей (семантика «хочу»); фактическая поверхность — `MainWindowShellSurfaceCompositor`. |
-| `MainWindowViewModel.PrimaryWorkSurface.cs` | 38 | Переключатель лобового якоря Intercom / Editor (ADR 0120). |
+| `MainWindowViewModel.PrimaryWorkSurface.cs` | 66 | Переключатель лобового якоря Intercom / Editor (ADR 0120). |
 | `MainWindowViewModel.RelayCommands.Debug.cs` | 144 | Relay: отладка. |
 | `MainWindowViewModel.RelayCommands.Documents.cs` | 65 | Relay: вкладки документов и группы. |
 | `MainWindowViewModel.RelayCommands.Layout.cs` | 64 | Relay: регионы, панели MFD, группы редакторов. |
 | `MainWindowViewModel.RelayCommands.Shell.cs` | 127 | Relay: приложение, диалоги открытия, тема, язык, окна-хосты. |
 | `MainWindowViewModel.RelayCommands.UiMode.cs` | 56 | Relay: режим UI и уровень безопасности. |
 | `MainWindowViewModel.SettingsReactive.cs` | 248 | Реакции на изменение полей настроек и ключей API: диск, автономный агент, панели. |
-| `MainWindowViewModel.ShellConstruction.cs` | 175 | Конструктор и композиция shell: дочерние VM, шина, DAP/HCI, топология presentation (ADR 0017). |
+| `MainWindowViewModel.ShellConstruction.cs` | 180 | Конструктор и композиция shell: дочерние VM, шина, DAP/HCI, топология presentation (ADR 0017). |
 | `MainWindowViewModel.ShellState.AiProviders.cs` | 58 | Часть `ShellState`: режим ИИ и облачные ключи привязаны к нижнему приложению/чату. |
 | `MainWindowViewModel.ShellState.AutonomousAgentStripe.cs` | 63 | Часть `ShellState`: полоса/карточки автономной задачи агента, безопасности, LOC и сводки тестов для IDE Health. |
 | `MainWindowViewModel.ShellState.ChatAndSessionConfig.cs` | 26 | Часть `ShellState`: ввод чата и конфиг MCP/ACP для автономной сессии. |
@@ -90,7 +90,7 @@
 | `MainWindowViewModel.ShellState.ModelPullMarkdown.cs` | 20 | Часть `MainWindowViewModel`: pull модели и превью Markdown / Kroki. |
 | `MainWindowViewModel.ShellState.RegionAndContour.cs` | 63 | Часть `MainWindowViewModel`: регионы MainGrid и видимость страниц вторичного контура MFD. |
 | `MainWindowViewModel.ShellState.UiSessionChrome.cs` | 68 | Часть `MainWindowViewModel`: режим UI, прогресс сборки на полосе, палитра, снимок раскладки. |
-| `MainWindowViewModel.SolutionBuild.cs` | 138 | Сборка, `BuildOutputPanel`. |
+| `MainWindowViewModel.SolutionBuild.cs` | 159 | Сборка, `BuildOutputPanel`. |
 | `MainWindowViewModel.StartupProject.cs` | 172 | Стартовый проект. |
 | `MainWindowViewModel.UiGitWorkspace.cs` | 141 | Git + workspace UI. |
 | `MainWindowViewModel.ViewBridge.cs` | 64 | Колбэки и провайдеры, которые View подставляет в главный VM (диалоги, UI automation). |
@@ -120,11 +120,11 @@
 | `IdeMcpCommandExecutor.Handlers.DapDebug.Stepping.cs` | 49 | MCP DAP: шагание, стоп, стек, снимок, переменные кадра. |
 | `IdeMcpCommandExecutor.Handlers.DebuggerUi.cs` | 77 | Поверхность отладки. |
 | `IdeMcpCommandExecutor.Handlers.Editor.EditNavigation.cs` | 26 | MCP: правка текста и переход к позиции в файле. |
-| `IdeMcpCommandExecutor.Handlers.Editor.FilesAndChat.cs` | 57 | MCP: открытие файла, загрузка решения, выделение в редакторе, выбор/редактирование сообщений чата. |
+| `IdeMcpCommandExecutor.Handlers.Editor.FilesAndChat.cs` | 67 | MCP: открытие файла, загрузка решения, выделение в редакторе, выбор/редактирование сообщений чата. |
 | `IdeMcpCommandExecutor.Handlers.Editor.StateContent.cs` | 30 | MCP: состояние редактора, диапазон текста и текст открытого документа. |
 | `IdeMcpCommandExecutor.Handlers.Editor.ToolCatalog.cs` | 18 | MCP: каталог инструментов `list_tools`. |
 | `IdeMcpCommandExecutor.Handlers.PowerDocuments.Documents.cs` | 68 | MCP-хендлеры вкладок документов: переоткрытие, активация, закрепление, перенос по группам редакторов. |
-| `IdeMcpCommandExecutor.Handlers.PowerDocuments.FocusPowerAgent.cs` | 215 | MCP-хендлеры Power / фокус-шагов, автономного агента, чата и установки модели Ollama. |
+| `IdeMcpCommandExecutor.Handlers.PowerDocuments.FocusPowerAgent.cs` | 228 | MCP-хендлеры Power / фокус-шагов, автономного агента, чата и установки модели Ollama. |
 | `Generated/IdeMcpCommandExecutor.Generated.g.cs` | 108 | Сгенерированные хендлеры MCP → `IIdeMcpActions` (`CascadeIDE.ProtocolDocGen`). |
 
 <!-- AUTO:MAIN-WINDOW-SLICE:EXEC-TABLE:END -->
