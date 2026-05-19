@@ -125,6 +125,37 @@ if (-not (Test-Path -LiteralPath $targetExe)) {
     exit 1
 }
 
+# Avalonia: dotnet publish may copy a DLL without CompileAvaloniaXaml output (XamlLoadException at runtime).
+# Prefer the post-build assembly from bin/{Configuration}/{tfm}/{Runtime}/ when present.
+$tfm = "net10.0"
+try {
+    [xml]$projXml = Get-Content -LiteralPath $projectPath
+    $tfmNode = $projXml.Project.PropertyGroup.TargetFramework | Select-Object -First 1
+    if ($tfmNode -and -not [string]::IsNullOrWhiteSpace($tfmNode.'#text')) { $tfm = $tfmNode.'#text'.Trim() }
+    elseif ($projXml.Project.PropertyGroup.TargetFrameworks) {
+        $tfm = ($projXml.Project.PropertyGroup.TargetFrameworks | Select-Object -First 1).'#text'.Split(';')[0].Trim()
+    }
+} catch { }
+
+$binDll = Join-Path $repoRoot "bin\$Configuration\$tfm\$Runtime\$exeName.dll"
+$binPdb = Join-Path $repoRoot "bin\$Configuration\$tfm\$Runtime\$exeName.pdb"
+$targetDll = Join-Path $Target "$exeName.dll"
+$targetPdb = Join-Path $Target "$exeName.pdb"
+if (Test-Path -LiteralPath $binDll) {
+    $pubDll = Join-Path $OutDir "$exeName.dll"
+    $pubLen = (Test-Path -LiteralPath $pubDll) ? (Get-Item -LiteralPath $pubDll).Length : -1
+    $binLen = (Get-Item -LiteralPath $binDll).Length
+    if (-not (Test-Path -LiteralPath $pubDll) -or $pubLen -ne $binLen) {
+        Write-Host "Syncing $exeName.dll from bin ($binLen bytes) -> publish + target (Avalonia XAML IL)."
+        Copy-Item -LiteralPath $binDll -Destination $pubDll -Force
+        Copy-Item -LiteralPath $binDll -Destination $targetDll -Force
+        if (Test-Path -LiteralPath $binPdb) {
+            Copy-Item -LiteralPath $binPdb -Destination (Join-Path $OutDir "$exeName.pdb") -Force -ErrorAction SilentlyContinue
+            Copy-Item -LiteralPath $binPdb -Destination $targetPdb -Force -ErrorAction SilentlyContinue
+        }
+    }
+}
+
 $publishExe = Join-Path $OutDir ($exeName + ".exe")
 $publishTs = (Test-Path -LiteralPath $publishExe) ? (Get-Item -LiteralPath $publishExe).LastWriteTimeUtc : $null
 $targetTs = (Get-Item -LiteralPath $targetExe).LastWriteTimeUtc
