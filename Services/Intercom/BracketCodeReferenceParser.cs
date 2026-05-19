@@ -1,12 +1,13 @@
 #nullable enable
 
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using CascadeIDE.Models.Intercom;
 
 namespace CascadeIDE.Services.Intercom;
 
 /// <summary>
-/// Разбор bracket-ссылок H1/L2 (ADR 0128 §5, 0131): <c>[M:…]</c>, <c>[file.cs M:…]</c>, <c>[F:…; M:…; L:…]</c>.
+/// Разбор bracket-ссылок H1/L2 (ADR 0128 §5.1, 0131): <c>F</c>/<c>M</c>/<c>L</c>/<c>S</c> — напр. <c>[M:Run S:for:2]</c>, <c>[F:…; M:…; S:for:2]</c>.
 /// </summary>
 public static class BracketCodeReferenceParser
 {
@@ -20,6 +21,10 @@ public static class BracketCodeReferenceParser
 
     private static readonly Regex LineToken = new(
         @"\bL:(?<start>\d+)\s*(?:-\s*(?<end>\d+))?",
+        RegexOptions.CultureInvariant | RegexOptions.Compiled);
+
+    private static readonly Regex ScopeToken = new(
+        @"\bS:(?<kind>[A-Za-z_][\w]*)\s*(?::|\()\s*(?<index>\d+)\s*\)?",
         RegexOptions.CultureInvariant | RegexOptions.Compiled);
 
     private static readonly Regex CsFileBeforeMember = new(
@@ -69,12 +74,26 @@ public static class BracketCodeReferenceParser
             file = AttachmentAnchorPaths.ToWorkspaceRelative(activeFilePath, workspaceRoot) ?? activeFilePath;
         }
 
+        JsonElement? syntaxScope = null;
+        if (!string.IsNullOrWhiteSpace(reference.ScopeKind))
+        {
+            var index = reference.ScopeIndexInParent is > 0 ? reference.ScopeIndexInParent.Value : 1;
+            var parentMember = string.IsNullOrWhiteSpace(reference.MemberKey) ? null : reference.MemberKey.Trim();
+            syntaxScope = JsonSerializer.SerializeToElement(new Dictionary<string, object?>
+            {
+                ["kind"] = reference.ScopeKind.Trim(),
+                ["indexInParent"] = index,
+                ["parentMemberKey"] = parentMember,
+            });
+        }
+
         anchor = new AttachmentAnchor
         {
             File = file.Replace('\\', '/'),
             MemberKey = string.IsNullOrWhiteSpace(reference.MemberKey) ? null : reference.MemberKey.Trim(),
             LineStart = reference.LineStart,
             LineEnd = reference.LineEnd,
+            SyntaxScope = syntaxScope,
         };
 
         return true;
@@ -89,6 +108,8 @@ public static class BracketCodeReferenceParser
         string? member = null;
         int? lineStart = null;
         int? lineEnd = null;
+        string? scopeKind = null;
+        int? scopeIndex = null;
 
         foreach (var part in text.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
         {
@@ -114,17 +135,27 @@ public static class BracketCodeReferenceParser
                 continue;
             }
 
+            if (part.StartsWith("S:", StringComparison.OrdinalIgnoreCase))
+            {
+                if (!TryParseScopePayload(part[2..].Trim(), out scopeKind, out scopeIndex, out error))
+                    return false;
+                continue;
+            }
+
             error = $"Неизвестное поле L2: «{part}».";
             return false;
         }
 
-        if (string.IsNullOrWhiteSpace(file) && string.IsNullOrWhiteSpace(member) && lineStart is null)
+        if (string.IsNullOrWhiteSpace(file)
+            && string.IsNullOrWhiteSpace(member)
+            && lineStart is null
+            && string.IsNullOrWhiteSpace(scopeKind))
         {
-            error = "L2-ссылка не содержит F:, M: или L:.";
+            error = "L2-ссылка не содержит F:, M:, L: или S:.";
             return false;
         }
 
-        reference = new BracketCodeReference(file, member, lineStart, lineEnd);
+        reference = new BracketCodeReference(file, member, lineStart, lineEnd, scopeKind, scopeIndex);
         return true;
     }
 
@@ -143,6 +174,20 @@ public static class BracketCodeReferenceParser
         else if (text.StartsWith("M:", StringComparison.OrdinalIgnoreCase))
             member = text[2..].Trim();
 
+        string? scopeKind = null;
+        int? scopeIndex = null;
+        if (ScopeToken.Match(text) is { Success: true } sm)
+        {
+            scopeKind = sm.Groups["kind"].Value.Trim();
+            if (!int.TryParse(sm.Groups["index"].Value, out var scopeIdx) || scopeIdx < 1)
+            {
+                error = "Некорректный индекс S: (ожидается ≥ 1).";
+                return false;
+            }
+
+            scopeIndex = scopeIdx;
+        }
+
         int? lineStart = null;
         int? lineEnd = null;
         if (LineToken.Match(text) is { Success: true } lm)
@@ -160,13 +205,39 @@ public static class BracketCodeReferenceParser
                 lineEnd = start;
         }
 
-        if (string.IsNullOrWhiteSpace(file) && string.IsNullOrWhiteSpace(member) && lineStart is null)
+        if (string.IsNullOrWhiteSpace(file)
+            && string.IsNullOrWhiteSpace(member)
+            && lineStart is null
+            && string.IsNullOrWhiteSpace(scopeKind))
         {
-            error = "Ожидается [M:…], [file.cs M:…] или [F:…; M:…; L:…].";
+            error = "Ожидается [M:…], [M:… S:for:2], [file.cs M:…] или L2 [F:…; M:…; …].";
             return false;
         }
 
-        reference = new BracketCodeReference(file, member, lineStart, lineEnd);
+        reference = new BracketCodeReference(file, member, lineStart, lineEnd, scopeKind, scopeIndex);
+        return true;
+    }
+
+    private static bool TryParseScopePayload(string payload, out string? kind, out int? indexInParent, out string error)
+    {
+        kind = null;
+        indexInParent = null;
+        error = "";
+        var token = "S:" + payload;
+        if (ScopeToken.Match(token) is not { Success: true } m)
+        {
+            error = "S: ожидает for:2 или if(1) (kind + 1-based index).";
+            return false;
+        }
+
+        kind = m.Groups["kind"].Value.Trim();
+        if (!int.TryParse(m.Groups["index"].Value, out var idx) || idx < 1)
+        {
+            error = "Некорректный индекс S: (ожидается ≥ 1).";
+            return false;
+        }
+
+        indexInParent = idx;
         return true;
     }
 
@@ -213,4 +284,6 @@ public readonly record struct BracketCodeReference(
     string? File,
     string? MemberKey,
     int? LineStart,
-    int? LineEnd);
+    int? LineEnd,
+    string? ScopeKind = null,
+    int? ScopeIndexInParent = null);

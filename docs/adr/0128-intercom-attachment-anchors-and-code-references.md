@@ -177,10 +177,47 @@
 
 ### 5. Inline `[…]` — вторая поверхность, тот же anchor
 
-- `[M:GetUserAsync]` — **F** из active file или autocomplete.
-- `[Foo.cs M:…]` — явный файл.
+- `[M:GetUserAsync]` — **M**; **F** (файл) из active file или autocomplete, если путь не указан.
+- `[Foo.cs M:…]` — явный **F** + **M**.
 - Не путать: `@` — **люди**; `[` — **артефакты**; не markdown `[](url)`.
-- **L2** для агента: `[F:path; M:name; L:50-100]` — один parse tree с L1; разделитель полей **`;`** (единственный канон).
+- **L2** для агента: поля через **`;`** (единственный канон), тот же parse tree, что L1.
+
+#### 5.1 Оси полей bracket (`F` | `M` | `L` | `S`)
+
+Четыре **ортогональные** оси в одном `[…]` или в L2. В wire они попадают в те же поля `AttachmentAnchor` (`file`, `memberKey`, `lineStart`/`lineEnd`, `syntaxScope`). **`B:` (block)** не вводим — путается с **branch** (git); для `for`/`if`/`while` внутри члена — ось **`S:`** (syntax scope / statement).
+
+| Ось | Префикс | Смысл | Wire / resolve |
+|-----|---------|--------|----------------|
+| **File** | `F:` | Workspace-relative или абсолютный путь | `file` |
+| **Member** | `M:` | Метод, свойство, тип (stable / Roslyn key) | `memberKey` + re-resolve |
+| **Lines** | `L:` | Позиционный fallback (1-based inclusive) | `lineStart`, `lineEnd` @ send (hint) |
+| **Scope** | `S:` | Синтаксический фрагмент **внутри** члена | `syntaxScope`: `{ kind, indexInParent, parentMemberKey? }` |
+
+**`S:` — семантика индекса:** `S:for:2` = **второй** узел kind `for` (**1-based** `indexInParent`) от **начала тела** члена `M:…` (или текущего member при H0b). Не «второй for в файле». Kind — lowercase Roslyn-имя узла: `for`, `if`, `while`, `switch`, … (как в `AttachmentSyntaxScope.Kind`).
+
+**Примеры L1 (человек):**
+
+| Выражение | Разбор |
+|-----------|--------|
+| `[M:Run]` | только member |
+| `[M:Run S:for:2]` | member + второй `for` в `Run` |
+| `[M:Run S:for(2)]` | то же; скобки `()` — только читаемость; **канон для парсера:** `S:for:2` |
+| `[Foo.cs M:Bar S:if:1]` | явный файл + member + scope |
+| `[S:for:2]` | только scope (нужен active file + member @ caret или H0b) |
+
+**Примеры L2 (агент, `;`):**
+
+```text
+[F:src/Foo.cs; M:Run; S:for:2]
+[F:src/Foo.cs; M:Run; L:50-100]
+[F:src/Foo.cs; M:Run; S:for:2; L:50-100]
+```
+
+`L:` и `S:` могут сосуществовать: при re-resolve у получателя приоритет **member + syntaxScope**; `L:` — fallback @ send и при `member_not_found` (§8–9.1).
+
+**Связь с фазой 4:** UI picker и chip label (`displayLabel`: `Run › for (2)`) используют ту же ось **S:**, что prose `[M:Run S:for:2]`.
+
+**Реализация parse (0131):** `BracketCodeReferenceParser` — `F`/`M`/`L`/`S` → `AttachmentAnchor` (в т.ч. `syntaxScope` для `S:`). MCP по-прежнему предпочитает JSON `syntax_scope`, не prose.
 
 Парсер attach: только в **prose**-сегментах тела (после `SplitSegments` — [0129](0129-intercom-message-body-markdown-and-fenced-code.md) §5); **не** внутри fenced code.
 
@@ -348,3 +385,4 @@
 | 2026-05-19 | §11–12 fenced/MD → [0129](0129-intercom-message-body-markdown-and-fenced-code.md); attach-only scope. |
 | 2026-05-19 | §9.1 исходы re-resolve: другая ветка / нет файла; excerpt как общий знаменатель. |
 | 2026-05-19 | §3.1 `senderWorkspaceContext` (ветка, commit) на уровне сообщения @ send. |
+| 2026-05-19 | §5.1 оси bracket `F` \| `M` \| `L` \| `S` (scope/statement); `S:for:n`, не `B:`; L2 с `S:`. |

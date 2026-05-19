@@ -8,7 +8,7 @@
 | ADR | Роль |
 |-----|------|
 | [0124](0124-slash-parametric-editor-line-commands.md) | `/editor line select 5 10` — select по **номерам строк** |
-| [0128](0128-intercom-attachment-anchors-and-code-references.md) | Грамматика `[M:…]`, `[F:…]`, L2 `;` — **attach** в Intercom; общий parse tree |
+| [0128](0128-intercom-attachment-anchors-and-code-references.md) | Грамматика `F`/`M`/`L`/`S` в `[…]` (§5.1); L2 `;` — **attach** в Intercom; общий parse tree |
 | [0130](0130-editor-agent-range-reveal-without-selection.md) | Reveal без selection; MCP `member_key` / `syntax_scope` (JSON) |
 | [0058](0058-agent-roslyn-mcp-coupling-settings-toml.md) | Roslyn resolve member |
 | [0119](0119-chat-slash-commands-intercom-surface.md) | Slash в composer Intercom |
@@ -18,7 +18,7 @@
 
 Добавить **editor-действие** (меняет `Selection` в буфере), вводимое из **той же bracket-грамматики**, что attach в [0128](0128-intercom-attachment-anchors-and-code-references.md), но **без** сообщения в Intercom:
 
-- Slash (черновик): **`/editor select code [M:GetUserAsync]`**, **`/editor select code [Foo.cs M:Bar]`**, **`/editor select code [F:path; M:name; L:50-100]`** (L2).
+- Slash: **`/editor select code [M:GetUserAsync]`**, **`/editor select code [Foo.cs M:Bar]`**, **`/editor select code [M:Run S:for:2]`**, L2 **`[F:path; M:name; L:50-100]`** / **`[F:…; M:…; S:for:2]`** ([0128](0128-intercom-attachment-anchors-and-code-references.md) §5.1).
 - Опционально паритет: **`/editor reveal code […]`** — тот же parse + resolve, эффект [0130](0130-editor-agent-range-reveal-without-selection.md) (рамка, не selection).
 
 **Не attach:** не создаёт chip, не пишет в event log чата. **Не заменяет** `/editor line select` — дополняет смысловым якорем вместо сырых строк.
@@ -82,8 +82,8 @@ MCP **не обязан** парсить prose `[M:…]` — только struct
 | Фаза | Содержание |
 |------|------------|
 | **0** | ADR; согласовать `command_id` и tail в `intent-catalog.toml` |
-| **1** *(done)* | `BracketCodeReferenceParser`; `/editor select code`, `/editor reveal code`; `editor.select_code` / `editor.reveal_code` |
-| **2** | `/editor reveal code`; autocomplete member/path; L2 `;` |
+| **1** *(done)* | `BracketCodeReferenceParser` (`F`/`M`/`L`); `/editor select code`, `/editor reveal code`; `editor.select_code` / `editor.reveal_code` |
+| **2** | Parse **`S:kind:n`** в bracket (→ `syntaxScope`); autocomplete member/path/scope; полный L2 |
 | **3** | Паритет hotkey / palette melody рядом с `c:els` |
 
 ---
@@ -101,3 +101,4 @@ MCP **не обязан** парсить prose `[M:…]` — только struct
 | Дата | Изменение |
 |------|-----------|
 | 2026-05-19 | Proposed: идея `/editor select code [F:/M:…]`; ортогонально attach и 0124 line select. |
+| 2026-05-19 | Фаза 2: ось **`S:`** (syntax scope) в bracket — канон [0128](0128-intercom-attachment-anchors-and-code-references.md) §5.1. |
