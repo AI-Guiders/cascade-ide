@@ -191,6 +191,7 @@
 | [0124](0124-slash-parametric-editor-line-commands.md) | Фича: параметрический slash = полный паритет `melody_shape=parametric` в TOML (`wire_class`, binders, TOML, SubAction) | Accepted · Implemented |
 | [0125](0125-slash-workspace-file-commands-and-dynamic-completion.md) | Slash workspace/file: `/file open`, `/solution new`, динамические подсказки по файлам; `create_project_in_solution` (console/classlib/webapi) | Accepted · Implemented |
 | [0126](0126-intercom-inspect-slash-and-compact-chrome-status.md) | Intercom inspect: `/topic`/`/spine` list\|tree (`kind=report`); статус в compact toolbar; UX открытия файла из slash | Accepted · Implemented |
+| [0128](0128-intercom-attachment-anchors-and-code-references.md) | Intercom: якоря вложений (attach), `[M:…]` / chips, reveal, re-resolve; ортогонально `/file open` и `/editor line` | Proposed |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 

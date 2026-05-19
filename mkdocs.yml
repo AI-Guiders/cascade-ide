@@ -86,7 +86,9 @@ plugins:
                 - Design Handbook: design/cide-design-handbook-v1.md
                 - Философия продукта: design/cascadeide-philosophy-v1.md
                 - Токены chrome: design/ide-chrome-tokens-v1.md
+                - Intercom (design hub): design/intercom-design-hub-v1.md
                 - Intercom (референсы): design/intercom-ux-reference-slack-mattermost-v1.md
+                - "ADR 0128: attach / code references": adr/0128-intercom-attachment-anchors-and-code-references.md
                 - Зоны внимания (playbook): design/attention-zone-panel-playbook-v1.md
                 - Skia vs overlay: design/skia-surfaces-vs-overlays-v1.md
         - locale: en

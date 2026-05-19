@@ -7,7 +7,8 @@
 | [cide-design-handbook-v1.md](cide-design-handbook-v1.md) | **Старт здесь** — принципы (§2), зоны (§3), **фокус работы дизайнера** (§8) | v1 hub |
 | [cascadeide-philosophy-v1.md](cascadeide-philosophy-v1.md) | Зачем продукт, метафоры, анти-паттерны AI | справочник |
 | [ide-chrome-tokens-v1.md](ide-chrome-tokens-v1.md) | Семантические токены IDE chrome (`CascadeTheme.*`) | v1 |
-| [intercom-ux-reference-slack-mattermost-v1.md](intercom-ux-reference-slack-mattermost-v1.md) | Intercom: что брать из Slack/MM, границы | черновик |
+| [intercom-design-hub-v1.md](intercom-design-hub-v1.md) | **Intercom для дизайнера:** домены D1–D9, иерархия доков, чеклист PNG | v1 hub |
+| [intercom-ux-reference-slack-mattermost-v1.md](intercom-ux-reference-slack-mattermost-v1.md) | Intercom: паттерны Slack/MM, attach, flat feed | черновик |
 | [feature-archetype-v1.md](feature-archetype-v1.md) | Как новая фича ложится в UI-слои (для дизайн+разработка) | v1 |
 | [north-star-cursor-mcp-cascade-workbench-v1.md](north-star-cursor-mcp-cascade-workbench-v1.md) | North star: агент и человек в одном контуре | справочник |
 | [attention-zone-panel-playbook-v1.md](attention-zone-panel-playbook-v1.md) | Куда класть панель по зонам PFD/Forward/MFD | playbook |
