@@ -18,6 +18,7 @@
 | [MCP-протокол IDE](MCP-PROTOCOL.md) | Команды для агента и человека |
 | [Раскладка UI (Flight)](ui-ux/cascade-ide-ui-layout-v1.md) | PFD · Forward · MFD, имена контролов для MCP |
 | [Карта концепт → код](ui-ux/concept-to-implementation-map-v1.md) | Что в коде vs архивные концепты |
+| [**Design Handbook**](design/cide-design-handbook-v1.md) | **Для дизайнеров:** принципы, зоны, навигация в ADR и макеты |
 
 ## Репозиторий
 

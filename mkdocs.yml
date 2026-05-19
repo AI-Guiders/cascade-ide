@@ -82,6 +82,13 @@ plugins:
             - UX:
                 - Раскладка UI: ui-ux/cascade-ide-ui-layout-v1.md
                 - Карта концептов: ui-ux/concept-to-implementation-map-v1.md
+            - Дизайн:
+                - Design Handbook: design/cide-design-handbook-v1.md
+                - Философия продукта: design/cascadeide-philosophy-v1.md
+                - Токены chrome: design/ide-chrome-tokens-v1.md
+                - Intercom (референсы): design/intercom-ux-reference-slack-mattermost-v1.md
+                - Зоны внимания (playbook): design/attention-zone-panel-playbook-v1.md
+                - Skia vs overlay: design/skia-surfaces-vs-overlays-v1.md
         - locale: en
           name: English
           build: true
@@ -110,6 +117,9 @@ plugins:
                 - UI layout: ui-ux/cascade-ide-ui-layout-v1.md
                 - Concept map: ui-ux/concept-to-implementation-map-v1.md
                 - UX index: ui-ux/README.md
+            - Design:
+                - Design Handbook (RU): design/cide-design-handbook-v1.md
+                - Concept overview: concept-overview.md
 
 markdown_extensions:
   - admonition
@@ -130,7 +140,16 @@ markdown_extensions:
 
 exclude_docs: |
   architecture-migration.md
-  design/*
+  design/workspace-health-implementation-map-v1.md
+  design/ide-command-registry-v1.md
+  design/editor-hud-inline-migration-inventory-v1.md
+  design/editor-surface-candidates-comparison-v1.md
+  design/editor-hud-banner-inline-policy-v1.md
+  design/analyzer-rollout-dal-ccu-v1.md
+  design/data-acquisition-layer-boundaries-v1.md
+  design/cds-contract-v0.md
+  design/workspace-navigation-mcp-cookbook.md
+  design/vertical-slice-attention-capabilities-v1.md
   adr/snippets/*
 
 validation:

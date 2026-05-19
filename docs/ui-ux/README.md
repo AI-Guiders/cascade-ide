@@ -4,6 +4,8 @@
 
 **Актуальная линия (~2026):** в поставке один продуктовый UI-режим — **Flight** (`UiModes/index.toml`); топология **PFD | Forward | MFD** в `MainWindow` — см. **`cascade-ide-ui-layout-v1.md`**; мультиоконность — **[ADR 0017](../adr/0017-multi-window-workspace-and-agent-surfaces.md)**; внимание — **[ADR 0021](../adr/0021-pfd-mfd-cockpit-attention-model.md)**; TOML — **[ADR 0010](../adr/0010-ui-modes-toml-configuration.md)**. Старые PNG/тексты про Focus / Balanced / Power — **архив**; с кодом не сверяем.
 
+**Design Handbook (принципы + карта ADR):** [design/cide-design-handbook-v1.md](../design/cide-design-handbook-v1.md).
+
 ## Содержимое
 
 | Файл                                    | Назначение                                                                                                       |

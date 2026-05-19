@@ -56,6 +56,7 @@ Long-running streams (build log, terminal) live on **MFD pages**, not in a legac
 | Architecture policy & snapshot | [Policy](architecture-policy.md) · [Current architecture](architecture/current-architecture-v1.md) |
 | Agent/MCP commands | [MCP protocol](../MCP-PROTOCOL.md) |
 | Project principles | [ADR 0100 constitution](adr/0100-project-constitution.md) |
+| **Design handbook (RU, navigation hub)** | [CIDE Design Handbook v1](../design/cide-design-handbook-v1.md) |
 
 ## Language on this site
 
