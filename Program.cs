@@ -34,8 +34,9 @@ sealed class Program
             .WithInterFont()
             .LogToTrace();
 
-        // Диагностика «прозрачных» окон на Windows: set CASCADE_RENDER_SOFTWARE=1
-        if (string.Equals(Environment.GetEnvironmentVariable("CASCADE_RENDER_SOFTWARE"), "1", StringComparison.Ordinal))
+        // Диагностика «прозрачных» окон: set CASCADE_RENDER_SOFTWARE=1 (Win32 only).
+        if (OperatingSystem.IsWindows()
+            && string.Equals(Environment.GetEnvironmentVariable("CASCADE_RENDER_SOFTWARE"), "1", StringComparison.Ordinal))
         {
             builder = builder.With(new Win32PlatformOptions
             {

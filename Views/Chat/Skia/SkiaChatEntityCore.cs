@@ -25,7 +25,7 @@ internal readonly record struct SkiaChatMeasuredLayout(
     SkiaTopicCardLayout? TopicCardLayout = null);
 
 internal readonly record struct SkiaChatBubbleMetrics(
-    IReadOnlyList<string> ContentLines,
+    IReadOnlyList<SkiaMarkdownLine> ContentLines,
     string? Footer,
     float TitleHeight,
     float FooterHeight,

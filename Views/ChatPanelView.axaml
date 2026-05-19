@@ -37,7 +37,7 @@
 
     <Panel>
         <!-- Forward Intercom (ADR 0123): Skia-колонна + компактный composer; toolbar в Skia -->
-        <Panel IsVisible="{Binding IsForwardIntercomLayout}"
+        <Panel IsVisible="{Binding IsSkiaIntercomHostVisible}"
                Background="{DynamicResource CascadeTheme.ChatPanelBackground}">
             <Border Background="{DynamicResource CascadeTheme.ChatPanelBackground}">
             <views:IntercomSkiaSurface x:Name="ForwardIntercomSurface"
@@ -47,7 +47,7 @@
                                           SelectedMessageIndex="{Binding SelectedMessageIndex, Mode=TwoWay}"
                                           DetailThreadId="{Binding SelectedChatThreadId, Mode=TwoWay}"
                                           OverviewMode="{Binding IsChatOverviewMode, Mode=TwoWay}"
-                                          CompactLayout="True"
+                                          CompactLayout="{Binding IntercomSkiaCompactLayout}"
                                           ChromeTitle="Intercom"
                                           IsChatLoading="{Binding IsChatLoading}"
                                           LoadingStatusText="{Binding ChatLoadingStatusText}"
@@ -113,7 +113,7 @@
         </Panel>
 
         <!-- MFD / comfortable: UiKit shell (до слияния в один Skia-surface) -->
-        <Grid IsVisible="{Binding !IsForwardIntercomLayout}"
+        <Grid IsVisible="{Binding !IsSkiaIntercomHostVisible}"
               RowDefinitions="Auto,Auto,*"
               RowSpacing="8">
             <uikit:CascadeSection Grid.Row="0">

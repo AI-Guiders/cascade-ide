@@ -37,9 +37,10 @@ internal static class SkiaChatBubbleRenderer
     public static SkiaChatBubbleMetrics Measure(SkiaChatMeasureContext context, in SkiaChatBubbleSpec spec)
     {
         var maxChars = Math.Max(24, context.MaxChars);
-        var lines = SkiaTextLayout.Wrap(Trim(spec.Body, 32_000), maxChars);
+        var runs = SkiaMarkdownLayout.ParseInline(Trim(spec.Body, 32_000));
+        var lines = SkiaMarkdownLayout.WrapLines(runs, maxChars);
         if (lines.Count == 0)
-            lines = [""];
+            lines = [new SkiaMarkdownLine([new SkiaMarkdownRun("", SkiaMarkdownStyle.Plain)])];
         if (lines.Count > spec.MaxBodyLines)
             lines = lines.Take(spec.MaxBodyLines).ToList();
 
@@ -196,11 +197,30 @@ internal static class SkiaChatBubbleRenderer
         });
         foreach (var line in metrics.ContentLines)
         {
-            var bodyColor = spec.BodyTone == SkiaChatBodyTone.Placeholder
-                ? ctx.Theme.MutedContent
-                : ctx.Theme.Content;
-            using var linePaint = new SKPaint { IsAntialias = true, Color = bodyColor };
-            ctx.Canvas.DrawText(line, contentLeft, textY, SKTextAlign.Left, bodyFont, linePaint);
+            var x = contentLeft;
+            foreach (var run in line.Runs)
+            {
+                if (run.Text.Length == 0)
+                    continue;
+
+                var (font, color, disposeFont) = ResolveRunStyle(
+                    ctx,
+                    spec,
+                    bodyFont,
+                    run.Style);
+                try
+                {
+                    using var linePaint = new SKPaint { IsAntialias = true, Color = color };
+                    ctx.Canvas.DrawText(run.Text, x, textY, SKTextAlign.Left, font, linePaint);
+                    x += font.MeasureText(run.Text);
+                }
+                finally
+                {
+                    if (disposeFont)
+                        font.Dispose();
+                }
+            }
+
             textY += metrics.LineHeight;
         }
 
@@ -259,6 +279,33 @@ internal static class SkiaChatBubbleRenderer
             Style = SKPaintStyle.Stroke,
             StrokeWidth = width
         };
+
+    private static (SKFont Font, SKColor Color, bool DisposeFont) ResolveRunStyle(
+        SkiaChatDrawContext ctx,
+        in SkiaChatBubbleSpec spec,
+        SKFont bodyFont,
+        SkiaMarkdownStyle style)
+    {
+        var bodyColor = spec.BodyTone == SkiaChatBodyTone.Placeholder
+            ? ctx.Theme.MutedContent
+            : ctx.Theme.Content;
+        return style switch
+        {
+            SkiaMarkdownStyle.Bold => (
+                new SKFont(SKTypeface.FromFamilyName("Segoe UI", SKFontStyle.Bold), bodyFont.Size),
+                bodyColor,
+                true),
+            SkiaMarkdownStyle.Italic => (
+                new SKFont(SKTypeface.FromFamilyName("Segoe UI", SKFontStyle.Italic), bodyFont.Size),
+                bodyColor,
+                true),
+            SkiaMarkdownStyle.Code => (
+                new SKFont(SKTypeface.FromFamilyName("Cascadia Mono", SKFontStyle.Normal), bodyFont.Size * 0.95f),
+                SkiaKitColor.Blend(ctx.Theme.Content, ctx.Theme.HoverBorder, 0.35f),
+                true),
+            _ => (bodyFont, bodyColor, false)
+        };
+    }
 
     private static string Trim(string text, int maxLen) =>
         text.Length <= maxLen ? text : text[..maxLen] + "...";

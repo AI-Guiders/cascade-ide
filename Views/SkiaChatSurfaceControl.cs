@@ -2,10 +2,12 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Input.Platform;
 using Avalonia.Media;
 using Avalonia.Interactivity;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
+using Avalonia.VisualTree;
 using CascadeIDE.Features.Chat;
 using CascadeIDE.Views.Chat;
 using CascadeIDE.Views.Chat.Skia;
@@ -105,6 +107,7 @@ public partial class SkiaChatSurfaceControl : Control
 
     static SkiaChatSurfaceControl()
     {
+        FocusableProperty.OverrideDefaultValue<SkiaChatSurfaceControl>(true);
         AffectsRender<SkiaChatSurfaceControl>(
             SnapshotProperty,
             SelectedMessageIndexProperty,
@@ -132,6 +135,7 @@ public partial class SkiaChatSurfaceControl : Control
         AddHandler(PointerPressedEvent, OnPointerPressed, RoutingStrategies.Bubble);
         AddHandler(PointerExitedEvent, OnPointerExited, RoutingStrategies.Bubble);
         AddHandler(PointerWheelChangedEvent, OnPointerWheelChanged, RoutingStrategies.Bubble);
+        AddHandler(KeyDownEvent, OnKeyDown, RoutingStrategies.Bubble);
         InitializeIntercomComposer();
     }
 
@@ -374,6 +378,34 @@ public partial class SkiaChatSurfaceControl : Control
             _theme = _theme with { Surface = surface.WithAlpha(byte.MaxValue) };
     }
 
+    private async void OnKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.C || (e.KeyModifiers & KeyModifiers.Control) == 0)
+            return;
+
+        if (!await TryCopySelectedMessageAsync().ConfigureAwait(true))
+            return;
+
+        e.Handled = true;
+    }
+
+    private async Task<bool> TryCopySelectedMessageAsync()
+    {
+        if (SelectedMessageIndex < 0)
+            return false;
+
+        var body = ChatSurfaceSnapshotMessageLookup.TryGetMessageBody(Snapshot, SelectedMessageIndex);
+        if (string.IsNullOrEmpty(body))
+            return false;
+
+        var top = TopLevel.GetTopLevel(this);
+        if (top?.Clipboard is not { } clipboard)
+            return false;
+
+        await clipboard.SetTextAsync(body).ConfigureAwait(true);
+        return true;
+    }
+
     private void OnPointerWheelChanged(object? sender, PointerWheelEventArgs e)
     {
         var p = e.GetPosition(this);
@@ -431,6 +463,7 @@ public partial class SkiaChatSurfaceControl : Control
         else if (hit.MessageIndex is { } messageIndex)
         {
             SelectedMessageIndex = messageIndex;
+            Focus();
             if (hit.ToggleThinking && e.ClickCount >= 2)
                 ThinkingToggleRequested?.Invoke(this, messageIndex);
         }

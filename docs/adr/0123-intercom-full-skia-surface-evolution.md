@@ -131,8 +131,8 @@
 ### Фаза 3 — **Богатая лента (ёмкость)**
 
 - Группировка сообщений, схлопнутые блоки кода (mono strip), сворачиваемый «thinking».
-- Markdown subset в Skia (`SkiaTextLayout` + легкие стили) или preformatted-only v1.
-- Копирование выделения: hit-test → буфер (platform API).
+- ~~Markdown subset в Skia~~ → **v1.1:** `SkiaMarkdownLayout` (`**` / `*` / `` ` ``) в prose; fenced code — `ChatMessageBodyPresentation`.
+- ~~Копирование выделения~~ → **v1.1:** выбранное сообщение + Ctrl+C → clipboard (`ChatSurfaceSnapshotMessageLookup`).
 
 ### Фаза 4 — **Только тяжёлые IDS-оверлеи на Avalonia**
 
@@ -216,3 +216,5 @@ Skia draw (Views/Chat/Skia, SkiaKit)
 | 2026-05-18 | Уточнение: Avalonia только фюзеляж + тяжёлые контуры; отказ от steady-state Avalonia в Intercom; composer через `ITextInputMethodClient` (Avalonia 12), не Fluent TextBox. |
 | 2026-05-18 | **Accepted.** Фаза 1 в коде: Forward shell, Skia toolbar, `intercomComposer` strip (временный TextBox до фазы 2). |
 | 2026-05-17 | **Implemented (фазы 1–3 v1):** `IntercomSkiaSurface`, Skia composer + `SkiaPopupList` + IME client; MFD на том же surface; группировка ленты, `SkiaMonoCodeStrip`, double-click thinking toggle. Markdown subset и copy — открыто. |
+| 2026-05-18 | **Render fix:** offscreen `WriteableBitmap` + `DrawImage` (не `SKCanvas.Clear` на leased canvas окна — [Avalonia #5932](https://github.com/AvaloniaUI/Avalonia/issues/5932)). |
+| 2026-05-18 | **Фаза 3 (v1.1):** inline Markdown subset (`**` / `*` / `` ` ``) в prose; Ctrl+C копирует тело выбранного сообщения; MFD Chat на `IsSkiaIntercomHostVisible` (comfortable `CompactLayout=false`). |
