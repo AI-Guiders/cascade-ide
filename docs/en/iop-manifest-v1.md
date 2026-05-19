@@ -54,6 +54,12 @@ Beyond relying on C# types alone — **knowledge canon and context routing**: [k
 
 Cockpit placement — [ADR 0120](adr/0120-primary-work-surface-intercom-or-editor.md) (Accepted · Implemented): **`primary_work_surface = intercom`** when the forward anchor is connection and intent, not code alone.
 
+### Agent as sparring partner before implementation
+
+In an agent-first IDE, the agent is useful **before** commit and PR: you can **cheaply** walk through product corners (how to reference a code fragment, feed shape, anchor re-resolve) — **discuss, push back, narrow scope** — without waiting on a colleague and without most social friction of human coordination.
+
+That does **not** replace human review or auto-write ADRs: the operator stays captain. A typical IOP cycle in Cascade: **resolve branches in dialogue** → record in ADR/playbook → **implement quickly** in the same contour (Intercom, MCP, editor). See [cascadeide-philosophy-v1.md](design/cascadeide-philosophy-v1.md) §8.
+
 ---
 
 ## Honestly about human message volume

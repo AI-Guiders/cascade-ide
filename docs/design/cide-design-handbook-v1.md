@@ -12,7 +12,8 @@
     3. [Раскладка UI](../ui-ux/cascade-ide-ui-layout-v1.md) + wireframe в `docs/ui-ux/`.  
     4. **§8** — приоритеты работы дизайнера.  
     5. По задаче — **§6** (тематические ссылки), не весь каталог ADR.  
-    6. Макеты — **§9**.
+    6. **Intercom** — [intercom-design-hub-v1.md](intercom-design-hub-v1.md) (домены D1–D9, макеты).  
+    7. Макеты — **§9**.
 
 **English (краткий обзор продукта):** [Concept overview](../en/concept-overview.md) · [UI layout EN](../en/ui-ux/cascade-ide-ui-layout-v1.md).
 
@@ -103,7 +104,9 @@
 | **Паритет команд** | То, что видишь в UI, агент может вызвать тем же **`command_id`** | Один каталог команд: палитра, слэш, MCP — не три разных мира |
 | **Честность рассуждения** | Не притворяемся «полным мышлением» без границ провайдера | Слои «thinking», лимиты, явные ошибки API — без театра |
 
-**Intercom** — не «чат с ботом», а **канал сессии** (как рация в работе): темы, spine, composer внизу, слэши с подсказками — см. §5.2 и [intercom-ux-reference](intercom-ux-reference-slack-mattermost-v1.md).
+**Intercom** — не «чат с ботом», а **канал сессии** (как рация в работе): темы, spine, composer внизу, слэши с подсказками — см. §5.2, [intercom-design-hub](intercom-design-hub-v1.md), [intercom-ux-reference](intercom-ux-reference-slack-mattermost-v1.md).
+
+**Партнёр для проектирования:** агент в том же контуре — для **обсуждения и спора до кода** (снять ветвления → ADR → быстрая реализация), без замены вкуса и ответственности человека — [philosophy §8](cascadeide-philosophy-v1.md#8-агент-как-партнёр-для-проектирования-до-кода), [IOP manifest](../iop-manifest-v1.md).
 
 ---
 
@@ -291,16 +294,31 @@ flowchart TB
 
 ### 5.2 Intercom (канал, темы, composer)
 
-| Тема | Документ | ADR |
-|------|----------|-----|
-| Не «чатбот», а канал | [intercom-ux-reference-slack-mattermost-v1.md](intercom-ux-reference-slack-mattermost-v1.md) | [0080](../adr/0080-intercom-naming-and-multi-party-channel-model.md) |
-| Topic cards, overview/detail | — | [0072](../adr/0072-chat-topic-cards-intent-melody-keyboard-contract.md) |
-| Product spine | — | [0096](../adr/0096-intercom-topic-card-summary-and-product-spine.md) |
-| **Spine + вкладки + Navigator** (направление) | — | [0127](../adr/0127-intercom-spine-and-topic-tabs-chrome-navigation.md) Proposed |
-| Skia-лента и chrome | — | [0123](../adr/0123-intercom-full-skia-surface-evolution.md), [0126](../adr/0126-intercom-inspect-slash-and-compact-chrome-status.md) |
-| Слэш-команды в composer | — | [0119](../adr/0119-chat-slash-commands-intercom-surface.md) |
-| Сессия, треды, steer | — | [0116](../adr/0116-intercom-session-tree-and-agent-message-steering.md) Proposed |
-| Skia host | — | [0044](../adr/0044-avalonia-host-skia-agent-chat-surface.md) |
+Intercom — **не один экран**, а **несколько доменов** (лента, composer, attach, мост в редактор, навигация тем, три входа команд). Для дизайна — отдельный хаб с иерархией документов и чеклистом референс-PNG.
+
+| С чего начать | Содержание |
+|---------------|------------|
+| **[intercom-design-hub-v1.md](intercom-design-hub-v1.md)** | Домены **D1–D9**, карта доков, порядок итераций, [чеклист макетов](../ui-ux/concept-screens/intercom/README.md) |
+| [intercom-ux-reference-slack-mattermost-v1.md](intercom-ux-reference-slack-mattermost-v1.md) | Границы Slack/MM, flat feed, `/attach`, клик → рамка |
+| [ide-chrome-tokens-v1.md](ide-chrome-tokens-v1.md) | Токены оболочки вокруг Skia-ленты |
+
+**Сквозные UX-развилки** (фиксировать в макете, не смешивать):
+
+| Развилка | Дизайн по умолчанию |
+|----------|---------------------|
+| Attach vs `/editor line` vs `/file open` | Разные slash и chip; см. hub **D4–D6** |
+| Клик по chip в ленте | Open + scroll + **рамка**; Shift → selection |
+| `@` vs `[path]` vs `/attach` | Люди vs inline-якорь vs slash с autocomplete |
+| Палитра / Chord / slash | Один `command_id`, три affordance — §2.6 |
+
+| Тема (ADR-указатель) | ADR |
+|----------------------|-----|
+| Канал, multi-party | [0080](../adr/0080-intercom-naming-and-multi-party-channel-model.md) |
+| Topic cards | [0072](../adr/0072-chat-topic-cards-intent-melody-keyboard-contract.md) |
+| Spine, tabs, Navigator | [0127](../adr/0127-intercom-spine-and-topic-tabs-chrome-navigation.md) Proposed |
+| Slash, **attach / якоря** | [0128](../adr/0128-intercom-attachment-anchors-and-code-references.md) Proposed · [0119](../adr/0119-chat-slash-commands-intercom-surface.md), [0124](../adr/0124-slash-parametric-editor-line-commands.md)–[0125](../adr/0125-slash-workspace-file-commands-and-dynamic-completion.md) |
+| Skia лента | [0123](../adr/0123-intercom-full-skia-surface-evolution.md), [0057](../adr/0057-chat-surface-pipeline-adoption.md) |
+| Forward fullscreen | [0120](../adr/0120-primary-work-surface-intercom-or-editor.md) Proposed |
 
 ### 5.3 Команды, палитра, клавиатура
 
@@ -414,7 +432,7 @@ flowchart TB
 1. Прочитать §2–3 handbook → согласовать словарь с командой.  
 2. **IDE chrome tokens** + 1–2 эталонных экрана (MFD page + Intercom compact).  
 3. **Deck primitives** (лампы/readout) для health / semantic map.  
-4. **Intercom chrome** по 0127 (wireflow + компоненты Skia).  
+4. **Intercom** по [intercom-design-hub](intercom-design-hub-v1.md): P0 макеты (feed, chips, reveal frame) → chrome 0127.  
 5. Мультимониторные **storyboard**-ы (1/2/3 экрана) — без смены семантики зон.
 
 ---
