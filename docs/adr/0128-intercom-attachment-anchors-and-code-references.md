@@ -18,6 +18,7 @@
 | [0053](0053-semantic-map-control-flow-pfd.md) | Structural picker внутри метода (v2+) |
 | [0120](0120-primary-work-surface-intercom-or-editor.md) | Composer в Forward |
 | [0123](0123-intercom-full-skia-surface-evolution.md) | Skia-лента; fenced code в теле — `ChatMessageBodyPresentation` |
+| [0069](0069-markdown-preview-tool-surface-and-renderer-decoupling.md) | **Полный** Markdown: Markdig, MFD tool / окно — **не** inline в документе |
 
 ### Вне ADR (playbook)
 
@@ -218,9 +219,39 @@
 | Клик по умолчанию | **копировать** / развернуть блок; **не** open file | **reveal** в редакторе (§8) |
 | Парсер `[…]` | **внутри fenced code не парсить** attach-токены (§5) | только вне code-сегментов |
 
-**Реализация v1 (есть в коде):** `ChatMessageBodyPresentation.SplitSegments` — prose + **первый** fenced block; отрисовка — mono strip в Skia ([0123](0123-intercom-full-skia-surface-evolution.md) фаза 3). Ограничения v1: один блок `` ``` `` на сообщение; без подсветки синтаксиса по языку (stretch).
+**Fenced — да (канон):** тело сообщения хранится как markdown-строка; в ленте — сегменты **prose** + **code** (`ChatMessageBodySegmentKind`). Fenced blocks — первый класс, не «обрезанный plain text».
+
+**Реализация v1 (есть в коде):**
+
+| Слой | Что |
+|------|-----|
+| Разбор | `ChatMessageBodyPresentation.SplitSegments` — prose + fenced `` ``` `` (v1: **первый** блок; tail prose после закрывающих fence) |
+| Prose в ленте | `SkiaMarkdownLayout` — inline subset: `**` / `*` / `` ` `` ([0123](0123-intercom-full-skia-surface-evolution.md) фаза 3.1) |
+| Code в ленте | `SkiaMonoCodeStrip` — mono inset, перенос строк, **без** lang-highlight |
+
+**v1.1 (лента):** несколько fenced blocks на сообщение; опционально lang tag → тот же strip или лёгкая подсветка; кнопка **копировать** на блоке.
 
 **Связь с attach:** «посмотри этот метод» в prose + chip; длинный listing в ответе агента — fenced block. Не смешивать: fenced block **не** подменяет excerpt для агента, если нужна привязка к репо — нужен anchor.
+
+<a id="adr0128-p12"></a>
+
+### 12. Полный Markdown в сообщении (reuse preview, не дублировать движок)
+
+**Да, целый `.md` в `content` допустим** — агент и человек уже шлют markdown (заголовки, списки, таблицы, несколько fence). Вопрос только **где рендерить**.
+
+| Поверхность | Рендер | Когда |
+|-------------|--------|--------|
+| **Лента Intercom (steady)** | Skia: inline subset + fenced strips (§11) | Быстрый scroll, плотность, flat feed |
+| **Markdown Preview** ([0069](0069-markdown-preview-tool-surface-and-renderer-decoupling.md)) | `MarkdigMarkdownPreviewRenderer` + `MarkdownPreviewPayloadBuilder` | Длинный ответ, таблицы, диаграммы, «как документ» |
+| **MCP / команды** | `ide_show_preview`, `show_markdown_preview_page`, `chat_export_readable` | Агент явно открывает превью; экспорт сессии |
+
+**Решение:** не встраивать **полный Markdig** в каждую строку Skia-ленты (layout, perf, hit-test, CDS) — это отклонённая альтернатива ниже. Вместо этого:
+
+1. **В ленте** — читаемый subset + fenced (достаточно для 80% реплик).
+2. **Действие на сообщении** *(фаза 3b+)*: `intercom.open_message_markdown_preview` — тело сообщения → тот же pipeline, что [0069](0069-markdown-preview-tool-surface-and-renderer-decoupling.md) (MFD tool или отдельное окно); заголовок «Сообщение #N / тема».
+3. **Эвристика UI** *(опционально)*: если после parse > N строк или есть `| table |` / `##` — показать chip «Открыть как Markdown» рядом с сообщением.
+
+Composer для человека остаётся **plain/markdown source** (как сейчас); WYSIWYG в composer — не цель v1.
 
 ---
 
@@ -233,7 +264,8 @@
 | **2** | Bracket parse `[M:…]`, `[path]`; `/attach` в TOML; reveal рамка | 0058, Roslyn |
 | **3** | `/attach scope`; `syntaxScope`; re-resolve @ recipient; Shift→select | 0053 опционально |
 | **4** | Structural picker; `[M:Foo S:for:2]`; stale hint | 0053 |
-| **3b** *(stretch)* | Несколько fenced blocks; lang tag → подсветка; copy chip на блоке | 0123 |
+| **3b** | Несколько fenced blocks; copy на блоке; `intercom.open_message_markdown_preview` → [0069](0069-markdown-preview-tool-surface-and-renderer-decoupling.md) | 0123, 0069 |
+| **3c** *(stretch)* | Lang highlight в strip; chip «Открыть как Markdown» по эвристике | 0123 |
 
 ---
 
@@ -255,6 +287,7 @@
 | Клик → always selection | Риск случайного удаления |
 | Отдельный тип сообщения без canonical anchor | Дубли с prose; плохо для 0045 |
 | Две грамматики `T:,M:` и `type;member:` | Двойной парсер |
+| Markdig/WebView **внутри каждой** строки ленты | Scroll/perf; дубли [0069](0069-markdown-preview-tool-surface-and-renderer-decoupling.md); ломает flat Skia-модель [0123](0123-intercom-full-skia-surface-evolution.md) |
 
 ---
 
@@ -271,6 +304,8 @@
 | Excerpt лимит | По умолчанию **120 строк** или **16 KiB** (что меньше по объёму), хвост `…`; агенту в prompt — полный excerpt в пределах лимита |
 | Redaction внешний контур | Отдельное событие / политика [0080](0080-intercom-naming-and-multi-party-channel-model.md), не в slash UX |
 | `@file` inline | **Отложено** до фазы 2 attach; приоритет `/attach` + `[path]` |
+| Полный MD в чате | **Да** в `content`; рендер в ленте — subset + fenced; **полный** — через [0069](0069-markdown-preview-tool-surface-and-renderer-decoupling.md) по действию (§12) |
+| Fenced в ленте | **Да**, канон; расширять парсер (несколько блоков), не отказываться |
 
 ---
 
@@ -278,8 +313,9 @@
 
 1. Точная JSON-schema `AttachmentAnchor` в [0045](0045-agent-chat-persistence-event-log-and-projections.md) (`schema_version` bump, имена полей).
 2. Нужен ли **отдельный** `command_id` «скопировать excerpt anchor» vs общий copy selection.
-3. Collapse длинного fenced block по умолчанию (порог строк) — продуктовый порог.
+3. Collapse длинного fenced block в ленте (порог строк, по умолчанию свёрнут >40?) — продуктовый порог.
 4. Паритет: агент шлёт только fenced code без anchor — когда UI предлагает «attach как ссылку на файл» (heuristic, v2+).
+5. `open_message_markdown_preview`: MFD tool vs отдельное окно по умолчанию; включать ли Kroki/diagram expansion из [0023](0023-markdown-diagrams-language-tooling.md) для тела сообщения.
 
 ---
 
@@ -289,3 +325,4 @@
 |------|-----------|
 | 2026-05-19 | Proposed: канон AttachmentAnchor, H/M слои, `/attach`, reveal, re-resolve. |
 | 2026-05-19 | §11 fenced code vs anchor; согласованные решения; уточнены открытые вопросы. |
+| 2026-05-19 | §12 полный MD через [0069](0069-markdown-preview-tool-surface-and-renderer-decoupling.md); fenced канон; фазы 3b–3c. |

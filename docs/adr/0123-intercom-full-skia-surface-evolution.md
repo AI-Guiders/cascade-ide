@@ -202,7 +202,7 @@ Skia draw (Views/Chat/Skia, SkiaKit)
 ## Открытые вопросы
 
 1. **Platform input:** `InputMethod` + offscreen presenter vs отдельный нативный HWND для composer на Windows — спайк в фазе 2.
-2. **Markdown в ленте:** subset в Skia vs plain + preview.
+2. *(закрыто — [0128 §12](0128-intercom-attachment-anchors-and-code-references.md#adr0128-p12))* лента: Skia subset + fenced; полный MD — preview [0069](0069-markdown-preview-tool-surface-and-renderer-decoupling.md) по действию на сообщении.
 3. **Clarifications IDS:** bottom sheet vs боковая панель (оба — Avalonia overlay, не встроенный блок).
 4. **Приоритет:** фаза 1 (убрать Avalonia-остров) перед фазой 3 (группировка сообщений) — **рекомендуется**.
 
