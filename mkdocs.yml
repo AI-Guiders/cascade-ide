@@ -43,6 +43,9 @@ theme:
 plugins:
   - redirects:
       redirect_maps:
+        # Broken relative links from docs/site/adr-nav/ (../adr → /site/adr/ on Pages)
+        site/adr/README.md: adr/README.md
+        site/adr/status-lifecycle.md: adr/status-lifecycle.md
         # docs/ux/ matched ISO 639-1 locale "ux" in mkdocs-static-i18n — use ui-ux/
         ux/cascade-ide-ui-layout-v1.md: ui-ux/cascade-ide-ui-layout-v1.md
         ux/concept-to-implementation-map-v1.md: ui-ux/concept-to-implementation-map-v1.md

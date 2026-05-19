@@ -1,10 +1,10 @@
 # Навигатор ADR по статусам
 
-Сгруппированный индекс архитектурных решений по [жизненному циклу](../adr/status-lifecycle.md). Полный табличный индекс и тематические кластеры — в [README ADR](../adr/README.md).
+Сгруппированный индекс архитектурных решений по [жизненному циклу](../../adr/status-lifecycle.md). Полный табличный индекс и тематические кластеры — в [README ADR](../../adr/README.md).
 
-[Жизненный цикл статусов](../adr/status-lifecycle.md) · [Полный индекс ADR](../adr/README.md)
+[Жизненный цикл статусов](../../adr/status-lifecycle.md) · [Полный индекс ADR](../../adr/README.md)
 
-- [Proposed](proposed.md) — **39**
+- [Proposed](proposed.md) — **41**
 - [Accepted](accepted.md) — **42**
 - [Accepted · In progress](accepted-in-progress.md) — **1**
 - [Accepted · Implemented](accepted-implemented.md) — **47**

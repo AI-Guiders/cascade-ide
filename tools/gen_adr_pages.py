@@ -219,11 +219,11 @@ def write_index(out_dir: Path, records: list[AdrRecord], *, lang: str) -> None:
     if lang == "ru":
         h1 = "Навигатор ADR по статусам"
         intro = (
-            "Сгруппированный индекс архитектурных решений по [жизненному циклу](../adr/status-lifecycle.md). "
-            "Полный табличный индекс и тематические кластеры — в [README ADR](../adr/README.md)."
+            "Сгруппированный индекс архитектурных решений по [жизненному циклу](../../adr/status-lifecycle.md). "
+            "Полный табличный индекс и тематические кластеры — в [README ADR](../../adr/README.md)."
         )
-        full = "[Полный индекс ADR](../adr/README.md)"
-        life = "[Жизненный цикл статусов](../adr/status-lifecycle.md)"
+        full = "[Полный индекс ADR](../../adr/README.md)"
+        life = "[Жизненный цикл статусов](../../adr/status-lifecycle.md)"
     else:
         h1 = "ADR navigator by status"
         intro = (
