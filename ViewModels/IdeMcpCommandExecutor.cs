@@ -40,6 +40,7 @@ internal sealed partial class IdeMcpCommandExecutor
         RegisterPreviewAndConfirmation(Add);
         RegisterEditorStateAndContent(Add);
         RegisterEditAndNavigation(Add);
+        RegisterIntercom(Add);
         RegisterOutputAndFocus(Add);
         // NOTE: these are now generated:
         // - workspace/solution info

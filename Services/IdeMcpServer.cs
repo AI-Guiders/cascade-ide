@@ -41,7 +41,7 @@ public static class IdeMcpServer
                         else
                         {
                             var isActionTool = name is "ide_open_file" or "ide_load_solution" or "ide_select" or "ide_set_breakpoint" or "ide_remove_breakpoint"
-                                or "ide_show_preview" or "ide_show_editor_preview" or "ide_apply_edit" or "ide_go_to_position" or "ide_focus_editor"
+                                or "ide_show_preview" or "ide_show_editor_preview" or "ide_apply_edit" or "ide_go_to_position" or "ide_reveal_editor_range" or "ide_intercom_reveal_attachment" or "ide_focus_editor"
                                 or "ide_set_ui_theme" or "ide_set_control_layout" or "ide_set_control_text" or "ide_click_control"
                                 or "ide_send_keys" or "ide_set_focus" or "ide_highlight_control" or "ide_set_panel_size" or "ide_add_control"
                                 or "ide_write_agent_notes"

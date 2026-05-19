@@ -234,6 +234,41 @@ internal static class IdeMcpToolCatalogFull
             },
             new()
             {
+                Name = "ide_reveal_editor_range",
+                Description = "Показать диапазон строк transient-подсветкой без изменения selection (ADR 0130). Строки 1-based, inclusive.",
+                InputSchema = Schema(new
+                {
+                    type = "object",
+                    properties = new
+                    {
+                        file_path = new { type = "string" },
+                        start_line = new { type = "integer" },
+                        end_line = new { type = "integer" }
+                    },
+                    required = new[] { "file_path", "start_line", "end_line" }
+                })
+            },
+            new()
+            {
+                Name = "ide_intercom_reveal_attachment",
+                Description = "Reveal из Intercom по AttachmentAnchor (ADR 0128 §8): open + transient highlight; select=true — выделить. args: anchor_json или file + line_start + line_end; member_key?, select?",
+                InputSchema = Schema(new
+                {
+                    type = "object",
+                    properties = new
+                    {
+                        anchor_json = new { type = "object", description = "Полный AttachmentAnchor (JSON)." },
+                        file = new { type = "string", description = "Плоский режим: workspace-relative file." },
+                        line_start = new { type = "integer" },
+                        line_end = new { type = "integer" },
+                        member_key = new { type = "string" },
+                        select = new { type = "boolean", description = "true — SelectInEditor вместо reveal." }
+                    },
+                    required = Array.Empty<string>()
+                })
+            },
+            new()
+            {
                 Name = "ide_get_solution_info",
                 Description = "Информация о решении: solution_path, current_file_path, project_paths, selected_solution_path (путь узла, выделенного в обозревателе). JSON.",
                 InputSchema = s_emptyObjectInputSchema
