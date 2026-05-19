@@ -160,3 +160,7 @@ variable_types = true
 enabled = true
 show_assignments = true
 show_conditions = true
+
+# Intercom: дефолт клика по attach-chip (ADR 0130 фаза 3): reveal | select
+[intercom]
+attachment_navigate = "reveal"

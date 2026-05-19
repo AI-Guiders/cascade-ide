@@ -1,6 +1,6 @@
 # ADR 0131: `/editor select code` — selection в редакторе по bracket-ссылке `[F:… M:…]`
 
-**Статус:** Proposed  
+**Статус:** Accepted (фаза 1)  
 **Дата:** 2026-05-19
 
 ## Связанные ADR
@@ -82,7 +82,7 @@ MCP **не обязан** парсить prose `[M:…]` — только struct
 | Фаза | Содержание |
 |------|------------|
 | **0** | ADR; согласовать `command_id` и tail в `intent-catalog.toml` |
-| **1** | Общий bracket parser (вынести из 0128 фазы 2); `/editor select code` + `SelectInEditor` |
+| **1** *(done)* | `BracketCodeReferenceParser`; `/editor select code`, `/editor reveal code`; `editor.select_code` / `editor.reveal_code` |
 | **2** | `/editor reveal code`; autocomplete member/path; L2 `;` |
 | **3** | Паритет hotkey / palette melody рядом с `c:els` |
 
