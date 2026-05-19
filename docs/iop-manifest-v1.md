@@ -6,6 +6,8 @@
 
 **Cascade IDE** — открытая **рабочая реализация** IOP: стек, где этот поток сделан явным в agent-first IDE для .NET.
 
+**Как войти:** IOP и CIDE можно начать не с манифеста, а с **папки и разговора** (любопытство, один вопрос агенту) — дисциплина и ADR накладываются по мере практики. Показывать только «готовый кокпит» — завышать порог. Два пути — [cascadeide-philosophy-v1.md](design/cascadeide-philosophy-v1.md) §9, [handbook §1.1](design/cide-design-handbook-v1.md#11-два-порога-входа).
+
 !!! info "Нормативная привязка"
     Детали, non-goals и связи с ADR — [ADR 0121](adr/0121-intent-oriented-programming-paradigm.md) (Accepted).  
     English: [IOP manifest (EN)](en/iop-manifest-v1.md).

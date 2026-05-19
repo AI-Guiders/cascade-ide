@@ -6,6 +6,8 @@
 
 **Cascade IDE** is an open **working implementation** of IOP: a stack that makes this flow explicit in a **.NET** **agent-first** IDE.
 
+**How to enter:** you can start IOP and CIDE not from the manifest but from a **folder and a conversation** (curiosity, one honest question to the agent) — discipline and ADRs layer on as practice demands. Showing only the “finished cockpit” raises the barrier. Two paths — [cascadeide-philosophy-v1.md](../design/cascadeide-philosophy-v1.md) §9, [handbook §1.1](../design/cide-design-handbook-v1.md#11-два-порога-входа).
+
 !!! info "Normative detail"
     Non-goals and ADR links — [ADR 0121](adr/0121-intent-oriented-programming-paradigm.md) (Accepted).  
     Russian: [манифест IOP (RU)](../iop-manifest-v1.md).

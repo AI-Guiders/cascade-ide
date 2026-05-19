@@ -4,8 +4,8 @@
 
 | Документ | Для кого | Статус |
 |----------|----------|--------|
-| [cide-design-handbook-v1.md](cide-design-handbook-v1.md) | **Старт здесь** — принципы (§2), зоны (§3), **фокус работы дизайнера** (§8) | v1 hub |
-| [cascadeide-philosophy-v1.md](cascadeide-philosophy-v1.md) | Зачем продукт, метафоры, анти-паттерны AI | справочник |
+| [cide-design-handbook-v1.md](cide-design-handbook-v1.md) | **Старт здесь** — §1.1 два порога входа, принципы (§2), зоны (§3), фокус дизайнера (§8) | v1 hub |
+| [cascadeide-philosophy-v1.md](cascadeide-philosophy-v1.md) | Зачем продукт, метафоры, §9 любопытство vs интегрированный контур, AI | справочник |
 | [ide-chrome-tokens-v1.md](ide-chrome-tokens-v1.md) | Семантические токены IDE chrome (`CascadeTheme.*`) | v1 |
 | [intercom-design-hub-v1.md](intercom-design-hub-v1.md) | **Intercom для дизайнера:** домены D1–D9, иерархия доков, чеклист PNG | v1 hub |
 | [intercom-ux-reference-slack-mattermost-v1.md](intercom-ux-reference-slack-mattermost-v1.md) | Intercom: паттерны Slack/MM, attach, flat feed | черновик |
