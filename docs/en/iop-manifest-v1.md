@@ -4,9 +4,9 @@
 
 **Communication is the whole key.** With communication come aligned intent, transparency, and meaningful code; without it — local order in files and global chaos, which agents made painfully visible. IT is about **information flow**; writing software is only part of that flow.
 
-**Cascade IDE** is an open **working implementation** of IOP: a stack that makes this flow explicit in a **.NET** **agent-first** IDE.
+**Cascade IDE** is an open **working implementation** of IOP (one example stack, not the only carrier): a **.NET** **agent-first** IDE where the flow is explicit.
 
-**How to enter:** you can start IOP and CIDE not from the manifest but from a **folder and a conversation** (curiosity, one honest question to the agent) — discipline and ADRs layer on as practice demands. Showing only the “finished cockpit” raises the barrier. Two paths — [cascadeide-philosophy-v1.md](../design/cascadeide-philosophy-v1.md) §9, [handbook §1.1](../design/cide-design-handbook-v1.md#11-два-порога-входа).
+**How to enter:** you do not have to start with this whole manifest — see [§ Two entry thresholds](#two-entry-thresholds-project-aware) (folder + dialogue vs an already integrated contour). This is **project-aware** IOP/KB practice, not a single-product feature.
 
 !!! info "Normative detail"
     Non-goals and ADR links — [ADR 0121](adr/0121-intent-oriented-programming-paradigm.md) (Accepted).  
@@ -26,6 +26,33 @@ IOP in the IDE centers **explicit intent** (goal, target state, agreed process) 
 
 - **Not** “zoomers invented `/build`” — slashes, palette, and Melody are **surfaces** for one meaning.
 - **Not** a replacement for OOP/FP: classes and functions remain; what changes is how the team **agrees on work** before and after edits.
+
+---
+
+## Two entry thresholds (project-aware)
+
+A mature IOP/KB contour **from outside** often looks like: philosophy first, shed “instrumental thinking” (“just give me a button”), then you may work. That describes the **summit**, not the only legitimate start. Many began differently — and that remains the **canonical** entry.
+
+| Path | Where you start | What accumulates | Typical carrier |
+|------|-----------------|------------------|-----------------|
+| **Curiosity** | A **folder** workspace (project-aware root), one dialogue with the agent: *“how do you even think?”*, one hypothesis, one `project-id` when clear | Practice → questions → playbook/ADR in canon → MCP and product **as pain appears**, not “learn everything first” | Any environment with repo + agent; `[PRIMARY:…]`, `[SCOPE:…]` when needed (KB `playbook-multi-project-context-v1`) |
+| **Integrated** | Ready-made contour: router, hot-context, product cockpit, ADRs, three command surfaces | Faster for people **already inside**; risky as the **only** demo to skeptics | [SHOWCASE](https://github.com/AI-Guiders/kb-public) → KB index; in CIDE — [handbook](../design/cide-design-handbook-v1.md), Intercom, ADRs |
+
+Both paths **converge** on one discipline: explicit intent, observable delta, agent and human in the **same** information flow (artifacts, not “chat on the side”). The difference is **presentation order**, not “lite IOP vs real IOP”.
+
+**Project-aware:** “folder” is a concrete `workspace_path` and, when needed, **primary** / **scope** in the thread so the agent does not mix repositories or load all of canon. IOP does not require learning the full MCP map first — it requires **not confusing** products when there are several.
+
+**Onboarding mistakes:**
+
+| Mistake | Why it hurts |
+|---------|----------------|
+| Show only the integrated path (“read the manifest/handbook or you won’t get it”) | Blocks people who could enter via curiosity |
+| Promise the curiosity path needs no discipline | The contour degrades into “chat with buttons” without intent and verification |
+| Tie IOP to one IDE brand | IOP is about meaning flow; CIDE, Cursor+MCP, other stacks are **examples** |
+
+**Agent before heavy implementation:** in both paths the agent helps **before** commit — discuss, push back, narrow scope (see [§ Intercom](#intercom--communication-hub-around-a-goal-perspective)). That does not replace human review: the operator stays captain.
+
+**Example implementation (Cascade IDE):** after dialogue — ADR/playbook in `docs/`, fast code in the same contour (Intercom, in-proc MCP, editor); product design onboarding — [handbook §1.1](../design/cide-design-handbook-v1.md#11-two-entry-thresholds-cide).
 
 ---
 
@@ -58,9 +85,7 @@ Cockpit placement — [ADR 0120](adr/0120-primary-work-surface-intercom-or-edito
 
 ### Agent as sparring partner before implementation
 
-In an agent-first IDE, the agent is useful **before** commit and PR: you can **cheaply** walk through product corners (how to reference a code fragment, feed shape, anchor re-resolve) — **discuss, push back, narrow scope** — without waiting on a colleague and without most social friction of human coordination.
-
-That does **not** replace human review or auto-write ADRs: the operator stays captain. A typical IOP cycle in Cascade: **resolve branches in dialogue** → record in ADR/playbook → **implement quickly** in the same contour (Intercom, MCP, editor). See [cascadeide-philosophy-v1.md](design/cascadeide-philosophy-v1.md) §8.
+In an agent-first contour the agent helps **before** commit and PR: **cheaply** walk corners — **discuss, push back, narrow scope** — without waiting on a colleague. General rule — [§ Two entry thresholds](#two-entry-thresholds-project-aware); in CIDE — [philosophy §8](../design/cascadeide-philosophy-v1.md#8-агент-как-партнёр-для-проектирования-до-кода).
 
 ---
 
@@ -126,6 +151,7 @@ flowchart LR
 
 | If you want… | Document |
 |--------------|----------|
+| **Two entry thresholds (IOP/KB, project-aware)** | [§ above](#two-entry-thresholds-project-aware) · KB: `playbook-multi-project-context-v1`, `SHOWCASE.md` |
 | Cockpit PFD / Forward / MFD | [UI layout](ui-ux/cascade-ide-ui-layout-v1.md) |
 | Intercom and slashes | [ADR 0119](adr/0119-chat-slash-commands-intercom-surface.md) |
 | Team environment and shared display | [ADR 0122](adr/0122-collaborative-iop-environment-and-shared-situational-display.md) |
