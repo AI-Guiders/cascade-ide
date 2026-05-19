@@ -91,4 +91,30 @@ public partial class MainWindowViewModel
     {
         ((Services.IIdeMcpActions)this).SelectInEditor(filePath, line, column, endLine ?? line, endColumn ?? column);
     }
+
+    void Services.IIdeMcpActions.RevealEditorRange(string? filePath, int startLine, int endLine)
+    {
+        UiScheduler.Default.Post(() =>
+        {
+            if (!string.IsNullOrEmpty(filePath))
+            {
+                var normalized = CanonicalFilePath.Normalize(filePath);
+                if (!CanonicalFilePath.Equals(CurrentFilePath, normalized) && File.Exists(normalized))
+                {
+                    IsLoadingCurrentFile = true;
+                    try
+                    {
+                        Documents.OpenOrActivateDocument(normalized);
+                    }
+                    finally
+                    {
+                        IsLoadingCurrentFile = false;
+                    }
+                }
+            }
+
+            var path = string.IsNullOrEmpty(filePath) ? CurrentFilePath : CanonicalFilePath.Normalize(filePath);
+            _revealEditorRangeAction?.Invoke(path, startLine, endLine);
+        });
+    }
 }

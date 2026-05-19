@@ -90,6 +90,21 @@ public sealed class EditorMcpSpansTests
     }
 
     [Fact]
+    public void EditorRevealRange_TryParse_RequiresFileAndLines()
+    {
+        var fp = @"D:\p\f.cs";
+        var args = Args(
+            ("file_path", JsonSerializer.SerializeToElement(fp)),
+            ("start_line", JsonSerializer.SerializeToElement(10)),
+            ("end_line", JsonSerializer.SerializeToElement(25)));
+
+        Assert.True(EditorRevealRangeMcpArgs.TryParse(args, out var doc, out var lines, out var err), err);
+        Assert.Equal(CanonicalFilePath.Normalize(fp), doc.Value, ignoreCase: true);
+        Assert.Equal(10, lines.Start.Value);
+        Assert.Equal(25, lines.End.Value);
+    }
+
+    [Fact]
     public void EditorGoToPosition_TryParse_OptionalEndColumns()
     {
         var fp = @"D:\p\f.cs";

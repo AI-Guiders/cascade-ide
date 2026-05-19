@@ -25,6 +25,7 @@ public interface IIdeMcpActions
     void ApplyEdit(string filePath, int startLine, int startColumn, int endLine, int endColumn, string newText);
     /// <summary>Перейти на позицию (и опционально выделить до end). Если файл не открыт — открыть.</summary>
     void GoToPosition(string? filePath, int line, int column, int? endLine = null, int? endColumn = null);
+    void RevealEditorRange(string? filePath, int startLine, int endLine);
     /// <summary>Информация о решении и открытом файле. JSON.</summary>
     string GetSolutionInfo();
     /// <summary>Список файлов в дереве решения (обозреватель). JSON: file_entries [{ path, title }]. Выполняется в UI-потоке.</summary>

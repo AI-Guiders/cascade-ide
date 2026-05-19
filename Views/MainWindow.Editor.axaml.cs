@@ -42,6 +42,7 @@ public partial class MainWindow
             var active = TryGetActiveDockEditor();
             active?.Focus();
         });
+        vmSetup.SetRevealEditorRange(RevealEditorRangeInDock);
 
         if (!_workspaceEventsAttached)
         {
@@ -340,5 +341,17 @@ public partial class MainWindow
         editor.Select(start, length);
         editor.Focus();
         editor.TextArea.Caret.BringCaretToView();
+    }
+
+    private void RevealEditorRangeInDock(string? filePath, int startLine, int endLine)
+    {
+        if (DataContext is not ViewModels.MainWindowViewModel vm)
+            return;
+
+        var editor = Services.EditorActiveDockResolver.TryGetEditor(vm, filePath);
+        if (editor is null)
+            return;
+
+        _ = Services.EditorAgentRangeReveal.Show(editor, startLine, endLine);
     }
 }

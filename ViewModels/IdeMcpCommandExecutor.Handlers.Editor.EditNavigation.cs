@@ -24,5 +24,13 @@ internal sealed partial class IdeMcpCommandExecutor
             a.GoToPosition(file.Value, line.Value, column.Value, endLine?.Value, endColumn?.Value);
             return await Task.FromResult("OK");
         });
+        add(Services.IdeCommands.RevealEditorRange, async (args, ct) =>
+        {
+            var a = (IIdeMcpActions)_vm;
+            if (!EditorRevealRangeMcpArgs.TryParse(args, out var file, out var lines, out var err))
+                return err;
+            a.RevealEditorRange(file.Value, lines.Start.Value, lines.End.Value);
+            return await Task.FromResult("OK");
+        });
     }
 }

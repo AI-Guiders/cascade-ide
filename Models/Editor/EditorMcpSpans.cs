@@ -254,3 +254,32 @@ public static class EditorGoToPositionMcpArgs
         return true;
     }
 }
+
+/// <summary>Разбор <c>reveal_editor_range</c> (ADR 0130): <c>file_path</c> + инклюзивный диапазон строк.</summary>
+public static class EditorRevealRangeMcpArgs
+{
+    public static bool TryParse(
+        IReadOnlyDictionary<string, JsonElement>? args,
+        out EditorDocumentPath file,
+        out LineRange lines,
+        out string error)
+    {
+        file = default;
+        lines = default;
+        error = "";
+
+        if (!EditorDocumentPath.TryCreate(McpCommandJsonArgs.String(args, "file_path"), out file, out var fileErr))
+        {
+            error = fileErr;
+            return false;
+        }
+
+        if (!EditorContentLineRangeMcpArgs.TryParse(args, out lines, out var rangeErr))
+        {
+            error = rangeErr;
+            return false;
+        }
+
+        return true;
+    }
+}

@@ -9,11 +9,13 @@ public partial class MainWindowViewModel
     private Func<int, int, string?>? _editorContentRangeProvider;
     private Action<string, int, int, int, int, string>? _applyEditAction;
     private Action? _focusEditorAction;
+    private Action<string?, int, int>? _revealEditorRangeAction;
 
     public void SetEditorStateProvider(Func<int?, Services.EditorStateDto?> provider) => _editorStateProvider = provider;
     public void SetEditorContentRangeProvider(Func<int, int, string?> provider) => _editorContentRangeProvider = provider;
     public void SetApplyEdit(Action<string, int, int, int, int, string> action) => _applyEditAction = action;
     public void SetFocusEditor(Action action) => _focusEditorAction = action;
+    public void SetRevealEditorRange(Action<string?, int, int> action) => _revealEditorRangeAction = action;
 
     /// <summary>Вызвать, чтобы показать диалог «Открыть решение» (View подставит реализацию).</summary>
     public Action? RequestOpenSolution { get; set; }

@@ -78,6 +78,7 @@ public sealed class WebAiPortalCommandBridgeTests
         public Task<string> GetOpenDocumentTextAsync(string? filePath, int? maxChars) => throw new NotImplementedException();
         public void ApplyEdit(string filePath, int startLine, int startColumn, int endLine, int endColumn, string newText) => throw new NotImplementedException();
         public void GoToPosition(string? filePath, int line, int column, int? endLine = null, int? endColumn = null) => throw new NotImplementedException();
+        public void RevealEditorRange(string? filePath, int startLine, int endLine) => throw new NotImplementedException();
         public string GetSolutionInfo() => throw new NotImplementedException();
         public Task<string> GetSolutionFilesAsync() => throw new NotImplementedException();
         public Task<string> SearchWorkspaceTextAsync(string pattern, string? subPath, bool fixedString, string? glob, int maxMatches, string? rgPath) => throw new NotImplementedException();
