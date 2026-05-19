@@ -115,6 +115,8 @@ flowchart LR
 
 **Use case**, не определение IOP. [Cascade IDE](https://github.com/AI-Guiders/cascade-ide) — открытая **рабочая реализация** дисциплины для .NET: agent-first IDE, in-proc MCP, канон KB ([kb-public](https://github.com/AI-Guiders/kb-public), agent-notes). Другие стеки (Cursor + MCP, свой продукт) могут нести те же опоры иначе.
 
+**По духу Agile (не Scrum):** короткие циклы, проверка и адаптация, кооперация вместо обвинений — то же семейство привычек, что в [Agile Manifesto](https://agilemanifesto.org/iso/ru/manifesto.html), но команда шире (люди + агент), а дисциплина здесь названа **IOP** (манифест отдельно от фреймворка — как Agile от Scrum). Публичный нарратив «среда уже так живёт» — [статья на KDGIO](https://karataevdmitry.github.io/ru/writing/agent-workspace-agile.html).
+
 ### Как опоры легли на стек
 
 | Опора IOP | В экосистеме Cascade |
@@ -140,6 +142,7 @@ flowchart LR
 | Если нужно… | Документ |
 |-------------|----------|
 | **IOP (манифест)** | этот файл · [ADR 0121](adr/0121-intent-oriented-programming-paradigm.md) |
+| **Agile по духу (human–agent)** | [KDGIO: среда «человек–агент»](https://karataevdmitry.github.io/ru/writing/agent-workspace-agile.html) |
 | **Экосистема Cascade (use case)** | [§ выше](#пример-экосистема-cascade) · [handbook](design/cide-design-handbook-v1.md) · [навигатор ADR](site/adr-nav/index.md) |
 | **KB (отдельно от IOP)** | [kb-public / SHOWCASE](https://github.com/AI-Guiders/kb-public) |
 | Раскладка UI, Melody, политика agent-first | [UI layout](ui-ux/cascade-ide-ui-layout-v1.md) · [intent-melody](intent-melody-language-v1.md) · [architecture-policy](architecture-policy.md) |

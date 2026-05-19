@@ -115,6 +115,8 @@ flowchart LR
 
 A **use case**, not the definition of IOP. [Cascade IDE](https://github.com/AI-Guiders/cascade-ide) is an open **working implementation** of the discipline for .NET: agent-first IDE, in-proc MCP, KB canon ([kb-public](https://github.com/AI-Guiders/kb-public), agent-notes). Other stacks (Cursor + MCP, your own product) can carry the same pillars differently.
 
+**Agile in spirit (not Scrum):** short cycles, inspect and adapt, cooperation over blame — the same habit family as the [Agile Manifesto](https://agilemanifesto.org/), with a wider team (people + agent) and this discipline named **IOP** (manifest separate from framework — as Agile is from Scrum). A public narrative that the workspace already lives this way — [article on KDGIO](https://karataevdmitry.github.io/writing/agent-workspace-agile.html).
+
 ### How the pillars map to the stack
 
 | IOP pillar | In the Cascade ecosystem |
@@ -140,6 +142,7 @@ Product onboarding (not IOP): [handbook §1.1](../design/cide-design-handbook-v1
 | If you want… | Document |
 |--------------|----------|
 | **IOP (manifest)** | this file · [ADR 0121](adr/0121-intent-oriented-programming-paradigm.md) |
+| **Agile in spirit (human–agent)** | [KDGIO: human–agent workspace](https://karataevdmitry.github.io/writing/agent-workspace-agile.html) |
 | **Cascade ecosystem (use case)** | [§ above](#example-cascade-ecosystem) · [handbook](../design/cide-design-handbook-v1.md) · [ADR navigator](site/adr-nav/index.md) |
 | **KB (separate from IOP)** | [kb-public / SHOWCASE](https://github.com/AI-Guiders/kb-public) |
 | UI layout, Melody, agent-first policy | [UI layout](ui-ux/cascade-ide-ui-layout-v1.md) · [intent-melody](../intent-melody-language-v1.md) · [architecture-policy](architecture-policy.md) |
