@@ -120,6 +120,41 @@
 
 **Принцип:** то, что видит человек в ленте — **смысл** (`displayLabel`, excerpt); path/lines — вторично (hover, агент, fallback). При `file_missing` excerpt остаётся источником правды для всех.
 
+<a id="adr0128-p3b"></a>
+
+#### 3.1 Контекст отправителя @ send (`senderWorkspaceContext`)
+
+**Да, ветку (и короткий commit) стоит сохранять** — как **подсказку**, не как часть re-resolve.
+
+| Правило | Смысл |
+|---------|--------|
+| **Уровень** | На **сообщение** в payload [0045](0045-agent-chat-persistence-event-log-and-projections.md) (`message_added` / `message_completed`), **не** дублировать на каждый `AttachmentAnchor` |
+| **Обязательность** | Опционально; заполнять при send, если git repo доступен |
+| **Использование** | UI («отправитель был на `feature/x`»), агент в prompt, кнопка «переключиться?» — **не** автоматический checkout |
+| **Не использовать для** | Вычисления `lineStart`/`lineEnd` у получателя; единственного ключа навигации |
+
+Рекомендуемая форма *(имена при schema bump)*:
+
+```json
+"senderWorkspaceContext": {
+  "gitBranch": "feature/intercom-attach",
+  "gitCommitShort": "a1b2c3d",
+  "solutionPath": "relative/or/abs path to .sln at send",
+  "capturedAtUtc": "2026-05-19T12:00:00Z"
+}
+```
+
+| Поле | Заметки |
+|------|---------|
+| `gitBranch` | Имя ветки или `HEAD (detached)`; при detached — опираться на `gitCommitShort` |
+| `gitCommitShort` | 7–12 hex; для «та же ревизия?» у получателя |
+| `solutionPath` | Какой sln был активен @ send (multi-sln workspace) |
+| `capturedAtUtc` | Момент снимка (может совпадать с `resolvedAtUtc` у anchors) |
+
+**UX при `file_missing`:** toast + «файла нет в **твоём** workspace; отправитель: `feature/x` @ `a1b2c3d`» + excerpt; опционально действие **«Checkout ветки отправителя»** (явное, v2+, не silent).
+
+**Риск:** ветка устарела / force-push — поле **информационное**, может не совпадать с историей; не скрывать excerpt.
+
 <a id="adr0128-p4"></a>
 
 ### 4. Ввод для человека (слои H / M)
@@ -219,7 +254,7 @@
 
 **Почему excerpt обязателен @ send:** именно он **одинаков** у отправителя и получателя, когда репозитории разъехались. Строки и path — подсказки для IDE **после** успешного resolve у **этого** человека.
 
-**Ветка:** отдельного поля `gitBranch` в wire v1 **не** требуем (часто устаревает и врёт). Опционально v2: `senderWorkspaceHint` (branch name, commit) **только для UI** («отправитель был на `feature/x`»), без попытки checkout.
+**Ветка отправителя:** см. §3.1 `senderWorkspaceContext` на уровне сообщения — **рекомендуется** сохранять; не путать с re-resolve у получателя.
 
 **Не делаем v1:**
 
@@ -244,7 +279,7 @@
 
 | Фаза | Содержание | Зависимости |
 |------|------------|-------------|
-| **0** | Schema `AttachmentAnchor` в [0045](0045-agent-chat-persistence-event-log-and-projections.md); projection в ленту (read-only метки) | 0045 |
+| **0** | Schema `AttachmentAnchor` + опционально `senderWorkspaceContext` на сообщении в [0045](0045-agent-chat-persistence-event-log-and-projections.md); projection в ленту | 0045, git |
 | **1** | `/attach selection`, `/attach file`; chips; resolve @ send; excerpt | 0125, 0111 |
 | **2** | Bracket parse `[M:…]`, `[path]`; `/attach` в TOML; reveal рамка | 0058, Roslyn |
 | **3** | `/attach scope`; `syntaxScope`; re-resolve @ recipient; Shift→select | 0053 опционально |
@@ -289,12 +324,13 @@
 | Redaction внешний контур | Отдельное событие / политика [0080](0080-intercom-naming-and-multi-party-channel-model.md) |
 | `@file` inline | **Отложено** до фазы 2 attach |
 | Нет файла у получателя | Excerpt + warning; reveal **не** открывает пустой файл — §9.1 |
+| Ветка @ send | `senderWorkspaceContext` на сообщении — подсказка UI/агенту; checkout только явно — §3.1 |
 
 ---
 
 ## Открытые вопросы
 
-1. Точная JSON-schema `AttachmentAnchor` в [0045](0045-agent-chat-persistence-event-log-and-projections.md) (`schema_version` bump, имена полей).
+1. Точная JSON-schema `AttachmentAnchor` + `senderWorkspaceContext` в [0045](0045-agent-chat-persistence-event-log-and-projections.md) (`schema_version` bump).
 2. Нужен ли **отдельный** `command_id` «скопировать excerpt anchor» vs общий copy selection.
 3. Паритет: агент шлёт только fenced code без anchor — когда UI предлагает «attach как ссылку на файл» (heuristic, v2+; координация с [0129](0129-intercom-message-body-markdown-and-fenced-code.md)).
 
@@ -307,3 +343,4 @@
 | 2026-05-19 | Proposed: канон AttachmentAnchor, H/M слои, `/attach`, reveal, re-resolve. |
 | 2026-05-19 | §11–12 fenced/MD → [0129](0129-intercom-message-body-markdown-and-fenced-code.md); attach-only scope. |
 | 2026-05-19 | §9.1 исходы re-resolve: другая ветка / нет файла; excerpt как общий знаменатель. |
+| 2026-05-19 | §3.1 `senderWorkspaceContext` (ветка, commit) на уровне сообщения @ send. |
