@@ -17,6 +17,7 @@
 | [0111](0111-editor-linenumber-linerange-value-objects.md) | `LineRange` в домене |
 | [0053](0053-semantic-map-control-flow-pfd.md) | Structural picker внутри метода (v2+) |
 | [0120](0120-primary-work-surface-intercom-or-editor.md) | Composer в Forward |
+| [0123](0123-intercom-full-skia-surface-evolution.md) | Skia-лента; fenced code в теле — `ChatMessageBodyPresentation` |
 
 ### Вне ADR (playbook)
 
@@ -35,7 +36,9 @@
 4. **Клик из ленты:** `intercom.reveal_attachment` — open + scroll + **рамка** (не selection); Shift → select.
 5. **Строки @ send** — не контракт между участниками; устойчивее **excerpt** и **member** / **syntaxScope**.
 
-**Не входит:** vision/policy для image в prompt агента; полный structural picker (v2); `@file` inline (запасной); реализация composer chips (отдельные задачи).
+**Не входит:** vision/policy для image в prompt агента; полный structural picker (v2); `@file` inline (запасной); реализация composer chips (отдельные задачи); полный markdown-рендер ленты (см. [0123](0123-intercom-full-skia-surface-evolution.md) фаза 3).
+
+**Два вида «кода» в чате:** (1) **якорь на workspace** — этот ADR (`AttachmentAnchor`, chip, reveal); (2) **цитата в теле** — fenced `` ``` `` в `content`, без anchor — §11.
 
 ---
 
@@ -201,6 +204,24 @@
 - Лента: **flat feed** ([0123](0123-intercom-full-skia-surface-evolution.md)); inline-метки; без messenger-пузырей.
 - Агенту: ordered `AttachmentAnchor[]` + prose (для LLM — excerpt обязателен для безымянных блоков).
 
+<a id="adr0128-p11"></a>
+
+### 11. Fenced code в теле сообщения (не AttachmentAnchor)
+
+Отдельно от attach: агент или человек вставляет **фрагмент кода как текст** в `content` (markdown `` ```lang … ``` ``). Это **не** ссылка на файл в workspace, пока оператор явно не сделал attach / `[M:…]`.
+
+| Аспект | Fenced block в `content` | `AttachmentAnchor` |
+|--------|--------------------------|-------------------|
+| Источник | stream / paste в сообщение | `/attach`, `[…]`, chip в composer |
+| Wire | строка `content` (+ сегменты в проекции UI) | массив anchors в payload [0045](0045-agent-chat-persistence-event-log-and-projections.md) |
+| Стабильность | снимок на момент send; не re-resolve в репо | member / scope → re-resolve у получателя |
+| Клик по умолчанию | **копировать** / развернуть блок; **не** open file | **reveal** в редакторе (§8) |
+| Парсер `[…]` | **внутри fenced code не парсить** attach-токены (§5) | только вне code-сегментов |
+
+**Реализация v1 (есть в коде):** `ChatMessageBodyPresentation.SplitSegments` — prose + **первый** fenced block; отрисовка — mono strip в Skia ([0123](0123-intercom-full-skia-surface-evolution.md) фаза 3). Ограничения v1: один блок `` ``` `` на сообщение; без подсветки синтаксиса по языку (stretch).
+
+**Связь с attach:** «посмотри этот метод» в prose + chip; длинный listing в ответе агента — fenced block. Не смешивать: fenced block **не** подменяет excerpt для агента, если нужна привязка к репо — нужен anchor.
+
 ---
 
 ## Фазы внедрения
@@ -212,6 +233,7 @@
 | **2** | Bracket parse `[M:…]`, `[path]`; `/attach` в TOML; reveal рамка | 0058, Roslyn |
 | **3** | `/attach scope`; `syntaxScope`; re-resolve @ recipient; Shift→select | 0053 опционально |
 | **4** | Structural picker; `[M:Foo S:for:2]`; stale hint | 0053 |
+| **3b** *(stretch)* | Несколько fenced blocks; lang tag → подсветка; copy chip на блоке | 0123 |
 
 ---
 
@@ -236,13 +258,28 @@
 
 ---
 
+## Согласованные решения (для реализации)
+
+| Тема | Решение |
+|------|---------|
+| Fenced vs anchor | Разные сущности (§11); fenced не open file по клику |
+| `[` в fenced code | Attach-грамматика **не** применяется внутри code-сегмента |
+| `[` в prose | Только распознаваемые attach-токены; литеральные `[` в v1 — редкий кейс, экранирование `\[` — фаза 2+ |
+| Reveal highlight v1 | Transient **overlay / gutter band** (~3 s), не `Selection`; editor adornment — v2 |
+| `memberKey` v1 | `file` (workspace-relative) + Roslyn **display/qualified name** строкой; rename → stale + re-resolve |
+| `memberKey` v2 | DocumentId / symbol id при необходимости |
+| Excerpt лимит | По умолчанию **120 строк** или **16 KiB** (что меньше по объёму), хвост `…`; агенту в prompt — полный excerpt в пределах лимита |
+| Redaction внешний контур | Отдельное событие / политика [0080](0080-intercom-naming-and-multi-party-channel-model.md), не в slash UX |
+| `@file` inline | **Отложено** до фазы 2 attach; приоритет `/attach` + `[path]` |
+
+---
+
 ## Открытые вопросы
 
-1. Точная JSON-schema для [0045](0045-agent-chat-persistence-event-log-and-projections.md) (version bump).
-2. Editor adornment vs overlay для range highlight при reveal.
-3. Экранирование `[` в prose; конфликт с цитатами кода.
-4. `memberKey` format (Roslyn DocumentId vs custom stable id).
-5. Лимит excerpt (строки/символы) и redaction для внешнего контура [0080](0080-intercom-naming-and-multi-party-channel-model.md).
+1. Точная JSON-schema `AttachmentAnchor` в [0045](0045-agent-chat-persistence-event-log-and-projections.md) (`schema_version` bump, имена полей).
+2. Нужен ли **отдельный** `command_id` «скопировать excerpt anchor» vs общий copy selection.
+3. Collapse длинного fenced block по умолчанию (порог строк) — продуктовый порог.
+4. Паритет: агент шлёт только fenced code без anchor — когда UI предлагает «attach как ссылку на файл» (heuristic, v2+).
 
 ---
 
@@ -251,3 +288,4 @@
 | Дата | Изменение |
 |------|-----------|
 | 2026-05-19 | Proposed: канон AttachmentAnchor, H/M слои, `/attach`, reveal, re-resolve. |
+| 2026-05-19 | §11 fenced code vs anchor; согласованные решения; уточнены открытые вопросы. |

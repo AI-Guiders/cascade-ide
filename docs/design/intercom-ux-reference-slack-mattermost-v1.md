@@ -413,12 +413,12 @@
 3. **Минимальный набор system-сообщений v1:** только build fail/success или шире (git, index)?
 4. **Критерии выбора внешнего провайдера (слой B):** self-host, API, SSO — до ADR интеграции.
 5. **0128 implementation:** schema в [0045](../adr/0045-agent-chat-persistence-event-log-and-projections.md); фазы 0–4.
-6. *(закрыто в 0128)* attach vs open vs editor line; `attachmentShape`; H/M слои — см. ADR.
+6. *(закрыто в [0128](../adr/0128-intercom-attachment-anchors-and-code-references.md))* attach vs open vs editor line; `attachmentShape`; H/M; fenced vs anchor (§11).
 7. **Изображения в prompt агента:** политика vision vs path-only — отдельно от slash UX.
-8. **Нужен ли `@file` inline:** после прототипа `/attach` и `[path]` в курсор.
-9. **Грамматика `[path]`:** L0 vs L1 (`M:`/`L:`) vs L2 (`F;M;L`); один канон разделителей; resolve member при send.
-10. **Editor range highlight:** adornment в редакторе vs overlay; TTL рамки; паритет с `highlight_control`.
-11. **`/attach scope`:** innermost syntax span; нумерация `for (2)`; picker vs `S:for:2`.
+8. *(отложено в [0128](../adr/0128-intercom-attachment-anchors-and-code-references.md))* `@file` inline — после фазы 2 `/attach` + `[path]`.
+9. *(закрыто в [0128](../adr/0128-intercom-attachment-anchors-and-code-references.md))* L2 `F;M;L` — канон для агента; L1 `[M:…]` для людей; `[` не парсить внутри fenced code.
+10. *(v1 в [0128](../adr/0128-intercom-attachment-anchors-and-code-references.md))* reveal: overlay/gutter ~3 s; adornment — v2.
+11. **`/attach scope`:** innermost syntax span; нумерация `for (2)`; picker vs `S:for:2` — фаза 3 [0128](../adr/0128-intercom-attachment-anchors-and-code-references.md).
 
 ---
 
