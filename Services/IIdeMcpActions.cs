@@ -155,20 +155,20 @@ public interface IIdeMcpActions
     Task<string> UpsertAgentNotesSectionAsync(string sectionId, string content, CancellationToken cancellationToken = default);
     /// <summary>Поиск по заметкам агента (case-insensitive). Возвращает JSON: matches [{ line, text }].</summary>
     Task<string> SearchAgentNotesAsync(string query, int? headLimit = null, CancellationToken cancellationToken = default);
-    /// <summary>Прочитать knowledge-файл из каталога решения (knowledge/&lt;file_path&gt;). Опционально offset (1-based) и limit (число строк). Возвращает текст или "".</summary>
-    Task<string> ReadKnowledgeFileAsync(string filePath, int? offset = null, int? limit = null, CancellationToken cancellationToken = default);
-    /// <summary>Список knowledge-файлов в каталоге решения (knowledge/). subdir — относительный подкаталог (например "work"). Возвращает JSON: files [{ path, size_bytes, modified_utc }].</summary>
-    Task<string> ListKnowledgeFilesAsync(string? subdir = null, CancellationToken cancellationToken = default);
-    /// <summary>Записать knowledge-файл (полная замена). knowledge_path — корень с каталогом knowledge/; если не задан — primary root из TOML ([agent_notes].config_path).</summary>
-    Task<string> WriteKnowledgeFileAsync(string filePath, string content, string? knowledgePath = null, bool saveRevision = true, CancellationToken cancellationToken = default);
+    /// <summary>Прочитать knowledge-файл. Корень: knowledge_path, knowledge_root_id или primary из TOML.</summary>
+    Task<string> ReadKnowledgeFileAsync(string filePath, int? offset = null, int? limit = null, string? knowledgeRootId = null, CancellationToken cancellationToken = default);
+    /// <summary>Список knowledge-файлов. subdir — относительный подкаталог (например "work").</summary>
+    Task<string> ListKnowledgeFilesAsync(string? subdir = null, string? knowledgeRootId = null, CancellationToken cancellationToken = default);
+    /// <summary>Записать knowledge-файл (полная замена). Запись только в primary; read-only roots отклоняются.</summary>
+    Task<string> WriteKnowledgeFileAsync(string filePath, string content, string? knowledgePath = null, bool saveRevision = true, string? knowledgeRootId = null, CancellationToken cancellationToken = default);
     /// <summary>Добавить блок в конец knowledge-файла.</summary>
-    Task<string> AppendKnowledgeFileAsync(string filePath, string content, string? knowledgePath = null, bool saveRevision = true, CancellationToken cancellationToken = default);
+    Task<string> AppendKnowledgeFileAsync(string filePath, string content, string? knowledgePath = null, bool saveRevision = true, string? knowledgeRootId = null, CancellationToken cancellationToken = default);
     /// <summary>Вставить/обновить секцию в knowledge-файле по section_id.</summary>
-    Task<string> UpsertKnowledgeSectionAsync(string filePath, string sectionId, string content, string? knowledgePath = null, bool saveRevision = true, CancellationToken cancellationToken = default);
+    Task<string> UpsertKnowledgeSectionAsync(string filePath, string sectionId, string content, string? knowledgePath = null, bool saveRevision = true, string? knowledgeRootId = null, CancellationToken cancellationToken = default);
     /// <summary>Удалить knowledge-файл.</summary>
-    Task<string> DeleteKnowledgeFileAsync(string filePath, string? knowledgePath = null, CancellationToken cancellationToken = default);
+    Task<string> DeleteKnowledgeFileAsync(string filePath, string? knowledgePath = null, string? knowledgeRootId = null, CancellationToken cancellationToken = default);
     /// <summary>Удалить секцию из knowledge-файла.</summary>
-    Task<string> DeleteKnowledgeSectionAsync(string filePath, string sectionId, string? knowledgePath = null, CancellationToken cancellationToken = default);
+    Task<string> DeleteKnowledgeSectionAsync(string filePath, string sectionId, string? knowledgePath = null, string? knowledgeRootId = null, CancellationToken cancellationToken = default);
 
     /// <summary>Статус гибридного индекса (паритет MCP <c>codebase_index_status</c>). JSON.</summary>
     Task<string> CodebaseIndexStatusAsync(string? workspacePath, string? solutionPath, CancellationToken cancellationToken = default);

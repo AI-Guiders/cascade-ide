@@ -255,7 +255,7 @@ internal static class IdeCommandsContractGenerated
         ["highlight_control"] = "{\"name\":\"BuildButton\"}",
         ["install_ollama_model"] = "{\"model\":\"qwen2.5-coder:7b\"}",
         ["list_agent_notes_revisions"] = "{\"limit\":20}",
-        ["list_knowledge_files"] = "{\"subdir\":\"work\"}",
+        ["list_knowledge_files"] = "{\"subdir\":\"work\",\"knowledge_root_id\":\"group\"}",
         ["load_solution"] = "{\"path\":\"D:\\\\repo\\\\MyApp.csproj\"}",
         ["memory_health"] = "{\"active_scope\":\"door-to-singularity\"}",
         ["move_document_to_group_1"] = "{\"file_path\":\"C:\\\\\\\\tmp\\\\\\\\a.cs\"}",

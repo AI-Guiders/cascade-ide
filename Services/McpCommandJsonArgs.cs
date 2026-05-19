@@ -12,6 +12,10 @@ public static class McpCommandJsonArgs
     public static string? KnowledgePath(IReadOnlyDictionary<string, JsonElement>? args) =>
         String(args, "knowledge_path") ?? String(args, "canon_path");
 
+    /// <summary>Knowledge root id from TOML <c>[knowledge.roots]</c> / <c>[[knowledge.read_only]]</c> (MCP 2.1 / ADR 015). Mutually exclusive with <see cref="KnowledgePath"/>.</summary>
+    public static string? KnowledgeRootId(IReadOnlyDictionary<string, JsonElement>? args) =>
+        String(args, "knowledge_root_id");
+
     public static int Int(IReadOnlyDictionary<string, JsonElement>? args, string key, int defaultValue = 0)
     {
         if (args is null || !args.TryGetValue(key, out var e) || e.ValueKind != JsonValueKind.Number)

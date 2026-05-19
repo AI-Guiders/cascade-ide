@@ -43,15 +43,20 @@ internal sealed partial class IdeMcpCommandExecutor
                 McpCommandJsonArgs.String(args, "file_path") ?? "",
                 McpCommandJsonArgs.OptionalInt32(args, "offset"),
                 McpCommandJsonArgs.OptionalInt32(args, "limit"),
+                McpCommandJsonArgs.KnowledgeRootId(args),
                 ct));
         add(Services.IdeCommands.ListKnowledgeFiles, async (args, ct) =>
-            await ((IIdeMcpActions)_vm).ListKnowledgeFilesAsync(McpCommandJsonArgs.String(args, "subdir"), ct));
+            await ((IIdeMcpActions)_vm).ListKnowledgeFilesAsync(
+                McpCommandJsonArgs.String(args, "subdir"),
+                McpCommandJsonArgs.KnowledgeRootId(args),
+                ct));
         add(Services.IdeCommands.WriteKnowledgeFile, async (args, ct) =>
             await ((IIdeMcpActions)_vm).WriteKnowledgeFileAsync(
                 McpCommandJsonArgs.String(args, "file_path") ?? "",
                 McpCommandJsonArgs.String(args, "content") ?? "",
                 McpCommandJsonArgs.KnowledgePath(args),
                 McpCommandJsonArgs.Bool(args, "save_revision", true),
+                McpCommandJsonArgs.KnowledgeRootId(args),
                 ct));
         add(Services.IdeCommands.AppendKnowledgeFile, async (args, ct) =>
             await ((IIdeMcpActions)_vm).AppendKnowledgeFileAsync(
@@ -59,6 +64,7 @@ internal sealed partial class IdeMcpCommandExecutor
                 McpCommandJsonArgs.String(args, "content") ?? "",
                 McpCommandJsonArgs.KnowledgePath(args),
                 McpCommandJsonArgs.Bool(args, "save_revision", true),
+                McpCommandJsonArgs.KnowledgeRootId(args),
                 ct));
         add(Services.IdeCommands.UpsertKnowledgeSection, async (args, ct) =>
             await ((IIdeMcpActions)_vm).UpsertKnowledgeSectionAsync(
@@ -67,10 +73,20 @@ internal sealed partial class IdeMcpCommandExecutor
                 McpCommandJsonArgs.String(args, "content") ?? "",
                 McpCommandJsonArgs.KnowledgePath(args),
                 McpCommandJsonArgs.Bool(args, "save_revision", true),
+                McpCommandJsonArgs.KnowledgeRootId(args),
                 ct));
         add(Services.IdeCommands.DeleteKnowledgeFile, async (args, ct) =>
-            await ((IIdeMcpActions)_vm).DeleteKnowledgeFileAsync(McpCommandJsonArgs.String(args, "file_path") ?? "", McpCommandJsonArgs.KnowledgePath(args), ct));
+            await ((IIdeMcpActions)_vm).DeleteKnowledgeFileAsync(
+                McpCommandJsonArgs.String(args, "file_path") ?? "",
+                McpCommandJsonArgs.KnowledgePath(args),
+                McpCommandJsonArgs.KnowledgeRootId(args),
+                ct));
         add(Services.IdeCommands.DeleteKnowledgeSection, async (args, ct) =>
-            await ((IIdeMcpActions)_vm).DeleteKnowledgeSectionAsync(McpCommandJsonArgs.String(args, "file_path") ?? "", McpCommandJsonArgs.String(args, "section_id") ?? "", McpCommandJsonArgs.KnowledgePath(args), ct));
+            await ((IIdeMcpActions)_vm).DeleteKnowledgeSectionAsync(
+                McpCommandJsonArgs.String(args, "file_path") ?? "",
+                McpCommandJsonArgs.String(args, "section_id") ?? "",
+                McpCommandJsonArgs.KnowledgePath(args),
+                McpCommandJsonArgs.KnowledgeRootId(args),
+                ct));
     }
 }

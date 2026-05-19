@@ -225,9 +225,19 @@ public static class EnvironmentReadinessSnapshotBuilder
         return new AnnunciatorLampItem(
             EnvironmentReadinessCellIds.AgentNotesCanonPath,
             title,
-            "TOML загружен; primary knowledge root доступен (паритет с agent-notes-mcp 2.0).",
+            BuildAgentNotesKbOkDetail(root),
             AnnunciatorLampLevel.Ok,
             LampShortLabel: "KB");
+    }
+
+    private static string BuildAgentNotesKbOkDetail(string primaryRoot)
+    {
+        var readOnlyCount = AgentNotesRuntime.IsConfigured
+            ? AgentNotesRuntime.Settings.ReadOnlyKnowledgeRoots.Count
+            : 0;
+        return readOnlyCount > 0
+            ? $"TOML загружен; primary KB доступен; read-only roots: {readOnlyCount} (knowledge_root_id, паритет MCP 2.1)."
+            : "TOML загружен; primary knowledge root доступен (паритет agent-notes-mcp 2.1).";
     }
 
     private static AnnunciatorLampItem BuildNetcoreDbgRow(string? raw, Func<string?>? tryResolveNetcoreDbgWhenUnset = null)

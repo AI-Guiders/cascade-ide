@@ -35,7 +35,14 @@ public sealed class McpAgentNotesService
 
     private CascadeIdeSettings Settings => _settingsProvider();
 
-    private bool TryEnsureRuntime() => AgentNotesRuntimeLoader.EnsureInitialized(Settings);
+    private bool TryEnsureRuntime()
+    {
+        var settings = Settings;
+        if (string.IsNullOrWhiteSpace(settings.AgentNotes.ConfigPath))
+            return AgentNotesRuntime.IsConfigured;
+
+        return AgentNotesRuntimeLoader.EnsureInitialized(settings);
+    }
 
     /// <summary>
     /// Каталог workspace для <see cref="NotesStorage"/> (read/write/list).
@@ -251,7 +258,7 @@ public sealed class McpAgentNotesService
         }
     }
 
-    public string ReadKnowledgeFile(string filePath, int? offset = null, int? limit = null)
+    public string ReadKnowledgeFile(string filePath, int? offset = null, int? limit = null, string? knowledgeRootId = null)
     {
         TryEnsureRuntime();
         if (string.IsNullOrWhiteSpace(filePath))
@@ -259,7 +266,10 @@ public sealed class McpAgentNotesService
         try
         {
             if (AgentNotesRuntime.IsConfigured)
-                return _storage.ReadKnowledgeFile(knowledgePath: null, filePath, offset, limit);
+                return _storage.ReadKnowledgeFile(knowledgePath: null, filePath, offset, limit, knowledgeRootId);
+
+            if (!string.IsNullOrWhiteSpace(knowledgeRootId))
+                return "Error: knowledge_root_id requires agent-notes TOML ([agent_notes].config_path).";
 
             var overlayCanon = KbBaseOverlayPathResolver.TryResolveCanonRoot(Settings);
             if (overlayCanon is not null)
@@ -285,13 +295,16 @@ public sealed class McpAgentNotesService
         }
     }
 
-    public string ListKnowledgeFiles(string? subdir)
+    public string ListKnowledgeFiles(string? subdir, string? knowledgeRootId = null)
     {
         TryEnsureRuntime();
         try
         {
             if (AgentNotesRuntime.IsConfigured)
-                return _storage.ListKnowledgeFiles(knowledgePath: null, subdir);
+                return _storage.ListKnowledgeFiles(knowledgePath: null, subdir, knowledgeRootId);
+
+            if (!string.IsNullOrWhiteSpace(knowledgeRootId))
+                return "{\"error\":\"knowledge_root_id requires agent-notes TOML ([agent_notes].config_path).\"}";
 
             var overlayCanon = KbBaseOverlayPathResolver.TryResolveCanonRoot(Settings);
             var overlayJson =
@@ -333,12 +346,12 @@ public sealed class McpAgentNotesService
         }
     }
 
-    public string WriteKnowledgeFile(string filePath, string content, string? knowledgePath, bool saveRevision)
+    public string WriteKnowledgeFile(string filePath, string content, string? knowledgePath, bool saveRevision, string? knowledgeRootId = null)
     {
         TryEnsureRuntime();
         try
         {
-            return _storage.WriteKnowledgeFile(knowledgePath, filePath, content, saveRevision);
+            return _storage.WriteKnowledgeFile(knowledgePath, filePath, content, saveRevision, knowledgeRootId);
         }
         catch (Exception ex)
         {
@@ -346,12 +359,12 @@ public sealed class McpAgentNotesService
         }
     }
 
-    public string AppendKnowledgeFile(string filePath, string content, string? knowledgePath, bool saveRevision)
+    public string AppendKnowledgeFile(string filePath, string content, string? knowledgePath, bool saveRevision, string? knowledgeRootId = null)
     {
         TryEnsureRuntime();
         try
         {
-            return _storage.AppendKnowledgeFile(knowledgePath, filePath, content, saveRevision);
+            return _storage.AppendKnowledgeFile(knowledgePath, filePath, content, saveRevision, knowledgeRootId);
         }
         catch (Exception ex)
         {
@@ -359,12 +372,12 @@ public sealed class McpAgentNotesService
         }
     }
 
-    public string UpsertKnowledgeSection(string filePath, string sectionId, string content, string? knowledgePath, bool saveRevision)
+    public string UpsertKnowledgeSection(string filePath, string sectionId, string content, string? knowledgePath, bool saveRevision, string? knowledgeRootId = null)
     {
         TryEnsureRuntime();
         try
         {
-            return _storage.UpsertKnowledgeSection(knowledgePath, filePath, sectionId, content, saveRevision);
+            return _storage.UpsertKnowledgeSection(knowledgePath, filePath, sectionId, content, saveRevision, knowledgeRootId);
         }
         catch (Exception ex)
         {
@@ -372,12 +385,12 @@ public sealed class McpAgentNotesService
         }
     }
 
-    public string DeleteKnowledgeFile(string filePath, string? knowledgePath)
+    public string DeleteKnowledgeFile(string filePath, string? knowledgePath, string? knowledgeRootId = null)
     {
         TryEnsureRuntime();
         try
         {
-            return _storage.DeleteKnowledgeFile(knowledgePath, filePath);
+            return _storage.DeleteKnowledgeFile(knowledgePath, filePath, knowledgeRootId);
         }
         catch (Exception ex)
         {
@@ -385,12 +398,12 @@ public sealed class McpAgentNotesService
         }
     }
 
-    public string DeleteKnowledgeSection(string filePath, string sectionId, string? knowledgePath)
+    public string DeleteKnowledgeSection(string filePath, string sectionId, string? knowledgePath, string? knowledgeRootId = null)
     {
         TryEnsureRuntime();
         try
         {
-            return _storage.DeleteKnowledgeSection(knowledgePath, filePath, sectionId);
+            return _storage.DeleteKnowledgeSection(knowledgePath, filePath, sectionId, knowledgeRootId);
         }
         catch (Exception ex)
         {
