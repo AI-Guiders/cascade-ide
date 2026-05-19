@@ -192,6 +192,7 @@
 | [0125](0125-slash-workspace-file-commands-and-dynamic-completion.md) | Slash workspace/file: `/file open`, `/solution new`, динамические подсказки по файлам; `create_project_in_solution` (console/classlib/webapi) | Accepted · Implemented |
 | [0126](0126-intercom-inspect-slash-and-compact-chrome-status.md) | Intercom inspect: `/topic`/`/spine` list\|tree (`kind=report`); статус в compact toolbar; UX открытия файла из slash | Accepted · Implemented |
 | [0128](0128-intercom-attachment-anchors-and-code-references.md) | Intercom: якоря вложений (attach), `[M:…]` / chips, reveal, re-resolve; ортогонально `/file open` и `/editor line` | Proposed |
+| [0129](0129-intercom-message-body-markdown-and-fenced-code.md) | Intercom: тело сообщения — fenced code, inline MD в ленте, полный preview через [0069](0069-markdown-preview-tool-surface-and-renderer-decoupling.md) | Proposed |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 

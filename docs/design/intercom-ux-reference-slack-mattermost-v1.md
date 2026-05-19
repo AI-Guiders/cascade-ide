@@ -2,7 +2,7 @@
 
 **Статус:** продуктовый playbook (детали attach — **ADR**).  
 **Дата:** 2026-05-17  
-**Норматив (attach / якоря):** [ADR 0128](../adr/0128-intercom-attachment-anchors-and-code-references.md)  
+**Норматив:** attach / якоря — [ADR 0128](../adr/0128-intercom-attachment-anchors-and-code-references.md); fenced / MD в теле — [ADR 0129](../adr/0129-intercom-message-body-markdown-and-fenced-code.md)  
 **Связь:** [intercom-design-hub-v1.md](intercom-design-hub-v1.md) · [0080](../adr/0080-intercom-naming-and-multi-party-channel-model.md) · [0072](../adr/0072-chat-topic-cards-intent-melody-keyboard-contract.md) · [0119](../adr/0119-chat-slash-commands-intercom-surface.md) · [0057](../adr/0057-chat-surface-pipeline-adoption.md) · [0120](../adr/0120-primary-work-surface-intercom-or-editor.md) · [north-star](north-star-cursor-mcp-cascade-workbench-v1.md)
 
 ## Зачем этот документ
@@ -413,10 +413,10 @@
 3. **Минимальный набор system-сообщений v1:** только build fail/success или шире (git, index)?
 4. **Критерии выбора внешнего провайдера (слой B):** self-host, API, SSO — до ADR интеграции.
 5. **0128 implementation:** schema в [0045](../adr/0045-agent-chat-persistence-event-log-and-projections.md); фазы 0–4.
-6. *(закрыто в [0128](../adr/0128-intercom-attachment-anchors-and-code-references.md))* attach vs open vs editor line; `attachmentShape`; H/M; fenced vs anchor (§11).
+6. *(закрыто)* attach — [0128](../adr/0128-intercom-attachment-anchors-and-code-references.md); fenced vs anchor — [0129](../adr/0129-intercom-message-body-markdown-and-fenced-code.md).
 7. **Изображения в prompt агента:** политика vision vs path-only — отдельно от slash UX.
 8. *(отложено в [0128](../adr/0128-intercom-attachment-anchors-and-code-references.md))* `@file` inline — после фазы 2 `/attach` + `[path]`.
-9. *(закрыто в [0128](../adr/0128-intercom-attachment-anchors-and-code-references.md))* L2 `F;M;L` — канон для агента; L1 `[M:…]` для людей; `[` не парсить внутри fenced code.
+9. *(закрыто)* L2 `F;M;L` — [0128](../adr/0128-intercom-attachment-anchors-and-code-references.md); `[` не парсить внутри fenced — [0129](../adr/0129-intercom-message-body-markdown-and-fenced-code.md) §5.
 10. *(v1 в [0128](../adr/0128-intercom-attachment-anchors-and-code-references.md))* reveal: overlay/gutter ~3 s; adornment — v2.
 11. **`/attach scope`:** innermost syntax span; нумерация `for (2)`; picker vs `S:for:2` — фаза 3 [0128](../adr/0128-intercom-attachment-anchors-and-code-references.md).
 
@@ -439,3 +439,4 @@
 | 2026-05-19 | Строки @ send — не контракт между участниками; re-resolve у получателя; excerpt устойчивее L50–100. |
 | 2026-05-19 | Внутри метода: H0b `/attach scope`, member+prose, v2 `S:for:2` / structural picker. |
 | 2026-05-19 | Норматив attach → [ADR 0128](../adr/0128-intercom-attachment-anchors-and-code-references.md). |
+| 2026-05-19 | Fenced / MD в теле → [ADR 0129](../adr/0129-intercom-message-body-markdown-and-fenced-code.md). |

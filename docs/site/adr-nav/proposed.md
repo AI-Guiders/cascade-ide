@@ -51,6 +51,7 @@ hide:
 | [0122](../../adr/0122-collaborative-iop-environment-and-shared-situational-display.md) | Командная среда IOP — рабочие места и общий ситуационный экран | Proposed |
 | [0127](../../adr/0127-intercom-spine-and-topic-tabs-chrome-navigation.md) | Intercom — spine и вкладки тем в chrome (навигация без overview) | Proposed · **согласованное направление** (2026-05-18) |
 | [0128](../../adr/0128-intercom-attachment-anchors-and-code-references.md) | Intercom — якоря вложений (code references), attach, reveal, re-resolve | Proposed |
+| [0129](../../adr/0129-intercom-message-body-markdown-and-fenced-code.md) | Intercom — тело сообщения: Markdown, fenced code, preview [0069] | Proposed |
 
 
 ---
