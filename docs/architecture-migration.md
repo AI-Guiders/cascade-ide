@@ -108,7 +108,7 @@
 | Файл | Строк (≈) | Содержание |
 |------|------------|------------|
 | `IdeMcpCommandExecutor.cs` | 51 | Диспетчер MCP-команд IDE: разбор args и вызов `IIdeMcpActions` / UI-команд главного окна. |
-| `IdeMcpCommandExecutor.Handlers.AgentNotes.cs` | 74 | Хендлеры agent-notes. |
+| `IdeMcpCommandExecutor.Handlers.AgentNotes.cs` | 90 | Хендлеры agent-notes. |
 | `IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.cs` | 11 | MCP-хендлеры меню и тулбара: делегирование по группам (диалоги, тема/язык, панели и сборка). |
 | `IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.DialogsApp.cs` | 77 | MCP-хендлеры диалогов открытия, выхода, настроек, превью и окон-хостов презентации. |
 | `IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.PanelsLayout.cs` | 75 | MCP-хендлеры показа панелей MFD, групп редакторов и сборки из UI. |
