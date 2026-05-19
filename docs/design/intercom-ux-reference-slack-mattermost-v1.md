@@ -54,6 +54,23 @@
 - **Карточка темы** со **сводкой** [0096](../adr/0096-intercom-topic-card-summary-and-product-spine.md) — аналог preview последнего сообщения в списке каналов.
 - **Product spine** — ортогонален main thread; не смешивать с обычной лентой без явного действия.
 
+#### Лента без «пузырей» (как Slack/MM, не как Telegram)
+
+У **Slack и Mattermost** в канале **нет** messenger-пузырей (цветные «шарики» слева/справа) — плоская **лента**: аватар (опционально) + **имя + время** + текст на фоне канала. У Cascade Intercom **целевое направление — то же**: пузыри **отвлекают** от кода и смысла реплики; лишний визуальный шум в Forward.
+
+| Делаем | Не делаем |
+|--------|-----------|
+| **Большинство** реплик — одна плоская строка, **без** рамки и без заливки | Оформлять каждое сообщение как «карточку» |
+| Роль human / agent / system — **типографика** (имя, цвет метки, плотность), не balloon | Залитые rounded **bubble** вокруг каждой реплики |
+| **Акцент редко:** рамка / inset только когда есть смысл прервать (ошибка, блокер, результат слэша, diff) | Рамка «для красоты» или на каждую реплику агента |
+| System / slash-outcome — по умолчанию **компактная строка**; рамка — только при ошибке или явном статусе | Псевдо-диалог «два собеседника в шариках» |
+
+**Правило акцента:** если рамкой/inset помечено **больше малой доли** ленты, акцент **теряет смысл** — как в Dark Cockpit ([handbook §2.5](cide-design-handbook-v1.md)): в норме лента **тихая**, прерывание — по делу.
+
+**Текущее состояние:** в коде/теме ещё есть legacy `message_bubble` / `ChatMessageBubbleBackground` (Avalonia/Skia) — **долг** на эволюцию к flat feed ([0123](../adr/0123-intercom-full-skia-surface-evolution.md)). В макетах для дизайнера — **не** рисовать Telegram/iMessage-пузыри; ориентир — скриншот Slack (плоская лента).
+
+*Исключение термина:* в ADR про слэш иногда «пузырь» = **одна строка результата** `/command` в ленте (не chat-bubble); при рефакторинге лучше «slash outcome row».
+
 ### IDE-специфичное «богатое сообщение» (не копия Slack)
 
 - Якоря на **файл / диапазон / выделение** ([0080 future](../adr/0080-intercom-naming-and-multi-party-channel-model.md#adr0080-future-modalities)) — превью, jump-to-code, мини-diff.
@@ -81,6 +98,7 @@
 | **WebView полного клиента MM/Slack** в IDE без ADR | «Две правды», фокус, SSO — только осознанно |
 | **Одна бесконечная лента** как единственный режим | Ломает topic cards [0072](../adr/0072-chat-topic-cards-intent-melody-keyboard-contract.md) |
 | **Короткие слэш-мнемоники** (`/br`) | Discoverability только autocomplete; сжатие — `c:` Melody |
+| **Messenger-пузыри** (Telegram/iMessage-style) | Отвлекают; у Slack/MM их нет — flat feed; акцент — рамка/inset, см. §«Лента без пузырей» |
 | **Реакции, GIF, emoji-first** | Шум для IDE-цикла; отложить |
 | **Полный поиск по истории** как в MM Enterprise | v2+; не блокер v1 Intercom |
 | **Паритет каждой фичи MM** (threads в threads, workflows) | Берём **ментальную модель**, не feature checklist |
@@ -95,7 +113,8 @@
 | Thread | Тема / `ThreadNode` [0031](../adr/0031-agent-chat-clarification-batches-and-threading.md) |
 | `/command` + picker | [0119](../adr/0119-chat-slash-commands-intercom-surface.md) |
 | @mention | Якорь на код / workspace context (будущее) |
-| Bot / system message | System role + build/git/MCP lines |
+| Сообщение в канале (flat) | Строка ленты: имя + время + текст; **без** balloon |
+| Bot / system message | System role + build/git/MCP lines (компактно, не пузырь) |
 | Pin / bookmark | Spine, session tree [0116](../adr/0116-intercom-session-tree-and-agent-message-steering.md) |
 | Unread badge | IDE Health / уведомления кабины (не дублировать MM) |
 
@@ -103,12 +122,12 @@
 
 ## Skia и «ощущение Slack»
 
-[0044](../adr/0044-avalonia-host-skia-agent-chat-surface.md) / [0057](../adr/0057-chat-surface-pipeline-adoption.md): вдохновение — **иерархия экранов, composer, типографика, пузыри/системные строки**, а не HTML-виджеты Slack. Pipeline **Intent → Layout → Render** сохраняет intent-first [0072 §5](../adr/0072-chat-topic-cards-intent-melody-keyboard-contract.md): pointer и слэш не дергают Skia напрямую.
+[0044](../adr/0044-avalonia-host-skia-agent-chat-surface.md) / [0057](../adr/0057-chat-surface-pipeline-adoption.md): вдохновение — **иерархия экранов, composer, типографика, плоская лента + системные строки**, а не HTML-виджеты Slack и не messenger-пузыри. Pipeline **Intent → Layout → Render** сохраняет intent-first [0072 §5](../adr/0072-chat-topic-cards-intent-melody-keyboard-contract.md): pointer и слэш не дергают Skia напрямую.
 
 **Визуальные ориентиры v1 (мягкие):**
 
-- human / agent — различимые «стороны» или роли (не обязательно копировать цвета Slack);
-- system — компактная строка или inset, не псевдо-диалог;
+- human / agent — различимые **роли** (цвет имени, иконка), **без** balloon; **без** рамки на обычной реплике;
+- system / slash-outcome — по умолчанию компактная строка; **рамка/inset — исключение** (ошибка, fail, требует действия);
 - topic card — заголовок + сводка + метаданные (время, непрочитанное — по мере готовности модели).
 
 ---
@@ -140,3 +159,4 @@
 | Дата | Изменение |
 |------|-----------|
 | 2026-05-17 | Черновик: Slack/Mattermost как UX-ориентир; границы A/B; in/out of scope; карта паттернов. |
+| 2026-05-19 | Лента без messenger-пузырей (flat feed как Slack); акцент редко (рамка/inset); legacy bubble — долг. |

@@ -160,6 +160,7 @@ flowchart LR
 | Toast на каждое событие сборки | Сводим в MFD / health |
 | Сырые hex-цвета в макете без семантики | Только имена токенов — [ide-chrome-tokens-v1.md](ide-chrome-tokens-v1.md) |
 | Отдельный UX только для агента | Паритет команд и Intercom |
+| Пузыри / рамка на каждом сообщении Intercom | Отвлекают; flat feed Slack/MM; **большинство строк без акцента**, рамка редко — [intercom-ux-reference](intercom-ux-reference-slack-mattermost-v1.md) |
 
 ---
 
@@ -391,7 +392,7 @@ flowchart TB
 |---------|---------|----------------|
 | **Deck-индикаторы** | Lamp, Bar, Sign, Readout, annunciator | [0063](../adr/0063-instrument-deck-named-composition-one-anchor.md), [0064](../adr/0064-deck-primitives-visual-language-render-layer-and-palette.md) |
 | **SkiaKit (IDE-плотные UI)** | Composer strip, popup list, sectioned card, mono code strip | [ADR 0117](../adr/0117-ide-skia-kit.md), `Views/SkiaKit/` |
-| **Intercom (Skia chrome + лента)** | Spine, tab bar, topic card, message bubble, status chip | [0123](../adr/0123-intercom-full-skia-surface-evolution.md), [0127](../adr/0127-intercom-spine-and-topic-tabs-chrome-navigation.md) Proposed |
+| **Intercom (Skia chrome + лента)** | Spine, tab bar, topic card, **message row** (flat, без balloon), status chip | [0123](../adr/0123-intercom-full-skia-surface-evolution.md), [0127](../adr/0127-intercom-spine-and-topic-tabs-chrome-navigation.md) Proposed; лента — [intercom-ux-reference](intercom-ux-reference-slack-mattermost-v1.md) |
 | **Chrome-контролы** | Section, status chip, inset surface | [ide-chrome-tokens-v1.md](ide-chrome-tokens-v1.md), `Views/UiKit/` |
 
 **Deliverable:** Figma (или аналог) + **именованные спецификации** (как `CascadeTheme.X` / `DeckPrimitiveKind`), экспорт референсов в `docs/ui-ux/concept-screens/`.
