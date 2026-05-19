@@ -31,6 +31,8 @@ internal static class IdeCommandsArgsGenerated
         ["debug_variables"] = new IdeCommandsArgs.Arg[] { new("frame_index", "integer", false, false, null) },
         ["delete_knowledge_file"] = new IdeCommandsArgs.Arg[] { new("file_path", "string", true, false, null), new("knowledge_path", "string", false, false, null), new("knowledge_root_id", "string", false, false, null) },
         ["delete_knowledge_section"] = new IdeCommandsArgs.Arg[] { new("file_path", "string", true, false, null), new("section_id", "string", true, false, null), new("knowledge_path", "string", false, false, null), new("knowledge_root_id", "string", false, false, null) },
+        ["editor.reveal_code"] = new IdeCommandsArgs.Arg[] { new("code_ref", "string", true, false, null), new("active_file", "string", false, false, null), new("duration_ms", "integer", false, false, null) },
+        ["editor.select_code"] = new IdeCommandsArgs.Arg[] { new("code_ref", "string", true, false, null), new("active_file", "string", false, false, null), new("duration_ms", "integer", false, false, null) },
         ["explain_trace_step"] = new IdeCommandsArgs.Arg[] { new("step_index", "integer", true, false, null) },
         ["extract_from_archive"] = new IdeCommandsArgs.Arg[] { new("query", "string", true, false, null), new("revision_file", "string", false, false, null), new("head_limit", "integer", false, false, null), new("context_lines", "integer", false, false, null) },
         ["fetch_web_public_url"] = new IdeCommandsArgs.Arg[] { new("url", "string", true, false, null), new("max_chars", "integer", false, false, null) },

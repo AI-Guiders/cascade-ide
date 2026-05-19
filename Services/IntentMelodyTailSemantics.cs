@@ -37,19 +37,28 @@ internal static class IntentMelodyTailSemantics
                || tailSignature.Contains(":url>", StringComparison.OrdinalIgnoreCase);
     }
 
+    internal static bool HasBracketCodeRefSlot([NotNullWhen(true)] string? tailSignature)
+    {
+        if (string.IsNullOrEmpty(tailSignature))
+            return false;
+        return tailSignature.Contains("<code_ref:bracket>", StringComparison.OrdinalIgnoreCase)
+               || tailSignature.Contains(":bracket>", StringComparison.OrdinalIgnoreCase);
+    }
+
     internal static void ValidateMelodyAgainstWireClass(in MelodyRootEntry e, in TailWireClassEntry wire)
     {
         var numericSlots = CountDelimitedNumericSlots(e.TailSignature);
         var url = HasUrlSlot(e.TailSignature);
-        if (numericSlots > 0 && url)
+        var bracket = HasBracketCodeRefSlot(e.TailSignature);
+        if (numericSlots > 0 && (url || bracket))
         {
             throw new InvalidOperationException(
-                $"{IntentMelodyAliases.BundledRelativePath}: [[melody_root]] slug '{e.Slug}' — tail_signature смешивает url и числовые слоты (int/ln), не поддерживается.");
+                $"{IntentMelodyAliases.BundledRelativePath}: [[melody_root]] slug '{e.Slug}' — tail_signature смешивает url/bracket и числовые слоты (int/ln), не поддерживается.");
         }
 
         switch (wire.Kind)
         {
-            case TailWireKind.SingleRemainder when !url || numericSlots != 0:
+            case TailWireKind.SingleRemainder when (!url && !bracket) || numericSlots != 0:
                 throw new InvalidOperationException(
                     $"{IntentMelodyAliases.BundledRelativePath}: wire_class '{wire.Id}' ({nameof(TailWireKind.SingleRemainder)}) несогласован с tail_signature корня '{e.Slug}'.");
             case TailWireKind.DelimitedSlots when url || numericSlots < 2:

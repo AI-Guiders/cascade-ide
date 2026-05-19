@@ -28,6 +28,10 @@ id = "int_chain_colon_space"
 kind = "delimited_slots"
 between_slots_any_of = [":", ";", " "]
 
+[[tail_wire_class]]
+id = "bracket_code_ref"
+kind = "single_remainder"
+
 # ==============================================================================
 # Editor (parametric line)
 # ==============================================================================
@@ -62,6 +66,38 @@ melody_palette_usage_category = "Editor -> Line -> Select"
 [[command.form.slash]]
 path = "/editor line select"
 help = "Выделить строки в открытом файле (1-based): одна, «5 10» или «5:10»."
+group = "Editor"
+
+# editor.select_code — Select по bracket [M:…] (ADR 0131)
+[[command]]
+command_id = "editor.select_code"
+melody_slug = "esc"
+melody_shape = "parametric"
+melody_tail_signature = "<code_ref:bracket>"
+melody_wire_class = "bracket_code_ref"
+melody_chord_commit = "enter"
+melody_palette_usage_hint = "c:esc:[M:Method] — выделить фрагмент по bracket-ссылке"
+melody_palette_usage_category = "Editor -> Code"
+
+[[command.form.slash]]
+path = "/editor select code"
+help = "Выделить фрагмент по bracket: [M:…], [file.cs M:…] или [F:…; M:…; L:…]."
+group = "Editor"
+
+# editor.reveal_code — Reveal по bracket (ADR 0131, 0130)
+[[command]]
+command_id = "editor.reveal_code"
+melody_slug = "erc"
+melody_shape = "parametric"
+melody_tail_signature = "<code_ref:bracket>"
+melody_wire_class = "bracket_code_ref"
+melody_chord_commit = "enter"
+melody_palette_usage_hint = "c:erc:[M:Method] — показать фрагмент (transient highlight)"
+melody_palette_usage_category = "Editor -> Code"
+
+[[command.form.slash]]
+path = "/editor reveal code"
+help = "Показать фрагмент по bracket без изменения selection."
 group = "Editor"
 
 # ==============================================================================

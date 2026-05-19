@@ -43,6 +43,8 @@ internal static class ChatSlashParametricArgsBuilder
                 => TryBuildLineRange(root, argsTail, editor, out args, out error),
             TailWireKind.SingleRemainder when IntentMelodyTailSemantics.HasUrlSlot(root.TailSignature)
                 => TryBuildUrlRemainder(argsTail, out args, out error),
+            TailWireKind.SingleRemainder when IntentMelodyTailSemantics.HasBracketCodeRefSlot(root.TailSignature)
+                => TryBuildBracketCodeRef(argsTail, editor, out args, out error),
             _ => Fail($"Форма wire_class «{root.WireClass}» для slash ещё не поддержана.", out args, out error),
         };
     }
@@ -60,6 +62,7 @@ internal static class ChatSlashParametricArgsBuilder
         {
             TailWireKind.DelimitedSlots => true,
             TailWireKind.SingleRemainder when IntentMelodyTailSemantics.HasUrlSlot(root.TailSignature) => false,
+            TailWireKind.SingleRemainder when IntentMelodyTailSemantics.HasBracketCodeRefSlot(root.TailSignature) => true,
             _ => true,
         };
     }
@@ -98,6 +101,30 @@ internal static class ChatSlashParametricArgsBuilder
         }
 
         args = JsonArgsToDictionary(argsJson);
+        return true;
+    }
+
+    private static bool TryBuildBracketCodeRef(
+        string? argsTail,
+        ChatSlashEditorContext editor,
+        out IReadOnlyDictionary<string, JsonElement>? args,
+        out string error)
+    {
+        args = null;
+        error = "";
+        var codeRef = (argsTail ?? "").Trim();
+        if (codeRef.Length == 0)
+        {
+            error = "Укажи bracket-ссылку: [M:Method], [file.cs M:Method] или [F:path; M:name; L:10-20].";
+            return false;
+        }
+
+        var payload = new Dictionary<string, object?> { ["code_ref"] = codeRef };
+        if (!string.IsNullOrWhiteSpace(editor.CurrentFilePath))
+            payload["active_file"] = editor.CurrentFilePath;
+
+        var json = JsonSerializer.Serialize(payload);
+        args = JsonArgsToDictionary(json);
         return true;
     }
 

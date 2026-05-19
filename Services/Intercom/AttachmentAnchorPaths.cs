@@ -36,4 +36,29 @@ internal static class AttachmentAnchorPaths
 
         return true;
     }
+
+    public static string? ToWorkspaceRelative(string absoluteOrRelative, string? workspaceRoot)
+    {
+        if (string.IsNullOrWhiteSpace(absoluteOrRelative))
+            return null;
+
+        var trimmed = absoluteOrRelative.Trim();
+        if (!Path.IsPathRooted(trimmed))
+            return trimmed.Replace('\\', '/');
+
+        if (string.IsNullOrWhiteSpace(workspaceRoot)
+            || !CanonicalFilePath.TryNormalize(workspaceRoot.Trim(), out var rootNorm)
+            || !CanonicalFilePath.TryNormalize(trimmed, out var fileNorm))
+        {
+            return trimmed.Replace('\\', '/');
+        }
+
+        if (!fileNorm.StartsWith(rootNorm, StringComparison.OrdinalIgnoreCase))
+            return trimmed.Replace('\\', '/');
+
+        var rel = fileNorm.Length == rootNorm.Length
+            ? ""
+            : fileNorm[rootNorm.Length..].TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        return rel.Replace('\\', '/');
+    }
 }
