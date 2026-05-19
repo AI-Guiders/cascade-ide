@@ -20,7 +20,8 @@ public sealed partial class CascadeIdeSettings
             && MarkdownEquals(Markdown, o.Markdown)
             && DisplayEquals(Display, o.Display)
             && EditorEquals(Editor, o.Editor)
-            && CodeNavigationEquals(CodeNavigation, o.CodeNavigation);
+            && CodeNavigationEquals(CodeNavigation, o.CodeNavigation)
+            && IntercomEquals(Intercom, o.Intercom);
     }
 
     public override ModelBase Clone()
@@ -253,6 +254,10 @@ public sealed partial class CascadeIdeSettings
                         ExcludeKinds = p.ExcludeKinds?.ToList(),
                     })
                     .ToList(),
+            },
+            Intercom = new IntercomSettings
+            {
+                AttachmentNavigate = Intercom.AttachmentNavigate,
             },
         };
     }
@@ -490,6 +495,13 @@ public sealed partial class CascadeIdeSettings
         }
 
         return true;
+    }
+
+    private static bool IntercomEquals(IntercomSettings? a, IntercomSettings? b)
+    {
+        if (a is null || b is null)
+            return a == b;
+        return a.AttachmentNavigate.Is(b.AttachmentNavigate);
     }
 
     private static bool CodeNavigationEquals(CodeNavigationSettings? a, CodeNavigationSettings? b)

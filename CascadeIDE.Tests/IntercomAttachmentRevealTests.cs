@@ -23,11 +23,11 @@ public sealed class IntercomAttachmentRevealTests
             ["anchor_json"] = anchorJson
         };
 
-        Assert.True(IntercomRevealAttachmentMcpArgs.TryParse(args, out var anchor, out var select, out _, out var err), err);
+        Assert.True(IntercomRevealAttachmentMcpArgs.TryParse(args, out var anchor, out var selectExplicit, out _, out var err), err);
         Assert.Equal("src/Foo.cs", anchor.File);
         Assert.Equal(10, anchor.LineStart);
         Assert.Equal(20, anchor.LineEnd);
-        Assert.False(select);
+        Assert.Null(selectExplicit);
     }
 
     [Fact]

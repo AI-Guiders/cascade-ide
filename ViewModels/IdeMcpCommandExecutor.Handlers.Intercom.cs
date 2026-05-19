@@ -1,10 +1,10 @@
-using System.Text.Json;
 using CascadeIDE.Models.Intercom;
 using CascadeIDE.Services;
+using CascadeIDE.Services.Intercom;
 
 namespace CascadeIDE.ViewModels;
 
-/// <summary>MCP: Intercom (reveal attachment).</summary>
+/// <summary>MCP: Intercom (reveal attachment) и editor bracket navigation (ADR 0131).</summary>
 internal sealed partial class IdeMcpCommandExecutor
 {
     private void RegisterIntercom(Action<string, Handler> add)
@@ -12,32 +12,44 @@ internal sealed partial class IdeMcpCommandExecutor
         add(Services.IdeCommands.IntercomRevealAttachment, async (args, ct) =>
         {
             var a = (IIdeMcpActions)_vm;
-            if (!IntercomRevealAttachmentMcpArgs.TryParse(args, out var anchor, out var select, out var durationMs, out var err))
+            if (!IntercomRevealAttachmentMcpArgs.TryParse(args, out var anchor, out var selectExplicit, out var durationMs, out var err))
                 return err;
 
             var workspaceRoot = TryGetWorkspaceRoot(a);
-            var plan = IntercomAttachmentRevealPlan.Create(anchor, workspaceRoot);
-
-            if (plan.ResolveOutcome == IntercomAttachmentRevealPlan.OutcomeFileMissing)
-                return plan.Message;
-
-            if (string.IsNullOrEmpty(plan.AbsoluteFilePath))
-                return plan.Message;
-
-            if (plan.Lines is { } range && !plan.OpenFileOnly)
-            {
-                if (select)
-                {
-                    a.SelectInEditor(plan.AbsoluteFilePath, range.Start.Value, 1, range.End.Value, 1);
-                    return plan.Message.StartsWith("OK", StringComparison.Ordinal) ? "OK (select)" : plan.Message + " (select)";
-                }
-
-                a.RevealEditorRange(plan.AbsoluteFilePath, range.Start.Value, range.End.Value, durationMs);
-                return plan.Message;
-            }
-
-            a.OpenFile(plan.AbsoluteFilePath);
-            return plan.Message;
+            return await Task.FromResult(IntercomAttachmentNavigator.Apply(
+                a,
+                _vm.GetCascadeSettingsForExecutor().Intercom,
+                workspaceRoot,
+                anchor,
+                selectExplicit,
+                shiftSelect: false,
+                durationMs));
         });
+
+        add(Services.IdeCommands.EditorSelectCode, ExecuteEditorCodeRefNavigation(select: true));
+        add(Services.IdeCommands.EditorRevealCode, ExecuteEditorCodeRefNavigation(select: false));
     }
+
+    private Handler ExecuteEditorCodeRefNavigation(bool select) => async (args, ct) =>
+    {
+        var a = (IIdeMcpActions)_vm;
+        if (!EditorCodeRefMcpArgs.TryParse(args, out var codeRef, out var activeFile, out var durationMs, out var err))
+            return err;
+
+        if (!BracketCodeReferenceParser.TryParse(codeRef, out var reference, out err))
+            return err;
+
+        var workspaceRoot = TryGetWorkspaceRoot(a);
+        if (!BracketCodeReferenceParser.TryToAttachmentAnchor(reference, activeFile, workspaceRoot, out var anchor, out err))
+            return err;
+
+        return await Task.FromResult(IntercomAttachmentNavigator.Apply(
+            a,
+            _vm.GetCascadeSettingsForExecutor().Intercom,
+            workspaceRoot,
+            anchor,
+            selectExplicit: select,
+            shiftSelect: false,
+            durationMs));
+    };
 }

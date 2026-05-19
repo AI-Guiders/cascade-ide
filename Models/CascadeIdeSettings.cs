@@ -34,6 +34,9 @@ public sealed partial class CascadeIdeSettings : ModelBase
     /// <summary>Пресеты навигации по коду / решению (ADR 0039, Code Navigation Context). TOML: <c>[code_navigation]</c>.</summary>
     public CodeNavigationSettings CodeNavigation { get; set; } = new();
 
+    /// <summary>Intercom: дефолт клика по attach, reveal vs select (ADR 0130 фаза 3). TOML: <c>[intercom]</c>.</summary>
+    public IntercomSettings Intercom { get; set; } = new();
+
     /// <summary>
     /// При пресете «Mfd на втором экране» и >=2 мониторах — открыть окно-хост зоны Mfd при старте (ADR 0017 v1).
     /// </summary>

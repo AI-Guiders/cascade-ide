@@ -223,6 +223,20 @@ public sealed class CascadeIdeSettingsTomlDeserializeTests
     }
 
     [Fact]
+    public void Deserialize_IntercomAttachmentNavigate_ParsesExpected()
+    {
+        const string text =
+            """
+            [intercom]
+            attachment_navigate = "select"
+            """;
+
+        var s = Deserialize(text);
+        Assert.True(s.Intercom.DefaultAttachmentNavigateSelects());
+        Assert.Equal("select", s.Intercom.AttachmentNavigate);
+    }
+
+    [Fact]
     public void Deserialize_HybridIndexSection_ParsesExpected()
     {
         const string text =

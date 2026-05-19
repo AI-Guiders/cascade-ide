@@ -40,6 +40,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private readonly Services.IOllamaService _ollama = new Services.OllamaService();
     private readonly Services.AiProviderManager _aiProviderManager;
     private readonly CascadeIdeSettings _settings = Services.SettingsService.Load();
+    internal CascadeIdeSettings GetCascadeSettingsForExecutor() => _settings;
     private AiKeys _aiKeys = Services.AiKeysStorage.Load();
     private CascadeIdeSettings? _lastSavedSettings;
     private AiKeys? _lastSavedAiKeys;

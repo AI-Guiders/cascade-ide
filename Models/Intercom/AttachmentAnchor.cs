@@ -129,12 +129,12 @@ public static class IntercomRevealAttachmentMcpArgs
     public static bool TryParse(
         IReadOnlyDictionary<string, JsonElement>? args,
         out AttachmentAnchor anchor,
-        out bool select,
+        out bool? selectExplicit,
         out int? durationMs,
         out string error)
     {
         anchor = new AttachmentAnchor();
-        select = false;
+        selectExplicit = null;
         durationMs = null;
         error = "";
 
@@ -157,9 +157,55 @@ public static class IntercomRevealAttachmentMcpArgs
         if (durationMs is null)
             durationMs = McpCommandJsonArgs.OptionalInt32(args, "duration_ms");
 
-        select = args.TryGetValue("select", out var selEl)
-                 && selEl.ValueKind == JsonValueKind.True;
+        if (args.TryGetValue("select", out var selEl))
+        {
+            selectExplicit = selEl.ValueKind switch
+            {
+                JsonValueKind.True => true,
+                JsonValueKind.False => false,
+                _ => null,
+            };
+            if (selectExplicit is null)
+            {
+                error = "select должен быть true или false.";
+                return false;
+            }
+        }
 
+        return true;
+    }
+}
+
+/// <summary>Args для <c>editor.select_code</c> / <c>editor.reveal_code</c> (ADR 0131).</summary>
+public static class EditorCodeRefMcpArgs
+{
+    public static bool TryParse(
+        IReadOnlyDictionary<string, JsonElement>? args,
+        out string codeRef,
+        out string? activeFile,
+        out int? durationMs,
+        out string error)
+    {
+        codeRef = "";
+        activeFile = null;
+        durationMs = null;
+        error = "";
+
+        if (args is null)
+        {
+            error = "Отсутствуют аргументы.";
+            return false;
+        }
+
+        codeRef = McpCommandJsonArgs.String(args, "code_ref") ?? "";
+        if (string.IsNullOrWhiteSpace(codeRef))
+        {
+            error = "Отсутствует code_ref.";
+            return false;
+        }
+
+        activeFile = McpCommandJsonArgs.String(args, "active_file");
+        durationMs = McpCommandJsonArgs.OptionalInt32(args, "duration_ms");
         return true;
     }
 }
