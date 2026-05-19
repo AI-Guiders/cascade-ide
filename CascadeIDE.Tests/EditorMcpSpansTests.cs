@@ -96,12 +96,28 @@ public sealed class EditorMcpSpansTests
         var args = Args(
             ("file_path", JsonSerializer.SerializeToElement(fp)),
             ("start_line", JsonSerializer.SerializeToElement(10)),
-            ("end_line", JsonSerializer.SerializeToElement(25)));
+            ("end_line", JsonSerializer.SerializeToElement(25)),
+            ("duration_ms", JsonSerializer.SerializeToElement(5000)));
 
-        Assert.True(EditorRevealRangeMcpArgs.TryParse(args, out var doc, out var lines, out var err), err);
-        Assert.Equal(CanonicalFilePath.Normalize(fp), doc.Value, ignoreCase: true);
-        Assert.Equal(10, lines.Start.Value);
-        Assert.Equal(25, lines.End.Value);
+        Assert.True(EditorRevealRangeMcpArgs.TryParse(args, out var req, out var err), err);
+        Assert.Equal(CanonicalFilePath.Normalize(fp), req.File.Value, ignoreCase: true);
+        Assert.NotNull(req.Lines);
+        Assert.Equal(10, req.Lines!.Value.Start.Value);
+        Assert.Equal(25, req.Lines!.Value.End.Value);
+        Assert.Equal(5000, req.DurationMs);
+    }
+
+    [Fact]
+    public void EditorRevealRange_TryParse_AcceptsMemberKeyWithoutLines()
+    {
+        var fp = @"D:\p\f.cs";
+        var args = Args(
+            ("file_path", JsonSerializer.SerializeToElement(fp)),
+            ("member_key", JsonSerializer.SerializeToElement("DoWork")));
+
+        Assert.True(EditorRevealRangeMcpArgs.TryParse(args, out var req, out var err), err);
+        Assert.Equal("DoWork", req.MemberKey);
+        Assert.Null(req.Lines);
     }
 
     [Fact]

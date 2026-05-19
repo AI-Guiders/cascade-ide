@@ -92,7 +92,7 @@ public partial class MainWindowViewModel
         ((Services.IIdeMcpActions)this).SelectInEditor(filePath, line, column, endLine ?? line, endColumn ?? column);
     }
 
-    void Services.IIdeMcpActions.RevealEditorRange(string? filePath, int startLine, int endLine)
+    void Services.IIdeMcpActions.RevealEditorRange(string? filePath, int startLine, int endLine, int? durationMs)
     {
         UiScheduler.Default.Post(() =>
         {
@@ -114,7 +114,7 @@ public partial class MainWindowViewModel
             }
 
             var path = string.IsNullOrEmpty(filePath) ? CurrentFilePath : CanonicalFilePath.Normalize(filePath);
-            _revealEditorRangeAction?.Invoke(path, startLine, endLine);
+            _revealEditorRangeAction?.Invoke(path, startLine, endLine, durationMs);
         });
     }
 }

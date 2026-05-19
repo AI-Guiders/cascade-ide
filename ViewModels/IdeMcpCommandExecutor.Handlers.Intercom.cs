@@ -1,5 +1,4 @@
 using System.Text.Json;
-using CascadeIDE.Features.Workspace.Application;
 using CascadeIDE.Models.Intercom;
 using CascadeIDE.Services;
 
@@ -13,10 +12,10 @@ internal sealed partial class IdeMcpCommandExecutor
         add(Services.IdeCommands.IntercomRevealAttachment, async (args, ct) =>
         {
             var a = (IIdeMcpActions)_vm;
-            if (!IntercomRevealAttachmentMcpArgs.TryParse(args, out var anchor, out var select, out var err))
+            if (!IntercomRevealAttachmentMcpArgs.TryParse(args, out var anchor, out var select, out var durationMs, out var err))
                 return err;
 
-            var workspaceRoot = tryGetWorkspaceRoot(a);
+            var workspaceRoot = TryGetWorkspaceRoot(a);
             var plan = IntercomAttachmentRevealPlan.Create(anchor, workspaceRoot);
 
             if (plan.ResolveOutcome == IntercomAttachmentRevealPlan.OutcomeFileMissing)
@@ -33,31 +32,12 @@ internal sealed partial class IdeMcpCommandExecutor
                     return plan.Message.StartsWith("OK", StringComparison.Ordinal) ? "OK (select)" : plan.Message + " (select)";
                 }
 
-                a.RevealEditorRange(plan.AbsoluteFilePath, range.Start.Value, range.End.Value);
+                a.RevealEditorRange(plan.AbsoluteFilePath, range.Start.Value, range.End.Value, durationMs);
                 return plan.Message;
             }
 
             a.OpenFile(plan.AbsoluteFilePath);
             return plan.Message;
         });
-    }
-
-    private static string? tryGetWorkspaceRoot(IIdeMcpActions actions)
-    {
-        try
-        {
-            var json = actions.GetSolutionInfo();
-            using var doc = JsonDocument.Parse(json);
-            if (doc.RootElement.TryGetProperty("error", out _))
-                return null;
-            var sln = doc.RootElement.TryGetProperty("solution_path", out var sp) ? sp.GetString() : null;
-            if (string.IsNullOrWhiteSpace(sln))
-                return null;
-            return WorkspaceDirectoryFromSolutionPath.Resolve(sln);
-        }
-        catch (JsonException)
-        {
-            return null;
-        }
     }
 }

@@ -3,6 +3,7 @@
 using System.Text.Json;
 using CascadeIDE.Models.Editor;
 using CascadeIDE.Models.Intercom;
+using CascadeIDE.Services.Intercom;
 
 namespace CascadeIDE.Services;
 
@@ -36,7 +37,7 @@ public sealed class IntercomAttachmentRevealPlan
             };
         }
 
-        if (!tryResolveAbsolutePath(anchor.File, workspaceRoot, out var absolute, out var pathErr))
+        if (!AttachmentAnchorPaths.TryResolveAbsolute(anchor.File, workspaceRoot, out var absolute, out var pathErr))
         {
             return new IntercomAttachmentRevealPlan
             {
@@ -57,12 +58,28 @@ public sealed class IntercomAttachmentRevealPlan
         }
 
         var hasMember = !string.IsNullOrWhiteSpace(anchor.MemberKey);
-        var hasScope = anchor.SyntaxScope is JsonElement scopeEl && scopeEl.ValueKind == JsonValueKind.Object;
+        AttachmentSyntaxScope.TryParse(anchor.SyntaxScope, out var syntaxScope);
+        var hasScope = syntaxScope is not null;
         var hasLines = tryBuildLineRange(anchor.LineStart, anchor.LineEnd, out var lines);
 
         if (hasMember || hasScope)
         {
-            // Фаза 1: re-resolve member/scope через Roslyn — в фазе 2/3 ([0128] фаза 3). Fallback на lines @ send.
+            if (AttachmentAnchorRoslynResolver.TryResolveLineRange(
+                    absolute,
+                    anchor.MemberKey,
+                    syntaxScope,
+                    out var resolved,
+                    out var resolveDetail))
+            {
+                return new IntercomAttachmentRevealPlan
+                {
+                    ResolveOutcome = OutcomeResolved,
+                    AbsoluteFilePath = absolute,
+                    Lines = resolved,
+                    Message = $"OK resolveOutcome={OutcomeResolved} lines={resolved.Start.Value}-{resolved.End.Value} ({resolveDetail})",
+                };
+            }
+
             if (hasLines)
             {
                 return new IntercomAttachmentRevealPlan
@@ -70,7 +87,7 @@ public sealed class IntercomAttachmentRevealPlan
                     ResolveOutcome = OutcomeMemberNotFound,
                     AbsoluteFilePath = absolute,
                     Lines = lines,
-                    Message = $"member_not_found: re-resolve пока не реализован; fallback lines {lines!.Value.Start.Value}–{lines.Value.End.Value} @ send.",
+                    Message = $"member_not_found: {resolveDetail}; fallback lines {lines!.Value.Start.Value}–{lines.Value.End.Value} @ send.",
                 };
             }
 
@@ -79,7 +96,7 @@ public sealed class IntercomAttachmentRevealPlan
                 ResolveOutcome = OutcomeMemberNotFound,
                 AbsoluteFilePath = absolute,
                 OpenFileOnly = true,
-                Message = "member_not_found: файл открыт; диапазон строк не задан.",
+                Message = $"member_not_found: {resolveDetail}; диапазон строк не задан.",
             };
         }
 
@@ -101,39 +118,6 @@ public sealed class IntercomAttachmentRevealPlan
             Lines = lines,
             Message = $"OK resolveOutcome={OutcomeResolved} lines={lines!.Value.Start.Value}-{lines.Value.End.Value}",
         };
-    }
-
-    private static bool tryResolveAbsolutePath(string file, string? workspaceRoot, out string absolute, out string error)
-    {
-        absolute = "";
-        error = "";
-
-        var trimmed = file.Trim();
-        if (Path.IsPathRooted(trimmed))
-        {
-            if (!CanonicalFilePath.TryNormalize(trimmed, out absolute))
-            {
-                error = "не удалось нормализовать абсолютный путь.";
-                return false;
-            }
-
-            return true;
-        }
-
-        if (string.IsNullOrWhiteSpace(workspaceRoot))
-        {
-            error = "относительный file без загруженного workspace.";
-            return false;
-        }
-
-        var combined = Path.Combine(workspaceRoot.Trim(), trimmed.Replace('/', Path.DirectorySeparatorChar));
-        if (!CanonicalFilePath.TryNormalize(combined, out absolute))
-        {
-            error = "не удалось нормализовать путь относительно workspace.";
-            return false;
-        }
-
-        return true;
     }
 
     private static bool tryBuildLineRange(int? start, int? end, out LineRange? lines)

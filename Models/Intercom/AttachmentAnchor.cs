@@ -62,9 +62,14 @@ public sealed record AttachmentAnchor
         return true;
     }
 
-    public static bool TryParseFlatArgs(IReadOnlyDictionary<string, JsonElement>? args, out AttachmentAnchor anchor, out string error)
+    public static bool TryParseFlatArgs(
+        IReadOnlyDictionary<string, JsonElement>? args,
+        out AttachmentAnchor anchor,
+        out int? durationMs,
+        out string error)
     {
         anchor = new AttachmentAnchor();
+        durationMs = null;
         error = "";
 
         if (args is null)
@@ -72,6 +77,8 @@ public sealed record AttachmentAnchor
             error = "Отсутствуют аргументы.";
             return false;
         }
+
+        durationMs = McpCommandJsonArgs.OptionalInt32(args, "duration_ms");
 
         var file = McpCommandJsonArgs.String(args, "file");
         if (string.IsNullOrWhiteSpace(file))
@@ -98,6 +105,13 @@ public sealed record AttachmentAnchor
         return true;
     }
 
+    public static bool TryParseFlatArgs(IReadOnlyDictionary<string, JsonElement>? args, out AttachmentAnchor anchor, out string error)
+    {
+        if (!TryParseFlatArgs(args, out anchor, out _, out error))
+            return false;
+        return true;
+    }
+
     private static string? readString(JsonElement obj, string name) =>
         obj.TryGetProperty(name, out var el) && el.ValueKind == JsonValueKind.String ? el.GetString() : null;
 
@@ -116,10 +130,12 @@ public static class IntercomRevealAttachmentMcpArgs
         IReadOnlyDictionary<string, JsonElement>? args,
         out AttachmentAnchor anchor,
         out bool select,
+        out int? durationMs,
         out string error)
     {
         anchor = new AttachmentAnchor();
         select = false;
+        durationMs = null;
         error = "";
 
         if (args is null)
@@ -133,10 +149,13 @@ public static class IntercomRevealAttachmentMcpArgs
             if (!AttachmentAnchor.TryParseFromJsonElement(anchorEl, out anchor, out error))
                 return false;
         }
-        else if (!AttachmentAnchor.TryParseFlatArgs(args, out anchor, out error))
+        else if (!AttachmentAnchor.TryParseFlatArgs(args, out anchor, out durationMs, out error))
         {
             return false;
         }
+
+        if (durationMs is null)
+            durationMs = McpCommandJsonArgs.OptionalInt32(args, "duration_ms");
 
         select = args.TryGetValue("select", out var selEl)
                  && selEl.ValueKind == JsonValueKind.True;

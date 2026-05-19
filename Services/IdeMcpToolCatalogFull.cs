@@ -235,7 +235,7 @@ internal static class IdeMcpToolCatalogFull
             new()
             {
                 Name = "ide_reveal_editor_range",
-                Description = "Показать диапазон строк transient-подсветкой без изменения selection (ADR 0130). Строки 1-based, inclusive.",
+                Description = "Показать диапазон строк transient-подсветкой без изменения selection (ADR 0130). Строки 1-based или re-resolve member_key/syntax_scope (Roslyn). duration_ms опционально (250–120000).",
                 InputSchema = Schema(new
                 {
                     type = "object",
@@ -243,15 +243,18 @@ internal static class IdeMcpToolCatalogFull
                     {
                         file_path = new { type = "string" },
                         start_line = new { type = "integer" },
-                        end_line = new { type = "integer" }
+                        end_line = new { type = "integer" },
+                        member_key = new { type = "string", description = "Documentation comment id или простое имя члена." },
+                        syntax_scope = new { type = "object", description = "{ kind, indexInParent, parentMemberKey? }" },
+                        duration_ms = new { type = "integer" }
                     },
-                    required = new[] { "file_path", "start_line", "end_line" }
+                    required = new[] { "file_path" }
                 })
             },
             new()
             {
                 Name = "ide_intercom_reveal_attachment",
-                Description = "Reveal из Intercom по AttachmentAnchor (ADR 0128 §8): open + transient highlight; select=true — выделить. args: anchor_json или file + line_start + line_end; member_key?, select?",
+                Description = "Reveal из Intercom по AttachmentAnchor (ADR 0128 §8): re-resolve member/scope (Roslyn), transient highlight; select=true — выделить.",
                 InputSchema = Schema(new
                 {
                     type = "object",
@@ -262,6 +265,8 @@ internal static class IdeMcpToolCatalogFull
                         line_start = new { type = "integer" },
                         line_end = new { type = "integer" },
                         member_key = new { type = "string" },
+                        syntax_scope = new { type = "object" },
+                        duration_ms = new { type = "integer" },
                         select = new { type = "boolean", description = "true — SelectInEditor вместо reveal." }
                     },
                     required = Array.Empty<string>()

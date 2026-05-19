@@ -343,7 +343,7 @@ public partial class MainWindow
         editor.TextArea.Caret.BringCaretToView();
     }
 
-    private void RevealEditorRangeInDock(string? filePath, int startLine, int endLine)
+    private void RevealEditorRangeInDock(string? filePath, int startLine, int endLine, int? durationMs = null)
     {
         if (DataContext is not ViewModels.MainWindowViewModel vm)
             return;
@@ -352,6 +352,6 @@ public partial class MainWindow
         if (editor is null)
             return;
 
-        _ = Services.EditorAgentRangeReveal.Show(editor, startLine, endLine);
+        _ = Services.EditorAgentRangeReveal.Show(editor, startLine, endLine, EditorRevealDuration.ToTimeSpan(durationMs));
     }
 }

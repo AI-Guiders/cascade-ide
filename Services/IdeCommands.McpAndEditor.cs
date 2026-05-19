@@ -33,7 +33,7 @@ public static partial class IdeCommands
     public const string ApplyEdit = "apply_edit";
     /// <summary>Перейти на позицию (и опционально выделить диапазон). args: file_path:string, line:integer, column:integer, end_line?:integer, end_column?:integer; returns: text; example: {"file_path":"C:\\tmp\\a.cs","line":10,"column":1}.</summary>
     public const string GoToPosition = "go_to_position";
-    /// <summary>Показать диапазон строк в редакторе transient-подсветкой без изменения selection (ADR 0130). args: file_path:string, start_line:integer, end_line:integer; returns: text; example: {"file_path":"C:\\tmp\\a.cs","start_line":10,"end_line":25}.</summary>
+    /// <summary>Показать диапазон строк в редакторе transient-подсветкой без изменения selection (ADR 0130). args: file_path:string, start_line?:integer, end_line?:integer, member_key?:string, syntax_scope?:object, duration_ms?:integer; returns: text; example: {"file_path":"C:\\tmp\\a.cs","start_line":10,"end_line":25,"duration_ms":4000}.</summary>
     public const string RevealEditorRange = "reveal_editor_range";
 
     /// <summary>Живость MCP-хоста IDE (без аргументов). Имя MCP-тула: <c>ide_ping</c>. returns: json.</summary>

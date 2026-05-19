@@ -255,31 +255,76 @@ public static class EditorGoToPositionMcpArgs
     }
 }
 
-/// <summary>Разбор <c>reveal_editor_range</c> (ADR 0130): <c>file_path</c> + инклюзивный диапазон строк.</summary>
+/// <summary>Запрос <c>reveal_editor_range</c> (ADR 0130): строки и/или member/scope + опциональная длительность.</summary>
+public readonly struct EditorRevealRangeRequest
+{
+    public EditorDocumentPath File { get; init; }
+
+    public LineRange? Lines { get; init; }
+
+    public string? MemberKey { get; init; }
+
+    public Intercom.AttachmentSyntaxScope? SyntaxScope { get; init; }
+
+    public int? DurationMs { get; init; }
+}
+
+/// <summary>Разбор <c>reveal_editor_range</c> (ADR 0130 фаза 2).</summary>
 public static class EditorRevealRangeMcpArgs
 {
     public static bool TryParse(
         IReadOnlyDictionary<string, JsonElement>? args,
-        out EditorDocumentPath file,
-        out LineRange lines,
+        out EditorRevealRangeRequest request,
         out string error)
     {
-        file = default;
-        lines = default;
+        request = default;
         error = "";
 
-        if (!EditorDocumentPath.TryCreate(McpCommandJsonArgs.String(args, "file_path"), out file, out var fileErr))
+        if (args is null)
+        {
+            error = "Отсутствуют аргументы.";
+            return false;
+        }
+
+        if (!EditorDocumentPath.TryCreate(McpCommandJsonArgs.String(args, "file_path"), out var file, out var fileErr))
         {
             error = fileErr;
             return false;
         }
 
-        if (!EditorContentLineRangeMcpArgs.TryParse(args, out lines, out var rangeErr))
+        LineRange? lines = null;
+        if (args.ContainsKey("start_line") || args.ContainsKey("end_line"))
         {
-            error = rangeErr;
+            if (!EditorContentLineRangeMcpArgs.TryParse(args, out var range, out var rangeErr))
+            {
+                error = rangeErr;
+                return false;
+            }
+
+            lines = range;
+        }
+
+        var memberKey = McpCommandJsonArgs.String(args, "member_key");
+        Intercom.AttachmentSyntaxScope? syntaxScope = null;
+        if (args.TryGetValue("syntax_scope", out var scopeEl))
+            Intercom.AttachmentSyntaxScope.TryParse(scopeEl, out syntaxScope);
+
+        var durationMs = McpCommandJsonArgs.OptionalInt32(args, "duration_ms");
+
+        if (lines is null && string.IsNullOrWhiteSpace(memberKey) && syntaxScope is null)
+        {
+            error = "Нужен диапазон строк (start_line, end_line) или member_key / syntax_scope.";
             return false;
         }
 
+        request = new EditorRevealRangeRequest
+        {
+            File = file,
+            Lines = lines,
+            MemberKey = string.IsNullOrWhiteSpace(memberKey) ? null : memberKey.Trim(),
+            SyntaxScope = syntaxScope,
+            DurationMs = durationMs,
+        };
         return true;
     }
 }

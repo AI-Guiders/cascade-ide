@@ -270,7 +270,7 @@ internal static class IdeCommandsContractGenerated
         ["read_knowledge_file"] = "{\"file_path\":\"META/integrity-core.md\",\"offset\":2,\"limit\":20}",
         ["remove_breakpoint"] = "{\"file_path\":\"C:\\\\tmp\\\\a.cs\",\"line\":42}",
         ["request_confirmation"] = "{\"message\":\"Продолжить?\"}",
-        ["reveal_editor_range"] = "{\"file_path\":\"C:\\\\tmp\\\\a.cs\",\"start_line\":10,\"end_line\":25}",
+        ["reveal_editor_range"] = "{\"file_path\":\"C:\\\\tmp\\\\a.cs\",\"start_line\":10,\"end_line\":25,\"duration_ms\":4000}",
         ["rollback_agent_notes"] = "{\"revision_file\":\"20260402-120000-write-acde123.md\"}",
         ["rollback_trace_step"] = "{\"step_index\":0}",
         ["route_context"] = "{\"query\":\"CascadeIDE notes structure\",\"max_sections\":5,\"max_chars\":12000}",

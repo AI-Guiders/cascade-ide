@@ -27,10 +27,16 @@ internal sealed partial class IdeMcpCommandExecutor
         add(Services.IdeCommands.RevealEditorRange, async (args, ct) =>
         {
             var a = (IIdeMcpActions)_vm;
-            if (!EditorRevealRangeMcpArgs.TryParse(args, out var file, out var lines, out var err))
+            if (!EditorRevealRangeMcpArgs.TryParse(args, out var request, out var err))
                 return err;
-            a.RevealEditorRange(file.Value, lines.Start.Value, lines.End.Value);
-            return await Task.FromResult("OK");
+
+            var workspaceRoot = TryGetWorkspaceRoot(a);
+            if (!EditorRevealRangeResolution.TryResolveLines(request, workspaceRoot, out var lines, out var detail, out var usedFallback))
+                return $"reveal failed: {detail}";
+
+            a.RevealEditorRange(request.File.Value, lines.Start.Value, lines.End.Value, request.DurationMs);
+            var suffix = usedFallback ? $" (fallback: {detail})" : string.IsNullOrEmpty(detail) ? "" : $" ({detail})";
+            return await Task.FromResult($"OK lines={lines.Start.Value}-{lines.End.Value}{suffix}");
         });
     }
 }
