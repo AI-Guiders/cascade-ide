@@ -33,7 +33,9 @@
 
 **v1 реализация:** line-based `file_path` + `start_line` + `end_line`; общий сервис `EditorAgentRangeReveal` на активном `TextEditor`.
 
-**Не входит (v2+):** `memberKey` / re-resolve Roslyn; `syntaxScope`; overlay-рамка поверх глифов; настройка длительности в TOML; паритет hotkey для человека.
+**Фаза 2 (реализовано):** опциональные `member_key`, `syntax_scope` (JSON), `duration_ms`; re-resolve в `.cs` через `AttachmentAnchorRoslynResolver` (один файл, documentation id или простое имя; scope — `for`/`if`/… + `indexInParent`).
+
+**Не входит (v3+):** overlay-рамка поверх глифов; настройка длительности в TOML; паритет hotkey для человека; полный MSBuildWorkspace по solution.
 
 ---
 
@@ -150,3 +152,4 @@
 | Дата | Изменение |
 |------|-----------|
 | 2026-05-19 | Proposed: отдельный ADR; v1 MCP + `EditorAgentRangeReveal`. |
+| 2026-05-19 | Фаза 2: `member_key`, `syntax_scope`, `duration_ms`; Roslyn re-resolve. |
