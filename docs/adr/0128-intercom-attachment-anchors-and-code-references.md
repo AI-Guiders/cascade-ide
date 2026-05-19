@@ -19,6 +19,7 @@
 | [0120](0120-primary-work-surface-intercom-or-editor.md) | Composer в Forward |
 | [0123](0123-intercom-full-skia-surface-evolution.md) | Skia-лента |
 | [0129](0129-intercom-message-body-markdown-and-fenced-code.md) | **Fenced code** и markdown в `content` — **не** этот ADR |
+| [0130](0130-editor-agent-range-reveal-without-selection.md) | MCP **reveal** диапазона без selection (агент); общий presentation mode с §8 |
 
 ### Вне ADR (playbook)
 
@@ -208,6 +209,7 @@
 | Открыть файл | `/file open` [0125](0125-slash-workspace-file-commands-and-dynamic-completion.md) | нет | нет |
 | Select/delete lines | `/editor line` [0124](0124-slash-parametric-editor-line-commands.md) | **да** | нет |
 | Прикрепить к реплике | `/attach …`, `[…]` | нет | **да** |
+| Агент показывает участок | MCP `reveal_editor_range` [0130](0130-editor-agent-range-reveal-without-selection.md) | нет | нет |
 | Агент идёт править | MCP `go_to_position` | **да** (select) | нет |
 | Цитата кода в тексте | markdown fence | нет | нет — [0129](0129-intercom-message-body-markdown-and-fenced-code.md) |
 
@@ -226,7 +228,7 @@
 | 4 | Scroll into view + **transient range highlight** (рамка / gutter band), **не** `Selection` |
 | 5 | Shift+клик или настройка → `SelectInEditor` |
 
-Отличие от MCP `go_to_position`: reveal = **просмотр**; go_to_position = **правка** агентом.
+Отличие от MCP `go_to_position`: reveal = **просмотр**; go_to_position = **правка** агентом. Прямой MCP reveal без сообщения в чат — [0130](0130-editor-agent-range-reveal-without-selection.md) (`editor.reveal_range`); **фаза 1** — `intercom.reveal_attachment` вызывает тот же `EditorAgentRangeReveal`.
 
 <a id="adr0128-p9"></a>
 
