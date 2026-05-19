@@ -52,6 +52,7 @@ hide:
 | [0103](../../adr/0103-editor-hud-substrate-semantic-projection-and-surface-adapter.md) | субстрат Editor HUD — семантическая проекция, адаптер поверхности, границы DAL / CCU / DataBus | Accepted (strangler) |
 | [0115](../../adr/0115-cds-graph-backed-shared-layer.md) | CDS — общий слой graph-backed приборов (реализация в кабине, не IDS) | Accepted |
 | [0121](../../adr/0121-intent-oriented-programming-paradigm.md) | Парадигма Intent-Oriented Programming (IOP) — концептуальный фундамент Cascade IDE | Accepted |
+| [0123](../../adr/0123-intercom-full-skia-surface-evolution.md) | Intercom — эволюция к full-Skia surface (плотный Slack/MM-like UX) | Accepted |
 
 
 ---

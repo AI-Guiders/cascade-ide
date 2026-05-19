@@ -26,7 +26,7 @@
 | Command palette | `CommandPaletteHost` | ✅ | Complements Intercom slash commands ([ADR 0119](../../adr/0119-chat-slash-commands-intercom-surface.md)). |
 | Intercom / chat | MFD page + Skia surface | ✅ | See [ADR 0044](../../adr/0044-avalonia-host-skia-agent-chat-surface.md). |
 | Intercom in Forward (Cursor-like) | — | ❌ Proposed | [ADR 0120](../../adr/0120-primary-work-surface-intercom-or-editor.md). |
-| Slash commands in chat input | — | ❌ Proposed | [ADR 0119](../../adr/0119-chat-slash-commands-intercom-surface.md). |
+| Slash commands in chat input | `ChatInput` + slash autocomplete | ✅ | [ADR 0119](../../adr/0119-chat-slash-commands-intercom-surface.md); parametric/workspace: [0124](../../adr/0124-slash-parametric-editor-line-commands.md)–[0126](../../adr/0126-intercom-inspect-slash-and-compact-chrome-status.md). |
 
 ---
 

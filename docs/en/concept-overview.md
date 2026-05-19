@@ -36,13 +36,22 @@ Long-running streams (build log, terminal) live on **MFD pages**, not in a legac
 
 ## Intercom (not “just chat”)
 
-**Intercom** is the IDE’s session channel: topics, topic cards, agent steering, and (planned) slash commands such as `/build run` in the same input line ([ADR 0119](adr/0119-chat-slash-commands-intercom-surface.md)). Chat UI may be rendered with a Skia surface ([ADR 0044](adr/0044-avalonia-host-skia-agent-chat-surface.md)); the product idea is **parity** between what you type and what an agent can invoke via MCP.
+**Intercom** is the IDE’s session channel: topics, topic cards, agent steering, and **slash commands** in the composer (`/build run`, `/topic open`, …) — same `command_id` as the palette and MCP ([ADR 0119](adr/0119-chat-slash-commands-intercom-surface.md), Implemented). Chat UI may be rendered with a Skia surface ([ADR 0044](adr/0044-avalonia-host-skia-agent-chat-surface.md)); the product idea is **parity** between what you type and what an agent can invoke via MCP.
+
+## Three command surfaces (one `command_id`)
+
+| Mode | Entry | Role |
+|------|-------|------|
+| **Rehearsal** | Command palette (**Ctrl+Q**) | Full catalog, search, onboarding |
+| **Performance** | **CascadeChord** (**Ctrl+K**) + Melody `c:` | Muscle-memory shortcuts; compact mnemonics live here, not in `/` |
+| **Session channel** | **Slash** in Intercom composer (`/` + autocomplete) | IDE and Intercom verbs without leaving the input line |
+
+Details: [Design Handbook §2.6](../design/cide-design-handbook-v1.md) (RU) · [ADR 0013](adr/0013-command-surface-and-discoverability.md) · [ADR 0060](adr/0060-keyboard-chord-stack-fms-tactical-strategic.md) · [ADR 0119](adr/0119-chat-slash-commands-intercom-surface.md).
 
 ## What we are building next (Proposed)
 
 | ADR | Idea |
 |-----|------|
-| [0119](adr/0119-chat-slash-commands-intercom-surface.md) | Slash commands in Intercom input → same `command_id` as palette/MCP |
 | [0120](adr/0120-primary-work-surface-intercom-or-editor.md) | Choose whether **Forward** is Intercom-centric (Cursor-like) or editor-centric |
 
 ## Where to go next

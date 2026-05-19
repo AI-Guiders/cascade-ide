@@ -51,6 +51,7 @@ Accepted as norm; implementation not complete or intentionally phased.
 | [0103](../../adr/0103-editor-hud-substrate-semantic-projection-and-surface-adapter.md) | Editor Hud Substrate Semantic Projection And Surface Adapter | Accepted (strangler) |
 | [0115](../../adr/0115-cds-graph-backed-shared-layer.md) | CDS - common layer of graph-backed devices (implementation in the cockpit, not IDS) | Accepted |
 | [0121](../../adr/0121-intent-oriented-programming-paradigm.md) | Intent-Oriented Programming (IOP) — conceptual foundation of Cascade IDE | Accepted |
+| [0123](../../adr/0123-intercom-full-skia-surface-evolution.md) | Intercom — эволюция к full-Skia surface (плотный Slack/MM-like UX) | Accepted |
 
 
 ---

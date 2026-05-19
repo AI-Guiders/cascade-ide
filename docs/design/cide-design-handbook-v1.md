@@ -119,20 +119,34 @@
 
 ---
 
-### 2.6 Команды: репетиция и выступление
+### 2.6 Команды: три входа (репетиция, выступление, канал)
 
-**Мотивация.** Разные режимы работы мозга: **учиться** действию vs **делать** его на автомате. Два входа — одна модель команд.
+**Мотивация.** Разные режимы работы мозга: **учиться** действию, **делать** на автомате, **оставаться в канале сессии** и всё равно вызвать IDE-действие. Три поверхности — одна модель `command_id` (палитра, аккорд, MCP не расходятся).
 
 | Режим | Вход | Зачем |
 |-------|------|--------|
 | **Репетиция** | Палитра (Ctrl+Q) | Поиск, полный каталог, онбординг, редкие команды |
-| **Выступление** | CascadeChord (Ctrl+K) + Melody | Быстрые освоенные действия без отрыва от клавиатуры |
-| **Intercom** | `/` + autocomplete | Те же `command_id`, что в палитре и у агента — discoverability без зубрёжки |
+| **Выступление** | CascadeChord (Ctrl+K) + Melody `c:` | Освоенные действия с клавиатуры; короткие alias — здесь, не в слэше |
+| **Канал сессии** | Слэш в composer (`/` + autocomplete) | Те же `command_id`, когда фокус уже в Intercom: `/build run`, `/topic …`, `/help` — иерархия вместо мнемоник ([0119](../adr/0119-chat-slash-commands-intercom-surface.md)) |
+
+```mermaid
+flowchart LR
+  subgraph surfaces["Один command_id"]
+    P["Палитра Ctrl+Q\nрепетиция"]
+    K["Chord Ctrl+K + c:\nвыступление"]
+    S["/ в composer\nканал сессии"]
+  end
+  R["IdeCommands / MCP"]
+  P --> R
+  K --> R
+  S --> R
+```
 
 **Для дизайна:**
 
-- Слэш-команды — **иерархические подсказки** (`/` → группа → действие), не мнемоники из головы.
+- Слэш — **иерархические подсказки** (`/` → namespace → действие), autocomplete обязателен; не дублировать «сжатые» формы палитры/аккорда (`/br` и т.п.).
 - Обычный текст в composer — **агенту**; неизвестный `/` — **отклонять локально**, не «отправить модели наугад».
+- Визуально различать **три affordance** в онбординге и help, не смешивать «палитра = всё».
 
 ---
 
@@ -158,7 +172,7 @@
 | P3 | Не клон VS Code + inline AI | Согласованный контур, не панельный зоопарк |
 | P4 | Суверенитет AI | Вкл/выкл, прозрачность, паритет с агентом |
 | P5 | Dark cockpit | Тишина в норме; тревога — по делу |
-| P6 | Репетиция / выступление | Палитра учит, аккорд и слэш ускоряют |
+| P6 | Три входа команд | Палитра учит, аккорд ускоряет, слэш — discoverability в Intercom |
 | P7 | Intercom = канал сессии | Не generic chat sidebar |
 
 **Ценности проекта (кратко):** открытость, наблюдаемость, паритет человека и агента — [ADR 0100](../adr/0100-project-constitution.md) (инженерам).
@@ -291,11 +305,13 @@ flowchart TB
 
 | Тема | ADR / design |
 |------|----------------|
+| **Три входа** (репетиция / выступление / канал) | §2.6 handbook · [philosophy §7](cascadeide-philosophy-v1.md) |
 | Поверхность команд | [0013](../adr/0013-command-surface-and-discoverability.md) |
 | Палитра overlay | [0070](../adr/0070-command-palette-direct-overlay-surface.md) |
-| Chord stack (Ctrl+K) | [0060](../adr/0060-keyboard-chord-stack-fms-tactical-strategic.md) |
+| Chord stack (Ctrl+K) | [0060](../adr/0060-keyboard-chord-stack-fms-tactical-strategic.md) (§1a — слэш) |
+| Slash в composer | [0119](../adr/0119-chat-slash-commands-intercom-surface.md), [0124](../adr/0124-slash-parametric-editor-line-commands.md)–[0126](../adr/0126-intercom-inspect-slash-and-compact-chrome-status.md) |
 | Реестр команд (справочник) | [ide-command-registry-v1.md](ide-command-registry-v1.md) |
-| Intent / Melody | [intent-melody-language-v1.md](../intent-melody-language-v1.md), [ADR 0109](../adr/0109-intent-melody-command-first-catalog.md) |
+| Intent / Melody | [intent-melody-language-v1.md](../intent-melody-language-v1.md), [ADR 0109](../adr/0109-declarative-parametric-melody-catalog-toml-and-code-binders.md) |
 
 ### 5.4 Карты, графы, semantic map (PFD)
 
@@ -350,6 +366,7 @@ flowchart TB
 | **MCP** | Протокол инструментов агента внутри IDE |
 | **IOP** | Intent-Oriented Programming — дисциплина намерения и верификации |
 | **Melody / Chord** | Клавиатурная «мелодия» команд после Ctrl+K ([0060](../adr/0060-keyboard-chord-stack-fms-tactical-strategic.md)) |
+| **Slash / unified command line** | `/…` в composer Intercom → тот же `command_id`, что палитра/MCP ([0119](../adr/0119-chat-slash-commands-intercom-surface.md)) |
 
 ---
 
@@ -386,7 +403,7 @@ flowchart TB
 | 3 | **Intercom navigation v1** — spine + вкладки + navigator (target по [0127](../adr/0127-intercom-spine-and-topic-tabs-chrome-navigation.md)) | Ежедневное переключение тем без «второго мира» overview |
 | 4 | **Раскладка Flight + пресеты 1/2/3 монитора** | Wireframe и плотность зон; см. §3.1 |
 | 5 | **Состояния и оповещения** (health, EICAS, compact status) | Dark cockpit: тишина в норме, тревога по делу — [environment-readiness-glance-v1.md](environment-readiness-glance-v1.md) |
-| 6 | **Command / discoverability** | Палитра, слэш-autocomplete, иконки intent — [0013](../adr/0013-command-surface-and-discoverability.md), [0119](../adr/0119-chat-slash-commands-intercom-surface.md) |
+| 6 | **Command / discoverability** | Три входа (палитра / аккорд / слэш), единый autocomplete слэша, иконки intent — [0013](../adr/0013-command-surface-and-discoverability.md), [0119](../adr/0119-chat-slash-commands-intercom-surface.md) |
 | 7 | **Темы** (светлая / тёмная / Power-циан) | Пресеты поверх одних токенов — [0086](../adr/0086-ui-theme-toml-canonical-json-mcp-wire.md) |
 
 **Не в фокусе дизайнера v1:** внутренние implementation-map, DAL/CCU, editor HUD migration — см. исключённые чертежи в `docs/design/` (не на публичном сайте).

@@ -13,7 +13,8 @@
 |-----|------|
 | [0021](0021-pfd-mfd-cockpit-attention-model.md) | кокпит, зоны |
 | [0071](0071-ai-assistance-sovereignty-locality-invisibility.md) | Принципы интеграции AI/ассистента в IDE — суверенитет, локальность, невидимость |
-| [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md) | Аккордный слой (FMS-style), S/T и overlay — расширение keyboard-first (ADR 0013) |
+| [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md) | Аккордный слой (FMS-style), S/T и overlay — расширение keyboard-first (ADR 0013); §1a — слэш |
+| [0119](0119-chat-slash-commands-intercom-surface.md) | Слэш в Intercom — третий вход discoverability, тот же `command_id` |
 | [0075](0075-ui-topic-index-and-mfd-page-conventions.md) | указатель `UI/` |
 
 ### Вне ADR

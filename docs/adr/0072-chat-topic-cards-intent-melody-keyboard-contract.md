@@ -125,7 +125,7 @@
 
 ## Связь с ADR 0060
 
-- [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md) остаётся **каноном** для: двух входов (палитра vs `CascadeChord`), осей S/T/M/E где применимо, overlay, Command Melody `c:`, паритета с реестром.
+- [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md) остаётся **каноном** для: **трёх входов** команд (палитра, `CascadeChord`, слэш в Intercom — [0119](0119-chat-slash-commands-intercom-surface.md) §1a), осей S/T/M/E где применимо, overlay, Command Melody `c:`, паритета с реестром.
 - **0072** вводит **дополнительный продуктовый контракт** только для **chat-topic navigation** и **не** отменяет общую chord/melody модель.
 - Формулировка уровня **«amended in part»**: для **домена чата** нормативно заданы overview/detail, topic cards и **минимальный** набор intent-команд с обязательным Melody/Chords/palette паритетом; остальная часть **0060** не изменена.
 

@@ -49,6 +49,7 @@ hide:
 | [0116](../../adr/0116-intercom-session-tree-and-agent-message-steering.md) | Intercom — дерево сессии (ветвление) и steer / follow-up при работе агента | Proposed |
 | [0117](../../adr/0117-remote-operator-surface-multidevice.md) | Remote operator surface — мультидевайсность оператора (пульт, не mobile IDE) | Proposed |
 | [0122](../../adr/0122-collaborative-iop-environment-and-shared-situational-display.md) | Командная среда IOP — рабочие места и общий ситуационный экран | Proposed |
+| [0127](../../adr/0127-intercom-spine-and-topic-tabs-chrome-navigation.md) | Intercom — spine и вкладки тем в chrome (навигация без overview) | Proposed · **согласованное направление** (2026-05-18) |
 
 
 ---

@@ -4,7 +4,7 @@
 
 **Реализация разбора:** `Services/ChordNotation/` — см. слои ниже; Vim-EBNF в `ChordNotationGrammar.cs` ([Eto.Parse](https://www.nuget.org/packages/Eto.Parse)).
 
-**Философия читаемости:** нотация — для людей; где уместно, рядом с цепочкой шагов даётся **мнемоника намерений** (см. [ADR 0060 §10](adr/0060-keyboard-chord-stack-fms-tactical-strategic.md#adr0060-p10) — невидимый инструмент, overlay как суфлёр, палитра vs аккорд). Конкретные буквы и количество шагов зависят от версии грамматики и `hotkeys.toml`; смысл §10 не привязан к одной таблице.
+**Философия читаемости:** нотация — для людей; где уместно, рядом с цепочкой шагов даётся **мнемоника намерений** (см. [ADR 0060 §10](adr/0060-keyboard-chord-stack-fms-tactical-strategic.md#adr0060-p10) — невидимый инструмент, overlay как суфлёр; **три входа** команд: палитра, аккорд, слэш в Intercom — [philosophy §7](design/cascadeide-philosophy-v1.md)). Конкретные буквы и количество шагов зависят от версии грамматики и `hotkeys.toml`; смысл §10 не привязан к одной таблице.
 
 **Command Melody в палитре:** префикс строки поиска **`c:`** — отдельный текстовый namespace ([ADR 0060 §11](adr/0060-keyboard-chord-stack-fms-tactical-strategic.md#adr0060-p11)), не путать с Vim-нотацией `<C-…>`: `c:` не описывает физические клавиши, а задаёт **alias** к тому же `command_id`, что и аккорд (`Ctrl+K` + буквы семейства/действия). Формальное описание языка и раздел для обсуждения эволюции — [intent-melody-language-v1.md](intent-melody-language-v1.md).
 

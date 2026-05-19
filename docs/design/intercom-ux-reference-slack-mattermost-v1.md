@@ -61,12 +61,15 @@
 
 ### Входы (ортогональность)
 
+Один `command_id` — несколько поверхностей ([0013](../adr/0013-command-surface-and-discoverability.md), [handbook §2.6](cide-design-handbook-v1.md)):
+
 | Вход | Роль |
 |------|------|
 | Pointer / hit-target | тактика на карточках |
-| **Chat slash** + autocomplete | CLI в composer |
-| **Melody `c:`** / аккорды | сжатые мнемоники **в палитре**, не в слэше [0119](../adr/0119-chat-slash-commands-intercom-surface.md) |
-| Палитра, MCP | тот же `command_id` [0030](../adr/0030-command-ids-hotkeys-and-ui-registry-layers.md) |
+| **Палитра (Ctrl+Q)** | репетиция: полный каталог, fuzzy-поиск |
+| **CascadeChord (Ctrl+K)** + Melody `c:` | выступление: мнемоники **в палитре/аккорде**, не в слэше |
+| **Chat slash** + autocomplete | канал сессии: CLI в composer ([0119](../adr/0119-chat-slash-commands-intercom-surface.md) Implemented) |
+| MCP / агент | тот же `command_id` [0030](../adr/0030-command-ids-hotkeys-and-ui-registry-layers.md) |
 
 ---
 

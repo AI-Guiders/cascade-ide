@@ -125,7 +125,7 @@ Parity with [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md): any com
 
 ## Communication with ADR 0060
 
-- [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md) remains **canon** for: two inputs (palette vs `CascadeChord`), S/T/M/E axes where applicable, overlay, Command Melody `c:`, registry parity.
+- [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md) remains **canon** for: **three command surfaces** (palette, `CascadeChord`, slash in Intercom — [0119](0119-chat-slash-commands-intercom-surface.md) §1a), S/T/M/E axes where applicable, overlay, Command Melody `c:`, registry parity.
 - **0072** introduces **additional product contract** for **chat-topic navigation** only and **does not** override the general chord/melody model.
 - Formulation of the **“amended in part”** level: for the **chat domain** overview/detail, topic cards and a **minimal** set of intent commands with mandatory Melody/Chords/palette parity are specified; the rest of **0060** is unchanged.
 

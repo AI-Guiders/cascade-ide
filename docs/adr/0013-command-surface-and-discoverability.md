@@ -13,6 +13,7 @@
 | [0002](0002-debug-human-agent-parity.md) | один слой для человека и агента, если команды общие |
 | [0030](0030-command-ids-hotkeys-and-ui-registry-layers.md) | Слои идентификаторов команд, хоткеев и UI (без одной таблицы «всё в одном» пока) |
 | [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md) | аккордный слой FMS-style, S/T, overlay — **расширение** keyboard-first, не замена палитры |
+| [0119](0119-chat-slash-commands-intercom-surface.md) | слэш в composer Intercom — **третья** поверхность discoverability; тот же `command_id`, дополняет палитру и аккорд |
 
 ### Вне ADR
 
@@ -48,7 +49,9 @@
 
 4. **Toolbar минимизировать:** оставить только **якорные** действия с высокой частотой (или убрать до одной кнопки открытия палитры — по продуктовой итерации). Остальное — палитра + режимы ([0010](0010-ui-modes-toml-configuration.md)) + при необходимости чеклисты.
 
-5. **Паритет агента:** команды, доступные человеку из палитры и привязанные к тому же слою, что и `IdeCommands`/MCP, остаются **согласованными** с автоматизацией ([0002](0002-debug-human-agent-parity.md), [0008](0008-mcp-contracts-and-testable-infrastructure.md)); имена и id не разъезжаются между «кнопка в UI» и «вызов агента».
+5. **Три опорных входа для человека** (один реестр): **палитра** (поиск и полный каталог), **аккорд/Melody** ([0060](0060-keyboard-chord-stack-fms-tactical-strategic.md)), **слэш в Intercom** ([0119](0119-chat-slash-commands-intercom-surface.md) — unified command line в composer). Не смешивать роли: сжатые мнемоники — аккорд/`c:`, иерархический discoverability в канале — `/` + autocomplete.
+
+6. **Паритет агента:** команды, доступные человеку из палитры и привязанные к тому же слою, что и `IdeCommands`/MCP, остаются **согласованными** с автоматизацией ([0002](0002-debug-human-agent-parity.md), [0008](0008-mcp-contracts-and-testable-infrastructure.md)); имена и id не разъезжаются между «кнопка в UI» и «вызов агента».
 
 ## Связь с [0014](0014-situational-checklists.md)
 

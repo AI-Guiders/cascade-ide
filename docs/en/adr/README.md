@@ -185,7 +185,7 @@ Brief navigation; **full list** - [below](#adr-index-full). Large ADRs have a **
 | [0117 (SkiaKit)](0117-ide-skia-kit.md) | **SkiaKit:** reusable Skia IDE primitives (sectioned cards, tile grid) | Accepted |
 | [0117](0117-remote-operator-surface-multidevice.md) | Remote operator surface: **PWA**-remote from a phone/other PC, Operator Gateway; not mobile IDE; [0017](0017-multi-window-workspace-and-agent-surfaces.md), [0108](0108-web-ai-portal-host-object-tools-bridge.md) | Proposed |
 | [0118](0118-agent-notes-core-2-toml-and-knowledge-path.md) | Agent Notes Core **2.0**: TOML in-proc, `config_path` SSOT with MCP, `knowledge_path` in `IdeCommands` | Accepted |
-| [0119](0119-chat-slash-commands-intercom-surface.md) | Chat as command line: Intercom (`/card`) + IDE (`/build run`, `/test run`, `/debug launch`); autocomplete, `command_id` | Proposed |
+| [0119](0119-chat-slash-commands-intercom-surface.md) | Chat as command line: Intercom (`/card`) + IDE (`/build run`, `/test run`, `/debug launch`); autocomplete, `command_id` | Accepted · Implemented |
 | [0120](0120-primary-work-surface-intercom-or-editor.md) | `primary_work_surface`: Intercom or Editor in Forward anchor (analogous to Agent/Editor in Cursor) | Proposed |
 | [0121](0121-intent-oriented-programming-paradigm.md) | IOP (Intent-Oriented Programming) paradigm — conceptual foundation; [manifest](../iop-manifest-v1.md) | Accepted |
 

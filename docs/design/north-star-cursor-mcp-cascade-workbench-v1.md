@@ -24,7 +24,7 @@
 
 Это **не отменяет** необходимости «скучных километров» редактора, отладки и языковых сервисов. Но продуктовый смысл — **не клонировать VS**, а дать **иную повседневную работу** тем, кому важнее ясность и устойчивый фокус, чем максимум встроенных инструментов на экране.
 
-**Keyboard-first:** на уровне замысла CascadeIDE **не** задумывается как IDE, где обязателен постоянный «охват мышью» по плотным панелям. Ориентир — **клавиатура + палитра команд + осмысленные хоткеи** (и согласованность с автоматизацией через те же `IdeCommands`), а широкие панели и тулбар — вторичны к этому контуру; детали поверхности — [ADR 0013](../adr/0013-command-surface-and-discoverability.md).
+**Keyboard-first:** на уровне замысла CascadeIDE **не** задумывается как IDE, где обязателен постоянный «охват мышью» по плотным панелям. Ориентир — **клавиатура + три входа команд** (палитра Ctrl+Q, аккорд Ctrl+K, слэш в Intercom — [0119](../adr/0119-chat-slash-commands-intercom-surface.md)) и согласованность с автоматизацией через те же `IdeCommands`; широкие панели и тулбар — вторичны; детали — [ADR 0013](../adr/0013-command-surface-and-discoverability.md), [philosophy §7](cascadeide-philosophy-v1.md).
 
 **JetBrains:** для .NET честнее сравнивать Cascade не с IntelliJ IDEA, а с **JetBrains Rider** — тот же контур (решение, отладка, рефакторинги в экосистеме .NET). Ось дифференциации та же: не «ещё один насыщенный IDE-стол», а кокпит и иерархия внимания; по глубине и зрелости функций Rider остаётся сильным ориентиром в своей нише.
 
@@ -74,7 +74,7 @@
 | **Мультиоконность / MFD** | `MfdHostWindow`, `presentation`, сохранение геометрии ([ADR 0017](../adr/0017-multi-window-workspace-and-agent-surfaces.md)). | Политика закрытия главного окна, fallback при смене мониторов, подтверждения агента при нескольких TopLevel — открытые пункты ADR. |
 | **Агент ↔ человек: внимание** | Модель зон [0021](../adr/0021-pfd-mfd-cockpit-attention-model.md), UX чата [0031](../adr/0031-agent-chat-clarification-batches-and-threading.md) (частично). | Единая картина «затык / жду ввода / критично» без перегруза модалками ([ADR 0017 п. 6](../adr/0017-multi-window-workspace-and-agent-surfaces.md#adr0017-p6)). |
 | **Кокпит / Dark Cockpit** | Режимы UI, полосы health/EICAS в концепции [0021](../adr/0021-pfd-mfd-cockpit-attention-model.md), Power/Flight ([0010](../adr/0010-ui-modes-toml-configuration.md)). | Сплошной опыт «не утонуть» при росте функций; согласовать плотность UI с north star выше. |
-| **Палитра / keyboard UX** | Реестр команд и хоткеев ([0030](../adr/0030-command-ids-hotkeys-and-ui-registry-layers.md)); направление палитры и минимального toolbar — [0013](../adr/0013-command-surface-and-discoverability.md). | Довести до полного **keyboard-first**: предсказуемые хоткеи, покрытие частых действий без охота за кнопками, единая дисциплина имён с MCP. |
+| **Палитра / chord / slash UX** | Реестр ([0030](../adr/0030-command-ids-hotkeys-and-ui-registry-layers.md)); палитра, аккорд ([0060](../adr/0060-keyboard-chord-stack-fms-tactical-strategic.md)), слэш ([0119](../adr/0119-chat-slash-commands-intercom-surface.md) Implemented). | Расширять каталог slash с autocomplete; единая дисциплина имён с MCP; онбординг **трёх** входов, не «только палитра». |
 
 ## Следующий шаг документа
 

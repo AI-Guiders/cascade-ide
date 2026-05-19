@@ -3,7 +3,7 @@
 **Статус:** справочник для людей (не нормативный ADR).  
 **Назначение:** вводный текст для новых участников и для внешнего User Guide — **смысл** продукта и метафор до чтения конкретных ADR.  
 **Дата:** 2026-04-19  
-**Связь:** [ADR 0071](../adr/0071-ai-assistance-sovereignty-locality-invisibility.md) (принципы и анти-паттерны интеграции AI), [ADR 0060 §10](../adr/0060-keyboard-chord-stack-fms-tactical-strategic.md#adr0060-p10) (невидимый инструмент, overlay, палитра vs аккорд), [ADR 0021](../adr/0021-pfd-mfd-cockpit-attention-model.md) (PFD/MFD, модель внимания), [north-star](north-star-cursor-mcp-cascade-workbench-v1.md), [ADR 0020](../adr/0020-agent-reasoning-visibility-and-provider-limits.md), [ADR 0008](../adr/0008-mcp-contracts-and-testable-infrastructure.md), [ADR 0028](../adr/0028-user-settings-toml-localappdata-and-secrets.md).
+**Связь:** [ADR 0071](../adr/0071-ai-assistance-sovereignty-locality-invisibility.md) (принципы и анти-паттерны интеграции AI), [ADR 0060 §10](../adr/0060-keyboard-chord-stack-fms-tactical-strategic.md#adr0060-p10) (невидимый инструмент, overlay; **три входа** команд — §7 ниже, [0119](../adr/0119-chat-slash-commands-intercom-surface.md)), [ADR 0021](../adr/0021-pfd-mfd-cockpit-attention-model.md) (PFD/MFD, модель внимания), [north-star](north-star-cursor-mcp-cascade-workbench-v1.md), [ADR 0020](../adr/0020-agent-reasoning-visibility-and-provider-limits.md), [ADR 0008](../adr/0008-mcp-contracts-and-testable-infrastructure.md), [ADR 0028](../adr/0028-user-settings-toml-localappdata-and-secrets.md).
 
 **Источник нарратива:** линия обсуждений **Comet** (внешний диалог), зафиксированная в каноне personal-слоя KB; здесь — продуктовая выжимка без привязки к датам релизов сторонних IDE.
 
@@ -30,7 +30,7 @@
 | **Иерархия внимания** | Один и тот же экран может показать **всё**; без явной иерархии пользователь тонет в панелях. PFD / лобовое / **Forward** задают роль «сейчас главное» vs «вторичный контекст» — см. [0021](../adr/0021-pfd-mfd-cockpit-attention-model.md). |
 | **MFD и «земля»** | Диагностика, логи, карта, инструменты — не конкурируют с редактированием за фокус по умолчанию; их место и плотность политикой, а не случайным нагромождением окон. |
 | **Dark Cockpit** | В норме приборы **не кричат**: тревога — когда есть что сказать. Аналог для IDE: меньше визуального шума и «маркетинговых» пульсаций, больше спокойного фона для кода ([0021](../adr/0021-pfd-mfd-cockpit-attention-model.md) § про кокпит и осведомлённость). |
-| **Скан и предсказуемость** | У пилота есть **порядок обхода** приборов; у разработчика — порядок команд и зон. Аккордный слой и палитра как два входа в одну модель ([0060](../adr/0060-keyboard-chord-stack-fms-tactical-strategic.md), [0013](../adr/0013-command-surface-and-discoverability.md)) поддерживают привычку, а не хаотичный поиск кнопки. |
+| **Скан и предсказуемость** | У пилота есть **порядок обхода** приборов; у разработчика — порядок команд и зон. **Три входа** в одну модель `command_id` ([§7](#7-три-входа-команд-палитра-аккорд-слэш), [0060](../adr/0060-keyboard-chord-stack-fms-tactical-strategic.md), [0013](../adr/0013-command-surface-and-discoverability.md), [0119](../adr/0119-chat-slash-commands-intercom-surface.md)) поддерживают привычку, а не хаотичный поиск кнопки. |
 | **Общий словарь** | PFD/MFD/EFB, режимы, «тактика vs стратегия» ([0059](../adr/0059-roslyn-mcp-profiles-manager-tactical-strategic-efb.md)) дают **одинаковые имена** в ADR, коде и разговоре команды — меньше «я про верхнюю панель, ты про правую». |
 | **Агент в том же контуре** | Самолёт сравнивают с экипажем: кто сейчас несёт ответственность за траекторию. Agent-first north-star ([north-star](north-star-cursor-mcp-cascade-workbench-v1.md), [0002](../adr/0002-debug-human-agent-parity.md)) — про **наблюдаемость** чужого действия, а не про «магию сбоку». |
 
@@ -94,12 +94,17 @@
 
 ---
 
-## 7. Палитра vs аккорд, discoverability
+## 7. Три входа команд: палитра, аккорд, слэш
 
-- **Палитра (Ctrl+Q)** — режим **«репетиции»**: полный каталог, поиск, обучение.
-- **CascadeChord (Ctrl+K)** — режим **«выступления»**: быстрый вход для освоенных действий.
+Один каталог **`command_id`** ([0013](../adr/0013-command-surface-and-discoverability.md), [0030](../adr/0030-command-ids-hotkeys-and-ui-registry-layers.md)) — три **поверхности discoverability**, не три исполнителя:
 
-Обе опоры сходятся к **одной модели `command_id`** ([0013](../adr/0013-command-surface-and-discoverability.md), [0030](../adr/0030-command-ids-hotkeys-and-ui-registry-layers.md)).
+| Режим | Вход | Зачем |
+|-------|------|--------|
+| **Репетиция** | Палитра (**Ctrl+Q**) | Полный каталог, fuzzy-поиск, онбординг, редкие команды |
+| **Выступление** | **CascadeChord** (**Ctrl+K**) + Melody `c:` | Быстрый вход для освоенных действий без отрыва от клавиатуры; короткие мнемоники — здесь, не в `/` |
+| **Канал сессии** | Слэш в composer Intercom (`/` + autocomplete) | Те же команды, когда руки уже в поле сообщения: иерархия `/build run`, `/topic open`, `/help` — без зубрёжки и без смены фокуса на палитру ([0119](../adr/0119-chat-slash-commands-intercom-surface.md), [0124](../adr/0124-slash-parametric-editor-line-commands.md)–[0126](../adr/0126-intercom-inspect-slash-and-compact-chrome-status.md)) |
+
+Слэш **дополняет** палитру и аккорд ([0013](../adr/0013-command-surface-and-discoverability.md)); обычный текст в composer — **агенту**, неизвестный `/` — отклонять локально.
 
 ---
 

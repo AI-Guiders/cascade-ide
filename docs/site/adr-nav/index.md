@@ -4,10 +4,10 @@
 
 [Жизненный цикл статусов](../adr/status-lifecycle.md) · [Полный индекс ADR](../adr/README.md)
 
-- [Proposed](proposed.md) — **38**
-- [Accepted](accepted.md) — **41**
+- [Proposed](proposed.md) — **39**
+- [Accepted](accepted.md) — **42**
 - [Accepted · In progress](accepted-in-progress.md) — **1**
-- [Accepted · Implemented](accepted-implemented.md) — **43**
+- [Accepted · Implemented](accepted-implemented.md) — **47**
 - [Superseded](superseded.md) — **1**
 - [Deferred / Deprecated / other](other.md) — **3**
 

@@ -49,6 +49,7 @@ Draft for discussion — not yet accepted.
 | [0116](../../adr/0116-intercom-session-tree-and-agent-message-steering.md) | Intercom - session tree (branching) and steer / follow-up during agent operation | Proposed |
 | [0117](../../adr/0117-remote-operator-surface-multidevice.md) | Remote operator surface - multi-device operator (remote control, not mobile IDE) | Proposed |
 | [0122](../../adr/0122-collaborative-iop-environment-and-shared-situational-display.md) | Collaborative IOP Environment — Workstations and Shared Situational Display | Proposed |
+| [0127](../../adr/0127-intercom-spine-and-topic-tabs-chrome-navigation.md) | Intercom — spine и вкладки тем в chrome (навигация без overview) | Proposed · **согласованное направление** (2026-05-18) |
 
 
 ---

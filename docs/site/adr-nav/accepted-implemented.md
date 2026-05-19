@@ -52,8 +52,12 @@ hide:
 | [0112](../../adr/0112-command-palette-query-modes-strategy.md) | Режимы строки палитры (`f:` / `t:` / `m:` / `x:` / `c:`) — модель режимов, стратегии и **бэкенды** workspace-поиска | Accepted · Implemented |
 | [0117](../../adr/0117-ide-skia-kit.md) | SkiaKit — переиспользуемые Skia-примитивы IDE | Accepted · Implemented |
 | [0118](../../adr/0118-agent-notes-core-2-toml-and-knowledge-path.md) | Agent Notes Core 2.0 — TOML, `knowledge_path`, паритет с agent-notes-mcp | Accepted · Implemented |
+| [0119](../../adr/0119-agent-notes-core-2-1-multi-root-knowledge.md) | Agent Notes Core 2.1 — multi-root knowledge (`knowledge_root_id`) | Accepted · Implemented |
 | [0119](../../adr/0119-chat-slash-commands-intercom-surface.md) | Слэш-команды в чате — unified command line (Intercom + IDE) | Accepted · Implemented |
 | [0120](../../adr/0120-primary-work-surface-intercom-or-editor.md) | Primary work surface — Intercom или Editor (аналог Agent / Editor) | Accepted · Implemented |
+| [0124](../../adr/0124-slash-parametric-editor-line-commands.md) | Параметрические слэш-команды — полный паритет каталога IML в Intercom | Accepted · Implemented |
+| [0125](../../adr/0125-slash-workspace-file-commands-and-dynamic-completion.md) | Слэш-команды workspace/file — `/file open`, `/solution new`, динамические подсказки | Accepted · Implemented |
+| [0126](../../adr/0126-intercom-inspect-slash-and-compact-chrome-status.md) | Intercom inspect — `/topic`/`/spine` list\|tree и статус в chrome (compact) | Accepted · Implemented |
 
 
 ---
