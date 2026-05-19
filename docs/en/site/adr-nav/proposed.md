@@ -53,6 +53,7 @@ Draft for discussion — not yet accepted.
 | [0128](../../adr/0128-intercom-attachment-anchors-and-code-references.md) | Intercom — якоря вложений (code references) и канонический attach | Proposed |
 | [0129](../../adr/0129-intercom-message-body-markdown-and-fenced-code.md) | Intercom — тело сообщения: Markdown, fenced code и preview | Proposed |
 | [0130](../../adr/0130-editor-agent-range-reveal-without-selection.md) | Подсветка диапазона кода для агента без изменения selection | Proposed |
+| [0131](../../adr/0131-editor-slash-select-code-by-bracket-reference.md) | `/editor select code` by bracket `[M:…]` — editor select, not attach | Proposed |
 
 
 ---

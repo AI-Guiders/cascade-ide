@@ -20,6 +20,7 @@
 | [0123](0123-intercom-full-skia-surface-evolution.md) | Skia-лента |
 | [0129](0129-intercom-message-body-markdown-and-fenced-code.md) | **Fenced code** и markdown в `content` — **не** этот ADR |
 | [0130](0130-editor-agent-range-reveal-without-selection.md) | MCP **reveal** диапазона без selection (агент); общий presentation mode с §8 |
+| [0131](0131-editor-slash-select-code-by-bracket-reference.md) | *(Proposed)* `/editor select code [M:…]` — bracket → select в редакторе, не attach |
 
 ### Вне ADR (playbook)
 
@@ -208,6 +209,7 @@
 |----------|---------|---------------|---------|
 | Открыть файл | `/file open` [0125](0125-slash-workspace-file-commands-and-dynamic-completion.md) | нет | нет |
 | Select/delete lines | `/editor line` [0124](0124-slash-parametric-editor-line-commands.md) | **да** | нет |
+| Select по смыслу в редакторе | `/editor select code [M:…]` [0131](0131-editor-slash-select-code-by-bracket-reference.md) *(Proposed)* | **да** | нет |
 | Прикрепить к реплике | `/attach …`, `[…]` | нет | **да** |
 | Агент показывает участок | MCP `reveal_editor_range` [0130](0130-editor-agent-range-reveal-without-selection.md) | нет | нет |
 | Агент идёт править | MCP `go_to_position` | **да** (select) | нет |
