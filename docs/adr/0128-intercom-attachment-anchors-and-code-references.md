@@ -115,9 +115,10 @@
 | `syntaxScope` | опционально | `{ kind: "for", indexInParent: 2, parentMemberKey }` — v2 |
 | `excerpt` | рекомендуется | Текст фрагмента @ send — **устойчивый** для всех участников |
 | `proseStart`, `proseLength` | да | Offset inline-метки в теле сообщения |
-| `resolvedAtUtc` | да | Момент resolve |
+| `resolvedAtUtc` | да | Момент resolve @ send |
+| `resolveOutcome` | опционально | Кэш последнего reveal у получателя: `resolved` \| `file_missing` \| … — §9.1 |
 
-**Принцип:** то, что видит человек в ленте — **смысл** (`displayLabel`, excerpt); path/lines — вторично (hover, агент, fallback).
+**Принцип:** то, что видит человек в ленте — **смысл** (`displayLabel`, excerpt); path/lines — вторично (hover, агент, fallback). При `file_missing` excerpt остаётся источником правды для всех.
 
 <a id="adr0128-p4"></a>
 
@@ -186,6 +187,7 @@
 | 1 | Open `file` (или preview для non-text) |
 | 2 | Если есть `memberKey` или `syntaxScope` → **re-resolve** в solution **получателя** → `LineRange` |
 | 3 | Иначе если есть lines @ send → best-effort + drift warning |
+| 4a | Если `file_missing` / `member_not_found` → шаги 4–5 **не** выполнять; UI по §9.1 |
 | 4 | Scroll into view + **transient range highlight** (рамка / gutter band), **не** `Selection` |
 | 5 | Shift+клик или настройка → `SelectInEditor` |
 
@@ -198,6 +200,34 @@
 - **Excerpt** и **displayLabel** (member, `Foo › for (2)`) — общий знаменатель в ленте.
 - **lineStart/lineEnd @ send** — снимок отправителя для агента и fallback; при клике у получателя — **re-resolve** при наличии `memberKey`/`syntaxScope`.
 - UI может показать: «при отправке L50–100» при hover, если текущий диапазон другой.
+
+<a id="adr0128-p9b"></a>
+
+### 9.1 Re-resolve у получателя: другая ветка, нет файла, нет символа
+
+**Вопрос:** отправитель сослался на `Foo.cs` / `[M:Bar]`, у получателя на другой ветке файла нет (или member переименован). Что видит человек и что получает агент?
+
+**Принцип:** attach — это **намерение + снимок @ send**, а не гарантия, что у всех открыт **тот же** снимок workspace. Re-resolve всегда идёт в **текущем** solution/ветке **получателя**; если там нет цели — **не ломаем** ленту и не открываем пустой редактор молча.
+
+| Исход `resolveOutcome` *(в UI / при reveal)* | Условие | Лента (chip / hover) | Клик **reveal** | Агент в prompt |
+|---------------------------------------------|---------|----------------------|-----------------|---------------|
+| `resolved` | Файл есть, member/scope найден | `displayLabel` | Open + рамка по **текущим** строкам; опционально «было L50–100 @ send» | `file` + lines + **excerpt** |
+| `file_missing` | Путь не в workspace (другая ветка, не checkout, другой sln) | Метка + иконка ⚠; **excerpt** в tooltip / expand | Toast: «`Foo.cs` нет в текущем workspace»; **не** создавать пустую вкладку; предложить **показать excerpt** (flyout) или копировать excerpt | **excerpt** + `displayLabel` + `file` (как hint); явно: *не удалось открыть в твоём дереве* |
+| `member_not_found` | Файл есть, символа нет (rename, ветка без метода) | `displayLabel` + ⚠ stale | Open файл; рамка по **lines @ send** если валидны, иначе только scroll к файлу + warning | excerpt обязателен; memberKey как hint |
+| `lines_drift` | Только M0 / fallback lines, диапазон пустой или сильно сдвинулся | как выше + «drift» | Open + best-effort lines + **предупреждение** | excerpt + lines @ send |
+| `excerpt_only` | Non-text / preview-only / resolve отключён | excerpt в expand | Preview или copy excerpt | excerpt |
+
+**Почему excerpt обязателен @ send:** именно он **одинаков** у отправителя и получателя, когда репозитории разъехались. Строки и path — подсказки для IDE **после** успешного resolve у **этого** человека.
+
+**Ветка:** отдельного поля `gitBranch` в wire v1 **не** требуем (часто устаревает и врёт). Опционально v2: `senderWorkspaceHint` (branch name, commit) **только для UI** («отправитель был на `feature/x`»), без попытки checkout.
+
+**Не делаем v1:**
+
+- Автоматический `git checkout` ветки отправителя по клику из чата.
+- Скрывать сообщение или chip, если файл отсутствует — смысл реплики и excerpt остаются видимыми.
+- Притворяться, что lines @ send — общий контракт между участниками.
+
+**Связь с [0129](0129-intercom-message-body-markdown-and-fenced-code.md):** fenced block в ответе агента **не** зависит от файла в репо; attach chip — да. Если файла нет, получатель всё равно читает **excerpt** или fenced текст, а не «битую» ссылку.
 
 <a id="adr0128-p10"></a>
 
@@ -258,6 +288,7 @@
 | Excerpt лимит | **120 строк** или **16 KiB**, хвост `…` |
 | Redaction внешний контур | Отдельное событие / политика [0080](0080-intercom-naming-and-multi-party-channel-model.md) |
 | `@file` inline | **Отложено** до фазы 2 attach |
+| Нет файла у получателя | Excerpt + warning; reveal **не** открывает пустой файл — §9.1 |
 
 ---
 
@@ -275,3 +306,4 @@
 |------|-----------|
 | 2026-05-19 | Proposed: канон AttachmentAnchor, H/M слои, `/attach`, reveal, re-resolve. |
 | 2026-05-19 | §11–12 fenced/MD → [0129](0129-intercom-message-body-markdown-and-fenced-code.md); attach-only scope. |
+| 2026-05-19 | §9.1 исходы re-resolve: другая ветка / нет файла; excerpt как общий знаменатель. |
