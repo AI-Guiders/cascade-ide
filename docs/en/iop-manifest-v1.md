@@ -35,12 +35,16 @@ A mature IOP/KB contour **from outside** often looks like: philosophy first, she
 
 | Path | Where you start | What accumulates | Typical carrier |
 |------|-----------------|------------------|-----------------|
-| **Curiosity** | A **folder** workspace (project-aware root), one dialogue with the agent: *“how do you even think?”*, one hypothesis, one `project-id` when clear | Practice → questions → playbook/ADR in canon → MCP and product **as pain appears**, not “learn everything first” | Any environment with repo + agent; `[PRIMARY:…]`, `[SCOPE:…]` when needed (KB `playbook-multi-project-context-v1`) |
-| **Integrated** | Ready-made contour: router, hot-context, product cockpit, ADRs, three command surfaces | Faster for people **already inside**; risky as the **only** demo to skeptics | [SHOWCASE](https://github.com/AI-Guiders/kb-public) → KB index; in CIDE — [handbook](../design/cide-design-handbook-v1.md), Intercom, ADRs |
+| **Curiosity** | A **folder** and one honest dialogue: *“how do you even think?”*, one hypothesis — **no** ready-made KB, no `[PRIMARY]` / `[SCOPE]`, no “read the manifest first” | Practice → a shared **file** the agent can write (tools) → later playbook/ADR, KB, markers, MCP and product **as pain appears** | Any environment: repo + agent + a way to record agreement in an artifact |
+| **Integrated** | Ready-made contour: router, hot-context, product cockpit, ADRs, three command surfaces, project-aware markers | Faster for people **already inside**; risky as the **only** demo to skeptics | [SHOWCASE](https://github.com/AI-Guiders/kb-public) → KB index; in CIDE — [handbook](../design/cide-design-handbook-v1.md), Intercom, ADRs |
 
 Both paths **converge** on one discipline: explicit intent, observable delta, agent and human in the **same** information flow (artifacts, not “chat on the side”). The difference is **presentation order**, not “lite IOP vs real IOP”.
 
-**Project-aware:** “folder” is a concrete `workspace_path` and, when needed, **primary** / **scope** in the thread so the agent does not mix repositories or load all of canon. IOP does not require learning the full MCP map first — it requires **not confusing** products when there are several.
+**How it actually grew (not retroactive):** first **dialogue and curiosity** — not “I gave you the contour,” but **joint work**: human and agent figured out what was needed together. Then **one small file** the agent could write with tools (memory across sessions). Then KB canon, `[PRIMARY]` / `[SCOPE]`, router, IDE, Intercom. **Project-aware** is a **maturity** layer, not day-one requirements; do not describe the start as if markers and KB already existed.
+
+**Co-creation:** the operator stays captain (taste, acceptance, scope), but the contour is **not handed down** as a finished gift to agents. It is **built in dialogue** — questions, pushback, drafts in a file, then normalization into playbooks. IOP is honest when it admits: without the agent in that loop, many artifacts would not have appeared in time.
+
+**Project-aware (when several repos exist):** concrete `workspace_path`, **primary** / **scope** in the thread when needed — avoid mixing products and loading all of canon (KB `playbook-multi-project-context-v1`). IOP does not require learning the full MCP map first.
 
 **Onboarding mistakes:**
 
@@ -49,6 +53,7 @@ Both paths **converge** on one discipline: explicit intent, observable delta, ag
 | Show only the integrated path (“read the manifest/handbook or you won’t get it”) | Blocks people who could enter via curiosity |
 | Promise the curiosity path needs no discipline | The contour degrades into “chat with buttons” without intent and verification |
 | Tie IOP to one IDE brand | IOP is about meaning flow; CIDE, Cursor+MCP, other stacks are **examples** |
+| Narrate the start as if KB and PRIMARY already existed, or “the human gave agents the contour” | Distorts history; blocks skeptics and people who could enter via dialogue |
 
 **Agent before heavy implementation:** in both paths the agent helps **before** commit — discuss, push back, narrow scope (see [§ Intercom](#intercom--communication-hub-around-a-goal-perspective)). That does not replace human review: the operator stays captain.
 
