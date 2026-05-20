@@ -2,11 +2,13 @@
 
 using System.Text;
 using System.Text.Json;
+using CascadeIDE.Contracts;
 using CascadeIDE.Models.Intercom;
 
 namespace CascadeIDE.Features.Chat;
 
 /// <summary>Блок attachments для prompt агента (ADR 0128 §10).</summary>
+[ComputingUnit]
 public static class IntercomAttachmentPromptFormatter
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)

@@ -788,7 +788,7 @@ public partial class ChatPanelViewModel : ViewModelBase
         IReadOnlyList<AttachmentAnchor> attachments = [];
         SenderWorkspaceContext? senderContext = null;
         string? statusHint = null;
-        if (containsBracketOrWireMarker(trimmed))
+        if (IntercomAttachSyntax.HasWireOrBracketSyntax(trimmed))
         {
             var (editor, workspace, solution, pending) = await UiScheduler.Default.InvokeAsync(() =>
             {
@@ -849,10 +849,6 @@ public partial class ChatPanelViewModel : ViewModelBase
             return "OK";
         }).ConfigureAwait(false);
     }
-
-    private static bool containsBracketOrWireMarker(string text) =>
-        text.Contains('\u27E6', StringComparison.Ordinal)
-        || IntercomAttachmentMarkers.TryExtractBracketSpans(text, out _);
 
     public string SubmitClarificationResponseFromJson(string responseJson)
     {

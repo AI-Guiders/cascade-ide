@@ -1,6 +1,6 @@
 using System.Text.Json;
+using CascadeIDE.Features.IdeMcp.Application;
 using CascadeIDE.Models;
-using CascadeIDE.Services.Intercom;
 
 namespace CascadeIDE.ViewModels;
 
@@ -137,8 +137,7 @@ internal sealed partial class IdeMcpCommandExecutor
             if (string.IsNullOrWhiteSpace(msg))
                 return "Missing message";
 
-            var useFastAttachPath = string.Equals(role, "assistant", StringComparison.OrdinalIgnoreCase)
-                || messageHasAttachSyntax(msg);
+            var useFastAttachPath = IntercomMcpSendChatRoute.ShouldAppendPreparedFeedMessage(role, msg);
             if (useFastAttachPath)
             {
                 var feedRole = string.Equals(role, "assistant", StringComparison.OrdinalIgnoreCase)
@@ -247,7 +246,4 @@ internal sealed partial class IdeMcpCommandExecutor
         });
     }
 
-    private static bool messageHasAttachSyntax(string text) =>
-        text.Contains('\u27E6', StringComparison.Ordinal)
-        || IntercomAttachmentMarkers.TryExtractBracketSpans(text, out _);
 }

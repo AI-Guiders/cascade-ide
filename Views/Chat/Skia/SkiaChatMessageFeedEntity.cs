@@ -1,5 +1,6 @@
 #nullable enable
 using CascadeIDE.Features.Chat;
+using CascadeIDE.Features.Chat.Application;
 using CascadeIDE.Models.Intercom;
 using CascadeIDE.Services.Intercom;
 using CascadeIDE.Views.SkiaKit;

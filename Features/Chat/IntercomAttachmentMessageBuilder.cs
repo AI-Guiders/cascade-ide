@@ -1,5 +1,6 @@
 #nullable enable
 
+using CascadeIDE.Features.Chat.Application;
 using CascadeIDE.Features.Workspace.Application;
 using CascadeIDE.Models.Intercom;
 using CascadeIDE.Services;
@@ -29,9 +30,7 @@ public static class IntercomAttachmentMessageBuilder
             editor,
             workspaceRoot,
             solutionPath,
-            allowDegradedMemberResolve: false,
-            skipMemberRoslynAtSend: false,
-            captureSenderWorkspaceContext: true,
+            IntercomOutboundPrepareProfile.ComposerStrictBuild,
             warnings: null,
             out outbound,
             out error);
@@ -42,32 +41,15 @@ public static class IntercomAttachmentMessageBuilder
         IntercomAttachmentResolveAtSend.EditorSnapshot editor,
         string? workspaceRoot,
         string? solutionPath,
-        out PreparedIntercomMessage prepared)
-    {
-        var warnings = new List<string>();
-        if (!TryBuildCore(
-                rawInput,
-                pendingByShortId,
-                editor,
-                workspaceRoot,
-                solutionPath,
-                allowDegradedMemberResolve: true,
-                skipMemberRoslynAtSend: false,
-                captureSenderWorkspaceContext: true,
-                warnings,
-                out var outbound,
-                out var error))
-        {
-            prepared = new PreparedIntercomMessage(
-                IntercomMessagePrepareStatus.Failed,
-                outbound,
-                warnings,
-                error);
-            return false;
-        }
-
-        return finishPrepare(outbound, warnings, out prepared);
-    }
+        out PreparedIntercomMessage prepared) =>
+        TryPrepareWithProfile(
+            rawInput,
+            pendingByShortId,
+            editor,
+            workspaceRoot,
+            solutionPath,
+            IntercomOutboundPrepareProfile.ComposerPrepare,
+            out prepared);
 
     /// <summary>MCP fast-path: F/M/L/S @ send без Roslyn и без excerpt; L: строки из bracket; M/S — re-resolve при reveal.</summary>
     public static bool TryPrepareForMcp(
@@ -76,6 +58,23 @@ public static class IntercomAttachmentMessageBuilder
         IntercomAttachmentResolveAtSend.EditorSnapshot editor,
         string? workspaceRoot,
         string? solutionPath,
+        out PreparedIntercomMessage prepared) =>
+        TryPrepareWithProfile(
+            rawInput,
+            pendingByShortId,
+            editor,
+            workspaceRoot,
+            solutionPath,
+            IntercomOutboundPrepareProfile.McpFastPrepare,
+            out prepared);
+
+    private static bool TryPrepareWithProfile(
+        string rawInput,
+        IReadOnlyDictionary<string, AttachmentAnchor> pendingByShortId,
+        IntercomAttachmentResolveAtSend.EditorSnapshot editor,
+        string? workspaceRoot,
+        string? solutionPath,
+        IntercomOutboundPrepareProfile profile,
         out PreparedIntercomMessage prepared)
     {
         var warnings = new List<string>();
@@ -85,9 +84,7 @@ public static class IntercomAttachmentMessageBuilder
                 editor,
                 workspaceRoot,
                 solutionPath,
-                allowDegradedMemberResolve: true,
-                skipMemberRoslynAtSend: true,
-                captureSenderWorkspaceContext: false,
+                profile,
                 warnings,
                 out var outbound,
                 out var error))
@@ -100,7 +97,7 @@ public static class IntercomAttachmentMessageBuilder
             return false;
         }
 
-        if (outbound.Attachments.Count > 0)
+        if (profile.AddMcpFastPathWarning && outbound.Attachments.Count > 0)
             warnings.Add("MCP fast-path (F/M/L/S): Roslyn и excerpt @ send отложены; reveal — re-resolve.");
 
         return finishPrepare(outbound, warnings, out prepared);
@@ -134,9 +131,7 @@ public static class IntercomAttachmentMessageBuilder
         IntercomAttachmentResolveAtSend.EditorSnapshot editor,
         string? workspaceRoot,
         string? solutionPath,
-        bool allowDegradedMemberResolve,
-        bool skipMemberRoslynAtSend,
-        bool captureSenderWorkspaceContext,
+        IntercomOutboundPrepareProfile profile,
         List<string>? warnings,
         out Outbound outbound,
         out string error)
@@ -153,7 +148,7 @@ public static class IntercomAttachmentMessageBuilder
 
         workspaceRoot = coalesceWorkspaceRoot(workspaceRoot, solutionPath);
 
-        var resolveSession = skipMemberRoslynAtSend ? null : new IntercomAttachmentRoslynResolveSession();
+        var resolveSession = profile.SkipMemberRoslynAtSend ? null : new IntercomAttachmentRoslynResolveSession();
         var segments = ChatMessageBodyPresentation.SplitSegments(trimmed);
         var attachments = new List<AttachmentAnchor>();
         var rebuilt = new System.Text.StringBuilder();
@@ -173,8 +168,8 @@ public static class IntercomAttachmentMessageBuilder
                     workspaceRoot,
                     solutionPath,
                     resolveSession,
-                    allowDegradedMemberResolve,
-                    skipMemberRoslynAtSend,
+                    profile.AllowDegradedMemberResolve,
+                    profile.SkipMemberRoslynAtSend,
                     warnings,
                     attachments,
                     rebuilt,
@@ -187,7 +182,7 @@ public static class IntercomAttachmentMessageBuilder
         var content = rebuilt.ToString();
         IntercomAttachmentMarkers.UpdateProseOffsets(content, attachments);
 
-        var senderContext = captureSenderWorkspaceContext
+        var senderContext = profile.CaptureSenderWorkspaceContext
             ? IntercomSenderWorkspaceContextCapture.TryCapture(workspaceRoot, solutionPath)
             : null;
         outbound = new Outbound(content, attachments, senderContext);
