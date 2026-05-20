@@ -7,27 +7,37 @@ namespace CascadeIDE.Views.SkiaKit;
 /// <summary>Нижняя полоса ввода Intercom (рамка, текст, кнопка отправки). ADR 0123 фаза 2.</summary>
 internal static class SkiaComposerStrip
 {
-    public const float MinHeight = 44f;
-    public const float MaxHeight = 120f;
     public const float HorizontalPadding = 10f;
     public const float VerticalPadding = 8f;
+    public const float LineHeight = 17f;
+    public const int MinLines = 3;
+    public const float MinHeight = VerticalPadding * 2 + MinLines * LineHeight;
+    public const float MaxHeight = VerticalPadding * 2 + 8 * LineHeight;
     public const float SendButtonWidth = 44f;
     public const float SendButtonHeight = 32f;
     public const float BorderWidth = 1f;
-    public const float LineHeight = 17f;
+
+    private const float FontSize = 12f;
+    private const float TextTopInset = LineHeight - 4f - FontSize * 0.85f - 4f;
+    private const float CaretVerticalPad = 2f;
+    private static readonly SKColor CaretColor = new(120, 195, 255);
+    private const float CaretStrokeWidth = 2f;
+
+    private readonly record struct TextLayout(SKRect TextBounds, float ContentWidth);
 
     public static float MeasureHeight(string text, string? preeditText, float contentWidth)
     {
         var display = BuildDisplayText(text, preeditText);
+        var minInner = MinLines * LineHeight;
         var maxLines = (int)((MaxHeight - VerticalPadding * 2) / LineHeight);
         var rich = SkiaRichTextKitMarkdown.TryMeasurePlain(
             display,
             contentWidth,
-            fontSize: 12f,
+            fontSize: FontSize,
             color: new SKColor(220, 225, 235),
-            maxLines: Math.Max(1, maxLines),
+            maxLines: Math.Max(MinLines, maxLines),
             lineHeight: LineHeight);
-        var inner = rich?.BodyHeight ?? LineHeight;
+        var inner = Math.Max(minInner, rich?.BodyHeight ?? LineHeight);
         return Math.Clamp(inner + VerticalPadding * 2, MinHeight, MaxHeight);
     }
 
@@ -40,7 +50,8 @@ internal static class SkiaComposerStrip
         string placeholder,
         bool isEnabled,
         int caretIndex,
-        float layoutScale,
+        bool showCaret,
+        bool caretVisible,
         out SKRect sendButtonBounds,
         out SKRect textBounds)
     {
@@ -63,32 +74,28 @@ internal static class SkiaComposerStrip
         var sendTop = bounds.Top + (bounds.Height - SendButtonHeight) * 0.5f;
         sendButtonBounds = new SKRect(sendLeft, sendTop, sendLeft + SendButtonWidth, sendTop + SendButtonHeight);
 
-        textBounds = new SKRect(
-            bounds.Left + HorizontalPadding,
-            bounds.Top + VerticalPadding,
-            sendLeft - 8f,
-            bounds.Bottom - VerticalPadding);
-
-        var contentWidth = Math.Max(40f, textBounds.Width);
+        var layout = ComputeTextLayout(bounds, sendLeft);
+        textBounds = layout.TextBounds;
+        var contentWidth = layout.ContentWidth;
         var display = BuildDisplayText(text, preeditText);
         var isEmpty = string.IsNullOrEmpty(display);
 
-        using var bodyFont = SkiaKitFonts.CreateUi(12);
+        using var bodyFont = SkiaKitFonts.CreateUi(FontSize);
 
         if (isEmpty)
         {
             var hintLayout = SkiaRichTextKitMarkdown.TryMeasurePlain(
                 placeholder,
                 contentWidth,
-                12f,
+                FontSize,
                 theme.EmptyHint,
-                maxLines: 4,
+                maxLines: MinLines,
                 LineHeight);
             if (hintLayout is not null)
             {
                 SkiaRichTextKitMarkdown.Paint(
                     canvas,
-                    new SKPoint(textBounds.Left, textBounds.Top + LineHeight - 4f - 12f * 0.85f),
+                    new SKPoint(textBounds.Left, textBounds.Top + TextTopInset),
                     hintLayout,
                     theme.EmptyHint,
                     theme.EmptyHint);
@@ -100,15 +107,15 @@ internal static class SkiaComposerStrip
             var rich = SkiaRichTextKitMarkdown.TryMeasurePlain(
                 display,
                 contentWidth,
-                12f,
+                FontSize,
                 isEnabled ? theme.Content : theme.EmptyHint,
-                Math.Max(1, maxLines),
+                Math.Max(MinLines, maxLines),
                 LineHeight);
             if (rich is not null)
             {
                 SkiaRichTextKitMarkdown.Paint(
                     canvas,
-                    new SKPoint(textBounds.Left, textBounds.Top + LineHeight - 4f - 12f * 0.85f),
+                    new SKPoint(textBounds.Left, textBounds.Top + TextTopInset),
                     rich,
                     isEnabled ? theme.Content : theme.EmptyHint,
                     SkiaKitColor.Blend(theme.Content, theme.HoverBorder, 0.35f));
@@ -117,8 +124,79 @@ internal static class SkiaComposerStrip
 
         DrawSendButton(canvas, sendButtonBounds, theme, isEnabled);
 
-        if (isEnabled && caretIndex >= 0 && !isEmpty)
-            DrawCaret(canvas, textBounds, bodyFont, display, caretIndex, contentWidth);
+        if (isEnabled && showCaret && caretVisible && caretIndex >= 0
+            && TryComputeCaretLine(layout, display, caretIndex, bodyFont, out var x, out var yTop, out var yBottom))
+        {
+            DrawCaretLine(canvas, x, yTop, yBottom);
+        }
+    }
+
+    public static bool TryGetCaretRect(
+        SKRect composerBounds,
+        string text,
+        string? preeditText,
+        int caretIndex,
+        out SKRect caretRect)
+    {
+        caretRect = default;
+        if (composerBounds.Width <= 0)
+            return false;
+
+        var sendLeft = composerBounds.Right - HorizontalPadding - SendButtonWidth;
+        var layout = ComputeTextLayout(composerBounds, sendLeft);
+        var display = BuildDisplayText(text, preeditText);
+        using var font = SkiaKitFonts.CreateUi(FontSize);
+        if (!TryComputeCaretLine(layout, display, caretIndex, font, out var x, out var yTop, out var yBottom))
+            return false;
+
+        caretRect = new SKRect(x, yTop, x + CaretStrokeWidth, yBottom);
+        return true;
+    }
+
+    private static TextLayout ComputeTextLayout(SKRect bounds, float sendLeft)
+    {
+        var textBounds = new SKRect(
+            bounds.Left + HorizontalPadding,
+            bounds.Top + VerticalPadding,
+            sendLeft - 8f,
+            bounds.Bottom - VerticalPadding);
+        return new TextLayout(textBounds, Math.Max(40f, textBounds.Width));
+    }
+
+    private static bool TryComputeCaretLine(
+        TextLayout layout,
+        string display,
+        int caretIndex,
+        SKFont font,
+        out float x,
+        out float yTop,
+        out float yBottom)
+    {
+        x = yTop = yBottom = 0f;
+        if (caretIndex < 0)
+            return false;
+
+        caretIndex = Math.Clamp(caretIndex, 0, display.Length);
+        var before = display[..caretIndex];
+        var beforeLines = WrapLines(before, layout.ContentWidth);
+        var lineIndex = Math.Max(0, beforeLines.Count - 1);
+        var colText = beforeLines.Count == 0 ? "" : beforeLines[^1];
+        x = layout.TextBounds.Left + font.MeasureText(colText);
+        yTop = layout.TextBounds.Top + lineIndex * LineHeight + CaretVerticalPad;
+        yBottom = yTop + LineHeight - CaretVerticalPad * 2f;
+        return true;
+    }
+
+    private static void DrawCaretLine(SKCanvas canvas, float x, float yTop, float yBottom)
+    {
+        using var caret = new SKPaint
+        {
+            Color = CaretColor,
+            StrokeWidth = CaretStrokeWidth,
+            IsAntialias = true,
+            StrokeCap = SKStrokeCap.Round,
+        };
+        canvas.DrawLine(x, yTop, x, yBottom, caret);
     }
 
     private static void DrawSendButton(SKCanvas canvas, SKRect rect, ISkiaKitPaintTheme theme, bool enabled)
@@ -136,27 +214,6 @@ internal static class SkiaComposerStrip
         canvas.DrawText("↑", rect.MidX, rect.MidY + 5f, SKTextAlign.Center, font, paint);
     }
 
-    private static void DrawCaret(
-        SKCanvas canvas,
-        SKRect textBounds,
-        SKFont font,
-        string display,
-        int caretIndex,
-        float contentWidth)
-    {
-        caretIndex = Math.Clamp(caretIndex, 0, display.Length);
-        var before = display[..caretIndex];
-        var beforeLines = WrapLines(before, contentWidth);
-        var lineIndex = Math.Max(0, beforeLines.Count - 1);
-        var colText = beforeLines.Count == 0 ? "" : beforeLines[^1];
-
-        var x = textBounds.Left + font.MeasureText(colText);
-        var yTop = textBounds.Top + lineIndex * LineHeight;
-        var yBottom = yTop + LineHeight;
-        using var caret = new SKPaint { Color = new SKColor(220, 230, 245), StrokeWidth = 1.5f, IsAntialias = true };
-        canvas.DrawLine(x, yTop + 2f, x, yBottom - 4f, caret);
-    }
-
     private static string BuildDisplayText(string text, string? preeditText)
     {
         if (string.IsNullOrEmpty(preeditText))
@@ -166,7 +223,7 @@ internal static class SkiaComposerStrip
 
     private static List<string> WrapLines(string text, float maxWidth)
     {
-        using var font = SkiaKitFonts.CreateUi(12);
+        using var font = SkiaKitFonts.CreateUi(FontSize);
         var lines = new List<string>();
         foreach (var raw in text.Replace("\r", "").Split('\n'))
         {

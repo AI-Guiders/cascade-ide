@@ -120,6 +120,7 @@ public partial class SkiaChatSurfaceControl : Control
             IsChatLoadingProperty,
             ShowIntercomComposerProperty,
             ComposerTextProperty,
+            ComposerCaretIndexProperty,
             ComposerPreeditTextProperty,
             IsComposerEnabledProperty,
             IsSlashAutocompleteVisibleProperty,
@@ -149,6 +150,7 @@ public partial class SkiaChatSurfaceControl : Control
 
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
+        StopComposerCaretBlink();
         ActualThemeVariantChanged -= OnActualThemeVariantChanged;
         _skiaFrame?.Dispose();
         _skiaFrame = null;
@@ -377,7 +379,6 @@ public partial class SkiaChatSurfaceControl : Control
                     SelectedMessageIndex = SelectedMessageIndex,
                     HitTargets = _hitTargets
                 };
-                item.Entity.Draw(drawContext, item.Top, item.Layout);
 
                 var hit = item.Entity.CreateHit(item.Layout);
                 if (hit is { } h)
@@ -385,6 +386,8 @@ public partial class SkiaChatSurfaceControl : Control
                     var rect = new SKRect(itemLeft, item.Top, itemLeft + itemWidth, item.Top + item.Layout.Height);
                     drawContext.RegisterHit(rect, h);
                 }
+
+                item.Entity.Draw(drawContext, item.Top, item.Layout);
             }
         }
 
@@ -452,7 +455,8 @@ public partial class SkiaChatSurfaceControl : Control
         if (index == _hoveredItem)
             return;
         _hoveredItem = index;
-        Cursor = _hoveredItem >= 0 ? new Cursor(StandardCursorType.Hand) : new Cursor(StandardCursorType.Arrow);
+        var hand = index >= 0 && _hitTargets[index].Hit.RevealAttachment is not null;
+        Cursor = hand ? new Cursor(StandardCursorType.Hand) : new Cursor(StandardCursorType.Arrow);
         InvalidateVisual();
     }
 
@@ -484,7 +488,9 @@ public partial class SkiaChatSurfaceControl : Control
         if (hit.RevealAttachment is { } attachAnchor)
         {
             var select = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
-            AttachmentRevealRequested?.Invoke(this, new IntercomAttachmentRevealEventArgs(attachAnchor, select));
+            AttachmentRevealRequested?.Invoke(
+                this,
+                new IntercomAttachmentRevealEventArgs(attachAnchor, select, hit.MessageIndex));
             e.Handled = true;
             InvalidateVisual();
             return;
@@ -520,7 +526,8 @@ public partial class SkiaChatSurfaceControl : Control
 
     private int FindHit(Point point)
     {
-        for (var i = 0; i < _hitTargets.Count; i++)
+        // Последний зарегистрированный hit (узкий attach поверх общего hit сообщения) имеет приоритет.
+        for (var i = _hitTargets.Count - 1; i >= 0; i--)
         {
             if (_hitTargets[i].Bounds.Contains(point))
                 return i;

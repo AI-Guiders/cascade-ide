@@ -4,6 +4,7 @@ using Avalonia.Input;
 using Avalonia.Input.TextInput;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Threading;
 using CascadeIDE.Features.Chat;
 using CascadeIDE.Models.Intercom;
 using CascadeIDE.Views.Chat;
@@ -44,6 +45,8 @@ public partial class SkiaChatSurfaceControl
         AvaloniaProperty.Register<SkiaChatSurfaceControl, IEnumerable<ChatSlashSuggestionItem>?>(nameof(SlashSuggestions));
 
     private IntercomSkiaTextInputClient? _textInputClient;
+    private DispatcherTimer? _composerCaretBlinkTimer;
+    private bool _composerCaretBlinkVisible = true;
     private SKRect _sendButtonBounds;
     private SKRect _slashPopupBounds;
     private SKRect _composerBounds;
@@ -116,6 +119,58 @@ public partial class SkiaChatSurfaceControl
         TextInputMethodClientRequested += OnTextInputMethodClientRequested;
         AddHandler(KeyDownEvent, OnComposerKeyDown, RoutingStrategies.Tunnel);
         AddHandler(TextInputEvent, OnComposerTextInput, RoutingStrategies.Tunnel);
+        GotFocus += OnComposerFocusChanged;
+        LostFocus += OnComposerFocusChanged;
+    }
+
+    private void OnComposerFocusChanged(object? sender, RoutedEventArgs e)
+    {
+        if (IsKeyboardFocusWithin)
+            StartComposerCaretBlink();
+        else
+            StopComposerCaretBlink();
+    }
+
+    private void StartComposerCaretBlink()
+    {
+        _composerCaretBlinkVisible = true;
+        if (_composerCaretBlinkTimer is null)
+        {
+            _composerCaretBlinkTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(530) };
+            _composerCaretBlinkTimer.Tick += OnComposerCaretBlinkTick;
+        }
+
+        if (!_composerCaretBlinkTimer.IsEnabled)
+            _composerCaretBlinkTimer.Start();
+        InvalidateVisual();
+    }
+
+    private void StopComposerCaretBlink()
+    {
+        if (_composerCaretBlinkTimer is not null)
+            _composerCaretBlinkTimer.Stop();
+        _composerCaretBlinkVisible = false;
+        InvalidateVisual();
+    }
+
+    private void ShowComposerCaretSolid()
+    {
+        if (!IsKeyboardFocusWithin)
+            return;
+        _composerCaretBlinkVisible = true;
+        InvalidateVisual();
+    }
+
+    private void OnComposerCaretBlinkTick(object? sender, EventArgs e)
+    {
+        if (!ShowIntercomComposer || !IsComposerEnabled || !IsKeyboardFocusWithin)
+        {
+            StopComposerCaretBlink();
+            return;
+        }
+
+        _composerCaretBlinkVisible = !_composerCaretBlinkVisible;
+        InvalidateVisual();
     }
 
     private void OnTextInputMethodClientRequested(object? sender, TextInputMethodClientRequestedEventArgs e)
@@ -129,12 +184,22 @@ public partial class SkiaChatSurfaceControl
 
     internal Rect GetComposerCaretScreenRect()
     {
-        if (_composerBounds.Width <= 0)
-            return new Rect(Bounds.Width * 0.5, Bounds.Height - 24, 1, 18);
+        if (_composerBounds.Width > 0
+            && SkiaComposerStrip.TryGetCaretRect(
+                _composerBounds,
+                ComposerText ?? "",
+                ComposerPreeditText,
+                ComposerCaretIndex,
+                out var caret))
+            return new Rect(caret.Left, caret.Top, Math.Max(2, caret.Width), caret.Height);
 
-        var textLeft = _composerBounds.Left + SkiaComposerStrip.HorizontalPadding;
-        var textTop = _composerBounds.Top + SkiaComposerStrip.VerticalPadding + 12;
-        return new Rect(textLeft, textTop, 1, 18);
+        var textLeft = _composerBounds.Width > 0
+            ? _composerBounds.Left + SkiaComposerStrip.HorizontalPadding
+            : Bounds.Width * 0.5f;
+        var textTop = _composerBounds.Width > 0
+            ? _composerBounds.Top + SkiaComposerStrip.VerticalPadding + 2f
+            : Bounds.Height - 24;
+        return new Rect(textLeft, textTop, 2, SkiaComposerStrip.LineHeight - 4f);
     }
 
     private float ResolveBottomChromeHeight(float width)
@@ -191,6 +256,7 @@ public partial class SkiaChatSurfaceControl
         var composerTop = bottom - composerHeight;
 
         _composerBounds = new SKRect(0, composerTop, width, bottom);
+        var showCaret = IsComposerEnabled && IsKeyboardFocusWithin;
         SkiaComposerStrip.Draw(
             canvas,
             _composerBounds,
@@ -200,7 +266,8 @@ public partial class SkiaChatSurfaceControl
             ComposerPlaceholder,
             IsComposerEnabled,
             ComposerCaretIndex,
-            layoutScale,
+            showCaret,
+            showCaret && _composerCaretBlinkVisible,
             out _sendButtonBounds,
             out _);
 
@@ -219,10 +286,9 @@ public partial class SkiaChatSurfaceControl
         if (!ShowIntercomComposer)
             return false;
 
-        Focus();
-
         if (_sendButtonBounds.Width > 0 && _sendButtonBounds.Contains((float)point.X, (float)point.Y))
         {
+            Focus();
             if (IsComposerEnabled)
                 SendRequested?.Invoke(this, EventArgs.Empty);
             return true;
@@ -240,7 +306,10 @@ public partial class SkiaChatSurfaceControl
         }
 
         if (_composerBounds.Contains((float)point.X, (float)point.Y))
+        {
+            Focus();
             return true;
+        }
 
         return false;
     }
@@ -332,7 +401,7 @@ public partial class SkiaChatSurfaceControl
         ComposerCaretIndex = caret + text.Length;
         _textInputClient?.NotifyTextChanged();
         _textInputClient?.NotifyCursorMoved();
-        InvalidateVisual();
+        ShowComposerCaretSolid();
     }
 
     private void DeleteComposer(int direction)
@@ -356,7 +425,7 @@ public partial class SkiaChatSurfaceControl
         }
 
         _textInputClient?.NotifyTextChanged();
-        InvalidateVisual();
+        ShowComposerCaretSolid();
     }
 
     private void MoveCaret(int delta)
@@ -364,7 +433,7 @@ public partial class SkiaChatSurfaceControl
         var len = (ComposerText ?? "").Length;
         ComposerCaretIndex = Math.Clamp(ComposerCaretIndex + delta, 0, len);
         _textInputClient?.NotifyCursorMoved();
-        InvalidateVisual();
+        ShowComposerCaretSolid();
     }
 
 }

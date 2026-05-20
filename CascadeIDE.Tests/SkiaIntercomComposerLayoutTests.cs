@@ -32,8 +32,20 @@ public sealed class SkiaIntercomComposerLayoutTests
     public void Composer_grows_with_multiline_text()
     {
         var width = 400f;
-        var single = SkiaComposerStrip.MeasureHeight("one line", null, width);
-        var multi = SkiaComposerStrip.MeasureHeight("line one\nline two\nline three", null, width);
-        Assert.True(multi > single);
+        var min = SkiaComposerStrip.MeasureHeight("", null, width);
+        var fourLines = SkiaComposerStrip.MeasureHeight(
+            "line one\nline two\nline three\nline four",
+            null,
+            width);
+        Assert.Equal(SkiaComposerStrip.MinHeight, min);
+        Assert.True(fourLines > min);
+    }
+
+    [Fact]
+    public void Composer_empty_uses_min_three_lines_height()
+    {
+        var height = SkiaComposerStrip.MeasureHeight("", null, 400f);
+        Assert.Equal(SkiaComposerStrip.MinHeight, height);
+        Assert.True(height >= SkiaComposerStrip.VerticalPadding * 2 + SkiaComposerStrip.MinLines * SkiaComposerStrip.LineHeight);
     }
 }
