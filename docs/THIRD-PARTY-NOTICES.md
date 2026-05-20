@@ -52,6 +52,7 @@
 | TextMateSharp | 2.0.3 | MIT | https://www.nuget.org/packages/TextMateSharp |
 | TextMateSharp.Grammars | 2.0.3 | MIT | https://www.nuget.org/packages/TextMateSharp.Grammars |
 | Tomlyn | 2.3.0 | MIT | https://www.nuget.org/packages/Tomlyn |
+| Topten.RichTextKit | 0.4.167 | MIT | https://www.nuget.org/packages/Topten.RichTextKit · spike `feature/RichTextKit` |
 | Tmds.DBus.Protocol | 0.92.0 | MIT | https://www.nuget.org/packages/Tmds.DBus.Protocol |
 
 ## Встроенные и скопированные артефакты (не NuGet)

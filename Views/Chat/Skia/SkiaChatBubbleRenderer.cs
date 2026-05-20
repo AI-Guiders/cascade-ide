@@ -39,26 +39,60 @@ internal static class SkiaChatBubbleRenderer
     public static SkiaChatBubbleMetrics Measure(SkiaChatMeasureContext context, in SkiaChatBubbleSpec spec)
     {
         var maxChars = Math.Max(24, context.MaxChars);
-        var runs = SkiaMarkdownLayout.ParseInline(Trim(spec.Body, 32_000));
+        var body = Trim(spec.Body, 32_000);
+        var titleHeight = string.IsNullOrWhiteSpace(spec.Title) ? 0 : spec.TitleHeight;
+        var footerHeight = string.IsNullOrWhiteSpace(spec.Footer) ? 0 : spec.FooterHeight;
+
+        if (spec.Kind == SkiaChatBubbleKind.Feed && SkiaRichTextKitFeature.UseForIntercomFeedBody)
+        {
+            var bodyWidth = Math.Max(80f, context.ContentWidth - 24f);
+            var bodyColor = spec.BodyTone == SkiaChatBodyTone.Placeholder
+                ? new SKColor(160, 165, 175)
+                : new SKColor(220, 225, 235);
+            var codeColor = new SKColor(180, 190, 210);
+            var rich = SkiaRichTextKitMarkdown.TryMeasure(
+                body,
+                bodyWidth,
+                fontSize: 11f,
+                bodyColor,
+                codeColor,
+                spec.MaxBodyLines,
+                spec.LineHeight);
+            if (rich is not null)
+            {
+                var placeholder = new SkiaMarkdownLine([new SkiaMarkdownRun("", SkiaMarkdownStyle.Plain)]);
+                return new SkiaChatBubbleMetrics(
+                    [placeholder],
+                    spec.Footer,
+                    titleHeight,
+                    footerHeight,
+                    spec.LineHeight,
+                    rich);
+            }
+        }
+
+        var runs = SkiaMarkdownLayout.ParseInline(body);
         var lines = SkiaMarkdownLayout.WrapLines(runs, maxChars);
         if (lines.Count == 0)
             lines = [new SkiaMarkdownLine([new SkiaMarkdownRun("", SkiaMarkdownStyle.Plain)])];
         if (lines.Count > spec.MaxBodyLines)
             lines = lines.Take(spec.MaxBodyLines).ToList();
 
-        var titleHeight = string.IsNullOrWhiteSpace(spec.Title) ? 0 : spec.TitleHeight;
-        var footerHeight = string.IsNullOrWhiteSpace(spec.Footer) ? 0 : spec.FooterHeight;
         return new SkiaChatBubbleMetrics(lines, spec.Footer, titleHeight, footerHeight, spec.LineHeight);
     }
 
-    public static float MeasureHeight(in SkiaChatBubbleSpec spec, in SkiaChatBubbleMetrics metrics) =>
-        spec.Kind == SkiaChatBubbleKind.Feed
+    public static float MeasureHeight(in SkiaChatBubbleSpec spec, in SkiaChatBubbleMetrics metrics)
+    {
+        var bodyHeight = metrics.RichTextBody?.BodyHeight
+                         ?? metrics.ContentLines.Count * metrics.LineHeight;
+        return spec.Kind == SkiaChatBubbleKind.Feed
             ? Math.Max(
                 spec.MinHeight,
-                2f + metrics.TitleHeight + metrics.ContentLines.Count * metrics.LineHeight + metrics.FooterHeight + 2f)
+                2f + metrics.TitleHeight + bodyHeight + metrics.FooterHeight + 2f)
             : Math.Max(
                 spec.MinHeight,
-                spec.Padding + metrics.TitleHeight + metrics.ContentLines.Count * metrics.LineHeight + metrics.FooterHeight + spec.Padding);
+                spec.Padding + metrics.TitleHeight + bodyHeight + metrics.FooterHeight + spec.Padding);
+    }
 
     public static void Draw(
         SkiaChatDrawContext ctx,
@@ -235,6 +269,24 @@ internal static class SkiaChatBubbleRenderer
             SkiaChatBubbleKind.CardPanel => 10f,
             _ => 12f
         });
+        if (metrics.RichTextBody is { } richBody)
+        {
+            var bodyColor = spec.BodyTone == SkiaChatBodyTone.Placeholder
+                ? ctx.Theme.MutedContent
+                : ctx.Theme.Content;
+            var codeColor = SkiaKitColor.Blend(ctx.Theme.Content, ctx.Theme.HoverBorder, 0.35f);
+            SkiaRichTextKitMarkdown.Paint(
+                ctx.Canvas,
+                new SKPoint(contentLeft, textY - bodyFont.Size * 0.85f),
+                richBody,
+                bodyColor,
+                codeColor);
+            if (string.IsNullOrWhiteSpace(metrics.Footer))
+                return;
+            DrawFooter(ctx, rect, contentLeft, spec, metrics, footerPaint);
+            return;
+        }
+
         foreach (var line in metrics.ContentLines)
         {
             var x = contentLeft;
@@ -267,6 +319,17 @@ internal static class SkiaChatBubbleRenderer
         if (string.IsNullOrWhiteSpace(metrics.Footer))
             return;
 
+        DrawFooter(ctx, rect, contentLeft, spec, metrics, footerPaint);
+    }
+
+    private static void DrawFooter(
+        SkiaChatDrawContext ctx,
+        SKRect rect,
+        float contentLeft,
+        in SkiaChatBubbleSpec spec,
+        in SkiaChatBubbleMetrics metrics,
+        SKPaint footerPaint)
+    {
         if (spec.Kind == SkiaChatBubbleKind.CardPanel)
         {
             var sepY = rect.Bottom - metrics.FooterHeight - 6;

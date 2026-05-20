@@ -32,7 +32,8 @@ internal readonly record struct SkiaChatBubbleMetrics(
     string? Footer,
     float TitleHeight,
     float FooterHeight,
-    float LineHeight);
+    float LineHeight,
+    SkiaRichTextKitBodyLayout? RichTextBody = null);
 
 internal readonly record struct SkiaChatPlacedEntity(
     ISkiaChatEntity Entity,
