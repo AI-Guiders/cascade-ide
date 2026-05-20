@@ -165,7 +165,9 @@ public static class BracketCodeReferenceParser
         error = "";
 
         string? file = null;
-        if (CsFileBeforeMember.Match(text) is { Success: true } fm)
+        if (FileToken.Match(text) is { Success: true } ff)
+            file = ff.Groups["file"].Value.Trim();
+        else if (CsFileBeforeMember.Match(text) is { Success: true } fm)
             file = fm.Groups["file"].Value.Trim();
 
         string? member = null;

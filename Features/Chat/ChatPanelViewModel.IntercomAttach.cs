@@ -1,6 +1,7 @@
 #nullable enable
 
 using System.Text.Json;
+using CascadeIDE.Features.Workspace.Application;
 using CascadeIDE.Models.Intercom;
 using CascadeIDE.Services;
 using CascadeIDE.Services.Intercom;
@@ -90,6 +91,15 @@ public partial class ChatPanelViewModel
                 : $"Прикреплено: {string.Join(", ", labels)}";
     }
 
+    /// <summary>Корень для resolve вложений: workspace VM, иначе каталог .sln.</summary>
+    private string ResolveAttachWorkspaceRoot()
+    {
+        var ws = _getWorkspaceRoot()?.Trim() ?? "";
+        if (ws.Length > 0)
+            return ws;
+        return WorkspaceDirectoryFromSolutionPath.Resolve(_getSolutionPath?.Invoke() ?? "");
+    }
+
     private IntercomAttachmentResolveAtSend.EditorSnapshot BuildAttachEditorSnapshot() =>
         new(
             _getCurrentFilePath?.Invoke(),
@@ -133,31 +143,79 @@ public partial class ChatPanelViewModel
         return IntercomAttachmentResolveAtSend.TryResolveFile(path, lineStart, lineEnd, workspaceRoot, solutionPath, out anchor, out error);
     }
 
-    public async Task RevealAttachmentFromFeedAsync(AttachmentAnchor anchor, bool select, CancellationToken cancellationToken = default)
+    public async Task RevealAttachmentFromFeedAsync(
+        AttachmentAnchor anchor,
+        bool select,
+        int? messageIndex = null,
+        CancellationToken cancellationToken = default)
     {
-        var exec = _executeIdeCommandForMafAgent;
-        if (exec is null || string.IsNullOrWhiteSpace(anchor.File))
-            return;
-
-        var anchorJson = JsonSerializer.SerializeToElement(anchor, ChatPanelJson);
-        var args = new Dictionary<string, JsonElement>
+        anchor = resolveFeedAttachmentAnchor(anchor, messageIndex);
+        if (string.IsNullOrWhiteSpace(anchor.File))
         {
-            ["anchor_json"] = anchorJson,
-            ["select"] = JsonSerializer.SerializeToElement(select),
-        };
+            await UiScheduler.Default.InvokeAsync(() =>
+                ClarificationStatusText = "Не удалось перейти: у вложения нет пути к файлу.");
+            return;
+        }
 
         try
         {
-            var result = await exec(IdeCommands.IntercomRevealAttachment, args, cancellationToken).ConfigureAwait(false);
-            await UiScheduler.Default.InvokeAsync(() =>
+            string result;
+            if (_revealIntercomAttachmentInIde is { } revealInIde)
             {
-                if (!string.IsNullOrWhiteSpace(result))
-                    ClarificationStatusText = result.Trim();
-            });
+                result = revealInIde(anchor, select);
+            }
+            else if (_executeIdeCommandForMafAgent is { } exec)
+            {
+                var anchorJson = JsonSerializer.SerializeToElement(anchor, ChatPanelJson);
+                var args = new Dictionary<string, JsonElement>
+                {
+                    ["anchor_json"] = anchorJson,
+                    ["select"] = JsonSerializer.SerializeToElement(select),
+                };
+                result = await exec(IdeCommands.IntercomRevealAttachment, args, cancellationToken).ConfigureAwait(true);
+            }
+            else
+            {
+                await UiScheduler.Default.InvokeAsync(() =>
+                    ClarificationStatusText = "Не удалось перейти: IDE bridge недоступен.");
+                return;
+            }
+
+            await UiScheduler.Default.InvokeAsync(() =>
+                ClarificationStatusText = string.IsNullOrWhiteSpace(result) ? "OK" : result.Trim());
         }
         catch (Exception ex)
         {
             await UiScheduler.Default.InvokeAsync(() => ClarificationStatusText = ex.Message);
         }
+    }
+
+    private AttachmentAnchor resolveFeedAttachmentAnchor(AttachmentAnchor anchor, int? messageIndex)
+    {
+        if (!string.IsNullOrWhiteSpace(anchor.File))
+            return anchor;
+
+        if (messageIndex is not >= 0 || messageIndex >= ChatMessages.Count)
+            return anchor;
+
+        var attachments = ChatMessages[messageIndex.Value].Attachments;
+        if (attachments is null || attachments.Count == 0)
+            return anchor;
+
+        if (!string.IsNullOrWhiteSpace(anchor.Id))
+        {
+            foreach (var candidate in attachments)
+            {
+                if (string.IsNullOrWhiteSpace(candidate.Id)
+                    || !string.Equals(candidate.Id, anchor.Id, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                return candidate;
+            }
+        }
+
+        return attachments[0];
     }
 }

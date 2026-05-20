@@ -15,6 +15,7 @@ public sealed class BracketCodeReferenceParserTests
     [InlineData("[M:Run S:for:2]", null, "Run", null, null, "for", 2)]
     [InlineData("[M:Run S:for(2)]", null, "Run", null, null, "for", 2)]
     [InlineData("[F:src/A.cs; M:Run; S:for:2]", "src/A.cs", "Run", null, null, "for", 2)]
+    [InlineData("[F:Views/Chat/Skia/SkiaChatBubbleRenderer.cs M:Measure]", "Views/Chat/Skia/SkiaChatBubbleRenderer.cs", "Measure", null, null, null, null)]
     public void TryParse_CommonForms(
         string input,
         string? file,

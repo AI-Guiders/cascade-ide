@@ -41,7 +41,7 @@ public partial class ChatPanelViewModel
         CancellationToken cancellationToken)
     {
         var pending = new Dictionary<string, AttachmentAnchor>(_pendingAttachDrafts, StringComparer.OrdinalIgnoreCase);
-        var result = await IntercomAttachmentResolveAtSendWorker.TryBuildAsync(
+        var prepared = await IntercomOutboundMessagePreparer.PrepareAsync(
             rawInput,
             pending,
             BuildAttachEditorSnapshot(),
@@ -49,16 +49,21 @@ public partial class ChatPanelViewModel
             _getSolutionPath?.Invoke(),
             cancellationToken).ConfigureAwait(false);
 
-        if (result.Ok)
+        if (prepared.IsCommittable)
         {
             await UiScheduler.Default.InvokeAsync(() =>
             {
                 _pendingAttachDrafts.Clear();
                 ComposerAttachHint = "";
+                var hint = IntercomPreparedMessageCommit.FormatStatusHint(prepared);
+                if (!string.IsNullOrWhiteSpace(hint))
+                    ClarificationStatusText = hint;
             });
+
+            return (true, prepared.Outbound, "");
         }
 
-        return result;
+        return (false, prepared.Outbound, prepared.Error ?? "Не удалось собрать сообщение.");
     }
 
     private Task beginPrepareOutboundAsync() =>

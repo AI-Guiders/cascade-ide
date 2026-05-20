@@ -1,11 +1,13 @@
 #nullable enable
 
+using CascadeIDE.Features.Workspace.Application;
 using CascadeIDE.Models.Intercom;
+using CascadeIDE.Services;
 using CascadeIDE.Services.Intercom;
 
 namespace CascadeIDE.Features.Chat;
 
-/// <summary>Сборка исходящего сообщения: prose, bracket → markers, attachments @ send (ADR 0128).</summary>
+/// <summary>Сборка исходящего сообщения: prose, bracket → markers, attachments @ send (ADR 0128, 0134).</summary>
 public static class IntercomAttachmentMessageBuilder
 {
     public sealed record Outbound(
@@ -20,6 +22,123 @@ public static class IntercomAttachmentMessageBuilder
         string? workspaceRoot,
         string? solutionPath,
         out Outbound outbound,
+        out string error) =>
+        TryBuildCore(
+            rawInput,
+            pendingByShortId,
+            editor,
+            workspaceRoot,
+            solutionPath,
+            allowDegradedMemberResolve: false,
+            skipMemberRoslynAtSend: false,
+            captureSenderWorkspaceContext: true,
+            warnings: null,
+            out outbound,
+            out error);
+
+    public static bool TryPrepare(
+        string rawInput,
+        IReadOnlyDictionary<string, AttachmentAnchor> pendingByShortId,
+        IntercomAttachmentResolveAtSend.EditorSnapshot editor,
+        string? workspaceRoot,
+        string? solutionPath,
+        out PreparedIntercomMessage prepared)
+    {
+        var warnings = new List<string>();
+        if (!TryBuildCore(
+                rawInput,
+                pendingByShortId,
+                editor,
+                workspaceRoot,
+                solutionPath,
+                allowDegradedMemberResolve: true,
+                skipMemberRoslynAtSend: false,
+                captureSenderWorkspaceContext: true,
+                warnings,
+                out var outbound,
+                out var error))
+        {
+            prepared = new PreparedIntercomMessage(
+                IntercomMessagePrepareStatus.Failed,
+                outbound,
+                warnings,
+                error);
+            return false;
+        }
+
+        return finishPrepare(outbound, warnings, out prepared);
+    }
+
+    /// <summary>MCP fast-path: F/M/L/S @ send без Roslyn и без excerpt; L: строки из bracket; M/S — re-resolve при reveal.</summary>
+    public static bool TryPrepareForMcp(
+        string rawInput,
+        IReadOnlyDictionary<string, AttachmentAnchor> pendingByShortId,
+        IntercomAttachmentResolveAtSend.EditorSnapshot editor,
+        string? workspaceRoot,
+        string? solutionPath,
+        out PreparedIntercomMessage prepared)
+    {
+        var warnings = new List<string>();
+        if (!TryBuildCore(
+                rawInput,
+                pendingByShortId,
+                editor,
+                workspaceRoot,
+                solutionPath,
+                allowDegradedMemberResolve: true,
+                skipMemberRoslynAtSend: true,
+                captureSenderWorkspaceContext: false,
+                warnings,
+                out var outbound,
+                out var error))
+        {
+            prepared = new PreparedIntercomMessage(
+                IntercomMessagePrepareStatus.Failed,
+                outbound,
+                warnings,
+                error);
+            return false;
+        }
+
+        if (outbound.Attachments.Count > 0)
+            warnings.Add("MCP fast-path (F/M/L/S): Roslyn и excerpt @ send отложены; reveal — re-resolve.");
+
+        return finishPrepare(outbound, warnings, out prepared);
+    }
+
+    private static bool finishPrepare(
+        Outbound outbound,
+        List<string> warnings,
+        out PreparedIntercomMessage prepared)
+    {
+        var hasDegraded = outbound.Attachments.Any(static a =>
+            string.Equals(
+                a.ResolveOutcome,
+                IntercomAttachmentRevealPlan.OutcomeMemberNotFound,
+                StringComparison.Ordinal));
+
+        if (hasDegraded && !warnings.Any(static w => w.Contains("re-resolve", StringComparison.OrdinalIgnoreCase)))
+            warnings.Add("Часть вложений собрана без строк Roslyn — reveal попробует re-resolve.");
+
+        var status = hasDegraded
+            ? IntercomMessagePrepareStatus.PartialSuccess
+            : IntercomMessagePrepareStatus.Success;
+
+        prepared = new PreparedIntercomMessage(status, outbound, warnings, null);
+        return true;
+    }
+
+    private static bool TryBuildCore(
+        string rawInput,
+        IReadOnlyDictionary<string, AttachmentAnchor> pendingByShortId,
+        IntercomAttachmentResolveAtSend.EditorSnapshot editor,
+        string? workspaceRoot,
+        string? solutionPath,
+        bool allowDegradedMemberResolve,
+        bool skipMemberRoslynAtSend,
+        bool captureSenderWorkspaceContext,
+        List<string>? warnings,
+        out Outbound outbound,
         out string error)
     {
         outbound = new Outbound("", [], null);
@@ -32,7 +151,9 @@ public static class IntercomAttachmentMessageBuilder
             return false;
         }
 
-        var resolveSession = new IntercomAttachmentRoslynResolveSession();
+        workspaceRoot = coalesceWorkspaceRoot(workspaceRoot, solutionPath);
+
+        var resolveSession = skipMemberRoslynAtSend ? null : new IntercomAttachmentRoslynResolveSession();
         var segments = ChatMessageBodyPresentation.SplitSegments(trimmed);
         var attachments = new List<AttachmentAnchor>();
         var rebuilt = new System.Text.StringBuilder();
@@ -52,6 +173,9 @@ public static class IntercomAttachmentMessageBuilder
                     workspaceRoot,
                     solutionPath,
                     resolveSession,
+                    allowDegradedMemberResolve,
+                    skipMemberRoslynAtSend,
+                    warnings,
                     attachments,
                     rebuilt,
                     out error))
@@ -63,9 +187,19 @@ public static class IntercomAttachmentMessageBuilder
         var content = rebuilt.ToString();
         IntercomAttachmentMarkers.UpdateProseOffsets(content, attachments);
 
-        var senderContext = IntercomSenderWorkspaceContextCapture.TryCapture(workspaceRoot, solutionPath);
+        var senderContext = captureSenderWorkspaceContext
+            ? IntercomSenderWorkspaceContextCapture.TryCapture(workspaceRoot, solutionPath)
+            : null;
         outbound = new Outbound(content, attachments, senderContext);
         return true;
+    }
+
+    private static string? coalesceWorkspaceRoot(string? workspaceRoot, string? solutionPath)
+    {
+        if (!string.IsNullOrWhiteSpace(workspaceRoot))
+            return workspaceRoot.Trim();
+        var dir = WorkspaceDirectoryFromSolutionPath.Resolve(solutionPath ?? "");
+        return dir.Length > 0 ? dir : null;
     }
 
     private static bool tryProcessProseSegment(
@@ -74,7 +208,10 @@ public static class IntercomAttachmentMessageBuilder
         IntercomAttachmentResolveAtSend.EditorSnapshot editor,
         string? workspaceRoot,
         string? solutionPath,
-        IntercomAttachmentRoslynResolveSession resolveSession,
+        IntercomAttachmentRoslynResolveSession? resolveSession,
+        bool allowDegradedMemberResolve,
+        bool skipMemberRoslynAtSend,
+        List<string>? warnings,
         List<AttachmentAnchor> attachments,
         System.Text.StringBuilder rebuilt,
         out string error)
@@ -110,12 +247,10 @@ public static class IntercomAttachmentMessageBuilder
                 if (!BracketCodeReferenceParser.TryParse(span.Inner, out var reference, out error))
                     return false;
 
-                if (!IntercomAttachmentResolveAtSend.TryResolveBracket(
+                if (!IntercomAttachmentResolveAtSend.TryResolveBracketDraft(
                         reference,
                         editor.CurrentFilePath,
                         workspaceRoot,
-                        solutionPath,
-                        resolveSession,
                         out var draft,
                         out error))
                 {
@@ -129,10 +264,22 @@ public static class IntercomAttachmentMessageBuilder
                         workspaceRoot,
                         solutionPath,
                         resolveSession,
+                        allowDegradedMemberResolve,
+                        skipMemberRoslynAtSend,
                         out var resolved,
                         out error))
                 {
                     return false;
+                }
+
+                if (allowDegradedMemberResolve
+                    && string.Equals(
+                        resolved.ResolveOutcome,
+                        IntercomAttachmentRevealPlan.OutcomeMemberNotFound,
+                        StringComparison.Ordinal))
+                {
+                    warnings?.Add(
+                        $"Вложение «{resolved.DisplayLabel}»: member не разрешён @ send, будет re-resolve при клике.");
                 }
 
                 attachments.Add(resolved);
@@ -153,6 +300,8 @@ public static class IntercomAttachmentMessageBuilder
                         workspaceRoot,
                         solutionPath,
                         resolveSession,
+                        allowDegradedMemberResolve,
+                        skipMemberRoslynAtSend,
                         out var resolved,
                         out error))
                 {

@@ -64,10 +64,16 @@ public sealed class IntercomAttachmentRevealPlan
 
         if (hasMember || hasScope)
         {
+            var cacheContext = IntercomAttachResolveCacheContext.From(
+                workspaceRoot,
+                solutionPath: null,
+                anchor.File);
             if (AttachmentAnchorRoslynResolver.TryResolveLineRange(
+                    null,
                     absolute,
                     anchor.MemberKey,
                     syntaxScope,
+                    cacheContext,
                     out var resolved,
                     out var resolveDetail))
             {

@@ -5,6 +5,7 @@ using System.Text.Json;
 using CascadeIDE.Features.WorkspaceNavigation.Application;
 using CascadeIDE.Models.Editor;
 using CascadeIDE.Models.Intercom;
+using CascadeIDE.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -23,7 +24,12 @@ public static class IntercomAttachmentResolveAtSend
         string? EditorText,
         int? SelectionStart,
         int? SelectionLength,
-        int? CaretOffset);
+        int? CaretOffset)
+    {
+        /// <summary>MCP/bracket @ send: не тянуть <see cref="EditorText"/> с UI (может быть очень большим).</summary>
+        public static EditorSnapshot ForMcpBracketResolve(string? currentFilePath) =>
+            new(currentFilePath, null, null, null, null);
+    }
 
     public static bool TryResolveSelection(
         in EditorSnapshot editor,
@@ -65,7 +71,7 @@ public static class IntercomAttachmentResolveAtSend
             DisplayLabel = buildSelectionLabel(rel, lineStart, lineEnd),
         };
 
-        return finalize(anchor, workspaceRoot, solutionPath, null, out anchor, out error);
+        return finalize(anchor, workspaceRoot, solutionPath, null, false, false, out anchor, out error);
     }
 
     public static bool TryResolveScope(
@@ -89,7 +95,7 @@ public static class IntercomAttachmentResolveAtSend
             return false;
         }
 
-        return finalize(anchor, workspaceRoot, solutionPath, null, out anchor, out error);
+        return finalize(anchor, workspaceRoot, solutionPath, null, false, false, out anchor, out error);
     }
 
     public static bool TryResolveFile(
@@ -112,7 +118,7 @@ public static class IntercomAttachmentResolveAtSend
         }
 
         var rel = AttachmentAnchorPaths.ToWorkspaceRelative(path, workspaceRoot) ?? path.Replace('\\', '/');
-        var isText = isTextFile(rel);
+        var isText = EditorLanguageSupport.IsTextFilePath(rel);
         if (!isText && (lineStart.HasValue || lineEnd.HasValue))
         {
             error = "Для бинарного файла нельзя задать диапазон строк.";
@@ -127,7 +133,7 @@ public static class IntercomAttachmentResolveAtSend
                 File = rel.Replace('\\', '/'),
                 DisplayLabel = Path.GetFileName(rel),
             };
-            return finalize(anchor, workspaceRoot, solutionPath, null, out anchor, out error);
+            return finalize(anchor, workspaceRoot, solutionPath, null, false, false, out anchor, out error);
         }
 
         if (lineStart is null)
@@ -138,7 +144,7 @@ public static class IntercomAttachmentResolveAtSend
                 File = rel.Replace('\\', '/'),
                 DisplayLabel = Path.GetFileName(rel),
             };
-            return finalize(anchor, workspaceRoot, solutionPath, null, out anchor, out error);
+            return finalize(anchor, workspaceRoot, solutionPath, null, false, false, out anchor, out error);
         }
 
         var end = lineEnd ?? lineStart;
@@ -150,7 +156,7 @@ public static class IntercomAttachmentResolveAtSend
             LineEnd = end,
             DisplayLabel = $"{Path.GetFileName(rel)}:{lineStart}-{end}",
         };
-        return finalize(anchor, workspaceRoot, solutionPath, null, out anchor, out error);
+        return finalize(anchor, workspaceRoot, solutionPath, null, false, false, out anchor, out error);
     }
 
     public static bool TryResolveBracket(
@@ -169,6 +175,23 @@ public static class IntercomAttachmentResolveAtSend
         string? solutionPath,
         IntercomAttachmentRoslynResolveSession? resolveSession,
         out AttachmentAnchor anchor,
+        out string error) =>
+        TryResolveBracket(
+            reference,
+            activeFilePath,
+            workspaceRoot,
+            solutionPath,
+            resolveSession,
+            allowDegradedMemberResolve: false,
+            out anchor,
+            out error);
+
+    /// <summary>Черновик якоря из bracket без Roslyn (один вызов <see cref="TryAssignIdAndResolve"/>).</summary>
+    public static bool TryResolveBracketDraft(
+        in BracketCodeReference reference,
+        string? activeFilePath,
+        string? workspaceRoot,
+        out AttachmentAnchor anchor,
         out string error)
     {
         if (!BracketCodeReferenceParser.TryToAttachmentAnchor(reference, activeFilePath, workspaceRoot, out anchor, out error))
@@ -183,8 +206,31 @@ public static class IntercomAttachmentResolveAtSend
             AttachmentShape = shape,
             DisplayLabel = buildBracketLabel(reference, anchor.File),
         };
+        return true;
+    }
 
-        return finalize(anchor, workspaceRoot, solutionPath, resolveSession, out anchor, out error);
+    public static bool TryResolveBracket(
+        in BracketCodeReference reference,
+        string? activeFilePath,
+        string? workspaceRoot,
+        string? solutionPath,
+        IntercomAttachmentRoslynResolveSession? resolveSession,
+        bool allowDegradedMemberResolve,
+        out AttachmentAnchor anchor,
+        out string error)
+    {
+        if (!TryResolveBracketDraft(reference, activeFilePath, workspaceRoot, out anchor, out error))
+            return false;
+
+        return finalize(
+            anchor,
+            workspaceRoot,
+            solutionPath,
+            resolveSession,
+            allowDegradedMemberResolve,
+            skipMemberRoslynResolve: false,
+            out anchor,
+            out error);
     }
 
     public static bool TryAssignIdAndResolve(
@@ -203,6 +249,47 @@ public static class IntercomAttachmentResolveAtSend
         string? solutionPath,
         IntercomAttachmentRoslynResolveSession? resolveSession,
         out AttachmentAnchor anchor,
+        out string error) =>
+        TryAssignIdAndResolve(
+            draft,
+            shortId,
+            workspaceRoot,
+            solutionPath,
+            resolveSession,
+            allowDegradedMemberResolve: false,
+            skipMemberRoslynResolve: false,
+            out anchor,
+            out error);
+
+    public static bool TryAssignIdAndResolve(
+        AttachmentAnchor draft,
+        string shortId,
+        string? workspaceRoot,
+        string? solutionPath,
+        IntercomAttachmentRoslynResolveSession? resolveSession,
+        bool allowDegradedMemberResolve,
+        out AttachmentAnchor anchor,
+        out string error) =>
+        TryAssignIdAndResolve(
+            draft,
+            shortId,
+            workspaceRoot,
+            solutionPath,
+            resolveSession,
+            allowDegradedMemberResolve,
+            skipMemberRoslynResolve: false,
+            out anchor,
+            out error);
+
+    public static bool TryAssignIdAndResolve(
+        AttachmentAnchor draft,
+        string shortId,
+        string? workspaceRoot,
+        string? solutionPath,
+        IntercomAttachmentRoslynResolveSession? resolveSession,
+        bool allowDegradedMemberResolve,
+        bool skipMemberRoslynResolve,
+        out AttachmentAnchor anchor,
         out string error)
     {
         anchor = draft with
@@ -210,7 +297,15 @@ public static class IntercomAttachmentResolveAtSend
             Id = shortId,
             ResolvedAtUtc = DateTimeOffset.UtcNow.ToString("O"),
         };
-        return finalize(anchor, workspaceRoot, solutionPath, resolveSession, out anchor, out error);
+        return finalize(
+            anchor,
+            workspaceRoot,
+            solutionPath,
+            resolveSession,
+            allowDegradedMemberResolve,
+            skipMemberRoslynResolve,
+            out anchor,
+            out error);
     }
 
     private static bool finalize(
@@ -218,6 +313,8 @@ public static class IntercomAttachmentResolveAtSend
         string? workspaceRoot,
         string? solutionPath,
         IntercomAttachmentRoslynResolveSession? resolveSession,
+        bool allowDegradedMemberResolve,
+        bool skipMemberRoslynResolve,
         out AttachmentAnchor anchor,
         out string error)
     {
@@ -238,6 +335,8 @@ public static class IntercomAttachmentResolveAtSend
             return false;
         }
 
+        var cacheContext = buildResolveCacheContext(workspaceRoot, solutionPath, anchor.File);
+
         if (string.IsNullOrWhiteSpace(anchor.DisplayLabel))
             anchor = anchor with { DisplayLabel = Path.GetFileName(anchor.File) };
 
@@ -245,28 +344,50 @@ public static class IntercomAttachmentResolveAtSend
         if (AttachmentSyntaxScope.TryParse(anchor.SyntaxScope, out var parsedScope))
             syntaxScope = parsedScope;
 
+        // Fast-path @ send (MCP): F/L/M/S без Roslyn; M и S — строки при reveal; L — строки из bracket сохраняются.
         if (!string.IsNullOrWhiteSpace(anchor.MemberKey) || syntaxScope is not null)
         {
-            if (!AttachmentAnchorRoslynResolver.TryResolveLineRange(
+            if (skipMemberRoslynResolve)
+            {
+                anchor = anchor with
+                {
+                    ResolveOutcome = IntercomAttachmentRevealPlan.OutcomeMemberNotFound,
+                };
+            }
+            else if (!AttachmentAnchorRoslynResolver.TryResolveLineRange(
                     resolveSession,
                     absolute,
                     anchor.MemberKey,
                     syntaxScope,
+                    cacheContext,
                     out var lines,
                     out var roslynDetail))
             {
-                error = formatRoslynResolveError(anchor, syntaxScope, roslynDetail);
-                return false;
-            }
+                if (!allowDegradedMemberResolve)
+                {
+                    error = formatRoslynResolveError(anchor, syntaxScope, roslynDetail);
+                    return false;
+                }
 
-            anchor = anchor with
+                anchor = anchor with
+                {
+                    ResolveOutcome = IntercomAttachmentRevealPlan.OutcomeMemberNotFound,
+                };
+            }
+            else
             {
-                LineStart = lines.Start.Value,
-                LineEnd = lines.End.Value,
-            };
+                anchor = anchor with
+                {
+                    LineStart = lines.Start.Value,
+                    LineEnd = lines.End.Value,
+                };
+            }
         }
 
-        var excerpt = tryBuildExcerpt(absolute, anchor.LineStart, anchor.LineEnd, resolveSession);
+        // Fast-path: без ReadAllText/excerpt @ send (все оси; L: lineStart/lineEnd уже в draft).
+        string? excerpt = skipMemberRoslynResolve
+            ? null
+            : tryBuildExcerpt(absolute, anchor.LineStart, anchor.LineEnd, resolveSession, cacheContext);
 
         anchor = anchor with { Excerpt = excerpt };
         return true;
@@ -288,27 +409,26 @@ public static class IntercomAttachmentResolveAtSend
             : $"Не удалось разрешить вложение в {file}: {target} ({roslynDetail}).";
     }
 
+    private static IntercomAttachResolveCacheContext? buildResolveCacheContext(
+        string? workspaceRoot,
+        string? solutionPath,
+        string? relativeFile)
+    {
+        if (string.IsNullOrWhiteSpace(workspaceRoot) || string.IsNullOrWhiteSpace(relativeFile))
+            return null;
+
+        return IntercomAttachResolveCacheContext.From(workspaceRoot, solutionPath, relativeFile);
+    }
+
     private static string? tryBuildExcerpt(
         string absolutePath,
         int? lineStart,
         int? lineEnd,
-        IntercomAttachmentRoslynResolveSession? resolveSession)
+        IntercomAttachmentRoslynResolveSession? resolveSession,
+        IntercomAttachResolveCacheContext? cacheContext)
     {
-        string text;
-        if (!AttachmentAnchorRoslynResolver.TryGetCachedText(resolveSession, absolutePath, out text))
-        {
-            if (!File.Exists(absolutePath))
-                return null;
-
-            try
-            {
-                text = File.ReadAllText(absolutePath);
-            }
-            catch
-            {
-                return null;
-            }
-        }
+        if (!tryReadFileText(absolutePath, resolveSession, cacheContext, out var text))
+            return null;
 
         if (lineStart is null || lineEnd is null)
         {
@@ -325,6 +445,46 @@ public static class IntercomAttachmentResolveAtSend
         return trimExcerpt(slice);
     }
 
+    private static bool tryReadFileText(
+        string absolutePath,
+        IntercomAttachmentRoslynResolveSession? resolveSession,
+        IntercomAttachResolveCacheContext? cacheContext,
+        out string text)
+    {
+        if (AttachmentAnchorRoslynResolver.TryGetCachedText(resolveSession, absolutePath, out text))
+            return true;
+
+        if (cacheContext is not null
+            && AttachmentAnchorRoslynResolver.TryGetOrCreateEntry(
+                resolveSession,
+                absolutePath,
+                cacheContext,
+                out var entry,
+                out _)
+            && entry is not null)
+        {
+            text = entry.Text;
+            return true;
+        }
+
+        if (!File.Exists(absolutePath))
+        {
+            text = "";
+            return false;
+        }
+
+        try
+        {
+            text = File.ReadAllText(absolutePath);
+            return true;
+        }
+        catch
+        {
+            text = "";
+            return false;
+        }
+    }
+
     private static string? trimExcerpt(string text)
     {
         if (string.IsNullOrEmpty(text))
@@ -336,27 +496,6 @@ public static class IntercomAttachmentResolveAtSend
 
         var maxChars = Math.Max(1, MaxExcerptBytes / 4);
         return text.Length <= maxChars ? text : text[..maxChars] + "…";
-    }
-
-    private static bool isTextFile(string path)
-    {
-        var ext = Path.GetExtension(path);
-        if (ext.Length == 0)
-            return true;
-        return ext.Equals(".cs", StringComparison.OrdinalIgnoreCase)
-            || ext.Equals(".md", StringComparison.OrdinalIgnoreCase)
-            || ext.Equals(".json", StringComparison.OrdinalIgnoreCase)
-            || ext.Equals(".txt", StringComparison.OrdinalIgnoreCase)
-            || ext.Equals(".xml", StringComparison.OrdinalIgnoreCase)
-            || ext.Equals(".yaml", StringComparison.OrdinalIgnoreCase)
-            || ext.Equals(".yml", StringComparison.OrdinalIgnoreCase)
-            || ext.Equals(".ts", StringComparison.OrdinalIgnoreCase)
-            || ext.Equals(".tsx", StringComparison.OrdinalIgnoreCase)
-            || ext.Equals(".js", StringComparison.OrdinalIgnoreCase)
-            || ext.Equals(".jsx", StringComparison.OrdinalIgnoreCase)
-            || ext.Equals(".css", StringComparison.OrdinalIgnoreCase)
-            || ext.Equals(".html", StringComparison.OrdinalIgnoreCase)
-            || ext.Equals(".sql", StringComparison.OrdinalIgnoreCase);
     }
 
     private static string buildSelectionLabel(string file, int lineStart, int lineEnd) =>

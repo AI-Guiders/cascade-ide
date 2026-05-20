@@ -25,6 +25,9 @@ public static class IntercomAttachmentMarkers
 
     public static string FormatDisplayLabel(string label) => $"【{label}】";
 
+    /// <summary>Текст кликабельной строки в ленте Intercom (подчёркнутый <c>[label]</c>).</summary>
+    public static string FormatFeedLinkLabel(string label) => $"[{label}]";
+
     public static string ReplaceMarkersForDisplay(string content, IReadOnlyList<AttachmentAnchor> attachments)
     {
         if (string.IsNullOrEmpty(content))
@@ -72,8 +75,9 @@ public static class IntercomAttachmentMarkers
             var label = anchor?.DisplayLabel ?? id;
             list.Add(new IntercomAttachmentFeedSegment(
                 IntercomAttachmentFeedSegmentKind.Attachment,
-                FormatDisplayLabel(label),
-                anchor));
+                FormatFeedLinkLabel(label),
+                anchor,
+                MarkerShortId: id));
             last = m.Index + m.Length;
         }
 
@@ -132,4 +136,5 @@ public enum IntercomAttachmentFeedSegmentKind
 public readonly record struct IntercomAttachmentFeedSegment(
     IntercomAttachmentFeedSegmentKind Kind,
     string Text,
-    AttachmentAnchor? Anchor = null);
+    AttachmentAnchor? Anchor = null,
+    string? MarkerShortId = null);

@@ -10,8 +10,10 @@ using AgentClientProtocol;
 using CascadeIDE.Models;
 using CascadeIDE.Models.AgentChat;
 using CascadeIDE.Features.Chat.Application;
+using CascadeIDE.Features.Chat.DataAcquisition;
 using CascadeIDE.Models.Intercom;
 using CascadeIDE.Services;
+using CascadeIDE.Services.Intercom;
 using CascadeIDE.Services.CursorAcp;
 using CascadeIDE.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -44,6 +46,7 @@ public partial class ChatPanelViewModel : ViewModelBase
     private readonly Action<string>? _appendAcpTerminal;
     private readonly Action? _showAcpTerminal;
     private readonly Func<string, IReadOnlyDictionary<string, JsonElement>?, CancellationToken, Task<string>>? _executeIdeCommandForMafAgent;
+    private readonly Func<AttachmentAnchor, bool, string>? _revealIntercomAttachmentInIde;
     private readonly ChatSlashCommandRunner _slashCommandRunner;
     private readonly IWorkspaceFileSlashCompletionProvider? _workspaceFileSlashCompletion;
     private readonly ISessionTopicSlashCompletionProvider _sessionTopicSlashCompletion;
@@ -88,6 +91,7 @@ public partial class ChatPanelViewModel : ViewModelBase
         Action<string>? appendAcpTerminal = null,
         Action? showAcpTerminal = null,
         Func<string, IReadOnlyDictionary<string, JsonElement>?, CancellationToken, Task<string>>? executeIdeCommandForMafAgent = null,
+        Func<AttachmentAnchor, bool, string>? revealIntercomAttachmentInIde = null,
         Func<Uri>? getLocalOllamaEndpoint = null,
         Func<string>? getEffectiveOllamaModelId = null,
         Func<IChatClient?>? tryCreateCloudMafIChatClient = null,
@@ -116,6 +120,7 @@ public partial class ChatPanelViewModel : ViewModelBase
         _appendAcpTerminal = appendAcpTerminal;
         _showAcpTerminal = showAcpTerminal;
         _executeIdeCommandForMafAgent = executeIdeCommandForMafAgent;
+        _revealIntercomAttachmentInIde = revealIntercomAttachmentInIde;
         _workspaceFileSlashCompletion = getSolutionPath is not null && getSolutionRoots is not null
             ? new WorkspaceFileSlashCompletionProvider(getSolutionPath, getSolutionRoots, getWorkspaceRoot)
             : null;
@@ -772,19 +777,82 @@ public partial class ChatPanelViewModel : ViewModelBase
     private bool CanDismissClarificationBatch() => _activeClarificationBatch is not null;
 
     /// <summary>Добавить сообщение из внешнего MCP (<c>send_chat</c> с <c>role=assistant</c>).</summary>
-    public string AppendMessageFromMcp(string role, string content)
+    public async Task<string> AppendMessageFromMcpAsync(string role, string content, CancellationToken cancellationToken = default)
     {
         var r = string.Equals(role, "assistant", StringComparison.OrdinalIgnoreCase) ? "assistant" : "user";
         var trimmed = content.Trim();
         if (trimmed.Length == 0)
             return "Empty content";
-        var vm = new ChatMessageViewModel(r, trimmed, threadId: _activeThreadId);
-        ChatMessages.Add(vm);
-        _ = PersistEventAsync(ChatHistoryEventKind.MessageAdded, ChatHistoryPayloadMapping.ToMessagePayload(vm));
-        if (string.Equals(r, "assistant", StringComparison.Ordinal))
-            _ = PersistEventAsync(ChatHistoryEventKind.MessageCompleted, ChatHistoryPayloadMapping.ToMessagePayload(vm));
-        return "OK";
+
+        var body = trimmed;
+        IReadOnlyList<AttachmentAnchor> attachments = [];
+        SenderWorkspaceContext? senderContext = null;
+        string? statusHint = null;
+        if (containsBracketOrWireMarker(trimmed))
+        {
+            var (editor, workspace, solution, pending) = await UiScheduler.Default.InvokeAsync(() =>
+            {
+                var p = new Dictionary<string, AttachmentAnchor>(_pendingAttachDrafts, StringComparer.OrdinalIgnoreCase);
+                return (
+                    IntercomAttachmentResolveAtSend.EditorSnapshot.ForMcpBracketResolve(_getCurrentFilePath?.Invoke()),
+                    ResolveAttachWorkspaceRoot(),
+                    _getSolutionPath?.Invoke(),
+                    p);
+            }).ConfigureAwait(false);
+
+            var prepared = await IntercomSendTrace.RunAsync(
+                workspace,
+                "AppendMessageFromMcp.Prepare",
+                async phase =>
+                {
+                    var result = await IntercomOutboundMessagePreparer.PrepareForMcpAsync(
+                        trimmed,
+                        pending,
+                        editor,
+                        workspace,
+                        solution,
+                        cancellationToken).ConfigureAwait(false);
+                    phase.Detail(result.Status.ToString());
+                    return result;
+                }).ConfigureAwait(false);
+
+            if (!prepared.IsCommittable)
+            {
+                var err = prepared.Error ?? "Не удалось собрать вложения.";
+                await UiScheduler.Default.InvokeAsync(() =>
+                    ClarificationStatusText = $"MCP: сообщение не добавлено — {err}").ConfigureAwait(false);
+                return err;
+            }
+
+            body = prepared.Outbound.Content;
+            attachments = prepared.Outbound.Attachments;
+            senderContext = prepared.Outbound.SenderWorkspaceContext;
+            statusHint = IntercomPreparedMessageCommit.FormatStatusHint(prepared);
+        }
+
+        // Commit только на UI-потоке; prepare — с ConfigureAwait(false), иначе дедлок с MCP на UI.
+        return await UiScheduler.Default.InvokeAsync(() =>
+        {
+            if (!string.IsNullOrWhiteSpace(statusHint))
+                ClarificationStatusText = statusHint;
+
+            var vm = new ChatMessageViewModel(
+                r,
+                body,
+                threadId: _activeThreadId,
+                attachments: attachments,
+                senderWorkspaceContext: senderContext);
+            ChatMessages.Add(vm);
+            _ = PersistEventAsync(ChatHistoryEventKind.MessageAdded, ChatHistoryPayloadMapping.ToMessagePayload(vm));
+            if (string.Equals(r, "assistant", StringComparison.Ordinal))
+                _ = PersistEventAsync(ChatHistoryEventKind.MessageCompleted, ChatHistoryPayloadMapping.ToMessagePayload(vm));
+            return "OK";
+        }).ConfigureAwait(false);
     }
+
+    private static bool containsBracketOrWireMarker(string text) =>
+        text.Contains('\u27E6', StringComparison.Ordinal)
+        || IntercomAttachmentMarkers.TryExtractBracketSpans(text, out _);
 
     public string SubmitClarificationResponseFromJson(string responseJson)
     {
