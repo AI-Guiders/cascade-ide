@@ -106,9 +106,14 @@ Reveal у получателя делает re-resolve (уже `IntercomAttachme
 ### 6. Skia / hit-test
 
 - `IntercomFeedProjector.Project(content, attachments)` — единая логика сегментов.
-- `SkiaChatMessageFeedEntity`: `CreateHit` → **null** (не перехватывать всё сообщение).
-- Hits только в `Draw` для `AttachLink` (+ опционально title band для select message).
-- `AttachLink`: `BodyTone.Link`, draw **без** RichTextKit (гарантированное подчёркивание `[label]`).
+- **`SkiaChatHitRegistry`** — единственный реестр pointer hit на кадр (`_chatHits.Clear()` в начале `DrawSkiaScene`).
+- **Приоритет `FindIndex`:** `RevealAttachment` (attach chip, markdown link) → `SkiaChatPointerAction` (chrome: overview, composer, slash) → z-order.
+- **`SkiaChatDrawContext.RegisterHit`** → `RegisterContentRect` (content + `scrollOffset`); chrome — `RegisterControlRect` (`SkiaChatHitGeometry`).
+- **Диспетчер:** `SkiaChatSurfaceControl.PointerDispatch.cs` — `TryDispatchPointerPress` / `TryDispatchPointerWheel` (не разрозненные `Contains` по полям).
+- **Лента:** `SkiaChatMessageFeedEntity.CreateHit` → **null**; узкие hits только в `Draw` (attach chip, markdown link, row select).
+- **Markdown link:** `RegisterFeedMarkdownLinkHits` (markdown-lines) или `RegisterFeedMarkdownLinkHitsFromText` (RTK/plain prose).
+- **Composer / overview:** `RegisterComposerPointerHits`, `registerChromePointerHits` — `SkiaChatPointerAction`.
+- **`CreateHit` на entity** — только цельные плитки (topic card, slash block), не feed-сообщения.
 - `ParseInline`: при `[` без code-ref — продвинуть `i`, не зацикливаться.
 
 ### 7. Reveal
@@ -125,7 +130,7 @@ Reveal у получателя делает re-resolve (уже `IntercomAttachme
 | 2 | `TryPrepare` + degraded resolve |
 | 3 | `IntercomOutboundMessagePreparer`, единый commit |
 | 4 | Orchestrator + MCP append |
-| 5 | Skia presentation + hit + underline |
+| 5 | Skia presentation + hit (chip: рамка/статус, без underline) |
 
 ---
 

@@ -320,7 +320,7 @@
 | Действие | Эффект |
 |----------|--------|
 | **Shift+клик** или пункт меню «Выделить в редакторе» | тот же якорь → `SelectInEditor` (как сегодня `go_to_position` для агента) |
-| Настройка `intercom.attachment_navigate` | `highlight` *(default)* \| `select` |
+| Настройка `[intercom.attachments.code].navigate` | `reveal` *(default)* \| `select` |
 
 **Разделение с агентом:** MCP `go_to_position` сегодня зовёт `SelectInEditor` — уместно, когда агент **готовит правку**. Клик человека из ленты — другой intent (`command_id` вроде `intercom.reveal_attachment` / `editor.reveal_range`), тот же binder строк, **другой presentation mode**. Отдельный ADR: editor range adornment vs reuse CDS attention channel.
 

@@ -71,6 +71,8 @@
 | 0132 | [federated transport](0132-intercom-federated-transport-and-multi-client-boundary.md) — **Proposed** (wire для команды) |
 | 0134 | [prepare-pipeline](0134-intercom-message-prepare-pipeline-v1.md) — **In progress** (MCP fast path @ send) |
 | 0135 | [symbol cache + HCI sidecar](0135-intercom-attach-symbol-cache-and-hci-sidecar.md) — **In progress** (L1 parse cache, L2 SQLite @ HCI reindex) |
+| 0136 | [gutter + `/intercom` namespace](0136-intercom-feed-gutter-and-slash-namespace.md) — **In progress** (select ПКМ/slash, без старых `/topic`) |
+| 0138 | [Cockpit Command Line](0138-cockpit-command-line-and-parametric-ranges.md) — **Proposed** (Commander+Pilot, Ctrl+K `/`, `[3;5] [8;15]`, preview) |
 
 <a id="adr-index-full"></a>
 
@@ -210,6 +212,9 @@
 | [0132](0132-intercom-federated-transport-and-multi-client-boundary.md) | Intercom: federated transport, multi-client; тот же wire `AttachmentAnchor` для команды | Proposed |
 | [0134](0134-intercom-message-prepare-pipeline-v1.md) | Intercom: единый prepare-pipeline (wire, Skia, MCP fail-closed) | Accepted · In progress |
 | [0135](0135-intercom-attach-symbol-cache-and-hci-sidecar.md) | Intercom attach: L1 Roslyn file cache, L2 symbol sidecar colocated с HCI | Accepted · In progress |
+| [0136](0136-intercom-feed-gutter-and-slash-namespace.md) | Intercom: gutter номеров, явный select, единый `/intercom` slash | Accepted · In progress |
+| [0137](0137-intercom-message-code-correspondence.md) | Intercom: соответствие gutter ↔ code; авто-infer + relate в event log; find; editor HUD | Accepted · In progress |
+| [0138](0138-cockpit-command-line-and-parametric-ranges.md) | Cockpit Command Line (Commander+Pilot); chord Ctrl+K `/`; multi-range `[3;5] [8;15]`; preview | Proposed |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 

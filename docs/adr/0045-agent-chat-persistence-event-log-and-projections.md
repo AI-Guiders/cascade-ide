@@ -40,7 +40,8 @@
 Каталог: `workspace/.cascade-ide/chat-sessions/`
 
 - `session-<id>.events.ndjson`
-- `session-<id>.meta.json`
+- `session-<id>.meta.json` — в т.ч. `solution_path` (относительно workspace: `.sln`/`.slnx`/… для resolve якорей без открытого решения в UI)
+- `current.session.json` — указатель на активную сессию (восстановление после рестарта; fallback — последняя `meta` или `events` в каталоге)
 
 Типы событий v1:
 
@@ -50,6 +51,7 @@
 - `clarification_batch_opened`
 - `clarification_answer_submitted`
 - `message_edited` — компенсирующее событие: новый текст для существующего `message_id` в payload (`message_added` / `message_completed` не переписываются).
+- `message_range_related` — явная связь contiguous gutter ordinals с `AttachmentAnchor` ([0137](0137-intercom-message-code-correspondence.md)); не top-level «только строки».
 
 Полезная нагрузка `message_added` и `message_completed` v1 включает стабильный `message_id` (строка без дефисов), `role`, `content`.
 
