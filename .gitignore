@@ -31,6 +31,8 @@ publish-debug/
 publish-debug-staging/
 publish-hotkeyfix/
 publish-gh-release/
+publish-test/
+*.binlog
 # Локальные файлы Wit внутри Data/ (исходники Data/*.cs в репо)
 Data/*.witdb
 Data/**/*.witdb
