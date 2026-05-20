@@ -3,6 +3,7 @@ using CascadeIDE.Features.Workspace.Application;
 
 namespace CascadeIDE.ViewModels;
 
+/// <summary>Вспомогательные методы MCP: корень workspace из solution_path.</summary>
 internal sealed partial class IdeMcpCommandExecutor
 {
     internal static string? TryGetWorkspaceRoot(IIdeMcpActions actions)
