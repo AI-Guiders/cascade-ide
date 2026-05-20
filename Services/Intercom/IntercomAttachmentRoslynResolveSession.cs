@@ -12,7 +12,7 @@ public sealed class IntercomAttachmentRoslynResolveSession
 
     internal ConcurrentDictionary<string, FileEntry?> Entries => _entries;
 
-    internal sealed class FileEntry
+    public sealed class FileEntry
     {
         public required string Text { get; init; }
         public required SyntaxTree Tree { get; init; }

@@ -19,13 +19,23 @@ public static class AttachmentAnchorRoslynResolver
         AttachmentSyntaxScope? syntaxScope,
         out LineRange lines,
         out string detail) =>
-        TryResolveLineRange(null, absoluteFilePath, memberKey, syntaxScope, out lines, out detail);
+        TryResolveLineRange(null, absoluteFilePath, memberKey, syntaxScope, null, out lines, out detail);
 
     public static bool TryResolveLineRange(
         IntercomAttachmentRoslynResolveSession? session,
         string absoluteFilePath,
         string? memberKey,
         AttachmentSyntaxScope? syntaxScope,
+        out LineRange lines,
+        out string detail) =>
+        TryResolveLineRange(session, absoluteFilePath, memberKey, syntaxScope, null, out lines, out detail);
+
+    public static bool TryResolveLineRange(
+        IntercomAttachmentRoslynResolveSession? session,
+        string absoluteFilePath,
+        string? memberKey,
+        AttachmentSyntaxScope? syntaxScope,
+        IntercomAttachResolveCacheContext? cacheContext,
         out LineRange lines,
         out string detail)
     {
@@ -38,7 +48,16 @@ public static class AttachmentAnchorRoslynResolver
             return false;
         }
 
-        if (!TryGetOrCreateEntry(session, absoluteFilePath, out var entry, out detail))
+        if (syntaxScope is null
+            && !string.IsNullOrWhiteSpace(memberKey)
+            && cacheContext is { } cache
+            && IntercomSymbolLineIndex.TryResolveMemberLines(cache, absoluteFilePath, memberKey, out lines, out var cacheDetail))
+        {
+            detail = cacheDetail;
+            return true;
+        }
+
+        if (!TryGetOrCreateEntry(session, absoluteFilePath, cacheContext, out var entry, out detail))
             return false;
 
         var tree = entry.Tree;
@@ -69,6 +88,9 @@ public static class AttachmentAnchorRoslynResolver
         if (!tryResolveMember(root, tree, model, memberKey.Trim(), out lines, out detail))
             return false;
 
+        if (cacheContext is { } ctxAfter)
+            IntercomSymbolLineIndex.UpsertMemberLines(ctxAfter, absoluteFilePath, memberKey, lines);
+
         detail = string.IsNullOrEmpty(detail) ? "member" : detail;
         return true;
     }
@@ -76,6 +98,14 @@ public static class AttachmentAnchorRoslynResolver
     internal static bool TryGetOrCreateEntry(
         IntercomAttachmentRoslynResolveSession? session,
         string absoluteFilePath,
+        out IntercomAttachmentRoslynResolveSession.FileEntry entry,
+        out string detail) =>
+        TryGetOrCreateEntry(session, absoluteFilePath, null, out entry, out detail);
+
+    internal static bool TryGetOrCreateEntry(
+        IntercomAttachmentRoslynResolveSession? session,
+        string absoluteFilePath,
+        IntercomAttachResolveCacheContext? cacheContext,
         out IntercomAttachmentRoslynResolveSession.FileEntry entry,
         out string detail)
     {
@@ -93,6 +123,13 @@ public static class AttachmentAnchorRoslynResolver
 
             detail = "parse_error";
             return false;
+        }
+
+        if (cacheContext is { } cache
+            && IntercomAttachmentRoslynWorkspaceCache.TryGet(cache.ScopeKey, absoluteFilePath, out entry))
+        {
+            session?.Entries.TryAdd(absoluteFilePath, entry);
+            return true;
         }
 
         if (!File.Exists(absoluteFilePath))
@@ -130,6 +167,10 @@ public static class AttachmentAnchorRoslynResolver
             Model = compilation.GetSemanticModel(tree),
         };
         session?.Entries.TryAdd(absoluteFilePath, entry);
+
+        if (cacheContext is { } ctxStore)
+            IntercomAttachmentRoslynWorkspaceCache.Store(ctxStore.ScopeKey, absoluteFilePath, entry);
+
         return true;
     }
 

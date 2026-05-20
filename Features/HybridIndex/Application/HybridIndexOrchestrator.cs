@@ -4,6 +4,7 @@ using System.Threading.Channels;
 using CascadeIDE.Cockpit.ComputingUnits.HybridIndex;
 using CascadeIDE.Cockpit.DataBus;
 using CascadeIDE.Contracts;
+using CascadeIDE.Services.Intercom;
 using HybridCodebaseIndex.Core;
 
 namespace CascadeIDE.Features.HybridIndex.Application;
@@ -27,6 +28,7 @@ public sealed class HybridIndexOrchestrator : IDisposable, IHybridIndexOrchestra
         private readonly string? _solutionPath;
         private readonly int _debounceMs;
         private readonly string _indexDirRelativeMarker;
+        private readonly string _indexDirRelative;
 
         private readonly Channel<int> _poke;
         private readonly CancellationTokenSource _cts;
@@ -46,7 +48,8 @@ public sealed class HybridIndexOrchestrator : IDisposable, IHybridIndexOrchestra
             _workspaceRoot = workspaceRoot;
             _solutionPath = solutionPath;
             _debounceMs = Math.Clamp(debounceMs, 50, 60_000);
-            _indexDirRelativeMarker = (indexDirectoryRelativeForNoiseFilter ?? "").Trim().TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            _indexDirRelative = indexDirectoryRelativeForNoiseFilter ?? "";
+            _indexDirRelativeMarker = _indexDirRelative.Trim().TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
             _cts = new CancellationTokenSource();
             _poke = Channel.CreateUnbounded<int>(new UnboundedChannelOptions
@@ -145,6 +148,10 @@ public sealed class HybridIndexOrchestrator : IDisposable, IHybridIndexOrchestra
                 }
 
                 await PublishStatusAsync(CancellationToken.None).ConfigureAwait(false);
+                IntercomSymbolLineIndexCoordinator.ScheduleRebuildAfterHybridIndex(
+                    _workspaceRoot,
+                    _solutionPath,
+                    _indexDirRelative);
             }
         }
 
@@ -295,6 +302,7 @@ public sealed class HybridIndexOrchestrator : IDisposable, IHybridIndexOrchestra
             ? await _service.FullRebuildAsync(root, sln, cancellationToken).ConfigureAwait(false)
             : await _service.FullReindexAsync(root, sln, cancellationToken).ConfigureAwait(false);
         await PublishHybridIndexSnapshotAsync(root, sln, cancellationToken).ConfigureAwait(false);
+        IntercomSymbolLineIndexCoordinator.ScheduleRebuildAfterHybridIndex(root, sln, _indexDirectoryRelative);
         return summary;
     }
 
@@ -339,6 +347,7 @@ public sealed class HybridIndexOrchestrator : IDisposable, IHybridIndexOrchestra
         }
 
         await PublishHybridIndexSnapshotAsync(root, sln, cancellationToken).ConfigureAwait(false);
+        IntercomSymbolLineIndexCoordinator.ScheduleRebuildAfterHybridIndex(root, sln, _indexDirectoryRelative);
     }
 
     public void Dispose()
