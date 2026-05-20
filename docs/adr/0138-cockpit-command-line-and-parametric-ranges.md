@@ -1,6 +1,6 @@
 # ADR 0138: Cockpit Command Line — параметрический CLI для Commander и Pilot
 
-**Статус:** Proposed (уточнено автором 2026-05-20)  
+**Статус:** Accepted · In progress (парсер и slash; CCL UI — фаза A)  
 **Дата:** 2026-05-20
 
 ## Связанные ADR
@@ -389,17 +389,22 @@ intercom_host = "above_composer"  # Q1
 
 <a id="adr0138-open-questions"></a>
 
-## Открытые вопросы
+## Принятые решения по открытым вопросам (Q1–Q5)
+
+| # | Решение |
+|---|---------|
+| **Q1** | **IntercomHost над composer** — CLI между лентой и полем prose; граница «дискурс / команда» видна при взгляде сверху вниз |
+| **Q2** | **Slash в composer** — да, для коротких команд (`/help`, `/clear`, короткий `/overview`). Любая параметрика со скобками `[…]` или несколькими сегментами → handoff в CCL (`Ctrl+K` → `/`) |
+| **Q3** | **Preview MVP — фаза A:** только текстовый summary под строкой CCL. Ghost (фаза B) — после стабилизации парсера |
+| **Q4** | **Debounced preview при наборе + один Enter = Apply.** Не два Enter и не отдельный Ctrl+Enter |
+| **Q5** | **`3:5` / `3 5` / `5`** остаются alias **одного** contiguous сегмента ([0124](0124-slash-parametric-editor-line-commands.md)). **Disjoint** — только `[3;5] [8;15] [20]` |
+
+### Остаются открытыми
 
 | # | Вопрос |
 |---|--------|
-| **Q1** | IntercomHost **над** или **под** composer? |
-| **Q2** | Slash в composer Intercom оставляем для коротких команд? |
-| **Q3** | Preview: только текст (A) или сразу ghost (B)? |
-| **Q4** | Enter once vs Enter=preview / Ctrl+Enter=apply |
-| **Q5** | `[3;5]` обязателен или `3:5` остаётся alias одного сегмента? |
 | **Q6** | TOML: `[cockpit.command_line]` — height, preview_enabled |
-| **Q7** | Disjoint **relate** на `[3;5] [8;15]` — когда (не MVP 0137) |
+| **Q7** | Disjoint **relate** на `[3;5] [8;15]` — отдельно от MVP 0137 (contiguous relate only) |
 
 ---
 
@@ -444,12 +449,15 @@ intercom_host = "above_composer"  # Q1
 
 | Компонент | Состояние |
 |-----------|-----------|
-| ADR | **Proposed** — D1–D5 приняты автором; Q1–Q7 открыты |
-| CCL IntercomHost | — |
-| CCL EditorHost | — |
+| ADR | **Accepted** — D1–D5, Q1–Q5 |
+| `ParametricSegmentListParser` | **Implemented** — legacy + `[a;b]`; unit-тесты |
+| `/intercom message select […]` multi-highlight | **Implemented** — slash/composer; Skia feed |
+| `CockpitCommandLinePreviewBuilder` | **Implemented** (internal) — текстовый summary для slash |
+| `/editor line select` multi-segment | **Partial** — один contiguous; disjoint → ошибка до CCL/editor union |
+| CCL IntercomHost / EditorHost | — |
 | `cockpit.open_command_line` | — |
-| Parser `[a;b]` segments | — |
-| Preview | — |
+| Preview в CCL UI (debounced) | — |
+| Ghost preview (фаза B) | — |
 
 ---
 
@@ -460,3 +468,4 @@ intercom_host = "above_composer"  # Q1
 | 2026-05-20 | Черновик (Intercom-only ICL) |
 | 2026-05-20 | **Пересмотр:** CCL кокпит-wide; Commander/Pilot; `[3;5] [8;15] [20]`; preview; Ctrl+K `/` глобально |
 | 2026-05-20 | § «Позиция и обоснование»; § «Набросок API» (`ICockpitCommandLineSession`, `ParametricSegmentListParser`) |
+| 2026-05-21 | **Accepted**; Q1–Q5 закрыты; `ParametricSegmentListParser` + multi message select + preview builder |
