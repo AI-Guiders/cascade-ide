@@ -37,6 +37,9 @@ public sealed partial class CascadeIdeSettings : ModelBase
     /// <summary>Intercom: дефолт клика по attach, reveal vs select (ADR 0130 фаза 3). TOML: <c>[intercom]</c>.</summary>
     public IntercomSettings Intercom { get; set; } = new();
 
+    /// <summary>Диагностические логи. TOML: <c>[logging.intercom]</c> и др.</summary>
+    public LoggingSettings Logging { get; set; } = new();
+
     /// <summary>
     /// При пресете «Mfd на втором экране» и >=2 мониторах — открыть окно-хост зоны Mfd при старте (ADR 0017 v1).
     /// </summary>

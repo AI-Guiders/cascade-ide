@@ -119,3 +119,7 @@ variable_types = true
 enabled = true
 show_assignments = true
 show_conditions = true
+
+# Intercom send trace → {workspace}/.cascade-ide/intercom-send-trace.log
+[logging.intercom]
+send_trace = false

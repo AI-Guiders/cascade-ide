@@ -278,7 +278,8 @@ flowchart TD
 |-----------|------|
 | `Features/Chat/ChatSlashCommandCatalog.cs` *(новый)* | verb → descriptor (`command_id`, help, arg hint) |
 | `Features/Chat/ChatSlashCommandParser.cs` *(новый)* | разбор строки, валидация |
-| [`ChatPanelViewModel`](../../Features/Chat/ChatPanelViewModel.cs) | вызов парсера в `SendChatAsync` **до** `ApplyProductSpineToOutboundMessage` / ACP |
+| [`IntercomOutboundSendOrchestrator`](../../Features/Chat/Application/IntercomOutboundSendOrchestrator.cs) | сценарий Send: Slash → BuildOutbound (фон + Roslyn cache) → PrepareMessage → CommitFeed → DispatchProvider; trace по фазам |
+| [`ChatPanelViewModel`](../../Features/Chat/ChatPanelViewModel.cs) | порты через `IntercomOutboundSendHost`; `SendChatCommand` → оркестратор |
 | [`IdeMcpCommandExecutor`](../../ViewModels/IdeMcpCommandExecutor.cs) | исполнение тех же `command_id`, что MCP |
 | [`ChatPanelView.axaml`](../../Views/ChatPanelView.axaml) | popup autocomplete (**обязателен** до фазы B) |
 | `ChatSlashAutocompleteControl` *(новый)* | иерархический popup, привязка к `ChatInput` |
@@ -316,4 +317,5 @@ flowchart TD
 | 2026-05-17 | Расширение: unified command line — IDE namespaces (`/build run`, `/test run`, `/debug launch`); autocomplete обязателен; фазы A–C. |
 | 2026-05-17 | Уточнение: discoverability слэша — **autocomplete**; короткие алиасы (`/br`) и «мелодия после `/`» — **non-goal** (сжатие — `c:` Melody). |
 | 2026-05-17 | Accepted · Implemented: фазы **A**, **A′**, **B** (`ChatSlashCommand*`, autocomplete, IDE namespaces); фаза **C** — backlog. |
+| 2026-05-20 | `/help` — справка Intercom (`Intercom/intercom-help.ru.md`, EmbeddedResource + override на диске); ось **`audience`** (`channel` \| `self`) на сообщении и в `intent-catalog.toml`. |
 | 2026-05-17 | См. [0124](0124-slash-parametric-editor-line-commands.md): полный slash-паритет каталога IML (`wire_class`, `/editor line …`, `/portal open`). |

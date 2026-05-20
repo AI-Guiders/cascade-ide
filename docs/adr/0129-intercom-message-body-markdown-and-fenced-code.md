@@ -1,6 +1,6 @@
 # ADR 0129: Intercom — тело сообщения: Markdown, fenced code и preview
 
-**Статус:** Proposed  
+**Статус:** Accepted · In progress  
 **Дата:** 2026-05-19
 
 ## Связанные ADR
@@ -142,13 +142,15 @@ Composer остаётся **source** markdown; WYSIWYG в composer — не це
 
 ## Фазы внедрения
 
-| Фаза | Содержание | Зависимости |
-|------|------------|-------------|
-| **0** | Документировать v1 ограничения; тесты `SplitSegments` (несколько fence) | — |
-| **1** | Несколько fenced blocks; copy на блоке | 0123 |
-| **2** | `intercom.open_message_markdown_preview` → [0069](0069-markdown-preview-tool-surface-and-renderer-decoupling.md) | 0069 |
-| **3** | Collapse long fence; chip «Открыть как MD» по эвристике | 0123 |
-| **4** *(stretch)* | Lang highlight в strip; Kroki в preview тела сообщения | 0023 |
+| Фаза | Содержание | Зависимости | CIDE |
+|------|------------|-------------|------|
+| **0** | Документировать v1 ограничения; тесты `SplitSegments` (несколько fence) | — | **да** — `ChatMessageBodyPresentation.SplitSegments` (первый fence + tail); `ChatMessageBodyPresentationTests` |
+| **1** | Несколько fenced blocks; copy на блоке | 0123 | **нет** |
+| **2** | `intercom.open_message_markdown_preview` → [0069](0069-markdown-preview-tool-surface-and-renderer-decoupling.md) | 0069 | **нет** |
+| **3** | Collapse long fence; chip «Открыть как MD» по эвристике | 0123 | **нет** |
+| **4** *(stretch)* | Lang highlight в strip; Kroki в preview тела сообщения | 0023 | **нет** |
+
+**Граница с attach ([0128](0128-intercom-attachment-anchors-and-code-references.md)):** prose vs fenced — в коде v1; bracket attach в prose **не** парсится в ленте (только slash/MCP reveal-select по [0131](0131-editor-slash-select-code-by-bracket-reference.md)).
 
 ---
 
@@ -198,3 +200,4 @@ Composer остаётся **source** markdown; WYSIWYG в composer — не це
 | Дата | Изменение |
 |------|-----------|
 | 2026-05-19 | Proposed: вынесено из [0128](0128-intercom-attachment-anchors-and-code-references.md) §11–12; fenced + MD preview. |
+| 2026-05-20 | **Accepted · In progress**; фаза 0 в CIDE; колонка CIDE; граница с attach/0131. |

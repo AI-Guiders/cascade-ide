@@ -1,4 +1,5 @@
 using CascadeIDE.Features.Chat;
+using CascadeIDE.Models.Intercom;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace CascadeIDE.ViewModels;
@@ -26,6 +27,14 @@ public sealed partial class ChatMessageViewModel : ObservableObject
     [ObservableProperty]
     private ChatSlashCommandStatus? _slashCommandStatus;
 
+    public IReadOnlyList<AttachmentAnchor> Attachments { get; private set; } = [];
+
+    public SenderWorkspaceContext? SenderWorkspaceContext { get; private set; }
+
+    public IntercomMessageAudience Audience { get; private set; } = IntercomMessageAudience.Channel;
+
+    public bool IsLocalSelfOnly => Audience == IntercomMessageAudience.SelfOnly;
+
     public bool IsSlashCommand => SlashCommandStatus is not null;
 
     public ChatMessageViewModel(
@@ -36,7 +45,10 @@ public sealed partial class ChatMessageViewModel : ObservableObject
         Guid? parentMessageId = null,
         string? slashCommandPath = null,
         string? slashCommandArgs = null,
-        ChatSlashCommandStatus? slashCommandStatus = null)
+        ChatSlashCommandStatus? slashCommandStatus = null,
+        IReadOnlyList<AttachmentAnchor>? attachments = null,
+        SenderWorkspaceContext? senderWorkspaceContext = null,
+        IntercomMessageAudience audience = IntercomMessageAudience.Channel)
     {
         MessageId = messageId ?? Guid.NewGuid();
         Role = role;
@@ -46,19 +58,32 @@ public sealed partial class ChatMessageViewModel : ObservableObject
         SlashCommandPath = slashCommandPath;
         SlashCommandArgs = slashCommandArgs;
         _slashCommandStatus = slashCommandStatus;
+        Attachments = attachments ?? [];
+        SenderWorkspaceContext = senderWorkspaceContext;
+        Audience = audience;
+    }
+
+    public void SetAttachments(IReadOnlyList<AttachmentAnchor> attachments, SenderWorkspaceContext? senderWorkspaceContext)
+    {
+        Attachments = attachments;
+        SenderWorkspaceContext = senderWorkspaceContext;
+        OnPropertyChanged(nameof(Attachments));
+        OnPropertyChanged(nameof(SenderWorkspaceContext));
     }
 
     public static ChatMessageViewModel CreateSlashCommand(
         string slashPath,
         string? args,
-        Guid? threadId = null) =>
+        Guid? threadId = null,
+        IntercomMessageAudience audience = IntercomMessageAudience.Channel) =>
         new(
             "slash_command",
             "",
             threadId: threadId,
             slashCommandPath: slashPath,
             slashCommandArgs: args,
-            slashCommandStatus: ChatSlashCommandStatus.Running);
+            slashCommandStatus: ChatSlashCommandStatus.Running,
+            audience: audience);
 
     /// <summary>Привязать слэш-сообщение к ветке после fork (<c>/topic create</c>, MCP).</summary>
     public void AssignThread(Guid threadId)

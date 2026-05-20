@@ -60,6 +60,7 @@
     <Content Include="AiPrompts\maf-ide-agent.prompts.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="AiPrompts\web-ai-portal-bridge-adr0108.prompts.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="AiPrompts\web-ai-portal-bridge-adr0108.chat-paste.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="Intercom\intercom-help.ru.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <!-- Шипнутые дефолты: копия на диске (override) + встроенный ресурс, если файла нет. -->
     <EmbeddedResource Include="CodeNavigation\presets.toml" />
     <EmbeddedResource Include="Cockpit\DataBus\databus-event-policy.toml" />
@@ -71,6 +72,7 @@
     <EmbeddedResource Include="AiPrompts\maf-ide-agent.prompts.md" />
     <EmbeddedResource Include="AiPrompts\web-ai-portal-bridge-adr0108.prompts.md" />
     <EmbeddedResource Include="AiPrompts\web-ai-portal-bridge-adr0108.chat-paste.txt" />
+    <EmbeddedResource Include="Intercom\intercom-help.ru.md" />
     <EmbeddedResource Include="KbBase\kb-base-cide.zip" />
     <EmbeddedResource Include="TextMateGrammars\toml\package.json" />
     <EmbeddedResource Include="TextMateGrammars\toml\syntaxes\toml.tmLanguage.json" />

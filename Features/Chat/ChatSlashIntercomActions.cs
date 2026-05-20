@@ -15,7 +15,8 @@ public static class ChatSlashIntercomActions
         ChatSurfaceSnapshot snapshot,
         out ChatSlashIntercomResult result,
         Action<TopicPickerPresentation>? setTopicPicker = null,
-        Func<string, TopicCreateResult>? createTopicWithTitle = null)
+        Func<string, TopicCreateResult>? createTopicWithTitle = null,
+        Func<string, string?, ChatSlashIntercomResult>? tryAttachSlash = null)
     {
         result = ChatSlashIntercomResult.Fail("");
         if (!IntentSlashCatalog.TryGetRoute(slashPath, out var route)
@@ -34,7 +35,8 @@ public static class ChatSlashIntercomActions
                     setOverviewMode,
                     snapshot,
                     setTopicPicker,
-                    createTopicWithTitle),
+                    createTopicWithTitle,
+                    tryAttachSlash),
                 out result))
         {
             result = ChatSlashIntercomResult.Fail($"Неизвестное действие: {slashPath}");

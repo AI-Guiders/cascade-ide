@@ -31,6 +31,13 @@ public partial class ChatPanelView : UserControl
             _ = vm.ToggleSelectedThinkingDetails();
         };
 
+        surface.AttachmentRevealRequested += (_, e) =>
+        {
+            if (DataContext is not ChatPanelViewModel vm)
+                return;
+            _ = vm.RevealAttachmentFromFeedAsync(e.Anchor, e.Select);
+        };
+
         surface.ComposerKeyDown += (_, e) =>
         {
             if (DataContext is not ChatPanelViewModel vm)
@@ -39,24 +46,25 @@ public partial class ChatPanelView : UserControl
             switch (e.Kind)
             {
                 case IntercomComposerKeyKind.Tab:
-                    if (vm.TryCommitSelectedChatSlashSuggestion(out bool _))
-                        surface.ComposerCaretIndex = vm.ChatInput.Length;
+                    if (vm.TryCommitSelectedComposerSuggestion(out bool _))
+                        surface.ComposerCaretIndex = vm.ChatComposerCaretIndex;
                     break;
                 case IntercomComposerKeyKind.SlashUp:
-                    vm.MoveChatSlashSuggestionSelection(-1);
+                    vm.MoveComposerAutocompleteSelection(-1);
                     break;
                 case IntercomComposerKeyKind.SlashDown:
-                    vm.MoveChatSlashSuggestionSelection(1);
+                    vm.MoveComposerAutocompleteSelection(1);
                     break;
                 case IntercomComposerKeyKind.Escape:
                     vm.DismissChatSlashAutocomplete();
+                    vm.DismissChatBracketAutocomplete();
                     break;
                 case IntercomComposerKeyKind.Enter:
-                    if (vm.IsChatSlashAutocompleteVisible)
+                    if (vm.IsComposerAutocompleteVisible)
                     {
-                        if (vm.TryCommitSelectedChatSlashSuggestion(out var autoExecute))
+                        if (vm.TryCommitSelectedComposerSuggestion(out var autoExecute))
                         {
-                            surface.ComposerCaretIndex = vm.ChatInput.Length;
+                            surface.ComposerCaretIndex = vm.ChatComposerCaretIndex;
                             if (autoExecute)
                                 TryExecuteSendChat(vm);
                         }
@@ -70,12 +78,13 @@ public partial class ChatPanelView : UserControl
                         var caret = surface.ComposerCaretIndex;
                         vm.ChatInput = vm.ChatInput.Insert(Math.Clamp(caret, 0, vm.ChatInput.Length), "\n");
                         surface.ComposerCaretIndex = caret + 1;
+                        vm.ChatComposerCaretIndex = caret + 1;
                     }
                     break;
                 case IntercomComposerKeyKind.CommitSlashSuggestion:
-                    if (vm.TryCommitSelectedChatSlashSuggestion(out var execute))
+                    if (vm.TryCommitSelectedComposerSuggestion(out var execute))
                     {
-                        surface.ComposerCaretIndex = vm.ChatInput.Length;
+                        surface.ComposerCaretIndex = vm.ChatComposerCaretIndex;
                         if (execute)
                             TryExecuteSendChat(vm);
                     }

@@ -218,3 +218,4 @@ Skia draw (Views/Chat/Skia, SkiaKit)
 | 2026-05-17 | **Implemented (фазы 1–3 v1):** `IntercomSkiaSurface`, Skia composer + `SkiaPopupList` + IME client; MFD на том же surface; группировка ленты, `SkiaMonoCodeStrip`, double-click thinking toggle. Markdown subset и copy — открыто. |
 | 2026-05-18 | **Render fix:** offscreen `WriteableBitmap` + `DrawImage` (не `SKCanvas.Clear` на leased canvas окна — [Avalonia #5932](https://github.com/AvaloniaUI/Avalonia/issues/5932)). |
 | 2026-05-18 | **Фаза 3 (v1.1):** inline Markdown subset (`**` / `*` / `` ` ``) в prose; Ctrl+C копирует тело выбранного сообщения; MFD Chat на `IsSkiaIntercomHostVisible` (comfortable `CompactLayout=false`). |
+| 2026-05-20 | **Flat feed в ленте:** `SkiaChatBubbleKind.Feed` — user/agent/thinking/tool, slash outcome, clarification, nav-строки без messenger-пузыря; акцент — selection / branch / ошибка. |

@@ -26,6 +26,7 @@ public sealed class ChatSlashCommandRunner
     private readonly Action<bool>? _setChatOverviewMode;
     private readonly Action<TopicPickerPresentation>? _setTopicPicker;
     private readonly Func<string, TopicCreateResult>? _createTopicWithTitle;
+    private readonly Func<string, string?, ChatSlashIntercomResult>? _tryAttachSlash;
 
     public ChatSlashCommandRunner(
         Func<string, IReadOnlyDictionary<string, JsonElement>?, CancellationToken, Task<string>>? executeIdeCommand,
@@ -36,7 +37,8 @@ public sealed class ChatSlashCommandRunner
         Action<Guid>? selectChatThread = null,
         Action<bool>? setChatOverviewMode = null,
         Action<TopicPickerPresentation>? setTopicPicker = null,
-        Func<string, TopicCreateResult>? createTopicWithTitle = null)
+        Func<string, TopicCreateResult>? createTopicWithTitle = null,
+        Func<string, string?, ChatSlashIntercomResult>? tryAttachSlash = null)
     {
         _executeIdeCommand = executeIdeCommand;
         _getEditorContext = getEditorContext;
@@ -47,6 +49,7 @@ public sealed class ChatSlashCommandRunner
         _setChatOverviewMode = setChatOverviewMode;
         _setTopicPicker = setTopicPicker;
         _createTopicWithTitle = createTopicWithTitle;
+        _tryAttachSlash = tryAttachSlash;
     }
 
     public async Task<ChatSlashCommandRunResult> TryRunAsync(string rawInput, CancellationToken cancellationToken = default)
@@ -79,12 +82,15 @@ public sealed class ChatSlashCommandRunner
         displayPath = descriptor.SlashPath;
         if (descriptor.ExecutionKind == ChatSlashCommandExecutionKind.LocalHelp)
         {
+            var helpText = string.IsNullOrWhiteSpace(argsTail)
+                ? IntercomHelpGuide.FormatFull()
+                : string.Join(Environment.NewLine, ChatSlashCommandCatalog.ListHelpLines(argsTail));
             return new ChatSlashCommandRunResult(
                 true,
                 true,
                 displayPath,
                 argsTail,
-                string.Join(Environment.NewLine, ChatSlashCommandCatalog.ListHelpLines(argsTail)));
+                helpText);
         }
 
         if (descriptor.ExecutionKind == ChatSlashCommandExecutionKind.LocalReport)
@@ -118,7 +124,8 @@ public sealed class ChatSlashCommandRunner
                     snapshot,
                     out var intercom,
                     _setTopicPicker,
-                    _createTopicWithTitle))
+                    _createTopicWithTitle,
+                    _tryAttachSlash))
             {
                 return new ChatSlashCommandRunResult(
                     true,

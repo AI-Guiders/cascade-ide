@@ -60,7 +60,8 @@ public static class ParametricIntentMelody
                 continue;
 
             if (wire.Kind == TailWireKind.SingleRemainder
-                && IntentMelodyTailSemantics.HasUrlSlot(e.TailSignature))
+                && (IntentMelodyTailSemantics.HasUrlSlot(e.TailSignature)
+                    || IntentMelodyTailSemantics.HasBracketCodeRefSlot(e.TailSignature)))
             {
                 var w = e.Slug;
                 if (tailNormalizedLower.Length <= w.Length
@@ -154,10 +155,58 @@ public static class ParametricIntentMelody
         return false;
     }
 
+    public static bool TryParseBracketCodeRefMelodyTail(string tailNormalized, out string? codeRefPayloadTrimmed) =>
+        TryParseBracketCodeRefMelodyTail(tailNormalized, out _, out codeRefPayloadTrimmed);
+
+    /// <summary>Разбор параметрики с bracket-хвостом после первого <c>:</c> (ADR 0131, wire <c>bracket_code_ref</c>).</summary>
+    public static bool TryParseBracketCodeRefMelodyTail(
+        string tailNormalized,
+        out string melodySlugLower,
+        out string? codeRefPayloadTrimmed)
+    {
+        melodySlugLower = "";
+        codeRefPayloadTrimmed = null;
+
+        if (string.IsNullOrEmpty(tailNormalized))
+            return false;
+
+        tailNormalized = tailNormalized.Trim();
+
+        foreach (var entry in EnumerateSingleRemainderBracketRoots())
+        {
+            var slug = entry.Slug;
+            if (string.IsNullOrWhiteSpace(entry.WireClass)
+                || !IntentMelodyCatalog.TryGetTailWireClass(entry.WireClass, out var wire))
+                continue;
+            if (wire.Kind != TailWireKind.SingleRemainder
+                || !IntentMelodyTailSemantics.HasBracketCodeRefSlot(entry.TailSignature))
+                continue;
+
+            if (string.Equals(tailNormalized, slug, StringComparison.Ordinal))
+            {
+                melodySlugLower = slug;
+                codeRefPayloadTrimmed = "";
+                return true;
+            }
+
+            var prefix = slug + ":";
+            if (!tailNormalized.StartsWith(prefix, StringComparison.Ordinal))
+                continue;
+
+            melodySlugLower = slug;
+            codeRefPayloadTrimmed = tailNormalized.Length > prefix.Length
+                ? tailNormalized[prefix.Length..].Trim()
+                : "";
+            return true;
+        }
+
+        return false;
+    }
+
     /// <summary>
     /// Единая точка: успешно собрать <c>command_id</c> и JSON-args для параметрики палитры/аккорда —
-    /// остаток URL (<see cref="TailWireKind.SingleRemainder"/> + url-слот) или два int на проводе
-    /// (<see cref="TailWireKind.DelimitedSlots"/>), см. каталог ADR 0109.
+    /// остаток URL (<see cref="TailWireKind.SingleRemainder"/> + url-слот), bracket (<c>bracket_code_ref</c>)
+    /// или два int на проводе (<see cref="TailWireKind.DelimitedSlots"/>), см. каталог ADR 0109.
     /// </summary>
     /// <param name="displayTailForPaletteRow">Хвост для строки палитры: исходный ввод в URL-ветке или <see cref="ParsedLineRange.DisplayTail"/> для диапазона.</param>
     public static bool TryResolveParametricExecution(
@@ -185,6 +234,22 @@ public static class ParametricIntentMelody
             commandId = webCmd;
             var url = (urlPayload ?? "").Trim();
             argsJson = string.IsNullOrEmpty(url) ? null : JsonSerializer.Serialize(new { url });
+            displayTailForPaletteRow = tail;
+            return true;
+        }
+
+        if (TryParseBracketCodeRefMelodyTail(tail, out var bracketSlug, out var codeRefPayload))
+        {
+            var bracketCmd = IntentMelodyAliases.TryResolveExactCommandId(bracketSlug);
+            if (string.IsNullOrEmpty(bracketCmd))
+                return false;
+
+            var codeRef = (codeRefPayload ?? "").Trim();
+            if (codeRef.Length == 0)
+                return false;
+
+            commandId = bracketCmd;
+            argsJson = BuildBracketCodeRefArgsJson(codeRef, currentFilePath);
             displayTailForPaletteRow = tail;
             return true;
         }
@@ -311,6 +376,20 @@ public static class ParametricIntentMelody
     private static IEnumerable<MelodyRootEntry> EnumerateSingleRemainderUrlRoots() =>
         IntentMelodyAliases.GetCatalogSnapshot().Roots.Values
             .Where(e => e.Shape == IntentMelodyShape.Parametric && IntentMelodyTailSemantics.HasUrlSlot(e.TailSignature));
+
+    private static IEnumerable<MelodyRootEntry> EnumerateSingleRemainderBracketRoots() =>
+        IntentMelodyAliases.GetCatalogSnapshot().Roots.Values
+            .Where(e => e.Shape == IntentMelodyShape.Parametric
+                        && IntentMelodyTailSemantics.HasBracketCodeRefSlot(e.TailSignature));
+
+    private static string BuildBracketCodeRefArgsJson(string codeRef, string? currentFilePath)
+    {
+        var payload = new Dictionary<string, object?> { ["code_ref"] = codeRef };
+        if (!string.IsNullOrWhiteSpace(currentFilePath))
+            payload["active_file"] = currentFilePath;
+
+        return JsonSerializer.Serialize(payload);
+    }
 
     private static string NormalizeChordCommit(string? raw) =>
         string.IsNullOrWhiteSpace(raw) ? "enter" : raw.Trim().ToLowerInvariant();

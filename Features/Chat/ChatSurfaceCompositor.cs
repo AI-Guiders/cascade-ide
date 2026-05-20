@@ -1,5 +1,6 @@
 #nullable enable
 using CascadeIDE.Models.AgentChat;
+using CascadeIDE.Models.Intercom;
 
 namespace CascadeIDE.Features.Chat;
 
@@ -37,7 +38,9 @@ public sealed partial class ChatSurfaceIntentStage : IChatSurfaceIntentStage
                 StartsBranch: false,
                 message.SlashCommandPath,
                 message.SlashCommandArgs,
-                message.SlashCommandStatus))
+                message.SlashCommandStatus,
+                message.Attachments,
+                message.Audience))
             .OrderBy(message => message.MessageIndex)
             .ToList();
 
@@ -285,7 +288,9 @@ public sealed class ChatSurfaceLayoutStage : IChatSurfaceLayoutStage
                         StartsBranch: message.StartsBranch,
                         SlashCommandPath: message.SlashCommandPath,
                         SlashCommandArgs: message.SlashCommandArgs,
-                        SlashCommandStatus: message.SlashCommandStatus));
+                        SlashCommandStatus: message.SlashCommandStatus,
+                        Attachments: message.Attachments,
+                        Audience: message.Audience));
                 }
             }
 
@@ -373,7 +378,9 @@ public sealed class ChatSurfaceLayoutStage : IChatSurfaceLayoutStage
             "assistant" => "Агент",
             "thinking" => "Размышление",
             "tool" => "Инструмент",
-            "slash_command" => "Команда",
+            "slash_command" => message.Audience == IntercomMessageAudience.SelfOnly
+                ? "Справка"
+                : "Команда",
             _ => message.Role
         };
     }

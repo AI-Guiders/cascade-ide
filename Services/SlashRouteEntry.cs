@@ -1,5 +1,6 @@
 #nullable enable
 using CascadeIDE.Features.Chat;
+using CascadeIDE.Models.Intercom;
 
 namespace CascadeIDE.Services;
 
@@ -14,4 +15,5 @@ public readonly record struct SlashRouteEntry(
     string? Group = null,
     SlashCompletionKind Completion = SlashCompletionKind.None,
     string? ReportHandlerId = null,
-    string? IntercomHandlerId = null);
+    string? IntercomHandlerId = null,
+    IntercomMessageAudience MessageAudience = IntercomMessageAudience.Channel);

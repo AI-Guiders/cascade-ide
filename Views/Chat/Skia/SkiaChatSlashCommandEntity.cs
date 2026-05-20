@@ -1,108 +1,128 @@
 #nullable enable
+
 using CascadeIDE.Features.Chat;
+using CascadeIDE.Models.Intercom;
 using CascadeIDE.Views.SkiaKit;
 using SkiaSharp;
 
 namespace CascadeIDE.Views.Chat.Skia;
 
-/// <summary>Пузырь локальной слэш-команды: путь, аргументы, иконка статуса.</summary>
+/// <summary>
+/// Результат локальной слэш-команды в ленте — <b>flat feed</b> (ADR 0123, UX ref: без messenger-пузыря).
+/// Meta-строка + тело; рамка/inset только при ошибке; <c>audience: self</c> — тонкая полоска слева.
+/// </summary>
 internal sealed class SkiaChatSlashCommandEntity(
-    string slashPath,
-    string? args,
-    string? detail,
-    ChatSlashCommandStatus status,
-    int? messageIndex) : ISkiaChatEntity
+    ChatSurfaceEntry entry,
+    bool compactLayout) : ISkiaChatEntity
 {
-    private const float Padding = 12f;
-    private const float GapAfter = 8f;
+    private const float GapAfter = 6f;
+    private const float AccentWidth = 3f;
     private const float IconReserve = SkiaSlashCommandStatusIconRenderer.IconSize + SkiaSlashCommandStatusIconRenderer.IconMargin + 4f;
-    private const float MinHeight = 44f;
+
+    private readonly string _slashPath = entry.SlashCommandPath ?? "";
+    private readonly string? _args = entry.SlashCommandArgs;
+    private readonly string? _detail = string.IsNullOrWhiteSpace(entry.Body) ? null : entry.Body;
+    private readonly ChatSlashCommandStatus _status = entry.SlashCommandStatus ?? ChatSlashCommandStatus.Running;
+    private readonly bool _isLocalSelfOnly = entry.Audience == IntercomMessageAudience.SelfOnly;
+    private readonly string _metaTitle = entry.Title;
 
     public SkiaChatMeasuredLayout Measure(SkiaChatMeasureContext context)
     {
-        var maxChars = Math.Max(16, (int)((context.ContentWidth - IconReserve - Padding * 2) / 6.8f));
-        var pathLines = SkiaTextLayout.Wrap(slashPath, maxChars);
-        var argsLines = string.IsNullOrWhiteSpace(args)
-            ? []
-            : SkiaTextLayout.Wrap(args!, maxChars);
-        var detailLines = string.IsNullOrWhiteSpace(detail)
-            ? []
-            : SkiaTextLayout.Wrap(detail!, maxChars);
+        var textWidth = context.ContentWidth - AccentWidth - 4f - IconReserve;
+        var maxChars = Math.Max(16, (int)(textWidth / 6.5f));
 
-        var lineHeight = 15f;
-        var height = Padding;
-        height += pathLines.Count * 17f;
-        if (argsLines.Count > 0)
-            height += 4f + argsLines.Count * lineHeight;
-        if (detailLines.Count > 0)
-            height += 6f + detailLines.Count * lineHeight;
-        height += Padding;
+        var height = MetaLineHeight(compactLayout) + 2f;
+        if (!string.IsNullOrWhiteSpace(_args))
+            height += ArgsLineHeight(compactLayout) + 2f;
+        if (!string.IsNullOrWhiteSpace(_detail))
+        {
+            var detailRows = SkiaMarkdownDocument.Layout(_detail, maxChars);
+            height += 4f + SkiaMarkdownPainter.MeasureHeight(detailRows, compactLayout);
+        }
 
-        return new SkiaChatMeasuredLayout(Math.Max(MinHeight, height), GapAfter);
+        return new SkiaChatMeasuredLayout(Math.Max(20f, height), GapAfter);
     }
 
     public void Draw(SkiaChatDrawContext context, float top, in SkiaChatMeasuredLayout layout)
     {
         var rect = new SKRect(context.ContentLeft, top, context.ContentLeft + context.ContentWidth, top + layout.Height);
-        using var fill = new SKPaint
-        {
-            Color = SkiaKitColor.Blend(context.Theme.Surface, context.Theme.Border, 0.22f),
-            IsAntialias = true,
-            Style = SKPaintStyle.Fill,
-        };
-        context.Canvas.DrawRoundRect(rect, 8, 8, fill);
-
-        using var stroke = new SKPaint
-        {
-            Color = SkiaKitColor.Blend(context.Theme.Border, context.Theme.HoverBorder, 0.35f),
-            IsAntialias = true,
-            Style = SKPaintStyle.Stroke,
-            StrokeWidth = 1,
-        };
-        context.Canvas.DrawRoundRect(rect, 8, 8, stroke);
-
+        var textLeft = rect.Left + AccentWidth + 4f;
         var textRight = rect.Right - IconReserve;
-        var y = rect.Top + Padding + 13f;
 
-        using var pathFont = new SKFont(SKTypeface.FromFamilyName("Consolas", SKFontStyle.Bold), 13.5f);
-        using var pathPaint = new SKPaint { IsAntialias = true, Color = context.Theme.Content };
-        context.Canvas.DrawText(slashPath, rect.Left + Padding, y, SKTextAlign.Left, pathFont, pathPaint);
-        y += 18f;
+        DrawAccentIfNeeded(context, rect);
 
-        if (!string.IsNullOrWhiteSpace(args))
-        {
-            using var argsFont = new SKFont(SKTypeface.FromFamilyName("Consolas", SKFontStyle.Normal), 11.5f);
-            using var argsPaint = new SKPaint { IsAntialias = true, Color = context.Theme.MutedContent };
-            context.Canvas.DrawText(args!, rect.Left + Padding, y, SKTextAlign.Left, argsFont, argsPaint);
-            y += 15f;
-        }
-
-        if (!string.IsNullOrWhiteSpace(detail))
-        {
-            using var detailFont = new SKFont(SKTypeface.FromFamilyName("Segoe UI"), 11);
-            using var detailPaint = new SKPaint
-            {
-                IsAntialias = true,
-                Color = status == ChatSlashCommandStatus.Failed
-                    ? new SKColor(240, 160, 160)
-                    : context.Theme.MutedContent,
-            };
-            var maxChars = Math.Max(16, (int)((textRight - rect.Left - Padding) / 6.5f));
-            foreach (var line in SkiaTextLayout.Wrap(detail, maxChars))
-            {
-                context.Canvas.DrawText(line, rect.Left + Padding, y, SKTextAlign.Left, detailFont, detailPaint);
-                y += 14f;
-            }
-        }
+        var y = rect.Top + MetaBaseline(compactLayout);
+        DrawMetaLine(context, textLeft, textRight, y);
 
         var iconRect = SkiaSlashCommandStatusIconRenderer.ResolveIconRect(
-            rect,
+            new SKRect(textRight, rect.Top, rect.Right, rect.Top + MetaLineHeight(compactLayout) + 4f),
             ChatSlashCommandPresentation.DefaultStatusIconPlacement);
-        SkiaSlashCommandStatusIconRenderer.Draw(context.Canvas, iconRect, context.Theme, status);
+        SkiaSlashCommandStatusIconRenderer.Draw(context.Canvas, iconRect, context.Theme, _status);
+
+        y += MetaLineHeight(compactLayout) - 10f;
+        if (!string.IsNullOrWhiteSpace(_args))
+        {
+            y += 4f;
+            using var argsFont = new SKFont(SKTypeface.FromFamilyName("Consolas", SKFontStyle.Normal), compactLayout ? 10.5f : 11f);
+            using var argsPaint = new SKPaint { IsAntialias = true, Color = context.Theme.MutedContent };
+            context.Canvas.DrawText(_args, textLeft, y, SKTextAlign.Left, argsFont, argsPaint);
+            y += ArgsLineHeight(compactLayout);
+        }
+
+        if (!string.IsNullOrWhiteSpace(_detail))
+        {
+            y += 6f;
+            var maxChars = Math.Max(16, (int)((textRight - textLeft) / 6.5f));
+            var detailRows = SkiaMarkdownDocument.Layout(_detail, maxChars);
+            var bodyColor = _status == ChatSlashCommandStatus.Failed
+                ? new SKColor(240, 160, 160)
+                : context.Theme.Content;
+            y = SkiaMarkdownPainter.Draw(context, textLeft, textRight, y, detailRows, compactLayout, bodyColor);
+        }
     }
 
     public SkiaChatHit? CreateHit(in SkiaChatMeasuredLayout layout) =>
-        messageIndex is { } index
+        entry.MessageIndex is { } index
             ? new SkiaChatHit(index, null, ResetDetailMode: false)
             : null;
+
+    private void DrawAccentIfNeeded(SkiaChatDrawContext context, SKRect rect)
+    {
+        if (_status == ChatSlashCommandStatus.Failed)
+        {
+            var bar = new SKRect(rect.Left, rect.Top + 2f, rect.Left + AccentWidth, rect.Bottom - 2f);
+            using var paint = new SKPaint { Color = new SKColor(220, 90, 90, 220), IsAntialias = true, Style = SKPaintStyle.Fill };
+            context.Canvas.DrawRoundRect(bar, 1.5f, 1.5f, paint);
+            return;
+        }
+
+        if (_isLocalSelfOnly)
+        {
+            var bar = new SKRect(rect.Left, rect.Top + 2f, rect.Left + AccentWidth, rect.Bottom - 2f);
+            using var paint = new SKPaint { Color = new SKColor(100, 150, 200, 160), IsAntialias = true, Style = SKPaintStyle.Fill };
+            context.Canvas.DrawRoundRect(bar, 1.5f, 1.5f, paint);
+        }
+    }
+
+    private void DrawMetaLine(SkiaChatDrawContext context, float textLeft, float textRight, float baselineY)
+    {
+        var pathPart = _slashPath;
+        var meta = string.IsNullOrWhiteSpace(_metaTitle) ? pathPart : $"{_metaTitle} · {pathPart}";
+
+        using var metaFont = new SKFont(SKTypeface.FromFamilyName("Segoe UI", SKFontStyle.Bold), compactLayout ? 10f : 10.5f);
+        using var metaPaint = new SKPaint { IsAntialias = true, Color = context.Theme.Role };
+        context.Canvas.DrawText(meta, textLeft, baselineY, SKTextAlign.Left, metaFont, metaPaint);
+
+        if (_isLocalSelfOnly)
+        {
+            const string badge = "только ты";
+            using var badgeFont = new SKFont(SKTypeface.FromFamilyName("Segoe UI", SKFontStyle.Normal), 9f);
+            using var badgePaint = new SKPaint { IsAntialias = true, Color = context.Theme.MutedContent };
+            context.Canvas.DrawText(badge, textRight - 2f, baselineY - 1f, SKTextAlign.Right, badgeFont, badgePaint);
+        }
+    }
+
+    private static float MetaLineHeight(bool compact) => compact ? 14f : 16f;
+    private static float MetaBaseline(bool compact) => compact ? 12f : 14f;
+    private static float ArgsLineHeight(bool compact) => compact ? 13f : 14f;
 }

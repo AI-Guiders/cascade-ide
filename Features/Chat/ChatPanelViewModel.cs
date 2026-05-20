@@ -9,6 +9,8 @@ using CascadeConversationMessage = CascadeIDE.Services.ChatMessage;
 using AgentClientProtocol;
 using CascadeIDE.Models;
 using CascadeIDE.Models.AgentChat;
+using CascadeIDE.Features.Chat.Application;
+using CascadeIDE.Models.Intercom;
 using CascadeIDE.Services;
 using CascadeIDE.Services.CursorAcp;
 using CascadeIDE.ViewModels;
@@ -50,6 +52,10 @@ public partial class ChatPanelViewModel : ViewModelBase
     private readonly Func<IChatClient?>? _tryCreateCloudMafIChatClient;
     private readonly Func<string?>? _getChatMinimizedContextBlock;
     private readonly Func<string> _getSendMessageKey;
+    private readonly Func<string?>? _getSolutionPath;
+    private readonly Func<int?>? _getEditorSelectionStart;
+    private readonly Func<int?>? _getEditorSelectionLength;
+    private readonly Func<int?>? _getEditorCaretOffset;
     private readonly ChatSessionStore _sessionStore;
     private readonly Dictionary<Guid, string> _collapsedThinkingByMessageId = new();
 
@@ -88,7 +94,10 @@ public partial class ChatPanelViewModel : ViewModelBase
         Func<string?>? getChatMinimizedContextBlock = null,
         Func<string>? getSendMessageKey = null,
         Func<string?>? getSolutionPath = null,
-        Func<ObservableCollection<SolutionItem>>? getSolutionRoots = null)
+        Func<ObservableCollection<SolutionItem>>? getSolutionRoots = null,
+        Func<int?>? getEditorSelectionStart = null,
+        Func<int?>? getEditorSelectionLength = null,
+        Func<int?>? getEditorCaretOffset = null)
     {
         _aiProviderManager = aiProviderManager;
         _getActiveAiProvider = getActiveAiProvider;
@@ -113,19 +122,29 @@ public partial class ChatPanelViewModel : ViewModelBase
         _sessionTopicSlashCompletion = new SessionTopicSlashCompletionProvider(() => ChatSurfaceSnapshot);
         _slashCommandRunner = new ChatSlashCommandRunner(
             executeIdeCommandForMafAgent,
-            () => new ChatSlashEditorContext(_getCurrentFilePath?.Invoke(), _getEditorText?.Invoke()),
+            () => new ChatSlashEditorContext(
+                _getCurrentFilePath?.Invoke(),
+                _getEditorText?.Invoke(),
+                _getEditorSelectionStart?.Invoke(),
+                _getEditorSelectionLength?.Invoke(),
+                _getEditorCaretOffset?.Invoke()),
             getWorkspaceRoot,
             () => ChatSurfaceSnapshot,
             () => SelectedChatThreadId,
             id => SelectedChatThreadId = id,
             v => IsChatOverviewMode = v,
             setTopicPicker: SetTopicPickerPresentation,
-            createTopicWithTitle: CreateTopicWithTitle);
+            createTopicWithTitle: CreateTopicWithTitle,
+            tryAttachSlash: TryExecuteAttachSlash);
         _getLocalOllamaEndpoint = getLocalOllamaEndpoint;
         _getEffectiveOllamaModelId = getEffectiveOllamaModelId;
         _tryCreateCloudMafIChatClient = tryCreateCloudMafIChatClient;
         _getChatMinimizedContextBlock = getChatMinimizedContextBlock;
         _getSendMessageKey = getSendMessageKey ?? (() => "Enter");
+        _getSolutionPath = getSolutionPath;
+        _getEditorSelectionStart = getEditorSelectionStart;
+        _getEditorSelectionLength = getEditorSelectionLength;
+        _getEditorCaretOffset = getEditorCaretOffset;
         _sessionStore = new ChatSessionStore(_getWorkspaceRoot());
         _sessionId = _sessionStore.EnsureSessionId();
         ChatMessages.CollectionChanged += OnChatMessagesCollectionChanged;
@@ -322,70 +341,8 @@ public partial class ChatPanelViewModel : ViewModelBase
     }
 
     [RelayCommand(CanExecute = nameof(CanSendChat))]
-    private async Task SendChatAsync()
-    {
-        var rawInput = ChatInput.Trim();
-        if (string.IsNullOrEmpty(rawInput))
-            return;
-
-        var parse = ChatSlashCommandParser.TryParse(rawInput);
-        if (parse.IsSlashLine)
-        {
-            var slashPath = ChatSlashCommandPresentation.FormatDisplayPath(parse, rawInput);
-            var slashArgs = ChatSlashCommandPresentation.NormalizeArgsTail(parse.ArgsTail);
-            var threadAtSlash = _activeThreadId;
-            var cmdMsg = ChatMessageViewModel.CreateSlashCommand(slashPath, slashArgs, threadAtSlash);
-            ChatInput = "";
-            ChatMessages.Add(cmdMsg);
-            RefreshChatSurfaceSnapshot();
-
-            var slash = await _slashCommandRunner.TryRunAsync(rawInput).ConfigureAwait(false);
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                if (_activeThreadId != threadAtSlash && _activeThreadId != Guid.Empty)
-                    cmdMsg.AssignThread(_activeThreadId);
-                cmdMsg.ApplySlashCommandResult(slash);
-                var payload = ChatHistoryPayloadMapping.ToMessagePayload(cmdMsg);
-                _ = PersistEventAsync(ChatHistoryEventKind.MessageAdded, payload);
-                _ = PersistEventAsync(ChatHistoryEventKind.MessageCompleted, payload);
-                RefreshChatSurfaceSnapshot();
-            });
-            return;
-        }
-
-        var input = ApplyProductSpineToOutboundMessage(rawInput);
-        if (string.IsNullOrEmpty(input))
-            return;
-
-        ChatInput = "";
-        var parent = _pendingParentForNextMessage;
-        _pendingParentForNextMessage = null;
-        var userMsg = new ChatMessageViewModel("user", input, threadId: _activeThreadId, parentMessageId: parent);
-        ChatMessages.Add(userMsg);
-        _ = PersistEventAsync(ChatHistoryEventKind.MessageAdded, ChatHistoryPayloadMapping.ToMessagePayload(userMsg));
-        IsChatLoading = true;
-        ChatLoadingStatusText = "Модель отвечает…";
-
-        try
-        {
-            if (_getChatMcpOnly())
-                return;
-
-            if (string.Equals(_getActiveAiProvider(), "CursorACP", StringComparison.Ordinal))
-                await SendChatWithCursorAcpAsync(input).ConfigureAwait(false);
-            else
-                await SendChatWithStreamingProviderAsync(input).ConfigureAwait(false);
-        }
-        finally
-        {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                StopAcpWaitWatchdog();
-                IsChatLoading = false;
-                ChatLoadingStatusText = "";
-            });
-        }
-    }
+    private Task SendChatAsync() =>
+        IntercomOutboundSendOrchestrator.RunAsync(CreateIntercomOutboundSendHost());
 
     private async Task SendChatWithCursorAcpAsync(string input)
     {
@@ -470,13 +427,13 @@ public partial class ChatPanelViewModel : ViewModelBase
         }
     }
 
-    private async Task SendChatWithStreamingProviderAsync(string input)
+    private async Task SendChatWithStreamingProviderAsync(string agentInput, string displayInput)
     {
         if (TryResolveMafIdeChat(out var exec, out var chatClient))
         {
             try
             {
-                await SendChatWithMafIdeAgentAsync(input, exec!, chatClient!).ConfigureAwait(false);
+                await SendChatWithMafIdeAgentAsync(agentInput, exec!, chatClient!).ConfigureAwait(false);
             }
             finally
             {
@@ -487,8 +444,9 @@ public partial class ChatPanelViewModel : ViewModelBase
         }
 
         var messages = ChatMessages.Take(ChatMessages.Count - 1)
+            .Where(m => !m.IsLocalSelfOnly)
             .Select(m => new Services.ChatMessage(m.Role, m.Content))
-            .Append(new Services.ChatMessage("user", input))
+            .Append(new Services.ChatMessage("user", agentInput))
             .ToList();
         var assistantMsg = new ChatMessageViewModel("assistant", "", threadId: _activeThreadId);
         ChatMessages.Add(assistantMsg);
@@ -554,6 +512,7 @@ public partial class ChatPanelViewModel : ViewModelBase
         IChatClient chatClient)
     {
         var dialogMessages = ChatMessages.Take(ChatMessages.Count - 1)
+            .Where(m => !m.IsLocalSelfOnly)
             .Where(m => IsUserOrAssistantOrToolForMafHistory(m.Role))
             .Select(m => new CascadeConversationMessage(m.Role, m.Content))
             .Append(new CascadeConversationMessage("user", input))

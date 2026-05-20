@@ -18,6 +18,15 @@ public static class AttachmentAnchorRoslynResolver
         string? memberKey,
         AttachmentSyntaxScope? syntaxScope,
         out LineRange lines,
+        out string detail) =>
+        TryResolveLineRange(null, absoluteFilePath, memberKey, syntaxScope, out lines, out detail);
+
+    public static bool TryResolveLineRange(
+        IntercomAttachmentRoslynResolveSession? session,
+        string absoluteFilePath,
+        string? memberKey,
+        AttachmentSyntaxScope? syntaxScope,
+        out LineRange lines,
         out string detail)
     {
         lines = default;
@@ -29,24 +38,10 @@ public static class AttachmentAnchorRoslynResolver
             return false;
         }
 
-        if (!File.Exists(absoluteFilePath))
-        {
-            detail = "file_not_found";
+        if (!TryGetOrCreateEntry(session, absoluteFilePath, out var entry, out detail))
             return false;
-        }
 
-        string text;
-        try
-        {
-            text = File.ReadAllText(absoluteFilePath);
-        }
-        catch (Exception ex)
-        {
-            detail = "read_error: " + ex.Message;
-            return false;
-        }
-
-        var tree = CSharpSyntaxTree.ParseText(SourceText.From(text, Encoding.UTF8), path: absoluteFilePath);
+        var tree = entry.Tree;
         var root = tree.GetCompilationUnitRoot();
         if (root is null)
         {
@@ -54,8 +49,7 @@ public static class AttachmentAnchorRoslynResolver
             return false;
         }
 
-        var compilation = buildCompilation(absoluteFilePath, tree);
-        var model = compilation.GetSemanticModel(tree);
+        var model = entry.Model;
 
         if (syntaxScope is not null)
         {
@@ -77,6 +71,84 @@ public static class AttachmentAnchorRoslynResolver
 
         detail = string.IsNullOrEmpty(detail) ? "member" : detail;
         return true;
+    }
+
+    internal static bool TryGetOrCreateEntry(
+        IntercomAttachmentRoslynResolveSession? session,
+        string absoluteFilePath,
+        out IntercomAttachmentRoslynResolveSession.FileEntry entry,
+        out string detail)
+    {
+        entry = null!;
+        detail = "";
+
+        if (session is not null
+            && session.Entries.TryGetValue(absoluteFilePath, out var cached))
+        {
+            if (cached is not null)
+            {
+                entry = cached;
+                return true;
+            }
+
+            detail = "parse_error";
+            return false;
+        }
+
+        if (!File.Exists(absoluteFilePath))
+        {
+            detail = "file_not_found";
+            session?.Entries.TryAdd(absoluteFilePath, null);
+            return false;
+        }
+
+        string text;
+        try
+        {
+            text = File.ReadAllText(absoluteFilePath);
+        }
+        catch (Exception ex)
+        {
+            detail = "read_error: " + ex.Message;
+            session?.Entries.TryAdd(absoluteFilePath, null);
+            return false;
+        }
+
+        var tree = CSharpSyntaxTree.ParseText(SourceText.From(text, Encoding.UTF8), path: absoluteFilePath);
+        if (tree.GetCompilationUnitRoot() is null)
+        {
+            detail = "parse_error";
+            session?.Entries.TryAdd(absoluteFilePath, null);
+            return false;
+        }
+
+        var compilation = buildCompilation(absoluteFilePath, tree);
+        entry = new IntercomAttachmentRoslynResolveSession.FileEntry
+        {
+            Text = text,
+            Tree = tree,
+            Model = compilation.GetSemanticModel(tree),
+        };
+        session?.Entries.TryAdd(absoluteFilePath, entry);
+        return true;
+    }
+
+    internal static bool TryGetCachedText(
+        IntercomAttachmentRoslynResolveSession? session,
+        string absoluteFilePath,
+        out string text)
+    {
+        text = "";
+        if (session is null)
+            return false;
+
+        if (session.Entries.TryGetValue(absoluteFilePath, out var cached) && cached is not null)
+        {
+            text = cached.Text;
+            return true;
+        }
+
+        return false;
     }
 
     private static bool tryResolveMember(

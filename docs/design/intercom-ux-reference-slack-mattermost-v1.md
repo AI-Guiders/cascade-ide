@@ -110,7 +110,8 @@
 |------------------------|--------|--------|
 | **`/editor line select`** / **`delete`** | **Сделать** в редакторе | `/editor line select 5 10` — [0124](../adr/0124-slash-parametric-editor-line-commands.md) |
 | **`/file open`** … | **Открыть** файл | [0125](../adr/0125-slash-workspace-file-commands-and-dynamic-completion.md) |
-| **`/attach file`** / **`/attach selection`** / **`/attach scope`** | **Вложение** в сообщение агенту | [0128](../adr/0128-intercom-attachment-anchors-and-code-references.md) Proposed |
+| **`/attach file`** / **`/attach selection`** / **`/attach scope`** | **Вложение** в сообщение агенту | [0128](../adr/0128-intercom-attachment-anchors-and-code-references.md) *(фазы 1–3)* |
+| **`/editor select code [M:…]`** / **`/editor reveal code […]`** | **Select / reveal** в редакторе без attach | [0131](../adr/0131-editor-slash-select-code-by-bracket-reference.md) *(в коде)* |
 
 **Рекомендуемый namespace:** **`/attach`** с подкомандами (не `/codecontext`).
 

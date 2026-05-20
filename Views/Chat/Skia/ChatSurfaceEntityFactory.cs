@@ -1,5 +1,6 @@
 #nullable enable
 using CascadeIDE.Features.Chat;
+using CascadeIDE.Models.Intercom;
 
 namespace CascadeIDE.Views.Chat.Skia;
 
@@ -113,7 +114,7 @@ internal static class ChatSurfaceEntityFactory
                         ChatThreadOverviewPresentation.FormatSideThreadRowTitle(item),
                         ChatThreadOverviewPresentation.FormatSideThreadRowMeta(item),
                         Footer: null,
-                        SkiaChatBubbleKind.Standard,
+                        SkiaChatBubbleKind.Feed,
                         fillRole,
                         SkiaChatBodyTone.Normal,
                         IsPending: false,
@@ -132,7 +133,7 @@ internal static class ChatSurfaceEntityFactory
                     "Темы",
                     "Назад к обзору всех веток",
                     Footer: null,
-                    SkiaChatBubbleKind.Standard,
+                    SkiaChatBubbleKind.Feed,
                     SkiaBubbleFillRole.OverviewNav,
                     SkiaChatBodyTone.Normal,
                     IsPending: false,
@@ -166,7 +167,7 @@ internal static class ChatSurfaceEntityFactory
                             lane.Thread.Title,
                             ChatThreadOverviewPresentation.FormatThreadHeaderMeta(lane.Thread),
                             Footer: null,
-                            SkiaChatBubbleKind.Standard,
+                            SkiaChatBubbleKind.Feed,
                             headerRole,
                             SkiaChatBodyTone.Normal,
                             IsPending: false,
@@ -214,12 +215,7 @@ internal static class ChatSurfaceEntityFactory
             && entry.SlashCommandStatus is { } slashStatus
             && !string.IsNullOrWhiteSpace(entry.SlashCommandPath))
         {
-            return new SkiaChatSlashCommandEntity(
-                entry.SlashCommandPath,
-                entry.SlashCommandArgs,
-                string.IsNullOrWhiteSpace(entry.Body) ? null : entry.Body,
-                slashStatus,
-                entry.MessageIndex);
+            return new SkiaChatSlashCommandEntity(entry, compactLayout);
         }
 
         return new SkiaChatMessageFeedEntity(entry, compactLayout, suppressTitle, gapAfter);
@@ -234,7 +230,7 @@ internal static class ChatSurfaceEntityFactory
                     entry.Title,
                     entry.Body,
                     Footer: null,
-                    SkiaChatBubbleKind.Standard,
+                    SkiaChatBubbleKind.Feed,
                     fillRole,
                     SkiaChatBodyTone.Normal,
                     IsPending: entry.IsPending,
@@ -242,7 +238,7 @@ internal static class ChatSurfaceEntityFactory
                     StartsBranch: false,
                     MessageIndex: null,
                     GapAfter: 5,
-                    Padding: 8,
+                    Padding: 0,
                     TitleHeight: 14,
                     LineHeight: 14),
                 compactLayout),

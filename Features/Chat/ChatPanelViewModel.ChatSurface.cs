@@ -63,6 +63,8 @@ public partial class ChatPanelViewModel
                 index,
                 message.SlashCommandPath,
                 message.SlashCommandArgs,
-                message.SlashCommandStatus))
+                message.SlashCommandStatus,
+                message.Attachments,
+                message.Audience))
             .ToList();
 }

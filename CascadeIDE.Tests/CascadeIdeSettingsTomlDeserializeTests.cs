@@ -22,6 +22,19 @@ public sealed class CascadeIdeSettingsTomlDeserializeTests
         ?? throw new InvalidOperationException("Deserialize returned null");
 
     [Fact]
+    public void Deserialize_LoggingIntercomSendTrace_ParsesExpected()
+    {
+        const string text =
+            """
+            [logging.intercom]
+            send_trace = true
+            """;
+
+        var s = Deserialize(text);
+        Assert.True(s.Logging.Intercom.SendTrace);
+    }
+
+    [Fact]
     public void Deserialize_DisplayScreensAndMarkdownNested_ParsesExpected()
     {
         const string text =

@@ -54,9 +54,10 @@
                                           ShowIntercomComposer="True"
                                           ComposerText="{Binding ChatInput, Mode=TwoWay}"
                                           IsComposerEnabled="{Binding !IsChatLoading}"
-                                          IsSlashAutocompleteVisible="{Binding IsChatSlashAutocompleteVisible}"
-                                          SelectedSlashSuggestionIndex="{Binding SelectedChatSlashSuggestionIndex, Mode=TwoWay}"
-                                          SlashSuggestions="{Binding ChatSlashSuggestions}"/>
+                                          IsSlashAutocompleteVisible="{Binding IsComposerAutocompleteVisible}"
+                                          SelectedSlashSuggestionIndex="{Binding SelectedComposerAutocompleteIndex, Mode=TwoWay}"
+                                          SlashSuggestions="{Binding ComposerPopupSuggestions}"
+                                          ComposerCaretIndex="{Binding ChatComposerCaretIndex, Mode=TwoWay}"/>
             </Border>
 
             <Border IsVisible="{Binding HasActiveClarificationBatch}"

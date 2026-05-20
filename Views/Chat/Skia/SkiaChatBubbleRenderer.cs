@@ -7,6 +7,8 @@ namespace CascadeIDE.Views.Chat.Skia;
 internal enum SkiaChatBubbleKind
 {
     Standard,
+    /// <summary>Плоская строка ленты Intercom (ADR 0123): meta + тело, без messenger-пузыря.</summary>
+    Feed,
     CardPanel,
     OverviewHeader,
     SpineStrip
@@ -50,9 +52,13 @@ internal static class SkiaChatBubbleRenderer
     }
 
     public static float MeasureHeight(in SkiaChatBubbleSpec spec, in SkiaChatBubbleMetrics metrics) =>
-        Math.Max(
-            spec.MinHeight,
-            spec.Padding + metrics.TitleHeight + metrics.ContentLines.Count * metrics.LineHeight + metrics.FooterHeight + spec.Padding);
+        spec.Kind == SkiaChatBubbleKind.Feed
+            ? Math.Max(
+                spec.MinHeight,
+                2f + metrics.TitleHeight + metrics.ContentLines.Count * metrics.LineHeight + metrics.FooterHeight + 2f)
+            : Math.Max(
+                spec.MinHeight,
+                spec.Padding + metrics.TitleHeight + metrics.ContentLines.Count * metrics.LineHeight + metrics.FooterHeight + spec.Padding);
 
     public static void Draw(
         SkiaChatDrawContext ctx,
@@ -71,10 +77,42 @@ internal static class SkiaChatBubbleRenderer
             DrawSpineStripFrame(ctx, rect, corner, spec);
         else if (spec.Kind == SkiaChatBubbleKind.OverviewHeader)
             DrawOverviewHeaderFrame(ctx, rect);
+        else if (spec.Kind == SkiaChatBubbleKind.Feed)
+            DrawFeedAccent(ctx, rect, spec);
         else
             DrawStandardFrame(ctx, rect, corner, spec, metrics);
 
-        DrawText(ctx, rect, contentLeft, insetX, spec, metrics);
+        var textInset = spec.Kind == SkiaChatBubbleKind.Feed ? 6f : insetX;
+        var textLeft = spec.Kind == SkiaChatBubbleKind.Feed ? ctx.ContentLeft + textInset : contentLeft;
+        DrawText(ctx, rect, textLeft, textInset, spec, metrics);
+    }
+
+    private static void DrawFeedAccent(SkiaChatDrawContext ctx, SKRect rect, in SkiaChatBubbleSpec spec)
+    {
+        if (spec.IsSelected || (spec.MessageIndex is not null && spec.MessageIndex == ctx.SelectedMessageIndex))
+        {
+            var bar = new SKRect(rect.Left, rect.Top + 1f, rect.Left + 3f, rect.Bottom - 1f);
+            using var paint = new SKPaint
+            {
+                Color = ctx.Theme.SelectedBorder,
+                IsAntialias = true,
+                Style = SKPaintStyle.Fill,
+            };
+            ctx.Canvas.DrawRoundRect(bar, 1.5f, 1.5f, paint);
+            return;
+        }
+
+        if (!spec.StartsBranch)
+            return;
+
+        var branchBar = new SKRect(rect.Left, rect.Top + 2f, rect.Left + 3f, rect.Bottom - 2f);
+        using var branchPaint = new SKPaint
+        {
+            Color = SkiaKitColor.Blend(ctx.Theme.HoverBorder, new SKColor(255, 210, 120), 0.45f),
+            IsAntialias = true,
+            Style = SKPaintStyle.Fill,
+        };
+        ctx.Canvas.DrawRoundRect(branchBar, 1.5f, 1.5f, branchPaint);
     }
 
     private static void DrawCardShadow(SKCanvas canvas, SKRect rect, float corner)
@@ -181,6 +219,7 @@ internal static class SkiaChatBubbleRenderer
 
         var titleBaseline = rect.Top + (spec.Kind switch
         {
+            SkiaChatBubbleKind.Feed => 12f,
             SkiaChatBubbleKind.CardPanel => 20f,
             SkiaChatBubbleKind.OverviewHeader => 18f,
             SkiaChatBubbleKind.SpineStrip => 14f,
@@ -191,6 +230,7 @@ internal static class SkiaChatBubbleRenderer
 
         var textY = rect.Top + metrics.TitleHeight + (spec.Kind switch
         {
+            SkiaChatBubbleKind.Feed => 3f,
             SkiaChatBubbleKind.OverviewHeader => 6f,
             SkiaChatBubbleKind.CardPanel => 10f,
             _ => 12f

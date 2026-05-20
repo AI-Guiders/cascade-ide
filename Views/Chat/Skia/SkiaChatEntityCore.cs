@@ -1,5 +1,6 @@
 #nullable enable
 using Avalonia;
+using CascadeIDE.Models.Intercom;
 using CascadeIDE.Views.SkiaKit;
 using SkiaSharp;
 
@@ -15,7 +16,9 @@ internal readonly record struct SkiaChatHit(
     int? MessageIndex,
     Guid? SelectThreadId,
     bool ResetDetailMode,
-    bool ToggleThinking = false);
+    bool ToggleThinking = false,
+    AttachmentAnchor? RevealAttachment = null,
+    bool RevealAttachmentSelect = false);
 
 internal readonly record struct SkiaChatMeasuredLayout(
     float Height,

@@ -31,7 +31,18 @@ public partial class ChatPanelViewModel
                 _threadForks.Clear();
                 _threadForks.AddRange(forks);
                 foreach (var row in rows)
-                    ChatMessages.Add(new ChatMessageViewModel(row.Role, row.Content, row.MessageId, row.ThreadId, row.ParentMessageId));
+                    ChatMessages.Add(new ChatMessageViewModel(
+                        row.Role,
+                        row.Content,
+                        row.MessageId,
+                        row.ThreadId,
+                        row.ParentMessageId,
+                        slashCommandPath: row.SlashCommandPath,
+                        slashCommandArgs: row.SlashCommandArgs,
+                        slashCommandStatus: row.SlashCommandStatus,
+                        attachments: row.Attachments,
+                        senderWorkspaceContext: row.SenderWorkspaceContext,
+                        audience: row.Audience));
                 if (rows.Count > 0)
                     ClarificationStatusText = $"Восстановлено сообщений: {rows.Count}";
                 RefreshChatSurfaceSnapshot();

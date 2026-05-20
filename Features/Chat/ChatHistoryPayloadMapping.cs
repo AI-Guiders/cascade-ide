@@ -1,5 +1,6 @@
 #nullable enable
 using CascadeIDE.Models.AgentChat;
+using CascadeIDE.Models.Intercom;
 using CascadeIDE.ViewModels;
 
 namespace CascadeIDE.Features.Chat;
@@ -17,7 +18,10 @@ internal static class ChatHistoryPayloadMapping
             message.ParentMessageId?.ToString("N"),
             message.SlashCommandPath,
             string.IsNullOrWhiteSpace(message.SlashCommandArgs) ? null : message.SlashCommandArgs,
-            slashStatus);
+            slashStatus,
+            message.Attachments.Count > 0 ? message.Attachments : null,
+            message.SenderWorkspaceContext,
+            message.Audience == IntercomMessageAudience.Channel ? null : message.Audience);
     }
 
     public static ChatHistoryMessageEditedPayload ToMessageEditedPayload(

@@ -14,6 +14,7 @@
 | [0129](0129-intercom-message-body-markdown-and-fenced-code.md) | Тело сообщения, fenced — wire в `content` |
 | [0130](0130-editor-agent-range-reveal-without-selection.md) | Reveal/select из attach; MCP |
 | [0131](0131-editor-slash-select-code-by-bracket-reference.md) | Bracket в редакторе без attach |
+| [0129](0129-intercom-message-body-markdown-and-fenced-code.md) | Fenced / MD в `content`; attach `[` не в fence |
 | [0119](0119-chat-slash-commands-intercom-surface.md) | Slash — subset может жить на Web |
 | [0057](0057-chat-surface-pipeline-adoption.md) | `ChatSurfaceSnapshot` — **проекция** клиента |
 

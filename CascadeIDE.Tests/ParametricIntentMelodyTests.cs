@@ -114,6 +114,51 @@ public sealed class ParametricIntentMelodyTests
     }
 
     [Theory]
+    [InlineData("esc:", true, "")]
+    [InlineData("esc:[m:run]", true, "[m:run]")]
+    [InlineData("erc:[f:foo.cs; m:bar]", true, "[f:foo.cs; m:bar]")]
+    [InlineData("er", false, null)]
+    public void TryParseBracketCodeRefMelodyTail_PrefixAndPayload(string tail, bool expectedOk, string? expectedPayload)
+    {
+        var ok = ParametricIntentMelody.TryParseBracketCodeRefMelodyTail(tail, out var slugOut, out var payload);
+        Assert.Equal(expectedOk, ok);
+        Assert.Equal(expectedPayload, ok ? payload : null);
+        if (ok)
+        {
+            var expectedSlug = tail.StartsWith("erc", StringComparison.Ordinal) ? "erc" : "esc";
+            Assert.Equal(expectedSlug, slugOut);
+        }
+    }
+
+    [Fact]
+    public void TryResolveParametricExecution_BracketSelect_BuildsEditorSelectCodeArgs()
+    {
+        var ok = ParametricIntentMelody.TryResolveParametricExecution(
+            "esc:[M:Run]",
+            @"D:\repo\src\Foo.cs",
+            "",
+            out var commandId,
+            out var argsJson,
+            out _);
+
+        Assert.True(ok);
+        Assert.Equal(IdeCommands.EditorSelectCode, commandId);
+        Assert.Contains(@"""code_ref"":""[M:Run]""", argsJson, StringComparison.Ordinal);
+        Assert.Contains("Foo.cs", argsJson!, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("e", true)]
+    [InlineData("es", true)]
+    [InlineData("esc", true)]
+    [InlineData("esc:", true)]
+    [InlineData("esc:[", true)]
+    [InlineData("erc:[m:run", true)]
+    [InlineData("ex", false)]
+    public void IsParametricChordTailPrefix_MatchesBracketMelodyTails(string tail, bool expected) =>
+        Assert.Equal(expected, ParametricIntentMelody.IsParametricChordTailPrefix(tail));
+
+    [Theory]
     [InlineData("w", true)]
     [InlineData("wa", true)]
     [InlineData("wai", true)]

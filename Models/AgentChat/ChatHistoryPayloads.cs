@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using CascadeIDE.Models.Intercom;
 
 namespace CascadeIDE.Models.AgentChat;
 
@@ -11,7 +12,10 @@ public sealed record ChatHistoryMessagePayload(
     [property: JsonPropertyName("parent_message_id")] string? ParentMessageId = null,
     [property: JsonPropertyName("slash_command_path")] string? SlashCommandPath = null,
     [property: JsonPropertyName("slash_command_args")] string? SlashCommandArgs = null,
-    [property: JsonPropertyName("slash_command_status")] string? SlashCommandStatus = null);
+    [property: JsonPropertyName("slash_command_status")] string? SlashCommandStatus = null,
+    [property: JsonPropertyName("attachments")] IReadOnlyList<AttachmentAnchor>? Attachments = null,
+    [property: JsonPropertyName("sender_workspace_context")] SenderWorkspaceContext? SenderWorkspaceContext = null,
+    [property: JsonPropertyName("audience")] IntercomMessageAudience? Audience = null);
 
 /// <summary>Компенсирующее редактирование (<see cref="ChatHistoryEventKind.MessageEdited"/>).</summary>
 public sealed record ChatHistoryMessageEditedPayload(

@@ -28,6 +28,14 @@ public sealed record AttachmentAnchor
 
     public string? Excerpt { get; init; }
 
+    public int? ProseStart { get; init; }
+
+    public int? ProseLength { get; init; }
+
+    public string? ResolvedAtUtc { get; init; }
+
+    public string? ResolveOutcome { get; init; }
+
     public static bool TryParseFromJsonElement(JsonElement root, out AttachmentAnchor anchor, out string error)
     {
         anchor = new AttachmentAnchor();
@@ -51,6 +59,10 @@ public sealed record AttachmentAnchor
             SyntaxScope = root.TryGetProperty("syntaxScope", out var ss) ? ss
                 : root.TryGetProperty("syntax_scope", out var ss2) ? ss2 : null,
             Excerpt = readString(root, "excerpt"),
+            ProseStart = readInt(root, "proseStart") ?? readInt(root, "prose_start"),
+            ProseLength = readInt(root, "proseLength") ?? readInt(root, "prose_length"),
+            ResolvedAtUtc = readString(root, "resolvedAtUtc") ?? readString(root, "resolved_at_utc"),
+            ResolveOutcome = readString(root, "resolveOutcome") ?? readString(root, "resolve_outcome"),
         };
 
         if (string.IsNullOrWhiteSpace(anchor.File))

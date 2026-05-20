@@ -1,5 +1,6 @@
 using System.Text.Json;
 using CascadeIDE.Models.AgentChat;
+using CascadeIDE.Models.Intercom;
 
 namespace CascadeIDE.Features.Chat;
 
@@ -8,7 +9,18 @@ namespace CascadeIDE.Features.Chat;
 /// </summary>
 internal static class ChatHistoryMessageProjector
 {
-    public sealed record Row(Guid MessageId, string Role, string Content, Guid ThreadId, Guid? ParentMessageId);
+    public sealed record Row(
+        Guid MessageId,
+        string Role,
+        string Content,
+        Guid ThreadId,
+        Guid? ParentMessageId,
+        IReadOnlyList<AttachmentAnchor> Attachments,
+        SenderWorkspaceContext? SenderWorkspaceContext,
+        string? SlashCommandPath = null,
+        string? SlashCommandArgs = null,
+        ChatSlashCommandStatus? SlashCommandStatus = null,
+        IntercomMessageAudience Audience = IntercomMessageAudience.Channel);
 
     public static List<Row> Project(IReadOnlyList<ChatHistoryEvent> events, Guid defaultThreadId)
     {
@@ -82,12 +94,27 @@ internal static class ChatHistoryMessageProjector
             parentMessageId = parent;
         }
 
+        ChatSlashCommandStatus? slashStatus = null;
+        if (!string.IsNullOrWhiteSpace(payload.SlashCommandStatus)
+            && Enum.TryParse<ChatSlashCommandStatus>(payload.SlashCommandStatus, ignoreCase: true, out var parsedStatus))
+        {
+            slashStatus = parsedStatus;
+        }
+
+        var audience = payload.Audience ?? IntercomMessageAudience.Channel;
+
         row = new Row(
             messageId,
             string.IsNullOrWhiteSpace(payload.Role) ? "assistant" : payload.Role,
             payload.Content ?? "",
             threadId,
-            parentMessageId);
+            parentMessageId,
+            payload.Attachments ?? [],
+            payload.SenderWorkspaceContext,
+            payload.SlashCommandPath,
+            string.IsNullOrWhiteSpace(payload.SlashCommandArgs) ? null : payload.SlashCommandArgs,
+            slashStatus,
+            audience);
         return true;
     }
 
@@ -166,7 +193,7 @@ internal static class ChatHistoryMessageProjector
             if (TryGetGuidProperty(root, "parent_message_id", "ParentMessageId", out var parent) && parent != Guid.Empty)
                 parentMessageId = parent;
 
-            row = new Row(messageId, role, content, threadId, parentMessageId);
+            row = new Row(messageId, role, content, threadId, parentMessageId, [], null);
             return true;
         }
         catch (JsonException)

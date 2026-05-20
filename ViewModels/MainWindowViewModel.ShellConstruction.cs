@@ -118,7 +118,10 @@ public partial class MainWindowViewModel
             getChatMinimizedContextBlock: BuildChatMinimizedContextBlockCore,
             getSendMessageKey: () => SendMessageKey,
             getSolutionPath: () => Workspace.SolutionPath,
-            getSolutionRoots: () => Workspace.SolutionRoots);
+            getSolutionRoots: () => Workspace.SolutionRoots,
+            getEditorSelectionStart: () => EditorSelectionStart,
+            getEditorSelectionLength: () => EditorSelectionLength,
+            getEditorCaretOffset: () => _editorCaretOffset);
         InstrumentationPanel = new InstrumentationPanelViewModel();
         InstrumentationPanel.PropertyChanged += OnInstrumentationPanelPropertyChanged;
         HypothesesPanel = new HypothesesPanelViewModel(GetWorkspacePath);

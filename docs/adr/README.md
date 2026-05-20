@@ -60,6 +60,16 @@
 |----|-----|
 | 0023, 0026→0069 | [язык/diagrams](0023-markdown-diagrams-language-tooling.md) · [**0026 Superseded →**](0026-markdown-preview-surfaces-and-placement.md) [**0069**](0069-markdown-preview-tool-surface-and-renderer-decoupling.md) |
 
+### Intercom: attach, fenced body, reveal/select в редакторе
+
+| ID | ADR |
+|----|-----|
+| 0128 | [якоря attach / `[M:…]` / re-resolve](0128-intercom-attachment-anchors-and-code-references.md) — **In progress** (reveal/select в коде; chips `/attach` — нет) |
+| 0129 | [fenced code и MD в теле](0129-intercom-message-body-markdown-and-fenced-code.md) — **In progress** (v1 `SplitSegments`) |
+| 0130 | [reveal без selection (MCP)](0130-editor-agent-range-reveal-without-selection.md) — **Implemented** |
+| 0131 | [`/editor select|reveal code […]`](0131-editor-slash-select-code-by-bracket-reference.md) — **In progress** |
+| 0132 | [federated transport](0132-intercom-federated-transport-and-multi-client-boundary.md) — **Proposed** (wire для команды) |
+
 <a id="adr-index-full"></a>
 
 ## Полный индекс
@@ -191,8 +201,11 @@
 | [0124](0124-slash-parametric-editor-line-commands.md) | Фича: параметрический slash = полный паритет `melody_shape=parametric` в TOML (`wire_class`, binders, TOML, SubAction) | Accepted · Implemented |
 | [0125](0125-slash-workspace-file-commands-and-dynamic-completion.md) | Slash workspace/file: `/file open`, `/solution new`, динамические подсказки по файлам; `create_project_in_solution` (console/classlib/webapi) | Accepted · Implemented |
 | [0126](0126-intercom-inspect-slash-and-compact-chrome-status.md) | Intercom inspect: `/topic`/`/spine` list\|tree (`kind=report`); статус в compact toolbar; UX открытия файла из slash | Accepted · Implemented |
-| [0128](0128-intercom-attachment-anchors-and-code-references.md) | Intercom: якоря вложений (attach), `[M:…]` / chips, reveal, re-resolve; ортогонально `/file open` и `/editor line` | Proposed |
-| [0129](0129-intercom-message-body-markdown-and-fenced-code.md) | Intercom: тело сообщения — fenced code, inline MD в ленте, полный preview через [0069](0069-markdown-preview-tool-surface-and-renderer-decoupling.md) | Proposed |
+| [0128](0128-intercom-attachment-anchors-and-code-references.md) | Intercom: якоря вложений (attach), `[M:…]` / chips, reveal, re-resolve; ортогонально `/file open` и `/editor line` | Accepted · In progress |
+| [0129](0129-intercom-message-body-markdown-and-fenced-code.md) | Intercom: тело сообщения — fenced code, inline MD в ленте, полный preview через [0069](0069-markdown-preview-tool-surface-and-renderer-decoupling.md) | Accepted · In progress |
+| [0130](0130-editor-agent-range-reveal-without-selection.md) | Подсветка диапазона кода для агента без изменения selection (`reveal_editor_range`, `EditorAgentRangeReveal`) | Accepted · Implemented |
+| [0131](0131-editor-slash-select-code-by-bracket-reference.md) | `/editor select|reveal code [M:…]` — bracket → select/reveal в буфере, не attach | Accepted · In progress |
+| [0132](0132-intercom-federated-transport-and-multi-client-boundary.md) | Intercom: federated transport, multi-client; тот же wire `AttachmentAnchor` для команды | Proposed |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 

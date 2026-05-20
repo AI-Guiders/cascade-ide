@@ -50,10 +50,8 @@ Draft for discussion — not yet accepted.
 | [0117](../../adr/0117-remote-operator-surface-multidevice.md) | Remote operator surface - multi-device operator (remote control, not mobile IDE) | Proposed |
 | [0122](../../adr/0122-collaborative-iop-environment-and-shared-situational-display.md) | Collaborative IOP Environment — Workstations and Shared Situational Display | Proposed |
 | [0127](../../adr/0127-intercom-spine-and-topic-tabs-chrome-navigation.md) | Intercom — spine и вкладки тем в chrome (навигация без overview) | Proposed · **согласованное направление** (2026-05-18) |
-| [0128](../../adr/0128-intercom-attachment-anchors-and-code-references.md) | Intercom — якоря вложений (code references) и канонический attach | Proposed |
-| [0129](../../adr/0129-intercom-message-body-markdown-and-fenced-code.md) | Intercom — тело сообщения: Markdown, fenced code и preview | Proposed |
-| [0130](../../adr/0130-editor-agent-range-reveal-without-selection.md) | Подсветка диапазона кода для агента без изменения selection | Proposed |
-| [0131](../../adr/0131-editor-slash-select-code-by-bracket-reference.md) | `/editor select code` by bracket `[M:…]` — editor select, not attach | Proposed |
+| [0132](../../adr/0132-intercom-federated-transport-and-multi-client-boundary.md) | Intercom — федерация, общий transport и граница multi-client (CIDE / Web / MCC) | Proposed |
+| [0133](../../adr/0133-commander-cockpit-shared-attention-model-and-instrument-deck.md) | Commander cockpit — общая модель внимания и instrument deck по роли | Proposed |
 
 
 ---

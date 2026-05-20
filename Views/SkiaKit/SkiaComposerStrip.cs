@@ -32,6 +32,7 @@ internal static class SkiaComposerStrip
         string placeholder,
         bool isEnabled,
         int caretIndex,
+        float layoutScale,
         out SKRect sendButtonBounds,
         out SKRect textBounds)
     {
@@ -65,24 +66,28 @@ internal static class SkiaComposerStrip
         var isEmpty = string.IsNullOrEmpty(display);
         var lines = isEmpty ? [] : WrapLines(display, contentWidth);
 
-        using var bodyFont = new SKFont(SKTypeface.FromFamilyName("Segoe UI"), 12);
-        using var bodyPaint = new SKPaint
-        {
-            IsAntialias = true,
-            Color = isEnabled ? theme.Content : theme.EmptyHint,
-        };
+        using var bodyFont = SkiaKitFonts.CreateUi(12);
+        using var bodyPaint = SkiaKitFonts.CreateTextPaint(isEnabled ? theme.Content : theme.EmptyHint);
 
         if (isEmpty)
         {
-            using var hintPaint = new SKPaint { IsAntialias = true, Color = theme.EmptyHint };
-            canvas.DrawText(placeholder, textBounds.Left, textBounds.Top + LineHeight - 4f, SKTextAlign.Left, bodyFont, hintPaint);
+            using var hintPaint = SkiaKitFonts.CreateTextPaint(theme.EmptyHint);
+            SkiaKitFonts.DrawText(
+                canvas,
+                placeholder,
+                textBounds.Left,
+                textBounds.Top + LineHeight - 4f,
+                SKTextAlign.Left,
+                bodyFont,
+                hintPaint,
+                layoutScale);
         }
         else
         {
             var y = textBounds.Top + LineHeight - 4f;
             foreach (var line in lines)
             {
-                canvas.DrawText(line, textBounds.Left, y, SKTextAlign.Left, bodyFont, bodyPaint);
+                SkiaKitFonts.DrawText(canvas, line, textBounds.Left, y, SKTextAlign.Left, bodyFont, bodyPaint, layoutScale);
                 y += LineHeight;
                 if (y > textBounds.Bottom)
                     break;
@@ -105,8 +110,8 @@ internal static class SkiaComposerStrip
         };
         canvas.DrawRoundRect(rect, 6f, 6f, fill);
 
-        using var font = new SKFont(SKTypeface.FromFamilyName("Segoe UI", SKFontStyle.Bold), 14);
-        using var paint = new SKPaint { IsAntialias = true, Color = SKColors.White };
+        using var font = SkiaKitFonts.CreateUi(14, bold: true);
+        using var paint = SkiaKitFonts.CreateTextPaint(SKColors.White);
         canvas.DrawText("↑", rect.MidX, rect.MidY + 5f, SKTextAlign.Center, font, paint);
     }
 
@@ -140,7 +145,7 @@ internal static class SkiaComposerStrip
 
     private static List<string> WrapLines(string text, float maxWidth)
     {
-        using var font = new SKFont(SKTypeface.FromFamilyName("Segoe UI"), 12);
+        using var font = SkiaKitFonts.CreateUi(12);
         var lines = new List<string>();
         foreach (var raw in text.Replace("\r", "").Split('\n'))
         {

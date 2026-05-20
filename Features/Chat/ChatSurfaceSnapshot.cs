@@ -1,5 +1,6 @@
 #nullable enable
 using CascadeIDE.Models.AgentChat;
+using CascadeIDE.Models.Intercom;
 
 namespace CascadeIDE.Features.Chat;
 
@@ -26,7 +27,9 @@ public sealed record ChatConversationMessage(
     int MessageIndex,
     string? SlashCommandPath = null,
     string? SlashCommandArgs = null,
-    ChatSlashCommandStatus? SlashCommandStatus = null);
+    ChatSlashCommandStatus? SlashCommandStatus = null,
+    IReadOnlyList<AttachmentAnchor>? Attachments = null,
+    IntercomMessageAudience Audience = IntercomMessageAudience.Channel);
 
 public sealed record ChatThreadNode(
     Guid ThreadId,
@@ -51,7 +54,9 @@ public sealed record ChatMessageNode(
     bool StartsBranch,
     string? SlashCommandPath = null,
     string? SlashCommandArgs = null,
-    ChatSlashCommandStatus? SlashCommandStatus = null);
+    ChatSlashCommandStatus? SlashCommandStatus = null,
+    IReadOnlyList<AttachmentAnchor>? Attachments = null,
+    IntercomMessageAudience Audience = IntercomMessageAudience.Channel);
 
 public sealed record ChatConfirmationNode(
     string NodeId,
@@ -87,7 +92,9 @@ public sealed record ChatSurfaceEntry(
     bool StartsBranch = false,
     string? SlashCommandPath = null,
     string? SlashCommandArgs = null,
-    ChatSlashCommandStatus? SlashCommandStatus = null);
+    ChatSlashCommandStatus? SlashCommandStatus = null,
+    IReadOnlyList<AttachmentAnchor>? Attachments = null,
+    IntercomMessageAudience Audience = IntercomMessageAudience.Channel);
 
 public sealed record ChatThreadOverviewItem(
     Guid ThreadId,

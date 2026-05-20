@@ -59,6 +59,8 @@ Accepted and main delivery is in the codebase.
 | [0124](../../adr/0124-slash-parametric-editor-line-commands.md) | Параметрические слэш-команды — полный паритет каталога IML в Intercom | Accepted · Implemented |
 | [0125](../../adr/0125-slash-workspace-file-commands-and-dynamic-completion.md) | Слэш-команды workspace/file — `/file open`, `/solution new`, динамические подсказки | Accepted · Implemented |
 | [0126](../../adr/0126-intercom-inspect-slash-and-compact-chrome-status.md) | Intercom inspect — `/topic`/`/spine` list\|tree и статус в chrome (compact) | Accepted · Implemented |
+| [0128](../../adr/0128-intercom-attachment-anchors-and-code-references.md) | Intercom — якоря вложений (code references) и канонический attach | Accepted · Implemented |
+| [0130](../../adr/0130-editor-agent-range-reveal-without-selection.md) | Подсветка диапазона кода для агента без изменения selection | Accepted · Implemented |
 
 
 ---

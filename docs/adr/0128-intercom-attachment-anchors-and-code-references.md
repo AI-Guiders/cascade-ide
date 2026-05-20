@@ -1,6 +1,6 @@
 # ADR 0128: Intercom — якоря вложений (code references) и канонический attach
 
-**Статус:** Proposed  
+**Статус:** Accepted · Implemented  
 **Дата:** 2026-05-19
 
 ## Связанные ADR
@@ -20,7 +20,7 @@
 | [0123](0123-intercom-full-skia-surface-evolution.md) | Skia-лента |
 | [0129](0129-intercom-message-body-markdown-and-fenced-code.md) | **Fenced code** и markdown в `content` — **не** этот ADR |
 | [0130](0130-editor-agent-range-reveal-without-selection.md) | MCP **reveal** диапазона без selection (агент); общий presentation mode с §8 |
-| [0131](0131-editor-slash-select-code-by-bracket-reference.md) | *(Proposed)* `/editor select code [M:…]` — bracket → select в редакторе, не attach |
+| [0131](0131-editor-slash-select-code-by-bracket-reference.md) | `/editor select code [M:…]` — bracket → select в редакторе, не attach |
 
 ### Вне ADR (playbook)
 
@@ -166,7 +166,7 @@
 | Слой | Ввод | `command_id` / механизм |
 |------|------|-------------------------|
 | **H0** | Выделение → attach | `attach_selection` → `/attach selection` |
-| **H0b** | Каретка в `for` → attach scope | `attach_scope` → `/attach scope` *(Proposed)* |
+| **H0b** | Каретка в `for` → attach scope | `attach_scope` → `/attach scope` *(фаза 3)* |
 | **H1** | `[M:Method]`, `[Foo.cs M:Method]` | Parse bracket → resolve member |
 | **H2** | `[diagram.png]`, `[appsettings.json]` | `whole-file` |
 | **M0** | `[Foo.cs 50 100]`, `[F:…; L:…]` | Агент, paste; positional fallback |
@@ -246,7 +246,7 @@
 |----------|---------|---------------|---------|
 | Открыть файл | `/file open` [0125](0125-slash-workspace-file-commands-and-dynamic-completion.md) | нет | нет |
 | Select/delete lines | `/editor line` [0124](0124-slash-parametric-editor-line-commands.md) | **да** | нет |
-| Select по смыслу в редакторе | `/editor select code [M:…]` [0131](0131-editor-slash-select-code-by-bracket-reference.md) *(Proposed)* | **да** | нет |
+| Select по смыслу в редакторе | `/editor select code [M:…]` [0131](0131-editor-slash-select-code-by-bracket-reference.md) | **да** | нет |
 | Прикрепить к реплике | `/attach …`, `[…]` | нет | **да** |
 | Агент показывает участок | MCP `reveal_editor_range` [0130](0130-editor-agent-range-reveal-without-selection.md) | нет | нет |
 | Агент идёт править | MCP `go_to_position` | **да** (select) | нет |
@@ -267,7 +267,7 @@
 | 4 | Scroll into view + **transient range highlight** (рамка / gutter band), **не** `Selection` |
 | 5 | Shift+клик или настройка → `SelectInEditor` |
 
-Отличие от MCP `go_to_position`: reveal = **просмотр**; go_to_position = **правка** агентом. Прямой MCP reveal без сообщения в чат — [0130](0130-editor-agent-range-reveal-without-selection.md) (`editor.reveal_range`); **фаза 1** — `intercom.reveal_attachment` вызывает тот же `EditorAgentRangeReveal`.
+Отличие от MCP `go_to_position`: reveal = **просмотр**; go_to_position = **правка** агентом. Прямой MCP reveal без сообщения в чат — [0130](0130-editor-agent-range-reveal-without-selection.md) (`editor.reveal_range`); **`intercom.reveal_attachment`** (и slash `/editor … code`) вызывают тот же `EditorAgentRangeReveal` / `IntercomAttachmentNavigator` — см. [0130](0130-editor-agent-range-reveal-without-selection.md), [0131](0131-editor-slash-select-code-by-bracket-reference.md).
 
 <a id="adr0128-p9"></a>
 
@@ -318,13 +318,13 @@
 
 ## Фазы внедрения
 
-| Фаза | Содержание | Зависимости |
-|------|------------|-------------|
-| **0** | Schema `AttachmentAnchor` + опционально `senderWorkspaceContext` на сообщении в [0045](0045-agent-chat-persistence-event-log-and-projections.md); projection в ленту | 0045, git |
-| **1** | `/attach selection`, `/attach file`; chips; resolve @ send; excerpt | 0125, 0111 |
-| **2** | Bracket parse `[M:…]`, `[path]`; `/attach` в TOML; reveal рамка | 0058, Roslyn |
-| **3** | `/attach scope`; `syntaxScope`; re-resolve @ recipient; Shift→select | 0053 опционально |
-| **4** | Structural picker; `[M:Foo S:for:2]`; stale hint | 0053 |
+| Фаза | Содержание | Зависимости | CIDE |
+|------|------------|-------------|------|
+| **0** | Schema `AttachmentAnchor` + опционально `senderWorkspaceContext` на сообщении в [0045](0045-agent-chat-persistence-event-log-and-projections.md); projection в ленту | 0045, git | **да** — payload `attachments[]`, `sender_workspace_context`, projector, лента |
+| **1** | `/attach selection`, `/attach file`; chips; resolve @ send; excerpt | 0125, 0111 | **да** — slash + marker в composer + `IntercomAttachmentResolveAtSend` |
+| **2** | Bracket parse `[M:…]`, `[path]`; `/attach` в TOML; reveal рамка; **composer autocomplete** в незакрытом `[` | 0058, Roslyn, 0125 | **да** — `BracketCodeReferenceParser`; reveal/select; клик в ленте → `intercom.reveal_attachment`; `ChatBracketAutocomplete` (оси `F`/`M`/`L`/`S`, файлы [0125]) |
+| **3** | `/attach scope`; `syntaxScope`; re-resolve @ recipient; Shift→select | 0053 опционально | **да** — `/attach scope`, `AttachmentAnchorCaretScopeResolver`, Shift+клик |
+| **4** | Structural picker (дерево узлов @ caret); chip `displayLabel`; stale hint | 0053 | **нет** — prose autocomplete в `[` — фаза **2**; полный picker — здесь |
 
 ---
 
@@ -386,3 +386,5 @@
 | 2026-05-19 | §9.1 исходы re-resolve: другая ветка / нет файла; excerpt как общий знаменатель. |
 | 2026-05-19 | §3.1 `senderWorkspaceContext` (ветка, commit) на уровне сообщения @ send. |
 | 2026-05-19 | §5.1 оси bracket `F` \| `M` \| `L` \| `S` (scope/statement); `S:for:n`, не `B:`; L2 с `S:`. |
+| 2026-05-20 | **Accepted · In progress**; колонка CIDE в фазах; связка с [0130](0130-editor-agent-range-reveal-without-selection.md) / [0131](0131-editor-slash-select-code-by-bracket-reference.md) в §8. |
+| 2026-05-20 | **Accepted · Implemented**; фаза 2: composer bracket autocomplete (`ChatBracketAutocomplete`, общий popup с slash); фаза 4 — только structural picker. |

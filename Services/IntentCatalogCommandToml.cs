@@ -66,6 +66,8 @@ internal sealed class SlashFormToml
     public string? ReportHandler { get; set; }
     /// <summary>Обработчик Intercom при <c>kind=intercom</c> (см. <see cref="Chat.ChatSlashIntercomHandlers"/>).</summary>
     public string? IntercomHandler { get; set; }
+    /// <summary><c>self</c> (по умолчанию) или <c>channel</c> — видимость ответа слэша в ленте (ADR 0119).</summary>
+    public string? Audience { get; set; }
 }
 
 /// <remarks><c>[command.form.slash.args]</c> → JSON args исполнителя.</remarks>

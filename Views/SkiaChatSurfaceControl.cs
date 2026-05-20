@@ -30,6 +30,7 @@ public partial class SkiaChatSurfaceControl : Control
     private WriteableBitmap? _skiaFrame;
     private int _skiaFrameWidth;
     private int _skiaFrameHeight;
+    private float _skiaFrameLayoutScale = 1f;
 
     public static readonly StyledProperty<ChatSurfaceSnapshot> SnapshotProperty =
         AvaloniaProperty.Register<SkiaChatSurfaceControl, ChatSurfaceSnapshot>(nameof(Snapshot), ChatSurfaceSnapshot.Empty);
@@ -212,8 +213,10 @@ public partial class SkiaChatSurfaceControl : Control
         var bottomChrome = (float)ResolveBottomChromeHeight((float)Math.Max(160, Bounds.Width));
         ClampScrollToContent(showOverviewCatalog, statusSubtitle, bottomChrome);
 
-        var pixelWidth = Math.Max(1, (int)Math.Ceiling(width));
-        var pixelHeight = Math.Max(1, (int)Math.Ceiling(Bounds.Height));
+        var layoutScale = ResolveLayoutScale();
+        var logicalHeight = Math.Max(1, Bounds.Height);
+        var pixelWidth = Math.Max(1, (int)Math.Ceiling(width * layoutScale));
+        var pixelHeight = Math.Max(1, (int)Math.Ceiling(logicalHeight * layoutScale));
         var surfaceColor = _theme.Surface;
         var fallbackBrush = new SolidColorBrush(
             Color.FromArgb(byte.MaxValue, surfaceColor.Red, surfaceColor.Green, surfaceColor.Blue));
@@ -223,7 +226,7 @@ public partial class SkiaChatSurfaceControl : Control
         if (!IsIntercomSkiaRenderingEnabled())
             return;
 
-        var bitmap = EnsureSkiaFrameBitmap(pixelWidth, pixelHeight);
+        var bitmap = EnsureSkiaFrameBitmap(pixelWidth, pixelHeight, layoutScale);
         using (var framebuffer = bitmap.Lock())
         {
             var info = new SKImageInfo(pixelWidth, pixelHeight, SKColorType.Bgra8888, SKAlphaType.Premul);
@@ -231,16 +234,21 @@ public partial class SkiaChatSurfaceControl : Control
             if (skSurface is null)
                 return;
 
+            var canvas = skSurface.Canvas;
+            canvas.Save();
+            canvas.Scale(layoutScale);
             DrawSkiaScene(
-                skSurface.Canvas,
-                (float)pixelWidth,
-                (float)pixelHeight,
+                canvas,
+                (float)width,
+                (float)logicalHeight,
                 placed,
                 (float)_scrollOffset,
                 showOverviewCatalog,
                 snapshot.Layout.Overview.Count,
                 statusSubtitle,
-                bottomChrome);
+                bottomChrome,
+                layoutScale);
+            canvas.Restore();
         }
 
         var srcRect = new Rect(0, 0, bitmap.PixelSize.Width, bitmap.PixelSize.Height);
@@ -253,17 +261,28 @@ public partial class SkiaChatSurfaceControl : Control
             "0",
             StringComparison.Ordinal);
 
-    private WriteableBitmap EnsureSkiaFrameBitmap(int width, int height)
+    private float ResolveLayoutScale()
     {
-        if (_skiaFrame is not null && _skiaFrameWidth == width && _skiaFrameHeight == height)
+        var scale = TopLevel.GetTopLevel(this)?.RenderScaling ?? 1.0;
+        return scale > 0 ? (float)scale : 1f;
+    }
+
+    private WriteableBitmap EnsureSkiaFrameBitmap(int pixelWidth, int pixelHeight, float layoutScale)
+    {
+        if (_skiaFrame is not null
+            && _skiaFrameWidth == pixelWidth
+            && _skiaFrameHeight == pixelHeight
+            && Math.Abs(_skiaFrameLayoutScale - layoutScale) < 0.001f)
             return _skiaFrame;
 
         _skiaFrame?.Dispose();
-        _skiaFrameWidth = width;
-        _skiaFrameHeight = height;
+        _skiaFrameWidth = pixelWidth;
+        _skiaFrameHeight = pixelHeight;
+        _skiaFrameLayoutScale = layoutScale;
+        var dpi = 96.0 * layoutScale;
         _skiaFrame = new WriteableBitmap(
-            new PixelSize(width, height),
-            new Vector(96, 96),
+            new PixelSize(pixelWidth, pixelHeight),
+            new Vector(dpi, dpi),
             PixelFormat.Bgra8888,
             AlphaFormat.Premul);
         return _skiaFrame;
@@ -281,7 +300,8 @@ public partial class SkiaChatSurfaceControl : Control
         bool showOverviewCatalog,
         int overviewTopicCount,
         string? statusSubtitle,
-        float bottomChrome)
+        float bottomChrome,
+        float layoutScale)
     {
         canvas.Clear(_theme.Surface);
 
@@ -326,9 +346,17 @@ public partial class SkiaChatSurfaceControl : Control
 
         if (placed.Count == 0)
         {
-            using var emptyFont = new SKFont(SKTypeface.FromFamilyName("Segoe UI"), 11);
-            using var emptyPaint = new SKPaint { IsAntialias = true, Color = _theme.EmptyHint };
-            canvas.DrawText("Пока пусто. Задай вопрос или команду.", contentLeft, 28, SKTextAlign.Left, emptyFont, emptyPaint);
+            using var emptyFont = SkiaKit.SkiaKitFonts.CreateUi(11);
+            using var emptyPaint = SkiaKit.SkiaKitFonts.CreateTextPaint(_theme.EmptyHint);
+            SkiaKit.SkiaKitFonts.DrawText(
+                canvas,
+                "Пока пусто. Задай вопрос или команду.",
+                contentLeft,
+                28,
+                SKTextAlign.Left,
+                emptyFont,
+                emptyPaint,
+                layoutScale);
         }
         else
         {
@@ -361,7 +389,7 @@ public partial class SkiaChatSurfaceControl : Control
         }
 
         canvas.Restore();
-        DrawIntercomBottomChrome(canvas, width, height, _theme);
+        DrawIntercomBottomChrome(canvas, width, height, _theme, layoutScale);
     }
 
     private void OnActualThemeVariantChanged(object? sender, EventArgs e)
@@ -453,6 +481,15 @@ public partial class SkiaChatSurfaceControl : Control
         if (index < 0)
             return;
         var hit = _hitTargets[index].Hit;
+        if (hit.RevealAttachment is { } attachAnchor)
+        {
+            var select = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
+            AttachmentRevealRequested?.Invoke(this, new IntercomAttachmentRevealEventArgs(attachAnchor, select));
+            e.Handled = true;
+            InvalidateVisual();
+            return;
+        }
+
         if (hit.ResetDetailMode)
             OverviewMode = true;
         else if (hit.SelectThreadId is { } threadId)

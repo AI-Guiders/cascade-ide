@@ -19,7 +19,8 @@ internal static class SkiaPopupList
         SKRect bounds,
         ISkiaKitPaintTheme theme,
         IReadOnlyList<SkiaPopupListRow> rows,
-        int selectedIndex)
+        int selectedIndex,
+        float layoutScale = 1f)
     {
         if (rows.Count == 0)
             return;
@@ -53,19 +54,43 @@ internal static class SkiaPopupList
 
             if (!string.IsNullOrWhiteSpace(row.Group))
             {
-                using var groupFont = new SKFont(SKTypeface.FromFamilyName("Segoe UI"), 10);
-                using var groupPaint = new SKPaint { IsAntialias = true, Color = theme.EmptyHint };
-                canvas.DrawText(row.Group, rowRect.Left + 6f, rowRect.Top + 12f, SKTextAlign.Left, groupFont, groupPaint);
+                using var groupFont = SkiaKitFonts.CreateUi(10);
+                using var groupPaint = SkiaKitFonts.CreateTextPaint(theme.EmptyHint);
+                SkiaKitFonts.DrawText(
+                    canvas,
+                    row.Group,
+                    rowRect.Left + 6f,
+                    rowRect.Top + 12f,
+                    SKTextAlign.Left,
+                    groupFont,
+                    groupPaint,
+                    layoutScale);
             }
 
-            using var titleFont = new SKFont(SKTypeface.FromFamilyName("Segoe UI", SKFontStyle.Bold), 12);
-            using var titlePaint = new SKPaint { IsAntialias = true, Color = theme.Content };
-            canvas.DrawText(row.Title, rowRect.Left + 6f, rowRect.Top + 28f, SKTextAlign.Left, titleFont, titlePaint);
+            using var titleFont = SkiaKitFonts.CreateUi(12, bold: true);
+            using var titlePaint = SkiaKitFonts.CreateTextPaint(theme.Content);
+            SkiaKitFonts.DrawText(
+                canvas,
+                row.Title,
+                rowRect.Left + 6f,
+                rowRect.Top + 28f,
+                SKTextAlign.Left,
+                titleFont,
+                titlePaint,
+                layoutScale);
 
-            using var subFont = new SKFont(SKTypeface.FromFamilyName("Segoe UI"), 10);
-            using var subPaint = new SKPaint { IsAntialias = true, Color = theme.EmptyHint };
+            using var subFont = SkiaKitFonts.CreateUi(10);
+            using var subPaint = SkiaKitFonts.CreateTextPaint(theme.EmptyHint);
             var subtitle = Truncate(row.Subtitle, 72);
-            canvas.DrawText(subtitle, rowRect.Left + 6f, rowRect.Top + 44f, SKTextAlign.Left, subFont, subPaint);
+            SkiaKitFonts.DrawText(
+                canvas,
+                subtitle,
+                rowRect.Left + 6f,
+                rowRect.Top + 44f,
+                SKTextAlign.Left,
+                subFont,
+                subPaint,
+                layoutScale);
 
             y += RowHeight;
         }

@@ -1,6 +1,6 @@
 # ADR 0131: `/editor select code` — selection в редакторе по bracket-ссылке `[F:… M:…]`
 
-**Статус:** Accepted (фаза 1)  
+**Статус:** Accepted · In progress  
 **Дата:** 2026-05-19
 
 ## Связанные ADR
@@ -83,7 +83,7 @@ MCP **не обязан** парсить prose `[M:…]` — только struct
 |------|------------|
 | **0** | ADR; согласовать `command_id` и tail в `intent-catalog.toml` |
 | **1** *(done)* | `BracketCodeReferenceParser` (`F`/`M`/`L`); `/editor select code`, `/editor reveal code`; `editor.select_code` / `editor.reveal_code` |
-| **2** | Parse **`S:kind:n`** в bracket (→ `syntaxScope`); autocomplete member/path/scope; полный L2 |
+| **2** *(частично)* | Parse **`S:kind:n`** в bracket (→ `syntaxScope`) — **done** (`BracketCodeReferenceParser`); паритет melody `c:esc` / `c:erc` — **done**; autocomplete member/path/scope — позже |
 | **3** | Паритет hotkey / palette melody рядом с `c:els` |
 
 ---
@@ -102,3 +102,5 @@ MCP **не обязан** парсить prose `[M:…]` — только struct
 |------|-----------|
 | 2026-05-19 | Proposed: идея `/editor select code [F:/M:…]`; ортогонально attach и 0124 line select. |
 | 2026-05-19 | Фаза 2: ось **`S:`** (syntax scope) в bracket — канон [0128](0128-intercom-attachment-anchors-and-code-references.md) §5.1. |
+| 2026-05-20 | Фаза 2 (часть): `ParametricIntentMelody` для `bracket_code_ref` (`c:esc`, `c:erc`). |
+| 2026-05-20 | Кластер ADR: [0128](0128-intercom-attachment-anchors-and-code-references.md) (attach UX) · [0129](0129-intercom-message-body-markdown-and-fenced-code.md) (fenced) · [0130](0130-editor-agent-range-reveal-without-selection.md) (reveal) · этот ADR (select/reveal slash). |

@@ -13,6 +13,9 @@ public static class ChatSlashIntercomHandlers
         public const string TopicList = "topic_list";
         public const string TopicTree = "topic_tree";
         public const string TopicCreate = "topic_create";
+        public const string AttachSelection = "attach_selection";
+        public const string AttachScope = "attach_scope";
+        public const string AttachFile = "attach_file";
     }
 
     public sealed record Context(
@@ -22,7 +25,8 @@ public static class ChatSlashIntercomHandlers
         Action<bool> SetOverviewMode,
         ChatSurfaceSnapshot Snapshot,
         Action<TopicPickerPresentation>? SetTopicPicker,
-        Func<string, TopicCreateResult>? CreateTopicWithTitle);
+        Func<string, TopicCreateResult>? CreateTopicWithTitle,
+        Func<string, string?, ChatSlashIntercomResult>? TryAttachSlash);
 
     private delegate ChatSlashIntercomResult Handler(Context context);
 
@@ -54,7 +58,17 @@ public static class ChatSlashIntercomHandlers
             [Ids.TopicCreate] = static ctx => ChatSlashIntercomActions.CreateTopic(
                 ctx.ArgsTail,
                 ctx.CreateTopicWithTitle),
+            [Ids.AttachSelection] = static ctx => executeAttach(ctx, Ids.AttachSelection),
+            [Ids.AttachScope] = static ctx => executeAttach(ctx, Ids.AttachScope),
+            [Ids.AttachFile] = static ctx => executeAttach(ctx, Ids.AttachFile),
         };
+
+    private static ChatSlashIntercomResult executeAttach(Context ctx, string handlerId)
+    {
+        if (ctx.TryAttachSlash is null)
+            return ChatSlashIntercomResult.Fail("Attach недоступен в этой сессии.");
+        return ctx.TryAttachSlash(handlerId, ctx.ArgsTail);
+    }
 
     public static bool IsKnown(string handlerId) => Handlers.ContainsKey(handlerId);
 

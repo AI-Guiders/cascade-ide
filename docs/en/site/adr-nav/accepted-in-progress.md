@@ -12,6 +12,8 @@ Accepted; implementation in progress.
 | ID | Title | Status (raw) |
 |----|-------|----------------|
 | [0106](../../adr/0106-hybrid-codebase-index-cascadeide-integration-and-semantic-map.md) | Hybrid Codebase Index - integration into CascadeIDE, freshness and Semantic Map | Accepted · In progress |
+| [0129](../../adr/0129-intercom-message-body-markdown-and-fenced-code.md) | Intercom — тело сообщения: Markdown, fenced code и preview | Accepted · In progress |
+| [0131](../../adr/0131-editor-slash-select-code-by-bracket-reference.md) | `/editor select code` — selection в редакторе по bracket-ссылке `[F:… M:…]` | Accepted · In progress |
 
 
 ---

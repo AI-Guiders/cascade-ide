@@ -1,5 +1,6 @@
 #nullable enable
 using CascadeIDE.Features.Chat;
+using CascadeIDE.Models.Intercom;
 
 namespace CascadeIDE.Services;
 
@@ -263,6 +264,7 @@ internal static class IntentCatalogLoader
         var completion = ParseSlashCompletion(row.Completion, path, slashPath);
         var reportHandler = ResolveReportHandler(row, kind, path, slashPath);
         var intercomHandler = ResolveIntercomHandler(row, kind, path, slashPath);
+        var audience = ParseSlashAudience(row.Audience, path, slashPath);
 
         routes[slashPath] = new SlashRouteEntry(
             slashPath,
@@ -274,7 +276,23 @@ internal static class IntentCatalogLoader
             group,
             completion,
             reportHandler,
-            intercomHandler);
+            intercomHandler,
+            audience);
+    }
+
+    private static IntercomMessageAudience ParseSlashAudience(string? raw, string path, string slashPath)
+    {
+        // ADR 0119 §7: слэш-команды local — не расширяют промпт агента; channel только явно в TOML.
+        if (string.IsNullOrWhiteSpace(raw))
+            return IntercomMessageAudience.SelfOnly;
+
+        return raw.Trim().ToLowerInvariant() switch
+        {
+            "channel" => IntercomMessageAudience.Channel,
+            "self" or "self_only" or "local" => IntercomMessageAudience.SelfOnly,
+            _ => throw new InvalidOperationException(
+                $"{path}: slash '{slashPath}' unknown audience '{raw}' (channel | self)."),
+        };
     }
 
     private static string? ResolveReportHandler(

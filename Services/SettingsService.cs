@@ -1,3 +1,4 @@
+using CascadeIDE.Features.Chat;
 using CascadeIDE.Models;
 
 namespace CascadeIDE.Services;
@@ -25,6 +26,7 @@ public static class SettingsService
         if (toml is null)
         {
             _settingsFileMtimeUtcAtLastLoad = mtime;
+            IntercomSendTrace.InvalidateSettingsCache();
             return ValidateAndReturn(new CascadeIdeSettings());
         }
 
@@ -33,11 +35,13 @@ public static class SettingsService
             var normalized = NormalizeFriendlySectionAliases(toml);
             var settings = CascadeTomlSerializer.Deserialize<CascadeIdeSettings>(normalized) ?? new CascadeIdeSettings();
             _settingsFileMtimeUtcAtLastLoad = mtime;
+            IntercomSendTrace.InvalidateSettingsCache();
             return ValidateAndReturn(settings);
         }
         catch
         {
             _settingsFileMtimeUtcAtLastLoad = mtime;
+            IntercomSendTrace.InvalidateSettingsCache();
             return ValidateAndReturn(new CascadeIdeSettings());
         }
     }
@@ -69,6 +73,7 @@ public static class SettingsService
             var toml = CascadeTomlSerializer.Serialize(settings);
             UserSettingsTomlFileAccess.WriteAllText(toml, out var writtenMtime);
             _settingsFileMtimeUtcAtLastLoad = writtenMtime;
+            IntercomSendTrace.InvalidateSettingsCache();
         }
         catch
         {

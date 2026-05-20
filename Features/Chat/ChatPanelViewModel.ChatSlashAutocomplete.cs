@@ -14,7 +14,7 @@ public partial class ChatPanelViewModel
     [ObservableProperty]
     private int _selectedChatSlashSuggestionIndex = -1;
 
-    partial void OnChatInputChanged(string value) => RefreshChatSlashAutocomplete();
+    partial void OnChatInputChanged(string value) => RefreshComposerAutocomplete();
 
     /// <param name="inputOverride">Текст из TextBox при <c>TextChanged</c> (биндинг может отставать на один тик).</param>
     public void RefreshChatSlashAutocomplete(string? inputOverride = null)
@@ -34,6 +34,7 @@ public partial class ChatPanelViewModel
             OnPropertyChanged(nameof(IsChatSlashAutocompleteVisible));
 
         SelectedChatSlashSuggestionIndex = visible ? 0 : -1;
+        rebuildComposerPopup();
     }
 
     public void MoveChatSlashSuggestionSelection(int delta)

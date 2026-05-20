@@ -123,7 +123,8 @@ public static partial class ChatSlashCommandCatalog
             route.MfdPage,
             route.PrimarySurface,
             route.Group,
-            route.Completion);
+            route.Completion,
+            route.MessageAudience);
 
     internal static bool TryGetRoute(string slashPath, out SlashRouteEntry route) =>
         IntentSlashCatalog.TryGetRoute(slashPath, out route);

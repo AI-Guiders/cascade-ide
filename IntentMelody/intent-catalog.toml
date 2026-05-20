@@ -100,6 +100,37 @@ path = "/editor reveal code"
 help = "Показать фрагмент по bracket без изменения selection."
 group = "Editor"
 
+# attach_selection — прикрепить выделение в редакторе (ADR 0128)
+[[command]]
+
+[[command.form.slash]]
+path = "/attach selection"
+help = "Прикрепить текущее выделение в редакторе к черновику сообщения."
+group = "Intercom"
+kind = "intercom"
+intercom_handler = "attach_selection"
+
+# attach_scope — syntax scope @ caret (ADR 0128 H0b)
+[[command]]
+
+[[command.form.slash]]
+path = "/attach scope"
+help = "Прикрепить innermost for/if/while @ каретке."
+group = "Intercom"
+kind = "intercom"
+intercom_handler = "attach_scope"
+
+# attach_file — файл или диапазон строк (ADR 0128)
+[[command]]
+
+[[command.form.slash]]
+path = "/attach file"
+help = "Прикрепить файл: /attach file <path> [start] [end]."
+group = "Intercom"
+kind = "intercom"
+intercom_handler = "attach_file"
+completion = "workspace_files"
+
 # ==============================================================================
 # Intercom
 # ==============================================================================
@@ -878,11 +909,12 @@ intercom_handler = "spine_open"
 # Help
 # ==============================================================================
 
-# local — Список слэш-команд. (/help)
+# local — Справка Intercom (локально, не в общий канал). (/help)
 [[command]]
 
 [[command.form.slash]]
 path = "/help"
-help = "Список слэш-команд."
+help = "Справка Intercom: темы, [вложения], слэши; /help <namespace> — только команды."
 group = "Справка"
 kind = "help"
+audience = "self"
