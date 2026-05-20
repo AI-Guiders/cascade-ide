@@ -69,6 +69,8 @@
 | 0130 | [reveal без selection (MCP)](0130-editor-agent-range-reveal-without-selection.md) — **Implemented** |
 | 0131 | [`/editor select|reveal code […]`](0131-editor-slash-select-code-by-bracket-reference.md) — **In progress** |
 | 0132 | [federated transport](0132-intercom-federated-transport-and-multi-client-boundary.md) — **Proposed** (wire для команды) |
+| 0134 | [prepare-pipeline](0134-intercom-message-prepare-pipeline-v1.md) — **In progress** (MCP fast path @ send) |
+| 0135 | [symbol cache + HCI sidecar](0135-intercom-attach-symbol-cache-and-hci-sidecar.md) — **In progress** (L1 parse cache, L2 SQLite @ HCI reindex) |
 
 <a id="adr-index-full"></a>
 
@@ -206,6 +208,8 @@
 | [0130](0130-editor-agent-range-reveal-without-selection.md) | Подсветка диапазона кода для агента без изменения selection (`reveal_editor_range`, `EditorAgentRangeReveal`) | Accepted · Implemented |
 | [0131](0131-editor-slash-select-code-by-bracket-reference.md) | `/editor select|reveal code [M:…]` — bracket → select/reveal в буфере, не attach | Accepted · In progress |
 | [0132](0132-intercom-federated-transport-and-multi-client-boundary.md) | Intercom: federated transport, multi-client; тот же wire `AttachmentAnchor` для команды | Proposed |
+| [0134](0134-intercom-message-prepare-pipeline-v1.md) | Intercom: единый prepare-pipeline (wire, Skia, MCP fail-closed) | Accepted · In progress |
+| [0135](0135-intercom-attach-symbol-cache-and-hci-sidecar.md) | Intercom attach: L1 Roslyn file cache, L2 symbol sidecar colocated с HCI | Accepted · In progress |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 
