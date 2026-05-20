@@ -68,7 +68,7 @@ internal static class IntercomSlashPathBuilder
         var innerVerb = firstToken(tail);
         if (string.Equals(parse.Action, "message", StringComparison.OrdinalIgnoreCase)
             && tail.Length > 0
-            && ChatSlashParametricArgsBuilder.TryParseLineRangeTail(tail, out _, out _, out _))
+            && isMessageSelectRangeTail(tail))
         {
             slashPath = "/intercom message select";
             return true;
@@ -122,6 +122,10 @@ internal static class IntercomSlashPathBuilder
         var secondSpace = rest.IndexOf(' ');
         return secondSpace < 0 ? rest : rest[..secondSpace];
     }
+
+    private static bool isMessageSelectRangeTail(string tail) =>
+        ParametricSegmentListParser.TryParse(tail, out _, out _)
+        || ChatSlashParametricArgsBuilder.TryParseLineRangeTail(tail, out _, out _, out _);
 
     private static bool isKnownInnerVerb(string group, string verb) =>
         group.ToLowerInvariant() switch

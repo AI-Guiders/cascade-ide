@@ -75,8 +75,11 @@ internal static class ChatSlashParametricArgsBuilder
         out string error)
     {
         args = null;
-        if (!TryParseLineRangeTail(argsTail, out var start, out var end, out error))
+        if (!ParametricSegmentListParser.TryParseSingleContiguous(argsTail, out var contiguous, out error))
             return false;
+
+        var start = contiguous.Start;
+        var end = contiguous.End;
 
         if (!LineNumber.TryCreate(start, out var lnStart)
             || !LineNumber.TryCreate(end, out var lnEnd)

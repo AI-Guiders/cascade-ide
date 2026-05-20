@@ -26,4 +26,16 @@ public sealed class ChatSlashIntercomMessageSelectTests
         Assert.False(ChatSlashParametricArgsBuilder.TryParseLineRangeTail("3 5 7", out _, out _, out var error));
         Assert.Contains("Ожидается", error);
     }
+
+    [Fact]
+    public void Parse_BracketSegments_InMessageSelect()
+    {
+        var parse = ChatSlashCommandParser.TryParse("/intercom message select [3;5] [8;15] [20]");
+        Assert.True(parse.IsSlashLine);
+        Assert.Equal("[3;5] [8;15] [20]", parse.ArgsTail);
+        Assert.True(ParametricSegmentListParser.TryParse(parse.ArgsTail, out var segments, out _));
+        Assert.Equal(3, segments.Count);
+        Assert.True(ChatSlashCommandCatalog.TryResolve(parse, out var d));
+        Assert.Equal("/intercom message select", d.SlashPath);
+    }
 }

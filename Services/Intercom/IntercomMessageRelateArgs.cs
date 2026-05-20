@@ -53,9 +53,11 @@ public static class IntercomMessageRelateArgs
             return false;
         }
 
-        if (!ChatSlashParametricArgsBuilder.TryParseLineRangeTail(rangePart, out startOrdinal, out endOrdinal, out error))
+        if (!ParametricSegmentListParser.TryParseSingleContiguous(rangePart, out var range, out error))
             return false;
 
+        startOrdinal = range.Start;
+        endOrdinal = range.End;
         codeRefTail = codePart;
         return true;
     }
