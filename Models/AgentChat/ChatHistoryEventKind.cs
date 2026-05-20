@@ -13,4 +13,7 @@ public static class ChatHistoryEventKind
 
     /// <summary>Новая ветка: payload — new_thread_id, previous_thread_id, optional parent_message_id.</summary>
     public const string ThreadForked = "thread_forked";
+
+    /// <summary>Явная связь диапазона gutter-сообщений с кодом (ADR 0137): payload — <see cref="ChatHistoryMessageRangeRelatedPayload"/>.</summary>
+    public const string MessageRangeRelated = "message_range_related";
 }

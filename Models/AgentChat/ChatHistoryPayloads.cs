@@ -33,3 +33,11 @@ public sealed record ChatHistoryThreadForkedPayload(
 public sealed record ChatHistoryClarificationAnswerSubmittedPayload(
     [property: JsonPropertyName("batch_id")] string BatchId,
     [property: JsonPropertyName("answers")] IReadOnlyDictionary<string, string> Answers);
+
+/// <summary>Явная связь contiguous gutter ordinals с кодом (<see cref="ChatHistoryEventKind.MessageRangeRelated"/>, ADR 0137).</summary>
+public sealed record ChatHistoryMessageRangeRelatedPayload(
+    [property: JsonPropertyName("thread_id")] string ThreadId,
+    [property: JsonPropertyName("start_ordinal")] int StartOrdinal,
+    [property: JsonPropertyName("end_ordinal")] int EndOrdinal,
+    [property: JsonPropertyName("code_ref")] AttachmentAnchor CodeRef,
+    [property: JsonPropertyName("source")] string Source);

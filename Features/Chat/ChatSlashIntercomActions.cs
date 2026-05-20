@@ -16,7 +16,10 @@ public static class ChatSlashIntercomActions
         out ChatSlashIntercomResult result,
         Action<TopicPickerPresentation>? setTopicPicker = null,
         Func<string, TopicCreateResult>? createTopicWithTitle = null,
-        Func<string, string?, ChatSlashIntercomResult>? tryAttachSlash = null)
+        Func<string, string?, ChatSlashIntercomResult>? tryAttachSlash = null,
+        Func<int, int, string>? selectMessageByOrdinalRangeInDetailLane = null,
+        Func<string?, string>? findMessagesForCodeRef = null,
+        Func<string?, string>? relateMessageRangeToCodeRef = null)
     {
         result = ChatSlashIntercomResult.Fail("");
         if (!IntentSlashCatalog.TryGetRoute(slashPath, out var route)
@@ -36,7 +39,10 @@ public static class ChatSlashIntercomActions
                     snapshot,
                     setTopicPicker,
                     createTopicWithTitle,
-                    tryAttachSlash),
+                    tryAttachSlash,
+                    selectMessageByOrdinalRangeInDetailLane,
+                    findMessagesForCodeRef,
+                    relateMessageRangeToCodeRef),
                 out result))
         {
             result = ChatSlashIntercomResult.Fail($"Неизвестное действие: {slashPath}");
@@ -66,7 +72,7 @@ public static class ChatSlashIntercomActions
         ChatSurfaceSnapshot snapshot)
     {
         if (setTopicPicker is null)
-            return ChatSlashIntercomResult.Fail("Интерактивный список тем недоступен. Для агента: /topic list text.");
+            return ChatSlashIntercomResult.Fail("Интерактивный список тем недоступен. Для агента: /intercom topic list text.");
 
         if (snapshot.State.Threads.Count == 0)
             return ChatSlashIntercomResult.Fail(ChatThreadPresentation.EmptyTopicsHint);
@@ -99,10 +105,10 @@ public static class ChatSlashIntercomActions
         setOverviewMode(true);
         if (!snapshot.ProductSpine.HasContent)
             return ChatSlashIntercomResult.Ok(
-                "Картотека тем. Spine пуст — /spine set <текст>. Открыть тему: /topic open <имя>.");
+                "Картотека тем. Spine пуст — /intercom spine set <текст>. Открыть тему: /intercom topic open <имя>.");
 
         var title = ChatProductSpinePresentation.ResolveLineTitle(snapshot.ProductSpine);
         return ChatSlashIntercomResult.Ok(
-            $"Картотека тем: spine «{title}». /topic open <имя> — открыть тему.");
+            $"Картотека тем: spine «{title}». /intercom topic open <имя> — открыть тему.");
     }
 }

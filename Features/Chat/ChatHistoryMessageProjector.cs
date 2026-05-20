@@ -48,6 +48,23 @@ internal static class ChatHistoryMessageProjector
         return rows;
     }
 
+    /// <summary>
+    /// Восстановить корневую ветку из событий (meta без <c>main_thread_id</c> или сброс после миграции).
+    /// </summary>
+    public static Guid InferMainThreadId(IReadOnlyList<ChatHistoryEvent> events)
+    {
+        var rows = Project(events, Guid.Empty);
+        if (rows.Count == 0)
+            return Guid.NewGuid();
+
+        return rows
+            .GroupBy(row => row.ThreadId)
+            .OrderByDescending(group => group.Count())
+            .ThenBy(group => rows.FindIndex(row => row.ThreadId == group.Key))
+            .First()
+            .Key;
+    }
+
     private static void Upsert(
         List<Row> rows,
         Dictionary<Guid, int> indexById,

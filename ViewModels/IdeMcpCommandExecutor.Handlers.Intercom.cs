@@ -16,6 +16,7 @@ internal sealed partial class IdeMcpCommandExecutor
                 return err;
 
             var workspaceRoot = TryGetWorkspaceRoot(a);
+            var solutionPath = TryGetAttachSolutionPath();
             return await Task.FromResult(IntercomAttachmentNavigator.Apply(
                 a,
                 _vm.GetCascadeSettingsForExecutor().Intercom,
@@ -23,11 +24,24 @@ internal sealed partial class IdeMcpCommandExecutor
                 anchor,
                 selectExplicit,
                 shiftSelect: false,
-                durationMs));
+                durationMs,
+                solutionPath));
         });
 
         add(Services.IdeCommands.EditorSelectCode, ExecuteEditorCodeRefNavigation(select: true));
         add(Services.IdeCommands.EditorRevealCode, ExecuteEditorCodeRefNavigation(select: false));
+
+        add(Services.IdeCommands.IntercomMessagesForCode, async (args, _) =>
+        {
+            var a = (IIdeMcpActions)_vm;
+            return await a.FindIntercomMessagesForCodeAsync(args);
+        });
+
+        add(Services.IdeCommands.IntercomMessageRelate, async (args, _) =>
+        {
+            var a = (IIdeMcpActions)_vm;
+            return await a.RelateIntercomMessageRangeToCodeAsync(args);
+        });
     }
 
     private Handler ExecuteEditorCodeRefNavigation(bool select) => async (args, ct) =>
@@ -40,6 +54,7 @@ internal sealed partial class IdeMcpCommandExecutor
             return err;
 
         var workspaceRoot = TryGetWorkspaceRoot(a);
+        var solutionPath = TryGetAttachSolutionPath();
         if (!BracketCodeReferenceParser.TryToAttachmentAnchor(reference, activeFile, workspaceRoot, out var anchor, out err))
             return err;
 
@@ -50,6 +65,7 @@ internal sealed partial class IdeMcpCommandExecutor
             anchor,
             selectExplicit: select,
             shiftSelect: false,
-            durationMs));
+            durationMs,
+            solutionPath));
     };
 }

@@ -104,7 +104,7 @@ group = "Editor"
 [[command]]
 
 [[command.form.slash]]
-path = "/attach selection"
+path = "/intercom attach selection"
 help = "Прикрепить текущее выделение в редакторе к черновику сообщения."
 group = "Intercom"
 kind = "intercom"
@@ -114,7 +114,7 @@ intercom_handler = "attach_selection"
 [[command]]
 
 [[command.form.slash]]
-path = "/attach scope"
+path = "/intercom attach scope"
 help = "Прикрепить innermost for/if/while @ каретке."
 group = "Intercom"
 kind = "intercom"
@@ -124,7 +124,7 @@ intercom_handler = "attach_scope"
 [[command]]
 
 [[command.form.slash]]
-path = "/attach file"
+path = "/intercom attach file"
 help = "Прикрепить файл: /attach file <path> [start] [end]."
 group = "Intercom"
 kind = "intercom"
@@ -151,7 +151,7 @@ group = "Intercom"
 command_id = "chat_get_product_spine"
 
 [[command.form.slash]]
-path = "/spine show"
+path = "/intercom spine show"
 help = "Показать текущий spine (JSON)."
 group = "Intercom"
 
@@ -172,6 +172,11 @@ command_id = "chat_select_next_message"
 melody_slug = "amn"
 melody_shape = "simple"
 
+[[command.form.slash]]
+path = "/intercom message next"
+help = "Следующее сообщение в detail-ленте."
+group = "Intercom"
+
 # chat_select_next_thread — Следующая тема в overview. (/thread next)
 [[command]]
 command_id = "chat_select_next_thread"
@@ -179,7 +184,7 @@ melody_slug = "atn"
 melody_shape = "simple"
 
 [[command.form.slash]]
-path = "/thread next"
+path = "/intercom topic next"
 help = "Следующая тема в overview."
 group = "Intercom"
 
@@ -189,6 +194,11 @@ command_id = "chat_select_prev_message"
 melody_slug = "amp"
 melody_shape = "simple"
 
+[[command.form.slash]]
+path = "/intercom message prev"
+help = "Предыдущее сообщение в detail-ленте."
+group = "Intercom"
+
 # chat_select_prev_thread — Предыдущая тема в overview. (/thread prev)
 [[command]]
 command_id = "chat_select_prev_thread"
@@ -196,7 +206,7 @@ melody_slug = "atp"
 melody_shape = "simple"
 
 [[command.form.slash]]
-path = "/thread prev"
+path = "/intercom topic prev"
 help = "Предыдущая тема в overview."
 group = "Intercom"
 
@@ -205,7 +215,7 @@ group = "Intercom"
 command_id = "chat_set_product_spine"
 
 [[command.form.slash]]
-path = "/spine set"
+path = "/intercom spine set"
 help = "Обновить product spine (хвост — focus)."
 group = "Intercom"
 
@@ -216,7 +226,7 @@ melody_slug = "atb"
 melody_shape = "simple"
 
 [[command.form.slash]]
-path = "/overview"
+path = "/intercom overview"
 help = "Показать картотеку тем."
 group = "Intercom"
 
@@ -225,7 +235,7 @@ group = "Intercom"
 command_id = "chat_toggle_product_spine_in_agent_context"
 
 [[command.form.slash]]
-path = "/spine toggle"
+path = "/intercom spine toggle"
 help = "Spine в контексте агента: вкл/выкл."
 group = "Intercom"
 
@@ -241,19 +251,11 @@ command_id = "chat_toggle_show_thinking_in_history"
 melody_slug = "amh"
 melody_shape = "simple"
 
-# fork_chat_thread — Новая ветка (MCP / melody ctf). Заголовок — /topic create или /card.
+# fork_chat_thread — Новая ветка (MCP / melody ctf). Заголовок — /intercom topic create.
 [[command]]
 command_id = "fork_chat_thread"
 melody_slug = "ctf"
 melody_shape = "simple"
-
-[[command]]
-[[command.form.slash]]
-path = "/card"
-help = "Новая тема с заголовком (алиас /topic create). Хвост — название."
-group = "Intercom"
-kind = "intercom"
-intercom_handler = "topic_create"
 
 # send_chat — Отправить черновик из поля ввода (как c:cs). (c:cs · /chat send)
 [[command]]
@@ -826,7 +828,7 @@ group = "Web AI Portal"
 
 [[command]]
 [[command.form.slash]]
-path = "/topic list"
+path = "/intercom topic list"
 help = "Интерактивный список тем в ленте (клик — открыть). Текст для агента: /topic list text."
 group = "Intercom"
 kind = "intercom"
@@ -834,7 +836,7 @@ intercom_handler = "topic_list"
 
 [[command]]
 [[command.form.slash]]
-path = "/topic list text"
+path = "/intercom topic list text"
 help = "Текстовый список тем (для агента): main, active, число сообщений."
 group = "Intercom"
 kind = "report"
@@ -842,7 +844,7 @@ report_handler = "topic_list_text"
 
 [[command]]
 [[command.form.slash]]
-path = "/topic tree"
+path = "/intercom topic tree"
 help = "Интерактивное дерево тем в ленте (клик — открыть). Текст: /topic tree text."
 group = "Intercom"
 kind = "intercom"
@@ -850,7 +852,7 @@ intercom_handler = "topic_tree"
 
 [[command]]
 [[command.form.slash]]
-path = "/topic tree text"
+path = "/intercom topic tree text"
 help = "Текстовое дерево веток (fork) с числом сообщений."
 group = "Intercom"
 kind = "report"
@@ -858,7 +860,7 @@ report_handler = "topic_tree_text"
 
 [[command]]
 [[command.form.slash]]
-path = "/topic create"
+path = "/intercom topic create"
 help = "Новая тема с заголовком: /topic create <название>."
 group = "Intercom"
 kind = "intercom"
@@ -866,7 +868,7 @@ intercom_handler = "topic_create"
 
 [[command]]
 [[command.form.slash]]
-path = "/spine list"
+path = "/intercom spine list"
 help = "Product spine: линия, фокус, вехи (список)."
 group = "Intercom"
 kind = "report"
@@ -874,7 +876,7 @@ report_handler = "spine_list"
 
 [[command]]
 [[command.form.slash]]
-path = "/spine tree"
+path = "/intercom spine tree"
 help = "Product spine: линия → фокус → вехи (дерево)."
 group = "Intercom"
 kind = "report"
@@ -882,7 +884,7 @@ report_handler = "spine_tree"
 
 [[command]]
 [[command.form.slash]]
-path = "/topic cards"
+path = "/intercom topic cards"
 help = "Картотека тем (overview): карточки тем и spine; drill-in — /topic open."
 group = "Intercom"
 kind = "intercom"
@@ -890,7 +892,7 @@ intercom_handler = "topic_cards"
 
 [[command]]
 [[command.form.slash]]
-path = "/topic open"
+path = "/intercom topic open"
 help = "Открыть тему (detail): подсказки «id · заголовок»; аргумент — короткий id, заголовок или пусто — выбранная/активная."
 group = "Intercom"
 kind = "intercom"
@@ -899,11 +901,35 @@ completion = "session_topics"
 
 [[command]]
 [[command.form.slash]]
-path = "/spine open"
-help = "Картотека (overview); то же, что /topic cards."
+path = "/intercom spine open"
+help = "Картотека (overview); то же, что /intercom topic cards."
 group = "Intercom"
 kind = "intercom"
 intercom_handler = "spine_open"
+
+[[command]]
+[[command.form.slash]]
+path = "/intercom message select"
+help = "Выбрать сообщение по gutter (1-based): n, «n m» или «n:m» (как /editor line select); активно — конец диапазона."
+group = "Intercom"
+kind = "intercom"
+intercom_handler = "message_select"
+
+[[command]]
+[[command.form.slash]]
+path = "/intercom message find"
+help = "Сообщения ветки по коду (inferred из attach): selection, L:10-20, [M:…]."
+group = "Intercom"
+kind = "intercom"
+intercom_handler = "message_find"
+
+[[command]]
+[[command.form.slash]]
+path = "/intercom message relate"
+help = "Связать диапазон gutter (#n или n:m) с кодом: «3:5 relate selection»; в лог — AttachmentAnchor, не голые строки."
+group = "Intercom"
+kind = "intercom"
+intercom_handler = "message_relate"
 
 # ==============================================================================
 # Help
