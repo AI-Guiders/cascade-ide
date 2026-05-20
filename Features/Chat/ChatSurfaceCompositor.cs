@@ -401,6 +401,6 @@ public sealed class ChatSurfaceCompositor(
         var decluttered = _declutterStage.Apply(resolved);
         var layout = _layoutStage.Layout(decluttered);
         var spine = intent.ProductSpine ?? ChatProductSpine.Empty;
-        return new ChatSurfaceSnapshot(decluttered, layout, spine, intent.TopicPicker);
+        return new ChatSurfaceSnapshot(decluttered, layout, spine, intent.TopicPicker, intent.HighlightedMessageIndices);
     }
 }

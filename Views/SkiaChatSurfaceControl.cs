@@ -376,6 +376,7 @@ public partial class SkiaChatSurfaceControl : Control
                     ItemIndex = i,
                     HoveredItemIndex = _hoveredItem,
                     SelectedMessageIndex = SelectedMessageIndex,
+                    HighlightedMessageIndices = Snapshot?.HighlightedMessageIndices,
                     HitRegistry = _chatHits
                 };
 

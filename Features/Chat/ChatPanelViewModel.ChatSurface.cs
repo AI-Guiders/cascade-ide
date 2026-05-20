@@ -18,7 +18,8 @@ public partial class ChatPanelViewModel
             BuildProductSpine(),
             BuildThreadDisplayTitles(),
             _threadForks,
-            _topicPickerPresentation));
+            _topicPickerPresentation,
+            HighlightedMessageIndices.Count > 0 ? HighlightedMessageIndices : null));
 
         var overview = ChatSurfaceSnapshot.Layout.Overview;
         if (overview.Count == 0)

@@ -31,6 +31,7 @@ public static class ChatSlashIntercomHandlers
         Func<string, TopicCreateResult>? CreateTopicWithTitle,
         Func<string, string?, ChatSlashIntercomResult>? TryAttachSlash,
         Func<int, int, string>? SelectMessageByOrdinalRangeInDetailLane = null,
+        Func<IReadOnlyList<ParametricIntRange>, string>? SelectMessagesByOrdinalRangesInDetailLane = null,
         Func<string?, string>? FindMessagesForCodeRef = null,
         Func<string?, string>? RelateMessageRangeToCodeRef = null);
 
@@ -81,20 +82,35 @@ public static class ChatSlashIntercomHandlers
 
     private static ChatSlashIntercomResult executeMessageSelect(Context ctx)
     {
+        var tail = ctx.ArgsTail?.Trim() ?? "";
+        if (!ParametricSegmentListParser.TryParse(tail, out var segments, out var parseError))
+            return ChatSlashIntercomResult.Fail(parseError);
+
+        if (segments.Count > 1)
+        {
+            if (ctx.SelectMessagesByOrdinalRangesInDetailLane is null)
+                return ChatSlashIntercomResult.Fail("Выбор сообщений (multi-range) недоступен.");
+
+            var multiResult = ctx.SelectMessagesByOrdinalRangesInDetailLane(segments);
+            if (!string.Equals(multiResult, "OK", StringComparison.Ordinal))
+                return ChatSlashIntercomResult.Fail(multiResult);
+
+            var labels = segments.Select(static s =>
+                s.Start == s.End ? $"#{s.Start}" : $"#{s.Start}–#{s.End}");
+            return ChatSlashIntercomResult.Ok($"Выбрано: {string.Join(", ", labels)}.");
+        }
+
         if (ctx.SelectMessageByOrdinalRangeInDetailLane is null)
             return ChatSlashIntercomResult.Fail("Выбор сообщения недоступен.");
 
-        var tail = ctx.ArgsTail?.Trim() ?? "";
-        if (!ChatSlashParametricArgsBuilder.TryParseLineRangeTail(tail, out var start, out var end, out var parseError))
-            return ChatSlashIntercomResult.Fail(parseError);
-
-        var result = ctx.SelectMessageByOrdinalRangeInDetailLane(start, end);
+        var range = segments[0];
+        var result = ctx.SelectMessageByOrdinalRangeInDetailLane(range.Start, range.End);
         if (!string.Equals(result, "OK", StringComparison.Ordinal))
             return ChatSlashIntercomResult.Fail(result);
 
-        var text = start == end
-            ? $"Выбрано сообщение #{start}."
-            : $"Выбран диапазон #{start}–#{end} (активно #{end}).";
+        var text = range.Start == range.End
+            ? $"Выбрано сообщение #{range.Start}."
+            : $"Выбран диапазон #{range.Start}–#{range.End} (активно #{range.End}).";
         return ChatSlashIntercomResult.Ok(text);
     }
 

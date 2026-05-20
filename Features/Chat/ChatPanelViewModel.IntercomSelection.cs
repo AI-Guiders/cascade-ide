@@ -32,8 +32,66 @@ public partial class ChatPanelViewModel
         if (endOrdinal > indices.Count)
             return $"Нет сообщения #{endOrdinal} (в ветке {indices.Count}).";
 
-        SelectedMessageIndex = indices[endOrdinal - 1];
+        ApplyMessageOrdinalSelection(indices, startOrdinal, endOrdinal);
         return "OK";
+    }
+
+    /// <summary>Disjoint multi-range по gutter (ADR 0138). Активным — конец последнего сегмента.</summary>
+    public string SelectMessagesByOrdinalRangesInDetailLane(IReadOnlyList<ParametricIntRange> segments)
+    {
+        if (IsChatOverviewMode)
+            return "Открой тему (detail): /intercom topic open или клик по карточке.";
+
+        if (segments.Count == 0)
+            return "Укажи хотя бы один сегмент [n] или [a;b].";
+
+        if (!TryGetActiveDetailLaneMessageIndices(out var indices))
+            return "В активной ветке нет сообщений.";
+
+        var lastSegment = segments[^1];
+        if (lastSegment.End > indices.Count)
+            return $"Нет сообщения #{lastSegment.End} (в ветке {indices.Count}).";
+
+        foreach (var segment in segments)
+        {
+            if (segment.Start < 1 || segment.End < 1)
+                return "Номера сообщений должны быть ≥ 1.";
+            if (segment.End < segment.Start)
+                return "Конец диапазона не может быть меньше начала.";
+            if (segment.Start > indices.Count)
+                return $"Нет сообщения #{segment.Start} (в ветке {indices.Count}).";
+            if (segment.End > indices.Count)
+                return $"Нет сообщения #{segment.End} (в ветке {indices.Count}).";
+        }
+
+        ApplyMessageOrdinalSelection(indices, segments[0].Start, lastSegment.End, segments);
+        return "OK";
+    }
+
+    private void ApplyMessageOrdinalSelection(
+        IReadOnlyList<int> laneIndices,
+        int startOrdinal,
+        int endOrdinal,
+        IReadOnlyList<ParametricIntRange>? highlightSegments = null)
+    {
+        var highlighted = new HashSet<int>();
+        if (highlightSegments is { Count: > 1 })
+        {
+            foreach (var segment in highlightSegments)
+            {
+                for (var ord = segment.Start; ord <= segment.End; ord++)
+                    highlighted.Add(laneIndices[ord - 1]);
+            }
+        }
+        else
+        {
+            for (var ord = startOrdinal; ord <= endOrdinal; ord++)
+                highlighted.Add(laneIndices[ord - 1]);
+        }
+
+        HighlightedMessageIndices = highlighted;
+        SelectedMessageIndex = laneIndices[endOrdinal - 1];
+        RefreshChatSurfaceSnapshot();
     }
 
     public bool TryGetFeedOrdinalForMessageIndex(int messageIndex, out int ordinal)

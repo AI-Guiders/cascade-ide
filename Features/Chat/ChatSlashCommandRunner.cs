@@ -28,6 +28,7 @@ public sealed class ChatSlashCommandRunner
     private readonly Func<string, TopicCreateResult>? _createTopicWithTitle;
     private readonly Func<string, string?, ChatSlashIntercomResult>? _tryAttachSlash;
     private readonly Func<int, int, string>? _selectMessageByOrdinalRangeInDetailLane;
+    private readonly Func<IReadOnlyList<ParametricIntRange>, string>? _selectMessagesByOrdinalRangesInDetailLane;
     private readonly Func<string?, string>? _findMessagesForCodeRef;
     private readonly Func<string?, string>? _relateMessageRangeToCodeRef;
 
@@ -43,6 +44,7 @@ public sealed class ChatSlashCommandRunner
         Func<string, TopicCreateResult>? createTopicWithTitle = null,
         Func<string, string?, ChatSlashIntercomResult>? tryAttachSlash = null,
         Func<int, int, string>? selectMessageByOrdinalRangeInDetailLane = null,
+        Func<IReadOnlyList<ParametricIntRange>, string>? selectMessagesByOrdinalRangesInDetailLane = null,
         Func<string?, string>? findMessagesForCodeRef = null,
         Func<string?, string>? relateMessageRangeToCodeRef = null)
     {
@@ -57,6 +59,7 @@ public sealed class ChatSlashCommandRunner
         _createTopicWithTitle = createTopicWithTitle;
         _tryAttachSlash = tryAttachSlash;
         _selectMessageByOrdinalRangeInDetailLane = selectMessageByOrdinalRangeInDetailLane;
+        _selectMessagesByOrdinalRangesInDetailLane = selectMessagesByOrdinalRangesInDetailLane;
         _findMessagesForCodeRef = findMessagesForCodeRef;
         _relateMessageRangeToCodeRef = relateMessageRangeToCodeRef;
     }
@@ -152,6 +155,7 @@ public sealed class ChatSlashCommandRunner
                     _createTopicWithTitle,
                     _tryAttachSlash,
                     _selectMessageByOrdinalRangeInDetailLane,
+                    _selectMessagesByOrdinalRangesInDetailLane,
                     _findMessagesForCodeRef,
                     _relateMessageRangeToCodeRef))
             {

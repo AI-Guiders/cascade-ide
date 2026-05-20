@@ -71,7 +71,7 @@ internal sealed class SkiaChatMessageFeedEntity : ISkiaChatEntity
     public void Draw(SkiaChatDrawContext context, float top, in SkiaChatMeasuredLayout layout)
     {
         var rowBottom = top + layout.Height;
-        var isSelected = _entry.MessageIndex == context.SelectedMessageIndex;
+        var isSelected = context.IsMessageHighlighted(_entry.MessageIndex);
         if (isSelected)
             DrawMessageRowSelection(context, top, rowBottom, includeGutter: _feedOrdinal > 0);
         if (_feedOrdinal > 0)

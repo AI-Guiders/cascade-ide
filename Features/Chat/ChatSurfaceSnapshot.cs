@@ -15,7 +15,8 @@ public sealed record ChatSurfaceIntent(
     ChatProductSpine? ProductSpine = null,
     IReadOnlyDictionary<Guid, string>? ThreadDisplayTitles = null,
     IReadOnlyList<ChatThreadForkRecord>? ThreadForks = null,
-    TopicPickerPresentation TopicPicker = TopicPickerPresentation.None);
+    TopicPickerPresentation TopicPicker = TopicPickerPresentation.None,
+    IReadOnlySet<int>? HighlightedMessageIndices = null);
 
 /// <summary>Плоское представление сообщения, отвязанное от UI-observable состояния.</summary>
 public sealed record ChatConversationMessage(
@@ -125,7 +126,8 @@ public sealed record ChatSurfaceSnapshot(
     ChatSurfaceState State,
     ChatSurfaceLayout Layout,
     ChatProductSpine ProductSpine,
-    TopicPickerPresentation TopicPicker = TopicPickerPresentation.None)
+    TopicPickerPresentation TopicPicker = TopicPickerPresentation.None,
+    IReadOnlySet<int>? HighlightedMessageIndices = null)
 {
     public static ChatSurfaceSnapshot Empty { get; } = new(
         new ChatSurfaceState([], [], [], [], Guid.Empty, "Chat"),

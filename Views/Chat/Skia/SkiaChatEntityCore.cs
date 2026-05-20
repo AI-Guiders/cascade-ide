@@ -57,9 +57,14 @@ internal sealed class SkiaChatDrawContext
     public required int ItemIndex { get; init; }
     public required int HoveredItemIndex { get; init; }
     public required int SelectedMessageIndex { get; init; }
+    public IReadOnlySet<int>? HighlightedMessageIndices { get; init; }
     public required SkiaChatHitRegistry HitRegistry { get; init; }
 
     public bool IsHovered => ItemIndex == HoveredItemIndex;
+
+    public bool IsMessageHighlighted(int? messageIndex) =>
+        messageIndex is { } idx
+        && (HighlightedMessageIndices?.Contains(idx) == true || idx == SelectedMessageIndex);
 
     public void RegisterHit(SKRect contentRect, SkiaChatHit hit) =>
         HitRegistry.RegisterContentRect(contentRect, ScrollOffset, hit);

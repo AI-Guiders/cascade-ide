@@ -143,6 +143,7 @@ public partial class ChatPanelViewModel : ViewModelBase
             createTopicWithTitle: CreateTopicWithTitle,
             tryAttachSlash: TryExecuteAttachSlash,
             selectMessageByOrdinalRangeInDetailLane: SelectMessageByOrdinalRangeInDetailLane,
+            selectMessagesByOrdinalRangesInDetailLane: SelectMessagesByOrdinalRangesInDetailLane,
             findMessagesForCodeRef: FindMessagesForCodeRef,
             relateMessageRangeToCodeRef: RelateMessageRangeToCodeRef);
         _getLocalOllamaEndpoint = getLocalOllamaEndpoint;
@@ -219,6 +220,9 @@ public partial class ChatPanelViewModel : ViewModelBase
 
     [ObservableProperty]
     private int _selectedMessageIndex = -1;
+
+    /// <summary>Подсветка строк ленты при multi-range select (ADR 0138). Пусто — только <see cref="SelectedMessageIndex"/>.</summary>
+    public IReadOnlySet<int> HighlightedMessageIndices { get; private set; } = new HashSet<int>();
 
     [ObservableProperty]
     private ChatSurfaceSnapshot _chatSurfaceSnapshot = ChatSurfaceSnapshot.Empty;
@@ -884,7 +888,9 @@ public partial class ChatPanelViewModel : ViewModelBase
     {
         if (index < 0 || index >= ChatMessages.Count)
             return $"Index out of range: {index}. Count={ChatMessages.Count}.";
+        HighlightedMessageIndices = new HashSet<int> { index };
         SelectedMessageIndex = index;
+        RefreshChatSurfaceSnapshot();
         return "OK";
     }
 

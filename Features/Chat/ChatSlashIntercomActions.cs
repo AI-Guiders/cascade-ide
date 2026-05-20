@@ -18,6 +18,7 @@ public static class ChatSlashIntercomActions
         Func<string, TopicCreateResult>? createTopicWithTitle = null,
         Func<string, string?, ChatSlashIntercomResult>? tryAttachSlash = null,
         Func<int, int, string>? selectMessageByOrdinalRangeInDetailLane = null,
+        Func<IReadOnlyList<ParametricIntRange>, string>? selectMessagesByOrdinalRangesInDetailLane = null,
         Func<string?, string>? findMessagesForCodeRef = null,
         Func<string?, string>? relateMessageRangeToCodeRef = null)
     {
@@ -41,6 +42,7 @@ public static class ChatSlashIntercomActions
                     createTopicWithTitle,
                     tryAttachSlash,
                     selectMessageByOrdinalRangeInDetailLane,
+                    selectMessagesByOrdinalRangesInDetailLane,
                     findMessagesForCodeRef,
                     relateMessageRangeToCodeRef),
                 out result))
