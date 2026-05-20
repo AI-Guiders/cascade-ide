@@ -11,8 +11,11 @@ public interface IIdeMcpActions
     Task<string> ExecuteCommandAsync(string commandId, IReadOnlyDictionary<string, JsonElement>? args, CancellationToken cancellationToken = default);
 
     void OpenFile(string path);
-    /// <summary>Загрузить решение (.sln / .slnx / .slnf), один проект (.csproj / .fsproj) или каталог — дерево в обозревателе обновится.</summary>
+    /// <summary>Загрузить решение (.sln / .slnx / .slnf), один проект (.csproj / .fsproj) или каталог — дерево в обозревателе обновится (fire-and-forget на UI, для меню).</summary>
     void LoadSolution(string path);
+
+    /// <summary>То же, что <see cref="LoadSolution"/>, но дожидается <c>LoadSolutionAsync</c> и возвращает <c>OK</c> или текст ошибки (для MCP <c>load_solution</c>).</summary>
+    Task<string> LoadSolutionAndWaitAsync(string path, CancellationToken cancellationToken = default);
     /// <summary>Выделить диапазон в редакторе (1-based line/column). Если файл не открыт — открыть.</summary>
     void SelectInEditor(string? filePath, int startLine, int startColumn, int endLine, int endColumn);
     /// <summary>Текущее состояние редактора (файл, каретка, выделение, content_length, is_empty, content_preview). JSON. maxPreviewChars: 0 = без превью, null/2000 = первые 2000 символов.</summary>

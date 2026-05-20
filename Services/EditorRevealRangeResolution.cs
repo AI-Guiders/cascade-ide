@@ -29,10 +29,16 @@ public static class EditorRevealRangeResolution
 
         if (request.SyntaxScope is not null || !string.IsNullOrWhiteSpace(request.MemberKey))
         {
+            var cacheContext = IntercomAttachResolveCacheContext.From(
+                workspaceRoot,
+                solutionPath: null,
+                filePath);
             if (AttachmentAnchorRoslynResolver.TryResolveLineRange(
+                    null,
                     absolute,
                     request.MemberKey,
                     request.SyntaxScope,
+                    cacheContext,
                     out var resolved,
                     out var roslynDetail))
             {

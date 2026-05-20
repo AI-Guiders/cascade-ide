@@ -1,5 +1,6 @@
 using System.Text.Json;
 using CascadeIDE.Models;
+using CascadeIDE.Services.Intercom;
 
 namespace CascadeIDE.ViewModels;
 
@@ -129,19 +130,24 @@ internal sealed partial class IdeMcpCommandExecutor
             return "OK";
         });
 
-        add(Services.IdeCommands.SendChat, async (args, _) =>
+        add(Services.IdeCommands.SendChat, async (args, ct) =>
         {
             var role = McpCommandJsonArgs.String(args, "role")?.Trim();
             var msg = McpCommandJsonArgs.String(args, "message");
-            if (string.Equals(role, "assistant", StringComparison.OrdinalIgnoreCase))
+            if (string.IsNullOrWhiteSpace(msg))
+                return "Missing message";
+
+            var useFastAttachPath = string.Equals(role, "assistant", StringComparison.OrdinalIgnoreCase)
+                || messageHasAttachSyntax(msg);
+            if (useFastAttachPath)
             {
-                if (string.IsNullOrWhiteSpace(msg))
-                    return "Missing message for role=assistant";
-                return _vm.ChatPanel.AppendMessageFromMcp("assistant", msg!);
+                var feedRole = string.Equals(role, "assistant", StringComparison.OrdinalIgnoreCase)
+                    ? "assistant"
+                    : "user";
+                return await _vm.ChatPanel.AppendMessageFromMcpAsync(feedRole, msg!, ct).ConfigureAwait(false);
             }
 
-            if (!string.IsNullOrWhiteSpace(msg))
-                _vm.ChatPanel.ChatInput = msg!;
+            _vm.ChatPanel.ChatInput = msg!;
             if (_vm.ChatPanel.SendChatCommand.CanExecute(null))
                 await _vm.ChatPanel.SendChatCommand.ExecuteAsync(null);
             return "OK";
@@ -240,4 +246,8 @@ internal sealed partial class IdeMcpCommandExecutor
             return "OK";
         });
     }
+
+    private static bool messageHasAttachSyntax(string text) =>
+        text.Contains('\u27E6', StringComparison.Ordinal)
+        || IntercomAttachmentMarkers.TryExtractBracketSpans(text, out _);
 }

@@ -95,6 +95,27 @@ public static class EditorLanguageSupport
 
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = false };
 
+    private static readonly HashSet<string> SupportedExtensionSet = new(
+        Supported.Select(static t => t.Extension),
+        StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>Плоский текст без отдельной грамматики в TextMate (excerpt, attach file).</summary>
+    private static readonly HashSet<string> PlainTextExtensionsWithoutGrammar = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".txt",
+        ".log",
+        ".jsx",
+    };
+
+    /// <summary>Файл читается как текст (excerpt @ send, attach): расширение из <see cref="Supported"/> или plain-text supplement; без расширения — да.</summary>
+    public static bool IsTextFilePath(string path)
+    {
+        var ext = Path.GetExtension(path);
+        return ext.Length == 0
+            || SupportedExtensionSet.Contains(ext)
+            || PlainTextExtensionsWithoutGrammar.Contains(ext);
+    }
+
     /// <summary>Краткий текст для настроек: «C#, Markdown, XML/XAML, JSON, SQL, HTML, CSS, …».</summary>
     public static string GetSummary()
     {

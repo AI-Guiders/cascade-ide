@@ -39,4 +39,14 @@ public class EditorLanguageSupportTests
         Assert.NotNull(lang);
         Assert.Equal("toml", lang.Id);
     }
+
+    [Theory]
+    [InlineData("src/Foo.cs", true)]
+    [InlineData("notes.md", true)]
+    [InlineData("app.toml", true)]
+    [InlineData("readme.txt", true)]
+    [InlineData("image.png", false)]
+    [InlineData("noext", true)]
+    public void IsTextFilePath_matches_editor_and_plain_text_extensions(string path, bool expected) =>
+        Assert.Equal(expected, CascadeIDE.Services.EditorLanguageSupport.IsTextFilePath(path));
 }

@@ -16,12 +16,12 @@ internal sealed partial class IdeMcpCommandExecutor
             a.OpenFile(McpCommandJsonArgs.String(args, "path")!);
             return await Task.FromResult("OK");
         });
-        add(Services.IdeCommands.LoadSolution, async (args, _) =>
+        add(Services.IdeCommands.LoadSolution, async (args, ct) =>
         {
             var a = (IIdeMcpActions)_vm;
-            if (string.IsNullOrEmpty(McpCommandJsonArgs.String(args, "path"))) return "Missing path";
-            a.LoadSolution(McpCommandJsonArgs.String(args, "path")!);
-            return await Task.FromResult("OK");
+            if (string.IsNullOrEmpty(McpCommandJsonArgs.String(args, "path")))
+                return "Missing path";
+            return await a.LoadSolutionAndWaitAsync(McpCommandJsonArgs.String(args, "path")!, ct).ConfigureAwait(false);
         });
         add(Services.IdeCommands.CreateProjectInSolution, async (args, ct) =>
         {

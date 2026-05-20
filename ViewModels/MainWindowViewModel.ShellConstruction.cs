@@ -112,6 +112,14 @@ public partial class MainWindowViewModel
                     ShowTerminalPanelCommand.Execute(null);
             }),
             executeIdeCommandForMafAgent: (commandId, args, ct) => ((Services.IIdeMcpActions)this).ExecuteCommandAsync(commandId, args, ct),
+            revealIntercomAttachmentInIde: (anchor, select) => Services.IntercomAttachmentNavigator.Apply(
+                (Services.IIdeMcpActions)this,
+                _settings.Intercom,
+                GetWorkspacePath(),
+                anchor,
+                selectExplicit: select,
+                shiftSelect: false,
+                durationMs: null),
             getLocalOllamaEndpoint: () => new Uri(Services.OllamaService.DefaultBaseUriString),
             getEffectiveOllamaModelId: () => EffectiveOllamaModelId,
             tryCreateCloudMafIChatClient: TryCreateCloudMafIChatClientForChatPanel,

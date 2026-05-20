@@ -25,6 +25,21 @@ public partial class MainWindowViewModel
     void Services.IIdeMcpActions.LoadSolution(string path) =>
         IdeMcpEditorDocumentActions.ScheduleLoadSolution(UiScheduler.Default, path, LoadSolution);
 
+    async Task<string> Services.IIdeMcpActions.LoadSolutionAndWaitAsync(string path, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        await LoadSolutionAsync(path).ConfigureAwait(false);
+        cancellationToken.ThrowIfCancellationRequested();
+        return await UiScheduler.Default.InvokeAsync(() =>
+        {
+            if (!string.IsNullOrWhiteSpace(Workspace.SolutionLoadError))
+                return Workspace.SolutionLoadError.Trim();
+            if (string.IsNullOrWhiteSpace(Workspace.SolutionPath) || Workspace.SolutionRoots.Count == 0)
+                return "Не удалось загрузить решение.";
+            return "OK";
+        }).ConfigureAwait(false);
+    }
+
     void Services.IIdeMcpActions.SelectInEditor(string? filePath, int startLine, int startColumn, int endLine, int endColumn)
     {
         UiScheduler.Default.Post(() =>

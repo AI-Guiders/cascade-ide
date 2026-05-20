@@ -72,6 +72,9 @@ public sealed class WebAiPortalCommandBridgeTests
 
         public void OpenFile(string path) => throw new NotImplementedException();
         public void LoadSolution(string path) => throw new NotImplementedException();
+
+        public Task<string> LoadSolutionAndWaitAsync(string path, CancellationToken cancellationToken = default) =>
+            throw new NotImplementedException();
         public void SelectInEditor(string? filePath, int startLine, int startColumn, int endLine, int endColumn) => throw new NotImplementedException();
         public Task<string> GetEditorStateAsync(int? maxPreviewChars = null) => throw new NotImplementedException();
         public Task<string> GetEditorContentRangeAsync(int startLine, int endLine) => throw new NotImplementedException();
