@@ -54,6 +54,8 @@ hide:
 | [0129](../../adr/0129-intercom-message-body-markdown-and-fenced-code.md) | Intercom — тело сообщения: Markdown, fenced code и preview | Proposed |
 | [0130](../../adr/0130-editor-agent-range-reveal-without-selection.md) | Подсветка диапазона кода для агента без изменения selection | Proposed |
 | [0131](../../adr/0131-editor-slash-select-code-by-bracket-reference.md) | `/editor select code` по bracket `[M:…]` — select в буфере, не attach | Proposed |
+| [0132](../../adr/0132-intercom-federated-transport-and-multi-client-boundary.md) | Intercom — transport, федерация, CIDE / Web / MCC | Proposed |
+| [0133](../../adr/0133-commander-cockpit-shared-attention-model-and-instrument-deck.md) | Commander cockpit — общая модель внимания, instrument deck, MCC | Proposed |
 
 
 ---
