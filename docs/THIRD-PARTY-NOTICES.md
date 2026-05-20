@@ -13,7 +13,7 @@
 | Пакет | Версия | Лицензия | Ссылка |
 |--------|--------|----------|--------|
 | AIGuiders.DotnetDebugMCP.Core | 0.1.0 | MIT | https://www.nuget.org/packages/AIGuiders.DotnetDebugMCP.Core |
-| AIGuiders.HybridCodebaseIndex.Core | 0.1.0 | MIT | https://www.nuget.org/packages/AIGuiders.HybridCodebaseIndex.Core |
+| AIGuiders.HybridCodebaseIndex.Core | 0.1.1 | MIT | https://www.nuget.org/packages/AIGuiders.HybridCodebaseIndex.Core |
 | AIGuiders.AvaloniaEdit | 12.0.1-cascade.1 | MIT | https://www.nuget.org/packages/AIGuiders.AvaloniaEdit |
 | AIGuiders.AvaloniaEdit.TextMate | 12.0.1-cascade.1 | MIT | https://www.nuget.org/packages/AIGuiders.AvaloniaEdit.TextMate |
 | Avalonia | 12.0.1 | MIT | https://www.nuget.org/packages/Avalonia |
