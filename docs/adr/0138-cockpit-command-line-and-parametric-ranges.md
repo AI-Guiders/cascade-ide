@@ -228,6 +228,23 @@ CCL — не «ещё одна фича Intercom», а **слой между cho
 | Третий буфер в голове (chord / CCL / composer / палитра) | Chord help: «`/` → command line»; autocomplete в CCL |
 | Preview на больших файлах | Лимит строк в ghost; фаза A — только текст |
 | Relate на disjoint ranges | Не смешивать с CCL v1; отдельное решение после 0137 MVP |
+| Четвёртая «Shell»-поверхность в Forward | См. [§ Инварианты внимания](#adr0138-attention-invariants) |
+
+<a id="adr0138-attention-invariants"></a>
+
+### Инварианты внимания (Forward vs Shell)
+
+**Не смешивать** зону внимания ([0021](0021-pfd-mfd-cockpit-attention-model.md)) и режим ввода в Forward (таблица выше).
+
+| Инвариант | Смысл |
+|-----------|--------|
+| **CCL — единственный REPL Forward** | Сложный slash, preview, multi-range, `anchor peek` — только в **CCL** (или handoff из composer в CCL). Один parser + один runner ([0119](0119-chat-slash-commands-intercom-surface.md)). |
+| **Отдельной Shell-страницы в Forward нет** | Не вводим вторую постоянную REPL-панель в лобовом стеке (лента + shell + composer). «Shell» в коде/доках = **хром полосы CCL** (`CCL shell`), не новая primary surface. |
+| **MFD Terminal — OS/process** | `dotnet build`, `git`, пайпы, scrollback — страница **MFD** ([0063](0063-instrument-deck-named-composition-one-anchor.md) `MfdShellPage`), **не** дубль `command_id` slash из CCL. |
+| **CCL — modal по Esc** | Пока CCL открыт, Forward в режиме «команда»; `Close()` не трогает composer, selection, event log (см. **Инварианты сессии** ниже). |
+| **Один активный CCL host** | `IntercomHost` **или** `EditorHost` — не оба видимы ([0120](0120-primary-work-surface-intercom-or-editor.md)). |
+
+**Валидация в стиле attach ([0128](0128-intercom-attachment-anchors-and-code-references.md) §9.1):** debounced preview в CCL показывает исход (`resolved` / `degraded` / `failed`) **без блокировки** Enter, как chip в ленте — не отдельный «терминал ошибок».
 
 **Рекомендуемый порядок внедрения**
 
@@ -304,6 +321,7 @@ public readonly record struct CockpitCommandLineCommitResult(
 - `BufferText` **≠** `ComposerText` / `ChatInput` / `CascadeChordOverlayInputText`.
 - `Close()` не вызывает handlers; не трогает selection/editor/event log.
 - `TryCommitAsync` делегирует в существующий `ChatSlashCommandRunner.TryRunAsync(BufferText)` ([0119](0119-chat-slash-commands-intercom-surface.md)); host влияет только на **default autocomplete prefix**, не на whitelist команд.
+- Не дублирует **MFD Terminal** и не заменяет его; workplace-команды (`/intercom`, `/editor`, `/anchor`, `/file`) — только здесь ([§ Инварианты внимания](#adr0138-attention-invariants)).
 
 ### Chord handoff
 
@@ -458,6 +476,7 @@ intercom_host = "above_composer"  # Q1
 | `cockpit.open_command_line` | — |
 | Preview в CCL UI (debounced) | — |
 | Ghost preview (фаза B) | — |
+| `/intercom message anchors list`, `/anchor peek` | — (см. [0128 §10.1](0128-intercom-attachment-anchors-and-code-references.md#adr0128-p10b)) |
 
 ---
 
@@ -469,3 +488,4 @@ intercom_host = "above_composer"  # Q1
 | 2026-05-20 | **Пересмотр:** CCL кокпит-wide; Commander/Pilot; `[3;5] [8;15] [20]`; preview; Ctrl+K `/` глобально |
 | 2026-05-20 | § «Позиция и обоснование»; § «Набросок API» (`ICockpitCommandLineSession`, `ParametricSegmentListParser`) |
 | 2026-05-21 | **Accepted**; Q1–Q5 закрыты; `ParametricSegmentListParser` + multi message select + preview builder |
+| 2026-05-21 | § [Инварианты внимания](#adr0138-attention-invariants): CCL = единственный REPL Forward; MFD Terminal для OS/process |

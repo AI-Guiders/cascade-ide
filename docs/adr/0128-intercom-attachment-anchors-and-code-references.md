@@ -21,6 +21,8 @@
 | [0129](0129-intercom-message-body-markdown-and-fenced-code.md) | **Fenced code** и markdown в `content` — **не** этот ADR |
 | [0130](0130-editor-agent-range-reveal-without-selection.md) | MCP **reveal** диапазона без selection (агент); общий presentation mode с §8 |
 | [0131](0131-editor-slash-select-code-by-bracket-reference.md) | `/editor select code [M:…]` — bracket → select в редакторе, не attach |
+| [0137](0137-intercom-message-code-correspondence.md) | `anchor:<id>` в find/relate; message ordinals |
+| [0138](0138-cockpit-command-line-and-parametric-ranges.md) | CCL — единственный REPL Forward; anchor list/peek без hit-test |
 
 ### Вне ADR (playbook)
 
@@ -314,6 +316,29 @@
 - Агенту: ordered `AttachmentAnchor[]` + prose (для LLM — excerpt обязателен для безымянных блоков).
 - Отрисовка fenced / inline MD в prose между метками — [0129](0129-intercom-message-body-markdown-and-fenced-code.md).
 
+<a id="adr0128-p10b"></a>
+
+### 10.1 Anchor id в CLI (CCL), без hit-test
+
+Wire-id: маркер `⟦a:{8 hex}⟧` (`IntercomAttachmentMarkers`) ↔ `AttachmentAnchor.Id`. Клик по chip в Skia остаётся; **второй путь** — клавиатура и CCL ([0138](0138-cockpit-command-line-and-parametric-ranges.md) [§ Инварианты внимания](#adr0138-attention-invariants)).
+
+| Команда *(предложение)* | Назначение |
+|-------------------------|------------|
+| `/intercom message anchors list` | Anchors выбранного / текущего сообщения (или черновика): `a:abcd1234`, `displayLabel`, `resolveOutcome` |
+| `/anchor peek <id>` | Reveal по id → тот же pipeline, что `intercom.reveal_attachment` / клик chip; **без** hit-test |
+
+**Валидация:** как §9.1 — preview-строка в CCL (`resolved` / `file_missing` / …), excerpt остаётся fallback; Enter допускается с предупреждением на degraded.
+
+**ID в ленте (UX, на обсуждение):**
+
+| Вариант | Когда |
+|---------|--------|
+| Short id **справа от chip** (приглушённый `a:abcd1234`) | Быстрый ввод `/anchor peek` без `list` |
+| Id только в **hover** / compact mode | Минимум шума в ленте |
+| Только **`anchors list`** | Старые сообщения, узкий layout |
+
+**Не цель:** отдельная Shell-страница в Forward или scrollback-терминал для slash — только CCL + при необходимости MFD Terminal для OS/process.
+
 ---
 
 ## Фазы внедрения
@@ -366,6 +391,7 @@
 | `@file` inline | **Отложено** до фазы 2 attach |
 | Нет файла у получателя | Excerpt + warning; reveal **не** открывает пустой файл — §9.1 |
 | Ветка @ send | `senderWorkspaceContext` на сообщении — подсказка UI/агенту; checkout только явно — §3.1 |
+| Anchor CLI | `anchors list` + `/anchor peek` в **CCL**; id в UI — hover vs inline — §10.1 |
 
 ---
 
@@ -387,4 +413,5 @@
 | 2026-05-19 | §3.1 `senderWorkspaceContext` (ветка, commit) на уровне сообщения @ send. |
 | 2026-05-19 | §5.1 оси bracket `F` \| `M` \| `L` \| `S` (scope/statement); `S:for:n`, не `B:`; L2 с `S:`. |
 | 2026-05-20 | **Accepted · In progress**; колонка CIDE в фазах; связка с [0130](0130-editor-agent-range-reveal-without-selection.md) / [0131](0131-editor-slash-select-code-by-bracket-reference.md) в §8. |
+| 2026-05-21 | §10.1 anchor id в CCL (`anchors list`, `/anchor peek`); связь с [0138](0138-cockpit-command-line-and-parametric-ranges.md) |
 | 2026-05-20 | **Accepted · Implemented**; фаза 2: composer bracket autocomplete (`ChatBracketAutocomplete`, общий popup с slash); фаза 4 — только structural picker. |
