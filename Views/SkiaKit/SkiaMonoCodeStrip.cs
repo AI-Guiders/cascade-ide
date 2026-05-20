@@ -1,4 +1,5 @@
 #nullable enable
+using CascadeIDE.Views.Chat.Skia;
 using SkiaSharp;
 
 namespace CascadeIDE.Views.SkiaKit;
@@ -13,8 +14,16 @@ internal static class SkiaMonoCodeStrip
 
     public static float MeasureHeight(string code, float contentWidth, int maxLines = DefaultMaxLines)
     {
-        var lines = WrapLines(code, contentWidth, maxLines);
-        return Padding * 2 + Math.Max(1, lines.Count) * LineHeight;
+        var innerWidth = Math.Max(40f, contentWidth - Padding * 2);
+        var rich = SkiaRichTextKitMarkdown.TryMeasurePlain(
+            code,
+            innerWidth,
+            fontSize: 10.5f,
+            color: new SKColor(220, 225, 235),
+            maxLines: maxLines,
+            lineHeight: LineHeight,
+            fontFamily: "Cascadia Mono");
+        return Padding * 2 + (rich?.BodyHeight ?? LineHeight);
     }
 
     public static void Draw(
@@ -42,46 +51,23 @@ internal static class SkiaMonoCodeStrip
         };
         canvas.DrawRoundRect(bounds, CornerRadius, CornerRadius, border);
 
-        var lines = WrapLines(code, contentWidth, maxLines);
-        var typeface = SKTypeface.FromFamilyName("Cascadia Mono", SKFontStyle.Normal)
-                       ?? SKTypeface.FromFamilyName("Consolas", SKFontStyle.Normal)
-                       ?? SKTypeface.FromFamilyName("Segoe UI", SKFontStyle.Normal);
-        using var font = new SKFont(typeface, 10.5f);
+        var innerWidth = Math.Max(40f, contentWidth - Padding * 2);
+        var rich = SkiaRichTextKitMarkdown.TryMeasurePlain(
+            code,
+            innerWidth,
+            10.5f,
+            theme.Content,
+            maxLines,
+            LineHeight,
+            "Cascadia Mono");
+        if (rich is null)
+            return;
 
-        using var paint = new SKPaint { IsAntialias = true, Color = theme.Content };
-        var y = bounds.Top + Padding + LineHeight - 3f;
-        foreach (var line in lines)
-        {
-            canvas.DrawText(line, bounds.Left + Padding, y, SKTextAlign.Left, font, paint);
-            y += LineHeight;
-        }
-    }
-
-    private static List<string> WrapLines(string code, float contentWidth, int maxLines)
-    {
-        var maxChars = Math.Max(16, (int)(contentWidth / 6.2f));
-        var raw = code.Replace("\r", "").Split('\n');
-        var lines = new List<string>();
-        foreach (var row in raw)
-        {
-            if (lines.Count >= maxLines)
-                break;
-            if (row.Length <= maxChars)
-            {
-                lines.Add(row);
-                continue;
-            }
-
-            for (var i = 0; i < row.Length && lines.Count < maxLines; i += maxChars)
-            {
-                var take = Math.Min(maxChars, row.Length - i);
-                lines.Add(row.Substring(i, take));
-            }
-        }
-
-        if (raw.Length > maxLines || code.Split('\n').Length > maxLines)
-            lines[^1] = lines[^1].TrimEnd() + " …";
-
-        return lines.Count == 0 ? [""] : lines;
+        SkiaRichTextKitMarkdown.Paint(
+            canvas,
+            new SKPoint(bounds.Left + Padding, bounds.Top + Padding + LineHeight - 3f - 10.5f * 0.85f),
+            rich,
+            theme.Content,
+            theme.Content);
     }
 }

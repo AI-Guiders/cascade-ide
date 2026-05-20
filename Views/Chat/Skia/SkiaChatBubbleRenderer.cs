@@ -40,46 +40,67 @@ internal static class SkiaChatBubbleRenderer
     {
         var maxChars = Math.Max(24, context.MaxChars);
         var body = Trim(spec.Body, 32_000);
+        var maxBodyLines = EffectiveMaxBodyLines(spec);
         var titleHeight = string.IsNullOrWhiteSpace(spec.Title) ? 0 : spec.TitleHeight;
         var footerHeight = string.IsNullOrWhiteSpace(spec.Footer) ? 0 : spec.FooterHeight;
 
-        if (spec.Kind == SkiaChatBubbleKind.Feed && SkiaRichTextKitFeature.UseForIntercomFeedBody)
+        var bodyWidth = BodyWidthForMeasure(context, spec);
+        var bodyColor = spec.BodyTone == SkiaChatBodyTone.Placeholder
+            ? new SKColor(160, 165, 175)
+            : new SKColor(220, 225, 235);
+        var codeColor = new SKColor(180, 190, 210);
+        var rich = SkiaRichTextKitMarkdown.TryMeasure(
+            body,
+            bodyWidth,
+            fontSize: BodyFontSize(spec.Kind),
+            bodyColor,
+            codeColor,
+            maxBodyLines,
+            spec.LineHeight);
+        if (rich is not null)
         {
-            var bodyWidth = Math.Max(80f, context.ContentWidth - 24f);
-            var bodyColor = spec.BodyTone == SkiaChatBodyTone.Placeholder
-                ? new SKColor(160, 165, 175)
-                : new SKColor(220, 225, 235);
-            var codeColor = new SKColor(180, 190, 210);
-            var rich = SkiaRichTextKitMarkdown.TryMeasure(
-                body,
-                bodyWidth,
-                fontSize: 11f,
-                bodyColor,
-                codeColor,
-                spec.MaxBodyLines,
-                spec.LineHeight);
-            if (rich is not null)
-            {
-                var placeholder = new SkiaMarkdownLine([new SkiaMarkdownRun("", SkiaMarkdownStyle.Plain)]);
-                return new SkiaChatBubbleMetrics(
-                    [placeholder],
-                    spec.Footer,
-                    titleHeight,
-                    footerHeight,
-                    spec.LineHeight,
-                    rich);
-            }
+            var placeholder = new SkiaMarkdownLine([new SkiaMarkdownRun("", SkiaMarkdownStyle.Plain)]);
+            return new SkiaChatBubbleMetrics(
+                [placeholder],
+                spec.Footer,
+                titleHeight,
+                footerHeight,
+                spec.LineHeight,
+                rich);
         }
 
         var runs = SkiaMarkdownLayout.ParseInline(body);
         var lines = SkiaMarkdownLayout.WrapLines(runs, maxChars);
         if (lines.Count == 0)
             lines = [new SkiaMarkdownLine([new SkiaMarkdownRun("", SkiaMarkdownStyle.Plain)])];
-        if (lines.Count > spec.MaxBodyLines)
-            lines = lines.Take(spec.MaxBodyLines).ToList();
+        if (lines.Count > maxBodyLines)
+            lines = lines.Take(maxBodyLines).ToList();
 
         return new SkiaChatBubbleMetrics(lines, spec.Footer, titleHeight, footerHeight, spec.LineHeight);
     }
+
+    private static int EffectiveMaxBodyLines(in SkiaChatBubbleSpec spec)
+    {
+        if (spec.MaxBodyLines != int.MaxValue)
+            return spec.MaxBodyLines;
+
+        return SkiaChatRenderLimits.MaxProseBodyLines;
+    }
+
+    private static float BodyWidthForMeasure(SkiaChatMeasureContext context, in SkiaChatBubbleSpec spec) =>
+        spec.Kind switch
+        {
+            SkiaChatBubbleKind.Feed => Math.Max(80f, context.ContentWidth - 24f),
+            SkiaChatBubbleKind.CardPanel => Math.Max(80f, context.ContentWidth - 40f),
+            _ => Math.Max(80f, context.ContentWidth - 24f),
+        };
+
+    private static float BodyFontSize(SkiaChatBubbleKind kind) =>
+        kind switch
+        {
+            SkiaChatBubbleKind.CardPanel => 11.5f,
+            _ => 11f,
+        };
 
     public static float MeasureHeight(in SkiaChatBubbleSpec spec, in SkiaChatBubbleMetrics metrics)
     {

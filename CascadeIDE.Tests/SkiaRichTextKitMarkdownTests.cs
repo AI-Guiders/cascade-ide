@@ -24,9 +24,8 @@ public sealed class SkiaRichTextKitMarkdownTests
     }
 
     [Fact]
-    public void Feed_bubble_with_rtk_enabled_uses_rich_text_layout()
+    public void Feed_bubble_uses_rich_text_layout()
     {
-        SkiaRichTextKitFeature.UseForIntercomFeedBody = true;
         var ctx = new SkiaChatMeasureContext(60, 480);
         var spec = new SkiaChatBubbleSpec(
             Title: "agent",
@@ -43,5 +42,23 @@ public sealed class SkiaRichTextKitMarkdownTests
         var metrics = SkiaChatBubbleRenderer.Measure(ctx, spec);
         Assert.NotNull(metrics.RichTextBody);
         Assert.True(SkiaChatBubbleRenderer.MeasureHeight(spec, metrics) > 20f);
+    }
+
+    [Fact]
+    public void TryMeasureDocument_heading2_returns_positive_height()
+    {
+        var layout = SkiaRichTextKitMarkdown.TryMeasureDocument(
+            "## Title\n\nBody **bold**",
+            maxWidth: 400f,
+            baseFontSize: 11f,
+            contentColor: SKColors.White,
+            codeColor: SKColors.LightGray,
+            maxRows: 64,
+            lineHeight: 15f,
+            compact: false);
+
+        Assert.NotNull(layout);
+        Assert.True(layout.IsDocument);
+        Assert.True(layout.BodyHeight > 15f);
     }
 }

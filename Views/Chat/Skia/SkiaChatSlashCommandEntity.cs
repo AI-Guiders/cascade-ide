@@ -29,18 +29,26 @@ internal sealed class SkiaChatSlashCommandEntity(
     public SkiaChatMeasuredLayout Measure(SkiaChatMeasureContext context)
     {
         var textWidth = context.ContentWidth - AccentWidth - 4f - IconReserve;
-        var maxChars = Math.Max(16, (int)(textWidth / 6.5f));
 
         var height = MetaLineHeight(compactLayout) + 2f;
         if (!string.IsNullOrWhiteSpace(_args))
             height += ArgsLineHeight(compactLayout) + 2f;
+        SkiaRichTextKitBodyLayout? richDetail = null;
         if (!string.IsNullOrWhiteSpace(_detail))
         {
-            var detailRows = SkiaMarkdownDocument.Layout(_detail, maxChars);
-            height += 4f + SkiaMarkdownPainter.MeasureHeight(detailRows, compactLayout);
+            richDetail = SkiaRichTextKitMarkdown.TryMeasureDocument(
+                _detail,
+                textWidth,
+                baseFontSize: compactLayout ? 10.5f : 11f,
+                contentColor: new SKColor(220, 225, 235),
+                codeColor: new SKColor(180, 190, 210),
+                maxRows: SkiaChatRenderLimits.MaxDocumentRows,
+                lineHeight: compactLayout ? 14f : 15f,
+                compactLayout);
+            height += 4f + (richDetail?.BodyHeight ?? 0f);
         }
 
-        return new SkiaChatMeasuredLayout(Math.Max(20f, height), GapAfter);
+        return new SkiaChatMeasuredLayout(Math.Max(20f, height), GapAfter, RichTextDetail: richDetail);
     }
 
     public void Draw(SkiaChatDrawContext context, float top, in SkiaChatMeasuredLayout layout)
@@ -72,12 +80,26 @@ internal sealed class SkiaChatSlashCommandEntity(
         if (!string.IsNullOrWhiteSpace(_detail))
         {
             y += 6f;
-            var maxChars = Math.Max(16, (int)((textRight - textLeft) / 6.5f));
-            var detailRows = SkiaMarkdownDocument.Layout(_detail, maxChars);
             var bodyColor = _status == ChatSlashCommandStatus.Failed
                 ? new SKColor(240, 160, 160)
                 : context.Theme.Content;
-            y = SkiaMarkdownPainter.Draw(context, textLeft, textRight, y, detailRows, compactLayout, bodyColor);
+            var codeColor = SkiaKitColor.Blend(context.Theme.Content, context.Theme.HoverBorder, 0.35f);
+            if (layout.RichTextDetail is { } rich)
+            {
+                SkiaRichTextKitMarkdown.Paint(
+                    context.Canvas,
+                    new SKPoint(textLeft, y - (compactLayout ? 10f : 11f) * 0.85f),
+                    rich,
+                    bodyColor,
+                    codeColor);
+                y += rich.BodyHeight;
+            }
+            else
+            {
+                var maxChars = Math.Max(16, (int)((textRight - textLeft) / 6.5f));
+                var detailRows = SkiaMarkdownDocument.Layout(_detail, maxChars);
+                y = SkiaMarkdownPainter.Draw(context, textLeft, textRight, y, detailRows, compactLayout, bodyColor);
+            }
         }
     }
 

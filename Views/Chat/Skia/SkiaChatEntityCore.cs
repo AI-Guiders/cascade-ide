@@ -25,7 +25,8 @@ internal readonly record struct SkiaChatMeasuredLayout(
     float GapAfter,
     SkiaChatBubbleMetrics? Bubble = null,
     SkiaTopicCardModel? TopicCard = null,
-    SkiaTopicCardLayout? TopicCardLayout = null);
+    SkiaTopicCardLayout? TopicCardLayout = null,
+    SkiaRichTextKitBodyLayout? RichTextDetail = null);
 
 internal readonly record struct SkiaChatBubbleMetrics(
     IReadOnlyList<SkiaMarkdownLine> ContentLines,

@@ -1,4 +1,5 @@
 #nullable enable
+using CascadeIDE.Views.Chat.Skia;
 using SkiaSharp;
 
 namespace CascadeIDE.Views.SkiaKit;
@@ -18,8 +19,15 @@ internal static class SkiaComposerStrip
     public static float MeasureHeight(string text, string? preeditText, float contentWidth)
     {
         var display = BuildDisplayText(text, preeditText);
-        var lines = WrapLines(display, contentWidth);
-        var inner = Math.Max(1, lines.Count) * LineHeight;
+        var maxLines = (int)((MaxHeight - VerticalPadding * 2) / LineHeight);
+        var rich = SkiaRichTextKitMarkdown.TryMeasurePlain(
+            display,
+            contentWidth,
+            fontSize: 12f,
+            color: new SKColor(220, 225, 235),
+            maxLines: Math.Max(1, maxLines),
+            lineHeight: LineHeight);
+        var inner = rich?.BodyHeight ?? LineHeight;
         return Math.Clamp(inner + VerticalPadding * 2, MinHeight, MaxHeight);
     }
 
@@ -64,39 +72,52 @@ internal static class SkiaComposerStrip
         var contentWidth = Math.Max(40f, textBounds.Width);
         var display = BuildDisplayText(text, preeditText);
         var isEmpty = string.IsNullOrEmpty(display);
-        var lines = isEmpty ? [] : WrapLines(display, contentWidth);
 
         using var bodyFont = SkiaKitFonts.CreateUi(12);
-        using var bodyPaint = SkiaKitFonts.CreateTextPaint(isEnabled ? theme.Content : theme.EmptyHint);
 
         if (isEmpty)
         {
-            using var hintPaint = SkiaKitFonts.CreateTextPaint(theme.EmptyHint);
-            SkiaKitFonts.DrawText(
-                canvas,
+            var hintLayout = SkiaRichTextKitMarkdown.TryMeasurePlain(
                 placeholder,
-                textBounds.Left,
-                textBounds.Top + LineHeight - 4f,
-                SKTextAlign.Left,
-                bodyFont,
-                hintPaint,
-                layoutScale);
+                contentWidth,
+                12f,
+                theme.EmptyHint,
+                maxLines: 4,
+                LineHeight);
+            if (hintLayout is not null)
+            {
+                SkiaRichTextKitMarkdown.Paint(
+                    canvas,
+                    new SKPoint(textBounds.Left, textBounds.Top + LineHeight - 4f - 12f * 0.85f),
+                    hintLayout,
+                    theme.EmptyHint,
+                    theme.EmptyHint);
+            }
         }
         else
         {
-            var y = textBounds.Top + LineHeight - 4f;
-            foreach (var line in lines)
+            var maxLines = (int)((MaxHeight - VerticalPadding * 2) / LineHeight);
+            var rich = SkiaRichTextKitMarkdown.TryMeasurePlain(
+                display,
+                contentWidth,
+                12f,
+                isEnabled ? theme.Content : theme.EmptyHint,
+                Math.Max(1, maxLines),
+                LineHeight);
+            if (rich is not null)
             {
-                SkiaKitFonts.DrawText(canvas, line, textBounds.Left, y, SKTextAlign.Left, bodyFont, bodyPaint, layoutScale);
-                y += LineHeight;
-                if (y > textBounds.Bottom)
-                    break;
+                SkiaRichTextKitMarkdown.Paint(
+                    canvas,
+                    new SKPoint(textBounds.Left, textBounds.Top + LineHeight - 4f - 12f * 0.85f),
+                    rich,
+                    isEnabled ? theme.Content : theme.EmptyHint,
+                    SkiaKitColor.Blend(theme.Content, theme.HoverBorder, 0.35f));
             }
         }
 
         DrawSendButton(canvas, sendButtonBounds, theme, isEnabled);
 
-        if (isEnabled && caretIndex >= 0)
+        if (isEnabled && caretIndex >= 0 && !isEmpty)
             DrawCaret(canvas, textBounds, bodyFont, display, caretIndex, contentWidth);
     }
 

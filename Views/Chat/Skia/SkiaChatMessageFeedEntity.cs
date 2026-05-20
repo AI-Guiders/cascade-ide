@@ -129,7 +129,8 @@ internal sealed class SkiaChatMessageFeedEntity : ISkiaChatEntity
             GapAfter: 0,
             Padding: 0,
             TitleHeight: _suppressTitle ? 0 : _compactLayout ? 14 : 16,
-            LineHeight: _compactLayout ? 14 : 15);
+            LineHeight: _compactLayout ? 14 : 15,
+            MaxBodyLines: SkiaChatRenderLimits.MaxProseBodyLines);
         return SkiaChatDensity.Apply(spec, _compactLayout);
     }
 
