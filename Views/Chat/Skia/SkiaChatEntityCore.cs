@@ -18,7 +18,8 @@ internal readonly record struct SkiaChatHit(
     bool ResetDetailMode,
     bool ToggleThinking = false,
     AttachmentAnchor? RevealAttachment = null,
-    bool RevealAttachmentSelect = false);
+    bool RevealAttachmentSelect = false,
+    SkiaChatPointerAction PointerAction = SkiaChatPointerAction.None);
 
 internal readonly record struct SkiaChatMeasuredLayout(
     float Height,
@@ -45,22 +46,23 @@ internal readonly record struct SkiaChatPlacedEntity(
 
 internal sealed class SkiaChatDrawContext
 {
+    public const float FeedGutterWidth = 36f;
+
     public required SKCanvas Canvas { get; init; }
     public required SkiaChatTheme Theme { get; init; }
     public required float ContentLeft { get; init; }
     public required float ContentWidth { get; init; }
+    public float FeedGutterLeft => ContentLeft - FeedGutterWidth;
     public required float ScrollOffset { get; init; }
     public required int ItemIndex { get; init; }
     public required int HoveredItemIndex { get; init; }
     public required int SelectedMessageIndex { get; init; }
-    public required List<(Rect Bounds, SkiaChatHit Hit)> HitTargets { get; init; }
+    public required SkiaChatHitRegistry HitRegistry { get; init; }
 
     public bool IsHovered => ItemIndex == HoveredItemIndex;
 
-    public void RegisterHit(SKRect rect, SkiaChatHit hit) =>
-        HitTargets.Add((
-            new Rect(rect.Left, rect.Top - ScrollOffset, rect.Width, rect.Height),
-            hit));
+    public void RegisterHit(SKRect contentRect, SkiaChatHit hit) =>
+        HitRegistry.RegisterContentRect(contentRect, ScrollOffset, hit);
 }
 
 internal interface ISkiaChatEntity

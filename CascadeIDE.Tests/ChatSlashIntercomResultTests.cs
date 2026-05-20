@@ -15,10 +15,10 @@ public sealed class ChatSlashIntercomResultTests
             setChatOverviewMode: _ => { },
             createTopicWithTitle: title =>
                 string.IsNullOrWhiteSpace(title)
-                    ? TopicCreateResult.Fail("Укажи заголовок: /topic create <название>")
+                    ? TopicCreateResult.Fail("Укажи заголовок: /intercom topic create <название>")
                     : TopicCreateResult.Ok("ok"));
 
-        var result = await runner.TryRunAsync("/topic create");
+        var result = await runner.TryRunAsync("/intercom topic create ");
 
         Assert.True(result.Handled);
         Assert.False(result.Success);
@@ -34,7 +34,7 @@ public sealed class ChatSlashIntercomResultTests
             selectChatThread: _ => { },
             setChatOverviewMode: _ => { });
 
-        var result = await runner.TryRunAsync("/topic open missing");
+        var result = await runner.TryRunAsync("/intercom topic open missing");
 
         Assert.True(result.Handled);
         Assert.False(result.Success);

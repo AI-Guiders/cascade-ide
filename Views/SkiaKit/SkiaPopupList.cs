@@ -7,12 +7,36 @@ namespace CascadeIDE.Views.SkiaKit;
 internal static class SkiaPopupList
 {
     public const float RowHeight = 52f;
-    public const float MaxVisibleRows = 4f;
+    public const float MaxVisibleRows = 6f;
     public const float HorizontalPadding = 8f;
     public const float CornerRadius = 8f;
 
+    public static int ViewportRowCount(int rowCount) =>
+        rowCount <= 0 ? 0 : (int)Math.Min(MaxVisibleRows, rowCount);
+
+    public static int MaxScrollOffset(int rowCount) =>
+        Math.Max(0, rowCount - ViewportRowCount(rowCount));
+
+    public static int ClampScrollOffset(int scrollOffset, int rowCount) =>
+        Math.Clamp(scrollOffset, 0, MaxScrollOffset(rowCount));
+
+    /// <summary>Сдвинуть окно так, чтобы <paramref name="selectedIndex"/> был виден (для стрелок).</summary>
+    public static int EnsureSelectionVisible(int selectedIndex, int scrollOffset, int rowCount)
+    {
+        if (rowCount <= 0 || selectedIndex < 0)
+            return 0;
+
+        scrollOffset = ClampScrollOffset(scrollOffset, rowCount);
+        var viewport = ViewportRowCount(rowCount);
+        if (selectedIndex < scrollOffset)
+            return selectedIndex;
+        if (selectedIndex >= scrollOffset + viewport)
+            return ClampScrollOffset(selectedIndex - viewport + 1, rowCount);
+        return scrollOffset;
+    }
+
     public static float MeasureHeight(int rowCount) =>
-        rowCount <= 0 ? 0f : Math.Min(MaxVisibleRows, rowCount) * RowHeight + HorizontalPadding * 2;
+        rowCount <= 0 ? 0f : ViewportRowCount(rowCount) * RowHeight + HorizontalPadding * 2;
 
     public static void Draw(
         SKCanvas canvas,
@@ -20,10 +44,13 @@ internal static class SkiaPopupList
         ISkiaKitPaintTheme theme,
         IReadOnlyList<SkiaPopupListRow> rows,
         int selectedIndex,
+        int scrollOffset,
         float layoutScale = 1f)
     {
         if (rows.Count == 0)
             return;
+
+        scrollOffset = ClampScrollOffset(scrollOffset, rows.Count);
 
         using var shadow = new SKPaint { Color = new SKColor(0, 0, 0, 48), IsAntialias = true };
         canvas.DrawRoundRect(bounds, CornerRadius, CornerRadius, shadow);
@@ -40,13 +67,20 @@ internal static class SkiaPopupList
         };
         canvas.DrawRoundRect(bounds, CornerRadius, CornerRadius, border);
 
+        canvas.Save();
+        canvas.ClipRect(bounds);
+
         var y = bounds.Top + HorizontalPadding;
-        var visible = (int)Math.Min(MaxVisibleRows, rows.Count);
-        for (var i = 0; i < visible; i++)
+        var visible = ViewportRowCount(rows.Count);
+        for (var slot = 0; slot < visible; slot++)
         {
-            var row = rows[i];
+            var rowIndex = scrollOffset + slot;
+            if (rowIndex >= rows.Count)
+                break;
+
+            var row = rows[rowIndex];
             var rowRect = new SKRect(bounds.Left + 4f, y, bounds.Right - 4f, y + RowHeight - 4f);
-            if (i == selectedIndex)
+            if (rowIndex == selectedIndex)
             {
                 using var sel = new SKPaint { Color = theme.HoverBorder.WithAlpha(56), IsAntialias = true };
                 canvas.DrawRoundRect(rowRect, 4f, 4f, sel);
@@ -94,18 +128,27 @@ internal static class SkiaPopupList
 
             y += RowHeight;
         }
+
+        canvas.Restore();
     }
 
-    public static int HitTestRow(SKRect bounds, float x, float y, int rowCount)
+    public static int HitTestRow(SKRect bounds, float x, float y, int rowCount, int scrollOffset)
     {
         if (rowCount <= 0 || !bounds.Contains(x, y))
             return -1;
+
+        scrollOffset = ClampScrollOffset(scrollOffset, rowCount);
 
         var localY = y - bounds.Top - HorizontalPadding;
         if (localY < 0)
             return -1;
 
-        var index = (int)(localY / RowHeight);
+        var slot = (int)(localY / RowHeight);
+        var viewport = ViewportRowCount(rowCount);
+        if (slot < 0 || slot >= viewport)
+            return -1;
+
+        var index = scrollOffset + slot;
         return index >= 0 && index < rowCount ? index : -1;
     }
 

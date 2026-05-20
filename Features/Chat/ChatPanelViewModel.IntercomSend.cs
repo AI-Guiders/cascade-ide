@@ -16,7 +16,7 @@ public partial class ChatPanelViewModel
         new()
         {
             GetTrimmedInput = () => ChatInput.Trim(),
-            GetWorkspaceRoot = _getWorkspaceRoot,
+            GetWorkspaceRoot = ResolveAttachWorkspaceRoot,
             GetPendingAttachCount = () => _pendingAttachDrafts.Count,
             TryHandleSlashLineAsync = tryHandleIntercomSlashLineAsync,
             TryBuildOutboundAsync = buildOutboundOnBackgroundAsync,
@@ -45,7 +45,7 @@ public partial class ChatPanelViewModel
             rawInput,
             pending,
             BuildAttachEditorSnapshot(),
-            _getWorkspaceRoot(),
+            ResolveAttachWorkspaceRoot(),
             _getSolutionPath?.Invoke(),
             cancellationToken).ConfigureAwait(false);
 
@@ -136,7 +136,10 @@ public partial class ChatPanelViewModel
                 attachments: outbound.Attachments,
                 senderWorkspaceContext: outbound.SenderWorkspaceContext);
             ChatMessages.Add(userMsg);
+            SelectedChatThreadId = _activeThreadId;
             _ = PersistEventAsync(ChatHistoryEventKind.MessageAdded, ChatHistoryPayloadMapping.ToMessagePayload(userMsg));
+            RefreshChatSurfaceSnapshot();
+            _ = PersistSessionSolutionPathIfChangedAsync(CancellationToken.None);
             if (startProviderLoading)
             {
                 IsChatLoading = true;

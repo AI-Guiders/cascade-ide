@@ -49,26 +49,26 @@ public sealed class ChatSlashSessionReportsTests
     [Fact]
     public void Catalog_ResolvesTopicList_AsLocalIntercom()
     {
-        var parse = ChatSlashCommandParser.TryParse("/topic list");
+        var parse = ChatSlashCommandParser.TryParse("/intercom topic list");
         Assert.True(ChatSlashCommandCatalog.TryResolve(parse, out var d));
         Assert.Equal(ChatSlashCommandExecutionKind.LocalIntercom, d.ExecutionKind);
-        Assert.Equal("/topic list", d.SlashPath);
+        Assert.Equal("/intercom topic list", d.SlashPath);
     }
 
     [Fact]
     public void Catalog_ResolvesTopicListText_AsLocalReport()
     {
-        var parse = ChatSlashCommandParser.TryParse("/topic list text");
+        var parse = ChatSlashCommandParser.TryParse("/intercom topic list text");
         Assert.True(ChatSlashCommandCatalog.TryResolve(parse, out var d));
         Assert.Equal(ChatSlashCommandExecutionKind.LocalReport, d.ExecutionKind);
-        Assert.Equal("/topic list text", d.SlashPath);
+        Assert.Equal("/intercom topic list text", d.SlashPath);
     }
 
     [Fact]
     public void TryFormat_TopicListText_Route()
     {
         var snapshot = SampleSnapshot();
-        var text = ChatSlashSessionReports.TryFormat("/topic list text", snapshot);
+        var text = ChatSlashSessionReports.TryFormat("/intercom topic list text", snapshot);
         Assert.NotNull(text);
         Assert.Contains("Темы сессии", text);
     }
@@ -100,13 +100,13 @@ public sealed class ChatSlashSessionReportsTests
     }
 
     [Fact]
-    public void Catalog_ResolvesCard_AsLocalIntercomTopicCreate()
+    public void Catalog_ResolvesIntercomTopicCreate_AsLocalIntercom()
     {
-        var parse = ChatSlashCommandParser.TryParse("/card My title");
+        var parse = ChatSlashCommandParser.TryParse("/intercom topic create My title");
         Assert.True(ChatSlashCommandCatalog.TryResolve(parse, out var d));
         Assert.Equal(ChatSlashCommandExecutionKind.LocalIntercom, d.ExecutionKind);
-        Assert.Equal("/card", d.SlashPath);
-        Assert.True(IntentSlashCatalog.TryGetRoute("/card", out var route));
+        Assert.Equal("/intercom topic create", d.SlashPath);
+        Assert.True(IntentSlashCatalog.TryGetRoute("/intercom topic create", out var route));
         Assert.Equal(ChatSlashIntercomHandlers.Ids.TopicCreate, route.IntercomHandlerId);
     }
 

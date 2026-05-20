@@ -23,10 +23,10 @@ public sealed class SessionTopicSlashCompletionProviderTests
     {
         var provider = new SessionTopicSlashCompletionProvider(SampleSnapshot);
         var suggestions = ChatSlashAutocomplete.GetSuggestions(
-            "/topic open ",
+            "/intercom topic open ",
             sessionTopics: provider);
         Assert.Contains(suggestions, s =>
-            s.InsertText == "/topic open bbbbbbbb"
+            s.InsertText == "/intercom topic open bbbbbbbb"
             && s.SlashPath == "bbbbbbbb · Ветка");
     }
 

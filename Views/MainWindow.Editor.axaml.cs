@@ -343,15 +343,28 @@ public partial class MainWindow
         editor.TextArea.Caret.BringCaretToView();
     }
 
-    private void RevealEditorRangeInDock(string? filePath, int startLine, int endLine, int? durationMs = null)
+    private const int RevealEditorRangeMaxAttempts = 10;
+
+    private void RevealEditorRangeInDock(string? filePath, int startLine, int endLine, int? durationMs = null) =>
+        RevealEditorRangeInDockWithRetry(filePath, startLine, endLine, durationMs, attempt: 0);
+
+    private void RevealEditorRangeInDockWithRetry(string? filePath, int startLine, int endLine, int? durationMs, int attempt)
     {
         if (DataContext is not ViewModels.MainWindowViewModel vm)
             return;
 
         var editor = Services.EditorActiveDockResolver.TryGetEditor(vm, filePath);
-        if (editor is null)
+        if (editor is not null)
+        {
+            _ = Services.EditorAgentRangeReveal.Show(editor, startLine, endLine, EditorRevealDuration.ToTimeSpan(durationMs));
+            return;
+        }
+
+        if (attempt >= RevealEditorRangeMaxAttempts)
             return;
 
-        _ = Services.EditorAgentRangeReveal.Show(editor, startLine, endLine, EditorRevealDuration.ToTimeSpan(durationMs));
+        Avalonia.Threading.Dispatcher.UIThread.Post(
+            () => RevealEditorRangeInDockWithRetry(filePath, startLine, endLine, durationMs, attempt + 1),
+            Avalonia.Threading.DispatcherPriority.Background);
     }
 }

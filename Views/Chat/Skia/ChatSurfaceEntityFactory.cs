@@ -179,10 +179,14 @@ internal static class ChatSurfaceEntityFactory
             }
 
             ChatMessageVisualRole? previousMessageRole = null;
+            var feedOrdinal = 0;
+            var showFeedGutter = detailThreadId != Guid.Empty;
             foreach (var entry in lane.Entries)
             {
                 if (entry.Kind == ChatSurfaceEntryKind.Message)
                 {
+                    if (showFeedGutter)
+                        feedOrdinal++;
                     var suppressTitle = previousMessageRole == entry.VisualRole
                                         && !entry.StartsBranch
                                         && entry.VisualRole is ChatMessageVisualRole.User
@@ -191,7 +195,12 @@ internal static class ChatSurfaceEntityFactory
                     var gapAfter = suppressTitle
                         ? compactLayout ? 2f : 3f
                         : compactLayout ? 5f : 8f;
-                    entities.Add(MessageEntity(entry, compactLayout, suppressTitle, gapAfter));
+                    entities.Add(MessageEntity(
+                        entry,
+                        compactLayout,
+                        suppressTitle,
+                        gapAfter,
+                        showFeedGutter ? feedOrdinal : 0));
                     previousMessageRole = entry.VisualRole;
                     continue;
                 }
@@ -209,7 +218,8 @@ internal static class ChatSurfaceEntityFactory
         ChatSurfaceEntry entry,
         bool compactLayout,
         bool suppressTitle,
-        float gapAfter)
+        float gapAfter,
+        int feedOrdinal = 0)
     {
         if (entry.VisualRole == ChatMessageVisualRole.SlashCommand
             && entry.SlashCommandStatus is { } slashStatus
@@ -218,7 +228,7 @@ internal static class ChatSurfaceEntityFactory
             return new SkiaChatSlashCommandEntity(entry, compactLayout);
         }
 
-        return new SkiaChatMessageFeedEntity(entry, compactLayout, suppressTitle, gapAfter);
+        return new SkiaChatMessageFeedEntity(entry, compactLayout, suppressTitle, gapAfter, feedOrdinal);
     }
 
     private static SkiaChatBubbleEntity ConfirmationEntity(ChatSurfaceEntry entry, bool compactLayout)

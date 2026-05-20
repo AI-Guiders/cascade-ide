@@ -127,7 +127,12 @@ public sealed class WebAiPortalCommandBridgeTests
         public Task<string> ClickControlAsync(string? controlName) => throw new NotImplementedException();
         public Task<string> SendKeysAsync(string? controlName, string keys) => throw new NotImplementedException();
         public Task<string> SelectChatMessageAsync(int index) => throw new NotImplementedException();
+        public Task<string> SelectChatMessageByOrdinalAsync(int ordinal, int endOrdinal) => throw new NotImplementedException();
         public Task<string> GetSelectedChatMessageAsync() => throw new NotImplementedException();
+        public Task<string> FindIntercomMessagesForCodeAsync(IReadOnlyDictionary<string, JsonElement>? args) =>
+            throw new NotImplementedException();
+        public Task<string> RelateIntercomMessageRangeToCodeAsync(IReadOnlyDictionary<string, JsonElement>? args) =>
+            throw new NotImplementedException();
         public Task<string> EditChatAssistantMessageAsync(string messageId, string newContent, string? reason = null) => throw new NotImplementedException();
         public Task<string> ExportChatReadableAsync(bool writeFile = false, string? fileName = null) => throw new NotImplementedException();
         public Task<string> SetFocusAsync(string? controlName) => throw new NotImplementedException();

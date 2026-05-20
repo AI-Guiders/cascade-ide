@@ -70,10 +70,11 @@ public partial class MainWindowViewModel
         _ = LoadSolutionAsync(path);
     }
 
-    /// <summary>Загрузка решения в фоне, чтобы не блокировать UI.</summary>
+    /// <summary>Загрузка решения: парсинг .sln/папки в пуле потоков, применение к UI — на UI-потоке.</summary>
     public async Task LoadSolutionAsync(string path)
     {
-        Workspace.SolutionLoadError = "";
+        await UiScheduler.Default.InvokeAsync(() => Workspace.SolutionLoadError = "").ConfigureAwait(false);
+
         try
         {
             var (root, normalizedSolutionPath, error, workspaceLoadVersion) =

@@ -26,7 +26,10 @@ public sealed class IntercomAttachmentRevealPlan
 
     public string Message { get; init; } = "";
 
-    public static IntercomAttachmentRevealPlan Create(AttachmentAnchor anchor, string? workspaceRoot)
+    public static IntercomAttachmentRevealPlan Create(
+        AttachmentAnchor anchor,
+        string? workspaceRoot,
+        string? solutionPath = null)
     {
         if (string.IsNullOrWhiteSpace(anchor.File))
         {
@@ -66,7 +69,7 @@ public sealed class IntercomAttachmentRevealPlan
         {
             var cacheContext = IntercomAttachResolveCacheContext.From(
                 workspaceRoot,
-                solutionPath: null,
+                solutionPath,
                 anchor.File);
             if (AttachmentAnchorRoslynResolver.TryResolveLineRange(
                     null,

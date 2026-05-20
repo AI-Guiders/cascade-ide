@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using CascadeIDE.Features.Chat;
@@ -38,6 +39,13 @@ public partial class ChatPanelView : UserControl
             _ = vm.RevealAttachmentFromFeedAsync(e.Anchor, e.Select, messageIndex: e.MessageIndex);
         };
 
+        surface.MessageSelectContextRequested += (_, messageIndex) =>
+        {
+            if (DataContext is not ChatPanelViewModel vm)
+                return;
+            showMessageSelectContextMenu(surface, vm, messageIndex);
+        };
+
         surface.ComposerKeyDown += (_, e) =>
         {
             if (DataContext is not ChatPanelViewModel vm)
@@ -60,14 +68,12 @@ public partial class ChatPanelView : UserControl
                     vm.DismissChatBracketAutocomplete();
                     break;
                 case IntercomComposerKeyKind.Enter:
-                    if (vm.IsComposerAutocompleteVisible)
+                    if (vm.IsComposerAutocompleteVisible
+                        && vm.TryCommitSelectedComposerSuggestion(out var autoExecute))
                     {
-                        if (vm.TryCommitSelectedComposerSuggestion(out var autoExecute))
-                        {
-                            surface.ComposerCaretIndex = vm.ChatComposerCaretIndex;
-                            if (autoExecute)
-                                TryExecuteSendChat(vm);
-                        }
+                        surface.ComposerCaretIndex = vm.ChatComposerCaretIndex;
+                        if (autoExecute)
+                            TryExecuteSendChat(vm);
                     }
                     else if (e.KeyEvent is { } enterKey && ChatSendKeyMatcher.Matches(enterKey, vm.GetSendMessageKey()))
                     {
@@ -75,8 +81,10 @@ public partial class ChatPanelView : UserControl
                     }
                     else
                     {
-                        var caret = surface.ComposerCaretIndex;
-                        vm.ChatInput = vm.ChatInput.Insert(Math.Clamp(caret, 0, vm.ChatInput.Length), "\n");
+                        var text = surface.ComposerText ?? vm.ChatInput;
+                        var caret = Math.Clamp(surface.ComposerCaretIndex, 0, text.Length);
+                        var next = text.Insert(caret, "\n");
+                        vm.ChatInput = next;
                         surface.ComposerCaretIndex = caret + 1;
                         vm.ChatComposerCaretIndex = caret + 1;
                     }
@@ -99,5 +107,32 @@ public partial class ChatPanelView : UserControl
             _ = async.ExecuteAsync(null);
         else if (vm.SendChatCommand is IRelayCommand relay && relay.CanExecute(null))
             relay.Execute(null);
+    }
+
+    private static void showMessageSelectContextMenu(
+        SkiaChatSurfaceControl surface,
+        ChatPanelViewModel vm,
+        int messageIndex)
+    {
+        var label = vm.TryGetFeedOrdinalForMessageIndex(messageIndex, out var ordinal)
+            ? $"Выбрать сообщение #{ordinal}"
+            : "Выбрать сообщение";
+
+        var menu = new ContextMenu();
+        var item = new MenuItem { Header = label };
+        item.Click += (_, _) =>
+        {
+            if (ordinal > 0)
+            {
+                _ = vm.SelectMessageByOrdinalInDetailLane(ordinal);
+                surface.SelectedMessageIndex = vm.SelectedMessageIndex;
+                return;
+            }
+
+            _ = vm.SelectMessageByIndex(messageIndex);
+            surface.SelectedMessageIndex = vm.SelectedMessageIndex;
+        };
+        menu.Items.Add(item);
+        menu.Open(surface);
     }
 }

@@ -1,4 +1,5 @@
 #nullable enable
+using System.Text.Json;
 using CascadeIDE.Features.IdeMcp.Application;
 using CascadeIDE.Models;
 
@@ -78,10 +79,27 @@ public partial class MainWindowViewModel
             UiScheduler.Default,
             () => ChatPanel.SelectMessageByIndex(index));
 
+    async Task<string> Services.IIdeMcpActions.SelectChatMessageByOrdinalAsync(int ordinal, int endOrdinal) =>
+        await IdeMcpUiAutomationOrchestrator.InvokeStringResultOnUiAsync(
+            UiScheduler.Default,
+            () => ChatPanel.SelectMessageByOrdinalRangeInDetailLane(ordinal, endOrdinal));
+
     async Task<string> Services.IIdeMcpActions.GetSelectedChatMessageAsync() =>
         await IdeMcpUiAutomationOrchestrator.InvokeStringResultOnUiAsync(
             UiScheduler.Default,
             ChatPanel.GetSelectedMessageJson);
+
+    async Task<string> Services.IIdeMcpActions.FindIntercomMessagesForCodeAsync(
+        IReadOnlyDictionary<string, JsonElement>? args) =>
+        await IdeMcpUiAutomationOrchestrator.InvokeStringResultOnUiAsync(
+            UiScheduler.Default,
+            () => ChatPanel.FindMessagesForCodeRefFromMcp(args));
+
+    async Task<string> Services.IIdeMcpActions.RelateIntercomMessageRangeToCodeAsync(
+        IReadOnlyDictionary<string, JsonElement>? args) =>
+        await IdeMcpUiAutomationOrchestrator.InvokeStringResultOnUiAsync(
+            UiScheduler.Default,
+            () => ChatPanel.RelateMessageRangeToCodeRefFromMcp(args));
 
     async Task<string> Services.IIdeMcpActions.EditChatAssistantMessageAsync(string messageId, string newContent, string? reason) =>
         await IdeMcpUiAutomationOrchestrator.EditChatAssistantMessageOnUiAsync(

@@ -11,6 +11,7 @@ using Avalonia.VisualTree;
 using CascadeIDE.Features.Chat;
 using CascadeIDE.Views.Chat;
 using CascadeIDE.Views.Chat.Skia;
+using CascadeIDE.Views.SkiaKit;
 using SkiaSharp;
 
 namespace CascadeIDE.Views;
@@ -22,7 +23,7 @@ public partial class SkiaChatSurfaceControl : Control
 {
     private const double WheelPixelsPerDelta = 48;
 
-    private readonly List<(Rect Bounds, SkiaChatHit Hit)> _hitTargets = [];
+    private readonly SkiaChatHitRegistry _chatHits = new();
     private double _scrollOffset;
     private double _cachedContentHeight;
     private int _hoveredItem = -1;
@@ -55,8 +56,6 @@ public partial class SkiaChatSurfaceControl : Control
 
     public static readonly StyledProperty<bool> IsChatLoadingProperty =
         AvaloniaProperty.Register<SkiaChatSurfaceControl, bool>(nameof(IsChatLoading), false);
-
-    private SKRect _overviewButtonBounds;
 
     public ChatSurfaceSnapshot Snapshot
     {
@@ -306,6 +305,7 @@ public partial class SkiaChatSurfaceControl : Control
         float layoutScale)
     {
         canvas.Clear(_theme.Surface);
+        _chatHits.Clear();
 
         var chromeTop = SkiaChatChromeRenderer.ResolveTopChromeHeight(
             CompactLayout,
@@ -323,10 +323,8 @@ public partial class SkiaChatSurfaceControl : Control
                 LoadingStatusText,
                 statusSubtitle,
                 out var overviewBounds);
-            _overviewButtonBounds = overviewBounds;
+            registerChromePointerHits(overviewBounds);
         }
-        else
-            _overviewButtonBounds = default;
 
         if (showOverviewCatalog)
         {
@@ -336,15 +334,16 @@ public partial class SkiaChatSurfaceControl : Control
             SkiaChatChromeRenderer.DrawOverviewCatalogBand(canvas, width, bandTop, _theme, overviewTopicCount);
         }
 
-        const float contentLeft = 12f;
-        var contentWidth = width - 24f;
+        var showFeedGutter = !OverviewMode && (Snapshot?.Layout.Lanes.Any(l => l.Entries.Any(e => e.Kind == ChatSurfaceEntryKind.Message)) ?? false);
+        var gutterPad = showFeedGutter ? SkiaChatDrawContext.FeedGutterWidth : 0f;
+        const float contentLeftBase = 12f;
+        var contentLeft = contentLeftBase + gutterPad;
+        var contentWidth = width - 24f - gutterPad;
         var contentBottom = Math.Max(chromeTop + 1f, height - bottomChrome);
 
         canvas.Save();
         canvas.ClipRect(new SKRect(0, chromeTop, width, contentBottom), antialias: false);
         canvas.Translate(0, chromeTop - scrollOffset);
-
-        _hitTargets.Clear();
 
         if (placed.Count == 0)
         {
@@ -377,7 +376,7 @@ public partial class SkiaChatSurfaceControl : Control
                     ItemIndex = i,
                     HoveredItemIndex = _hoveredItem,
                     SelectedMessageIndex = SelectedMessageIndex,
-                    HitTargets = _hitTargets
+                    HitRegistry = _chatHits
                 };
 
                 var hit = item.Entity.CreateHit(item.Layout);
@@ -440,8 +439,12 @@ public partial class SkiaChatSurfaceControl : Control
     private void OnPointerWheelChanged(object? sender, PointerWheelEventArgs e)
     {
         var p = e.GetPosition(this);
-        if (_composerBounds.Width > 0 && _composerBounds.Contains((float)p.X, (float)p.Y))
+        if (TryDispatchPointerWheel(p, e))
+        {
+            e.Handled = true;
+            InvalidateVisual();
             return;
+        }
 
         _scrollOffset -= e.Delta.Y * WheelPixelsPerDelta;
         ClampScrollToContent();
@@ -451,65 +454,19 @@ public partial class SkiaChatSurfaceControl : Control
 
     private void OnPointerMoved(object? sender, PointerEventArgs e)
     {
-        var index = FindHit(e.GetPosition(this));
+        var index = _chatHits.FindIndex(e.GetPosition(this));
         if (index == _hoveredItem)
             return;
         _hoveredItem = index;
-        var hand = index >= 0 && _hitTargets[index].Hit.RevealAttachment is not null;
+        var hand = index >= 0 && _chatHits.TryGetHit(index, out var hoverHit) && SkiaChatHitRegistry.WantsHandCursor(hoverHit);
         Cursor = hand ? new Cursor(StandardCursorType.Hand) : new Cursor(StandardCursorType.Arrow);
         InvalidateVisual();
     }
 
     private void OnPointerPressed(object? sender, PointerPressedEventArgs e)
     {
-        if (TryHandleIntercomPointer(e.GetPosition(this)))
-        {
-            e.Handled = true;
-            InvalidateVisual();
+        if (!TryDispatchPointerPress(e.GetPosition(this), e))
             return;
-        }
-
-        if (CompactLayout && _overviewButtonBounds.Width > 0)
-        {
-            var p = e.GetPosition(this);
-            if (_overviewButtonBounds.Contains((float)p.X, (float)p.Y))
-            {
-                OverviewMode = !OverviewMode;
-                e.Handled = true;
-                InvalidateVisual();
-                return;
-            }
-        }
-
-        var index = FindHit(e.GetPosition(this));
-        if (index < 0)
-            return;
-        var hit = _hitTargets[index].Hit;
-        if (hit.RevealAttachment is { } attachAnchor)
-        {
-            var select = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
-            AttachmentRevealRequested?.Invoke(
-                this,
-                new IntercomAttachmentRevealEventArgs(attachAnchor, select, hit.MessageIndex));
-            e.Handled = true;
-            InvalidateVisual();
-            return;
-        }
-
-        if (hit.ResetDetailMode)
-            OverviewMode = true;
-        else if (hit.SelectThreadId is { } threadId)
-        {
-            DetailThreadId = threadId;
-            OverviewMode = false;
-        }
-        else if (hit.MessageIndex is { } messageIndex)
-        {
-            SelectedMessageIndex = messageIndex;
-            Focus();
-            if (hit.ToggleThinking && e.ClickCount >= 2)
-                ThinkingToggleRequested?.Invoke(this, messageIndex);
-        }
 
         e.Handled = true;
         InvalidateVisual();
@@ -522,18 +479,6 @@ public partial class SkiaChatSurfaceControl : Control
         _hoveredItem = -1;
         Cursor = new Cursor(StandardCursorType.Arrow);
         InvalidateVisual();
-    }
-
-    private int FindHit(Point point)
-    {
-        // Последний зарегистрированный hit (узкий attach поверх общего hit сообщения) имеет приоритет.
-        for (var i = _hitTargets.Count - 1; i >= 0; i--)
-        {
-            if (_hitTargets[i].Bounds.Contains(point))
-                return i;
-        }
-
-        return -1;
     }
 
     private void ClampScrollToContent(bool? showOverviewCatalog = null, string? statusSubtitle = null, float? bottomChrome = null)

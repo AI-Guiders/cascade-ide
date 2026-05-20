@@ -13,13 +13,14 @@ public sealed class ChatSlashCommandParserTests
     }
 
     [Fact]
-    public void TryParse_FlatOverview()
+    public void TryParse_IntercomOverview()
     {
-        var r = ChatSlashCommandParser.TryParse("/overview");
+        var r = ChatSlashCommandParser.TryParse("/intercom overview");
         Assert.True(r.IsSlashLine);
         Assert.False(r.IsRejected);
-        Assert.Equal(ChatSlashCommandShape.Flat, r.Shape);
-        Assert.Equal("overview", r.Head);
+        Assert.Equal(ChatSlashCommandShape.NamespaceAction, r.Shape);
+        Assert.Equal("intercom", r.Head);
+        Assert.Equal("overview", r.Action);
     }
 
     [Fact]
@@ -33,12 +34,23 @@ public sealed class ChatSlashCommandParserTests
     }
 
     [Fact]
-    public void TryParse_CardWithArgsTail()
+    public void TryParse_IntercomTopicCreateWithoutTitle_EmptyArgsTail()
     {
-        var r = ChatSlashCommandParser.TryParse("/card ADR 0119");
+        var r = ChatSlashCommandParser.TryParse("/intercom topic create");
         Assert.True(r.IsSlashLine);
-        Assert.Equal(ChatSlashCommandShape.Flat, r.Shape);
-        Assert.Equal("card", r.Head);
+        Assert.Equal("", r.ArgsTail);
+        Assert.True(ChatSlashCommandCatalog.TryResolve(r, out var d));
+        Assert.Equal("/intercom topic create", d.SlashPath);
+    }
+
+    [Fact]
+    public void TryParse_IntercomTopicCreateWithArgsTail()
+    {
+        var r = ChatSlashCommandParser.TryParse("/intercom topic create ADR 0119");
+        Assert.True(r.IsSlashLine);
+        Assert.Equal(ChatSlashCommandShape.NamespaceAction, r.Shape);
+        Assert.Equal("intercom", r.Head);
+        Assert.Equal("topic", r.Action);
         Assert.Equal("ADR 0119", r.ArgsTail);
     }
 

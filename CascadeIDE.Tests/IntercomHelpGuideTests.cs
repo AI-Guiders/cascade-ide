@@ -12,7 +12,9 @@ public sealed class IntercomHelpGuideTests
     {
         var text = IntercomHelpGuide.FormatFull();
         Assert.Contains("[M:", text, StringComparison.Ordinal);
-        Assert.Contains("/attach", text, StringComparison.Ordinal);
+        Assert.Contains("/intercom attach", text, StringComparison.Ordinal);
+        Assert.Contains("feed_ordinal", text, StringComparison.Ordinal);
+        Assert.Contains("/intercom message select", text, StringComparison.Ordinal);
         Assert.Contains("/help", text, StringComparison.Ordinal);
         Assert.Contains("audience: self", text, StringComparison.OrdinalIgnoreCase);
         Assert.Contains(IntercomHelpGuide.BundledRelativePath, text, StringComparison.Ordinal);

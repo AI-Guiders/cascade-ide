@@ -27,6 +27,9 @@ public sealed class ChatSlashCommandRunner
     private readonly Action<TopicPickerPresentation>? _setTopicPicker;
     private readonly Func<string, TopicCreateResult>? _createTopicWithTitle;
     private readonly Func<string, string?, ChatSlashIntercomResult>? _tryAttachSlash;
+    private readonly Func<int, int, string>? _selectMessageByOrdinalRangeInDetailLane;
+    private readonly Func<string?, string>? _findMessagesForCodeRef;
+    private readonly Func<string?, string>? _relateMessageRangeToCodeRef;
 
     public ChatSlashCommandRunner(
         Func<string, IReadOnlyDictionary<string, JsonElement>?, CancellationToken, Task<string>>? executeIdeCommand,
@@ -38,7 +41,10 @@ public sealed class ChatSlashCommandRunner
         Action<bool>? setChatOverviewMode = null,
         Action<TopicPickerPresentation>? setTopicPicker = null,
         Func<string, TopicCreateResult>? createTopicWithTitle = null,
-        Func<string, string?, ChatSlashIntercomResult>? tryAttachSlash = null)
+        Func<string, string?, ChatSlashIntercomResult>? tryAttachSlash = null,
+        Func<int, int, string>? selectMessageByOrdinalRangeInDetailLane = null,
+        Func<string?, string>? findMessagesForCodeRef = null,
+        Func<string?, string>? relateMessageRangeToCodeRef = null)
     {
         _executeIdeCommand = executeIdeCommand;
         _getEditorContext = getEditorContext;
@@ -50,6 +56,25 @@ public sealed class ChatSlashCommandRunner
         _setTopicPicker = setTopicPicker;
         _createTopicWithTitle = createTopicWithTitle;
         _tryAttachSlash = tryAttachSlash;
+        _selectMessageByOrdinalRangeInDetailLane = selectMessageByOrdinalRangeInDetailLane;
+        _findMessagesForCodeRef = findMessagesForCodeRef;
+        _relateMessageRangeToCodeRef = relateMessageRangeToCodeRef;
+    }
+
+    private static string? resolveIntercomArgsTail(in ChatSlashCommandParseResult parse)
+    {
+        var tail = parse.ArgsTail;
+        if (string.Equals(parse.Head, "intercom", StringComparison.OrdinalIgnoreCase)
+            && parse.Shape == ChatSlashCommandShape.Flat
+            && !string.IsNullOrWhiteSpace(tail))
+        {
+            var trimmed = tail.Trim();
+            const string topicCreatePrefix = "topic create";
+            if (trimmed.StartsWith(topicCreatePrefix, StringComparison.OrdinalIgnoreCase))
+                tail = trimmed[topicCreatePrefix.Length..].Trim();
+        }
+
+        return ChatSlashCommandPresentation.NormalizeArgsTail(tail);
     }
 
     public async Task<ChatSlashCommandRunResult> TryRunAsync(string rawInput, CancellationToken cancellationToken = default)
@@ -59,7 +84,7 @@ public sealed class ChatSlashCommandRunner
             return ChatSlashCommandRunResult.NotHandled();
 
         var displayPath = ChatSlashCommandPresentation.FormatDisplayPath(parse, rawInput);
-        var argsTail = ChatSlashCommandPresentation.NormalizeArgsTail(parse.ArgsTail);
+        var argsTail = resolveIntercomArgsTail(parse);
 
         if (parse.IsRejected)
             return new ChatSlashCommandRunResult(
@@ -125,7 +150,10 @@ public sealed class ChatSlashCommandRunner
                     out var intercom,
                     _setTopicPicker,
                     _createTopicWithTitle,
-                    _tryAttachSlash))
+                    _tryAttachSlash,
+                    _selectMessageByOrdinalRangeInDetailLane,
+                    _findMessagesForCodeRef,
+                    _relateMessageRangeToCodeRef))
             {
                 return new ChatSlashCommandRunResult(
                     true,

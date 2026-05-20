@@ -23,6 +23,18 @@ public static partial class ChatSlashCommandCatalog
 
         if (parse.Shape == ChatSlashCommandShape.Flat)
         {
+            if (IntercomSlashPathBuilder.TryBuildPath(parse, out var intercomFlatPath))
+            {
+                foreach (var entry in Descriptors)
+                {
+                    if (string.Equals(entry.SlashPath, intercomFlatPath, StringComparison.OrdinalIgnoreCase))
+                    {
+                        descriptor = entry;
+                        return true;
+                    }
+                }
+            }
+
             var flat = "/" + parse.Head;
             foreach (var entry in Descriptors)
             {
@@ -42,6 +54,18 @@ public static partial class ChatSlashCommandCatalog
             }
 
             return false;
+        }
+
+        if (IntercomSlashPathBuilder.TryBuildPath(parse, out var intercomPath))
+        {
+            foreach (var entry in Descriptors)
+            {
+                if (string.Equals(entry.SlashPath, intercomPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    descriptor = entry;
+                    return true;
+                }
+            }
         }
 
         var path = string.IsNullOrEmpty(parse.SubAction)

@@ -6,6 +6,9 @@ namespace CascadeIDE.ViewModels;
 /// <summary>Вспомогательные методы MCP: корень workspace из solution_path.</summary>
 internal sealed partial class IdeMcpCommandExecutor
 {
+    private string? TryGetAttachSolutionPath() =>
+        _vm is MainWindowViewModel mw ? mw.ChatPanel.ResolveAttachSolutionPath() : null;
+
     internal static string? TryGetWorkspaceRoot(IIdeMcpActions actions)
     {
         try

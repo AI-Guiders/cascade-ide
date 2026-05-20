@@ -26,8 +26,8 @@ public partial class ChatPanelViewModel
     public ChatSlashIntercomResult TryExecuteAttachSlash(string handlerId, string? argsTail)
     {
         var editor = BuildAttachEditorSnapshot();
-        var workspace = _getWorkspaceRoot();
-        var solution = _getSolutionPath?.Invoke();
+        var workspace = ResolveAttachWorkspaceRoot();
+        var solution = ResolveAttachSolutionPath();
 
         AttachmentAnchor draft;
         string error;
@@ -100,6 +100,13 @@ public partial class ChatPanelViewModel
         return WorkspaceDirectoryFromSolutionPath.Resolve(_getSolutionPath?.Invoke() ?? "");
     }
 
+    /// <summary>Абсолютный путь решения: открытое в UI, иначе <c>session.meta.solution_path</c> (.slnx и др.).</summary>
+    public string? ResolveAttachSolutionPath() =>
+        IntercomAttachScope.ResolveSolutionPath(
+            ResolveAttachWorkspaceRoot(),
+            _getSolutionPath?.Invoke(),
+            _sessionSolutionPathRelative);
+
     private IntercomAttachmentResolveAtSend.EditorSnapshot BuildAttachEditorSnapshot() =>
         new(
             _getCurrentFilePath?.Invoke(),
@@ -162,7 +169,7 @@ public partial class ChatPanelViewModel
             string result;
             if (_revealIntercomAttachmentInIde is { } revealInIde)
             {
-                result = revealInIde(anchor, select);
+                result = await revealInIde(anchor, select, cancellationToken).ConfigureAwait(true);
             }
             else if (_executeIdeCommandForMafAgent is { } exec)
             {

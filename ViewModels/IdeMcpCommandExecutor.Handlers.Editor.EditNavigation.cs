@@ -31,7 +31,14 @@ internal sealed partial class IdeMcpCommandExecutor
                 return err;
 
             var workspaceRoot = TryGetWorkspaceRoot(a);
-            if (!EditorRevealRangeResolution.TryResolveLines(request, workspaceRoot, out var lines, out var detail, out var usedFallback))
+            var solutionPath = TryGetAttachSolutionPath();
+            if (!EditorRevealRangeResolution.TryResolveLines(
+                    request,
+                    workspaceRoot,
+                    out var lines,
+                    out var detail,
+                    out var usedFallback,
+                    solutionPath))
                 return $"reveal failed: {detail}";
 
             a.RevealEditorRange(request.File.Value, lines.Start.Value, lines.End.Value, request.DurationMs);

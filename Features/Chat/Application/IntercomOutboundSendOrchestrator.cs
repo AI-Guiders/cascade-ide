@@ -82,22 +82,26 @@ public static class IntercomOutboundSendOrchestrator
             });
 
         if (prepared.Display is null)
+        {
+            await host.SetClarificationStatusAsync("Сообщение пустое после подготовки.").ConfigureAwait(false);
             return;
+        }
 
         var displayInput = prepared.Display;
         var agentInput = prepared.Agent!;
         var mcpOnly = host.GetChatMcpOnly();
-
-        await IntercomSendTrace.RunAsync(
-            workspaceRoot,
-            IntercomSendPhases.SendChat.CommitFeed,
-            _ => host.CommitUserMessageAsync(displayInput, build.Outbound, !mcpOnly)).ConfigureAwait(false);
-
-        if (mcpOnly)
-            return;
+        var startProviderLoading = !mcpOnly;
 
         try
         {
+            await IntercomSendTrace.RunAsync(
+                workspaceRoot,
+                IntercomSendPhases.SendChat.CommitFeed,
+                _ => host.CommitUserMessageAsync(displayInput, build.Outbound, startProviderLoading)).ConfigureAwait(false);
+
+            if (mcpOnly)
+                return;
+
             await IntercomSendTrace.RunAsync(
                 workspaceRoot,
                 IntercomSendPhases.SendChat.DispatchProvider,
@@ -119,7 +123,8 @@ public static class IntercomOutboundSendOrchestrator
         }
         finally
         {
-            await host.EndProviderTurnAsync().ConfigureAwait(false);
+            if (startProviderLoading)
+                await host.EndProviderTurnAsync().ConfigureAwait(false);
         }
     }
 }

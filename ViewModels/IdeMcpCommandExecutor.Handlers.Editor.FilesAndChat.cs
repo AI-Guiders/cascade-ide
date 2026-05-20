@@ -44,9 +44,21 @@ internal sealed partial class IdeMcpCommandExecutor
         add(Services.IdeCommands.ChatSelectMessage, async (args, _) =>
         {
             var a = (IIdeMcpActions)_vm;
-            if (args is null || !args.TryGetValue("index", out var raw) || !raw.TryGetInt32(out var index))
-                return "Missing index";
-            return await a.SelectChatMessageAsync(index);
+            var ordinal = Services.McpCommandJsonArgs.OptionalInt32(args, "ordinal");
+            var endOrdinal = Services.McpCommandJsonArgs.OptionalInt32(args, "end_ordinal");
+            var index = Services.McpCommandJsonArgs.OptionalInt32(args, "index");
+            if (ordinal is not null && index is not null)
+                return "Specify either ordinal or index, not both.";
+            if (ordinal is { } start)
+            {
+                var end = endOrdinal ?? start;
+                return await a.SelectChatMessageByOrdinalAsync(start, end);
+            }
+
+            if (index is { } globalIndex)
+                return await a.SelectChatMessageAsync(globalIndex);
+
+            return "Missing ordinal (1-based in active detail branch) or index (0-based global ChatMessages).";
         });
         add(Services.IdeCommands.ChatGetSelectedMessage, async (_, _) =>
         {

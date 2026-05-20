@@ -1,14 +1,47 @@
 namespace CascadeIDE.Models;
 
-/// <summary>Настройки Intercom. TOML: <c>[intercom]</c> (ADR 0130 фаза 3).</summary>
+/// <summary>Настройки Intercom. TOML: <c>[intercom.*]</c> (ADR 0130).</summary>
 public sealed class IntercomSettings
 {
+    /// <summary>Вложения в ленте. TOML: <c>[intercom.attachments.*]</c>.</summary>
+    public IntercomAttachmentsSettings Attachments { get; set; } = new();
+}
+
+/// <summary>TOML: секция-родитель <c>[intercom.attachments]</c> (поля — во вложенных таблицах).</summary>
+public sealed class IntercomAttachmentsSettings
+{
+    /// <summary>Code-якоря (F:/M:/L:, chip, reveal/select). TOML: <c>[intercom.attachments.code]</c>.</summary>
+    public IntercomAttachmentsCodeSettings Code { get; set; } = new();
+}
+
+/// <summary>Навигация и загрузка решения для code-attach. TOML: <c>[intercom.attachments.code]</c>.</summary>
+public sealed class IntercomAttachmentsCodeSettings
+{
     /// <summary>
-    /// Дефолт навигации по клику на attach-chip: <c>reveal</c> (transient highlight) или <c>select</c> (selection в редакторе).
+    /// Клик по attach-chip: <c>reveal</c> (transient highlight) или <c>select</c> (selection в редакторе).
     /// Shift+клик всегда select. MCP с явным <c>select</c> переопределяет дефолт.
     /// </summary>
-    public string AttachmentNavigate { get; set; } = "reveal";
+    public string Navigate { get; set; } = "reveal";
 
-    public bool DefaultAttachmentNavigateSelects() =>
-        string.Equals(AttachmentNavigate, "select", StringComparison.OrdinalIgnoreCase);
+    /// <summary>
+    /// Перед reveal: <c>when_needed</c> — .sln от файла, если не совпадает с открытым;
+    /// <c>never</c> — только open/reveal файла.
+    /// </summary>
+    public string RevealLoadSolution { get; set; } = IntercomAttachmentsCodeRevealLoadSolutionModes.WhenNeeded;
+
+    public bool DefaultNavigateSelects() =>
+        string.Equals(Navigate, "select", StringComparison.OrdinalIgnoreCase);
+
+    public bool ShouldLoadSolutionBeforeReveal() =>
+        !string.Equals(
+            RevealLoadSolution?.Trim(),
+            IntercomAttachmentsCodeRevealLoadSolutionModes.Never,
+            StringComparison.OrdinalIgnoreCase);
+}
+
+/// <summary>Значения <see cref="IntercomAttachmentsCodeSettings.RevealLoadSolution"/>.</summary>
+public static class IntercomAttachmentsCodeRevealLoadSolutionModes
+{
+    public const string WhenNeeded = "when_needed";
+    public const string Never = "never";
 }

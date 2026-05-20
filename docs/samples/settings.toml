@@ -161,9 +161,11 @@ enabled = true
 show_assignments = true
 show_conditions = true
 
-# Intercom: дефолт клика по attach-chip (ADR 0130 фаза 3): reveal | select
-[intercom]
-attachment_navigate = "reveal"
+# Intercom: code-attach (chip F:/M:/L:) — ADR 0130
+# navigate: reveal | select; reveal_load_solution: when_needed | never
+[intercom.attachments.code]
+navigate = "reveal"
+reveal_load_solution = "when_needed"
 
 # Диагностика отправки Intercom → {workspace}/.cascade-ide/intercom-send-trace.log
 [logging.intercom]

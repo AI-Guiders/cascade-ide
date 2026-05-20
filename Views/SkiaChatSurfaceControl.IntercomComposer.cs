@@ -8,6 +8,7 @@ using Avalonia.Threading;
 using CascadeIDE.Features.Chat;
 using CascadeIDE.Models.Intercom;
 using CascadeIDE.Views.Chat;
+using CascadeIDE.Views.Chat.Skia;
 using CascadeIDE.Views.SkiaKit;
 using SkiaSharp;
 
@@ -51,11 +52,14 @@ public partial class SkiaChatSurfaceControl
     private SKRect _slashPopupBounds;
     private SKRect _composerBounds;
     private readonly List<SkiaPopupListRow> _slashRows = [];
+    private int _slashPopupScrollOffset;
+    private int _slashPopupLastRowCount;
 
     public event EventHandler? SendRequested;
     public event EventHandler<IntercomComposerKeyEventArgs>? ComposerKeyDown;
     public event EventHandler<int>? ThinkingToggleRequested;
     public event EventHandler<IntercomAttachmentRevealEventArgs>? AttachmentRevealRequested;
+    public event EventHandler<int>? MessageSelectContextRequested;
 
     public bool ShowIntercomComposer
     {
@@ -273,45 +277,63 @@ public partial class SkiaChatSurfaceControl
 
         if (popupHeight > 0)
         {
+            if (_slashRows.Count != _slashPopupLastRowCount)
+            {
+                _slashPopupLastRowCount = _slashRows.Count;
+                _slashPopupScrollOffset = 0;
+            }
+
+            var selected = SelectedSlashSuggestionIndex;
+            if (selected < 0 && _slashRows.Count > 0)
+                selected = 0;
+            _slashPopupScrollOffset = SkiaPopupList.EnsureSelectionVisible(
+                selected,
+                _slashPopupScrollOffset,
+                _slashRows.Count);
+
             var popupTop = composerTop - popupHeight;
             _slashPopupBounds = new SKRect(8f, popupTop, width - 8f, composerTop - 2f);
-            SkiaPopupList.Draw(canvas, _slashPopupBounds, theme, _slashRows, SelectedSlashSuggestionIndex, layoutScale);
+            SkiaPopupList.Draw(
+                canvas,
+                _slashPopupBounds,
+                theme,
+                _slashRows,
+                selected,
+                _slashPopupScrollOffset,
+                layoutScale);
         }
         else
+        {
             _slashPopupBounds = default;
+            _slashPopupScrollOffset = 0;
+            _slashPopupLastRowCount = 0;
+        }
+
+        RegisterComposerPointerHits();
     }
 
-    private bool TryHandleIntercomPointer(Point point)
+    private void RegisterComposerPointerHits()
     {
-        if (!ShowIntercomComposer)
-            return false;
-
-        if (_sendButtonBounds.Width > 0 && _sendButtonBounds.Contains((float)point.X, (float)point.Y))
+        if (_sendButtonBounds.Width > 0)
         {
-            Focus();
-            if (IsComposerEnabled)
-                SendRequested?.Invoke(this, EventArgs.Empty);
-            return true;
+            _chatHits.RegisterControlRect(
+                SkiaChatHitGeometry.ToControlRect(_sendButtonBounds),
+                new SkiaChatHit(null, null, ResetDetailMode: false, PointerAction: SkiaChatPointerAction.ComposerSend));
         }
 
         if (_slashPopupBounds.Width > 0)
         {
-            var row = SkiaPopupList.HitTestRow(_slashPopupBounds, (float)point.X, (float)point.Y, _slashRows.Count);
-            if (row >= 0)
-            {
-                SelectedSlashSuggestionIndex = row;
-                ComposerKeyDown?.Invoke(this, new IntercomComposerKeyEventArgs(IntercomComposerKeyKind.CommitSlashSuggestion));
-                return true;
-            }
+            _chatHits.RegisterControlRect(
+                SkiaChatHitGeometry.ToControlRect(_slashPopupBounds),
+                new SkiaChatHit(null, null, ResetDetailMode: false, PointerAction: SkiaChatPointerAction.SlashPopup));
         }
 
-        if (_composerBounds.Contains((float)point.X, (float)point.Y))
+        if (_composerBounds.Width > 0)
         {
-            Focus();
-            return true;
+            _chatHits.RegisterControlRect(
+                SkiaChatHitGeometry.ToControlRect(_composerBounds),
+                new SkiaChatHit(null, null, ResetDetailMode: false, PointerAction: SkiaChatPointerAction.ComposerFocus));
         }
-
-        return false;
     }
 
     private void OnComposerTextInput(object? sender, TextInputEventArgs e)
@@ -344,18 +366,21 @@ public partial class SkiaChatSurfaceControl
             return;
         }
 
-        if (!IsKeyboardFocusWithin)
-            return;
-
         if (kind is IntercomComposerKeyKind.Tab
             or IntercomComposerKeyKind.Escape
             or IntercomComposerKeyKind.Enter
             or IntercomComposerKeyKind.CommitSlashSuggestion)
         {
+            if (!IsKeyboardFocusWithin)
+                Focus();
+
             ComposerKeyDown?.Invoke(this, new IntercomComposerKeyEventArgs(kind.Value, e));
             e.Handled = true;
             return;
         }
+
+        if (!IsKeyboardFocusWithin)
+            return;
 
         if (e.Key == Key.Back)
         {
@@ -385,7 +410,7 @@ public partial class SkiaChatSurfaceControl
         Key.Up => IntercomComposerKeyKind.SlashUp,
         Key.Down => IntercomComposerKeyKind.SlashDown,
         Key.Escape => IntercomComposerKeyKind.Escape,
-        Key.Enter => IntercomComposerKeyKind.Enter,
+        Key.Enter or Key.Return => IntercomComposerKeyKind.Enter,
         _ => null,
     };
 

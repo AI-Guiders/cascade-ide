@@ -191,7 +191,12 @@ public sealed class IdeMcpServerDispatchTests
         public Task<string> CodebaseIndexExplainAsync(string? workspacePath, string? solutionPath, long hitId, CancellationToken cancellationToken = default) => throw new NotImplementedException();
         public Task<string> CodebaseIndexReindexAsync(string? workspacePath, string? solutionPath, bool fullRebuild, CancellationToken cancellationToken = default) => throw new NotImplementedException();
         public Task<string> SelectChatMessageAsync(int index) => throw new NotImplementedException();
+        public Task<string> SelectChatMessageByOrdinalAsync(int ordinal, int endOrdinal) => throw new NotImplementedException();
         public Task<string> GetSelectedChatMessageAsync() => throw new NotImplementedException();
+        public Task<string> FindIntercomMessagesForCodeAsync(IReadOnlyDictionary<string, JsonElement>? args) =>
+            throw new NotImplementedException();
+        public Task<string> RelateIntercomMessageRangeToCodeAsync(IReadOnlyDictionary<string, JsonElement>? args) =>
+            throw new NotImplementedException();
         public Task<string> EditChatAssistantMessageAsync(string messageId, string newContent, string? reason = null) => throw new NotImplementedException();
         public Task<string> ExportChatReadableAsync(bool writeFile = false, string? fileName = null) => throw new NotImplementedException();
     }

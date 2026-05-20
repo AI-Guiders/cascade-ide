@@ -122,7 +122,9 @@ public sealed class IntercomAttachmentMessageBuilderTests
 
         var memberAnchor = prepared.Outbound.Attachments[1];
         Assert.Equal("Run", memberAnchor.MemberKey);
-        Assert.Null(memberAnchor.LineStart);
+        Assert.Equal(3, memberAnchor.LineStart);
+        Assert.Equal(3, memberAnchor.LineEnd);
+        Assert.Equal(IntercomAttachmentRevealPlan.OutcomeResolved, memberAnchor.ResolveOutcome);
         Assert.Null(memberAnchor.Excerpt);
     }
 

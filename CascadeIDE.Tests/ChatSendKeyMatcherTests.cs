@@ -11,6 +11,7 @@ public sealed class ChatSendKeyMatcherTests
     [InlineData("Enter", Key.Enter, KeyModifiers.Control, false)]
     [InlineData("Ctrl+Enter", Key.Enter, KeyModifiers.Control, true)]
     [InlineData("Shift+Enter", Key.Enter, KeyModifiers.Shift, true)]
+    [InlineData("Ctrl+Enter", Key.Return, KeyModifiers.Control, true)]
     public void Matches_respects_send_message_key_setting(string setting, Key key, KeyModifiers mods, bool expected)
     {
         var e = new KeyEventArgs { Key = key, KeyModifiers = mods };

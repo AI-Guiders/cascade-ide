@@ -1,4 +1,5 @@
 #nullable enable
+using CascadeIDE.Models.Intercom;
 using CascadeIDE.Views.SkiaKit;
 using SkiaSharp;
 
@@ -47,7 +48,8 @@ internal static class SkiaChatBubbleRenderer
         var bodyWidth = BodyWidthForMeasure(context, spec);
         if (spec.BodyTone == SkiaChatBodyTone.Link)
         {
-            var linkRuns = SkiaMarkdownLayout.ParseInline(body);
+            // Attach label в ленте — один кликабельный токен [label]; не разбираем как code-ref markdown.
+            var linkRuns = new List<SkiaMarkdownRun> { new(body, SkiaMarkdownStyle.Link) };
             var linkLines = SkiaMarkdownLayout.WrapLines(linkRuns, maxChars);
             if (linkLines.Count == 0)
                 linkLines = [new SkiaMarkdownLine([new SkiaMarkdownRun("", SkiaMarkdownStyle.Plain)])];
@@ -117,6 +119,107 @@ internal static class SkiaChatBubbleRenderer
             _ => 11f,
         };
 
+    private const float FeedTextInset = 6f;
+    private const float FeedBodyTopPad = 6f;
+    private const float FeedLinkHitPadX = 2f;
+    private const float FeedLinkHitPadY = 2f;
+
+    /// <summary>Узкий hit по фактической строке ссылки в feed-сегменте (не на всю ширину bubble).</summary>
+    public static SKRect ComputeFeedLinkHitRect(
+        SKRect segmentRect,
+        string linkText,
+        in SkiaChatBubbleMetrics metrics)
+    {
+        var top = segmentRect.Top + metrics.TitleHeight + FeedBodyTopPad;
+        var left = segmentRect.Left + FeedTextInset;
+        return computeFeedLinkRunHitRect(left, top, linkText, metrics.LineHeight);
+    }
+
+    /// <summary>Регистрация hit по каждому <see cref="SkiaMarkdownStyle.Link"/> run в feed-prose (через <see cref="SkiaChatDrawContext.HitRegistry"/>).</summary>
+    public static void RegisterFeedMarkdownLinkHits(
+        SkiaChatDrawContext context,
+        SKRect segmentRect,
+        in SkiaChatBubbleMetrics metrics,
+        int? messageIndex,
+        Func<string, AttachmentAnchor?> tryResolveAnchor)
+    {
+        if (tryResolveAnchor is null)
+            return;
+
+        var textY = segmentRect.Top + metrics.TitleHeight + FeedBodyTopPad;
+        var xStart = segmentRect.Left + FeedTextInset;
+
+        using var bodyFont = new SKFont(SKTypeface.FromFamilyName("Segoe UI"), BodyFontSize(SkiaChatBubbleKind.Feed));
+
+        foreach (var line in metrics.ContentLines)
+        {
+            var x = xStart;
+            foreach (var run in line.Runs)
+            {
+                if (run.Text.Length == 0)
+                    continue;
+
+                if (run.Style == SkiaMarkdownStyle.Link
+                    && tryResolveAnchor(run.Text) is { } anchor)
+                {
+                    context.RegisterHit(
+                        computeFeedLinkRunHitRect(x, textY, run.Text, metrics.LineHeight),
+                        new SkiaChatHit(
+                            messageIndex,
+                            null,
+                            ResetDetailMode: false,
+                            RevealAttachment: anchor));
+                }
+
+                x += bodyFont.MeasureText(run.Text);
+            }
+
+            textY += metrics.LineHeight;
+        }
+    }
+
+    /// <summary>RTK/plain feed: link hit по разбору inline markdown (когда <see cref="SkiaChatBubbleMetrics.RichTextBody"/> задействован).</summary>
+    public static void RegisterFeedMarkdownLinkHitsFromText(
+        SkiaChatDrawContext context,
+        SKRect segmentRect,
+        string proseText,
+        float contentWidth,
+        float lineHeight,
+        int? messageIndex,
+        Func<string, AttachmentAnchor?> tryResolveAnchor)
+    {
+        if (tryResolveAnchor is null || string.IsNullOrWhiteSpace(proseText))
+            return;
+
+        var maxChars = Math.Max(12, (int)(contentWidth / 7.1f));
+        var runs = SkiaMarkdownLayout.ParseInline(proseText);
+        var lines = SkiaMarkdownLayout.WrapLines(runs, maxChars);
+        if (lines.Count == 0)
+            return;
+
+        var metrics = new SkiaChatBubbleMetrics(
+            lines,
+            Footer: null,
+            TitleHeight: 0,
+            FooterHeight: 0,
+            lineHeight);
+        RegisterFeedMarkdownLinkHits(context, segmentRect, metrics, messageIndex, tryResolveAnchor);
+    }
+
+    private static SKRect computeFeedLinkRunHitRect(float left, float top, string linkText, float lineHeight)
+    {
+        using var bodyFont = new SKFont(SKTypeface.FromFamilyName("Segoe UI"), 11f);
+        var width = string.IsNullOrWhiteSpace(linkText)
+            ? 24f
+            : bodyFont.MeasureText(linkText);
+        var height = Math.Max(lineHeight, bodyFont.Size + 4f);
+        return new SKRect(
+            left - FeedLinkHitPadX,
+            top - FeedLinkHitPadY,
+            left + width + FeedLinkHitPadX,
+            top + height + FeedLinkHitPadY);
+    }
+
     public static float MeasureHeight(in SkiaChatBubbleSpec spec, in SkiaChatBubbleMetrics metrics)
     {
         var bodyHeight = metrics.RichTextBody?.BodyHeight
@@ -159,19 +262,6 @@ internal static class SkiaChatBubbleRenderer
 
     private static void DrawFeedAccent(SkiaChatDrawContext ctx, SKRect rect, in SkiaChatBubbleSpec spec)
     {
-        if (spec.IsSelected || (spec.MessageIndex is not null && spec.MessageIndex == ctx.SelectedMessageIndex))
-        {
-            var bar = new SKRect(rect.Left, rect.Top + 1f, rect.Left + 3f, rect.Bottom - 1f);
-            using var paint = new SKPaint
-            {
-                Color = ctx.Theme.SelectedBorder,
-                IsAntialias = true,
-                Style = SKPaintStyle.Fill,
-            };
-            ctx.Canvas.DrawRoundRect(bar, 1.5f, 1.5f, paint);
-            return;
-        }
-
         if (!spec.StartsBranch)
             return;
 
@@ -264,8 +354,12 @@ internal static class SkiaChatBubbleRenderer
         ctx.Canvas.DrawRoundRect(rect, corner, corner, FrameStroke(ctx.Theme.Border));
         if (ctx.IsHovered)
             ctx.Canvas.DrawRoundRect(rect, corner, corner, FrameStroke(ctx.Theme.HoverBorder, 2));
-        if (spec.IsSelected || (spec.MessageIndex is not null && spec.MessageIndex == ctx.SelectedMessageIndex))
+        var messageSelected = spec.MessageIndex is not null && spec.MessageIndex == ctx.SelectedMessageIndex;
+        if (spec.Kind != SkiaChatBubbleKind.Feed
+            && (spec.IsSelected || messageSelected))
+        {
             ctx.Canvas.DrawRoundRect(rect, corner, corner, FrameStroke(ctx.Theme.SelectedBorder, 2.2f));
+        }
     }
 
     private static void DrawText(

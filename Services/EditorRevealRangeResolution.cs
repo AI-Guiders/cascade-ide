@@ -14,7 +14,8 @@ public static class EditorRevealRangeResolution
         string? workspaceRoot,
         out LineRange lines,
         out string detail,
-        out bool usedFallback)
+        out bool usedFallback,
+        string? solutionPath = null)
     {
         lines = default;
         detail = "";
@@ -31,7 +32,7 @@ public static class EditorRevealRangeResolution
         {
             var cacheContext = IntercomAttachResolveCacheContext.From(
                 workspaceRoot,
-                solutionPath: null,
+                solutionPath,
                 filePath);
             if (AttachmentAnchorRoslynResolver.TryResolveLineRange(
                     null,

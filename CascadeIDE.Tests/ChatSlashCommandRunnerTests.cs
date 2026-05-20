@@ -10,11 +10,11 @@ public sealed class ChatSlashCommandRunnerTests
     public async Task TryRun_Overview_SucceedsWithoutOkText()
     {
         var runner = new ChatSlashCommandRunner((_, _, _) => Task.FromResult("{\"ok\":true}"));
-        var result = await runner.TryRunAsync("/overview");
+        var result = await runner.TryRunAsync("/intercom overview");
 
         Assert.True(result.Handled);
         Assert.True(result.Success);
-        Assert.Equal("/overview", result.SlashPath);
+        Assert.Equal("/intercom overview", result.SlashPath);
         Assert.Null(result.DetailText);
     }
 

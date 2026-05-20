@@ -19,7 +19,7 @@ public static partial class IdeCommands
     public const string GetUiModesDiagnostics = "get_ui_modes_diagnostics";
     /// <summary>Контекст навигации по коду (ADR 0039, CNC): связанные файлы или мини-подграф. Виды связей — partial_peer project_peer xaml_codebehind_pair test_counterpart same_namespace same_directory. Имена preset — из settings.toml <c>[code_navigation]</c> / <c>[[code_navigation.presets]]</c>. args: mode:string, file_path?:string, line?:integer, column?:integer, max_related?:integer, max_nodes?:integer, max_edges?:integer, preset?:string, include_kinds?:string[], exclude_kinds?:string[], level?:string; returns: json; example: {"mode":"related","file_path":"src/Foo.cs","preset":"no_namespace_noise","level":"controlFlow"}.</summary>
     public const string GetCodeNavigationContext = "get_code_navigation_context";
-    /// <summary>Выбрать сообщение в чате по индексу (0-based), в т.ч. для Skia-поверхности. args: index:integer; returns: text; example: {"index":0}.</summary>
+    /// <summary>Выбрать сообщение в чате. args: ordinal?:integer, end_ordinal?:integer, index?:integer; returns: text; example: {"ordinal":3}. ordinal/end_ordinal — 1-based gutter активной detail-ветки; index — 0-based глобальный ChatMessages.</summary>
     public const string ChatSelectMessage = "chat_select_message";
     /// <summary>Сместить выбор на предыдущее сообщение чата (keyboard-first). returns: text.</summary>
     public const string ChatSelectPrevMessage = "chat_select_prev_message";
@@ -43,7 +43,7 @@ public static partial class IdeCommands
     public const string ChatGetProductSpine = "chat_get_product_spine";
     /// <summary>Обновить spine (частично): переданные поля перезаписываются; milestones — многострочный текст (веха на строку). args: line_title?:string, current_focus?:string, milestones?:string, include_in_agent_context?:boolean; returns: text; example: {"current_focus":"Topic cards + spine MCP","milestones":"ADR 0096\\nMCP get/set"}.</summary>
     public const string ChatSetProductSpine = "chat_set_product_spine";
-    /// <summary>Получить выбранное сообщение чата (индекс, роль, контент) в JSON. returns: json.</summary>
+    /// <summary>Получить выбранное сообщение чата в JSON. returns: json. Поля: selected_index, feed_ordinal, branch_message_count, message_id, role, content.</summary>
     public const string ChatGetSelectedMessage = "chat_get_selected_message";
     /// <summary>Заменить текст ответа ассистента по стабильному message_id; в лог пишется message_edited. args: message_id:string, new_content:string, reason?:string; returns: json; example: {"message_id":"a1b2c3d4e5f6789012345678901234ab","new_content":"fixed text"}.</summary>
     public const string ChatEditMessage = "chat_edit_message";

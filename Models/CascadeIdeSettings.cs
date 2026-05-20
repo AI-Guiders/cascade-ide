@@ -34,7 +34,7 @@ public sealed partial class CascadeIdeSettings : ModelBase
     /// <summary>Пресеты навигации по коду / решению (ADR 0039, Code Navigation Context). TOML: <c>[code_navigation]</c>.</summary>
     public CodeNavigationSettings CodeNavigation { get; set; } = new();
 
-    /// <summary>Intercom: дефолт клика по attach, reveal vs select (ADR 0130 фаза 3). TOML: <c>[intercom]</c>.</summary>
+    /// <summary>Intercom (вложения, лента). TOML: <c>[intercom]</c>, code-attach — <c>[intercom.attachments.code]</c> (ADR 0130).</summary>
     public IntercomSettings Intercom { get; set; } = new();
 
     /// <summary>Диагностические логи. TOML: <c>[logging.intercom]</c> и др.</summary>

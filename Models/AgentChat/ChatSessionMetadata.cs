@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace CascadeIDE.Models.AgentChat;
 
 /// <summary>Лёгкие метаданные сессии чата.</summary>
@@ -7,6 +9,8 @@ public sealed record ChatSessionMetadata(
     DateTimeOffset UpdatedAtUtc,
     string? Title = null,
     int SchemaVersion = 1,
+    /// <summary>Путь к решению относительно workspace (.sln/.slnx/.slnf/.csproj) для resolve якорей без UI. Schema ≥ 2.</summary>
+    [property: JsonPropertyName("solution_path")] string? SolutionPath = null,
     /// <summary>Корневая ветка по умолчанию; новые сообщения привязываются к активной ветке (см. события <c>thread_forked</c>).</summary>
     Guid MainThreadId = default,
     string? ProductSpineLineTitle = null,

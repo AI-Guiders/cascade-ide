@@ -114,10 +114,17 @@ public interface IIdeMcpActions
     Task<string> ClickControlAsync(string? controlName);
     /// <summary>Отправить сочетание клавиш в эффективный контрол (под курсором или по name). keys — текст вида Ctrl+Enter, Alt+F4. Вызов на UI-потоке.</summary>
     Task<string> SendKeysAsync(string? controlName, string keys);
-    /// <summary>Выбрать сообщение в чате по индексу (0-based) для сценариев MCP/агента.</summary>
+    /// <summary>Выбрать сообщение в чате по индексу (0-based, полный ChatMessages) для сценариев MCP/агента.</summary>
     Task<string> SelectChatMessageAsync(int index);
-    /// <summary>Получить выбранное сообщение чата (0-based) в JSON для agent-friendly чтения.</summary>
+    /// <summary>Выбрать по номеру gutter (1-based) в активной detail-ветке; <paramref name="endOrdinal"/> — конец диапазона (активным станет он).</summary>
+    Task<string> SelectChatMessageByOrdinalAsync(int ordinal, int endOrdinal);
+    /// <summary>Получить выбранное сообщение чата в JSON (глобальный индекс + feed_ordinal в ветке).</summary>
     Task<string> GetSelectedChatMessageAsync();
+    /// <summary>Найти сообщения ветки по коду (inferred attach, ADR 0137). returns: json.</summary>
+    Task<string> FindIntercomMessagesForCodeAsync(IReadOnlyDictionary<string, JsonElement>? args);
+
+    /// <summary>Явная связь диапазона gutter-сообщений с кодом (ADR 0137).</summary>
+    Task<string> RelateIntercomMessageRangeToCodeAsync(IReadOnlyDictionary<string, JsonElement>? args);
     /// <summary>Заменить текст ответа ассистента по message_id; в event log пишется message_edited.</summary>
     Task<string> EditChatAssistantMessageAsync(string messageId, string newContent, string? reason = null);
     /// <summary>Экспорт текущего чата в Markdown; при write_file — запись в .cascade-ide/chat-sessions/exports/.</summary>

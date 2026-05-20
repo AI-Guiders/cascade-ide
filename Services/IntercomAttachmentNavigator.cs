@@ -17,13 +17,14 @@ public static class IntercomAttachmentNavigator
         AttachmentAnchor anchor,
         bool? selectExplicit,
         bool shiftSelect,
-        int? durationMs)
+        int? durationMs,
+        string? solutionPath = null)
     {
         var select = shiftSelect
                      || selectExplicit == true
-                     || (selectExplicit is null && settings.DefaultAttachmentNavigateSelects());
+                     || (selectExplicit is null && settings.Attachments.Code.DefaultNavigateSelects());
 
-        var plan = IntercomAttachmentRevealPlan.Create(anchor, workspaceRoot);
+        var plan = IntercomAttachmentRevealPlan.Create(anchor, workspaceRoot, solutionPath);
 
         if (plan.ResolveOutcome == IntercomAttachmentRevealPlan.OutcomeFileMissing)
             return plan.Message;

@@ -344,10 +344,27 @@ public static class IntercomAttachmentResolveAtSend
         if (AttachmentSyntaxScope.TryParse(anchor.SyntaxScope, out var parsedScope))
             syntaxScope = parsedScope;
 
-        // Fast-path @ send (MCP): F/L/M/S без Roslyn; M и S — строки при reveal; L — строки из bracket сохраняются.
+        // Fast-path @ send (MCP): без excerpt; L — строки из bracket; M/S — re-resolve при неудаче (single-file Roslyn по абсолютному пути).
         if (!string.IsNullOrWhiteSpace(anchor.MemberKey) || syntaxScope is not null)
         {
-            if (skipMemberRoslynResolve)
+            if (skipMemberRoslynResolve
+                && AttachmentAnchorRoslynResolver.TryResolveLineRange(
+                    resolveSession,
+                    absolute,
+                    anchor.MemberKey,
+                    syntaxScope,
+                    cacheContext,
+                    out var mcpLines,
+                    out _))
+            {
+                anchor = anchor with
+                {
+                    LineStart = mcpLines.Start.Value,
+                    LineEnd = mcpLines.End.Value,
+                    ResolveOutcome = IntercomAttachmentRevealPlan.OutcomeResolved,
+                };
+            }
+            else if (skipMemberRoslynResolve)
             {
                 anchor = anchor with
                 {

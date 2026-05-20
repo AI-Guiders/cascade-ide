@@ -46,7 +46,7 @@ public partial class ChatPanelViewModel : ViewModelBase
     private readonly Action<string>? _appendAcpTerminal;
     private readonly Action? _showAcpTerminal;
     private readonly Func<string, IReadOnlyDictionary<string, JsonElement>?, CancellationToken, Task<string>>? _executeIdeCommandForMafAgent;
-    private readonly Func<AttachmentAnchor, bool, string>? _revealIntercomAttachmentInIde;
+    private readonly Func<AttachmentAnchor, bool, CancellationToken, Task<string>>? _revealIntercomAttachmentInIde;
     private readonly ChatSlashCommandRunner _slashCommandRunner;
     private readonly IWorkspaceFileSlashCompletionProvider? _workspaceFileSlashCompletion;
     private readonly ISessionTopicSlashCompletionProvider _sessionTopicSlashCompletion;
@@ -65,6 +65,7 @@ public partial class ChatPanelViewModel : ViewModelBase
     private CursorAcpChatConnection? _cursorAcp;
     private ClarificationBatch? _activeClarificationBatch;
     private Guid _sessionId;
+    private string? _sessionSolutionPathRelative;
     private Guid _mainThreadId;
     private Guid _activeThreadId;
     private Guid? _pendingParentForNextMessage;
@@ -91,7 +92,7 @@ public partial class ChatPanelViewModel : ViewModelBase
         Action<string>? appendAcpTerminal = null,
         Action? showAcpTerminal = null,
         Func<string, IReadOnlyDictionary<string, JsonElement>?, CancellationToken, Task<string>>? executeIdeCommandForMafAgent = null,
-        Func<AttachmentAnchor, bool, string>? revealIntercomAttachmentInIde = null,
+        Func<AttachmentAnchor, bool, CancellationToken, Task<string>>? revealIntercomAttachmentInIde = null,
         Func<Uri>? getLocalOllamaEndpoint = null,
         Func<string>? getEffectiveOllamaModelId = null,
         Func<IChatClient?>? tryCreateCloudMafIChatClient = null,
@@ -140,7 +141,10 @@ public partial class ChatPanelViewModel : ViewModelBase
             v => IsChatOverviewMode = v,
             setTopicPicker: SetTopicPickerPresentation,
             createTopicWithTitle: CreateTopicWithTitle,
-            tryAttachSlash: TryExecuteAttachSlash);
+            tryAttachSlash: TryExecuteAttachSlash,
+            selectMessageByOrdinalRangeInDetailLane: SelectMessageByOrdinalRangeInDetailLane,
+            findMessagesForCodeRef: FindMessagesForCodeRef,
+            relateMessageRangeToCodeRef: RelateMessageRangeToCodeRef);
         _getLocalOllamaEndpoint = getLocalOllamaEndpoint;
         _getEffectiveOllamaModelId = getEffectiveOllamaModelId;
         _tryCreateCloudMafIChatClient = tryCreateCloudMafIChatClient;
@@ -150,10 +154,10 @@ public partial class ChatPanelViewModel : ViewModelBase
         _getEditorSelectionStart = getEditorSelectionStart;
         _getEditorSelectionLength = getEditorSelectionLength;
         _getEditorCaretOffset = getEditorCaretOffset;
-        _sessionStore = new ChatSessionStore(_getWorkspaceRoot());
-        _sessionId = _sessionStore.EnsureSessionId();
+        _sessionStore = new ChatSessionStore(null);
+        _sessionId = Guid.Empty;
         ChatMessages.CollectionChanged += OnChatMessagesCollectionChanged;
-        _ = InitializeSessionAsync();
+        _ = ReloadIntercomSessionFromDiskAsync();
         RefreshChatSurfaceSnapshot();
     }
 
@@ -796,7 +800,7 @@ public partial class ChatPanelViewModel : ViewModelBase
                 return (
                     IntercomAttachmentResolveAtSend.EditorSnapshot.ForMcpBracketResolve(_getCurrentFilePath?.Invoke()),
                     ResolveAttachWorkspaceRoot(),
-                    _getSolutionPath?.Invoke(),
+                    ResolveAttachSolutionPath(),
                     p);
             }).ConfigureAwait(false);
 
@@ -970,9 +974,20 @@ public partial class ChatPanelViewModel : ViewModelBase
         var m = ChatMessages[SelectedMessageIndex];
         var role = m.Role ?? "";
         var content = m.Content ?? "";
+        int? feedOrdinal = null;
+        int? branchMessageCount = null;
+        if (TryGetActiveDetailLaneMessageIndices(out var branchIndices))
+        {
+            branchMessageCount = branchIndices.Count;
+            if (TryGetFeedOrdinalForMessageIndex(SelectedMessageIndex, out var ord))
+                feedOrdinal = ord;
+        }
+
         return JsonSerializer.Serialize(new
         {
             selected_index = SelectedMessageIndex,
+            feed_ordinal = feedOrdinal,
+            branch_message_count = branchMessageCount,
             has_selection = true,
             message_id = m.MessageId.ToString("N"),
             thread_id = m.ThreadId.ToString("N"),

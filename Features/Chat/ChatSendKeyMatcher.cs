@@ -5,9 +5,11 @@ namespace CascadeIDE.Features.Chat;
 /// <summary>Сопоставление нажатия с настройкой «отправить сообщение» (Enter / Ctrl+Enter / Shift+Enter).</summary>
 internal static class ChatSendKeyMatcher
 {
+    public static bool IsEnterPhysicalKey(Key key) => key is Key.Enter or Key.Return;
+
     public static bool Matches(KeyEventArgs e, string sendMessageKey)
     {
-        var isEnter = e.Key == Key.Enter;
+        var isEnter = IsEnterPhysicalKey(e.Key);
         var ctrl = e.KeyModifiers.HasFlag(KeyModifiers.Control);
         var shift = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
         return sendMessageKey switch

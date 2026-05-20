@@ -98,7 +98,7 @@ public static class IntercomAttachmentMessageBuilder
         }
 
         if (profile.AddMcpFastPathWarning && outbound.Attachments.Count > 0)
-            warnings.Add("MCP fast-path (F/M/L/S): Roslyn и excerpt @ send отложены; reveal — re-resolve.");
+            warnings.Add("MCP fast-path (F/M/L/S): excerpt @ send отложен; member — single-file Roslyn, иначе re-resolve при клике.");
 
         return finishPrepare(outbound, warnings, out prepared);
     }

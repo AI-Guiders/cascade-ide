@@ -293,6 +293,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         OnPropertyChanged(nameof(IsPfdColumnVisible));
 
         ChatPanel.DisposeCursorAcpSession();
+        _ = ChatPanel.ReloadIntercomSessionFromDiskAsync();
         ApplyHybridCodebaseIndexOrchestrationForCurrentSolution(pokeWhenAutoReindex: true);
         AttachBreakpointsFileWatcher(value);
         _ = RefreshGitSummaryAsync();

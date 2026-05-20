@@ -236,17 +236,46 @@ public sealed class CascadeIdeSettingsTomlDeserializeTests
     }
 
     [Fact]
-    public void Deserialize_IntercomAttachmentNavigate_ParsesExpected()
+    public void Deserialize_IntercomAttachmentsCodeNavigate_ParsesExpected()
     {
         const string text =
             """
-            [intercom]
-            attachment_navigate = "select"
+            [intercom.attachments.code]
+            navigate = "select"
             """;
 
         var s = Deserialize(text);
-        Assert.True(s.Intercom.DefaultAttachmentNavigateSelects());
-        Assert.Equal("select", s.Intercom.AttachmentNavigate);
+        Assert.True(s.Intercom.Attachments.Code.DefaultNavigateSelects());
+        Assert.Equal("select", s.Intercom.Attachments.Code.Navigate);
+    }
+
+    [Fact]
+    public void Deserialize_IntercomAttachmentsCodeRevealLoadSolution_ParsesExpected()
+    {
+        const string text =
+            """
+            [intercom.attachments.code]
+            reveal_load_solution = "never"
+            """;
+
+        var s = Deserialize(text);
+        Assert.False(s.Intercom.Attachments.Code.ShouldLoadSolutionBeforeReveal());
+        Assert.Equal("never", s.Intercom.Attachments.Code.RevealLoadSolution);
+    }
+
+    [Fact]
+    public void Deserialize_IntercomAttachmentsCode_DefaultsWhenSectionMissing()
+    {
+        const string text =
+            """
+            [hybrid_index]
+            enabled = false
+            """;
+
+        var s = Deserialize(text);
+        Assert.False(s.Intercom.Attachments.Code.DefaultNavigateSelects());
+        Assert.Equal("reveal", s.Intercom.Attachments.Code.Navigate);
+        Assert.True(s.Intercom.Attachments.Code.ShouldLoadSolutionBeforeReveal());
     }
 
     [Fact]

@@ -257,7 +257,14 @@ public sealed partial class CascadeIdeSettings
             },
             Intercom = new IntercomSettings
             {
-                AttachmentNavigate = Intercom.AttachmentNavigate,
+                Attachments = new IntercomAttachmentsSettings
+                {
+                    Code = new IntercomAttachmentsCodeSettings
+                    {
+                        Navigate = Intercom.Attachments.Code.Navigate,
+                        RevealLoadSolution = Intercom.Attachments.Code.RevealLoadSolution,
+                    },
+                },
             },
         };
     }
@@ -501,7 +508,8 @@ public sealed partial class CascadeIdeSettings
     {
         if (a is null || b is null)
             return a == b;
-        return a.AttachmentNavigate.Is(b.AttachmentNavigate);
+        return a.Attachments.Code.Navigate.Is(b.Attachments.Code.Navigate)
+            && a.Attachments.Code.RevealLoadSolution.Is(b.Attachments.Code.RevealLoadSolution);
     }
 
     private static bool CodeNavigationEquals(CodeNavigationSettings? a, CodeNavigationSettings? b)

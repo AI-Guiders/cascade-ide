@@ -9,8 +9,11 @@ public partial class MainWindowViewModel
     string Services.IIdeMcpActions.GetSolutionInfo()
     {
         var projects = McpSolutionTree.CollectProjectPaths(Workspace.SolutionRoots).ToList();
+        var solutionPath = Workspace.SolutionPath;
+        if (string.IsNullOrWhiteSpace(solutionPath))
+            solutionPath = ChatPanel.ResolveAttachSolutionPath() ?? "";
         return IdeMcpWorkspaceOrchestrator.SerializeSolutionInfo(
-            Workspace.SolutionPath,
+            solutionPath,
             CurrentFilePath,
             projects,
             Workspace.SelectedSolutionItem?.FullPath);

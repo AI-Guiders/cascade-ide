@@ -42,15 +42,14 @@ public sealed partial class SolutionWorkspaceViewModel : ViewModelBase
     /// Caller should ignore stale results by comparing returned <c>LoadVersion</c>.
     /// </summary>
     /// <remarks>
-    /// Вызов с UI-потока: до первого <c>await</c> выполняется сброс <see cref="SolutionLoadError"/> и инкремент версии —
-    /// это свойства, связанные с интерфейсом (Avalonia). Вызывать с фона нельзя без маршалинга на UI.
+    /// Парсинг дерева — в <see cref="Task.Run"/> (не UI). Свойства VM (в т.ч. <see cref="SolutionLoadError"/>)
+    /// меняет только вызывающий код на UI-потоке (см. <see cref="MainWindowViewModel.LoadSolutionAsync"/>).
     /// </remarks>
     public async Task<(SolutionItem? Root, string? NormalizedSolutionPath, string? Error, long LoadVersion)> LoadSolutionTreeAsync(
         string path,
         CancellationToken cancellationToken = default)
     {
         var loadVersion = Interlocked.Increment(ref _loadVersion);
-        SolutionLoadError = "";
 
         try
         {

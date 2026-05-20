@@ -91,6 +91,58 @@ public static class ChatSlashCommandParser
         if (!IsToken(action))
             return ChatSlashCommandParseResult.Reject($"Некорректный action «{action}».");
 
+        var topicArgsBeforeNormalize = args;
+        if (IsIntercomTopicDelegate(head))
+            args = NormalizeIntercomTopicCommandArgs(action, args);
+
+        if (IsIntercomTopicDelegate(head))
+            args = NormalizeIntercomMessageCommandArgs(action, args);
+
+        if (IsIntercomTopicDelegate(head)
+            && string.Equals(action, "topic", StringComparison.OrdinalIgnoreCase)
+            && string.Equals(topicArgsBeforeNormalize, "create", StringComparison.OrdinalIgnoreCase))
+        {
+            return new ChatSlashCommandParseResult(
+                true,
+                false,
+                ChatSlashCommandShape.NamespaceAction,
+                head,
+                action,
+                "create",
+                "",
+                null);
+        }
+
+        if (IsIntercomTopicDelegate(head)
+            && string.Equals(action, "message", StringComparison.OrdinalIgnoreCase)
+            && isIntercomMessageFindPrefix(topicArgsBeforeNormalize, out var findTail))
+        {
+            return new ChatSlashCommandParseResult(
+                true,
+                false,
+                ChatSlashCommandShape.NamespaceAction,
+                head,
+                action,
+                "find",
+                findTail,
+                null);
+        }
+
+        if (IsIntercomTopicDelegate(head)
+            && string.Equals(action, "message", StringComparison.OrdinalIgnoreCase)
+            && isIntercomMessageRelatePrefix(topicArgsBeforeNormalize, out var relateTail))
+        {
+            return new ChatSlashCommandParseResult(
+                true,
+                false,
+                ChatSlashCommandShape.NamespaceAction,
+                head,
+                action,
+                "relate",
+                relateTail,
+                null);
+        }
+
         if (TryParseEditorLineSubAction(head, action, args, out var subAction, out var lineArgs))
         {
             return new ChatSlashCommandParseResult(
@@ -212,6 +264,31 @@ public static class ChatSlashCommandParser
         subAction = "";
         remainder = args;
 
+        if (IsIntercomTopicDelegate(head))
+        {
+            if (!string.Equals(action, "topic", StringComparison.OrdinalIgnoreCase)
+                || string.IsNullOrWhiteSpace(args))
+            {
+                return false;
+            }
+
+            var verb = firstToken(args);
+            if (!string.Equals(verb, "list", StringComparison.OrdinalIgnoreCase)
+                && !string.Equals(verb, "tree", StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            var afterVerb = args[(verb.Length)..].TrimStart();
+            if (!string.Equals(firstToken(afterVerb), "text", StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            subAction = verb + " text";
+            var afterText = afterVerb[(firstToken(afterVerb).Length)..].TrimStart();
+            remainder = afterText;
+            return true;
+        }
+
         if (!string.Equals(head, "topic", StringComparison.OrdinalIgnoreCase))
             return false;
 
@@ -255,11 +332,72 @@ public static class ChatSlashCommandParser
         return true;
     }
 
-    private static bool IsFlatVerbWithArgTail(string head, string tail)
+    private static bool IsIntercomTopicDelegate(string head) =>
+        string.Equals(head, "intercom", StringComparison.OrdinalIgnoreCase);
+
+    private static string NormalizeIntercomTopicCommandArgs(string action, string args)
     {
-        if (string.Equals(head, "card", StringComparison.OrdinalIgnoreCase))
+        if (!string.Equals(action, "topic", StringComparison.OrdinalIgnoreCase))
+            return args;
+
+        if (string.Equals(args, "create", StringComparison.OrdinalIgnoreCase))
+            return "";
+
+        const string createPrefix = "create ";
+        if (args.StartsWith(createPrefix, StringComparison.OrdinalIgnoreCase))
+            return args[createPrefix.Length..].Trim();
+
+        return args;
+    }
+
+    private static bool isIntercomMessageFindPrefix(string args, out string findTail)
+    {
+        findTail = "";
+        if (string.Equals(args, "find", StringComparison.OrdinalIgnoreCase))
             return true;
 
+        const string prefix = "find ";
+        if (args.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+        {
+            findTail = args[prefix.Length..].Trim();
+            return true;
+        }
+
+        return false;
+    }
+
+    private static bool isIntercomMessageRelatePrefix(string args, out string relateTail)
+    {
+        relateTail = "";
+        const string marker = " relate ";
+        var idx = args.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+        if (idx < 0)
+            return false;
+
+        relateTail = args[..idx].Trim() + " " + args[(idx + marker.Length)..].Trim();
+        return relateTail.Length > 0 && relateTail.Contains(' ', StringComparison.Ordinal);
+    }
+
+    private static string NormalizeIntercomMessageCommandArgs(string action, string args)
+    {
+        if (!string.Equals(action, "message", StringComparison.OrdinalIgnoreCase))
+            return args;
+
+        foreach (var verb in new[] { "select", "next", "prev" })
+        {
+            if (string.Equals(args, verb, StringComparison.OrdinalIgnoreCase))
+                return "";
+
+            var prefix = verb + " ";
+            if (args.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                return args[prefix.Length..].Trim();
+        }
+
+        return args;
+    }
+
+    private static bool IsFlatVerbWithArgTail(string head, string tail)
+    {
         // /spine set <focus> — flat; /spine open|list|tree|show|toggle — namespace (см. intent-catalog).
         if (!string.Equals(head, "spine", StringComparison.OrdinalIgnoreCase))
             return false;
@@ -290,6 +428,26 @@ public static class ChatSlashCommandParser
         return char.IsLetter(token[0]);
     }
 
+    private static string firstToken(string tail)
+    {
+        if (string.IsNullOrWhiteSpace(tail))
+            return "";
+        var space = tail.IndexOf(' ');
+        return space < 0 ? tail : tail[..space];
+    }
+
+    private static string secondToken(string tail)
+    {
+        if (string.IsNullOrWhiteSpace(tail))
+            return "";
+        var firstSpace = tail.IndexOf(' ');
+        if (firstSpace < 0)
+            return "";
+        var rest = tail[(firstSpace + 1)..].TrimStart();
+        var secondSpace = rest.IndexOf(' ');
+        return secondSpace < 0 ? rest : rest[..secondSpace];
+    }
+
     /// <summary>
     /// После выбора подсказки с путём: сразу выполнить open/load без второго Enter.
     /// </summary>
@@ -303,7 +461,7 @@ public static class ChatSlashCommandParser
             return false;
 
         if (descriptor.ExecutionKind == ChatSlashCommandExecutionKind.LocalIntercom
-            && descriptor.SlashPath is "/topic open" or "/topic cards" or "/spine open")
+            && descriptor.SlashPath is "/intercom topic open" or "/intercom topic cards" or "/intercom spine open")
         {
             return true;
         }
