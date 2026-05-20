@@ -45,9 +45,24 @@ internal static class SkiaChatBubbleRenderer
         var footerHeight = string.IsNullOrWhiteSpace(spec.Footer) ? 0 : spec.FooterHeight;
 
         var bodyWidth = BodyWidthForMeasure(context, spec);
-        var bodyColor = spec.BodyTone == SkiaChatBodyTone.Placeholder
-            ? new SKColor(160, 165, 175)
-            : new SKColor(220, 225, 235);
+        if (spec.BodyTone == SkiaChatBodyTone.Link)
+        {
+            var linkRuns = SkiaMarkdownLayout.ParseInline(body);
+            var linkLines = SkiaMarkdownLayout.WrapLines(linkRuns, maxChars);
+            if (linkLines.Count == 0)
+                linkLines = [new SkiaMarkdownLine([new SkiaMarkdownRun("", SkiaMarkdownStyle.Plain)])];
+            if (linkLines.Count > maxBodyLines)
+                linkLines = linkLines.Take(maxBodyLines).ToList();
+
+            return new SkiaChatBubbleMetrics(
+                linkLines,
+                spec.Footer,
+                titleHeight,
+                footerHeight,
+                spec.LineHeight);
+        }
+
+        var bodyColor = ResolveBodyColor(spec.BodyTone);
         var codeColor = new SKColor(180, 190, 210);
         var rich = SkiaRichTextKitMarkdown.TryMeasure(
             body,
@@ -272,29 +287,28 @@ internal static class SkiaChatBubbleRenderer
         };
         using var footerPaint = new SKPaint { IsAntialias = true, Color = ctx.Theme.FooterMuted };
 
-        var titleBaseline = rect.Top + (spec.Kind switch
+        var titleTopInset = spec.Kind switch
         {
-            SkiaChatBubbleKind.Feed => 12f,
-            SkiaChatBubbleKind.CardPanel => 20f,
-            SkiaChatBubbleKind.OverviewHeader => 18f,
-            SkiaChatBubbleKind.SpineStrip => 14f,
-            _ => 14f
-        });
+            SkiaChatBubbleKind.Feed => 4f,
+            SkiaChatBubbleKind.CardPanel => 12f,
+            SkiaChatBubbleKind.OverviewHeader => 10f,
+            SkiaChatBubbleKind.SpineStrip => 6f,
+            _ => 8f
+        };
+        var titleBaseline = rect.Top + titleTopInset + titleFont.Size * 0.85f;
         if (!string.IsNullOrWhiteSpace(spec.Title))
             ctx.Canvas.DrawText(spec.Title, contentLeft, titleBaseline, SKTextAlign.Left, titleFont, titlePaint);
 
         var textY = rect.Top + metrics.TitleHeight + (spec.Kind switch
         {
-            SkiaChatBubbleKind.Feed => 3f,
+            SkiaChatBubbleKind.Feed => 6f,
             SkiaChatBubbleKind.OverviewHeader => 6f,
             SkiaChatBubbleKind.CardPanel => 10f,
             _ => 12f
         });
         if (metrics.RichTextBody is { } richBody)
         {
-            var bodyColor = spec.BodyTone == SkiaChatBodyTone.Placeholder
-                ? ctx.Theme.MutedContent
-                : ctx.Theme.Content;
+            var bodyColor = ResolveBodyColor(ctx.Theme, spec.BodyTone);
             var codeColor = SkiaKitColor.Blend(ctx.Theme.Content, ctx.Theme.HoverBorder, 0.35f);
             SkiaRichTextKitMarkdown.Paint(
                 ctx.Canvas,
@@ -302,6 +316,11 @@ internal static class SkiaChatBubbleRenderer
                 richBody,
                 bodyColor,
                 codeColor);
+            if (spec.BodyTone == SkiaChatBodyTone.Link)
+            {
+                var linkWidth = bodyFont.MeasureText(richBody.Body);
+                DrawLinkUnderline(ctx.Canvas, contentLeft, textY, linkWidth, bodyColor);
+            }
             if (string.IsNullOrWhiteSpace(metrics.Footer))
                 return;
             DrawFooter(ctx, rect, contentLeft, spec, metrics, footerPaint);
@@ -325,7 +344,10 @@ internal static class SkiaChatBubbleRenderer
                 {
                     using var linePaint = new SKPaint { IsAntialias = true, Color = color };
                     ctx.Canvas.DrawText(run.Text, x, textY, SKTextAlign.Left, font, linePaint);
-                    x += font.MeasureText(run.Text);
+                    var runWidth = font.MeasureText(run.Text);
+                    if (run.Style == SkiaMarkdownStyle.Link)
+                        DrawLinkUnderline(ctx.Canvas, x, textY, runWidth, color);
+                    x += runWidth;
                 }
                 finally
                 {
@@ -410,11 +432,13 @@ internal static class SkiaChatBubbleRenderer
         SKFont bodyFont,
         SkiaMarkdownStyle style)
     {
-        var bodyColor = spec.BodyTone == SkiaChatBodyTone.Placeholder
-            ? ctx.Theme.MutedContent
-            : ctx.Theme.Content;
+        var bodyColor = ResolveBodyColor(ctx.Theme, spec.BodyTone);
         return style switch
         {
+            SkiaMarkdownStyle.Link => (
+                bodyFont,
+                bodyColor,
+                false),
             SkiaMarkdownStyle.Bold => (
                 new SKFont(SKTypeface.FromFamilyName("Segoe UI", SKFontStyle.Bold), bodyFont.Size),
                 bodyColor,
@@ -433,4 +457,36 @@ internal static class SkiaChatBubbleRenderer
 
     private static string Trim(string text, int maxLen) =>
         text.Length <= maxLen ? text : text[..maxLen] + "...";
+
+    private static SKColor ResolveBodyColor(SkiaChatBodyTone tone) =>
+        tone switch
+        {
+            SkiaChatBodyTone.Placeholder => new SKColor(160, 165, 175),
+            SkiaChatBodyTone.Link => new SKColor(120, 185, 255),
+            _ => new SKColor(220, 225, 235)
+        };
+
+    private static SKColor ResolveBodyColor(SkiaChatTheme theme, SkiaChatBodyTone tone) =>
+        tone switch
+        {
+            SkiaChatBodyTone.Placeholder => theme.MutedContent,
+            SkiaChatBodyTone.Link => SkiaKitColor.Blend(theme.Content, theme.HoverBorder, 0.55f),
+            _ => theme.Content
+        };
+
+    private static void DrawLinkUnderline(SKCanvas canvas, float x, float textBaselineY, float width, SKColor color)
+    {
+        if (width <= 0f)
+            return;
+
+        var y = textBaselineY + 2f;
+        using var paint = new SKPaint
+        {
+            Color = color,
+            IsAntialias = true,
+            Style = SKPaintStyle.Stroke,
+            StrokeWidth = 1f
+        };
+        canvas.DrawLine(x, y, x + width, y, paint);
+    }
 }

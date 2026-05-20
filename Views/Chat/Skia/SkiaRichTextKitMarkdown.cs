@@ -193,6 +193,9 @@ internal static class SkiaRichTextKitMarkdown
                         .Add(run.Text);
                     rs.FontFamily(fontFamily).TextColor(contentColor).FontSize(fontSize);
                     break;
+                case SkiaMarkdownStyle.Link:
+                    rs.TextColor(contentColor).Add(run.Text);
+                    break;
                 default:
                     rs.Add(run.Text);
                     break;

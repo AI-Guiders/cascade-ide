@@ -7,7 +7,8 @@ internal enum SkiaMarkdownStyle
     Plain = 0,
     Bold = 1,
     Italic = 2,
-    Code = 3
+    Code = 3,
+    Link = 4
 }
 
 internal readonly record struct SkiaMarkdownRun(string Text, SkiaMarkdownStyle Style);
@@ -26,6 +27,24 @@ internal static class SkiaMarkdownLayout
         var i = 0;
         while (i < text.Length)
         {
+            if (TryBracketLink(text, i, out var bracketEnd, out var bracketInner))
+            {
+                AppendRun(runs, bracketInner, SkiaMarkdownStyle.Link);
+                i = bracketEnd;
+                continue;
+            }
+
+            if (text[i] == '[')
+            {
+                var close = text.IndexOf(']', i + 1);
+                if (close > i)
+                {
+                    AppendRun(runs, text[i..(close + 1)], SkiaMarkdownStyle.Plain);
+                    i = close + 1;
+                    continue;
+                }
+            }
+
             if (TryDelimited(text, i, "**", out var boldEnd, out var boldInner))
             {
                 AppendRun(runs, boldInner, SkiaMarkdownStyle.Bold);
@@ -59,7 +78,8 @@ internal static class SkiaMarkdownLayout
                    && !StartsWith(text, i, "**")
                    && text[i] != '`'
                    && text[i] != '*'
-                   && text[i] != '_')
+                   && text[i] != '_'
+                   && text[i] != '[')
                 i++;
 
             AppendRun(runs, text[plainStart..i], SkiaMarkdownStyle.Plain);
@@ -219,6 +239,35 @@ internal static class SkiaMarkdownLayout
         end = close + 1;
         return true;
     }
+
+    private static bool TryBracketLink(string text, int start, out int end, out string span)
+    {
+        end = start;
+        span = "";
+        if (start >= text.Length || text[start] != '[')
+            return false;
+
+        var close = text.IndexOf(']', start + 1);
+        if (close < 0)
+            return false;
+
+        var inner = text[(start + 1)..close];
+        if (inner.Length == 0 || inner.Contains('`', StringComparison.Ordinal))
+            return false;
+
+        if (!looksLikeCodeReference(inner))
+            return false;
+
+        span = text[start..(close + 1)];
+        end = close + 1;
+        return true;
+    }
+
+    private static bool looksLikeCodeReference(string inner) =>
+        inner.Contains(':', StringComparison.Ordinal)
+        || inner.Contains(".cs", StringComparison.OrdinalIgnoreCase)
+        || inner.Contains("F:", StringComparison.OrdinalIgnoreCase)
+        || inner.Contains("M:", StringComparison.OrdinalIgnoreCase);
 
     private static bool StartsWith(string text, int index, string value) =>
         index >= 0 && index + value.Length <= text.Length

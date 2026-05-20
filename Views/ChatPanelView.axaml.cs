@@ -35,7 +35,7 @@ public partial class ChatPanelView : UserControl
         {
             if (DataContext is not ChatPanelViewModel vm)
                 return;
-            _ = vm.RevealAttachmentFromFeedAsync(e.Anchor, e.Select);
+            _ = vm.RevealAttachmentFromFeedAsync(e.Anchor, e.Select, messageIndex: e.MessageIndex);
         };
 
         surface.ComposerKeyDown += (_, e) =>
