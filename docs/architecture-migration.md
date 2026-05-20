@@ -17,7 +17,7 @@
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:BEGIN -->
 
-`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~7k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~5.7k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.3k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
+`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~7.1k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~5.7k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~1.4k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:END -->
 
@@ -34,7 +34,7 @@
 | `MainWindowViewModel.Capabilities.cs` | 23 | Реестр capabilities. |
 | `MainWindowViewModel.CascadeChord.cs` | 107 | Аккордный слой ADR 0060: корень `cascade_chord` из hotkeys.toml (по умолчанию Ctrl+K), затем тот же хвост мелодии, что после `c:`. Однозначный обычный alias (например `so`) исполняется без Enter при отсутствии более длинного alias-префикса; параметрические (`wai:`, `els:`:…) — только по Enter или из палитры. При конфликте префиксов (`gs` vs `gsu`) — точный хвост или Enter. |
 | `MainWindowViewModel.CommandPalette.cs` | 164 | Палитра команд. |
-| `MainWindowViewModel.cs` | 293 | Главный композитор окна (partial-класс, несколько `MainWindowViewModel*.cs`). Карта файлов и ответственности — `docs/architecture-migration.md`, раздел «Срез MainWindowViewModel». |
+| `MainWindowViewModel.cs` | 294 | Главный композитор окна (partial-класс, несколько `MainWindowViewModel*.cs`). Карта файлов и ответственности — `docs/architecture-migration.md`, раздел «Срез MainWindowViewModel». |
 | `MainWindowViewModel.CSharpLsp.cs` | 120 | Запуск/перезапуск C# LSP. |
 | `MainWindowViewModel.CursorAcp.cs` | 36 | Путь Cursor ACP и предпочитаемая модель. |
 | `MainWindowViewModel.DebugStackUi.cs` | 35 | Выбор кадра в панели «Стек» Mfd: подгрузка Locals для выбранного кадра (DAP). |
@@ -54,7 +54,7 @@
 | `MainWindowViewModel.IdeMcpActions.BuildTest.Build.cs` | 127 | MCP: диагностики текущего файла, список файлов решения, сборка и code cleanup с публикацией фазы сборки на шину. |
 | `MainWindowViewModel.IdeMcpActions.BuildTest.Tests.cs` | 64 | MCP: запуск тестов (все / affected) и обновление панели инструментирования после прогона. |
 | `MainWindowViewModel.IdeMcpActions.DebuggerPanel.cs` | 76 | Панель отладки и снимок DAP (ADR 0002): один `DebugSessionSnapshot`. |
-| `MainWindowViewModel.IdeMcpActions.Editor.cs` | 85 | MCP: редактор. |
+| `MainWindowViewModel.IdeMcpActions.Editor.cs` | 109 | MCP: редактор. |
 | `MainWindowViewModel.IdeMcpActions.Git.cs` | 42 | MCP: git (`IdeMcpGitWorkspaceSession`). |
 | `MainWindowViewModel.IdeMcpActions.HybridCodebaseIndex.cs` | 103 | MCP / ide_execute_command: Hybrid Codebase Index (имена команд как у внешнего MCP). |
 | `MainWindowViewModel.IdeMcpActions.Navigation.cs` | 61 | MCP: семантическая навигация (ADR 0039). |
@@ -82,7 +82,7 @@
 | `MainWindowViewModel.RelayCommands.Shell.cs` | 127 | Relay: приложение, диалоги открытия, тема, язык, окна-хосты. |
 | `MainWindowViewModel.RelayCommands.UiMode.cs` | 56 | Relay: режим UI и уровень безопасности. |
 | `MainWindowViewModel.SettingsReactive.cs` | 248 | Реакции на изменение полей настроек и ключей API: диск, автономный агент, панели. |
-| `MainWindowViewModel.ShellConstruction.cs` | 180 | Конструктор и композиция shell: дочерние VM, шина, DAP/HCI, топология presentation (ADR 0017). |
+| `MainWindowViewModel.ShellConstruction.cs` | 183 | Конструктор и композиция shell: дочерние VM, шина, DAP/HCI, топология presentation (ADR 0017). |
 | `MainWindowViewModel.ShellState.AiProviders.cs` | 58 | Часть `ShellState`: режим ИИ и облачные ключи привязаны к нижнему приложению/чату. |
 | `MainWindowViewModel.ShellState.AutonomousAgentStripe.cs` | 63 | Часть `ShellState`: полоса/карточки автономной задачи агента, безопасности, LOC и сводки тестов для IDE Health. |
 | `MainWindowViewModel.ShellState.ChatAndSessionConfig.cs` | 26 | Часть `ShellState`: ввод чата и конфиг MCP/ACP для автономной сессии. |
@@ -93,7 +93,7 @@
 | `MainWindowViewModel.SolutionBuild.cs` | 159 | Сборка, `BuildOutputPanel`. |
 | `MainWindowViewModel.StartupProject.cs` | 172 | Стартовый проект. |
 | `MainWindowViewModel.UiGitWorkspace.cs` | 141 | Git + workspace UI. |
-| `MainWindowViewModel.ViewBridge.cs` | 64 | Колбэки и провайдеры, которые View подставляет в главный VM (диалоги, UI automation). |
+| `MainWindowViewModel.ViewBridge.cs` | 66 | Колбэки и провайдеры, которые View подставляет в главный VM (диалоги, UI automation). |
 | `MainWindowViewModel.WebAiPortal.cs` | 29 | Страница MFD «веб-портал» (ADR 0108): URL, результат последнего вызова моста, `WebAiPortalCommandBridge`. |
 | `MainWindowViewModel.WorkspaceNavigationMap.cs` | 140 | Слот Pfd: отображение карты намерений / `GraphDocument` (те же данные, что JSON MCP). Граф подграфа — не синоним `instrument_id`, см. ADR 0065. По доменам: карта намерений (в т.ч. control flow) — CodeNavigation; зависимости файлов — WorkspaceNavigation; submodules — дерево/GitMap (ADR 0062). |
 | `MainWindowViewModel.WorkspaceNavigationMap.Refresh.cs` | 157 | Срез карты workspace: перезапрос refresh и сборка через `WorkspaceNavigationMapRefreshComposer`. |
@@ -107,7 +107,7 @@
 
 | Файл | Строк (≈) | Содержание |
 |------|------------|------------|
-| `IdeMcpCommandExecutor.cs` | 51 | Диспетчер MCP-команд IDE: разбор args и вызов `IIdeMcpActions` / UI-команд главного окна. |
+| `IdeMcpCommandExecutor.cs` | 52 | Диспетчер MCP-команд IDE: разбор args и вызов `IIdeMcpActions` / UI-команд главного окна. |
 | `IdeMcpCommandExecutor.Handlers.AgentNotes.cs` | 90 | Хендлеры agent-notes. |
 | `IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.cs` | 11 | MCP-хендлеры меню и тулбара: делегирование по группам (диалоги, тема/язык, панели и сборка). |
 | `IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.DialogsApp.cs` | 77 | MCP-хендлеры диалогов открытия, выхода, настроек, превью и окон-хостов презентации. |
@@ -119,12 +119,14 @@
 | `IdeMcpCommandExecutor.Handlers.DapDebug.LaunchAttach.cs` | 69 | MCP DAP: ping, launch и attach. |
 | `IdeMcpCommandExecutor.Handlers.DapDebug.Stepping.cs` | 49 | MCP DAP: шагание, стоп, стек, снимок, переменные кадра. |
 | `IdeMcpCommandExecutor.Handlers.DebuggerUi.cs` | 77 | Поверхность отладки. |
-| `IdeMcpCommandExecutor.Handlers.Editor.EditNavigation.cs` | 26 | MCP: правка текста и переход к позиции в файле. |
+| `IdeMcpCommandExecutor.Handlers.Editor.EditNavigation.cs` | 38 | MCP: правка текста и переход к позиции в файле. |
 | `IdeMcpCommandExecutor.Handlers.Editor.FilesAndChat.cs` | 67 | MCP: открытие файла, загрузка решения, выделение в редакторе, выбор/редактирование сообщений чата. |
 | `IdeMcpCommandExecutor.Handlers.Editor.StateContent.cs` | 30 | MCP: состояние редактора, диапазон текста и текст открытого документа. |
 | `IdeMcpCommandExecutor.Handlers.Editor.ToolCatalog.cs` | 18 | MCP: каталог инструментов `list_tools`. |
+| `IdeMcpCommandExecutor.Handlers.Intercom.cs` | 47 | MCP: Intercom (reveal attachment) и editor bracket navigation (ADR 0131). |
 | `IdeMcpCommandExecutor.Handlers.PowerDocuments.Documents.cs` | 68 | MCP-хендлеры вкладок документов: переоткрытие, активация, закрепление, перенос по группам редакторов. |
 | `IdeMcpCommandExecutor.Handlers.PowerDocuments.FocusPowerAgent.cs` | 233 | MCP-хендлеры Power / фокус-шагов, автономного агента, чата и установки модели Ollama. |
+| `IdeMcpCommandExecutor.Workspace.cs` | 25 | Вспомогательные методы MCP: корень workspace из solution_path. |
 | `Generated/IdeMcpCommandExecutor.Generated.g.cs` | 108 | Сгенерированные хендлеры MCP → `IIdeMcpActions` (`CascadeIDE.ProtocolDocGen`). |
 
 <!-- AUTO:MAIN-WINDOW-SLICE:EXEC-TABLE:END -->
