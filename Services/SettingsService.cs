@@ -27,13 +27,13 @@ public static class SettingsService
         {
             _settingsFileMtimeUtcAtLastLoad = mtime;
             IntercomSendTrace.InvalidateSettingsCache();
-            return ValidateAndReturn(new CascadeIdeSettings());
+            return ValidateAndReturn(SettingsDefaultsLoader.DeserializeEffective(null));
         }
 
         try
         {
             var normalized = NormalizeFriendlySectionAliases(toml);
-            var settings = CascadeTomlSerializer.Deserialize<CascadeIdeSettings>(normalized) ?? new CascadeIdeSettings();
+            var settings = SettingsDefaultsLoader.DeserializeEffective(normalized);
             _settingsFileMtimeUtcAtLastLoad = mtime;
             IntercomSendTrace.InvalidateSettingsCache();
             return ValidateAndReturn(settings);
@@ -42,7 +42,7 @@ public static class SettingsService
         {
             _settingsFileMtimeUtcAtLastLoad = mtime;
             IntercomSendTrace.InvalidateSettingsCache();
-            return ValidateAndReturn(new CascadeIdeSettings());
+            return ValidateAndReturn(SettingsDefaultsLoader.DeserializeEffective(null));
         }
     }
 

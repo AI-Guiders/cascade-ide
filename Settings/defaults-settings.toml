@@ -1,8 +1,8 @@
-# Пример пользовательского settings.toml (ADR 0028: %LocalAppData%\CascadeIDE\settings.toml).
-# Ключи — snake_case (CascadeTomlSerializer / Tomlyn). Секции — вложенные таблицы.
-# Заводские дефолты при загрузке: Settings/defaults-settings.toml (embedded; merge поверх user-файла).
+# CascadeIDE — заводские дефолты (шипнутый слой, ADR 0028).
+# EmbeddedResource + опционально Settings/defaults-settings.toml рядом с exe.
+# Merge: пользовательский %LocalAppData%\CascadeIDE\settings.toml поверх этого файла.
+# Расширенный пример / комментарии: docs/samples/settings.toml
 
-# Строка топологии и грамматика якорей (ADR 0017 § display.screens).
 [display.screens]
 topology = "(0.25P + 0.75F) (M)"
 
@@ -54,7 +54,6 @@ sa_score = 0.75
 performance_score = 0.72
 workload_score = 0.28
 
-# Основные слоты PFD/MFD (ADR 0050): alias или канонический instrument_id.
 [display.instruments]
 pfd_primary = "workspace_map"
 
@@ -69,7 +68,6 @@ model = "qwen2.5-coder:7b"
 
 [ai.acp]
 cursor_acp_path = ""
-# Пусто = искать cursor-agent в PATH.
 cursor_acp_model_id = ""
 
 [ai.mcp_only]
@@ -98,19 +96,20 @@ external_servers_json = "[]"
 external_servers_json_path = ""
 
 [hybrid_index]
-# In-proc integration settings for Hybrid Codebase Index (ADR 0106).
-# Core HCI settings live in workspace folder under `index_dir` (same as external MCP).
 enabled = true
 index_dir = ".hybrid-codebase-index"
 debounce_ms = 750
 auto_reindex_on_solution_open = true
 watch_files = true
-scope_mode = "workspace+solution" # or "workspace"
+scope_mode = "workspace+solution"
 pause_when_mcp_stdio_host = false
 
-# Palette go-to workspace search (ADR 0112): t:/m:/x:. hci/auto fall back to ripgrep until HCI path lands.
 [command_palette.go_to_search]
 backend = "rg"
+
+[agent_notes]
+config_path = ""
+kb_base_overlay_path = ""
 
 [workspace]
 pfd_expanded = true
@@ -120,7 +119,6 @@ show_instrumentation = true
 mode = "Flight"
 culture = ""
 splitters_locked = false
-# ADR 0120: "editor" (дефолт) | "intercom" — Intercom в Forward, редактор на MFD
 primary_work_surface = "editor"
 
 [code_navigation_map]
@@ -145,28 +143,20 @@ arguments = ""
 kroki = true
 kroki_url = "https://kroki.io"
 
-[code_navigation]
-# Пресеты: бандл CodeNavigation/presets.toml + .cascade/workspace.toml + этот файл ([[code_navigation.presets]]).
-# [[code_navigation.presets]]
-# id = "my_preset"
-# exclude_kinds = ["same_namespace"]
-
-# Типографика (Skia Intercom, AvaloniaEdit). Заводские значения — Settings/defaults-settings.toml.
 [fonts.intercom]
 prose_pt = 13
-# Отдельный размер только для лобового Forward (intercom); MFD Chat — prose_pt. Не про ширину split-колонки.
 prose_pt_forward = 12
-# Composer: ввод и placeholder внизу; 0 = ~prose×12/11
-# composer_pt = 15
-# chrome_title_pt = 14
-# chrome_subtitle_pt = 11
-# chrome_heading_pt = 15
-# card_title_pt = 15
-# panel_title_pt = 16
-# panel_subtitle_pt = 12
-# panel_label_pt = 13
-# panel_input_pt = 15
-# panel_body_pt = 16
+composer_pt = 15
+command_line_pt = 15
+chrome_title_pt = 14
+chrome_subtitle_pt = 11
+chrome_heading_pt = 15
+card_title_pt = 15
+panel_title_pt = 16
+panel_subtitle_pt = 12
+panel_label_pt = 13
+panel_input_pt = 15
+panel_body_pt = 16
 prose_family = "Segoe UI"
 mono_family = "Cascadia Mono,Consolas"
 chip_family = "Segoe UI"
@@ -181,7 +171,6 @@ size_pt = 14
 family = "Consolas,Cascadia Code,monospace"
 
 [editor.inline_hints]
-# Editor inlay-hints toggles.
 enabled = true
 parameter_names = true
 variable_types = true
@@ -191,12 +180,9 @@ enabled = true
 show_assignments = true
 show_conditions = true
 
-# Intercom: code-attach (chip F:/M:/L:) — ADR 0130
-# navigate: reveal | select; reveal_load_solution: when_needed | never
 [intercom.attachments.code]
 navigate = "reveal"
 reveal_load_solution = "when_needed"
 
-# Диагностика отправки Intercom → {workspace}/.cascade-ide/intercom-send-trace.log
 [logging.intercom]
 send_trace = false

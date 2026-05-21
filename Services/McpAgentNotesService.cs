@@ -19,7 +19,7 @@ public sealed class McpAgentNotesService
     /// <inheritdoc cref="McpAgentNotesService" />
     public McpAgentNotesService(Func<CascadeIdeSettings>? settingsProvider = null, NotesStorage? storage = null)
     {
-        _settingsProvider = settingsProvider ?? (() => new CascadeIdeSettings());
+        _settingsProvider = settingsProvider ?? SettingsDefaultsLoader.CreateDefault;
         _storage = storage ?? new();
     }
 

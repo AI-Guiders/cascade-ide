@@ -63,7 +63,7 @@ We need **one canon point**: where “my computer” is located, what is in TOML
 
 ### 3. Historically: JSON is no longer supported
 - Previously, the code had a one-time migration **`settings.json` → `settings.toml`**; As of this ADR, there are **no legacy settings supported**, migration branch **removed** from `SettingsService.Load()`.
-- **Canon** - only **`settings.toml`**; if there is no file, default values ​​from the code. The custom **`settings.json`** in `%LocalAppData%\CascadeIDE\` is **not** readable (if the file is left manually, you need to transfer it to TOML yourself or delete it).
+- **Canon** - only **`settings.toml`**; if there is no file, factory defaults from embedded **`Settings/defaults-settings.toml`** (EmbeddedResource), then user overlay merge. The custom **`settings.json`** in `%LocalAppData%\CascadeIDE\` is **not** readable (if the file is left manually, you need to transfer it to TOML yourself or delete it).
 
 ### 4. Secrets: not in `settings.toml`
 
