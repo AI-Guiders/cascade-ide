@@ -1,6 +1,7 @@
 #nullable enable
 
 using CascadeIDE.Models;
+using CascadeIDE.Services;
 using SkiaSharp;
 
 namespace CascadeIDE.Views.Chat.Skia;
@@ -76,7 +77,7 @@ internal readonly struct SkiaChatFeedLayout
     }
 
     public static SkiaChatFeedLayout For(bool forwardHost, IntercomFontsSettings? fonts = null) =>
-        new(forwardHost, fonts ?? new IntercomFontsSettings());
+        new(forwardHost, fonts ?? IntercomFontDefaults.Intercom);
 
     public bool ShouldShowRoleRail(string? roleLabel, bool suppressTitle) =>
         !suppressTitle && !string.IsNullOrWhiteSpace(roleLabel);

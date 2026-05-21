@@ -5,25 +5,15 @@ namespace CascadeIDE.Tests;
 
 public sealed class ChatTopicOverviewPolicyTests
 {
-    [Theory]
-    [InlineData(1, -1, false, false)]
-    [InlineData(2, -1, false, true)]
-    [InlineData(1, 2, true, false)]
-    [InlineData(2, 1, false, true)]
-    [InlineData(3, 2, true, true)]
-    public void ResolveNextOverviewMode_MatchesAdr0072(int threadCount, int lastCount, bool current, bool expected) =>
-        Assert.Equal(expected, ChatTopicOverviewPolicy.ResolveNextOverviewMode(threadCount, lastCount, current));
+    [Fact]
+    public void ResolveNextOverviewMode_FirstLoad_StartsInDetailWithTabs()
+    {
+        Assert.False(ChatTopicOverviewPolicy.ResolveNextOverviewMode(threadCount: 3, lastOverviewThreadCount: -1, currentOverviewMode: false));
+    }
 
     [Fact]
-    public void ApplyAdaptiveDefault_UpdatesLastCountOnce()
+    public void ResolveNextOverviewMode_SingleThread_StaysDetail()
     {
-        var last = -1;
-        var mode = false;
-        ChatTopicOverviewPolicy.ApplyAdaptiveDefault(2, ref last, v => mode = v, () => mode);
-        Assert.Equal(2, last);
-        Assert.True(mode);
-
-        ChatTopicOverviewPolicy.ApplyAdaptiveDefault(2, ref last, v => mode = v, () => mode);
-        Assert.True(mode);
+        Assert.False(ChatTopicOverviewPolicy.ResolveNextOverviewMode(threadCount: 1, lastOverviewThreadCount: -1, currentOverviewMode: false));
     }
 }

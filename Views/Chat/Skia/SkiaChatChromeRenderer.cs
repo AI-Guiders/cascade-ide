@@ -1,6 +1,7 @@
 #nullable enable
 using CascadeIDE.Features.Chat;
 using CascadeIDE.Models;
+using CascadeIDE.Services;
 using SkiaSharp;
 
 namespace CascadeIDE.Views.Chat.Skia;
@@ -20,8 +21,20 @@ internal static class SkiaChatChromeRenderer
         forwardHost ? (showStatusSubtitle ? ToolbarWithStatusHeight : ToolbarHeight) : 0f;
 
     public static float ResolveTopChromeHeight(bool forwardHost, bool showOverviewCatalog, bool showStatusSubtitle) =>
-        ResolveToolbarHeight(forwardHost, showStatusSubtitle)
-        + (showOverviewCatalog ? OverviewCatalogBandHeight : 0f);
+        ResolveTopChromeHeight(forwardHost, showOverviewCatalog, showStatusSubtitle, overviewMode: showOverviewCatalog, topicCount: 0);
+
+    public static float ResolveTopChromeHeight(
+        bool forwardHost,
+        bool showOverviewCatalog,
+        bool showStatusSubtitle,
+        bool overviewMode,
+        int topicCount) =>
+        SkiaIntercomNavigationChrome.ResolveTopChromeHeight(
+            forwardHost,
+            showOverviewCatalog,
+            showStatusSubtitle,
+            overviewMode,
+            topicCount);
 
     public static void Draw(
         SKCanvas canvas,
@@ -32,10 +45,14 @@ internal static class SkiaChatChromeRenderer
         bool isLoading,
         string? loadingText,
         string? statusSubtitle,
+        bool showNavigatorToggle,
+        bool navigatorVisible,
         out SKRect overviewButtonBounds,
+        out SKRect navigatorToggleBounds,
         IntercomFontsSettings? fonts = null)
     {
-        fonts ??= new IntercomFontsSettings();
+        navigatorToggleBounds = default;
+        fonts ??= IntercomFontDefaults.Intercom;
         var titlePt = fonts.ResolveChromeTitlePt();
         var subtitlePt = fonts.ResolveChromeSubtitlePt();
         var toolbarHeight = ResolveToolbarHeight(forwardHost: true, showStatusSubtitle: !string.IsNullOrWhiteSpace(statusSubtitle));
@@ -76,6 +93,17 @@ internal static class SkiaChatChromeRenderer
         var right = width - 12f;
         overviewButtonBounds = new SKRect(right - topicsWidth, 6, right, 28);
         right = overviewButtonBounds.Left - 8f;
+
+        if (showNavigatorToggle)
+        {
+            var navLabel = navigatorVisible ? "Nav ✓" : "☰ Nav";
+            var navWidth = btnFont.MeasureText(navLabel) + 16;
+            navigatorToggleBounds = new SKRect(right - navWidth, 6, right, 28);
+            right = navigatorToggleBounds.Left - 8f;
+            using var navBg = new SKPaint { IsAntialias = true, Color = SkiaKit.SkiaKitColor.Blend(theme.Surface, theme.Border, 0.35f) };
+            canvas.DrawRoundRect(navigatorToggleBounds, 6, 6, navBg);
+            canvas.DrawText(navLabel, navigatorToggleBounds.MidX, 20, SKTextAlign.Center, btnFont, btnPaint);
+        }
         if (isLoading && !string.IsNullOrWhiteSpace(loadingText))
         {
             using var chipFont = new SKFont(SKTypeface.FromFamilyName(fonts.ResolveProseFamily()), subtitlePt);
@@ -99,7 +127,7 @@ internal static class SkiaChatChromeRenderer
         int topicCount,
         IntercomFontsSettings? fonts = null)
     {
-        fonts ??= new IntercomFontsSettings();
+        fonts ??= IntercomFontDefaults.Intercom;
         var headingPt = fonts.ResolveChromeHeadingPt();
         var hintPt = fonts.ResolveChromeSubtitlePt();
         var bottom = top + OverviewCatalogBandHeight;

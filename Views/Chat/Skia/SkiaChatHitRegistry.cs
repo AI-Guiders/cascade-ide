@@ -92,7 +92,12 @@ internal sealed class SkiaChatHitRegistry
 
     public static bool WantsHandCursor(in SkiaChatHit hit) =>
         hit.RevealAttachment is not null
-        || hit.PointerAction is SkiaChatPointerAction.ComposerSend or SkiaChatPointerAction.OverviewToggle;
+        || hit.PointerAction is SkiaChatPointerAction.ComposerSend
+            or SkiaChatPointerAction.OverviewToggle
+            or SkiaChatPointerAction.TopicTabSelect
+            or SkiaChatPointerAction.TopicTabCreate
+            or SkiaChatPointerAction.TopicTabOverflow
+            or SkiaChatPointerAction.TopicNavigatorToggle;
 
     public static bool IsChromeAction(in SkiaChatHit hit) =>
         hit.PointerAction != SkiaChatPointerAction.None;

@@ -8,7 +8,7 @@ namespace CascadeIDE.Features.Chat;
 public static class ChatThreadPresentation
 {
     public const string EmptyTopicsHint =
-        "Тем пока нет. Отправь сообщение или /topic create <название>.";
+        "Тем пока нет. Отправь сообщение или /intercom topic create <название>.";
 
     public sealed record PickerRow(Guid ThreadId, string Title, string Meta, int Depth);
 
@@ -95,6 +95,30 @@ public static class ChatThreadPresentation
             AppendTreeNode(sb, roots[i], byId, msgCounts, prefix: "", isLast: i == roots.Count - 1);
 
         return sb.ToString().TrimEnd();
+    }
+
+    /// <summary>Строки Topic Navigator (дерево + опциональный фильтр по заголовку, ADR 0127-E).</summary>
+    public static IReadOnlyList<PickerRow> BuildNavigatorRows(
+        IReadOnlyList<ChatThreadNode> threads,
+        IReadOnlyDictionary<Guid, int> messageCounts,
+        string? searchQuery = null)
+    {
+        var rows = BuildPickerRows(TopicPickerPresentation.Tree, threads, messageCounts);
+        return FilterNavigatorRows(rows, searchQuery);
+    }
+
+    public static IReadOnlyList<PickerRow> FilterNavigatorRows(
+        IReadOnlyList<PickerRow> rows,
+        string? searchQuery)
+    {
+        var q = searchQuery?.Trim() ?? "";
+        if (q.Length == 0)
+            return rows;
+
+        return rows
+            .Where(r => r.Title.Contains(q, StringComparison.OrdinalIgnoreCase)
+                        || r.Meta.Contains(q, StringComparison.OrdinalIgnoreCase))
+            .ToList();
     }
 
     public static IReadOnlyList<PickerRow> BuildPickerRows(

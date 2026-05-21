@@ -11,4 +11,8 @@ internal enum SkiaChatPointerAction
     SlashPopup = 3,
     OverviewToggle = 4,
     CommandLineFocus = 5,
+    TopicTabSelect = 6,
+    TopicTabCreate = 7,
+    TopicTabOverflow = 8,
+    TopicNavigatorToggle = 9,
 }

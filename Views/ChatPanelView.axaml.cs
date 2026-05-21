@@ -82,6 +82,20 @@ public partial class ChatPanelView : UserControl
             showMessageSelectContextMenu(surface, vm, messageIndex);
         };
 
+        surface.TopicCreateRequested += (_, _) =>
+        {
+            if (DataContext is not ChatPanelViewModel vm)
+                return;
+            var n = vm.ChatSurfaceSnapshot.Layout.Overview.Count + 1;
+            _ = vm.CreateTopicWithTitle($"Тема {n}");
+        };
+
+        surface.TopicNavigatorToggleRequested += (_, _) =>
+        {
+            if (DataContext is ChatPanelViewModel vm)
+                vm.ToggleIntercomTopicNavigator();
+        };
+
         surface.ComposerKeyDown += (_, e) =>
         {
             if (DataContext is not ChatPanelViewModel vm)

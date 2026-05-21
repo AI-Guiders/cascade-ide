@@ -75,6 +75,8 @@ public partial class SkiaChatSurfaceControl
     public event EventHandler<int>? ThinkingToggleRequested;
     public event EventHandler<IntercomAttachmentRevealEventArgs>? AttachmentRevealRequested;
     public event EventHandler<int>? MessageSelectContextRequested;
+    public event EventHandler? TopicCreateRequested;
+    public event EventHandler? TopicNavigatorToggleRequested;
 
     public bool ShowIntercomComposer
     {

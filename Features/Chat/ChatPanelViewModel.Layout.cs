@@ -19,6 +19,15 @@ public partial class ChatPanelViewModel
     /// <summary>Метрики ленты для Forward-хоста (плотнее). MFD Chat — false. Не «узкая колонка».</summary>
     public bool IntercomForwardHost => IsForwardIntercomLayout;
 
+    /// <summary>Forward: toggle Navigator; MFD Skia — панель всегда при наличии тем (ADR 0127-E).</summary>
+    [ObservableProperty]
+    private bool _isTopicNavigatorVisible;
+
+    public bool IntercomTopicNavigatorVisible => !IntercomForwardHost || IsTopicNavigatorVisible;
+
+    [ObservableProperty]
+    private string _topicNavigatorSearchQuery = "";
+
     /// <summary>Шрифты Skia-ленты и MFD-панели из <c>[fonts.intercom]</c>.</summary>
     [ObservableProperty]
     private IntercomFontsSettings _intercomFonts = new();
@@ -39,4 +48,10 @@ public partial class ChatPanelViewModel
 
     partial void OnUseComfortableSkiaIntercomHostChanged(bool value) =>
         OnPropertyChanged(nameof(IsSkiaIntercomHostVisible));
+
+    partial void OnIsTopicNavigatorVisibleChanged(bool value) =>
+        OnPropertyChanged(nameof(IntercomTopicNavigatorVisible));
+
+    public void ToggleIntercomTopicNavigator() =>
+        IsTopicNavigatorVisible = !IsTopicNavigatorVisible;
 }

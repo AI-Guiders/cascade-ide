@@ -11,8 +11,15 @@ public static class ChatIntercomChromeStatusPresentation
     public static string? FormatSubtitle(
         ChatSurfaceSnapshot snapshot,
         bool overviewMode,
-        Guid detailThreadId)
+        Guid detailThreadId,
+        bool showTopicTabBar = false)
     {
+        if (!overviewMode && showTopicTabBar)
+        {
+            var messageCount = ResolveMessageCount(snapshot, detailThreadId);
+            return $"сообщений: {messageCount}";
+        }
+
         if (overviewMode)
         {
             var count = snapshot.Layout.Overview.Count;

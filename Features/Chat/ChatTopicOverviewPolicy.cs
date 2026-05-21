@@ -8,8 +8,9 @@ internal static class ChatTopicOverviewPolicy
         if (threadCount == lastOverviewThreadCount)
             return currentOverviewMode;
 
+        // ADR 0127: вкладки тем — daily path в detail; overview остаётся для картотеки.
         if (lastOverviewThreadCount < 0)
-            return threadCount > 1;
+            return false;
 
         if (threadCount <= 1)
             return false;

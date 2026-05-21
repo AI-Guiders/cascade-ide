@@ -2,6 +2,7 @@
 using CascadeIDE.Features.Chat;
 using CascadeIDE.Models;
 using CascadeIDE.Models.Intercom;
+using CascadeIDE.Services;
 
 namespace CascadeIDE.Views.Chat.Skia;
 
@@ -52,7 +53,7 @@ internal static class ChatSurfaceEntityFactory
             return;
 
         var title = ChatProductSpinePresentation.ResolveLineTitle(spine);
-        var cardTitleHeight = (intercomFonts ?? new IntercomFontsSettings()).ResolveCardTitleLineHeight(forwardHost);
+        var cardTitleHeight = (intercomFonts ?? IntercomFontDefaults.Intercom).ResolveCardTitleLineHeight(forwardHost);
         if (overviewMode)
         {
             entities.Add(SkiaChatTopicCard.ForSpine(
@@ -159,7 +160,7 @@ internal static class ChatSurfaceEntityFactory
         bool hideNavChromeInFeed,
         IntercomFontsSettings? intercomFonts)
     {
-        var cardTitleHeight = (intercomFonts ?? new IntercomFontsSettings()).ResolveCardTitleLineHeight(forwardHost);
+        var cardTitleHeight = (intercomFonts ?? IntercomFontDefaults.Intercom).ResolveCardTitleLineHeight(forwardHost);
         var lanes = snapshot.Layout.Lanes.OrderBy(lane => lane.Thread.Order);
         if (detailThreadId != Guid.Empty)
             lanes = lanes.Where(lane => lane.Thread.ThreadId == detailThreadId).OrderBy(lane => lane.Thread.Order);

@@ -61,6 +61,8 @@
                                           DetailThreadId="{Binding SelectedChatThreadId, Mode=TwoWay}"
                                           OverviewMode="{Binding IsChatOverviewMode, Mode=TwoWay}"
                                           ForwardHost="{Binding IntercomForwardHost}"
+                                          TopicNavigatorVisible="{Binding IntercomTopicNavigatorVisible}"
+                                          TopicNavigatorSearchQuery="{Binding TopicNavigatorSearchQuery}"
                                           IntercomFonts="{Binding IntercomFonts}"
                                           ChromeTitle="Intercom"
                                           IsChatLoading="{Binding IsChatLoading}"

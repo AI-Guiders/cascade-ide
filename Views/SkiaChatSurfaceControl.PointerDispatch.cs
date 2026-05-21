@@ -64,6 +64,19 @@ public partial class SkiaChatSurfaceControl
                 _commandLineFocused = false;
                 Focus();
                 return true;
+            case SkiaChatPointerAction.TopicTabSelect when hit.SelectThreadId is { } tabThreadId:
+                DetailThreadId = tabThreadId;
+                OverviewMode = false;
+                return true;
+            case SkiaChatPointerAction.TopicTabCreate:
+                TopicCreateRequested?.Invoke(this, EventArgs.Empty);
+                return true;
+            case SkiaChatPointerAction.TopicTabOverflow:
+                OverviewMode = true;
+                return true;
+            case SkiaChatPointerAction.TopicNavigatorToggle:
+                TopicNavigatorToggleRequested?.Invoke(this, EventArgs.Empty);
+                return true;
             default:
                 return false;
         }
@@ -129,13 +142,60 @@ public partial class SkiaChatSurfaceControl
         return false;
     }
 
-    private void registerChromePointerHits(SKRect overviewButtonBounds)
+    private void registerChromePointerHits(SKRect overviewButtonBounds, SKRect navigatorToggleBounds)
     {
+        if (navigatorToggleBounds.Width > 0)
+        {
+            _chatHits.RegisterControlRect(
+                SkiaChatHitGeometry.ToControlRect(navigatorToggleBounds),
+                new SkiaChatHit(null, null, ResetDetailMode: false, PointerAction: SkiaChatPointerAction.TopicNavigatorToggle));
+        }
+
         if (overviewButtonBounds.Width > 0)
         {
             _chatHits.RegisterControlRect(
                 SkiaChatHitGeometry.ToControlRect(overviewButtonBounds),
                 new SkiaChatHit(null, null, ResetDetailMode: false, PointerAction: SkiaChatPointerAction.OverviewToggle));
+        }
+    }
+
+    private void registerTopicNavigatorPointerHits(SkiaIntercomTopicNavigator.LayoutResult layout, float panelLeft, float chromeTop)
+    {
+        foreach (var row in layout.RowHits)
+        {
+            var bounds = row.Bounds;
+            bounds.Offset(panelLeft, chromeTop);
+            _chatHits.RegisterControlRect(
+                SkiaChatHitGeometry.ToControlRect(bounds),
+                new SkiaChatHit(null, row.ThreadId, ResetDetailMode: false));
+        }
+    }
+
+    private void registerNavigationPointerHits(SkiaIntercomNavigationChrome.LayoutResult layout)
+    {
+        foreach (var tab in layout.TabHits)
+        {
+            _chatHits.RegisterControlRect(
+                SkiaChatHitGeometry.ToControlRect(tab.Bounds),
+                new SkiaChatHit(
+                    null,
+                    tab.ThreadId,
+                    ResetDetailMode: false,
+                    PointerAction: SkiaChatPointerAction.TopicTabSelect));
+        }
+
+        if (layout.CreateButtonBounds.Width > 0)
+        {
+            _chatHits.RegisterControlRect(
+                SkiaChatHitGeometry.ToControlRect(layout.CreateButtonBounds),
+                new SkiaChatHit(null, null, ResetDetailMode: false, PointerAction: SkiaChatPointerAction.TopicTabCreate));
+        }
+
+        if (layout.OverflowBounds is { } overflow && layout.OverflowHiddenCount > 0)
+        {
+            _chatHits.RegisterControlRect(
+                SkiaChatHitGeometry.ToControlRect(overflow),
+                new SkiaChatHit(null, null, ResetDetailMode: false, PointerAction: SkiaChatPointerAction.TopicTabOverflow));
         }
     }
 }
