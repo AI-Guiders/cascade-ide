@@ -1,6 +1,6 @@
 # ADR 0138: Cockpit Command Line — параметрический CLI для Commander и Pilot
 
-**Статус:** Accepted · In progress (парсер и slash; CCL UI — фаза A)  
+**Статус:** Accepted · In progress (парсер, slash, CCL IntercomHost фаза A, anchor CLI)  
 **Дата:** 2026-05-20
 
 ## Связанные ADR
@@ -92,6 +92,32 @@
 | **EditorHost** | `PrimaryWorkSurface == Editor` (Pilot preset) | Над нижним краем Forward editor / под HUD — уточнить в макете [0120](0120-primary-work-surface-intercom-or-editor.md) |
 
 Оба host могут существовать в layout, но **активен** один; chord `/` фокусирует host, соответствующий текущему Forward.
+
+### IntercomHost: Command Deck (2026-05-21)
+
+На Skia-ленте Intercom нижний chrome — **один Command Deck**, а не «popup поверх сообщений»:
+
+| Слой (сверху вниз внутри deck) | Содержимое |
+|--------------------------------|------------|
+| Верх deck | Slash autocomplete (`SkiaPopupList`), max 6 строк, скролл внутри deck |
+| Середина | CCL (`SkiaCommandLineStrip`), если открыт |
+| Низ deck | Composer (отправка агенту) |
+
+**Инварианты:** лента сообщений отступает на `SkiaIntercomCommandDeckLayout.TotalHeight`; подсказки **не рисуются** выше верхней границы deck. Реализация: `Views/Chat/SkiaIntercomCommandDeckLayout.cs`.
+
+#### Aviation alignment (CDU / PFD, не HUD-menu)
+
+В кабине **не** кладут выпадающий список FMS поверх **PFD** (attitude / flight path). Длинный ввод идёт в **CDU scratchpad** + **EXEC**; тактика — **glareshield / LSK** ([0060](0060-keyboard-chord-stack-fms-tactical-strategic.md): префикс → вторая клавиша). **MFD** — отдельная *страница* (карта, план), не полупрозрачный слой на лобовом.
+
+| Авиация | Cascade |
+|---------|---------|
+| PFD — «куда смотрю» | Forward: лента Intercom / редактор |
+| CDU scratchpad + line select | **Command Deck**: popup → CCL → composer |
+| EXEC / CLR | Enter commit / Esc в CCL |
+| Прозрачное меню на PFD | **Отклонено** — непрозрачный deck, верхняя граница, inset ленты ([0021](0021-pfd-mfd-cockpit-attention-model.md)) |
+| Длинный route на MFD-странице | **EditorHost** / MFD Terminal — не overlay на Commander-ленту |
+
+**Вывод:** Command Deck — не «косметика», а перенос **CDU-панели** под PFD: командный ввод **вне** зоны первичного внимания, но **в том же** Forward, без перекрытия сообщений.
 
 ```mermaid
 flowchart TB
@@ -472,11 +498,12 @@ intercom_host = "above_composer"  # Q1
 | `/intercom message select […]` multi-highlight | **Implemented** — slash/composer; Skia feed |
 | `CockpitCommandLinePreviewBuilder` | **Implemented** (internal) — текстовый summary для slash |
 | `/editor line select` multi-segment | **Partial** — один contiguous; disjoint → ошибка до CCL/editor union |
-| CCL IntercomHost / EditorHost | — |
-| `cockpit.open_command_line` | — |
-| Preview в CCL UI (debounced) | — |
+| CCL **IntercomHost** (полоса над composer, preview, Enter/Esc) | **Partial** — фаза A; `OpenCockpitCommandLineUiCommand` |
+| CCL **EditorHost** | — |
+| `cockpit.open_command_line` + chord Ctrl+K `/` | **Partial** — палитра/MCP; chord — |
+| Preview в CCL UI (текст при наборе) | **Implemented** — `OnCockpitCommandLineTextChanged` → `CockpitCommandLinePreviewBuilder` |
 | Ghost preview (фаза B) | — |
-| `/intercom message anchors list`, `/anchor peek` | — (см. [0128 §10.1](0128-intercom-attachment-anchors-and-code-references.md#adr0128-p10b)) |
+| `/intercom message anchors list`, `/anchor peek` | **Implemented** — slash + CCL; chip `a:…` ([0128 §10.1](0128-intercom-attachment-anchors-and-code-references.md#adr0128-p10b)) |
 
 ---
 
@@ -489,3 +516,4 @@ intercom_host = "above_composer"  # Q1
 | 2026-05-20 | § «Позиция и обоснование»; § «Набросок API» (`ICockpitCommandLineSession`, `ParametricSegmentListParser`) |
 | 2026-05-21 | **Accepted**; Q1–Q5 закрыты; `ParametricSegmentListParser` + multi message select + preview builder |
 | 2026-05-21 | § [Инварианты внимания](#adr0138-attention-invariants): CCL = единственный REPL Forward; MFD Terminal для OS/process |
+| 2026-05-20 | Фаза A: IntercomHost CCL, `/intercom message anchors list`, `/anchor peek`, chip `a:…` |

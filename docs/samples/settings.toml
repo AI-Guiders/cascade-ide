@@ -150,6 +150,35 @@ kroki_url = "https://kroki.io"
 # id = "my_preset"
 # exclude_kinds = ["same_namespace"]
 
+# Типографика (Skia Intercom, AvaloniaEdit). Пустые family / 0 pt = встроенные дефолты.
+[fonts.intercom]
+prose_pt = 13
+# Отдельный размер только для лобового Forward (intercom); MFD Chat — prose_pt. Не про ширину split-колонки.
+prose_pt_forward = 12
+# Composer: ввод и placeholder внизу; 0 = ~prose×12/11
+# composer_pt = 15
+# chrome_title_pt = 14
+# chrome_subtitle_pt = 11
+# chrome_heading_pt = 15
+# card_title_pt = 15
+# panel_title_pt = 16
+# panel_subtitle_pt = 12
+# panel_label_pt = 13
+# panel_input_pt = 15
+# panel_body_pt = 16
+prose_family = "Segoe UI"
+mono_family = "Cascadia Mono,Consolas"
+chip_family = "Segoe UI"
+chip_id_family = "Consolas"
+slash_meta_family = "Consolas"
+slash_args_family = "Consolas"
+role_family = "Segoe UI"
+gutter_family = "Cascadia Mono,Consolas"
+
+[fonts.editor]
+size_pt = 14
+family = "Consolas,Cascadia Code,monospace"
+
 [editor.inline_hints]
 # Editor inlay-hints toggles.
 enabled = true

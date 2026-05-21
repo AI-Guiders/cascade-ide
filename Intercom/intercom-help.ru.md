@@ -22,6 +22,8 @@
 | `/intercom message find selection` | Сообщения ветки с attach на текущее выделение (inferred) |
 | `/intercom message find L:10-20` | По строкам открытого файла (M0 fallback) |
 | `/intercom message 3:5 relate selection` | Явная связь #3–#5 с кодом → event `message_range_related` (`AttachmentAnchor`) |
+| `/intercom message anchors list` | Якоря выбранного сообщения и черновика: `a:abcd1234`, статус, путь |
+| `/anchor peek <id>` | Reveal по short id (8 hex с chip или list), без hit-test |
 | MCP `intercom.messages_for_code` | Find: JSON `use_selection`, `code_ref`, `anchor_json`, или `file`+`line_*` |
 | MCP `intercom.message_relate` | Relate: `start_ordinal`, `end_ordinal?`, тот же code-ref |
 
@@ -32,6 +34,8 @@
 - Обычный текст в composer → отправка агенту (Enter по настройке send).
 - `@` — люди/упоминания; `[ … ]` — артефакты кода и вложения (не markdown-ссылки).
 - ЛКМ по телу сообщения **не** меняет выбор (клик по attach-chip → reveal в редакторе).
+- На chip справа — приглушённый **`a:…`** (short id для `/anchor peek`).
+- **Cockpit Command Line** (полоса над composer): тот же **slash autocomplete**, что в composer (`/`, Tab, ↑↓, клик по списку); preview под строкой; Enter — выполнить, Esc — закрыть. Открыть: **Ctrl+K** затем **/** (handoff), **Ctrl+Q** → `c:ccl` или «Cockpit: Command Line», MCP `cockpit.open_command_line`. Палитра — **Ctrl+Q**, не Ctrl+Shift+P (у Avalonia сочетания с модификаторами ненадёжны).
 
 ## Вложения в тексте `[ … ]`
 

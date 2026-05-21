@@ -28,8 +28,31 @@ internal static class CockpitCommandLinePreviewBuilder
             return true;
         }
 
+        if (IsAnchorPeek(parse))
+        {
+            summary = IntercomAnchorSlash.TryNormalizeAnchorId(tail, out _, out var idError)
+                ? $"Peek: {tail.Trim()}"
+                : idError;
+            return true;
+        }
+
+        if (IsMessageAnchorsList(parse))
+        {
+            summary = "Список якорей выбранного сообщения и черновика.";
+            return true;
+        }
+
         return false;
     }
+
+    private static bool IsAnchorPeek(in ChatSlashCommandParseResult parse) =>
+        string.Equals(parse.Head, "anchor", StringComparison.OrdinalIgnoreCase)
+        && string.Equals(parse.Action, "peek", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsMessageAnchorsList(in ChatSlashCommandParseResult parse) =>
+        string.Equals(parse.Head, "intercom", StringComparison.OrdinalIgnoreCase)
+        && string.Equals(parse.Action, "message", StringComparison.OrdinalIgnoreCase)
+        && string.Equals(parse.ArgsTail.Trim(), "anchors list", StringComparison.OrdinalIgnoreCase);
 
     private static bool IsMessageSelect(in ChatSlashCommandParseResult parse) =>
         string.Equals(parse.Head, "intercom", StringComparison.OrdinalIgnoreCase)

@@ -52,9 +52,6 @@ internal static class SkiaPopupList
 
         scrollOffset = ClampScrollOffset(scrollOffset, rows.Count);
 
-        using var shadow = new SKPaint { Color = new SKColor(0, 0, 0, 48), IsAntialias = true };
-        canvas.DrawRoundRect(bounds, CornerRadius, CornerRadius, shadow);
-
         using var fill = new SKPaint { Color = theme.Surface, IsAntialias = true, Style = SKPaintStyle.Fill };
         canvas.DrawRoundRect(bounds, CornerRadius, CornerRadius, fill);
 

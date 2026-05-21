@@ -16,8 +16,10 @@ internal sealed class SkiaRichTextKitBodyLayout
     public float LineHeight { get; init; }
     public float BodyHeight { get; init; }
     public bool IsDocument { get; init; }
-    public bool Compact { get; init; }
+    public bool ForwardHost { get; init; }
     public string FontFamily { get; init; } = "Segoe UI";
+
+    public string MonoFamily { get; init; } = "Cascadia Mono,Consolas";
 }
 
 internal static class SkiaRichTextKitMarkdown
@@ -30,9 +32,11 @@ internal static class SkiaRichTextKitMarkdown
         SKColor codeColor,
         int maxBodyLines,
         float lineHeight,
-        string fontFamily = "Segoe UI")
+        string fontFamily = "Segoe UI",
+        string? monoFamily = null)
     {
-        var rs = TryBuildRichString(body, maxWidth, fontSize, contentColor, codeColor, maxBodyLines, lineHeight, fontFamily);
+        var mono = ResolveMonoFamily(monoFamily);
+        var rs = TryBuildRichString(body, maxWidth, fontSize, contentColor, codeColor, maxBodyLines, lineHeight, fontFamily, mono);
         if (rs is null)
             return null;
 
@@ -49,6 +53,7 @@ internal static class SkiaRichTextKitMarkdown
             LineHeight = lineHeight,
             BodyHeight = height,
             FontFamily = fontFamily,
+            MonoFamily = mono,
         };
     }
 
@@ -60,14 +65,17 @@ internal static class SkiaRichTextKitMarkdown
         SKColor codeColor,
         int maxRows,
         float lineHeight,
-        bool compact)
+        bool forwardHost,
+        string fontFamily = "Segoe UI",
+        string? monoFamily = null)
     {
         if (maxWidth < 8f || string.IsNullOrWhiteSpace(body))
             return null;
 
+        var mono = ResolveMonoFamily(monoFamily);
         var maxChars = Math.Max(8, (int)(maxWidth / 6.5f));
         var rows = SkiaMarkdownDocument.Layout(body, maxChars);
-        var rs = BuildRichStringFromDocument(rows, maxWidth, baseFontSize, contentColor, codeColor, compact);
+        var rs = BuildRichStringFromDocument(rows, maxWidth, baseFontSize, contentColor, codeColor, forwardHost, fontFamily, mono);
         if (rs is null)
             return null;
 
@@ -87,7 +95,9 @@ internal static class SkiaRichTextKitMarkdown
             LineHeight = lineHeight,
             BodyHeight = height,
             IsDocument = true,
-            Compact = compact,
+            ForwardHost = forwardHost,
+            FontFamily = fontFamily,
+            MonoFamily = mono,
         };
     }
 
@@ -134,7 +144,15 @@ internal static class SkiaRichTextKitMarkdown
         {
             var maxChars = Math.Max(8, (int)(layout.MaxWidth / 6.5f));
             var rows = SkiaMarkdownDocument.Layout(layout.Body, maxChars);
-            rs = BuildRichStringFromDocument(rows, layout.MaxWidth, layout.FontSize, contentColor, codeColor, layout.Compact);
+            rs = BuildRichStringFromDocument(
+                rows,
+                layout.MaxWidth,
+                layout.FontSize,
+                contentColor,
+                codeColor,
+                layout.ForwardHost,
+                layout.FontFamily,
+                layout.MonoFamily);
             if (rs is not null && layout.MaxBodyLines > 0 && layout.MaxBodyLines < int.MaxValue)
                 rs.MaxHeight = layout.MaxBodyLines * layout.LineHeight;
         }
@@ -148,7 +166,8 @@ internal static class SkiaRichTextKitMarkdown
                 codeColor,
                 layout.MaxBodyLines,
                 layout.LineHeight,
-                layout.FontFamily);
+                layout.FontFamily,
+                layout.MonoFamily);
         }
 
         rs?.Paint(canvas, origin);
@@ -162,7 +181,8 @@ internal static class SkiaRichTextKitMarkdown
         SKColor codeColor,
         int maxBodyLines,
         float lineHeight,
-        string fontFamily)
+        string fontFamily,
+        string monoFamily)
     {
         if (maxWidth < 8f || string.IsNullOrEmpty(body))
             return null;
@@ -188,7 +208,7 @@ internal static class SkiaRichTextKitMarkdown
                     rs.Add(run.Text, fontItalic: true);
                     break;
                 case SkiaMarkdownStyle.Code:
-                    rs.FontFamily("Cascadia Mono")
+                    rs.FontFamily(PrimaryFamily(monoFamily))
                         .TextColor(codeColor)
                         .Add(run.Text);
                     rs.FontFamily(fontFamily).TextColor(contentColor).FontSize(fontSize);
@@ -214,7 +234,9 @@ internal static class SkiaRichTextKitMarkdown
         float baseFontSize,
         SKColor contentColor,
         SKColor codeColor,
-        bool compact)
+        bool forwardHost,
+        string fontFamily,
+        string monoFamily)
     {
         if (maxWidth < 8f || rows.Count == 0)
             return null;
@@ -233,24 +255,24 @@ internal static class SkiaRichTextKitMarkdown
                     rs.Add("\n");
                     break;
                 case SkiaMarkdownBlockKind.HorizontalRule:
-                    rs.FontFamily("Segoe UI")
+                    rs.FontFamily(fontFamily)
                         .FontSize(baseFontSize)
                         .TextColor(SkiaKitColor.Blend(contentColor, codeColor, 0.5f))
-                        .Add(compact ? "—" : "────────");
+                        .Add(forwardHost ? "—" : "────────");
                     break;
                 case SkiaMarkdownBlockKind.Heading1:
-                    AppendInlineRuns(rs, row.Runs, baseFontSize * 1.28f, contentColor, codeColor, boldDefault: true);
+                    AppendInlineRuns(rs, row.Runs, baseFontSize * 1.28f, contentColor, codeColor, fontFamily, monoFamily, boldDefault: true);
                     break;
                 case SkiaMarkdownBlockKind.Heading2:
-                    AppendInlineRuns(rs, row.Runs, baseFontSize * 1.14f, contentColor, codeColor, boldDefault: true);
+                    AppendInlineRuns(rs, row.Runs, baseFontSize * 1.14f, contentColor, codeColor, fontFamily, monoFamily, boldDefault: true);
                     break;
                 case SkiaMarkdownBlockKind.Heading3:
-                    AppendInlineRuns(rs, row.Runs, baseFontSize * 1.06f, contentColor, codeColor, boldDefault: true);
+                    AppendInlineRuns(rs, row.Runs, baseFontSize * 1.06f, contentColor, codeColor, fontFamily, monoFamily, boldDefault: true);
                     break;
                 case SkiaMarkdownBlockKind.Bullet:
                 case SkiaMarkdownBlockKind.Paragraph:
                 default:
-                    AppendInlineRuns(rs, row.Runs, baseFontSize, contentColor, codeColor, boldDefault: false);
+                    AppendInlineRuns(rs, row.Runs, baseFontSize, contentColor, codeColor, fontFamily, monoFamily, boldDefault: false);
                     break;
             }
         }
@@ -264,9 +286,11 @@ internal static class SkiaRichTextKitMarkdown
         float fontSize,
         SKColor contentColor,
         SKColor codeColor,
+        string fontFamily,
+        string monoFamily,
         bool boldDefault)
     {
-        rs.FontFamily("Segoe UI").FontSize(fontSize).TextColor(contentColor);
+        rs.FontFamily(fontFamily).FontSize(fontSize).TextColor(contentColor);
         foreach (var run in runs)
         {
             if (run.Text.Length == 0)
@@ -281,8 +305,8 @@ internal static class SkiaRichTextKitMarkdown
                     rs.Add(run.Text, fontItalic: true);
                     break;
                 case SkiaMarkdownStyle.Code:
-                    rs.FontFamily("Cascadia Mono").TextColor(codeColor).Add(run.Text);
-                    rs.FontFamily("Segoe UI").TextColor(contentColor).FontSize(fontSize);
+                    rs.FontFamily(PrimaryFamily(monoFamily)).TextColor(codeColor).Add(run.Text);
+                    rs.FontFamily(fontFamily).TextColor(contentColor).FontSize(fontSize);
                     break;
                 default:
                     if (boldDefault)
@@ -292,5 +316,14 @@ internal static class SkiaRichTextKitMarkdown
                     break;
             }
         }
+    }
+
+    private static string ResolveMonoFamily(string? monoFamily) =>
+        string.IsNullOrWhiteSpace(monoFamily) ? "Cascadia Mono,Consolas" : monoFamily.Trim();
+
+    private static string PrimaryFamily(string familyList)
+    {
+        var idx = familyList.IndexOf(',');
+        return (idx < 0 ? familyList : familyList[..idx]).Trim();
     }
 }

@@ -52,7 +52,7 @@ internal static class SkiaKitFonts
         canvas.DrawText(text, x, y, align, font, paint);
     }
 
-    private static void ApplyTextQuality(SKFont font)
+    internal static void ApplyTextQuality(SKFont font)
     {
         font.Edging = SKFontEdging.SubpixelAntialias;
         font.Subpixel = true;

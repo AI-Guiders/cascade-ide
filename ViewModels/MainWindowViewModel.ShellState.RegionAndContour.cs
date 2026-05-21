@@ -67,5 +67,11 @@ public partial class MainWindowViewModel
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsMfdShellSolutionExplorerPageActive))]
     [NotifyPropertyChangedFor(nameof(CurrentMfdShellPageAsShell))]
+    [NotifyPropertyChangedFor(nameof(ChatPanelColumnPixelWidth))]
+    [NotifyPropertyChangedFor(nameof(IsChatPanelColumnVisible))]
+    [NotifyPropertyChangedFor(nameof(IsMfdColumnVisible))]
+    [NotifyPropertyChangedFor(nameof(MfdRegionPixelWidth))]
+    [NotifyPropertyChangedFor(nameof(IsMfdRegionVisible))]
+    [NotifyPropertyChangedFor(nameof(MainGridColumnDefinitions))]
     private MfdShellPage _currentMfdShellPage = MfdShellPage.Terminal;
 }

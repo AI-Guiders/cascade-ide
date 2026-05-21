@@ -279,7 +279,7 @@ public sealed class ChatSurfaceLayoutStage : IChatSurfaceLayoutStage
                         message.NodeId,
                         BuildMessageTitle(message, thread),
                         message.Content,
-                        message.SlashCommandStatus is not null
+                        !string.IsNullOrWhiteSpace(message.SlashCommandPath)
                             ? ChatMessageVisualRole.SlashCommand
                             : ChatMessageVisualRoleMapping.FromMessageRole(message.Role),
                         message.MessageIndex,
@@ -367,6 +367,13 @@ public sealed class ChatSurfaceLayoutStage : IChatSurfaceLayoutStage
 
     private static string BuildMessageTitle(ChatMessageNode message, ChatThreadNode thread)
     {
+        if (!string.IsNullOrWhiteSpace(message.SlashCommandPath))
+        {
+            return message.Audience == IntercomMessageAudience.SelfOnly
+                ? "Система"
+                : "Команда";
+        }
+
         if (message.StartsBranch)
             return message.Role == "user" ? "Новая ветка" : "Ответвление";
         if (thread.IsMainThread && message.MessageIndex == 0)
@@ -379,7 +386,7 @@ public sealed class ChatSurfaceLayoutStage : IChatSurfaceLayoutStage
             "thinking" => "Размышление",
             "tool" => "Инструмент",
             "slash_command" => message.Audience == IntercomMessageAudience.SelfOnly
-                ? "Справка"
+                ? "Система"
                 : "Команда",
             _ => message.Role
         };

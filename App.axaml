@@ -261,11 +261,11 @@
         </Style>
         <!-- IDE chrome (UiKit): секции, inset, status chip — design/ide-chrome-tokens-v1.md -->
         <Style Selector="Border.cascadeSection">
-            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="CornerRadius" Value="4"/>
             <Setter Property="Padding" Value="10"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.EditorColumnBorderBrush}"/>
-            <Setter Property="Background" Value="{DynamicResource CascadeTheme.ChatMessageBubbleBackground}"/>
+            <Setter Property="Background" Value="{DynamicResource CascadeTheme.PanelBackgroundBrush}"/>
         </Style>
         <Style Selector="Border.cascadeSection TextBox">
             <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
@@ -284,8 +284,32 @@
         <Style Selector="Border.cascadeSection Expander">
             <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
         </Style>
+        <Style Selector="Border.ideHealthStrip">
+            <Setter Property="Padding" Value="6,4"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"/>
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+        <Style Selector="TextBlock.ideHealthSegment">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Opacity" Value="0.88"/>
+            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="UserControl:not(.power) TreeView TreeViewItem">
+            <Setter Property="Padding" Value="2,1"/>
+            <Setter Property="MinHeight" Value="22"/>
+        </Style>
+        <Style Selector="UserControl:not(.power) TreeView TreeViewItem:pointerover">
+            <Setter Property="Background" Value="#2A2D2E"/>
+        </Style>
+        <Style Selector="UserControl:not(.power) TreeView TreeViewItem:selected">
+            <Setter Property="Background" Value="#2A3A4A"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.PanelTitleAccentBrush}"/>
+            <Setter Property="BorderThickness" Value="2,0,0,0"/>
+        </Style>
         <Style Selector="Border.cascadeInset">
-            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="CornerRadius" Value="4"/>
             <Setter Property="Padding" Value="8"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.InsetSurfaceBorderBrush}"/>
@@ -299,7 +323,7 @@
             <Setter Property="Background" Value="{DynamicResource CascadeTheme.ChatPanelBackground}"/>
         </Style>
         <Style Selector="Border.cascadeStatusChip">
-            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="CornerRadius" Value="4"/>
             <Setter Property="Padding" Value="8,3"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.StatusChipBorderBrush}"/>

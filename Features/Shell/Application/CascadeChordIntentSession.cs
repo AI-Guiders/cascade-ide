@@ -2,6 +2,7 @@
 using Avalonia.Input;
 using Avalonia.Threading;
 using CascadeIDE.Models.Shell;
+using CascadeIDE.Services;
 
 namespace CascadeIDE.Features.Shell.Application;
 
@@ -95,7 +96,7 @@ public sealed class CascadeChordIntentSession
             : 1.0;
 
     public string OverlayCompactFooter =>
-        "Esc — отмена · таймаут " + (int)TimeoutSeconds + " с · Ctrl+Q — палитра";
+        "Esc — отмена · / — Command Line · таймаут " + (int)TimeoutSeconds + " с · Ctrl+Q — палитра";
 
     public bool OverlayNoMatches =>
         _phase == Phase.AwaitMelodyTail
@@ -298,6 +299,14 @@ public sealed class CascadeChordIntentSession
 
         if (!CascadeChordMelodyKeyMap.TryMapChordMelodyGlyph(e.Key, e.KeyModifiers, e.PhysicalKey, out var ch))
         {
+            EndIdle();
+            e.Handled = true;
+            return true;
+        }
+
+        if (_melodyTail.Length == 0 && ch == '/')
+        {
+            _ = ExecuteCommandFireAndForgetAsync(IdeCommands.CockpitOpenCommandLine, """{"initial_text":"/"}""");
             EndIdle();
             e.Handled = true;
             return true;

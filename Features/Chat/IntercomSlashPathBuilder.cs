@@ -64,6 +64,13 @@ internal static class IntercomSlashPathBuilder
             return true;
         }
 
+        if (string.Equals(parse.Action, "message", StringComparison.OrdinalIgnoreCase)
+            && isMessageAnchorsListTail(parse.ArgsTail))
+        {
+            slashPath = "/intercom message anchors list";
+            return true;
+        }
+
         var tail = parse.ArgsTail.Trim();
         var innerVerb = firstToken(tail);
         if (string.Equals(parse.Action, "message", StringComparison.OrdinalIgnoreCase)
@@ -122,6 +129,9 @@ internal static class IntercomSlashPathBuilder
         var secondSpace = rest.IndexOf(' ');
         return secondSpace < 0 ? rest : rest[..secondSpace];
     }
+
+    private static bool isMessageAnchorsListTail(string? argsTail) =>
+        string.Equals((argsTail ?? "").Trim(), "anchors list", StringComparison.OrdinalIgnoreCase);
 
     private static bool isMessageSelectRangeTail(string tail) =>
         ParametricSegmentListParser.TryParse(tail, out _, out _)

@@ -6,6 +6,9 @@ namespace CascadeIDE.Tests;
 
 public sealed class SkiaIntercomComposerLayoutTests
 {
+    private const float DefaultFontSize = 12f;
+    private const float DefaultLineHeight = 17f;
+
     [Fact]
     public void MeasureBottomChrome_includes_composer_and_slash_popup()
     {
@@ -16,7 +19,9 @@ public sealed class SkiaIntercomComposerLayoutTests
             slashRowCount: 0,
             composerText: "hello",
             surfaceWidth: width);
-        Assert.InRange(composerOnly, SkiaComposerStrip.MinHeight, SkiaComposerStrip.MaxHeight + 2);
+        var minH = SkiaComposerStrip.MinHeightFor(DefaultLineHeight);
+        var maxH = SkiaComposerStrip.MaxHeightFor(DefaultLineHeight);
+        Assert.InRange(composerOnly, minH, maxH + 2);
 
         var withPopup = SkiaIntercomComposerLayout.MeasureBottomChromeHeight(
             showComposer: true,
@@ -32,20 +37,22 @@ public sealed class SkiaIntercomComposerLayoutTests
     public void Composer_grows_with_multiline_text()
     {
         var width = 400f;
-        var min = SkiaComposerStrip.MeasureHeight("", null, width);
+        var min = SkiaComposerStrip.MeasureHeight("", null, width, DefaultFontSize, DefaultLineHeight);
         var fourLines = SkiaComposerStrip.MeasureHeight(
             "line one\nline two\nline three\nline four",
             null,
-            width);
-        Assert.Equal(SkiaComposerStrip.MinHeight, min);
+            width,
+            DefaultFontSize,
+            DefaultLineHeight);
+        Assert.Equal(SkiaComposerStrip.MinHeightFor(DefaultLineHeight), min);
         Assert.True(fourLines > min);
     }
 
     [Fact]
     public void Composer_empty_uses_min_three_lines_height()
     {
-        var height = SkiaComposerStrip.MeasureHeight("", null, 400f);
-        Assert.Equal(SkiaComposerStrip.MinHeight, height);
-        Assert.True(height >= SkiaComposerStrip.VerticalPadding * 2 + SkiaComposerStrip.MinLines * SkiaComposerStrip.LineHeight);
+        var height = SkiaComposerStrip.MeasureHeight("", null, 400f, DefaultFontSize, DefaultLineHeight);
+        Assert.Equal(SkiaComposerStrip.MinHeightFor(DefaultLineHeight), height);
+        Assert.True(height >= SkiaComposerStrip.VerticalPadding * 2 + SkiaComposerStrip.MinLines * DefaultLineHeight);
     }
 }

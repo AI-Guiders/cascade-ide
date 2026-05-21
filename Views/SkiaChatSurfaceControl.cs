@@ -9,6 +9,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.VisualTree;
 using CascadeIDE.Features.Chat;
+using CascadeIDE.Models;
 using CascadeIDE.Views.Chat;
 using CascadeIDE.Views.Chat.Skia;
 using CascadeIDE.Views.SkiaKit;
@@ -45,8 +46,14 @@ public partial class SkiaChatSurfaceControl : Control
     public static readonly StyledProperty<bool> OverviewModeProperty =
         AvaloniaProperty.Register<SkiaChatSurfaceControl, bool>(nameof(OverviewMode), false);
 
-    public static readonly StyledProperty<bool> CompactLayoutProperty =
-        AvaloniaProperty.Register<SkiaChatSurfaceControl, bool>(nameof(CompactLayout), false);
+    public static readonly StyledProperty<bool> ForwardHostProperty =
+        AvaloniaProperty.Register<SkiaChatSurfaceControl, bool>(nameof(ForwardHost), false);
+
+    /// <summary>Типографика Skia-ленты из <c>[fonts.intercom]</c>.</summary>
+    public static readonly StyledProperty<IntercomFontsSettings> IntercomFontsProperty =
+        AvaloniaProperty.Register<SkiaChatSurfaceControl, IntercomFontsSettings>(
+            nameof(IntercomFonts),
+            new IntercomFontsSettings());
 
     public static readonly StyledProperty<string> ChromeTitleProperty =
         AvaloniaProperty.Register<SkiaChatSurfaceControl, string>(nameof(ChromeTitle), "Intercom");
@@ -81,10 +88,16 @@ public partial class SkiaChatSurfaceControl : Control
         set => SetValue(OverviewModeProperty, value);
     }
 
-    public bool CompactLayout
+    public bool ForwardHost
     {
-        get => GetValue(CompactLayoutProperty);
-        set => SetValue(CompactLayoutProperty, value);
+        get => GetValue(ForwardHostProperty);
+        set => SetValue(ForwardHostProperty, value);
+    }
+
+    public IntercomFontsSettings IntercomFonts
+    {
+        get => GetValue(IntercomFontsProperty);
+        set => SetValue(IntercomFontsProperty, value);
     }
 
     public string ChromeTitle
@@ -113,7 +126,8 @@ public partial class SkiaChatSurfaceControl : Control
             SelectedMessageIndexProperty,
             DetailThreadIdProperty,
             OverviewModeProperty,
-            CompactLayoutProperty,
+            ForwardHostProperty,
+            IntercomFontsProperty,
             ChromeTitleProperty,
             LoadingStatusTextProperty,
             IsChatLoadingProperty,
@@ -124,7 +138,22 @@ public partial class SkiaChatSurfaceControl : Control
             IsComposerEnabledProperty,
             IsSlashAutocompleteVisibleProperty,
             SelectedSlashSuggestionIndexProperty,
-            SlashSuggestionsProperty);
+            SlashSuggestionsProperty,
+            ShowCockpitCommandLineProperty,
+            CommandLineTextProperty,
+            CommandLinePreviewProperty,
+            CommandLineCaretIndexProperty);
+
+        ShowCockpitCommandLineProperty.Changed.AddClassHandler<SkiaChatSurfaceControl>(OnShowCockpitCommandLineChanged);
+    }
+
+    private static void OnShowCockpitCommandLineChanged(SkiaChatSurfaceControl control, AvaloniaPropertyChangedEventArgs e)
+    {
+        if (e.NewValue is true)
+        {
+            control._commandLineFocused = true;
+            control.InvalidateVisual();
+        }
     }
 
     public SkiaChatSurfaceControl()
@@ -199,16 +228,24 @@ public partial class SkiaChatSurfaceControl : Control
         RefreshTheme();
 
         var snapshot = Snapshot ?? ChatSurfaceSnapshot.Empty;
-        var entities = SkiaChatSceneBuilder.Build(snapshot, OverviewMode, DetailThreadId, CompactLayout);
+        var entities = SkiaChatSceneBuilder.Build(
+            snapshot,
+            OverviewMode,
+            DetailThreadId,
+            ForwardHost,
+            IntercomFonts);
         var width = Math.Max(160, Bounds.Width);
-        var contentWidth = (float)(width - 24);
+        var showFeedGutterForMeasure = !OverviewMode
+            && (snapshot.Layout.Lanes.Any(l => l.Entries.Any(e => e.Kind == ChatSurfaceEntryKind.Message)));
+        var gutterPadForMeasure = showFeedGutterForMeasure ? SkiaChatDrawContext.FeedGutterWidth : 0f;
+        var contentWidth = (float)(width - 24 - gutterPadForMeasure);
         var maxChars = Math.Max(18, (int)(contentWidth / 7.1f));
         var measureContext = new SkiaChatMeasureContext(maxChars, contentWidth);
         var placed = SkiaChatLayoutEngine.Layout(entities, measureContext);
         _cachedContentHeight = SkiaChatLayoutEngine.TotalHeight(placed);
 
         var showOverviewCatalog = OverviewMode && snapshot.Layout.Overview.Count > 0;
-        var statusSubtitle = CompactLayout
+        var statusSubtitle = ForwardHost
             ? ChatIntercomChromeStatusPresentation.FormatSubtitle(snapshot, OverviewMode, DetailThreadId)
             : null;
         var bottomChrome = (float)ResolveBottomChromeHeight((float)Math.Max(160, Bounds.Width));
@@ -308,10 +345,10 @@ public partial class SkiaChatSurfaceControl : Control
         _chatHits.Clear();
 
         var chromeTop = SkiaChatChromeRenderer.ResolveTopChromeHeight(
-            CompactLayout,
+            ForwardHost,
             showOverviewCatalog,
             !string.IsNullOrWhiteSpace(statusSubtitle));
-        if (CompactLayout)
+        if (ForwardHost)
         {
             SkiaChatChromeRenderer.Draw(
                 canvas,
@@ -322,16 +359,17 @@ public partial class SkiaChatSurfaceControl : Control
                 IsChatLoading,
                 LoadingStatusText,
                 statusSubtitle,
-                out var overviewBounds);
+                out var overviewBounds,
+                IntercomFonts);
             registerChromePointerHits(overviewBounds);
         }
 
         if (showOverviewCatalog)
         {
-            var bandTop = CompactLayout
+            var bandTop = ForwardHost
                 ? SkiaChatChromeRenderer.ResolveToolbarHeight(true, !string.IsNullOrWhiteSpace(statusSubtitle))
                 : 0f;
-            SkiaChatChromeRenderer.DrawOverviewCatalogBand(canvas, width, bandTop, _theme, overviewTopicCount);
+            SkiaChatChromeRenderer.DrawOverviewCatalogBand(canvas, width, bandTop, _theme, overviewTopicCount, IntercomFonts);
         }
 
         var showFeedGutter = !OverviewMode && (Snapshot?.Layout.Lanes.Any(l => l.Entries.Any(e => e.Kind == ChatSurfaceEntryKind.Message)) ?? false);
@@ -486,10 +524,10 @@ public partial class SkiaChatSurfaceControl : Control
     {
         var catalog = showOverviewCatalog ?? (OverviewMode && (Snapshot?.Layout.Overview.Count ?? 0) > 0);
         var subtitle = statusSubtitle;
-        if (subtitle is null && CompactLayout && Snapshot is { } snap)
+        if (subtitle is null && ForwardHost && Snapshot is { } snap)
             subtitle = ChatIntercomChromeStatusPresentation.FormatSubtitle(snap, OverviewMode, DetailThreadId);
         var chromeTop = SkiaChatChromeRenderer.ResolveTopChromeHeight(
-            CompactLayout,
+            ForwardHost,
             catalog,
             !string.IsNullOrWhiteSpace(subtitle));
         var chromeBottom = bottomChrome ?? (float)ResolveBottomChromeHeight((float)Math.Max(160, Bounds.Width));

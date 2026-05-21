@@ -212,6 +212,7 @@
 | command_id | Описание |
 |-----------:|----------|
 | `build_solution_ui` | Кнопка «Собрать» в тулбаре: dotnet build в панель вывода (не structured build). returns: text. |
+| `cockpit.open_command_line` | Открыть Cockpit Command Line активного Forward host (Intercom: полоса над composer). args: initial_text?:string; returns: text; example: {"initial_text":"/intercom message anchors list"}. |
 | `set_dual_editor_group` | Две группы редакторов (2-up). returns: text. |
 | `set_single_editor_group` | Одна группа редакторов (1-up). returns: text. |
 | `set_triple_editor_group` | Три группы редакторов (3-up). returns: text. |
@@ -275,7 +276,7 @@
 | `editor.select_code` | Select в редакторе по bracket-ссылке (ADR 0131). args: code_ref:string, active_file?:string, duration_ms?:integer; returns: text; example: {"code_ref":"[M:Run]","active_file":"src/Foo.cs"}. |
 | `intercom.message_relate` | Явная связь диапазона gutter-сообщений с кодом (ADR 0137). args: start_ordinal:integer, end_ordinal?:integer, use_selection?:boolean, code_ref?:string, anchor_json?:object, file?:string, line_start?:integer, line_end?:integer; returns: json; example: {"start_ordinal":3,"end_ordinal":5,"use_selection":true}. |
 | `intercom.messages_for_code` | Сообщения активной detail-ветки по фрагменту кода (ADR 0137 inferred + explicit relate). args: use_selection?:boolean, code_ref?:string, anchor_json?:object, file?:string, line_start?:integer, line_end?:integer; returns: json; example: {"use_selection":true}. |
-| `intercom.reveal_attachment` | Reveal из ленты по AttachmentAnchor: open + re-resolve + highlight (ADR 0128 §8, 0130). args: anchor_json?:object, file?:string, line_start?:integer, line_end?:integer, member_key?:string, syntax_scope?:object, duration_ms?:integer, select?:boolean; если select опущен — дефолт из settings `[intercom.attachments.code].navigate`; returns: text; example: {"file":"src/Foo.cs","line_start":10,"line_end":25}. |
+| `intercom.reveal_attachment` | Reveal из ленты по AttachmentAnchor: open + re-resolve + highlight (ADR 0128 §8, 0130). args: anchor_json?:object, file?:string, line_start?:integer, line_end?:integer, member_key?:string, syntax_scope?:object, duration_ms?:integer, select?:boolean; если select опущен — дефолт из settings [intercom.attachments.code].navigate; returns: text; example: {"file":"src/Foo.cs","line_start":10,"line_end":25}. |
 | `list_knowledge_files` | Список knowledge-файлов. args: subdir?:string, knowledge_path?:string, knowledge_root_id?:string; returns: json; example: {"subdir":"work","knowledge_root_id":"group"}. |
 | `read_knowledge_file` | Прочитать knowledge-файл. Корень: knowledge_path, knowledge_root_id (group, …) или primary из TOML. args: file_path:string, knowledge_path?:string, knowledge_root_id?:string, offset?:integer, limit?:integer; returns: text; example: {"file_path":"META/integrity-core.md","offset":2,"limit":20}. |
 | `upsert_knowledge_section` | Вставить/обновить секцию в knowledge-файле по section_id. args: file_path:string, section_id:string, content:string, knowledge_path?:string, knowledge_root_id?:string, save_revision?:boolean; returns: text; example: {"file_path":"index.md","section_id":"foo","content":"body"}. |

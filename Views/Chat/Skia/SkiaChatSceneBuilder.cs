@@ -1,5 +1,6 @@
 #nullable enable
 using CascadeIDE.Features.Chat;
+using CascadeIDE.Models;
 
 namespace CascadeIDE.Views.Chat.Skia;
 
@@ -10,6 +11,7 @@ internal static class SkiaChatSceneBuilder
         ChatSurfaceSnapshot snapshot,
         bool overviewMode,
         Guid detailThreadId,
-        bool compactLayout = false) =>
-        ChatSurfaceEntityFactory.Build(snapshot, overviewMode, detailThreadId, compactLayout);
+        bool forwardHost = false,
+        IntercomFontsSettings? intercomFonts = null) =>
+        ChatSurfaceEntityFactory.Build(snapshot, overviewMode, detailThreadId, forwardHost, intercomFonts);
 }

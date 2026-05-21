@@ -18,11 +18,29 @@ public static class MainWindowPresentationSurfaceProjection
     /// <summary>Кадр хоста: intent + CDS style → shell + инструменты (ADR 0036 п.3, 0047).</summary>
     public static MainWindowHostSurfaceFrame ComposeHostSurfaceFrame(
         IMainWindowHostSurfaceInput host,
-        string normalizedUiMode) =>
+        string normalizedUiMode,
+        MfdShellPage currentMfdShellPage,
+        PrimaryWorkSurfaceKind primaryWorkSurface) =>
         MainWindowHostSurfaceProjection.ComposeFrame(
             host,
-            UiModeCatalog.GetMfdRegionExpandedWidthPixels(normalizedUiMode),
+            ResolveExpandedMfdWidthPixels(normalizedUiMode, currentMfdShellPage, primaryWorkSurface),
             UiWorkspaceLayoutRuntimeMetrics.MfdRegionCollapsedWidthPixels);
+
+    /// <summary>
+    /// Ширина колонки MFD: для страницы «Чат» — не уже <see cref="UiWorkspaceLayoutRuntimeMetrics.MfdRegionExpandedAgentChatWidthPixels"/> (520).
+    /// </summary>
+    public static int ResolveExpandedMfdWidthPixels(
+        string normalizedUiMode,
+        MfdShellPage currentMfdShellPage,
+        PrimaryWorkSurfaceKind primaryWorkSurface)
+    {
+        _ = primaryWorkSurface;
+        var modeDefault = UiModeCatalog.GetMfdRegionExpandedWidthPixels(normalizedUiMode);
+        if (currentMfdShellPage != MfdShellPage.Chat)
+            return modeDefault;
+
+        return Math.Max(modeDefault, UiWorkspaceLayoutRuntimeMetrics.MfdRegionExpandedAgentChatWidthPixels);
+    }
 
     public const string DefaultRiskSummaryPlaceholder = "Риски не зафиксированы.";
     public const string DefaultResultSummaryPlaceholder = "Результатов пока нет.";

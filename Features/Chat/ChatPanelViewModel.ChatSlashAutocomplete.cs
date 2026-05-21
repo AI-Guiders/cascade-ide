@@ -69,9 +69,20 @@ public partial class ChatPanelViewModel
         if (idx >= ChatSlashSuggestions.Count)
             idx = 0;
 
-        ChatInput = ChatSlashSuggestions[idx].InsertText;
+        var insertText = ChatSlashSuggestions[idx].InsertText;
+        if (IsCockpitCommandLineOpen)
+        {
+            CockpitCommandLineText = insertText;
+            CockpitCommandLineCaretIndex = insertText.Length;
+        }
+        else
+        {
+            ChatInput = insertText;
+            ChatComposerCaretIndex = insertText.Length;
+        }
+
         IsChatSlashAutocompleteVisible = false;
-        shouldAutoExecute = ChatSlashCommandParser.ShouldAutoExecuteAfterAutocompleteCommit(ChatInput);
+        shouldAutoExecute = ChatSlashCommandParser.ShouldAutoExecuteAfterAutocompleteCommit(insertText);
         return true;
     }
 

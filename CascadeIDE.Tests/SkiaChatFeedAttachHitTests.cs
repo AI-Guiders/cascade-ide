@@ -23,7 +23,8 @@ public sealed class SkiaChatFeedAttachHitTests
             FooterHeight: 0,
             LineHeight: 15);
 
-        var hit = SkiaChatBubbleRenderer.ComputeFeedLinkHitRect(segment, "[TryResolveFile]", metrics);
+        var feed = SkiaChatFeedLayout.For(forwardHost: false);
+        var hit = SkiaChatBubbleRenderer.ComputeFeedLinkHitRect(segment, "[TryResolveFile]", metrics, feed);
 
         Assert.True(hit.Width < segment.Width - 40f);
         Assert.True(hit.Left > segment.Left);
@@ -132,16 +133,19 @@ public sealed class SkiaChatFeedAttachHitTests
             LineHeight: 15);
 
         var anchor = new AttachmentAnchor { File = "Foo.cs", MemberKey = "Run", DisplayLabel = "Run" };
+        var feed = SkiaChatFeedLayout.For(forwardHost: false);
         SkiaChatBubbleRenderer.RegisterFeedMarkdownLinkHits(
             drawContext,
             segment,
             metrics,
+            feed,
             messageIndex: 3,
             linkText => string.Equals(linkText, "Run", StringComparison.Ordinal) ? anchor : null);
 
         Assert.Equal(1, registry.Count);
-        Assert.Equal(0, registry.FindIndex(new Avalonia.Point(50, 48)));
-        Assert.Equal(-1, registry.FindIndex(new Avalonia.Point(12, 40)));
+        var linkBaseline = feed.FirstLineBaselineY(segment.Top, metrics.TitleHeight);
+        Assert.Equal(0, registry.FindIndex(new Avalonia.Point(50, linkBaseline)));
+        Assert.Equal(-1, registry.FindIndex(new Avalonia.Point(12, segment.Top)));
         Assert.True(registry.TryGetHit(0, out var hit));
         Assert.Equal(3, hit.MessageIndex);
         Assert.Equal("Run", hit.RevealAttachment?.MemberKey);

@@ -1,5 +1,6 @@
 #nullable enable
 using CascadeIDE.Features.Chat;
+using CascadeIDE.Models;
 using SkiaSharp;
 
 namespace CascadeIDE.Views.Chat.Skia;
@@ -15,11 +16,11 @@ internal static class SkiaChatChromeRenderer
     /// <summary>Заголовок режима overview (картотека) — не в скролле ленты.</summary>
     public const float OverviewCatalogBandHeight = 44f;
 
-    public static float ResolveToolbarHeight(bool compactLayout, bool showStatusSubtitle) =>
-        compactLayout ? (showStatusSubtitle ? ToolbarWithStatusHeight : ToolbarHeight) : 0f;
+    public static float ResolveToolbarHeight(bool forwardHost, bool showStatusSubtitle) =>
+        forwardHost ? (showStatusSubtitle ? ToolbarWithStatusHeight : ToolbarHeight) : 0f;
 
-    public static float ResolveTopChromeHeight(bool compactLayout, bool showOverviewCatalog, bool showStatusSubtitle) =>
-        ResolveToolbarHeight(compactLayout, showStatusSubtitle)
+    public static float ResolveTopChromeHeight(bool forwardHost, bool showOverviewCatalog, bool showStatusSubtitle) =>
+        ResolveToolbarHeight(forwardHost, showStatusSubtitle)
         + (showOverviewCatalog ? OverviewCatalogBandHeight : 0f);
 
     public static void Draw(
@@ -31,9 +32,13 @@ internal static class SkiaChatChromeRenderer
         bool isLoading,
         string? loadingText,
         string? statusSubtitle,
-        out SKRect overviewButtonBounds)
+        out SKRect overviewButtonBounds,
+        IntercomFontsSettings? fonts = null)
     {
-        var toolbarHeight = ResolveToolbarHeight(compactLayout: true, showStatusSubtitle: !string.IsNullOrWhiteSpace(statusSubtitle));
+        fonts ??= new IntercomFontsSettings();
+        var titlePt = fonts.ResolveChromeTitlePt();
+        var subtitlePt = fonts.ResolveChromeSubtitlePt();
+        var toolbarHeight = ResolveToolbarHeight(forwardHost: true, showStatusSubtitle: !string.IsNullOrWhiteSpace(statusSubtitle));
         canvas.DrawRect(new SKRect(0, 0, width, toolbarHeight), new SKPaint
         {
             Color = theme.Surface,
@@ -46,25 +51,26 @@ internal static class SkiaChatChromeRenderer
             IsAntialias = true,
         });
 
-        using var titleFont = new SKFont(SKTypeface.FromFamilyName("Segoe UI", SKFontStyle.Bold), 13);
+        using var titleFont = new SKFont(SKTypeface.FromFamilyName(fonts.ResolveProseFamily(), SKFontStyle.Bold), titlePt);
         using var titlePaint = new SKPaint { IsAntialias = true, Color = theme.Content };
-        canvas.DrawText(title, 12, 20, SKTextAlign.Left, titleFont, titlePaint);
+        canvas.DrawText(title, 12, 12 + titlePt * 0.85f, SKTextAlign.Left, titleFont, titlePaint);
 
         if (!string.IsNullOrWhiteSpace(statusSubtitle))
         {
-            using var statusFont = new SKFont(SKTypeface.FromFamilyName("Segoe UI"), 10);
+            using var statusFont = new SKFont(SKTypeface.FromFamilyName(fonts.ResolveProseFamily()), subtitlePt);
             using var statusPaint = new SKPaint { IsAntialias = true, Color = theme.MutedContent };
             canvas.DrawText(
                 Truncate(statusSubtitle, 96),
                 12,
-                38,
+                12 + titlePt * 0.85f + subtitlePt + 6f,
                 SKTextAlign.Left,
                 statusFont,
                 statusPaint);
         }
 
         var topicsLabel = overviewMode ? "Темы ✓" : "Темы";
-        using var btnFont = new SKFont(SKTypeface.FromFamilyName("Segoe UI"), 11);
+        var btnPt = Math.Max(10f, subtitlePt + 1f);
+        using var btnFont = new SKFont(SKTypeface.FromFamilyName(fonts.ResolveProseFamily()), btnPt);
         using var btnPaint = new SKPaint { IsAntialias = true, Color = theme.Role };
         var topicsWidth = btnFont.MeasureText(topicsLabel) + 16;
         var right = width - 12f;
@@ -72,7 +78,7 @@ internal static class SkiaChatChromeRenderer
         right = overviewButtonBounds.Left - 8f;
         if (isLoading && !string.IsNullOrWhiteSpace(loadingText))
         {
-            using var chipFont = new SKFont(SKTypeface.FromFamilyName("Segoe UI"), 10);
+            using var chipFont = new SKFont(SKTypeface.FromFamilyName(fonts.ResolveProseFamily()), subtitlePt);
             var chipText = Truncate(loadingText, 28);
             var chipWidth = chipFont.MeasureText(chipText) + 14;
             var chipRect = new SKRect(right - chipWidth, 8, right, 28);
@@ -85,8 +91,17 @@ internal static class SkiaChatChromeRenderer
     }
 
     /// <summary>Полоса «Картотека тем» под toolbar — заголовок режима, не карточка в ленте.</summary>
-    public static void DrawOverviewCatalogBand(SKCanvas canvas, float width, float top, SkiaChatTheme theme, int topicCount)
+    public static void DrawOverviewCatalogBand(
+        SKCanvas canvas,
+        float width,
+        float top,
+        SkiaChatTheme theme,
+        int topicCount,
+        IntercomFontsSettings? fonts = null)
     {
+        fonts ??= new IntercomFontsSettings();
+        var headingPt = fonts.ResolveChromeHeadingPt();
+        var hintPt = fonts.ResolveChromeSubtitlePt();
         var bottom = top + OverviewCatalogBandHeight;
         using (var fill = new SKPaint
         {
@@ -104,15 +119,15 @@ internal static class SkiaChatChromeRenderer
         })
             canvas.DrawLine(0, bottom - 0.5f, width, bottom - 0.5f, line);
 
-        using var modeFont = new SKFont(SKTypeface.FromFamilyName("Segoe UI", SKFontStyle.Bold), 14);
+        using var modeFont = new SKFont(SKTypeface.FromFamilyName(fonts.ResolveProseFamily(), SKFontStyle.Bold), headingPt);
         using var modePaint = new SKPaint { IsAntialias = true, Color = theme.Content };
-        canvas.DrawText("Картотека тем", 12, top + 20, SKTextAlign.Left, modeFont, modePaint);
+        canvas.DrawText("Картотека тем", 12, top + headingPt * 0.85f + 6f, SKTextAlign.Left, modeFont, modePaint);
 
         var hint = ChatThreadOverviewPresentation.FormatCatalogHint(topicCount) + " · " +
                    ChatThreadOverviewPresentation.CatalogFooter;
-        using var hintFont = new SKFont(SKTypeface.FromFamilyName("Segoe UI"), 10);
+        using var hintFont = new SKFont(SKTypeface.FromFamilyName(fonts.ResolveProseFamily()), hintPt);
         using var hintPaint = new SKPaint { IsAntialias = true, Color = theme.MutedContent };
-        canvas.DrawText(hint, 12, top + 36, SKTextAlign.Left, hintFont, hintPaint);
+        canvas.DrawText(hint, 12, top + headingPt * 0.85f + hintPt + 14f, SKTextAlign.Left, hintFont, hintPaint);
     }
 
     private static void DrawChip(SKCanvas canvas, SKRect rect, string text, SkiaChatTheme theme, SKFont font)

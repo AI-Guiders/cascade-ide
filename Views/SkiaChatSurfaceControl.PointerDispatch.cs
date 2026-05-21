@@ -52,9 +52,16 @@ public partial class SkiaChatSurfaceControl
                 ComposerKeyDown?.Invoke(this, new IntercomComposerKeyEventArgs(IntercomComposerKeyKind.CommitSlashSuggestion));
                 return true;
             }
+            case SkiaChatPointerAction.CommandLineFocus:
+                if (!ShowIntercomComposer || !ShowCockpitCommandLine)
+                    return false;
+                _commandLineFocused = true;
+                Focus();
+                return true;
             case SkiaChatPointerAction.ComposerFocus:
                 if (!ShowIntercomComposer)
                     return false;
+                _commandLineFocused = false;
                 Focus();
                 return true;
             default:

@@ -22,6 +22,52 @@ public sealed class CascadeIdeSettingsTomlDeserializeTests
         ?? throw new InvalidOperationException("Deserialize returned null");
 
     [Fact]
+    public void Deserialize_FontsIntercomAndEditor_ParsesExpected()
+    {
+        const string text =
+            """
+            [fonts.intercom]
+            prose_pt = 13
+            prose_pt_forward = 12
+            composer_pt = 15
+            chrome_title_pt = 14
+            chrome_subtitle_pt = 11
+            chrome_heading_pt = 16
+            card_title_pt = 15
+            panel_title_pt = 16
+            panel_input_pt = 14
+            prose_family = "Segoe UI"
+            mono_family = "Cascadia Mono,Consolas"
+            chip_id_family = "Consolas"
+
+            [fonts.editor]
+            size_pt = 14
+            family = "Consolas,Cascadia Code,monospace"
+            """;
+
+        var s = Deserialize(text);
+        Assert.Equal(13, s.Fonts.Intercom.ProsePt);
+        Assert.Equal(12, s.Fonts.Intercom.ProsePtForward);
+        Assert.Equal(15, s.Fonts.Intercom.ComposerPt);
+        Assert.Equal(14, s.Fonts.Intercom.ChromeTitlePt);
+        Assert.Equal(15f, s.Fonts.Intercom.ResolveComposerPt(forwardHost: false));
+        Assert.Equal(14f, s.Fonts.Intercom.ResolveChromeTitlePt());
+        Assert.Equal(15f, s.Fonts.Intercom.ResolveCardTitleLineHeight(forwardHost: false));
+        Assert.Equal(16f, s.Fonts.Intercom.ResolvePanelTitlePt());
+        Assert.Equal(14f, s.Fonts.Intercom.ResolvePanelInputPt());
+        Assert.Equal("Segoe UI", s.Fonts.Intercom.ProseFamily);
+        Assert.Equal("Cascadia Mono,Consolas", s.Fonts.Intercom.MonoFamily);
+        Assert.Equal("Consolas", s.Fonts.Intercom.ChipIdFamily);
+        Assert.Equal(14, s.Fonts.Editor.SizePt);
+        Assert.Equal("Consolas,Cascadia Code,monospace", s.Fonts.Editor.Family);
+        Assert.Equal(12f, s.Fonts.Intercom.ResolveProsePt(forwardHost: true));
+        Assert.Equal(13f, s.Fonts.Intercom.ResolveProsePt(forwardHost: false));
+        Assert.Equal(14f, s.Fonts.Editor.ResolveSizePt());
+        Assert.Equal("Segoe UI", s.Fonts.Intercom.ResolveProseFamily());
+        Assert.Equal("Consolas,Cascadia Code,monospace", s.Fonts.Editor.ResolveFamily());
+    }
+
+    [Fact]
     public void Deserialize_LoggingIntercomSendTrace_ParsesExpected()
     {
         const string text =

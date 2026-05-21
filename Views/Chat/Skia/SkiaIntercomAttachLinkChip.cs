@@ -15,7 +15,7 @@ internal static class SkiaIntercomAttachLinkChip
     private const float IconBox = 14f;
     private const float IconGap = 5f;
     private const float Corner = 6f;
-    private const float FontSize = 11f;
+    private const float DefaultLabelFontSize = 11f;
     private const float MinChipHeight = 22f;
 
     public static IntercomAttachLinkVisualStatus Classify(AttachmentAnchor? anchor, bool messagePending)
@@ -39,16 +39,46 @@ internal static class SkiaIntercomAttachLinkChip
         return IntercomAttachLinkVisualStatus.Resolved;
     }
 
-    public static float MeasureHeight(bool compactLayout) =>
-        compactLayout ? MinChipHeight - 2f : MinChipHeight;
-
-    public static float MeasureWidth(string label, float maxContentWidth)
+    public static float MeasureHeight(bool forwardHost, float labelFontSize = DefaultLabelFontSize)
     {
-        using var font = CreateLabelFont();
+        var baseH = forwardHost ? MinChipHeight - 2f : MinChipHeight;
+        return baseH * (labelFontSize / DefaultLabelFontSize);
+    }
+
+    public static float MeasureWidth(
+        string label,
+        string? anchorShortId,
+        float maxContentWidth,
+        float labelFontSize = DefaultLabelFontSize,
+        string? chipFamily = null,
+        string? chipIdFamily = null)
+    {
+        using var font = CreateLabelFont(labelFontSize, chipFamily);
+        using var idFont = CreateIdFont(labelFontSize, chipIdFamily);
         var text = normalizeLabel(label);
         var textW = font.MeasureText(text);
-        var w = PadX * 2f + IconBox + IconGap + textW;
+        var idW = string.IsNullOrWhiteSpace(anchorShortId) ? 0f : idFont.MeasureText(formatIdSuffix(anchorShortId)) + 4f;
+        var w = PadX * 2f + IconBox + IconGap + textW + idW;
         return Math.Min(Math.Max(48f, w), Math.Max(80f, maxContentWidth));
+    }
+
+    /// <summary>Ширина chip без усечения под колонку (для inline-раскладки prose+chip).</summary>
+    public static float MeasureIntrinsicWidth(
+        string label,
+        string? anchorShortId,
+        float labelFontSize = DefaultLabelFontSize,
+        string? chipFamily = null,
+        string? chipIdFamily = null)
+    {
+        using var font = CreateLabelFont(labelFontSize, chipFamily);
+        using var idFont = CreateIdFont(labelFontSize, chipIdFamily);
+        var text = normalizeLabel(label);
+        var textW = font.MeasureText(text);
+        var idW = string.IsNullOrWhiteSpace(anchorShortId)
+            ? 0f
+            : idFont.MeasureText(formatIdSuffix(anchorShortId)) + 4f;
+        var w = PadX * 2f + IconBox + IconGap + textW + idW;
+        return Math.Max(48f, w);
     }
 
     public static void Draw(
@@ -56,7 +86,11 @@ internal static class SkiaIntercomAttachLinkChip
         SkiaChatTheme theme,
         SKRect chipRect,
         string label,
-        IntercomAttachLinkVisualStatus status)
+        IntercomAttachLinkVisualStatus status,
+        string? anchorShortId = null,
+        float labelFontSize = DefaultLabelFontSize,
+        string? chipFamily = null,
+        string? chipIdFamily = null)
     {
         var (border, fill, iconColor, linkColor) = colorsFor(theme, status);
         using var fillPaint = new SKPaint { Color = fill, IsAntialias = true, Style = SKPaintStyle.Fill };
@@ -72,14 +106,23 @@ internal static class SkiaIntercomAttachLinkChip
 
         var iconCenterX = chipRect.Left + PadX + IconBox * 0.5f;
         var iconCenterY = chipRect.MidY;
-        DrawStatusIcon(canvas, iconCenterX, iconCenterY, status, iconColor);
+        DrawStatusIcon(canvas, iconCenterX, iconCenterY, status, iconColor, labelFontSize);
 
-        using var labelFont = CreateLabelFont();
+        using var labelFont = CreateLabelFont(labelFontSize, chipFamily);
         var text = normalizeLabel(label);
         var textLeft = chipRect.Left + PadX + IconBox + IconGap;
         var baseline = chipRect.MidY + labelFont.Size * 0.35f;
         using var labelPaint = new SKPaint { IsAntialias = true, Color = linkColor };
         canvas.DrawText(text, textLeft, baseline, SKTextAlign.Left, labelFont, labelPaint);
+
+        if (!string.IsNullOrWhiteSpace(anchorShortId))
+        {
+            using var idFont = CreateIdFont(labelFontSize, chipIdFamily);
+            var idText = formatIdSuffix(anchorShortId);
+            var idLeft = textLeft + labelFont.MeasureText(text) + 4f;
+            using var idPaint = new SKPaint { IsAntialias = true, Color = theme.MutedContent };
+            canvas.DrawText(idText, idLeft, baseline, SKTextAlign.Left, idFont, idPaint);
+        }
     }
 
     public static SKRect ComputeHitRect(SKRect chipRect) =>
@@ -93,8 +136,18 @@ internal static class SkiaIntercomAttachLinkChip
         return t;
     }
 
-    private static SKFont CreateLabelFont() =>
-        new(SKTypeface.FromFamilyName("Segoe UI", SKFontStyle.Normal), FontSize);
+    private static SKFont CreateLabelFont(float labelFontSize, string? chipFamily) =>
+        SkiaChatFeedFontResolver.CreateFont(
+            string.IsNullOrWhiteSpace(chipFamily) ? "Segoe UI" : chipFamily,
+            labelFontSize);
+
+    private static SKFont CreateIdFont(float labelFontSize, string? chipIdFamily) =>
+        SkiaChatFeedFontResolver.CreateFont(
+            string.IsNullOrWhiteSpace(chipIdFamily) ? "Consolas" : chipIdFamily,
+            labelFontSize - 1f);
+
+    private static string formatIdSuffix(string anchorShortId) =>
+        $"a:{anchorShortId.Trim().ToLowerInvariant()}";
 
     private static (SKColor Border, SKColor Fill, SKColor Icon, SKColor Link) colorsFor(
         SkiaChatTheme theme,
@@ -128,7 +181,8 @@ internal static class SkiaIntercomAttachLinkChip
         float cx,
         float cy,
         IntercomAttachLinkVisualStatus status,
-        SKColor color)
+        SKColor color,
+        float labelFontSize)
     {
         var glyph = status switch
         {
@@ -138,7 +192,9 @@ internal static class SkiaIntercomAttachLinkChip
             _ => "\u2715",
         };
 
-        using var font = new SKFont(SKTypeface.FromFamilyName("Segoe UI Symbol", SKFontStyle.Normal), 11f);
+        using var font = new SKFont(
+            SKTypeface.FromFamilyName("Segoe UI Symbol", SKFontStyle.Normal),
+            labelFontSize);
         using var paint = new SKPaint { IsAntialias = true, Color = color };
         canvas.DrawText(glyph, cx, cy + 4f, SKTextAlign.Center, font, paint);
     }

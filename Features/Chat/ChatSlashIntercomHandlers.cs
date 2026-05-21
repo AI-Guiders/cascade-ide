@@ -19,6 +19,8 @@ public static class ChatSlashIntercomHandlers
         public const string MessageSelect = "message_select";
         public const string MessageFind = "message_find";
         public const string MessageRelate = "message_relate";
+        public const string MessageAnchorsList = "message_anchors_list";
+        public const string AnchorPeek = "anchor_peek";
     }
 
     public sealed record Context(
@@ -33,7 +35,9 @@ public static class ChatSlashIntercomHandlers
         Func<int, int, string>? SelectMessageByOrdinalRangeInDetailLane = null,
         Func<IReadOnlyList<ParametricIntRange>, string>? SelectMessagesByOrdinalRangesInDetailLane = null,
         Func<string?, string>? FindMessagesForCodeRef = null,
-        Func<string?, string>? RelateMessageRangeToCodeRef = null);
+        Func<string?, string>? RelateMessageRangeToCodeRef = null,
+        Func<string>? ListMessageAnchors = null,
+        Func<string?, string>? PeekAnchorById = null);
 
     private delegate ChatSlashIntercomResult Handler(Context context);
 
@@ -71,6 +75,8 @@ public static class ChatSlashIntercomHandlers
             [Ids.MessageSelect] = static ctx => executeMessageSelect(ctx),
             [Ids.MessageFind] = static ctx => executeMessageFind(ctx),
             [Ids.MessageRelate] = static ctx => executeMessageRelate(ctx),
+            [Ids.MessageAnchorsList] = static ctx => executeMessageAnchorsList(ctx),
+            [Ids.AnchorPeek] = static ctx => executeAnchorPeek(ctx),
         };
 
     private static ChatSlashIntercomResult executeAttach(Context ctx, string handlerId)
@@ -134,6 +140,30 @@ public static class ChatSlashIntercomHandlers
         return result.StartsWith("Связь сообщений", StringComparison.Ordinal)
             ? ChatSlashIntercomResult.Ok(result)
             : ChatSlashIntercomResult.Fail(result);
+    }
+
+    private static ChatSlashIntercomResult executeMessageAnchorsList(Context ctx)
+    {
+        if (ctx.ListMessageAnchors is null)
+            return ChatSlashIntercomResult.Fail("Список якорей недоступен.");
+
+        return ChatSlashIntercomResult.Ok(ctx.ListMessageAnchors());
+    }
+
+    private static ChatSlashIntercomResult executeAnchorPeek(Context ctx)
+    {
+        if (ctx.PeekAnchorById is null)
+            return ChatSlashIntercomResult.Fail("Peek якоря недоступен.");
+
+        var result = ctx.PeekAnchorById(ctx.ArgsTail);
+        if (result.Contains("не найден", StringComparison.OrdinalIgnoreCase)
+            || result.Contains("Укажи id", StringComparison.OrdinalIgnoreCase)
+            || result.Contains("8 hex", StringComparison.OrdinalIgnoreCase))
+        {
+            return ChatSlashIntercomResult.Fail(result);
+        }
+
+        return ChatSlashIntercomResult.Ok(result);
     }
 
     public static bool IsKnown(string handlerId) => Handlers.ContainsKey(handlerId);

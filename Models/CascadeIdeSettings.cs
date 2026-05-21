@@ -31,6 +31,9 @@ public sealed partial class CascadeIdeSettings : ModelBase
 
     public EditorSettings Editor { get; set; } = new();
 
+    /// <summary>Шрифты Intercom, редактора и др. TOML: <c>[fonts.*]</c>.</summary>
+    public FontsSettings Fonts { get; set; } = new();
+
     /// <summary>Пресеты навигации по коду / решению (ADR 0039, Code Navigation Context). TOML: <c>[code_navigation]</c>.</summary>
     public CodeNavigationSettings CodeNavigation { get; set; } = new();
 

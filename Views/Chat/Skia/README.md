@@ -13,7 +13,7 @@ Topic и spine **намеренно разделены**: topic = drill-in по 
 
 | Сущность | `SkiaChatBubbleKind` | Когда |
 |----------|----------------------|--------|
-| **Сообщения** (`SkiaChatMessageFeedEntity`) | `Feed` | user / agent / thinking / tool — meta + тело, **без** messenger-пузыря ([ADR 0123](../../../docs/adr/0123-intercom-full-skia-surface-evolution.md)) |
+| **Сообщения** (`SkiaChatMessageFeedEntity`) | `Feed` | user / agent / thinking / tool — role rail + тело через **`SkiaChatFeedLayout`** ([ADR 0123](../../../docs/adr/0123-intercom-full-skia-surface-evolution.md)) |
 | **Slash outcome** (`SkiaChatSlashCommandEntity`) | отдельный flat row | `/help`, `/build run`, … |
 | **Clarification** | `Feed` | пакеты уточнений |
 | **Навигация** (заголовок ветки, «Назад к темам») | `Feed` | компактные meta-строки |

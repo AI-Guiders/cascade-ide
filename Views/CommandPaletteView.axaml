@@ -51,8 +51,7 @@
             Background="{DynamicResource CascadeTheme.CommandPaletteSurfaceBackground}"
             BorderBrush="{DynamicResource CascadeTheme.CommandPaletteSurfaceBorderBrush}"
             BorderThickness="1"
-            CornerRadius="8"
-            BoxShadow="0 10 40 0 #50000000"
+            CornerRadius="6"
             PointerPressed="OnPanelPressed">
       <Grid RowDefinitions="Auto,*,Auto">
         <TextBox x:Name="SearchTextBox"

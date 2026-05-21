@@ -1,5 +1,6 @@
 #nullable enable
 using CascadeIDE.Features.Chat;
+using CascadeIDE.Models;
 using CascadeIDE.Models.Intercom;
 
 namespace CascadeIDE.Views.Chat.Skia;
@@ -11,17 +12,18 @@ internal static class ChatSurfaceEntityFactory
         ChatSurfaceSnapshot snapshot,
         bool overviewMode,
         Guid detailThreadId,
-        bool compactLayout = false)
+        bool forwardHost = false,
+        IntercomFontsSettings? intercomFonts = null)
     {
         var entities = new List<ISkiaChatEntity>();
-        var hideNavChromeInFeed = compactLayout;
+        var hideNavChromeInFeed = forwardHost;
 
         if (!hideNavChromeInFeed)
-            AppendSpine(entities, snapshot.ProductSpine, overviewMode, compactLayout);
+            AppendSpine(entities, snapshot.ProductSpine, overviewMode, forwardHost, intercomFonts);
 
         if (snapshot.Layout.Overview.Count > 0)
         {
-            AppendOverview(entities, snapshot, overviewMode, detailThreadId, compactLayout, hideNavChromeInFeed);
+            AppendOverview(entities, snapshot, overviewMode, detailThreadId, forwardHost, hideNavChromeInFeed);
             if (overviewMode)
                 return entities;
         }
@@ -35,16 +37,22 @@ internal static class ChatSurfaceEntityFactory
                 counts));
         }
 
-        AppendDetailLanes(entities, snapshot, detailThreadId, compactLayout, hideNavChromeInFeed);
+        AppendDetailLanes(entities, snapshot, detailThreadId, forwardHost, hideNavChromeInFeed, intercomFonts);
         return entities;
     }
 
-    private static void AppendSpine(List<ISkiaChatEntity> entities, ChatProductSpine spine, bool overviewMode, bool compactLayout)
+    private static void AppendSpine(
+        List<ISkiaChatEntity> entities,
+        ChatProductSpine spine,
+        bool overviewMode,
+        bool forwardHost,
+        IntercomFontsSettings? intercomFonts)
     {
         if (!spine.HasContent)
             return;
 
         var title = ChatProductSpinePresentation.ResolveLineTitle(spine);
+        var cardTitleHeight = (intercomFonts ?? new IntercomFontsSettings()).ResolveCardTitleLineHeight(forwardHost);
         if (overviewMode)
         {
             entities.Add(SkiaChatTopicCard.ForSpine(
@@ -72,9 +80,9 @@ internal static class ChatSurfaceEntityFactory
                     MaxBodyLines: 1,
                     GapAfter: 6,
                     Padding: 8,
-                    TitleHeight: 16,
+                    TitleHeight: cardTitleHeight,
                     LineHeight: 15),
-                compactLayout),
+                forwardHost),
             static () => new SkiaChatHit(null, null, ResetDetailMode: true)));
     }
 
@@ -83,11 +91,11 @@ internal static class ChatSurfaceEntityFactory
         ChatSurfaceSnapshot snapshot,
         bool overviewMode,
         Guid detailThreadId,
-        bool compactLayout,
+        bool forwardHost,
         bool hideNavChromeInFeed)
     {
         if (!overviewMode && !hideNavChromeInFeed)
-            entities.Add(OverviewBackLink(compactLayout));
+            entities.Add(OverviewBackLink(forwardHost));
 
         foreach (var item in snapshot.Layout.Overview)
         {
@@ -121,12 +129,12 @@ internal static class ChatSurfaceEntityFactory
                         IsSelected: false,
                         StartsBranch: false,
                         MessageIndex: null),
-                    compactLayout),
+                    forwardHost),
                 () => new SkiaChatHit(null, item.ThreadId, ResetDetailMode: false)));
         }
     }
 
-    private static SkiaChatBubbleEntity OverviewBackLink(bool compactLayout) =>
+    private static SkiaChatBubbleEntity OverviewBackLink(bool forwardHost) =>
         new(
             D(
                 new SkiaChatBubbleSpec(
@@ -140,16 +148,18 @@ internal static class ChatSurfaceEntityFactory
                     IsSelected: false,
                     StartsBranch: false,
                     MessageIndex: null),
-                compactLayout),
+                forwardHost),
             static () => new SkiaChatHit(null, null, ResetDetailMode: true));
 
     private static void AppendDetailLanes(
         List<ISkiaChatEntity> entities,
         ChatSurfaceSnapshot snapshot,
         Guid detailThreadId,
-        bool compactLayout,
-        bool hideNavChromeInFeed)
+        bool forwardHost,
+        bool hideNavChromeInFeed,
+        IntercomFontsSettings? intercomFonts)
     {
+        var cardTitleHeight = (intercomFonts ?? new IntercomFontsSettings()).ResolveCardTitleLineHeight(forwardHost);
         var lanes = snapshot.Layout.Lanes.OrderBy(lane => lane.Thread.Order);
         if (detailThreadId != Guid.Empty)
             lanes = lanes.Where(lane => lane.Thread.ThreadId == detailThreadId).OrderBy(lane => lane.Thread.Order);
@@ -173,8 +183,9 @@ internal static class ChatSurfaceEntityFactory
                             IsPending: false,
                             IsSelected: false,
                             StartsBranch: false,
-                            MessageIndex: null),
-                        compactLayout),
+                            MessageIndex: null,
+                            TitleHeight: cardTitleHeight),
+                        forwardHost),
                     () => new SkiaChatHit(null, lane.Thread.ThreadId, ResetDetailMode: false)));
             }
 
@@ -193,45 +204,49 @@ internal static class ChatSurfaceEntityFactory
                                             or ChatMessageVisualRole.Assistant
                                             or ChatMessageVisualRole.Thinking;
                     var gapAfter = suppressTitle
-                        ? compactLayout ? 2f : 3f
-                        : compactLayout ? 5f : 8f;
+                        ? forwardHost ? 2f : 3f
+                        : forwardHost ? 5f : 8f;
                     entities.Add(MessageEntity(
                         entry,
-                        compactLayout,
+                        forwardHost,
                         suppressTitle,
                         gapAfter,
-                        showFeedGutter ? feedOrdinal : 0));
+                        showFeedGutter ? feedOrdinal : 0,
+                        intercomFonts));
                     previousMessageRole = entry.VisualRole;
                     continue;
                 }
 
-                entities.Add(ConfirmationEntity(entry, compactLayout));
+                entities.Add(ConfirmationEntity(entry, forwardHost));
                 previousMessageRole = null;
             }
         }
     }
 
-    private static SkiaChatBubbleSpec D(in SkiaChatBubbleSpec spec, bool compact) =>
-        SkiaChatDensity.Apply(spec, compact);
+    private static SkiaChatBubbleSpec D(in SkiaChatBubbleSpec spec, bool forwardHost) =>
+        SkiaChatDensity.Apply(spec, forwardHost);
 
     private static ISkiaChatEntity MessageEntity(
         ChatSurfaceEntry entry,
-        bool compactLayout,
+        bool forwardHost,
         bool suppressTitle,
         float gapAfter,
-        int feedOrdinal = 0)
+        int feedOrdinal = 0,
+        IntercomFontsSettings? intercomFonts = null)
     {
-        if (entry.VisualRole == ChatMessageVisualRole.SlashCommand
-            && entry.SlashCommandStatus is { } slashStatus
-            && !string.IsNullOrWhiteSpace(entry.SlashCommandPath))
-        {
-            return new SkiaChatSlashCommandEntity(entry, compactLayout);
-        }
+        if (!string.IsNullOrWhiteSpace(entry.SlashCommandPath))
+            return new SkiaChatSlashCommandEntity(entry, forwardHost, feedOrdinal, intercomFonts);
 
-        return new SkiaChatMessageFeedEntity(entry, compactLayout, suppressTitle, gapAfter, feedOrdinal);
+        return new SkiaChatMessageFeedEntity(
+            entry,
+            forwardHost,
+            suppressTitle,
+            gapAfter,
+            feedOrdinal,
+            intercomFonts);
     }
 
-    private static SkiaChatBubbleEntity ConfirmationEntity(ChatSurfaceEntry entry, bool compactLayout)
+    private static SkiaChatBubbleEntity ConfirmationEntity(ChatSurfaceEntry entry, bool forwardHost)
     {
         var fillRole = SkiaBubbleFillRoleMapping.FromMessageRole(entry.VisualRole);
         return new SkiaChatBubbleEntity(
@@ -251,7 +266,7 @@ internal static class ChatSurfaceEntityFactory
                     Padding: 0,
                     TitleHeight: 14,
                     LineHeight: 14),
-                compactLayout),
+                forwardHost),
             static () => new SkiaChatHit(null, null, ResetDetailMode: false));
     }
 }

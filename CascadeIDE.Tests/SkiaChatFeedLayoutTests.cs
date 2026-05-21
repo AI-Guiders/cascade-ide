@@ -37,4 +37,27 @@ public sealed class SkiaChatFeedLayoutTests
 
         Assert.True(feedHeight < bubbleHeight);
     }
+
+    [Fact]
+    public void Body_column_shifts_right_when_role_rail_shown()
+    {
+        var layout = SkiaChatFeedLayout.For(forwardHost: false);
+        var without = layout.BodyColumn(contentLeft: 40f, contentWidth: 400f, includeRoleRail: false);
+        var with = layout.BodyColumn(contentLeft: 40f, contentWidth: 400f, includeRoleRail: true);
+
+        Assert.Equal(40f, without.Left);
+        Assert.Equal(400f, without.Width);
+        Assert.Equal(40f + layout.RoleRailWidth, with.Left);
+        Assert.Equal(400f - layout.RoleRailWidth, with.Width);
+    }
+
+    [Fact]
+    public void Slash_text_column_reserves_role_rail_and_icon()
+    {
+        var layout = SkiaChatFeedLayout.For(forwardHost: true);
+        var column = layout.SlashTextColumn(contentLeft: 0f, contentWidth: 320f);
+
+        Assert.True(column.Left > layout.RoleRailWidth);
+        Assert.True(column.Width < 320f - layout.RoleRailWidth - layout.SlashIconReserve);
+    }
 }

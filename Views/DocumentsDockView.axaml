@@ -16,8 +16,8 @@
         <Style Selector="Border#DockIslandInner">
             <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="10"/>
-            <Setter Property="Background" Value="{DynamicResource CascadeTheme.EditorColumnBackground}"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Background" Value="{DynamicResource CascadeTheme.MainWindowBackground}"/>
             <Setter Property="Margin" Value="0"/>
             <Setter Property="Padding" Value="4"/>
         </Style>

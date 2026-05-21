@@ -20,10 +20,10 @@ internal readonly record struct SkiaChatTheme(
     SKColor FooterMuted) : ISkiaKitPaintTheme
 {
     public static SkiaChatTheme DarkFallback => new(
-        Surface: new SKColor(37, 37, 38),
-        BubbleAssistant: new SKColor(45, 47, 55),
-        BubbleUser: new SKColor(53, 72, 112),
-        Border: new SKColor(84, 92, 108),
+        Surface: new SKColor(30, 30, 30),
+        BubbleAssistant: new SKColor(37, 37, 38),
+        BubbleUser: new SKColor(42, 48, 58),
+        Border: new SKColor(63, 63, 65),
         HoverBorder: new SKColor(126, 196, 255),
         SelectedBorder: new SKColor(196, 146, 255),
         Role: new SKColor(181, 196, 230),

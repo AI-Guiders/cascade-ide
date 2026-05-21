@@ -5,6 +5,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
+using Avalonia.Media;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using AvaloniaEdit;
@@ -13,6 +14,7 @@ using AvaloniaEdit.Rendering;
 using CascadeIDE.Features.Documents;
 using CascadeIDE.Features.Editor.Application;
 using CascadeIDE.Features.Editor.Application.Presentation;
+using CascadeIDE.Models;
 using CascadeIDE.Services;
 using CascadeIDE.ViewModels;
 using Microsoft.CodeAnalysis;
@@ -93,6 +95,7 @@ public partial class DockDocumentView : UserControl
 
         EditorSelectionChrome.Apply(_editor);
         EditorTextChrome.Apply(_editor);
+        EditorHelpers.ApplyEditorFontFromSettings(_editor, _vm.GetCascadeSettingsForExecutor().Fonts.Editor);
 
         EditorInlineHoverChrome.ApplyToolTipServiceTo(_editor);
 
@@ -502,6 +505,12 @@ public partial class DockDocumentView : UserControl
 
 internal static class EditorHelpers
 {
+    public static void ApplyEditorFontFromSettings(TextEditor editor, EditorFontsSettings fonts)
+    {
+        editor.FontSize = fonts.ResolveSizePt();
+        editor.FontFamily = new FontFamily(fonts.ResolveFamily());
+    }
+
     public static EditorStateDto GetEditorState(TextEditor editor, string? currentFilePath, int? maxPreviewChars)
     {
         var doc = editor.Document;

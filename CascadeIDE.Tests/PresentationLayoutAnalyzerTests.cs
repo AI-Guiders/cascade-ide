@@ -54,4 +54,23 @@ public sealed class PresentationLayoutAnalyzerTests
         Assert.True(r.IsSuccess);
         Assert.False(PresentationLayoutAnalyzer.IsPfdForwardCombinedOnFirstScreen(r.Screens));
     }
+
+    [Fact]
+    public void TryGetMainWindowPresentationScreenIndex_TripleP_F_M_ForwardIsScreen1()
+    {
+        var r = PresentationParser.Parse("(P) (F) (M)", DefaultGrammar());
+        Assert.True(r.IsSuccess);
+        Assert.True(PresentationLayoutAnalyzer.TryGetMainWindowPresentationScreenIndex(r.Screens, out var idx));
+        Assert.Equal(1, idx);
+        Assert.Equal(1, PresentationLayoutAnalyzer.GetMainWindowPresentationScreenIndexOrDefault(r));
+    }
+
+    [Fact]
+    public void TryGetMainWindowPresentationScreenIndex_TriplePermuted_M_F_P_ForwardIsScreen1()
+    {
+        var r = PresentationParser.Parse("(M) (F) (P)", DefaultGrammar());
+        Assert.True(r.IsSuccess);
+        Assert.True(PresentationLayoutAnalyzer.TryGetMainWindowPresentationScreenIndex(r.Screens, out var idx));
+        Assert.Equal(1, idx);
+    }
 }

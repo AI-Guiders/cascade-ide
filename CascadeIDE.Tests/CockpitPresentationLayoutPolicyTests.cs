@@ -60,4 +60,13 @@ public sealed class CockpitPresentationLayoutPolicyTests
         var r = PresentationParser.Parse("(P+F) (M)", DefaultGrammar());
         Assert.False(CockpitPresentationLayoutPolicy.CoerceMfdRegionExpanded(r, false));
     }
+
+    [Fact]
+    public void RequiresPfdInMain_WhenTripleP_F_M_FalseOnForwardScreen()
+    {
+        var r = PresentationParser.Parse("(P) (F) (M)", DefaultGrammar());
+        Assert.True(r.IsSuccess);
+        Assert.False(CockpitPresentationLayoutPolicy.RequiresPfdRegionInMainWindow(r));
+        Assert.False(CockpitPresentationLayoutPolicy.RequiresMfdRegionInMainWindow(r));
+    }
 }

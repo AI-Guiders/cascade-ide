@@ -106,4 +106,10 @@
 
 ---
 
+## 9. Troubleshooting (симптомы раскладки)
+
+Операционная диагностика («узкая полоса», пустота по бокам, неверный монитор, лишние колонки PFD/MFD): KB **`playbook-layout-presentation-intercom-troubleshooting-v1.md`** (указатель в репо: [playbook-layout-presentation-intercom-troubleshooting-v1.md](playbook-layout-presentation-intercom-troubleshooting-v1.md)). Не путать с дизайном ленты Intercom (`docs/design/intercom-design-hub-v1.md`).
+
+---
+
 *Версия документа: 2.0. Соответствует `MainWindow.axaml` и `UiModes/index.toml` (только **Flight**). При смене разметки — обновить этот файл.*

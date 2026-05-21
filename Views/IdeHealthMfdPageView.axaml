@@ -5,21 +5,18 @@
              x:Class="CascadeIDE.Views.WorkspaceHealthMfdPageView"
              Classes.power="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Power}"
              x:DataType="vm:MainWindowViewModel">
-    <Border Classes="modeCard"
+    <Border Classes="ideHealthStrip"
             Margin="0,0,0,8"
-            Padding="8,8"
-            BorderBrush="{DynamicResource CascadeTheme.EditorColumnBorderBrush}"
-            BorderThickness="1"
-            CornerRadius="8">
+            Padding="8,8,8,10">
         <Grid RowDefinitions="Auto,*">
             <TextBlock Grid.Row="0"
                        Text="WORKSPACE"
                        FontSize="10"
                        FontWeight="SemiBold"
                        Opacity="0.75"
-                       Margin="0,0,0,6"
+                       Margin="0,0,0,8"
                        Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-            <!-- Balanced / Focus / Debug / AgentChat: вертикальный список сегментов -->
+            <!-- Flight / non-Power: плоский список (Dark Cockpit — без карточки на сегмент). -->
             <ScrollViewer Grid.Row="1"
                           MaxHeight="320"
                           VerticalScrollBarVisibility="Auto"
@@ -28,11 +25,10 @@
                 <ItemsControl ItemsSource="{Binding IdeHealthSegments}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="cockpitWh:IdeHealthSegment">
-                            <Border Classes="modeCard" Padding="8,6" Margin="0,0,0,6">
-                                <TextBlock Text="{Binding LineText}"
-                                           TextWrapping="Wrap"
-                                           Foreground="{DynamicResource CascadeTheme.ToolbarTextForeground}"/>
-                            </Border>
+                            <TextBlock Classes="ideHealthSegment"
+                                       Text="{Binding LineText}"
+                                       TextWrapping="Wrap"
+                                       Margin="0,0,0,10"/>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>

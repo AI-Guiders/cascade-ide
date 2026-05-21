@@ -259,8 +259,10 @@ public partial class MainWindow
             UpdateSolutionColumnWidth(vmSol.IsPfdColumnVisible);
         if ((e.PropertyName is nameof(ViewModels.MainWindowViewModel.IsMfdRegionExpanded)
             or nameof(ViewModels.MainWindowViewModel.UiMode)
+            or nameof(ViewModels.MainWindowViewModel.CurrentMfdShellPage)
             or nameof(ViewModels.MainWindowViewModel.MfdRegionPixelWidth) or nameof(ViewModels.MainWindowViewModel.IsMfdRegionVisible)
-            or nameof(ViewModels.MainWindowViewModel.IsMfdColumnVisible))
+            or nameof(ViewModels.MainWindowViewModel.IsMfdColumnVisible)
+            or nameof(ViewModels.MainWindowViewModel.ChatPanelColumnPixelWidth))
             && DataContext is ViewModels.MainWindowViewModel vmChat)
             UpdateChatColumnWidth(vmChat);
         if (e.PropertyName is nameof(ViewModels.MainWindowViewModel.IsCommandPaletteOpen) && DataContext is ViewModels.MainWindowViewModel vmPalette)

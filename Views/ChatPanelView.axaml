@@ -13,7 +13,7 @@
         <Style Selector="Expander /template/ ToggleButton#PART_toggle">
             <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
         </Style>
-        <Style Selector="Expander TextBox">
+        <Style Selector="Expander TextBox.chatPanelInput">
             <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
             <Setter Property="Background" Value="{DynamicResource CascadeTheme.ChatPanelBackground}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.ButtonBorderBrush}"/>
@@ -23,11 +23,24 @@
             <Setter Property="Padding" Value="8,6"/>
             <Setter Property="CaretBrush" Value="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
         </Style>
-        <Style Selector="Expander TextBox:focus">
+        <Style Selector="Expander TextBox.chatPanelInput:focus">
             <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.PanelTitleAccentBrush}"/>
             <Setter Property="BorderThickness" Value="2"/>
         </Style>
-        <Style Selector="Expander TextBox /template/ TextBlock#PART_Watermark">
+        <Style Selector="Expander TextBox.chatPanelInput /template/ TextBlock#PART_Watermark">
+            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+        </Style>
+        <Style Selector="TextBox.chatPanelInput">
+            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
+            <Setter Property="Background" Value="{DynamicResource CascadeTheme.ChatPanelBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.ButtonBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="MinHeight" Value="32"/>
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="CaretBrush" Value="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
+        </Style>
+        <Style Selector="TextBox.chatPanelInput /template/ TextBlock#PART_Watermark">
             <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
         </Style>
         <Style Selector="Expander CheckBox">
@@ -47,7 +60,8 @@
                                           SelectedMessageIndex="{Binding SelectedMessageIndex, Mode=TwoWay}"
                                           DetailThreadId="{Binding SelectedChatThreadId, Mode=TwoWay}"
                                           OverviewMode="{Binding IsChatOverviewMode, Mode=TwoWay}"
-                                          CompactLayout="{Binding IntercomSkiaCompactLayout}"
+                                          ForwardHost="{Binding IntercomForwardHost}"
+                                          IntercomFonts="{Binding IntercomFonts}"
                                           ChromeTitle="Intercom"
                                           IsChatLoading="{Binding IsChatLoading}"
                                           LoadingStatusText="{Binding ChatLoadingStatusText}"
@@ -57,7 +71,11 @@
                                           IsSlashAutocompleteVisible="{Binding IsComposerAutocompleteVisible}"
                                           SelectedSlashSuggestionIndex="{Binding SelectedComposerAutocompleteIndex, Mode=TwoWay}"
                                           SlashSuggestions="{Binding ComposerPopupSuggestions}"
-                                          ComposerCaretIndex="{Binding ChatComposerCaretIndex, Mode=TwoWay}"/>
+                                          ComposerCaretIndex="{Binding ChatComposerCaretIndex, Mode=TwoWay}"
+                                          ShowCockpitCommandLine="{Binding IsCockpitCommandLineOpen}"
+                                          CommandLineText="{Binding CockpitCommandLineText, Mode=TwoWay}"
+                                          CommandLinePreview="{Binding CockpitCommandLinePreview}"
+                                          CommandLineCaretIndex="{Binding CockpitCommandLineCaretIndex, Mode=TwoWay}"/>
             </Border>
 
             <Border IsVisible="{Binding HasActiveClarificationBatch}"
@@ -71,6 +89,7 @@
                     <StackPanel Spacing="8">
                         <DockPanel LastChildFill="False">
                             <TextBlock DockPanel.Dock="Left" Text="{Binding ActiveClarificationTitle}"
+                                       Classes="chatPanelTitle"
                                        FontWeight="SemiBold"
                                        Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
                             <Button DockPanel.Dock="Right"
@@ -84,14 +103,17 @@
                                     <Border Classes="cascadeInset" Margin="0,0,0,6">
                                         <StackPanel Spacing="6">
                                             <TextBlock Text="{Binding Prompt}" TextWrapping="Wrap"
+                                                       Classes="chatPanelBody"
                                                        Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
                                             <TextBox Text="{Binding Answer, Mode=TwoWay}"
+                                                     Classes="chatPanelInput"
                                                      IsVisible="{Binding IsFreeText}"
                                                      AcceptsReturn="True"
                                                      MinHeight="56"
                                                      TextWrapping="Wrap"
                                                      PlaceholderText="Ответ..."/>
                                             <ComboBox ItemsSource="{Binding ChoiceOptions}"
+                                                      Classes="chatPanelInput"
                                                       SelectedItem="{Binding Answer, Mode=TwoWay}"
                                                       IsVisible="{Binding IsChoice}"/>
                                         </StackPanel>
@@ -120,10 +142,10 @@
             <uikit:CascadeSection Grid.Row="0">
                 <DockPanel LastChildFill="False">
                     <StackPanel DockPanel.Dock="Left" Spacing="2">
-                        <TextBlock Text="Agent Chat" FontSize="16" FontWeight="SemiBold"
+                        <TextBlock Text="Agent Chat" Classes="chatPanelTitle" FontWeight="SemiBold"
                                    Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
                         <TextBlock Text="Живой диалог + структурированные уточнения"
-                                   FontSize="11"
+                                   Classes="chatPanelSubtitle"
                                    Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
                     </StackPanel>
                     <uikit:CascadeStatusChip DockPanel.Dock="Right"
@@ -136,6 +158,7 @@
                 <StackPanel Spacing="8">
                     <DockPanel LastChildFill="False">
                         <TextBlock DockPanel.Dock="Left" Text="{Binding ActiveClarificationTitle}"
+                                   Classes="chatPanelTitle"
                                    FontWeight="SemiBold"
                                    Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
                         <Button DockPanel.Dock="Right"
@@ -179,6 +202,7 @@
             <uikit:CascadeSection Grid.Row="2">
                 <DockPanel>
                     <Expander DockPanel.Dock="Top"
+                              Classes="chatPanelLabel"
                               Header="Продуктовая линия (spine)"
                               IsExpanded="{Binding IsChatOverviewMode}"
                               Margin="0,0,0,6">
@@ -188,13 +212,16 @@
                                 BorderThickness="1">
                             <StackPanel Spacing="8">
                                 <TextBox Text="{Binding ProductSpineLineTitle, Mode=TwoWay}"
+                                         Classes="chatPanelInput"
                                          PlaceholderText="Линия (например Cascade IDE)"/>
                                 <TextBox Text="{Binding ProductSpineCurrentFocus, Mode=TwoWay}"
+                                         Classes="chatPanelInput"
                                          PlaceholderText="Текущий фокус линии"
                                          AcceptsReturn="True"
                                          MinHeight="36"
                                          TextWrapping="Wrap"/>
                                 <TextBox Text="{Binding ProductSpineMilestonesText, Mode=TwoWay}"
+                                         Classes="chatPanelInput"
                                          PlaceholderText="Вехи — по одной на строку"
                                          AcceptsReturn="True"
                                          MinHeight="56"
@@ -206,8 +233,8 @@
                     </Expander>
                     <TextBlock DockPanel.Dock="Top"
                                Text="Диалог"
+                               Classes="chatPanelLabel"
                                Margin="0,0,0,6"
-                               FontSize="12"
                                Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
                     <Border Background="{DynamicResource CascadeTheme.ChatPanelBackground}">
                     <views:IntercomSkiaSurface x:Name="ClassicIntercomSurface"
@@ -218,7 +245,8 @@
                                                SelectedMessageIndex="{Binding SelectedMessageIndex, Mode=TwoWay}"
                                                DetailThreadId="{Binding SelectedChatThreadId, Mode=TwoWay}"
                                                OverviewMode="{Binding IsChatOverviewMode, Mode=TwoWay}"
-                                               CompactLayout="False"
+                                               ForwardHost="False"
+                                               IntercomFonts="{Binding IntercomFonts}"
                                                ShowIntercomComposer="True"
                                                ComposerText="{Binding ChatInput, Mode=TwoWay}"
                                                IsComposerEnabled="{Binding !IsChatLoading}"

@@ -124,6 +124,7 @@ public partial class MainWindowViewModel
             getEditorSelectionStart: () => EditorSelectionStart,
             getEditorSelectionLength: () => EditorSelectionLength,
             getEditorCaretOffset: () => _editorCaretOffset);
+        ChatPanel.SetIntercomFontsSettings(_settings.Fonts.Intercom);
         InstrumentationPanel = new InstrumentationPanelViewModel();
         InstrumentationPanel.PropertyChanged += OnInstrumentationPanelPropertyChanged;
         HypothesesPanel = new HypothesesPanelViewModel(GetWorkspacePath);

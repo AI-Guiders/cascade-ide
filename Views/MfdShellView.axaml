@@ -29,7 +29,7 @@
                 BorderBrush="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"
                 BorderThickness="0,1,0,0"
                 Padding="4"
-                Background="{DynamicResource CascadeTheme.TerminalBackground}">
+                Background="{DynamicResource CascadeTheme.MainWindowBackground}">
             <views:MfdShellPageStack/>
         </Border>
     </Grid>

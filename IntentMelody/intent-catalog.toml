@@ -931,6 +931,39 @@ group = "Intercom"
 kind = "intercom"
 intercom_handler = "message_relate"
 
+[[command]]
+[[command.form.slash]]
+path = "/intercom message anchors list"
+help = "Якоря выбранного сообщения и черновика composer: a:id, статус resolve, путь. Без hit-test — затем /anchor peek <id>."
+group = "Intercom"
+kind = "intercom"
+intercom_handler = "message_anchors_list"
+
+[[command]]
+[[command.form.slash]]
+path = "/anchor peek"
+help = "Reveal вложения по short id (8 hex из ⟦a:…⟧ или list). Пример: /anchor peek abcd1234"
+group = "Intercom"
+kind = "intercom"
+intercom_handler = "anchor_peek"
+
+# ==============================================================================
+# Cockpit (ADR 0138)
+# ==============================================================================
+
+# cockpit.open_command_line — Cockpit Command Line (slash REPL над composer). (c:ccl · Ctrl+K /)
+[[command]]
+command_id = "cockpit.open_command_line"
+melody_slug = "ccl"
+melody_shape = "simple"
+melody_palette_usage_hint = "c:ccl или Ctrl+K затем / — полоса slash REPL (Enter — выполнить, Esc — закрыть)"
+melody_palette_usage_category = "Cockpit"
+
+[[command.form.slash]]
+path = "/cockpit command line"
+help = "Открыть Cockpit Command Line над composer (не путать с composer и не с MFD Terminal)."
+group = "Cockpit"
+
 # ==============================================================================
 # Help
 # ==============================================================================

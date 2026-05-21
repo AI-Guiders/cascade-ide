@@ -73,22 +73,25 @@ public static class PresentationLayoutAnalyzer
         out int index)
     {
         index = -1;
-        if (!IsPmPlusForwardTwoScreenPreset(screens))
+        if (IsPmPlusForwardTwoScreenPreset(screens))
+        {
+            if (IsForwardOnlyScreen(screens[0]))
+            {
+                index = 0;
+                return true;
+            }
+
+            if (IsForwardOnlyScreen(screens[1]))
+            {
+                index = 1;
+                return true;
+            }
+
             return false;
-
-        if (IsForwardOnlyScreen(screens[0]))
-        {
-            index = 0;
-            return true;
         }
 
-        if (IsForwardOnlyScreen(screens[1]))
-        {
-            index = 1;
-            return true;
-        }
-
-        return false;
+        // (P)(F)(M) и перестановки: лобовое — экран с единственным F, не первый экран в строке (ADR 0017).
+        return TryGetSingleAnchorScreenIndex(screens, PresentationAnchorKind.Forward, out index);
     }
 
     /// <summary>Индекс экрана с объединённым <c>P+M</c> для окна-хоста сплита (симметрично <c>(F)</c>).</summary>
@@ -116,7 +119,7 @@ public static class PresentationLayoutAnalyzer
     }
 
     /// <summary>
-    /// Индекс группы главного окна (лобовое): для <see cref="IsPmPlusForwardTwoScreenPreset"/> — экран с <c>F</c>, иначе <c>0</c>.
+    /// Индекс группы главного окна (лобовое): <see cref="IsPmPlusForwardTwoScreenPreset"/> или тройной <c>(P)(F)(M)</c> — экран с <c>F</c>; иначе <c>0</c>.
     /// </summary>
     public static int GetMainWindowPresentationScreenIndexOrDefault(PresentationParseResult parse)
     {

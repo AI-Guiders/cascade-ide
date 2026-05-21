@@ -20,7 +20,9 @@ public static class ChatSlashIntercomActions
         Func<int, int, string>? selectMessageByOrdinalRangeInDetailLane = null,
         Func<IReadOnlyList<ParametricIntRange>, string>? selectMessagesByOrdinalRangesInDetailLane = null,
         Func<string?, string>? findMessagesForCodeRef = null,
-        Func<string?, string>? relateMessageRangeToCodeRef = null)
+        Func<string?, string>? relateMessageRangeToCodeRef = null,
+        Func<string>? listMessageAnchors = null,
+        Func<string?, string>? peekAnchorById = null)
     {
         result = ChatSlashIntercomResult.Fail("");
         if (!IntentSlashCatalog.TryGetRoute(slashPath, out var route)
@@ -44,7 +46,9 @@ public static class ChatSlashIntercomActions
                     selectMessageByOrdinalRangeInDetailLane,
                     selectMessagesByOrdinalRangesInDetailLane,
                     findMessagesForCodeRef,
-                    relateMessageRangeToCodeRef),
+                    relateMessageRangeToCodeRef,
+                    listMessageAnchors,
+                    peekAnchorById),
                 out result))
         {
             result = ChatSlashIntercomResult.Fail($"Неизвестное действие: {slashPath}");

@@ -59,8 +59,26 @@ public partial class ChatPanelViewModel
 
     partial void OnChatComposerCaretIndexChanged(int value) => RefreshComposerAutocomplete();
 
+    /// <summary>Slash popup для Cockpit Command Line (тот же каталог, что у composer).</summary>
+    public void RefreshCockpitCommandLineAutocomplete(string? inputOverride = null)
+    {
+        if (!IsCockpitCommandLineOpen)
+            return;
+
+        IsChatBracketAutocompleteVisible = false;
+        ChatBracketSuggestions.Clear();
+        SelectedChatBracketSuggestionIndex = -1;
+        RefreshChatSlashAutocomplete(inputOverride ?? CockpitCommandLineText);
+    }
+
     public void RefreshComposerAutocomplete(string? inputOverride = null)
     {
+        if (IsCockpitCommandLineOpen)
+        {
+            RefreshCockpitCommandLineAutocomplete(inputOverride);
+            return;
+        }
+
         var text = inputOverride ?? ChatInput;
         var caret = Math.Clamp(ChatComposerCaretIndex, 0, text.Length);
 

@@ -31,6 +31,8 @@ public sealed class ChatSlashCommandRunner
     private readonly Func<IReadOnlyList<ParametricIntRange>, string>? _selectMessagesByOrdinalRangesInDetailLane;
     private readonly Func<string?, string>? _findMessagesForCodeRef;
     private readonly Func<string?, string>? _relateMessageRangeToCodeRef;
+    private readonly Func<string>? _listMessageAnchors;
+    private readonly Func<string?, string>? _peekAnchorById;
 
     public ChatSlashCommandRunner(
         Func<string, IReadOnlyDictionary<string, JsonElement>?, CancellationToken, Task<string>>? executeIdeCommand,
@@ -46,7 +48,9 @@ public sealed class ChatSlashCommandRunner
         Func<int, int, string>? selectMessageByOrdinalRangeInDetailLane = null,
         Func<IReadOnlyList<ParametricIntRange>, string>? selectMessagesByOrdinalRangesInDetailLane = null,
         Func<string?, string>? findMessagesForCodeRef = null,
-        Func<string?, string>? relateMessageRangeToCodeRef = null)
+        Func<string?, string>? relateMessageRangeToCodeRef = null,
+        Func<string>? listMessageAnchors = null,
+        Func<string?, string>? peekAnchorById = null)
     {
         _executeIdeCommand = executeIdeCommand;
         _getEditorContext = getEditorContext;
@@ -62,6 +66,8 @@ public sealed class ChatSlashCommandRunner
         _selectMessagesByOrdinalRangesInDetailLane = selectMessagesByOrdinalRangesInDetailLane;
         _findMessagesForCodeRef = findMessagesForCodeRef;
         _relateMessageRangeToCodeRef = relateMessageRangeToCodeRef;
+        _listMessageAnchors = listMessageAnchors;
+        _peekAnchorById = peekAnchorById;
     }
 
     private static string? resolveIntercomArgsTail(in ChatSlashCommandParseResult parse)
@@ -157,7 +163,9 @@ public sealed class ChatSlashCommandRunner
                     _selectMessageByOrdinalRangeInDetailLane,
                     _selectMessagesByOrdinalRangesInDetailLane,
                     _findMessagesForCodeRef,
-                    _relateMessageRangeToCodeRef))
+                    _relateMessageRangeToCodeRef,
+                    _listMessageAnchors,
+                    _peekAnchorById))
             {
                 return new ChatSlashCommandRunResult(
                     true,

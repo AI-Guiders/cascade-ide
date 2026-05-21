@@ -145,7 +145,9 @@ public partial class ChatPanelViewModel : ViewModelBase
             selectMessageByOrdinalRangeInDetailLane: SelectMessageByOrdinalRangeInDetailLane,
             selectMessagesByOrdinalRangesInDetailLane: SelectMessagesByOrdinalRangesInDetailLane,
             findMessagesForCodeRef: FindMessagesForCodeRef,
-            relateMessageRangeToCodeRef: RelateMessageRangeToCodeRef);
+            relateMessageRangeToCodeRef: RelateMessageRangeToCodeRef,
+            listMessageAnchors: ListAnchorsForSlashContext,
+            peekAnchorById: PeekAnchorById);
         _getLocalOllamaEndpoint = getLocalOllamaEndpoint;
         _getEffectiveOllamaModelId = getEffectiveOllamaModelId;
         _tryCreateCloudMafIChatClient = tryCreateCloudMafIChatClient;

@@ -1,4 +1,5 @@
 #nullable enable
+using CascadeIDE.Models;
 using CascadeIDE.Features.Chat;
 using CascadeIDE.Features.Chat.Application;
 using CascadeIDE.Models.Intercom;
@@ -12,11 +13,9 @@ namespace CascadeIDE.Views.Chat.Skia;
 /// <summary>Сообщение ленты: prose (flat feed, ADR 0123) + mono code strips, attach-метки, thinking.</summary>
 internal sealed class SkiaChatMessageFeedEntity : ISkiaChatEntity
 {
-    private const float FeedTextInset = 6f;
-    private const float TitleGapAfter = 4f;
-
     private readonly ChatSurfaceEntry _entry;
-    private readonly bool _compactLayout;
+    private readonly SkiaChatFeedLayout _layout;
+    private readonly bool _forwardHost;
     private readonly bool _suppressTitle;
     private readonly float _gapAfter;
     private readonly IReadOnlyList<ChatMessageBodySegment> _segments;
@@ -25,13 +24,15 @@ internal sealed class SkiaChatMessageFeedEntity : ISkiaChatEntity
 
     public SkiaChatMessageFeedEntity(
         ChatSurfaceEntry entry,
-        bool compactLayout,
+        bool forwardHost,
         bool suppressTitle,
         float gapAfter,
-        int feedOrdinal = 0)
+        int feedOrdinal = 0,
+        IntercomFontsSettings? intercomFonts = null)
     {
         _entry = entry;
-        _compactLayout = compactLayout;
+        _forwardHost = forwardHost;
+        _layout = SkiaChatFeedLayout.For(forwardHost, intercomFonts);
         _suppressTitle = suppressTitle;
         _gapAfter = gapAfter;
         _feedOrdinal = feedOrdinal;
@@ -39,28 +40,59 @@ internal sealed class SkiaChatMessageFeedEntity : ISkiaChatEntity
         _segments = ChatMessageBodyPresentation.SplitSegments(entry.Body);
     }
 
+    private bool ShowRoleRail =>
+        _layout.ShouldShowRoleRail(_entry.Title, _suppressTitle);
+
+    private FeedBodyColumn BodyColumn(SkiaChatDrawContext context) =>
+        _layout.BodyColumn(context.ContentLeft, context.ContentWidth, ShowRoleRail);
+
     public SkiaChatMeasuredLayout Measure(SkiaChatMeasureContext context)
     {
-        var height = MessageTitleBandHeight();
-        var gap = 4f;
+        var bodyContext = _layout.NarrowMeasureContext(context, ShowRoleRail);
+        var height = 0f;
+        var gap = _layout.SegmentGap;
         foreach (var segment in _segments)
         {
             if (segment.Kind == ChatMessageBodySegmentKind.Code)
             {
-                height += SkiaMonoCodeStrip.MeasureHeight(segment.Text, context.ContentWidth) + gap;
+                height += SkiaMonoCodeStrip.MeasureHeight(segment.Text, bodyContext.ContentWidth) + gap;
                 continue;
             }
 
-            foreach (var feedSeg in IntercomFeedProjector.ProjectProse(segment.Text, _attachments))
+            var feedSegs = IntercomFeedProjector.ProjectProse(segment.Text, _attachments);
+            for (var fi = 0; fi < feedSegs.Count; fi++)
             {
+                var feedSeg = feedSegs[fi];
                 if (feedSeg.Kind == IntercomAttachmentFeedSegmentKind.Attachment)
                 {
-                    height += SkiaIntercomAttachLinkChip.MeasureHeight(_compactLayout) + gap;
+                    height += SkiaIntercomAttachLinkChip.MeasureHeight(_forwardHost, _layout.AttachChipFontSize) + gap;
                     continue;
                 }
 
+                if (fi + 1 < feedSegs.Count
+                    && feedSegs[fi + 1].Kind == IntercomAttachmentFeedSegmentKind.Attachment)
+                {
+                    var attachSeg = feedSegs[fi + 1];
+                    var proseSpec = BuildProseSpec(feedSeg.Text, isAttachment: false);
+                    var anchorId = attachSeg.Anchor?.Id ?? attachSeg.MarkerShortId;
+                    if (SkiaChatFeedInlineAttachLayout.TryMeasurePair(
+                            feedSeg.Text,
+                            attachSeg.Text,
+                            anchorId,
+                            bodyContext.ContentWidth,
+                            _layout,
+                            proseSpec,
+                            out _,
+                            out var rowH))
+                    {
+                        height += rowH + gap;
+                        fi++;
+                        continue;
+                    }
+                }
+
                 var spec = BuildProseSpec(feedSeg.Text, isAttachment: false);
-                var metrics = SkiaChatBubbleRenderer.Measure(context, spec);
+                var metrics = SkiaChatBubbleRenderer.Measure(bodyContext, spec);
                 height += SkiaChatBubbleRenderer.MeasureHeight(spec, metrics) + gap;
             }
         }
@@ -75,90 +107,76 @@ internal sealed class SkiaChatMessageFeedEntity : ISkiaChatEntity
         if (isSelected)
             DrawMessageRowSelection(context, top, rowBottom, includeGutter: _feedOrdinal > 0);
         if (_feedOrdinal > 0)
-            DrawFeedGutterOrdinal(context, top, rowBottom, isSelected, _feedOrdinal);
+            SkiaChatFeedGutter.DrawOrdinal(context, top, rowBottom, _feedOrdinal, _layout, isSelected);
 
-        var y = top;
-        if (!_suppressTitle && !string.IsNullOrWhiteSpace(_entry.Title))
+        if (ShowRoleRail)
         {
-            var titleH = MessageTitleBandHeight();
-            DrawMessageTitle(context, context.ContentLeft + FeedTextInset, top);
-            y = top + titleH + TitleGapAfter;
+            SkiaChatFeedRoleRail.Draw(
+                context.Canvas,
+                context.Theme,
+                context.ContentLeft,
+                top,
+                rowBottom,
+                _entry.Title,
+                _layout);
         }
 
-        var gap = 4f;
+        var bodyColumn = BodyColumn(context);
+        var y = top;
+        var gap = _layout.SegmentGap;
         foreach (var segment in _segments)
         {
             if (segment.Kind == ChatMessageBodySegmentKind.Code)
             {
-                var h = SkiaMonoCodeStrip.MeasureHeight(segment.Text, context.ContentWidth);
-                var rect = new SKRect(context.ContentLeft, y, context.ContentLeft + context.ContentWidth, y + h);
-                SkiaMonoCodeStrip.Draw(context.Canvas, rect, context.Theme, segment.Text, context.ContentWidth);
+                var h = SkiaMonoCodeStrip.MeasureHeight(segment.Text, bodyColumn.Width);
+                var rect = _layout.SegmentRect(bodyColumn, y, h);
+                SkiaMonoCodeStrip.Draw(context.Canvas, rect, context.Theme, segment.Text, bodyColumn.Width);
                 y += h + gap;
                 continue;
             }
 
-            foreach (var feedSeg in IntercomFeedProjector.ProjectProse(segment.Text, _attachments))
+            var feedSegs = IntercomFeedProjector.ProjectProse(segment.Text, _attachments);
+            for (var fi = 0; fi < feedSegs.Count; fi++)
             {
+                var feedSeg = feedSegs[fi];
                 if (feedSeg.Kind == IntercomAttachmentFeedSegmentKind.Attachment)
                 {
-                    var canReveal = tryResolveAttachmentAnchorForRevealHit(feedSeg, out var anchor);
-                    var status = SkiaIntercomAttachLinkChip.Classify(anchor, _entry.IsPending);
-                    var chipH = SkiaIntercomAttachLinkChip.MeasureHeight(_compactLayout);
-                    var chipW = SkiaIntercomAttachLinkChip.MeasureWidth(feedSeg.Text, context.ContentWidth);
-                    var chipRect = new SKRect(context.ContentLeft, y, context.ContentLeft + chipW, y + chipH);
-                    SkiaIntercomAttachLinkChip.Draw(
-                        context.Canvas,
-                        context.Theme,
-                        chipRect,
-                        feedSeg.Text,
-                        status);
-
-                    if (canReveal)
-                    {
-                        context.RegisterHit(
-                            SkiaIntercomAttachLinkChip.ComputeHitRect(chipRect),
-                            new SkiaChatHit(
-                                _entry.MessageIndex,
-                                null,
-                                ResetDetailMode: false,
-                                RevealAttachment: anchor,
-                                RevealAttachmentSelect: false));
-                    }
-
-                    y += chipH + gap;
+                    y += drawAttachmentChip(context, bodyColumn, y, feedSeg) + gap;
                     continue;
                 }
 
-                var spec = BuildProseSpec(feedSeg.Text, isAttachment: false);
-                var measure = new SkiaChatMeasureContext(
-                    Math.Max(12, (int)(context.ContentWidth / 7.1f)),
-                    context.ContentWidth);
-                var metrics = SkiaChatBubbleRenderer.Measure(measure, spec);
-                var h2 = SkiaChatBubbleRenderer.MeasureHeight(spec, metrics);
-                var rect2 = new SKRect(context.ContentLeft, y, context.ContentLeft + context.ContentWidth, y + h2);
-                SkiaChatBubbleRenderer.Draw(context, rect2, spec, metrics);
-                if (metrics.RichTextBody is not null)
+                if (fi + 1 < feedSegs.Count
+                    && feedSegs[fi + 1].Kind == IntercomAttachmentFeedSegmentKind.Attachment)
                 {
-                    SkiaChatBubbleRenderer.RegisterFeedMarkdownLinkHitsFromText(
-                        context,
-                        rect2,
-                        feedSeg.Text,
-                        context.ContentWidth,
-                        metrics.LineHeight,
-                        _entry.MessageIndex,
-                        tryResolveLinkRunAnchor);
-                }
-                else
-                {
-                    SkiaChatBubbleRenderer.RegisterFeedMarkdownLinkHits(
-                        context,
-                        rect2,
-                        metrics,
-                        _entry.MessageIndex,
-                        tryResolveLinkRunAnchor);
+                    var attachSeg = feedSegs[fi + 1];
+                    var proseSpec = BuildProseSpec(feedSeg.Text, isAttachment: false);
+                    var anchorId = attachSeg.Anchor?.Id ?? attachSeg.MarkerShortId;
+                    if (SkiaChatFeedInlineAttachLayout.TryMeasurePair(
+                            feedSeg.Text,
+                            attachSeg.Text,
+                            anchorId,
+                            bodyColumn.Width,
+                            _layout,
+                            proseSpec,
+                            out var proseBlockW,
+                            out var rowH))
+                    {
+                        y += drawInlineProseAttach(
+                                context,
+                                bodyColumn,
+                                y,
+                                feedSeg,
+                                attachSeg,
+                                proseSpec,
+                                proseBlockW,
+                                rowH)
+                            + gap;
+                        fi++;
+                        continue;
+                    }
                 }
 
-                y += h2 + gap;
+                y += drawProseSegment(context, bodyColumn, y, feedSeg) + gap;
             }
         }
 
@@ -211,28 +229,6 @@ internal sealed class SkiaChatMessageFeedEntity : ISkiaChatEntity
             StrokeWidth = 1f,
         };
         context.Canvas.DrawRect(rect, rowStroke);
-    }
-
-    private static void DrawFeedGutterOrdinal(SkiaChatDrawContext context, float top, float bottom, bool isSelected, int ordinal)
-    {
-        var gutterRect = new SKRect(context.FeedGutterLeft, top, context.ContentLeft, bottom);
-
-        using var numFont = new SKFont(SKTypeface.FromFamilyName("Cascadia Mono", SKFontStyle.Normal), 10f);
-        using var numPaint = new SKPaint
-        {
-            IsAntialias = true,
-            Color = isSelected
-                ? context.Theme.SelectedBorder
-                : SkiaKit.SkiaKitColor.Blend(context.Theme.Role, context.Theme.Content, 0.55f),
-        };
-        var baseline = top + numFont.Size * 0.9f + 2f;
-        context.Canvas.DrawText(
-            ordinal.ToString(),
-            gutterRect.Right - 6f,
-            baseline,
-            SKTextAlign.Right,
-            numFont,
-            numPaint);
     }
 
     private bool tryResolveAttachmentAnchorForRevealHit(
@@ -360,6 +356,166 @@ internal sealed class SkiaChatMessageFeedEntity : ISkiaChatEntity
         return t;
     }
 
+    private float drawAttachmentChip(
+        SkiaChatDrawContext context,
+        FeedBodyColumn bodyColumn,
+        float y,
+        in IntercomAttachmentFeedSegment feedSeg)
+    {
+        var canReveal = tryResolveAttachmentAnchorForRevealHit(feedSeg, out var anchor);
+        var status = SkiaIntercomAttachLinkChip.Classify(anchor, _entry.IsPending);
+        var chipH = SkiaIntercomAttachLinkChip.MeasureHeight(_forwardHost, _layout.AttachChipFontSize);
+        var chipW = SkiaIntercomAttachLinkChip.MeasureWidth(
+            feedSeg.Text,
+            anchor.Id,
+            bodyColumn.Width,
+            _layout.AttachChipFontSize,
+            _layout.ChipFamily,
+            _layout.ChipIdFamily);
+        var chipRect = new SKRect(bodyColumn.Left, y, bodyColumn.Left + chipW, y + chipH);
+        SkiaIntercomAttachLinkChip.Draw(
+            context.Canvas,
+            context.Theme,
+            chipRect,
+            feedSeg.Text,
+            status,
+            anchor.Id,
+            _layout.AttachChipFontSize,
+            _layout.ChipFamily,
+            _layout.ChipIdFamily);
+
+        if (canReveal)
+        {
+            context.RegisterHit(
+                SkiaIntercomAttachLinkChip.ComputeHitRect(chipRect),
+                new SkiaChatHit(
+                    _entry.MessageIndex,
+                    null,
+                    ResetDetailMode: false,
+                    RevealAttachment: anchor,
+                    RevealAttachmentSelect: false));
+        }
+
+        return chipH;
+    }
+
+    private float drawInlineProseAttach(
+        SkiaChatDrawContext context,
+        FeedBodyColumn bodyColumn,
+        float y,
+        in IntercomAttachmentFeedSegment proseSeg,
+        in IntercomAttachmentFeedSegment attachSeg,
+        in SkiaChatBubbleSpec proseSpec,
+        float proseBlockWidth,
+        float rowHeight)
+    {
+        var narrowMaxChars = _layout.MaxCharsForWidth(proseBlockWidth);
+        var narrowCtx = new SkiaChatMeasureContext(narrowMaxChars, proseBlockWidth);
+        var metrics = SkiaChatBubbleRenderer.Measure(narrowCtx, proseSpec);
+        var proseH = SkiaChatBubbleRenderer.MeasureHeight(proseSpec, metrics);
+        var proseRect = new SKRect(
+            bodyColumn.Left,
+            y,
+            bodyColumn.Left + proseBlockWidth,
+            y + proseH);
+        SkiaChatBubbleRenderer.Draw(context, proseRect, proseSpec, metrics);
+        if (metrics.RichTextBody is not null)
+        {
+            SkiaChatBubbleRenderer.RegisterFeedMarkdownLinkHitsFromText(
+                context,
+                proseRect,
+                proseSeg.Text,
+                _layout,
+                _entry.MessageIndex,
+                tryResolveLinkRunAnchor);
+        }
+        else
+        {
+            SkiaChatBubbleRenderer.RegisterFeedMarkdownLinkHits(
+                context,
+                proseRect,
+                metrics,
+                _layout,
+                _entry.MessageIndex,
+                tryResolveLinkRunAnchor);
+        }
+
+        var canReveal = tryResolveAttachmentAnchorForRevealHit(attachSeg, out var anchor);
+        var status = SkiaIntercomAttachLinkChip.Classify(anchor, _entry.IsPending);
+        var chipH = SkiaIntercomAttachLinkChip.MeasureHeight(_forwardHost, _layout.AttachChipFontSize);
+        var chipW = SkiaIntercomAttachLinkChip.MeasureIntrinsicWidth(
+            attachSeg.Text,
+            anchor.Id,
+            _layout.AttachChipFontSize,
+            _layout.ChipFamily,
+            _layout.ChipIdFamily);
+        var chipLeft = bodyColumn.Left + proseBlockWidth + SkiaChatFeedInlineAttachLayout.Gap;
+        var chipTop = SkiaChatFeedInlineAttachLayout.ChipTop(y, rowHeight, chipH);
+        var chipRect = new SKRect(chipLeft, chipTop, chipLeft + chipW, chipTop + chipH);
+        SkiaIntercomAttachLinkChip.Draw(
+            context.Canvas,
+            context.Theme,
+            chipRect,
+            attachSeg.Text,
+            status,
+            anchor.Id,
+            _layout.AttachChipFontSize,
+            _layout.ChipFamily,
+            _layout.ChipIdFamily);
+
+        if (canReveal)
+        {
+            context.RegisterHit(
+                SkiaIntercomAttachLinkChip.ComputeHitRect(chipRect),
+                new SkiaChatHit(
+                    _entry.MessageIndex,
+                    null,
+                    ResetDetailMode: false,
+                    RevealAttachment: anchor,
+                    RevealAttachmentSelect: false));
+        }
+
+        return rowHeight;
+    }
+
+    private float drawProseSegment(
+        SkiaChatDrawContext context,
+        FeedBodyColumn bodyColumn,
+        float y,
+        in IntercomAttachmentFeedSegment feedSeg)
+    {
+        var spec = BuildProseSpec(feedSeg.Text, isAttachment: false);
+        var measure = new SkiaChatMeasureContext(
+            _layout.MaxCharsForWidth(bodyColumn.Width),
+            bodyColumn.Width);
+        var metrics = SkiaChatBubbleRenderer.Measure(measure, spec);
+        var h2 = SkiaChatBubbleRenderer.MeasureHeight(spec, metrics);
+        var rect2 = _layout.SegmentRect(bodyColumn, y, h2);
+        SkiaChatBubbleRenderer.Draw(context, rect2, spec, metrics);
+        if (metrics.RichTextBody is not null)
+        {
+            SkiaChatBubbleRenderer.RegisterFeedMarkdownLinkHitsFromText(
+                context,
+                rect2,
+                feedSeg.Text,
+                _layout,
+                _entry.MessageIndex,
+                tryResolveLinkRunAnchor);
+        }
+        else
+        {
+            SkiaChatBubbleRenderer.RegisterFeedMarkdownLinkHits(
+                context,
+                rect2,
+                metrics,
+                _layout,
+                _entry.MessageIndex,
+                tryResolveLinkRunAnchor);
+        }
+
+        return h2;
+    }
+
     private SkiaChatBubbleSpec BuildProseSpec(string body, bool isAttachment)
     {
         var fillRole = SkiaBubbleFillRoleMapping.FromMessageRole(_entry.VisualRole);
@@ -378,26 +534,11 @@ internal sealed class SkiaChatMessageFeedEntity : ISkiaChatEntity
             GapAfter: 0,
             Padding: 0,
             TitleHeight: 0,
-            LineHeight: _compactLayout ? 14 : 15,
-            MaxBodyLines: SkiaChatRenderLimits.MaxProseBodyLines);
-        return SkiaChatDensity.Apply(spec, _compactLayout);
-    }
-
-    private float MessageTitleBandHeight() =>
-        _suppressTitle || string.IsNullOrWhiteSpace(_entry.Title)
-            ? 0f
-            : _compactLayout
-                ? 14f + TitleGapAfter
-                : 16f + TitleGapAfter;
-
-    private void DrawMessageTitle(SkiaChatDrawContext context, float textLeft, float top)
-    {
-        using var titleFont = new SKFont(
-            SKTypeface.FromFamilyName("Segoe UI", SKFontStyle.Bold),
-            _compactLayout ? 9.5f : 10f);
-        using var titlePaint = new SKPaint { IsAntialias = true, Color = context.Theme.Role };
-        var baseline = top + titleFont.Size * 0.85f + 2f;
-        context.Canvas.DrawText(_entry.Title, textLeft, baseline, SKTextAlign.Left, titleFont, titlePaint);
+            LineHeight: _layout.ProseLineHeight,
+            MaxBodyLines: SkiaChatRenderLimits.MaxProseBodyLines,
+            ForwardFeedMetrics: _forwardHost,
+            IntercomFonts: _layout.Fonts);
+        return SkiaChatDensity.Apply(spec, _forwardHost);
     }
 
     private string? BuildThinkingFooter()

@@ -11,6 +11,8 @@ pfd_region_expanded = true
 build_output_visible = true
 terminal_visible = true
 mfd_region_expanded = true
+# Чат на MFD: ширина из workspace.toml (agent_chat 520), не дефолт 340.
+mfd_region_expanded_width_pixels = 520
 editor_group_count = 2
 select_terminal_tab_when_terminal_shown = false
 active_task_strip = true

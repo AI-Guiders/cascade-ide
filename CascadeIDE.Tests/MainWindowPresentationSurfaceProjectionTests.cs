@@ -134,4 +134,34 @@ public sealed class MainWindowPresentationSurfaceProjectionTests
         Assert.Equal("mfd", capturedSlot);
         Assert.Equal("inst-1", capturedInstrument);
     }
+
+    [Fact]
+    public void ResolveExpandedMfdWidthPixels_Flight_uses_agent_chat_width()
+    {
+        var w = MainWindowPresentationSurfaceProjection.ResolveExpandedMfdWidthPixels(
+            "Flight",
+            MfdShellPage.Terminal,
+            PrimaryWorkSurfaceKind.Editor);
+        Assert.Equal(UiWorkspaceLayoutRuntimeMetrics.MfdRegionExpandedAgentChatWidthPixels, w);
+    }
+
+    [Fact]
+    public void ResolveExpandedMfdWidthPixels_Chat_page_at_least_agent_chat_width()
+    {
+        var w = MainWindowPresentationSurfaceProjection.ResolveExpandedMfdWidthPixels(
+            "Editor",
+            MfdShellPage.Chat,
+            PrimaryWorkSurfaceKind.Editor);
+        Assert.Equal(UiWorkspaceLayoutRuntimeMetrics.MfdRegionExpandedAgentChatWidthPixels, w);
+    }
+
+    [Fact]
+    public void ResolveExpandedMfdWidthPixels_non_chat_uses_mode_default()
+    {
+        var w = MainWindowPresentationSurfaceProjection.ResolveExpandedMfdWidthPixels(
+            "Editor",
+            MfdShellPage.Terminal,
+            PrimaryWorkSurfaceKind.Editor);
+        Assert.Equal(UiWorkspaceLayoutRuntimeMetrics.MfdRegionExpandedDefaultWidthPixels, w);
+    }
 }

@@ -16,12 +16,23 @@ internal static class SkiaMarkdownPainter
         float top,
         IReadOnlyList<SkiaMarkdownRow> rows,
         bool compact,
-        SKColor bodyColor)
+        SKColor bodyColor) =>
+        Draw(context, left, right, top, rows, compact, bodyColor, SkiaChatFeedLayout.For(compact));
+
+    public static float Draw(
+        SkiaChatDrawContext context,
+        float left,
+        float right,
+        float top,
+        IReadOnlyList<SkiaMarkdownRow> rows,
+        bool compact,
+        SKColor bodyColor,
+        in SkiaChatFeedLayout layout)
     {
         var y = top;
         foreach (var row in rows)
         {
-            y += DrawRow(context, left, right, y, row, compact, bodyColor);
+            y += DrawRow(context, left, right, y, row, compact, bodyColor, layout);
         }
 
         return y;
@@ -34,7 +45,8 @@ internal static class SkiaMarkdownPainter
         float baselineY,
         SkiaMarkdownRow row,
         bool compact,
-        SKColor bodyColor)
+        SKColor bodyColor,
+        in SkiaChatFeedLayout layout)
     {
         var height = RowHeight(row.Kind, compact);
         if (row.Kind == SkiaMarkdownBlockKind.HorizontalRule)
@@ -55,7 +67,7 @@ internal static class SkiaMarkdownPainter
             return height;
 
         var (bodySize, boldSize) = BodySizes(row.Kind, compact);
-        using var bodyFont = new SKFont(SKTypeface.FromFamilyName("Segoe UI"), bodySize);
+        using var bodyFont = SkiaChatFeedFontResolver.CreateFont(layout.ProseFamily, bodySize);
         var textY = baselineY + BaselineOffset(row.Kind, compact);
 
         var x = left;
@@ -66,6 +78,7 @@ internal static class SkiaMarkdownPainter
 
             var (font, color, disposeFont) = ResolveRunStyle(
                 context,
+                layout,
                 bodyFont,
                 bodySize,
                 boldSize,
@@ -90,6 +103,7 @@ internal static class SkiaMarkdownPainter
 
     private static (SKFont Font, SKColor Color, bool DisposeFont) ResolveRunStyle(
         SkiaChatDrawContext ctx,
+        in SkiaChatFeedLayout layout,
         SKFont bodyFont,
         float bodySize,
         float boldSize,
@@ -103,22 +117,22 @@ internal static class SkiaMarkdownPainter
 
         if (heading && style is SkiaMarkdownStyle.Plain or SkiaMarkdownStyle.Bold)
             return (
-                new SKFont(SKTypeface.FromFamilyName("Segoe UI", SKFontStyle.Bold), boldSize),
+                SkiaChatFeedFontResolver.CreateFont(layout.ProseFamily, boldSize, SKFontStyle.Bold),
                 bodyColor,
                 true);
 
         return style switch
         {
             SkiaMarkdownStyle.Bold => (
-                new SKFont(SKTypeface.FromFamilyName("Segoe UI", SKFontStyle.Bold), bodySize),
+                SkiaChatFeedFontResolver.CreateFont(layout.ProseFamily, bodySize, SKFontStyle.Bold),
                 bodyColor,
                 true),
             SkiaMarkdownStyle.Italic => (
-                new SKFont(SKTypeface.FromFamilyName("Segoe UI", SKFontStyle.Italic), bodySize),
+                SkiaChatFeedFontResolver.CreateFont(layout.ProseFamily, bodySize, SKFontStyle.Italic),
                 bodyColor,
                 true),
             SkiaMarkdownStyle.Code => (
-                new SKFont(SKTypeface.FromFamilyName("Cascadia Mono", SKFontStyle.Normal), bodySize * 0.95f),
+                SkiaChatFeedFontResolver.CreateFont(layout.MonoFamily, bodySize * 0.95f),
                 SkiaKitColor.Blend(bodyColor, ctx.Theme.HoverBorder, 0.35f),
                 true),
             _ => (bodyFont, bodyColor, false),

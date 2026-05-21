@@ -2,12 +2,12 @@
 
 namespace CascadeIDE.Views.Chat.Skia;
 
-/// <summary>Метрики пузырей: comfortable (MFD) vs compact (Forward Intercom, Slack-like).</summary>
+/// <summary>Метрики пузырей: MFD (comfortable) vs Forward-хост (плотнее chrome/spine). Не ширина split-колонки.</summary>
 internal static class SkiaChatDensity
 {
-    public static SkiaChatBubbleSpec Apply(in SkiaChatBubbleSpec spec, bool compact)
+    public static SkiaChatBubbleSpec Apply(in SkiaChatBubbleSpec spec, bool forwardHost)
     {
-        if (!compact)
+        if (!forwardHost)
             return spec;
 
         return spec with
@@ -18,6 +18,7 @@ internal static class SkiaChatDensity
             TitleHeight = spec.TitleHeight > 0 ? Math.Max(13f, spec.TitleHeight - 2f) : 0,
             FooterHeight = spec.FooterHeight > 0 ? Math.Max(12f, spec.FooterHeight - 2f) : 0,
             MinHeight = spec.MinHeight > 0 ? Math.Max(32f, spec.MinHeight - 8f) : 0,
+            ForwardFeedMetrics = true,
         };
     }
 }

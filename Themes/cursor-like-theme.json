@@ -9,7 +9,7 @@
     "disabled_background": "#2D2D2D",
     "disabled_foreground": "#858585"
   },
-  "toolbar": { "background": "#2D2D2D" },
+  "toolbar": { "background": "#1E1E1E" },
   "toolbar_text": { "foreground": "#CCCCCC", "error_foreground": "#F48771" },
   "editor": {
     "background": "#1E1E1E",
@@ -38,20 +38,20 @@
     "border_brush": "#3F3F46"
   },
   "chat_panel": {
-    "background": "#252526",
-    "label_foreground": "#CCCCCC",
-    "message_bubble_background": "#2D2D2D",
+    "background": "#1E1E1E",
+    "label_foreground": "#9D9D9D",
+    "message_bubble_background": "#252526",
     "message_content_foreground": "#D4D4D4",
     "send_button_background": "#3794FF",
     "send_button_foreground": "#FFF"
   },
   "ide_chrome": {
-    "panel_background": "#2D2D2D",
-    "inset_surface_background": "#1A1A1A",
-    "inset_surface_border_brush": "#3F3F46",
-    "status_chip_background": "#2E3A52",
-    "status_chip_border_brush": "#50658C",
-    "status_chip_foreground": "#D8E4FF"
+    "panel_background": "#252526",
+    "inset_surface_background": "#181818",
+    "inset_surface_border_brush": "#333841",
+    "status_chip_background": "#252526",
+    "status_chip_border_brush": "#3F3F46",
+    "status_chip_foreground": "#CCCCCC"
   },
   "terminal": {
     "background": "#1E1E1E",

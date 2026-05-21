@@ -10,4 +10,5 @@ internal enum SkiaChatPointerAction
     ComposerFocus = 2,
     SlashPopup = 3,
     OverviewToggle = 4,
+    CommandLineFocus = 5,
 }

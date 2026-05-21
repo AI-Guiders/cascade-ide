@@ -1,4 +1,5 @@
 #nullable enable
+using CascadeIDE.Models;
 using CascadeIDE.Models.Intercom;
 using CascadeIDE.Views.SkiaKit;
 using SkiaSharp;
@@ -33,19 +34,24 @@ internal readonly record struct SkiaChatBubbleSpec(
     float TitleHeight = 16,
     float FooterHeight = 16,
     float LineHeight = 16,
-    float CornerRadius = 7);
+    float CornerRadius = 7,
+    bool ForwardFeedMetrics = false,
+    IntercomFontsSettings? IntercomFonts = null);
 
 internal static class SkiaChatBubbleRenderer
 {
     public static SkiaChatBubbleMetrics Measure(SkiaChatMeasureContext context, in SkiaChatBubbleSpec spec)
     {
-        var maxChars = Math.Max(24, context.MaxChars);
+        var feed = FeedLayout(spec);
+        var maxChars = spec.Kind == SkiaChatBubbleKind.Feed
+            ? feed.MaxCharsForWidth(context.ContentWidth)
+            : Math.Max(24, context.MaxChars);
         var body = Trim(spec.Body, 32_000);
         var maxBodyLines = EffectiveMaxBodyLines(spec);
         var titleHeight = string.IsNullOrWhiteSpace(spec.Title) ? 0 : spec.TitleHeight;
         var footerHeight = string.IsNullOrWhiteSpace(spec.Footer) ? 0 : spec.FooterHeight;
 
-        var bodyWidth = BodyWidthForMeasure(context, spec);
+        var bodyWidth = BodyWidthForMeasure(context, spec, feed);
         if (spec.BodyTone == SkiaChatBodyTone.Link)
         {
             // Attach label в ленте — один кликабельный токен [label]; не разбираем как code-ref markdown.
@@ -69,11 +75,13 @@ internal static class SkiaChatBubbleRenderer
         var rich = SkiaRichTextKitMarkdown.TryMeasure(
             body,
             bodyWidth,
-            fontSize: BodyFontSize(spec.Kind),
+            fontSize: ProseFontSize(spec, feed),
             bodyColor,
             codeColor,
             maxBodyLines,
-            spec.LineHeight);
+            spec.LineHeight,
+            fontFamily: feed.ProseFamily,
+            monoFamily: feed.MonoFamily);
         if (rich is not null)
         {
             var placeholder = new SkiaMarkdownLine([new SkiaMarkdownRun("", SkiaMarkdownStyle.Plain)]);
@@ -104,13 +112,24 @@ internal static class SkiaChatBubbleRenderer
         return SkiaChatRenderLimits.MaxProseBodyLines;
     }
 
-    private static float BodyWidthForMeasure(SkiaChatMeasureContext context, in SkiaChatBubbleSpec spec) =>
+    private static SkiaChatFeedLayout FeedLayout(in SkiaChatBubbleSpec spec) =>
+        SkiaChatFeedLayout.For(spec.ForwardFeedMetrics, spec.IntercomFonts);
+
+    private static float BodyWidthForMeasure(
+        SkiaChatMeasureContext context,
+        in SkiaChatBubbleSpec spec,
+        in SkiaChatFeedLayout feed) =>
         spec.Kind switch
         {
-            SkiaChatBubbleKind.Feed => Math.Max(80f, context.ContentWidth - 24f),
+            SkiaChatBubbleKind.Feed => Math.Max(
+                SkiaChatFeedLayout.MinColumnWidth,
+                context.ContentWidth - feed.ProseMeasureWidthTrim),
             SkiaChatBubbleKind.CardPanel => Math.Max(80f, context.ContentWidth - 40f),
             _ => Math.Max(80f, context.ContentWidth - 24f),
         };
+
+    private static float ProseFontSize(in SkiaChatBubbleSpec spec, in SkiaChatFeedLayout feed) =>
+        spec.Kind == SkiaChatBubbleKind.Feed ? feed.ProseFontSize : BodyFontSize(spec.Kind);
 
     private static float BodyFontSize(SkiaChatBubbleKind kind) =>
         kind switch
@@ -119,8 +138,6 @@ internal static class SkiaChatBubbleRenderer
             _ => 11f,
         };
 
-    private const float FeedTextInset = 6f;
-    private const float FeedBodyTopPad = 6f;
     private const float FeedLinkHitPadX = 2f;
     private const float FeedLinkHitPadY = 2f;
 
@@ -128,11 +145,12 @@ internal static class SkiaChatBubbleRenderer
     public static SKRect ComputeFeedLinkHitRect(
         SKRect segmentRect,
         string linkText,
-        in SkiaChatBubbleMetrics metrics)
+        in SkiaChatBubbleMetrics metrics,
+        in SkiaChatFeedLayout feed)
     {
-        var top = segmentRect.Top + metrics.TitleHeight + FeedBodyTopPad;
-        var left = segmentRect.Left + FeedTextInset;
-        return computeFeedLinkRunHitRect(left, top, linkText, metrics.LineHeight);
+        var baseline = feed.FirstLineBaselineY(segmentRect.Top, metrics.TitleHeight);
+        var left = segmentRect.Left + feed.TextInset;
+        return computeFeedLinkRunHitRect(left, baseline, linkText, metrics.LineHeight, feed.ProseFamily, feed.ProseFontSize);
     }
 
     /// <summary>Регистрация hit по каждому <see cref="SkiaMarkdownStyle.Link"/> run в feed-prose (через <see cref="SkiaChatDrawContext.HitRegistry"/>).</summary>
@@ -140,16 +158,17 @@ internal static class SkiaChatBubbleRenderer
         SkiaChatDrawContext context,
         SKRect segmentRect,
         in SkiaChatBubbleMetrics metrics,
+        in SkiaChatFeedLayout feed,
         int? messageIndex,
         Func<string, AttachmentAnchor?> tryResolveAnchor)
     {
         if (tryResolveAnchor is null)
             return;
 
-        var textY = segmentRect.Top + metrics.TitleHeight + FeedBodyTopPad;
-        var xStart = segmentRect.Left + FeedTextInset;
+        var textY = feed.FirstLineBaselineY(segmentRect.Top, metrics.TitleHeight);
+        var xStart = segmentRect.Left + feed.TextInset;
 
-        using var bodyFont = new SKFont(SKTypeface.FromFamilyName("Segoe UI"), BodyFontSize(SkiaChatBubbleKind.Feed));
+        using var bodyFont = SkiaChatFeedFontResolver.CreateFont(feed.ProseFamily, feed.ProseFontSize);
 
         foreach (var line in metrics.ContentLines)
         {
@@ -163,7 +182,7 @@ internal static class SkiaChatBubbleRenderer
                     && tryResolveAnchor(run.Text) is { } anchor)
                 {
                     context.RegisterHit(
-                        computeFeedLinkRunHitRect(x, textY, run.Text, metrics.LineHeight),
+                        computeFeedLinkRunHitRect(x, textY, run.Text, metrics.LineHeight, feed.ProseFamily, feed.ProseFontSize),
                         new SkiaChatHit(
                             messageIndex,
                             null,
@@ -183,15 +202,14 @@ internal static class SkiaChatBubbleRenderer
         SkiaChatDrawContext context,
         SKRect segmentRect,
         string proseText,
-        float contentWidth,
-        float lineHeight,
+        in SkiaChatFeedLayout feed,
         int? messageIndex,
         Func<string, AttachmentAnchor?> tryResolveAnchor)
     {
         if (tryResolveAnchor is null || string.IsNullOrWhiteSpace(proseText))
             return;
 
-        var maxChars = Math.Max(12, (int)(contentWidth / 7.1f));
+        var maxChars = feed.MaxCharsForWidth(segmentRect.Width);
         var runs = SkiaMarkdownLayout.ParseInline(proseText);
         var lines = SkiaMarkdownLayout.WrapLines(runs, maxChars);
         if (lines.Count == 0)
@@ -202,13 +220,19 @@ internal static class SkiaChatBubbleRenderer
             Footer: null,
             TitleHeight: 0,
             FooterHeight: 0,
-            lineHeight);
-        RegisterFeedMarkdownLinkHits(context, segmentRect, metrics, messageIndex, tryResolveAnchor);
+            feed.ProseLineHeight);
+        RegisterFeedMarkdownLinkHits(context, segmentRect, metrics, feed, messageIndex, tryResolveAnchor);
     }
 
-    private static SKRect computeFeedLinkRunHitRect(float left, float top, string linkText, float lineHeight)
+    private static SKRect computeFeedLinkRunHitRect(
+        float left,
+        float top,
+        string linkText,
+        float lineHeight,
+        string proseFamily,
+        float proseFontSize)
     {
-        using var bodyFont = new SKFont(SKTypeface.FromFamilyName("Segoe UI"), 11f);
+        using var bodyFont = SkiaChatFeedFontResolver.CreateFont(proseFamily, proseFontSize);
         var width = string.IsNullOrWhiteSpace(linkText)
             ? 24f
             : bodyFont.MeasureText(linkText);
@@ -255,9 +279,10 @@ internal static class SkiaChatBubbleRenderer
         else
             DrawStandardFrame(ctx, rect, corner, spec, metrics);
 
-        var textInset = spec.Kind == SkiaChatBubbleKind.Feed ? 6f : insetX;
-        var textLeft = spec.Kind == SkiaChatBubbleKind.Feed ? ctx.ContentLeft + textInset : contentLeft;
-        DrawText(ctx, rect, textLeft, textInset, spec, metrics);
+        var feed = FeedLayout(spec);
+        var textInset = spec.Kind == SkiaChatBubbleKind.Feed ? feed.TextInset : insetX;
+        var textLeft = spec.Kind == SkiaChatBubbleKind.Feed ? rect.Left + textInset : contentLeft;
+        DrawText(ctx, rect, textLeft, textInset, spec, metrics, feed);
     }
 
     private static void DrawFeedAccent(SkiaChatDrawContext ctx, SKRect rect, in SkiaChatBubbleSpec spec)
@@ -368,12 +393,15 @@ internal static class SkiaChatBubbleRenderer
         float contentLeft,
         float insetX,
         in SkiaChatBubbleSpec spec,
-        in SkiaChatBubbleMetrics metrics)
+        in SkiaChatBubbleMetrics metrics,
+        in SkiaChatFeedLayout feed)
     {
-        using var titleFont = new SKFont(
-            SKTypeface.FromFamilyName("Segoe UI", SKFontStyle.Bold),
-            spec.Kind is SkiaChatBubbleKind.CardPanel or SkiaChatBubbleKind.OverviewHeader ? 13.5f : 10);
-        using var bodyFont = new SKFont(SKTypeface.FromFamilyName("Segoe UI"), spec.Kind == SkiaChatBubbleKind.CardPanel ? 11.5f : 11);
+        var uiFamily = spec.Kind == SkiaChatBubbleKind.Feed ? feed.ProseFamily : "Segoe UI";
+        using var titleFont = SkiaChatFeedFontResolver.CreateFont(
+            uiFamily,
+            spec.Kind is SkiaChatBubbleKind.CardPanel or SkiaChatBubbleKind.OverviewHeader ? 13.5f : 10,
+            SKFontStyle.Bold);
+        using var bodyFont = SkiaChatFeedFontResolver.CreateFont(uiFamily, ProseFontSize(spec, feed));
         using var titlePaint = new SKPaint
         {
             IsAntialias = true,
@@ -383,30 +411,34 @@ internal static class SkiaChatBubbleRenderer
 
         var titleTopInset = spec.Kind switch
         {
-            SkiaChatBubbleKind.Feed => 4f,
+            SkiaChatBubbleKind.Feed => feed.BodyTopPad - 2f,
             SkiaChatBubbleKind.CardPanel => 12f,
             SkiaChatBubbleKind.OverviewHeader => 10f,
             SkiaChatBubbleKind.SpineStrip => 6f,
             _ => 8f
         };
-        var titleBaseline = rect.Top + titleTopInset + titleFont.Size * 0.85f;
+        var titleBaseline = rect.Top + titleTopInset + titleFont.Size * SkiaChatFeedLayout.TextBaselineFactor;
         if (!string.IsNullOrWhiteSpace(spec.Title))
             ctx.Canvas.DrawText(spec.Title, contentLeft, titleBaseline, SKTextAlign.Left, titleFont, titlePaint);
 
-        var textY = rect.Top + metrics.TitleHeight + (spec.Kind switch
-        {
-            SkiaChatBubbleKind.Feed => 6f,
-            SkiaChatBubbleKind.OverviewHeader => 6f,
-            SkiaChatBubbleKind.CardPanel => 10f,
-            _ => 12f
-        });
+        var textY = spec.Kind == SkiaChatBubbleKind.Feed
+            ? feed.FirstLineBaselineY(rect.Top, metrics.TitleHeight)
+            : rect.Top + metrics.TitleHeight + (spec.Kind switch
+            {
+                SkiaChatBubbleKind.OverviewHeader => 6f,
+                SkiaChatBubbleKind.CardPanel => 10f,
+                _ => 12f
+            });
         if (metrics.RichTextBody is { } richBody)
         {
             var bodyColor = ResolveBodyColor(ctx.Theme, spec.BodyTone);
             var codeColor = SkiaKitColor.Blend(ctx.Theme.Content, ctx.Theme.HoverBorder, 0.35f);
+            var paintOrigin = spec.Kind == SkiaChatBubbleKind.Feed
+                ? feed.RichTextPaintOrigin(contentLeft, textY, bodyFont.Size)
+                : new SKPoint(contentLeft, textY - bodyFont.Size * SkiaChatFeedLayout.TextBaselineFactor);
             SkiaRichTextKitMarkdown.Paint(
                 ctx.Canvas,
-                new SKPoint(contentLeft, textY - bodyFont.Size * 0.85f),
+                paintOrigin,
                 richBody,
                 bodyColor,
                 codeColor);
@@ -432,6 +464,7 @@ internal static class SkiaChatBubbleRenderer
                 var (font, color, disposeFont) = ResolveRunStyle(
                     ctx,
                     spec,
+                    feed,
                     bodyFont,
                     run.Style);
                 try
@@ -523,10 +556,13 @@ internal static class SkiaChatBubbleRenderer
     private static (SKFont Font, SKColor Color, bool DisposeFont) ResolveRunStyle(
         SkiaChatDrawContext ctx,
         in SkiaChatBubbleSpec spec,
+        in SkiaChatFeedLayout feed,
         SKFont bodyFont,
         SkiaMarkdownStyle style)
     {
         var bodyColor = ResolveBodyColor(ctx.Theme, spec.BodyTone);
+        var proseFamily = spec.Kind == SkiaChatBubbleKind.Feed ? feed.ProseFamily : "Segoe UI";
+        var monoFamily = spec.Kind == SkiaChatBubbleKind.Feed ? feed.MonoFamily : "Cascadia Mono,Consolas";
         return style switch
         {
             SkiaMarkdownStyle.Link => (
@@ -534,15 +570,15 @@ internal static class SkiaChatBubbleRenderer
                 bodyColor,
                 false),
             SkiaMarkdownStyle.Bold => (
-                new SKFont(SKTypeface.FromFamilyName("Segoe UI", SKFontStyle.Bold), bodyFont.Size),
+                SkiaChatFeedFontResolver.CreateFont(proseFamily, bodyFont.Size, SKFontStyle.Bold),
                 bodyColor,
                 true),
             SkiaMarkdownStyle.Italic => (
-                new SKFont(SKTypeface.FromFamilyName("Segoe UI", SKFontStyle.Italic), bodyFont.Size),
+                SkiaChatFeedFontResolver.CreateFont(proseFamily, bodyFont.Size, SKFontStyle.Italic),
                 bodyColor,
                 true),
             SkiaMarkdownStyle.Code => (
-                new SKFont(SKTypeface.FromFamilyName("Cascadia Mono", SKFontStyle.Normal), bodyFont.Size * 0.95f),
+                SkiaChatFeedFontResolver.CreateFont(monoFamily, bodyFont.Size * 0.95f),
                 SkiaKitColor.Blend(ctx.Theme.Content, ctx.Theme.HoverBorder, 0.35f),
                 true),
             _ => (bodyFont, bodyColor, false)

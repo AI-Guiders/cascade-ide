@@ -52,6 +52,7 @@ public static class UiModeLayoutRegistry
     /// <summary>Ширина развёрнутого региона Mfd в пикселях для нормализованного режима (с учётом <c>workspace.toml</c> через <see cref="UiWorkspaceLayoutRuntimeMetrics"/>).</summary>
     public static int GetMfdRegionExpandedWidthPixels(string normalizedMode) => normalizedMode switch
     {
+        "Flight" => UiWorkspaceLayoutRuntimeMetrics.MfdRegionExpandedAgentChatWidthPixels,
         _ => UiWorkspaceLayoutRuntimeMetrics.MfdRegionExpandedDefaultWidthPixels,
     };
 }

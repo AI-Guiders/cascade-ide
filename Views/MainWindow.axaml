@@ -102,29 +102,29 @@
             <Setter Property="RenderTransform" Value="scale(1.02)"/>
         </Style>
         <Style Selector="Border.modeCard">
-            <Setter Property="Background" Value="{DynamicResource CascadeTheme.ChatMessageBubbleBackground}"/>
+            <Setter Property="Background" Value="{DynamicResource CascadeTheme.PanelBackgroundBrush}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="CornerRadius" Value="4"/>
             <Setter Property="Padding" Value="8"/>
         </Style>
         <!-- Визуальные якоря PFD | Forward | MFD (отладка раскладки; классы задаёт AttentionZoneContainer). -->
         <Style Selector="chrome|AttentionZoneContainer.attention-zone-pfd">
-            <Setter Property="BorderThickness" Value="2"/>
-            <Setter Property="BorderBrush" Value="#00ACC1"/>
-            <Setter Property="Background" Value="#1400ACC1"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#6600ACC1"/>
+            <Setter Property="Background" Value="Transparent"/>
             <Setter Property="ToolTip.Tip" Value="Якорь: PFD"/>
         </Style>
         <Style Selector="chrome|AttentionZoneContainer.attention-zone-forward">
-            <Setter Property="BorderThickness" Value="2"/>
-            <Setter Property="BorderBrush" Value="#FFB300"/>
-            <Setter Property="Background" Value="#18FFB300"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#66FFB300"/>
+            <Setter Property="Background" Value="Transparent"/>
             <Setter Property="ToolTip.Tip" Value="Якорь: Forward"/>
         </Style>
         <Style Selector="chrome|AttentionZoneContainer.attention-zone-mfd">
-            <Setter Property="BorderThickness" Value="2"/>
-            <Setter Property="BorderBrush" Value="#7E57C2"/>
-            <Setter Property="Background" Value="#147E57C2"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#667E57C2"/>
+            <Setter Property="Background" Value="Transparent"/>
             <Setter Property="ToolTip.Tip" Value="Якорь: MFD"/>
         </Style>
         <Style Selector="chrome|AttentionZoneContainer.attention-layer-hud">

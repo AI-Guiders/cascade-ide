@@ -39,9 +39,13 @@
 
 ## Отступы и радиусы (конвенция)
 
-- Section: `Padding=10`, `CornerRadius=8` — класс `cascadeSection` в `App.axaml`
+См. [flat-chrome-dark-cockpit-v1.md](flat-chrome-dark-cockpit-v1.md) (Flight).
+
+- Section: `Padding=10`, `CornerRadius=4` — класс `cascadeSection` в `App.axaml`
+- Inset: `CornerRadius=4` — `cascadeInset`
 - Control: `CornerRadius=6`, `Padding=8,6`
-- Status chip: `CornerRadius=10`, `Padding=8,3`
+- Status chip: `CornerRadius=4`, `Padding=8,3` — только при активном ходе работы (Dark Cockpit)
+- IDE Health (non-Power): `ideHealthStrip` + `ideHealthSegment` — без `modeCard` на сегмент
 
 ## Правило для разметки
 

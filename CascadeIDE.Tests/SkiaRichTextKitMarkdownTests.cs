@@ -55,7 +55,7 @@ public sealed class SkiaRichTextKitMarkdownTests
             codeColor: SKColors.LightGray,
             maxRows: 64,
             lineHeight: 15f,
-            compact: false);
+            forwardHost: false);
 
         Assert.NotNull(layout);
         Assert.True(layout.IsDocument);
