@@ -34,6 +34,7 @@ public sealed class DotnetCommandRunner : IDotnetCommandRunner
                 CreateNoWindow = true,
                 WorkingDirectory = workingDirectory
             };
+            DotnetProcessIoEncoding.ApplyUtf8(psi);
             foreach (var arg in args)
                 psi.ArgumentList.Add(arg);
 
@@ -95,6 +96,7 @@ public sealed class DotnetCommandRunner : IDotnetCommandRunner
                 CreateNoWindow = true,
                 WorkingDirectory = workingDirectory
             };
+            DotnetProcessIoEncoding.ApplyUtf8(psi);
             foreach (var arg in args)
                 psi.ArgumentList.Add(arg);
 
