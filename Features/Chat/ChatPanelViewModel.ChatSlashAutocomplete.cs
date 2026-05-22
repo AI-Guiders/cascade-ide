@@ -78,6 +78,16 @@ public partial class ChatPanelViewModel
             CockpitCommandLineText = insertText;
             CockpitCommandLineCaretIndex = insertText.Length;
         }
+        else if (ChatSlashAutocomplete.TryReplaceSlashLineAtCaret(
+                     ChatInput,
+                     ChatComposerCaretIndex,
+                     insertText,
+                     out var newText,
+                     out var newCaret))
+        {
+            ChatInput = newText;
+            ChatComposerCaretIndex = newCaret;
+        }
         else
         {
             ChatInput = insertText;

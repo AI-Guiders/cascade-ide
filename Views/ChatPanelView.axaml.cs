@@ -95,7 +95,7 @@ public partial class ChatPanelView : UserControl
         surface.SendRequested += (_, _) =>
         {
             if (DataContext is ChatPanelViewModel vm)
-                TryExecuteSendChat(vm);
+                TryExecuteSendChat(vm, surface);
         };
 
         surface.ThinkingToggleRequested += (_, messageIndex) =>
@@ -203,11 +203,11 @@ public partial class ChatPanelView : UserControl
                     {
                         surface.ComposerCaretIndex = vm.ChatComposerCaretIndex;
                         if (autoExecute)
-                            TryExecuteSendChat(vm);
+                            TryExecuteSendChat(vm, surface);
                     }
                     else if (e.KeyEvent is { } enterKey && ChatSendKeyMatcher.Matches(enterKey, vm.GetSendMessageKey()))
                     {
-                        TryExecuteSendChat(vm);
+                        TryExecuteSendChat(vm, surface);
                     }
                     else
                     {
@@ -233,7 +233,7 @@ public partial class ChatPanelView : UserControl
                         {
                             surface.ComposerCaretIndex = vm.ChatComposerCaretIndex;
                             if (execute)
-                                TryExecuteSendChat(vm);
+                                TryExecuteSendChat(vm, surface);
                         }
                     }
 
@@ -325,12 +325,34 @@ public partial class ChatPanelView : UserControl
         await dlg.ShowDialog(owner);
     }
 
-    private static void TryExecuteSendChat(ChatPanelViewModel vm)
+    private static void TryExecuteSendChat(ChatPanelViewModel vm, SkiaChatSurfaceControl surface)
     {
+        SyncComposerDraftToViewModel(vm, surface);
+
         if (vm.SendChatCommand is IAsyncRelayCommand async && async.CanExecute(null))
             _ = async.ExecuteAsync(null);
         else if (vm.SendChatCommand is IRelayCommand relay && relay.CanExecute(null))
             relay.Execute(null);
+    }
+
+    /// <summary>Свести Skia composer (и IME preedit) в VM перед отправкой — иначе ChatInput может отставать.</summary>
+    private static void SyncComposerDraftToViewModel(ChatPanelViewModel vm, SkiaChatSurfaceControl surface)
+    {
+        var text = surface.ComposerText ?? "";
+        var caret = Math.Clamp(surface.ComposerCaretIndex, 0, text.Length);
+        if (!string.IsNullOrEmpty(surface.ComposerPreeditText))
+        {
+            text = text.Insert(caret, surface.ComposerPreeditText);
+            caret += surface.ComposerPreeditText.Length;
+            surface.ComposerPreeditText = null;
+            surface.ComposerText = text;
+            surface.ComposerCaretIndex = caret;
+        }
+
+        if (!string.Equals(vm.ChatInput, text, StringComparison.Ordinal))
+            vm.ChatInput = text;
+        if (vm.ChatComposerCaretIndex != caret)
+            vm.ChatComposerCaretIndex = caret;
     }
 
     private static void showMessageSelectContextMenu(
