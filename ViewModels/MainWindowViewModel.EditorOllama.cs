@@ -38,27 +38,4 @@ public partial class MainWindowViewModel
     /// <summary>Последняя выбранная реальная модель (для восстановления после "Install New").</summary>
     public string? LastSelectedRealModel { get; set; }
 
-    /// <summary>True, если открыт файл .md или .markdown — показываем превью.</summary>
-    public bool IsMarkdownFile =>
-        !string.IsNullOrEmpty(CurrentFilePath)
-        && (CurrentFilePath.EndsWith(".md", StringComparison.OrdinalIgnoreCase)
-            || CurrentFilePath.EndsWith(".markdown", StringComparison.OrdinalIgnoreCase));
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsMarkdownPreviewVisible))]
-    private bool _isLoadingCurrentFile;
-
-    /// <summary>Показывать панель превью Markdown только когда контент уже загружен (избегаем смены лейаута до загрузки, из‑за которой сбрасывается выбор в дереве).</summary>
-    public bool IsMarkdownPreviewVisible => IsMarkdownFile && !IsLoadingCurrentFile;
-
-    [ObservableProperty]
-    private string _editorText = "";
-
-    /// <summary>Запрос выделения: начальный offset. View применит к редактору и сбросит.</summary>
-    [ObservableProperty]
-    private int? _editorSelectionStart;
-
-    /// <summary>Запрос выделения: длина. View применит к редактору и сбросит.</summary>
-    [ObservableProperty]
-    private int? _editorSelectionLength;
 }

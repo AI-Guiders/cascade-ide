@@ -11,6 +11,7 @@ using CascadeIDE.Features.Build;
 using CascadeIDE.Features.Chat;
 using CascadeIDE.Features.Debug;
 using CascadeIDE.Features.Documents;
+using CascadeIDE.Features.Editor;
 using CascadeIDE.Features.Git;
 using CascadeIDE.Features.HybridIndex.Application;
 using CascadeIDE.Features.IdeMcp.Application;
@@ -37,6 +38,8 @@ public partial class MainWindowViewModel
         _osShell = osShell ?? OsShell.Default;
         Workspace = new SolutionWorkspaceViewModel();
         Chrome = new UiChromeViewModel();
+        Editor = new EditorWorkspaceViewModel(this);
+        Editor.PropertyChanged += OnEditorWorkspacePropertyChanged;
         Documents = new DocumentsWorkspaceViewModel(this, Workspace, () => ReopenClosedDocumentCommand.NotifyCanExecuteChanged());
         Documents.PropertyChanged += OnDocumentsPropertyChanged;
         _csharpLanguageService = new Services.CSharpLanguageService();

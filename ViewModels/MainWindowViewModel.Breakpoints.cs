@@ -16,14 +16,6 @@ public partial class MainWindowViewModel
         nameof(AllBreakpointLinesInCurrentFile),
     ];
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsMarkdownFile))]
-    [NotifyPropertyChangedFor(nameof(IsMarkdownPreviewVisible))]
-    [NotifyPropertyChangedFor(nameof(BreakpointLinesInCurrentFile))]
-    [NotifyPropertyChangedFor(nameof(AllBreakpointLinesInCurrentFile))]
-    [NotifyPropertyChangedFor(nameof(DebugCurrentLineInCurrentFile))]
-    private string? _currentFilePath;
-
     private FileSystemWatcher? _breakpointsFileWatcher;
 
     /// <summary>Номера строк с брейкпоинтами в текущем открытом файле (глифы в редакторе).</summary>

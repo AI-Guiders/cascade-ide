@@ -290,7 +290,12 @@
 - Call sites: `App.axaml.cs` (MCP stdio), `AgentContractHeadlessRuntime`, hotkeys, command palette, Intercom, Git panel (`IdeMcp`), DAP callback → `_ideMcpHost.ApplyDapDebugSnapshotToUi`.
 - RelayCommand превью Markdown остались на MWVM (`MainWindowViewModel.IdeMcpUiRelayCommands.cs`).
 
-**Дальше (этапы 2–5, не в этом коммите):** Editor session VM, Shell/Presentation proxy, RelayCommands → feature VMs, метрики LOC «композитор без доменной логики».
+**Этап 2 (v1.54):**
+
+- **`EditorWorkspaceViewModel`** (`Features/Editor/`) — `CurrentFilePath`, `EditorText`, selection, `IsLoadingCurrentFile`, markdown preview flags.
+- MWVM — прокси-свойства + ретрансляция `PropertyChanged` (Views/MCP без массовой правки).
+
+**Дальше (этапы 3–5):** Shell/Presentation proxy, RelayCommands → feature VMs, LSP/breakpoints/HUD в editor slice, метрики LOC.
 
 **Backlog MWVM (закрыт, v1.49–v1.52):**
 
