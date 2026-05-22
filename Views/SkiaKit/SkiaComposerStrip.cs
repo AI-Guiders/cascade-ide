@@ -1,4 +1,5 @@
 #nullable enable
+using CascadeIDE.Features.Chat;
 using CascadeIDE.Views.Chat.Skia;
 using SkiaSharp;
 using Topten.RichTextKit;
@@ -14,6 +15,7 @@ internal static class SkiaComposerStrip
     public const float SendButtonWidth = 44f;
     public const float SendButtonHeight = 32f;
     public const float BorderWidth = 1f;
+    public const float SlashPreviewGap = 4f;
 
     private const float CaretVerticalPad = 2f;
     private static readonly SKColor CaretColor = new(120, 195, 255);
@@ -56,13 +58,18 @@ internal static class SkiaComposerStrip
         return Math.Max(0f, inner - visibleInnerHeight);
     }
 
+    public static float SlashPreviewReserve(string? previewText, float previewFontSize) => 0f;
+
     public static float MeasureHeight(
         string text,
         string? preeditText,
         float contentWidth,
         float fontSize,
-        float lineHeight)
+        float lineHeight,
+        string? slashPreviewText = null,
+        float previewFontSize = 10f)
     {
+        var previewReserve = SlashPreviewReserve(slashPreviewText, previewFontSize);
         var display = BuildDisplayText(text, preeditText);
         var minInner = MinLines * lineHeight;
         var maxLines = (int)((MaxHeightFor(lineHeight) - VerticalPadding * 2) / lineHeight);
@@ -74,9 +81,9 @@ internal static class SkiaComposerStrip
             Math.Max(MinLines, maxLines),
             lineHeight);
         var inner = Math.Max(minInner, rich?.BodyHeight ?? lineHeight);
-        var minH = MinHeightFor(lineHeight);
-        var maxH = MaxHeightFor(lineHeight);
-        return Math.Clamp(inner + VerticalPadding * 2, minH, maxH);
+        var minH = MinHeightFor(lineHeight) + previewReserve;
+        var maxH = MaxHeightFor(lineHeight) + previewReserve;
+        return Math.Clamp(inner + VerticalPadding * 2 + previewReserve, minH, maxH);
     }
 
     public static bool TryHitTestCaretAtPoint(
@@ -88,6 +95,8 @@ internal static class SkiaComposerStrip
         float fontSize,
         float lineHeight,
         float contentScrollOffsetY,
+        string? slashPreviewText,
+        float previewFontSize,
         out int caretIndex)
     {
         caretIndex = 0;
@@ -95,7 +104,8 @@ internal static class SkiaComposerStrip
             return false;
 
         var sendLeft = composerBounds.Right - HorizontalPadding - SendButtonWidth;
-        var layout = ComputeTextLayout(composerBounds, sendLeft, fontSize, lineHeight);
+        var previewReserve = SlashPreviewReserve(slashPreviewText, previewFontSize);
+        var layout = ComputeTextLayout(composerBounds, sendLeft, fontSize, lineHeight, previewReserve);
         if (!layout.TextBounds.Contains(pointX, pointY))
             return false;
 
@@ -130,7 +140,10 @@ internal static class SkiaComposerStrip
         out SKRect sendButtonBounds,
         out SKRect textBounds,
         int selectionAnchor = -1,
-        float contentScrollOffsetY = 0f)
+        float contentScrollOffsetY = 0f,
+        string? slashPreviewText = null,
+        SlashCommandPreviewKind slashPreviewKind = SlashCommandPreviewKind.None,
+        float previewFontSize = 10f)
     {
         sendButtonBounds = default;
         textBounds = default;
@@ -151,7 +164,8 @@ internal static class SkiaComposerStrip
         var sendTop = bounds.Top + (bounds.Height - SendButtonHeight) * 0.5f;
         sendButtonBounds = new SKRect(sendLeft, sendTop, sendLeft + SendButtonWidth, sendTop + SendButtonHeight);
 
-        var layout = ComputeTextLayout(bounds, sendLeft, fontSize, lineHeight);
+        var previewReserve = SlashPreviewReserve(slashPreviewText, previewFontSize);
+        var layout = ComputeTextLayout(bounds, sendLeft, fontSize, lineHeight, previewReserve);
         textBounds = layout.TextBounds;
         var contentWidth = layout.ContentWidth;
         var textTopInset = layout.TextTopInset;
@@ -181,6 +195,19 @@ internal static class SkiaComposerStrip
         }
 
         canvas.Translate(0, -contentScrollOffsetY);
+
+        if (!isEmpty)
+            drawComposerSlashChip(
+                canvas,
+                theme,
+                text,
+                caretIndex,
+                slashPreviewKind,
+                layout,
+                textOrigin,
+                contentScrollOffsetY,
+                fontSize,
+                lineHeight);
 
         if (isEmpty)
         {
@@ -251,14 +278,17 @@ internal static class SkiaComposerStrip
         float fontSize,
         float lineHeight,
         out SKRect caretRect,
-        float contentScrollOffsetY = 0f)
+        float contentScrollOffsetY = 0f,
+        string? slashPreviewText = null,
+        float previewFontSize = 10f)
     {
         caretRect = default;
         if (composerBounds.Width <= 0)
             return false;
 
         var sendLeft = composerBounds.Right - HorizontalPadding - SendButtonWidth;
-        var layout = ComputeTextLayout(composerBounds, sendLeft, fontSize, lineHeight);
+        var previewReserve = SlashPreviewReserve(slashPreviewText, previewFontSize);
+        var layout = ComputeTextLayout(composerBounds, sendLeft, fontSize, lineHeight, previewReserve);
         var display = BuildDisplayText(text, preeditText);
         var textTopInset = lineHeight - 4f - fontSize * 0.85f - 4f;
         var textOrigin = new SKPoint(layout.TextBounds.Left, layout.TextBounds.Top + textTopInset);
@@ -346,14 +376,19 @@ internal static class SkiaComposerStrip
         }
     }
 
-    private static TextLayout ComputeTextLayout(SKRect bounds, float sendLeft, float fontSize, float lineHeight)
+    private static TextLayout ComputeTextLayout(
+        SKRect bounds,
+        float sendLeft,
+        float fontSize,
+        float lineHeight,
+        float previewReserve = 0f)
     {
         var textTopInset = lineHeight - 4f - fontSize * 0.85f - 4f;
         var textBounds = new SKRect(
             bounds.Left + HorizontalPadding,
             bounds.Top + VerticalPadding,
             sendLeft - 8f,
-            bounds.Bottom - VerticalPadding);
+            bounds.Bottom - VerticalPadding - previewReserve);
         return new TextLayout(textBounds, Math.Max(40f, textBounds.Width), textTopInset);
     }
 
@@ -414,6 +449,52 @@ internal static class SkiaComposerStrip
         using var font = SkiaKitFonts.CreateUi(sendLabelPt, bold: true);
         using var paint = SkiaKitFonts.CreateTextPaint(SKColors.White);
         canvas.DrawText("↑", rect.MidX, rect.MidY + sendLabelPt * 0.35f, SKTextAlign.Center, font, paint);
+    }
+
+    private static void drawComposerSlashChip(
+        SKCanvas canvas,
+        ISkiaKitPaintTheme theme,
+        string text,
+        int caretIndex,
+        SlashCommandPreviewKind kind,
+        TextLayout layout,
+        SKPoint textOrigin,
+        float contentScrollOffsetY,
+        float fontSize,
+        float lineHeight)
+    {
+        if (!SkiaSlashCommandChip.ShouldDraw(kind, text))
+            return;
+
+        if (!ChatSlashAutocomplete.TryGetSlashLineRange(text, caretIndex, out var lineStart, out var lineEnd))
+            return;
+
+        var lineText = text[lineStart..lineEnd];
+        var lineIndex = 0;
+        for (var i = 0; i < lineStart; i++)
+        {
+            if (text[i] == '\n')
+                lineIndex++;
+        }
+
+        var lineBegin = lineStart;
+        while (lineBegin > 0 && text[lineBegin - 1] != '\n')
+            lineBegin--;
+
+        var beforeSlash = text[lineBegin..lineStart];
+        var prefixWidth = string.IsNullOrEmpty(beforeSlash)
+            ? 0f
+            : SkiaSlashCommandChip.MeasureLabelWidth(beforeSlash, fontSize, monoFont: false);
+
+        var textLeft = textOrigin.X + prefixWidth;
+        var lineTop = textOrigin.Y + lineIndex * lineHeight;
+        var labelW = SkiaSlashCommandChip.MeasureLabelWidth(lineText, fontSize, monoFont: false);
+        var chipRect = SkiaSlashCommandChip.ComputeChipRect(
+            textLeft,
+            lineTop,
+            lineHeight,
+            labelW);
+        SkiaSlashCommandChip.Draw(canvas, chipRect, theme, kind, fontSize);
     }
 
     private static string BuildDisplayText(string text, string? preeditText)

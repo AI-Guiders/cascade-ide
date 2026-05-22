@@ -412,6 +412,20 @@ public static class ChatSlashAutocomplete
         return true;
     }
 
+    /// <summary>Полная slash-строка на линии каретки (для preview/валидации в composer).</summary>
+    public static bool TryGetSlashLineAtCaret(string? rawInput, int caretIndex, out string slashLine)
+    {
+        slashLine = "";
+        if (string.IsNullOrEmpty(rawInput))
+            return false;
+
+        if (!TryGetSlashLineRange(rawInput, caretIndex, out var lineStart, out var lineEnd))
+            return false;
+
+        slashLine = rawInput[lineStart..lineEnd].TrimEnd();
+        return slashLine.Length > 0;
+    }
+
     internal static bool TryGetSlashLineRange(string rawInput, int caretIndex, out int lineStart, out int lineEnd)
     {
         lineStart = 0;

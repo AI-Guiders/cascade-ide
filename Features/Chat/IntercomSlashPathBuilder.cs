@@ -127,9 +127,20 @@ internal static class IntercomSlashPathBuilder
     private static bool isMessageAnchorsListTail(string? argsTail) =>
         string.Equals((argsTail ?? "").Trim(), "anchors list", StringComparison.OrdinalIgnoreCase);
 
-    private static bool isMessageSelectRangeTail(string tail) =>
-        ParametricSegmentListParser.TryParse(tail, out _, out _)
-        || ChatSlashParametricArgsBuilder.TryParseLineRangeTail(tail, out _, out _, out _);
+    private static bool isMessageSelectRangeTail(string tail)
+    {
+        if (ParametricSegmentListParser.TryParse(tail, out _, out _))
+            return true;
+
+        if (ChatSlashParametricArgsBuilder.TryParseLineRangeTail(tail, out _, out _, out _))
+            return true;
+
+        // Невалидный, но явно параметрический хвост — всё равно /intercom message select (preview покажет ошибку).
+        if (tail.Contains('['))
+            return true;
+
+        return tail.Any(static ch => ch is >= '0' and <= '9');
+    }
 
     private static bool isKnownInnerVerb(string group, string verb) =>
         group.ToLowerInvariant() switch

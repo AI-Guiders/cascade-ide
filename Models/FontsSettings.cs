@@ -75,6 +75,9 @@ public sealed class IntercomFontsSettings
     public float ResolveCommandLinePreviewPt(bool forwardHost) =>
         ResolveCommandLinePt(forwardHost) * (10f / 12f);
 
+    public float ResolveCommandLineLineHeight(bool forwardHost) =>
+        ResolveCommandLinePt(forwardHost) * (22f / 12f);
+
     public float ResolveChromeTitlePt() => (float)ChromeTitlePt;
 
     public float ResolveChromeSubtitlePt() => (float)ChromeSubtitlePt;

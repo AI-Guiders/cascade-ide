@@ -65,8 +65,21 @@ public partial class SkiaChatSurfaceControl
     public static readonly StyledProperty<string?> CommandLinePreviewProperty =
         AvaloniaProperty.Register<SkiaChatSurfaceControl, string?>(nameof(CommandLinePreview));
 
+    public static readonly StyledProperty<SlashCommandPreviewKind> CommandLinePreviewKindProperty =
+        AvaloniaProperty.Register<SkiaChatSurfaceControl, SlashCommandPreviewKind>(
+            nameof(CommandLinePreviewKind),
+            defaultValue: SlashCommandPreviewKind.None);
+
     public static readonly StyledProperty<int> CommandLineCaretIndexProperty =
         AvaloniaProperty.Register<SkiaChatSurfaceControl, int>(nameof(CommandLineCaretIndex), defaultValue: 0);
+
+    public static readonly StyledProperty<string?> ComposerPreviewProperty =
+        AvaloniaProperty.Register<SkiaChatSurfaceControl, string?>(nameof(ComposerPreview));
+
+    public static readonly StyledProperty<SlashCommandPreviewKind> ComposerPreviewKindProperty =
+        AvaloniaProperty.Register<SkiaChatSurfaceControl, SlashCommandPreviewKind>(
+            nameof(ComposerPreviewKind),
+            defaultValue: SlashCommandPreviewKind.None);
 
     private IntercomSkiaTextInputClient? _textInputClient;
     private DispatcherTimer? _composerCaretBlinkTimer;
@@ -82,6 +95,9 @@ public partial class SkiaChatSurfaceControl
     private int _slashPopupLastRowCount;
     private int _composerSelectionAnchor;
     private float _composerScrollOffsetY;
+    private int _commandLineSelectionAnchor;
+    private bool _commandLineExtendSelection;
+    private float _commandLineScrollOffsetX;
 
     public event EventHandler? SendRequested;
     public event EventHandler<IntercomComposerKeyEventArgs>? ComposerKeyDown;
@@ -96,6 +112,9 @@ public partial class SkiaChatSurfaceControl
 
     /// <summary>Текст/caret composer изменены (до синхронизации биндинга с VM).</summary>
     public event EventHandler? ComposerDraftChanged;
+
+    /// <summary>Текст/caret CCL изменены (до синхронизации биндинга с VM).</summary>
+    public event EventHandler? CommandLineDraftChanged;
 
     public bool ShowIntercomComposer
     {
@@ -116,6 +135,10 @@ public partial class SkiaChatSurfaceControl
     }
 
     internal int ComposerSelectionAnchor => _composerSelectionAnchor;
+
+    internal int CommandLineSelectionAnchor => _commandLineSelectionAnchor;
+
+    internal bool IsCommandLineInputActive => ShowCockpitCommandLine && _commandLineFocused;
 
     public string? ComposerPreeditText
     {
@@ -194,10 +217,28 @@ public partial class SkiaChatSurfaceControl
         set => SetValue(CommandLinePreviewProperty, value);
     }
 
+    public SlashCommandPreviewKind CommandLinePreviewKind
+    {
+        get => GetValue(CommandLinePreviewKindProperty);
+        set => SetValue(CommandLinePreviewKindProperty, value);
+    }
+
     public int CommandLineCaretIndex
     {
         get => GetValue(CommandLineCaretIndexProperty);
         set => SetValue(CommandLineCaretIndexProperty, value);
+    }
+
+    public string? ComposerPreview
+    {
+        get => GetValue(ComposerPreviewProperty);
+        set => SetValue(ComposerPreviewProperty, value);
+    }
+
+    public SlashCommandPreviewKind ComposerPreviewKind
+    {
+        get => GetValue(ComposerPreviewKindProperty);
+        set => SetValue(ComposerPreviewKindProperty, value);
     }
 
     private void InitializeIntercomComposer()
@@ -258,7 +299,10 @@ public partial class SkiaChatSurfaceControl
             return;
         }
 
-        if (!_navigatorSearchFocused && (!ShowIntercomComposer || !IsComposerEnabled))
+        var activeInput = _navigatorSearchFocused
+            || (ShowCockpitCommandLine && _commandLineFocused)
+            || (ShowIntercomComposer && IsComposerEnabled && !_commandLineFocused);
+        if (!activeInput)
         {
             StopComposerCaretBlink();
             return;
@@ -276,7 +320,7 @@ public partial class SkiaChatSurfaceControl
 
     private void OnTextInputMethodClientRequested(object? sender, TextInputMethodClientRequestedEventArgs e)
     {
-        if (!ShowIntercomComposer && !_navigatorSearchFocused)
+        if (!ShowIntercomComposer && !_navigatorSearchFocused && !ShowCockpitCommandLine)
             return;
 
         _textInputClient ??= new IntercomSkiaTextInputClient(this);
@@ -287,6 +331,7 @@ public partial class SkiaChatSurfaceControl
     {
         var composerPt = IntercomFonts.ResolveComposerPt(FeedUsesForwardMetrics);
         var composerLine = IntercomFonts.ResolveComposerLineHeight(FeedUsesForwardMetrics);
+        var composerPreviewPt = IntercomFonts.ResolveCommandLinePreviewPt(FeedUsesForwardMetrics);
         if (_composerBounds.Width > 0
             && SkiaComposerStrip.TryGetCaretRect(
                 _composerBounds,
@@ -296,7 +341,9 @@ public partial class SkiaChatSurfaceControl
                 composerPt,
                 composerLine,
                 out var caret,
-                _composerScrollOffsetY))
+                _composerScrollOffsetY,
+                ComposerPreview,
+                composerPreviewPt))
             return new Rect(caret.Left, caret.Top, Math.Max(2, caret.Width), caret.Height);
 
         var textLeft = _composerBounds.Width > 0
@@ -306,6 +353,24 @@ public partial class SkiaChatSurfaceControl
             ? _composerBounds.Top + SkiaComposerStrip.VerticalPadding + 2f
             : Bounds.Height - 24;
         return new Rect(textLeft, textTop, 2, composerLine - 4f);
+    }
+
+    internal Rect GetCommandLineCaretScreenRect()
+    {
+        var cclPt = IntercomFonts.ResolveCommandLinePt(FeedUsesForwardMetrics);
+        if (_commandLineBounds.Width > 0
+            && SkiaCommandLineStrip.TryGetCaretRect(
+                _commandLineBounds,
+                CommandLineText ?? "/",
+                CommandLineCaretIndex,
+                cclPt,
+                _commandLineScrollOffsetX,
+                out var caret))
+            return new Rect(caret.Left, caret.Top, Math.Max(2, caret.Width), caret.Height);
+
+        var region = SkiaCommandLineStrip.ComputeInputRegion(_commandLineBounds, cclPt);
+        var lineH = SkiaCommandLineStrip.InputLineHeightFor(cclPt);
+        return new Rect(region.TextBounds.Left, region.TextBounds.Top + 2f, 2, lineH - 4f);
     }
 
     private float ResolveBottomChromeHeight(float width)
@@ -327,8 +392,10 @@ public partial class SkiaChatSurfaceControl
             showSlashHierarchyHeader: ShowSlashHierarchyHeader,
             fonts.ResolveComposerPt(FeedUsesForwardMetrics),
             fonts.ResolveComposerLineHeight(FeedUsesForwardMetrics),
-            fonts.ResolveCommandLinePt(FeedUsesForwardMetrics),
-            fonts.ResolveCommandLinePreviewPt(FeedUsesForwardMetrics));
+            composerSlashPreview: ComposerPreview,
+            composerSlashPreviewFontSize: fonts.ResolveCommandLinePreviewPt(FeedUsesForwardMetrics),
+            commandLineFontSize: fonts.ResolveCommandLinePt(FeedUsesForwardMetrics),
+            commandLinePreviewFontSize: fonts.ResolveCommandLinePreviewPt(FeedUsesForwardMetrics));
     }
 
     private void RebuildSlashRows()
@@ -378,8 +445,10 @@ public partial class SkiaChatSurfaceControl
             showSlashHierarchyHeader: ShowSlashHierarchyHeader,
             fonts.ResolveComposerPt(FeedUsesForwardMetrics),
             fonts.ResolveComposerLineHeight(FeedUsesForwardMetrics),
-            fonts.ResolveCommandLinePt(FeedUsesForwardMetrics),
-            fonts.ResolveCommandLinePreviewPt(FeedUsesForwardMetrics));
+            composerSlashPreview: ComposerPreview,
+            composerSlashPreviewFontSize: fonts.ResolveCommandLinePreviewPt(FeedUsesForwardMetrics),
+            commandLineFontSize: fonts.ResolveCommandLinePt(FeedUsesForwardMetrics),
+            commandLinePreviewFontSize: fonts.ResolveCommandLinePreviewPt(FeedUsesForwardMetrics));
 
         _deckBounds = deck.DeckBounds;
         _composerBounds = deck.ComposerBounds;
@@ -432,16 +501,20 @@ public partial class SkiaChatSurfaceControl
                 theme,
                 CommandLineText ?? "/",
                 CommandLinePreview,
+                CommandLinePreviewKind,
                 "/intercom … · /anchor peek …",
                 IsComposerEnabled,
                 CommandLineCaretIndex,
+                _commandLineSelectionAnchor,
                 cclCaret,
                 cclCaret && _composerCaretBlinkVisible,
+                _commandLineScrollOffsetX,
                 fonts.ResolveCommandLinePt(FeedUsesForwardMetrics),
                 fonts.ResolveCommandLinePreviewPt(FeedUsesForwardMetrics));
         }
 
         var showCaret = !_commandLineFocused && IsComposerEnabled && IsKeyboardFocusWithin;
+        var composerPreviewPt = fonts.ResolveCommandLinePreviewPt(FeedUsesForwardMetrics);
         SkiaComposerStrip.Draw(
             canvas,
             _composerBounds,
@@ -458,7 +531,10 @@ public partial class SkiaChatSurfaceControl
             out _sendButtonBounds,
             out _,
             _composerSelectionAnchor,
-            _composerScrollOffsetY);
+            _composerScrollOffsetY,
+            ComposerPreview,
+            ComposerPreviewKind,
+            composerPreviewPt);
 
         RegisterComposerPointerHits();
     }
@@ -470,6 +546,7 @@ public partial class SkiaChatSurfaceControl
 
         var composerPt = IntercomFonts.ResolveComposerPt(FeedUsesForwardMetrics);
         var composerLine = IntercomFonts.ResolveComposerLineHeight(FeedUsesForwardMetrics);
+        var composerPreviewPt = IntercomFonts.ResolveCommandLinePreviewPt(FeedUsesForwardMetrics);
         if (!SkiaComposerStrip.TryHitTestCaretAtPoint(
                 _composerBounds,
                 ComposerText ?? "",
@@ -479,6 +556,8 @@ public partial class SkiaChatSurfaceControl
                 composerPt,
                 composerLine,
                 _composerScrollOffsetY,
+                ComposerPreview,
+                composerPreviewPt,
                 out var index))
             return false;
 
@@ -493,6 +572,84 @@ public partial class SkiaChatSurfaceControl
         return true;
     }
 
+    internal bool TryPlaceCommandLineCaretAtPoint(float x, float y, bool extendSelection)
+    {
+        if (_commandLineBounds.Width <= 0 || !ShowCockpitCommandLine)
+            return false;
+
+        var cclPt = IntercomFonts.ResolveCommandLinePt(FeedUsesForwardMetrics);
+        if (!SkiaCommandLineStrip.TryHitTestCaretAtPoint(
+                _commandLineBounds,
+                CommandLineText ?? "/",
+                x,
+                y,
+                cclPt,
+                _commandLineScrollOffsetX,
+                out var index))
+            return false;
+
+        _commandLineExtendSelection = extendSelection;
+        if (!extendSelection)
+            _commandLineSelectionAnchor = index;
+
+        CommandLineCaretIndex = index;
+        EnsureCommandLineCaretVisible();
+        _textInputClient?.NotifyCursorMoved();
+        ShowComposerCaretSolid();
+        NotifyCommandLineDraftChanged();
+        return true;
+    }
+
+    private void EnsureCommandLineCaretVisible()
+    {
+        if (_commandLineBounds.Width <= 0)
+            return;
+
+        var cclPt = IntercomFonts.ResolveCommandLinePt(FeedUsesForwardMetrics);
+        var region = SkiaCommandLineStrip.ComputeInputRegion(_commandLineBounds, cclPt);
+        var maxScroll = SkiaCommandLineStrip.MaxHorizontalScroll(
+            CommandLineText ?? "/",
+            region.ContentWidth,
+            cclPt);
+
+        if (!SkiaCommandLineStrip.TryGetCaretRect(
+                _commandLineBounds,
+                CommandLineText ?? "/",
+                CommandLineCaretIndex,
+                cclPt,
+                _commandLineScrollOffsetX,
+                out var caret))
+            return;
+
+        var viewLeft = region.TextBounds.Left;
+        var viewRight = region.TextBounds.Right;
+        if (caret.Left < viewLeft)
+            _commandLineScrollOffsetX = Math.Max(0, _commandLineScrollOffsetX - (viewLeft - caret.Left));
+        else if (caret.Right > viewRight)
+            _commandLineScrollOffsetX = Math.Min(maxScroll, _commandLineScrollOffsetX + (caret.Right - viewRight));
+
+        _commandLineScrollOffsetX = Math.Clamp(_commandLineScrollOffsetX, 0f, maxScroll);
+    }
+
+    internal bool TryScrollCommandLine(float deltaX)
+    {
+        if (_commandLineBounds.Width <= 0)
+            return false;
+
+        var cclPt = IntercomFonts.ResolveCommandLinePt(FeedUsesForwardMetrics);
+        var region = SkiaCommandLineStrip.ComputeInputRegion(_commandLineBounds, cclPt);
+        var maxScroll = SkiaCommandLineStrip.MaxHorizontalScroll(
+            CommandLineText ?? "/",
+            region.ContentWidth,
+            cclPt);
+        if (maxScroll <= 0f)
+            return false;
+
+        _commandLineScrollOffsetX = Math.Clamp(_commandLineScrollOffsetX - deltaX, 0f, maxScroll);
+        InvalidateComposerChrome();
+        return true;
+    }
+
     private void EnsureComposerCaretVisible()
     {
         if (_composerBounds.Width <= 0)
@@ -500,8 +657,10 @@ public partial class SkiaChatSurfaceControl
 
         var composerPt = IntercomFonts.ResolveComposerPt(FeedUsesForwardMetrics);
         var composerLine = IntercomFonts.ResolveComposerLineHeight(FeedUsesForwardMetrics);
+        var composerPreviewPt = IntercomFonts.ResolveCommandLinePreviewPt(FeedUsesForwardMetrics);
+        var previewReserve = SkiaComposerStrip.SlashPreviewReserve(ComposerPreview, composerPreviewPt);
         var sendLeft = _composerBounds.Right - SkiaComposerStrip.HorizontalPadding - SkiaComposerStrip.SendButtonWidth;
-        var innerH = Math.Max(1f, _composerBounds.Height - SkiaComposerStrip.VerticalPadding * 2);
+        var innerH = Math.Max(1f, _composerBounds.Height - SkiaComposerStrip.VerticalPadding * 2 - previewReserve);
         var contentWidth = Math.Max(40f, sendLeft - 8f - (_composerBounds.Left + SkiaComposerStrip.HorizontalPadding));
         var maxScroll = SkiaComposerStrip.MaxContentScrollOffset(
             ComposerText ?? "",
@@ -519,11 +678,13 @@ public partial class SkiaChatSurfaceControl
                 composerPt,
                 composerLine,
                 out var caret,
-                _composerScrollOffsetY))
+                _composerScrollOffsetY,
+                ComposerPreview,
+                composerPreviewPt))
             return;
 
         var viewTop = _composerBounds.Top + SkiaComposerStrip.VerticalPadding;
-        var viewBottom = _composerBounds.Bottom - SkiaComposerStrip.VerticalPadding;
+        var viewBottom = _composerBounds.Bottom - SkiaComposerStrip.VerticalPadding - previewReserve;
         if (caret.Top < viewTop)
             _composerScrollOffsetY = Math.Max(0, _composerScrollOffsetY - (viewTop - caret.Top));
         else if (caret.Bottom > viewBottom)
@@ -744,11 +905,12 @@ public partial class SkiaChatSurfaceControl
         if (!IsKeyboardFocusWithin)
             return;
 
-        if (TryHandleComposerClipboardKey(e))
-            return;
-
         if (ShowCockpitCommandLine && _commandLineFocused)
         {
+            if (TryHandleCommandLineClipboardKey(e))
+                return;
+
+            var cclExtendSel = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
             if (e.Key == Key.Back)
             {
                 DeleteCommandLine(-1);
@@ -761,17 +923,30 @@ public partial class SkiaChatSurfaceControl
             }
             else if (e.Key == Key.Left)
             {
-                MoveCommandLineCaret(-1);
+                MoveCommandLineCaret(-1, cclExtendSel);
                 e.Handled = true;
             }
             else if (e.Key == Key.Right)
             {
-                MoveCommandLineCaret(1);
+                MoveCommandLineCaret(1, cclExtendSel);
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Home)
+            {
+                MoveCommandLineCaretTo(0, cclExtendSel);
+                e.Handled = true;
+            }
+            else if (e.Key == Key.End)
+            {
+                MoveCommandLineCaretTo((CommandLineText ?? "").Length, cclExtendSel);
                 e.Handled = true;
             }
 
             return;
         }
+
+        if (TryHandleComposerClipboardKey(e))
+            return;
 
         var extendSel = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
 
@@ -816,42 +991,167 @@ public partial class SkiaChatSurfaceControl
         _commandLineFocused = true;
         var current = CommandLineText ?? "";
         var caret = Math.Clamp(CommandLineCaretIndex, 0, current.Length);
-        CommandLineText = current.Insert(caret, text);
+        if (HasCommandLineSelection)
+        {
+            var (start, end) = GetCommandLineSelectionRange();
+            current = current[..start] + current[end..];
+            caret = start;
+            _commandLineSelectionAnchor = start;
+        }
+
         CommandLineCaretIndex = caret + text.Length;
+        _commandLineSelectionAnchor = CommandLineCaretIndex;
+        CommandLineText = current.Insert(caret, text);
+        EnsureCommandLineCaretVisible();
+        _textInputClient?.NotifyTextChanged();
+        _textInputClient?.NotifyCursorMoved();
         ShowComposerCaretSolid();
-        InvalidateVisual();
-        NotifyComposerDraftChanged();
+        NotifyCommandLineDraftChanged();
     }
 
     private void DeleteCommandLine(int direction)
     {
         var current = CommandLineText ?? "";
         var caret = Math.Clamp(CommandLineCaretIndex, 0, current.Length);
-        if (direction < 0)
+        if (HasCommandLineSelection)
+        {
+            var (start, end) = GetCommandLineSelectionRange();
+            CommandLineText = current[..start] + current[end..];
+            CommandLineCaretIndex = start;
+            _commandLineSelectionAnchor = start;
+        }
+        else if (direction < 0)
         {
             if (caret == 0)
                 return;
             CommandLineText = current.Remove(caret - 1, 1);
             CommandLineCaretIndex = caret - 1;
+            _commandLineSelectionAnchor = CommandLineCaretIndex;
         }
         else
         {
             if (caret >= current.Length)
                 return;
             CommandLineText = current.Remove(caret, 1);
-            CommandLineCaretIndex = caret;
+            _commandLineSelectionAnchor = caret;
         }
 
+        EnsureCommandLineCaretVisible();
+        _textInputClient?.NotifyTextChanged();
+        _textInputClient?.NotifyCursorMoved();
         ShowComposerCaretSolid();
-        InvalidateVisual();
+        NotifyCommandLineDraftChanged();
     }
 
-    private void MoveCommandLineCaret(int delta)
+    private (int Start, int End) GetCommandLineSelectionRange()
     {
         var len = (CommandLineText ?? "").Length;
-        CommandLineCaretIndex = Math.Clamp(CommandLineCaretIndex + delta, 0, len);
+        var caret = Math.Clamp(CommandLineCaretIndex, 0, len);
+        var anchor = Math.Clamp(_commandLineSelectionAnchor, 0, len);
+        return caret < anchor ? (caret, anchor) : (anchor, caret);
+    }
+
+    private bool HasCommandLineSelection => GetCommandLineSelectionRange().Start != GetCommandLineSelectionRange().End;
+
+    internal void CollapseCommandLineSelection()
+    {
+        var len = (CommandLineText ?? "").Length;
+        _commandLineSelectionAnchor = Math.Clamp(CommandLineCaretIndex, 0, len);
+    }
+
+    internal void SetCommandLineSelectionAnchor(int anchor)
+    {
+        var len = (CommandLineText ?? "").Length;
+        _commandLineSelectionAnchor = Math.Clamp(anchor, 0, len);
+    }
+
+    private void MoveCommandLineCaret(int delta, bool extendSelection)
+    {
+        var len = (CommandLineText ?? "").Length;
+        var next = Math.Clamp(CommandLineCaretIndex + delta, 0, len);
+        _commandLineExtendSelection = extendSelection;
+        if (!extendSelection)
+            _commandLineSelectionAnchor = next;
+
+        CommandLineCaretIndex = next;
+        EnsureCommandLineCaretVisible();
+        _textInputClient?.NotifyCursorMoved();
         ShowComposerCaretSolid();
-        InvalidateVisual();
+        NotifyCommandLineDraftChanged();
+    }
+
+    private void MoveCommandLineCaretTo(int index, bool extendSelection)
+    {
+        var len = (CommandLineText ?? "").Length;
+        index = Math.Clamp(index, 0, len);
+        _commandLineExtendSelection = extendSelection;
+        if (!extendSelection)
+            _commandLineSelectionAnchor = index;
+
+        CommandLineCaretIndex = index;
+        EnsureCommandLineCaretVisible();
+        _textInputClient?.NotifyCursorMoved();
+        ShowComposerCaretSolid();
+        NotifyCommandLineDraftChanged();
+    }
+
+    private bool TryHandleCommandLineClipboardKey(KeyEventArgs e)
+    {
+        var ctrl = e.KeyModifiers.HasFlag(KeyModifiers.Control);
+        if (!ctrl)
+            return false;
+
+        if (e.Key == Key.A)
+        {
+            _commandLineSelectionAnchor = 0;
+            CommandLineCaretIndex = (CommandLineText ?? "").Length;
+            ShowComposerCaretSolid();
+            e.Handled = true;
+            return true;
+        }
+
+        if (e.Key is Key.C or Key.X)
+        {
+            if (!HasCommandLineSelection)
+                return false;
+
+            var (start, end) = GetCommandLineSelectionRange();
+            var slice = (CommandLineText ?? "")[start..end];
+            _ = SetClipboardTextAsync(slice);
+            if (e.Key == Key.X)
+            {
+                CommandLineText = (CommandLineText ?? "")[..start] + (CommandLineText ?? "")[end..];
+                CommandLineCaretIndex = start;
+                _commandLineSelectionAnchor = start;
+                _textInputClient?.NotifyTextChanged();
+                NotifyCommandLineDraftChanged();
+            }
+
+            e.Handled = true;
+            return true;
+        }
+
+        if (e.Key == Key.V)
+        {
+            _ = PasteCommandLineFromClipboardAsync();
+            e.Handled = true;
+            return true;
+        }
+
+        return false;
+    }
+
+    private async Task PasteCommandLineFromClipboardAsync()
+    {
+        var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
+        if (clipboard is null)
+            return;
+
+        var pasted = await clipboard.TryGetTextAsync();
+        if (string.IsNullOrEmpty(pasted))
+            return;
+
+        InsertCommandLineText(pasted);
     }
 
     private static bool TryMapComposerTextKey(KeyEventArgs e, out string text)
@@ -873,6 +1173,8 @@ public partial class SkiaChatSurfaceControl
     }
 
     private void NotifyComposerDraftChanged() => ComposerDraftChanged?.Invoke(this, EventArgs.Empty);
+
+    private void NotifyCommandLineDraftChanged() => CommandLineDraftChanged?.Invoke(this, EventArgs.Empty);
 
     private static IntercomComposerKeyKind? MapComposerKey(KeyEventArgs e) => e.Key switch
     {
@@ -976,26 +1278,4 @@ public partial class SkiaChatSurfaceControl
         ShowComposerCaretSolid();
     }
 
-}
-
-public enum IntercomComposerKeyKind
-{
-    Tab,
-    SlashUp,
-    SlashDown,
-    Escape,
-    Enter,
-    CommitSlashSuggestion,
-    InsertNewLine,
-    Backspace,
-    DeleteForward,
-    MoveCaretLeft,
-    MoveCaretRight,
-}
-
-public sealed class IntercomComposerKeyEventArgs(IntercomComposerKeyKind kind, KeyEventArgs? keyEvent = null) : EventArgs
-{
-    public IntercomComposerKeyKind Kind { get; } = kind;
-
-    public KeyEventArgs? KeyEvent { get; } = keyEvent;
 }

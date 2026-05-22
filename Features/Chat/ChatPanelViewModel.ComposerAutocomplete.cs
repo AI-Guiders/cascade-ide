@@ -57,7 +57,11 @@ public partial class ChatPanelViewModel
         }
     }
 
-    partial void OnChatComposerCaretIndexChanged(int value) => RefreshComposerAutocomplete();
+    partial void OnChatComposerCaretIndexChanged(int value)
+    {
+        RefreshComposerAutocomplete();
+        RefreshComposerSlashPreview();
+    }
 
     /// <summary>Slash popup для Cockpit Command Line (тот же каталог, что у composer).</summary>
     public void RefreshCockpitCommandLineAutocomplete(string? inputOverride = null, int? caretOverride = null)
@@ -104,6 +108,7 @@ public partial class ChatPanelViewModel
 
         RefreshChatSlashAutocomplete(text, caretOverride: caret);
         rebuildComposerPopup();
+        RefreshComposerSlashPreview(text, caret);
     }
 
     private void rebuildComposerPopup()

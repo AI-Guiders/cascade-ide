@@ -24,6 +24,7 @@
 
     <Panel Background="{DynamicResource CascadeTheme.ChatPanelBackground}">
         <views:IntercomSkiaSurface x:Name="IntercomSkiaSurface"
+                                   ToolTip.Tip="{Binding IntercomSlashPreviewToolTip}"
                                    HorizontalAlignment="Stretch"
                                    VerticalAlignment="Stretch"
                                    Snapshot="{Binding ChatSurfaceSnapshot}"
@@ -48,9 +49,12 @@
                                    SlashAutocompleteNextStep="{Binding ChatSlashNextStepLabel}"
                                    SlashAutocompleteBreadcrumb="{Binding ChatSlashBreadcrumb}"
                                    ComposerCaretIndex="{Binding ChatComposerCaretIndex, Mode=TwoWay}"
+                                   ComposerPreview="{Binding ComposerSlashPreview}"
+                                   ComposerPreviewKind="{Binding ComposerSlashPreviewKind}"
                                    ShowCockpitCommandLine="{Binding IsCockpitCommandLineOpen}"
                                    CommandLineText="{Binding CockpitCommandLineText, Mode=TwoWay}"
-                                   CommandLinePreview="{Binding CockpitCommandLinePreview}"
+                                   CommandLinePreview="{Binding CommandLineSlashPreview}"
+                                   CommandLinePreviewKind="{Binding CommandLineSlashPreviewKind}"
                                    CommandLineCaretIndex="{Binding CockpitCommandLineCaretIndex, Mode=TwoWay}"/>
 
         <Border IsVisible="{Binding HasActiveClarificationBatch}"

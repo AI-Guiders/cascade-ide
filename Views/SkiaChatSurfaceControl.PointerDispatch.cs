@@ -60,6 +60,11 @@ public partial class SkiaChatSurfaceControl
                 ClearNavigatorSearchFocus();
                 _commandLineFocused = true;
                 Focus();
+                var cclPoint = e.GetPosition(this);
+                TryPlaceCommandLineCaretAtPoint(
+                    (float)cclPoint.X,
+                    (float)cclPoint.Y,
+                    e.KeyModifiers.HasFlag(KeyModifiers.Shift));
                 return true;
             case SkiaChatPointerAction.ComposerFocus:
                 if (!ShowIntercomComposer)
@@ -171,6 +176,15 @@ public partial class SkiaChatSurfaceControl
             _slashPopupScrollOffset = SkiaPopupList.ClampScrollOffset(
                 _slashPopupScrollOffset + deltaRows,
                 _slashRows.Count);
+            return true;
+        }
+
+        if (_chatHits.ContainsPointerAction(point, SkiaChatPointerAction.CommandLineFocus)
+            && ShowCockpitCommandLine
+            && _commandLineFocused)
+        {
+            if (TryScrollCommandLine((float)(e.Delta.Y * WheelPixelsPerDelta)))
+                return true;
             return true;
         }
 

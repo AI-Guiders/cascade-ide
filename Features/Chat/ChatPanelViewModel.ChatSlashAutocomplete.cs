@@ -23,7 +23,11 @@ public partial class ChatPanelViewModel
     [ObservableProperty]
     private string? _chatSlashBreadcrumb;
 
-    partial void OnChatInputChanged(string value) => RefreshComposerAutocomplete();
+    partial void OnChatInputChanged(string value)
+    {
+        RefreshComposerAutocomplete();
+        RefreshComposerSlashPreview();
+    }
 
     /// <param name="inputOverride">Текст из TextBox при <c>TextChanged</c> (биндинг может отставать на один тик).</param>
     /// <param name="caretOverride">Каретка из Skia composer (приоритет над VM, если биндинг отстаёт).</param>

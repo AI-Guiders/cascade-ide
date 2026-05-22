@@ -189,9 +189,18 @@ public partial class SkiaChatSurfaceControl : Control
             ShowCockpitCommandLineProperty,
             CommandLineTextProperty,
             CommandLinePreviewProperty,
-            CommandLineCaretIndexProperty);
+            CommandLinePreviewKindProperty,
+            CommandLineCaretIndexProperty,
+            ComposerPreviewProperty,
+            ComposerPreviewKindProperty);
 
         ShowCockpitCommandLineProperty.Changed.AddClassHandler<SkiaChatSurfaceControl>(OnShowCockpitCommandLineChanged);
+        CommandLineTextProperty.Changed.AddClassHandler<SkiaChatSurfaceControl>(OnCommandLineTextChanged);
+        CommandLineCaretIndexProperty.Changed.AddClassHandler<SkiaChatSurfaceControl>(OnCommandLineCaretIndexChanged);
+        ComposerPreviewProperty.Changed.AddClassHandler<SkiaChatSurfaceControl>(OnComposerPreviewChanged);
+        ComposerPreviewKindProperty.Changed.AddClassHandler<SkiaChatSurfaceControl>(OnComposerPreviewChanged);
+        CommandLinePreviewProperty.Changed.AddClassHandler<SkiaChatSurfaceControl>(OnCommandLinePreviewChanged);
+        CommandLinePreviewKindProperty.Changed.AddClassHandler<SkiaChatSurfaceControl>(OnCommandLinePreviewChanged);
         TopicNavigatorSearchQueryProperty.Changed.AddClassHandler<SkiaChatSurfaceControl>(OnTopicNavigatorSearchQueryChanged);
     }
 
@@ -200,9 +209,37 @@ public partial class SkiaChatSurfaceControl : Control
         if (e.NewValue is true)
         {
             control._commandLineFocused = true;
+            control.CollapseCommandLineSelection();
             control.InvalidateVisual();
         }
     }
+
+    private static void OnCommandLineTextChanged(SkiaChatSurfaceControl control, AvaloniaPropertyChangedEventArgs e)
+    {
+        if (e.NewValue is null)
+            return;
+
+        control.CollapseCommandLineSelection();
+        control.InvalidateComposerChrome();
+    }
+
+    private static void OnCommandLineCaretIndexChanged(SkiaChatSurfaceControl control, AvaloniaPropertyChangedEventArgs e)
+    {
+        if (e.NewValue is not int)
+            return;
+
+        if (!control._commandLineExtendSelection)
+            control.CollapseCommandLineSelection();
+
+        control._commandLineExtendSelection = false;
+        control.InvalidateComposerChrome();
+    }
+
+    private static void OnComposerPreviewChanged(SkiaChatSurfaceControl control, AvaloniaPropertyChangedEventArgs e) =>
+        control.InvalidateComposerChrome();
+
+    private static void OnCommandLinePreviewChanged(SkiaChatSurfaceControl control, AvaloniaPropertyChangedEventArgs e) =>
+        control.InvalidateComposerChrome();
 
     public SkiaChatSurfaceControl()
     {

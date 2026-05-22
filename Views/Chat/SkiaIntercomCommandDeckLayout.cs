@@ -37,6 +37,8 @@ internal static class SkiaIntercomCommandDeckLayout
         bool showSlashHierarchyHeader = false,
         float composerFontSize = 12f,
         float composerLineHeight = 17f,
+        string? composerSlashPreview = null,
+        float composerSlashPreviewFontSize = 10f,
         float commandLineFontSize = 12f,
         float commandLinePreviewFontSize = 10f)
     {
@@ -51,7 +53,9 @@ internal static class SkiaIntercomCommandDeckLayout
             composerPreeditText,
             contentWidth,
             composerFontSize,
-            composerLineHeight);
+            composerLineHeight,
+            composerSlashPreview,
+            composerSlashPreviewFontSize);
         var commandLineHeight = showCommandLine
             ? SkiaCommandLineStrip.MeasureHeight(commandLinePreview, commandLineFontSize, commandLinePreviewFontSize)
             : 0f;
@@ -107,6 +111,8 @@ internal static class SkiaIntercomCommandDeckLayout
         bool showSlashHierarchyHeader = false,
         float composerFontSize = 12f,
         float composerLineHeight = 17f,
+        string? composerSlashPreview = null,
+        float composerSlashPreviewFontSize = 10f,
         float commandLineFontSize = 12f,
         float commandLinePreviewFontSize = 10f) =>
         Compute(
@@ -122,6 +128,8 @@ internal static class SkiaIntercomCommandDeckLayout
                 showSlashHierarchyHeader,
                 composerFontSize,
                 composerLineHeight,
+                composerSlashPreview,
+                composerSlashPreviewFontSize,
                 commandLineFontSize,
                 commandLinePreviewFontSize)
             .TotalHeight;

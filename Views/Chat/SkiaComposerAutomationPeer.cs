@@ -16,14 +16,19 @@ internal sealed class SkiaComposerAutomationPeer(SkiaChatSurfaceControl owner) :
     protected override string GetClassNameCore() => nameof(SkiaChatSurfaceControl);
 
     protected override string GetNameCore() =>
-        string.IsNullOrWhiteSpace(SkiaOwner.ComposerPlaceholder)
-            ? "Intercom composer"
-            : SkiaOwner.ComposerPlaceholder;
+        SkiaOwner.IsCommandLineInputActive
+            ? "Cockpit command line"
+            : string.IsNullOrWhiteSpace(SkiaOwner.ComposerPlaceholder)
+                ? "Intercom composer"
+                : SkiaOwner.ComposerPlaceholder;
 
-    protected override string GetAutomationIdCore() => "intercom-composer";
+    protected override string GetAutomationIdCore() =>
+        SkiaOwner.IsCommandLineInputActive ? "cockpit-command-line" : "intercom-composer";
 
-    protected override bool IsKeyboardFocusableCore() => SkiaOwner.ShowIntercomComposer && SkiaOwner.IsComposerEnabled;
+    protected override bool IsKeyboardFocusableCore() =>
+        SkiaOwner.ShowIntercomComposer && SkiaOwner.IsComposerEnabled;
 
     protected override bool HasKeyboardFocusCore() =>
-        SkiaOwner.IsKeyboardFocusWithin && !SkiaOwner.IsNavigatorSearchInputActive;
+        SkiaOwner.IsKeyboardFocusWithin
+        && !SkiaOwner.IsNavigatorSearchInputActive;
 }

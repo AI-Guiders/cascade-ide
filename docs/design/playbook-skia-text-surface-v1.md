@@ -1,5 +1,7 @@
 # Playbook: Skia text surface (composer) v1
 
+Семейство TCI (composer, CCL, navigator): см. `playbook-tci-v1.md`.
+
 **Связь:** [ADR 0123](../adr/0123-intercom-full-skia-surface-evolution.md), `Views/SkiaKit/SkiaPlainTextLayout.cs`, `SkiaComposerStrip.cs`.
 
 ## Инварианты (PR-review)
