@@ -9,6 +9,7 @@ internal static class SkiaPopupList
     public const float RowHeight = 52f;
     public const float MaxVisibleRows = 6f;
     public const float HorizontalPadding = 8f;
+    public const float HierarchyHeaderHeight = 34f;
     public const float CornerRadius = 8f;
 
     public static int ViewportRowCount(int rowCount) =>
@@ -35,8 +36,14 @@ internal static class SkiaPopupList
         return scrollOffset;
     }
 
-    public static float MeasureHeight(int rowCount) =>
-        rowCount <= 0 ? 0f : ViewportRowCount(rowCount) * RowHeight + HorizontalPadding * 2;
+    public static float MeasureHeight(int rowCount, bool showHierarchyHeader = false)
+    {
+        if (rowCount <= 0)
+            return 0f;
+
+        var header = showHierarchyHeader ? HierarchyHeaderHeight : 0f;
+        return header + ViewportRowCount(rowCount) * RowHeight + HorizontalPadding * 2;
+    }
 
     public static void Draw(
         SKCanvas canvas,
@@ -45,12 +52,18 @@ internal static class SkiaPopupList
         IReadOnlyList<SkiaPopupListRow> rows,
         int selectedIndex,
         int scrollOffset,
-        float layoutScale = 1f)
+        float layoutScale = 1f,
+        string? hierarchyPathPrefix = null,
+        string? hierarchyNextStep = null,
+        string? hierarchyBreadcrumb = null)
     {
         if (rows.Count == 0)
             return;
 
         scrollOffset = ClampScrollOffset(scrollOffset, rows.Count);
+        var showHeader = !string.IsNullOrWhiteSpace(hierarchyPathPrefix)
+                         || !string.IsNullOrWhiteSpace(hierarchyNextStep)
+                         || !string.IsNullOrWhiteSpace(hierarchyBreadcrumb);
 
         using var fill = new SKPaint { Color = theme.Surface, IsAntialias = true, Style = SKPaintStyle.Fill };
         canvas.DrawRoundRect(bounds, CornerRadius, CornerRadius, fill);
@@ -68,6 +81,19 @@ internal static class SkiaPopupList
         canvas.ClipRect(bounds);
 
         var y = bounds.Top + HorizontalPadding;
+        if (showHeader)
+        {
+            DrawHierarchyHeader(
+                canvas,
+                new SKRect(bounds.Left + 4f, y, bounds.Right - 4f, y + HierarchyHeaderHeight - 2f),
+                theme,
+                hierarchyPathPrefix,
+                hierarchyNextStep,
+                hierarchyBreadcrumb,
+                layoutScale);
+            y += HierarchyHeaderHeight;
+        }
+
         var visible = ViewportRowCount(rows.Count);
         for (var slot = 0; slot < visible; slot++)
         {
@@ -129,14 +155,21 @@ internal static class SkiaPopupList
         canvas.Restore();
     }
 
-    public static int HitTestRow(SKRect bounds, float x, float y, int rowCount, int scrollOffset)
+    public static int HitTestRow(
+        SKRect bounds,
+        float x,
+        float y,
+        int rowCount,
+        int scrollOffset,
+        bool showHierarchyHeader = false)
     {
         if (rowCount <= 0 || !bounds.Contains(x, y))
             return -1;
 
         scrollOffset = ClampScrollOffset(scrollOffset, rowCount);
 
-        var localY = y - bounds.Top - HorizontalPadding;
+        var headerOffset = showHierarchyHeader ? HierarchyHeaderHeight : 0f;
+        var localY = y - bounds.Top - HorizontalPadding - headerOffset;
         if (localY < 0)
             return -1;
 
@@ -147,6 +180,70 @@ internal static class SkiaPopupList
 
         var index = scrollOffset + slot;
         return index >= 0 && index < rowCount ? index : -1;
+    }
+
+    private static void DrawHierarchyHeader(
+        SKCanvas canvas,
+        SKRect headerRect,
+        ISkiaKitPaintTheme theme,
+        string? pathPrefix,
+        string? nextStep,
+        string? breadcrumb,
+        float layoutScale)
+    {
+        using var divider = new SKPaint
+        {
+            Color = theme.Border.WithAlpha(140),
+            IsAntialias = true,
+            StrokeWidth = 1f,
+        };
+        canvas.DrawLine(headerRect.Left, headerRect.Bottom, headerRect.Right, headerRect.Bottom, divider);
+
+        if (!string.IsNullOrWhiteSpace(breadcrumb))
+        {
+            using var crumbFont = SkiaKitFonts.CreateUi(9);
+            using var crumbPaint = SkiaKitFonts.CreateTextPaint(theme.EmptyHint);
+            SkiaKitFonts.DrawText(
+                canvas,
+                Truncate(breadcrumb, 80),
+                headerRect.Left + 6f,
+                headerRect.Top + 10f,
+                SKTextAlign.Left,
+                crumbFont,
+                crumbPaint,
+                layoutScale);
+        }
+
+        if (!string.IsNullOrWhiteSpace(pathPrefix))
+        {
+            using var pathFont = SkiaKitFonts.CreateUi(11, bold: true);
+            using var pathPaint = SkiaKitFonts.CreateTextPaint(theme.Content);
+            SkiaKitFonts.DrawText(
+                canvas,
+                Truncate(pathPrefix, 48),
+                headerRect.Left + 6f,
+                headerRect.Top + 22f,
+                SKTextAlign.Left,
+                pathFont,
+                pathPaint,
+                layoutScale);
+        }
+
+        if (!string.IsNullOrWhiteSpace(nextStep))
+        {
+            using var stepFont = SkiaKitFonts.CreateUi(10);
+            using var stepPaint = SkiaKitFonts.CreateTextPaint(theme.EmptyHint);
+            var stepLabel = $"→ {nextStep}";
+            SkiaKitFonts.DrawText(
+                canvas,
+                stepLabel,
+                headerRect.Right - 6f,
+                headerRect.Top + 22f,
+                SKTextAlign.Right,
+                stepFont,
+                stepPaint,
+                layoutScale);
+        }
     }
 
     private static string Truncate(string text, int maxChars) =>

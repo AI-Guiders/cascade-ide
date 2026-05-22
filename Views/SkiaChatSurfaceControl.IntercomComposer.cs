@@ -45,6 +45,15 @@ public partial class SkiaChatSurfaceControl
     public static readonly StyledProperty<IEnumerable<ChatSlashSuggestionItem>?> SlashSuggestionsProperty =
         AvaloniaProperty.Register<SkiaChatSurfaceControl, IEnumerable<ChatSlashSuggestionItem>?>(nameof(SlashSuggestions));
 
+    public static readonly StyledProperty<string?> SlashAutocompletePathPrefixProperty =
+        AvaloniaProperty.Register<SkiaChatSurfaceControl, string?>(nameof(SlashAutocompletePathPrefix));
+
+    public static readonly StyledProperty<string?> SlashAutocompleteNextStepProperty =
+        AvaloniaProperty.Register<SkiaChatSurfaceControl, string?>(nameof(SlashAutocompleteNextStep));
+
+    public static readonly StyledProperty<string?> SlashAutocompleteBreadcrumbProperty =
+        AvaloniaProperty.Register<SkiaChatSurfaceControl, string?>(nameof(SlashAutocompleteBreadcrumb));
+
     public static readonly StyledProperty<bool> ShowCockpitCommandLineProperty =
         AvaloniaProperty.Register<SkiaChatSurfaceControl, bool>(nameof(ShowCockpitCommandLine));
 
@@ -137,6 +146,29 @@ public partial class SkiaChatSurfaceControl
         get => GetValue(SlashSuggestionsProperty);
         set => SetValue(SlashSuggestionsProperty, value);
     }
+
+    public string? SlashAutocompletePathPrefix
+    {
+        get => GetValue(SlashAutocompletePathPrefixProperty);
+        set => SetValue(SlashAutocompletePathPrefixProperty, value);
+    }
+
+    public string? SlashAutocompleteNextStep
+    {
+        get => GetValue(SlashAutocompleteNextStepProperty);
+        set => SetValue(SlashAutocompleteNextStepProperty, value);
+    }
+
+    public string? SlashAutocompleteBreadcrumb
+    {
+        get => GetValue(SlashAutocompleteBreadcrumbProperty);
+        set => SetValue(SlashAutocompleteBreadcrumbProperty, value);
+    }
+
+    private bool ShowSlashHierarchyHeader =>
+        !string.IsNullOrWhiteSpace(SlashAutocompletePathPrefix)
+        || !string.IsNullOrWhiteSpace(SlashAutocompleteNextStep)
+        || !string.IsNullOrWhiteSpace(SlashAutocompleteBreadcrumb);
 
     public bool ShowCockpitCommandLine
     {
@@ -278,6 +310,7 @@ public partial class SkiaChatSurfaceControl
             composerText: ComposerText ?? "",
             showSlashPopup: IsSlashAutocompleteVisible && _slashRows.Count > 0,
             slashRowCount: _slashRows.Count,
+            showSlashHierarchyHeader: ShowSlashHierarchyHeader,
             fonts.ResolveComposerPt(FeedUsesForwardMetrics),
             fonts.ResolveComposerLineHeight(FeedUsesForwardMetrics),
             fonts.ResolveCommandLinePt(FeedUsesForwardMetrics),
@@ -327,6 +360,7 @@ public partial class SkiaChatSurfaceControl
             composerText: ComposerText ?? "",
             showSlashPopup: IsSlashAutocompleteVisible && _slashRows.Count > 0,
             slashRowCount: _slashRows.Count,
+            showSlashHierarchyHeader: ShowSlashHierarchyHeader,
             fonts.ResolveComposerPt(FeedUsesForwardMetrics),
             fonts.ResolveComposerLineHeight(FeedUsesForwardMetrics),
             fonts.ResolveCommandLinePt(FeedUsesForwardMetrics),
@@ -363,7 +397,10 @@ public partial class SkiaChatSurfaceControl
                 _slashRows,
                 selected,
                 _slashPopupScrollOffset,
-                layoutScale);
+                layoutScale,
+                SlashAutocompletePathPrefix,
+                SlashAutocompleteNextStep,
+                SlashAutocompleteBreadcrumb);
         }
         else
         {

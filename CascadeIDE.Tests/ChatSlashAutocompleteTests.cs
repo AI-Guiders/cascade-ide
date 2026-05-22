@@ -240,6 +240,35 @@ public sealed class ChatSlashAutocompleteTests
 
 
     [Fact]
+    public void GetHierarchyContext_RootSlash_ShowsDomainStep()
+    {
+        var ctx = ChatSlashAutocomplete.GetHierarchyContext("/");
+        Assert.NotNull(ctx);
+        Assert.Equal("/", ctx.PathPrefix);
+        Assert.Equal("домен", ctx.NextStepLabel);
+        Assert.Contains("домен", ctx.Breadcrumb, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void GetHierarchyContext_IntercomDomain_ShowsObjectStep()
+    {
+        var ctx = ChatSlashAutocomplete.GetHierarchyContext("/intercom ");
+        Assert.NotNull(ctx);
+        Assert.Equal("/intercom", ctx.PathPrefix);
+        Assert.Equal("объект", ctx.NextStepLabel);
+        Assert.Contains("intercom", ctx.Breadcrumb, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void GetHierarchyContext_IntercomTopic_ShowsIntentStep()
+    {
+        var ctx = ChatSlashAutocomplete.GetHierarchyContext("/intercom topic ");
+        Assert.NotNull(ctx);
+        Assert.Equal("/intercom topic", ctx.PathPrefix);
+        Assert.Equal("действие", ctx.NextStepLabel);
+    }
+
+    [Fact]
 
     public void TryReplaceSlashLineAtCaret_PreservesTextBeforeSlashLine()
 

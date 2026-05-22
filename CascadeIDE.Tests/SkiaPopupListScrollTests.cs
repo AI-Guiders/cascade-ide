@@ -63,4 +63,12 @@ public sealed class SkiaPopupListScrollTests
             SkiaPopupList.ViewportRowCount(20) * SkiaPopupList.RowHeight + SkiaPopupList.HorizontalPadding * 2,
             SkiaPopupList.MeasureHeight(20));
     }
+
+    [Fact]
+    public void MeasureHeight_includes_hierarchy_header_when_requested()
+    {
+        var without = SkiaPopupList.MeasureHeight(2, showHierarchyHeader: false);
+        var withHeader = SkiaPopupList.MeasureHeight(2, showHierarchyHeader: true);
+        Assert.Equal(without + SkiaPopupList.HierarchyHeaderHeight, withHeader);
+    }
 }

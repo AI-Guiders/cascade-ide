@@ -33,6 +33,7 @@ internal static class SkiaIntercomCommandDeckLayout
         string composerText,
         bool showSlashPopup,
         int slashRowCount,
+        bool showSlashHierarchyHeader = false,
         float composerFontSize = 12f,
         float composerLineHeight = 17f,
         float commandLineFontSize = 12f,
@@ -54,7 +55,7 @@ internal static class SkiaIntercomCommandDeckLayout
             ? SkiaCommandLineStrip.MeasureHeight(commandLinePreview, commandLineFontSize, commandLinePreviewFontSize)
             : 0f;
         var popupHeight = showSlashPopup && slashRowCount > 0
-            ? SkiaPopupList.MeasureHeight(slashRowCount) + PopupInnerPadding
+            ? SkiaPopupList.MeasureHeight(slashRowCount, showSlashHierarchyHeader) + PopupInnerPadding
             : 0f;
 
         var cursor = surfaceBottom;
@@ -101,6 +102,7 @@ internal static class SkiaIntercomCommandDeckLayout
         string composerText,
         bool showSlashPopup,
         int slashRowCount,
+        bool showSlashHierarchyHeader = false,
         float composerFontSize = 12f,
         float composerLineHeight = 17f,
         float commandLineFontSize = 12f,
@@ -114,6 +116,7 @@ internal static class SkiaIntercomCommandDeckLayout
                 composerText,
                 showSlashPopup,
                 slashRowCount,
+                showSlashHierarchyHeader,
                 composerFontSize,
                 composerLineHeight,
                 commandLineFontSize,

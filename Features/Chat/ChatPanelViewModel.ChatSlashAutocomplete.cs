@@ -14,6 +14,15 @@ public partial class ChatPanelViewModel
     [ObservableProperty]
     private int _selectedChatSlashSuggestionIndex = -1;
 
+    [ObservableProperty]
+    private string? _chatSlashPathPrefix;
+
+    [ObservableProperty]
+    private string? _chatSlashNextStepLabel;
+
+    [ObservableProperty]
+    private string? _chatSlashBreadcrumb;
+
     partial void OnChatInputChanged(string value) => RefreshComposerAutocomplete();
 
     /// <param name="inputOverride">Текст из TextBox при <c>TextChanged</c> (биндинг может отставать на один тик).</param>
@@ -37,6 +46,12 @@ public partial class ChatPanelViewModel
             OnPropertyChanged(nameof(IsChatSlashAutocompleteVisible));
 
         SelectedChatSlashSuggestionIndex = visible ? 0 : -1;
+
+        var hierarchy = ChatSlashAutocomplete.GetHierarchyContext(text, caret);
+        ChatSlashPathPrefix = hierarchy?.PathPrefix;
+        ChatSlashNextStepLabel = hierarchy?.NextStepLabel;
+        ChatSlashBreadcrumb = hierarchy?.Breadcrumb;
+
         rebuildComposerPopup();
     }
 
@@ -99,5 +114,11 @@ public partial class ChatPanelViewModel
         return true;
     }
 
-    public void DismissChatSlashAutocomplete() => IsChatSlashAutocompleteVisible = false;
+    public void DismissChatSlashAutocomplete()
+    {
+        IsChatSlashAutocompleteVisible = false;
+        ChatSlashPathPrefix = null;
+        ChatSlashNextStepLabel = null;
+        ChatSlashBreadcrumb = null;
+    }
 }

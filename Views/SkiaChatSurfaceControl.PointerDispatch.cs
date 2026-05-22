@@ -46,7 +46,8 @@ public partial class SkiaChatSurfaceControl
                     (float)popupPoint.X,
                     (float)popupPoint.Y,
                     _slashRows.Count,
-                    _slashPopupScrollOffset);
+                    _slashPopupScrollOffset,
+                    ShowSlashHierarchyHeader);
                 if (row < 0)
                     return false;
                 SelectedSlashSuggestionIndex = row;

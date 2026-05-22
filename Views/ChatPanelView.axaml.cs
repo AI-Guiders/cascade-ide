@@ -1,4 +1,5 @@
 using System.Collections.Specialized;
+using System.ComponentModel;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -36,6 +37,7 @@ public partial class ChatPanelView : UserControl
         {
             _subscribedVm.IntercomPanelFontsChanged -= OnIntercomPanelFontsChanged;
             _subscribedVm.ComposerPopupSuggestions.CollectionChanged -= OnComposerPopupSuggestionsChanged;
+            _subscribedVm.PropertyChanged -= OnChatPanelVmPropertyChanged;
         }
 
         _subscribedVm = DataContext as ChatPanelViewModel;
@@ -43,6 +45,7 @@ public partial class ChatPanelView : UserControl
         {
             _subscribedVm.IntercomPanelFontsChanged += OnIntercomPanelFontsChanged;
             _subscribedVm.ComposerPopupSuggestions.CollectionChanged += OnComposerPopupSuggestionsChanged;
+            _subscribedVm.PropertyChanged += OnChatPanelVmPropertyChanged;
         }
 
         TryApplyPanelFonts();
@@ -74,6 +77,14 @@ public partial class ChatPanelView : UserControl
 
     private void OnComposerPopupSuggestionsChanged(object? sender, NotifyCollectionChangedEventArgs e) =>
         IntercomSkiaSurface.InvalidateVisual();
+
+    private void OnChatPanelVmPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is nameof(ChatPanelViewModel.ChatSlashPathPrefix)
+            or nameof(ChatPanelViewModel.ChatSlashNextStepLabel)
+            or nameof(ChatPanelViewModel.ChatSlashBreadcrumb))
+            IntercomSkiaSurface.InvalidateVisual();
+    }
 
     private void OnIntercomPanelFontsChanged(object? sender, IntercomFontsSettings fonts) =>
         ChatPanelTypographyApplier.Apply(this, fonts);

@@ -20,6 +20,12 @@ public sealed record ChatSlashSuggestion(
             : $"{SlashPath} — {Help}";
 }
 
+/// <summary>Контекст иерархии slash для шапки popup (путь + следующий шаг).</summary>
+public sealed record ChatSlashHierarchyContext(string PathPrefix, string NextStepLabel, string Breadcrumb)
+{
+    public bool HasHeader => !string.IsNullOrEmpty(PathPrefix) || !string.IsNullOrEmpty(NextStepLabel);
+}
+
 /// <summary>Иерархические подсказки для <c>/</c> в ChatInput (ADR 0119 §6, 0125 dynamic).</summary>
 public static class ChatSlashAutocomplete
 {
@@ -63,6 +69,29 @@ public static class ChatSlashAutocomplete
             return topicSuggestions;
 
         return BuildStaticSegmentSuggestions(body);
+    }
+
+    /// <summary>Путь и подпись шага для шапки popup (домен → объект → действие → аргумент).</summary>
+    public static ChatSlashHierarchyContext? GetHierarchyContext(string? rawInput, int? caretIndex = null)
+    {
+        if (string.IsNullOrEmpty(rawInput))
+            return null;
+
+        if (!TryGetSlashTokenBeforeCaret(rawInput, caretIndex ?? rawInput.Length, out var body))
+            return null;
+
+        ParseTypedBody(body, out var tokens, out var endsWithSpace);
+        var pathPrefix = body.Length == 0 ? "/" : "/" + body.TrimEnd();
+        var depth = ResolveHierarchyDepth(tokens, endsWithSpace);
+        var nextStep = depth switch
+        {
+            0 => "домен",
+            1 => "объект",
+            2 => "действие",
+            _ => "аргумент",
+        };
+
+        return new ChatSlashHierarchyContext(pathPrefix, nextStep, BuildBreadcrumb(tokens, nextStep));
     }
 
     /// <summary>Заменить slash-токен на текущей строке; вернуть полный текст и каретку.</summary>
@@ -403,6 +432,27 @@ public static class ChatSlashAutocomplete
 
         lineStart += linePrefix.Length - trimmed.Length;
         return true;
+    }
+
+    private static int ResolveHierarchyDepth(IReadOnlyList<string> tokens, bool endsWithSpace)
+    {
+        if (tokens.Count == 0)
+            return 0;
+
+        return endsWithSpace ? tokens.Count : Math.Max(0, tokens.Count - 1);
+    }
+
+    private static string BuildBreadcrumb(IReadOnlyList<string> tokens, string nextStepLabel)
+    {
+        if (tokens.Count == 0)
+            return $"/ → {nextStepLabel}";
+
+        var parts = new List<string>(tokens.Count + 2) { "/" };
+        foreach (var token in tokens)
+            parts.Add(token);
+
+        parts.Add("…");
+        return string.Join(" › ", parts);
     }
 
     private static string FormatDynamicStepSegment(string insertTail)
