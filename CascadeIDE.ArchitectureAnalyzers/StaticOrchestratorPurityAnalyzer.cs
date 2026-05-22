@@ -17,17 +17,17 @@ public sealed class StaticOrchestratorPurityAnalyzer : DiagnosticAnalyzer
     public const string StatefulStaticOrchestratorId = "CASCOPE030";
     public const string ExternalIoInStaticOrchestratorId = "CASCOPE031";
 
-    private static readonly ImmutableHashSet<string> ForbiddenExternalTypeNames =
-        ImmutableHashSet.Create(
-            StringComparer.Ordinal,
-            "File",
-            "Directory",
-            "FileInfo",
-            "DirectoryInfo",
-            "Process",
-            "HttpClient",
-            "WebRequest",
-            "WebClient");
+    private static readonly ImmutableHashSet<string> ForbiddenExternalTypeNames = BuildForbiddenExternalTypeNames();
+
+    private static ImmutableHashSet<string> BuildForbiddenExternalTypeNames()
+    {
+        var builder = ImmutableHashSet.CreateBuilder<string>(StringComparer.Ordinal);
+        foreach (var name in ArchitectureForbiddenApiSyntax.ForbiddenExternalTypeNames)
+            builder.Add(name);
+        builder.Add("WebRequest");
+        builder.Add("WebClient");
+        return builder.ToImmutable();
+    }
 
     private static readonly DiagnosticDescriptor StatefulStaticOrchestratorRule = new(
         StatefulStaticOrchestratorId,
@@ -84,16 +84,15 @@ public sealed class StaticOrchestratorPurityAnalyzer : DiagnosticAnalyzer
             return;
         if (invocation.Expression is not MemberAccessExpressionSyntax memberAccess)
             return;
-        if (memberAccess.Expression is not IdentifierNameSyntax id)
-            return;
-        if (!ForbiddenExternalTypeNames.Contains(id.Identifier.ValueText))
+        var apiType = ArchitectureForbiddenApiSyntax.GetForbiddenApiTypeName(memberAccess.Expression);
+        if (apiType is null || !ForbiddenExternalTypeNames.Contains(apiType))
             return;
 
         context.ReportDiagnostic(Diagnostic.Create(
             ExternalIoInStaticOrchestratorRule,
             memberAccess.GetLocation(),
             classDeclaration.Identifier.ValueText,
-            id.Identifier.ValueText));
+            apiType));
     }
 
     private static void AnalyzeObjectCreation(SyntaxNodeAnalysisContext context)
@@ -102,7 +101,7 @@ public sealed class StaticOrchestratorPurityAnalyzer : DiagnosticAnalyzer
             return;
         if (!TryGetTargetStaticOrchestrator(creation, out var classDeclaration))
             return;
-        var typeName = ExtractSimpleTypeName(creation.Type);
+        var typeName = ArchitectureForbiddenApiSyntax.ExtractSimpleTypeName(creation.Type);
         if (typeName is null || !ForbiddenExternalTypeNames.Contains(typeName))
             return;
 
@@ -139,13 +138,4 @@ public sealed class StaticOrchestratorPurityAnalyzer : DiagnosticAnalyzer
             && normalized.Contains("/Application/", StringComparison.OrdinalIgnoreCase);
     }
 
-    private static string? ExtractSimpleTypeName(TypeSyntax typeSyntax) =>
-        typeSyntax switch
-        {
-            IdentifierNameSyntax i => i.Identifier.ValueText,
-            QualifiedNameSyntax q => q.Right.Identifier.ValueText,
-            GenericNameSyntax g => g.Identifier.ValueText,
-            AliasQualifiedNameSyntax a => a.Name.Identifier.ValueText,
-            _ => null
-        };
 }

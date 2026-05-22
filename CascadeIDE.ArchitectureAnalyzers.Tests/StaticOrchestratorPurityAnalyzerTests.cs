@@ -65,6 +65,24 @@ public sealed class StaticOrchestratorPurityAnalyzerTests
     }
 
     [Fact]
+    public async Task CASCOPE031_QualifiedFileAccess_InOrchestrator_Reports()
+    {
+        var diags = await RunAnalyzerAsync((
+            @"D:\repo\Features\IdeMcp\Application\BadOrchestrator.cs",
+            """
+            namespace CascadeIDE.Features.IdeMcp.Application;
+
+            public static class BadOrchestrator
+            {
+                public static bool Exists(string path) => System.IO.File.Exists(path);
+            }
+            """));
+
+        var d = Assert.Single(diags);
+        Assert.Equal(StaticOrchestratorPurityAnalyzer.ExternalIoInStaticOrchestratorId, d.Id);
+    }
+
+    [Fact]
     public async Task PureStaticOrchestrator_DoesNotReport()
     {
         var diags = await RunAnalyzerAsync((
