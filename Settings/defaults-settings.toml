@@ -180,6 +180,10 @@ enabled = true
 show_assignments = true
 show_conditions = true
 
+[intercom]
+# comfortable — prose_pt, просторная лента; compact — prose_pt_forward + плотные отступы (legacy Forward)
+feed_metrics = "compact"
+
 [intercom.attachments.code]
 navigate = "reveal"
 reveal_load_solution = "when_needed"

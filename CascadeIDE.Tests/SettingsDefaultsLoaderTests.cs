@@ -1,3 +1,4 @@
+using CascadeIDE.Models;
 using CascadeIDE.Services;
 using Xunit;
 
@@ -12,6 +13,8 @@ public sealed class SettingsDefaultsLoaderTests
         Assert.Contains("[fonts.intercom]", text, StringComparison.Ordinal);
         Assert.Contains("prose_pt = 13", text, StringComparison.Ordinal);
         Assert.Contains("prose_pt_forward = 12", text, StringComparison.Ordinal);
+        Assert.Contains("[intercom]", text, StringComparison.Ordinal);
+        Assert.Contains("feed_metrics = \"compact\"", text, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -36,6 +39,8 @@ public sealed class SettingsDefaultsLoaderTests
         Assert.Equal("editor", s.Workspace.PrimaryWorkSurface);
         Assert.True(s.HybridIndex.Enabled);
         Assert.Equal("rg", s.CommandPalette.GoToSearch.Backend);
+        Assert.False(s.Intercom.UseComfortableFeedMetrics());
+        Assert.Equal(IntercomFeedMetricsModes.Compact, s.Intercom.FeedMetrics);
     }
 
     [Fact]

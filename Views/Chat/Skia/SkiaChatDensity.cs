@@ -2,7 +2,7 @@
 
 namespace CascadeIDE.Views.Chat.Skia;
 
-/// <summary>Метрики пузырей: MFD (comfortable) vs Forward-хост (плотнее chrome/spine). Не ширина split-колонки.</summary>
+/// <summary>Метрики пузырей: compact Forward feed (<see cref="SkiaChatSurfaceControl.ComfortableFeed"/> = false). Chrome spine/toolbar отдельно.</summary>
 internal static class SkiaChatDensity
 {
     public static SkiaChatBubbleSpec Apply(in SkiaChatBubbleSpec spec, bool forwardHost)

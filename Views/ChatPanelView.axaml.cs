@@ -1,3 +1,4 @@
+using System.Collections.Specialized;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -16,8 +17,8 @@ public partial class ChatPanelView : UserControl
     public ChatPanelView()
     {
         InitializeComponent();
-        WireIntercomSurface(ForwardIntercomSurface);
-        WireIntercomSurface(ClassicIntercomSurface);
+        WireIntercomSurface(IntercomSkiaSurface);
+        IntercomSkiaSurface.ComposerDraftChanged += OnIntercomComposerDraftChanged;
         Loaded += OnLoaded;
         DataContextChanged += OnDataContextChanged;
     }
@@ -28,14 +29,37 @@ public partial class ChatPanelView : UserControl
     private void OnDataContextChanged(object? sender, EventArgs e)
     {
         if (_subscribedVm is not null)
+        {
             _subscribedVm.IntercomPanelFontsChanged -= OnIntercomPanelFontsChanged;
+            _subscribedVm.ComposerPopupSuggestions.CollectionChanged -= OnComposerPopupSuggestionsChanged;
+        }
 
         _subscribedVm = DataContext as ChatPanelViewModel;
         if (_subscribedVm is not null)
+        {
             _subscribedVm.IntercomPanelFontsChanged += OnIntercomPanelFontsChanged;
+            _subscribedVm.ComposerPopupSuggestions.CollectionChanged += OnComposerPopupSuggestionsChanged;
+        }
 
         TryApplyPanelFonts();
     }
+
+    private void OnIntercomComposerDraftChanged(object? sender, EventArgs e)
+    {
+        if (DataContext is not ChatPanelViewModel vm)
+            return;
+
+        var text = IntercomSkiaSurface.ComposerText ?? "";
+        var caret = Math.Clamp(IntercomSkiaSurface.ComposerCaretIndex, 0, text.Length);
+        if (!string.Equals(vm.ChatInput, text, StringComparison.Ordinal))
+            vm.ChatInput = text;
+        if (vm.ChatComposerCaretIndex != caret)
+            vm.ChatComposerCaretIndex = caret;
+        vm.RefreshComposerAutocomplete(text);
+    }
+
+    private void OnComposerPopupSuggestionsChanged(object? sender, NotifyCollectionChangedEventArgs e) =>
+        IntercomSkiaSurface.InvalidateVisual();
 
     private void OnIntercomPanelFontsChanged(object? sender, IntercomFontsSettings fonts) =>
         ChatPanelTypographyApplier.Apply(this, fonts);

@@ -159,12 +159,15 @@ public partial class SkiaChatSurfaceControl
         }
     }
 
-    private void registerTopicNavigatorPointerHits(SkiaIntercomTopicNavigator.LayoutResult layout, float panelLeft, float chromeTop)
+    private void registerTopicNavigatorPointerHits(SkiaIntercomTopicNavigator.LayoutResult layout, float panelLeft)
     {
+        // RowHits.Bounds уже в координатах контрола (MapRowBoundsToPanel в Draw).
         foreach (var row in layout.RowHits)
         {
             var bounds = row.Bounds;
-            bounds.Offset(panelLeft, chromeTop);
+            if (panelLeft != 0f)
+                bounds.Offset(panelLeft, 0f);
+
             _chatHits.RegisterControlRect(
                 SkiaChatHitGeometry.ToControlRect(bounds),
                 new SkiaChatHit(null, row.ThreadId, ResetDetailMode: false));

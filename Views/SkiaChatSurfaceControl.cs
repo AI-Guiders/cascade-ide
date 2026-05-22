@@ -47,8 +47,13 @@ public partial class SkiaChatSurfaceControl : Control
     public static readonly StyledProperty<bool> OverviewModeProperty =
         AvaloniaProperty.Register<SkiaChatSurfaceControl, bool>(nameof(OverviewMode), false);
 
+    /// <summary>Forward chrome: toolbar, spine, вкладки (не метрики ленты).</summary>
     public static readonly StyledProperty<bool> ForwardHostProperty =
         AvaloniaProperty.Register<SkiaChatSurfaceControl, bool>(nameof(ForwardHost), false);
+
+    /// <summary>Comfortable feed/composer metrics; false — legacy compact Forward feed (prose_pt_forward + SkiaChatDensity).</summary>
+    public static readonly StyledProperty<bool> ComfortableFeedProperty =
+        AvaloniaProperty.Register<SkiaChatSurfaceControl, bool>(nameof(ComfortableFeed), false);
 
     /// <summary>Topic Navigator (ADR 0127-E): видимая боковая панель (MFD — pinned; Forward — toggle).</summary>
     public static readonly StyledProperty<bool> TopicNavigatorVisibleProperty =
@@ -102,6 +107,15 @@ public partial class SkiaChatSurfaceControl : Control
         set => SetValue(ForwardHostProperty, value);
     }
 
+    public bool ComfortableFeed
+    {
+        get => GetValue(ComfortableFeedProperty);
+        set => SetValue(ComfortableFeedProperty, value);
+    }
+
+    /// <summary>Compact feed metrics (инверсия <see cref="ComfortableFeed"/>).</summary>
+    private bool FeedUsesForwardMetrics => ForwardHost && !ComfortableFeed;
+
     public bool TopicNavigatorVisible
     {
         get => GetValue(TopicNavigatorVisibleProperty);
@@ -149,6 +163,9 @@ public partial class SkiaChatSurfaceControl : Control
             DetailThreadIdProperty,
             OverviewModeProperty,
             ForwardHostProperty,
+            ComfortableFeedProperty,
+            TopicNavigatorVisibleProperty,
+            TopicNavigatorSearchQueryProperty,
             IntercomFontsProperty,
             ChromeTitleProperty,
             LoadingStatusTextProperty,
@@ -254,7 +271,7 @@ public partial class SkiaChatSurfaceControl : Control
             snapshot,
             OverviewMode,
             DetailThreadId,
-            ForwardHost,
+            FeedUsesForwardMetrics,
             IntercomFonts);
         var width = Math.Max(160, Bounds.Width);
         var topicCountForMeasure = snapshot.Layout.Overview.Count;
@@ -463,7 +480,7 @@ public partial class SkiaChatSurfaceControl : Control
                 DetailThreadId,
                 TopicNavigatorSearchQuery,
                 _navigatorScrollOffset);
-            registerTopicNavigatorPointerHits(topicNavLayout, 0, chromeTop);
+            registerTopicNavigatorPointerHits(topicNavLayout, 0);
         }
 
         canvas.Save();

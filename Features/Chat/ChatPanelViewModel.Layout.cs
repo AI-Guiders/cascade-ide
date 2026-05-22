@@ -10,20 +10,22 @@ public partial class ChatPanelViewModel
     [ObservableProperty]
     private bool _isForwardIntercomLayout;
 
-    /// <summary>MFD Chat: Skia Intercom на странице Chat (ADR 0123).</summary>
+    /// <summary>Skia chrome: toolbar, spine, вкладки (лобовой Forward на весь экран).</summary>
+    public bool IntercomForwardChrome => IsForwardIntercomLayout;
+
+    /// <summary>Лента и composer: <c>comfortable</c> vs <c>compact</c> из <c>[intercom] feed_metrics</c>.</summary>
     [ObservableProperty]
-    private bool _useComfortableSkiaIntercomHost = true;
+    private bool _intercomComfortableFeed;
 
-    public bool IsSkiaIntercomHostVisible => IsForwardIntercomLayout || UseComfortableSkiaIntercomHost;
+    /// <summary>Устаревшее имя привязки: только chrome, не плотность ленты.</summary>
+    public bool IntercomForwardHost => IntercomForwardChrome;
 
-    /// <summary>Метрики ленты для Forward-хоста (плотнее). MFD Chat — false. Не «узкая колонка».</summary>
-    public bool IntercomForwardHost => IsForwardIntercomLayout;
-
-    /// <summary>Forward: toggle Navigator; MFD Skia — панель всегда при наличии тем (ADR 0127-E).</summary>
+    /// <summary>Topic Navigator: при comfortable — как на MFD; иначе toggle на Forward.</summary>
     [ObservableProperty]
     private bool _isTopicNavigatorVisible;
 
-    public bool IntercomTopicNavigatorVisible => !IntercomForwardHost || IsTopicNavigatorVisible;
+    public bool IntercomTopicNavigatorVisible =>
+        IsTopicNavigatorVisible || !IntercomForwardChrome;
 
     [ObservableProperty]
     private string _topicNavigatorSearchQuery = "";
@@ -36,8 +38,11 @@ public partial class ChatPanelViewModel
 
     partial void OnIsForwardIntercomLayoutChanged(bool value)
     {
-        OnPropertyChanged(nameof(IsSkiaIntercomHostVisible));
+        OnPropertyChanged(nameof(IntercomForwardChrome));
         OnPropertyChanged(nameof(IntercomForwardHost));
+        OnPropertyChanged(nameof(IntercomTopicNavigatorVisible));
+        if (value && IntercomComfortableFeed)
+            IsTopicNavigatorVisible = true;
     }
 
     public void SetIntercomFontsSettings(IntercomFontsSettings fonts) =>
@@ -46,12 +51,18 @@ public partial class ChatPanelViewModel
     partial void OnIntercomFontsChanged(IntercomFontsSettings value) =>
         IntercomPanelFontsChanged?.Invoke(this, value);
 
-    partial void OnUseComfortableSkiaIntercomHostChanged(bool value) =>
-        OnPropertyChanged(nameof(IsSkiaIntercomHostVisible));
-
     partial void OnIsTopicNavigatorVisibleChanged(bool value) =>
         OnPropertyChanged(nameof(IntercomTopicNavigatorVisible));
 
     public void ToggleIntercomTopicNavigator() =>
         IsTopicNavigatorVisible = !IsTopicNavigatorVisible;
+
+    /// <summary>Применить <c>[intercom]</c> (плотность ленты) после load/save settings.</summary>
+    public void ApplyIntercomPresentationSettings(IntercomSettings intercom)
+    {
+        IntercomComfortableFeed = intercom.UseComfortableFeedMetrics();
+    }
+
+    partial void OnIntercomComfortableFeedChanged(bool value) =>
+        OnPropertyChanged(nameof(IntercomTopicNavigatorVisible));
 }

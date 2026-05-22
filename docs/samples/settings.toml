@@ -191,6 +191,10 @@ enabled = true
 show_assignments = true
 show_conditions = true
 
+# Intercom: плотность ленты — comfortable | compact (см. также [fonts.intercom] prose_pt / prose_pt_forward)
+[intercom]
+feed_metrics = "compact"
+
 # Intercom: code-attach (chip F:/M:/L:) — ADR 0130
 # navigate: reveal | select; reveal_load_solution: when_needed | never
 [intercom.attachments.code]

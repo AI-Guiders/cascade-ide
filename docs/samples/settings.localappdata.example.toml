@@ -149,6 +149,9 @@ enabled = true
 show_assignments = true
 show_conditions = true
 
+# [intercom]
+# feed_metrics = "comfortable"   # comfortable | compact
+
 # Intercom send trace → {workspace}/.cascade-ide/intercom-send-trace.log
 [logging.intercom]
 send_trace = false

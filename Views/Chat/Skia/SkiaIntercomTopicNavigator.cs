@@ -14,12 +14,41 @@ internal static class SkiaIntercomTopicNavigator
     public const float RowGap = 3f;
     public const float Pad = 8f;
 
+    /// <summary>Геометрия панели: один расчёт для отрисовки и pointer-hit (без дублирования listTop/scroll).</summary>
+    internal sealed record PanelLayout(
+        SKRect SearchBounds,
+        SKRect ListClipRect,
+        float ListTop,
+        float ContentHeight);
+
     public sealed record RowHit(Guid ThreadId, SKRect Bounds);
 
     public sealed record LayoutResult(
         IReadOnlyList<RowHit> RowHits,
+        PanelLayout Layout,
         SKRect SearchBounds,
         float ContentHeight);
+
+    /// <summary>Единая точка: координаты строки в пространстве списка (после Translate) → координаты контрола.</summary>
+    internal static SKRect MapRowBoundsToPanel(SKRect rowInListSpace, PanelLayout layout, float scrollOffset)
+    {
+        var bounds = rowInListSpace;
+        bounds.Offset(0f, layout.ListTop - scrollOffset);
+        return bounds;
+    }
+
+    internal static PanelLayout ComputePanelLayout(float left, float top, float height, int rowCount)
+    {
+        var searchTop = top + Pad;
+        var searchBounds = new SKRect(left + Pad, searchTop, left + PanelWidth - Pad, searchTop + SearchHeight);
+        var listTop = searchBounds.Bottom + Pad;
+        var listBottom = top + height - Pad;
+        var contentHeight = rowCount > 0
+            ? Pad + SearchHeight + Pad + rowCount * RowHeight + Math.Max(0, rowCount - 1) * RowGap + Pad
+            : Pad + SearchHeight + Pad + 24f;
+        var listClip = new SKRect(left, listTop, left + PanelWidth, listBottom);
+        return new PanelLayout(searchBounds, listClip, listTop, contentHeight);
+    }
 
     public static LayoutResult Draw(
         SKCanvas canvas,
@@ -33,6 +62,7 @@ internal static class SkiaIntercomTopicNavigator
         string? searchQuery,
         float scrollOffset)
     {
+        var panelLayout = ComputePanelLayout(left, top, height, rows.Count);
         var panelRect = new SKRect(left, top, left + PanelWidth, top + height);
         using (var panelFill = new SKPaint
         {
@@ -44,20 +74,11 @@ internal static class SkiaIntercomTopicNavigator
         using (var divider = new SKPaint { Color = theme.Border, StrokeWidth = 1, IsAntialias = true })
             canvas.DrawLine(left + PanelWidth - 0.5f, top, left + PanelWidth - 0.5f, top + height, divider);
 
-        var searchTop = top + Pad;
-        var searchBounds = new SKRect(left + Pad, searchTop, left + PanelWidth - Pad, searchTop + SearchHeight);
-        DrawSearchField(canvas, searchBounds, theme, fonts, searchQuery);
-
-        var listTop = searchBounds.Bottom + Pad;
-        var listBottom = top + height - Pad;
-        var listHeight = Math.Max(0, listBottom - listTop);
-        var contentHeight = rows.Count > 0
-            ? Pad + SearchHeight + Pad + rows.Count * RowHeight + Math.Max(0, rows.Count - 1) * RowGap + Pad
-            : Pad + SearchHeight + Pad + 24f;
+        DrawSearchField(canvas, panelLayout.SearchBounds, theme, fonts, searchQuery);
 
         canvas.Save();
-        canvas.ClipRect(new SKRect(left, listTop, left + PanelWidth, listBottom), antialias: false);
-        canvas.Translate(0, listTop - scrollOffset);
+        canvas.ClipRect(panelLayout.ListClipRect, antialias: false);
+        canvas.Translate(0, panelLayout.ListTop - scrollOffset);
 
         var hits = new List<RowHit>();
         var y = 0f;
@@ -73,9 +94,9 @@ internal static class SkiaIntercomTopicNavigator
 
         foreach (var row in rows)
         {
-            var rowRect = new SKRect(left + Pad, y, left + PanelWidth - Pad, y + RowHeight);
+            var rowInListSpace = new SKRect(left + Pad, y, left + PanelWidth - Pad, y + RowHeight);
             if (row.ThreadId == selectedThreadId)
-                canvas.DrawRoundRect(rowRect, 5, 5, selBg);
+                canvas.DrawRoundRect(rowInListSpace, 5, 5, selBg);
             else
             {
                 using var rowFill = new SKPaint
@@ -83,13 +104,13 @@ internal static class SkiaIntercomTopicNavigator
                     Color = SkiaKit.SkiaKitColor.Blend(theme.Surface, theme.Border, 0.18f),
                     IsAntialias = true,
                 };
-                canvas.DrawRoundRect(rowRect, 5, 5, rowFill);
+                canvas.DrawRoundRect(rowInListSpace, 5, 5, rowFill);
             }
 
-            var titleX = rowRect.Left + 6f + row.Depth * 12f;
-            canvas.DrawText(Truncate(row.Title, 22), titleX, rowRect.MidY + 4f, SKTextAlign.Left, titleFont, titlePaint);
-            canvas.DrawText(row.Meta, rowRect.Right - 6f, rowRect.MidY + 4f, SKTextAlign.Right, titleFont, mutedPaint);
-            hits.Add(new RowHit(row.ThreadId, rowRect));
+            var titleX = rowInListSpace.Left + 6f + row.Depth * 12f;
+            canvas.DrawText(Truncate(row.Title, 22), titleX, rowInListSpace.MidY + 4f, SKTextAlign.Left, titleFont, titlePaint);
+            canvas.DrawText(row.Meta, rowInListSpace.Right - 6f, rowInListSpace.MidY + 4f, SKTextAlign.Right, titleFont, mutedPaint);
+            hits.Add(new RowHit(row.ThreadId, MapRowBoundsToPanel(rowInListSpace, panelLayout, scrollOffset)));
             y += RowHeight + RowGap;
         }
 
@@ -106,7 +127,7 @@ internal static class SkiaIntercomTopicNavigator
         }
 
         canvas.Restore();
-        return new LayoutResult(hits, searchBounds, contentHeight);
+        return new LayoutResult(hits, panelLayout, panelLayout.SearchBounds, panelLayout.ContentHeight);
     }
 
     private static void DrawSearchField(

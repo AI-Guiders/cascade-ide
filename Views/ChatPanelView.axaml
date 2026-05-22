@@ -7,29 +7,6 @@
              x:DataType="chat:ChatPanelViewModel"
              Background="{DynamicResource CascadeTheme.ChatPanelBackground}">
     <UserControl.Styles>
-        <Style Selector="Expander">
-            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
-        </Style>
-        <Style Selector="Expander /template/ ToggleButton#PART_toggle">
-            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
-        </Style>
-        <Style Selector="Expander TextBox.chatPanelInput">
-            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
-            <Setter Property="Background" Value="{DynamicResource CascadeTheme.ChatPanelBackground}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.ButtonBorderBrush}"/>
-            <Setter Property="BorderThickness" Value="1.5"/>
-            <Setter Property="CornerRadius" Value="6"/>
-            <Setter Property="MinHeight" Value="32"/>
-            <Setter Property="Padding" Value="8,6"/>
-            <Setter Property="CaretBrush" Value="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
-        </Style>
-        <Style Selector="Expander TextBox.chatPanelInput:focus">
-            <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.PanelTitleAccentBrush}"/>
-            <Setter Property="BorderThickness" Value="2"/>
-        </Style>
-        <Style Selector="Expander TextBox.chatPanelInput /template/ TextBlock#PART_Watermark">
-            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-        </Style>
         <Style Selector="TextBox.chatPanelInput">
             <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
             <Setter Property="Background" Value="{DynamicResource CascadeTheme.ChatPanelBackground}"/>
@@ -43,120 +20,44 @@
         <Style Selector="TextBox.chatPanelInput /template/ TextBlock#PART_Watermark">
             <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
         </Style>
-        <Style Selector="Expander CheckBox">
-            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
-        </Style>
     </UserControl.Styles>
 
-    <Panel>
-        <!-- Forward Intercom (ADR 0123): Skia-колонна + компактный composer; toolbar в Skia -->
-        <Panel IsVisible="{Binding IsSkiaIntercomHostVisible}"
-               Background="{DynamicResource CascadeTheme.ChatPanelBackground}">
-            <Border Background="{DynamicResource CascadeTheme.ChatPanelBackground}">
-            <views:IntercomSkiaSurface x:Name="ForwardIntercomSurface"
-                                          HorizontalAlignment="Stretch"
-                                          VerticalAlignment="Stretch"
-                                          Snapshot="{Binding ChatSurfaceSnapshot}"
-                                          SelectedMessageIndex="{Binding SelectedMessageIndex, Mode=TwoWay}"
-                                          DetailThreadId="{Binding SelectedChatThreadId, Mode=TwoWay}"
-                                          OverviewMode="{Binding IsChatOverviewMode, Mode=TwoWay}"
-                                          ForwardHost="{Binding IntercomForwardHost}"
-                                          TopicNavigatorVisible="{Binding IntercomTopicNavigatorVisible}"
-                                          TopicNavigatorSearchQuery="{Binding TopicNavigatorSearchQuery}"
-                                          IntercomFonts="{Binding IntercomFonts}"
-                                          ChromeTitle="Intercom"
-                                          IsChatLoading="{Binding IsChatLoading}"
-                                          LoadingStatusText="{Binding ChatLoadingStatusText}"
-                                          ShowIntercomComposer="True"
-                                          ComposerText="{Binding ChatInput, Mode=TwoWay}"
-                                          IsComposerEnabled="{Binding !IsChatLoading}"
-                                          IsSlashAutocompleteVisible="{Binding IsComposerAutocompleteVisible}"
-                                          SelectedSlashSuggestionIndex="{Binding SelectedComposerAutocompleteIndex, Mode=TwoWay}"
-                                          SlashSuggestions="{Binding ComposerPopupSuggestions}"
-                                          ComposerCaretIndex="{Binding ChatComposerCaretIndex, Mode=TwoWay}"
-                                          ShowCockpitCommandLine="{Binding IsCockpitCommandLineOpen}"
-                                          CommandLineText="{Binding CockpitCommandLineText, Mode=TwoWay}"
-                                          CommandLinePreview="{Binding CockpitCommandLinePreview}"
-                                          CommandLineCaretIndex="{Binding CockpitCommandLineCaretIndex, Mode=TwoWay}"/>
-            </Border>
+    <Panel Background="{DynamicResource CascadeTheme.ChatPanelBackground}">
+        <views:IntercomSkiaSurface x:Name="IntercomSkiaSurface"
+                                   HorizontalAlignment="Stretch"
+                                   VerticalAlignment="Stretch"
+                                   Snapshot="{Binding ChatSurfaceSnapshot}"
+                                   SelectedMessageIndex="{Binding SelectedMessageIndex, Mode=TwoWay}"
+                                   DetailThreadId="{Binding SelectedChatThreadId, Mode=TwoWay}"
+                                   OverviewMode="{Binding IsChatOverviewMode, Mode=TwoWay}"
+                                   ForwardHost="{Binding IntercomForwardChrome}"
+                                   ComfortableFeed="{Binding IntercomComfortableFeed}"
+                                   TopicNavigatorVisible="{Binding IntercomTopicNavigatorVisible}"
+                                   TopicNavigatorSearchQuery="{Binding TopicNavigatorSearchQuery}"
+                                   IntercomFonts="{Binding IntercomFonts}"
+                                   ChromeTitle="Intercom"
+                                   IsChatLoading="{Binding IsChatLoading}"
+                                   LoadingStatusText="{Binding ChatLoadingStatusText}"
+                                   ShowIntercomComposer="True"
+                                   ComposerText="{Binding ChatInput, Mode=TwoWay}"
+                                   IsComposerEnabled="{Binding !IsChatLoading}"
+                                   IsSlashAutocompleteVisible="{Binding IsComposerAutocompleteVisible}"
+                                   SelectedSlashSuggestionIndex="{Binding SelectedComposerAutocompleteIndex, Mode=TwoWay}"
+                                   SlashSuggestions="{Binding ComposerPopupSuggestions}"
+                                   ComposerCaretIndex="{Binding ChatComposerCaretIndex, Mode=TwoWay}"
+                                   ShowCockpitCommandLine="{Binding IsCockpitCommandLineOpen}"
+                                   CommandLineText="{Binding CockpitCommandLineText, Mode=TwoWay}"
+                                   CommandLinePreview="{Binding CockpitCommandLinePreview}"
+                                   CommandLineCaretIndex="{Binding CockpitCommandLineCaretIndex, Mode=TwoWay}"/>
 
-            <Border IsVisible="{Binding HasActiveClarificationBatch}"
-                    ZIndex="40"
-                    Background="#B0000000">
-                <Border MaxWidth="520"
-                        Margin="16"
-                        VerticalAlignment="Center"
-                        HorizontalAlignment="Stretch"
-                        Classes="cascadeSection">
-                    <StackPanel Spacing="8">
-                        <DockPanel LastChildFill="False">
-                            <TextBlock DockPanel.Dock="Left" Text="{Binding ActiveClarificationTitle}"
-                                       Classes="chatPanelTitle"
-                                       FontWeight="SemiBold"
-                                       Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
-                            <Button DockPanel.Dock="Right"
-                                    Content="Закрыть"
-                                    Command="{Binding DismissClarificationBatchCommand}"
-                                    Padding="8,3"/>
-                        </DockPanel>
-                        <ItemsControl ItemsSource="{Binding ClarificationDraftItems}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate DataType="chat:ClarificationDraftItemViewModel">
-                                    <Border Classes="cascadeInset" Margin="0,0,0,6">
-                                        <StackPanel Spacing="6">
-                                            <TextBlock Text="{Binding Prompt}" TextWrapping="Wrap"
-                                                       Classes="chatPanelBody"
-                                                       Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
-                                            <TextBox Text="{Binding Answer, Mode=TwoWay}"
-                                                     Classes="chatPanelInput"
-                                                     IsVisible="{Binding IsFreeText}"
-                                                     AcceptsReturn="True"
-                                                     MinHeight="56"
-                                                     TextWrapping="Wrap"
-                                                     PlaceholderText="Ответ..."/>
-                                            <ComboBox ItemsSource="{Binding ChoiceOptions}"
-                                                      Classes="chatPanelInput"
-                                                      SelectedItem="{Binding Answer, Mode=TwoWay}"
-                                                      IsVisible="{Binding IsChoice}"/>
-                                        </StackPanel>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <Button Content="Отправить уточнения"
-                                    Command="{Binding SubmitClarificationResponseCommand}"
-                                    Padding="10,4"/>
-                            <TextBlock Text="{Binding ClarificationStatusText}"
-                                       VerticalAlignment="Center"
-                                       TextWrapping="Wrap"
-                                       Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
-            </Border>
-        </Panel>
-
-        <!-- MFD / comfortable: UiKit shell (до слияния в один Skia-surface) -->
-        <Grid IsVisible="{Binding !IsSkiaIntercomHostVisible}"
-              RowDefinitions="Auto,Auto,*"
-              RowSpacing="8">
-            <uikit:CascadeSection Grid.Row="0">
-                <DockPanel LastChildFill="False">
-                    <StackPanel DockPanel.Dock="Left" Spacing="2">
-                        <TextBlock Text="Agent Chat" Classes="chatPanelTitle" FontWeight="SemiBold"
-                                   Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
-                        <TextBlock Text="Живой диалог + структурированные уточнения"
-                                   Classes="chatPanelSubtitle"
-                                   Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-                    </StackPanel>
-                    <uikit:CascadeStatusChip DockPanel.Dock="Right"
-                                             Text="{Binding ChatLoadingStatusText}"
-                                             IsVisible="{Binding IsChatLoading}"/>
-                </DockPanel>
-            </uikit:CascadeSection>
-
-            <uikit:CascadeSection Grid.Row="1" IsVisible="{Binding HasActiveClarificationBatch}">
+        <Border IsVisible="{Binding HasActiveClarificationBatch}"
+                ZIndex="40"
+                Background="#B0000000">
+            <Border MaxWidth="520"
+                    Margin="16"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Stretch"
+                    Classes="cascadeSection">
                 <StackPanel Spacing="8">
                     <DockPanel LastChildFill="False">
                         <TextBlock DockPanel.Dock="Left" Text="{Binding ActiveClarificationTitle}"
@@ -174,14 +75,17 @@
                                 <Border Classes="cascadeInset" Margin="0,0,0,6">
                                     <StackPanel Spacing="6">
                                         <TextBlock Text="{Binding Prompt}" TextWrapping="Wrap"
+                                                   Classes="chatPanelBody"
                                                    Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
                                         <TextBox Text="{Binding Answer, Mode=TwoWay}"
+                                                 Classes="chatPanelInput"
                                                  IsVisible="{Binding IsFreeText}"
                                                  AcceptsReturn="True"
                                                  MinHeight="56"
                                                  TextWrapping="Wrap"
                                                  PlaceholderText="Ответ..."/>
                                         <ComboBox ItemsSource="{Binding ChoiceOptions}"
+                                                  Classes="chatPanelInput"
                                                   SelectedItem="{Binding Answer, Mode=TwoWay}"
                                                   IsVisible="{Binding IsChoice}"/>
                                     </StackPanel>
@@ -199,65 +103,7 @@
                                    Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
                     </StackPanel>
                 </StackPanel>
-            </uikit:CascadeSection>
-
-            <uikit:CascadeSection Grid.Row="2">
-                <DockPanel>
-                    <Expander DockPanel.Dock="Top"
-                              Classes="chatPanelLabel"
-                              Header="Продуктовая линия (spine)"
-                              IsExpanded="{Binding IsChatOverviewMode}"
-                              Margin="0,0,0,6">
-                        <Border Margin="0,4,0,0" Padding="8" CornerRadius="6"
-                                Background="{DynamicResource CascadeTheme.ChatPanelBackground}"
-                                BorderBrush="{DynamicResource CascadeTheme.EditorColumnBorderBrush}"
-                                BorderThickness="1">
-                            <StackPanel Spacing="8">
-                                <TextBox Text="{Binding ProductSpineLineTitle, Mode=TwoWay}"
-                                         Classes="chatPanelInput"
-                                         PlaceholderText="Линия (например Cascade IDE)"/>
-                                <TextBox Text="{Binding ProductSpineCurrentFocus, Mode=TwoWay}"
-                                         Classes="chatPanelInput"
-                                         PlaceholderText="Текущий фокус линии"
-                                         AcceptsReturn="True"
-                                         MinHeight="36"
-                                         TextWrapping="Wrap"/>
-                                <TextBox Text="{Binding ProductSpineMilestonesText, Mode=TwoWay}"
-                                         Classes="chatPanelInput"
-                                         PlaceholderText="Вехи — по одной на строку"
-                                         AcceptsReturn="True"
-                                         MinHeight="56"
-                                         TextWrapping="Wrap"/>
-                                <CheckBox Content="Добавлять сжатый spine в сообщения агенту"
-                                          IsChecked="{Binding IncludeProductSpineInAgentContext, Mode=TwoWay}"/>
-                            </StackPanel>
-                        </Border>
-                    </Expander>
-                    <TextBlock DockPanel.Dock="Top"
-                               Text="Диалог"
-                               Classes="chatPanelLabel"
-                               Margin="0,0,0,6"
-                               Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-                    <Border Background="{DynamicResource CascadeTheme.ChatPanelBackground}">
-                    <views:IntercomSkiaSurface x:Name="ClassicIntercomSurface"
-                                               MinHeight="220"
-                                               HorizontalAlignment="Stretch"
-                                               VerticalAlignment="Stretch"
-                                               Snapshot="{Binding ChatSurfaceSnapshot}"
-                                               SelectedMessageIndex="{Binding SelectedMessageIndex, Mode=TwoWay}"
-                                               DetailThreadId="{Binding SelectedChatThreadId, Mode=TwoWay}"
-                                               OverviewMode="{Binding IsChatOverviewMode, Mode=TwoWay}"
-                                               ForwardHost="False"
-                                               IntercomFonts="{Binding IntercomFonts}"
-                                               ShowIntercomComposer="True"
-                                               ComposerText="{Binding ChatInput, Mode=TwoWay}"
-                                               IsComposerEnabled="{Binding !IsChatLoading}"
-                                               IsSlashAutocompleteVisible="{Binding IsChatSlashAutocompleteVisible}"
-                                               SelectedSlashSuggestionIndex="{Binding SelectedChatSlashSuggestionIndex, Mode=TwoWay}"
-                                               SlashSuggestions="{Binding ChatSlashSuggestions}"/>
-                    </Border>
-                </DockPanel>
-            </uikit:CascadeSection>
-        </Grid>
+            </Border>
+        </Border>
     </Panel>
 </UserControl>

@@ -310,6 +310,20 @@ public sealed class CascadeIdeSettingsTomlDeserializeTests
     }
 
     [Fact]
+    public void Deserialize_IntercomFeedMetrics_ParsesCompact()
+    {
+        const string text =
+            """
+            [intercom]
+            feed_metrics = "compact"
+            """;
+
+        var s = Deserialize(text);
+        Assert.Equal(IntercomFeedMetricsModes.Compact, s.Intercom.FeedMetrics);
+        Assert.False(s.Intercom.UseComfortableFeedMetrics());
+    }
+
+    [Fact]
     public void Deserialize_IntercomAttachmentsCode_DefaultsWhenSectionMissing()
     {
         const string text =

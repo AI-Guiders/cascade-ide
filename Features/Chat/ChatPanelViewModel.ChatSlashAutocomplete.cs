@@ -19,10 +19,13 @@ public partial class ChatPanelViewModel
     /// <param name="inputOverride">Текст из TextBox при <c>TextChanged</c> (биндинг может отставать на один тик).</param>
     public void RefreshChatSlashAutocomplete(string? inputOverride = null)
     {
+        var text = inputOverride ?? ChatInput;
+        var caret = Math.Clamp(ChatComposerCaretIndex, 0, text.Length);
         var suggestions = ChatSlashAutocomplete.GetSuggestions(
-            inputOverride ?? ChatInput,
+            text,
             _workspaceFileSlashCompletion,
-            _sessionTopicSlashCompletion);
+            _sessionTopicSlashCompletion,
+            caretIndex: caret);
         ChatSlashSuggestions.Clear();
         foreach (var s in suggestions)
             ChatSlashSuggestions.Add(new ChatSlashSuggestionItem(s));

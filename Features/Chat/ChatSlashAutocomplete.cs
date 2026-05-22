@@ -16,19 +16,14 @@ public static class ChatSlashAutocomplete
         IWorkspaceFileSlashCompletionProvider? workspaceFiles = null,
         ISessionTopicSlashCompletionProvider? sessionTopics = null,
         int workspaceFileLimit = DefaultWorkspaceFileSuggestionLimit,
-        int sessionTopicLimit = DefaultSessionTopicSuggestionLimit)
+        int sessionTopicLimit = DefaultSessionTopicSuggestionLimit,
+        int? caretIndex = null)
     {
-        if (string.IsNullOrWhiteSpace(rawInput))
+        if (string.IsNullOrEmpty(rawInput))
             return [];
 
-        var trimmed = rawInput.TrimStart();
-        if (trimmed.Length == 0 || trimmed[0] != '/')
+        if (!TryGetSlashTokenBeforeCaret(rawInput, caretIndex ?? rawInput.Length, out var body))
             return [];
-
-        if (trimmed.Contains('\n') || trimmed.Contains('\r'))
-            return [];
-
-        var body = trimmed[1..];
         if (body.Length == 0)
             return ChatSlashCommandCatalog.AllSuggestions();
 
@@ -169,6 +164,24 @@ public static class ChatSlashAutocomplete
             return false;
 
         route = best.Value;
+        return true;
+    }
+
+    /// <summary>Строка до каретки на текущей линии должна начинаться с <c>/</c> (после пробелов).</summary>
+    internal static bool TryGetSlashTokenBeforeCaret(string rawInput, int caretIndex, out string body)
+    {
+        body = "";
+        caretIndex = Math.Clamp(caretIndex, 0, rawInput.Length);
+        var lineStart = rawInput.LastIndexOf('\n', Math.Max(0, caretIndex - 1)) + 1;
+        var linePrefix = rawInput[lineStart..caretIndex];
+        if (linePrefix.Contains('\r'))
+            return false;
+
+        var trimmed = linePrefix.TrimStart();
+        if (trimmed.Length == 0 || trimmed[0] != '/')
+            return false;
+
+        body = trimmed[1..];
         return true;
     }
 

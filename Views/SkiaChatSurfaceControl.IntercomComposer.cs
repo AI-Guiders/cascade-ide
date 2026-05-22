@@ -78,6 +78,9 @@ public partial class SkiaChatSurfaceControl
     public event EventHandler? TopicCreateRequested;
     public event EventHandler? TopicNavigatorToggleRequested;
 
+    /// <summary>Текст/caret composer изменены (до синхронизации биндинга с VM).</summary>
+    public event EventHandler? ComposerDraftChanged;
+
     public bool ShowIntercomComposer
     {
         get => GetValue(ShowIntercomComposerProperty);
@@ -229,8 +232,8 @@ public partial class SkiaChatSurfaceControl
 
     internal Rect GetComposerCaretScreenRect()
     {
-        var composerPt = IntercomFonts.ResolveComposerPt(ForwardHost);
-        var composerLine = IntercomFonts.ResolveComposerLineHeight(ForwardHost);
+        var composerPt = IntercomFonts.ResolveComposerPt(FeedUsesForwardMetrics);
+        var composerLine = IntercomFonts.ResolveComposerLineHeight(FeedUsesForwardMetrics);
         if (_composerBounds.Width > 0
             && SkiaComposerStrip.TryGetCaretRect(
                 _composerBounds,
@@ -266,10 +269,10 @@ public partial class SkiaChatSurfaceControl
             composerText: ComposerText ?? "",
             showSlashPopup: IsSlashAutocompleteVisible && _slashRows.Count > 0,
             slashRowCount: _slashRows.Count,
-            fonts.ResolveComposerPt(ForwardHost),
-            fonts.ResolveComposerLineHeight(ForwardHost),
-            fonts.ResolveCommandLinePt(ForwardHost),
-            fonts.ResolveCommandLinePreviewPt(ForwardHost));
+            fonts.ResolveComposerPt(FeedUsesForwardMetrics),
+            fonts.ResolveComposerLineHeight(FeedUsesForwardMetrics),
+            fonts.ResolveCommandLinePt(FeedUsesForwardMetrics),
+            fonts.ResolveCommandLinePreviewPt(FeedUsesForwardMetrics));
     }
 
     private void RebuildSlashRows()
@@ -315,10 +318,10 @@ public partial class SkiaChatSurfaceControl
             composerText: ComposerText ?? "",
             showSlashPopup: IsSlashAutocompleteVisible && _slashRows.Count > 0,
             slashRowCount: _slashRows.Count,
-            fonts.ResolveComposerPt(ForwardHost),
-            fonts.ResolveComposerLineHeight(ForwardHost),
-            fonts.ResolveCommandLinePt(ForwardHost),
-            fonts.ResolveCommandLinePreviewPt(ForwardHost));
+            fonts.ResolveComposerPt(FeedUsesForwardMetrics),
+            fonts.ResolveComposerLineHeight(FeedUsesForwardMetrics),
+            fonts.ResolveCommandLinePt(FeedUsesForwardMetrics),
+            fonts.ResolveCommandLinePreviewPt(FeedUsesForwardMetrics));
 
         _deckBounds = deck.DeckBounds;
         _composerBounds = deck.ComposerBounds;
@@ -373,8 +376,8 @@ public partial class SkiaChatSurfaceControl
                 CommandLineCaretIndex,
                 cclCaret,
                 cclCaret && _composerCaretBlinkVisible,
-                fonts.ResolveCommandLinePt(ForwardHost),
-                fonts.ResolveCommandLinePreviewPt(ForwardHost));
+                fonts.ResolveCommandLinePt(FeedUsesForwardMetrics),
+                fonts.ResolveCommandLinePreviewPt(FeedUsesForwardMetrics));
         }
 
         var showCaret = !_commandLineFocused && IsComposerEnabled && IsKeyboardFocusWithin;
@@ -389,8 +392,8 @@ public partial class SkiaChatSurfaceControl
             ComposerCaretIndex,
             showCaret,
             showCaret && _composerCaretBlinkVisible,
-            fonts.ResolveComposerPt(ForwardHost),
-            fonts.ResolveComposerLineHeight(ForwardHost),
+            fonts.ResolveComposerPt(FeedUsesForwardMetrics),
+            fonts.ResolveComposerLineHeight(FeedUsesForwardMetrics),
             out _sendButtonBounds,
             out _);
 
@@ -478,6 +481,20 @@ public partial class SkiaChatSurfaceControl
             return;
         }
 
+        if (TryMapComposerTextKey(e, out var textKey))
+        {
+            if (!IsKeyboardFocusWithin)
+                Focus();
+
+            if (ShowCockpitCommandLine && _commandLineFocused)
+                InsertCommandLineText(textKey);
+            else
+                InsertComposerText(textKey);
+
+            e.Handled = true;
+            return;
+        }
+
         if (!IsKeyboardFocusWithin)
             return;
 
@@ -541,6 +558,7 @@ public partial class SkiaChatSurfaceControl
         CommandLineCaretIndex = caret + text.Length;
         ShowComposerCaretSolid();
         InvalidateVisual();
+        NotifyComposerDraftChanged();
     }
 
     private void DeleteCommandLine(int direction)
@@ -574,6 +592,26 @@ public partial class SkiaChatSurfaceControl
         InvalidateVisual();
     }
 
+    private static bool TryMapComposerTextKey(KeyEventArgs e, out string text)
+    {
+        if ((e.KeyModifiers & (KeyModifiers.Control | KeyModifiers.Alt | KeyModifiers.Meta)) != 0)
+        {
+            text = "";
+            return false;
+        }
+
+        if (e.Key is Key.Oem2 or Key.OemQuestion or Key.Divide)
+        {
+            text = "/";
+            return true;
+        }
+
+        text = "";
+        return false;
+    }
+
+    private void NotifyComposerDraftChanged() => ComposerDraftChanged?.Invoke(this, EventArgs.Empty);
+
     private static IntercomComposerKeyKind? MapComposerKey(KeyEventArgs e) => e.Key switch
     {
         Key.Tab => IntercomComposerKeyKind.Tab,
@@ -597,6 +635,7 @@ public partial class SkiaChatSurfaceControl
         _textInputClient?.NotifyTextChanged();
         _textInputClient?.NotifyCursorMoved();
         ShowComposerCaretSolid();
+        NotifyComposerDraftChanged();
     }
 
     private void DeleteComposer(int direction)
@@ -621,6 +660,7 @@ public partial class SkiaChatSurfaceControl
 
         _textInputClient?.NotifyTextChanged();
         ShowComposerCaretSolid();
+        NotifyComposerDraftChanged();
     }
 
     private void MoveCaret(int delta)
