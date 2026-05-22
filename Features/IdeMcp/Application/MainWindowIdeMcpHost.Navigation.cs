@@ -1,14 +1,16 @@
-#nullable enable
-using CascadeIDE.Services.CodeNavigation;
+using CascadeIDE.ViewModels;
 using CascadeIDE.Features.IdeMcp.Application;
+using CascadeIDE.Models;
+using CascadeIDE.Services;
+using CascadeIDE.Services.CodeNavigation;
 
-namespace CascadeIDE.ViewModels;
+namespace CascadeIDE.Features.IdeMcp.Application;
 
-/// <summary>MCP: семантическая навигация (ADR 0039).</summary>
-public partial class MainWindowViewModel
+internal sealed partial class MainWindowIdeMcpHost
 {
+
     /// <inheritdoc />
-    Task<string> Services.IIdeMcpActions.GetCodeNavigationContextAsync(
+    public Task<string> GetCodeNavigationContextAsync(
         string mode,
         string? filePath,
         int? line,
@@ -26,7 +28,7 @@ public partial class MainWindowViewModel
 
         var (effectiveLevel, effectiveMode) = IdeMcpNavigationOrchestrator.ResolveEffectiveLevelAndMode(
             level,
-            _settings.CodeNavigationMap.Depth,
+            _host.McpSettings.CodeNavigationMap.Depth,
             requestedMode);
 
         if (effectiveLevel == Models.CodeNavigationMapLevelKind.ControlFlow)
@@ -34,13 +36,13 @@ public partial class MainWindowViewModel
             var (effectiveLine, effectiveColumn) = IdeMcpNavigationOrchestrator.ResolveControlFlowLineColumn(
                 line,
                 column,
-                EditorText,
-                _editorCaretOffset ?? EditorSelectionStart);
+                _host.EditorText,
+                _host.McpEditorCaretOffset ?? _host.EditorSelectionStart);
 
             return UiScheduler.Default.InvokeAsync(() =>
                 CodeNavigationControlFlowSubgraphBuilder.BuildJson(
-                    string.IsNullOrWhiteSpace(filePath) ? CurrentFilePath : filePath,
-                    EditorText,
+                    string.IsNullOrWhiteSpace(filePath) ? _host.CurrentFilePath : filePath,
+                    _host.EditorText,
                     effectiveLine,
                     effectiveColumn,
                     maxNodes ?? CodeNavigationContextBuilder.DefaultMaxNodes,
@@ -51,9 +53,9 @@ public partial class MainWindowViewModel
             CodeNavigationContextBuilder.BuildJson(
                 effectiveMode,
                 filePath,
-                CurrentFilePath,
-                Workspace.SolutionRoots,
-                Workspace.SolutionPath,
+                _host.CurrentFilePath,
+                _host.Workspace.SolutionRoots,
+                _host.Workspace.SolutionPath,
                 line,
                 column,
                 maxRelated ?? CodeNavigationContextBuilder.DefaultMaxRelated,
@@ -62,6 +64,7 @@ public partial class MainWindowViewModel
                 includeKinds,
                 excludeKinds,
                 preset,
-                _settings.CodeNavigation));
+                _host.McpSettings.CodeNavigation));
     }
+
 }

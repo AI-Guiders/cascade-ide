@@ -1,18 +1,18 @@
 using CascadeIDE.Cockpit.DataBus;
+using CascadeIDE.ViewModels;
 using CascadeIDE.Features.IdeMcp.Application;
 using CascadeIDE.Models;
+using CascadeIDE.Services;
 
-namespace CascadeIDE.ViewModels;
+namespace CascadeIDE.Features.IdeMcp.Application;
 
-/// <summary>MCP: запуск тестов (все / affected) и обновление панели инструментирования после прогона.</summary>
-public partial class MainWindowViewModel
+internal sealed partial class MainWindowIdeMcpHost
 {
-    async Task<string> Services.IIdeMcpActions.RunTestsAsync()
+    public async Task<string> RunTestsAsync()
     {
         return await RunTestsInternalAsync(filterExpression: null, mode: "all").ConfigureAwait(false);
     }
-
-    async Task<string> Services.IIdeMcpActions.RunAffectedTestsAsync(IReadOnlyList<string>? changedPaths)
+    public async Task<string> RunAffectedTestsAsync(IReadOnlyList<string>? changedPaths)
     {
         var request = IdeMcpBuildTestOrchestrator.BuildAffectedTestsRequest(changedPaths);
         return await RunTestsInternalAsync(request.filterExpression, request.mode, request.tokens).ConfigureAwait(false);
@@ -20,13 +20,13 @@ public partial class MainWindowViewModel
 
     private async Task<string> RunTestsInternalAsync(string? filterExpression, string mode, IReadOnlyList<string>? tokens = null)
     {
-        var path = await UiScheduler.Default.InvokeAsync(() => Workspace.SolutionPath ?? "");
+        var path = await UiScheduler.Default.InvokeAsync(() => _host.Workspace.SolutionPath ?? "");
         if (!IdeMcpSolutionPathAvailability.IsRunnableSolutionFile(path))
             return IdeMcpBuildTestOrchestrator.SerializeMissingSolutionError(mode);
 
         try
         {
-            var outcome = await _mcpBuildTest.RunTestsAsync(path, filterExpression, mode, tokens).ConfigureAwait(false);
+            var outcome = await _host.McpBuildTest.RunTestsAsync(path, filterExpression, mode, tokens).ConfigureAwait(false);
             var parsed = outcome.Parsed;
             var outStr = outcome.ConsoleOutput;
 
@@ -36,9 +36,9 @@ public partial class MainWindowViewModel
                     parsed.Passed,
                     parsed.Total,
                     parsed.Failed,
-                    InstrumentationPanel.TestResultsOutput,
+                    _host.InstrumentationPanel.TestResultsOutput,
                     outStr,
-                    InstrumentationTabs);
+                    _host.InstrumentationTabs);
                 PublishIdeMcpTestRunMutation(mutation, openTestsPageIfRequested: true);
             });
             return outcome.JsonPayload;
@@ -48,7 +48,7 @@ public partial class MainWindowViewModel
             UiScheduler.Default.Post(() =>
             {
                 var mutation = IdeMcpBuildTestOrchestrator.IdeMcpTestRunInstrumentationMutation.FromThrownException(
-                    InstrumentationPanel.TestResultsOutput,
+                    _host.InstrumentationPanel.TestResultsOutput,
                     ex.Message);
                 PublishIdeMcpTestRunMutation(mutation, openTestsPageIfRequested: false);
             });
@@ -56,16 +56,17 @@ public partial class MainWindowViewModel
         }
     }
 
-    /// <summary>Обновляет инструментацию, шину и навигацию MFD после MCP-тестов.</summary>
+    /// <summary>РћР±РЅРѕРІР»СЏРµС‚ РёРЅСЃС‚СЂСѓРјРµРЅС‚Р°С†РёСЋ, С€РёРЅСѓ Рё РЅР°РІРёРіР°С†РёСЋ MFD РїРѕСЃР»Рµ MCP-С‚РµСЃС‚РѕРІ.</summary>
     private void PublishIdeMcpTestRunMutation(
         IdeMcpBuildTestOrchestrator.IdeMcpTestRunInstrumentationMutation mutation,
         bool openTestsPageIfRequested)
     {
-        LastTestSummary = mutation.Summary;
-        ImpactedTestsBadge = mutation.ImpactedTestsBadge;
-        PublishToIdeDataBusAndRebuild(new TestsStateChanged(mutation.Summary, mutation.ImpactedTestsBadge));
-        InstrumentationPanel.TestResultsOutput = mutation.UpdatedTestResultsOutput;
+        _host.LastTestSummary = mutation.Summary;
+        _host.ImpactedTestsBadge = mutation.ImpactedTestsBadge;
+        _host.McpPublishToIdeDataBusAndRebuild(new TestsStateChanged(mutation.Summary, mutation.ImpactedTestsBadge));
+        _host.InstrumentationPanel.TestResultsOutput = mutation.UpdatedTestResultsOutput;
         if (openTestsPageIfRequested && mutation.ShouldOpenTestsPage)
-            CurrentMfdShellPage = MfdShellPage.Tests;
+            _host.CurrentMfdShellPage = MfdShellPage.Tests;
     }
+
 }

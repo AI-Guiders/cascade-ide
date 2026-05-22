@@ -1,12 +1,14 @@
+using CascadeIDE.ViewModels;
 using CascadeIDE.Features.HybridIndex.McpParity;
 using CascadeIDE.Features.IdeMcp.Application;
-using CascadeIDE.Features.Workspace.Application;
+using CascadeIDE.Models;
+using CascadeIDE.Services;
 
-namespace CascadeIDE.ViewModels;
+namespace CascadeIDE.Features.IdeMcp.Application;
 
-/// <summary>MCP / ide_execute_command: Hybrid Codebase Index (имена команд как у внешнего MCP).</summary>
-public partial class MainWindowViewModel
+internal sealed partial class MainWindowIdeMcpHost
 {
+
     private bool TryResolveHybridIndexScopeForCodebaseIndexCalls(
         string? argWorkspacePath,
         string? argSolutionPath,
@@ -16,26 +18,26 @@ public partial class MainWindowViewModel
         IdeMcpHybridIndexScope.TryResolveForCodebaseIndexCommand(
             argWorkspacePath,
             argSolutionPath,
-            _settings.HybridIndex.ScopeMode,
-            Workspace.SolutionPath,
+            _host.McpSettings.HybridIndex.ScopeMode,
+            _host.Workspace.SolutionPath,
             WorkspaceDirectoryFromSolutionPath.Resolve,
             out hciWorkspaceRoot,
             out hciSolutionPath,
             out errorJson);
 
-    Task<string> Services.IIdeMcpActions.CodebaseIndexStatusAsync(string? workspacePath, string? solutionPath, CancellationToken cancellationToken)
+    public Task<string> CodebaseIndexStatusAsync(string? workspacePath, string? solutionPath, CancellationToken cancellationToken)
     {
         if (!TryResolveHybridIndexScopeForCodebaseIndexCalls(workspacePath, solutionPath, out var ws, out var sln, out var errJson))
             return Task.FromResult(errJson!);
 
         return Task.Run(async () =>
         {
-            var st = await _hybridIndex.GetIndexStatusAsync(ws, sln, cancellationToken).ConfigureAwait(false);
+            var st = await _host.McpHybridIndex.GetIndexStatusAsync(ws, sln, cancellationToken).ConfigureAwait(false);
             return CodebaseIndexIdeJsonResponses.SerializeStatus(st);
         }, cancellationToken);
     }
 
-    Task<string> Services.IIdeMcpActions.CodebaseIndexSearchAsync(
+    public Task<string> CodebaseIndexSearchAsync(
         string? workspacePath,
         string? solutionPath,
         string query,
@@ -57,7 +59,7 @@ public partial class MainWindowViewModel
 
         return Task.Run(async () =>
         {
-            var (response, searchErr) = await _hybridIndex.SearchHybridAsync(
+            var (response, searchErr) = await _host.McpHybridIndex.SearchHybridAsync(
                     ws,
                     sln,
                     query.Trim(),
@@ -75,7 +77,7 @@ public partial class MainWindowViewModel
         }, cancellationToken);
     }
 
-    Task<string> Services.IIdeMcpActions.CodebaseIndexExplainAsync(string? workspacePath, string? solutionPath, long hitId, CancellationToken cancellationToken)
+    public Task<string> CodebaseIndexExplainAsync(string? workspacePath, string? solutionPath, long hitId, CancellationToken cancellationToken)
     {
         if (hitId <= 0)
             return Task.FromResult(IdeMcpHybridCodebaseIndexOrchestrator.InvalidHitIdJson());
@@ -85,12 +87,12 @@ public partial class MainWindowViewModel
 
         return Task.Run(async () =>
         {
-            var resp = await _hybridIndex.ExplainHitAsync(ws, sln, hitId, cancellationToken).ConfigureAwait(false);
+            var resp = await _host.McpHybridIndex.ExplainHitAsync(ws, sln, hitId, cancellationToken).ConfigureAwait(false);
             return CodebaseIndexIdeJsonResponses.SerializeExplain(resp);
         }, cancellationToken);
     }
 
-    Task<string> Services.IIdeMcpActions.CodebaseIndexReindexAsync(string? workspacePath, string? solutionPath, bool fullRebuild, CancellationToken cancellationToken)
+    public Task<string> CodebaseIndexReindexAsync(string? workspacePath, string? solutionPath, bool fullRebuild, CancellationToken cancellationToken)
     {
         if (!TryResolveHybridIndexScopeForCodebaseIndexCalls(workspacePath, solutionPath, out var ws, out var sln, out var errJson))
             return Task.FromResult(errJson!);
@@ -99,7 +101,7 @@ public partial class MainWindowViewModel
         {
             try
             {
-                var summary = await _hybridIndex.RunReindexWithPublishAsync(ws, sln, fullRebuild, cancellationToken).ConfigureAwait(false);
+                var summary = await _host.McpHybridIndex.RunReindexWithPublishAsync(ws, sln, fullRebuild, cancellationToken).ConfigureAwait(false);
                 return CodebaseIndexIdeJsonResponses.SerializeReindex(summary);
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -112,4 +114,5 @@ public partial class MainWindowViewModel
             }
         }, cancellationToken);
     }
+
 }

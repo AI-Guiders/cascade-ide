@@ -13,7 +13,7 @@ using CascadeIDE.Features.Debug;
 using CascadeIDE.Features.Documents;
 using CascadeIDE.Features.Git;
 using CascadeIDE.Features.HybridIndex.Application;
-using CascadeIDE.Features.IdeMcp.Execution;
+using CascadeIDE.Features.IdeMcp.Application;
 using CascadeIDE.Features.Workspace;
 using CascadeIDE.Features.Instrumentation;
 using CascadeIDE.Features.Markdown;
@@ -86,12 +86,12 @@ public partial class MainWindowViewModel
         _hciScopeMode = ShellSettingsPresentationProjection.NormalizeHybridIndexScopeMode(_settings.HybridIndex.ScopeMode);
         _hciPauseWhenMcpStdioHost = _settings.HybridIndex.PauseWhenMcpStdioHost;
 
-        _ideMcpExecutor = new IdeMcpCommandExecutor(this);
-        _webAiPortalBridge = new WebAiPortalCommandBridge(this);
+        _ideMcpHost = new MainWindowIdeMcpHost(this);
+        _webAiPortalBridge = new WebAiPortalCommandBridge(IdeMcp);
 
         BuildOutputPanel = new BuildOutputPanelViewModel();
         TerminalPanel = new TerminalPanelViewModel(() => Workspace.SolutionPath);
-        GitPanel = new GitPanelViewModel(_gitRunner, GetWorkspacePath, this, LoadSolution, RefreshGitSummaryAsync, osShell: _osShell);
+        GitPanel = new GitPanelViewModel(_gitRunner, GetWorkspacePath, IdeMcp, LoadSolution, RefreshGitSummaryAsync, osShell: _osShell);
         ChatPanel = new ChatPanelViewModel(
             _aiProviderManager,
             () => ActiveAiProvider,
@@ -113,7 +113,7 @@ public partial class MainWindowViewModel
                 if (ShowTerminalPanelCommand.CanExecute(null))
                     ShowTerminalPanelCommand.Execute(null);
             }),
-            executeIdeCommandForMafAgent: (commandId, args, ct) => ((Services.IIdeMcpActions)this).ExecuteCommandAsync(commandId, args, ct),
+            executeIdeCommandForMafAgent: (commandId, args, ct) => IdeMcp.ExecuteCommandAsync(commandId, args, ct),
             revealIntercomAttachmentInIde: (anchor, select, ct) =>
                 RevealIntercomAttachmentInIdeAsync(anchor, select, ct),
             getLocalOllamaEndpoint: () => new Uri(Services.OllamaService.DefaultBaseUriString),
@@ -160,7 +160,7 @@ public partial class MainWindowViewModel
             HybridIndexIndexDirectoryRelative.ResolveOrDefault(_settings.HybridIndex.IndexDir));
         _dapDebug = new Services.IdeDapDebugSession(() =>
         {
-            UiScheduler.Default.Post(ApplyDapDebugSnapshotToUi);
+            UiScheduler.Default.Post(_ideMcpHost.ApplyDapDebugSnapshotToUi);
         }, _ideDataBus);
         _dapDebug.StateChanged += (_, _) => NotifyDebugRelayCommandsChanged();
         _mcpBuildTest = new Services.McpDotnetBuildTestService(_dotnetRunner);

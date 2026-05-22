@@ -25,7 +25,7 @@ public partial class MainWindowViewModel
                 try
                 {
                     IReadOnlyDictionary<string, JsonElement>? args = IdeCommandRegistry.ParseArgs(argsJson);
-                    await ((IIdeMcpActions)this).ExecuteCommandAsync(commandId, args, CancellationToken.None)
+                    await IdeMcp.ExecuteCommandAsync(commandId, args, CancellationToken.None)
                         .ConfigureAwait(false);
                 }
                 catch

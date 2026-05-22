@@ -50,7 +50,7 @@ public partial class MainWindowViewModel
         await UiScheduler.Default.InvokeAsync(() =>
         {
             RegisterIdeMcpBreakpoint(path, line, condition);
-            ((Services.IIdeMcpActions)this).GoToPosition(path, line, 1, line, 1);
+            IdeMcp.GoToPosition(path, line, 1, line, 1);
             _focusEditorAction?.Invoke();
         }).ConfigureAwait(false);
 
