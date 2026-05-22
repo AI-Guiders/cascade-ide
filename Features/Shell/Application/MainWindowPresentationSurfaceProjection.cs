@@ -12,7 +12,7 @@ namespace CascadeIDE.Features.Shell.Application;
 /// <summary>
 /// Статические проекции для вычисляемых свойств главного окна (видимость, подписи, mount-контекст без логики на VM).
 /// </summary>
-[ComputingUnit]
+[PresentationProjection]
 public static class MainWindowPresentationSurfaceProjection
 {
     /// <summary>Кадр хоста: intent + CDS style → shell + инструменты (ADR 0036 п.3, 0047).</summary>

@@ -267,6 +267,23 @@
 - Четвёртый срез (**v1.40e**): partial **`MainWindowViewModel.WorkspaceNavigationMap.Refresh`** — debounce、`RunWorkspaceNavigationMapRefreshAsync` и viewport width; файл привязок/команд карты (**`WorkspaceNavigationMap.cs`**) укорочен до состояния и проекций.
   - пятый срез (**v1.40f**): **`MainWindowPresentationSurfaceProjection`** — видимость сплита main grid (`IsMainGridSplitColumnVisible`), флаги Skia-mount IDE Health (колонка / окно-хост), **`ResolveInstrumentMountStyleForSlot`**; отдельно **`MainWindowPresentationDapProjection`** для паузы/«running» DAP; геттеры **`MainWindowViewModel.Presentation`** только делегируют; тесты **`MainWindowPresentationDapProjectionTests`** и доп. кейсы в **`MainWindowPresentationSurfaceProjectionTests`**.
   - шестой срез (**v1.40g**): **`IMainWindowHostSurfaceInput`** (`Cockpit/Composition/HostSurface`) — **`MainWindowHostSurfaceProjection`** принимает контракт вместо ссылки на **`MainWindowViewModel`**; реализация на VM через partial; тест **`MainWindowHostSurfaceProjectionTests`**.
+- Кластер **Solution / Build / Startup / UiMode** (завершение Wave 1 UI, **v1.45–v1.48**):
+  - **`StartupProjectRefreshProjection`** — восстановление стартового `.csproj` после `LoadSolution`; **`MainWindowViewModel.StartupProject`** — делегирование.
+  - **`SolutionLoadUiApplyProjection`** — первая страница MFD после загрузки решения; **`MainWindowViewModel.SolutionBuild`** (`LoadSolutionAsync`).
+  - **`MainWindowBuildSolutionPrepProjection`** — `CanBuild` / prep заголовка и страницы Build; сборка по-прежнему через **`DotnetSolutionChunkedBuildOrchestrator`**.
+  - **`UiModeLayoutApplyProjection`** — план раскладки + persist workspace; **`ApplyUiModeLayout`** в **`UiGitWorkspace`**.
+
+### Wave 1 — статус (текущий объём **закрыт**)
+
+Фазы **0–5** и Wave 1 (**MCP thinning** + **UI clusters thinning** по плану v1.15–v1.48) считаются **выполненными** для зафиксированного scope strangler: главный VM остаётся композитором (`IIdeMcpActions`, подписки, дочерние VM), но крупные кластеры вынесены в `Features/*/Application` оркестраторами/проекциями.
+
+**Не входит в «завершение» (осознанный backlog, ADR 0009):**
+
+- **`SolutionWorkspaceViewModel`** — ядро сессии решения/документов по-прежнему на MWVM.
+- Точечный вынос новых MCP/UI при росте API (правило feature-archetype).
+- MEF/плагины, опциональный батчинг Problems, полное схлопывание `IdeMcpCommandExecutor` в сервисы.
+
+Новые фичи — по **[feature-archetype-v1.md](design/feature-archetype-v1.md)**; MWVM не раздуваем без выноса.
 
 ## Версионирование
 
@@ -335,6 +352,12 @@
 - **v1.41k** — MCP UI automation: **`IdeMcpActions.UiAutomation`** разнесён на **`UiAutomation.EditorPreview`** (редактор, брейкпоинты, превью) и **`UiAutomation.Providers`** (подтверждения, тема, провайдеры контролов и чата).
 - **v1.41l** — MCP executor: **`Handlers.DapDebug`** → **`DapDebug.LaunchAttach`** / **`DapDebug.Stepping`**; **`Handlers.Editor`** → **`Editor.ToolCatalog`** (статический **`RegisterCore`**), **`FilesAndChat`**, **`StateContent`**, **`EditNavigation`**; **`Chrome.MenuToolbar`** → **`MenuToolbar.DialogsApp`**, **`ThemeLanguage`**, **`PanelsLayout`**; **`CascadeIDE.csproj`** — **`DependentUpon`** для вложенных partial.
 - **v1.41m** — Workspace: **`BlankSolutionCreator`** (`Features/Workspace/Application`) — новое пустое **`.sln`** через **`dotnet new sln`**; меню **Файл → Создать новое решение…**, MCP **`create_new_solution_dialog`**, тесты **`BlankSolutionCreatorTests`**; **`MainWindowViewModel.TryCreateBlankSolutionAtPathAsync`**.
+- **v1.41n** — Роли слоёв: атрибут **`[PresentationProjection]`** (`CascadeIDE.Contracts`), анализатор **`LayerRoleConsistencyAnalyzer`** (**CASCOPE032–042**); проекции в `Features/*/Application` переведены с `[ComputingUnit]` на `[PresentationProjection]`; оркестраторы палитры/F5/debug — `[ApplicationOrchestrator]`; I/O-исключения (`ExpandedMarkdownFileExportProjection`, `StartupProjectDebugInferenceProjection`) остаются на `[ComputingUnit]`.
+- **v1.41o** — **`ShellSettingsPresentationProjection`** (был `ShellSettingsOrchestrator`); **CASCOPE039** не предупреждает MCP/application-фасады с `[ApplicationOrchestrator]` и делегированием в `*Service` (и разбором `JsonElement`/`GraphDocument`).
 - **v1.42** — [design/feature-archetype-v1.md](design/feature-archetype-v1.md) + [design/ide-chrome-tokens-v1.md](design/ide-chrome-tokens-v1.md); глобальные стили `cascadeSection` / UiKit **`CascadeSection`**, **`CascadeStatusChip`**; ADR **0076**, **0121** → Accepted.
 - **v1.43** — ADR **0120** (primary work surface Intercom/Editor) → Accepted · Implemented; IOP manifest синхронизирован.
 - **v1.44** — ADR **0119** (chat slash commands) → Accepted · Implemented (фазы A, A′, B); **0121** таблица зрелости обновлена.
+- **v1.45** — Strangler UI: **`StartupProjectRefreshProjection`**; MWVM **`StartupProject`** укорочен.
+- **v1.46** — **`SolutionLoadUiApplyProjection`** + **`MainWindowBuildSolutionPrepProjection`**; MWVM **`SolutionBuild`** без прямого `File.Exists` для CanBuild.
+- **v1.47** — **`UiModeLayoutApplyProjection`**; **`ApplyUiModeLayout`** в **`UiGitWorkspace`**.
+- **v1.48** — Wave 1 strangler MWVM (текущий объём) отмечен **закрытым**; backlog зафиксирован в разделе «Wave 1 — статус».

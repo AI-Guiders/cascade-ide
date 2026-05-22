@@ -3,7 +3,7 @@ using CascadeIDE.Contracts;
 namespace CascadeIDE.Features.Launch.Application;
 
 /// <summary>Текст баннера стартового проекта в хроме (ADR 0090 + F5).</summary>
-[ComputingUnit("startup-project-ui")]
+[PresentationProjection("startup-project-ui")]
 public static class StartupProjectBannerProjection
 {
     public static string Format(

@@ -6,7 +6,7 @@ namespace CascadeIDE.ViewModels;
 public partial class MainWindowViewModel
 {
     void Services.IIdeMcpActions.OpenFile(string path) =>
-        IdeMcpEditorDocumentActions.ScheduleOpenFile(
+        IdeMcpEditorDocumentOrchestrator.ScheduleOpenFile(
             UiScheduler.Default,
             path,
             normalizedPath =>
@@ -23,7 +23,7 @@ public partial class MainWindowViewModel
             });
 
     void Services.IIdeMcpActions.LoadSolution(string path) =>
-        IdeMcpEditorDocumentActions.ScheduleLoadSolution(UiScheduler.Default, path, LoadSolution);
+        IdeMcpEditorDocumentOrchestrator.ScheduleLoadSolution(UiScheduler.Default, path, LoadSolution);
 
     async Task<string> Services.IIdeMcpActions.LoadSolutionAndWaitAsync(string path, CancellationToken cancellationToken)
     {

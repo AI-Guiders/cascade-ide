@@ -5,11 +5,10 @@ using CascadeIDE.Models;
 namespace CascadeIDE.Features.Shell.Application;
 
 /// <summary>
-/// Pure helpers for shell/settings reactive handlers.
-/// Keeps small normalization and page-coercion decisions out of MainWindowViewModel.
+/// Нормализация и coercion для shell/settings reactive handlers (без сценария и I/O).
 /// </summary>
-[ApplicationOrchestrator]
-public static class ShellSettingsOrchestrator
+[PresentationProjection]
+public static class ShellSettingsPresentationProjection
 {
     public static string NormalizeExternalMcpServersJson(string? value) =>
         value ?? "[]";

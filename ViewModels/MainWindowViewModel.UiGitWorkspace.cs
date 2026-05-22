@@ -1,5 +1,6 @@
 using Avalonia.Threading;
 using CascadeIDE.Features.IdeMcp.Application;
+using CascadeIDE.Features.UiChrome.Application;
 using CascadeIDE.Features.Workspace.Application;
 using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Models;
@@ -35,8 +36,8 @@ public partial class MainWindowViewModel
 
     private void ApplyUiModeLayout(string mode, bool persist)
     {
-        var normalized = NormalizeUiMode(mode);
-        var spec = UiModeCatalog.GetSpec(normalized);
+        var plan = UiModeLayoutApplyProjection.Create(mode, persist);
+        var spec = plan.Spec;
 
         IsPfdRegionExpanded = spec.PfdRegionExpanded;
         IsBuildOutputVisible = spec.BuildOutputVisible;
@@ -46,8 +47,7 @@ public partial class MainWindowViewModel
         IsInstrumentationDockVisible = spec.InstrumentationDockVisible;
 
         CoerceMfdShellPageToAllowed();
-        if (spec.SelectTerminalTabWhenTerminalShown && IsTerminalVisible)
-            CurrentMfdShellPage = MfdShellPage.Terminal;
+        CurrentMfdShellPage = UiModeLayoutApplyProjection.ResolveMfdPageAfterApply(plan, CurrentMfdShellPage);
 
         _ = spec.ThemeSlot switch
         {
@@ -57,13 +57,12 @@ public partial class MainWindowViewModel
             _ => Services.UiThemeApply.ApplyOnUiThreadAsync(Services.UiThemeApply.GetCursorLikeThemeJson())
         };
 
-        if (!persist)
-            return;
-
-        _settings.Workspace.Mode = normalized;
-        _settings.Workspace.PfdExpanded = IsPfdRegionExpanded;
-        _settings.Workspace.ShowTerminal = IsTerminalVisible;
-        SaveSettingsIfChanged();
+        UiModeLayoutApplyProjection.PersistWorkspaceMode(
+            plan,
+            IsPfdRegionExpanded,
+            IsTerminalVisible,
+            _settings,
+            SaveSettingsIfChanged);
     }
 
     private string GetWorkspacePath() => WorkspaceDirectoryFromSolutionPath.Resolve(Workspace.SolutionPath);

@@ -77,11 +77,11 @@ public partial class MainWindowViewModel
         _workspaceSplittersLocked = _settings.Workspace.SplittersLocked;
 
         _hciIntegrationEnabled = _settings.HybridIndex.Enabled;
-        _hciIndexDir = ShellSettingsOrchestrator.NormalizeHybridIndexDir(_settings.HybridIndex.IndexDir);
+        _hciIndexDir = ShellSettingsPresentationProjection.NormalizeHybridIndexDir(_settings.HybridIndex.IndexDir);
         _hciDebounceMs = Math.Clamp(_settings.HybridIndex.DebounceMs, 0, 60_000);
         _hciAutoReindexOnSolutionOpen = _settings.HybridIndex.AutoReindexOnSolutionOpen;
         _hciWatchFiles = _settings.HybridIndex.WatchFiles;
-        _hciScopeMode = ShellSettingsOrchestrator.NormalizeHybridIndexScopeMode(_settings.HybridIndex.ScopeMode);
+        _hciScopeMode = ShellSettingsPresentationProjection.NormalizeHybridIndexScopeMode(_settings.HybridIndex.ScopeMode);
         _hciPauseWhenMcpStdioHost = _settings.HybridIndex.PauseWhenMcpStdioHost;
 
         _ideMcpExecutor = new IdeMcpCommandExecutor(this);

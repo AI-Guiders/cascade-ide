@@ -1,10 +1,12 @@
 #nullable enable
+using CascadeIDE.Contracts;
 using CascadeIDE.Services;
 using CascadeIDE.ViewModels;
 
 namespace CascadeIDE.Features.Search.Application;
 
 /// <summary>Выполнение выбранной строки палитры команд (MCP или go-to).</summary>
+[ApplicationOrchestrator("ide-command-palette-execute")]
 internal static class IdeCommandPaletteExecutionOrchestrator
 {
     public static Task RunSelectionAsync(

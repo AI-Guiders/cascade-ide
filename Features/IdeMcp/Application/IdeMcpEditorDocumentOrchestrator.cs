@@ -1,12 +1,13 @@
 #nullable enable
 using CascadeIDE.Contracts;
+using CascadeIDE.Features.Launch.DataAcquisition;
 using CascadeIDE.Services;
 
 namespace CascadeIDE.Features.IdeMcp.Application;
 
 /// <summary>UI-мутации редактора/документов для MCP (маршалинг остаётся на хосте).</summary>
 [ApplicationOrchestrator]
-public static class IdeMcpEditorDocumentActions
+public static class IdeMcpEditorDocumentOrchestrator
 {
     public static void ScheduleOpenFile(
         IUiScheduler scheduler,
@@ -19,9 +20,10 @@ public static class IdeMcpEditorDocumentActions
         var pathCopy = path;
         scheduler.Post(() =>
         {
-            if (!File.Exists(pathCopy))
+            var normalized = LaunchProjectPathResolver.NormalizeExistingProjectFileFullPath(pathCopy);
+            if (normalized is null)
                 return;
-            openNormalizedExistingFile(CanonicalFilePath.Normalize(pathCopy));
+            openNormalizedExistingFile(normalized);
         });
     }
 

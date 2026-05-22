@@ -6,7 +6,7 @@ namespace CascadeIDE.Features.WorkspaceNavigation.Application;
 /// <summary>
 /// Проекция UI для панели карты намерений (PFD): видимость list/graph и вспомогательные строки без привязки к ViewModel.
 /// </summary>
-[ComputingUnit]
+[PresentationProjection]
 public static class CodeNavigationMapPresentationProjection
 {
     private static readonly string[] PresentationViewCycleOrder = ["list", "graph", "both"];

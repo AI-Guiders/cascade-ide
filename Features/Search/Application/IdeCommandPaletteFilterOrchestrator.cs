@@ -1,5 +1,6 @@
 #nullable enable
 using System.Collections.ObjectModel;
+using CascadeIDE.Contracts;
 using CascadeIDE.Features.Shell.Application;
 using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Models;
@@ -9,6 +10,7 @@ using CascadeIDE.ViewModels;
 namespace CascadeIDE.Features.Search.Application;
 
 /// <summary>Фильтрация и наполнение списка палитры команд (каталог, melody, go-to).</summary>
+[ApplicationOrchestrator("ide-command-palette-filter")]
 internal static class IdeCommandPaletteFilterOrchestrator
 {
     public static void RefreshCommandPaletteFilter(

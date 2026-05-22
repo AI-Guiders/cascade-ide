@@ -16,13 +16,13 @@ public partial class MainWindowViewModel
 
     partial void OnMarkdownKrokiBaseUrlChanged(string value)
     {
-        _settings.Markdown.Diagrams.KrokiUrl = ShellSettingsOrchestrator.NormalizeKrokiBaseUrl(value);
+        _settings.Markdown.Diagrams.KrokiUrl = ShellSettingsPresentationProjection.NormalizeKrokiBaseUrl(value);
         SaveSettingsIfChanged();
     }
 
     partial void OnExternalMcpServersJsonChanged(string value) =>
         ShellSettingsReactiveSideEffects.ApplyExternalMcpServersJson(
-            ShellSettingsOrchestrator.NormalizeExternalMcpServersJson(value),
+            ShellSettingsPresentationProjection.NormalizeExternalMcpServersJson(value),
             _settings,
             Autonomous.CancelForHostReconfiguration,
             CreateAutonomousAgentService,
@@ -56,7 +56,7 @@ public partial class MainWindowViewModel
         SaveSettingsIfChanged();
         if (value)
             TryNavigateToMfdShellPage(MfdShellPage.Terminal);
-        else if (ShellSettingsOrchestrator.ShouldCoerceCurrentPageWhenHidden(CurrentMfdShellPage, MfdShellPage.Terminal))
+        else if (ShellSettingsPresentationProjection.ShouldCoerceCurrentPageWhenHidden(CurrentMfdShellPage, MfdShellPage.Terminal))
             CoerceMfdShellPageToAllowed();
     }
 
@@ -66,7 +66,7 @@ public partial class MainWindowViewModel
         OnPropertyChanged(nameof(IsMfdContourContentVisible));
         if (value)
             TryNavigateToMfdShellPage(MfdShellPage.Build);
-        else if (ShellSettingsOrchestrator.ShouldCoerceCurrentPageWhenHidden(CurrentMfdShellPage, MfdShellPage.Build))
+        else if (ShellSettingsPresentationProjection.ShouldCoerceCurrentPageWhenHidden(CurrentMfdShellPage, MfdShellPage.Build))
             CoerceMfdShellPageToAllowed();
     }
 
@@ -80,7 +80,7 @@ public partial class MainWindowViewModel
             return;
         }
 
-        if (ShellSettingsOrchestrator.ShouldCoerceWhenInstrumentationHidden(CurrentMfdShellPage))
+        if (ShellSettingsPresentationProjection.ShouldCoerceWhenInstrumentationHidden(CurrentMfdShellPage))
             CoerceMfdShellPageToAllowed();
     }
 
@@ -99,8 +99,8 @@ public partial class MainWindowViewModel
 
     partial void OnAiModeChanged(string value)
     {
-        var n = ShellSettingsOrchestrator.NormalizeAiMode(value);
-        if (ShellSettingsOrchestrator.ShouldRewriteWithNormalizedValue(value, n))
+        var n = ShellSettingsPresentationProjection.NormalizeAiMode(value);
+        if (ShellSettingsPresentationProjection.ShouldRewriteWithNormalizedValue(value, n))
         {
             AiMode = n;
             return;
@@ -118,8 +118,8 @@ public partial class MainWindowViewModel
 
     partial void OnCloudActiveProviderChanged(string value)
     {
-        var n = ShellSettingsOrchestrator.NormalizeCloudProvider(value);
-        if (ShellSettingsOrchestrator.ShouldRewriteWithNormalizedValue(value, n))
+        var n = ShellSettingsPresentationProjection.NormalizeCloudProvider(value);
+        if (ShellSettingsPresentationProjection.ShouldRewriteWithNormalizedValue(value, n))
         {
             CloudActiveProvider = n;
             return;
@@ -136,19 +136,19 @@ public partial class MainWindowViewModel
 
     partial void OnAnthropicApiKeyChanged(string value)
     {
-        _aiKeys.AnthropicApiKey = ShellSettingsOrchestrator.NormalizeOptionalSecret(value);
+        _aiKeys.AnthropicApiKey = ShellSettingsPresentationProjection.NormalizeOptionalSecret(value);
         SaveAiKeysIfChanged();
     }
 
     partial void OnOpenAiApiKeyChanged(string value)
     {
-        _aiKeys.OpenAiApiKey = ShellSettingsOrchestrator.NormalizeOptionalSecret(value);
+        _aiKeys.OpenAiApiKey = ShellSettingsPresentationProjection.NormalizeOptionalSecret(value);
         SaveAiKeysIfChanged();
     }
 
     partial void OnDeepSeekApiKeyChanged(string value)
     {
-        _aiKeys.DeepSeekApiKey = ShellSettingsOrchestrator.NormalizeOptionalSecret(value);
+        _aiKeys.DeepSeekApiKey = ShellSettingsPresentationProjection.NormalizeOptionalSecret(value);
         SaveAiKeysIfChanged();
     }
 
@@ -162,7 +162,7 @@ public partial class MainWindowViewModel
             TryNavigateToMfdShellPage(MfdShellPage.Git);
             _ = GitPanel.RefreshGitPanelAsync();
         }
-        else if (ShellSettingsOrchestrator.ShouldCoerceCurrentPageWhenHidden(CurrentMfdShellPage, MfdShellPage.Git))
+        else if (ShellSettingsPresentationProjection.ShouldCoerceCurrentPageWhenHidden(CurrentMfdShellPage, MfdShellPage.Git))
             CoerceMfdShellPageToAllowed();
     }
 
@@ -174,7 +174,7 @@ public partial class MainWindowViewModel
     partial void OnCodeNavigationMapPresentationChanged(string value)
     {
         var normalized = CodeNavigationMapPresentationKind.Normalize(value);
-        if (ShellSettingsOrchestrator.ShouldRewriteWithNormalizedValue(value, normalized))
+        if (ShellSettingsPresentationProjection.ShouldRewriteWithNormalizedValue(value, normalized))
         {
             CodeNavigationMapPresentation = normalized;
             return;
@@ -188,7 +188,7 @@ public partial class MainWindowViewModel
     partial void OnCodeNavigationMapLevelChanged(string value)
     {
         var normalized = CodeNavigationMapLevelKind.Normalize(value);
-        if (ShellSettingsOrchestrator.ShouldRewriteWithNormalizedValue(value, normalized))
+        if (ShellSettingsPresentationProjection.ShouldRewriteWithNormalizedValue(value, normalized))
         {
             CodeNavigationMapLevel = normalized;
             return;
@@ -215,8 +215,8 @@ public partial class MainWindowViewModel
 
     partial void OnHciIndexDirChanged(string value)
     {
-        var normalized = ShellSettingsOrchestrator.NormalizeHybridIndexDir(value);
-        if (ShellSettingsOrchestrator.ShouldRewriteWithNormalizedValue(value, normalized))
+        var normalized = ShellSettingsPresentationProjection.NormalizeHybridIndexDir(value);
+        if (ShellSettingsPresentationProjection.ShouldRewriteWithNormalizedValue(value, normalized))
         {
             HciIndexDir = normalized;
             return;
@@ -260,8 +260,8 @@ public partial class MainWindowViewModel
 
     partial void OnHciScopeModeChanged(string value)
     {
-        var n = ShellSettingsOrchestrator.NormalizeHybridIndexScopeMode(value);
-        if (ShellSettingsOrchestrator.ShouldRewriteWithNormalizedValue(value, n))
+        var n = ShellSettingsPresentationProjection.NormalizeHybridIndexScopeMode(value);
+        if (ShellSettingsPresentationProjection.ShouldRewriteWithNormalizedValue(value, n))
         {
             HciScopeMode = n;
             return;

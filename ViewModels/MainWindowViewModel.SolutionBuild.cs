@@ -1,11 +1,9 @@
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using CascadeIDE.Cockpit.DataBus;
 using CascadeIDE.Features.Build.Application;
 using CascadeIDE.Features.Workspace.Application;
 using CascadeIDE.Services;
-using CascadeIDE.Models;
 using CommunityToolkit.Mvvm.Input;
 
 namespace CascadeIDE.ViewModels;
@@ -22,8 +20,8 @@ public partial class MainWindowViewModel
     [RelayCommand(CanExecute = nameof(CanBuildSolution))]
     private async Task BuildSolutionAsync()
     {
-        var solutionPath = Workspace.SolutionPath;
-        if (string.IsNullOrWhiteSpace(solutionPath) || !File.Exists(solutionPath))
+        var prep = MainWindowBuildSolutionPrepProjection.TryCreatePrep(Workspace.SolutionPath);
+        if (prep is null)
             return;
 
         PublishToIdeDataBusAndRebuild(new BuildStateChanged(true));
@@ -34,16 +32,14 @@ public partial class MainWindowViewModel
 
         // Один канонический лог — только «Сборка · вывод» (и MCP get_build_output). Терминал не дублируем:
         // в Power переключаем MFD на вывод сборки, чтобы лог был на глазах без второй копии текста.
-        CurrentMfdShellPage = MfdShellPage.Build;
-
-        var header = $"Сборка: {solutionPath}\r\n";
-        BuildOutputPanel.Set(header);
+        CurrentMfdShellPage = prep.TargetMfdPage;
+        BuildOutputPanel.Set(prep.BuildOutputHeader);
 
         void AppendBuildChunk(string chunk) => BuildOutputPanel.Append(chunk);
 
         var (lastExitCode, lastBuildSucceeded) =
             await DotnetSolutionChunkedBuildOrchestrator.RunSolutionBuildStreamingAsync(
-                    solutionPath,
+                    prep.SolutionPath,
                     _dotnetRunner,
                     AppendBuildChunk,
                     CancellationToken.None)
@@ -55,9 +51,7 @@ public partial class MainWindowViewModel
     }
 
     private bool CanBuildSolution() =>
-        !string.IsNullOrWhiteSpace(Workspace.SolutionPath)
-        && File.Exists(Workspace.SolutionPath)
-        && !IsBuilding;
+        MainWindowBuildSolutionPrepProjection.CanBuild(Workspace.SolutionPath, IsBuilding);
 
     [RelayCommand]
     private void HideBuildOutput()
@@ -99,13 +93,15 @@ public partial class MainWindowViewModel
                 EditorText = "";
                 IsLoadingCurrentFile = false;
 
-                Workspace.SolutionPath = normalizedSolutionPath ?? path;
+                var loadPlan = SolutionLoadUiApplyProjection.Create(
+                    path,
+                    normalizedSolutionPath,
+                    IsDockedMfdSolutionExplorerTree);
+                Workspace.SolutionPath = loadPlan.NormalizedSolutionPath;
                 Workspace.SolutionRoots.Clear();
                 Workspace.SolutionRoots.Add(root);
                 RefreshStartupProjectAfterSolutionLoad();
-                // Страница «Обозреватель» во вторичном контуре — только если карта инструментов назначает дерево в слот Mfd (без дубля с колонкой PFD).
-                TryNavigateToMfdShellPage(
-                    IsDockedMfdSolutionExplorerTree ? MfdShellPage.SolutionExplorer : MfdShellPage.Terminal);
+                TryNavigateToMfdShellPage(loadPlan.InitialMfdPage);
             });
         }
         catch (Exception ex)
