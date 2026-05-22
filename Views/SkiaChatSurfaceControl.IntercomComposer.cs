@@ -294,8 +294,8 @@ public partial class SkiaChatSurfaceControl
         {
             _slashRows.Add(new SkiaPopupListRow(
                 item.Group,
-                item.SlashPath,
-                item.Help));
+                item.ListTitle,
+                item.ListSubtitle));
         }
     }
 

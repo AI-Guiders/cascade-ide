@@ -3,7 +3,17 @@ using CascadeIDE.Services;
 
 namespace CascadeIDE.Features.Chat;
 
-public sealed record ChatSlashSuggestion(string InsertText, string SlashPath, string Help, string? Group = null);
+public sealed record ChatSlashSuggestion(string InsertText, string SlashPath, string Help, string? Group = null)
+{
+    /// <summary>Строка в popup: что подставит Tab (по ступеням).</summary>
+    public string ListTitle => InsertText;
+
+    /// <summary>Вторичная строка: полная команда и описание.</summary>
+    public string ListSubtitle =>
+        string.Equals(InsertText.TrimEnd(), SlashPath, StringComparison.OrdinalIgnoreCase)
+            ? Help
+            : $"{SlashPath} — {Help}";
+}
 
 /// <summary>Иерархические подсказки для <c>/</c> в ChatInput (ADR 0119 §6, 0125 dynamic).</summary>
 public static class ChatSlashAutocomplete

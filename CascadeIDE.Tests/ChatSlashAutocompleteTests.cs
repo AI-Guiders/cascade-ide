@@ -180,23 +180,33 @@ public sealed class ChatSlashAutocompleteTests
     }
 
     [Fact]
-
     public void GetSuggestions_IntercomTopicObject_ListsActions()
-
     {
-
         var suggestions = ChatSlashAutocomplete.GetSuggestions("/intercom topic ");
-
         Assert.Contains(suggestions, s => s.SlashPath == "/intercom topic rename");
         Assert.Contains(suggestions, s => s.InsertText == "/intercom topic rename ");
-
         Assert.Contains(suggestions, s => s.InsertText == "/intercom topic create ");
-
         Assert.Contains(suggestions, s => s.InsertText == "/intercom topic open");
-
         Assert.DoesNotContain(suggestions, s => s.InsertText == "/intercom message select ");
-
     }
+
+    [Fact]
+    public void Suggestion_ListTitle_is_insert_step_not_full_slash_path()
+    {
+        var suggestions = ChatSlashAutocomplete.GetSuggestions("/intercom ");
+        var deeperThanOneStep = suggestions.Where(s => SlashPathSegmentCount(s.SlashPath) > SlashPathSegmentCount(s.ListTitle)).ToList();
+        Assert.NotEmpty(deeperThanOneStep);
+        Assert.All(deeperThanOneStep, s =>
+        {
+            Assert.Equal(s.InsertText, s.ListTitle);
+            Assert.False(string.Equals(s.ListTitle.TrimEnd(), s.SlashPath, StringComparison.OrdinalIgnoreCase));
+            Assert.StartsWith("/intercom ", s.ListTitle, StringComparison.Ordinal);
+            Assert.Contains(s.SlashPath, s.ListSubtitle);
+        });
+    }
+
+    private static int SlashPathSegmentCount(string slashPath) =>
+        slashPath.TrimStart('/').Split(' ', StringSplitOptions.RemoveEmptyEntries).Length;
 
 
 
