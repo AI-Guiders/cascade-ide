@@ -25,7 +25,7 @@ public static class ChatSlashAutocomplete
         if (!TryGetSlashTokenBeforeCaret(rawInput, caretIndex ?? rawInput.Length, out var body))
             return [];
         if (body.Length == 0)
-            return ChatSlashCommandCatalog.AllSuggestions();
+            return BuildRootSegmentSuggestions();
 
         if (TryGetDynamicSuggestions(
                 body,
@@ -47,19 +47,199 @@ public static class ChatSlashAutocomplete
                 out var topicSuggestions))
             return topicSuggestions;
 
-        var firstSpace = body.IndexOf(' ');
-        if (firstSpace < 0)
+        return BuildStaticSegmentSuggestions(body);
+    }
+
+    /// <summary>Заменить slash-токен на текущей строке; вернуть полный текст и каретку.</summary>
+    public static bool TryReplaceSlashLineAtCaret(
+        string rawInput,
+        int caretIndex,
+        string slashLineInsert,
+        out string newText,
+        out int newCaret)
+    {
+        newText = rawInput;
+        newCaret = caretIndex;
+        if (!TryGetSlashLineRange(rawInput, caretIndex, out var lineStart, out var lineEnd))
+            return false;
+
+        newText = rawInput[..lineStart] + slashLineInsert + rawInput[lineEnd..];
+        newCaret = lineStart + slashLineInsert.Length;
+        return true;
+    }
+
+    private static IReadOnlyList<ChatSlashSuggestion> BuildRootSegmentSuggestions()
+    {
+        var buckets = new Dictionary<string, ChatSlashSuggestion>(StringComparer.OrdinalIgnoreCase);
+        foreach (var entry in ChatSlashCommandCatalog.AllSuggestions())
         {
-            return ChatSlashCommandCatalog.AllSuggestions()
-                .Where(s => MatchesPathPrefix(s.SlashPath, body))
-                .OrderBy(s => ChatSlashCommandCatalog.SortKeyForSuggestion(s.SlashPath))
-                .ToList();
+            if (!TrySplitPathBody(entry.SlashPath, out var segments) || segments.Count == 0)
+                continue;
+
+            var first = segments[0];
+            if (buckets.ContainsKey(first))
+                continue;
+
+            var insert = "/" + first + " ";
+            buckets[first] = new ChatSlashSuggestion(insert, "/" + first, entry.Help, entry.Group);
         }
 
-        return ChatSlashCommandCatalog.AllSuggestions()
-            .Where(s => MatchesTypedPathPrefix(s.SlashPath, body))
+        return buckets.Values
             .OrderBy(s => ChatSlashCommandCatalog.SortKeyForSuggestion(s.SlashPath))
             .ToList();
+    }
+
+    private static IReadOnlyList<ChatSlashSuggestion> BuildStaticSegmentSuggestions(string body)
+    {
+        ParseTypedBody(body, out var typedTokens, out var endsWithSpace);
+        var buckets = new Dictionary<string, (string Insert, string Path, string Help, string? Group)>(
+            StringComparer.OrdinalIgnoreCase);
+
+        foreach (var entry in ChatSlashCommandCatalog.AllSuggestions())
+        {
+            if (!TrySplitPathBody(entry.SlashPath, out var pathSegments))
+                continue;
+
+            if (!TryGetCompletionSegmentIndex(pathSegments, typedTokens, endsWithSpace, out var segmentIndex))
+                continue;
+
+            if (segmentIndex >= pathSegments.Count)
+                continue;
+
+            var segmentValue = pathSegments[segmentIndex];
+            if (!buckets.TryGetValue(segmentValue, out var existing)
+                || entry.SlashPath.Length > existing.Path.Length)
+            {
+                var insert = BuildSlashLineInsert(body, pathSegments, segmentIndex, segmentValue);
+                buckets[segmentValue] = (insert, entry.SlashPath, entry.Help, entry.Group);
+            }
+        }
+
+        return buckets.Values
+            .Select(v => new ChatSlashSuggestion(v.Insert, v.Path, v.Help, v.Group))
+            .OrderBy(s => ChatSlashCommandCatalog.SortKeyForSuggestion(s.SlashPath))
+            .ToList();
+    }
+
+    private static string BuildSlashLineInsert(
+        string typedBody,
+        IReadOnlyList<string> pathSegments,
+        int completeSegmentIndex,
+        string segmentValue)
+    {
+        ParseTypedBody(typedBody, out var typedTokens, out _);
+        var resultSegs = new List<string>(completeSegmentIndex + 1);
+        for (var i = 0; i < completeSegmentIndex; i++)
+            resultSegs.Add(i < typedTokens.Count ? typedTokens[i] : pathSegments[i]);
+
+        resultSegs.Add(segmentValue);
+        var slashPath = "/" + string.Join(" ", resultSegs);
+        if (completeSegmentIndex + 1 < pathSegments.Count
+            || SegmentNeedsUserArgTail(slashPath))
+            slashPath += " ";
+
+        return slashPath;
+    }
+
+    private static bool SegmentNeedsUserArgTail(string slashPath)
+    {
+        if (ChatSlashCommandParser.ShouldAutoExecuteAfterAutocompleteCommit(slashPath))
+            return false;
+
+        if (IntentSlashCatalog.TryGetRoute(slashPath, out var route)
+            && route.Completion != SlashCompletionKind.None)
+            return true;
+
+        ReadOnlySpan<string> suffixes =
+        [
+            " rename", " create", " set", " load", " find", " relate", " select", " file",
+        ];
+        foreach (var suffix in suffixes)
+        {
+            if (slashPath.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+
+        return slashPath.Contains(" open", StringComparison.OrdinalIgnoreCase)
+               && !slashPath.Contains("dialog", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static void ParseTypedBody(string body, out List<string> tokens, out bool endsWithSpace)
+    {
+        endsWithSpace = body.Length > 0 && body[^1] == ' ';
+        var trimmed = endsWithSpace ? body.TrimEnd() : body;
+        tokens = trimmed.Length == 0
+            ? []
+            : trimmed.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
+    }
+
+    private static bool TrySplitPathBody(string slashPath, out List<string> segments)
+    {
+        segments = [];
+        if (slashPath.Length < 2 || slashPath[0] != '/')
+            return false;
+
+        var body = slashPath[1..];
+        if (body.Length == 0)
+            return false;
+
+        segments = body.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
+        return segments.Count > 0;
+    }
+
+    private static bool TryGetCompletionSegmentIndex(
+        IReadOnlyList<string> pathSegments,
+        IReadOnlyList<string> typedTokens,
+        bool endsWithSpace,
+        out int segmentIndex)
+    {
+        segmentIndex = 0;
+        if (endsWithSpace)
+        {
+            if (typedTokens.Count > pathSegments.Count)
+                return false;
+
+            for (var i = 0; i < typedTokens.Count; i++)
+            {
+                if (!pathSegments[i].Equals(typedTokens[i], StringComparison.OrdinalIgnoreCase))
+                    return false;
+            }
+
+            segmentIndex = typedTokens.Count;
+            return segmentIndex < pathSegments.Count;
+        }
+
+        if (typedTokens.Count == 0)
+        {
+            segmentIndex = 0;
+            return pathSegments.Count > 0;
+        }
+
+        for (var i = 0; i < typedTokens.Count - 1; i++)
+        {
+            if (i >= pathSegments.Count
+                || !pathSegments[i].Equals(typedTokens[i], StringComparison.OrdinalIgnoreCase))
+                return false;
+        }
+
+        var lastIdx = typedTokens.Count - 1;
+        if (lastIdx >= pathSegments.Count)
+            return false;
+
+        var lastTyped = typedTokens[lastIdx];
+        var pathSeg = pathSegments[lastIdx];
+        if (!pathSeg.StartsWith(lastTyped, StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        if (lastTyped.Equals(pathSeg, StringComparison.OrdinalIgnoreCase)
+            && typedTokens.Count < pathSegments.Count)
+        {
+            segmentIndex = typedTokens.Count;
+            return true;
+        }
+
+        segmentIndex = lastIdx;
+        return true;
     }
 
     private static bool TryGetDynamicSuggestions(
@@ -171,8 +351,9 @@ public static class ChatSlashAutocomplete
     internal static bool TryGetSlashTokenBeforeCaret(string rawInput, int caretIndex, out string body)
     {
         body = "";
-        caretIndex = Math.Clamp(caretIndex, 0, rawInput.Length);
-        var lineStart = rawInput.LastIndexOf('\n', Math.Max(0, caretIndex - 1)) + 1;
+        if (!TryGetSlashLineRange(rawInput, caretIndex, out var lineStart, out _))
+            return false;
+
         var linePrefix = rawInput[lineStart..caretIndex];
         if (linePrefix.Contains('\r'))
             return false;
@@ -185,21 +366,25 @@ public static class ChatSlashAutocomplete
         return true;
     }
 
-    private static bool MatchesPathPrefix(string slashPath, string prefixWithoutSlash)
+    internal static bool TryGetSlashLineRange(string rawInput, int caretIndex, out int lineStart, out int lineEnd)
     {
-        if (slashPath.Length < 2)
+        lineStart = 0;
+        lineEnd = rawInput.Length;
+        caretIndex = Math.Clamp(caretIndex, 0, rawInput.Length);
+        lineStart = rawInput.LastIndexOf('\n', Math.Max(0, caretIndex - 1)) + 1;
+        lineEnd = rawInput.IndexOf('\n', caretIndex);
+        if (lineEnd < 0)
+            lineEnd = rawInput.Length;
+
+        var linePrefix = rawInput[lineStart..caretIndex];
+        if (linePrefix.Contains('\r'))
             return false;
 
-        var pathBody = slashPath[1..];
-        return pathBody.StartsWith(prefixWithoutSlash, StringComparison.OrdinalIgnoreCase);
-    }
-
-    private static bool MatchesTypedPathPrefix(string slashPath, string typedBody)
-    {
-        if (slashPath.Length < 2)
+        var trimmed = linePrefix.TrimStart();
+        if (trimmed.Length == 0 || trimmed[0] != '/')
             return false;
 
-        var pathBody = slashPath[1..];
-        return pathBody.StartsWith(typedBody, StringComparison.OrdinalIgnoreCase);
+        lineStart += linePrefix.Length - trimmed.Length;
+        return true;
     }
 }

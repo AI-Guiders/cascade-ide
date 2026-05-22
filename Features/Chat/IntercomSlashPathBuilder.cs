@@ -94,12 +94,6 @@ internal static class IntercomSlashPathBuilder
             return true;
         }
 
-        if (string.Equals(parse.Action, "topic", StringComparison.OrdinalIgnoreCase))
-        {
-            slashPath = "/intercom topic create";
-            return true;
-        }
-
         if (string.Equals(parse.Action, "spine", StringComparison.OrdinalIgnoreCase))
         {
             slashPath = "/intercom spine set";
