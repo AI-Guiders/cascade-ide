@@ -28,6 +28,10 @@ public sealed class ChatSlashAutocompleteTests
 
         Assert.Contains(suggestions, s => s.InsertText.Equals("/build ", StringComparison.Ordinal));
 
+        Assert.Contains(suggestions, s => s.ListTitle == "intercom");
+
+        Assert.Contains(suggestions, s => s.ListTitle == "build");
+
     }
 
 
@@ -158,6 +162,32 @@ public sealed class ChatSlashAutocompleteTests
 
         Assert.DoesNotContain(suggestions, s => s.InsertText == "/intercom topic rename ");
 
+        Assert.Contains(suggestions, s => s.ListTitle == "topic");
+
+        Assert.Contains(suggestions, s => s.ListTitle == "message");
+
+        Assert.All(suggestions, s => Assert.DoesNotContain('/', s.ListTitle));
+
+    }
+
+
+
+    [Fact]
+
+    public void GetSuggestions_IntercomWithoutTrailingSpace_ListsObjectSegmentsOnly()
+
+    {
+
+        var suggestions = ChatSlashAutocomplete.GetSuggestions("/intercom");
+
+        Assert.NotEmpty(suggestions);
+
+        Assert.Contains(suggestions, s => s.ListTitle == "topic");
+
+        Assert.DoesNotContain(suggestions, s => s.ListTitle == "selection");
+
+        Assert.All(suggestions, s => Assert.DoesNotContain('/', s.ListTitle));
+
     }
 
 
@@ -188,27 +218,10 @@ public sealed class ChatSlashAutocompleteTests
         Assert.Contains(suggestions, s => s.InsertText == "/intercom topic create ");
         Assert.Contains(suggestions, s => s.InsertText == "/intercom topic open");
         Assert.DoesNotContain(suggestions, s => s.InsertText == "/intercom message select ");
+        Assert.Contains(suggestions, s => s.ListTitle == "rename");
+        Assert.Contains(suggestions, s => s.ListTitle == "create");
+        Assert.All(suggestions, s => Assert.DoesNotContain('/', s.ListTitle));
     }
-
-    [Fact]
-    public void Suggestion_ListTitle_is_insert_step_not_full_slash_path()
-    {
-        var suggestions = ChatSlashAutocomplete.GetSuggestions("/intercom ");
-        var deeperThanOneStep = suggestions.Where(s => SlashPathSegmentCount(s.SlashPath) > SlashPathSegmentCount(s.ListTitle)).ToList();
-        Assert.NotEmpty(deeperThanOneStep);
-        Assert.All(deeperThanOneStep, s =>
-        {
-            Assert.Equal(s.InsertText, s.ListTitle);
-            Assert.False(string.Equals(s.ListTitle.TrimEnd(), s.SlashPath, StringComparison.OrdinalIgnoreCase));
-            Assert.StartsWith("/intercom ", s.ListTitle, StringComparison.Ordinal);
-            Assert.Contains(s.SlashPath, s.ListSubtitle);
-        });
-    }
-
-    private static int SlashPathSegmentCount(string slashPath) =>
-        slashPath.TrimStart('/').Split(' ', StringSplitOptions.RemoveEmptyEntries).Length;
-
-
 
     [Fact]
 

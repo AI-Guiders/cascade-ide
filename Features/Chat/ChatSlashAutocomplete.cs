@@ -3,10 +3,15 @@ using CascadeIDE.Services;
 
 namespace CascadeIDE.Features.Chat;
 
-public sealed record ChatSlashSuggestion(string InsertText, string SlashPath, string Help, string? Group = null)
+public sealed record ChatSlashSuggestion(
+    string InsertText,
+    string SlashPath,
+    string Help,
+    string? Group = null,
+    string? StepSegment = null)
 {
-    /// <summary>Строка в popup: что подставит Tab (по ступеням).</summary>
-    public string ListTitle => InsertText;
+    /// <summary>Строка в popup: только следующий сегмент (домен / объект / intent).</summary>
+    public string ListTitle => StepSegment ?? "";
 
     /// <summary>Вторичная строка: полная команда и описание.</summary>
     public string ListSubtitle =>
@@ -91,7 +96,7 @@ public static class ChatSlashAutocomplete
                 continue;
 
             var insert = "/" + first + " ";
-            buckets[first] = new ChatSlashSuggestion(insert, "/" + first, entry.Help, entry.Group);
+            buckets[first] = new ChatSlashSuggestion(insert, "/" + first, entry.Help, entry.Group, first);
         }
 
         return buckets.Values
@@ -102,7 +107,7 @@ public static class ChatSlashAutocomplete
     private static IReadOnlyList<ChatSlashSuggestion> BuildStaticSegmentSuggestions(string body)
     {
         ParseTypedBody(body, out var typedTokens, out var endsWithSpace);
-        var buckets = new Dictionary<string, (string Insert, string Path, string Help, string? Group)>(
+        var buckets = new Dictionary<string, (string Insert, string Path, string Help, string? Group, string Segment)>(
             StringComparer.OrdinalIgnoreCase);
 
         foreach (var entry in ChatSlashCommandCatalog.AllSuggestions())
@@ -121,12 +126,12 @@ public static class ChatSlashAutocomplete
                 || entry.SlashPath.Length > existing.Path.Length)
             {
                 var insert = BuildSlashLineInsert(body, pathSegments, segmentIndex, segmentValue);
-                buckets[segmentValue] = (insert, entry.SlashPath, entry.Help, entry.Group);
+                buckets[segmentValue] = (insert, entry.SlashPath, entry.Help, entry.Group, segmentValue);
             }
         }
 
         return buckets.Values
-            .Select(v => new ChatSlashSuggestion(v.Insert, v.Path, v.Help, v.Group))
+            .Select(v => new ChatSlashSuggestion(v.Insert, v.Path, v.Help, v.Group, v.Segment))
             .OrderBy(s => ChatSlashCommandCatalog.SortKeyForSuggestion(s.SlashPath))
             .ToList();
     }
@@ -280,7 +285,8 @@ public static class ChatSlashAutocomplete
                     $"{route.SlashPath} {m.InsertPath}",
                     route.SlashPath,
                     m.Help,
-                    group))
+                    group,
+                    FormatDynamicStepSegment(m.InsertPath)))
                 .ToList();
             return true;
         }
@@ -299,7 +305,8 @@ public static class ChatSlashAutocomplete
                     $"{route.SlashPath} {m.InsertArg}",
                     m.Label,
                     m.Help,
-                    group))
+                    group,
+                    FormatDynamicStepSegment(m.InsertArg)))
                 .ToList();
             return true;
         }
@@ -396,5 +403,17 @@ public static class ChatSlashAutocomplete
 
         lineStart += linePrefix.Length - trimmed.Length;
         return true;
+    }
+
+    private static string FormatDynamicStepSegment(string insertTail)
+    {
+        if (string.IsNullOrWhiteSpace(insertTail))
+            return insertTail;
+
+        var trimmed = insertTail.Trim();
+        var lastSlash = trimmed.LastIndexOf('/');
+        var leaf = lastSlash >= 0 ? trimmed[(lastSlash + 1)..] : trimmed;
+        var space = leaf.IndexOf(' ');
+        return space >= 0 ? leaf[..space] : leaf;
     }
 }
