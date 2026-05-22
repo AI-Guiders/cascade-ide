@@ -43,7 +43,7 @@ internal sealed partial class IdeMcpCommandExecutor
 
         add(Services.IdeCommands.GetDebugSnapshot, async (_, ct) =>
         {
-            try { return await ((IIdeMcpActions)_vm).GetDebugSnapshotAsync(ct).ConfigureAwait(false); }
+            try { return await _actions.GetDebugSnapshotAsync(ct).ConfigureAwait(false); }
             catch (Exception ex) { return "# Error: " + ex.Message; }
         });
 

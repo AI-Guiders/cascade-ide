@@ -11,7 +11,7 @@ internal sealed partial class IdeMcpCommandExecutor
     {
         add(Services.IdeCommands.IntercomRevealAttachment, async (args, ct) =>
         {
-            var a = (IIdeMcpActions)_vm;
+            var a = _actions;
             if (!IntercomRevealAttachmentMcpArgs.TryParse(args, out var anchor, out var selectExplicit, out var durationMs, out var err))
                 return err;
 
@@ -33,20 +33,20 @@ internal sealed partial class IdeMcpCommandExecutor
 
         add(Services.IdeCommands.IntercomMessagesForCode, async (args, _) =>
         {
-            var a = (IIdeMcpActions)_vm;
+            var a = _actions;
             return await a.FindIntercomMessagesForCodeAsync(args);
         });
 
         add(Services.IdeCommands.IntercomMessageRelate, async (args, _) =>
         {
-            var a = (IIdeMcpActions)_vm;
+            var a = _actions;
             return await a.RelateIntercomMessageRangeToCodeAsync(args);
         });
     }
 
     private Handler ExecuteEditorCodeRefNavigation(bool select) => async (args, ct) =>
     {
-        var a = (IIdeMcpActions)_vm;
+        var a = _actions;
         if (!EditorCodeRefMcpArgs.TryParse(args, out var codeRef, out var activeFile, out var durationMs, out var err))
             return err;
 

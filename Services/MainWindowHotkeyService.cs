@@ -306,7 +306,7 @@ public static class MainWindowHotkeyService
         {
             try
             {
-                await ((IIdeMcpActions)vm).ExecuteCommandAsync(commandId, args).ConfigureAwait(false);
+                await vm.IdeMcp.ExecuteCommandAsync(commandId, args).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

@@ -11,19 +11,19 @@ internal sealed partial class IdeMcpCommandExecutor
     {
         add(Services.IdeCommands.GetEditorState, async (args, _) =>
         {
-            var a = (IIdeMcpActions)_vm;
+            var a = _actions;
             return await a.GetEditorStateAsync(args is not null && args.TryGetValue("max_preview_chars", out var mpc) && mpc.TryGetInt32(out var maxPreview) ? maxPreview : null);
         });
         add(Services.IdeCommands.GetEditorContentRange, async (args, _) =>
         {
-            var a = (IIdeMcpActions)_vm;
+            var a = _actions;
             if (!EditorContentLineRangeMcpArgs.TryParse(args, out var lines, out var errLines))
                 return errLines;
             return await a.GetEditorContentRangeAsync(lines.Start.Value, lines.End.Value);
         });
         add(Services.IdeCommands.GetOpenDocumentText, async (args, _) =>
         {
-            var a = (IIdeMcpActions)_vm;
+            var a = _actions;
             int? maxCharsOpen = null;
             if (args is not null && args.TryGetValue("max_chars", out var mco) && mco.ValueKind == JsonValueKind.Number && mco.TryGetInt32(out var mcOpen) && mcOpen > 0)
                 maxCharsOpen = mcOpen;

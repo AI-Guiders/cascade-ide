@@ -349,48 +349,63 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="ViewModels\MainWindowViewModel.IdeMcpActions.AgentNotes.cs">
-      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    <Compile Update="Features\IdeMcp\Application\MainWindowIdeMcpHost.AgentNotes.cs">
+      <DependentUpon>MainWindowIdeMcpHost.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="ViewModels\MainWindowViewModel.IdeMcpActions.BuildTest.Build.cs">
-      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    <Compile Update="Features\IdeMcp\Application\MainWindowIdeMcpHost.BuildTest.Build.cs">
+      <DependentUpon>MainWindowIdeMcpHost.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="ViewModels\MainWindowViewModel.IdeMcpActions.BuildTest.Tests.cs">
-      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    <Compile Update="Features\IdeMcp\Application\MainWindowIdeMcpHost.BuildTest.Tests.cs">
+      <DependentUpon>MainWindowIdeMcpHost.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="ViewModels\MainWindowViewModel.IdeMcpActions.DebuggerPanel.cs">
-      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    <Compile Update="Features\IdeMcp\Application\MainWindowIdeMcpHost.DebuggerPanel.cs">
+      <DependentUpon>MainWindowIdeMcpHost.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="ViewModels\MainWindowViewModel.IdeMcpActions.Editor.cs">
-      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    <Compile Update="Features\IdeMcp\Application\MainWindowIdeMcpHost.Editor.cs">
+      <DependentUpon>MainWindowIdeMcpHost.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="ViewModels\MainWindowViewModel.IdeMcpActions.Git.cs">
-      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    <Compile Update="Features\IdeMcp\Application\MainWindowIdeMcpHost.Git.cs">
+      <DependentUpon>MainWindowIdeMcpHost.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="ViewModels\MainWindowViewModel.IdeMcpActions.UiAutomation.EditorPreview.cs">
-      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    <Compile Update="Features\IdeMcp\Application\MainWindowIdeMcpHost.HybridCodebaseIndex.cs">
+      <DependentUpon>MainWindowIdeMcpHost.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="ViewModels\MainWindowViewModel.IdeMcpActions.UiAutomation.Providers.cs">
-      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    <Compile Update="Features\IdeMcp\Application\MainWindowIdeMcpHost.Navigation.cs">
+      <DependentUpon>MainWindowIdeMcpHost.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="ViewModels\MainWindowViewModel.IdeMcpActions.Workspace.cs">
-      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    <Compile Update="Features\IdeMcp\Application\MainWindowIdeMcpHost.UiAutomation.EditorPreview.cs">
+      <DependentUpon>MainWindowIdeMcpHost.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Features\IdeMcp\Application\MainWindowIdeMcpHost.UiAutomation.Providers.cs">
+      <DependentUpon>MainWindowIdeMcpHost.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Features\IdeMcp\Application\MainWindowIdeMcpHost.Web.cs">
+      <DependentUpon>MainWindowIdeMcpHost.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Features\IdeMcp\Application\MainWindowIdeMcpHost.Workspace.cs">
+      <DependentUpon>MainWindowIdeMcpHost.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>

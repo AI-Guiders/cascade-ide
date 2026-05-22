@@ -275,7 +275,22 @@
 
 ### Wave 1 — статус (текущий объём **закрыт**)
 
-Фазы **0–5** и Wave 1 (**MCP thinning** + **UI clusters thinning** по плану v1.15–v1.48) считаются **выполненными** для зафиксированного scope strangler: главный VM остаётся композитором (`IIdeMcpActions`, подписки, дочерние VM), но крупные кластеры вынесены в `Features/*/Application` оркестраторами/проекциями.
+Фазы **0–5** и Wave 1 (**MCP thinning** + **UI clusters thinning** по плану v1.15–v1.48) считаются **выполненными** для зафиксированного scope strangler: главный VM остаётся композитором (подписки, дочерние VM, `IdeMcp` property), но крупные кластеры вынесены в `Features/*/Application` оркестраторами/проекциями.
+
+### Wave 2 — Big Bang MCP (v1.53, этап 1)
+
+**Цель:** убрать реализацию `IIdeMcpActions` с `MainWindowViewModel` — только композиция и `public IIdeMcpActions IdeMcp => _ideMcpHost`.
+
+**Сделано (этап 1):**
+
+- **`MainWindowIdeMcpHost`** (`Features/IdeMcp/Application/`, partial’ы бывших `MainWindowViewModel.IdeMcpActions.*`) — единственная реализация `IIdeMcpActions`.
+- **`MainWindowViewModel.McpHostBridge`** — internal-доступ к приватным полям/методам VM для host (git, editor providers, DataBus, breakpoints, debug stack).
+- **`IdeMcpCommandExecutor`** принимает `(MainWindowViewModel vm, IIdeMcpActions actions)`; generated/handlers вызывают `_actions`, не cast VM.
+- **`ProtocolDocGen`** генерирует `_actions` в pass-through хендлерах.
+- Call sites: `App.axaml.cs` (MCP stdio), `AgentContractHeadlessRuntime`, hotkeys, command palette, Intercom, Git panel (`IdeMcp`), DAP callback → `_ideMcpHost.ApplyDapDebugSnapshotToUi`.
+- RelayCommand превью Markdown остались на MWVM (`MainWindowViewModel.IdeMcpUiRelayCommands.cs`).
+
+**Дальше (этапы 2–5, не в этом коммите):** Editor session VM, Shell/Presentation proxy, RelayCommands → feature VMs, метрики LOC «композитор без доменной логики».
 
 **Backlog MWVM (закрыт, v1.49–v1.52):**
 

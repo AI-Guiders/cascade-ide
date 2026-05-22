@@ -15,7 +15,7 @@ internal sealed partial class IdeMcpCommandExecutor
 
         add(FocusEditor, async (_, _) =>
         {
-            ((IIdeMcpActions)_vm).FocusEditor();
+            _actions.FocusEditor();
             return await Task.FromResult("OK");
         });
 

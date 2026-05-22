@@ -11,14 +11,14 @@ internal sealed partial class IdeMcpCommandExecutor
     {
         add(Services.IdeCommands.OpenFile, async (args, _) =>
         {
-            var a = (IIdeMcpActions)_vm;
+            var a = _actions;
             if (string.IsNullOrEmpty(McpCommandJsonArgs.String(args, "path"))) return "Missing path";
             a.OpenFile(McpCommandJsonArgs.String(args, "path")!);
             return await Task.FromResult("OK");
         });
         add(Services.IdeCommands.LoadSolution, async (args, ct) =>
         {
-            var a = (IIdeMcpActions)_vm;
+            var a = _actions;
             if (string.IsNullOrEmpty(McpCommandJsonArgs.String(args, "path")))
                 return "Missing path";
             return await a.LoadSolutionAndWaitAsync(McpCommandJsonArgs.String(args, "path")!, ct).ConfigureAwait(false);
@@ -35,7 +35,7 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.Select, async (args, _) =>
         {
-            var a = (IIdeMcpActions)_vm;
+            var a = _actions;
             if (!EditorTextSpan.TryParse(args, out var span, out var err))
                 return err;
             a.SelectInEditor(span.File.Value, span.StartLine.Value, span.StartColumn.Value, span.EndLine.Value, span.EndColumn.Value);
@@ -43,7 +43,7 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.ChatSelectMessage, async (args, _) =>
         {
-            var a = (IIdeMcpActions)_vm;
+            var a = _actions;
             var ordinal = Services.McpCommandJsonArgs.OptionalInt32(args, "ordinal");
             var endOrdinal = Services.McpCommandJsonArgs.OptionalInt32(args, "end_ordinal");
             var index = Services.McpCommandJsonArgs.OptionalInt32(args, "index");
@@ -62,12 +62,12 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.ChatGetSelectedMessage, async (_, _) =>
         {
-            var a = (IIdeMcpActions)_vm;
+            var a = _actions;
             return await a.GetSelectedChatMessageAsync();
         });
         add(Services.IdeCommands.ChatEditMessage, async (args, ct) =>
         {
-            var a = (IIdeMcpActions)_vm;
+            var a = _actions;
             if (string.IsNullOrWhiteSpace(McpCommandJsonArgs.String(args, "message_id")))
                 return "Missing message_id";
             if (args is null || !args.TryGetValue("new_content", out _))

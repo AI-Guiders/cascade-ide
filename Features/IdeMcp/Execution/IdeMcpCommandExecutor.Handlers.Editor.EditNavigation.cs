@@ -9,7 +9,7 @@ internal sealed partial class IdeMcpCommandExecutor
     {
         add(Services.IdeCommands.ApplyEdit, async (args, ct) =>
         {
-            var a = (IIdeMcpActions)_vm;
+            var a = _actions;
             if (args is null || !args.TryGetValue("new_text", out _)) return "Missing arguments";
             if (!EditorTextSpan.TryParse(args, out var span, out var errSpan))
                 return errSpan;
@@ -18,7 +18,7 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.GoToPosition, async (args, ct) =>
         {
-            var a = (IIdeMcpActions)_vm;
+            var a = _actions;
             if (!EditorGoToPositionMcpArgs.TryParse(args, out var file, out var line, out var column, out var endLine, out var endColumn, out var err))
                 return err;
             a.GoToPosition(file.Value, line.Value, column.Value, endLine?.Value, endColumn?.Value);
@@ -26,7 +26,7 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(Services.IdeCommands.RevealEditorRange, async (args, ct) =>
         {
-            var a = (IIdeMcpActions)_vm;
+            var a = _actions;
             if (!EditorRevealRangeMcpArgs.TryParse(args, out var request, out var err))
                 return err;
 
