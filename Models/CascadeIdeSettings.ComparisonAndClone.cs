@@ -257,6 +257,7 @@ public sealed partial class CascadeIdeSettings
             },
             Intercom = new IntercomSettings
             {
+                FeedMetrics = Intercom.FeedMetrics,
                 Attachments = new IntercomAttachmentsSettings
                 {
                     Code = new IntercomAttachmentsCodeSettings
@@ -508,7 +509,8 @@ public sealed partial class CascadeIdeSettings
     {
         if (a is null || b is null)
             return a == b;
-        return a.Attachments.Code.Navigate.Is(b.Attachments.Code.Navigate)
+        return a.FeedMetrics.Is(b.FeedMetrics)
+            && a.Attachments.Code.Navigate.Is(b.Attachments.Code.Navigate)
             && a.Attachments.Code.RevealLoadSolution.Is(b.Attachments.Code.RevealLoadSolution);
     }
 

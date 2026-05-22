@@ -1,0 +1,22 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CascadeIDE.ViewModels"
+             x:Class="CascadeIDE.Views.SettingsMarkdownLspPanelView"
+             x:DataType="vm:MainWindowViewModel">
+    <StackPanel Spacing="10">
+        <TextBlock Text="Marksman — ссылки и диагностики по *.md в корне workspace. Нужен marksman в PATH или полный путь к exe."
+                   Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                   TextWrapping="Wrap"
+                   FontSize="12"/>
+        <StackPanel Spacing="6">
+            <TextBlock Text="Провайдер (settings.toml: [lsp.markdown]):" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+            <ComboBox ItemsSource="{Binding MarkdownLspProviderOptionsList}" SelectedItem="{Binding MarkdownLspProvider}" MinWidth="220"/>
+        </StackPanel>
+        <StackPanel Spacing="6" IsVisible="{Binding IsMarkdownLspProcessSelected}">
+            <TextBlock Text="Исполняемый файл (пусто = marksman в PATH):" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" TextWrapping="Wrap"/>
+            <TextBox Text="{Binding MarkdownLspExecutable, Mode=TwoWay}" PlaceholderText="marksman" MinWidth="280"/>
+            <TextBlock Text="Доп. аргументы:" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+            <TextBox Text="{Binding MarkdownLspArguments, Mode=TwoWay}" PlaceholderText="" MinWidth="280"/>
+        </StackPanel>
+    </StackPanel>
+</UserControl>

@@ -5,14 +5,7 @@
              x:Class="CascadeIDE.Views.AiChatSettingsMfdPageView"
              x:DataType="vm:MainWindowViewModel">
     <DockPanel>
-        <views:PanelChromeHeader DockPanel.Dock="Top" Title="Параметры AI и чата" UppercaseTitle="False"/>
-        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-            <StackPanel Spacing="10" Margin="0,4,0,0">
-                <views:AiChatSettingsPanelView/>
-                <TextBlock Text="Редактор, LSP, Markdown — в полном окне настроек." FontSize="11" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" TextWrapping="Wrap"/>
-                <Button Content="Все настройки в отдельном окне…" HorizontalAlignment="Left" Padding="10,6"
-                        Command="{Binding OpenFullSettingsWindowCommand}"/>
-            </StackPanel>
-        </ScrollViewer>
+        <views:PanelChromeHeader DockPanel.Dock="Top" Title="Настройки" UppercaseTitle="False"/>
+        <views:SettingsShellView MinHeight="360"/>
     </DockPanel>
 </UserControl>

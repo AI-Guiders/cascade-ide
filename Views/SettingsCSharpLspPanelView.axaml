@@ -1,0 +1,22 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CascadeIDE.ViewModels"
+             x:Class="CascadeIDE.Views.SettingsCSharpLspPanelView"
+             x:DataType="vm:MainWindowViewModel">
+    <StackPanel Spacing="10">
+        <TextBlock Text="Один процесс language server на открытое решение. ParseOnly — только синтаксис в IDE без внешнего exe."
+                   Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                   TextWrapping="Wrap"
+                   FontSize="12"/>
+        <StackPanel Spacing="6">
+            <TextBlock Text="Провайдер (settings.toml: [lsp.csharp]):" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+            <ComboBox ItemsSource="{Binding CSharpLspProviderOptionsList}" SelectedItem="{Binding CSharpLspProvider}" MinWidth="220"/>
+        </StackPanel>
+        <StackPanel Spacing="6" IsVisible="{Binding IsCSharpLspProcessSelected}">
+            <TextBlock Text="Исполняемый файл (пусто = по умолчанию: OmniSharp / csharp-ls):" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" TextWrapping="Wrap"/>
+            <TextBox Text="{Binding CSharpLspExecutable, Mode=TwoWay}" PlaceholderText="C:\Tools\OmniSharp.exe" MinWidth="280"/>
+            <TextBlock Text="Доп. аргументы:" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+            <TextBox Text="{Binding CSharpLspArguments, Mode=TwoWay}" PlaceholderText="" MinWidth="280"/>
+        </StackPanel>
+    </StackPanel>
+</UserControl>

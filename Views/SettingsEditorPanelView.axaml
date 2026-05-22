@@ -1,0 +1,13 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CascadeIDE.ViewModels"
+             x:Class="CascadeIDE.Views.SettingsEditorPanelView"
+             x:DataType="vm:MainWindowViewModel">
+    <StackPanel Spacing="8">
+        <TextBlock Text="Подсветка синтаксиса:" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+        <TextBlock Text="{Binding SupportedEditorLanguagesSummary}"
+                   Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                   TextWrapping="Wrap"
+                   FontSize="12"/>
+    </StackPanel>
+</UserControl>

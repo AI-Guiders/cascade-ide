@@ -58,12 +58,14 @@
     <Content Include="IntentMelody\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="CodeNavigation\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="Settings\defaults-settings.toml" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="Settings\settings-categories.toml" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="AiPrompts\maf-ide-agent.prompts.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="AiPrompts\web-ai-portal-bridge-adr0108.prompts.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="AiPrompts\web-ai-portal-bridge-adr0108.chat-paste.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="Intercom\intercom-help.ru.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <!-- Шипнутые дефолты: копия на диске (override) + встроенный ресурс, если файла нет. -->
     <EmbeddedResource Include="Settings\defaults-settings.toml" />
+    <EmbeddedResource Include="Settings\settings-categories.toml" />
     <EmbeddedResource Include="CodeNavigation\presets.toml" />
     <EmbeddedResource Include="Cockpit\DataBus\databus-event-policy.toml" />
     <EmbeddedResource Include="Themes\*.json" />

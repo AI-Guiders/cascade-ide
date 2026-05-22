@@ -56,8 +56,7 @@ internal static class UiThemeDeepSnapshot
         "MfdContourStackHost",
         "ModeBadge",
         "UiModeBloomOverlay",
-        "ForwardIntercomSurface",
-        "ClassicIntercomSurface",
+        "IntercomSkiaSurface",
         "TerminalInputBox"
     ];
 

@@ -1,0 +1,55 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CascadeIDE.ViewModels"
+             xmlns:settings="using:CascadeIDE.Features.Settings"
+             x:Class="CascadeIDE.Views.SettingsShellView"
+             x:DataType="vm:MainWindowViewModel">
+    <Grid ColumnDefinitions="200,*">
+        <Border Grid.Column="0"
+                BorderBrush="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"
+                BorderThickness="0,0,1,0"
+                Padding="8,4">
+            <ListBox x:Name="CategoryList"
+                     Background="Transparent"
+                     BorderThickness="0"
+                     ScrollViewer.VerticalScrollBarVisibility="Auto">
+                <ListBox.DataTemplates>
+                    <DataTemplate DataType="settings:SettingsNavigationGroupHeader">
+                        <TextBlock Text="{Binding Title}"
+                                   FontSize="11"
+                                   FontWeight="SemiBold"
+                                   Margin="4,12,4,4"
+                                   Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                                   Opacity="0.8"/>
+                    </DataTemplate>
+                    <DataTemplate DataType="settings:SettingsNavigationCategory">
+                        <StackPanel Margin="0,0,0,2">
+                            <TextBlock Text="{Binding Group}"
+                                       IsVisible="{Binding ShowGroupHeader}"
+                                       FontSize="11"
+                                       Margin="4,10,4,2"
+                                       Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                                       Opacity="0.75"/>
+                            <TextBlock Text="{Binding Title}"
+                                       Margin="4,2,4,6"
+                                       TextWrapping="Wrap"
+                                       Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.DataTemplates>
+            </ListBox>
+        </Border>
+
+        <DockPanel Grid.Column="1" Margin="16,8,16,8">
+            <TextBlock x:Name="PageTitle"
+                       DockPanel.Dock="Top"
+                       FontWeight="SemiBold"
+                       FontSize="16"
+                       Margin="0,0,0,12"
+                       Foreground="{DynamicResource CascadeTheme.ChatMessageContentForeground}"/>
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <ContentControl x:Name="PageHost" HorizontalAlignment="Stretch" VerticalAlignment="Top"/>
+            </ScrollViewer>
+        </DockPanel>
+    </Grid>
+</UserControl>

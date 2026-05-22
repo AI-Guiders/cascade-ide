@@ -1,0 +1,19 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CascadeIDE.ViewModels"
+             x:Class="CascadeIDE.Views.SettingsMarkdownPanelView"
+             x:DataType="vm:MainWindowViewModel">
+    <StackPanel Spacing="10">
+        <TextBlock Text="Блоки ```mermaid и ```plantuml в превью рендерятся через Kroki (SVG). Текст диаграммы отправляется на указанный сервер."
+                   Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                   TextWrapping="Wrap"
+                   FontSize="12"/>
+        <CheckBox Content="Включить Kroki для Mermaid / PlantUML"
+                  IsChecked="{Binding MarkdownKrokiEnabled}"
+                  Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+        <StackPanel Spacing="4">
+            <TextBlock Text="Базовый URL Kroki (settings.toml: markdown.kroki_base_url):" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+            <TextBox Text="{Binding MarkdownKrokiBaseUrl, Mode=TwoWay}" PlaceholderText="https://kroki.io" MinWidth="280"/>
+        </StackPanel>
+    </StackPanel>
+</UserControl>

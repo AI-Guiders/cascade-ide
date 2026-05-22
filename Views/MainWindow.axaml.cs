@@ -109,7 +109,7 @@ public partial class MainWindow : PointerTrackingWindow
             vm.SetControlTextProvider = (name, text) =>
             {
                 var result = Services.UiControlSetText.SetText(this, name, text);
-                if (name is "ChatInputBox" or "ForwardIntercomSurface" or "ClassicIntercomSurface")
+                if (name is "ChatInputBox" or "IntercomSkiaSurface")
                     vm.ChatPanel.ChatInput = text ?? "";
                 return result;
             };

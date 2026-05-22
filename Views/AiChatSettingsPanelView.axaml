@@ -3,9 +3,7 @@
              xmlns:vm="using:CascadeIDE.ViewModels"
              x:Class="CascadeIDE.Views.AiChatSettingsPanelView"
              x:DataType="vm:MainWindowViewModel">
-    <StackPanel Spacing="16">
-        <TextBlock Text="AI и чат" FontWeight="SemiBold" FontSize="16" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-
+    <StackPanel Spacing="14">
         <StackPanel Spacing="6">
             <TextBlock Text="Режим AI (settings.toml: ai.mode):" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
             <ComboBox ItemsSource="{Binding AiModeOptionsList}" SelectedItem="{Binding AiMode}" MinWidth="200"/>
@@ -54,6 +52,15 @@
         <StackPanel Spacing="6">
             <TextBlock Text="Отправка сообщения в чате:" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
             <ComboBox ItemsSource="{Binding SendMessageKeyOptionsList}" SelectedItem="{Binding SendMessageKey}" MinWidth="140"/>
+        </StackPanel>
+
+        <StackPanel Spacing="6">
+            <TextBlock Text="Плотность ленты Intercom (settings.toml: [intercom] feed_metrics):" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" TextWrapping="Wrap"/>
+            <ComboBox ItemsSource="{Binding IntercomFeedMetricsOptionsList}" SelectedItem="{Binding IntercomFeedMetrics}" MinWidth="200"/>
+            <TextBlock Text="comfortable — prose_pt, просторная лента; compact — prose_pt_forward и плотные отступы (как раньше на Forward)."
+                       FontSize="11"
+                       Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                       TextWrapping="Wrap"/>
         </StackPanel>
 
         <CheckBox Content="Минимальный контекст (только диагностики и сигнатуры)" IsChecked="{Binding UseMinimizedContext}" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>

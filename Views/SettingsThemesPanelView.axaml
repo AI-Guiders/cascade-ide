@@ -1,0 +1,26 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CascadeIDE.ViewModels"
+             x:Class="CascadeIDE.Views.SettingsThemesPanelView"
+             x:DataType="vm:MainWindowViewModel">
+    <StackPanel Spacing="12">
+        <TextBlock Text="Пресеты в Themes/*.json (формат ide_get_ui_theme / ide_set_ui_theme). Значения в settings.toml не хранятся."
+                   Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                   TextWrapping="Wrap"
+                   FontSize="12"/>
+        <StackPanel Spacing="6">
+            <TextBlock Text="Быстрые пресеты:" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+            <WrapPanel Orientation="Horizontal">
+                <Button Content="Тёмная" Margin="0,0,8,8" Padding="10,5" Command="{Binding ApplyDarkThemeCommand}"/>
+                <Button Content="Светлая" Margin="0,0,8,8" Padding="10,5" Command="{Binding ApplyLightThemeCommand}"/>
+                <Button Content="Cursor-like" Margin="0,0,8,8" Padding="10,5" Command="{Binding ApplyCursorLikeThemeCommand}"/>
+                <Button Content="Power classic" Margin="0,0,8,8" Padding="10,5" Command="{Binding ApplyPowerClassicThemeCommand}"/>
+            </WrapPanel>
+        </StackPanel>
+        <Button Content="Открыть JSON с диска…" HorizontalAlignment="Left" Padding="10,5" Command="{Binding OpenThemeFileCommand}"/>
+        <StackPanel Spacing="6">
+            <TextBlock Text="Файлы в каталоге Themes:" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+            <ListBox x:Name="ThemeFilesList" MinHeight="120" MaxHeight="220"/>
+        </StackPanel>
+    </StackPanel>
+</UserControl>

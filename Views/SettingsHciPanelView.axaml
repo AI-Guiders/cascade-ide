@@ -1,0 +1,34 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CascadeIDE.ViewModels"
+             x:Class="CascadeIDE.Views.SettingsHciPanelView"
+             x:DataType="vm:MainWindowViewModel">
+    <StackPanel Spacing="10">
+        <TextBlock Text="In-proc индекс (ADR 0106): секция [hybrid_index] в settings.toml. Статус и ручной reindex — страница INDEX в MFD."
+                   Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                   TextWrapping="Wrap"
+                   FontSize="12"/>
+        <CheckBox Content="Включить HCI (master switch)" IsChecked="{Binding HciIntegrationEnabled}" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+        <CheckBox Content="Следить за файлами (FileSystemWatcher + debounce)" IsChecked="{Binding HciWatchFiles}" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+        <CheckBox Content="Пауза watcher при mcp_only (pause_when_mcp_stdio_host)" IsChecked="{Binding HciPauseWhenMcpStdioHost}" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+        <CheckBox Content="Короткий reindex при открытии/смене решения (auto_reindex_on_solution_open)" IsChecked="{Binding HciAutoReindexOnSolutionOpen}" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+        <StackPanel Spacing="4">
+            <TextBlock Text="Каталог данных под корнем workspace (index_dir):" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" TextWrapping="Wrap"/>
+            <TextBox Text="{Binding HciIndexDir, Mode=TwoWay}" PlaceholderText=".hybrid-codebase-index" MinWidth="280"/>
+        </StackPanel>
+        <StackPanel Spacing="4">
+            <TextBlock Text="Debounce, мс (0…60000):" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" TextWrapping="Wrap"/>
+            <NumericUpDown Minimum="0" Maximum="60000" Increment="50" ClipValueToMinMax="True"
+                           Value="{Binding HciDebounceMs, Mode=TwoWay}"
+                           HorizontalAlignment="Left" MinWidth="140"/>
+        </StackPanel>
+        <StackPanel Spacing="6">
+            <TextBlock Text="Ключ области индекса (scope_mode):" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" TextWrapping="Wrap"/>
+            <ComboBox ItemsSource="{Binding HciScopeModeUiOptions}" SelectedItem="{Binding HciScopeMode, Mode=TwoWay}" MinWidth="260"/>
+            <TextBlock Text="workspace — одна база на workspace; workspace+solution — учёт slug решения под index_dir."
+                       Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                       TextWrapping="Wrap"
+                       FontSize="11"/>
+        </StackPanel>
+    </StackPanel>
+</UserControl>

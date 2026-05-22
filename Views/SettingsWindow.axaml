@@ -8,82 +8,19 @@
         x:Class="CascadeIDE.Views.SettingsWindow"
         x:DataType="vm:MainWindowViewModel"
         Title="Настройки"
-        Width="520" Height="640"
-        MinWidth="440" MinHeight="480"
+        Width="760" Height="640"
+        MinWidth="560" MinHeight="480"
         Background="{DynamicResource CascadeTheme.MainWindowBackground}"
         WindowStartupLocation="CenterOwner">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="20">
-        <StackPanel Spacing="16">
-            <views:AiChatSettingsPanelView/>
-
-            <TextBlock Text="Редактор" FontWeight="SemiBold" FontSize="16" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-            <StackPanel Spacing="4">
-                <TextBlock Text="Подсветка синтаксиса:" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-                <TextBlock Text="{Binding SupportedEditorLanguagesSummary}" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" TextWrapping="Wrap" FontSize="12"/>
-            </StackPanel>
-
-            <TextBlock Text="Markdown · диаграммы" FontWeight="SemiBold" FontSize="16" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" Margin="0,8,0,0"/>
-            <TextBlock Text="Блоки ```mermaid и ```plantuml в превью рендерятся через Kroki (SVG). Текст диаграммы отправляется на указанный сервер." Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" TextWrapping="Wrap" FontSize="12"/>
-            <CheckBox Content="Включить Kroki для Mermaid / PlantUML" IsChecked="{Binding MarkdownKrokiEnabled}" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-            <StackPanel Spacing="4">
-                <TextBlock Text="Базовый URL Kroki:" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-                <TextBox Text="{Binding MarkdownKrokiBaseUrl, Mode=TwoWay}" PlaceholderText="https://kroki.io" MinWidth="280"/>
-            </StackPanel>
-
-            <TextBlock Text="C# / LSP" FontWeight="SemiBold" FontSize="16" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" Margin="0,8,0,0"/>
-            <TextBlock Text="Один процесс language server на открытое решение. ParseOnly — только синтаксис в IDE без внешнего exe." Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" TextWrapping="Wrap" FontSize="12"/>
-            <StackPanel Spacing="6">
-                <TextBlock Text="Провайдер:" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-                <ComboBox ItemsSource="{Binding CSharpLspProviderOptionsList}" SelectedItem="{Binding CSharpLspProvider}" MinWidth="220"/>
-            </StackPanel>
-            <StackPanel Spacing="6" IsVisible="{Binding IsCSharpLspProcessSelected}">
-                <TextBlock Text="Исполняемый файл (пусто = по умолчанию: OmniSharp / csharp-ls):" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" TextWrapping="Wrap"/>
-                <TextBox Text="{Binding CSharpLspExecutable, Mode=TwoWay}" PlaceholderText="C:\Tools\OmniSharp.exe" MinWidth="280"/>
-                <TextBlock Text="Доп. аргументы:" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-                <TextBox Text="{Binding CSharpLspArguments, Mode=TwoWay}" PlaceholderText="" MinWidth="280"/>
-            </StackPanel>
-
-            <TextBlock Text="Hybrid Codebase Index (HCI)" FontWeight="SemiBold" FontSize="16" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" Margin="0,8,0,0"/>
-            <TextBlock Text="In-proc индекс (ADR 0106): те же параметры, что секция [hybrid_index] в settings.toml под %AppData%. Статус и ручной reindex — страница INDEX в MFD (команда show_hybrid_index_page)." Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" TextWrapping="Wrap" FontSize="12"/>
-
-            <CheckBox Content="Включить HCI (master switch)" IsChecked="{Binding HciIntegrationEnabled}" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-            <CheckBox Content="Следить за файлами (FileSystemWatcher + debounce)" IsChecked="{Binding HciWatchFiles}" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-            <CheckBox Content="Пауза watcher при mcp_only, если включён режим ниже (pause_when_mcp_stdio_host)" IsChecked="{Binding HciPauseWhenMcpStdioHost}" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-            <CheckBox Content="Короткий reindex при открытии/смене решения (auto_reindex_on_solution_open)" IsChecked="{Binding HciAutoReindexOnSolutionOpen}" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-
-            <StackPanel Spacing="4">
-                <TextBlock Text="Каталог данных под корнем workspace (index_dir):" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" TextWrapping="Wrap"/>
-                <TextBox Text="{Binding HciIndexDir, Mode=TwoWay}" PlaceholderText=".hybrid-codebase-index" MinWidth="280"/>
-            </StackPanel>
-
-            <StackPanel Spacing="4">
-                <TextBlock Text="Debounce, мс (0…60000):" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" TextWrapping="Wrap"/>
-                <NumericUpDown Minimum="0" Maximum="60000" Increment="50" ClipValueToMinMax="True"
-                               Value="{Binding HciDebounceMs, Mode=TwoWay}"
-                               HorizontalAlignment="Left" MinWidth="140"/>
-            </StackPanel>
-
-            <StackPanel Spacing="6">
-                <TextBlock Text="Ключ области индекса (scope_mode):" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" TextWrapping="Wrap"/>
-                <ComboBox ItemsSource="{Binding HciScopeModeUiOptions}" SelectedItem="{Binding HciScopeMode, Mode=TwoWay}" MinWidth="260"/>
-                <TextBlock Text="workspace — одна база на workspace; workspace+solution — учёт slug решения под index_dir." Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" TextWrapping="Wrap" FontSize="11"/>
-            </StackPanel>
-
-            <TextBlock Text="Markdown LSP" FontWeight="SemiBold" FontSize="16" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" Margin="0,8,0,0"/>
-            <TextBlock Text="Marksman — ссылки и диагностики по *.md в корне workspace (каталог решения). Нужен marksman в PATH или полный путь к exe." Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" TextWrapping="Wrap" FontSize="12"/>
-            <StackPanel Spacing="6">
-                <TextBlock Text="Провайдер:" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-                <ComboBox ItemsSource="{Binding MarkdownLspProviderOptionsList}" SelectedItem="{Binding MarkdownLspProvider}" MinWidth="220"/>
-            </StackPanel>
-            <StackPanel Spacing="6" IsVisible="{Binding IsMarkdownLspProcessSelected}">
-                <TextBlock Text="Исполняемый файл (пусто = marksman в PATH):" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" TextWrapping="Wrap"/>
-                <TextBox Text="{Binding MarkdownLspExecutable, Mode=TwoWay}" PlaceholderText="marksman" MinWidth="280"/>
-                <TextBlock Text="Доп. аргументы:" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-                <TextBox Text="{Binding MarkdownLspArguments, Mode=TwoWay}" PlaceholderText="" MinWidth="280"/>
-            </StackPanel>
-
-            <Button x:Name="CloseButton" Content="Закрыть" HorizontalAlignment="Right" MinWidth="100" Margin="0,8,0,0"/>
-        </StackPanel>
-    </ScrollViewer>
+    <DockPanel Margin="12">
+        <Button x:Name="CloseButton"
+                DockPanel.Dock="Bottom"
+                Content="Закрыть"
+                HorizontalAlignment="Right"
+                MinWidth="100"
+                Margin="0,12,0,0"
+                Padding="10,6"/>
+        <views:SettingsShellView/>
+    </DockPanel>
 </views:PointerTrackingWindow>
