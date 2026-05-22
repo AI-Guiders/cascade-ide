@@ -1,5 +1,7 @@
 #nullable enable
 using Avalonia;
+using Avalonia.Automation;
+using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Input.Platform;
@@ -34,6 +36,9 @@ public partial class SkiaChatSurfaceControl : Control
     private int _skiaFrameWidth;
     private int _skiaFrameHeight;
     private float _skiaFrameLayoutScale = 1f;
+    private bool _chromeOnlyInvalidation;
+    private IReadOnlyList<SkiaChatPlacedEntity>? _feedLayoutCache;
+    private string? _feedLayoutCacheKey;
 
     public static readonly StyledProperty<ChatSurfaceSnapshot> SnapshotProperty =
         AvaloniaProperty.Register<SkiaChatSurfaceControl, ChatSurfaceSnapshot>(nameof(Snapshot), ChatSurfaceSnapshot.Empty);
@@ -233,6 +238,9 @@ public partial class SkiaChatSurfaceControl : Control
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
         base.OnPropertyChanged(change);
+        if (change.Property == SnapshotProperty)
+            _feedLayoutCacheKey = null;
+
         if (change.Property == SnapshotProperty
             || change.Property == OverviewModeProperty
             || change.Property == DetailThreadIdProperty)
@@ -271,12 +279,6 @@ public partial class SkiaChatSurfaceControl : Control
         RefreshTheme();
 
         var snapshot = Snapshot ?? ChatSurfaceSnapshot.Empty;
-        var entities = SkiaChatSceneBuilder.Build(
-            snapshot,
-            OverviewMode,
-            DetailThreadId,
-            FeedUsesForwardMetrics,
-            IntercomFonts);
         var width = Math.Max(160, Bounds.Width);
         var topicCountForMeasure = snapshot.Layout.Overview.Count;
         var showNavigatorForMeasure = ShouldShowTopicNavigator(topicCountForMeasure);
@@ -287,7 +289,30 @@ public partial class SkiaChatSurfaceControl : Control
         var contentWidth = (float)(width - 24 - gutterPadForMeasure - navigatorPadForMeasure);
         var maxChars = Math.Max(18, (int)(contentWidth / 7.1f));
         var measureContext = new SkiaChatMeasureContext(maxChars, contentWidth);
-        var placed = SkiaChatLayoutEngine.Layout(entities, measureContext);
+        var layoutCacheKey = BuildFeedLayoutCacheKey(snapshot);
+        var chromeOnly = _chromeOnlyInvalidation;
+        _chromeOnlyInvalidation = false;
+
+        IReadOnlyList<SkiaChatPlacedEntity> placed;
+        if (chromeOnly
+            && layoutCacheKey == _feedLayoutCacheKey
+            && _feedLayoutCache is not null)
+        {
+            placed = _feedLayoutCache;
+        }
+        else
+        {
+            var entities = SkiaChatSceneBuilder.Build(
+                snapshot,
+                OverviewMode,
+                DetailThreadId,
+                FeedUsesForwardMetrics,
+                IntercomFonts);
+            placed = SkiaChatLayoutEngine.Layout(entities, measureContext);
+            _feedLayoutCache = placed;
+            _feedLayoutCacheKey = layoutCacheKey;
+        }
+
         _cachedContentHeight = SkiaChatLayoutEngine.TotalHeight(placed);
 
         var topicCount = snapshot.Layout.Overview.Count;
@@ -340,6 +365,12 @@ public partial class SkiaChatSurfaceControl : Control
         var srcRect = new Rect(0, 0, bitmap.PixelSize.Width, bitmap.PixelSize.Height);
         context.DrawImage(bitmap, srcRect, destRect);
     }
+
+    private string BuildFeedLayoutCacheKey(ChatSurfaceSnapshot snapshot) =>
+        $"{snapshot.State.ActiveThreadId:N}|{OverviewMode}|{DetailThreadId:N}|{snapshot.Layout.Lanes.Count}|{snapshot.Layout.Overview.Count}|{_scrollOffset:F0}|{SelectedMessageIndex}|{ComfortableFeed}|{ForwardHost}";
+
+    protected override AutomationPeer OnCreateAutomationPeer() =>
+        new SkiaComposerAutomationPeer(this);
 
     private static bool IsIntercomSkiaRenderingEnabled() =>
         !string.Equals(

@@ -33,6 +33,7 @@ internal static class SkiaIntercomCommandDeckLayout
         string composerText,
         bool showSlashPopup,
         int slashRowCount,
+        string? composerPreeditText = null,
         bool showSlashHierarchyHeader = false,
         float composerFontSize = 12f,
         float composerLineHeight = 17f,
@@ -47,7 +48,7 @@ internal static class SkiaIntercomCommandDeckLayout
             surfaceWidth - SkiaComposerStrip.HorizontalPadding * 2 - SkiaComposerStrip.SendButtonWidth - 24f);
         var composerHeight = SkiaComposerStrip.MeasureHeight(
             composerText,
-            preeditText: null,
+            composerPreeditText,
             contentWidth,
             composerFontSize,
             composerLineHeight);
@@ -102,6 +103,7 @@ internal static class SkiaIntercomCommandDeckLayout
         string composerText,
         bool showSlashPopup,
         int slashRowCount,
+        string? composerPreeditText = null,
         bool showSlashHierarchyHeader = false,
         float composerFontSize = 12f,
         float composerLineHeight = 17f,
@@ -116,6 +118,7 @@ internal static class SkiaIntercomCommandDeckLayout
                 composerText,
                 showSlashPopup,
                 slashRowCount,
+                composerPreeditText,
                 showSlashHierarchyHeader,
                 composerFontSize,
                 composerLineHeight,

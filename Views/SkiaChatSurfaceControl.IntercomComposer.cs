@@ -1,6 +1,8 @@
 #nullable enable
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Input;
+using Avalonia.Input.Platform;
 using Avalonia.Input.TextInput;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
@@ -78,6 +80,8 @@ public partial class SkiaChatSurfaceControl
     private readonly List<SkiaPopupListRow> _slashRows = [];
     private int _slashPopupScrollOffset;
     private int _slashPopupLastRowCount;
+    private int _composerSelectionAnchor;
+    private float _composerScrollOffsetY;
 
     public event EventHandler? SendRequested;
     public event EventHandler<IntercomComposerKeyEventArgs>? ComposerKeyDown;
@@ -110,6 +114,8 @@ public partial class SkiaChatSurfaceControl
         get => GetValue(ComposerCaretIndexProperty);
         set => SetValue(ComposerCaretIndexProperty, value);
     }
+
+    internal int ComposerSelectionAnchor => _composerSelectionAnchor;
 
     public string? ComposerPreeditText
     {
@@ -225,7 +231,7 @@ public partial class SkiaChatSurfaceControl
 
         if (!_composerCaretBlinkTimer.IsEnabled)
             _composerCaretBlinkTimer.Start();
-        InvalidateVisual();
+        InvalidateComposerChrome();
     }
 
     private void StopComposerCaretBlink()
@@ -233,7 +239,7 @@ public partial class SkiaChatSurfaceControl
         if (_composerCaretBlinkTimer is not null)
             _composerCaretBlinkTimer.Stop();
         _composerCaretBlinkVisible = false;
-        InvalidateVisual();
+        InvalidateComposerChrome();
     }
 
     private void ShowComposerCaretSolid()
@@ -241,7 +247,7 @@ public partial class SkiaChatSurfaceControl
         if (!IsKeyboardFocusWithin)
             return;
         _composerCaretBlinkVisible = true;
-        InvalidateVisual();
+        InvalidateComposerChrome();
     }
 
     private void OnComposerCaretBlinkTick(object? sender, EventArgs e)
@@ -259,6 +265,12 @@ public partial class SkiaChatSurfaceControl
         }
 
         _composerCaretBlinkVisible = !_composerCaretBlinkVisible;
+        InvalidateComposerChrome();
+    }
+
+    internal void InvalidateComposerChrome()
+    {
+        _chromeOnlyInvalidation = true;
         InvalidateVisual();
     }
 
@@ -283,7 +295,8 @@ public partial class SkiaChatSurfaceControl
                 ComposerCaretIndex,
                 composerPt,
                 composerLine,
-                out var caret))
+                out var caret,
+                _composerScrollOffsetY))
             return new Rect(caret.Left, caret.Top, Math.Max(2, caret.Width), caret.Height);
 
         var textLeft = _composerBounds.Width > 0
@@ -310,6 +323,7 @@ public partial class SkiaChatSurfaceControl
             composerText: ComposerText ?? "",
             showSlashPopup: IsSlashAutocompleteVisible && _slashRows.Count > 0,
             slashRowCount: _slashRows.Count,
+            composerPreeditText: ComposerPreeditText,
             showSlashHierarchyHeader: ShowSlashHierarchyHeader,
             fonts.ResolveComposerPt(FeedUsesForwardMetrics),
             fonts.ResolveComposerLineHeight(FeedUsesForwardMetrics),
@@ -360,6 +374,7 @@ public partial class SkiaChatSurfaceControl
             composerText: ComposerText ?? "",
             showSlashPopup: IsSlashAutocompleteVisible && _slashRows.Count > 0,
             slashRowCount: _slashRows.Count,
+            composerPreeditText: ComposerPreeditText,
             showSlashHierarchyHeader: ShowSlashHierarchyHeader,
             fonts.ResolveComposerPt(FeedUsesForwardMetrics),
             fonts.ResolveComposerLineHeight(FeedUsesForwardMetrics),
@@ -441,9 +456,188 @@ public partial class SkiaChatSurfaceControl
             fonts.ResolveComposerPt(FeedUsesForwardMetrics),
             fonts.ResolveComposerLineHeight(FeedUsesForwardMetrics),
             out _sendButtonBounds,
-            out _);
+            out _,
+            _composerSelectionAnchor,
+            _composerScrollOffsetY);
 
         RegisterComposerPointerHits();
+    }
+
+    internal bool TryPlaceComposerCaretAtPoint(float x, float y, bool extendSelection)
+    {
+        if (_composerBounds.Width <= 0 || !IsComposerEnabled)
+            return false;
+
+        var composerPt = IntercomFonts.ResolveComposerPt(FeedUsesForwardMetrics);
+        var composerLine = IntercomFonts.ResolveComposerLineHeight(FeedUsesForwardMetrics);
+        if (!SkiaComposerStrip.TryHitTestCaretAtPoint(
+                _composerBounds,
+                ComposerText ?? "",
+                ComposerPreeditText,
+                x,
+                y,
+                composerPt,
+                composerLine,
+                _composerScrollOffsetY,
+                out var index))
+            return false;
+
+        if (!extendSelection)
+            _composerSelectionAnchor = index;
+
+        ComposerCaretIndex = index;
+        EnsureComposerCaretVisible();
+        _textInputClient?.NotifyCursorMoved();
+        ShowComposerCaretSolid();
+        NotifyComposerDraftChanged();
+        return true;
+    }
+
+    private void EnsureComposerCaretVisible()
+    {
+        if (_composerBounds.Width <= 0)
+            return;
+
+        var composerPt = IntercomFonts.ResolveComposerPt(FeedUsesForwardMetrics);
+        var composerLine = IntercomFonts.ResolveComposerLineHeight(FeedUsesForwardMetrics);
+        var sendLeft = _composerBounds.Right - SkiaComposerStrip.HorizontalPadding - SkiaComposerStrip.SendButtonWidth;
+        var innerH = Math.Max(1f, _composerBounds.Height - SkiaComposerStrip.VerticalPadding * 2);
+        var contentWidth = Math.Max(40f, sendLeft - 8f - (_composerBounds.Left + SkiaComposerStrip.HorizontalPadding));
+        var maxScroll = SkiaComposerStrip.MaxContentScrollOffset(
+            ComposerText ?? "",
+            ComposerPreeditText,
+            contentWidth,
+            innerH,
+            composerPt,
+            composerLine);
+
+        if (!SkiaComposerStrip.TryGetCaretRect(
+                _composerBounds,
+                ComposerText ?? "",
+                ComposerPreeditText,
+                ComposerCaretIndex,
+                composerPt,
+                composerLine,
+                out var caret,
+                _composerScrollOffsetY))
+            return;
+
+        var viewTop = _composerBounds.Top + SkiaComposerStrip.VerticalPadding;
+        var viewBottom = _composerBounds.Bottom - SkiaComposerStrip.VerticalPadding;
+        if (caret.Top < viewTop)
+            _composerScrollOffsetY = Math.Max(0, _composerScrollOffsetY - (viewTop - caret.Top));
+        else if (caret.Bottom > viewBottom)
+            _composerScrollOffsetY = Math.Min(maxScroll, _composerScrollOffsetY + (caret.Bottom - viewBottom));
+
+        _composerScrollOffsetY = Math.Clamp(_composerScrollOffsetY, 0f, maxScroll);
+    }
+
+    private string GetComposerDisplayText() =>
+        string.IsNullOrEmpty(ComposerPreeditText)
+            ? ComposerText ?? ""
+            : (ComposerText ?? "") + ComposerPreeditText;
+
+    private (int Start, int End) GetComposerSelectionRange()
+    {
+        var caret = Math.Clamp(ComposerCaretIndex, 0, GetComposerDisplayText().Length);
+        var anchor = Math.Clamp(_composerSelectionAnchor, 0, GetComposerDisplayText().Length);
+        return caret < anchor ? (caret, anchor) : (anchor, caret);
+    }
+
+    private bool HasComposerSelection => GetComposerSelectionRange().Start != GetComposerSelectionRange().End;
+
+    private bool TryHandleComposerClipboardKey(KeyEventArgs e)
+    {
+        var ctrl = e.KeyModifiers.HasFlag(KeyModifiers.Control);
+        if (!ctrl)
+            return false;
+
+        if (e.Key == Key.A)
+        {
+            _composerSelectionAnchor = 0;
+            ComposerCaretIndex = (ComposerText ?? "").Length;
+            ShowComposerCaretSolid();
+            e.Handled = true;
+            return true;
+        }
+
+        if (e.Key is Key.C or Key.X)
+        {
+            if (!HasComposerSelection)
+                return false;
+
+            var (start, end) = GetComposerSelectionRange();
+            var slice = (ComposerText ?? "")[start..end];
+            _ = SetClipboardTextAsync(slice);
+            if (e.Key == Key.X)
+            {
+                ComposerPreeditText = null;
+                ComposerText = (ComposerText ?? "")[..start] + (ComposerText ?? "")[end..];
+                ComposerCaretIndex = start;
+                _composerSelectionAnchor = start;
+                _textInputClient?.NotifyTextChanged();
+                NotifyComposerDraftChanged();
+            }
+
+            e.Handled = true;
+            return true;
+        }
+
+        if (e.Key == Key.V)
+        {
+            _ = PasteComposerFromClipboardAsync();
+            e.Handled = true;
+            return true;
+        }
+
+        return false;
+    }
+
+    private async Task SetClipboardTextAsync(string text)
+    {
+        var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
+        if (clipboard is null)
+            return;
+
+        await clipboard.SetTextAsync(text);
+    }
+
+    private async Task PasteComposerFromClipboardAsync()
+    {
+        var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
+        if (clipboard is null)
+            return;
+
+        var pasted = await clipboard.TryGetTextAsync();
+        if (string.IsNullOrEmpty(pasted))
+            return;
+
+        InsertComposerText(pasted);
+    }
+
+    internal bool TryScrollComposer(float deltaY)
+    {
+        if (_composerBounds.Width <= 0)
+            return false;
+
+        var composerPt = IntercomFonts.ResolveComposerPt(FeedUsesForwardMetrics);
+        var composerLine = IntercomFonts.ResolveComposerLineHeight(FeedUsesForwardMetrics);
+        var sendLeft = _composerBounds.Right - SkiaComposerStrip.HorizontalPadding - SkiaComposerStrip.SendButtonWidth;
+        var innerH = Math.Max(1f, _composerBounds.Height - SkiaComposerStrip.VerticalPadding * 2);
+        var contentWidth = Math.Max(40f, sendLeft - 8f - (_composerBounds.Left + SkiaComposerStrip.HorizontalPadding));
+        var maxScroll = SkiaComposerStrip.MaxContentScrollOffset(
+            ComposerText ?? "",
+            ComposerPreeditText,
+            contentWidth,
+            innerH,
+            composerPt,
+            composerLine);
+        if (maxScroll <= 0f)
+            return false;
+
+        _composerScrollOffsetY = Math.Clamp(_composerScrollOffsetY - deltaY, 0f, maxScroll);
+        InvalidateComposerChrome();
+        return true;
     }
 
     private void RegisterComposerPointerHits()
@@ -550,6 +744,9 @@ public partial class SkiaChatSurfaceControl
         if (!IsKeyboardFocusWithin)
             return;
 
+        if (TryHandleComposerClipboardKey(e))
+            return;
+
         if (ShowCockpitCommandLine && _commandLineFocused)
         {
             if (e.Key == Key.Back)
@@ -576,6 +773,8 @@ public partial class SkiaChatSurfaceControl
             return;
         }
 
+        var extendSel = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
+
         if (e.Key == Key.Back)
         {
             DeleteComposer(-1);
@@ -588,12 +787,22 @@ public partial class SkiaChatSurfaceControl
         }
         else if (e.Key == Key.Left)
         {
-            MoveCaret(-1);
+            MoveCaret(-1, extendSel);
             e.Handled = true;
         }
         else if (e.Key == Key.Right)
         {
-            MoveCaret(1);
+            MoveCaret(1, extendSel);
+            e.Handled = true;
+        }
+        else if (e.Key == Key.Home)
+        {
+            MoveCaretTo(0, extendSel);
+            e.Handled = true;
+        }
+        else if (e.Key == Key.End)
+        {
+            MoveCaretTo((ComposerText ?? "").Length, extendSel);
             e.Handled = true;
         }
     }
@@ -684,10 +893,20 @@ public partial class SkiaChatSurfaceControl
         ComposerPreeditText = null;
         var current = ComposerText ?? "";
         var caret = Math.Clamp(ComposerCaretIndex, 0, current.Length);
+        if (HasComposerSelection)
+        {
+            var (start, end) = GetComposerSelectionRange();
+            current = current[..start] + current[end..];
+            caret = start;
+            _composerSelectionAnchor = start;
+        }
+
         var newText = current.Insert(caret, text);
         var newCaret = caret + text.Length;
         ComposerCaretIndex = newCaret;
+        _composerSelectionAnchor = newCaret;
         ComposerText = newText;
+        EnsureComposerCaretVisible();
         _textInputClient?.NotifyTextChanged();
         _textInputClient?.NotifyCursorMoved();
         ShowComposerCaretSolid();
@@ -698,12 +917,25 @@ public partial class SkiaChatSurfaceControl
     {
         ComposerPreeditText = null;
         var current = ComposerText ?? "";
+        if (HasComposerSelection)
+        {
+            var (start, end) = GetComposerSelectionRange();
+            ComposerText = current[..start] + current[end..];
+            ComposerCaretIndex = start;
+            _composerSelectionAnchor = start;
+            _textInputClient?.NotifyTextChanged();
+            ShowComposerCaretSolid();
+            NotifyComposerDraftChanged();
+            return;
+        }
+
         var caret = Math.Clamp(ComposerCaretIndex, 0, current.Length);
         if (direction < 0)
         {
             if (caret == 0)
                 return;
             ComposerCaretIndex = caret - 1;
+            _composerSelectionAnchor = caret - 1;
             ComposerText = current.Remove(caret - 1, 1);
         }
         else
@@ -718,10 +950,28 @@ public partial class SkiaChatSurfaceControl
         NotifyComposerDraftChanged();
     }
 
-    private void MoveCaret(int delta)
+    private void MoveCaret(int delta, bool extendSelection)
     {
         var len = (ComposerText ?? "").Length;
-        ComposerCaretIndex = Math.Clamp(ComposerCaretIndex + delta, 0, len);
+        var next = Math.Clamp(ComposerCaretIndex + delta, 0, len);
+        if (!extendSelection)
+            _composerSelectionAnchor = next;
+
+        ComposerCaretIndex = next;
+        EnsureComposerCaretVisible();
+        _textInputClient?.NotifyCursorMoved();
+        ShowComposerCaretSolid();
+    }
+
+    private void MoveCaretTo(int index, bool extendSelection)
+    {
+        var len = (ComposerText ?? "").Length;
+        index = Math.Clamp(index, 0, len);
+        if (!extendSelection)
+            _composerSelectionAnchor = index;
+
+        ComposerCaretIndex = index;
+        EnsureComposerCaretVisible();
         _textInputClient?.NotifyCursorMoved();
         ShowComposerCaretSolid();
     }

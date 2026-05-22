@@ -31,7 +31,16 @@ internal sealed class IntercomSkiaTextInputClient : TextInputMethodClient
             var caret = _host.IsNavigatorSearchInputActive
                 ? Math.Clamp(_host.NavigatorSearchCaretIndex, 0, text.Length)
                 : Math.Clamp(_host.ComposerCaretIndex, 0, text.Length);
-            return new TextSelection(caret, caret);
+            if (_host.IsNavigatorSearchInputActive)
+                return new TextSelection(caret, caret);
+
+            var anchor = Math.Clamp(_host.ComposerSelectionAnchor, 0, text.Length);
+            if (anchor == caret)
+                return new TextSelection(caret, caret);
+
+            var start = Math.Min(anchor, caret);
+            var end = Math.Max(anchor, caret);
+            return new TextSelection(start, end);
         }
         set
         {
