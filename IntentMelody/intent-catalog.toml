@@ -868,6 +868,14 @@ intercom_handler = "topic_create"
 
 [[command]]
 [[command.form.slash]]
+path = "/intercom topic rename"
+help = "Переименовать текущую тему: /topic rename <название>."
+group = "Intercom"
+kind = "intercom"
+intercom_handler = "topic_rename"
+
+[[command]]
+[[command.form.slash]]
 path = "/intercom spine list"
 help = "Product spine: линия, фокус, вехи (список)."
 group = "Intercom"

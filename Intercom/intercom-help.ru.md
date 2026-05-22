@@ -6,7 +6,8 @@
 
 - `/intercom overview` · `/intercom show` — картотека тем
 - `/intercom topic open <id|заголовок>` — detail темы
-- `/intercom topic create <название>` · `/intercom topic list` · `/intercom topic tree` — списки (текст: `… list text`)
+- `/intercom topic create <название>` · `/intercom topic rename <название>` — текущая тема (detail)
+- `/intercom topic list` · `/intercom topic tree` — списки (текст: `… list text`); в Navigator: ПКМ или двойной клик по теме — переименовать
 - `/intercom spine list` · `/intercom spine tree` · `/intercom spine set focus=…` — product spine
 
 ## Номера сообщений (gutter) и выбор

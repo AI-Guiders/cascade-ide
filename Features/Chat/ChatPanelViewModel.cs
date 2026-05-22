@@ -141,6 +141,8 @@ public partial class ChatPanelViewModel : ViewModelBase
             v => IsChatOverviewMode = v,
             setTopicPicker: SetTopicPickerPresentation,
             createTopicWithTitle: CreateTopicWithTitle,
+            renameTopicWithTitle: (threadId, title) =>
+                RenameTopicWithTitle(title, threadId == Guid.Empty ? null : threadId),
             tryAttachSlash: TryExecuteAttachSlash,
             selectMessageByOrdinalRangeInDetailLane: SelectMessageByOrdinalRangeInDetailLane,
             selectMessagesByOrdinalRangesInDetailLane: SelectMessagesByOrdinalRangesInDetailLane,

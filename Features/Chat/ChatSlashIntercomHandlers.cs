@@ -13,6 +13,7 @@ public static class ChatSlashIntercomHandlers
         public const string TopicList = "topic_list";
         public const string TopicTree = "topic_tree";
         public const string TopicCreate = "topic_create";
+        public const string TopicRename = "topic_rename";
         public const string AttachSelection = "attach_selection";
         public const string AttachScope = "attach_scope";
         public const string AttachFile = "attach_file";
@@ -31,6 +32,7 @@ public static class ChatSlashIntercomHandlers
         ChatSurfaceSnapshot Snapshot,
         Action<TopicPickerPresentation>? SetTopicPicker,
         Func<string, TopicCreateResult>? CreateTopicWithTitle,
+        Func<Guid, string, TopicRenameResult>? RenameTopicWithTitle,
         Func<string, string?, ChatSlashIntercomResult>? TryAttachSlash,
         Func<int, int, string>? SelectMessageByOrdinalRangeInDetailLane = null,
         Func<IReadOnlyList<ParametricIntRange>, string>? SelectMessagesByOrdinalRangesInDetailLane = null,
@@ -69,6 +71,10 @@ public static class ChatSlashIntercomHandlers
             [Ids.TopicCreate] = static ctx => ChatSlashIntercomActions.CreateTopic(
                 ctx.ArgsTail,
                 ctx.CreateTopicWithTitle),
+            [Ids.TopicRename] = static ctx => ChatSlashIntercomActions.RenameTopic(
+                ctx.SelectedThreadId,
+                ctx.ArgsTail,
+                ctx.RenameTopicWithTitle),
             [Ids.AttachSelection] = static ctx => executeAttach(ctx, Ids.AttachSelection),
             [Ids.AttachScope] = static ctx => executeAttach(ctx, Ids.AttachScope),
             [Ids.AttachFile] = static ctx => executeAttach(ctx, Ids.AttachFile),

@@ -16,6 +16,7 @@ public static class ChatSlashIntercomActions
         out ChatSlashIntercomResult result,
         Action<TopicPickerPresentation>? setTopicPicker = null,
         Func<string, TopicCreateResult>? createTopicWithTitle = null,
+        Func<Guid, string, TopicRenameResult>? renameTopicWithTitle = null,
         Func<string, string?, ChatSlashIntercomResult>? tryAttachSlash = null,
         Func<int, int, string>? selectMessageByOrdinalRangeInDetailLane = null,
         Func<IReadOnlyList<ParametricIntRange>, string>? selectMessagesByOrdinalRangesInDetailLane = null,
@@ -42,6 +43,7 @@ public static class ChatSlashIntercomActions
                     snapshot,
                     setTopicPicker,
                     createTopicWithTitle,
+                    renameTopicWithTitle,
                     tryAttachSlash,
                     selectMessageByOrdinalRangeInDetailLane,
                     selectMessagesByOrdinalRangesInDetailLane,
@@ -69,6 +71,20 @@ public static class ChatSlashIntercomActions
         return create.Success
             ? ChatSlashIntercomResult.Ok(create.Message)
             : ChatSlashIntercomResult.Fail(create.Message);
+    }
+
+    internal static ChatSlashIntercomResult RenameTopic(
+        Guid selectedThreadId,
+        string? title,
+        Func<Guid, string, TopicRenameResult>? renameTopicWithTitle)
+    {
+        if (renameTopicWithTitle is null)
+            return ChatSlashIntercomResult.Fail("Переименование тем недоступно.");
+
+        var rename = renameTopicWithTitle(selectedThreadId, title ?? "");
+        return rename.Success
+            ? ChatSlashIntercomResult.Ok(rename.Message)
+            : ChatSlashIntercomResult.Fail(rename.Message);
     }
 
     internal static ChatSlashIntercomResult ShowTopicPicker(

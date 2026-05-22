@@ -92,6 +92,47 @@ public partial class ChatPanelViewModel
         return TopicCreateResult.Ok($"Создана тема: {trimmed}");
     }
 
+    /// <summary>Переименовать тему (slash <c>/topic rename</c>, Navigator, вкладка). Пустой <paramref name="threadId"/> — выбранная.</summary>
+    public TopicRenameResult RenameTopicWithTitle(string? title, Guid? threadId = null)
+    {
+        if (string.IsNullOrWhiteSpace(title))
+            return TopicRenameResult.Fail("Укажи название: /topic rename <название>");
+
+        var id = threadId is { } explicitId && explicitId != Guid.Empty
+            ? explicitId
+            : SelectedChatThreadId;
+        if (id == Guid.Empty)
+            id = _activeThreadId != Guid.Empty ? _activeThreadId : _mainThreadId;
+        if (id == Guid.Empty)
+            return TopicRenameResult.Fail("Нет активной темы для переименования.");
+
+        if (!ChatSurfaceSnapshot.State.Threads.Any(t => t.ThreadId == id))
+            return TopicRenameResult.Fail("Тема не найдена в сессии.");
+
+        var trimmed = title.Trim();
+        ApplyDisplayTitleForThread(id, trimmed);
+        if (SelectedChatThreadId != id)
+            SelectedChatThreadId = id;
+        IsChatOverviewMode = false;
+        RefreshChatSurfaceSnapshot();
+        return TopicRenameResult.Ok($"Тема переименована: {trimmed}");
+    }
+
+    /// <summary>Заголовок темы из snapshot (для диалога переименования).</summary>
+    public string? TryGetThreadTitleForRename(Guid threadId)
+    {
+        if (threadId == Guid.Empty)
+            return null;
+
+        foreach (var t in ChatSurfaceSnapshot.State.Threads)
+        {
+            if (t.ThreadId == threadId)
+                return t.Title;
+        }
+
+        return null;
+    }
+
     private void RecordThreadFork(Guid newThreadId, Guid previousThreadId, Guid? parentMessageId)
     {
         if (newThreadId == Guid.Empty)

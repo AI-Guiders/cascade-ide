@@ -26,6 +26,7 @@ public sealed class ChatSlashCommandRunner
     private readonly Action<bool>? _setChatOverviewMode;
     private readonly Action<TopicPickerPresentation>? _setTopicPicker;
     private readonly Func<string, TopicCreateResult>? _createTopicWithTitle;
+    private readonly Func<Guid, string, TopicRenameResult>? _renameTopicWithTitle;
     private readonly Func<string, string?, ChatSlashIntercomResult>? _tryAttachSlash;
     private readonly Func<int, int, string>? _selectMessageByOrdinalRangeInDetailLane;
     private readonly Func<IReadOnlyList<ParametricIntRange>, string>? _selectMessagesByOrdinalRangesInDetailLane;
@@ -44,6 +45,7 @@ public sealed class ChatSlashCommandRunner
         Action<bool>? setChatOverviewMode = null,
         Action<TopicPickerPresentation>? setTopicPicker = null,
         Func<string, TopicCreateResult>? createTopicWithTitle = null,
+        Func<Guid, string, TopicRenameResult>? renameTopicWithTitle = null,
         Func<string, string?, ChatSlashIntercomResult>? tryAttachSlash = null,
         Func<int, int, string>? selectMessageByOrdinalRangeInDetailLane = null,
         Func<IReadOnlyList<ParametricIntRange>, string>? selectMessagesByOrdinalRangesInDetailLane = null,
@@ -61,6 +63,7 @@ public sealed class ChatSlashCommandRunner
         _setChatOverviewMode = setChatOverviewMode;
         _setTopicPicker = setTopicPicker;
         _createTopicWithTitle = createTopicWithTitle;
+        _renameTopicWithTitle = renameTopicWithTitle;
         _tryAttachSlash = tryAttachSlash;
         _selectMessageByOrdinalRangeInDetailLane = selectMessageByOrdinalRangeInDetailLane;
         _selectMessagesByOrdinalRangesInDetailLane = selectMessagesByOrdinalRangesInDetailLane;
@@ -81,6 +84,12 @@ public sealed class ChatSlashCommandRunner
             const string topicCreatePrefix = "topic create";
             if (trimmed.StartsWith(topicCreatePrefix, StringComparison.OrdinalIgnoreCase))
                 tail = trimmed[topicCreatePrefix.Length..].Trim();
+            else
+            {
+                const string topicRenamePrefix = "topic rename";
+                if (trimmed.StartsWith(topicRenamePrefix, StringComparison.OrdinalIgnoreCase))
+                    tail = trimmed[topicRenamePrefix.Length..].Trim();
+            }
         }
 
         return ChatSlashCommandPresentation.NormalizeArgsTail(tail);
@@ -159,6 +168,7 @@ public sealed class ChatSlashCommandRunner
                     out var intercom,
                     _setTopicPicker,
                     _createTopicWithTitle,
+                    _renameTopicWithTitle,
                     _tryAttachSlash,
                     _selectMessageByOrdinalRangeInDetailLane,
                     _selectMessagesByOrdinalRangesInDetailLane,
