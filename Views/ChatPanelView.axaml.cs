@@ -1,6 +1,9 @@
 using System.Collections.Specialized;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Layout;
+using Avalonia.Media;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using CascadeIDE.Features.Chat;
@@ -19,6 +22,7 @@ public partial class ChatPanelView : UserControl
         InitializeComponent();
         WireIntercomSurface(IntercomSkiaSurface);
         IntercomSkiaSurface.ComposerDraftChanged += OnIntercomComposerDraftChanged;
+        IntercomSkiaSurface.NavigatorSearchDraftChanged += OnIntercomNavigatorSearchDraftChanged;
         Loaded += OnLoaded;
         DataContextChanged += OnDataContextChanged;
     }
@@ -56,6 +60,16 @@ public partial class ChatPanelView : UserControl
         if (vm.ChatComposerCaretIndex != caret)
             vm.ChatComposerCaretIndex = caret;
         vm.RefreshComposerAutocomplete(text);
+    }
+
+    private void OnIntercomNavigatorSearchDraftChanged(object? sender, EventArgs e)
+    {
+        if (DataContext is not ChatPanelViewModel vm)
+            return;
+
+        var query = IntercomSkiaSurface.TopicNavigatorSearchQuery ?? "";
+        if (!string.Equals(vm.TopicNavigatorSearchQuery, query, StringComparison.Ordinal))
+            vm.TopicNavigatorSearchQuery = query;
     }
 
     private void OnComposerPopupSuggestionsChanged(object? sender, NotifyCollectionChangedEventArgs e) =>
@@ -119,6 +133,9 @@ public partial class ChatPanelView : UserControl
             if (DataContext is ChatPanelViewModel vm)
                 vm.ToggleIntercomTopicNavigator();
         };
+
+        surface.TopicRenameRequested += (_, e) =>
+            _ = HandleTopicRenameRequestAsync(surface, e);
 
         surface.ComposerKeyDown += (_, e) =>
         {
@@ -223,6 +240,89 @@ public partial class ChatPanelView : UserControl
                     break;
             }
         };
+    }
+
+    private async Task HandleTopicRenameRequestAsync(SkiaChatSurfaceControl surface, TopicRenameRequestEventArgs e)
+    {
+        if (DataContext is not ChatPanelViewModel vm)
+            return;
+
+        var owner = TopLevel.GetTopLevel(this) as Window;
+        if (owner is null)
+            return;
+
+        if (e.ShowContextMenu)
+        {
+            showTopicRenameContextMenu(surface, vm, owner, e.ThreadId);
+            return;
+        }
+
+        await RunTopicRenameDialogAsync(surface, vm, owner, e.ThreadId).ConfigureAwait(true);
+    }
+
+    private void showTopicRenameContextMenu(
+        SkiaChatSurfaceControl surface,
+        ChatPanelViewModel vm,
+        Window owner,
+        Guid threadId)
+    {
+        var current = vm.TryGetThreadTitleForRename(threadId) ?? "";
+        var menu = new ContextMenu();
+        var renameItem = new MenuItem { Header = "Переименовать…" };
+        renameItem.Click += async (_, _) =>
+        {
+            await RunTopicRenameDialogAsync(surface, vm, owner, threadId, current).ConfigureAwait(true);
+        };
+        menu.Items.Add(renameItem);
+        menu.Open(surface);
+    }
+
+    private static async Task RunTopicRenameDialogAsync(
+        SkiaChatSurfaceControl surface,
+        ChatPanelViewModel vm,
+        Window owner,
+        Guid threadId,
+        string? presetTitle = null)
+    {
+        var current = presetTitle ?? vm.TryGetThreadTitleForRename(threadId) ?? "";
+        var newTitle = await TopicRenameDialog.ShowAsync(owner, current).ConfigureAwait(true);
+        if (newTitle is null)
+            return;
+
+        var result = vm.RenameTopicWithTitle(newTitle, threadId);
+        if (!result.Success)
+        {
+            await ShowTopicRenameErrorAsync(owner, result.Message).ConfigureAwait(true);
+            return;
+        }
+
+        surface.DetailThreadId = vm.SelectedChatThreadId;
+        surface.InvalidateVisual();
+    }
+
+    private static async Task ShowTopicRenameErrorAsync(Window owner, string message)
+    {
+        var ok = new Button { Content = "OK", MinWidth = 80, HorizontalAlignment = HorizontalAlignment.Right };
+        var dlg = new Window
+        {
+            Title = "Переименование темы",
+            Width = 360,
+            Height = 140,
+            CanResize = false,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Content = new StackPanel
+            {
+                Margin = new Thickness(16),
+                Spacing = 12,
+                Children =
+                {
+                    new TextBlock { Text = message, TextWrapping = TextWrapping.Wrap },
+                    ok,
+                },
+            },
+        };
+        ok.Click += (_, _) => dlg.Close();
+        await dlg.ShowDialog(owner);
     }
 
     private static void TryExecuteSendChat(ChatPanelViewModel vm)

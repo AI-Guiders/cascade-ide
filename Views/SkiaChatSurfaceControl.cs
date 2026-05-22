@@ -184,6 +184,7 @@ public partial class SkiaChatSurfaceControl : Control
             CommandLineCaretIndexProperty);
 
         ShowCockpitCommandLineProperty.Changed.AddClassHandler<SkiaChatSurfaceControl>(OnShowCockpitCommandLineChanged);
+        TopicNavigatorSearchQueryProperty.Changed.AddClassHandler<SkiaChatSurfaceControl>(OnTopicNavigatorSearchQueryChanged);
     }
 
     private static void OnShowCockpitCommandLineChanged(SkiaChatSurfaceControl control, AvaloniaPropertyChangedEventArgs e)
@@ -469,6 +470,7 @@ public partial class SkiaChatSurfaceControl : Control
                 snapNavPanel.State.Threads,
                 msgCounts,
                 TopicNavigatorSearchQuery);
+            var searchCaretVisible = _navigatorSearchFocused && IsKeyboardFocusWithin && _composerCaretBlinkVisible;
             var topicNavLayout = SkiaIntercomTopicNavigator.Draw(
                 canvas,
                 0,
@@ -479,7 +481,10 @@ public partial class SkiaChatSurfaceControl : Control
                 navRows,
                 DetailThreadId,
                 TopicNavigatorSearchQuery,
-                _navigatorScrollOffset);
+                _navigatorScrollOffset,
+                _navigatorSearchFocused && IsKeyboardFocusWithin,
+                _navigatorSearchCaretIndex,
+                searchCaretVisible);
             registerTopicNavigatorPointerHits(topicNavLayout, 0);
         }
 
@@ -558,6 +563,16 @@ public partial class SkiaChatSurfaceControl : Control
 
     private async void OnKeyDown(object? sender, KeyEventArgs e)
     {
+        if (e.Key == Key.F2
+            && !_navigatorSearchFocused
+            && DetailThreadId != Guid.Empty
+            && (e.KeyModifiers & (KeyModifiers.Control | KeyModifiers.Alt | KeyModifiers.Meta)) == 0)
+        {
+            TopicRenameRequested?.Invoke(this, new TopicRenameRequestEventArgs(DetailThreadId, showContextMenu: false));
+            e.Handled = true;
+            return;
+        }
+
         if (e.Key != Key.C || (e.KeyModifiers & KeyModifiers.Control) == 0)
             return;
 

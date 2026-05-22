@@ -15,4 +15,5 @@ internal enum SkiaChatPointerAction
     TopicTabCreate = 7,
     TopicTabOverflow = 8,
     TopicNavigatorToggle = 9,
+    TopicNavigatorSearchFocus = 10,
 }

@@ -60,7 +60,10 @@ internal static class SkiaIntercomTopicNavigator
         IReadOnlyList<ChatThreadPresentation.PickerRow> rows,
         Guid selectedThreadId,
         string? searchQuery,
-        float scrollOffset)
+        float scrollOffset,
+        bool searchFocused,
+        int searchCaretIndex,
+        bool searchCaretVisible)
     {
         var panelLayout = ComputePanelLayout(left, top, height, rows.Count);
         var panelRect = new SKRect(left, top, left + PanelWidth, top + height);
@@ -74,7 +77,15 @@ internal static class SkiaIntercomTopicNavigator
         using (var divider = new SKPaint { Color = theme.Border, StrokeWidth = 1, IsAntialias = true })
             canvas.DrawLine(left + PanelWidth - 0.5f, top, left + PanelWidth - 0.5f, top + height, divider);
 
-        DrawSearchField(canvas, panelLayout.SearchBounds, theme, fonts, searchQuery);
+        DrawSearchField(
+            canvas,
+            panelLayout.SearchBounds,
+            theme,
+            fonts,
+            searchQuery,
+            searchFocused,
+            searchCaretIndex,
+            searchCaretVisible);
 
         canvas.Save();
         canvas.ClipRect(panelLayout.ListClipRect, antialias: false);
@@ -135,7 +146,10 @@ internal static class SkiaIntercomTopicNavigator
         SKRect bounds,
         SkiaChatTheme theme,
         IntercomFontsSettings fonts,
-        string? query)
+        string? query,
+        bool searchFocused,
+        int caretIndex,
+        bool caretVisible)
     {
         using var fill = new SKPaint
         {
@@ -145,22 +159,37 @@ internal static class SkiaIntercomTopicNavigator
         canvas.DrawRoundRect(bounds, 6, 6, fill);
         using var stroke = new SKPaint
         {
-            Color = theme.Border,
+            Color = searchFocused
+                ? SkiaKit.SkiaKitColor.Blend(theme.BubbleUser, theme.Border, 0.35f)
+                : theme.Border,
             IsAntialias = true,
             Style = SKPaintStyle.Stroke,
-            StrokeWidth = 1,
+            StrokeWidth = searchFocused ? 1.5f : 1f,
         };
         canvas.DrawRoundRect(bounds, 6, 6, stroke);
 
         var pt = Math.Max(10f, fonts.ResolveChromeSubtitlePt());
         using var font = new SKFont(SKTypeface.FromFamilyName(fonts.ResolveProseFamily()), pt);
-        var text = string.IsNullOrWhiteSpace(query) ? "Поиск…" : query.Trim();
+        var trimmed = query?.Trim() ?? "";
+        var showPlaceholder = trimmed.Length == 0 && !searchFocused;
+        var text = showPlaceholder ? "Поиск…" : trimmed;
         using var paint = new SKPaint
         {
             IsAntialias = true,
-            Color = string.IsNullOrWhiteSpace(query) ? theme.MutedContent : theme.Content,
+            Color = showPlaceholder ? theme.MutedContent : theme.Content,
         };
-        canvas.DrawText(Truncate(text, 28), bounds.Left + 8f, bounds.MidY + 4f, SKTextAlign.Left, font, paint);
+        var textLeft = bounds.Left + 8f;
+        canvas.DrawText(Truncate(text, 28), textLeft, bounds.MidY + 4f, SKTextAlign.Left, font, paint);
+
+        if (searchFocused && caretVisible)
+        {
+            var caret = Math.Clamp(caretIndex, 0, trimmed.Length);
+            var prefix = trimmed[..caret];
+            var caretX = textLeft + (prefix.Length > 0 ? font.MeasureText(prefix) : 0f);
+            using var caretPaint = new SKPaint { IsAntialias = true, Color = theme.Content, StrokeWidth = 1.5f };
+            var midY = bounds.MidY + 4f;
+            canvas.DrawLine(caretX, midY - pt * 0.45f, caretX, midY + pt * 0.45f, caretPaint);
+        }
     }
 
     private static string Truncate(string text, int maxChars) =>

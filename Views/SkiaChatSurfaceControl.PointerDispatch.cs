@@ -19,12 +19,12 @@ public partial class SkiaChatSurfaceControl
             return false;
 
         if (SkiaChatHitRegistry.IsChromeAction(hit))
-            return dispatchChromePointerPress(hit, point);
+            return dispatchChromePointerPress(hit, e);
 
         return dispatchFeedPointerPress(hit, point, e);
     }
 
-    private bool dispatchChromePointerPress(in SkiaChatHit hit, Point point)
+    private bool dispatchChromePointerPress(in SkiaChatHit hit, PointerPressedEventArgs e)
     {
         switch (hit.PointerAction)
         {
@@ -40,10 +40,11 @@ public partial class SkiaChatSurfaceControl
                 return true;
             case SkiaChatPointerAction.SlashPopup when ShowIntercomComposer && _slashPopupBounds.Width > 0:
             {
+                var popupPoint = e.GetPosition(this);
                 var row = SkiaPopupList.HitTestRow(
                     _slashPopupBounds,
-                    (float)point.X,
-                    (float)point.Y,
+                    (float)popupPoint.X,
+                    (float)popupPoint.Y,
                     _slashRows.Count,
                     _slashPopupScrollOffset);
                 if (row < 0)
@@ -55,16 +56,33 @@ public partial class SkiaChatSurfaceControl
             case SkiaChatPointerAction.CommandLineFocus:
                 if (!ShowIntercomComposer || !ShowCockpitCommandLine)
                     return false;
+                ClearNavigatorSearchFocus();
                 _commandLineFocused = true;
                 Focus();
                 return true;
             case SkiaChatPointerAction.ComposerFocus:
                 if (!ShowIntercomComposer)
                     return false;
+                ClearNavigatorSearchFocus();
                 _commandLineFocused = false;
                 Focus();
                 return true;
+            case SkiaChatPointerAction.TopicNavigatorSearchFocus:
+                FocusNavigatorSearch();
+                return true;
             case SkiaChatPointerAction.TopicTabSelect when hit.SelectThreadId is { } tabThreadId:
+                if (e.GetCurrentPoint(this).Properties.IsRightButtonPressed)
+                {
+                    TopicRenameRequested?.Invoke(this, new TopicRenameRequestEventArgs(tabThreadId, showContextMenu: true));
+                    return true;
+                }
+
+                if (e.ClickCount >= 2)
+                {
+                    TopicRenameRequested?.Invoke(this, new TopicRenameRequestEventArgs(tabThreadId, showContextMenu: false));
+                    return true;
+                }
+
                 DetailThreadId = tabThreadId;
                 OverviewMode = false;
                 return true;
@@ -101,6 +119,18 @@ public partial class SkiaChatSurfaceControl
 
         if (hit.SelectThreadId is { } threadId)
         {
+            if (e.GetCurrentPoint(this).Properties.IsRightButtonPressed)
+            {
+                TopicRenameRequested?.Invoke(this, new TopicRenameRequestEventArgs(threadId, showContextMenu: true));
+                return true;
+            }
+
+            if (e.ClickCount >= 2)
+            {
+                TopicRenameRequested?.Invoke(this, new TopicRenameRequestEventArgs(threadId, showContextMenu: false));
+                return true;
+            }
+
             DetailThreadId = threadId;
             OverviewMode = false;
             return true;
@@ -161,6 +191,18 @@ public partial class SkiaChatSurfaceControl
 
     private void registerTopicNavigatorPointerHits(SkiaIntercomTopicNavigator.LayoutResult layout, float panelLeft)
     {
+        if (layout.SearchBounds.Width > 0)
+        {
+            _navigatorSearchBounds = layout.SearchBounds;
+            var searchBounds = layout.SearchBounds;
+            if (panelLeft != 0f)
+                searchBounds.Offset(panelLeft, 0f);
+
+            _chatHits.RegisterControlRect(
+                SkiaChatHitGeometry.ToControlRect(searchBounds),
+                new SkiaChatHit(null, null, ResetDetailMode: false, PointerAction: SkiaChatPointerAction.TopicNavigatorSearchFocus));
+        }
+
         // RowHits.Bounds уже в координатах контрола (MapRowBoundsToPanel в Draw).
         foreach (var row in layout.RowHits)
         {

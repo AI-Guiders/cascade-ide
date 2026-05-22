@@ -33,7 +33,7 @@
                                    ForwardHost="{Binding IntercomForwardChrome}"
                                    ComfortableFeed="{Binding IntercomComfortableFeed}"
                                    TopicNavigatorVisible="{Binding IntercomTopicNavigatorVisible}"
-                                   TopicNavigatorSearchQuery="{Binding TopicNavigatorSearchQuery}"
+                                   TopicNavigatorSearchQuery="{Binding TopicNavigatorSearchQuery, Mode=TwoWay}"
                                    IntercomFonts="{Binding IntercomFonts}"
                                    ChromeTitle="Intercom"
                                    IsChatLoading="{Binding IsChatLoading}"

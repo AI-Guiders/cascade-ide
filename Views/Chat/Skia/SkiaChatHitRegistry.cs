@@ -97,7 +97,8 @@ internal sealed class SkiaChatHitRegistry
             or SkiaChatPointerAction.TopicTabSelect
             or SkiaChatPointerAction.TopicTabCreate
             or SkiaChatPointerAction.TopicTabOverflow
-            or SkiaChatPointerAction.TopicNavigatorToggle;
+            or SkiaChatPointerAction.TopicNavigatorToggle
+            or SkiaChatPointerAction.TopicNavigatorSearchFocus;
 
     public static bool IsChromeAction(in SkiaChatHit hit) =>
         hit.PointerAction != SkiaChatPointerAction.None;

@@ -78,6 +78,9 @@ public partial class SkiaChatSurfaceControl
     public event EventHandler? TopicCreateRequested;
     public event EventHandler? TopicNavigatorToggleRequested;
 
+    /// <summary>Переименовать тему (ПКМ / двойной клик / F2 в Nav или на вкладке).</summary>
+    public event EventHandler<TopicRenameRequestEventArgs>? TopicRenameRequested;
+
     /// <summary>Текст/caret composer изменены (до синхронизации биндинга с VM).</summary>
     public event EventHandler? ComposerDraftChanged;
 
@@ -211,7 +214,13 @@ public partial class SkiaChatSurfaceControl
 
     private void OnComposerCaretBlinkTick(object? sender, EventArgs e)
     {
-        if (!ShowIntercomComposer || !IsComposerEnabled || !IsKeyboardFocusWithin)
+        if (!IsKeyboardFocusWithin)
+        {
+            StopComposerCaretBlink();
+            return;
+        }
+
+        if (!_navigatorSearchFocused && (!ShowIntercomComposer || !IsComposerEnabled))
         {
             StopComposerCaretBlink();
             return;
@@ -223,7 +232,7 @@ public partial class SkiaChatSurfaceControl
 
     private void OnTextInputMethodClientRequested(object? sender, TextInputMethodClientRequestedEventArgs e)
     {
-        if (!ShowIntercomComposer)
+        if (!ShowIntercomComposer && !_navigatorSearchFocused)
             return;
 
         _textInputClient ??= new IntercomSkiaTextInputClient(this);
@@ -433,6 +442,9 @@ public partial class SkiaChatSurfaceControl
 
     private void OnComposerTextInput(object? sender, TextInputEventArgs e)
     {
+        if (TryHandleNavigatorSearchTextInput(e))
+            return;
+
         if (!ShowIntercomComposer || !IsComposerEnabled || string.IsNullOrEmpty(e.Text))
             return;
 
@@ -449,6 +461,9 @@ public partial class SkiaChatSurfaceControl
 
     private void OnComposerKeyDown(object? sender, KeyEventArgs e)
     {
+        if (TryHandleNavigatorSearchKeyDown(e))
+            return;
+
         if (!ShowIntercomComposer || !IsComposerEnabled)
             return;
 
@@ -551,6 +566,7 @@ public partial class SkiaChatSurfaceControl
         if (!IsKeyboardFocusWithin)
             Focus();
 
+        ClearNavigatorSearchFocus();
         _commandLineFocused = true;
         var current = CommandLineText ?? "";
         var caret = Math.Clamp(CommandLineCaretIndex, 0, current.Length);
@@ -627,6 +643,7 @@ public partial class SkiaChatSurfaceControl
         if (!IsKeyboardFocusWithin)
             Focus();
 
+        ClearNavigatorSearchFocus();
         ComposerPreeditText = null;
         var current = ComposerText ?? "";
         var caret = Math.Clamp(ComposerCaretIndex, 0, current.Length);

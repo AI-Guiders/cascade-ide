@@ -5,7 +5,7 @@ using Avalonia.Media;
 
 namespace CascadeIDE.Views.Chat;
 
-/// <summary>IME/ввод для Skia composer (ADR 0123 фаза 2).</summary>
+/// <summary>IME/ввод для Skia composer и поля поиска Topic Navigator (ADR 0123 фаза 2).</summary>
 internal sealed class IntercomSkiaTextInputClient : TextInputMethodClient
 {
     private readonly SkiaChatSurfaceControl _host;
@@ -14,23 +14,39 @@ internal sealed class IntercomSkiaTextInputClient : TextInputMethodClient
 
     public override Visual TextViewVisual => _host;
 
-    public override bool SupportsPreedit => true;
+    public override bool SupportsPreedit => !_host.IsNavigatorSearchInputActive;
 
     public override bool SupportsSurroundingText => true;
 
-    public override string SurroundingText => _host.ComposerText ?? "";
+    public override string SurroundingText =>
+        _host.IsNavigatorSearchInputActive
+            ? _host.TopicNavigatorSearchQuery ?? ""
+            : _host.ComposerText ?? "";
 
     public override TextSelection Selection
     {
         get
         {
-            var caret = Math.Clamp(_host.ComposerCaretIndex, 0, SurroundingText.Length);
+            var text = SurroundingText;
+            var caret = _host.IsNavigatorSearchInputActive
+                ? Math.Clamp(_host.NavigatorSearchCaretIndex, 0, text.Length)
+                : Math.Clamp(_host.ComposerCaretIndex, 0, text.Length);
             return new TextSelection(caret, caret);
         }
-        set => _host.ComposerCaretIndex = Math.Clamp(value.Start, 0, SurroundingText.Length);
+        set
+        {
+            var caret = Math.Clamp(value.Start, 0, SurroundingText.Length);
+            if (_host.IsNavigatorSearchInputActive)
+                _host.NavigatorSearchCaretIndex = caret;
+            else
+                _host.ComposerCaretIndex = caret;
+        }
     }
 
-    public override Rect CursorRectangle => _host.GetComposerCaretScreenRect();
+    public override Rect CursorRectangle =>
+        _host.IsNavigatorSearchInputActive
+            ? _host.GetNavigatorSearchCaretScreenRect()
+            : _host.GetComposerCaretScreenRect();
 
     public void NotifyTextChanged() => RaiseSurroundingTextChanged();
 
@@ -38,6 +54,9 @@ internal sealed class IntercomSkiaTextInputClient : TextInputMethodClient
 
     public override void SetPreeditText(string? preedit)
     {
+        if (_host.IsNavigatorSearchInputActive)
+            return;
+
         _host.ComposerPreeditText = string.IsNullOrEmpty(preedit) ? null : preedit;
         NotifyCursorMoved();
         _host.InvalidateVisual();
