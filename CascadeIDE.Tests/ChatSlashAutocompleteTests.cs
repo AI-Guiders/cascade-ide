@@ -32,6 +32,28 @@ public sealed class ChatSlashAutocompleteTests
 
         Assert.Contains(suggestions, s => s.ListTitle == "build");
 
+        Assert.All(suggestions, s => Assert.DoesNotContain(' ', s.ListTitle));
+
+        Assert.All(suggestions, s => Assert.DoesNotContain(' ', s.SlashPath.TrimStart('/')));
+
+    }
+
+
+
+    [Fact]
+
+    public void GetSuggestions_JustSlash_CaretAfterSlash_ReturnsDomainSegmentsOnly()
+
+    {
+
+        var suggestions = ChatSlashAutocomplete.GetSuggestions("/", caretIndex: 1);
+
+        Assert.NotEmpty(suggestions);
+
+        Assert.All(suggestions, s => Assert.DoesNotContain(' ', s.ListTitle));
+
+        Assert.Contains(suggestions, s => s.ListTitle == "intercom");
+
     }
 
 

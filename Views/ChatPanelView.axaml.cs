@@ -58,11 +58,11 @@ public partial class ChatPanelView : UserControl
 
         var text = IntercomSkiaSurface.ComposerText ?? "";
         var caret = Math.Clamp(IntercomSkiaSurface.ComposerCaretIndex, 0, text.Length);
-        if (!string.Equals(vm.ChatInput, text, StringComparison.Ordinal))
-            vm.ChatInput = text;
         if (vm.ChatComposerCaretIndex != caret)
             vm.ChatComposerCaretIndex = caret;
-        vm.RefreshComposerAutocomplete(text);
+        if (!string.Equals(vm.ChatInput, text, StringComparison.Ordinal))
+            vm.ChatInput = text;
+        vm.RefreshComposerAutocomplete(text, caret);
     }
 
     private void OnIntercomNavigatorSearchDraftChanged(object? sender, EventArgs e)
@@ -360,10 +360,10 @@ public partial class ChatPanelView : UserControl
             surface.ComposerCaretIndex = caret;
         }
 
-        if (!string.Equals(vm.ChatInput, text, StringComparison.Ordinal))
-            vm.ChatInput = text;
         if (vm.ChatComposerCaretIndex != caret)
             vm.ChatComposerCaretIndex = caret;
+        if (!string.Equals(vm.ChatInput, text, StringComparison.Ordinal))
+            vm.ChatInput = text;
     }
 
     private static void showMessageSelectContextMenu(

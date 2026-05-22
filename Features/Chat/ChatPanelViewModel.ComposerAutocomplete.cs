@@ -60,7 +60,7 @@ public partial class ChatPanelViewModel
     partial void OnChatComposerCaretIndexChanged(int value) => RefreshComposerAutocomplete();
 
     /// <summary>Slash popup для Cockpit Command Line (тот же каталог, что у composer).</summary>
-    public void RefreshCockpitCommandLineAutocomplete(string? inputOverride = null)
+    public void RefreshCockpitCommandLineAutocomplete(string? inputOverride = null, int? caretOverride = null)
     {
         if (!IsCockpitCommandLineOpen)
             return;
@@ -68,19 +68,21 @@ public partial class ChatPanelViewModel
         IsChatBracketAutocompleteVisible = false;
         ChatBracketSuggestions.Clear();
         SelectedChatBracketSuggestionIndex = -1;
-        RefreshChatSlashAutocomplete(inputOverride ?? CockpitCommandLineText);
+        RefreshChatSlashAutocomplete(
+            inputOverride ?? CockpitCommandLineText,
+            caretOverride ?? CockpitCommandLineCaretIndex);
     }
 
-    public void RefreshComposerAutocomplete(string? inputOverride = null)
+    public void RefreshComposerAutocomplete(string? inputOverride = null, int? caretOverride = null)
     {
         if (IsCockpitCommandLineOpen)
         {
-            RefreshCockpitCommandLineAutocomplete(inputOverride);
+            RefreshCockpitCommandLineAutocomplete(inputOverride, caretOverride);
             return;
         }
 
         var text = inputOverride ?? ChatInput;
-        var caret = Math.Clamp(ChatComposerCaretIndex, 0, text.Length);
+        var caret = Math.Clamp(caretOverride ?? ChatComposerCaretIndex, 0, text.Length);
 
         if (ChatBracketAutocomplete.TryGetEditState(text, caret, out _))
         {
@@ -100,7 +102,7 @@ public partial class ChatPanelViewModel
             SelectedChatBracketSuggestionIndex = -1;
         }
 
-        RefreshChatSlashAutocomplete(text);
+        RefreshChatSlashAutocomplete(text, caretOverride: caret);
         rebuildComposerPopup();
     }
 

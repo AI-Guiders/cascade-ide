@@ -684,8 +684,10 @@ public partial class SkiaChatSurfaceControl
         ComposerPreeditText = null;
         var current = ComposerText ?? "";
         var caret = Math.Clamp(ComposerCaretIndex, 0, current.Length);
-        ComposerText = current.Insert(caret, text);
-        ComposerCaretIndex = caret + text.Length;
+        var newText = current.Insert(caret, text);
+        var newCaret = caret + text.Length;
+        ComposerCaretIndex = newCaret;
+        ComposerText = newText;
         _textInputClient?.NotifyTextChanged();
         _textInputClient?.NotifyCursorMoved();
         ShowComposerCaretSolid();
@@ -701,15 +703,14 @@ public partial class SkiaChatSurfaceControl
         {
             if (caret == 0)
                 return;
-            ComposerText = current.Remove(caret - 1, 1);
             ComposerCaretIndex = caret - 1;
+            ComposerText = current.Remove(caret - 1, 1);
         }
         else
         {
             if (caret >= current.Length)
                 return;
             ComposerText = current.Remove(caret, 1);
-            ComposerCaretIndex = caret;
         }
 
         _textInputClient?.NotifyTextChanged();

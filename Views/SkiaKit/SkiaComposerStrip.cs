@@ -91,6 +91,7 @@ internal static class SkiaComposerStrip
         var contentWidth = layout.ContentWidth;
         var display = BuildDisplayText(text, preeditText);
         var isEmpty = string.IsNullOrEmpty(display);
+        var textOrigin = new SKPoint(textBounds.Left, textBounds.Top + textTopInset);
 
         using var bodyFont = SkiaKitFonts.CreateUi(fontSize);
 
@@ -127,7 +128,7 @@ internal static class SkiaComposerStrip
             {
                 SkiaRichTextKitMarkdown.Paint(
                     canvas,
-                    new SKPoint(textBounds.Left, textBounds.Top + textTopInset),
+                    textOrigin,
                     rich,
                     isEnabled ? theme.Content : theme.EmptyHint,
                     SkiaKitColor.Blend(theme.Content, theme.HoverBorder, 0.35f));
@@ -137,7 +138,17 @@ internal static class SkiaComposerStrip
         DrawSendButton(canvas, sendButtonBounds, theme, isEnabled, fontSize);
 
         if (isEnabled && showCaret && caretVisible && caretIndex >= 0
-            && TryComputeCaretLine(layout, display, caretIndex, bodyFont, lineHeight, out var x, out var yTop, out var yBottom))
+            && TryComputeCaretLine(
+                layout,
+                display,
+                caretIndex,
+                fontSize,
+                lineHeight,
+                textTopInset,
+                textOrigin,
+                out var x,
+                out var yTop,
+                out var yBottom))
         {
             DrawCaretLine(canvas, x, yTop, yBottom);
         }
@@ -159,8 +170,19 @@ internal static class SkiaComposerStrip
         var sendLeft = composerBounds.Right - HorizontalPadding - SendButtonWidth;
         var layout = ComputeTextLayout(composerBounds, sendLeft);
         var display = BuildDisplayText(text, preeditText);
-        using var font = SkiaKitFonts.CreateUi(fontSize);
-        if (!TryComputeCaretLine(layout, display, caretIndex, font, lineHeight, out var x, out var yTop, out var yBottom))
+        var textTopInset = lineHeight - 4f - fontSize * 0.85f - 4f;
+        var textOrigin = new SKPoint(layout.TextBounds.Left, layout.TextBounds.Top + textTopInset);
+        if (!TryComputeCaretLine(
+                layout,
+                display,
+                caretIndex,
+                fontSize,
+                lineHeight,
+                textTopInset,
+                textOrigin,
+                out var x,
+                out var yTop,
+                out var yBottom))
             return false;
 
         caretRect = new SKRect(x, yTop, x + CaretStrokeWidth, yBottom);
@@ -181,23 +203,38 @@ internal static class SkiaComposerStrip
         TextLayout layout,
         string display,
         int caretIndex,
-        SKFont font,
+        float fontSize,
         float lineHeight,
+        float textTopInset,
+        SKPoint textOrigin,
         out float x,
         out float yTop,
         out float yBottom)
     {
+        if (SkiaRichTextKitMarkdown.TryGetPlainCaretLine(
+                display,
+                caretIndex,
+                layout.ContentWidth,
+                fontSize,
+                lineHeight,
+                textOrigin,
+                out x,
+                out yTop,
+                out yBottom))
+            return true;
+
         x = yTop = yBottom = 0f;
         if (caretIndex < 0)
             return false;
 
+        using var font = SkiaKitFonts.CreateUi(fontSize);
         caretIndex = Math.Clamp(caretIndex, 0, display.Length);
         var before = display[..caretIndex];
         var beforeLines = WrapLines(before, layout.ContentWidth, font.Size);
         var lineIndex = Math.Max(0, beforeLines.Count - 1);
         var colText = beforeLines.Count == 0 ? "" : beforeLines[^1];
         x = layout.TextBounds.Left + font.MeasureText(colText);
-        yTop = layout.TextBounds.Top + lineIndex * lineHeight + CaretVerticalPad;
+        yTop = layout.TextBounds.Top + textTopInset + lineIndex * lineHeight + CaretVerticalPad;
         yBottom = yTop + lineHeight - CaretVerticalPad * 2f;
         return true;
     }

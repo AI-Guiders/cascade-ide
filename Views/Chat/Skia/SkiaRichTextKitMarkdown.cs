@@ -137,6 +137,50 @@ internal static class SkiaRichTextKitMarkdown
         };
     }
 
+    /// <summary>Координаты каретки в той же вёрстке, что <see cref="TryMeasurePlain"/> / Paint plain.</summary>
+    public static bool TryGetPlainCaretLine(
+        string text,
+        int caretIndex,
+        float maxWidth,
+        float fontSize,
+        float lineHeight,
+        SKPoint origin,
+        out float x,
+        out float yTop,
+        out float yBottom,
+        string fontFamily = "Segoe UI")
+    {
+        x = yTop = yBottom = 0f;
+        if (maxWidth < 8f || caretIndex < 0)
+            return false;
+
+        var body = text.Replace("\r", "");
+        caretIndex = Math.Clamp(caretIndex, 0, body.Length);
+
+        var rs = new RichString { MaxWidth = maxWidth };
+        rs.FontFamily(fontFamily).FontSize(fontSize);
+        if (!string.IsNullOrEmpty(body))
+            rs.Add(body);
+
+        var maxLines = (int)Math.Max(1, Math.Ceiling(rs.MeasuredHeight / Math.Max(1f, lineHeight)));
+        if (maxLines > 0 && maxLines < int.MaxValue)
+            rs.MaxHeight = maxLines * lineHeight;
+
+        var caretInfo = rs.GetCaretInfo(new CaretPosition(caretIndex, altPosition: false));
+        if (caretInfo.IsNone)
+            return false;
+
+        var caretRect = caretInfo.CaretRectangle;
+        x = origin.X + caretInfo.CaretXCoord;
+        yTop = origin.Y + caretRect.Top + CaretVerticalPad;
+        yBottom = origin.Y + caretRect.Bottom - CaretVerticalPad;
+        if (yBottom <= yTop)
+            yBottom = yTop + Math.Max(lineHeight - CaretVerticalPad * 2f, 8f);
+        return true;
+    }
+
+    private const float CaretVerticalPad = 2f;
+
     public static void Paint(SKCanvas canvas, SKPoint origin, SkiaRichTextKitBodyLayout layout, SKColor contentColor, SKColor codeColor)
     {
         RichString? rs;

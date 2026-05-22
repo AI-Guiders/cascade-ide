@@ -26,10 +26,11 @@ public partial class ChatPanelViewModel
     partial void OnChatInputChanged(string value) => RefreshComposerAutocomplete();
 
     /// <param name="inputOverride">Текст из TextBox при <c>TextChanged</c> (биндинг может отставать на один тик).</param>
-    public void RefreshChatSlashAutocomplete(string? inputOverride = null)
+    /// <param name="caretOverride">Каретка из Skia composer (приоритет над VM, если биндинг отстаёт).</param>
+    public void RefreshChatSlashAutocomplete(string? inputOverride = null, int? caretOverride = null)
     {
         var text = inputOverride ?? ChatInput;
-        var caret = Math.Clamp(ChatComposerCaretIndex, 0, text.Length);
+        var caret = Math.Clamp(caretOverride ?? ChatComposerCaretIndex, 0, text.Length);
         var suggestions = ChatSlashAutocomplete.GetSuggestions(
             text,
             _workspaceFileSlashCompletion,
