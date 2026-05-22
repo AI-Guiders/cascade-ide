@@ -23,6 +23,8 @@ using CascadeIDE.Features.HybridIndex.Application;
 using CascadeIDE.Features.Shell.Application;
 using CascadeIDE.Models;
 using CascadeIDE.Features.Os.DataAcquisition;
+using CascadeIDE.Features.IdeMcp.Execution;
+using CascadeIDE.Features.Workspace;
 using CascadeIDE.Features.Workspace.Application;
 
 namespace CascadeIDE.ViewModels;
@@ -33,7 +35,7 @@ namespace CascadeIDE.ViewModels;
 /// </summary>
 [DataBusPublisher("ide-health & related domain signals")]
 public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpActions, IAutonomousAgentSessionHost,
-    IMainWindowHostSurfaceInput
+    IMainWindowHostSurfaceInput, SolutionLoadSessionApplyProjection.IHost
 {
     public const string InstallNewSentinel = "— Установить модель… —";
 

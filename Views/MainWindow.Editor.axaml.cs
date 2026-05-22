@@ -49,7 +49,7 @@ public partial class MainWindow
             _workspaceEventsAttached = true;
             vmSetup.Workspace.PropertyChanged += (_, e) =>
             {
-                if (e.PropertyName is nameof(ViewModels.SolutionWorkspaceViewModel.SolutionPath))
+                if (e.PropertyName is nameof(CascadeIDE.Features.Workspace.SolutionWorkspaceViewModel.SolutionPath))
                     _languageService?.InvalidateCache();
             };
         }

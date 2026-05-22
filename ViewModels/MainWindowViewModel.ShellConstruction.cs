@@ -13,6 +13,8 @@ using CascadeIDE.Features.Debug;
 using CascadeIDE.Features.Documents;
 using CascadeIDE.Features.Git;
 using CascadeIDE.Features.HybridIndex.Application;
+using CascadeIDE.Features.IdeMcp.Execution;
+using CascadeIDE.Features.Workspace;
 using CascadeIDE.Features.Instrumentation;
 using CascadeIDE.Features.Markdown;
 using CascadeIDE.Features.Os.DataAcquisition;

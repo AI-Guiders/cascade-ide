@@ -6,6 +6,7 @@ using System.Threading;
 using Avalonia.Threading;
 using CascadeIDE.Features.IdeMcp.Application;
 using CascadeIDE.Models;
+using CascadeIDE.Features.Workspace;
 using CascadeIDE.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Dock.Model.Core;

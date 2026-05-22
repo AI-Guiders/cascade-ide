@@ -172,7 +172,7 @@
     <_IdeCommandsDocGenerated>$(MSBuildProjectDirectory)\Services\Generated\IdeCommandsDoc.g.cs</_IdeCommandsDocGenerated>
     <_IdeCommandsArgsGenerated>$(MSBuildProjectDirectory)\Services\Generated\IdeCommandsArgsGenerated.g.cs</_IdeCommandsArgsGenerated>
     <_IdeCommandsContractGenerated>$(MSBuildProjectDirectory)\Services\Generated\IdeCommandsContract.g.cs</_IdeCommandsContractGenerated>
-    <_IdeExecutorGenerated>$(MSBuildProjectDirectory)\ViewModels\Generated\IdeMcpCommandExecutor.Generated.g.cs</_IdeExecutorGenerated>
+    <_IdeExecutorGenerated>$(MSBuildProjectDirectory)\Features\IdeMcp\Execution\Generated\IdeMcpCommandExecutor.Generated.g.cs</_IdeExecutorGenerated>
     <_McpProtocolDoc>$(MSBuildProjectDirectory)\docs\MCP-PROTOCOL.md</_McpProtocolDoc>
   </PropertyGroup>
   <ItemGroup Condition="'$(GenerateIdeProtocolDocs)'=='true'">
@@ -247,71 +247,71 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.AgentNotes.cs">
+    <Compile Update="Features\IdeMcp\Execution\IdeMcpCommandExecutor.Handlers.AgentNotes.cs">
       <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.cs">
+    <Compile Update="Features\IdeMcp\Execution\IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.cs">
       <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
     </Compile>
-    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.DialogsApp.cs">
+    <Compile Update="Features\IdeMcp\Execution\IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.DialogsApp.cs">
       <DependentUpon>IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.cs</DependentUpon>
     </Compile>
-    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.PanelsLayout.cs">
+    <Compile Update="Features\IdeMcp\Execution\IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.PanelsLayout.cs">
       <DependentUpon>IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.cs</DependentUpon>
     </Compile>
-    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.ThemeLanguage.cs">
+    <Compile Update="Features\IdeMcp\Execution\IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.ThemeLanguage.cs">
       <DependentUpon>IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.Chrome.OutputFocus.cs">
+    <Compile Update="Features\IdeMcp\Execution\IdeMcpCommandExecutor.Handlers.Chrome.OutputFocus.cs">
       <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.Chrome.UiVisibility.cs">
+    <Compile Update="Features\IdeMcp\Execution\IdeMcpCommandExecutor.Handlers.Chrome.UiVisibility.cs">
       <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.DapDebug.cs">
+    <Compile Update="Features\IdeMcp\Execution\IdeMcpCommandExecutor.Handlers.DapDebug.cs">
       <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
     </Compile>
-    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.DapDebug.LaunchAttach.cs">
+    <Compile Update="Features\IdeMcp\Execution\IdeMcpCommandExecutor.Handlers.DapDebug.LaunchAttach.cs">
       <DependentUpon>IdeMcpCommandExecutor.Handlers.DapDebug.cs</DependentUpon>
     </Compile>
-    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.DapDebug.Stepping.cs">
+    <Compile Update="Features\IdeMcp\Execution\IdeMcpCommandExecutor.Handlers.DapDebug.Stepping.cs">
       <DependentUpon>IdeMcpCommandExecutor.Handlers.DapDebug.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.DebuggerUi.cs">
+    <Compile Update="Features\IdeMcp\Execution\IdeMcpCommandExecutor.Handlers.DebuggerUi.cs">
       <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.Editor.EditNavigation.cs">
+    <Compile Update="Features\IdeMcp\Execution\IdeMcpCommandExecutor.Handlers.Editor.EditNavigation.cs">
       <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
     </Compile>
-    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.Editor.FilesAndChat.cs">
+    <Compile Update="Features\IdeMcp\Execution\IdeMcpCommandExecutor.Handlers.Editor.FilesAndChat.cs">
       <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
     </Compile>
-    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.Editor.StateContent.cs">
+    <Compile Update="Features\IdeMcp\Execution\IdeMcpCommandExecutor.Handlers.Editor.StateContent.cs">
       <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
     </Compile>
-    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.Editor.ToolCatalog.cs">
-      <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.PowerDocuments.Documents.cs">
+    <Compile Update="Features\IdeMcp\Execution\IdeMcpCommandExecutor.Handlers.Editor.ToolCatalog.cs">
       <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.PowerDocuments.FocusPowerAgent.cs">
+    <Compile Update="Features\IdeMcp\Execution\IdeMcpCommandExecutor.Handlers.PowerDocuments.Documents.cs">
+      <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Features\IdeMcp\Execution\IdeMcpCommandExecutor.Handlers.PowerDocuments.FocusPowerAgent.cs">
       <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
     </Compile>
   </ItemGroup>

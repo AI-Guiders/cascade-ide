@@ -145,7 +145,7 @@
 | **Терминал** | `TerminalPanelViewModel` | `Features/Terminal/TerminalPanelViewModel` | Вкладка Terminal (телеметрия Power на той же вкладке — пока на главном VM) |
 | **Чат** | История, ввод, `SendChat`, стриминг в `ChatPanelViewModel` | `Features/Chat/ChatPanelViewModel` + `ChatMessageViewModel` | Правая колонка; провайдер/модель и контекст редактора — замыкания на `MainWindowViewModel` |
 | **Инструментирование** | События, таймлайн, агент, тесты, MCP-отладка | `Features/Instrumentation/InstrumentationPanelViewModel` | В разметке — `DataContext="{Binding InstrumentationPanel}"` + `x:DataType`; главный VM не дублирует поля |
-| **Решение и документы** | `SolutionRoots`, `OpenDocuments`, dock | Остаётся в `MainWindowViewModel` или выносится **SolutionWorkspaceViewModel** позже | Ядро сессии IDE |
+| **Решение и документы** | `SolutionRoots`, `OpenDocuments`, dock | **`SolutionWorkspaceViewModel`** + **`DocumentsWorkspaceViewModel`** (`Features/Workspace`, `Features/Documents`); MWVM — композитор и `SolutionLoadSessionApplyProjection.IHost` | Ядро сессии IDE |
 | **MCP-мост** | `IIdeMcpActions` на `MainWindowViewModel` | Остаётся на главном VM; делегирование в сервисы/дочерние VM | Контракт стабилен |
 
 ## Фазы
@@ -277,13 +277,14 @@
 
 Фазы **0–5** и Wave 1 (**MCP thinning** + **UI clusters thinning** по плану v1.15–v1.48) считаются **выполненными** для зафиксированного scope strangler: главный VM остаётся композитором (`IIdeMcpActions`, подписки, дочерние VM), но крупные кластеры вынесены в `Features/*/Application` оркестраторами/проекциями.
 
-**Не входит в «завершение» (осознанный backlog, ADR 0009):**
+**Backlog MWVM (закрыт, v1.49–v1.52):**
 
-- **`SolutionWorkspaceViewModel`** — ядро сессии решения/документов по-прежнему на MWVM.
-- Точечный вынос новых MCP/UI при росте API (правило feature-archetype).
-- MEF/плагины, опциональный батчинг Problems, полное схлопывание `IdeMcpCommandExecutor` в сервисы.
+- **v1.49** — **`SolutionWorkspaceViewModel`** в `Features/Workspace/`; **`SolutionLoadSessionApplyProjection`** — применение загрузки решения (дерево + сброс редактора + MFD); тесты **`SolutionLoadSessionApplyProjectionTests`**.
+- **v1.50** — **`IdeMcpCommandExecutor`** перенесён в **`Features/IdeMcp/Execution/`** (диспетчер вне `ViewModels/`; генератор **`ProtocolDocGen`** и **`CascadeIDE.csproj`** синхронизированы). MWVM по-прежнему владеет экземпляром и маршалит UI.
+- **v1.51** — Точечный вынос MCP/UI при росте API — **правило на поддержку** ([feature-archetype-v1.md](design/feature-archetype-v1.md)); не big-bang.
+- **v1.52** — MEF/плагины и опциональный дополнительный батчинг Problems — **вне scope** (политика ADR 0009 / фаза 5 «основное сделано»); коалесcing BuildOutput и Diagnostics уже в продукте.
 
-Новые фичи — по **[feature-archetype-v1.md](design/feature-archetype-v1.md)**; MWVM не раздуваем без выноса.
+Новые фичи — по **feature-archetype**; MWVM не раздуваем без выноса.
 
 ## Версионирование
 
@@ -361,3 +362,5 @@
 - **v1.46** — **`SolutionLoadUiApplyProjection`** + **`MainWindowBuildSolutionPrepProjection`**; MWVM **`SolutionBuild`** без прямого `File.Exists` для CanBuild.
 - **v1.47** — **`UiModeLayoutApplyProjection`**; **`ApplyUiModeLayout`** в **`UiGitWorkspace`**.
 - **v1.48** — Wave 1 strangler MWVM (текущий объём) отмечен **закрытым**; backlog зафиксирован в разделе «Wave 1 — статус».
+- **v1.49** — **`SolutionWorkspaceViewModel`** + **`SolutionLoadSessionApplyProjection`** (см. backlog MWVM).
+- **v1.50** — **`IdeMcpCommandExecutor`** → **`Features/IdeMcp/Execution/`**.

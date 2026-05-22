@@ -2,7 +2,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using CascadeIDE.Cockpit.DataBus;
 using CascadeIDE.Features.Build.Application;
+using CascadeIDE.Features.Workspace;
 using CascadeIDE.Features.Workspace.Application;
+using CascadeIDE.Models;
 using CascadeIDE.Services;
 using CommunityToolkit.Mvvm.Input;
 
@@ -85,23 +87,13 @@ public partial class MainWindowViewModel
                     return;
                 }
 
-                // New solution becomes authoritative UI context: clear stale editor selection/state.
-                _openFileDebounceCts?.Cancel();
-                Workspace.SelectedSolutionItem = null;
-                Documents.ClearForNewSolution();
-                CurrentFilePath = null;
-                EditorText = "";
-                IsLoadingCurrentFile = false;
-
-                var loadPlan = SolutionLoadUiApplyProjection.Create(
+                SolutionLoadSessionApplyProjection.ApplySuccessfulLoad(
+                    Workspace,
+                    root,
                     path,
                     normalizedSolutionPath,
-                    IsDockedMfdSolutionExplorerTree);
-                Workspace.SolutionPath = loadPlan.NormalizedSolutionPath;
-                Workspace.SolutionRoots.Clear();
-                Workspace.SolutionRoots.Add(root);
-                RefreshStartupProjectAfterSolutionLoad();
-                TryNavigateToMfdShellPage(loadPlan.InitialMfdPage);
+                    IsDockedMfdSolutionExplorerTree,
+                    this);
             });
         }
         catch (Exception ex)
@@ -179,4 +171,19 @@ public partial class MainWindowViewModel
     }
 
     private bool CanInstallModel() => OllamaAvailable && !string.IsNullOrWhiteSpace(ModelToInstall) && !IsPullingModel;
+
+    void SolutionLoadSessionApplyProjection.IHost.ResetEditorSessionForNewSolution()
+    {
+        _openFileDebounceCts?.Cancel();
+        Documents.ClearForNewSolution();
+        CurrentFilePath = null;
+        EditorText = "";
+        IsLoadingCurrentFile = false;
+    }
+
+    void SolutionLoadSessionApplyProjection.IHost.AfterSolutionApplied(MfdShellPage initialMfdPage)
+    {
+        RefreshStartupProjectAfterSolutionLoad();
+        TryNavigateToMfdShellPage(initialMfdPage);
+    }
 }
