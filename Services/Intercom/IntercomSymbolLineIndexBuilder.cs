@@ -26,6 +26,18 @@ public static class IntercomSymbolLineIndexBuilder
             return [];
         }
 
+        return CollectFromText(text, absolutePath);
+    }
+
+    /// <summary>Собрать symbol entries из уже прочитанного текста (HCI reindex observer, ADR 0135).</summary>
+    public static IReadOnlyList<IntercomSymbolLineEntry> CollectFromText(string text, string absolutePath)
+    {
+        if (!absolutePath.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)
+            || string.IsNullOrEmpty(text))
+        {
+            return [];
+        }
+
         var tree = CSharpSyntaxTree.ParseText(text, path: absolutePath);
         if (tree.GetCompilationUnitRoot() is not { } root)
             return [];
@@ -74,20 +86,32 @@ public static class IntercomSymbolLineIndexBuilder
 
     public static void IndexFile(in IntercomAttachResolveCacheContext cache, string absolutePath, string relativePath)
     {
+        IndexFile(cache, absolutePath, relativePath, text: null, lastWriteUtcTicks: null);
+    }
+
+    public static void IndexFile(
+        in IntercomAttachResolveCacheContext cache,
+        string absolutePath,
+        string relativePath,
+        string? text,
+        long? lastWriteUtcTicks)
+    {
         if (!File.Exists(absolutePath))
             return;
 
         long mtime;
         try
         {
-            mtime = File.GetLastWriteTimeUtc(absolutePath).Ticks;
+            mtime = lastWriteUtcTicks ?? File.GetLastWriteTimeUtc(absolutePath).Ticks;
         }
         catch
         {
             return;
         }
 
-        var entries = CollectFromFile(absolutePath);
+        var entries = text is null
+            ? CollectFromFile(absolutePath)
+            : CollectFromText(text, absolutePath);
         IntercomSymbolLineIndex.ReplaceFileSymbols(cache, relativePath, mtime, entries);
     }
 

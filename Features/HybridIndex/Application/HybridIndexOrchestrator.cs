@@ -4,8 +4,8 @@ using System.Threading.Channels;
 using CascadeIDE.Cockpit.ComputingUnits.HybridIndex;
 using CascadeIDE.Cockpit.DataBus;
 using CascadeIDE.Contracts;
-using CascadeIDE.Services.Intercom;
 using HybridCodebaseIndex.Core;
+using HybridCodebaseIndex.Core.Indexing;
 
 namespace CascadeIDE.Features.HybridIndex.Application;
 
@@ -136,7 +136,8 @@ public sealed class HybridIndexOrchestrator : IDisposable, IHybridIndexOrchestra
 
                 try
                 {
-                    await _service.FullReindexAsync(_workspaceRoot, _solutionPath, ct).ConfigureAwait(false);
+                    var observers = HybridIndexIntercomReindexObservers.Create(_solutionPath, _indexDirRelative);
+                    await _service.FullReindexAsync(_workspaceRoot, _solutionPath, observers, ct).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException) when (ct.IsCancellationRequested)
                 {
@@ -148,10 +149,6 @@ public sealed class HybridIndexOrchestrator : IDisposable, IHybridIndexOrchestra
                 }
 
                 await PublishStatusAsync(CancellationToken.None).ConfigureAwait(false);
-                IntercomSymbolLineIndexCoordinator.ScheduleRebuildAfterHybridIndex(
-                    _workspaceRoot,
-                    _solutionPath,
-                    _indexDirRelative);
             }
         }
 
@@ -298,11 +295,11 @@ public sealed class HybridIndexOrchestrator : IDisposable, IHybridIndexOrchestra
 
         var root = CanonicalFilePath.Normalize(workspaceRoot.TrimEnd(Path.DirectorySeparatorChar));
         var sln = string.IsNullOrWhiteSpace(solutionPath) ? null : solutionPath.Trim();
+        var observers = HybridIndexIntercomReindexObservers.Create(sln, _indexDirectoryRelative);
         ReindexSummary summary = fullRebuild
-            ? await _service.FullRebuildAsync(root, sln, cancellationToken).ConfigureAwait(false)
-            : await _service.FullReindexAsync(root, sln, cancellationToken).ConfigureAwait(false);
+            ? await _service.FullRebuildAsync(root, sln, observers, cancellationToken).ConfigureAwait(false)
+            : await _service.FullReindexAsync(root, sln, observers, cancellationToken).ConfigureAwait(false);
         await PublishHybridIndexSnapshotAsync(root, sln, cancellationToken).ConfigureAwait(false);
-        IntercomSymbolLineIndexCoordinator.ScheduleRebuildAfterHybridIndex(root, sln, _indexDirectoryRelative);
         return summary;
     }
 
@@ -335,7 +332,8 @@ public sealed class HybridIndexOrchestrator : IDisposable, IHybridIndexOrchestra
         var sln = string.IsNullOrWhiteSpace(solutionPath) ? null : solutionPath.Trim();
         try
         {
-            await _service.FullReindexAsync(root, sln, cancellationToken).ConfigureAwait(false);
+            var observers = HybridIndexIntercomReindexObservers.Create(sln, _indexDirectoryRelative);
+            await _service.FullReindexAsync(root, sln, observers, cancellationToken).ConfigureAwait(false);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -347,7 +345,6 @@ public sealed class HybridIndexOrchestrator : IDisposable, IHybridIndexOrchestra
         }
 
         await PublishHybridIndexSnapshotAsync(root, sln, cancellationToken).ConfigureAwait(false);
-        IntercomSymbolLineIndexCoordinator.ScheduleRebuildAfterHybridIndex(root, sln, _indexDirectoryRelative);
     }
 
     public void Dispose()
