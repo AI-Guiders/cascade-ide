@@ -42,7 +42,7 @@
 | Microsoft.Extensions.AI.OpenAI | 10.5.0 | MIT | https://www.nuget.org/packages/Microsoft.Extensions.AI.OpenAI |
 | Microsoft.Extensions.AI.Ollama | 9.7.0-preview.1.25356.2 | MIT | https://www.nuget.org/packages/Microsoft.Extensions.AI.Ollama |
 | Microsoft.VisualStudio.SolutionPersistence | 1.0.52 | MIT | https://www.nuget.org/packages/Microsoft.VisualStudio.SolutionPersistence |
-| ModelContextProtocol | 1.2.0 | Apache-2.0 | https://www.nuget.org/packages/ModelContextProtocol |
+| ModelContextProtocol | 1.3.0 | Apache-2.0 | https://www.nuget.org/packages/ModelContextProtocol |
 | OllamaSharp | 5.4.25 | MIT | https://www.nuget.org/packages/OllamaSharp |
 | OutWit.Common | 1.3.2 | Apache-2.0 | https://www.nuget.org/packages/OutWit.Common |
 | OutWit.Common.Json | 1.1.3 | Apache-2.0 | https://www.nuget.org/packages/OutWit.Common.Json |

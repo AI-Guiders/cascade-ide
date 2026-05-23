@@ -101,7 +101,9 @@
     <ProjectReference Include="externals\acp-csharp\src\AgentClientProtocol\AgentClientProtocol.csproj" />
     <PackageReference Include="AIGuiders.DotNetBuildTestParsers" Version="0.1.1" />
     <PackageReference Include="AIGuiders.DotnetDebugMCP.Core" Version="0.1.0" />
-    <PackageReference Include="AIGuiders.HybridCodebaseIndex.Core" Version="0.1.1" />
+    <!-- Локальный Core в open/; иначе NuGet AIGuiders.HybridCodebaseIndex.Core (как agent-notes-core) -->
+    <ProjectReference Include="..\hybrid-codebase-index-core\HybridCodebaseIndex.Core.csproj" Condition="Exists('..\hybrid-codebase-index-core\HybridCodebaseIndex.Core.csproj')" />
+    <PackageReference Include="AIGuiders.HybridCodebaseIndex.Core" Version="0.1.2" Condition="!Exists('..\hybrid-codebase-index-core\HybridCodebaseIndex.Core.csproj')" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.0" />
     <PackageReference Include="Avalonia" Version="12.0.1" />
     <PackageReference Include="Avalonia.Controls.WebView" Version="12.0.0" />
@@ -133,7 +135,7 @@
     <PackageReference Include="Microsoft.Agents.AI" Version="1.3.0" />
     <PackageReference Include="Microsoft.Extensions.AI" Version="10.5.0" />
     <PackageReference Include="Microsoft.Extensions.AI.Ollama" Version="9.7.0-preview.1.25356.2" />
-    <PackageReference Include="ModelContextProtocol" Version="1.2.0" />
+    <PackageReference Include="ModelContextProtocol" Version="1.3.0" />
     <PackageReference Include="OllamaSharp" Version="5.4.25" />
     <PackageReference Include="OutWit.Common" Version="1.3.2" />
     <PackageReference Include="OutWit.Common.Json" Version="1.1.3" />
