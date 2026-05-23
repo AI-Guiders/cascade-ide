@@ -18,6 +18,7 @@ public static class ChatSlashIntercomHandlers
         public const string AttachScope = "attach_scope";
         public const string AttachFile = "attach_file";
         public const string MessageSelect = "message_select";
+        public const string MessageSelectClear = "message_select_clear";
         public const string MessageFind = "message_find";
         public const string MessageRelate = "message_relate";
         public const string MessageAnchorsList = "message_anchors_list";
@@ -36,6 +37,7 @@ public static class ChatSlashIntercomHandlers
         Func<string, string?, ChatSlashIntercomResult>? TryAttachSlash,
         Func<int, int, string>? SelectMessageByOrdinalRangeInDetailLane = null,
         Func<IReadOnlyList<ParametricIntRange>, string>? SelectMessagesByOrdinalRangesInDetailLane = null,
+        Func<string>? ClearMessageSelectionInDetailLane = null,
         Func<string?, string>? FindMessagesForCodeRef = null,
         Func<string?, string>? RelateMessageRangeToCodeRef = null,
         Func<string>? ListMessageAnchors = null,
@@ -79,6 +81,7 @@ public static class ChatSlashIntercomHandlers
             [Ids.AttachScope] = static ctx => executeAttach(ctx, Ids.AttachScope),
             [Ids.AttachFile] = static ctx => executeAttach(ctx, Ids.AttachFile),
             [Ids.MessageSelect] = static ctx => executeMessageSelect(ctx),
+            [Ids.MessageSelectClear] = static ctx => executeMessageSelectClear(ctx),
             [Ids.MessageFind] = static ctx => executeMessageFind(ctx),
             [Ids.MessageRelate] = static ctx => executeMessageRelate(ctx),
             [Ids.MessageAnchorsList] = static ctx => executeMessageAnchorsList(ctx),
@@ -124,6 +127,21 @@ public static class ChatSlashIntercomHandlers
             ? $"Выбрано сообщение #{range.Start}."
             : $"Выбран диапазон #{range.Start}–#{range.End} (активно #{range.End}).";
         return ChatSlashIntercomResult.Ok(text);
+    }
+
+    private static ChatSlashIntercomResult executeMessageSelectClear(Context ctx)
+    {
+        if (ctx.ClearMessageSelectionInDetailLane is null)
+            return ChatSlashIntercomResult.Fail("Сброс выбора сообщений недоступен.");
+
+        var tail = ctx.ArgsTail?.Trim() ?? "";
+        if (tail.Length > 0)
+            return ChatSlashIntercomResult.Fail("Ожидается «/intercom message select clear» без аргументов.");
+
+        var result = ctx.ClearMessageSelectionInDetailLane();
+        return string.Equals(result, "OK", StringComparison.Ordinal)
+            ? ChatSlashIntercomResult.Ok("Подсветка сообщений в ветке сброшена.")
+            : ChatSlashIntercomResult.Fail(result);
     }
 
     private static ChatSlashIntercomResult executeMessageFind(Context ctx)

@@ -68,6 +68,18 @@ public partial class ChatPanelViewModel
         return "OK";
     }
 
+    /// <summary>Сбросить multi-highlight и активное сообщение в detail-ленте (slash <c>/intercom message select clear</c>).</summary>
+    public string ClearMessageSelectionInDetailLane()
+    {
+        if (IsChatOverviewMode)
+            return "Открой тему (detail): /intercom topic open или клик по карточке.";
+
+        HighlightedMessageIndices = new HashSet<int>();
+        SelectedMessageIndex = -1;
+        RefreshChatSurfaceSnapshot();
+        return "OK";
+    }
+
     private void ApplyMessageOrdinalSelection(
         IReadOnlyList<int> laneIndices,
         int startOrdinal,

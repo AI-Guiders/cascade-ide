@@ -37,6 +37,14 @@ internal static class IntercomSlashPathBuilder
 
         if (!string.IsNullOrWhiteSpace(parse.SubAction))
         {
+            if (string.Equals(parse.Action, "message", StringComparison.OrdinalIgnoreCase)
+                && string.Equals(parse.SubAction, "select", StringComparison.OrdinalIgnoreCase)
+                && string.Equals(parse.ArgsTail.Trim(), "clear", StringComparison.OrdinalIgnoreCase))
+            {
+                slashPath = "/intercom message select clear";
+                return true;
+            }
+
             slashPath = string.Equals(parse.SubAction, "list text", StringComparison.OrdinalIgnoreCase)
                          || string.Equals(parse.SubAction, "tree text", StringComparison.OrdinalIgnoreCase)
                 ? $"/intercom {parse.Action} {parse.SubAction}"

@@ -30,6 +30,7 @@ public sealed class ChatSlashCommandRunner
     private readonly Func<string, string?, ChatSlashIntercomResult>? _tryAttachSlash;
     private readonly Func<int, int, string>? _selectMessageByOrdinalRangeInDetailLane;
     private readonly Func<IReadOnlyList<ParametricIntRange>, string>? _selectMessagesByOrdinalRangesInDetailLane;
+    private readonly Func<string>? _clearMessageSelectionInDetailLane;
     private readonly Func<string?, string>? _findMessagesForCodeRef;
     private readonly Func<string?, string>? _relateMessageRangeToCodeRef;
     private readonly Func<string>? _listMessageAnchors;
@@ -49,6 +50,7 @@ public sealed class ChatSlashCommandRunner
         Func<string, string?, ChatSlashIntercomResult>? tryAttachSlash = null,
         Func<int, int, string>? selectMessageByOrdinalRangeInDetailLane = null,
         Func<IReadOnlyList<ParametricIntRange>, string>? selectMessagesByOrdinalRangesInDetailLane = null,
+        Func<string>? clearMessageSelectionInDetailLane = null,
         Func<string?, string>? findMessagesForCodeRef = null,
         Func<string?, string>? relateMessageRangeToCodeRef = null,
         Func<string>? listMessageAnchors = null,
@@ -67,6 +69,7 @@ public sealed class ChatSlashCommandRunner
         _tryAttachSlash = tryAttachSlash;
         _selectMessageByOrdinalRangeInDetailLane = selectMessageByOrdinalRangeInDetailLane;
         _selectMessagesByOrdinalRangesInDetailLane = selectMessagesByOrdinalRangesInDetailLane;
+        _clearMessageSelectionInDetailLane = clearMessageSelectionInDetailLane;
         _findMessagesForCodeRef = findMessagesForCodeRef;
         _relateMessageRangeToCodeRef = relateMessageRangeToCodeRef;
         _listMessageAnchors = listMessageAnchors;
@@ -172,6 +175,7 @@ public sealed class ChatSlashCommandRunner
                     _tryAttachSlash,
                     _selectMessageByOrdinalRangeInDetailLane,
                     _selectMessagesByOrdinalRangesInDetailLane,
+                    _clearMessageSelectionInDetailLane,
                     _findMessagesForCodeRef,
                     _relateMessageRangeToCodeRef,
                     _listMessageAnchors,

@@ -173,6 +173,14 @@ internal static class SlashCommandPreviewRuleHelpers
         if (string.Equals(intercomPath, "/intercom message select", StringComparison.OrdinalIgnoreCase))
             return BuildParametricPreview(parse.ArgsTail, "Сообщения", parse);
 
+        if (string.Equals(intercomPath, "/intercom message select clear", StringComparison.OrdinalIgnoreCase))
+        {
+            var tail = (parse.ArgsTail ?? "").Trim();
+            return tail.Length > 0
+                ? new("Ожидается «/intercom message select clear» без аргументов.", SlashCommandPreviewKind.Error)
+                : new("Сбросить подсветку сообщений в detail-ленте.", SlashCommandPreviewKind.Ok);
+        }
+
         if (string.Equals(intercomPath, "/intercom message anchors list", StringComparison.OrdinalIgnoreCase))
             return new("Готово: список якорей сообщения и черновика.", SlashCommandPreviewKind.Ok);
 
