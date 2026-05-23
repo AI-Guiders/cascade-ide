@@ -295,7 +295,14 @@
 - **`EditorWorkspaceViewModel`** (`Features/Editor/`) — `CurrentFilePath`, `EditorText`, selection, `IsLoadingCurrentFile`, markdown preview flags.
 - MWVM — прокси-свойства + ретрансляция `PropertyChanged` (Views/MCP без массовой правки).
 
-**Дальше (этапы 3–5):** Shell/Presentation proxy, RelayCommands → feature VMs, LSP/breakpoints/HUD в editor slice, метрики LOC.
+**Этап 3 (v1.55):**
+
+- **`ShellChromeViewModel`** (`Features/Shell/`) — регионы MainGrid, видимость MFD-страниц, `UiMode`, `EditorGroupCount`, `IsBuilding`, `CurrentMfdShellPage`, …
+- **`ShellChromePresentationNotifyMap`** — presentation-зависимости на MWVM (бывшие `NotifyPropertyChangedFor` на shell-полях).
+- MWVM — `Shell` + прокси + `OnShellChromePropertyChanged`; reactive side-effects (настройки, MFD-навигация, bloom UI mode) в `MainWindowViewModel.ShellSession`.
+- Удалены `MainWindowViewModel.ShellState.RegionAndContour` / `UiSessionChrome` (поля перенесены).
+
+**Дальше (этапы 4–5):** RelayCommands → feature VMs, LSP/breakpoints/HUD в editor slice, метрики LOC.
 
 **Backlog MWVM (закрыт, v1.49–v1.52):**
 

@@ -12,6 +12,7 @@ using CascadeIDE.Features.Chat;
 using CascadeIDE.Features.Debug;
 using CascadeIDE.Features.Documents;
 using CascadeIDE.Features.Editor;
+using CascadeIDE.Features.Shell;
 using CascadeIDE.Features.Git;
 using CascadeIDE.Features.HybridIndex.Application;
 using CascadeIDE.Features.IdeMcp.Application;
@@ -38,6 +39,10 @@ public partial class MainWindowViewModel
         _osShell = osShell ?? OsShell.Default;
         Workspace = new SolutionWorkspaceViewModel();
         Chrome = new UiChromeViewModel();
+        Shell = new ShellChromeViewModel(this);
+        Shell.ApplyBootstrapFromSettings(_settings);
+        Shell.PropertyChanged += OnShellChromePropertyChanged;
+
         Editor = new EditorWorkspaceViewModel(this);
         Editor.PropertyChanged += OnEditorWorkspacePropertyChanged;
         Documents = new DocumentsWorkspaceViewModel(this, Workspace, () => ReopenClosedDocumentCommand.NotifyCanExecuteChanged());
@@ -61,14 +66,9 @@ public partial class MainWindowViewModel
         _anthropicApiKey = _aiKeys.AnthropicApiKey ?? "";
         _openAiApiKey = _aiKeys.OpenAiApiKey ?? "";
         _deepSeekApiKey = _aiKeys.DeepSeekApiKey ?? "";
-        _isPfdRegionExpanded = _settings.Workspace.PfdExpanded;
-        _isTerminalVisible = _settings.Workspace.ShowTerminal;
-        _isGitPanelVisible = _settings.Workspace.ShowGit;
-        _isInstrumentationDockVisible = _settings.Workspace.ShowInstrumentation;
-        _uiMode = NormalizeUiMode(_settings.Workspace.Mode);
         InitializeAgentUiDefaults();
         RegisterAgentFeedHandlers();
-        ApplyUiModeLayout(_uiMode, persist: false);
+        ApplyUiModeLayout(Shell.UiMode, persist: false);
         if (UiModeFamily.IsPowerFamily())
             UiScheduler.Default.Post(RefreshWorkspaceSnapshotCore, DispatcherPriority.Background);
 

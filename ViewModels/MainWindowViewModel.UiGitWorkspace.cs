@@ -107,24 +107,6 @@ public partial class MainWindowViewModel
         }
     }
 
-    partial void OnUiModeChanged(string value)
-    {
-        var normalized = NormalizeUiMode(value);
-        if (!string.Equals(value, normalized, StringComparison.Ordinal))
-        {
-            UiMode = normalized;
-            return;
-        }
-
-        ApplyUiModeLayout(normalized, persist: true);
-        Autonomous.NotifyHostPowerContextChanged();
-        if (string.Equals(normalized, "Power", StringComparison.OrdinalIgnoreCase))
-            UiScheduler.Default.Post(RefreshWorkspaceSnapshotCore, DispatcherPriority.Background);
-
-        Chrome.NotifyUiModeChangedForBloom(normalized);
-        RefreshCommandPaletteIfOpen();
-    }
-
     public async Task RefreshOllamaAsync()
     {
         OllamaStatus = "Проверка Ollama…";

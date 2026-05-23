@@ -39,58 +39,6 @@ public partial class MainWindowViewModel
         SaveSettingsIfChanged();
     }
 
-    partial void OnIsPfdRegionExpandedChanged(bool value)
-    {
-        _settings.Workspace.PfdExpanded = value;
-        OnPropertyChanged(nameof(IsPfdRegionCollapsed));
-        SaveSettingsIfChanged();
-        if (value)
-            ScheduleWorkspaceNavigationMapRefresh();
-    }
-
-    partial void OnIsTerminalVisibleChanged(bool value)
-    {
-        _settings.Workspace.ShowTerminal = value;
-        OnPropertyChanged(nameof(IsTerminalPanelHidden));
-        OnPropertyChanged(nameof(IsMfdContourContentVisible));
-        SaveSettingsIfChanged();
-        if (value)
-            TryNavigateToMfdShellPage(MfdShellPage.Terminal);
-        else if (ShellSettingsPresentationProjection.ShouldCoerceCurrentPageWhenHidden(CurrentMfdShellPage, MfdShellPage.Terminal))
-            CoerceMfdShellPageToAllowed();
-    }
-
-    partial void OnIsBuildOutputVisibleChanged(bool value)
-    {
-        OnPropertyChanged(nameof(IsBuildPanelHidden));
-        OnPropertyChanged(nameof(IsMfdContourContentVisible));
-        if (value)
-            TryNavigateToMfdShellPage(MfdShellPage.Build);
-        else if (ShellSettingsPresentationProjection.ShouldCoerceCurrentPageWhenHidden(CurrentMfdShellPage, MfdShellPage.Build))
-            CoerceMfdShellPageToAllowed();
-    }
-
-    partial void OnIsInstrumentationDockVisibleChanged(bool value)
-    {
-        _settings.Workspace.ShowInstrumentation = value;
-        SaveSettingsIfChanged();
-        if (value)
-        {
-            TryNavigateToMfdShellPage(MfdShellPage.Events);
-            return;
-        }
-
-        if (ShellSettingsPresentationProjection.ShouldCoerceWhenInstrumentationHidden(CurrentMfdShellPage))
-            CoerceMfdShellPageToAllowed();
-    }
-
-    partial void OnIsMfdRegionExpandedChanged(bool value)
-    {
-        OnPropertyChanged(nameof(IsMfdRegionCollapsed));
-        // Intent «развёрнут/свёрнут регион Mfd» в раскладке (ширина в MainGrid через композитор).
-        // Активная страница вторичного контура — отдельно (CurrentMfdShellPage); не переключаем её здесь.
-    }
-
     partial void OnShowThinkingInHistoryChanged(bool value)
     {
         _settings.Ai.Chat.ShowThinkingInHistory = value;
@@ -150,20 +98,6 @@ public partial class MainWindowViewModel
     {
         _aiKeys.DeepSeekApiKey = ShellSettingsPresentationProjection.NormalizeOptionalSecret(value);
         SaveAiKeysIfChanged();
-    }
-
-    partial void OnIsGitPanelVisibleChanged(bool value)
-    {
-        _settings.Workspace.ShowGit = value;
-        OnPropertyChanged(nameof(IsMfdContourContentVisible));
-        SaveSettingsIfChanged();
-        if (value)
-        {
-            TryNavigateToMfdShellPage(MfdShellPage.Git);
-            _ = GitPanel.RefreshGitPanelAsync();
-        }
-        else if (ShellSettingsPresentationProjection.ShouldCoerceCurrentPageWhenHidden(CurrentMfdShellPage, MfdShellPage.Git))
-            CoerceMfdShellPageToAllowed();
     }
 
     partial void OnSendMessageKeyChanged(string value)
