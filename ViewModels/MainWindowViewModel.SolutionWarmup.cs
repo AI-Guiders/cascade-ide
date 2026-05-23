@@ -6,6 +6,9 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace CascadeIDE.ViewModels;
 
+/// <summary>
+/// Solution warm-up: оркестратор фаз загрузки решения, лампа статуса и подписка на DataBus (ADR 0141).
+/// </summary>
 public partial class MainWindowViewModel
 {
     private SolutionWarmupOrchestrator? _solutionWarmup;
