@@ -14,7 +14,7 @@ public partial class MainWindowViewModel
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(SolutionWarmupStatusText))]
     [NotifyPropertyChangedFor(nameof(SolutionWarmupLampItem))]
-    [NotifyPropertyChangedFor(nameof(HybridIndexMsgLine2), nameof(SolutionWarmupStatusText))]
+    [NotifyPropertyChangedFor(nameof(HybridIndexMsgLine2), nameof(SolutionWarmupStatusText), nameof(ShowPfdBackgroundStatusBar))]
     private SolutionWarmupStateChanged? _solutionWarmupLast;
 
     public string SolutionWarmupStatusText =>

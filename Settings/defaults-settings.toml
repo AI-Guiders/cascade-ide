@@ -56,6 +56,8 @@ workload_score = 0.28
 
 [display.instruments]
 pfd_primary = "workspace_map"
+pfd_status_strip = "background_status"
+forward_status_strip = "background_status"
 
 [ai]
 mode = "local"
@@ -112,6 +114,7 @@ warm_open_documents = true
 warm_recent_cs_files = true
 max_parallel_file_jobs = 2
 max_open_document_files = 6
+show_background_status_on_pfd = true
 
 [command_palette.go_to_search]
 backend = "rg"

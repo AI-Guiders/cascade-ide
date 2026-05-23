@@ -15,6 +15,17 @@ ADR: [0141](../adr/0141-solution-scoped-warmup-orchestration.md)
 
 TOML `[solution_warmup]` в `settings.toml` (см. `defaults-settings.toml`).
 
+`show_background_status_on_pfd` (по умолчанию `true`) — мастер-выключатель полосы warm-up/HCI.
+
+Размещение по зонам — instrument **`workspace_background_status_v1`** (alias `background_status`) в **`[display.instruments]`** (ADR 0050, оверлей-слоты, не `pfd_primary`):
+
+| Ключ | Зона |
+|------|------|
+| `pfd_status_strip` | колонка PFD (над картой / обозревателем) |
+| `forward_status_strip` | Forward (над чатом / редактором) |
+
+Значения: `background_status` (показать) или `none` (скрыть в этой зоне). По умолчанию в `defaults-settings.toml` — обе зоны `background_status`. Текст: «Indexing…» / «Warming…»; после успеха полоса скрывается (мин. ~400 ms); при ошибке — caution, клик → HCI.
+
 ## Для агента
 
 - UI **не ждёт** `Ready` — только lazy/debounce fallback.

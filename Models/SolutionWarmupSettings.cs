@@ -18,4 +18,7 @@ public sealed class SolutionWarmupSettings
 
     /// <summary>Сколько открытых вкладок .cs прогревать (P2).</summary>
     public int MaxOpenDocumentFiles { get; set; } = 6;
+
+    /// <summary>Компактная полоса на зоне Forward пока идёт warm-up / HCI (ADR 0141).</summary>
+    public bool ShowBackgroundStatusOnPfd { get; set; } = true;
 }

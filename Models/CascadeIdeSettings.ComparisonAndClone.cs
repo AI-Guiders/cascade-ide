@@ -89,6 +89,7 @@ public sealed partial class CascadeIdeSettings
                 WarmRecentCsFiles = SolutionWarmup.WarmRecentCsFiles,
                 MaxParallelFileJobs = SolutionWarmup.MaxParallelFileJobs,
                 MaxOpenDocumentFiles = SolutionWarmup.MaxOpenDocumentFiles,
+                ShowBackgroundStatusOnPfd = SolutionWarmup.ShowBackgroundStatusOnPfd,
             },
             CommandPalette = new CommandPaletteSettings
             {
@@ -340,7 +341,8 @@ public sealed partial class CascadeIdeSettings
             && a.WarmOpenDocuments == b.WarmOpenDocuments
             && a.WarmRecentCsFiles == b.WarmRecentCsFiles
             && a.MaxParallelFileJobs == b.MaxParallelFileJobs
-            && a.MaxOpenDocumentFiles == b.MaxOpenDocumentFiles;
+            && a.MaxOpenDocumentFiles == b.MaxOpenDocumentFiles
+            && a.ShowBackgroundStatusOnPfd == b.ShowBackgroundStatusOnPfd;
     }
 
     private static bool CommandPaletteEquals(CommandPaletteSettings? a, CommandPaletteSettings? b)

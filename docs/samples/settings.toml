@@ -57,6 +57,9 @@ workload_score = 0.28
 # Основные слоты PFD/MFD (ADR 0050): alias или канонический instrument_id.
 [display.instruments]
 pfd_primary = "workspace_map"
+# Полоса warm-up/HCI (instrument workspace_background_status_v1): background_status | none
+pfd_status_strip = "background_status"
+forward_status_strip = "background_status"
 
 [ai]
 mode = "local"

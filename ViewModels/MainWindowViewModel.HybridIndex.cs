@@ -62,7 +62,8 @@ public partial class MainWindowViewModel
         nameof(HybridIndexDatabaseShortText),
         nameof(HybridIndexLampItem),
         nameof(HybridIndexMsgLine1),
-        nameof(HybridIndexMsgLine2))]
+        nameof(HybridIndexMsgLine2),
+        nameof(ShowPfdBackgroundStatusBar))]
     private HybridIndexStateChanged? _hybridIndexLast;
 
     public string HybridIndexLampText => HybridIndexHisPresentationProjection.LampText(HybridIndexLast);
