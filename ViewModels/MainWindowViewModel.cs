@@ -296,6 +296,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAutonomousAgentSessio
 
         ChatPanel.DisposeCursorAcpSession();
         _ = ChatPanel.ReloadIntercomSessionFromDiskAsync();
+        ApplySolutionWarmupForCurrentSolution();
         ApplyHybridCodebaseIndexOrchestrationForCurrentSolution(pokeWhenAutoReindex: true);
         Editor.AttachBreakpointsFileWatcher(value);
         _ = RefreshGitSummaryAsync();

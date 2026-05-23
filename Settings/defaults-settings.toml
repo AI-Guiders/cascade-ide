@@ -104,6 +104,15 @@ watch_files = true
 scope_mode = "workspace+solution"
 pause_when_mcp_stdio_host = false
 
+[solution_warmup]
+enabled = true
+warm_active_file_on_solution_open = true
+warm_feed_anchors_after_symbol_sidecar = true
+warm_open_documents = true
+warm_recent_cs_files = true
+max_parallel_file_jobs = 2
+max_open_document_files = 6
+
 [command_palette.go_to_search]
 backend = "rg"
 

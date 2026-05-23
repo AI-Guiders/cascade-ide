@@ -1,6 +1,6 @@
 # ADR 0141: Прогрев (warm-up) при открытии solution — отложенная асинхронная оркестрация
 
-**Статус:** Accepted · Proposed (оркестратор и фазы — к реализации)  
+**Статус:** Accepted · Implemented (v1: оркестратор, P0–P2, TOML, HIS hint)  
 **Дата:** 2026-05-23
 
 ## Связанные ADR
@@ -14,7 +14,7 @@
 | [0138](0138-cockpit-command-line-and-parametric-ranges.md) | TCI preview debounced, Enter не блокируется |
 | [0140](0140-tci-slash-status-glyphs-and-args-counter.md) | Slash preview не блокирует ввод |
 
-Playbook (после имплементации): `docs/design/playbook-solution-warmup-v1.md` (черновик — см. § Последствия).
+Playbook: `docs/design/playbook-solution-warmup-v1.md`.
 
 ## Резюме
 

@@ -14,6 +14,7 @@ public sealed partial class CascadeIdeSettings
             && AgentNotesEquals(AgentNotes, o.AgentNotes)
             && WorkspaceEquals(Workspace, o.Workspace)
             && HybridIndexEquals(HybridIndex, o.HybridIndex)
+            && SolutionWarmupEquals(SolutionWarmup, o.SolutionWarmup)
             && CommandPaletteEquals(CommandPalette, o.CommandPalette)
             && CodeNavigationMapEquals(CodeNavigationMap, o.CodeNavigationMap)
             && LanguagesEquals(Languages, o.Languages)
@@ -78,6 +79,16 @@ public sealed partial class CascadeIdeSettings
                 WatchFiles = HybridIndex.WatchFiles,
                 ScopeMode = HybridIndex.ScopeMode,
                 PauseWhenMcpStdioHost = HybridIndex.PauseWhenMcpStdioHost,
+            },
+            SolutionWarmup = new SolutionWarmupSettings
+            {
+                Enabled = SolutionWarmup.Enabled,
+                WarmActiveFileOnSolutionOpen = SolutionWarmup.WarmActiveFileOnSolutionOpen,
+                WarmFeedAnchorsAfterSymbolSidecar = SolutionWarmup.WarmFeedAnchorsAfterSymbolSidecar,
+                WarmOpenDocuments = SolutionWarmup.WarmOpenDocuments,
+                WarmRecentCsFiles = SolutionWarmup.WarmRecentCsFiles,
+                MaxParallelFileJobs = SolutionWarmup.MaxParallelFileJobs,
+                MaxOpenDocumentFiles = SolutionWarmup.MaxOpenDocumentFiles,
             },
             CommandPalette = new CommandPaletteSettings
             {
@@ -317,6 +328,19 @@ public sealed partial class CascadeIdeSettings
             && a.PauseWhenMcpStdioHost == b.PauseWhenMcpStdioHost
             && a.IndexDir.Is(b.IndexDir)
             && a.ScopeMode.Is(b.ScopeMode);
+    }
+
+    private static bool SolutionWarmupEquals(SolutionWarmupSettings? a, SolutionWarmupSettings? b)
+    {
+        if (a is null || b is null)
+            return a == b;
+        return a.Enabled == b.Enabled
+            && a.WarmActiveFileOnSolutionOpen == b.WarmActiveFileOnSolutionOpen
+            && a.WarmFeedAnchorsAfterSymbolSidecar == b.WarmFeedAnchorsAfterSymbolSidecar
+            && a.WarmOpenDocuments == b.WarmOpenDocuments
+            && a.WarmRecentCsFiles == b.WarmRecentCsFiles
+            && a.MaxParallelFileJobs == b.MaxParallelFileJobs
+            && a.MaxOpenDocumentFiles == b.MaxOpenDocumentFiles;
     }
 
     private static bool CommandPaletteEquals(CommandPaletteSettings? a, CommandPaletteSettings? b)

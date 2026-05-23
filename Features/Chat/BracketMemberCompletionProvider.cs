@@ -19,6 +19,31 @@ public static class BracketMemberCompletionProvider
     private static readonly ConcurrentDictionary<string, FileIndexCache> IndexByAbsolutePath =
         new(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>Проактивно построить индекс членов для файла (ADR 0141 P0).</summary>
+    public static void WarmIndex(string? filePath, string? workspaceRoot)
+    {
+        if (string.IsNullOrWhiteSpace(filePath))
+            return;
+
+        if (!TryResolveAbsolute(filePath, workspaceRoot, out var absolute))
+            return;
+
+        if (!absolute.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
+            return;
+
+        long mtimeTicks;
+        try
+        {
+            mtimeTicks = File.GetLastWriteTimeUtc(absolute).Ticks;
+        }
+        catch
+        {
+            return;
+        }
+
+        _ = loadOrBuildIndex(absolute, mtimeTicks);
+    }
+
     public static IReadOnlyList<Match> GetMatches(
         string? filePath,
         string? workspaceRoot,

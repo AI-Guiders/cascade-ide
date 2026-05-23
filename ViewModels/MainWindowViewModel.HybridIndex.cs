@@ -120,7 +120,7 @@ public partial class MainWindowViewModel
         $"HCI {HybridIndexLampText}  DOCS {HybridIndexDocumentCountText}  FRESH {HybridIndexFreshnessEcamText}";
 
     public string HybridIndexMsgLine2 =>
-        HybridIndexHisPresentationProjection.SecondMessageLine(HybridIndexLastErrorText);
+        $"{SolutionWarmupStatusText}  |  {HybridIndexHisPresentationProjection.SecondMessageLine(HybridIndexLastErrorText)}";
 
     [RelayCommand]
     private void HybridIndexReindexNow()
