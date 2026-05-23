@@ -11,6 +11,9 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace CascadeIDE.ViewModels;
 
+/// <summary>
+/// Компактная полоса статуса над PFD/Forward: индексация HCI и solution warm-up (ADR 0141).
+/// </summary>
 public partial class MainWindowViewModel
 {
     private const int PfdStatusMinVisibleMs = 400;
