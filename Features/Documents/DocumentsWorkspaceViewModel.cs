@@ -25,20 +25,15 @@ public sealed partial class DocumentsWorkspaceViewModel : ObservableObject
 
     private readonly MainWindowViewModel _host;
     private readonly SolutionWorkspaceViewModel _workspace;
-    private readonly Action _notifyReopenClosedCommand;
     private readonly Stack<string> _recentlyClosedDocumentPaths = new();
     private int _recentlyClosedDocumentCount;
     private bool _isSwitchingDocument;
     private IDisposable? _selectedDocumentContentSubscription;
 
-    public DocumentsWorkspaceViewModel(
-        MainWindowViewModel host,
-        SolutionWorkspaceViewModel workspace,
-        Action notifyReopenClosedCommand)
+    public DocumentsWorkspaceViewModel(MainWindowViewModel host, SolutionWorkspaceViewModel workspace)
     {
         _host = host;
         _workspace = workspace;
-        _notifyReopenClosedCommand = notifyReopenClosedCommand;
         OpenDocuments.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasOpenDocuments));
     }
 
@@ -106,7 +101,7 @@ public sealed partial class DocumentsWorkspaceViewModel : ObservableObject
         DockActiveDocument = null;
         _recentlyClosedDocumentPaths.Clear();
         _recentlyClosedDocumentCount = 0;
-        _notifyReopenClosedCommand();
+        NotifyReopenClosedCanExecuteChanged();
         SelectedDocument = null;
         SelectedDocumentGroup2 = null;
         SelectedDocumentGroup3 = null;
@@ -244,7 +239,7 @@ public sealed partial class DocumentsWorkspaceViewModel : ObservableObject
         OnPropertyChanged(nameof(DockLayout));
     }
 
-    public void CloseDocument(string? filePath)
+    public void CloseDocumentByPath(string? filePath)
     {
         if (string.IsNullOrWhiteSpace(filePath))
             return;
@@ -262,7 +257,7 @@ public sealed partial class DocumentsWorkspaceViewModel : ObservableObject
             DockDocuments.Remove(dockDoc);
         _recentlyClosedDocumentPaths.Push(doc.FilePath);
         _recentlyClosedDocumentCount = _recentlyClosedDocumentPaths.Count;
-        _notifyReopenClosedCommand();
+        NotifyReopenClosedCanExecuteChanged();
 
         if (OpenDocuments.Count == 0)
         {
@@ -292,7 +287,7 @@ public sealed partial class DocumentsWorkspaceViewModel : ObservableObject
             return;
         var path = _recentlyClosedDocumentPaths.Pop();
         _recentlyClosedDocumentCount = _recentlyClosedDocumentPaths.Count;
-        _notifyReopenClosedCommand();
+        NotifyReopenClosedCanExecuteChanged();
         OpenOrActivateDocument(path);
     }
 

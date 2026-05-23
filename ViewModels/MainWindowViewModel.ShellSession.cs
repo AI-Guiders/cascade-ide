@@ -104,10 +104,10 @@ public partial class MainWindowViewModel
         switch (e.PropertyName)
         {
             case nameof(ShellChromeViewModel.IsMfdRegionExpanded):
-                ToggleMfdRegionExpandedCommand.NotifyCanExecuteChanged();
+                Shell.ToggleMfdRegionExpandedCommand.NotifyCanExecuteChanged();
                 break;
             case nameof(ShellChromeViewModel.IsPfdRegionExpanded):
-                TogglePfdRegionExpandedCommand.NotifyCanExecuteChanged();
+                Shell.TogglePfdRegionExpandedCommand.NotifyCanExecuteChanged();
                 break;
             case nameof(ShellChromeViewModel.IsBuilding):
                 BuildSolutionCommand.NotifyCanExecuteChanged();

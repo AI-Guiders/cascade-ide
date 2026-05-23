@@ -1,0 +1,59 @@
+using CascadeIDE.Features.Documents;
+using CascadeIDE.Features.Shell;
+using CommunityToolkit.Mvvm.Input;
+
+namespace CascadeIDE.ViewModels;
+
+/// <summary>
+/// Wave 2 этап 4: прокси RelayCommand на feature VMs (XAML, MCP, hotkeys без смены привязок).
+/// </summary>
+public partial class MainWindowViewModel
+{
+    public IRelayCommand TogglePfdRegionExpandedCommand => Shell.TogglePfdRegionExpandedCommand;
+
+    public IRelayCommand ToggleMfdRegionExpandedCommand => Shell.ToggleMfdRegionExpandedCommand;
+
+    public IRelayCommand ToggleBuildOutputCommand => Shell.ToggleBuildOutputCommand;
+
+    public IRelayCommand ToggleTerminalCommand => Shell.ToggleTerminalCommand;
+
+    public IRelayCommand ToggleInstrumentationDockCommand => Shell.ToggleInstrumentationDockCommand;
+
+    public IRelayCommand SetSingleEditorGroupCommand => Shell.SetSingleEditorGroupCommand;
+
+    public IRelayCommand SetDualEditorGroupCommand => Shell.SetDualEditorGroupCommand;
+
+    public IRelayCommand SetTripleEditorGroupCommand => Shell.SetTripleEditorGroupCommand;
+
+    public IRelayCommand ShowPfdRegionPanelCommand => Shell.ShowPfdRegionPanelCommand;
+
+    public IRelayCommand ShowBuildOutputPanelCommand => Shell.ShowBuildOutputPanelCommand;
+
+    public IRelayCommand ShowChatPageCommand => Shell.ShowChatPageCommand;
+
+    public IRelayCommand ShowSolutionExplorerPageCommand => Shell.ShowSolutionExplorerPageCommand;
+
+    public IRelayCommand ShowRelatedFilesMfdPageCommand => Shell.ShowRelatedFilesMfdPageCommand;
+
+    public IRelayCommand ShowTerminalPanelCommand => Shell.ShowTerminalPanelCommand;
+
+    public IRelayCommand<string?> SetUiModeByIdCommand => Shell.SetUiModeByIdCommand;
+
+    public IRelayCommand<object?> SetUiModeByIndexCommand => Shell.SetUiModeByIndexCommand;
+
+    public IRelayCommand CycleUiModeCommand => Shell.CycleUiModeCommand;
+
+    public IRelayCommand<string?> ActivateDocumentCommand => Documents.ActivateDocumentCommand;
+
+    public IRelayCommand<string?> CloseDocumentCommand => Documents.CloseDocumentCommand;
+
+    public IRelayCommand<string?> TogglePinDocumentCommand => Documents.TogglePinDocumentCommand;
+
+    public IRelayCommand<string?> MoveDocumentToGroup1Command => Documents.MoveDocumentToGroup1Command;
+
+    public IRelayCommand<string?> MoveDocumentToGroup2Command => Documents.MoveDocumentToGroup2Command;
+
+    public IRelayCommand<string?> MoveDocumentToGroup3Command => Documents.MoveDocumentToGroup3Command;
+
+    public IRelayCommand ReopenClosedDocumentCommand => Documents.ReopenClosedDocumentCommand;
+}

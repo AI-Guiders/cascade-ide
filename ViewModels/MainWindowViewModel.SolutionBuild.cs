@@ -13,12 +13,6 @@ namespace CascadeIDE.ViewModels;
 /// <summary>Сборка, <c>BuildOutputPanel</c>.</summary>
 public partial class MainWindowViewModel
 {
-    [RelayCommand]
-    private void ToggleMfdRegionExpanded()
-    {
-        ApplyMfdRegionExpanded(!IsMfdRegionExpanded);
-    }
-
     [RelayCommand(CanExecute = nameof(CanBuildSolution))]
     private async Task BuildSolutionAsync()
     {

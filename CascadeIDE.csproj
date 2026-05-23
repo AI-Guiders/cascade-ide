@@ -352,9 +352,21 @@
     <Compile Update="Features\Shell\ShellChromeViewModel.Reactive.cs">
       <DependentUpon>ShellChromeViewModel.cs</DependentUpon>
     </Compile>
+    <Compile Update="Features\Shell\ShellChromeViewModel.Commands.Layout.cs">
+      <DependentUpon>ShellChromeViewModel.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Features\Shell\ShellChromeViewModel.Commands.UiMode.cs">
+      <DependentUpon>ShellChromeViewModel.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Features\Documents\DocumentsWorkspaceViewModel.Commands.cs">
+      <DependentUpon>DocumentsWorkspaceViewModel.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Compile Update="ViewModels\MainWindowViewModel.ShellSession.cs">
+      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    </Compile>
+    <Compile Update="ViewModels\MainWindowViewModel.FeatureCommandProxies.cs">
       <DependentUpon>MainWindowViewModel.cs</DependentUpon>
     </Compile>
   </ItemGroup>

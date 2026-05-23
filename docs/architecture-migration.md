@@ -302,7 +302,14 @@
 - MWVM — `Shell` + прокси + `OnShellChromePropertyChanged`; reactive side-effects (настройки, MFD-навигация, bloom UI mode) в `MainWindowViewModel.ShellSession`.
 - Удалены `MainWindowViewModel.ShellState.RegionAndContour` / `UiSessionChrome` (поля перенесены).
 
-**Дальше (этапы 4–5):** RelayCommands → feature VMs, LSP/breakpoints/HUD в editor slice, метрики LOC.
+**Этап 4 (v1.56):**
+
+- **Shell:** layout/MFD/UI mode RelayCommand → `ShellChromeViewModel.Commands.*`; MWVM — `MainWindowViewModel.FeatureCommandProxies` (палитра, MCP, hotkeys без смены имён команд).
+- **Documents:** вкладки/группы → `DocumentsWorkspaceViewModel.Commands`; `CloseDocument` API → `CloseDocumentByPath`.
+- **Safety L1–L3** — пока на MWVM (`RelayCommands.UiMode`).
+- Удалены `RelayCommands.Layout` / `RelayCommands.Documents`; `ToggleMfdRegionExpanded` убран из `SolutionBuild`.
+
+**Дальше (этап 5):** Shell/Debug/остальные RelayCommands, LSP/breakpoints/HUD в editor slice, метрики LOC.
 
 **Backlog MWVM (закрыт, v1.49–v1.52):**
 

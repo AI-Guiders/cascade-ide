@@ -45,7 +45,7 @@ public partial class MainWindowViewModel
 
         Editor = new EditorWorkspaceViewModel(this);
         Editor.PropertyChanged += OnEditorWorkspacePropertyChanged;
-        Documents = new DocumentsWorkspaceViewModel(this, Workspace, () => ReopenClosedDocumentCommand.NotifyCanExecuteChanged());
+        Documents = new DocumentsWorkspaceViewModel(this, Workspace);
         Documents.PropertyChanged += OnDocumentsPropertyChanged;
         _csharpLanguageService = new Services.CSharpLanguageService();
         _contextMinimizer = new Services.ContextMinimizer(_csharpLanguageService);

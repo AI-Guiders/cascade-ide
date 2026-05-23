@@ -1,21 +1,25 @@
 using CascadeIDE.Models;
 using CommunityToolkit.Mvvm.Input;
 
-namespace CascadeIDE.ViewModels;
+namespace CascadeIDE.Features.Shell;
 
 /// <summary>Relay: регионы, панели MFD, группы редакторов.</summary>
-public partial class MainWindowViewModel
+public sealed partial class ShellChromeViewModel
 {
     [RelayCommand]
     private void TogglePfdRegionExpanded() =>
-        ApplyPfdRegionExpanded(!IsPfdRegionExpanded);
+        _host.ApplyPfdRegionExpanded(!IsPfdRegionExpanded);
+
+    [RelayCommand]
+    private void ToggleMfdRegionExpanded() =>
+        _host.ApplyMfdRegionExpanded(!IsMfdRegionExpanded);
 
     [RelayCommand]
     private void ToggleBuildOutput()
     {
         IsBuildOutputVisible = !IsBuildOutputVisible;
         if (IsBuildOutputVisible)
-            TryNavigateToMfdShellPage(MfdShellPage.Build);
+            _host.TryNavigateToMfdShellPage(MfdShellPage.Build);
     }
 
     [RelayCommand]
@@ -23,7 +27,7 @@ public partial class MainWindowViewModel
     {
         IsTerminalVisible = !IsTerminalVisible;
         if (IsTerminalVisible)
-            TryNavigateToMfdShellPage(MfdShellPage.Terminal);
+            _host.TryNavigateToMfdShellPage(MfdShellPage.Terminal);
     }
 
     [RelayCommand]
@@ -39,40 +43,40 @@ public partial class MainWindowViewModel
     private void SetTripleEditorGroup() => EditorGroupCount = 3;
 
     [RelayCommand]
-    private void ShowPfdRegionPanel() => ApplyPfdRegionExpanded(true);
+    private void ShowPfdRegionPanel() => _host.ApplyPfdRegionExpanded(true);
 
     [RelayCommand]
     private void ShowBuildOutputPanel()
     {
         IsBuildOutputVisible = true;
-        TryNavigateToMfdShellPage(MfdShellPage.Build);
+        _host.TryNavigateToMfdShellPage(MfdShellPage.Build);
     }
 
     [RelayCommand]
     private void ShowChatPage()
     {
-        ApplyMfdRegionExpanded(true);
-        TryNavigateToMfdShellPage(MfdShellPage.Chat);
+        _host.ApplyMfdRegionExpanded(true);
+        _host.TryNavigateToMfdShellPage(MfdShellPage.Chat);
     }
 
     [RelayCommand]
     private void ShowSolutionExplorerPage()
     {
-        ApplyMfdRegionExpanded(true);
-        TryNavigateToMfdShellPage(MfdShellPage.SolutionExplorer);
+        _host.ApplyMfdRegionExpanded(true);
+        _host.TryNavigateToMfdShellPage(MfdShellPage.SolutionExplorer);
     }
 
     [RelayCommand]
     private void ShowRelatedFilesMfdPage()
     {
-        ApplyMfdRegionExpanded(true);
-        TryNavigateToMfdShellPage(MfdShellPage.RelatedFiles);
+        _host.ApplyMfdRegionExpanded(true);
+        _host.TryNavigateToMfdShellPage(MfdShellPage.RelatedFiles);
     }
 
     [RelayCommand]
     private void ShowTerminalPanel()
     {
         IsTerminalVisible = true;
-        TryNavigateToMfdShellPage(MfdShellPage.Terminal);
+        _host.TryNavigateToMfdShellPage(MfdShellPage.Terminal);
     }
 }
