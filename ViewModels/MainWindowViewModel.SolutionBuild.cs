@@ -1,7 +1,5 @@
 using System.Threading;
 using System.Threading.Tasks;
-using CascadeIDE.Cockpit.DataBus;
-using CascadeIDE.Features.Build.Application;
 using CascadeIDE.Features.Workspace;
 using CascadeIDE.Features.Workspace.Application;
 using CascadeIDE.Models;
@@ -10,51 +8,9 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace CascadeIDE.ViewModels;
 
-/// <summary>Сборка, <c>BuildOutputPanel</c>.</summary>
+/// <summary>Загрузка решения, Ollama install; сборка — <see cref="Features.Build.MainWindowBuildSessionViewModel"/>.</summary>
 public partial class MainWindowViewModel
 {
-    [RelayCommand(CanExecute = nameof(CanBuildSolution))]
-    private async Task BuildSolutionAsync()
-    {
-        var prep = MainWindowBuildSolutionPrepProjection.TryCreatePrep(Workspace.SolutionPath);
-        if (prep is null)
-            return;
-
-        PublishToIdeDataBusAndRebuild(new BuildStateChanged(true));
-        IsBuilding = true;
-        if (!IsTerminalVisible)
-            IsTerminalVisible = true;
-        IsBuildOutputVisible = true;
-
-        // Один канонический лог — только «Сборка · вывод» (и MCP get_build_output). Терминал не дублируем:
-        // в Power переключаем MFD на вывод сборки, чтобы лог был на глазах без второй копии текста.
-        CurrentMfdShellPage = prep.TargetMfdPage;
-        BuildOutputPanel.Set(prep.BuildOutputHeader);
-
-        void AppendBuildChunk(string chunk) => BuildOutputPanel.Append(chunk);
-
-        var (lastExitCode, lastBuildSucceeded) =
-            await DotnetSolutionChunkedBuildOrchestrator.RunSolutionBuildStreamingAsync(
-                    prep.SolutionPath,
-                    _dotnetRunner,
-                    AppendBuildChunk,
-                    CancellationToken.None)
-                .ConfigureAwait(true);
-
-        BuildOutputPanel.FlushPending();
-        PublishToIdeDataBusAndRebuild(new BuildStateChanged(false, lastExitCode, lastBuildSucceeded));
-        IsBuilding = false;
-    }
-
-    private bool CanBuildSolution() =>
-        MainWindowBuildSolutionPrepProjection.CanBuild(Workspace.SolutionPath, IsBuilding);
-
-    [RelayCommand]
-    private void HideBuildOutput()
-    {
-        IsBuildOutputVisible = false;
-    }
-
     public void LoadSolution(string path)
     {
         _ = LoadSolutionAsync(path);

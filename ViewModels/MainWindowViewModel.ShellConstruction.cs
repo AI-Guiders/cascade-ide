@@ -42,6 +42,8 @@ public partial class MainWindowViewModel
         Shell = new ShellChromeViewModel(this);
         Shell.ApplyBootstrapFromSettings(_settings);
         Shell.PropertyChanged += OnShellChromePropertyChanged;
+        ApplicationShell = new MainWindowApplicationShellViewModel(this);
+        Build = new MainWindowBuildSessionViewModel(this);
 
         Editor = new EditorWorkspaceViewModel(this);
         Editor.PropertyChanged += OnEditorWorkspacePropertyChanged;
@@ -165,7 +167,8 @@ public partial class MainWindowViewModel
         {
             UiScheduler.Default.Post(_ideMcpHost.ApplyDapDebugSnapshotToUi);
         }, _ideDataBus);
-        _dapDebug.StateChanged += (_, _) => NotifyDebugRelayCommandsChanged();
+        Debug = new MainWindowDebugSessionViewModel(this);
+        _dapDebug.StateChanged += (_, _) => Debug.NotifyRelayCommandsChanged();
         _mcpBuildTest = new Services.McpDotnetBuildTestService(_dotnetRunner);
         _mcpAgentNotes = new Services.McpAgentNotesService(() => _settings);
 

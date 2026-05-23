@@ -65,7 +65,7 @@ public partial class MainWindowViewModel
             SaveSettingsIfChanged);
     }
 
-    private string GetWorkspacePath() => WorkspaceDirectoryFromSolutionPath.Resolve(Workspace.SolutionPath);
+    internal string GetWorkspacePath() => WorkspaceDirectoryFromSolutionPath.Resolve(Workspace.SolutionPath);
 
     partial void OnSelectedOllamaModelChanged(string? value)
     {

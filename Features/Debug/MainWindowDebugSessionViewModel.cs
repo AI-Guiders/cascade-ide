@@ -1,25 +1,30 @@
 using CascadeIDE.Models;
 using CascadeIDE.Services;
+using CascadeIDE.ViewModels;
 using CommunityToolkit.Mvvm.Input;
 
-namespace CascadeIDE.ViewModels;
+namespace CascadeIDE.Features.Debug;
 
-/// <summary>Relay: отладка.</summary>
-public partial class MainWindowViewModel
+/// <summary>Relay: DAP отладка (композитор — <see cref="MainWindowViewModel"/>).</summary>
+public sealed partial class MainWindowDebugSessionViewModel : ViewModelBase
 {
     private static readonly string[] DebugRelayUiPresentationNames =
     [
-        nameof(HasDebugSession),
-        nameof(IsDebugExecutionPaused),
-        nameof(IsDebugExecutionRunning),
-        nameof(IdeHealthDebugText),
-        nameof(IdeHealthDebugCockpitShort),
-        nameof(IdeHealthMountPayload),
-        nameof(PfdIdeHealthMountContext),
-        nameof(MfdIdeHealthMountContext),
+        nameof(MainWindowViewModel.HasDebugSession),
+        nameof(MainWindowViewModel.IsDebugExecutionPaused),
+        nameof(MainWindowViewModel.IsDebugExecutionRunning),
+        nameof(MainWindowViewModel.IdeHealthDebugText),
+        nameof(MainWindowViewModel.IdeHealthDebugCockpitShort),
+        nameof(MainWindowViewModel.IdeHealthMountPayload),
+        nameof(MainWindowViewModel.PfdIdeHealthMountContext),
+        nameof(MainWindowViewModel.MfdIdeHealthMountContext),
     ];
 
-    private void NotifyDebugRelayCommandsChanged()
+    private readonly MainWindowViewModel _host;
+
+    public MainWindowDebugSessionViewModel(MainWindowViewModel host) => _host = host;
+
+    internal void NotifyRelayCommandsChanged()
     {
         DebugStartOrContinueCommand.NotifyCanExecuteChanged();
         DebugAttachCommand.NotifyCanExecuteChanged();
@@ -28,40 +33,44 @@ public partial class MainWindowViewModel
         DebugStepIntoCommand.NotifyCanExecuteChanged();
         DebugStepOutCommand.NotifyCanExecuteChanged();
         foreach (var name in DebugRelayUiPresentationNames)
-            OnPropertyChanged(name);
+            _host.McpNotifyPropertyChanged(name);
     }
 
-    private Task ShowDebugInfoAsync(string title, string message) =>
-        RequestShowInfoAsync != null ? RequestShowInfoAsync(title, message) : Task.CompletedTask;
+    /// <summary><c>debug_launch</c> без JSON: тот же поток, что F5.</summary>
+    internal async Task<string> DebugLaunchInteractiveAsync()
+    {
+        await DebugStartOrContinueAsync().ConfigureAwait(true);
+        return "OK";
+    }
 
-    /// <summary>F5: продолжить при остановке; иначе старт — сохранённый/единственный в решении/по активному .cs, при полном провале — диалог .dll/.exe.</summary>
     [RelayCommand(CanExecute = nameof(CanDebugStartOrContinue))]
     private async Task DebugStartOrContinueAsync()
     {
-        if (_dapDebug.HasActiveSession && _dapDebug.IsExecutionStopped)
+        var dap = _host.DapDebug;
+        if (dap.HasActiveSession && dap.IsExecutionStopped)
         {
-            try { await _dapDebug.ContinueAsync().ConfigureAwait(false); }
+            try { await dap.ContinueAsync().ConfigureAwait(false); }
             catch (Exception ex) { await ShowDebugInfoAsync("Отладка", ex.Message).ConfigureAwait(false); }
             return;
         }
 
-        if (_dapDebug.HasActiveSession && !_dapDebug.IsExecutionStopped)
+        if (dap.HasActiveSession && !dap.IsExecutionStopped)
         {
             await ShowDebugInfoAsync("Отладка", "Выполнение не остановлено. Дождись брейкпоинта или останови отладку.").ConfigureAwait(false);
             return;
         }
 
-        var ws = GetWorkspacePath();
+        var ws = _host.GetWorkspacePath();
         if (string.IsNullOrEmpty(ws))
         {
             await ShowDebugInfoAsync("Отладка", "Сначала открой решение — нужен каталог workspace для брейкпоинтов.").ConfigureAwait(false);
             return;
         }
 
-        var res = await TryResolveDebugLaunchForF5Async().ConfigureAwait(false);
+        var res = await _host.TryResolveDebugLaunchForF5Async().ConfigureAwait(false);
         if (res is not { } r)
         {
-            var target = RequestPickDebugTarget != null ? await RequestPickDebugTarget().ConfigureAwait(false) : null;
+            var target = _host.RequestPickDebugTarget != null ? await _host.RequestPickDebugTarget().ConfigureAwait(false) : null;
             if (string.IsNullOrEmpty(target))
                 return;
             r = new DebugLaunchResolution(target, null, null, null, OpenLaunchBrowser: false, LaunchUrl: null);
@@ -69,9 +78,9 @@ public partial class MainWindowViewModel
 
         try
         {
-            IsInstrumentationDockVisible = true;
-            CurrentMfdShellPage = MfdShellPage.DebugStack;
-            _ = await _dapDebug.LaunchAsync(
+            _host.IsInstrumentationDockVisible = true;
+            _host.CurrentMfdShellPage = MfdShellPage.DebugStack;
+            _ = await dap.LaunchAsync(
                 ws,
                 r.TargetDllPath,
                 netcoredbgPath: null,
@@ -89,30 +98,30 @@ public partial class MainWindowViewModel
 
     private bool CanDebugStartOrContinue()
     {
-        if (_dapDebug.HasActiveSession)
-            return _dapDebug.IsExecutionStopped;
+        if (_host.DapDebug.HasActiveSession)
+            return _host.DapDebug.IsExecutionStopped;
         return true;
     }
 
     [RelayCommand(CanExecute = nameof(CanDebugAttach))]
     private async Task DebugAttachAsync()
     {
-        var ws = GetWorkspacePath();
+        var ws = _host.GetWorkspacePath();
         if (string.IsNullOrEmpty(ws))
         {
             await ShowDebugInfoAsync("Отладка", "Сначала открой решение.").ConfigureAwait(false);
             return;
         }
 
-        var pid = RequestAttachProcessId != null ? await RequestAttachProcessId().ConfigureAwait(false) : null;
+        var pid = _host.RequestAttachProcessId != null ? await _host.RequestAttachProcessId().ConfigureAwait(false) : null;
         if (pid is null or <= 0)
             return;
 
         try
         {
-            IsInstrumentationDockVisible = true;
-            CurrentMfdShellPage = MfdShellPage.DebugStack;
-            _ = await _dapDebug.AttachAsync(ws, pid.Value, targetPath: null, netcoredbgPath: null).ConfigureAwait(false);
+            _host.IsInstrumentationDockVisible = true;
+            _host.CurrentMfdShellPage = MfdShellPage.DebugStack;
+            _ = await _host.DapDebug.AttachAsync(ws, pid.Value, targetPath: null, netcoredbgPath: null).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -120,46 +129,40 @@ public partial class MainWindowViewModel
         }
     }
 
-    private bool CanDebugAttach() => !_dapDebug.HasActiveSession;
+    private bool CanDebugAttach() => !_host.DapDebug.HasActiveSession;
 
     [RelayCommand(CanExecute = nameof(CanDebugStop))]
     private async Task DebugStopAsync()
     {
-        try { await _dapDebug.StopAsync().ConfigureAwait(false); }
+        try { await _host.DapDebug.StopAsync().ConfigureAwait(false); }
         catch (Exception ex) { await ShowDebugInfoAsync("Отладка", ex.Message).ConfigureAwait(false); }
     }
 
-    private bool CanDebugStop() => _dapDebug.HasActiveSession;
+    private bool CanDebugStop() => _host.DapDebug.HasActiveSession;
 
     [RelayCommand(CanExecute = nameof(CanDebugStep))]
     private async Task DebugStepOverAsync()
     {
-        try { _ = await _dapDebug.StepOverAsync().ConfigureAwait(false); }
+        try { _ = await _host.DapDebug.StepOverAsync().ConfigureAwait(false); }
         catch (Exception ex) { await ShowDebugInfoAsync("Отладка", ex.Message).ConfigureAwait(false); }
     }
 
     [RelayCommand(CanExecute = nameof(CanDebugStep))]
     private async Task DebugStepIntoAsync()
     {
-        try { _ = await _dapDebug.StepIntoAsync().ConfigureAwait(false); }
+        try { _ = await _host.DapDebug.StepIntoAsync().ConfigureAwait(false); }
         catch (Exception ex) { await ShowDebugInfoAsync("Отладка", ex.Message).ConfigureAwait(false); }
     }
 
     [RelayCommand(CanExecute = nameof(CanDebugStep))]
     private async Task DebugStepOutAsync()
     {
-        try { _ = await _dapDebug.StepOutAsync().ConfigureAwait(false); }
+        try { _ = await _host.DapDebug.StepOutAsync().ConfigureAwait(false); }
         catch (Exception ex) { await ShowDebugInfoAsync("Отладка", ex.Message).ConfigureAwait(false); }
     }
 
-    private bool CanDebugStep() => _dapDebug.HasActiveSession && _dapDebug.IsExecutionStopped;
+    private bool CanDebugStep() => _host.DapDebug.HasActiveSession && _host.DapDebug.IsExecutionStopped;
 
-    /// <summary>
-    /// <c>debug_launch</c> без JSON-аргументов (мелодия <c>dl</c>, CascadeChord, палитра): тот же поток, что F5 (старт / continue / диалог цели).
-    /// </summary>
-    internal async Task<string> DebugLaunchInteractiveAsync()
-    {
-        await DebugStartOrContinueAsync().ConfigureAwait(true);
-        return "OK";
-    }
+    private Task ShowDebugInfoAsync(string title, string message) =>
+        _host.ShowDebugInfoAsync(title, message);
 }

@@ -321,11 +321,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="ViewModels\MainWindowViewModel.Breakpoints.cs">
-      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Update="ViewModels\MainWindowViewModel.CSharpLsp.cs">
       <DependentUpon>MainWindowViewModel.cs</DependentUpon>
     </Compile>
@@ -368,6 +363,20 @@
     </Compile>
     <Compile Update="ViewModels\MainWindowViewModel.FeatureCommandProxies.cs">
       <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    </Compile>
+    <Compile Update="ViewModels\MainWindowViewModel.FeatureSessions.cs">
+      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    </Compile>
+    <Compile Update="ViewModels\MainWindowViewModel.EditorSession.cs">
+      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Features\Editor\EditorWorkspaceViewModel.DebugGlyphs.cs">
+      <DependentUpon>EditorWorkspaceViewModel.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Features\Editor\EditorWorkspaceViewModel.Hud.cs">
+      <DependentUpon>EditorWorkspaceViewModel.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -442,11 +451,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Update="ViewModels\MainWindowViewModel.RelayCommands.cs">
-      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Update="ViewModels\MainWindowViewModel.RelayCommands.Debug.cs">
       <DependentUpon>MainWindowViewModel.cs</DependentUpon>
     </Compile>
   </ItemGroup>

@@ -7,20 +7,6 @@ namespace CascadeIDE.ViewModels;
 /// <summary>MCP: постановка брейкпоинта с загрузкой решения и показом строки в редакторе.</summary>
 public partial class MainWindowViewModel
 {
-    /// <summary>Регистрация брейкпоинта в JSON (тот же источник, что DAP; ADR 0002).</summary>
-    private void RegisterIdeMcpBreakpoint(string filePath, int line, string? condition)
-    {
-        if (string.IsNullOrEmpty(filePath) || line < 1)
-            return;
-        var path = CanonicalFilePath.Normalize(filePath);
-        var ws = GetWorkspacePath();
-        if (!string.IsNullOrEmpty(ws))
-            Services.BreakpointsFileService.SetBreakpointForBundledSampleTarget(ws, path, line, condition);
-        OnPropertyChanged(nameof(BreakpointLinesInCurrentFile));
-        OnPropertyChanged(nameof(AllBreakpointLinesInCurrentFile));
-        ResyncDapBreakpointsFireAndForget();
-    }
-
     /// <summary>Полный сценарий для MCP <c>set_breakpoint</c>: при необходимости загрузка решения, регистрация точки, открытие файла и переход к строке.</summary>
     internal async Task<string> CompleteMcpSetBreakpointAsync(string filePath, int line, string? condition, CancellationToken cancellationToken)
     {
@@ -49,7 +35,7 @@ public partial class MainWindowViewModel
 
         await UiScheduler.Default.InvokeAsync(() =>
         {
-            RegisterIdeMcpBreakpoint(path, line, condition);
+            Editor.RegisterIdeMcpBreakpoint(path, line, condition);
             IdeMcp.GoToPosition(path, line, 1, line, 1);
             _focusEditorAction?.Invoke();
         }).ConfigureAwait(false);
@@ -57,7 +43,7 @@ public partial class MainWindowViewModel
         return "OK";
     }
 
-    private async void ResyncDapBreakpointsFireAndForget()
+    internal async void ResyncDapBreakpointsFireAndForget()
     {
         try
         {

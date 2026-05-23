@@ -129,7 +129,7 @@ public partial class MainWindowViewModel
     private bool CanClearStartupProject() => HasStartupProject;
 
     /// <summary>MSBuild + launch profile (ADR 0090) или унаследованный стартовый <c>.csproj</c>.</summary>
-    private Task<DebugLaunchResolution?> TryResolveDebugLaunchForF5Async() =>
+    internal Task<DebugLaunchResolution?> TryResolveDebugLaunchForF5Async() =>
         DebugLaunchForF5Orchestrator.TryResolveAsync(
             Workspace.SolutionRoots,
             CurrentFilePath,

@@ -1,33 +1,31 @@
+using System.IO;
 using Avalonia.Threading;
+using CascadeIDE.Features.Workspace.Application;
+using CascadeIDE.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 
-using CascadeIDE.Features.Workspace.Application;
+namespace CascadeIDE.Features.Editor;
 
-namespace CascadeIDE.ViewModels;
-
-/// <summary>
-/// Брейкпоинты: <see cref="BreakpointsFileService"/> / <see cref="DotnetDebug.Core.BreakpointsStorage"/> — один источник (ADR 0002).
-/// </summary>
-public partial class MainWindowViewModel
+/// <summary>Глифы брейкпоинтов и подсветка текущей строки DAP в редакторе.</summary>
+public sealed partial class EditorWorkspaceViewModel
 {
     private static readonly string[] BreakpointGlyphBindingNames =
     [
         nameof(BreakpointLinesInCurrentFile),
         nameof(AllBreakpointLinesInCurrentFile),
+        nameof(DebugCurrentLineInCurrentFile),
     ];
 
     private FileSystemWatcher? _breakpointsFileWatcher;
 
-    /// <summary>Номера строк с брейкпоинтами в текущем открытом файле (глифы в редакторе).</summary>
     public IReadOnlyList<int> BreakpointLinesInCurrentFile => AllBreakpointLinesInCurrentFile;
 
-    /// <summary>Все брейкпоинты для указанного файла (все target в JSON workspace).</summary>
     public IReadOnlyList<int> GetAllBreakpointLinesForFile(string? filePath)
     {
         if (string.IsNullOrEmpty(filePath))
             return [];
         var normalized = CanonicalFilePath.Normalize(filePath);
-        return DapDebug.GetSnapshot().Breakpoints
+        return _host.DapDebug.GetSnapshot().Breakpoints
             .Where(b => CanonicalFilePath.EqualsNormalized(normalized, b.File))
             .Select(b => b.Line)
             .OrderBy(static line => line)
@@ -35,7 +33,6 @@ public partial class MainWindowViewModel
             .ToList();
     }
 
-    /// <summary>Все брейкпоинты в текущем файле для отрисовки.</summary>
     public IReadOnlyList<int> AllBreakpointLinesInCurrentFile =>
         GetAllBreakpointLinesForFile(CurrentFilePath);
 
@@ -47,7 +44,6 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(DebugCurrentLineInCurrentFile))]
     private int _debugPositionLine;
 
-    /// <summary>Строка подсветки останова отладчика для указанного файла (0 если не тот файл или сброшено).</summary>
     public int GetDebugCurrentLineForFile(string? filePath)
     {
         if (string.IsNullOrEmpty(DebugPositionFile) || string.IsNullOrEmpty(filePath))
@@ -57,34 +53,27 @@ public partial class MainWindowViewModel
         return DebugPositionLine;
     }
 
-    /// <summary>Номер строки текущей позиции отладки в открытом файле (0 если другой файл или сброшено).</summary>
     public int DebugCurrentLineInCurrentFile => GetDebugCurrentLineForFile(CurrentFilePath);
 
-    private void NotifyBreakpointGlyphBindings()
+    internal void NotifyBreakpointGlyphBindings()
     {
         foreach (var name in BreakpointGlyphBindingNames)
             OnPropertyChanged(name);
     }
 
-    private void RefreshBreakpointSnapshotFromWorkspace(string? solutionPath)
-    {
-        var ws = WorkspaceDirectoryFromSolutionPath.Resolve(solutionPath);
-        DapDebug.RefreshBreakpointSnapshotFromStorage(ws);
-    }
-
-    private void AttachBreakpointsFileWatcher(string? solutionPath)
+    internal void AttachBreakpointsFileWatcher(string? solutionPath)
     {
         _breakpointsFileWatcher?.Dispose();
         _breakpointsFileWatcher = null;
         var ws = WorkspaceDirectoryFromSolutionPath.Resolve(solutionPath);
-        RefreshBreakpointSnapshotFromWorkspace(solutionPath);
+        _host.DapDebug.RefreshBreakpointSnapshotFromStorage(ws);
         if (string.IsNullOrEmpty(ws) || !Directory.Exists(ws))
             return;
         try
         {
             _breakpointsFileWatcher = new FileSystemWatcher(ws)
             {
-                Filter = Services.BreakpointsFileService.FileName,
+                Filter = BreakpointsFileService.FileName,
                 NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName
             };
             _breakpointsFileWatcher.Changed += (_, _) => UiScheduler.Default.Post(() =>
@@ -99,6 +88,26 @@ public partial class MainWindowViewModel
             });
             _breakpointsFileWatcher.EnableRaisingEvents = true;
         }
-        catch { /* нет прав или диск недоступен */ }
+        catch
+        {
+        }
+    }
+
+    private void RefreshBreakpointSnapshotFromWorkspace(string? solutionPath)
+    {
+        var ws = WorkspaceDirectoryFromSolutionPath.Resolve(solutionPath);
+        _host.DapDebug.RefreshBreakpointSnapshotFromStorage(ws);
+    }
+
+    internal void RegisterIdeMcpBreakpoint(string filePath, int line, string? condition)
+    {
+        if (string.IsNullOrEmpty(filePath) || line < 1)
+            return;
+        var path = CanonicalFilePath.Normalize(filePath);
+        var ws = _host.GetWorkspacePath();
+        if (!string.IsNullOrEmpty(ws))
+            BreakpointsFileService.SetBreakpointForBundledSampleTarget(ws, path, line, condition);
+        NotifyBreakpointGlyphBindings();
+        _host.ResyncDapBreakpointsFireAndForget();
     }
 }

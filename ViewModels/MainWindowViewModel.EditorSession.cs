@@ -1,5 +1,7 @@
 using System.ComponentModel;
 using CascadeIDE.Features.Editor;
+using CascadeIDE.Features.Editor.Application;
+using CascadeIDE.Features.Editor.Application.Presentation;
 
 namespace CascadeIDE.ViewModels;
 
@@ -8,7 +10,7 @@ namespace CascadeIDE.ViewModels;
 /// </summary>
 public partial class MainWindowViewModel
 {
-    /// <summary>Активный документ в редакторе (путь, текст, selection).</summary>
+    /// <summary>Активный документ в редакторе (путь, текст, selection, HUD, брейкпоинты).</summary>
     public EditorWorkspaceViewModel Editor { get; private set; } = null!;
 
     public string? CurrentFilePath
@@ -45,6 +47,37 @@ public partial class MainWindowViewModel
 
     public bool IsMarkdownPreviewVisible => Editor.IsMarkdownPreviewVisible;
 
+    public IReadOnlyList<int> BreakpointLinesInCurrentFile => Editor.BreakpointLinesInCurrentFile;
+
+    public IReadOnlyList<int> AllBreakpointLinesInCurrentFile => Editor.AllBreakpointLinesInCurrentFile;
+
+    public IReadOnlyList<int> GetAllBreakpointLinesForFile(string? filePath) =>
+        Editor.GetAllBreakpointLinesForFile(filePath);
+
+    public string? DebugPositionFile
+    {
+        get => Editor.DebugPositionFile;
+        set => Editor.DebugPositionFile = value;
+    }
+
+    public int DebugPositionLine
+    {
+        get => Editor.DebugPositionLine;
+        set => Editor.DebugPositionLine = value;
+    }
+
+    public int GetDebugCurrentLineForFile(string? filePath) => Editor.GetDebugCurrentLineForFile(filePath);
+
+    public int DebugCurrentLineInCurrentFile => Editor.DebugCurrentLineInCurrentFile;
+
+    public string? EditorHudBannerText
+    {
+        get => Editor.EditorHudBannerText;
+        set => Editor.EditorHudBannerText = value;
+    }
+
+    public bool IsEditorHudBannerVisible => Editor.IsEditorHudBannerVisible;
+
     private void OnEditorWorkspacePropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName is null)
@@ -64,6 +97,15 @@ public partial class MainWindowViewModel
         {
             OnPropertyChanged(nameof(IsMarkdownPreviewVisible));
         }
+        else if (e.PropertyName is nameof(EditorWorkspaceViewModel.DebugPositionFile)
+                 or nameof(EditorWorkspaceViewModel.DebugPositionLine))
+        {
+            OnPropertyChanged(nameof(DebugCurrentLineInCurrentFile));
+        }
+        else if (e.PropertyName == nameof(EditorWorkspaceViewModel.EditorHudBannerText))
+        {
+            OnPropertyChanged(nameof(IsEditorHudBannerVisible));
+        }
     }
 
     /// <summary>Бывший <c>OnCurrentFilePathChanged</c> из DocumentsDock.</summary>
@@ -71,7 +113,7 @@ public partial class MainWindowViewModel
     {
         UpdateCodeNavigationMapCaretOffset(null);
         RefreshLocBadgeFromCurrentFile();
-        RefreshEditorHudBanner();
+        Editor.RefreshEditorHudBanner();
         ScheduleWorkspaceNavigationMapRefresh();
     }
 
@@ -84,6 +126,18 @@ public partial class MainWindowViewModel
         Documents.ApplyEditorTextFromHost(value);
         OnPropertyChanged(nameof(EditorTextGroup2));
         OnPropertyChanged(nameof(EditorTextGroup3));
-        RefreshEditorHudBanner();
+        Editor.RefreshEditorHudBanner();
     }
+
+    internal void OnWorkspaceDiagnosticsChangedForHud() => Editor.OnWorkspaceDiagnosticsChangedForHud();
+
+    private void ScheduleEditorHudBannerRefresh() => Editor.ScheduleEditorHudBannerRefresh();
+
+    internal void SetStabilizedEditorHudContext(EditorHudStabilizedContext? context) =>
+        Editor.SetStabilizedEditorHudContext(context);
+
+    private void RefreshEditorHudBanner() => Editor.RefreshEditorHudBanner();
+
+    internal async Task<string> DebugLaunchInteractiveAsync() =>
+        await Debug.DebugLaunchInteractiveAsync().ConfigureAwait(true);
 }

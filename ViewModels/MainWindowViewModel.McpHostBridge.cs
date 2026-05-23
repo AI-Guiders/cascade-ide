@@ -25,9 +25,9 @@ public partial class MainWindowViewModel
     internal Task McpRefreshGitSummaryAsync() => RefreshGitSummaryAsync();
 
     internal void McpRegisterIdeMcpBreakpoint(string filePath, int line, string? condition) =>
-        RegisterIdeMcpBreakpoint(filePath, line, condition);
+        Editor.RegisterIdeMcpBreakpoint(filePath, line, condition);
 
-    internal void McpNotifyBreakpointGlyphBindings() => NotifyBreakpointGlyphBindings();
+    internal void McpNotifyBreakpointGlyphBindings() => Editor.NotifyBreakpointGlyphBindings();
 
     internal void McpResyncDapBreakpointsFireAndForget() => ResyncDapBreakpointsFireAndForget();
 
@@ -46,6 +46,14 @@ public partial class MainWindowViewModel
     internal void McpNotifyPropertyChanged(string propertyName) => OnPropertyChanged(propertyName);
 
     internal void McpPublishToIdeDataBusAndRebuild<T>(T evt) => PublishToIdeDataBusAndRebuild(evt);
+
+    internal void HostSaveSettingsIfChanged() => SaveSettingsIfChanged();
+
+    internal Services.CSharpLanguageService HostCsharpLanguageService => _csharpLanguageService;
+
+    internal Services.WorkspaceDiagnosticsCoordinator HostWorkspaceDiagnostics => _workspaceDiagnostics;
+
+    internal Services.IDotnetCommandRunner HostDotnetRunner => _dotnetRunner;
 
     internal int McpDebugStackSelectedIndex
     {

@@ -309,7 +309,16 @@
 - **Safety L1–L3** — пока на MWVM (`RelayCommands.UiMode`).
 - Удалены `RelayCommands.Layout` / `RelayCommands.Documents`; `ToggleMfdRegionExpanded` убран из `SolutionBuild`.
 
-**Дальше (этап 5):** Shell/Debug/остальные RelayCommands, LSP/breakpoints/HUD в editor slice, метрики LOC.
+**Этап 5 (v1.57):**
+
+- **Application shell:** `MainWindowApplicationShellViewModel` — меню (открыть решение/папку/файл), темы, язык UI, окна-хосты; прокси команд на MWVM.
+- **Debug:** `MainWindowDebugSessionViewModel` — F5/attach/step/stop; `DebugLaunchInteractiveAsync` → `Debug.*`; `StateChanged` → `Debug.NotifyRelayCommandsChanged()`.
+- **Build:** `MainWindowBuildSessionViewModel` — `BuildSolutionAsync`, `HideBuildOutput`; bridge `HostDotnetRunner`.
+- **Editor slice:** `EditorWorkspaceViewModel.DebugGlyphs` (брейкпоинты, `DebugPosition*`), `EditorWorkspaceViewModel.Hud` (баннер диагностик/вхождений); прокси на MWVM.
+- Удалены `RelayCommands.Shell`, `RelayCommands.Debug`; build-команды убраны из `SolutionBuild`; удалены `Breakpoints.cs`, `EditorHud.cs` на MWVM.
+- `ShowDebugInfoAsync`, `GetWorkspacePath` — internal на host; тесты MCP → `vm.IdeMcp`.
+
+**Дальше (этап 6):** Safety L1–L3 (`RelayCommands.UiMode`), оставшиеся MCP relay на MWVM, метрики LOC / сужение partial MWVM.
 
 **Backlog MWVM (закрыт, v1.49–v1.52):**
 
