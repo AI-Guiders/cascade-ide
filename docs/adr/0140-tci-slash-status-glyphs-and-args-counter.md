@@ -39,7 +39,7 @@ Preview **не блокирует** Enter ([0138](0138-cockpit-command-line-and-
 
 ### Проблемы
 
-1. **Иконка не была видна:** pill рисовался с иконкой слева от `/`, но `ClipRect` обрезал область **левее** `textBounds` — глиф оказывался за клипом. **Исправлено:** clip расширяется на `SkiaStatusChip.IconLeadingOverhang` в `SkiaCommandLineStrip` и `SkiaComposerStrip`.
+1. **Иконка обрезалась:** pill рисовался с иконкой слева от `/`, а **clip** был только по `textBounds` (иконка вне клипа). **Исправлено:** clip = union(textBounds, chipRect); по умолчанию иконка **справа** (`tci_validation_icon = right`); для `left` — `LeadingChipLayoutGutter`.
 2. **⚠ для «ждём args»** плохо читается при пошаговом autocomplete: оператор ожидает **P** / **P(3)**, как в REPL.
 3. **На полупути** (`/intercom mes`) preview часто даёт **✕** («нет команды»), хотя autocomplete ещё ведёт по ступеням — нужны правила «prefix match → Incomplete + P(n)», не Error.
 
@@ -93,7 +93,7 @@ public readonly record struct SlashCommandPreviewGlyph(
 
 - Примитив: `SkiaStatusChip.DrawIconGlyph` — уже поддерживает произвольную строку.
 - `SkiaSlashCommandChip.Draw` принимает `SlashCommandPreviewGlyph` (или `iconText`) вместо только `SlashCommandPreviewKind`.
-- **Инвариант клипа:** при `ShouldDrawChip` clip-rect слева расширяется на `IconLeadingOverhang`; при смене глифа на `P(3)` учитывать **ширину** глифа (моно, 2–4 символа) — при необходимости увеличить `IconBox` или рисовать глиф без отдельного квадрата иконки.
+- **Инвариант layout:** при `ShouldDrawChip` резерв `LeadingChipLayoutGutter` слева в `ComputeInputRegion` (CCL) или `ComputeTextLayout` (composer, slash в начале строки); при смене глифа на `P(3)` учитывать **ширину** глифа — при необходимости увеличить `IconBox` или gutter.
 
 ### 4. A11y
 
@@ -128,7 +128,7 @@ public readonly record struct SlashCommandPreviewGlyph(
 | Элемент | Статус |
 |---------|--------|
 | Pill + ✓/✕/⚠/ℹ по `SlashCommandPreviewKind` | **Implemented** |
-| Clip для иконки слева (`IconLeadingOverhang`) | **Implemented** (2026-05-23) |
+| Clip union + icon right default + `tci_validation_icon` | **Implemented** (2026-05-23) |
 | Глиф **P** вместо ⚠ для `Incomplete` | **Proposed** |
 | Счётчик **P(n)** + prefix→Incomplete | **Proposed** |
 | Метаданные args в каталоге | **Proposed** |

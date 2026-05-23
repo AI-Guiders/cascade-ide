@@ -87,7 +87,12 @@ internal static class SkiaIntercomAttachLinkChip
     {
         var colors = SkiaStatusChip.ResolveColors(theme, ToSeverity(status), theme.MutedContent);
         SkiaStatusChip.DrawFrame(canvas, chipRect, colors);
-        SkiaStatusChip.DrawIcon(canvas, SkiaStatusChip.IconCenterInRect(chipRect), ToSeverity(status), colors.Icon, labelFontSize);
+        SkiaStatusChip.DrawIcon(
+            canvas,
+            SkiaStatusChip.IconCenterInRect(chipRect, SkiaStatusChipIconPlacement.Left),
+            ToSeverity(status),
+            colors.Icon,
+            labelFontSize);
 
         using var labelFont = CreateLabelFont(labelFontSize, chipFamily);
         var text = normalizeLabel(label);

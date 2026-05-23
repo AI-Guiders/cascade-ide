@@ -183,6 +183,8 @@ show_conditions = true
 [intercom]
 # comfortable — prose_pt, просторная лента; compact — prose_pt_forward + плотные отступы (legacy Forward)
 feed_metrics = "compact"
+# slash TCI pill: left | right (default) | highlight_only
+tci_validation_icon = "right"
 
 [intercom.attachments.code]
 navigate = "reveal"

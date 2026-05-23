@@ -148,6 +148,7 @@ public partial class ChatPanelViewModel : ViewModelBase
             tryAttachSlash: TryExecuteAttachSlash,
             selectMessageByOrdinalRangeInDetailLane: SelectMessageByOrdinalRangeInDetailLane,
             selectMessagesByOrdinalRangesInDetailLane: SelectMessagesByOrdinalRangesInDetailLane,
+            clearMessageSelectionInDetailLane: ClearMessageSelectionInDetailLane,
             findMessagesForCodeRef: FindMessagesForCodeRef,
             relateMessageRangeToCodeRef: RelateMessageRangeToCodeRef,
             listMessageAnchors: ListAnchorsForSlashContext,

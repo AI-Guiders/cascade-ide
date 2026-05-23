@@ -28,11 +28,20 @@ internal static class SkiaCommandLineStrip
     public static float MeasureHeight(string? previewText = null, float fontSize = 12f, float previewFontSize = 10f) =>
         MinHeight(fontSize);
 
-    public static SkiaTciTextField.Region ComputeInputRegion(SKRect bounds, float fontSize)
+    public static bool ShouldReserveLeadingChip(SlashCommandPreviewKind previewKind, string? bufferText) =>
+        SkiaSlashCommandChip.IconPlacement == SkiaStatusChipIconPlacement.Left
+        && !string.IsNullOrEmpty(bufferText)
+        && SkiaSlashCommandChip.ShouldDraw(previewKind, bufferText);
+
+    public static SkiaTciTextField.Region ComputeInputRegion(
+        SKRect bounds,
+        float fontSize,
+        bool reserveLeadingChip = false)
     {
         var lineHeight = InputLineHeightFor(fontSize);
+        var leadingGutter = reserveLeadingChip ? SkiaStatusChip.LeadingChipLayoutGutter : 0f;
         var textBounds = new SKRect(
-            bounds.Left + HorizontalPadding,
+            bounds.Left + HorizontalPadding + leadingGutter,
             bounds.Top + VerticalPadding,
             bounds.Right - HorizontalPadding,
             bounds.Top + VerticalPadding + lineHeight);
@@ -53,10 +62,11 @@ internal static class SkiaCommandLineStrip
         float pointY,
         float fontSize,
         float scrollOffsetX,
-        out int caretIndex)
+        out int caretIndex,
+        SlashCommandPreviewKind previewKind = SlashCommandPreviewKind.None)
     {
         caretIndex = 0;
-        var region = ComputeInputRegion(stripBounds, fontSize);
+        var region = ComputeInputRegion(stripBounds, fontSize, ShouldReserveLeadingChip(previewKind, bufferText));
         var typo = ResolveTypography(fontSize);
         return SkiaTciTextField.TryHitTestCaret(
             region,
@@ -76,10 +86,11 @@ internal static class SkiaCommandLineStrip
         int caretIndex,
         float fontSize,
         float scrollOffsetX,
-        out SKRect caretRect)
+        out SKRect caretRect,
+        SlashCommandPreviewKind previewKind = SlashCommandPreviewKind.None)
     {
         caretRect = default;
-        var region = ComputeInputRegion(stripBounds, fontSize);
+        var region = ComputeInputRegion(stripBounds, fontSize, ShouldReserveLeadingChip(previewKind, bufferText));
         var typo = ResolveTypography(fontSize);
         var origin = new SKPoint(region.TextBounds.Left, region.TextBounds.Top + region.TextTopInset);
         if (!SkiaTciTextField.TryGetCaretRect(
@@ -133,10 +144,11 @@ internal static class SkiaCommandLineStrip
         };
         canvas.DrawLine(bounds.Left, bounds.Top + 0.5f, bounds.Right, bounds.Top + 0.5f, border);
 
+        var reserveChip = ShouldReserveLeadingChip(previewKind, bufferText);
         drawInputLine(
             canvas,
             theme,
-            ComputeInputRegion(bounds, fontSize),
+            ComputeInputRegion(bounds, fontSize, reserveChip),
             bufferText,
             placeholder,
             isEnabled,
@@ -186,8 +198,20 @@ internal static class SkiaCommandLineStrip
         var linkColor = SkiaSlashPreviewChrome.ChipColors(theme, previewKind).Accent;
 
         var clipRect = textBounds;
-        if (!isEmpty && SkiaSlashCommandChip.ShouldDraw(previewKind, bufferText))
-            clipRect.Left -= SkiaStatusChip.IconLeadingOverhang;
+        SKRect chipRect = default;
+        var drawChip = !isEmpty && SkiaSlashCommandChip.ShouldDraw(previewKind, bufferText);
+        if (drawChip)
+        {
+            var labelW = SkiaSlashCommandChip.MeasureLabelWidth(bufferText, fontSize);
+            chipRect = SkiaSlashCommandChip.ComputeChipRect(
+                textBounds.Left + scrollOffsetX,
+                textBounds.Top,
+                typo.LineHeight,
+                labelW);
+            var chipClip = chipRect;
+            chipClip.Offset(-scrollOffsetX, 0f);
+            clipRect = SkiaStatusChip.ExpandClipForChip(textBounds, chipClip);
+        }
 
         canvas.Save();
         canvas.ClipRect(clipRect);
@@ -195,16 +219,8 @@ internal static class SkiaCommandLineStrip
 
         var textLeft = textBounds.Left + scrollOffsetX;
         var origin = new SKPoint(textLeft, textBounds.Top + region.TextTopInset);
-        if (!isEmpty && SkiaSlashCommandChip.ShouldDraw(previewKind, bufferText))
-        {
-            var labelW = SkiaSlashCommandChip.MeasureLabelWidth(bufferText, fontSize);
-            var chipRect = SkiaSlashCommandChip.ComputeChipRect(
-                textLeft,
-                textBounds.Top,
-                typo.LineHeight,
-                labelW);
+        if (drawChip)
             SkiaSlashCommandChip.Draw(canvas, chipRect, theme, previewKind, fontSize);
-        }
 
         if (!isEmpty)
         {

@@ -344,7 +344,8 @@ public partial class SkiaChatSurfaceControl
                 out var caret,
                 _composerScrollOffsetY,
                 ComposerPreview,
-                composerPreviewPt))
+                composerPreviewPt,
+                ComposerPreviewKind))
             return new Rect(caret.Left, caret.Top, Math.Max(2, caret.Width), caret.Height);
 
         var textLeft = _composerBounds.Width > 0
@@ -366,10 +367,14 @@ public partial class SkiaChatSurfaceControl
                 CommandLineCaretIndex,
                 cclPt,
                 _commandLineScrollOffsetX,
-                out var caret))
+                out var caret,
+                CommandLinePreviewKind))
             return new Rect(caret.Left, caret.Top, Math.Max(2, caret.Width), caret.Height);
 
-        var region = SkiaCommandLineStrip.ComputeInputRegion(_commandLineBounds, cclPt);
+        var region = SkiaCommandLineStrip.ComputeInputRegion(
+            _commandLineBounds,
+            cclPt,
+            SkiaCommandLineStrip.ShouldReserveLeadingChip(CommandLinePreviewKind, CommandLineText ?? "/"));
         var lineH = SkiaCommandLineStrip.InputLineHeightFor(cclPt);
         return new Rect(region.TextBounds.Left, region.TextBounds.Top + 2f, 2, lineH - 4f);
     }
@@ -559,7 +564,9 @@ public partial class SkiaChatSurfaceControl
                 _composerScrollOffsetY,
                 ComposerPreview,
                 composerPreviewPt,
-                out var index))
+                out var index,
+                ComposerPreviewKind,
+                ComposerCaretIndex))
             return false;
 
         _composerExtendSelection = extendSelection;
@@ -587,7 +594,8 @@ public partial class SkiaChatSurfaceControl
                 y,
                 cclPt,
                 _commandLineScrollOffsetX,
-                out var index))
+                out var index,
+                CommandLinePreviewKind))
             return false;
 
         _commandLineExtendSelection = extendSelection;
@@ -608,19 +616,22 @@ public partial class SkiaChatSurfaceControl
             return;
 
         var cclPt = IntercomFonts.ResolveCommandLinePt(FeedUsesForwardMetrics);
-        var region = SkiaCommandLineStrip.ComputeInputRegion(_commandLineBounds, cclPt);
+        var cclText = CommandLineText ?? "/";
+        var reserveChip = SkiaCommandLineStrip.ShouldReserveLeadingChip(CommandLinePreviewKind, cclText);
+        var region = SkiaCommandLineStrip.ComputeInputRegion(_commandLineBounds, cclPt, reserveChip);
         var maxScroll = SkiaCommandLineStrip.MaxHorizontalScroll(
-            CommandLineText ?? "/",
+            cclText,
             region.ContentWidth,
             cclPt);
 
         if (!SkiaCommandLineStrip.TryGetCaretRect(
                 _commandLineBounds,
-                CommandLineText ?? "/",
+                cclText,
                 CommandLineCaretIndex,
                 cclPt,
                 _commandLineScrollOffsetX,
-                out var caret))
+                out var caret,
+                CommandLinePreviewKind))
             return;
 
         var viewLeft = region.TextBounds.Left;
@@ -639,9 +650,13 @@ public partial class SkiaChatSurfaceControl
             return false;
 
         var cclPt = IntercomFonts.ResolveCommandLinePt(FeedUsesForwardMetrics);
-        var region = SkiaCommandLineStrip.ComputeInputRegion(_commandLineBounds, cclPt);
+        var cclText = CommandLineText ?? "/";
+        var region = SkiaCommandLineStrip.ComputeInputRegion(
+            _commandLineBounds,
+            cclPt,
+            SkiaCommandLineStrip.ShouldReserveLeadingChip(CommandLinePreviewKind, cclText));
         var maxScroll = SkiaCommandLineStrip.MaxHorizontalScroll(
-            CommandLineText ?? "/",
+            cclText,
             region.ContentWidth,
             cclPt);
         if (maxScroll <= 0f)
@@ -682,7 +697,8 @@ public partial class SkiaChatSurfaceControl
                 out var caret,
                 _composerScrollOffsetY,
                 ComposerPreview,
-                composerPreviewPt))
+                composerPreviewPt,
+                ComposerPreviewKind))
             return;
 
         var viewTop = _composerBounds.Top + SkiaComposerStrip.VerticalPadding;

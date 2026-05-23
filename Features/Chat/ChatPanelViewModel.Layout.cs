@@ -57,10 +57,20 @@ public partial class ChatPanelViewModel
     public void ToggleIntercomTopicNavigator() =>
         IsTopicNavigatorVisible = !IsTopicNavigatorVisible;
 
-    /// <summary>Применить <c>[intercom]</c> (плотность ленты) после load/save settings.</summary>
+    /// <summary>TOML <c>[intercom] tci_validation_icon</c> (left | right | highlight_only).</summary>
+    public string IntercomTciValidationIcon { get; private set; } = TciValidationIconModes.Right;
+
+    /// <summary>Сбросить Skia TCI chrome (pill placement) после load/save settings.</summary>
+    public event EventHandler? IntercomTciChromeChanged;
+
+    /// <summary>Применить <c>[intercom]</c> (плотность ленты, TCI icon) после load/save settings.</summary>
     public void ApplyIntercomPresentationSettings(IntercomSettings intercom)
     {
         IntercomComfortableFeed = intercom.UseComfortableFeedMetrics();
+        IntercomTciValidationIcon = string.IsNullOrWhiteSpace(intercom.TciValidationIcon)
+            ? TciValidationIconModes.Right
+            : intercom.TciValidationIcon.Trim();
+        IntercomTciChromeChanged?.Invoke(this, EventArgs.Empty);
     }
 
     partial void OnIntercomComfortableFeedChanged(bool value) =>

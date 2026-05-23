@@ -1,3 +1,4 @@
+using CascadeIDE.Models;
 using CascadeIDE.Views.SkiaKit;
 using SkiaSharp;
 using Xunit;
@@ -56,6 +57,24 @@ public sealed class SkiaTciTextFieldTests
         var h15 = SkiaCommandLineStrip.MeasureHeight("err", 15f, 12.5f);
         Assert.True(h15 > h12);
         Assert.True(h15 >= 15f + SkiaCommandLineStrip.VerticalPadding * 2);
+    }
+
+    [Fact]
+    public void Leading_chip_gutter_only_when_icon_on_left()
+    {
+        const float fontSize = 12f;
+        var bounds = new SKRect(0, 0, 400, SkiaCommandLineStrip.MeasureHeight("/x", fontSize, 10f));
+        try
+        {
+            SkiaSlashCommandChip.ConfigureIconPlacement(TciValidationIconModes.Left);
+            var plain = SkiaCommandLineStrip.ComputeInputRegion(bounds, fontSize);
+            var withChip = SkiaCommandLineStrip.ComputeInputRegion(bounds, fontSize, reserveLeadingChip: true);
+            Assert.True(withChip.TextBounds.Left > plain.TextBounds.Left);
+        }
+        finally
+        {
+            SkiaSlashCommandChip.ConfigureIconPlacement(TciValidationIconModes.Right);
+        }
     }
 
     [Fact]

@@ -13,9 +13,10 @@ public sealed class SkiaStatusChipTests
             textLeft: 100f,
             textTop: 10f,
             lineHeight: 22f,
-            labelWidth: 80f);
+            labelWidth: 80f,
+            SkiaStatusChipIconPlacement.Left);
 
-        Assert.Equal(100f, SkiaStatusChip.ContentLeftInRect(rect), 0.5f);
+        Assert.Equal(100f, SkiaStatusChip.ContentLeftInRect(rect, SkiaStatusChipIconPlacement.Left), 0.5f);
         Assert.True(rect.Left < 100f);
         Assert.True(rect.Width >= 80f + SkiaStatusChip.IconBox);
     }

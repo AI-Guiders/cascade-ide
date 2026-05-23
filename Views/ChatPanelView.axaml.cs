@@ -10,6 +10,7 @@ using Avalonia.Threading;
 using CascadeIDE.Features.Chat;
 using CascadeIDE.Models;
 using CascadeIDE.Views.Chat;
+using CascadeIDE.Views.SkiaKit;
 using CommunityToolkit.Mvvm.Input;
 
 namespace CascadeIDE.Views;
@@ -37,6 +38,7 @@ public partial class ChatPanelView : UserControl
         if (_subscribedVm is not null)
         {
             _subscribedVm.IntercomPanelFontsChanged -= OnIntercomPanelFontsChanged;
+            _subscribedVm.IntercomTciChromeChanged -= OnIntercomTciChromeChanged;
             _subscribedVm.ComposerPopupSuggestions.CollectionChanged -= OnComposerPopupSuggestionsChanged;
             _subscribedVm.PropertyChanged -= OnChatPanelVmPropertyChanged;
         }
@@ -45,11 +47,13 @@ public partial class ChatPanelView : UserControl
         if (_subscribedVm is not null)
         {
             _subscribedVm.IntercomPanelFontsChanged += OnIntercomPanelFontsChanged;
+            _subscribedVm.IntercomTciChromeChanged += OnIntercomTciChromeChanged;
             _subscribedVm.ComposerPopupSuggestions.CollectionChanged += OnComposerPopupSuggestionsChanged;
             _subscribedVm.PropertyChanged += OnChatPanelVmPropertyChanged;
         }
 
         TryApplyPanelFonts();
+        ApplyIntercomTciChrome();
     }
 
     private void OnIntercomComposerDraftChanged(object? sender, EventArgs e)
@@ -104,6 +108,17 @@ public partial class ChatPanelView : UserControl
 
     private void OnIntercomPanelFontsChanged(object? sender, IntercomFontsSettings fonts) =>
         ChatPanelTypographyApplier.Apply(this, fonts);
+
+    private void OnIntercomTciChromeChanged(object? sender, EventArgs e) => ApplyIntercomTciChrome();
+
+    private void ApplyIntercomTciChrome()
+    {
+        if (DataContext is not ChatPanelViewModel vm)
+            return;
+
+        SkiaSlashCommandChip.ConfigureIconPlacement(vm.IntercomTciValidationIcon);
+        IntercomSkiaSurface.InvalidateVisual();
+    }
 
     private void TryApplyPanelFonts()
     {

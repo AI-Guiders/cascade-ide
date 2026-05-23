@@ -35,7 +35,7 @@
 
 Визуальная валидация slash — **отдельный контур** от W/C/A в [ADR 0021](../adr/0021-pfd-mfd-cockpit-attention-model.md): не попадает в `EicasAlertsBar`/CAS, Enter не блокируется (как chip attach, ADR 0128 §9.1). Рисование: `SkiaStatusChip` (примитив) → `SkiaSlashCommandChip` / `SkiaSlashPreviewChrome`. Контракт глифов ✓ / ✕ / **P(n)** — [ADR 0140](../adr/0140-tci-slash-status-glyphs-and-args-counter.md).
 
-**Иконка слева в pill:** рисуется **левее** начала slash-текста на `SkiaStatusChip.IconLeadingOverhang`; clip поля ввода расширяется влево, иначе глиф обрезается.
+**Иконка в pill:** по умолчанию **справа** от slash-текста (`[intercom] tci_validation_icon = right`). Варианты: `left` (gutter + clip union), `highlight_only` (без глифа). Clip поля ввода — union `textBounds` и `chipRect`, иначе глиф обрезается.
 
 **Палитру** берём из кокпита (красный / янтарь / зелёный / серый), **семантику** — свою:
 

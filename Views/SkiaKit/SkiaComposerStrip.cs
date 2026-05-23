@@ -97,7 +97,9 @@ internal static class SkiaComposerStrip
         float contentScrollOffsetY,
         string? slashPreviewText,
         float previewFontSize,
-        out int caretIndex)
+        out int caretIndex,
+        SlashCommandPreviewKind slashPreviewKind = SlashCommandPreviewKind.None,
+        int caretIndexForChipLayout = -1)
     {
         caretIndex = 0;
         if (composerBounds.Width <= 0)
@@ -105,11 +107,13 @@ internal static class SkiaComposerStrip
 
         var sendLeft = composerBounds.Right - HorizontalPadding - SendButtonWidth;
         var previewReserve = SlashPreviewReserve(slashPreviewText, previewFontSize);
-        var layout = ComputeTextLayout(composerBounds, sendLeft, fontSize, lineHeight, previewReserve);
+        var display = BuildDisplayText(text, preeditText);
+        var chipCaret = caretIndexForChipLayout >= 0 ? caretIndexForChipLayout : display.Length;
+        var leadingGutter = ResolveLeadingChipLayoutGutter(display, chipCaret, slashPreviewKind);
+        var layout = ComputeTextLayout(composerBounds, sendLeft, fontSize, lineHeight, previewReserve, leadingGutter);
         if (!layout.TextBounds.Contains(pointX, pointY))
             return false;
 
-        var display = BuildDisplayText(text, preeditText);
         var maxLines = (int)((MaxHeightFor(lineHeight) - VerticalPadding * 2) / lineHeight);
         var localX = pointX - layout.TextBounds.Left;
         var localY = pointY - layout.TextBounds.Top - layout.TextTopInset + contentScrollOffsetY;
@@ -165,11 +169,12 @@ internal static class SkiaComposerStrip
         sendButtonBounds = new SKRect(sendLeft, sendTop, sendLeft + SendButtonWidth, sendTop + SendButtonHeight);
 
         var previewReserve = SlashPreviewReserve(slashPreviewText, previewFontSize);
-        var layout = ComputeTextLayout(bounds, sendLeft, fontSize, lineHeight, previewReserve);
+        var display = BuildDisplayText(text, preeditText);
+        var leadingGutter = ResolveLeadingChipLayoutGutter(display, caretIndex, slashPreviewKind);
+        var layout = ComputeTextLayout(bounds, sendLeft, fontSize, lineHeight, previewReserve, leadingGutter);
         textBounds = layout.TextBounds;
         var contentWidth = layout.ContentWidth;
         var textTopInset = layout.TextTopInset;
-        var display = BuildDisplayText(text, preeditText);
         var isEmpty = string.IsNullOrEmpty(display);
         var textOrigin = new SKPoint(textBounds.Left, textBounds.Top + textTopInset);
 
@@ -177,13 +182,17 @@ internal static class SkiaComposerStrip
         var maxLines = (int)((MaxHeightFor(lineHeight) - VerticalPadding * 2) / lineHeight);
 
         var clipRect = textBounds;
-        if (!isEmpty
-            && slashPreviewKind != SlashCommandPreviewKind.None
-            && ChatSlashAutocomplete.TryGetSlashLineRange(display, caretIndex, out var slashStart, out var slashEnd)
-            && SkiaSlashCommandChip.ShouldDraw(slashPreviewKind, display[slashStart..slashEnd]))
-        {
-            clipRect.Left -= SkiaStatusChip.IconLeadingOverhang;
-        }
+        if (!isEmpty)
+            clipRect = expandComposerClipForSlashChip(
+                display,
+                caretIndex,
+                slashPreviewKind,
+                layout,
+                textOrigin,
+                contentScrollOffsetY,
+                fontSize,
+                lineHeight,
+                textBounds);
 
         canvas.Save();
         canvas.ClipRect(clipRect);
@@ -289,7 +298,8 @@ internal static class SkiaComposerStrip
         out SKRect caretRect,
         float contentScrollOffsetY = 0f,
         string? slashPreviewText = null,
-        float previewFontSize = 10f)
+        float previewFontSize = 10f,
+        SlashCommandPreviewKind slashPreviewKind = SlashCommandPreviewKind.None)
     {
         caretRect = default;
         if (composerBounds.Width <= 0)
@@ -297,8 +307,9 @@ internal static class SkiaComposerStrip
 
         var sendLeft = composerBounds.Right - HorizontalPadding - SendButtonWidth;
         var previewReserve = SlashPreviewReserve(slashPreviewText, previewFontSize);
-        var layout = ComputeTextLayout(composerBounds, sendLeft, fontSize, lineHeight, previewReserve);
         var display = BuildDisplayText(text, preeditText);
+        var leadingGutter = ResolveLeadingChipLayoutGutter(display, caretIndex, slashPreviewKind);
+        var layout = ComputeTextLayout(composerBounds, sendLeft, fontSize, lineHeight, previewReserve, leadingGutter);
         var textTopInset = lineHeight - 4f - fontSize * 0.85f - 4f;
         var textOrigin = new SKPoint(layout.TextBounds.Left, layout.TextBounds.Top + textTopInset);
         if (!TryComputeCaretLine(
@@ -390,15 +401,75 @@ internal static class SkiaComposerStrip
         float sendLeft,
         float fontSize,
         float lineHeight,
-        float previewReserve = 0f)
+        float previewReserve = 0f,
+        float leadingChipGutter = 0f)
     {
         var textTopInset = lineHeight - 4f - fontSize * 0.85f - 4f;
         var textBounds = new SKRect(
-            bounds.Left + HorizontalPadding,
+            bounds.Left + HorizontalPadding + leadingChipGutter,
             bounds.Top + VerticalPadding,
             sendLeft - 8f,
             bounds.Bottom - VerticalPadding - previewReserve);
         return new TextLayout(textBounds, Math.Max(40f, textBounds.Width), textTopInset);
+    }
+
+    private static SKRect expandComposerClipForSlashChip(
+        string display,
+        int caretIndex,
+        SlashCommandPreviewKind kind,
+        TextLayout layout,
+        SKPoint textOrigin,
+        float contentScrollOffsetY,
+        float fontSize,
+        float lineHeight,
+        SKRect textBounds)
+    {
+        if (!SkiaSlashCommandChip.ShouldDraw(kind, display))
+            return textBounds;
+        if (!ChatSlashAutocomplete.TryGetSlashLineRange(display, caretIndex, out var lineStart, out var lineEnd))
+            return textBounds;
+
+        var lineText = display[lineStart..lineEnd];
+        var lineIndex = 0;
+        for (var i = 0; i < lineStart; i++)
+        {
+            if (display[i] == '\n')
+                lineIndex++;
+        }
+
+        var lineBegin = lineStart;
+        while (lineBegin > 0 && display[lineBegin - 1] != '\n')
+            lineBegin--;
+
+        var beforeSlash = display[lineBegin..lineStart];
+        var prefixWidth = string.IsNullOrEmpty(beforeSlash)
+            ? 0f
+            : SkiaSlashCommandChip.MeasureLabelWidth(beforeSlash, fontSize, monoFont: false);
+
+        var textLeft = textOrigin.X + prefixWidth;
+        var lineTop = textOrigin.Y + lineIndex * lineHeight - contentScrollOffsetY;
+        var labelW = SkiaSlashCommandChip.MeasureLabelWidth(lineText, fontSize, monoFont: false);
+        var chipRect = SkiaSlashCommandChip.ComputeChipRect(textLeft, lineTop, lineHeight, labelW);
+        return SkiaStatusChip.ExpandClipForChip(textBounds, chipRect);
+    }
+
+    private static float ResolveLeadingChipLayoutGutter(
+        string display,
+        int caretIndex,
+        SlashCommandPreviewKind kind)
+    {
+        if (string.IsNullOrEmpty(display) || kind == SlashCommandPreviewKind.None)
+            return 0f;
+        if (!ChatSlashAutocomplete.TryGetSlashLineRange(display, caretIndex, out var lineStart, out var lineEnd))
+            return 0f;
+        var slashText = display[lineStart..lineEnd];
+        if (!SkiaSlashCommandChip.ShouldDraw(kind, slashText))
+            return 0f;
+        var lineBegin = lineStart;
+        while (lineBegin > 0 && display[lineBegin - 1] != '\n')
+            lineBegin--;
+        var beforeSlash = display[lineBegin..lineStart];
+        return string.IsNullOrWhiteSpace(beforeSlash) ? SkiaStatusChip.LeadingChipLayoutGutter : 0f;
     }
 
     private static bool TryComputeCaretLine(

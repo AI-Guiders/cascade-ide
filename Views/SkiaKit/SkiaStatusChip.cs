@@ -23,8 +23,8 @@ internal readonly record struct SkiaStatusChipColors(
     SKColor Accent);
 
 /// <summary>
-/// Примитив Skia: скруглённая рамка + опциональная иконка слева (как attach-chip / slash TCI).
-/// Текст рисует вызывающий код с <see cref="ContentLeftInRect"/> и <see cref="Accent"/> из палитры.
+/// Примитив Skia: скруглённая рамка + опциональная иконка (как attach-chip / slash TCI).
+/// Текст рисует вызывающий код с акцентом из палитры.
 /// </summary>
 internal static class SkiaStatusChip
 {
@@ -36,45 +36,62 @@ internal static class SkiaStatusChip
     public const float MinHeight = 22f;
     public const float BorderStroke = 1.25f;
 
-    /// <summary>Ширина зоны иконки слева от начала текста (pill рисуется левее <c>/</c>).</summary>
+    /// <summary>Ширина зоны иконки слева от начала текста (legacy left placement).</summary>
     public const float IconLeadingOverhang = PadX + IconBox + IconGap;
 
-    public static float ContentWidthPadding(bool withIcon = true) =>
-        PadX * 2f + (withIcon ? IconBox + IconGap : 0f);
+    /// <summary>Доп. отступ слева в layout при <see cref="SkiaStatusChipIconPlacement.Left"/>.</summary>
+    public const float LeadingChipLayoutGutter = IconLeadingOverhang + BorderStroke + 2f;
 
-    public static float ComputeContentWidth(float labelWidth, bool withIcon = true) =>
-        ContentWidthPadding(withIcon) + labelWidth;
+    public static float ContentWidthPadding(SkiaStatusChipIconPlacement iconPlacement) =>
+        PadX * 2f + IconZoneWidth(iconPlacement);
 
-    /// <summary>
-    /// Pill вокруг контента, начинающегося в <paramref name="textLeft"/> (иконка слева от текста).
-    /// </summary>
+    public static float ComputeContentWidth(float labelWidth, SkiaStatusChipIconPlacement iconPlacement) =>
+        ContentWidthPadding(iconPlacement) + labelWidth;
+
+    /// <summary>Pill вокруг slash-текста, начинающегося в <paramref name="textLeft"/>.</summary>
     public static SKRect ComputeRectAroundTextStart(
         float textLeft,
         float textTop,
         float lineHeight,
         float labelWidth,
-        bool withIcon = true)
+        SkiaStatusChipIconPlacement iconPlacement = SkiaStatusChipIconPlacement.Right)
     {
-        var chipW = ComputeContentWidth(labelWidth, withIcon);
+        var chipW = ComputeContentWidth(labelWidth, iconPlacement);
         var chipH = Math.Max(lineHeight + PadY * 2f, MinHeight);
         var chipTop = textTop + (lineHeight - chipH) * 0.5f;
-        var chipLeft = withIcon
-            ? textLeft - PadX - IconBox - IconGap
-            : textLeft - PadX;
+        var chipLeft = textLeft - PadX;
         return new SKRect(chipLeft, chipTop, chipLeft + chipW, chipTop + chipH);
     }
 
-    public static float ContentLeftInRect(SKRect chipRect, bool withIcon = true) =>
-        chipRect.Left + (withIcon ? PadX + IconBox + IconGap : PadX);
+    public static float ContentLeftInRect(
+        SKRect chipRect,
+        SkiaStatusChipIconPlacement iconPlacement = SkiaStatusChipIconPlacement.Left) =>
+        iconPlacement switch
+        {
+            SkiaStatusChipIconPlacement.Right => chipRect.Left + PadX,
+            SkiaStatusChipIconPlacement.HighlightOnly => chipRect.Left + PadX,
+            _ => chipRect.Left + PadX + IconBox + IconGap,
+        };
 
-    public static SKPoint IconCenterInRect(SKRect chipRect) =>
-        new(chipRect.Left + PadX + IconBox * 0.5f, chipRect.MidY);
+    public static SKPoint IconCenterInRect(
+        SKRect chipRect,
+        SkiaStatusChipIconPlacement iconPlacement = SkiaStatusChipIconPlacement.Left) =>
+        iconPlacement switch
+        {
+            SkiaStatusChipIconPlacement.Left => new(chipRect.Left + PadX + IconBox * 0.5f, chipRect.MidY),
+            SkiaStatusChipIconPlacement.Right => new(chipRect.Right - PadX - IconBox * 0.5f, chipRect.MidY),
+            _ => new(chipRect.MidX, chipRect.MidY),
+        };
 
-    public static SkiaStatusChipColors ResolveColors(
-        ISkiaKitPaintTheme theme,
-        SkiaStatusChipSeverity severity,
-        SKColor? mutedContent = null) =>
-        ResolveColors(theme, severity, mutedContent ?? theme.EmptyHint);
+    public static float ComputeContentWidth(float labelWidth) =>
+        ComputeContentWidth(labelWidth, SkiaStatusChipIconPlacement.Left);
+
+    public static SKRect ExpandClipForChip(SKRect clipRect, SKRect chipRect)
+    {
+        var union = SKRect.Union(clipRect, chipRect);
+        union.Inflate(BorderStroke + 1f, BorderStroke + 1f);
+        return union;
+    }
 
     public static void DrawFrame(SKCanvas canvas, SKRect chipRect, in SkiaStatusChipColors colors)
     {
@@ -138,16 +155,25 @@ internal static class SkiaStatusChip
         ISkiaKitPaintTheme theme,
         SkiaStatusChipSeverity severity,
         float iconFontSize,
-        bool withIcon = true)
+        SkiaStatusChipIconPlacement iconPlacement = SkiaStatusChipIconPlacement.Right)
     {
         if (severity == SkiaStatusChipSeverity.None)
             return;
 
         var colors = ResolveColors(theme, severity);
         DrawFrame(canvas, chipRect, colors);
-        if (withIcon)
-            DrawIcon(canvas, IconCenterInRect(chipRect), severity, colors.Icon, iconFontSize);
+        if (iconPlacement != SkiaStatusChipIconPlacement.HighlightOnly)
+            DrawIcon(canvas, IconCenterInRect(chipRect, iconPlacement), severity, colors.Icon, iconFontSize);
     }
+
+    public static SkiaStatusChipColors ResolveColors(
+        ISkiaKitPaintTheme theme,
+        SkiaStatusChipSeverity severity,
+        SKColor? mutedContent = null) =>
+        ResolveColors(theme, severity, mutedContent ?? theme.EmptyHint);
+
+    private static float IconZoneWidth(SkiaStatusChipIconPlacement iconPlacement) =>
+        iconPlacement == SkiaStatusChipIconPlacement.HighlightOnly ? 0f : IconBox + IconGap;
 
     private static SkiaStatusChipColors ResolveColors(
         ISkiaKitPaintTheme theme,

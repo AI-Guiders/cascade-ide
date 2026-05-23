@@ -9,6 +9,12 @@ public sealed class IntercomSettings
     /// </summary>
     public string FeedMetrics { get; set; } = IntercomFeedMetricsModes.Compact;
 
+    /// <summary>
+    /// Глиф валидации slash в CCL/composer: <c>left</c>, <c>right</c> (по умолчанию), <c>highlight_only</c>.
+    /// TOML: <c>[intercom] tci_validation_icon</c>.
+    /// </summary>
+    public string TciValidationIcon { get; set; } = TciValidationIconModes.Right;
+
     /// <summary>Вложения в ленте. TOML: <c>[intercom.attachments.*]</c>.</summary>
     public IntercomAttachmentsSettings Attachments { get; set; } = new();
 
