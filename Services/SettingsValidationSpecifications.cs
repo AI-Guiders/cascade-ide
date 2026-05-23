@@ -46,14 +46,22 @@ internal sealed class DisplaySettingsValidationSpecification : ISettingsValidati
                 }
 
                 var k = kv.Key.Trim();
-                if (!k.Equals(InstrumentRoutingSlotKeys.PfdPrimary, StringComparison.OrdinalIgnoreCase)
-                    && !k.Equals(InstrumentRoutingSlotKeys.MfdPrimary, StringComparison.OrdinalIgnoreCase))
+                var isPrimary = k.Equals(InstrumentRoutingSlotKeys.PfdPrimary, StringComparison.OrdinalIgnoreCase)
+                    || k.Equals(InstrumentRoutingSlotKeys.MfdPrimary, StringComparison.OrdinalIgnoreCase);
+                var isStrip = InstrumentRoutingSlotKeys.IsStatusStripKey(k);
+
+                if (!isPrimary && !isStrip)
                 {
-                    yield return $"[display.instruments] unknown key '{k}' (expected {InstrumentRoutingSlotKeys.PfdPrimary} or {InstrumentRoutingSlotKeys.MfdPrimary}).";
+                    yield return $"[display.instruments] unknown key '{k}' (expected {InstrumentRoutingSlotKeys.PfdPrimary}, {InstrumentRoutingSlotKeys.MfdPrimary}, {InstrumentRoutingSlotKeys.PfdStatusStrip}, or {InstrumentRoutingSlotKeys.ForwardStatusStrip}).";
                 }
 
                 if (string.IsNullOrWhiteSpace(kv.Value))
                     yield return $"[display.instruments] value for '{k}' is required.";
+                else if (isStrip)
+                {
+                    if (!InstrumentStatusStripRouting.TryParse(kv.Value, out var showStrip, out _))
+                        yield return $"[display.instruments] unknown value for '{k}' (expected {InstrumentStatusStripRouting.None} or background_status).";
+                }
                 else if (!InstrumentRoutingAliasResolver.TryResolve(kv.Value, out _))
                     yield return $"[display.instruments] unknown instrument alias or id for '{k}'.";
             }
