@@ -16,4 +16,7 @@ public static class CockpitStandardInstrumentIds
 
     /// <summary>Компактный статус IDE Health (build/tests/debug/git) в mount-слое (Wave 3).</summary>
     public const string IdeHealthStatusV1 = "ide_health_status_v1";
+
+    /// <summary>Полоса фона warm-up / HCI над зоной PFD или Forward (ADR 0141).</summary>
+    public const string WorkspaceBackgroundStatusV1 = "workspace_background_status_v1";
 }

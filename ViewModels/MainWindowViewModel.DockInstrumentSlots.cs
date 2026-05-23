@@ -34,6 +34,7 @@ public partial class MainWindowViewModel
     {
         foreach (var name in DockedInstrumentPlacementBindingNames)
             OnPropertyChanged(name);
+        NotifyWorkspaceBackgroundStatusStripPlacement();
         CoerceMfdShellPageToAllowed();
     }
 }

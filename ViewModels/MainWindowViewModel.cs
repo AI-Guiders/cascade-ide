@@ -296,6 +296,12 @@ public partial class MainWindowViewModel : ViewModelBase, IAutonomousAgentSessio
 
         ChatPanel.DisposeCursorAcpSession();
         _ = ChatPanel.ReloadIntercomSessionFromDiskAsync();
+        EnsurePfdBackgroundStatusSubscription();
+        if (string.IsNullOrWhiteSpace(value))
+            _hciReindexPending = false;
+        else
+            MarkHciReindexPendingForPfdStatus();
+
         ApplySolutionWarmupForCurrentSolution();
         ApplyHybridCodebaseIndexOrchestrationForCurrentSolution(pokeWhenAutoReindex: true);
         Editor.AttachBreakpointsFileWatcher(value);

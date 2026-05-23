@@ -41,13 +41,20 @@ public static class InstrumentRoutingAliasResolver
             return true;
         }
 
+        if (t.Equals("background_status", StringComparison.OrdinalIgnoreCase))
+        {
+            canonicalInstrumentId = CockpitStandardInstrumentIds.WorkspaceBackgroundStatusV1;
+            return true;
+        }
+
         return false;
     }
 
     private static bool IsKnownCanonical(string t) =>
         t.Equals(CockpitStandardInstrumentIds.SolutionExplorerTree, StringComparison.OrdinalIgnoreCase)
         || t.Equals(CockpitStandardInstrumentIds.WorkspaceNavigationMap, StringComparison.OrdinalIgnoreCase)
-        || t.Equals(CockpitStandardInstrumentIds.IdeHealthStatusV1, StringComparison.OrdinalIgnoreCase);
+        || t.Equals(CockpitStandardInstrumentIds.IdeHealthStatusV1, StringComparison.OrdinalIgnoreCase)
+        || t.Equals(CockpitStandardInstrumentIds.WorkspaceBackgroundStatusV1, StringComparison.OrdinalIgnoreCase);
 
     private static string NormalizeCanonical(string t)
     {
@@ -55,6 +62,8 @@ public static class InstrumentRoutingAliasResolver
             return CockpitStandardInstrumentIds.SolutionExplorerTree;
         if (t.Equals(CockpitStandardInstrumentIds.WorkspaceNavigationMap, StringComparison.OrdinalIgnoreCase))
             return CockpitStandardInstrumentIds.WorkspaceNavigationMap;
+        if (t.Equals(CockpitStandardInstrumentIds.WorkspaceBackgroundStatusV1, StringComparison.OrdinalIgnoreCase))
+            return CockpitStandardInstrumentIds.WorkspaceBackgroundStatusV1;
         return CockpitStandardInstrumentIds.IdeHealthStatusV1;
     }
 }
