@@ -1,31 +1,31 @@
 using System.Text.RegularExpressions;
 using CascadeIDE.Services;
 
-namespace CascadeIDE.ViewModels;
+namespace CascadeIDE.Features.Editor;
 
 /// <summary>Debug-hints редактора: EOL-подсказки по текущей остановке DAP и top-level переменным.</summary>
-public partial class MainWindowViewModel
+public sealed partial class EditorWorkspaceViewModel
 {
-    private static readonly Regex s_assignmentRegex = new(
+    private static readonly Regex AssignmentRegex = new(
         @"^\s*(?:(?:var|[A-Za-z_][\w<>,\[\]\?\s]*)\s+)?([A-Za-z_]\w*)\s*=",
         RegexOptions.Compiled);
 
-    private static readonly Regex s_conditionRegex = new(
+    private static readonly Regex ConditionRegex = new(
         @"^\s*(if|while|switch)\s*\((?<expr>.*)\)",
         RegexOptions.Compiled);
 
-    private static readonly Regex s_identifierRegex = new(
+    private static readonly Regex IdentifierRegex = new(
         @"\b[_A-Za-z]\w*\b",
         RegexOptions.Compiled);
 
     /// <summary>Собрать EOL debug hints для файла: в v1 только текущая исполняемая строка.</summary>
     public IReadOnlyList<EditorDebugHintStrip> GetEditorDebugHintsForFile(string filePath, string sourceText)
     {
-        var opts = _settings.Editor.DebugHints;
+        var opts = _host.McpSettings.Editor.DebugHints;
         if (!opts.Enabled)
             return [];
 
-        var snapshot = DapDebug.GetSnapshot();
+        var snapshot = _host.DapDebug.GetSnapshot();
         if (!snapshot.IsExecutionStopped || string.IsNullOrWhiteSpace(snapshot.StoppedFile))
             return [];
 
@@ -65,7 +65,7 @@ public partial class MainWindowViewModel
 
     private static string? TryBuildAssignmentLabel(string lineText, IReadOnlyDictionary<string, string> vars)
     {
-        var m = s_assignmentRegex.Match(lineText);
+        var m = AssignmentRegex.Match(lineText);
         if (!m.Success)
             return null;
         var name = m.Groups[1].Value;
@@ -76,7 +76,7 @@ public partial class MainWindowViewModel
 
     private static string? TryBuildConditionLabel(string lineText, IReadOnlyDictionary<string, string> vars)
     {
-        var m = s_conditionRegex.Match(lineText);
+        var m = ConditionRegex.Match(lineText);
         if (!m.Success)
             return null;
         var expr = m.Groups["expr"].Value;
@@ -98,7 +98,7 @@ public partial class MainWindowViewModel
     {
         var values = new List<string>(4);
         var seen = new HashSet<string>(StringComparer.Ordinal);
-        foreach (Match id in s_identifierRegex.Matches(source))
+        foreach (Match id in IdentifierRegex.Matches(source))
         {
             var name = id.Value;
             if (!seen.Add(name))

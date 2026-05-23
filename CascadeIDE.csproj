@@ -353,6 +353,12 @@
     <Compile Update="Features\Shell\ShellChromeViewModel.Commands.UiMode.cs">
       <DependentUpon>ShellChromeViewModel.cs</DependentUpon>
     </Compile>
+    <Compile Update="Features\Shell\ShellChromeViewModel.Commands.Safety.cs">
+      <DependentUpon>ShellChromeViewModel.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Features\Shell\ShellChromeViewModel.Commands.MarkdownPreview.cs">
+      <DependentUpon>ShellChromeViewModel.cs</DependentUpon>
+    </Compile>
     <Compile Update="Features\Documents\DocumentsWorkspaceViewModel.Commands.cs">
       <DependentUpon>DocumentsWorkspaceViewModel.cs</DependentUpon>
     </Compile>
@@ -376,6 +382,15 @@
       <DependentUpon>EditorWorkspaceViewModel.cs</DependentUpon>
     </Compile>
     <Compile Update="Features\Editor\EditorWorkspaceViewModel.Hud.cs">
+      <DependentUpon>EditorWorkspaceViewModel.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Features\Editor\EditorWorkspaceViewModel.DebugHints.cs">
+      <DependentUpon>EditorWorkspaceViewModel.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Features\Editor\EditorWorkspaceViewModel.InlineHints.cs">
+      <DependentUpon>EditorWorkspaceViewModel.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Features\Editor\EditorWorkspaceViewModel.StabilizedInput.cs">
       <DependentUpon>EditorWorkspaceViewModel.cs</DependentUpon>
     </Compile>
   </ItemGroup>

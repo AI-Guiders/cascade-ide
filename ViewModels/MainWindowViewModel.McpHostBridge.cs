@@ -55,6 +55,9 @@ public partial class MainWindowViewModel
 
     internal Services.IDotnetCommandRunner HostDotnetRunner => _dotnetRunner;
 
+    internal void HostUpdateCodeNavigationMapCaretOffset(int? offset) =>
+        UpdateCodeNavigationMapCaretOffset(offset);
+
     internal int McpDebugStackSelectedIndex
     {
         get => _debugStackSelectedIndex;

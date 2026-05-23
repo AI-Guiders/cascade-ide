@@ -2,6 +2,7 @@ using System.ComponentModel;
 using CascadeIDE.Features.Editor;
 using CascadeIDE.Features.Editor.Application;
 using CascadeIDE.Features.Editor.Application.Presentation;
+using CascadeIDE.Services;
 
 namespace CascadeIDE.ViewModels;
 
@@ -77,6 +78,23 @@ public partial class MainWindowViewModel
     }
 
     public bool IsEditorHudBannerVisible => Editor.IsEditorHudBannerVisible;
+
+    public IReadOnlyList<EditorTrailingInlayPart> GetEditorInlineHintsForFile(string filePath, string sourceText) =>
+        Editor.GetEditorInlineHintsForFile(filePath, sourceText);
+
+    public IReadOnlyList<EditorDebugHintStrip> GetEditorDebugHintsForFile(string filePath, string sourceText) =>
+        Editor.GetEditorDebugHintsForFile(filePath, sourceText);
+
+    internal void SetActiveEditorStabilizedHudHandler(Action<EditorInputDelta>? handler) =>
+        Editor.SetActiveEditorStabilizedHudHandler(handler);
+
+    internal void ClearActiveEditorStabilizedHudHandlerIfEquals(Action<EditorInputDelta>? handler) =>
+        Editor.ClearActiveEditorStabilizedHudHandlerIfEquals(handler);
+
+    internal bool TryPostEditorStabilizedInput(EditorInputDelta delta) =>
+        Editor.TryPostEditorStabilizedInput(delta);
+
+    internal void ShutdownEditorStabilizedInput() => Editor.ShutdownEditorStabilizedInput();
 
     private void OnEditorWorkspacePropertyChanged(object? sender, PropertyChangedEventArgs e)
     {

@@ -34,7 +34,7 @@ public sealed class MarkdownPreviewRoutingTests
             EditorText = "# Title"
         };
 
-        ((IIdeMcpActions)vm).ShowEditorPreview();
+        vm.IdeMcp.ShowEditorPreview();
         await Dispatcher.UIThread.InvokeAsync(() => { });
 
         Assert.Equal(MfdShellPage.MarkdownPreview, vm.CurrentMfdShellPage);

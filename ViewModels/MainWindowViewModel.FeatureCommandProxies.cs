@@ -108,4 +108,14 @@ public partial class MainWindowViewModel
     public IRelayCommand<string?> MoveDocumentToGroup3Command => Documents.MoveDocumentToGroup3Command;
 
     public IRelayCommand ReopenClosedDocumentCommand => Documents.ReopenClosedDocumentCommand;
+
+    public IRelayCommand SetSafetyL1Command => Shell.SetSafetyL1Command;
+
+    public IRelayCommand SetSafetyL2Command => Shell.SetSafetyL2Command;
+
+    public IRelayCommand SetSafetyL3Command => Shell.SetSafetyL3Command;
+
+    public IRelayCommand ShowMarkdownPreviewPageCommand => Shell.ShowMarkdownPreviewPageCommand;
+
+    public IRelayCommand OpenPreviewWindowCommand => Shell.OpenPreviewWindowCommand;
 }

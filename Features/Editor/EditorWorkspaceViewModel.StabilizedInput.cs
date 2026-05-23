@@ -1,13 +1,14 @@
 using CascadeIDE.Features.Editor.Application;
+using CascadeIDE.Services;
 
-namespace CascadeIDE.ViewModels;
+namespace CascadeIDE.Features.Editor;
 
 /// <summary>
 /// Один hi-freq throttler на главное окно (ADR 0103): не N фоновых consumer на N вкладок.
 /// Стабилизированный выход обрабатывается только если <see cref="EditorInputDelta.FilePath"/>
-/// совпадает с <see cref="CurrentFilePath"/> (устаревшие дельты после смены вкладки отбрасываются).
+/// совпадает с <see cref="CurrentFilePath"/>.
 /// </summary>
-public partial class MainWindowViewModel
+public sealed partial class EditorWorkspaceViewModel
 {
     private EditorStabilizedInputThrottler? _editorStabilizedThrottler;
     private CancellationTokenSource? _editorStabilizedCts;
@@ -48,7 +49,7 @@ public partial class MainWindowViewModel
             return;
 
         _activeEditorStabilizedHudHandler?.Invoke(d);
-        UpdateCodeNavigationMapCaretOffset(d.CaretOffset);
+        _host.HostUpdateCodeNavigationMapCaretOffset(d.CaretOffset);
     }
 
     internal void ShutdownEditorStabilizedInput()
@@ -63,7 +64,6 @@ public partial class MainWindowViewModel
             }
             catch
             {
-                // cancel
             }
         }
 

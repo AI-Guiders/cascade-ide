@@ -318,7 +318,14 @@
 - Удалены `RelayCommands.Shell`, `RelayCommands.Debug`; build-команды убраны из `SolutionBuild`; удалены `Breakpoints.cs`, `EditorHud.cs` на MWVM.
 - `ShowDebugInfoAsync`, `GetWorkspacePath` — internal на host; тесты MCP → `vm.IdeMcp`.
 
-**Дальше (этап 6):** Safety L1–L3 (`RelayCommands.UiMode`), оставшиеся MCP relay на MWVM, метрики LOC / сужение partial MWVM.
+**Этап 6 (v1.58):**
+
+- **Shell:** `ShellChromeViewModel.Commands.Safety` (L1–L3), `Commands.MarkdownPreview` (MFD preview / отдельное окно).
+- **Editor:** `EditorWorkspaceViewModel.DebugHints`, `InlineHints`, `StabilizedInput`; прокси на MWVM.
+- Удалены `RelayCommands.UiMode`, `IdeMcpUiRelayCommands`, `EditorDebugHints` / `EditorInlineHints` / `EditorStabilizedInput` на MWVM.
+- Bridge: `HostUpdateCodeNavigationMapCaretOffset`.
+
+**Дальше:** метрики LOC в таблице partial MWVM; крупные кластеры (navigation map, HCI) — Plan B по мере фич.
 
 **Backlog MWVM (закрыт, v1.49–v1.52):**
 
