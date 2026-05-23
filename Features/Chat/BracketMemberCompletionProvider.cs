@@ -1,5 +1,6 @@
 #nullable enable
 
+using System.Collections.Concurrent;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -12,6 +13,11 @@ namespace CascadeIDE.Features.Chat;
 public static class BracketMemberCompletionProvider
 {
     public sealed record Match(string Name, string Help);
+
+    private sealed record FileIndexCache(long MtimeUtcTicks, IReadOnlyList<Match> Members);
+
+    private static readonly ConcurrentDictionary<string, FileIndexCache> IndexByAbsolutePath =
+        new(StringComparer.OrdinalIgnoreCase);
 
     public static IReadOnlyList<Match> GetMatches(
         string? filePath,
@@ -28,6 +34,41 @@ public static class BracketMemberCompletionProvider
         if (!absolute.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
             return [];
 
+        long mtimeTicks;
+        try
+        {
+            mtimeTicks = File.GetLastWriteTimeUtc(absolute).Ticks;
+        }
+        catch
+        {
+            return [];
+        }
+
+        var all = loadOrBuildIndex(absolute, mtimeTicks);
+        var prefix = namePrefix.Trim();
+
+        IEnumerable<Match> ranked = all;
+        if (prefix.Length > 0)
+            ranked = ranked.Where(m => m.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
+
+        return ranked
+            .OrderBy(m => m.Name, StringComparer.OrdinalIgnoreCase)
+            .Take(limit)
+            .ToList();
+    }
+
+    private static IReadOnlyList<Match> loadOrBuildIndex(string absolute, long mtimeTicks)
+    {
+        if (IndexByAbsolutePath.TryGetValue(absolute, out var cached) && cached.MtimeUtcTicks == mtimeTicks)
+            return cached.Members;
+
+        var built = buildIndex(absolute);
+        IndexByAbsolutePath[absolute] = new FileIndexCache(mtimeTicks, built);
+        return built;
+    }
+
+    private static IReadOnlyList<Match> buildIndex(string absolute)
+    {
         string text;
         try
         {
@@ -38,7 +79,6 @@ public static class BracketMemberCompletionProvider
             return [];
         }
 
-        var prefix = namePrefix.Trim();
         var tree = CSharpSyntaxTree.ParseText(SourceText.From(text, Encoding.UTF8), path: absolute);
         var root = tree.GetCompilationUnitRoot();
         if (root is null)
@@ -68,10 +108,10 @@ public static class BracketMemberCompletionProvider
                     foreach (var v in f.Declaration.Variables)
                         add(names, v.Identifier.Text, "field");
                     break;
-                case ClassDeclarationSyntax cl:
-                case StructDeclarationSyntax st:
-                case InterfaceDeclarationSyntax it:
-                case RecordDeclarationSyntax r:
+                case ClassDeclarationSyntax:
+                case StructDeclarationSyntax:
+                case InterfaceDeclarationSyntax:
+                case RecordDeclarationSyntax:
                     var typeName = node switch
                     {
                         ClassDeclarationSyntax c => c.Identifier.Text,
@@ -86,13 +126,8 @@ public static class BracketMemberCompletionProvider
             }
         }
 
-        IEnumerable<KeyValuePair<string, string>> ranked = names;
-        if (prefix.Length > 0)
-            ranked = ranked.Where(p => p.Key.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
-
-        return ranked
+        return names
             .OrderBy(p => p.Key, StringComparer.OrdinalIgnoreCase)
-            .Take(limit)
             .Select(p => new Match(p.Key, p.Value))
             .ToList();
     }
