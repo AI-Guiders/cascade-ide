@@ -6,6 +6,7 @@ using Avalonia.Input.TextInput;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using CascadeIDE.Views.Chat.Skia;
+using CascadeIDE.Views.SkiaKit;
 using SkiaSharp;
 
 namespace CascadeIDE.Views;
@@ -48,15 +49,46 @@ public partial class SkiaChatSurfaceControl
             return default;
 
         var pt = Math.Max(10f, IntercomFonts.ResolveChromeSubtitlePt());
-        using var font = new SKFont(SKTypeface.FromFamilyName(IntercomFonts.ResolveProseFamily()), pt);
         var text = TopicNavigatorSearchQuery ?? "";
         var caret = Math.Clamp(_navigatorSearchCaretIndex, 0, text.Length);
         var prefix = text[..caret];
         var textLeft = _navigatorSearchBounds.Left + 8f;
-        var caretX = textLeft + (prefix.Length > 0 ? font.MeasureText(prefix) : 0f);
+        var caretX = textLeft + SkiaPlainTextLayout.MeasurePrefixWidth(prefix, pt);
         var midY = _navigatorSearchBounds.MidY + 4f;
-        var lineH = font.Metrics.CapHeight + 4f;
+        var lineH = pt + 4f;
         return new Rect(caretX, midY - lineH * 0.55f, 2, lineH);
+    }
+
+    internal bool TryPlaceNavigatorSearchCaretAtPoint(float x, float y)
+    {
+        if (_navigatorSearchBounds.Width <= 0)
+            return false;
+
+        var pt = Math.Max(10f, IntercomFonts.ResolveChromeSubtitlePt());
+        var text = TopicNavigatorSearchQuery ?? "";
+        var innerLeft = _navigatorSearchBounds.Left + 8f;
+        var innerTop = _navigatorSearchBounds.Top + 4f;
+        var innerWidth = Math.Max(20f, _navigatorSearchBounds.Width - 16f);
+        var innerHeight = Math.Max(12f, _navigatorSearchBounds.Height - 8f);
+        if (x < innerLeft || x > innerLeft + innerWidth || y < innerTop || y > innerTop + innerHeight)
+            return false;
+
+        if (!SkiaPlainTextLayout.TryHitTestCaretIndex(
+                text,
+                x - innerLeft,
+                y - innerTop,
+                innerWidth,
+                pt,
+                innerHeight,
+                out var index,
+                maxLines: 1))
+            index = text.Length;
+
+        NavigatorSearchCaretIndex = index;
+        _textInputClient?.NotifyCursorMoved();
+        ShowComposerCaretSolid();
+        NotifyNavigatorSearchDraftChanged();
+        return true;
     }
 
     private void FocusNavigatorSearch()

@@ -272,6 +272,8 @@ CCL — не «ещё одна фича Intercom», а **слой между cho
 
 **Валидация в стиле attach ([0128](0128-intercom-attachment-anchors-and-code-references.md) §9.1):** debounced preview в CCL показывает исход (`resolved` / `degraded` / `failed`) **без блокировки** Enter, как chip в ленте — не отдельный «терминал ошибок».
 
+**Preview severity ≠ канал EICAS ([0021](0021-pfd-mfd-cockpit-attention-model.md) W/C/A):** TCI slash-preview — `SlashCommandPreviewService` / `SlashCommandPreviewKind` (CCL + composer). Таблица — [`playbook-tci-v1.md`](../design/playbook-tci-v1.md) § Preview severity. Глифы ✓ / ✕ / **P(n)** — [0140](0140-tci-slash-status-glyphs-and-args-counter.md).
+
 **Рекомендуемый порядок внедрения**
 
 1. CCL shell + `cockpit.open_command_line` + chord `/` (хотя бы **EditorHost** для Pilot).
@@ -401,14 +403,12 @@ Preview: `FormatSummary` → `PreviewSummary`; `PreviewSegments` → ghost (фа
 ### Preview pipeline (фаза A)
 
 ```csharp
-internal static class CockpitCommandLinePreviewBuilder
+public sealed class SlashCommandPreviewService
 {
-    public static bool TryBuild(
-        string bufferText,
-        CockpitCommandLineHostKind host,
-        out string? summary,
-        out IReadOnlyList<IntRange>? segments);
+    public SlashCommandPreviewResult Evaluate(string? slashBuffer);
+    public SlashCommandPreviewResult EvaluateComposerAtCaret(string? chatInput, int caretIndex);
 }
+// правила: internal SlashCommandPreviewEvaluator
 ```
 
 Логика: `ChatSlashCommandParser.TryParse` → если action известен и tail содержит segment syntax → summary без мутации VM.
@@ -496,12 +496,12 @@ intercom_host = "above_composer"  # Q1
 | ADR | **Accepted** — D1–D5, Q1–Q5 |
 | `ParametricSegmentListParser` | **Implemented** — legacy + `[a;b]`; unit-тесты |
 | `/intercom message select […]` multi-highlight | **Implemented** — slash/composer; Skia feed |
-| `CockpitCommandLinePreviewBuilder` | **Implemented** (internal) — текстовый summary для slash |
+| `SlashCommandPreviewService` / `SlashCommandPreviewEvaluator` | **Implemented** — текстовый summary для slash (CCL + composer) |
 | `/editor line select` multi-segment | **Partial** — один contiguous; disjoint → ошибка до CCL/editor union |
-| CCL **IntercomHost** (полоса над composer, preview, Enter/Esc) | **Partial** — фаза A; `OpenCockpitCommandLineUiCommand` |
+| CCL **IntercomHost** (полоса над composer, preview, Enter/Esc) | **Partial** — фаза A; `ICockpitCommandLineSession` + `CommandLineSession` |
 | CCL **EditorHost** | — |
 | `cockpit.open_command_line` + chord Ctrl+K `/` | **Partial** — палитра/MCP; chord — |
-| Preview в CCL UI (текст при наборе) | **Implemented** — `OnCockpitCommandLineTextChanged` → `CockpitCommandLinePreviewBuilder` |
+| Preview в CCL UI (текст при наборе) | **Implemented** — `SlashCommandPreviewService` (CCL + composer) |
 | Ghost preview (фаза B) | — |
 | `/intercom message anchors list`, `/anchor peek` | **Implemented** — slash + CCL; chip `a:…` ([0128 §10.1](0128-intercom-attachment-anchors-and-code-references.md#adr0128-p10b)) |
 

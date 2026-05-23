@@ -8,7 +8,7 @@ namespace CascadeIDE.Features.Launch.Application;
 /// <summary>
 /// Pre-resolve launch profile + MSBuild для F5 из главного окна (профиль / стартовый <c>.csproj</c>).
 /// </summary>
-[ComputingUnit("debug-launch-f5-ui")]
+[ApplicationOrchestrator("debug-launch-f5-ui")]
 public static class DebugLaunchForF5Orchestrator
 {
     /// <summary>

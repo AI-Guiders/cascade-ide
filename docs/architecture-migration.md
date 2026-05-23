@@ -145,7 +145,7 @@
 | **Терминал** | `TerminalPanelViewModel` | `Features/Terminal/TerminalPanelViewModel` | Вкладка Terminal (телеметрия Power на той же вкладке — пока на главном VM) |
 | **Чат** | История, ввод, `SendChat`, стриминг в `ChatPanelViewModel` | `Features/Chat/ChatPanelViewModel` + `ChatMessageViewModel` | Правая колонка; провайдер/модель и контекст редактора — замыкания на `MainWindowViewModel` |
 | **Инструментирование** | События, таймлайн, агент, тесты, MCP-отладка | `Features/Instrumentation/InstrumentationPanelViewModel` | В разметке — `DataContext="{Binding InstrumentationPanel}"` + `x:DataType`; главный VM не дублирует поля |
-| **Решение и документы** | `SolutionRoots`, `OpenDocuments`, dock | Остаётся в `MainWindowViewModel` или выносится **SolutionWorkspaceViewModel** позже | Ядро сессии IDE |
+| **Решение и документы** | `SolutionRoots`, `OpenDocuments`, dock | **`SolutionWorkspaceViewModel`** + **`DocumentsWorkspaceViewModel`** (`Features/Workspace`, `Features/Documents`); MWVM — композитор и `SolutionLoadSessionApplyProjection.IHost` | Ядро сессии IDE |
 | **MCP-мост** | `IIdeMcpActions` на `MainWindowViewModel` | Остаётся на главном VM; делегирование в сервисы/дочерние VM | Контракт стабилен |
 
 ## Фазы
@@ -267,6 +267,74 @@
 - Четвёртый срез (**v1.40e**): partial **`MainWindowViewModel.WorkspaceNavigationMap.Refresh`** — debounce、`RunWorkspaceNavigationMapRefreshAsync` и viewport width; файл привязок/команд карты (**`WorkspaceNavigationMap.cs`**) укорочен до состояния и проекций.
   - пятый срез (**v1.40f**): **`MainWindowPresentationSurfaceProjection`** — видимость сплита main grid (`IsMainGridSplitColumnVisible`), флаги Skia-mount IDE Health (колонка / окно-хост), **`ResolveInstrumentMountStyleForSlot`**; отдельно **`MainWindowPresentationDapProjection`** для паузы/«running» DAP; геттеры **`MainWindowViewModel.Presentation`** только делегируют; тесты **`MainWindowPresentationDapProjectionTests`** и доп. кейсы в **`MainWindowPresentationSurfaceProjectionTests`**.
   - шестой срез (**v1.40g**): **`IMainWindowHostSurfaceInput`** (`Cockpit/Composition/HostSurface`) — **`MainWindowHostSurfaceProjection`** принимает контракт вместо ссылки на **`MainWindowViewModel`**; реализация на VM через partial; тест **`MainWindowHostSurfaceProjectionTests`**.
+- Кластер **Solution / Build / Startup / UiMode** (завершение Wave 1 UI, **v1.45–v1.48**):
+  - **`StartupProjectRefreshProjection`** — восстановление стартового `.csproj` после `LoadSolution`; **`MainWindowViewModel.StartupProject`** — делегирование.
+  - **`SolutionLoadUiApplyProjection`** — первая страница MFD после загрузки решения; **`MainWindowViewModel.SolutionBuild`** (`LoadSolutionAsync`).
+  - **`MainWindowBuildSolutionPrepProjection`** — `CanBuild` / prep заголовка и страницы Build; сборка по-прежнему через **`DotnetSolutionChunkedBuildOrchestrator`**.
+  - **`UiModeLayoutApplyProjection`** — план раскладки + persist workspace; **`ApplyUiModeLayout`** в **`UiGitWorkspace`**.
+
+### Wave 1 — статус (текущий объём **закрыт**)
+
+Фазы **0–5** и Wave 1 (**MCP thinning** + **UI clusters thinning** по плану v1.15–v1.48) считаются **выполненными** для зафиксированного scope strangler: главный VM остаётся композитором (подписки, дочерние VM, `IdeMcp` property), но крупные кластеры вынесены в `Features/*/Application` оркестраторами/проекциями.
+
+### Wave 2 — Big Bang MCP (v1.53, этап 1)
+
+**Цель:** убрать реализацию `IIdeMcpActions` с `MainWindowViewModel` — только композиция и `public IIdeMcpActions IdeMcp => _ideMcpHost`.
+
+**Сделано (этап 1):**
+
+- **`MainWindowIdeMcpHost`** (`Features/IdeMcp/Application/`, partial’ы бывших `MainWindowViewModel.IdeMcpActions.*`) — единственная реализация `IIdeMcpActions`.
+- **`MainWindowViewModel.McpHostBridge`** — internal-доступ к приватным полям/методам VM для host (git, editor providers, DataBus, breakpoints, debug stack).
+- **`IdeMcpCommandExecutor`** принимает `(MainWindowViewModel vm, IIdeMcpActions actions)`; generated/handlers вызывают `_actions`, не cast VM.
+- **`ProtocolDocGen`** генерирует `_actions` в pass-through хендлерах.
+- Call sites: `App.axaml.cs` (MCP stdio), `AgentContractHeadlessRuntime`, hotkeys, command palette, Intercom, Git panel (`IdeMcp`), DAP callback → `_ideMcpHost.ApplyDapDebugSnapshotToUi`.
+- RelayCommand превью Markdown остались на MWVM (`MainWindowViewModel.IdeMcpUiRelayCommands.cs`).
+
+**Этап 2 (v1.54):**
+
+- **`EditorWorkspaceViewModel`** (`Features/Editor/`) — `CurrentFilePath`, `EditorText`, selection, `IsLoadingCurrentFile`, markdown preview flags.
+- MWVM — прокси-свойства + ретрансляция `PropertyChanged` (Views/MCP без массовой правки).
+
+**Этап 3 (v1.55):**
+
+- **`ShellChromeViewModel`** (`Features/Shell/`) — регионы MainGrid, видимость MFD-страниц, `UiMode`, `EditorGroupCount`, `IsBuilding`, `CurrentMfdShellPage`, …
+- **`ShellChromePresentationNotifyMap`** — presentation-зависимости на MWVM (бывшие `NotifyPropertyChangedFor` на shell-полях).
+- MWVM — `Shell` + прокси + `OnShellChromePropertyChanged`; reactive side-effects (настройки, MFD-навигация, bloom UI mode) в `MainWindowViewModel.ShellSession`.
+- Удалены `MainWindowViewModel.ShellState.RegionAndContour` / `UiSessionChrome` (поля перенесены).
+
+**Этап 4 (v1.56):**
+
+- **Shell:** layout/MFD/UI mode RelayCommand → `ShellChromeViewModel.Commands.*`; MWVM — `MainWindowViewModel.FeatureCommandProxies` (палитра, MCP, hotkeys без смены имён команд).
+- **Documents:** вкладки/группы → `DocumentsWorkspaceViewModel.Commands`; `CloseDocument` API → `CloseDocumentByPath`.
+- **Safety L1–L3** — пока на MWVM (`RelayCommands.UiMode`).
+- Удалены `RelayCommands.Layout` / `RelayCommands.Documents`; `ToggleMfdRegionExpanded` убран из `SolutionBuild`.
+
+**Этап 5 (v1.57):**
+
+- **Application shell:** `MainWindowApplicationShellViewModel` — меню (открыть решение/папку/файл), темы, язык UI, окна-хосты; прокси команд на MWVM.
+- **Debug:** `MainWindowDebugSessionViewModel` — F5/attach/step/stop; `DebugLaunchInteractiveAsync` → `Debug.*`; `StateChanged` → `Debug.NotifyRelayCommandsChanged()`.
+- **Build:** `MainWindowBuildSessionViewModel` — `BuildSolutionAsync`, `HideBuildOutput`; bridge `HostDotnetRunner`.
+- **Editor slice:** `EditorWorkspaceViewModel.DebugGlyphs` (брейкпоинты, `DebugPosition*`), `EditorWorkspaceViewModel.Hud` (баннер диагностик/вхождений); прокси на MWVM.
+- Удалены `RelayCommands.Shell`, `RelayCommands.Debug`; build-команды убраны из `SolutionBuild`; удалены `Breakpoints.cs`, `EditorHud.cs` на MWVM.
+- `ShowDebugInfoAsync`, `GetWorkspacePath` — internal на host; тесты MCP → `vm.IdeMcp`.
+
+**Этап 6 (v1.58):**
+
+- **Shell:** `ShellChromeViewModel.Commands.Safety` (L1–L3), `Commands.MarkdownPreview` (MFD preview / отдельное окно).
+- **Editor:** `EditorWorkspaceViewModel.DebugHints`, `InlineHints`, `StabilizedInput`; прокси на MWVM.
+- Удалены `RelayCommands.UiMode`, `IdeMcpUiRelayCommands`, `EditorDebugHints` / `EditorInlineHints` / `EditorStabilizedInput` на MWVM.
+- Bridge: `HostUpdateCodeNavigationMapCaretOffset`.
+
+**Дальше:** метрики LOC в таблице partial MWVM; крупные кластеры (navigation map, HCI) — Plan B по мере фич.
+
+**Backlog MWVM (закрыт, v1.49–v1.52):**
+
+- **v1.49** — **`SolutionWorkspaceViewModel`** в `Features/Workspace/`; **`SolutionLoadSessionApplyProjection`** — применение загрузки решения (дерево + сброс редактора + MFD); тесты **`SolutionLoadSessionApplyProjectionTests`**.
+- **v1.50** — **`IdeMcpCommandExecutor`** перенесён в **`Features/IdeMcp/Execution/`** (диспетчер вне `ViewModels/`; генератор **`ProtocolDocGen`** и **`CascadeIDE.csproj`** синхронизированы). MWVM по-прежнему владеет экземпляром и маршалит UI.
+- **v1.51** — Точечный вынос MCP/UI при росте API — **правило на поддержку** ([feature-archetype-v1.md](design/feature-archetype-v1.md)); не big-bang.
+- **v1.52** — MEF/плагины и опциональный дополнительный батчинг Problems — **вне scope** (политика ADR 0009 / фаза 5 «основное сделано»); коалесcing BuildOutput и Diagnostics уже в продукте.
+
+Новые фичи — по **feature-archetype**; MWVM не раздуваем без выноса.
 
 ## Версионирование
 
@@ -335,6 +403,14 @@
 - **v1.41k** — MCP UI automation: **`IdeMcpActions.UiAutomation`** разнесён на **`UiAutomation.EditorPreview`** (редактор, брейкпоинты, превью) и **`UiAutomation.Providers`** (подтверждения, тема, провайдеры контролов и чата).
 - **v1.41l** — MCP executor: **`Handlers.DapDebug`** → **`DapDebug.LaunchAttach`** / **`DapDebug.Stepping`**; **`Handlers.Editor`** → **`Editor.ToolCatalog`** (статический **`RegisterCore`**), **`FilesAndChat`**, **`StateContent`**, **`EditNavigation`**; **`Chrome.MenuToolbar`** → **`MenuToolbar.DialogsApp`**, **`ThemeLanguage`**, **`PanelsLayout`**; **`CascadeIDE.csproj`** — **`DependentUpon`** для вложенных partial.
 - **v1.41m** — Workspace: **`BlankSolutionCreator`** (`Features/Workspace/Application`) — новое пустое **`.sln`** через **`dotnet new sln`**; меню **Файл → Создать новое решение…**, MCP **`create_new_solution_dialog`**, тесты **`BlankSolutionCreatorTests`**; **`MainWindowViewModel.TryCreateBlankSolutionAtPathAsync`**.
+- **v1.41n** — Роли слоёв: атрибут **`[PresentationProjection]`** (`CascadeIDE.Contracts`), анализатор **`LayerRoleConsistencyAnalyzer`** (**CASCOPE032–042**); проекции в `Features/*/Application` переведены с `[ComputingUnit]` на `[PresentationProjection]`; оркестраторы палитры/F5/debug — `[ApplicationOrchestrator]`; I/O-исключения (`ExpandedMarkdownFileExportProjection`, `StartupProjectDebugInferenceProjection`) остаются на `[ComputingUnit]`.
+- **v1.41o** — **`ShellSettingsPresentationProjection`** (был `ShellSettingsOrchestrator`); **CASCOPE039** не предупреждает MCP/application-фасады с `[ApplicationOrchestrator]` и делегированием в `*Service` (и разбором `JsonElement`/`GraphDocument`).
 - **v1.42** — [design/feature-archetype-v1.md](design/feature-archetype-v1.md) + [design/ide-chrome-tokens-v1.md](design/ide-chrome-tokens-v1.md); глобальные стили `cascadeSection` / UiKit **`CascadeSection`**, **`CascadeStatusChip`**; ADR **0076**, **0121** → Accepted.
 - **v1.43** — ADR **0120** (primary work surface Intercom/Editor) → Accepted · Implemented; IOP manifest синхронизирован.
 - **v1.44** — ADR **0119** (chat slash commands) → Accepted · Implemented (фазы A, A′, B); **0121** таблица зрелости обновлена.
+- **v1.45** — Strangler UI: **`StartupProjectRefreshProjection`**; MWVM **`StartupProject`** укорочен.
+- **v1.46** — **`SolutionLoadUiApplyProjection`** + **`MainWindowBuildSolutionPrepProjection`**; MWVM **`SolutionBuild`** без прямого `File.Exists` для CanBuild.
+- **v1.47** — **`UiModeLayoutApplyProjection`**; **`ApplyUiModeLayout`** в **`UiGitWorkspace`**.
+- **v1.48** — Wave 1 strangler MWVM (текущий объём) отмечен **закрытым**; backlog зафиксирован в разделе «Wave 1 — статус».
+- **v1.49** — **`SolutionWorkspaceViewModel`** + **`SolutionLoadSessionApplyProjection`** (см. backlog MWVM).
+- **v1.50** — **`IdeMcpCommandExecutor`** → **`Features/IdeMcp/Execution/`**.

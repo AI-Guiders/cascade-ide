@@ -96,21 +96,7 @@ public static class ChatBracketAutocomplete
             list.Add(template(state, "S:", "Syntax scope (for/if/…)", "Attach", "S:for:1", false));
             list.Add(template(state, "L:", "Lines 1-based", "Attach", "L:", false));
 
-            if (!string.IsNullOrWhiteSpace(activeFilePath)
-                && activeFilePath.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
-            {
-                foreach (var m in BracketMemberCompletionProvider.GetMatches(activeFilePath, workspaceRoot, "", Math.Min(8, memberLimit)))
-                {
-                    list.Add(template(
-                        state,
-                        $"M:{m.Name}",
-                        m.Help,
-                        "Member",
-                        $"M:{m.Name}",
-                        true));
-                }
-            }
-
+            // Не тянуть Roslyn/parse всего .cs на один символ «[» — только шаблоны осей; члены после M: / file M:.
             return list;
         }
 

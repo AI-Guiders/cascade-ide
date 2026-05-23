@@ -18,6 +18,7 @@
 |--------|------------|
 | Gutter, ПКМ «Выбрать сообщение #n» | 1-based в ветке |
 | `/intercom message select <n>` или `n m` / `n:m` | 1-based; активным — **конец** диапазона |
+| `/intercom message select clear` | Сбросить multi-highlight и активное сообщение в detail-ленте |
 | MCP `chat_select_message` с `ordinal` | то же, что slash (нужна открытая ветка) |
 | MCP `chat_select_message` с `index` | 0-based по **всему** списку сообщений сессии (legacy) |
 | `/intercom message find selection` | Сообщения ветки с attach на текущее выделение (inferred) |

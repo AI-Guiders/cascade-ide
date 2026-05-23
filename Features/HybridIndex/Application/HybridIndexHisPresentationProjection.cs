@@ -6,7 +6,7 @@ using CascadeIDE.Models;
 namespace CascadeIDE.Features.HybridIndex.Application;
 
 /// <summary>Статические строки лампы/сводки HIS (MFD) по событию DataBus без VM.</summary>
-[ComputingUnit("hybrid-index-his")]
+[PresentationProjection("hybrid-index-his")]
 public static class HybridIndexHisPresentationProjection
 {
     public static string LampText(HybridIndexStateChanged? last) =>

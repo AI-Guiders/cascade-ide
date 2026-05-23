@@ -33,9 +33,12 @@ internal static class SkiaIntercomCommandDeckLayout
         string composerText,
         bool showSlashPopup,
         int slashRowCount,
+        string? composerPreeditText = null,
         bool showSlashHierarchyHeader = false,
         float composerFontSize = 12f,
         float composerLineHeight = 17f,
+        string? composerSlashPreview = null,
+        float composerSlashPreviewFontSize = 10f,
         float commandLineFontSize = 12f,
         float commandLinePreviewFontSize = 10f)
     {
@@ -47,10 +50,12 @@ internal static class SkiaIntercomCommandDeckLayout
             surfaceWidth - SkiaComposerStrip.HorizontalPadding * 2 - SkiaComposerStrip.SendButtonWidth - 24f);
         var composerHeight = SkiaComposerStrip.MeasureHeight(
             composerText,
-            preeditText: null,
+            composerPreeditText,
             contentWidth,
             composerFontSize,
-            composerLineHeight);
+            composerLineHeight,
+            composerSlashPreview,
+            composerSlashPreviewFontSize);
         var commandLineHeight = showCommandLine
             ? SkiaCommandLineStrip.MeasureHeight(commandLinePreview, commandLineFontSize, commandLinePreviewFontSize)
             : 0f;
@@ -102,9 +107,12 @@ internal static class SkiaIntercomCommandDeckLayout
         string composerText,
         bool showSlashPopup,
         int slashRowCount,
+        string? composerPreeditText = null,
         bool showSlashHierarchyHeader = false,
         float composerFontSize = 12f,
         float composerLineHeight = 17f,
+        string? composerSlashPreview = null,
+        float composerSlashPreviewFontSize = 10f,
         float commandLineFontSize = 12f,
         float commandLinePreviewFontSize = 10f) =>
         Compute(
@@ -116,9 +124,12 @@ internal static class SkiaIntercomCommandDeckLayout
                 composerText,
                 showSlashPopup,
                 slashRowCount,
+                composerPreeditText,
                 showSlashHierarchyHeader,
                 composerFontSize,
                 composerLineHeight,
+                composerSlashPreview,
+                composerSlashPreviewFontSize,
                 commandLineFontSize,
                 commandLinePreviewFontSize)
             .TotalHeight;

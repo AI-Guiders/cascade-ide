@@ -3,7 +3,7 @@ using CascadeIDE.Contracts;
 
 namespace CascadeIDE.Features.Shell.Application;
 
-[ComputingUnit]
+[PresentationProjection]
 public static class UiModeSelectionParameter
 {
     public static int ParseIndex(object? parameter) =>

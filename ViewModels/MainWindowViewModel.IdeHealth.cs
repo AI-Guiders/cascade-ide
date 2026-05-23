@@ -59,7 +59,7 @@ public partial class MainWindowViewModel
     }
 
     /// <summary>Состояние сборки на шину после await с <c>ConfigureAwait(false)</c>; гарантирует пересбор полосы IDE Health на UI-потоке.</summary>
-    private Task PublishIdeBuildStateOnUiAsync(BuildStateChanged e) =>
+    internal Task PublishIdeBuildStateOnUiAsync(BuildStateChanged e) =>
         UiScheduler.Default.InvokeAsync(() => PublishToIdeDataBusAndRebuild(e));
 
     /// <summary>LSP → шина + пересбор полосы; вызывать с UI thread.</summary>

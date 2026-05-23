@@ -185,6 +185,21 @@ public static class ChatSlashCommandParser
                 null);
         }
 
+        if (IsIntercomTopicDelegate(head)
+            && string.Equals(action, "message", StringComparison.OrdinalIgnoreCase)
+            && TryParseIntercomMessageSelectVerb(topicArgsBeforeNormalize, args, out subAction, out var messageArgs))
+        {
+            return new ChatSlashCommandParseResult(
+                true,
+                false,
+                ChatSlashCommandShape.NamespaceAction,
+                head,
+                action,
+                subAction,
+                messageArgs,
+                null);
+        }
+
         return new ChatSlashCommandParseResult(
             true,
             false,
@@ -440,6 +455,28 @@ public static class ChatSlashCommandParser
         }
 
         return args;
+    }
+
+    private static bool TryParseIntercomMessageSelectVerb(
+        string topicArgsBeforeNormalize,
+        string normalizedArgs,
+        out string subAction,
+        out string messageArgs)
+    {
+        subAction = "";
+        messageArgs = normalizedArgs;
+        foreach (var verb in new[] { "select", "next", "prev" })
+        {
+            if (string.Equals(topicArgsBeforeNormalize, verb, StringComparison.OrdinalIgnoreCase)
+                || topicArgsBeforeNormalize.StartsWith(verb + " ", StringComparison.OrdinalIgnoreCase))
+            {
+                subAction = verb;
+                messageArgs = normalizedArgs;
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static bool IsFlatVerbWithArgTail(string head, string tail)

@@ -60,6 +60,11 @@ public partial class SkiaChatSurfaceControl
                 ClearNavigatorSearchFocus();
                 _commandLineFocused = true;
                 Focus();
+                var cclPoint = e.GetPosition(this);
+                TryPlaceCommandLineCaretAtPoint(
+                    (float)cclPoint.X,
+                    (float)cclPoint.Y,
+                    e.KeyModifiers.HasFlag(KeyModifiers.Shift));
                 return true;
             case SkiaChatPointerAction.ComposerFocus:
                 if (!ShowIntercomComposer)
@@ -67,9 +72,16 @@ public partial class SkiaChatSurfaceControl
                 ClearNavigatorSearchFocus();
                 _commandLineFocused = false;
                 Focus();
+                var composerPoint = e.GetPosition(this);
+                TryPlaceComposerCaretAtPoint(
+                    (float)composerPoint.X,
+                    (float)composerPoint.Y,
+                    e.KeyModifiers.HasFlag(KeyModifiers.Shift));
                 return true;
             case SkiaChatPointerAction.TopicNavigatorSearchFocus:
                 FocusNavigatorSearch();
+                var searchPoint = e.GetPosition(this);
+                TryPlaceNavigatorSearchCaretAtPoint((float)searchPoint.X, (float)searchPoint.Y);
                 return true;
             case SkiaChatPointerAction.TopicTabSelect when hit.SelectThreadId is { } tabThreadId:
                 if (e.GetCurrentPoint(this).Properties.IsRightButtonPressed)
@@ -167,8 +179,21 @@ public partial class SkiaChatSurfaceControl
             return true;
         }
 
-        if (_chatHits.ContainsPointerAction(point, SkiaChatPointerAction.ComposerFocus))
+        if (_chatHits.ContainsPointerAction(point, SkiaChatPointerAction.CommandLineFocus)
+            && ShowCockpitCommandLine
+            && _commandLineFocused)
+        {
+            if (TryScrollCommandLine((float)(e.Delta.Y * WheelPixelsPerDelta)))
+                return true;
             return true;
+        }
+
+        if (_chatHits.ContainsPointerAction(point, SkiaChatPointerAction.ComposerFocus))
+        {
+            if (TryScrollComposer((float)(e.Delta.Y * WheelPixelsPerDelta)))
+                return true;
+            return true;
+        }
 
         return false;
     }

@@ -1,0 +1,29 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CascadeIDE.ViewModels"
+             xmlns:chrome="using:CascadeIDE.Features.UiChrome"
+             x:Class="CascadeIDE.Views.PfdBackgroundStatusBarView"
+             x:DataType="vm:MainWindowViewModel">
+    <UserControl.Styles>
+        <Style Selector="Button.caution">
+            <Setter Property="Background" Value="#33FFB020"/>
+        </Style>
+    </UserControl.Styles>
+    <chrome:AttentionZoneContainer Zone="Hud">
+        <Button Classes.caution="{Binding IsPfdBackgroundStatusCaution}"
+                Background="{DynamicResource CascadeTheme.McpBannerBackground}"
+                BorderBrush="{DynamicResource CascadeTheme.BuildOutputBorderBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="10,5"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Left"
+                Command="{Binding OpenPfdBackgroundStatusDetailsCommand}"
+                Cursor="Hand">
+            <TextBlock Text="{Binding PfdBackgroundStatusText}"
+                       TextTrimming="CharacterEllipsis"
+                       Foreground="{DynamicResource CascadeTheme.HudBannerForeground}"
+                       FontSize="11.5"
+                       Opacity="0.95"/>
+        </Button>
+    </chrome:AttentionZoneContainer>
+</UserControl>

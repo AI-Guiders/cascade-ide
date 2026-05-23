@@ -4,6 +4,8 @@ using CascadeIDE.Views.SkiaKit;
 using SkiaSharp;
 using Topten.RichTextKit;
 
+// SkiaPlainTextLayout — единый measure/caret/hit-test для plain-текста.
+
 namespace CascadeIDE.Views.Chat.Skia;
 
 /// <summary>RichTextKit layout/paint for inline and block markdown subsets.</summary>
@@ -108,34 +110,8 @@ internal static class SkiaRichTextKitMarkdown
         SKColor color,
         int maxLines,
         float lineHeight,
-        string fontFamily = "Segoe UI")
-    {
-        if (maxWidth < 8f)
-            return null;
-
-        var rs = new RichString { MaxWidth = maxWidth };
-        rs.FontFamily(fontFamily).FontSize(fontSize).TextColor(color);
-        if (!string.IsNullOrEmpty(text))
-            rs.Add(text.Replace("\r", ""));
-
-        if (maxLines > 0 && maxLines < int.MaxValue)
-            rs.MaxHeight = maxLines * lineHeight;
-
-        var height = rs.MeasuredHeight;
-        if (height <= 0f)
-            height = string.IsNullOrEmpty(text) ? 0f : lineHeight;
-
-        return new SkiaRichTextKitBodyLayout
-        {
-            Body = text ?? "",
-            MaxWidth = maxWidth,
-            FontSize = fontSize,
-            MaxBodyLines = maxLines,
-            LineHeight = lineHeight,
-            BodyHeight = height,
-            FontFamily = fontFamily,
-        };
-    }
+        string fontFamily = "Segoe UI") =>
+        SkiaPlainTextLayout.TryMeasure(text, maxWidth, fontSize, color, maxLines, lineHeight, fontFamily);
 
     /// <summary>Координаты каретки в той же вёрстке, что <see cref="TryMeasurePlain"/> / Paint plain.</summary>
     public static bool TryGetPlainCaretLine(
@@ -148,38 +124,19 @@ internal static class SkiaRichTextKitMarkdown
         out float x,
         out float yTop,
         out float yBottom,
-        string fontFamily = "Segoe UI")
-    {
-        x = yTop = yBottom = 0f;
-        if (maxWidth < 8f || caretIndex < 0)
-            return false;
-
-        var body = text.Replace("\r", "");
-        caretIndex = Math.Clamp(caretIndex, 0, body.Length);
-
-        var rs = new RichString { MaxWidth = maxWidth };
-        rs.FontFamily(fontFamily).FontSize(fontSize);
-        if (!string.IsNullOrEmpty(body))
-            rs.Add(body);
-
-        var maxLines = (int)Math.Max(1, Math.Ceiling(rs.MeasuredHeight / Math.Max(1f, lineHeight)));
-        if (maxLines > 0 && maxLines < int.MaxValue)
-            rs.MaxHeight = maxLines * lineHeight;
-
-        var caretInfo = rs.GetCaretInfo(new CaretPosition(caretIndex, altPosition: false));
-        if (caretInfo.IsNone)
-            return false;
-
-        var caretRect = caretInfo.CaretRectangle;
-        x = origin.X + caretInfo.CaretXCoord;
-        yTop = origin.Y + caretRect.Top + CaretVerticalPad;
-        yBottom = origin.Y + caretRect.Bottom - CaretVerticalPad;
-        if (yBottom <= yTop)
-            yBottom = yTop + Math.Max(lineHeight - CaretVerticalPad * 2f, 8f);
-        return true;
-    }
-
-    private const float CaretVerticalPad = 2f;
+        string fontFamily = "Segoe UI") =>
+        SkiaPlainTextLayout.TryGetCaretLine(
+            text,
+            caretIndex,
+            maxWidth,
+            fontSize,
+            lineHeight,
+            origin,
+            out x,
+            out yTop,
+            out yBottom,
+            int.MaxValue,
+            fontFamily);
 
     public static void Paint(SKCanvas canvas, SKPoint origin, SkiaRichTextKitBodyLayout layout, SKColor contentColor, SKColor codeColor)
     {

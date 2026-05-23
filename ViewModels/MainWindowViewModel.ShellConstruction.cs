@@ -11,8 +11,12 @@ using CascadeIDE.Features.Build;
 using CascadeIDE.Features.Chat;
 using CascadeIDE.Features.Debug;
 using CascadeIDE.Features.Documents;
+using CascadeIDE.Features.Editor;
+using CascadeIDE.Features.Shell;
 using CascadeIDE.Features.Git;
 using CascadeIDE.Features.HybridIndex.Application;
+using CascadeIDE.Features.IdeMcp.Application;
+using CascadeIDE.Features.Workspace;
 using CascadeIDE.Features.Instrumentation;
 using CascadeIDE.Features.Markdown;
 using CascadeIDE.Features.Os.DataAcquisition;
@@ -35,7 +39,15 @@ public partial class MainWindowViewModel
         _osShell = osShell ?? OsShell.Default;
         Workspace = new SolutionWorkspaceViewModel();
         Chrome = new UiChromeViewModel();
-        Documents = new DocumentsWorkspaceViewModel(this, Workspace, () => ReopenClosedDocumentCommand.NotifyCanExecuteChanged());
+        Shell = new ShellChromeViewModel(this);
+        Shell.ApplyBootstrapFromSettings(_settings);
+        Shell.PropertyChanged += OnShellChromePropertyChanged;
+        ApplicationShell = new MainWindowApplicationShellViewModel(this);
+        Build = new MainWindowBuildSessionViewModel(this);
+
+        Editor = new EditorWorkspaceViewModel(this);
+        Editor.PropertyChanged += OnEditorWorkspacePropertyChanged;
+        Documents = new DocumentsWorkspaceViewModel(this, Workspace);
         Documents.PropertyChanged += OnDocumentsPropertyChanged;
         _csharpLanguageService = new Services.CSharpLanguageService();
         _contextMinimizer = new Services.ContextMinimizer(_csharpLanguageService);
@@ -56,14 +68,9 @@ public partial class MainWindowViewModel
         _anthropicApiKey = _aiKeys.AnthropicApiKey ?? "";
         _openAiApiKey = _aiKeys.OpenAiApiKey ?? "";
         _deepSeekApiKey = _aiKeys.DeepSeekApiKey ?? "";
-        _isPfdRegionExpanded = _settings.Workspace.PfdExpanded;
-        _isTerminalVisible = _settings.Workspace.ShowTerminal;
-        _isGitPanelVisible = _settings.Workspace.ShowGit;
-        _isInstrumentationDockVisible = _settings.Workspace.ShowInstrumentation;
-        _uiMode = NormalizeUiMode(_settings.Workspace.Mode);
         InitializeAgentUiDefaults();
         RegisterAgentFeedHandlers();
-        ApplyUiModeLayout(_uiMode, persist: false);
+        ApplyUiModeLayout(Shell.UiMode, persist: false);
         if (UiModeFamily.IsPowerFamily())
             UiScheduler.Default.Post(RefreshWorkspaceSnapshotCore, DispatcherPriority.Background);
 
@@ -77,19 +84,19 @@ public partial class MainWindowViewModel
         _workspaceSplittersLocked = _settings.Workspace.SplittersLocked;
 
         _hciIntegrationEnabled = _settings.HybridIndex.Enabled;
-        _hciIndexDir = ShellSettingsOrchestrator.NormalizeHybridIndexDir(_settings.HybridIndex.IndexDir);
+        _hciIndexDir = ShellSettingsPresentationProjection.NormalizeHybridIndexDir(_settings.HybridIndex.IndexDir);
         _hciDebounceMs = Math.Clamp(_settings.HybridIndex.DebounceMs, 0, 60_000);
         _hciAutoReindexOnSolutionOpen = _settings.HybridIndex.AutoReindexOnSolutionOpen;
         _hciWatchFiles = _settings.HybridIndex.WatchFiles;
-        _hciScopeMode = ShellSettingsOrchestrator.NormalizeHybridIndexScopeMode(_settings.HybridIndex.ScopeMode);
+        _hciScopeMode = ShellSettingsPresentationProjection.NormalizeHybridIndexScopeMode(_settings.HybridIndex.ScopeMode);
         _hciPauseWhenMcpStdioHost = _settings.HybridIndex.PauseWhenMcpStdioHost;
 
-        _ideMcpExecutor = new IdeMcpCommandExecutor(this);
-        _webAiPortalBridge = new WebAiPortalCommandBridge(this);
+        _ideMcpHost = new MainWindowIdeMcpHost(this);
+        _webAiPortalBridge = new WebAiPortalCommandBridge(IdeMcp);
 
         BuildOutputPanel = new BuildOutputPanelViewModel();
         TerminalPanel = new TerminalPanelViewModel(() => Workspace.SolutionPath);
-        GitPanel = new GitPanelViewModel(_gitRunner, GetWorkspacePath, this, LoadSolution, RefreshGitSummaryAsync, osShell: _osShell);
+        GitPanel = new GitPanelViewModel(_gitRunner, GetWorkspacePath, IdeMcp, LoadSolution, RefreshGitSummaryAsync, osShell: _osShell);
         ChatPanel = new ChatPanelViewModel(
             _aiProviderManager,
             () => ActiveAiProvider,
@@ -111,7 +118,7 @@ public partial class MainWindowViewModel
                 if (ShowTerminalPanelCommand.CanExecute(null))
                     ShowTerminalPanelCommand.Execute(null);
             }),
-            executeIdeCommandForMafAgent: (commandId, args, ct) => ((Services.IIdeMcpActions)this).ExecuteCommandAsync(commandId, args, ct),
+            executeIdeCommandForMafAgent: (commandId, args, ct) => IdeMcp.ExecuteCommandAsync(commandId, args, ct),
             revealIntercomAttachmentInIde: (anchor, select, ct) =>
                 RevealIntercomAttachmentInIdeAsync(anchor, select, ct),
             getLocalOllamaEndpoint: () => new Uri(Services.OllamaService.DefaultBaseUriString),
@@ -158,9 +165,10 @@ public partial class MainWindowViewModel
             HybridIndexIndexDirectoryRelative.ResolveOrDefault(_settings.HybridIndex.IndexDir));
         _dapDebug = new Services.IdeDapDebugSession(() =>
         {
-            UiScheduler.Default.Post(ApplyDapDebugSnapshotToUi);
+            UiScheduler.Default.Post(_ideMcpHost.ApplyDapDebugSnapshotToUi);
         }, _ideDataBus);
-        _dapDebug.StateChanged += (_, _) => NotifyDebugRelayCommandsChanged();
+        Debug = new MainWindowDebugSessionViewModel(this);
+        _dapDebug.StateChanged += (_, _) => Debug.NotifyRelayCommandsChanged();
         _mcpBuildTest = new Services.McpDotnetBuildTestService(_dotnetRunner);
         _mcpAgentNotes = new Services.McpAgentNotesService(() => _settings);
 

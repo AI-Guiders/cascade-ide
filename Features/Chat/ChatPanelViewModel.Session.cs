@@ -89,6 +89,7 @@ public partial class ChatPanelViewModel
                 ClarificationStatusText = rows.Count > 0
                     ? $"Восстановлено сообщений: {rows.Count}"
                     : "История Intercom пуста (новая сессия или нет событий на диске).";
+                RefreshAttachmentAnchorsForCurrentScope();
                 RefreshChatSurfaceSnapshot();
             }).ConfigureAwait(false);
         }

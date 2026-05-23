@@ -3,7 +3,7 @@ using CascadeIDE.Contracts;
 namespace CascadeIDE.Features.Search.Application;
 
 /// <summary>Сборка строк из совпадений <see cref="RipgrepWorkspaceMatch"/> после поиска.</summary>
-[ComputingUnit(note: "command palette goto ripgrep rows")]
+[PresentationProjection("command palette goto ripgrep rows")]
 public static class CommandPaletteGoToRipgrepNavRowsProjection
 {
     private const int PreviewMaxChars = 160;

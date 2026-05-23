@@ -1,70 +1,16 @@
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using CascadeIDE.Cockpit.DataBus;
-using CascadeIDE.Features.Build.Application;
+using CascadeIDE.Features.Workspace;
 using CascadeIDE.Features.Workspace.Application;
-using CascadeIDE.Services;
 using CascadeIDE.Models;
+using CascadeIDE.Services;
 using CommunityToolkit.Mvvm.Input;
 
 namespace CascadeIDE.ViewModels;
 
-/// <summary>Сборка, <c>BuildOutputPanel</c>.</summary>
+/// <summary>Загрузка решения, Ollama install; сборка — <see cref="Features.Build.MainWindowBuildSessionViewModel"/>.</summary>
 public partial class MainWindowViewModel
 {
-    [RelayCommand]
-    private void ToggleMfdRegionExpanded()
-    {
-        ApplyMfdRegionExpanded(!IsMfdRegionExpanded);
-    }
-
-    [RelayCommand(CanExecute = nameof(CanBuildSolution))]
-    private async Task BuildSolutionAsync()
-    {
-        var solutionPath = Workspace.SolutionPath;
-        if (string.IsNullOrWhiteSpace(solutionPath) || !File.Exists(solutionPath))
-            return;
-
-        PublishToIdeDataBusAndRebuild(new BuildStateChanged(true));
-        IsBuilding = true;
-        if (!IsTerminalVisible)
-            IsTerminalVisible = true;
-        IsBuildOutputVisible = true;
-
-        // Один канонический лог — только «Сборка · вывод» (и MCP get_build_output). Терминал не дублируем:
-        // в Power переключаем MFD на вывод сборки, чтобы лог был на глазах без второй копии текста.
-        CurrentMfdShellPage = MfdShellPage.Build;
-
-        var header = $"Сборка: {solutionPath}\r\n";
-        BuildOutputPanel.Set(header);
-
-        void AppendBuildChunk(string chunk) => BuildOutputPanel.Append(chunk);
-
-        var (lastExitCode, lastBuildSucceeded) =
-            await DotnetSolutionChunkedBuildOrchestrator.RunSolutionBuildStreamingAsync(
-                    solutionPath,
-                    _dotnetRunner,
-                    AppendBuildChunk,
-                    CancellationToken.None)
-                .ConfigureAwait(true);
-
-        BuildOutputPanel.FlushPending();
-        PublishToIdeDataBusAndRebuild(new BuildStateChanged(false, lastExitCode, lastBuildSucceeded));
-        IsBuilding = false;
-    }
-
-    private bool CanBuildSolution() =>
-        !string.IsNullOrWhiteSpace(Workspace.SolutionPath)
-        && File.Exists(Workspace.SolutionPath)
-        && !IsBuilding;
-
-    [RelayCommand]
-    private void HideBuildOutput()
-    {
-        IsBuildOutputVisible = false;
-    }
-
     public void LoadSolution(string path)
     {
         _ = LoadSolutionAsync(path);
@@ -91,21 +37,13 @@ public partial class MainWindowViewModel
                     return;
                 }
 
-                // New solution becomes authoritative UI context: clear stale editor selection/state.
-                _openFileDebounceCts?.Cancel();
-                Workspace.SelectedSolutionItem = null;
-                Documents.ClearForNewSolution();
-                CurrentFilePath = null;
-                EditorText = "";
-                IsLoadingCurrentFile = false;
-
-                Workspace.SolutionPath = normalizedSolutionPath ?? path;
-                Workspace.SolutionRoots.Clear();
-                Workspace.SolutionRoots.Add(root);
-                RefreshStartupProjectAfterSolutionLoad();
-                // Страница «Обозреватель» во вторичном контуре — только если карта инструментов назначает дерево в слот Mfd (без дубля с колонкой PFD).
-                TryNavigateToMfdShellPage(
-                    IsDockedMfdSolutionExplorerTree ? MfdShellPage.SolutionExplorer : MfdShellPage.Terminal);
+                SolutionLoadSessionApplyProjection.ApplySuccessfulLoad(
+                    Workspace,
+                    root,
+                    path,
+                    normalizedSolutionPath,
+                    IsDockedMfdSolutionExplorerTree,
+                    this);
             });
         }
         catch (Exception ex)
@@ -183,4 +121,20 @@ public partial class MainWindowViewModel
     }
 
     private bool CanInstallModel() => OllamaAvailable && !string.IsNullOrWhiteSpace(ModelToInstall) && !IsPullingModel;
+
+    void SolutionLoadSessionApplyProjection.IHost.ResetEditorSessionForNewSolution()
+    {
+        _openFileDebounceCts?.Cancel();
+        Documents.ClearForNewSolution();
+        CurrentFilePath = null;
+        EditorText = "";
+        IsLoadingCurrentFile = false;
+    }
+
+    void SolutionLoadSessionApplyProjection.IHost.AfterSolutionApplied(MfdShellPage initialMfdPage)
+    {
+        RefreshStartupProjectAfterSolutionLoad();
+        TryNavigateToMfdShellPage(initialMfdPage);
+        ScheduleWorkspaceNavigationMapRefresh();
+    }
 }

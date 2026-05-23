@@ -3,7 +3,7 @@ using CascadeIDE.Contracts;
 namespace CascadeIDE.Features.HybridIndex.Application;
 
 /// <summary>Сжатие длинных путей/строк для строк HIS (как ECAM).</summary>
-[ComputingUnit("presentation-his-shorten")]
+[PresentationProjection("presentation-his-shorten")]
 public static class HybridIndexHisPathDisplayShortener
 {
     public static string ShortenLikeEcam(string text)

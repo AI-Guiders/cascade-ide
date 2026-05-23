@@ -6,7 +6,7 @@ namespace CascadeIDE.Features.WorkspaceNavigation.Application;
 /// <summary>
 /// Проекция UI для панели карты намерений (PFD): видимость list/graph и вспомогательные строки без привязки к ViewModel.
 /// </summary>
-[ComputingUnit]
+[PresentationProjection]
 public static class CodeNavigationMapPresentationProjection
 {
     private static readonly string[] PresentationViewCycleOrder = ["list", "graph", "both"];
@@ -60,8 +60,15 @@ public static class CodeNavigationMapPresentationProjection
     public static bool ShowCodeNavigationMapList(string presentationView) =>
         CodeNavigationMapSettings.ViewWantsList(presentationView);
 
-    public static bool ShowCodeNavigationMapGraph(string presentationView) =>
-        CodeNavigationMapSettings.ViewWantsGraph(presentationView);
+    /// <summary>
+    /// Граф на PFD: для <c>controlFlow</c> всегда виден (основной продукт уровня), для <c>file</c> — по <c>view</c>.
+    /// </summary>
+    public static bool ShowCodeNavigationMapGraph(string presentationView, string mapLevel) =>
+        string.Equals(
+            CodeNavigationMapLevelKind.Normalize(mapLevel),
+            CodeNavigationMapLevelKind.ControlFlow,
+            StringComparison.Ordinal)
+        || CodeNavigationMapSettings.ViewWantsGraph(presentationView);
 
     /// <summary>Нужна ли нижняя строка под список на PFD (политика: список только в MFD — всегда false).</summary>
     public static bool ListAreaRowUsesStar(bool showList, bool showListOnPfd) => showList && showListOnPfd;

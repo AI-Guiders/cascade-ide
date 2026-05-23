@@ -4,7 +4,11 @@ using CascadeIDE.Features.HybridIndex.Application;
 
 namespace CascadeIDE.Services.Intercom;
 
-/// <summary>Фоновая синхронизация symbol sidecar с HCI reindex (ADR 0135).</summary>
+/// <summary>
+/// Фоновая синхронизация symbol sidecar с HCI reindex (ADR 0135).
+/// Fallback, если reindex прошёл без <see cref="HybridCodebaseIndex.Core.Indexing.ICodebaseIndexReindexObserver"/>
+/// (внешний MCP). In-proc CascadeIDE передаёт <see cref="IntercomSymbolLineHciReindexObserver"/>.
+/// </summary>
 public static class IntercomSymbolLineIndexCoordinator
 {
     private static int _rebuildGeneration;

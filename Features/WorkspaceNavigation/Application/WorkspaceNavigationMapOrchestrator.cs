@@ -2,6 +2,8 @@
 using System.Text.Json;
 using CascadeIDE.Cockpit.Graph;
 using CascadeIDE.Contracts;
+using CascadeIDE.Features.IdeMcp.Application;
+using CascadeIDE.Services.CodeNavigation;
 
 namespace CascadeIDE.Features.WorkspaceNavigation.Application;
 
@@ -34,6 +36,27 @@ public static class WorkspaceNavigationMapOrchestrator
         }
 
         return (line, col);
+    }
+
+    /// <summary>
+    /// CF refresh: курсор редактора для текущего файла; для fallback-якоря — первый метод в загруженном тексте.
+    /// </summary>
+    public static (int? line, int? column) ResolveControlFlowCursorForRefresh(
+        string? anchorPath,
+        string? currentPath,
+        string? sourceText,
+        int? caretOrSelectionOffset)
+    {
+        var anchorMatchesEditor = !string.IsNullOrEmpty(anchorPath)
+            && string.Equals(anchorPath, currentPath, StringComparison.OrdinalIgnoreCase);
+        if (anchorMatchesEditor)
+            return IdeMcpNavigationOrchestrator.ResolveControlFlowLineColumn(
+                null,
+                null,
+                sourceText,
+                caretOrSelectionOffset);
+
+        return CodeNavigationControlFlowSubgraphBuilder.TryResolveFirstMethodLineColumn(sourceText);
     }
 
     public static string ResolveErrorStatus(JsonElement root, string? currentPath)

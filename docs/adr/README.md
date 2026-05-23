@@ -73,6 +73,7 @@
 | 0135 | [symbol cache + HCI sidecar](0135-intercom-attach-symbol-cache-and-hci-sidecar.md) — **In progress** (L1 parse cache, L2 SQLite @ HCI reindex) |
 | 0136 | [gutter + `/intercom` namespace](0136-intercom-feed-gutter-and-slash-namespace.md) — **In progress** (select ПКМ/slash, без старых `/topic`) |
 | 0138 | [Cockpit Command Line](0138-cockpit-command-line-and-parametric-ranges.md) — **Accepted** (парсер + slash multi-select; CCL UI — фаза A) |
+| 0141 | [прогрев при open solution](0141-solution-scoped-warmup-orchestration.md) — **Accepted · Proposed** (оркестратор attach/bracket/HCI) |
 
 <a id="adr-index-full"></a>
 
@@ -215,6 +216,8 @@
 | [0136](0136-intercom-feed-gutter-and-slash-namespace.md) | Intercom: gutter номеров, явный select, единый `/intercom` slash | Accepted · In progress |
 | [0137](0137-intercom-message-code-correspondence.md) | Intercom: соответствие gutter ↔ code; авто-infer + relate в event log; find; editor HUD | Accepted · In progress |
 | [0138](0138-cockpit-command-line-and-parametric-ranges.md) | Cockpit Command Line (Commander+Pilot); chord Ctrl+K `/`; multi-range `[3;5] [8;15]`; preview | Accepted · In progress |
+| [0140](0140-tci-slash-status-glyphs-and-args-counter.md) | TCI: глифы ✓/✕/P(n) в slash pill; clip/icon placement | Accepted · Proposed |
+| [0141](0141-solution-scoped-warmup-orchestration.md) | Solution warm-up: фоновый прогрев HCI/symbol sidecar/bracket/feed anchors при open | Accepted · Proposed |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 

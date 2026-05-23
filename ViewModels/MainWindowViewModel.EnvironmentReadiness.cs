@@ -18,28 +18,6 @@ public partial class MainWindowViewModel
     /// <summary>ADR 0063: тот же порядок ячеек; широкая проекция — таблица с лампой Korry в первой колонке (ADR 0068).</summary>
     public InstrumentDeckDescriptor EnvironmentReadinessTextualDeck => EnvironmentReadinessInstrumentDeck.TextualDetail;
 
-    partial void OnCurrentMfdShellPageChanged(MfdShellPage value)
-    {
-        // Прямые присвоения CurrentMfdShellPage (сборка, отладка, …) обходят TryNavigateToMfdShellPage — не оставляем запрещённую страницу (в т.ч. SE в Mfd при дереве в PFD).
-        if (!IsMfdShellPageAllowed(value))
-        {
-            CoerceMfdShellPageToAllowed();
-            return;
-        }
-
-        if (value == MfdShellPage.EnvironmentReadiness)
-            _ = RefreshEnvironmentReadinessAsync();
-
-        if (value == MfdShellPage.HybridIndex)
-        {
-            EnsureHybridIndexSubscription();
-            RaiseHybridIndexPresentationProperties();
-        }
-
-        if (value == MfdShellPage.RelatedFiles)
-            ScheduleWorkspaceNavigationMapRefresh();
-    }
-
     /// <summary>Уйти со страницы готовности окружения на первую другую разрешённую страницу оболочки Mfd.</summary>
     [RelayCommand]
     private void CloseEnvironmentReadinessPage()

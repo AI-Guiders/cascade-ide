@@ -23,6 +23,8 @@ using CascadeIDE.Features.HybridIndex.Application;
 using CascadeIDE.Features.Shell.Application;
 using CascadeIDE.Models;
 using CascadeIDE.Features.Os.DataAcquisition;
+using CascadeIDE.Features.IdeMcp.Execution;
+using CascadeIDE.Features.Workspace;
 using CascadeIDE.Features.Workspace.Application;
 
 namespace CascadeIDE.ViewModels;
@@ -32,8 +34,8 @@ namespace CascadeIDE.ViewModels;
 /// Карта файлов и ответственности — <c>docs/architecture-migration.md</c>, раздел «Срез MainWindowViewModel».
 /// </summary>
 [DataBusPublisher("ide-health & related domain signals")]
-public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpActions, IAutonomousAgentSessionHost,
-    IMainWindowHostSurfaceInput
+public partial class MainWindowViewModel : ViewModelBase, IAutonomousAgentSessionHost,
+    IMainWindowHostSurfaceInput, SolutionLoadSessionApplyProjection.IHost
 {
     public const string InstallNewSentinel = "— Установить модель… —";
 
@@ -61,7 +63,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private readonly Services.Capabilities.SimpleCapabilityRegistry _capabilities = new();
     private CSharpLspDiagnosticsHost? _csharpLspHost;
     private MarkdownLspDiagnosticsHost? _markdownLspHost;
-    private readonly IdeMcpCommandExecutor _ideMcpExecutor;
+    private readonly Features.IdeMcp.Application.MainWindowIdeMcpHost _ideMcpHost;
     private readonly Services.IdeDapDebugSession _dapDebug;
     private readonly IDataBus _ideDataBus;
     private readonly HybridIndexOrchestrator _hybridIndex;
@@ -146,7 +148,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
     private AutonomousAgentService CreateAutonomousAgentService(Services.McpClientService mcpClientService) =>
         new AutonomousAgentService(
             _aiProviderManager,
-            this,
+            IdeMcp,
             mcpClientService,
             () => ActiveAiProvider,
             () => SelectedOllamaModel,
@@ -294,8 +296,15 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
 
         ChatPanel.DisposeCursorAcpSession();
         _ = ChatPanel.ReloadIntercomSessionFromDiskAsync();
+        EnsurePfdBackgroundStatusSubscription();
+        if (string.IsNullOrWhiteSpace(value))
+            _hciReindexPending = false;
+        else
+            MarkHciReindexPendingForPfdStatus();
+
+        ApplySolutionWarmupForCurrentSolution();
         ApplyHybridCodebaseIndexOrchestrationForCurrentSolution(pokeWhenAutoReindex: true);
-        AttachBreakpointsFileWatcher(value);
+        Editor.AttachBreakpointsFileWatcher(value);
         _ = RefreshGitSummaryAsync();
         _ = GitPanel.RefreshRepositoryFlagAsync();
         if (IsGitPanelVisible)
@@ -337,8 +346,7 @@ public partial class MainWindowViewModel : ViewModelBase, Services.IIdeMcpAction
         return string.IsNullOrWhiteSpace(minimized) ? null : minimized;
     }
 
-    /// <summary>MCP и агент вызывают с фона; весь разбор команд и доступ к VM — на UI-потоке. Тяжёлые операции внутри хендлеров сами уходят с UI (<c>ConfigureAwait(false)</c>, <c>Task.Run</c>, <c>Post</c> обратно).</summary>
-    Task<string> Services.IIdeMcpActions.ExecuteCommandAsync(string commandId, IReadOnlyDictionary<string, JsonElement>? args, CancellationToken cancellationToken) =>
-        UiScheduler.Default.InvokeAsync(() => _ideMcpExecutor.ExecuteAsync(commandId, args, cancellationToken));
+    /// <summary>MCP / палитра / MAF — единая поверхность команд IDE (Wave 2 Big Bang).</summary>
+    public Services.IIdeMcpActions IdeMcp => _ideMcpHost;
 
 }

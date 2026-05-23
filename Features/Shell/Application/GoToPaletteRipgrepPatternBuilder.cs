@@ -5,7 +5,7 @@ using CascadeIDE.Services;
 namespace CascadeIDE.Features.Shell.Application;
 
 /// <summary>Построение паттерна ripgrep для префиксов Go-to палитры (<c>x:</c>/<c>t:</c>/<c>m:</c>).</summary>
-[ComputingUnit]
+[PresentationProjection("goto-palette-ripgrep-pattern")]
 public static class GoToPaletteRipgrepPatternBuilder
 {
     public static (string Pattern, bool FixedString, string? Glob) Build(GoToAllQuery q)

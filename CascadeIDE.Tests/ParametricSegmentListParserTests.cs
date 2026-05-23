@@ -79,9 +79,9 @@ public sealed class ParametricSegmentListParserTests
     }
 
     [Fact]
-    public void CockpitCommandLinePreviewBuilder_MessageSelect()
+    public void SlashCommandPreviewEvaluator_MessageSelect()
     {
-        Assert.True(CockpitCommandLinePreviewBuilder.TryBuild(
+        Assert.True(SlashCommandPreviewEvaluator.TryEvaluateSummary(
             "/intercom message select [3;5] [8;15] [20]",
             out var summary));
         Assert.Contains("Сообщения", summary);

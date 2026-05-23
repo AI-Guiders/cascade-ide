@@ -3,7 +3,7 @@ using CascadeIDE.Contracts;
 namespace CascadeIDE.Features.Search.Application;
 
 /// <summary>Фильтрация файлов решения для префикса <c>f:</c>.</summary>
-[ComputingUnit(note: "command palette goto file rows")]
+[PresentationProjection("command palette goto file rows")]
 public static class CommandPaletteGoToFileNavRowsProjection
 {
     public static IEnumerable<CommandPaletteGoToNavRowPresentation> EnumerateFiltered(

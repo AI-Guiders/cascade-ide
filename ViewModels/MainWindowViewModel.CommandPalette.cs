@@ -110,7 +110,7 @@ public partial class MainWindowViewModel
             if (string.IsNullOrEmpty(row.NavigateFilePath))
                 return;
             await IdeCommandPaletteExecutionOrchestrator
-                .RunSelectionAsync(row, (Services.IIdeMcpActions)this, _ideMcpExecutor, CancellationToken.None)
+                .RunSelectionAsync(row, IdeMcp, _ideMcpHost.Executor, CancellationToken.None)
                 .ConfigureAwait(false);
             return;
         }
@@ -119,7 +119,7 @@ public partial class MainWindowViewModel
             return;
         IsCommandPaletteOpen = false;
         await IdeCommandPaletteExecutionOrchestrator
-            .RunSelectionAsync(row, (Services.IIdeMcpActions)this, _ideMcpExecutor, CancellationToken.None)
+            .RunSelectionAsync(row, IdeMcp, _ideMcpHost.Executor, CancellationToken.None)
             .ConfigureAwait(false);
     }
 

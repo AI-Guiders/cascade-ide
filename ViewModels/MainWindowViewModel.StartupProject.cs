@@ -43,62 +43,23 @@ public partial class MainWindowViewModel
         StartupProjectShortLabel = "";
 
         var sln = Workspace.SolutionPath;
-        if (string.IsNullOrEmpty(sln) || Workspace.SolutionRoots.Count == 0)
+        var solutionDir = string.IsNullOrEmpty(sln)
+            ? null
+            : Services.BreakpointsFileService.GetWorkspaceRoot(sln);
+        if (string.IsNullOrEmpty(solutionDir))
         {
             RefreshLaunchProfilePickerFromStore();
             return;
         }
 
-        var solutionDir = Services.BreakpointsFileService.GetWorkspaceRoot(sln);
-        if (string.IsNullOrEmpty(solutionDir))
-            return;
-
-        var projects = McpSolutionTree.CollectProjectPaths(Workspace.SolutionRoots)
-            .Select(static p => CanonicalFilePath.Normalize(p))
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-        var fromStore = false;
-        if (StartupProjectStore.TryLoad(sln, out var rel) && !string.IsNullOrEmpty(rel))
-        {
-            var full = CanonicalFilePath.Normalize(Path.Combine(solutionDir, rel));
-            if (File.Exists(full) && projects.Contains(full))
-            {
-                ApplyStartupProject(full);
-                fromStore = true;
-            }
-            else
-                StartupProjectStore.Clear(sln);
-        }
-
-        if (!fromStore)
-            TryApplyDefaultSingleProjectStartup(sln, solutionDir, projects);
+        var resolved = StartupProjectRefreshProjection.ResolveAfterSolutionLoad(
+            sln,
+            Workspace.SolutionRoots,
+            solutionDir);
+        if (!string.IsNullOrEmpty(resolved.CsprojFullPath))
+            ApplyStartupProject(resolved.CsprojFullPath);
 
         RefreshLaunchProfilePickerFromStore();
-    }
-
-    /// <summary>Единственный <c>.csproj</c> в дереве — считаем его стартовым и сохраняем, чтобы F5 не открывал диалог выбора DLL.</summary>
-    private void TryApplyDefaultSingleProjectStartup(string sln, string solutionDir, HashSet<string> projectPathSet)
-    {
-        var csprojs = McpSolutionTree.CollectDistinctManagedProjectPaths(Workspace.SolutionRoots);
-        if (csprojs.Count != 1)
-            return;
-
-        var only = csprojs[0];
-        if (!projectPathSet.Contains(only))
-            return;
-
-        if (!LaunchProjectRelativePath.TryGetRelativeToSolutionDirectory(solutionDir, only, out var rel, out _))
-            return;
-        try
-        {
-            StartupProjectStore.Save(sln, rel);
-        }
-        catch
-        {
-            // сохранение опционально — в памяти стартовый проект всё равно будет
-        }
-
-        ApplyStartupProject(only);
     }
 
     private void ApplyStartupProject(string csprojFullPath)
@@ -168,7 +129,7 @@ public partial class MainWindowViewModel
     private bool CanClearStartupProject() => HasStartupProject;
 
     /// <summary>MSBuild + launch profile (ADR 0090) или унаследованный стартовый <c>.csproj</c>.</summary>
-    private Task<DebugLaunchResolution?> TryResolveDebugLaunchForF5Async() =>
+    internal Task<DebugLaunchResolution?> TryResolveDebugLaunchForF5Async() =>
         DebugLaunchForF5Orchestrator.TryResolveAsync(
             Workspace.SolutionRoots,
             CurrentFilePath,

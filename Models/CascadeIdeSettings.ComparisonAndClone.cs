@@ -14,6 +14,7 @@ public sealed partial class CascadeIdeSettings
             && AgentNotesEquals(AgentNotes, o.AgentNotes)
             && WorkspaceEquals(Workspace, o.Workspace)
             && HybridIndexEquals(HybridIndex, o.HybridIndex)
+            && SolutionWarmupEquals(SolutionWarmup, o.SolutionWarmup)
             && CommandPaletteEquals(CommandPalette, o.CommandPalette)
             && CodeNavigationMapEquals(CodeNavigationMap, o.CodeNavigationMap)
             && LanguagesEquals(Languages, o.Languages)
@@ -78,6 +79,17 @@ public sealed partial class CascadeIdeSettings
                 WatchFiles = HybridIndex.WatchFiles,
                 ScopeMode = HybridIndex.ScopeMode,
                 PauseWhenMcpStdioHost = HybridIndex.PauseWhenMcpStdioHost,
+            },
+            SolutionWarmup = new SolutionWarmupSettings
+            {
+                Enabled = SolutionWarmup.Enabled,
+                WarmActiveFileOnSolutionOpen = SolutionWarmup.WarmActiveFileOnSolutionOpen,
+                WarmFeedAnchorsAfterSymbolSidecar = SolutionWarmup.WarmFeedAnchorsAfterSymbolSidecar,
+                WarmOpenDocuments = SolutionWarmup.WarmOpenDocuments,
+                WarmRecentCsFiles = SolutionWarmup.WarmRecentCsFiles,
+                MaxParallelFileJobs = SolutionWarmup.MaxParallelFileJobs,
+                MaxOpenDocumentFiles = SolutionWarmup.MaxOpenDocumentFiles,
+                ShowBackgroundStatusOnPfd = SolutionWarmup.ShowBackgroundStatusOnPfd,
             },
             CommandPalette = new CommandPaletteSettings
             {
@@ -258,6 +270,7 @@ public sealed partial class CascadeIdeSettings
             Intercom = new IntercomSettings
             {
                 FeedMetrics = Intercom.FeedMetrics,
+                TciValidationIcon = Intercom.TciValidationIcon,
                 Attachments = new IntercomAttachmentsSettings
                 {
                     Code = new IntercomAttachmentsCodeSettings
@@ -316,6 +329,20 @@ public sealed partial class CascadeIdeSettings
             && a.PauseWhenMcpStdioHost == b.PauseWhenMcpStdioHost
             && a.IndexDir.Is(b.IndexDir)
             && a.ScopeMode.Is(b.ScopeMode);
+    }
+
+    private static bool SolutionWarmupEquals(SolutionWarmupSettings? a, SolutionWarmupSettings? b)
+    {
+        if (a is null || b is null)
+            return a == b;
+        return a.Enabled == b.Enabled
+            && a.WarmActiveFileOnSolutionOpen == b.WarmActiveFileOnSolutionOpen
+            && a.WarmFeedAnchorsAfterSymbolSidecar == b.WarmFeedAnchorsAfterSymbolSidecar
+            && a.WarmOpenDocuments == b.WarmOpenDocuments
+            && a.WarmRecentCsFiles == b.WarmRecentCsFiles
+            && a.MaxParallelFileJobs == b.MaxParallelFileJobs
+            && a.MaxOpenDocumentFiles == b.MaxOpenDocumentFiles
+            && a.ShowBackgroundStatusOnPfd == b.ShowBackgroundStatusOnPfd;
     }
 
     private static bool CommandPaletteEquals(CommandPaletteSettings? a, CommandPaletteSettings? b)
@@ -510,6 +537,7 @@ public sealed partial class CascadeIdeSettings
         if (a is null || b is null)
             return a == b;
         return a.FeedMetrics.Is(b.FeedMetrics)
+            && a.TciValidationIcon.Is(b.TciValidationIcon)
             && a.Attachments.Code.Navigate.Is(b.Attachments.Code.Navigate)
             && a.Attachments.Code.RevealLoadSolution.Is(b.Attachments.Code.RevealLoadSolution);
     }

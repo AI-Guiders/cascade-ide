@@ -5,6 +5,7 @@ using CascadeIDE.Cockpit.Graph;
 using CascadeIDE.Features.WorkspaceNavigation.Application;
 using CascadeIDE.Models;
 using CascadeIDE.Features.HybridIndex.Application;
+using System.IO;
 
 namespace CascadeIDE.ViewModels;
 
@@ -40,11 +41,14 @@ public partial class MainWindowViewModel
         }
 
         List<string> rawPaths = [];
+        List<string> openDocumentPaths = [];
         string? currentPath = null;
+        string? anchorPath = null;
         string? solutionPath = null;
         string? editorText = null;
         int? cursorLine = null;
         int? cursorColumn = null;
+        int? caretOffset = null;
         CodeNavigationSettings? navSettings = null;
         var wantList = false;
         var wantGraph = false;
@@ -53,10 +57,13 @@ public partial class MainWindowViewModel
         await UiScheduler.Default.InvokeAsync(() =>
         {
             rawPaths = McpSolutionTree.CollectFileEntries(Workspace.SolutionRoots).Select(e => e.FullPath).ToList();
+            openDocumentPaths = Documents.OpenDocuments.Select(d => d.FilePath).ToList();
             currentPath = CurrentFilePath;
+            anchorPath = WorkspaceNavigationMapAnchorResolver.Resolve(currentPath, openDocumentPaths, rawPaths);
             solutionPath = Workspace.SolutionPath;
             editorText = EditorText;
-            var (line, column) = WorkspaceNavigationMapOrchestrator.ComputeLineColumn(EditorText, _editorCaretOffset ?? EditorSelectionStart);
+            caretOffset = _editorCaretOffset ?? EditorSelectionStart;
+            var (line, column) = WorkspaceNavigationMapOrchestrator.ComputeLineColumn(EditorText, caretOffset);
             cursorLine = line;
             cursorColumn = column;
             navSettings = _settings.CodeNavigation;
@@ -67,6 +74,31 @@ public partial class MainWindowViewModel
             if (level == CodeNavigationMapLevelKind.ControlFlow)
                 cockpitSurfaceCapturedOnUi = CockpitSurfaceSnapshotBuilder.Build(this);
         });
+
+        if (!string.IsNullOrEmpty(anchorPath)
+            && !string.Equals(anchorPath, currentPath, StringComparison.OrdinalIgnoreCase))
+        {
+            try
+            {
+                if (File.Exists(anchorPath))
+                    editorText = File.ReadAllText(anchorPath);
+            }
+            catch
+            {
+                // keep editor text as-is
+            }
+        }
+
+        var navigationPath = anchorPath ?? currentPath;
+
+        if (level == CodeNavigationMapLevelKind.ControlFlow)
+        {
+            (cursorLine, cursorColumn) = WorkspaceNavigationMapOrchestrator.ResolveControlFlowCursorForRefresh(
+                navigationPath,
+                currentPath,
+                editorText,
+                caretOffset);
+        }
 
         if (ct.IsCancellationRequested)
             return;
@@ -81,7 +113,7 @@ public partial class MainWindowViewModel
                         new GraphNavigationJsonRequest(
                             level,
                             wantGraph,
-                            currentPath,
+                            navigationPath,
                             editorText,
                             cursorLine,
                             cursorColumn,
@@ -108,7 +140,7 @@ public partial class MainWindowViewModel
             json,
             useSubgraphMode,
             wantList,
-            currentPath,
+            navigationPath,
             solutionPath,
             level,
             CodeNavigationMapGraphWidth,
@@ -128,7 +160,7 @@ public partial class MainWindowViewModel
                         _settings.HybridIndex,
                         wsRoot,
                         solutionPath,
-                        currentPath,
+                        navigationPath,
                         ct)
                     .ConfigureAwait(false);
             }

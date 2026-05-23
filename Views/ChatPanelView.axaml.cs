@@ -10,6 +10,7 @@ using Avalonia.Threading;
 using CascadeIDE.Features.Chat;
 using CascadeIDE.Models;
 using CascadeIDE.Views.Chat;
+using CascadeIDE.Views.SkiaKit;
 using CommunityToolkit.Mvvm.Input;
 
 namespace CascadeIDE.Views;
@@ -23,6 +24,7 @@ public partial class ChatPanelView : UserControl
         InitializeComponent();
         WireIntercomSurface(IntercomSkiaSurface);
         IntercomSkiaSurface.ComposerDraftChanged += OnIntercomComposerDraftChanged;
+        IntercomSkiaSurface.CommandLineDraftChanged += OnIntercomCommandLineDraftChanged;
         IntercomSkiaSurface.NavigatorSearchDraftChanged += OnIntercomNavigatorSearchDraftChanged;
         Loaded += OnLoaded;
         DataContextChanged += OnDataContextChanged;
@@ -36,6 +38,7 @@ public partial class ChatPanelView : UserControl
         if (_subscribedVm is not null)
         {
             _subscribedVm.IntercomPanelFontsChanged -= OnIntercomPanelFontsChanged;
+            _subscribedVm.IntercomTciChromeChanged -= OnIntercomTciChromeChanged;
             _subscribedVm.ComposerPopupSuggestions.CollectionChanged -= OnComposerPopupSuggestionsChanged;
             _subscribedVm.PropertyChanged -= OnChatPanelVmPropertyChanged;
         }
@@ -44,11 +47,13 @@ public partial class ChatPanelView : UserControl
         if (_subscribedVm is not null)
         {
             _subscribedVm.IntercomPanelFontsChanged += OnIntercomPanelFontsChanged;
+            _subscribedVm.IntercomTciChromeChanged += OnIntercomTciChromeChanged;
             _subscribedVm.ComposerPopupSuggestions.CollectionChanged += OnComposerPopupSuggestionsChanged;
             _subscribedVm.PropertyChanged += OnChatPanelVmPropertyChanged;
         }
 
         TryApplyPanelFonts();
+        ApplyIntercomTciChrome();
     }
 
     private void OnIntercomComposerDraftChanged(object? sender, EventArgs e)
@@ -63,6 +68,21 @@ public partial class ChatPanelView : UserControl
         if (!string.Equals(vm.ChatInput, text, StringComparison.Ordinal))
             vm.ChatInput = text;
         vm.RefreshComposerAutocomplete(text, caret);
+        vm.RefreshComposerSlashPreview(text, caret);
+    }
+
+    private void OnIntercomCommandLineDraftChanged(object? sender, EventArgs e)
+    {
+        if (DataContext is not ChatPanelViewModel vm || !vm.IsCockpitCommandLineOpen)
+            return;
+
+        var text = IntercomSkiaSurface.CommandLineText ?? "/";
+        var caret = Math.Clamp(IntercomSkiaSurface.CommandLineCaretIndex, 0, text.Length);
+        if (vm.CockpitCommandLineCaretIndex != caret)
+            vm.CockpitCommandLineCaretIndex = caret;
+        if (!string.Equals(vm.CockpitCommandLineText, text, StringComparison.Ordinal))
+            vm.CockpitCommandLineText = text;
+        vm.RefreshCockpitCommandLineAutocomplete(text, caret);
     }
 
     private void OnIntercomNavigatorSearchDraftChanged(object? sender, EventArgs e)
@@ -88,6 +108,17 @@ public partial class ChatPanelView : UserControl
 
     private void OnIntercomPanelFontsChanged(object? sender, IntercomFontsSettings fonts) =>
         ChatPanelTypographyApplier.Apply(this, fonts);
+
+    private void OnIntercomTciChromeChanged(object? sender, EventArgs e) => ApplyIntercomTciChrome();
+
+    private void ApplyIntercomTciChrome()
+    {
+        if (DataContext is not ChatPanelViewModel vm)
+            return;
+
+        SkiaSlashCommandChip.ConfigureIconPlacement(vm.IntercomTciValidationIcon);
+        IntercomSkiaSurface.InvalidateVisual();
+    }
 
     private void TryApplyPanelFonts()
     {
@@ -153,103 +184,38 @@ public partial class ChatPanelView : UserControl
             if (DataContext is not ChatPanelViewModel vm)
                 return;
 
-            switch (e.Kind)
+            var handle = vm.TryHandleIntercomComposerKey(e.Kind, e.KeyEvent);
+            if (!handle.Handled)
             {
-                case IntercomComposerKeyKind.Tab:
-                    if (vm.TryCommitSelectedComposerSuggestion(out var tabAutoExecute))
+                if (e.Kind == IntercomComposerKeyKind.Enter)
+                {
+                    var text = surface.ComposerText ?? vm.ChatInput;
+                    var caret = Math.Clamp(surface.ComposerCaretIndex, 0, text.Length);
+                    if (vm.TryInsertComposerNewLineAtCaret(text, caret, out var next, out var newCaret))
                     {
-                        if (vm.IsCockpitCommandLineOpen)
-                        {
-                            surface.CommandLineText = vm.CockpitCommandLineText;
-                            surface.CommandLineCaretIndex = vm.CockpitCommandLineCaretIndex;
-                            if (tabAutoExecute)
-                                _ = vm.TryCommitCockpitCommandLineAsync();
-                        }
-                        else
-                        {
-                            surface.ComposerCaretIndex = vm.ChatComposerCaretIndex;
-                        }
+                        surface.ComposerText = next;
+                        surface.ComposerCaretIndex = newCaret;
                     }
+                }
 
-                    break;
-                case IntercomComposerKeyKind.SlashUp:
-                    vm.MoveComposerAutocompleteSelection(-1);
-                    break;
-                case IntercomComposerKeyKind.SlashDown:
-                    vm.MoveComposerAutocompleteSelection(1);
-                    break;
-                case IntercomComposerKeyKind.Escape:
-                    if (vm.IsCockpitCommandLineOpen)
-                    {
-                        vm.CloseCockpitCommandLine();
-                        surface.CommandLineText = "/";
-                        break;
-                    }
-
-                    vm.DismissChatSlashAutocomplete();
-                    vm.DismissChatBracketAutocomplete();
-                    break;
-                case IntercomComposerKeyKind.Enter:
-                    if (vm.IsCockpitCommandLineOpen)
-                    {
-                        if (vm.IsComposerAutocompleteVisible
-                            && vm.TryCommitSelectedComposerSuggestion(out var cclAutoExecute))
-                        {
-                            surface.CommandLineText = vm.CockpitCommandLineText;
-                            surface.CommandLineCaretIndex = vm.CockpitCommandLineCaretIndex;
-                            if (cclAutoExecute)
-                                _ = vm.TryCommitCockpitCommandLineAsync();
-                        }
-                        else
-                        {
-                            surface.CommandLineText = vm.CockpitCommandLineText;
-                            _ = vm.TryCommitCockpitCommandLineAsync();
-                        }
-
-                        break;
-                    }
-
-                    if (vm.IsComposerAutocompleteVisible
-                        && vm.TryCommitSelectedComposerSuggestion(out var autoExecute))
-                    {
-                        surface.ComposerCaretIndex = vm.ChatComposerCaretIndex;
-                        if (autoExecute)
-                            TryExecuteSendChat(vm, surface);
-                    }
-                    else if (e.KeyEvent is { } enterKey && ChatSendKeyMatcher.Matches(enterKey, vm.GetSendMessageKey()))
-                    {
-                        TryExecuteSendChat(vm, surface);
-                    }
-                    else
-                    {
-                        var text = surface.ComposerText ?? vm.ChatInput;
-                        var caret = Math.Clamp(surface.ComposerCaretIndex, 0, text.Length);
-                        var next = text.Insert(caret, "\n");
-                        vm.ChatInput = next;
-                        surface.ComposerCaretIndex = caret + 1;
-                        vm.ChatComposerCaretIndex = caret + 1;
-                    }
-                    break;
-                case IntercomComposerKeyKind.CommitSlashSuggestion:
-                    if (vm.TryCommitSelectedComposerSuggestion(out var execute))
-                    {
-                        if (vm.IsCockpitCommandLineOpen)
-                        {
-                            surface.CommandLineText = vm.CockpitCommandLineText;
-                            surface.CommandLineCaretIndex = vm.CockpitCommandLineCaretIndex;
-                            if (execute)
-                                _ = vm.TryCommitCockpitCommandLineAsync();
-                        }
-                        else
-                        {
-                            surface.ComposerCaretIndex = vm.ChatComposerCaretIndex;
-                            if (execute)
-                                TryExecuteSendChat(vm, surface);
-                        }
-                    }
-
-                    break;
+                return;
             }
+
+            if (handle.SyncCommandLineFromViewModel)
+            {
+                syncCommandLineFromViewModel(surface, vm);
+                if (!vm.IsCockpitCommandLineOpen)
+                    surface.CommandLineText = "/";
+            }
+
+            if (handle.SyncComposerCaretFromViewModel)
+                syncComposerFromViewModel(surface, vm);
+
+            if (handle.RunCockpitCommit)
+                _ = vm.TryCommitCockpitCommandLineAsync();
+
+            if (handle.RunSendChat)
+                TryExecuteSendChat(vm, surface);
         };
     }
 
@@ -364,6 +330,23 @@ public partial class ChatPanelView : UserControl
             vm.ChatComposerCaretIndex = caret;
         if (!string.Equals(vm.ChatInput, text, StringComparison.Ordinal))
             vm.ChatInput = text;
+    }
+
+    private static void syncCommandLineFromViewModel(SkiaChatSurfaceControl surface, ChatPanelViewModel vm)
+    {
+        surface.CommandLineText = vm.CockpitCommandLineText;
+        surface.CommandLineCaretIndex = vm.CockpitCommandLineCaretIndex;
+        surface.CollapseCommandLineSelection();
+        surface.NotifyCommandLineImeStateChanged();
+    }
+
+    private static void syncComposerFromViewModel(SkiaChatSurfaceControl surface, ChatPanelViewModel vm)
+    {
+        surface.ComposerPreeditText = null;
+        surface.ComposerText = vm.ChatInput;
+        surface.ComposerCaretIndex = vm.ChatComposerCaretIndex;
+        surface.CollapseComposerSelection();
+        surface.NotifyComposerImeStateChanged();
     }
 
     private static void showMessageSelectContextMenu(

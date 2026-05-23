@@ -925,6 +925,14 @@ intercom_handler = "message_select"
 
 [[command]]
 [[command.form.slash]]
+path = "/intercom message select clear"
+help = "Сбросить подсветку gutter-выбора и активное сообщение в detail-ленте."
+group = "Intercom"
+kind = "intercom"
+intercom_handler = "message_select_clear"
+
+[[command]]
+[[command.form.slash]]
 path = "/intercom message find"
 help = "Сообщения ветки по коду (inferred из attach): selection, L:10-20, [M:…]."
 group = "Intercom"

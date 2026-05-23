@@ -68,9 +68,9 @@ Roslyn walk (существующая логика)
 
 ### Связь с HCI
 
-После `RunReindexWithPublishAsync` / debounced watcher reindex — **fire-and-forget** `IntercomSymbolLineIndexCoordinator.ScheduleRebuild(scope)` (не блокирует UI/MCP).
+**v0.1.2+ `HybridCodebaseIndex.Core`:** extension point `ICodebaseIndexReindexObserver` — при reindex HCI вызывает `OnFileIndexed` с текстом файла; Cascade IDE: `IntercomSymbolLineHciReindexObserver` пишет symbol sidecar **без второго прохода по диску**.
 
-Отдельная таблица в **sidecar** до появления extension point в `HybridCodebaseIndex.Core` для symbol projection.
+**Fallback:** `IntercomSymbolLineIndexCoordinator.ScheduleRebuildAfterHybridIndex` — если reindex был без observer (внешний MCP); in-proc IDE observer включён, отдельный rebuild не вызывается.
 
 ## Не-цели
 

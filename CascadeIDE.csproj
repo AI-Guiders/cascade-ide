@@ -101,7 +101,9 @@
     <ProjectReference Include="externals\acp-csharp\src\AgentClientProtocol\AgentClientProtocol.csproj" />
     <PackageReference Include="AIGuiders.DotNetBuildTestParsers" Version="0.1.1" />
     <PackageReference Include="AIGuiders.DotnetDebugMCP.Core" Version="0.1.0" />
-    <PackageReference Include="AIGuiders.HybridCodebaseIndex.Core" Version="0.1.1" />
+    <!-- Локальный Core в open/; иначе NuGet AIGuiders.HybridCodebaseIndex.Core (как agent-notes-core) -->
+    <ProjectReference Include="..\hybrid-codebase-index-core\HybridCodebaseIndex.Core.csproj" Condition="Exists('..\hybrid-codebase-index-core\HybridCodebaseIndex.Core.csproj')" />
+    <PackageReference Include="AIGuiders.HybridCodebaseIndex.Core" Version="0.1.2" Condition="!Exists('..\hybrid-codebase-index-core\HybridCodebaseIndex.Core.csproj')" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.0" />
     <PackageReference Include="Avalonia" Version="12.0.1" />
     <PackageReference Include="Avalonia.Controls.WebView" Version="12.0.0" />
@@ -133,7 +135,7 @@
     <PackageReference Include="Microsoft.Agents.AI" Version="1.3.0" />
     <PackageReference Include="Microsoft.Extensions.AI" Version="10.5.0" />
     <PackageReference Include="Microsoft.Extensions.AI.Ollama" Version="9.7.0-preview.1.25356.2" />
-    <PackageReference Include="ModelContextProtocol" Version="1.2.0" />
+    <PackageReference Include="ModelContextProtocol" Version="1.3.0" />
     <PackageReference Include="OllamaSharp" Version="5.4.25" />
     <PackageReference Include="OutWit.Common" Version="1.3.2" />
     <PackageReference Include="OutWit.Common.Json" Version="1.1.3" />
@@ -172,7 +174,7 @@
     <_IdeCommandsDocGenerated>$(MSBuildProjectDirectory)\Services\Generated\IdeCommandsDoc.g.cs</_IdeCommandsDocGenerated>
     <_IdeCommandsArgsGenerated>$(MSBuildProjectDirectory)\Services\Generated\IdeCommandsArgsGenerated.g.cs</_IdeCommandsArgsGenerated>
     <_IdeCommandsContractGenerated>$(MSBuildProjectDirectory)\Services\Generated\IdeCommandsContract.g.cs</_IdeCommandsContractGenerated>
-    <_IdeExecutorGenerated>$(MSBuildProjectDirectory)\ViewModels\Generated\IdeMcpCommandExecutor.Generated.g.cs</_IdeExecutorGenerated>
+    <_IdeExecutorGenerated>$(MSBuildProjectDirectory)\Features\IdeMcp\Execution\Generated\IdeMcpCommandExecutor.Generated.g.cs</_IdeExecutorGenerated>
     <_McpProtocolDoc>$(MSBuildProjectDirectory)\docs\MCP-PROTOCOL.md</_McpProtocolDoc>
   </PropertyGroup>
   <ItemGroup Condition="'$(GenerateIdeProtocolDocs)'=='true'">
@@ -247,81 +249,76 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.AgentNotes.cs">
+    <Compile Update="Features\IdeMcp\Execution\IdeMcpCommandExecutor.Handlers.AgentNotes.cs">
       <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.cs">
+    <Compile Update="Features\IdeMcp\Execution\IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.cs">
       <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
     </Compile>
-    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.DialogsApp.cs">
+    <Compile Update="Features\IdeMcp\Execution\IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.DialogsApp.cs">
       <DependentUpon>IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.cs</DependentUpon>
     </Compile>
-    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.PanelsLayout.cs">
+    <Compile Update="Features\IdeMcp\Execution\IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.PanelsLayout.cs">
       <DependentUpon>IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.cs</DependentUpon>
     </Compile>
-    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.ThemeLanguage.cs">
+    <Compile Update="Features\IdeMcp\Execution\IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.ThemeLanguage.cs">
       <DependentUpon>IdeMcpCommandExecutor.Handlers.Chrome.MenuToolbar.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.Chrome.OutputFocus.cs">
+    <Compile Update="Features\IdeMcp\Execution\IdeMcpCommandExecutor.Handlers.Chrome.OutputFocus.cs">
       <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.Chrome.UiVisibility.cs">
+    <Compile Update="Features\IdeMcp\Execution\IdeMcpCommandExecutor.Handlers.Chrome.UiVisibility.cs">
       <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.DapDebug.cs">
+    <Compile Update="Features\IdeMcp\Execution\IdeMcpCommandExecutor.Handlers.DapDebug.cs">
       <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
     </Compile>
-    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.DapDebug.LaunchAttach.cs">
+    <Compile Update="Features\IdeMcp\Execution\IdeMcpCommandExecutor.Handlers.DapDebug.LaunchAttach.cs">
       <DependentUpon>IdeMcpCommandExecutor.Handlers.DapDebug.cs</DependentUpon>
     </Compile>
-    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.DapDebug.Stepping.cs">
+    <Compile Update="Features\IdeMcp\Execution\IdeMcpCommandExecutor.Handlers.DapDebug.Stepping.cs">
       <DependentUpon>IdeMcpCommandExecutor.Handlers.DapDebug.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.DebuggerUi.cs">
+    <Compile Update="Features\IdeMcp\Execution\IdeMcpCommandExecutor.Handlers.DebuggerUi.cs">
       <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.Editor.EditNavigation.cs">
+    <Compile Update="Features\IdeMcp\Execution\IdeMcpCommandExecutor.Handlers.Editor.EditNavigation.cs">
       <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
     </Compile>
-    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.Editor.FilesAndChat.cs">
+    <Compile Update="Features\IdeMcp\Execution\IdeMcpCommandExecutor.Handlers.Editor.FilesAndChat.cs">
       <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
     </Compile>
-    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.Editor.StateContent.cs">
+    <Compile Update="Features\IdeMcp\Execution\IdeMcpCommandExecutor.Handlers.Editor.StateContent.cs">
       <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
     </Compile>
-    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.Editor.ToolCatalog.cs">
-      <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.PowerDocuments.Documents.cs">
+    <Compile Update="Features\IdeMcp\Execution\IdeMcpCommandExecutor.Handlers.Editor.ToolCatalog.cs">
       <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="ViewModels\IdeMcpCommandExecutor.Handlers.PowerDocuments.FocusPowerAgent.cs">
+    <Compile Update="Features\IdeMcp\Execution\IdeMcpCommandExecutor.Handlers.PowerDocuments.Documents.cs">
+      <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Features\IdeMcp\Execution\IdeMcpCommandExecutor.Handlers.PowerDocuments.FocusPowerAgent.cs">
       <DependentUpon>IdeMcpCommandExecutor.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
     <Compile Update="ViewModels\MainWindowViewModel.AutonomousAgent.cs">
-      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Update="ViewModels\MainWindowViewModel.Breakpoints.cs">
       <DependentUpon>MainWindowViewModel.cs</DependentUpon>
     </Compile>
   </ItemGroup>
@@ -349,48 +346,114 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="ViewModels\MainWindowViewModel.IdeMcpActions.AgentNotes.cs">
+    <Compile Update="Features\Shell\ShellChromeViewModel.Reactive.cs">
+      <DependentUpon>ShellChromeViewModel.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Features\Shell\ShellChromeViewModel.Commands.Layout.cs">
+      <DependentUpon>ShellChromeViewModel.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Features\Shell\ShellChromeViewModel.Commands.UiMode.cs">
+      <DependentUpon>ShellChromeViewModel.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Features\Shell\ShellChromeViewModel.Commands.Safety.cs">
+      <DependentUpon>ShellChromeViewModel.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Features\Shell\ShellChromeViewModel.Commands.MarkdownPreview.cs">
+      <DependentUpon>ShellChromeViewModel.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Features\Documents\DocumentsWorkspaceViewModel.Commands.cs">
+      <DependentUpon>DocumentsWorkspaceViewModel.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="ViewModels\MainWindowViewModel.ShellSession.cs">
+      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    </Compile>
+    <Compile Update="ViewModels\MainWindowViewModel.FeatureCommandProxies.cs">
+      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    </Compile>
+    <Compile Update="ViewModels\MainWindowViewModel.FeatureSessions.cs">
+      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    </Compile>
+    <Compile Update="ViewModels\MainWindowViewModel.EditorSession.cs">
       <DependentUpon>MainWindowViewModel.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="ViewModels\MainWindowViewModel.IdeMcpActions.BuildTest.Build.cs">
-      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    <Compile Update="Features\Editor\EditorWorkspaceViewModel.DebugGlyphs.cs">
+      <DependentUpon>EditorWorkspaceViewModel.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Features\Editor\EditorWorkspaceViewModel.Hud.cs">
+      <DependentUpon>EditorWorkspaceViewModel.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Features\Editor\EditorWorkspaceViewModel.DebugHints.cs">
+      <DependentUpon>EditorWorkspaceViewModel.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Features\Editor\EditorWorkspaceViewModel.InlineHints.cs">
+      <DependentUpon>EditorWorkspaceViewModel.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Features\Editor\EditorWorkspaceViewModel.StabilizedInput.cs">
+      <DependentUpon>EditorWorkspaceViewModel.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="ViewModels\MainWindowViewModel.IdeMcpActions.BuildTest.Tests.cs">
-      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    <Compile Update="Features\IdeMcp\Application\MainWindowIdeMcpHost.AgentNotes.cs">
+      <DependentUpon>MainWindowIdeMcpHost.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="ViewModels\MainWindowViewModel.IdeMcpActions.DebuggerPanel.cs">
-      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    <Compile Update="Features\IdeMcp\Application\MainWindowIdeMcpHost.BuildTest.Build.cs">
+      <DependentUpon>MainWindowIdeMcpHost.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="ViewModels\MainWindowViewModel.IdeMcpActions.Editor.cs">
-      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    <Compile Update="Features\IdeMcp\Application\MainWindowIdeMcpHost.BuildTest.Tests.cs">
+      <DependentUpon>MainWindowIdeMcpHost.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="ViewModels\MainWindowViewModel.IdeMcpActions.Git.cs">
-      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    <Compile Update="Features\IdeMcp\Application\MainWindowIdeMcpHost.DebuggerPanel.cs">
+      <DependentUpon>MainWindowIdeMcpHost.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="ViewModels\MainWindowViewModel.IdeMcpActions.UiAutomation.EditorPreview.cs">
-      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    <Compile Update="Features\IdeMcp\Application\MainWindowIdeMcpHost.Editor.cs">
+      <DependentUpon>MainWindowIdeMcpHost.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="ViewModels\MainWindowViewModel.IdeMcpActions.UiAutomation.Providers.cs">
-      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    <Compile Update="Features\IdeMcp\Application\MainWindowIdeMcpHost.Git.cs">
+      <DependentUpon>MainWindowIdeMcpHost.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="ViewModels\MainWindowViewModel.IdeMcpActions.Workspace.cs">
-      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
+    <Compile Update="Features\IdeMcp\Application\MainWindowIdeMcpHost.HybridCodebaseIndex.cs">
+      <DependentUpon>MainWindowIdeMcpHost.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Features\IdeMcp\Application\MainWindowIdeMcpHost.Navigation.cs">
+      <DependentUpon>MainWindowIdeMcpHost.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Features\IdeMcp\Application\MainWindowIdeMcpHost.UiAutomation.EditorPreview.cs">
+      <DependentUpon>MainWindowIdeMcpHost.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Features\IdeMcp\Application\MainWindowIdeMcpHost.UiAutomation.Providers.cs">
+      <DependentUpon>MainWindowIdeMcpHost.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Features\IdeMcp\Application\MainWindowIdeMcpHost.Web.cs">
+      <DependentUpon>MainWindowIdeMcpHost.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Features\IdeMcp\Application\MainWindowIdeMcpHost.Workspace.cs">
+      <DependentUpon>MainWindowIdeMcpHost.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -405,11 +468,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Update="ViewModels\MainWindowViewModel.RelayCommands.cs">
-      <DependentUpon>MainWindowViewModel.cs</DependentUpon>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Update="ViewModels\MainWindowViewModel.RelayCommands.Debug.cs">
       <DependentUpon>MainWindowViewModel.cs</DependentUpon>
     </Compile>
   </ItemGroup>
@@ -453,4 +511,4 @@
       <DependentUpon>ProblemsPanelViewModel.cs</DependentUpon>
     </Compile>
   </ItemGroup>
-<ItemGroup><Compile Update="Models\CascadeIdeSettings.ComparisonAndClone.cs"><DependentUpon>CascadeIdeSettings.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Services\IdeCommandRegistry.BuildTest.cs"><DependentUpon>IdeCommandRegistry.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Services\IdeCommandRegistry.Chat.cs"><DependentUpon>IdeCommandRegistry.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Services\IdeCommandRegistry.Debug.cs"><DependentUpon>IdeCommandRegistry.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Services\IdeCommandRegistry.Documents.cs"><DependentUpon>IdeCommandRegistry.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Services\IdeCommandRegistry.File.cs"><DependentUpon>IdeCommandRegistry.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Services\IdeCommandRegistry.Git.cs"><DependentUpon>IdeCommandRegistry.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Services\IdeCommandRegistry.MfdShell.cs"><DependentUpon>IdeCommandRegistry.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Services\IdeCommandRegistry.SettingsHelp.cs"><DependentUpon>IdeCommandRegistry.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Services\IdeCommandRegistry.View.cs"><DependentUpon>IdeCommandRegistry.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Services\IdeCommandRegistry.WorkspaceSearch.cs"><DependentUpon>IdeCommandRegistry.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Services\IdeCommands.ExternalReference.cs"><DependentUpon>IdeCommands.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Services\IdeCommands.HybridCodebaseIndex.cs"><DependentUpon>IdeCommands.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.Capabilities.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.CascadeChord.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.CommandPalette.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.DebugStackUi.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.DockInstrumentSlots.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.EditorDebugHints.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.EditorHud.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.EditorInlineHints.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.EditorStabilizedInput.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.Eicas.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.EnvironmentReadiness.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.HybridIndex.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.HybridIndexSettings.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.IdeHealth.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.IdeMcpActions.HybridCodebaseIndex.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.IdeMcpActions.Navigation.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.IdeMcpActions.Web.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.IdeMcpHostLifecycle.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.LaunchProfiles.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.LayoutNotifications.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.MarkdownExport.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.McpBreakpointReveal.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.MfdShell.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.PresentationLayout.CockpitSurfaceSnapshot.cs"><DependentUpon>MainWindowViewModel.PresentationLayout.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.PresentationLayout.HostShell.cs"><DependentUpon>MainWindowViewModel.PresentationLayout.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.PresentationLayout.HostWindowBounds.cs"><DependentUpon>MainWindowViewModel.PresentationLayout.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.PresentationLayoutAuthority.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.RelayCommands.Documents.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.RelayCommands.Layout.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.RelayCommands.Shell.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.RelayCommands.UiMode.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.ShellState.AiProviders.cs"><DependentUpon>MainWindowViewModel.ShellState.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.ShellState.AutonomousAgentStripe.cs"><DependentUpon>MainWindowViewModel.ShellState.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.ShellState.ChatAndSessionConfig.cs"><DependentUpon>MainWindowViewModel.ShellState.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.ShellState.ModelPullMarkdown.cs"><DependentUpon>MainWindowViewModel.ShellState.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.ShellState.RegionAndContour.cs"><DependentUpon>MainWindowViewModel.ShellState.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.ShellState.UiSessionChrome.cs"><DependentUpon>MainWindowViewModel.ShellState.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.WorkspaceNavigationMap.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.WorkspaceNavigationMap.Refresh.cs"><DependentUpon>MainWindowViewModel.WorkspaceNavigationMap.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.WorkspaceSplitters.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Cockpit\PrimitivesKit\CodeNavigationMapSceneDrawing.Edges.cs"><DependentUpon>CodeNavigationMapSceneDrawing.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Cockpit\PrimitivesKit\CodeNavigationMapSceneDrawing.Legend.cs"><DependentUpon>CodeNavigationMapSceneDrawing.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Cockpit\PrimitivesKit\CodeNavigationMapSceneDrawing.Nodes.cs"><DependentUpon>CodeNavigationMapSceneDrawing.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Services\CSharp\CSharpLanguageService.Completion.cs"><DependentUpon>CSharpLanguageService.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Services\CSharp\CSharpLanguageService.DiagnosticsAndSignatures.cs"><DependentUpon>CSharpLanguageService.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Services\CSharp\CSharpLanguageService.Highlight.cs"><DependentUpon>CSharpLanguageService.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Services\CSharp\CSharpLanguageService.InlayHints.cs"><DependentUpon>CSharpLanguageService.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Services\CSharp\CSharpLanguageService.QuickInfo.cs"><DependentUpon>CSharpLanguageService.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Services\CSharp\CSharpLanguageService.SignatureHelp.cs"><DependentUpon>CSharpLanguageService.cs</DependentUpon></Compile></ItemGroup></Project>
+<ItemGroup><Compile Update="Models\CascadeIdeSettings.ComparisonAndClone.cs"><DependentUpon>CascadeIdeSettings.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Services\IdeCommandRegistry.BuildTest.cs"><DependentUpon>IdeCommandRegistry.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Services\IdeCommandRegistry.Chat.cs"><DependentUpon>IdeCommandRegistry.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Services\IdeCommandRegistry.Debug.cs"><DependentUpon>IdeCommandRegistry.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Services\IdeCommandRegistry.Documents.cs"><DependentUpon>IdeCommandRegistry.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Services\IdeCommandRegistry.File.cs"><DependentUpon>IdeCommandRegistry.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Services\IdeCommandRegistry.Git.cs"><DependentUpon>IdeCommandRegistry.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Services\IdeCommandRegistry.MfdShell.cs"><DependentUpon>IdeCommandRegistry.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Services\IdeCommandRegistry.SettingsHelp.cs"><DependentUpon>IdeCommandRegistry.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Services\IdeCommandRegistry.View.cs"><DependentUpon>IdeCommandRegistry.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Services\IdeCommandRegistry.WorkspaceSearch.cs"><DependentUpon>IdeCommandRegistry.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Services\IdeCommands.ExternalReference.cs"><DependentUpon>IdeCommands.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Services\IdeCommands.HybridCodebaseIndex.cs"><DependentUpon>IdeCommands.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.Capabilities.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.CascadeChord.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.CommandPalette.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.DebugStackUi.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.DockInstrumentSlots.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.EditorDebugHints.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.EditorHud.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.EditorInlineHints.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.EditorStabilizedInput.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.Eicas.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.EnvironmentReadiness.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.HybridIndex.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.HybridIndexSettings.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.IdeHealth.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.IdeMcpActions.HybridCodebaseIndex.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.IdeMcpActions.Navigation.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.IdeMcpActions.Web.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.IdeMcpHostLifecycle.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.LaunchProfiles.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.LayoutNotifications.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.MarkdownExport.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.McpBreakpointReveal.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.MfdShell.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.PresentationLayout.CockpitSurfaceSnapshot.cs"><DependentUpon>MainWindowViewModel.PresentationLayout.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.PresentationLayout.HostShell.cs"><DependentUpon>MainWindowViewModel.PresentationLayout.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.PresentationLayout.HostWindowBounds.cs"><DependentUpon>MainWindowViewModel.PresentationLayout.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.PresentationLayoutAuthority.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.RelayCommands.Documents.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.RelayCommands.Layout.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.RelayCommands.Shell.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.RelayCommands.UiMode.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.ShellState.AiProviders.cs"><DependentUpon>MainWindowViewModel.ShellState.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.ShellState.AutonomousAgentStripe.cs"><DependentUpon>MainWindowViewModel.ShellState.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.ShellState.ChatAndSessionConfig.cs"><DependentUpon>MainWindowViewModel.ShellState.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.ShellState.ModelPullMarkdown.cs"><DependentUpon>MainWindowViewModel.ShellState.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.WorkspaceNavigationMap.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.WorkspaceNavigationMap.Refresh.cs"><DependentUpon>MainWindowViewModel.WorkspaceNavigationMap.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="ViewModels\MainWindowViewModel.WorkspaceSplitters.cs"><DependentUpon>MainWindowViewModel.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Cockpit\PrimitivesKit\CodeNavigationMapSceneDrawing.Edges.cs"><DependentUpon>CodeNavigationMapSceneDrawing.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Cockpit\PrimitivesKit\CodeNavigationMapSceneDrawing.Legend.cs"><DependentUpon>CodeNavigationMapSceneDrawing.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Cockpit\PrimitivesKit\CodeNavigationMapSceneDrawing.Nodes.cs"><DependentUpon>CodeNavigationMapSceneDrawing.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Services\CSharp\CSharpLanguageService.Completion.cs"><DependentUpon>CSharpLanguageService.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Services\CSharp\CSharpLanguageService.DiagnosticsAndSignatures.cs"><DependentUpon>CSharpLanguageService.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Services\CSharp\CSharpLanguageService.Highlight.cs"><DependentUpon>CSharpLanguageService.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Services\CSharp\CSharpLanguageService.InlayHints.cs"><DependentUpon>CSharpLanguageService.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Services\CSharp\CSharpLanguageService.QuickInfo.cs"><DependentUpon>CSharpLanguageService.cs</DependentUpon></Compile></ItemGroup><ItemGroup><Compile Update="Services\CSharp\CSharpLanguageService.SignatureHelp.cs"><DependentUpon>CSharpLanguageService.cs</DependentUpon></Compile></ItemGroup></Project>

@@ -6,22 +6,6 @@ namespace CascadeIDE.ViewModels;
 /// <summary>Документы / dock.</summary>
 public partial class MainWindowViewModel
 {
-    partial void OnEditorTextChanged(string value)
-    {
-        Documents.ApplyEditorTextFromHost(value);
-        OnPropertyChanged(nameof(EditorTextGroup2));
-        OnPropertyChanged(nameof(EditorTextGroup3));
-        RefreshEditorHudBanner();
-    }
-
-    partial void OnCurrentFilePathChanged(string? value)
-    {
-        UpdateCodeNavigationMapCaretOffset(null);
-        RefreshLocBadgeFromCurrentFile();
-        RefreshEditorHudBanner();
-        ScheduleWorkspaceNavigationMapRefresh();
-    }
-
     /// <summary>LOC для task cockpit: непустые строки текущего файла на диске (как <c>get_code_metrics</c> <c>loc</c>), при смене документа.</summary>
     private void RefreshLocBadgeFromCurrentFile()
     {

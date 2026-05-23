@@ -4,7 +4,7 @@ using CascadeIDE.Features.Workspace.Application;
 namespace CascadeIDE.Features.Search.Application;
 
 /// <summary>Разрешение каталога workspace для палитры и относительных путей.</summary>
-[ComputingUnit(note: "command palette goto workspace root")]
+[PresentationProjection("command palette goto workspace root")]
 public static class CommandPaletteGoToWorkspacePresentation
 {
     public static string? TryResolveRoot(string? solutionPath) =>

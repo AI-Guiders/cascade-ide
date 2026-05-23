@@ -28,6 +28,20 @@ public sealed class ChatSlashIntercomMessageSelectTests
     }
 
     [Fact]
+    public void Parse_MessageSelectClear_ResolvesCatalog()
+    {
+        var parse = ChatSlashCommandParser.TryParse("/intercom message select clear");
+        Assert.True(parse.IsSlashLine);
+        Assert.False(parse.IsRejected);
+        Assert.Equal("select", parse.SubAction);
+        Assert.Equal("clear", parse.ArgsTail);
+        Assert.True(ChatSlashCommandCatalog.TryResolve(parse, out var d));
+        Assert.Equal("/intercom message select clear", d.SlashPath);
+        Assert.True(IntercomSlashPathBuilder.TryBuildPath(parse, out var path));
+        Assert.Equal("/intercom message select clear", path);
+    }
+
+    [Fact]
     public void Parse_BracketSegments_InMessageSelect()
     {
         var parse = ChatSlashCommandParser.TryParse("/intercom message select [3;5] [8;15] [20]");

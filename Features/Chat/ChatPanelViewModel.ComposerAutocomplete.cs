@@ -1,12 +1,16 @@
 #nullable enable
 
 using System.Collections.ObjectModel;
+using CascadeIDE.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace CascadeIDE.Features.Chat;
 
 public partial class ChatPanelViewModel
 {
+    private const int BracketAutocompleteDebounceMs = 80;
+
+    private CancellationTokenSource? _bracketAutocompleteDebounceCts;
     /// <summary>Строки popup (slash или bracket) — один список для Skia.</summary>
     public ObservableCollection<ChatSlashSuggestionItem> ComposerPopupSuggestions { get; } = [];
 
@@ -57,7 +61,11 @@ public partial class ChatPanelViewModel
         }
     }
 
-    partial void OnChatComposerCaretIndexChanged(int value) => RefreshComposerAutocomplete();
+    partial void OnChatComposerCaretIndexChanged(int value)
+    {
+        RefreshComposerAutocomplete();
+        RefreshComposerSlashPreview();
+    }
 
     /// <summary>Slash popup для Cockpit Command Line (тот же каталог, что у composer).</summary>
     public void RefreshCockpitCommandLineAutocomplete(string? inputOverride = null, int? caretOverride = null)
@@ -84,10 +92,24 @@ public partial class ChatPanelViewModel
         var text = inputOverride ?? ChatInput;
         var caret = Math.Clamp(caretOverride ?? ChatComposerCaretIndex, 0, text.Length);
 
-        if (ChatBracketAutocomplete.TryGetEditState(text, caret, out _))
+        if (ChatBracketAutocomplete.TryGetEditState(text, caret, out var bracketState))
         {
-            RefreshChatBracketAutocomplete(text, caret);
-            if (IsChatBracketAutocompleteVisible)
+            var syncBracketRefresh = bracketState.ActiveAxis == ChatBracketAutocomplete.Axis.Start
+                && bracketState.AxisPrefix.Length == 0;
+            if (syncBracketRefresh)
+                RefreshChatBracketAutocomplete(text, caret);
+            else
+                scheduleBracketAutocompleteRefresh(text, caret);
+
+            if (syncBracketRefresh && IsChatBracketAutocompleteVisible)
+            {
+                IsChatSlashAutocompleteVisible = false;
+                ChatSlashSuggestions.Clear();
+                rebuildComposerPopup();
+                return;
+            }
+
+            if (!syncBracketRefresh)
             {
                 IsChatSlashAutocompleteVisible = false;
                 ChatSlashSuggestions.Clear();
@@ -97,6 +119,7 @@ public partial class ChatPanelViewModel
         }
         else
         {
+            _bracketAutocompleteDebounceCts?.Cancel();
             IsChatBracketAutocompleteVisible = false;
             ChatBracketSuggestions.Clear();
             SelectedChatBracketSuggestionIndex = -1;
@@ -104,6 +127,7 @@ public partial class ChatPanelViewModel
 
         RefreshChatSlashAutocomplete(text, caretOverride: caret);
         rebuildComposerPopup();
+        RefreshComposerSlashPreview(text, caret);
     }
 
     private void rebuildComposerPopup()
@@ -125,6 +149,47 @@ public partial class ChatPanelViewModel
 
         OnPropertyChanged(nameof(IsComposerAutocompleteVisible));
         NotifyComposerAutocompleteSelectionChanged();
+    }
+
+    private void scheduleBracketAutocompleteRefresh(string text, int caret)
+    {
+        _bracketAutocompleteDebounceCts?.Cancel();
+        _bracketAutocompleteDebounceCts = new CancellationTokenSource();
+        var cts = _bracketAutocompleteDebounceCts;
+        var capturedText = text;
+        var capturedCaret = caret;
+        _ = refreshBracketAutocompleteDebouncedAsync(capturedText, capturedCaret, cts);
+    }
+
+    private async Task refreshBracketAutocompleteDebouncedAsync(
+        string text,
+        int caret,
+        CancellationTokenSource cts)
+    {
+        try
+        {
+            await Task.Delay(BracketAutocompleteDebounceMs, cts.Token).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
+        await UiScheduler.Default.InvokeAsync(() =>
+        {
+            if (cts.IsCancellationRequested)
+                return;
+
+            if (!ChatBracketAutocomplete.TryGetEditState(text, caret, out _))
+            {
+                IsChatBracketAutocompleteVisible = false;
+                ChatBracketSuggestions.Clear();
+                return;
+            }
+
+            RefreshChatBracketAutocomplete(text, caret);
+            rebuildComposerPopup();
+        }).ConfigureAwait(false);
     }
 
     private void RefreshChatBracketAutocomplete(string text, int caret)

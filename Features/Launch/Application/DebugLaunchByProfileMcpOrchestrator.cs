@@ -6,7 +6,7 @@ namespace CascadeIDE.Features.Launch.Application;
 /// <summary>
 /// Режим B <c>debug_launch</c> (MCP): явный <paramref name="targetPath"/> или resolve по профилю / решению.
 /// </summary>
-[ComputingUnit("debug-launch-mcp-profile")]
+[ApplicationOrchestrator("debug-launch-mcp-profile")]
 public static class DebugLaunchByProfileMcpOrchestrator
 {
     public static async Task<string> RunAsync(

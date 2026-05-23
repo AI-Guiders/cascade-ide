@@ -1,5 +1,6 @@
 #nullable enable
 
+using CascadeIDE.Features.Cockpit;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -7,17 +8,44 @@ namespace CascadeIDE.Features.Chat;
 
 public partial class ChatPanelViewModel
 {
+    private readonly SlashCommandPreviewService _slashCommandPreviewService;
+    private readonly ICockpitCommandLineSession _cockpitCommandLineSession;
+
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IntercomSlashPreviewToolTip))]
     private bool _isCockpitCommandLineOpen;
 
     [ObservableProperty]
     private string _cockpitCommandLineText = "/";
 
     [ObservableProperty]
-    private string _cockpitCommandLinePreview = "";
+    private string _commandLineSlashPreview = "";
+
+    [ObservableProperty]
+    private SlashCommandPreviewKind _commandLineSlashPreviewKind;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IntercomSlashPreviewToolTip))]
+    private string? _commandLineSlashPreviewToolTip;
+
+    [ObservableProperty]
+    private string _composerSlashPreview = "";
+
+    [ObservableProperty]
+    private SlashCommandPreviewKind _composerSlashPreviewKind;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IntercomSlashPreviewToolTip))]
+    private string? _composerSlashPreviewToolTip;
 
     [ObservableProperty]
     private int _cockpitCommandLineCaretIndex;
+
+    /// <summary>ToolTip на Intercom surface: CCL приоритетнее composer.</summary>
+    public string? IntercomSlashPreviewToolTip =>
+        IsCockpitCommandLineOpen ? CommandLineSlashPreviewToolTip : ComposerSlashPreviewToolTip;
+
+    public ICockpitCommandLineSession CommandLineSession => _cockpitCommandLineSession;
 
     [RelayCommand]
     private void OpenCockpitCommandLineUi() => OpenCockpitCommandLine("/");
@@ -28,21 +56,23 @@ public partial class ChatPanelViewModel
         IsCockpitCommandLineOpen = true;
         CockpitCommandLineText = text;
         CockpitCommandLineCaretIndex = text.Length;
-        refreshCockpitCommandLinePreview();
+        UpdateSlashPreview(TciInputSurface.CockpitCommandLine);
+        UpdateSlashPreview(TciInputSurface.Composer);
         RefreshCockpitCommandLineAutocomplete();
     }
 
     public void CloseCockpitCommandLine()
     {
         IsCockpitCommandLineOpen = false;
-        CockpitCommandLinePreview = "";
+        applySlashPreview(SlashCommandPreviewResult.Empty, TciInputSurface.CockpitCommandLine);
         DismissChatSlashAutocomplete();
         RefreshComposerAutocomplete();
+        UpdateSlashPreview(TciInputSurface.Composer);
     }
 
     partial void OnCockpitCommandLineTextChanged(string value)
     {
-        refreshCockpitCommandLinePreview();
+        UpdateSlashPreview(TciInputSurface.CockpitCommandLine);
         if (IsCockpitCommandLineOpen)
             RefreshCockpitCommandLineAutocomplete(value);
     }
@@ -53,11 +83,66 @@ public partial class ChatPanelViewModel
             RefreshCockpitCommandLineAutocomplete();
     }
 
-    private void refreshCockpitCommandLinePreview()
+    /// <summary>Единая точка обновления slash-preview (P2).</summary>
+    public void UpdateSlashPreview(TciInputSurface surface, string? textOverride = null, int? caretOverride = null)
     {
-        CockpitCommandLinePreview = CockpitCommandLinePreviewBuilder.TryBuild(CockpitCommandLineText, out var summary)
-            ? summary ?? ""
-            : "";
+        if (surface == TciInputSurface.Composer && IsCockpitCommandLineOpen)
+        {
+            applySlashPreview(SlashCommandPreviewResult.Empty, TciInputSurface.Composer);
+            return;
+        }
+
+        var preview = surface switch
+        {
+            TciInputSurface.CockpitCommandLine => _slashCommandPreviewService.Evaluate(
+                textOverride ?? CockpitCommandLineText),
+            TciInputSurface.Composer =>
+                _slashCommandPreviewService.EvaluateComposerAtCaret(
+                    textOverride ?? ChatInput,
+                    caretOverride ?? ChatComposerCaretIndex),
+            _ => SlashCommandPreviewResult.Empty,
+        };
+
+        applySlashPreview(preview, surface);
+    }
+
+    /// <summary>Slash preview под composer (линия по каретке).</summary>
+    public void RefreshComposerSlashPreview(string? inputOverride = null, int? caretOverride = null) =>
+        UpdateSlashPreview(TciInputSurface.Composer, inputOverride, caretOverride);
+
+    private void applySlashPreview(SlashCommandPreviewResult preview, TciInputSurface surface)
+    {
+        var text = preview.Text ?? "";
+        var tip = SlashCommandPreviewAccessibility.FormatToolTip(preview);
+        switch (surface)
+        {
+            case TciInputSurface.CockpitCommandLine:
+                CommandLineSlashPreview = text;
+                CommandLineSlashPreviewKind = preview.Kind;
+                CommandLineSlashPreviewToolTip = tip;
+                break;
+            case TciInputSurface.Composer:
+                ComposerSlashPreview = text;
+                ComposerSlashPreviewKind = preview.Kind;
+                ComposerSlashPreviewToolTip = tip;
+                break;
+        }
+    }
+
+    private bool tryBuildAnchorSlashPreview(string argsTail, out SlashCommandPreviewResult result)
+    {
+        if (!TryResolveAnchorByShortId(argsTail, out var anchor, out _, out var error))
+        {
+            result = new(error, SlashCommandPreviewKind.Error);
+            return true;
+        }
+
+        var kind = SlashCommandPreviewService.MapResolveOutcome(anchor.ResolveOutcome);
+        var label = anchor.DisplayLabel ?? anchor.MemberKey ?? anchor.File ?? "—";
+        var status = IntercomAnchorSlash.FormatOutcomeShort(anchor.ResolveOutcome);
+        var id = string.IsNullOrWhiteSpace(anchor.Id) ? "?" : anchor.Id;
+        result = new($"a:{id}  {label}  {status}", kind);
+        return true;
     }
 
     public async Task<bool> TryCommitCockpitCommandLineAsync(CancellationToken cancellationToken = default)

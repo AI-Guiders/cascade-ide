@@ -50,7 +50,7 @@ public sealed class IntercomAnchorSlashTests
     [Fact]
     public void PreviewBuilder_AnchorPeek()
     {
-        Assert.True(CockpitCommandLinePreviewBuilder.TryBuild("/anchor peek abcd1234", out var summary));
+        Assert.True(SlashCommandPreviewEvaluator.TryEvaluateSummary("/anchor peek abcd1234", out var summary));
         Assert.Contains("Peek", summary);
     }
 }

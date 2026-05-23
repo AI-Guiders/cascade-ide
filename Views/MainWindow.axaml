@@ -232,7 +232,10 @@
 
         <!-- Якорь зоны PFD: контент по InstrumentPlacementRuntime + Display / workspace.toml (pfd_primary), без дубля с MfdShellView. -->
         <chrome:AttentionZoneContainer Zone="Pfd" Grid.Row="2" Grid.Column="0">
-            <Grid>
+            <Grid RowDefinitions="Auto,*">
+                <views:PfdBackgroundStatusBarView Grid.Row="0"
+                                                  IsVisible="{Binding ShowWorkspaceBackgroundStatusOnPfd}"/>
+                <Grid Grid.Row="1">
                 <views:SolutionExplorerView IsVisible="{Binding IsDockedPfdSolutionExplorerTree}"/>
                 <views:WorkspaceNavigationMapView IsVisible="{Binding IsDockedPfdWorkspaceNavigationMap}"/>
                 <!-- Wave 3: mount-layer host preview для PFD (единая точка подключения мини-инструмента). -->
@@ -245,19 +248,24 @@
                                                SlotId="pfd"
                                                MountStyle="{Binding PfdInstrumentMountStyle}"
                                                ZIndex="415"/>
+                </Grid>
             </Grid>
         </chrome:AttentionZoneContainer>
         <GridSplitter Grid.Row="2" Grid.Column="1" Width="4" ResizeDirection="Columns" Background="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}" IsVisible="{Binding IsPfdColumnVisible}" IsEnabled="{Binding WorkspaceSplittersUnlocked}"/>
 
         <!-- Лобовое: редактор или Intercom (ADR 0120 primary_work_surface) -->
         <chrome:AttentionZoneContainer Zone="Forward" Grid.Row="2" Grid.Column="2">
-            <Panel>
-                <views:DocumentsDockView IsVisible="{Binding IsForwardEditorHostVisible}" />
-                <Border IsVisible="{Binding IsForwardIntercomHostVisible}"
-                        Background="{DynamicResource CascadeTheme.ChatPanelBackground}">
-                    <views:ChatPanelView DataContext="{Binding ChatPanel}" />
-                </Border>
-            </Panel>
+            <Grid RowDefinitions="Auto,*">
+                <views:PfdBackgroundStatusBarView Grid.Row="0"
+                                                  IsVisible="{Binding ShowWorkspaceBackgroundStatusOnForward}"/>
+                <Panel Grid.Row="1">
+                    <views:DocumentsDockView IsVisible="{Binding IsForwardEditorHostVisible}" />
+                    <Border IsVisible="{Binding IsForwardIntercomHostVisible}"
+                            Background="{DynamicResource CascadeTheme.ChatPanelBackground}">
+                        <views:ChatPanelView DataContext="{Binding ChatPanel}" />
+                    </Border>
+                </Panel>
+            </Grid>
         </chrome:AttentionZoneContainer>
         <GridSplitter Grid.Row="2" Grid.Column="3"
                       Grid.RowSpan="{Binding ChatPanelMainGridRowSpan}"

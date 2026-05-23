@@ -37,7 +37,7 @@ public partial class MainWindowViewModel
         cancellationToken.ThrowIfCancellationRequested();
         return await UiScheduler.Default.InvokeAsync(() =>
                 IntercomAttachmentNavigator.Apply(
-                    (IIdeMcpActions)this,
+                    IdeMcp,
                     _settings.Intercom,
                     GetWorkspacePath(),
                     anchor,

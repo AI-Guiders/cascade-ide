@@ -11,7 +11,8 @@ internal static class SkiaIntercomComposerLayout
         string composerText,
         float surfaceWidth,
         bool showCommandLine = false,
-        string? commandLinePreview = null) =>
+        string? commandLinePreview = null,
+        string? composerSlashPreview = null) =>
         SkiaIntercomCommandDeckLayout.MeasureTotalHeight(
             surfaceWidth,
             showComposer,
@@ -19,5 +20,6 @@ internal static class SkiaIntercomComposerLayout
             commandLinePreview,
             composerText,
             showSlashPopup,
-            slashRowCount);
+            slashRowCount,
+            composerSlashPreview: composerSlashPreview);
 }

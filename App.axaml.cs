@@ -40,7 +40,7 @@ public partial class App : Application
     {
         try
         {
-            var options = Services.IdeMcpServer.BuildOptions(vm);
+            var options = Services.IdeMcpServer.BuildOptions(vm.IdeMcp);
             await using var server = McpServer.Create(new StdioServerTransport("CascadeIDE"), options);
             await server.RunAsync();
         }

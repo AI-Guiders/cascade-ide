@@ -3,7 +3,7 @@ using CascadeIDE.Contracts;
 namespace CascadeIDE.Features.Shell.Application;
 
 /// <summary>Выбор строки в палитре команд без привязки к <c>ObservableCollection</c>.</summary>
-[ComputingUnit]
+[PresentationProjection]
 public static class CommandPaletteSelectionProjection
 {
     /// <summary>После полного пересчёта списка: первая строка или «нет выбора».</summary>

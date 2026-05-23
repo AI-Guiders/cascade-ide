@@ -56,6 +56,8 @@ workload_score = 0.28
 
 [display.instruments]
 pfd_primary = "workspace_map"
+pfd_status_strip = "background_status"
+forward_status_strip = "background_status"
 
 [ai]
 mode = "local"
@@ -103,6 +105,16 @@ auto_reindex_on_solution_open = true
 watch_files = true
 scope_mode = "workspace+solution"
 pause_when_mcp_stdio_host = false
+
+[solution_warmup]
+enabled = true
+warm_active_file_on_solution_open = true
+warm_feed_anchors_after_symbol_sidecar = true
+warm_open_documents = true
+warm_recent_cs_files = true
+max_parallel_file_jobs = 2
+max_open_document_files = 6
+show_background_status_on_pfd = true
 
 [command_palette.go_to_search]
 backend = "rg"
@@ -183,6 +195,8 @@ show_conditions = true
 [intercom]
 # comfortable — prose_pt, просторная лента; compact — prose_pt_forward + плотные отступы (legacy Forward)
 feed_metrics = "compact"
+# slash TCI pill: left | right (default) | highlight_only
+tci_validation_icon = "right"
 
 [intercom.attachments.code]
 navigate = "reveal"

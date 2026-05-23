@@ -6,7 +6,7 @@ namespace CascadeIDE.Features.Shell.Application;
 /// <summary>
 /// Видимость и составные флаги из <see cref="UiModeCapabilities"/> (UI cluster Presentation — без формул режима на главном VM).
 /// </summary>
-[ComputingUnit]
+[PresentationProjection]
 public static class MainWindowPresentationCapabilitiesProjection
 {
     public static bool ShowIdeHealthStrip(UiModeCapabilities c) =>

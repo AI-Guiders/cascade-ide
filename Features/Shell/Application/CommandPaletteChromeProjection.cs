@@ -3,7 +3,7 @@ using CascadeIDE.Contracts;
 namespace CascadeIDE.Features.Shell.Application;
 
 /// <summary>Тексты подсказки/плейсхолдера оверлея палитры (без привязки к VM).</summary>
-[ComputingUnit]
+[PresentationProjection]
 public static class CommandPaletteChromeProjection
 {
     private static string ModeHints(string? melodyAliasesSample) =>

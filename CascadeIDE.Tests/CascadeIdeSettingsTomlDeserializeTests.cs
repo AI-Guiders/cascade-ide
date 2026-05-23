@@ -417,9 +417,9 @@ public sealed class CascadeIdeSettingsTomlDeserializeTests
     [Fact]
     public void NormalizeHybridIndexScopeMode_DefaultsExpected()
     {
-        Assert.Equal("workspace", ShellSettingsOrchestrator.NormalizeHybridIndexScopeMode("workspace"));
-        Assert.Equal("workspace+solution", ShellSettingsOrchestrator.NormalizeHybridIndexScopeMode(""));
-        Assert.Equal("workspace+solution", ShellSettingsOrchestrator.NormalizeHybridIndexScopeMode("garbage"));
+        Assert.Equal("workspace", ShellSettingsPresentationProjection.NormalizeHybridIndexScopeMode("workspace"));
+        Assert.Equal("workspace+solution", ShellSettingsPresentationProjection.NormalizeHybridIndexScopeMode(""));
+        Assert.Equal("workspace+solution", ShellSettingsPresentationProjection.NormalizeHybridIndexScopeMode("garbage"));
     }
 
 }

@@ -3,7 +3,7 @@ using CascadeIDE.Contracts;
 namespace CascadeIDE.Features.Shell.Application;
 
 /// <summary>Подписи строк палитры команд (вторая строка / режим c:).</summary>
-[ComputingUnit]
+[PresentationProjection]
 public static class CommandPaletteSubtitleProjection
 {
     public static string CommandPaletteSubtitle(string commandId, string category)

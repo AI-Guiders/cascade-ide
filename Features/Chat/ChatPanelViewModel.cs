@@ -11,6 +11,7 @@ using CascadeIDE.Models;
 using CascadeIDE.Models.AgentChat;
 using CascadeIDE.Features.Chat.Application;
 using CascadeIDE.Features.Chat.DataAcquisition;
+using CascadeIDE.Features.Cockpit;
 using CascadeIDE.Models.Intercom;
 using CascadeIDE.Services;
 using CascadeIDE.Services.Intercom;
@@ -102,7 +103,8 @@ public partial class ChatPanelViewModel : ViewModelBase
         Func<ObservableCollection<SolutionItem>>? getSolutionRoots = null,
         Func<int?>? getEditorSelectionStart = null,
         Func<int?>? getEditorSelectionLength = null,
-        Func<int?>? getEditorCaretOffset = null)
+        Func<int?>? getEditorCaretOffset = null,
+        SlashCommandPreviewService? slashCommandPreviewService = null)
     {
         _aiProviderManager = aiProviderManager;
         _getActiveAiProvider = getActiveAiProvider;
@@ -146,10 +148,14 @@ public partial class ChatPanelViewModel : ViewModelBase
             tryAttachSlash: TryExecuteAttachSlash,
             selectMessageByOrdinalRangeInDetailLane: SelectMessageByOrdinalRangeInDetailLane,
             selectMessagesByOrdinalRangesInDetailLane: SelectMessagesByOrdinalRangesInDetailLane,
+            clearMessageSelectionInDetailLane: ClearMessageSelectionInDetailLane,
             findMessagesForCodeRef: FindMessagesForCodeRef,
             relateMessageRangeToCodeRef: RelateMessageRangeToCodeRef,
             listMessageAnchors: ListAnchorsForSlashContext,
             peekAnchorById: PeekAnchorById);
+        _slashCommandPreviewService = slashCommandPreviewService
+            ?? new SlashCommandPreviewService(tryBuildAnchorSlashPreview);
+        _cockpitCommandLineSession = new CockpitCommandLineSession(this, _slashCommandPreviewService);
         _getLocalOllamaEndpoint = getLocalOllamaEndpoint;
         _getEffectiveOllamaModelId = getEffectiveOllamaModelId;
         _tryCreateCloudMafIChatClient = tryCreateCloudMafIChatClient;

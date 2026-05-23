@@ -32,7 +32,7 @@ class Demo
         Assert.True(offset >= 0);
         vm.EditorSelectionStart = offset;
 
-        IIdeMcpActions mcp = vm;
+        IIdeMcpActions mcp = vm.IdeMcp;
         var json = await mcp.GetCodeNavigationContextAsync(
             mode: "related",
             filePath: null,

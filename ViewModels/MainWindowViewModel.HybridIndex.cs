@@ -62,7 +62,8 @@ public partial class MainWindowViewModel
         nameof(HybridIndexDatabaseShortText),
         nameof(HybridIndexLampItem),
         nameof(HybridIndexMsgLine1),
-        nameof(HybridIndexMsgLine2))]
+        nameof(HybridIndexMsgLine2),
+        nameof(ShowPfdBackgroundStatusBar))]
     private HybridIndexStateChanged? _hybridIndexLast;
 
     public string HybridIndexLampText => HybridIndexHisPresentationProjection.LampText(HybridIndexLast);
@@ -120,7 +121,7 @@ public partial class MainWindowViewModel
         $"HCI {HybridIndexLampText}  DOCS {HybridIndexDocumentCountText}  FRESH {HybridIndexFreshnessEcamText}";
 
     public string HybridIndexMsgLine2 =>
-        HybridIndexHisPresentationProjection.SecondMessageLine(HybridIndexLastErrorText);
+        $"{SolutionWarmupStatusText}  |  {HybridIndexHisPresentationProjection.SecondMessageLine(HybridIndexLastErrorText)}";
 
     [RelayCommand]
     private void HybridIndexReindexNow()

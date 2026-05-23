@@ -20,6 +20,21 @@ Roslyn-анализаторы для границ [ADR 0036](../docs/adr/0036-cd
 | **CASCOPE019** | Error | Во всех `MainWindowViewModel*.cs`, кроме `MainWindowViewModel.IdeHealth.cs`, запрещён вызов `_workspaceHealth.Build(...)` (единая точка свёртки в `RebuildIdeHealth`, строки в UI — из кэша; см. [ADR 0099](../docs/adr/0099-ide-databus-typed-events-and-projections.md)). |
 | **CASCOPE020** | Warning | В `Cockpit/ComputingUnits/*` запрещён прямой доступ к внешним источникам (`File`, `Directory`, `Process`, `HttpClient`, `JsonDocument/Serializer` и др.): добыча данных — в DAL ([ADR 0102](../docs/adr/0102-data-acquisition-layer-boundary-and-contract.md)). |
 | **CASCOPE021** | Warning | В `Cockpit/ComputingUnits/*` запрещены UI-зависимости через `using` (`CascadeIDE.ViewModels`, `CascadeIDE.Views`, `CascadeIDE.Features.Ui*`, `Avalonia*`). |
+| **CASCOPE030** | Error | В `Features/*/Application` у типа с `[ApplicationOrchestrator]` запрещены static-поля (состояние процесса — в host/DAL/CCU). |
+| **CASCOPE031** | Error | Статический orchestrator в `Features/Application` не вызывает `File`/`Process`/`HttpClient` и др. напрямую — I/O в DAL/instance service. |
+| **CASCOPE032** | Info | `*Orchestrator` в `Features/*/Application` без `[ApplicationOrchestrator]`. |
+| **CASCOPE033** | Info | `ICockpitComputeUnit` в `Cockpit/ComputingUnits` без `[ComputingUnit]`. |
+| **CASCOPE034** | Info | `*PresentationProjection` без `[PresentationProjection]` / `[ComputingUnit]`. |
+| **CASCOPE035** | Warning | `[ApplicationOrchestrator]` на типе, имя которого не оканчивается на `Orchestrator`. |
+| **CASCOPE036** | Error | `[ComputingUnit]` на типе с суффиксом `Orchestrator` — используйте `[ApplicationOrchestrator]`. |
+| **CASCOPE037** | Error | `[ApplicationOrchestrator]` в `Cockpit/ComputingUnits` (роли не смешивать). |
+| **CASCOPE038** | Info | Статический helper в `Features/Application` без суффикса `Orchestrator`/`Projection` и **без** `[ComputingUnit]` / `[PresentationProjection]` / `[ApplicationOrchestrator]` — рассмотрите явную роль. |
+| **CASCOPE039** | Warning | `*Orchestrator` похож на чистую projection (нет async/Task, координации) — рассмотрите `*PresentationProjection`. Не срабатывает на `[ApplicationOrchestrator]` с делегированием в `*Service`/`*Runner`/`*Session` или входом `JsonElement`/`GraphDocument`. |
+| **CASCOPE040** | Warning | Только `[PresentationProjection]`: прямой I/O (`File`, `Process`, `HttpClient`, …) — вынести в DAL/orchestrator. Типы с `[ComputingUnit]` в Application не проверяются (I/O-исключения вроде markdown-export). |
+| **CASCOPE041** | Info | `*Projection` в `ViewModels` — перенос в `Features/*/Application`. |
+| **CASCOPE042** | Info | `*Projection` (не `*PresentationProjection`) в `Features/Application` без маркера роли. |
+
+Маркеры ролей в `CascadeIDE.Contracts`: `[ApplicationOrchestrator]`, `[ComputingUnit]` (CCU), `[PresentationProjection]` (биндинг из снимка). См. [ADR 0097](../docs/adr/0097-cockpit-compute-units-transport-to-channel-dto.md), [architecture-migration](../docs/architecture-migration.md).
 
 ### Черновые направления (правила пока не вводим)
 

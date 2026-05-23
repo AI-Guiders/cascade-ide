@@ -59,7 +59,7 @@ public partial class MainWindowViewModel
                 TryNavigateToMfdShellPage(MfdShellPage.Editor);
         }
 
-        ((Services.IIdeMcpActions)this).FocusEditor();
+        IdeMcp.FocusEditor();
     }
 
     public bool IsForwardEditorHostVisible => PrimaryWorkSurface == PrimaryWorkSurfaceKind.Editor;

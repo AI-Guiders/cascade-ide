@@ -17,7 +17,7 @@ public sealed class IdeMcpIdeStateCdsIntegrationTests
     public async Task Get_ide_state_cockpit_surface_matches_BuildCockpitSurfaceSnapshot()
     {
         var vm = new MainWindowViewModel();
-        IIdeMcpActions mcp = vm;
+        IIdeMcpActions mcp = vm.IdeMcp;
 
         var json = await mcp.GetIdeStateAsync();
 

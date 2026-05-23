@@ -4,7 +4,7 @@ using CascadeIDE.Models;
 namespace CascadeIDE.Features.Shell.Application;
 
 /// <summary>Видимость страниц вторичной оболочки Mfd при текущих флагах возможностей/доков (ADR 0021).</summary>
-[ComputingUnit]
+[PresentationProjection]
 public static class MfdShellPageAllowanceProjection
 {
     /// <summary>Порядок обхода при выборе первой доступной страницы (как в главном окне до выноса политики).</summary>

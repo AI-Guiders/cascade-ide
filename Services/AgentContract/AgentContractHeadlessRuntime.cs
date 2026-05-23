@@ -23,7 +23,7 @@ internal static class AgentContractHeadlessRuntime
         return Dispatcher.UIThread.Invoke(() =>
         {
             var vm = new MainWindowViewModel();
-            return ((IIdeMcpActions)vm).GetSolutionInfo();
+            return vm.IdeMcp.GetSolutionInfo();
         });
     }
 
@@ -48,7 +48,7 @@ internal static class AgentContractHeadlessRuntime
         return Dispatcher.UIThread.Invoke(() =>
         {
             var vm = new MainWindowViewModel();
-            IIdeMcpActions mcp = vm;
+            IIdeMcpActions mcp = vm.IdeMcp;
             var task = mcp.GetIdeStateAsync();
             for (var n = 0; !task.IsCompleted; n++)
             {
