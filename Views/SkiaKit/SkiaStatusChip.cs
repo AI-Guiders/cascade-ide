@@ -36,6 +36,9 @@ internal static class SkiaStatusChip
     public const float MinHeight = 22f;
     public const float BorderStroke = 1.25f;
 
+    /// <summary>Ширина зоны иконки слева от начала текста (pill рисуется левее <c>/</c>).</summary>
+    public const float IconLeadingOverhang = PadX + IconBox + IconGap;
+
     public static float ContentWidthPadding(bool withIcon = true) =>
         PadX * 2f + (withIcon ? IconBox + IconGap : 0f);
 

@@ -185,8 +185,12 @@ internal static class SkiaCommandLineStrip
             : isEnabled ? theme.Content : theme.EmptyHint;
         var linkColor = SkiaSlashPreviewChrome.ChipColors(theme, previewKind).Accent;
 
+        var clipRect = textBounds;
+        if (!isEmpty && SkiaSlashCommandChip.ShouldDraw(previewKind, bufferText))
+            clipRect.Left -= SkiaStatusChip.IconLeadingOverhang;
+
         canvas.Save();
-        canvas.ClipRect(textBounds);
+        canvas.ClipRect(clipRect);
         canvas.Translate(-scrollOffsetX, 0f);
 
         var textLeft = textBounds.Left + scrollOffsetX;

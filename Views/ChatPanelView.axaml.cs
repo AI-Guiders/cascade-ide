@@ -194,7 +194,7 @@ public partial class ChatPanelView : UserControl
             }
 
             if (handle.SyncComposerCaretFromViewModel)
-                surface.ComposerCaretIndex = vm.ChatComposerCaretIndex;
+                syncComposerFromViewModel(surface, vm);
 
             if (handle.RunCockpitCommit)
                 _ = vm.TryCommitCockpitCommandLineAsync();
@@ -322,6 +322,16 @@ public partial class ChatPanelView : UserControl
         surface.CommandLineText = vm.CockpitCommandLineText;
         surface.CommandLineCaretIndex = vm.CockpitCommandLineCaretIndex;
         surface.CollapseCommandLineSelection();
+        surface.NotifyCommandLineImeStateChanged();
+    }
+
+    private static void syncComposerFromViewModel(SkiaChatSurfaceControl surface, ChatPanelViewModel vm)
+    {
+        surface.ComposerPreeditText = null;
+        surface.ComposerText = vm.ChatInput;
+        surface.ComposerCaretIndex = vm.ChatComposerCaretIndex;
+        surface.CollapseComposerSelection();
+        surface.NotifyComposerImeStateChanged();
     }
 
     private static void showMessageSelectContextMenu(

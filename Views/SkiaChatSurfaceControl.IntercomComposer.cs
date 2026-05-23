@@ -94,6 +94,7 @@ public partial class SkiaChatSurfaceControl
     private int _slashPopupScrollOffset;
     private int _slashPopupLastRowCount;
     private int _composerSelectionAnchor;
+    private bool _composerExtendSelection;
     private float _composerScrollOffsetY;
     private int _commandLineSelectionAnchor;
     private bool _commandLineExtendSelection;
@@ -561,6 +562,7 @@ public partial class SkiaChatSurfaceControl
                 out var index))
             return false;
 
+        _composerExtendSelection = extendSelection;
         if (!extendSelection)
             _composerSelectionAnchor = index;
 
@@ -707,6 +709,18 @@ public partial class SkiaChatSurfaceControl
 
     private bool HasComposerSelection => GetComposerSelectionRange().Start != GetComposerSelectionRange().End;
 
+    internal void CollapseComposerSelection()
+    {
+        var len = GetComposerDisplayText().Length;
+        _composerSelectionAnchor = Math.Clamp(ComposerCaretIndex, 0, len);
+    }
+
+    internal void SetComposerSelectionAnchor(int anchor)
+    {
+        var len = GetComposerDisplayText().Length;
+        _composerSelectionAnchor = Math.Clamp(anchor, 0, len);
+    }
+
     private bool TryHandleComposerClipboardKey(KeyEventArgs e)
     {
         var ctrl = e.KeyModifiers.HasFlag(KeyModifiers.Control);
@@ -839,6 +853,16 @@ public partial class SkiaChatSurfaceControl
 
         if (!ShowIntercomComposer || !IsComposerEnabled || string.IsNullOrEmpty(e.Text))
             return;
+
+        if (e.Text == " " && IsSlashAutocompleteVisible && _slashRows.Count > 0)
+        {
+            if (!IsKeyboardFocusWithin)
+                Focus();
+
+            ComposerKeyDown?.Invoke(this, new IntercomComposerKeyEventArgs(IntercomComposerKeyKind.CommitSlashSuggestion));
+            e.Handled = true;
+            return;
+        }
 
         if (ShowCockpitCommandLine && _commandLineFocused)
         {
@@ -1176,6 +1200,20 @@ public partial class SkiaChatSurfaceControl
 
     private void NotifyCommandLineDraftChanged() => CommandLineDraftChanged?.Invoke(this, EventArgs.Empty);
 
+    internal void NotifyComposerImeStateChanged()
+    {
+        _textInputClient?.NotifyTextChanged();
+        _textInputClient?.NotifyCursorMoved();
+        InvalidateComposerChrome();
+    }
+
+    internal void NotifyCommandLineImeStateChanged()
+    {
+        _textInputClient?.NotifyTextChanged();
+        _textInputClient?.NotifyCursorMoved();
+        InvalidateComposerChrome();
+    }
+
     private static IntercomComposerKeyKind? MapComposerKey(KeyEventArgs e) => e.Key switch
     {
         Key.Tab => IntercomComposerKeyKind.Tab,
@@ -1256,6 +1294,7 @@ public partial class SkiaChatSurfaceControl
     {
         var len = (ComposerText ?? "").Length;
         var next = Math.Clamp(ComposerCaretIndex + delta, 0, len);
+        _composerExtendSelection = extendSelection;
         if (!extendSelection)
             _composerSelectionAnchor = next;
 
@@ -1269,6 +1308,7 @@ public partial class SkiaChatSurfaceControl
     {
         var len = (ComposerText ?? "").Length;
         index = Math.Clamp(index, 0, len);
+        _composerExtendSelection = extendSelection;
         if (!extendSelection)
             _composerSelectionAnchor = index;
 

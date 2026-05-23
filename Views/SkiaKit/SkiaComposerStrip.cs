@@ -176,8 +176,17 @@ internal static class SkiaComposerStrip
         var selAnchor = selectionAnchor < 0 ? caretIndex : selectionAnchor;
         var maxLines = (int)((MaxHeightFor(lineHeight) - VerticalPadding * 2) / lineHeight);
 
+        var clipRect = textBounds;
+        if (!isEmpty
+            && slashPreviewKind != SlashCommandPreviewKind.None
+            && ChatSlashAutocomplete.TryGetSlashLineRange(display, caretIndex, out var slashStart, out var slashEnd)
+            && SkiaSlashCommandChip.ShouldDraw(slashPreviewKind, display[slashStart..slashEnd]))
+        {
+            clipRect.Left -= SkiaStatusChip.IconLeadingOverhang;
+        }
+
         canvas.Save();
-        canvas.ClipRect(textBounds);
+        canvas.ClipRect(clipRect);
 
         if (!isEmpty && selAnchor != caretIndex)
         {

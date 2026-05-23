@@ -272,7 +272,7 @@ CCL — не «ещё одна фича Intercom», а **слой между cho
 
 **Валидация в стиле attach ([0128](0128-intercom-attachment-anchors-and-code-references.md) §9.1):** debounced preview в CCL показывает исход (`resolved` / `degraded` / `failed`) **без блокировки** Enter, как chip в ленте — не отдельный «терминал ошибок».
 
-**Preview severity ≠ канал EICAS ([0021](0021-pfd-mfd-cockpit-attention-model.md) W/C/A):** TCI slash-preview — `SlashCommandPreviewService` / `SlashCommandPreviewKind` (CCL + composer). Таблица — [`playbook-tci-v1.md`](../design/playbook-tci-v1.md) § Preview severity.
+**Preview severity ≠ канал EICAS ([0021](0021-pfd-mfd-cockpit-attention-model.md) W/C/A):** TCI slash-preview — `SlashCommandPreviewService` / `SlashCommandPreviewKind` (CCL + composer). Таблица — [`playbook-tci-v1.md`](../design/playbook-tci-v1.md) § Preview severity. Глифы ✓ / ✕ / **P(n)** — [0140](0140-tci-slash-status-glyphs-and-args-counter.md).
 
 **Рекомендуемый порядок внедрения**
 

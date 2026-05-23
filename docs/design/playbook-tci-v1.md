@@ -33,18 +33,20 @@
 
 ### Preview severity (не канал EICAS)
 
-Визуальная валидация slash — **отдельный контур** от W/C/A в [ADR 0021](../adr/0021-pfd-mfd-cockpit-attention-model.md): не попадает в `EicasAlertsBar`/CAS, Enter не блокируется (как chip attach, ADR 0128 §9.1). Рисование: `SkiaStatusChip` (примитив) → `SkiaSlashCommandChip` / `SkiaSlashPreviewChrome`.
+Визуальная валидация slash — **отдельный контур** от W/C/A в [ADR 0021](../adr/0021-pfd-mfd-cockpit-attention-model.md): не попадает в `EicasAlertsBar`/CAS, Enter не блокируется (как chip attach, ADR 0128 §9.1). Рисование: `SkiaStatusChip` (примитив) → `SkiaSlashCommandChip` / `SkiaSlashPreviewChrome`. Контракт глифов ✓ / ✕ / **P(n)** — [ADR 0140](../adr/0140-tci-slash-status-glyphs-and-args-counter.md).
+
+**Иконка слева в pill:** рисуется **левее** начала slash-текста на `SkiaStatusChip.IconLeadingOverhang`; clip поля ввода расширяется влево, иначе глиф обрезается.
 
 **Палитру** берём из кокпита (красный / янтарь / зелёный / серый), **семантику** — свою:
 
-| TCI (`SlashCommandPreviewKind`) | Смысл | Цвет | Рифма с EICAS (только визуально) |
-|---------------------------------------|-------|------|----------------------------------|
-| `Ok` (**Ready**) | команда + args готовы | зелёный | *вне* W/C/A (штат = тихо) |
-| `Incomplete` | команда есть, не хватает args, id допечатывается, anchor degraded | янтарь | Caution (C) |
-| `Error` (**Invalid**) | нет команды, опечатка, синтаксис диапазона | красный | Warning / Critical (W) |
-| `Hint` | мягкая подсказка (редко) | серый | Advisory (A) |
+| TCI (`SlashCommandPreviewKind`) | Глиф (целевой) | Смысл | Цвет |
+|---------------------------------------|----------------|-------|------|
+| `Ok` (**Ready**) | ✓ | команда + args готовы | зелёный |
+| `Incomplete` | **P** / **P(n)** (сейчас ⚠) | не хватает args, id допечатывается | янтарь |
+| `Error` (**Invalid**) | ✕ | нет команды, опечатка, синтаксис | красный |
+| `Hint` | ℹ | мягкая подсказка (редко) | серый |
 
-Примеры: `/intercom test` → `Error`; `/intercom message select` → `Incomplete`; `… select 5 7` → `Ok`; `/intercom mesage select 5?7` → `Error`.
+Примеры: `/intercom test` → `Error` (✕); `/intercom message select` → `Incomplete` (P); `… select 5 7` → `Ok` (✓); `/intercom mesage select 5?7` → `Error` (✕).
 
 **Слой:** `SlashCommandPreviewService` → `SlashCommandPreviewRulePipeline` (правила); маппинг severity — **только** `SlashCommandPreviewVisualMapper` → `SkiaSlashPreviewChrome.ToChipSeverity`; chrome — `SkiaStatusChip`. В UI — pill, не вторая строка.
 

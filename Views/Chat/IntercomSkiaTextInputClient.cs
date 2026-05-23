@@ -72,6 +72,10 @@ internal sealed class IntercomSkiaTextInputClient : TextInputMethodClient
             }
 
             _host.ComposerCaretIndex = end;
+            if (start != end)
+                _host.SetComposerSelectionAnchor(start);
+            else
+                _host.CollapseComposerSelection();
         }
     }
 
