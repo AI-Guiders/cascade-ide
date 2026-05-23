@@ -8,6 +8,21 @@ namespace CascadeIDE.Tests;
 public sealed class CodeNavigationControlFlowSubgraphBuilderTests
 {
     [Fact]
+    public void TryResolveFirstMethodLineColumn_finds_first_method()
+    {
+        const string source = """
+class Demo {
+    void First() { }
+    void Second() { }
+}
+""";
+        var (line, col) = CodeNavigationControlFlowSubgraphBuilder.TryResolveFirstMethodLineColumn(source);
+        Assert.NotNull(line);
+        Assert.True(line > 0);
+        Assert.Contains("First", source.Split('\n')[line!.Value - 1], StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void BuildJson_EmitsLoopAndMultiBranchEdgeKinds()
     {
         const string source = """

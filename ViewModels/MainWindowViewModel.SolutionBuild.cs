@@ -135,5 +135,6 @@ public partial class MainWindowViewModel
     {
         RefreshStartupProjectAfterSolutionLoad();
         TryNavigateToMfdShellPage(initialMfdPage);
+        ScheduleWorkspaceNavigationMapRefresh();
     }
 }

@@ -14,6 +14,25 @@ namespace CascadeIDE.Services.CodeNavigation;
 /// </summary>
 public static class CodeNavigationControlFlowSubgraphBuilder
 {
+    /// <summary>Первая декларация метода в тексте — якорь CF, когда курсор редактора не применим (fallback-файл).</summary>
+    public static (int? line, int? column) TryResolveFirstMethodLineColumn(string? sourceText)
+    {
+        if (string.IsNullOrWhiteSpace(sourceText))
+            return (null, null);
+
+        var tree = CSharpSyntaxTree.ParseText(sourceText);
+        var root = tree.GetRoot();
+        if (root is null)
+            return (null, null);
+
+        var method = root.DescendantNodes().OfType<MethodDeclarationSyntax>().FirstOrDefault();
+        if (method is null)
+            return (null, null);
+
+        var span = tree.GetLineSpan(method.Identifier.Span);
+        return (span.StartLinePosition.Line + 1, span.StartLinePosition.Character + 1);
+    }
+
     public static string BuildJson(
         string? filePath,
         string? sourceText,

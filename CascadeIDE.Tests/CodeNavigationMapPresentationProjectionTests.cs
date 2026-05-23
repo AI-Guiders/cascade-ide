@@ -13,9 +13,17 @@ public sealed class CodeNavigationMapPresentationProjectionTests
     public void Presentation_list_graph_match_settings_normalize_view(string view, bool expectList, bool expectGraph)
     {
         Assert.Equal(expectList, CodeNavigationMapPresentationProjection.ShowCodeNavigationMapList(view));
-        Assert.Equal(expectGraph, CodeNavigationMapPresentationProjection.ShowCodeNavigationMapGraph(view));
+        Assert.Equal(expectGraph, CodeNavigationMapPresentationProjection.ShowCodeNavigationMapGraph(view, CodeNavigationMapLevelKind.File));
         Assert.Equal(expectList, CodeNavigationMapSettings.ViewWantsList(view));
         Assert.Equal(expectGraph, CodeNavigationMapSettings.ViewWantsGraph(view));
+    }
+
+    [Theory]
+    [InlineData("list")]
+    [InlineData("graph")]
+    public void ControlFlow_always_shows_graph_on_pfd(string view)
+    {
+        Assert.True(CodeNavigationMapPresentationProjection.ShowCodeNavigationMapGraph(view, CodeNavigationMapLevelKind.ControlFlow));
     }
 
     [Fact]

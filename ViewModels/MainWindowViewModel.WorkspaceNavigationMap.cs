@@ -72,6 +72,7 @@ public partial class MainWindowViewModel
 
     /// <summary><c>file</c> | <c>controlFlow</c> — уровень построения карты (секция <c>[code_navigation_map]</c>).</summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowCodeNavigationMapGraph))]
     [NotifyPropertyChangedFor(nameof(ShowCodeNavigationMapGraphClickHint))]
     private string _codeNavigationMapLevel = CodeNavigationMapLevelKind.File;
 
@@ -99,7 +100,7 @@ public partial class MainWindowViewModel
 
     /// <summary>Показать мини-карту подграфа.</summary>
     public bool ShowCodeNavigationMapGraph =>
-        CodeNavigationMapPresentationProjection.ShowCodeNavigationMapGraph(CodeNavigationMapPresentation);
+        CodeNavigationMapPresentationProjection.ShowCodeNavigationMapGraph(CodeNavigationMapPresentation, CodeNavigationMapLevel);
 
     /// <summary>
     /// Высота нижней строки Grid под список на PFD: список перенесён в MFD — всегда 0.
