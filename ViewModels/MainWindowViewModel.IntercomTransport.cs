@@ -4,6 +4,9 @@ using CascadeIDE.Features.Intercom.Transport;
 
 namespace CascadeIDE.ViewModels;
 
+/// <summary>
+/// Координатор team transport Intercom: подключение SSE/HTTP ingest и делегирование в ChatPanel.
+/// </summary>
 public partial class MainWindowViewModel
 {
     private readonly IntercomTransportCoordinator _intercomTransport = new();
