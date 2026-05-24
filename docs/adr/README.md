@@ -68,7 +68,10 @@
 | 0129 | [fenced code и MD в теле](0129-intercom-message-body-markdown-and-fenced-code.md) — **In progress** (v1 `SplitSegments`) |
 | 0130 | [reveal без selection (MCP)](0130-editor-agent-range-reveal-without-selection.md) — **Implemented** |
 | 0131 | [`/editor select|reveal code […]`](0131-editor-slash-select-code-by-bracket-reference.md) — **In progress** |
-| 0132 | [federated transport](0132-intercom-federated-transport-and-multi-client-boundary.md) — **Proposed** (wire для команды) |
+| 0132 | [federated transport](0132-intercom-federated-transport-and-multi-client-boundary.md) — **Proposed** (Web/MCC/паритет; transport → [0144](0144-intercom-team-transport-cide-sync-and-reference-service.md)) |
+| 0144 | [team transport + CIDE sync](0144-intercom-team-transport-cide-sync-and-reference-service.md) — **Accepted** (reference service, SSE, human v1) |
+| 0145 | [Intercom Web PWA](0145-intercom-web-pwa-team-client.md) — **Accepted** (отдельный org-репо) |
+| 0146 | [intercom-wire package](0146-intercom-wire-canonical-protocol-package.md) — **Accepted** (канон схем отдельно от server) |
 | 0134 | [prepare-pipeline](0134-intercom-message-prepare-pipeline-v1.md) — **In progress** (MCP fast path @ send) |
 | 0135 | [symbol cache + HCI sidecar](0135-intercom-attach-symbol-cache-and-hci-sidecar.md) — **In progress** (L1 parse cache, L2 SQLite @ HCI reindex) |
 | 0136 | [gutter + `/intercom` namespace](0136-intercom-feed-gutter-and-slash-namespace.md) — **In progress** (select ПКМ/slash, без старых `/topic`) |
@@ -210,8 +213,12 @@
 | [0129](0129-intercom-message-body-markdown-and-fenced-code.md) | Intercom: тело сообщения — fenced code, inline MD в ленте, полный preview через [0069](0069-markdown-preview-tool-surface-and-renderer-decoupling.md) | Accepted · In progress |
 | [0130](0130-editor-agent-range-reveal-without-selection.md) | Подсветка диапазона кода для агента без изменения selection (`reveal_editor_range`, `EditorAgentRangeReveal`) | Accepted · Implemented |
 | [0131](0131-editor-slash-select-code-by-bracket-reference.md) | `/editor select|reveal code [M:…]` — bracket → select/reveal в буфере, не attach | Accepted · In progress |
-| [0132](0132-intercom-federated-transport-and-multi-client-boundary.md) | Intercom: federated transport, multi-client; тот же wire `AttachmentAnchor` для команды | Proposed |
+| [0132](0132-intercom-federated-transport-and-multi-client-boundary.md) | Intercom: federated transport, multi-client (Web/MCC); transport 2+ CIDE → [0144](0144-intercom-team-transport-cide-sync-and-reference-service.md) | Proposed |
 | [0142](0142-intercom-open-wire-pluggable-transports.md) | Intercom: **открытый wire** (схема событий), **pluggable** transport, мосты Matrix/MM/webhook опциональны | Accepted |
+| [0143](0143-intercom-feed-participant-lens.md) | Intercom: **participant lens** ленты (All / Humans / Agents / System) — UI-фильтр в chrome, не transport channel | Accepted |
+| [0144](0144-intercom-team-transport-cide-sync-and-reference-service.md) | Intercom: **team transport**, reference `intercom-service`, CIDE FederatedSync, SSE; human-only sync v1 | Accepted |
+| [0145](0145-intercom-web-pwa-team-client.md) | Intercom Web: PWA team client — **отдельный org-репо** `intercom-web` | Accepted |
+| [0146](0146-intercom-wire-canonical-protocol-package.md) | Intercom Wire: канонический пакет `intercom-wire/` (схемы, extensions, HTTP profiles) | Accepted |
 | [0134](0134-intercom-message-prepare-pipeline-v1.md) | Intercom: единый prepare-pipeline (wire, Skia, MCP fail-closed) | Accepted · In progress |
 | [0135](0135-intercom-attach-symbol-cache-and-hci-sidecar.md) | Intercom attach: L1 Roslyn file cache, L2 symbol sidecar colocated с HCI | Accepted · In progress |
 | [0136](0136-intercom-feed-gutter-and-slash-namespace.md) | Intercom: gutter номеров, явный select, единый `/intercom` slash | Accepted · In progress |

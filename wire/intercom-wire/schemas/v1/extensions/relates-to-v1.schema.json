@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cascade.dev/intercom-wire/v1/extensions/relates-to-v1.schema.json",
+  "title": "RelatesToLinkV1",
+  "description": "Связь сущностей с сообщением. Эволюция ADR 0137 (range) → точечные relatesTo.",
+  "type": "object",
+  "required": ["target_kind", "relation"],
+  "properties": {
+    "target_kind": {
+      "type": "string",
+      "enum": ["code", "message", "doc", "topic"]
+    },
+    "relation": {
+      "type": "string",
+      "enum": ["discusses", "implements", "references", "documents", "blocks", "duplicates"]
+    },
+    "code_ref": { "$ref": "../common/attachment-anchor.schema.json" },
+    "message_id": { "type": "string" },
+    "doc_path": {
+      "type": "string",
+      "description": "KB or repo-relative doc path"
+    },
+    "topic_id": { "type": "string" },
+    "ordinal_range": {
+      "type": "object",
+      "properties": {
+        "start_ordinal": { "type": "integer", "minimum": 1 },
+        "end_ordinal": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "confidence": {
+      "type": "string",
+      "enum": ["explicit", "inferred", "agent"]
+    }
+  },
+  "additionalProperties": true,
+  "allOf": [
+    {
+      "if": { "properties": { "target_kind": { "const": "code" } } },
+      "then": { "required": ["code_ref"] }
+    },
+    {
+      "if": { "properties": { "target_kind": { "const": "message" } } },
+      "then": { "required": ["message_id"] }
+    },
+    {
+      "if": { "properties": { "target_kind": { "const": "doc" } } },
+      "then": { "required": ["doc_path"] }
+    }
+  ]
+}

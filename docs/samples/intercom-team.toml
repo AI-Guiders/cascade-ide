@@ -1,0 +1,5 @@
+# Пример manifest команды (ADR 0144). Положить в <git-root>/.cascade-ide/intercom-team.toml
+
+[team]
+team_id = "financial-open"
+display_name = "Financial Open"

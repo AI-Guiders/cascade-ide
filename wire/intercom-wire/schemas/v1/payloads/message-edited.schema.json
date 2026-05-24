@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cascade.dev/intercom-wire/v1/payloads/message-edited.schema.json",
+  "title": "IntercomMessageEditedPayload",
+  "type": "object",
+  "required": ["message_id", "new_content", "reason"],
+  "properties": {
+    "message_id": { "type": "string" },
+    "new_content": { "type": "string" },
+    "reason": { "type": "string" }
+  },
+  "additionalProperties": true
+}

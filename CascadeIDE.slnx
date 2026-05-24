@@ -1,6 +1,8 @@
 <Solution>
   <Project Path="CascadeIDE.csproj" />
   <Project Path="CascadeIDE.Tests\CascadeIDE.Tests.csproj" />
+  <Project Path="host\intercom-service\src\IntercomService\IntercomService.csproj" />
+  <Project Path="host\intercom-service\tests\IntercomService.Tests\IntercomService.Tests.csproj" />
   <Project Path="samples\DebugTarget\DebugTarget.csproj" />
   <Project Path="samples\AcpSmokeDotnet\AcpSmokeDotnet.csproj" />
 </Solution>

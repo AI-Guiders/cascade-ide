@@ -1,0 +1,160 @@
+openapi: 3.0.3
+info:
+  title: Intercom reference HTTP transport (profile reference-http-v1)
+  version: 1.0.0
+  description: |
+    Transport profile for Intercom wire v1 — NOT the wire itself.
+    Canonical schemas: ../../schemas/v1/
+    Reference implementation: intercom-service
+servers:
+  - url: http://127.0.0.1:5080
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        "200":
+          description: OK
+  /api/v1/auth/login:
+    get:
+      summary: Start OAuth (github | oidc) + PKCE
+      parameters:
+        - name: provider
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [github, oidc]
+        - name: team_id
+          in: query
+          required: true
+          schema: { type: string }
+        - name: redirect_uri
+          in: query
+          required: true
+          schema: { type: string, format: uri }
+        - name: code_challenge
+          in: query
+          schema: { type: string }
+        - name: code_challenge_method
+          in: query
+          schema: { type: string, enum: [S256] }
+      responses:
+        "302":
+          description: Redirect to IdP
+  /api/v1/auth/callback/github:
+    get:
+      summary: GitHub OAuth callback (server-side)
+      responses:
+        "302":
+          description: Redirect to client with tokens
+  /api/v1/auth/callback/oidc:
+    get:
+      summary: Generic OIDC callback
+      responses:
+        "302":
+          description: Redirect to client with tokens
+  /api/v1/auth/token:
+    post:
+      summary: Refresh access token
+      responses:
+        "200":
+          description: TokenResponse
+  /api/v1/auth/logout:
+    post:
+      summary: Revoke refresh token
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: OK
+  /api/v1/auth/me:
+    get:
+      summary: Current member
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: MeResponse
+  /api/v1/teams/{teamId}/topics:
+    get:
+      summary: List topics
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: TopicDto[]
+    post:
+      summary: Create topic
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: TopicDto
+  /api/v1/teams/{teamId}/topics/ensure:
+    post:
+      summary: Ensure topic by spine_key (e.g. thread_id)
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: TopicDto
+  /api/v1/teams/{teamId}/events:
+    get:
+      summary: Catch-up all team events (after_seq)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema: { type: string }
+        - name: after_seq
+          in: query
+          schema: { type: integer, format: int64 }
+        - name: limit
+          in: query
+          schema: { type: integer }
+      responses:
+        "200":
+          description: TransportEventEnvelope[]
+  /api/v1/teams/{teamId}/stream:
+    get:
+      summary: SSE transport events (optional topic_id filter)
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: text/event-stream
+  /api/v1/topics/{topicId}/events:
+    get:
+      summary: List events for topic
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: TransportEventEnvelope[]
+    post:
+      summary: Append event (idempotent client_event_id)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AppendEventRequest"
+      responses:
+        "200":
+          description: TransportEventEnvelope
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    AppendEventRequest:
+      type: object
+      required: [schema_version, client_event_id, event_kind, payload]
+      properties:
+        schema_version: { type: integer }
+        client_event_id: { type: string }
+        occurred_at_utc: { type: string, format: date-time }
+        event_kind: { type: string }
+        sender:
+          type: object
+        payload:
+          type: object
+          description: See ../../schemas/v1/event-kinds.json

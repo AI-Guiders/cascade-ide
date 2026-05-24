@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cascade.dev/intercom-wire/v1/team-manifest.schema.json",
+  "title": "IntercomTeamManifest",
+  "type": "object",
+  "required": ["team"],
+  "properties": {
+    "team": {
+      "type": "object",
+      "required": ["team_id"],
+      "properties": {
+        "team_id": { "type": "string", "minLength": 1 },
+        "display_name": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

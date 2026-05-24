@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cascade.dev/intercom-wire/v1/payloads/message-range-related.schema.json",
+  "title": "IntercomMessageRangeRelatedPayload",
+  "description": "Explicit gutter ordinal range ↔ code (ADR 0137).",
+  "type": "object",
+  "required": ["thread_id", "start_ordinal", "end_ordinal", "code_ref", "source"],
+  "properties": {
+    "thread_id": { "type": "string" },
+    "start_ordinal": { "type": "integer", "minimum": 1 },
+    "end_ordinal": { "type": "integer", "minimum": 1 },
+    "code_ref": { "$ref": "../common/attachment-anchor.schema.json" },
+    "source": {
+      "type": "string",
+      "description": "explicit | inferred | slash"
+    },
+    "code_doc_links": {
+      "type": "array",
+      "items": { "$ref": "../extensions/code-doc-link-v1.schema.json" }
+    }
+  },
+  "additionalProperties": true
+}

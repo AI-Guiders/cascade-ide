@@ -43,6 +43,7 @@
     <Compile Remove="CascadeIDE.Tests\**\*.cs" />
     <Compile Remove="CascadeIDE.ArchitectureAnalyzers.Tests\**\*.cs" />
     <Compile Remove="samples\**\*.cs" />
+    <Compile Remove="host\**\*.cs" />
     <Compile Remove="tools\**\*.cs" />
     
     <Folder Include="Models\" />

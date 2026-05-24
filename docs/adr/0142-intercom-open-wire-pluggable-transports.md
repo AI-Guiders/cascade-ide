@@ -13,6 +13,8 @@
 | [0128](0128-intercom-attachment-anchors-and-code-references.md) | `AttachmentAnchor` в wire — JSON, не prose |
 | [0134](0134-intercom-message-prepare-pipeline-v1.md) | Prepare/commit до transport |
 | [0133](0133-commander-cockpit-shared-attention-model-and-instrument-deck.md) | MCC подписывается на transport, не владеет store |
+| [0143](0143-intercom-feed-participant-lens.md) | **Participant lens** (All/Humans/Agents/System) — проекция UI, не wire channel |
+| [0144](0144-intercom-team-transport-cide-sync-and-reference-service.md) | **Accepted:** reference Intercom service, team id, CIDE FederatedSync, SSE |
 
 ### Вне ADR
 
@@ -88,7 +90,7 @@ flowchart TB
 | **Attachment** | structured JSON ([0128](0128-intercom-attachment-anchors-and-code-references.md)); prose bracket — convenience на клиенте |
 | **Экспорт/импорт** | CIDE local log ↔ wire ([0132](0132-intercom-federated-transport-and-multi-client-boundary.md) фаза 1) |
 
-Публикация: репозиторий продукта (или отдельный `intercom-wire`), лицензия совместима с открытым продуктом ([0101](0101-licensing-and-commercialization-strategy.md) при выборе зависимостей мостов).
+Публикация: канон в [`wire/intercom-wire`](../../wire/intercom-wire/README.md) ([0146](0146-intercom-wire-canonical-protocol-package.md)); лицензия совместима с открытым продуктом ([0101](0101-licensing-and-commercialization-strategy.md) при выборе зависимостей мостов).
 
 **Обратная совместимость wire:** при изменении полей — явная версия схемы; потребители вне репо — отдельная политика, когда появятся.
 

@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cascade.dev/intercom-wire/v1/common/attachment-anchor.schema.json",
+  "title": "AttachmentAnchor",
+  "description": "Structured code attach (ADR 0128). snake_case on wire.",
+  "type": "object",
+  "required": ["file"],
+  "properties": {
+    "id": { "type": "string" },
+    "attachment_shape": { "type": "string" },
+    "display_label": { "type": "string" },
+    "file": { "type": "string" },
+    "line_start": { "type": "integer" },
+    "line_end": { "type": "integer" },
+    "member_key": { "type": "string" },
+    "syntax_scope": { "type": "object" },
+    "excerpt": { "type": "string" },
+    "prose_start": { "type": "integer" },
+    "prose_length": { "type": "integer" },
+    "resolved_at_utc": { "type": "string", "format": "date-time" },
+    "resolve_outcome": { "type": "string" }
+  },
+  "additionalProperties": true
+}
