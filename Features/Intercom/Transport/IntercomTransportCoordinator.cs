@@ -198,24 +198,8 @@ public sealed class IntercomTransportCoordinator : IDisposable
             return false;
         }
 
-        JsonElement payloadElement;
-        try
-        {
-            payloadElement = JsonSerializer.Deserialize<JsonElement>(ev.PayloadJson, IntercomTransportJson.Web);
-        }
-        catch (JsonException)
-        {
+        if (!TryBuildAppendPayload(ev, out var request))
             return false;
-        }
-
-        var senderRole = IntercomTransportPublishRules.ResolveWireSenderRole(ev.PayloadJson, ev.Kind);
-        var request = new IntercomAppendEventRequestDto(
-            SchemaVersion: 1,
-            ClientEventId: ev.EventId.ToString("N"),
-            OccurredAtUtc: ev.AtUtc.ToString("O"),
-            EventKind: IntercomTransportPublishRules.ToWireEventKind(ev.Kind),
-            Sender: new IntercomSenderWireDto("", "", senderRole, "cide"),
-            Payload: payloadElement);
 
         try
         {
@@ -248,24 +232,8 @@ public sealed class IntercomTransportCoordinator : IDisposable
         if (string.IsNullOrWhiteSpace(topicId))
             topicId = "pending";
 
-        JsonElement payloadElement;
-        try
-        {
-            payloadElement = JsonSerializer.Deserialize<JsonElement>(ev.PayloadJson, IntercomTransportJson.Web);
-        }
-        catch (JsonException)
-        {
+        if (!TryBuildAppendPayload(ev, out var request))
             return;
-        }
-
-        var senderRole = IntercomTransportPublishRules.ResolveWireSenderRole(ev.PayloadJson, ev.Kind);
-        var request = new IntercomAppendEventRequestDto(
-            SchemaVersion: 1,
-            ClientEventId: ev.EventId.ToString("N"),
-            OccurredAtUtc: ev.AtUtc.ToString("O"),
-            EventKind: IntercomTransportPublishRules.ToWireEventKind(ev.Kind),
-            Sender: new IntercomSenderWireDto("", "", senderRole, "cide"),
-            Payload: payloadElement);
 
         await _outbox.EnqueueAsync(new IntercomOutboundQueueEntry(topicId, request), ct).ConfigureAwait(false);
     }
@@ -588,6 +556,31 @@ public sealed class IntercomTransportCoordinator : IDisposable
             return false;
         }
 
+        return true;
+    }
+
+    private static bool TryBuildAppendPayload(ChatHistoryEvent ev, out IntercomAppendEventRequestDto request)
+    {
+        request = default!;
+        JsonElement payloadElement;
+        try
+        {
+            payloadElement = JsonSerializer.Deserialize<JsonElement>(ev.PayloadJson, IntercomTransportJson.Web);
+        }
+        catch (JsonException)
+        {
+            return false;
+        }
+
+        payloadElement = IntercomTransportPayloadEnricher.EnrichForWire(ev.Kind, payloadElement);
+        var senderRole = IntercomTransportPublishRules.ResolveWireSenderRole(ev.PayloadJson, ev.Kind);
+        request = new IntercomAppendEventRequestDto(
+            SchemaVersion: 1,
+            ClientEventId: ev.EventId.ToString("N"),
+            OccurredAtUtc: ev.AtUtc.ToString("O"),
+            EventKind: IntercomTransportPublishRules.ToWireEventKind(ev.Kind),
+            Sender: new IntercomSenderWireDto("", "", senderRole, "cide"),
+            Payload: payloadElement);
         return true;
     }
 
