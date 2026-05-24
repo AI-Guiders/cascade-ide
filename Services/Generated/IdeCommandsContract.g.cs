@@ -113,6 +113,8 @@ internal static class IdeCommandsContractGenerated
         ["hide_build_output_panel"] = IdeReturnKind.Text,
         ["highlight_control"] = IdeReturnKind.Text,
         ["install_ollama_model"] = IdeReturnKind.Text,
+        ["intercom.connect_team"] = IdeReturnKind.Text,
+        ["intercom.disconnect_team"] = IdeReturnKind.Text,
         ["intercom.message_relate"] = IdeReturnKind.Json,
         ["intercom.messages_for_code"] = IdeReturnKind.Json,
         ["intercom.reveal_attachment"] = IdeReturnKind.Text,

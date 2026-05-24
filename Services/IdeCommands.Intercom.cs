@@ -17,4 +17,10 @@ public static partial class IdeCommands
 
     /// <summary>Явная связь диапазона gutter-сообщений с кодом (ADR 0137). args: start_ordinal:integer, end_ordinal?:integer, use_selection?:boolean, code_ref?:string, anchor_json?:object, file?:string, line_start?:integer, line_end?:integer; returns: json; example: {"start_ordinal":3,"end_ordinal":5,"use_selection":true}.</summary>
     public const string IntercomMessageRelate = "intercom.message_relate";
+
+    /// <summary>OAuth Connect к team Intercom service (ADR 0144). returns: text.</summary>
+    public const string IntercomConnectTeam = "intercom.connect_team";
+
+    /// <summary>Disconnect team transport и очистка JWT. returns: text.</summary>
+    public const string IntercomDisconnectTeam = "intercom.disconnect_team";
 }

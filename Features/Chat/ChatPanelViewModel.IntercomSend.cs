@@ -138,6 +138,7 @@ public partial class ChatPanelViewModel
             ChatMessages.Add(userMsg);
             SelectedChatThreadId = _activeThreadId;
             _ = PersistEventAsync(ChatHistoryEventKind.MessageAdded, ChatHistoryPayloadMapping.ToMessagePayload(userMsg));
+            _ = TryAutoConnectIntercomTransportAsync();
             RefreshChatSurfaceSnapshot();
             _ = PersistSessionSolutionPathIfChangedAsync(CancellationToken.None);
             if (startProviderLoading)

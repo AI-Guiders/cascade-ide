@@ -92,6 +92,8 @@ public partial class ChatPanelViewModel
                 RefreshAttachmentAnchorsForCurrentScope();
                 RefreshChatSurfaceSnapshot();
             }).ConfigureAwait(false);
+
+            _ = StartIntercomTransportAsync(ct);
         }
         catch (Exception ex)
         {
@@ -122,6 +124,7 @@ public partial class ChatPanelViewModel
                 ChatHistoryJson.Serialize(payload),
                 ThreadId: tid == Guid.Empty ? null : tid.ToString("N"));
             await _sessionStore.AppendEventAsync(ev, CancellationToken.None).ConfigureAwait(false);
+            NotifyIntercomTransportAfterPersist(ev);
             await _sessionStore.BindCurrentSessionAsync(_sessionId, CancellationToken.None).ConfigureAwait(false);
             var meta = await _sessionStore.LoadOrCreateMetadataAsync(_sessionId, CancellationToken.None).ConfigureAwait(false);
             if (meta.UpdatedAtUtc < ev.AtUtc)

@@ -49,7 +49,10 @@ internal static class IdeMcpToolCatalog
             if (string.IsNullOrWhiteSpace(commandId))
                 continue;
 
-            var toolName = "ide_" + commandId;
+            if (!IdeMcpToolNaming.IsSupportedAutoProxyToolName(commandId))
+                continue;
+
+            var toolName = IdeMcpToolNaming.ToToolName(commandId);
             if (existingToolNames.Contains(toolName))
                 continue;
 
@@ -252,8 +255,7 @@ internal static class IdeMcpToolCatalog
     {
         var d = tool.Description ?? "";
 
-        var commandId = tool.Name.StartsWith("ide_", StringComparison.Ordinal) ? tool.Name[4..] : null;
-        if (string.IsNullOrWhiteSpace(commandId))
+        if (!IdeMcpToolNaming.TryToCommandId(tool.Name, out var commandId))
             return;
 
         if (!d.Contains("\nВозвращает:", StringComparison.Ordinal) && IdeCommandsContract.TryGetReturns(commandId, out var kind))

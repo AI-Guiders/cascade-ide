@@ -91,7 +91,8 @@ public static class IdeMcpServer
         //   tool ide_open_file -> command_id open_file
         //   tool ide_get_ui_theme -> command_id get_ui_theme
         // and so on.
-        var commandId = toolName["ide_".Length..];
+        if (!IdeMcpToolNaming.TryToCommandId(toolName, out var commandId))
+            return $"Unknown tool: {toolName}";
 
         // Compatibility overrides (tool name stays stable; backend command id may evolve).
         if (string.Equals(commandId, IdeCommands.Build, StringComparison.Ordinal))

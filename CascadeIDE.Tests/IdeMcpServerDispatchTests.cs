@@ -66,6 +66,16 @@ public sealed class IdeMcpServerDispatchTests
     }
 
     [Fact]
+    public async Task ProxyTool_DottedCommandId_MapsUnderscoreToolToCanonicalCommandId()
+    {
+        var fake = new FakeActions();
+        var result = await CallToolByConventionAsync(fake, "ide_intercom_reveal_attachment", null);
+
+        Assert.Equal("OK", result);
+        Assert.Equal(IdeCommands.IntercomRevealAttachment, fake.LastCommandId);
+    }
+
+    [Fact]
     public async Task CompatibilityOverride_IdeBuildMapsToBuildStructured()
     {
         var fake = new FakeActions();

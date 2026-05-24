@@ -42,6 +42,18 @@ internal sealed partial class IdeMcpCommandExecutor
             var a = _actions;
             return await a.RelateIntercomMessageRangeToCodeAsync(args);
         });
+
+        add(Services.IdeCommands.IntercomConnectTeam, async (_, ct) =>
+        {
+            var (ok, message) = await _vm.ConnectIntercomTeamTransportAsync(ct).ConfigureAwait(false);
+            return ok ? message : "Error: " + message;
+        });
+
+        add(Services.IdeCommands.IntercomDisconnectTeam, async (_, ct) =>
+        {
+            await _vm.DisconnectIntercomTeamTransportAsync(ct).ConfigureAwait(false);
+            return "Intercom transport disconnected.";
+        });
     }
 
     private Handler ExecuteEditorCodeRefNavigation(bool select) => async (args, ct) =>

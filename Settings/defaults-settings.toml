@@ -202,5 +202,16 @@ tci_validation_icon = "right"
 navigate = "reveal"
 reveal_load_solution = "when_needed"
 
+[intercom.transport]
+enabled = false
+base_url = ""
+team_id = ""
+default_topic_id = ""
+oauth_provider = "github"
+dev_team_token = ""
+sse_reconnect_backoff_ms = 1000
+auto_connect_on_send = true
+sync_agent_channel_messages = true
+
 [logging.intercom]
 send_trace = false

@@ -253,6 +253,18 @@ internal static class IdeMcpToolCatalogFull
             },
             new()
             {
+                Name = "ide_intercom_connect_team",
+                Description = "OAuth Connect к team Intercom transport (ADR 0144).",
+                InputSchema = s_emptyObjectInputSchema
+            },
+            new()
+            {
+                Name = "ide_intercom_disconnect_team",
+                Description = "Disconnect Intercom team transport.",
+                InputSchema = s_emptyObjectInputSchema
+            },
+            new()
+            {
                 Name = "ide_intercom_reveal_attachment",
                 Description = "Reveal из Intercom по AttachmentAnchor (ADR 0128 §8): re-resolve member/scope (Roslyn), transient highlight; select=true — выделить.",
                 InputSchema = Schema(new

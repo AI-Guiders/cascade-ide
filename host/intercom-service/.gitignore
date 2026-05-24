@@ -1,6 +1,7 @@
 **/bin/
 **/obj/
-**/data/
+/intercom-service-data/
+*.witdb
 *.witdb
 *.user
 .vs/

@@ -279,6 +279,18 @@ public sealed partial class CascadeIdeSettings
                         RevealLoadSolution = Intercom.Attachments.Code.RevealLoadSolution,
                     },
                 },
+                Transport = new IntercomTransportSettings
+                {
+                    Enabled = Intercom.Transport.Enabled,
+                    BaseUrl = Intercom.Transport.BaseUrl,
+                    TeamId = Intercom.Transport.TeamId,
+                    DefaultTopicId = Intercom.Transport.DefaultTopicId,
+                    OAuthProvider = Intercom.Transport.OAuthProvider,
+                    DevTeamToken = Intercom.Transport.DevTeamToken,
+                    SseReconnectBackoffMs = Intercom.Transport.SseReconnectBackoffMs,
+                    AutoConnectOnSend = Intercom.Transport.AutoConnectOnSend,
+                    SyncAgentChannelMessages = Intercom.Transport.SyncAgentChannelMessages,
+                },
             },
         };
     }
@@ -539,7 +551,16 @@ public sealed partial class CascadeIdeSettings
         return a.FeedMetrics.Is(b.FeedMetrics)
             && a.TciValidationIcon.Is(b.TciValidationIcon)
             && a.Attachments.Code.Navigate.Is(b.Attachments.Code.Navigate)
-            && a.Attachments.Code.RevealLoadSolution.Is(b.Attachments.Code.RevealLoadSolution);
+            && a.Attachments.Code.RevealLoadSolution.Is(b.Attachments.Code.RevealLoadSolution)
+            && a.Transport.Enabled == b.Transport.Enabled
+            && a.Transport.BaseUrl.Is(b.Transport.BaseUrl)
+            && a.Transport.TeamId.Is(b.Transport.TeamId)
+            && a.Transport.DefaultTopicId.Is(b.Transport.DefaultTopicId)
+            && a.Transport.OAuthProvider.Is(b.Transport.OAuthProvider)
+            && a.Transport.DevTeamToken.Is(b.Transport.DevTeamToken)
+            && a.Transport.SseReconnectBackoffMs == b.Transport.SseReconnectBackoffMs
+            && a.Transport.AutoConnectOnSend == b.Transport.AutoConnectOnSend
+            && a.Transport.SyncAgentChannelMessages == b.Transport.SyncAgentChannelMessages;
     }
 
     private static bool CodeNavigationEquals(CodeNavigationSettings? a, CodeNavigationSettings? b)
