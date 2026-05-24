@@ -30,7 +30,18 @@ public partial class ChatPanelViewModel
             return parseError;
         }
 
-        return formatFindResult(executeFind(query, workspace));
+        if (!TryGetActiveDetailLaneMessageIndices(out var indices))
+            return "В активной ветке нет сообщений.";
+
+        return IntercomCorrespondenceOperations.FormatFindResult(
+            IntercomCorrespondenceOperations.ExecuteFind(
+                query,
+                workspace,
+                IsChatOverviewMode,
+                indices.Count,
+                buildLaneMessages(indices),
+                IntercomMessageRangeRelatedProjector.ForThread(_explicitMessageRangeRelates, _activeThreadId),
+                SelectMessageByOrdinalRangeInDetailLane));
     }
 
     /// <summary>
@@ -101,7 +112,17 @@ public partial class ChatPanelViewModel
         if (!IntercomCodeRefParser.TryParseFromMcp(args, editor, workspace, solution, out var query, out var parseError))
             return JsonSerializer.Serialize(new { error = "parse", message = parseError });
 
-        var result = executeFind(query, workspace);
+        if (!TryGetActiveDetailLaneMessageIndices(out var indices))
+            return JsonSerializer.Serialize(new { error = "empty_lane", message = "В активной ветке нет сообщений." });
+
+        var result = IntercomCorrespondenceOperations.ExecuteFind(
+            query,
+            workspace,
+            IsChatOverviewMode,
+            indices.Count,
+            buildLaneMessages(indices),
+            IntercomMessageRangeRelatedProjector.ForThread(_explicitMessageRangeRelates, _activeThreadId),
+            SelectMessageByOrdinalRangeInDetailLane);
         if (result.Error is { } err)
             return JsonSerializer.Serialize(new { error = err.Kind, message = err.Message });
 
@@ -304,41 +325,6 @@ public partial class ChatPanelViewModel
         _explicitMessageRangeRelates = list;
     }
 
-    private FindExecutionResult executeFind(IntercomCodeRefQuery query, string? workspace)
-    {
-        if (IsChatOverviewMode)
-            return FindExecutionResult.Fail("overview_mode", "Открой тему (detail): /intercom topic open или клик по карточке.");
-
-        if (!TryGetActiveDetailLaneMessageIndices(out var indices))
-            return FindExecutionResult.Fail("empty_lane", "В активной ветке нет сообщений.");
-
-        var lane = buildLaneMessages(indices);
-        var explicitForThread = IntercomMessageRangeRelatedProjector.ForThread(_explicitMessageRangeRelates, _activeThreadId);
-        var entries = IntercomMessageCodeCorrespondenceProjector.BuildCombined(lane, explicitForThread);
-        var hits = IntercomMessageCodeCorrespondenceProjector.Find(entries, query, workspace);
-        if (hits.Count == 0)
-            return FindExecutionResult.Fail("no_hits", "Нет сообщений в ветке, связанных с этим фрагментом кода.");
-
-        var ordinals = hits.Select(h => h.Ordinal).OrderBy(o => o).ToList();
-        int? selected = null;
-        if (string.Equals(SelectMessageByOrdinalRangeInDetailLane(ordinals[0], ordinals[^1]), "OK", StringComparison.Ordinal))
-            selected = ordinals[^1];
-
-        return new FindExecutionResult(hits, ordinals, selected, indices.Count, null);
-    }
-
-    private static string formatFindResult(FindExecutionResult result)
-    {
-        if (result.Error is { } err)
-            return err.Message;
-
-        var ordinals = result.Ordinals!;
-        var label = ordinals.Count == 1
-            ? $"#{ordinals[0]}"
-            : $"#{ordinals[0]}–#{ordinals[^1]}";
-        return $"Связанные сообщения: {label} ({result.Hits!.Count}). Активно #{ordinals[^1]}.";
-    }
-
     private IReadOnlyList<IntercomMessageCodeCorrespondenceProjector.LaneMessage> buildLaneMessages(
         IReadOnlyList<int> indices)
     {
@@ -359,17 +345,4 @@ public partial class ChatPanelViewModel
 
         return list;
     }
-
-    private sealed record FindExecutionResult(
-        IReadOnlyList<IntercomMessageCodeCorrespondenceProjector.MatchHit>? Hits,
-        IReadOnlyList<int>? Ordinals,
-        int? SelectedOrdinal,
-        int BranchMessageCount,
-        FindError? Error)
-    {
-        public static FindExecutionResult Fail(string kind, string message) =>
-            new(null, null, null, 0, new FindError(kind, message));
-    }
-
-    private sealed record FindError(string Kind, string Message);
 }
