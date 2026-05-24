@@ -1,4 +1,5 @@
 using System.Text.Json;
+using IntercomWire;
 using IntercomService.Contracts;
 using IntercomService.Data;
 using Microsoft.EntityFrameworkCore;
@@ -7,15 +8,6 @@ namespace IntercomService.Services;
 
 public sealed class TransportEventService(IntercomDbContext db, SseEventHub sse)
 {
-    private static readonly HashSet<string> AllowedKinds = new(StringComparer.Ordinal)
-    {
-        "message_added",
-        "message_completed",
-        "message_edited",
-        "thread_forked",
-        "message_range_related",
-    };
-
     public async Task<TopicEntity> EnsureGeneralTopicAsync(string teamId, CancellationToken ct)
     {
         var existing = await db.Topics
@@ -78,12 +70,10 @@ public sealed class TransportEventService(IntercomDbContext db, SseEventHub sse)
         if (string.IsNullOrWhiteSpace(request.ClientEventId))
             return (null, "client_event_id required");
 
-        if (!AllowedKinds.Contains(request.EventKind))
+        if (!IntercomWireTransportEventKinds.SyncDefault.Contains(request.EventKind))
             return (null, $"event_kind '{request.EventKind}' not allowed");
 
-        var role = request.Sender?.SenderRole
-            ?? InferSenderRoleFromPayload(request)
-            ?? "human";
+        var role = InferSenderRoleFromPayload(request) ?? "human";
 
         var topic = await db.Topics.FirstOrDefaultAsync(x => x.TopicId == topicId && x.TeamId == teamId, ct)
             .ConfigureAwait(false);

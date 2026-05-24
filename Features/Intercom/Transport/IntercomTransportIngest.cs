@@ -1,27 +1,19 @@
 using System.Text.Json;
 using CascadeIDE.Models.AgentChat;
+using IntercomWire;
 
 namespace CascadeIDE.Features.Intercom.Transport;
 
 /// <summary>Входящие transport events → локальный NDJSON (ADR 0144 §6).</summary>
 internal static class IntercomTransportIngest
 {
-    private static readonly HashSet<string> SupportedWireKinds = new(StringComparer.Ordinal)
-    {
-        "message_added",
-        "message_completed",
-        "message_edited",
-        "thread_forked",
-        "message_range_related",
-    };
-
     public static bool TryMapToLocalEvent(
         IntercomTransportEventEnvelopeDto envelope,
         Guid sessionId,
         out ChatHistoryEvent? localEvent)
     {
         localEvent = null;
-        if (!SupportedWireKinds.Contains(envelope.EventKind))
+        if (!IntercomWireTransportEventKinds.SyncDefault.Contains(envelope.EventKind))
             return false;
 
         var kind = ToLocalKind(envelope.EventKind);
