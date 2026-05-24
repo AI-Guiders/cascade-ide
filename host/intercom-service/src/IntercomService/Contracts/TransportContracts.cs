@@ -52,6 +52,14 @@ public sealed record RefreshTokenRequest(
     [property: JsonPropertyName("grant_type")] string GrantType,
     [property: JsonPropertyName("refresh_token")] string? RefreshToken);
 
+public sealed record OAuthTokenRequest(
+    [property: JsonPropertyName("grant_type")] string GrantType,
+    [property: JsonPropertyName("refresh_token")] string? RefreshToken,
+    [property: JsonPropertyName("code")] string? Code,
+    [property: JsonPropertyName("state")] string? State,
+    [property: JsonPropertyName("code_verifier")] string? CodeVerifier,
+    [property: JsonPropertyName("redirect_uri")] string? RedirectUri);
+
 public sealed record MeResponse(
     [property: JsonPropertyName("member_id")] string MemberId,
     [property: JsonPropertyName("display_name")] string DisplayName,

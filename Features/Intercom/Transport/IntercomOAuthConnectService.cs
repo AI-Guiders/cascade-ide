@@ -57,7 +57,7 @@ public sealed class IntercomOAuthConnectService(IntercomTransportApiClient api)
             return (false, "Не удалось открыть браузер: " + ex.Message);
         }
 
-        var waitTask = WaitForCallbackAsync(listener, ct);
+        var waitTask = WaitForCallbackAsync(listener, api, redirectUri, verifier, ct);
         var completed = await Task.WhenAny(waitTask, Task.Delay(TimeSpan.FromMinutes(5), ct)).ConfigureAwait(false);
         listener.Stop();
 
@@ -85,17 +85,19 @@ public sealed class IntercomOAuthConnectService(IntercomTransportApiClient api)
         return (true, "");
     }
 
-    private static async Task<(bool Ok, string Access, string Refresh, int ExpiresIn, string Error)> WaitForCallbackAsync(
+    private async Task<(bool Ok, string Access, string Refresh, int ExpiresIn, string Error)> WaitForCallbackAsync(
         HttpListener listener,
+        IntercomTransportApiClient api,
+        string redirectUri,
+        string codeVerifier,
         CancellationToken ct)
     {
         while (!ct.IsCancellationRequested)
         {
             var ctx = await listener.GetContextAsync().ConfigureAwait(false);
             var query = ParseQuery(ctx.Request.Url?.Query);
-            query.TryGetValue("access_token", out var access);
-            query.TryGetValue("refresh_token", out var refresh);
-            query.TryGetValue("expires_in", out var expiresRaw);
+            query.TryGetValue("code", out var code);
+            query.TryGetValue("state", out var state);
             query.TryGetValue("error", out var error);
 
             var body = !string.IsNullOrWhiteSpace(error)
@@ -110,14 +112,15 @@ public sealed class IntercomOAuthConnectService(IntercomTransportApiClient api)
             if (!string.IsNullOrWhiteSpace(error))
                 return (false, "", "", 0, error);
 
-            if (string.IsNullOrWhiteSpace(access) || string.IsNullOrWhiteSpace(refresh))
-                return (false, "", "", 0, "В callback нет токенов.");
+            if (string.IsNullOrWhiteSpace(code) || string.IsNullOrWhiteSpace(state))
+                return (false, "", "", 0, "В callback нет code/state.");
 
-            _ = int.TryParse(expiresRaw, out var expiresIn);
-            if (expiresIn <= 0)
-                expiresIn = 3600;
+            var tokens = await api.ExchangeAuthorizationCodeAsync(code, state, codeVerifier, redirectUri, ct)
+                .ConfigureAwait(false);
+            if (tokens is null)
+                return (false, "", "", 0, "Обмен code на токен не удался.");
 
-            return (true, access, refresh, expiresIn, "");
+            return (true, tokens.AccessToken, tokens.RefreshToken, tokens.ExpiresIn, "");
         }
 
         return (false, "", "", 0, "Отменено.");

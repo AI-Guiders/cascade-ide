@@ -45,13 +45,23 @@ public sealed class OidcAuthService(
 
     public async Task<OAuthStateEntity?> ConsumeStateAsync(string state, CancellationToken ct)
     {
-        var row = await db.OAuthStates.FindAsync([state], ct).ConfigureAwait(false);
-        if (row is null || row.ExpiresAtUtc < DateTimeOffset.UtcNow)
+        var row = await db.OAuthStates
+            .FirstOrDefaultAsync(x => x.State == state && x.ExpiresAtUtc >= DateTimeOffset.UtcNow, ct)
+            .ConfigureAwait(false);
+        if (row is null)
             return null;
+
         db.OAuthStates.Remove(row);
         await db.SaveChangesAsync(ct).ConfigureAwait(false);
         return row;
     }
+
+    public Task<OAuthStateEntity?> GetValidStateAsync(string state, CancellationToken ct) =>
+        db.OAuthStates
+            .AsNoTracking()
+            .FirstOrDefaultAsync(
+                x => x.State == state && x.ExpiresAtUtc >= DateTimeOffset.UtcNow,
+                ct);
 
     public string BuildAuthorizeUrl(OAuthStateEntity state)
     {
@@ -78,20 +88,33 @@ public sealed class OidcAuthService(
         return $"{meta.AuthorizationEndpoint}?{qs}";
     }
 
-    public async Task<OidcUser?> ExchangeCodeAsync(string code, OAuthStateEntity state, CancellationToken ct)
+    public async Task<OidcUser?> ExchangeCodeAsync(
+        string code,
+        OAuthStateEntity state,
+        string? codeVerifier,
+        CancellationToken ct)
     {
+        if (!string.IsNullOrWhiteSpace(state.CodeChallenge)
+            && !OAuthPkce.ValidateS256(codeVerifier, state.CodeChallenge))
+        {
+            return null;
+        }
+
         var meta = GetMetadata();
         var client = httpClientFactory.CreateClient();
 
         using var tokenRequest = new HttpRequestMessage(HttpMethod.Post, meta.TokenEndpoint);
-        tokenRequest.Content = new FormUrlEncodedContent(new Dictionary<string, string>
+        var form = new Dictionary<string, string>
         {
             ["grant_type"] = "authorization_code",
             ["code"] = code,
             ["redirect_uri"] = GetCallbackUrl(),
             ["client_id"] = _oidc.ClientId,
             ["client_secret"] = _oidc.ClientSecret,
-        });
+        };
+        if (!string.IsNullOrWhiteSpace(codeVerifier))
+            form["code_verifier"] = codeVerifier;
+        tokenRequest.Content = new FormUrlEncodedContent(form);
 
         using var tokenResponse = await client.SendAsync(tokenRequest, ct).ConfigureAwait(false);
         tokenResponse.EnsureSuccessStatusCode();

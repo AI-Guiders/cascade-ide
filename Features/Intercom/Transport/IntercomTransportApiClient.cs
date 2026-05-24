@@ -105,7 +105,29 @@ public sealed class IntercomTransportApiClient : IDisposable
 
     public async Task<IntercomTokenResponseDto?> RefreshTokenAsync(string refreshToken, CancellationToken ct)
     {
-        var body = new { grant_type = "refresh_token", refresh_token = refreshToken };
+        var body = new OAuthTokenRequest("refresh_token", refreshToken, null, null, null, null);
+        return await postTokenAsync(body, ct).ConfigureAwait(false);
+    }
+
+    public async Task<IntercomTokenResponseDto?> ExchangeAuthorizationCodeAsync(
+        string code,
+        string state,
+        string codeVerifier,
+        string redirectUri,
+        CancellationToken ct)
+    {
+        var body = new OAuthTokenRequest(
+            "authorization_code",
+            null,
+            code,
+            state,
+            codeVerifier,
+            redirectUri);
+        return await postTokenAsync(body, ct).ConfigureAwait(false);
+    }
+
+    private async Task<IntercomTokenResponseDto?> postTokenAsync(OAuthTokenRequest body, CancellationToken ct)
+    {
         using var res = await _http.PostAsJsonAsync("/api/v1/auth/token", body, IntercomTransportJson.Web, ct)
             .ConfigureAwait(false);
         if (!res.IsSuccessStatusCode)

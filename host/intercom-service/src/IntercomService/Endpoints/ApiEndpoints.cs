@@ -38,6 +38,9 @@ public static class ApiEndpoints
             if (string.IsNullOrWhiteSpace(team_id) || string.IsNullOrWhiteSpace(redirect_uri))
                 return Results.BadRequest(new { error = "team_id and redirect_uri required" });
 
+            if (!OAuthRedirectAllowlist.IsAllowed(redirect_uri))
+                return Results.BadRequest(new { error = "redirect_uri not allowed" });
+
             await teams.EnsureTeamAsync(team_id, team_id, ct).ConfigureAwait(false);
 
             if (string.Equals(provider, "github", StringComparison.OrdinalIgnoreCase))
@@ -67,66 +70,52 @@ public static class ApiEndpoints
             string? code,
             string? state,
             GitHubAuthService github,
-            TeamMembershipService teams,
-            JwtTokenService jwt,
             CancellationToken ct) =>
         {
             if (string.IsNullOrWhiteSpace(code) || string.IsNullOrWhiteSpace(state))
                 return Results.BadRequest(new { error = "code and state required" });
 
-            var oauthState = await github.ConsumeStateAsync(state, ct).ConfigureAwait(false);
+            var oauthState = await github.GetValidStateAsync(state, ct).ConfigureAwait(false);
             if (oauthState is null)
                 return Results.BadRequest(new { error = "invalid_state" });
 
-            var user = await github.ExchangeCodeAsync(code, oauthState, ct).ConfigureAwait(false);
-            if (user is null)
-                return Results.BadRequest(new { error = "token_exchange_failed" });
-
-            await teams.EnsureTeamAsync(oauthState.TeamId, oauthState.TeamId, ct).ConfigureAwait(false);
-            var member = await teams.EnsureGitHubMemberAsync(user.Id, user.Login, ct).ConfigureAwait(false);
-            await teams.JoinTeamAsync(oauthState.TeamId, member.MemberId, ct).ConfigureAwait(false);
-
-            var tokens = await jwt.IssueTokensAsync(member, ct).ConfigureAwait(false);
-            var redirect = AppendTokensToRedirect(oauthState.RedirectUri, tokens);
-            return Results.Redirect(redirect);
+            return Results.Redirect(AppendAuthorizationCode(oauthState.RedirectUri, code, state));
         });
 
         api.MapGet("/auth/callback/oidc", async (
             string? code,
             string? state,
             OidcAuthService oidc,
-            TeamMembershipService teams,
-            JwtTokenService jwt,
             CancellationToken ct) =>
         {
             if (string.IsNullOrWhiteSpace(code) || string.IsNullOrWhiteSpace(state))
                 return Results.BadRequest(new { error = "code and state required" });
 
-            var oauthState = await oidc.ConsumeStateAsync(state, ct).ConfigureAwait(false);
+            var oauthState = await oidc.GetValidStateAsync(state, ct).ConfigureAwait(false);
             if (oauthState is null)
                 return Results.BadRequest(new { error = "invalid_state" });
 
-            var user = await oidc.ExchangeCodeAsync(code, oauthState, ct).ConfigureAwait(false);
-            if (user is null)
-                return Results.BadRequest(new { error = "token_exchange_failed" });
-
-            await teams.EnsureTeamAsync(oauthState.TeamId, oauthState.TeamId, ct).ConfigureAwait(false);
-            var member = await teams.EnsureOidcMemberAsync(user.Issuer, user.Subject, user.DisplayName, ct).ConfigureAwait(false);
-            await teams.JoinTeamAsync(oauthState.TeamId, member.MemberId, ct).ConfigureAwait(false);
-
-            var tokens = await jwt.IssueTokensAsync(member, ct).ConfigureAwait(false);
-            var redirect = AppendTokensToRedirect(oauthState.RedirectUri, tokens);
-            return Results.Redirect(redirect);
+            return Results.Redirect(AppendAuthorizationCode(oauthState.RedirectUri, code, state));
         });
 
         api.MapPost("/auth/token", async (
-            RefreshTokenRequest body,
+            OAuthTokenRequest body,
             JwtTokenService jwt,
+            GitHubAuthService github,
+            OidcAuthService oidc,
+            TeamMembershipService teams,
             CancellationToken ct) =>
         {
+            if (string.Equals(body.GrantType, "authorization_code", StringComparison.OrdinalIgnoreCase))
+            {
+                return await exchangeAuthorizationCodeAsync(body, github, oidc, teams, jwt, ct);
+            }
+
             if (!string.Equals(body.GrantType, "refresh_token", StringComparison.OrdinalIgnoreCase)
                 || string.IsNullOrWhiteSpace(body.RefreshToken))
-                return Results.BadRequest(new { error = "grant_type must be refresh_token" });
+            {
+                return Results.BadRequest(new { error = "grant_type must be refresh_token or authorization_code" });
+            }
 
             var tokens = await jwt.RefreshAsync(body.RefreshToken, ct).ConfigureAwait(false);
             return tokens is null ? Results.Unauthorized() : Results.Json(tokens);
@@ -362,11 +351,65 @@ public static class ApiEndpoints
     private static bool IsDevAuth(ClaimsPrincipal user) =>
         string.Equals(user.Identity?.AuthenticationType, IntercomService.Auth.DevBearerAuthenticationHandler.SchemeName, StringComparison.Ordinal);
 
-    private static string AppendTokensToRedirect(string redirectUri, TokenResponse tokens)
+    private static string AppendAuthorizationCode(string redirectUri, string code, string state)
     {
         var sep = redirectUri.Contains('?', StringComparison.Ordinal) ? '&' : '?';
-        return $"{redirectUri}{sep}access_token={Uri.EscapeDataString(tokens.AccessToken)}" +
-               $"&refresh_token={Uri.EscapeDataString(tokens.RefreshToken)}" +
-               $"&expires_in={tokens.ExpiresIn}&token_type=Bearer";
+        return $"{redirectUri}{sep}code={Uri.EscapeDataString(code)}&state={Uri.EscapeDataString(state)}";
+    }
+
+    private static async Task<IResult> exchangeAuthorizationCodeAsync(
+        OAuthTokenRequest body,
+        GitHubAuthService github,
+        OidcAuthService oidc,
+        TeamMembershipService teams,
+        JwtTokenService jwt,
+        CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(body.Code)
+            || string.IsNullOrWhiteSpace(body.State)
+            || string.IsNullOrWhiteSpace(body.CodeVerifier)
+            || string.IsNullOrWhiteSpace(body.RedirectUri))
+        {
+            return Results.BadRequest(new { error = "code, state, code_verifier, redirect_uri required" });
+        }
+
+        if (!OAuthRedirectAllowlist.IsAllowed(body.RedirectUri))
+            return Results.BadRequest(new { error = "redirect_uri not allowed" });
+
+        OAuthStateEntity? oauthState = await github.ConsumeStateAsync(body.State, ct).ConfigureAwait(false);
+        oauthState ??= await oidc.ConsumeStateAsync(body.State, ct).ConfigureAwait(false);
+        if (oauthState is null)
+            return Results.BadRequest(new { error = "invalid_state" });
+
+        if (!string.Equals(oauthState.RedirectUri, body.RedirectUri, StringComparison.OrdinalIgnoreCase))
+            return Results.BadRequest(new { error = "redirect_uri mismatch" });
+
+        if (string.Equals(oauthState.Provider, "github", StringComparison.OrdinalIgnoreCase))
+        {
+            var user = await github.ExchangeCodeAsync(body.Code, oauthState, body.CodeVerifier, ct).ConfigureAwait(false);
+            if (user is null)
+                return Results.BadRequest(new { error = "token_exchange_failed" });
+
+            await teams.EnsureTeamAsync(oauthState.TeamId, oauthState.TeamId, ct).ConfigureAwait(false);
+            var member = await teams.EnsureGitHubMemberAsync(user.Id, user.Login, ct).ConfigureAwait(false);
+            await teams.JoinTeamAsync(oauthState.TeamId, member.MemberId, ct).ConfigureAwait(false);
+            var tokens = await jwt.IssueTokensAsync(member, ct).ConfigureAwait(false);
+            return Results.Json(tokens);
+        }
+
+        if (string.Equals(oauthState.Provider, "oidc", StringComparison.OrdinalIgnoreCase))
+        {
+            var user = await oidc.ExchangeCodeAsync(body.Code, oauthState, body.CodeVerifier, ct).ConfigureAwait(false);
+            if (user is null)
+                return Results.BadRequest(new { error = "token_exchange_failed" });
+
+            await teams.EnsureTeamAsync(oauthState.TeamId, oauthState.TeamId, ct).ConfigureAwait(false);
+            var member = await teams.EnsureOidcMemberAsync(user.Issuer, user.Subject, user.DisplayName, ct).ConfigureAwait(false);
+            await teams.JoinTeamAsync(oauthState.TeamId, member.MemberId, ct).ConfigureAwait(false);
+            var tokens = await jwt.IssueTokensAsync(member, ct).ConfigureAwait(false);
+            return Results.Json(tokens);
+        }
+
+        return Results.BadRequest(new { error = "unsupported_provider" });
     }
 }

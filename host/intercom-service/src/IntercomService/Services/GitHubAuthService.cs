@@ -43,13 +43,23 @@ public sealed class GitHubAuthService(
 
     public async Task<OAuthStateEntity?> ConsumeStateAsync(string state, CancellationToken ct)
     {
-        var row = await db.OAuthStates.FindAsync([state], ct).ConfigureAwait(false);
-        if (row is null || row.ExpiresAtUtc < DateTimeOffset.UtcNow)
+        var row = await db.OAuthStates
+            .FirstOrDefaultAsync(x => x.State == state && x.ExpiresAtUtc >= DateTimeOffset.UtcNow, ct)
+            .ConfigureAwait(false);
+        if (row is null)
             return null;
+
         db.OAuthStates.Remove(row);
         await db.SaveChangesAsync(ct).ConfigureAwait(false);
         return row;
     }
+
+    public Task<OAuthStateEntity?> GetValidStateAsync(string state, CancellationToken ct) =>
+        db.OAuthStates
+            .AsNoTracking()
+            .FirstOrDefaultAsync(
+                x => x.State == state && x.ExpiresAtUtc >= DateTimeOffset.UtcNow,
+                ct);
 
     public string BuildAuthorizeUrl(OAuthStateEntity state)
     {
@@ -75,20 +85,24 @@ public sealed class GitHubAuthService(
         return $"https://github.com/login/oauth/authorize?{qs}";
     }
 
-    public async Task<GitHubUser?> ExchangeCodeAsync(string code, OAuthStateEntity state, CancellationToken ct)
+    public async Task<GitHubUser?> ExchangeCodeAsync(
+        string code,
+        OAuthStateEntity state,
+        string? codeVerifier,
+        CancellationToken ct)
     {
+        if (!string.IsNullOrWhiteSpace(state.CodeChallenge)
+            && !OAuthPkce.ValidateS256(codeVerifier, state.CodeChallenge))
+        {
+            return null;
+        }
+
         var client = httpClientFactory.CreateClient();
         var callback = GetCallbackUrl();
 
         using var tokenRequest = new HttpRequestMessage(HttpMethod.Post, "https://github.com/login/oauth/access_token");
         tokenRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-        tokenRequest.Content = new FormUrlEncodedContent(new Dictionary<string, string>
-        {
-            ["client_id"] = _github.ClientId,
-            ["client_secret"] = _github.ClientSecret,
-            ["code"] = code,
-            ["redirect_uri"] = callback,
-        });
+        tokenRequest.Content = new FormUrlEncodedContent(buildTokenForm(code, callback, codeVerifier));
 
         using var tokenResponse = await client.SendAsync(tokenRequest, ct).ConfigureAwait(false);
         tokenResponse.EnsureSuccessStatusCode();
@@ -113,6 +127,20 @@ public sealed class GitHubAuthService(
         if (string.IsNullOrWhiteSpace(baseUrl))
             baseUrl = "http://127.0.0.1:5080";
         return $"{baseUrl}/api/v1/auth/callback/github";
+    }
+
+    private Dictionary<string, string> buildTokenForm(string code, string callback, string? codeVerifier)
+    {
+        var form = new Dictionary<string, string>
+        {
+            ["client_id"] = _github.ClientId,
+            ["client_secret"] = _github.ClientSecret,
+            ["code"] = code,
+            ["redirect_uri"] = callback,
+        };
+        if (!string.IsNullOrWhiteSpace(codeVerifier))
+            form["code_verifier"] = codeVerifier;
+        return form;
     }
 
     private sealed record GitHubTokenResponse(
