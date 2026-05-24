@@ -93,6 +93,8 @@
 
 **Меню, тулбар, task bar и чат через `ide_execute_command`:** те же `command_id`, что заданы в частичном классе `IdeCommands` (`Services/IdeCommands.cs`, `Services/IdeCommands.*.cs`).
 
+**Имена MCP-тулов (Cursor):** только `A–Z`, `a–z`, `0–9`, `_`; точки в `command_id` на wire → `_` (`intercom.reveal_attachment` → `ide_intercom_reveal_attachment`). Длина `server`+`tool` ≤ 60 — длинные команды получают короткий alias (`chat_toggle_product_spine_in_agent_context` → `ide_chat_toggle_spine_ctx`). Канон: `Services/IdeMcpToolNaming.cs`.
+
 ### Подведение итогов сессии чата
 
 Агенту **не нужно** притворяться, что «всё помнит без сжатия»: для длинного треда нормально **предложить** явное подведение итогов. Поддерживаемый сценарий:
@@ -274,6 +276,8 @@
 | `delete_knowledge_section` | Удалить секцию из knowledge-файла. args: file_path:string, section_id:string, knowledge_path?:string, knowledge_root_id?:string; returns: text; example: {"file_path":"index.md","section_id":"foo"}. |
 | `editor.reveal_code` | Reveal в редакторе по bracket-ссылке (ADR 0131). args: code_ref:string, active_file?:string, duration_ms?:integer; returns: text; example: {"code_ref":"[M:Run]","active_file":"src/Foo.cs","duration_ms":4000}. |
 | `editor.select_code` | Select в редакторе по bracket-ссылке (ADR 0131). args: code_ref:string, active_file?:string, duration_ms?:integer; returns: text; example: {"code_ref":"[M:Run]","active_file":"src/Foo.cs"}. |
+| `intercom.connect_team` | OAuth Connect к team Intercom service (ADR 0144). returns: text. |
+| `intercom.disconnect_team` | Disconnect team transport и очистка JWT. returns: text. |
 | `intercom.message_relate` | Явная связь диапазона gutter-сообщений с кодом (ADR 0137). args: start_ordinal:integer, end_ordinal?:integer, use_selection?:boolean, code_ref?:string, anchor_json?:object, file?:string, line_start?:integer, line_end?:integer; returns: json; example: {"start_ordinal":3,"end_ordinal":5,"use_selection":true}. |
 | `intercom.messages_for_code` | Сообщения активной detail-ветки по фрагменту кода (ADR 0137 inferred + explicit relate). args: use_selection?:boolean, code_ref?:string, anchor_json?:object, file?:string, line_start?:integer, line_end?:integer; returns: json; example: {"use_selection":true}. |
 | `intercom.reveal_attachment` | Reveal из ленты по AttachmentAnchor: open + re-resolve + highlight (ADR 0128 §8, 0130). args: anchor_json?:object, file?:string, line_start?:integer, line_end?:integer, member_key?:string, syntax_scope?:object, duration_ms?:integer, select?:boolean; если select опущен — дефолт из settings [intercom.attachments.code].navigate; returns: text; example: {"file":"src/Foo.cs","line_start":10,"line_end":25}. |

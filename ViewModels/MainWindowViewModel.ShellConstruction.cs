@@ -91,6 +91,17 @@ public partial class MainWindowViewModel
         _hciScopeMode = ShellSettingsPresentationProjection.NormalizeHybridIndexScopeMode(_settings.HybridIndex.ScopeMode);
         _hciPauseWhenMcpStdioHost = _settings.HybridIndex.PauseWhenMcpStdioHost;
 
+        var transport = _settings.Intercom.Transport;
+        _intercomTransportEnabled = transport.Enabled;
+        _intercomTransportBaseUrl = transport.BaseUrl;
+        _intercomTransportTeamId = transport.TeamId;
+        _intercomTransportDefaultTopicId = transport.DefaultTopicId;
+        _intercomTransportOAuthProvider = string.IsNullOrWhiteSpace(transport.OAuthProvider) ? "github" : transport.OAuthProvider;
+        _intercomTransportDevTeamToken = transport.DevTeamToken;
+        _intercomTransportSseReconnectBackoffMs = transport.SseReconnectBackoffMs;
+        _intercomTransportAutoConnectOnSend = transport.AutoConnectOnSend;
+        _intercomTransportSyncAgentChannelMessages = transport.SyncAgentChannelMessages;
+
         _ideMcpHost = new MainWindowIdeMcpHost(this);
         _webAiPortalBridge = new WebAiPortalCommandBridge(IdeMcp);
 
@@ -133,6 +144,8 @@ public partial class MainWindowViewModel
             getEditorCaretOffset: () => _editorCaretOffset);
         ChatPanel.SetIntercomFontsSettings(_settings.Fonts.Intercom);
         ChatPanel.ApplyIntercomPresentationSettings(_settings.Intercom);
+        ChatPanel.SetCascadeSettingsAccessor(() => _settings);
+        ChatPanel.SetIntercomTransportCoordinator(_intercomTransport);
         InstrumentationPanel = new InstrumentationPanelViewModel();
         InstrumentationPanel.PropertyChanged += OnInstrumentationPanelPropertyChanged;
         HypothesesPanel = new HypothesesPanelViewModel(GetWorkspacePath);
