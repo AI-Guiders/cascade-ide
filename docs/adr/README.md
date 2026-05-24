@@ -211,6 +211,7 @@
 | [0130](0130-editor-agent-range-reveal-without-selection.md) | Подсветка диапазона кода для агента без изменения selection (`reveal_editor_range`, `EditorAgentRangeReveal`) | Accepted · Implemented |
 | [0131](0131-editor-slash-select-code-by-bracket-reference.md) | `/editor select|reveal code [M:…]` — bracket → select/reveal в буфере, не attach | Accepted · In progress |
 | [0132](0132-intercom-federated-transport-and-multi-client-boundary.md) | Intercom: federated transport, multi-client; тот же wire `AttachmentAnchor` для команды | Proposed |
+| [0142](0142-intercom-open-wire-pluggable-transports.md) | Intercom: **открытый wire** (схема событий), **pluggable** transport, мосты Matrix/MM/webhook опциональны | Accepted |
 | [0134](0134-intercom-message-prepare-pipeline-v1.md) | Intercom: единый prepare-pipeline (wire, Skia, MCP fail-closed) | Accepted · In progress |
 | [0135](0135-intercom-attach-symbol-cache-and-hci-sidecar.md) | Intercom attach: L1 Roslyn file cache, L2 symbol sidecar colocated с HCI | Accepted · In progress |
 | [0136](0136-intercom-feed-gutter-and-slash-namespace.md) | Intercom: gutter номеров, явный select, единый `/intercom` slash | Accepted · In progress |

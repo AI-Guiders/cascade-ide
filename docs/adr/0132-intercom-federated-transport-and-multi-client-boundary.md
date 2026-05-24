@@ -27,6 +27,7 @@
 | agent-notes: [note-intercom-shared-backend-v1](https://github.com/KarataevDmitry/personal-knowledge-base/blob/main/knowledge/work/projects/door-to-singularity/door-to-singularity/note-intercom-shared-backend-v1.md) | Рабочая гипотеза → канон здесь |
 | Mission Control Center (идея) | Commander cockpit (SA); подписка на event log — [0133](0133-commander-cockpit-shared-attention-model-and-instrument-deck.md) |
 | [0133](0133-commander-cockpit-shared-attention-model-and-instrument-deck.md) | Роль Commander, общие зоны внимания, instrument deck; MCC ≠ плоский дашборд |
+| [0142](0142-intercom-open-wire-pluggable-transports.md) | **Accepted:** открытый wire, pluggable transport, мосты — не выбор одного мессенджера |
 
 ## Резюме
 

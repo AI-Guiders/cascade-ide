@@ -20,7 +20,7 @@
 | **A. Intercom в IDE** | Сессия + агент + workspace + MCP; Skia pipeline [0057](../adr/0057-chat-surface-pipeline-adoption.md) | Паттерны **UI и поведения**, не бэкенд |
 | **B. Внешний командный контур** | Люди вне IDE, организация, retention, мобилки | Mattermost / Matrix / корп. API — **интеграция**, не переписывание ([0080 §5](../adr/0080-intercom-naming-and-multi-party-channel-model.md#adr0080-p5)) |
 
-Документ в основном про **слой A**. Слой B — **[ADR 0132](../adr/0132-intercom-federated-transport-and-multi-client-boundary.md)** (transport, Web, MCC, federation); этот playbook остаётся UX-ориентиром.
+Документ в основном про **слой A**. Слой B — **[ADR 0132](../adr/0132-intercom-federated-transport-and-multi-client-boundary.md)** (transport, Web, MCC, federation) и **[ADR 0142](../adr/0142-intercom-open-wire-pluggable-transports.md)** (открытый wire, pluggable transport, опциональные мосты); этот playbook остаётся UX-ориентиром.
 
 ---
 
