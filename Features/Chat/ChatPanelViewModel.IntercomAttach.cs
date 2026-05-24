@@ -107,6 +107,10 @@ public partial class ChatPanelViewModel
             _getSolutionPath?.Invoke(),
             _sessionSolutionPathRelative);
 
+    private string? ResolveAttachIndexDirectoryRelative() =>
+        CascadeIDE.Features.HybridIndex.Application.HybridIndexIndexDirectoryRelative.ResolveOrDefault(
+            _getCascadeSettings?.Invoke().HybridIndex.IndexDir);
+
     private IntercomAttachmentResolveAtSend.EditorSnapshot BuildAttachEditorSnapshot() =>
         new(
             _getCurrentFilePath?.Invoke(),

@@ -298,8 +298,87 @@ public static class IntercomSymbolLineIndex
             );
             CREATE INDEX IF NOT EXISTS idx_symbol_line_lookup
               ON symbol_line(scope_key, relative_path, lookup_kind, lookup_key);
+            CREATE INDEX IF NOT EXISTS idx_symbol_line_member_lookup
+              ON symbol_line(scope_key, lookup_kind, lookup_key);
             """;
         cmd.ExecuteNonQuery();
+    }
+
+    /// <summary>Все workspace-relative файлы, где sidecar знает <paramref name="memberKey"/>.</summary>
+    public static bool TryFindRelativePathsForMember(
+        in IntercomAttachResolveCacheContext cache,
+        string? memberKey,
+        out IReadOnlyList<string> relativePaths)
+    {
+        relativePaths = [];
+        if (string.IsNullOrWhiteSpace(cache.WorkspaceRoot) || string.IsNullOrWhiteSpace(memberKey))
+            return false;
+
+        var dbPath = resolveDatabasePath(cache.WorkspaceRoot, cache.IndexDirectoryRelative);
+        if (!File.Exists(dbPath))
+            return false;
+
+        var keys = lookupKeysForMember(memberKey);
+        if (keys.Count == 0)
+            return false;
+
+        try
+        {
+            using var conn = openConnection(dbPath);
+            ensureSchema(conn);
+            var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var (kind, key) in keys)
+            {
+                foreach (var path in queryPaths(conn, cache.ScopeKey, kind, key))
+                    set.Add(path);
+            }
+
+            if (set.Count == 0)
+                return false;
+
+            relativePaths = set.OrderBy(p => p, StringComparer.OrdinalIgnoreCase).ToList();
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static IReadOnlyList<(string Kind, string Key)> lookupKeysForMember(string memberKey)
+    {
+        var trimmed = memberKey.Trim();
+        if (trimmed.Length == 0)
+            return [];
+
+        var list = new List<(string, string)> { (LookupKindDocId, trimmed) };
+        var simple = trimmed.Contains('.') ? trimmed.Split('.')[^1] : trimmed;
+        if (!string.Equals(simple, trimmed, StringComparison.Ordinal))
+            list.Add((LookupKindSimple, simple));
+
+        return list;
+    }
+
+    private static IEnumerable<string> queryPaths(
+        SqliteConnection conn,
+        string scopeKey,
+        string lookupKind,
+        string lookupKey)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText =
+            """
+            SELECT DISTINCT relative_path FROM symbol_line
+            WHERE scope_key = $scope AND lookup_kind = $kind AND lookup_key = $key
+            ORDER BY relative_path;
+            """;
+        cmd.Parameters.AddWithValue("$scope", scopeKey);
+        cmd.Parameters.AddWithValue("$kind", lookupKind);
+        cmd.Parameters.AddWithValue("$key", lookupKey);
+
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+            yield return reader.GetString(0).Replace('\\', '/');
     }
 }
 
