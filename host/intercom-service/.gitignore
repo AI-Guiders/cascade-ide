@@ -2,6 +2,7 @@
 **/obj/
 /intercom-service-data/
 *.witdb
+**/intercom.witdb_indexes/
 *.witdb
 *.user
 .vs/
