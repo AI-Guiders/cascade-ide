@@ -68,6 +68,12 @@ internal sealed class SlashFormToml
     public string? IntercomHandler { get; set; }
     /// <summary><c>self</c> (по умолчанию) или <c>channel</c> — видимость ответа слэша в ленте (ADR 0119).</summary>
     public string? Audience { get; set; }
+    /// <summary>После Tab/autocomplete — сразу выполнить без второго Enter (ADR 0119).</summary>
+    public bool? AutoRunOnCommit { get; set; }
+    /// <summary>При <see cref="AutoRunOnCommit"/> — только если в строке уже есть args-хвост (по умолчанию true).</summary>
+    public bool? AutoRunRequiresArgs { get; set; }
+    /// <summary>Явно: autocomplete должен оставить хвост для аргументов (иначе — эвристика из каталога).</summary>
+    public bool? RequiresArgTail { get; set; }
 }
 
 /// <remarks><c>[command.form.slash.args]</c> → JSON args исполнителя.</remarks>

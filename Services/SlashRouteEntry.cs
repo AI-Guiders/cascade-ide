@@ -16,4 +16,7 @@ public readonly record struct SlashRouteEntry(
     SlashCompletionKind Completion = SlashCompletionKind.None,
     string? ReportHandlerId = null,
     string? IntercomHandlerId = null,
-    IntercomMessageAudience MessageAudience = IntercomMessageAudience.Channel);
+    IntercomMessageAudience MessageAudience = IntercomMessageAudience.Channel,
+    bool AutoRunOnCommit = false,
+    bool AutoRunRequiresArgs = true,
+    bool? RequiresArgTailExplicit = null);

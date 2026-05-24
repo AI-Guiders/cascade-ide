@@ -14,6 +14,9 @@ internal static class IntercomSlashPathBuilder
         if (!string.Equals(parse.Head, "intercom", StringComparison.OrdinalIgnoreCase))
             return false;
 
+        if (SlashPathAliases.TryGetCanonical(parse, out slashPath, out _))
+            return true;
+
         if (string.IsNullOrWhiteSpace(parse.Action))
         {
             var flatTail = parse.ArgsTail.Trim();
@@ -151,12 +154,5 @@ internal static class IntercomSlashPathBuilder
     }
 
     private static bool isKnownInnerVerb(string group, string verb) =>
-        group.ToLowerInvariant() switch
-        {
-            "topic" => verb is "list" or "tree" or "create" or "rename" or "open" or "cards" or "next" or "prev",
-            "spine" => verb is "list" or "tree" or "set" or "show" or "toggle" or "open",
-            "message" => verb is "select" or "find" or "relate" or "next" or "prev",
-            "attach" => verb is "selection" or "scope" or "file",
-            _ => false,
-        };
+        SlashRouteCatalogIndex.IsKnownIntercomInnerVerb(group, verb);
 }

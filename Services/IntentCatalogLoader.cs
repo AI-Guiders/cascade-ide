@@ -265,6 +265,9 @@ internal static class IntentCatalogLoader
         var reportHandler = ResolveReportHandler(row, kind, path, slashPath);
         var intercomHandler = ResolveIntercomHandler(row, kind, path, slashPath);
         var audience = ParseSlashAudience(row.Audience, path, slashPath);
+        var autoRunOnCommit = row.AutoRunOnCommit ?? false;
+        var autoRunRequiresArgs = row.AutoRunRequiresArgs ?? true;
+        var requiresArgTailExplicit = row.RequiresArgTail;
 
         routes[slashPath] = new SlashRouteEntry(
             slashPath,
@@ -277,7 +280,10 @@ internal static class IntentCatalogLoader
             completion,
             reportHandler,
             intercomHandler,
-            audience);
+            audience,
+            autoRunOnCommit,
+            autoRunRequiresArgs,
+            requiresArgTailExplicit);
     }
 
     private static IntercomMessageAudience ParseSlashAudience(string? raw, string path, string slashPath)
@@ -373,8 +379,11 @@ internal static class IntentCatalogLoader
         if (string.Equals(v, "session_topics", StringComparison.OrdinalIgnoreCase))
             return SlashCompletionKind.SessionTopics;
 
+        if (string.Equals(v, "message_anchors", StringComparison.OrdinalIgnoreCase))
+            return SlashCompletionKind.MessageAnchors;
+
         throw new InvalidOperationException(
-            $"{path}: slash '{slashPath}' has unknown completion '{v}' (expected workspace_files | session_topics).");
+            $"{path}: slash '{slashPath}' has unknown completion '{v}' (expected workspace_files | session_topics | message_anchors).");
     }
 
     private static void ResolveSlashStaticArgs(SlashFormToml row, out string? mfdPage, out string? primarySurface)
