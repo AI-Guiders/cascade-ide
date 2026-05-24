@@ -870,19 +870,19 @@ public partial class SkiaChatSurfaceControl
         if (!ShowIntercomComposer || !IsComposerEnabled || string.IsNullOrEmpty(e.Text))
             return;
 
+        if (ShowCockpitCommandLine && _commandLineFocused)
+        {
+            InsertCommandLineText(e.Text);
+            e.Handled = true;
+            return;
+        }
+
         if (e.Text == " " && IsSlashAutocompleteVisible && _slashRows.Count > 0)
         {
             if (!IsKeyboardFocusWithin)
                 Focus();
 
             ComposerKeyDown?.Invoke(this, new IntercomComposerKeyEventArgs(IntercomComposerKeyKind.CommitSlashSuggestion));
-            e.Handled = true;
-            return;
-        }
-
-        if (ShowCockpitCommandLine && _commandLineFocused)
-        {
-            InsertCommandLineText(e.Text);
             e.Handled = true;
             return;
         }

@@ -53,6 +53,7 @@ public partial class ChatPanelViewModel : ViewModelBase
     private readonly ChatSlashCommandRunner _slashCommandRunner;
     private readonly IWorkspaceFileSlashCompletionProvider? _workspaceFileSlashCompletion;
     private readonly ISessionTopicSlashCompletionProvider _sessionTopicSlashCompletion;
+    private readonly IMessageAnchorSlashCompletionProvider _messageAnchorSlashCompletion;
     private readonly Func<Uri>? _getLocalOllamaEndpoint;
     private readonly Func<string>? _getEffectiveOllamaModelId;
     private readonly Func<IChatClient?>? _tryCreateCloudMafIChatClient;
@@ -139,6 +140,7 @@ public partial class ChatPanelViewModel : ViewModelBase
             ? new WorkspaceFileSlashCompletionProvider(getSolutionPath, getSolutionRoots, getWorkspaceRoot)
             : null;
         _sessionTopicSlashCompletion = new SessionTopicSlashCompletionProvider(() => ChatSurfaceSnapshot);
+        _messageAnchorSlashCompletion = new MessageAnchorSlashCompletionProvider(GetSelectedMessageAttachmentsForSlash);
         _slashCommandRunner = new ChatSlashCommandRunner(
             executeIdeCommandForMafAgent,
             () => new ChatSlashEditorContext(
@@ -265,6 +267,7 @@ public partial class ChatPanelViewModel : ViewModelBase
     partial void OnSelectedMessageIndexChanged(int value)
     {
         RefreshChatSurfaceSnapshot();
+        RefreshComposerAutocomplete();
     }
 
     partial void OnThreadBranchHintChanged(string value)

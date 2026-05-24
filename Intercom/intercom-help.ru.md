@@ -27,7 +27,7 @@
 | `/intercom message 3:5 relate selection` | Явная связь #3–#5 с кодом → event `message_range_related` (`AttachmentAnchor`) |
 | `/intercom message [3;5] [8;15] relate selection` | Disjoint relate: несколько сегментов gutter (ADR 0138) |
 | `/intercom message anchors list` | Якоря выбранного сообщения и черновика: `a:abcd1234`, статус, путь |
-| `/anchor peek <id>` | Reveal по short id (8 hex с chip или list), без hit-test |
+| `/anchor peek <id>` | Reveal по short id (8 hex с chip или list) или **№ якоря** (#1…) выбранного сообщения |
 | MCP `intercom.messages_for_code` | Find: JSON `use_selection`, `code_ref`, `anchor_json`, или `file`+`line_*` |
 | MCP `intercom.message_relate` | Relate: `start_ordinal`+`end_ordinal?`, или `range_expr` (`[3;5] [8;15]`), или `ordinal_segments[]`, тот же code-ref |
 

@@ -39,6 +39,7 @@ public partial class ChatPanelViewModel
             text,
             _workspaceFileSlashCompletion,
             _sessionTopicSlashCompletion,
+            _messageAnchorSlashCompletion,
             caretIndex: caret);
         ChatSlashSuggestions.Clear();
         foreach (var s in suggestions)

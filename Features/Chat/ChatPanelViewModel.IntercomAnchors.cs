@@ -1,7 +1,7 @@
 #nullable enable
 
+using CascadeIDE.Features.Chat.AnchorPeek;
 using CascadeIDE.Models.Intercom;
-using CascadeIDE.Services.Intercom;
 
 namespace CascadeIDE.Features.Chat;
 
@@ -57,7 +57,34 @@ public partial class ChatPanelViewModel
         _ = RevealAttachmentFromFeedAsync(anchor, select: false, messageIndex);
         var status = IntercomAnchorSlash.FormatOutcomeShort(anchor.ResolveOutcome);
         var id = anchor.Id ?? "?";
+        if (AnchorPeekResolver.TryResolve(rawId, BuildAnchorPeekResolveContext(), out _, out _, out var ordinal, out _))
+            return $"Peek #{ordinal} a:{id} ({status}) — открываю в редакторе.";
+
         return $"Peek a:{id} ({status}) — открываю в редакторе.";
+    }
+
+    private IReadOnlyList<AttachmentAnchor> GetSelectedMessageAttachmentsForSlash()
+    {
+        if (SelectedMessageIndex < 0 || SelectedMessageIndex >= ChatMessages.Count)
+            return [];
+
+        return ChatMessages[SelectedMessageIndex].Attachments ?? [];
+    }
+
+    private AnchorPeekResolveContext BuildAnchorPeekResolveContext()
+    {
+        var all = new List<FeedMessageAnchor>();
+        for (var i = 0; i < ChatMessages.Count; i++)
+        {
+            foreach (var candidate in ChatMessages[i].Attachments ?? [])
+                all.Add(new FeedMessageAnchor(i, candidate));
+        }
+
+        return new AnchorPeekResolveContext(
+            SelectedMessageIndex,
+            GetSelectedMessageAttachmentsForSlash(),
+            _pendingAttachDrafts,
+            all);
     }
 
     private bool TryResolveAnchorByShortId(
@@ -70,48 +97,12 @@ public partial class ChatPanelViewModel
         messageIndex = null;
         error = "";
 
-        if (!IntercomAnchorSlash.TryNormalizeAnchorId(rawId, out var shortId, out error))
+        if (AnchorPeekResolver.TryResolve(rawId, BuildAnchorPeekResolveContext(), out anchor, out messageIndex, out _, out error))
+            return true;
+
+        if (IntercomAnchorSlash.TryFormatPeekOrdinalError(rawId, GetSelectedMessageAttachmentsForSlash().Count, out error))
             return false;
 
-        if (_pendingAttachDrafts.TryGetValue(shortId, out var draft))
-        {
-            anchor = draft;
-            return true;
-        }
-
-        if (SelectedMessageIndex >= 0 && SelectedMessageIndex < ChatMessages.Count)
-        {
-            foreach (var candidate in ChatMessages[SelectedMessageIndex].Attachments ?? [])
-            {
-                if (string.IsNullOrWhiteSpace(candidate.Id)
-                    || !string.Equals(candidate.Id, shortId, StringComparison.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
-
-                anchor = candidate;
-                messageIndex = SelectedMessageIndex;
-                return true;
-            }
-        }
-
-        for (var i = 0; i < ChatMessages.Count; i++)
-        {
-            foreach (var candidate in ChatMessages[i].Attachments ?? [])
-            {
-                if (string.IsNullOrWhiteSpace(candidate.Id)
-                    || !string.Equals(candidate.Id, shortId, StringComparison.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
-
-                anchor = candidate;
-                messageIndex = i;
-                return true;
-            }
-        }
-
-        error = $"Якорь a:{shortId} не найден. /intercom message anchors list";
         return false;
     }
 }
