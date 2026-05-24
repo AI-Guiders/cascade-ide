@@ -18,8 +18,17 @@ public partial class ChatPanelViewModel
         var editor = BuildAttachEditorSnapshot();
         var workspace = ResolveAttachWorkspaceRoot();
         var solution = ResolveAttachSolutionPath();
-        if (!IntercomCodeRefParser.TryParse(codeRefTail, editor, workspace, solution, out var query, out var parseError))
+        if (!IntercomCodeRefParser.TryParse(
+                codeRefTail,
+                editor,
+                workspace,
+                solution,
+                out var query,
+                out var parseError,
+                ResolveAttachIndexDirectoryRelative()))
+        {
             return parseError;
+        }
 
         return formatFindResult(executeFind(query, workspace));
     }
@@ -29,7 +38,7 @@ public partial class ChatPanelViewModel
     /// </summary>
     public string RelateMessageRangeToCodeRef(string? relateTail)
     {
-        if (!IntercomMessageRelateArgs.TryParse(relateTail, out var startOrdinal, out var endOrdinal, out var codeRefTail, out var parseError))
+        if (!IntercomMessageRelateArgs.TryParse(relateTail, out var segments, out var codeRefTail, out var parseError))
             return parseError;
 
         if (IsChatOverviewMode)
@@ -38,28 +47,48 @@ public partial class ChatPanelViewModel
         if (_activeThreadId == Guid.Empty)
             return "Нет активной ветки.";
 
-        if (!string.Equals(SelectMessageByOrdinalRangeInDetailLane(startOrdinal, endOrdinal), "OK", StringComparison.Ordinal))
-            return "Диапазон сообщений вне активной ветки.";
+        if (!TryGetActiveDetailLaneMessageIndices(out var indices))
+            return "В активной ветке нет сообщений.";
+
+        var ordinalSegments = segments
+            .Select(s => new ChatHistoryMessageOrdinalSegment(s.Start, s.End))
+            .ToList();
+
+        if (!IntercomMessageRangeRelatedSupport.TryValidateSegmentsInLane(ordinalSegments, indices.Count, out var rangeError))
+            return rangeError;
+
+        var selectResult = segments.Count == 1
+            ? SelectMessageByOrdinalRangeInDetailLane(segments[0].Start, segments[0].End)
+            : SelectMessagesByOrdinalRangesInDetailLane(segments);
+
+        if (!string.Equals(selectResult, "OK", StringComparison.Ordinal))
+            return selectResult;
 
         var editor = BuildAttachEditorSnapshot();
         var workspace = ResolveAttachWorkspaceRoot();
         var solution = ResolveAttachSolutionPath();
-        if (!IntercomCodeRefParser.TryResolveAnchor(codeRefTail, editor, workspace, solution, out var anchor, out var anchorError))
+        if (!IntercomCodeRefParser.TryResolveAnchor(
+                codeRefTail,
+                editor,
+                workspace,
+                solution,
+                out var anchor,
+                out var anchorError,
+                ResolveAttachIndexDirectoryRelative()))
+        {
             return anchorError;
+        }
 
-        var payload = new ChatHistoryMessageRangeRelatedPayload(
+        var payload = IntercomMessageRangeRelatedSupport.CreatePayload(
             _activeThreadId.ToString("N"),
-            startOrdinal,
-            endOrdinal,
+            ordinalSegments,
             anchor,
             "slash");
 
         _ = PersistEventAsync(ChatHistoryEventKind.MessageRangeRelated, payload, _activeThreadId);
         appendExplicitRelateInMemory(payload);
 
-        var label = startOrdinal == endOrdinal
-            ? $"#{startOrdinal}"
-            : $"#{startOrdinal}–#{endOrdinal}";
+        var label = IntercomMessageRangeRelatedSupport.FormatOrdinalSummary(ordinalSegments);
         return $"Связь сообщений {label} с кодом записана ({anchor.DisplayLabel ?? anchor.File}).";
     }
 
@@ -104,22 +133,25 @@ public partial class ChatPanelViewModel
         if (args is null)
             return JsonSerializer.Serialize(new { error = "parse", message = "Отсутствуют аргументы." });
 
-        var startOrdinal = McpCommandJsonArgs.OptionalInt32(args, "start_ordinal");
-        var endOrdinal = McpCommandJsonArgs.OptionalInt32(args, "end_ordinal") ?? startOrdinal;
-        if (startOrdinal is null or < 1 || endOrdinal is null or < 1 || endOrdinal < startOrdinal)
+        if (!TryParseOrdinalSegmentsFromMcp(args, out var ordinalSegments, out var parametricSegments, out var segmentParseError))
         {
-            return JsonSerializer.Serialize(new
-            {
-                error = "parse",
-                message = "Укажи start_ordinal (1-based) и опционально end_ordinal ≥ start.",
-            });
+            return JsonSerializer.Serialize(new { error = "parse", message = segmentParseError });
         }
 
         var editor = BuildAttachEditorSnapshot();
         var workspace = ResolveAttachWorkspaceRoot();
         var solution = ResolveAttachSolutionPath();
-        if (!IntercomCodeRefParser.TryResolveAnchorFromMcp(args, editor, workspace, solution, out var anchor, out var anchorError))
+        if (!IntercomCodeRefParser.TryResolveAnchorFromMcp(
+                args,
+                editor,
+                workspace,
+                solution,
+                out var anchor,
+                out var anchorError,
+                ResolveAttachIndexDirectoryRelative()))
+        {
             return JsonSerializer.Serialize(new { error = "parse", message = anchorError });
+        }
 
         if (IsChatOverviewMode)
             return JsonSerializer.Serialize(new { error = "overview_mode", message = "Открой detail-ветку." });
@@ -127,19 +159,28 @@ public partial class ChatPanelViewModel
         if (_activeThreadId == Guid.Empty)
             return JsonSerializer.Serialize(new { error = "no_thread", message = "Нет активной ветки." });
 
-        if (!string.Equals(SelectMessageByOrdinalRangeInDetailLane(startOrdinal.Value, endOrdinal.Value), "OK", StringComparison.Ordinal))
+        if (!TryGetActiveDetailLaneMessageIndices(out var indices))
         {
-            return JsonSerializer.Serialize(new
-            {
-                error = "range",
-                message = "Диапазон сообщений вне активной ветки.",
-            });
+            return JsonSerializer.Serialize(new { error = "empty_lane", message = "В активной ветке нет сообщений." });
         }
 
-        var payload = new ChatHistoryMessageRangeRelatedPayload(
+        if (!IntercomMessageRangeRelatedSupport.TryValidateSegmentsInLane(ordinalSegments, indices.Count, out var rangeError))
+        {
+            return JsonSerializer.Serialize(new { error = "range", message = rangeError });
+        }
+
+        var selectResult = parametricSegments.Count == 1
+            ? SelectMessageByOrdinalRangeInDetailLane(parametricSegments[0].Start, parametricSegments[0].End)
+            : SelectMessagesByOrdinalRangesInDetailLane(parametricSegments);
+
+        if (!string.Equals(selectResult, "OK", StringComparison.Ordinal))
+        {
+            return JsonSerializer.Serialize(new { error = "range", message = selectResult });
+        }
+
+        var payload = IntercomMessageRangeRelatedSupport.CreatePayload(
             _activeThreadId.ToString("N"),
-            startOrdinal.Value,
-            endOrdinal.Value,
+            ordinalSegments,
             anchor,
             "mcp");
 
@@ -152,6 +193,11 @@ public partial class ChatPanelViewModel
             thread_id = payload.ThreadId,
             start_ordinal = payload.StartOrdinal,
             end_ordinal = payload.EndOrdinal,
+            ordinal_segments = ordinalSegments.Select(s => new
+            {
+                start_ordinal = s.StartOrdinal,
+                end_ordinal = s.EndOrdinal,
+            }),
             code_ref = new
             {
                 id = anchor.Id,
@@ -163,6 +209,81 @@ public partial class ChatPanelViewModel
             },
         });
     }
+
+    private static bool TryParseOrdinalSegmentsFromMcp(
+        IReadOnlyDictionary<string, JsonElement> args,
+        out IReadOnlyList<ChatHistoryMessageOrdinalSegment> ordinalSegments,
+        out IReadOnlyList<ParametricIntRange> parametricSegments,
+        out string error)
+    {
+        ordinalSegments = [];
+        parametricSegments = [];
+        error = "";
+
+        if (args.TryGetValue("range_expr", out var rangeExpr)
+            && rangeExpr.ValueKind == JsonValueKind.String
+            && !string.IsNullOrWhiteSpace(rangeExpr.GetString()))
+        {
+            if (!ParametricSegmentListParser.TryParse(rangeExpr.GetString(), out parametricSegments, out error))
+                return false;
+
+            ordinalSegments = ToOrdinalSegments(parametricSegments);
+            return true;
+        }
+
+        if (args.TryGetValue("ordinal_segments", out var segmentsEl)
+            && segmentsEl.ValueKind == JsonValueKind.Array)
+        {
+            var list = new List<ChatHistoryMessageOrdinalSegment>();
+            foreach (var item in segmentsEl.EnumerateArray())
+            {
+                if (item.ValueKind != JsonValueKind.Object)
+                {
+                    error = "ordinal_segments: каждый элемент — объект { start_ordinal, end_ordinal }.";
+                    return false;
+                }
+
+                if (!item.TryGetProperty("start_ordinal", out var startEl)
+                    || !item.TryGetProperty("end_ordinal", out var endEl)
+                    || !startEl.TryGetInt32(out var start)
+                    || !endEl.TryGetInt32(out var end))
+                {
+                    error = "ordinal_segments: укажи start_ordinal и end_ordinal (integer ≥ 1).";
+                    return false;
+                }
+
+                list.Add(new ChatHistoryMessageOrdinalSegment(start, end));
+            }
+
+            if (list.Count == 0)
+            {
+                error = "ordinal_segments не может быть пустым.";
+                return false;
+            }
+
+            ordinalSegments = list;
+            parametricSegments = list
+                .Select(s => new ParametricIntRange(s.StartOrdinal, s.EndOrdinal))
+                .ToList();
+            return true;
+        }
+
+        var startOrdinal = McpCommandJsonArgs.OptionalInt32(args, "start_ordinal");
+        var endOrdinal = McpCommandJsonArgs.OptionalInt32(args, "end_ordinal") ?? startOrdinal;
+        if (startOrdinal is null or < 1 || endOrdinal is null or < 1 || endOrdinal < startOrdinal)
+        {
+            error = "Укажи start_ordinal (1-based) и опционально end_ordinal, либо range_expr / ordinal_segments для disjoint.";
+            return false;
+        }
+
+        ordinalSegments = [new ChatHistoryMessageOrdinalSegment(startOrdinal.Value, endOrdinal.Value)];
+        parametricSegments = [new ParametricIntRange(startOrdinal.Value, endOrdinal.Value)];
+        return true;
+    }
+
+    private static IReadOnlyList<ChatHistoryMessageOrdinalSegment> ToOrdinalSegments(
+        IReadOnlyList<ParametricIntRange> segments) =>
+        segments.Select(s => new ChatHistoryMessageOrdinalSegment(s.Start, s.End)).ToList();
 
     private void rebuildExplicitRelatesFromEvents(IReadOnlyList<ChatHistoryEvent> events) =>
         _explicitMessageRangeRelates = IntercomMessageRangeRelatedProjector.Project(events);
@@ -177,6 +298,7 @@ public partial class ChatPanelViewModel
             threadId,
             payload.StartOrdinal,
             payload.EndOrdinal,
+            IntercomMessageRangeRelatedSupport.ResolveSegments(payload),
             payload.CodeRef,
             payload.Source));
         _explicitMessageRangeRelates = list;

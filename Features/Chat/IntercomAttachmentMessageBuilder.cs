@@ -23,13 +23,15 @@ public static class IntercomAttachmentMessageBuilder
         string? workspaceRoot,
         string? solutionPath,
         out Outbound outbound,
-        out string error) =>
+        out string error,
+        string? indexDirectoryRelative = null) =>
         TryBuildCore(
             rawInput,
             pendingByShortId,
             editor,
             workspaceRoot,
             solutionPath,
+            indexDirectoryRelative,
             IntercomOutboundPrepareProfile.ComposerStrictBuild,
             warnings: null,
             out outbound,
@@ -84,6 +86,7 @@ public static class IntercomAttachmentMessageBuilder
                 editor,
                 workspaceRoot,
                 solutionPath,
+                indexDirectoryRelative: null,
                 profile,
                 warnings,
                 out var outbound,
@@ -131,6 +134,7 @@ public static class IntercomAttachmentMessageBuilder
         IntercomAttachmentResolveAtSend.EditorSnapshot editor,
         string? workspaceRoot,
         string? solutionPath,
+        string? indexDirectoryRelative,
         IntercomOutboundPrepareProfile profile,
         List<string>? warnings,
         out Outbound outbound,
@@ -167,6 +171,7 @@ public static class IntercomAttachmentMessageBuilder
                     editor,
                     workspaceRoot,
                     solutionPath,
+                    indexDirectoryRelative,
                     resolveSession,
                     profile.AllowDegradedMemberResolve,
                     profile.SkipMemberRoslynAtSend,
@@ -203,6 +208,7 @@ public static class IntercomAttachmentMessageBuilder
         IntercomAttachmentResolveAtSend.EditorSnapshot editor,
         string? workspaceRoot,
         string? solutionPath,
+        string? indexDirectoryRelative,
         IntercomAttachmentRoslynResolveSession? resolveSession,
         bool allowDegradedMemberResolve,
         bool skipMemberRoslynAtSend,
@@ -246,6 +252,8 @@ public static class IntercomAttachmentMessageBuilder
                         reference,
                         editor.CurrentFilePath,
                         workspaceRoot,
+                        solutionPath,
+                        indexDirectoryRelative,
                         out var draft,
                         out error))
                 {

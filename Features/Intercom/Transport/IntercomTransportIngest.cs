@@ -37,12 +37,16 @@ internal static class IntercomTransportIngest
 
         string? threadId = TryExtractThreadIdFromPayload(envelope);
 
+        var payloadJson = envelope.Payload.GetRawText();
+        if (string.Equals(envelope.EventKind, "message_range_related", StringComparison.Ordinal))
+            payloadJson = IntercomTransportPayloadNormalizer.NormalizeInbound(envelope.EventKind, payloadJson);
+
         localEvent = new ChatHistoryEvent(
             eventId,
             sessionId,
             at,
             kind,
-            envelope.Payload.GetRawText(),
+            payloadJson,
             ThreadId: threadId);
 
         return true;

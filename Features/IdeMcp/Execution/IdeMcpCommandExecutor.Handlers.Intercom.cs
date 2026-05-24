@@ -67,8 +67,19 @@ internal sealed partial class IdeMcpCommandExecutor
 
         var workspaceRoot = TryGetWorkspaceRoot(a);
         var solutionPath = TryGetAttachSolutionPath();
-        if (!BracketCodeReferenceParser.TryToAttachmentAnchor(reference, activeFile, workspaceRoot, out var anchor, out err))
+        var indexDir = CascadeIDE.Features.HybridIndex.Application.HybridIndexIndexDirectoryRelative.ResolveOrDefault(
+            _vm.GetCascadeSettingsForExecutor().HybridIndex.IndexDir);
+        if (!BracketCodeReferenceParser.TryToAttachmentAnchor(
+                reference,
+                activeFile,
+                workspaceRoot,
+                solutionPath,
+                indexDir,
+                out var anchor,
+                out err))
+        {
             return err;
+        }
 
         return await Task.FromResult(IntercomAttachmentNavigator.Apply(
             a,

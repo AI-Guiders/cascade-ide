@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using CascadeIDE.Models.AgentChat;
+using CascadeIDE.Services.Intercom;
 
 namespace CascadeIDE.Features.Intercom.Transport;
 
@@ -25,15 +26,23 @@ internal static class IntercomTransportPayloadEnricher
         if (range is null)
             return payload;
 
-        var link = IntercomRelatesToWire.FromMessageRangeRelated(range);
-        var linkJson = JsonSerializer.SerializeToNode(link, IntercomTransportJson.Web);
-        if (linkJson is null)
-            return payload;
-
         var root = JsonNode.Parse(payload.GetRawText()) as JsonObject ?? new JsonObject();
         var relates = root["relates_to"] as JsonArray ?? new JsonArray();
-        relates.Add(linkJson);
-        root["relates_to"] = relates;
+        foreach (var link in IntercomRelatesToWire.FromMessageRangeRelated(range))
+        {
+            var linkJson = JsonSerializer.SerializeToNode(link, IntercomTransportJson.Web);
+            if (linkJson is not null)
+                relates.Add(linkJson);
+        }
+
+        if (relates.Count > 0)
+            root["relates_to"] = relates;
+
+        if (IntercomMessageRangeRelatedSupport.IsDisjoint(range)
+            && range.OrdinalSegments is { Count: > 0 } segments)
+        {
+            root["ordinal_segments"] = JsonSerializer.SerializeToNode(segments, IntercomTransportJson.Web);
+        }
 
         return JsonSerializer.SerializeToElement(root, IntercomTransportJson.Web);
     }
