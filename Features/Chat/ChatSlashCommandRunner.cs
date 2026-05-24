@@ -95,6 +95,9 @@ public sealed class ChatSlashCommandRunner
             }
         }
 
+        if (IntercomAnchorSlash.IsAnchorPeekCommand(parse))
+            return ChatSlashCommandPresentation.NormalizeArgsTail(SlashPathAliases.ExtractPeekArgs(parse));
+
         return ChatSlashCommandPresentation.NormalizeArgsTail(tail);
     }
 
