@@ -12,6 +12,7 @@ using CascadeIDE.Models.AgentChat;
 using CascadeIDE.Features.Chat.Application;
 using CascadeIDE.Features.Chat.DataAcquisition;
 using CascadeIDE.Features.Cockpit;
+using AvaloniaEdit;
 using CascadeIDE.Models.Intercom;
 using CascadeIDE.Services;
 using CascadeIDE.Services.Intercom;
@@ -48,6 +49,7 @@ public partial class ChatPanelViewModel : ViewModelBase
     private readonly Action? _showAcpTerminal;
     private readonly Func<string, IReadOnlyDictionary<string, JsonElement>?, CancellationToken, Task<string>>? _executeIdeCommandForMafAgent;
     private readonly Func<AttachmentAnchor, bool, CancellationToken, Task<string>>? _revealIntercomAttachmentInIde;
+    private readonly AnchorDraftPreviewCoordinator? _anchorDraftPreview;
     private readonly ChatSlashCommandRunner _slashCommandRunner;
     private readonly IWorkspaceFileSlashCompletionProvider? _workspaceFileSlashCompletion;
     private readonly ISessionTopicSlashCompletionProvider _sessionTopicSlashCompletion;
@@ -104,6 +106,7 @@ public partial class ChatPanelViewModel : ViewModelBase
         Func<int?>? getEditorSelectionStart = null,
         Func<int?>? getEditorSelectionLength = null,
         Func<int?>? getEditorCaretOffset = null,
+        Func<string?, TextEditor?>? getTextEditorForAbsoluteFilePath = null,
         SlashCommandPreviewService? slashCommandPreviewService = null)
     {
         _aiProviderManager = aiProviderManager;
@@ -124,6 +127,14 @@ public partial class ChatPanelViewModel : ViewModelBase
         _showAcpTerminal = showAcpTerminal;
         _executeIdeCommandForMafAgent = executeIdeCommandForMafAgent;
         _revealIntercomAttachmentInIde = revealIntercomAttachmentInIde;
+        _anchorDraftPreview = getTextEditorForAbsoluteFilePath is null
+            ? null
+            : new AnchorDraftPreviewCoordinator(
+                () => _getCurrentFilePath?.Invoke(),
+                getWorkspaceRoot,
+                () => ResolveAttachSolutionPath(),
+                ResolveAttachIndexDirectoryRelative,
+                getTextEditorForAbsoluteFilePath);
         _workspaceFileSlashCompletion = getSolutionPath is not null && getSolutionRoots is not null
             ? new WorkspaceFileSlashCompletionProvider(getSolutionPath, getSolutionRoots, getWorkspaceRoot)
             : null;

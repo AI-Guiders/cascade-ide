@@ -46,8 +46,9 @@ public partial class ChatPanelViewModel
             pending,
             BuildAttachEditorSnapshot(),
             ResolveAttachWorkspaceRoot(),
-            _getSolutionPath?.Invoke(),
-            cancellationToken).ConfigureAwait(false);
+            ResolveAttachSolutionPath(),
+            cancellationToken,
+            ResolveAttachIndexDirectoryRelative()).ConfigureAwait(false);
 
         if (prepared.IsCommittable)
         {

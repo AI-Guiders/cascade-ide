@@ -141,7 +141,11 @@ public partial class MainWindowViewModel
             getSolutionRoots: () => Workspace.SolutionRoots,
             getEditorSelectionStart: () => EditorSelectionStart,
             getEditorSelectionLength: () => EditorSelectionLength,
-            getEditorCaretOffset: () => _editorCaretOffset);
+            getEditorCaretOffset: () => _editorCaretOffset,
+            getTextEditorForAbsoluteFilePath: path =>
+                string.IsNullOrWhiteSpace(path)
+                    ? null
+                    : EditorActiveDockResolver.TryGetEditor(this, path));
         ChatPanel.SetIntercomFontsSettings(_settings.Fonts.Intercom);
         ChatPanel.ApplyIntercomPresentationSettings(_settings.Intercom);
         ChatPanel.SetCascadeSettingsAccessor(() => _settings);

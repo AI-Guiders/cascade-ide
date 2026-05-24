@@ -22,12 +22,14 @@
 | MCP `chat_select_message` с `ordinal` | то же, что slash (нужна открытая ветка) |
 | MCP `chat_select_message` с `index` | 0-based по **всему** списку сообщений сессии (legacy) |
 | `/intercom message find selection` | Сообщения ветки с attach на текущее выделение (inferred) |
+| `/intercom message find M:Foo.Bar` | По member key; `F:` выводится из активного файла или symbol index |
 | `/intercom message find L:10-20` | По строкам открытого файла (M0 fallback) |
 | `/intercom message 3:5 relate selection` | Явная связь #3–#5 с кодом → event `message_range_related` (`AttachmentAnchor`) |
+| `/intercom message [3;5] [8;15] relate selection` | Disjoint relate: несколько сегментов gutter (ADR 0138) |
 | `/intercom message anchors list` | Якоря выбранного сообщения и черновика: `a:abcd1234`, статус, путь |
 | `/anchor peek <id>` | Reveal по short id (8 hex с chip или list), без hit-test |
 | MCP `intercom.messages_for_code` | Find: JSON `use_selection`, `code_ref`, `anchor_json`, или `file`+`line_*` |
-| MCP `intercom.message_relate` | Relate: `start_ordinal`, `end_ordinal?`, тот же code-ref |
+| MCP `intercom.message_relate` | Relate: `start_ordinal`+`end_ordinal?`, или `range_expr` (`[3;5] [8;15]`), или `ordinal_segments[]`, тот же code-ref |
 
 После выбора: `chat_get_selected_message` → `selected_index` (глобальный 0-based) и при detail — `feed_ordinal` (номер в gutter).
 
@@ -42,6 +44,7 @@
 ## Вложения в тексте `[ … ]`
 
 - Оси: `F:` путь · `M:` член · `L:` строки · `S:` scope (напр. `S:for:2` — 2-й `for` в теле `M:…`)
+- При наборе `[M:…]` / `[F:… M:…]` в composer — **ghost-рамка** в редакторе (если файл открыт в dock), как при reveal, без смены selection
 - Примеры: `[M:Run]` · `[Foo.cs M:Bar]` · `[M:Run S:for:1]` · `[F:src/X.cs; M:Y; L:10-20]`
 - Autocomplete: набери `[` — подсказки по осям; Tab/Enter — вставить; Esc — закрыть.
 - `/intercom attach selection` · `/intercom attach scope` · `/intercom attach file <path> [start] [end]`
