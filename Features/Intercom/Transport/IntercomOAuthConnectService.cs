@@ -14,19 +14,21 @@ public sealed class IntercomOAuthConnectService(IntercomTransportApiClient api)
         string baseUrl,
         string teamId,
         string provider,
+        string? inviteToken,
         CancellationToken ct) =>
-        ConnectCoreAsync(baseUrl, teamId, provider, ct);
+        ConnectCoreAsync(baseUrl, teamId, provider, inviteToken, ct);
 
     public async Task<(bool Ok, string Error)> ConnectGitHubAsync(
         string baseUrl,
         string teamId,
         CancellationToken ct) =>
-        await ConnectCoreAsync(baseUrl, teamId, "github", ct).ConfigureAwait(false);
+        await ConnectCoreAsync(baseUrl, teamId, "github", null, ct).ConfigureAwait(false);
 
     private async Task<(bool Ok, string Error)> ConnectCoreAsync(
         string baseUrl,
         string teamId,
         string provider,
+        string? inviteToken,
         CancellationToken ct)
     {
         api.ConfigureBaseUrl(baseUrl);
@@ -45,7 +47,10 @@ public sealed class IntercomOAuthConnectService(IntercomTransportApiClient api)
             $"{baseUrl.TrimEnd('/')}/api/v1/auth/login" +
             $"?provider={Uri.EscapeDataString(normalizedProvider)}&team_id={Uri.EscapeDataString(teamId)}" +
             $"&redirect_uri={Uri.EscapeDataString(redirectUri)}" +
-            $"&code_challenge={Uri.EscapeDataString(challenge)}&code_challenge_method=S256";
+            $"&code_challenge={Uri.EscapeDataString(challenge)}&code_challenge_method=S256"
+            + (string.IsNullOrWhiteSpace(inviteToken)
+                ? ""
+                : $"&invite_token={Uri.EscapeDataString(inviteToken.Trim())}");
 
         try
         {

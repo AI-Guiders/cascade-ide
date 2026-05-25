@@ -9,17 +9,23 @@ public sealed class IntercomTransportSettings
     /// <summary>Базовый URL reference Intercom service, без завершающего <c>/</c>.</summary>
     public string BaseUrl { get; set; } = "";
 
-    /// <summary>Явный <c>team_id</c>; пусто — из <c>.cascade-ide/intercom-team.toml</c> в git root.</summary>
+    /// <summary>Last selected <c>team_id</c> (кэш, не SSOT).</summary>
     public string TeamId { get; set; } = "";
 
     /// <summary>Topic на сервере; пусто — topic <c>general</c> после bootstrap.</summary>
     public string DefaultTopicId { get; set; } = "";
 
-    /// <summary>OAuth provider для Connect: <c>github</c> (пилот).</summary>
+    /// <summary>OAuth provider для Connect (<c>provider_id</c> из <c>/auth/providers</c>).</summary>
     public string OAuthProvider { get; set; } = "github";
+
+    /// <summary>Опциональный invite token для join (ADR 0147 §2.1).</summary>
+    public string InviteToken { get; set; } = "";
 
     /// <summary>DEV: shared team Bearer вместо JWT (только локальная разработка).</summary>
     public string DevTeamToken { get; set; } = "";
+
+    /// <summary>Local hint per normalized repo URL. TOML: <c>[intercom.transport.workspace_hints."…"]</c>.</summary>
+    public Dictionary<string, IntercomWorkspaceHintEntry> WorkspaceHints { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>Начальная задержка переподключения SSE, мс.</summary>
     public int SseReconnectBackoffMs { get; set; } = 1000;

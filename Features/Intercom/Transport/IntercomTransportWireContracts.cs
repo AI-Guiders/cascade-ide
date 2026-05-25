@@ -48,10 +48,34 @@ public sealed record OAuthTokenRequest(
     [property: JsonPropertyName("code_verifier")] string? CodeVerifier,
     [property: JsonPropertyName("redirect_uri")] string? RedirectUri);
 
+public sealed record IntercomMeTeamDto(
+    [property: JsonPropertyName("team_id")] string TeamId,
+    [property: JsonPropertyName("team_role")] string TeamRole,
+    [property: JsonPropertyName("display_name")] string DisplayName,
+    [property: JsonPropertyName("team_display_name")] string? TeamDisplayName = null);
+
 public sealed record IntercomMeResponseDto(
     [property: JsonPropertyName("member_id")] string MemberId,
     [property: JsonPropertyName("display_name")] string DisplayName,
-    [property: JsonPropertyName("teams")] IReadOnlyList<string> Teams);
+    [property: JsonPropertyName("member_kind")] string MemberKind,
+    [property: JsonPropertyName("teams")] IReadOnlyList<IntercomMeTeamDto> Teams);
+
+public sealed record IntercomAuthProviderDto(
+    [property: JsonPropertyName("provider_id")] string ProviderId,
+    [property: JsonPropertyName("display_name")] string DisplayName,
+    [property: JsonPropertyName("enabled")] bool Enabled);
+
+public sealed record IntercomWorkspaceContextTeamDto(
+    [property: JsonPropertyName("team_id")] string TeamId,
+    [property: JsonPropertyName("display_name")] string DisplayName,
+    [property: JsonPropertyName("team_role")] string TeamRole,
+    [property: JsonPropertyName("project_id")] string ProjectId);
+
+public sealed record IntercomWorkspaceContextResponseDto(
+    [property: JsonPropertyName("normalized_repo_urls")] IReadOnlyList<string> NormalizedRepoUrls,
+    [property: JsonPropertyName("projects")] IReadOnlyList<object> Projects,
+    [property: JsonPropertyName("teams")] IReadOnlyList<IntercomWorkspaceContextTeamDto> Teams,
+    [property: JsonPropertyName("suggested_team_id")] string? SuggestedTeamId);
 
 public sealed record IntercomEnsureTopicRequestDto(
     [property: JsonPropertyName("spine_key")] string SpineKey,

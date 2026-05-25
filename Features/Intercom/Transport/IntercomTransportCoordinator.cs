@@ -88,6 +88,25 @@ public sealed class IntercomTransportCoordinator : IDisposable
             return;
         }
 
+        var resolvedTeam = await TryResolveTeamIdAsync(settings, ct).ConfigureAwait(false);
+        if (!string.IsNullOrWhiteSpace(resolvedTeam))
+            teamId = resolvedTeam;
+
+        var bearer = await ResolveBearerAsync(settings, ct).ConfigureAwait(false);
+        if (!string.IsNullOrWhiteSpace(bearer))
+        {
+            var me = await _api.GetMeAsync(bearer, ct).ConfigureAwait(false);
+            if (me is not null)
+                IntercomWorkspaceContextResolver.InvalidateStaleHints(settings, me);
+        }
+
+        if (string.IsNullOrWhiteSpace(teamId))
+        {
+            _connectionStatus = "Intercom: team_id не определён.";
+            StopSse();
+            return;
+        }
+
         _connectionStatus = "Intercom: подключено";
         await FlushOutboxAsync(settings, teamId, ct).ConfigureAwait(false);
         await CatchUpAsync(settings, teamId, ct).ConfigureAwait(false);
@@ -109,7 +128,12 @@ public sealed class IntercomTransportCoordinator : IDisposable
         }
 
         var provider = string.IsNullOrWhiteSpace(settings.OAuthProvider) ? "github" : settings.OAuthProvider.Trim();
-        var (ok, oauthError) = await _oauth.ConnectAsync(settings.BaseUrl, teamId, provider, ct).ConfigureAwait(false);
+        var (ok, oauthError) = await _oauth.ConnectAsync(
+            settings.BaseUrl,
+            teamId,
+            provider,
+            string.IsNullOrWhiteSpace(settings.InviteToken) ? null : settings.InviteToken.Trim(),
+            ct).ConfigureAwait(false);
         if (!ok)
             return (false, oauthError);
 
@@ -543,20 +567,47 @@ public sealed class IntercomTransportCoordinator : IDisposable
             return false;
         }
 
-        teamId = settings.TeamId.Trim();
+        teamId = ResolveTeamIdSync(settings, _getWorkspaceRoot?.Invoke());
         if (string.IsNullOrWhiteSpace(teamId))
         {
-            var manifest = IntercomTeamManifestResolver.TryResolve(_getWorkspaceRoot?.Invoke());
-            teamId = manifest?.TeamId ?? "";
-        }
-
-        if (string.IsNullOrWhiteSpace(teamId))
-        {
-            error = "team_id не задан (settings или .cascade-ide/intercom-team.toml).";
+            error = "team_id не задан (settings, workspace hint или Connect).";
             return false;
         }
 
         return true;
+    }
+
+    private async Task<string?> TryResolveTeamIdAsync(
+        IntercomTransportSettings settings,
+        CancellationToken ct)
+    {
+        var bearer = await ResolveBearerAsync(settings, ct).ConfigureAwait(false);
+        var resolved = await IntercomWorkspaceContextResolver.ResolveAsync(
+            settings,
+            _getWorkspaceRoot?.Invoke(),
+            bearer,
+            _api,
+            ct).ConfigureAwait(false);
+
+        if (resolved.Found && !string.IsNullOrWhiteSpace(resolved.TeamId))
+            return resolved.TeamId;
+
+        return ResolveTeamIdSync(settings, _getWorkspaceRoot?.Invoke());
+    }
+
+    private static string ResolveTeamIdSync(IntercomTransportSettings settings, string? workspaceRoot)
+    {
+        if (!string.IsNullOrWhiteSpace(settings.TeamId))
+            return settings.TeamId.Trim();
+
+        var repoKey = IntercomWorkspaceGitRemoteResolver.TryGetNormalizedOrigin(workspaceRoot);
+        if (!string.IsNullOrWhiteSpace(repoKey)
+            && settings.WorkspaceHints.TryGetValue(repoKey, out var hint)
+            && !string.IsNullOrWhiteSpace(hint.TeamId))
+            return hint.TeamId.Trim();
+
+        var manifest = IntercomTeamManifestResolver.TryResolve(workspaceRoot);
+        return manifest?.TeamId.Trim() ?? "";
     }
 
     private static bool TryBuildAppendPayload(ChatHistoryEvent ev, out IntercomAppendEventRequestDto request)

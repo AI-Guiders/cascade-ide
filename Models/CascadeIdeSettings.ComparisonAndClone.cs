@@ -286,7 +286,18 @@ public sealed partial class CascadeIdeSettings
                     TeamId = Intercom.Transport.TeamId,
                     DefaultTopicId = Intercom.Transport.DefaultTopicId,
                     OAuthProvider = Intercom.Transport.OAuthProvider,
+                    InviteToken = Intercom.Transport.InviteToken,
                     DevTeamToken = Intercom.Transport.DevTeamToken,
+                    WorkspaceHints = Intercom.Transport.WorkspaceHints.ToDictionary(
+                        kv => kv.Key,
+                        kv => new IntercomWorkspaceHintEntry
+                        {
+                            TeamId = kv.Value.TeamId,
+                            ProjectId = kv.Value.ProjectId,
+                            UpdatedAtUtc = kv.Value.UpdatedAtUtc,
+                            Source = kv.Value.Source,
+                        },
+                        StringComparer.OrdinalIgnoreCase),
                     SseReconnectBackoffMs = Intercom.Transport.SseReconnectBackoffMs,
                     AutoConnectOnSend = Intercom.Transport.AutoConnectOnSend,
                     SyncAgentChannelMessages = Intercom.Transport.SyncAgentChannelMessages,
@@ -557,10 +568,34 @@ public sealed partial class CascadeIdeSettings
             && a.Transport.TeamId.Is(b.Transport.TeamId)
             && a.Transport.DefaultTopicId.Is(b.Transport.DefaultTopicId)
             && a.Transport.OAuthProvider.Is(b.Transport.OAuthProvider)
+            && a.Transport.InviteToken.Is(b.Transport.InviteToken)
             && a.Transport.DevTeamToken.Is(b.Transport.DevTeamToken)
+            && WorkspaceHintsEqual(a.Transport.WorkspaceHints, b.Transport.WorkspaceHints)
             && a.Transport.SseReconnectBackoffMs == b.Transport.SseReconnectBackoffMs
             && a.Transport.AutoConnectOnSend == b.Transport.AutoConnectOnSend
             && a.Transport.SyncAgentChannelMessages == b.Transport.SyncAgentChannelMessages;
+    }
+
+    private static bool WorkspaceHintsEqual(
+        Dictionary<string, IntercomWorkspaceHintEntry>? a,
+        Dictionary<string, IntercomWorkspaceHintEntry>? b)
+    {
+        if (a is null || b is null)
+            return a == b;
+        if (a.Count != b.Count)
+            return false;
+        foreach (var (key, av) in a)
+        {
+            if (!b.TryGetValue(key, out var bv))
+                return false;
+            if (!av.TeamId.Is(bv.TeamId)
+                || !av.ProjectId.Is(bv.ProjectId)
+                || !av.UpdatedAtUtc.Is(bv.UpdatedAtUtc)
+                || !av.Source.Is(bv.Source))
+                return false;
+        }
+
+        return true;
     }
 
     private static bool CodeNavigationEquals(CodeNavigationSettings? a, CodeNavigationSettings? b)

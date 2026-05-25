@@ -155,6 +155,30 @@ public sealed class IntercomTransportApiClient : IDisposable
             .ConfigureAwait(false);
     }
 
+    public async Task<IReadOnlyList<IntercomAuthProviderDto>> ListAuthProvidersAsync(CancellationToken ct)
+    {
+        using var res = await _http.GetAsync("/api/v1/auth/providers", ct).ConfigureAwait(false);
+        if (!res.IsSuccessStatusCode)
+            return [];
+        var list = await res.Content.ReadFromJsonAsync<List<IntercomAuthProviderDto>>(IntercomTransportJson.Web, ct)
+            .ConfigureAwait(false);
+        return list ?? [];
+    }
+
+    public async Task<IntercomWorkspaceContextResponseDto?> ResolveWorkspaceContextAsync(
+        string normalizedRepoUrl,
+        string bearerToken,
+        CancellationToken ct)
+    {
+        var path = $"/api/v1/resolve/workspace-context?repo_url={Uri.EscapeDataString(normalizedRepoUrl)}";
+        using var req = Authorized(HttpMethod.Get, path, bearerToken);
+        using var res = await _http.SendAsync(req, ct).ConfigureAwait(false);
+        if (!res.IsSuccessStatusCode)
+            return null;
+        return await res.Content.ReadFromJsonAsync<IntercomWorkspaceContextResponseDto>(IntercomTransportJson.Web, ct)
+            .ConfigureAwait(false);
+    }
+
     public HttpRequestMessage CreateSseRequest(string teamId, string? topicId, string bearerToken)
     {
         var path = $"/api/v1/teams/{Uri.EscapeDataString(teamId)}/stream";
