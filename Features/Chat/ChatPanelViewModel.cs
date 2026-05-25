@@ -108,7 +108,9 @@ public partial class ChatPanelViewModel : ViewModelBase
         Func<int?>? getEditorSelectionLength = null,
         Func<int?>? getEditorCaretOffset = null,
         Func<string?, TextEditor?>? getTextEditorForAbsoluteFilePath = null,
-        SlashCommandPreviewService? slashCommandPreviewService = null)
+        SlashCommandPreviewService? slashCommandPreviewService = null,
+        Features.Agent.Environment.IAgentEnvironmentService? agentEnvironment = null,
+        Func<string?>? getSolutionPathForAgent = null)
     {
         _aiProviderManager = aiProviderManager;
         _getActiveAiProvider = getActiveAiProvider;
@@ -165,7 +167,9 @@ public partial class ChatPanelViewModel : ViewModelBase
             findMessagesForCodeRef: FindMessagesForCodeRef,
             relateMessageRangeToCodeRef: RelateMessageRangeToCodeRef,
             listMessageAnchors: ListAnchorsForSlashContext,
-            peekAnchorById: PeekAnchorById);
+            peekAnchorById: PeekAnchorById,
+            agentEnvironment: agentEnvironment,
+            getSolutionPathForAgent: getSolutionPathForAgent);
         _slashCommandPreviewService = slashCommandPreviewService
             ?? new SlashCommandPreviewService(tryBuildAnchorSlashPreview);
         _cockpitCommandLineSession = new CockpitCommandLineSession(this, _slashCommandPreviewService);
@@ -222,6 +226,17 @@ public partial class ChatPanelViewModel : ViewModelBase
 
     public bool HasChatMessages => ChatMessages.Count > 0;
     public bool HasActiveClarificationBatch => _activeClarificationBatch is not null;
+
+    /// <summary>AEE time accounting trace (ADR 0148 W3).</summary>
+    public void AppendAgentEnvironmentTrace(string text, ChatSlashCommandStatus status)
+    {
+        var vm = new ChatMessageViewModel(
+            "assistant",
+            text.Trim(),
+            slashCommandPath: "/agent verify",
+            slashCommandStatus: status);
+        ChatMessages.Add(vm);
+    }
 
     public string ActiveClarificationTitle => _activeClarificationBatch?.Title?.Trim() is { Length: > 0 } title
         ? title

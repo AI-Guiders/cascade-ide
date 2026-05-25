@@ -101,6 +101,8 @@
     <!-- ACP C# SDK: вендор externals/acp-csharp (IAcpClient с TerminalOutputResponse). NuGet AgentClientProtocol 0.1.5 расходится по сигнатуре TerminalOutputAsync — не использовать до фикса апстрима. -->
     <ProjectReference Include="externals\acp-csharp\src\AgentClientProtocol\AgentClientProtocol.csproj" />
     <PackageReference Include="AIGuiders.DotNetBuildTestParsers" Version="0.1.1" />
+    <ProjectReference Include="..\dotnet-build-test-core\DotNetBuildTest.Core.csproj" Condition="Exists('..\dotnet-build-test-core\DotNetBuildTest.Core.csproj')" />
+    <PackageReference Include="AIGuiders.DotNetBuildTest.Core" Version="0.1.0" Condition="!Exists('..\dotnet-build-test-core\DotNetBuildTest.Core.csproj')" />
     <PackageReference Include="AIGuiders.DotnetDebugMCP.Core" Version="0.1.0" />
     <!-- Локальный Core в open/; иначе NuGet AIGuiders.HybridCodebaseIndex.Core (как agent-notes-core) -->
     <ProjectReference Include="..\hybrid-codebase-index-core\HybridCodebaseIndex.Core.csproj" Condition="Exists('..\hybrid-codebase-index-core\HybridCodebaseIndex.Core.csproj')" />

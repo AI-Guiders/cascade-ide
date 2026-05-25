@@ -66,6 +66,8 @@ public partial class MainWindowViewModel : ViewModelBase, IAutonomousAgentSessio
     private readonly Features.IdeMcp.Application.MainWindowIdeMcpHost _ideMcpHost;
     private readonly Services.IdeDapDebugSession _dapDebug;
     private readonly IDataBus _ideDataBus;
+    private readonly DotNetBuildTest.Core.BuildTestJobService _buildTestJobService;
+    private readonly Features.Agent.Environment.IAgentEnvironmentService _agentEnvironment;
     private readonly HybridIndexOrchestrator _hybridIndex;
     private readonly IIdeHealthChannel _workspaceHealth;
     private readonly IIdeHealthSurfaceCompositor _workspaceHealthSurfaceCompositor;

@@ -84,6 +84,21 @@ public partial class MainWindowViewModel
             return;
         }
 
+        if (_settings.Agent.Environment.TimeAccounting.PfdInstrumentEnabled)
+        {
+            var agentStatus = _agentEnvironment.GetStatus();
+            if (agentStatus.IsActive)
+            {
+                StopPfdStatusHideTimer();
+                _pfdStatusVisibleSinceUtc = DateTimeOffset.UtcNow;
+                PfdBackgroundStatusText =
+                    $"AEE verify {agentStatus.RunId![..8]}… · {agentStatus.Policy}";
+                IsPfdBackgroundStatusCaution = false;
+                NotifyWorkspaceBackgroundStatusStripPlacement();
+                return;
+            }
+        }
+
         var workspaceRoot = WorkspaceDirectoryFromSolutionPath.Resolve(Workspace.SolutionPath ?? "");
         var solutionPath = Workspace.SolutionPath;
 

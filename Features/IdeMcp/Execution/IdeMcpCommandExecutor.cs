@@ -58,6 +58,7 @@ internal sealed partial class IdeMcpCommandExecutor
         // NOTE: UI inspection/control (pure IIdeMcpActions) is generated.
         RegisterDebugUiSurface(Add);
         RegisterAgentNotes(Add);
+        RegisterAgentEnvironment(Add);
 
         return map;
     }

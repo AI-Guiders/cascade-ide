@@ -8,4 +8,5 @@ public enum ChatSlashCommandExecutionKind
     LocalHelp,
     LocalReport,
     LocalIntercom,
+    LocalAgent,
 }

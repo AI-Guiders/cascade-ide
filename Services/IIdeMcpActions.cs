@@ -189,4 +189,16 @@ public interface IIdeMcpActions
     Task<string> CodebaseIndexExplainAsync(string? workspacePath, string? solutionPath, long hitId, CancellationToken cancellationToken = default);
     /// <summary>Reindex (паритет <c>codebase_index_reindex</c>; после успеха публикуется снимок в DataBus для MFD). JSON.</summary>
     Task<string> CodebaseIndexReindexAsync(string? workspacePath, string? solutionPath, bool fullRebuild, CancellationToken cancellationToken = default);
+
+    /// <summary>Verification ladder (ADR 0148). args: policy?, sandbox_profile?, solution_path?; JSON.</summary>
+    Task<string> IdeAgentVerifyAsync(string? policy, string? sandboxProfile, string? solutionPath, CancellationToken cancellationToken = default);
+
+    Task<string> IdeAgentCancelAsync(CancellationToken cancellationToken = default);
+
+    Task<string> IdeAgentStatusAsync(CancellationToken cancellationToken = default);
+
+    Task<string> IdeAgentLastAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>Prepare sandbox substrate. args: profile?, workspace_root?; JSON.</summary>
+    Task<string> IdeAgentSandboxPrepareAsync(string? profile, string? workspaceRoot, CancellationToken cancellationToken = default);
 }

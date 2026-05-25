@@ -12,6 +12,7 @@ public sealed partial class CascadeIdeSettings
         return AiEquals(Ai, o.Ai)
             && McpEquals(Mcp, o.Mcp)
             && AgentNotesEquals(AgentNotes, o.AgentNotes)
+            && AgentEquals(Agent, o.Agent)
             && WorkspaceEquals(Workspace, o.Workspace)
             && HybridIndexEquals(HybridIndex, o.HybridIndex)
             && SolutionWarmupEquals(SolutionWarmup, o.SolutionWarmup)
@@ -99,6 +100,27 @@ public sealed partial class CascadeIdeSettings
             {
                 ConfigPath = AgentNotes.ConfigPath,
                 KbBaseOverlayPath = AgentNotes.KbBaseOverlayPath
+            },
+            Agent = new AgentSettings
+            {
+                Environment = new AgentEnvironmentSettings
+                {
+                    DefaultVerifyPolicy = Agent.Environment.DefaultVerifyPolicy,
+                    DefaultSandboxProfile = Agent.Environment.DefaultSandboxProfile,
+                    RunnerMaxConcurrency = Agent.Environment.RunnerMaxConcurrency,
+                    CoalesceWindowMs = Agent.Environment.CoalesceWindowMs,
+                    ShellEscapeTier = Agent.Environment.ShellEscapeTier,
+                    Ladder = new AgentEnvironmentLadderSettings
+                    {
+                        L0Enabled = Agent.Environment.Ladder.L0Enabled,
+                        L4RequireExplicit = Agent.Environment.Ladder.L4RequireExplicit,
+                    },
+                    TimeAccounting = new AgentEnvironmentTimeAccountingSettings
+                    {
+                        ShowInChat = Agent.Environment.TimeAccounting.ShowInChat,
+                        PfdInstrumentEnabled = Agent.Environment.TimeAccounting.PfdInstrumentEnabled,
+                    },
+                },
             },
             Workspace = new WorkspaceSettings
             {
@@ -339,6 +361,23 @@ public sealed partial class CascadeIdeSettings
         if (a is null || b is null)
             return a == b;
         return a.ConfigPath.Is(b.ConfigPath) && a.KbBaseOverlayPath.Is(b.KbBaseOverlayPath);
+    }
+
+    private static bool AgentEquals(AgentSettings? a, AgentSettings? b)
+    {
+        if (a is null || b is null)
+            return a == b;
+        var ea = a.Environment;
+        var eb = b.Environment;
+        return ea.DefaultVerifyPolicy == eb.DefaultVerifyPolicy
+            && ea.DefaultSandboxProfile == eb.DefaultSandboxProfile
+            && ea.RunnerMaxConcurrency == eb.RunnerMaxConcurrency
+            && ea.CoalesceWindowMs == eb.CoalesceWindowMs
+            && ea.ShellEscapeTier == eb.ShellEscapeTier
+            && ea.Ladder.L0Enabled == eb.Ladder.L0Enabled
+            && ea.Ladder.L4RequireExplicit == eb.Ladder.L4RequireExplicit
+            && ea.TimeAccounting.ShowInChat == eb.TimeAccounting.ShowInChat
+            && ea.TimeAccounting.PfdInstrumentEnabled == eb.TimeAccounting.PfdInstrumentEnabled;
     }
 
     private static bool HybridIndexEquals(HybridIndexSettings? a, HybridIndexSettings? b)

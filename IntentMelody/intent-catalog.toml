@@ -985,6 +985,42 @@ intercom_handler = "anchor_peek"
 completion = "message_anchors"
 
 # ==============================================================================
+# Agent environment (ADR 0148 W1)
+# ==============================================================================
+
+[[command.form.slash]]
+path = "/agent verify"
+help = "Verification ladder (build + tests по policy). Хвост: minimal | standard | strict | ci_parity."
+group = "Agent"
+kind = "agent"
+requires_arg_tail = false
+
+[[command.form.slash]]
+path = "/agent cancel"
+help = "Отменить активный verify run."
+group = "Agent"
+kind = "agent"
+
+[[command.form.slash]]
+path = "/agent status"
+help = "Статус AEE: активный verify, snapshot_id."
+group = "Agent"
+kind = "agent"
+
+[[command.form.slash]]
+path = "/agent last"
+help = "Time accounting последнего verify run."
+group = "Agent"
+kind = "agent"
+
+[[command.form.slash]]
+path = "/agent sandbox"
+help = "Подготовить sandbox substrate. Хвост: agent_ephemeral | agent_worktree | in_place."
+group = "Agent"
+kind = "agent"
+requires_arg_tail = false
+
+# ==============================================================================
 # Cockpit (ADR 0138)
 # ==============================================================================
 

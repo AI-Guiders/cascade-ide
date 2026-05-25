@@ -252,7 +252,8 @@ internal static class IntentCatalogLoader
 
         if ((kind is ChatSlashCommandExecutionKind.LocalHelp
                 or ChatSlashCommandExecutionKind.LocalReport
-                or ChatSlashCommandExecutionKind.LocalIntercom)
+                or ChatSlashCommandExecutionKind.LocalIntercom
+                or ChatSlashCommandExecutionKind.LocalAgent)
             && cmdId.Length > 0)
         {
             throw new InvalidOperationException(
@@ -491,9 +492,10 @@ internal static class IntentCatalogLoader
             "help" => ChatSlashCommandExecutionKind.LocalHelp,
             "report" => ChatSlashCommandExecutionKind.LocalReport,
             "intercom" => ChatSlashCommandExecutionKind.LocalIntercom,
+            "agent" => ChatSlashCommandExecutionKind.LocalAgent,
             "ide" or "command" => ChatSlashCommandExecutionKind.IdeCommand,
             _ => throw new InvalidOperationException(
-                $"{path}: slash unknown kind '{raw}' (help | report | intercom | ide)."),
+                $"{path}: slash unknown kind '{raw}' (help | report | intercom | agent | ide)."),
         };
     }
 

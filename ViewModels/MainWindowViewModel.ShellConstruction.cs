@@ -105,6 +105,17 @@ public partial class MainWindowViewModel
         _ideMcpHost = new MainWindowIdeMcpHost(this);
         _webAiPortalBridge = new WebAiPortalCommandBridge(IdeMcp);
 
+        _ideDataBus = new InMemoryDataBus(asynchronousDispatch: false);
+        _buildTestJobService = new DotNetBuildTest.Core.BuildTestJobService();
+        _agentEnvironment = new Features.Agent.Environment.AgentEnvironmentService(
+            _ideDataBus,
+            _settings.Agent.Environment,
+            _buildTestJobService,
+            _csharpLanguageService,
+            GetOpenCsDocumentsForAgentL0,
+            _gitRunner,
+            () => Workspace.SolutionPath);
+
         BuildOutputPanel = new BuildOutputPanelViewModel();
         TerminalPanel = new TerminalPanelViewModel(() => Workspace.SolutionPath);
         GitPanel = new GitPanelViewModel(_gitRunner, GetWorkspacePath, IdeMcp, LoadSolution, RefreshGitSummaryAsync, osShell: _osShell);
@@ -145,7 +156,9 @@ public partial class MainWindowViewModel
             getTextEditorForAbsoluteFilePath: path =>
                 string.IsNullOrWhiteSpace(path)
                     ? null
-                    : EditorActiveDockResolver.TryGetEditor(this, path));
+                    : EditorActiveDockResolver.TryGetEditor(this, path),
+            agentEnvironment: _agentEnvironment,
+            getSolutionPathForAgent: () => Workspace.SolutionPath);
         ChatPanel.SetIntercomFontsSettings(_settings.Fonts.Intercom);
         ChatPanel.ApplyIntercomPresentationSettings(_settings.Intercom);
         ChatPanel.SetCascadeSettingsAccessor(() => _settings);
@@ -176,7 +189,6 @@ public partial class MainWindowViewModel
         _mcpClientService = new Services.McpClientService(Services.McpExternalServersJsonResolver.ResolveEffectiveJson(_settings));
         _autonomousAgentService = CreateAutonomousAgentService(_mcpClientService);
         Autonomous = new AutonomousAgentSessionViewModel(_autonomousAgentService, this);
-        _ideDataBus = new InMemoryDataBus(asynchronousDispatch: false);
         _hybridIndex = new HybridIndexOrchestrator(
             _ideDataBus,
             HybridIndexIndexDirectoryRelative.ResolveOrDefault(_settings.HybridIndex.IndexDir));
@@ -225,5 +237,19 @@ public partial class MainWindowViewModel
         SyncMfdShellPageForPrimaryWorkSurface();
         ChatPanel.IsForwardIntercomLayout = PrimaryWorkSurface == PrimaryWorkSurfaceKind.Intercom;
         NotifyDockedInstrumentSlotBindings();
+        EnsureAgentEnvironmentWiring();
+    }
+
+    private IReadOnlyList<(string Path, string Content)> GetOpenCsDocumentsForAgentL0()
+    {
+        var list = new List<(string Path, string Content)>();
+        foreach (var doc in Documents.OpenDocuments)
+        {
+            if (!doc.FilePath.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
+                continue;
+            list.Add((doc.FilePath, doc.Content ?? ""));
+        }
+
+        return list;
     }
 }

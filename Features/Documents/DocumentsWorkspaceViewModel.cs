@@ -301,6 +301,7 @@ public sealed partial class DocumentsWorkspaceViewModel : ObservableObject
 
         SelectedDocument.Content = value ?? "";
         SelectedDocument.IsDirty = !string.Equals(SelectedDocument.Content, SelectedDocument.OriginalContent, StringComparison.Ordinal);
+        _host.NotifyAgentEnvironmentDocumentWrite(SelectedDocument.FilePath);
     }
 
     partial void OnSelectedDocumentChanged(OpenDocumentViewModel? value)
