@@ -1,6 +1,8 @@
 # Пример пользовательского settings.toml (ADR 0028: %LocalAppData%\CascadeIDE\settings.toml).
 # Ключи — snake_case (CascadeTomlSerializer / Tomlyn). Секции — вложенные таблицы.
-# Заводские дефолты при загрузке: Settings/defaults-settings.toml (embedded; merge поверх user-файла).
+# Заводские дефолты: Settings/defaults-settings.toml (embedded; merge поверх user-файла).
+# Соглашение как в defaults: явные URL/пути; пустая строка только с комментарием (PATH, выключено, позже).
+# Env: <field>_env (ADR 0149): executable_env = "PATH" или имя переменной с путём/URL.
 
 # Строка топологии и грамматика якорей (ADR 0017 § display.screens).
 [display.screens]
