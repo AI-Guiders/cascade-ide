@@ -4,6 +4,7 @@ using CascadeIDE.Cockpit.DataBus;
 using CascadeIDE.Contracts;
 using CascadeIDE.Models;
 using CascadeIDE.Services;
+using CascadeIDE.Services;
 using CascadeIDE.Services.Lsp;
 
 namespace CascadeIDE.Features.EnvironmentReadiness.Application;
@@ -377,6 +378,7 @@ public static class EnvironmentReadinessSnapshotBuilder
             csharpLsp.Arguments);
 
         var exeHint = string.IsNullOrWhiteSpace(exe) ? provider : $"{provider}: {exe}";
+        exeHint += FormatPendingSettingsEnvHint(settings.Languages.CSharp, provider);
 
         if (!hostPresent)
         {
@@ -442,6 +444,7 @@ public static class EnvironmentReadinessSnapshotBuilder
 
         var argHint = string.IsNullOrWhiteSpace(args) ? "" : $" {args}";
         var exeHint = string.IsNullOrWhiteSpace(exe) ? $"{provider}" : $"{provider}: {exe}{argHint}";
+        exeHint += FormatPendingSettingsEnvHint(settings.Languages.Markdown, provider);
 
         if (!hostPresent)
         {
@@ -501,5 +504,39 @@ public static class EnvironmentReadinessSnapshotBuilder
         combined.Add(envSection);
         combined.AddRange(envRows);
         return combined;
+    }
+
+    private static string FormatPendingSettingsEnvHint(CSharpLanguageServerSettings csharp, string mode)
+    {
+        var profile = mode switch
+        {
+            "OmniSharp" => csharp.OmniSharp,
+            "CSharpLs" => csharp.CSharpLs,
+            "Custom" => csharp.Custom,
+            _ => csharp.ParseOnly,
+        };
+        return FormatPendingEnvVar(profile.ExecutableEnv);
+    }
+
+    private static string FormatPendingSettingsEnvHint(MarkdownLanguageServerSettings markdown, string mode)
+    {
+        var profile = mode switch
+        {
+            "Marksman" => markdown.Marksman,
+            "Custom" => markdown.Custom,
+            _ => markdown.Off,
+        };
+        return FormatPendingEnvVar(profile.ExecutableEnv);
+    }
+
+    private static string FormatPendingEnvVar(string? environmentVariableName)
+    {
+        if (string.IsNullOrWhiteSpace(environmentVariableName)
+            || SettingsEnvResolver.IsPathLookupSentinel(environmentVariableName))
+            return "";
+
+        return SettingsEnvResolver.TryGetEnvironmentValue(environmentVariableName) is null
+            ? $" (ожидается {environmentVariableName.Trim()})"
+            : "";
     }
 }

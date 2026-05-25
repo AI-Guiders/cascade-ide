@@ -63,7 +63,7 @@ public partial class MainWindowViewModel
         _cloudActiveProvider = AiSettings.NormalizeCloudProvider(_settings.Ai.Cloud.ActiveProvider);
 #pragma warning restore MVVMTK0034
         _showThinkingInHistory = _settings.Ai.Chat.ShowThinkingInHistory;
-        _cursorAcpAgentPath = _settings.Ai.Acp.CursorAcpPath ?? "";
+        _cursorAcpAgentPath = _settings.Ai.Acp.ResolveCursorAcpPath();
         _cursorAcpModelId = _settings.Ai.Acp.CursorAcpModelId ?? "";
         _anthropicApiKey = _aiKeys.AnthropicApiKey ?? "";
         _openAiApiKey = _aiKeys.OpenAiApiKey ?? "";
@@ -94,6 +94,7 @@ public partial class MainWindowViewModel
         var transport = _settings.Intercom.Transport;
         _intercomTransportEnabled = transport.Enabled;
         _intercomTransportBaseUrl = transport.BaseUrl;
+        _intercomTransportLocalServerPath = transport.LocalServerPath;
         _intercomTransportTeamId = transport.TeamId;
         _intercomTransportDefaultTopicId = transport.DefaultTopicId;
         _intercomTransportOAuthProvider = string.IsNullOrWhiteSpace(transport.OAuthProvider) ? "github" : transport.OAuthProvider;

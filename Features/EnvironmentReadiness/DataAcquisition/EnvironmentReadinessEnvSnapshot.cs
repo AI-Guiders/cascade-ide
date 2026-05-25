@@ -34,4 +34,12 @@ public static class WellKnownEnv
 {
     public const string AgentNotesFile = "AGENT_NOTES_FILE";
     public const string NetcoreDbgPath = "NETCOREDBG_PATH";
+
+    /// <summary>Sentinel <c>executable_env</c> / <c>cursor_acp_path_env</c> (ADR 0149) — не переменная <c>PATH</c> процесса.</summary>
+    public const string SettingsPathLookupSentinel = SettingsEnvResolver.PathLookupSentinel;
+
+    /// <summary>Опционально: именованная переменная с абсолютным путём, если не в PATH.</summary>
+    public const string CascadeIntercomServerExe = "CASCADE_INTERCOM_SERVER_EXE";
+    public const string CascadeIntercomBaseUrl = "CASCADE_INTERCOM_BASE_URL";
+    public const string CursorAcpAgentPath = "CURSOR_ACP_AGENT_PATH";
 }

@@ -1,7 +1,11 @@
 # CascadeIDE — заводские дефолты (шипнутый слой, ADR 0028).
-# EmbeddedResource + опционально Settings/defaults-settings.toml рядом с exe.
-# Merge: пользовательский %LocalAppData%\CascadeIDE\settings.toml поверх этого файла.
-# Расширенный пример / комментарии: docs/samples/settings.toml
+# EmbeddedResource + Settings/defaults-settings.toml рядом с exe.
+# Merge: %LocalAppData%\CascadeIDE\settings.toml поверх этого файла.
+#
+# Соглашение:
+# - Пути/URL с каноном — явное значение (относительно CascadeIDE.exe, workspace или LocalAppData — см. комментарий).
+# - Пустая строка только там, где «выключено / поиск в PATH / выбор позже» — всегда с комментарием.
+# Расширенный пример: docs/samples/settings.toml
 
 [display.screens]
 topology = "(0.25P + 0.75F) (M)"
@@ -60,6 +64,7 @@ pfd_status_strip = "background_status"
 forward_status_strip = "background_status"
 
 [ai]
+# local | acp | mcp_only | cloud
 mode = "local"
 
 [ai.local]
@@ -70,6 +75,9 @@ model = "qwen2.5-coder:7b"
 
 [ai.acp]
 cursor_acp_path = ""
+# PATH = поиск cursor-agent в PATH; иначе имя переменной с путём (ADR 0149)
+cursor_acp_path_env = "PATH"
+# Пусто = модель из session/new или дефолт ACP
 cursor_acp_model_id = ""
 
 [ai.mcp_only]
@@ -89,16 +97,19 @@ base_url = "https://api.deepseek.com"
 model = "deepseek-chat"
 
 [ai.chat]
+# mfd | window
 settings_presentation = "mfd"
 show_thinking_in_history = true
 
 [mcp]
 acp_auto_inject_ide_mcp = true
 external_servers_json = "[]"
+# Пусто = только inline JSON выше; иначе путь относительно %LocalAppData%\CascadeIDE\
 external_servers_json_path = ""
 
 [hybrid_index]
 enabled = true
+# Относительно корня workspace
 index_dir = ".hybrid-codebase-index"
 debounce_ms = 750
 auto_reindex_on_solution_open = true
@@ -119,9 +130,29 @@ show_background_status_on_pfd = true
 [command_palette.go_to_search]
 backend = "rg"
 
+[agent.environment]
+default_verify_policy = "standard"
+default_sandbox_profile = "agent_ephemeral"
+runner_max_concurrency = 2
+coalesce_window_ms = 1500
+# deny | l3_only | allow_with_audit
+shell_escape_tier = "deny"
+
+[agent.environment.ladder]
+l0_enabled = true
+l4_require_explicit = true
+
+[agent.environment.time_accounting]
+show_in_chat = true
+pfd_instrument_enabled = true
+
 [agent_notes]
+# Пусто = встроенный agent-notes; иначе путь относительно %LocalAppData%\CascadeIDE\
 config_path = ""
+config_path_env = ""
+# Пусто = без overlay; иначе каталог с knowledge/ поверх KB-Base
 kb_base_overlay_path = ""
+kb_base_overlay_path_env = ""
 
 [workspace]
 pfd_expanded = true
@@ -129,25 +160,60 @@ show_terminal = true
 show_git = false
 show_instrumentation = true
 mode = "Flight"
+# Пусто = язык UI из ОС / thread culture
 culture = ""
 splitters_locked = false
+# editor | intercom
 primary_work_surface = "editor"
 
 [code_navigation_map]
+# list | graph | both
 view = "list"
+# file | controlFlow
 depth = "file"
+# glance | normal | inspect
+detail_level = "normal"
 
 [languages.csharp]
+# ParseOnly | OmniSharp | CSharpLs | Custom
 mode = "OmniSharp"
 
+[languages.csharp.parse_only]
+executable = ""
+arguments = ""
+
 [languages.csharp.omni_sharp]
+executable = ""
+# PATH = явно искать OmniSharp в PATH (ADR 0149); иначе имя переменной с абсолютным путём
+executable_env = "PATH"
+arguments = ""
+arguments_env = ""
+
+[languages.csharp.csharp_ls]
+executable = ""
+executable_env = "PATH"
+arguments = ""
+arguments_env = ""
+
+[languages.csharp.custom]
 executable = ""
 arguments = ""
 
 [languages.markdown]
+# Off | Marksman | Custom
 mode = "Marksman"
 
+[languages.markdown.off]
+executable = ""
+arguments = ""
+
 [languages.markdown.marksman]
+executable = ""
+executable_env = "PATH"
+arguments = ""
+arguments_env = ""
+
+[languages.markdown.custom]
 executable = ""
 arguments = ""
 
@@ -193,21 +259,29 @@ show_assignments = true
 show_conditions = true
 
 [intercom]
-# comfortable — prose_pt, просторная лента; compact — prose_pt_forward + плотные отступы (legacy Forward)
+# comfortable | compact
 feed_metrics = "compact"
-# slash TCI pill: left | right (default) | highlight_only
+# left | right | highlight_only
 tci_validation_icon = "right"
 
 [intercom.attachments.code]
+# reveal | select
 navigate = "reveal"
+# when_needed | never
 reveal_load_solution = "when_needed"
 
 [intercom.transport]
 enabled = false
-base_url = ""
+base_url = "http://127.0.0.1:5080"
+base_url_env = ""
+local_server_path = "tools/intercom-service/IntercomService.exe"
+local_server_path_env = ""
+# Пусто = после Connect / resolve workspace (не путь к файлу)
 team_id = ""
+# Пусто = topic general на сервере
 default_topic_id = ""
 oauth_provider = "github"
+# DEV: Bearer для curl/локальных тестов; пусто = только OAuth
 dev_team_token = ""
 sse_reconnect_backoff_ms = 1000
 auto_connect_on_send = true

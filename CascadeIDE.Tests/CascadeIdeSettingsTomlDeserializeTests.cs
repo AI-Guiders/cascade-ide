@@ -218,6 +218,24 @@ public sealed class CascadeIdeSettingsTomlDeserializeTests
     }
 
     [Fact]
+    public void Deserialize_LanguagesCSharp_executable_env_ParsesExpected()
+    {
+        const string text =
+            """
+            [languages.csharp]
+            mode = "Custom"
+
+            [languages.csharp.custom]
+            executable = "fallback.exe"
+            executable_env = "CASCADE_IDE_CSHARP_EXECUTABLE"
+            """;
+
+        var s = Deserialize(text);
+        Assert.Equal("fallback.exe", s.Languages.CSharp.Custom.Executable);
+        Assert.Equal("CASCADE_IDE_CSHARP_EXECUTABLE", s.Languages.CSharp.Custom.ExecutableEnv);
+    }
+
+    [Fact]
     public void Deserialize_LanguagesCSharpNestedMode_ParsesExpected()
     {
         const string text =

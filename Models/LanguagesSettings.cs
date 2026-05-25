@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using CascadeIDE.Services;
 
 namespace CascadeIDE.Models;
 
@@ -43,7 +44,7 @@ public sealed class CSharpLanguageServerSettings
     {
         var mode = GetNormalizedMode();
         var profile = GetProfileForMode(mode);
-        return (mode, profile.Executable ?? "", profile.Arguments ?? "");
+        return (mode, profile.ResolveExecutable(), profile.ResolveArguments());
     }
 
     public void SetMode(string mode)
@@ -75,7 +76,19 @@ public sealed class LanguageServerLaunchProfile
 {
     public string Executable { get; set; } = "";
 
+    /// <summary>TOML: <c>executable_env</c> — <c>PATH</c> (поиск в PATH) или имя переменной с путём (ADR 0149).</summary>
+    public string ExecutableEnv { get; set; } = "";
+
     public string Arguments { get; set; } = "";
+
+    /// <summary>TOML: <c>arguments_env</c>.</summary>
+    public string ArgumentsEnv { get; set; } = "";
+
+    public string ResolveExecutable() =>
+        SettingsEnvResolver.ResolveLaunchPath(Executable, ExecutableEnv);
+
+    public string ResolveArguments() =>
+        SettingsEnvResolver.Resolve(Arguments, ArgumentsEnv);
 }
 
 /// <summary>Markdown LSP c дискриминатором режима и вложенными профилями запуска.</summary>
@@ -105,7 +118,7 @@ public sealed class MarkdownLanguageServerSettings
     {
         var mode = GetNormalizedMode();
         var profile = GetProfileForMode(mode);
-        return (mode, profile.Executable ?? "", profile.Arguments ?? "");
+        return (mode, profile.ResolveExecutable(), profile.ResolveArguments());
     }
 
     public void SetMode(string mode)
