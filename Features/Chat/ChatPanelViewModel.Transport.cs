@@ -25,6 +25,10 @@ public partial class ChatPanelViewModel
     public void SetCascadeSettingsAccessor(Func<Models.CascadeIdeSettings> getSettings) =>
         _getCascadeSettings = getSettings;
 
+    public void SetIntercomAdminRunner(
+        Func<string, string?, CancellationToken, Task<ChatSlashIntercomResult>> runAdmin) =>
+        _slashCommandRunner.SetIntercomAdminRunner(runAdmin);
+
     public async Task StartIntercomTransportAsync(CancellationToken ct = default)
     {
         if (_intercomTransport is null)

@@ -281,11 +281,16 @@
 | `delete_knowledge_section` | Удалить секцию из knowledge-файла. args: file_path:string, section_id:string, knowledge_path?:string, knowledge_root_id?:string; returns: text; example: {"file_path":"index.md","section_id":"foo"}. |
 | `editor.reveal_code` | Reveal в редакторе по bracket-ссылке (ADR 0131). args: code_ref:string, active_file?:string, duration_ms?:integer; returns: text; example: {"code_ref":"[M:Run]","active_file":"src/Foo.cs","duration_ms":4000}. |
 | `editor.select_code` | Select в редакторе по bracket-ссылке (ADR 0131). args: code_ref:string, active_file?:string, duration_ms?:integer; returns: text; example: {"code_ref":"[M:Run]","active_file":"src/Foo.cs"}. |
+| `intercom.agent_provision` | Provision agent account. args: display_name:string; returns: text; example: {"display_name":"Nova"}. |
 | `intercom.connect_team` | OAuth Connect к team Intercom service (ADR 0144). returns: text. |
 | `intercom.disconnect_team` | Disconnect team transport и очистка JWT. returns: text. |
 | `intercom.message_relate` | Явная связь диапазона gutter-сообщений с кодом (ADR 0137). args: start_ordinal:integer, end_ordinal?:integer, use_selection?:boolean, code_ref?:string, anchor_json?:object, file?:string, line_start?:integer, line_end?:integer; returns: json; example: {"start_ordinal":3,"end_ordinal":5,"use_selection":true}. |
 | `intercom.messages_for_code` | Сообщения активной detail-ветки по фрагменту кода (ADR 0137 inferred + explicit relate). args: use_selection?:boolean, code_ref?:string, anchor_json?:object, file?:string, line_start?:integer, line_end?:integer; returns: json; example: {"use_selection":true}. |
 | `intercom.reveal_attachment` | Reveal из ленты по AttachmentAnchor: open + re-resolve + highlight (ADR 0128 §8, 0130). args: anchor_json?:object, file?:string, line_start?:integer, line_end?:integer, member_key?:string, syntax_scope?:object, duration_ms?:integer, select?:boolean; если select опущен — дефолт из settings [intercom.attachments.code].navigate; returns: text; example: {"file":"src/Foo.cs","line_start":10,"line_end":25}. |
+| `intercom.server_start` | Запустить intercom-service. args: base_url?:string; returns: text; example: {"base_url":"http://127.0.0.1:5080"}. |
+| `intercom.server_status` | Статус локального intercom-service (ADR 0147). returns: text. |
+| `intercom.server_stop` | Остановить intercom-service. returns: text. |
+| `intercom.team_members` | Список members team. returns: text. |
 | `list_knowledge_files` | Список knowledge-файлов. args: subdir?:string, knowledge_path?:string, knowledge_root_id?:string; returns: json; example: {"subdir":"work","knowledge_root_id":"group"}. |
 | `read_knowledge_file` | Прочитать knowledge-файл. Корень: knowledge_path, knowledge_root_id (group, …) или primary из TOML. args: file_path:string, knowledge_path?:string, knowledge_root_id?:string, offset?:integer, limit?:integer; returns: text; example: {"file_path":"META/integrity-core.md","offset":2,"limit":20}. |
 | `upsert_knowledge_section` | Вставить/обновить секцию в knowledge-файле по section_id. args: file_path:string, section_id:string, content:string, knowledge_path?:string, knowledge_root_id?:string, save_revision?:boolean; returns: text; example: {"file_path":"index.md","section_id":"foo","content":"body"}. |

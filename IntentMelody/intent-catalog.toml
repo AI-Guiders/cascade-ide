@@ -984,6 +984,80 @@ kind = "intercom"
 intercom_handler = "anchor_peek"
 completion = "message_anchors"
 
+[[command]]
+[[command.form.slash]]
+path = "/intercom server status"
+help = "Статус локального intercom-service, /health и transport."
+group = "Intercom"
+kind = "intercom"
+intercom_handler = "server_status"
+
+[[command]]
+[[command.form.slash]]
+path = "/intercom server start"
+help = "Запустить reference intercom-service (dotnet run). Опционально base URL."
+group = "Intercom"
+kind = "intercom"
+intercom_handler = "server_start"
+
+[[command]]
+[[command.form.slash]]
+path = "/intercom server stop"
+help = "Остановить intercom-service, запущенный из CIDE."
+group = "Intercom"
+kind = "intercom"
+intercom_handler = "server_stop"
+
+[[command]]
+[[command.form.slash]]
+path = "/intercom team members"
+help = "Список участников team (member_id, role, display name)."
+group = "Intercom"
+kind = "intercom"
+intercom_handler = "team_members"
+
+[[command]]
+[[command.form.slash]]
+path = "/intercom team invite"
+help = "Создать invite token. Хвост: team_role (member, guest, admin…)."
+group = "Intercom"
+kind = "intercom"
+intercom_handler = "team_invite"
+
+[[command]]
+[[command.form.slash]]
+path = "/intercom team seed"
+help = "Seed project+repo для resolve (ADR 0147 §1b). Хвост: project_id."
+group = "Intercom"
+kind = "intercom"
+intercom_handler = "team_seed_project"
+
+[[command]]
+[[command.form.slash]]
+path = "/intercom agent list"
+help = "Список agent accounts в team (* — выбранный для fan-out)."
+group = "Intercom"
+kind = "intercom"
+intercom_handler = "agent_list"
+
+[[command]]
+[[command.form.slash]]
+path = "/intercom agent provision"
+help = "Создать agent account. Хвост: display name."
+group = "Intercom"
+kind = "intercom"
+intercom_handler = "agent_provision"
+requires_arg_tail = true
+
+[[command]]
+[[command.form.slash]]
+path = "/intercom agent select"
+help = "Выбрать agent member_id для transport fan-out."
+group = "Intercom"
+kind = "intercom"
+intercom_handler = "agent_select"
+requires_arg_tail = true
+
 # ==============================================================================
 # Agent environment (ADR 0148 W1)
 # ==============================================================================

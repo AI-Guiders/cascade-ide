@@ -1,3 +1,4 @@
+using System.Text.Json;
 using CascadeIDE.Models.Intercom;
 using CascadeIDE.Services;
 using CascadeIDE.Services.Intercom;
@@ -53,6 +54,62 @@ internal sealed partial class IdeMcpCommandExecutor
         {
             await _vm.DisconnectIntercomTeamTransportAsync(ct).ConfigureAwait(false);
             return "Intercom transport disconnected.";
+        });
+
+        add(Services.IdeCommands.IntercomServerStatus, async (_, ct) =>
+        {
+            var result = await _vm.RunIntercomAdminSlashAsync(
+                CascadeIDE.Features.Chat.ChatSlashIntercomHandlers.Ids.ServerStatus,
+                null,
+                ct).ConfigureAwait(false);
+            return result.Message;
+        });
+
+        add(Services.IdeCommands.IntercomServerStart, async (args, ct) =>
+        {
+            var url = args is not null
+                && args.TryGetValue("base_url", out var el)
+                && el.ValueKind == JsonValueKind.String
+                ? el.GetString()
+                : null;
+            var result = await _vm.RunIntercomAdminSlashAsync(
+                CascadeIDE.Features.Chat.ChatSlashIntercomHandlers.Ids.ServerStart,
+                url,
+                ct).ConfigureAwait(false);
+            return result.Message;
+        });
+
+        add(Services.IdeCommands.IntercomServerStop, async (_, ct) =>
+        {
+            var result = await _vm.RunIntercomAdminSlashAsync(
+                CascadeIDE.Features.Chat.ChatSlashIntercomHandlers.Ids.ServerStop,
+                null,
+                ct).ConfigureAwait(false);
+            return result.Message;
+        });
+
+        add(Services.IdeCommands.IntercomTeamMembers, async (_, ct) =>
+        {
+            var result = await _vm.RunIntercomAdminSlashAsync(
+                CascadeIDE.Features.Chat.ChatSlashIntercomHandlers.Ids.TeamMembers,
+                null,
+                ct).ConfigureAwait(false);
+            return result.Message;
+        });
+
+        add(Services.IdeCommands.IntercomAgentProvision, async (args, ct) =>
+        {
+            if (args is null
+                || !args.TryGetValue("display_name", out var nameEl)
+                || nameEl.ValueKind != JsonValueKind.String
+                || string.IsNullOrWhiteSpace(nameEl.GetString()))
+                return "Error: display_name required.";
+
+            var result = await _vm.RunIntercomAdminSlashAsync(
+                CascadeIDE.Features.Chat.ChatSlashIntercomHandlers.Ids.AgentProvision,
+                nameEl.GetString(),
+                ct).ConfigureAwait(false);
+            return result.Message;
         });
     }
 

@@ -38,6 +38,7 @@ public sealed class ChatSlashCommandRunner
     private readonly Func<string?, string>? _peekAnchorById;
     private readonly Func<string?>? _getSolutionPathForAgent;
     private readonly IAgentEnvironmentService? _agentEnvironment;
+    private Func<string, string?, CancellationToken, Task<ChatSlashIntercomResult>>? _runIntercomAdmin;
 
     public ChatSlashCommandRunner(
         Func<string, IReadOnlyDictionary<string, JsonElement>?, CancellationToken, Task<string>>? executeIdeCommand,
@@ -59,7 +60,8 @@ public sealed class ChatSlashCommandRunner
         Func<string>? listMessageAnchors = null,
         Func<string?, string>? peekAnchorById = null,
         IAgentEnvironmentService? agentEnvironment = null,
-        Func<string?>? getSolutionPathForAgent = null)
+        Func<string?>? getSolutionPathForAgent = null,
+        Func<string, string?, CancellationToken, Task<ChatSlashIntercomResult>>? runIntercomAdmin = null)
     {
         _executeIdeCommand = executeIdeCommand;
         _getEditorContext = getEditorContext;
@@ -81,7 +83,12 @@ public sealed class ChatSlashCommandRunner
         _peekAnchorById = peekAnchorById;
         _agentEnvironment = agentEnvironment;
         _getSolutionPathForAgent = getSolutionPathForAgent;
+        _runIntercomAdmin = runIntercomAdmin;
     }
+
+    public void SetIntercomAdminRunner(
+        Func<string, string?, CancellationToken, Task<ChatSlashIntercomResult>> runIntercomAdmin) =>
+        _runIntercomAdmin = runIntercomAdmin;
 
     private static string? resolveIntercomArgsTail(in ChatSlashCommandParseResult parse)
     {
@@ -189,7 +196,8 @@ public sealed class ChatSlashCommandRunner
                     _findMessagesForCodeRef,
                     _relateMessageRangeToCodeRef,
                     _listMessageAnchors,
-                    _peekAnchorById))
+                    _peekAnchorById,
+                    _runIntercomAdmin))
             {
                 return new ChatSlashCommandRunResult(
                     true,

@@ -163,6 +163,8 @@ public partial class MainWindowViewModel
         ChatPanel.ApplyIntercomPresentationSettings(_settings.Intercom);
         ChatPanel.SetCascadeSettingsAccessor(() => _settings);
         ChatPanel.SetIntercomTransportCoordinator(_intercomTransport);
+        ChatPanel.SetIntercomAdminRunner((handlerId, argsTail, ct) =>
+            RunIntercomAdminSlashAsync(handlerId, argsTail, ct));
         InstrumentationPanel = new InstrumentationPanelViewModel();
         InstrumentationPanel.PropertyChanged += OnInstrumentationPanelPropertyChanged;
         HypothesesPanel = new HypothesesPanelViewModel(GetWorkspacePath);
