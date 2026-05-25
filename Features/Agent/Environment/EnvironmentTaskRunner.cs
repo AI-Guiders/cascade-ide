@@ -10,6 +10,9 @@ public sealed class EnvironmentTaskRunner
     private readonly IDataBus _dataBus;
     private readonly BuildTestJobCoordinator _coordinator;
 
+    /// <summary>Test seam: override job status (return null → <see cref="AgentEnvironmentTaskDied"/>).</summary>
+    public Func<string, object?>? TestJobStatusFactory { get; set; }
+
     public EnvironmentTaskRunner(IDataBus dataBus, BuildTestJobCoordinator coordinator)
     {
         _dataBus = dataBus;
@@ -113,7 +116,9 @@ public sealed class EnvironmentTaskRunner
 
         while (!cancellationToken.IsCancellationRequested)
         {
-            var statusObj = _coordinator.GetJobStatus(coreJobId);
+            object? statusObj = TestJobStatusFactory is not null
+                ? TestJobStatusFactory(coreJobId)
+                : _coordinator.GetJobStatus(coreJobId);
             if (statusObj is null)
             {
                 PublishDied(taskId, runId, kind, null, "job not found");
@@ -163,8 +168,8 @@ public sealed class EnvironmentTaskRunner
         string? message) =>
         _dataBus.Publish(new AgentEnvironmentTaskChanged(taskId, runId, kind, state, message));
 
-    private void PublishDied(string taskId, string runId, string kind, int? exitCode, string? tail) =>
-        _dataBus.Publish(new AgentEnvironmentTaskDied(taskId, runId, kind, exitCode, tail));
+    private void PublishDied(string taskId, string runId, string taskKind, int? exitCode, string? tail) =>
+        _dataBus.Publish(new AgentEnvironmentTaskDied(taskId, runId, "supervised-inproc", exitCode, tail ?? taskKind));
 
     private static bool TryReadSuccess(string? resultJson)
     {

@@ -26,7 +26,6 @@ public sealed class AgentSandboxManager
                     Directory.Delete(runDir, recursive: true);
                 Directory.CreateDirectory(runDir);
                 Directory.CreateDirectory(Path.Combine(runDir, "temp"));
-                Directory.CreateDirectory(Path.Combine(runDir, "substrate"));
                 break;
 
             case AgentSandboxProfile.AgentWorktree:
@@ -38,19 +37,23 @@ public sealed class AgentSandboxManager
                 break;
         }
 
-        return new AgentSandboxLease(runId, profile, runDir, workspaceRoot);
+        AgentSandboxSubstrateBundle? substrate = profile == AgentSandboxProfile.AgentEphemeral
+            ? AgentSandboxSubstrate.Allocate(runDir)
+            : null;
+
+        return new AgentSandboxLease(runId, profile, runDir, workspaceRoot, substrate);
     }
 
-    public void RecreateSubstrateBeforeTests(AgentSandboxLease lease)
+    public AgentSandboxSubstrateBundle RecreateSubstrateBeforeTests(AgentSandboxLease lease)
     {
         if (lease.Profile != AgentSandboxProfile.AgentEphemeral)
-            return;
+            return lease.Substrate ?? AgentSandboxSubstrate.Allocate(lease.RunDirectory);
 
         var substrate = Path.Combine(lease.RunDirectory, "substrate");
         if (Directory.Exists(substrate))
             Directory.Delete(substrate, recursive: true);
-        Directory.CreateDirectory(substrate);
         Directory.CreateDirectory(Path.Combine(lease.RunDirectory, "temp"));
+        return AgentSandboxSubstrate.Allocate(lease.RunDirectory);
     }
 }
 
@@ -58,4 +61,5 @@ public sealed record AgentSandboxLease(
     string RunId,
     AgentSandboxProfile Profile,
     string RunDirectory,
-    string? WorkspaceRoot);
+    string? WorkspaceRoot,
+    AgentSandboxSubstrateBundle? Substrate = null);

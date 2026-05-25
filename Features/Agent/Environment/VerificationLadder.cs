@@ -93,7 +93,10 @@ public sealed class VerificationLadder
 
             if (green && policy is AgentVerifyPolicy.Standard or AgentVerifyPolicy.Strict or AgentVerifyPolicy.CiParity)
             {
-                _sandbox.RecreateSubstrateBeforeTests(sandboxLease);
+                sandboxLease = sandboxLease with
+                {
+                    Substrate = _sandbox.RecreateSubstrateBeforeTests(sandboxLease),
+                };
                 maxRung = "L3";
                 var test = await _runner.RunTestsAsync(
                     runId,
