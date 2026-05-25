@@ -90,7 +90,7 @@ public sealed class IntercomTransportCoordinator : IDisposable
             return;
         }
 
-        _api.ConfigureBaseUrl(settings.BaseUrl);
+        _api.ConfigureBaseUrl(settings.ResolveBaseUrl());
         OnWorkspaceChanged();
 
         if (!await EnsureBearerAsync(settings, ct).ConfigureAwait(false))
@@ -145,7 +145,7 @@ public sealed class IntercomTransportCoordinator : IDisposable
 
         var provider = string.IsNullOrWhiteSpace(settings.OAuthProvider) ? "github" : settings.OAuthProvider.Trim();
         var (ok, oauthError) = await _oauth.ConnectAsync(
-            settings.BaseUrl,
+            settings.ResolveBaseUrl(),
             teamId,
             provider,
             string.IsNullOrWhiteSpace(settings.InviteToken) ? null : settings.InviteToken.Trim(),

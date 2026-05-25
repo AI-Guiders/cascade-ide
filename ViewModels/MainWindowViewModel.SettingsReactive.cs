@@ -229,6 +229,12 @@ public partial class MainWindowViewModel
         SaveSettingsIfChanged();
     }
 
+    partial void OnIntercomTransportLocalServerPathChanged(string value)
+    {
+        _settings.Intercom.Transport.LocalServerPath = value?.Trim() ?? "";
+        SaveSettingsIfChanged();
+    }
+
     partial void OnIntercomTransportTeamIdChanged(string value)
     {
         _settings.Intercom.Transport.TeamId = value?.Trim() ?? "";

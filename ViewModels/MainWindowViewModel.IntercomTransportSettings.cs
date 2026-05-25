@@ -10,6 +10,7 @@ public partial class MainWindowViewModel
 
     [ObservableProperty] private bool _intercomTransportEnabled;
     [ObservableProperty] private string _intercomTransportBaseUrl = "";
+    [ObservableProperty] private string _intercomTransportLocalServerPath = "";
     [ObservableProperty] private string _intercomTransportTeamId = "";
     [ObservableProperty] private string _intercomTransportDefaultTopicId = "";
     [ObservableProperty] private string _intercomTransportOAuthProvider = "github";

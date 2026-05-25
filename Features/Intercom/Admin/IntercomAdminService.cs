@@ -80,36 +80,37 @@ public sealed class IntercomAdminService
     {
         var settings = _getSettings().Intercom.Transport;
         var host = _serverHost.DescribeStatus();
-        if (string.IsNullOrWhiteSpace(settings.BaseUrl))
+        var baseUrl = settings.ResolveBaseUrl();
+        if (string.IsNullOrWhiteSpace(baseUrl))
             return ChatSlashIntercomResult.Ok($"{host}\nbase_url не задан.");
 
-        _transport.ApiClient.ConfigureBaseUrl(settings.BaseUrl);
+        _transport.ApiClient.ConfigureBaseUrl(baseUrl);
         var ping = await _transport.ApiClient.PingHealthAsync(ct).ConfigureAwait(false);
         var health = ping ? "HTTP /health OK" : "HTTP /health недоступен";
 
         if (!await _transport.EnsureBearerForAdminAsync(settings, ct).ConfigureAwait(false))
-            return ChatSlashIntercomResult.Ok($"{host}\n{settings.BaseUrl}: {health}. Bearer: нет.");
+            return ChatSlashIntercomResult.Ok($"{host}\n{baseUrl}: {health}. Bearer: нет.");
 
         var bearer = await _transport.ResolveBearerForAdminAsync(settings, ct).ConfigureAwait(false);
         var teamId = settings.TeamId.Trim();
         if (string.IsNullOrWhiteSpace(teamId))
-            return ChatSlashIntercomResult.Ok($"{host}\n{settings.BaseUrl}: {health}. team_id не задан.");
+            return ChatSlashIntercomResult.Ok($"{host}\n{baseUrl}: {health}. team_id не задан.");
 
         var admin = await _transport.ApiClient.GetTeamAdminHealthAsync(teamId, bearer!, ct).ConfigureAwait(false);
         var adminText = admin is null
             ? "admin/health: нет доступа"
             : $"admin/health: {admin.Status}, SSE={admin.SseSubscribers}";
-        return ChatSlashIntercomResult.Ok($"{host}\n{settings.BaseUrl}: {health}. {adminText}. Transport: {_transport.ConnectionStatus}");
+        return ChatSlashIntercomResult.Ok($"{host}\n{baseUrl}: {health}. {adminText}. Transport: {_transport.ConnectionStatus}");
     }
 
     private ChatSlashIntercomResult ServerStart(string? argsTail)
     {
         var settings = _getSettings().Intercom.Transport;
-        var url = string.IsNullOrWhiteSpace(argsTail) ? settings.BaseUrl : argsTail.Trim();
+        var url = string.IsNullOrWhiteSpace(argsTail) ? settings.ResolveBaseUrl() : argsTail.Trim();
         if (string.IsNullOrWhiteSpace(url))
             url = _serverHost.DefaultBaseUrl;
 
-        var (ok, message) = _serverHost.Start(url);
+        var (ok, message) = _serverHost.Start(url, settings.ResolveLocalServerPath());
         if (ok && string.IsNullOrWhiteSpace(settings.BaseUrl))
         {
             settings.BaseUrl = url;
@@ -254,7 +255,7 @@ public sealed class IntercomAdminService
         if (!settings.IsConfigured)
             return (null, null, "Transport не настроен (base_url).");
 
-        _transport.ApiClient.ConfigureBaseUrl(settings.BaseUrl);
+        _transport.ApiClient.ConfigureBaseUrl(settings.ResolveBaseUrl());
         if (!await _transport.EnsureBearerForAdminAsync(settings, ct).ConfigureAwait(false))
             return (null, null, "Нужен Connect или dev_team_token.");
 

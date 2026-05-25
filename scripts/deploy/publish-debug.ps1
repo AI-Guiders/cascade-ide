@@ -22,8 +22,16 @@ if (-not (Test-Path -LiteralPath $csproj)) {
 $debugTargetProj = Join-Path $repoRoot "samples\DebugTarget\DebugTarget.csproj"
 $generic = Join-Path $repoRoot "scripts\deploy\publish-to-fixed-target.ps1"
 
+$intercomPublish = Join-Path $repoRoot "scripts\intercom\publish-intercom-service.ps1"
+$intercomOut = Join-Path $repoRoot "artifacts\intercom-service"
+
 Push-Location $repoRoot
 try {
+    if (Test-Path -LiteralPath $intercomPublish) {
+        & pwsh -NoProfile -ExecutionPolicy Bypass -File $intercomPublish -Configuration Debug -SelfContained -OutDir $intercomOut
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    }
+
     if (-not (Test-Path -LiteralPath $debugTargetProj)) {
         Write-Error "DebugTarget project not found: $debugTargetProj"
         exit 1
@@ -55,6 +63,16 @@ try {
             -KillRunning:$KillRunning
     }
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+    if (Test-Path -LiteralPath $intercomOut) {
+        $intercomTarget = Join-Path $Target "tools\intercom-service"
+        New-Item -ItemType Directory -Path $intercomTarget -Force | Out-Null
+        robocopy $intercomOut $intercomTarget /E /MIR /NFL /NDL /NJH /NJS | Out-Null
+        if ($LASTEXITCODE -ge 8) {
+            Write-Error "robocopy intercom-service failed with exit code $LASTEXITCODE"
+            exit $LASTEXITCODE
+        }
+    }
 
     $exe = Join-Path $Target "CascadeIDE.exe"
     $exeJson = $exe.Replace('\', '\\')

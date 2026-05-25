@@ -20,6 +20,18 @@ dotnet run
 
 Слушает `http://127.0.0.1:5080` (см. `Properties/launchSettings.json`).
 
+### Publish (exe, без SDK на целевой машине)
+
+```powershell
+# из корня cascade-ide
+.\scripts\intercom\publish-intercom-service.ps1 -Configuration Release -SelfContained
+# → artifacts/intercom-service/IntercomService.exe
+```
+
+Скрипты `scripts/deploy/publish-release.ps1` и `publish-debug.ps1` вызывают publish intercom и копируют в `<Target>/tools/intercom-service/`.
+
+В CIDE (`defaults-settings.toml`): `base_url = "http://127.0.0.1:5080"`, `local_server_path = "tools/intercom-service/IntercomService.exe"` (относительно CascadeIDE.exe). Если exe ещё нет — fallback `artifacts/` или `dotnet run`.
+
 ### GitHub OAuth App
 
 1. GitHub → Settings → Developer settings → OAuth App.

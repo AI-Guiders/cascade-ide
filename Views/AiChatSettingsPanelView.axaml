@@ -88,6 +88,11 @@
             <TextBox Text="{Binding IntercomTransportBaseUrl, Mode=TwoWay}" PlaceholderText="http://127.0.0.1:5080" MinWidth="280"/>
         </StackPanel>
         <StackPanel Spacing="4">
+            <TextBlock Text="local_server_path (относительно CascadeIDE.exe):" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+            <TextBox Text="{Binding IntercomTransportLocalServerPath, Mode=TwoWay}"
+                     PlaceholderText="tools/intercom-service/IntercomService.exe" MinWidth="280"/>
+        </StackPanel>
+        <StackPanel Spacing="4">
             <TextBlock Text="team_id (пусто → .cascade-ide/intercom-team.toml):" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
             <TextBox Text="{Binding IntercomTransportTeamId, Mode=TwoWay}" MinWidth="280"/>
         </StackPanel>
