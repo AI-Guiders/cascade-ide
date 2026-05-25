@@ -316,7 +316,15 @@ public sealed class TeamMembershipService(
             MemberKind = MemberKinds.Human,
             CreatedAtUtc = DateTimeOffset.UtcNow,
         });
-        await db.SaveChangesAsync(ct).ConfigureAwait(false);
+
+        try
+        {
+            await db.SaveChangesAsync(ct).ConfigureAwait(false);
+        }
+        catch (DbUpdateException)
+        {
+            db.ChangeTracker.Clear();
+        }
     }
 
     public async Task<MemberEntity?> GetMemberAsync(string memberId, CancellationToken ct) =>

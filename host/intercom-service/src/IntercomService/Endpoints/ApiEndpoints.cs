@@ -376,9 +376,33 @@ public static partial class ApiEndpoints
                 body.Sender?.ClientKind ?? "cide",
                 ct).ConfigureAwait(false);
 
-            return error is not null
-                ? Results.BadRequest(new { error })
-                : Results.Json(envelope);
+            return error switch
+            {
+                "guest_cannot_publish" => Results.Forbid(),
+                "not_a_member" => Results.Forbid(),
+                not null => Results.BadRequest(new { error }),
+                _ => Results.Json(envelope),
+            };
+        }).RequireAuthorization();
+
+        api.MapGet("/teams/{teamId}/admin/health", async (
+            string teamId,
+            SseEventHub sse,
+            TeamMembershipService teams,
+            ClaimsPrincipal user,
+            CancellationToken ct) =>
+        {
+            var memberId = user.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            var role = await teams.GetTeamRoleAsync(teamId, memberId, ct).ConfigureAwait(false);
+            if (role is null || !TeamRoleAuthorization.CanManageMembers(role))
+                return Results.Forbid();
+
+            return Results.Json(new
+            {
+                status = "ok",
+                team_id = teamId,
+                sse_subscribers = sse.GetSubscriberCount(teamId),
+            });
         }).RequireAuthorization();
     }
 

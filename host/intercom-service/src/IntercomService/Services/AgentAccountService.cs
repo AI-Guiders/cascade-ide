@@ -12,7 +12,7 @@ public sealed class AgentAccountService(IntercomDbContext db)
         string? avatarGlyph,
         CancellationToken ct)
     {
-        var memberId = $"agent:{Guid.NewGuid():N}";
+        var memberId = $"agent-{Guid.NewGuid():N}";
         var member = new MemberEntity
         {
             MemberId = memberId,

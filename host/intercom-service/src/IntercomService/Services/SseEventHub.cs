@@ -9,6 +9,9 @@ public sealed class SseEventHub
 {
     private readonly ConcurrentDictionary<string, ConcurrentDictionary<Guid, Channel<TransportEventEnvelopeDto>>> _teamChannels = new(StringComparer.Ordinal);
 
+    public int GetSubscriberCount(string teamId) =>
+        _teamChannels.TryGetValue(teamId, out var subscribers) ? subscribers.Count : 0;
+
     public void Publish(string teamId, TransportEventEnvelopeDto envelope)
     {
         if (!_teamChannels.TryGetValue(teamId, out var subscribers))

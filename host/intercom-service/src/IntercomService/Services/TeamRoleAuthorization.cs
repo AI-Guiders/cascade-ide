@@ -11,6 +11,10 @@ public sealed class TeamRoleAuthorization
 
     public static bool CanManageAgents(string role) => TeamRoles.IsOwnerOrAdmin(role);
 
+    /// <summary>Append transport events (human or on behalf of agent). Guest — read-only.</summary>
+    public static bool CanPublishMessages(string role) =>
+        TeamRoles.Rank(role) >= TeamRoles.Rank(TeamRoles.Member);
+
     public static bool CanPatchTeam(string role) => TeamRoles.IsOwnerOrAdmin(role);
 
     public static bool CanChangeJoinPolicy(string role) =>

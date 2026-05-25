@@ -164,6 +164,10 @@ public static partial class ApiEndpoints
             CancellationToken ct) =>
         {
             var memberId = user.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            if (!await teams.EnsureAccessAsync(teamId, memberId, IsDevAuth(user), user.FindFirstValue("display_name"), ct)
+                    .ConfigureAwait(false))
+                return Results.Forbid();
+
             var role = await teams.GetTeamRoleAsync(teamId, memberId, ct).ConfigureAwait(false);
             if (role is null || !TeamRoleAuthorization.CanManageAgents(role))
                 return Results.Forbid();
