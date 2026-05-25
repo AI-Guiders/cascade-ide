@@ -120,6 +120,11 @@
 | `extract_from_archive` | Поиск по архивной ревизии заметок с контекстом строк. args: query:string, revision_file?:string, head_limit?:integer, context_lines?:integer; returns: json; example: {"query":"ActiveProjectId","head_limit":10,"context_lines":2}. |
 | `get_build_output` | Текст панели «Вывод сборки» + цвета оформления. returns: json. |
 | `get_code_metrics` | Метрики кода (LOC/классы/методы/цикломатика). args: scope?:string, path?:string; returns: json; example: {"scope":"solution","path":"."}. |
+| `ide_agent_cancel` | Cancel active verify. returns: json. |
+| `ide_agent_last` | Last verify run summary. returns: json. |
+| `ide_agent_sandbox_prepare` | Prepare sandbox. args: profile:string, workspace_root:string; returns: json; example: {"profile":"agent_ephemeral"}. |
+| `ide_agent_status` | AEE status snapshot. returns: json. |
+| `ide_agent_verify` | Verification ladder. args: policy:string, sandbox_profile:string, solution_path:string; returns: json; example: {"policy":"standard"}. |
 | `list_agent_notes_revisions` | Список ревизий заметок агента. args: limit?:integer; returns: json; example: {"limit":20}. |
 | `memory_health` | Health-check памяти: размер hot-context и рекомендации. args: active_scope?:string; returns: json; example: {"active_scope":"door-to-singularity"}. |
 | `read_agent_notes` | Прочитать заметки агента из каталога решения. returns: text. |

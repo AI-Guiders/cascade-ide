@@ -36,12 +36,12 @@
 ## Резюме
 
 - **Проблема:** wall-clock агента доминирует **latency среды** (build, test, shell, lock файлов/БД), а не «скорость рассуждения» модели.
-- **Решение:** **Agent Execution Environment (AEE)** — первоклассный подсистемный контур standalone CIDE: **native in-process tools**, **Verification Ladder**, **Environment Task Runner**, **push-наблюдения** через DataBus, **sandbox** для side effects.
+- **Решение:** **Agent Execution Environment (AEE)** — подсистемный контур: **native tools** (Roslyn in-proc; build/test via supervised host), **Verification Ladder**, **Environment Task Runner**, **push** через DataBus, **sandbox**.
 - **MLP (Minimum Lovable Product):** оператор видит **живой прогресс**, **отмену**, **разложение времени** reasoning vs environment; агент по умолчанию **не гоняет full suite**; Roslyn/build/test — **through-runner**, не блокирующий shell в чате.
 - **Идеал:** reasoning и verify **пайплайнятся**; warm substrate из [0141](0141-solution-scoped-warmup-orchestration.md); batch native API; изолированные dev-сервисы; тот же AEE для человека (CCL) и агента ([0002](0002-debug-human-agent-parity.md)).
-- **Enabler:** C# / solution verify — **library-first open stack** (.NET MIT/Apache): AEE строится **in-process** на Roslyn / MSBuild / VSTest, не как форк `dotnet.exe` (§2.3).
+- **Enabler:** C# / solution verify — **library-first open stack** (.NET MIT/Apache): Roslyn in-proc, MSBuild/VSTest через **supervised host** или библиотеки — не форк `dotnet.exe` (§2.3, §5.2).
 
-**Нормативно:** в standalone CIDE **shell — escape hatch**, не primary API агента. External MCP ([0008](0008-mcp-contracts-and-testable-infrastructure.md)) остаётся для **L3** и polyglot; C# / solution work — **in-process**.
+**Нормативно:** shell — escape hatch. External MCP ([0008](0008-mcp-contracts-and-testable-infrastructure.md)) — L3/polyglot; C# / solution — **native AEE** (§5, §5.2).
 
 ---
 
@@ -101,7 +101,7 @@ North-star: [north-star-cursor-mcp-cascade-workbench-v1.md](../design/north-star
 
 | Уровень | Что | Для CIDE |
 |---------|-----|----------|
-| **A — in-process (default)** | `IAeeTool` → Roslyn workspace, MSBuild API, VSTest OM, `Formatter` | **MLP / идеал AEE**; shared warm substrate [0141](0141-solution-scoped-warmup-orchestration.md) |
+| **A — native AEE (default)** | Roslyn in-proc; MSBuild/VSTest via **supervised worker** + open libs | **MLP**; shared warm substrate [0141](0141-solution-scoped-warmup-orchestration.md) |
 | **B — свой CLI на тех же пакетах** | `cide verify`, `cide format` как thin host над NuGet | Опционально; runner всё равно in-proc или supervised child |
 | **C — полный форк SDK / `dotnet`** | [dotnet/dotnet](https://github.com/dotnet/dotnet) source-build | **Вне scope** продукта IDE; отдельный продукт уровня дистрибьютора |
 
@@ -116,7 +116,7 @@ North-star: [north-star-cursor-mcp-cascade-workbench-v1.md](../design/north-star
 | Prebuilt deps в полном source-build SDK | [dotnet/source-build](https://github.com/dotnet/source-build); **не** блокер уровня A |
 | Торговая марка «.NET» / «dotnet» | Свой брендинг CLI; библиотеки — по лицензии |
 
-**Техдолг (2026-05):** `McpDotnetBuildTestService` / `IDotnetCommandRunner` — subprocess `dotnet build|test|format`. **W2+:** ladder rungs L0–L2 **мигрируют** на in-process; shell остаётся **E-tier** и для polyglot.
+**Техдолг (2026-05):** `McpDotnetBuildTestService` / `IDotnetCommandRunner` — subprocess `dotnet build|test|format`. **W2+:** L0 in-proc Roslyn; L1–L2 **supervised build host** (§5.2); shell — E-tier.
 
 ### Что уже есть (фрагменты)
 
@@ -207,6 +207,7 @@ flowchart TB
 | **Step model** | Один шаг = `{ plan?, tool_calls[], verify_policy?, sandbox_profile }` — общий для chat-autonomous и server-side jobs |
 | **Tool routing** | Native first → DAL → external MCP (L3) → shell (E, deny by default) |
 | **Verify gate** | После mutate-tools: автоматический climb ladder до policy-green или явный fail |
+| **Epoch contract** | Не treat green на snapshot **S** как валидный для правок **S′**; ждать `AgentRunCompleted` или stale (§8.2) |
 | **Trace** | Append-only шаги в event log ([0045](0045-agent-chat-persistence-event-log-and-projections.md)) + optional export |
 | **Safety** | Наследует L1/L2/L3 [0038](0038-agent-facade-ai-provider-and-tool-orchestration.md); high-risk → [0042](0042-pre-flight-planned-changes-and-review-before-apply.md) |
 
@@ -237,8 +238,9 @@ flowchart TB
 
 1. **Monotonic climb:** L0 fail → не запускать L4 «на удачу»; fix или stop.
 2. **Coalesce:** N правок за T секунд → **один** L1/L2, не N.
-3. **Incremental graph:** affected projects из Roslyn/MSBuild — **не** rebuild whole solution по умолчанию.
-4. **Human parity:** `/agent verify quick|standard|strict` ([0138](0138-cockpit-command-line-and-parametric-ranges.md)) вызывает **тот же** ladder API.
+3. **Verify epoch (одна цепочка):** в MLP **не более одного** активного verify run на workspace scope; новый verify после `coalesce_window_ms` → **implicit cancel predecessor** (§8.2).
+4. **Incremental graph:** affected projects из Roslyn/MSBuild — **не** rebuild whole solution по умолчанию.
+5. **Human parity:** `/agent verify quick|standard|strict` ([0138](0138-cockpit-command-line-and-parametric-ranges.md)) вызывает **тот же** ladder API.
 
 ```mermaid
 stateDiagram-v2
@@ -265,7 +267,8 @@ stateDiagram-v2
 | **Priority** | Interactive (operator CCL) > agent run foreground > background warm |
 | **Cancel** | `CancellationToken` per task; cascade cancel run |
 | **Dedup** | Key `(kind, target, sandbox_id)` — merge pending identical |
-| **Progress** | Streaming: `Started`, `Progress`, `Completed`, `Failed` на DataBus |
+| **Verify chains (MLP)** | Одна активная verify-цепочка на scope; новый run → cancel predecessor + `verify_snapshot_id` (§8.2) |
+| **Progress** | Streaming: `Started`, `Progress`, `Completed`, `Failed`, **`Died`** на DataBus |
 | **Artifacts** | Structured result DTO (не raw stdout только): `{ diagnostics[], test_results[], exit_code, log_ref? }` |
 | **Persistence** | Last N results in LocalAppData для HUD; full log optional |
 
@@ -274,22 +277,22 @@ stateDiagram-v2
 | `task_kind` | Описание |
 |-------------|----------|
 | `roslyn.diagnose` | L0 |
-| `msbuild.compile` | L1/L2 |
-| `dotnet.test` | L3/L4 |
+| `msbuild.compile` | L1/L2 (через **build host**, §5.2) |
+| `dotnet.test` | L3/L4 (через **test host** или supervised VSTest, §5.2) |
 | `git.*` | через [0019](0019-shared-git-core-ide-and-git-mcp.md) |
 | `process.supervise` | local `intercom-service`, tools with ports |
 | `shell.escape` | **E-tier**, audit log + confirm L2+ |
 
-### 5. Native Tool Host (in-process)
+### 5. Native Tool Host (`IAeeTool`)
 
-**Принято:** AEE экспонирует **`IAeeTool`** — in-process аналог MCP tool без stdio.
+**Принято:** AEE экспонирует **`IAeeTool`** — native API без stdio MCP. **Не всё** грузится в AppDomain CIDE: Roslyn/L0 — in-process; **L1+ build/test — supervised worker** (§5.2), чтобы не тащить MSBuild-таски и утечки в UI-процесс.
 
 | Surface | MLP | Идеал |
 |---------|-----|-------|
 | `workspace.read/write` batch | ✓ | ✓ zero-copy paths |
-| `roslyn.*` | ✓ | ✓ shared with [0058](0058-agent-roslyn-mcp-coupling-settings-toml.md) limits |
-| `msbuild.affected` | ✓ | ✓ cached graph |
-| `test.run_filter` | ✓ | ✓ |
+| `roslyn.*` | ✓ in-proc | ✓ shared with [0058](0058-agent-roslyn-mcp-coupling-settings-toml.md) limits |
+| `msbuild.affected` | ✓ via build host | ✓ cached graph; опц. in-proc MSBuild |
+| `test.run_filter` | ✓ via test host | ✓ in-proc VSTest OM |
 | `git.*` | read + status MLP | full через shared core |
 | `solution.warm_status` | read | subscribe |
 
@@ -299,18 +302,32 @@ External MCP остаётся для: polyglot LSP, tinvest, telegram, **third-p
 
 #### 5.1. Карта ladder → open-stack API (норматив v1)
 
-| Rung / task | Subprocess (legacy / E-tier) | **In-process (целевое)** | NuGet / entry (ориентир) |
-|-------------|------------------------------|--------------------------|---------------------------|
-| L0 `roslyn.diagnose` | Roslyn MCP stdio | Shared `Solution` / `Document` workspace | `Microsoft.CodeAnalysis.*` (уже в CIDE) |
-| L0 format / cleanup | `dotnet format` | `Formatter.AnalyzeAsync` + code fixes | Roslyn Workspaces + Formatting |
-| L1 `msbuild.compile` | `dotnet build` | MSBuild in-proc / `BuildManager` | `Microsoft.Build` / Tasks из SDK |
-| L2 affected graph | full solution build | incremental project closure | Roslyn + MSBuild project graph |
-| L3 `test.run_filter` | `dotnet test --filter` | VSTest programmatic host | `Microsoft.TestPlatform.*` |
-| L2+ debug | external DAP | netcoredbg / [0002](0002-debug-human-agent-parity.md) | Samsung/netcoredbg MIT |
+| Rung / task | Subprocess (legacy / E-tier) | **MLP (норма)** | Идеал / опция |
+|-------------|------------------------------|-----------------|---------------|
+| L0 `roslyn.diagnose` | Roslyn MCP stdio | **In-proc** shared workspace | — |
+| L0 format / cleanup | `dotnet format` | **In-proc** `Formatter` + code fixes | — |
+| L1 `msbuild.compile` | cold `dotnet build` | **Supervised build host** (§5.2) | MSBuild in-proc / `BuildManager` |
+| L2 affected graph | full solution build | build host + incremental closure | in-proc graph cache |
+| L3 `test.run_filter` | cold `dotnet test --filter` | **Supervised test host** (§5.2) | VSTest OM in-proc |
+| L2+ debug | external DAP | netcoredbg / [0002](0002-debug-human-agent-parity.md) | — |
 
-**Правило:** новый native tool для C# / solution **сначала** ищет in-process API из таблицы; subprocess — только E-tier или до миграции wave (см. §2.3 техдолг).
+**Правило:** для C# / solution **сначала** библиотечный API (Roslyn, MSBuild, VSTest) — не fork SDK (§2.3). **Где MSBuild/VSTest** — MLP предпочитает **долгоживущий supervised worker** (named pipe / gRPC / stdio JSON), а не загрузку MSBuild-тасков в процесс Avalonia: warm graph и structured DTO без cold CLI, но **изоляция** от крашей/утечек компиляции.
 
-**Правило fork:** форк `dotnet/sdk` или VMR **не** является допустимым решением задачи verify в IDE; допустимы **ссылки на NuGet-пакеты** и точечные патчи upstream.
+**Правило fork:** форк `dotnet/sdk` или VMR **не** является допустимым решением verify в IDE.
+
+#### 5.2. Supervised build/test host (MLP, W2)
+
+**Принято (review 2026-05-25):** отдельный **долгоживущий worker-процесс** (child of CIDE, не «каждый раз новый `dotnet build`») держит warm MSBuild/VSTest graph; CIDE/AEE общается по IPC.
+
+| Аспект | Норма |
+|--------|-------|
+| **Зачем** | MSBuild кэширует состояние, грузит таски в ALC — in-proc в UI = утечки, блокировки, риск краша кабины |
+| **Не то же, что E-tier** | Worker **переиспользуется**; cancel/progress/structured result — как у runner |
+| **Протокол** | MLP: named pipes или line-delimited JSON; идеал: gRPC |
+| **Падение worker** | Runner перезапускает host; CIDE жив; fallback E-tier `dotnet build` с audit |
+| **Roslyn** | Остаётся **in-proc** в CIDE (shared с [0141](0141-solution-scoped-warmup-orchestration.md)); build host **не** дублирует Roslyn workspace без необходимости |
+
+**Открыто (идеал):** один host на build+test vs два; общий `AssemblyLoadContext` policy в worker.
 
 ### 6. Sandbox profiles (side effects)
 
@@ -325,6 +342,18 @@ External MCP остаётся для: polyglot LSP, tinvest, telegram, **third-p
 
 **Пример (0147 lesson):** `intercom-service` dev → runner поднимает instance с `Intercom:DataDirectory=%Temp%/cide-agent/{run_id}` и `RecreateDatabaseOnStart=true` — **не** трогает operator `data/intercom.witdb`.
 
+**Контракт dev-сервиса (норматив для `agent_ephemeral`):** подмена data dir / connection string **работает только если приложение** читает конфигурацию (env, CLI, `IOptions`, layered config) — **не** хардкод единственного пути в `appsettings.json` без override.
+
+| Требование | Зачем |
+|------------|-------|
+| Data directory / DB path — через **конфиг + env/CLI** | Runner может задать `Intercom:DataDirectory`, `ConnectionStrings__*`, и т.п. |
+| Порты — через **конфиг** или ephemeral assignment | `process.supervise` не конфликтует с operator |
+| Нет эксклюзивного lock файла БД в operator path без override | Иначе агент блокирует человека даже при «ephemeral» профиле |
+
+**Если контракт не выполнен:** не обещать изоляцию только подменой ключей — использовать **`agent_worktree`** (W6), отдельный клон, или **read_only** + без локального dev DB. Идеал: FS-sandbox / symlink data root (отложено).
+
+**Playbook:** требования к тестируемым сервисам и чеклист перед agent run — [playbook-agent-environment-v1.md](../design/playbook-agent-environment-v1.md) (§ sandbox, после review).
+
 ### 7. Warm substrate ([0141](0141-solution-scoped-warmup-orchestration.md) integration)
 
 **Принято:** AEE **не дублирует** warm-up; **подписывается** на него.
@@ -338,6 +367,15 @@ External MCP остаётся для: polyglot LSP, tinvest, telegram, **third-p
 **Идеал:** warm items `agent.msbuild_graph`, `agent.test_catalog` в каталоге [0141](0141-solution-scoped-warmup-orchestration.md) §2 (P2/P3).
 
 ### 8. Observability и Time Accounting
+
+**Environment Consistency Matrix (W1–MLP)** — единый язык для runner, UI, orchestrator ([playbook](../design/playbook-agent-environment-v1.md) §«Матрица согласованности»):
+
+| Зона риска | Норма (W1–MLP) | Не в MLP |
+|------------|----------------|----------|
+| **Stale context** | `verify_snapshot_id` (HEAD + dirty set) + coalesce 1.5 s; orchestrator: green на **S** ≠ green на **S′**; implicit cancel predecessor | Auto-rollback operator tree; worktree на каждый verify |
+| **State bleeding** | **Fresh substrate bundle** per L3+ task (data dir + ports + temp); recreate/wipe | Rollback transaction как единственный механизм |
+| **Metrics** | `reasoning` \| `environment` \| `blocked` (только при активном env task) | `idle_user`, психометрия фокуса — **W3+** |
+| **Source generators** | SG-aware Roslyn L0; stale SG → L1 supervised host, не отдельный GeneratorDriver в CIDE | Дублировать 0141 warm отдельным драйвером |
 
 **MLP must-have:**
 
@@ -357,6 +395,69 @@ Agent run a1b2…
 | **PFD instrument** | `AgentEnvironmentInstrument` — running task, cancel ([0021](0021-pfd-mfd-cockpit-attention-model.md), [0063](0063-instrument-deck-named-composition-one-anchor.md)) |
 | **DataBus** | `AgentEnvironmentTaskChanged`, `AgentRunPhaseChanged` |
 | **LocalAppData** | Rolling metrics: p50 build, cache hit — для [0054](0054-benchmarking-methodology-and-baselines.md) |
+
+**Фазы time slice (уточнение):** `reasoning` | `environment` | **`idle_user`** (нет фокуса CIDE / ввода — не считать environment blocked) | `blocked` только при активном run и ожидании среды.
+
+Playbook: [playbook-agent-environment-v1.md](../design/playbook-agent-environment-v1.md) §«Слепые зоны».
+
+### 8.1. Концептуальные риски (review Orion 2026-05-25)
+
+Четыре зоны, не покрытые runner/ladder «в лоб». Детали и чеклисты — playbook §«Слепые зоны»; здесь — норма для ADR.
+
+#### 8.1.1. Stale context (verify epoch)
+
+**Принято:** каждый environment verify run несёт **`verify_snapshot_id`** (git HEAD + hash затронутых путей на старт). Пока run `running`, правки в пересекающихся файлах помечают snapshot **stale** (DataBus + chat glyph).
+
+| Поведение | MLP | Идеал |
+|-----------|-----|-------|
+| UI: «verify устарел, перезапусти» | ✓ | |
+| Агент autonomous: не assume green без completed run на **текущем** snapshot | ✓ | |
+| Когнитивный такт в `agent_worktree` до green | — | W4/W6 default для long agent runs |
+| Auto-rollback operator tree к pre-verify | ✗ | только explicit human |
+
+**Не заменяет** git revert агента: при failed run — **новый verify**, не откат «40 секунд мысли» без политики.
+
+**Implicit cancel predecessor (MLP):** если стартует verify epoch **E2**, а **E1** ещё `running` на L1+ — runner шлёт `CancellationToken` в supervised host для E1, фиксирует `cancelled` в time slices, UI показывает одну активную цепочку. **Параллельные** verify-цепочки в одной session — запрещены (race в glyph / snapshot).
+
+**Write → stale (human parity):** правка файла из `in_verification` dirty set **мгновенно** помечает epoch `stale` в DataBus (`AgentVerifyEpochStale`), даже если compile ещё не убит; опционально W3: визуальное «заморожение»/тускнение gutter для файлов epoch ([0140](0140-tci-slash-status-glyphs-and-args-counter.md) family).
+
+#### 8.1.2. Ephemeral DB idempotency (fresh substrate per jump)
+
+**Принято:** для L3+ integration каждый **новый** environment task (или новый climb после failed rung) получает **fresh substrate bundle** — не только `*.witdb`, а **data dir + выделенные порты + temp/mock scope** (recreate / wipe), если предыдущий run писал side effects.
+
+| Поведение | Норма |
+|-----------|-------|
+| `agent_ephemeral` + L3 | Новый `{run_id}` data dir **или** explicit recreate перед task |
+| Повтор `standard` verify подряд | Не reuse dirty WitDB без recreate |
+| Test host | Может держать rollback fixture **внутри одного** task; между tasks — fresh |
+
+#### 8.1.3. Source generators и L0
+
+**Принято:** L0 использует Roslyn с **`GetSourceGeneratedDocumentsAsync`** (как roslyn-mcp); при проектах с SG — warm path из [0141](0141-solution-scoped-warmup-orchestration.md) или **не climb** с L0 на L1 без build host, если generated docs stale.
+
+**Отклонено для MLP:** «прогретый GeneratorDriver в памяти CIDE» без интеграции с 0141 — дублирование; сначала переиспользовать HCI/sidecar и build host incremental.
+
+#### 8.1.4. Metrics dilution (`idle_user` vs `blocked`)
+
+**Принято:** time slices различают ожидание **среды** (`blocked`, только при активном environment task) и **отсутствие внимания оператора** (`idle_user`: потеря фокуса CIDE / нет ввода ≥ N с — порог в settings, W3+).
+
+**Не смешивать** `idle_user` с `environment` в отчётах эффективности агента; LocalAppData rolling metrics могут фильтровать `idle_user` отдельно.
+
+#### 8.1.5. Supervised host death (hard environment failure)
+
+**Принято:** crash/OOM/segfault build или test host — **`AgentEnvironmentTaskDied`** (`task_id`, `host_kind`, `exit_code?`, `stderr_tail?`), не бесконечный wait на timeout.
+
+| Действие | Владелец |
+|----------|----------|
+| Runner | Перезапуск supervised host; task → `died` |
+| Orchestrator | Не assume green; системный alert агенту: среда аварийно завершилась (возможен user code: SG loop, static ctor) |
+| UI | Glyph «environment died» + retry verify |
+
+**Не путать** с `Failed` (тесты красные / compile errors) — `Died` = инфраструктура хоста.
+
+### 8.2. Ссылка на матрицу
+
+Сводная таблица W1–MLP — §8 «Environment Consistency Matrix»; детали §8.1; playbook §«Матрица согласованности» и §«Операционные инварианты».
 
 ### 9. UI / CCL ([0138](0138-cockpit-command-line-and-parametric-ranges.md))
 
@@ -380,6 +481,8 @@ Namespace: `CascadeIDE.Agent.Environment`.
 | `AgentRunPhaseChanged` | `run_id`, `phase`: reasoning \| environment |
 | `AgentEnvironmentTaskChanged` | `task_id`, `kind`, `state`, `progress?`, `message?` |
 | `AgentEnvironmentTaskCompleted` | `task_id`, `result_summary`, `duration_ms` |
+| `AgentEnvironmentTaskDied` | `task_id`, `host_kind`, `exit_code?`, `stderr_tail?` |
+| `AgentVerifyEpochStale` | `run_id`, `verify_snapshot_id`, `reason`: write_in_epoch \| superseded \| cancel |
 | `AgentRunCompleted` | `run_id`, `green`, `max_rung_reached`, `time_slices[]` |
 
 Projections: PFD instrument, chat strip glyph ([0140](0140-tci-slash-status-glyphs-and-args-counter.md) family).
@@ -442,7 +545,7 @@ Roslyn limits — по-прежнему [0058](0058-agent-roslyn-mcp-coupling-se
 | Wave | Deliver | Зависимости |
 |------|---------|-------------|
 | W1 | `EnvironmentTaskRunner` + DataBus events + time slices | [0099](0099-ide-databus-typed-events-and-projections.md) |
-| W2 | L0–L2 ladder + `verify_policy` in orchestrator | Roslyn in-proc, msbuild in-proc (§5.1); subprocess только fallback |
+| W2 | L0 in-proc Roslyn + L1–L2 via **supervised build host** + ladder policy | §5.2; E-tier subprocess только fallback |
 | W3 | MLP UI: chat trace + `/agent verify\|cancel\|status` | [0138](0138-cockpit-command-line-and-parametric-ranges.md) |
 | W4 | Sandbox ephemeral (DB/ports) + intercom pattern | [0147](0147-intercom-team-identity-roles-and-cide-server-admin.md) host |
 | W5 | PFD instrument + warm hooks [0141](0141-solution-scoped-warmup-orchestration.md) | [0063](0063-instrument-deck-named-composition-one-anchor.md) |
@@ -465,7 +568,14 @@ Roslyn limits — по-прежнему [0058](0058-agent-roslyn-mcp-coupling-se
 | Риск | Mitigation |
 |------|------------|
 | Дублирование Roslyn MCP vs native | Single library; MCP = thin wrapper over AEE |
-| Сложность sandbox | Default `agent_ephemeral`; operator explicit opt-in to shared |
+| Сложность sandbox | Default `agent_ephemeral`; **dev-service config contract** (§6); worktree если контракт не выполнен |
+| Stale verify + parallel edits | **verify_snapshot_id** + stale UI; worktree for long autonomous (§8.1.1) |
+| Parallel verify chains | **Implicit cancel predecessor**; одна цепочка на scope (§8.1.1) |
+| DB / port / temp state bleeding | **Fresh substrate bundle** per L3+ task (§8.1.2) |
+| Metrics mix human idle + environment | **`idle_user`** W3+; MLP: `blocked` only on active env task (§8, §8.1.4) |
+| L0 false negatives with SG | Generated documents + ladder policy (§8.1.3) |
+| Supervised host crash | **`AgentEnvironmentTaskDied`** + host restart (§8.1.5) |
+| MSBuild in UI process | **Supervised build host** (§5.2); in-proc MSBuild — идеал, не MLP gate |
 | Runner bugs block agent | Escape hatch shell tier E + human takeover |
 | Over-engineering | **MLP gate** чёткий; waves — порядок, не обязательность |
 
@@ -477,7 +587,8 @@ Roslyn limits — по-прежнему [0058](0058-agent-roslyn-mcp-coupling-se
 |--------------|------------|
 | **Shell-only agent** (как Cursor default) | Bottleneck среды остаётся; не moat standalone |
 | **MCP-only** (все tools subprocess) | Latency + JSON tax; Roslyn/build suffer most |
-| **Full fork `dotnet` SDK as IDE requirement** | Cost дистрибьютора; in-process (§2.3, §5.1) достаточен |
+| **MSBuild fully in-proc в CIDE (MLP)** | Риск утечек/крашей UI; supervised host (§5.2) достаточен |
+| **Full fork `dotnet` SDK as IDE requirement** | Cost дистрибьютора; библиотеки + worker (§2.3, §5) достаточны |
 | **Full verify always (L4)** | 20-min → hours; wrong default |
 | **No sandbox** («агент осторожен») | WitDB lock и подобное — уже воспроизведено |
 | **Verify только в CI, не в IDE** | Поздний feedback; ломает agent loop |
@@ -494,7 +605,11 @@ Roslyn limits — по-прежнему [0058](0058-agent-roslyn-mcp-coupling-se
 | 3 | **L3 default filter:** auto from `[TestClass]` touched vs manual trait? |
 | 4 | **CASCOPE:** новый analyzer «agent shell in Features/ without runner»? |
 | 5 | **Cross-platform:** `process.supervise` on Linux/macOS — parity windows first? |
-| 6 | **MSBuild in-proc:** `BuildManager` vs supervised `dotnet build` для L1 на W2? |
+| 6 | **Build/test host IPC:** named pipes vs gRPC; один host vs build+test split? |
+| 7 | **Sandbox без config contract:** auto-downgrade to `agent_worktree` vs hard fail? |
+| 8 | **Verify epoch UX:** stale glyph — chat W1; PFD/gutter dim W3+ |
+| 9 | **idle_user detection:** focus API Avalonia vs heuristic only? |
+| 10 | **Host restart policy:** auto-restart vs require `/agent verify` after `Died`? |
 
 ---
 
@@ -502,5 +617,8 @@ Roslyn limits — по-прежнему [0058](0058-agent-roslyn-mcp-coupling-se
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-05-25 | Orion round 2: Environment Consistency Matrix; implicit cancel predecessor; substrate bundle; `TaskDied`/`EpochStale`; §8.1.5 host death |
+| 2026-05-25 | Orion review: §8.1 stale context (verify epoch), DB fresh substrate, idle_user metrics, L0+SG; playbook §«Слепые зоны» |
+| 2026-05-25 | Review: §5.2 supervised build/test host (MLP, не MSBuild in UI); §6 dev-service config contract; W2/risks/open Q обновлены |
 | 2026-05-24 | §2.2–2.3: когнитивный vs средовой такт; открытый .NET stack (enabler, три уровня A/B/C, границы); §5.1 ladder→API; техдолг subprocess |
 | 2026-05-24 | Proposed: AEE, ladder, runner, MLP vs ideal; мотивация 0144/0147 wall-clock |

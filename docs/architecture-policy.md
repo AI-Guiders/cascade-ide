@@ -29,6 +29,8 @@
 
 **Когнитивная vs среда (agent-first):** классический dev tooling (shell, full rebuild, blocking test) оптимизирован под **темп человека** и wall-clock, а не под **скорость мышления** — у быстрого оператора и тем более у агента (×10–×100) bottleneck — **latency среды**, не модель. Standalone CIDE целится снять это через AEE ([0148](adr/0148-agent-execution-environment-verification-ladder-and-native-tooling.md) §2.2–2.3, §5.1): ladder verify, runner, push-события, in-process open .NET stack; playbook — [playbook-agent-environment-v1.md](design/playbook-agent-environment-v1.md).
 
+**Культура агента (не промпт-роль):** *читай ADR → спорь с нормой → дописывай историю* — [cascadeide-philosophy-v1 §8.1](design/cascadeide-philosophy-v1.md#81-память-команды-не-лычка-в-промпте). ADR/playbook = память и договорённости команды; «веди себя как senior» без этого не заменяет опыт и ошибки.
+
 ### Документация и справка (намерение)
 
 Развёрнутые объяснения для **конечного пользователя** (в т.ч. раскладки дисплеев, ментальная модель зон внимания) — **отдельный продуктовый слой** от ADR: каналы (внешний User Guide, встроенная справка в IDE, иное), объём и приоритеты задаются **на уровне продукта**, а не «внутри» конкретного ADR по окнам или конфигу. ADR остаются **нормативной** сжатой формой для разработки; пример нотации дисплеев — [0017](adr/0017-multi-window-workspace-and-agent-surfaces.md).
