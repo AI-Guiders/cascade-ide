@@ -163,5 +163,10 @@ public sealed class WebAiPortalCommandBridgeTests
         public Task<string> CodebaseIndexSearchAsync(string? workspacePath, string? solutionPath, string query, int topN, string? pathPrefix, IReadOnlyList<string>? excludePathPrefixes, IReadOnlyList<string>? extensions, bool semantic, double alpha, double beta, int vecTopK, CancellationToken cancellationToken = default) => throw new NotImplementedException();
         public Task<string> CodebaseIndexExplainAsync(string? workspacePath, string? solutionPath, long hitId, CancellationToken cancellationToken = default) => throw new NotImplementedException();
         public Task<string> CodebaseIndexReindexAsync(string? workspacePath, string? solutionPath, bool fullRebuild, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<string> IdeAgentVerifyAsync(string? policy, string? sandboxProfile, string? solutionPath, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<string> IdeAgentCancelAsync(CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<string> IdeAgentStatusAsync(CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<string> IdeAgentLastAsync(CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<string> IdeAgentSandboxPrepareAsync(string? profile, string? workspaceRoot, CancellationToken cancellationToken = default) => throw new NotImplementedException();
     }
 }
