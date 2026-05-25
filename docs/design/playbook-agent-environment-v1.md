@@ -158,6 +158,12 @@ L0 diagnostics **без** сгенерированных документов д
 - Две параллельные `/agent verify` без отмены первой.
 - Считать green завершённого verify после правки файлов из epoch dirty set.
 
+## Локальный test-drive (Orion)
+
+- Док: [aee-orion-local-test-drive-v1.md](aee-orion-local-test-drive-v1.md)
+- Скрипт: `scripts/aee/orion-test-drive.ps1`
+- xUnit: `Category=AgentEnvironment` → `AgentEnvironmentOrionStressTests`
+
 ## Открытые вопросы (из ADR)
 
 Orchestrator ownership, ACP parity, auto test filters, CASCOPE для raw shell, cross-platform process supervise — см. [0148 § Open questions](../adr/0148-agent-execution-environment-verification-ladder-and-native-tooling.md).
