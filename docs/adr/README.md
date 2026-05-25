@@ -77,6 +77,7 @@
 | 0136 | [gutter + `/intercom` namespace](0136-intercom-feed-gutter-and-slash-namespace.md) — **In progress** (select ПКМ/slash, без старых `/topic`) |
 | 0138 | [Cockpit Command Line](0138-cockpit-command-line-and-parametric-ranges.md) — **Accepted** (парсер + slash multi-select; CCL UI — фаза A) |
 | 0141 | [прогрев при open solution](0141-solution-scoped-warmup-orchestration.md) — **Accepted · Proposed** (оркестратор attach/bracket/HCI) |
+| 0148 | [Agent Execution Environment](0148-agent-execution-environment-verification-ladder-and-native-tooling.md) — **Proposed** (ladder, runner, native tools; MLP) |
 
 <a id="adr-index-full"></a>
 
@@ -219,6 +220,8 @@
 | [0144](0144-intercom-team-transport-cide-sync-and-reference-service.md) | Intercom: **team transport**, reference `intercom-service`, CIDE FederatedSync, SSE; human-only sync v1 | Accepted |
 | [0145](0145-intercom-web-pwa-team-client.md) | Intercom Web: PWA team client — **отдельный org-репо** `intercom-web` | Accepted |
 | [0146](0146-intercom-wire-canonical-protocol-package.md) | Intercom Wire: канонический пакет `intercom-wire/` (схемы, extensions, HTTP profiles) | Accepted |
+| [0147](0147-intercom-team-identity-roles-and-cide-server-admin.md) | Intercom: per-team roles, agent accounts (display name), CIDE server/team admin | Accepted |
+| [0148](0148-agent-execution-environment-verification-ladder-and-native-tooling.md) | AEE: verification ladder, environment task runner, native in-process tools, sandbox, time accounting (standalone CIDE) | Proposed |
 | [0134](0134-intercom-message-prepare-pipeline-v1.md) | Intercom: единый prepare-pipeline (wire, Skia, MCP fail-closed) | Accepted · In progress |
 | [0135](0135-intercom-attach-symbol-cache-and-hci-sidecar.md) | Intercom attach: L1 Roslyn file cache, L2 symbol sidecar colocated с HCI | Accepted · In progress |
 | [0136](0136-intercom-feed-gutter-and-slash-namespace.md) | Intercom: gutter номеров, явный select, единый `/intercom` slash | Accepted · In progress |

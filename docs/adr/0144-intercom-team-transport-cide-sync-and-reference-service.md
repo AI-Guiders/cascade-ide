@@ -17,6 +17,7 @@
 | [0028](0028-user-settings-toml-localappdata-and-secrets.md) | Секреты transport (token) — LocalAppData / secrets, не в git |
 | [0101](0101-licensing-and-commercialization-strategy.md) | Лицензия reference server и зависимостей |
 | [0146](0146-intercom-wire-canonical-protocol-package.md) | Канон wire в `intercom-wire/` — независимо от сервера |
+| [0147](0147-intercom-team-identity-roles-and-cide-server-admin.md) | Per-team roles, agent УЗ, CIDE admin — **расширение** §2.2, §8, §10; **teams + projects** §2.1–2.3 |
 
 ### Вне ADR
 
@@ -103,29 +104,202 @@ flowchart TB
 
 ### 2. Intercom Team — идентичность `team_id`
 
-**Нормативно:** все клиенты одной команды используют **один** `team_id`.
+**Нормативно:** все клиенты одной **логической команды** используют **один** `team_id`. **Канон team — на сервере** (`intercom-service`), не в git/TOML репозитория и не в monorepo/submodule layout.
 
-| Источник (приоритет) | Правило |
-|----------------------|---------|
-| 1. User override | `[intercom].team_id` в settings ([0028](0028-user-settings-toml-localappdata-and-secrets.md)) — побеждает |
-| 2. Repo manifest | `.cascade-ide/intercom-team.toml` в **git root команды** (см. §2.1) |
-| 3. Git remote | `team_id = "git:" + normalized_url(origin)` если manifest нет |
-| 4. Отсутствие | Transport **disabled**; только LocalOnly ([0142](0142-intercom-open-wire-pluggable-transports.md)) |
+| Слой | Источник истины |
+|------|-----------------|
+| **Team exists, metadata, policy** | Сервер — таблица `Teams` + admin API / CIDE admin ([0147](0147-intercom-team-identity-roles-and-cide-server-admin.md)) |
+| **Membership, roles** | Сервер — `TeamMembers` ([0147](0147-intercom-team-identity-roles-and-cide-server-admin.md) §2) |
+| **Активный team в CIDE** | Пользователь выбирает из `GET /auth/me` → `teams[]`; кэш **last selected** в user settings ([0028](0028-user-settings-toml-localappdata-and-secrets.md)) — **не** определение team |
+| **OAuth / Connect** | `team_id` в state — из выбора пользователя или **invite**; сервер валидирует membership / join policy |
 
-`team_id` **не** вычисляется из абсолютного пути workspace.
+`team_id` **не** вычисляется из абсолютного пути workspace, **не** из monorepo vs submodule, **не** из `git remote`.
 
-#### 2.1 Файл `.cascade-ide/intercom-team.toml` (v1)
+#### 2.1 Server-managed teams (normative v1.1)
 
-```toml
-# Коммитится в репозиторий команды — один team на репо (или monorepo root).
-schema_version = 1
-team_id = "financial-open"
-display_name = "Financial Open"
+**Принято:** создание team, `display_name`, **`join_policy`**, invites, members/roles — **только на сервере** (и CIDE admin как клиент API). Layout репозитория на диске **не** создаёт team; связь workspace ↔ team — через **project** (§2.3).
+
+| Операция | Где |
+|----------|-----|
+| Создать team | `POST /api/v1/teams` (owner bootstrap) или admin CIDE |
+| Join policy, GitHub org allowlist | Поля/config **team на сервере** ([0147](0147-intercom-team-identity-roles-and-cide-server-admin.md) §2.1) |
+| Пригласить | Invite token через admin API |
+| Выбрать team в CIDE | UI picker ← `/auth/me`; `[intercom.transport].team_id` = last selection |
+
+**CIDE settings (LocalAppData):** `base_url`, `oauth_provider`, **optional** `team_id` (last selected team), **`workspace_hints`** (§2.3.1). **Не** committed TOML с определением team.
+
+#### 2.2 Repo manifest — не SSOT (strangler)
+
+Ранний черновик: `.cascade-ide/intercom-team.toml` в git. **Amend:** файл **не** является источником team для transport v1.1+.
+
+| Было (MVP / strangler) | Сейчас (normative) |
+|------------------------|---------------------|
+| `team_id` в committed TOML | **Сервер**; TOML не обязателен |
+| Monorepo root vs submodule = разные teams | **Не** по пути на диске; monorepo/submodule → **repos проекта** §2.3 |
+| `git:` + remote URL inference | **Убрать** из normative path |
+
+Код `IntercomTeamManifestResolver` — **strangler** до **§2.3.1** (resolve + local hint); после v1.1 — только fallback **до первого** успешного resolve, не SSOT.
+
+`wire/intercom-wire/schemas/v1/team-manifest.schema.json` — **deprecated** для SSOT; удаление из wire v1.2.
+
+#### 2.3 Team → Project → Repositories
+
+**Принято:** логическая цепочка **не** «team = git root», а:
+
+```text
+Team  ──works on──▶  Project  ──links──▶  Repository (git remote URL, normalized)
 ```
 
-Для monorepo: файл в **корне, который команда считает IOP root** (тот же, где лежит общий `.cascade-ide` policy). Отдельный `team_id` на submodule — **отдельный team** (осознанно).
+| Сущность | Смысл | Где живёт |
+|----------|--------|-----------|
+| **Team** | Люди, roles, Intercom transport (`team_id`), topics | Сервер `Teams` |
+| **Project** | Продукт / IOP-единица, над которой работает team | Сервер `Projects` |
+| **Repository** | Привязка к **git** (origin URL, optional path hint); **не** абсолютный путь диска | Сервер `ProjectRepos` |
 
-#### 2.2 Member identity
+**Правила:**
+
+1. **Team не равен repo.** Один team может вести **несколько** projects; один project может иметь **несколько** repos (monorepo + submodule remotes, polyrepo product).
+2. **Monorepo vs submodule** — это **сколько repo-ссылок у project**, не «какой `.cascade-ide` root = team_id».
+3. **CIDE workspace** (solution/git root локально) → клиент шлёт **normalized remote URL(s)** → сервер: `repos → projects → teams` (фильтр по membership) → **предложить default team** для compose; пользователь может переключить.
+4. **Transport** по-прежнему keyed by **`team_id`**; project — контекст маршрутизации и admin, не второй message store.
+5. Связи team↔project↔repo — **server-managed** (admin API / CIDE), как §2.1.
+
+```mermaid
+flowchart LR
+  T["Team: financial-open"]
+  P["Project: Cascade IDE"]
+  R1["repo: github.com/…/cascade-ide"]
+  R2["repo: github.com/…/intercom-web"]
+  T --> P
+  P --> R1
+  P --> R2
+```
+
+**API sketch — project admin (v1.2):**
+
+| Метод | Назначение |
+|-------|------------|
+| `POST /projects`, `PATCH /projects/{id}` | CRUD project (admin) |
+| `PUT /projects/{id}/repos` | Список normalized git URLs |
+| `PUT /teams/{team_id}/projects` | Привязка team ↔ project |
+
+#### 2.3.1 Workspace resolve + local hint (v1.1, DX)
+
+**Принято:** чтобы не откатить DX «открыл clone → понятен team», без repo TOML как SSOT:
+
+| Механизм | Роль |
+|----------|------|
+| **`GET /api/v1/resolve/workspace-context`** | Сервер: `repo URL(s) → projects → teams` (фильтр membership) |
+| **Local workspace hint** | CIDE LocalAppData: кэш **последнего** успешного resolve / ручного выбора **per normalized repo** — **не SSOT**, offline fallback |
+| **`IntercomTeamManifestResolver`** | Strangler: если нет hint и нет JWT — одноразовый bootstrap; после resolve **не** перезаписывает server hint |
+
+**Flow (CIDE):**
+
+```mermaid
+sequenceDiagram
+  participant C as CIDE
+  participant L as LocalAppData hint
+  participant S as intercom-service
+  C->>C: normalize git remote(s) workspace
+  C->>L: read hint[repo_key]
+  alt JWT + online
+    C->>S: GET /resolve/workspace-context
+    S-->>C: teams[], suggested_team_id
+    C->>L: write hint (not SSOT)
+  else offline / no JWT
+    C->>C: hint or manifest strangler or manual picker
+  end
+```
+
+**`GET /api/v1/resolve/workspace-context` (normative sketch v1.1):**
+
+| Param | Содержание |
+|-------|------------|
+| `repo_url` | Повторяемый query param; 1..N remotes (root `origin`; опционально submodule remotes v1.2) |
+| Auth | `Authorization: Bearer` — только teams, где caller ∈ membership |
+
+**Response (orientир):**
+
+```json
+{
+  "normalized_repo_urls": ["github.com/ai-guiders/cascade-ide"],
+  "projects": [
+    { "project_id": "cascade-ide", "display_name": "Cascade IDE" }
+  ],
+  "teams": [
+    {
+      "team_id": "financial-open",
+      "display_name": "Financial Open",
+      "team_role": "member",
+      "project_id": "cascade-ide"
+    }
+  ],
+  "suggested_team_id": "financial-open"
+}
+```
+
+`suggested_team_id` — пересечение repo→project→team и `/auth/me`; при неоднозначности — `null`, CIDE показывает picker.
+
+**Repo URL normalization (normative):**
+
+| Правило | Пример |
+|---------|--------|
+| Lowercase host | `GitHub.com` → `github.com` |
+| Без `.git` suffix | `repo.git` → `repo` |
+| SSH → HTTPS host/path | `git@github.com:Org/Repo` → `github.com/org/repo` |
+| Без credentials / userinfo | — |
+| Несколько remotes | v1.1: **`origin` only**; v1.2: все remotes workspace + union match |
+
+**Local hint (CIDE, [0028](0028-user-settings-toml-localappdata-and-secrets.md)):**
+
+```toml
+# [intercom.transport.workspace_hints] — LocalAppData only, NOT in git
+[intercom.transport.workspace_hints."github.com/ai-guiders/cascade-ide"]
+team_id = "financial-open"
+project_id = "cascade-ide"          # optional, from last resolve
+updated_at_utc = "2026-05-24T12:00:00Z"
+source = "resolve"                  # resolve | manual | manifest_strangler
+```
+
+| Поле | Правило |
+|------|---------|
+| Key | **Normalized** repo URL (§ выше) |
+| `team_id` | Last used / suggested; **invalidate** если `/auth/me` не содержит team |
+| `source = manifest_strangler` | Допустимо до первого resolve; затем перезаписать |
+
+**Не SSOT:** hint может устареть; server policy (join, roles) всегда wins at Connect/post.
+
+**Не v1.1:** автосоздание project/team из clone без admin; IOP manifest в git как SSOT project (может **подсказать** `project_id` после регистрации на сервере).
+
+#### 2.3.2 Risks и v1 scope (не «всё сразу в production»)
+
+Целевая модель §2.1–2.3 **полная**; **реализация и ops** — **волнами**. ADR описывает конечное состояние; ниже — что **обязательно** в ближайших волнах и где сознательные дыры.
+
+| Волна | Deliver | Не блокирует transport |
+|-------|---------|------------------------|
+| **v1 / фаза 1** ([0147](0147-intercom-team-identity-roles-and-cide-server-admin.md)) | Server teams, roles, join policy, invite; human fan-out; DEV `open` / `first_owner` | Project CRUD UI, agent accounts, multi-IdP registry |
+| **v1.1** | `GET /resolve/workspace-context`, workspace hints, strangler manifest → hint; manual team picker | Полный project admin, submodule remotes в resolve |
+| **v1.2** | `Projects` / `ProjectRepos` / `TeamProject` на сервере; admin link repos | Account linking (Google+Microsoft → один member) |
+| **v2+** | Agent transport fan-out, `idp_domain`, native WebAuthn на service | — |
+
+**Риски и mitigations:**
+
+| Риск | Mitigation |
+|------|------------|
+| **Resolve хрупкий** (нет origin, SSH/https drift, fork) | Нормализация URL §2.3.1; v1.1 `origin` only; **manual picker** всегда; offline → local hint |
+| **Bootstrap chicken-egg** (нет server / owner) | CIDE local server host; DEV join policy; LocalOnly без transport |
+| **DX без repo TOML** | §2.3.1 hints + resolve; manifest strangler временно |
+| **Project дублирует IOP / solution** | `project_id` **стыкуется** с IOP manifest ([0121](0121-intent-oriented-programming-paradigm.md)) — server shell для transport/admin, IOP остаётся продуктовым описанием в git; один канонический id при регистрации project |
+| **Solo-dev overkill** | LocalOnly + один WitDB файл — valid; federated — когда 2+ CIDE |
+| **Agent УЗ до fan-out** | Модель в [0147](0147-intercom-team-identity-roles-and-cide-server-admin.md) §3; код — фаза 3–4 |
+| **Local hint устарел** | Invalidate по `/auth/me`; server policy wins |
+| **Passwordless friction в LAN** | Development `open` / invite bootstrap — не «стыдный» режим |
+
+**Production vs pilot:** Production-like = `invite_required`, TLS, per-member JWT, **без** committed team TOML, **без** shared team token. Pilot LAN может ослабить join policy; **не** ослабляет passwordless и anti-spoof `member_id`.
+
+**Порядок кода (рекомендация):** roles + invite + resolve/hints **раньше**, чем полный project admin UI; transport MVP **не ждёт** v1.2 project layer, если есть hints + picker + minimal repo seed (фаза 1b [0147](0147-intercom-team-identity-roles-and-cide-server-admin.md)).
+
+#### 2.4 Member identity
 
 | Поле | Пилот (норма) |
 |------|----------------|
@@ -141,13 +315,28 @@ display_name = "Financial Open"
 | Аспект | Решение |
 |--------|---------|
 | **Репозиторий** | `cascade-ide` — `host/intercom-service/` (тот же git, что IDE) |
-| **Стек** | ASP.NET Minimal API + **[WitDatabase](https://github.com/dmitrat/WitDatabase)** (`intercom.witdb`, EF `UseWitDb`); Postgres — v1.1 ops (multi-instance) |
-| **Store** | Append-only `transport_events` (LSM-friendly append); проекции topic/message — в сервисе |
+| **Стек** | ASP.NET Minimal API + **EF Core** (`IntercomDbContext`); **v1 default:** [WitDatabase](https://github.com/dmitrat/WitDatabase) (`intercom.witdb`, `UseWitDb`); **v1.1+ ops:** shared server RDBMS через тот же EF — провайдер из конфига (§3.1) |
+| **Store** | Append-only `transport_events` (LSM-friendly append на Wit); проекции topic/message — в сервисе |
 | **Realtime** | `GET /teams/{team_id}/stream` — **SSE** (primary v1) |
 | **Альтернатива** | `WS` — v1.1, тот же payload |
 | **Идемпотентность** | `client_event_id` (UUID) unique per team — повтор POST не дублирует |
 
 **Не цель v1:** HA, sharding, E2EE, Matrix federation.
+
+#### 3.1 Database provider (EF Core, конфигурируемо)
+
+**Принято:** persistence — **`IntercomDbContext` + EF Core**; выбор движка — **deployment**, не переписывание домена. Postgres в ранних черновиках — **пример** shared RDBMS, не единственный вариант.
+
+| Режим | Когда | Провайдер EF |
+|-------|-------|----------------|
+| **Пилот v1 (default)** | Один процесс, LAN/Tailscale/VPS | **WitDatabase** — файл `intercom.witdb` (`UseWitDb`) |
+| **Ops v1.1+** | Несколько инстансов `intercom-service`, managed backup | **Shared server RDBMS** — Npgsql (Postgres), SQL Server, MariaDB, … — **из конфига** |
+
+**Смена провайдера (ориентир):** connection string + `UseNpgsql` / `UseSqlServer` / … в `Program.cs` (или `Database:Provider` + factory); **EF migrations** вместо `EnsureCreated()`; секреты — env/vault.
+
+**Почему Wit в v1:** append-heavy `transport_events`, один writer, zero ops — см. [WitDatabase](https://github.com/dmitrat/WitDatabase). **Почему shared RDBMS позже:** несколько writer'ов **не** делят один witdb-файл по сети; нужен client–server store (не «потому что EF требует Postgres»).
+
+**Anti-pattern:** NFS/SMB-шара одного `intercom.witdb` между репликами — вместо этого shared RDBMS или один инстанс.
 
 ### 4. HTTP API v1 (нормативный sketch)
 
@@ -253,7 +442,7 @@ default_topic_id = ""   # empty → follow "general" from server
 | `wire/intercom-wire/schemas/v1/transport-envelope.schema.json` | Envelope + payload refs |
 | `wire/intercom-wire/schemas/v1/event-kinds.json` | Реестр `event_kind` |
 | `wire/intercom-wire/schemas/v1/extension-registry.json` | `relates_to`, `code_doc_link`, … |
-| `wire/intercom-wire/schemas/v1/team-manifest.schema.json` | `intercom-team.toml` |
+| `wire/intercom-wire/schemas/v1/team-manifest.schema.json` | ~~`intercom-team.toml`~~ deprecated SSOT; team на сервере §2.1 |
 | `wire/intercom-wire/profiles/reference-http-v1/openapi.yaml` | HTTP+SSE profile (не wire) |
 
 Генерация C# DTO (опционально): `tools/IntercomWireCodegen` или NSwag в CI — **не блокирует** v1; PR в wire и PR в service **раздельно**.
@@ -273,11 +462,11 @@ default_topic_id = ""   # empty → follow "general" from server
 |---------|------------|
 | **Протокол** | OAuth 2.0 Authorization Code + **PKCE** (Web, desktop CIDE через system browser) |
 | **Первый провайдер** | **GitHub** (Sign in with GitHub) — естественно для dev-команды, `sub` + login/display name в claims |
-| **Расширение** | Любой **OIDC**-совместимый IdP: Google, Microsoft Entra, GitLab, Keycloak, Authentik, … — конфиг deployment, не форк wire |
+| **Расширение** | Любой **OIDC**-совместимый IdP — конфиг deployment, не форк wire. Ориентир registry: **Google**, **Microsoft Entra**, **Yandex ID**, **LinkedIn**, GitLab, Keycloak, Authentik, … ([0147](0147-intercom-team-identity-roles-and-cide-server-admin.md) §2.2) |
 | **Member identity** | `member_id` = стабильный ключ из claims (`iss` + `sub` или provider-specific id); `display_name` / avatar из claims |
 | **API после входа** | `Authorization: Bearer <intercom_jwt>`; SSE с тем же JWT (query `access_token` или заголовок — зафиксировать в OpenAPI) |
 | **Logout** | «Disconnect Intercom» в CIDE: удалить refresh/access; `POST /auth/logout` в MVP |
-| **Team membership (пилот)** | После первого OIDC: auto-join к `team_id` из `intercom-team.toml`, если member ещё не в team; позже — invite / GitHub org allowlist |
+| **Team membership (пилот)** | После OIDC: join по **server** `join_policy` + invite ([0147](0147-intercom-team-identity-roles-and-cide-server-admin.md) §2.1); не auto-join из repo TOML |
 
 **Не делаем:**
 
@@ -348,7 +537,7 @@ Deployment пилота:
 | Фаза | Содержание | Критерий «готово» |
 |------|------------|-------------------|
 | **0** | Этот ADR Accepted | README + cross-links |
-| **1** | `wire/intercom-wire/schemas/v1/*` + profile OpenAPI + пример `intercom-team.toml` | Schema ↔ `AttachmentAnchor`; extensions в registry |
+| **1** | `wire/intercom-wire/schemas/v1/*` + profile OpenAPI + server team API sketch | Schema ↔ `AttachmentAnchor`; extensions в registry |
 | **2** | `intercom-service` MVP: events + SSE + **OIDC** (GitHub + 1 generic OIDC) + JWT | Два аккаунта GitHub → оба POST в `general`; SSE у обоих |
 | **3** | CIDE: `FederatedSyncTransport` + **Connect / Disconnect** | Два CIDE без ручного копирования secret |
 | **3.1** | `message_edited`, multi-topic, team invite | Changelog wire |
@@ -401,20 +590,22 @@ Deployment пилота:
 | Anti-pattern | Почему |
 |--------------|--------|
 | `team_id` = абсолютный путь диска | Ломает второй CIDE |
+| **Team definition / join policy в repo TOML** | SSOT — сервер §2.1; monorepo/submodule не задают team |
+| **Local workspace hint как SSOT** | Hint — кэш §2.3.1; server + membership wins |
 | Два message store (MCC + service) | [0142](0142-intercom-open-wire-pluggable-transports.md) |
 | Sync всех `message_stream_delta` в v1 | Шум, гонки, трафик |
 | Transport без idempotency | Дубликаты при retry |
-| Секрет OAuth/JWT в `intercom-team.toml` в git | [0028](0028-user-settings-toml-localappdata-and-secrets.md) |
+| Секрет OAuth/JWT в committed manifest | [0028](0028-user-settings-toml-localappdata-and-secrets.md) |
 | Shared team token в Production | Только per-member JWT после OIDC |
 
 ---
 
 ## Открытые вопросы
 
-1. **Postgres vs WitDatabase file** — один процесс + Tailscale: `intercom.witdb`; multi-instance → Postgres (ops ADR или § service README).
-2. **Единый team на monorepo vs submodule** — команда выбирает IOP root; документировать в `intercom-team.toml` README.
+1. ~~**Postgres vs WitDatabase file**~~ → **§3.1:** v1 — Wit file + один инстанс; multi-instance — shared RDBMS через EF (**провайдер из конфига**, Postgres — пример).
+2. ~~**Единый team на monorepo vs submodule**~~ → **§2.1:** teams server-managed; repo layout irrelevant; выбор team из `/auth/me`.
 3. **Порог fan-out agent** — метрики + amend §10 после фазы 3.
-4. **Team invite после OIDC** — invite URL vs auto-join по GitHub org/repo; зафиксировать при реализации фазы 4.
+4. ~~**Team invite после OIDC**~~ → [0147](0147-intercom-team-identity-roles-and-cide-server-admin.md) §2.1 (`join_policy`, invite token, `github_org`).
 5. **SSE + JWT** — заголовок vs `?access_token=` (some proxies); в OpenAPI auth v1.
 
 ---
@@ -429,3 +620,8 @@ Deployment пилота:
 | 2026-05-24 | §8.1: OAuth/OIDC (GitHub + generic), JWT. |
 | 2026-05-24 | Auth **в пилоте** (фазы 2–3): OIDC обязателен; shared token — только DEV bootstrap. |
 | 2026-05-24 | Store: **WitDatabase** (`intercom.witdb`), не generic SQLite; [WitDatabase](https://github.com/dmitrat/WitDatabase). |
+| 2026-05-24 | §3.1: EF provider из конфига; shared RDBMS (Postgres и др.) — v1.1 ops, не привязка к Npgsql. |
+| 2026-05-24 | §2.1–2.2: teams server-managed; repo `intercom-team.toml` не SSOT; monorepo/submodule не задают team. |
+| 2026-05-24 | §2.3: Team → Project → Repositories; workspace resolve через git remote, не disk path. |
+| 2026-05-24 | §2.3.1: `GET /resolve/workspace-context` + local workspace hints (v1.1 DX). |
+| 2026-05-24 | §2.3.2: Risks и v1 scope — волны реализации, не big-bang production. |
