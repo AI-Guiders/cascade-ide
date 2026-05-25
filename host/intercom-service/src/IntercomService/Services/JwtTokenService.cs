@@ -69,6 +69,7 @@ public sealed class JwtTokenService(
         {
             new Claim(JwtRegisteredClaimNames.Sub, member.MemberId),
             new Claim("display_name", member.DisplayName),
+            new Claim("member_kind", member.MemberKind),
         };
 
         var token = new JwtSecurityToken(

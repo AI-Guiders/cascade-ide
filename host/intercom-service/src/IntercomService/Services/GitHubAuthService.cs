@@ -24,6 +24,7 @@ public sealed class GitHubAuthService(
         string redirectUri,
         string? codeChallenge,
         string? codeChallengeMethod,
+        string? inviteToken,
         CancellationToken ct)
     {
         var state = new OAuthStateEntity
@@ -34,6 +35,7 @@ public sealed class GitHubAuthService(
             RedirectUri = redirectUri,
             CodeChallenge = codeChallenge,
             CodeChallengeMethod = codeChallengeMethod,
+            InviteToken = inviteToken,
             ExpiresAtUtc = DateTimeOffset.UtcNow.AddMinutes(15),
         };
         db.OAuthStates.Add(state);
@@ -85,7 +87,7 @@ public sealed class GitHubAuthService(
         return $"https://github.com/login/oauth/authorize?{qs}";
     }
 
-    public async Task<GitHubUser?> ExchangeCodeAsync(
+    public async Task<GitHubExchangeResult?> ExchangeCodeAsync(
         string code,
         OAuthStateEntity state,
         string? codeVerifier,
@@ -118,7 +120,40 @@ public sealed class GitHubAuthService(
         using var userResponse = await client.SendAsync(userRequest, ct).ConfigureAwait(false);
         userResponse.EnsureSuccessStatusCode();
         var userJson = await userResponse.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
-        return JsonSerializer.Deserialize<GitHubUser>(userJson, IntercomService.Contracts.IntercomJson.Web);
+        var user = JsonSerializer.Deserialize<GitHubUser>(userJson, IntercomService.Contracts.IntercomJson.Web);
+        if (user is null)
+            return null;
+
+        return new GitHubExchangeResult(token.AccessToken, user);
+    }
+
+    public async Task<bool> IsMemberOfAnyOrgAsync(
+        string accessToken,
+        IReadOnlyList<string> orgs,
+        CancellationToken ct)
+    {
+        if (orgs.Count == 0)
+            return false;
+
+        var client = httpClientFactory.CreateClient();
+        foreach (var org in orgs)
+        {
+            var url = $"https://api.github.com/user/memberships/orgs/{Uri.EscapeDataString(org.Trim())}";
+            using var req = new HttpRequestMessage(HttpMethod.Get, url);
+            req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            req.Headers.UserAgent.ParseAdd("IntercomService/1.0");
+            using var res = await client.SendAsync(req, ct).ConfigureAwait(false);
+            if (!res.IsSuccessStatusCode)
+                continue;
+
+            var json = await res.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
+            var membership = JsonSerializer.Deserialize<GitHubOrgMembership>(json, IntercomService.Contracts.IntercomJson.Web);
+            if (membership is not null
+                && string.Equals(membership.State, "active", StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+
+        return false;
     }
 
     private string GetCallbackUrl()
@@ -149,4 +184,9 @@ public sealed class GitHubAuthService(
     public sealed record GitHubUser(
         [property: JsonPropertyName("id")] long Id,
         [property: JsonPropertyName("login")] string Login);
+
+    public sealed record GitHubExchangeResult(string AccessToken, GitHubUser User);
+
+    private sealed record GitHubOrgMembership(
+        [property: JsonPropertyName("state")] string? State);
 }

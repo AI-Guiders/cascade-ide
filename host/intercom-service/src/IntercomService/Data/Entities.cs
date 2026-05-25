@@ -6,6 +6,12 @@ public sealed class TeamEntity
 
     public required string DisplayName { get; set; }
 
+    public string JoinPolicy { get; set; } = JoinPolicies.FirstOwner;
+
+    public string DefaultTeamRole { get; set; } = TeamRoles.Member;
+
+    public string? JoinPolicyJson { get; set; }
+
     public DateTimeOffset CreatedAtUtc { get; set; }
 }
 
@@ -19,6 +25,10 @@ public sealed class MemberEntity
 
     public required string DisplayName { get; set; }
 
+    public string MemberKind { get; set; } = MemberKinds.Human;
+
+    public string? AvatarGlyph { get; set; }
+
     public DateTimeOffset CreatedAtUtc { get; set; }
 }
 
@@ -27,6 +37,10 @@ public sealed class TeamMemberEntity
     public required string TeamId { get; set; }
 
     public required string MemberId { get; set; }
+
+    public string TeamRole { get; set; } = TeamRoles.Member;
+
+    public string? TeamDisplayName { get; set; }
 
     public DateTimeOffset JoinedAtUtc { get; set; }
 
@@ -106,5 +120,80 @@ public sealed class OAuthStateEntity
 
     public string? CodeChallengeMethod { get; set; }
 
+    public string? InviteToken { get; set; }
+
     public DateTimeOffset ExpiresAtUtc { get; set; }
+}
+
+public sealed class TeamInviteEntity
+{
+    public required string InviteId { get; set; }
+
+    public required string TeamId { get; set; }
+
+    public required string TokenHash { get; set; }
+
+    public string TeamRole { get; set; } = TeamRoles.Member;
+
+    public int MaxUses { get; set; } = 1;
+
+    public int UseCount { get; set; }
+
+    public required string CreatedByMemberId { get; set; }
+
+    public DateTimeOffset ExpiresAtUtc { get; set; }
+
+    public DateTimeOffset CreatedAtUtc { get; set; }
+
+    public TeamEntity? Team { get; set; }
+}
+
+public sealed class AgentCredentialEntity
+{
+    public required string CredentialId { get; set; }
+
+    public required string MemberId { get; set; }
+
+    public required string TokenHash { get; set; }
+
+    public DateTimeOffset? ExpiresAtUtc { get; set; }
+
+    public DateTimeOffset? RevokedAtUtc { get; set; }
+
+    public DateTimeOffset CreatedAtUtc { get; set; }
+
+    public MemberEntity? Member { get; set; }
+}
+
+public sealed class ProjectEntity
+{
+    public required string ProjectId { get; set; }
+
+    public required string DisplayName { get; set; }
+
+    public DateTimeOffset CreatedAtUtc { get; set; }
+}
+
+public sealed class ProjectRepoEntity
+{
+    public required string ProjectId { get; set; }
+
+    public required string NormalizedRepoUrl { get; set; }
+
+    public DateTimeOffset LinkedAtUtc { get; set; }
+
+    public ProjectEntity? Project { get; set; }
+}
+
+public sealed class TeamProjectEntity
+{
+    public required string TeamId { get; set; }
+
+    public required string ProjectId { get; set; }
+
+    public DateTimeOffset LinkedAtUtc { get; set; }
+
+    public TeamEntity? Team { get; set; }
+
+    public ProjectEntity? Project { get; set; }
 }

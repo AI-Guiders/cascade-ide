@@ -7,6 +7,8 @@ public sealed class IntercomOptions
     public string DataDirectory { get; set; } = "data";
 
     public string DatabaseFileName { get; set; } = "intercom.witdb";
+
+    public bool RecreateDatabaseOnStart { get; set; }
 }
 
 public sealed class JwtOptions
@@ -55,4 +57,8 @@ public sealed class OidcAuthOptions
     public string ClientSecret { get; set; } = "";
 
     public string Scopes { get; set; } = "openid profile email";
+
+    public string ProviderId { get; set; } = "oidc";
+
+    public string DisplayName { get; set; } = "OpenID Connect";
 }

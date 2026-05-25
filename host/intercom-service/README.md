@@ -7,7 +7,8 @@ Reference transport для командного Intercom ([ADR 0144](../../docs/
 ## Стек
 
 - ASP.NET Minimal API (.NET 10)
-- [WitDatabase](https://github.com/dmitrat/WitDatabase) (`data/intercom.witdb`) + EF `UseWitDb`
+- **EF Core** — `IntercomDbContext`; **v1 default:** [WitDatabase](https://github.com/dmitrat/WitDatabase) (`data/intercom.witdb`, `UseWitDb`)
+- **v1.1+ ops:** тот же контекст, другой провайдер EF (Postgres, SQL Server, …) — connection string из конфига ([ADR 0144 §3.1](../../docs/adr/0144-intercom-team-transport-cide-sync-and-reference-service.md))
 - GitHub / OIDC → JWT для API/SSE
 
 ## Запуск (dev)

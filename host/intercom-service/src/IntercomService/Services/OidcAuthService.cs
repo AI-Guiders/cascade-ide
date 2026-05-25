@@ -26,6 +26,7 @@ public sealed class OidcAuthService(
         string redirectUri,
         string? codeChallenge,
         string? codeChallengeMethod,
+        string? inviteToken,
         CancellationToken ct)
     {
         var state = new OAuthStateEntity
@@ -36,6 +37,7 @@ public sealed class OidcAuthService(
             RedirectUri = redirectUri,
             CodeChallenge = codeChallenge,
             CodeChallengeMethod = codeChallengeMethod,
+            InviteToken = inviteToken,
             ExpiresAtUtc = DateTimeOffset.UtcNow.AddMinutes(15),
         };
         db.OAuthStates.Add(state);

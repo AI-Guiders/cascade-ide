@@ -31,6 +31,10 @@ builder.Services.AddHttpClient();
 builder.Services.AddSingleton<SseEventHub>();
 builder.Services.AddScoped<JwtTokenService>();
 builder.Services.AddScoped<TransportEventService>();
+builder.Services.AddScoped<TeamInviteService>();
+builder.Services.AddScoped<AgentAccountService>();
+builder.Services.AddScoped<WorkspaceResolveService>();
+builder.Services.AddSingleton<AuthProviderRegistry>();
 builder.Services.AddScoped<TeamMembershipService>();
 builder.Services.AddScoped<GitHubAuthService>();
 builder.Services.AddScoped<OidcAuthService>();
@@ -93,6 +97,9 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<IntercomDbContext>();
+    var intercomOpts = scope.ServiceProvider.GetRequiredService<Microsoft.Extensions.Options.IOptions<IntercomOptions>>().Value;
+    if (intercomOpts.RecreateDatabaseOnStart)
+        db.Database.EnsureDeleted();
     db.Database.EnsureCreated();
 }
 

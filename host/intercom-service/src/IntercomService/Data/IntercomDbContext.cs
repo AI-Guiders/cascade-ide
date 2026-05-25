@@ -18,6 +18,16 @@ public sealed class IntercomDbContext(DbContextOptions<IntercomDbContext> option
 
     public DbSet<OAuthStateEntity> OAuthStates => Set<OAuthStateEntity>();
 
+    public DbSet<TeamInviteEntity> TeamInvites => Set<TeamInviteEntity>();
+
+    public DbSet<AgentCredentialEntity> AgentCredentials => Set<AgentCredentialEntity>();
+
+    public DbSet<ProjectEntity> Projects => Set<ProjectEntity>();
+
+    public DbSet<ProjectRepoEntity> ProjectRepos => Set<ProjectRepoEntity>();
+
+    public DbSet<TeamProjectEntity> TeamProjects => Set<TeamProjectEntity>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<TeamEntity>(e =>
@@ -68,6 +78,44 @@ public sealed class IntercomDbContext(DbContextOptions<IntercomDbContext> option
         {
             e.ToTable("OAuthStates");
             e.HasKey(x => x.State);
+        });
+
+        modelBuilder.Entity<TeamInviteEntity>(e =>
+        {
+            e.ToTable("TeamInvites");
+            e.HasKey(x => x.InviteId);
+            e.HasIndex(x => x.TokenHash);
+            e.HasOne(x => x.Team).WithMany().HasForeignKey(x => x.TeamId);
+        });
+
+        modelBuilder.Entity<AgentCredentialEntity>(e =>
+        {
+            e.ToTable("AgentCredentials");
+            e.HasKey(x => x.CredentialId);
+            e.HasIndex(x => x.TokenHash);
+            e.HasOne(x => x.Member).WithMany().HasForeignKey(x => x.MemberId);
+        });
+
+        modelBuilder.Entity<ProjectEntity>(e =>
+        {
+            e.ToTable("Projects");
+            e.HasKey(x => x.ProjectId);
+        });
+
+        modelBuilder.Entity<ProjectRepoEntity>(e =>
+        {
+            e.ToTable("ProjectRepos");
+            e.HasKey(x => new { x.ProjectId, x.NormalizedRepoUrl });
+            e.HasOne(x => x.Project).WithMany().HasForeignKey(x => x.ProjectId);
+            e.HasIndex(x => x.NormalizedRepoUrl);
+        });
+
+        modelBuilder.Entity<TeamProjectEntity>(e =>
+        {
+            e.ToTable("TeamProjects");
+            e.HasKey(x => new { x.TeamId, x.ProjectId });
+            e.HasOne(x => x.Team).WithMany().HasForeignKey(x => x.TeamId);
+            e.HasOne(x => x.Project).WithMany().HasForeignKey(x => x.ProjectId);
         });
     }
 }

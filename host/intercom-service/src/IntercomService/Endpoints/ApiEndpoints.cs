@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IntercomService.Endpoints;
 
-public static class ApiEndpoints
+public static partial class ApiEndpoints
 {
     public static void MapIntercomApi(this WebApplication app)
     {
@@ -18,6 +18,7 @@ public static class ApiEndpoints
         var api = app.MapGroup("/api/v1");
 
         MapAuth(api, app);
+        MapIdentity(api);
         MapTeams(api);
         MapTopics(api);
     }
@@ -30,6 +31,7 @@ public static class ApiEndpoints
             string redirect_uri,
             string? code_challenge,
             string? code_challenge_method,
+            string? invite_token,
             GitHubAuthService github,
             OidcAuthService oidc,
             TeamMembershipService teams,
@@ -48,7 +50,13 @@ public static class ApiEndpoints
                 if (!github.IsConfigured)
                     return Results.Problem("GitHub OAuth is not configured", statusCode: StatusCodes.Status503ServiceUnavailable);
 
-                var ghState = await github.CreateStateAsync(team_id, redirect_uri, code_challenge, code_challenge_method, ct)
+                var ghState = await github.CreateStateAsync(
+                        team_id,
+                        redirect_uri,
+                        code_challenge,
+                        code_challenge_method,
+                        invite_token,
+                        ct)
                     .ConfigureAwait(false);
                 return Results.Redirect(github.BuildAuthorizeUrl(ghState));
             }
@@ -58,7 +66,13 @@ public static class ApiEndpoints
                 if (!oidc.IsConfigured)
                     return Results.Problem("OIDC is not configured", statusCode: StatusCodes.Status503ServiceUnavailable);
 
-                var oidcState = await oidc.CreateStateAsync(team_id, redirect_uri, code_challenge, code_challenge_method, ct)
+                var oidcState = await oidc.CreateStateAsync(
+                        team_id,
+                        redirect_uri,
+                        code_challenge,
+                        code_challenge_method,
+                        invite_token,
+                        ct)
                     .ConfigureAwait(false);
                 return Results.Redirect(oidc.BuildAuthorizeUrl(oidcState));
             }
@@ -131,6 +145,24 @@ public static class ApiEndpoints
             return Results.Ok();
         }).RequireAuthorization();
 
+        api.MapPatch("/auth/me", async (
+            PatchMeRequest body,
+            TeamMembershipService teams,
+            ClaimsPrincipal user,
+            CancellationToken ct) =>
+        {
+            var memberId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(memberId))
+                return Results.Unauthorized();
+
+            if (string.IsNullOrWhiteSpace(body.DisplayName))
+                return Results.BadRequest(new { error = "display_name required" });
+
+            var ok = await teams.PatchMemberDefaultDisplayNameAsync(memberId, body.DisplayName, ct)
+                .ConfigureAwait(false);
+            return ok ? Results.Ok() : Results.NotFound();
+        }).RequireAuthorization();
+
         api.MapGet("/auth/me", async (
             ClaimsPrincipal user,
             TeamMembershipService teams,
@@ -140,9 +172,11 @@ public static class ApiEndpoints
             if (string.IsNullOrWhiteSpace(memberId))
                 return Results.Unauthorized();
 
-            var display = user.FindFirstValue("display_name") ?? memberId;
-            var teamIds = await teams.ListTeamIdsForMemberAsync(memberId, ct).ConfigureAwait(false);
-            return Results.Json(new MeResponse(memberId, display, teamIds));
+            var member = await teams.GetMemberAsync(memberId, ct).ConfigureAwait(false);
+            var displayName = member?.DisplayName ?? user.FindFirstValue("display_name") ?? memberId;
+            var memberKind = member?.MemberKind ?? MemberKinds.Human;
+            var teamList = await teams.ListMeTeamsAsync(memberId, ct).ConfigureAwait(false);
+            return Results.Json(new MeResponse(memberId, displayName, memberKind, teamList));
         }).RequireAuthorization();
     }
 
@@ -386,13 +420,22 @@ public static class ApiEndpoints
 
         if (string.Equals(oauthState.Provider, "github", StringComparison.OrdinalIgnoreCase))
         {
-            var user = await github.ExchangeCodeAsync(body.Code, oauthState, body.CodeVerifier, ct).ConfigureAwait(false);
-            if (user is null)
+            var exchange = await github.ExchangeCodeAsync(body.Code, oauthState, body.CodeVerifier, ct).ConfigureAwait(false);
+            if (exchange is null)
                 return Results.BadRequest(new { error = "token_exchange_failed" });
 
             await teams.EnsureTeamAsync(oauthState.TeamId, oauthState.TeamId, ct).ConfigureAwait(false);
-            var member = await teams.EnsureGitHubMemberAsync(user.Id, user.Login, ct).ConfigureAwait(false);
-            await teams.JoinTeamAsync(oauthState.TeamId, member.MemberId, ct).ConfigureAwait(false);
+            var member = await teams.EnsureGitHubMemberAsync(exchange.User.Id, exchange.User.Login, ct).ConfigureAwait(false);
+            var (joined, joinError) = await teams.TryJoinTeamAsync(
+                oauthState.TeamId,
+                member,
+                oauthState.InviteToken,
+                "github",
+                exchange.AccessToken,
+                ct).ConfigureAwait(false);
+            if (!joined)
+                return Results.Forbid();
+
             var tokens = await jwt.IssueTokensAsync(member, ct).ConfigureAwait(false);
             return Results.Json(tokens);
         }
@@ -405,7 +448,16 @@ public static class ApiEndpoints
 
             await teams.EnsureTeamAsync(oauthState.TeamId, oauthState.TeamId, ct).ConfigureAwait(false);
             var member = await teams.EnsureOidcMemberAsync(user.Issuer, user.Subject, user.DisplayName, ct).ConfigureAwait(false);
-            await teams.JoinTeamAsync(oauthState.TeamId, member.MemberId, ct).ConfigureAwait(false);
+            var (joined, joinError) = await teams.TryJoinTeamAsync(
+                oauthState.TeamId,
+                member,
+                oauthState.InviteToken,
+                "oidc",
+                null,
+                ct).ConfigureAwait(false);
+            if (!joined)
+                return Results.Forbid();
+
             var tokens = await jwt.IssueTokensAsync(member, ct).ConfigureAwait(false);
             return Results.Json(tokens);
         }

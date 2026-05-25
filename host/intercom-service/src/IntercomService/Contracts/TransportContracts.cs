@@ -60,11 +60,6 @@ public sealed record OAuthTokenRequest(
     [property: JsonPropertyName("code_verifier")] string? CodeVerifier,
     [property: JsonPropertyName("redirect_uri")] string? RedirectUri);
 
-public sealed record MeResponse(
-    [property: JsonPropertyName("member_id")] string MemberId,
-    [property: JsonPropertyName("display_name")] string DisplayName,
-    [property: JsonPropertyName("teams")] IReadOnlyList<string> Teams);
-
 public static class IntercomJson
 {
     public static readonly JsonSerializerOptions Web = new(JsonSerializerDefaults.Web);

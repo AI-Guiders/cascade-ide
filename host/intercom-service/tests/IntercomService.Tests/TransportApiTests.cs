@@ -5,7 +5,8 @@ using IntercomService.Contracts;
 
 namespace IntercomService.Tests;
 
-public sealed class TransportApiTests : IClassFixture<IntercomWebApplicationFactory>
+[Collection("IntercomApi")]
+public sealed class TransportApiTests
 {
     private readonly HttpClient _client;
 
@@ -22,7 +23,7 @@ public sealed class TransportApiTests : IClassFixture<IntercomWebApplicationFact
     [Fact]
     public async Task Dev_token_can_append_and_list_human_event()
     {
-        const string teamId = "test-team";
+        var teamId = "dev-test-team-" + Guid.NewGuid().ToString("N")[..8];
         const string devToken = "dev-intercom-local-change-me";
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", devToken);

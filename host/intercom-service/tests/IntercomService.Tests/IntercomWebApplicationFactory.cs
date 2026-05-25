@@ -16,6 +16,7 @@ public sealed class IntercomWebApplicationFactory : WebApplicationFactory<Progra
             config.AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["Intercom:DataDirectory"] = _dataDir,
+                ["Intercom:RecreateDatabaseOnStart"] = "true",
                 ["DevAuth:TeamToken"] = "dev-intercom-local-change-me",
             });
         });
