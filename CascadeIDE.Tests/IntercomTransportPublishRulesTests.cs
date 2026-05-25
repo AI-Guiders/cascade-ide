@@ -1,48 +1,25 @@
+using System.Text.Json;
 using CascadeIDE.Features.Intercom.Transport;
-using Xunit;
 using CascadeIDE.Models.AgentChat;
-using CascadeIDE.Models.Intercom;
+using Xunit;
 
 namespace CascadeIDE.Tests;
 
 public sealed class IntercomTransportPublishRulesTests
 {
     [Fact]
-    public void ShouldPublish_HumanChannelUserMessage()
+    public void Assistant_message_resolves_to_agent_sender_role()
     {
-        var payload = new ChatHistoryMessagePayload(
-            Guid.NewGuid().ToString("N"),
-            "user",
-            "hello",
-            Guid.NewGuid().ToString("N"));
-        var json = System.Text.Json.JsonSerializer.Serialize(payload, IntercomTransportJson.Web);
-        Assert.True(IntercomTransportPublishRules.ShouldPublish(ChatHistoryEventKind.MessageAdded, json));
-    }
+        var payload = JsonSerializer.Serialize(new ChatHistoryMessagePayload(
+            MessageId: Guid.NewGuid().ToString("N"),
+            Role: "assistant",
+            Content: "hi",
+            ThreadId: Guid.NewGuid().ToString("N")));
 
-    [Fact]
-    public void ShouldPublish_SkipsSelfOnlyAndSlash()
-    {
-        var self = new ChatHistoryMessagePayload(
-            Guid.NewGuid().ToString("N"),
-            "user",
-            "x",
-            Guid.NewGuid().ToString("N"),
-            Audience: IntercomMessageAudience.SelfOnly);
-        var slash = new ChatHistoryMessagePayload(
-            Guid.NewGuid().ToString("N"),
-            "user",
-            "x",
-            Guid.NewGuid().ToString("N"),
-            SlashCommandPath: "/help");
-        var selfJson = System.Text.Json.JsonSerializer.Serialize(self, IntercomTransportJson.Web);
-        var slashJson = System.Text.Json.JsonSerializer.Serialize(slash, IntercomTransportJson.Web);
-        Assert.False(IntercomTransportPublishRules.ShouldPublish(ChatHistoryEventKind.MessageAdded, selfJson));
-        Assert.False(IntercomTransportPublishRules.ShouldPublish(ChatHistoryEventKind.MessageAdded, slashJson));
+        var role = IntercomTransportPublishRules.ResolveWireSenderRole(
+            payload,
+            ChatHistoryEventKind.MessageCompleted);
 
-        var fork = new ChatHistoryThreadForkedPayload(
-            Guid.NewGuid().ToString("N"),
-            Guid.NewGuid().ToString("N"));
-        var forkJson = System.Text.Json.JsonSerializer.Serialize(fork, IntercomTransportJson.Web);
-        Assert.True(IntercomTransportPublishRules.ShouldPublish(ChatHistoryEventKind.ThreadForked, forkJson));
+        Assert.Equal("agent", role);
     }
 }

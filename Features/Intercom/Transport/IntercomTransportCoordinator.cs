@@ -28,8 +28,20 @@ public sealed class IntercomTransportCoordinator : IDisposable
     private Task? _sseTask;
     private string _deliveryStatus = "";
     private string _connectionStatus = "";
+    private string _operatorMemberId = "";
+    private string _operatorDisplayName = "";
 
     public IntercomTransportCoordinator() => _oauth = new IntercomOAuthConnectService(_api);
+
+    public IntercomTransportApiClient ApiClient => _api;
+
+    public string? GetWorkspaceRootForAdmin() => _getWorkspaceRoot?.Invoke();
+
+    public Task<bool> EnsureBearerForAdminAsync(IntercomTransportSettings settings, CancellationToken ct) =>
+        EnsureBearerAsync(settings, ct);
+
+    public Task<string?> ResolveBearerForAdminAsync(IntercomTransportSettings settings, CancellationToken ct) =>
+        ResolveBearerAsync(settings, ct);
 
     public string DeliveryStatus => _deliveryStatus;
 
@@ -97,7 +109,11 @@ public sealed class IntercomTransportCoordinator : IDisposable
         {
             var me = await _api.GetMeAsync(bearer, ct).ConfigureAwait(false);
             if (me is not null)
+            {
+                _operatorMemberId = me.MemberId;
+                _operatorDisplayName = me.DisplayName;
                 IntercomWorkspaceContextResolver.InvalidateStaleHints(settings, me);
+            }
         }
 
         if (string.IsNullOrWhiteSpace(teamId))
@@ -610,7 +626,7 @@ public sealed class IntercomTransportCoordinator : IDisposable
         return manifest?.TeamId.Trim() ?? "";
     }
 
-    private static bool TryBuildAppendPayload(ChatHistoryEvent ev, out IntercomAppendEventRequestDto request)
+    private bool TryBuildAppendPayload(ChatHistoryEvent ev, out IntercomAppendEventRequestDto request)
     {
         request = default!;
         JsonElement payloadElement;
@@ -623,14 +639,39 @@ public sealed class IntercomTransportCoordinator : IDisposable
             return false;
         }
 
-        payloadElement = IntercomTransportPayloadEnricher.EnrichForWire(ev.Kind, payloadElement);
         var senderRole = IntercomTransportPublishRules.ResolveWireSenderRole(ev.PayloadJson, ev.Kind);
+        var transport = _getSettings?.Invoke().Intercom.Transport;
+        string memberId;
+        string displayName;
+
+        if (string.Equals(senderRole, "agent", StringComparison.Ordinal))
+        {
+            memberId = transport?.SelectedAgentMemberId.Trim() ?? "";
+            displayName = transport?.SelectedAgentDisplayName.Trim() ?? "";
+            if (string.IsNullOrWhiteSpace(memberId))
+                return false;
+
+            if (string.IsNullOrWhiteSpace(displayName))
+                displayName = memberId;
+
+            payloadElement = IntercomTransportPayloadEnricher.EnrichForWire(
+                ev.Kind,
+                payloadElement,
+                _operatorMemberId);
+        }
+        else
+        {
+            memberId = _operatorMemberId;
+            displayName = _operatorDisplayName;
+            payloadElement = IntercomTransportPayloadEnricher.EnrichForWire(ev.Kind, payloadElement);
+        }
+
         request = new IntercomAppendEventRequestDto(
             SchemaVersion: 1,
             ClientEventId: ev.EventId.ToString("N"),
             OccurredAtUtc: ev.AtUtc.ToString("O"),
             EventKind: IntercomTransportPublishRules.ToWireEventKind(ev.Kind),
-            Sender: new IntercomSenderWireDto("", "", senderRole, "cide"),
+            Sender: new IntercomSenderWireDto(memberId, displayName, senderRole, "cide"),
             Payload: payloadElement);
         return true;
     }

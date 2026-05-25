@@ -8,7 +8,7 @@ using CascadeIDE.Services;
 namespace CascadeIDE.Features.Intercom.Transport;
 
 /// <summary>HTTP-клиент reference Intercom service (ADR 0144).</summary>
-public sealed class IntercomTransportApiClient : IDisposable
+public sealed partial class IntercomTransportApiClient : IDisposable
 {
     private readonly HttpClient _http = new() { Timeout = TimeSpan.FromSeconds(120) };
 

@@ -36,6 +36,12 @@ public sealed class IntercomTransportSettings
     /// <summary>Синхронизировать ответы ассистента в Channel (<c>sender_role: agent</c>).</summary>
     public bool SyncAgentChannelMessages { get; set; } = true;
 
+    /// <summary>Выбранный provisioned agent <c>member_id</c> для fan-out (ADR 0147 §3–4).</summary>
+    public string SelectedAgentMemberId { get; set; } = "";
+
+    /// <summary>Кэш display name выбранного агента (не SSOT).</summary>
+    public string SelectedAgentDisplayName { get; set; } = "";
+
     public bool IsConfigured =>
         Enabled
         && !string.IsNullOrWhiteSpace(BaseUrl);

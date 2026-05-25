@@ -323,6 +323,8 @@ public sealed partial class CascadeIdeSettings
                     SseReconnectBackoffMs = Intercom.Transport.SseReconnectBackoffMs,
                     AutoConnectOnSend = Intercom.Transport.AutoConnectOnSend,
                     SyncAgentChannelMessages = Intercom.Transport.SyncAgentChannelMessages,
+                    SelectedAgentMemberId = Intercom.Transport.SelectedAgentMemberId,
+                    SelectedAgentDisplayName = Intercom.Transport.SelectedAgentDisplayName,
                 },
             },
         };
