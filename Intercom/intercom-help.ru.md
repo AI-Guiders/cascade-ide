@@ -35,7 +35,8 @@
 
 ## Сообщения агенту
 
-- Обычный текст в composer → отправка агенту (Enter по настройке send).
+- Обычный текст в composer → отправка тем сочетанием, что в **Параметры → «Отправить сообщение»** (Enter / Ctrl+Enter / Shift+Enter).
+- **Новая строка в поле сообщения** — отдельная настройка «Новая строка…» там же (по умолчанию не совпадает с отправкой, как в мессенджерах).
 - `@` — люди/упоминания; `[ … ]` — артефакты кода и вложения (не markdown-ссылки).
 - ЛКМ по телу сообщения **не** меняет выбор (клик по attach-chip → reveal в редакторе).
 - На chip справа — приглушённый **`a:…`** (short id для `/anchor peek`).
@@ -49,6 +50,16 @@
 - Autocomplete: набери `[` — подсказки по осям; Tab/Enter — вставить; Esc — закрыть.
 - `/intercom attach selection` · `/intercom attach scope` · `/intercom attach file <path> [start] [end]`
 - Маркеры `⟦a:…⟧` в черновике — chip; клик в ленте → reveal в редакторе.
+
+## Локальный intercom-service и team transport (ADR 0147)
+
+1. `/intercom server start` — поднять reference server (по умолчанию `http://127.0.0.1:5080`).
+2. `/intercom server status` — процесс из CIDE, HTTP `/health`, transport (нужен Connect).
+3. Настройки (MFD → AI / Intercom): `[intercom.transport] enabled = true`, `base_url`, при необходимости `team_id`.
+4. **Connect Intercom** в настройках или первый human send в Channel (auto connect) — OAuth в браузере; для DEV можно `dev_team_token` в settings.
+5. `/intercom team members` · `/intercom agent list` — после Connect.
+
+Autocomplete: после каждого сегмента (`intercom` → `server` → `start`) дождись списка следующего шага; **полная** строка `/intercom server status`, не `/intercom server`.
 
 ## Слэш-команды IDE и Intercom
 

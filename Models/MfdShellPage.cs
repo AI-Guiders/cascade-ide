@@ -18,7 +18,7 @@ public enum MfdShellPage
     Tests = 7,
     Hypotheses = 8,
     DebugStack = 9,
-    /// <summary>Параметры AI и чата (провайдеры, MCP, ключи) — по умолчанию в зоне Mfd; см. <c>[ai.chat].settings_presentation</c> в <c>settings.toml</c> (ADR 0083).</summary>
+    /// <summary>Параметры IDE (AI, MCP, Intercom, сочетания в чате) — по умолчанию в зоне Mfd; см. <c>[ai.chat].settings_presentation</c> в <c>settings.toml</c> (ADR 0083).</summary>
     AiChatSettings = 10,
     /// <summary>Готовность окружения (LSP, dotnet…) — ADR 0023; страница оболочки Mfd, не оверлей.</summary>
     EnvironmentReadiness = 11,

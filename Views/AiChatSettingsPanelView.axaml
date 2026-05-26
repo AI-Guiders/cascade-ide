@@ -49,10 +49,27 @@
                       PlaceholderText="Нет данных — отправь сообщение в чат"/>
         </StackPanel>
 
-        <StackPanel Spacing="6">
-            <TextBlock Text="Отправка сообщения в чате:" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-            <ComboBox ItemsSource="{Binding SendMessageKeyOptionsList}" SelectedItem="{Binding SendMessageKey}" MinWidth="140"/>
-        </StackPanel>
+        <Border Background="{DynamicResource CascadeTheme.SurfaceRegionLowBrush}"
+                CornerRadius="4"
+                Padding="10">
+            <StackPanel Spacing="10">
+                <TextBlock FontWeight="SemiBold"
+                           Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                           Text="Чат · сочетания клавиш"/>
+                <StackPanel Spacing="6">
+                    <TextBlock Text="Отправить сообщение" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+                    <ComboBox ItemsSource="{Binding SendMessageKeyOptionsList}"
+                              SelectedItem="{Binding SendMessageKey}"
+                              MinWidth="220"/>
+                </StackPanel>
+                <StackPanel Spacing="6">
+                    <TextBlock Text="Новая строка в поле сообщения (Skia)" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" TextWrapping="Wrap"/>
+                    <ComboBox ItemsSource="{Binding ComposerNewLineKeyOptionsList}"
+                              SelectedItem="{Binding ComposerNewLineKey}"
+                              MinWidth="220"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
 
         <StackPanel Spacing="6">
             <TextBlock Text="Плотность ленты Intercom (settings.toml: [intercom] feed_metrics):" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" TextWrapping="Wrap"/>

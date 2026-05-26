@@ -51,6 +51,16 @@ public static partial class ChatSlashCommandCatalog
         return Snapshot.ByPath.TryGetValue(path, out descriptor);
     }
 
+    /// <summary>Резолв по каноническому пути и хвосту (ADR 0150), без дублирования intercom strip.</summary>
+    public static bool TryResolveCanonical(string canonicalPath, string? argTail, out ChatSlashCommandDescriptor descriptor)
+    {
+        descriptor = null!;
+        var line = string.IsNullOrWhiteSpace(argTail)
+            ? canonicalPath
+            : $"{canonicalPath} {argTail.Trim()}";
+        return TryResolve(ChatSlashCommandParser.TryParse(line), out descriptor);
+    }
+
     private static bool TryResolveFlatHelp(string flat, out ChatSlashCommandDescriptor descriptor)
     {
         if (!Snapshot.ByPath.TryGetValue(flat, out descriptor))

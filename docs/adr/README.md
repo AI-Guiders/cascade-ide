@@ -229,6 +229,7 @@
 | [0138](0138-cockpit-command-line-and-parametric-ranges.md) | Cockpit Command Line (Commander+Pilot); chord Ctrl+K `/`; multi-range `[3;5] [8;15]`; preview | Accepted · In progress |
 | [0140](0140-tci-slash-status-glyphs-and-args-counter.md) | TCI: глифы ✓/✕/P(n) в slash pill; clip/icon placement | Accepted · Proposed |
 | [0141](0141-solution-scoped-warmup-orchestration.md) | Solution warm-up: фоновый прогрев HCI/symbol sidecar/bracket/feed anchors при open | Accepted · Proposed |
+| [0150](0150-slash-line-canonical-resolution.md) | Slash: `SlashLineResolver`, `arg_tail` в каталоге; единый резолв autocomplete · Enter · execute | Accepted · In progress |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 

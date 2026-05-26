@@ -103,6 +103,13 @@ public partial class MainWindowViewModel
     partial void OnSendMessageKeyChanged(string value)
     {
         _appData.Put("SendMessageKey", value);
+        NormalizeChatEnterChordPair();
+    }
+
+    partial void OnComposerNewLineKeyChanged(string value)
+    {
+        _appData.Put("ComposerNewLineKey", value);
+        NormalizeChatEnterChordPair();
     }
 
     partial void OnCodeNavigationMapPresentationChanged(string value)

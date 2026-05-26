@@ -149,6 +149,7 @@ public partial class MainWindowViewModel
             tryCreateCloudMafIChatClient: TryCreateCloudMafIChatClientForChatPanel,
             getChatMinimizedContextBlock: BuildChatMinimizedContextBlockCore,
             getSendMessageKey: () => SendMessageKey,
+            getComposerNewLineKey: () => ComposerNewLineKey,
             getSolutionPath: () => Workspace.SolutionPath,
             getSolutionRoots: () => Workspace.SolutionRoots,
             getEditorSelectionStart: () => EditorSelectionStart,

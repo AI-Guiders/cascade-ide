@@ -269,6 +269,7 @@ internal static class IntentCatalogLoader
         var autoRunOnCommit = row.AutoRunOnCommit ?? false;
         var autoRunRequiresArgs = row.AutoRunRequiresArgs ?? true;
         var requiresArgTailExplicit = row.RequiresArgTail;
+        var argTailKindExplicit = ParseSlashArgTail(row.ArgTail, row.RequiresArgTail, path, slashPath);
 
         routes[slashPath] = new SlashRouteEntry(
             slashPath,
@@ -284,7 +285,32 @@ internal static class IntentCatalogLoader
             audience,
             autoRunOnCommit,
             autoRunRequiresArgs,
-            requiresArgTailExplicit);
+            requiresArgTailExplicit,
+            argTailKindExplicit);
+    }
+
+    private static SlashArgTailKind? ParseSlashArgTail(
+        string? argTail,
+        bool? legacyRequiresArgTail,
+        string path,
+        string slashPath)
+    {
+        if (!string.IsNullOrWhiteSpace(argTail))
+        {
+            return argTail.Trim().ToLowerInvariant() switch
+            {
+                "none" => SlashArgTailKind.None,
+                "optional" => SlashArgTailKind.Optional,
+                "required" => SlashArgTailKind.Required,
+                _ => throw new InvalidOperationException(
+                    $"{path}: slash '{slashPath}' arg_tail must be none|optional|required, got '{argTail}'."),
+            };
+        }
+
+        if (legacyRequiresArgTail is { } legacy)
+            return legacy ? SlashArgTailKind.Required : SlashArgTailKind.None;
+
+        return null;
     }
 
     private static IntercomMessageAudience ParseSlashAudience(string? raw, string path, string slashPath)

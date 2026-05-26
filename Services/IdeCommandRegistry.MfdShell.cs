@@ -10,7 +10,7 @@ public static partial class IdeCommandRegistry
         AddPalette(b, "mfd_shell_page_workspace", IdeCommands.SetMfdShellPage, "Вторичный контур: WORKSPACE (здоровье)", "Вторичный контур", """{"page":"WorkspaceHealth"}""");
         AddPalette(b, "mfd_shell_page_related_files", IdeCommands.SetMfdShellPage, "Вторичный контур: Связанные файлы", "Вторичный контур", """{"page":"RelatedFiles"}""");
         AddPalette(b, "mfd_shell_page_chat", IdeCommands.SetMfdShellPage, "Вторичный контур: Чат", "Вторичный контур", """{"page":"Chat"}""");
-        AddPalette(b, "mfd_shell_page_ai_settings", IdeCommands.SetMfdShellPage, "Вторичный контур: Параметры AI и чата", "Вторичный контур", """{"page":"AiChatSettings"}""");
+        AddPalette(b, "mfd_shell_page_ai_settings", IdeCommands.SetMfdShellPage, "Вторичный контур: Параметры", "Вторичный контур", """{"page":"AiChatSettings"}""");
         AddPalette(b, "mfd_shell_page_terminal", IdeCommands.SetMfdShellPage, "Вторичный контур: Терминал", "Вторичный контур", """{"page":"Terminal"}""");
         AddPalette(b, "mfd_shell_page_build", IdeCommands.SetMfdShellPage, "Вторичный контур: Сборка · вывод", "Вторичный контур", """{"page":"Build"}""");
         AddPalette(b, "mfd_shell_page_problems", IdeCommands.SetMfdShellPage, "Вторичный контур: Problems", "Вторичный контур", """{"page":"Problems"}""");

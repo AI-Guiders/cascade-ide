@@ -90,8 +90,11 @@ public sealed class ChatSlashCommandRunner
         Func<string, string?, CancellationToken, Task<ChatSlashIntercomResult>> runIntercomAdmin) =>
         _runIntercomAdmin = runIntercomAdmin;
 
-    private static string? resolveIntercomArgsTail(in ChatSlashCommandParseResult parse)
+    private static string? resolveSlashArgsTail(string rawInput, in ChatSlashCommandParseResult parse)
     {
+        if (SlashLineResolver.TryResolveSlashLine(rawInput.Trim(), out var line) && line.IsCatalogMatch)
+            return ChatSlashCommandPresentation.NormalizeArgsTail(line.ArgTail);
+
         var tail = parse.ArgsTail;
         if (string.Equals(parse.Head, "intercom", StringComparison.OrdinalIgnoreCase)
             && parse.Shape == ChatSlashCommandShape.Flat
@@ -122,7 +125,7 @@ public sealed class ChatSlashCommandRunner
             return ChatSlashCommandRunResult.NotHandled();
 
         var displayPath = ChatSlashCommandPresentation.FormatDisplayPath(parse, rawInput);
-        var argsTail = resolveIntercomArgsTail(parse);
+        var argsTail = resolveSlashArgsTail(rawInput, parse);
 
         if (parse.IsRejected)
             return new ChatSlashCommandRunResult(

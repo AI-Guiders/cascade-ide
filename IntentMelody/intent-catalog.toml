@@ -9,7 +9,8 @@
 # - [command.form.slash.args] — статические args (page, surface); legacy mfd_page тоже читается.
 # - enabled = false — отключить команду или отдельный slash без удаления из файла.
 # - auto_run_on_commit / auto_run_requires_args — после Tab выполнить без второго Enter (по умолчанию false / true).
-# - requires_arg_tail — autocomplete оставляет хвост для аргументов (иначе эвристика: completion, auto_run, prefix).
+# - arg_tail = none|optional|required — режим хвоста после полного пути (ADR 0150; предпочтительно).
+# - requires_arg_tail — legacy: true→required, false→none (если arg_tail не задан).
 # - IML v2 (параметрические мелодии, tail_wire_class) — смысл языка, ADR 0109; не путать с intent_catalog_schema_version.
 # - Параметрический slash: любая команда с melody_shape=parametric — хвост по wire_class (ADR 0124).
 #   Редактор: /editor line select|delete <строки>. Портал: /portal open [url] (как c:wai).
@@ -777,7 +778,15 @@ page = "WorkspaceHealth"
 
 [[command.form.slash]]
 path = "/settings show"
-help = "Параметры AI и чата."
+help = "Параметры (AI, MCP, Intercom, сочетания в чате)."
+group = "Панели"
+
+[command.form.slash.args]
+page = "AiChatSettings"
+
+[[command.form.slash]]
+path = "/ide options show"
+help = "То же, что «Параметры»: страница настроек (AI, MCP, Intercom)."
 group = "Панели"
 
 [command.form.slash.args]
@@ -999,6 +1008,7 @@ help = "Запустить reference intercom-service (dotnet run). Опцион
 group = "Intercom"
 kind = "intercom"
 intercom_handler = "server_start"
+arg_tail = "optional"
 
 [[command]]
 [[command.form.slash]]

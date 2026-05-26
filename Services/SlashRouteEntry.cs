@@ -19,4 +19,5 @@ public readonly record struct SlashRouteEntry(
     IntercomMessageAudience MessageAudience = IntercomMessageAudience.Channel,
     bool AutoRunOnCommit = false,
     bool AutoRunRequiresArgs = true,
-    bool? RequiresArgTailExplicit = null);
+    bool? RequiresArgTailExplicit = null,
+    SlashArgTailKind? ArgTailKindExplicit = null);

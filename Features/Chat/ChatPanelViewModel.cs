@@ -59,6 +59,7 @@ public partial class ChatPanelViewModel : ViewModelBase
     private readonly Func<IChatClient?>? _tryCreateCloudMafIChatClient;
     private readonly Func<string?>? _getChatMinimizedContextBlock;
     private readonly Func<string> _getSendMessageKey;
+    private readonly Func<string> _getComposerNewLineKey;
     private readonly Func<string?>? _getSolutionPath;
     private readonly Func<int?>? _getEditorSelectionStart;
     private readonly Func<int?>? _getEditorSelectionLength;
@@ -102,6 +103,7 @@ public partial class ChatPanelViewModel : ViewModelBase
         Func<IChatClient?>? tryCreateCloudMafIChatClient = null,
         Func<string?>? getChatMinimizedContextBlock = null,
         Func<string>? getSendMessageKey = null,
+        Func<string>? getComposerNewLineKey = null,
         Func<string?>? getSolutionPath = null,
         Func<ObservableCollection<SolutionItem>>? getSolutionRoots = null,
         Func<int?>? getEditorSelectionStart = null,
@@ -178,6 +180,8 @@ public partial class ChatPanelViewModel : ViewModelBase
         _tryCreateCloudMafIChatClient = tryCreateCloudMafIChatClient;
         _getChatMinimizedContextBlock = getChatMinimizedContextBlock;
         _getSendMessageKey = getSendMessageKey ?? (() => "Enter");
+        _getComposerNewLineKey = getComposerNewLineKey
+            ?? (() => ChatComposerChordOptions.ComplementaryChord(_getSendMessageKey()));
         _getSolutionPath = getSolutionPath;
         _getEditorSelectionStart = getEditorSelectionStart;
         _getEditorSelectionLength = getEditorSelectionLength;
@@ -219,6 +223,9 @@ public partial class ChatPanelViewModel : ViewModelBase
 
     /// <summary>Клавиша отправки из настроек (Enter / Ctrl+Enter / Shift+Enter).</summary>
     public string GetSendMessageKey() => _getSendMessageKey();
+
+    /// <summary>Сочетание для переноса строки в composer (отдельно от отправки).</summary>
+    public string GetComposerNewLineKey() => _getComposerNewLineKey();
 
     public ObservableCollection<ChatMessageViewModel> ChatMessages { get; } = [];
     public ObservableCollection<ClarificationDraftItemViewModel> ClarificationDraftItems { get; } = [];

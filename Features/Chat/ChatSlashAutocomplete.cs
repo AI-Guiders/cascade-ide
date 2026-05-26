@@ -156,8 +156,17 @@ public static class ChatSlashAutocomplete
             .ToList();
     }
 
+    public static bool IsRunnableSlashLineAtCaret(string? rawInput, int caretIndex) =>
+        SlashLineResolver.TryResolveLine(rawInput, caretIndex, out var line) && line.IsRunnable;
+
+    internal static void ParseTypedBodyForResolver(string body, out List<string> tokens, out bool endsWithSpace) =>
+        ParseTypedBody(body, out tokens, out endsWithSpace);
+
     private static IReadOnlyList<ChatSlashSuggestion> BuildStaticSegmentSuggestions(string body)
     {
+        if (SlashLineResolver.TryResolveBody(body, out var line) && line.ShouldHideSegmentSuggestions)
+            return [];
+
         ParseTypedBody(body, out var typedTokens, out var endsWithSpace);
         var buckets = new Dictionary<string, (string Insert, string Path, string Help, string? Group, string Segment)>(
             StringComparer.OrdinalIgnoreCase);
@@ -213,10 +222,7 @@ public static class ChatSlashAutocomplete
         if (ChatSlashCommandParser.ShouldAutoExecuteAfterAutocompleteCommit(slashPath))
             return false;
 
-        if (SlashRouteCatalogIndex.RouteRequiresArgTail(slashPath))
-            return true;
-
-        return false;
+        return SlashRouteCatalogIndex.GetArgTailKind(slashPath) != SlashArgTailKind.None;
     }
 
     private static void ParseTypedBody(string body, out List<string> tokens, out bool endsWithSpace)

@@ -53,7 +53,7 @@ Attach chip: ЛКМ → только `RevealAttachment`.
 /intercom attach selection | scope | file
 ```
 
-Парсер: `head=intercom`, хвост делегируется во внутренний verb; `ChatSlashCommandCatalog.TryResolve` строит полный путь через `IntercomSlashPathBuilder`.
+Парсер: `head=intercom`, хвост делегируется во внутренний verb; `ChatSlashCommandCatalog.TryResolve` строит полный путь через `IntercomSlashPathBuilder`. Канонический путь и args для UI/execute — [0150](0150-slash-line-canonical-resolution.md) (`SlashLineResolver`).
 
 ## MCP и координаты выбора
 
