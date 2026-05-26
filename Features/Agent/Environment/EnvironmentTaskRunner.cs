@@ -9,21 +9,26 @@ namespace CascadeIDE.Features.Agent.Environment;
 public sealed class EnvironmentTaskRunner
 {
     private readonly IDataBus _dataBus;
-    private readonly BuildTestJobCoordinator _coordinator;
+    private readonly IEnvironmentJobBackend _backend;
     private readonly string _hostKind;
     private readonly ConcurrentDictionary<string, ConcurrentBag<string>> _coreJobsByRun = new();
 
     /// <summary>Test seam: override job status (return null → <see cref="AgentEnvironmentTaskDied"/>).</summary>
     public Func<string, object?>? TestJobStatusFactory { get; set; }
 
-    public EnvironmentTaskRunner(IDataBus dataBus, BuildTestJobCoordinator coordinator, string hostKind = "supervised-inproc")
+    public EnvironmentTaskRunner(IDataBus dataBus, IEnvironmentJobBackend backend)
     {
         _dataBus = dataBus;
-        _coordinator = coordinator;
-        _hostKind = hostKind;
+        _backend = backend;
+        _hostKind = backend.HostKind;
     }
 
-    public BuildTestJobCoordinator Coordinator => _coordinator;
+    public EnvironmentTaskRunner(IDataBus dataBus, BuildTestJobCoordinator coordinator, string hostKind = "supervised-inproc")
+        : this(dataBus, new InProcessEnvironmentJobBackend(coordinator, hostKind))
+    {
+    }
+
+    public IEnvironmentJobBackend Backend => _backend;
 
     public async Task<EnvironmentTaskOutcome> RunBuildAsync(
         string runId,
@@ -72,7 +77,7 @@ public sealed class EnvironmentTaskRunner
     }
 
     public bool TryCancelCoreJob(string coreJobId) =>
-        _coordinator.CancelJob(coreJobId) is { } o
+        _backend.CancelJob(coreJobId) is { } o
         && JsonSerializer.Serialize(o).Contains("\"cancelled\":true", StringComparison.Ordinal);
 
     /// <summary>Implicit cancel predecessor (ADR 0148 §8.1.1): отменить build/test jobs активного run.</summary>
@@ -99,7 +104,7 @@ public sealed class EnvironmentTaskRunner
         var taskId = Guid.NewGuid().ToString("N");
         PublishTaskChanged(taskId, runId, kind, AgentEnvironmentTaskState.Queued, "queued");
 
-        var enqueued = _coordinator.TryEnqueue(
+        var enqueued = _backend.TryEnqueue(
             coreKind,
             solutionPath,
             includeRawOutput,
@@ -119,7 +124,7 @@ public sealed class EnvironmentTaskRunner
         if (!waitForCompletion)
             return new EnvironmentTaskOutcome(taskId, coreJobId, true, "queued", null);
 
-        var resultJson = await _coordinator.WaitForCompletionAsync(coreJobId, cancellationToken).ConfigureAwait(false);
+        var resultJson = await _backend.WaitForCompletionAsync(coreJobId, cancellationToken).ConfigureAwait(false);
         var success = TryReadSuccess(resultJson);
         return new EnvironmentTaskOutcome(taskId, coreJobId, success, success ? "completed" : "failed", resultJson);
     }
@@ -138,7 +143,7 @@ public sealed class EnvironmentTaskRunner
         {
             object? statusObj = TestJobStatusFactory is not null
                 ? TestJobStatusFactory(coreJobId)
-                : _coordinator.GetJobStatus(coreJobId);
+                : _backend.GetJobStatus(coreJobId);
             if (statusObj is null)
             {
                 PublishDied(taskId, runId, kind, null, "job not found");

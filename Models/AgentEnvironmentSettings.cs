@@ -17,6 +17,12 @@ public sealed class AgentEnvironmentSettings
     /// <summary>agent_ephemeral | agent_worktree | in_place — для длинных autonomous run (W6).</summary>
     public string LongRunSandboxProfile { get; set; } = "agent_worktree";
 
+    /// <summary>supervised-inproc | supervised-worker-process | supervised-worker-daemon</summary>
+    public string BuildVerifyHost { get; set; } = "supervised-inproc";
+
+    /// <summary>Абсолютный путь к <c>CascadeIDE.BuildVerifyWorker.dll</c>; пусто = авто рядом с exe / repo tools.</summary>
+    public string? BuildVerifyWorkerAssemblyPath { get; set; }
+
     public AgentEnvironmentLadderSettings Ladder { get; set; } = new();
 
     public AgentEnvironmentTimeAccountingSettings TimeAccounting { get; set; } = new();
@@ -33,6 +39,12 @@ public sealed class AgentEnvironmentLadderSettings
 
     /// <summary>Макс. доп. <c>.cs</c>-файлов из git diff (рабочее дерево + индекс).</summary>
     public int L0GitDirtyMaxFiles { get; set; } = 48;
+
+    /// <summary>Добавлять в L0 пути из solution warm-up (открытые/активный .cs), читая с диска если не во вкладках.</summary>
+    public bool L0IncludeWarmupCs { get; set; } = true;
+
+    /// <summary>Лимит доп. warmup-путей; 0 = как <c>solution_warmup.max_open_document_files</c>.</summary>
+    public int L0WarmupMaxFiles { get; set; }
 }
 
 public sealed class AgentEnvironmentTimeAccountingSettings

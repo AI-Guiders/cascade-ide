@@ -140,6 +140,10 @@ shell_escape_tier = "deny"
 
 # agent_worktree | agent_ephemeral | in_place — для batch/long autonomous verify (W6)
 long_run_sandbox_profile = "agent_worktree"
+# supervised-inproc | supervised-worker-process | supervised-worker-daemon (opt-in long-lived IPC)
+build_verify_host = "supervised-inproc"
+# Пусто = авто (рядом с CascadeIDE.exe или tools/ в dev)
+# build_verify_worker_assembly_path = ""
 
 [agent.environment.ladder]
 l0_enabled = true
@@ -147,6 +151,10 @@ l4_require_explicit = true
 # open_tabs — только вкладки; open_tabs_and_git_dirty_cs — + .cs из git diff / --cached в workspace (парсер L0).
 l0_cs_scope = "open_tabs_and_git_dirty_cs"
 l0_git_dirty_max_files = 48
+# + .cs из solution warm-up (открытые/активный), с диска если не во вкладке
+l0_include_warmup_cs = true
+# 0 = как solution_warmup.max_open_document_files
+l0_warmup_max_files = 0
 
 [agent.environment.time_accounting]
 show_in_chat = true

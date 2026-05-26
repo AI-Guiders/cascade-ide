@@ -53,20 +53,22 @@ public sealed class AgentEnvironmentService : IAgentEnvironmentService
         Func<IReadOnlyList<(string Path, string Content)>>? openCsDocuments = null,
         IGitCommandRunner? gitRunner = null,
         Func<string?>? getWorkspaceRootForL0Git = null,
-        Func<string?>? getSolutionPathForOrchestrator = null)
+        Func<string?>? getSolutionPathForOrchestrator = null,
+        Func<IReadOnlyList<string>>? getWarmupCsFilePaths = null)
     {
         _dataBus = dataBus;
         _settings = settings;
         _sandbox = new AgentSandboxManager();
         _epoch = new AgentVerifyEpochTracker(dataBus);
         var coordinator = buildTestJobService?.Coordinator ?? new BuildTestJobCoordinator();
-        _buildTestHost = new InProcessBuildTestHost(coordinator);
+        _buildTestHost = BuildTestHostFactory.Create(settings, coordinator);
         var l0 = new AgentRoslynL0Diagnostics(
             languageService,
             openCsDocuments,
             settings.Ladder,
             gitRunner,
-            getWorkspaceRootForL0Git);
+            getWorkspaceRootForL0Git,
+            getWarmupCsFilePaths);
         _ladder = new VerificationLadder(dataBus, _buildTestHost, l0, settings, _sandbox);
         _worktree = gitRunner is null ? null : new AgentWorktreeSandbox(gitRunner);
         _orchestrator = new AgentOrchestratorBridge(
@@ -76,11 +78,7 @@ public sealed class AgentEnvironmentService : IAgentEnvironmentService
                 ? p
                 : AgentVerifyPolicy.Standard);
 
-        _dataBus.Subscribe<AgentEnvironmentTaskDied>(_ =>
-        {
-            if (_buildTestHost is InProcessBuildTestHost inProc)
-                inProc.MarkUnhealthy();
-        });
+        _dataBus.Subscribe<AgentEnvironmentTaskDied>(_ => _buildTestHost.MarkUnhealthy());
     }
 
     public AgentVerifyEpochTracker EpochTracker => _epoch;

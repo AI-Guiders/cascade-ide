@@ -117,7 +117,8 @@ public partial class MainWindowViewModel
             GetOpenCsDocumentsForAgentL0,
             _gitRunner,
             () => WorkspaceDirectoryFromSolutionPath.Resolve(Workspace.SolutionPath),
-            () => Workspace.SolutionPath);
+            () => Workspace.SolutionPath,
+            GetAgentL0WarmupCsFilePaths);
 
         BuildOutputPanel = new BuildOutputPanelViewModel();
         TerminalPanel = new TerminalPanelViewModel(() => Workspace.SolutionPath);
@@ -257,5 +258,21 @@ public partial class MainWindowViewModel
         }
 
         return list;
+    }
+
+    private IReadOnlyList<string> GetAgentL0WarmupCsFilePaths()
+    {
+        var warmup = _settings.SolutionWarmup;
+        return Features.Agent.Environment.AgentL0WarmupPathCollector.Collect(
+            warmup.Enabled,
+            warmup.WarmActiveFileOnSolutionOpen,
+            warmup.WarmOpenDocuments,
+            warmup.WarmRecentCsFiles,
+            warmup.MaxOpenDocumentFiles,
+            () => Documents.OpenDocuments
+                .Select(d => d.FilePath)
+                .Where(p => !string.IsNullOrWhiteSpace(p))
+                .ToList(),
+            () => CurrentFilePath);
     }
 }

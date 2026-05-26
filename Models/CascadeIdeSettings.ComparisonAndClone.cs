@@ -114,12 +114,16 @@ public sealed partial class CascadeIdeSettings
                     CoalesceWindowMs = Agent.Environment.CoalesceWindowMs,
                     ShellEscapeTier = Agent.Environment.ShellEscapeTier,
                     LongRunSandboxProfile = Agent.Environment.LongRunSandboxProfile,
+                    BuildVerifyHost = Agent.Environment.BuildVerifyHost,
+                    BuildVerifyWorkerAssemblyPath = Agent.Environment.BuildVerifyWorkerAssemblyPath,
                     Ladder = new AgentEnvironmentLadderSettings
                     {
                         L0Enabled = Agent.Environment.Ladder.L0Enabled,
                         L4RequireExplicit = Agent.Environment.Ladder.L4RequireExplicit,
                         L0CsScope = Agent.Environment.Ladder.L0CsScope,
                         L0GitDirtyMaxFiles = Agent.Environment.Ladder.L0GitDirtyMaxFiles,
+                        L0IncludeWarmupCs = Agent.Environment.Ladder.L0IncludeWarmupCs,
+                        L0WarmupMaxFiles = Agent.Environment.Ladder.L0WarmupMaxFiles,
                     },
                     TimeAccounting = new AgentEnvironmentTimeAccountingSettings
                     {
@@ -406,10 +410,14 @@ public sealed partial class CascadeIdeSettings
             && ea.CoalesceWindowMs == eb.CoalesceWindowMs
             && ea.ShellEscapeTier == eb.ShellEscapeTier
             && ea.LongRunSandboxProfile == eb.LongRunSandboxProfile
+            && ea.BuildVerifyHost == eb.BuildVerifyHost
+            && ea.BuildVerifyWorkerAssemblyPath == eb.BuildVerifyWorkerAssemblyPath
             && ea.Ladder.L0Enabled == eb.Ladder.L0Enabled
             && ea.Ladder.L4RequireExplicit == eb.Ladder.L4RequireExplicit
             && ea.Ladder.L0CsScope == eb.Ladder.L0CsScope
             && ea.Ladder.L0GitDirtyMaxFiles == eb.Ladder.L0GitDirtyMaxFiles
+            && ea.Ladder.L0IncludeWarmupCs == eb.Ladder.L0IncludeWarmupCs
+            && ea.Ladder.L0WarmupMaxFiles == eb.Ladder.L0WarmupMaxFiles
             && ea.TimeAccounting.ShowInChat == eb.TimeAccounting.ShowInChat
             && ea.TimeAccounting.PfdInstrumentEnabled == eb.TimeAccounting.PfdInstrumentEnabled
             && ea.TimeAccounting.ShowTaskProgressInChat == eb.TimeAccounting.ShowTaskProgressInChat

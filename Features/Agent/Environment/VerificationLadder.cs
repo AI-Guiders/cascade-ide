@@ -27,7 +27,7 @@ public sealed class VerificationLadder
         AgentSandboxManager sandbox)
     {
         _dataBus = dataBus;
-        _runner = new EnvironmentTaskRunner(dataBus, host.Coordinator, host.HostKind);
+        _runner = new EnvironmentTaskRunner(dataBus, host.JobBackend);
         _l0 = l0;
         _settings = settings;
         _sandbox = sandbox;

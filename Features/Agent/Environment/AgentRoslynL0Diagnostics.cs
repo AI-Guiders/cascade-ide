@@ -22,19 +22,22 @@ public sealed class AgentRoslynL0Diagnostics
     private readonly AgentEnvironmentLadderSettings _ladder;
     private readonly IGitCommandRunner? _gitRunner;
     private readonly Func<string?>? _getWorkspaceRoot;
+    private readonly Func<IReadOnlyList<string>>? _getWarmupCsFilePaths;
 
     public AgentRoslynL0Diagnostics(
         CSharpLanguageService? language,
         Func<IReadOnlyList<(string Path, string Content)>>? openCsDocuments,
         AgentEnvironmentLadderSettings? ladderSettings = null,
         IGitCommandRunner? gitRunner = null,
-        Func<string?>? getWorkspaceRoot = null)
+        Func<string?>? getWorkspaceRoot = null,
+        Func<IReadOnlyList<string>>? getWarmupCsFilePaths = null)
     {
         _language = language;
         _openCsDocuments = openCsDocuments;
         _ladder = ladderSettings ?? new AgentEnvironmentLadderSettings();
         _gitRunner = gitRunner;
         _getWorkspaceRoot = getWorkspaceRoot;
+        _getWarmupCsFilePaths = getWarmupCsFilePaths;
     }
 
     public async Task<L0DiagnosticsOutcome> RunAsync(CancellationToken cancellationToken = default)
@@ -48,7 +51,9 @@ public sealed class AgentRoslynL0Diagnostics
         {
             var scopeNote = AgentL0CsScopeParser.IncludesGitDirtyWorktreeCs(_ladder.L0CsScope)
                 ? "; no open .cs and git scope yielded none"
-                : "";
+                : _ladder.L0IncludeWarmupCs
+                    ? "; no open .cs and warmup scope yielded none"
+                    : "";
             return new(true, 0, 0, $"L0 skipped (no .cs inputs{scopeNote})");
         }
 
@@ -104,6 +109,9 @@ public sealed class AgentRoslynL0Diagnostics
                 await AppendGitDirtyCsFromDiskAsync(merged, ws, cancellationToken).ConfigureAwait(false);
         }
 
+        if (_ladder.L0IncludeWarmupCs && _getWarmupCsFilePaths is not null)
+            await AppendWarmupCsFromDiskAsync(merged, cancellationToken).ConfigureAwait(false);
+
         return merged;
     }
 
@@ -130,6 +138,56 @@ public sealed class AgentRoslynL0Diagnostics
 
             if (!AgentL0CsScopeParser.TryResolveWorkspaceCs(wsFull, rel, out var full))
                 continue;
+            if (!seen.Add(full))
+                continue;
+
+            string text;
+            try
+            {
+                text = await File.ReadAllTextAsync(full, cancellationToken).ConfigureAwait(false);
+            }
+            catch
+            {
+                continue;
+            }
+
+            merged.Add((full, text));
+            taken++;
+        }
+    }
+
+    private async Task AppendWarmupCsFromDiskAsync(
+        List<(string Path, string Content)> merged,
+        CancellationToken cancellationToken)
+    {
+        var paths = _getWarmupCsFilePaths!();
+        if (paths.Count == 0)
+            return;
+
+        var seen = new HashSet<string>(
+            merged.Select(t => Path.GetFullPath(t.Path)),
+            StringComparer.OrdinalIgnoreCase);
+
+        var cap = _ladder.L0WarmupMaxFiles > 0
+            ? Math.Max(1, _ladder.L0WarmupMaxFiles)
+            : Math.Max(1, paths.Count);
+
+        var taken = 0;
+        foreach (var path in paths)
+        {
+            if (taken >= cap)
+                break;
+
+            string full;
+            try
+            {
+                full = Path.GetFullPath(path.Trim());
+            }
+            catch
+            {
+                continue;
+            }
+
             if (!seen.Add(full))
                 continue;
 
