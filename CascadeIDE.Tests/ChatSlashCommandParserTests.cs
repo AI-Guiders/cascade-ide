@@ -64,6 +64,27 @@ public sealed class ChatSlashCommandParserTests
     }
 
     [Fact]
+    public void TryParse_IntercomServerStatus_HasSubAction()
+    {
+        var parse = ChatSlashCommandParser.TryParse("/intercom server status");
+        Assert.True(parse.IsSlashLine);
+        Assert.False(parse.IsRejected);
+        Assert.Equal("intercom", parse.Head);
+        Assert.Equal("server", parse.Action);
+        Assert.Null(parse.SubAction);
+        Assert.Equal("status", parse.ArgsTail);
+    }
+
+    [Fact]
+    public void Catalog_ResolvesIntercomServerStatus()
+    {
+        var parse = ChatSlashCommandParser.TryParse("/intercom server status");
+        Assert.True(ChatSlashCommandCatalog.TryResolve(parse, out var d));
+        Assert.Equal("/intercom server status", d.SlashPath);
+        Assert.Equal(ChatSlashCommandExecutionKind.LocalIntercom, d.ExecutionKind);
+    }
+
+    [Fact]
     public void Catalog_ResolvesBuildRun()
     {
         var parse = ChatSlashCommandParser.TryParse("/build run");

@@ -29,4 +29,16 @@ public sealed class SlashRouteCatalogIndexTests
     {
         Assert.False(SlashRouteCatalogIndex.RouteRequiresArgTail("/intercom topic open"));
     }
+
+    [Fact]
+    public void GetArgTailKind_ServerStart_Optional()
+    {
+        Assert.Equal(SlashArgTailKind.Optional, SlashRouteCatalogIndex.GetArgTailKind("/intercom server start"));
+    }
+
+    [Fact]
+    public void GetArgTailKind_ServerStatus_None()
+    {
+        Assert.Equal(SlashArgTailKind.None, SlashRouteCatalogIndex.GetArgTailKind("/intercom server status"));
+    }
 }
