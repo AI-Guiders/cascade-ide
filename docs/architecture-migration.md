@@ -29,7 +29,7 @@
 
 | Файл | Строк (≈) | Содержание |
 |------|------------|------------|
-| `MainWindowViewModel.AgentEnvironment.cs` | 56 | AEE: PFD status strip, chat trace, epoch stale on write (ADR 0148 W3–W5). |
+| `MainWindowViewModel.AgentEnvironment.cs` | 65 | AEE: PFD status strip, chat trace, epoch stale on write (ADR 0148 W3–W5). |
 | `MainWindowViewModel.AutonomousAgent.cs` | 113 | Автономный агент (Power). |
 | `MainWindowViewModel.Capabilities.cs` | 23 | Реестр capabilities. |
 | `MainWindowViewModel.CascadeChord.cs` | 107 | Аккордный слой ADR 0060: корень `cascade_chord` из hotkeys.toml (по умолчанию Ctrl+K), затем тот же хвост мелодии, что после `c:`. Однозначный обычный alias (например `so`) исполняется без Enter при отсутствии более длинного alias-префикса; параметрические (`wai:`, `els:`:…) — только по Enter или из палитры. При конфликте префиксов (`gs` vs `gsu`) — точный хвост или Enter. |
@@ -61,7 +61,7 @@
 | `MainWindowViewModel.McpBreakpointReveal.cs` | 49 | MCP: постановка брейкпоинта с загрузкой решения и показом строки в редакторе. |
 | `MainWindowViewModel.McpHostBridge.cs` | 52 | Внутренний мост для `MainWindowIdeMcpHost` (Wave 2 Big Bang). |
 | `MainWindowViewModel.MfdShell.cs` | 58 | Оболочка Mfd: одна активная страница; навигация — команды и палитра. Якорь на экране задаётся presentation (зона Mfd в main и/или окно-хост). |
-| `MainWindowViewModel.PfdBackgroundStatus.cs` | 153 | Компактная полоса статуса над PFD/Forward: индексация HCI и solution warm-up (ADR 0141). |
+| `MainWindowViewModel.PfdBackgroundStatus.cs` | 162 | Компактная полоса статуса над PFD/Forward: индексация HCI и solution warm-up (ADR 0141). |
 | `MainWindowViewModel.Presentation.cs` | 277 | Вычисляемые свойства разметки, Workspace Health и видимости панелей (режимы UI). |
 | `MainWindowViewModel.PresentationLayout.CockpitSurfaceSnapshot.cs` | 8 | Сборка `CockpitSurfaceState` главного окна (`Build`). |
 | `MainWindowViewModel.PresentationLayout.cs` | 91 | ADR 0017: строка `presentation` и второй `TopLevel` — `MfdHostWindow` с полным вторичным контуром (п. 8). |
