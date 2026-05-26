@@ -77,17 +77,27 @@ public sealed class VerificationLadder
             if (green)
             {
                 var dedupKey = $"build|{solutionPath}";
-                if (!_dedup.ShouldCoalesce(dedupKey))
+                var coalesced = _dedup.ShouldCoalesce(dedupKey);
+                if (!coalesced)
                 {
                     maxRung = "L2";
                     var build = await _runner.RunBuildAsync(
-                        runId,
-                        solutionPath,
-                        waitForCompletion: true,
-                        cancellationToken).ConfigureAwait(false);
+                            runId,
+                            solutionPath,
+                            waitForCompletion: true,
+                            cancellationToken)
+                        .ConfigureAwait(false);
                     green = build.Success;
                     if (!green)
                         failure = build.Status;
+                }
+                else
+                {
+                    maxRung = "L2";
+                    slices.Add(new AgentTimeSlice(
+                        AgentRunPhaseKind.Environment,
+                        0,
+                        "L2: build skipped (dedup/coalesce window; prior build assumed sufficient)"));
                 }
             }
 
@@ -98,12 +108,17 @@ public sealed class VerificationLadder
                     Substrate = _sandbox.RecreateSubstrateBeforeTests(sandboxLease),
                 };
                 maxRung = "L3";
+                var supplementalEnv = sandboxLease.Substrate is null
+                    ? null
+                    : AgentSandboxProcessEnvironmentKeys.ForBundle(sandboxLease.Substrate);
+
                 var test = await _runner.RunTestsAsync(
                     runId,
                     solutionPath,
                     filterExpression: null,
                     waitForCompletion: true,
-                    cancellationToken).ConfigureAwait(false);
+                    cancellationToken,
+                    supplementalEnvironmentVariables: supplementalEnv).ConfigureAwait(false);
                 green = test.Success;
                 if (!green)
                     failure = test.Status;

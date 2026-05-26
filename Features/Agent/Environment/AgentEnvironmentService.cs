@@ -83,7 +83,10 @@ public sealed class AgentEnvironmentService : IAgentEnvironmentService
                 _active.RunId,
                 _active.VerifySnapshotId,
                 _active.PolicyWire,
-                _active.SandboxWire);
+                _active.SandboxWire,
+                WritesInvalidatedVerifyEpoch: _epoch.WritesInvalidatedVerifyEpoch,
+                SandboxRunDirectory: _activeLease?.RunDirectory,
+                ExecutionChannel: "BuildTestJobCoordinator");
         }
     }
 
@@ -273,10 +276,18 @@ public sealed record AgentEnvironmentStatusSnapshot(
     string? RunId,
     string? VerifySnapshotId,
     string? Policy,
-    string? SandboxProfile)
+    string? SandboxProfile,
+    bool WritesInvalidatedVerifyEpoch = false,
+    string? SandboxRunDirectory = null,
+    string ExecutionChannel = "BuildTestJobCoordinator")
 {
     public AgentEnvironmentStatusSnapshot(bool isActive, string? runId, string? verifySnapshotId, string? policy)
-        : this(isActive, runId, verifySnapshotId, policy, null)
+        : this(isActive, runId, verifySnapshotId, policy, null, false, null, "BuildTestJobCoordinator")
+    {
+    }
+
+    public AgentEnvironmentStatusSnapshot(bool isActive, string? runId, string? verifySnapshotId, string? policy, string? sandboxProfile)
+        : this(isActive, runId, verifySnapshotId, policy, sandboxProfile, false, null, "BuildTestJobCoordinator")
     {
     }
 }

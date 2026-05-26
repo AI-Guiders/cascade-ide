@@ -80,9 +80,14 @@ public static class ChatSlashAgentActions
             return true;
         }
 
+        var tail = status.WritesInvalidatedVerifyEpoch ? " · правки во время verify — перезапусти verify." : "";
         result = new(
             true,
-            $"AEE: verify {status.RunId![..8]}… · policy {status.Policy} · snapshot {status.VerifySnapshotId}");
+            $"AEE: verify {status.RunId![..8]}… · policy {status.Policy} · snapshot {status.VerifySnapshotId}"
+            + (!string.IsNullOrEmpty(status.SandboxRunDirectory)
+                ? $" · sandbox {status.SandboxRunDirectory}"
+                : "")
+            + $"{tail}");
         return true;
     }
 

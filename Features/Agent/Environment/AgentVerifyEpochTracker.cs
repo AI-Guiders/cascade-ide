@@ -10,8 +10,19 @@ public sealed class AgentVerifyEpochTracker
     private string? _runId;
     private string? _snapshotId;
     private HashSet<string> _watchedPaths = new(StringComparer.OrdinalIgnoreCase);
+    private bool _writesInvalidatedVerifyEpoch;
 
     public AgentVerifyEpochTracker(IDataBus dataBus) => _dataBus = dataBus;
+
+    /// <summary>Писали в workspace во время активного verify — результат лестницы может не соответствовать текущему дереву.</summary>
+    public bool WritesInvalidatedVerifyEpoch
+    {
+        get
+        {
+            lock (_gate)
+                return _writesInvalidatedVerifyEpoch;
+        }
+    }
 
     public void Begin(string runId, string snapshotId, string solutionPath)
     {
@@ -20,6 +31,7 @@ public sealed class AgentVerifyEpochTracker
             _runId = runId;
             _snapshotId = snapshotId;
             _watchedPaths = new(StringComparer.OrdinalIgnoreCase) { Path.GetFullPath(solutionPath) };
+            _writesInvalidatedVerifyEpoch = false;
         }
     }
 
@@ -57,7 +69,11 @@ public sealed class AgentVerifyEpochTracker
         }
 
         if (runId is not null && snapshotId is not null)
+        {
+            lock (_gate)
+                _writesInvalidatedVerifyEpoch = true;
             _dataBus.Publish(new AgentVerifyEpochStale(runId, snapshotId, "write_in_epoch"));
+        }
     }
 
     public void End(string? reason = null)
@@ -70,6 +86,7 @@ public sealed class AgentVerifyEpochTracker
             _runId = null;
             _snapshotId = null;
             _watchedPaths.Clear();
+            _writesInvalidatedVerifyEpoch = false;
         }
     }
 }

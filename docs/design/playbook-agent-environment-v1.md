@@ -54,6 +54,8 @@ CLI (`dotnet build|test|format`) — оболочка над **MIT/Apache** би
 5. **Slash** — `/agent verify`, `/agent cancel`, `/agent status` ([0138](../adr/0138-cockpit-command-line-and-parametric-ranges.md)).
 6. **Ephemeral sandbox** — substrate bundle (WitDB + ports + temp); fresh per L3+ task.
 
+На шаге L3 лестницы verify переменные **`CASCADE_AGENT_SUBSTRATE_WIT_DB`** и **`CASCADE_AGENT_SUBSTRATE_DEV_PORT`** добавляются в среду процесса `dotnet test` (тест может читать их при желании явной изоляции).
+
 Не в W1: worktree sandbox, batch native tools, L4, PFD instrument deck, gutter dim для epoch, `idle_user`.
 
 ## Матрица согласованности среды (W1–MLP)

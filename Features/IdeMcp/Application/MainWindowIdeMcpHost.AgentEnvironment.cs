@@ -57,6 +57,9 @@ internal sealed partial class MainWindowIdeMcpHost
             verify_snapshot_id = s.VerifySnapshotId,
             policy = s.Policy,
             sandbox_profile = s.SandboxProfile,
+            sandbox_run_directory = s.SandboxRunDirectory,
+            execution_channel = s.ExecutionChannel,
+            writes_invalidated_verify_epoch = s.WritesInvalidatedVerifyEpoch,
         }));
     }
 

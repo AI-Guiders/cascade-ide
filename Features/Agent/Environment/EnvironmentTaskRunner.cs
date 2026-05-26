@@ -44,11 +44,16 @@ public sealed class EnvironmentTaskRunner
         string solutionPath,
         string? filterExpression,
         bool waitForCompletion,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        IReadOnlyDictionary<string, string>? supplementalEnvironmentVariables = null)
     {
-        var options = string.IsNullOrWhiteSpace(filterExpression)
+        var baseOptions = string.IsNullOrWhiteSpace(filterExpression)
             ? DotnetExecutionOptions.Empty
             : DotnetExecutionOptions.Empty with { Filter = filterExpression.Trim() };
+
+        var options = supplementalEnvironmentVariables is null
+            ? baseOptions
+            : baseOptions with { SupplementalEnvironmentVariables = supplementalEnvironmentVariables };
 
         return await RunCoreJobAsync(
             runId,

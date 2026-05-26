@@ -91,6 +91,10 @@
 | `ide_read_agent_notes` | Прочитать заметки агента из `.cascade-ide/agent-notes.md`. Возвращает содержимое или пустую строку. Агент восстанавливает контекст в новом чате. | —; возвращает текст файла или `""` |
 | `ide_execute_command` | Унифицированный вызов IDE-команды по коду (`command_id`) с аргументами (`args`) в формате выбранного инструмента. Нужен для единой точки входа (MCP/меню/хоткеи). | `command_id`, опционально `args` (JSON object) |
 
+**AEE (`ide_agent_*`) и `shell_escape_tier`:** в `settings.toml`, секция `[agent.environment]`, ключ `shell_escape_tier`: `deny` (по умолчанию), `l3_only`, `allow_with_audit`. При `deny` команды **`build`** / **`build_structured`** / **`run_tests`** / **`run_affected_tests`** / **`run_code_cleanup`**, если идут через `ide_execute_command` (или совместимые тулы вроде `ide_build`), возвращают JSON с **`error: shell_escape_blocked`**; для сборки и verify используй **`ide_agent_verify`**. В `l3_only` допускаются только прямые вызовы тестов; `allow_with_audit` всё пропускает и пишет аудит в trace.
+
+**`ide_agent_status`:** JSON включает `sandbox_run_directory`, `execution_channel` (очередь `BuildTestJobCoordinator`), `writes_invalidated_verify_epoch` (были сохранённые правки .cs/workspace во время активного verify).
+
 **Меню, тулбар, task bar и чат через `ide_execute_command`:** те же `command_id`, что заданы в частичном классе `IdeCommands` (`Services/IdeCommands.cs`, `Services/IdeCommands.*.cs`).
 
 **Имена MCP-тулов (Cursor):** только `A–Z`, `a–z`, `0–9`, `_`; точки в `command_id` на wire → `_` (`intercom.reveal_attachment` → `ide_intercom_reveal_attachment`). Длина `server`+`tool` ≤ 60 — длинные команды получают короткий alias (`chat_toggle_product_spine_in_agent_context` → `ide_chat_toggle_spine_ctx`). Канон: `Services/IdeMcpToolNaming.cs`.

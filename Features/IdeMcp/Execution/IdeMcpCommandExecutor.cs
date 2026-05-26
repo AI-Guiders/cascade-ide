@@ -1,4 +1,5 @@
 using System.Text.Json;
+using CascadeIDE.Features.Agent.Environment;
 using CascadeIDE.Services;
 using CascadeIDE.ViewModels;
 
@@ -23,6 +24,12 @@ internal sealed partial class IdeMcpCommandExecutor
     /// <summary>Вход с MCP/агента маршалится на UI в <see cref="MainWindowViewModel"/> до вызова хендлеров; UI-операции выполнять напрямую без вложенного маршалинга.</summary>
     public async Task<string> ExecuteAsync(string commandId, IReadOnlyDictionary<string, JsonElement>? args, CancellationToken cancellationToken)
     {
+        var shellBlock = ShellEscapePolicy.TryBlockJson(
+            commandId,
+            _vm.GetCascadeSettingsForExecutor().Agent.Environment.ShellEscapeTier);
+        if (shellBlock is not null)
+            return shellBlock;
+
         if (_handlers.TryGetValue(commandId, out var handler))
             return await handler(args, cancellationToken);
 

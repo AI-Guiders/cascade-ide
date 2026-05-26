@@ -58,3 +58,17 @@ public sealed record AgentSandboxSubstrateBundle(
     string MarkerPath,
     string PortFilePath,
     string SubstrateDirectory);
+
+/// <summary>Переменные среды для дочернего <c>dotnet test</c> (ADR 0148 §8.1.2). Тесты могут явно опираться на ключи при необходимости изоляции.</summary>
+public static class AgentSandboxProcessEnvironmentKeys
+{
+    public const string WitDbPath = "CASCADE_AGENT_SUBSTRATE_WIT_DB";
+
+    public const string DevPort = "CASCADE_AGENT_SUBSTRATE_DEV_PORT";
+
+    public static Dictionary<string, string> ForBundle(AgentSandboxSubstrateBundle bundle) => new(StringComparer.Ordinal)
+    {
+        [WitDbPath] = bundle.DatabasePath,
+        [DevPort] = bundle.DevPort.ToString(),
+    };
+}
