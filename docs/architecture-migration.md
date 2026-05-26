@@ -70,7 +70,7 @@
 | `MainWindowViewModel.PresentationLayoutAuthority.cs` | 14 | Запись intent видимости панелей (семантика «хочу»); фактическая поверхность — `MainWindowShellSurfaceCompositor`. |
 | `MainWindowViewModel.PrimaryWorkSurface.cs` | 66 | Переключатель лобового якоря Intercom / Editor (ADR 0120). |
 | `MainWindowViewModel.SettingsReactive.cs` | 252 | Реакции на изменение полей настроек и ключей API: диск, автономный агент, панели. |
-| `MainWindowViewModel.ShellConstruction.cs` | 237 | Конструктор и композиция shell: дочерние VM, шина, DAP/HCI, топология presentation (ADR 0017). |
+| `MainWindowViewModel.ShellConstruction.cs` | 239 | Конструктор и композиция shell: дочерние VM, шина, DAP/HCI, топология presentation (ADR 0017). |
 | `MainWindowViewModel.ShellSession.cs` | 187 | Wave 2 этап 3: `ShellChromeViewModel` + прокси на MWVM для привязок и presentation. |
 | `MainWindowViewModel.ShellState.AiProviders.cs` | 58 | Часть `ShellState`: режим ИИ и облачные ключи привязаны к нижнему приложению/чату. |
 | `MainWindowViewModel.ShellState.AutonomousAgentStripe.cs` | 63 | Часть `ShellState`: полоса/карточки автономной задачи агента, безопасности, LOC и сводки тестов для IDE Health. |
