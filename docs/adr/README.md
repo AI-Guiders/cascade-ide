@@ -28,7 +28,7 @@
 | ID | ADR |
 |----|-----|
 | 0010, 0028–0029 | [UI modes](0010-ui-modes-toml-configuration.md) · [settings.toml](0028-user-settings-toml-localappdata-and-secrets.md) · [TOML-first UI](0029-configuration-toml-canonical-ui-facade.md) |
-| 0030, 0040, 0050–0051, 0083, 0086 | [команды/хоткеи](0030-command-ids-hotkeys-and-ui-registry-layers.md) · [LSP presets](0040-lsp-launch-line-settings-toml-presets-and-environment.md) · [инструменты в TOML](0050-declarative-instrument-zone-placement-toml.md) · [intent routing](0051-intent-based-attention-routing-toml.md) · [`[ai]`](0083-ai-mode-and-nested-settings-toml.md) · [тема UI](0086-ui-theme-toml-canonical-json-mcp-wire.md) |
+| 0030, 0040, 0050–0051, 0083, 0086, 0149 | [команды/хоткеи](0030-command-ids-hotkeys-and-ui-registry-layers.md) · [LSP presets](0040-lsp-launch-line-settings-toml-presets-and-environment.md) · [`*_env`](0149-settings-toml-pointwise-environment-bindings.md) · [инструменты в TOML](0050-declarative-instrument-zone-placement-toml.md) · [intent routing](0051-intent-based-attention-routing-toml.md) · [`[ai]`](0083-ai-mode-and-nested-settings-toml.md) · [тема UI](0086-ui-theme-toml-canonical-json-mcp-wire.md) |
 
 ### Кокпит, CDS и вычислительный контур
 
@@ -45,7 +45,7 @@
 |----|-----|
 | 0008, 0016, 0038 | [контракты MCP](0008-mcp-contracts-and-testable-infrastructure.md) · [ACP](0016-agent-client-protocol-external-agent.md) · [фасад агента](0038-agent-facade-ai-provider-and-tool-orchestration.md) |
 | 0031, 0045, 0048, 0082, 0087 | [чат](0031-agent-chat-clarification-batches-and-threading.md) · [persistence](0045-agent-chat-persistence-event-log-and-projections.md) · [Cursor parity](0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) · [loopback MCP](0082-acp-ide-mcp-loopback-single-process.md) · [MAF](0087-microsoft-agent-framework-builtin-agent-orchestration.md) |
-| 0105–0106, 0118 | [hybrid index](0105-hybrid-codebase-index-for-csharp-web.md) · [интеграция в CIDE](0106-hybrid-codebase-index-cascadeide-integration-and-semantic-map.md) · [agent-notes 2.0](0118-agent-notes-core-2-toml-and-knowledge-path.md) |
+| 0105–0106, 0118, 0148 | [hybrid index](0105-hybrid-codebase-index-for-csharp-web.md) · [интеграция в CIDE](0106-hybrid-codebase-index-cascadeide-integration-and-semantic-map.md) · [agent-notes 2.0](0118-agent-notes-core-2-toml-and-knowledge-path.md) · [AEE / verify ladder](0148-agent-execution-environment-verification-ladder-and-native-tooling.md) |
 
 ### Граф, semantic map и навигация
 
@@ -64,7 +64,7 @@
 
 | ID | ADR |
 |----|-----|
-| 0128 | [якоря attach / `[M:…]` / re-resolve](0128-intercom-attachment-anchors-and-code-references.md) — **In progress** (reveal/select в коде; chips `/attach` — нет) |
+| 0128 | [якоря attach / `[M:…]` / re-resolve](0128-intercom-attachment-anchors-and-code-references.md) — **Implemented** (v1: slash `/attach`, bracket autocomplete; chips UI — v2+) |
 | 0129 | [fenced code и MD в теле](0129-intercom-message-body-markdown-and-fenced-code.md) — **In progress** (v1 `SplitSegments`) |
 | 0130 | [reveal без selection (MCP)](0130-editor-agent-range-reveal-without-selection.md) — **Implemented** |
 | 0131 | [`/editor select|reveal code […]`](0131-editor-slash-select-code-by-bracket-reference.md) — **In progress** |
@@ -76,8 +76,8 @@
 | 0135 | [symbol cache + HCI sidecar](0135-intercom-attach-symbol-cache-and-hci-sidecar.md) — **In progress** (L1 parse cache, L2 SQLite @ HCI reindex) |
 | 0136 | [gutter + `/intercom` namespace](0136-intercom-feed-gutter-and-slash-namespace.md) — **In progress** (select ПКМ/slash, без старых `/topic`) |
 | 0138 | [Cockpit Command Line](0138-cockpit-command-line-and-parametric-ranges.md) — **Accepted** (парсер + slash multi-select; CCL UI — фаза A) |
-| 0141 | [прогрев при open solution](0141-solution-scoped-warmup-orchestration.md) — **Accepted · Proposed** (оркестратор attach/bracket/HCI) |
-| 0148 | [Agent Execution Environment](0148-agent-execution-environment-verification-ladder-and-native-tooling.md) — **Proposed** (ladder, runner, native tools; MLP) |
+| 0141 | [прогрев при open solution](0141-solution-scoped-warmup-orchestration.md) — **Implemented** (v1 оркестратор; AEE L0 warmup — [0148](0148-agent-execution-environment-verification-ladder-and-native-tooling.md)) |
+| 0148 | [Agent Execution Environment](0148-agent-execution-environment-verification-ladder-and-native-tooling.md) — **In progress** (W1–W2 в коде; supervised build worker; MLP на target hardware) |
 
 <a id="adr-index-full"></a>
 
@@ -204,13 +204,13 @@
 | [0117](0117-remote-operator-surface-multidevice.md) | Remote operator surface: **PWA**-пульт с телефона/другого ПК, Operator Gateway; не mobile IDE; [0017](0017-multi-window-workspace-and-agent-surfaces.md), [0108](0108-web-ai-portal-host-object-tools-bridge.md) | Proposed |
 | [0118](0118-agent-notes-core-2-toml-and-knowledge-path.md) | Agent Notes Core **2.0**: TOML in-proc, `config_path` SSOT с MCP, `knowledge_path` в `IdeCommands` | Accepted |
 | [0119](0119-chat-slash-commands-intercom-surface.md) | Чат как command line: Intercom (`/card`) + IDE (`/build run`, `/test run`, `/debug launch`); autocomplete, `command_id` | Accepted · Implemented |
-| [0120](0120-primary-work-surface-intercom-or-editor.md) | `primary_work_surface`: Intercom или Editor в якоре Forward (аналог Agent/Editor в Cursor) | Proposed |
+| [0120](0120-primary-work-surface-intercom-or-editor.md) | `primary_work_surface`: Intercom или Editor в якоре Forward (аналог Agent/Editor в Cursor) | Accepted · Implemented |
 | [0121](0121-intent-oriented-programming-paradigm.md) | Парадигма IOP (Intent-Oriented Programming) — концептуальный фундамент; [манифест](../iop-manifest-v1.md) | Accepted |
 | [0123](0123-intercom-full-skia-surface-evolution.md) | Intercom → full-Skia surface (Slack/MM-like); strangler фазы 0–4; Avalonia = фюзеляж | Accepted |
 | [0124](0124-slash-parametric-editor-line-commands.md) | Фича: параметрический slash = полный паритет `melody_shape=parametric` в TOML (`wire_class`, binders, TOML, SubAction) | Accepted · Implemented |
 | [0125](0125-slash-workspace-file-commands-and-dynamic-completion.md) | Slash workspace/file: `/file open`, `/solution new`, динамические подсказки по файлам; `create_project_in_solution` (console/classlib/webapi) | Accepted · Implemented |
 | [0126](0126-intercom-inspect-slash-and-compact-chrome-status.md) | Intercom inspect: `/topic`/`/spine` list\|tree (`kind=report`); статус в compact toolbar; UX открытия файла из slash | Accepted · Implemented |
-| [0128](0128-intercom-attachment-anchors-and-code-references.md) | Intercom: якоря вложений (attach), `[M:…]` / chips, reveal, re-resolve; ортогонально `/file open` и `/editor line` | Accepted · In progress |
+| [0128](0128-intercom-attachment-anchors-and-code-references.md) | Intercom: якоря вложений (attach), `[M:…]` / bracket autocomplete, reveal, re-resolve; chips UI — v2+ | Accepted · Implemented |
 | [0129](0129-intercom-message-body-markdown-and-fenced-code.md) | Intercom: тело сообщения — fenced code, inline MD в ленте, полный preview через [0069](0069-markdown-preview-tool-surface-and-renderer-decoupling.md) | Accepted · In progress |
 | [0130](0130-editor-agent-range-reveal-without-selection.md) | Подсветка диапазона кода для агента без изменения selection (`reveal_editor_range`, `EditorAgentRangeReveal`) | Accepted · Implemented |
 | [0131](0131-editor-slash-select-code-by-bracket-reference.md) | `/editor select|reveal code [M:…]` — bracket → select/reveal в буфере, не attach | Accepted · In progress |
@@ -221,7 +221,8 @@
 | [0145](0145-intercom-web-pwa-team-client.md) | Intercom Web: PWA team client — **отдельный org-репо** `intercom-web` | Accepted |
 | [0146](0146-intercom-wire-canonical-protocol-package.md) | Intercom Wire: канонический пакет `intercom-wire/` (схемы, extensions, HTTP profiles) | Accepted |
 | [0147](0147-intercom-team-identity-roles-and-cide-server-admin.md) | Intercom: per-team roles, agent accounts (display name), CIDE server/team admin | Accepted |
-| [0148](0148-agent-execution-environment-verification-ladder-and-native-tooling.md) | AEE: verification ladder, environment task runner, native in-process tools, sandbox, time accounting (standalone CIDE) | Proposed |
+| [0148](0148-agent-execution-environment-verification-ladder-and-native-tooling.md) | AEE: verification ladder, environment task runner, supervised build hosts, L0+warmup, sandbox (W1–W2 в коде; W3–W6 частично) | Accepted · In progress |
+| [0149](0149-settings-toml-pointwise-environment-bindings.md) | Точечные `*_env` в `settings.toml` (`SettingsEnvResolver`); LSP, intercom transport, ACP, agent_notes | Accepted · Implemented |
 | [0134](0134-intercom-message-prepare-pipeline-v1.md) | Intercom: единый prepare-pipeline (wire, Skia, MCP fail-closed) | Accepted · In progress |
 | [0135](0135-intercom-attach-symbol-cache-and-hci-sidecar.md) | Intercom attach: L1 Roslyn file cache, L2 symbol sidecar colocated с HCI | Accepted · In progress |
 | [0136](0136-intercom-feed-gutter-and-slash-namespace.md) | Intercom: gutter номеров, явный select, единый `/intercom` slash | Accepted · In progress |
