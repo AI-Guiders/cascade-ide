@@ -124,7 +124,14 @@ public sealed class IdeMcpServerDispatchTests
         public Task<string> GetEditorStateAsync(int? maxPreviewChars = null) => throw new NotImplementedException();
         public Task<string> GetEditorContentRangeAsync(int startLine, int endLine) => throw new NotImplementedException();
         public Task<string> GetOpenDocumentTextAsync(string? filePath, int? maxChars) => throw new NotImplementedException();
-        public void ApplyEdit(string filePath, int startLine, int startColumn, int endLine, int endColumn, string newText) => throw new NotImplementedException();
+        public Task<string> ApplyEditAsync(string filePath, int startLine, int startColumn, int endLine, int endColumn, string newText) =>
+            Task.FromResult("OK");
+
+        public Task<string> ReadWorkspaceFileAsync(string filePath, int? offset, int? limit, int? maxChars) =>
+            Task.FromResult("""{"text":""}""");
+
+        public Task<string> SaveDocumentAsync(string? filePath, string? content) =>
+            Task.FromResult("""{"file_path":"x"}""");
         public void GoToPosition(string? filePath, int line, int column, int? endLine = null, int? endColumn = null) => throw new NotImplementedException();
         public void RevealEditorRange(string? filePath, int startLine, int endLine, int? durationMs) => throw new NotImplementedException();
         public string GetSolutionInfo() => throw new NotImplementedException();

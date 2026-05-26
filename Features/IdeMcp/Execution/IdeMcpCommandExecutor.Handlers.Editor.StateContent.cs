@@ -29,5 +29,30 @@ internal sealed partial class IdeMcpCommandExecutor
                 maxCharsOpen = mcOpen;
             return await a.GetOpenDocumentTextAsync(McpCommandJsonArgs.String(args, "file_path"), maxCharsOpen);
         });
+        add(Services.IdeCommands.ReadWorkspaceFile, async (args, _) =>
+        {
+            var a = _actions;
+            var path = McpCommandJsonArgs.String(args, "file_path");
+            if (string.IsNullOrWhiteSpace(path))
+                return """{"error":"no_path","message":"file_path is required."}""";
+            int? offset = null;
+            int? limit = null;
+            int? maxChars = null;
+            if (args is not null)
+            {
+                if (args.TryGetValue("offset", out var off) && off.TryGetInt32(out var o) && o > 0)
+                    offset = o;
+                if (args.TryGetValue("limit", out var lim) && lim.TryGetInt32(out var l) && l > 0)
+                    limit = l;
+                if (args.TryGetValue("max_chars", out var mc) && mc.TryGetInt32(out var m) && m > 0)
+                    maxChars = m;
+            }
+
+            return await a.ReadWorkspaceFileAsync(path, offset, limit, maxChars);
+        });
+        add(Services.IdeCommands.SaveDocument, async (args, _) =>
+            await _actions.SaveDocumentAsync(
+                McpCommandJsonArgs.String(args, "file_path"),
+                McpCommandJsonArgs.String(args, "content")));
     }
 }

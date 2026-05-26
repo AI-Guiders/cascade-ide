@@ -2,11 +2,13 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using Avalonia.Threading;
 using CascadeIDE.Features.IdeMcp.Application;
 using CascadeIDE.Models;
 using CascadeIDE.Features.Workspace;
+using CascadeIDE.Features.Workspace.DataAcquisition;
 using CascadeIDE.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Dock.Model.Core;
@@ -303,6 +305,99 @@ public sealed partial class DocumentsWorkspaceViewModel : ObservableObject
         SelectedDocument.IsDirty = !string.Equals(SelectedDocument.Content, SelectedDocument.OriginalContent, StringComparison.Ordinal);
         _host.NotifyAgentEnvironmentDocumentWrite(SelectedDocument.FilePath);
     }
+
+    /// <summary>MCP <c>apply_edit</c>: правка в модели любой открытой вкладки; при необходимости открывает файл.</summary>
+    public string ApplyMcpEditToDocument(
+        string filePath,
+        int startLine,
+        int startColumn,
+        int endLine,
+        int endColumn,
+        string newText)
+    {
+        if (!SolutionTreePath.TryGetFullPath(filePath, out var normalized))
+            return JsonSerializer.Serialize(new { error = "invalid_path", message = "Некорректный file_path." });
+
+        var doc = FindOpenDocument(normalized);
+        if (doc is null)
+        {
+            if (!File.Exists(normalized))
+                return JsonSerializer.Serialize(new { error = "not_found", message = "Файл не найден.", file_path = normalized });
+
+            OpenOrActivateDocument(normalized);
+            doc = FindOpenDocument(normalized);
+            if (doc is null)
+                return JsonSerializer.Serialize(new { error = "open_failed", message = "Не удалось открыть файл.", file_path = normalized });
+        }
+
+        if (!IdeMcpEditorOrchestrator.TryReplaceTextRange(
+                doc.Content, startLine, startColumn, endLine, endColumn, newText, out var updated))
+            return JsonSerializer.Serialize(new { error = "invalid_range", message = "Некорректный диапазон line/column.", file_path = doc.FilePath });
+
+        doc.Content = updated;
+        doc.IsDirty = !string.Equals(doc.Content, doc.OriginalContent, StringComparison.Ordinal);
+        _host.NotifyAgentEnvironmentDocumentWrite(doc.FilePath);
+
+        if (IsActiveDocumentForHost(doc))
+            _host.EditorText = updated;
+
+        return "OK";
+    }
+
+    /// <summary>MCP <c>save_document</c>: запись буфера открытой вкладки или явного content на диск.</summary>
+    public string SaveDocumentToDisk(string? filePath, string? content)
+    {
+        var workspace = _host.McpGetWorkspacePath();
+
+        if (!string.IsNullOrWhiteSpace(content))
+        {
+            if (string.IsNullOrWhiteSpace(filePath))
+                return JsonSerializer.Serialize(new { error = "no_path", message = "file_path обязателен при записи content." });
+
+            if (!WorkspaceDocumentFileIo.TryResolvePath(workspace, null, filePath, out var target, out var resolveError))
+                return JsonSerializer.Serialize(new { error = "resolve_failed", message = resolveError });
+
+            if (!WorkspaceDocumentFileIo.TryWriteText(target, content, createIfMissing: true, out var writeError))
+                return JsonSerializer.Serialize(new { error = "write_failed", message = writeError, file_path = target });
+
+            var open = FindOpenDocument(target);
+            if (open is not null)
+            {
+                open.ReloadContent(content);
+                if (IsActiveDocumentForHost(open))
+                    _host.EditorText = open.Content;
+            }
+
+            _host.NotifyAgentEnvironmentDocumentWrite(target);
+            return JsonSerializer.Serialize(new { file_path = target, bytes = Encoding.UTF8.GetByteCount(content) });
+        }
+
+        var path = string.IsNullOrWhiteSpace(filePath) ? _host.CurrentFilePath : filePath.Trim();
+        if (string.IsNullOrWhiteSpace(path))
+            return JsonSerializer.Serialize(new { error = "no_path", message = "Нет открытого файла и file_path не задан." });
+
+        if (!WorkspaceDocumentFileIo.TryResolvePath(workspace, null, path, out var normalized, out var resolveErr))
+            return JsonSerializer.Serialize(new { error = "resolve_failed", message = resolveErr });
+
+        var doc = FindOpenDocument(normalized);
+        if (doc is null)
+            return JsonSerializer.Serialize(new { error = "not_open", message = "Файл не открыт; передай content для записи на диск.", file_path = normalized });
+
+        if (!WorkspaceDocumentFileIo.TryWriteText(normalized, doc.Content, createIfMissing: false, out var diskError))
+            return JsonSerializer.Serialize(new { error = "write_failed", message = diskError, file_path = normalized });
+
+        doc.ReloadContent(doc.Content);
+        _host.NotifyAgentEnvironmentDocumentWrite(normalized);
+        return JsonSerializer.Serialize(new { file_path = normalized, bytes = Encoding.UTF8.GetByteCount(doc.Content) });
+    }
+
+    private OpenDocumentViewModel? FindOpenDocument(string normalizedPath) =>
+        OpenDocuments.FirstOrDefault(d =>
+            EditorTextCoordinateUtilities.PathsReferToSameFile(d.FilePath, normalizedPath));
+
+    private bool IsActiveDocumentForHost(OpenDocumentViewModel doc) =>
+        !string.IsNullOrEmpty(_host.CurrentFilePath)
+        && EditorTextCoordinateUtilities.PathsReferToSameFile(_host.CurrentFilePath, doc.FilePath);
 
     partial void OnSelectedDocumentChanged(OpenDocumentViewModel? value)
     {

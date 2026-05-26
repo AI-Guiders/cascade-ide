@@ -86,6 +86,26 @@ public static class IdeMcpEditorOrchestrator
             file_path_requested = filePathRequested
         });
 
+    /// <summary>Замена диапазона (1-based line/column) в <paramref name="text"/>.</summary>
+    public static bool TryReplaceTextRange(
+        string text,
+        int startLine,
+        int startColumn,
+        int endLine,
+        int endColumn,
+        string newText,
+        out string updated)
+    {
+        updated = text;
+        var start = EditorTextCoordinateUtilities.LineColumnToOffset(text, startLine, startColumn);
+        var end = EditorTextCoordinateUtilities.LineColumnToOffset(text, endLine, endColumn);
+        if (start < 0 || end < 0)
+            return false;
+
+        updated = text[..start] + (newText ?? "") + text[end..];
+        return true;
+    }
+
     public static string SerializeOpenDocumentText(
         string? filePath,
         string? fullText,

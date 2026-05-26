@@ -197,8 +197,40 @@ internal static class IdeMcpToolCatalogFull
             },
             new()
             {
+                Name = "ide_read_workspace_file",
+                Description = "Прочитать текст файла workspace с диска (в т.ч. если вкладка не открыта). JSON: file_path, length, text, truncated; offset/limit — строки 1-based.",
+                InputSchema = Schema(new
+                {
+                    type = "object",
+                    properties = new
+                    {
+                        file_path = new { type = "string" },
+                        offset = new { type = "integer", description = "Первая строка (1-based)." },
+                        limit = new { type = "integer", description = "Число строк." },
+                        max_chars = new { type = "integer", description = "Обрезка текста." }
+                    },
+                    required = new[] { "file_path" }
+                })
+            },
+            new()
+            {
+                Name = "ide_save_document",
+                Description = "Сохранить на диск: без content — буфер открытой вкладки; с content — полная замена файла (создаёт при отсутствии). JSON: file_path, bytes.",
+                InputSchema = Schema(new
+                {
+                    type = "object",
+                    properties = new
+                    {
+                        file_path = new { type = "string", description = "Путь; пусто — текущий открытый файл (только для save буфера)." },
+                        content = new { type = "string", description = "Полное содержимое для записи." }
+                    },
+                    required = Array.Empty<string>()
+                })
+            },
+            new()
+            {
                 Name = "ide_apply_edit",
-                Description = "Применить правку в открытом файле: заменить диапазон (1-based line/column) на новый текст.",
+                Description = "Применить правку: заменить диапазон (1-based) в модели документа; открывает файл при необходимости; любая открытая вкладка.",
                 InputSchema = Schema(new
                 {
                     type = "object",

@@ -488,8 +488,6 @@ public partial class DockDocumentView : UserControl
 
         _vm.SetEditorStateProvider(maxPreview => EditorHelpers.GetEditorState(_editor, _vm.CurrentFilePath, maxPreview));
         _vm.SetEditorContentRangeProvider((startLine, endLine) => EditorHelpers.GetEditorContentRange(_editor, startLine, endLine));
-        _vm.SetApplyEdit((path, sl, sc, el, ec, newText) =>
-            EditorHelpers.ApplyEditInEditor(_editor, _vm, path, sl, sc, el, ec, newText));
         _vm.SetFocusEditor(() => _editor.Focus());
     }
 

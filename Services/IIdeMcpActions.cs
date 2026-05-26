@@ -24,8 +24,12 @@ public interface IIdeMcpActions
     Task<string> GetEditorContentRangeAsync(int startLine, int endLine);
     /// <summary>Полный текст открытой вкладки из модели документа. JSON: file_path, length, truncated, is_dirty, text; или error. filePath null — текущий файл; maxChars — опциональная обрезка.</summary>
     Task<string> GetOpenDocumentTextAsync(string? filePath, int? maxChars);
-    /// <summary>Применить правку: заменить диапазон в файле (1-based). Файл должен быть открыт.</summary>
-    void ApplyEdit(string filePath, int startLine, int startColumn, int endLine, int endColumn, string newText);
+    /// <summary>Применить правку: заменить диапазон (1-based). Открывает файл при необходимости; любая открытая вкладка.</summary>
+    Task<string> ApplyEditAsync(string filePath, int startLine, int startColumn, int endLine, int endColumn, string newText);
+    /// <summary>Прочитать текст файла workspace с диска. JSON.</summary>
+    Task<string> ReadWorkspaceFileAsync(string filePath, int? offset, int? limit, int? maxChars);
+    /// <summary>Сохранить на диск (буфер вкладки или content). JSON.</summary>
+    Task<string> SaveDocumentAsync(string? filePath, string? content);
     /// <summary>Перейти на позицию (и опционально выделить до end). Если файл не открыт — открыть.</summary>
     void GoToPosition(string? filePath, int line, int column, int? endLine = null, int? endColumn = null);
     void RevealEditorRange(string? filePath, int startLine, int endLine, int? durationMs);

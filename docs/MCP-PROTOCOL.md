@@ -127,7 +127,7 @@
 | `ide_agent_cancel` | Cancel active verify. returns: json. |
 | `ide_agent_last` | Last verify run summary. returns: json. |
 | `ide_agent_sandbox_prepare` | Prepare sandbox. args: profile:string, workspace_root:string; returns: json; example: {"profile":"agent_ephemeral"}. |
-| `ide_agent_status` | AEE status snapshot. returns: json. |
+| `ide_agent_status` | AEE status snapshot: active, run_id, verify_snapshot_id, policy, sandbox_profile, sandbox_run_directory, execution_channel (supervised build host kind), writes_invalidated_verify_epoch. returns: json. |
 | `ide_agent_verify` | Verification ladder. args: policy:string, sandbox_profile:string, solution_path:string; returns: json; example: {"policy":"standard"}. |
 | `list_agent_notes_revisions` | Список ревизий заметок агента. args: limit?:integer; returns: json; example: {"limit":20}. |
 | `memory_health` | Health-check памяти: размер hot-context и рекомендации. args: active_scope?:string; returns: json; example: {"active_scope":"door-to-singularity"}. |
@@ -313,10 +313,12 @@
 | `load_solution` | Загрузить решение (.sln/.slnx/.slnf), один проект (.csproj/.fsproj) или каталог как workspace (дерево без .sln) — обновить обозреватель. args: path:string; returns: text; example: {"path":"D:\\repo\\MyApp.csproj"}. |
 | `open_file` | Открыть файл в редакторе IDE. args: path:string; returns: text; example: {"path":"C:\\tmp\\a.txt"}. |
 | `ping` | Живость MCP-хоста IDE (без аргументов). Имя MCP-тула: `ide_ping`. returns: json. |
+| `read_workspace_file` | Прочитать файл workspace с диска (не только открытые вкладки). args: file_path:string, offset?:integer, limit?:integer, max_chars?:integer; returns: json; example: {"file_path":"src/Program.cs"}. |
 | `remove_breakpoint` | Снять брейкпоинт. args: file_path:string, line:integer; returns: text; example: {"file_path":"C:\\tmp\\a.cs","line":42}. |
 | `request_confirmation` | Запросить подтверждение у пользователя. args: message:string; returns: text; example: {"message":"Продолжить?"}. Возвращает `ok`/`cancel`. |
 | `restart_mcp_clients` | Пересоздать клиентов внешних MCP и сбросить сессию Cursor ACP (после сбоев транспорта). Имя MCP-тула: `ide_restart_mcp_clients`. returns: json. |
 | `reveal_editor_range` | Показать диапазон строк в редакторе transient-подсветкой без изменения selection (ADR 0130). args: file_path:string, start_line?:integer, end_line?:integer, member_key?:string, syntax_scope?:object, duration_ms?:integer; returns: text; example: {"file_path":"C:\\tmp\\a.cs","start_line":10,"end_line":25,"duration_ms":4000}. |
+| `save_document` | Сохранить документ на диск: буфер открытой вкладки или полная замена content. args: file_path?:string, content?:string; returns: json; example: {"file_path":"src/Program.cs"}. |
 | `select` | Выделить диапазон в редакторе (1-based). args: file_path:string, start_line:integer, start_column:integer, end_line:integer, end_column:integer; returns: text; example: {"file_path":"C:\\tmp\\a.cs","start_line":1,"start_column":1,"end_line":1,"end_column":10}. |
 | `set_breakpoint` | Поставить брейкпоинт: при необходимости загрузка найденного .sln/.slnx/.slnf, запись в JSON отладки, открытие файла и переход к строке. args: file_path:string, line:integer, condition?:string; returns: text; example: {"file_path":"C:\\tmp\\a.cs","line":42}. |
 | `show_editor_preview` | Показать превью текущего файла из редактора в отдельном окне (контент берётся из IDE). returns: text. |
