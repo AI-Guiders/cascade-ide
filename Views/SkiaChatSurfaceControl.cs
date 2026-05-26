@@ -309,10 +309,20 @@ public partial class SkiaChatSurfaceControl : Control
                 _scrollOffset = 0;
 
             var next = Snapshot ?? ChatSurfaceSnapshot.Empty;
-            if (DetailThreadId == Guid.Empty && next.State.ActiveThreadId != Guid.Empty)
+            if (change.Property == SnapshotProperty)
+            {
+                if (DetailThreadId == Guid.Empty && next.State.ActiveThreadId != Guid.Empty)
+                    DetailThreadId = next.State.ActiveThreadId;
+                else if (DetailThreadId != Guid.Empty
+                         && !next.Layout.Lanes.Any(lane => lane.Thread.ThreadId == DetailThreadId))
+                    DetailThreadId = next.State.ActiveThreadId;
+            }
+            else if (change.Property == DetailThreadIdProperty
+                     && !next.Layout.Lanes.Any(lane => lane.Thread.ThreadId == DetailThreadId)
+                     && next.State.ActiveThreadId != Guid.Empty)
+            {
                 DetailThreadId = next.State.ActiveThreadId;
-            if (DetailThreadId != Guid.Empty && !next.Layout.Lanes.Any(lane => lane.Thread.ThreadId == DetailThreadId))
-                DetailThreadId = next.State.ActiveThreadId;
+            }
             ClampScrollToContent();
             InvalidateVisual();
         }

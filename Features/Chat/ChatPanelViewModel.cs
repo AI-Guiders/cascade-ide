@@ -240,10 +240,15 @@ public partial class ChatPanelViewModel : ViewModelBase
         var vm = new ChatMessageViewModel(
             "assistant",
             text.Trim(),
+            threadId: ResolveMessageThreadId(),
             slashCommandPath: "/agent verify",
             slashCommandStatus: status);
         ChatMessages.Add(vm);
     }
+
+    /// <summary>Активная ветка; иначе основная (не <see cref="Guid.Empty"/> — иначе ломается выбор темы в Skia).</summary>
+    private Guid ResolveMessageThreadId() =>
+        _activeThreadId != Guid.Empty ? _activeThreadId : _mainThreadId;
 
     public string ActiveClarificationTitle => _activeClarificationBatch?.Title?.Trim() is { Length: > 0 } title
         ? title
