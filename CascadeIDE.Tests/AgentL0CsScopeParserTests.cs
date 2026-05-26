@@ -56,4 +56,11 @@ public sealed class AgentL0CsScopeParserTests
             catch { /* best-effort */ }
         }
     }
+
+    [Theory]
+    [InlineData("open_tabs", false)]
+    [InlineData("open_tabs_and_git_dirty_cs", true)]
+    [InlineData("OPEN_TABS_AND_GIT_DIRTY_CS", true)]
+    public void IncludesGitDirtyWorktreeCs_recognizes_scope(string scope, bool expected) =>
+        Assert.Equal(expected, AgentL0CsScopeParser.IncludesGitDirtyWorktreeCs(scope));
 }

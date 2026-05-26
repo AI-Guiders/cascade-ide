@@ -25,6 +25,16 @@
     <ProjectReference Include="..\CascadeIDE.csproj" />
     <ProjectReference Include="..\CascadeIDE.Contracts\CascadeIDE.Contracts.csproj" />
   </ItemGroup>
+  <Target Name="CopyBuildVerifyWorker" AfterTargets="Build">
+    <MSBuild
+      Projects="..\tools\CascadeIDE.BuildVerifyWorker\CascadeIDE.BuildVerifyWorker.csproj"
+      Properties="Configuration=$(Configuration)"
+      Targets="Build" />
+    <ItemGroup>
+      <_BuildVerifyWorkerFiles Include="..\tools\CascadeIDE.BuildVerifyWorker\bin\$(Configuration)\net10.0\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_BuildVerifyWorkerFiles)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" />
+  </Target>
   <!-- Примеры для MarkdownExamplesVerificationTests — рядом с выводом тестов (см. тест). -->
   <ItemGroup>
     <None Include="..\samples\MarkdownExamples\**\*">

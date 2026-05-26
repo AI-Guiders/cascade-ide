@@ -3,6 +3,12 @@ using DotNetBuildTest.Core;
 
 namespace CascadeIDE.BuildVerifyWorker;
 
+/// <summary>Маркер сборки для тестов и deploy layout.</summary>
+public static class BuildVerifyWorkerManifest
+{
+    public const string Name = "CascadeIDE.BuildVerifyWorker";
+}
+
 /// <summary>
 /// Одноразовый воркер verify: <c>BuildTestJobCoordinator</c> вне процесса CascadeIDE (ADR 0148 / out-of-proc scaffold).
 /// MSBuild/VSTest выполняются через тот же пайплайн, что и в IDE — <see cref="DotnetProcessRunner"/>.
