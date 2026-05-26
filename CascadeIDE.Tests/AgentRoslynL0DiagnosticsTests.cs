@@ -158,6 +158,67 @@ public sealed class AgentRoslynL0DiagnosticsTests
         Assert.Contains("no .cs inputs", outcome.Detail, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public async Task RunAsync_warmup_loads_cs_from_disk_when_not_open()
+    {
+        var dir = Directory.CreateTempSubdirectory("cide-l0-warmup-");
+        try
+        {
+            var onlyWarmup = Path.Combine(dir.FullName, "WarmOnly.cs");
+            await File.WriteAllTextAsync(onlyWarmup, "namespace T; public class Warm { }");
+
+            var l0 = new AgentRoslynL0Diagnostics(
+                new CSharpLanguageService(),
+                () => [],
+                new AgentEnvironmentLadderSettings { L0IncludeWarmupCs = true },
+                getWarmupCsFilePaths: () => [onlyWarmup]);
+
+            var outcome = await l0.RunAsync();
+
+            Assert.True(outcome.Green);
+            Assert.Contains("1 file", outcome.Detail, StringComparison.Ordinal);
+        }
+        finally
+        {
+            try { dir.Delete(recursive: true); } catch { /* best-effort */ }
+        }
+    }
+
+    [Fact]
+    public async Task RunAsync_warmup_respects_max_files_cap()
+    {
+        var dir = Directory.CreateTempSubdirectory("cide-l0-warmup-cap-");
+        try
+        {
+            var paths = new List<string>();
+            for (var i = 0; i < 4; i++)
+            {
+                var p = Path.Combine(dir.FullName, $"W{i}.cs");
+                await File.WriteAllTextAsync(p, $"namespace T{i}; public class C{i} {{}}");
+                paths.Add(p);
+            }
+
+            var l0 = new AgentRoslynL0Diagnostics(
+                new CSharpLanguageService(),
+                () => [],
+                new AgentEnvironmentLadderSettings
+                {
+                    L0IncludeWarmupCs = true,
+                    L0WarmupMaxFiles = 2,
+                },
+                getWarmupCsFilePaths: () => paths);
+
+            var outcome = await l0.RunAsync();
+
+            Assert.True(outcome.Green);
+            Assert.Contains("2 file", outcome.Detail, StringComparison.Ordinal);
+        }
+        finally
+        {
+            try { dir.Delete(recursive: true); } catch { /* best-effort */ }
+        }
+    }
+
     private sealed class GitNameOnlyRunner : IGitCommandRunner
     {
         public string? UnstagedOutput { get; set; }
