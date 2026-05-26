@@ -1,24 +1,60 @@
-# Out-of-process verify worker (scaffold)
+# Out-of-process verify worker
 
 Текущее состояние (CIDE + AEE):
 
-- `BuildTestJobCoordinator` живёт **в процессе CascadeIDE.** Каждая job вызывает **`DotnetProcessRunner`**: `dotnet build` / `dotnet test` уже в **отдельном OS-процессе** dotnet — т.е. типичный MSBuild **не** выполняется «внутри» VM Avalonia, а в дочернем `dotnet`.
-- Долгая цель из [ADR 0148](../adr/0148-agent-execution-environment-verification-ladder-and-native-tooling.md): **полный** вынес очереди/coordinator в supervised worker (единый долгоживущий процесс, RPC/stdio), чтобы локализовать нагрузку и сбои ещё до уровня IDE.
+| `build_verify_host` | Поведение |
+|---------------------|-----------|
+| `supervised-inproc` (default) | `BuildTestJobCoordinator` в IDE; `dotnet build`/`test` в дочерних процессах |
+| `supervised-worker-process` | One-shot: `dotnet exec BuildVerifyWorker.dll build\|test …` на каждый job |
+| `supervised-worker-daemon` (opt-in) | Long-lived: `dotnet exec … serve`, JSON-lines IPC (enqueue / status / wait / cancel) |
+
+Долгая цель ADR 0148: изоляция coordinator и нагрузки от UI; daemon снижает latency повторных verify.
 
 ## Артефакт
 
-`tools/CascadeIDE.BuildVerifyWorker` — консоль **net10.0**, которая создаёт свой `BuildTestJobCoordinator` в **отдельном от CIDE** процессе и синхронно ждёт результат (одна команда `build` или `test`). Тот же стек, что и в IDE (`DotNetBuildTest.Core`).
+`tools/CascadeIDE.BuildVerifyWorker` — консоль **net10.0**. Копируется рядом с `CascadeIDE.exe` (`CopyBuildVerifyWorker`).
 
-### Примеры
+### Настройки (`[agent.environment]`)
 
-```bash
-dotnet run --project tools/CascadeIDE.BuildVerifyWorker/CascadeIDE.BuildVerifyWorker.csproj -- build Path/To/Solution.sln
-dotnet run --project tools/CascadeIDE.BuildVerifyWorker/CascadeIDE.BuildVerifyWorker.csproj -- test Path/To/Solution.sln --filter FullyQualifiedName~SomeTests
+```toml
+build_verify_host = "supervised-inproc"
+# build_verify_worker_assembly_path = ""
 ```
 
-Выход: structured JSON в stdout; exit code 0 при `success: true`, иначе 1 (или 11 при `busy` очереди координатора внутри воркера).
+### CLI one-shot
 
-## Следующий шаг (не в этом срезе)
+```bash
+dotnet exec CascadeIDE.BuildVerifyWorker.dll build Path/To/Solution.sln
+dotnet exec CascadeIDE.BuildVerifyWorker.dll test Path/To/Solution.sln --filter FullyQualifiedName~SomeTests
+```
 
-- IPC / long-lived worker + маршрутизация `CancelJobsForRun` и `job_id` между CIDE и процессом (см. `EnvironmentTaskRunner`).
-- Опционально: deploy layout (копировать `BuildVerifyWorker` рядом с CIDE и вызывать по абсолютному пути из настроек).
+### Daemon IPC (`serve`)
+
+Запуск: `dotnet exec CascadeIDE.BuildVerifyWorker.dll serve`
+
+- Первая строка stdout: `{"id":"0","ok":true,"ready":true,"protocol":1}`
+- Далее: одна JSON-строка на запрос (stdin) и одна на ответ (stdout)
+
+Операции:
+
+| `op` | Поля | Ответ |
+|------|------|--------|
+| `ping` | — | `pong: true` |
+| `enqueue` | `kind` build\|test, `path`, `filter?`, `timeout_seconds?`, `include_raw_output?` | `accepted`, `job_id` |
+| `get_status` | `job_id` | `status` (как у coordinator) |
+| `wait` | `job_id` | `result_json` |
+| `cancel` | `job_id` | `cancelled` |
+| `shutdown` | — | завершение процесса |
+
+Закрытие stdin воркера → graceful exit.
+
+Клиент в IDE: `BuildVerifyWorkerDaemonClient` + `DaemonBuildVerifyWorkerBackend`.
+
+## L0 + warmup
+
+При `l0_include_warmup_cs = true` L0 добавляет `.cs` из solution warm-up (см. defaults `agent.environment.ladder`).
+
+## Следующий шаг
+
+- Auto-restart daemon при падении (policy в settings).
+- Semantic L0 / affected-project graph (0141+).
