@@ -27,6 +27,12 @@ public sealed class AgentEnvironmentLadderSettings
     public bool L0Enabled { get; set; } = true;
 
     public bool L4RequireExplicit { get; set; } = true;
+
+    /// <summary>open_tabs | open_tabs_and_git_dirty_cs — см. <c>AgentL0CsScopeParser</c> (ADR 0148 L0).</summary>
+    public string L0CsScope { get; set; } = "open_tabs_and_git_dirty_cs";
+
+    /// <summary>Макс. доп. <c>.cs</c>-файлов из git diff (рабочее дерево + индекс).</summary>
+    public int L0GitDirtyMaxFiles { get; set; } = 48;
 }
 
 public sealed class AgentEnvironmentTimeAccountingSettings

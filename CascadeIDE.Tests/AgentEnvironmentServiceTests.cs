@@ -118,4 +118,17 @@ public sealed class AgentEnvironmentServiceTests
         Assert.Equal("l3_only", s.Agent.Environment.ShellEscapeTier);
         Assert.False(s.Agent.Environment.Ladder.L0Enabled);
     }
+
+    [Fact]
+    public void SettingsToml_DeserializesL0CsScopeAndCap()
+    {
+        const string toml = """
+            [agent.environment.ladder]
+            l0_cs_scope = "open_tabs"
+            l0_git_dirty_max_files = 12
+            """;
+        var s = CascadeIDE.Services.CascadeTomlSerializer.Deserialize<CascadeIdeSettings>(toml)!;
+        Assert.Equal("open_tabs", s.Agent.Environment.Ladder.L0CsScope);
+        Assert.Equal(12, s.Agent.Environment.Ladder.L0GitDirtyMaxFiles);
+    }
 }

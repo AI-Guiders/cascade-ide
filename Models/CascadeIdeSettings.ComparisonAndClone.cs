@@ -118,6 +118,8 @@ public sealed partial class CascadeIdeSettings
                     {
                         L0Enabled = Agent.Environment.Ladder.L0Enabled,
                         L4RequireExplicit = Agent.Environment.Ladder.L4RequireExplicit,
+                        L0CsScope = Agent.Environment.Ladder.L0CsScope,
+                        L0GitDirtyMaxFiles = Agent.Environment.Ladder.L0GitDirtyMaxFiles,
                     },
                     TimeAccounting = new AgentEnvironmentTimeAccountingSettings
                     {
@@ -406,6 +408,8 @@ public sealed partial class CascadeIdeSettings
             && ea.LongRunSandboxProfile == eb.LongRunSandboxProfile
             && ea.Ladder.L0Enabled == eb.Ladder.L0Enabled
             && ea.Ladder.L4RequireExplicit == eb.Ladder.L4RequireExplicit
+            && ea.Ladder.L0CsScope == eb.Ladder.L0CsScope
+            && ea.Ladder.L0GitDirtyMaxFiles == eb.Ladder.L0GitDirtyMaxFiles
             && ea.TimeAccounting.ShowInChat == eb.TimeAccounting.ShowInChat
             && ea.TimeAccounting.PfdInstrumentEnabled == eb.TimeAccounting.PfdInstrumentEnabled
             && ea.TimeAccounting.ShowTaskProgressInChat == eb.TimeAccounting.ShowTaskProgressInChat

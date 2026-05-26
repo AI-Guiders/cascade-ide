@@ -138,9 +138,15 @@ coalesce_window_ms = 1500
 # deny | l3_only | allow_with_audit
 shell_escape_tier = "deny"
 
+# agent_worktree | agent_ephemeral | in_place — для batch/long autonomous verify (W6)
+long_run_sandbox_profile = "agent_worktree"
+
 [agent.environment.ladder]
 l0_enabled = true
 l4_require_explicit = true
+# open_tabs — только вкладки; open_tabs_and_git_dirty_cs — + .cs из git diff / --cached в workspace (парсер L0).
+l0_cs_scope = "open_tabs_and_git_dirty_cs"
+l0_git_dirty_max_files = 48
 
 [agent.environment.time_accounting]
 show_in_chat = true
@@ -148,9 +154,6 @@ pfd_instrument_enabled = true
 show_task_progress_in_chat = true
 # 0 = idle_user выкл
 idle_user_threshold_ms = 0
-
-# agent_worktree | agent_ephemeral | in_place — для batch/long autonomous verify (W6)
-long_run_sandbox_profile = "agent_worktree"
 
 [agent_notes]
 # Пусто = встроенный agent-notes; иначе путь относительно %LocalAppData%\CascadeIDE\

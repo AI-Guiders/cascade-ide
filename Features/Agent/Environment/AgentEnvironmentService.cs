@@ -52,6 +52,7 @@ public sealed class AgentEnvironmentService : IAgentEnvironmentService
         CSharpLanguageService? languageService = null,
         Func<IReadOnlyList<(string Path, string Content)>>? openCsDocuments = null,
         IGitCommandRunner? gitRunner = null,
+        Func<string?>? getWorkspaceRootForL0Git = null,
         Func<string?>? getSolutionPathForOrchestrator = null)
     {
         _dataBus = dataBus;
@@ -60,7 +61,12 @@ public sealed class AgentEnvironmentService : IAgentEnvironmentService
         _epoch = new AgentVerifyEpochTracker(dataBus);
         var coordinator = buildTestJobService?.Coordinator ?? new BuildTestJobCoordinator();
         _buildTestHost = new InProcessBuildTestHost(coordinator);
-        var l0 = new AgentRoslynL0Diagnostics(languageService, openCsDocuments);
+        var l0 = new AgentRoslynL0Diagnostics(
+            languageService,
+            openCsDocuments,
+            settings.Ladder,
+            gitRunner,
+            getWorkspaceRootForL0Git);
         _ladder = new VerificationLadder(dataBus, _buildTestHost, l0, settings, _sandbox);
         _worktree = gitRunner is null ? null : new AgentWorktreeSandbox(gitRunner);
         _orchestrator = new AgentOrchestratorBridge(

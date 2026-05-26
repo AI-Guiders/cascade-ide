@@ -24,6 +24,7 @@ using CascadeIDE.Features.WebAiPortal.Application;
 using CascadeIDE.Features.Shell.Application;
 using CascadeIDE.Features.Terminal;
 using CascadeIDE.Features.UiChrome;
+using CascadeIDE.Features.Workspace.Application;
 using CascadeIDE.Models;
 using CascadeIDE.Services.Presentation;
 
@@ -115,6 +116,7 @@ public partial class MainWindowViewModel
             _csharpLanguageService,
             GetOpenCsDocumentsForAgentL0,
             _gitRunner,
+            () => WorkspaceDirectoryFromSolutionPath.Resolve(Workspace.SolutionPath),
             () => Workspace.SolutionPath);
 
         BuildOutputPanel = new BuildOutputPanelViewModel();
