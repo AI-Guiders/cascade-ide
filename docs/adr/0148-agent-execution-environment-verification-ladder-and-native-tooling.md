@@ -2,7 +2,7 @@
 
 | Поле | Значение |
 |------|----------|
-| **Статус** | Proposed |
+| **Статус** | Accepted · In progress (W1–W2 в коде; W3–W6 частично) |
 | **Дата** | 2026-05-24 |
 | **Дополняет** | [0038](0038-agent-facade-ai-provider-and-tool-orchestration.md) §«Направление» (единый оркестратор); [0141](0141-solution-scoped-warmup-orchestration.md) (warm substrate) |
 
@@ -553,6 +553,23 @@ Roslyn limits — по-прежнему [0058](0058-agent-roslyn-mcp-coupling-se
 
 ---
 
+## Статус реализации (2026-05-27)
+
+| Wave | Состояние | Артефакты (кратко) |
+|------|-----------|-------------------|
+| **W1** | **В коде** | `EnvironmentTaskRunner`, `IEnvironmentJobBackend`, DataBus-события, time slices |
+| **W2** | **В коде** | `VerificationLadder`, `AgentRoslynL0Diagnostics`, `BuildTestHostFactory` (`supervised-inproc` \| `supervised-worker-process` \| `supervised-worker-daemon`), `CascadeIDE.BuildVerifyWorker` |
+| **W3** | **Частично** | `AgentEnvironmentService`, slash `/agent verify\|cancel\|status\|last` (`ChatSlashAgentActions`); PFD instrument / verify epoch UX — нет |
+| **W4** | **Частично** | `AgentSandboxManager` (ephemeral substrate); dev-service config contract — не полный |
+| **W5** | **Частично** | L0 warmup paths из solution warm-up (`AgentL0WarmupPathCollector`, `[agent.environment]` в TOML) |
+| **W6** | **Частично** | `StartVerifyBatch`, `AgentWorktreeSandbox`; batch native API / политики — не MLP-complete |
+
+Дизайн worker/daemon: [build-verify-out-of-process-worker-v1.md](../design/build-verify-out-of-process-worker-v1.md).
+
+**Не ставим `Implemented`:** MLP-контур ещё не стабилен на target hardware; открытые вопросы §Open questions (orchestrator ownership, verify epoch UX, host restart).
+
+---
+
 ## Последствия
 
 ### Плюсы
@@ -621,4 +638,5 @@ Roslyn limits — по-прежнему [0058](0058-agent-roslyn-mcp-coupling-se
 | 2026-05-25 | Orion review: §8.1 stale context (verify epoch), DB fresh substrate, idle_user metrics, L0+SG; playbook §«Слепые зоны» |
 | 2026-05-25 | Review: §5.2 supervised build/test host (MLP, не MSBuild in UI); §6 dev-service config contract; W2/risks/open Q обновлены |
 | 2026-05-24 | §2.2–2.3: когнитивный vs средовой такт; открытый .NET stack (enabler, три уровня A/B/C, границы); §5.1 ladder→API; техдолг subprocess |
+| 2026-05-27 | **Accepted · In progress:** W1–W2 + частично W3–W6 в `Features/Agent/Environment/`; статус синхронизирован с README |
 | 2026-05-24 | Proposed: AEE, ladder, runner, MLP vs ideal; мотивация 0144/0147 wall-clock |
