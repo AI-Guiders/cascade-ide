@@ -12,9 +12,11 @@ public interface IBuildTestHost
     bool IsHealthy { get; }
 }
 
-/// <summary>In-process supervised coordinator (MLP stand-in for separate build host process).</summary>
+/// <summary>In-process supervised coordinator (MLP stand-in for separate build host process, ADR 0148 §5.2 W2).</summary>
 public sealed class InProcessBuildTestHost : IBuildTestHost
 {
+    private volatile bool _healthy = true;
+
     public InProcessBuildTestHost(BuildTestJobCoordinator coordinator)
     {
         Coordinator = coordinator;
@@ -24,5 +26,10 @@ public sealed class InProcessBuildTestHost : IBuildTestHost
 
     public BuildTestJobCoordinator Coordinator { get; }
 
-    public bool IsHealthy => true;
+    public bool IsHealthy => _healthy;
+
+    /// <summary>Отметить host unhealthy после <see cref="AgentEnvironmentTaskDied"/> (W2).</summary>
+    public void MarkUnhealthy() => _healthy = false;
+
+    public void MarkHealthy() => _healthy = true;
 }

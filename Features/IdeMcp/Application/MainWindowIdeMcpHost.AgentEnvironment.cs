@@ -5,6 +5,41 @@ namespace CascadeIDE.Features.IdeMcp.Application;
 
 internal sealed partial class MainWindowIdeMcpHost
 {
+    public Task<string> IdeAgentVerifyBatchAsync(
+        string? policy,
+        string? sandboxProfile,
+        string? solutionPath,
+        bool useWorktree,
+        CancellationToken cancellationToken = default)
+    {
+        _ = cancellationToken;
+        var svc = _host.AgentEnvironment;
+        var solution = string.IsNullOrWhiteSpace(solutionPath)
+            ? _host.Workspace.SolutionPath
+            : solutionPath;
+
+        if (!AgentVerifyPolicyParser.TryParse(
+                policy ?? _host.GetCascadeSettingsForExecutor().Agent.Environment.DefaultVerifyPolicy,
+                out var p))
+            p = AgentVerifyPolicy.Standard;
+
+        AgentSandboxProfile sandbox = AgentSandboxProfile.AgentEphemeral;
+        if (!string.IsNullOrWhiteSpace(sandboxProfile)
+            && AgentSandboxProfileParser.TryParse(sandboxProfile, out var sp))
+            sandbox = sp;
+
+        var start = svc.StartVerifyBatch(new AgentVerifyBatchRequest(p, sandbox, solution, useWorktree));
+        return Task.FromResult(JsonSerializer.Serialize(new
+        {
+            accepted = start.Accepted,
+            run_id = start.RunId,
+            verify_snapshot_id = start.VerifySnapshotId,
+            error = start.Error,
+            batch = true,
+            use_worktree = useWorktree,
+        }));
+    }
+
     public Task<string> IdeAgentVerifyAsync(
         string? policy,
         string? sandboxProfile,

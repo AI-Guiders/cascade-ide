@@ -66,9 +66,13 @@ public static class AgentSandboxProcessEnvironmentKeys
 
     public const string DevPort = "CASCADE_AGENT_SUBSTRATE_DEV_PORT";
 
+    /// <summary>Каталог данных Intercom host (ADR 0148 W4 / 0147).</summary>
+    public const string IntercomDataDirectory = "Intercom__DataDirectory";
+
     public static Dictionary<string, string> ForBundle(AgentSandboxSubstrateBundle bundle) => new(StringComparer.Ordinal)
     {
         [WitDbPath] = bundle.DatabasePath,
         [DevPort] = bundle.DevPort.ToString(),
+        [IntercomDataDirectory] = bundle.SubstrateDirectory,
     };
 }

@@ -171,6 +171,7 @@ public sealed class WebAiPortalCommandBridgeTests
         public Task<string> CodebaseIndexExplainAsync(string? workspacePath, string? solutionPath, long hitId, CancellationToken cancellationToken = default) => throw new NotImplementedException();
         public Task<string> CodebaseIndexReindexAsync(string? workspacePath, string? solutionPath, bool fullRebuild, CancellationToken cancellationToken = default) => throw new NotImplementedException();
         public Task<string> IdeAgentVerifyAsync(string? policy, string? sandboxProfile, string? solutionPath, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<string> IdeAgentVerifyBatchAsync(string? policy, string? sandboxProfile, string? solutionPath, bool useWorktree, CancellationToken cancellationToken = default) => throw new NotImplementedException();
         public Task<string> IdeAgentCancelAsync(CancellationToken cancellationToken = default) => throw new NotImplementedException();
         public Task<string> IdeAgentStatusAsync(CancellationToken cancellationToken = default) => throw new NotImplementedException();
         public Task<string> IdeAgentLastAsync(CancellationToken cancellationToken = default) => throw new NotImplementedException();

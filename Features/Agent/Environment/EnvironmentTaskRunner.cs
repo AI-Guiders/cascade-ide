@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Text.Json;
 using CascadeIDE.Cockpit.DataBus;
 using DotNetBuildTest.Core;
@@ -9,14 +10,17 @@ public sealed class EnvironmentTaskRunner
 {
     private readonly IDataBus _dataBus;
     private readonly BuildTestJobCoordinator _coordinator;
+    private readonly string _hostKind;
+    private readonly ConcurrentDictionary<string, ConcurrentBag<string>> _coreJobsByRun = new();
 
     /// <summary>Test seam: override job status (return null → <see cref="AgentEnvironmentTaskDied"/>).</summary>
     public Func<string, object?>? TestJobStatusFactory { get; set; }
 
-    public EnvironmentTaskRunner(IDataBus dataBus, BuildTestJobCoordinator coordinator)
+    public EnvironmentTaskRunner(IDataBus dataBus, BuildTestJobCoordinator coordinator, string hostKind = "supervised-inproc")
     {
         _dataBus = dataBus;
         _coordinator = coordinator;
+        _hostKind = hostKind;
     }
 
     public BuildTestJobCoordinator Coordinator => _coordinator;
@@ -71,6 +75,16 @@ public sealed class EnvironmentTaskRunner
         _coordinator.CancelJob(coreJobId) is { } o
         && JsonSerializer.Serialize(o).Contains("\"cancelled\":true", StringComparison.Ordinal);
 
+    /// <summary>Implicit cancel predecessor (ADR 0148 §8.1.1): отменить build/test jobs активного run.</summary>
+    public void CancelJobsForRun(string runId)
+    {
+        if (!_coreJobsByRun.TryRemove(runId, out var bag))
+            return;
+
+        foreach (var coreJobId in bag)
+            TryCancelCoreJob(coreJobId);
+    }
+
     private async Task<EnvironmentTaskOutcome> RunCoreJobAsync(
         string runId,
         string kind,
@@ -99,6 +113,7 @@ public sealed class EnvironmentTaskRunner
         }
 
         var coreJobId = enqueued.JobId!;
+        _coreJobsByRun.GetOrAdd(runId, _ => []).Add(coreJobId);
         _ = WatchJobAsync(taskId, runId, kind, coreJobId, cancellationToken);
 
         if (!waitForCompletion)
@@ -174,7 +189,7 @@ public sealed class EnvironmentTaskRunner
         _dataBus.Publish(new AgentEnvironmentTaskChanged(taskId, runId, kind, state, message));
 
     private void PublishDied(string taskId, string runId, string taskKind, int? exitCode, string? tail) =>
-        _dataBus.Publish(new AgentEnvironmentTaskDied(taskId, runId, "supervised-inproc", exitCode, tail ?? taskKind));
+        _dataBus.Publish(new AgentEnvironmentTaskDied(taskId, runId, _hostKind, exitCode, tail ?? taskKind));
 
     private static bool TryReadSuccess(string? resultJson)
     {

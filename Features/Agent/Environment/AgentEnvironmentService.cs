@@ -14,6 +14,9 @@ public interface IAgentEnvironmentService
         AgentVerifyPolicy policy,
         AgentSandboxProfile? sandboxProfile = null);
 
+    /// <summary>Batch entry (W6): optional worktree profile для long autonomous runs.</summary>
+    AgentVerifyStartResult StartVerifyBatch(AgentVerifyBatchRequest request);
+
     AgentSandboxPrepareResult PrepareSandbox(AgentSandboxProfile profile, string? workspaceRoot = null);
 
     bool CancelActive();
@@ -66,6 +69,12 @@ public sealed class AgentEnvironmentService : IAgentEnvironmentService
             () => AgentVerifyPolicyParser.TryParse(_settings.DefaultVerifyPolicy, out var p)
                 ? p
                 : AgentVerifyPolicy.Standard);
+
+        _dataBus.Subscribe<AgentEnvironmentTaskDied>(_ =>
+        {
+            if (_buildTestHost is InProcessBuildTestHost inProc)
+                inProc.MarkUnhealthy();
+        });
     }
 
     public AgentVerifyEpochTracker EpochTracker => _epoch;
@@ -165,6 +174,18 @@ public sealed class AgentEnvironmentService : IAgentEnvironmentService
         return new AgentVerifyStartResult(true, run.RunId, run.VerifySnapshotId, null);
     }
 
+    public AgentVerifyStartResult StartVerifyBatch(AgentVerifyBatchRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.SolutionPath))
+            return new(false, null, null, "solution_path is required for batch verify.");
+
+        var profile = request.UseWorktree
+            ? AgentSandboxProfile.AgentWorktree
+            : request.SandboxProfile;
+
+        return StartVerify(request.SolutionPath, request.Policy, profile);
+    }
+
     public bool CancelActive()
     {
         lock (_gate)
@@ -188,6 +209,9 @@ public sealed class AgentEnvironmentService : IAgentEnvironmentService
     {
         if (_active is null)
             return false;
+
+        var runId = _active.RunId;
+        _ladder.Runner.CancelJobsForRun(runId);
 
         _activeCts?.Cancel();
         if (staleReason is not null)

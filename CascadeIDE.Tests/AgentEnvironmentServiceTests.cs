@@ -20,6 +20,48 @@ public sealed class AgentEnvironmentServiceTests
     }
 
     [Fact]
+    public void StartVerifyBatch_WithoutSolution_ReturnsError()
+    {
+        var result = CreateService().StartVerifyBatch(new AgentVerifyBatchRequest(
+            AgentVerifyPolicy.Standard,
+            AgentSandboxProfile.AgentEphemeral,
+            null));
+
+        Assert.False(result.Accepted);
+        Assert.Contains("solution_path", result.Error, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void ParseBatchVerify_UseWorktree_SetsFlag()
+    {
+        var req = AgentEnvironmentNativeTools.ParseBatchVerify(new Dictionary<string, string?>
+        {
+            ["policy"] = "standard",
+            ["use_worktree"] = "true",
+        });
+
+        Assert.True(req.UseWorktree);
+    }
+
+    [Fact]
+    public void SubstrateEnvironment_IncludesIntercomDataDirectory()
+    {
+        var dir = Path.Combine(Path.GetTempPath(), "cide-sub-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(dir);
+        try
+        {
+            var bundle = AgentSandboxSubstrate.Allocate(dir);
+            var env = AgentSandboxProcessEnvironmentKeys.ForBundle(bundle);
+            Assert.True(env.ContainsKey(AgentSandboxProcessEnvironmentKeys.IntercomDataDirectory));
+            Assert.Equal(bundle.SubstrateDirectory, env[AgentSandboxProcessEnvironmentKeys.IntercomDataDirectory]);
+        }
+        finally
+        {
+            try { Directory.Delete(dir, recursive: true); } catch { /* best-effort */ }
+        }
+    }
+
+    [Fact]
     public void PolicyParser_AcceptsAliases()
     {
         Assert.True(AgentVerifyPolicyParser.TryParse("quick", out var p));

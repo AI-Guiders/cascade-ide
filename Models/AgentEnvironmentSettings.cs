@@ -14,6 +14,9 @@ public sealed class AgentEnvironmentSettings
     /// <summary>deny | l3_only | allow_with_audit</summary>
     public string ShellEscapeTier { get; set; } = "deny";
 
+    /// <summary>agent_ephemeral | agent_worktree | in_place — для длинных autonomous run (W6).</summary>
+    public string LongRunSandboxProfile { get; set; } = "agent_worktree";
+
     public AgentEnvironmentLadderSettings Ladder { get; set; } = new();
 
     public AgentEnvironmentTimeAccountingSettings TimeAccounting { get; set; } = new();
@@ -31,4 +34,10 @@ public sealed class AgentEnvironmentTimeAccountingSettings
     public bool ShowInChat { get; set; } = true;
 
     public bool PfdInstrumentEnabled { get; set; } = true;
+
+    /// <summary>Краткие строки build/test в чат (W3).</summary>
+    public bool ShowTaskProgressInChat { get; set; } = true;
+
+    /// <summary>0 = выкл; иначе порог без фокуса CIDE для idle_user (W3+).</summary>
+    public int IdleUserThresholdMs { get; set; }
 }

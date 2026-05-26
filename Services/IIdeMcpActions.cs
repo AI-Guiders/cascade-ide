@@ -197,6 +197,13 @@ public interface IIdeMcpActions
     /// <summary>Verification ladder (ADR 0148). args: policy?, sandbox_profile?, solution_path?; JSON.</summary>
     Task<string> IdeAgentVerifyAsync(string? policy, string? sandboxProfile, string? solutionPath, CancellationToken cancellationToken = default);
 
+    Task<string> IdeAgentVerifyBatchAsync(
+        string? policy,
+        string? sandboxProfile,
+        string? solutionPath,
+        bool useWorktree,
+        CancellationToken cancellationToken = default);
+
     Task<string> IdeAgentCancelAsync(CancellationToken cancellationToken = default);
 
     Task<string> IdeAgentStatusAsync(CancellationToken cancellationToken = default);

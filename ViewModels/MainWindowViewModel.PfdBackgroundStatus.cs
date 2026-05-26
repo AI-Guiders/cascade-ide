@@ -87,6 +87,16 @@ public partial class MainWindowViewModel
         if (_settings.Agent.Environment.TimeAccounting.PfdInstrumentEnabled)
         {
             var agentStatus = _agentEnvironment.GetStatus();
+            if (agentStatus.WritesInvalidatedVerifyEpoch)
+            {
+                StopPfdStatusHideTimer();
+                _pfdStatusVisibleSinceUtc = DateTimeOffset.UtcNow;
+                PfdBackgroundStatusText = "AEE verify устарел — перезапусти /agent verify";
+                IsPfdBackgroundStatusCaution = true;
+                NotifyWorkspaceBackgroundStatusStripPlacement();
+                return;
+            }
+
             if (agentStatus.IsActive)
             {
                 StopPfdStatusHideTimer();

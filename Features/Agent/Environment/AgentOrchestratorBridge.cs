@@ -17,7 +17,7 @@ public sealed class AgentOrchestratorBridge
         _getDefaultPolicy = getDefaultPolicy ?? (() => AgentVerifyPolicy.Standard);
     }
 
-    public AgentVerifyStartResult TryVerifyAfterStep(bool writesOccurred)
+    public AgentVerifyStartResult TryVerifyAfterStep(bool writesOccurred, bool longRun = false)
     {
         if (!writesOccurred)
             return new(false, null, null, "No writes; verify skipped.");
@@ -25,6 +25,15 @@ public sealed class AgentOrchestratorBridge
         var solution = _getSolutionPath();
         if (string.IsNullOrWhiteSpace(solution))
             return new(false, null, null, "Solution not open.");
+
+        if (longRun)
+        {
+            return _environment.StartVerifyBatch(new AgentVerifyBatchRequest(
+                _getDefaultPolicy(),
+                AgentSandboxProfile.AgentEphemeral,
+                solution,
+                UseWorktree: true));
+        }
 
         return _environment.StartVerify(solution, _getDefaultPolicy());
     }

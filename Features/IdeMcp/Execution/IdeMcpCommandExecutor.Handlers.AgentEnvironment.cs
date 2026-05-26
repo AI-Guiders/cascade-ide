@@ -15,6 +15,14 @@ internal sealed partial class IdeMcpCommandExecutor
                 McpCommandJsonArgs.String(args, "solution_path"),
                 ct));
 
+        add(IdeCommands.IdeAgentVerifyBatch, async (args, ct) =>
+            await _actions.IdeAgentVerifyBatchAsync(
+                McpCommandJsonArgs.String(args, "policy"),
+                McpCommandJsonArgs.String(args, "sandbox_profile"),
+                McpCommandJsonArgs.String(args, "solution_path"),
+                McpCommandJsonArgs.Bool(args, "use_worktree", false),
+                ct));
+
         add(IdeCommands.IdeAgentCancel, async (_, ct) => await _actions.IdeAgentCancelAsync(ct));
 
         add(IdeCommands.IdeAgentStatus, async (_, ct) => await _actions.IdeAgentStatusAsync(ct));

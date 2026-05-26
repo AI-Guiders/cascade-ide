@@ -113,6 +113,7 @@ public sealed partial class CascadeIdeSettings
                     RunnerMaxConcurrency = Agent.Environment.RunnerMaxConcurrency,
                     CoalesceWindowMs = Agent.Environment.CoalesceWindowMs,
                     ShellEscapeTier = Agent.Environment.ShellEscapeTier,
+                    LongRunSandboxProfile = Agent.Environment.LongRunSandboxProfile,
                     Ladder = new AgentEnvironmentLadderSettings
                     {
                         L0Enabled = Agent.Environment.Ladder.L0Enabled,
@@ -122,6 +123,8 @@ public sealed partial class CascadeIdeSettings
                     {
                         ShowInChat = Agent.Environment.TimeAccounting.ShowInChat,
                         PfdInstrumentEnabled = Agent.Environment.TimeAccounting.PfdInstrumentEnabled,
+                        ShowTaskProgressInChat = Agent.Environment.TimeAccounting.ShowTaskProgressInChat,
+                        IdleUserThresholdMs = Agent.Environment.TimeAccounting.IdleUserThresholdMs,
                     },
                 },
             },
@@ -400,10 +403,13 @@ public sealed partial class CascadeIdeSettings
             && ea.RunnerMaxConcurrency == eb.RunnerMaxConcurrency
             && ea.CoalesceWindowMs == eb.CoalesceWindowMs
             && ea.ShellEscapeTier == eb.ShellEscapeTier
+            && ea.LongRunSandboxProfile == eb.LongRunSandboxProfile
             && ea.Ladder.L0Enabled == eb.Ladder.L0Enabled
             && ea.Ladder.L4RequireExplicit == eb.Ladder.L4RequireExplicit
             && ea.TimeAccounting.ShowInChat == eb.TimeAccounting.ShowInChat
-            && ea.TimeAccounting.PfdInstrumentEnabled == eb.TimeAccounting.PfdInstrumentEnabled;
+            && ea.TimeAccounting.PfdInstrumentEnabled == eb.TimeAccounting.PfdInstrumentEnabled
+            && ea.TimeAccounting.ShowTaskProgressInChat == eb.TimeAccounting.ShowTaskProgressInChat
+            && ea.TimeAccounting.IdleUserThresholdMs == eb.TimeAccounting.IdleUserThresholdMs;
     }
 
     private static bool HybridIndexEquals(HybridIndexSettings? a, HybridIndexSettings? b)

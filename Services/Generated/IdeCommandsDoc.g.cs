@@ -117,6 +117,7 @@ internal static class IdeCommandsDoc
         ["ide_agent_sandbox_prepare"] = "Prepare sandbox. args: profile:string, workspace_root:string; returns: json; example: {\"profile\":\"agent_ephemeral\"}.",
         ["ide_agent_status"] = "AEE status snapshot: active, run_id, verify_snapshot_id, policy, sandbox_profile, sandbox_run_directory, execution_channel (supervised build host kind), writes_invalidated_verify_epoch. returns: json.",
         ["ide_agent_verify"] = "Verification ladder. args: policy:string, sandbox_profile:string, solution_path:string; returns: json; example: {\"policy\":\"standard\"}.",
+        ["ide_agent_verify_batch"] = "Batch verify (W6): policy, sandbox_profile, solution_path, use_worktree. returns: json.",
         ["install_ollama_model"] = "Скачать модель Ollama (как в настройках). args: model:string; returns: text; example: {\"model\":\"qwen2.5-coder:7b\"}.",
         ["intercom.agent_provision"] = "Provision agent account. args: display_name:string; returns: text; example: {\"display_name\":\"Nova\"}.",
         ["intercom.connect_team"] = "OAuth Connect к team Intercom service (ADR 0144). returns: text.",

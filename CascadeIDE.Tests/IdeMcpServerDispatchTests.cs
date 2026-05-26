@@ -217,6 +217,7 @@ public sealed class IdeMcpServerDispatchTests
         public Task<string> EditChatAssistantMessageAsync(string messageId, string newContent, string? reason = null) => throw new NotImplementedException();
         public Task<string> ExportChatReadableAsync(bool writeFile = false, string? fileName = null) => throw new NotImplementedException();
         public Task<string> IdeAgentVerifyAsync(string? policy, string? sandboxProfile, string? solutionPath, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<string> IdeAgentVerifyBatchAsync(string? policy, string? sandboxProfile, string? solutionPath, bool useWorktree, CancellationToken cancellationToken = default) => throw new NotImplementedException();
         public Task<string> IdeAgentCancelAsync(CancellationToken cancellationToken = default) => throw new NotImplementedException();
         public Task<string> IdeAgentStatusAsync(CancellationToken cancellationToken = default) => throw new NotImplementedException();
         public Task<string> IdeAgentLastAsync(CancellationToken cancellationToken = default) => throw new NotImplementedException();

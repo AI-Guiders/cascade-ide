@@ -117,6 +117,7 @@ internal static class IdeCommandsContractGenerated
         ["ide_agent_sandbox_prepare"] = IdeReturnKind.Json,
         ["ide_agent_status"] = IdeReturnKind.Json,
         ["ide_agent_verify"] = IdeReturnKind.Json,
+        ["ide_agent_verify_batch"] = IdeReturnKind.Json,
         ["install_ollama_model"] = IdeReturnKind.Text,
         ["intercom.agent_provision"] = IdeReturnKind.Text,
         ["intercom.connect_team"] = IdeReturnKind.Text,

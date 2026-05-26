@@ -13,6 +13,9 @@ namespace CascadeIDE.ViewModels;
 public partial class MainWindowViewModel
 {
     private IDisposable? _agentEnvironmentBusSubscription;
+    private IDisposable? _agentEnvironmentChatProjection;
+    private IDisposable? _agentEnvironmentChatProgressProjection;
+    private IDisposable? _agentEnvironmentWarmupBridge;
 
     public Features.Agent.Environment.IAgentEnvironmentService AgentEnvironment => _agentEnvironment;
 
@@ -20,6 +23,8 @@ public partial class MainWindowViewModel
     {
         if (_agentEnvironmentBusSubscription is not null)
             return;
+
+        var accounting = _settings.Agent.Environment.TimeAccounting;
 
         _agentEnvironmentBusSubscription = new AgentEnvironmentBusComposite(
             _ideDataBus.Subscribe<AgentEnvironmentTaskChanged>(_ =>
@@ -29,13 +34,20 @@ public partial class MainWindowViewModel
             _ideDataBus.Subscribe<AgentVerifyEpochStale>(_ =>
                 UiScheduler.Default.Post(RefreshPfdBackgroundStatusBar, DispatcherPriority.Background)));
 
-        if (_settings.Agent.Environment.TimeAccounting.ShowInChat)
+        if (accounting.ShowInChat)
         {
-            _ = new AgentEnvironmentChatProjection(
+            _agentEnvironmentChatProjection = new AgentEnvironmentChatProjection(
                 _ideDataBus,
-                _settings.Agent.Environment.TimeAccounting,
+                accounting,
                 AppendAgentEnvironmentChatTrace);
         }
+
+        _agentEnvironmentChatProgressProjection = new AgentEnvironmentChatProgressProjection(
+            _ideDataBus,
+            accounting,
+            AppendAgentEnvironmentChatTrace);
+
+        _agentEnvironmentWarmupBridge = new AgentEnvironmentWarmupBridge(_ideDataBus, _agentEnvironment);
     }
 
     internal void NotifyAgentEnvironmentDocumentWrite(string? filePath)
