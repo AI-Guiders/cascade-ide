@@ -66,6 +66,18 @@ try {
 
     if (Test-Path -LiteralPath $intercomOut) {
         $intercomTarget = Join-Path $Target "tools\intercom-service"
+        $intercomExeTarget = Join-Path $intercomTarget "IntercomService.exe"
+        foreach ($p in (Get-Process -Name "IntercomService" -ErrorAction SilentlyContinue)) {
+            try {
+                $path = $p.Path
+                if ($path -and [string]::Equals($path, $intercomExeTarget, [System.StringComparison]::OrdinalIgnoreCase)) {
+                    Write-Host "Stopping IntercomService PID $($p.Id) (target copy is locked by running instance)"
+                    Stop-Process -Id $p.Id -Force -ErrorAction Stop
+                }
+            } catch {
+                # Ignore path access issues; robocopy may still succeed if file is not locked.
+            }
+        }
         New-Item -ItemType Directory -Path $intercomTarget -Force | Out-Null
         robocopy $intercomOut $intercomTarget /E /MIR /NFL /NDL /NJH /NJS | Out-Null
         if ($LASTEXITCODE -ge 8) {

@@ -8,6 +8,7 @@ public sealed class IntercomServerHostService : IDisposable
 {
     private Process? _process;
     private string _lastStderr = "";
+    private string _lastStdout = "";
     private string _lastLaunchSource = "";
 
     public bool IsRunning => _process is { HasExited: false };
@@ -33,10 +34,13 @@ public sealed class IntercomServerHostService : IDisposable
                 ? $"--urls {url}"
                 : $"{launch.Arguments} --urls {url}",
             UseShellExecute = false,
+            // Child must not inherit IDE stdout: in --mcp-stdio it carries MCP JSON-RPC.
+            RedirectStandardOutput = true,
             RedirectStandardError = true,
             CreateNoWindow = true,
             WorkingDirectory = launch.WorkingDirectory,
         };
+        psi.Environment["ASPNETCORE_ENVIRONMENT"] = "Development";
 
         try
         {
@@ -49,8 +53,18 @@ public sealed class IntercomServerHostService : IDisposable
             {
                 try
                 {
-                    var err = await _process.StandardError.ReadToEndAsync().ConfigureAwait(false);
-                    _lastStderr = err;
+                    _lastStdout = await _process.StandardOutput.ReadToEndAsync().ConfigureAwait(false);
+                }
+                catch
+                {
+                    // ignore
+                }
+            });
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    _lastStderr = await _process.StandardError.ReadToEndAsync().ConfigureAwait(false);
                 }
                 catch
                 {
@@ -79,12 +93,15 @@ public sealed class IntercomServerHostService : IDisposable
                 _process.WaitForExit(5000);
             }
 
-            var msg = string.IsNullOrWhiteSpace(_lastStderr)
+            var tail = FormatProcessLogTail(_lastStdout, _lastStderr);
+            var msg = string.IsNullOrWhiteSpace(tail)
                 ? "intercom-service остановлен."
-                : $"intercom-service остановлен.\n{_lastStderr.Trim()}";
+                : $"intercom-service остановлен.\n{tail}";
             _process.Dispose();
             _process = null;
             _lastLaunchSource = "";
+            _lastStdout = "";
+            _lastStderr = "";
             return (true, msg);
         }
         catch (Exception ex)
@@ -226,6 +243,16 @@ public sealed class IntercomServerHostService : IDisposable
                     yield return full;
             }
         }
+    }
+
+    private static string FormatProcessLogTail(string stdout, string stderr)
+    {
+        var parts = new List<string>(2);
+        if (!string.IsNullOrWhiteSpace(stdout))
+            parts.Add(stdout.Trim());
+        if (!string.IsNullOrWhiteSpace(stderr))
+            parts.Add(stderr.Trim());
+        return string.Join(Environment.NewLine, parts);
     }
 
     public void Dispose() => Stop();

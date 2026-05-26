@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>14</LangVersion>
     <RootNamespace>IntercomService</RootNamespace>
+    <UserSecretsId>7f3c8a2e-4b1d-4f9a-9c2e-1a8b4d6e0f31</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,7 +14,9 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.3" />
-    <PackageReference Include="OutWit.Database.EntityFramework" Version="1.0.2" />
+    <!-- Выровнять с Core 10.0.3; иначе от OutWit тянется Relational 10.0.1 и LINQ с DateTimeOffset.UtcNow снова «could not be translated». -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.3" />
+    <PackageReference Include="OutWit.Database.EntityFramework" Version="1.0.3" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
   </ItemGroup>
 

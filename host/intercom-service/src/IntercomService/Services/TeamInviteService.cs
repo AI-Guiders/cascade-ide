@@ -47,7 +47,9 @@ public sealed class TeamInviteService(IntercomDbContext db)
         var hash = JwtTokenService.HashToken(plainToken);
         var invite = await db.TeamInvites
             .FirstOrDefaultAsync(
-                x => x.TeamId == teamId && x.TokenHash == hash && x.ExpiresAtUtc >= DateTimeOffset.UtcNow,
+                x => x.TeamId == teamId
+                     && x.TokenHash == hash
+                     && x.ExpiresAtUtc >= DateTimeOffset.UtcNow,
                 ct)
             .ConfigureAwait(false);
 
@@ -65,9 +67,9 @@ public sealed class TeamInviteService(IntercomDbContext db)
         return await db.TeamInvites.AsNoTracking()
             .AnyAsync(
                 x => x.TeamId == teamId
-                    && x.TokenHash == hash
-                    && x.ExpiresAtUtc >= DateTimeOffset.UtcNow
-                    && x.UseCount < x.MaxUses,
+                     && x.TokenHash == hash
+                     && x.ExpiresAtUtc >= DateTimeOffset.UtcNow
+                     && x.UseCount < x.MaxUses,
                 ct)
             .ConfigureAwait(false);
     }

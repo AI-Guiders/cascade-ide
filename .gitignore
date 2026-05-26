@@ -37,6 +37,8 @@ publish-verify-sqlite/
 # Локальные файлы Wit внутри Data/ (исходники Data/*.cs в репо)
 Data/*.witdb
 Data/**/*.witdb
+Data/intercom.witdb_indexes/
+
 .cursor/
 .hybrid-codebase-index/
 

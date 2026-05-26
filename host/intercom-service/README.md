@@ -37,14 +37,17 @@ dotnet run
 1. GitHub → Settings → Developer settings → OAuth App.
 2. Homepage: `http://127.0.0.1:5080`
 3. Callback: `http://127.0.0.1:5080/api/v1/auth/callback/github`
-4. В `appsettings.Development.json` или user-secrets:
+4. **User Secrets** (рекомендуется; переживает `publish-debug`, в git не попадает):
 
-```json
-"GitHub": {
-  "ClientId": "<id>",
-  "ClientSecret": "<secret>"
-}
+```powershell
+# из корня cascade-ide
+.\scripts\intercom\set-intercom-github-user-secrets.ps1 -ClientId "<id>" -ClientSecret "<secret>"
+# или однократная миграция со старого appsettings.Development.local.json:
+.\scripts\intercom\set-intercom-github-user-secrets.ps1 -FromLocalFile
 ```
+
+Секреты: `%APPDATA%\Microsoft\UserSecrets\7f3c8a2e-4b1d-4f9a-9c2e-1a8b4d6e0f31\secrets.json`.  
+Подхватываются при `ASPNETCORE_ENVIRONMENT=Development` (CIDE выставляет при `intercom server start`).
 
 ### Dev bootstrap (без GitHub)
 

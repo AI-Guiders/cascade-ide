@@ -6,3 +6,5 @@
 *.witdb
 *.user
 .vs/
+appsettings.Development.local.json
+**/appsettings.Development.local.json
