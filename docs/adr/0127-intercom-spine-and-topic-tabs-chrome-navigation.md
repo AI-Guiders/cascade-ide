@@ -15,6 +15,7 @@
 | [0057](0057-chat-surface-pipeline-adoption.md) | `ChatSurfaceSnapshot` — единый источник списка тем |
 | [0120](0120-primary-work-surface-intercom-or-editor.md) | Forward / MFD — один `IntercomSkiaSurface`, разная плотность |
 | [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md) | Melody/Chords для переключения вкладок |
+| [0143](0143-intercom-feed-participant-lens.md) | Participant lens (All/Humans/Agents/System) в том же chrome — ортогонально topic tabs |
 | [0048](0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) | `load_solution`, workspace — источник «открытого» sln/slnx |
 | `multi-root-kb` (параллельная работа, agent-notes / MCP) | Несколько корней knowledge под один workspace — **та же ось**, что spine по solution (см. [§9](#adr0127-p9)) |
 

@@ -1,5 +1,6 @@
 #nullable enable
 
+using CascadeIDE.Features.Chat.AnchorPeek;
 using CascadeIDE.Features.Cockpit;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -131,17 +132,26 @@ public partial class ChatPanelViewModel
 
     private bool tryBuildAnchorSlashPreview(string argsTail, out SlashCommandPreviewResult result)
     {
-        if (!TryResolveAnchorByShortId(argsTail, out var anchor, out _, out var error))
+        if (TryResolveAnchorByShortId(argsTail, out var anchor, out _, out var error))
         {
-            result = new(error, SlashCommandPreviewKind.Error);
+            var kind = SlashCommandPreviewService.MapResolveOutcome(anchor.ResolveOutcome);
+            var label = anchor.DisplayLabel ?? anchor.MemberKey ?? anchor.File ?? "—";
+            var status = IntercomAnchorSlash.FormatOutcomeShort(anchor.ResolveOutcome);
+            var id = string.IsNullOrWhiteSpace(anchor.Id) ? "?" : anchor.Id;
+            var ordinalPrefix = AnchorPeekResolver.TryResolve(
+                argsTail,
+                BuildAnchorPeekResolveContext(),
+                out _,
+                out _,
+                out var ordinal,
+                out _)
+                ? $"#{ordinal} "
+                : "";
+            result = new($"{ordinalPrefix}a:{id}  {label}  {status}", kind);
             return true;
         }
 
-        var kind = SlashCommandPreviewService.MapResolveOutcome(anchor.ResolveOutcome);
-        var label = anchor.DisplayLabel ?? anchor.MemberKey ?? anchor.File ?? "—";
-        var status = IntercomAnchorSlash.FormatOutcomeShort(anchor.ResolveOutcome);
-        var id = string.IsNullOrWhiteSpace(anchor.Id) ? "?" : anchor.Id;
-        result = new($"a:{id}  {label}  {status}", kind);
+        result = new(error, SlashCommandPreviewKind.Error);
         return true;
     }
 

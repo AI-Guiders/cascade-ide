@@ -39,6 +39,7 @@ public partial class ChatPanelViewModel
             text,
             _workspaceFileSlashCompletion,
             _sessionTopicSlashCompletion,
+            _messageAnchorSlashCompletion,
             caretIndex: caret);
         ChatSlashSuggestions.Clear();
         foreach (var s in suggestions)
@@ -114,8 +115,19 @@ public partial class ChatPanelViewModel
             ChatComposerCaretIndex = insertText.Length;
         }
 
-        IsChatSlashAutocompleteVisible = false;
         shouldAutoExecute = ChatSlashCommandParser.ShouldAutoExecuteAfterAutocompleteCommit(insertText);
+        if (shouldAutoExecute)
+        {
+            IsChatSlashAutocompleteVisible = false;
+        }
+        else
+        {
+            // Не гасить popup после сегмента: иначе следующий Enter уходит в Send вместо «start» (ADR 0119 §6).
+            RefreshComposerAutocomplete(
+                inputOverride: IsCockpitCommandLineOpen ? CockpitCommandLineText : ChatInput,
+                caretOverride: IsCockpitCommandLineOpen ? CockpitCommandLineCaretIndex : ChatComposerCaretIndex);
+        }
+
         return true;
     }
 

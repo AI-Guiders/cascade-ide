@@ -1,5 +1,6 @@
 #nullable enable
 using System.Text.Json;
+using CascadeIDE.Features.Agent.Environment;
 using CascadeIDE.Services;
 
 namespace CascadeIDE.Features.Chat;
@@ -35,6 +36,9 @@ public sealed class ChatSlashCommandRunner
     private readonly Func<string?, string>? _relateMessageRangeToCodeRef;
     private readonly Func<string>? _listMessageAnchors;
     private readonly Func<string?, string>? _peekAnchorById;
+    private readonly Func<string?>? _getSolutionPathForAgent;
+    private readonly IAgentEnvironmentService? _agentEnvironment;
+    private Func<string, string?, CancellationToken, Task<ChatSlashIntercomResult>>? _runIntercomAdmin;
 
     public ChatSlashCommandRunner(
         Func<string, IReadOnlyDictionary<string, JsonElement>?, CancellationToken, Task<string>>? executeIdeCommand,
@@ -54,7 +58,10 @@ public sealed class ChatSlashCommandRunner
         Func<string?, string>? findMessagesForCodeRef = null,
         Func<string?, string>? relateMessageRangeToCodeRef = null,
         Func<string>? listMessageAnchors = null,
-        Func<string?, string>? peekAnchorById = null)
+        Func<string?, string>? peekAnchorById = null,
+        IAgentEnvironmentService? agentEnvironment = null,
+        Func<string?>? getSolutionPathForAgent = null,
+        Func<string, string?, CancellationToken, Task<ChatSlashIntercomResult>>? runIntercomAdmin = null)
     {
         _executeIdeCommand = executeIdeCommand;
         _getEditorContext = getEditorContext;
@@ -74,10 +81,20 @@ public sealed class ChatSlashCommandRunner
         _relateMessageRangeToCodeRef = relateMessageRangeToCodeRef;
         _listMessageAnchors = listMessageAnchors;
         _peekAnchorById = peekAnchorById;
+        _agentEnvironment = agentEnvironment;
+        _getSolutionPathForAgent = getSolutionPathForAgent;
+        _runIntercomAdmin = runIntercomAdmin;
     }
 
-    private static string? resolveIntercomArgsTail(in ChatSlashCommandParseResult parse)
+    public void SetIntercomAdminRunner(
+        Func<string, string?, CancellationToken, Task<ChatSlashIntercomResult>> runIntercomAdmin) =>
+        _runIntercomAdmin = runIntercomAdmin;
+
+    private static string? resolveSlashArgsTail(string rawInput, in ChatSlashCommandParseResult parse)
     {
+        if (SlashLineResolver.TryResolveSlashLine(rawInput.Trim(), out var line) && line.IsCatalogMatch)
+            return ChatSlashCommandPresentation.NormalizeArgsTail(line.ArgTail);
+
         var tail = parse.ArgsTail;
         if (string.Equals(parse.Head, "intercom", StringComparison.OrdinalIgnoreCase)
             && parse.Shape == ChatSlashCommandShape.Flat
@@ -95,6 +112,9 @@ public sealed class ChatSlashCommandRunner
             }
         }
 
+        if (IntercomAnchorSlash.IsAnchorPeekCommand(parse))
+            return ChatSlashCommandPresentation.NormalizeArgsTail(SlashPathAliases.ExtractPeekArgs(parse));
+
         return ChatSlashCommandPresentation.NormalizeArgsTail(tail);
     }
 
@@ -105,7 +125,7 @@ public sealed class ChatSlashCommandRunner
             return ChatSlashCommandRunResult.NotHandled();
 
         var displayPath = ChatSlashCommandPresentation.FormatDisplayPath(parse, rawInput);
-        var argsTail = resolveIntercomArgsTail(parse);
+        var argsTail = resolveSlashArgsTail(rawInput, parse);
 
         if (parse.IsRejected)
             return new ChatSlashCommandRunResult(
@@ -179,7 +199,8 @@ public sealed class ChatSlashCommandRunner
                     _findMessagesForCodeRef,
                     _relateMessageRangeToCodeRef,
                     _listMessageAnchors,
-                    _peekAnchorById))
+                    _peekAnchorById,
+                    _runIntercomAdmin))
             {
                 return new ChatSlashCommandRunResult(
                     true,
@@ -195,6 +216,41 @@ public sealed class ChatSlashCommandRunner
                 displayPath,
                 argsTail,
                 intercom.Message);
+        }
+
+        if (descriptor.ExecutionKind == ChatSlashCommandExecutionKind.LocalAgent)
+        {
+            if (_agentEnvironment is null || _getSolutionPathForAgent is null)
+            {
+                return new ChatSlashCommandRunResult(
+                    true,
+                    false,
+                    displayPath,
+                    argsTail,
+                    "Agent Execution Environment недоступен.");
+            }
+
+            if (!ChatSlashAgentActions.TryExecute(
+                    descriptor.SlashPath,
+                    argsTail,
+                    _agentEnvironment,
+                    _getSolutionPathForAgent,
+                    out var agent))
+            {
+                return new ChatSlashCommandRunResult(
+                    true,
+                    false,
+                    displayPath,
+                    argsTail,
+                    "Действие agent недоступно.");
+            }
+
+            return new ChatSlashCommandRunResult(
+                true,
+                agent.Success,
+                displayPath,
+                argsTail,
+                agent.Message);
         }
 
         var validationError = ValidateRequiredArgs(descriptor, parse);

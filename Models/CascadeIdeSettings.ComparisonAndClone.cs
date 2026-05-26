@@ -12,6 +12,7 @@ public sealed partial class CascadeIdeSettings
         return AiEquals(Ai, o.Ai)
             && McpEquals(Mcp, o.Mcp)
             && AgentNotesEquals(AgentNotes, o.AgentNotes)
+            && AgentEquals(Agent, o.Agent)
             && WorkspaceEquals(Workspace, o.Workspace)
             && HybridIndexEquals(HybridIndex, o.HybridIndex)
             && SolutionWarmupEquals(SolutionWarmup, o.SolutionWarmup)
@@ -40,6 +41,7 @@ public sealed partial class CascadeIdeSettings
                 Acp = new AiAcpSettings
                 {
                     CursorAcpPath = Ai.Acp.CursorAcpPath,
+                    CursorAcpPathEnv = Ai.Acp.CursorAcpPathEnv,
                     CursorAcpModelId = Ai.Acp.CursorAcpModelId,
                 },
                 McpOnly = new AiMcpOnlySettings(),
@@ -98,7 +100,39 @@ public sealed partial class CascadeIdeSettings
             AgentNotes = new AgentNotesSettings
             {
                 ConfigPath = AgentNotes.ConfigPath,
-                KbBaseOverlayPath = AgentNotes.KbBaseOverlayPath
+                ConfigPathEnv = AgentNotes.ConfigPathEnv,
+                KbBaseOverlayPath = AgentNotes.KbBaseOverlayPath,
+                KbBaseOverlayPathEnv = AgentNotes.KbBaseOverlayPathEnv,
+            },
+            Agent = new AgentSettings
+            {
+                Environment = new AgentEnvironmentSettings
+                {
+                    DefaultVerifyPolicy = Agent.Environment.DefaultVerifyPolicy,
+                    DefaultSandboxProfile = Agent.Environment.DefaultSandboxProfile,
+                    RunnerMaxConcurrency = Agent.Environment.RunnerMaxConcurrency,
+                    CoalesceWindowMs = Agent.Environment.CoalesceWindowMs,
+                    ShellEscapeTier = Agent.Environment.ShellEscapeTier,
+                    LongRunSandboxProfile = Agent.Environment.LongRunSandboxProfile,
+                    BuildVerifyHost = Agent.Environment.BuildVerifyHost,
+                    BuildVerifyWorkerAssemblyPath = Agent.Environment.BuildVerifyWorkerAssemblyPath,
+                    Ladder = new AgentEnvironmentLadderSettings
+                    {
+                        L0Enabled = Agent.Environment.Ladder.L0Enabled,
+                        L4RequireExplicit = Agent.Environment.Ladder.L4RequireExplicit,
+                        L0CsScope = Agent.Environment.Ladder.L0CsScope,
+                        L0GitDirtyMaxFiles = Agent.Environment.Ladder.L0GitDirtyMaxFiles,
+                        L0IncludeWarmupCs = Agent.Environment.Ladder.L0IncludeWarmupCs,
+                        L0WarmupMaxFiles = Agent.Environment.Ladder.L0WarmupMaxFiles,
+                    },
+                    TimeAccounting = new AgentEnvironmentTimeAccountingSettings
+                    {
+                        ShowInChat = Agent.Environment.TimeAccounting.ShowInChat,
+                        PfdInstrumentEnabled = Agent.Environment.TimeAccounting.PfdInstrumentEnabled,
+                        ShowTaskProgressInChat = Agent.Environment.TimeAccounting.ShowTaskProgressInChat,
+                        IdleUserThresholdMs = Agent.Environment.TimeAccounting.IdleUserThresholdMs,
+                    },
+                },
             },
             Workspace = new WorkspaceSettings
             {
@@ -124,22 +158,30 @@ public sealed partial class CascadeIdeSettings
                     ParseOnly = new LanguageServerLaunchProfile
                     {
                         Executable = Languages.CSharp.ParseOnly.Executable,
+                        ExecutableEnv = Languages.CSharp.ParseOnly.ExecutableEnv,
                         Arguments = Languages.CSharp.ParseOnly.Arguments,
+                        ArgumentsEnv = Languages.CSharp.ParseOnly.ArgumentsEnv,
                     },
                     OmniSharp = new LanguageServerLaunchProfile
                     {
                         Executable = Languages.CSharp.OmniSharp.Executable,
+                        ExecutableEnv = Languages.CSharp.OmniSharp.ExecutableEnv,
                         Arguments = Languages.CSharp.OmniSharp.Arguments,
+                        ArgumentsEnv = Languages.CSharp.OmniSharp.ArgumentsEnv,
                     },
                     CSharpLs = new LanguageServerLaunchProfile
                     {
                         Executable = Languages.CSharp.CSharpLs.Executable,
+                        ExecutableEnv = Languages.CSharp.CSharpLs.ExecutableEnv,
                         Arguments = Languages.CSharp.CSharpLs.Arguments,
+                        ArgumentsEnv = Languages.CSharp.CSharpLs.ArgumentsEnv,
                     },
                     Custom = new LanguageServerLaunchProfile
                     {
                         Executable = Languages.CSharp.Custom.Executable,
+                        ExecutableEnv = Languages.CSharp.Custom.ExecutableEnv,
                         Arguments = Languages.CSharp.Custom.Arguments,
+                        ArgumentsEnv = Languages.CSharp.Custom.ArgumentsEnv,
                     },
                 },
                 Markdown = new MarkdownLanguageServerSettings
@@ -148,17 +190,23 @@ public sealed partial class CascadeIdeSettings
                     Off = new LanguageServerLaunchProfile
                     {
                         Executable = Languages.Markdown.Off.Executable,
+                        ExecutableEnv = Languages.Markdown.Off.ExecutableEnv,
                         Arguments = Languages.Markdown.Off.Arguments,
+                        ArgumentsEnv = Languages.Markdown.Off.ArgumentsEnv,
                     },
                     Marksman = new LanguageServerLaunchProfile
                     {
                         Executable = Languages.Markdown.Marksman.Executable,
+                        ExecutableEnv = Languages.Markdown.Marksman.ExecutableEnv,
                         Arguments = Languages.Markdown.Marksman.Arguments,
+                        ArgumentsEnv = Languages.Markdown.Marksman.ArgumentsEnv,
                     },
                     Custom = new LanguageServerLaunchProfile
                     {
                         Executable = Languages.Markdown.Custom.Executable,
+                        ExecutableEnv = Languages.Markdown.Custom.ExecutableEnv,
                         Arguments = Languages.Markdown.Custom.Arguments,
+                        ArgumentsEnv = Languages.Markdown.Custom.ArgumentsEnv,
                     },
                 },
             },
@@ -279,6 +327,34 @@ public sealed partial class CascadeIdeSettings
                         RevealLoadSolution = Intercom.Attachments.Code.RevealLoadSolution,
                     },
                 },
+                Transport = new IntercomTransportSettings
+                {
+                    Enabled = Intercom.Transport.Enabled,
+                    BaseUrl = Intercom.Transport.BaseUrl,
+                    BaseUrlEnv = Intercom.Transport.BaseUrlEnv,
+                    LocalServerPath = Intercom.Transport.LocalServerPath,
+                    LocalServerPathEnv = Intercom.Transport.LocalServerPathEnv,
+                    TeamId = Intercom.Transport.TeamId,
+                    DefaultTopicId = Intercom.Transport.DefaultTopicId,
+                    OAuthProvider = Intercom.Transport.OAuthProvider,
+                    InviteToken = Intercom.Transport.InviteToken,
+                    DevTeamToken = Intercom.Transport.DevTeamToken,
+                    WorkspaceHints = Intercom.Transport.WorkspaceHints.ToDictionary(
+                        kv => kv.Key,
+                        kv => new IntercomWorkspaceHintEntry
+                        {
+                            TeamId = kv.Value.TeamId,
+                            ProjectId = kv.Value.ProjectId,
+                            UpdatedAtUtc = kv.Value.UpdatedAtUtc,
+                            Source = kv.Value.Source,
+                        },
+                        StringComparer.OrdinalIgnoreCase),
+                    SseReconnectBackoffMs = Intercom.Transport.SseReconnectBackoffMs,
+                    AutoConnectOnSend = Intercom.Transport.AutoConnectOnSend,
+                    SyncAgentChannelMessages = Intercom.Transport.SyncAgentChannelMessages,
+                    SelectedAgentMemberId = Intercom.Transport.SelectedAgentMemberId,
+                    SelectedAgentDisplayName = Intercom.Transport.SelectedAgentDisplayName,
+                },
             },
         };
     }
@@ -291,6 +367,7 @@ public sealed partial class CascadeIdeSettings
             && a.Local.Backend.Is(b.Local.Backend)
             && a.Local.Ollama.Model.Is(b.Local.Ollama.Model)
             && a.Acp.CursorAcpPath.Is(b.Acp.CursorAcpPath)
+            && a.Acp.CursorAcpPathEnv.Is(b.Acp.CursorAcpPathEnv)
             && a.Acp.CursorAcpModelId.Is(b.Acp.CursorAcpModelId)
             && a.Cloud.ActiveProvider.Is(b.Cloud.ActiveProvider)
             && a.Cloud.Anthropic.Model.Is(b.Cloud.Anthropic.Model)
@@ -315,7 +392,36 @@ public sealed partial class CascadeIdeSettings
     {
         if (a is null || b is null)
             return a == b;
-        return a.ConfigPath.Is(b.ConfigPath) && a.KbBaseOverlayPath.Is(b.KbBaseOverlayPath);
+        return a.ConfigPath.Is(b.ConfigPath)
+            && a.ConfigPathEnv.Is(b.ConfigPathEnv)
+            && a.KbBaseOverlayPath.Is(b.KbBaseOverlayPath)
+            && a.KbBaseOverlayPathEnv.Is(b.KbBaseOverlayPathEnv);
+    }
+
+    private static bool AgentEquals(AgentSettings? a, AgentSettings? b)
+    {
+        if (a is null || b is null)
+            return a == b;
+        var ea = a.Environment;
+        var eb = b.Environment;
+        return ea.DefaultVerifyPolicy == eb.DefaultVerifyPolicy
+            && ea.DefaultSandboxProfile == eb.DefaultSandboxProfile
+            && ea.RunnerMaxConcurrency == eb.RunnerMaxConcurrency
+            && ea.CoalesceWindowMs == eb.CoalesceWindowMs
+            && ea.ShellEscapeTier == eb.ShellEscapeTier
+            && ea.LongRunSandboxProfile == eb.LongRunSandboxProfile
+            && ea.BuildVerifyHost == eb.BuildVerifyHost
+            && ea.BuildVerifyWorkerAssemblyPath == eb.BuildVerifyWorkerAssemblyPath
+            && ea.Ladder.L0Enabled == eb.Ladder.L0Enabled
+            && ea.Ladder.L4RequireExplicit == eb.Ladder.L4RequireExplicit
+            && ea.Ladder.L0CsScope == eb.Ladder.L0CsScope
+            && ea.Ladder.L0GitDirtyMaxFiles == eb.Ladder.L0GitDirtyMaxFiles
+            && ea.Ladder.L0IncludeWarmupCs == eb.Ladder.L0IncludeWarmupCs
+            && ea.Ladder.L0WarmupMaxFiles == eb.Ladder.L0WarmupMaxFiles
+            && ea.TimeAccounting.ShowInChat == eb.TimeAccounting.ShowInChat
+            && ea.TimeAccounting.PfdInstrumentEnabled == eb.TimeAccounting.PfdInstrumentEnabled
+            && ea.TimeAccounting.ShowTaskProgressInChat == eb.TimeAccounting.ShowTaskProgressInChat
+            && ea.TimeAccounting.IdleUserThresholdMs == eb.TimeAccounting.IdleUserThresholdMs;
     }
 
     private static bool HybridIndexEquals(HybridIndexSettings? a, HybridIndexSettings? b)
@@ -395,7 +501,10 @@ public sealed partial class CascadeIdeSettings
     {
         if (a is null || b is null)
             return a == b;
-        return a.Executable.Is(b.Executable) && a.Arguments.Is(b.Arguments);
+        return a.Executable.Is(b.Executable)
+            && a.ExecutableEnv.Is(b.ExecutableEnv)
+            && a.Arguments.Is(b.Arguments)
+            && a.ArgumentsEnv.Is(b.ArgumentsEnv);
     }
 
     private static bool MarkdownLanguageServerSettingsEquals(MarkdownLanguageServerSettings? a, MarkdownLanguageServerSettings? b)
@@ -539,7 +648,43 @@ public sealed partial class CascadeIdeSettings
         return a.FeedMetrics.Is(b.FeedMetrics)
             && a.TciValidationIcon.Is(b.TciValidationIcon)
             && a.Attachments.Code.Navigate.Is(b.Attachments.Code.Navigate)
-            && a.Attachments.Code.RevealLoadSolution.Is(b.Attachments.Code.RevealLoadSolution);
+            && a.Attachments.Code.RevealLoadSolution.Is(b.Attachments.Code.RevealLoadSolution)
+            && a.Transport.Enabled == b.Transport.Enabled
+            && a.Transport.BaseUrl.Is(b.Transport.BaseUrl)
+            && a.Transport.BaseUrlEnv.Is(b.Transport.BaseUrlEnv)
+            && a.Transport.LocalServerPath.Is(b.Transport.LocalServerPath)
+            && a.Transport.LocalServerPathEnv.Is(b.Transport.LocalServerPathEnv)
+            && a.Transport.TeamId.Is(b.Transport.TeamId)
+            && a.Transport.DefaultTopicId.Is(b.Transport.DefaultTopicId)
+            && a.Transport.OAuthProvider.Is(b.Transport.OAuthProvider)
+            && a.Transport.InviteToken.Is(b.Transport.InviteToken)
+            && a.Transport.DevTeamToken.Is(b.Transport.DevTeamToken)
+            && WorkspaceHintsEqual(a.Transport.WorkspaceHints, b.Transport.WorkspaceHints)
+            && a.Transport.SseReconnectBackoffMs == b.Transport.SseReconnectBackoffMs
+            && a.Transport.AutoConnectOnSend == b.Transport.AutoConnectOnSend
+            && a.Transport.SyncAgentChannelMessages == b.Transport.SyncAgentChannelMessages;
+    }
+
+    private static bool WorkspaceHintsEqual(
+        Dictionary<string, IntercomWorkspaceHintEntry>? a,
+        Dictionary<string, IntercomWorkspaceHintEntry>? b)
+    {
+        if (a is null || b is null)
+            return a == b;
+        if (a.Count != b.Count)
+            return false;
+        foreach (var (key, av) in a)
+        {
+            if (!b.TryGetValue(key, out var bv))
+                return false;
+            if (!av.TeamId.Is(bv.TeamId)
+                || !av.ProjectId.Is(bv.ProjectId)
+                || !av.UpdatedAtUtc.Is(bv.UpdatedAtUtc)
+                || !av.Source.Is(bv.Source))
+                return false;
+        }
+
+        return true;
     }
 
     private static bool CodeNavigationEquals(CodeNavigationSettings? a, CodeNavigationSettings? b)

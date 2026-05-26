@@ -172,6 +172,80 @@ public sealed class ChatSlashAutocompleteTests
 
     [Fact]
 
+    public void GetSuggestions_IntercomDomain_ListsServerObject()
+
+    {
+
+        var suggestions = ChatSlashAutocomplete.GetSuggestions("/intercom ");
+
+        Assert.Contains(suggestions, s => s.ListTitle == "server");
+
+        Assert.Equal("/intercom server ", suggestions.First(s => s.ListTitle == "server").InsertText);
+
+    }
+
+
+
+    [Fact]
+
+    public void GetSuggestions_IntercomServerSpace_ListsStartStatusStop()
+
+    {
+
+        var suggestions = ChatSlashAutocomplete.GetSuggestions("/intercom server ");
+
+        Assert.Contains(suggestions, s => s.ListTitle == "start" && s.InsertText == "/intercom server start ");
+
+        Assert.Contains(suggestions, s => s.ListTitle == "status");
+
+        Assert.Contains(suggestions, s => s.ListTitle == "stop");
+
+    }
+
+    [Fact]
+    public void GetSuggestions_IntercomServerStartComplete_ReturnsEmpty()
+    {
+        Assert.Empty(ChatSlashAutocomplete.GetSuggestions("/intercom server start"));
+    }
+
+    [Fact]
+    public void GetSuggestions_IntercomServerStartWithTrailingSpace_ReturnsEmpty()
+    {
+        Assert.Empty(ChatSlashAutocomplete.GetSuggestions("/intercom server start "));
+    }
+
+    [Fact]
+    public void GetSuggestions_IntercomServerStartWithBaseUrl_ReturnsEmpty()
+    {
+        Assert.Empty(ChatSlashAutocomplete.GetSuggestions("/intercom server start http://127.0.0.1:5080"));
+    }
+
+    [Fact]
+    public void GetSuggestions_IntercomServerStaPartial_StillListsMatches()
+    {
+        var suggestions = ChatSlashAutocomplete.GetSuggestions("/intercom server sta");
+        Assert.Contains(suggestions, s => s.ListTitle == "start");
+        Assert.Contains(suggestions, s => s.ListTitle == "status");
+    }
+
+    [Fact]
+    public void IsRunnableSlashLineAtCaret_IntercomServerStart_ReturnsTrue()
+    {
+        const string line = "/intercom server start";
+        Assert.True(ChatSlashAutocomplete.IsRunnableSlashLineAtCaret(line, line.Length));
+    }
+
+    [Fact]
+    public void IsRunnableSlashLineAtCaret_FileOpenWithoutPath_ReturnsFalse()
+    {
+        const string line = "/file open";
+        Assert.False(ChatSlashAutocomplete.IsRunnableSlashLineAtCaret(line, line.Length));
+    }
+
+
+
+    [Fact]
+
     public void GetSuggestions_IntercomDomain_ListsObjects()
 
     {

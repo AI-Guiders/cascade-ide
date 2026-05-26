@@ -36,7 +36,7 @@ public partial class MainWindow
             return active is null ? "" : GetEditorContentRange(active, startLine, endLine);
         });
         vmSetup.SetApplyEdit((path, sl, sc, el, ec, newText) =>
-            ApplyEditInActiveDockEditor(vmSetup, path, sl, sc, el, ec, newText));
+            _ = vmSetup.Documents.ApplyMcpEditToDocument(path, sl, sc, el, ec, newText));
         vmSetup.SetFocusEditor(() =>
         {
             var active = TryGetActiveDockEditor();

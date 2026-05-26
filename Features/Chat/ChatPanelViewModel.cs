@@ -12,6 +12,7 @@ using CascadeIDE.Models.AgentChat;
 using CascadeIDE.Features.Chat.Application;
 using CascadeIDE.Features.Chat.DataAcquisition;
 using CascadeIDE.Features.Cockpit;
+using AvaloniaEdit;
 using CascadeIDE.Models.Intercom;
 using CascadeIDE.Services;
 using CascadeIDE.Services.Intercom;
@@ -48,14 +49,17 @@ public partial class ChatPanelViewModel : ViewModelBase
     private readonly Action? _showAcpTerminal;
     private readonly Func<string, IReadOnlyDictionary<string, JsonElement>?, CancellationToken, Task<string>>? _executeIdeCommandForMafAgent;
     private readonly Func<AttachmentAnchor, bool, CancellationToken, Task<string>>? _revealIntercomAttachmentInIde;
+    private readonly AnchorDraftPreviewCoordinator? _anchorDraftPreview;
     private readonly ChatSlashCommandRunner _slashCommandRunner;
     private readonly IWorkspaceFileSlashCompletionProvider? _workspaceFileSlashCompletion;
     private readonly ISessionTopicSlashCompletionProvider _sessionTopicSlashCompletion;
+    private readonly IMessageAnchorSlashCompletionProvider _messageAnchorSlashCompletion;
     private readonly Func<Uri>? _getLocalOllamaEndpoint;
     private readonly Func<string>? _getEffectiveOllamaModelId;
     private readonly Func<IChatClient?>? _tryCreateCloudMafIChatClient;
     private readonly Func<string?>? _getChatMinimizedContextBlock;
     private readonly Func<string> _getSendMessageKey;
+    private readonly Func<string> _getComposerNewLineKey;
     private readonly Func<string?>? _getSolutionPath;
     private readonly Func<int?>? _getEditorSelectionStart;
     private readonly Func<int?>? _getEditorSelectionLength;
@@ -99,12 +103,16 @@ public partial class ChatPanelViewModel : ViewModelBase
         Func<IChatClient?>? tryCreateCloudMafIChatClient = null,
         Func<string?>? getChatMinimizedContextBlock = null,
         Func<string>? getSendMessageKey = null,
+        Func<string>? getComposerNewLineKey = null,
         Func<string?>? getSolutionPath = null,
         Func<ObservableCollection<SolutionItem>>? getSolutionRoots = null,
         Func<int?>? getEditorSelectionStart = null,
         Func<int?>? getEditorSelectionLength = null,
         Func<int?>? getEditorCaretOffset = null,
-        SlashCommandPreviewService? slashCommandPreviewService = null)
+        Func<string?, TextEditor?>? getTextEditorForAbsoluteFilePath = null,
+        SlashCommandPreviewService? slashCommandPreviewService = null,
+        Features.Agent.Environment.IAgentEnvironmentService? agentEnvironment = null,
+        Func<string?>? getSolutionPathForAgent = null)
     {
         _aiProviderManager = aiProviderManager;
         _getActiveAiProvider = getActiveAiProvider;
@@ -124,10 +132,19 @@ public partial class ChatPanelViewModel : ViewModelBase
         _showAcpTerminal = showAcpTerminal;
         _executeIdeCommandForMafAgent = executeIdeCommandForMafAgent;
         _revealIntercomAttachmentInIde = revealIntercomAttachmentInIde;
+        _anchorDraftPreview = getTextEditorForAbsoluteFilePath is null
+            ? null
+            : new AnchorDraftPreviewCoordinator(
+                () => _getCurrentFilePath?.Invoke(),
+                getWorkspaceRoot,
+                () => ResolveAttachSolutionPath(),
+                ResolveAttachIndexDirectoryRelative,
+                getTextEditorForAbsoluteFilePath);
         _workspaceFileSlashCompletion = getSolutionPath is not null && getSolutionRoots is not null
             ? new WorkspaceFileSlashCompletionProvider(getSolutionPath, getSolutionRoots, getWorkspaceRoot)
             : null;
         _sessionTopicSlashCompletion = new SessionTopicSlashCompletionProvider(() => ChatSurfaceSnapshot);
+        _messageAnchorSlashCompletion = new MessageAnchorSlashCompletionProvider(GetSelectedMessageAttachmentsForSlash);
         _slashCommandRunner = new ChatSlashCommandRunner(
             executeIdeCommandForMafAgent,
             () => new ChatSlashEditorContext(
@@ -152,7 +169,9 @@ public partial class ChatPanelViewModel : ViewModelBase
             findMessagesForCodeRef: FindMessagesForCodeRef,
             relateMessageRangeToCodeRef: RelateMessageRangeToCodeRef,
             listMessageAnchors: ListAnchorsForSlashContext,
-            peekAnchorById: PeekAnchorById);
+            peekAnchorById: PeekAnchorById,
+            agentEnvironment: agentEnvironment,
+            getSolutionPathForAgent: getSolutionPathForAgent);
         _slashCommandPreviewService = slashCommandPreviewService
             ?? new SlashCommandPreviewService(tryBuildAnchorSlashPreview);
         _cockpitCommandLineSession = new CockpitCommandLineSession(this, _slashCommandPreviewService);
@@ -161,6 +180,8 @@ public partial class ChatPanelViewModel : ViewModelBase
         _tryCreateCloudMafIChatClient = tryCreateCloudMafIChatClient;
         _getChatMinimizedContextBlock = getChatMinimizedContextBlock;
         _getSendMessageKey = getSendMessageKey ?? (() => "Enter");
+        _getComposerNewLineKey = getComposerNewLineKey
+            ?? (() => ChatComposerChordOptions.ComplementaryChord(_getSendMessageKey()));
         _getSolutionPath = getSolutionPath;
         _getEditorSelectionStart = getEditorSelectionStart;
         _getEditorSelectionLength = getEditorSelectionLength;
@@ -203,12 +224,31 @@ public partial class ChatPanelViewModel : ViewModelBase
     /// <summary>Клавиша отправки из настроек (Enter / Ctrl+Enter / Shift+Enter).</summary>
     public string GetSendMessageKey() => _getSendMessageKey();
 
+    /// <summary>Сочетание для переноса строки в composer (отдельно от отправки).</summary>
+    public string GetComposerNewLineKey() => _getComposerNewLineKey();
+
     public ObservableCollection<ChatMessageViewModel> ChatMessages { get; } = [];
     public ObservableCollection<ClarificationDraftItemViewModel> ClarificationDraftItems { get; } = [];
     public ObservableCollection<CursorAcpModelPick> CursorAcpModelPicks { get; } = [];
 
     public bool HasChatMessages => ChatMessages.Count > 0;
     public bool HasActiveClarificationBatch => _activeClarificationBatch is not null;
+
+    /// <summary>AEE time accounting trace (ADR 0148 W3).</summary>
+    public void AppendAgentEnvironmentTrace(string text, ChatSlashCommandStatus status)
+    {
+        var vm = new ChatMessageViewModel(
+            "assistant",
+            text.Trim(),
+            threadId: ResolveMessageThreadId(),
+            slashCommandPath: "/agent verify",
+            slashCommandStatus: status);
+        ChatMessages.Add(vm);
+    }
+
+    /// <summary>Активная ветка; иначе основная (не <see cref="Guid.Empty"/> — иначе ломается выбор темы в Skia).</summary>
+    private Guid ResolveMessageThreadId() =>
+        _activeThreadId != Guid.Empty ? _activeThreadId : _mainThreadId;
 
     public string ActiveClarificationTitle => _activeClarificationBatch?.Title?.Trim() is { Length: > 0 } title
         ? title
@@ -254,6 +294,7 @@ public partial class ChatPanelViewModel : ViewModelBase
     partial void OnSelectedMessageIndexChanged(int value)
     {
         RefreshChatSurfaceSnapshot();
+        RefreshComposerAutocomplete();
     }
 
     partial void OnThreadBranchHintChanged(string value)

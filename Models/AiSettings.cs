@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using CascadeIDE.Services;
 
 namespace CascadeIDE.Models;
 
@@ -70,7 +71,13 @@ public sealed class AiAcpSettings
 {
     public string CursorAcpPath { get; set; } = "";
 
+    /// <summary>TOML: <c>cursor_acp_path_env</c> — <c>PATH</c> или имя переменной с путём (ADR 0149).</summary>
+    public string CursorAcpPathEnv { get; set; } = "";
+
     public string CursorAcpModelId { get; set; } = "";
+
+    public string ResolveCursorAcpPath() =>
+        SettingsEnvResolver.ResolveLaunchPath(CursorAcpPath, CursorAcpPathEnv);
 }
 
 /// <summary>TOML: <c>[ai.mcp_only]</c> — зарезервировано под флаги режима.</summary>

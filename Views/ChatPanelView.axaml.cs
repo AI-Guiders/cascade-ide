@@ -187,7 +187,11 @@ public partial class ChatPanelView : UserControl
             var handle = vm.TryHandleIntercomComposerKey(e.Kind, e.KeyEvent);
             if (!handle.Handled)
             {
-                if (e.Kind == IntercomComposerKeyKind.Enter)
+                // Перенос строки только по явному chord из настроек (разделение с отправкой, как в мессенджерах).
+                if (e.Kind == IntercomComposerKeyKind.Enter
+                    && !vm.IsCockpitCommandLineOpen
+                    && e.KeyEvent is { } nk
+                    && ChatSendKeyMatcher.Matches(nk, vm.GetComposerNewLineKey()))
                 {
                     var text = surface.ComposerText ?? vm.ChatInput;
                     var caret = Math.Clamp(surface.ComposerCaretIndex, 0, text.Length);

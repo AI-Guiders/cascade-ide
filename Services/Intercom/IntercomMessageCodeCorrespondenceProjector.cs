@@ -75,18 +75,21 @@ public static class IntercomMessageCodeCorrespondenceProjector
         var byOrdinal = lane.ToDictionary(m => m.Ordinal);
         foreach (var relate in explicitRelates)
         {
-            for (var ordinal = relate.StartOrdinal; ordinal <= relate.EndOrdinal; ordinal++)
+            foreach (var segment in relate.OrdinalSegments)
             {
-                if (!byOrdinal.TryGetValue(ordinal, out var msg))
-                    continue;
+                for (var ordinal = segment.StartOrdinal; ordinal <= segment.EndOrdinal; ordinal++)
+                {
+                    if (!byOrdinal.TryGetValue(ordinal, out var msg))
+                        continue;
 
-                appendEntriesFromAnchor(
-                    list,
-                    msg.Ordinal,
-                    msg.MessageIndex,
-                    msg.MessageId,
-                    relate.CodeRef,
-                    MatchKindExplicit);
+                    appendEntriesFromAnchor(
+                        list,
+                        msg.Ordinal,
+                        msg.MessageIndex,
+                        msg.MessageId,
+                        relate.CodeRef,
+                        MatchKindExplicit);
+                }
             }
         }
 

@@ -211,7 +211,7 @@
                 <MenuItem Header="Превью в отдельном _окне" Command="{Binding OpenPreviewWindowCommand}"/>
             </MenuItem>
             <MenuItem Header="_Настройки">
-                <MenuItem Header="Параметры AI и чата..." Command="{Binding OpenSettingsCommand}"/>
+                <MenuItem Header="Параметры…" Command="{Binding OpenSettingsCommand}"/>
             </MenuItem>
             <MenuItem Header="_Справка">
                 <MenuItem Header="О _программе" Command="{Binding AboutCommand}"/>

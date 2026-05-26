@@ -192,10 +192,29 @@ public static class IntercomAttachmentResolveAtSend
         string? activeFilePath,
         string? workspaceRoot,
         out AttachmentAnchor anchor,
+        out string error) =>
+        TryResolveBracketDraft(reference, activeFilePath, workspaceRoot, solutionPath: null, indexDirectoryRelative: null, out anchor, out error);
+
+    public static bool TryResolveBracketDraft(
+        in BracketCodeReference reference,
+        string? activeFilePath,
+        string? workspaceRoot,
+        string? solutionPath,
+        string? indexDirectoryRelative,
+        out AttachmentAnchor anchor,
         out string error)
     {
-        if (!BracketCodeReferenceParser.TryToAttachmentAnchor(reference, activeFilePath, workspaceRoot, out anchor, out error))
+        if (!BracketCodeReferenceParser.TryToAttachmentAnchor(
+                reference,
+                activeFilePath,
+                workspaceRoot,
+                solutionPath,
+                indexDirectoryRelative,
+                out anchor,
+                out error))
+        {
             return false;
+        }
 
         var shape = !string.IsNullOrWhiteSpace(reference.MemberKey)
             ? reference.ScopeKind is not null ? "syntax-scope" : "member"
@@ -219,8 +238,17 @@ public static class IntercomAttachmentResolveAtSend
         out AttachmentAnchor anchor,
         out string error)
     {
-        if (!TryResolveBracketDraft(reference, activeFilePath, workspaceRoot, out anchor, out error))
+        if (!TryResolveBracketDraft(
+                reference,
+                activeFilePath,
+                workspaceRoot,
+                solutionPath,
+                indexDirectoryRelative: null,
+                out anchor,
+                out error))
+        {
             return false;
+        }
 
         return finalize(
             anchor,

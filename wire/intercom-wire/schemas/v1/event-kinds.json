@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cascade.dev/intercom-wire/v1/event-kinds.json",
+  "title": "IntercomWireEventKindRegistry",
+  "description": "Маппинг event_kind → payload schema. Transport MAY reject unknown kinds.",
+  "event_kinds": {
+    "message_added": {
+      "payload_schema": "./payloads/message.schema.json",
+      "sync_default": true,
+      "notes": "role user→human, assistant→agent on wire sender"
+    },
+    "message_completed": {
+      "payload_schema": "./payloads/message.schema.json",
+      "sync_default": true
+    },
+    "message_edited": {
+      "payload_schema": "./payloads/message-edited.schema.json",
+      "sync_default": true
+    },
+    "thread_forked": {
+      "payload_schema": "./payloads/thread-forked.schema.json",
+      "sync_default": true
+    },
+    "message_range_related": {
+      "payload_schema": "./payloads/message-range-related.schema.json",
+      "sync_default": true,
+      "adr": "0137"
+    },
+    "message_stream_delta": {
+      "payload_schema": null,
+      "sync_default": false,
+      "notes": "Local/agent only; not on team transport"
+    },
+    "clarification_batch_opened": {
+      "payload_schema": null,
+      "sync_default": false
+    },
+    "clarification_answer_submitted": {
+      "payload_schema": null,
+      "sync_default": false
+    }
+  }
+}

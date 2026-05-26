@@ -10,10 +10,9 @@ namespace CascadeIDE.Features.Chat;
 /// </summary>
 public static partial class ChatSlashCommandCatalog
 {
-    private static readonly Lazy<IReadOnlyList<ChatSlashCommandDescriptor>> DescriptorsLazy = new(
-        static () => IntentSlashCatalog.SlashRoutes.Values.Select(ToDescriptor).ToList());
+    private static readonly Lazy<CatalogSnapshot> SnapshotLazy = new(static () => BuildSnapshot());
 
-    private static IReadOnlyList<ChatSlashCommandDescriptor> Descriptors => DescriptorsLazy.Value;
+    private static CatalogSnapshot Snapshot => SnapshotLazy.Value;
 
     public static bool TryResolve(ChatSlashCommandParseResult parse, out ChatSlashCommandDescriptor descriptor)
     {
@@ -23,68 +22,61 @@ public static partial class ChatSlashCommandCatalog
 
         if (parse.Shape == ChatSlashCommandShape.Flat)
         {
-            if (IntercomSlashPathBuilder.TryBuildPath(parse, out var intercomFlatPath))
+            if (IntercomSlashPathBuilder.TryBuildPath(parse, out var intercomFlatPath)
+                && Snapshot.ByPath.TryGetValue(intercomFlatPath, out descriptor))
             {
-                foreach (var entry in Descriptors)
-                {
-                    if (string.Equals(entry.SlashPath, intercomFlatPath, StringComparison.OrdinalIgnoreCase))
-                    {
-                        descriptor = entry;
-                        return true;
-                    }
-                }
+                return true;
             }
 
             var flat = "/" + parse.Head;
-            foreach (var entry in Descriptors)
-            {
-                if (entry.ExecutionKind == ChatSlashCommandExecutionKind.LocalHelp
-                    && string.Equals(entry.SlashPath, flat, StringComparison.OrdinalIgnoreCase))
-                {
-                    descriptor = entry;
-                    return true;
-                }
+            if (Snapshot.ByPath.TryGetValue(flat, out descriptor))
+                return true;
 
-                if (!entry.SlashPath.Contains(' ', StringComparison.Ordinal)
-                    && string.Equals(entry.SlashPath, flat, StringComparison.OrdinalIgnoreCase))
-                {
-                    descriptor = entry;
-                    return true;
-                }
-            }
+            if (TryResolveFlatHelp(flat, out descriptor))
+                return true;
 
             return false;
         }
 
-        if (IntercomSlashPathBuilder.TryBuildPath(parse, out var intercomPath))
+        if (IntercomSlashPathBuilder.TryBuildPath(parse, out var intercomPath)
+            && Snapshot.ByPath.TryGetValue(intercomPath, out descriptor))
         {
-            foreach (var entry in Descriptors)
-            {
-                if (string.Equals(entry.SlashPath, intercomPath, StringComparison.OrdinalIgnoreCase))
-                {
-                    descriptor = entry;
-                    return true;
-                }
-            }
+            return true;
         }
 
         var path = string.IsNullOrEmpty(parse.SubAction)
             ? "/" + parse.Head + " " + parse.Action
             : "/" + parse.Head + " " + parse.Action + " " + parse.SubAction;
-        foreach (var entry in Descriptors)
+
+        return Snapshot.ByPath.TryGetValue(path, out descriptor);
+    }
+
+    /// <summary>Резолв по каноническому пути и хвосту (ADR 0150), без дублирования intercom strip.</summary>
+    public static bool TryResolveCanonical(string canonicalPath, string? argTail, out ChatSlashCommandDescriptor descriptor)
+    {
+        descriptor = null!;
+        var line = string.IsNullOrWhiteSpace(argTail)
+            ? canonicalPath
+            : $"{canonicalPath} {argTail.Trim()}";
+        return TryResolve(ChatSlashCommandParser.TryParse(line), out descriptor);
+    }
+
+    private static bool TryResolveFlatHelp(string flat, out ChatSlashCommandDescriptor descriptor)
+    {
+        if (!Snapshot.ByPath.TryGetValue(flat, out descriptor))
         {
-            if (string.Equals(entry.SlashPath, path, StringComparison.OrdinalIgnoreCase))
-            {
-                descriptor = entry;
-                return true;
-            }
+            descriptor = null!;
+            return false;
         }
 
-        return false;
+        if (descriptor.ExecutionKind == ChatSlashCommandExecutionKind.LocalHelp)
+            return true;
+
+        return !descriptor.SlashPath.Contains(' ', StringComparison.Ordinal);
     }
 
     public static IReadOnlyList<ChatSlashSuggestion> AllSuggestions() =>
-        OrderDescriptors(Descriptors)
+        OrderDescriptors(Snapshot.Descriptors)
             .Select(e => new ChatSlashSuggestion(
                 e.SlashPath,
                 e.SlashPath,
@@ -101,7 +93,7 @@ public static partial class ChatSlashCommandCatalog
                 : $"Слэш-команды /{namespaceFilter.Trim()}:*",
         };
 
-        foreach (var entry in OrderDescriptors(Descriptors))
+        foreach (var entry in OrderDescriptors(Snapshot.Descriptors))
         {
             if (!string.IsNullOrWhiteSpace(namespaceFilter)
                 && !entry.SlashPath.StartsWith("/" + namespaceFilter.Trim(), StringComparison.OrdinalIgnoreCase))
@@ -148,10 +140,23 @@ public static partial class ChatSlashCommandCatalog
             route.PrimarySurface,
             route.Group,
             route.Completion,
-            route.MessageAudience);
+            route.MessageAudience,
+            route.AutoRunOnCommit,
+            route.AutoRunRequiresArgs);
 
     internal static bool TryGetRoute(string slashPath, out SlashRouteEntry route) =>
-        IntentSlashCatalog.TryGetRoute(slashPath, out route);
+        SlashRouteCatalogIndex.TryGetRoute(slashPath, out route);
+
+    private static CatalogSnapshot BuildSnapshot()
+    {
+        var routes = IntentSlashCatalog.SlashRoutes;
+        var descriptors = routes.Values.Select(ToDescriptor).ToList();
+        var byPath = new Dictionary<string, ChatSlashCommandDescriptor>(StringComparer.OrdinalIgnoreCase);
+        foreach (var d in descriptors)
+            byPath[d.SlashPath] = d;
+
+        return new CatalogSnapshot(descriptors, byPath);
+    }
 
     private static string SortKey(ChatSlashCommandDescriptor descriptor)
     {
@@ -168,4 +173,8 @@ public static partial class ChatSlashCommandCatalog
         var space = body.IndexOf(' ');
         return space < 0 ? body : body[..space];
     }
+
+    private sealed record CatalogSnapshot(
+        IReadOnlyList<ChatSlashCommandDescriptor> Descriptors,
+        Dictionary<string, ChatSlashCommandDescriptor> ByPath);
 }

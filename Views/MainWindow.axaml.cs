@@ -81,6 +81,7 @@ public partial class MainWindow : PointerTrackingWindow
             vm.GotoActiveEditorLineColumnRequested += OnGotoEditorLineColumn;
 
             vm.LoadSendMessageKeyFromStorage();
+            vm.LoadComposerNewLineKeyFromStorage();
             vm.PropertyChanged += OnViewModelPropertyChanged;
             vm.RequestOpenSolution = () => _ = ShowOpenSolutionDialogAsync();
             vm.RequestCreateNewSolution = () => _ = ShowCreateNewSolutionDialogAsync();

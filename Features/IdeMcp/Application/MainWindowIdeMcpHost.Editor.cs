@@ -1,5 +1,6 @@
 using CascadeIDE.ViewModels;
 using CascadeIDE.Features.IdeMcp.Application;
+using CascadeIDE.Features.Workspace.DataAcquisition;
 using CascadeIDE.Models;
 using CascadeIDE.Services;
 
@@ -100,10 +101,25 @@ internal sealed partial class MainWindowIdeMcpHost
             .ConfigureAwait(false);
     }
 
-    public void ApplyEdit(string filePath, int startLine, int startColumn, int endLine, int endColumn, string newText)
-    {
-        UiScheduler.Default.Post(() => _host.McpApplyEditAction?.Invoke(filePath, startLine, startColumn, endLine, endColumn, newText));
-    }
+    public Task<string> ApplyEditAsync(string filePath, int startLine, int startColumn, int endLine, int endColumn, string newText) =>
+        UiScheduler.Default.InvokeAsync(() =>
+            _host.Documents.ApplyMcpEditToDocument(filePath, startLine, startColumn, endLine, endColumn, newText));
+
+    public Task<string> ReadWorkspaceFileAsync(string filePath, int? offset, int? limit, int? maxChars) =>
+        UiScheduler.Default.InvokeAsync(() =>
+        {
+            var workspace = _host.McpGetWorkspacePath();
+            if (!WorkspaceDocumentFileIo.TryResolvePath(workspace, null, filePath, out var full, out var resolveError))
+                return System.Text.Json.JsonSerializer.Serialize(new { error = "resolve_failed", message = resolveError });
+
+            if (!WorkspaceDocumentFileIo.TryReadText(full, offset, limit, maxChars, out var json, out var readError))
+                return System.Text.Json.JsonSerializer.Serialize(new { error = "read_failed", message = readError, file_path = full });
+
+            return json;
+        });
+
+    public Task<string> SaveDocumentAsync(string? filePath, string? content) =>
+        UiScheduler.Default.InvokeAsync(() => _host.Documents.SaveDocumentToDisk(filePath, content));
 
     public void GoToPosition(string? filePath, int line, int column, int? endLine, int? endColumn)
     {

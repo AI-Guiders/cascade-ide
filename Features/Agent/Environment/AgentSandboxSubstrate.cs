@@ -1,0 +1,78 @@
+using System.Net;
+using System.Net.Sockets;
+
+namespace CascadeIDE.Features.Agent.Environment;
+
+/// <summary>
+/// Per-run substrate bundle (ADR 0148 §8.1.2): isolated DB path + ephemeral dev port.
+/// Layout: <c>{runDirectory}/substrate/wit.db</c>, <c>port.txt</c>, <c>owner.txt</c>.
+/// </summary>
+public static class AgentSandboxSubstrate
+{
+    public static AgentSandboxSubstrateBundle Allocate(string runDirectory)
+    {
+        var substrateDir = Path.Combine(runDirectory, "substrate");
+        Directory.CreateDirectory(substrateDir);
+
+        var port = ReserveFreeTcpPort();
+        var dbPath = Path.Combine(substrateDir, "wit.db");
+        var markerPath = Path.Combine(substrateDir, "owner.txt");
+        var portPath = Path.Combine(substrateDir, "port.txt");
+
+        var ownerId = Path.GetFileName(runDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+        File.WriteAllText(markerPath, ownerId);
+        File.WriteAllText(portPath, port.ToString());
+        File.WriteAllText(dbPath, ownerId);
+
+        return new AgentSandboxSubstrateBundle(port, dbPath, markerPath, portPath, substrateDir);
+    }
+
+    public static void WriteHeavyMarker(AgentSandboxSubstrateBundle bundle, string payload)
+    {
+        Directory.CreateDirectory(bundle.SubstrateDirectory);
+        File.WriteAllText(bundle.DatabasePath, payload);
+        File.AppendAllText(bundle.MarkerPath, "|" + payload);
+    }
+
+    public static string ReadDatabaseOwner(AgentSandboxSubstrateBundle bundle) =>
+        File.ReadAllText(bundle.DatabasePath);
+
+    private static int ReserveFreeTcpPort()
+    {
+        using var listener = new TcpListener(IPAddress.Loopback, 0);
+        listener.Start();
+        try
+        {
+            return ((IPEndPoint)listener.LocalEndpoint).Port;
+        }
+        finally
+        {
+            listener.Stop();
+        }
+    }
+}
+
+public sealed record AgentSandboxSubstrateBundle(
+    int DevPort,
+    string DatabasePath,
+    string MarkerPath,
+    string PortFilePath,
+    string SubstrateDirectory);
+
+/// <summary>Переменные среды для дочернего <c>dotnet test</c> (ADR 0148 §8.1.2). Тесты могут явно опираться на ключи при необходимости изоляции.</summary>
+public static class AgentSandboxProcessEnvironmentKeys
+{
+    public const string WitDbPath = "CASCADE_AGENT_SUBSTRATE_WIT_DB";
+
+    public const string DevPort = "CASCADE_AGENT_SUBSTRATE_DEV_PORT";
+
+    /// <summary>Каталог данных Intercom host (ADR 0148 W4 / 0147).</summary>
+    public const string IntercomDataDirectory = "Intercom__DataDirectory";
+
+    public static Dictionary<string, string> ForBundle(AgentSandboxSubstrateBundle bundle) => new(StringComparer.Ordinal)
+    {
+        [WitDbPath] = bundle.DatabasePath,
+        [DevPort] = bundle.DevPort.ToString(),
+        [IntercomDataDirectory] = bundle.SubstrateDirectory,
+    };
+}

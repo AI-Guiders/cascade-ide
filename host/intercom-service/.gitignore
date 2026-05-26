@@ -1,0 +1,10 @@
+**/bin/
+**/obj/
+/intercom-service-data/
+*.witdb
+**/intercom.witdb_indexes/
+*.witdb
+*.user
+.vs/
+appsettings.Development.local.json
+**/appsettings.Development.local.json

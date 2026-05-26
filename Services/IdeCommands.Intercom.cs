@@ -17,4 +17,25 @@ public static partial class IdeCommands
 
     /// <summary>Явная связь диапазона gutter-сообщений с кодом (ADR 0137). args: start_ordinal:integer, end_ordinal?:integer, use_selection?:boolean, code_ref?:string, anchor_json?:object, file?:string, line_start?:integer, line_end?:integer; returns: json; example: {"start_ordinal":3,"end_ordinal":5,"use_selection":true}.</summary>
     public const string IntercomMessageRelate = "intercom.message_relate";
+
+    /// <summary>OAuth Connect к team Intercom service (ADR 0144). returns: text.</summary>
+    public const string IntercomConnectTeam = "intercom.connect_team";
+
+    /// <summary>Disconnect team transport и очистка JWT. returns: text.</summary>
+    public const string IntercomDisconnectTeam = "intercom.disconnect_team";
+
+    /// <summary>Статус локального intercom-service (ADR 0147). returns: text.</summary>
+    public const string IntercomServerStatus = "intercom.server_status";
+
+    /// <summary>Запустить intercom-service. args: base_url?:string; returns: text; example: {"base_url":"http://127.0.0.1:5080"}.</summary>
+    public const string IntercomServerStart = "intercom.server_start";
+
+    /// <summary>Остановить intercom-service. returns: text.</summary>
+    public const string IntercomServerStop = "intercom.server_stop";
+
+    /// <summary>Список members team. returns: text.</summary>
+    public const string IntercomTeamMembers = "intercom.team_members";
+
+    /// <summary>Provision agent account. args: display_name:string; returns: text; example: {"display_name":"Nova"}.</summary>
+    public const string IntercomAgentProvision = "intercom.agent_provision";
 }

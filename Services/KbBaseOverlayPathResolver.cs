@@ -8,7 +8,7 @@ internal static class KbBaseOverlayPathResolver
     internal static string? TryResolveCanonRoot(CascadeIdeSettings settings)
     {
         ArgumentNullException.ThrowIfNull(settings);
-        var raw = settings.AgentNotes.KbBaseOverlayPath.Trim();
+        var raw = settings.AgentNotes.ResolveKbBaseOverlayPath().Trim();
         if (raw.Length == 0)
             return null;
 

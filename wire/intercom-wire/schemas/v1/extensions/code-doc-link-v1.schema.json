@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cascade.dev/intercom-wire/v1/extensions/code-doc-link-v1.schema.json",
+  "title": "CodeDocLinkV1",
+  "description": "Связка документации (KB, ADR, spec) с фрагментом кода.",
+  "type": "object",
+  "required": ["doc_path", "code_ref", "link_kind"],
+  "properties": {
+    "doc_path": { "type": "string" },
+    "doc_anchor": {
+      "type": "string",
+      "description": "Heading id or line range within doc"
+    },
+    "code_ref": { "$ref": "../common/attachment-anchor.schema.json" },
+    "link_kind": {
+      "type": "string",
+      "enum": ["specifies", "explains", "tests", "deprecates", "see_also"]
+    },
+    "bidirectional": { "type": "boolean", "default": false }
+  },
+  "additionalProperties": true
+}

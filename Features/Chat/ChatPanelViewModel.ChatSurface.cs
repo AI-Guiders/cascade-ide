@@ -8,6 +8,7 @@ public partial class ChatPanelViewModel
 
     private void RefreshChatSurfaceSnapshot()
     {
+        NormalizeOrphanMessageThreadIds();
         ChatSurfaceSnapshot = _chatSurfaceCompositor.Compose(new ChatSurfaceIntent(
             BuildConversationMessages(),
             _activeClarificationBatch,
@@ -52,6 +53,20 @@ public partial class ChatPanelViewModel
             ref _lastOverviewThreadCount,
             value => IsChatOverviewMode = value,
             () => IsChatOverviewMode);
+
+    /// <summary>Сообщения без thread_id (legacy AEE trace) — в активную/основную ветку, чтобы не появлялась «призрачная» вкладка 00000000….</summary>
+    private void NormalizeOrphanMessageThreadIds()
+    {
+        var target = ResolveMessageThreadId();
+        if (target == Guid.Empty)
+            return;
+
+        foreach (var message in ChatMessages)
+        {
+            if (message.ThreadId == Guid.Empty)
+                message.AssignThread(target);
+        }
+    }
 
     private IReadOnlyList<ChatConversationMessage> BuildConversationMessages() =>
         ChatMessages

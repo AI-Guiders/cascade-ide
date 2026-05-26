@@ -18,8 +18,16 @@ if (-not (Test-Path -LiteralPath $csproj)) {
 
 $outDir = Join-Path $repoRoot "publish"
 
+$intercomPublish = Join-Path $repoRoot "scripts\intercom\publish-intercom-service.ps1"
+$intercomOut = Join-Path $repoRoot "artifacts\intercom-service"
+
 Push-Location $repoRoot
 try {
+    if (Test-Path -LiteralPath $intercomPublish) {
+        & pwsh -NoProfile -ExecutionPolicy Bypass -File $intercomPublish -Configuration Release -SelfContained -OutDir $intercomOut
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    }
+
     $publishArgs = @(
         "publish", $csproj,
         "-c", "Release",
@@ -44,6 +52,17 @@ try {
     if ($robocode -ge 8) {
         Write-Error "robocopy failed with exit code $robocode"
         exit $robocode
+    }
+
+    if (Test-Path -LiteralPath $intercomOut) {
+        $intercomTarget = Join-Path $Target "tools\intercom-service"
+        New-Item -ItemType Directory -Path $intercomTarget -Force | Out-Null
+        robocopy $intercomOut $intercomTarget /E /MIR /NFL /NDL /NJH /NJS | Out-Null
+        $robocode = $LASTEXITCODE
+        if ($robocode -ge 8) {
+            Write-Error "robocopy intercom-service failed with exit code $robocode"
+            exit $robocode
+        }
     }
 
     $exe = Join-Path $Target "CascadeIDE.exe"

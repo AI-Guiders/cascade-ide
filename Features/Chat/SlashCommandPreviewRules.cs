@@ -81,10 +81,12 @@ internal static class SlashCommandPreviewRulePipeline
             SlashCommandAnchorPreviewResolver? resolveAnchor,
             out SlashCommandPreviewResult result)
         {
-            if (!SlashCommandPreviewRuleHelpers.IsAnchorPeek(parse))
+            if (!SlashPathAliases.IsAnchorPeekCommand(parse))
                 return TryReject(out result);
 
-            result = SlashCommandPreviewRuleHelpers.BuildAnchorPeek(parse.ArgsTail, resolveAnchor);
+            result = SlashCommandPreviewRuleHelpers.BuildAnchorPeek(
+                SlashPathAliases.ExtractPeekArgs(parse),
+                resolveAnchor);
             return true;
         }
     }
@@ -170,24 +172,13 @@ internal static class SlashCommandPreviewRuleHelpers
         if (!ChatSlashCommandCatalog.TryResolve(parse, out _))
             return new($"Нет такой команды «{intercomPath}».", SlashCommandPreviewKind.Error);
 
-        if (string.Equals(intercomPath, "/intercom message select", StringComparison.OrdinalIgnoreCase))
-            return BuildParametricPreview(parse.ArgsTail, "Сообщения", parse);
+        if (SlashIntercomPreviewPolicies.TryBuild(intercomPath, parse, resolveAnchor, out var policyResult))
+            return policyResult;
 
-        if (string.Equals(intercomPath, "/intercom message select clear", StringComparison.OrdinalIgnoreCase))
-        {
-            var tail = (parse.ArgsTail ?? "").Trim();
-            return tail.Length > 0
-                ? new("Ожидается «/intercom message select clear» без аргументов.", SlashCommandPreviewKind.Error)
-                : new("Сбросить подсветку сообщений в detail-ленте.", SlashCommandPreviewKind.Ok);
-        }
+        if (string.Equals(intercomPath, SlashPathAliases.AnchorPeekPath, StringComparison.OrdinalIgnoreCase))
+            return SlashCommandPreviewRuleHelpers.BuildAnchorPeek(SlashPathAliases.ExtractPeekArgs(parse), resolveAnchor);
 
-        if (string.Equals(intercomPath, "/intercom message anchors list", StringComparison.OrdinalIgnoreCase))
-            return new("Готово: список якорей сообщения и черновика.", SlashCommandPreviewKind.Ok);
-
-        if (string.Equals(intercomPath, "/anchor peek", StringComparison.OrdinalIgnoreCase))
-            return BuildAnchorPeek(parse.ArgsTail, resolveAnchor);
-
-        return BuildCatalogCommandPreview(intercomPath, parse.ArgsTail);
+        return SlashCommandPreviewRuleHelpers.BuildCatalogCommandPreview(intercomPath, parse.ArgsTail);
     }
 
     public static SlashCommandPreviewResult BuildCatalogCommandPreview(string slashPath, string? argsTail)
@@ -199,20 +190,20 @@ internal static class SlashCommandPreviewRuleHelpers
         return new($"Команда «{slashPath}».", SlashCommandPreviewKind.Ok);
     }
 
-    public static SlashCommandPreviewResult BuildAnchorPeek(string tail, SlashCommandAnchorPreviewResolver? resolveAnchor)
+    public static SlashCommandPreviewResult BuildAnchorPeek(string? tail, SlashCommandAnchorPreviewResolver? resolveAnchor)
     {
-        var raw = tail.Trim();
+        var raw = (tail ?? "").Trim();
         if (raw.Length == 0)
-            return new("Укажи id: /anchor peek abcd1234 (или a:abcd1234).", SlashCommandPreviewKind.Incomplete);
+            return new("Укажи № якоря (1…) или 8 hex: /anchor peek 1.", SlashCommandPreviewKind.Incomplete);
 
-        if (raw.Length > 0 && raw.Length < 8 && IsPartialHexAnchorId(raw))
+        if (resolveAnchor is not null && resolveAnchor(raw, out var resolved))
+            return resolved;
+
+        if (raw.Length > 0 && raw.Length < 8 && IntercomAnchorSlash.IsPartialHexAnchorId(raw))
             return new("Id якоря — 8 hex (как a:abcd1234).", SlashCommandPreviewKind.Incomplete);
 
         if (!IntercomAnchorSlash.TryNormalizeAnchorId(tail, out _, out var syntaxError))
             return new(syntaxError, SlashCommandPreviewKind.Error);
-
-        if (resolveAnchor is not null && resolveAnchor(tail, out var resolved))
-            return resolved;
 
         return new($"Peek: {raw}", SlashCommandPreviewKind.Incomplete);
     }
@@ -242,23 +233,9 @@ internal static class SlashCommandPreviewRuleHelpers
             SlashCommandPreviewKind.Ok);
     }
 
-    public static bool IsAnchorPeek(in ChatSlashCommandParseResult parse) =>
-        string.Equals(parse.Head, "anchor", StringComparison.OrdinalIgnoreCase)
-        && string.Equals(parse.Action, "peek", StringComparison.OrdinalIgnoreCase);
-
     public static bool IsEditorLineSelect(in ChatSlashCommandParseResult parse) =>
         string.Equals(parse.Head, "editor", StringComparison.OrdinalIgnoreCase)
         && string.Equals(parse.Action, "line", StringComparison.OrdinalIgnoreCase)
         && string.Equals(parse.SubAction, "select", StringComparison.OrdinalIgnoreCase);
 
-    private static bool IsPartialHexAnchorId(string raw)
-    {
-        var t = raw;
-        if (t.StartsWith("a:", StringComparison.OrdinalIgnoreCase))
-            t = t[2..].Trim();
-
-        return t.Length > 0
-               && t.Length < 8
-               && t.All(static c => c is >= '0' and <= '9' or >= 'a' and <= 'f' or >= 'A' and <= 'F');
-    }
 }

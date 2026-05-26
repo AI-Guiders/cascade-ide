@@ -55,6 +55,9 @@ public partial class ChatPanelViewModel
     {
         if (IsCockpitCommandLineOpen)
         {
+            if (trySendRunnableSlashLine(keyEvent, CockpitCommandLineText, CockpitCommandLineCaretIndex, out var cclSend))
+                return new(true, true, false, cclSend, false);
+
             if (IsComposerAutocompleteVisible
                 && TryCommitSelectedComposerSuggestion(out var cclAutoExecute))
             {
@@ -64,9 +67,16 @@ public partial class ChatPanelViewModel
             return new(true, true, false, true, false);
         }
 
+        if (trySendRunnableSlashLine(keyEvent, ChatInput, ChatComposerCaretIndex, out var sendSlash))
+            return new(true, false, true, false, true);
+
         if (IsComposerAutocompleteVisible
             && TryCommitSelectedComposerSuggestion(out var autoExecute))
         {
+            if (!autoExecute
+                && trySendRunnableSlashLine(keyEvent, ChatInput, ChatComposerCaretIndex, out _))
+                return new(true, false, true, false, true);
+
             return new(true, false, true, false, autoExecute);
         }
 
@@ -74,6 +84,29 @@ public partial class ChatPanelViewModel
             return new(true, false, false, false, true);
 
         return default;
+    }
+
+    private bool trySendRunnableSlashLine(KeyEventArgs? keyEvent, string text, int caret, out bool runCockpitCommit)
+    {
+        runCockpitCommit = false;
+        if (keyEvent is not { } enterKey)
+            return false;
+
+        if (!ChatSlashAutocomplete.IsRunnableSlashLineAtCaret(text, caret))
+            return false;
+
+        if (!ChatSendKeyMatcher.Matches(enterKey, GetSendMessageKey())
+            && !ChatSendKeyMatcher.IsBareEnterForSlashCommit(enterKey))
+            return false;
+
+        if (IsComposerAutocompleteVisible)
+        {
+            DismissChatSlashAutocomplete();
+            DismissChatBracketAutocomplete();
+        }
+
+        runCockpitCommit = IsCockpitCommandLineOpen;
+        return true;
     }
 
     /// <summary>Composer Enter без send: вставка новой строки (view обновляет текст/caret).</summary>

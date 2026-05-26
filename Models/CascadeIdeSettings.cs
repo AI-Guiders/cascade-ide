@@ -22,6 +22,9 @@ public sealed partial class CascadeIdeSettings : ModelBase
     /// <summary>Agent-notes / knowledge (встроенный KB-Base и оверлей). TOML: <c>[agent_notes]</c>.</summary>
     public AgentNotesSettings AgentNotes { get; set; } = new();
 
+    /// <summary>Agent execution environment (ADR 0148). TOML: <c>[agent.environment]</c>.</summary>
+    public AgentSettings Agent { get; set; } = new();
+
     public WorkspaceSettings Workspace { get; set; } = new();
 
     public CodeNavigationMapSettings CodeNavigationMap { get; set; } = new();

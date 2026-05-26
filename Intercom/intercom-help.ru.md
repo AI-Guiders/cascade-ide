@@ -22,18 +22,21 @@
 | MCP `chat_select_message` с `ordinal` | то же, что slash (нужна открытая ветка) |
 | MCP `chat_select_message` с `index` | 0-based по **всему** списку сообщений сессии (legacy) |
 | `/intercom message find selection` | Сообщения ветки с attach на текущее выделение (inferred) |
+| `/intercom message find M:Foo.Bar` | По member key; `F:` выводится из активного файла или symbol index |
 | `/intercom message find L:10-20` | По строкам открытого файла (M0 fallback) |
 | `/intercom message 3:5 relate selection` | Явная связь #3–#5 с кодом → event `message_range_related` (`AttachmentAnchor`) |
+| `/intercom message [3;5] [8;15] relate selection` | Disjoint relate: несколько сегментов gutter (ADR 0138) |
 | `/intercom message anchors list` | Якоря выбранного сообщения и черновика: `a:abcd1234`, статус, путь |
-| `/anchor peek <id>` | Reveal по short id (8 hex с chip или list), без hit-test |
+| `/anchor peek <id>` | Reveal по short id (8 hex с chip или list) или **№ якоря** (#1…) выбранного сообщения |
 | MCP `intercom.messages_for_code` | Find: JSON `use_selection`, `code_ref`, `anchor_json`, или `file`+`line_*` |
-| MCP `intercom.message_relate` | Relate: `start_ordinal`, `end_ordinal?`, тот же code-ref |
+| MCP `intercom.message_relate` | Relate: `start_ordinal`+`end_ordinal?`, или `range_expr` (`[3;5] [8;15]`), или `ordinal_segments[]`, тот же code-ref |
 
 После выбора: `chat_get_selected_message` → `selected_index` (глобальный 0-based) и при detail — `feed_ordinal` (номер в gutter).
 
 ## Сообщения агенту
 
-- Обычный текст в composer → отправка агенту (Enter по настройке send).
+- Обычный текст в composer → отправка тем сочетанием, что в **Параметры → «Отправить сообщение»** (Enter / Ctrl+Enter / Shift+Enter).
+- **Новая строка в поле сообщения** — отдельная настройка «Новая строка…» там же (по умолчанию не совпадает с отправкой, как в мессенджерах).
 - `@` — люди/упоминания; `[ … ]` — артефакты кода и вложения (не markdown-ссылки).
 - ЛКМ по телу сообщения **не** меняет выбор (клик по attach-chip → reveal в редакторе).
 - На chip справа — приглушённый **`a:…`** (short id для `/anchor peek`).
@@ -42,10 +45,21 @@
 ## Вложения в тексте `[ … ]`
 
 - Оси: `F:` путь · `M:` член · `L:` строки · `S:` scope (напр. `S:for:2` — 2-й `for` в теле `M:…`)
+- При наборе `[M:…]` / `[F:… M:…]` в composer — **ghost-рамка** в редакторе (если файл открыт в dock), как при reveal, без смены selection
 - Примеры: `[M:Run]` · `[Foo.cs M:Bar]` · `[M:Run S:for:1]` · `[F:src/X.cs; M:Y; L:10-20]`
 - Autocomplete: набери `[` — подсказки по осям; Tab/Enter — вставить; Esc — закрыть.
 - `/intercom attach selection` · `/intercom attach scope` · `/intercom attach file <path> [start] [end]`
 - Маркеры `⟦a:…⟧` в черновике — chip; клик в ленте → reveal в редакторе.
+
+## Локальный intercom-service и team transport (ADR 0147)
+
+1. `/intercom server start` — поднять reference server (по умолчанию `http://127.0.0.1:5080`).
+2. `/intercom server status` — процесс из CIDE, HTTP `/health`, transport (нужен Connect).
+3. Настройки (MFD → AI / Intercom): `[intercom.transport] enabled = true`, `base_url`, при необходимости `team_id`.
+4. **Connect Intercom** в настройках или первый human send в Channel (auto connect) — OAuth в браузере; для DEV можно `dev_team_token` в settings.
+5. `/intercom team members` · `/intercom agent list` — после Connect.
+
+Autocomplete: после каждого сегмента (`intercom` → `server` → `start`) дождись списка следующего шага; **полная** строка `/intercom server status`, не `/intercom server`.
 
 ## Слэш-команды IDE и Intercom
 

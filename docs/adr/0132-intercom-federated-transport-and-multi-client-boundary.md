@@ -27,8 +27,12 @@
 | agent-notes: [note-intercom-shared-backend-v1](https://github.com/KarataevDmitry/personal-knowledge-base/blob/main/knowledge/work/projects/door-to-singularity/door-to-singularity/note-intercom-shared-backend-v1.md) | Рабочая гипотеза → канон здесь |
 | Mission Control Center (идея) | Commander cockpit (SA); подписка на event log — [0133](0133-commander-cockpit-shared-attention-model-and-instrument-deck.md) |
 | [0133](0133-commander-cockpit-shared-attention-model-and-instrument-deck.md) | Роль Commander, общие зоны внимания, instrument deck; MCC ≠ плоский дашборд |
+| [0142](0142-intercom-open-wire-pluggable-transports.md) | **Accepted:** открытый wire, pluggable transport, мосты — не выбор одного мессенджера |
+| [0144](0144-intercom-team-transport-cide-sync-and-reference-service.md) | **Accepted:** team transport, reference service, CIDE sync, SSE — **канон реализации** для 2+ CIDE |
 
 ## Резюме
+
+> **Transport (2+ CIDE, realtime, team id):** канон реализации — **[0144](0144-intercom-team-transport-cide-sync-and-reference-service.md)** (Accepted). Этот ADR сохраняет multi-client vision (Web, MCC, паритет ролей, фазы 3–5).
 
 **Intercom** в экосистеме IOP — не панель Avalonia и не «ещё один мессенджер в IDE», а **контракт обмена** (event log, topics, attach, slash subset) с **несколькими клиентами**:
 
@@ -247,3 +251,4 @@ Prose `[F:…; M:…; S:for:2]` парсится **на клиенте** в эт
 | 2026-05-19 | Proposed: transport vs CIDE UX vs Web/MCC; client–server default; MM/Slack patterns not product clone. |
 | 2026-05-19 | §1.1 паритет ролей (PO/Lead/QA); Intercom Web vs MCC; фазы 3 перед 4; team-console shell. |
 | 2026-05-19 | Согласование с [0133](0133-commander-cockpit-shared-attention-model-and-instrument-deck.md): MCC как Commander cockpit, compose в Forward. |
+| 2026-05-24 | Transport-реализация (team, reference service, CIDE sync) → [0144](0144-intercom-team-transport-cide-sync-and-reference-service.md) Accepted; вариант A (client–server) зафиксирован там. |

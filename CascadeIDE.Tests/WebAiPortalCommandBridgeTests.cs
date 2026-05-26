@@ -79,7 +79,14 @@ public sealed class WebAiPortalCommandBridgeTests
         public Task<string> GetEditorStateAsync(int? maxPreviewChars = null) => throw new NotImplementedException();
         public Task<string> GetEditorContentRangeAsync(int startLine, int endLine) => throw new NotImplementedException();
         public Task<string> GetOpenDocumentTextAsync(string? filePath, int? maxChars) => throw new NotImplementedException();
-        public void ApplyEdit(string filePath, int startLine, int startColumn, int endLine, int endColumn, string newText) => throw new NotImplementedException();
+        public Task<string> ApplyEditAsync(string filePath, int startLine, int startColumn, int endLine, int endColumn, string newText) =>
+            throw new NotImplementedException();
+
+        public Task<string> ReadWorkspaceFileAsync(string filePath, int? offset, int? limit, int? maxChars) =>
+            throw new NotImplementedException();
+
+        public Task<string> SaveDocumentAsync(string? filePath, string? content) =>
+            throw new NotImplementedException();
         public void GoToPosition(string? filePath, int line, int column, int? endLine = null, int? endColumn = null) => throw new NotImplementedException();
         public void RevealEditorRange(string? filePath, int startLine, int endLine, int? durationMs) => throw new NotImplementedException();
         public string GetSolutionInfo() => throw new NotImplementedException();
@@ -163,5 +170,11 @@ public sealed class WebAiPortalCommandBridgeTests
         public Task<string> CodebaseIndexSearchAsync(string? workspacePath, string? solutionPath, string query, int topN, string? pathPrefix, IReadOnlyList<string>? excludePathPrefixes, IReadOnlyList<string>? extensions, bool semantic, double alpha, double beta, int vecTopK, CancellationToken cancellationToken = default) => throw new NotImplementedException();
         public Task<string> CodebaseIndexExplainAsync(string? workspacePath, string? solutionPath, long hitId, CancellationToken cancellationToken = default) => throw new NotImplementedException();
         public Task<string> CodebaseIndexReindexAsync(string? workspacePath, string? solutionPath, bool fullRebuild, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<string> IdeAgentVerifyAsync(string? policy, string? sandboxProfile, string? solutionPath, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<string> IdeAgentVerifyBatchAsync(string? policy, string? sandboxProfile, string? solutionPath, bool useWorktree, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<string> IdeAgentCancelAsync(CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<string> IdeAgentStatusAsync(CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<string> IdeAgentLastAsync(CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<string> IdeAgentSandboxPrepareAsync(string? profile, string? workspaceRoot, CancellationToken cancellationToken = default) => throw new NotImplementedException();
     }
 }

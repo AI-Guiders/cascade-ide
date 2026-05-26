@@ -56,7 +56,7 @@ internal static class AgentNotesRuntimeLoader
     /// <summary>Absolute path to agent-notes TOML from settings (may be missing on disk).</summary>
     public static string? ResolveConfigPath(CascadeIdeSettings settings)
     {
-        var raw = settings.AgentNotes.ConfigPath.Trim();
+        var raw = settings.AgentNotes.ResolveConfigPath().Trim();
         if (raw.Length == 0)
             return null;
 

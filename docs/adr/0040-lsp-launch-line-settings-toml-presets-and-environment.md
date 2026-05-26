@@ -1,7 +1,7 @@
 # ADR 0040: LSP (C# / Markdown) — командная строка в `settings.toml`: пресеты, опциональные ключи, переопределение через окружение
 
-**Статус:** Accepted · Implemented (как [§Решение](#решение) ниже)  
-**Дата:** 2026-04-13; обновлено 2026-04-25 — канон TOML: `[languages.csharp]` / `[languages.markdown]` + `mode` + вложенные профили
+**Статус:** Accepted · Implemented  
+**Дата:** 2026-04-13; обновлено 2026-05-24 — `executable_env` / `arguments_env` ([0149](0149-settings-toml-pointwise-environment-bindings.md))
 
 ## Связанные ADR
 
@@ -10,6 +10,7 @@
 | [0028](0028-user-settings-toml-localappdata-and-secrets.md) | где лежит `settings.toml`, snake_case, модель `CascadeIdeSettings` |
 | [0029](0029-configuration-toml-canonical-ui-facade.md) | TOML как канон; UI — фасад |
 | [0023](0023-environment-readiness-glance.md) | краткие подсказки по LSP без дампа `environ` |
+| [0149](0149-settings-toml-pointwise-environment-bindings.md) | общее соглашение `*_env` и приоритет резолва |
 | [0023](0023-markdown-diagrams-language-tooling.md) | Markdown как first-class; LSP в долгой перспективе |
 
 ---
@@ -53,16 +54,26 @@ executable = ""
 arguments = ""
 ```
 
-### 3. Предложение на будущее (не обязатель реализовано): явный флаг «из окружения»
+### 3. Точечные привязки к окружению (реализовано, [0149](0149-settings-toml-pointwise-environment-bindings.md))
 
-**Цель:** дать опцию **не дублировать** путь в TOML и при этом явно сказать IDE «бери из переменных окружения», а не полагаться на случайно пустую строку.
+В каждом **профиле** LSP опциональны пары:
 
-- В **профиле** (или в общем блоке LSP) вводится булево поле, например **`launch_from_environment`** (snake_case в файле, PascalCase в модели — как у остального `settings.toml` по [0028](0028-user-settings-toml-localappdata-and-secrets.md)).
-- При **`launch_from_environment = true`**:
-  - **`executable`** и **`arguments`** в TOML **могут отсутствовать** или быть пустыми без потери смысла;
-  - IDE читает **согласованные** имена переменных (префикс, например `CASCADE_IDE_…`, и суффиксы по виду LSP), документированные в этом ADR и в краткой подсказке readiness ([0023](0023-environment-readiness-glance.md)).
-- **Приоритет** после реализации должен быть зафиксирован в коде и здесь же; рекомендуемый порядок: значения из окружения **только если** флаг true; иначе — как сейчас (TOML → пресет). При флаге true и **отсутствующих** переменных — либо откат к пресету как к п. 1 (с явной строкой в readiness), либо «не стартуем» с явной причиной; **не** молчаливое смешивание.
-- Имена переменных окружения задаются **отдельным подпунктом** этого ADR при первой реализации (чтобы не блокировать принятие п. 1–2); до реализации статус расширения остаётся **Proposed**.
+- **`executable_env`** — **`PATH`** (явно: команда пресета ищется в PATH) **или** имя переменной с абсолютным путём;
+- **`arguments_env`** — только имя переменной с аргументами (без sentinel `PATH`).
+
+Пример (намерение видно в файле):
+
+```toml
+[languages.csharp]
+mode = "OmniSharp"
+
+[languages.csharp.omni_sharp]
+executable = ""
+executable_env = "PATH"
+arguments = ""
+```
+
+Резолв: `ResolveLaunchPath` → при `PATH` пустой `executable` → пресет `CSharpLspProviderIds` (п. 1). Именованная переменная — когда бинарник не в PATH ([0149](0149-settings-toml-pointwise-environment-bindings.md) §2). Отклонён **`launch_from_environment`** (глобальный bool).
 
 ### 4. Отклонённые альтернативы
 
@@ -74,7 +85,7 @@ arguments = ""
 ## Последствия
 
 - Документация и примеры `settings.toml` сокращают секции LSP до `mode` и при необходимости **одной** вложенной таблицы профиля; полные `executable`/`arguments` остаются валидными для явности.
-- При добавлении **`launch_from_environment`** — обновить модели `CSharpLanguageServerSettings` / `MarkdownLanguageServerSettings` (и при необходимости обёртки `ResolveForRuntime`), хосты запуска, **Environment readiness** и пример в `docs/samples/settings.toml`; статус расширения в шапке ADR сменить на **Accepted** после ревью.
+- `*_env` — см. [0149](0149-settings-toml-pointwise-environment-bindings.md); LSP-специфика — этот ADR §3.
 - [0028](0028-user-settings-toml-localappdata-and-secrets.md) не дублирует семантику LSP — для деталей командной строки и env ссылка **сюда**.
 
 ---
@@ -85,4 +96,4 @@ arguments = ""
 |-----------|-----------------|
 | Пресеты, пустой `executable` | `CSharpLspProviderIds`, `MarkdownLspProviderIds`, `LanguageServerLaunchProfile` |
 | Опциональные ключи в TOML | Десериализация `CascadeIdeSettings` + значения по умолчанию в `CSharpLanguageServerSettings` / `MarkdownLanguageServerSettings` |
-| `launch_from_environment` | Пока **нет** в модели и резолвере — **Proposed** |
+| `executable_env` / `arguments_env` | `LanguageServerLaunchProfile`, `SettingsEnvResolver`, [0149](0149-settings-toml-pointwise-environment-bindings.md) |

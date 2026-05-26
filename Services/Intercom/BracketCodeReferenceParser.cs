@@ -57,21 +57,39 @@ public static class BracketCodeReferenceParser
         string? activeFilePath,
         string? workspaceRoot,
         out AttachmentAnchor anchor,
+        out string error) =>
+        TryToAttachmentAnchor(
+            reference,
+            activeFilePath,
+            workspaceRoot,
+            solutionPath: null,
+            indexDirectoryRelative: null,
+            out anchor,
+            out error);
+
+    public static bool TryToAttachmentAnchor(
+        in BracketCodeReference reference,
+        string? activeFilePath,
+        string? workspaceRoot,
+        string? solutionPath,
+        string? indexDirectoryRelative,
+        out AttachmentAnchor anchor,
         out string error)
     {
         anchor = new AttachmentAnchor();
         error = "";
 
-        var file = reference.File?.Trim();
-        if (string.IsNullOrWhiteSpace(file))
+        if (!IntercomMemberFileInference.TryResolveRelativeFile(
+                reference.File,
+                reference.MemberKey,
+                activeFilePath,
+                workspaceRoot,
+                solutionPath,
+                indexDirectoryRelative,
+                out var file,
+                out error))
         {
-            if (string.IsNullOrWhiteSpace(activeFilePath))
-            {
-                error = "Не задан файл в ссылке и нет активного файла в редакторе.";
-                return false;
-            }
-
-            file = AttachmentAnchorPaths.ToWorkspaceRelative(activeFilePath, workspaceRoot) ?? activeFilePath;
+            return false;
         }
 
         JsonElement? syntaxScope = null;

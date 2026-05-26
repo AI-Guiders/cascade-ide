@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cascade.dev/intercom-wire/v1/transport-envelope.schema.json",
+  "title": "IntercomTransportEventEnvelope",
+  "description": "Оболочка события на pluggable transport. Payload — по event_kind (см. event-kinds.json).",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "seq",
+    "team_id",
+    "topic_id",
+    "client_event_id",
+    "occurred_at_utc",
+    "event_kind",
+    "sender",
+    "payload"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 1,
+      "description": "Major wire version. Breaking → 2."
+    },
+    "seq": {
+      "type": "integer",
+      "description": "Monotonic per team (transport assigns)."
+    },
+    "team_id": { "type": "string" },
+    "topic_id": { "type": "string" },
+    "client_event_id": {
+      "type": "string",
+      "description": "Idempotency key; often equals local event UUID (N)."
+    },
+    "occurred_at_utc": { "type": "string", "format": "date-time" },
+    "event_kind": {
+      "type": "string",
+      "description": "See event-kinds.json"
+    },
+    "sender": { "$ref": "#/$defs/sender" },
+    "payload": {
+      "type": "object",
+      "description": "Shape per event_kind; validate with linked schema in event-kinds.json"
+    }
+  },
+  "$defs": {
+    "sender": {
+      "type": "object",
+      "required": ["member_id", "display_name", "sender_role", "client_kind"],
+      "properties": {
+        "member_id": { "type": "string" },
+        "display_name": { "type": "string" },
+        "sender_role": {
+          "type": "string",
+          "enum": ["human", "agent", "system"]
+        },
+        "client_kind": {
+          "type": "string",
+          "description": "cide | intercom-web | mcc | bridge-matrix | …"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

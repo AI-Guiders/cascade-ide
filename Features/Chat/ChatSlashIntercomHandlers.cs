@@ -23,6 +23,15 @@ public static class ChatSlashIntercomHandlers
         public const string MessageRelate = "message_relate";
         public const string MessageAnchorsList = "message_anchors_list";
         public const string AnchorPeek = "anchor_peek";
+        public const string ServerStatus = "server_status";
+        public const string ServerStart = "server_start";
+        public const string ServerStop = "server_stop";
+        public const string TeamMembers = "team_members";
+        public const string TeamInvite = "team_invite";
+        public const string TeamSeedProject = "team_seed_project";
+        public const string AgentList = "agent_list";
+        public const string AgentProvision = "agent_provision";
+        public const string AgentSelect = "agent_select";
     }
 
     public sealed record Context(
@@ -41,7 +50,8 @@ public static class ChatSlashIntercomHandlers
         Func<string?, string>? FindMessagesForCodeRef = null,
         Func<string?, string>? RelateMessageRangeToCodeRef = null,
         Func<string>? ListMessageAnchors = null,
-        Func<string?, string>? PeekAnchorById = null);
+        Func<string?, string>? PeekAnchorById = null,
+        Func<string, string?, CancellationToken, Task<ChatSlashIntercomResult>>? RunAdmin = null);
 
     private delegate ChatSlashIntercomResult Handler(Context context);
 
@@ -86,6 +96,15 @@ public static class ChatSlashIntercomHandlers
             [Ids.MessageRelate] = static ctx => executeMessageRelate(ctx),
             [Ids.MessageAnchorsList] = static ctx => executeMessageAnchorsList(ctx),
             [Ids.AnchorPeek] = static ctx => executeAnchorPeek(ctx),
+            [Ids.ServerStatus] = static ctx => executeAdmin(ctx, Ids.ServerStatus),
+            [Ids.ServerStart] = static ctx => executeAdmin(ctx, Ids.ServerStart),
+            [Ids.ServerStop] = static ctx => executeAdmin(ctx, Ids.ServerStop),
+            [Ids.TeamMembers] = static ctx => executeAdmin(ctx, Ids.TeamMembers),
+            [Ids.TeamInvite] = static ctx => executeAdmin(ctx, Ids.TeamInvite),
+            [Ids.TeamSeedProject] = static ctx => executeAdmin(ctx, Ids.TeamSeedProject),
+            [Ids.AgentList] = static ctx => executeAdmin(ctx, Ids.AgentList),
+            [Ids.AgentProvision] = static ctx => executeAdmin(ctx, Ids.AgentProvision),
+            [Ids.AgentSelect] = static ctx => executeAdmin(ctx, Ids.AgentSelect),
         };
 
     private static ChatSlashIntercomResult executeAttach(Context ctx, string handlerId)
@@ -172,6 +191,17 @@ public static class ChatSlashIntercomHandlers
             return ChatSlashIntercomResult.Fail("Список якорей недоступен.");
 
         return ChatSlashIntercomResult.Ok(ctx.ListMessageAnchors());
+    }
+
+    private static ChatSlashIntercomResult executeAdmin(Context ctx, string handlerId)
+    {
+        if (ctx.RunAdmin is null)
+            return ChatSlashIntercomResult.Fail("Intercom admin недоступен в этой сессии.");
+
+        return ctx.RunAdmin(handlerId, ctx.ArgsTail, CancellationToken.None)
+            .ConfigureAwait(false)
+            .GetAwaiter()
+            .GetResult();
     }
 
     private static ChatSlashIntercomResult executeAnchorPeek(Context ctx)

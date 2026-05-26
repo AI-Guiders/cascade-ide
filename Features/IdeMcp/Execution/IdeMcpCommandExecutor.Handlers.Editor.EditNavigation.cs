@@ -13,8 +13,13 @@ internal sealed partial class IdeMcpCommandExecutor
             if (args is null || !args.TryGetValue("new_text", out _)) return "Missing arguments";
             if (!EditorTextSpan.TryParse(args, out var span, out var errSpan))
                 return errSpan;
-            a.ApplyEdit(span.File.Value, span.StartLine.Value, span.StartColumn.Value, span.EndLine.Value, span.EndColumn.Value, McpCommandJsonArgs.String(args, "new_text") ?? "");
-            return await Task.FromResult("OK");
+            return await a.ApplyEditAsync(
+                span.File.Value,
+                span.StartLine.Value,
+                span.StartColumn.Value,
+                span.EndLine.Value,
+                span.EndColumn.Value,
+                McpCommandJsonArgs.String(args, "new_text") ?? "");
         });
         add(Services.IdeCommands.GoToPosition, async (args, ct) =>
         {

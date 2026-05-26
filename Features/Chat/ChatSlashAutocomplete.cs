@@ -36,8 +36,10 @@ public static class ChatSlashAutocomplete
         string? rawInput,
         IWorkspaceFileSlashCompletionProvider? workspaceFiles = null,
         ISessionTopicSlashCompletionProvider? sessionTopics = null,
+        IMessageAnchorSlashCompletionProvider? messageAnchors = null,
         int workspaceFileLimit = DefaultWorkspaceFileSuggestionLimit,
         int sessionTopicLimit = DefaultSessionTopicSuggestionLimit,
+        int messageAnchorLimit = MessageAnchorSlashCompletionProvider.DefaultLimit,
         int? caretIndex = null)
     {
         if (string.IsNullOrEmpty(rawInput))
@@ -45,6 +47,11 @@ public static class ChatSlashAutocomplete
 
         if (!TryGetSlashTokenBeforeCaret(rawInput, caretIndex ?? rawInput.Length, out var body))
             return [];
+
+        body = SlashPathAliases.NormalizeCompletionBody(body);
+        if (IntercomAnchorSlash.IsAnchorPeekHexIdEntryBody(body))
+            return [];
+
         if (body.Length == 0)
             return BuildRootSegmentSuggestions();
 
@@ -53,8 +60,10 @@ public static class ChatSlashAutocomplete
                 SlashCompletionKind.WorkspaceFiles,
                 workspaceFiles,
                 null,
+                null,
                 workspaceFileLimit,
                 sessionTopicLimit,
+                messageAnchorLimit,
                 out var fileSuggestions))
             return fileSuggestions;
 
@@ -63,10 +72,24 @@ public static class ChatSlashAutocomplete
                 SlashCompletionKind.SessionTopics,
                 null,
                 sessionTopics,
+                null,
                 workspaceFileLimit,
                 sessionTopicLimit,
+                messageAnchorLimit,
                 out var topicSuggestions))
             return topicSuggestions;
+
+        if (TryGetDynamicSuggestions(
+                body,
+                SlashCompletionKind.MessageAnchors,
+                null,
+                null,
+                messageAnchors,
+                workspaceFileLimit,
+                sessionTopicLimit,
+                messageAnchorLimit,
+                out var anchorSuggestions))
+            return anchorSuggestions;
 
         return BuildStaticSegmentSuggestions(body);
     }
@@ -133,8 +156,17 @@ public static class ChatSlashAutocomplete
             .ToList();
     }
 
+    public static bool IsRunnableSlashLineAtCaret(string? rawInput, int caretIndex) =>
+        SlashLineResolver.TryResolveLine(rawInput, caretIndex, out var line) && line.IsRunnable;
+
+    internal static void ParseTypedBodyForResolver(string body, out List<string> tokens, out bool endsWithSpace) =>
+        ParseTypedBody(body, out tokens, out endsWithSpace);
+
     private static IReadOnlyList<ChatSlashSuggestion> BuildStaticSegmentSuggestions(string body)
     {
+        if (SlashLineResolver.TryResolveBody(body, out var line) && line.ShouldHideSegmentSuggestions)
+            return [];
+
         ParseTypedBody(body, out var typedTokens, out var endsWithSpace);
         var buckets = new Dictionary<string, (string Insert, string Path, string Help, string? Group, string Segment)>(
             StringComparer.OrdinalIgnoreCase);
@@ -190,22 +222,7 @@ public static class ChatSlashAutocomplete
         if (ChatSlashCommandParser.ShouldAutoExecuteAfterAutocompleteCommit(slashPath))
             return false;
 
-        if (IntentSlashCatalog.TryGetRoute(slashPath, out var route)
-            && route.Completion != SlashCompletionKind.None)
-            return true;
-
-        ReadOnlySpan<string> suffixes =
-        [
-            " rename", " create", " set", " load", " find", " relate", " select", " file",
-        ];
-        foreach (var suffix in suffixes)
-        {
-            if (slashPath.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
-                return true;
-        }
-
-        return slashPath.Contains(" open", StringComparison.OrdinalIgnoreCase)
-               && !slashPath.Contains("dialog", StringComparison.OrdinalIgnoreCase);
+        return SlashRouteCatalogIndex.GetArgTailKind(slashPath) != SlashArgTailKind.None;
     }
 
     private static void ParseTypedBody(string body, out List<string> tokens, out bool endsWithSpace)
@@ -291,8 +308,10 @@ public static class ChatSlashAutocomplete
         SlashCompletionKind completionKind,
         IWorkspaceFileSlashCompletionProvider? workspaceFiles,
         ISessionTopicSlashCompletionProvider? sessionTopics,
+        IMessageAnchorSlashCompletionProvider? messageAnchors,
         int workspaceFileLimit,
         int sessionTopicLimit,
+        int messageAnchorLimit,
         out IReadOnlyList<ChatSlashSuggestion> suggestions)
     {
         suggestions = [];
@@ -340,8 +359,31 @@ public static class ChatSlashAutocomplete
             return true;
         }
 
+        if (completionKind == SlashCompletionKind.MessageAnchors)
+        {
+            if (messageAnchors is null)
+                return false;
+
+            var matches = messageAnchors.GetMatches(argPrefix, messageAnchorLimit);
+            if (matches.Count == 0)
+                return false;
+
+            suggestions = matches
+                .Select(m => new ChatSlashSuggestion(
+                    $"{route.SlashPath} {m.InsertArg}",
+                    m.Label,
+                    m.Help,
+                    group,
+                    FormatDynamicStepSegment(m.InsertArg)))
+                .ToList();
+            return true;
+        }
+
         return false;
     }
+
+    internal static string NormalizeSlashCompletionBody(string body) =>
+        SlashPathAliases.NormalizeCompletionBody(body);
 
     private static bool TryResolveCompletionRoute(
         string body,

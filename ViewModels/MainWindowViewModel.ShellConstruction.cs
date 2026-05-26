@@ -24,6 +24,7 @@ using CascadeIDE.Features.WebAiPortal.Application;
 using CascadeIDE.Features.Shell.Application;
 using CascadeIDE.Features.Terminal;
 using CascadeIDE.Features.UiChrome;
+using CascadeIDE.Features.Workspace.Application;
 using CascadeIDE.Models;
 using CascadeIDE.Services.Presentation;
 
@@ -63,7 +64,7 @@ public partial class MainWindowViewModel
         _cloudActiveProvider = AiSettings.NormalizeCloudProvider(_settings.Ai.Cloud.ActiveProvider);
 #pragma warning restore MVVMTK0034
         _showThinkingInHistory = _settings.Ai.Chat.ShowThinkingInHistory;
-        _cursorAcpAgentPath = _settings.Ai.Acp.CursorAcpPath ?? "";
+        _cursorAcpAgentPath = _settings.Ai.Acp.ResolveCursorAcpPath();
         _cursorAcpModelId = _settings.Ai.Acp.CursorAcpModelId ?? "";
         _anthropicApiKey = _aiKeys.AnthropicApiKey ?? "";
         _openAiApiKey = _aiKeys.OpenAiApiKey ?? "";
@@ -91,8 +92,33 @@ public partial class MainWindowViewModel
         _hciScopeMode = ShellSettingsPresentationProjection.NormalizeHybridIndexScopeMode(_settings.HybridIndex.ScopeMode);
         _hciPauseWhenMcpStdioHost = _settings.HybridIndex.PauseWhenMcpStdioHost;
 
+        var transport = _settings.Intercom.Transport;
+        _intercomTransportEnabled = transport.Enabled;
+        _intercomTransportBaseUrl = transport.BaseUrl;
+        _intercomTransportLocalServerPath = transport.LocalServerPath;
+        _intercomTransportTeamId = transport.TeamId;
+        _intercomTransportDefaultTopicId = transport.DefaultTopicId;
+        _intercomTransportOAuthProvider = string.IsNullOrWhiteSpace(transport.OAuthProvider) ? "github" : transport.OAuthProvider;
+        _intercomTransportDevTeamToken = transport.DevTeamToken;
+        _intercomTransportSseReconnectBackoffMs = transport.SseReconnectBackoffMs;
+        _intercomTransportAutoConnectOnSend = transport.AutoConnectOnSend;
+        _intercomTransportSyncAgentChannelMessages = transport.SyncAgentChannelMessages;
+
         _ideMcpHost = new MainWindowIdeMcpHost(this);
         _webAiPortalBridge = new WebAiPortalCommandBridge(IdeMcp);
+
+        _ideDataBus = new InMemoryDataBus(asynchronousDispatch: false);
+        _buildTestJobService = new DotNetBuildTest.Core.BuildTestJobService();
+        _agentEnvironment = new Features.Agent.Environment.AgentEnvironmentService(
+            _ideDataBus,
+            _settings.Agent.Environment,
+            _buildTestJobService,
+            _csharpLanguageService,
+            GetOpenCsDocumentsForAgentL0,
+            _gitRunner,
+            () => WorkspaceDirectoryFromSolutionPath.Resolve(Workspace.SolutionPath),
+            () => Workspace.SolutionPath,
+            GetAgentL0WarmupCsFilePaths);
 
         BuildOutputPanel = new BuildOutputPanelViewModel();
         TerminalPanel = new TerminalPanelViewModel(() => Workspace.SolutionPath);
@@ -126,13 +152,24 @@ public partial class MainWindowViewModel
             tryCreateCloudMafIChatClient: TryCreateCloudMafIChatClientForChatPanel,
             getChatMinimizedContextBlock: BuildChatMinimizedContextBlockCore,
             getSendMessageKey: () => SendMessageKey,
+            getComposerNewLineKey: () => ComposerNewLineKey,
             getSolutionPath: () => Workspace.SolutionPath,
             getSolutionRoots: () => Workspace.SolutionRoots,
             getEditorSelectionStart: () => EditorSelectionStart,
             getEditorSelectionLength: () => EditorSelectionLength,
-            getEditorCaretOffset: () => _editorCaretOffset);
+            getEditorCaretOffset: () => _editorCaretOffset,
+            getTextEditorForAbsoluteFilePath: path =>
+                string.IsNullOrWhiteSpace(path)
+                    ? null
+                    : EditorActiveDockResolver.TryGetEditor(this, path),
+            agentEnvironment: _agentEnvironment,
+            getSolutionPathForAgent: () => Workspace.SolutionPath);
         ChatPanel.SetIntercomFontsSettings(_settings.Fonts.Intercom);
         ChatPanel.ApplyIntercomPresentationSettings(_settings.Intercom);
+        ChatPanel.SetCascadeSettingsAccessor(() => _settings);
+        ChatPanel.SetIntercomTransportCoordinator(_intercomTransport);
+        ChatPanel.SetIntercomAdminRunner((handlerId, argsTail, ct) =>
+            RunIntercomAdminSlashAsync(handlerId, argsTail, ct));
         InstrumentationPanel = new InstrumentationPanelViewModel();
         InstrumentationPanel.PropertyChanged += OnInstrumentationPanelPropertyChanged;
         HypothesesPanel = new HypothesesPanelViewModel(GetWorkspacePath);
@@ -159,7 +196,6 @@ public partial class MainWindowViewModel
         _mcpClientService = new Services.McpClientService(Services.McpExternalServersJsonResolver.ResolveEffectiveJson(_settings));
         _autonomousAgentService = CreateAutonomousAgentService(_mcpClientService);
         Autonomous = new AutonomousAgentSessionViewModel(_autonomousAgentService, this);
-        _ideDataBus = new InMemoryDataBus(asynchronousDispatch: false);
         _hybridIndex = new HybridIndexOrchestrator(
             _ideDataBus,
             HybridIndexIndexDirectoryRelative.ResolveOrDefault(_settings.HybridIndex.IndexDir));
@@ -208,5 +244,35 @@ public partial class MainWindowViewModel
         SyncMfdShellPageForPrimaryWorkSurface();
         ChatPanel.IsForwardIntercomLayout = PrimaryWorkSurface == PrimaryWorkSurfaceKind.Intercom;
         NotifyDockedInstrumentSlotBindings();
+        EnsureAgentEnvironmentWiring();
+    }
+
+    private IReadOnlyList<(string Path, string Content)> GetOpenCsDocumentsForAgentL0()
+    {
+        var list = new List<(string Path, string Content)>();
+        foreach (var doc in Documents.OpenDocuments)
+        {
+            if (!doc.FilePath.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
+                continue;
+            list.Add((doc.FilePath, doc.Content ?? ""));
+        }
+
+        return list;
+    }
+
+    private IReadOnlyList<string> GetAgentL0WarmupCsFilePaths()
+    {
+        var warmup = _settings.SolutionWarmup;
+        return Features.Agent.Environment.AgentL0WarmupPathCollector.Collect(
+            warmup.Enabled,
+            warmup.WarmActiveFileOnSolutionOpen,
+            warmup.WarmOpenDocuments,
+            warmup.WarmRecentCsFiles,
+            warmup.MaxOpenDocumentFiles,
+            () => Documents.OpenDocuments
+                .Select(d => d.FilePath)
+                .Where(p => !string.IsNullOrWhiteSpace(p))
+                .ToList(),
+            () => CurrentFilePath);
     }
 }

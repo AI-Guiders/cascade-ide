@@ -1,42 +1,67 @@
 #nullable enable
 
+using CascadeIDE.Features.Chat.AnchorPeek;
 using CascadeIDE.Models.Intercom;
-using CascadeIDE.Services;
 using CascadeIDE.Services.Intercom;
 
 namespace CascadeIDE.Features.Chat;
 
-/// <summary>Форматирование и разбор anchor id для slash/CCL (ADR 0128 §10.1).</summary>
+/// <summary>Фасад форматирования и anchor peek для slash/CCL (ADR 0128 §10.1).</summary>
 internal static class IntercomAnchorSlash
 {
+    public static bool IsAnchorPeekCommand(in ChatSlashCommandParseResult parse) =>
+        SlashPathAliases.IsAnchorPeekCommand(parse);
+
+    public static string? ExtractPeekIdTail(in ChatSlashCommandParseResult parse) =>
+        SlashPathAliases.ExtractPeekArgs(parse);
+
+    public static bool IsAnchorPeekHexIdEntryBody(string body) =>
+        isAnchorPeekHexIdEntryBody(SlashPathAliases.NormalizeCompletionBody(body));
+
+    internal static bool IsPartialHexAnchorId(string raw) =>
+        AnchorPeekTargetParser.IsPartialHex(raw);
+
+    public static bool TryResolvePeekOrdinal(
+        string? raw,
+        IReadOnlyList<AttachmentAnchor> selectedMessageAnchors,
+        out AttachmentAnchor anchor,
+        out int ordinal) =>
+        tryResolveOrdinalOnly(raw, selectedMessageAnchors, out anchor, out ordinal);
+
+    public static bool TryFormatPeekOrdinalError(string? raw, int attachmentCount, out string error)
+    {
+        error = "";
+        if (!AnchorPeekTargetParser.TryParse(raw ?? "", out var target, out _))
+            return false;
+
+        if (target.Kind != AnchorPeekTargetKind.Ordinal)
+            return false;
+
+        if (attachmentCount > 0 && target.Ordinal >= 1 && target.Ordinal <= attachmentCount)
+            return false;
+
+        error = target.Ordinal < 1
+            ? "№ якоря — целое число от 1."
+            : attachmentCount <= 0
+                ? "Выбери сообщение с вложениями: /intercom message select <n>."
+                : $"Якоря #{target.Ordinal} нет (в сообщении {attachmentCount}). /intercom message anchors list";
+        return true;
+    }
+
     public static bool TryNormalizeAnchorId(string? raw, out string shortId, out string error)
     {
         shortId = "";
         error = "";
-        var t = (raw ?? "").Trim();
-        if (t.Length == 0)
+        if (!AnchorPeekTargetParser.TryParse(raw, out var target, out error))
+            return false;
+
+        if (target.Kind != AnchorPeekTargetKind.HexId)
         {
-            error = "Укажи id: /anchor peek abcd1234 (или a:abcd1234).";
+            error = AnchorPeekTargetParser.InvalidHexError;
             return false;
         }
 
-        if (t.StartsWith("a:", StringComparison.OrdinalIgnoreCase))
-            t = t[2..].Trim();
-
-        var wirePrefix = $"{IntercomAttachmentMarkers.MarkerOpen}a:";
-        if (t.StartsWith(wirePrefix, StringComparison.Ordinal))
-        {
-            var end = t.IndexOf(IntercomAttachmentMarkers.MarkerClose);
-            t = end >= wirePrefix.Length ? t[wirePrefix.Length..end] : t[wirePrefix.Length..];
-        }
-
-        if (t.Length != 8 || !t.All(static c => c is >= '0' and <= '9' or >= 'a' and <= 'f' or >= 'A' and <= 'F'))
-        {
-            error = "Id якоря — 8 hex-символов (как в маркере ⟦a:abcd1234⟧).";
-            return false;
-        }
-
-        shortId = t.ToLowerInvariant();
+        shortId = target.HexId;
         return true;
     }
 
@@ -62,6 +87,63 @@ internal static class IntercomAnchorSlash
         if (string.Equals(o, IntercomAttachmentRevealPlan.OutcomeExcerptOnly, StringComparison.OrdinalIgnoreCase))
             return "excerpt_only";
         return string.IsNullOrWhiteSpace(o) ? "—" : o;
+    }
+
+    private static bool tryResolveOrdinalOnly(
+        string? raw,
+        IReadOnlyList<AttachmentAnchor> selectedMessageAnchors,
+        out AttachmentAnchor anchor,
+        out int ordinal)
+    {
+        anchor = new AttachmentAnchor();
+        ordinal = 0;
+        var context = new AnchorPeekResolveContext(
+            SelectedMessageIndex: -1,
+            selectedMessageAnchors,
+            new Dictionary<string, AttachmentAnchor>(),
+            []);
+
+        return AnchorPeekResolver.TryResolve(raw, context, out anchor, out _, out ordinal, out _);
+    }
+
+    private static bool isAnchorPeekHexIdEntryBody(string body)
+    {
+        if (string.IsNullOrWhiteSpace(body))
+            return false;
+
+        var tokens = body.TrimEnd().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (tokens.Length == 0)
+            return false;
+
+        if (tokens[0].Equals("anchor", StringComparison.OrdinalIgnoreCase))
+            return isHexArgAfterPeek(tokens, startIndex: 1);
+
+        if (tokens.Length >= 2
+            && tokens[0].Equals("intercom", StringComparison.OrdinalIgnoreCase)
+            && tokens[1].Equals("anchor", StringComparison.OrdinalIgnoreCase))
+        {
+            return isHexArgAfterPeek(tokens, startIndex: 2);
+        }
+
+        return false;
+    }
+
+    private static bool isHexArgAfterPeek(string[] tokens, int startIndex)
+    {
+        if (tokens.Length <= startIndex)
+            return false;
+
+        var peekToken = tokens[startIndex];
+        if (!peekToken.StartsWith("peek", StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        if (peekToken.Equals("peek", StringComparison.OrdinalIgnoreCase))
+        {
+            return tokens.Length > startIndex + 1
+                   && AnchorPeekTargetParser.LooksLikeHexEntry(tokens[startIndex + 1]);
+        }
+
+        return peekToken.Length > 4 && AnchorPeekTargetParser.LooksLikeHexEntry(peekToken[4..]);
     }
 
     private static string FormatLocationShort(AttachmentAnchor anchor)

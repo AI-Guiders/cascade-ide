@@ -29,6 +29,10 @@ public static partial class IdeCommands
     public const string GetEditorContentRange = "get_editor_content_range";
     /// <summary>Полный текст открытого документа по пути (или текущего). Модель вкладки, не снимок темы. returns: text.</summary>
     public const string GetOpenDocumentText = "get_open_document_text";
+    /// <summary>Прочитать файл workspace с диска (не только открытые вкладки). args: file_path:string, offset?:integer, limit?:integer, max_chars?:integer; returns: json; example: {"file_path":"src/Program.cs"}.</summary>
+    public const string ReadWorkspaceFile = "read_workspace_file";
+    /// <summary>Сохранить документ на диск: буфер открытой вкладки или полная замена content. args: file_path?:string, content?:string; returns: json; example: {"file_path":"src/Program.cs"}.</summary>
+    public const string SaveDocument = "save_document";
     /// <summary>Применить текстовую правку в открытом документе. args: file_path:string, start_line:integer, start_column:integer, end_line:integer, end_column:integer, new_text:string; returns: text; example: {"file_path":"C:\\tmp\\a.cs","start_line":1,"start_column":1,"end_line":1,"end_column":1,"new_text":"// hi\n"}.</summary>
     public const string ApplyEdit = "apply_edit";
     /// <summary>Перейти на позицию (и опционально выделить диапазон). args: file_path:string, line:integer, column:integer, end_line?:integer, end_column?:integer; returns: text; example: {"file_path":"C:\\tmp\\a.cs","line":10,"column":1}.</summary>

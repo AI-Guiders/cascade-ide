@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cascade.dev/intercom-wire/v1/payloads/thread-forked.schema.json",
+  "title": "IntercomThreadForkedPayload",
+  "type": "object",
+  "required": ["new_thread_id", "previous_thread_id"],
+  "properties": {
+    "new_thread_id": { "type": "string" },
+    "previous_thread_id": { "type": "string" },
+    "parent_message_id": { "type": "string" }
+  },
+  "additionalProperties": true
+}

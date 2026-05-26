@@ -1,19 +1,21 @@
 #nullable enable
 
 using System.Text.Json;
-using CascadeIDE.Features.Chat;
 using CascadeIDE.Models.AgentChat;
 using CascadeIDE.Models.Intercom;
 
 namespace CascadeIDE.Services.Intercom;
 
-/// <summary>Проекция explicit relate из event log (ADR 0137 фаза 2).</summary>
+/// <summary>Проекция explicit relate из event log (ADR 0137 contiguous, 0138 disjoint).</summary>
 public static class IntercomMessageRangeRelatedProjector
 {
+    private static readonly JsonSerializerOptions PayloadJson = new(JsonSerializerDefaults.Web);
+
     public sealed record ExplicitRelate(
         Guid ThreadId,
         int StartOrdinal,
         int EndOrdinal,
+        IReadOnlyList<ChatHistoryMessageOrdinalSegment> OrdinalSegments,
         AttachmentAnchor CodeRef,
         string Source);
 
@@ -45,7 +47,7 @@ public static class IntercomMessageRangeRelatedProjector
         ChatHistoryMessageRangeRelatedPayload? payload;
         try
         {
-            payload = JsonSerializer.Deserialize<ChatHistoryMessageRangeRelatedPayload>(payloadJson, ChatHistoryJson.Options);
+            payload = JsonSerializer.Deserialize<ChatHistoryMessageRangeRelatedPayload>(payloadJson, PayloadJson);
         }
         catch (JsonException)
         {
@@ -55,17 +57,23 @@ public static class IntercomMessageRangeRelatedProjector
         if (payload is null
             || !Guid.TryParse(payload.ThreadId, out var threadId)
             || threadId == Guid.Empty
-            || payload.StartOrdinal < 1
-            || payload.EndOrdinal < payload.StartOrdinal
             || string.IsNullOrWhiteSpace(payload.CodeRef.File))
         {
             return false;
+        }
+
+        var segments = IntercomMessageRangeRelatedSupport.ResolveSegments(payload);
+        foreach (var segment in segments)
+        {
+            if (segment.StartOrdinal < 1 || segment.EndOrdinal < segment.StartOrdinal)
+                return false;
         }
 
         relate = new ExplicitRelate(
             threadId,
             payload.StartOrdinal,
             payload.EndOrdinal,
+            segments,
             payload.CodeRef,
             string.IsNullOrWhiteSpace(payload.Source) ? "unknown" : payload.Source);
         return true;

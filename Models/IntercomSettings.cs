@@ -18,6 +18,9 @@ public sealed class IntercomSettings
     /// <summary>Вложения в ленте. TOML: <c>[intercom.attachments.*]</c>.</summary>
     public IntercomAttachmentsSettings Attachments { get; set; } = new();
 
+    /// <summary>Team transport (FederatedSync). TOML: <c>[intercom.transport]</c> (ADR 0144).</summary>
+    public IntercomTransportSettings Transport { get; set; } = new();
+
     public bool UseComfortableFeedMetrics() => IntercomFeedMetricsModes.IsComfortable(FeedMetrics);
 }
 

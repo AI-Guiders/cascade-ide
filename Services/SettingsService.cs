@@ -99,6 +99,7 @@ public static class SettingsService
 
     private static CascadeIdeSettings ValidateAndReturn(CascadeIdeSettings settings)
     {
+        SettingsLegacyStringDefaults.Apply(settings);
         foreach (var validationError in ValidationSpecifications.SelectMany(spec => spec.Validate(settings)))
             global::System.Diagnostics.Debug.WriteLine($"Settings validation: {validationError}");
         return settings;

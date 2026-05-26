@@ -94,6 +94,7 @@ public partial class ChatPanelViewModel
 
         if (ChatBracketAutocomplete.TryGetEditState(text, caret, out var bracketState))
         {
+            scheduleAnchorDraftPreview(text, caret);
             var syncBracketRefresh = bracketState.ActiveAxis == ChatBracketAutocomplete.Axis.Start
                 && bracketState.AxisPrefix.Length == 0;
             if (syncBracketRefresh)
@@ -123,6 +124,7 @@ public partial class ChatPanelViewModel
             IsChatBracketAutocompleteVisible = false;
             ChatBracketSuggestions.Clear();
             SelectedChatBracketSuggestionIndex = -1;
+            clearAnchorDraftPreview();
         }
 
         RefreshChatSlashAutocomplete(text, caretOverride: caret);
@@ -189,6 +191,7 @@ public partial class ChatPanelViewModel
 
             RefreshChatBracketAutocomplete(text, caret);
             rebuildComposerPopup();
+            scheduleAnchorDraftPreview(text, caret);
         }).ConfigureAwait(false);
     }
 
@@ -262,6 +265,7 @@ public partial class ChatPanelViewModel
         ChatBracketSuggestions.Clear();
         OnPropertyChanged(nameof(IsComposerAutocompleteVisible));
         RefreshComposerAutocomplete();
+        scheduleAnchorDraftPreview(newText, ChatComposerCaretIndex);
         return true;
     }
 
@@ -269,6 +273,7 @@ public partial class ChatPanelViewModel
     {
         IsChatBracketAutocompleteVisible = false;
         ChatBracketSuggestions.Clear();
+        clearAnchorDraftPreview();
         OnPropertyChanged(nameof(IsComposerAutocompleteVisible));
     }
 

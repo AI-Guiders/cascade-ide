@@ -91,7 +91,13 @@
 | `ide_read_agent_notes` | Прочитать заметки агента из `.cascade-ide/agent-notes.md`. Возвращает содержимое или пустую строку. Агент восстанавливает контекст в новом чате. | —; возвращает текст файла или `""` |
 | `ide_execute_command` | Унифицированный вызов IDE-команды по коду (`command_id`) с аргументами (`args`) в формате выбранного инструмента. Нужен для единой точки входа (MCP/меню/хоткеи). | `command_id`, опционально `args` (JSON object) |
 
+**AEE (`ide_agent_*`) и `shell_escape_tier`:** в `settings.toml`, секция `[agent.environment]`, ключ `shell_escape_tier`: `deny` (по умолчанию), `l3_only`, `allow_with_audit`. При `deny` команды **`build`** / **`build_structured`** / **`run_tests`** / **`run_affected_tests`** / **`run_code_cleanup`**, если идут через `ide_execute_command` (или совместимые тулы вроде `ide_build`), возвращают JSON с **`error: shell_escape_blocked`**; для сборки и verify используй **`ide_agent_verify`**. В `l3_only` допускаются только прямые вызовы тестов; `allow_with_audit` всё пропускает и пишет аудит в trace.
+
+**`ide_agent_status`:** JSON включает `sandbox_run_directory`, `execution_channel` (очередь `BuildTestJobCoordinator`), `writes_invalidated_verify_epoch` (были сохранённые правки .cs/workspace во время активного verify).
+
 **Меню, тулбар, task bar и чат через `ide_execute_command`:** те же `command_id`, что заданы в частичном классе `IdeCommands` (`Services/IdeCommands.cs`, `Services/IdeCommands.*.cs`).
+
+**Имена MCP-тулов (Cursor):** только `A–Z`, `a–z`, `0–9`, `_`; точки в `command_id` на wire → `_` (`intercom.reveal_attachment` → `ide_intercom_reveal_attachment`). Длина `server`+`tool` ≤ 60 — длинные команды получают короткий alias (`chat_toggle_product_spine_in_agent_context` → `ide_chat_toggle_spine_ctx`). Канон: `Services/IdeMcpToolNaming.cs`.
 
 ### Подведение итогов сессии чата
 
@@ -118,6 +124,12 @@
 | `extract_from_archive` | Поиск по архивной ревизии заметок с контекстом строк. args: query:string, revision_file?:string, head_limit?:integer, context_lines?:integer; returns: json; example: {"query":"ActiveProjectId","head_limit":10,"context_lines":2}. |
 | `get_build_output` | Текст панели «Вывод сборки» + цвета оформления. returns: json. |
 | `get_code_metrics` | Метрики кода (LOC/классы/методы/цикломатика). args: scope?:string, path?:string; returns: json; example: {"scope":"solution","path":"."}. |
+| `ide_agent_cancel` | Cancel active verify. returns: json. |
+| `ide_agent_last` | Last verify run summary. returns: json. |
+| `ide_agent_sandbox_prepare` | Prepare sandbox. args: profile:string, workspace_root:string; returns: json; example: {"profile":"agent_ephemeral"}. |
+| `ide_agent_status` | AEE status snapshot: active, run_id, verify_snapshot_id, policy, sandbox_profile, sandbox_run_directory, execution_channel (supervised build host kind), writes_invalidated_verify_epoch. returns: json. |
+| `ide_agent_verify` | Verification ladder. args: policy:string, sandbox_profile:string, solution_path:string; returns: json; example: {"policy":"standard"}. |
+| `ide_agent_verify_batch` | Batch verify (W6): policy, sandbox_profile, solution_path, use_worktree. returns: json. |
 | `list_agent_notes_revisions` | Список ревизий заметок агента. args: limit?:integer; returns: json; example: {"limit":20}. |
 | `memory_health` | Health-check памяти: размер hot-context и рекомендации. args: active_scope?:string; returns: json; example: {"active_scope":"door-to-singularity"}. |
 | `read_agent_notes` | Прочитать заметки агента из каталога решения. returns: text. |
@@ -274,9 +286,16 @@
 | `delete_knowledge_section` | Удалить секцию из knowledge-файла. args: file_path:string, section_id:string, knowledge_path?:string, knowledge_root_id?:string; returns: text; example: {"file_path":"index.md","section_id":"foo"}. |
 | `editor.reveal_code` | Reveal в редакторе по bracket-ссылке (ADR 0131). args: code_ref:string, active_file?:string, duration_ms?:integer; returns: text; example: {"code_ref":"[M:Run]","active_file":"src/Foo.cs","duration_ms":4000}. |
 | `editor.select_code` | Select в редакторе по bracket-ссылке (ADR 0131). args: code_ref:string, active_file?:string, duration_ms?:integer; returns: text; example: {"code_ref":"[M:Run]","active_file":"src/Foo.cs"}. |
+| `intercom.agent_provision` | Provision agent account. args: display_name:string; returns: text; example: {"display_name":"Nova"}. |
+| `intercom.connect_team` | OAuth Connect к team Intercom service (ADR 0144). returns: text. |
+| `intercom.disconnect_team` | Disconnect team transport и очистка JWT. returns: text. |
 | `intercom.message_relate` | Явная связь диапазона gutter-сообщений с кодом (ADR 0137). args: start_ordinal:integer, end_ordinal?:integer, use_selection?:boolean, code_ref?:string, anchor_json?:object, file?:string, line_start?:integer, line_end?:integer; returns: json; example: {"start_ordinal":3,"end_ordinal":5,"use_selection":true}. |
 | `intercom.messages_for_code` | Сообщения активной detail-ветки по фрагменту кода (ADR 0137 inferred + explicit relate). args: use_selection?:boolean, code_ref?:string, anchor_json?:object, file?:string, line_start?:integer, line_end?:integer; returns: json; example: {"use_selection":true}. |
 | `intercom.reveal_attachment` | Reveal из ленты по AttachmentAnchor: open + re-resolve + highlight (ADR 0128 §8, 0130). args: anchor_json?:object, file?:string, line_start?:integer, line_end?:integer, member_key?:string, syntax_scope?:object, duration_ms?:integer, select?:boolean; если select опущен — дефолт из settings [intercom.attachments.code].navigate; returns: text; example: {"file":"src/Foo.cs","line_start":10,"line_end":25}. |
+| `intercom.server_start` | Запустить intercom-service. args: base_url?:string; returns: text; example: {"base_url":"http://127.0.0.1:5080"}. |
+| `intercom.server_status` | Статус локального intercom-service (ADR 0147). returns: text. |
+| `intercom.server_stop` | Остановить intercom-service. returns: text. |
+| `intercom.team_members` | Список members team. returns: text. |
 | `list_knowledge_files` | Список knowledge-файлов. args: subdir?:string, knowledge_path?:string, knowledge_root_id?:string; returns: json; example: {"subdir":"work","knowledge_root_id":"group"}. |
 | `read_knowledge_file` | Прочитать knowledge-файл. Корень: knowledge_path, knowledge_root_id (group, …) или primary из TOML. args: file_path:string, knowledge_path?:string, knowledge_root_id?:string, offset?:integer, limit?:integer; returns: text; example: {"file_path":"META/integrity-core.md","offset":2,"limit":20}. |
 | `upsert_knowledge_section` | Вставить/обновить секцию в knowledge-файле по section_id. args: file_path:string, section_id:string, content:string, knowledge_path?:string, knowledge_root_id?:string, save_revision?:boolean; returns: text; example: {"file_path":"index.md","section_id":"foo","content":"body"}. |
@@ -295,10 +314,12 @@
 | `load_solution` | Загрузить решение (.sln/.slnx/.slnf), один проект (.csproj/.fsproj) или каталог как workspace (дерево без .sln) — обновить обозреватель. args: path:string; returns: text; example: {"path":"D:\\repo\\MyApp.csproj"}. |
 | `open_file` | Открыть файл в редакторе IDE. args: path:string; returns: text; example: {"path":"C:\\tmp\\a.txt"}. |
 | `ping` | Живость MCP-хоста IDE (без аргументов). Имя MCP-тула: `ide_ping`. returns: json. |
+| `read_workspace_file` | Прочитать файл workspace с диска (не только открытые вкладки). args: file_path:string, offset?:integer, limit?:integer, max_chars?:integer; returns: json; example: {"file_path":"src/Program.cs"}. |
 | `remove_breakpoint` | Снять брейкпоинт. args: file_path:string, line:integer; returns: text; example: {"file_path":"C:\\tmp\\a.cs","line":42}. |
 | `request_confirmation` | Запросить подтверждение у пользователя. args: message:string; returns: text; example: {"message":"Продолжить?"}. Возвращает `ok`/`cancel`. |
 | `restart_mcp_clients` | Пересоздать клиентов внешних MCP и сбросить сессию Cursor ACP (после сбоев транспорта). Имя MCP-тула: `ide_restart_mcp_clients`. returns: json. |
 | `reveal_editor_range` | Показать диапазон строк в редакторе transient-подсветкой без изменения selection (ADR 0130). args: file_path:string, start_line?:integer, end_line?:integer, member_key?:string, syntax_scope?:object, duration_ms?:integer; returns: text; example: {"file_path":"C:\\tmp\\a.cs","start_line":10,"end_line":25,"duration_ms":4000}. |
+| `save_document` | Сохранить документ на диск: буфер открытой вкладки или полная замена content. args: file_path?:string, content?:string; returns: json; example: {"file_path":"src/Program.cs"}. |
 | `select` | Выделить диапазон в редакторе (1-based). args: file_path:string, start_line:integer, start_column:integer, end_line:integer, end_column:integer; returns: text; example: {"file_path":"C:\\tmp\\a.cs","start_line":1,"start_column":1,"end_line":1,"end_column":10}. |
 | `set_breakpoint` | Поставить брейкпоинт: при необходимости загрузка найденного .sln/.slnx/.slnf, запись в JSON отладки, открытие файла и переход к строке. args: file_path:string, line:integer, condition?:string; returns: text; example: {"file_path":"C:\\tmp\\a.cs","line":42}. |
 | `show_editor_preview` | Показать превью текущего файла из редактора в отдельном окне (контент берётся из IDE). returns: text. |

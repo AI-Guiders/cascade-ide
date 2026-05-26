@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cascade.dev/intercom-wire/v1/extension-registry.json",
+  "title": "IntercomWireExtensionRegistry",
+  "description": "Optional extensions on payloads. Additive evolution without envelope schema_version bump.",
+  "extensions": [
+    {
+      "id": "relates_to",
+      "version": "1",
+      "since": "1.1.0",
+      "schema": "./extensions/relates-to-v1.schema.json",
+      "applies_to_payloads": ["message"],
+      "wire_field": "relates_to",
+      "description": "Связи сообщения с кодом, другим message или doc (ADR 0137+)"
+    },
+    {
+      "id": "code_doc_link",
+      "version": "1",
+      "since": "1.1.0",
+      "schema": "./extensions/code-doc-link-v1.schema.json",
+      "applies_to_payloads": ["message", "message_range_related"],
+      "wire_field": "code_doc_links",
+      "description": "Явная связка KB/doc path ↔ code anchor"
+    }
+  ]
+}

@@ -16,7 +16,8 @@ public static class IntercomAttachmentResolveAtSendWorker
         IntercomAttachmentResolveAtSend.EditorSnapshot editor,
         string? workspaceRoot,
         string? solutionPath,
-        CancellationToken cancellationToken = default) =>
+        CancellationToken cancellationToken = default,
+        string? indexDirectoryRelative = null) =>
         Task.Run(
             () =>
             {
@@ -28,7 +29,8 @@ public static class IntercomAttachmentResolveAtSendWorker
                     workspaceRoot,
                     solutionPath,
                     out var outbound,
-                    out var error);
+                    out var error,
+                    indexDirectoryRelative);
                 return (ok, outbound, error);
             },
             cancellationToken);
@@ -39,8 +41,17 @@ public static class IntercomAttachmentResolveAtSendWorker
         IntercomAttachmentResolveAtSend.EditorSnapshot editor,
         string? workspaceRoot,
         string? solutionPath,
-        CancellationToken cancellationToken = default) =>
-        tryPrepareOnPool(rawInput, pendingByShortId, editor, workspaceRoot, solutionPath, forMcp: false, cancellationToken);
+        CancellationToken cancellationToken = default,
+        string? indexDirectoryRelative = null) =>
+        tryPrepareOnPool(
+            rawInput,
+            pendingByShortId,
+            editor,
+            workspaceRoot,
+            solutionPath,
+            indexDirectoryRelative,
+            forMcp: false,
+            cancellationToken);
 
     public static Task<PreparedIntercomMessage> TryPrepareForMcpAsync(
         string rawInput,
@@ -49,7 +60,15 @@ public static class IntercomAttachmentResolveAtSendWorker
         string? workspaceRoot,
         string? solutionPath,
         CancellationToken cancellationToken = default) =>
-        tryPrepareOnPool(rawInput, pendingByShortId, editor, workspaceRoot, solutionPath, forMcp: true, cancellationToken);
+        tryPrepareOnPool(
+            rawInput,
+            pendingByShortId,
+            editor,
+            workspaceRoot,
+            solutionPath,
+            indexDirectoryRelative: null,
+            forMcp: true,
+            cancellationToken);
 
     private static Task<PreparedIntercomMessage> tryPrepareOnPool(
         string rawInput,
@@ -57,6 +76,7 @@ public static class IntercomAttachmentResolveAtSendWorker
         IntercomAttachmentResolveAtSend.EditorSnapshot editor,
         string? workspaceRoot,
         string? solutionPath,
+        string? indexDirectoryRelative,
         bool forMcp,
         CancellationToken cancellationToken) =>
         Task.Run(

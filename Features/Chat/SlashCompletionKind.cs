@@ -8,4 +8,5 @@ public enum SlashCompletionKind
     None = 0,
     WorkspaceFiles = 1,
     SessionTopics = 2,
+    MessageAnchors = 3,
 }

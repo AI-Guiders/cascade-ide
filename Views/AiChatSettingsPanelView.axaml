@@ -49,10 +49,27 @@
                       PlaceholderText="Нет данных — отправь сообщение в чат"/>
         </StackPanel>
 
-        <StackPanel Spacing="6">
-            <TextBlock Text="Отправка сообщения в чате:" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-            <ComboBox ItemsSource="{Binding SendMessageKeyOptionsList}" SelectedItem="{Binding SendMessageKey}" MinWidth="140"/>
-        </StackPanel>
+        <Border Background="{DynamicResource CascadeTheme.SurfaceRegionLowBrush}"
+                CornerRadius="4"
+                Padding="10">
+            <StackPanel Spacing="10">
+                <TextBlock FontWeight="SemiBold"
+                           Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                           Text="Чат · сочетания клавиш"/>
+                <StackPanel Spacing="6">
+                    <TextBlock Text="Отправить сообщение" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+                    <ComboBox ItemsSource="{Binding SendMessageKeyOptionsList}"
+                              SelectedItem="{Binding SendMessageKey}"
+                              MinWidth="220"/>
+                </StackPanel>
+                <StackPanel Spacing="6">
+                    <TextBlock Text="Новая строка в поле сообщения (Skia)" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" TextWrapping="Wrap"/>
+                    <ComboBox ItemsSource="{Binding ComposerNewLineKeyOptionsList}"
+                              SelectedItem="{Binding ComposerNewLineKey}"
+                              MinWidth="220"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
 
         <StackPanel Spacing="6">
             <TextBlock Text="Плотность ленты Intercom (settings.toml: [intercom] feed_metrics):" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" TextWrapping="Wrap"/>
@@ -78,5 +95,42 @@
                  FontFamily="Consolas,monospace"
                  FontSize="11"
                  MinHeight="110"/>
+
+        <TextBlock Text="Team transport (Intercom FederatedSync, ADR 0144)" FontWeight="SemiBold" Margin="0,16,0,0"
+                   Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+        <CheckBox Content="Включить transport ([intercom.transport] enabled)" IsChecked="{Binding IntercomTransportEnabled}"
+                  Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+        <StackPanel Spacing="4">
+            <TextBlock Text="base_url (reference intercom-service):" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+            <TextBox Text="{Binding IntercomTransportBaseUrl, Mode=TwoWay}" PlaceholderText="http://127.0.0.1:5080" MinWidth="280"/>
+        </StackPanel>
+        <StackPanel Spacing="4">
+            <TextBlock Text="local_server_path (относительно CascadeIDE.exe):" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+            <TextBox Text="{Binding IntercomTransportLocalServerPath, Mode=TwoWay}"
+                     PlaceholderText="tools/intercom-service/IntercomService.exe" MinWidth="280"/>
+        </StackPanel>
+        <StackPanel Spacing="4">
+            <TextBlock Text="team_id (пусто → .cascade-ide/intercom-team.toml):" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+            <TextBox Text="{Binding IntercomTransportTeamId, Mode=TwoWay}" MinWidth="280"/>
+        </StackPanel>
+        <StackPanel Spacing="4">
+            <TextBlock Text="OAuth provider (github | oidc):" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+            <ComboBox ItemsSource="{x:Static vm:MainWindowViewModel.IntercomOAuthProviderOptions}"
+                      SelectedItem="{Binding IntercomTransportOAuthProvider, Mode=TwoWay}" MinWidth="200"/>
+        </StackPanel>
+        <StackPanel Spacing="4">
+            <TextBlock Text="DEV team token (только локальная отладка):" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+            <TextBox Text="{Binding IntercomTransportDevTeamToken, Mode=TwoWay}" PasswordChar="*" MinWidth="280"/>
+        </StackPanel>
+        <CheckBox Content="Auto Connect при первом human send" IsChecked="{Binding IntercomTransportAutoConnectOnSend}"
+                  Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+        <CheckBox Content="Синхронизировать ответы ассистента в Channel" IsChecked="{Binding IntercomTransportSyncAgentChannelMessages}"
+                  Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+        <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button Content="Connect Intercom" Command="{Binding ConnectIntercomTransportFromSettingsCommand}"/>
+            <Button Content="Disconnect" Command="{Binding DisconnectIntercomTransportFromSettingsCommand}"/>
+        </StackPanel>
+        <TextBlock Text="{Binding IntercomTransportConnectionStatus}" TextWrapping="Wrap" FontSize="11"
+                   Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
     </StackPanel>
 </UserControl>

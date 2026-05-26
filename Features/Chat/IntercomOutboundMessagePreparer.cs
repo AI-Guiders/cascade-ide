@@ -15,14 +15,16 @@ public static class IntercomOutboundMessagePreparer
         IntercomAttachmentResolveAtSend.EditorSnapshot editor,
         string? workspaceRoot,
         string? solutionPath,
-        CancellationToken cancellationToken = default) =>
+        CancellationToken cancellationToken = default,
+        string? indexDirectoryRelative = null) =>
         IntercomAttachmentResolveAtSendWorker.TryPrepareAsync(
             rawInput,
             pendingByShortId,
             editor,
             workspaceRoot,
             solutionPath,
-            cancellationToken);
+            cancellationToken,
+            indexDirectoryRelative);
 
     /// <summary><c>send_chat</c> / MCP: без Roslyn по member @ send.</summary>
     public static Task<PreparedIntercomMessage> PrepareForMcpAsync(

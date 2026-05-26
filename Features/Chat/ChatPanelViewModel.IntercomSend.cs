@@ -46,8 +46,9 @@ public partial class ChatPanelViewModel
             pending,
             BuildAttachEditorSnapshot(),
             ResolveAttachWorkspaceRoot(),
-            _getSolutionPath?.Invoke(),
-            cancellationToken).ConfigureAwait(false);
+            ResolveAttachSolutionPath(),
+            cancellationToken,
+            ResolveAttachIndexDirectoryRelative()).ConfigureAwait(false);
 
         if (prepared.IsCommittable)
         {
@@ -138,6 +139,7 @@ public partial class ChatPanelViewModel
             ChatMessages.Add(userMsg);
             SelectedChatThreadId = _activeThreadId;
             _ = PersistEventAsync(ChatHistoryEventKind.MessageAdded, ChatHistoryPayloadMapping.ToMessagePayload(userMsg));
+            _ = TryAutoConnectIntercomTransportAsync();
             RefreshChatSurfaceSnapshot();
             _ = PersistSessionSolutionPathIfChangedAsync(CancellationToken.None);
             if (startProviderLoading)

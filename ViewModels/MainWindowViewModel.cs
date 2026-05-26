@@ -66,6 +66,8 @@ public partial class MainWindowViewModel : ViewModelBase, IAutonomousAgentSessio
     private readonly Features.IdeMcp.Application.MainWindowIdeMcpHost _ideMcpHost;
     private readonly Services.IdeDapDebugSession _dapDebug;
     private readonly IDataBus _ideDataBus;
+    private readonly DotNetBuildTest.Core.BuildTestJobService _buildTestJobService;
+    private readonly Features.Agent.Environment.IAgentEnvironmentService _agentEnvironment;
     private readonly HybridIndexOrchestrator _hybridIndex;
     private readonly IIdeHealthChannel _workspaceHealth;
     private readonly IIdeHealthSurfaceCompositor _workspaceHealthSurfaceCompositor;
@@ -269,6 +271,38 @@ public partial class MainWindowViewModel : ViewModelBase, IAutonomousAgentSessio
             SendMessageKey = stored;
     }
 
+    public void LoadComposerNewLineKeyFromStorage()
+    {
+        var stored = _appData.Get("ComposerNewLineKey");
+        if (!string.IsNullOrEmpty(stored) && SendMessageKeyOptions.Contains(stored))
+            ComposerNewLineKey = stored;
+        else
+            ComposerNewLineKey = Features.Chat.ChatComposerChordOptions.ComplementaryChord(SendMessageKey);
+
+        NormalizeChatEnterChordPair();
+    }
+
+    private bool _suppressChatEnterChordPair;
+
+    /// <summary>Совпадение send/newline запрещено: сдвигаем перенос строки.</summary>
+    private void NormalizeChatEnterChordPair()
+    {
+        if (_suppressChatEnterChordPair)
+            return;
+        if (string.Equals(ComposerNewLineKey, SendMessageKey, StringComparison.Ordinal))
+        {
+            _suppressChatEnterChordPair = true;
+            try
+            {
+                ComposerNewLineKey = Features.Chat.ChatComposerChordOptions.ComplementaryChord(SendMessageKey);
+            }
+            finally
+            {
+                _suppressChatEnterChordPair = false;
+            }
+        }
+    }
+
     private void HandleSelectedSolutionItemChanged(SolutionItem? value)
     {
         _openFileDebounceCts?.Cancel();
@@ -296,6 +330,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAutonomousAgentSessio
 
         ChatPanel.DisposeCursorAcpSession();
         _ = ChatPanel.ReloadIntercomSessionFromDiskAsync();
+        RefreshIntercomOnSolutionOpen();
         EnsurePfdBackgroundStatusSubscription();
         if (string.IsNullOrWhiteSpace(value))
             _hciReindexPending = false;

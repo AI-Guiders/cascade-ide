@@ -1,19 +1,25 @@
 #nullable enable
 
+using System.Text.RegularExpressions;
 using CascadeIDE.Models.Intercom;
 
 namespace CascadeIDE.Services.Intercom;
 
-/// <summary>Разбор code-ref хвоста find/relate (selection, L:, bracket).</summary>
+/// <summary>Разбор code-ref хвоста find/relate (selection, L:, bracket, bare M:).</summary>
 public static class IntercomCodeRefParser
 {
+    private static readonly Regex CsFileBeforeMember = new(
+        @"(?<file>[^\s\[\]]+\.cs)\s+M:",
+        RegexOptions.CultureInvariant | RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
     public static bool TryParse(
         string? tail,
         in IntercomAttachmentResolveAtSend.EditorSnapshot editor,
         string? workspaceRoot,
         string? solutionPath,
         out IntercomCodeRefQuery query,
-        out string error)
+        out string error,
+        string? indexDirectoryRelative = null)
     {
         query = new IntercomCodeRefQuery("", null, null);
         error = "";
@@ -21,7 +27,7 @@ public static class IntercomCodeRefParser
         var text = (tail ?? "").Trim();
         if (text.Length == 0)
         {
-            error = "Укажи фрагмент кода: selection, L:10-20, [M:…].";
+            error = "Укажи фрагмент кода: selection, L:10-20, [M:…] или M:Member.";
             return false;
         }
 
@@ -31,10 +37,20 @@ public static class IntercomCodeRefParser
         if (text.StartsWith("L:", StringComparison.OrdinalIgnoreCase))
             return fromLineLiteral(text[2..].Trim(), editor, out query, out error);
 
-        if (text.StartsWith("[", StringComparison.Ordinal))
-            return fromBracket(text, editor, workspaceRoot, out query, out error);
+        if (text.StartsWith("[", StringComparison.Ordinal) || looksLikeBareBracketAxes(text))
+        {
+            var bracketText = text.StartsWith("[", StringComparison.Ordinal) ? text : $"[{text}]";
+            return fromBracket(
+                bracketText,
+                editor,
+                workspaceRoot,
+                solutionPath,
+                indexDirectoryRelative,
+                out query,
+                out error);
+        }
 
-        error = "Ожидается selection, L:строки или bracket [M:…].";
+        error = "Ожидается selection, L:строки, [M:…] или M:Member.";
         return false;
     }
 
@@ -45,10 +61,11 @@ public static class IntercomCodeRefParser
         string? workspaceRoot,
         string? solutionPath,
         out AttachmentAnchor anchor,
-        out string error)
+        out string error,
+        string? indexDirectoryRelative = null)
     {
         anchor = new AttachmentAnchor();
-        if (!TryParse(tail, editor, workspaceRoot, solutionPath, out var query, out error))
+        if (!TryParse(tail, editor, workspaceRoot, solutionPath, out var query, out error, indexDirectoryRelative))
             return false;
 
         if (query.ResolvedAnchor is { } resolved)
@@ -84,7 +101,8 @@ public static class IntercomCodeRefParser
         string? workspaceRoot,
         string? solutionPath,
         out AttachmentAnchor anchor,
-        out string error)
+        out string error,
+        string? indexDirectoryRelative = null)
     {
         anchor = new AttachmentAnchor();
         error = "";
@@ -98,7 +116,14 @@ public static class IntercomCodeRefParser
             return true;
         }
 
-        return TryResolveAnchorFromMcpQuery(args, editor, workspaceRoot, solutionPath, out anchor, out error);
+        return TryResolveAnchorFromMcpQuery(
+            args,
+            editor,
+            workspaceRoot,
+            solutionPath,
+            indexDirectoryRelative,
+            out anchor,
+            out error);
     }
 
     private static bool TryResolveAnchorFromMcpQuery(
@@ -106,10 +131,11 @@ public static class IntercomCodeRefParser
         in IntercomAttachmentResolveAtSend.EditorSnapshot editor,
         string? workspaceRoot,
         string? solutionPath,
+        string? indexDirectoryRelative,
         out AttachmentAnchor anchor,
         out string error)
     {
-        if (!TryParseFromMcp(args, editor, workspaceRoot, solutionPath, out var query, out error))
+        if (!TryParseFromMcp(args, editor, workspaceRoot, solutionPath, out var query, out error, indexDirectoryRelative))
         {
             anchor = new AttachmentAnchor();
             return false;
@@ -223,6 +249,8 @@ public static class IntercomCodeRefParser
         string text,
         in IntercomAttachmentResolveAtSend.EditorSnapshot editor,
         string? workspaceRoot,
+        string? solutionPath,
+        string? indexDirectoryRelative,
         out IntercomCodeRefQuery query,
         out string error)
     {
@@ -236,6 +264,8 @@ public static class IntercomCodeRefParser
                 reference,
                 editor.CurrentFilePath,
                 workspaceRoot,
+                solutionPath,
+                indexDirectoryRelative,
                 out var anchor,
                 out error))
         {
@@ -260,13 +290,20 @@ public static class IntercomCodeRefParser
         return true;
     }
 
+    private static bool looksLikeBareBracketAxes(string text) =>
+        text.StartsWith("M:", StringComparison.OrdinalIgnoreCase)
+        || text.StartsWith("F:", StringComparison.OrdinalIgnoreCase)
+        || text.StartsWith("S:", StringComparison.OrdinalIgnoreCase)
+        || CsFileBeforeMember.IsMatch(text);
+
     public static bool TryParseFromMcp(
         IReadOnlyDictionary<string, System.Text.Json.JsonElement>? args,
         in IntercomAttachmentResolveAtSend.EditorSnapshot editor,
         string? workspaceRoot,
         string? solutionPath,
         out IntercomCodeRefQuery query,
-        out string error)
+        out string error,
+        string? indexDirectoryRelative = null)
     {
         query = new IntercomCodeRefQuery("", null, null);
         error = "";
@@ -279,11 +316,29 @@ public static class IntercomCodeRefParser
 
         var codeRef = McpCommandJsonArgs.String(args, "code_ref");
         if (!string.IsNullOrWhiteSpace(codeRef))
-            return TryParse(codeRef, editor, workspaceRoot, solutionPath, out query, out error);
+        {
+            return TryParse(
+                codeRef,
+                editor,
+                workspaceRoot,
+                solutionPath,
+                out query,
+                out error,
+                indexDirectoryRelative);
+        }
 
         if (args.TryGetValue("use_selection", out var selEl)
             && selEl.ValueKind is System.Text.Json.JsonValueKind.True)
-            return TryParse("selection", editor, workspaceRoot, solutionPath, out query, out error);
+        {
+            return TryParse(
+                "selection",
+                editor,
+                workspaceRoot,
+                solutionPath,
+                out query,
+                out error,
+                indexDirectoryRelative);
+        }
 
         var file = McpCommandJsonArgs.String(args, "file");
         if (string.IsNullOrWhiteSpace(file))

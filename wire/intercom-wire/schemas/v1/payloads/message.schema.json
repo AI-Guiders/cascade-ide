@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cascade.dev/intercom-wire/v1/payloads/message.schema.json",
+  "title": "IntercomMessagePayload",
+  "description": "message_added / message_completed payload (aligns with CIDE ChatHistoryMessagePayload, snake_case).",
+  "type": "object",
+  "required": ["message_id", "role", "content", "thread_id"],
+  "properties": {
+    "message_id": { "type": "string" },
+    "role": { "type": "string", "enum": ["user", "assistant", "system"] },
+    "content": { "type": "string" },
+    "thread_id": { "type": "string" },
+    "parent_message_id": { "type": "string" },
+    "slash_command_path": { "type": "string" },
+    "slash_command_args": { "type": "string" },
+    "slash_command_status": { "type": "string" },
+    "attachments": {
+      "type": "array",
+      "items": { "$ref": "../common/attachment-anchor.schema.json" }
+    },
+    "sender_workspace_context": {
+      "type": "object",
+      "properties": {
+        "branch": { "type": "string" },
+        "commit": { "type": "string" },
+        "solution_path": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "audience": {
+      "type": "string",
+      "enum": ["channel", "self_only"],
+      "description": "self_only MUST NOT be synced to team transport"
+    },
+    "relates_to": {
+      "type": "array",
+      "description": "Extension relates_to v1 (optional)",
+      "items": { "$ref": "../extensions/relates-to-v1.schema.json" }
+    },
+    "code_doc_links": {
+      "type": "array",
+      "description": "Extension code_doc_link v1 (optional)",
+      "items": { "$ref": "../extensions/code-doc-link-v1.schema.json" }
+    }
+  },
+  "additionalProperties": true
+}
