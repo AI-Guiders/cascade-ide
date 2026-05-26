@@ -30,6 +30,7 @@ public sealed class AgentEnvironmentService : IAgentEnvironmentService
 {
     private readonly IDataBus _dataBus;
     private readonly AgentEnvironmentSettings _settings;
+    private readonly IBuildTestHost _buildTestHost;
     private readonly VerificationLadder _ladder;
     private readonly AgentSandboxManager _sandbox;
     private readonly AgentWorktreeSandbox? _worktree;
@@ -55,9 +56,9 @@ public sealed class AgentEnvironmentService : IAgentEnvironmentService
         _sandbox = new AgentSandboxManager();
         _epoch = new AgentVerifyEpochTracker(dataBus);
         var coordinator = buildTestJobService?.Coordinator ?? new BuildTestJobCoordinator();
-        var host = new InProcessBuildTestHost(coordinator);
+        _buildTestHost = new InProcessBuildTestHost(coordinator);
         var l0 = new AgentRoslynL0Diagnostics(languageService, openCsDocuments);
-        _ladder = new VerificationLadder(dataBus, host, l0, settings, _sandbox);
+        _ladder = new VerificationLadder(dataBus, _buildTestHost, l0, settings, _sandbox);
         _worktree = gitRunner is null ? null : new AgentWorktreeSandbox(gitRunner);
         _orchestrator = new AgentOrchestratorBridge(
             this,
@@ -86,7 +87,7 @@ public sealed class AgentEnvironmentService : IAgentEnvironmentService
                 _active.SandboxWire,
                 WritesInvalidatedVerifyEpoch: _epoch.WritesInvalidatedVerifyEpoch,
                 SandboxRunDirectory: _activeLease?.RunDirectory,
-                ExecutionChannel: "BuildTestJobCoordinator");
+                ExecutionChannel: _buildTestHost.HostKind);
         }
     }
 
@@ -279,15 +280,15 @@ public sealed record AgentEnvironmentStatusSnapshot(
     string? SandboxProfile,
     bool WritesInvalidatedVerifyEpoch = false,
     string? SandboxRunDirectory = null,
-    string ExecutionChannel = "BuildTestJobCoordinator")
+    string ExecutionChannel = "supervised-inproc")
 {
     public AgentEnvironmentStatusSnapshot(bool isActive, string? runId, string? verifySnapshotId, string? policy)
-        : this(isActive, runId, verifySnapshotId, policy, null, false, null, "BuildTestJobCoordinator")
+        : this(isActive, runId, verifySnapshotId, policy, null, false, null, "supervised-inproc")
     {
     }
 
     public AgentEnvironmentStatusSnapshot(bool isActive, string? runId, string? verifySnapshotId, string? policy, string? sandboxProfile)
-        : this(isActive, runId, verifySnapshotId, policy, sandboxProfile, false, null, "BuildTestJobCoordinator")
+        : this(isActive, runId, verifySnapshotId, policy, sandboxProfile, false, null, "supervised-inproc")
     {
     }
 }

@@ -7,7 +7,7 @@ public static partial class IdeCommands
     public const string IdeAgentVerify = "ide_agent_verify";
     /// <summary>Cancel active verify. returns: json.</summary>
     public const string IdeAgentCancel = "ide_agent_cancel";
-    /// <summary>AEE status snapshot: active, run_id, verify_snapshot_id, policy, sandbox_profile, sandbox_run_directory, execution_channel (BuildTestJobCoordinator), writes_invalidated_verify_epoch. returns: json.</summary>
+    /// <summary>AEE status snapshot: active, run_id, verify_snapshot_id, policy, sandbox_profile, sandbox_run_directory, execution_channel (supervised build host kind), writes_invalidated_verify_epoch. returns: json.</summary>
     public const string IdeAgentStatus = "ide_agent_status";
     /// <summary>Last verify run summary. returns: json.</summary>
     public const string IdeAgentLast = "ide_agent_last";
