@@ -14,6 +14,7 @@ public sealed class SettingsCategoryCatalogTests
         Assert.Contains(discovered, c => c.Panel == SettingsPanelIds.AiChat);
         Assert.Contains(discovered, c => c.Panel == SettingsPanelIds.Themes);
         Assert.Contains(discovered, c => c.Panel == SettingsPanelIds.Hci);
+        Assert.Contains(discovered, c => c.Panel == SettingsPanelIds.WorkspaceNavigationMap);
     }
 
     [Fact]

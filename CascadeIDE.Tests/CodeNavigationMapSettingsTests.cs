@@ -74,4 +74,29 @@ public sealed class CodeNavigationMapSettingsTests
         var map = new CodeNavigationMapSettings { DetailLevel = raw ?? "" };
         Assert.Equal(expected, map.NormalizedDetailLevel);
     }
+
+    [Theory]
+    [InlineData("radial", CodeNavigationMapRelatedGraphLayoutKind.Radial)]
+    [InlineData("top_down", CodeNavigationMapRelatedGraphLayoutKind.TopDown)]
+    [InlineData("bottom_up", CodeNavigationMapRelatedGraphLayoutKind.BottomUp)]
+    [InlineData("junk", CodeNavigationMapRelatedGraphLayoutKind.Radial)]
+    public void NormalizeRelatedGraphLayout(string raw, string expected)
+    {
+        Assert.Equal(expected, CodeNavigationMapRelatedGraphLayoutKind.Normalize(raw));
+        var map = new CodeNavigationMapSettings { RelatedGraphLayout = raw };
+        Assert.Equal(expected, map.NormalizedRelatedGraphLayout);
+    }
+
+    [Theory]
+    [InlineData("auto", CodeNavigationMapControlFlowMainAxisKind.Auto)]
+    [InlineData("", CodeNavigationMapControlFlowMainAxisKind.Auto)]
+    [InlineData("junk", CodeNavigationMapControlFlowMainAxisKind.Auto)]
+    [InlineData("vertical", CodeNavigationMapControlFlowMainAxisKind.Vertical)]
+    [InlineData("HORIZONTAL", CodeNavigationMapControlFlowMainAxisKind.Horizontal)]
+    public void NormalizeControlFlowMainAxis(string raw, string expected)
+    {
+        Assert.Equal(expected, CodeNavigationMapControlFlowMainAxisKind.Normalize(raw));
+        var map = new CodeNavigationMapSettings { ControlFlowMainAxis = raw };
+        Assert.Equal(expected, map.NormalizedControlFlowMainAxis);
+    }
 }

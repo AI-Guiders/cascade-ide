@@ -167,6 +167,19 @@ public sealed class CascadeIdeSettingsTomlDeserializeTests
     }
 
     [Fact]
+    public void Deserialize_CodeNavigationMapSection_ParsesControlFlowMainAxis()
+    {
+        const string text =
+            """
+            [code_navigation_map]
+            control_flow_main_axis = "vertical"
+            """;
+
+        var s = Deserialize(text);
+        Assert.Equal(CodeNavigationMapControlFlowMainAxisKind.Vertical, s.CodeNavigationMap.NormalizedControlFlowMainAxis);
+    }
+
+    [Fact]
     public void Deserialize_DisplayScreensTopology_WithoutGrammar_ParsesAsTwoScreens()
     {
         const string text =

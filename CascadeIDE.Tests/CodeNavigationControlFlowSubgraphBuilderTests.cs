@@ -71,6 +71,72 @@ class Demo {
         var edges = root.GetProperty("edges").EnumerateArray().ToList();
         Assert.Contains(edges, e => string.Equals(e.GetProperty("kind").GetString(), "LoopCall", StringComparison.Ordinal));
         Assert.Contains(edges, e => string.Equals(e.GetProperty("kind").GetString(), "MultiBranch", StringComparison.Ordinal));
+        Assert.Contains(edges, e => string.Equals(e.GetProperty("kind").GetString(), "LoopBack", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void BuildJson_WhileTrueWithNestedIf_TargetsInnerIfLegendWithTryParse()
+    {
+        const string source = """
+using System;
+
+class Demo
+{
+    void M(Request request)
+    {
+        while (true)
+        {
+            Console.WriteLine("?");
+            var answer = Console.ReadLine()?.Trim() ?? "";
+
+            if (int.TryParse(answer, out _))
+                return;
+
+            Console.WriteLine("!");
+        }
+    }
+
+    sealed class Request { }
+}
+""";
+
+        var json = CodeNavigationControlFlowSubgraphBuilder.BuildJson(
+            filePath: @"D:\w\Demo.cs",
+            sourceText: source,
+            line: 5,
+            column: 10,
+            maxNodes: 48,
+            maxEdges: 96);
+
+        using var doc = JsonDocument.Parse(json);
+        var root = doc.RootElement;
+        Assert.Equal("subgraph", root.GetProperty("mode").GetString());
+
+        var nodes = root.GetProperty("nodes").EnumerateArray().ToList();
+
+        Assert.Contains(nodes, node =>
+            string.Equals(node.GetProperty("kind").GetString(), "condition_step", StringComparison.OrdinalIgnoreCase)
+            && node.GetProperty("legend_text").GetString()?.Contains("TryParse", StringComparison.OrdinalIgnoreCase)
+            == true);
+
+        Assert.Contains(nodes, node =>
+            string.Equals(node.GetProperty("kind").GetString(), "condition_step", StringComparison.OrdinalIgnoreCase)
+            && string.Equals(node.GetProperty("legend_text").GetString(), "true", StringComparison.OrdinalIgnoreCase));
+
+        Assert.Contains(nodes, node =>
+            string.Equals(node.GetProperty("kind").GetString(), "exit_step", StringComparison.OrdinalIgnoreCase));
+
+        var loopGroupIds = nodes
+            .Where(n =>
+                n.TryGetProperty("loop_group", out var gp)
+                && gp is { ValueKind: JsonValueKind.Number }
+                && gp.TryGetInt32(out var gv)
+                && gv > 0)
+            .Select(n => n.GetProperty("loop_group").GetInt32())
+            .Distinct()
+            .ToList();
+        Assert.NotEmpty(loopGroupIds);
+        Assert.Single(loopGroupIds);
     }
 
     [Fact]

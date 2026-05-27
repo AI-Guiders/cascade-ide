@@ -80,8 +80,10 @@ public sealed class CodeNavigationMapPresentationProjectionTests
     [Fact]
     public void SettingsSummaryLine_includes_trimmed_detail()
     {
-        var s = CodeNavigationMapPresentationProjection.SettingsSummaryLine("both", "file", "  normal  ");
+        var s = CodeNavigationMapPresentationProjection.SettingsSummaryLine("both", "file", "  normal  ", "top_down", "auto");
         Assert.Contains("детализация: normal", s, StringComparison.Ordinal);
+        Assert.Contains("укладка: top_down", s, StringComparison.Ordinal);
+        Assert.Contains("CF ось: auto", s, StringComparison.Ordinal);
     }
 
     [Theory]
