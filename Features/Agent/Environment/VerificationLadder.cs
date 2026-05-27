@@ -1,5 +1,6 @@
 using CascadeIDE.Cockpit.DataBus;
 using CascadeIDE.Models;
+using CascadeIDE.Services;
 
 namespace CascadeIDE.Features.Agent.Environment;
 
@@ -18,13 +19,17 @@ public sealed class VerificationLadder
     private readonly AgentSandboxManager _sandbox;
     private readonly EnvironmentTaskDedup _dedup;
     private readonly IDataBus _dataBus;
+    private readonly IGitCommandRunner? _gitRunner;
+    private readonly Func<string?>? _getWorkspaceRoot;
 
     public VerificationLadder(
         IDataBus dataBus,
         IBuildTestHost host,
         AgentRoslynL0Diagnostics l0,
         AgentEnvironmentSettings settings,
-        AgentSandboxManager sandbox)
+        AgentSandboxManager sandbox,
+        IGitCommandRunner? gitRunner = null,
+        Func<string?>? getWorkspaceRoot = null)
     {
         _dataBus = dataBus;
         _runner = new EnvironmentTaskRunner(dataBus, host.JobBackend);
@@ -32,6 +37,8 @@ public sealed class VerificationLadder
         _settings = settings;
         _sandbox = sandbox;
         _dedup = new EnvironmentTaskDedup(settings.CoalesceWindowMs);
+        _gitRunner = gitRunner;
+        _getWorkspaceRoot = getWorkspaceRoot;
     }
 
     public EnvironmentTaskRunner Runner => _runner;
@@ -108,14 +115,33 @@ public sealed class VerificationLadder
                     Substrate = _sandbox.RecreateSubstrateBeforeTests(sandboxLease),
                 };
                 maxRung = "L3";
+
+                var contract = AgentDevServiceContractValidator.ValidateForL3(
+                    _settings.DevServices,
+                    sandboxLease.Profile,
+                    sandboxLease);
+                slices.Add(new AgentTimeSlice(AgentRunPhaseKind.Environment, 0, contract.Detail));
+                if (!contract.Ok && _settings.DevServices.GateL3OnViolation)
+                {
+                    green = false;
+                    failure = contract.Detail;
+                    return Finish(slices, envStart, maxRung, green, failure);
+                }
+
                 var supplementalEnv = sandboxLease.Substrate is null
                     ? null
                     : AgentSandboxProcessEnvironmentKeys.ForBundle(sandboxLease.Substrate);
 
+                var filter = await AgentL3TouchedTestFilter.BuildFilterExpressionAsync(
+                    _settings.Ladder,
+                    _gitRunner,
+                    _getWorkspaceRoot?.Invoke(),
+                    cancellationToken).ConfigureAwait(false);
+
                 var test = await _runner.RunTestsAsync(
                     runId,
                     solutionPath,
-                    filterExpression: null,
+                    filterExpression: filter,
                     waitForCompletion: true,
                     cancellationToken,
                     supplementalEnvironmentVariables: supplementalEnv).ConfigureAwait(false);

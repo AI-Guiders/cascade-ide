@@ -379,9 +379,10 @@
 | `cycle_code_navigation_map_detail_level` | Карта намерений: цикл детализации glance → normal → inspect (Ctrl+K → S → D). returns: text. |
 | `cycle_code_navigation_map_level` | Карта намерений: переключить уровень file ↔ controlFlow (Ctrl+K → S → F). returns: text. |
 | `cycle_code_navigation_map_presentation` | Карта намерений: цикл вида list → graph → both (палитра; быстрый путь — Ctrl+K → S → P). returns: text. |
+| `cycle_code_navigation_map_related_graph_layout` | Карта намерений: цикл укладки related-files radial → top_down → bottom_up. returns: text. |
 | `focus_editor` | Передать фокус в редактор (чтобы клавиши/ввод шли в него). returns: text. |
 | `get_cockpit_surface` | Только CDS (`CockpitSurfaceState`): тот же payload, что поле `cockpit_surface` в `get_ide_state`. returns: json. Для `--agent-contract` без полной сводки. |
-| `get_code_navigation_context` | Контекст навигации по коду (ADR 0039, CNC): связанные файлы или мини-подграф. Виды связей — partial_peer project_peer xaml_codebehind_pair test_counterpart same_namespace same_directory. Имена preset — из settings.toml `[code_navigation]` / `[[code_navigation.presets]]`. args: mode:string, file_path?:string, line?:integer, column?:integer, max_related?:integer, max_nodes?:integer, max_edges?:integer, preset?:string, include_kinds?:string[], exclude_kinds?:string[], level?:string; returns: json; example: {"mode":"related","file_path":"src/Foo.cs","preset":"no_namespace_noise","level":"controlFlow"}. |
+| `get_code_navigation_context` | Контекст навигации по коду (ADR 0039, CNC): связанные файлы или мини-подграф. Виды связей — partial_peer project_peer xaml_codebehind_pair test_counterpart same_namespace same_directory. Имена preset — из settings.toml `[code_navigation]` / `[[code_navigation.presets]]`. При `level: controlFlow` зерно subgraph задаёт **`[code_navigation_map].control_flow_grain`** (ADR 0151: `intent` по умолчанию vs `detailed`). args: mode:string, file_path?:string, line?:integer, column?:integer, max_related?:integer, max_nodes?:integer, max_edges?:integer, preset?:string, include_kinds?:string[], exclude_kinds?:string[], level?:string; returns: json; example: {"mode":"related","file_path":"src/Foo.cs","preset":"no_namespace_noise","level":"controlFlow"}. |
 | `get_current_file_diagnostics` | Диагностики текущего открытого .cs (ошибки/предупреждения). returns: json. |
 | `get_ide_state` | Единая сводка состояния IDE (solution/editor/build/diagnostics...). returns: json. |
 | `get_solution_files` | Список файлов и дерево решения (Solution Explorer). returns: json. |
@@ -404,7 +405,7 @@
 | `toggle_workspace_splitters_lock` | Сплиттеры рабочей области: переключить ON GND / IN AIR (мелодия tol, лампа TOL в task cockpit). returns: text. |
 <!-- GENERATED:IdeCommands END -->
 
-**Семантическая навигация (`get_code_navigation_context`):** пресеты задаются в `%LocalAppData%\CascadeIDE\settings.toml` в секции `[code_navigation]` (`[[code_navigation.presets]]` в TOML). В ответе смотри `kind_filter` (эффективные списки) и в режиме `subgraph` — `kind` на узлах и `related_kind` на рёбрах. Подробный cookbook: [workspace-navigation-mcp-cookbook.md](design/workspace-navigation-mcp-cookbook.md).
+**Семантическая навигация (`get_code_navigation_context`):** пресеты задаются в `%LocalAppData%\CascadeIDE\settings.toml` в секции `[code_navigation]` (`[[code_navigation.presets]]` в TOML). В ответе смотри `kind_filter` (эффективные списки) и в режиме `subgraph` — `kind` на узлах и `related_kind` на рёбрах. Для **control-flow** subgraph зерно графа — **`[code_navigation_map].control_flow_grain`** (`intent` \| `detailed`, см. [ADR 0151](adr/0151-control-flow-subgraph-intent-vs-detailed-grain.md)). Подробный cookbook: [workspace-navigation-mcp-cookbook.md](design/workspace-navigation-mcp-cookbook.md).
 
 Проверка: `ide_get_ide_state` — помимо `terminal.is_visible`, `ui_mode`, есть `panels` (видимость колонок), `safety_level`, `editor_group_count`, `agent_trace_step_count`, `is_autonomous_running`, **`cockpit_surface`** (CDS: `schema_version`, зоны, топология, `instruments` и т.д., см. `docs/design/cds-contract-v0.md`).
 

@@ -1,16 +1,23 @@
 #nullable enable
 using Avalonia;
 using CascadeIDE.Cockpit.Graph;
+using CascadeIDE.Models;
 
 namespace CascadeIDE.Cockpit.Graph.Layout;
 
 /// <summary>
-/// Укладка control-flow в формате "полётного плана": основной поток сверху вниз,
-/// а узлы одного шага по глубине — в сторону от центральной оси.
+/// Укладка control-flow: главный поток по оси (адаптивно горизонт/вертикаль),
+/// побочная ось — параллели уровня из BFS от якоря.
 /// </summary>
 public sealed class ControlFlowGraphLayoutEngine : IGraphLayoutEngine
 {
-    public GraphLayoutScene Layout(GraphDocument doc, double width, double height)
+    public GraphLayoutScene Layout(
+        GraphDocument doc,
+        double width,
+        double height,
+        CodeNavigationMapDetailLevel detailLevel = CodeNavigationMapDetailLevel.Normal,
+        GraphControlFlowMainAxis? controlFlowMainAxisOverride = null,
+        GraphLayoutEngineOptions layoutOptions = default)
     {
         if (width <= 0 || height <= 0)
             return new GraphLayoutScene
@@ -67,18 +74,22 @@ public sealed class ControlFlowGraphLayoutEngine : IGraphLayoutEngine
         static bool IsConditionStep(GraphNode n) =>
             string.Equals(n.Kind, "condition_step", StringComparison.OrdinalIgnoreCase);
 
-        var hasLegendRows = doc.Nodes.Any(static n =>
+        var compactLegend = detailLevel == CodeNavigationMapDetailLevel.Glance;
+        var hasLegendRows = detailLevel == CodeNavigationMapDetailLevel.Inspect && doc.Nodes.Any(static n =>
             !IsExitStep(n)
             && n.LegendIndex is > 0
             && !string.IsNullOrWhiteSpace(n.LegendText));
-        var showLegendConditionKey = doc.Nodes.Any(IsConditionStep);
-        var showLegendReturnKey = doc.Nodes.Any(IsExitStep);
-        var showLegendExceptionFlowKey = doc.Nodes.Any(static n =>
+        var showNodeLegendGlyphs = doc.Nodes.Any(static n =>
+            !IsExitStep(n) && n.LegendIndex is > 0);
+        var showLegendConditionKey = !compactLegend && doc.Nodes.Any(IsConditionStep);
+        var showLegendReturnKey = !compactLegend && doc.Nodes.Any(IsExitStep);
+        var showLegendExceptionFlowKey = !compactLegend && doc.Nodes.Any(static n =>
             string.Equals(n.Kind, "handler_step", StringComparison.OrdinalIgnoreCase));
         ComputeEdgeStyleLegend(
             doc.Edges,
-            out var showLegendEdgeStyleKey,
+            out var edgeStyleLegendKey,
             out var edgeStyleLegendRowCount);
+        var showLegendEdgeStyleKey = !compactLegend && edgeStyleLegendKey;
         var useLegendColumn = hasLegendRows || showLegendConditionKey || showLegendReturnKey
             || showLegendExceptionFlowKey || showLegendEdgeStyleKey;
         var legendRowsPreview = hasLegendRows
@@ -115,35 +126,54 @@ public sealed class ControlFlowGraphLayoutEngine : IGraphLayoutEngine
             GraphControlFlowLayoutMetrics.MinGraphWidth,
             width - legendResForWidth - (useLegendColumn ? legendGap : 0));
 
-        // Узлы на одном уровне не разъезжаются на всю ширину слота — ограниченная «полоса чтения», по центру области графа.
-        var bandW = GraphControlFlowLayoutMetrics.ResolveReadableBandWidth(graphWidth);
-        var bandLeft = (graphWidth - bandW) * 0.5;
-        var centerX = bandLeft + bandW * 0.5;
-        var labelCharBudget = GraphControlFlowLayoutMetrics.ResolveLabelCharBudget(bandW);
+        var levelKeys = Math.Max(1, levels.Count);
+        var maxBreadth = levels.Count == 0 ? 1 : levels.Values.Max(static ids => ids.Count);
+        var mainAxis = controlFlowMainAxisOverride
+            ?? GraphControlFlowLayoutMetrics.ChooseMainAxis(graphWidth, heightForY, levelKeys, maxBreadth);
+        var horizontal = mainAxis == GraphControlFlowMainAxis.Horizontal;
 
-        var levelCount = Math.Max(1, levels.Count);
         var innerH = heightForY - topPadding - bottomPadding;
-        var slotCount = Math.Max(1, levelCount - 1);
-        var rawYStep = innerH / slotCount;
-        var minYStep = GraphControlFlowLayoutMetrics.MinVerticalStepForLevelCount(levelCount);
-        var maxYStep = Math.Min(
+        var innerMain = horizontal ? graphWidth - 2 * sidePadding : innerH;
+        var bandCrossSize = horizontal
+            ? GraphControlFlowLayoutMetrics.ResolveReadableBandWidth(innerH)
+            : GraphControlFlowLayoutMetrics.ResolveReadableBandWidth(graphWidth);
+        var bandCrossStart = horizontal
+            ? topPadding + (innerH - bandCrossSize) * 0.5
+            : (graphWidth - bandCrossSize) * 0.5;
+        var centerCross = bandCrossStart + bandCrossSize * 0.5;
+        var labelCharBudget = GraphControlFlowLayoutMetrics.ResolveLabelCharBudget(bandCrossSize);
+        if (layoutOptions.IsDense)
+            labelCharBudget = Math.Max(GraphControlFlowLayoutMetrics.LabelCharBudgetMin, labelCharBudget - 4);
+
+        var slotCount = Math.Max(1, levelKeys - 1);
+        var rawMainStep = innerMain / slotCount;
+        var minMainStep = GraphControlFlowLayoutMetrics.MinVerticalStepForLevelCount(levelKeys);
+        var maxMainStep = Math.Min(
             GraphControlFlowLayoutMetrics.MaxReadableVerticalStepCap,
-            Math.Max(GraphControlFlowLayoutMetrics.MaxReadableVerticalStep, rawYStep));
-        var yStep = Math.Clamp(rawYStep, minYStep, maxYStep);
-        var verticalSpan = Math.Max(0, levelCount - 1) * yStep;
-        var yStart = topPadding + (innerH - verticalSpan) * 0.5;
+            Math.Max(GraphControlFlowLayoutMetrics.MaxReadableVerticalStep, rawMainStep));
+        var mainStep = Math.Clamp(rawMainStep, minMainStep, maxMainStep);
+        var mainSpan = Math.Max(0, levelKeys - 1) * mainStep;
+        var mainStart = horizontal
+            ? sidePadding + ((graphWidth - 2 * sidePadding) - mainSpan) * 0.5
+            : topPadding + (innerH - mainSpan) * 0.5;
+
         var radiusMul = Math.Clamp(
-            yStep / GraphControlFlowLayoutMetrics.RefVerticalStep,
+            mainStep / GraphControlFlowLayoutMetrics.RefVerticalStep,
             GraphControlFlowLayoutMetrics.RadiusScaleMin,
             GraphControlFlowLayoutMetrics.RadiusScaleMax);
         var horizontalRadiusScale = Math.Clamp(
-            bandW / GraphControlFlowLayoutMetrics.MaxReadableBandWidth,
+            bandCrossSize / GraphControlFlowLayoutMetrics.MaxReadableBandWidth,
             GraphControlFlowLayoutMetrics.HorizontalRadiusScaleMin,
             1.0);
         radiusMul *= horizontalRadiusScale;
-        var sideLabelFontPx = GraphControlFlowLayoutMetrics.ResolveSideLabelFontSize(bandW, yStep);
+        if (layoutOptions.IsDense)
+            radiusMul *= 0.92;
+        var sideLabelFontPx = GraphControlFlowLayoutMetrics.ResolveSideLabelFontSize(bandCrossSize, mainStep);
         var anchorR = GraphControlFlowLayoutMetrics.AnchorRadiusBase * radiusMul;
         var nodeR = GraphControlFlowLayoutMetrics.NodeRadiusBase * radiusMul;
+
+        var minCross = bandCrossStart + sidePadding + nodeR;
+        var maxCross = Math.Max(minCross, bandCrossStart + bandCrossSize - sidePadding - nodeR);
 
         var idToCenter = new Dictionary<string, Point>(StringComparer.OrdinalIgnoreCase);
         var idToRadius = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
@@ -151,27 +181,28 @@ public sealed class ControlFlowGraphLayoutEngine : IGraphLayoutEngine
 
         foreach (var (depth, ids) in levels)
         {
-            var y = yStart + depth * yStep;
             var orderedIds = ids
                 .OrderBy(id => string.Equals(id, anchor.Id, StringComparison.OrdinalIgnoreCase) ? 0 : 1)
                 .ThenBy(id => id, StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
             var count = orderedIds.Count;
-            var minX = bandLeft + sidePadding + nodeR;
-            var maxX = Math.Max(minX, bandLeft + bandW - sidePadding - nodeR);
+            var mainPos = mainStart + depth * mainStep;
+
             for (var i = 0; i < count; i++)
             {
                 var id = orderedIds[i];
                 if (!nodeById.TryGetValue(id, out var n))
                     continue;
 
-                var x = count == 1
-                    ? centerX
-                    : minX + (maxX - minX) * i / (count - 1);
+                var crossPos = count == 1
+                    ? centerCross
+                    : minCross + (maxCross - minCross) * i / (count - 1);
                 var radius = string.Equals(id, anchor.Id, StringComparison.OrdinalIgnoreCase) ? anchorR : nodeR;
-                var point = new Point(x, y);
-                idToCenter[id] = point;
+                var pt = horizontal
+                    ? new Point(mainPos, crossPos)
+                    : new Point(crossPos, mainPos);
+                idToCenter[id] = pt;
                 idToRadius[id] = radius;
                 var isAnchor = string.Equals(n.Id, anchor.Id, StringComparison.OrdinalIgnoreCase);
                 var shape = !isAnchor && string.Equals(n.Kind, "condition_step", StringComparison.OrdinalIgnoreCase)
@@ -183,12 +214,15 @@ public sealed class ControlFlowGraphLayoutEngine : IGraphLayoutEngine
                     Kind = n.Kind,
                     FullPath = n.Path,
                     Label = TruncateLabel(n.Label, labelCharBudget),
-                    Center = point,
+                    Center = pt,
                     Radius = radius,
                     IsAnchor = isAnchor,
                     Shape = shape,
                     LegendIndex = n.LegendIndex,
-                    LegendLine = n.LegendText
+                    LegendLine = n.LegendText,
+                    LineStart = n.LineStart,
+                    LineEnd = n.LineEnd,
+                    LoopGroupId = n.LoopGroupId
                 });
             }
         }
@@ -209,12 +243,12 @@ public sealed class ControlFlowGraphLayoutEngine : IGraphLayoutEngine
                 To = to,
                 ToRadius = idToRadius.TryGetValue(e.ToId, out var toR) ? toR : nodeR,
                 Kind = e.Kind,
-                RelationKind = e.RelationKind
+                RelationKind = e.RelationKind,
+                EdgeProvenance = e.EdgeProvenance
             });
         }
 
-        // Колонка легенды: сразу справа от фактического «чернильного» правого края узлов, а не от правой границы
-        // полосы чтения (bandW может быть 380px при одном столбце узлов — тогда зазор до текста нелепо большой).
+        // Колонка легенды: сразу справа от фактического «чернильного» правого края узлов, а не от правой границы полосы.
         var legendColumnLeft = width;
         if (useLegendColumn)
         {
@@ -230,7 +264,9 @@ public sealed class ControlFlowGraphLayoutEngine : IGraphLayoutEngine
             else
             {
                 var minClear = Math.Max(legendGap, GraphControlFlowLayoutMetrics.LegendBesideMinClearance);
-                legendColumnLeft = bandLeft + bandW + minClear;
+                legendColumnLeft = horizontal
+                    ? graphWidth - sidePadding * 2 + minClear
+                    : bandCrossStart + bandCrossSize + minClear;
             }
         }
 
@@ -247,7 +283,9 @@ public sealed class ControlFlowGraphLayoutEngine : IGraphLayoutEngine
             LegendColumnLeft = legendColumnLeft,
             LegendPlacement = GraphLegendBlockPlacement.BesideGraph,
             LegendBlockTopY = 0,
-            SideLabelFontSizePx = sideLabelFontPx
+            SideLabelFontSizePx = sideLabelFontPx,
+            ShowNodeLegendGlyphs = showNodeLegendGlyphs,
+            ControlFlowMainAxis = mainAxis
         };
         }
 
@@ -300,7 +338,9 @@ public sealed class ControlFlowGraphLayoutEngine : IGraphLayoutEngine
             LegendColumnLeft = sidePadding,
             LegendPlacement = GraphLegendBlockPlacement.BelowGraph,
             LegendBlockTopY = legendTopY,
-            SideLabelFontSizePx = sceneBelow.SideLabelFontSizePx
+            SideLabelFontSizePx = sceneBelow.SideLabelFontSizePx,
+            ShowNodeLegendGlyphs = showNodeLegendGlyphs,
+            ControlFlowMainAxis = sceneBelow.ControlFlowMainAxis
         };
     }
 

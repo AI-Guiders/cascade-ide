@@ -14,6 +14,7 @@ internal static class SettingsPanelFactory
         SettingsPanelIds.Markdown => new SettingsMarkdownPanelView(),
         SettingsPanelIds.MarkdownLsp => new SettingsMarkdownLspPanelView(),
         SettingsPanelIds.Hci => new SettingsHciPanelView(),
+        SettingsPanelIds.WorkspaceNavigationMap => new SettingsWorkspaceNavigationPanelView(),
         _ => null,
     };
 }

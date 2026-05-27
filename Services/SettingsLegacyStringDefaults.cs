@@ -109,6 +109,12 @@ public static class SettingsLegacyStringDefaults
             m.Depth = CodeNavigationMapLevelKind.File;
         if (string.IsNullOrWhiteSpace(m.DetailLevel))
             m.DetailLevel = "normal";
+        if (string.IsNullOrWhiteSpace(m.RelatedGraphLayout))
+            m.RelatedGraphLayout = CodeNavigationMapRelatedGraphLayoutKind.TopDown;
+        if (string.IsNullOrWhiteSpace(m.ControlFlowMainAxis))
+            m.ControlFlowMainAxis = CodeNavigationMapControlFlowMainAxisKind.Auto;
+        if (string.IsNullOrWhiteSpace(m.ControlFlowGrain))
+            m.ControlFlowGrain = CodeNavigationMapControlFlowGrainKind.Intent;
     }
 
     private static void ApplyMarkdown(MarkdownSettings md)

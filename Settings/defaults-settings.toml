@@ -145,9 +145,14 @@ build_verify_host = "supervised-inproc"
 # Пусто = авто (рядом с CascadeIDE.exe или tools/ в dev)
 # build_verify_worker_assembly_path = ""
 
+[agent.environment.dev_services]
+require_config_override = true
+gate_l3_on_violation = true
+
 [agent.environment.ladder]
 l0_enabled = true
 l4_require_explicit = true
+l3_touched_tests_only = true
 # open_tabs — только вкладки; open_tabs_and_git_dirty_cs — + .cs из git diff / --cached в workspace (парсер L0).
 l0_cs_scope = "open_tabs_and_git_dirty_cs"
 l0_git_dirty_max_files = 48
@@ -185,11 +190,26 @@ primary_work_surface = "editor"
 
 [code_navigation_map]
 # list | graph | both
-view = "list"
+view = "graph"
 # file | controlFlow
 depth = "file"
 # glance | normal | inspect
 detail_level = "normal"
+# radial | top_down | bottom_up — укладка related-files на PFD (не solution explorer)
+related_graph_layout = "top_down"
+# auto | vertical | horizontal — главная ось потока на мини-карте control-flow
+control_flow_main_axis = "auto"
+# intent (деф.) | detailed — зерно subgraph control-flow: намерение vs пошаговый CFG (ADR 0151)
+control_flow_grain = "intent"
+# id активного пресета: бандл → .cascade/workspace.toml → settings ([[code_navigation_map.condition_branch.presets]])
+condition_branch_label_preset = "plus_minus"
+# при preset = custom — подписи на секции (не из таблицы):
+# condition_branch_positive = "+"
+# condition_branch_negative = "-"
+# [[code_navigation_map.condition_branch.presets]]
+# id = "ja"
+# positive = "はい"
+# negative = "いいえ"
 
 [languages.csharp]
 # ParseOnly | OmniSharp | CSharpLs | Custom

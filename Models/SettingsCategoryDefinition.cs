@@ -30,4 +30,5 @@ public static class SettingsPanelIds
     public const string Markdown = "markdown";
     public const string MarkdownLsp = "markdown_lsp";
     public const string Hci = "hci";
+    public const string WorkspaceNavigationMap = "workspace_navigation_map";
 }

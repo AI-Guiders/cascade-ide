@@ -15,4 +15,6 @@ public readonly record struct GraphNavigationJsonRequest(
     int? CursorColumn,
     IReadOnlyList<string> RawFilePathsFromSolution,
     string? SolutionPath,
-    CodeNavigationSettings? NavSettings);
+    CodeNavigationSettings? NavSettings,
+    /// <summary>Канон: <see cref="CodeNavigationMapControlFlowGrainKind"/> (TOML <c>[code_navigation_map].control_flow_grain</c>).</summary>
+    string ControlFlowGrain = CodeNavigationMapControlFlowGrainKind.Intent);

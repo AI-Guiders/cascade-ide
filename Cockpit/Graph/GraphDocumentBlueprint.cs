@@ -31,6 +31,9 @@ public class GraphDocumentBlueprint
             "",
             anchorRationale,
             null,
+            null,
+            null,
+            null,
             null));
     }
 
@@ -47,6 +50,10 @@ public class GraphDocumentBlueprint
     public List<GraphBuildNode> Nodes { get; } = [];
 
     public List<GraphBuildEdge> Edges { get; } = [];
+
+    public bool TruncatedNodes { get; private set; }
+
+    public bool TruncatedEdges { get; private set; }
 
     public static string SanitizeLegendLine(string? text, int maxLen)
     {
@@ -68,10 +75,16 @@ public class GraphDocumentBlueprint
         string relativePath,
         string rationale,
         string? legendLine,
-        bool assignControlFlowLegendIndex)
+        bool assignControlFlowLegendIndex,
+        int? lineStart = null,
+        int? lineEnd = null,
+        int? loopGroupId = null)
     {
         if (Nodes.Count >= MaxNodes)
+        {
+            TruncatedNodes = true;
             return null;
+        }
 
         var id = $"n{_nextId++}";
         int? legendIndex = null;
@@ -86,14 +99,18 @@ public class GraphDocumentBlueprint
             legendText = string.IsNullOrEmpty(leg) ? null : leg;
         }
 
-        Nodes.Add(new GraphBuildNode(id, nodePath, kind, label, relativePath, rationale, legendIndex, legendText));
+        Nodes.Add(new GraphBuildNode(
+            id, nodePath, kind, label, relativePath, rationale, legendIndex, legendText, lineStart, lineEnd, loopGroupId));
         return id;
     }
 
     public bool TryAddEdge(string fromId, string toId, string kind, string relationKind, string? edgeProvenance = null)
     {
         if (Edges.Count >= MaxEdges)
+        {
+            TruncatedEdges = true;
             return false;
+        }
         Edges.Add(new GraphBuildEdge(fromId, toId, kind, relationKind, edgeProvenance));
         return true;
     }
@@ -107,7 +124,10 @@ public class GraphDocumentBlueprint
         foreach (var fromId in fromIds)
         {
             if (Edges.Count >= MaxEdges)
+            {
+                TruncatedEdges = true;
                 break;
+            }
             Edges.Add(new GraphBuildEdge(fromId, toId, edgeKind, relationKind, edgeProvenance));
         }
     }
@@ -139,7 +159,10 @@ public class GraphDocumentBlueprint
                 RelativePath = string.IsNullOrEmpty(n.RelativePath) ? null : n.RelativePath,
                 Rationale = n.Rationale,
                 LegendIndex = n.LegendIndex,
-                LegendText = n.LegendText
+                LegendText = n.LegendText,
+                LineStart = n.LineStart,
+                LineEnd = n.LineEnd,
+                LoopGroupId = n.LoopGroupId
             }).ToList(),
             Edges = Edges.Select(e => new GraphEdge
             {
@@ -160,7 +183,10 @@ public readonly record struct GraphBuildNode(
     string RelativePath,
     string Rationale,
     int? LegendIndex,
-    string? LegendText);
+    string? LegendText,
+    int? LineStart,
+    int? LineEnd,
+    int? LoopGroupId);
 
 public readonly record struct GraphBuildEdge(
     string FromId,

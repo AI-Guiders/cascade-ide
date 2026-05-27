@@ -21,7 +21,7 @@ public sealed class CodeNavigationMapCompositor : ICodeNavigationMapCompositor
     private readonly ICodeNavigationMapLayoutStage _layoutStage;
 
     public CodeNavigationMapCompositor(
-        IGraphLayoutEngine? fileLayout = null,
+        Func<string, IGraphLayoutEngine>? fileLayoutResolver = null,
         IGraphLayoutEngine? controlFlowLayout = null,
         ICodeNavigationMapIntentStage? intentStage = null,
         ICodeNavigationMapDeclutterStage? declutterStage = null,
@@ -29,7 +29,7 @@ public sealed class CodeNavigationMapCompositor : ICodeNavigationMapCompositor
     {
         _intentStage = intentStage ?? new CodeNavigationMapIntentStage();
         _declutterStage = declutterStage ?? new CodeNavigationMapDeclutterStage(_intentStage);
-        _layoutStage = layoutStage ?? new CodeNavigationMapLayoutStage(fileLayout, controlFlowLayout);
+        _layoutStage = layoutStage ?? new CodeNavigationMapLayoutStage(fileLayoutResolver, controlFlowLayout);
     }
 
     public CodeNavigationMapCompositionResult Compose(CodeNavigationMapCompositionIntent intent, in SkiaInstrumentViewport viewport)
@@ -38,7 +38,9 @@ public sealed class CodeNavigationMapCompositor : ICodeNavigationMapCompositor
             intent.Subgraph,
             intent.MapLevel,
             viewport,
-            intent.DetailLevel);
+            intent.DetailLevel,
+            intent.RelatedGraphLayout,
+            intent.ControlFlowMainAxis);
         var resolved = _intentStage.Resolve(context);
         var decluttered = _declutterStage.Apply(resolved);
         return WithCodeNavigationInstrumentBlocks(_layoutStage.Layout(decluttered), decluttered);
@@ -55,7 +57,9 @@ public sealed class CodeNavigationMapCompositor : ICodeNavigationMapCompositor
             doc,
             mapLevel,
             new SkiaInstrumentViewport(availableWidth, availableHeight),
-            detailLevel);
+            detailLevel,
+            CodeNavigationMapRelatedGraphLayoutKind.Radial,
+            CodeNavigationMapControlFlowMainAxisKind.Auto);
         var resolved = _intentStage.Resolve(context);
         var decluttered = _declutterStage.Apply(resolved);
         return WithCodeNavigationInstrumentBlocks(_layoutStage.Layout(decluttered), decluttered);
@@ -67,7 +71,7 @@ public sealed class CodeNavigationMapCompositor : ICodeNavigationMapCompositor
     {
         var vw = state.Viewport.Width > 0 ? state.Viewport.Width : DefaultWidth;
         var vh = laidOut.PreferredHeight;
-        var blocks = CodeNavigationMapInstrumentBlockCompositor.Compose(laidOut.Scene, vw, vh);
+        var blocks = CodeNavigationMapInstrumentBlockCompositor.Compose(laidOut.ToSceneVm(vw, vh), vw, vh);
         return laidOut with { CodeNavigationMapInstrumentBlocks = blocks };
     }
 }

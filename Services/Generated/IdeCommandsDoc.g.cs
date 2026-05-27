@@ -52,6 +52,7 @@ internal static class IdeCommandsDoc
         ["cycle_code_navigation_map_detail_level"] = "Карта намерений: цикл детализации glance → normal → inspect (Ctrl+K → S → D). returns: text.",
         ["cycle_code_navigation_map_level"] = "Карта намерений: переключить уровень file ↔ controlFlow (Ctrl+K → S → F). returns: text.",
         ["cycle_code_navigation_map_presentation"] = "Карта намерений: цикл вида list → graph → both (палитра; быстрый путь — Ctrl+K → S → P). returns: text.",
+        ["cycle_code_navigation_map_related_graph_layout"] = "Карта намерений: цикл укладки related-files radial → top_down → bottom_up. returns: text.",
         ["cycle_ui_mode"] = "Циклически переключить UI mode (hotkey). returns: text.",
         ["debug_attach"] = "Подключиться к процессу по PID. args: workspace_path:string, process_id:integer, target_path?:string, netcoredbg_path?:string; returns: text; example: {\"workspace_path\":\"D:\\\\\\\\proj\",\"process_id\":12345}.",
         ["debug_continue"] = "Продолжить выполнение (DAP continue). returns: text.",

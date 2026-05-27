@@ -24,6 +24,7 @@ public static class SettingsCategoryCatalog
         new() { Id = "markdown", Group = "Контент", Title = "Markdown · диаграммы", Panel = SettingsPanelIds.Markdown, Order = 40 },
         new() { Id = "markdown_lsp", Group = "Контент", Title = "Markdown LSP", Panel = SettingsPanelIds.MarkdownLsp, Order = 50 },
         new() { Id = "hci", Group = "Индекс", Title = "Hybrid Codebase Index", Panel = SettingsPanelIds.Hci, Order = 60 },
+        new() { Id = "workspace_navigation_map", Group = "Рабочая область", Title = "Карта намерений (PFD)", Panel = SettingsPanelIds.WorkspaceNavigationMap, Order = 25 },
     ];
 
     internal static IReadOnlyList<SettingsCategoryDefinition> ParseTomlCategories(string text)

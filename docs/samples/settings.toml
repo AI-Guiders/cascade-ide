@@ -131,6 +131,16 @@ primary_work_surface = "editor"
 [code_navigation_map]
 view = "list"
 depth = "file"
+# auto | vertical | horizontal — главная ось control-flow мини-карты
+control_flow_main_axis = "auto"
+# intent | detailed (ADR 0151)
+control_flow_grain = "intent"
+# id пресета: бандл → .cascade/workspace.toml → settings ([[code_navigation_map.condition_branch.presets]])
+condition_branch_label_preset = "plus_minus"
+# [[code_navigation_map.condition_branch.presets]]
+# id = "my_labels"
+# positive = "Y"
+# negative = "N"
 
 [languages.csharp]
 mode = "OmniSharp"
@@ -152,6 +162,8 @@ kroki_url = "https://kroki.io"
 
 [code_navigation]
 # Пресеты: бандл CodeNavigation/presets.toml + .cascade/workspace.toml + этот файл ([[code_navigation.presets]]).
+# Подписи ветвей IF (control-flow): condition-branch-label-presets.toml + workspace + settings
+#   [[code_navigation_map.condition_branch.presets]] в .cascade/workspace.toml — team overlay.
 # [[code_navigation.presets]]
 # id = "my_preset"
 # exclude_kinds = ["same_namespace"]

@@ -79,6 +79,8 @@ public partial class MainWindowViewModel
 
     public bool IsEditorHudBannerVisible => Editor.IsEditorHudBannerVisible;
 
+    public bool IsEditorHudChromeVisible => IsEditorHudBannerVisible || ShowEditorHudControlFlowStrip;
+
     public IReadOnlyList<EditorTrailingInlayPart> GetEditorInlineHintsForFile(string filePath, string sourceText) =>
         Editor.GetEditorInlineHintsForFile(filePath, sourceText);
 
@@ -123,15 +125,18 @@ public partial class MainWindowViewModel
         else if (e.PropertyName == nameof(EditorWorkspaceViewModel.EditorHudBannerText))
         {
             OnPropertyChanged(nameof(IsEditorHudBannerVisible));
+            OnPropertyChanged(nameof(IsEditorHudChromeVisible));
         }
     }
 
     /// <summary>Бывший <c>OnCurrentFilePathChanged</c> из DocumentsDock.</summary>
     internal void OnEditorCurrentFilePathChanged()
     {
-        UpdateCodeNavigationMapCaretOffset(null);
+        if (!TryPreserveControlFlowNavigateCaretOnFileChange())
+            UpdateCodeNavigationMapCaretOffset(null);
         RefreshLocBadgeFromCurrentFile();
         Editor.RefreshEditorHudBanner();
+        RefreshEditorHudControlFlowStrip();
         ScheduleWorkspaceNavigationMapRefresh();
     }
 

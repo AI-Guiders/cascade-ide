@@ -167,6 +167,19 @@ public sealed class CascadeIdeSettingsTomlDeserializeTests
     }
 
     [Fact]
+    public void Deserialize_CodeNavigationMapSection_ParsesControlFlowMainAxis()
+    {
+        const string text =
+            """
+            [code_navigation_map]
+            control_flow_main_axis = "vertical"
+            """;
+
+        var s = Deserialize(text);
+        Assert.Equal(CodeNavigationMapControlFlowMainAxisKind.Vertical, s.CodeNavigationMap.NormalizedControlFlowMainAxis);
+    }
+
+    [Fact]
     public void Deserialize_DisplayScreensTopology_WithoutGrammar_ParsesAsTwoScreens()
     {
         const string text =
@@ -438,6 +451,34 @@ public sealed class CascadeIdeSettingsTomlDeserializeTests
         Assert.Equal("workspace", ShellSettingsPresentationProjection.NormalizeHybridIndexScopeMode("workspace"));
         Assert.Equal("workspace+solution", ShellSettingsPresentationProjection.NormalizeHybridIndexScopeMode(""));
         Assert.Equal("workspace+solution", ShellSettingsPresentationProjection.NormalizeHybridIndexScopeMode("garbage"));
+    }
+
+    [Fact]
+    public void Deserialize_CodeNavigationMapControlFlowGrain_ParsesExpected()
+    {
+        const string text =
+            """
+            [code_navigation_map]
+            control_flow_grain = "detailed"
+            """;
+
+        var s = Deserialize(text);
+        Assert.Equal("detailed", s.CodeNavigationMap.ControlFlowGrain);
+        Assert.Equal(CodeNavigationMapControlFlowGrainKind.Detailed, s.CodeNavigationMap.NormalizedControlFlowGrain);
+    }
+
+    [Fact]
+    public void Deserialize_CodeNavigationMapControlFlowGrain_Unknown_NormalizesIntent()
+    {
+        const string text =
+            """
+            [code_navigation_map]
+            control_flow_grain = "micro_cfg"
+            """;
+
+        var s = Deserialize(text);
+        Assert.Equal("micro_cfg", s.CodeNavigationMap.ControlFlowGrain);
+        Assert.Equal(CodeNavigationMapControlFlowGrainKind.Intent, s.CodeNavigationMap.NormalizedControlFlowGrain);
     }
 
 }

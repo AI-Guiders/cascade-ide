@@ -1,0 +1,18 @@
+# Пресеты подписей положительной/отрицательной ветви IF на control-flow графе.
+# Оверлей: [[code_navigation_map.condition_branch.presets]] в settings.toml (merge по id).
+# Активный: [code_navigation_map].condition_branch_label_preset = "<id>"
+
+[[code_navigation_map.condition_branch.presets]]
+id = "plus_minus"
+positive = "+"
+negative = "-"
+
+[[code_navigation_map.condition_branch.presets]]
+id = "true_false"
+positive = "true"
+negative = "false"
+
+[[code_navigation_map.condition_branch.presets]]
+id = "one_zero"
+positive = "1"
+negative = "0"

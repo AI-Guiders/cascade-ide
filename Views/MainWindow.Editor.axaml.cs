@@ -104,6 +104,11 @@ public partial class MainWindow
         if (textMateOk)
             ApplyGrammarByFilePath(editor, vmSetup.CurrentFilePath);
 
+        Services.EditorAgentVerifyEpochDim.RefreshForPath(
+            editor,
+            vmSetup.CurrentFilePath,
+            path => vmSetup.AgentEnvironment.EpochTracker.IsPathUiStale(path));
+
         _editorIntelligence?.Detach();
         _editorIntelligence = new Services.EditorIntelligence(editor, _languageService!, () =>
             (vmSetup.CurrentFilePath, editor.Document.Text));
@@ -346,6 +351,21 @@ public partial class MainWindow
     }
 
     private const int RevealEditorRangeMaxAttempts = 10;
+
+    private void OnRefreshActiveEditorEpochDim(bool dimmed)
+    {
+        var editor = TryGetActiveDockEditor();
+        if (editor is null)
+            return;
+
+        Services.EditorAgentVerifyEpochDim.SetDimmed(editor, dimmed);
+    }
+
+    internal void WireAgentVerifyEpochDim(ViewModels.MainWindowViewModel vm)
+    {
+        vm.RefreshActiveEditorEpochDimRequested -= OnRefreshActiveEditorEpochDim;
+        vm.RefreshActiveEditorEpochDimRequested += OnRefreshActiveEditorEpochDim;
+    }
 
     private void RevealEditorRangeInDock(string? filePath, int startLine, int endLine, int? durationMs = null) =>
         RevealEditorRangeInDockWithRetry(filePath, startLine, endLine, durationMs, attempt: 0);

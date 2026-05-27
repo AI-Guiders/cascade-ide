@@ -1,12 +1,19 @@
 #nullable enable
 using Avalonia;
+using CascadeIDE.Models;
 
 namespace CascadeIDE.Cockpit.Graph.Layout;
 
-/// <summary>Звезда: якорь в центре, спутники по окружности.</summary>
+/// <summary>Звезда: якорь в центре, спутники по окружности (<c>radial</c>).</summary>
 public sealed class StarGraphLayoutEngine : IGraphLayoutEngine
 {
-    public GraphLayoutScene Layout(GraphDocument doc, double width, double height)
+    public GraphLayoutScene Layout(
+        GraphDocument doc,
+        double width,
+        double height,
+        CodeNavigationMapDetailLevel detailLevel = CodeNavigationMapDetailLevel.Normal,
+        GraphControlFlowMainAxis? controlFlowMainAxisOverride = null,
+        GraphLayoutEngineOptions layoutOptions = default)
     {
         if (width <= 0 || height <= 0)
             return EmptyScene(width);
@@ -17,9 +24,14 @@ public sealed class StarGraphLayoutEngine : IGraphLayoutEngine
             .Where(n => anchor is null || !string.Equals(n.Id, anchor.Id, StringComparison.OrdinalIgnoreCase))
             .ToList();
 
+        var margin = Math.Min(
+            GraphFileLayoutMetrics.SideLabelMargin,
+            Math.Max(28, Math.Min(width, height) * 0.22));
+        var innerW = Math.Max(80, width - 2 * margin);
+        var innerH = Math.Max(80, height - 2 * margin);
         var cx = width / 2;
         var cy = height / 2;
-        var minDim = Math.Min(width, height);
+        var minDim = Math.Min(innerW, innerH);
         var scale = Math.Clamp(minDim / 220.0, 0.58, 1.22);
         var anchorR = 16 * scale;
         var satR = 13 * scale;
@@ -36,26 +48,13 @@ public sealed class StarGraphLayoutEngine : IGraphLayoutEngine
             anchorCenter = ac;
             idToCenter[anchor.Id] = ac;
             idToRadius[anchor.Id] = anchorR;
-            layouts.Add(new GraphLayoutNode
-            {
-                Id = anchor.Id,
-                Kind = anchor.Kind,
-                FullPath = anchor.Path,
-                Label = TruncateLabel(anchor.Label),
-                Center = ac,
-                Radius = anchorR,
-                IsAnchor = true,
-                Shape = GraphNodeShape.Circle
-            });
+            layouts.Add(MakeNode(anchor, ac, anchorR, isAnchor: true));
         }
 
         var nSat = satellites.Count;
         var useTwoRings = nSat > singleRingMaxSatellites;
         var innerCount = useTwoRings ? (nSat + 1) / 2 : nSat;
-        var orbitInner = Math.Max(22, minDim * (useTwoRings ? 0.26 : 0.32));
-        var orbitOuter = useTwoRings
-            ? Math.Max(orbitInner + satR * 2 + 8, Math.Min(minDim * 0.40, orbitInner + minDim * 0.18))
-            : orbitInner;
+        var (orbitInner, orbitOuter) = GraphFileLayoutMetrics.ResolveRadialOrbits(nSat, innerW, innerH, satR);
 
         for (var i = 0; i < nSat; i++)
         {
@@ -86,17 +85,7 @@ public sealed class StarGraphLayoutEngine : IGraphLayoutEngine
             var p = new Point(px, py);
             idToCenter[sat.Id] = p;
             idToRadius[sat.Id] = satR;
-            layouts.Add(new GraphLayoutNode
-            {
-                Id = sat.Id,
-                Kind = sat.Kind,
-                FullPath = sat.Path,
-                Label = TruncateLabel(sat.Label),
-                Center = p,
-                Radius = satR,
-                IsAnchor = false,
-                Shape = GraphNodeShape.Circle
-            });
+            layouts.Add(MakeNode(sat, p, satR, isAnchor: false));
         }
 
         var edgeLayouts = new List<GraphLayoutEdge>();
@@ -139,9 +128,25 @@ public sealed class StarGraphLayoutEngine : IGraphLayoutEngine
             Edges = edgeLayouts,
             Legend = [],
             UseLegendColumn = false,
-            LegendColumnLeft = width
+            LegendColumnLeft = width,
+            RelatedFilesLayout = CodeNavigationMapRelatedGraphLayoutKind.Radial
         };
     }
+
+    private static GraphLayoutNode MakeNode(GraphNode n, Point center, double radius, bool isAnchor) =>
+        new()
+        {
+            Id = n.Id,
+            Kind = n.Kind,
+            FullPath = n.Path,
+            Label = TruncateLabel(n.Label),
+            Center = center,
+            Radius = radius,
+            IsAnchor = isAnchor,
+            Shape = GraphNodeShape.Circle,
+            LineStart = n.LineStart,
+            LineEnd = n.LineEnd
+        };
 
     private static GraphLayoutScene EmptyScene(double width) =>
         new()

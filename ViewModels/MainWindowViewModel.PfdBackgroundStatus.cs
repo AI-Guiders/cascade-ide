@@ -3,6 +3,7 @@
 using Avalonia.Threading;
 using CascadeIDE.Cockpit.Composition.HostSurface;
 using CascadeIDE.Cockpit.DataBus;
+using CascadeIDE.Features.Agent.Environment;
 using CascadeIDE.Features.SolutionWarmup.Application;
 using CascadeIDE.Features.Workspace;
 using CascadeIDE.Models;
@@ -23,6 +24,8 @@ public partial class MainWindowViewModel
     private bool _hciReindexPending;
     private DateTimeOffset _pfdStatusVisibleSinceUtc;
     private IDisposable? _pfdStatusHideTimer;
+    private IDisposable? _pfdAgentEnvironmentTaskSubscription;
+    private string? _pfdAgentEnvironmentTaskDetail;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowPfdBackgroundStatusBar))]
@@ -30,6 +33,13 @@ public partial class MainWindowViewModel
 
     [ObservableProperty]
     private bool _isPfdBackgroundStatusCaution;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowPfdAgentEnvironmentCancel))]
+    private bool _pfdAgentEnvironmentCancelVisible;
+
+    public bool ShowPfdAgentEnvironmentCancel =>
+        ShowPfdBackgroundStatusBar && PfdAgentEnvironmentCancelVisible;
 
     public bool ShowPfdBackgroundStatusBar =>
         _settings.SolutionWarmup.ShowBackgroundStatusOnPfd
@@ -87,11 +97,15 @@ public partial class MainWindowViewModel
         if (_settings.Agent.Environment.TimeAccounting.PfdInstrumentEnabled)
         {
             var agentStatus = _agentEnvironment.GetStatus();
-            if (agentStatus.WritesInvalidatedVerifyEpoch)
+            var epochStale = _agentEnvironment.EpochTracker.IsUiStale
+                || agentStatus.WritesInvalidatedVerifyEpoch;
+            PfdAgentEnvironmentCancelVisible = false;
+
+            if (epochStale)
             {
                 StopPfdStatusHideTimer();
                 _pfdStatusVisibleSinceUtc = DateTimeOffset.UtcNow;
-                PfdBackgroundStatusText = "AEE verify устарел — перезапусти /agent verify";
+                PfdBackgroundStatusText = "⚠ AEE verify устарел — перезапусти /agent verify";
                 IsPfdBackgroundStatusCaution = true;
                 NotifyWorkspaceBackgroundStatusStripPlacement();
                 return;
@@ -101,12 +115,18 @@ public partial class MainWindowViewModel
             {
                 StopPfdStatusHideTimer();
                 _pfdStatusVisibleSinceUtc = DateTimeOffset.UtcNow;
+                var detail = string.IsNullOrWhiteSpace(_pfdAgentEnvironmentTaskDetail)
+                    ? ""
+                    : $" · {_pfdAgentEnvironmentTaskDetail}";
                 PfdBackgroundStatusText =
-                    $"AEE verify {agentStatus.RunId![..8]}… · {agentStatus.Policy}";
+                    $"AEE verify {agentStatus.RunId![..8]}… · {agentStatus.Policy}{detail}";
                 IsPfdBackgroundStatusCaution = false;
+                PfdAgentEnvironmentCancelVisible = true;
                 NotifyWorkspaceBackgroundStatusStripPlacement();
                 return;
             }
+
+            _pfdAgentEnvironmentTaskDetail = null;
         }
 
         var workspaceRoot = WorkspaceDirectoryFromSolutionPath.Resolve(Workspace.SolutionPath ?? "");
@@ -146,6 +166,33 @@ public partial class MainWindowViewModel
         }
 
         applyPfdStatusHidden(immediate: true);
+    }
+
+    internal void EnsurePfdAgentEnvironmentTaskSubscription()
+    {
+        if (_pfdAgentEnvironmentTaskSubscription is not null)
+            return;
+
+        _pfdAgentEnvironmentTaskSubscription = _ideDataBus.Subscribe<AgentEnvironmentTaskChanged>(evt =>
+        {
+            if (evt.State is not (AgentEnvironmentTaskState.Running or AgentEnvironmentTaskState.Queued))
+                return;
+
+            UiScheduler.Default.Post(() =>
+            {
+                _pfdAgentEnvironmentTaskDetail = string.IsNullOrWhiteSpace(evt.ProgressMessage)
+                    ? evt.Kind
+                    : $"{evt.Kind}: {evt.ProgressMessage}";
+                RefreshPfdBackgroundStatusBar();
+            }, DispatcherPriority.Background);
+        });
+    }
+
+    [RelayCommand]
+    private void CancelPfdAgentEnvironmentVerify()
+    {
+        if (_agentEnvironment.CancelActive())
+            RefreshPfdBackgroundStatusBar();
     }
 
     [RelayCommand]

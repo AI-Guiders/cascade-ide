@@ -10,7 +10,9 @@ public sealed class AgentVerifyEpochTracker
     private string? _runId;
     private string? _snapshotId;
     private HashSet<string> _watchedPaths = new(StringComparer.OrdinalIgnoreCase);
+    private HashSet<string> _uiStalePaths = new(StringComparer.OrdinalIgnoreCase);
     private bool _writesInvalidatedVerifyEpoch;
+    private bool _uiStale;
 
     public AgentVerifyEpochTracker(IDataBus dataBus) => _dataBus = dataBus;
 
@@ -24,6 +26,35 @@ public sealed class AgentVerifyEpochTracker
         }
     }
 
+    /// <summary>UI stale: запись в epoch или отмена/supersede — до следующего verify.</summary>
+    public bool IsUiStale
+    {
+        get
+        {
+            lock (_gate)
+                return _uiStale;
+        }
+    }
+
+    public bool IsPathUiStale(string? filePath)
+    {
+        if (string.IsNullOrWhiteSpace(filePath))
+            return false;
+
+        string full;
+        try
+        {
+            full = Path.GetFullPath(filePath);
+        }
+        catch
+        {
+            return false;
+        }
+
+        lock (_gate)
+            return _uiStale && _uiStalePaths.Contains(full);
+    }
+
     public void Begin(string runId, string snapshotId, string solutionPath)
     {
         lock (_gate)
@@ -31,7 +62,9 @@ public sealed class AgentVerifyEpochTracker
             _runId = runId;
             _snapshotId = snapshotId;
             _watchedPaths = new(StringComparer.OrdinalIgnoreCase) { Path.GetFullPath(solutionPath) };
+            _uiStalePaths.Clear();
             _writesInvalidatedVerifyEpoch = false;
+            _uiStale = false;
         }
     }
 
@@ -71,7 +104,11 @@ public sealed class AgentVerifyEpochTracker
         if (runId is not null && snapshotId is not null)
         {
             lock (_gate)
+            {
                 _writesInvalidatedVerifyEpoch = true;
+                MarkUiStaleLocked();
+            }
+
             _dataBus.Publish(new AgentVerifyEpochStale(runId, snapshotId, "write_in_epoch"));
         }
     }
@@ -81,12 +118,21 @@ public sealed class AgentVerifyEpochTracker
         lock (_gate)
         {
             if (_snapshotId is not null && reason is "superseded" or "cancel" && _runId is not null)
+            {
+                MarkUiStaleLocked();
                 _dataBus.Publish(new AgentVerifyEpochStale(_runId, _snapshotId, reason));
+            }
 
             _runId = null;
             _snapshotId = null;
             _watchedPaths.Clear();
             _writesInvalidatedVerifyEpoch = false;
         }
+    }
+
+    private void MarkUiStaleLocked()
+    {
+        _uiStale = true;
+        _uiStalePaths = new HashSet<string>(_watchedPaths, StringComparer.OrdinalIgnoreCase);
     }
 }

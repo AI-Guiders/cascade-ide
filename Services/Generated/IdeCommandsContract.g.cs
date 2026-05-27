@@ -52,6 +52,7 @@ internal static class IdeCommandsContractGenerated
         ["cycle_code_navigation_map_detail_level"] = IdeReturnKind.Text,
         ["cycle_code_navigation_map_level"] = IdeReturnKind.Text,
         ["cycle_code_navigation_map_presentation"] = IdeReturnKind.Text,
+        ["cycle_code_navigation_map_related_graph_layout"] = IdeReturnKind.Text,
         ["cycle_ui_mode"] = IdeReturnKind.Text,
         ["debug_attach"] = IdeReturnKind.Text,
         ["debug_continue"] = IdeReturnKind.Text,

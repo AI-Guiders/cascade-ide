@@ -22,7 +22,7 @@ public static partial class SkiaGraphSceneDrawing
                     context.DrawEllipse(null, theme.HighlightedNodePen, n.Center, n.Radius + 3, n.Radius + 3);
             }
 
-            var glyph = BuildNodeGlyph(n, useLegend);
+            var glyph = BuildNodeGlyph(n, useLegend, scene.ShowNodeLegendGlyphs);
             if (IsExitNode(n))
             {
                 var arrowLen = Math.Clamp(n.Radius * 0.95, 4.5, 12);
@@ -47,7 +47,7 @@ public static partial class SkiaGraphSceneDrawing
                 context.DrawText(glyphText, glyphOrigin);
             }
 
-            var fullLabel = BuildNodeFullLabel(n, useLegend);
+            var fullLabel = BuildNodeFullLabel(n, useLegend, scene);
             if (!string.IsNullOrWhiteSpace(fullLabel))
             {
                 var sideFont = scene.SideLabelFontSizePx ?? SkiaGraphRenderInvariants.MinSideLabelFontSize;
@@ -58,9 +58,7 @@ public static partial class SkiaGraphSceneDrawing
                     theme.SideLabelTypeface,
                     sideFont,
                     theme.SideLabelBrush);
-                var labelOrigin = new Point(
-                    n.Center.X + n.Radius + 6,
-                    n.Center.Y - labelText.Height / 2);
+                var labelOrigin = ResolveSideLabelOrigin(n, labelText, scene);
                 context.DrawText(labelText, labelOrigin);
             }
         }
@@ -112,7 +110,7 @@ public static partial class SkiaGraphSceneDrawing
         return theme.CallFill;
     }
 
-    private static string BuildNodeGlyph(GraphLayoutNode node, bool useLegendColumn)
+    private static string BuildNodeGlyph(GraphLayoutNode node, bool useLegendColumn, bool showNodeLegendGlyphs)
     {
         if (node.IsAnchor)
             return "A";
@@ -120,7 +118,7 @@ public static partial class SkiaGraphSceneDrawing
             return "T";
         if (IsExitNode(node))
             return "";
-        if (node.LegendIndex is { } idx && useLegendColumn)
+        if (node.LegendIndex is { } idx && (useLegendColumn || showNodeLegendGlyphs))
             return idx.ToString(CultureInfo.InvariantCulture);
         if (IsConditionNode(node))
             return "?";
@@ -129,12 +127,83 @@ public static partial class SkiaGraphSceneDrawing
         return "•";
     }
 
-    private static string? BuildNodeFullLabel(GraphLayoutNode node, bool useLegendColumn)
+    /// <summary>Подпись спутника: иерархия (related-files); CFG вертикаль — справа, CFG горизонт — под узлом (не в поток).</summary>
+    private static Point ResolveSideLabelOrigin(
+        GraphLayoutNode node,
+        FormattedText labelText,
+        GraphLayoutScene scene)
+    {
+        const double gap = 6;
+
+        if (scene.Presentation == GraphLayoutPresentation.CodeControlFlow
+            && scene.ControlFlowMainAxis == GraphControlFlowMainAxis.Horizontal
+            && !node.IsAnchor)
+        {
+            return new Point(
+                node.Center.X - labelText.Width / 2,
+                node.Center.Y + node.Radius + gap);
+        }
+
+        var anchorCenter =
+            scene.Presentation == GraphLayoutPresentation.WorkspaceRelatedFiles
+                ? scene.Nodes.FirstOrDefault(static n => n.IsAnchor)?.Center
+                : null;
+        var layout = CascadeIDE.Models.CodeNavigationMapRelatedGraphLayoutKind.Normalize(scene.RelatedFilesLayout);
+        if (layout == CascadeIDE.Models.CodeNavigationMapRelatedGraphLayoutKind.TopDown && !node.IsAnchor)
+        {
+            return new Point(
+                node.Center.X - labelText.Width / 2,
+                node.Center.Y + node.Radius + gap);
+        }
+
+        if (layout == CascadeIDE.Models.CodeNavigationMapRelatedGraphLayoutKind.BottomUp && !node.IsAnchor)
+        {
+            return new Point(
+                node.Center.X - labelText.Width / 2,
+                node.Center.Y - node.Radius - gap - labelText.Height);
+        }
+
+        if (anchorCenter is { } anchor && !node.IsAnchor
+            && layout == CascadeIDE.Models.CodeNavigationMapRelatedGraphLayoutKind.Radial)
+        {
+            var dx = node.Center.X - anchor.X;
+            var dy = node.Center.Y - anchor.Y;
+            var dist = Math.Sqrt(dx * dx + dy * dy);
+            if (dist > 4)
+            {
+                var ux = dx / dist;
+                var uy = dy / dist;
+                var edge = new Point(
+                    node.Center.X + ux * (node.Radius + gap),
+                    node.Center.Y + uy * (node.Radius + gap));
+                return ux >= 0
+                    ? new Point(edge.X, edge.Y - labelText.Height / 2)
+                    : new Point(edge.X - labelText.Width, edge.Y - labelText.Height / 2);
+            }
+        }
+
+        return new Point(
+            node.Center.X + node.Radius + gap,
+            node.Center.Y - labelText.Height / 2);
+    }
+
+    private static string? BuildNodeFullLabel(GraphLayoutNode node, bool useLegendColumn, GraphLayoutScene scene)
     {
         if (useLegendColumn)
             return null;
         if (node.IsAnchor || IsConditionNode(node) || IsExitNode(node))
             return null;
+        if (scene.Presentation == GraphLayoutPresentation.WorkspaceRelatedFiles
+            && !CascadeIDE.Models.CodeNavigationMapRelatedGraphLayoutKind.IsHierarchy(scene.RelatedFilesLayout))
+        {
+            var satellites = scene.Nodes.Count(n => !n.IsAnchor);
+            if (satellites > 8)
+                return null;
+        }
+
+        if (scene.ShowNodeLegendGlyphs && node.LegendIndex is > 0)
+            return null;
+
         var label = node.Label?.Trim();
         if (string.IsNullOrWhiteSpace(label))
             return null;

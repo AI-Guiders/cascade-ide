@@ -179,6 +179,31 @@ public sealed partial class DocumentsWorkspaceViewModel : ObservableObject
         _host.RevealEditorForOpenedDocument();
     }
 
+    /// <summary>
+    /// Для reveal с карты/anchor: не пересобирать dock, если файл уже открыт (ADR 0130).
+    /// Новый файл — полный <see cref="OpenOrActivateDocument"/>.
+    /// </summary>
+    public void ActivateDocumentForReveal(string filePath)
+    {
+        if (string.IsNullOrWhiteSpace(filePath))
+            return;
+        if (!SolutionTreePath.TryGetFullPath(filePath, out var normalized) || !File.Exists(normalized))
+            return;
+
+        var existing = OpenDocuments.FirstOrDefault(d =>
+            string.Equals(d.FilePath, normalized, StringComparison.OrdinalIgnoreCase));
+        if (existing is null)
+        {
+            OpenOrActivateDocument(normalized);
+            return;
+        }
+
+        if (EditorTextCoordinateUtilities.PathsReferToSameFile(_host.CurrentFilePath, normalized))
+            return;
+
+        ActivateDocumentInternal(existing);
+    }
+
     public void ActivateDocumentInternal(OpenDocumentViewModel doc)
     {
         ActiveEditorGroup = doc.GroupIndex;

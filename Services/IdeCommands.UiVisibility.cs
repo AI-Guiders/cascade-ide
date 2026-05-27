@@ -24,6 +24,9 @@ public static partial class IdeCommands
 
     /// <summary>Карта намерений: цикл детализации glance → normal → inspect (Ctrl+K → S → D). returns: text.</summary>
     public const string CycleCodeNavigationMapDetailLevel = "cycle_code_navigation_map_detail_level";
+
+    /// <summary>Карта намерений: цикл укладки related-files radial → top_down → bottom_up. returns: text.</summary>
+    public const string CycleCodeNavigationMapRelatedGraphLayout = "cycle_code_navigation_map_related_graph_layout";
     /// <summary>Явно показать/скрыть терминал (без переключения). args: visible:boolean; returns: text; example: {"visible":true}.</summary>
     public const string SetTerminalVisible = "set_terminal_visible";
     /// <summary>Явно показать/скрыть журнал сборки. args: visible:boolean; returns: text; example: {"visible":true}.</summary>

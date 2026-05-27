@@ -1,7 +1,4 @@
-using CascadeIDE.ViewModels;
-using CascadeIDE.Features.IdeMcp.Application;
 using CascadeIDE.Models;
-using CascadeIDE.Services;
 using CascadeIDE.Services.CodeNavigation;
 
 namespace CascadeIDE.Features.IdeMcp.Application;
@@ -31,7 +28,7 @@ internal sealed partial class MainWindowIdeMcpHost
             _host.McpSettings.CodeNavigationMap.Depth,
             requestedMode);
 
-        if (effectiveLevel == Models.CodeNavigationMapLevelKind.ControlFlow)
+        if (effectiveLevel == CodeNavigationMapLevelKind.ControlFlow)
         {
             var (effectiveLine, effectiveColumn) = IdeMcpNavigationOrchestrator.ResolveControlFlowLineColumn(
                 line,
@@ -39,14 +36,27 @@ internal sealed partial class MainWindowIdeMcpHost
                 _host.EditorText,
                 _host.McpEditorCaretOffset ?? _host.EditorSelectionStart);
 
+            var maxN = maxNodes ?? CodeNavigationContextBuilder.DefaultControlFlowSubgraphMaxNodes;
+            var maxE = maxEdges ?? CodeNavigationContextBuilder.DefaultControlFlowSubgraphMaxEdges;
+            var path = string.IsNullOrWhiteSpace(filePath) ? _host.CurrentFilePath : filePath;
+            var grain = CodeNavigationMapControlFlowGrainKind.Normalize(_host.McpSettings.CodeNavigationMap.ControlFlowGrain);
+
             return UiScheduler.Default.InvokeAsync(() =>
-                CodeNavigationControlFlowSubgraphBuilder.BuildJson(
-                    string.IsNullOrWhiteSpace(filePath) ? _host.CurrentFilePath : filePath,
-                    _host.EditorText,
-                    effectiveLine,
-                    effectiveColumn,
-                    maxNodes ?? CodeNavigationContextBuilder.DefaultMaxNodes,
-                    maxEdges ?? CodeNavigationContextBuilder.DefaultMaxEdges));
+                CodeNavigationMapControlFlowGrainKind.IsDetailed(grain)
+                    ? CodeNavigationControlFlowSubgraphBuilder.BuildJson(
+                        path,
+                        _host.EditorText,
+                        effectiveLine,
+                        effectiveColumn,
+                        maxN,
+                        maxE)
+                    : CodeNavigationMethodIntentSubgraphBuilder.BuildJson(
+                        path,
+                        _host.EditorText,
+                        effectiveLine,
+                        effectiveColumn,
+                        maxN,
+                        maxE));
         }
 
         return UiScheduler.Default.InvokeAsync(() =>

@@ -59,4 +59,45 @@ public sealed class StarGraphLayoutEngineTests
         });
         Assert.Contains(scene.Edges, e => string.Equals(e.Kind, "related_to", StringComparison.Ordinal));
     }
+
+    [Fact]
+    public void Layout_ManySatellites_SpreadsBeyondCompactCenter()
+    {
+        var engine = new StarGraphLayoutEngine();
+        var nodes = new List<GraphNode>
+        {
+            new()
+            {
+                Id = "n0",
+                Path = @"D:\w\A.cs",
+                Kind = "anchor",
+                Label = "A.cs"
+            }
+        };
+        for (var i = 1; i <= 14; i++)
+        {
+            nodes.Add(new GraphNode
+            {
+                Id = $"n{i}",
+                Path = $@"D:\w\F{i}.cs",
+                Kind = "project_peer",
+                Label = $"File{i}.cs"
+            });
+        }
+
+        var doc = new GraphDocument
+        {
+            AnchorPath = @"D:\w\A.cs",
+            Nodes = nodes,
+            Edges = nodes.Skip(1).Select(n => new GraphEdge { FromId = "n0", ToId = n.Id, Kind = "related_to" }).ToList()
+        };
+
+        var compact = engine.Layout(doc, 400, 120);
+        var tall = engine.Layout(doc, 400, 240);
+        var maxRadiusCompact = compact.Nodes.Where(n => !n.IsAnchor).Max(n =>
+            Math.Sqrt(Math.Pow(n.Center.X - 200, 2) + Math.Pow(n.Center.Y - 60, 2)));
+        var maxRadiusTall = tall.Nodes.Where(n => !n.IsAnchor).Max(n =>
+            Math.Sqrt(Math.Pow(n.Center.X - 200, 2) + Math.Pow(n.Center.Y - 120, 2)));
+        Assert.True(maxRadiusTall > maxRadiusCompact + 8);
+    }
 }

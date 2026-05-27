@@ -1,4 +1,5 @@
 using System.Text.Json;
+using CascadeIDE.Features.Agent.Environment;
 using CascadeIDE.ViewModels;
 
 namespace CascadeIDE.Features.AutonomousAgent;
@@ -30,6 +31,7 @@ public sealed class AutonomousAgentService
 
     private readonly Action<string, string, string, DateTimeOffset?> _appendTraceStep;
     private readonly Action<string> _appendEvent;
+    private readonly IAgentOrchestrator? _orchestrator;
 
     public AutonomousAgentService(
         AiProviderManager aiProviderManager,
@@ -41,7 +43,8 @@ public sealed class AutonomousAgentService
         Func<string?> getCurrentFilePath,
         Func<string> getEditorText,
         Action<string, string, string, DateTimeOffset?> appendTraceStep,
-        Action<string> appendEvent)
+        Action<string> appendEvent,
+        IAgentOrchestrator? orchestrator = null)
     {
         _aiProviderManager = aiProviderManager;
         _ideActions = ideActions;
@@ -53,6 +56,7 @@ public sealed class AutonomousAgentService
         _getEditorText = getEditorText;
         _appendTraceStep = appendTraceStep;
         _appendEvent = appendEvent;
+        _orchestrator = orchestrator;
     }
 
     public async Task<string> RunAutonomousAsync(string objective, string safetyLevel, int maxSteps, CancellationToken cancellationToken)
@@ -140,6 +144,7 @@ public sealed class AutonomousAgentService
             }
 
             var observation = await ExecuteToolCallAsync(decision, safetyLevel, cancellationToken).ConfigureAwait(false);
+            observation = AppendVerifyAfterWrite(decision, observation, maxSteps);
             state.History.Add($"[{step + 1}] {observation}");
             state.NextStep = step + 1;
 
@@ -432,6 +437,26 @@ Return JSON in this exact shape:
             JsonValueKind.Object => el.EnumerateObject().ToDictionary(p => p.Name, p => JsonElementToObject(p.Value)),
             _ => el.GetRawText()
         };
+    }
+
+    private string AppendVerifyAfterWrite(Decision decision, string observation, int maxSteps)
+    {
+        if (_orchestrator is null || !ToolWritesWorkspace(decision))
+            return observation;
+
+        var verify = _orchestrator.TryVerifyAfterStep(writesOccurred: true, longRun: maxSteps > 10);
+        if (!verify.Accepted)
+            return observation + $"\n[AEE] verify skipped: {verify.Error ?? "not started"}";
+
+        return observation + $"\n[AEE] verify queued ({verify.RunId?[..8]}…).";
+    }
+
+    private static bool ToolWritesWorkspace(Decision decision)
+    {
+        if (!string.Equals(decision.Scope, "ide", StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        return decision.IdeCommandId is "apply_edit" or "git_commit" or "write_agent_notes";
     }
 
     private static string? ExtractFirstJsonObject(string text)

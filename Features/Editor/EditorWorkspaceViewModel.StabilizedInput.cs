@@ -45,7 +45,7 @@ public sealed partial class EditorWorkspaceViewModel
     {
         var path = CurrentFilePath;
         if (string.IsNullOrEmpty(d.FilePath) || string.IsNullOrEmpty(path)
-            || !string.Equals(d.FilePath, path, StringComparison.OrdinalIgnoreCase))
+            || !EditorTextCoordinateUtilities.PathsReferToSameFile(d.FilePath, path))
             return;
 
         _activeEditorStabilizedHudHandler?.Invoke(d);

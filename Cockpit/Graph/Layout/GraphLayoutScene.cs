@@ -26,6 +26,15 @@ public sealed class GraphLayoutScene
     public IReadOnlySet<string> HighlightedEdgeKeys { get; init; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
     public double? SideLabelFontSizePx { get; init; }
 
+    /// <summary>Номера шагов на узлах без колонки легенды (code anchor UX).</summary>
+    public bool ShowNodeLegendGlyphs { get; init; }
+
+    /// <summary>Укладка related-files (<c>radial</c> | <c>top_down</c> | <c>bottom_up</c>); только для <see cref="GraphLayoutPresentation.WorkspaceRelatedFiles"/>.</summary>
+    public string RelatedFilesLayout { get; init; } = Models.CodeNavigationMapRelatedGraphLayoutKind.Radial;
+
+    /// <summary>CFG: главная ось потока (автовыбор в <see cref="ControlFlowGraphLayoutEngine"/>).</summary>
+    public GraphControlFlowMainAxis ControlFlowMainAxis { get; init; } = GraphControlFlowMainAxis.Vertical;
+
     public bool IsEmpty => Nodes.Count == 0;
 
     public GraphLayoutScene WithPresentation(GraphLayoutPresentation presentation)
@@ -48,7 +57,10 @@ public sealed class GraphLayoutScene
             LegendBlockTopY = LegendBlockTopY,
             HighlightedNodeIds = HighlightedNodeIds,
             HighlightedEdgeKeys = HighlightedEdgeKeys,
-            SideLabelFontSizePx = SideLabelFontSizePx
+            SideLabelFontSizePx = SideLabelFontSizePx,
+            ShowNodeLegendGlyphs = ShowNodeLegendGlyphs,
+            RelatedFilesLayout = RelatedFilesLayout,
+            ControlFlowMainAxis = ControlFlowMainAxis
         };
     }
 }
@@ -71,6 +83,10 @@ public sealed class GraphLayoutNode
     public GraphNodeShape Shape { get; init; } = GraphNodeShape.Circle;
     public int? LegendIndex { get; init; }
     public string? LegendLine { get; init; }
+    public int? LineStart { get; init; }
+    public int? LineEnd { get; init; }
+    /// <summary>Тот же id, что у <see cref="GraphNode.LoopGroupId"/>; овал на миникарте группирует по этому значению.</summary>
+    public int? LoopGroupId { get; init; }
 }
 
 public sealed class GraphLayoutEdge
@@ -82,6 +98,8 @@ public sealed class GraphLayoutEdge
     public required double ToRadius { get; init; }
     public string? Kind { get; init; }
     public string? RelationKind { get; init; }
+    public string? EdgeProvenance { get; init; }
+    public string? BranchLabel { get; init; }
 
     public string Key => $"{FromNodeId}->{ToNodeId}";
 }

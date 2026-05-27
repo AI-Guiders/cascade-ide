@@ -41,20 +41,104 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <!-- ADR 0021 §9: HUD — слой на лобовом; визуальный хост — только при непустом баннере. -->
+                <!-- ADR 0021 §9: HUD — слой на лобовом; визуальный хост — когда есть баннер и/или CF-полоска. -->
                 <chrome:AttentionZoneContainer Zone="Hud" Grid.Row="0"
-                                               IsVisible="{Binding IsEditorHudBannerVisible}">
+                                               IsVisible="{Binding IsEditorHudChromeVisible}">
                     <Border Background="{DynamicResource CascadeTheme.HudBannerBackground}"
                             BorderBrush="{DynamicResource CascadeTheme.HudBannerBorderBrush}"
                             BorderThickness="0,0,0,1"
                             Padding="10,6"
                             CornerRadius="6,6,0,0">
-                        <TextBlock Text="{Binding EditorHudBannerText}"
-                                   TextTrimming="CharacterEllipsis"
-                                   Foreground="{DynamicResource CascadeTheme.HudBannerForeground}"
-                                   Opacity="0.95"
-                                   FontSize="11.5"
-                                   LineHeight="16"/>
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="{Binding EditorHudBannerText}"
+                                       IsVisible="{Binding IsEditorHudBannerVisible}"
+                                       TextTrimming="CharacterEllipsis"
+                                       Foreground="{DynamicResource CascadeTheme.HudBannerForeground}"
+                                       Opacity="0.95"
+                                       FontSize="11.5"
+                                       LineHeight="16"/>
+
+                            <ItemsControl ItemsSource="{Binding EditorHudControlFlowNodes}"
+                                          IsVisible="{Binding ShowEditorHudControlFlowStrip}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal" Spacing="6"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:EditorHudControlFlowNodeVm">
+                                        <Button ToolTip.Tip="{Binding HudToolTip}"
+                                                Command="{Binding $parent[vm:MainWindowViewModel].NavigateEditorHudControlFlowNodeCommand}"
+                                                CommandParameter="{Binding}"
+                                                Padding="0"
+                                                Background="Transparent"
+                                                BorderThickness="0">
+                                            <Panel Width="22" Height="22">
+                                                <Border IsVisible="{Binding IsHighlighted}"
+                                                        Background="{DynamicResource CascadeTheme.HudBannerForeground}"
+                                                        Opacity="0.22"
+                                                        CornerRadius="11"/>
+                                                <Ellipse Width="18" Height="18"
+                                                         IsVisible="{Binding IsVisualAnchor}"
+                                                         HorizontalAlignment="Center"
+                                                         VerticalAlignment="Center"
+                                                         Fill="#5964AAD4"
+                                                         Stroke="{DynamicResource CascadeTheme.HudBannerBorderBrush}"
+                                                         StrokeThickness="1"/>
+                                                <Ellipse Width="18" Height="18"
+                                                         IsVisible="{Binding IsVisualCircle}"
+                                                         HorizontalAlignment="Center"
+                                                         VerticalAlignment="Center"
+                                                         Fill="Transparent"
+                                                         Stroke="{DynamicResource CascadeTheme.HudBannerBorderBrush}"
+                                                         StrokeThickness="1"/>
+                                                <Path IsVisible="{Binding IsVisualDiamond}"
+                                                      Stretch="Uniform"
+                                                      Width="17" Height="17"
+                                                      HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"
+                                                      Fill="Transparent"
+                                                      Stroke="{DynamicResource CascadeTheme.HudBannerBorderBrush}"
+                                                      StrokeThickness="1"
+                                                      Data="M 11 3 L 19 11 L 11 19 L 3 11 Z"/>
+                                                <Panel HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center"
+                                                       IsVisible="{Binding IsVisualExit}">
+                                                    <Ellipse Width="18" Height="18"
+                                                             HorizontalAlignment="Center"
+                                                             VerticalAlignment="Center"
+                                                             Fill="Transparent"
+                                                             Stroke="{DynamicResource CascadeTheme.HudBannerBorderBrush}"
+                                                             StrokeThickness="1"/>
+                                                    <Path Stretch="Uniform"
+                                                          Width="12" Height="12"
+                                                          HorizontalAlignment="Center"
+                                                          VerticalAlignment="Center"
+                                                          Stroke="{DynamicResource CascadeTheme.HudBannerForeground}"
+                                                          StrokeThickness="1.15"
+                                                          IsVisible="{Binding ShowExitArrow}"
+                                                          Data="M 2 11 L 9 4 M 5.8 4 L 9 4 L 9 7.8"/>
+                                                </Panel>
+                                                <TextBlock HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"
+                                                           IsVisible="{Binding HudGlyphInkAnchor}"
+                                                           Text="{Binding Glyph}"
+                                                           FontWeight="SemiBold"
+                                                           FontSize="9.8"
+                                                           Foreground="#FFF8FBFF"/>
+                                                <TextBlock HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"
+                                                           IsVisible="{Binding HudGlyphInkDefault}"
+                                                           Text="{Binding Glyph}"
+                                                           Foreground="{DynamicResource CascadeTheme.HudBannerForeground}"
+                                                           FontWeight="SemiBold"
+                                                           FontSize="9.8"/>
+                                            </Panel>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
                     </Border>
                 </chrome:AttentionZoneContainer>
                 <!-- CascadeChord: полоска ввода — TaskCockpitView (видна без открытого документа). -->

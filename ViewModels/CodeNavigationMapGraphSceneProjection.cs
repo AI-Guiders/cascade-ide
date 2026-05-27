@@ -1,16 +1,24 @@
 #nullable enable
 using CascadeIDE.Cockpit.Graph.Layout;
+using CascadeIDE.Models;
 
 namespace CascadeIDE.ViewModels;
 
 /// <summary>Мост <see cref="GraphLayoutScene"/> ↔ binding VM (ADR 0055 layout/render split).</summary>
 public static class CodeNavigationMapGraphSceneProjection
 {
-    public static CodeNavigationMapGraphSceneVm ToViewModel(GraphLayoutScene scene) =>
-        new()
+    public static CodeNavigationMapGraphSceneVm ToViewModel(
+        GraphLayoutScene scene,
+        double layoutViewportWidth = 0,
+        double layoutViewportHeight = 0,
+        CodeNavigationMapSettings? mapSettings = null,
+        string? solutionPath = null)
+    {
+        var branchLabels = CodeNavigationMapConditionBranchLabels.Resolve(mapSettings, solutionPath);
+        return new CodeNavigationMapGraphSceneVm
         {
             Nodes = scene.Nodes.Select(MapNode).ToList(),
-            Edges = scene.Edges.Select(MapEdge).ToList(),
+            Edges = scene.Edges.Select(e => MapEdge(e, branchLabels)).ToList(),
             Presentation = MapPresentation(scene.Presentation),
             Legend = scene.Legend.Select(e => new CodeNavigationMapLegendEntry { Index = e.Index, Text = e.Text }).ToList(),
             UseLegendColumn = scene.UseLegendColumn,
@@ -23,8 +31,14 @@ public static class CodeNavigationMapGraphSceneProjection
             LegendBlockTopY = scene.LegendBlockTopY,
             HighlightedNodeIds = scene.HighlightedNodeIds,
             HighlightedEdgeKeys = scene.HighlightedEdgeKeys,
-            SideLabelFontSizePx = scene.SideLabelFontSizePx
+            SideLabelFontSizePx = scene.SideLabelFontSizePx,
+            ShowNodeLegendGlyphs = scene.ShowNodeLegendGlyphs,
+            RelatedFilesLayout = scene.RelatedFilesLayout,
+            ControlFlowMainAxis = scene.ControlFlowMainAxis,
+            LayoutViewportWidth = layoutViewportWidth,
+            LayoutViewportHeight = layoutViewportHeight
         };
+    }
 
     public static GraphLayoutScene FromViewModel(CodeNavigationMapGraphSceneVm scene) =>
         new()
@@ -43,7 +57,10 @@ public static class CodeNavigationMapGraphSceneProjection
             LegendBlockTopY = scene.LegendBlockTopY,
             HighlightedNodeIds = scene.HighlightedNodeIds,
             HighlightedEdgeKeys = scene.HighlightedEdgeKeys,
-            SideLabelFontSizePx = scene.SideLabelFontSizePx
+            SideLabelFontSizePx = scene.SideLabelFontSizePx,
+            ShowNodeLegendGlyphs = scene.ShowNodeLegendGlyphs,
+            RelatedFilesLayout = scene.RelatedFilesLayout,
+            ControlFlowMainAxis = scene.ControlFlowMainAxis
         };
 
     public static CodeNavigationMapGraphNodeLayout MapNode(GraphLayoutNode n) =>
@@ -58,10 +75,15 @@ public static class CodeNavigationMapGraphSceneProjection
             IsAnchor = n.IsAnchor,
             Shape = MapNodeShape(n.Shape),
             LegendIndex = n.LegendIndex,
-            LegendLine = n.LegendLine
+            LegendLine = n.LegendLine,
+            LineStart = n.LineStart,
+            LineEnd = n.LineEnd,
+            LoopGroupId = n.LoopGroupId
         };
 
-    public static CodeNavigationMapGraphEdgeLayout MapEdge(GraphLayoutEdge e) =>
+    public static CodeNavigationMapGraphEdgeLayout MapEdge(
+        GraphLayoutEdge e,
+        CodeNavigationMapConditionBranchLabels.Pair? branchLabels = null) =>
         new()
         {
             FromNodeId = e.FromNodeId,
@@ -70,7 +92,11 @@ public static class CodeNavigationMapGraphSceneProjection
             To = e.To,
             ToRadius = e.ToRadius,
             Kind = e.Kind,
-            RelatedKind = e.RelationKind
+            RelatedKind = e.RelationKind,
+            BranchLabel = branchLabels is null
+                ? e.BranchLabel
+                : CodeNavigationMapConditionBranchLabels.ResolveDisplayLabel(e.EdgeProvenance, branchLabels)
+                    ?? e.BranchLabel
         };
 
     public static GraphLayoutNode ToLayoutNode(CodeNavigationMapGraphNodeLayout n) =>
@@ -85,7 +111,10 @@ public static class CodeNavigationMapGraphSceneProjection
             IsAnchor = n.IsAnchor,
             Shape = MapNodeShapeToLayout(n.Shape),
             LegendIndex = n.LegendIndex,
-            LegendLine = n.LegendLine
+            LegendLine = n.LegendLine,
+            LineStart = n.LineStart,
+            LineEnd = n.LineEnd,
+            LoopGroupId = n.LoopGroupId
         };
 
     public static GraphLayoutEdge ToLayoutEdge(CodeNavigationMapGraphEdgeLayout e) =>
@@ -97,7 +126,8 @@ public static class CodeNavigationMapGraphSceneProjection
             To = e.To,
             ToRadius = e.ToRadius,
             Kind = e.Kind,
-            RelationKind = e.RelatedKind
+            RelationKind = e.RelatedKind,
+            BranchLabel = e.BranchLabel
         };
 
     private static CodeNavigationMapGraphPresentationKind MapPresentation(GraphLayoutPresentation presentation) =>

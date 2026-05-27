@@ -68,6 +68,7 @@
     <EmbeddedResource Include="Settings\defaults-settings.toml" />
     <EmbeddedResource Include="Settings\settings-categories.toml" />
     <EmbeddedResource Include="CodeNavigation\presets.toml" />
+    <EmbeddedResource Include="CodeNavigation\condition-branch-label-presets.toml" />
     <EmbeddedResource Include="Cockpit\DataBus\databus-event-policy.toml" />
     <EmbeddedResource Include="Themes\*.json" />
     <!-- Обязательно для деплоя без шипнутой папки: BundledAppContent / TryReadUiModesFile fallback. -->

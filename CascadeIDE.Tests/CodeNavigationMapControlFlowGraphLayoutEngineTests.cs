@@ -1,5 +1,6 @@
 using CascadeIDE.Cockpit.Graph;
 using CascadeIDE.Cockpit.Graph.Layout;
+using CascadeIDE.Models;
 using CascadeIDE.Services;
 using CascadeIDE.Features.WorkspaceNavigation.Application;
 using CascadeIDE.ViewModels;
@@ -47,8 +48,10 @@ public sealed class ControlFlowGraphLayoutEngineTests
             ]
         };
 
-        var scene = engine.Layout(doc, 280, 120);
+        // Высота ≥ ширина — автоматический выбор оси вертикальный поток сверху вниз (широко-низкая панель дала бы горизонталь).
+        var scene = engine.Layout(doc, 280, 300);
         Assert.Equal(3, scene.Nodes.Count);
+        Assert.Equal(GraphControlFlowMainAxis.Vertical, scene.ControlFlowMainAxis);
 
         var n0 = scene.Nodes.Single(n => n.Id == "n0");
         var n1 = scene.Nodes.Single(n => n.Id == "n1");
@@ -132,7 +135,9 @@ public sealed class ControlFlowGraphLayoutEngineTests
             ]
         };
 
-        var scene = engine.Layout(doc, 280, 120);
+        // Вертикальный основной поток: ветки одного уровня — одинаковый Y, разведение по X.
+        var scene = engine.Layout(doc, 220, 280);
+        Assert.Equal(GraphControlFlowMainAxis.Vertical, scene.ControlFlowMainAxis);
         var n1 = scene.Nodes.Single(n => n.Id == "n1");
         var n2 = scene.Nodes.Single(n => n.Id == "n2");
         Assert.Equal(n1.Center.Y, n2.Center.Y, 0.5);
@@ -205,7 +210,8 @@ public sealed class ControlFlowGraphLayoutEngineTests
             Edges = [new GraphEdge { FromId = "n0", ToId = "n1", Kind = "Call" }]
         };
         const double viewportW = 400;
-        var scene = engine.Layout(doc, viewportW, 200);
+        // Выше модель горизонтальной полосы: легенда справа фиксируется от max(Center.X+R), без привязки к концу reading band по X.
+        var scene = engine.Layout(doc, viewportW, 260);
         Assert.True(scene.UseLegendColumn);
         var inkSl = GraphControlFlowLayoutMetrics.BesideLegendInkSlack;
         var minCl = Math.Max(
@@ -246,5 +252,158 @@ public sealed class ControlFlowGraphLayoutEngineTests
         Assert.Equal(GraphLegendBlockPlacement.BelowGraph, scene.LegendPlacement);
         Assert.True(scene.LegendBlockTopY > 0);
         Assert.Equal(GraphControlFlowLayoutMetrics.SidePadding, scene.LegendColumnLeft, 0.01);
+    }
+
+    [Fact]
+    public void Layout_WideViewport_LinearChain_SelectsHorizontalMainAxis()
+    {
+        var engine = new ControlFlowGraphLayoutEngine();
+        GraphNode Node(string id, string label) =>
+            new()
+            {
+                Id = id,
+                Path = @"D:\w\Chain.cs",
+                Kind = "call_step",
+                Label = label
+            };
+
+        var edges = new List<GraphEdge>();
+        var nodes = new List<GraphNode>
+        {
+            new()
+            {
+                Id = "n0",
+                Path = @"D:\w\Chain.cs",
+                Kind = "anchor",
+                Label = "Anchor"
+            }
+        };
+        for (var i = 1; i <= 6; i++)
+        {
+            nodes.Add(Node($"n{i}", $"s{i}"));
+            edges.Add(new GraphEdge { FromId = $"n{i - 1}", ToId = $"n{i}", Kind = "Call" });
+        }
+
+        var doc = new GraphDocument
+        {
+            AnchorPath = @"D:\w\Chain.cs",
+            Nodes = nodes,
+            Edges = edges
+        };
+
+        var scene = engine.Layout(doc, 640, 130);
+        Assert.Equal(GraphControlFlowMainAxis.Horizontal, scene.ControlFlowMainAxis);
+        for (var i = 0; i < 6; i++)
+        {
+            var a = scene.Nodes.Single(n => n.Id == $"n{i}");
+            var b = scene.Nodes.Single(n => n.Id == $"n{i + 1}");
+            Assert.True(a.Center.X < b.Center.X);
+        }
+    }
+
+    [Fact]
+    public void Layout_TallViewport_LinearChain_SelectsVerticalMainAxis()
+    {
+        var engine = new ControlFlowGraphLayoutEngine();
+        GraphNode Node(string id, string label) =>
+            new()
+            {
+                Id = id,
+                Path = @"D:\w\Chain.cs",
+                Kind = "call_step",
+                Label = label
+            };
+
+        var edges = new List<GraphEdge>();
+        var nodes = new List<GraphNode>
+        {
+            new()
+            {
+                Id = "n0",
+                Path = @"D:\w\Chain.cs",
+                Kind = "anchor",
+                Label = "Anchor"
+            }
+        };
+        for (var i = 1; i <= 6; i++)
+        {
+            nodes.Add(Node($"n{i}", $"s{i}"));
+            edges.Add(new GraphEdge { FromId = $"n{i - 1}", ToId = $"n{i}", Kind = "Call" });
+        }
+
+        var doc = new GraphDocument
+        {
+            AnchorPath = @"D:\w\Chain.cs",
+            Nodes = nodes,
+            Edges = edges
+        };
+
+        var scene = engine.Layout(doc, 200, 420);
+        Assert.Equal(GraphControlFlowMainAxis.Vertical, scene.ControlFlowMainAxis);
+        for (var i = 0; i < 6; i++)
+        {
+            var a = scene.Nodes.Single(n => n.Id == $"n{i}");
+            var b = scene.Nodes.Single(n => n.Id == $"n{i + 1}");
+            Assert.True(a.Center.Y < b.Center.Y);
+        }
+    }
+
+    [Fact]
+    public void ChooseMainAxis_PicksAxisBySlackAndAspect()
+    {
+        Assert.Equal(
+            GraphControlFlowMainAxis.Horizontal,
+            GraphControlFlowLayoutMetrics.ChooseMainAxis(graphWidth: 520, heightForLayout: 118, levelCount: 6, maxNodesOnAnyLevel: 2));
+
+        Assert.Equal(
+            GraphControlFlowMainAxis.Vertical,
+            GraphControlFlowLayoutMetrics.ChooseMainAxis(graphWidth: 178, heightForLayout: 380, levelCount: 6, maxNodesOnAnyLevel: 2));
+    }
+
+    [Fact]
+    public void Layout_SettingsOverride_Vertical_OverridesWideShortHeuristic()
+    {
+        var engine = new ControlFlowGraphLayoutEngine();
+        GraphNode Node(string id, string label) =>
+            new()
+            {
+                Id = id,
+                Path = @"D:\w\Chain.cs",
+                Kind = "call_step",
+                Label = label
+            };
+
+        var edges = new List<GraphEdge>();
+        var nodes = new List<GraphNode>
+        {
+            new()
+            {
+                Id = "n0",
+                Path = @"D:\w\Chain.cs",
+                Kind = "anchor",
+                Label = "Anchor"
+            }
+        };
+        for (var i = 1; i <= 6; i++)
+        {
+            nodes.Add(Node($"n{i}", $"s{i}"));
+            edges.Add(new GraphEdge { FromId = $"n{i - 1}", ToId = $"n{i}", Kind = "Call" });
+        }
+
+        var doc = new GraphDocument
+        {
+            AnchorPath = @"D:\w\Chain.cs",
+            Nodes = nodes,
+            Edges = edges
+        };
+
+        var scene = engine.Layout(
+            doc,
+            640,
+            130,
+            CodeNavigationMapDetailLevel.Normal,
+            GraphControlFlowMainAxis.Vertical);
+        Assert.Equal(GraphControlFlowMainAxis.Vertical, scene.ControlFlowMainAxis);
+        Assert.True(scene.Nodes.Single(n => n.Id == "n0").Center.Y < scene.Nodes.Single(n => n.Id == "n1").Center.Y);
     }
 }

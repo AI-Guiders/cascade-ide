@@ -27,6 +27,20 @@ internal sealed partial class MainWindowIdeMcpHost : IIdeMcpActions
     public Task<string> ExecuteCommandAsync(
         string commandId,
         IReadOnlyDictionary<string, JsonElement>? args,
-        CancellationToken cancellationToken = default) =>
-        UiScheduler.Default.InvokeAsync(() => _executor.ExecuteAsync(commandId, args, cancellationToken));
+        CancellationToken cancellationToken = default)
+    {
+        // AEE: не блокировать MCP на очереди UI (warm-up/HCI). Сервис потокобезопасен.
+        if (IsAgentEnvironmentCommand(commandId))
+            return _executor.ExecuteAsync(commandId, args, cancellationToken);
+
+        return UiScheduler.Default.InvokeAsync(() => _executor.ExecuteAsync(commandId, args, cancellationToken));
+    }
+
+    private static bool IsAgentEnvironmentCommand(string commandId) =>
+        commandId is IdeCommands.IdeAgentVerify
+            or IdeCommands.IdeAgentVerifyBatch
+            or IdeCommands.IdeAgentCancel
+            or IdeCommands.IdeAgentStatus
+            or IdeCommands.IdeAgentLast
+            or IdeCommands.IdeAgentSandboxPrepare;
 }

@@ -34,6 +34,9 @@ public sealed class WorkspaceNavigationMapRefreshComposerTests
             graphWidth: 100,
             graphHeight: 100,
             CodeNavigationMapDetailLevel.Normal,
+            CodeNavigationMapRelatedGraphLayoutKind.Radial,
+            CodeNavigationMapControlFlowMainAxisKind.Auto,
+            new CodeNavigationMapSettings(),
             new WorkspaceNavigationMapRefreshComposer.TraceSignals(0, null),
             cockpitSurfaceCapturedOnUi: null);
 
@@ -57,6 +60,9 @@ public sealed class WorkspaceNavigationMapRefreshComposerTests
             graphWidth: 100,
             graphHeight: 100,
             CodeNavigationMapDetailLevel.Normal,
+            CodeNavigationMapRelatedGraphLayoutKind.Radial,
+            CodeNavigationMapControlFlowMainAxisKind.Auto,
+            new CodeNavigationMapSettings(),
             new WorkspaceNavigationMapRefreshComposer.TraceSignals(0, null),
             cockpitSurfaceCapturedOnUi: null);
 
