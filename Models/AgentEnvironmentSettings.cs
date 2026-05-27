@@ -23,6 +23,8 @@ public sealed class AgentEnvironmentSettings
     /// <summary>Абсолютный путь к <c>CascadeIDE.BuildVerifyWorker.dll</c>; пусто = авто рядом с exe / repo tools.</summary>
     public string? BuildVerifyWorkerAssemblyPath { get; set; }
 
+    public AgentDevServiceContractSettings DevServices { get; set; } = new();
+
     public AgentEnvironmentLadderSettings Ladder { get; set; } = new();
 
     public AgentEnvironmentTimeAccountingSettings TimeAccounting { get; set; } = new();
@@ -45,6 +47,9 @@ public sealed class AgentEnvironmentLadderSettings
 
     /// <summary>Лимит доп. warmup-путей; 0 = как <c>solution_warmup.max_open_document_files</c>.</summary>
     public int L0WarmupMaxFiles { get; set; }
+
+    /// <summary>L3: только тесты, затронутые git-dirty <c>.cs</c> (ADR 0148 F).</summary>
+    public bool L3TouchedTestsOnly { get; set; } = true;
 }
 
 public sealed class AgentEnvironmentTimeAccountingSettings

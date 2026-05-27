@@ -116,6 +116,11 @@ public sealed partial class CascadeIdeSettings
                     LongRunSandboxProfile = Agent.Environment.LongRunSandboxProfile,
                     BuildVerifyHost = Agent.Environment.BuildVerifyHost,
                     BuildVerifyWorkerAssemblyPath = Agent.Environment.BuildVerifyWorkerAssemblyPath,
+                    DevServices = new AgentDevServiceContractSettings
+                    {
+                        RequireConfigOverride = Agent.Environment.DevServices.RequireConfigOverride,
+                        GateL3OnViolation = Agent.Environment.DevServices.GateL3OnViolation,
+                    },
                     Ladder = new AgentEnvironmentLadderSettings
                     {
                         L0Enabled = Agent.Environment.Ladder.L0Enabled,
@@ -124,6 +129,7 @@ public sealed partial class CascadeIdeSettings
                         L0GitDirtyMaxFiles = Agent.Environment.Ladder.L0GitDirtyMaxFiles,
                         L0IncludeWarmupCs = Agent.Environment.Ladder.L0IncludeWarmupCs,
                         L0WarmupMaxFiles = Agent.Environment.Ladder.L0WarmupMaxFiles,
+                        L3TouchedTestsOnly = Agent.Environment.Ladder.L3TouchedTestsOnly,
                     },
                     TimeAccounting = new AgentEnvironmentTimeAccountingSettings
                     {

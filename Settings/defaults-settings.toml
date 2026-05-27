@@ -145,9 +145,14 @@ build_verify_host = "supervised-inproc"
 # Пусто = авто (рядом с CascadeIDE.exe или tools/ в dev)
 # build_verify_worker_assembly_path = ""
 
+[agent.environment.dev_services]
+require_config_override = true
+gate_l3_on_violation = true
+
 [agent.environment.ladder]
 l0_enabled = true
 l4_require_explicit = true
+l3_touched_tests_only = true
 # open_tabs — только вкладки; open_tabs_and_git_dirty_cs — + .cs из git diff / --cached в workspace (парсер L0).
 l0_cs_scope = "open_tabs_and_git_dirty_cs"
 l0_git_dirty_max_files = 48
