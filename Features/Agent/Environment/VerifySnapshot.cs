@@ -21,13 +21,14 @@ public static class VerifySnapshot
             && !string.IsNullOrWhiteSpace(workspaceRoot)
             && Directory.Exists(workspaceRoot))
         {
-            var head = TryGitHead(git, workspaceRoot);
-            if (head is not null)
-                parts.Add("head:" + head);
-
-            var dirty = TryGitDirtyFingerprint(git, workspaceRoot);
-            if (dirty is not null)
-                parts.Add("dirty:" + dirty);
+            try
+            {
+                parts.AddRange(CollectGitParts(git, workspaceRoot));
+            }
+            catch
+            {
+                parts.Add("tick:" + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+            }
         }
         else
         {
@@ -39,13 +40,30 @@ public static class VerifySnapshot
         return hash;
     }
 
+    private static IEnumerable<string> CollectGitParts(IGitCommandRunner git, string workspaceRoot) =>
+        Task.Run(() => CollectGitPartsCore(git, workspaceRoot)).GetAwaiter().GetResult();
+
+    private static List<string> CollectGitPartsCore(IGitCommandRunner git, string workspaceRoot)
+    {
+        var parts = new List<string>();
+        var head = TryGitHead(git, workspaceRoot);
+        if (head is not null)
+            parts.Add("head:" + head);
+
+        var dirty = TryGitDirtyFingerprint(git, workspaceRoot);
+        if (dirty is not null)
+            parts.Add("dirty:" + dirty);
+
+        return parts;
+    }
+
     private static string? TryGitHead(IGitCommandRunner git, string workspaceRoot)
     {
         try
         {
             var wd = Path.GetFullPath(workspaceRoot);
-            var task = git.RunAsync(["-c", "core.quotepath=false", "rev-parse", "HEAD"], wd);
-            var (ok, _, output) = task.GetAwaiter().GetResult();
+            var (ok, _, output) = git.RunAsync(["-c", "core.quotepath=false", "rev-parse", "HEAD"], wd)
+                .GetAwaiter().GetResult();
             if (!ok)
                 return null;
 
@@ -63,8 +81,10 @@ public static class VerifySnapshot
         try
         {
             var wd = Path.GetFullPath(workspaceRoot);
-            var unstaged = git.RunAsync(["-c", "core.quotepath=false", "diff", "--name-only"], wd).GetAwaiter().GetResult();
-            var staged = git.RunAsync(["-c", "core.quotepath=false", "diff", "--name-only", "--cached"], wd).GetAwaiter().GetResult();
+            var unstaged = git.RunAsync(["-c", "core.quotepath=false", "diff", "--name-only"], wd)
+                .GetAwaiter().GetResult();
+            var staged = git.RunAsync(["-c", "core.quotepath=false", "diff", "--name-only", "--cached"], wd)
+                .GetAwaiter().GetResult();
             if (!unstaged.Success && !staged.Success)
                 return null;
 
