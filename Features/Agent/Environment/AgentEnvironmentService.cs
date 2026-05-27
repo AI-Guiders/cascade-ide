@@ -25,7 +25,11 @@ public interface IAgentEnvironmentService
 
     AgentVerifyEpochTracker EpochTracker { get; }
 
-    AgentOrchestratorBridge OrchestratorBridge { get; }
+    IAgentOrchestrator Orchestrator { get; }
+
+    AgentAeeRoslynBridge RoslynBridge { get; }
+
+    void NotifyCideWindowFocus(bool focused);
 }
 
 /// <summary>Verify ladder + runner (ADR 0148 W1–W6).</summary>
@@ -33,12 +37,19 @@ public sealed class AgentEnvironmentService : IAgentEnvironmentService
 {
     private readonly IDataBus _dataBus;
     private readonly AgentEnvironmentSettings _settings;
-    private readonly IBuildTestHost _buildTestHost;
-    private readonly VerificationLadder _ladder;
+    private readonly BuildTestJobCoordinator _coordinator;
+    private readonly IGitCommandRunner? _gitRunner;
+    private readonly Func<string?>? _getWorkspaceRootForSnapshot;
+    private IBuildTestHost _buildTestHost;
+    private VerificationLadder _ladder;
     private readonly AgentSandboxManager _sandbox;
     private readonly AgentWorktreeSandbox? _worktree;
     private readonly AgentVerifyEpochTracker _epoch;
-    private readonly AgentOrchestratorBridge _orchestrator;
+    private readonly AgentRoslynL0Diagnostics _l0;
+    private readonly AgentOrchestrator _orchestrator;
+    private readonly AgentIdleUserTracker _idleUser;
+    private readonly AgentAeeRoslynBridge _roslynBridge;
+    private readonly object _hostGate = new();
     private readonly object _gate = new();
     private AgentEnvironmentRun? _active;
     private AgentEnvironmentLastRunSummary? _last;
@@ -58,32 +69,41 @@ public sealed class AgentEnvironmentService : IAgentEnvironmentService
     {
         _dataBus = dataBus;
         _settings = settings;
+        _gitRunner = gitRunner;
+        _getWorkspaceRootForSnapshot = getWorkspaceRootForL0Git;
         _sandbox = new AgentSandboxManager();
         _epoch = new AgentVerifyEpochTracker(dataBus);
-        var coordinator = buildTestJobService?.Coordinator ?? new BuildTestJobCoordinator();
-        _buildTestHost = BuildTestHostFactory.Create(settings, coordinator);
-        var l0 = new AgentRoslynL0Diagnostics(
+        _coordinator = buildTestJobService?.Coordinator ?? new BuildTestJobCoordinator();
+        _buildTestHost = BuildTestHostFactory.Create(settings, _coordinator);
+        _l0 = new AgentRoslynL0Diagnostics(
             languageService,
             openCsDocuments,
             settings.Ladder,
             gitRunner,
             getWorkspaceRootForL0Git,
             getWarmupCsFilePaths);
-        _ladder = new VerificationLadder(dataBus, _buildTestHost, l0, settings, _sandbox);
+        _ladder = CreateLadder();
         _worktree = gitRunner is null ? null : new AgentWorktreeSandbox(gitRunner);
-        _orchestrator = new AgentOrchestratorBridge(
+        _orchestrator = new AgentOrchestrator(
             this,
+            settings,
             getSolutionPathForOrchestrator ?? (() => null),
             () => AgentVerifyPolicyParser.TryParse(_settings.DefaultVerifyPolicy, out var p)
                 ? p
                 : AgentVerifyPolicy.Standard);
+        _idleUser = new AgentIdleUserTracker();
+        _roslynBridge = new AgentAeeRoslynBridge(languageService);
 
-        _dataBus.Subscribe<AgentEnvironmentTaskDied>(_ => _buildTestHost.MarkUnhealthy());
+        _dataBus.Subscribe<AgentEnvironmentTaskDied>(_ => TryRestartBuildTestHostAfterDied());
     }
 
     public AgentVerifyEpochTracker EpochTracker => _epoch;
 
-    public AgentOrchestratorBridge OrchestratorBridge => _orchestrator;
+    public IAgentOrchestrator Orchestrator => _orchestrator;
+
+    public AgentAeeRoslynBridge RoslynBridge => _roslynBridge;
+
+    public void NotifyCideWindowFocus(bool focused) => _idleUser.NotifyCideFocus(focused);
 
     public AgentEnvironmentStatusSnapshot GetStatus()
     {
@@ -100,7 +120,8 @@ public sealed class AgentEnvironmentService : IAgentEnvironmentService
                 _active.SandboxWire,
                 WritesInvalidatedVerifyEpoch: _epoch.WritesInvalidatedVerifyEpoch,
                 SandboxRunDirectory: _activeLease?.RunDirectory,
-                ExecutionChannel: _buildTestHost.HostKind);
+                ExecutionChannel: _buildTestHost.HostKind,
+                SolutionPath: _active.SolutionPath);
         }
     }
 
@@ -143,7 +164,7 @@ public sealed class AgentEnvironmentService : IAgentEnvironmentService
         {
             CancelActiveCore("superseded");
             var runId = Guid.NewGuid().ToString("N");
-            var snapshotId = VerifySnapshot.Create(solutionPath);
+            var snapshotId = VerifySnapshot.Create(solutionPath, _gitRunner, _getWorkspaceRootForSnapshot?.Invoke());
             _activeCts = new CancellationTokenSource();
             _activeLease = _sandbox.Prepare(runId, profile);
             _active = new AgentEnvironmentRun(
@@ -238,6 +259,10 @@ public sealed class AgentEnvironmentService : IAgentEnvironmentService
     {
         try
         {
+            var threshold = _settings.TimeAccounting.IdleUserThresholdMs;
+            if (threshold > 0)
+                _idleUser.SampleWhileUnfocused(threshold);
+
             var result = await _ladder.ClimbAsync(
                 run.RunId,
                 run.SolutionPath,
@@ -245,11 +270,15 @@ public sealed class AgentEnvironmentService : IAgentEnvironmentService
                 lease,
                 cancellationToken).ConfigureAwait(false);
 
+            var slices = result.Slices.ToList();
+            foreach (var idle in _idleUser.DrainSlices())
+                slices.Add(idle);
+
             _dataBus.Publish(new AgentRunCompleted(
                 run.RunId,
                 result.Green,
                 result.MaxRungReached,
-                result.Slices));
+                slices));
 
             lock (_gate)
             {
@@ -258,7 +287,7 @@ public sealed class AgentEnvironmentService : IAgentEnvironmentService
                     run.VerifySnapshotId,
                     result.Green,
                     result.MaxRungReached,
-                    result.Slices,
+                    slices,
                     DateTimeOffset.UtcNow);
                 if (_active?.RunId == run.RunId)
                 {
@@ -279,6 +308,37 @@ public sealed class AgentEnvironmentService : IAgentEnvironmentService
                     CancelActiveCore("cancel");
             }
         }
+    }
+
+    private VerificationLadder CreateLadder() =>
+        new(
+            _dataBus,
+            _buildTestHost,
+            _l0,
+            _settings,
+            _sandbox,
+            _gitRunner,
+            _getWorkspaceRootForSnapshot);
+
+    private void TryRestartBuildTestHostAfterDied()
+    {
+        if (!IsSupervisedWorkerHost(_settings.BuildVerifyHost))
+            return;
+
+        lock (_hostGate)
+        {
+            _buildTestHost.MarkUnhealthy();
+            _buildTestHost = BuildTestHostFactory.Create(_settings, _coordinator);
+            _ladder = CreateLadder();
+            _buildTestHost.MarkHealthy();
+        }
+    }
+
+    private static bool IsSupervisedWorkerHost(string? hostKind)
+    {
+        var h = hostKind?.Trim() ?? "";
+        return string.Equals(h, BuildTestHostFactory.WorkerProcessHostKind, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(h, BuildTestHostFactory.WorkerDaemonHostKind, StringComparison.OrdinalIgnoreCase);
     }
 }
 
@@ -308,7 +368,8 @@ public sealed record AgentEnvironmentStatusSnapshot(
     string? SandboxProfile,
     bool WritesInvalidatedVerifyEpoch = false,
     string? SandboxRunDirectory = null,
-    string ExecutionChannel = "supervised-inproc")
+    string ExecutionChannel = "supervised-inproc",
+    string? SolutionPath = null)
 {
     public AgentEnvironmentStatusSnapshot(bool isActive, string? runId, string? verifySnapshotId, string? policy)
         : this(isActive, runId, verifySnapshotId, policy, null, false, null, "supervised-inproc")
