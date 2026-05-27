@@ -1,5 +1,6 @@
 #nullable enable
 using Avalonia;
+using CascadeIDE.Cockpit.Graph.Layout;
 using CascadeIDE.Models;
 
 namespace CascadeIDE.ViewModels;
@@ -63,6 +64,9 @@ public sealed class CodeNavigationMapGraphSceneVm
     /// <summary><c>radial</c> | <c>top_down</c> | <c>bottom_up</c> (related-files).</summary>
     public string RelatedFilesLayout { get; init; } = CodeNavigationMapRelatedGraphLayoutKind.Radial;
 
+    /// <summary>Главная ось потока после укладки CF — для подписей узлов и согласованности VM↔layout (ADR 0056).</summary>
+    public GraphControlFlowMainAxis ControlFlowMainAxis { get; init; } = GraphControlFlowMainAxis.Vertical;
+
     /// <summary>
     /// Размер шрифта боковых подписей узлов (call_step), согласованный с укладкой; null — <see cref="CascadeIDE.Cockpit.Graph.Layout.GraphRenderInvariants.MinSideLabelFontSize"/> при отрисовке.
     /// </summary>
@@ -107,6 +111,9 @@ public sealed class CodeNavigationMapGraphNodeLayout
     public string? LegendLine { get; init; }
     public int? LineStart { get; init; }
     public int? LineEnd { get; init; }
+
+    /// <summary>Группа тела цикла (овал регион + loop edges); см. <see cref="GraphLayoutNode.LoopGroupId"/>.</summary>
+    public int? LoopGroupId { get; init; }
 }
 
 public sealed class CodeNavigationMapGraphEdgeLayout
@@ -118,6 +125,7 @@ public sealed class CodeNavigationMapGraphEdgeLayout
     public required double ToRadius { get; init; }
     public string? Kind { get; init; }
     public string? RelatedKind { get; init; }
+    public string? BranchLabel { get; init; }
 
     public string Key => $"{FromNodeId}->{ToNodeId}";
 }

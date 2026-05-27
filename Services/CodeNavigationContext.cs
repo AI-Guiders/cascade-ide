@@ -17,8 +17,12 @@ namespace CascadeIDE.Services;
 public static class CodeNavigationContextBuilder
 {
     public const int DefaultMaxRelated = 32;
+    /// <summary>Связанные файлы / лёгкий subgraph (не control-flow по методу).</summary>
     public const int DefaultMaxNodes = 12;
     public const int DefaultMaxEdges = 24;
+    /// <summary>Control-flow subgraph (intent/detailed): якорь + шаги метода / top-level.</summary>
+    public const int DefaultControlFlowSubgraphMaxNodes = 48;
+    public const int DefaultControlFlowSubgraphMaxEdges = 96;
 
     private static readonly JsonSerializerOptions s_compactJson = new() { WriteIndented = false };
 

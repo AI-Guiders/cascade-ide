@@ -98,6 +98,8 @@ public sealed class GraphLayoutEdge
     public required double ToRadius { get; init; }
     public string? Kind { get; init; }
     public string? RelationKind { get; init; }
+    public string? EdgeProvenance { get; init; }
+    public string? BranchLabel { get; init; }
 
     public string Key => $"{FromNodeId}->{ToNodeId}";
 }

@@ -16,7 +16,8 @@ public sealed class GraphRelatedFileHierarchyLayoutEngine : IGraphLayoutEngine
         double width,
         double height,
         CodeNavigationMapDetailLevel detailLevel = CodeNavigationMapDetailLevel.Normal,
-        GraphControlFlowMainAxis? controlFlowMainAxisOverride = null)
+        GraphControlFlowMainAxis? controlFlowMainAxisOverride = null,
+        GraphLayoutEngineOptions layoutOptions = default)
     {
         if (width <= 0 || height <= 0)
             return EmptyScene(width);

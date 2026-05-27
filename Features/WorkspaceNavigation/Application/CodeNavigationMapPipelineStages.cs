@@ -126,7 +126,7 @@ public sealed class CodeNavigationMapDeclutterStage(ICodeNavigationMapIntentStag
 
     public CodeNavigationMapPipelineState Apply(in CodeNavigationMapPipelineState state)
     {
-        var filtered = TryGlanceFilterControlFlow(state);
+        var filtered = CodeNavigationMapControlFlowDeclutter.TryTransform(state);
         if (filtered is null)
             return state;
 
@@ -138,81 +138,6 @@ public sealed class CodeNavigationMapDeclutterStage(ICodeNavigationMapIntentStag
             state.RelatedGraphLayout,
             state.NormalizedControlFlowMainAxis);
         return _intentStage.Resolve(ctx);
-    }
-
-    private static GraphDocument? TryGlanceFilterControlFlow(in CodeNavigationMapPipelineState state)
-    {
-        if (state.DetailLevel != CodeNavigationMapDetailLevel.Glance)
-            return null;
-        if (!string.Equals(state.MapLevel, CodeNavigationMapLevelKind.ControlFlow, StringComparison.Ordinal))
-            return null;
-
-        var doc = state.Subgraph;
-        var edgesWithoutMulti = doc.Edges.Where(e => !IsMultibranchEdge(e)).ToList();
-        if (edgesWithoutMulti.Count == doc.Edges.Count)
-            return null;
-
-        var anchorId = FindAnchorNodeId(doc);
-        var reachable = ReachableForward(anchorId, edgesWithoutMulti);
-        var nodes = doc.Nodes.Where(n => reachable.Contains(n.Id)).ToList();
-        var kept = new HashSet<string>(reachable, StringComparer.OrdinalIgnoreCase);
-        var finalEdges = edgesWithoutMulti.Where(e => kept.Contains(e.FromId) && kept.Contains(e.ToId)).ToList();
-
-        return new GraphDocument
-        {
-            AnchorPath = doc.AnchorPath,
-            Kind = doc.Kind,
-            Nodes = nodes,
-            Edges = finalEdges
-        };
-    }
-
-    private static bool IsMultibranchEdge(GraphEdge e) =>
-        !string.IsNullOrWhiteSpace(e.Kind)
-        && e.Kind.Contains("multibranch", StringComparison.OrdinalIgnoreCase);
-
-    private static string FindAnchorNodeId(GraphDocument doc)
-    {
-        var anchor = doc.Nodes.FirstOrDefault(n => string.Equals(n.Kind, "anchor", StringComparison.OrdinalIgnoreCase));
-        if (anchor is not null)
-            return anchor.Id;
-        var n0 = doc.Nodes.FirstOrDefault(n => n.Id.Equals("n0", StringComparison.OrdinalIgnoreCase));
-        if (n0 is not null)
-            return n0.Id;
-        return doc.Nodes[0].Id;
-    }
-
-    private static HashSet<string> ReachableForward(string anchorId, IReadOnlyList<GraphEdge> edges)
-    {
-        var outgoing = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
-        foreach (var e in edges)
-        {
-            if (!outgoing.TryGetValue(e.FromId, out var list))
-            {
-                list = [];
-                outgoing[e.FromId] = list;
-            }
-
-            list.Add(e.ToId);
-        }
-
-        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        var queue = new Queue<string>();
-        queue.Enqueue(anchorId);
-        seen.Add(anchorId);
-        while (queue.Count > 0)
-        {
-            var id = queue.Dequeue();
-            if (!outgoing.TryGetValue(id, out var next))
-                continue;
-            foreach (var t in next)
-            {
-                if (seen.Add(t))
-                    queue.Enqueue(t);
-            }
-        }
-
-        return seen;
     }
 }
 
@@ -250,8 +175,11 @@ public sealed class CodeNavigationMapLayoutStage(
                 Array.Empty<CodeNavigationMapInstrumentBlockDescriptor>());
         }
 
+        var estimatedLevels = state.EstimatedLevelCount;
+        if (state.IsDense)
+            estimatedLevels += 2;
         var computedHeight = GraphControlFlowLayoutMetrics.EstimatePreferredHeight(
-            state.EstimatedLevelCount,
+            estimatedLevels,
             state.DetailLevel);
         var preferredCfHeight = Math.Clamp(
             computedHeight,
@@ -263,7 +191,8 @@ public sealed class CodeNavigationMapLayoutStage(
                 width,
                 preferredCfHeight,
                 state.DetailLevel,
-                state.ControlFlowMainAxisOverride)
+                state.ControlFlowMainAxisOverride,
+                new GraphLayoutEngineOptions(state.IsDense))
             .WithPresentation(presentation);
         return new CodeNavigationMapCompositionResult(
             cfScene,

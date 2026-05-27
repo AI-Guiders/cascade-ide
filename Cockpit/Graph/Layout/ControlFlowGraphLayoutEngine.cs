@@ -16,7 +16,8 @@ public sealed class ControlFlowGraphLayoutEngine : IGraphLayoutEngine
         double width,
         double height,
         CodeNavigationMapDetailLevel detailLevel = CodeNavigationMapDetailLevel.Normal,
-        GraphControlFlowMainAxis? controlFlowMainAxisOverride = null)
+        GraphControlFlowMainAxis? controlFlowMainAxisOverride = null,
+        GraphLayoutEngineOptions layoutOptions = default)
     {
         if (width <= 0 || height <= 0)
             return new GraphLayoutScene
@@ -141,6 +142,8 @@ public sealed class ControlFlowGraphLayoutEngine : IGraphLayoutEngine
             : (graphWidth - bandCrossSize) * 0.5;
         var centerCross = bandCrossStart + bandCrossSize * 0.5;
         var labelCharBudget = GraphControlFlowLayoutMetrics.ResolveLabelCharBudget(bandCrossSize);
+        if (layoutOptions.IsDense)
+            labelCharBudget = Math.Max(GraphControlFlowLayoutMetrics.LabelCharBudgetMin, labelCharBudget - 4);
 
         var slotCount = Math.Max(1, levelKeys - 1);
         var rawMainStep = innerMain / slotCount;
@@ -163,6 +166,8 @@ public sealed class ControlFlowGraphLayoutEngine : IGraphLayoutEngine
             GraphControlFlowLayoutMetrics.HorizontalRadiusScaleMin,
             1.0);
         radiusMul *= horizontalRadiusScale;
+        if (layoutOptions.IsDense)
+            radiusMul *= 0.92;
         var sideLabelFontPx = GraphControlFlowLayoutMetrics.ResolveSideLabelFontSize(bandCrossSize, mainStep);
         var anchorR = GraphControlFlowLayoutMetrics.AnchorRadiusBase * radiusMul;
         var nodeR = GraphControlFlowLayoutMetrics.NodeRadiusBase * radiusMul;
@@ -238,7 +243,8 @@ public sealed class ControlFlowGraphLayoutEngine : IGraphLayoutEngine
                 To = to,
                 ToRadius = idToRadius.TryGetValue(e.ToId, out var toR) ? toR : nodeR,
                 Kind = e.Kind,
-                RelationKind = e.RelationKind
+                RelationKind = e.RelationKind,
+                EdgeProvenance = e.EdgeProvenance
             });
         }
 

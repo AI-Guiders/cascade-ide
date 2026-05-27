@@ -51,6 +51,10 @@ public class GraphDocumentBlueprint
 
     public List<GraphBuildEdge> Edges { get; } = [];
 
+    public bool TruncatedNodes { get; private set; }
+
+    public bool TruncatedEdges { get; private set; }
+
     public static string SanitizeLegendLine(string? text, int maxLen)
     {
         if (string.IsNullOrWhiteSpace(text))
@@ -77,7 +81,10 @@ public class GraphDocumentBlueprint
         int? loopGroupId = null)
     {
         if (Nodes.Count >= MaxNodes)
+        {
+            TruncatedNodes = true;
             return null;
+        }
 
         var id = $"n{_nextId++}";
         int? legendIndex = null;
@@ -100,7 +107,10 @@ public class GraphDocumentBlueprint
     public bool TryAddEdge(string fromId, string toId, string kind, string relationKind, string? edgeProvenance = null)
     {
         if (Edges.Count >= MaxEdges)
+        {
+            TruncatedEdges = true;
             return false;
+        }
         Edges.Add(new GraphBuildEdge(fromId, toId, kind, relationKind, edgeProvenance));
         return true;
     }
@@ -114,7 +124,10 @@ public class GraphDocumentBlueprint
         foreach (var fromId in fromIds)
         {
             if (Edges.Count >= MaxEdges)
+            {
+                TruncatedEdges = true;
                 break;
+            }
             Edges.Add(new GraphBuildEdge(fromId, toId, edgeKind, relationKind, edgeProvenance));
         }
     }

@@ -18,7 +18,8 @@ public sealed class WorkspaceNavigationMapContextJsonDataSource : IGraphDataSour
             request.CursorColumn,
             request.RawFilePathsFromSolution,
             request.SolutionPath,
-            request.NavSettings);
+            request.NavSettings,
+            request.ControlFlowGrain);
 
     public bool TryBuildDocument(GraphNavigationJsonRequest request, out GraphDocument? document, out string? wireJson)
     {

@@ -11,5 +11,6 @@ public interface IGraphLayoutEngine
         double width,
         double height,
         CodeNavigationMapDetailLevel detailLevel = CodeNavigationMapDetailLevel.Normal,
-        GraphControlFlowMainAxis? controlFlowMainAxisOverride = null);
+        GraphControlFlowMainAxis? controlFlowMainAxisOverride = null,
+        GraphLayoutEngineOptions layoutOptions = default);
 }

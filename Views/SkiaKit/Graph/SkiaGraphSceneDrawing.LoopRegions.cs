@@ -18,15 +18,15 @@ public static partial class SkiaGraphSceneDrawing
 
         var loopColor = scb.Color;
         var stroke = new SolidColorBrush(
-            Color.FromArgb((byte)Math.Clamp((int)(loopColor.A * 0.40), 22, 96), loopColor.R, loopColor.G, loopColor.B));
-        var dashPen = new Pen(stroke, 1.2) { DashStyle = new DashStyle([7, 4], 0) };
+            Color.FromArgb((byte)Math.Clamp((int)(loopColor.A * 0.28), 16, 72), loopColor.R, loopColor.G, loopColor.B));
+        var dashPen = new Pen(stroke, 1.0) { DashStyle = new DashStyle([6, 5], 0) };
 
         foreach (var g in scene.Nodes
                      .Where(n => n.LoopGroupId > 0)
                      .GroupBy(n => n.LoopGroupId!.Value))
         {
             var nodes = g.ToList();
-            if (nodes.Count == 0)
+            if (nodes.Count < 2)
                 continue;
 
             var minX = double.PositiveInfinity;

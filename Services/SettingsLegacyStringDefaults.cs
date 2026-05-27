@@ -113,6 +113,8 @@ public static class SettingsLegacyStringDefaults
             m.RelatedGraphLayout = CodeNavigationMapRelatedGraphLayoutKind.TopDown;
         if (string.IsNullOrWhiteSpace(m.ControlFlowMainAxis))
             m.ControlFlowMainAxis = CodeNavigationMapControlFlowMainAxisKind.Auto;
+        if (string.IsNullOrWhiteSpace(m.ControlFlowGrain))
+            m.ControlFlowGrain = CodeNavigationMapControlFlowGrainKind.Intent;
     }
 
     private static void ApplyMarkdown(MarkdownSettings md)

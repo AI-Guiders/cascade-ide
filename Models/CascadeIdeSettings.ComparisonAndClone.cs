@@ -157,6 +157,21 @@ public sealed partial class CascadeIdeSettings
                 DetailLevel = CodeNavigationMap.DetailLevel,
                 RelatedGraphLayout = CodeNavigationMap.RelatedGraphLayout,
                 ControlFlowMainAxis = CodeNavigationMap.ControlFlowMainAxis,
+                ControlFlowGrain = CodeNavigationMap.ControlFlowGrain,
+                ConditionBranchLabelPreset = CodeNavigationMap.ConditionBranchLabelPreset,
+                ConditionBranch = new CodeNavigationMapConditionBranchToml
+                {
+                    Presets = CodeNavigationMap.ConditionBranch.Presets
+                        .Select(p => new CodeNavigationMapConditionBranchPresetEntry
+                        {
+                            Id = p.Id,
+                            Positive = p.Positive,
+                            Negative = p.Negative
+                        })
+                        .ToList()
+                },
+                ConditionBranchPositive = CodeNavigationMap.ConditionBranchPositive,
+                ConditionBranchNegative = CodeNavigationMap.ConditionBranchNegative,
             },
             Languages = new LanguagesSettings
             {
@@ -487,7 +502,32 @@ public sealed partial class CascadeIdeSettings
             && a.Depth.Is(b.Depth)
             && a.DetailLevel.Is(b.DetailLevel)
             && a.RelatedGraphLayout.Is(b.RelatedGraphLayout)
-            && a.ControlFlowMainAxis.Is(b.ControlFlowMainAxis);
+            && a.ControlFlowMainAxis.Is(b.ControlFlowMainAxis)
+            && CodeNavigationMapControlFlowGrainKind.Normalize(a.ControlFlowGrain)
+                .Is(CodeNavigationMapControlFlowGrainKind.Normalize(b.ControlFlowGrain))
+            && a.NormalizedConditionBranchLabelPreset.Is(b.NormalizedConditionBranchLabelPreset)
+            && ConditionBranchPresetListsEqual(a.ConditionBranch.Presets, b.ConditionBranch.Presets)
+            && a.ConditionBranchPositive.Is(b.ConditionBranchPositive)
+            && a.ConditionBranchNegative.Is(b.ConditionBranchNegative);
+    }
+
+    private static bool ConditionBranchPresetListsEqual(
+        IReadOnlyList<CodeNavigationMapConditionBranchPresetEntry>? a,
+        IReadOnlyList<CodeNavigationMapConditionBranchPresetEntry>? b)
+    {
+        a ??= [];
+        b ??= [];
+        if (a.Count != b.Count)
+            return false;
+        for (var i = 0; i < a.Count; i++)
+        {
+            if (!a[i].Id.Is(b[i].Id)
+                || !(a[i].Positive ?? "").Is(b[i].Positive ?? "")
+                || !(a[i].Negative ?? "").Is(b[i].Negative ?? ""))
+                return false;
+        }
+
+        return true;
     }
 
     private static bool LanguagesEquals(LanguagesSettings? a, LanguagesSettings? b)

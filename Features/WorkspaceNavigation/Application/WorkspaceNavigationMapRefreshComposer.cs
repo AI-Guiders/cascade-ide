@@ -50,6 +50,7 @@ public static class WorkspaceNavigationMapRefreshComposer
         CodeNavigationMapDetailLevel mapDetailLevel,
         string relatedGraphLayout,
         string controlFlowMainAxis,
+        CodeNavigationMapSettings mapSettings,
         TraceSignals trace,
         CockpitSurfaceState? cockpitSurfaceCapturedOnUi)
     {
@@ -93,12 +94,12 @@ public static class WorkspaceNavigationMapRefreshComposer
                         trace.LastTestSummary ?? ""));
                     var cdsDecision = deps.TraceFlowCdsRouter.Route(
                         new TraceFlowCdsRouteInput(cockpitSurfaceCapturedOnUi, normalizedLevel));
-                    var baseScene = composed.ToSceneVm(graphWidth, composed.PreferredHeight);
+                    var baseScene = composed.ToSceneVm(graphWidth, composed.PreferredHeight, mapSettings, solutionPath);
                     scene = deps.TraceFlowSurfaceCompositor.Compose(baseScene, channelPayload, cdsDecision);
                 }
                 else
                 {
-                    scene = composed.ToSceneVm(graphWidth, composed.PreferredHeight);
+                    scene = composed.ToSceneVm(graphWidth, composed.PreferredHeight, mapSettings, solutionPath);
                 }
 
                 graphPreferredHeight = composed.PreferredHeight;

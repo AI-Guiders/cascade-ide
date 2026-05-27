@@ -24,8 +24,13 @@ public sealed record CodeNavigationMapCompositionResult(
     double PreferredHeight,
     IReadOnlyList<CodeNavigationMapInstrumentBlockDescriptor> CodeNavigationMapInstrumentBlocks)
 {
-    public CodeNavigationMapGraphSceneVm ToSceneVm(double layoutViewportWidth, double layoutViewportHeight) =>
-        CodeNavigationMapGraphSceneProjection.ToViewModel(LayoutScene, layoutViewportWidth, layoutViewportHeight);
+    public CodeNavigationMapGraphSceneVm ToSceneVm(
+        double layoutViewportWidth,
+        double layoutViewportHeight,
+        CodeNavigationMapSettings? mapSettings = null,
+        string? solutionPath = null) =>
+        CodeNavigationMapGraphSceneProjection.ToViewModel(
+            LayoutScene, layoutViewportWidth, layoutViewportHeight, mapSettings, solutionPath);
 }
 
 public sealed record CodeNavigationMapCompositionIntent(

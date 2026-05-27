@@ -42,25 +42,58 @@ public static class WorkspaceNavigationMapOrchestrator
     }
 
     /// <summary>
-    /// CF refresh: курсор редактора для текущего файла; для fallback-якоря — первый метод в загруженном тексте.
+    /// CF refresh: только позиция каретки в текущем открытом <c>.cs</c>; без подстановки «первого метода» файла.
     /// </summary>
     public static (int? line, int? column) ResolveControlFlowCursorForRefresh(
-        string? anchorPath,
+        string? navigationPath,
         string? currentPath,
         string? sourceText,
-        int? caretOrSelectionOffset)
+        int? caretOrSelectionOffset,
+        int? navigateToLine = null,
+        int? navigateToColumn = null)
     {
-        var anchorMatchesEditor = !string.IsNullOrEmpty(anchorPath)
-            && !string.IsNullOrEmpty(currentPath)
-            && EditorTextCoordinateUtilities.PathsReferToSameFile(anchorPath, currentPath);
-        if (anchorMatchesEditor)
-            return IdeMcpNavigationOrchestrator.ResolveControlFlowLineColumn(
-                null,
-                null,
-                sourceText,
-                caretOrSelectionOffset);
+        if (string.IsNullOrWhiteSpace(currentPath)
+            || !currentPath.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
+            return (null, null);
 
-        return CodeNavigationControlFlowSubgraphBuilder.TryResolveFirstMethodLineColumn(sourceText);
+        if (!EditorTextCoordinateUtilities.PathsReferToSameFile(navigationPath ?? "", currentPath))
+            return (null, null);
+
+        if (string.IsNullOrEmpty(sourceText))
+            return (null, null);
+
+        return IdeMcpNavigationOrchestrator.ResolveControlFlowLineColumn(
+            navigateToLine,
+            navigateToColumn,
+            sourceText,
+            caretOrSelectionOffset);
+    }
+
+    /// <summary>1-based line → offset в <paramref name="text"/> (для якоря клика по узлу CF).</summary>
+    public static int? TryOffsetForLine(string? text, int lineOneBased, int columnOneBased = 1)
+    {
+        if (string.IsNullOrEmpty(text) || lineOneBased < 1)
+            return null;
+
+        var line = 1;
+        var i = 0;
+        while (line < lineOneBased && i < text.Length)
+        {
+            if (text[i++] == '\n')
+                line++;
+        }
+
+        if (line != lineOneBased)
+            return null;
+
+        var col = Math.Max(1, columnOneBased) - 1;
+        while (col > 0 && i < text.Length && text[i] != '\n')
+        {
+            i++;
+            col--;
+        }
+
+        return Math.Clamp(i, 0, text.Length);
     }
 
     /// <summary>
@@ -93,6 +126,10 @@ public static class WorkspaceNavigationMapOrchestrator
         var msg = root.TryGetProperty("message", out var mEl) ? mEl.GetString() ?? string.Empty : string.Empty;
         if (code == "no_file" && string.IsNullOrEmpty(currentPath))
             return "Откройте файл из дерева решения — здесь появятся связанные.";
+        if (code == "no_control_flow_scope")
+            return string.IsNullOrEmpty(msg)
+                ? "Поставьте курсор в метод или top-level оператор."
+                : msg;
         return string.IsNullOrEmpty(msg) ? code : msg;
     }
 

@@ -1,6 +1,7 @@
 #nullable enable
 using System.Text.Json;
 using CascadeIDE.Cockpit.Graph;
+using CascadeIDE.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -13,25 +14,6 @@ namespace CascadeIDE.Services.CodeNavigation;
 /// </summary>
 public static class CodeNavigationControlFlowSubgraphBuilder
 {
-    /// <summary>Первая декларация метода в тексте — якорь CF, когда курсор редактора не применим (fallback-файл).</summary>
-    public static (int? line, int? column) TryResolveFirstMethodLineColumn(string? sourceText)
-    {
-        if (string.IsNullOrWhiteSpace(sourceText))
-            return (null, null);
-
-        var tree = CSharpSyntaxTree.ParseText(sourceText);
-        var root = tree.GetRoot();
-        if (root is null)
-            return (null, null);
-
-        var method = root.DescendantNodes().OfType<MethodDeclarationSyntax>().FirstOrDefault();
-        if (method is null)
-            return (null, null);
-
-        var span = tree.GetLineSpan(method.Identifier.Span);
-        return (span.StartLinePosition.Line + 1, span.StartLinePosition.Character + 1);
-    }
-
     public static string BuildJson(
         string? filePath,
         string? sourceText,
@@ -62,22 +44,49 @@ public static class CodeNavigationControlFlowSubgraphBuilder
         if (root is null)
             return """{"error":"parse_error","message":"Unable to parse syntax tree."}""";
 
-        var method = FindTargetMethod(root, tree, line, column);
-        if (method is null)
-            return BuildEmptySubgraph(filePath!, line is > 0 ? "no_method_at_cursor" : "no_cursor_position");
+        var scope = CodeNavigationControlFlowScopeResolver.TryFindScope(root, tree, line, column);
+        if (scope is null)
+            return BuildNoScopeAtCursorJson(filePath!, line is > 0);
 
-        var nodeCap = Math.Max(2, maxNodes <= 0 ? 32 : maxNodes);
-        var edgeCap = Math.Max(1, maxEdges <= 0 ? 64 : maxEdges);
+        var nodeCap = Math.Max(2, maxNodes <= 0 ? CodeNavigationContextBuilder.DefaultControlFlowSubgraphMaxNodes : maxNodes);
+        var edgeCap = Math.Max(1, maxEdges <= 0 ? CodeNavigationContextBuilder.DefaultControlFlowSubgraphMaxEdges : maxEdges);
 
-        var graph = new ControlFlowGraphBuilder(filePath!, method.Identifier.Text, nodeCap, edgeCap);
-        graph.Build(method);
+        var graph = new ControlFlowGraphBuilder(filePath!, scope.ScopeLabel, nodeCap, edgeCap);
+        graph.Build(scope);
 
+        return SerializeSubgraphPayload(filePath!, graph.Blueprint);
+    }
+
+    internal static string BuildNoScopeAtCursorJson(string filePath, bool hasCursorPosition) =>
+        JsonSerializer.Serialize(new
+        {
+            error = "no_control_flow_scope",
+            message = hasCursorPosition
+                ? "Нет области control-flow под курсором (метод или top-level statements)."
+                : "Откройте .cs и поставьте курсор в метод или top-level оператор.",
+            anchor_path = filePath
+        });
+
+    internal static string SerializeSubgraphPayload(
+        string anchorPath,
+        GraphDocumentBlueprint blueprint) =>
+        SerializeSubgraphPayload(anchorPath, blueprint.Nodes, blueprint.Edges, blueprint.TruncatedNodes, blueprint.TruncatedEdges);
+
+    internal static string SerializeSubgraphPayload(
+        string anchorPath,
+        IEnumerable<GraphBuildNode> nodes,
+        IEnumerable<GraphBuildEdge> edges,
+        bool truncatedNodes = false,
+        bool truncatedEdges = false)
+    {
         var payload = new
         {
             mode = "subgraph",
             graph_kind = GraphKindWire.CodeIntent,
-            anchor_path = filePath,
-            nodes = graph.Nodes.Select(n => new
+            anchor_path = anchorPath,
+            truncated_nodes = truncatedNodes,
+            truncated_edges = truncatedEdges,
+            nodes = nodes.Select(n => new
             {
                 id = n.Id,
                 path = n.Path,
@@ -91,55 +100,16 @@ public static class CodeNavigationControlFlowSubgraphBuilder
                 line_end = n.LineEnd,
                 loop_group = n.LoopGroupId
             }).ToList(),
-            edges = graph.Edges.Select(e => new
+            edges = edges.Select(e => new
             {
                 from_id = e.FromId,
                 to_id = e.ToId,
                 kind = e.Kind,
-                related_kind = e.RelationKind
+                related_kind = e.RelationKind,
+                edge_provenance = e.EdgeProvenance
             }).ToList()
         };
         return JsonSerializer.Serialize(payload);
-    }
-
-    private static string BuildEmptySubgraph(string filePath, string rationale)
-    {
-        var payload = new
-        {
-            mode = "subgraph",
-            graph_kind = GraphKindWire.CodeIntent,
-            anchor_path = filePath,
-            nodes = new[]
-            {
-                new
-                {
-                    id = "n0",
-                    path = filePath,
-                    kind = "anchor",
-                    label = Path.GetFileName(filePath),
-                    relative_path = "",
-                    rationale
-                }
-            },
-            edges = Array.Empty<object>()
-        };
-        return JsonSerializer.Serialize(payload);
-    }
-
-    private static MethodDeclarationSyntax? FindTargetMethod(SyntaxNode root, SyntaxTree tree, int? line, int? column)
-    {
-        if (line is null || line <= 0)
-            return null;
-
-        var linePos = Math.Max(0, line.Value - 1);
-        var colPos = Math.Max(0, (column ?? 1) - 1);
-        var text = tree.GetText();
-        if (linePos >= text.Lines.Count)
-            return null;
-
-        var pos = text.Lines[linePos].Start + Math.Min(colPos, text.Lines[linePos].Span.Length);
-        var token = root.FindToken(pos);
-        return token.Parent?.AncestorsAndSelf().OfType<MethodDeclarationSyntax>().FirstOrDefault();
     }
 
     private sealed class ControlFlowGraphBuilder
@@ -149,6 +119,9 @@ public static class CodeNavigationControlFlowSubgraphBuilder
         private SyntaxTree? _syntaxTree;
         private int _nextLoopGroupId = 1;
         private int? _currentLoopGroupId;
+        private string? _pendingBranchProvenance;
+
+        public GraphDocumentBlueprint Blueprint => _graph;
 
         public List<GraphBuildNode> Nodes => _graph.Nodes;
 
@@ -166,18 +139,26 @@ public static class CodeNavigationControlFlowSubgraphBuilder
                 GraphKind.CodeIntent);
         }
 
-        public void Build(MethodDeclarationSyntax method)
+        public void Build(CodeNavigationControlFlowScope scope)
         {
-            _syntaxTree = method.SyntaxTree;
+            _syntaxTree = scope.SyntaxTree;
             var continuation = new List<string> { "n0" };
-            if (method.Body is not null)
+            _ = BuildStatementEnumerable(CodeNavigationControlFlowScopeStatements.Enumerate(scope), continuation);
+        }
+
+        private List<string> BuildStatementEnumerable(
+            IEnumerable<StatementSyntax> statements,
+            List<string> incoming)
+        {
+            var continuation = incoming;
+            foreach (var statement in statements)
             {
-                _ = BuildStatementList(method.Body.Statements, continuation);
-                return;
+                continuation = BuildStatement(statement, continuation);
+                if (continuation.Count == 0)
+                    break;
             }
 
-            if (method.ExpressionBody is not null)
-                _ = BuildExpressionInvocations(method.ExpressionBody.Expression, continuation);
+            return continuation;
         }
 
         private List<string> BuildStatementList(SyntaxList<StatementSyntax> statements, List<string> incoming)
@@ -282,10 +263,20 @@ public static class CodeNavigationControlFlowSubgraphBuilder
 
             var fromCondition = new List<string> { conditionId };
 
+            _pendingBranchProvenance = CodeNavigationMapConditionBranchProvenance.True;
             var thenContinuation = BuildStatement(ifStatement.Statement, fromCondition);
-            var elseContinuation = ifStatement.Else is null
-                ? fromCondition
-                : BuildStatement(ifStatement.Else.Statement, fromCondition);
+            List<string> elseContinuation;
+            if (ifStatement.Else is null)
+            {
+                elseContinuation = fromCondition;
+            }
+            else
+            {
+                _pendingBranchProvenance = CodeNavigationMapConditionBranchProvenance.False;
+                elseContinuation = BuildStatement(ifStatement.Else.Statement, fromCondition);
+            }
+
+            _pendingBranchProvenance = null;
 
             return thenContinuation
                 .Concat(elseContinuation)
@@ -543,8 +534,18 @@ public static class CodeNavigationControlFlowSubgraphBuilder
             return (start, Math.Max(start, end));
         }
 
-        private void AddEdges(List<string> fromIds, string toId, string kind, string relatedKind) =>
-            _graph.AddEdges(fromIds, toId, kind, relatedKind);
+        private void AddEdges(List<string> fromIds, string toId, string kind, string relatedKind)
+        {
+            var provenance = _pendingBranchProvenance;
+            if (provenance is not null)
+            {
+                kind = "ConditionalCall";
+                relatedKind = "ConditionalCall";
+            }
+
+            _graph.AddEdges(fromIds, toId, kind, relatedKind, provenance);
+            _pendingBranchProvenance = null;
+        }
     }
 
     private static string DetectEdgeKind(InvocationExpressionSyntax invocation) =>

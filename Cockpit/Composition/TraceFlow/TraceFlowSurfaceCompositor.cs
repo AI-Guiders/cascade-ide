@@ -42,6 +42,7 @@ public sealed class TraceFlowSurfaceCompositor : ITraceFlowSurfaceCompositor
             SideLabelFontSizePx = scene.SideLabelFontSizePx,
             ShowNodeLegendGlyphs = scene.ShowNodeLegendGlyphs,
             RelatedFilesLayout = scene.RelatedFilesLayout,
+            ControlFlowMainAxis = scene.ControlFlowMainAxis,
             LayoutViewportWidth = scene.LayoutViewportWidth,
             LayoutViewportHeight = scene.LayoutViewportHeight
         };
