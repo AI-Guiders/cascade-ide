@@ -49,6 +49,11 @@ internal sealed partial class IdeMcpCommandExecutor
             _vm.CycleCodeNavigationMapDetailLevel();
             return "OK";
         });
+        add(CycleCodeNavigationMapRelatedGraphLayout, async (_, _) =>
+        {
+            _vm.CycleCodeNavigationMapRelatedGraphLayout();
+            return "OK";
+        });
 
         add(SetTerminalVisible, async (args, _) =>
         {
