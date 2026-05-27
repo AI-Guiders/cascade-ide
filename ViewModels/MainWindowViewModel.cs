@@ -158,7 +158,8 @@ public partial class MainWindowViewModel : ViewModelBase, IAutonomousAgentSessio
             () => CurrentFilePath,
             () => EditorText,
             (kind, text, status, at) => InstrumentationPanel.AppendAgentTraceStep(kind, text, status, at),
-            msg => UiScheduler.Default.Post(() => InstrumentationPanel.EventTimeline.Insert(0, msg)));
+            msg => UiScheduler.Default.Post(() => InstrumentationPanel.EventTimeline.Insert(0, msg)),
+            _agentEnvironment.Orchestrator);
 
     /// <summary>
     /// Полоса Workspace Health читает счётчики отладки с главного VM; при смене MCP-стека обновляем строки.
