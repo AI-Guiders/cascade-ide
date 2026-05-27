@@ -28,7 +28,7 @@
 | ID | ADR |
 |----|-----|
 | 0010, 0028–0029 | [UI modes](0010-ui-modes-toml-configuration.md) · [settings.toml](0028-user-settings-toml-localappdata-and-secrets.md) · [TOML-first UI](0029-configuration-toml-canonical-ui-facade.md) |
-| 0030, 0040, 0050–0051, 0083, 0086, 0149 | [команды/хоткеи](0030-command-ids-hotkeys-and-ui-registry-layers.md) · [LSP presets](0040-lsp-launch-line-settings-toml-presets-and-environment.md) · [`*_env`](0149-settings-toml-pointwise-environment-bindings.md) · [инструменты в TOML](0050-declarative-instrument-zone-placement-toml.md) · [intent routing](0051-intent-based-attention-routing-toml.md) · [`[ai]`](0083-ai-mode-and-nested-settings-toml.md) · [тема UI](0086-ui-theme-toml-canonical-json-mcp-wire.md) |
+| 0030, 0040, 0050–0051, 0083, 0086, 0149, 0151 | [команды/хоткеи](0030-command-ids-hotkeys-and-ui-registry-layers.md) · [LSP presets](0040-lsp-launch-line-settings-toml-presets-and-environment.md) · [`*_env`](0149-settings-toml-pointwise-environment-bindings.md) · [CF subgraph grain](0151-control-flow-subgraph-intent-vs-detailed-grain.md) · [инструменты в TOML](0050-declarative-instrument-zone-placement-toml.md) · [intent routing](0051-intent-based-attention-routing-toml.md) · [`[ai]`](0083-ai-mode-and-nested-settings-toml.md) · [тема UI](0086-ui-theme-toml-canonical-json-mcp-wire.md) |
 
 ### Кокпит, CDS и вычислительный контур
 
@@ -51,7 +51,7 @@
 
 | ID | ADR |
 |----|-----|
-| 0039, 0053, 0062 | [workspace navigation](0039-workspace-navigation-affordances.md) · [control flow PFD](0053-semantic-map-control-flow-pfd.md) · [GitMap](0062-git-submodules-semantic-map-subgraph.md) |
+| 0039, 0053, 0151, 0062 | [workspace navigation](0039-workspace-navigation-affordances.md) · [control flow PFD](0053-semantic-map-control-flow-pfd.md) · [CF subgraph grain](0151-control-flow-subgraph-intent-vs-detailed-grain.md) · [GitMap](0062-git-submodules-semantic-map-subgraph.md) |
 | 0067, 0113–0115 | [graph-backed contract](0067-graph-backed-surfaces-contract.md) · [HCI orientation](0113-hci-semantic-map-orientation-layer.md) · [`relation_kind`](0114-graph-edge-relation-kind-taxonomy.md) · [CDS graph layer](0115-cds-graph-backed-shared-layer.md) |
 
 ### Превью и документация (Markdown)
@@ -231,6 +231,8 @@
 | [0140](0140-tci-slash-status-glyphs-and-args-counter.md) | TCI: глифы ✓/✕/P(n) в slash pill; clip/icon placement | Accepted · Proposed |
 | [0141](0141-solution-scoped-warmup-orchestration.md) | Solution warm-up: фоновый прогрев HCI/symbol sidecar/bracket/feed anchors при open | Accepted · Proposed |
 | [0150](0150-slash-line-canonical-resolution.md) | Slash: `SlashLineResolver`, `arg_tail` в каталоге; единый резолв autocomplete · Enter · execute | Accepted · Implemented |
+| [0151](0151-control-flow-subgraph-intent-vs-detailed-grain.md) | Мини-карта CF: `[code_navigation_map].control_flow_grain` intent (деф.) vs detailed; MCP следует тем же settings | Accepted · Implemented |
+| [0152](0152-editor-control-flow-virtual-spacing.md) | Virtual Spacing в редакторе: полоса слева от текста под глифы CF (не поверх кода) | Accepted · Implemented |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 

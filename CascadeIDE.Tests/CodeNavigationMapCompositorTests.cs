@@ -250,6 +250,37 @@ public sealed class CodeNavigationMapCompositorTests
     }
 
     [Fact]
+    public void Compose_ControlFlow_Normal_CollapsesLargeMultiBranchFanOut()
+    {
+        var compositor = new CodeNavigationMapCompositor();
+        var nodes = new List<GraphNode>
+        {
+            new() { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A" },
+            new() { Id = "n1", Path = @"D:\w\A.cs", Kind = "call_step", Label = "B1" },
+            new() { Id = "n2", Path = @"D:\w\A.cs", Kind = "call_step", Label = "B2" },
+            new() { Id = "n3", Path = @"D:\w\A.cs", Kind = "call_step", Label = "B3" },
+            new() { Id = "n4", Path = @"D:\w\A.cs", Kind = "call_step", Label = "B4" },
+            new() { Id = "n5", Path = @"D:\w\A.cs", Kind = "call_step", Label = "B5" },
+        };
+        var edges = new List<GraphEdge>
+        {
+            new() { FromId = "n0", ToId = "n1", Kind = "MultiBranch" },
+            new() { FromId = "n0", ToId = "n2", Kind = "MultiBranch" },
+            new() { FromId = "n0", ToId = "n3", Kind = "MultiBranch" },
+            new() { FromId = "n0", ToId = "n4", Kind = "MultiBranch" },
+            new() { FromId = "n0", ToId = "n5", Kind = "MultiBranch" },
+        };
+        var doc = new GraphDocument { AnchorPath = @"D:\w\A.cs", Nodes = nodes, Edges = edges };
+
+        var normal = compositor.Compose(doc, CodeNavigationMapLevelKind.ControlFlow, 320, 160, CodeNavigationMapDetailLevel.Normal);
+        var vm = normal.ToSceneVm(320, normal.PreferredHeight);
+
+        Assert.Equal(5, vm.Nodes.Count);
+        Assert.Contains(vm.Nodes, n => n.Label == "+2");
+        Assert.Equal(4, vm.Edges.Count(e => e.Kind?.Contains("multibranch", StringComparison.OrdinalIgnoreCase) == true));
+    }
+
+    [Fact]
     public void Compose_ControlFlow_GlanceVsInspect_PreferredHeightInspectIsTallerWhenIntrinsicExceedsMinClamp()
     {
         var compositor = new CodeNavigationMapCompositor();

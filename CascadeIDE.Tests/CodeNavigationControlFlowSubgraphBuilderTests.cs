@@ -1,4 +1,6 @@
 using System.Text.Json;
+using CascadeIDE.Models;
+using CascadeIDE.Services;
 using CascadeIDE.Services.CodeNavigation;
 using CascadeIDE.Features.WorkspaceNavigation.Application;
 using Xunit;
@@ -8,18 +10,163 @@ namespace CascadeIDE.Tests;
 public sealed class CodeNavigationControlFlowSubgraphBuilderTests
 {
     [Fact]
-    public void TryResolveFirstMethodLineColumn_finds_first_method()
+    public void BuildJson_TopLevelStatements_BuildsScopeGraph()
     {
         const string source = """
-class Demo {
-    void First() { }
-    void Second() { }
+using System;
+
+Console.WriteLine("hi");
+if (args.Length > 0)
+    Console.WriteLine(args[0]);
+""";
+
+        var json = CodeNavigationMethodIntentSubgraphBuilder.BuildJson(
+            @"D:\w\Program.cs",
+            source,
+            line: 4,
+            column: 8,
+            maxNodes: 32,
+            maxEdges: 64);
+
+        using var doc = JsonDocument.Parse(json);
+        Assert.False(doc.RootElement.TryGetProperty("error", out _));
+        var nodes = doc.RootElement.GetProperty("nodes").EnumerateArray().ToList();
+        Assert.True(nodes.Count >= 2);
+        Assert.Contains(nodes, n => string.Equals(n.GetProperty("kind").GetString(), "condition_step", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void BuildJson_AcpSmokeTopLevel_ReachesPastLegacyTwelveNodeCap()
+    {
+        var path = Path.GetFullPath(Path.Combine(
+            AppContext.BaseDirectory,
+            "..", "..", "..", "..", "..",
+            "samples", "AcpSmokeDotnet", "Program.cs"));
+        Assert.True(File.Exists(path), path);
+
+        var source = File.ReadAllText(path);
+        var json = CodeNavigationMethodIntentSubgraphBuilder.BuildJson(
+            path,
+            source,
+            line: 40,
+            column: 10,
+            CodeNavigationContextBuilder.DefaultControlFlowSubgraphMaxNodes,
+            CodeNavigationContextBuilder.DefaultControlFlowSubgraphMaxEdges);
+
+        using var doc = JsonDocument.Parse(json);
+        var nodes = doc.RootElement.GetProperty("nodes").EnumerateArray().ToList();
+        Assert.True(nodes.Count > 12, $"expected >12 nodes, got {nodes.Count}");
+        if (doc.RootElement.TryGetProperty("truncated_nodes", out var trunc))
+            Assert.False(trunc.GetBoolean());
+        Assert.True(
+            nodes.Any(n => n.TryGetProperty("legend_text", out var leg)
+                && leg.ValueKind == JsonValueKind.String
+                && leg.GetString()!.Contains("InitializeAsync", StringComparison.Ordinal))
+            || nodes.Any(n => n.TryGetProperty("line_start", out var ls)
+                && ls.ValueKind == JsonValueKind.Number
+                && ls.GetInt32() >= 43));
+    }
+
+    [Fact]
+    public void BuildJson_WhenNodeCapReached_SetsTruncatedFlag()
+    {
+        const string source = """
+class X {
+  void M() {
+    A(); B(); C(); D(); E(); F(); G(); H(); I(); J(); K(); L(); M2(); N(); O();
+  }
+  void A() { } void B() { } void C() { } void D() { } void E() { } void F() { }
+  void G() { } void H() { } void I() { } void J() { } void K() { } void L() { }
+  void M2() { } void N() { } void O() { }
 }
 """;
-        var (line, col) = CodeNavigationControlFlowSubgraphBuilder.TryResolveFirstMethodLineColumn(source);
-        Assert.NotNull(line);
-        Assert.True(line > 0);
-        Assert.Contains("First", source.Split('\n')[line!.Value - 1], StringComparison.Ordinal);
+        var json = CodeNavigationMethodIntentSubgraphBuilder.BuildJson(
+            @"D:\w\X.cs",
+            source,
+            line: 4,
+            column: 8,
+            maxNodes: 12,
+            maxEdges: 64);
+
+        using var doc = JsonDocument.Parse(json);
+        Assert.True(doc.RootElement.GetProperty("truncated_nodes").GetBoolean());
+    }
+
+    [Fact]
+    public void BuildJson_IfInsideWhile_BranchEdgesAreConditionalCallNotLoopCall()
+    {
+        const string source = """
+class X {
+    void M(int x) {
+        while (x > 0) {
+            if (x > 1)
+                return;
+            x--;
+        }
+    }
+}
+""";
+        var json = CodeNavigationMethodIntentSubgraphBuilder.BuildJson(
+            @"D:\w\X.cs",
+            source,
+            line: 6,
+            column: 16,
+            maxNodes: 32,
+            maxEdges: 64);
+
+        using var doc = JsonDocument.Parse(json);
+        var edges = doc.RootElement.GetProperty("edges").EnumerateArray().ToList();
+        var branchEdges = edges
+            .Where(e =>
+                e.TryGetProperty("edge_provenance", out var p)
+                && (p.GetString() == CodeNavigationMapConditionBranchProvenance.True
+                    || p.GetString() == CodeNavigationMapConditionBranchProvenance.False))
+            .ToList();
+        Assert.NotEmpty(branchEdges);
+        Assert.All(
+            branchEdges,
+            e => Assert.Equal("ConditionalCall", e.GetProperty("kind").GetString()));
+        Assert.Contains(
+            edges,
+            e => string.Equals(e.GetProperty("kind").GetString(), "LoopCall", StringComparison.Ordinal));
+        Assert.Contains(
+            edges,
+            e => string.Equals(e.GetProperty("kind").GetString(), "LoopBack", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void BuildJson_IfStatement_TagsTrueAndFalseBranchEdges()
+    {
+        const string source = """
+class X {
+    void M(int x) {
+        if (x > 0)
+            A();
+        else
+            B();
+    }
+    void A() { }
+    void B() { }
+}
+""";
+        var json = CodeNavigationMethodIntentSubgraphBuilder.BuildJson(
+            @"D:\w\X.cs",
+            source,
+            line: 4,
+            column: 12,
+            maxNodes: 32,
+            maxEdges: 64);
+
+        using var doc = JsonDocument.Parse(json);
+        var edges = doc.RootElement.GetProperty("edges").EnumerateArray().ToList();
+        Assert.Contains(
+            edges,
+            e => e.TryGetProperty("edge_provenance", out var p)
+                && p.GetString() == "cf_branch_true");
+        Assert.Contains(
+            edges,
+            e => e.TryGetProperty("edge_provenance", out var p)
+                && p.GetString() == "cf_branch_false");
     }
 
     [Fact]
@@ -220,12 +367,8 @@ class Demo {
 
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
-        var nodes = root.GetProperty("nodes").EnumerateArray().ToList();
-        var edges = root.GetProperty("edges").EnumerateArray().ToList();
-
-        Assert.Single(nodes);
-        Assert.Empty(edges);
-        Assert.Equal("no_method_at_cursor", nodes[0].GetProperty("rationale").GetString());
+        Assert.Equal("no_control_flow_scope", root.GetProperty("error").GetString());
+        Assert.False(root.TryGetProperty("nodes", out _));
     }
 
     [Fact]

@@ -49,6 +49,10 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>CodeNavigation\presets.toml</Link>
     </None>
+    <None Include="..\CodeNavigation\condition-branch-label-presets.toml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>CodeNavigation\condition-branch-label-presets.toml</Link>
+    </None>
     <!-- AiPrompts: промпт ADR 0108 веб-портала — см. WebAiPortalAdr0108PromptVerificationTests -->
     <None Include="..\AiPrompts\web-ai-portal-bridge-adr0108.prompts.md">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

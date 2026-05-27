@@ -172,7 +172,7 @@ IDE-команда **`get_code_navigation_context`** (`ide_execute_command`) —
 
 **Базовые пресеты** — один источник в репо (**`CodeNavigation/presets.toml`**): файл копируется рядом с exe (как `UiModes/`, `Hotkeys/`); при отсутствии файла на диске тот же текст подхватывается из **встроенного ресурса** сборки (без дублирующего литерала в коде). Содержимое по умолчанию: `peers_only`, `no_namespace_noise`, `tests_and_peers`, `structure_only`.
 
-**Репозиторий (команда)** — в **`.cascade/workspace.toml`** в корне открытого решения, секция **`[code_navigation]`** и **`[[code_navigation.presets]]`** (тот же формат, что в `settings.toml`). Merge по **`id`** поверх бандла IDE; приоритет ниже пользовательского слоя (см. ниже). Согласовано с паттерном overlay метрик UI из [0021](0021-pfd-mfd-cockpit-attention-model.md) (`UiWorkspaceToml` + репо).
+**Репозиторий (команда)** — в **`.cascade/workspace.toml`** в корне открытого решения, секция **`[code_navigation]`** и **`[[code_navigation.presets]]`** (тот же формат, что в `settings.toml`). Merge по **`id`** поверх бандла IDE; приоритет ниже пользовательского слоя (см. ниже). Согласовано с паттерном overlay метрик UI из [0021](0021-pfd-mfd-cockpit-attention-model.md) (`UiWorkspaceToml` + репо). Подписи ветвей IF на control-flow — **`[[code_navigation_map.condition_branch.presets]]`** в том же файле ([0053](0053-semantic-map-control-flow-pfd.md)); порядок слоёв: бандл → репо → settings.
 
 **Пользовательский overlay** — в **`%LocalAppData%\CascadeIDE\settings.toml`**, **`[[code_navigation.presets]]`**: у каждой таблицы **`id`**, опционально **`include_kinds`** / **`exclude_kinds`**. Запись с тем же **`id`** перекрывает и бандл, и репо. Итоговый порядок: **бандл → `.cascade/workspace.toml` → `settings.toml`**.
 
