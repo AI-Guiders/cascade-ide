@@ -13,6 +13,12 @@ public sealed class SlashLineResolverTests
     [InlineData("/file open", "", SlashArgTailKind.Required, false, false)]
     [InlineData("/file open src/Foo.cs", "src/Foo.cs", SlashArgTailKind.Required, true, true)]
     [InlineData("/build run", "", SlashArgTailKind.None, true, true)]
+    [InlineData("/intercom topic open", "", SlashArgTailKind.Optional, true, true)]
+    [InlineData("/intercom topic open main", "main", SlashArgTailKind.Optional, true, true)]
+    [InlineData("/agent verify", "", SlashArgTailKind.Optional, true, true)]
+    [InlineData("/agent verify strict", "strict", SlashArgTailKind.Optional, true, true)]
+    [InlineData("/intercom attach selection", "", SlashArgTailKind.None, true, true)]
+    [InlineData("/portal open", "", SlashArgTailKind.Optional, true, true)]
     public void ResolveSlashLine_Matrix(
         string line,
         string expectedArgTail,
