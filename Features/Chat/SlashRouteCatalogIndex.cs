@@ -73,6 +73,7 @@ internal static class SlashRouteCatalogIndex
         return new Snapshot(byPath, intercomVerbs, argTailKind);
     }
 
+    /// <summary>Fallback, если в TOML нет <c>arg_tail</c> (ADR 0150: в bundled catalog — всегда явно).</summary>
     private static SlashArgTailKind inferArgTailKind(
         string path,
         IReadOnlyDictionary<string, SlashRouteEntry> byPath,

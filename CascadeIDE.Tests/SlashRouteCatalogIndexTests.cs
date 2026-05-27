@@ -31,6 +31,24 @@ public sealed class SlashRouteCatalogIndexTests
     }
 
     [Fact]
+    public void GetArgTailKind_TopicOpen_Optional_FromCatalog()
+    {
+        Assert.Equal(SlashArgTailKind.Optional, SlashRouteCatalogIndex.GetArgTailKind("/intercom topic open"));
+    }
+
+    [Fact]
+    public void GetArgTailKind_AgentVerify_Optional_FromCatalog()
+    {
+        Assert.Equal(SlashArgTailKind.Optional, SlashRouteCatalogIndex.GetArgTailKind("/agent verify"));
+    }
+
+    [Fact]
+    public void GetArgTailKind_AttachSelection_None_FromCatalog()
+    {
+        Assert.Equal(SlashArgTailKind.None, SlashRouteCatalogIndex.GetArgTailKind("/intercom attach selection"));
+    }
+
+    [Fact]
     public void GetArgTailKind_ServerStart_Optional()
     {
         Assert.Equal(SlashArgTailKind.Optional, SlashRouteCatalogIndex.GetArgTailKind("/intercom server start"));
