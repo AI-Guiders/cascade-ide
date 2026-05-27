@@ -29,6 +29,11 @@ public partial class MainWindowViewModel
     private readonly ITraceFlowSurfaceCompositor _traceFlowSurfaceCompositor = new TraceFlowSurfaceCompositor();
     private int? _editorCaretOffset;
 
+    /// <summary>Одноразовый якорь CF после клика по узлу графа (строка для refresh + reveal).</summary>
+    private string? _controlFlowGraphNavigatePath;
+    private int? _controlFlowGraphNavigateLine;
+    private int? _controlFlowGraphNavigateColumn;
+
     private CancellationTokenSource? _workspaceNavigationMapRefreshCts;
 
     internal void UpdateCodeNavigationMapCaretOffset(int? offset)
@@ -240,26 +245,20 @@ public partial class MainWindowViewModel
         OnPropertyChanged(nameof(IsEditorHudChromeVisible));
     }
 
+    public bool IsControlFlowEditorVirtualSpacingActiveForFile(string? filePath) =>
+        EditorControlFlowVirtualSpacing.ShouldReserveLane(
+            CodeNavigationMapLevel,
+            WorkspaceNavigationMapCfAnchorFullPath,
+            filePath,
+            CodeNavigationMapGraphScene);
+
     /// <summary>Список глифов CF для строки gutter активного документа (<c>null</c> если не CF / не совпадает якорь).</summary>
     public IReadOnlyList<ControlFlowLineVisual>? GetControlFlowGutterLineVisualsForFile(string? filePath)
     {
-        var wantCf = string.Equals(
-            CodeNavigationMapLevelKind.Normalize(CodeNavigationMapLevel),
-            CodeNavigationMapLevelKind.ControlFlow,
-            StringComparison.Ordinal);
-
-        var anchor = WorkspaceNavigationMapCfAnchorFullPath;
-        var scene = CodeNavigationMapGraphScene;
-        if (!wantCf
-            || string.IsNullOrEmpty(anchor)
-            || string.IsNullOrWhiteSpace(filePath)
-            || !EditorTextCoordinateUtilities.PathsReferToSameFile(anchor, filePath)
-            || scene is null
-            || scene.IsEmpty
-            || scene.Presentation != CodeNavigationMapGraphPresentationKind.CodeControlFlow)
+        if (!IsControlFlowEditorVirtualSpacingActiveForFile(filePath))
             return null;
 
-        return CodeNavigationControlFlowGlyphComposer.BuildGutterLineVisuals(scene);
+        return CodeNavigationControlFlowGlyphComposer.BuildGutterLineVisuals(CodeNavigationMapGraphScene!);
     }
 
     /// <summary>Открыть связанный файл / code anchor из карты намерений.</summary>
@@ -275,6 +274,56 @@ public partial class MainWindowViewModel
                 Documents.OpenOrActivateDocument(path);
                 return;
         }
+    }
+
+    private void BeginControlFlowGraphNodeNavigation(string fullPath, int lineOneBased)
+    {
+        _controlFlowGraphNavigatePath = fullPath;
+        _controlFlowGraphNavigateLine = lineOneBased;
+        _controlFlowGraphNavigateColumn = 1;
+
+        if (!EditorTextCoordinateUtilities.PathsReferToSameFile(CurrentFilePath, fullPath))
+            return;
+
+        var text = TryCaptureLiveEditorText(CurrentFilePath) ?? EditorText;
+        if (WorkspaceNavigationMapOrchestrator.TryOffsetForLine(text, lineOneBased) is int offset)
+            _editorCaretOffset = offset;
+    }
+
+    /// <summary>Не сбрасывать каретку при смене файла, если идёт навигация с CF-графа на ту же цель.</summary>
+    internal bool TryPreserveControlFlowNavigateCaretOnFileChange()
+    {
+        if (_controlFlowGraphNavigateLine is not int line || line < 1
+            || string.IsNullOrEmpty(_controlFlowGraphNavigatePath))
+            return false;
+
+        if (!EditorTextCoordinateUtilities.PathsReferToSameFile(CurrentFilePath, _controlFlowGraphNavigatePath))
+            return false;
+
+        foreach (var editor in EnumerateEditorsForPath(CurrentFilePath))
+        {
+            var docText = editor.Document?.Text;
+            if (WorkspaceNavigationMapOrchestrator.TryOffsetForLine(docText, line) is int offset)
+            {
+                _editorCaretOffset = offset;
+                return true;
+            }
+        }
+
+        if (WorkspaceNavigationMapOrchestrator.TryOffsetForLine(EditorText, line) is int hostOffset)
+        {
+            _editorCaretOffset = hostOffset;
+            return true;
+        }
+
+        return false;
+    }
+
+    private void ClearControlFlowGraphNodeNavigationAnchor()
+    {
+        _controlFlowGraphNavigatePath = null;
+        _controlFlowGraphNavigateLine = null;
+        _controlFlowGraphNavigateColumn = null;
     }
 
     private void NavigateWorkspaceNavigationMapNode(CodeNavigationMapNodeNavigatePayload payload)
@@ -307,7 +356,10 @@ public partial class MainWindowViewModel
                 }
             }
 
-            Documents.OpenOrActivateDocument(path);
+            if (isCf && payload.LineStart is > 0)
+                BeginControlFlowGraphNodeNavigation(path, payload.LineStart.Value);
+
+            Documents.ActivateDocumentForReveal(path);
 
             if (payload.LineStart is > 0)
             {
@@ -315,13 +367,15 @@ public partial class MainWindowViewModel
                 var end = payload.LineEnd is > 0 ? payload.LineEnd.Value : start;
                 var revealPath = path;
                 Avalonia.Threading.Dispatcher.UIThread.Post(
-                    () => _revealEditorRangeAction?.Invoke(revealPath, start, end, 5000),
+                    () => _revealEditorRangeAction?.Invoke(revealPath, start, end, null),
                     Avalonia.Threading.DispatcherPriority.Loaded);
+                if (isCf)
+                    ScheduleWorkspaceNavigationMapRefresh();
             }
             else if (isCf && string.Equals(payload.Kind, "anchor", StringComparison.OrdinalIgnoreCase))
             {
                 Avalonia.Threading.Dispatcher.UIThread.Post(
-                    () => _revealEditorRangeAction?.Invoke(path, 1, 1, 3000),
+                    () => _revealEditorRangeAction?.Invoke(path, 1, 1, null),
                     Avalonia.Threading.DispatcherPriority.Loaded);
             }
 

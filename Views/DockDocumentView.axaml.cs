@@ -42,6 +42,7 @@ public partial class DockDocumentView : UserControl
     private Border? _stickyScrollHost;
     private TextBlock? _stickyScrollText;
     private IBackgroundRenderer? _controlFlowGutterGlyphRenderer;
+    private ControlFlowVirtualSpacingElementGenerator? _controlFlowSpacingGenerator;
 
     // ADR 0103: hi-freq → bounded + throttle на уровне MainWindowViewModel, не DataBus
     private IEditorSurfaceAdapter? _editorSurface;
@@ -223,10 +224,21 @@ public partial class DockDocumentView : UserControl
             _inlineHoverToolTip?.Dispose();
             _inlineHoverToolTip = null;
 
-            if (_editor is not null && _controlFlowGutterGlyphRenderer is not null)
+            if (_editor is not null)
             {
-                _editor.TextArea.TextView.BackgroundRenderers.Remove(_controlFlowGutterGlyphRenderer);
-                _controlFlowGutterGlyphRenderer = null;
+                if (_controlFlowGutterGlyphRenderer is not null)
+                {
+                    _editor.TextArea.TextView.BackgroundRenderers.Remove(_controlFlowGutterGlyphRenderer);
+                    _controlFlowGutterGlyphRenderer = null;
+                }
+
+                if (_controlFlowSpacingGenerator is not null)
+                {
+                    ControlFlowEditorVisualsRegistry.RemoveSpacingGenerator(
+                        _editor.TextArea.TextView,
+                        _controlFlowSpacingGenerator);
+                    _controlFlowSpacingGenerator = null;
+                }
             }
 
             _backgroundVisuals?.Dispose();
@@ -292,9 +304,18 @@ public partial class DockDocumentView : UserControl
             () => _vm.GetEditorInlineHintsForFile(_docVm.Doc.FilePath, _editor.Document.Text ?? ""),
             () => _vm.GetEditorDebugHintsForFile(_docVm.Doc.FilePath, _editor.Document.Text ?? ""));
 
+        _controlFlowSpacingGenerator = ControlFlowEditorVisualsRegistry.GetOrCreateSpacingGenerator(
+            _editor.TextArea.TextView);
+        _controlFlowSpacingGenerator.SetActiveCheck(
+            () => _vm.IsControlFlowEditorVirtualSpacingActiveForFile(_docVm.Doc.FilePath));
+        ControlFlowEditorVisualsRegistry.InstallSpacingGenerator(
+            _editor.TextArea.TextView,
+            _controlFlowSpacingGenerator);
+
         _controlFlowGutterGlyphRenderer = new EditorControlFlowGutterGlyphBackgroundRenderer(
             () => _docVm.Doc.FilePath,
-            fp => _vm.GetControlFlowGutterLineVisualsForFile(fp));
+            fp => _vm.GetControlFlowGutterLineVisualsForFile(fp),
+            fp => _vm.IsControlFlowEditorVirtualSpacingActiveForFile(fp));
         _editor.TextArea.TextView.BackgroundRenderers.Add(_controlFlowGutterGlyphRenderer);
 
         _diagHubHandler = () =>

@@ -12,10 +12,11 @@ namespace CascadeIDE.Services;
 /// <summary>Gutter-глифы control-flow (совпадают с мини-картой Skia / HUD).</summary>
 public sealed class EditorControlFlowGutterGlyphBackgroundRenderer(
     Func<string?> getFilePath,
-    Func<string?, IReadOnlyList<ControlFlowLineVisual>?> getLineVisuals) : IBackgroundRenderer
+    Func<string?, IReadOnlyList<ControlFlowLineVisual>?> getLineVisuals,
+    Func<string?, bool> isVirtualSpacingActive) : IBackgroundRenderer
 {
-    private const double R = 6.2;
-    private const double LeftPad = 3.0;
+    private const double R = EditorControlFlowVirtualSpacing.GlyphRadius;
+    private const double LeftPad = EditorControlFlowVirtualSpacing.LanePadding;
     private static readonly IBrush s_glyph = new SolidColorBrush(Color.FromRgb(180, 188, 204));
     private static readonly IBrush s_anchorFill = new SolidColorBrush(Color.FromArgb(95, 64, 140, 200));
     private static readonly Pen s_stroke = new(new SolidColorBrush(Color.FromRgb(120, 132, 156)), 1);
@@ -45,6 +46,9 @@ public sealed class EditorControlFlowGutterGlyphBackgroundRenderer(
         if (visuals is null || visuals.Count == 0)
             return;
 
+        var filePath = getFilePath();
+        var useVirtualLane = isVirtualSpacingActive(filePath);
+
         var rawSize = TextElement.GetFontSize(textView);
         if (rawSize <= 0 || double.IsNaN(rawSize))
             rawSize = 13.0;
@@ -60,11 +64,8 @@ public sealed class EditorControlFlowGutterGlyphBackgroundRenderer(
             if (v.LineOneBased < 1 || v.LineOneBased > document.LineCount)
                 continue;
             var line = document.GetLineByNumber(v.LineOneBased);
-            if (!TryGetFirstRect(textView, line, out var rect))
+            if (!TryGetLineCenter(textView, v.LineOneBased, useVirtualLane, out var cx, out var cy))
                 continue;
-
-            var cy = rect.Top + rect.Height / 2;
-            var cx = rect.Left + LeftPad + R;
 
             switch (v.VisualKind)
             {
@@ -136,23 +137,37 @@ public sealed class EditorControlFlowGutterGlyphBackgroundRenderer(
         ctx.DrawGeometry(null, pen, geo);
     }
 
-    private static bool TryGetFirstRect(TextView textView, IDocumentLine line, out Rect rect)
+    private static bool TryGetLineCenter(
+        TextView textView,
+        int lineOneBased,
+        bool useVirtualLane,
+        out double cx,
+        out double cy)
     {
-        rect = default;
-        var first = true;
-        foreach (var r in BackgroundGeometryBuilder.GetRectsForSegment(textView, line))
+        cx = 0;
+        cy = 0;
+        if (lineOneBased < 1 || lineOneBased > textView.Document!.LineCount)
+            return false;
+
+        var line = textView.Document.GetLineByNumber(lineOneBased);
+        foreach (var rect in BackgroundGeometryBuilder.GetRectsForSegment(textView, line))
         {
-            if (first)
-            {
-                rect = r;
-                first = false;
-            }
-            else
-            {
-                rect = rect.Union(r);
-            }
+            cy = rect.Top + rect.Height / 2;
+            cx = useVirtualLane
+                ? ResolveVirtualLaneCenterX(rect)
+                : rect.Left + LeftPad + R;
+            return true;
         }
 
-        return !first;
+        return false;
+    }
+
+    /// <summary>Центр virtual-spacing сегмента или слева от текста на переносе строки.</summary>
+    private static double ResolveVirtualLaneCenterX(Rect rect)
+    {
+        if (rect.Width <= EditorControlFlowVirtualSpacing.LaneWidthPixels * 1.25 + 1)
+            return rect.Left + rect.Width / 2;
+
+        return rect.Left - EditorControlFlowVirtualSpacing.LaneHalfWidth;
     }
 }

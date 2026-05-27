@@ -50,7 +50,11 @@ public partial class MainWindowViewModel
         int? cursorLine = null;
         int? cursorColumn = null;
         int? caretOffset = null;
+        string? cfGraphNavigatePath = null;
+        int? cfGraphNavigateLine = null;
+        int? cfGraphNavigateColumn = null;
         CodeNavigationSettings? navSettings = null;
+        string controlFlowGrain = CodeNavigationMapControlFlowGrainKind.Intent;
         var wantList = false;
         var wantGraph = false;
         var level = CodeNavigationMapLevelKind.File;
@@ -78,17 +82,24 @@ public partial class MainWindowViewModel
             anchorPath = WorkspaceNavigationMapAnchorResolver.Resolve(currentPath, openDocumentPaths, rawPaths);
             solutionPath = Workspace.SolutionPath;
             editorText = EditorText;
-            caretOffset = _editorCaretOffset ?? EditorSelectionStart;
-            var (line, column) = WorkspaceNavigationMapOrchestrator.ComputeLineColumn(EditorText, caretOffset);
-            cursorLine = line;
-            cursorColumn = column;
+            caretOffset = TryCaptureLiveEditorCaretOffset(currentPath)
+                ?? _editorCaretOffset
+                ?? EditorSelectionStart;
+            if (TryCaptureLiveEditorText(currentPath) is { } liveText)
+                editorText = liveText;
             navSettings = _settings.CodeNavigation;
             var sm = _settings.CodeNavigationMap;
             wantList = sm.WantsCodeNavigationMapList;
             wantGraph = sm.WantsCodeNavigationMapGraph;
             level = CodeNavigationMapLevelKind.Normalize(sm.Depth);
+            controlFlowGrain = CodeNavigationMapControlFlowGrainKind.Normalize(sm.ControlFlowGrain);
             if (level == CodeNavigationMapLevelKind.ControlFlow)
+            {
                 cockpitSurfaceCapturedOnUi = CockpitSurfaceSnapshotBuilder.Build(this);
+                cfGraphNavigatePath = _controlFlowGraphNavigatePath;
+                cfGraphNavigateLine = _controlFlowGraphNavigateLine;
+                cfGraphNavigateColumn = _controlFlowGraphNavigateColumn;
+            }
         });
 
         var navigationPath = WorkspaceNavigationMapOrchestrator.ResolveNavigationPathForGraphJson(
@@ -113,11 +124,22 @@ public partial class MainWindowViewModel
 
         if (level == CodeNavigationMapLevelKind.ControlFlow)
         {
+            int? navigateLine = null;
+            int? navigateColumn = null;
+            if (cfGraphNavigateLine is > 0
+                && EditorTextCoordinateUtilities.PathsReferToSameFile(cfGraphNavigatePath, navigationPath))
+            {
+                navigateLine = cfGraphNavigateLine;
+                navigateColumn = cfGraphNavigateColumn ?? 1;
+            }
+
             (cursorLine, cursorColumn) = WorkspaceNavigationMapOrchestrator.ResolveControlFlowCursorForRefresh(
                 navigationPath,
                 currentPath,
                 editorText,
-                caretOffset);
+                caretOffset,
+                navigateLine,
+                navigateColumn);
         }
 
         if (ct.IsCancellationRequested)
@@ -139,7 +161,8 @@ public partial class MainWindowViewModel
                             cursorColumn,
                             rawPaths,
                             solutionPath,
-                            navSettings)),
+                            navSettings,
+                            controlFlowGrain)),
                     ct)
                 .ConfigureAwait(false);
         }
@@ -168,6 +191,7 @@ public partial class MainWindowViewModel
             _settings.CodeNavigationMap.NormalizedDetailLevel,
             _settings.CodeNavigationMap.NormalizedRelatedGraphLayout,
             _settings.CodeNavigationMap.NormalizedControlFlowMainAxis,
+            _settings.CodeNavigationMap,
             new WorkspaceNavigationMapRefreshComposer.TraceSignals(ImpactedTestsBadge, LastTestSummary),
             cockpitSurfaceCapturedOnUi);
 
@@ -200,26 +224,76 @@ public partial class MainWindowViewModel
 
         await UiScheduler.Default.InvokeAsync(() =>
         {
-            if (ct.IsCancellationRequested)
-                return;
-            WorkspaceNavigationMapAnchorLabel = dry.AnchorLabel;
-            WorkspaceNavigationMapStatus = dry.Status;
-            WorkspaceNavigationMapRelatedCount = dry.AccentCount;
-            CodeNavigationMapGraphScene = dry.Scene;
-            CodeNavigationMapGraphHeight = dry.GraphHeight;
-            WorkspaceNavigationMapCfAnchorFullPath = dry.CfAnchorFullPath;
-            WorkspaceNavigationMapHciOrientationLine = hciLine;
-            WorkspaceNavigationMapItems.Clear();
-            foreach (var parsed in dry.ListRows)
+            try
             {
-                WorkspaceNavigationMapItems.Add(new WorkspaceNavigationMapItemVm
+                if (ct.IsCancellationRequested)
+                    return;
+                WorkspaceNavigationMapAnchorLabel = dry.AnchorLabel;
+                WorkspaceNavigationMapStatus = dry.Status;
+                WorkspaceNavigationMapRelatedCount = dry.AccentCount;
+                CodeNavigationMapGraphScene = dry.Scene;
+                CodeNavigationMapGraphHeight = dry.GraphHeight;
+                WorkspaceNavigationMapCfAnchorFullPath = dry.CfAnchorFullPath;
+                WorkspaceNavigationMapHciOrientationLine = hciLine;
+                WorkspaceNavigationMapItems.Clear();
+                foreach (var parsed in dry.ListRows)
                 {
-                    FullPath = parsed.FullPath,
-                    RelativePath = parsed.RelativePath,
-                    Kind = parsed.Kind,
-                    Rationale = parsed.Rationale
-                });
+                    WorkspaceNavigationMapItems.Add(new WorkspaceNavigationMapItemVm
+                    {
+                        FullPath = parsed.FullPath,
+                        RelativePath = parsed.RelativePath,
+                        Kind = parsed.Kind,
+                        Rationale = parsed.Rationale
+                    });
+                }
+            }
+            finally
+            {
+                if (cfGraphNavigateLine is > 0)
+                    ClearControlFlowGraphNodeNavigationAnchor();
             }
         });
+    }
+
+    /// <summary>Каретка из видимого <see cref="AvaloniaEdit.TextEditor"/> (не только throttled <see cref="_editorCaretOffset"/>).</summary>
+    private int? TryCaptureLiveEditorCaretOffset(string? currentPath)
+    {
+        foreach (var editor in EnumerateEditorsForPath(currentPath))
+            return editor.TextArea.Caret.Offset;
+
+        return null;
+    }
+
+    private string? TryCaptureLiveEditorText(string? currentPath)
+    {
+        foreach (var editor in EnumerateEditorsForPath(currentPath))
+            return editor.Document.Text;
+
+        return null;
+    }
+
+    private IEnumerable<AvaloniaEdit.TextEditor> EnumerateEditorsForPath(string? currentPath)
+    {
+        if (string.IsNullOrWhiteSpace(currentPath))
+            yield break;
+
+        var direct = EditorActiveDockResolver.TryGetEditor(this, currentPath);
+        if (direct is not null)
+        {
+            yield return direct;
+            yield break;
+        }
+
+        foreach (var doc in Documents.OpenDocuments)
+        {
+            if (string.IsNullOrEmpty(doc.FilePath))
+                continue;
+            if (!EditorTextCoordinateUtilities.PathsReferToSameFile(doc.FilePath, currentPath))
+                continue;
+
+            var editor = EditorActiveDockResolver.TryGetEditor(this, doc.FilePath);
+            if (editor is not null)
+                yield return editor;
+        }
     }
 }

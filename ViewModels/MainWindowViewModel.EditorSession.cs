@@ -132,7 +132,8 @@ public partial class MainWindowViewModel
     /// <summary>Бывший <c>OnCurrentFilePathChanged</c> из DocumentsDock.</summary>
     internal void OnEditorCurrentFilePathChanged()
     {
-        UpdateCodeNavigationMapCaretOffset(null);
+        if (!TryPreserveControlFlowNavigateCaretOnFileChange())
+            UpdateCodeNavigationMapCaretOffset(null);
         RefreshLocBadgeFromCurrentFile();
         Editor.RefreshEditorHudBanner();
         RefreshEditorHudControlFlowStrip();
