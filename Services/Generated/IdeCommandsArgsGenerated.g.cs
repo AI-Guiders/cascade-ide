@@ -93,6 +93,7 @@ internal static class IdeCommandsArgsGenerated
         ["send_keys"] = new IdeCommandsArgs.Arg[] { new("keys", "string", true, false, null), new("name", "string", false, false, null) },
         ["set_breakpoint"] = new IdeCommandsArgs.Arg[] { new("file_path", "string", true, false, null), new("line", "integer", true, false, null), new("condition", "string", false, false, null) },
         ["set_build_output_visible"] = new IdeCommandsArgs.Arg[] { new("visible", "boolean", true, false, null) },
+        ["set_code_navigation_map_level"] = new IdeCommandsArgs.Arg[] { new("level", "string", true, false, null) },
         ["set_control_layout"] = new IdeCommandsArgs.Arg[] { new("name", "string", true, false, null), new("layout", "string", true, false, null) },
         ["set_control_text"] = new IdeCommandsArgs.Arg[] { new("name", "string", true, false, null), new("text", "string", true, false, null) },
         ["set_focus"] = new IdeCommandsArgs.Arg[] { new("name", "string", false, false, null) },

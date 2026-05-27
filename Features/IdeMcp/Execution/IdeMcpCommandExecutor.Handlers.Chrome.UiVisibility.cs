@@ -44,6 +44,14 @@ internal sealed partial class IdeMcpCommandExecutor
             _vm.CycleCodeNavigationMapLevel();
             return "OK";
         });
+        add(SetCodeNavigationMapLevel, async (args, _) =>
+        {
+            var level = McpCommandJsonArgs.String(args, "level")?.Trim();
+            if (string.IsNullOrEmpty(level))
+                return "Missing level (file | controlFlow)";
+            _vm.SetCodeNavigationMapLevel(level);
+            return $"OK: {CodeNavigationMapLevelKind.Normalize(level)}";
+        });
         add(CycleCodeNavigationMapDetailLevel, async (_, _) =>
         {
             _vm.CycleCodeNavigationMapDetailLevel();

@@ -79,7 +79,7 @@ public partial class MainWindowViewModel
 
     public bool IsEditorHudBannerVisible => Editor.IsEditorHudBannerVisible;
 
-    public bool IsEditorHudChromeVisible => IsEditorHudBannerVisible || ShowEditorHudControlFlowStrip;
+    public bool IsEditorHudChromeVisible => IsEditorHudBannerVisible;
 
     public IReadOnlyList<EditorTrailingInlayPart> GetEditorInlineHintsForFile(string filePath, string sourceText) =>
         Editor.GetEditorInlineHintsForFile(filePath, sourceText);
@@ -136,7 +136,6 @@ public partial class MainWindowViewModel
             UpdateCodeNavigationMapCaretOffset(null);
         RefreshLocBadgeFromCurrentFile();
         Editor.RefreshEditorHudBanner();
-        RefreshEditorHudControlFlowStrip();
         ScheduleWorkspaceNavigationMapRefresh();
     }
 

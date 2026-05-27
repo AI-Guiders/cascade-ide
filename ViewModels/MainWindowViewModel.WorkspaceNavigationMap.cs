@@ -42,16 +42,10 @@ public partial class MainWindowViewModel
         if (_settings.CodeNavigationMap.IsControlFlowDepth)
             ScheduleWorkspaceNavigationMapRefresh();
         ScheduleEditorHudBannerRefresh();
-        RefreshEditorHudControlFlowStrip();
     }
 
     /// <summary>Связанные файлы для текущего якоря (режим списка).</summary>
     public ObservableCollection<WorkspaceNavigationMapItemVm> WorkspaceNavigationMapItems { get; } = new();
-
-    /// <summary>Полоска control-flow в HUD над редактором (узлы карты без якорей в коде).</summary>
-    public ObservableCollection<EditorHudControlFlowNodeVm> EditorHudControlFlowNodes { get; } = new();
-
-    public bool ShowEditorHudControlFlowStrip => EditorHudControlFlowNodes.Count > 0;
 
     /// <summary>Варианты <see cref="CodeNavigationMapPresentationKind"/> для ComboBox.</summary>
     public string[] CodeNavigationMapPresentationOptions { get; } =
@@ -123,12 +117,6 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(WorkspaceNavigationMapHasRelated))]
     private int _workspaceNavigationMapRelatedCount;
 
-    partial void OnCodeNavigationMapGraphSceneChanged(CodeNavigationMapGraphSceneVm? value) =>
-        RefreshEditorHudControlFlowStrip();
-
-    partial void OnWorkspaceNavigationMapCfAnchorFullPathChanged(string? value) =>
-        RefreshEditorHudControlFlowStrip();
-
     /// <summary>Настройка <c>list</c>/<c>both</c>: список связанных ренерится на странице MFD <see cref="MfdShellPage.RelatedFiles"/>, не в колонке PFD.</summary>
     public bool ShowCodeNavigationMapList =>
         CodeNavigationMapPresentationProjection.ShowCodeNavigationMapList(CodeNavigationMapPresentation);
@@ -167,83 +155,6 @@ public partial class MainWindowViewModel
         CodeNavigationMapPresentationProjection.WorkspaceNavigationMapHasRelated(
             WorkspaceNavigationMapRelatedCount,
             CodeNavigationMapGraphScene?.Nodes.Count);
-
-    [RelayCommand]
-    private void NavigateEditorHudControlFlowNode(object? parameter)
-    {
-        if (parameter is EditorHudControlFlowNodeVm n)
-            NavigateWorkspaceNavigationMapNode(n.ToNavigatePayload());
-    }
-
-    private void RefreshEditorHudControlFlowStrip()
-    {
-        var wantCf = string.Equals(
-            CodeNavigationMapLevelKind.Normalize(CodeNavigationMapLevel),
-            CodeNavigationMapLevelKind.ControlFlow,
-            StringComparison.Ordinal);
-
-        var anchor = WorkspaceNavigationMapCfAnchorFullPath;
-        var current = CurrentFilePath;
-        var scene = CodeNavigationMapGraphScene;
-        if (!wantCf
-            || string.IsNullOrEmpty(anchor)
-            || string.IsNullOrEmpty(current)
-            || !EditorTextCoordinateUtilities.PathsReferToSameFile(anchor, current)
-            || scene is null
-            || scene.IsEmpty
-            || scene.Presentation != CodeNavigationMapGraphPresentationKind.CodeControlFlow)
-        {
-            if (EditorHudControlFlowNodes.Count > 0)
-            {
-                EditorHudControlFlowNodes.Clear();
-                OnPropertyChanged(nameof(ShowEditorHudControlFlowStrip));
-                OnPropertyChanged(nameof(IsEditorHudChromeVisible));
-            }
-
-            return;
-        }
-
-        var caretOffset = _editorCaretOffset ?? EditorSelectionStart;
-        var (caretLine, _) = WorkspaceNavigationMapOrchestrator.ComputeLineColumn(EditorText, caretOffset);
-
-        static int SortKey(CodeNavigationMapGraphNodeLayout n) =>
-            n.IsAnchor ? int.MinValue :
-            n.LegendIndex is > 0 ? n.LegendIndex.Value :
-            string.Equals(n.Kind, "exit_step", StringComparison.OrdinalIgnoreCase) ? int.MaxValue :
-            int.MaxValue - 1;
-
-        var newNodes = scene.Nodes
-            .OrderBy(SortKey)
-            .Select(n =>
-            {
-                CodeNavigationControlFlowGlyphComposer.GetNodeVisual(n, scene, out var vk, out var text, out var exitArrow);
-
-                var vm = new EditorHudControlFlowNodeVm
-                {
-                    NodeId = n.Id,
-                    Kind = n.Kind,
-                    FullPath = n.FullPath,
-                    LineStart = n.LineStart,
-                    LineEnd = n.LineEnd,
-                    LegendLine = n.LegendLine,
-                    Label = n.Label,
-                    Glyph = text,
-                    VisualKind = vk,
-                    ShowExitArrow = exitArrow,
-                    HudToolTip = CodeNavigationControlFlowGlyphComposer.TooltipForNode(n),
-                };
-                if (caretLine > 0)
-                    vm.IsHighlighted = vm.IsCaretOnNode(caretLine);
-                return vm;
-            })
-            .ToList();
-
-        EditorHudControlFlowNodes.Clear();
-        foreach (var n in newNodes)
-            EditorHudControlFlowNodes.Add(n);
-        OnPropertyChanged(nameof(ShowEditorHudControlFlowStrip));
-        OnPropertyChanged(nameof(IsEditorHudChromeVisible));
-    }
 
     public bool IsControlFlowEditorVirtualSpacingActiveForFile(string? filePath) =>
         EditorControlFlowVirtualSpacing.ShouldReserveLane(
@@ -408,6 +319,10 @@ public partial class MainWindowViewModel
     /// <summary>Команда палитры / MCP: file ↔ controlFlow.</summary>
     public void CycleCodeNavigationMapLevel() =>
         CodeNavigationMapLevel = CodeNavigationMapPresentationProjection.ToggledMapLevel(CodeNavigationMapLevel);
+
+    /// <summary>Команда палитры / MCP / слэш: явно <c>file</c> или <c>controlFlow</c>.</summary>
+    public void SetCodeNavigationMapLevel(string level) =>
+        CodeNavigationMapLevel = CodeNavigationMapLevelKind.Normalize(level);
 
     /// <summary>Команда палитры / MCP: radial → top_down → bottom_up.</summary>
     public void CycleCodeNavigationMapRelatedGraphLayout()

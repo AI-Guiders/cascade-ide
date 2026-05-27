@@ -177,6 +177,7 @@ internal static class IdeCommandsDoc
         ["send_keys"] = "Отправить хоткей в контрол. args: keys:string, name?:string; returns: text; example: {\"keys\":\"Ctrl+S\"}.",
         ["set_breakpoint"] = "Поставить брейкпоинт: при необходимости загрузка найденного .sln/.slnx/.slnf, запись в JSON отладки, открытие файла и переход к строке. args: file_path:string, line:integer, condition?:string; returns: text; example: {\"file_path\":\"C:\\\\tmp\\\\a.cs\",\"line\":42}.",
         ["set_build_output_visible"] = "Явно показать/скрыть журнал сборки. args: visible:boolean; returns: text; example: {\"visible\":true}.",
+        ["set_code_navigation_map_level"] = "Карта намерений: установить уровень `file` или `controlFlow` (слэш `/map type …`). args: level:string; returns: text; example: {\"level\":\"file\"}.",
         ["set_control_layout"] = "Изменить раскладку/позицию контрола. args: name:string, layout:string; returns: text; example: {\"name\":\"BuildButton\",\"layout\":\"{}\"}.",
         ["set_control_text"] = "Установить текст в контроле ввода. args: name:string, text:string; returns: text; example: {\"name\":\"ChatInput\",\"text\":\"hi\"}.",
         ["set_dual_editor_group"] = "Две группы редакторов (2-up). returns: text.",

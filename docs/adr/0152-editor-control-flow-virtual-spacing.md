@@ -17,7 +17,7 @@
 
 ## Решение
 
-**Virtual Spacing:** при активной карте CF для текущего `.cs` (тот же якорь, что subgraph) в начале **каждой** визуальной строки вставляется элемент с `DocumentLength = 0` и фиксированной визуальной шириной (`ControlFlowVirtualSpacingElementGenerator`, по аналогии с inlay). Текст и каретка сдвигаются вправо; глифы рисуются в центре зарезервированной полосы (`EditorControlFlowVirtualSpacing.LaneWidthPixels`).
+**Virtual Spacing:** при активной карте CF для текущего `.cs` (тот же якорь, что subgraph) в начале **каждой** визуальной строки вставляется элемент с `DocumentLength = 0` и фиксированной визуальной шириной (`ControlFlowVirtualSpacingElementGenerator`, по аналогии с inlay). Текст и каретка сдвигаются вправо; узлы рисуются в центре полосы (`ControlFlowEditorNodePainter` — заливки/фигуры как на мини-карте Skia, палитра `CockpitPrimitivesPalette.CodeNavigationMap`).
 
 Условие включения совпадает с отображением gutter-глифов: `controlFlow` + непустая сцена subgraph + путь файла = якорь CF.
 

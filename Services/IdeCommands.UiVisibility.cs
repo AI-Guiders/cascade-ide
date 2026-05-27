@@ -22,6 +22,9 @@ public static partial class IdeCommands
     /// <summary>Карта намерений: переключить уровень file ↔ controlFlow (Ctrl+K → S → F). returns: text.</summary>
     public const string CycleCodeNavigationMapLevel = "cycle_code_navigation_map_level";
 
+    /// <summary>Карта намерений: установить уровень <c>file</c> или <c>controlFlow</c> (слэш <c>/map type …</c>). args: level:string; returns: text; example: {"level":"file"}.</summary>
+    public const string SetCodeNavigationMapLevel = "set_code_navigation_map_level";
+
     /// <summary>Карта намерений: цикл детализации glance → normal → inspect (Ctrl+K → S → D). returns: text.</summary>
     public const string CycleCodeNavigationMapDetailLevel = "cycle_code_navigation_map_detail_level";
 

@@ -12,6 +12,7 @@ public static partial class IdeCommandRegistry
         AddPalette(b, "toggle_pfd_region_expanded", IdeCommands.TogglePfdRegionExpanded, "Переключить регион Pfd (карта намерений)", "Вид");
         AddPalette(b, "cycle_code_navigation_map_presentation", IdeCommands.CycleCodeNavigationMapPresentation, "Карта намерений: цикл вида (list / graph / both)", "Вид");
         AddPalette(b, "cycle_code_navigation_map_level", IdeCommands.CycleCodeNavigationMapLevel, "Карта намерений: уровень file ↔ control flow", "Вид");
+        AddPalette(b, "set_code_navigation_map_level", IdeCommands.SetCodeNavigationMapLevel, "Карта намерений: установить уровень file | controlFlow", "Вид");
         AddPalette(b, "cycle_code_navigation_map_detail_level", IdeCommands.CycleCodeNavigationMapDetailLevel, "Карта намерений: детализация glance / normal / inspect", "Вид");
         AddPalette(b, "cycle_code_navigation_map_related_graph_layout", IdeCommands.CycleCodeNavigationMapRelatedGraphLayout, "Карта намерений: укладка related (radial / top_down / bottom_up)", "Вид");
         AddPalette(b, "toggle_build_output", IdeCommands.ToggleBuildOutput, "Переключить вывод сборки", "Вид");

@@ -308,6 +308,8 @@ public partial class DockDocumentView : UserControl
             _editor.TextArea.TextView);
         _controlFlowSpacingGenerator.SetActiveCheck(
             () => _vm.IsControlFlowEditorVirtualSpacingActiveForFile(_docVm.Doc.FilePath));
+        _controlFlowSpacingGenerator.SetLineVisualsProvider(
+            () => _vm.GetControlFlowGutterLineVisualsForFile(_docVm.Doc.FilePath));
         ControlFlowEditorVisualsRegistry.InstallSpacingGenerator(
             _editor.TextArea.TextView,
             _controlFlowSpacingGenerator);

@@ -16,15 +16,16 @@ public enum ControlFlowNodeVisualKind
     Exit
 }
 
-/// <summary>Одна метка в gutter / соответствие HUD: логическая строка 1-based.</summary>
+/// <summary>Одна метка в gutter / virtual spacing lane: логическая строка 1-based.</summary>
 public sealed record ControlFlowLineVisual(
     int LineOneBased,
     ControlFlowNodeVisualKind VisualKind,
+    string NodeKind,
     string TextGlyph,
     bool ShowExitArrow,
     string? ToolTip);
 
-/// <summary>Сборка глифов control-flow для gutter и Editor HUD (без дублирования логики Skia).</summary>
+/// <summary>Сборка глифов control-flow для редактора (без дублирования логики Skia).</summary>
 [ComputingUnit]
 public static class CodeNavigationControlFlowGlyphComposer
 {
@@ -97,7 +98,7 @@ public static class CodeNavigationControlFlowGlyphComposer
                 continue;
             GetNodeVisual(n, scene, out var kind, out var text, out var arrow);
             var tip = TooltipForNode(n);
-            byLine[line.Value] = new ControlFlowLineVisual(line.Value, kind, text, arrow, tip);
+            byLine[line.Value] = new ControlFlowLineVisual(line.Value, kind, n.Kind, text, arrow, tip);
         }
 
         return byLine.Keys.OrderBy(k => k).Select(k => byLine[k]).ToList();
