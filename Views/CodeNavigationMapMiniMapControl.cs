@@ -47,27 +47,37 @@ public sealed class CodeNavigationMapMiniMapControl : Control
         var cmd = OpenFileCommand;
         if (scene is null || cmd is null)
             return;
-        var p = e.GetPosition(this);
-        foreach (var n in scene.Nodes)
-        {
-            if (!SkiaGraphSceneDrawing.HitTestNode(GraphLayoutSceneMapper.MapNode(n), p))
-                continue;
-            var path = n.FullPath;
-            if (string.IsNullOrWhiteSpace(path))
-                continue;
-            if (!cmd.CanExecute(path))
-                continue;
-            try
-            {
-                cmd.Execute(path);
-                e.Handled = true;
-            }
-            catch
-            {
-                // RelayCommand/ICommand: не роняем UI при кривом пути или сбое дока
-            }
-
+        var layout = GraphLayoutSceneMapper.FromViewModel(scene);
+        var p = SkiaGraphSceneHitTesting.MapControlPointToLayout(
+            e.GetPosition(this),
+            Bounds.Width,
+            Bounds.Height,
+            scene.LayoutViewportWidth,
+            scene.LayoutViewportHeight);
+        var hit = SkiaGraphSceneHitTesting.FindNodeAt(layout, p);
+        if (hit is null || string.IsNullOrWhiteSpace(hit.FullPath))
             return;
+
+        var vmNode = scene.Nodes.FirstOrDefault(n => string.Equals(n.Id, hit.Id, StringComparison.OrdinalIgnoreCase));
+        if (vmNode is null)
+            return;
+
+        var payload = new CodeNavigationMapNodeNavigatePayload(
+            vmNode.FullPath,
+            vmNode.LineStart,
+            vmNode.LineEnd,
+            vmNode.LegendLine,
+            vmNode.Kind);
+        if (!cmd.CanExecute(payload))
+            return;
+        try
+        {
+            cmd.Execute(payload);
+            e.Handled = true;
+        }
+        catch
+        {
+            // RelayCommand/ICommand: не роняем UI при кривом пути или сбое дока
         }
     }
 

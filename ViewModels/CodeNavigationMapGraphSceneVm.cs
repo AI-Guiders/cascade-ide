@@ -1,5 +1,6 @@
 #nullable enable
 using Avalonia;
+using CascadeIDE.Models;
 
 namespace CascadeIDE.ViewModels;
 
@@ -56,10 +57,22 @@ public sealed class CodeNavigationMapGraphSceneVm
     public IReadOnlySet<string> HighlightedNodeIds { get; init; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
     public IReadOnlySet<string> HighlightedEdgeKeys { get; init; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>Номера шагов на узлах (без колонки легенды).</summary>
+    public bool ShowNodeLegendGlyphs { get; init; }
+
+    /// <summary><c>radial</c> | <c>top_down</c> | <c>bottom_up</c> (related-files).</summary>
+    public string RelatedFilesLayout { get; init; } = CodeNavigationMapRelatedGraphLayoutKind.Radial;
+
     /// <summary>
     /// Размер шрифта боковых подписей узлов (call_step), согласованный с укладкой; null — <see cref="CascadeIDE.Cockpit.Graph.Layout.GraphRenderInvariants.MinSideLabelFontSize"/> при отрисовке.
     /// </summary>
     public double? SideLabelFontSizePx { get; init; }
+
+    /// <summary>Ширина viewport при укладке (для hit-test при расхождении с <c>Bounds</c>).</summary>
+    public double LayoutViewportWidth { get; init; }
+
+    /// <summary>Высота viewport при укладке (для hit-test при расхождении с <c>Bounds</c>).</summary>
+    public double LayoutViewportHeight { get; init; }
 
     public bool IsEmpty => Nodes.Count == 0;
 }
@@ -92,6 +105,8 @@ public sealed class CodeNavigationMapGraphNodeLayout
     public CodeNavigationMapNodeShape Shape { get; init; } = CodeNavigationMapNodeShape.Circle;
     public int? LegendIndex { get; init; }
     public string? LegendLine { get; init; }
+    public int? LineStart { get; init; }
+    public int? LineEnd { get; init; }
 }
 
 public sealed class CodeNavigationMapGraphEdgeLayout

@@ -6,7 +6,10 @@ namespace CascadeIDE.ViewModels;
 /// <summary>Мост <see cref="GraphLayoutScene"/> ↔ binding VM (ADR 0055 layout/render split).</summary>
 public static class CodeNavigationMapGraphSceneProjection
 {
-    public static CodeNavigationMapGraphSceneVm ToViewModel(GraphLayoutScene scene) =>
+    public static CodeNavigationMapGraphSceneVm ToViewModel(
+        GraphLayoutScene scene,
+        double layoutViewportWidth = 0,
+        double layoutViewportHeight = 0) =>
         new()
         {
             Nodes = scene.Nodes.Select(MapNode).ToList(),
@@ -23,7 +26,11 @@ public static class CodeNavigationMapGraphSceneProjection
             LegendBlockTopY = scene.LegendBlockTopY,
             HighlightedNodeIds = scene.HighlightedNodeIds,
             HighlightedEdgeKeys = scene.HighlightedEdgeKeys,
-            SideLabelFontSizePx = scene.SideLabelFontSizePx
+            SideLabelFontSizePx = scene.SideLabelFontSizePx,
+            ShowNodeLegendGlyphs = scene.ShowNodeLegendGlyphs,
+            RelatedFilesLayout = scene.RelatedFilesLayout,
+            LayoutViewportWidth = layoutViewportWidth,
+            LayoutViewportHeight = layoutViewportHeight
         };
 
     public static GraphLayoutScene FromViewModel(CodeNavigationMapGraphSceneVm scene) =>
@@ -43,7 +50,9 @@ public static class CodeNavigationMapGraphSceneProjection
             LegendBlockTopY = scene.LegendBlockTopY,
             HighlightedNodeIds = scene.HighlightedNodeIds,
             HighlightedEdgeKeys = scene.HighlightedEdgeKeys,
-            SideLabelFontSizePx = scene.SideLabelFontSizePx
+            SideLabelFontSizePx = scene.SideLabelFontSizePx,
+            ShowNodeLegendGlyphs = scene.ShowNodeLegendGlyphs,
+            RelatedFilesLayout = scene.RelatedFilesLayout
         };
 
     public static CodeNavigationMapGraphNodeLayout MapNode(GraphLayoutNode n) =>
@@ -58,7 +67,9 @@ public static class CodeNavigationMapGraphSceneProjection
             IsAnchor = n.IsAnchor,
             Shape = MapNodeShape(n.Shape),
             LegendIndex = n.LegendIndex,
-            LegendLine = n.LegendLine
+            LegendLine = n.LegendLine,
+            LineStart = n.LineStart,
+            LineEnd = n.LineEnd
         };
 
     public static CodeNavigationMapGraphEdgeLayout MapEdge(GraphLayoutEdge e) =>
@@ -85,7 +96,9 @@ public static class CodeNavigationMapGraphSceneProjection
             IsAnchor = n.IsAnchor,
             Shape = MapNodeShapeToLayout(n.Shape),
             LegendIndex = n.LegendIndex,
-            LegendLine = n.LegendLine
+            LegendLine = n.LegendLine,
+            LineStart = n.LineStart,
+            LineEnd = n.LineEnd
         };
 
     public static GraphLayoutEdge ToLayoutEdge(CodeNavigationMapGraphEdgeLayout e) =>

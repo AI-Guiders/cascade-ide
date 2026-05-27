@@ -82,6 +82,8 @@ public partial class MainWindowViewModel
 
         _codeNavigationMapPresentation = CodeNavigationMapPresentationKind.Normalize(_settings.CodeNavigationMap.View);
         _codeNavigationMapLevel = CodeNavigationMapLevelKind.Normalize(_settings.CodeNavigationMap.Depth);
+        _codeNavigationMapControlFlowMainAxis =
+            CodeNavigationMapControlFlowMainAxisKind.Normalize(_settings.CodeNavigationMap.ControlFlowMainAxis);
         _workspaceSplittersLocked = _settings.Workspace.SplittersLocked;
 
         _hciIntegrationEnabled = _settings.HybridIndex.Enabled;

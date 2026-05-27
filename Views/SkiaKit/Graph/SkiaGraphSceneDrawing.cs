@@ -58,6 +58,7 @@ public static partial class SkiaGraphSceneDrawing
         if (scene.IsEmpty || width <= 0 || height <= 0)
             return;
 
+        DrawLoopGroupOutlines(context, scene, theme);
         DrawEdges(context, scene, theme);
         DrawNodes(context, scene, theme);
         DrawLegend(context, scene, theme, width, height);

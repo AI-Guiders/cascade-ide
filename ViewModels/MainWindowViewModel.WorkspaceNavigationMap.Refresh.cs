@@ -5,6 +5,7 @@ using CascadeIDE.Cockpit.Graph;
 using CascadeIDE.Features.WorkspaceNavigation.Application;
 using CascadeIDE.Models;
 using CascadeIDE.Features.HybridIndex.Application;
+using CascadeIDE.Services;
 using System.IO;
 
 namespace CascadeIDE.ViewModels;
@@ -57,8 +58,23 @@ public partial class MainWindowViewModel
         await UiScheduler.Default.InvokeAsync(() =>
         {
             rawPaths = McpSolutionTree.CollectFileEntries(Workspace.SolutionRoots).Select(e => e.FullPath).ToList();
-            openDocumentPaths = Documents.OpenDocuments.Select(d => d.FilePath).ToList();
+            openDocumentPaths = Documents.OpenDocuments
+                .Select(d => d.FilePath)
+                .Where(fp => !string.IsNullOrEmpty(fp))
+                .Select(fp => fp!)
+                .ToList();
             currentPath = CurrentFilePath;
+            var curOrder = currentPath ?? "";
+            openDocumentPaths.Sort((a, b) =>
+            {
+                bool Match(string d) =>
+                    !string.IsNullOrEmpty(curOrder) && EditorTextCoordinateUtilities.PathsReferToSameFile(d, curOrder);
+                var am = Match(a);
+                var bm = Match(b);
+                if (am == bm)
+                    return 0;
+                return am ? -1 : 1;
+            });
             anchorPath = WorkspaceNavigationMapAnchorResolver.Resolve(currentPath, openDocumentPaths, rawPaths);
             solutionPath = Workspace.SolutionPath;
             editorText = EditorText;
@@ -75,21 +91,25 @@ public partial class MainWindowViewModel
                 cockpitSurfaceCapturedOnUi = CockpitSurfaceSnapshotBuilder.Build(this);
         });
 
-        if (!string.IsNullOrEmpty(anchorPath)
-            && !string.Equals(anchorPath, currentPath, StringComparison.OrdinalIgnoreCase))
+        var navigationPath = WorkspaceNavigationMapOrchestrator.ResolveNavigationPathForGraphJson(
+            level,
+            currentPath,
+            anchorPath,
+            rawPaths);
+
+        if (!string.IsNullOrEmpty(navigationPath)
+            && !EditorTextCoordinateUtilities.PathsReferToSameFile(navigationPath, currentPath ?? ""))
         {
             try
             {
-                if (File.Exists(anchorPath))
-                    editorText = File.ReadAllText(anchorPath);
+                if (File.Exists(navigationPath))
+                    editorText = File.ReadAllText(navigationPath);
             }
             catch
             {
                 // keep editor text as-is
             }
         }
-
-        var navigationPath = anchorPath ?? currentPath;
 
         if (level == CodeNavigationMapLevelKind.ControlFlow)
         {
@@ -146,6 +166,8 @@ public partial class MainWindowViewModel
             CodeNavigationMapGraphWidth,
             CodeNavigationMapGraphHeight,
             _settings.CodeNavigationMap.NormalizedDetailLevel,
+            _settings.CodeNavigationMap.NormalizedRelatedGraphLayout,
+            _settings.CodeNavigationMap.NormalizedControlFlowMainAxis,
             new WorkspaceNavigationMapRefreshComposer.TraceSignals(ImpactedTestsBadge, LastTestSummary),
             cockpitSurfaceCapturedOnUi);
 
@@ -185,6 +207,7 @@ public partial class MainWindowViewModel
             WorkspaceNavigationMapRelatedCount = dry.AccentCount;
             CodeNavigationMapGraphScene = dry.Scene;
             CodeNavigationMapGraphHeight = dry.GraphHeight;
+            WorkspaceNavigationMapCfAnchorFullPath = dry.CfAnchorFullPath;
             WorkspaceNavigationMapHciOrientationLine = hciLine;
             WorkspaceNavigationMapItems.Clear();
             foreach (var parsed in dry.ListRows)

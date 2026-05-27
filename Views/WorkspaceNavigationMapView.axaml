@@ -75,7 +75,7 @@
                                Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
                                TextWrapping="Wrap"
                                IsVisible="{Binding ShowCodeNavigationMapGraphClickHint}"
-                               Text="Клик по узлу — открыть файл."/>
+                               Text="Клик по узлу — открыть файл; в control flow — подсветка фрагмента (code anchor)."/>
                     <TextBlock Text="{Binding WorkspaceNavigationMapStatus}"
                                FontSize="11"
                                Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"

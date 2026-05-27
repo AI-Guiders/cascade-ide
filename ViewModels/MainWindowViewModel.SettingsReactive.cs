@@ -140,6 +140,20 @@ public partial class MainWindowViewModel
         ScheduleWorkspaceNavigationMapRefresh();
     }
 
+    partial void OnCodeNavigationMapControlFlowMainAxisChanged(string value)
+    {
+        var normalized = CodeNavigationMapControlFlowMainAxisKind.Normalize(value);
+        if (ShellSettingsPresentationProjection.ShouldRewriteWithNormalizedValue(value, normalized))
+        {
+            CodeNavigationMapControlFlowMainAxis = normalized;
+            return;
+        }
+
+        _settings.CodeNavigationMap.ControlFlowMainAxis = normalized;
+        SaveSettingsIfChanged();
+        ScheduleWorkspaceNavigationMapRefresh();
+    }
+
     partial void OnWorkspaceSplittersLockedChanged(bool value)
     {
         _settings.Workspace.SplittersLocked = value;

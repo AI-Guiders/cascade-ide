@@ -1,0 +1,24 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CascadeIDE.ViewModels"
+             x:Class="CascadeIDE.Views.SettingsWorkspaceNavigationPanelView"
+             x:DataType="vm:MainWindowViewModel">
+    <StackPanel Spacing="10">
+        <TextBlock TextWrapping="Wrap"
+                   FontSize="12"
+                   Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                   Text="Карта намерений (PFD): настройки укладки control-flow мини-карты."/>
+        <StackPanel Spacing="6">
+            <TextBlock Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                       TextWrapping="Wrap"
+                       Text="Главная ось control-flow (settings.toml: [code_navigation_map].control_flow_main_axis):"/>
+            <ComboBox ItemsSource="{Binding CodeNavigationMapControlFlowMainAxisOptions}"
+                      SelectedItem="{Binding CodeNavigationMapControlFlowMainAxis, Mode=TwoWay}"
+                      MinWidth="260"/>
+            <TextBlock FontSize="11"
+                       Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                       TextWrapping="Wrap"
+                       Text="auto — выбор оси по доступному месту; vertical / horizontal — принудительная фиксация."/>
+        </StackPanel>
+    </StackPanel>
+</UserControl>
