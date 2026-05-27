@@ -10,10 +10,8 @@ internal static class SlashCommandPreviewRulePipeline
     private static readonly ISlashCommandPreviewRule[] Rules =
     [
         new NotSlashPreviewRule(),
-        new RejectedSlashPreviewRule(),
         new AnchorPeekPreviewRule(),
         new EditorLineSelectPreviewRule(),
-        new IntercomPathPreviewRule(),
         new CatalogSlashPreviewRule(),
         new UnknownSlashPreviewRule(),
     ];
@@ -22,10 +20,9 @@ internal static class SlashCommandPreviewRulePipeline
         string? bufferText,
         SlashCommandAnchorPreviewResolver? resolveAnchor)
     {
-        var parse = ChatSlashCommandParser.TryParse(bufferText);
         foreach (var rule in Rules)
         {
-            if (rule.TryEvaluate(parse, bufferText, resolveAnchor, out var result))
+            if (rule.TryEvaluate(bufferText, resolveAnchor, out var result))
                 return result;
         }
 
@@ -35,7 +32,6 @@ internal static class SlashCommandPreviewRulePipeline
     private interface ISlashCommandPreviewRule
     {
         bool TryEvaluate(
-            ChatSlashCommandParseResult parse,
             string? bufferText,
             SlashCommandAnchorPreviewResolver? resolveAnchor,
             out SlashCommandPreviewResult result);
@@ -44,12 +40,11 @@ internal static class SlashCommandPreviewRulePipeline
     private sealed class NotSlashPreviewRule : ISlashCommandPreviewRule
     {
         public bool TryEvaluate(
-            ChatSlashCommandParseResult parse,
             string? bufferText,
             SlashCommandAnchorPreviewResolver? resolveAnchor,
             out SlashCommandPreviewResult result)
         {
-            if (parse.IsSlashLine)
+            if (ChatSlashCommandParser.IsSlashLine(bufferText))
                 return TryReject(out result);
 
             result = SlashCommandPreviewResult.Empty;
@@ -57,35 +52,22 @@ internal static class SlashCommandPreviewRulePipeline
         }
     }
 
-    private sealed class RejectedSlashPreviewRule : ISlashCommandPreviewRule
-    {
-        public bool TryEvaluate(
-            ChatSlashCommandParseResult parse,
-            string? bufferText,
-            SlashCommandAnchorPreviewResolver? resolveAnchor,
-            out SlashCommandPreviewResult result)
-        {
-            if (!parse.IsRejected)
-                return TryReject(out result);
-
-            result = new(parse.RejectReason ?? "Некорректная команда.", SlashCommandPreviewKind.Error);
-            return true;
-        }
-    }
-
     private sealed class AnchorPeekPreviewRule : ISlashCommandPreviewRule
     {
         public bool TryEvaluate(
-            ChatSlashCommandParseResult parse,
             string? bufferText,
             SlashCommandAnchorPreviewResolver? resolveAnchor,
             out SlashCommandPreviewResult result)
         {
-            if (!SlashPathAliases.IsAnchorPeekCommand(parse))
+            if (!SlashLineResolver.TryResolveSlashLine((bufferText ?? "").Trim(), out var line)
+                || !line.IsCatalogMatch
+                || !SlashPathAliases.IsAnchorPeekPath(line.CanonicalPath))
+            {
                 return TryReject(out result);
+            }
 
             result = SlashCommandPreviewRuleHelpers.BuildAnchorPeek(
-                SlashPathAliases.ExtractPeekArgs(parse),
+                SlashPathAliases.ExtractPeekArgs(line.CanonicalPath, line.ArgTail),
                 resolveAnchor);
             return true;
         }
@@ -94,31 +76,21 @@ internal static class SlashCommandPreviewRulePipeline
     private sealed class EditorLineSelectPreviewRule : ISlashCommandPreviewRule
     {
         public bool TryEvaluate(
-            ChatSlashCommandParseResult parse,
             string? bufferText,
             SlashCommandAnchorPreviewResolver? resolveAnchor,
             out SlashCommandPreviewResult result)
         {
-            if (!SlashCommandPreviewRuleHelpers.IsEditorLineSelect(parse))
+            if (!SlashLineResolver.TryResolveSlashLine((bufferText ?? "").Trim(), out var line)
+                || !line.IsCatalogMatch
+                || !SlashCommandPreviewRuleHelpers.IsEditorLineSelect(line.CanonicalPath))
+            {
                 return TryReject(out result);
+            }
 
-            result = SlashCommandPreviewRuleHelpers.BuildParametricPreview(parse.ArgsTail, "Строки", parse);
-            return true;
-        }
-    }
-
-    private sealed class IntercomPathPreviewRule : ISlashCommandPreviewRule
-    {
-        public bool TryEvaluate(
-            ChatSlashCommandParseResult parse,
-            string? bufferText,
-            SlashCommandAnchorPreviewResolver? resolveAnchor,
-            out SlashCommandPreviewResult result)
-        {
-            if (!IntercomSlashPathBuilder.TryBuildPath(parse, out var intercomPath))
-                return TryReject(out result);
-
-            result = SlashCommandPreviewRuleHelpers.BuildIntercomPathPreview(intercomPath, parse, resolveAnchor);
+            result = SlashCommandPreviewRuleHelpers.BuildParametricPreview(
+                line.ArgTail,
+                "Строки",
+                line.CanonicalPath);
             return true;
         }
     }
@@ -126,15 +98,23 @@ internal static class SlashCommandPreviewRulePipeline
     private sealed class CatalogSlashPreviewRule : ISlashCommandPreviewRule
     {
         public bool TryEvaluate(
-            ChatSlashCommandParseResult parse,
             string? bufferText,
             SlashCommandAnchorPreviewResolver? resolveAnchor,
             out SlashCommandPreviewResult result)
         {
-            if (!ChatSlashCommandCatalog.TryResolve(parse, out var descriptor))
+            if (!ChatSlashCommandCatalog.TryResolveInput(bufferText, out var descriptor, out var resolvedArgTail))
                 return TryReject(out result);
 
-            result = SlashCommandPreviewRuleHelpers.BuildCatalogCommandPreview(descriptor.SlashPath, parse.ArgsTail);
+            if (SlashIntercomPreviewPolicies.TryBuild(
+                    descriptor.SlashPath,
+                    resolvedArgTail,
+                    resolveAnchor,
+                    out result))
+            {
+                return true;
+            }
+
+            result = SlashCommandPreviewRuleHelpers.BuildCatalogCommandPreview(descriptor.SlashPath, resolvedArgTail);
             return true;
         }
     }
@@ -142,12 +122,11 @@ internal static class SlashCommandPreviewRulePipeline
     private sealed class UnknownSlashPreviewRule : ISlashCommandPreviewRule
     {
         public bool TryEvaluate(
-            ChatSlashCommandParseResult parse,
             string? bufferText,
             SlashCommandAnchorPreviewResolver? resolveAnchor,
             out SlashCommandPreviewResult result)
         {
-            if (!parse.IsSlashLine)
+            if (!ChatSlashCommandParser.IsSlashLine(bufferText))
                 return TryReject(out result);
 
             result = new("Нет такой команды.", SlashCommandPreviewKind.Error);
@@ -164,23 +143,6 @@ internal static class SlashCommandPreviewRulePipeline
 
 internal static class SlashCommandPreviewRuleHelpers
 {
-    public static SlashCommandPreviewResult BuildIntercomPathPreview(
-        string intercomPath,
-        ChatSlashCommandParseResult parse,
-        SlashCommandAnchorPreviewResolver? resolveAnchor)
-    {
-        if (!ChatSlashCommandCatalog.TryResolve(parse, out _))
-            return new($"Нет такой команды «{intercomPath}».", SlashCommandPreviewKind.Error);
-
-        if (SlashIntercomPreviewPolicies.TryBuild(intercomPath, parse, resolveAnchor, out var policyResult))
-            return policyResult;
-
-        if (string.Equals(intercomPath, SlashPathAliases.AnchorPeekPath, StringComparison.OrdinalIgnoreCase))
-            return SlashCommandPreviewRuleHelpers.BuildAnchorPeek(SlashPathAliases.ExtractPeekArgs(parse), resolveAnchor);
-
-        return SlashCommandPreviewRuleHelpers.BuildCatalogCommandPreview(intercomPath, parse.ArgsTail);
-    }
-
     public static SlashCommandPreviewResult BuildCatalogCommandPreview(string slashPath, string? argsTail)
     {
         var tail = (argsTail ?? "").Trim();
@@ -211,7 +173,7 @@ internal static class SlashCommandPreviewRuleHelpers
     public static SlashCommandPreviewResult BuildParametricPreview(
         string tail,
         string unitLabel,
-        ChatSlashCommandParseResult parse)
+        string slashPath)
     {
         var trimmed = tail.Trim();
         if (trimmed.Length == 0)
@@ -225,7 +187,7 @@ internal static class SlashCommandPreviewRuleHelpers
         if (!ParametricSegmentListParser.TryParse(trimmed, out var segments, out var error))
             return new(error, SlashCommandPreviewKind.Error);
 
-        if (!ChatSlashCommandCatalog.TryResolve(parse, out _))
+        if (!ChatSlashCommandCatalog.TryResolveCanonical(slashPath, tail, out _))
             return new("Нет такой команды.", SlashCommandPreviewKind.Error);
 
         return new(
@@ -233,9 +195,6 @@ internal static class SlashCommandPreviewRuleHelpers
             SlashCommandPreviewKind.Ok);
     }
 
-    public static bool IsEditorLineSelect(in ChatSlashCommandParseResult parse) =>
-        string.Equals(parse.Head, "editor", StringComparison.OrdinalIgnoreCase)
-        && string.Equals(parse.Action, "line", StringComparison.OrdinalIgnoreCase)
-        && string.Equals(parse.SubAction, "select", StringComparison.OrdinalIgnoreCase);
-
+    public static bool IsEditorLineSelect(string canonicalPath) =>
+        string.Equals(canonicalPath, "/editor line select", StringComparison.OrdinalIgnoreCase);
 }

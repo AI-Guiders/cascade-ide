@@ -34,13 +34,9 @@ public sealed class SlashLineResolverTests
     }
 
     [Fact]
-    public void ResolveSlashLine_ServerStart_StripsVerbFromParserShape()
+    public void ResolveSlashLine_ServerStart_UrlInArgTail()
     {
         const string line = "/intercom server start http://127.0.0.1:5080";
-        var parse = ChatSlashCommandParser.TryParse(line);
-        Assert.Equal("server", parse.Action);
-        Assert.Contains("start", parse.ArgsTail, StringComparison.Ordinal);
-
         Assert.True(SlashLineResolver.TryResolveSlashLine(line, out var r));
         Assert.Equal("/intercom server start", r.CanonicalPath);
         Assert.Equal("http://127.0.0.1:5080", r.ArgTail);

@@ -1,4 +1,5 @@
 #nullable enable
+using CascadeIDE.Services;
 
 namespace CascadeIDE.Features.Chat;
 
@@ -58,28 +59,26 @@ public static class SlashLineResolver
         if (tokens.Count == 0)
             return false;
 
-        for (var len = tokens.Count; len >= 1; len--)
+        if (!SlashRouteCatalogPathsGenerated.TryResolveLongestPrefix(
+                tokens,
+                endsWithSpace,
+                out var path,
+                out var argTail,
+                out var isExactPath,
+                out var endsWithSpaceAfterPath))
         {
-            var path = "/" + string.Join(' ', tokens.Take(len));
-            if (!SlashRouteCatalogIndex.TryGetRoute(path, out _))
-                continue;
-
-            var argTail = string.Join(' ', tokens.Skip(len));
-            var hasArgTail = argTail.Length > 0;
-            var isExactPath = len == tokens.Count && !endsWithSpace && !hasArgTail;
-            var endsWithSpaceAfterPath = endsWithSpace && !hasArgTail && len == tokens.Count;
-
-            resolution = new SlashLineResolution(
-                path,
-                argTail,
-                SlashRouteCatalogIndex.GetArgTailKind(path),
-                IsCatalogMatch: true,
-                IsExactPathMatch: isExactPath,
-                EndsWithSpaceAfterPath: endsWithSpaceAfterPath,
-                HasArgTailContent: hasArgTail);
-            return true;
+            return false;
         }
 
-        return false;
+        var hasArgTail = argTail.Length > 0;
+        resolution = new SlashLineResolution(
+            path,
+            argTail,
+            SlashRouteCatalogIndex.GetArgTailKind(path),
+            IsCatalogMatch: true,
+            IsExactPathMatch: isExactPath,
+            EndsWithSpaceAfterPath: endsWithSpaceAfterPath,
+            HasArgTailContent: hasArgTail);
+        return true;
     }
 }

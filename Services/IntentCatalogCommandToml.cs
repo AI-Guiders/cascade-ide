@@ -83,4 +83,5 @@ internal sealed class SlashStaticArgsToml
 {
     public string? Page { get; set; }
     public string? Surface { get; set; }
+    public string? Level { get; set; }
 }

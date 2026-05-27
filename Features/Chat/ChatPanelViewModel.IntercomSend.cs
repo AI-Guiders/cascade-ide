@@ -79,11 +79,10 @@ public partial class ChatPanelViewModel
 
     private async Task<bool> tryHandleIntercomSlashLineAsync(string rawInput)
     {
-        var parse = ChatSlashCommandParser.TryParse(rawInput);
-        if (!parse.IsSlashLine)
+        if (!ChatSlashCommandParser.IsSlashLine(rawInput))
             return false;
 
-        var slashPath = ChatSlashCommandPresentation.FormatDisplayPath(parse, rawInput);
+        var slashPath = ChatSlashCommandPresentation.FormatDisplayPath(rawInput);
         if (IsComposerAttachSlash(slashPath))
         {
             var attachOnly = await _slashCommandRunner.TryRunAsync(rawInput).ConfigureAwait(false);
@@ -96,8 +95,9 @@ public partial class ChatPanelViewModel
             return true;
         }
 
-        var slashArgs = ChatSlashCommandPresentation.NormalizeArgsTail(parse.ArgsTail);
-        var slashAudience = ChatSlashCommandCatalog.TryResolve(parse, out var slashDescriptor)
+        var slashResolved = ChatSlashCommandCatalog.TryResolveInput(rawInput, out var slashDescriptor, out var resolvedSlashTail);
+        var slashArgs = ChatSlashCommandPresentation.NormalizeArgsTail(resolvedSlashTail);
+        var slashAudience = slashResolved
             ? slashDescriptor.MessageAudience
             : IntercomMessageAudience.Channel;
 

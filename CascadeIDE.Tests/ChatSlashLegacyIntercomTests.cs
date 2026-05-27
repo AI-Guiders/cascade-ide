@@ -14,20 +14,14 @@ public sealed class ChatSlashLegacyIntercomTests
     [InlineData("/attach selection")]
     [InlineData("/card My")]
     [InlineData("/thread next")]
-    public void Parse_LegacyTopLevelHead_IsRejected(string line)
+    public void LegacyTopLevel_DoesNotResolve(string line)
     {
-        var parse = ChatSlashCommandParser.TryParse(line);
-        Assert.True(parse.IsSlashLine);
-        Assert.True(parse.IsRejected);
-        Assert.Contains("/intercom", parse.RejectReason, StringComparison.OrdinalIgnoreCase);
+        ChatSlashCatalogTestSupport.AssertDoesNotResolve(line);
     }
 
     [Fact]
-    public void Parse_IntercomTopicList_IsAccepted()
+    public void IntercomTopicList_Resolves()
     {
-        var parse = ChatSlashCommandParser.TryParse("/intercom topic list");
-        Assert.True(parse.IsSlashLine);
-        Assert.False(parse.IsRejected);
-        Assert.Equal("intercom", parse.Head);
+        ChatSlashCatalogTestSupport.AssertResolves("/intercom topic list", "/intercom topic list");
     }
 }

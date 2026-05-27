@@ -90,52 +90,15 @@ public sealed class ChatSlashCommandRunner
         Func<string, string?, CancellationToken, Task<ChatSlashIntercomResult>> runIntercomAdmin) =>
         _runIntercomAdmin = runIntercomAdmin;
 
-    private static string? resolveSlashArgsTail(string rawInput, in ChatSlashCommandParseResult parse)
-    {
-        if (SlashLineResolver.TryResolveSlashLine(rawInput.Trim(), out var line) && line.IsCatalogMatch)
-            return ChatSlashCommandPresentation.NormalizeArgsTail(line.ArgTail);
-
-        var tail = parse.ArgsTail;
-        if (string.Equals(parse.Head, "intercom", StringComparison.OrdinalIgnoreCase)
-            && parse.Shape == ChatSlashCommandShape.Flat
-            && !string.IsNullOrWhiteSpace(tail))
-        {
-            var trimmed = tail.Trim();
-            const string topicCreatePrefix = "topic create";
-            if (trimmed.StartsWith(topicCreatePrefix, StringComparison.OrdinalIgnoreCase))
-                tail = trimmed[topicCreatePrefix.Length..].Trim();
-            else
-            {
-                const string topicRenamePrefix = "topic rename";
-                if (trimmed.StartsWith(topicRenamePrefix, StringComparison.OrdinalIgnoreCase))
-                    tail = trimmed[topicRenamePrefix.Length..].Trim();
-            }
-        }
-
-        if (IntercomAnchorSlash.IsAnchorPeekCommand(parse))
-            return ChatSlashCommandPresentation.NormalizeArgsTail(SlashPathAliases.ExtractPeekArgs(parse));
-
-        return ChatSlashCommandPresentation.NormalizeArgsTail(tail);
-    }
-
     public async Task<ChatSlashCommandRunResult> TryRunAsync(string rawInput, CancellationToken cancellationToken = default)
     {
-        var parse = ChatSlashCommandParser.TryParse(rawInput);
-        if (!parse.IsSlashLine)
+        if (!ChatSlashCommandParser.IsSlashLine(rawInput))
             return ChatSlashCommandRunResult.NotHandled();
 
-        var displayPath = ChatSlashCommandPresentation.FormatDisplayPath(parse, rawInput);
-        var argsTail = resolveSlashArgsTail(rawInput, parse);
+        var displayPath = ChatSlashCommandPresentation.FormatDisplayPath(rawInput);
+        string? argsTail = null;
 
-        if (parse.IsRejected)
-            return new ChatSlashCommandRunResult(
-                true,
-                false,
-                displayPath,
-                argsTail,
-                parse.RejectReason ?? "Неизвестная слэш-команда.");
-
-        if (!ChatSlashCommandCatalog.TryResolve(parse, out var descriptor))
+        if (!ChatSlashCommandCatalog.TryResolveInput(rawInput, out var descriptor, out var resolvedArgTail))
         {
             return new ChatSlashCommandRunResult(
                 true,
@@ -145,6 +108,7 @@ public sealed class ChatSlashCommandRunner
                 "Неизвестная команда. Введи /help — список доступных слэш-команд.");
         }
 
+        argsTail = resolvedArgTail;
         displayPath = descriptor.SlashPath;
         if (descriptor.ExecutionKind == ChatSlashCommandExecutionKind.LocalHelp)
         {
@@ -253,7 +217,7 @@ public sealed class ChatSlashCommandRunner
                 agent.Message);
         }
 
-        var validationError = ValidateRequiredArgs(descriptor, parse);
+        var validationError = ValidateRequiredArgs(descriptor, argsTail);
         if (validationError is not null)
             return new ChatSlashCommandRunResult(true, false, displayPath, argsTail, validationError);
 
@@ -282,7 +246,7 @@ public sealed class ChatSlashCommandRunner
 
             if (!ChatSlashParametricArgsBuilder.TryBuild(
                     descriptor.CommandId,
-                    parse.ArgsTail,
+                    argsTail ?? "",
                     _getEditorContext(),
                     out args,
                     out var parametricError))
@@ -290,13 +254,13 @@ public sealed class ChatSlashCommandRunner
                 return new ChatSlashCommandRunResult(true, false, displayPath, argsTail, parametricError);
             }
         }
-        else if (!TryBuildPathArgs(descriptor, parse, out args, out var pathError))
+        else if (!TryBuildPathArgs(descriptor, argsTail, out args, out var pathError))
         {
             return new ChatSlashCommandRunResult(true, false, displayPath, argsTail, pathError);
         }
         else if (args is null)
         {
-            args = BuildArgs(descriptor, parse);
+            args = BuildArgs(descriptor, argsTail);
         }
 
         try
@@ -317,7 +281,7 @@ public sealed class ChatSlashCommandRunner
 
     private bool TryBuildPathArgs(
         ChatSlashCommandDescriptor descriptor,
-        ChatSlashCommandParseResult parse,
+        string? argTail,
         out IReadOnlyDictionary<string, JsonElement>? args,
         out string? error)
     {
@@ -327,9 +291,10 @@ public sealed class ChatSlashCommandRunner
         if (descriptor.CommandId is not (IdeCommands.OpenFile or IdeCommands.LoadSolution))
             return true;
 
+        var pathArg = argTail;
         var workspaceRoot = _getWorkspaceRoot?.Invoke();
         if (!ChatSlashWorkspacePathHelper.TryNormalizePathArgument(
-                parse.ArgsTail,
+                pathArg,
                 workspaceRoot,
                 out var fullPath,
                 out error))
@@ -360,7 +325,7 @@ public sealed class ChatSlashCommandRunner
 
     private static IReadOnlyDictionary<string, JsonElement>? BuildArgs(
         ChatSlashCommandDescriptor descriptor,
-        ChatSlashCommandParseResult parse)
+        string? argTail)
     {
         if (!string.IsNullOrEmpty(descriptor.MfdPage))
         {
@@ -378,14 +343,22 @@ public sealed class ChatSlashCommandRunner
             };
         }
 
-        if (string.IsNullOrWhiteSpace(parse.ArgsTail))
+        if (!string.IsNullOrEmpty(descriptor.MapLevel))
+        {
+            return new Dictionary<string, JsonElement>(StringComparer.Ordinal)
+            {
+                ["level"] = JsonSerializer.SerializeToElement(descriptor.MapLevel),
+            };
+        }
+
+        if (string.IsNullOrWhiteSpace(argTail))
             return null;
 
         return descriptor.CommandId switch
         {
             IdeCommands.ChatSetProductSpine => new Dictionary<string, JsonElement>(StringComparer.Ordinal)
             {
-                ["current_focus"] = JsonSerializer.SerializeToElement(parse.ArgsTail),
+                ["current_focus"] = JsonSerializer.SerializeToElement(argTail),
             },
             IdeCommands.ChatExportReadable => new Dictionary<string, JsonElement>(StringComparer.Ordinal)
             {
@@ -393,45 +366,61 @@ public sealed class ChatSlashCommandRunner
             },
             IdeCommands.GitCommit => new Dictionary<string, JsonElement>(StringComparer.Ordinal)
             {
-                ["message"] = JsonSerializer.SerializeToElement(ChatSlashArgsTail.NormalizeFreeText(parse.ArgsTail)),
+                ["message"] = JsonSerializer.SerializeToElement(ChatSlashArgsTail.NormalizeFreeText(argTail)),
             },
-            IdeCommands.GitDiff when !string.IsNullOrWhiteSpace(parse.ArgsTail) =>
+            IdeCommands.GitDiff when !string.IsNullOrWhiteSpace(argTail) =>
                 new Dictionary<string, JsonElement>(StringComparer.Ordinal)
                 {
-                    ["path"] = JsonSerializer.SerializeToElement(parse.ArgsTail.Trim()),
+                    ["path"] = JsonSerializer.SerializeToElement(argTail.Trim()),
                 },
-            IdeCommands.GitLog when int.TryParse(parse.ArgsTail.Trim(), out var n) =>
+            IdeCommands.GitLog when int.TryParse(argTail.Trim(), out var n) =>
                 new Dictionary<string, JsonElement>(StringComparer.Ordinal)
                 {
                     ["n"] = JsonSerializer.SerializeToElement(n),
                 },
-            IdeCommands.SearchWorkspaceText when !string.IsNullOrWhiteSpace(parse.ArgsTail) =>
+            IdeCommands.SearchWorkspaceText when !string.IsNullOrWhiteSpace(argTail) =>
                 new Dictionary<string, JsonElement>(StringComparer.Ordinal)
                 {
-                    ["pattern"] = JsonSerializer.SerializeToElement(parse.ArgsTail.Trim()),
+                    ["pattern"] = JsonSerializer.SerializeToElement(argTail.Trim()),
                 },
-            IdeCommands.CreateProjectInSolution when !string.IsNullOrWhiteSpace(parse.SubAction) =>
+            IdeCommands.CreateProjectInSolution
+                when TryGetSolutionNewTemplate(descriptor.SlashPath, out var template) =>
                 new Dictionary<string, JsonElement>(StringComparer.Ordinal)
                 {
-                    ["template"] = JsonSerializer.SerializeToElement(parse.SubAction.Trim().ToLowerInvariant()),
-                    ["project_name"] = JsonSerializer.SerializeToElement(parse.ArgsTail.Trim()),
+                    ["template"] = JsonSerializer.SerializeToElement(template),
+                    ["project_name"] = JsonSerializer.SerializeToElement(argTail.Trim()),
                 },
             _ => null,
         };
     }
 
+    private static bool TryGetSolutionNewTemplate(string slashPath, out string template)
+    {
+        const string prefix = "/solution new ";
+        if (slashPath.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+        {
+            template = slashPath[prefix.Length..].Trim().ToLowerInvariant();
+            if (template is "console" or "classlib" or "webapi")
+                return true;
+        }
+
+        template = "";
+        return false;
+    }
+
     private static string? ValidateRequiredArgs(
         ChatSlashCommandDescriptor descriptor,
-        ChatSlashCommandParseResult parse)
+        string? argTail)
     {
-        if (descriptor.CommandId == IdeCommands.GitCommit && string.IsNullOrWhiteSpace(parse.ArgsTail))
+
+        if (descriptor.CommandId == IdeCommands.GitCommit && string.IsNullOrWhiteSpace(argTail))
             return "Укажи сообщение коммита: /git commit <message>";
 
-        if (descriptor.CommandId == IdeCommands.SearchWorkspaceText && string.IsNullOrWhiteSpace(parse.ArgsTail))
+        if (descriptor.CommandId == IdeCommands.SearchWorkspaceText && string.IsNullOrWhiteSpace(argTail))
             return "Укажи шаблон поиска: /search <pattern>";
 
         if (descriptor.CommandId is IdeCommands.OpenFile or IdeCommands.LoadSolution
-            && string.IsNullOrWhiteSpace(parse.ArgsTail))
+            && string.IsNullOrWhiteSpace(argTail))
         {
             return descriptor.CommandId == IdeCommands.OpenFile
                 ? "Укажи путь к файлу: /file open <path>"
@@ -440,15 +429,15 @@ public sealed class ChatSlashCommandRunner
 
         if (descriptor.CommandId == IdeCommands.CreateProjectInSolution)
         {
-            if (string.IsNullOrWhiteSpace(parse.SubAction))
+            if (!TryGetSolutionNewTemplate(descriptor.SlashPath, out var template))
                 return "Укажи шаблон: /solution new console|classlib|webapi <имя>";
-            if (string.IsNullOrWhiteSpace(parse.ArgsTail))
-                return $"Укажи имя проекта: /solution new {parse.SubAction} <имя>";
+            if (string.IsNullOrWhiteSpace(argTail))
+                return $"Укажи имя проекта: /solution new {template} <имя>";
         }
 
         if (IntentMelodyCatalog.TryGetParametricRootByCommandId(descriptor.CommandId, out var parametricRoot)
             && ChatSlashParametricArgsBuilder.RequiresNonEmptyArgsTail(parametricRoot)
-            && string.IsNullOrWhiteSpace(parse.ArgsTail))
+            && string.IsNullOrWhiteSpace(argTail))
         {
             return parametricRoot.WireClass switch
             {

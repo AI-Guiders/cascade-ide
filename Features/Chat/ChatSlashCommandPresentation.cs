@@ -1,3 +1,5 @@
+#nullable enable
+
 namespace CascadeIDE.Features.Chat;
 
 /// <summary>Строки для пузыря слэш-команды в ленте.</summary>
@@ -7,23 +9,17 @@ public static class ChatSlashCommandPresentation
     public static ChatSlashCommandStatusIconPlacement DefaultStatusIconPlacement { get; set; } =
         ChatSlashCommandStatusIconPlacement.TopRight;
 
-    public static string FormatDisplayPath(in ChatSlashCommandParseResult parse, string rawLine)
+    public static string FormatDisplayPath(string? rawLine)
     {
-        if (parse.IsRejected)
-        {
-            var t = rawLine.Trim();
-            var sp = t.IndexOf(' ');
-            return sp < 0 ? t : t[..sp];
-        }
+        var trimmed = (rawLine ?? "").Trim();
+        if (trimmed.Length == 0 || trimmed[0] != '/')
+            return trimmed;
 
-        if (parse.Shape == ChatSlashCommandShape.NamespaceAction && !string.IsNullOrEmpty(parse.Action))
-        {
-            return string.IsNullOrEmpty(parse.SubAction)
-                ? $"/{parse.Head} {parse.Action}"
-                : $"/{parse.Head} {parse.Action} {parse.SubAction}";
-        }
+        if (SlashLineResolver.TryResolveSlashLine(trimmed, out var line) && line.IsCatalogMatch)
+            return line.CanonicalPath;
 
-        return "/" + parse.Head;
+        var space = trimmed.IndexOf(' ');
+        return space < 0 ? trimmed : trimmed[..space];
     }
 
     public static string? NormalizeArgsTail(string? argsTail) =>

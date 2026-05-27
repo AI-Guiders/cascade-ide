@@ -203,17 +203,14 @@ public sealed class IntercomMessageRangeRelatedTests
     }
 
     [Fact]
-    public void Parse_MessageRelate_SubActionAndTail()
+    public void ResolveInput_MessageRelate()
     {
-        var parse = ChatSlashCommandParser.TryParse("/intercom message 3:5 relate selection");
-        Assert.True(parse.IsSlashLine);
-        Assert.Equal("message", parse.Action);
-        Assert.Equal("relate", parse.SubAction);
-        Assert.Equal("3:5 selection", parse.ArgsTail);
-
-        Assert.True(IntercomSlashPathBuilder.TryBuildPath(parse, out var path));
-        Assert.Equal("/intercom message relate", path);
-        Assert.True(IntentSlashCatalog.TryGetRoute(path, out var route));
+        const string line = "/intercom message 3:5 relate selection";
+        Assert.True(SlashLineResolver.TryResolveSlashLine(line, out var resolved));
+        Assert.Equal("/intercom message relate", resolved.CanonicalPath);
+        Assert.Equal("3:5 selection", resolved.ArgTail);
+        ChatSlashCatalogTestSupport.AssertResolves(line, "/intercom message relate", "3:5 selection");
+        Assert.True(IntentSlashCatalog.TryGetRoute("/intercom message relate", out var route));
         Assert.Equal("message_relate", route.IntercomHandlerId);
     }
 }

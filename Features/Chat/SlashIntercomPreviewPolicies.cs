@@ -6,24 +6,27 @@ namespace CascadeIDE.Features.Chat;
 internal static class SlashIntercomPreviewPolicies
 {
     public static bool TryBuild(
-        string intercomPath,
-        in ChatSlashCommandParseResult parse,
+        string slashPath,
+        string? argTail,
         SlashCommandAnchorPreviewResolver? resolveAnchor,
         out SlashCommandPreviewResult result)
     {
         result = default;
-        if (!SlashRouteCatalogIndex.TryGetIntercomHandler(intercomPath, out var handlerId))
+        if (!SlashRouteCatalogIndex.TryGetIntercomHandler(slashPath, out var handlerId))
             return false;
 
         switch (handlerId)
         {
             case ChatSlashIntercomHandlers.Ids.MessageSelect:
-                result = SlashCommandPreviewRuleHelpers.BuildParametricPreview(parse.ArgsTail, "Сообщения", parse);
+                result = SlashCommandPreviewRuleHelpers.BuildParametricPreview(
+                    argTail ?? "",
+                    "Сообщения",
+                    slashPath);
                 return true;
 
             case ChatSlashIntercomHandlers.Ids.MessageSelectClear:
             {
-                var tail = (parse.ArgsTail ?? "").Trim();
+                var tail = (argTail ?? "").Trim();
                 result = tail.Length > 0
                     ? new("Ожидается «/intercom message select clear» без аргументов.", SlashCommandPreviewKind.Error)
                     : new("Сбросить подсветку сообщений в detail-ленте.", SlashCommandPreviewKind.Ok);
@@ -36,7 +39,7 @@ internal static class SlashIntercomPreviewPolicies
 
             case ChatSlashIntercomHandlers.Ids.AnchorPeek:
                 result = SlashCommandPreviewRuleHelpers.BuildAnchorPeek(
-                    SlashPathAliases.ExtractPeekArgs(parse),
+                    SlashPathAliases.ExtractPeekArgs(slashPath, argTail),
                     resolveAnchor);
                 return true;
         }

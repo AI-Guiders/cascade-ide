@@ -30,34 +30,32 @@ public sealed class ChatSlashParametricTests
     }
 
     [Fact]
-    public void TryParse_EditorLineSelect_WithRange()
+    public void ResolveInput_EditorLineSelect_WithRange()
     {
-        var r = ChatSlashCommandParser.TryParse("/editor line select 5 10");
-        Assert.True(r.IsSlashLine);
-        Assert.False(r.IsRejected);
-        Assert.Equal("editor", r.Head);
-        Assert.Equal("line", r.Action);
-        Assert.Equal("select", r.SubAction);
-        Assert.Equal("5 10", r.ArgsTail);
+        Assert.True(SlashLineResolver.TryResolveSlashLine("/editor line select 5 10", out var line));
+        Assert.Equal("/editor line select", line.CanonicalPath);
+        Assert.Equal("5 10", line.ArgTail);
     }
 
     [Fact]
     public void Catalog_ResolvesEditorLineSelect()
     {
-        var parse = ChatSlashCommandParser.TryParse("/editor line select 5");
-        Assert.True(ChatSlashCommandCatalog.TryResolve(parse, out var d));
-        Assert.Equal("/editor line select", d.SlashPath);
+        ChatSlashCatalogTestSupport.AssertResolves("/editor line select 5", "/editor line select", "5");
+        Assert.True(
+            ChatSlashCommandCatalog.TryResolveInput("/editor line select 5", out var d, out _));
         Assert.Equal(IdeCommands.Select, d.CommandId);
     }
 
     [Fact]
     public void Catalog_ResolvesPortalOpen()
     {
-        var parse = ChatSlashCommandParser.TryParse("/portal open https://example.com");
-        Assert.True(ChatSlashCommandCatalog.TryResolve(parse, out var d));
-        Assert.Equal("/portal open", d.SlashPath);
+        ChatSlashCatalogTestSupport.AssertResolves(
+            "/portal open https://example.com",
+            "/portal open",
+            "https://example.com");
+        Assert.True(
+            ChatSlashCommandCatalog.TryResolveInput("/portal open https://example.com", out var d, out _));
         Assert.Equal(IdeCommands.ShowWebAiPortalPage, d.CommandId);
-        Assert.Equal("https://example.com", parse.ArgsTail);
     }
 
     [Fact]

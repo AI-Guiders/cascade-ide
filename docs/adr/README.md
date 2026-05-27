@@ -75,6 +75,7 @@
 | 0134 | [prepare-pipeline](0134-intercom-message-prepare-pipeline-v1.md) — **In progress** (MCP fast path @ send) |
 | 0135 | [symbol cache + HCI sidecar](0135-intercom-attach-symbol-cache-and-hci-sidecar.md) — **In progress** (L1 parse cache, L2 SQLite @ HCI reindex) |
 | 0136 | [gutter + `/intercom` namespace](0136-intercom-feed-gutter-and-slash-namespace.md) — **In progress** (select ПКМ/slash, без старых `/topic`) |
+| 0150, 0153 | [slash резолв строки](0150-slash-line-canonical-resolution.md) · [только каталог, без parser shape](0153-slash-catalog-only-resolution.md) |
 | 0138 | [Cockpit Command Line](0138-cockpit-command-line-and-parametric-ranges.md) — **Accepted** (парсер + slash multi-select; CCL UI — фаза A) |
 | 0141 | [прогрев при open solution](0141-solution-scoped-warmup-orchestration.md) — **Implemented** (v1 оркестратор; AEE L0 warmup — [0148](0148-agent-execution-environment-verification-ladder-and-native-tooling.md)) |
 | 0148 | [Agent Execution Environment](0148-agent-execution-environment-verification-ladder-and-native-tooling.md) — **In progress** (W1–W2 в коде; supervised build worker; MLP на target hardware) |
@@ -233,6 +234,7 @@
 | [0150](0150-slash-line-canonical-resolution.md) | Slash: `SlashLineResolver`, `arg_tail` в каталоге; единый резолв autocomplete · Enter · execute | Accepted · Implemented |
 | [0151](0151-control-flow-subgraph-intent-vs-detailed-grain.md) | Мини-карта CF: `[code_navigation_map].control_flow_grain` intent (деф.) vs detailed; MCP следует тем же settings | Accepted · Implemented |
 | [0152](0152-editor-control-flow-virtual-spacing.md) | Virtual Spacing в редакторе: полоса слева от текста под глифы CF (не поверх кода) | Accepted · Implemented |
+| [0153](0153-slash-catalog-only-resolution.md) | Slash: только `intent-catalog` + codegen trie; удалены `SlashParse`, parser shape, legacy `[[slash_route]]` | Accepted · Implemented |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 
@@ -242,6 +244,7 @@
 
 - **Связанные ADR:** не сплошной абзац в шапке — секция [## Связанные ADR](snippets/adr-related-links-convention.md) с таблицей `| ADR | Роль |` (шаблон и правила в snippets).
 - **Имя файла:** `NNNN-краткий-kebab-title.md`, четыре цифры с ведущими нулями.
+- **Язык:** канонический текст ADR — **русский** (сборки `adr-book-*.md`: `lang: ru`). Имена в коде, `command_id`, slash-пути, цитаты API — как в репозитории (обычно EN). Полный перевод — опциональный sibling `NNNN-title.en.md` или отдельный PR, когда нужен внешний читатель (GitHub / партнёры); **не** обязателен для каждого номера и не генерируется автоматически из коробки.
 - **Статусы:** в шапке ADR и в колонке «Статус» — см. [status-lifecycle.md](status-lifecycle.md). Кратко: первый тег (**Proposed** / **Accepted** / **Superseded** / **Deprecated**); для **внедрённого в код** решения — **`Accepted · Implemented`** (второй тег через **` · `**). Без подпапок по статусу — один `docs/adr/`.
 - **Тематические подпапки** (не по статусу): опционально указатель по теме — [0075](0075-ui-topic-index-and-mfd-page-conventions.md) и [`UI/README.md`](UI/README.md); **TECH** — [`TECH/README.md`](TECH/README.md) и [0077](0077-tech-principles-hub.md).
 - Новый ADR добавляет строку в таблицу выше и при необходимости строку в таблицу в [architecture-policy.md](../architecture-policy.md).

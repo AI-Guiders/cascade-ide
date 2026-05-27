@@ -7,13 +7,14 @@ namespace CascadeIDE.Tests;
 public sealed class ChatTopicRenameTests
 {
     [Fact]
-    public void Parse_topic_rename_resolves_catalog_route()
+    public void ResolveInput_topic_rename()
     {
-        var parse = ChatSlashCommandParser.TryParse("/intercom topic rename New title");
-        Assert.True(parse.IsSlashLine);
-        Assert.False(parse.IsRejected);
-        Assert.True(ChatSlashCommandCatalog.TryResolve(parse, out var descriptor));
-        Assert.Equal("/intercom topic rename", descriptor.SlashPath);
+        ChatSlashCatalogTestSupport.AssertResolves(
+            "/intercom topic rename New title",
+            "/intercom topic rename",
+            "New title");
+        Assert.True(
+            ChatSlashCommandCatalog.TryResolveInput("/intercom topic rename New title", out var descriptor, out _));
         Assert.True(IntentSlashCatalog.TryGetRoute(descriptor.SlashPath, out var route));
         Assert.Equal("topic_rename", route.IntercomHandlerId);
     }

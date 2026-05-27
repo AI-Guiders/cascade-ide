@@ -7,46 +7,20 @@ internal static class SlashPathAliases
 {
     public const string AnchorPeekPath = "/anchor peek";
 
+    private const string IntercomAnchorPeekPath = "/intercom anchor peek";
     private const string IntercomAnchorPeekBody = "intercom anchor peek";
     private const string AnchorPeekBody = "anchor peek";
 
-    public static bool IsAnchorPeekCommand(in ChatSlashCommandParseResult parse) =>
-        string.Equals(parse.Head, "anchor", StringComparison.OrdinalIgnoreCase)
-            && parse.Action?.StartsWith("peek", StringComparison.OrdinalIgnoreCase) == true
-        || string.Equals(parse.Head, "intercom", StringComparison.OrdinalIgnoreCase)
-            && string.Equals(parse.Action, "anchor", StringComparison.OrdinalIgnoreCase)
-            && parse.ArgsTail.TrimStart().StartsWith("peek", StringComparison.OrdinalIgnoreCase);
+    public static bool IsAnchorPeekPath(string canonicalPath) =>
+        string.Equals(canonicalPath, AnchorPeekPath, StringComparison.OrdinalIgnoreCase)
+        || string.Equals(canonicalPath, IntercomAnchorPeekPath, StringComparison.OrdinalIgnoreCase);
 
-    public static bool TryGetCanonical(in ChatSlashCommandParseResult parse, out string canonicalPath, out string argsTail)
+    public static string? ExtractPeekArgs(string canonicalPath, string? argTail)
     {
-        canonicalPath = "";
-        argsTail = "";
-        if (!IsAnchorPeekCommand(parse))
-            return false;
-
-        canonicalPath = AnchorPeekPath;
-        argsTail = ExtractPeekArgs(parse) ?? "";
-        return true;
-    }
-
-    public static string? ExtractPeekArgs(in ChatSlashCommandParseResult parse)
-    {
-        if (!IsAnchorPeekCommand(parse))
+        if (!IsAnchorPeekPath(canonicalPath))
             return null;
 
-        if (string.Equals(parse.Head, "intercom", StringComparison.OrdinalIgnoreCase))
-        {
-            var args = parse.ArgsTail.Trim();
-            if (args.StartsWith("peek ", StringComparison.OrdinalIgnoreCase))
-                return args[5..];
-
-            return args.Length > 4 ? args[4..] : "";
-        }
-
-        if (string.Equals(parse.Action, "peek", StringComparison.OrdinalIgnoreCase))
-            return parse.ArgsTail;
-
-        return parse.Action!.Length > 4 ? parse.Action[4..] + parse.ArgsTail : parse.ArgsTail;
+        return string.IsNullOrWhiteSpace(argTail) ? "" : argTail.Trim();
     }
 
     public static string NormalizeCompletionBody(string body)

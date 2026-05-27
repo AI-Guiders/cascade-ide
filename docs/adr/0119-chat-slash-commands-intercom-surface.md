@@ -24,6 +24,9 @@
 | [0124](0124-slash-parametric-editor-line-commands.md) | Параметрический слэш: `/editor line select|delete` (паритет `c:els` / `c:eld`) |
 | [0125](0125-slash-workspace-file-commands-and-dynamic-completion.md) | Workspace/file: `/file open`, `/solution new`, динамические подсказки по файлам solution |
 | [0126](0126-intercom-inspect-slash-and-compact-chrome-status.md) | `kind=report`: `/topic`/`/spine` list\|tree; compact chrome status |
+| [0136](0136-intercom-feed-gutter-and-slash-namespace.md) | Канон `/intercom …`; top-level `/topic` — non-goal |
+| [0150](0150-slash-line-canonical-resolution.md) | `SlashLineResolver`, `arg_tail`; autocomplete · Enter · execute |
+| [0153](0153-slash-catalog-only-resolution.md) | **Исполнение пути:** только `intent-catalog` + codegen trie; без parser shape |
 
 ### Вне ADR
 
@@ -90,10 +93,14 @@ Intercom в CIDE ([0080](0080-intercom-naming-and-multi-party-channel-model.md))
 **Инвариант** (расширение [0072 §5](0072-chat-topic-cards-intent-melody-keyboard-contract.md)):
 
 ```text
-ChatInput (/verb args…) → ChatSlashCommandParser → command_id (+ args)
-  → IdeMcpCommandExecutor / ChatPanel handlers (как palette/MCP)
+ChatInput (/path …args)
+  → SlashLineResolver (longest-prefix по intent-catalog, ADR 0150/0153)
+  → ChatSlashCommandCatalog → descriptor (command_id, handlers, arg_tail)
+  → ChatSlashCommandRunner / Intercom local handlers / IdeMcpCommandExecutor
   → ChatPanelViewModel state → ChatSurfaceCompositor → Skia render
 ```
+
+*(Историческая схема v1: `ChatSlashCommandParser.TryParse` → `head`/`action` — снята, [0153](0153-slash-catalog-only-resolution.md).)*
 
 - Слэш-команда **не** меняет Skia напрямую и **не** читает hit-target геометрию.
 - Pointer, Melody, Chords, палитра, MCP и слэш **сходятся** в одном `command_id`, где это возможно.
@@ -260,10 +267,11 @@ arg_token    = quoted_string | bare_token ;
 ```mermaid
 flowchart TD
     input[ChatInput]
-    input -->|starts with /| parser[ChatSlashCommandParser]
+    input -->|starts with /| resolver[SlashLineResolver]
     input -->|normal text| agent[SendToAgent]
-    parser -->|known verb| cmd[command_id handler]
-    parser -->|unknown| err[Inline error + help]
+    resolver --> catalog[ChatSlashCommandCatalog]
+    catalog -->|known path| cmd[command_id / intercom handler]
+    catalog -->|unknown| err[Inline error + help]
     cmd --> vm[ChatPanelViewModel]
     vm --> snap[ChatSurfaceSnapshot]
     snap --> skia[SkiaChatSurfaceControl]
@@ -276,8 +284,12 @@ flowchart TD
 
 | Компонент | Роль |
 |-----------|------|
-| `Features/Chat/ChatSlashCommandCatalog.cs` *(новый)* | verb → descriptor (`command_id`, help, arg hint) |
-| `Features/Chat/ChatSlashCommandParser.cs` *(новый)* | разбор строки, валидация |
+| `IntentMelody/intent-catalog.toml` | Канон slash `path`, `arg_tail`, handlers ([0153](0153-slash-catalog-only-resolution.md)) |
+| `Services/Generated/SlashRouteCatalogPathsGenerated.g.cs` | Codegen trie (build, ProtocolDocGen) |
+| `Features/Chat/SlashLineResolver.cs` | Канонический путь + `ArgTail` ([0150](0150-slash-line-canonical-resolution.md)) |
+| `Features/Chat/ChatSlashCommandCatalog.cs` | path → descriptor (`command_id`, help, execution kind) |
+| `Features/Chat/ChatSlashCommandParser.cs` | `IsSlashLine`, `ShouldAutoExecuteAfterAutocompleteCommit` — **без** `TryParse` |
+| `Features/Chat/ChatSlashCommandRunner.cs` | local execution, args из резолва |
 | [`IntercomOutboundSendOrchestrator`](../../Features/Chat/Application/IntercomOutboundSendOrchestrator.cs) | сценарий Send: Slash → BuildOutbound (фон + Roslyn cache) → PrepareMessage → CommitFeed → DispatchProvider; trace по фазам |
 | [`ChatPanelViewModel`](../../Features/Chat/ChatPanelViewModel.cs) | порты через `IntercomOutboundSendHost`; `SendChatCommand` → оркестратор |
 | [`IdeMcpCommandExecutor`](../../ViewModels/IdeMcpCommandExecutor.cs) | исполнение тех же `command_id`, что MCP |
@@ -319,3 +331,4 @@ flowchart TD
 | 2026-05-17 | Accepted · Implemented: фазы **A**, **A′**, **B** (`ChatSlashCommand*`, autocomplete, IDE namespaces); фаза **C** — backlog. |
 | 2026-05-20 | `/help` — справка Intercom (`Intercom/intercom-help.ru.md`, EmbeddedResource + override на диске); ось **`audience`** (`channel` \| `self`) на сообщении и в `intent-catalog.toml`. |
 | 2026-05-17 | См. [0124](0124-slash-parametric-editor-line-commands.md): полный slash-паритет каталога IML (`wire_class`, `/editor line …`, `/portal open`). |
+| 2026-05-28 | Исполнение пути: [0153](0153-slash-catalog-only-resolution.md) — catalog-only; диаграмма и якоря реализации обновлены. |

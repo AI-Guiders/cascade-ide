@@ -14,65 +14,47 @@ public static partial class ChatSlashCommandCatalog
 
     private static CatalogSnapshot Snapshot => SnapshotLazy.Value;
 
-    public static bool TryResolve(ChatSlashCommandParseResult parse, out ChatSlashCommandDescriptor descriptor)
-    {
-        descriptor = null!;
-        if (!parse.IsSlashLine || parse.IsRejected)
-            return false;
-
-        if (parse.Shape == ChatSlashCommandShape.Flat)
-        {
-            if (IntercomSlashPathBuilder.TryBuildPath(parse, out var intercomFlatPath)
-                && Snapshot.ByPath.TryGetValue(intercomFlatPath, out descriptor))
-            {
-                return true;
-            }
-
-            var flat = "/" + parse.Head;
-            if (Snapshot.ByPath.TryGetValue(flat, out descriptor))
-                return true;
-
-            if (TryResolveFlatHelp(flat, out descriptor))
-                return true;
-
-            return false;
-        }
-
-        if (IntercomSlashPathBuilder.TryBuildPath(parse, out var intercomPath)
-            && Snapshot.ByPath.TryGetValue(intercomPath, out descriptor))
-        {
-            return true;
-        }
-
-        var path = string.IsNullOrEmpty(parse.SubAction)
-            ? "/" + parse.Head + " " + parse.Action
-            : "/" + parse.Head + " " + parse.Action + " " + parse.SubAction;
-
-        return Snapshot.ByPath.TryGetValue(path, out descriptor);
-    }
-
-    /// <summary>Резолв по каноническому пути и хвосту (ADR 0150), без дублирования intercom strip.</summary>
+    /// <summary>Резолв по каноническому пути и хвосту (ADR 0150): lookup в каталоге.</summary>
     public static bool TryResolveCanonical(string canonicalPath, string? argTail, out ChatSlashCommandDescriptor descriptor)
     {
         descriptor = null!;
-        var line = string.IsNullOrWhiteSpace(argTail)
-            ? canonicalPath
-            : $"{canonicalPath} {argTail.Trim()}";
-        return TryResolve(ChatSlashCommandParser.TryParse(line), out descriptor);
+        var path = IntentSlashCatalog.NormalizeSlashPath(canonicalPath);
+        if (path.Length == 0 || !Snapshot.ByPath.TryGetValue(path, out descriptor))
+            return false;
+
+        return satisfiesArgTailPolicy(path, argTail);
     }
 
-    private static bool TryResolveFlatHelp(string flat, out ChatSlashCommandDescriptor descriptor)
+    /// <summary>Единая точка резолва строки слэша: longest-path из intent-catalog (<see cref="SlashLineResolver"/>).</summary>
+    public static bool TryResolveInput(
+        string? rawInput,
+        out ChatSlashCommandDescriptor descriptor,
+        out string? resolvedArgTail)
     {
-        if (!Snapshot.ByPath.TryGetValue(flat, out descriptor))
-        {
-            descriptor = null!;
+        descriptor = null!;
+        resolvedArgTail = "";
+        var trimmed = (rawInput ?? "").Trim();
+        if (trimmed.Length == 0 || trimmed[0] != '/')
             return false;
-        }
 
-        if (descriptor.ExecutionKind == ChatSlashCommandExecutionKind.LocalHelp)
-            return true;
+        if (!SlashLineResolver.TryResolveSlashLine(trimmed, out var line) || !line.IsCatalogMatch)
+            return false;
 
-        return !descriptor.SlashPath.Contains(' ', StringComparison.Ordinal);
+        var path = IntentSlashCatalog.NormalizeSlashPath(line.CanonicalPath);
+        if (!Snapshot.ByPath.TryGetValue(path, out descriptor))
+            return false;
+
+        resolvedArgTail = ChatSlashCommandPresentation.NormalizeArgsTail(line.ArgTail);
+        return true;
+    }
+
+    private static bool satisfiesArgTailPolicy(string slashPath, string? argTail)
+    {
+        return SlashRouteCatalogIndex.GetArgTailKind(slashPath) switch
+        {
+            SlashArgTailKind.Required => !string.IsNullOrWhiteSpace(argTail),
+            _ => true,
+        };
     }
 
     public static IReadOnlyList<ChatSlashSuggestion> AllSuggestions() =>
@@ -138,6 +120,7 @@ public static partial class ChatSlashCommandCatalog
             route.ExecutionKind,
             route.MfdPage,
             route.PrimarySurface,
+            route.MapLevel,
             route.Group,
             route.Completion,
             route.MessageAudience,

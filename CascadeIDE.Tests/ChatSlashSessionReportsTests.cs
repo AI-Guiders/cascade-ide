@@ -49,8 +49,7 @@ public sealed class ChatSlashSessionReportsTests
     [Fact]
     public void Catalog_ResolvesTopicList_AsLocalIntercom()
     {
-        var parse = ChatSlashCommandParser.TryParse("/intercom topic list");
-        Assert.True(ChatSlashCommandCatalog.TryResolve(parse, out var d));
+        Assert.True(ChatSlashCommandCatalog.TryResolveInput("/intercom topic list", out var d, out _));
         Assert.Equal(ChatSlashCommandExecutionKind.LocalIntercom, d.ExecutionKind);
         Assert.Equal("/intercom topic list", d.SlashPath);
     }
@@ -58,8 +57,7 @@ public sealed class ChatSlashSessionReportsTests
     [Fact]
     public void Catalog_ResolvesTopicListText_AsLocalReport()
     {
-        var parse = ChatSlashCommandParser.TryParse("/intercom topic list text");
-        Assert.True(ChatSlashCommandCatalog.TryResolve(parse, out var d));
+        Assert.True(ChatSlashCommandCatalog.TryResolveInput("/intercom topic list text", out var d, out _));
         Assert.Equal(ChatSlashCommandExecutionKind.LocalReport, d.ExecutionKind);
         Assert.Equal("/intercom topic list text", d.SlashPath);
     }
@@ -102,8 +100,7 @@ public sealed class ChatSlashSessionReportsTests
     [Fact]
     public void Catalog_ResolvesIntercomTopicCreate_AsLocalIntercom()
     {
-        var parse = ChatSlashCommandParser.TryParse("/intercom topic create My title");
-        Assert.True(ChatSlashCommandCatalog.TryResolve(parse, out var d));
+        Assert.True(ChatSlashCommandCatalog.TryResolveInput("/intercom topic create My title", out var d, out _));
         Assert.Equal(ChatSlashCommandExecutionKind.LocalIntercom, d.ExecutionKind);
         Assert.Equal("/intercom topic create", d.SlashPath);
         Assert.True(IntentSlashCatalog.TryGetRoute("/intercom topic create", out var route));

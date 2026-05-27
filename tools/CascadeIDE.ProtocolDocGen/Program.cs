@@ -61,6 +61,8 @@ var generatedCsPath = Path.Combine(root, "Services", "Generated", "IdeCommandsDo
 var generatedArgsPath = Path.Combine(root, "Services", "Generated", "IdeCommandsArgsGenerated.g.cs");
 var generatedContractPath = Path.Combine(root, "Services", "Generated", "IdeCommandsContract.g.cs");
 var generatedExecutorPath = Path.Combine(root, "Features", "IdeMcp", "Execution", "Generated", "IdeMcpCommandExecutor.Generated.g.cs");
+var intentCatalogPath = Path.Combine(root, "IntentMelody", "intent-catalog.toml");
+var generatedSlashPaths = Path.Combine(root, "Services", "Generated", "SlashRouteCatalogPathsGenerated.g.cs");
 
 if (!File.Exists(ideCommandsPath))
 {
@@ -94,6 +96,17 @@ if (!mdOnly)
     GeneratedFileWriter.WriteIfChanged(generatedArgsPath, IdeCommandsArgsEmitter.Emit(items));
     GeneratedFileWriter.WriteIfChanged(generatedContractPath, IdeCommandsContractEmitter.Emit(items));
     GeneratedFileWriter.WriteIfChanged(generatedExecutorPath, IdeMcpCommandExecutorEmitter.Emit());
+    if (File.Exists(intentCatalogPath))
+    {
+        var slashRoutes = IntentCatalogSlashPathCollector.Collect(intentCatalogPath);
+        GeneratedFileWriter.WriteIfChanged(
+            generatedSlashPaths,
+            SlashRouteCatalogPathsEmitter.Emit(slashRoutes));
+    }
+    else
+    {
+        Console.Error.WriteLine($"Missing file (slash codegen skipped): {intentCatalogPath}");
+    }
 }
 
 if (!csOnly)

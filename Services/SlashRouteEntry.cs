@@ -12,6 +12,7 @@ public readonly record struct SlashRouteEntry(
     ChatSlashCommandExecutionKind ExecutionKind = ChatSlashCommandExecutionKind.IdeCommand,
     string? MfdPage = null,
     string? PrimarySurface = null,
+    string? MapLevel = null,
     string? Group = null,
     SlashCompletionKind Completion = SlashCompletionKind.None,
     string? ReportHandlerId = null,
@@ -19,5 +20,4 @@ public readonly record struct SlashRouteEntry(
     IntercomMessageAudience MessageAudience = IntercomMessageAudience.Channel,
     bool AutoRunOnCommit = false,
     bool AutoRunRequiresArgs = true,
-    bool? RequiresArgTailExplicit = null,
     SlashArgTailKind? ArgTailKindExplicit = null);

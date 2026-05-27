@@ -26,24 +26,21 @@ public sealed class IntercomAnchorSlashTests
     }
 
     [Fact]
-    public void Parse_IntercomMessageAnchorsList_ResolvesCatalog()
+    public void ResolveInput_IntercomMessageAnchorsList()
     {
-        var parse = ChatSlashCommandParser.TryParse("/intercom message anchors list");
-        Assert.True(parse.IsSlashLine);
-        Assert.True(ChatSlashCommandCatalog.TryResolve(parse, out var d));
-        Assert.Equal("/intercom message anchors list", d.SlashPath);
+        ChatSlashCatalogTestSupport.AssertResolves("/intercom message anchors list", "/intercom message anchors list");
+        Assert.True(
+            ChatSlashCommandCatalog.TryResolveInput("/intercom message anchors list", out var d, out _));
         Assert.True(IntentSlashCatalog.TryGetRoute(d.SlashPath, out var route));
         Assert.Equal("message_anchors_list", route.IntercomHandlerId);
     }
 
     [Fact]
-    public void Parse_AnchorPeek_ResolvesCatalog()
+    public void ResolveInput_AnchorPeek()
     {
-        var parse = ChatSlashCommandParser.TryParse("/anchor peek abcd1234");
-        Assert.True(parse.IsSlashLine);
-        Assert.Equal("abcd1234", parse.ArgsTail);
-        Assert.True(ChatSlashCommandCatalog.TryResolve(parse, out var d));
-        Assert.Equal("/anchor peek", d.SlashPath);
+        ChatSlashCatalogTestSupport.AssertResolves("/anchor peek abcd1234", "/anchor peek", "abcd1234");
+        Assert.True(
+            ChatSlashCommandCatalog.TryResolveInput("/anchor peek abcd1234", out var d, out _));
         Assert.True(IntentSlashCatalog.TryGetRoute(d.SlashPath, out var route));
         Assert.Equal("anchor_peek", route.IntercomHandlerId);
     }
@@ -56,22 +53,15 @@ public sealed class IntercomAnchorSlashTests
     }
 
     [Fact]
-    public void Parse_IntercomAnchorPeek_ResolvesCatalog()
+    public void ResolveInput_IntercomAnchorPeek()
     {
-        var parse = ChatSlashCommandParser.TryParse("/intercom anchor peek abcd1234");
-        Assert.True(parse.IsSlashLine);
-        Assert.Equal("abcd1234", IntercomAnchorSlash.ExtractPeekIdTail(parse));
-        Assert.True(ChatSlashCommandCatalog.TryResolve(parse, out var d));
-        Assert.Equal("/anchor peek", d.SlashPath);
-    }
-
-    [Fact]
-    public void Parse_AnchorPeek_GluedHexWithoutSpace()
-    {
-        var parse = ChatSlashCommandParser.TryParse("/anchor peekabcd1234");
-        Assert.True(parse.IsSlashLine);
-        Assert.Equal("peek", parse.Action);
-        Assert.Equal("abcd1234", parse.ArgsTail);
+        ChatSlashCatalogTestSupport.AssertResolves(
+            "/intercom anchor peek abcd1234",
+            "/intercom anchor peek",
+            "abcd1234");
+        Assert.Equal(
+            "abcd1234",
+            IntercomAnchorSlash.ExtractPeekIdTail("/intercom anchor peek", "abcd1234"));
     }
 
     [Fact]
@@ -96,7 +86,7 @@ public sealed class IntercomAnchorSlashTests
     }
 
     [Fact]
-    public void Parse_AnchorPeek_Ordinal_in_preview()
+    public void AnchorPeek_Ordinal_in_preview()
     {
         var preview = SlashCommandPreviewEvaluator.Evaluate("/anchor peek 1");
         Assert.Equal(SlashCommandPreviewKind.Incomplete, preview.Kind);

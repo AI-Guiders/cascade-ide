@@ -6,106 +6,57 @@ namespace CascadeIDE.Tests;
 public sealed class ChatSlashCommandParserTests
 {
     [Fact]
-    public void TryParse_NotSlash_ReturnsNotSlash()
+    public void IsSlashLine_NotSlash_ReturnsFalse()
     {
-        var r = ChatSlashCommandParser.TryParse("hello");
-        Assert.False(r.IsSlashLine);
+        Assert.False(ChatSlashCommandParser.IsSlashLine("hello"));
     }
 
     [Fact]
-    public void TryParse_IntercomOverview()
+    public void TryResolveInput_IntercomOverview()
     {
-        var r = ChatSlashCommandParser.TryParse("/intercom overview");
-        Assert.True(r.IsSlashLine);
-        Assert.False(r.IsRejected);
-        Assert.Equal(ChatSlashCommandShape.NamespaceAction, r.Shape);
-        Assert.Equal("intercom", r.Head);
-        Assert.Equal("overview", r.Action);
+        ChatSlashCatalogTestSupport.AssertResolves("/intercom overview", "/intercom overview");
     }
 
     [Fact]
-    public void TryParse_NamespaceAction_BuildRun()
+    public void TryResolveInput_BuildRun()
     {
-        var r = ChatSlashCommandParser.TryParse("/build run");
-        Assert.True(r.IsSlashLine);
-        Assert.Equal(ChatSlashCommandShape.NamespaceAction, r.Shape);
-        Assert.Equal("build", r.Head);
-        Assert.Equal("run", r.Action);
+        ChatSlashCatalogTestSupport.AssertResolves("/build run", "/build run");
     }
 
     [Fact]
-    public void TryParse_IntercomTopicCreateWithoutTitle_EmptyArgsTail()
+    public void TryResolveInput_IntercomTopicCreate()
     {
-        var r = ChatSlashCommandParser.TryParse("/intercom topic create");
-        Assert.True(r.IsSlashLine);
-        Assert.Equal("", r.ArgsTail);
-        Assert.True(ChatSlashCommandCatalog.TryResolve(r, out var d));
-        Assert.Equal("/intercom topic create", d.SlashPath);
+        ChatSlashCatalogTestSupport.AssertResolves(
+            "/intercom topic create",
+            "/intercom topic create");
     }
 
     [Fact]
-    public void TryParse_IntercomTopicCreateWithArgsTail()
+    public void TryResolveInput_IntercomTopicCreate_WithTitle()
     {
-        var r = ChatSlashCommandParser.TryParse("/intercom topic create ADR 0119");
-        Assert.True(r.IsSlashLine);
-        Assert.Equal(ChatSlashCommandShape.NamespaceAction, r.Shape);
-        Assert.Equal("intercom", r.Head);
-        Assert.Equal("topic", r.Action);
-        Assert.Equal("ADR 0119", r.ArgsTail);
+        ChatSlashCatalogTestSupport.AssertResolves(
+            "/intercom topic create ADR 0119",
+            "/intercom topic create",
+            "ADR 0119");
     }
 
     [Theory]
-    [InlineData("/foo")]
-    [InlineData("/")]
-    public void TryParse_UnknownOrEmpty_RejectedOrResolvable(string line)
+    [InlineData("/intercom server status", "/intercom server status")]
+    [InlineData("/build run", "/build run")]
+    [InlineData("/help", "/help")]
+    public void TryResolveInput_CatalogPaths(string line, string expectedPath)
     {
-        var r = ChatSlashCommandParser.TryParse(line);
-        Assert.True(r.IsSlashLine);
-    }
-
-    [Fact]
-    public void TryParse_IntercomServerStatus_HasSubAction()
-    {
-        var parse = ChatSlashCommandParser.TryParse("/intercom server status");
-        Assert.True(parse.IsSlashLine);
-        Assert.False(parse.IsRejected);
-        Assert.Equal("intercom", parse.Head);
-        Assert.Equal("server", parse.Action);
-        Assert.Null(parse.SubAction);
-        Assert.Equal("status", parse.ArgsTail);
-    }
-
-    [Fact]
-    public void Catalog_ResolvesIntercomServerStatus()
-    {
-        var parse = ChatSlashCommandParser.TryParse("/intercom server status");
-        Assert.True(ChatSlashCommandCatalog.TryResolve(parse, out var d));
-        Assert.Equal("/intercom server status", d.SlashPath);
-        Assert.Equal(ChatSlashCommandExecutionKind.LocalIntercom, d.ExecutionKind);
-    }
-
-    [Fact]
-    public void Catalog_ResolvesBuildRun()
-    {
-        var parse = ChatSlashCommandParser.TryParse("/build run");
-        Assert.True(ChatSlashCommandCatalog.TryResolve(parse, out var d));
-        Assert.Equal("/build run", d.SlashPath);
-        Assert.Equal(Services.IdeCommands.Build, d.CommandId);
-    }
-
-    [Fact]
-    public void Catalog_Help_IsLocal()
-    {
-        var parse = ChatSlashCommandParser.TryParse("/help");
-        Assert.True(ChatSlashCommandCatalog.TryResolve(parse, out var d));
-        Assert.Equal(ChatSlashCommandExecutionKind.LocalHelp, d.ExecutionKind);
+        ChatSlashCatalogTestSupport.AssertResolves(line, expectedPath);
     }
 
     [Theory]
-    [InlineData("/file open src/Foo.cs", true)]
-    [InlineData("/solution load My.sln", true)]
-    [InlineData("/file open", false)]
-    [InlineData("/build run", false)]
-    public void ShouldAutoExecuteAfterAutocompleteCommit(string line, bool expected) =>
+    [InlineData("/intercom topic open bbbbbbbb", true)]
+    [InlineData("/intercom topic open Ветка", true)]
+    [InlineData("/intercom spine open", true)]
+    [InlineData("/intercom topic cards", true)]
+    [InlineData("/intercom topic open", true)]
+    public void ShouldAutoExecuteAfterAutocompleteCommit(string line, bool expected)
+    {
         Assert.Equal(expected, ChatSlashCommandParser.ShouldAutoExecuteAfterAutocompleteCommit(line));
+    }
 }

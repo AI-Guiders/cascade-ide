@@ -13,16 +13,14 @@ public sealed class IntercomMessageAudienceTests
     [Fact]
     public void Help_slash_route_is_self_only()
     {
-        var parse = ChatSlashCommandParser.TryParse("/help");
-        Assert.True(ChatSlashCommandCatalog.TryResolve(parse, out var d));
+        Assert.True(ChatSlashCommandCatalog.TryResolveInput("/help", out var d, out _));
         Assert.Equal(IntercomMessageAudience.SelfOnly, d.MessageAudience);
     }
 
     [Fact]
     public void Ide_slash_routes_default_to_self_only()
     {
-        var parse = ChatSlashCommandParser.TryParse("/solution open");
-        Assert.True(ChatSlashCommandCatalog.TryResolve(parse, out var d));
+        Assert.True(ChatSlashCommandCatalog.TryResolveInput("/solution open", out var d, out _));
         Assert.Equal(IntercomMessageAudience.SelfOnly, d.MessageAudience);
         Assert.Equal("open_solution_dialog", d.CommandId);
     }

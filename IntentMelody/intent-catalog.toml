@@ -705,6 +705,222 @@ help = "Сплиттеры рабочей области: переключить
 group = "Workspace"
 
 # ==============================================================================
+# Solution explorer & code navigation map
+# ==============================================================================
+
+# show_solution_explorer_page — Обозреватель решения на Mfd. (/solution explorer show)
+[[command]]
+command_id = "show_solution_explorer_page"
+
+[[command.form.slash]]
+path = "/solution explorer show"
+help = "Обозреватель решения (дерево проектов и файлов) в регионе Mfd."
+group = "Workspace"
+auto_run_on_commit = true
+arg_tail = "none"
+
+# set_code_navigation_map_level — Уровень карты намерений PFD: file | controlFlow. (/map type file, /map type controlflow)
+[[command]]
+command_id = "set_code_navigation_map_level"
+slash_group = "Карта"
+
+[[command.form.slash]]
+path = "/map type file"
+help = "Карта намерений: уровень file (связанные файлы по якорю)."
+group = "Карта"
+auto_run_on_commit = true
+arg_tail = "none"
+
+[command.form.slash.args]
+level = "file"
+
+[[command.form.slash]]
+path = "/map type controlflow"
+help = "Карта намерений: уровень controlFlow (подграф потока управления)."
+group = "Карта"
+auto_run_on_commit = true
+arg_tail = "none"
+
+[command.form.slash.args]
+level = "controlFlow"
+
+# cycle_code_navigation_map_presentation — list → graph → both. (/map cycle presentation)
+[[command]]
+command_id = "cycle_code_navigation_map_presentation"
+
+[[command.form.slash]]
+path = "/map cycle presentation"
+help = "Карта намерений: цикл вида list / graph / both."
+group = "Карта"
+auto_run_on_commit = true
+arg_tail = "none"
+
+# cycle_code_navigation_map_level — file ↔ controlFlow (toggle). (/map cycle level)
+[[command]]
+command_id = "cycle_code_navigation_map_level"
+
+[[command.form.slash]]
+path = "/map cycle level"
+help = "Карта намерений: переключить уровень file ↔ controlFlow."
+group = "Карта"
+auto_run_on_commit = true
+arg_tail = "none"
+
+# cycle_code_navigation_map_detail_level — glance → normal → inspect. (/map cycle detail)
+[[command]]
+command_id = "cycle_code_navigation_map_detail_level"
+
+[[command.form.slash]]
+path = "/map cycle detail"
+help = "Карта намерений: цикл детализации glance / normal / inspect."
+group = "Карта"
+auto_run_on_commit = true
+arg_tail = "none"
+
+# cycle_code_navigation_map_related_graph_layout — radial → top_down → bottom_up. (/map cycle layout)
+[[command]]
+command_id = "cycle_code_navigation_map_related_graph_layout"
+
+[[command.form.slash]]
+path = "/map cycle layout"
+help = "Карта намерений: цикл укладки related (radial / top_down / bottom_up)."
+group = "Карта"
+auto_run_on_commit = true
+arg_tail = "none"
+
+# show_pfd_region_panel — развернуть Pfd / карту. (/pfd show)
+[[command]]
+command_id = "show_pfd_region_panel"
+
+[[command.form.slash]]
+path = "/pfd show"
+help = "Развернуть регион Pfd (карта намерений)."
+group = "Карта"
+auto_run_on_commit = true
+arg_tail = "none"
+
+# toggle_pfd_region_expanded — свернуть/развернуть Pfd. (/pfd toggle)
+[[command]]
+command_id = "toggle_pfd_region_expanded"
+
+[[command.form.slash]]
+path = "/pfd toggle"
+help = "Переключить регион Pfd (карта намерений)."
+group = "Карта"
+auto_run_on_commit = true
+arg_tail = "none"
+
+# show_related_files_mfd_page — связанные файлы на Mfd. (/related show)
+[[command]]
+command_id = "show_related_files_mfd_page"
+
+[[command.form.slash]]
+path = "/related show"
+help = "Страница «Связанные файлы» (Mfd) по якорю."
+group = "Карта"
+auto_run_on_commit = true
+arg_tail = "none"
+
+# toggle_mfd_region_expanded — регион Mfd. (/mfd toggle)
+[[command]]
+command_id = "toggle_mfd_region_expanded"
+
+[[command.form.slash]]
+path = "/mfd toggle"
+help = "Переключить развёрнут/свёрнут регион Mfd."
+group = "Панели"
+auto_run_on_commit = true
+arg_tail = "none"
+
+# show_markdown_preview_page — Markdown preview на Mfd. (/preview show)
+[[command]]
+command_id = "show_markdown_preview_page"
+
+[[command.form.slash]]
+path = "/preview show"
+help = "Markdown preview (страница Mfd)."
+group = "Панели"
+auto_run_on_commit = true
+arg_tail = "none"
+
+# toggle_build_output — вывод сборки. (/output toggle)
+[[command]]
+command_id = "toggle_build_output"
+
+[[command.form.slash]]
+path = "/output toggle"
+help = "Переключить панель вывода сборки."
+group = "Сборка"
+auto_run_on_commit = true
+arg_tail = "none"
+
+# hide_build_output_panel — скрыть вывод сборки. (/output hide)
+[[command]]
+command_id = "hide_build_output_panel"
+
+[[command.form.slash]]
+path = "/output hide"
+help = "Скрыть панель вывода сборки."
+group = "Сборка"
+auto_run_on_commit = true
+arg_tail = "none"
+
+# toggle_git_panel — панель Git. (/repository toggle)
+[[command]]
+command_id = "toggle_git_panel"
+
+[[command.form.slash]]
+path = "/repository toggle"
+help = "Переключить панель Git (SCM)."
+group = "Панели"
+auto_run_on_commit = true
+arg_tail = "none"
+
+# toggle_instrumentation_dock — Events/Tests/Debug dock. (/instrumentation toggle)
+[[command]]
+command_id = "toggle_instrumentation_dock"
+
+[[command.form.slash]]
+path = "/instrumentation toggle"
+help = "Переключить док инструментирования (Events/Tests/Debug)."
+group = "Панели"
+auto_run_on_commit = true
+arg_tail = "none"
+
+# set_single_editor_group — одна группа редакторов. (/editor layout single)
+[[command]]
+command_id = "set_single_editor_group"
+
+[[command.form.slash]]
+path = "/editor layout single"
+help = "Одна группа редакторов (1-up)."
+group = "Редактор"
+auto_run_on_commit = true
+arg_tail = "none"
+
+# set_dual_editor_group — две группы. (/editor layout dual)
+[[command]]
+command_id = "set_dual_editor_group"
+
+[[command.form.slash]]
+path = "/editor layout dual"
+help = "Две группы редакторов (2-up)."
+group = "Редактор"
+auto_run_on_commit = true
+arg_tail = "none"
+
+# set_triple_editor_group — три группы. (/editor layout triple)
+[[command]]
+command_id = "set_triple_editor_group"
+
+[[command.form.slash]]
+path = "/editor layout triple"
+help = "Три группы редакторов (3-up)."
+group = "Редактор"
+auto_run_on_commit = true
+arg_tail = "none"
+
+# ==============================================================================
 # Panels (MFD)
 # ==============================================================================
 
@@ -999,6 +1215,15 @@ intercom_handler = "message_anchors_list"
 [[command.form.slash]]
 path = "/anchor peek"
 help = "Reveal вложения: № якоря (#1…) выбранного сообщения или 8 hex (⟦a:…⟧, list). Пример: /anchor peek 1"
+group = "Intercom"
+kind = "intercom"
+intercom_handler = "anchor_peek"
+completion = "message_anchors"
+arg_tail = "required"
+
+[[command.form.slash]]
+path = "/intercom anchor peek"
+help = "То же, что /anchor peek — reveal вложения по № или 8 hex."
 group = "Intercom"
 kind = "intercom"
 intercom_handler = "anchor_peek"

@@ -11,23 +11,20 @@ public sealed class ChatSlashIntercomMessageFindTests
     [Theory]
     [InlineData("/intercom message find selection", "selection")]
     [InlineData("/intercom message find L:3-7", "L:3-7")]
-    public void Parse_StripsFindVerb(string line, string expectedTail)
+    public void ResolveInput_MessageFind_ArgTail(string line, string expectedTail)
     {
-        var parse = ChatSlashCommandParser.TryParse(line);
-        Assert.True(parse.IsSlashLine);
-        Assert.Equal("message", parse.Action);
-        Assert.Equal(expectedTail, parse.ArgsTail);
-
-        Assert.True(IntercomSlashPathBuilder.TryBuildPath(parse, out var path));
-        Assert.Equal("/intercom message find", path);
+        Assert.True(SlashLineResolver.TryResolveSlashLine(line, out var resolved));
+        Assert.Equal("/intercom message find", resolved.CanonicalPath);
+        Assert.Equal(expectedTail, resolved.ArgTail);
+        ChatSlashCatalogTestSupport.AssertResolves(line, "/intercom message find", expectedTail);
     }
 
     [Fact]
     public void Catalog_ResolvesMessageFind()
     {
-        var parse = ChatSlashCommandParser.TryParse("/intercom message find selection");
-        Assert.True(ChatSlashCommandCatalog.TryResolve(parse, out var d));
-        Assert.Equal("/intercom message find", d.SlashPath);
+        ChatSlashCatalogTestSupport.AssertResolves("/intercom message find selection", "/intercom message find", "selection");
+        Assert.True(
+            ChatSlashCommandCatalog.TryResolveInput("/intercom message find selection", out var d, out _));
         Assert.True(IntentSlashCatalog.TryGetRoute(d.SlashPath, out var route));
         Assert.Equal("message_find", route.IntercomHandlerId);
     }

@@ -4,7 +4,7 @@ using CascadeIDE.Models.Intercom;
 
 namespace CascadeIDE.Services;
 
-/// <summary>Сборка <see cref="IntentMelodyCatalogSnapshot"/> из TOML: command-first и legacy-таблицы.</summary>
+/// <summary>Сборка <see cref="IntentMelodyCatalogSnapshot"/> из TOML (<c>[[command]]</c>).</summary>
 internal static class IntentCatalogLoader
 {
     internal static IntentMelodyCatalogSnapshot BuildSnapshot(
@@ -13,10 +13,13 @@ internal static class IntentCatalogLoader
     {
         var wireClasses = LoadTailWireClassTable(root, bundledRelativePath);
 
-        if (root.Command is { Count: > 0 })
-            return BuildFromCommands(root, wireClasses, bundledRelativePath);
+        if (root.Command is not { Count: > 0 })
+        {
+            throw new InvalidOperationException(
+                $"{bundledRelativePath}: ожидается intent-catalog с [[command]] (legacy melody_root/slash_route удалены).");
+        }
 
-        return BuildFromLegacyTables(root, wireClasses, bundledRelativePath);
+        return BuildFromCommands(root, wireClasses, bundledRelativePath);
     }
 
     internal static Dictionary<string, string> BuildMelodyAliasMap(IntentMelodyCatalogSnapshot catalog)
@@ -126,55 +129,6 @@ internal static class IntentCatalogLoader
         return false;
     }
 
-    private static IntentMelodyCatalogSnapshot BuildFromLegacyTables(
-        IntentMelodyAliases.IntentMelodyTomlRoot root,
-        Dictionary<string, TailWireClassEntry> wireClasses,
-        string path)
-    {
-        var normAliases = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var kv in root.Aliases ?? new Dictionary<string, string>())
-        {
-            var key = kv.Key?.Trim().ToLowerInvariant();
-            var val = kv.Value?.Trim();
-            if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(val))
-                continue;
-            normAliases[key] = val;
-        }
-
-        var merged = new Dictionary<string, MelodyRootEntry>(StringComparer.OrdinalIgnoreCase);
-
-        if (root.MelodyRoot is { Count: > 0 })
-        {
-            foreach (var row in root.MelodyRoot)
-                AddMelodyForm(merged, ToMelodyForm(row), row.CommandId?.Trim() ?? "", path);
-
-            foreach (var kv in normAliases)
-            {
-                if (merged.ContainsKey(kv.Key))
-                    continue;
-
-                merged[kv.Key] = new MelodyRootEntry(
-                    kv.Key, kv.Value, IntentMelodyShape.Simple, ShowUsageHintIfBareSlug: false,
-                    null, null, null, null);
-            }
-        }
-        else
-        {
-            foreach (var kv in normAliases)
-            {
-                merged[kv.Key] = new MelodyRootEntry(
-                    kv.Key, kv.Value, IntentMelodyShape.Simple, ShowUsageHintIfBareSlug: false,
-                    null, null, null, null);
-            }
-        }
-
-        ValidateMelodyCatalog(merged, wireClasses, path);
-
-        var slashRoutes = LoadLegacySlashRoutes(root, path);
-
-        return new IntentMelodyCatalogSnapshot(merged, wireClasses, slashRoutes);
-    }
-
     private static void AddMelodyForm(
         Dictionary<string, MelodyRootEntry> merged,
         MelodyFormToml row,
@@ -261,15 +215,14 @@ internal static class IntentCatalogLoader
         }
 
         var group = NormOptional(row.Group) ?? defaultSlashGroup;
-        ResolveSlashStaticArgs(row, out var mfdPage, out var primarySurface);
+        ResolveSlashStaticArgs(row, out var mfdPage, out var primarySurface, out var mapLevel);
         var completion = ParseSlashCompletion(row.Completion, path, slashPath);
         var reportHandler = ResolveReportHandler(row, kind, path, slashPath);
         var intercomHandler = ResolveIntercomHandler(row, kind, path, slashPath);
         var audience = ParseSlashAudience(row.Audience, path, slashPath);
         var autoRunOnCommit = row.AutoRunOnCommit ?? false;
         var autoRunRequiresArgs = row.AutoRunRequiresArgs ?? true;
-        var requiresArgTailExplicit = row.RequiresArgTail;
-        var argTailKindExplicit = ParseSlashArgTail(row.ArgTail, row.RequiresArgTail, path, slashPath);
+        var argTailKindExplicit = ParseSlashArgTail(row.ArgTail, path, slashPath);
 
         routes[slashPath] = new SlashRouteEntry(
             slashPath,
@@ -278,6 +231,7 @@ internal static class IntentCatalogLoader
             kind,
             mfdPage,
             primarySurface,
+            mapLevel,
             group,
             completion,
             reportHandler,
@@ -285,32 +239,22 @@ internal static class IntentCatalogLoader
             audience,
             autoRunOnCommit,
             autoRunRequiresArgs,
-            requiresArgTailExplicit,
             argTailKindExplicit);
     }
 
-    private static SlashArgTailKind? ParseSlashArgTail(
-        string? argTail,
-        bool? legacyRequiresArgTail,
-        string path,
-        string slashPath)
+    private static SlashArgTailKind? ParseSlashArgTail(string? argTail, string path, string slashPath)
     {
-        if (!string.IsNullOrWhiteSpace(argTail))
+        if (string.IsNullOrWhiteSpace(argTail))
+            return null;
+
+        return argTail.Trim().ToLowerInvariant() switch
         {
-            return argTail.Trim().ToLowerInvariant() switch
-            {
-                "none" => SlashArgTailKind.None,
-                "optional" => SlashArgTailKind.Optional,
-                "required" => SlashArgTailKind.Required,
-                _ => throw new InvalidOperationException(
-                    $"{path}: slash '{slashPath}' arg_tail must be none|optional|required, got '{argTail}'."),
-            };
-        }
-
-        if (legacyRequiresArgTail is { } legacy)
-            return legacy ? SlashArgTailKind.Required : SlashArgTailKind.None;
-
-        return null;
+            "none" => SlashArgTailKind.None,
+            "optional" => SlashArgTailKind.Optional,
+            "required" => SlashArgTailKind.Required,
+            _ => throw new InvalidOperationException(
+                $"{path}: slash '{slashPath}' arg_tail must be none|optional|required, got '{argTail}'."),
+        };
     }
 
     private static IntercomMessageAudience ParseSlashAudience(string? raw, string path, string slashPath)
@@ -413,57 +357,15 @@ internal static class IntentCatalogLoader
             $"{path}: slash '{slashPath}' has unknown completion '{v}' (expected workspace_files | session_topics | message_anchors).");
     }
 
-    private static void ResolveSlashStaticArgs(SlashFormToml row, out string? mfdPage, out string? primarySurface)
+    private static void ResolveSlashStaticArgs(
+        SlashFormToml row,
+        out string? mfdPage,
+        out string? primarySurface,
+        out string? mapLevel)
     {
         mfdPage = NormOptional(row.MfdPage) ?? NormOptional(row.Args?.Page);
         primarySurface = NormOptional(row.PrimarySurface) ?? NormOptional(row.Args?.Surface);
-    }
-
-    private static MelodyFormToml ToMelodyForm(IntentMelodyAliases.MelodyRootToml row) =>
-        new()
-        {
-            Slug = row.Slug,
-            Shape = row.Shape,
-            ShowUsageHintIfBareSlug = row.ShowUsageHintIfBareSlug,
-            TailSignature = row.TailSignature,
-            WireClass = row.WireClass,
-            ChordCommit = row.ChordCommit,
-            PaletteHintSlug = row.PaletteHintSlug,
-            PaletteUsageHint = row.PaletteUsageHint,
-            PaletteUsageCategory = row.PaletteUsageCategory,
-        };
-
-    private static Dictionary<string, SlashRouteEntry> LoadLegacySlashRoutes(
-        IntentMelodyAliases.IntentMelodyTomlRoot root,
-        string path)
-    {
-        var routes = new Dictionary<string, SlashRouteEntry>(StringComparer.OrdinalIgnoreCase);
-        foreach (var row in root.SlashRoute ?? [])
-        {
-            AddSlashForm(
-                routes,
-                new SlashFormToml
-                {
-                    Path = row.Path,
-                    Help = row.Help,
-                    Group = row.Group,
-                    MfdPage = row.MfdPage,
-                    PrimarySurface = row.PrimarySurface,
-                    Kind = row.Kind,
-                },
-                row.CommandId?.Trim() ?? "",
-                path,
-                defaultSlashGroup: null);
-        }
-
-        if (routes.Count == 0
-            && (root.SlashCatalogSchemaVersion is > 0 || (root.SlashRoute?.Count ?? 0) > 0))
-        {
-            throw new InvalidOperationException(
-                $"{path}: slash_catalog заявлен, но нет валидных [[slash_route]].");
-        }
-
-        return routes;
+        mapLevel = NormOptional(row.Args?.Level);
     }
 
     private static void ValidateMelodyCatalog(

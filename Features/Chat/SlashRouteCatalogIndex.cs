@@ -23,6 +23,9 @@ internal static class SlashRouteCatalogIndex
     public static SlashArgTailKind GetArgTailKind(string slashPath)
     {
         var key = IntentSlashCatalog.NormalizeSlashPath(slashPath);
+        if (SlashRouteCatalogPathsGenerated.TryGetArgTailKind(key, out var generated))
+            return (SlashArgTailKind)generated;
+
         return Lazy.Value.ArgTailKind.TryGetValue(key, out var kind) ? kind : SlashArgTailKind.None;
     }
 
@@ -87,9 +90,6 @@ internal static class SlashRouteCatalogIndex
 
         if (route.AutoRunOnCommit && !route.AutoRunRequiresArgs)
             return SlashArgTailKind.None;
-
-        if (route.RequiresArgTailExplicit is { } legacyFlag)
-            return legacyFlag ? SlashArgTailKind.Required : SlashArgTailKind.None;
 
         if (route.Completion != SlashCompletionKind.None)
             return SlashArgTailKind.Required;

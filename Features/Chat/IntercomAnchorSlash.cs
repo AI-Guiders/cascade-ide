@@ -9,11 +9,11 @@ namespace CascadeIDE.Features.Chat;
 /// <summary>Фасад форматирования и anchor peek для slash/CCL (ADR 0128 §10.1).</summary>
 internal static class IntercomAnchorSlash
 {
-    public static bool IsAnchorPeekCommand(in ChatSlashCommandParseResult parse) =>
-        SlashPathAliases.IsAnchorPeekCommand(parse);
+    public static bool IsAnchorPeekPath(string canonicalPath) =>
+        SlashPathAliases.IsAnchorPeekPath(canonicalPath);
 
-    public static string? ExtractPeekIdTail(in ChatSlashCommandParseResult parse) =>
-        SlashPathAliases.ExtractPeekArgs(parse);
+    public static string? ExtractPeekIdTail(string canonicalPath, string? argTail) =>
+        SlashPathAliases.ExtractPeekArgs(canonicalPath, argTail);
 
     public static bool IsAnchorPeekHexIdEntryBody(string body) =>
         isAnchorPeekHexIdEntryBody(SlashPathAliases.NormalizeCompletionBody(body));
