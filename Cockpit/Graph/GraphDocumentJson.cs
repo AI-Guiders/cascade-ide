@@ -55,6 +55,18 @@ public static class GraphDocumentJson
                         && liEl.TryGetInt32(out var li))
                         legendIndex = li;
                     var legendText = el.TryGetProperty("legend_text", out var ltEl) ? ltEl.GetString() : null;
+                    int? lineStart = null;
+                    int? lineEnd = null;
+                    if (el.TryGetProperty("line_start", out var lsEl) && lsEl.ValueKind == JsonValueKind.Number
+                        && lsEl.TryGetInt32(out var ls))
+                        lineStart = ls;
+                    if (el.TryGetProperty("line_end", out var leEl) && leEl.ValueKind == JsonValueKind.Number
+                        && leEl.TryGetInt32(out var le))
+                        lineEnd = le;
+                    int? loopGroupId = null;
+                    if (el.TryGetProperty("loop_group", out var lgEl) && lgEl.ValueKind == JsonValueKind.Number
+                        && lgEl.TryGetInt32(out var lg))
+                        loopGroupId = lg;
                     nodes.Add(new GraphNode
                     {
                         Id = id,
@@ -64,7 +76,10 @@ public static class GraphDocumentJson
                         RelativePath = rel,
                         Rationale = rat,
                         LegendIndex = legendIndex,
-                        LegendText = legendText
+                        LegendText = legendText,
+                        LineStart = lineStart,
+                        LineEnd = lineEnd,
+                        LoopGroupId = loopGroupId
                     });
                 }
             }

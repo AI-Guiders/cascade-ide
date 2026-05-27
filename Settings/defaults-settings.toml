@@ -190,11 +190,15 @@ primary_work_surface = "editor"
 
 [code_navigation_map]
 # list | graph | both
-view = "list"
+view = "graph"
 # file | controlFlow
 depth = "file"
 # glance | normal | inspect
 detail_level = "normal"
+# radial | top_down | bottom_up — укладка related-files на PFD (не solution explorer)
+related_graph_layout = "top_down"
+# auto | vertical | horizontal — главная ось потока на мини-карте control-flow
+control_flow_main_axis = "auto"
 
 [languages.csharp]
 # ParseOnly | OmniSharp | CSharpLs | Custom

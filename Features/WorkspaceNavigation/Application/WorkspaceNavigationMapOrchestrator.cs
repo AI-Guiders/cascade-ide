@@ -2,7 +2,10 @@
 using System.Text.Json;
 using CascadeIDE.Cockpit.Graph;
 using CascadeIDE.Contracts;
+using CascadeIDE.Features.Documents;
 using CascadeIDE.Features.IdeMcp.Application;
+using CascadeIDE.Models;
+using CascadeIDE.Services;
 using CascadeIDE.Services.CodeNavigation;
 
 namespace CascadeIDE.Features.WorkspaceNavigation.Application;
@@ -48,7 +51,8 @@ public static class WorkspaceNavigationMapOrchestrator
         int? caretOrSelectionOffset)
     {
         var anchorMatchesEditor = !string.IsNullOrEmpty(anchorPath)
-            && string.Equals(anchorPath, currentPath, StringComparison.OrdinalIgnoreCase);
+            && !string.IsNullOrEmpty(currentPath)
+            && EditorTextCoordinateUtilities.PathsReferToSameFile(anchorPath, currentPath);
         if (anchorMatchesEditor)
             return IdeMcpNavigationOrchestrator.ResolveControlFlowLineColumn(
                 null,
@@ -57,6 +61,27 @@ public static class WorkspaceNavigationMapOrchestrator
                 caretOrSelectionOffset);
 
         return CodeNavigationControlFlowSubgraphBuilder.TryResolveFirstMethodLineColumn(sourceText);
+    }
+
+    /// <summary>
+    /// Путь для JSON подграфа карты: CF — всегда активный <c>.cs</c> редактора, если он задан (без замены на Program.cs /
+    /// «первый открытый» из дерева решения); иначе эвристический якорь.
+    /// </summary>
+    public static string? ResolveNavigationPathForGraphJson(
+        string normalizedLevel,
+        string? currentPath,
+        string? anchorPath,
+        IReadOnlyList<string> _)
+    {
+        var fallback = anchorPath ?? currentPath;
+        if (!string.Equals(normalizedLevel, CodeNavigationMapLevelKind.ControlFlow, StringComparison.Ordinal))
+            return fallback;
+
+        if (string.IsNullOrWhiteSpace(currentPath)
+            || !currentPath.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
+            return fallback;
+
+        return SolutionTreePath.TryGetFullPath(currentPath, out var full) ? full : currentPath;
     }
 
     public static string ResolveErrorStatus(JsonElement root, string? currentPath)

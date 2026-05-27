@@ -24,11 +24,13 @@ public sealed record CodeNavigationMapCompositionResult(
     double PreferredHeight,
     IReadOnlyList<CodeNavigationMapInstrumentBlockDescriptor> CodeNavigationMapInstrumentBlocks)
 {
-    public CodeNavigationMapGraphSceneVm Scene =>
-        CodeNavigationMapGraphSceneProjection.ToViewModel(LayoutScene);
+    public CodeNavigationMapGraphSceneVm ToSceneVm(double layoutViewportWidth, double layoutViewportHeight) =>
+        CodeNavigationMapGraphSceneProjection.ToViewModel(LayoutScene, layoutViewportWidth, layoutViewportHeight);
 }
 
 public sealed record CodeNavigationMapCompositionIntent(
     GraphDocument Subgraph,
     string MapLevel,
-    CodeNavigationMapDetailLevel DetailLevel = CodeNavigationMapDetailLevel.Normal);
+    CodeNavigationMapDetailLevel DetailLevel = CodeNavigationMapDetailLevel.Normal,
+    string RelatedGraphLayout = CodeNavigationMapRelatedGraphLayoutKind.Radial,
+    string ControlFlowMainAxis = CodeNavigationMapControlFlowMainAxisKind.Auto);

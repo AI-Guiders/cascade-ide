@@ -15,8 +15,22 @@ public static class CodeNavigationMapPresentationProjection
     public const bool ShowCodeNavigationMapListOnPfd = false;
 
     /// <summary>Строка сводки настроек карты для HUD (без ComboBox).</summary>
-    public static string SettingsSummaryLine(string presentationView, string mapLevel, string detailLevelRaw) =>
-        $"Вид: {presentationView} · уровень: {mapLevel} · детализация: {detailLevelRaw.Trim()} · палитра / MCP";
+    public static string SettingsSummaryLine(
+        string presentationView,
+        string mapLevel,
+        string detailLevelRaw,
+        string relatedGraphLayoutRaw,
+        string controlFlowMainAxisRaw) =>
+        $"Вид: {presentationView} · уровень: {mapLevel} · укладка: {CodeNavigationMapRelatedGraphLayoutKind.Normalize(relatedGraphLayoutRaw)} · CF ось: {CodeNavigationMapControlFlowMainAxisKind.Normalize(controlFlowMainAxisRaw)} · детализация: {detailLevelRaw.Trim()} · палитра / MCP";
+
+    /// <summary>Цикл укладки related-files: radial → top_down → bottom_up.</summary>
+    public static string NextRelatedGraphLayoutAfter(string current) =>
+        CodeNavigationMapRelatedGraphLayoutKind.Normalize(current) switch
+        {
+            CodeNavigationMapRelatedGraphLayoutKind.Radial => CodeNavigationMapRelatedGraphLayoutKind.TopDown,
+            CodeNavigationMapRelatedGraphLayoutKind.TopDown => CodeNavigationMapRelatedGraphLayoutKind.BottomUp,
+            _ => CodeNavigationMapRelatedGraphLayoutKind.Radial
+        };
 
     /// <summary>Следующий <see cref="CodeNavigationMapSettings.NormalizeView"/> после текущего: list → graph → both → list.</summary>
     public static string NextPresentationViewAfter(string currentPresentationView)

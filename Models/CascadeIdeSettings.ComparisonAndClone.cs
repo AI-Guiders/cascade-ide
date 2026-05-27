@@ -155,6 +155,8 @@ public sealed partial class CascadeIdeSettings
                 View = CodeNavigationMap.View,
                 Depth = CodeNavigationMap.Depth,
                 DetailLevel = CodeNavigationMap.DetailLevel,
+                RelatedGraphLayout = CodeNavigationMap.RelatedGraphLayout,
+                ControlFlowMainAxis = CodeNavigationMap.ControlFlowMainAxis,
             },
             Languages = new LanguagesSettings
             {
@@ -481,7 +483,11 @@ public sealed partial class CascadeIdeSettings
     {
         if (a is null || b is null)
             return a == b;
-        return a.View.Is(b.View) && a.Depth.Is(b.Depth) && a.DetailLevel.Is(b.DetailLevel);
+        return a.View.Is(b.View)
+            && a.Depth.Is(b.Depth)
+            && a.DetailLevel.Is(b.DetailLevel)
+            && a.RelatedGraphLayout.Is(b.RelatedGraphLayout)
+            && a.ControlFlowMainAxis.Is(b.ControlFlowMainAxis);
     }
 
     private static bool LanguagesEquals(LanguagesSettings? a, LanguagesSettings? b)

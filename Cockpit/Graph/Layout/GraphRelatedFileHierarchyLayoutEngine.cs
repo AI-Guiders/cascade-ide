@@ -4,9 +4,13 @@ using CascadeIDE.Models;
 
 namespace CascadeIDE.Cockpit.Graph.Layout;
 
-/// <summary>Звезда: якорь в центре, спутники по окружности (<c>radial</c>).</summary>
-public sealed class StarGraphLayoutEngine : IGraphLayoutEngine
+/// <summary>Иерархия related-files: якорь — корень, спутники — один уровень (не дерево solution explorer).</summary>
+public sealed class GraphRelatedFileHierarchyLayoutEngine : IGraphLayoutEngine
 {
+    private readonly bool _anchorAtTop;
+
+    public GraphRelatedFileHierarchyLayoutEngine(bool anchorAtTop) => _anchorAtTop = anchorAtTop;
+
     public GraphLayoutScene Layout(
         GraphDocument doc,
         double width,
@@ -21,72 +25,94 @@ public sealed class StarGraphLayoutEngine : IGraphLayoutEngine
                      ?? doc.Nodes.FirstOrDefault(n => n.Id.Equals("n0", StringComparison.OrdinalIgnoreCase));
         var satellites = doc.Nodes
             .Where(n => anchor is null || !string.Equals(n.Id, anchor.Id, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(n => n.Label, StringComparer.OrdinalIgnoreCase)
             .ToList();
 
         var margin = Math.Min(
             GraphFileLayoutMetrics.SideLabelMargin,
-            Math.Max(28, Math.Min(width, height) * 0.22));
+            Math.Max(28, Math.Min(width, height) * 0.18));
         var innerW = Math.Max(80, width - 2 * margin);
         var innerH = Math.Max(80, height - 2 * margin);
         var cx = width / 2;
-        var cy = height / 2;
-        var minDim = Math.Min(innerW, innerH);
-        var scale = Math.Clamp(minDim / 220.0, 0.58, 1.22);
+        var scale = Math.Clamp(Math.Min(innerW, innerH) / 220.0, 0.58, 1.22);
         var anchorR = 16 * scale;
-        var satR = 13 * scale;
-        const int singleRingMaxSatellites = 8;
+        var satR = 12 * scale;
+        var rowStep = Math.Clamp(anchorR * 2.6 + satR * 2.2, 38, innerH / Math.Max(2, satellites.Count + 1));
 
         var layouts = new List<GraphLayoutNode>();
-        Point? anchorCenter = null;
         var idToCenter = new Dictionary<string, Point>(StringComparer.OrdinalIgnoreCase);
         var idToRadius = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
+        Point? anchorCenter = null;
+
+        var nRows = Math.Max(1, satellites.Count + 1);
+        var totalSpan = rowStep * (nRows - 1);
+        var startY = _anchorAtTop
+            ? margin + anchorR
+            : margin + innerH - totalSpan - anchorR;
+        var anchorY = startY;
+        var childStartY = _anchorAtTop ? startY + rowStep : startY - rowStep;
 
         if (anchor is not null)
         {
-            var ac = new Point(cx, cy);
+            var ac = new Point(cx, anchorY);
             anchorCenter = ac;
             idToCenter[anchor.Id] = ac;
             idToRadius[anchor.Id] = anchorR;
             layouts.Add(MakeNode(anchor, ac, anchorR, isAnchor: true));
         }
 
-        var nSat = satellites.Count;
-        var useTwoRings = nSat > singleRingMaxSatellites;
-        var innerCount = useTwoRings ? (nSat + 1) / 2 : nSat;
-        var (orbitInner, orbitOuter) = GraphFileLayoutMetrics.ResolveRadialOrbits(nSat, innerW, innerH, satR);
-
-        for (var i = 0; i < nSat; i++)
+        for (var i = 0; i < satellites.Count; i++)
         {
             var sat = satellites[i];
-            double orbit;
-            double angle;
-            if (!useTwoRings)
-            {
-                orbit = orbitInner;
-                angle = nSat == 0 ? 0 : (2 * Math.PI * i / nSat) - Math.PI / 2;
-            }
-            else if (i < innerCount)
-            {
-                orbit = orbitInner;
-                angle = innerCount == 0 ? 0 : (2 * Math.PI * i / innerCount) - Math.PI / 2;
-            }
-            else
-            {
-                var outerN = nSat - innerCount;
-                var j = i - innerCount;
-                orbit = orbitOuter;
-                var stagger = innerCount > 0 ? Math.PI / innerCount : 0;
-                angle = outerN == 0 ? 0 : (2 * Math.PI * j / outerN) - Math.PI / 2 + stagger;
-            }
-
-            var px = cx + orbit * Math.Cos(angle);
-            var py = cy + orbit * Math.Sin(angle);
-            var p = new Point(px, py);
+            var y = _anchorAtTop
+                ? childStartY + i * rowStep
+                : childStartY - i * rowStep;
+            var p = new Point(cx, y);
             idToCenter[sat.Id] = p;
             idToRadius[sat.Id] = satR;
             layouts.Add(MakeNode(sat, p, satR, isAnchor: false));
         }
 
+        var edgeLayouts = BuildEdges(doc, anchor, anchorCenter, layouts, idToCenter, idToRadius, satR);
+        var layoutKind = _anchorAtTop
+            ? CodeNavigationMapRelatedGraphLayoutKind.TopDown
+            : CodeNavigationMapRelatedGraphLayoutKind.BottomUp;
+
+        return new GraphLayoutScene
+        {
+            Nodes = layouts,
+            Edges = edgeLayouts,
+            Legend = [],
+            UseLegendColumn = false,
+            LegendColumnLeft = width,
+            RelatedFilesLayout = layoutKind
+        };
+    }
+
+    private static GraphLayoutNode MakeNode(GraphNode n, Point center, double radius, bool isAnchor) =>
+        new()
+        {
+            Id = n.Id,
+            Kind = n.Kind,
+            FullPath = n.Path,
+            Label = TruncateLabel(n.Label),
+            Center = center,
+            Radius = radius,
+            IsAnchor = isAnchor,
+            Shape = GraphNodeShape.Circle,
+            LineStart = n.LineStart,
+            LineEnd = n.LineEnd
+        };
+
+    private static List<GraphLayoutEdge> BuildEdges(
+        GraphDocument doc,
+        GraphNode? anchor,
+        Point? anchorCenter,
+        List<GraphLayoutNode> layouts,
+        Dictionary<string, Point> idToCenter,
+        Dictionary<string, double> idToRadius,
+        double defaultSatR)
+    {
         var edgeLayouts = new List<GraphLayoutEdge>();
         foreach (var e in doc.Edges)
         {
@@ -100,7 +126,7 @@ public sealed class StarGraphLayoutEngine : IGraphLayoutEngine
                 ToNodeId = e.ToId,
                 From = a,
                 To = b,
-                ToRadius = idToRadius.TryGetValue(e.ToId, out var toR) ? toR : satR,
+                ToRadius = idToRadius.TryGetValue(e.ToId, out var toR) ? toR : defaultSatR,
                 Kind = e.Kind,
                 RelationKind = e.RelationKind
             });
@@ -121,31 +147,8 @@ public sealed class StarGraphLayoutEngine : IGraphLayoutEngine
                 });
         }
 
-        return new GraphLayoutScene
-        {
-            Nodes = layouts,
-            Edges = edgeLayouts,
-            Legend = [],
-            UseLegendColumn = false,
-            LegendColumnLeft = width,
-            RelatedFilesLayout = CodeNavigationMapRelatedGraphLayoutKind.Radial
-        };
+        return edgeLayouts;
     }
-
-    private static GraphLayoutNode MakeNode(GraphNode n, Point center, double radius, bool isAnchor) =>
-        new()
-        {
-            Id = n.Id,
-            Kind = n.Kind,
-            FullPath = n.Path,
-            Label = TruncateLabel(n.Label),
-            Center = center,
-            Radius = radius,
-            IsAnchor = isAnchor,
-            Shape = GraphNodeShape.Circle,
-            LineStart = n.LineStart,
-            LineEnd = n.LineEnd
-        };
 
     private static GraphLayoutScene EmptyScene(double width) =>
         new()

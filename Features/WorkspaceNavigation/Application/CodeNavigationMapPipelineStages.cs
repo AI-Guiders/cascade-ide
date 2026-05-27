@@ -11,13 +11,18 @@ public readonly record struct CodeNavigationMapPipelineContext(
     GraphDocument Subgraph,
     string MapLevel,
     SkiaInstrumentViewport Viewport,
-    CodeNavigationMapDetailLevel DetailLevel = CodeNavigationMapDetailLevel.Normal);
+    CodeNavigationMapDetailLevel DetailLevel = CodeNavigationMapDetailLevel.Normal,
+    string RelatedGraphLayout = CodeNavigationMapRelatedGraphLayoutKind.Radial,
+    string ControlFlowMainAxis = CodeNavigationMapControlFlowMainAxisKind.Auto);
 
 public readonly record struct CodeNavigationMapPipelineState(
     GraphDocument Subgraph,
     string MapLevel,
     SkiaInstrumentViewport Viewport,
     CodeNavigationMapDetailLevel DetailLevel,
+    string RelatedGraphLayout,
+    string NormalizedControlFlowMainAxis,
+    GraphControlFlowMainAxis? ControlFlowMainAxisOverride,
     int EstimatedLevelCount,
     int LoopEdgeCount,
     int MultiBranchEdgeCount,
@@ -56,11 +61,15 @@ public sealed class CodeNavigationMapIntentStage : ICodeNavigationMapIntentStage
 
         var estimatedLevelCount = EstimateLevelCount(doc);
         var isDense = doc.Nodes.Count > 8 || estimatedLevelCount > 6;
+        var cfAxis = CodeNavigationMapControlFlowMainAxisKind.Normalize(context.ControlFlowMainAxis);
         return new CodeNavigationMapPipelineState(
             doc,
             level,
             context.Viewport,
             context.DetailLevel,
+            CodeNavigationMapRelatedGraphLayoutKind.Normalize(context.RelatedGraphLayout),
+            cfAxis,
+            GraphControlFlowLayoutMetrics.TryControlFlowMainAxisOverride(cfAxis),
             estimatedLevelCount,
             loopEdgeCount,
             multiBranchEdgeCount,
@@ -125,7 +134,9 @@ public sealed class CodeNavigationMapDeclutterStage(ICodeNavigationMapIntentStag
             filtered,
             state.MapLevel,
             state.Viewport,
-            state.DetailLevel);
+            state.DetailLevel,
+            state.RelatedGraphLayout,
+            state.NormalizedControlFlowMainAxis);
         return _intentStage.Resolve(ctx);
     }
 
@@ -206,10 +217,11 @@ public sealed class CodeNavigationMapDeclutterStage(ICodeNavigationMapIntentStag
 }
 
 public sealed class CodeNavigationMapLayoutStage(
-    IGraphLayoutEngine? fileLayout = null,
+    Func<string, IGraphLayoutEngine>? fileLayoutResolver = null,
     IGraphLayoutEngine? controlFlowLayout = null) : ICodeNavigationMapLayoutStage
 {
-    private readonly IGraphLayoutEngine _fileLayout = fileLayout ?? new StarGraphLayoutEngine();
+    private readonly Func<string, IGraphLayoutEngine> _fileLayoutResolver =
+        fileLayoutResolver ?? ResolveRelatedFileLayout;
     private readonly IGraphLayoutEngine _controlFlowLayout = controlFlowLayout ?? new ControlFlowGraphLayoutEngine();
 
     public CodeNavigationMapCompositionResult Layout(in CodeNavigationMapPipelineState state)
@@ -221,8 +233,16 @@ public sealed class CodeNavigationMapLayoutStage(
 
         if (!isControlFlow)
         {
-            var preferredHeight = viewport.Height > 0 ? viewport.Height : CodeNavigationMapCompositor.DefaultHeightFile;
-            var layoutScene = _fileLayout.Layout(state.Subgraph, width, preferredHeight)
+            var satelliteCount = Math.Max(0, state.Subgraph.Nodes.Count - 1);
+            var intrinsicHeight = GraphFileLayoutMetrics.EstimatePreferredHeight(
+                satelliteCount,
+                state.DetailLevel,
+                state.RelatedGraphLayout);
+            var preferredHeight = viewport.Height > 0
+                ? Math.Max(viewport.Height, intrinsicHeight)
+                : intrinsicHeight;
+            var fileLayout = _fileLayoutResolver(state.RelatedGraphLayout);
+            var layoutScene = fileLayout.Layout(state.Subgraph, width, preferredHeight, state.DetailLevel, controlFlowMainAxisOverride: null)
                 .WithPresentation(presentation);
             return new CodeNavigationMapCompositionResult(
                 layoutScene,
@@ -238,11 +258,24 @@ public sealed class CodeNavigationMapLayoutStage(
             GraphViewportMetrics.DefaultHeightControlFlow,
             GraphViewportMetrics.MaxHeightControlFlow);
 
-        var cfScene = _controlFlowLayout.Layout(state.Subgraph, width, preferredCfHeight)
+        var cfScene = _controlFlowLayout.Layout(
+                state.Subgraph,
+                width,
+                preferredCfHeight,
+                state.DetailLevel,
+                state.ControlFlowMainAxisOverride)
             .WithPresentation(presentation);
         return new CodeNavigationMapCompositionResult(
             cfScene,
             preferredCfHeight,
             Array.Empty<CodeNavigationMapInstrumentBlockDescriptor>());
     }
+
+    private static IGraphLayoutEngine ResolveRelatedFileLayout(string? relatedLayout) =>
+        CodeNavigationMapRelatedGraphLayoutKind.Normalize(relatedLayout) switch
+        {
+            CodeNavigationMapRelatedGraphLayoutKind.TopDown => new GraphRelatedFileHierarchyLayoutEngine(anchorAtTop: true),
+            CodeNavigationMapRelatedGraphLayoutKind.BottomUp => new GraphRelatedFileHierarchyLayoutEngine(anchorAtTop: false),
+            _ => new StarGraphLayoutEngine()
+        };
 }

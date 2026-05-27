@@ -14,4 +14,9 @@ public class GraphNode
     /// <summary>Номер в легенде control flow (1-based).</summary>
     public int? LegendIndex { get; init; }
     public string? LegendText { get; init; }
+    /// <summary>1-based inclusive, снимок @ build (code anchor / reveal).</summary>
+    public int? LineStart { get; init; }
+    public int? LineEnd { get; init; }
+    /// <summary>Узлы одного цикла (while/for/foreach/do) — склейка на карте (овал вокруг группы).</summary>
+    public int? LoopGroupId { get; init; }
 }

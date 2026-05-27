@@ -12,6 +12,18 @@ public sealed class CodeNavigationMapSettings
     /// <summary><c>glance</c> | <c>normal</c> | <c>inspect</c> — детализация композиции (ADR 0055).</summary>
     public string DetailLevel { get; set; } = "normal";
 
+    /// <summary><c>radial</c> | <c>top_down</c> | <c>bottom_up</c> — укладка графа связанных файлов (уровень file).</summary>
+    public string RelatedGraphLayout { get; set; } = CodeNavigationMapRelatedGraphLayoutKind.TopDown;
+
+    /// <summary><c>auto</c> | <c>vertical</c> | <c>horizontal</c> — главная ось control-flow на мини-карте (ADR не задавал код ключ).</summary>
+    public string ControlFlowMainAxis { get; set; } = CodeNavigationMapControlFlowMainAxisKind.Auto;
+
+    public string NormalizedRelatedGraphLayout => CodeNavigationMapRelatedGraphLayoutKind.Normalize(RelatedGraphLayout);
+
+    /// <summary>Снимает синонимы к канону после загрузки TOML.</summary>
+    public string NormalizedControlFlowMainAxis =>
+        CodeNavigationMapControlFlowMainAxisKind.Normalize(ControlFlowMainAxis);
+
     /// <summary>
     /// Режим Control Flow по <see cref="Depth"/> — тот же критерий, что ветка CF в
     /// <c>RunWorkspaceNavigationMapRefreshAsync</c> и обновление карты по курсору (<c>UpdateCodeNavigationMapCaretOffset</c>).

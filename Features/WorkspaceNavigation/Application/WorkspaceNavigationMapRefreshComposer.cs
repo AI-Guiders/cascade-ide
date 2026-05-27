@@ -5,6 +5,7 @@ using CascadeIDE.Cockpit.Channels.TraceFlow;
 using CascadeIDE.Cockpit.Graph;
 using CascadeIDE.Cockpit.Composition.TraceFlow;
 using CascadeIDE.Contracts;
+using CascadeIDE.Features.Documents;
 using CascadeIDE.Models;
 using CascadeIDE.Services.SkiaInstruments;
 using CascadeIDE.ViewModels;
@@ -31,7 +32,8 @@ public static class WorkspaceNavigationMapRefreshComposer
         CodeNavigationMapGraphSceneVm? Scene,
         double GraphHeight,
         int AccentCount,
-        IReadOnlyList<WorkspaceNavigationMapOrchestrator.RelatedRow> ListRows);
+        IReadOnlyList<WorkspaceNavigationMapOrchestrator.RelatedRow> ListRows,
+        string? CfAnchorFullPath = null);
 
     /// <summary>Разбирает <paramref name="json"/> и собирает сцену или related-список; при сбое — статус ошибки без исключений наружу.</summary>
     /// <param name="cockpitSurfaceCapturedOnUi">Снимок CDS с UI-потока; обязателен, если ветка control-flow с подграфом (см. вызывающий refresh).</param>
@@ -46,6 +48,8 @@ public static class WorkspaceNavigationMapRefreshComposer
         double graphWidth,
         double graphHeight,
         CodeNavigationMapDetailLevel mapDetailLevel,
+        string relatedGraphLayout,
+        string controlFlowMainAxis,
         TraceSignals trace,
         CockpitSurfaceState? cockpitSurfaceCapturedOnUi)
     {
@@ -55,6 +59,7 @@ public static class WorkspaceNavigationMapRefreshComposer
         CodeNavigationMapGraphSceneVm? scene = null;
         var graphPreferredHeight = CodeNavigationMapCompositor.DefaultHeightFile;
         var accentCount = 0;
+        string? cfAnchorFullPath = null;
 
         try
         {
@@ -66,9 +71,18 @@ public static class WorkspaceNavigationMapRefreshComposer
             }
             else if (useSubgraphMode && GraphDocumentJson.TryParse(json, out var subgraph, out _))
             {
+                if (string.Equals(normalizedLevel, CodeNavigationMapLevelKind.ControlFlow, StringComparison.Ordinal)
+                    && SolutionTreePath.TryGetFullPath(subgraph!.AnchorPath, out var anchorNorm))
+                    cfAnchorFullPath = anchorNorm;
+
                 var viewport = new SkiaInstrumentViewport(graphWidth, graphHeight);
                 var composed = deps.MapCompositor.Compose(
-                    new CodeNavigationMapCompositionIntent(subgraph!, normalizedLevel, mapDetailLevel),
+                    new CodeNavigationMapCompositionIntent(
+                        subgraph!,
+                        normalizedLevel,
+                        mapDetailLevel,
+                        relatedGraphLayout,
+                        controlFlowMainAxis),
                     viewport);
                 if (normalizedLevel == CodeNavigationMapLevelKind.ControlFlow)
                 {
@@ -79,11 +93,12 @@ public static class WorkspaceNavigationMapRefreshComposer
                         trace.LastTestSummary ?? ""));
                     var cdsDecision = deps.TraceFlowCdsRouter.Route(
                         new TraceFlowCdsRouteInput(cockpitSurfaceCapturedOnUi, normalizedLevel));
-                    scene = deps.TraceFlowSurfaceCompositor.Compose(composed.Scene, channelPayload, cdsDecision);
+                    var baseScene = composed.ToSceneVm(graphWidth, composed.PreferredHeight);
+                    scene = deps.TraceFlowSurfaceCompositor.Compose(baseScene, channelPayload, cdsDecision);
                 }
                 else
                 {
-                    scene = composed.Scene;
+                    scene = composed.ToSceneVm(graphWidth, composed.PreferredHeight);
                 }
 
                 graphPreferredHeight = composed.PreferredHeight;
@@ -106,7 +121,7 @@ public static class WorkspaceNavigationMapRefreshComposer
                 status = WorkspaceNavigationMapOrchestrator.ResolveEmptyStatus(rows, status, wantList: true);
             }
 
-            return new DryResult(status, anchorLabel, scene, graphPreferredHeight, accentCount, rows);
+            return new DryResult(status, anchorLabel, scene, graphPreferredHeight, accentCount, rows, cfAnchorFullPath);
         }
         catch (ArgumentNullException)
         {
@@ -120,7 +135,8 @@ public static class WorkspaceNavigationMapRefreshComposer
                 null,
                 CodeNavigationMapCompositor.DefaultHeightFile,
                 0,
-                []);
+                [],
+                null);
         }
     }
 }

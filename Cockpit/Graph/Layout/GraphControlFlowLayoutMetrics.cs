@@ -6,14 +6,14 @@ namespace CascadeIDE.Cockpit.Graph.Layout;
 /// <summary>Геометрия и политика укладки control-flow graph-backed surface (ADR 0055).</summary>
 public static class GraphControlFlowLayoutMetrics
 {
-    public const double IntrinsicHeightBasePx = 28;
+    public const double IntrinsicHeightBasePx = 32;
 
     public static double VerticalSpacingForDetailLevel(CodeNavigationMapDetailLevel detailLevel) =>
         detailLevel switch
         {
-            CodeNavigationMapDetailLevel.Glance => 26,
-            CodeNavigationMapDetailLevel.Inspect => 36,
-            _ => 32,
+            CodeNavigationMapDetailLevel.Glance => 30,
+            CodeNavigationMapDetailLevel.Inspect => 40,
+            _ => 36,
         };
 
     public static double EstimatePreferredHeight(int estimatedLevelCount, CodeNavigationMapDetailLevel detailLevel)
@@ -23,9 +23,9 @@ public static class GraphControlFlowLayoutMetrics
         return IntrinsicHeightBasePx + Math.Max(0, levelBands - 1) * spacing;
     }
 
-    public const double TopPadding = 10;
-    public const double BottomPadding = 10;
-    public const double SidePadding = 10;
+    public const double TopPadding = 12;
+    public const double BottomPadding = 12;
+    public const double SidePadding = 12;
     public const double LegendGap = 2;
     public const double BesideLegendInkSlack = 4;
     public const double LegendBesideMinClearance = 6;
@@ -33,7 +33,7 @@ public static class GraphControlFlowLayoutMetrics
     public const double LegendBelowBlockGap = 6;
     public const double MinGraphHeightForBelowLegend = 50;
     public const double MinGraphWidth = 40;
-    public const double MaxReadableBandWidth = 380;
+    public const double MaxReadableBandWidth = 400;
     public const double LegendReserveWidthFraction = 0.30;
     public const double LegendReserveMin = 88;
     public const double LegendReserveHardCap = 340;
@@ -41,11 +41,11 @@ public static class GraphControlFlowLayoutMetrics
     public static double ResolveLegendReserveCap(double viewportWidth) =>
         Math.Min(LegendReserveHardCap, viewportWidth * 0.52);
 
-    public const double RefVerticalStep = 34;
-    public const double MaxReadableVerticalStep = 40;
-    public const double MaxReadableVerticalStepCap = 88;
-    public const double AnchorRadiusBase = 14;
-    public const double NodeRadiusBase = 12;
+    public const double RefVerticalStep = 38;
+    public const double MaxReadableVerticalStep = 44;
+    public const double MaxReadableVerticalStepCap = 96;
+    public const double AnchorRadiusBase = 15.5;
+    public const double NodeRadiusBase = 13.5;
     public const double RadiusScaleMin = 0.4;
     public const double RadiusScaleMax = 1.12;
     public const double HorizontalRadiusScaleMin = 0.74;
@@ -53,11 +53,65 @@ public static class GraphControlFlowLayoutMetrics
     public static double MinVerticalStepForLevelCount(int levelCount) =>
         levelCount switch
         {
-            >= 16 => 10,
-            >= 12 => 12,
-            >= 9 => 14,
-            >= 6 => 16,
-            _ => 18,
+            >= 16 => 12,
+            >= 12 => 14,
+            >= 9 => 16,
+            >= 6 => 18,
+            _ => 20,
+        };
+
+    /// <summary>Ось потока: приоритет — уместить шаги по главной оси; иначе соотношение сторон и «длина цепочки vs ширина уровня».</summary>
+    public static GraphControlFlowMainAxis ChooseMainAxis(
+        double graphWidth,
+        double heightForLayout,
+        int levelCount,
+        int maxNodesOnAnyLevel)
+    {
+        var innerH = heightForLayout - TopPadding - BottomPadding;
+        var innerW = graphWidth - 2 * SidePadding;
+        if (innerH < 1 || innerW < 1 || levelCount < 1)
+            return GraphControlFlowMainAxis.Vertical;
+
+        var slotCount = Math.Max(1, levelCount - 1);
+        var minStep = MinVerticalStepForLevelCount(levelCount);
+        var slackMainIfVertical = innerH / slotCount;
+        var slackMainIfHorizontal = innerW / slotCount;
+
+        if (slackMainIfHorizontal >= minStep && slackMainIfVertical < minStep * 0.92)
+            return GraphControlFlowMainAxis.Horizontal;
+        if (slackMainIfVertical >= minStep && slackMainIfHorizontal < minStep * 0.92)
+            return GraphControlFlowMainAxis.Vertical;
+
+        var aspect = innerW / innerH;
+
+        if (aspect >= 1.18 && slackMainIfHorizontal >= minStep * 0.85)
+            return GraphControlFlowMainAxis.Horizontal;
+        if (aspect <= 0.85 && slackMainIfVertical >= minStep * 0.85)
+            return GraphControlFlowMainAxis.Vertical;
+
+        if (Math.Abs(slackMainIfHorizontal - slackMainIfVertical) > 5)
+            return slackMainIfHorizontal > slackMainIfVertical
+                ? GraphControlFlowMainAxis.Horizontal
+                : GraphControlFlowMainAxis.Vertical;
+
+        var depthHeavy = slotCount > Math.Max(2, maxNodesOnAnyLevel);
+        if (depthHeavy && slackMainIfHorizontal >= minStep && innerW >= innerH)
+            return GraphControlFlowMainAxis.Horizontal;
+
+        return innerW > innerH * 1.02
+            ? GraphControlFlowMainAxis.Horizontal
+            : GraphControlFlowMainAxis.Vertical;
+    }
+
+    /// <summary>
+    /// Не-null — ось из <c>[code_navigation_map].control_flow_main_axis</c>; <see langword="null"/> для <c>auto</c> (см. <see cref="ChooseMainAxis"/>).
+    /// </summary>
+    public static GraphControlFlowMainAxis? TryControlFlowMainAxisOverride(string normalizedSetting) =>
+        normalizedSetting switch
+        {
+            CodeNavigationMapControlFlowMainAxisKind.Vertical => GraphControlFlowMainAxis.Vertical,
+            CodeNavigationMapControlFlowMainAxisKind.Horizontal => GraphControlFlowMainAxis.Horizontal,
+            _ => null,
         };
 
     public const int LabelMaxLength = 22;
