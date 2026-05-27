@@ -56,6 +56,7 @@ splitters_locked = false
 
 [code_navigation_map]
 view = "list"
+control_flow_main_axis = "auto"
 
 [languages.csharp]
 mode = "ParseOnly"

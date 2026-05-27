@@ -131,6 +131,8 @@ primary_work_surface = "editor"
 [code_navigation_map]
 view = "list"
 depth = "file"
+# auto | vertical | horizontal — главная ось control-flow мини-карты
+control_flow_main_axis = "auto"
 
 [languages.csharp]
 mode = "OmniSharp"
