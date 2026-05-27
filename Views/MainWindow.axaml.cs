@@ -32,8 +32,18 @@ public partial class MainWindow : PointerTrackingWindow
         AddHandler(InputElement.KeyDownEvent, OnDebugShortcutKeyDown, RoutingStrategies.Tunnel, handledEventsToo: true);
         DataContextChanged += OnDataContextChanged;
         Loaded += OnMainWindowLoaded;
+        Activated += OnMainWindowFocusChanged;
+        Deactivated += OnMainWindowFocusChanged;
         // Хосты PFD/MFD/PM: после первого показа главного окна — иначе Show(child, owner) падает, пока owner ещё не visible (headless/тесты).
         Opened += OnMainWindowOpenedPresentationHosts;
+    }
+
+    private void OnMainWindowFocusChanged(object? sender, EventArgs e)
+    {
+        if (DataContext is not ViewModels.MainWindowViewModel vm)
+            return;
+
+        vm.NotifyCideWindowFocusChanged(IsActive);
     }
 
     private void OnMainWindowOpenedPresentationHosts(object? sender, EventArgs e)
@@ -79,6 +89,7 @@ public partial class MainWindow : PointerTrackingWindow
                 _boundMainVm.GotoActiveEditorLineColumnRequested -= OnGotoEditorLineColumn;
             _boundMainVm = vm;
             vm.GotoActiveEditorLineColumnRequested += OnGotoEditorLineColumn;
+            WireAgentVerifyEpochDim(vm);
 
             vm.LoadSendMessageKeyFromStorage();
             vm.LoadComposerNewLineKeyFromStorage();
