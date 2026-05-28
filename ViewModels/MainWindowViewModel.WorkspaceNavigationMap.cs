@@ -11,6 +11,8 @@ using CascadeIDE.Features.WorkspaceNavigation.Application;
 using CascadeIDE.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CascadeIDE.Features.Workspace.DataAcquisition;
+using CascadeIDE.Features.WorkspaceNavigation.Application;
 using CascadeIDE.Services;
 using CascadeIDE.Features.UiChrome;
 
@@ -194,21 +196,22 @@ public partial class MainWindowViewModel
     private void OpenWorkspaceAdrCorrespondence()
     {
         var docPath = WorkspaceAdrCorrespondenceFirstDocPath;
-        if (string.IsNullOrWhiteSpace(docPath) || !File.Exists(docPath))
+        if (string.IsNullOrWhiteSpace(docPath))
             return;
 
-        try
-        {
-            var content = File.ReadAllText(docPath);
-            var title = WorkspaceAdrMapResolver.GuessAdrPreviewTitle(docPath);
-            MarkdownPreviewTool.SetContent(title, content, docPath);
-            ApplyMfdRegionExpanded(true);
-            TryNavigateToMfdShellPage(MfdShellPage.MarkdownPreview);
-        }
-        catch
-        {
-            // keep silent: correspondence must not break navigation refresh UX
-        }
+        var wsRoot = GetWorkspacePath();
+        if (string.IsNullOrWhiteSpace(wsRoot))
+            return;
+
+        if (!WorkspaceMarkdownPreviewOpener.TryOpenRepoDocument(
+                wsRoot,
+                docPath,
+                (title, content, source) => MarkdownPreviewTool.SetContent(title, content, source),
+                out _))
+            return;
+
+        ApplyMfdRegionExpanded(true);
+        TryNavigateToMfdShellPage(MfdShellPage.MarkdownPreview);
     }
 
     [RelayCommand]
@@ -231,22 +234,15 @@ public partial class MainWindowViewModel
         if (string.IsNullOrWhiteSpace(wsRoot))
             return;
 
-        var abs = WorkspaceAdrMapResolver.TryResolveAbsoluteDocPath(wsRoot, pick);
-        if (string.IsNullOrWhiteSpace(abs) || !File.Exists(abs))
+        if (!WorkspaceMarkdownPreviewOpener.TryOpenRepoDocument(
+                wsRoot,
+                pick,
+                (title, content, source) => MarkdownPreviewTool.SetContent(title, content, source),
+                out _))
             return;
 
-        try
-        {
-            var content = File.ReadAllText(abs);
-            var title = WorkspaceAdrMapResolver.GuessAdrPreviewTitle(pick);
-            MarkdownPreviewTool.SetContent(title, content, abs);
-            ApplyMfdRegionExpanded(true);
-            TryNavigateToMfdShellPage(MfdShellPage.MarkdownPreview);
-        }
-        catch
-        {
-            // ignore
-        }
+        ApplyMfdRegionExpanded(true);
+        TryNavigateToMfdShellPage(MfdShellPage.MarkdownPreview);
     }
 
     [RelayCommand]
@@ -256,7 +252,7 @@ public partial class MainWindowViewModel
         if (string.IsNullOrWhiteSpace(wsRoot))
             return;
 
-        var workspaceToml = TryReadRepositoryWorkspaceToml(wsRoot);
+        var workspaceToml = RepositoryWorkspaceTomlLoader.TryLoad(wsRoot);
         var templates = DocsTemplatesCatalogResolver.ResolveTemplatesFromWorkspaceToml(workspaceToml, wsRoot);
         if (templates.Count == 0)
             return;
@@ -309,38 +305,15 @@ public partial class MainWindowViewModel
             return;
         }
 
-        if (!string.IsNullOrWhiteSpace(entry.RepoPath))
+        if (!string.IsNullOrWhiteSpace(entry.RepoPath)
+            && WorkspaceMarkdownPreviewOpener.TryOpenRepoDocument(
+                wsRoot,
+                entry.RepoPath,
+                (title, content, source) => MarkdownPreviewTool.SetContent(entry.Title, content, source),
+                out _))
         {
-            var abs = WorkspaceAdrMapResolver.TryResolveAbsoluteDocPath(wsRoot, entry.RepoPath);
-            if (string.IsNullOrWhiteSpace(abs) || !File.Exists(abs))
-                return;
-
-            try
-            {
-                var content = File.ReadAllText(abs);
-                MarkdownPreviewTool.SetContent(entry.Title, content, abs);
-                ApplyMfdRegionExpanded(true);
-                TryNavigateToMfdShellPage(MfdShellPage.MarkdownPreview);
-            }
-            catch
-            {
-                // ignore
-            }
-        }
-    }
-
-    private static Features.Workspace.RepositoryWorkspaceToml? TryReadRepositoryWorkspaceToml(string workspaceRoot)
-    {
-        try
-        {
-            var path = Path.Combine(workspaceRoot.Trim(), ".cascade", "workspace.toml");
-            if (!File.Exists(path))
-                return null;
-            return CascadeTomlSerializer.Deserialize<Features.Workspace.RepositoryWorkspaceToml>(File.ReadAllText(path));
-        }
-        catch
-        {
-            return null;
+            ApplyMfdRegionExpanded(true);
+            TryNavigateToMfdShellPage(MfdShellPage.MarkdownPreview);
         }
     }
 
@@ -435,7 +408,7 @@ public partial class MainWindowViewModel
                 var end = payload.LineEnd is > 0 ? payload.LineEnd.Value : start;
                 var revealPath = path;
                 Avalonia.Threading.Dispatcher.UIThread.Post(
-                    () => _revealEditorRangeAction?.Invoke(revealPath, start, end, null),
+                    () => ((IWorkspaceNavigationMapHost)this).RevealEditorRange(revealPath, start, end, null),
                     Avalonia.Threading.DispatcherPriority.Loaded);
                 if (isCf)
                     ScheduleWorkspaceNavigationMapRefresh();

@@ -2,12 +2,17 @@ using CascadeIDE.Cockpit.Cds;
 using CascadeIDE.Cockpit.Channels.TraceFlow;
 using CascadeIDE.Cockpit.Composition.TraceFlow;
 using CascadeIDE.Cockpit.Graph;
+using AvaloniaEdit;
+using CascadeIDE.Features.Documents;
+using CascadeIDE.Features.Editor;
+using CascadeIDE.Features.Markdown;
+using CascadeIDE.Features.Workspace;
+using CascadeIDE.Features.Workspace.DataAcquisition;
 using CascadeIDE.Features.WorkspaceNavigation.Application;
 using CascadeIDE.Models;
 using CascadeIDE.Features.HybridIndex.Application;
 using CascadeIDE.Services;
 using CascadeIDE.Features.UiChrome;
-using System.IO;
 using System.Linq;
 
 namespace CascadeIDE.ViewModels;
@@ -97,7 +102,7 @@ public partial class MainWindowViewModel
             controlFlowGrain = CodeNavigationMapControlFlowGrainKind.Normalize(sm.ControlFlowGrain);
             if (level == CodeNavigationMapLevelKind.ControlFlow)
             {
-                cockpitSurfaceCapturedOnUi = CockpitSurfaceSnapshotBuilder.Build(this);
+                cockpitSurfaceCapturedOnUi = CockpitSurfaceSnapshotBuilder.Build(((IWorkspaceNavigationMapHost)this).Shell);
                 cfGraphNavigatePath = _controlFlowGraphNavigatePath;
                 cfGraphNavigateLine = _controlFlowGraphNavigateLine;
                 cfGraphNavigateColumn = _controlFlowGraphNavigateColumn;
@@ -115,8 +120,8 @@ public partial class MainWindowViewModel
         {
             try
             {
-                if (File.Exists(navigationPath))
-                    editorText = File.ReadAllText(navigationPath);
+                if (WorkspaceTextFileReader.TryReadAllText(navigationPath, out var navText))
+                    editorText = navText;
             }
             catch
             {
@@ -283,87 +288,8 @@ public partial class MainWindowViewModel
     private static (string FeatureLine, string[] FeatureDocPaths, string DocsCoverageLine, string AdrLine, string? AdrFirstDocPath)
         TryResolveWorkspaceCorrespondence(string? workspaceRoot, string? navigationPath)
     {
-        if (string.IsNullOrWhiteSpace(workspaceRoot) || string.IsNullOrWhiteSpace(navigationPath))
-            return ("", [], "", "", null);
-
-        try
-        {
-            var root = workspaceRoot.Trim();
-            var path = Path.Combine(root, ".cascade", "workspace.toml");
-            if (!File.Exists(path))
-                return ("", [], "", "", null);
-
-            var toml = File.ReadAllText(path);
-            var parsed = CascadeTomlSerializer.Deserialize<Features.Workspace.RepositoryWorkspaceToml>(toml);
-            var feature = WorkspaceFeatureResolver.ResolveFeatureFromWorkspaceToml(parsed, root, navigationPath.Trim());
-            var featureLine = WorkspaceFeatureResolver.BuildFeatureLine(feature);
-            var featureDocs = feature?.Docs is { Count: > 0 }
-                ? feature.Docs.Select(x => (x ?? "").Trim()).Where(x => x.Length > 0).ToArray()
-                : [];
-
-            var docPaths = new List<string>();
-            if (feature?.Docs is { Count: > 0 })
-                docPaths.AddRange(feature.Docs.Select(x => (x ?? "").Trim()).Where(x => x.Length > 0));
-
-            var mapped = WorkspaceAdrMapResolver.ResolveAdrDocPathsFromWorkspaceToml(parsed, root, navigationPath.Trim());
-            foreach (var m in mapped)
-            {
-                if (docPaths.Contains(m, StringComparer.OrdinalIgnoreCase))
-                    continue;
-                docPaths.Add(m);
-            }
-
-            // Optional auto-include of linked ADRs (one hop).
-            var autoInclude = WorkspaceAdrMapResolver.NormalizeAutoInclude(parsed?.Workspace?.Adr?.AutoInclude);
-            var maxRelated = parsed?.Workspace?.Adr?.MaxRelated is int mr && mr > 0 ? mr : 8;
-            if (autoInclude == WorkspaceAdrMapResolver.AutoIncludeLinked && docPaths.Count > 0)
-            {
-                var primary = docPaths[0];
-                var absPrimary = WorkspaceAdrMapResolver.TryResolveAbsoluteDocPath(root, primary);
-                if (!string.IsNullOrWhiteSpace(absPrimary) && File.Exists(absPrimary))
-                {
-                    var md = File.ReadAllText(absPrimary);
-            var linked = WorkspaceAdrMapResolver.ExtractLinkedAdrDocPathsFromMarkdown(md, primary, parsed?.Workspace?.Adr);
-                    if (linked.Count > 0)
-                    {
-                        var merged = new List<string>(docPaths);
-                        foreach (var l in linked)
-                        {
-                            if (merged.Count >= docPaths.Count + maxRelated)
-                                break;
-                            if (merged.Contains(l, StringComparer.OrdinalIgnoreCase))
-                                continue;
-                            merged.Add(l);
-                        }
-                        docPaths = merged;
-                    }
-                }
-            }
-
-            var adrLine = WorkspaceAdrMapResolver.BuildAdrIndicatorLine(docPaths, parsed?.Workspace?.Adr);
-            var firstRel = docPaths.Count > 0 ? docPaths[0] : null;
-            var firstAbs = firstRel is null ? null : WorkspaceAdrMapResolver.TryResolveAbsoluteDocPath(root, firstRel);
-
-            var templates = DocsTemplatesCatalogResolver.ResolveTemplatesFromWorkspaceToml(parsed, root);
-            var featureTemplate = templates.FirstOrDefault(t => string.Equals(t.Kind, "feature_doc", StringComparison.OrdinalIgnoreCase));
-            var moduleTemplate = templates.FirstOrDefault(t => string.Equals(t.Kind, "module_doc", StringComparison.OrdinalIgnoreCase));
-
-            var featureTemplateHint = featureTemplate?.RepoPath ?? "docs/templates/feature.md";
-            var moduleTemplateHint = moduleTemplate?.RepoPath ?? "docs/templates/module.md";
-
-            var docsCoverageLine =
-                docPaths.Count > 0
-                    ? ""
-                    : feature is not null
-                        ? $"Docs: missing (feature has no ADRs) · template: {featureTemplateHint}"
-                        : $"Docs: missing (no correspondence) · template: {moduleTemplateHint}";
-
-            return (featureLine, featureDocs, docsCoverageLine, adrLine, firstAbs);
-        }
-        catch
-        {
-            return ("", [], "", "", null);
-        }
+        var r = WorkspaceCorrespondenceResolver.Resolve(workspaceRoot, navigationPath);
+        return (r.FeatureLine, r.FeatureDocPaths, r.DocsCoverageLine, r.AdrLine, r.AdrFirstDocPath);
     }
 
     /// <summary>Каретка из видимого <see cref="AvaloniaEdit.TextEditor"/> (не только throttled <see cref="_editorCaretOffset"/>).</summary>
@@ -391,7 +317,7 @@ public partial class MainWindowViewModel
         if (string.IsNullOrWhiteSpace(currentPath))
             yield break;
 
-        var direct = EditorActiveDockResolver.TryGetEditor(this, currentPath);
+        var direct = EditorActiveDockResolver.TryGetEditor(((IWorkspaceNavigationMapHost)this).Shell, currentPath);
         if (direct is not null)
         {
             yield return direct;
@@ -405,9 +331,52 @@ public partial class MainWindowViewModel
             if (!EditorTextCoordinateUtilities.PathsReferToSameFile(doc.FilePath, currentPath))
                 continue;
 
-            var editor = EditorActiveDockResolver.TryGetEditor(this, doc.FilePath);
+            var editor = EditorActiveDockResolver.TryGetEditor(((IWorkspaceNavigationMapHost)this).Shell, doc.FilePath);
             if (editor is not null)
                 yield return editor;
         }
     }
+
+    MainWindowViewModel IWorkspaceNavigationMapHost.Shell => this;
+
+    SolutionWorkspaceViewModel IWorkspaceNavigationMapHost.Workspace => Workspace;
+
+    DocumentsWorkspaceViewModel IWorkspaceNavigationMapHost.Documents => Documents;
+
+    EditorWorkspaceViewModel IWorkspaceNavigationMapHost.Editor => Editor;
+
+    MarkdownPreviewToolViewModel IWorkspaceNavigationMapHost.MarkdownPreviewTool => MarkdownPreviewTool;
+
+    CascadeIdeSettings IWorkspaceNavigationMapHost.Settings => _settings;
+
+    IIdeMcpActions IWorkspaceNavigationMapHost.IdeMcp => IdeMcp;
+
+    string? IWorkspaceNavigationMapHost.GetWorkspacePath() => GetWorkspacePath();
+
+    string? IWorkspaceNavigationMapHost.CurrentFilePath => CurrentFilePath;
+
+    string IWorkspaceNavigationMapHost.EditorText => EditorText;
+
+    int? IWorkspaceNavigationMapHost.EditorSelectionStart => EditorSelectionStart;
+
+    int IWorkspaceNavigationMapHost.ImpactedTestsBadge => ImpactedTestsBadge;
+
+    string? IWorkspaceNavigationMapHost.LastTestSummary => LastTestSummary;
+
+    Func<string, IReadOnlyList<string>, Task<string?>>? IWorkspaceNavigationMapHost.RequestPickFeatureDocAsync =>
+        RequestPickFeatureDocAsync;
+
+    void IWorkspaceNavigationMapHost.ApplyMfdRegionExpanded(bool expanded) => ApplyMfdRegionExpanded(expanded);
+
+    void IWorkspaceNavigationMapHost.TryNavigateToMfdShellPage(MfdShellPage page) => TryNavigateToMfdShellPage(page);
+
+    void IWorkspaceNavigationMapHost.SaveSettingsIfChanged() => SaveSettingsIfChanged();
+
+    void IWorkspaceNavigationMapHost.ScheduleEditorHudBannerRefresh() => ScheduleEditorHudBannerRefresh();
+
+    IEnumerable<TextEditor> IWorkspaceNavigationMapHost.EnumerateEditorsForPath(string? currentPath) =>
+        EnumerateEditorsForPath(currentPath);
+
+    void IWorkspaceNavigationMapHost.RevealEditorRange(string? path, int startLine, int endLine, int? column) =>
+        _revealEditorRangeAction?.Invoke(path, startLine, endLine, column);
 }
