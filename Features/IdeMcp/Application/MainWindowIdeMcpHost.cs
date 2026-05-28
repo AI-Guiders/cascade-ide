@@ -21,7 +21,7 @@ internal sealed partial class MainWindowIdeMcpHost : IIdeMcpActions
     internal MainWindowIdeMcpHost(MainWindowViewModel host)
     {
         _host = host;
-        _executor = new IdeMcpCommandExecutor(host, this);
+        _executor = new IdeMcpCommandExecutor(host, this); // host: IMainWindowMcpHostContext
     }
 
     public Task<string> ExecuteCommandAsync(

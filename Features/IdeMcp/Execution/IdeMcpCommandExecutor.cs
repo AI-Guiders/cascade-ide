@@ -8,15 +8,17 @@ namespace CascadeIDE.Features.IdeMcp.Execution;
 /// <summary>Диспетчер MCP-команд IDE: разбор args и вызов <see cref="IIdeMcpActions"/> / UI-команд главного окна.</summary>
 internal sealed partial class IdeMcpCommandExecutor
 {
+    private readonly IMainWindowMcpHostContext _host;
     private readonly MainWindowViewModel _vm;
     private readonly IIdeMcpActions _actions;
     private readonly Dictionary<string, Handler> _handlers;
 
     private delegate Task<string> Handler(IReadOnlyDictionary<string, JsonElement>? args, CancellationToken cancellationToken);
 
-    public IdeMcpCommandExecutor(MainWindowViewModel vm, IIdeMcpActions actions)
+    public IdeMcpCommandExecutor(IMainWindowMcpHostContext host, IIdeMcpActions actions)
     {
-        _vm = vm;
+        _host = host;
+        _vm = host.Vm;
         _actions = actions;
         _handlers = BuildHandlers();
     }
