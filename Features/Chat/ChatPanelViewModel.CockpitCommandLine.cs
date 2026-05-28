@@ -11,7 +11,9 @@ public partial class ChatPanelViewModel
 {
     /// <summary>CCL на Skia Intercom (не оверлей редактора).</summary>
     public bool ShowIntercomCockpitCommandLine =>
-        IsCockpitCommandLineOpen && CommandLineSession.ActiveHost == CockpitCommandLineHostKind.Intercom;
+        Cockpit.Application.CockpitCommandLineHostPolicy.ShouldShowIntercomSkia(
+            IsCockpitCommandLineOpen,
+            CommandLineSession.ActiveHost);
 
     internal void NotifyCockpitCommandLinePresentationChanged() =>
         OnPropertyChanged(nameof(ShowIntercomCockpitCommandLine));

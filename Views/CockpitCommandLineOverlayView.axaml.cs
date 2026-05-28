@@ -5,9 +5,8 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
-using CascadeIDE.Features.Cockpit;
 using CascadeIDE.Features.Chat;
-using CascadeIDE.Models;
+using CascadeIDE.Features.Cockpit.Application;
 using CascadeIDE.Models.Shell;
 using CascadeIDE.ViewModels;
 
@@ -18,8 +17,7 @@ namespace CascadeIDE.Views;
 /// </summary>
 public partial class CockpitCommandLineOverlayView : UserControl
 {
-    private INotifyPropertyChanged? _boundVm;
-    private INotifyPropertyChanged? _boundChatPanel;
+    private CockpitCommandLineOverlayViewModel? _overlayVm;
     private Window? _hostWindow;
     private IInputElement? _focusBeforeOpen;
     private bool _wasVisible;
@@ -34,19 +32,19 @@ public partial class CockpitCommandLineOverlayView : UserControl
         AddHandler(InputElement.KeyDownEvent, OnPreviewKeyDown, RoutingStrategies.Tunnel, handledEventsToo: true);
     }
 
-    private MainWindowViewModel? ViewModel => DataContext as MainWindowViewModel;
+    private CockpitCommandLineOverlayViewModel? OverlayVm => DataContext as CockpitCommandLineOverlayViewModel;
 
     private void OnAttachedToVisualTree(object? sender, Avalonia.VisualTreeAttachmentEventArgs e)
     {
         AttachHostWindow();
-        BindVm();
+        BindOverlayVm();
         EnsureCommandLineHooks();
         UpdateOpenState();
     }
 
     private void OnDetachedFromVisualTree(object? sender, Avalonia.VisualTreeAttachmentEventArgs e)
     {
-        DetachVm();
+        DetachOverlayVm();
         DetachHostWindow();
         _focusBeforeOpen = null;
         _wasVisible = false;
@@ -54,36 +52,30 @@ public partial class CockpitCommandLineOverlayView : UserControl
 
     private void OnDataContextChanged(object? sender, EventArgs e)
     {
-        BindVm();
+        BindOverlayVm();
         UpdateOpenState();
     }
 
-    private void BindVm()
+    private void BindOverlayVm()
     {
-        if (ReferenceEquals(_boundVm, DataContext))
+        if (ReferenceEquals(_overlayVm, OverlayVm))
             return;
 
-        DetachVm();
-
-        _boundVm = DataContext as INotifyPropertyChanged;
-        if (_boundVm is not null)
-            _boundVm.PropertyChanged += OnVmPropertyChanged;
-
-        _boundChatPanel = ViewModel?.ChatPanel;
-        if (_boundChatPanel is not null)
-            _boundChatPanel.PropertyChanged += OnChatPanelPropertyChanged;
+        DetachOverlayVm();
+        _overlayVm = OverlayVm;
+        if (_overlayVm is not null)
+            _overlayVm.PropertyChanged += OnOverlayVmPropertyChanged;
     }
 
-    private void DetachVm()
+    private void DetachOverlayVm()
     {
-        if (_boundVm is not null)
-            _boundVm.PropertyChanged -= OnVmPropertyChanged;
-        _boundVm = null;
-
-        if (_boundChatPanel is not null)
-            _boundChatPanel.PropertyChanged -= OnChatPanelPropertyChanged;
-        _boundChatPanel = null;
+        if (_overlayVm is not null)
+            _overlayVm.PropertyChanged -= OnOverlayVmPropertyChanged;
+        _overlayVm = null;
     }
+
+    private void OnOverlayVmPropertyChanged(object? sender, PropertyChangedEventArgs e) =>
+        UpdateOpenState();
 
     private void EnsureCommandLineHooks()
     {
@@ -104,27 +96,26 @@ public partial class CockpitCommandLineOverlayView : UserControl
 
     private void SyncCommandLineDraftToViewModel()
     {
-        var vm = ViewModel;
-        if (vm is null || CommandLineTextBox is null || !IsVisible)
+        var overlay = OverlayVm;
+        if (overlay is null || CommandLineTextBox is null || !IsVisible)
             return;
 
-        var text = string.IsNullOrWhiteSpace(CommandLineTextBox.Text) ? "/" : CommandLineTextBox.Text;
-        var caret = Math.Clamp(CommandLineTextBox.CaretIndex, 0, text.Length);
-        vm.ChatPanel.CockpitCommandLineCaretIndex = caret;
-        vm.ChatPanel.RefreshCockpitCommandLineAutocomplete(text, caret);
+        CockpitCommandLineDraftBridge.ApplyDraftFromView(
+            overlay.ChatPanel,
+            CommandLineTextBox.Text,
+            CommandLineTextBox.CaretIndex);
     }
 
     private void SyncCommandLineFromViewModel()
     {
-        var vm = ViewModel;
-        if (vm is null || CommandLineTextBox is null)
+        var overlay = OverlayVm;
+        if (overlay is null || CommandLineTextBox is null)
             return;
 
-        var cp = vm.ChatPanel;
-        var text = cp.CockpitCommandLineText;
-        if (!string.Equals(CommandLineTextBox.Text ?? "", text, StringComparison.Ordinal))
-            CommandLineTextBox.Text = text;
-        CommandLineTextBox.CaretIndex = Math.Clamp(cp.CockpitCommandLineCaretIndex, 0, text.Length);
+        CockpitCommandLineDraftBridge.ApplyDraftFromViewModel(
+            overlay.ChatPanel,
+            text => CommandLineTextBox.Text = text,
+            caret => CommandLineTextBox.CaretIndex = caret);
     }
 
     private void AttachHostWindow()
@@ -155,39 +146,10 @@ public partial class CockpitCommandLineOverlayView : UserControl
 
     private void OnHostWindowActivationChanged(object? sender, EventArgs e) => UpdateOpenState();
 
-    private void OnVmPropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName is nameof(MainWindowViewModel.PrimaryWorkSurface)
-            or nameof(MainWindowViewModel.CommandPaletteHost))
-            UpdateOpenState();
-    }
-
-    private void OnChatPanelPropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName is nameof(ChatPanelViewModel.IsCockpitCommandLineOpen)
-            or nameof(ChatPanelViewModel.CockpitCommandLineText)
-            or nameof(ChatPanelViewModel.CockpitCommandLineCaretIndex)
-            or nameof(ChatPanelViewModel.CommandLineSlashPreview)
-            or nameof(ChatPanelViewModel.IsChatSlashAutocompleteVisible)
-            or nameof(ChatPanelViewModel.SelectedChatSlashSuggestionIndex)
-            or nameof(ChatPanelViewModel.ChatSlashBreadcrumb))
-        {
-            if (e.PropertyName is nameof(ChatPanelViewModel.CockpitCommandLineText)
-                or nameof(ChatPanelViewModel.CockpitCommandLineCaretIndex))
-                SyncCommandLineFromViewModel();
-
-            UpdateOpenState();
-        }
-    }
-
     private void UpdateOpenState()
     {
-        var vm = ViewModel;
-        var session = vm?.ChatPanel.CommandLineSession;
-        var visible = vm?.PrimaryWorkSurface == PrimaryWorkSurfaceKind.Editor
-                      && vm.ChatPanel.IsCockpitCommandLineOpen
-                      && session?.ActiveHost == CockpitCommandLineHostKind.Editor
-                      && vm.CommandPaletteHost == ResolveHost();
+        var overlay = OverlayVm;
+        var visible = overlay?.IsOverlayVisible(ResolveHost()) == true;
         IsVisible = visible;
 
         if (visible == _wasVisible)
@@ -235,8 +197,8 @@ public partial class CockpitCommandLineOverlayView : UserControl
 
     private void OnPreviewKeyDown(object? sender, KeyEventArgs e)
     {
-        var vm = ViewModel;
-        if (vm is null || !IsVisible)
+        var overlay = OverlayVm;
+        if (overlay is null || !IsVisible)
             return;
 
         var kind = e.Key switch
@@ -252,7 +214,7 @@ public partial class CockpitCommandLineOverlayView : UserControl
         if (kind is null)
             return;
 
-        var result = vm.ChatPanel.TryHandleIntercomComposerKey(kind.Value, e);
+        var result = overlay.ChatPanel.TryHandleSlashComposerKey(kind.Value, e);
         if (!result.Handled)
             return;
 
@@ -262,12 +224,12 @@ public partial class CockpitCommandLineOverlayView : UserControl
             SyncCommandLineFromViewModel();
 
         if (result.RunCockpitCommit)
-            _ = vm.ChatPanel.TryCommitCockpitCommandLineAsync();
+            _ = overlay.ChatPanel.TryCommitCockpitCommandLineAsync();
     }
 
     private void OnDimmerPressed(object? sender, PointerPressedEventArgs e)
     {
-        ViewModel?.ChatPanel.CommandLineSession.Close();
+        OverlayVm?.ChatPanel.CommandLineSession.Close();
         e.Handled = true;
     }
 

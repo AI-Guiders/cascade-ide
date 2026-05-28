@@ -3,7 +3,7 @@
              xmlns:vm="using:CascadeIDE.ViewModels"
              xmlns:chat="using:CascadeIDE.Features.Chat"
              x:Class="CascadeIDE.Views.CockpitCommandLineOverlayView"
-             x:DataType="vm:MainWindowViewModel"
+             x:DataType="vm:CockpitCommandLineOverlayViewModel"
              Focusable="True"
              IsVisible="False">
   <UserControl.Styles>

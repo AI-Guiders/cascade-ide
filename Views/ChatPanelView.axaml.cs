@@ -184,7 +184,7 @@ public partial class ChatPanelView : UserControl
             if (DataContext is not ChatPanelViewModel vm)
                 return;
 
-            var handle = vm.TryHandleIntercomComposerKey(e.Kind, e.KeyEvent);
+            var handle = vm.TryHandleSlashComposerKey(e.Kind, e.KeyEvent);
             if (!handle.Handled)
             {
                 // Перенос строки только по явному chord из настроек (разделение с отправкой, как в мессенджерах).

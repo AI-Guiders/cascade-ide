@@ -10,6 +10,8 @@ namespace CascadeIDE.ViewModels;
 /// </summary>
 public partial class MainWindowViewModel
 {
+    public CockpitCommandLineOverlayViewModel CockpitCommandLineOverlay { get; private set; } = null!;
+
     internal async Task OpenCockpitCommandLineOnActiveForwardHostAsync(string initialText = "/")
     {
         var text = string.IsNullOrWhiteSpace(initialText) ? "/" : initialText.Trim();
