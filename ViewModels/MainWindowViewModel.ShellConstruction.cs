@@ -77,13 +77,15 @@ public partial class MainWindowViewModel
 
         Documents.InitializeDock();
 
+        InitializeWorkspaceNavigationMap();
+        NavigationMap.CodeNavigationMapPresentation =
+            CodeNavigationMapPresentationKind.Normalize(_settings.CodeNavigationMap.View);
+        NavigationMap.CodeNavigationMapLevel = CodeNavigationMapLevelKind.Normalize(_settings.CodeNavigationMap.Depth);
+        NavigationMap.CodeNavigationMapControlFlowMainAxis =
+            CodeNavigationMapControlFlowMainAxisKind.Normalize(_settings.CodeNavigationMap.ControlFlowMainAxis);
+
         _lastSavedSettings = (CascadeIdeSettings)_settings.Clone();
         _lastSavedAiKeys = (AiKeys)_aiKeys.Clone();
-
-        _codeNavigationMapPresentation = CodeNavigationMapPresentationKind.Normalize(_settings.CodeNavigationMap.View);
-        _codeNavigationMapLevel = CodeNavigationMapLevelKind.Normalize(_settings.CodeNavigationMap.Depth);
-        _codeNavigationMapControlFlowMainAxis =
-            CodeNavigationMapControlFlowMainAxisKind.Normalize(_settings.CodeNavigationMap.ControlFlowMainAxis);
         _workspaceSplittersLocked = _settings.Workspace.SplittersLocked;
 
         _hciIntegrationEnabled = _settings.HybridIndex.Enabled;
@@ -159,7 +161,7 @@ public partial class MainWindowViewModel
             getSolutionRoots: () => Workspace.SolutionRoots,
             getEditorSelectionStart: () => EditorSelectionStart,
             getEditorSelectionLength: () => EditorSelectionLength,
-            getEditorCaretOffset: () => _editorCaretOffset,
+            getEditorCaretOffset: () => NavigationMap.EditorCaretOffset,
             getTextEditorForAbsoluteFilePath: path =>
                 string.IsNullOrWhiteSpace(path)
                     ? null

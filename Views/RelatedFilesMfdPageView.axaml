@@ -1,9 +1,10 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:nav="using:CascadeIDE.Features.WorkspaceNavigation.Presentation"
              xmlns:vm="using:CascadeIDE.ViewModels"
              xmlns:views="using:CascadeIDE.Views"
              x:Class="CascadeIDE.Views.RelatedFilesMfdPageView"
-             x:DataType="vm:MainWindowViewModel">
+             x:DataType="nav:WorkspaceNavigationMapViewModel">
     <UserControl.Resources>
         <views:StringNotEmptyToBoolConverter x:Key="HciOrientationLineVisible"/>
     </UserControl.Resources>

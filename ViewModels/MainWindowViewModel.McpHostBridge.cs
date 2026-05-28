@@ -32,7 +32,7 @@ public partial class MainWindowViewModel
 
     internal void McpResyncDapBreakpointsFireAndForget() => ResyncDapBreakpointsFireAndForget();
 
-    internal int? McpEditorCaretOffset => _editorCaretOffset;
+    internal int? McpEditorCaretOffset => NavigationMap.EditorCaretOffset;
 
     internal Action? McpFocusEditorAction => _focusEditorAction;
 

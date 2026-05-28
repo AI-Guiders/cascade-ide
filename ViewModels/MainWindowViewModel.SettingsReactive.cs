@@ -112,48 +112,6 @@ public partial class MainWindowViewModel
         NormalizeChatEnterChordPair();
     }
 
-    partial void OnCodeNavigationMapPresentationChanged(string value)
-    {
-        var normalized = CodeNavigationMapPresentationKind.Normalize(value);
-        if (ShellSettingsPresentationProjection.ShouldRewriteWithNormalizedValue(value, normalized))
-        {
-            CodeNavigationMapPresentation = normalized;
-            return;
-        }
-
-        _settings.CodeNavigationMap.View = normalized;
-        SaveSettingsIfChanged();
-        ScheduleWorkspaceNavigationMapRefresh();
-    }
-
-    partial void OnCodeNavigationMapLevelChanged(string value)
-    {
-        var normalized = CodeNavigationMapLevelKind.Normalize(value);
-        if (ShellSettingsPresentationProjection.ShouldRewriteWithNormalizedValue(value, normalized))
-        {
-            CodeNavigationMapLevel = normalized;
-            return;
-        }
-
-        _settings.CodeNavigationMap.Depth = normalized;
-        SaveSettingsIfChanged();
-        ScheduleWorkspaceNavigationMapRefresh();
-    }
-
-    partial void OnCodeNavigationMapControlFlowMainAxisChanged(string value)
-    {
-        var normalized = CodeNavigationMapControlFlowMainAxisKind.Normalize(value);
-        if (ShellSettingsPresentationProjection.ShouldRewriteWithNormalizedValue(value, normalized))
-        {
-            CodeNavigationMapControlFlowMainAxis = normalized;
-            return;
-        }
-
-        _settings.CodeNavigationMap.ControlFlowMainAxis = normalized;
-        SaveSettingsIfChanged();
-        ScheduleWorkspaceNavigationMapRefresh();
-    }
-
     partial void OnWorkspaceSplittersLockedChanged(bool value)
     {
         _settings.Workspace.SplittersLocked = value;

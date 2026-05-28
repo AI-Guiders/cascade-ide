@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.VisualTree;
+using CascadeIDE.Features.WorkspaceNavigation.Presentation;
 using CascadeIDE.ViewModels;
 
 namespace CascadeIDE.Views;
@@ -29,11 +30,21 @@ public partial class WorkspaceNavigationMapView : UserControl
 
     private void PushViewportWidth(Control miniMap)
     {
-        if (DataContext is not MainWindowViewModel vm)
+        if (DataContext is WorkspaceNavigationMapViewModel map)
+        {
+            var w = miniMap.Bounds.Width;
+            if (w <= 0)
+                return;
+            map.NotifyCodeNavigationMapGraphViewportWidthChanged(w);
             return;
-        var w = miniMap.Bounds.Width;
-        if (w <= 0)
-            return;
-        vm.NotifyCodeNavigationMapGraphViewportWidthChanged(w);
+        }
+
+        if (VisualRoot is not null
+            && this.FindAncestorOfType<MainWindow>()?.DataContext is MainWindowViewModel vm)
+        {
+            var w = miniMap.Bounds.Width;
+            if (w > 0)
+                vm.NotifyCodeNavigationMapGraphViewportWidthChanged(w);
+        }
     }
 }

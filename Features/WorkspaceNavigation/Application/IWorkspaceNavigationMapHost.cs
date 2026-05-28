@@ -1,6 +1,7 @@
 #nullable enable
 
 using AvaloniaEdit;
+using CascadeIDE.Features.HybridIndex.Application;
 using CascadeIDE.Features.Documents;
 using CascadeIDE.Features.Editor;
 using CascadeIDE.Features.Markdown;
@@ -27,6 +28,10 @@ public interface IWorkspaceNavigationMapHost
     CascadeIdeSettings Settings { get; }
 
     Services.IIdeMcpActions IdeMcp { get; }
+
+    HybridIndexOrchestrator HybridIndex { get; }
+
+    bool IsPfdRegionExpanded { get; }
 
     string? GetWorkspacePath();
 

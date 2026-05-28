@@ -1,29 +1,52 @@
+#nullable enable
+
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
 using Avalonia.Controls;
+using Avalonia.Threading;
+using AvaloniaEdit;
 using CascadeIDE.Cockpit.Cds;
 using CascadeIDE.Cockpit.Channels.TraceFlow;
 using CascadeIDE.Cockpit.Composition.TraceFlow;
 using CascadeIDE.Cockpit.Graph;
-using CascadeIDE.Features.WorkspaceNavigation.Application;
-using CascadeIDE.Models;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
+using CascadeIDE.Features.Documents;
+using CascadeIDE.Features.Editor;
+using CascadeIDE.Features.Shell.Application;
+using CascadeIDE.Features.HybridIndex.Application;
+using CascadeIDE.Features.Markdown;
+using CascadeIDE.Features.UiChrome;
+using CascadeIDE.Features.Workspace;
 using CascadeIDE.Features.Workspace.DataAcquisition;
 using CascadeIDE.Features.WorkspaceNavigation.Application;
+using CascadeIDE.Models;
 using CascadeIDE.Services;
-using CascadeIDE.Features.UiChrome;
+using CascadeIDE.ViewModels;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
-namespace CascadeIDE.ViewModels;
+namespace CascadeIDE.Features.WorkspaceNavigation.Presentation;
 
-/// <summary>
-/// Слот Pfd: <b>отображение</b> карты намерений / <see cref="CascadeIDE.Cockpit.Graph.GraphDocument"/> (те же данные, что JSON MCP). Граф подграфа — не синоним <c>instrument_id</c>, см. ADR 0065.
-/// По доменам: <b>карта намерений</b> (в т.ч. control flow) — CodeNavigation; <b>зависимости файлов</b> — WorkspaceNavigation; <b>submodules</b> — дерево/GitMap (ADR 0062).
-/// </summary>
-public partial class MainWindowViewModel
+/// <summary>PFD/MFD workspace navigation map (ADR 0039).</summary>
+public sealed partial class WorkspaceNavigationMapViewModel : ObservableObject
 {
+    private readonly IWorkspaceNavigationMapHost _host;
+
+    public WorkspaceNavigationMapViewModel(IWorkspaceNavigationMapHost host)
+    {
+        _host = host;
+        _host.Shell.PropertyChanged += OnShellPropertyChanged;
+    }
+
+    public bool IsPfdRegionExpanded => _host.IsPfdRegionExpanded;
+
+    private void OnShellPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is "IsPfdRegionExpanded" or null or "")
+            OnPropertyChanged(nameof(IsPfdRegionExpanded));
+    }
+
     private readonly IGraphDataSource _codeNavigationMapGraphDataSource = new WorkspaceNavigationMapContextJsonDataSource();
     private readonly TraceFlowChannelCoordinator _traceFlowChannelCoordinator = new(
         [
@@ -41,12 +64,14 @@ public partial class MainWindowViewModel
 
     private CancellationTokenSource? _workspaceNavigationMapRefreshCts;
 
+    internal int? EditorCaretOffset => _editorCaretOffset;
+
     internal void UpdateCodeNavigationMapCaretOffset(int? offset)
     {
         _editorCaretOffset = offset;
-        if (_settings.CodeNavigationMap.IsControlFlowDepth)
+        if (_host.Settings.CodeNavigationMap.IsControlFlowDepth)
             ScheduleWorkspaceNavigationMapRefresh();
-        ScheduleEditorHudBannerRefresh();
+        _host.ScheduleEditorHudBannerRefresh();
     }
 
     /// <summary>Связанные файлы для текущего якоря (режим списка).</summary>
@@ -187,7 +212,7 @@ public partial class MainWindowViewModel
                 NavigateWorkspaceNavigationMapNode(payload);
                 return;
             case string path when !string.IsNullOrWhiteSpace(path):
-                Documents.OpenOrActivateDocument(path);
+                _host.Documents.OpenOrActivateDocument(path);
                 return;
         }
     }
@@ -199,19 +224,19 @@ public partial class MainWindowViewModel
         if (string.IsNullOrWhiteSpace(docPath))
             return;
 
-        var wsRoot = GetWorkspacePath();
+        var wsRoot = _host.GetWorkspacePath();
         if (string.IsNullOrWhiteSpace(wsRoot))
             return;
 
         if (!WorkspaceMarkdownPreviewOpener.TryOpenRepoDocument(
                 wsRoot,
                 docPath,
-                (title, content, source) => MarkdownPreviewTool.SetContent(title, content, source),
+                (title, content, source) => _host.MarkdownPreviewTool.SetContent(title, content, source),
                 out _))
             return;
 
-        ApplyMfdRegionExpanded(true);
-        TryNavigateToMfdShellPage(MfdShellPage.MarkdownPreview);
+        _host.ApplyMfdRegionExpanded(true);
+        _host.TryNavigateToMfdShellPage(MfdShellPage.MarkdownPreview);
     }
 
     [RelayCommand]
@@ -223,32 +248,32 @@ public partial class MainWindowViewModel
 
         var pick = docs.Length == 1
             ? docs[0]
-            : RequestPickFeatureDocAsync is not null
-                ? await RequestPickFeatureDocAsync("Документация фичи", docs).ConfigureAwait(true)
+            : _host.RequestPickFeatureDocAsync is not null
+                ? await _host.RequestPickFeatureDocAsync("Документация фичи", docs).ConfigureAwait(true)
                 : docs[0];
 
         if (string.IsNullOrWhiteSpace(pick))
             return;
 
-        var wsRoot = GetWorkspacePath();
+        var wsRoot = _host.GetWorkspacePath();
         if (string.IsNullOrWhiteSpace(wsRoot))
             return;
 
         if (!WorkspaceMarkdownPreviewOpener.TryOpenRepoDocument(
                 wsRoot,
                 pick,
-                (title, content, source) => MarkdownPreviewTool.SetContent(title, content, source),
+                (title, content, source) => _host.MarkdownPreviewTool.SetContent(title, content, source),
                 out _))
             return;
 
-        ApplyMfdRegionExpanded(true);
-        TryNavigateToMfdShellPage(MfdShellPage.MarkdownPreview);
+        _host.ApplyMfdRegionExpanded(true);
+        _host.TryNavigateToMfdShellPage(MfdShellPage.MarkdownPreview);
     }
 
     [RelayCommand]
     private async Task OpenDocsTemplateAsync(object? parameter)
     {
-        var wsRoot = GetWorkspacePath();
+        var wsRoot = _host.GetWorkspacePath();
         if (string.IsNullOrWhiteSpace(wsRoot))
             return;
 
@@ -262,8 +287,8 @@ public partial class MainWindowViewModel
         if (string.IsNullOrWhiteSpace(selectedId))
         {
             var labels = templates.Select(t => $"{t.Id} — {t.Title}").ToArray();
-            var pick = RequestPickFeatureDocAsync is not null
-                ? await RequestPickFeatureDocAsync("Шаблон документации", labels).ConfigureAwait(true)
+            var pick = _host.RequestPickFeatureDocAsync is not null
+                ? await _host.RequestPickFeatureDocAsync("Шаблон документации", labels).ConfigureAwait(true)
                 : labels[0];
 
             if (string.IsNullOrWhiteSpace(pick))
@@ -291,12 +316,12 @@ public partial class MainWindowViewModel
                 if (!string.IsNullOrWhiteSpace(entry.KnowledgeRootId))
                     args["knowledge_root_id"] = System.Text.Json.JsonDocument.Parse($"\"{entry.KnowledgeRootId}\"").RootElement.Clone();
 
-                var content = await IdeMcp.ExecuteCommandAsync(Services.IdeCommands.ReadKnowledgeFile, args, CancellationToken.None)
+                var content = await _host.IdeMcp.ExecuteCommandAsync(Services.IdeCommands.ReadKnowledgeFile, args, CancellationToken.None)
                     .ConfigureAwait(true);
 
-                MarkdownPreviewTool.SetContent($"KB template: {entry.Title}", content ?? "", entry.KnowledgeFilePath);
-                ApplyMfdRegionExpanded(true);
-                TryNavigateToMfdShellPage(MfdShellPage.MarkdownPreview);
+                _host.MarkdownPreviewTool.SetContent($"KB template: {entry.Title}", content ?? "", entry.KnowledgeFilePath);
+                _host.ApplyMfdRegionExpanded(true);
+                _host.TryNavigateToMfdShellPage(MfdShellPage.MarkdownPreview);
             }
             catch
             {
@@ -309,11 +334,11 @@ public partial class MainWindowViewModel
             && WorkspaceMarkdownPreviewOpener.TryOpenRepoDocument(
                 wsRoot,
                 entry.RepoPath,
-                (title, content, source) => MarkdownPreviewTool.SetContent(entry.Title, content, source),
+                (title, content, source) => _host.MarkdownPreviewTool.SetContent(entry.Title, content, source),
                 out _))
         {
-            ApplyMfdRegionExpanded(true);
-            TryNavigateToMfdShellPage(MfdShellPage.MarkdownPreview);
+            _host.ApplyMfdRegionExpanded(true);
+            _host.TryNavigateToMfdShellPage(MfdShellPage.MarkdownPreview);
         }
     }
 
@@ -323,10 +348,10 @@ public partial class MainWindowViewModel
         _controlFlowGraphNavigateLine = lineOneBased;
         _controlFlowGraphNavigateColumn = 1;
 
-        if (!EditorTextCoordinateUtilities.PathsReferToSameFile(CurrentFilePath, fullPath))
+        if (!EditorTextCoordinateUtilities.PathsReferToSameFile(_host.CurrentFilePath, fullPath))
             return;
 
-        var text = TryCaptureLiveEditorText(CurrentFilePath) ?? EditorText;
+        var text = TryCaptureLiveEditorText(_host.CurrentFilePath) ?? _host.EditorText;
         if (WorkspaceNavigationMapOrchestrator.TryOffsetForLine(text, lineOneBased) is int offset)
             _editorCaretOffset = offset;
     }
@@ -338,10 +363,10 @@ public partial class MainWindowViewModel
             || string.IsNullOrEmpty(_controlFlowGraphNavigatePath))
             return false;
 
-        if (!EditorTextCoordinateUtilities.PathsReferToSameFile(CurrentFilePath, _controlFlowGraphNavigatePath))
+        if (!EditorTextCoordinateUtilities.PathsReferToSameFile(_host.CurrentFilePath, _controlFlowGraphNavigatePath))
             return false;
 
-        foreach (var editor in EnumerateEditorsForPath(CurrentFilePath))
+        foreach (var editor in EnumerateEditorsForPath(_host.CurrentFilePath))
         {
             var docText = editor.Document?.Text;
             if (WorkspaceNavigationMapOrchestrator.TryOffsetForLine(docText, line) is int offset)
@@ -351,7 +376,7 @@ public partial class MainWindowViewModel
             }
         }
 
-        if (WorkspaceNavigationMapOrchestrator.TryOffsetForLine(EditorText, line) is int hostOffset)
+        if (WorkspaceNavigationMapOrchestrator.TryOffsetForLine(_host.EditorText, line) is int hostOffset)
         {
             _editorCaretOffset = hostOffset;
             return true;
@@ -400,7 +425,7 @@ public partial class MainWindowViewModel
             if (isCf && payload.LineStart is > 0)
                 BeginControlFlowGraphNodeNavigation(path, payload.LineStart.Value);
 
-            Documents.ActivateDocumentForReveal(path);
+            _host.Documents.ActivateDocumentForReveal(path);
 
             if (payload.LineStart is > 0)
             {
@@ -408,7 +433,7 @@ public partial class MainWindowViewModel
                 var end = payload.LineEnd is > 0 ? payload.LineEnd.Value : start;
                 var revealPath = path;
                 Avalonia.Threading.Dispatcher.UIThread.Post(
-                    () => ((IWorkspaceNavigationMapHost)this).RevealEditorRange(revealPath, start, end, null),
+                    () => _host.RevealEditorRange(revealPath, start, end, null),
                     Avalonia.Threading.DispatcherPriority.Loaded);
                 if (isCf)
                     ScheduleWorkspaceNavigationMapRefresh();
@@ -416,7 +441,7 @@ public partial class MainWindowViewModel
             else if (isCf && string.Equals(payload.Kind, "anchor", StringComparison.OrdinalIgnoreCase))
             {
                 Avalonia.Threading.Dispatcher.UIThread.Post(
-                    () => _revealEditorRangeAction?.Invoke(path, 1, 1, null),
+                    () => _host.RevealEditorRange(path, 1, 1, null),
                     Avalonia.Threading.DispatcherPriority.Loaded);
             }
 
@@ -434,15 +459,15 @@ public partial class MainWindowViewModel
         CodeNavigationMapPresentationProjection.SettingsSummaryLine(
             CodeNavigationMapPresentation,
             CodeNavigationMapLevel,
-            _settings.CodeNavigationMap.DetailLevel,
-            _settings.CodeNavigationMap.RelatedGraphLayout,
-            _settings.CodeNavigationMap.NormalizedControlFlowMainAxis);
+            _host.Settings.CodeNavigationMap.DetailLevel,
+            _host.Settings.CodeNavigationMap.RelatedGraphLayout,
+            _host.Settings.CodeNavigationMap.NormalizedControlFlowMainAxis);
 
     /// <summary>Краткая строка ориентации HCI (слой B) рядом с картой; не влияет на Roslyn-граф (ADR 0106).</summary>
     [ObservableProperty]
     private string _workspaceNavigationMapHciOrientationLine = "";
 
-    /// <summary>Doc correspondence (ADR 0061): какие ADR относятся к текущему файлу по <c>[workspace.adr.map]</c>.</summary>
+    /// <summary>Doc correspondence (ADR 0061): какие ADR относятся к текущему файлу по <c>[_host.Workspace.adr.map]</c>.</summary>
     [ObservableProperty]
     private string _workspaceAdrCorrespondenceLine = "";
 
@@ -474,9 +499,9 @@ public partial class MainWindowViewModel
     /// <summary>Команда палитры / MCP: radial → top_down → bottom_up.</summary>
     public void CycleCodeNavigationMapRelatedGraphLayout()
     {
-        _settings.CodeNavigationMap.RelatedGraphLayout =
-            CodeNavigationMapPresentationProjection.NextRelatedGraphLayoutAfter(_settings.CodeNavigationMap.RelatedGraphLayout);
-        SaveSettingsIfChanged();
+        _host.Settings.CodeNavigationMap.RelatedGraphLayout =
+            CodeNavigationMapPresentationProjection.NextRelatedGraphLayoutAfter(_host.Settings.CodeNavigationMap.RelatedGraphLayout);
+        _host.SaveSettingsIfChanged();
         ScheduleWorkspaceNavigationMapRefresh();
         OnPropertyChanged(nameof(CodeNavigationMapSettingsSummaryLine));
     }
@@ -484,11 +509,54 @@ public partial class MainWindowViewModel
     /// <summary>Команда палитры / MCP: glance → normal → inspect.</summary>
     public void CycleCodeNavigationMapDetailLevel()
     {
-        var (_, toml) = CodeNavigationMapPresentationProjection.NextDetailCycle(_settings.CodeNavigationMap.NormalizedDetailLevel);
-        _settings.CodeNavigationMap.DetailLevel = toml;
-        SaveSettingsIfChanged();
+        var (_, toml) = CodeNavigationMapPresentationProjection.NextDetailCycle(_host.Settings.CodeNavigationMap.NormalizedDetailLevel);
+        _host.Settings.CodeNavigationMap.DetailLevel = toml;
+        _host.SaveSettingsIfChanged();
         ScheduleWorkspaceNavigationMapRefresh();
         OnPropertyChanged(nameof(CodeNavigationMapSettingsSummaryLine));
     }
+
+    partial void OnCodeNavigationMapPresentationChanged(string value)
+    {
+        var normalized = CodeNavigationMapPresentationKind.Normalize(value);
+        if (ShellSettingsPresentationProjection.ShouldRewriteWithNormalizedValue(value, normalized))
+        {
+            CodeNavigationMapPresentation = normalized;
+            return;
+        }
+
+        _host.Settings.CodeNavigationMap.View = normalized;
+        _host.SaveSettingsIfChanged();
+        ScheduleWorkspaceNavigationMapRefresh();
+    }
+
+    partial void OnCodeNavigationMapLevelChanged(string value)
+    {
+        var normalized = CodeNavigationMapLevelKind.Normalize(value);
+        if (ShellSettingsPresentationProjection.ShouldRewriteWithNormalizedValue(value, normalized))
+        {
+            CodeNavigationMapLevel = normalized;
+            return;
+        }
+
+        _host.Settings.CodeNavigationMap.Depth = normalized;
+        _host.SaveSettingsIfChanged();
+        ScheduleWorkspaceNavigationMapRefresh();
+    }
+
+    partial void OnCodeNavigationMapControlFlowMainAxisChanged(string value)
+    {
+        var normalized = CodeNavigationMapControlFlowMainAxisKind.Normalize(value);
+        if (ShellSettingsPresentationProjection.ShouldRewriteWithNormalizedValue(value, normalized))
+        {
+            CodeNavigationMapControlFlowMainAxis = normalized;
+            return;
+        }
+
+        _host.Settings.CodeNavigationMap.ControlFlowMainAxis = normalized;
+        _host.SaveSettingsIfChanged();
+        ScheduleWorkspaceNavigationMapRefresh();
+    }
 }
+
 
