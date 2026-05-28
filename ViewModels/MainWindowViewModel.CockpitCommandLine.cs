@@ -5,13 +5,11 @@ using CascadeIDE.Models;
 
 namespace CascadeIDE.ViewModels;
 
+/// <summary>
+/// Cockpit Command Line на Forward host: <c>primary=intercom</c> — Skia в ChatPanel; <c>primary=editor</c> — оверлей <see cref="Views.CockpitCommandLineOverlayView"/> (ADR 0120).
+/// </summary>
 public partial class MainWindowViewModel
 {
-    /// <summary>
-    /// Открыть Cockpit Command Line на активном Forward host.
-    /// <c>primary=intercom</c> — inline Skia в ChatPanel.
-    /// <c>primary=editor</c> — только оверлей <see cref="Views.CockpitCommandLineOverlayView"/> (как Ctrl+Q); inline в редакторе не используется.
-    /// </summary>
     internal async Task OpenCockpitCommandLineOnActiveForwardHostAsync(string initialText = "/")
     {
         var text = string.IsNullOrWhiteSpace(initialText) ? "/" : initialText.Trim();

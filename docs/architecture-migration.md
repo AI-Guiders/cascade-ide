@@ -17,7 +17,7 @@
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:BEGIN -->
 
-`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~5k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~5k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~0k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
+`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~5.3k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~5.3k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~0k**); счётчики — ориентир по состоянию репозитория (авто: 2026-05). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:END -->
 
@@ -33,6 +33,7 @@
 | `MainWindowViewModel.AutonomousAgent.cs` | 113 | Автономный агент (Power). |
 | `MainWindowViewModel.Capabilities.cs` | 23 | Реестр capabilities. |
 | `MainWindowViewModel.CascadeChord.cs` | 107 | Аккордный слой ADR 0060: корень `cascade_chord` из hotkeys.toml (по умолчанию Ctrl+K), затем тот же хвост мелодии, что после `c:`. Однозначный обычный alias (например `so`) исполняется без Enter при отсутствии более длинного alias-префикса; параметрические (`wai:`, `els:`:…) — только по Enter или из палитры. При конфликте префиксов (`gs` vs `gsu`) — точный хвост или Enter. |
+| `MainWindowViewModel.CockpitCommandLine.cs` | 23 | Cockpit Command Line на Forward host: `primary=intercom` — Skia в ChatPanel; `primary=editor` — оверлей `CockpitCommandLineOverlayView` (ADR 0120). |
 | `MainWindowViewModel.CommandPalette.cs` | 164 | Палитра команд. |
 | `MainWindowViewModel.cs` | 334 | Главный композитор окна (partial-класс, несколько `MainWindowViewModel*.cs`). Карта файлов и ответственности — `docs/architecture-migration.md`, раздел «Срез MainWindowViewModel». |
 | `MainWindowViewModel.CSharpLsp.cs` | 120 | Запуск/перезапуск C# LSP. |
@@ -81,10 +82,10 @@
 | `MainWindowViewModel.SolutionWarmup.cs` | 61 | Solution warm-up: оркестратор фаз загрузки решения, лампа статуса и подписка на DataBus (ADR 0141). |
 | `MainWindowViewModel.StartupProject.cs` | 140 | Стартовый проект. |
 | `MainWindowViewModel.UiGitWorkspace.cs` | 126 | Git + workspace UI. |
-| `MainWindowViewModel.ViewBridge.cs` | 66 | Колбэки и провайдеры, которые View подставляет в главный VM (диалоги, UI automation). |
+| `MainWindowViewModel.ViewBridge.cs` | 68 | Колбэки и провайдеры, которые View подставляет в главный VM (диалоги, UI automation). |
 | `MainWindowViewModel.WebAiPortal.cs` | 29 | Страница MFD «веб-портал» (ADR 0108): URL, результат последнего вызова моста, `WebAiPortalCommandBridge`. |
-| `MainWindowViewModel.WorkspaceNavigationMap.cs` | 292 | Слот Pfd: отображение карты намерений / `GraphDocument` (те же данные, что JSON MCP). Граф подграфа — не синоним `instrument_id`, см. ADR 0065. По доменам: карта намерений (в т.ч. control flow) — CodeNavigation; зависимости файлов — WorkspaceNavigation; submodules — дерево/GitMap (ADR 0062). |
-| `MainWindowViewModel.WorkspaceNavigationMap.Refresh.cs` | 291 | Срез карты workspace: перезапрос refresh и сборка через `WorkspaceNavigationMapRefreshComposer`. |
+| `MainWindowViewModel.WorkspaceNavigationMap.cs` | 440 | Слот Pfd: отображение карты намерений / `GraphDocument` (те же данные, что JSON MCP). Граф подграфа — не синоним `instrument_id`, см. ADR 0065. По доменам: карта намерений (в т.ч. control flow) — CodeNavigation; зависимости файлов — WorkspaceNavigation; submodules — дерево/GitMap (ADR 0062). |
+| `MainWindowViewModel.WorkspaceNavigationMap.Refresh.cs` | 375 | Срез карты workspace: перезапрос refresh и сборка через `WorkspaceNavigationMapRefreshComposer`. |
 | `MainWindowViewModel.WorkspaceSplitters.cs` | 23 | Сплиттеры рабочей области (MainGrid, обозреватель решения, Git и т.д.): режим «взлёт» — блокировка перетаскивания. |
 
 <!-- AUTO:MAIN-WINDOW-SLICE:MWVM-TABLE:END -->
