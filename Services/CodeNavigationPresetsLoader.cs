@@ -87,7 +87,7 @@ public static class CodeNavigationPresetsLoader
                 return [];
 
             var text = File.ReadAllText(path);
-            var ui = CascadeTomlSerializer.Deserialize<UiWorkspaceToml>(text);
+            var ui = CascadeTomlSerializer.Deserialize<Features.Workspace.RepositoryWorkspaceToml>(text);
             if (ui?.CodeNavigation?.Presets is not { Count: > 0 })
                 return [];
 

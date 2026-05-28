@@ -51,7 +51,7 @@
                                    ComposerCaretIndex="{Binding ChatComposerCaretIndex, Mode=TwoWay}"
                                    ComposerPreview="{Binding ComposerSlashPreview}"
                                    ComposerPreviewKind="{Binding ComposerSlashPreviewKind}"
-                                   ShowCockpitCommandLine="{Binding IsCockpitCommandLineOpen}"
+                                   ShowCockpitCommandLine="{Binding ShowIntercomCockpitCommandLine}"
                                    CommandLineText="{Binding CockpitCommandLineText, Mode=TwoWay}"
                                    CommandLinePreview="{Binding CommandLineSlashPreview}"
                                    CommandLinePreviewKind="{Binding CommandLineSlashPreviewKind}"

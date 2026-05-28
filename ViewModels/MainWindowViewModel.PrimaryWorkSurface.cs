@@ -21,6 +21,7 @@ public partial class MainWindowViewModel
             OnPropertyChanged(nameof(IsForwardEditorHostVisible));
             OnPropertyChanged(nameof(IsForwardIntercomHostVisible));
             ChatPanel.IsForwardIntercomLayout = value == PrimaryWorkSurfaceKind.Intercom;
+            CockpitCommandLineOverlay?.NotifyShellPresentationChanged();
             SyncMfdShellPageForPrimaryWorkSurface();
             try
             {

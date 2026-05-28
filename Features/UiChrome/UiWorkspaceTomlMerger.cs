@@ -1,25 +1,179 @@
+using CascadeIDE.Features.Workspace;
 using CascadeIDE.Models;
 using CascadeIDE.Services;
 
 namespace CascadeIDE.Features.UiChrome;
 
 /// <summary>
-/// Слияние слоёв <see cref="UiWorkspaceToml"/> (ADR 0021 §2.1): <c>chrome</c>, <c>loc_limits</c>, <c>routing</c>, <c>code_navigation.presets</c>.
+/// Слияние слоёв <see cref="RepositoryWorkspaceToml"/> (ADR 0021 §2.1): <c>chrome</c>, <c>loc_limits</c>, <c>routing</c>, <c>code_navigation.presets</c>.
 /// </summary>
-public static class UiWorkspaceTomlMerger
+public static class RepositoryWorkspaceTomlMerger
 {
-    public static UiWorkspaceToml? Merge(UiWorkspaceToml? lower, UiWorkspaceToml? higher)
+    public static RepositoryWorkspaceToml? Merge(RepositoryWorkspaceToml? lower, RepositoryWorkspaceToml? higher)
     {
         if (lower is null && higher is null)
             return null;
 
-        return new UiWorkspaceToml
+        return new RepositoryWorkspaceToml
         {
+            Workspace = MergeWorkspace(lower?.Workspace, higher?.Workspace),
             Chrome = MergeWorkspaceChrome(lower?.Chrome, higher?.Chrome),
             LocLimits = MergeLocLimits(lower?.LocLimits, higher?.LocLimits),
             Routing = MergeRouting(lower?.Routing, higher?.Routing),
             CodeNavigation = MergeCodeNavigation(lower?.CodeNavigation, higher?.CodeNavigation),
+            CodeNavigationMap = higher?.CodeNavigationMap ?? lower?.CodeNavigationMap,
         };
+    }
+
+    private static RepositoryWorkspaceSectionToml? MergeWorkspace(
+        RepositoryWorkspaceSectionToml? lower,
+        RepositoryWorkspaceSectionToml? higher)
+    {
+        if (lower is null && higher is null)
+            return null;
+
+        return new RepositoryWorkspaceSectionToml
+        {
+            Adr = MergeWorkspaceAdr(lower?.Adr, higher?.Adr),
+            Features = MergeWorkspaceFeatures(lower?.Features, higher?.Features),
+            DocsTemplates = MergeDocsTemplates(lower?.DocsTemplates, higher?.DocsTemplates),
+        };
+    }
+
+    private static RepositoryAdrToml? MergeWorkspaceAdr(
+        RepositoryAdrToml? lower,
+        RepositoryAdrToml? higher)
+    {
+        var map = MergeObjectDictionary(lower?.Map, higher?.Map);
+        if (map is null)
+            return null;
+        return new RepositoryAdrToml
+        {
+            AutoInclude = higher?.AutoInclude ?? lower?.AutoInclude,
+            MaxRelated = higher?.MaxRelated ?? lower?.MaxRelated,
+            Map = map
+        };
+    }
+
+    private static RepositoryFeaturesToml? MergeWorkspaceFeatures(
+        RepositoryFeaturesToml? lower,
+        RepositoryFeaturesToml? higher)
+    {
+        if (lower?.Feature is not { Count: > 0 } && higher?.Feature is not { Count: > 0 })
+            return null;
+
+        var merged = new Dictionary<string, RepositoryFeatureToml>(StringComparer.OrdinalIgnoreCase);
+        if (lower?.Feature is { Count: > 0 })
+        {
+            foreach (var f in lower.Feature)
+            {
+                var id = (f.Id ?? "").Trim();
+                if (id.Length == 0)
+                    continue;
+                merged[id] = CloneFeature(f);
+            }
+        }
+
+        if (higher?.Feature is { Count: > 0 })
+        {
+            foreach (var f in higher.Feature)
+            {
+                var id = (f.Id ?? "").Trim();
+                if (id.Length == 0)
+                    continue;
+                merged[id] = CloneFeature(f); // higher overrides by id
+            }
+        }
+
+        return merged.Count == 0 ? null : new RepositoryFeaturesToml { Feature = merged.Values.ToList() };
+    }
+
+    private static RepositoryFeatureToml CloneFeature(RepositoryFeatureToml f) => new()
+    {
+        Id = f.Id?.Trim(),
+        Title = f.Title?.Trim(),
+        Paths = f.Paths?.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim()).ToList() ?? [],
+        Docs = f.Docs?.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim()).ToList() ?? [],
+        Tags = f.Tags?.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim()).ToList() ?? [],
+    };
+
+    private static RepositoryDocsTemplatesToml? MergeDocsTemplates(
+        RepositoryDocsTemplatesToml? lower,
+        RepositoryDocsTemplatesToml? higher)
+    {
+        if (lower is null && higher is null)
+            return null;
+
+        // Higher wins for catalog path; inline templates are merged by id (higher overrides).
+        var merged = new Dictionary<string, DocsTemplateToml>(StringComparer.OrdinalIgnoreCase);
+        if (lower?.Template is { Count: > 0 })
+        {
+            foreach (var t in lower.Template)
+            {
+                var id = (t.Id ?? "").Trim();
+                if (id.Length == 0)
+                    continue;
+                merged[id] = CloneTemplate(t);
+            }
+        }
+        if (higher?.Template is { Count: > 0 })
+        {
+            foreach (var t in higher.Template)
+            {
+                var id = (t.Id ?? "").Trim();
+                if (id.Length == 0)
+                    continue;
+                merged[id] = CloneTemplate(t);
+            }
+        }
+
+        return new RepositoryDocsTemplatesToml
+        {
+            CatalogPath = higher?.CatalogPath ?? lower?.CatalogPath,
+            Template = merged.Values.ToList()
+        };
+    }
+
+    private static DocsTemplateToml CloneTemplate(DocsTemplateToml t) => new()
+    {
+        Id = t.Id?.Trim(),
+        Title = t.Title?.Trim(),
+        Kind = t.Kind?.Trim(),
+        Source = t.Source?.Trim(),
+        Path = t.Path?.Trim(),
+        KnowledgeRootId = t.KnowledgeRootId?.Trim(),
+        FilePath = t.FilePath?.Trim(),
+    };
+
+    private static Dictionary<string, object>? MergeObjectDictionary(
+        Dictionary<string, object>? lower,
+        Dictionary<string, object>? higher)
+    {
+        if (lower is not { Count: > 0 } && higher is not { Count: > 0 })
+            return null;
+
+        var merged = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+        if (lower is { Count: > 0 })
+        {
+            foreach (var kv in lower)
+            {
+                if (string.IsNullOrWhiteSpace(kv.Key))
+                    continue;
+                merged[kv.Key.Trim()] = kv.Value;
+            }
+        }
+
+        if (higher is { Count: > 0 })
+        {
+            foreach (var kv in higher)
+            {
+                if (string.IsNullOrWhiteSpace(kv.Key))
+                    continue;
+                merged[kv.Key.Trim()] = kv.Value;
+            }
+        }
+
+        return merged.Count > 0 ? merged : null;
     }
 
     private static UiWorkspaceChromeToml? MergeWorkspaceChrome(

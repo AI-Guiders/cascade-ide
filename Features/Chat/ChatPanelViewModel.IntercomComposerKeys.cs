@@ -6,8 +6,8 @@ namespace CascadeIDE.Features.Chat;
 
 public partial class ChatPanelViewModel
 {
-    /// <summary>Обработка клавиш composer/CCL в VM (P2); view синхронизирует surface по флагам результата.</summary>
-    public IntercomComposerKeyHandleResult TryHandleIntercomComposerKey(
+    /// <summary>Обработка клавиш slash-composer / CCL; view синхронизирует surface по флагам результата.</summary>
+    public IntercomComposerKeyHandleResult TryHandleSlashComposerKey(
         IntercomComposerKeyKind kind,
         KeyEventArgs? keyEvent = null)
     {
@@ -126,4 +126,10 @@ public partial class ChatPanelViewModel
         ChatComposerCaretIndex = newCaret;
         return true;
     }
+
+    [Obsolete("Use TryHandleSlashComposerKey.")]
+    public IntercomComposerKeyHandleResult TryHandleIntercomComposerKey(
+        IntercomComposerKeyKind kind,
+        KeyEventArgs? keyEvent = null) =>
+        TryHandleSlashComposerKey(kind, keyEvent);
 }

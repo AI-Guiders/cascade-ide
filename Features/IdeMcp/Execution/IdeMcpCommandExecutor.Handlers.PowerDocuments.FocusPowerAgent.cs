@@ -211,8 +211,7 @@ internal sealed partial class IdeMcpCommandExecutor
         add(Services.IdeCommands.CockpitOpenCommandLine, async (args, _) =>
         {
             var initial = McpCommandJsonArgs.String(args, "initial_text");
-            await UiScheduler.Default.InvokeAsync(() =>
-                _vm.ChatPanel.OpenCockpitCommandLine(string.IsNullOrWhiteSpace(initial) ? "/" : initial.Trim()));
+            await _vm.OpenCockpitCommandLineOnActiveForwardHostAsync(initial ?? "/");
             return "CockpitCommandLine=open";
         });
         add(Services.IdeCommands.TogglePrimaryWorkSurface, async (_, _) =>

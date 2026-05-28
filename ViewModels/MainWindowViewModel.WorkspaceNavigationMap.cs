@@ -1,5 +1,7 @@
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
+using System.Text.Json;
 using Avalonia.Controls;
 using CascadeIDE.Cockpit.Cds;
 using CascadeIDE.Cockpit.Channels.TraceFlow;
@@ -9,7 +11,10 @@ using CascadeIDE.Features.WorkspaceNavigation.Application;
 using CascadeIDE.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CascadeIDE.Features.Workspace.DataAcquisition;
+using CascadeIDE.Features.WorkspaceNavigation.Application;
 using CascadeIDE.Services;
+using CascadeIDE.Features.UiChrome;
 
 namespace CascadeIDE.ViewModels;
 
@@ -187,6 +192,131 @@ public partial class MainWindowViewModel
         }
     }
 
+    [RelayCommand]
+    private void OpenWorkspaceAdrCorrespondence()
+    {
+        var docPath = WorkspaceAdrCorrespondenceFirstDocPath;
+        if (string.IsNullOrWhiteSpace(docPath))
+            return;
+
+        var wsRoot = GetWorkspacePath();
+        if (string.IsNullOrWhiteSpace(wsRoot))
+            return;
+
+        if (!WorkspaceMarkdownPreviewOpener.TryOpenRepoDocument(
+                wsRoot,
+                docPath,
+                (title, content, source) => MarkdownPreviewTool.SetContent(title, content, source),
+                out _))
+            return;
+
+        ApplyMfdRegionExpanded(true);
+        TryNavigateToMfdShellPage(MfdShellPage.MarkdownPreview);
+    }
+
+    [RelayCommand]
+    private async Task OpenWorkspaceFeatureDocsAsync()
+    {
+        var docs = WorkspaceFeatureDocPaths ?? [];
+        if (docs.Length == 0)
+            return;
+
+        var pick = docs.Length == 1
+            ? docs[0]
+            : RequestPickFeatureDocAsync is not null
+                ? await RequestPickFeatureDocAsync("Документация фичи", docs).ConfigureAwait(true)
+                : docs[0];
+
+        if (string.IsNullOrWhiteSpace(pick))
+            return;
+
+        var wsRoot = GetWorkspacePath();
+        if (string.IsNullOrWhiteSpace(wsRoot))
+            return;
+
+        if (!WorkspaceMarkdownPreviewOpener.TryOpenRepoDocument(
+                wsRoot,
+                pick,
+                (title, content, source) => MarkdownPreviewTool.SetContent(title, content, source),
+                out _))
+            return;
+
+        ApplyMfdRegionExpanded(true);
+        TryNavigateToMfdShellPage(MfdShellPage.MarkdownPreview);
+    }
+
+    [RelayCommand]
+    private async Task OpenDocsTemplateAsync(object? parameter)
+    {
+        var wsRoot = GetWorkspacePath();
+        if (string.IsNullOrWhiteSpace(wsRoot))
+            return;
+
+        var workspaceToml = RepositoryWorkspaceTomlLoader.TryLoad(wsRoot);
+        var templates = DocsTemplatesCatalogResolver.ResolveTemplatesFromWorkspaceToml(workspaceToml, wsRoot);
+        if (templates.Count == 0)
+            return;
+
+        var requested = parameter as string;
+        var selectedId = !string.IsNullOrWhiteSpace(requested) ? requested!.Trim() : null;
+        if (string.IsNullOrWhiteSpace(selectedId))
+        {
+            var labels = templates.Select(t => $"{t.Id} — {t.Title}").ToArray();
+            var pick = RequestPickFeatureDocAsync is not null
+                ? await RequestPickFeatureDocAsync("Шаблон документации", labels).ConfigureAwait(true)
+                : labels[0];
+
+            if (string.IsNullOrWhiteSpace(pick))
+                return;
+
+            var dash = pick.IndexOf("—", StringComparison.Ordinal);
+            selectedId = (dash > 0 ? pick[..dash] : pick).Trim();
+        }
+
+        if (string.IsNullOrWhiteSpace(selectedId))
+            return;
+
+        var entry = templates.FirstOrDefault(t => string.Equals(t.Id, selectedId, StringComparison.OrdinalIgnoreCase));
+        if (entry is null)
+            return;
+
+        if (entry.Source == "knowledge" && !string.IsNullOrWhiteSpace(entry.KnowledgeFilePath))
+        {
+            try
+            {
+                var args = new Dictionary<string, System.Text.Json.JsonElement>
+                {
+                    ["file_path"] = System.Text.Json.JsonDocument.Parse($"\"{entry.KnowledgeFilePath}\"").RootElement.Clone(),
+                };
+                if (!string.IsNullOrWhiteSpace(entry.KnowledgeRootId))
+                    args["knowledge_root_id"] = System.Text.Json.JsonDocument.Parse($"\"{entry.KnowledgeRootId}\"").RootElement.Clone();
+
+                var content = await IdeMcp.ExecuteCommandAsync(Services.IdeCommands.ReadKnowledgeFile, args, CancellationToken.None)
+                    .ConfigureAwait(true);
+
+                MarkdownPreviewTool.SetContent($"KB template: {entry.Title}", content ?? "", entry.KnowledgeFilePath);
+                ApplyMfdRegionExpanded(true);
+                TryNavigateToMfdShellPage(MfdShellPage.MarkdownPreview);
+            }
+            catch
+            {
+                // ignore
+            }
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(entry.RepoPath)
+            && WorkspaceMarkdownPreviewOpener.TryOpenRepoDocument(
+                wsRoot,
+                entry.RepoPath,
+                (title, content, source) => MarkdownPreviewTool.SetContent(entry.Title, content, source),
+                out _))
+        {
+            ApplyMfdRegionExpanded(true);
+            TryNavigateToMfdShellPage(MfdShellPage.MarkdownPreview);
+        }
+    }
+
     private void BeginControlFlowGraphNodeNavigation(string fullPath, int lineOneBased)
     {
         _controlFlowGraphNavigatePath = fullPath;
@@ -278,7 +408,7 @@ public partial class MainWindowViewModel
                 var end = payload.LineEnd is > 0 ? payload.LineEnd.Value : start;
                 var revealPath = path;
                 Avalonia.Threading.Dispatcher.UIThread.Post(
-                    () => _revealEditorRangeAction?.Invoke(revealPath, start, end, null),
+                    () => ((IWorkspaceNavigationMapHost)this).RevealEditorRange(revealPath, start, end, null),
                     Avalonia.Threading.DispatcherPriority.Loaded);
                 if (isCf)
                     ScheduleWorkspaceNavigationMapRefresh();
@@ -311,6 +441,23 @@ public partial class MainWindowViewModel
     /// <summary>Краткая строка ориентации HCI (слой B) рядом с картой; не влияет на Roslyn-граф (ADR 0106).</summary>
     [ObservableProperty]
     private string _workspaceNavigationMapHciOrientationLine = "";
+
+    /// <summary>Doc correspondence (ADR 0061): какие ADR относятся к текущему файлу по <c>[workspace.adr.map]</c>.</summary>
+    [ObservableProperty]
+    private string _workspaceAdrCorrespondenceLine = "";
+
+    [ObservableProperty]
+    private string? _workspaceAdrCorrespondenceFirstDocPath;
+
+    [ObservableProperty]
+    private string _workspaceFeatureLine = "";
+
+    /// <summary>Мягкий сигнал “нет доков” (не ошибка): пусто, если всё ок.</summary>
+    [ObservableProperty]
+    private string _workspaceDocsCoverageLine = "";
+
+    [ObservableProperty]
+    private string[] _workspaceFeatureDocPaths = [];
 
     /// <summary>Команда палитры / MCP: list → graph → both.</summary>
     public void CycleCodeNavigationMapPresentation() =>

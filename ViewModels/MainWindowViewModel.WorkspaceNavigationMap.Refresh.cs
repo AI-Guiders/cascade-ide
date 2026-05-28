@@ -2,11 +2,18 @@ using CascadeIDE.Cockpit.Cds;
 using CascadeIDE.Cockpit.Channels.TraceFlow;
 using CascadeIDE.Cockpit.Composition.TraceFlow;
 using CascadeIDE.Cockpit.Graph;
+using AvaloniaEdit;
+using CascadeIDE.Features.Documents;
+using CascadeIDE.Features.Editor;
+using CascadeIDE.Features.Markdown;
+using CascadeIDE.Features.Workspace;
+using CascadeIDE.Features.Workspace.DataAcquisition;
 using CascadeIDE.Features.WorkspaceNavigation.Application;
 using CascadeIDE.Models;
 using CascadeIDE.Features.HybridIndex.Application;
 using CascadeIDE.Services;
-using System.IO;
+using CascadeIDE.Features.UiChrome;
+using System.Linq;
 
 namespace CascadeIDE.ViewModels;
 
@@ -95,7 +102,7 @@ public partial class MainWindowViewModel
             controlFlowGrain = CodeNavigationMapControlFlowGrainKind.Normalize(sm.ControlFlowGrain);
             if (level == CodeNavigationMapLevelKind.ControlFlow)
             {
-                cockpitSurfaceCapturedOnUi = CockpitSurfaceSnapshotBuilder.Build(this);
+                cockpitSurfaceCapturedOnUi = CockpitSurfaceSnapshotBuilder.Build(((IWorkspaceNavigationMapHost)this).Shell);
                 cfGraphNavigatePath = _controlFlowGraphNavigatePath;
                 cfGraphNavigateLine = _controlFlowGraphNavigateLine;
                 cfGraphNavigateColumn = _controlFlowGraphNavigateColumn;
@@ -113,8 +120,8 @@ public partial class MainWindowViewModel
         {
             try
             {
-                if (File.Exists(navigationPath))
-                    editorText = File.ReadAllText(navigationPath);
+                if (WorkspaceTextFileReader.TryReadAllText(navigationPath, out var navText))
+                    editorText = navText;
             }
             catch
             {
@@ -211,16 +218,16 @@ public partial class MainWindowViewModel
             new WorkspaceNavigationMapRefreshComposer.TraceSignals(ImpactedTestsBadge, LastTestSummary),
             cockpitSurfaceCapturedOnUi);
 
+        var workspaceRoot = GetWorkspacePath();
         SemanticMapHciOrientationSnapshot? hciSnap = null;
         if (!ct.IsCancellationRequested)
         {
             try
             {
-                var wsRoot = GetWorkspacePath();
                 hciSnap = await SemanticMapHciOrientationAcquirer.TryAcquireAsync(
                         _hybridIndex,
                         _settings.HybridIndex,
-                        wsRoot,
+                        workspaceRoot,
                         solutionPath,
                         navigationPath,
                         ct)
@@ -237,6 +244,8 @@ public partial class MainWindowViewModel
         }
 
         var hciLine = SemanticMapHciOrientationFormatting.ToStatusLine(hciSnap);
+        var (featureLine, featureDocPaths, docsCoverageLine, adrLine, adrFirstDocPath) =
+            TryResolveWorkspaceCorrespondence(workspaceRoot, navigationPath);
 
         await UiScheduler.Default.InvokeAsync(() =>
         {
@@ -251,6 +260,11 @@ public partial class MainWindowViewModel
                 CodeNavigationMapGraphHeight = dry.GraphHeight;
                 WorkspaceNavigationMapCfAnchorFullPath = dry.CfAnchorFullPath;
                 WorkspaceNavigationMapHciOrientationLine = hciLine;
+                WorkspaceFeatureLine = featureLine;
+                WorkspaceFeatureDocPaths = featureDocPaths;
+                WorkspaceAdrCorrespondenceLine = adrLine;
+                WorkspaceAdrCorrespondenceFirstDocPath = adrFirstDocPath;
+                WorkspaceDocsCoverageLine = docsCoverageLine;
                 WorkspaceNavigationMapItems.Clear();
                 foreach (var parsed in dry.ListRows)
                 {
@@ -269,6 +283,13 @@ public partial class MainWindowViewModel
                     ClearControlFlowGraphNodeNavigationAnchor();
             }
         });
+    }
+
+    private static (string FeatureLine, string[] FeatureDocPaths, string DocsCoverageLine, string AdrLine, string? AdrFirstDocPath)
+        TryResolveWorkspaceCorrespondence(string? workspaceRoot, string? navigationPath)
+    {
+        var r = WorkspaceCorrespondenceResolver.Resolve(workspaceRoot, navigationPath);
+        return (r.FeatureLine, r.FeatureDocPaths, r.DocsCoverageLine, r.AdrLine, r.AdrFirstDocPath);
     }
 
     /// <summary>Каретка из видимого <see cref="AvaloniaEdit.TextEditor"/> (не только throttled <see cref="_editorCaretOffset"/>).</summary>
@@ -296,7 +317,7 @@ public partial class MainWindowViewModel
         if (string.IsNullOrWhiteSpace(currentPath))
             yield break;
 
-        var direct = EditorActiveDockResolver.TryGetEditor(this, currentPath);
+        var direct = EditorActiveDockResolver.TryGetEditor(((IWorkspaceNavigationMapHost)this).Shell, currentPath);
         if (direct is not null)
         {
             yield return direct;
@@ -310,9 +331,52 @@ public partial class MainWindowViewModel
             if (!EditorTextCoordinateUtilities.PathsReferToSameFile(doc.FilePath, currentPath))
                 continue;
 
-            var editor = EditorActiveDockResolver.TryGetEditor(this, doc.FilePath);
+            var editor = EditorActiveDockResolver.TryGetEditor(((IWorkspaceNavigationMapHost)this).Shell, doc.FilePath);
             if (editor is not null)
                 yield return editor;
         }
     }
+
+    MainWindowViewModel IWorkspaceNavigationMapHost.Shell => this;
+
+    SolutionWorkspaceViewModel IWorkspaceNavigationMapHost.Workspace => Workspace;
+
+    DocumentsWorkspaceViewModel IWorkspaceNavigationMapHost.Documents => Documents;
+
+    EditorWorkspaceViewModel IWorkspaceNavigationMapHost.Editor => Editor;
+
+    MarkdownPreviewToolViewModel IWorkspaceNavigationMapHost.MarkdownPreviewTool => MarkdownPreviewTool;
+
+    CascadeIdeSettings IWorkspaceNavigationMapHost.Settings => _settings;
+
+    IIdeMcpActions IWorkspaceNavigationMapHost.IdeMcp => IdeMcp;
+
+    string? IWorkspaceNavigationMapHost.GetWorkspacePath() => GetWorkspacePath();
+
+    string? IWorkspaceNavigationMapHost.CurrentFilePath => CurrentFilePath;
+
+    string IWorkspaceNavigationMapHost.EditorText => EditorText;
+
+    int? IWorkspaceNavigationMapHost.EditorSelectionStart => EditorSelectionStart;
+
+    int IWorkspaceNavigationMapHost.ImpactedTestsBadge => ImpactedTestsBadge;
+
+    string? IWorkspaceNavigationMapHost.LastTestSummary => LastTestSummary;
+
+    Func<string, IReadOnlyList<string>, Task<string?>>? IWorkspaceNavigationMapHost.RequestPickFeatureDocAsync =>
+        RequestPickFeatureDocAsync;
+
+    void IWorkspaceNavigationMapHost.ApplyMfdRegionExpanded(bool expanded) => ApplyMfdRegionExpanded(expanded);
+
+    void IWorkspaceNavigationMapHost.TryNavigateToMfdShellPage(MfdShellPage page) => TryNavigateToMfdShellPage(page);
+
+    void IWorkspaceNavigationMapHost.SaveSettingsIfChanged() => SaveSettingsIfChanged();
+
+    void IWorkspaceNavigationMapHost.ScheduleEditorHudBannerRefresh() => ScheduleEditorHudBannerRefresh();
+
+    IEnumerable<TextEditor> IWorkspaceNavigationMapHost.EnumerateEditorsForPath(string? currentPath) =>
+        EnumerateEditorsForPath(currentPath);
+
+    void IWorkspaceNavigationMapHost.RevealEditorRange(string? path, int startLine, int endLine, int? column) =>
+        _revealEditorRangeAction?.Invoke(path, startLine, endLine, column);
 }

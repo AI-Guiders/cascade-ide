@@ -72,6 +72,7 @@ internal static class IdeCommandsArgsGenerated
         ["move_document_to_group_2"] = new IdeCommandsArgs.Arg[] { new("file_path", "string", true, false, null) },
         ["move_document_to_group_3"] = new IdeCommandsArgs.Arg[] { new("file_path", "string", true, false, null) },
         ["open_chat_clarification_batch"] = new IdeCommandsArgs.Arg[] { new("batch_json", "string", true, false, null) },
+        ["open_docs_template"] = new IdeCommandsArgs.Arg[] { new("path", "string", false, false, null) },
         ["open_file"] = new IdeCommandsArgs.Arg[] { new("path", "string", true, false, null) },
         ["read_hot_context"] = new IdeCommandsArgs.Arg[] { new("active_scope", "string", false, false, null) },
         ["read_knowledge_file"] = new IdeCommandsArgs.Arg[] { new("file_path", "string", true, false, null), new("knowledge_path", "string", false, false, null), new("knowledge_root_id", "string", false, false, null), new("offset", "integer", false, false, null), new("limit", "integer", false, false, null) },

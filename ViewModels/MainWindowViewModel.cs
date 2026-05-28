@@ -24,6 +24,7 @@ using CascadeIDE.Features.Shell.Application;
 using CascadeIDE.Models;
 using CascadeIDE.Features.Os.DataAcquisition;
 using CascadeIDE.Features.IdeMcp.Execution;
+using CascadeIDE.Features.WorkspaceNavigation.Application;
 using CascadeIDE.Features.Workspace;
 using CascadeIDE.Features.Workspace.Application;
 
@@ -35,7 +36,8 @@ namespace CascadeIDE.ViewModels;
 /// </summary>
 [DataBusPublisher("ide-health & related domain signals")]
 public partial class MainWindowViewModel : ViewModelBase, IAutonomousAgentSessionHost,
-    IMainWindowHostSurfaceInput, SolutionLoadSessionApplyProjection.IHost
+    IMainWindowHostSurfaceInput, SolutionLoadSessionApplyProjection.IHost,
+    IMainWindowMcpHostContext, IWorkspaceNavigationMapHost
 {
     public const string InstallNewSentinel = "— Установить модель… —";
 
@@ -321,7 +323,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAutonomousAgentSessio
         }
 
         var ws = WorkspaceDirectoryFromSolutionPath.Resolve(value);
-        UiModeCatalog.ApplyRepositoryWorkspaceOverlay(ws);
+        UiModeCatalog.ApplyRepositoryWorkspaceTomlOverlay(ws);
         NotifyDockedInstrumentSlotBindings();
         OnPropertyChanged(nameof(ChatPanelColumnPixelWidth));
         OnPropertyChanged(nameof(IsChatPanelColumnVisible));

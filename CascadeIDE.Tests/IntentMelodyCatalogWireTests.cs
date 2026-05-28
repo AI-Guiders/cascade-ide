@@ -9,18 +9,19 @@ public sealed class IntentMelodyCatalogWireTests
     {
         const string toml =
             """
+            intent_catalog_schema_version = 2
             melody_catalog_schema_version = 1
             [[tail_wire_class]]
             id = "ok"
             kind = "delimited_slots"
             between_slots_any_of = [":"]
-            [[melody_root]]
-            slug = "x"
+            [[command]]
             command_id = "select"
-            shape = "parametric"
-            tail_signature = "<start:int>:<end:int>"
-            wire_class = "missing"
-            chord_commit = "enter"
+            melody_slug = "x"
+            melody_shape = "parametric"
+            melody_tail_signature = "<start:int>:<end:int>"
+            melody_wire_class = "missing"
+            melody_chord_commit = "enter"
             """;
 
         var ex = Assert.Throws<InvalidOperationException>(() =>
@@ -34,18 +35,19 @@ public sealed class IntentMelodyCatalogWireTests
     {
         const string toml =
             """
+            intent_catalog_schema_version = 2
             melody_catalog_schema_version = 1
             [[tail_wire_class]]
             id = "del"
             kind = "delimited_slots"
             between_slots_any_of = [":"]
-            [[melody_root]]
-            slug = "x"
+            [[command]]
             command_id = "cmd"
-            shape = "parametric"
-            tail_signature = "<url:url>"
-            wire_class = "del"
-            chord_commit = "enter"
+            melody_slug = "x"
+            melody_shape = "parametric"
+            melody_tail_signature = "<url:url>"
+            melody_wire_class = "del"
+            melody_chord_commit = "enter"
             """;
 
         var ex = Assert.Throws<InvalidOperationException>(() =>
@@ -59,17 +61,18 @@ public sealed class IntentMelodyCatalogWireTests
     {
         const string toml =
             """
+            intent_catalog_schema_version = 2
             melody_catalog_schema_version = 1
             [[tail_wire_class]]
             id = "sr"
             kind = "single_remainder"
-            [[melody_root]]
-            slug = "x"
+            [[command]]
             command_id = "cmd"
-            shape = "parametric"
-            tail_signature = "<a:int>:<b:int>"
-            wire_class = "sr"
-            chord_commit = "enter"
+            melody_slug = "x"
+            melody_shape = "parametric"
+            melody_tail_signature = "<a:int>:<b:int>"
+            melody_wire_class = "sr"
+            melody_chord_commit = "enter"
             """;
 
         var ex = Assert.Throws<InvalidOperationException>(() =>

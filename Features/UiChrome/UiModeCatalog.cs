@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using CascadeIDE.Cockpit.Composition.HostSurface;
+using CascadeIDE.Features.UiChrome.Application;
 
 namespace CascadeIDE.Features.UiChrome;
 
@@ -32,7 +33,7 @@ public static class UiModeCatalog
     private static readonly Dictionary<string, string?> WindowTitleOverrideByMode = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>Снимок <c>UiModes/workspace.toml</c> из бандла для merge с репозиторием (ADR 0021 §2.1).</summary>
-    private static UiWorkspaceToml? _bundleWorkspaceToml;
+    private static Features.Workspace.RepositoryWorkspaceToml? _bundleWorkspaceToml;
 
     public static bool IsInitialized
     {
@@ -167,37 +168,14 @@ public static class UiModeCatalog
     /// Накладывает <c>.cascade/workspace.toml</c> из корня открытого решения на метрики и <c>routing</c> бандла.
     /// Вызывать с UI-потока при смене <see cref="SolutionWorkspaceViewModel.SolutionPath"/>; при пустом пути — только бандл.
     /// </summary>
-    public static void ApplyRepositoryWorkspaceOverlay(string? solutionDirectory)
+    public static void ApplyRepositoryWorkspaceTomlOverlay(string? solutionDirectory)
     {
         lock (Gate)
         {
             if (!_initialized)
                 return;
 
-            UiWorkspaceToml? repo = null;
-            if (!string.IsNullOrWhiteSpace(solutionDirectory))
-            {
-                var trimmed = solutionDirectory.Trim();
-                var path = Path.Combine(trimmed, ".cascade", "workspace.toml");
-                if (File.Exists(path))
-                {
-                    try
-                    {
-                        repo = CascadeTomlSerializer.Deserialize<UiWorkspaceToml>(File.ReadAllText(path));
-                    }
-                    catch (Exception ex)
-                    {
-                        global::System.Diagnostics.Debug.WriteLine($"UiModeCatalog: repo workspace.toml ignored — {ex.Message}");
-                    }
-                }
-            }
-
-            var merged = UiWorkspaceTomlMerger.Merge(_bundleWorkspaceToml, repo);
-            UiWorkspaceLayoutRuntimeMetrics.ApplyWorkspaceToml(merged);
-            AttentionZonePanelRuntime.ApplyWorkspaceToml(merged);
-            MarkdownPreviewPlacementRuntime.ApplyWorkspaceToml(merged);
-            LocLimitsRuntime.ApplyWorkspaceToml(merged);
-            InstrumentPlacementRuntime.ApplyWorkspaceInstrumentRouting(merged?.Routing?.Instruments);
+            RepositoryWorkspaceTomlOverlayApplicator.Apply(_bundleWorkspaceToml, solutionDirectory);
         }
     }
 
@@ -286,7 +264,7 @@ public static class UiModeCatalog
         {
             try
             {
-                var w = CascadeTomlSerializer.Deserialize<UiWorkspaceToml>(workspaceTomlText);
+                var w = CascadeTomlSerializer.Deserialize<Features.Workspace.RepositoryWorkspaceToml>(workspaceTomlText);
                 _bundleWorkspaceToml = w;
                 UiWorkspaceLayoutRuntimeMetrics.ApplyWorkspaceToml(w);
                 AttentionZonePanelRuntime.ApplyWorkspaceToml(w);

@@ -143,6 +143,36 @@ condition_branch_label_preset = "plus_minus"
 # positive = "Y"
 # negative = "N"
 
+# ------------------------------------------------------------
+# workspace.adr.map — doc correspondence (ADR 0061)
+# ------------------------------------------------------------
+#
+# Это пример секции для .cascade/workspace.toml (в корне репозитория), не для settings.toml.
+#
+# Секция задаёт декларативную карту «префикс пути (от корня репо) → ADR-док(и)».
+# Алгоритм: longest prefix wins, затем fallback "*".
+#
+# [workspace.adr.map]
+# "Features/UiChrome/" = [
+#   "docs/adr/0010-ui-mode-catalog.md",
+#   "docs/adr/0021-pfd-mfd-cockpit-attention-model.md",
+# ]
+# "*" = "docs/adr/0006-presentation-layers-and-feature-slices.md"
+#
+# [workspace.adr]
+# # none | linked — auto include ADRs linked from выбранного ADR markdown (1 hop)
+# auto_include = "linked"
+# # max linked ADRs to add (per click/preview)
+# max_related = 8
+#
+# [workspace.features]
+# [[workspace.features.feature]]
+# id = "intercom.chat"
+# title = "Intercom Chat"
+# paths = ["Features/Chat/", "Intercom/"]
+# docs = ["docs/adr/0137-intercom-message-code-correspondence.md", "docs/adr/0144-intercom-oauth-connect.md"]
+# tags = ["intercom", "chat"]
+
 [languages.csharp]
 mode = "OmniSharp"
 

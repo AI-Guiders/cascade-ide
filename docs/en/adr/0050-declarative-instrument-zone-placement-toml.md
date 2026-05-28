@@ -109,7 +109,7 @@ Low-level array `[[instrument_placement_rules]]` with fields `surface_id` / `slo
 ## Implementation status
 
 **Implemented**:
-- bundle/repo: `UiModes/workspace.toml` + `.cascade/workspace.toml` via `UiWorkspaceTomlMerger` and `UiModeCatalog.ApplyRepositoryWorkspaceOverlay`;
+- bundle/repo: `UiModes/workspace.toml` + `.cascade/workspace.toml` via `UiWorkspaceTomlMerger` and `UiModeCatalog.ApplyRepositoryWorkspaceTomlOverlay`;
 - user: `[display.instrument_routing]` and `prefer_repo_instruments_placement` in `%LocalAppData%\CascadeIDE\settings.toml`;
 - single runtime: `InstrumentRoutingAliasResolver`, `InstrumentPlacementRuntime`, `MainWindowHostSurfaceCompositor`.
 

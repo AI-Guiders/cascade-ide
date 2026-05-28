@@ -73,7 +73,7 @@ public partial class ChatPanelView : UserControl
 
     private void OnIntercomCommandLineDraftChanged(object? sender, EventArgs e)
     {
-        if (DataContext is not ChatPanelViewModel vm || !vm.IsCockpitCommandLineOpen)
+        if (DataContext is not ChatPanelViewModel vm || !vm.ShowIntercomCockpitCommandLine)
             return;
 
         var text = IntercomSkiaSurface.CommandLineText ?? "/";
@@ -184,7 +184,7 @@ public partial class ChatPanelView : UserControl
             if (DataContext is not ChatPanelViewModel vm)
                 return;
 
-            var handle = vm.TryHandleIntercomComposerKey(e.Kind, e.KeyEvent);
+            var handle = vm.TryHandleSlashComposerKey(e.Kind, e.KeyEvent);
             if (!handle.Handled)
             {
                 // Перенос строки только по явному chord из настроек (разделение с отправкой, как в мессенджерах).
@@ -207,8 +207,9 @@ public partial class ChatPanelView : UserControl
 
             if (handle.SyncCommandLineFromViewModel)
             {
-                syncCommandLineFromViewModel(surface, vm);
-                if (!vm.IsCockpitCommandLineOpen)
+                if (vm.ShowIntercomCockpitCommandLine)
+                    syncCommandLineFromViewModel(surface, vm);
+                else if (!vm.IsCockpitCommandLineOpen)
                     surface.CommandLineText = "/";
             }
 

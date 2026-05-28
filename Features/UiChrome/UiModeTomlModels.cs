@@ -33,28 +33,6 @@ public sealed class UiWorkspaceChromeToml
     public string? MarkdownPreviewPlacement { get; set; }
 }
 
-/// <summary>
-/// Корень <c>UiModes/workspace.toml</c> и <c>.cascade/workspace.toml</c>.
-/// TOML: <c>[chrome]</c>, <c>[loc_limits]</c>, <c>[routing.attention]</c>, <c>[routing.instruments]</c>,
-/// <c>[[code_navigation.presets]]</c>, <c>[[code_navigation_map.condition_branch.presets]]</c>.
-/// </summary>
-public sealed class UiWorkspaceToml
-{
-    /// <summary>Метрики хрома и превью Markdown.</summary>
-    public UiWorkspaceChromeToml? Chrome { get; set; }
-
-    /// <summary>Пороги Low/Medium/High для бейджа LOC в task cockpit (непустые строки).</summary>
-    public UiWorkspaceLocLimitsToml? LocLimits { get; set; }
-
-    public UiWorkspaceRoutingToml? Routing { get; set; }
-
-    /// <summary>Пресеты навигации по коду (ADR 0039, CNC).</summary>
-    public CodeNavigationSettings? CodeNavigation { get; set; }
-
-    /// <summary>Карта намерений / control-flow (ADR 0053): пресеты подписей ветвей IF в <c>.cascade/workspace.toml</c>.</summary>
-    public CodeNavigationMapSettings? CodeNavigationMap { get; set; }
-}
-
 /// <summary>TOML: <c>[loc_limits]</c> — ось размера файла (не EICAS).</summary>
 public sealed class UiWorkspaceLocLimitsToml
 {

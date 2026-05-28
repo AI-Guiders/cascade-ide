@@ -225,6 +225,9 @@
 |-----------:|----------|
 | `build_solution_ui` | Кнопка «Собрать» в тулбаре: dotnet build в панель вывода (не structured build). returns: text. |
 | `cockpit.open_command_line` | Открыть Cockpit Command Line активного Forward host (Intercom: полоса над composer). args: initial_text?:string; returns: text; example: {"initial_text":"/intercom message anchors list"}. |
+| `open_docs_template` | Открыть шаблон документации из `docs/templates` в Markdown Preview. args: path?:string; returns: text; example: {"path":"docs/templates/feature.md"}. |
+| `open_workspace_adr_correspondence` | Открыть correspondence ADR для текущего файла (как клик по строке ADR на PFD). returns: text. |
+| `open_workspace_feature_docs` | Открыть документацию фичи для текущего файла (как клик по строке Feature на PFD); при множестве docs — pick. returns: text. |
 | `set_dual_editor_group` | Две группы редакторов (2-up). returns: text. |
 | `set_single_editor_group` | Одна группа редакторов (1-up). returns: text. |
 | `set_triple_editor_group` | Три группы редакторов (3-up). returns: text. |

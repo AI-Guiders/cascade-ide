@@ -9,6 +9,14 @@ namespace CascadeIDE.Features.Chat;
 
 public partial class ChatPanelViewModel
 {
+    /// <summary>CCL на Skia Intercom (не оверлей редактора).</summary>
+    public bool ShowIntercomCockpitCommandLine =>
+        Cockpit.Application.CockpitCommandLineHostPolicy.ShouldShowIntercomSkia(
+            IsCockpitCommandLineOpen,
+            CommandLineSession.ActiveHost);
+
+    internal void NotifyCockpitCommandLinePresentationChanged() =>
+        OnPropertyChanged(nameof(ShowIntercomCockpitCommandLine));
     private readonly SlashCommandPreviewService _slashCommandPreviewService;
     private readonly ICockpitCommandLineSession _cockpitCommandLineSession;
 
@@ -42,9 +50,9 @@ public partial class ChatPanelViewModel
     [ObservableProperty]
     private int _cockpitCommandLineCaretIndex;
 
-    /// <summary>ToolTip на Intercom surface: CCL приоритетнее composer.</summary>
+    /// <summary>ToolTip на Intercom surface: CCL только при host=Intercom.</summary>
     public string? IntercomSlashPreviewToolTip =>
-        IsCockpitCommandLineOpen ? CommandLineSlashPreviewToolTip : ComposerSlashPreviewToolTip;
+        ShowIntercomCockpitCommandLine ? CommandLineSlashPreviewToolTip : ComposerSlashPreviewToolTip;
 
     public ICockpitCommandLineSession CommandLineSession => _cockpitCommandLineSession;
 
@@ -61,6 +69,9 @@ public partial class ChatPanelViewModel
         UpdateSlashPreview(TciInputSurface.Composer);
         RefreshCockpitCommandLineAutocomplete();
     }
+
+    partial void OnIsCockpitCommandLineOpenChanged(bool value) =>
+        NotifyCockpitCommandLinePresentationChanged();
 
     public void CloseCockpitCommandLine()
     {

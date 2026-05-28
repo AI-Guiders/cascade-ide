@@ -112,6 +112,9 @@ public partial class MainWindowViewModel
             case nameof(ShellChromeViewModel.IsBuilding):
                 BuildSolutionCommand.NotifyCanExecuteChanged();
                 break;
+            case nameof(ShellChromeViewModel.CommandPaletteHost):
+                CockpitCommandLineOverlay?.NotifyShellPresentationChanged();
+                break;
         }
     }
 

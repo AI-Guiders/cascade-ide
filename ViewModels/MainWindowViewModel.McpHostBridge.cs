@@ -1,5 +1,6 @@
 using CascadeIDE.Features.HybridIndex.Application;
 using CascadeIDE.Features.Git;
+using CascadeIDE.Features.IdeMcp.Execution;
 using CascadeIDE.Models;
 using CascadeIDE.Services;
 
@@ -78,4 +79,6 @@ public partial class MainWindowViewModel
 
     /// <summary>Прокси для UI редактора (клик по полю брейкпоинта).</summary>
     public void ToggleBreakpointInFile(int line) => _ideMcpHost.ToggleBreakpointInFile(line);
+
+    MainWindowViewModel IMainWindowMcpHostContext.Vm => this;
 }

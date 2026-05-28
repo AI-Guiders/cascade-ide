@@ -12,7 +12,7 @@ public static class MarkdownPreviewPlacementRuntime
 
     internal static void ResetToCodeDefaults() => Current = DefaultPlacement;
 
-    internal static void ApplyWorkspaceToml(UiWorkspaceToml? w)
+    internal static void ApplyWorkspaceToml(Features.Workspace.RepositoryWorkspaceToml? w)
     {
         ResetToCodeDefaults();
         if (w is null)

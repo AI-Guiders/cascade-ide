@@ -1,4 +1,5 @@
 using CascadeIDE.Features.UiChrome;
+using CascadeIDE.Features.Workspace;
 using CascadeIDE.Services;
 using Xunit;
 
@@ -31,7 +32,7 @@ public sealed class AttentionZonePanelRuntimeTests : IDisposable
     [Fact]
     public void ApplyWorkspaceToml_overrides_single_panel()
     {
-        AttentionZonePanelRuntime.ApplyWorkspaceToml(new UiWorkspaceToml
+        AttentionZonePanelRuntime.ApplyWorkspaceToml(new RepositoryWorkspaceToml
         {
             Routing = new UiWorkspaceRoutingToml
             {
@@ -59,7 +60,7 @@ public sealed class AttentionZonePanelRuntimeTests : IDisposable
             attention = { solution_explorer = "pfd", git = "mfd", terminal = "pfd" }
             """;
 
-        var w = CascadeTomlSerializer.Deserialize<UiWorkspaceToml>(toml);
+        var w = CascadeTomlSerializer.Deserialize<RepositoryWorkspaceToml>(toml);
         Assert.NotNull(w);
         Assert.NotNull(w!.Routing?.Attention);
         Assert.Equal("pfd", w.Routing.Attention!["solution_explorer"]);
@@ -73,7 +74,7 @@ public sealed class AttentionZonePanelRuntimeTests : IDisposable
     [Fact]
     public void ApplyWorkspaceToml_rejects_non_spatial_zone_for_terminal_intent()
     {
-        AttentionZonePanelRuntime.ApplyWorkspaceToml(new UiWorkspaceToml
+        AttentionZonePanelRuntime.ApplyWorkspaceToml(new RepositoryWorkspaceToml
         {
             Routing = new UiWorkspaceRoutingToml
             {
@@ -91,7 +92,7 @@ public sealed class AttentionZonePanelRuntimeTests : IDisposable
     [Fact]
     public void ApplyWorkspaceToml_does_not_allow_editor_hud_override_via_attention_routing()
     {
-        AttentionZonePanelRuntime.ApplyWorkspaceToml(new UiWorkspaceToml
+        AttentionZonePanelRuntime.ApplyWorkspaceToml(new RepositoryWorkspaceToml
         {
             Routing = new UiWorkspaceRoutingToml
             {

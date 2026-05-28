@@ -1,0 +1,40 @@
+[docs_templates]
+
+[[docs_templates.template]]
+id = "feature.v1"
+title = "Feature doc"
+kind = "feature_doc"
+source = "repo"
+path = "docs/templates/feature.md"
+
+[[docs_templates.template]]
+id = "module.v1"
+title = "Module doc"
+kind = "module_doc"
+source = "repo"
+path = "docs/templates/module.md"
+
+[[docs_templates.template]]
+id = "adr-mini.v1"
+title = "ADR mini"
+kind = "adr"
+source = "repo"
+path = "docs/templates/adr-mini.md"
+
+[[docs_templates.template]]
+id = "runbook.v1"
+title = "Runbook"
+kind = "runbook"
+source = "repo"
+path = "docs/templates/runbook.md"
+
+# Knowledge-backed templates (canonical KB in agent-notes) can be added like this:
+#
+# [[docs_templates.template]]
+# id = "kb.feature.v1"
+# title = "KB Feature doc (canonical)"
+# kind = "feature_doc"
+# source = "knowledge"
+# knowledge_root_id = "primary"
+# file_path = "templates/feature.md"
+
