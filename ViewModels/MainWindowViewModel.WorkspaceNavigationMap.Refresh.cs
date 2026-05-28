@@ -6,7 +6,9 @@ using CascadeIDE.Features.WorkspaceNavigation.Application;
 using CascadeIDE.Models;
 using CascadeIDE.Features.HybridIndex.Application;
 using CascadeIDE.Services;
+using CascadeIDE.Features.UiChrome;
 using System.IO;
+using System.Linq;
 
 namespace CascadeIDE.ViewModels;
 
@@ -211,16 +213,16 @@ public partial class MainWindowViewModel
             new WorkspaceNavigationMapRefreshComposer.TraceSignals(ImpactedTestsBadge, LastTestSummary),
             cockpitSurfaceCapturedOnUi);
 
+        var workspaceRoot = GetWorkspacePath();
         SemanticMapHciOrientationSnapshot? hciSnap = null;
         if (!ct.IsCancellationRequested)
         {
             try
             {
-                var wsRoot = GetWorkspacePath();
                 hciSnap = await SemanticMapHciOrientationAcquirer.TryAcquireAsync(
                         _hybridIndex,
                         _settings.HybridIndex,
-                        wsRoot,
+                        workspaceRoot,
                         solutionPath,
                         navigationPath,
                         ct)
@@ -237,6 +239,8 @@ public partial class MainWindowViewModel
         }
 
         var hciLine = SemanticMapHciOrientationFormatting.ToStatusLine(hciSnap);
+        var (featureLine, featureDocPaths, docsCoverageLine, adrLine, adrFirstDocPath) =
+            TryResolveWorkspaceCorrespondence(workspaceRoot, navigationPath);
 
         await UiScheduler.Default.InvokeAsync(() =>
         {
@@ -251,6 +255,11 @@ public partial class MainWindowViewModel
                 CodeNavigationMapGraphHeight = dry.GraphHeight;
                 WorkspaceNavigationMapCfAnchorFullPath = dry.CfAnchorFullPath;
                 WorkspaceNavigationMapHciOrientationLine = hciLine;
+                WorkspaceFeatureLine = featureLine;
+                WorkspaceFeatureDocPaths = featureDocPaths;
+                WorkspaceAdrCorrespondenceLine = adrLine;
+                WorkspaceAdrCorrespondenceFirstDocPath = adrFirstDocPath;
+                WorkspaceDocsCoverageLine = docsCoverageLine;
                 WorkspaceNavigationMapItems.Clear();
                 foreach (var parsed in dry.ListRows)
                 {
@@ -269,6 +278,85 @@ public partial class MainWindowViewModel
                     ClearControlFlowGraphNodeNavigationAnchor();
             }
         });
+    }
+
+    private static (string FeatureLine, string[] FeatureDocPaths, string DocsCoverageLine, string AdrLine, string? AdrFirstDocPath)
+        TryResolveWorkspaceCorrespondence(string? workspaceRoot, string? navigationPath)
+    {
+        if (string.IsNullOrWhiteSpace(workspaceRoot) || string.IsNullOrWhiteSpace(navigationPath))
+            return ("", [], "", "", null);
+
+        try
+        {
+            var root = workspaceRoot.Trim();
+            var path = Path.Combine(root, ".cascade", "workspace.toml");
+            if (!File.Exists(path))
+                return ("", [], "", "", null);
+
+            var toml = File.ReadAllText(path);
+            var parsed = CascadeTomlSerializer.Deserialize<UiWorkspaceToml>(toml);
+            var feature = WorkspaceFeatureResolver.ResolveFeatureFromWorkspaceToml(parsed, root, navigationPath.Trim());
+            var featureLine = WorkspaceFeatureResolver.BuildFeatureLine(feature);
+            var featureDocs = feature?.Docs is { Count: > 0 }
+                ? feature.Docs.Select(x => (x ?? "").Trim()).Where(x => x.Length > 0).ToArray()
+                : [];
+
+            var docPaths = new List<string>();
+            if (feature?.Docs is { Count: > 0 })
+                docPaths.AddRange(feature.Docs.Select(x => (x ?? "").Trim()).Where(x => x.Length > 0));
+
+            var mapped = WorkspaceAdrMapResolver.ResolveAdrDocPathsFromWorkspaceToml(parsed, root, navigationPath.Trim());
+            foreach (var m in mapped)
+            {
+                if (docPaths.Contains(m, StringComparer.OrdinalIgnoreCase))
+                    continue;
+                docPaths.Add(m);
+            }
+
+            // Optional auto-include of linked ADRs (one hop).
+            var autoInclude = WorkspaceAdrMapResolver.NormalizeAutoInclude(parsed?.Workspace?.Adr?.AutoInclude);
+            var maxRelated = parsed?.Workspace?.Adr?.MaxRelated is int mr && mr > 0 ? mr : 8;
+            if (autoInclude == WorkspaceAdrMapResolver.AutoIncludeLinked && docPaths.Count > 0)
+            {
+                var primary = docPaths[0];
+                var absPrimary = WorkspaceAdrMapResolver.TryResolveAbsoluteDocPath(root, primary);
+                if (!string.IsNullOrWhiteSpace(absPrimary) && File.Exists(absPrimary))
+                {
+                    var md = File.ReadAllText(absPrimary);
+                    var linked = WorkspaceAdrMapResolver.ExtractLinkedAdrDocPathsFromMarkdown(md, primary);
+                    if (linked.Count > 0)
+                    {
+                        var merged = new List<string>(docPaths);
+                        foreach (var l in linked)
+                        {
+                            if (merged.Count >= docPaths.Count + maxRelated)
+                                break;
+                            if (merged.Contains(l, StringComparer.OrdinalIgnoreCase))
+                                continue;
+                            merged.Add(l);
+                        }
+                        docPaths = merged;
+                    }
+                }
+            }
+
+            var adrLine = WorkspaceAdrMapResolver.BuildAdrIndicatorLine(docPaths);
+            var firstRel = docPaths.Count > 0 ? docPaths[0] : null;
+            var firstAbs = firstRel is null ? null : WorkspaceAdrMapResolver.TryResolveAbsoluteDocPath(root, firstRel);
+
+            var docsCoverageLine =
+                docPaths.Count > 0
+                    ? ""
+                    : feature is not null
+                        ? "Docs: missing (feature has no ADRs) · template: docs/templates/feature.md"
+                        : "Docs: missing (no correspondence) · template: docs/templates/module.md";
+
+            return (featureLine, featureDocs, docsCoverageLine, adrLine, firstAbs);
+        }
+        catch
+        {
+            return ("", [], "", "", null);
+        }
     }
 
     /// <summary>Каретка из видимого <see cref="AvaloniaEdit.TextEditor"/> (не только throttled <see cref="_editorCaretOffset"/>).</summary>

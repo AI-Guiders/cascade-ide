@@ -15,11 +15,114 @@ public static class UiWorkspaceTomlMerger
 
         return new UiWorkspaceToml
         {
+            Workspace = MergeWorkspace(lower?.Workspace, higher?.Workspace),
             Chrome = MergeWorkspaceChrome(lower?.Chrome, higher?.Chrome),
             LocLimits = MergeLocLimits(lower?.LocLimits, higher?.LocLimits),
             Routing = MergeRouting(lower?.Routing, higher?.Routing),
             CodeNavigation = MergeCodeNavigation(lower?.CodeNavigation, higher?.CodeNavigation),
         };
+    }
+
+    private static UiWorkspaceWorkspaceToml? MergeWorkspace(
+        UiWorkspaceWorkspaceToml? lower,
+        UiWorkspaceWorkspaceToml? higher)
+    {
+        if (lower is null && higher is null)
+            return null;
+
+        return new UiWorkspaceWorkspaceToml
+        {
+            Adr = MergeWorkspaceAdr(lower?.Adr, higher?.Adr),
+            Features = MergeWorkspaceFeatures(lower?.Features, higher?.Features),
+        };
+    }
+
+    private static UiWorkspaceAdrToml? MergeWorkspaceAdr(
+        UiWorkspaceAdrToml? lower,
+        UiWorkspaceAdrToml? higher)
+    {
+        var map = MergeObjectDictionary(lower?.Map, higher?.Map);
+        if (map is null)
+            return null;
+        return new UiWorkspaceAdrToml
+        {
+            AutoInclude = higher?.AutoInclude ?? lower?.AutoInclude,
+            MaxRelated = higher?.MaxRelated ?? lower?.MaxRelated,
+            Map = map
+        };
+    }
+
+    private static UiWorkspaceFeaturesToml? MergeWorkspaceFeatures(
+        UiWorkspaceFeaturesToml? lower,
+        UiWorkspaceFeaturesToml? higher)
+    {
+        if (lower?.Feature is not { Count: > 0 } && higher?.Feature is not { Count: > 0 })
+            return null;
+
+        var merged = new Dictionary<string, UiWorkspaceFeatureToml>(StringComparer.OrdinalIgnoreCase);
+        if (lower?.Feature is { Count: > 0 })
+        {
+            foreach (var f in lower.Feature)
+            {
+                var id = (f.Id ?? "").Trim();
+                if (id.Length == 0)
+                    continue;
+                merged[id] = CloneFeature(f);
+            }
+        }
+
+        if (higher?.Feature is { Count: > 0 })
+        {
+            foreach (var f in higher.Feature)
+            {
+                var id = (f.Id ?? "").Trim();
+                if (id.Length == 0)
+                    continue;
+                merged[id] = CloneFeature(f); // higher overrides by id
+            }
+        }
+
+        return merged.Count == 0 ? null : new UiWorkspaceFeaturesToml { Feature = merged.Values.ToList() };
+    }
+
+    private static UiWorkspaceFeatureToml CloneFeature(UiWorkspaceFeatureToml f) => new()
+    {
+        Id = f.Id?.Trim(),
+        Title = f.Title?.Trim(),
+        Paths = f.Paths?.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim()).ToList() ?? [],
+        Docs = f.Docs?.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim()).ToList() ?? [],
+        Tags = f.Tags?.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim()).ToList() ?? [],
+    };
+
+    private static Dictionary<string, object>? MergeObjectDictionary(
+        Dictionary<string, object>? lower,
+        Dictionary<string, object>? higher)
+    {
+        if (lower is not { Count: > 0 } && higher is not { Count: > 0 })
+            return null;
+
+        var merged = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+        if (lower is { Count: > 0 })
+        {
+            foreach (var kv in lower)
+            {
+                if (string.IsNullOrWhiteSpace(kv.Key))
+                    continue;
+                merged[kv.Key.Trim()] = kv.Value;
+            }
+        }
+
+        if (higher is { Count: > 0 })
+        {
+            foreach (var kv in higher)
+            {
+                if (string.IsNullOrWhiteSpace(kv.Key))
+                    continue;
+                merged[kv.Key.Trim()] = kv.Value;
+            }
+        }
+
+        return merged.Count > 0 ? merged : null;
     }
 
     private static UiWorkspaceChromeToml? MergeWorkspaceChrome(

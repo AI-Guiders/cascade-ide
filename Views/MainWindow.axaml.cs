@@ -111,6 +111,7 @@ public partial class MainWindow : PointerTrackingWindow
             vm.RequestPickDebugTarget = ShowPickDebugTargetAsync;
             vm.RequestAttachProcessId = ShowAttachProcessIdAsync;
             vm.RequestShowInfoAsync = ShowInfoDialogAsync;
+            vm.RequestPickFeatureDocAsync = (title, docs) => FeatureDocsPickDialog.ShowAsync(this, title, docs);
             vm.RequestSaveMarkdownFile = ShowSaveExpandedMarkdownDialogAsync;
             vm.CaptureWindowForMcpAsync = (ws, rel, scope) => CaptureWindowForMcpCoreAsync(ws, rel, scope);
             vm.GetUiLayoutProvider = () => UiLayoutSnapshot.BuildJsonAllWindows(this);

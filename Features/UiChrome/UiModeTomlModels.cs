@@ -40,6 +40,12 @@ public sealed class UiWorkspaceChromeToml
 /// </summary>
 public sealed class UiWorkspaceToml
 {
+    /// <summary>
+    /// Workspace-level overlays not tied to chrome/layout metrics (ADR 0061): documentation ↔ code correspondence maps.
+    /// TOML: <c>[workspace.*]</c>.
+    /// </summary>
+    public UiWorkspaceWorkspaceToml? Workspace { get; set; }
+
     /// <summary>Метрики хрома и превью Markdown.</summary>
     public UiWorkspaceChromeToml? Chrome { get; set; }
 
@@ -53,6 +59,59 @@ public sealed class UiWorkspaceToml
 
     /// <summary>Карта намерений / control-flow (ADR 0053): пресеты подписей ветвей IF в <c>.cascade/workspace.toml</c>.</summary>
     public CodeNavigationMapSettings? CodeNavigationMap { get; set; }
+}
+
+/// <summary>
+/// TOML: <c>[workspace]</c> — correspondence overlays (ADR 0061).
+/// </summary>
+public sealed class UiWorkspaceWorkspaceToml
+{
+    public UiWorkspaceAdrToml? Adr { get; set; }
+    public UiWorkspaceFeaturesToml? Features { get; set; }
+}
+
+/// <summary>
+/// TOML: <c>[workspace.features]</c> — feature registry (ADR 0155 §7): code scope → docs/tags.
+/// </summary>
+public sealed class UiWorkspaceFeaturesToml
+{
+    public List<UiWorkspaceFeatureToml> Feature { get; set; } = [];
+}
+
+/// <summary>
+/// TOML: <c>[[workspace.features.feature]]</c>.
+/// </summary>
+public sealed class UiWorkspaceFeatureToml
+{
+    public string? Id { get; set; }
+    public string? Title { get; set; }
+    public List<string> Paths { get; set; } = [];
+    public List<string> Docs { get; set; } = [];
+    public List<string> Tags { get; set; } = [];
+}
+
+/// <summary>
+/// TOML: <c>[workspace.adr]</c>.
+/// </summary>
+public sealed class UiWorkspaceAdrToml
+{
+    /// <summary>
+    /// Auto-include ADR links from the selected ADR markdown.
+    /// TOML: <c>auto_include</c> = <c>"none"</c> | <c>"linked"</c>.
+    /// </summary>
+    public string? AutoInclude { get; set; }
+
+    /// <summary>
+    /// Max number of linked ADR docs to auto-include (per click/preview).
+    /// TOML: <c>max_related</c>.
+    /// </summary>
+    public int? MaxRelated { get; set; }
+
+    /// <summary>
+    /// TOML: <c>[workspace.adr.map]</c> where keys are repo-relative prefixes and values are ADR path(s).
+    /// Values can be either a string or an array of strings.
+    /// </summary>
+    public Dictionary<string, object>? Map { get; set; }
 }
 
 /// <summary>TOML: <c>[loc_limits]</c> — ось размера файла (не EICAS).</summary>

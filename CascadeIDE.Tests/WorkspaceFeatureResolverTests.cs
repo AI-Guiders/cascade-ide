@@ -1,0 +1,50 @@
+using CascadeIDE.Features.UiChrome;
+using CascadeIDE.Services;
+using Xunit;
+
+namespace CascadeIDE.Tests;
+
+public sealed class WorkspaceFeatureResolverTests
+{
+    [Fact]
+    public void ResolveFeature_longest_prefix_wins()
+    {
+        var w = new UiWorkspaceToml
+        {
+            Workspace = new UiWorkspaceWorkspaceToml
+            {
+                Features = new UiWorkspaceFeaturesToml
+                {
+                    Feature =
+                    [
+                        new UiWorkspaceFeatureToml
+                        {
+                            Id = "ui",
+                            Title = "UI",
+                            Paths = ["Features/"],
+                            Docs = ["docs/adr/0006-presentation-layers-and-feature-slices.md"]
+                        },
+                        new UiWorkspaceFeatureToml
+                        {
+                            Id = "uichrome",
+                            Title = "UiChrome",
+                            Paths = ["Features/UiChrome/"],
+                            Docs = ["docs/adr/0010-ui-mode-catalog.md"]
+                        },
+                    ]
+                }
+            }
+        };
+
+        var f = WorkspaceFeatureResolver.ResolveFeatureFromWorkspaceToml(
+            w,
+            repositoryRootDirectory: "D:/w",
+            absoluteFilePath: "D:/w/Features/UiChrome/UiModeCatalog.cs");
+
+        Assert.NotNull(f);
+        Assert.Equal("uichrome", f!.Id);
+        Assert.Contains("docs/adr/0010-ui-mode-catalog.md", f.Docs);
+        Assert.Contains("Feature: UiChrome (uichrome)", WorkspaceFeatureResolver.BuildFeatureLine(f));
+    }
+}
+

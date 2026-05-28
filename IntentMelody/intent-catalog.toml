@@ -19,6 +19,46 @@
 #
 intent_catalog_schema_version = 2
 
+# ==============================================================================
+# Doc correspondence (ADR 0061, 0155)
+# ==============================================================================
+
+[[command]]
+command_id = "open_workspace_adr_correspondence"
+
+[[command.form.slash]]
+path = "/docs adr open"
+domain = "docs"
+object = "adr"
+intent = "open"
+help = "Открыть correspondence ADR для текущего файла (как клик по строке ADR на PFD)."
+group = "Docs"
+arg_tail = "none"
+
+[[command]]
+command_id = "open_workspace_feature_docs"
+
+[[command.form.slash]]
+path = "/docs feature open"
+domain = "docs"
+object = "feature"
+intent = "open"
+help = "Открыть docs фичи для текущего файла (как клик по строке Feature на PFD)."
+group = "Docs"
+arg_tail = "none"
+
+[[command]]
+command_id = "open_docs_template"
+
+[[command.form.slash]]
+path = "/docs template open"
+domain = "docs"
+object = "template"
+intent = "open"
+help = "Открыть шаблон документации из docs/templates (picker) в Markdown Preview."
+group = "Docs"
+arg_tail = "none"
+
 # ------------------------------------------------------------------------------
 # [[tail_wire_class]] — провода хвоста parametric melody (c:)
 # ------------------------------------------------------------------------------

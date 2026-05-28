@@ -67,6 +67,9 @@ public partial class MainWindowViewModel
     /// <summary>Простой информационный диалог (заголовок, текст).</summary>
     public Func<string, string, Task>? RequestShowInfoAsync { get; set; }
 
+    /// <summary>Показать выбор одного документа фичи (список путей) и вернуть выбранный путь.</summary>
+    public Func<string, IReadOnlyList<string>, Task<string?>>? RequestPickFeatureDocAsync { get; set; }
+
     /// <summary>Сохранить файл Markdown (View показывает SaveFile dialog). Возвращает выбранный путь или null.</summary>
     public Func<string?, Task<string?>>? RequestSaveMarkdownFile { get; set; }
 

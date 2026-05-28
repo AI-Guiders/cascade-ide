@@ -62,6 +62,7 @@ internal sealed partial class IdeMcpCommandExecutor
         RegisterMenuAndToolbarCommands(Add);
         RegisterFocusPowerAndAgentActions(Add);
         RegisterDocuments(Add);
+        RegisterCorrespondence(Add);
         // NOTE: UI inspection/control (pure IIdeMcpActions) is generated.
         RegisterDebugUiSurface(Add);
         RegisterAgentNotes(Add);
@@ -73,4 +74,29 @@ internal sealed partial class IdeMcpCommandExecutor
     // Generation hook: a source generator (or ProtocolDocGen) can emit a partial method
     // that registers 1:1 handlers for IIdeMcpActions methods.
     partial void RegisterGenerated(Action<string, Handler> add);
+
+    private void RegisterCorrespondence(Action<string, Handler> add)
+    {
+        add(Services.IdeCommands.OpenWorkspaceAdrCorrespondence, async (_, _) =>
+        {
+            if (_vm.OpenWorkspaceAdrCorrespondenceCommand.CanExecute(null))
+                _vm.OpenWorkspaceAdrCorrespondenceCommand.Execute(null);
+            return "OK";
+        });
+
+        add(Services.IdeCommands.OpenWorkspaceFeatureDocs, async (_, _) =>
+        {
+            if (_vm.OpenWorkspaceFeatureDocsCommand.CanExecute(null))
+                await _vm.OpenWorkspaceFeatureDocsCommand.ExecuteAsync(null);
+            return "OK";
+        });
+
+        add(Services.IdeCommands.OpenDocsTemplate, async (args, _) =>
+        {
+            var p = McpCommandJsonArgs.String(args, "path");
+            if (_vm.OpenDocsTemplateCommand.CanExecute(p))
+                await _vm.OpenDocsTemplateCommand.ExecuteAsync(p);
+            return "OK";
+        });
+    }
 }

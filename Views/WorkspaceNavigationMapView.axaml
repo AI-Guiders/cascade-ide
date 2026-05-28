@@ -52,6 +52,36 @@
                                Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
                                IsVisible="{Binding WorkspaceNavigationMapHciOrientationLine, Converter={StaticResource HciOrientationLineVisible}}"
                                Text="{Binding WorkspaceNavigationMapHciOrientationLine}"/>
+                    <Button Background="Transparent"
+                            BorderThickness="0"
+                            Padding="0"
+                            HorizontalAlignment="Left"
+                            Command="{Binding OpenWorkspaceFeatureDocsCommand}"
+                            IsVisible="{Binding WorkspaceFeatureLine, Converter={StaticResource HciOrientationLineVisible}}">
+                        <TextBlock FontSize="10"
+                                   TextWrapping="Wrap"
+                                   Opacity="0.9"
+                                   Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                                   Text="{Binding WorkspaceFeatureLine}"/>
+                    </Button>
+                    <Button Background="Transparent"
+                            BorderThickness="0"
+                            Padding="0"
+                            HorizontalAlignment="Left"
+                            Command="{Binding OpenWorkspaceAdrCorrespondenceCommand}"
+                            IsVisible="{Binding WorkspaceAdrCorrespondenceLine, Converter={StaticResource HciOrientationLineVisible}}">
+                        <TextBlock FontSize="10"
+                                   TextWrapping="Wrap"
+                                   Opacity="0.9"
+                                   Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                                   Text="{Binding WorkspaceAdrCorrespondenceLine}"/>
+                    </Button>
+                    <TextBlock FontSize="10"
+                               TextWrapping="Wrap"
+                               Opacity="0.85"
+                               Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                               IsVisible="{Binding WorkspaceDocsCoverageLine, Converter={StaticResource HciOrientationLineVisible}}"
+                               Text="{Binding WorkspaceDocsCoverageLine}"/>
                     <StackPanel Orientation="Horizontal" Spacing="4">
                         <TextBlock FontSize="11"
                                    Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"

@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using Avalonia.Controls;
 using CascadeIDE.Cockpit.Cds;
@@ -187,6 +188,101 @@ public partial class MainWindowViewModel
         }
     }
 
+    [RelayCommand]
+    private void OpenWorkspaceAdrCorrespondence()
+    {
+        var docPath = WorkspaceAdrCorrespondenceFirstDocPath;
+        if (string.IsNullOrWhiteSpace(docPath) || !File.Exists(docPath))
+            return;
+
+        try
+        {
+            var content = File.ReadAllText(docPath);
+            var title = WorkspaceAdrMapResolver.GuessAdrPreviewTitle(docPath);
+            MarkdownPreviewTool.SetContent(title, content, docPath);
+            ApplyMfdRegionExpanded(true);
+            TryNavigateToMfdShellPage(MfdShellPage.MarkdownPreview);
+        }
+        catch
+        {
+            // keep silent: correspondence must not break navigation refresh UX
+        }
+    }
+
+    [RelayCommand]
+    private async Task OpenWorkspaceFeatureDocsAsync()
+    {
+        var docs = WorkspaceFeatureDocPaths ?? [];
+        if (docs.Length == 0)
+            return;
+
+        var pick = docs.Length == 1
+            ? docs[0]
+            : RequestPickFeatureDocAsync is not null
+                ? await RequestPickFeatureDocAsync("Документация фичи", docs).ConfigureAwait(true)
+                : docs[0];
+
+        if (string.IsNullOrWhiteSpace(pick))
+            return;
+
+        var wsRoot = GetWorkspacePath();
+        if (string.IsNullOrWhiteSpace(wsRoot))
+            return;
+
+        var abs = WorkspaceAdrMapResolver.TryResolveAbsoluteDocPath(wsRoot, pick);
+        if (string.IsNullOrWhiteSpace(abs) || !File.Exists(abs))
+            return;
+
+        try
+        {
+            var content = File.ReadAllText(abs);
+            var title = WorkspaceAdrMapResolver.GuessAdrPreviewTitle(pick);
+            MarkdownPreviewTool.SetContent(title, content, abs);
+            ApplyMfdRegionExpanded(true);
+            TryNavigateToMfdShellPage(MfdShellPage.MarkdownPreview);
+        }
+        catch
+        {
+            // ignore
+        }
+    }
+
+    [RelayCommand]
+    private async Task OpenDocsTemplateAsync(object? parameter)
+    {
+        var wsRoot = GetWorkspacePath();
+        if (string.IsNullOrWhiteSpace(wsRoot))
+            return;
+
+        var requested = parameter as string;
+        var rel = !string.IsNullOrWhiteSpace(requested) ? requested!.Trim() : null;
+        if (string.IsNullOrWhiteSpace(rel))
+        {
+            rel = RequestPickFeatureDocAsync is not null
+                ? await RequestPickFeatureDocAsync("Шаблон документации", TemplateDocPaths).ConfigureAwait(true)
+                : TemplateDocPaths[0];
+        }
+
+        if (string.IsNullOrWhiteSpace(rel))
+            return;
+
+        var abs = WorkspaceAdrMapResolver.TryResolveAbsoluteDocPath(wsRoot, rel);
+        if (string.IsNullOrWhiteSpace(abs) || !File.Exists(abs))
+            return;
+
+        try
+        {
+            var content = File.ReadAllText(abs);
+            MarkdownPreviewTool.SetContent(rel, content, abs);
+            ApplyMfdRegionExpanded(true);
+            TryNavigateToMfdShellPage(MfdShellPage.MarkdownPreview);
+        }
+        catch
+        {
+            // ignore
+        }
+    }
+
     private void BeginControlFlowGraphNodeNavigation(string fullPath, int lineOneBased)
     {
         _controlFlowGraphNavigatePath = fullPath;
@@ -311,6 +407,32 @@ public partial class MainWindowViewModel
     /// <summary>Краткая строка ориентации HCI (слой B) рядом с картой; не влияет на Roslyn-граф (ADR 0106).</summary>
     [ObservableProperty]
     private string _workspaceNavigationMapHciOrientationLine = "";
+
+    /// <summary>Doc correspondence (ADR 0061): какие ADR относятся к текущему файлу по <c>[workspace.adr.map]</c>.</summary>
+    [ObservableProperty]
+    private string _workspaceAdrCorrespondenceLine = "";
+
+    [ObservableProperty]
+    private string? _workspaceAdrCorrespondenceFirstDocPath;
+
+    [ObservableProperty]
+    private string _workspaceFeatureLine = "";
+
+    /// <summary>Мягкий сигнал “нет доков” (не ошибка): пусто, если всё ок.</summary>
+    [ObservableProperty]
+    private string _workspaceDocsCoverageLine = "";
+
+    [ObservableProperty]
+    private string[] _workspaceFeatureDocPaths = [];
+
+    private static readonly string[] TemplateDocPaths =
+    [
+        "docs/templates/feature.md",
+        "docs/templates/module.md",
+        "docs/templates/adr-mini.md",
+        "docs/templates/runbook.md",
+        "docs/templates/README.md",
+    ];
 
     /// <summary>Команда палитры / MCP: list → graph → both.</summary>
     public void CycleCodeNavigationMapPresentation() =>

@@ -28,7 +28,7 @@
                            Text="{Binding WorkspaceNavigationMapRelatedBadge}"/>
             </Border>
         </Grid>
-        <Grid Grid.Row="1" RowDefinitions="Auto,Auto,Auto,Auto,*" MinHeight="0">
+        <Grid Grid.Row="1" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,*" MinHeight="0">
             <TextBlock Grid.Row="0" FontSize="10" TextWrapping="Wrap" Opacity="0.9"
                        Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
                        Text="{Binding CodeNavigationMapSettingsSummaryLine}"/>
@@ -36,17 +36,45 @@
                        Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
                        IsVisible="{Binding WorkspaceNavigationMapHciOrientationLine, Converter={StaticResource HciOrientationLineVisible}}"
                        Text="{Binding WorkspaceNavigationMapHciOrientationLine}"/>
-            <StackPanel Grid.Row="2" Margin="0,6,0,0" Spacing="4" Orientation="Horizontal">
+            <Button Grid.Row="2"
+                    Margin="0,2,0,0"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Padding="0"
+                    HorizontalAlignment="Left"
+                    Command="{Binding OpenWorkspaceFeatureDocsCommand}"
+                    IsVisible="{Binding WorkspaceFeatureLine, Converter={StaticResource HciOrientationLineVisible}}">
+                <TextBlock FontSize="10" TextWrapping="Wrap" Opacity="0.9"
+                           Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                           Text="{Binding WorkspaceFeatureLine}"/>
+            </Button>
+            <Button Grid.Row="3"
+                    Margin="0,2,0,0"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Padding="0"
+                    HorizontalAlignment="Left"
+                    Command="{Binding OpenWorkspaceAdrCorrespondenceCommand}"
+                    IsVisible="{Binding WorkspaceAdrCorrespondenceLine, Converter={StaticResource HciOrientationLineVisible}}">
+                <TextBlock FontSize="10" TextWrapping="Wrap" Opacity="0.9"
+                           Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                           Text="{Binding WorkspaceAdrCorrespondenceLine}"/>
+            </Button>
+            <TextBlock Grid.Row="4" Margin="0,2,0,0" FontSize="10" TextWrapping="Wrap" Opacity="0.85"
+                       Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                       IsVisible="{Binding WorkspaceDocsCoverageLine, Converter={StaticResource HciOrientationLineVisible}}"
+                       Text="{Binding WorkspaceDocsCoverageLine}"/>
+            <StackPanel Grid.Row="5" Margin="0,6,0,0" Spacing="4" Orientation="Horizontal">
                 <TextBlock FontSize="11" Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}" Text="Якорь:"/>
                 <TextBlock FontSize="11" FontWeight="SemiBold"
                            Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
                            Text="{Binding WorkspaceNavigationMapAnchorLabel}"/>
             </StackPanel>
-            <TextBlock Grid.Row="3" Margin="0,8,0,4"
+            <TextBlock Grid.Row="6" Margin="0,8,0,4"
                        Text="{Binding WorkspaceNavigationMapStatus}"
                        FontSize="11" TextWrapping="Wrap"
                        Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
-            <Panel Grid.Row="4">
+            <Panel Grid.Row="7">
                 <ScrollViewer HorizontalScrollBarVisibility="Disabled"
                               VerticalScrollBarVisibility="Auto"
                               IsVisible="{Binding ShowCodeNavigationMapList}">
