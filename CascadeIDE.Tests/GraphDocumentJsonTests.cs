@@ -67,4 +67,23 @@ public sealed class GraphDocumentJsonTests
         Assert.NotNull(doc);
         Assert.Equal(GraphKind.CodeIntent, doc!.Kind);
     }
+
+    [Fact]
+    public void TryParseRoot_RelatedMode_BuildsStarGraphDocument()
+    {
+        const string json = """
+            {
+              "mode":"related",
+              "anchor_path":"D:/w/A.cs",
+              "items":[
+                {"path":"D:/w/B.cs","kind":"project_peer","rationale":"peer"}
+              ]
+            }
+            """;
+        Assert.True(GraphDocumentJson.TryParse(json, out var doc, out var err), err);
+        Assert.NotNull(doc);
+        Assert.Equal(GraphKind.RelatedFiles, doc!.Kind);
+        Assert.Equal(2, doc.Nodes.Count);
+        Assert.Single(doc.Edges);
+    }
 }
