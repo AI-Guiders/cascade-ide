@@ -329,14 +329,14 @@ public partial class MainWindowViewModel
         }
     }
 
-    private static UiWorkspaceToml? TryReadRepositoryWorkspaceToml(string workspaceRoot)
+    private static Features.Workspace.RepositoryWorkspaceToml? TryReadRepositoryWorkspaceToml(string workspaceRoot)
     {
         try
         {
             var path = Path.Combine(workspaceRoot.Trim(), ".cascade", "workspace.toml");
             if (!File.Exists(path))
                 return null;
-            return CascadeTomlSerializer.Deserialize<UiWorkspaceToml>(File.ReadAllText(path));
+            return CascadeTomlSerializer.Deserialize<Features.Workspace.RepositoryWorkspaceToml>(File.ReadAllText(path));
         }
         catch
         {
@@ -485,15 +485,6 @@ public partial class MainWindowViewModel
 
     [ObservableProperty]
     private string[] _workspaceFeatureDocPaths = [];
-
-    private static readonly string[] TemplateDocPaths =
-    [
-        "docs/templates/feature.md",
-        "docs/templates/module.md",
-        "docs/templates/adr-mini.md",
-        "docs/templates/runbook.md",
-        "docs/templates/README.md",
-    ];
 
     /// <summary>Команда палитры / MCP: list → graph → both.</summary>
     public void CycleCodeNavigationMapPresentation() =>

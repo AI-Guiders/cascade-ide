@@ -294,7 +294,7 @@ public partial class MainWindowViewModel
                 return ("", [], "", "", null);
 
             var toml = File.ReadAllText(path);
-            var parsed = CascadeTomlSerializer.Deserialize<UiWorkspaceToml>(toml);
+            var parsed = CascadeTomlSerializer.Deserialize<Features.Workspace.RepositoryWorkspaceToml>(toml);
             var feature = WorkspaceFeatureResolver.ResolveFeatureFromWorkspaceToml(parsed, root, navigationPath.Trim());
             var featureLine = WorkspaceFeatureResolver.BuildFeatureLine(feature);
             var featureDocs = feature?.Docs is { Count: > 0 }
@@ -323,7 +323,7 @@ public partial class MainWindowViewModel
                 if (!string.IsNullOrWhiteSpace(absPrimary) && File.Exists(absPrimary))
                 {
                     var md = File.ReadAllText(absPrimary);
-                    var linked = WorkspaceAdrMapResolver.ExtractLinkedAdrDocPathsFromMarkdown(md, primary);
+            var linked = WorkspaceAdrMapResolver.ExtractLinkedAdrDocPathsFromMarkdown(md, primary, parsed?.Workspace?.Adr);
                     if (linked.Count > 0)
                     {
                         var merged = new List<string>(docPaths);
@@ -340,16 +340,23 @@ public partial class MainWindowViewModel
                 }
             }
 
-            var adrLine = WorkspaceAdrMapResolver.BuildAdrIndicatorLine(docPaths);
+            var adrLine = WorkspaceAdrMapResolver.BuildAdrIndicatorLine(docPaths, parsed?.Workspace?.Adr);
             var firstRel = docPaths.Count > 0 ? docPaths[0] : null;
             var firstAbs = firstRel is null ? null : WorkspaceAdrMapResolver.TryResolveAbsoluteDocPath(root, firstRel);
+
+            var templates = DocsTemplatesCatalogResolver.ResolveTemplatesFromWorkspaceToml(parsed, root);
+            var featureTemplate = templates.FirstOrDefault(t => string.Equals(t.Kind, "feature_doc", StringComparison.OrdinalIgnoreCase));
+            var moduleTemplate = templates.FirstOrDefault(t => string.Equals(t.Kind, "module_doc", StringComparison.OrdinalIgnoreCase));
+
+            var featureTemplateHint = featureTemplate?.RepoPath ?? "docs/templates/feature.md";
+            var moduleTemplateHint = moduleTemplate?.RepoPath ?? "docs/templates/module.md";
 
             var docsCoverageLine =
                 docPaths.Count > 0
                     ? ""
                     : feature is not null
-                        ? "Docs: missing (feature has no ADRs) · template: docs/templates/feature.md"
-                        : "Docs: missing (no correspondence) · template: docs/templates/module.md";
+                        ? $"Docs: missing (feature has no ADRs) · template: {featureTemplateHint}"
+                        : $"Docs: missing (no correspondence) · template: {moduleTemplateHint}";
 
             return (featureLine, featureDocs, docsCoverageLine, adrLine, firstAbs);
         }
