@@ -1,0 +1,45 @@
+[workspace.adr]
+auto_include = "linked"
+max_related = 8
+
+[workspace.adr.map]
+"Features/Chat/" = [
+  "docs/adr/0119-intercom-slash-commands-and-local-execution.md",
+  "docs/adr/0150-slash-line-canonical-resolution.md",
+  "docs/adr/0154-slash-route-semantics-domain-object-intent.md",
+]
+"Intercom/" = [
+  "docs/adr/0137-intercom-message-code-correspondence.md",
+  "docs/adr/0144-intercom-oauth-connect.md",
+]
+"Features/WorkspaceNavigation/" = [
+  "docs/adr/0039-workspace-navigation-affordances.md",
+  "docs/adr/0155-documentation-code-correspondence-and-architectural-drift.md",
+  "docs/adr/0061-context-aware-adr-map-pfd-knowledge-indicator.md",
+]
+"*" = "docs/adr/0006-presentation-layers-and-feature-slices.md"
+
+[workspace.features]
+[[workspace.features.feature]]
+id = "intercom.chat"
+title = "Intercom chat + slash"
+paths = ["Features/Chat/", "IntentMelody/", "Services/Generated/"]
+docs = [
+  "docs/adr/0119-intercom-slash-commands-and-local-execution.md",
+  "docs/adr/0150-slash-line-canonical-resolution.md",
+  "docs/adr/0154-slash-route-semantics-domain-object-intent.md",
+]
+tags = ["intercom", "slash", "chat"]
+
+[[workspace.features.feature]]
+id = "workspace.navigation.map"
+title = "Workspace navigation map (PFD/MFD)"
+paths = ["Features/WorkspaceNavigation/", "Cockpit/Graph/", "Views/SkiaKit/Graph/", "ViewModels/MainWindowViewModel.WorkspaceNavigationMap"]
+docs = [
+  "docs/adr/0039-workspace-navigation-affordances.md",
+  "docs/adr/0053-semantic-map-control-flow-pfd.md",
+  "docs/adr/0061-context-aware-adr-map-pfd-knowledge-indicator.md",
+  "docs/adr/0155-documentation-code-correspondence-and-architectural-drift.md",
+]
+tags = ["workspace", "navigation", "pfd", "mfd", "graph"]
+
