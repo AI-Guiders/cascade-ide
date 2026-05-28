@@ -114,7 +114,7 @@ pfd_primary = "workspace_map"
 ## Статус реализации
 
 **Реализовано**:
-- bundle/repo: `UiModes/workspace.toml` + `.cascade/workspace.toml` через `UiWorkspaceTomlMerger` и `UiModeCatalog.ApplyRepositoryWorkspaceOverlay`;
+- bundle/repo: `UiModes/workspace.toml` + `.cascade/workspace.toml` через `UiWorkspaceTomlMerger` и `UiModeCatalog.ApplyRepositoryWorkspaceTomlOverlay`;
 - user: `[display.instrument_routing]` и `prefer_repo_instruments_placement` в `%LocalAppData%\CascadeIDE\settings.toml`;
 - единый runtime: `InstrumentRoutingAliasResolver`, `InstrumentPlacementRuntime`, `MainWindowHostSurfaceCompositor`.
 

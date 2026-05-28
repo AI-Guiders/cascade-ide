@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using CascadeIDE.Cockpit.Composition.HostSurface;
+using CascadeIDE.Features.UiChrome.Application;
 
 namespace CascadeIDE.Features.UiChrome;
 
@@ -167,37 +168,14 @@ public static class UiModeCatalog
     /// Накладывает <c>.cascade/workspace.toml</c> из корня открытого решения на метрики и <c>routing</c> бандла.
     /// Вызывать с UI-потока при смене <see cref="SolutionWorkspaceViewModel.SolutionPath"/>; при пустом пути — только бандл.
     /// </summary>
-    public static void ApplyRepositoryWorkspaceOverlay(string? solutionDirectory)
+    public static void ApplyRepositoryWorkspaceTomlOverlay(string? solutionDirectory)
     {
         lock (Gate)
         {
             if (!_initialized)
                 return;
 
-            Features.Workspace.RepositoryWorkspaceToml? repo = null;
-            if (!string.IsNullOrWhiteSpace(solutionDirectory))
-            {
-                var trimmed = solutionDirectory.Trim();
-                var path = Path.Combine(trimmed, ".cascade", "workspace.toml");
-                if (File.Exists(path))
-                {
-                    try
-                    {
-                        repo = CascadeTomlSerializer.Deserialize<Features.Workspace.RepositoryWorkspaceToml>(File.ReadAllText(path));
-                    }
-                    catch (Exception ex)
-                    {
-                        global::System.Diagnostics.Debug.WriteLine($"UiModeCatalog: repo workspace.toml ignored — {ex.Message}");
-                    }
-                }
-            }
-
-            var merged = RepositoryWorkspaceTomlMerger.Merge(_bundleWorkspaceToml, repo);
-            UiWorkspaceLayoutRuntimeMetrics.ApplyWorkspaceToml(merged);
-            AttentionZonePanelRuntime.ApplyWorkspaceToml(merged);
-            MarkdownPreviewPlacementRuntime.ApplyWorkspaceToml(merged);
-            LocLimitsRuntime.ApplyWorkspaceToml(merged);
-            InstrumentPlacementRuntime.ApplyWorkspaceInstrumentRouting(merged?.Routing?.Instruments);
+            RepositoryWorkspaceTomlOverlayApplicator.Apply(_bundleWorkspaceToml, solutionDirectory);
         }
     }
 
