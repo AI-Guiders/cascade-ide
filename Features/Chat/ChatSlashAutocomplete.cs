@@ -53,7 +53,7 @@ public static class ChatSlashAutocomplete
             return [];
 
         if (body.Length == 0)
-            return BuildRootSegmentSuggestions();
+            return SlashSemanticCatalogIndex.GetSegmentSuggestions([], endsWithSpace: false, body);
 
         if (TryGetDynamicSuggestions(
                 body,
@@ -91,7 +91,8 @@ public static class ChatSlashAutocomplete
                 out var anchorSuggestions))
             return anchorSuggestions;
 
-        return BuildStaticSegmentSuggestions(body);
+        ParseTypedBody(body, out var tokens, out var endsWithSpace);
+        return SlashSemanticCatalogIndex.GetSegmentSuggestions(tokens, endsWithSpace, body);
     }
 
     /// <summary>Путь и подпись шага для шапки popup (домен → объект → действие → аргумент).</summary>
@@ -105,16 +106,29 @@ public static class ChatSlashAutocomplete
 
         ParseTypedBody(body, out var tokens, out var endsWithSpace);
         var pathPrefix = body.Length == 0 ? "/" : "/" + body.TrimEnd();
-        var depth = ResolveHierarchyDepth(tokens, endsWithSpace);
-        var nextStep = depth switch
-        {
-            0 => "домен",
-            1 => "объект",
-            2 => "действие",
-            _ => "аргумент",
-        };
+        SlashSemanticFields fields = default;
+        var matchedPath = "";
+        var hasSemantics = SlashSemanticCatalogIndex.TryResolveHierarchy(
+            tokens,
+            endsWithSpace,
+            out fields,
+            out matchedPath);
 
-        return new ChatSlashHierarchyContext(pathPrefix, nextStep, BuildBreadcrumb(tokens, nextStep));
+        var nextStep = !string.IsNullOrEmpty(fields.Domain)
+            ? SlashRouteSemantics.GetNextStepLabel(tokens, endsWithSpace, fields, matchedPath)
+            : ResolveHierarchyDepth(tokens, endsWithSpace) switch
+            {
+                0 => "домен",
+                1 => "объект",
+                2 => "действие",
+                _ => "аргумент",
+            };
+
+        var breadcrumb = !string.IsNullOrEmpty(fields.Domain)
+            ? SlashRouteSemantics.BuildSemanticBreadcrumb(tokens, fields, matchedPath)
+            : BuildBreadcrumb(tokens, nextStep);
+
+        return new ChatSlashHierarchyContext(pathPrefix, nextStep, breadcrumb);
     }
 
     /// <summary>Заменить slash-токен на текущей строке; вернуть полный текст и каретку.</summary>
@@ -135,95 +149,11 @@ public static class ChatSlashAutocomplete
         return true;
     }
 
-    private static IReadOnlyList<ChatSlashSuggestion> BuildRootSegmentSuggestions()
-    {
-        var buckets = new Dictionary<string, ChatSlashSuggestion>(StringComparer.OrdinalIgnoreCase);
-        foreach (var entry in ChatSlashCommandCatalog.AllSuggestions())
-        {
-            if (!TrySplitPathBody(entry.SlashPath, out var segments) || segments.Count == 0)
-                continue;
-
-            var first = segments[0];
-            if (buckets.ContainsKey(first))
-                continue;
-
-            var insert = "/" + first + " ";
-            buckets[first] = new ChatSlashSuggestion(insert, "/" + first, entry.Help, entry.Group, first);
-        }
-
-        return buckets.Values
-            .OrderBy(s => ChatSlashCommandCatalog.SortKeyForSuggestion(s.SlashPath))
-            .ToList();
-    }
-
     public static bool IsRunnableSlashLineAtCaret(string? rawInput, int caretIndex) =>
         SlashLineResolver.TryResolveLine(rawInput, caretIndex, out var line) && line.IsRunnable;
 
     internal static void ParseTypedBodyForResolver(string body, out List<string> tokens, out bool endsWithSpace) =>
         ParseTypedBody(body, out tokens, out endsWithSpace);
-
-    private static IReadOnlyList<ChatSlashSuggestion> BuildStaticSegmentSuggestions(string body)
-    {
-        if (SlashLineResolver.TryResolveBody(body, out var line) && line.ShouldHideSegmentSuggestions)
-            return [];
-
-        ParseTypedBody(body, out var typedTokens, out var endsWithSpace);
-        var buckets = new Dictionary<string, (string Insert, string Path, string Help, string? Group, string Segment)>(
-            StringComparer.OrdinalIgnoreCase);
-
-        foreach (var entry in ChatSlashCommandCatalog.AllSuggestions())
-        {
-            if (!TrySplitPathBody(entry.SlashPath, out var pathSegments))
-                continue;
-
-            if (!TryGetCompletionSegmentIndex(pathSegments, typedTokens, endsWithSpace, out var segmentIndex))
-                continue;
-
-            if (segmentIndex >= pathSegments.Count)
-                continue;
-
-            var segmentValue = pathSegments[segmentIndex];
-            if (!buckets.TryGetValue(segmentValue, out var existing)
-                || entry.SlashPath.Length > existing.Path.Length)
-            {
-                var insert = BuildSlashLineInsert(body, pathSegments, segmentIndex, segmentValue);
-                buckets[segmentValue] = (insert, entry.SlashPath, entry.Help, entry.Group, segmentValue);
-            }
-        }
-
-        return buckets.Values
-            .Select(v => new ChatSlashSuggestion(v.Insert, v.Path, v.Help, v.Group, v.Segment))
-            .OrderBy(s => ChatSlashCommandCatalog.SortKeyForSuggestion(s.SlashPath))
-            .ToList();
-    }
-
-    private static string BuildSlashLineInsert(
-        string typedBody,
-        IReadOnlyList<string> pathSegments,
-        int completeSegmentIndex,
-        string segmentValue)
-    {
-        ParseTypedBody(typedBody, out var typedTokens, out _);
-        var resultSegs = new List<string>(completeSegmentIndex + 1);
-        for (var i = 0; i < completeSegmentIndex; i++)
-            resultSegs.Add(i < typedTokens.Count ? typedTokens[i] : pathSegments[i]);
-
-        resultSegs.Add(segmentValue);
-        var slashPath = "/" + string.Join(" ", resultSegs);
-        if (completeSegmentIndex + 1 < pathSegments.Count
-            || SegmentNeedsUserArgTail(slashPath))
-            slashPath += " ";
-
-        return slashPath;
-    }
-
-    private static bool SegmentNeedsUserArgTail(string slashPath)
-    {
-        if (ChatSlashCommandParser.ShouldAutoExecuteAfterAutocompleteCommit(slashPath))
-            return false;
-
-        return SlashRouteCatalogIndex.GetArgTailKind(slashPath) != SlashArgTailKind.None;
-    }
 
     private static void ParseTypedBody(string body, out List<string> tokens, out bool endsWithSpace)
     {
@@ -232,75 +162,6 @@ public static class ChatSlashAutocomplete
         tokens = trimmed.Length == 0
             ? []
             : trimmed.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
-    }
-
-    private static bool TrySplitPathBody(string slashPath, out List<string> segments)
-    {
-        segments = [];
-        if (slashPath.Length < 2 || slashPath[0] != '/')
-            return false;
-
-        var body = slashPath[1..];
-        if (body.Length == 0)
-            return false;
-
-        segments = body.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
-        return segments.Count > 0;
-    }
-
-    private static bool TryGetCompletionSegmentIndex(
-        IReadOnlyList<string> pathSegments,
-        IReadOnlyList<string> typedTokens,
-        bool endsWithSpace,
-        out int segmentIndex)
-    {
-        segmentIndex = 0;
-        if (endsWithSpace)
-        {
-            if (typedTokens.Count > pathSegments.Count)
-                return false;
-
-            for (var i = 0; i < typedTokens.Count; i++)
-            {
-                if (!pathSegments[i].Equals(typedTokens[i], StringComparison.OrdinalIgnoreCase))
-                    return false;
-            }
-
-            segmentIndex = typedTokens.Count;
-            return segmentIndex < pathSegments.Count;
-        }
-
-        if (typedTokens.Count == 0)
-        {
-            segmentIndex = 0;
-            return pathSegments.Count > 0;
-        }
-
-        for (var i = 0; i < typedTokens.Count - 1; i++)
-        {
-            if (i >= pathSegments.Count
-                || !pathSegments[i].Equals(typedTokens[i], StringComparison.OrdinalIgnoreCase))
-                return false;
-        }
-
-        var lastIdx = typedTokens.Count - 1;
-        if (lastIdx >= pathSegments.Count)
-            return false;
-
-        var lastTyped = typedTokens[lastIdx];
-        var pathSeg = pathSegments[lastIdx];
-        if (!pathSeg.StartsWith(lastTyped, StringComparison.OrdinalIgnoreCase))
-            return false;
-
-        if (lastTyped.Equals(pathSeg, StringComparison.OrdinalIgnoreCase)
-            && typedTokens.Count < pathSegments.Count)
-        {
-            segmentIndex = typedTokens.Count;
-            return true;
-        }
-
-        segmentIndex = lastIdx;
-        return true;
     }
 
     private static bool TryGetDynamicSuggestions(

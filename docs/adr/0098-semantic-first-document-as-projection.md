@@ -21,6 +21,7 @@
 | [0095](0095-workspace-solution-ide-health-stratification.md) | три уровня Health, `stratum` |
 | [0045](0045-agent-chat-persistence-event-log-and-projections.md) | события + проекции |
 | [0009](0009-strangler-migration-and-exceptions.md) | strangler |
+| [0155](0155-documentation-code-correspondence-and-architectural-drift.md) | сквозной каркас correspondence / drift; этот ADR = **L0** |
 ## Резюме
 
 - **Semantic-first:** карта смысла первична; код/доки/git — проекции.
