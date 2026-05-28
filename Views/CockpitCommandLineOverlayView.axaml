@@ -1,7 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:CascadeIDE.ViewModels"
-             xmlns:chat="using:CascadeIDE.Features.Chat"
+             xmlns:ids="using:CascadeIDE.IdeDisplay.CockpitCommandLine"
              x:Class="CascadeIDE.Views.CockpitCommandLineOverlayView"
              x:DataType="vm:CockpitCommandLineOverlayViewModel"
              Focusable="True"
@@ -59,8 +59,8 @@
                    FontSize="11.5"
                    Opacity="0.85"
                    Foreground="{DynamicResource CascadeTheme.CommandPaletteMetaForeground}"
-                   IsVisible="{Binding ChatPanel.ChatSlashBreadcrumb, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
-                   Text="{Binding ChatPanel.ChatSlashBreadcrumb}"/>
+                   IsVisible="{Binding CockpitCommandLineSurfaceSnapshot.Breadcrumb, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                   Text="{Binding CockpitCommandLineSurfaceSnapshot.Breadcrumb}"/>
         <TextBox x:Name="CommandLineTextBox"
                  Classes="ccl-query"
                  Grid.Row="2"
@@ -70,18 +70,18 @@
                  Grid.Row="3"
                  Margin="0,8,0,0"
                  MaxHeight="280"
-                 IsVisible="{Binding ChatPanel.IsChatSlashAutocompleteVisible}"
-                 ItemsSource="{Binding ChatPanel.ComposerPopupSuggestions}"
+                 IsVisible="{Binding CockpitCommandLineSurfaceSnapshot.ShowSuggestions}"
+                 ItemsSource="{Binding CockpitCommandLineSurfaceSnapshot.Suggestions}"
                  SelectedIndex="{Binding ChatPanel.SelectedChatSlashSuggestionIndex, Mode=TwoWay}"
                  Background="Transparent">
           <ListBox.ItemTemplate>
-            <DataTemplate DataType="chat:ChatSlashSuggestionItem">
+            <DataTemplate DataType="ids:CockpitCommandLineSurfaceEntry">
               <StackPanel Orientation="Vertical" Spacing="2">
-                <TextBlock Text="{Binding ListTitle}"
+                <TextBlock Text="{Binding Title}"
                            FontWeight="SemiBold"
                            FontSize="13"
                            Foreground="{DynamicResource CascadeTheme.CommandPaletteTitleForeground}"/>
-                <TextBlock Text="{Binding ListSubtitle}"
+                <TextBlock Text="{Binding Subtitle}"
                            FontSize="12"
                            FontFamily="Consolas,Cascadia Mono,Courier New,monospace"
                            TextWrapping="Wrap"

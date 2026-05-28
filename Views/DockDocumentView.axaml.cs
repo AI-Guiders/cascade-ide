@@ -16,6 +16,7 @@ using CascadeIDE.Features.Editor.Application;
 using CascadeIDE.Features.Editor.Application.Presentation;
 using CascadeIDE.Models;
 using CascadeIDE.Services;
+using CascadeIDE.Features.WorkspaceNavigation.Presentation;
 using CascadeIDE.ViewModels;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -30,6 +31,7 @@ public partial class DockDocumentView : UserControl
     private MainWindowViewModel? _vm;
     private DockDocumentViewModel? _docVm;
     private PropertyChangedEventHandler? _vmHandler;
+    private PropertyChangedEventHandler? _navigationMapHandler;
     private PropertyChangedEventHandler? _documentsHandler;
 
     private bool _renderersInstalled;
@@ -131,13 +133,6 @@ public partial class DockDocumentView : UserControl
             if (args.PropertyName == nameof(MainWindowViewModel.CurrentFilePath))
                 UpdateStabilizedHudRegistration();
 
-            if (args.PropertyName is nameof(MainWindowViewModel.CodeNavigationMapGraphScene)
-                or nameof(MainWindowViewModel.CodeNavigationMapLevel)
-                or nameof(MainWindowViewModel.WorkspaceNavigationMapCfAnchorFullPath))
-            {
-                if (_editor is not null)
-                    _editor.TextArea.TextView.Redraw();
-            }
 
             if (args.PropertyName is nameof(MainWindowViewModel.BreakpointLinesInCurrentFile)
                 or nameof(MainWindowViewModel.AllBreakpointLinesInCurrentFile)
@@ -150,6 +145,18 @@ public partial class DockDocumentView : UserControl
             }
         };
         _vm.PropertyChanged += _vmHandler;
+
+        _navigationMapHandler = (_, args) =>
+        {
+            if (args.PropertyName is nameof(WorkspaceNavigationMapViewModel.CodeNavigationMapGraphScene)
+                or nameof(WorkspaceNavigationMapViewModel.CodeNavigationMapLevel)
+                or nameof(WorkspaceNavigationMapViewModel.WorkspaceNavigationMapCfAnchorFullPath))
+            {
+                if (_editor is not null)
+                    _editor.TextArea.TextView.Redraw();
+            }
+        };
+        _vm.NavigationMap.PropertyChanged += _navigationMapHandler;
 
         _documentsHandler = (_, args) =>
         {
@@ -265,6 +272,12 @@ public partial class DockDocumentView : UserControl
             _vm.SetStabilizedEditorHudContext(null);
             if (_vmHandler is not null)
                 _vm.PropertyChanged -= _vmHandler;
+            if (_navigationMapHandler is not null)
+            {
+                _vm.NavigationMap.PropertyChanged -= _navigationMapHandler;
+                _navigationMapHandler = null;
+            }
+
             if (_documentsHandler is not null)
                 _vm.Documents.PropertyChanged -= _documentsHandler;
         }
@@ -307,17 +320,17 @@ public partial class DockDocumentView : UserControl
         _controlFlowSpacingGenerator = ControlFlowEditorVisualsRegistry.GetOrCreateSpacingGenerator(
             _editor.TextArea.TextView);
         _controlFlowSpacingGenerator.SetActiveCheck(
-            () => _vm.IsControlFlowEditorVirtualSpacingActiveForFile(_docVm.Doc.FilePath));
+            () => _vm.NavigationMap.IsControlFlowEditorVirtualSpacingActiveForFile(_docVm.Doc.FilePath));
         _controlFlowSpacingGenerator.SetLineVisualsProvider(
-            () => _vm.GetControlFlowGutterLineVisualsForFile(_docVm.Doc.FilePath));
+            () => _vm.NavigationMap.GetControlFlowGutterLineVisualsForFile(_docVm.Doc.FilePath));
         ControlFlowEditorVisualsRegistry.InstallSpacingGenerator(
             _editor.TextArea.TextView,
             _controlFlowSpacingGenerator);
 
         _controlFlowGutterGlyphRenderer = new EditorControlFlowGutterGlyphBackgroundRenderer(
             () => _docVm.Doc.FilePath,
-            fp => _vm.GetControlFlowGutterLineVisualsForFile(fp),
-            fp => _vm.IsControlFlowEditorVirtualSpacingActiveForFile(fp));
+            fp => _vm.NavigationMap.GetControlFlowGutterLineVisualsForFile(fp),
+            fp => _vm.NavigationMap.IsControlFlowEditorVirtualSpacingActiveForFile(fp));
         _editor.TextArea.TextView.BackgroundRenderers.Add(_controlFlowGutterGlyphRenderer);
 
         _diagHubHandler = () =>

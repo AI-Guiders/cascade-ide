@@ -254,7 +254,7 @@ internal static partial class WorkspaceAdrMapResolver
         return s;
     }
 
-    private static string? TryComputeRepoRelativePath(string repositoryRootDirectory, string absoluteFilePath)
+    internal static string? TryComputeRepoRelativePath(string repositoryRootDirectory, string absoluteFilePath)
     {
         try
         {

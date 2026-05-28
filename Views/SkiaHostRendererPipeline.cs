@@ -34,7 +34,7 @@ public sealed class CockpitSkiaSceneRenderer : ISkiaSceneRenderer
 
         // Slot visuals: Avalonia controls inside SkiaHost. SM: тонкий accent, когда related непустой (не рисуем список).
         if (slot == SkiaHostSlot.Pfd && _surface == SkiaHostSurface.MainWindow
-            && vm.IsPfdRegionExpanded && vm.WorkspaceNavigationMapHasRelated)
+            && vm.IsPfdRegionExpanded && vm.NavigationMap.WorkspaceNavigationMapHasRelated)
             DrawCodeNavigationMapActiveAccent(context, bounds);
 
         static void DrawCodeNavigationMapActiveAccent(DrawingContext ctx, Rect b)

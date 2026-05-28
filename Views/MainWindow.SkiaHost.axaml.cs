@@ -40,7 +40,7 @@ public partial class MainWindow
             or nameof(ViewModels.MainWindowViewModel.IsMfdColumnVisible)
             or nameof(ViewModels.MainWindowViewModel.MainGridColumnDefinitions)
             or nameof(ViewModels.MainWindowViewModel.IsPfdRegionExpanded)
-            or nameof(ViewModels.MainWindowViewModel.WorkspaceNavigationMapRelatedCount)
-            or nameof(ViewModels.MainWindowViewModel.WorkspaceNavigationMapHasRelated)
-            or nameof(ViewModels.MainWindowViewModel.CodeNavigationMapGraphScene);
+            or nameof(Features.WorkspaceNavigation.Presentation.WorkspaceNavigationMapViewModel.WorkspaceNavigationMapRelatedCount)
+            or nameof(Features.WorkspaceNavigation.Presentation.WorkspaceNavigationMapViewModel.WorkspaceNavigationMapHasRelated)
+            or nameof(Features.WorkspaceNavigation.Presentation.WorkspaceNavigationMapViewModel.CodeNavigationMapGraphScene);
 }

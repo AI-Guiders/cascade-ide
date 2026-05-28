@@ -84,7 +84,7 @@
 | `MainWindowViewModel.UiGitWorkspace.cs` | 126 | Git + workspace UI. |
 | `MainWindowViewModel.ViewBridge.cs` | 68 | Колбэки и провайдеры, которые View подставляет в главный VM (диалоги, UI automation). |
 | `MainWindowViewModel.WebAiPortal.cs` | 29 | Страница MFD «веб-портал» (ADR 0108): URL, результат последнего вызова моста, `WebAiPortalCommandBridge`. |
-| `MainWindowViewModel.WorkspaceNavigationMap.Bridge.cs` | ≈40 | Мост `NavigationMap` + `IWorkspaceNavigationMapHost`; прокси для MCP/редактора. |
+| `MainWindowViewModel.WorkspaceNavigationMap.Bridge.cs` | ≈75 | Мост `NavigationMap` + `IWorkspaceNavigationMapHost`; lifecycle и host API без прокси-привязок на MWVM. |
 | `Features/WorkspaceNavigation/Presentation/WorkspaceNavigationMapViewModel*.cs` | ≈750 | Слот Pfd/MFD: карта намерений (ADR 0039/0065), refresh через `WorkspaceNavigationMapRefreshComposer`. |
 | `MainWindowViewModel.WorkspaceSplitters.cs` | 23 | Сплиттеры рабочей области (MainGrid, обозреватель решения, Git и т.д.): режим «взлёт» — блокировка перетаскивания. |
 

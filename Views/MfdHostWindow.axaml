@@ -48,5 +48,6 @@
             <Border x:Name="AgentHighlightOverlay" IsVisible="False" BorderBrush="#FF6B9D" BorderThickness="2" Background="#10000000"/>
         </Canvas>
         <views:CommandPaletteView ZIndex="5000"/>
+        <views:CockpitCommandLineOverlayView DataContext="{Binding CockpitCommandLineOverlay}" ZIndex="4999"/>
     </Grid>
 </views:PointerTrackingWindow>

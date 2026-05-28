@@ -12,8 +12,8 @@
             <TextBlock Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
                        TextWrapping="Wrap"
                        Text="Главная ось control-flow (settings.toml: [code_navigation_map].control_flow_main_axis):"/>
-            <ComboBox ItemsSource="{Binding CodeNavigationMapControlFlowMainAxisOptions}"
-                      SelectedItem="{Binding CodeNavigationMapControlFlowMainAxis, Mode=TwoWay}"
+            <ComboBox ItemsSource="{Binding NavigationMap.CodeNavigationMapControlFlowMainAxisOptions}"
+                      SelectedItem="{Binding NavigationMap.CodeNavigationMapControlFlowMainAxis, Mode=TwoWay}"
                       MinWidth="260"/>
             <TextBlock FontSize="11"
                        Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"

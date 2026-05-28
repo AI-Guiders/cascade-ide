@@ -20,7 +20,9 @@
         <chrome:AttentionZoneContainer Zone="Pfd" Grid.Column="0">
             <Grid>
                 <views:SolutionExplorerView IsVisible="{Binding IsDockedPfdSolutionExplorerTree}"/>
-                <views:WorkspaceNavigationMapView IsVisible="{Binding IsDockedPfdWorkspaceNavigationMap}"/>
+                <Grid IsVisible="{Binding IsDockedPfdWorkspaceNavigationMap}">
+                    <views:WorkspaceNavigationMapView DataContext="{Binding NavigationMap}"/>
+                </Grid>
                 <views:ZoneInstrumentMountView IsVisible="{Binding UseSkiaInstrumentMount}"
                                                HorizontalAlignment="Right"
                                                VerticalAlignment="Top"
@@ -73,5 +75,8 @@
             <Border x:Name="AgentHighlightOverlay" IsVisible="False" BorderBrush="#FF6B9D" BorderThickness="2" Background="#10000000"/>
         </Canvas>
         <views:CommandPaletteView Grid.Column="0" Grid.ColumnSpan="3" ZIndex="5000"/>
+        <views:CockpitCommandLineOverlayView Grid.Column="0" Grid.ColumnSpan="3"
+                                           DataContext="{Binding CockpitCommandLineOverlay}"
+                                           ZIndex="4999"/>
     </Grid>
 </views:PointerTrackingWindow>
