@@ -168,6 +168,10 @@ public partial class MainWindowViewModel
             getSolutionPathForAgent: () => Workspace.SolutionPath);
         ChatPanel.SetIntercomFontsSettings(_settings.Fonts.Intercom);
         ChatPanel.ApplyIntercomPresentationSettings(_settings.Intercom);
+        CockpitCommandLineOverlay = new CockpitCommandLineOverlayViewModel(
+            ChatPanel,
+            () => PrimaryWorkSurface,
+            () => CommandPaletteHost);
         ChatPanel.SetCascadeSettingsAccessor(() => _settings);
         ChatPanel.SetIntercomTransportCoordinator(_intercomTransport);
         ChatPanel.SetIntercomAdminRunner((handlerId, argsTail, ct) =>

@@ -78,7 +78,7 @@ public partial class MainWindow : PointerTrackingWindow
     private void TryApplyHotkeys()
     {
         if (DataContext is ViewModels.MainWindowViewModel vm)
-            Services.MainWindowHotkeyService.ApplyAll(this, vm);
+            Features.Shell.Application.MainWindowViewServices.ApplyHotkeys(this, vm);
     }
 
     private void OnDataContextChanged(object? sender, EventArgs e)
@@ -115,9 +115,11 @@ public partial class MainWindow : PointerTrackingWindow
             vm.RequestSaveMarkdownFile = ShowSaveExpandedMarkdownDialogAsync;
             vm.CaptureWindowForMcpAsync = (ws, rel, scope) => CaptureWindowForMcpCoreAsync(ws, rel, scope);
             vm.GetUiLayoutProvider = () => UiLayoutSnapshot.BuildJsonAllWindows(this);
-            vm.GetColorsUnderCursorProvider = () => Services.UiColorsUnderCursor.GetJson(this);
-            vm.GetControlAppearanceProvider = (name) => Services.UiControlAppearance.GetJson(this, name);
-            vm.SetControlLayoutProvider = (name, json) => Services.UiControlLayoutApply.Apply(this, name, json);
+            vm.GetColorsUnderCursorProvider = () => Features.Shell.Application.MainWindowViewServices.GetColorsUnderCursorJson(this);
+            vm.GetControlAppearanceProvider = name =>
+                Features.Shell.Application.MainWindowViewServices.GetControlAppearanceJson(this, name ?? "");
+            vm.SetControlLayoutProvider = (name, json) =>
+                Features.Shell.Application.MainWindowViewServices.ApplyControlLayout(this, name, json);
             vm.AddControlProvider = (parentName, controlType, content, controlName) => Services.UiControlAdd.AddControl(this, parentName, controlType, content, controlName);
             vm.SetControlTextProvider = (name, text) =>
             {
