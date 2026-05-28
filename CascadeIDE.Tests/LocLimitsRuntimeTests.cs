@@ -1,4 +1,5 @@
 using CascadeIDE.Features.UiChrome;
+using CascadeIDE.Features.Workspace;
 using CascadeIDE.Models;
 using Xunit;
 
@@ -22,7 +23,7 @@ public sealed class LocLimitsRuntimeTests
     {
         try
         {
-            LocLimitsRuntime.ApplyWorkspaceToml(new UiWorkspaceToml
+            LocLimitsRuntime.ApplyWorkspaceToml(new RepositoryWorkspaceToml
             {
                 LocLimits = new UiWorkspaceLocLimitsToml { MediumMin = 100, HighMin = 200 }
             });

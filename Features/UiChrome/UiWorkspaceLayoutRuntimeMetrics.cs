@@ -37,7 +37,7 @@ public static class UiWorkspaceLayoutRuntimeMetrics
         MfdRegionExpandedAgentChatWidthPixels = UiWorkspaceLayoutDimensions.MfdRegionExpandedAgentChatWidthPixels;
     }
 
-    internal static void ApplyWorkspaceToml(UiWorkspaceToml? w)
+    internal static void ApplyWorkspaceToml(Features.Workspace.RepositoryWorkspaceToml? w)
     {
         ResetToCodeDefaults();
         if (w is null)

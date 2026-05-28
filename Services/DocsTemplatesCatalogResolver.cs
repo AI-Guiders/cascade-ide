@@ -1,5 +1,5 @@
 using System.IO;
-using CascadeIDE.Features.UiChrome;
+using CascadeIDE.Features.Workspace;
 
 namespace CascadeIDE.Services;
 
@@ -16,11 +16,11 @@ internal static class DocsTemplatesCatalogResolver
 
     private sealed class DocsTemplatesCatalogRoot
     {
-        public UiWorkspaceDocsTemplatesToml? DocsTemplates { get; set; }
+        public RepositoryDocsTemplatesToml? DocsTemplates { get; set; }
     }
 
     public static IReadOnlyList<TemplateEntry> ResolveTemplatesFromWorkspaceToml(
-        UiWorkspaceToml? workspaceToml,
+        RepositoryWorkspaceToml? workspaceToml,
         string workspaceRoot)
     {
         var list = new List<TemplateEntry>();

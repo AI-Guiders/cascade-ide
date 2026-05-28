@@ -71,7 +71,7 @@ public static class CodeNavigationMapConditionBranchPresetsLoader
                 return [];
 
             var text = File.ReadAllText(path);
-            var ui = CascadeTomlSerializer.Deserialize<UiWorkspaceToml>(text);
+            var ui = CascadeTomlSerializer.Deserialize<Features.Workspace.RepositoryWorkspaceToml>(text);
             if (ui?.CodeNavigationMap?.ConditionBranch?.Presets is not { Count: > 0 } presets)
                 return [];
 

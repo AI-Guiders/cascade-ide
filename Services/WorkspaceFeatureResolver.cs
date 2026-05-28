@@ -1,12 +1,12 @@
-using CascadeIDE.Features.UiChrome;
+using CascadeIDE.Features.Workspace;
 using CascadeIDE.Models;
 
 namespace CascadeIDE.Services;
 
 internal static class WorkspaceFeatureResolver
 {
-    public static UiWorkspaceFeatureToml? ResolveFeatureFromWorkspaceToml(
-        UiWorkspaceToml? workspaceToml,
+    public static RepositoryFeatureToml? ResolveFeatureFromWorkspaceToml(
+        RepositoryWorkspaceToml? workspaceToml,
         string repositoryRootDirectory,
         string absoluteFilePath)
     {
@@ -20,7 +20,7 @@ internal static class WorkspaceFeatureResolver
 
         var normalizedRel = NormalizePath(rel);
 
-        UiWorkspaceFeatureToml? best = null;
+        RepositoryFeatureToml? best = null;
         var bestLen = -1;
 
         foreach (var f in features)
@@ -48,7 +48,7 @@ internal static class WorkspaceFeatureResolver
         return best;
     }
 
-    public static string BuildFeatureLine(UiWorkspaceFeatureToml? feature)
+    public static string BuildFeatureLine(RepositoryFeatureToml? feature)
     {
         if (feature is null)
             return "";

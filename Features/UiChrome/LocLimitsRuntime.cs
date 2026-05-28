@@ -23,7 +23,7 @@ public static class LocLimitsRuntime
         HighMin = DefaultHighMin;
     }
 
-    internal static void ApplyWorkspaceToml(UiWorkspaceToml? w)
+    internal static void ApplyWorkspaceToml(Features.Workspace.RepositoryWorkspaceToml? w)
     {
         ResetToCodeDefaults();
         var limits = w?.LocLimits;

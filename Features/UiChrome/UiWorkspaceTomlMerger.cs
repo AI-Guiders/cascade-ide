@@ -1,36 +1,38 @@
+using CascadeIDE.Features.Workspace;
 using CascadeIDE.Models;
 using CascadeIDE.Services;
 
 namespace CascadeIDE.Features.UiChrome;
 
 /// <summary>
-/// Слияние слоёв <see cref="UiWorkspaceToml"/> (ADR 0021 §2.1): <c>chrome</c>, <c>loc_limits</c>, <c>routing</c>, <c>code_navigation.presets</c>.
+/// Слияние слоёв <see cref="RepositoryWorkspaceToml"/> (ADR 0021 §2.1): <c>chrome</c>, <c>loc_limits</c>, <c>routing</c>, <c>code_navigation.presets</c>.
 /// </summary>
-public static class UiWorkspaceTomlMerger
+public static class RepositoryWorkspaceTomlMerger
 {
-    public static UiWorkspaceToml? Merge(UiWorkspaceToml? lower, UiWorkspaceToml? higher)
+    public static RepositoryWorkspaceToml? Merge(RepositoryWorkspaceToml? lower, RepositoryWorkspaceToml? higher)
     {
         if (lower is null && higher is null)
             return null;
 
-        return new UiWorkspaceToml
+        return new RepositoryWorkspaceToml
         {
             Workspace = MergeWorkspace(lower?.Workspace, higher?.Workspace),
             Chrome = MergeWorkspaceChrome(lower?.Chrome, higher?.Chrome),
             LocLimits = MergeLocLimits(lower?.LocLimits, higher?.LocLimits),
             Routing = MergeRouting(lower?.Routing, higher?.Routing),
             CodeNavigation = MergeCodeNavigation(lower?.CodeNavigation, higher?.CodeNavigation),
+            CodeNavigationMap = higher?.CodeNavigationMap ?? lower?.CodeNavigationMap,
         };
     }
 
-    private static UiWorkspaceWorkspaceToml? MergeWorkspace(
-        UiWorkspaceWorkspaceToml? lower,
-        UiWorkspaceWorkspaceToml? higher)
+    private static RepositoryWorkspaceSectionToml? MergeWorkspace(
+        RepositoryWorkspaceSectionToml? lower,
+        RepositoryWorkspaceSectionToml? higher)
     {
         if (lower is null && higher is null)
             return null;
 
-        return new UiWorkspaceWorkspaceToml
+        return new RepositoryWorkspaceSectionToml
         {
             Adr = MergeWorkspaceAdr(lower?.Adr, higher?.Adr),
             Features = MergeWorkspaceFeatures(lower?.Features, higher?.Features),
@@ -38,14 +40,14 @@ public static class UiWorkspaceTomlMerger
         };
     }
 
-    private static UiWorkspaceAdrToml? MergeWorkspaceAdr(
-        UiWorkspaceAdrToml? lower,
-        UiWorkspaceAdrToml? higher)
+    private static RepositoryAdrToml? MergeWorkspaceAdr(
+        RepositoryAdrToml? lower,
+        RepositoryAdrToml? higher)
     {
         var map = MergeObjectDictionary(lower?.Map, higher?.Map);
         if (map is null)
             return null;
-        return new UiWorkspaceAdrToml
+        return new RepositoryAdrToml
         {
             AutoInclude = higher?.AutoInclude ?? lower?.AutoInclude,
             MaxRelated = higher?.MaxRelated ?? lower?.MaxRelated,
@@ -53,14 +55,14 @@ public static class UiWorkspaceTomlMerger
         };
     }
 
-    private static UiWorkspaceFeaturesToml? MergeWorkspaceFeatures(
-        UiWorkspaceFeaturesToml? lower,
-        UiWorkspaceFeaturesToml? higher)
+    private static RepositoryFeaturesToml? MergeWorkspaceFeatures(
+        RepositoryFeaturesToml? lower,
+        RepositoryFeaturesToml? higher)
     {
         if (lower?.Feature is not { Count: > 0 } && higher?.Feature is not { Count: > 0 })
             return null;
 
-        var merged = new Dictionary<string, UiWorkspaceFeatureToml>(StringComparer.OrdinalIgnoreCase);
+        var merged = new Dictionary<string, RepositoryFeatureToml>(StringComparer.OrdinalIgnoreCase);
         if (lower?.Feature is { Count: > 0 })
         {
             foreach (var f in lower.Feature)
@@ -83,10 +85,10 @@ public static class UiWorkspaceTomlMerger
             }
         }
 
-        return merged.Count == 0 ? null : new UiWorkspaceFeaturesToml { Feature = merged.Values.ToList() };
+        return merged.Count == 0 ? null : new RepositoryFeaturesToml { Feature = merged.Values.ToList() };
     }
 
-    private static UiWorkspaceFeatureToml CloneFeature(UiWorkspaceFeatureToml f) => new()
+    private static RepositoryFeatureToml CloneFeature(RepositoryFeatureToml f) => new()
     {
         Id = f.Id?.Trim(),
         Title = f.Title?.Trim(),
@@ -95,9 +97,9 @@ public static class UiWorkspaceTomlMerger
         Tags = f.Tags?.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim()).ToList() ?? [],
     };
 
-    private static UiWorkspaceDocsTemplatesToml? MergeDocsTemplates(
-        UiWorkspaceDocsTemplatesToml? lower,
-        UiWorkspaceDocsTemplatesToml? higher)
+    private static RepositoryDocsTemplatesToml? MergeDocsTemplates(
+        RepositoryDocsTemplatesToml? lower,
+        RepositoryDocsTemplatesToml? higher)
     {
         if (lower is null && higher is null)
             return null;
@@ -125,7 +127,7 @@ public static class UiWorkspaceTomlMerger
             }
         }
 
-        return new UiWorkspaceDocsTemplatesToml
+        return new RepositoryDocsTemplatesToml
         {
             CatalogPath = higher?.CatalogPath ?? lower?.CatalogPath,
             Template = merged.Values.ToList()

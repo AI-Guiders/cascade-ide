@@ -32,7 +32,7 @@ public static class UiModeCatalog
     private static readonly Dictionary<string, string?> WindowTitleOverrideByMode = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>Снимок <c>UiModes/workspace.toml</c> из бандла для merge с репозиторием (ADR 0021 §2.1).</summary>
-    private static UiWorkspaceToml? _bundleWorkspaceToml;
+    private static Features.Workspace.RepositoryWorkspaceToml? _bundleWorkspaceToml;
 
     public static bool IsInitialized
     {
@@ -174,7 +174,7 @@ public static class UiModeCatalog
             if (!_initialized)
                 return;
 
-            UiWorkspaceToml? repo = null;
+            Features.Workspace.RepositoryWorkspaceToml? repo = null;
             if (!string.IsNullOrWhiteSpace(solutionDirectory))
             {
                 var trimmed = solutionDirectory.Trim();
@@ -183,7 +183,7 @@ public static class UiModeCatalog
                 {
                     try
                     {
-                        repo = CascadeTomlSerializer.Deserialize<UiWorkspaceToml>(File.ReadAllText(path));
+                        repo = CascadeTomlSerializer.Deserialize<Features.Workspace.RepositoryWorkspaceToml>(File.ReadAllText(path));
                     }
                     catch (Exception ex)
                     {
@@ -192,7 +192,7 @@ public static class UiModeCatalog
                 }
             }
 
-            var merged = UiWorkspaceTomlMerger.Merge(_bundleWorkspaceToml, repo);
+            var merged = RepositoryWorkspaceTomlMerger.Merge(_bundleWorkspaceToml, repo);
             UiWorkspaceLayoutRuntimeMetrics.ApplyWorkspaceToml(merged);
             AttentionZonePanelRuntime.ApplyWorkspaceToml(merged);
             MarkdownPreviewPlacementRuntime.ApplyWorkspaceToml(merged);
@@ -286,7 +286,7 @@ public static class UiModeCatalog
         {
             try
             {
-                var w = CascadeTomlSerializer.Deserialize<UiWorkspaceToml>(workspaceTomlText);
+                var w = CascadeTomlSerializer.Deserialize<Features.Workspace.RepositoryWorkspaceToml>(workspaceTomlText);
                 _bundleWorkspaceToml = w;
                 UiWorkspaceLayoutRuntimeMetrics.ApplyWorkspaceToml(w);
                 AttentionZonePanelRuntime.ApplyWorkspaceToml(w);

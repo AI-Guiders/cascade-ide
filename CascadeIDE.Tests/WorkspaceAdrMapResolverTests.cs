@@ -1,4 +1,5 @@
 using CascadeIDE.Features.UiChrome;
+using CascadeIDE.Features.Workspace;
 using CascadeIDE.Services;
 using Xunit;
 
@@ -9,11 +10,11 @@ public sealed class WorkspaceAdrMapResolverTests
     [Fact]
     public void ResolveAdrDocPaths_longest_prefix_wins_over_star()
     {
-        var w = new UiWorkspaceToml
+        var w = new RepositoryWorkspaceToml
         {
-            Workspace = new UiWorkspaceWorkspaceToml
+            Workspace = new RepositoryWorkspaceSectionToml
             {
-                Adr = new UiWorkspaceAdrToml
+                Adr = new RepositoryAdrToml
                 {
                     Map = new Dictionary<string, object>
                     {
@@ -38,11 +39,11 @@ public sealed class WorkspaceAdrMapResolverTests
     [Fact]
     public void ResolveAdrDocPaths_array_values_are_supported()
     {
-        var w = new UiWorkspaceToml
+        var w = new RepositoryWorkspaceToml
         {
-            Workspace = new UiWorkspaceWorkspaceToml
+            Workspace = new RepositoryWorkspaceSectionToml
             {
-                Adr = new UiWorkspaceAdrToml
+                Adr = new RepositoryAdrToml
                 {
                     Map = new Dictionary<string, object>
                     {

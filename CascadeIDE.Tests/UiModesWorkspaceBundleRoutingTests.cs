@@ -1,4 +1,5 @@
 using CascadeIDE.Features.UiChrome;
+using CascadeIDE.Features.Workspace;
 using CascadeIDE.Services;
 using Xunit;
 
@@ -30,7 +31,7 @@ public sealed class UiModesWorkspaceBundleRoutingTests
         Assert.True(File.Exists(path), $"Missing {path}");
 
         var text = File.ReadAllText(path);
-        var w = CascadeTomlSerializer.Deserialize<UiWorkspaceToml>(text);
+        var w = CascadeTomlSerializer.Deserialize<RepositoryWorkspaceToml>(text);
         Assert.NotNull(w?.Routing?.Attention);
 
         foreach (var intent in new[]

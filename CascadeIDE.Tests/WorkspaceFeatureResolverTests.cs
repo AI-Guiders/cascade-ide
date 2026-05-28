@@ -1,4 +1,4 @@
-using CascadeIDE.Features.UiChrome;
+using CascadeIDE.Features.Workspace;
 using CascadeIDE.Services;
 using Xunit;
 
@@ -9,22 +9,22 @@ public sealed class WorkspaceFeatureResolverTests
     [Fact]
     public void ResolveFeature_longest_prefix_wins()
     {
-        var w = new UiWorkspaceToml
+        var w = new RepositoryWorkspaceToml
         {
-            Workspace = new UiWorkspaceWorkspaceToml
+            Workspace = new RepositoryWorkspaceSectionToml
             {
-                Features = new UiWorkspaceFeaturesToml
+                Features = new RepositoryFeaturesToml
                 {
                     Feature =
                     [
-                        new UiWorkspaceFeatureToml
+                        new RepositoryFeatureToml
                         {
                             Id = "ui",
                             Title = "UI",
                             Paths = ["Features/"],
                             Docs = ["docs/adr/0006-presentation-layers-and-feature-slices.md"]
                         },
-                        new UiWorkspaceFeatureToml
+                        new RepositoryFeatureToml
                         {
                             Id = "uichrome",
                             Title = "UiChrome",

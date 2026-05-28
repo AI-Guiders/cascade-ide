@@ -36,7 +36,7 @@ public static class AttentionZonePanelRuntime
         _byPanel = BuildDefaultMap();
 
     /// <summary>Применяет метрики workspace и карту панелей из распарсенного TOML.</summary>
-    internal static void ApplyWorkspaceToml(UiWorkspaceToml? w)
+    internal static void ApplyWorkspaceToml(Features.Workspace.RepositoryWorkspaceToml? w)
     {
         var map = BuildDefaultMap();
         if (w?.Routing?.Attention is { Count: > 0 } overrides)

@@ -1,5 +1,5 @@
 using System.Text.RegularExpressions;
-using CascadeIDE.Features.UiChrome;
+using CascadeIDE.Features.Workspace;
 using CascadeIDE.Models;
 
 namespace CascadeIDE.Services;
@@ -9,8 +9,11 @@ internal static partial class WorkspaceAdrMapResolver
     public const string AutoIncludeNone = "none";
     public const string AutoIncludeLinked = "linked";
 
+    public const string DefaultAdrRootDir = "docs/adr/";
+    public const string DefaultAdrIdRegex = @"(?:^|/)docs/adr/(?<id>\d{4})-";
+
     public static IReadOnlyList<string> ResolveAdrDocPathsFromWorkspaceToml(
-        UiWorkspaceToml? workspaceToml,
+        RepositoryWorkspaceToml? workspaceToml,
         string repositoryRootDirectory,
         string absoluteFilePath)
     {
@@ -58,15 +61,19 @@ internal static partial class WorkspaceAdrMapResolver
             .ToList();
     }
 
-    public static string BuildAdrIndicatorLine(IReadOnlyList<string> adrDocPaths)
+    public static string BuildAdrIndicatorLine(
+        IReadOnlyList<string> adrDocPaths,
+        RepositoryAdrToml? adrSettings = null)
     {
         if (adrDocPaths.Count == 0)
             return "";
 
+        var idRegex = ResolveAdrIdRegex(adrSettings);
+
         var ids = new List<string>(adrDocPaths.Count);
         foreach (var p in adrDocPaths)
         {
-            var id = TryExtractAdrId(p);
+            var id = TryExtractAdrId(p, idRegex);
             ids.Add(id ?? p);
         }
 
@@ -111,17 +118,19 @@ internal static partial class WorkspaceAdrMapResolver
 
     public static string GuessAdrPreviewTitle(string repoRelativeDocPath)
     {
-        var id = TryExtractAdrId(repoRelativeDocPath);
+        var id = TryExtractAdrId(repoRelativeDocPath, ResolveAdrIdRegex(null));
         return id is null ? repoRelativeDocPath : $"{id}";
     }
 
     public static IReadOnlyList<string> ExtractLinkedAdrDocPathsFromMarkdown(
         string markdown,
-        string currentDocRepoRelativePath)
+        string currentDocRepoRelativePath,
+        RepositoryAdrToml? adrSettings = null)
     {
         if (string.IsNullOrWhiteSpace(markdown))
             return [];
 
+        var adrRoot = NormalizeAdrRootDir(adrSettings?.RootDir);
         var current = NormalizeDocPath(currentDocRepoRelativePath);
         var list = new List<string>();
 
@@ -139,7 +148,7 @@ internal static partial class WorkspaceAdrMapResolver
             if (resolved is null)
                 continue;
 
-            if (!resolved.StartsWith("docs/adr/", StringComparison.OrdinalIgnoreCase))
+            if (!resolved.StartsWith(adrRoot, StringComparison.OrdinalIgnoreCase))
                 continue;
 
             if (string.Equals(resolved, current, StringComparison.OrdinalIgnoreCase))
@@ -167,12 +176,16 @@ internal static partial class WorkspaceAdrMapResolver
         if (t.Length == 0)
             return null;
 
-        // Absolute-ish repo path.
-        if (t.StartsWith("docs/adr/", StringComparison.OrdinalIgnoreCase))
+        // Absolute-ish repo path (under configured ADR root).
+        var adrRoot = DefaultAdrRootDir;
+        if (t.StartsWith(adrRoot, StringComparison.OrdinalIgnoreCase))
             return NormalizeDocPath(t);
 
         // Relative path: resolve against current doc directory.
-        if (t.StartsWith("./", StringComparison.Ordinal) || t.StartsWith("../", StringComparison.Ordinal))
+        // Markdown commonly uses either "./x.md", "../x.md" or just "x.md" (same directory).
+        if (t.StartsWith("./", StringComparison.Ordinal)
+            || t.StartsWith("../", StringComparison.Ordinal)
+            || (!t.Contains(':') && !t.StartsWith("/", StringComparison.Ordinal)))
         {
             var cur = NormalizeDocPath(currentDocRepoRelativePath);
             var lastSlash = cur.LastIndexOf('/');
@@ -206,6 +219,33 @@ internal static partial class WorkspaceAdrMapResolver
         if (s.Length == 0)
             return "";
         return s.Replace('\\', '/');
+    }
+
+    private static string NormalizeAdrRootDir(string? raw)
+    {
+        var s = (raw ?? "").Trim();
+        if (s.Length == 0)
+            return DefaultAdrRootDir;
+        s = s.Replace('\\', '/');
+        if (!s.EndsWith("/", StringComparison.Ordinal))
+            s += "/";
+        return s;
+    }
+
+    private static Regex ResolveAdrIdRegex(RepositoryAdrToml? adrSettings)
+    {
+        var raw = (adrSettings?.IdRegex ?? "").Trim();
+        if (raw.Length == 0)
+            raw = DefaultAdrIdRegex;
+
+        try
+        {
+            return new Regex(raw, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        }
+        catch
+        {
+            return new Regex(DefaultAdrIdRegex, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        }
     }
 
     private static string NormalizeTomlPath(string rawKey)
@@ -254,17 +294,15 @@ internal static partial class WorkspaceAdrMapResolver
         return [];
     }
 
-    private static string? TryExtractAdrId(string docPath)
+    private static string? TryExtractAdrId(string docPath, Regex idRegex)
     {
         var p = (docPath ?? "").Replace('\\', '/');
-        var m = AdrIdFromPathRegex().Match(p);
+        var m = idRegex.Match(p);
         if (!m.Success)
             return null;
-        return $"ADR {m.Groups["id"].Value}";
+        var id = m.Groups["id"].Value;
+        return string.IsNullOrWhiteSpace(id) ? null : $"ADR {id}";
     }
-
-    [GeneratedRegex(@"(?:^|/)docs/adr/(?<id>\d{4})-", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
-    private static partial Regex AdrIdFromPathRegex();
 
     // Markdown links: [text](target)
     [GeneratedRegex(@"\[[^\]]*\]\((?<target>[^)]+)\)", RegexOptions.CultureInvariant)]
