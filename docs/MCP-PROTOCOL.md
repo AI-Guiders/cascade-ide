@@ -169,10 +169,12 @@
 
 | command_id | Описание |
 |-----------:|----------|
+| `close_correspondence_page` | Закрыть страницу Correspondence (CRS) — первая другая разрешённая страница Mfd. returns: text. |
 | `close_environment_readiness_page` | Перейти с страницы «готовность окружения» на первую другую разрешённую страницу вторичного контура. returns: text. |
 | `cycle_ui_mode` | Циклически переключить UI mode (hotkey). returns: text. |
 | `set_mfd_shell_page` | Активная страница оболочки Mfd: имя значения MfdShellPage (Chat, Terminal, …). Якорь на экране — пресет (v1 — колонка зоны Mfd). args: page:string; returns: text; example: {"page":"Chat"}. |
 | `set_secondary_shell_page` | Устаревший идентификатор MCP-команды; поведение совпадает с `set_mfd_shell_page`. args: page:string; returns: text; example: {"page":"Chat"}. |
+| `show_correspondence_page` | Показать страницу Correspondence (CRS) во вторичном контуре (ADR 0156). Разворачивает регион Mfd при необходимости. returns: text. |
 | `show_environment_readiness_page` | Показать страницу «готовность окружения» во вторичном контуре (зона Mfd; ADR 0023). Разворачивает регион Mfd при необходимости. returns: text. |
 | `show_hybrid_index_page` | Показать страницу Hybrid Codebase Index (HCI) во вторичном контуре/MFD. Разворачивает регион Mfd при необходимости. returns: text. |
 | `show_markdown_preview_page` | Показать Markdown preview как страницу во вторичном контуре/MFD. returns: text. |
@@ -225,6 +227,7 @@
 |-----------:|----------|
 | `build_solution_ui` | Кнопка «Собрать» в тулбаре: dotnet build в панель вывода (не structured build). returns: text. |
 | `cockpit.open_command_line` | Открыть Cockpit Command Line активного Forward host (Intercom: полоса над composer). args: initial_text?:string; returns: text; example: {"initial_text":"/intercom message anchors list"}. |
+| `get_correspondence_context` | JSON: слои correspondence, feature, forward ADR, reverse anchors для файла (ADR 0156). args: file_path?:string; returns: json; example: {"file_path":"Features/WorkspaceNavigation/Application/DocReverseAnchorResolver.cs"}. |
 | `open_docs_template` | Открыть шаблон документации из `docs/templates` в Markdown Preview. args: path?:string; returns: text; example: {"path":"docs/templates/feature.md"}. |
 | `open_workspace_adr_correspondence` | Открыть correspondence ADR для текущего файла (как клик по строке ADR на PFD). returns: text. |
 | `open_workspace_feature_docs` | Открыть документацию фичи для текущего файла (как клик по строке Feature на PFD); при множестве docs — pick. returns: text. |

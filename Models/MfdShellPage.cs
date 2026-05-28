@@ -40,4 +40,7 @@ public enum MfdShellPage
 
     /// <summary>Редактор документов в Mfd при <c>primary_work_surface = intercom</c> (ADR 0120).</summary>
     Editor = 17,
+
+    /// <summary>Correspondence Surface (CRS): слои L0–L4, forward/reverse doc↔code (ADR 0156).</summary>
+    Correspondence = 18,
 }

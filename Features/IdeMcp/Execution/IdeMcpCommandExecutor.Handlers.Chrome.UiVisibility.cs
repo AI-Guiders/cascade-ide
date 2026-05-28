@@ -36,12 +36,12 @@ internal sealed partial class IdeMcpCommandExecutor
         });
         add(CycleCodeNavigationMapPresentation, async (_, _) =>
         {
-            _vm.CycleCodeNavigationMapPresentation();
+            _vm.NavigationMap.CycleCodeNavigationMapPresentation();
             return "OK";
         });
         add(CycleCodeNavigationMapLevel, async (_, _) =>
         {
-            _vm.CycleCodeNavigationMapLevel();
+            _vm.NavigationMap.CycleCodeNavigationMapLevel();
             return "OK";
         });
         add(SetCodeNavigationMapLevel, async (args, _) =>
@@ -49,17 +49,17 @@ internal sealed partial class IdeMcpCommandExecutor
             var level = McpCommandJsonArgs.String(args, "level")?.Trim();
             if (string.IsNullOrEmpty(level))
                 return "Missing level (file | controlFlow)";
-            _vm.SetCodeNavigationMapLevel(level);
+            _vm.NavigationMap.SetCodeNavigationMapLevel(level);
             return $"OK: {CodeNavigationMapLevelKind.Normalize(level)}";
         });
         add(CycleCodeNavigationMapDetailLevel, async (_, _) =>
         {
-            _vm.CycleCodeNavigationMapDetailLevel();
+            _vm.NavigationMap.CycleCodeNavigationMapDetailLevel();
             return "OK";
         });
         add(CycleCodeNavigationMapRelatedGraphLayout, async (_, _) =>
         {
-            _vm.CycleCodeNavigationMapRelatedGraphLayout();
+            _vm.NavigationMap.CycleCodeNavigationMapRelatedGraphLayout();
             return "OK";
         });
 
@@ -174,6 +174,19 @@ internal sealed partial class IdeMcpCommandExecutor
         {
             if (_vm.CloseEnvironmentReadinessPageCommand.CanExecute(null))
                 _vm.CloseEnvironmentReadinessPageCommand.Execute(null);
+            return await Task.FromResult("OK");
+        });
+        Handler showCorrespondencePageHandler = async (_, _) =>
+        {
+            if (_vm.NavigationMap.ShowCorrespondencePageCommand.CanExecute(null))
+                _vm.NavigationMap.ShowCorrespondencePageCommand.Execute(null);
+            return await Task.FromResult("OK");
+        };
+        add(ShowCorrespondencePage, showCorrespondencePageHandler);
+        add(CloseCorrespondencePage, async (_, _) =>
+        {
+            if (_vm.CloseCorrespondencePageCommand.CanExecute(null))
+                _vm.CloseCorrespondencePageCommand.Execute(null);
             return await Task.FromResult("OK");
         });
         add(ShowMarkdownPreviewPage, async (_, _) =>

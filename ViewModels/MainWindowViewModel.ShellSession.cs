@@ -219,5 +219,8 @@ public partial class MainWindowViewModel
 
         if (value == MfdShellPage.RelatedFiles)
             ScheduleWorkspaceNavigationMapRefresh();
+
+        if (value == MfdShellPage.Correspondence)
+            ScheduleWorkspaceNavigationMapRefresh();
     }
 }

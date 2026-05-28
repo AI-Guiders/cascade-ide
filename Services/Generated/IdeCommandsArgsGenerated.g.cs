@@ -41,6 +41,7 @@ internal static class IdeCommandsArgsGenerated
         ["get_code_metrics"] = new IdeCommandsArgs.Arg[] { new("scope", "string", false, false, null), new("path", "string", false, false, null) },
         ["get_code_navigation_context"] = new IdeCommandsArgs.Arg[] { new("mode", "string", true, false, null), new("file_path", "string", false, false, null), new("line", "integer", false, false, null), new("column", "integer", false, false, null), new("max_related", "integer", false, false, null), new("max_nodes", "integer", false, false, null), new("max_edges", "integer", false, false, null), new("preset", "string", false, false, null), new("include_kinds", "string", false, true, "string"), new("exclude_kinds", "string", false, true, "string"), new("level", "string", false, false, null) },
         ["get_control_appearance"] = new IdeCommandsArgs.Arg[] { new("name", "string", false, false, null) },
+        ["get_correspondence_context"] = new IdeCommandsArgs.Arg[] { new("file_path", "string", false, false, null) },
         ["get_editor_content_range"] = new IdeCommandsArgs.Arg[] { new("start_line", "integer", true, false, null), new("end_line", "integer", true, false, null) },
         ["get_editor_state"] = new IdeCommandsArgs.Arg[] { new("max_preview_chars", "integer", false, false, null) },
         ["git_branch"] = new IdeCommandsArgs.Arg[] { new("action", "string", false, false, null), new("name", "string", false, false, null), new("start_point", "string", false, false, null), new("force", "boolean", false, false, null) },

@@ -1,5 +1,6 @@
 using System.Text.Json;
 using CascadeIDE.Features.Agent.Environment;
+using CascadeIDE.Features.WorkspaceNavigation.Application;
 using CascadeIDE.Services;
 using CascadeIDE.ViewModels;
 
@@ -81,24 +82,44 @@ internal sealed partial class IdeMcpCommandExecutor
     {
         add(Services.IdeCommands.OpenWorkspaceAdrCorrespondence, async (_, _) =>
         {
-            if (_vm.OpenWorkspaceAdrCorrespondenceCommand.CanExecute(null))
-                _vm.OpenWorkspaceAdrCorrespondenceCommand.Execute(null);
+            if (_vm.NavigationMap.OpenWorkspaceAdrCorrespondenceCommand.CanExecute(null))
+                _vm.NavigationMap.OpenWorkspaceAdrCorrespondenceCommand.Execute(null);
             return "OK";
         });
 
         add(Services.IdeCommands.OpenWorkspaceFeatureDocs, async (_, _) =>
         {
-            if (_vm.OpenWorkspaceFeatureDocsCommand.CanExecute(null))
-                await _vm.OpenWorkspaceFeatureDocsCommand.ExecuteAsync(null);
+            if (_vm.NavigationMap.OpenWorkspaceFeatureDocsCommand.CanExecute(null))
+                await _vm.NavigationMap.OpenWorkspaceFeatureDocsCommand.ExecuteAsync(null);
             return "OK";
         });
 
         add(Services.IdeCommands.OpenDocsTemplate, async (args, _) =>
         {
             var p = McpCommandJsonArgs.String(args, "path");
-            if (_vm.OpenDocsTemplateCommand.CanExecute(p))
-                await _vm.OpenDocsTemplateCommand.ExecuteAsync(p);
+            if (_vm.NavigationMap.OpenDocsTemplateCommand.CanExecute(p))
+                await _vm.NavigationMap.OpenDocsTemplateCommand.ExecuteAsync(p);
             return "OK";
+        });
+
+        add(Services.IdeCommands.GetCorrespondenceContext, async (args, _) =>
+        {
+            var file = McpCommandJsonArgs.String(args, "file_path")?.Trim();
+            if (string.IsNullOrEmpty(file))
+                file = _vm.CurrentFilePath;
+            if (string.IsNullOrWhiteSpace(file))
+                return WorkspaceCorrespondenceContextBuilder.BuildJson(_vm.GetWorkspacePath(), null);
+
+            var ws = _vm.GetWorkspacePath();
+            if (string.IsNullOrWhiteSpace(ws))
+                return WorkspaceCorrespondenceContextBuilder.BuildJson(null, file);
+
+            var abs = Path.IsPathRooted(file)
+                ? file
+                : Path.Combine(ws, file.Replace('/', Path.DirectorySeparatorChar));
+
+            var hasGraph = _vm.NavigationMap.WorkspaceNavigationMapRelatedCount > 0;
+            return WorkspaceCorrespondenceContextBuilder.BuildJson(ws, abs, hasGraph);
         });
     }
 }

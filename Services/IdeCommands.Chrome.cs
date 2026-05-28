@@ -53,6 +53,12 @@ public static partial class IdeCommands
     /// <summary>Перейти с страницы «готовность окружения» на первую другую разрешённую страницу вторичного контура. returns: text.</summary>
     public const string CloseEnvironmentReadinessPage = "close_environment_readiness_page";
 
+    /// <summary>Показать страницу Correspondence (CRS) во вторичном контуре (ADR 0156). Разворачивает регион Mfd при необходимости. returns: text.</summary>
+    public const string ShowCorrespondencePage = "show_correspondence_page";
+
+    /// <summary>Закрыть страницу Correspondence (CRS) — первая другая разрешённая страница Mfd. returns: text.</summary>
+    public const string CloseCorrespondencePage = "close_correspondence_page";
+
     /// <summary>Активная страница оболочки Mfd: имя значения MfdShellPage (Chat, Terminal, …). Якорь на экране — пресет (v1 — колонка зоны Mfd). args: page:string; returns: text; example: {"page":"Chat"}.</summary>
     public const string SetMfdShellPage = "set_mfd_shell_page";
 

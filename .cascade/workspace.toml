@@ -18,6 +18,7 @@ id_regex = "(?:^|/)docs/adr/(?<id>\\d{4})-"
   "docs/adr/0039-workspace-navigation-affordances.md",
   "docs/adr/0155-documentation-code-correspondence-and-architectural-drift.md",
   "docs/adr/0061-context-aware-adr-map-pfd-knowledge-indicator.md",
+  "docs/adr/0156-correspondence-mfd-surface-and-reverse-code-anchors.md",
 ]
 "*" = "docs/adr/0006-presentation-layers-and-feature-slices.md"
 
@@ -42,9 +43,35 @@ docs = [
   "docs/adr/0053-semantic-map-control-flow-pfd.md",
   "docs/adr/0061-context-aware-adr-map-pfd-knowledge-indicator.md",
   "docs/adr/0155-documentation-code-correspondence-and-architectural-drift.md",
+  "docs/adr/0156-correspondence-mfd-surface-and-reverse-code-anchors.md",
 ]
-tags = ["workspace", "navigation", "pfd", "mfd", "graph"]
+tags = ["workspace", "navigation", "pfd", "mfd", "graph", "correspondence", "crs"]
 
 [workspace.docs_templates]
 catalog_path = "docs/templates/catalog.toml"
+
+# Explicit reverse anchors (ADR 0156 §2.5) — override doc-body heuristics for same (doc, file).
+[[workspace.correspondence.code_anchors]]
+doc = "docs/adr/0156-correspondence-mfd-surface-and-reverse-code-anchors.md"
+file = "Features/WorkspaceNavigation/Application/DocReverseAnchorResolver.cs"
+bracket = "F:Features/WorkspaceNavigation/Application/DocReverseAnchorResolver.cs; M:Resolve"
+kind = "documents"
+
+[[workspace.correspondence.code_anchors]]
+doc = "docs/adr/0155-documentation-code-correspondence-and-architectural-drift.md"
+file = "Features/WorkspaceNavigation/Presentation/WorkspaceNavigationMapViewModel.Correspondence.cs"
+line_start = 43
+line_end = 43
+kind = "documents"
+
+[[workspace.correspondence.code_anchors]]
+doc = "docs/adr/0156-correspondence-mfd-surface-and-reverse-code-anchors.md"
+file = "Features/WorkspaceNavigation/Application/WorkspaceCorrespondenceContextBuilder.cs"
+bracket = "F:Features/WorkspaceNavigation/Application/WorkspaceCorrespondenceContextBuilder.cs; M:BuildJson"
+kind = "documents"
+
+[[workspace.correspondence.code_anchors]]
+doc = "docs/adr/0156-correspondence-mfd-surface-and-reverse-code-anchors.md"
+file = "Views/CorrespondenceMfdPageView.axaml"
+kind = "documents"
 

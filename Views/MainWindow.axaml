@@ -237,8 +237,9 @@
                                                   IsVisible="{Binding ShowWorkspaceBackgroundStatusOnPfd}"/>
                 <Grid Grid.Row="1">
                 <views:SolutionExplorerView IsVisible="{Binding IsDockedPfdSolutionExplorerTree}"/>
-                <views:WorkspaceNavigationMapView DataContext="{Binding NavigationMap}"
-                                                  IsVisible="{Binding IsDockedPfdWorkspaceNavigationMap}"/>
+                <Grid IsVisible="{Binding IsDockedPfdWorkspaceNavigationMap}">
+                    <views:WorkspaceNavigationMapView DataContext="{Binding NavigationMap}"/>
+                </Grid>
                 <!-- Wave 3: mount-layer host preview для PFD (единая точка подключения мини-инструмента). -->
                 <views:ZoneInstrumentMountView IsVisible="{Binding UseSkiaInstrumentMount}"
                                                HorizontalAlignment="Right"

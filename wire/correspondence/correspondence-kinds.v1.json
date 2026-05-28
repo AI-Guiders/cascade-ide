@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "title": "Cascade correspondence kinds and layers (ADR 0155)",
+  "layers": [
+    {
+      "id": "L0",
+      "label": "L0",
+      "title": "Semantic canon (0098)",
+      "adr": "0098-semantic-first-document-as-projection"
+    },
+    {
+      "id": "L1p",
+      "label": "L1′",
+      "title": "Feature registry (0155 §7)",
+      "adr": "0155-documentation-code-correspondence-and-architectural-drift"
+    },
+    {
+      "id": "L1",
+      "label": "L1",
+      "title": "ADR path map (0061)",
+      "adr": "0061-context-aware-adr-map-pfd-knowledge-indicator"
+    },
+    {
+      "id": "L2",
+      "label": "L2",
+      "title": "Code intent graph (0039, 0053)",
+      "adr": "0039-workspace-navigation-affordances"
+    },
+    {
+      "id": "L3",
+      "label": "L3",
+      "title": "Change intent / pre-flight (0042)",
+      "adr": "0042-pre-flight-planned-changes-and-review-before-apply"
+    },
+    {
+      "id": "L4",
+      "label": "L4",
+      "title": "Discourse ↔ code (0137)",
+      "adr": "0137-intercom-message-code-correspondence"
+    }
+  ],
+  "kinds": [
+    {
+      "id": "documents",
+      "family": "cascade-ext",
+      "layers": ["L1", "L1p"],
+      "title": "Document describes code zone"
+    },
+    {
+      "id": "implements",
+      "family": "cascade-ext",
+      "layers": ["L2"],
+      "title": "Code implements documented contract"
+    },
+    {
+      "id": "related",
+      "family": "uml-core",
+      "layers": ["L2"],
+      "title": "Code ↔ code navigation edge"
+    },
+    {
+      "id": "discusses",
+      "family": "cascade-ext",
+      "layers": ["L4"],
+      "title": "Intercom message discusses code anchor",
+      "aliases": { "wire": ["discusses"] }
+    },
+    {
+      "id": "constrains",
+      "family": "cascade-ext",
+      "layers": ["L3"],
+      "title": "Document constrains future edits"
+    },
+    {
+      "id": "projects",
+      "family": "cascade-ext",
+      "layers": ["L0"],
+      "title": "Semantic projection to files"
+    }
+  ]
+}

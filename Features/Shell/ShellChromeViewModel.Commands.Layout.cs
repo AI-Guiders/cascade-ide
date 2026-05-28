@@ -74,6 +74,13 @@ public sealed partial class ShellChromeViewModel
     }
 
     [RelayCommand]
+    private void ShowCorrespondencePage()
+    {
+        if (_host.NavigationMap.ShowCorrespondencePageCommand.CanExecute(null))
+            _host.NavigationMap.ShowCorrespondencePageCommand.Execute(null);
+    }
+
+    [RelayCommand]
     private void ShowTerminalPanel()
     {
         IsTerminalVisible = true;

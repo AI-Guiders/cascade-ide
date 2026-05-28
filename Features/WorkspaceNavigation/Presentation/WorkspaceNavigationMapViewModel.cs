@@ -218,26 +218,7 @@ public sealed partial class WorkspaceNavigationMapViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void OpenWorkspaceAdrCorrespondence()
-    {
-        var docPath = WorkspaceAdrCorrespondenceFirstDocPath;
-        if (string.IsNullOrWhiteSpace(docPath))
-            return;
-
-        var wsRoot = _host.GetWorkspacePath();
-        if (string.IsNullOrWhiteSpace(wsRoot))
-            return;
-
-        if (!WorkspaceMarkdownPreviewOpener.TryOpenRepoDocument(
-                wsRoot,
-                docPath,
-                (title, content, source) => _host.MarkdownPreviewTool.SetContent(title, content, source),
-                out _))
-            return;
-
-        _host.ApplyMfdRegionExpanded(true);
-        _host.TryNavigateToMfdShellPage(MfdShellPage.MarkdownPreview);
-    }
+    private void OpenWorkspaceAdrCorrespondence() => ShowCorrespondencePage();
 
     [RelayCommand]
     private async Task OpenWorkspaceFeatureDocsAsync()
@@ -466,6 +447,13 @@ public sealed partial class WorkspaceNavigationMapViewModel : ObservableObject
     /// <summary>Краткая строка ориентации HCI (слой B) рядом с картой; не влияет на Roslyn-граф (ADR 0106).</summary>
     [ObservableProperty]
     private string _workspaceNavigationMapHciOrientationLine = "";
+
+    /// <summary>Активные слои correspondence L0–L4 (ADR 0155 §3).</summary>
+    [ObservableProperty]
+    private string _workspaceCorrespondenceLayersLine = "";
+
+    [ObservableProperty]
+    private string _workspaceCorrespondenceLayersTooltip = "";
 
     /// <summary>Doc correspondence (ADR 0061): какие ADR относятся к текущему файлу по <c>[_host.Workspace.adr.map]</c>.</summary>
     [ObservableProperty]

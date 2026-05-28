@@ -29,6 +29,7 @@ public sealed class MfdShellPageAllowanceProjectionTests
     public void Related_related_markdown_indexes_always_allowed()
     {
         Assert.True(MfdShellPageAllowanceProjection.IsAllowed(MfdShellPage.RelatedFiles, AllDenied));
+        Assert.True(MfdShellPageAllowanceProjection.IsAllowed(MfdShellPage.Correspondence, AllDenied));
         Assert.True(MfdShellPageAllowanceProjection.IsAllowed(MfdShellPage.HybridIndex, AllDenied));
         Assert.True(MfdShellPageAllowanceProjection.IsAllowed(MfdShellPage.WebAiPortal, AllDenied));
     }

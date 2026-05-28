@@ -11,5 +11,8 @@ public static partial class IdeCommands
 
     /// <summary>Открыть шаблон документации из <c>docs/templates</c> в Markdown Preview. args: path?:string; returns: text; example: {"path":"docs/templates/feature.md"}.</summary>
     public const string OpenDocsTemplate = "open_docs_template";
+
+    /// <summary>JSON: слои correspondence, feature, forward ADR, reverse anchors для файла (ADR 0156). args: file_path?:string; returns: json; example: {"file_path":"Features/WorkspaceNavigation/Application/DocReverseAnchorResolver.cs"}.</summary>
+    public const string GetCorrespondenceContext = "get_correspondence_context";
 }
 

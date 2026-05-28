@@ -243,7 +243,7 @@ public sealed partial class WorkspaceNavigationMapViewModel
         }
 
         var hciLine = SemanticMapHciOrientationFormatting.ToStatusLine(hciSnap);
-        var (featureLine, featureDocPaths, docsCoverageLine, adrLine, adrFirstDocPath) =
+        var (featureLine, featureDocPaths, docsCoverageLine, adrLine, adrFirstDocPath, adrDocPaths) =
             TryResolveWorkspaceCorrespondence(workspaceRoot, navigationPath);
 
         await UiScheduler.Default.InvokeAsync(() =>
@@ -264,6 +264,8 @@ public sealed partial class WorkspaceNavigationMapViewModel
                 WorkspaceAdrCorrespondenceLine = adrLine;
                 WorkspaceAdrCorrespondenceFirstDocPath = adrFirstDocPath;
                 WorkspaceDocsCoverageLine = docsCoverageLine;
+                ApplyWorkspaceCorrespondenceLayers(hciLine, featureLine, adrLine, dry);
+                ApplyCorrespondenceDocAndReverseLists(workspaceRoot, navigationPath, adrDocPaths);
                 WorkspaceNavigationMapItems.Clear();
                 foreach (var parsed in dry.ListRows)
                 {
@@ -284,11 +286,31 @@ public sealed partial class WorkspaceNavigationMapViewModel
         });
     }
 
-    private static (string FeatureLine, string[] FeatureDocPaths, string DocsCoverageLine, string AdrLine, string? AdrFirstDocPath)
+    private void ApplyWorkspaceCorrespondenceLayers(
+        string hciLine,
+        string featureLine,
+        string adrLine,
+        WorkspaceNavigationMapRefreshComposer.DryResult dry)
+    {
+        var hasCodeGraph = dry.AccentCount > 0
+            || dry.ListRows.Count > 0
+            || dry.Scene?.Nodes.Count > 0;
+
+        var signals = CorrespondenceLayersProjection.FromCorrespondence(
+            hasHciOrientation: !string.IsNullOrWhiteSpace(hciLine),
+            hasFeature: !string.IsNullOrWhiteSpace(featureLine),
+            hasAdrDocs: !string.IsNullOrWhiteSpace(adrLine),
+            hasCodeGraph: hasCodeGraph);
+
+        WorkspaceCorrespondenceLayersLine = CorrespondenceLayersProjection.BuildLayersBadge(signals);
+        WorkspaceCorrespondenceLayersTooltip = CorrespondenceLayersProjection.BuildLayersTooltip(signals);
+    }
+
+    private static (string FeatureLine, string[] FeatureDocPaths, string DocsCoverageLine, string AdrLine, string? AdrFirstDocPath, string[] AdrDocPaths)
         TryResolveWorkspaceCorrespondence(string? workspaceRoot, string? navigationPath)
     {
         var r = WorkspaceCorrespondenceResolver.Resolve(workspaceRoot, navigationPath);
-        return (r.FeatureLine, r.FeatureDocPaths, r.DocsCoverageLine, r.AdrLine, r.AdrFirstDocPath);
+        return (r.FeatureLine, r.FeatureDocPaths, r.DocsCoverageLine, r.AdrLine, r.AdrFirstDocPath, r.AdrDocPaths);
     }
 
     private int? TryCaptureLiveEditorCaretOffset(string? currentPath)

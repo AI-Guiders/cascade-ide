@@ -32,6 +32,24 @@ public sealed class RepositoryWorkspaceSectionToml
     public RepositoryAdrToml? Adr { get; set; }
     public RepositoryFeaturesToml? Features { get; set; }
     public RepositoryDocsTemplatesToml? DocsTemplates { get; set; }
+    public RepositoryCorrespondenceToml? Correspondence { get; set; }
+}
+
+/// <summary>Explicit doc↔code anchors (<c>[[workspace.correspondence.code_anchors]]</c>, ADR 0156 §2.5).</summary>
+public sealed class RepositoryCorrespondenceToml
+{
+    public List<RepositoryCorrespondenceCodeAnchorToml> CodeAnchors { get; set; } = [];
+}
+
+public sealed class RepositoryCorrespondenceCodeAnchorToml
+{
+    public string? Doc { get; set; }
+    public string? File { get; set; }
+    public string? Bracket { get; set; }
+    public int? LineStart { get; set; }
+    public int? LineEnd { get; set; }
+    public string? Kind { get; set; }
+    public string? MemberKey { get; set; }
 }
 
 public sealed class RepositoryAdrToml

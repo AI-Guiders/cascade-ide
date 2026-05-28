@@ -13,6 +13,7 @@
 | [0028](0028-user-settings-toml-localappdata-and-secrets.md) | Пользовательские настройки — `settings.toml`, каталог `%LocalAppData%\CascadeIDE\`, секреты отдельно |
 | [0050](0050-declarative-instrument-zone-placement-toml.md) | декларативные карты в TOML |
 | [0155](0155-documentation-code-correspondence-and-architectural-drift.md) | сквозной каркас: док ↔ код, слои L0–L4, drift; этот ADR = **L1** |
+| [0156](0156-correspondence-mfd-surface-and-reverse-code-anchors.md) | страница CRS (Mfd) + reverse anchors (док → код) |
 
 ## Резюме
 

@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -21,6 +22,7 @@ public partial class MainWindow : PointerTrackingWindow
     private ViewModels.MarkdownPreviewWindowViewModel? _previewVm;
     private TextEditor? _marginPointerEditor;
     private ViewModels.MainWindowViewModel? _boundMainVm;
+    private PropertyChangedEventHandler? _navigationMapHandler;
     private bool _workspaceEventsAttached;
     private static readonly object HighlightLogLock = new();
 
@@ -94,6 +96,8 @@ public partial class MainWindow : PointerTrackingWindow
             vm.LoadSendMessageKeyFromStorage();
             vm.LoadComposerNewLineKeyFromStorage();
             vm.PropertyChanged += OnViewModelPropertyChanged;
+            _navigationMapHandler ??= OnNavigationMapPropertyChanged;
+            vm.NavigationMap.PropertyChanged += _navigationMapHandler;
             vm.RequestOpenSolution = () => _ = ShowOpenSolutionDialogAsync();
             vm.RequestCreateNewSolution = () => _ = ShowCreateNewSolutionDialogAsync();
             vm.RequestOpenFolder = () => _ = ShowOpenFolderDialogAsync();
@@ -148,6 +152,8 @@ public partial class MainWindow : PointerTrackingWindow
             {
                 _boundMainVm.GotoActiveEditorLineColumnRequested -= OnGotoEditorLineColumn;
                 _boundMainVm.PropertyChanged -= OnViewModelPropertyChanged;
+                if (_navigationMapHandler is not null)
+                    _boundMainVm.NavigationMap.PropertyChanged -= _navigationMapHandler;
                 _boundMainVm.CaptureWindowForMcpAsync = null;
                 _boundMainVm = null;
             }
@@ -156,5 +162,11 @@ public partial class MainWindow : PointerTrackingWindow
             CloseMfdHostWindowIfOpen();
             ClosePmSplitHostWindowIfOpen();
         }
+    }
+
+    private void OnNavigationMapPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (IsSkiaHostRelatedProperty(e.PropertyName))
+            InvalidateSkiaHosts();
     }
 }

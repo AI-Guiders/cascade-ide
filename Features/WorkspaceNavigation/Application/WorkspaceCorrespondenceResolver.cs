@@ -14,7 +14,8 @@ public static class WorkspaceCorrespondenceResolver
         string[] FeatureDocPaths,
         string DocsCoverageLine,
         string AdrLine,
-        string? AdrFirstDocPath);
+        string? AdrFirstDocPath,
+        string[] AdrDocPaths);
 
     public static Result Resolve(string? workspaceRoot, string? navigationPath)
     {
@@ -93,7 +94,7 @@ public static class WorkspaceCorrespondenceResolver
                         ? $"Docs: missing (feature has no ADRs) · template: {featureTemplateHint}"
                         : $"Docs: missing (no correspondence) · template: {moduleTemplateHint}";
 
-            return new(featureLine, featureDocs, docsCoverageLine, adrLine, firstAbs);
+            return new(featureLine, featureDocs, docsCoverageLine, adrLine, firstAbs, docPaths.ToArray());
         }
         catch
         {
@@ -101,5 +102,5 @@ public static class WorkspaceCorrespondenceResolver
         }
     }
 
-    private static Result Empty => new("", [], "", "", null);
+    private static Result Empty => new("", [], "", "", null, []);
 }

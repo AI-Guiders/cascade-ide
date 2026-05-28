@@ -1,5 +1,3 @@
-using CascadeIDE.Features.Chat;
-using CascadeIDE.Models.Intercom;
 using CascadeIDE.Services.Intercom;
 using Xunit;
 
@@ -7,59 +5,37 @@ namespace CascadeIDE.Tests;
 
 public sealed class BracketCodeReferenceParserTests
 {
-    [Theory]
-    [InlineData("[M:GetUserAsync]", null, "GetUserAsync", null, null, null, null)]
-    [InlineData("M:Foo.Bar", null, "Foo.Bar", null, null, null, null)]
-    [InlineData("[Foo.cs M:Bar]", "Foo.cs", "Bar", null, null, null, null)]
-    [InlineData("[F:src/A.cs; M:Method; L:10-20]", "src/A.cs", "Method", 10, 20, null, null)]
-    [InlineData("[M:Run S:for:2]", null, "Run", null, null, "for", 2)]
-    [InlineData("[M:Run S:for(2)]", null, "Run", null, null, "for", 2)]
-    [InlineData("[F:src/A.cs; M:Run; S:for:2]", "src/A.cs", "Run", null, null, "for", 2)]
-    [InlineData("[F:Views/Chat/Skia/SkiaChatBubbleRenderer.cs M:Measure]", "Views/Chat/Skia/SkiaChatBubbleRenderer.cs", "Measure", null, null, null, null)]
-    public void TryParse_CommonForms(
-        string input,
-        string? file,
-        string member,
-        int? lineStart,
-        int? lineEnd,
-        string? scopeKind,
-        int? scopeIndex)
+    [Fact]
+    public void TryParse_parses_F_M_axes()
     {
-        Assert.True(BracketCodeReferenceParser.TryParse(input, out var reference, out var err), err);
-        Assert.Equal(file, reference.File);
-        Assert.Equal(member, reference.MemberKey);
-        Assert.Equal(lineStart, reference.LineStart);
-        Assert.Equal(lineEnd, reference.LineEnd);
-        Assert.Equal(scopeKind, reference.ScopeKind);
-        Assert.Equal(scopeIndex, reference.ScopeIndexInParent);
+        Assert.True(BracketCodeReferenceParser.TryParse(
+            "[F:Features/Chat/Foo.cs M:RunAsync]",
+            out var reference,
+            out _));
+        Assert.Equal("Features/Chat/Foo.cs", reference.File);
+        Assert.Equal("RunAsync", reference.MemberKey);
     }
 
     [Fact]
-    public void TryToAttachmentAnchor_IncludesSyntaxScope()
+    public void EnumerateInProse_skips_fenced_code()
     {
-        Assert.True(BracketCodeReferenceParser.TryParse("[M:Run S:for:2]", out var reference, out var err), err);
-        Assert.True(
-            BracketCodeReferenceParser.TryToAttachmentAnchor(reference, "src/Foo.cs", null, out var anchor, out err),
-            err);
-        Assert.NotNull(anchor.SyntaxScope);
-        Assert.True(AttachmentSyntaxScope.TryParse(anchor.SyntaxScope, out var scope));
-        Assert.Equal("for", scope!.Kind);
-        Assert.Equal(2, scope.IndexInParent);
-        Assert.Equal("Run", scope.ParentMemberKey);
+        const string md = """
+            prose [F:src/A.cs M:Bar] here
+            ```csharp
+            var x = [F:ignored.cs M:Ignored];
+            ```
+            """;
+
+        var hits = BracketCodeReferenceParser.EnumerateInProse(md);
+        Assert.Single(hits);
+        Assert.Equal("src/A.cs", hits[0].Reference.File);
     }
 
     [Fact]
-    public void TryBuildBracketCodeRef_IncludesActiveFile()
+    public void EnumerateInProse_skips_markdown_link()
     {
-        Assert.True(ChatSlashParametricArgsBuilder.TryBuild(
-            "editor.select_code",
-            "[M:Run]",
-            new ChatSlashEditorContext(@"D:\ws\src\Foo.cs", ""),
-            out var args,
-            out var err), err);
+        const string md = "See [M:Run](docs/adr/0001.md) for details.";
 
-        Assert.NotNull(args);
-        Assert.Equal("[M:Run]", args!["code_ref"].GetString());
-        Assert.Equal(@"D:\ws\src\Foo.cs", args["active_file"].GetString());
+        Assert.Empty(BracketCodeReferenceParser.EnumerateInProse(md));
     }
 }

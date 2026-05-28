@@ -16,6 +16,7 @@
 | ADR | Роль в correspondence |
 |-----|------------------------|
 | [0061](0061-context-aware-adr-map-pfd-knowledge-indicator.md) | **L1:** декларативная карта `путь → ADR`, PFD, advisory агента (GPWS для доков) |
+| [0156](0156-correspondence-mfd-surface-and-reverse-code-anchors.md) | **CRS:** страница Mfd для L0–L4; **reverse anchors** (док → код через CodeAnchor) |
 | [0098](0098-semantic-first-document-as-projection.md) | **L0:** семантическая карта первична; код/доки/git — проекции; риск drift между проекциями |
 | [0039](0039-workspace-navigation-affordances.md) | **L2:** код ↔ код («связанные» файлы, subgraph, MCP `get_code_navigation_context`) |
 | [0053](0053-semantic-map-control-flow-pfd.md) | **L2:** намерения **в коде** (control flow, grain intent/detailed) |
@@ -311,7 +312,7 @@ wire/correspondence/
 4. MCP для агента: один tool `get_correspondence_context` vs существующие `get_code_navigation_context` + будущий ADR map.
 5. Маппинг `code-doc-link-v1.link_kind` ↔ канонический `id` (отдельная ось doc↔code или подмножество `documents` / `specifies`).
 6. **Feature:** гранулярность (`intercom` vs `intercom.slash`); правило **пересечения** `code_scope` (`primary`, теги, `shared`); полуавто из `Features/` vs только ручной реестр.
-7. Нужен ли отдельный ADR **0156** (норматив wire/MCP/PFD) или достаточно §7 до первой пилотной реализации.
+7. ~~Нужен ли отдельный ADR **0156**~~ → **[0156](0156-correspondence-mfd-surface-and-reverse-code-anchors.md)** (CRS + Reverse Anchors / CodeAnchor).
 
 ---
 

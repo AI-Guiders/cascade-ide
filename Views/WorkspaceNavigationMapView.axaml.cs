@@ -30,21 +30,11 @@ public partial class WorkspaceNavigationMapView : UserControl
 
     private void PushViewportWidth(Control miniMap)
     {
-        if (DataContext is WorkspaceNavigationMapViewModel map)
-        {
-            var w = miniMap.Bounds.Width;
-            if (w <= 0)
-                return;
-            map.NotifyCodeNavigationMapGraphViewportWidthChanged(w);
+        if (DataContext is not WorkspaceNavigationMapViewModel map)
             return;
-        }
 
-        if (VisualRoot is not null
-            && this.FindAncestorOfType<MainWindow>()?.DataContext is MainWindowViewModel vm)
-        {
-            var w = miniMap.Bounds.Width;
-            if (w > 0)
-                vm.NotifyCodeNavigationMapGraphViewportWidthChanged(w);
-        }
+        var w = miniMap.Bounds.Width;
+        if (w > 0)
+            map.NotifyCodeNavigationMapGraphViewportWidthChanged(w);
     }
 }

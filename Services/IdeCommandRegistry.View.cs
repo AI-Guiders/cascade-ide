@@ -28,6 +28,7 @@ public static partial class IdeCommandRegistry
         AddPalette(b, "show_chat_page", IdeCommands.ShowChatPage, "Страница Chat (регион Mfd)", "Вид");
         AddPalette(b, "show_solution_explorer_page", IdeCommands.ShowSolutionExplorerPage, "Страница обозревателя решения (регион Mfd)", "Вид");
         AddPalette(b, "show_related_files_mfd_page", IdeCommands.ShowRelatedFilesMfdPage, "Страница «Связанные файлы» (регион Mfd)", "Вид");
+        AddPalette(b, "show_correspondence_page", IdeCommands.ShowCorrespondencePage, "Correspondence (CRS, регион Mfd)", "Вид");
         AddPalette(b, "show_terminal_panel", IdeCommands.ShowTerminalPanel, "Показать терминал", "Вид");
         AddPalette(b, "hide_build_output_panel", IdeCommands.HideBuildOutputPanel, "Скрыть вывод сборки", "Вид");
 
@@ -60,5 +61,6 @@ public static partial class IdeCommandRegistry
         AddPalette(b, "show_hybrid_index_page", IdeCommands.ShowHybridIndexPage, "Hybrid Codebase Index (регион Mfd)", "Вид");
         AddPalette(b, "show_web_ai_portal_page", IdeCommands.ShowWebAiPortalPage, "Веб-портал AI (регион Mfd)", "Вид");
         AddPalette(b, "close_environment_readiness_page", IdeCommands.CloseEnvironmentReadinessPage, "Закрыть страницу готовности окружения", "Вид");
+        AddPalette(b, "close_correspondence_page", IdeCommands.CloseCorrespondencePage, "Закрыть страницу Correspondence (CRS)", "Вид");
     }
 }

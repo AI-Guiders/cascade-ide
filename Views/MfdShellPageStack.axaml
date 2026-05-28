@@ -19,6 +19,9 @@
             <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=RelatedFiles}">
                 <views:RelatedFilesMfdPageView DataContext="{Binding NavigationMap}" MinHeight="120"/>
             </Border>
+            <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=Correspondence}">
+                <views:CorrespondenceMfdPageView DataContext="{Binding NavigationMap}" MinHeight="120"/>
+            </Border>
             <Border IsVisible="{Binding CurrentMfdShellPage, Converter={StaticResource MfdShellPageEq}, ConverterParameter=MarkdownPreview}">
                 <views:MarkdownPreviewMfdPageView/>
             </Border>

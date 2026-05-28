@@ -1030,6 +1030,21 @@ group = "Карта"
 auto_run_on_commit = true
 arg_tail = "none"
 
+# show_correspondence_page — Correspondence (CRS). (c:crs · /correspondence show)
+[[command]]
+command_id = "show_correspondence_page"
+melody_slug = "crs"
+melody_shape = "simple"
+
+[[command.slash]]
+path = "/correspondence show"
+domain = "correspondence"
+intent = "show"
+help = "Страница Correspondence (CRS): слои L0–L4, forward/reverse ADR."
+group = "Карта"
+auto_run_on_commit = true
+arg_tail = "none"
+
 # toggle_mfd_region_expanded — регион Mfd. (/mfd toggle)
 [[command]]
 command_id = "toggle_mfd_region_expanded"

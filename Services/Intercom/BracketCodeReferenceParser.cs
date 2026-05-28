@@ -297,6 +297,84 @@ public static class BracketCodeReferenceParser
         lineEnd = end;
         return true;
     }
+
+    /// <summary>Скан bracket-ссылок только в prose (вне fenced code), ADR 0129 §5.</summary>
+    public static IReadOnlyList<(BracketCodeReference Reference, int LineNumber)> EnumerateInProse(string markdown)
+    {
+        var hits = new List<(BracketCodeReference, int)>();
+        foreach (var prose in MarkdownProseSegments.EnumerateProse(markdown))
+        {
+            var line = 1;
+            var lineStart = 0;
+            for (var i = 0; i < prose.Length; i++)
+            {
+                if (prose[i] == '\n')
+                {
+                    line++;
+                    lineStart = i + 1;
+                }
+
+                if (prose[i] != '[')
+                    continue;
+
+                if (!TryReadBracketSpan(prose, i, out var close))
+                    continue;
+
+                var inner = prose.Substring(i + 1, close - i - 1);
+                if (!TryParse(inner, out var reference, out _))
+                    continue;
+
+                if (IsMarkdownLinkAfter(prose, close))
+                    continue;
+
+                if (string.IsNullOrWhiteSpace(reference.File))
+                    continue;
+
+                var lineNumber = line;
+                for (var p = lineStart; p < i; p++)
+                {
+                    if (prose[p] == '\n')
+                        lineNumber++;
+                }
+
+                hits.Add((reference, lineNumber));
+                i = close;
+            }
+        }
+
+        return hits;
+    }
+
+    internal static bool IsMarkdownLinkAfter(string text, int closeBracketIndex)
+    {
+        var j = closeBracketIndex + 1;
+        while (j < text.Length && char.IsWhiteSpace(text[j]))
+            j++;
+
+        return j < text.Length && text[j] == '(';
+    }
+
+    internal static bool TryReadBracketSpan(string text, int openIndex, out int closeIndex)
+    {
+        closeIndex = -1;
+        var depth = 0;
+        for (var i = openIndex; i < text.Length; i++)
+        {
+            if (text[i] == '[')
+                depth++;
+            else if (text[i] == ']')
+            {
+                depth--;
+                if (depth == 0)
+                {
+                    closeIndex = i;
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
 }
 
 /// <summary>Результат parse bracket до resolve в <see cref="AttachmentAnchor"/>.</summary>

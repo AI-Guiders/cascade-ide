@@ -1,0 +1,124 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:nav="using:CascadeIDE.Features.WorkspaceNavigation.Presentation"
+             xmlns:views="using:CascadeIDE.Views"
+             x:Class="CascadeIDE.Views.CorrespondenceMfdPageView"
+             x:DataType="nav:WorkspaceNavigationMapViewModel">
+    <UserControl.Resources>
+        <views:StringNotEmptyToBoolConverter x:Key="HciOrientationLineVisible"/>
+    </UserControl.Resources>
+    <Grid RowDefinitions="Auto,*" MinHeight="0">
+        <views:PanelChromeHeader Grid.Row="0"
+                                 Title="Correspondence · workspace"
+                                 UppercaseTitle="True"/>
+        <ScrollViewer Grid.Row="1"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Spacing="8" Margin="0,6,0,0">
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                    <TextBlock FontSize="11"
+                               Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                               Text="Якорь:"/>
+                    <TextBlock FontSize="11"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                               Text="{Binding WorkspaceNavigationMapAnchorLabel}"/>
+                </StackPanel>
+                <TextBlock FontSize="10"
+                           TextWrapping="Wrap"
+                           Opacity="0.9"
+                           ToolTip.Tip="{Binding WorkspaceCorrespondenceLayersTooltip}"
+                           Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                           IsVisible="{Binding WorkspaceCorrespondenceLayersLine, Converter={StaticResource HciOrientationLineVisible}}"
+                           Text="{Binding WorkspaceCorrespondenceLayersLine}"/>
+                <Button Background="Transparent"
+                        BorderThickness="0"
+                        Padding="0"
+                        HorizontalAlignment="Left"
+                        Command="{Binding OpenWorkspaceFeatureDocsCommand}"
+                        IsVisible="{Binding WorkspaceFeatureLine, Converter={StaticResource HciOrientationLineVisible}}">
+                    <TextBlock FontSize="10"
+                               TextWrapping="Wrap"
+                               Opacity="0.9"
+                               Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                               Text="{Binding WorkspaceFeatureLine}"/>
+                </Button>
+                <Button Background="Transparent"
+                        BorderThickness="0"
+                        Padding="0"
+                        HorizontalAlignment="Left"
+                        Command="{Binding OpenWorkspaceAdrCorrespondenceCommand}"
+                        IsVisible="{Binding WorkspaceAdrCorrespondenceLine, Converter={StaticResource HciOrientationLineVisible}}">
+                    <TextBlock FontSize="10"
+                               TextWrapping="Wrap"
+                               Opacity="0.9"
+                               Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                               Text="{Binding WorkspaceAdrCorrespondenceLine}"/>
+                </Button>
+                <TextBlock FontSize="10"
+                           TextWrapping="Wrap"
+                           Opacity="0.85"
+                           Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                           IsVisible="{Binding WorkspaceDocsCoverageLine, Converter={StaticResource HciOrientationLineVisible}}"
+                           Text="{Binding WorkspaceDocsCoverageLine}"/>
+                <TextBlock FontSize="11"
+                           FontWeight="SemiBold"
+                           Margin="0,8,0,0"
+                           Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                           Text="Reverse anchors"/>
+                <TextBlock FontSize="10"
+                           Opacity="0.85"
+                           TextWrapping="Wrap"
+                           Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                           Text="{Binding WorkspaceReverseAnchorsStatus}"/>
+                <ItemsControl ItemsSource="{Binding WorkspaceReverseAnchorItems}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="nav:WorkspaceReverseAnchorItemVm">
+                            <Button Margin="0,0,0,4"
+                                    Padding="6,6"
+                                    HorizontalAlignment="Stretch"
+                                    HorizontalContentAlignment="Left"
+                                    Background="Transparent"
+                                    BorderThickness="1"
+                                    BorderBrush="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"
+                                    CornerRadius="6"
+                                    Command="{Binding $parent[UserControl].DataContext.OpenCorrespondenceDocumentCommand}"
+                                    CommandParameter="{Binding}">
+                                <TextBlock Text="{Binding DisplayLine}"
+                                           FontSize="10"
+                                           TextWrapping="Wrap"
+                                           Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"/>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <TextBlock FontSize="11"
+                           FontWeight="SemiBold"
+                           Margin="0,8,0,0"
+                           Foreground="{DynamicResource CascadeTheme.ChatLabelForeground}"
+                           Text="Linked ADRs (forward)"/>
+                <ItemsControl ItemsSource="{Binding WorkspaceCorrespondenceDocItems}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="nav:WorkspaceCorrespondenceDocItemVm">
+                            <Button Margin="0,0,0,4"
+                                    Padding="6,6"
+                                    HorizontalAlignment="Stretch"
+                                    HorizontalContentAlignment="Left"
+                                    Background="Transparent"
+                                    BorderThickness="1"
+                                    BorderBrush="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"
+                                    CornerRadius="6"
+                                    Command="{Binding $parent[UserControl].DataContext.OpenCorrespondenceDocumentCommand}"
+                                    CommandParameter="{Binding DocPath}">
+                                <TextBlock Text="{Binding DisplayLine}"
+                                           FontSize="10"
+                                           TextWrapping="Wrap"
+                                           Foreground="{DynamicResource CascadeTheme.SolutionExplorerHeaderForeground}"/>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>
