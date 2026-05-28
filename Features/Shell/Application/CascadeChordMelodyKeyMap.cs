@@ -16,7 +16,9 @@ public static class CascadeChordMelodyKeyMap
     {
         ch = default;
         var shift = modifiers.HasFlag(KeyModifiers.Shift);
-        if (modifiers.HasFlag(KeyModifiers.Control) || modifiers.HasFlag(KeyModifiers.Alt) || modifiers.HasFlag(KeyModifiers.Meta))
+        // В chord-последовательностях Ctrl часто продолжают держать (в стиле VSCode: Ctrl+K затем /).
+        // Поэтому Ctrl здесь игнорируем; а вот Alt/Meta ломают ввод и считаются "не мелодией".
+        if (modifiers.HasFlag(KeyModifiers.Alt) || modifiers.HasFlag(KeyModifiers.Meta))
             return false;
 
         if (key == Key.Space)

@@ -72,12 +72,38 @@ public sealed class CascadeChordMelodyKeyMapTests
     }
 
     [Fact]
-    public void Does_not_map_when_ctrl_held()
+    public void Does_not_map_when_alt_held()
     {
         Assert.False(CascadeChordMelodyKeyMap.TryMapChordMelodyGlyph(
             Key.Space,
-            KeyModifiers.Control,
+            KeyModifiers.Alt,
             PhysicalKey.Space,
             out _));
+    }
+
+    [Theory]
+    [InlineData(Key.Oem2, PhysicalKey.Slash)]
+    [InlineData(Key.Divide, PhysicalKey.None)]
+    public void Maps_slash_even_when_ctrl_held(Key key, PhysicalKey physical)
+    {
+        Assert.True(CascadeChordMelodyKeyMap.TryMapChordMelodyGlyph(
+            key,
+            KeyModifiers.Control,
+            physical,
+            out var ch));
+        Assert.Equal('/', ch);
+    }
+
+    [Theory]
+    [InlineData(Key.A, PhysicalKey.A, 'a')]
+    [InlineData(Key.D7, PhysicalKey.Digit7, '7')]
+    public void Maps_letters_and_digits_even_when_ctrl_held(Key key, PhysicalKey physical, char expected)
+    {
+        Assert.True(CascadeChordMelodyKeyMap.TryMapChordMelodyGlyph(
+            key,
+            KeyModifiers.Control,
+            physical,
+            out var ch));
+        Assert.Equal(expected, ch);
     }
 }
