@@ -15,6 +15,8 @@ public static partial class SkiaGraphSceneDrawing
             var highlighted = scene.HighlightedNodeIds.Contains(n.Id);
             if (n.Shape == GraphNodeShape.Condition)
                 DrawConditionBranch(context, theme, n, highlighted);
+            else if (n.Shape == GraphNodeShape.Rectangle)
+                DrawRectangleNode(context, theme, n, highlighted);
             else
             {
                 context.DrawEllipse(ResolveNodeFill(theme, n), theme.NodeStrokePen, n.Center, n.Radius, n.Radius);
@@ -22,44 +24,47 @@ public static partial class SkiaGraphSceneDrawing
                     context.DrawEllipse(null, theme.HighlightedNodePen, n.Center, n.Radius + 3, n.Radius + 3);
             }
 
-            var glyph = BuildNodeGlyph(n, useLegend, scene.ShowNodeLegendGlyphs);
-            if (IsExitNode(n))
+            if (n.Shape != GraphNodeShape.Rectangle)
             {
-                var arrowLen = Math.Clamp(n.Radius * 0.95, 4.5, 12);
-                DrawNorthEastExitArrowShaftCentered(context, theme.GlyphBrush, n.Center, arrowLen, 1.15);
-            }
-            else if (!string.IsNullOrEmpty(glyph))
-            {
-                var maxGlyph = Math.Max(SkiaGraphRenderInvariants.MinGlyphFontSize, n.Radius * 0.92);
-                var fontSize = n.LegendIndex is > 99
-                    ? SkiaGraphRenderInvariants.MinGlyphFontSize
-                    : Math.Clamp(maxGlyph, SkiaGraphRenderInvariants.MinGlyphFontSize, 11);
-                var glyphText = new FormattedText(
-                    glyph,
-                    CultureInfo.InvariantCulture,
-                    FlowDirection.LeftToRight,
-                    theme.GlyphTypeface,
-                    fontSize,
-                    theme.GlyphBrush);
-                var glyphOrigin = new Point(
-                    n.Center.X - glyphText.Width / 2,
-                    n.Center.Y - glyphText.Height / 2);
-                context.DrawText(glyphText, glyphOrigin);
-            }
+                var glyph = BuildNodeGlyph(n, useLegend, scene.ShowNodeLegendGlyphs);
+                if (IsExitNode(n))
+                {
+                    var arrowLen = Math.Clamp(n.Radius * 0.95, 4.5, 12);
+                    DrawNorthEastExitArrowShaftCentered(context, theme.GlyphBrush, n.Center, arrowLen, 1.15);
+                }
+                else if (!string.IsNullOrEmpty(glyph))
+                {
+                    var maxGlyph = Math.Max(SkiaGraphRenderInvariants.MinGlyphFontSize, n.Radius * 0.92);
+                    var fontSize = n.LegendIndex is > 99
+                        ? SkiaGraphRenderInvariants.MinGlyphFontSize
+                        : Math.Clamp(maxGlyph, SkiaGraphRenderInvariants.MinGlyphFontSize, 11);
+                    var glyphText = new FormattedText(
+                        glyph,
+                        CultureInfo.InvariantCulture,
+                        FlowDirection.LeftToRight,
+                        theme.GlyphTypeface,
+                        fontSize,
+                        theme.GlyphBrush);
+                    var glyphOrigin = new Point(
+                        n.Center.X - glyphText.Width / 2,
+                        n.Center.Y - glyphText.Height / 2);
+                    context.DrawText(glyphText, glyphOrigin);
+                }
 
-            var fullLabel = BuildNodeFullLabel(n, useLegend, scene);
-            if (!string.IsNullOrWhiteSpace(fullLabel))
-            {
-                var sideFont = scene.SideLabelFontSizePx ?? SkiaGraphRenderInvariants.MinSideLabelFontSize;
-                var labelText = new FormattedText(
-                    fullLabel,
-                    CultureInfo.InvariantCulture,
-                    FlowDirection.LeftToRight,
-                    theme.SideLabelTypeface,
-                    sideFont,
-                    theme.SideLabelBrush);
-                var labelOrigin = ResolveSideLabelOrigin(n, labelText, scene);
-                context.DrawText(labelText, labelOrigin);
+                var fullLabel = BuildNodeFullLabel(n, useLegend, scene);
+                if (!string.IsNullOrWhiteSpace(fullLabel))
+                {
+                    var sideFont = scene.SideLabelFontSizePx ?? SkiaGraphRenderInvariants.MinSideLabelFontSize;
+                    var labelText = new FormattedText(
+                        fullLabel,
+                        CultureInfo.InvariantCulture,
+                        FlowDirection.LeftToRight,
+                        theme.SideLabelTypeface,
+                        sideFont,
+                        theme.SideLabelBrush);
+                    var labelOrigin = ResolveSideLabelOrigin(n, labelText, scene);
+                    context.DrawText(labelText, labelOrigin);
+                }
             }
         }
     }
@@ -108,6 +113,192 @@ public static partial class SkiaGraphSceneDrawing
         if (IsHandlerNode(node))
             return theme.HandlerFill;
         return theme.CallFill;
+    }
+
+    private static void DrawRectangleNode(DrawingContext context, SkiaGraphVisualTheme theme, GraphLayoutNode n, bool highlighted)
+    {
+        const double padX = 10;
+        const double padY = 6;
+        var baseSize = ResolveRectangleNodeSize(n.Radius);
+        var fontSize = Math.Clamp(baseSize.Height * 0.52, 9, 14);
+        // Prefer "card grows to fit text" (instead of forcing ellipsis early). Keep a sane upper bound to avoid absurd cards.
+        var maxCardW = 560.0;
+        var maxCardH = 150.0;
+        var maxTextW = Math.Max(36, maxCardW - padX * 2);
+
+        var raw = (n.Label ?? "").Trim();
+        if (raw.Length == 0)
+            raw = Path.GetFileName(n.FullPath);
+
+        // Try single-line first, then fallback to 2-line split.
+        var single = new FormattedText(
+            raw,
+            CultureInfo.InvariantCulture,
+            FlowDirection.LeftToRight,
+            theme.SideLabelTypeface,
+            fontSize,
+            theme.SideLabelBrush);
+
+        string l1;
+        string? l2;
+        if (single.Width <= maxTextW)
+        {
+            l1 = raw;
+            l2 = null;
+        }
+        else
+        {
+            (l1, l2) = SplitLabelIntoTwoLines(raw);
+        }
+
+        var t1 = new FormattedText(
+            l1,
+            CultureInfo.InvariantCulture,
+            FlowDirection.LeftToRight,
+            theme.SideLabelTypeface,
+            fontSize,
+            theme.SideLabelBrush);
+        FormattedText? t2 = null;
+        if (!string.IsNullOrEmpty(l2))
+        {
+            t2 = new FormattedText(
+                l2,
+                CultureInfo.InvariantCulture,
+                FlowDirection.LeftToRight,
+                theme.SideLabelTypeface,
+                fontSize,
+                theme.SideLabelBrush);
+        }
+
+        // If still too wide, ellipsize the widest line using a conservative char budget.
+        if (t1.Width > maxTextW || (t2 is not null && t2.Width > maxTextW))
+        {
+            var approxCharW = Math.Max(5.5, t1.Width / Math.Max(1, l1.Length));
+            var budget = Math.Max(10, (int)Math.Floor(maxTextW / approxCharW));
+            l1 = Ellipsize(l1, budget);
+            if (!string.IsNullOrEmpty(l2))
+                l2 = Ellipsize(l2, budget);
+            t1 = new FormattedText(
+                l1,
+                CultureInfo.InvariantCulture,
+                FlowDirection.LeftToRight,
+                theme.SideLabelTypeface,
+                fontSize,
+                theme.SideLabelBrush);
+            t2 = string.IsNullOrEmpty(l2)
+                ? null
+                : new FormattedText(
+                    l2,
+                    CultureInfo.InvariantCulture,
+                    FlowDirection.LeftToRight,
+                    theme.SideLabelTypeface,
+                    fontSize,
+                    theme.SideLabelBrush);
+        }
+
+        // Ensure the card really contains the label (with padding), otherwise it looks like “text without a box”.
+        var textW = Math.Max(t1.Width, t2?.Width ?? 0);
+        var textH = t1.Height + (t2 is null ? 0 : t2.Height + 2);
+        var w = Math.Clamp(Math.Max(baseSize.Width, textW + padX * 2), 42, maxCardW);
+        var h = Math.Clamp(Math.Max(baseSize.Height, textH + padY * 2), 18, maxCardH);
+        var rect = new Rect(n.Center.X - w / 2, n.Center.Y - h / 2, w, h);
+        const double corner = 6;
+        context.DrawRectangle(ResolveNodeFill(theme, n), theme.NodeStrokePen, rect, corner, corner);
+        if (highlighted)
+        {
+            var hRect = rect.Inflate(3);
+            context.DrawRectangle(null, theme.HighlightedNodePen, hRect, corner, corner);
+        }
+
+        // Label inside card (up to 2 lines).
+        if (t2 is null)
+        {
+            context.DrawText(t1, new Point(n.Center.X - t1.Width / 2, n.Center.Y - t1.Height / 2));
+            return;
+        }
+
+        var totalH = t1.Height + 2 + t2.Height;
+        var top = n.Center.Y - totalH / 2;
+        context.DrawText(t1, new Point(n.Center.X - t1.Width / 2, top));
+        context.DrawText(t2, new Point(n.Center.X - t2.Width / 2, top + t1.Height + 2));
+    }
+
+    private static (double Width, double Height) ResolveRectangleNodeSize(double radius)
+    {
+        // Keep size derived only from radius so hit-testing can match without text measurement.
+        var w = Math.Clamp(radius * 4.6, 56, 200);
+        var h = Math.Clamp(radius * 2.6, 24, 60);
+        return (w, h);
+    }
+
+    private static (string Line1, string? Line2) SplitLabelIntoTwoLines(string raw)
+    {
+        // Tokenize by separators and PascalCase boundaries.
+        var tokens = SplitLabelTokens(raw);
+        if (tokens.Count == 0)
+            return (Ellipsize(raw, 24), null);
+
+        // Prefer: 2 lines with roughly balanced length.
+        var target = Math.Max(8, tokens.Sum(t => t.Length) / 2);
+        var line1 = new List<string>();
+        var len1 = 0;
+        foreach (var t in tokens)
+        {
+            var add = (line1.Count == 0 ? 0 : 1) + t.Length;
+            if (line1.Count > 0 && len1 + add > target)
+                break;
+            line1.Add(t);
+            len1 += add;
+        }
+
+        if (line1.Count == 0)
+            line1.Add(tokens[0]);
+
+        var rest = tokens.Skip(line1.Count).ToList();
+        var l1 = string.Join(' ', line1);
+        if (rest.Count == 0)
+            return (l1, null);
+
+        var l2 = string.Join(' ', rest);
+        return (l1, l2);
+    }
+
+    private static List<string> SplitLabelTokens(string raw)
+    {
+        var cleaned = raw.Replace('_', ' ').Replace('.', ' ').Replace('-', ' ').Trim();
+        if (cleaned.Length == 0)
+            return [];
+
+        var list = new List<string>();
+        foreach (var part in cleaned.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            // Split PascalCase: ArchitectureForbiddenApiSyntax -> Architecture Forbidden Api Syntax
+            var start = 0;
+            for (var i = 1; i < part.Length; i++)
+            {
+                if (char.IsUpper(part[i]) && char.IsLower(part[i - 1]))
+                {
+                    if (i - start >= 2)
+                        list.Add(part[start..i]);
+                    start = i;
+                }
+            }
+
+            if (start < part.Length)
+                list.Add(part[start..]);
+        }
+
+        return list;
+    }
+
+    private static string Ellipsize(string s, int maxChars)
+    {
+        var t = (s ?? "").Trim();
+        if (t.Length <= maxChars)
+            return t;
+        if (maxChars <= 1)
+            return "…";
+        return t[..(maxChars - 1)] + "…";
     }
 
     private static string BuildNodeGlyph(GraphLayoutNode node, bool useLegendColumn, bool showNodeLegendGlyphs)

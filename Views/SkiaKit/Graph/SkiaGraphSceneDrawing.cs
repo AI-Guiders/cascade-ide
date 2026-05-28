@@ -69,6 +69,8 @@ public static partial class SkiaGraphSceneDrawing
     {
         if (n.Shape == GraphNodeShape.Condition)
             return HitConditionBranchOutline(n.Center, n.Radius, p, tolerance);
+        if (n.Shape == GraphNodeShape.Rectangle)
+            return HitRectangleOutline(n.Center, n.Radius, p, tolerance);
         var dx = p.X - n.Center.X;
         var dy = p.Y - n.Center.Y;
         return Math.Sqrt(dx * dx + dy * dy) <= n.Radius + tolerance;
@@ -79,5 +81,14 @@ public static partial class SkiaGraphSceneDrawing
         var dx = Math.Abs(p.X - center.X);
         var dy = Math.Abs(p.Y - center.Y);
         return dx + dy <= r + tolerance;
+    }
+
+    private static bool HitRectangleOutline(Point center, double r, Point p, double tolerance)
+    {
+        // Keep constants in sync with rectangle sizing in SkiaGraphSceneDrawing.Nodes.
+        // Hit-test should be generous enough even when cards grow to fit text.
+        var w = Math.Clamp(r * 4.6, 56, 560) + tolerance * 2;
+        var h = Math.Clamp(r * 2.6, 24, 150) + tolerance * 2;
+        return Math.Abs(p.X - center.X) <= w / 2 && Math.Abs(p.Y - center.Y) <= h / 2;
     }
 }

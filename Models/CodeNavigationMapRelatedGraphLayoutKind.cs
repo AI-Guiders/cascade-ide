@@ -3,6 +3,7 @@ namespace CascadeIDE.Models;
 /// <summary>Укладка графа связанных файлов (уровень <c>file</c>). TOML: <c>[code_navigation_map].related_graph_layout</c>.</summary>
 public static class CodeNavigationMapRelatedGraphLayoutKind
 {
+    public const string Auto = "auto";
     public const string Radial = "radial";
     public const string TopDown = "top_down";
     public const string BottomUp = "bottom_up";
@@ -12,6 +13,7 @@ public static class CodeNavigationMapRelatedGraphLayoutKind
         var v = (value ?? "").Trim().ToLowerInvariant();
         return v switch
         {
+            Auto => Auto,
             TopDown => TopDown,
             BottomUp => BottomUp,
             Radial => Radial,
