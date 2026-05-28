@@ -338,6 +338,7 @@
         </Grid>
     </DockPanel>
     <views:CommandPaletteView ZIndex="5000"/>
+    <views:CockpitCommandLineOverlayView ZIndex="4999"/>
     <!-- CascadeChord (Ctrl+K): полоска ввода — TaskCockpitView / CascadeChordHudStripView (ADR 0060). -->
     </Grid>
 </views:PointerTrackingWindow>

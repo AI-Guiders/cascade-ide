@@ -1,0 +1,111 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CascadeIDE.ViewModels"
+             xmlns:chat="using:CascadeIDE.Features.Chat"
+             x:Class="CascadeIDE.Views.CockpitCommandLineOverlayView"
+             x:DataType="vm:MainWindowViewModel"
+             Focusable="True"
+             IsVisible="False">
+  <UserControl.Styles>
+    <Style Selector="TextBox.ccl-query">
+      <Setter Property="FontSize" Value="14"/>
+      <Setter Property="Padding" Value="10,8"/>
+      <Setter Property="FontFamily" Value="Consolas,Cascadia Mono,Courier New,monospace"/>
+      <Setter Property="Background" Value="{DynamicResource CascadeTheme.CommandPaletteQueryBackground}"/>
+      <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.CommandPaletteQueryForeground}"/>
+      <Setter Property="CaretBrush" Value="{DynamicResource CascadeTheme.CommandPaletteQueryCaretBrush}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource CascadeTheme.PanelTitleAccentBrush}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="6"/>
+    </Style>
+    <Style Selector="TextBox.ccl-query /template/ TextBlock#PART_Watermark">
+      <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.CommandPaletteQueryPlaceholderForeground}"/>
+    </Style>
+    <Style Selector="ListBoxItem">
+      <Setter Property="Padding" Value="8,5"/>
+      <Setter Property="Margin" Value="0,1"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="CornerRadius" Value="6"/>
+    </Style>
+    <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource CascadeTheme.CommandPaletteItemHoverBackground}"/>
+    </Style>
+    <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource CascadeTheme.CommandPaletteItemSelectedBackground}"/>
+    </Style>
+  </UserControl.Styles>
+  <Border Background="{DynamicResource CascadeTheme.CommandPaletteDimmerOverlay}"
+          PointerPressed="OnDimmerPressed">
+    <Border MaxWidth="860"
+            MaxHeight="620"
+            Margin="40"
+            Padding="16"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Background="{DynamicResource CascadeTheme.CommandPaletteSurfaceBackground}"
+            BorderBrush="{DynamicResource CascadeTheme.CommandPaletteSurfaceBorderBrush}"
+            BorderThickness="1"
+            CornerRadius="6"
+            PointerPressed="OnPanelPressed">
+      <Grid RowDefinitions="Auto,Auto,Auto,*,Auto,Auto">
+        <TextBlock Grid.Row="0"
+                   Margin="0,0,0,8"
+                   FontSize="12"
+                   Opacity="0.9"
+                   Foreground="{DynamicResource CascadeTheme.CommandPaletteMetaForeground}"
+                   Text="Cockpit Command Line"/>
+        <TextBlock Grid.Row="1"
+                   Margin="0,0,0,6"
+                   FontSize="11.5"
+                   Opacity="0.85"
+                   Foreground="{DynamicResource CascadeTheme.CommandPaletteMetaForeground}"
+                   IsVisible="{Binding ChatPanel.ChatSlashBreadcrumb, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                   Text="{Binding ChatPanel.ChatSlashBreadcrumb}"/>
+        <TextBox x:Name="CommandLineTextBox"
+                 Classes="ccl-query"
+                 Grid.Row="2"
+                 PlaceholderText="/"
+                 Text="{Binding ChatPanel.CockpitCommandLineText, Mode=TwoWay}"/>
+        <ListBox x:Name="SuggestionsListBox"
+                 Grid.Row="3"
+                 Margin="0,8,0,0"
+                 MaxHeight="280"
+                 IsVisible="{Binding ChatPanel.IsChatSlashAutocompleteVisible}"
+                 ItemsSource="{Binding ChatPanel.ComposerPopupSuggestions}"
+                 SelectedIndex="{Binding ChatPanel.SelectedChatSlashSuggestionIndex, Mode=TwoWay}"
+                 Background="Transparent">
+          <ListBox.ItemTemplate>
+            <DataTemplate DataType="chat:ChatSlashSuggestionItem">
+              <StackPanel Orientation="Vertical" Spacing="2">
+                <TextBlock Text="{Binding ListTitle}"
+                           FontWeight="SemiBold"
+                           FontSize="13"
+                           Foreground="{DynamicResource CascadeTheme.CommandPaletteTitleForeground}"/>
+                <TextBlock Text="{Binding ListSubtitle}"
+                           FontSize="12"
+                           FontFamily="Consolas,Cascadia Mono,Courier New,monospace"
+                           TextWrapping="Wrap"
+                           Opacity="0.95"
+                           Foreground="{DynamicResource CascadeTheme.CommandPaletteMetaForeground}"/>
+              </StackPanel>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+        <TextBlock Grid.Row="4"
+                   Margin="0,10,0,0"
+                   FontSize="12.5"
+                   FontFamily="Consolas,Cascadia Mono,Courier New,monospace"
+                   TextWrapping="Wrap"
+                   Opacity="0.95"
+                   Foreground="{DynamicResource CascadeTheme.CommandPaletteMetaForeground}"
+                   Text="{Binding ChatPanel.CommandLineSlashPreview}"/>
+        <TextBlock Grid.Row="5"
+                   Margin="0,10,0,0"
+                   FontSize="12"
+                   Opacity="0.92"
+                   Foreground="{DynamicResource CascadeTheme.CommandPaletteMetaForeground}"
+                   Text="Tab — подсказка · ↑↓ — выбор · Enter — выполнить · Esc — закрыть"/>
+      </Grid>
+    </Border>
+  </Border>
+</UserControl>

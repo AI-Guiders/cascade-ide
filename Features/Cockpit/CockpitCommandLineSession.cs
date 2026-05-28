@@ -44,6 +44,7 @@ internal sealed class CockpitCommandLineSession : ICockpitCommandLineSession
     {
         _activeHost = host ?? CockpitCommandLineHostKind.Intercom;
         _owner.OpenCockpitCommandLine(initialText);
+        _owner.NotifyCockpitCommandLinePresentationChanged();
     }
 
     public void Close() => _owner.CloseCockpitCommandLine();

@@ -73,7 +73,7 @@ public partial class ChatPanelView : UserControl
 
     private void OnIntercomCommandLineDraftChanged(object? sender, EventArgs e)
     {
-        if (DataContext is not ChatPanelViewModel vm || !vm.IsCockpitCommandLineOpen)
+        if (DataContext is not ChatPanelViewModel vm || !vm.ShowIntercomCockpitCommandLine)
             return;
 
         var text = IntercomSkiaSurface.CommandLineText ?? "/";
@@ -207,8 +207,9 @@ public partial class ChatPanelView : UserControl
 
             if (handle.SyncCommandLineFromViewModel)
             {
-                syncCommandLineFromViewModel(surface, vm);
-                if (!vm.IsCockpitCommandLineOpen)
+                if (vm.ShowIntercomCockpitCommandLine)
+                    syncCommandLineFromViewModel(surface, vm);
+                else if (!vm.IsCockpitCommandLineOpen)
                     surface.CommandLineText = "/";
             }
 
